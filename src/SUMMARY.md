@@ -93,6 +93,7 @@
 
 # 🧙‍♂️ Generic Hacking
 
+  - [Defi Amm Virtual Balance Cache Exploitation](blockchain/blockchain-and-crypto-currencies/defi-amm-virtual-balance-cache-exploitation.md)
 - [Archive Extraction Path Traversal](generic-hacking/archive-extraction-path-traversal.md)
 - [Brute Force - CheatSheet](generic-hacking/brute-force.md)
 - [Esim Javacard Exploitation](generic-hacking/esim-javacard-exploitation.md)
