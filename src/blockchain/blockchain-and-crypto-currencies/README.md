@@ -1,75 +1,75 @@
-# Blockchain and Crypto-Currencies
+# Blockchain και Κρυπτονομίσματα
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Βασικές Έννοιες
 
 - **Smart Contracts** ορίζονται ως προγράμματα που εκτελούνται σε ένα blockchain όταν πληρούνται ορισμένες προϋποθέσεις, αυτοματοποιώντας την εκτέλεση συμφωνιών χωρίς ενδιάμεσους.
-- **Decentralized Applications (dApps)** βασίζονται σε smart contracts, διαθέτοντας ένα φιλικό προς τον χρήστη front-end και ένα διαφανές, ελεγχόμενο back-end.
-- **Tokens & Coins** διαφοροποιούνται, όπου τα coins λειτουργούν ως ψηφιακό χρήμα, ενώ τα tokens αντιπροσωπεύουν αξία ή ιδιοκτησία σε συγκεκριμένα πλαίσια.
-- **Utility Tokens** παρέχουν πρόσβαση σε υπηρεσίες, και **Security Tokens** δηλώνουν ιδιοκτησία σε περιουσιακό στοιχείο.
-- **DeFi** σημαίνει Decentralized Finance, προσφέροντας χρηματοοικονομικές υπηρεσίες χωρίς κεντρικές αρχές.
-- **DEX** και **DAOs** αναφέρονται σε Decentralized Exchange Platforms και Decentralized Autonomous Organizations, αντίστοιχα.
+- **Decentralized Applications (dApps)** βασίζονται στα smart contracts, διαθέτοντας φιλικό προς τον χρήστη front-end και διαφανές, ελεγχόμενο back-end.
+- **Tokens & Coins** διακρίνονται ως εξής: τα coins λειτουργούν ως ψηφιακό χρήμα, ενώ τα tokens αντιπροσωπεύουν αξία ή ιδιοκτησία σε συγκεκριμένα πλαίσια.
+- **Utility Tokens** παρέχουν πρόσβαση σε υπηρεσίες, και **Security Tokens** υποδηλώνουν ιδιοκτησία περιουσιακού στοιχείου.
+- **DeFi** σημαίνει Αποκεντρωμένα Χρηματοοικονομικά, προσφέροντας χρηματοοικονομικές υπηρεσίες χωρίς κεντρικές αρχές.
+- **DEX** και **DAOs** αναφέρονται αντίστοιχα σε Πλατφόρμες Αποκεντρωμένης Ανταλλαγής (Decentralized Exchange Platforms) και Αποκεντρωμένες Αυτόνομες Οργανώσεις (Decentralized Autonomous Organizations).
 
-## Μηχανισμοί Συμφωνίας
+## Μηχανισμοί Συμφωνίας (Consensus Mechanisms)
 
-Οι μηχανισμοί συμφωνίας εξασφαλίζουν την ασφαλή και συμφωνημένη επικύρωση συναλλαγών στο blockchain:
+Οι μηχανισμοί συμφωνίας εξασφαλίζουν ασφαλή και συμφωνημένη επαλήθευση συναλλαγών στο blockchain:
 
 - **Proof of Work (PoW)** βασίζεται στην υπολογιστική ισχύ για την επαλήθευση συναλλαγών.
-- **Proof of Stake (PoS)** απαιτεί από τους validators να κατέχουν ένα συγκεκριμένο ποσό tokens, μειώνοντας την κατανάλωση ενέργειας σε σχέση με το PoW.
+- **Proof of Stake (PoS)** απαιτεί από τους validators να κατέχουν συγκεκριμένη ποσότητα tokens, μειώνοντας την κατανάλωση ενέργειας σε σύγκριση με το PoW.
 
-## Βασικά Στοιχεία του Bitcoin
+## Βασικά για το Bitcoin
 
 ### Συναλλαγές
 
-Οι συναλλαγές Bitcoin περιλαμβάνουν τη μεταφορά κεφαλαίων μεταξύ διευθύνσεων. Οι συναλλαγές επικυρώνονται μέσω ψηφιακών υπογραφών, διασφαλίζοντας ότι μόνο ο κάτοχος του ιδιωτικού κλειδιού μπορεί να ξεκινήσει μεταφορές.
+Οι συναλλαγές Bitcoin περιλαμβάνουν τη μεταφορά κεφαλαίων μεταξύ διευθύνσεων. Οι συναλλαγές επικυρώνονται μέσω ψηφιακών υπογραφών, εξασφαλίζοντας ότι μόνο ο κάτοχος του ιδιωτικού κλειδιού μπορεί να ξεκινήσει μεταφορές.
 
-#### Κύρια Συστατικά:
+#### Κύρια Στοιχεία:
 
 - **Multisignature Transactions** απαιτούν πολλαπλές υπογραφές για την εξουσιοδότηση μιας συναλλαγής.
-- Οι συναλλαγές αποτελούνται από **inputs** (πηγή κεφαλαίων), **outputs** (προορισμός), **fees** (καταβάλλονται στους miners) και **scripts** (κανόνες συναλλαγής).
+- Οι συναλλαγές αποτελούνται από **inputs** (πηγή κεφαλαίων), **outputs** (προορισμός), **fees** (πληρωτέα στους miners) και **scripts** (κανόνες συναλλαγής).
 
 ### Lightning Network
 
-Σκοπός του είναι να βελτιώσει την κλιμάκωση του Bitcoin επιτρέποντας πολλαπλές συναλλαγές μέσα σε ένα κανάλι, μεταδίδοντας στο blockchain μόνο την τελική κατάσταση.
+Σκοπός του είναι να αυξήσει την κλιμακωσιμότητα του Bitcoin επιτρέποντας πολλαπλές συναλλαγές εντός ενός καναλιού, μεταδίδοντας στο blockchain μόνο την τελική κατάσταση.
 
-## Προβλήματα Ιδιωτικότητας στο Bitcoin
+## Θέματα Ιδιωτικότητας του Bitcoin
 
-Επιθέσεις στην ιδιωτικότητα, όπως **Common Input Ownership** και **UTXO Change Address Detection**, εκμεταλλεύονται πρότυπα συναλλαγών. Στρατηγικές όπως **Mixers** και **CoinJoin** βελτιώνουν την ανωνυμία καλύπτοντας τους δεσμούς συναλλαγών μεταξύ χρηστών.
+Οι επιθέσεις κατά της ιδιωτικότητας, όπως **Common Input Ownership** και **UTXO Change Address Detection**, εκμεταλλεύονται πρότυπα συναλλαγών. Στρατηγικές όπως **Mixers** και **CoinJoin** βελτιώνουν την ανωνυμία θολώνοντας τους συνδέσμους συναλλαγών μεταξύ χρηστών.
 
 ## Απόκτηση Bitcoins Ανώνυμα
 
-Μέθοδοι περιλαμβάνουν ανταλλαγές με μετρητά, mining και χρήση mixers. **CoinJoin** αναμειγνύει πολλαπλές συναλλαγές για να περιπλέξει την ανιχνευσιμότητα, ενώ **PayJoin** εξαντλεί CoinJoins ως κανονικές συναλλαγές για αυξημένη ιδιωτικότητα.
+Μέθοδοι περιλαμβάνουν συναλλαγές με μετρητά, mining και χρήση mixers. Το **CoinJoin** αναμειγνύει πολλαπλές συναλλαγές για να περιπλέξει την ανιχνευσιμότητα, ενώ το **PayJoin** μεταμφιέζει CoinJoins ως κανονικές συναλλαγές για αυξημένη ιδιωτικότητα.
 
-# Bitcoin Privacy Atacks
+# Επιθέσεις στην Ιδιωτικότητα του Bitcoin
 
-# Περίληψη των Επιθέσεων στην Ιδιωτικότητα του Bitcoin
+# Σύνοψη Επιθέσεων στην Ιδιωτικότητα του Bitcoin
 
-Στον κόσμο του Bitcoin, η ιδιωτικότητα των συναλλαγών και η ανωνυμία των χρηστών συχνά απασχολούν. Ακολουθεί μια απλοποιημένη επισκόπηση αρκετών κοινών μεθόδων με τις οποίες οι επιτιθέμενοι μπορούν να υπονομεύσουν την ιδιωτικότητα του Bitcoin.
+Στον κόσμο του Bitcoin, η ιδιωτικότητα των συναλλαγών και η ανωνυμία των χρηστών συχνά προκαλούν ανησυχία. Ακολουθεί μια απλουστευμένη επισκόπηση αρκετών κοινών μεθόδων μέσω των οποίων οι επιτιθέμενοι μπορούν να υπονομεύσουν την ιδιωτικότητα στο Bitcoin.
 
-## **Common Input Ownership Assumption**
+## **Υπόθεση Κοινού Κατόχου Εισόδων (Common Input Ownership Assumption)**
 
-Είναι γενικά σπάνιο τα inputs από διαφορετικούς χρήστες να συνδυάζονται σε μία συναλλαγή λόγω της πολυπλοκότητας που εμπλέκεται. Έτσι, **δύο input διευθύνσεις στην ίδια συναλλαγή συχνά υποτίθεται ότι ανήκουν στον ίδιο κάτοχο**.
+Σε γενικές γραμμές είναι σπάνιο οι inputs από διαφορετικούς χρήστες να συνδυάζονται σε μία συναλλαγή λόγω της πολυπλοκότητας. Επομένως, **δύο διευθύνσεις εισόδων στην ίδια συναλλαγή συχνά θεωρείται ότι ανήκουν στον ίδιο κάτοχο**.
 
 ## **UTXO Change Address Detection**
 
-Ένα UTXO, ή **Unspent Transaction Output**, πρέπει να ξοδευτεί ολόκληρο σε μια συναλλαγή. Αν μόνο ένα μέρος του αποστέλλεται σε άλλη διεύθυνση, το υπόλοιπο πηγαίνει σε μια νέα change address. Οι παρατηρητές μπορούν να υποθέσουν ότι αυτή η νέα διεύθυνση ανήκει στον αποστολέα, υπονομεύοντας την ιδιωτικότητα.
+Ένα UTXO, ή **Unspent Transaction Output**, πρέπει να δαπανηθεί ολόκληρο σε μια συναλλαγή. Αν μόνο μέρος του σταλεί σε άλλη διεύθυνση, το υπόλοιπο πηγαίνει σε μια νέα διεύθυνση αλλαγής (change address). Οι παρατηρητές μπορούν να υποθέσουν ότι αυτή η νέα διεύθυνση ανήκει στον αποστολέα, θέτοντας σε κίνδυνο την ιδιωτικότητα.
 
 ### Παράδειγμα
 
-Για να μετριαστεί αυτό, υπηρεσίες mixing ή η χρήση πολλαπλών διευθύνσεων μπορούν να βοηθήσουν στην απόκρυψη της ιδιοκτησίας.
+Για να μετριαστεί αυτό, υπηρεσίες mixing ή η χρήση πολλαπλών διευθύνσεων μπορούν να βοηθήσουν στο να θολώσει η ιδιοκτησία.
 
-## **Social Networks & Forums Exposure**
+## **Έκθεση σε Social Networks & Forums**
 
-Οι χρήστες μερικές φορές μοιράζονται τις Bitcoin διευθύνσεις τους online, καθιστώντας **εύκολο να συνδεθεί η διεύθυνση με τον κάτοχό της**.
+Οι χρήστες μερικές φορές μοιράζονται τις διευθύνσεις Bitcoin τους online, καθιστώντας **εύκολο να συνδεθεί η διεύθυνση με τον κάτοχό της**.
 
-## **Transaction Graph Analysis**
+## **Ανάλυση Γραφήματος Συναλλαγών**
 
-Οι συναλλαγές μπορούν να απεικονιστούν ως γράφοι, αποκαλύπτοντας πιθανές συνδέσεις μεταξύ χρηστών με βάση τη ροή κεφαλαίων.
+Οι συναλλαγές μπορούν να απεικονιστούν ως γράφοι, αποκαλύπτοντας πιθανές συνδέσεις μεταξύ χρηστών βάσει της ροής των κεφαλαίων.
 
-## **Unnecessary Input Heuristic (Optimal Change Heuristic)**
+## **Ευριστική του Μη Αναγκαίου Input (Optimal Change Heuristic)**
 
-Αυτός ο heuristic βασίζεται στην ανάλυση συναλλαγών με πολλαπλά inputs και outputs για να μαντέψει ποιο output είναι το change που επιστρέφει στον αποστολέα.
+Αυτό το ευριστικό βασίζεται στην ανάλυση συναλλαγών με πολλαπλά inputs και outputs για να μαντέψει ποιο output είναι το υπόλοιπο που επιστρέφει στον αποστολέα.
 
 ### Παράδειγμα
 ```bash
@@ -84,41 +84,41 @@ Attackers may send small amounts to previously used addresses, hoping the recipi
 
 ### Correct Wallet Behavior
 
-Τα πορτοφόλια πρέπει να αποφεύγουν τη χρήση coins που έχουν ληφθεί σε ήδη χρησιμοποιημένες, άδειες διευθύνσεις, για να αποτρέπουν αυτό το privacy leak.
+Wallets should avoid using coins received on already used, empty addresses to prevent this privacy leak.
 
 ## **Other Blockchain Analysis Techniques**
 
-- **Exact Payment Amounts:** Οι transactions χωρίς change είναι πιθανό να γίνονται μεταξύ δύο διευθύνσεων που ανήκουν στον ίδιο χρήστη.
-- **Round Numbers:** Ένας round αριθμός σε μια transaction υποδηλώνει ότι είναι μια πληρωμή, με το μη-round output πιθανότατα να είναι το change.
-- **Wallet Fingerprinting:** Διαφορετικά wallets έχουν μοναδικά μοτίβα δημιουργίας transactions, επιτρέποντας σε analysts να αναγνωρίσουν το χρησιμοποιούμενο software και πιθανώς τη change address.
-- **Amount & Timing Correlations:** Η αποκάλυψη των χρόνων ή των ποσών των transactions μπορεί να κάνει τις transactions ιχνηλάσιμες.
+- **Exact Payment Amounts:** Transactions without change are likely between two addresses owned by the same user.
+- **Round Numbers:** A round number in a transaction suggests it's a payment, with the non-round output likely being the change.
+- **Wallet Fingerprinting:** Different wallets have unique transaction creation patterns, allowing analysts to identify the software used and potentially the change address.
+- **Amount & Timing Correlations:** Disclosing transaction times or amounts can make transactions traceable.
 
 ## **Traffic Analysis**
 
-Παρακολουθώντας το network traffic, attackers μπορούν ενδεχομένως να συνδέσουν transactions ή blocks με IP addresses, υπονομεύοντας την ιδιωτικότητα του χρήστη. Αυτό ισχύει ιδιαίτερα αν ένας φορέας λειτουργεί πολλούς Bitcoin nodes, βελτιώνοντας την ικανότητά του να παρακολουθεί transactions.
+By monitoring network traffic, attackers can potentially link transactions or blocks to IP addresses, compromising user privacy. This is especially true if an entity operates many Bitcoin nodes, enhancing their ability to monitor transactions.
 
 ## More
 
-Για μια ολοκληρωμένη λίστα επιθέσεων και αμυνών για την ιδιωτικότητα, επισκεφθείτε [Bitcoin Privacy on Bitcoin Wiki](https://en.bitcoin.it/wiki/Privacy).
+For a comprehensive list of privacy attacks and defenses, visit [Bitcoin Privacy on Bitcoin Wiki](https://en.bitcoin.it/wiki/Privacy).
 
 # Anonymous Bitcoin Transactions
 
 ## Ways to Get Bitcoins Anonymously
 
-- **Cash Transactions**: Απόκτηση bitcoin με μετρητά.
-- **Cash Alternatives**: Αγορά gift cards και ανταλλαγή τους online για bitcoin.
-- **Mining**: Η πιο ιδιωτική μέθοδος απόκτησης bitcoins είναι μέσω mining, ειδικά όταν γίνεται solo, επειδή τα mining pools μπορεί να γνωρίζουν το IP address του miner. [Mining Pools Information](https://en.bitcoin.it/wiki/Pooled_mining)
-- **Theft**: Θεωρητικά, η κλοπή bitcoin θα μπορούσε να είναι άλλη μια μέθοδος για να τα αποκτήσει κανείς ανώνυμα, αν και είναι παράνομη και δεν συστήνεται.
+- **Cash Transactions**: Acquiring bitcoin through cash.
+- **Cash Alternatives**: Purchasing gift cards and exchanging them online for bitcoin.
+- **Mining**: The most private method to earn bitcoins is through mining, especially when done alone because mining pools may know the miner's IP address. [Mining Pools Information](https://en.bitcoin.it/wiki/Pooled_mining)
+- **Theft**: Theoretically, stealing bitcoin could be another method to acquire it anonymously, although it's illegal and not recommended.
 
 ## Mixing Services
 
-Χρησιμοποιώντας ένα mixing service, ένας χρήστης μπορεί **send bitcoins** και να λάβει **different bitcoins in return**, κάτι που δυσκολεύει την ανίχνευση του αρχικού ιδιοκτήτη. Ωστόσο, αυτό απαιτεί εμπιστοσύνη στην υπηρεσία να μην κρατά logs και να επιστρέψει όντως τα bitcoins. Εναλλακτικές επιλογές mixing περιλαμβάνουν τα Bitcoin casinos.
+By using a mixing service, a user can **send bitcoins** and receive **different bitcoins in return**, which makes tracing the original owner difficult. Yet, this requires trust in the service not to keep logs and to actually return the bitcoins. Alternative mixing options include Bitcoin casinos.
 
 ## CoinJoin
 
-Το CoinJoin συγχωνεύει πολλαπλές transactions από διαφορετικούς users σε μία, δυσκολεύοντας τη διαδικασία για οποιονδήποτε προσπαθεί να αντιστοιχίσει inputs με outputs. Παρά την αποτελεσματικότητά του, transactions με μοναδικά μεγέθη inputs και outputs μπορούν ακόμη να ιχνηλατηθούν.
+**CoinJoin** merges multiple transactions from different users into one, complicating the process for anyone trying to match inputs with outputs. Despite its effectiveness, transactions with unique input and output sizes can still potentially be traced.
 
-Παραδείγματα transactions που μπορεί να έχουν χρησιμοποιήσει CoinJoin περιλαμβάνουν `402d3e1df685d1fdf82f36b220079c1bf44db227df2d676625ebcbee3f6cb22a` και `85378815f6ee170aa8c26694ee2df42b99cff7fa9357f073c1192fff1f540238`.
+Example transactions that may have used CoinJoin include `402d3e1df685d1fdf82f36b220079c1bf44db227df2d676625ebcbee3f6cb22a` and `85378815f6ee170aa8c26694ee2df42b99cff7fa9357f073c1192fff1f540238`.
 
 For more information, visit [CoinJoin](https://coinjoin.io/en). For a similar service on Ethereum, check out [Tornado Cash](https://tornado.cash), which anonymizes transactions with funds from miners.
 
@@ -129,52 +129,52 @@ A variant of CoinJoin, **PayJoin** (or P2EP), disguises the transaction among tw
 2 btc --> 3 btc
 5 btc     4 btc
 ```
-Συναλλαγές όπως η παραπάνω μπορεί να είναι PayJoin, ενισχύοντας την ιδιωτικότητα ενώ παραμένουν αδιαχώριστες από standard bitcoin συναλλαγές.
+Συναλλαγές όπως η παραπάνω θα μπορούσαν να είναι PayJoin, ενισχύοντας το απόρρητο ενώ παραμένουν αδιάκριτες σε σχέση με τις κανονικές bitcoin συναλλαγές.
 
-**Η χρήση του PayJoin θα μπορούσε να διαταράξει σημαντικά τις παραδοσιακές μεθόδους επιτήρησης**, καθιστώντας το μια ελπιδοφόρα εξέλιξη για την επιδίωξη της ιδιωτικότητας στις συναλλαγές.
+**Η χρήση του PayJoin θα μπορούσε να διαταράξει σημαντικά τις παραδοσιακές μεθόδους παρακολούθησης**, καθιστώντας το μια υποσχόμενη εξέλιξη στην επιδίωξη του συναλλακτικού απορρήτου.
 
-# Καλύτερες Πρακτικές για την Ιδιωτικότητα στα Κρυπτονομίσματα
+# Καλές πρακτικές για το απόρρητο στα κρυπτονομίσματα
 
-## **Τεχνικές Συγχρονισμού Πορτοφολιών**
+## **Τεχνικές συγχρονισμού πορτοφολιών**
 
-Για τη διατήρηση της ιδιωτικότητας και της ασφάλειας, ο συγχρονισμός των πορτοφολιών με το blockchain είναι κρίσιμος. Δύο μέθοδοι ξεχωρίζουν:
+Για να διατηρηθεί το απόρρητο και η ασφάλεια, ο συγχρονισμός των wallets με το blockchain είναι κρίσιμος. Δύο μέθοδοι ξεχωρίζουν:
 
-- **Full node**: Κατεβάζοντας ολόκληρο το blockchain, ένα Full node διασφαλίζει μέγιστη ιδιωτικότητα. Όλες οι συναλλαγές που έχουν γίνει αποθηκεύονται τοπικά, καθιστώντας αδύνατο για αντιπάλους να προσδιορίσουν ποιες συναλλαγές ή διευθύνσεις ενδιαφέρουν τον χρήστη.
-- **Client-side block filtering**: Αυτή η μέθοδος περιλαμβάνει τη δημιουργία φίλτρων για κάθε μπλοκ στο blockchain, επιτρέποντας στα πορτοφόλια να εντοπίζουν σχετικές συναλλαγές χωρίς να αποκαλύπτουν συγκεκριμένα ενδιαφέροντα σε παρατηρητές του δικτύου. Τα lightweight wallets κατεβάζουν αυτά τα φίλτρα, ανακτώντας πλήρη μπλοκ μόνο όταν βρεθεί ταύτιση με τις διευθύνσεις του χρήστη.
+- **Full node**: Κατεβάζοντας ολόκληρο το blockchain, ένας full node εξασφαλίζει μέγιστο απόρρητο. Όλες οι συναλλαγές που έγιναν αποθηκεύονται τοπικά, καθιστώντας αδύνατο για αντιπάλους να προσδιορίσουν ποιες συναλλαγές ή διευθύνσεις ενδιαφέρουν τον χρήστη.
+- **Client-side block filtering**: Αυτή η μέθοδος περιλαμβάνει τη δημιουργία φίλτρων για κάθε block στο blockchain, επιτρέποντας στα πορτοφόλια να εντοπίζουν σχετικές συναλλαγές χωρίς να εκθέτουν συγκεκριμένα ενδιαφέροντα σε παρατηρητές του δικτύου. Τα lightweight wallets κατεβάζουν αυτά τα φίλτρα, τραβώντας πλήρη blocks μόνο όταν υπάρχει ταύτιση με τις διευθύνσεις του χρήστη.
 
-## **Χρήση του Tor για Ανωνυμία**
+## **Χρήση του Tor για ανωνυμία**
 
-Δεδομένου ότι το Bitcoin λειτουργεί σε peer-to-peer δίκτυο, συνιστάται η χρήση του Tor για απόκρυψη της διεύθυνσης IP, βελτιώνοντας την ιδιωτικότητα κατά την αλληλεπίδραση με το δίκτυο.
+Δεδομένου ότι το Bitcoin λειτουργεί σε ένα peer-to-peer δίκτυο, προτείνεται η χρήση του Tor για να κρύψετε τη διεύθυνση IP σας, βελτιώνοντας το απόρρητο κατά την αλληλεπίδραση με το δίκτυο.
 
-## **Αποφυγή Επανάχρησης Διευθύνσεων**
+## **Αποφυγή επαναχρησιμοποίησης διευθύνσεων**
 
-Για την προστασία της ιδιωτικότητας, είναι ζωτικής σημασίας να χρησιμοποιείται μια νέα διεύθυνση για κάθε συναλλαγή. Η επανάχρηση διευθύνσεων μπορεί να θέσει σε κίνδυνο την ιδιωτικότητα συνδέοντας συναλλαγές με το ίδιο πρόσωπο. Τα σύγχρονα πορτοφόλια αποθαρρύνουν την επανάχρηση διευθύνσεων μέσω του σχεδιασμού τους.
+Για την προστασία του απορρήτου, είναι ζωτικής σημασίας η χρήση μιας νέας διεύθυνσης για κάθε συναλλαγή. Η επαναχρησιμοποίηση διευθύνσεων μπορεί να θέσει σε κίνδυνο το απόρρητο συνδέοντας συναλλαγές στο ίδιο ον. Τα σύγχρονα πορτοφόλια αποθαρρύνουν την επαναχρησιμοποίηση διευθύνσεων μέσω του σχεδιασμού τους.
 
-## **Στρατηγικές για την Ιδιωτικότητα Συναλλαγών**
+## **Στρατηγικές για το απόρρητο των συναλλαγών**
 
-- **Multiple transactions**: Η διάσπαση μιας πληρωμής σε πολλές συναλλαγές μπορεί να συγκαλύψει το ποσό της συναλλαγής, αποτρέποντας επιθέσεις στην ιδιωτικότητα.
-- **Change avoidance**: Η επιλογή συναλλαγών που δεν απαιτούν change outputs ενισχύει την ιδιωτικότητα διαταράσσοντας τις μεθόδους ανίχνευσης αλλαγής.
-- **Multiple change outputs**: Εάν η αποφυγή αλλαγής δεν είναι εφικτή, η δημιουργία πολλαπλών change outputs μπορεί ακόμα να βελτιώσει την ιδιωτικότητα.
+- **Πολλαπλές συναλλαγές**: Το διαχωρισμό μιας πληρωμής σε αρκετές συναλλαγές μπορεί να συγκαλύψει το ποσό της συναλλαγής, παρεμποδίζοντας επιθέσεις κατά του απορρήτου.
+- **Αποφυγή change**: Η επιλογή για συναλλαγές που δεν απαιτούν change outputs βελτιώνει το απόρρητο διαταράσσοντας τις μεθόδους ανίχνευσης change.
+- **Πολλαπλά change outputs**: Αν η αποφυγή change δεν είναι εφικτή, η δημιουργία πολλαπλών change outputs μπορεί ακόμα να βελτιώσει το απόρρητο.
 
-# **Monero: Φάρος Ανωνυμίας**
+# **Monero: Ένα φάρος ανωνυμίας**
 
-Το Monero ανταποκρίνεται στην ανάγκη για απόλυτη ανωνυμία στις ψηφιακές συναλλαγές, θέτοντας υψηλό πρότυπο για την ιδιωτικότητα.
+Το Monero καλύπτει την ανάγκη για απόλυτη ανωνυμία στις ψηφιακές συναλλαγές, θέτοντας υψηλό πρότυπο για το απόρρητο.
 
 # **Ethereum: Gas και Συναλλαγές**
 
 ## **Κατανόηση του Gas**
 
-Το Gas μετρά την υπολογιστική προσπάθεια που απαιτείται για την εκτέλεση λειτουργιών στο Ethereum, τιμολογείται σε **gwei**. Για παράδειγμα, μια συναλλαγή που κοστίζει 2,310,000 gwei (ή 0.00231 ETH) περιλαμβάνει ένα gas limit και ένα base fee, με ένα tip για να παρακινήσει τους miners. Οι χρήστες μπορούν να ορίσουν ένα max fee για να μην πληρώσουν υπερβολικά, με την περίσσεια να επιστρέφεται.
+Το Gas μετρά την υπολογιστική προσπάθεια που απαιτείται για την εκτέλεση λειτουργιών στο Ethereum, τιμολογείται σε **gwei**. Για παράδειγμα, μια συναλλαγή που κοστίζει 2,310,000 gwei (ή 0.00231 ETH) περιλαμβάνει ένα gas limit και ένα base fee, με ένα tip για να παρακινηθούν οι miners. Οι χρήστες μπορούν να ορίσουν ένα max fee για να εξασφαλίσουν ότι δεν θα πληρώσουν υπερβολικά, με την περίσσεια να επιστρέφεται.
 
 ## **Εκτέλεση Συναλλαγών**
 
-Οι συναλλαγές στο Ethereum περιλαμβάνουν έναν αποστολέα και έναν παραλήπτη, που μπορεί να είναι είτε διευθύνσεις χρηστών είτε smart contract. Απαιτούν αμοιβή και πρέπει να γίνουν mined. Βασικές πληροφορίες σε μια συναλλαγή περιλαμβάνουν τον παραλήπτη, την υπογραφή του αποστολέα, την αξία, προαιρετικά δεδομένα, το gas limit και τα fees. Σημειωτέον, η διεύθυνση του αποστολέα προκύπτει από την υπογραφή, εξαλείφοντας την ανάγκη να συμπεριληφθεί στα δεδομένα της συναλλαγής.
+Οι συναλλαγές στο Ethereum περιλαμβάνουν έναν αποστολέα και έναν παραλήπτη, που μπορούν να είναι είτε διευθύνσεις χρηστών είτε smart contract. Απαιτούν αμοιβή και πρέπει να εξορυχθούν. Βασικές πληροφορίες σε μια συναλλαγή περιλαμβάνουν τον παραλήπτη, την υπογραφή του αποστολέα, την αξία, προαιρετικά δεδομένα, το gas limit και τις αμοιβές. Σημειωτέον, η διεύθυνση του αποστολέα προκύπτει από την υπογραφή, εξαλείφοντας την ανάγκη για αυτή στα δεδομένα της συναλλαγής.
 
-Αυτές οι πρακτικές και μηχανισμοί είναι θεμελιώδεις για όποιον επιθυμεί να ασχοληθεί με κρυπτονομίσματα δίνοντας προτεραιότητα στην ιδιωτικότητα και την ασφάλεια.
+Αυτές οι πρακτικές και μηχανισμοί είναι θεμελιώδεις για οποιονδήποτε επιθυμεί να ασχοληθεί με κρυπτονομίσματα δίνοντας προτεραιότητα στο απόρρητο και την ασφάλεια.
 
-## Ασφάλεια Smart Contract
+## Smart Contract Security
 
-- Mutation testing to find blind spots in test suites:
+- Mutation testing για τον εντοπισμό τυφλών σημείων σε test suites:
 
 {{#ref}}
 ../smart-contract-security/mutation-testing-with-slither.md
@@ -189,12 +189,18 @@ A variant of CoinJoin, **PayJoin** (or P2EP), disguises the transaction among tw
 - [https://ethereum.org/en/developers/docs/gas/](https://ethereum.org/en/developers/docs/gas/)
 - [https://en.bitcoin.it/wiki/Privacy](https://en.bitcoin.it/wiki/Privacy#Forced_address_reuse)
 
-## Εκμετάλλευση DeFi/AMM
+## DeFi/AMM Exploitation
 
-Αν ερευνάτε πρακτική εκμετάλλευση των DEXes και AMMs (Uniswap v4 hooks, rounding/precision abuse, flash‑loan amplified threshold‑crossing swaps), δείτε:
+If you are researching practical exploitation of DEXes and AMMs (Uniswap v4 hooks, rounding/precision abuse, flash‑loan amplified threshold‑crossing swaps), check:
 
 {{#ref}}
 defi-amm-hook-precision.md
+{{#endref}}
+
+For multi-asset weighted pools that cache virtual balances and can be poisoned when `supply == 0`, study:
+
+{{#ref}}
+defi-amm-virtual-balance-cache-exploitation.md
 {{#endref}}
 
 {{#include ../../banners/hacktricks-training.md}}
