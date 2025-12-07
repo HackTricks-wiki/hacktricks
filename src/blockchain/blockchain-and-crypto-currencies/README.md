@@ -1,178 +1,178 @@
-# Blockchain and Crypto-Currencies
+# Blokzincir ve Kripto Para Birimleri
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Basic Concepts
+## Temel Kavramlar
 
-- **Akıllı Sözleşmeler (Smart Contracts)**, belirli koşullar yerine geldiğinde bir blok zincirinde çalışan ve anlaşmaların aracı olmadan otomatik olarak yürütülmesini sağlayan programlar olarak tanımlanır.
-- **Decentralized Applications (dApps)**, bir kullanıcı dostu ön yüz ve şeffaf, denetlenebilir bir arka uç üzerine inşa edilen uygulamalardır.
-- **Tokens & Coins** arasında ayrım şudur: coins dijital para görevi görürken, tokens belirli bağlamlarda değer veya sahipliği temsil eder.
-- **Utility Tokens** hizmetlere erişim sağlar, **Security Tokens** ise varlık sahipliğini ifade eder.
-- **DeFi**, merkezi otoriteler olmadan finansal hizmetler sunan Decentralized Finance anlamına gelir.
-- **DEX** ve **DAOs**, sırasıyla Decentralized Exchange Platforms ve Decentralized Autonomous Organizations anlamına gelir.
+- **Smart Contracts** belirli koşullar gerçekleştiğinde bir blockchain üzerinde çalışan programlar olarak tanımlanır, anlaşma yürütmelerini aracısız otomatikleştirir.
+- **Decentralized Applications (dApps)** smart contract'ların üzerine kurulur; kullanıcı dostu bir ön yüz ve şeffaf, denetlenebilir bir arka uç içerir.
+- **Tokens & Coins** ayrımı: coin'ler dijital para olarak hizmet ederken, token'lar belirli bağlamlarda değer veya mülkiyeti temsil eder.
+- **Utility Tokens** hizmetlere erişim sağlar, ve **Security Tokens** varlık mülkiyetini gösterir.
+- **DeFi** Merkeziyetsiz Finans anlamına gelir; merkezi otoriteler olmadan finansal hizmetler sunar.
+- **DEX** ve **DAOs** sırasıyla Merkeziyetsiz Borsa Platformları ve Merkeziyetsiz Otonom Organizasyonlar anlamına gelir.
 
-## Consensus Mechanisms
+## Konsensüs Mekanizmaları
 
-Consensus mekanizmaları, blok zincirinde işlemlerin güvenli ve üzerinde anlaşılmış şekilde doğrulanmasını sağlar:
+Konsensüs mekanizmaları, blockchain üzerinde güvenli ve uzlaşılan işlem doğrulamalarını sağlar:
 
 - **Proof of Work (PoW)** işlem doğrulaması için hesaplama gücüne dayanır.
-- **Proof of Stake (PoS)** doğrulayıcıların belirli miktarda token tutmasını gerektirir ve PoW'a kıyasla enerji tüketimini azaltır.
+- **Proof of Stake (PoS)** doğrulayıcıların belirli miktarda token bulundurmasını gerektirir ve PoW'e kıyasla enerji tüketimini azaltır.
 
-## Bitcoin Essentials
+## Bitcoin Temelleri
 
-### Transactions
+### İşlemler
 
-Bitcoin işlemleri adresler arasında fon transferini içerir. İşlemler dijital imzalarla doğrulanır, bu da yalnızca private key sahibinin transfer başlatabileceğini garanti eder.
+Bitcoin işlemleri adresler arasında fon transferini içerir. İşlemler dijital imzalarla doğrulanır; bu, yalnızca özel anahtarın sahibi tarafından transfer başlatılabileceğini garanti eder.
 
-#### Key Components:
+#### Temel Bileşenler:
 
 - **Multisignature Transactions** bir işlemi yetkilendirmek için birden fazla imza gerektirir.
-- İşlemler **inputs** (fon kaynağı), **outputs** (hedef), **fees** (madencilere ödenen ücretler) ve **scripts** (işlem kuralları) bileşenlerinden oluşur.
+- İşlemler **inputs** (fon kaynağı), **outputs** (hedef), **fees** (madencilere ödenir) ve **scripts** (işlem kuralları) içerir.
 
 ### Lightning Network
 
-Lightning Network, bir kanal içinde birden fazla işleme izin vererek Bitcoin'in ölçeklenebilirliğini artırmayı hedefler; yalnızca son durum blok zincirine yayınlanır.
+Bitcoin'in ölçeklenebilirliğini artırmayı amaçlar; bir kanal içinde birden fazla işlem yapılmasına izin verir ve yalnızca son durumu blockchain'e yayınlar.
 
-## Bitcoin Privacy Concerns
+## Bitcoin Gizlilik Endişeleri
 
-Gizlilik saldırıları, örneğin **Common Input Ownership** ve **UTXO Change Address Detection**, işlem desenlerinden yararlanır. **Mixers** ve **CoinJoin** gibi stratejiler, kullanıcılar arasındaki işlem bağlantılarını gizleyerek anonimliği artırır.
+Gizlilik saldırıları, **Common Input Ownership** ve **UTXO Change Address Detection** gibi işlem desenlerini istismar eder. **Mixers** ve **CoinJoin** gibi stratejiler, kullanıcılar arasındaki işlem bağlantılarını gizleyerek anonimliği artırır.
 
-## Acquiring Bitcoins Anonymously
+## Bitcoin'leri Anonim Olarak Edinme
 
-Yöntemler arasında nakit ticareti, mining ve mixers kullanımı bulunur. **CoinJoin** birden fazla işlemi karıştırarak izlenebilirliği zorlaştırır, **PayJoin** ise CoinJoin işlemlerini normal işlemler gibi göstererek daha yüksek gizlilik sağlar.
+Yöntemler arasında nakit takaslar, madencilik ve mixer kullanımı bulunur. **CoinJoin** birden fazla işlemi karıştırarak izlenebilirliği zorlaştırır, **PayJoin** ise CoinJoin'leri normal işlemler gibi gizleyerek daha yüksek gizlilik sağlar.
 
-# Bitcoin Privacy Saldırıları
+# Bitcoin Gizlilik Saldırıları
 
-# Summary of Bitcoin Privacy Attacks
+# Bitcoin Gizlilik Saldırıları Özeti
 
-Bitcoin dünyasında işlemlerin gizliliği ve kullanıcıların anonimliği sıklıkla endişe konusudur. İşte saldırganların Bitcoin gizliliğini tehlikeye atmak için kullandığı birkaç yaygın yöntemin basitleştirilmiş bir özeti.
+Bitcoin dünyasında işlemlerin gizliliği ve kullanıcıların anonimliği sık sık endişe konusudur. İşte saldırganların Bitcoin gizliliğini zayıflatabileceği birkaç yaygın yöntemin basitleştirilmiş bir özeti.
 
 ## **Common Input Ownership Assumption**
 
-Farklı kullanıcıların girdilerinin tek bir işlemde birleştirilmesi genellikle nadirdir çünkü bu ekstra karmaşıklık gerektirir. Bu nedenle, **aynı işlemdeki iki input adresi sıklıkla aynı kişiye ait olarak varsayılır**.
+Farklı kullanıcıların inputs'larının karmaşıklık nedeniyle tek bir işlemde birleştirilmesi genellikle nadirdir. Bu nedenle, **aynı işlemdeki iki input adres genellikle aynı kişiye ait varsayılır**.
 
 ## **UTXO Change Address Detection**
 
-UTXO (Unspent Transaction Output) bir işlemde tamamen harcanmalıdır. Eğer yalnızca bir kısmı başka bir adrese gönderilirse, kalan miktar yeni bir change adresine gider. Gözlemciler bu yeni adresin gönderene ait olduğunu varsayarak gizliliği ihlal edebilir.
+Bir UTXO, yani **Unspent Transaction Output**, bir işlemde tamamen harcanmak zorundadır. Sadece bir kısmı başka bir adrese gönderilirse, kalan miktar yeni bir change address'e gider. Gözlemciler bu yeni adresin göndericiye ait olduğunu varsayabilir ve gizliliği tehlikeye atar.
 
 ### Örnek
 
-Bunu azaltmak için mixing servisleri veya birden fazla adres kullanmak mülkiyeti gizlemeye yardımcı olabilir.
+Bunu hafifletmek için mixing servisleri veya birden fazla adres kullanmak mülkiyeti gizlemeye yardımcı olabilir.
 
 ## **Social Networks & Forums Exposure**
 
-Kullanıcılar bazen Bitcoin adreslerini çevrimiçi paylaşır; bu da adresin sahibine kolayca bağlanmasını sağlar.
+Kullanıcılar bazen Bitcoin adreslerini çevrimiçi paylaşır; bu, adresin sahibine **kolayca bağlanmasını** sağlar.
 
 ## **Transaction Graph Analysis**
 
-İşlemler grafikler olarak görselleştirilebilir ve fon akışına dayalı olarak kullanıcılar arasında potansiyel bağlantıları ortaya çıkarabilir.
+İşlemler grafikler olarak görselleştirilebilir; fon akışına dayanarak kullanıcılar arasında potansiyel bağlantıları ortaya çıkarır.
 
 ## **Unnecessary Input Heuristic (Optimal Change Heuristic)**
 
-Bu heurisik, birden fazla input ve output içeren işlemleri analiz ederek hangi output'un gönderenin geri dönen change'i olduğunu tahmin etmeye dayanır.
+Bu sezgi, birden fazla input ve output içeren işlemleri analiz ederek hangi output'un göndericiye dönen change olduğunu tahmin etmeye dayanır.
 
 ### Örnek
 ```bash
 2 btc --> 4 btc
 3 btc     1 btc
 ```
-If adding more inputs makes the change output larger than any single input, it can confuse the heuristic.
+Eğer daha fazla girdi eklemek, değişim çıktısını herhangi bir tek girdiden daha büyük yapıyorsa, bu heuristiği yanıltabilir.
 
 ## **Forced Address Reuse**
 
-Attackers may send small amounts to previously used addresses, hoping the recipient combines these with other inputs in future transactions, thereby linking addresses together.
+Saldırganlar, alıcının bunları gelecekteki işlemlerde diğer girdilerle birleştirerek adresleri birbirine bağlamasını umarak, daha önce kullanılmış adreslere küçük miktarlar gönderebilir.
 
-### Correct Wallet Behavior
+### Doğru Cüzdan Davranışı
 
-Wallets should avoid using coins received on already used, empty addresses to prevent this privacy leak.
+Cüzdanlar, bu gizlilik leak'ini önlemek için daha önce kullanılmış, boş adreslerde alınan coin'leri kullanmaktan kaçınmalıdır.
 
 ## **Other Blockchain Analysis Techniques**
 
-- **Exact Payment Amounts:** Transactions without change are likely between two addresses owned by the same user.
-- **Round Numbers:** A round number in a transaction suggests it's a payment, with the non-round output likely being the change.
-- **Wallet Fingerprinting:** Different wallets have unique transaction creation patterns, allowing analysts to identify the software used and potentially the change address.
-- **Amount & Timing Correlations:** Disclosing transaction times or amounts can make transactions traceable.
+- **Exact Payment Amounts:** Change içermeyen işlemler muhtemelen aynı kullanıcıya ait iki adres arasında gerçekleşir.
+- **Round Numbers:** Bir işlemdeki yuvarlak tutar, bunun bir ödeme olduğunu ve yuvarlak olmayan çıktının muhtemelen değişim olduğunu gösterir.
+- **Wallet Fingerprinting:** Farklı cüzdanlar benzersiz işlem oluşturma desenlerine sahiptir; bu, analistlerin kullanılan yazılımı ve muhtemelen değişim adresini tespit etmesine olanak tanır.
+- **Amount & Timing Correlations:** İşlem zamanları veya tutarlarının açıklanması işlemlerin izlenebilir hâle gelmesine neden olabilir.
 
 ## **Traffic Analysis**
 
-By monitoring network traffic, attackers can potentially link transactions or blocks to IP addresses, compromising user privacy. This is especially true if an entity operates many Bitcoin nodes, enhancing their ability to monitor transactions.
+Ağ trafiğini izleyerek saldırganlar işlemleri veya blokları IP adreslerine bağlayabilir ve kullanıcı gizliliğini tehlikeye atabilir. Bir varlık çok sayıda Bitcoin node'u çalıştırıyorsa, işlemleri izleme yetenekleri artar; bu özellikle geçerlidir.
 
-## More
+## Daha Fazlası
 
-For a comprehensive list of privacy attacks and defenses, visit [Bitcoin Privacy on Bitcoin Wiki](https://en.bitcoin.it/wiki/Privacy).
+Gizlilik saldırıları ve savunmalarının kapsamlı bir listesi için, [Bitcoin Privacy on Bitcoin Wiki](https://en.bitcoin.it/wiki/Privacy) sayfasını ziyaret edin.
 
-# Anonymous Bitcoin Transactions
+# Anonim Bitcoin İşlemleri
 
-## Ways to Get Bitcoins Anonymously
+## Bitcoinleri Anonim Olarak Elde Etme Yolları
 
-- **Cash Transactions**: Acquiring bitcoin through cash.
-- **Cash Alternatives**: Purchasing gift cards and exchanging them online for bitcoin.
-- **Mining**: The most private method to earn bitcoins is through mining, especially when done alone because mining pools may know the miner's IP address. [Mining Pools Information](https://en.bitcoin.it/wiki/Pooled_mining)
-- **Theft**: Theoretically, stealing bitcoin could be another method to acquire it anonymously, although it's illegal and not recommended.
+- **Cash Transactions**: Bitcoin'i nakit yoluyla edinme.
+- **Cash Alternatives**: Hediye kartları satın alıp çevrimiçi olarak bitcoin'e dönüştürme.
+- **Mining**: Bitcoin kazanmanın en özel yöntemi madenciliktir; özellikle tek başına yapıldığında daha gizlidir çünkü mining pool'ları madencinin IP adresini bilebilir. [Mining Pools Information](https://en.bitcoin.it/wiki/Pooled_mining)
+- **Theft**: Teorik olarak, bitcoin çalmak onu anonim olarak elde etmenin başka bir yolu olabilir; ancak bu yasa dışıdır ve tavsiye edilmez.
 
 ## Mixing Services
 
-By using a mixing service, a user can **send bitcoins** and receive **different bitcoins in return**, which makes tracing the original owner difficult. Yet, this requires trust in the service not to keep logs and to actually return the bitcoins. Alternative mixing options include Bitcoin casinos.
+Bir mixing servisi kullanarak, kullanıcı **bitcoin gönderebilir** ve karşılığında **farklı bitcoinler alabilir**, bu da orijinal sahibin izini zorlaştırır. Ancak bu, servise log tutmama ve gerçekten bitcoinleri geri verme konusunda güvenmeyi gerektirir. Alternatif mixing seçenekleri arasında Bitcoin casinoları bulunur.
 
 ## CoinJoin
 
-**CoinJoin** merges multiple transactions from different users into one, complicating the process for anyone trying to match inputs with outputs. Despite its effectiveness, transactions with unique input and output sizes can still potentially be traced.
+CoinJoin, farklı kullanıcıların birden fazla işlemini tek bir işlemde birleştirir; bu, girdileri çıktılarla eşleştirmeye çalışanlar için süreci zorlaştırır. Ancak benzersiz girdi ve çıktı boyutlarına sahip işlemler hâlâ izlenebilir.
 
-Example transactions that may have used CoinJoin include `402d3e1df685d1fdf82f36b220079c1bf44db227df2d676625ebcbee3f6cb22a` and `85378815f6ee170aa8c26694ee2df42b99cff7fa9357f073c1192fff1f540238`.
+CoinJoin kullanmış olabilecek örnek işlemler şunlardır: `402d3e1df685d1fdf82f36b220079c1bf44db227df2d676625ebcbee3f6cb22a` ve `85378815f6ee170aa8c26694ee2df42b99cff7fa9357f073c1192fff1f540238`.
 
-For more information, visit [CoinJoin](https://coinjoin.io/en). For a similar service on Ethereum, check out [Tornado Cash](https://tornado.cash), which anonymizes transactions with funds from miners.
+Daha fazla bilgi için [CoinJoin](https://coinjoin.io/en) adresini ziyaret edin. Ethereum için benzer bir servis olan [Tornado Cash](https://tornado.cash), miner'ların fonlarıyla işlemleri anonimleştirir.
 
 ## PayJoin
 
-A variant of CoinJoin, **PayJoin** (or P2EP), disguises the transaction among two parties (e.g., a customer and a merchant) as a regular transaction, without the distinctive equal outputs characteristic of CoinJoin. This makes it extremely hard to detect and could invalidate the common-input-ownership heuristic used by transaction surveillance entities.
+CoinJoin'ın bir varyantı olan PayJoin (veya P2EP), işlemi iki taraf (ör. müşteri ve satıcı) arasındaki normal bir işlem gibi gizler; CoinJoin'e özgü eşit çıktılar gibi belirgin özelliklere sahip değildir. Bu tespiti son derece zorlaştırır ve işlem gözetim yapan kuruluşların kullandığı common-input-ownership heuristic'i geçersiz kılabilir.
 ```plaintext
 2 btc --> 3 btc
 5 btc     4 btc
 ```
 Transactions like the above could be PayJoin, enhancing privacy while remaining indistinguishable from standard bitcoin transactions.
 
-**PayJoin kullanımı geleneksel gözetim yöntemlerini önemli ölçüde bozabilir**, bu da işlem gizliliği arayışında umut verici bir gelişme sağlar.
+**The utilization of PayJoin could significantly disrupt traditional surveillance methods**, making it a promising development in the pursuit of transactional privacy.
 
-# Kripto Paralarında Gizlilik İçin En İyi Uygulamalar
+# Kripto Para Birimlerinde Gizlilik İçin En İyi Uygulamalar
 
-## **Cüzdan Senkronizasyonu Teknikleri**
+## **Cüzdan Senkronizasyon Teknikleri**
 
-Gizlilik ve güvenliği korumak için cüzdanları blockchain ile senkronize etmek önemlidir. İki yöntem öne çıkar:
+Gizliliği ve güvenliği korumak için cüzdanların blockchain ile senkronize edilmesi kritik öneme sahiptir. İki yöntem öne çıkar:
 
-- **Full node**: Tüm blockchain'i indirerek, bir full node azami gizliliği sağlar. Yapılan tüm işlemler yerel olarak depolanır; bu, saldırganların kullanıcının hangi işlem veya adreslerle ilgilendiğini tespit etmesini imkansız hale getirir.
-- **Client-side block filtering**: Bu yöntem, blockchain'deki her blok için filtreler oluşturmayı içerir; böylece cüzdanlar belirli ilgi alanlarını ağ gözlemcilerine açmadan ilgili işlemleri belirleyebilir. Hafif cüzdanlar bu filtreleri indirir ve kullanıcının adresleriyle eşleşme olduğunda yalnızca tam blokları çeker.
+- **Full node**: Tüm blockchain'i indirerek, bir full node maksimum gizlilik sağlar. Yapılan tüm işlemler yerel olarak saklanır; bu da saldırganların kullanıcının hangi işlemlerle veya adreslerle ilgilendiğini belirlemesini imkansız kılar.
+- **Client-side block filtering**: Bu yöntem, blockchain'deki her blok için filtreler oluşturmayı içerir; böylece cüzdanlar ağ gözlemcilerine belirli ilgi alanlarını açmadan ilgili işlemleri tespit edebilir. Hafif cüzdanlar bu filtreleri indirir ve kullanıcının adresleriyle eşleşme olduğunda yalnızca tam blokları çeker.
 
-## **Anonimlik için Tor Kullanımı**
+## **Anonimlik İçin Tor Kullanımı**
 
-Bitcoin'in peer-to-peer bir ağ üzerinde çalıştığı göz önüne alındığında, IP adresinizi gizlemek ve ağla etkileşim sırasında gizliliği artırmak için Tor kullanılması önerilir.
+Bitcoin'in eşler arası bir ağ üzerinde çalışması nedeniyle, IP adresinizi gizlemek ve ağla etkileşim sırasında gizliliği artırmak için Tor kullanılması tavsiye edilir.
 
-## **Adres Tekrar Kullanımının Önlenmesi**
+## **Adres Tekrar Kullanımını Önleme**
 
-Gizliliği korumak için her işlemde yeni bir adres kullanmak hayati önem taşır. Adreslerin tekrar kullanılması, işlemleri aynı varlığa bağlayarak gizliliği tehlikeye atabilir. Modern cüzdanlar tasarımları gereği adres tekrar kullanımını caydırır.
+Gizliliği korumak için her işlemde yeni bir adres kullanmak hayati önemdedir. Adresleri tekrar kullanmak, işlemleri aynı varlığa bağlayarak gizliliği tehlikeye atabilir. Modern cüzdanlar tasarımları gereği adres tekrar kullanımını caydırır.
 
 ## **İşlem Gizliliği İçin Stratejiler**
 
-- **Multiple transactions**: Bir ödemeyi birkaç işleme bölmek işlem miktarını gizleyerek gizlilik saldırılarını önleyebilir.
-- **Change avoidance**: Change çıktısı gerektirmeyen işlemleri tercih etmek, change algılama yöntemlerini bozarak gizliliği artırır.
-- **Multiple change outputs**: Change'den kaçınmak mümkün değilse birden fazla change çıktısı oluşturmak yine de gizliliği artırabilir.
+- Birden çok işlem: Ödemeyi birkaç işleme bölmek, işlem miktarını gizleyebilir ve gizlilik saldırılarını zorlaştırabilir.
+- Para üstü (change) çıktılarından kaçınma: Para üstü çıktısı gerektirmeyen işlemleri tercih etmek, para üstü tespiti yöntemlerini bozarak gizliliği artırır.
+- Birden çok para üstü çıktısı: Para üstünden kaçınmak mümkün değilse, birden fazla para üstü çıktısı oluşturmak yine de gizliliği artırabilir.
 
-# **Monero: Anonimliğin Bir Sembolü**
+# **Monero: Anonimliğin Sembolü**
 
-Monero, dijital işlemlerde mutlak anonimlik ihtiyacına cevap vererek gizlilik için yüksek bir standart belirler.
+Monero, dijital işlemlerde mutlak anonimliğe olan ihtiyacı ele alır ve gizlilik için yüksek bir standart belirler.
 
 # **Ethereum: Gas ve İşlemler**
 
-## **Gas'in Anlaşılması**
+## **Gas'i Anlamak**
 
-Gas, Ethereum üzerinde işlemleri yürütmek için gereken hesaplama çabasını ölçer ve **gwei** cinsinden fiyatlandırılır. Örneğin, 2,310,000 gwei (veya 0.00231 ETH) tutarında bir işlem bir gas limit'i ve bir base fee'yi içerir; ayrıca madencileri teşvik etmek için bir tip bulunur. Kullanıcılar fazla ödememek için bir maksimum ücret belirleyebilir; artan miktar iade edilir.
+Gas, Ethereum üzerinde işlemleri yürütmek için gereken hesaplama çabasını ölçer ve **gwei** cinsinden fiyatlandırılır. Örneğin, 2,310,000 gwei (veya 0.00231 ETH) maliyetli bir işlem gas limit ve base fee içerir; ayrıca madencileri teşvik etmek için bir tip verilir. Kullanıcılar, fazla ödeme yapmamalarını sağlamak için bir max fee belirleyebilir; fazla ödenen kısım iade edilir.
 
-## **İşlemlerin Gerçekleştirilmesi**
+## **İşlemleri Gerçekleştirme**
 
-Ethereum'deki işlemler bir gönderici ve bir alıcı içerir; bunlar kullanıcı ya da smart contract adresleri olabilir. İşlemler ücret gerektirir ve madencilikle onaylanmalıdır. Bir işlemdeki temel bilgiler alıcı, gönderici imzası, değer, isteğe bağlı veri, gas limit ve ücretlerdir. Önemle, göndericinin adresi imzadan türetilir; bu nedenle işlem verisinde ayrıca gönderici adresine yer verilmesine gerek yoktur.
+Ethereum'daki işlemler bir gönderici ve bir alıcı içerir; bunlar kullanıcı veya smart contract adresleri olabilir. İşlemler bir ücret gerektirir ve mined (madencilik) edilmelidir. Bir işlemdeki temel bilgiler alıcı, göndericinin imzası, değer, isteğe bağlı veri, gas limiti ve ücretlerdir. Göndericinin adresi imzadan türetildiği için, işlem verisinde adresin ayrı olarak bulunmasına gerek yoktur.
 
-Bu uygulama ve mekanizmalar, gizlilik ve güvenliği önceliklendiren herkes için kripto paralarla etkileşime girerken temel teşkil eder.
+Bu uygulamalar ve mekanizmalar, gizliliği ve güvenliği ön planda tutarak kripto para birimleriyle etkileşime girmek isteyen herkes için temel oluşturur.
 
-## Smart Contract Güvenliği
+## Akıllı Sözleşme Güvenliği
 
 - Test süitlerindeki kör noktaları bulmak için mutation testing:
 
@@ -189,12 +189,18 @@ Bu uygulama ve mekanizmalar, gizlilik ve güvenliği önceliklendiren herkes iç
 - [https://ethereum.org/en/developers/docs/gas/](https://ethereum.org/en/developers/docs/gas/)
 - [https://en.bitcoin.it/wiki/Privacy](https://en.bitcoin.it/wiki/Privacy#Forced_address_reuse)
 
-## DeFi/AMM Sömürüsü
+## DeFi/AMM İstismarı
 
-DEX'ler ve AMM'lerin (Uniswap v4 hooks, rounding/precision abuse, flash‑loan amplified threshold‑crossing swaps) pratik sömürü yöntemlerini araştırıyorsanız, bakınız:
+If you are researching practical exploitation of DEXes and AMMs (Uniswap v4 hooks, rounding/precision abuse, flash‑loan amplified threshold‑crossing swaps), check:
 
 {{#ref}}
 defi-amm-hook-precision.md
+{{#endref}}
+
+For multi-asset weighted pools that cache virtual balances and can be poisoned when `supply == 0`, study:
+
+{{#ref}}
+defi-amm-virtual-balance-cache-exploitation.md
 {{#endref}}
 
 {{#include ../../banners/hacktricks-training.md}}
