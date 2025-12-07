@@ -779,6 +779,40 @@ rdp-sessions-abuse.md
 
 [**More information about domain trusts in ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/child-domain-da-to-ea-in-parent-domain)
 
+## LDAP-based AD Abuse from On-Host Implants
+
+The [LDAP BOF Collection](https://github.com/P0142/LDAP-Bof-Collection) re-implements bloodyAD-style LDAP primitives as x64 Beacon Object Files that run entirely inside an on-host implant (e.g., Adaptix C2). Operators compile the pack with `git clone https://github.com/P0142/ldap-bof-collection.git && cd ldap-bof-collection && make`, load `ldap.axs`, and then call `ldap <subcommand>` from the beacon. All traffic rides the current logon security context over LDAP (389) with signing/sealing or LDAPS (636) with auto certificate trust, so no socks proxies or disk artifacts are required.
+
+### Implant-side LDAP enumeration
+
+- `get-users`, `get-computers`, `get-groups`, `get-usergroups`, and `get-groupmembers` resolve short names/OU paths into full DNs and dump the corresponding objects.
+- `get-object`, `get-attribute`, and `get-domaininfo` pull arbitrary attributes (including security descriptors) plus the forest/domain metadata from `rootDSE`.
+- `get-uac`, `get-spn`, `get-delegation`, and `get-rbcd` expose roasting candidates, delegation settings, and existing [Resource-based Constrained Delegation](resource-based-constrained-delegation.md) descriptors directly from LDAP.
+- `get-acl` and `get-writable --detailed` parse the DACL to list trustees, rights (GenericAll/WriteDACL/WriteOwner/attribute writes), and inheritance, giving immediate targets for ACL privilege escalation.
+
+```powershell
+ldap get-users --ldaps
+ldap get-computers -ou "OU=Servers,DC=corp,DC=local"
+ldap get-writable --detailed
+ldap get-acl "CN=Tier0,OU=Admins,DC=corp,DC=local"
+```
+
+### LDAP write primitives for escalation & persistence
+
+- Object creation BOFs (`add-user`, `add-computer`, `add-group`, `add-ou`) let the operator stage new principals or machine accounts wherever OU rights exist. `add-groupmember`, `set-password`, `add-attribute`, and `set-attribute` directly hijack targets once write-property rights are found.
+- ACL-focused commands such as `add-ace`, `set-owner`, `add-genericall`, `add-genericwrite`, and `add-dcsync` translate WriteDACL/WriteOwner on any AD object into password resets, group membership control, or DCSync replication privileges without leaving PowerShell/ADSI artifacts. `remove-*` counterparts clean up injected ACEs.
+
+### Delegation, roasting, and Kerberos abuse
+
+- `add-spn`/`set-spn` instantly make a compromised user Kerberoastable; `add-asreproastable` (UAC toggle) marks it for AS-REP roasting without touching the password.
+- Delegation macros (`add-delegation`, `set-delegation`, `add-constrained`, `add-unconstrained`, `add-rbcd`) rewrite `msDS-AllowedToDelegateTo`, UAC flags, or `msDS-AllowedToActOnBehalfOfOtherIdentity` from the beacon, enabling constrained/unconstrained/RBCD attack paths and eliminating the need for remote PowerShell or RSAT.
+
+### sidHistory injection, OU relocation, and attack surface shaping
+
+- `add-sidhistory` injects privileged SIDs into a controlled principal’s SID history (see [SID-History Injection](sid-history-injection.md)), providing stealthy access inheritance fully over LDAP/LDAPS.
+- `move-object` changes the DN/OU of computers or users, letting an attacker drag assets into OUs where delegated rights already exist before abusing `set-password`, `add-groupmember`, or `add-spn`.
+- Tightly scoped removal commands (`remove-attribute`, `remove-delegation`, `remove-rbcd`, `remove-uac`, `remove-groupmember`, etc.) allow rapid rollback after the operator harvests credentials or persistence, minimizing telemetry.
+
 ## AD -> Azure & Azure -> AD
 
 
@@ -819,5 +853,6 @@ https://cloud.hacktricks.wiki/en/pentesting-cloud/azure-security/az-lateral-move
 - [http://www.harmj0y.net/blog/redteaming/a-guide-to-attacking-domain-trusts/](http://www.harmj0y.net/blog/redteaming/a-guide-to-attacking-domain-trusts/)
 - [https://www.labofapenetrationtester.com/2018/10/deploy-deception.html](https://www.labofapenetrationtester.com/2018/10/deploy-deception.html)
 - [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/child-domain-da-to-ea-in-parent-domain](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/child-domain-da-to-ea-in-parent-domain)
+- [LDAP BOF Collection – In-Memory LDAP Toolkit for Active Directory Exploitation](https://github.com/P0142/LDAP-Bof-Collection)
 
 {{#include ../../banners/hacktricks-training.md}}
