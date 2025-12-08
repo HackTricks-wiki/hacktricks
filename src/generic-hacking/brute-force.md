@@ -131,6 +131,14 @@ nmap --script cassandra-brute -p 9160 <IP>
 legba scylla --username cassandra --password wordlists/passwords.txt --target localhost:9042
 ```
 
+### ClickHouse
+
+[bruter](https://github.com/vflame6/bruter)
+
+```bash
+bruter clickhouse -u default -p passwords.txt localhost:9000
+```
+
 ### CouchDB
 
 ```bash
@@ -448,6 +456,12 @@ hydra -P /usr/share/seclists/Discovery/SNMP/common-snmp-community-strings.txt ta
 nmap --script smb-brute -p 445 <IP>
 hydra -l Administrator -P words.txt 192.168.1.12 smb -t 1
 legba smb --target share.company.com --username admin --password data/passwords.txt [--smb-workgroup <SMB_WORKGROUP>] [--smb-share <SMB_SHARE>]
+```
+
+### SMPP
+
+```bash
+bruter smpp -u smppclient1 -p passwords.txt localhost:2775
 ```
 
 ### SMTP
