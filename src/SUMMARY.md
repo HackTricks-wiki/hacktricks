@@ -85,6 +85,7 @@
   - [Web Requests](generic-methodologies-and-resources/python/web-requests.md)
   - [Bruteforce hash (few chars)](generic-methodologies-and-resources/python/bruteforce-hash-few-chars.md)
   - [Basic Python](generic-methodologies-and-resources/python/basic-python.md)
+- [Side Channel Attacks On Messaging Protocols](generic-methodologies-and-resources/side-channel-attacks-on-messaging-protocols.md)
 - [Threat Modeling](generic-methodologies-and-resources/threat-modeling.md)
 - [Blockchain & Crypto](blockchain/blockchain-and-crypto-currencies/README.md)
   - [Mutation Testing With Slither](blockchain/smart-contract-security/mutation-testing-with-slither.md)
