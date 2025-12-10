@@ -10,7 +10,9 @@ class MDBookSidebarScrollbox extends HTMLElement {
     connectedCallback() {
         // Modify TOC to support external links
         var toc = '{{#toc}}{{/toc}}';
-        toc = toc.replace(/<div>([^$<>]*)\$\$external:([^$<>]*)\$\$<\/div>/g, '<a class="external-link" href="$2">$1</a>') 
+        // Handle both old mdbook (<div>) and new mdbook 0.5 (<span>) formats
+        // External links open in new tab with external link icon
+        toc = toc.replace(/<(div|span)>([^$<>]*)\$\$external:([^$<>]*)\$\$<\/(div|span)>/g, '<a class="external-link" href="$3" target="_blank" rel="noopener noreferrer">$2 ↗</a>') 
         this.innerHTML = toc
         // Set the current, active page, and reveal it if it's hidden
         let current_page = document.location.href.toString();
