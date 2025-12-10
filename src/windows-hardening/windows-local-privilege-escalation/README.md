@@ -789,6 +789,25 @@ Detection ideas for defenders
 - Monitor user-mode opens of suspicious device names (e.g., \\ .\\amsdk*) and specific IOCTL sequences indicative of abuse.
 - Enforce Microsoft’s vulnerable driver blocklist (HVCI/WDAC/Smart App Control) and maintain your own allow/deny lists.
 
+### MalSeclogon & PPID Spoofing for stealth driver installs
+
+- `FileProcessIdsUsingFileInformation` (FILE_INFORMATION_CLASS 51) can leak the PID owning a handle even when process enumeration APIs are blocked. ValleyRAT’s installer uses it to always resolve the `dwm.exe` PID and then temporarily patches the current thread’s `TEB->ClientId.UniqueProcess` so any subsequent `CreateProcess*` call shows `dwm.exe` as the parent (PPID spoofing).
+- With the target PID known, the malware launches the open-source [MalSeclogon](https://github.com/antonioCoco/MalSeclogon) pattern: duplicate the `dwm.exe` token via `CreateProcessWithTokenW` to execute helper commands under the Desktop Window Manager’s credentials. If token duplication fails it falls back to `CreateProcessWithLogonW` but keeps the PPID spoof.
+- Operators run noisy helpers while spoofed, e.g.:
+  ```cmd
+  cmd /c start /min ipconfig /release
+  cmd /c start /min ipconfig /renew
+  ```
+  Cutting connectivity for a few seconds hides the follow-up driver service install from network telemetry and confuses EDR timelines because the parent looks like `dwm.exe`.
+- Once the helpers return, the original `TEB->ClientId` is restored and the signed driver is dropped, registered as `HKLM\SYSTEM\CurrentControlSet\Services\kernelquick`, and configured purely through registry values such as `KernelQuick_HideFsFiles` / `KernelQuick_ProtectedImages`.
+
+### Windows Kernel Rootkit Techniques: APC injection, registry-driven stealth, forced deletion & legacy-signed drivers
+
+- **Registry-controlled filtering:** the `kernelquick` driver (forked from JKornev/Hidden) never hard-codes what to hide. User mode writes multi-string lists into keys such as `KernelQuick_HideFsFiles`, `KernelQuick_HideFsDirs`, `KernelQuick_HideRegKeys`, `KernelQuick_HideRegValues`, `KernelQuick_ProtectedImages`, `KernelQuick_IgnoredImages`, `KernelQuick_State`, and `KernelQuick_StealthMode`. Each key is consumed inside the driver’s filter callbacks so operators can toggle concealment remotely through IOCTLs without reinstalling the driver.
+- **Kernel-to-user APC injection:** shellcode is staged inside `HKLM\SOFTWARE\IpDates`. The driver spins `UMInjectionRoutine()` which: (1) reads the shellcode blob from the registry, (2) locates a default target (`dwm.exe`) or uses a PID supplied through IOCTL `0x222144`, (3) queues a kernel APC into one of the target’s threads that executes `UMInjectExecShellcode()`. This helper allocates user-mode memory from kernel context, copies the payload, and queues a user-mode APC to pivot execution without any `WriteProcessMemory`/`CreateRemoteThread` noise.
+- **ForceDeleteFile():** IOCTL `0x222140` lets operators delete arbitrary files from kernel space. The routine opens the file path with direct IRPs, clears attributes via `FileBasicInformation`, sets `FileDispositionInformation`, and unmaps section objects so even loaded AV/EDR drivers are removed. ValleyRAT ships a built-in hit list (Qihoo 360, Huorong, Tencent, Kingsoft, Kaspersky, etc.) that is purged automatically at driver initialization.
+- **Boot persistence & legacy certificates:** a helper called `SetDriverStartType_SystemStart()` flips the service’s `Start` to `SERVICE_SYSTEM_START` so the driver loads before most security stacks. The samples analyzed were signed with 2013–2014 cross-signed certificates that still satisfy Microsoft’s kernel-mode signing exception policy, which means they load on Windows 10/11 (even with Secure Boot + HVCI) until the cert/hash hits the vulnerable-driver blocklist.
+
 
 ## PATH DLL Hijacking
 
@@ -1890,5 +1909,6 @@ C:\Windows\microsoft.net\framework\v4.0.30319\MSBuild.exe -version #Compile the 
 - [HTB Reaper: Format-string leak + stack BOF → VirtualAlloc ROP (RCE) and kernel token theft](https://0xdf.gitlab.io/2025/08/26/htb-reaper.html)
 
 - [Check Point Research – Chasing the Silver Fox: Cat & Mouse in Kernel Shadows](https://research.checkpoint.com/2025/silver-fox-apt-vulnerable-drivers/)
+- [Check Point Research – Cracking ValleyRAT: From Builder Secrets to Kernel Rootkits](https://research.checkpoint.com/2025/cracking-valleyrat-from-builder-secrets-to-kernel-rootkits/)
 
 {{#include ../../banners/hacktricks-training.md}}
