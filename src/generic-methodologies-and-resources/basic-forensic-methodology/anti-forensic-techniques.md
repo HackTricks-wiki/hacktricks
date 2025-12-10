@@ -301,6 +301,54 @@ Attackers frequently pair self‑patching with durable access paths:
 
 Defenders should correlate these artifacts with external exposure and service patching events to uncover anti‑forensic self‑remediation used to hide initial exploitation.
 
+### Cross-platform Rust ransomware anti-forensics (01flip)
+Unit 42 detailed the 01flip ransomware family, which compiles the same Rust codebase into PE and ELF payloads and layers several anti-forensic controls to frustrate triage.
+
+#### Enumerating shared Rust crates
+`rustbininfo` can fingerprint stripped Rust binaries by dumping the compiler version, commit hash, and crate dependency tree. Running it across Windows and Linux samples immediately proves they were built from the same project even after renaming or removing PDBs:
+
+```bash
+rustbininfo --input 01flip_windows.exe
+rustbininfo --input 01flip_linux
+```
+
+Matching crate lists or Rust commit IDs across artifacts is a low-effort way to cluster multi-platform ransomware families.
+
+#### Runtime string decoding via pairwise subtraction
+Sensitive strings (ransom note body, file-extension denylist, RSA public key) are stored as short byte blobs inside `.text`/`.data`. Right before use, 01flip subtracts each two-byte chunk to recover the plaintext. Reverse engineers can replicate the decoder as follows:
+
+```python
+from more_itertools import chunked
+
+def decode(enc: bytes) -> str:
+    return ''.join(chr(a - b) for a, b in chunked(enc, 2))
+```
+
+Hunt for tight subtraction loops that allocate 2-byte buffers repeatedly, or statically carve the encoded arrays and pass them through the helper to rebuild ransom notes and keys.
+
+#### Extension denylist and rename patterns
+Files marked with dozens of extensions (OS components, temp/media artifacts, and even the literal string `lockbit`) are skipped to avoid bricking systems or re-encrypting someone else’s loot. Processed files are renamed to ``<original>.<UNIQUE_ID>.<0|1>.01flip`` right after encryption. Detecting mass creation of `RECOVER-YOUR-FILE.TXT` plus rename bursts into that pattern is a strong signal even if the binary later wipes itself.
+
+#### Filename-gated detonation
+At start-up the payload resolves its own filename (e.g., via `GetModuleFileNameW`). If the substring `01flip` is present, encryption is skipped and only the cleanup path runs. Rename samples before detonating them in sandboxes, and alert on processes that query their image path and immediately exit without touching other APIs.
+
+#### Coordinated self-wiping
+Once encryption completes—or immediately if the filename gate triggers—the binary overwrites the first ~4 MB of itself and deletes the residue using only built-in utilities:
+
+Windows example:
+
+```cmd
+ping 127.0.0.7 -n 5 > Nul & fsutil file setZeroData offset=0 length=4194303 %SELF% > Nul & Del /f /q %SELF%
+```
+
+Linux example:
+
+```bash
+sleep 5 && dd if=/dev/urandom of=$SELF bs=1M count=4 >/dev/null 2>&1 && rm $SELF >/dev/null 2>&1
+```
+
+Telemetry that spots `fsutil file setZeroData` followed by `del /f /q` (Windows) or `dd if=/dev/urandom of=$(readlink /proc/self/exe)` followed by `rm` (Linux) against the same binary is a straightforward hunt query for this anti-forensic routine.
+
 ## References
 
 - Sophos X-Ops – “AuKill: A Weaponized Vulnerable Driver for Disabling EDR” (March 2023)  
@@ -310,6 +358,8 @@ Defenders should correlate these artifacts with external exposure and service pa
 
 - [Red Canary – Patching for persistence: How DripDropper Linux malware moves through the cloud](https://redcanary.com/blog/threat-intelligence/dripdropper-linux-malware/)
 - [CVE‑2023‑46604 – Apache ActiveMQ OpenWire RCE (NVD)](https://nvd.nist.gov/vuln/detail/CVE-2023-46604)
+- [Unit 42 – 01flip: Multi-Platform Ransomware Written in Rust](https://unit42.paloaltonetworks.com/new-ransomware-01flip-written-in-rust/)
+- [rustbininfo – Extract crate metadata from compiled Rust binaries](https://github.com/N0fix/rustbininfo)
 
 {{#include ../../banners/hacktricks-training.md}}
 
