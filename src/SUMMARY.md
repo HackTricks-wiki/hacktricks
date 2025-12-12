@@ -598,6 +598,7 @@
 
 # 🕸️ Pentesting Web
 
+- [Soap Jax Ws Threadlocal Auth Bypass](pentesting-web/soap-jax-ws-threadlocal-auth-bypass.md)
 - [Web Vulnerabilities Methodology](pentesting-web/web-vulnerabilities-methodology.md)
 - [Reflecting Techniques - PoCs and Polygloths CheatSheet](pentesting-web/pocs-and-polygloths-cheatsheet/README.md)
   - [Web Vulns List](pentesting-web/pocs-and-polygloths-cheatsheet/web-vulns-list.md)
