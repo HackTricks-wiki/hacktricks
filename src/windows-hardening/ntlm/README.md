@@ -342,7 +342,20 @@ krbrelayx.py -t TARGET.DOMAIN.LOCAL -smb2support
 * Kerberos AP-REQ containing a subsession key and a client principal equal to the hostname.
 * Windows Event 4624/4648 SYSTEM logons immediately followed by remote SMB writes from the same host.
 
+## SMB-to-MSSQL NTLM relay with TLS-required SQL Servers
+
+Enterprise SQL clusters often require TLS (`Encrypt=True`) on port 1433, which historically broke many relay workflows. Metasploit 6.4.102 adds `auxiliary/server/relay/smb_to_mssql`, a coercion-friendly SMB listener that forwards captured NTLM authentications into TLS-capable MSSQL sessions. Once a workstation authenticates to the rogue SMB share, the module negotiates encryption with each configured SQL host and spawns an interactive SQL shell under the relayed identity.
+
+Typical use:
+
+1. Launch the listener and define targets: `use auxiliary/server/relay/smb_to_mssql`, set the local `SRVHOST`/`SRVPORT`, and list SQL hosts in `RELAY_TARGETS`.
+2. Trigger SMB authentication from the victim (PrinterBug, DFSCoerce, UNC path injection, etc.).
+3. When the relay succeeds, issue Transact-SQL commands (enumeration, `xp_cmdshell`, data theft) through the interactive prompt that Metasploit opens, even if the SQL Server enforces TLS.
+
+The same TLS uplift also lands in `auxiliary/scanner/mssql/mssql_login`, so brute-force or password spraying campaigns can talk to hardened SQL Servers without falling back to plaintext.
+
 ## References
+* [Rapid7 – Metasploit Wrap-Up 12/12/2025](https://www.rapid7.com/blog/post/pt-metasploit-wrap-up-12-12-2025)
 * [NTLM Reflection is Dead, Long Live NTLM Reflection!](https://www.synacktiv.com/en/publications/la-reflexion-ntlm-est-morte-vive-la-reflexion-ntlm-analyse-approfondie-de-la-cve-2025.html)
 * [MSRC – CVE-2025-33073](https://msrc.microsoft.com/update-guide/vulnerability/CVE-2025-33073)
 
