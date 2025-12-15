@@ -255,7 +255,7 @@ Remarques
 Voir aussi stego tools et carving techniques :
 
 {{#ref}}
-../../crypto-and-stego/stego-tricks.md
+../../stego/workflow/README.md#quick-triage-checklist-first-10-minutes
 {{#endref}}
 
 ## JS/VBS droppers → Base64 PowerShell staging
