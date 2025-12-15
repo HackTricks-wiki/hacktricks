@@ -155,15 +155,15 @@ math.isqrt(2500)  # 50
 
 Binary-to-image helper:
 
-- https://www.dcode.fr/binary-image
+- [https://www.dcode.fr/binary-image](https://www.dcode.fr/binary-image)
 
 #### Braille
 
-- https://www.branah.com/braille-translator
+- [https://www.branah.com/braille-translator](https://www.branah.com/braille-translator)
 
 ## Reference lists
 
-- https://0xrick.github.io/lists/stego/
-- https://github.com/DominicBreuker/stego-toolkit
+- [https://0xrick.github.io/lists/stego/](https://0xrick.github.io/lists/stego/)
+- [https://github.com/DominicBreuker/stego-toolkit](https://github.com/DominicBreuker/stego-toolkit)
 
 {{#include ../../banners/hacktricks-training.md}}

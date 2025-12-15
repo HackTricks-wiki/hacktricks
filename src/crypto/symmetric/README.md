@@ -171,7 +171,7 @@ If you know any plaintext segment at position `i`, you can recover keystream byt
 
 Autosolvers:
 
-- https://wiremask.eu/tools/xor-cracker/
+- [https://wiremask.eu/tools/xor-cracker/](https://wiremask.eu/tools/xor-cracker/)
 
 ### RC4
 

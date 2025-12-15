@@ -32,7 +32,7 @@ Spectrogram stego hides data by shaping energy over time/frequency so it becomes
 
 Primary tool for spectrogram inspection:
 
-- https://www.sonicvisualiser.org/
+- [https://www.sonicvisualiser.org/](https://www.sonicvisualiser.org/)
 
 ### Alternatives
 
@@ -71,7 +71,7 @@ python3 WavSteg.py -r -b 2 -s sound.wav -o out.bin
 
 ### DeepSound
 
-- http://jpinsoft.net/deepsound/download.aspx
+- [http://jpinsoft.net/deepsound/download.aspx](http://jpinsoft.net/deepsound/download.aspx)
 
 ## DTMF / dial tones
 
@@ -81,7 +81,7 @@ DTMF encodes characters as pairs of fixed frequencies (telephone keypad). If the
 
 Online decoders:
 
-- https://unframework.github.io/dtmf-detect/
-- http://dialabc.com/sound/detect/index.html
+- [https://unframework.github.io/dtmf-detect/](https://unframework.github.io/dtmf-detect/)
+- [http://dialabc.com/sound/detect/index.html](http://dialabc.com/sound/detect/index.html)
 
 {{#include ../../banners/hacktricks-training.md}}
