@@ -87,13 +87,13 @@
   - [Basic Python](generic-methodologies-and-resources/python/basic-python.md)
 - [Threat Modeling](generic-methodologies-and-resources/threat-modeling.md)
 - [Blockchain & Crypto](blockchain/blockchain-and-crypto-currencies/README.md)
-  - [Mutation Testing With Slither](blockchain/smart-contract-security/mutation-testing-with-slither.md)
   - [Defi/AMM Hook Precision](blockchain/blockchain-and-crypto-currencies/defi-amm-hook-precision.md)
+  - [Defi Amm Virtual Balance Cache Exploitation](blockchain/blockchain-and-crypto-currencies/defi-amm-virtual-balance-cache-exploitation.md)
+  - [Mutation Testing With Slither](blockchain/smart-contract-security/mutation-testing-with-slither.md)
 - [Lua Sandbox Escape](generic-methodologies-and-resources/lua/bypass-lua-sandboxes/README.md)
 
 # 🧙‍♂️ Generic Hacking
 
-  - [Defi Amm Virtual Balance Cache Exploitation](blockchain/blockchain-and-crypto-currencies/defi-amm-virtual-balance-cache-exploitation.md)
 - [Archive Extraction Path Traversal](generic-hacking/archive-extraction-path-traversal.md)
 - [Brute Force - CheatSheet](generic-hacking/brute-force.md)
 - [Esim Javacard Exploitation](generic-hacking/esim-javacard-exploitation.md)
@@ -915,19 +915,27 @@
 - [Common API used in Malware](reversing/common-api-used-in-malware.md)
 - [Word Macros](reversing/word-macros.md)
 
-# 🔮 Crypto & Stego
+# 🕵️ Crypto
 
-- [Cryptographic/Compression Algorithms](crypto-and-stego/cryptographic-algorithms/README.md)
-  - [Unpacking binaries](crypto-and-stego/cryptographic-algorithms/unpacking-binaries.md)
-- [Certificates](crypto-and-stego/certificates.md)
-- [Cipher Block Chaining CBC-MAC](crypto-and-stego/cipher-block-chaining-cbc-mac-priv.md)
-- [Crypto CTFs Tricks](crypto-and-stego/crypto-ctfs-tricks.md)
-- [Electronic Code Book (ECB)](crypto-and-stego/electronic-code-book-ecb.md)
-- [Hash Length Extension Attack](crypto-and-stego/hash-length-extension-attack.md)
-- [Padding Oracle](crypto-and-stego/padding-oracle-priv.md)
-- [RC4 - Encrypt\&Decrypt](crypto-and-stego/rc4-encrypt-and-decrypt.md)
-- [Stego Tricks](crypto-and-stego/stego-tricks.md)
-- [Esoteric languages](crypto-and-stego/esoteric-languages.md)
+- [Crypto](crypto/README.md)
+- [Crypto CTF Workflow](crypto/ctf-workflow/README.md)
+- [Symmetric Crypto](crypto/symmetric/README.md)
+- [Hashes, MACs & KDFs](crypto/hashes/README.md)
+- [Public-Key Crypto](crypto/public-key/README.md)
+  - [RSA Attacks](crypto/public-key/rsa/README.md)
+- [TLS & Certificates](crypto/tls-and-certificates/README.md)
+- [Crypto in Malware](crypto/crypto-in-malware/README.md)
+- [Crypto CTF Misc](crypto/ctf-misc/README.md)
+
+# 🔮 Stego
+
+- [Stego](stego/README.md)
+- [Stego Workflow](stego/workflow/README.md)
+- [Images](stego/images/README.md)
+- [Audio](stego/audio/README.md)
+- [Text Stego](stego/text/README.md)
+- [Documents](stego/documents/README.md)
+- [Malware & Network Stego](stego/malware-and-network/README.md)
 
 # ✍️ TODO
 
