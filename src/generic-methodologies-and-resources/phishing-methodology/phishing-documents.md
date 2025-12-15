@@ -255,7 +255,7 @@ $null = $method.Invoke($null, @($C2, $env:PROCESSOR_ARCHITECTURE))
 See also stego tools and carving techniques:
 
 {{#ref}}
-../../crypto-and-stego/stego-tricks.md
+../../stego/workflow/README.md#quick-triage-checklist-first-10-minutes
 {{#endref}}
 
 ## JS/VBS droppers → Base64 PowerShell staging
