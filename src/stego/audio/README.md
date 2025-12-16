@@ -2,21 +2,21 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Mbinu za kawaida:
+Mifumo ya kawaida:
 
 - Spectrogram messages
 - WAV LSB embedding
 - DTMF / dial tones encoding
 - Metadata payloads
 
-## Uchunguzi wa haraka
+## Tathmini ya haraka
 
 Kabla ya zana maalum:
 
-- Thibitisha maelezo ya codec/kontena na kasoro zisizo za kawaida:
+- Thibitisha maelezo ya codec/container na kasoro:
 - `file audio`
 - `ffmpeg -v info -i audio -f null -`
-- Ikiwa sauti ina maudhui yanayofanana na kelele au muundo wa toni, angalia spectrogram mapema.
+- Ikiwa sauti ina maudhui yanayofanana na kelele au muundo wa tonal, angalia spectrogram mapema.
 ```bash
 ffmpeg -v info -i stego.mp3 -f null -
 ```
@@ -24,18 +24,18 @@ ffmpeg -v info -i stego.mp3 -f null -
 
 ### Mbinu
 
-Spectrogram stego inaficha data kwa kupangilia nishati juu ya muda/masafa ili ionekane tu kwenye mchoro wa muda-masafa (time-frequency plot) (mara nyingi haisikiki au huhisiwa kama kelele).
+Spectrogram stego inaficha data kwa kupangilia nishati kwa muda/frekowensi ili ionekane tu kwenye mchoro wa muda-frekowensi (mara nyingi hainsikiki au huhesabiwa kama kelele).
 
 ### Sonic Visualiser
 
-Zana kuu kwa ukaguzi wa spectrogram:
+Zana kuu ya ukaguzi wa spectrogram:
 
-- https://www.sonicvisualiser.org/
+- [https://www.sonicvisualiser.org/](https://www.sonicvisualiser.org/)
 
 ### Mbadala
 
-- Audacity (mwonekano wa spectrogramu, vichujio): https://www.audacityteam.org/
-- `sox` inaweza kuzalisha spectrograms kutoka CLI:
+- Audacity (tazamo la spectrogram, vichujio): https://www.audacityteam.org/
+- `sox` inaweza kutengeneza spectrograms kutoka CLI:
 ```bash
 sox input.wav -n spectrogram -o spectrogram.png
 ```
@@ -43,18 +43,18 @@ sox input.wav -n spectrogram -o spectrogram.png
 
 ### Mbinu
 
-Kwa PCM isiyobanwa (WAV), kila sampuli ni nambari nzima. Kubadilisha bits za chini kunabadilisha umbo la mawimbi kwa kiasi kidogo sana, hivyo washambuliaji wanaweza kuficha:
+Kwa PCM (WAV) isiyosimbuliwa, kila sampuli ni integer. Kubadilisha low bits hubadilisha mawimbi kwa kiasi kidogo sana, hivyo washambuliaji wanaweza kuficha:
 
 - 1 bit kwa sampuli (au zaidi)
-- Imepangwa kwa kuingiliana kati ya chaneli
-- kwa stride/permutation
+- Imepangwa kwa kuingiliana kati ya kanali
+- Kwa stride/permutation
 
 Other audio-hiding families you may encounter:
 
 - Phase coding
 - Echo hiding
 - Spread-spectrum embedding
-- Codec-side channels (format-dependent and tool-dependent)
+- Codec-side channels (zinategemea format na zana)
 
 ### WavSteg
 
@@ -65,17 +65,17 @@ python3 WavSteg.py -r -b 2 -s sound.wav -o out.bin
 ```
 ### DeepSound
 
-- http://jpinsoft.net/deepsound/download.aspx
+- [http://jpinsoft.net/deepsound/download.aspx](http://jpinsoft.net/deepsound/download.aspx)
 
-## DTMF / sauti za kupiga nambari
+## DTMF / midundo za simu
 
 ### Mbinu
 
-DTMF huweka characters kama jozi za masafa yaliyowekwa (keypad ya simu). Ikiwa sauti inafanana na midundo ya keypad au beep za masafa mawili za kawaida, jaribu ku-decode DTMF mapema.
+DTMF huweka herufi kama jozi za masafa yaliyowekwa (keypad ya simu). Ikiwa sauti inaonekana kama midundo ya keypad au bip za masafa mawili za kawaida, jaribu udekodishaji wa DTMF mapema.
 
 Online decoders:
 
-- https://unframework.github.io/dtmf-detect/
-- http://dialabc.com/sound/detect/index.html
+- [https://unframework.github.io/dtmf-detect/](https://unframework.github.io/dtmf-detect/)
+- [http://dialabc.com/sound/detect/index.html](http://dialabc.com/sound/detect/index.html)
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -1,36 +1,36 @@
-# Mtiririko wa Crypto CTF
+# Crypto CTF Workflow
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Orodha ya ukaguzi (Triage)
 
 1. Tambua unachonacho: encoding vs encryption vs hash vs signature vs MAC.
-2. Amua kinachodhibitiwa: plaintext/ciphertext, IV/nonce, key, oracle (padding/error/timing), partial leakage.
-3. Chambua: symmetric (AES/CTR/GCM), public-key (RSA/ECC), hash/MAC (SHA/MD5/HMAC), classical (Vigenere/XOR).
-4. Tumia kwanza ukaguzi wenye uwezekano mkubwa: decode layers, known-plaintext XOR, nonce reuse, mode misuse, oracle behavior.
-5. Pandisha hadi mbinu za juu tu wakati zinahitajika: lattices (LLL/Coppersmith), SMT/Z3, side-channels.
+2. Tambua ni nini kinadhibitiwa: plaintext/ciphertext, IV/nonce, key, oracle (padding/error/timing), partial leakage.
+3. Panga: symmetric (AES/CTR/GCM), public-key (RSA/ECC), hash/MAC (SHA/MD5/HMAC), classical (Vigenere/XOR).
+4. Anzisha ukaguzi wenye uwezekano mkubwa kwanza: decode layers, known-plaintext XOR, nonce reuse, mode misuse, oracle behavior.
+5. Hamisha kwenye mbinu za juu tu unapohitajika: lattices (LLL/Coppersmith), SMT/Z3, side-channels.
 
-## Rasilimali za mtandaoni & zana
+## Online resources & utilities
 
-Hizi ni muhimu wakati kazi ni utambuzi na kuondoa tabaka, au unahitaji uthibitisho wa haraka wa nadharia.
+Hizi zinakuwa muhimu unapoweka utambuzi na kutoa tabaka, au unapohitaji uthibitisho wa haraka wa nadharia.
 
 ### Hash lookups
 
-- Tafuta hash kwenye Google (inatokea kuwa yenye ufanisi).
-- https://crackstation.net/
-- https://md5decrypt.net/
-- https://hashes.org/search.php
-- https://www.onlinehashcrack.com/
-- https://gpuhash.me/
-- http://hashtoolkit.com/reverse-hash
+- Google the hash (surprisingly effective).
+- [https://crackstation.net/](https://crackstation.net/)
+- [https://md5decrypt.net/](https://md5decrypt.net/)
+- [https://hashes.org/search.php](https://hashes.org/search.php)
+- [https://www.onlinehashcrack.com/](https://www.onlinehashcrack.com/)
+- [https://gpuhash.me/](https://gpuhash.me/)
+- [http://hashtoolkit.com/reverse-hash](http://hashtoolkit.com/reverse-hash)
 
-### Vifaa vya utambuzi
+### Identification helpers
 
 - CyberChef (magic, decode, convert): https://gchq.github.io/CyberChef/
 - dCode (ciphers/encodings playground): https://www.dcode.fr/tools-list
 - Boxentriq (substitution solvers): https://www.boxentriq.com/code-breaking
 
-### Majukwaa ya mazoezi / marejeo
+### Practice platforms / references
 
 - CryptoHack (hands-on crypto challenges): https://cryptohack.org/
 - Cryptopals (classic modern crypto pitfalls): https://cryptopals.com/
@@ -42,21 +42,21 @@ Hizi ni muhimu wakati kazi ni utambuzi na kuondoa tabaka, au unahitaji uthibitis
 
 ## Encodings & classical ciphers
 
-### Mbinu
+### Technique
 
-Mara nyingi kazi za crypto za CTF ni mfululizo wa transforms: base encoding + simple substitution + compression. Lengo ni kutambua tabaka na kuziondoa kwa usalama.
+Mara nyingi kazi za Crypto CTF zinakuwa transforms zenye tabaka: base encoding + simple substitution + compression. Lengo ni kutambua tabaka na kuzifungua kwa usalama.
 
-### Encodings: jaribu base nyingi
+### Encodings: try many bases
 
-Ukishuku kuwepo kwa layered encoding (base64 → base32 → …), jaribu:
+Ikiwa unadhani kuna layered encoding (base64 → base32 → …), jaribu:
 
 - CyberChef "Magic"
 - `codext` (python-codext): `codext <string>`
 
-Dalili za kawaida:
+Vidokezo vya kawaida:
 
-- Base64: `A-Za-z0-9+/=` (padding `=` ni ya kawaida)
-- Base32: `A-Z2-7=` (mara nyingi kuna padding nyingi `=`)
+- Base64: `A-Za-z0-9+/=` (padding `=` is common)
+- Base32: `A-Z2-7=` (often lots of `=` padding)
 - Ascii85/Base85: dense punctuation; sometimes wrapped in `<~ ~>`
 
 ### Substitution / monoalphabetic
@@ -71,12 +71,12 @@ Dalili za kawaida:
 
 ### Vigenère
 
-- https://www.dcode.fr/vigenere-cipher
-- https://www.guballa.de/vigenere-solver
+- [https://www.dcode.fr/vigenere-cipher](https://www.dcode.fr/vigenere-cipher)
+- [https://www.guballa.de/vigenere-solver](https://www.guballa.de/vigenere-solver)
 
 ### Bacon cipher
 
-Mara nyingi huonekana kama makundi ya 5 bits au herufi 5:
+Often appears as groups of 5 bits or 5 letters:
 ```
 00111 01101 01010 00000 ...
 AABBB ABBAB ABABA AAAAA ...
@@ -87,20 +87,20 @@ AABBB ABBAB ABABA AAAAA ...
 ```
 ### Runes
 
-Runes mara nyingi ni alfabeti za ubadilishanaji; tafuta "futhark cipher" na jaribu meza za ramani.
+Runes mara nyingi ni substitution alphabets; tafuta "futhark cipher" na jaribu mapping tables.
 
-## Ukandishaji katika challenges
+## Compression katika changamoto
 
 ### Mbinu
 
-Ukandishaji hujitokeza mara kwa mara kama tabaka la ziada (zlib/deflate/gzip/xz/zstd), wakati mwingine limewekwa ndani ya lingine. Ikiwa matokeo karibu yafasiriwa lakini yanaonekana kama taka, shuku ukandishaji.
+Compression inaonekana mara kwa mara kama tabaka la ziada (zlib/deflate/gzip/xz/zstd), wakati mwingine imewekwa ndani. Ikiwa matokeo yanaonekana karibu kusomwa lakini yanaonekana kama taka, shuku compression.
 
-### Utambuzi wa Haraka
+### Utambuzi wa haraka
 
 - `file <blob>`
 - Tafuta magic bytes:
 - gzip: `1f 8b`
-- zlib: mara nyingi `78 01/9c/da`
+- zlib: often `78 01/9c/da`
 - zip: `50 4b 03 04`
 - bzip2: `42 5a 68` (`BZh`)
 - xz: `fd 37 7a 58 5a 00`
@@ -108,9 +108,9 @@ Ukandishaji hujitokeza mara kwa mara kama tabaka la ziada (zlib/deflate/gzip/xz/
 
 ### Raw DEFLATE
 
-CyberChef ina **Raw Deflate/Raw Inflate**, ambayo mara nyingi ndiyo njia ya haraka wakati blob inaonekana imekandishwa lakini `zlib` inashindwa.
+CyberChef ina **Raw Deflate/Raw Inflate**, ambayo mara nyingi ni njia ya haraka zaidi wakati blob inaonekana imefinywa lakini `zlib` inashindwa.
 
-### CLI muhimu
+### CLI Zinazofaa
 ```bash
 python3 - <<'PY'
 import sys, zlib
@@ -126,29 +126,29 @@ PY
 
 ### Mbinu
 
-Hizi zinaonekana mara kwa mara kwa sababu ni makosa halisi ya waendelezaji au maktaba zinazotumiwa vibaya. Lengo kawaida ni kutambua na kutumia mtiririko wa kazi uliotambulika wa uchimbaji au ujenzi upya.
+Hizi zinaonekana mara kwa mara kwa sababu ni makosa ya kweli ya developer au libraries zinazotumiwa vibaya. Lengo mara nyingi ni kutambua na kutumia workflow inayojulikana ya uchimbaji au ujenzi upya.
 
 ### Fernet
 
-Dalili ya kawaida: two Base64 strings (token + key).
+Dalili ya kawaida: kamba mbili za Base64 (token + key).
 
-- Decoder/notes: https://asecuritysite.com/encryption/ferdecode
-- Katika Python: `from cryptography.fernet import Fernet`
+- Decoder/maelezo: https://asecuritysite.com/encryption/ferdecode
+- In Python: `from cryptography.fernet import Fernet`
 
 ### Shamir Secret Sharing
 
-Ikiwa unaona sehemu nyingi na kizingiti `t` kimeelezwa, huenda ni Shamir.
+Ikiwa unaona sehemu nyingi na kizingiti `t` kimetajwa, kuna uwezekano ni Shamir.
 
-- Online reconstructor (handy for CTFs): http://christian.gen.co/secrets/
+- Mjenzi wa mtandaoni (mzuri kwa CTFs): http://christian.gen.co/secrets/
 
-### OpenSSL salted formats
+### Miundo ya OpenSSL zilizo na Salted
 
-CTFs mara nyingine hutoa matokeo ya `openssl enc` (kichwa mara nyingi huanza na `Salted__`).
+CTFs zinaweza kuonyesha outputs za `openssl enc` (kichwa mara nyingi huanza na `Salted__`).
 
-Bruteforce helpers:
+Vifaa vya kusaidia kwa bruteforce:
 
-- https://github.com/glv2/bruteforce-salted-openssl
-- https://github.com/carlospolop/easy_BFopensslCTF
+- [https://github.com/glv2/bruteforce-salted-openssl](https://github.com/glv2/bruteforce-salted-openssl)
+- [https://github.com/carlospolop/easy_BFopensslCTF](https://github.com/carlospolop/easy_BFopensslCTF)
 
 ### Seti ya zana za jumla
 
@@ -156,15 +156,15 @@ Bruteforce helpers:
 - featherduster: https://github.com/nccgroup/featherduster
 - cryptovenom: https://github.com/lockedbyte/cryptovenom
 
-## Usanidi wa ndani uliopendekezwa
+## Mpangilio wa ndani unaopendekezwa
 
-Stack ya CTF ya vitendo:
+Stack ya vitendo ya CTF:
 
-- Python + `pycryptodome` kwa symmetric primitives na prototyping ya haraka
-- SageMath kwa arithmetic ya modul, CRT, lattices, na kazi za RSA/ECC
-- Z3 kwa changamoto zinazoegemea vizingiti (mara crypto inapopungua kuwa vizingiti)
+- Python + `pycryptodome` kwa primitives za symmetric na prototyping ya haraka
+- SageMath kwa arithmetic ya moduli, CRT, lattices, na kazi za RSA/ECC
+- Z3 kwa changamoto zinazotegemea vikwazo (wakati crypto inapotatuliwa kama vikwazo)
 
-Vifurushi vya Python vilivyopendekezwa:
+Vifurushi vya Python vinavyopendekezwa:
 ```bash
 pip install pycryptodome gmpy2 sympy pwntools z3-solver
 ```

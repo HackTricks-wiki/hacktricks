@@ -1,12 +1,12 @@
-# TLS na Vyeti
+# TLS & Vyeti
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Eneo hili linahusu **uchambuzi wa X.509, miundo, uongofu, na makosa ya kawaida**.
+Eneo hili linahusu **Uchanganaji wa X.509, miundo, uongofu, na makosa ya kawaida**.
 
-## X.509: uchambuzi, miundo & makosa ya kawaida
+## X.509: uchanganaji, miundo & makosa ya kawaida
 
-### Uchambuzi wa haraka
+### Uchanganaji wa haraka
 ```bash
 openssl x509 -in cert.pem -noout -text
 openssl asn1parse -in cert.pem
@@ -21,26 +21,26 @@ Sehemu muhimu za kuchunguza:
 
 ### Miundo & uongofu
 
-- PEM (Base64 na header za BEGIN/END)
-- DER (bainari)
-- PKCS#7 (`.p7b`) (cert chain, hakuna private key)
-- PKCS#12 (`.pfx/.p12`) (cert + private key + chain)
+- PEM (Base64 na vichwa vya BEGIN/END)
+- DER (binary)
+- PKCS#7 (`.p7b`) (mnyororo wa cheti, hakuna funguo binafsi)
+- PKCS#12 (`.pfx/.p12`) (cheti + funguo binafsi + mnyororo wa cheti)
 
-Ubadilishaji:
+Uongofu:
 ```bash
 openssl x509 -in cert.cer -outform PEM -out cert.pem
 openssl x509 -in cert.pem -outform der -out cert.der
 openssl pkcs12 -in file.pfx -out out.pem
 ```
-### Mwelekeo ya kawaida ya mashambulizi
+### Njia za kawaida za mashambulizi
 
-- Kukubali mizizi zinazotolewa na mtumiaji / ukosefu wa uthibitishaji wa mnyororo
-- Algoritimu za saini dhaifu (za zamani)
-- Vizuizi vya majina / mende za kuchambua SAN (maalum kwa utekelezaji)
-- Masuala ya Confused deputy na misbinding ya client-certificate authentication
+- Kumwamini mizizi iliyotolewa na mtumiaji / ukosefu wa uhakiki wa mnyororo
+- Algoritimu dhaifu za saini (za zamani)
+- Vikwazo vya majina / mdudu wa uchambuzi wa SAN (maalum kwa utekelezaji)
+- Masuala ya confused deputy na client-certificate authentication misbinding
 
-### Logi za CT
+### Rekodi za CT
 
-- https://crt.sh/
+- [https://crt.sh/](https://crt.sh/)
 
 {{#include ../../banners/hacktricks-training.md}}
