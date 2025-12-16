@@ -9,33 +9,33 @@ Typowe wzorce:
 - DTMF / dial tones encoding
 - Metadata payloads
 
-## Szybkie rozpoznanie
+## Szybka analiza wstępna
 
 Przed użyciem specjalistycznych narzędzi:
 
-- Potwierdź szczegóły kodeka/kontenera i anomalie:
+- Sprawdź informacje o kodeku/kontenerze i anomalie:
 - `file audio`
 - `ffmpeg -v info -i audio -f null -`
-- Jeśli plik audio zawiera treść przypominającą szum lub strukturę tonalną, sprawdź spektrogram jak najwcześniej.
+- Jeśli audio zawiera treść przypominającą szum lub strukturę tonalną, sprawdź spectrogram na wczesnym etapie.
 ```bash
 ffmpeg -v info -i stego.mp3 -f null -
 ```
 ## Spectrogram steganography
 
-### Technique
+### Technika
 
-Spectrogram stego chowa dane przez kształtowanie energii w czasie/częstotliwości, tak że stają się widoczne tylko na wykresie czas‑częstotliwości (często niesłyszalne lub postrzegane jako szum).
+Spectrogram stego ukrywa dane, kształtując energię w czasie/częstotliwości, tak że stają się widoczne tylko na wykresie czas-częstotliwość (często niesłyszalne lub postrzegane jako szum).
 
 ### Sonic Visualiser
 
-Główne narzędzie do analizy spektrogramów:
+Główne narzędzie do inspekcji spektrogramów:
 
-- https://www.sonicvisualiser.org/
+- [https://www.sonicvisualiser.org/](https://www.sonicvisualiser.org/)
 
-### Alternatives
+### Alternatywy
 
 - Audacity (widok spektrogramu, filtry): https://www.audacityteam.org/
-- `sox` może generować spektrogramy z CLI:
+- `sox` może generować spektrogramy z poziomu CLI:
 ```bash
 sox input.wav -n spectrogram -o spectrogram.png
 ```
@@ -43,13 +43,13 @@ sox input.wav -n spectrogram -o spectrogram.png
 
 ### Technika
 
-Dla niekompresowanego PCM (WAV) każda próbka jest liczbą całkowitą. Modyfikacja niskich bitów zmienia przebieg fali bardzo nieznacznie, więc attackers mogą ukryć:
+Dla nieskompresowanego PCM (WAV), każda próbka jest liczbą całkowitą. Modyfikacja niskich bitów zmienia przebieg fali bardzo nieznacznie, więc atakujący mogą ukryć:
 
 - 1 bit na próbkę (lub więcej)
 - Przeplatane między kanałami
-- Z przeskokiem/permutacją
+- Z krokiem/permutacją
 
-Inne rodziny metod ukrywania w dźwięku, które możesz napotkać:
+Inne rodziny technik ukrywania audio, które możesz napotkać:
 
 - Phase coding
 - Echo hiding
@@ -65,17 +65,17 @@ python3 WavSteg.py -r -b 2 -s sound.wav -o out.bin
 ```
 ### DeepSound
 
-- http://jpinsoft.net/deepsound/download.aspx
+- [http://jpinsoft.net/deepsound/download.aspx](http://jpinsoft.net/deepsound/download.aspx)
 
 ## DTMF / tony wybierania
 
 ### Technika
 
-DTMF koduje znaki jako pary stałych częstotliwości (klawiatura telefoniczna). Jeśli audio przypomina tony klawiatury lub regularne dwuczęstotliwościowe sygnały dźwiękowe, przetestuj dekodowanie DTMF na wczesnym etapie.
+DTMF koduje znaki jako pary stałych częstotliwości (telefoniczna klawiatura). Jeśli audio przypomina tony klawiatury lub regularne dwuczęstotliwościowe piknięcia, przetestuj dekodowanie DTMF jak najszybciej.
 
 Dekodery online:
 
-- https://unframework.github.io/dtmf-detect/
-- http://dialabc.com/sound/detect/index.html
+- [https://unframework.github.io/dtmf-detect/](https://unframework.github.io/dtmf-detect/)
+- [http://dialabc.com/sound/detect/index.html](http://dialabc.com/sound/detect/index.html)
 
 {{#include ../../banners/hacktricks-training.md}}

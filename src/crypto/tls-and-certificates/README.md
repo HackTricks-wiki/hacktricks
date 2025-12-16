@@ -1,10 +1,10 @@
-# TLS & Certificates
+# TLS i certyfikaty
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Ta sekcja dotyczy **parsowania X.509, formatów, konwersji i typowych błędów**.
+Ta sekcja dotyczy **X.509: parsowanie, formaty, konwersje i typowe błędy**.
 
-## X.509: parsowanie, formaty & typowe błędy
+## X.509: parsowanie, formaty i typowe błędy
 
 ### Szybkie parsowanie
 ```bash
@@ -14,17 +14,17 @@ openssl asn1parse -in cert.pem
 Przydatne pola do sprawdzenia:
 
 - Subject / Issuer / SAN
-- Zastosowanie klucza / EKU
+- Key Usage / EKU
 - Basic Constraints (czy to CA?)
 - Okres ważności (NotBefore/NotAfter)
 - Algorytm podpisu (MD5? SHA1?)
 
-### Formaty i konwersje
+### Formaty i konwersja
 
 - PEM (Base64 z nagłówkami BEGIN/END)
 - DER (binarny)
 - PKCS#7 (`.p7b`) (łańcuch certyfikatów, bez klucza prywatnego)
-- PKCS#12 (`.pfx/.p12`) (cert + klucz prywatny + łańcuch)
+- PKCS#12 (`.pfx/.p12`) (certyfikat + klucz prywatny + łańcuch)
 
 Konwersje:
 ```bash
@@ -32,15 +32,15 @@ openssl x509 -in cert.cer -outform PEM -out cert.pem
 openssl x509 -in cert.pem -outform der -out cert.der
 openssl pkcs12 -in file.pfx -out out.pem
 ```
-### Typowe wektory ataku
+### Powszechne wektory ataku
 
-- Ufanie rootom dostarczonym przez użytkownika / brak walidacji łańcucha certyfikatów
+- Ufanie rootom dostarczonym przez użytkownika / brak walidacji łańcucha
 - Słabe algorytmy podpisu (przestarzałe)
-- Ograniczenia nazw / błędy parsowania SAN (zależne od implementacji)
-- Problemy Confused deputy związane z błędnym powiązaniem uwierzytelniania certyfikatem klienta
+- Ograniczenia nazw / błędy parsowania SAN (specyficzne dla implementacji)
+- Problemy typu Confused deputy związane z błędnym powiązaniem uwierzytelniania client-certificate
 
-### Dzienniki CT
+### CT logs
 
-- https://crt.sh/
+- [https://crt.sh/](https://crt.sh/)
 
 {{#include ../../banners/hacktricks-training.md}}
