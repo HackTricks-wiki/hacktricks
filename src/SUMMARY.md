@@ -439,6 +439,7 @@
     - [Firebase Database](network-services-pentesting/pentesting-web/buckets/firebase-database.md)
   - [CGI](network-services-pentesting/pentesting-web/cgi.md)
   - [Django](network-services-pentesting/pentesting-web/django.md)
+  - [Dotnet Soap Wsdl Client Exploitation](network-services-pentesting/pentesting-web/dotnet-soap-wsdl-client-exploitation.md)
   - [DotNetNuke (DNN)](network-services-pentesting/pentesting-web/dotnetnuke-dnn.md)
   - [Drupal](network-services-pentesting/pentesting-web/drupal/README.md)
     - [Drupal RCE](network-services-pentesting/pentesting-web/drupal/drupal-rce.md)
