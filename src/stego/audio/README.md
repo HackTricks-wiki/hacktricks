@@ -13,10 +13,10 @@ Padrões comuns:
 
 Antes de ferramentas especializadas:
 
-- Confirmar detalhes do codec/container e anomalias:
+- Confirme detalhes de codec/container e possíveis anomalias:
 - `file audio`
 - `ffmpeg -v info -i audio -f null -`
-- Se o áudio contiver conteúdo semelhante a ruído ou estrutura tonal, inspecione um spectrogram o quanto antes.
+- Se o áudio contiver conteúdo parecido com ruído ou estrutura tonal, inspecione um spectrogram logo no início.
 ```bash
 ffmpeg -v info -i stego.mp3 -f null -
 ```
@@ -24,13 +24,13 @@ ffmpeg -v info -i stego.mp3 -f null -
 
 ### Técnica
 
-Spectrogram stego esconde dados ao moldar a energia no domínio tempo/frequência, tornando-os visíveis apenas em um espectrograma (frequentemente inaudível ou percebido como ruído).
+Spectrogram stego oculta dados moldando a energia ao longo do tempo/frequência de modo que se torne visível apenas em um gráfico tempo-frequência (frequentemente inaudível ou percebido como ruído).
 
 ### Sonic Visualiser
 
 Ferramenta principal para inspeção de espectrogramas:
 
-- https://www.sonicvisualiser.org/
+- [https://www.sonicvisualiser.org/](https://www.sonicvisualiser.org/)
 
 ### Alternativas
 
@@ -43,18 +43,18 @@ sox input.wav -n spectrogram -o spectrogram.png
 
 ### Técnica
 
-Para PCM (WAV) não comprimido, cada amostra é um inteiro. Modificar os bits menos significativos altera a forma de onda muito levemente, então atacantes podem ocultar:
+Para PCM não comprimido (WAV), cada amostra é um inteiro. Modificar os bits menos significativos altera a forma de onda muito levemente, então atacantes podem ocultar:
 
 - 1 bit por amostra (ou mais)
 - Intercalado entre canais
 - Com um stride/permutação
 
-Outras famílias de ocultação de áudio que você pode encontrar:
+Outras famílias de ocultação em áudio que você pode encontrar:
 
 - Phase coding
 - Echo hiding
 - Spread-spectrum embedding
-- Codec-side channels (format-dependent and tool-dependent)
+- Codec-side channels (dependente do formato e da ferramenta)
 
 ### WavSteg
 
@@ -65,17 +65,17 @@ python3 WavSteg.py -r -b 2 -s sound.wav -o out.bin
 ```
 ### DeepSound
 
-- http://jpinsoft.net/deepsound/download.aspx
+- [http://jpinsoft.net/deepsound/download.aspx](http://jpinsoft.net/deepsound/download.aspx)
 
 ## DTMF / tons de discagem
 
 ### Técnica
 
-DTMF codifica caracteres como pares de frequências fixas (teclado telefônico). Se o áudio se assemelha a tons de teclado ou bipes regulares de dupla frequência, teste a decodificação DTMF o quanto antes.
+DTMF codifica caracteres como pares de frequências fixas (teclado do telefone). Se o áudio se assemelhar a tons do teclado ou bipes regulares de dupla frequência, teste a decodificação DTMF cedo.
 
 Decodificadores online:
 
-- https://unframework.github.io/dtmf-detect/
-- http://dialabc.com/sound/detect/index.html
+- [https://unframework.github.io/dtmf-detect/](https://unframework.github.io/dtmf-detect/)
+- [http://dialabc.com/sound/detect/index.html](http://dialabc.com/sound/detect/index.html)
 
 {{#include ../../banners/hacktricks-training.md}}

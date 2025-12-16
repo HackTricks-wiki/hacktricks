@@ -1,65 +1,65 @@
-# Fluxo de trabalho Crypto CTF
+# Fluxo de Trabalho Crypto CTF
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Checklist de triagem
 
 1. Identifique o que você tem: encoding vs encryption vs hash vs signature vs MAC.
-2. Determine o que está controlado: plaintext/ciphertext, IV/nonce, key, oracle (padding/error/timing), partial leakage.
+2. Determine o que está sob controle: plaintext/ciphertext, IV/nonce, key, oracle (padding/error/timing), partial leakage.
 3. Classifique: symmetric (AES/CTR/GCM), public-key (RSA/ECC), hash/MAC (SHA/MD5/HMAC), classical (Vigenere/XOR).
-4. Aplique primeiro as checagens de maior probabilidade: decode layers, known-plaintext XOR, nonce reuse, mode misuse, oracle behavior.
-5. Recorr a métodos avançados apenas quando necessário: lattices (LLL/Coppersmith), SMT/Z3, side-channels.
+4. Aplique primeiro as verificações de maior probabilidade: decode layers, known-plaintext XOR, nonce reuse, mode misuse, oracle behavior.
+5. Escale para métodos avançados somente quando necessário: lattices (LLL/Coppersmith), SMT/Z3, side-channels.
 
 ## Recursos online & utilitários
 
-Estes são úteis quando a tarefa é identificação e remoção de camadas, ou quando você precisa de uma confirmação rápida de uma hipótese.
+Esses são úteis quando a tarefa é identificação e remoção de camadas, ou quando você precisa de uma confirmação rápida de uma hipótese.
 
-### Hash lookups
+### Consulta de hashes
 
 - Pesquise o hash no Google (surpreendentemente eficaz).
-- https://crackstation.net/
-- https://md5decrypt.net/
-- https://hashes.org/search.php
-- https://www.onlinehashcrack.com/
-- https://gpuhash.me/
-- http://hashtoolkit.com/reverse-hash
+- [https://crackstation.net/](https://crackstation.net/)
+- [https://md5decrypt.net/](https://md5decrypt.net/)
+- [https://hashes.org/search.php](https://hashes.org/search.php)
+- [https://www.onlinehashcrack.com/](https://www.onlinehashcrack.com/)
+- [https://gpuhash.me/](https://gpuhash.me/)
+- [http://hashtoolkit.com/reverse-hash](http://hashtoolkit.com/reverse-hash)
 
-### Identification helpers
+### Auxiliares de identificação
 
-- CyberChef (magic, decode, convert): https://gchq.github.io/CyberChef/
-- dCode (ciphers/encodings playground): https://www.dcode.fr/tools-list
+- CyberChef (magia, decodificar, converter): https://gchq.github.io/CyberChef/
+- dCode (playground de ciphers/encodings): https://www.dcode.fr/tools-list
 - Boxentriq (substitution solvers): https://www.boxentriq.com/code-breaking
 
-### Practice platforms / references
+### Plataformas de prática / referências
 
 - CryptoHack (hands-on crypto challenges): https://cryptohack.org/
 - Cryptopals (classic modern crypto pitfalls): https://cryptopals.com/
 
-### Automated decoding
+### Decodificação automatizada
 
 - Ciphey: https://github.com/Ciphey/Ciphey
-- python-codext (tries many bases/encodings): https://github.com/dhondta/python-codext
+- python-codext (testa muitas bases/encodings): https://github.com/dhondta/python-codext
 
 ## Codificações & cifras clássicas
 
 ### Técnica
 
-Muitos desafios de crypto em CTF são transformações em camadas: base encoding + simple substitution + compression. O objetivo é identificar as camadas e removê-las com segurança.
+Muitas tarefas de crypto em CTF são transformações em camadas: base encoding + simple substitution + compression. O objetivo é identificar camadas e removê-las com segurança.
 
-### Encodings: tente muitas bases
+### Codificações: tente várias bases
 
-Se você suspeita de codificação em camadas (base64 → base32 → …), tente:
+Se você suspeitar de codificação em camadas (base64 → base32 → …), tente:
 
 - CyberChef "Magic"
 - `codext` (python-codext): `codext <string>`
 
-Indicadores comuns:
+Sinais comuns:
 
-- Base64: `A-Za-z0-9+/=` (o padding `=` é comum)
-- Base32: `A-Z2-7=` (frequentemente muitos `=` de padding)
+- Base64: `A-Za-z0-9+/=` (padding `=` é comum)
+- Base32: `A-Z2-7=` (frequentemente muito `=` padding)
 - Ascii85/Base85: pontuação densa; às vezes envolto em `<~ ~>`
 
-### Substituição / monoalphabetic
+### Substitution / monoalfabética
 
 - Boxentriq cryptogram solver: https://www.boxentriq.com/code-breaking/cryptogram
 - quipqiup: https://quipqiup.com/
@@ -71,12 +71,12 @@ Indicadores comuns:
 
 ### Vigenère
 
-- https://www.dcode.fr/vigenere-cipher
-- https://www.guballa.de/vigenere-solver
+- [https://www.dcode.fr/vigenere-cipher](https://www.dcode.fr/vigenere-cipher)
+- [https://www.guballa.de/vigenere-solver](https://www.guballa.de/vigenere-solver)
 
 ### Bacon cipher
 
-Frequentemente aparece como grupos de 5 bits ou 5 letras:
+Often appears as groups of 5 bits or 5 letters:
 ```
 00111 01101 01010 00000 ...
 AABBB ABBAB ABABA AAAAA ...
@@ -93,14 +93,14 @@ Runas são frequentemente alfabetos de substituição; procure por "futhark ciph
 
 ### Técnica
 
-A compressão aparece constantemente como uma camada extra (zlib/deflate/gzip/xz/zstd), às vezes aninhada. Se a saída quase é analisável, mas parece lixo, suspeite de compressão.
+A compressão aparece constantemente como uma camada extra (zlib/deflate/gzip/xz/zstd), às vezes aninhada. Se a saída quase é analisável mas parece lixo, suspeite de compressão.
 
 ### Identificação rápida
 
 - `file <blob>`
-- Procure por bytes mágicos:
+- Procure por magic bytes:
 - gzip: `1f 8b`
-- zlib: frequentemente `78 01/9c/da`
+- zlib: often `78 01/9c/da`
 - zip: `50 4b 03 04`
 - bzip2: `42 5a 68` (`BZh`)
 - xz: `fd 37 7a 58 5a 00`
@@ -108,7 +108,7 @@ A compressão aparece constantemente como uma camada extra (zlib/deflate/gzip/xz
 
 ### Raw DEFLATE
 
-CyberChef has **Raw Deflate/Raw Inflate**, que costuma ser o caminho mais rápido quando o blob parece comprimido mas `zlib` falha.
+CyberChef has **Raw Deflate/Raw Inflate**, which is often the fastest path when the blob looks compressed but `zlib` fails.
 
 ### CLI útil
 ```bash
@@ -126,31 +126,31 @@ PY
 
 ### Técnica
 
-Aparecem com frequência porque são erros realistas de desenvolvedores ou bibliotecas comuns usadas incorretamente. O objetivo geralmente é reconhecer e aplicar um fluxo de trabalho conhecido de extração ou reconstrução.
+Estas aparecem frequentemente porque são erros realistas de desenvolvedores ou bibliotecas comuns usadas incorretamente. O objetivo costuma ser o reconhecimento e a aplicação de um fluxo de trabalho conhecido de extração ou reconstrução.
 
 ### Fernet
 
-Indício típico: duas strings Base64 (token + key).
+Typical hint: two Base64 strings (token + key).
 
 - Decoder/notes: https://asecuritysite.com/encryption/ferdecode
 - In Python: `from cryptography.fernet import Fernet`
 
 ### Shamir Secret Sharing
 
-Se você vir múltiplos shares e um limiar `t` for mencionado, provavelmente é Shamir.
+Se vir múltiplas shares e um threshold `t` for mencionado, provavelmente é Shamir.
 
 - Online reconstructor (handy for CTFs): http://christian.gen.co/secrets/
 
 ### OpenSSL salted formats
 
-CTFs às vezes fornecem saídas de `openssl enc` (o header frequentemente começa com `Salted__`).
+CTFs às vezes fornecem outputs do `openssl enc` (o header frequentemente começa com `Salted__`).
 
 Bruteforce helpers:
 
-- https://github.com/glv2/bruteforce-salted-openssl
-- https://github.com/carlospolop/easy_BFopensslCTF
+- [https://github.com/glv2/bruteforce-salted-openssl](https://github.com/glv2/bruteforce-salted-openssl)
+- [https://github.com/carlospolop/easy_BFopensslCTF](https://github.com/carlospolop/easy_BFopensslCTF)
 
-### Conjunto de ferramentas geral
+### General toolset
 
 - RsaCtfTool: https://github.com/Ganapati/RsaCtfTool
 - featherduster: https://github.com/nccgroup/featherduster
@@ -158,13 +158,13 @@ Bruteforce helpers:
 
 ## Configuração local recomendada
 
-Pilha prática para CTF:
+Practical CTF stack:
 
-- Python + `pycryptodome` para primitivas simétricas e prototipagem rápida
-- SageMath para aritmética modular, CRT, lattices e trabalho com RSA/ECC
-- Z3 para desafios baseados em restrições (quando a criptografia se reduz a restrições)
+- Python + `pycryptodome` for symmetric primitives and fast prototyping
+- SageMath for modular arithmetic, CRT, lattices, and RSA/ECC work
+- Z3 for constraint-based challenges (when the crypto reduces to constraints)
 
-Pacotes Python sugeridos:
+Suggested Python packages:
 ```bash
 pip install pycryptodome gmpy2 sympy pwntools z3-solver
 ```
