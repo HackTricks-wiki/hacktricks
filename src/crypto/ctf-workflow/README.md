@@ -4,33 +4,33 @@
 
 ## トリアージチェックリスト
 
-1. 持っているものを識別する: encoding vs encryption vs hash vs signature vs MAC.
+1. 所持しているものを識別する: encoding vs encryption vs hash vs signature vs MAC.
 2. 制御されているものを特定する: plaintext/ciphertext, IV/nonce, key, oracle (padding/error/timing), partial leakage.
 3. 分類する: symmetric (AES/CTR/GCM), public-key (RSA/ECC), hash/MAC (SHA/MD5/HMAC), classical (Vigenere/XOR).
-4. 最も可能性の高いチェックを先に行う: decode layers, known-plaintext XOR, nonce reuse, mode misuse, oracle behavior.
-5. 必要な場合にのみ高度な手法にエスカレーションする: lattices (LLL/Coppersmith), SMT/Z3, side-channels.
+4. 高確率のチェックを最初に行う: decode layers, known-plaintext XOR, nonce reuse, mode misuse, oracle behavior.
+5. 必要な場合にのみ高度な手法にエスカレートする: lattices (LLL/Coppersmith), SMT/Z3, side-channels.
 
 ## オンラインリソース & ユーティリティ
 
-これらは、タスクが識別やレイヤー剥離のとき、または仮説を素早く確認したいときに有用です。
+これは、タスクが識別やレイヤー剥離の場合、または仮説の迅速な確認が必要なときに有用です。
 
 ### Hash lookups
 
-- Google the hash (驚くほど効果的).
-- https://crackstation.net/
-- https://md5decrypt.net/
-- https://hashes.org/search.php
-- https://www.onlinehashcrack.com/
-- https://gpuhash.me/
-- http://hashtoolkit.com/reverse-hash
+- Googleでhashを検索する（意外と有効）。
+- [https://crackstation.net/](https://crackstation.net/)
+- [https://md5decrypt.net/](https://md5decrypt.net/)
+- [https://hashes.org/search.php](https://hashes.org/search.php)
+- [https://www.onlinehashcrack.com/](https://www.onlinehashcrack.com/)
+- [https://gpuhash.me/](https://gpuhash.me/)
+- [http://hashtoolkit.com/reverse-hash](http://hashtoolkit.com/reverse-hash)
 
-### 識別ヘルパー
+### Identification helpers
 
 - CyberChef (magic, decode, convert): https://gchq.github.io/CyberChef/
 - dCode (ciphers/encodings playground): https://www.dcode.fr/tools-list
 - Boxentriq (substitution solvers): https://www.boxentriq.com/code-breaking
 
-### 練習プラットフォーム / 参考
+### Practice platforms / references
 
 - CryptoHack (hands-on crypto challenges): https://cryptohack.org/
 - Cryptopals (classic modern crypto pitfalls): https://cryptopals.com/
@@ -44,20 +44,20 @@
 
 ### Technique
 
-多くの CTF crypto タスクはレイヤー化された変換（base encoding + simple substitution + compression）です。目標はレイヤーを識別して安全に剥がすことです。
+多くのCTFのcryptoタスクはレイヤー化された変換です: base encoding + simple substitution + compression。目的はレイヤーを識別し、安全に剥がすことです。
 
 ### Encodings: try many bases
 
-layered encoding を疑う場合（base64 → base32 → …）、次を試す:
+レイヤードなエンコーディング（base64 → base32 → …）が疑われる場合は、次を試してください:
 
 - CyberChef "Magic"
 - `codext` (python-codext): `codext <string>`
 
 一般的な特徴:
 
-- Base64: `A-Za-z0-9+/=` (padding `=` が一般的)
-- Base32: `A-Z2-7=` (しばしば多くの `=` padding)
-- Ascii85/Base85: dense punctuation; sometimes wrapped in `<~ ~>`
+- Base64: `A-Za-z0-9+/=` （パディング `=` がよく見られる）
+- Base32: `A-Z2-7=` （しばしば大量の `=` パディング）
+- Ascii85/Base85: 句読点が密集；時に `<~ ~>` でラップされる
 
 ### Substitution / monoalphabetic
 
@@ -71,12 +71,12 @@ layered encoding を疑う場合（base64 → base32 → …）、次を試す:
 
 ### Vigenère
 
-- https://www.dcode.fr/vigenere-cipher
-- https://www.guballa.de/vigenere-solver
+- [https://www.dcode.fr/vigenere-cipher](https://www.dcode.fr/vigenere-cipher)
+- [https://www.guballa.de/vigenere-solver](https://www.guballa.de/vigenere-solver)
 
 ### Bacon cipher
 
-しばしば5ビットまたは5文字のグループとして現れる:
+Often appears as groups of 5 bits or 5 letters:
 ```
 00111 01101 01010 00000 ...
 AABBB ABBAB ABABA AAAAA ...
@@ -87,18 +87,18 @@ AABBB ABBAB ABABA AAAAA ...
 ```
 ### ルーン
 
-ルーンはしばしば置換アルファベットです。 "futhark cipher" を検索してマッピング表を試してください。
+ルーンはしばしば置換アルファベットです; search for "futhark cipher" and try mapping tables.
 
 ## チャレンジでの圧縮
 
-### テクニック
+### 手法
 
-圧縮は追加のレイヤーとして常に出現します（zlib/deflate/gzip/xz/zstd）、時にはネストされています。出力がほとんど解析できるがゴミに見える場合は、圧縮を疑ってください。
+圧縮はしばしば追加レイヤーとして現れます（zlib/deflate/gzip/xz/zstd）、時にネストしています。出力がほぼ解析できるがゴミに見える場合は、圧縮を疑ってください。
 
-### クイック識別
+### 簡易判別
 
 - `file <blob>`
-- マジックバイトを確認する:
+- Look for magic bytes:
 - gzip: `1f 8b`
 - zlib: often `78 01/9c/da`
 - zip: `50 4b 03 04`
@@ -110,7 +110,7 @@ AABBB ABBAB ABABA AAAAA ...
 
 CyberChef has **Raw Deflate/Raw Inflate**, which is often the fastest path when the blob looks compressed but `zlib` fails.
 
-### 便利な CLI
+### 便利なCLI
 ```bash
 python3 - <<'PY'
 import sys, zlib
@@ -122,33 +122,33 @@ except Exception:
 pass
 PY
 ```
-## 一般的な CTF の暗号構成
+## 一般的なCTFの暗号構成
 
 ### 手法
 
-これらは現実的な開発者のミスやライブラリの誤使用で頻出します。目的は通常、認識して既知の抽出・再構築ワークフローを適用することです。
+これらは現実的な開発者のミスや一般的なライブラリの誤用で頻出します。目的は通常、認識して既知の抽出や再構築のワークフローを適用することです。
 
 ### Fernet
 
-典型的なヒント: 二つの Base64 strings (token + key)。
+典型的なヒント：二つのBase64文字列（token + key）。
 
 - Decoder/notes: https://asecuritysite.com/encryption/ferdecode
 - In Python: `from cryptography.fernet import Fernet`
 
 ### Shamir Secret Sharing
 
-複数の shares を見て閾値 `t` が言及されている場合、それは Shamir である可能性が高いです。
+複数のsharesを見て、threshold `t` が言及されている場合、Shamirである可能性が高い。
 
 - Online reconstructor (handy for CTFs): http://christian.gen.co/secrets/
 
 ### OpenSSL salted formats
 
-CTF では時々 `openssl enc` の出力（ヘッダはしばしば `Salted__` で始まる）が与えられます。
+CTFでは `openssl enc` の出力（ヘッダがしばしば `Salted__` で始まる）が与えられることがある。
 
 Bruteforce helpers:
 
-- https://github.com/glv2/bruteforce-salted-openssl
-- https://github.com/carlospolop/easy_BFopensslCTF
+- [https://github.com/glv2/bruteforce-salted-openssl](https://github.com/glv2/bruteforce-salted-openssl)
+- [https://github.com/carlospolop/easy_BFopensslCTF](https://github.com/carlospolop/easy_BFopensslCTF)
 
 ### 一般的なツールセット
 
@@ -156,15 +156,15 @@ Bruteforce helpers:
 - featherduster: https://github.com/nccgroup/featherduster
 - cryptovenom: https://github.com/lockedbyte/cryptovenom
 
-## 推奨ローカル構成
+## 推奨ローカルセットアップ
 
-実用的なCTFスタック:
+実践的なCTFスタック：
 
-- Python + `pycryptodome` は対称プリミティブと迅速なプロトタイピングに便利
-- SageMath は modular arithmetic、CRT、lattices、そして RSA/ECC の作業向け
-- Z3 は制約ベースのチャレンジ向け（crypto が制約に帰着する場合）
+- Python + `pycryptodome`：対称プリミティブと迅速なプロトタイピング用
+- SageMath：剰余演算、CRT、格子、RSA/ECC に関する作業に
+- Z3：制約ベースのチャレンジ向け（cryptoが制約に帰着する場合）
 
-Suggested Python packages:
+推奨Pythonパッケージ：
 ```bash
 pip install pycryptodome gmpy2 sympy pwntools z3-solver
 ```

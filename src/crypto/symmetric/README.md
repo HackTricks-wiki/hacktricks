@@ -1,102 +1,102 @@
-# 対称暗号
+# Symmetric Crypto
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## CTFで見るべき点
+## CTFsで確認すべき点
 
-- **モードの誤用**: ECB patterns, CBC malleability, CTR/GCM nonce reuse.
-- **Padding oracles**: 不正なパディングに対してエラーやタイミングが異なる。
-- **MAC confusion**: CBC-MACを可変長メッセージに使っている、またはMAC-then-encryptの誤り。
-- **XOR everywhere**: ストリーム暗号やカスタム構成はしばしばkeystreamとのXORに帰着する。
+- **Mode misuse**: ECBパターン、CBCの可変性、CTR/GCMのnonceの再利用。
+- **Padding oracles**: 不正なpaddingに対する異なるエラー／タイミング。
+- **MAC confusion**: CBC-MACを可変長メッセージで使う、またはMAC-then-encryptのミス。
+- **XOR everywhere**: ストリーム暗号やカスタム実装はしばしばkeystreamとのXORに還元される。
 
-## AES モードと誤用
+## AESのモードと誤用
 
 ### ECB: Electronic Codebook
 
-ECB leaks patterns: equal plaintext blocks → equal ciphertext blocks. これにより次が可能になります:
+ECB leaks patterns: equal plaintext blocks → equal ciphertext blocks. これにより次のことが可能になる:
 
-- Cut-and-paste / block reordering
-- Block deletion (if the format remains valid)
+- Cut-and-paste / ブロックの並べ替え
+- ブロック削除（フォーマットが有効なままなら）
 
-もし平文を制御できて暗号文（またはcookies）を観察できるなら、繰り返しブロック（例: 多くの `A`s）を作って繰り返しを探してみてください。
+プレーンテキストを制御してciphertext（またはcookie）を観察できる場合は、繰り返しのブロック（例: 多数の`A`）を作成して繰り返しを探してみる。
 
 ### CBC: Cipher Block Chaining
 
-- CBC is **malleable**: flipping bits in `C[i-1]` flips predictable bits in `P[i]`.
-- システムが有効なpaddingと無効なpaddingを区別して露出している場合、**padding oracle**が存在する可能性があります。
+- CBCは**malleable**: `C[i-1]`のビットを反転すると`P[i]`の予測可能なビットが反転する。
+- システムが有効なpaddingと無効なpaddingを区別して露出する場合、**padding oracle**が存在する可能性がある。
 
 ### CTR
 
-CTRはAESをストリーム暗号に変えます: `C = P XOR keystream`.
+CTRはAESをストリーム暗号に変える: `C = P XOR keystream`。
 
-同じキーでnonce/IVが再利用されると:
+同じkeyでnonce/IVが再利用されると:
 
-- `C1 XOR C2 = P1 XOR P2` (古典的なkeystream再利用)
-- 既知の平文があれば、keystreamを回復して他を復号できます。
+- `C1 XOR C2 = P1 XOR P2`（古典的なkeystream再利用）
+- 既知のplaintextがあれば、keystreamを回復して他を復号できる。
 
 ### GCM
 
-GCMもnonce再利用で大きく破綻します。同じkey+nonceが複数回使われると、通常次が発生します:
+GCMもnonce再利用でひどく壊れる。same key+nonceが複数回使われると、通常次が発生する:
 
-- 暗号化でのkeystream再利用（CTRと同様）、既知平文があれば平文回復が可能。
-- 整合性保証の喪失。何が公開されているか（同じnonce下の複数のmessage/tagペアなど）によっては、タグを偽造できる可能性があります。
+- 暗号化でのkeystream再利用（CTRと同様）、既知のplaintextがあれば復号可能。
+- 整合性保証の喪失。露出するもの（同一nonce下の複数のmessage/tagペア）によっては、攻撃者がtagをforgeできる場合がある。
 
 運用上の指針:
 
-- AEADにおける"nonce reuse"は重大な脆弱性と扱ってください。
-- 同じnonce下の複数の暗号文がある場合は、まず `C1 XOR C2 = P1 XOR P2` のような関係を確認してください。
+- AEADでの "nonce reuse" を重大な脆弱性として扱う。
+- 同一nonce下で複数のciphertextがある場合は、まず `C1 XOR C2 = P1 XOR P2` のような関係を確認する。
 
 ### ツール
 
 - CyberChef for quick experiments: https://gchq.github.io/CyberChef/
 - Python: `pycryptodome` for scripting
 
-## ECB exploitation patterns
+## ECBの利用パターン
 
-ECB (Electronic Code Book) は各ブロックを独立して暗号化します:
+ECB (Electronic Code Book) は各ブロックを独立に暗号化する:
 
 - equal plaintext blocks → equal ciphertext blocks
-- これにより構造が漏れ、cut-and-pasteスタイルの攻撃が可能になります
+- これが構造を露出し、cut-and-paste型の攻撃を可能にする
 
 ![](https://upload.wikimedia.org/wikipedia/commons/thumb/e/e6/ECB_decryption.svg/601px-ECB_decryption.svg.png)
 
-### 検出のアイデア: token/cookie のパターン
+### 検出アイデア: token/cookieのパターン
 
-何度かログインして常に同じcookieが返ってくる場合、暗号文が決定的（ECBまたは固定IV）である可能性があります。
+何度かログインして**常に同じcookieが返る**なら、ciphertextが決定的（ECBまたは固定IV）な可能性がある。
 
-ほぼ同じプレーンテキスト構造（例: 長い繰り返し文字）を持つ2つのユーザを作成し、同じオフセットで繰り返し暗号文ブロックが見られるなら、ECBが有力な疑いです。
+長い繰り返し文字などでほぼ同一のplaintextレイアウトを持つ2つのユーザを作成し、同じオフセットで繰り返しのciphertextブロックが見られるなら、ECBが有力な疑い。
 
-### 攻略パターン
+### 利用パターン
 
-#### Removing entire blocks
+#### ブロック全体の削除
 
-トークン形式が `<username>|<password>` のようでブロック境界が合っている場合、`admin` ブロックが整列するようなユーザを作り、先行ブロックを削除して `admin` の有効なトークンを得られることがあります。
+トークン形式が `<username>|<password>` のようでブロック境界が整う場合、`admin`ブロックが整列するようにユーザを作り、前のブロックを削除して有効な`admin`トークンを得られる場合がある。
 
-#### Moving blocks
+#### ブロックの移動
 
-バックエンドがパディングや余分なスペース（`admin` vs `admin    `）を許容するなら:
+バックエンドがpaddingや余分なスペース（`admin` vs `admin    `）を許容するなら:
 
-- `admin   ` を含むブロックを整列させる
-- その暗号文ブロックを別のトークンに差し替え/再利用する
+- `admin   `を含むブロックを整列させ
+- そのciphertextブロックを別のトークンへ差し替え／再利用する
 
 ## Padding Oracle
 
-### 概要
+### それが何か
 
-CBCモードでは、サーバが復号された平文が**valid PKCS#7 padding**かどうかを（直接的にあるいは間接的に）判別可能にしていると、しばしば次が可能になります:
+CBCモードでは、サーバが復号されたplaintextが**PKCS#7 padding**として有効かどうかを（直接または間接に）明らかにする場合、多くの場合:
 
-- 鍵無しで暗号文を復号する
-- 選択した平文を暗号化（暗号文を偽造）する
+- keyなしでciphertextを復号できる
+- 選択したplaintextを暗号化（ciphertextをforge）できる
 
-オラクルは次のような形で現れることがあります:
+オラクルは次のような形で現れる:
 
 - 特定のエラーメッセージ
-- 異なるHTTPステータス / レスポンスサイズ
+- 異なるHTTPステータス／レスポンスサイズ
 - タイミング差
 
-### 実践的な攻撃
+### 実践的な悪用
 
-PadBusterは古典的なツールです:
+PadBusterは古典的なツール:
 
 {{#ref}}
 https://github.com/AonCyberLabs/PadBuster
@@ -109,73 +109,71 @@ perl ./padBuster.pl http://10.10.10.10/index.php "RVJDQrwUdTRWJUVUeBKkEA==" 16 \
 ```
 Notes:
 
-- ブロックサイズは AES ではしばしば `16` です。
+- ブロックサイズはしばしば `16` for AES.
 - `-encoding 0` は Base64 を意味します。
 - oracle が特定の文字列の場合は `-error` を使用してください。
 
-### なぜ機能するのか
+### なぜ動作するか
 
-CBC 復号は `P[i] = D(C[i]) XOR C[i-1]` を計算します。`C[i-1]` のバイトを変更してパディングが有効かどうかを監視することで、`P[i]` をバイト単位で復元できます。
+CBC の復号は `P[i] = D(C[i]) XOR C[i-1]` を計算します。`C[i-1]` のバイトを変更し、パディングが有効かどうかを観察することで、`P[i]` をバイト単位で復元できます。
 
-## CBC におけるビットフリッピング
+## CBC におけるビットフリップ
 
-padding oracle がなくても、CBC は改変可能です。暗号文ブロックを変更でき、アプリケーションが復号したプレーンテキストを構造化データ（例: `role=user`）として使用する場合、特定のビットを反転させて次のブロックの所定位置のプレーンテキストバイトを変更できます。
+padding oracle がなくても、CBC は変更可能です。暗号文ブロックを改変でき、アプリケーションが復号された plaintext を構造化データ（例: `role=user`）として扱う場合、次のブロックの指定位置にある特定の plaintext バイトを変更するためにビットを反転できます。
 
 典型的な CTF パターン:
 
 - Token = `IV || C1 || C2 || ...`
-- あなたは `C[i]` のバイトを制御できます
-- `P[i+1]` を狙います。なぜなら `P[i+1] = D(C[i+1]) XOR C[i]` だからです
+- あなたが `C[i]` のバイトを制御できる
+- `P[i+1] = D(C[i+1]) XOR C[i]` のため、`P[i+1]` の plaintext バイトを狙います
 
-これはそれ自体で機密性の破壊ではありませんが、整合性が欠如している場合には一般的な権限昇格のプリミティブになります。
+これはそれ自体で confidentiality の破壊ではありませんが、integrity がない環境では一般的な privilege-escalation のプリミティブになります。
 
 ## CBC-MAC
 
-CBC-MAC は特定の条件下（特に **固定長メッセージ** と適切なドメイン分離）でのみ安全です。
+CBC-MAC は特定の条件下でのみ安全です（特に **固定長メッセージ** と正しいドメイン分離）。
 
-### Classic variable-length forgery pattern
+### 古典的な可変長偽造パターン
 
 CBC-MAC は通常次のように計算されます:
 
 - IV = 0
 - `tag = last_block( CBC_encrypt(key, message, IV=0) )`
 
-選択したメッセージのタグを取得できる場合、CBC がブロックをどのように連鎖させるかを利用して、鍵を知らなくても連結（または関連する構造）のタグを作成できることがよくあります。
+選択したメッセージの tag を取得できる場合、CBC がブロックを連鎖させる仕組みを利用して、キーを知らなくても結合（または関連する構成）の tag を作成できることがよくあります。
 
-これは、username や role を CBC-MAC で MAC する CTF のクッキー/トークンによく見られます。
+これは、ユーザ名や role を CBC-MAC で MAC するような CTF の cookie/token に頻繁に現れます。
 
-### より安全な代替案
+### より安全な代替
 
-- HMAC (SHA-256/512) を使用する
-- CMAC (AES-CMAC) を正しく使用する
+- HMAC（SHA-256/512）を使用する
+- CMAC（AES-CMAC）を正しく使用する
 - メッセージ長 / ドメイン分離を含める
 
 ## Stream ciphers: XOR and RC4
 
-### 基本概念
-
-ほとんどのストリーム暗号の状況は次の形に帰着します:
+### 基本的な考え方
 
 `ciphertext = plaintext XOR keystream`
 
-したがって:
+つまり:
 
-- プレーンテキストが分かっていれば、キーストリームを復元できます。
-- キーストリームが再利用されている場合（同じ key+nonce）、`C1 XOR C2 = P1 XOR P2`。
+- plaintext を知っていれば、keystream を復元できる。
+- keystream が再利用される（同じ key+nonce）の場合、`C1 XOR C2 = P1 XOR P2`。
 
-### XOR-based encryption
+### XOR ベースの暗号
 
-位置 `i` の任意のプレーンテキストセグメントが分かっていれば、キーストリームバイトを復元して、同じ位置の他の暗号文を復号できます。
+`i` の位置で任意の plaintext セグメントを知っていれば、keystream バイトを復元し、同じ位置の他の ciphertext を復号できます。
 
 Autosolvers:
 
-- https://wiremask.eu/tools/xor-cracker/
+- [https://wiremask.eu/tools/xor-cracker/](https://wiremask.eu/tools/xor-cracker/)
 
 ### RC4
 
 RC4 はストリーム暗号で、暗号化と復号は同じ操作です。
 
-同じ鍵で既知のプレーンテキストの RC4 暗号化を得られる場合、キーストリームを復元して同じ長さ/オフセットの他のメッセージを復号できます。
+同じキーで既知の plaintext の RC4 暗号化を得られる場合、keystream を復元して同じ長さ/オフセットの他のメッセージを復号できます。
 
 Reference writeup (HTB Kryptos):
 
