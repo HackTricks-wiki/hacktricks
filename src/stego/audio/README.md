@@ -11,12 +11,12 @@ Pattern comuni:
 
 ## Triage rapido
 
-Prima di tooling specializzato:
+Before specialized tooling:
 
-- Conferma i dettagli di codec/container e anomalie:
+- Conferma i dettagli del codec/container e eventuali anomalie:
 - `file audio`
 - `ffmpeg -v info -i audio -f null -`
-- Se l'audio contiene contenuti simili a rumore o una struttura tonale, ispeziona uno spectrogram fin da subito.
+- Se l'audio contiene contenuto simile a rumore o una struttura tonale, ispeziona precocemente un spectrogram.
 ```bash
 ffmpeg -v info -i stego.mp3 -f null -
 ```
@@ -24,18 +24,18 @@ ffmpeg -v info -i stego.mp3 -f null -
 
 ### Tecnica
 
-Spectrogram stego nasconde i dati modellando l'energia nel tempo/frequenza in modo che diventi visibile solo in un grafico tempo-frequenza (spesso inaudibile o percepito come rumore).
+Spectrogram stego nasconde dati modellando l'energia nel dominio tempo/frequenza in modo che diventino visibili solo in un grafico tempo-frequenza (spesso inaudibili o percepiti come rumore).
 
 ### Sonic Visualiser
 
-Strumento principale per l'ispezione dello spettrogramma:
+Strumento principale per l'analisi degli spettrogrammi:
 
-- https://www.sonicvisualiser.org/
+- [https://www.sonicvisualiser.org/](https://www.sonicvisualiser.org/)
 
 ### Alternative
 
 - Audacity (visualizzazione spettrogramma, filtri): https://www.audacityteam.org/
-- `sox` può generare spettrogrammi dalla CLI:
+- `sox` può generare spettrogrammi dalla riga di comando (CLI):
 ```bash
 sox input.wav -n spectrogram -o spectrogram.png
 ```
@@ -43,13 +43,13 @@ sox input.wav -n spectrogram -o spectrogram.png
 
 ### Tecnica
 
-Per PCM non compresso (WAV), ogni campione è un intero. Modificando i bit meno significativi si altera la forma d'onda in modo molto lieve, quindi un attaccante può nascondere:
+Per PCM non compresso (WAV), ogni sample è un intero. Modificando i bit meno significativi la forma d'onda cambia molto poco, quindi attackers possono nascondere:
 
-- 1 bit per campione (o più)
-- Interlacciati tra i canali
-- Con uno stride/permutazione
+- 1 bit per sample (o più)
+- Interlacciato tra i canali
+- Con uno stride/permutation
 
-Altre famiglie di nascondimento audio che potresti incontrare:
+Altre famiglie di tecniche di nascondimento audio che potresti incontrare:
 
 - Phase coding
 - Echo hiding
@@ -58,24 +58,24 @@ Altre famiglie di nascondimento audio che potresti incontrare:
 
 ### WavSteg
 
-Da: https://github.com/ragibson/Steganography#WavSteg
+From: https://github.com/ragibson/Steganography#WavSteg
 ```bash
 python3 WavSteg.py -r -b 1 -s sound.wav -o out.bin
 python3 WavSteg.py -r -b 2 -s sound.wav -o out.bin
 ```
 ### DeepSound
 
-- http://jpinsoft.net/deepsound/download.aspx
+- [http://jpinsoft.net/deepsound/download.aspx](http://jpinsoft.net/deepsound/download.aspx)
 
-## DTMF / toni di composizione
+## DTMF / dial tones
 
 ### Tecnica
 
-DTMF codifica i caratteri come coppie di frequenze fisse (tastierino telefonico). Se l'audio somiglia a toni del tastierino o a segnali regolari a doppia frequenza, prova la decodifica DTMF subito.
+DTMF codifica caratteri come coppie di frequenze fisse (tastierino del telefono). Se l'audio somiglia a toni del tastierino o a bip regolari a doppia frequenza, verifica la decodifica DTMF subito.
 
-Decoder online:
+Decodificatori online:
 
-- https://unframework.github.io/dtmf-detect/
-- http://dialabc.com/sound/detect/index.html
+- [https://unframework.github.io/dtmf-detect/](https://unframework.github.io/dtmf-detect/)
+- [http://dialabc.com/sound/detect/index.html](http://dialabc.com/sound/detect/index.html)
 
 {{#include ../../banners/hacktricks-training.md}}

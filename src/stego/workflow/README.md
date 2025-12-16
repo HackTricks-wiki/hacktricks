@@ -1,4 +1,4 @@
-# Stego Flusso di lavoro
+# Flusso di lavoro Stego
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -6,21 +6,21 @@ La maggior parte dei problemi stego si risolve più velocemente con un triage si
 
 ## Flusso principale
 
-### Checklist di triage rapido
+### Lista di controllo per il triage rapido
 
-L'obiettivo è rispondere efficacemente a due domande:
+L'obiettivo è rispondere a due domande in modo efficiente:
 
-1. Qual è il vero container/formato?
-2. Il payload è in metadata, appended bytes, embedded files, o content-level stego?
+1. Qual è il vero contenitore/formato?
+2. Il payload è nei metadati, in byte aggiunti, in file incorporati o in stego a livello di contenuto?
 
-#### 1) Identificare il container
+#### 1) Identificare il contenitore
 ```bash
 file target
 ls -lah target
 ```
-Se `file` e l'estensione non corrispondono, fidati di `file`. Considera i formati comuni come contenitori quando appropriato (ad es., i documenti OOXML sono file ZIP).
+Se `file` e l'estensione non corrispondono, fidati di `file`. Considera i formati comuni come container quando appropriato (ad es., i documenti OOXML sono file ZIP).
 
-#### 2) Cerca metadata e stringhe ovvie
+#### 2) Cerca metadati e stringhe ovvie
 ```bash
 exiftool target
 strings -n 6 target | head
@@ -31,29 +31,29 @@ Prova più codifiche:
 strings -e l -n 6 target | head
 strings -e b -n 6 target | head
 ```
-#### 3) Controlla la presenza di dati aggiunti / file incorporati
+#### 3) Controllare dati aggiunti / file incorporati
 ```bash
 binwalk target
 binwalk -e target
 ```
-Se l'estrazione fallisce ma vengono segnalate signatures, effettua il carving manuale degli offset con `dd` e rilancia `file` sulla regione ricavata.
+Se l'estrazione fallisce ma vengono segnalate delle signatures, carve manualmente gli offset con `dd` e riesegui `file` sulla regione carveata.
 
-#### 4) Se è un'immagine
+#### 4) Se immagine
 
 - Ispeziona anomalie: `magick identify -verbose file`
 - Se PNG/BMP, enumera bit-planes/LSB: `zsteg -a file.png`
 - Valida la struttura PNG: `pngcheck -v file.png`
-- Usa filtri visivi (Stegsolve / StegoVeritas) quando il contenuto può emergere da trasformazioni di canale/piano
+- Usa filtri visuali (Stegsolve / StegoVeritas) quando il contenuto può essere rivelato da trasformazioni di channel/plane
 
-#### 5) Se è un file audio
+#### 5) Se audio
 
-- Prima lo spettrogramma (Sonic Visualiser)
+- Spettrogramma prima (Sonic Visualiser)
 - Decodifica/ispeziona gli stream: `ffmpeg -v info -i file -f null -`
-- Se l'audio assomiglia a toni strutturati, verifica la decodifica DTMF
+- Se l'audio somiglia a toni strutturati, prova la decodifica DTMF
 
-### Strumenti essenziali
+### Strumenti principali
 
-Questi catturano i casi ad alta frequenza a livello di container: metadata payloads, appended bytes, e embedded files camuffati dall'estensione.
+Questi coprono i casi più frequenti a livello container: metadata payloads, appended bytes e embedded files camuffati dall'estensione.
 
 #### Binwalk
 ```bash
@@ -70,7 +70,7 @@ foremost -i file
 exiftool file
 exiv2 file
 ```
-Per favore incolla qui il contenuto di src/stego/workflow/README.md che vuoi tradurre (mantieni intatti percorsi, tag e link).
+#### file / stringhe
 ```bash
 file file
 strings -n 6 file
@@ -79,13 +79,13 @@ strings -n 6 file
 ```bash
 cmp original.jpg stego.jpg -b -l
 ```
-### Contenitori, dati aggiunti e polyglot tricks
+### Contenitori, dati aggiunti, e polyglot tricks
 
-Molte challenge di steganography sono byte extra dopo un file valido, o archivi incorporati mascherati dall'estensione.
+Molte challenge di steganography consistono in byte extra dopo un file valido, o in archivi embedded mascherati dall'estensione.
 
 #### Payloads aggiunti
 
-Molti formati ignorano i byte finali. Un ZIP/PDF/script può essere appeso a un container immagine/audio.
+Molti formati ignorano i byte finali. A ZIP/PDF/script può essere appeso a un contenitore immagine/audio.
 
 Controlli rapidi:
 ```bash
@@ -97,9 +97,9 @@ Se conosci un offset, carve con `dd`:
 dd if=file of=carved.bin bs=1 skip=<offset>
 file carved.bin
 ```
-#### Byte magici
+#### Magic bytes
 
-Quando `file` è confuso, cerca byte magici con `xxd` e confrontali con firme note:
+Quando `file` è confuso, cerca i magic bytes con `xxd` e confrontali con firme conosciute:
 ```bash
 xxd -g 1 -l 32 file
 ```
@@ -112,26 +112,26 @@ unzip -l file
 ```
 ### Stranezze vicino a stego
 
-Link rapidi per schemi che compaiono regolarmente adiacenti a stego (QR-from-binary, braille, etc).
+Link rapidi per schemi che compaiono regolarmente adiacenti a stego (QR-from-binary, braille, ecc).
 
 #### QR codes from binary
 
-Se la lunghezza del blob è un quadrato perfetto, potrebbe essere pixel grezzi per un'immagine/QR.
+Se la lunghezza di un blob è un quadrato perfetto, potrebbe trattarsi di pixel grezzi per un'immagine/QR.
 ```python
 import math
 math.isqrt(2500)  # 50
 ```
-Strumento per convertire binario in immagine:
+Convertitore da binario a immagine:
 
-- https://www.dcode.fr/binary-image
+- [https://www.dcode.fr/binary-image](https://www.dcode.fr/binary-image)
 
 #### Braille
 
-- https://www.branah.com/braille-translator
+- [https://www.branah.com/braille-translator](https://www.branah.com/braille-translator)
 
-## Elenchi di riferimento
+## Liste di riferimento
 
-- https://0xrick.github.io/lists/stego/
-- https://github.com/DominicBreuker/stego-toolkit
+- [https://0xrick.github.io/lists/stego/](https://0xrick.github.io/lists/stego/)
+- [https://github.com/DominicBreuker/stego-toolkit](https://github.com/DominicBreuker/stego-toolkit)
 
 {{#include ../../banners/hacktricks-training.md}}

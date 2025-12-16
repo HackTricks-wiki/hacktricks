@@ -1,28 +1,28 @@
-# Flusso di lavoro Crypto per CTF
+# Crypto CTF Workflow
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Checklist di triage
+## Triage checklist
 
-1. Identify what you have: encoding vs encryption vs hash vs signature vs MAC.
-2. Determine what is controlled: plaintext/ciphertext, IV/nonce, key, oracle (padding/error/timing), partial leakage.
-3. Classify: symmetric (AES/CTR/GCM), public-key (RSA/ECC), hash/MAC (SHA/MD5/HMAC), classical (Vigenere/XOR).
-4. Apply the highest-probability checks first: decode layers, known-plaintext XOR, nonce reuse, mode misuse, oracle behavior.
-5. Escalate to advanced methods only when required: lattices (LLL/Coppersmith), SMT/Z3, side-channels.
+1. Identifica cosa hai: encoding vs encryption vs hash vs signature vs MAC.
+2. Determina cosa è controllato: plaintext/ciphertext, IV/nonce, key, oracle (padding/error/timing), partial leakage.
+3. Classifica: symmetric (AES/CTR/GCM), public-key (RSA/ECC), hash/MAC (SHA/MD5/HMAC), classical (Vigenere/XOR).
+4. Applica prima i check con probabilità più alta: decode layers, known-plaintext XOR, nonce reuse, mode misuse, oracle behavior.
+5. Passa a metodi avanzati solo quando necessario: lattices (LLL/Coppersmith), SMT/Z3, side-channels.
 
-## Risorse online & utility
+## Online resources & utilities
 
-Queste sono utili quando il task è identificazione e rimozione degli strati, o quando hai bisogno di una conferma rapida di un'ipotesi.
+Queste risorse sono utili quando il task è identificazione e layer peeling, o quando ti serve una rapida conferma di un'ipotesi.
 
 ### Hash lookups
 
-- Google the hash (surprisingly effective).
-- https://crackstation.net/
-- https://md5decrypt.net/
-- https://hashes.org/search.php
-- https://www.onlinehashcrack.com/
-- https://gpuhash.me/
-- http://hashtoolkit.com/reverse-hash
+- Cerca l'hash su Google (sorprendentemente efficace).
+- [https://crackstation.net/](https://crackstation.net/)
+- [https://md5decrypt.net/](https://md5decrypt.net/)
+- [https://hashes.org/search.php](https://hashes.org/search.php)
+- [https://www.onlinehashcrack.com/](https://www.onlinehashcrack.com/)
+- [https://gpuhash.me/](https://gpuhash.me/)
+- [http://hashtoolkit.com/reverse-hash](http://hashtoolkit.com/reverse-hash)
 
 ### Identification helpers
 
@@ -44,20 +44,20 @@ Queste sono utili quando il task è identificazione e rimozione degli strati, o 
 
 ### Technique
 
-Many CTF crypto tasks are layered transforms: base encoding + simple substitution + compression. L'obiettivo è identificare gli strati e rimuoverli in sicurezza.
+Molti task di crypto in CTF sono trasformazioni a strati: base encoding + simple substitution + compression. L'obiettivo è identificare gli strati e sbucciarli in sicurezza.
 
 ### Encodings: try many bases
 
-If you suspect layered encoding (base64 → base32 → …), try:
+Se sospetti encoding a strati (base64 → base32 → …), prova:
 
 - CyberChef "Magic"
 - `codext` (python-codext): `codext <string>`
 
-Indicatori comuni:
+Segnali comuni:
 
-- Base64: `A-Za-z0-9+/=` (il padding `=` è comune)
-- Base32: `A-Z2-7=` (spesso molti `=` di padding)
-- Ascii85/Base85: punteggiatura densa; a volte racchiuso in `<~ ~>`
+- Base64: `A-Za-z0-9+/=` (padding `=` is common)
+- Base32: `A-Z2-7=` (often lots of `=` padding)
+- Ascii85/Base85: dense punctuation; sometimes wrapped in `<~ ~>`
 
 ### Substitution / monoalphabetic
 
@@ -71,34 +71,34 @@ Indicatori comuni:
 
 ### Vigenère
 
-- https://www.dcode.fr/vigenere-cipher
-- https://www.guballa.de/vigenere-solver
+- [https://www.dcode.fr/vigenere-cipher](https://www.dcode.fr/vigenere-cipher)
+- [https://www.guballa.de/vigenere-solver](https://www.guballa.de/vigenere-solver)
 
 ### Bacon cipher
 
-Spesso appare come gruppi di 5 bit o 5 lettere:
+Solitamente appare come gruppi di 5 bit o 5 lettere:
 ```
 00111 01101 01010 00000 ...
 AABBB ABBAB ABABA AAAAA ...
 ```
-### Morse
+### Codice Morse
 ```
 .... --- .-.. -.-. .- .-. .- -.-. --- .-.. .-
 ```
 ### Rune
 
-Le rune sono spesso alfabeti di sostituzione; cerca "futhark cipher" e prova tabelle di mappatura.
+Rune sono frequentemente alfabeti di sostituzione; cerca "futhark cipher" e prova tabelle di mapping.
 
 ## Compressione nelle sfide
 
 ### Tecnica
 
-La compressione compare frequentemente come un livello aggiuntivo (zlib/deflate/gzip/xz/zstd), talvolta annidata. Se l'output quasi viene interpretato ma sembra spazzatura, sospetta che sia compresso.
+La compressione compare frequentemente come un ulteriore livello (zlib/deflate/gzip/xz/zstd), a volte annidata. Se l'output quasi si interpreta ma appare illeggibile, sospetta una compressione.
 
 ### Identificazione rapida
 
 - `file <blob>`
-- Cerca byte magici:
+- Cerca i magic bytes:
 - gzip: `1f 8b`
 - zlib: often `78 01/9c/da`
 - zip: `50 4b 03 04`
@@ -122,35 +122,35 @@ except Exception:
 pass
 PY
 ```
-## Costrutti crypto comuni nei CTF
+## Costrutti crittografici comuni nei CTF
 
 ### Tecnica
 
-Appaiono spesso perché sono errori realistici di sviluppatori o librerie comuni usate in modo errato. L'obiettivo è solitamente il riconoscimento e l'applicazione di un workflow noto di estrazione o ricostruzione.
+Questi appaiono frequentemente perché sono errori realistici di sviluppatori o librerie comuni usate in modo errato. L'obiettivo è di solito il riconoscimento e l'applicazione di un workflow noto di estrazione o ricostruzione.
 
 ### Fernet
 
 Indicazione tipica: due stringhe Base64 (token + key).
 
-- Decoder/note: https://asecuritysite.com/encryption/ferdecode
+- Decoder/appunti: https://asecuritysite.com/encryption/ferdecode
 - In Python: `from cryptography.fernet import Fernet`
 
 ### Shamir Secret Sharing
 
-Se vedi più shares e viene menzionata una soglia `t`, probabilmente si tratta di Shamir.
+Se vedi più shares e viene menzionata una soglia `t`, è probabile che si tratti di Shamir.
 
-- Ricostruttore online (utile per i CTF): http://christian.gen.co/secrets/
+- Ricostruttore online (comodo per i CTF): http://christian.gen.co/secrets/
 
-### Formati salted OpenSSL
+### OpenSSL salted formats
 
 I CTF a volte forniscono output di `openssl enc` (l'header spesso inizia con `Salted__`).
 
-Strumenti per bruteforce:
+Aiuti per bruteforce:
 
-- https://github.com/glv2/bruteforce-salted-openssl
-- https://github.com/carlospolop/easy_BFopensslCTF
+- [https://github.com/glv2/bruteforce-salted-openssl](https://github.com/glv2/bruteforce-salted-openssl)
+- [https://github.com/carlospolop/easy_BFopensslCTF](https://github.com/carlospolop/easy_BFopensslCTF)
 
-### Strumenti generali
+### General toolset
 
 - RsaCtfTool: https://github.com/Ganapati/RsaCtfTool
 - featherduster: https://github.com/nccgroup/featherduster
@@ -161,8 +161,8 @@ Strumenti per bruteforce:
 Stack pratico per CTF:
 
 - Python + `pycryptodome` per primitive simmetriche e prototipazione rapida
-- SageMath per aritmetica modulare, CRT, lattice e lavoro su RSA/ECC
-- Z3 per challenge basati su vincoli (quando la crypto si riduce a vincoli)
+- SageMath per aritmetica modulare, CRT, reticoli e lavoro su RSA/ECC
+- Z3 per challenge basate su vincoli (quando la crittografia si riduce a vincoli)
 
 Pacchetti Python suggeriti:
 ```bash
