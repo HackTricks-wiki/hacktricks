@@ -2,22 +2,22 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Αυτό το τμήμα αφορά **ανάλυση X.509, μορφές, μετατροπές και συνηθισμένα λάθη**.
+Αυτή η ενότητα αφορά **την ανάλυση X.509, τις μορφές, τις μετατροπές και τα κοινά λάθη**.
 
-## X.509: ανάλυση, μορφές & συνηθισμένα λάθη
+## X.509: ανάλυση, μορφές & κοινά λάθη
 
 ### Γρήγορη ανάλυση
 ```bash
 openssl x509 -in cert.pem -noout -text
 openssl asn1parse -in cert.pem
 ```
-Χρήσιμα πεδία προς εξέταση:
+Χρήσιμα πεδία για έλεγχο:
 
-- Θέμα / Εκδότης / SAN
-- Χρήση κλειδιού / EKU
-- Βασικοί περιορισμοί (είναι CA;)
-- Περίοδος ισχύος (NotBefore/NotAfter)
-- Αλγόριθμος υπογραφής (MD5? SHA1?)
+- Subject / Issuer / SAN
+- Key Usage / EKU
+- Basic Constraints (είναι CA?)
+- Validity window (NotBefore/NotAfter)
+- Signature algorithm (MD5? SHA1?)
 
 ### Μορφές & μετατροπή
 
@@ -34,13 +34,13 @@ openssl pkcs12 -in file.pfx -out out.pem
 ```
 ### Κοινές επιθετικές προσεγγίσεις
 
-- Εμπιστοσύνη σε ρίζες που παρέχονται από τον χρήστη / ελλιπής επικύρωση αλυσίδας
-- Αδύναμοι αλγόριθμοι υπογραφής (παρωχημένα)
-- Περιορισμοί ονομάτων / σφάλματα ανάλυσης SAN (εξαρτάται από την υλοποίηση)
-- Confused deputy issues with client-certificate authentication misbinding
+- Εμπιστοσύνη σε root πιστοποιητικά που παρέχονται από χρήστες / έλλειψη επαλήθευσης της αλυσίδας
+- Αδύναμοι αλγόριθμοι υπογραφής (παλαιοί)
+- Περιορισμοί ονομάτων / σφάλματα στην ανάλυση SAN (εξαρτώμενα από την υλοποίηση)
+- Προβλήματα τύπου Confused deputy με misbinding στην πιστοποίηση client-certificate
 
 ### CT logs
 
-- https://crt.sh/
+- [https://crt.sh/](https://crt.sh/)
 
 {{#include ../../banners/hacktricks-training.md}}
