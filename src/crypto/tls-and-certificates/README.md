@@ -1,8 +1,8 @@
-# TLS & Certificados
+# TLS y Certificados
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Esta área trata sobre **el análisis (parsing) de X.509, formatos, conversiones y errores comunes**.
+Esta área trata sobre **análisis de X.509, formatos, conversiones y errores comunes**.
 
 ## X.509: análisis, formatos y errores comunes
 
@@ -13,13 +13,13 @@ openssl asn1parse -in cert.pem
 ```
 Campos útiles para inspeccionar:
 
-- Sujeto / Emisor / SAN
-- Uso de clave / EKU
-- Restricciones básicas (¿es una CA?)
+- Subject / Issuer / SAN
+- Key Usage / EKU
+- Basic Constraints (¿es un CA?)
 - Ventana de validez (NotBefore/NotAfter)
 - Algoritmo de firma (MD5? SHA1?)
 
-### Formatos y conversión
+### Formatos & conversión
 
 - PEM (Base64 con encabezados BEGIN/END)
 - DER (binario)
@@ -32,15 +32,15 @@ openssl x509 -in cert.cer -outform PEM -out cert.pem
 openssl x509 -in cert.pem -outform der -out cert.der
 openssl pkcs12 -in file.pfx -out out.pem
 ```
-### Ángulos ofensivos comunes
+### Vectores ofensivos comunes
 
-- Confiar en certificados raíz proporcionados por el usuario / validación de la cadena ausente
+- Confiar en raíces proporcionadas por el usuario / falta de validación de la cadena
 - Algoritmos de firma débiles (obsoletos)
-- Restricciones de nombre / errores de parseo de SAN (específicos de la implementación)
-- Problemas de Confused deputy con misbinding en la autenticación client-certificate
+- Restricciones de nombre / bugs en el parsing de SAN (específicos de la implementación)
+- Problemas de Confused deputy con client-certificate authentication misbinding
 
-### Registros CT
+### CT logs
 
-- https://crt.sh/
+- [https://crt.sh/](https://crt.sh/)
 
 {{#include ../../banners/hacktricks-training.md}}
