@@ -701,6 +701,7 @@
 - [SAML Attacks](pentesting-web/saml-attacks/README.md)
   - [SAML Basics](pentesting-web/saml-attacks/saml-basics.md)
 - [Server Side Inclusion/Edge Side Inclusion Injection](pentesting-web/server-side-inclusion-edge-side-inclusion-injection.md)
+- [Soap Jax Ws Threadlocal Auth Bypass](pentesting-web/soap-jax-ws-threadlocal-auth-bypass.md)
 - [SQL Injection](pentesting-web/sql-injection/README.md)
   - [MS Access SQL Injection](pentesting-web/sql-injection/ms-access-sql-injection.md)
   - [MSSQL Injection](pentesting-web/sql-injection/mssql-injection.md)
