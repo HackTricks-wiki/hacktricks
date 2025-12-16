@@ -11,12 +11,12 @@ Uobičajeni obrasci:
 
 ## Brza trijaža
 
-Pre specijalizovanih alata:
+Pre nego što koristite specijalizovane alate:
 
-- Potvrdite codec/container detalje i anomalije:
+- Potvrdite detalje kodeka/kontejnera i anomalije:
 - `file audio`
 - `ffmpeg -v info -i audio -f null -`
-- Ako audio sadrži sadržaj sličan šumu ili tonalnu strukturu, rano pregledajte spectrogram.
+- Ako audio sadrži sadržaj nalik šumu ili tonalnu strukturu, rano pregledajte spectrogram.
 ```bash
 ffmpeg -v info -i stego.mp3 -f null -
 ```
@@ -28,14 +28,14 @@ Spectrogram stego skriva podatke oblikovanjem energije tokom vremena/frekvencije
 
 ### Sonic Visualiser
 
-Primarni alat za inspekciju spektrograma:
+Primarni alat za pregled spektrograma:
 
-- https://www.sonicvisualiser.org/
+- [https://www.sonicvisualiser.org/](https://www.sonicvisualiser.org/)
 
-### Alternative
+### Alternativni alati
 
-- Audacity (spektrogram prikaz, filteri): https://www.audacityteam.org/
-- `sox` može generisati spektrograme iz CLI:
+- Audacity (pregled spektrograma, filteri): https://www.audacityteam.org/
+- `sox` može generisati spektrograme iz komandne linije:
 ```bash
 sox input.wav -n spectrogram -o spectrogram.png
 ```
@@ -43,13 +43,13 @@ sox input.wav -n spectrogram -o spectrogram.png
 
 ### Tehnika
 
-Za nekompresovani PCM (WAV), svaki uzorak je ceo broj. Izmena niskih bitova menja talasni oblik vrlo malo, pa napadači mogu sakriti:
+Za nekompresovani PCM (WAV), svaki uzorak je ceo broj. Izmena najmanje značajnih bitova menja talasni oblik veoma malo, tako da napadači mogu sakriti:
 
 - 1 bit po uzorku (ili više)
-- Naizmenično po kanalima
-- Sa stride/permutacijom
+- Mešano po kanalima
+- Sa korakom/permutaacijom
 
-Druge porodice tehnika skrivanja u zvuku koje možete sresti:
+Druge tehnike skrivanja u audio zapisima na koje možete naići:
 
 - Phase coding
 - Echo hiding
@@ -65,17 +65,17 @@ python3 WavSteg.py -r -b 2 -s sound.wav -o out.bin
 ```
 ### DeepSound
 
-- http://jpinsoft.net/deepsound/download.aspx
+- [http://jpinsoft.net/deepsound/download.aspx](http://jpinsoft.net/deepsound/download.aspx)
 
-## DTMF / dial tones
+## DTMF / tonovi biranja
 
 ### Tehnika
 
-DTMF enkodira karaktere kao parove fiksnih frekvencija (telefonska tastatura). Ako audio podseća na tonove tastature ili regularne dvofrekventne bipove, testirajte DTMF dekodiranje što ranije.
+DTMF kodira karaktere kao parove fiksnih frekvencija (tastatura telefona). Ako audio podseća na tonove tastature ili na uobičajene dvofrekventne bipove, testirajte DTMF dekodiranje što ranije.
 
 Online dekoderi:
 
-- https://unframework.github.io/dtmf-detect/
-- http://dialabc.com/sound/detect/index.html
+- [https://unframework.github.io/dtmf-detect/](https://unframework.github.io/dtmf-detect/)
+- [http://dialabc.com/sound/detect/index.html](http://dialabc.com/sound/detect/index.html)
 
 {{#include ../../banners/hacktricks-training.md}}

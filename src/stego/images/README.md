@@ -2,7 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Većina CTF image stego problema svodi se na jednu od sledećih kategorija:
+Većina CTF image stego zadataka svodi se na jednu od ovih kategorija:
 
 - LSB/bit-planes (PNG/BMP)
 - Metadata/comment payloads
@@ -12,44 +12,44 @@ Većina CTF image stego problema svodi se na jednu od sledećih kategorija:
 
 ## Quick triage
 
-Prioritet dajte dokazima na nivou kontejnera pre dubinske analize sadržaja:
+Prioritizujte dokaze na nivou kontejnera pre dubinske analize sadržaja:
 
-- Potvrdite fajl i pregledajte strukturu: `file`, `magick identify -verbose`, alatke za validaciju formata (npr. `pngcheck`).
-- Ekstrahujte metapodatke i vidljive stringove: `exiftool -a -u -g1`, `strings`.
-- Proverite za ugrađeni/dodat sadržaj: `binwalk` i inspekcija kraja fajla (`tail | xxd`).
-- Razvrstavanje po kontejneru:
+- Proverite fajl i pregledajte strukturu: `file`, `magick identify -verbose`, format validators (npr. `pngcheck`).
+- Izvucite metapodatke i vidljive stringove: `exiftool -a -u -g1`, `strings`.
+- Proverite ugrađeni/dodat sadržaj: `binwalk` i inspekcija kraja fajla (`tail | xxd`).
+- Dalje postupajte prema tipu kontejnera:
 - PNG/BMP: bit-planes/LSB i anomalije na nivou chunk-ova.
-- JPEG: metapodaci + DCT-domain tooling (OutGuess/F5-style families).
-- GIF/APNG: ekstrakcija frejmova, frame differencing, trikovi sa paletom.
+- JPEG: metapodaci + DCT-domain alati (OutGuess/F5-style families).
+- GIF/APNG: ekstrakcija frejmova, poređenje frejmova, trikovi sa paletom.
 
 ## Bit-planes / LSB
 
 ### Technique
 
-PNG/BMP su popularni na CTF-ovima jer čuvaju piksele na način koji olakšava **manipulaciju na nivou bita**. Klasičan mehanizam za skrivanje/izvlačenje je:
+PNG/BMP su popularni na CTF-ovima jer čuvaju pixele na način koji olakšava manipulaciju na nivou bita. Klasičan mehanizam skrivanje/ekstrakcija je:
 
 - Svaki kanal piksela (R/G/B/A) ima više bitova.
-- The **least significant bit** (LSB) svakog kanala menja sliku vrlo malo.
-- Napadači skrivaju podatke u tim nisko-rangiranim bitovima, ponekad sa stride-om, permutacijom, ili izborom po kanalu.
+- **least significant bit** (LSB) svakog kanala menja sliku vrlo malo.
+- Napadači skrivaju podatke u tim niskorangiranim bitovima, ponekad sa stride-om, permutacijom ili izborom po kanalu.
 
 Šta očekivati u zadacima:
 
-- Payload je u samo jednom kanalu (npr. `R` LSB).
+- Payload je samo u jednom kanalu (npr. `R` LSB).
 - Payload je u alpha kanalu.
-- Payload je kompresovan/kodovan nakon ekstrakcije.
-- Poruka je raspoređena preko planova ili sakrivena putem XOR-a između planova.
+- Payload je kompresovan/enkodovan nakon ekstrakcije.
+- Poruka je raspoređena po planovima ili skrivena putem XOR-a između planova.
 
 Dodatne varijante na koje možete naići (zavisno od implementacije):
 
-- **LSB matching** (ne samo prevrnuti bit, već +/-1 prilagođavanja da bi se dobio ciljni bit)
-- **Palette/index-based hiding** (indexed PNG/GIF: payload u indeksima boja umesto u raw RGB)
+- **LSB matching** (ne samo preokretanje bita, već +/-1 podešavanja da bi se dobio ciljni bit)
+- **Palette/index-based hiding** (indexed PNG/GIF: payload u indeksima boja umesto raw RGB)
 - **Alpha-only payloads** (potpuno nevidljivo u RGB prikazu)
 
 ### Tooling
 
 #### zsteg
 
-`zsteg` izlistava mnoge LSB/bit-plane obrasce ekstrakcije za PNG/BMP:
+`zsteg` navodi mnoge LSB/bit-plane obrasce za ekstrakciju za PNG/BMP:
 ```bash
 zsteg -a file.png
 ```
@@ -64,31 +64,31 @@ Stegsolve download: https://github.com/eugenekolo/sec-tools/tree/master/stego/st
 
 #### FFT-based visibility tricks
 
-FFT nije LSB ekstrakcija; koristi se u slučajevima gde je sadržaj namerno sakriven u frekvencijskoj oblasti ili suptilnim šablonima.
+FFT nije LSB extraction; koristi se za slučajeve kada je sadržaj namerno sakriven u frekvencijskoj domeni ili u suptilnim šablonima.
 
 - EPFL demo: http://bigwww.epfl.ch/demo/ip/demos/FFT/
 - Fourifier: https://www.ejectamenta.com/Fourifier-fullscreen/
 - FFTStegPic: https://github.com/0xcomposure/FFTStegPic
 
-Web-bazirana trijaža često korišćena na CTF-ovima:
+Veb-trijaža često se koristi na CTF-ovima:
 
 - Aperi’Solve: https://aperisolve.com/
 - StegOnline: https://stegonline.georgeom.net/
 
-## Interna struktura PNG: chunks, korupcija i sakriveni podaci
+## PNG internals: chunks, corruption, and hidden data
 
 ### Tehnika
 
-PNG je format zasnovan na chunk-ovima. U mnogim izazovima payload se čuva na nivou kontejnera/chunk-a umesto u vrednostima piksela:
+PNG je format podeljen na chunk-ove. U mnogim izazovima payload je smešten na nivou kontejnera/chunk-a umesto u vrednostima piksela:
 
-- **Extra bytes after `IEND`** (mnogi pregledači ignorišu prateće bajtove)
-- **Non-standard ancillary chunks** carrying payloads
-- **Corrupted headers** koji sakrivaju dimenzije ili ruše parsere dok se ne isprave
+- **Dodatni bajtovi posle `IEND`** (mnogi pregledači ignorišu završne bajtove)
+- **Nestandardni ancillary chunks** koji nose payloads
+- **Oštećeni headeri** koji skrivaju dimenzije ili naruše parsere dok se ne poprave
 
-Ključne lokacije chunk-ova za proveru:
+Mesta u chunk-ovima koja vredi proveriti:
 
-- `tEXt` / `iTXt` / `zTXt` (text metadata, sometimes compressed)
-- `iCCP` (ICC profile) i drugi ancillary chunks koji se koriste kao carrier
+- `tEXt` / `iTXt` / `zTXt` (tekstualni metadata, ponekad kompresovan)
+- `iCCP` (ICC profile) i druge ancillary chunks korišćene kao nosač
 - `eXIf` (EXIF data in PNG)
 
 ### Komande za trijažu
@@ -96,10 +96,10 @@ Ključne lokacije chunk-ova za proveru:
 magick identify -verbose file.png
 pngcheck -v file.png
 ```
-Na šta treba obratiti pažnju:
+Na šta obratiti pažnju:
 
 - Neobične kombinacije width/height/bit-depth/colour-type
-- CRC/chunk greške (pngcheck obično ukazuje na tačan offset)
+- CRC/chunk greške (pngcheck obično pokazuje tačan offset)
 - Upozorenja o dodatnim podacima nakon `IEND`
 
 Ako vam treba dublji prikaz chunk-ova:
@@ -107,24 +107,24 @@ Ako vam treba dublji prikaz chunk-ova:
 pngcheck -vp file.png
 exiftool -a -u -g1 file.png
 ```
-Useful references:
+Korisne reference:
 
 - PNG specification (structure, chunks): https://www.w3.org/TR/PNG/
-- File format tricks (PNG/JPEG/GIF corner cases): https://github.com/corkami/docs
+- Trikovi sa formatima fajlova (PNG/JPEG/GIF rubni slučajevi): https://github.com/corkami/docs
 
-## JPEG: metapodaci, DCT-domain alati, and ELA ograničenja
+## JPEG: metadata, DCT-domain tools, and ELA limitations
 
 ### Tehnika
 
-JPEG se ne čuva kao sirovi pikseli; kompresovan je u DCT domenu. Zbog toga se JPEG stego alati razlikuju od PNG LSB alata:
+JPEG se ne čuva kao sirovi pikseli; komprimovan je u DCT domenu. Zato se JPEG stego alati razlikuju od PNG LSB alata:
 
-- Metapodaci/komentar payloads su na nivou fajla (high-signal i brzo za pregled)
-- DCT-domain stego alati umeću bitove u frekvencijske koeficijente
+- Podaci u metapodacima/komentarima su na nivou fajla (jak signal i brzo za proveru)
+- DCT-domain stego alati ugrađuju bitove u frekvencijske koeficijente
 
 Operativno, tretirajte JPEG kao:
 
-- Kontejner za segmente metapodataka (high-signal, brzo za pregled)
-- Kompresovan signalni domen (DCT koeficijenti) gde operišu specijalizovani stego alati
+- Kontejner za segmente metapodataka (jak signal, brzo za proveru)
+- Komprimovan signalni domen (DCT koeficijenti) u kojem rade specijalizovani stego alati
 
 ### Brze provere
 ```bash
@@ -132,26 +132,26 @@ exiftool file.jpg
 strings -n 6 file.jpg | head
 binwalk file.jpg
 ```
-Mesta visokog signala:
+Lokacije visokog signala:
 
 - EXIF/XMP/IPTC metapodaci
 - JPEG segment komentara (`COM`)
-- Aplikacioni segmenti (`APP1` for EXIF, `APPn` for vendor data)
+- Aplikacioni segmenti (`APP1` za EXIF, `APPn` za podatke proizvođača)
 
 ### Uobičajeni alati
 
 - OutGuess: https://github.com/resurrecting-open-source-projects/outguess
 - OpenStego: https://www.openstego.com/
 
-Ako imate steghide payloads u JPEG-ovima, razmislite o korišćenju `stegseek` (faster bruteforce than older scripts):
+If you are specifically facing steghide payloads in JPEGs, consider using `stegseek` (faster bruteforce than older scripts):
 
-- https://github.com/RickdeJager/stegseek
+- [https://github.com/RickdeJager/stegseek](https://github.com/RickdeJager/stegseek)
 
 ### Error Level Analysis
 
-ELA ističe različite artefakte ponovne kompresije; može ukazati na oblasti koje su izmenjene, ali sama po sebi nije detektor stega:
+ELA ističe različite artefakte ponovne kompresije; može ukazati na regione koji su izmenjeni, ali nije stego detector sam po sebi:
 
-- https://29a.ch/sandbox/2012/imageerrorlevelanalysis/
+- [https://29a.ch/sandbox/2012/imageerrorlevelanalysis/](https://29a.ch/sandbox/2012/imageerrorlevelanalysis/)
 
 ## Animirane slike
 
@@ -160,14 +160,14 @@ ELA ističe različite artefakte ponovne kompresije; može ukazati na oblasti ko
 Za animirane slike, pretpostavite da je poruka:
 
 - U jednom frejmu (lako), ili
-- Raspoređena preko frejmova (redosled je bitan), ili
+- Raspodeljena kroz frejmove (redosled je bitan), ili
 - Vidljiva samo kada napravite diff uzastopnih frejmova
 
 ### Ekstrakcija frejmova
 ```bash
 ffmpeg -i anim.gif frame_%04d.png
 ```
-Zatim tretirajte frejmove kao normalne PNGs: `zsteg`, `pngcheck`, channel isolation.
+Zatim tretirajte frejmove kao obične PNG-ove: `zsteg`, `pngcheck`, channel isolation.
 
 Alternativni alati:
 
@@ -178,9 +178,9 @@ Frame differencing je često presudno:
 ```bash
 magick frame_0001.png frame_0002.png -compose difference -composite diff.png
 ```
-## Umetanje zaštićeno lozinkom
+## Ugradnja zaštićena lozinkom
 
-Ako sumnjate da je umetanje zaštićeno passphrase-om umesto manipulacije na nivou piksela, ovo je obično najbrži put.
+Ako sumnjate da je embedding zaštićen passphrase-om umesto manipulacije na nivou piksela, ovo je obično najbrži put.
 
 ### steghide
 
@@ -189,7 +189,7 @@ Podržava `JPEG, BMP, WAV, AU` i može embed/extract encrypted payloads.
 steghide info file
 steghide extract -sf file --passphrase 'password'
 ```
-Molim vas zalepite sadržaj fajla src/stego/images/README.md ovde (ili omogućite pristup repozitorijumu). Kada primim sadržaj, prevešću ga na srpski zadržavajući istu markdown i html sintaksu i ne prevodeći kod, putanje, linkove, nazive tehnika, ni specijalne tagove.
+Nisam dobio sadržaj fajla. Molim vas nalepite pun sadržaj fajla src/stego/images/README.md koji želite da prevedem na srpski.
 ```bash
 stegcracker file.jpg wordlist.txt
 ```
