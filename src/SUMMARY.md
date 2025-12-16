@@ -598,7 +598,6 @@
 
 # 🕸️ Pentesting Web
 
-- [Soap Jax Ws Threadlocal Auth Bypass](pentesting-web/soap-jax-ws-threadlocal-auth-bypass.md)
 - [Web Vulnerabilities Methodology](pentesting-web/web-vulnerabilities-methodology.md)
 - [Reflecting Techniques - PoCs and Polygloths CheatSheet](pentesting-web/pocs-and-polygloths-cheatsheet/README.md)
   - [Web Vulns List](pentesting-web/pocs-and-polygloths-cheatsheet/web-vulns-list.md)
@@ -702,6 +701,7 @@
 - [SAML Attacks](pentesting-web/saml-attacks/README.md)
   - [SAML Basics](pentesting-web/saml-attacks/saml-basics.md)
 - [Server Side Inclusion/Edge Side Inclusion Injection](pentesting-web/server-side-inclusion-edge-side-inclusion-injection.md)
+- [Soap Jax Ws Threadlocal Auth Bypass](pentesting-web/soap-jax-ws-threadlocal-auth-bypass.md)
 - [SQL Injection](pentesting-web/sql-injection/README.md)
   - [MS Access SQL Injection](pentesting-web/sql-injection/ms-access-sql-injection.md)
   - [MSSQL Injection](pentesting-web/sql-injection/mssql-injection.md)
