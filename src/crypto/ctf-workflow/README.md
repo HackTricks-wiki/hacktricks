@@ -4,60 +4,60 @@
 
 ## Triage kontrol listesi
 
-1. Neye sahip olduğunuzu belirleyin: encoding vs encryption vs hash vs signature vs MAC.
+1. Elinizde olanı belirleyin: encoding vs encryption vs hash vs signature vs MAC.
 2. Kontrol edilenleri tespit edin: plaintext/ciphertext, IV/nonce, key, oracle (padding/error/timing), partial leakage.
 3. Sınıflandırın: symmetric (AES/CTR/GCM), public-key (RSA/ECC), hash/MAC (SHA/MD5/HMAC), classical (Vigenere/XOR).
-4. Önce en yüksek olasılıklı kontrolleri uygulayın: decode katmanları, known-plaintext XOR, nonce reuse, mode misuse, oracle davranışı.
-5. İleri yöntemlere yalnızca gerektiğinde geçin: lattices (LLL/Coppersmith), SMT/Z3, side-channels.
+4. Önce en yüksek olasılıkları kontrol edin: decode katmanları, known-plaintext XOR, nonce reuse, mode misuse, oracle davranışı.
+5. Gelişmiş yöntemleri yalnızca gerektiğinde kullanın: lattices (LLL/Coppersmith), SMT/Z3, side-channels.
 
-## Online resources & utilities
+## Çevrimiçi kaynaklar & araçlar
 
-Bunlar, görevin kimliklendirme ve katman soyma olduğu durumlarda veya bir hipotezin hızlıca doğrulanması gerektiğinde kullanışlıdır.
+Bunlar, görevin tanımlama ve katman sökme olduğu durumlarda ya da bir hipotezi hızlıca doğrulamanız gerektiğinde faydalıdır.
 
-### Hash lookups
+### Hash aramaları
 
-- Google the hash (surprisingly effective).
-- https://crackstation.net/
-- https://md5decrypt.net/
-- https://hashes.org/search.php
-- https://www.onlinehashcrack.com/
-- https://gpuhash.me/
-- http://hashtoolkit.com/reverse-hash
+- Hashi Google'da ara (şaşırtıcı derecede etkili).
+- [https://crackstation.net/](https://crackstation.net/)
+- [https://md5decrypt.net/](https://md5decrypt.net/)
+- [https://hashes.org/search.php](https://hashes.org/search.php)
+- [https://www.onlinehashcrack.com/](https://www.onlinehashcrack.com/)
+- [https://gpuhash.me/](https://gpuhash.me/)
+- [http://hashtoolkit.com/reverse-hash](http://hashtoolkit.com/reverse-hash)
 
-### Identification helpers
+### Tanımlama yardımcıları
 
 - CyberChef (magic, decode, convert): https://gchq.github.io/CyberChef/
 - dCode (ciphers/encodings playground): https://www.dcode.fr/tools-list
 - Boxentriq (substitution solvers): https://www.boxentriq.com/code-breaking
 
-### Practice platforms / references
+### Pratik platformları / referanslar
 
 - CryptoHack (hands-on crypto challenges): https://cryptohack.org/
 - Cryptopals (classic modern crypto pitfalls): https://cryptopals.com/
 
-### Automated decoding
+### Otomatik dekodlama
 
 - Ciphey: https://github.com/Ciphey/Ciphey
 - python-codext (tries many bases/encodings): https://github.com/dhondta/python-codext
 
-## Encodings & classical ciphers
+## Encodings & klasik şifreler
 
-### Technique
+### Yöntem
 
-Birçok CTF kripto görevi katmanlı dönüşümler içerir: base encoding + simple substitution + compression. Amaç, katmanları belirlemek ve güvenli şekilde soymaktır.
+Birçok CTF kripto görevi katmanlı dönüşümlerdir: base encoding + simple substitution + compression. Amaç, katmanları tespit etmek ve güvenli biçimde soymaktır.
 
-### Encodings: try many bases
+### Encodings: birçok base deneyin
 
-Eğer katmanlı encoding (base64 → base32 → …) şüphesi varsa, deneyin:
+Katmanlı encoding (base64 → base32 → …) olduğunu düşünüyorsanız, deneyin:
 
 - CyberChef "Magic"
 - `codext` (python-codext): `codext <string>`
 
-Yaygın işaretler:
+Yaygın göstergeler:
 
 - Base64: `A-Za-z0-9+/=` (padding `=` is common)
 - Base32: `A-Z2-7=` (often lots of `=` padding)
-- Ascii85/Base85: yoğun noktalama işaretleri; bazen `<~ ~>` içinde sarılı olur
+- Ascii85/Base85: yoğun noktalama; bazen `<~ ~>` ile sarılır
 
 ### Substitution / monoalphabetic
 
@@ -71,12 +71,12 @@ Yaygın işaretler:
 
 ### Vigenère
 
-- https://www.dcode.fr/vigenere-cipher
-- https://www.guballa.de/vigenere-solver
+- [https://www.dcode.fr/vigenere-cipher](https://www.dcode.fr/vigenere-cipher)
+- [https://www.guballa.de/vigenere-solver](https://www.guballa.de/vigenere-solver)
 
 ### Bacon cipher
 
-Çoğunlukla 5 bitlik veya 5 harflik gruplar halinde ortaya çıkar:
+Genellikle 5 bitlik veya 5 harflik gruplar halinde görülür:
 ```
 00111 01101 01010 00000 ...
 AABBB ABBAB ABABA AAAAA ...
@@ -87,20 +87,20 @@ AABBB ABBAB ABABA AAAAA ...
 ```
 ### Rünler
 
-Rünler genellikle yerine koyma alfabeleridir; "futhark cipher" arayın ve eşleme tablolarını deneyin.
+Rünler sık sık yerine koyma alfabeleridir; "futhark cipher" arayın ve eşleme tablolarını deneyin.
 
 ## Challenge'larda Sıkıştırma
 
 ### Teknik
 
-Sıkıştırma sık sık ekstra bir katman olarak (zlib/deflate/gzip/xz/zstd) ortaya çıkar, bazen iç içe. Çıktı neredeyse çözümlenebiliyor ama çöp gibi görünüyorsa, sıkıştırma olasılığını düşünün.
+Sıkıştırma, sıkça ekstra bir katman olarak (zlib/deflate/gzip/xz/zstd) karşınıza çıkar; bazen iç içe olur. Çıktı neredeyse çözümleniyor ama anlamsız görünüyorsa, sıkıştırmayı şüpheleyin.
 
 ### Hızlı tespit
 
 - `file <blob>`
-- Magic bytes'lara bakın:
+- Magic byte'lara bakın:
 - gzip: `1f 8b`
-- zlib: often `78 01/9c/da`
+- zlib: çoğunlukla `78 01/9c/da`
 - zip: `50 4b 03 04`
 - bzip2: `42 5a 68` (`BZh`)
 - xz: `fd 37 7a 58 5a 00`
@@ -108,9 +108,9 @@ Sıkıştırma sık sık ekstra bir katman olarak (zlib/deflate/gzip/xz/zstd) or
 
 ### Raw DEFLATE
 
-CyberChef'te **Raw Deflate/Raw Inflate** bulunur; blob sıkıştırılmış gibi göründüğünde ama `zlib` başarısız olduğunda bu genellikle en hızlı yoldur.
+CyberChef'te **Raw Deflate/Raw Inflate** bulunur; blob sıkıştırılmış gibi görünüp `zlib` başarısız olduğunda genellikle en hızlı yol budur.
 
-### Kullanışlı CLI
+### Faydalı CLI
 ```bash
 python3 - <<'PY'
 import sys, zlib
@@ -122,33 +122,33 @@ except Exception:
 pass
 PY
 ```
-## Yaygın CTF kripto yapıları
+## Yaygın CTF crypto yapıları
 
 ### Teknik
 
-Bunlar sıklıkla görünür çünkü gerçekçi geliştirici hataları veya yanlış kullanılan yaygın kütüphanelerdir. Amaç genellikle tanıma ve bilinen bir çıkarma veya yeniden yapılandırma iş akışını uygulamaktır.
+Bunlar sıkça görülür çünkü gerçekçi developer hataları veya yanlış kullanılan common libraries'dir. Amaç genellikle tanıma ve bilinen bir extraction veya reconstruction workflow'unu uygulamaktır.
 
 ### Fernet
 
-Tipik ipucu: iki Base64 string'i (token + key).
+Tipik ipucu: iki Base64 dizesi (token + key).
 
-- Decoder/notes: https://asecuritysite.com/encryption/ferdecode
+- Çözücü/notlar: https://asecuritysite.com/encryption/ferdecode
 - Python'da: `from cryptography.fernet import Fernet`
 
 ### Shamir Secret Sharing
 
-Birden fazla shares görürseniz ve bir eşik `t` belirtilmişse, muhtemelen Shamir'dir.
+Birden fazla share görürseniz ve bir eşik `t` belirtilmişse, muhtemelen Shamir'dir.
 
-- Online reconstructor (CTF'ler için kullanışlı): http://christian.gen.co/secrets/
+- Çevrimiçi yeniden oluşturucu (CTF'ler için kullanışlı): http://christian.gen.co/secrets/
 
 ### OpenSSL salted formats
 
 CTF'ler bazen `openssl enc` çıktıları verir (başlık genellikle `Salted__` ile başlar).
 
-Bruteforce yardımcıları:
+Bruteforce yardımcı araçları:
 
-- https://github.com/glv2/bruteforce-salted-openssl
-- https://github.com/carlospolop/easy_BFopensslCTF
+- [https://github.com/glv2/bruteforce-salted-openssl](https://github.com/glv2/bruteforce-salted-openssl)
+- [https://github.com/carlospolop/easy_BFopensslCTF](https://github.com/carlospolop/easy_BFopensslCTF)
 
 ### Genel araç seti
 
@@ -160,9 +160,9 @@ Bruteforce yardımcıları:
 
 Pratik CTF yığını:
 
-- Python + `pycryptodome` — simetrik kriptografi ve hızlı prototipleme için
-- SageMath — modüler aritmetik, CRT, lattice'ler ve RSA/ECC çalışmaları için
-- Z3 — kısıt-temelli zorluklar için (kriptografik problem kısıtlara indirgeniyorsa)
+- Python + `pycryptodome` simetrik primitive'ler ve hızlı prototipleme için
+- SageMath modüler aritmetik, CRT, lattices ve RSA/ECC çalışmaları için
+- Z3 kısıt tabanlı zorluklar için (crypto kısıtlara indirgeniyorsa)
 
 Önerilen Python paketleri:
 ```bash

@@ -11,13 +11,12 @@ Yaygın desenler:
 
 ## Hızlı triyaj
 
-Özel araçlara geçmeden önce:
+Uzman araçlara geçmeden önce:
 
-- Codec/container ayrıntılarını ve anomalileri doğrulayın:
+- Codec/container detaylarını ve anormallikleri doğrulayın:
 - `file audio`
 - `ffmpeg -v info -i audio -f null -`
-
-Eğer ses gürültü-benzeri içerik veya tonal bir yapıya sahipse, erken bir spectrogram incelemesi yapın.
+- Eğer ses gürültü-benzeri içerik veya tonal yapı içeriyorsa, erken aşamada bir spectrogram inceleyin.
 ```bash
 ffmpeg -v info -i stego.mp3 -f null -
 ```
@@ -25,13 +24,13 @@ ffmpeg -v info -i stego.mp3 -f null -
 
 ### Teknik
 
-Spectrogram stego verileri zaman/frekans boyunca enerjiyi şekillendirerek gizler; böylece yalnızca zaman-frekans grafiğinde görünür hale gelir (çoğunlukla işitilemez veya gürültü olarak algılanır).
+Spectrogram stego, zamana/frekansa göre enerjiyi şekillendirerek veriyi gizler; böylece yalnızca zaman-frekans grafiğinde görünür olur (çoğunlukla duyulmaz veya gürültü olarak algılanır).
 
 ### Sonic Visualiser
 
 Spectrogram incelemesi için birincil araç:
 
-- https://www.sonicvisualiser.org/
+- [https://www.sonicvisualiser.org/](https://www.sonicvisualiser.org/)
 
 ### Alternatifler
 
@@ -44,13 +43,13 @@ sox input.wav -n spectrogram -o spectrogram.png
 
 ### Teknik
 
-Sıkıştırılmamış PCM (WAV) için her örnek bir tam sayıdır. Düşük bitleri değiştirmek dalga formunu çok az değiştirir, bu yüzden saldırganlar şunları gizleyebilir:
+Sıkıştırılmamış PCM (WAV) için her örnek bir tamsayıdır. Düşük bitleri değiştirmek dalga şeklini çok az değiştirir, bu yüzden saldırganlar şunları gizleyebilir:
 
-- Her örnek için 1 bit (ya da daha fazla)
-- Kanallar arasında enterleştirilmiş
-- Bir stride/permütasyon ile
+- Örnek başına 1 bit (veya daha fazlası)
+- Kanallar arasında dağıtılmış (interleaved)
+- Adım/permütasyon ile
 
-Karşılaşabileceğiniz diğer ses gizleme teknikleri:
+Karşılaşabileceğiniz diğer ses gizleme yöntemleri:
 
 - Phase coding
 - Echo hiding
@@ -66,17 +65,17 @@ python3 WavSteg.py -r -b 2 -s sound.wav -o out.bin
 ```
 ### DeepSound
 
-- http://jpinsoft.net/deepsound/download.aspx
+- [http://jpinsoft.net/deepsound/download.aspx](http://jpinsoft.net/deepsound/download.aspx)
 
-## DTMF / dial tones
+## DTMF / tuş tonları
 
 ### Teknik
 
-DTMF, karakterleri sabit frekans çiftleri (telefon tuş takımı) olarak kodlar. Eğer ses tuş takımı tonlarına veya düzenli çift frekanslı bip'lere benziyorsa, DTMF çözümlenmesini erken test edin.
+DTMF, karakterleri sabit frekans çiftleri olarak kodlar (telefon tuş takımı). Ses tuş takımı tonlarına veya düzenli çift frekanslı bip'lere benziyorsa, DTMF çözümlemeyi erken test edin.
 
 Çevrimiçi çözücüler:
 
-- https://unframework.github.io/dtmf-detect/
-- http://dialabc.com/sound/detect/index.html
+- [https://unframework.github.io/dtmf-detect/](https://unframework.github.io/dtmf-detect/)
+- [http://dialabc.com/sound/detect/index.html](http://dialabc.com/sound/detect/index.html)
 
 {{#include ../../banners/hacktricks-training.md}}
