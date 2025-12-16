@@ -9,14 +9,14 @@ Häufige Muster:
 - DTMF / dial tones encoding
 - Metadata payloads
 
-## Schnelle Triage
+## Schnelle Ersteinschätzung
 
 Vor spezialisierten Tools:
 
-- Codec-/Container-Details und Anomalien bestätigen:
+- Codec-/Container-Details und Anomalien prüfen:
 - `file audio`
 - `ffmpeg -v info -i audio -f null -`
-- Wenn das Audio rauschähnlichen Inhalt oder tonale Strukturen enthält, untersuche frühzeitig ein Spectrogram.
+- Wenn die Audiodatei rauschähnlichen Inhalt oder tonale Strukturen enthält, frühzeitig ein Spektrogramm prüfen.
 ```bash
 ffmpeg -v info -i stego.mp3 -f null -
 ```
@@ -24,13 +24,13 @@ ffmpeg -v info -i stego.mp3 -f null -
 
 ### Technik
 
-Spectrogram stego versteckt Daten, indem es Energie über Zeit/Frequenz formt, sodass sie nur in einem Zeit-Frequenz-Diagramm sichtbar wird (oft unhörbar oder als Rauschen wahrgenommen).
+Spectrogram stego versteckt Daten, indem es Energie über Zeit/Frequenz formt, sodass sie nur in einer Zeit-Frequenz-Darstellung sichtbar werden (oft unhörbar oder als Rauschen wahrgenommen).
 
 ### Sonic Visualiser
 
-Hauptwerkzeug für die Spektrogramm-Analyse:
+Hauptwerkzeug zur Spektrogramm-Analyse:
 
-- https://www.sonicvisualiser.org/
+- [https://www.sonicvisualiser.org/](https://www.sonicvisualiser.org/)
 
 ### Alternativen
 
@@ -43,13 +43,13 @@ sox input.wav -n spectrogram -o spectrogram.png
 
 ### Technik
 
-Bei unkomprimiertem PCM (WAV) ist jedes Sample eine ganze Zahl. Das Ändern der niederwertigen Bits verändert die Wellenform nur minimal, daher können Angreifer darin verstecken:
+Bei unkomprimiertem PCM (WAV) ist jedes Sample ein Integer. Das Verändern der niederwertigen Bits verändert die Wellenform nur sehr geringfügig, sodass Angreifer verbergen können:
 
 - 1 Bit pro Sample (oder mehr)
-- Versetzt über die Kanäle
+- Interleaved über Kanäle
 - Mit einer Schrittweite/Permutation
 
-Andere Audio-Versteck-Methoden, denen Sie begegnen könnten:
+Weitere Audio-Hiding-Familien, denen du begegnen könntest:
 
 - Phase coding
 - Echo hiding
@@ -58,24 +58,24 @@ Andere Audio-Versteck-Methoden, denen Sie begegnen könnten:
 
 ### WavSteg
 
-Von: https://github.com/ragibson/Steganography#WavSteg
+From: https://github.com/ragibson/Steganography#WavSteg
 ```bash
 python3 WavSteg.py -r -b 1 -s sound.wav -o out.bin
 python3 WavSteg.py -r -b 2 -s sound.wav -o out.bin
 ```
 ### DeepSound
 
-- http://jpinsoft.net/deepsound/download.aspx
+- [http://jpinsoft.net/deepsound/download.aspx](http://jpinsoft.net/deepsound/download.aspx)
 
-## DTMF / Wähltöne
+## DTMF / Wählton
 
 ### Technik
 
-DTMF kodiert Zeichen als Paare fester Frequenzen (Telefon-Tastatur). Wenn das Audio Tastentöne oder regelmäßige Dual-Frequenz-Pieptöne ähnelt, teste frühzeitig eine DTMF-Decodierung.
+DTMF kodiert Zeichen als Paare fester Frequenzen (Telefon-Tastenfeld). Wenn das Audio wie Tasten-Töne oder regelmäßige Dual-Frequenz-Pieptöne klingt, teste frühzeitig eine DTMF-Decodierung.
 
 Online-Decoder:
 
-- https://unframework.github.io/dtmf-detect/
-- http://dialabc.com/sound/detect/index.html
+- [https://unframework.github.io/dtmf-detect/](https://unframework.github.io/dtmf-detect/)
+- [http://dialabc.com/sound/detect/index.html](http://dialabc.com/sound/detect/index.html)
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -2,19 +2,19 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Dieser Bereich behandelt **X.509 Parsing, Formate, Konvertierungen und häufige Fehler**.
+Dieser Bereich behandelt **X.509-Parsing, Formate, Konvertierungen und häufige Fehler**.
 
 ## X.509: Parsing, Formate & häufige Fehler
 
-### Schnelles Parsen
+### Schnelles Parsing
 ```bash
 openssl x509 -in cert.pem -noout -text
 openssl asn1parse -in cert.pem
 ```
-Nützliche Felder zum Prüfen:
+Nützliche Felder zur Überprüfung:
 
 - Subject / Issuer / SAN
-- Key Usage / EKU
+- Schlüsselverwendung / EKU
 - Basic Constraints (ist es eine CA?)
 - Gültigkeitszeitraum (NotBefore/NotAfter)
 - Signaturalgorithmus (MD5? SHA1?)
@@ -34,13 +34,13 @@ openssl pkcs12 -in file.pfx -out out.pem
 ```
 ### Häufige offensive Angriffsvektoren
 
-- Vertrauen in vom Benutzer bereitgestellte Roots / fehlende Chain-Validierung
+- Vertrauen auf vom Benutzer bereitgestellte Root-Zertifikate / fehlende Kettenvalidierung
 - Schwache Signaturalgorithmen (veraltet)
 - Name-Constraints / SAN-Parsing-Fehler (implementierungsspezifisch)
-- Confused deputy-Probleme durch client-certificate authentication misbinding
+- Confused-deputy-Probleme durch Fehlbindung der Client-Zertifikat-Authentifizierung
 
 ### CT-Logs
 
-- https://crt.sh/
+- [https://crt.sh/](https://crt.sh/)
 
 {{#include ../../banners/hacktricks-training.md}}
