@@ -122,20 +122,51 @@ from-high-integrity-to-system-with-name-pipes.md
 service-triggers.md
 {{#endref}}
 
+## Named Pipe IPC Abuse & MITM (DLL Injection, API Hooking, PID Validation Bypass)
+
+Named-pipe hardened services can still be hijacked by instrumenting the trusted client. Tools like [pipetap](https://sensepost.com/blog/2025/pipetap-a-windows-named-pipe-proxy-tool/) drop a helper DLL into the client, proxy its traffic, and let you tamper with privileged IPC before the SYSTEM service consumes it.
+
+### Inline API hooking inside trusted processes
+- Inject the helper DLL (OpenProcess → CreateRemoteThread → LoadLibrary) into any client.
+- The DLL Detours `ReadFile`, `WriteFile`, etc., but only when `GetFileType` reports `FILE_TYPE_PIPE`, copies each buffer/metadata to a control pipe, lets you edit/drop/replay it, then resumes the original API.
+- Turns the legitimate client into a Burp-style proxy: pause UTF-8/UTF-16/raw payloads, trigger error paths, replay sequences, or export JSON traces.
+
+### Remote client mode to defeat PID-based validation
+- Inject into an allow-listed client, then in the GUI choose the pipe plus that PID.
+- The DLL issues `CreateFile`/`ConnectNamedPipe` inside the trusted process and relays the I/O back to you, so the server still observes the legitimate PID/image.
+- Bypasses filters that rely on `GetNamedPipeClientProcessId` or signed-image checks.
+
+### Fast enumeration and fuzzing
+- `pipelist` enumerates `\\.\pipe\*`, shows ACLs/SIDs, and forwards entries to other modules for immediate probing.
+- The pipe client/message composer connects to any name and builds UTF-8/UTF-16/raw-hex payloads; import captured blobs, mutate fields, and resend to hunt deserializers or unauthenticated command verbs.
+- The helper DLL can host a loopback TCP listener so tooling/fuzzers can drive the pipe remotely via the Python SDK.
+
+```bash
+pip install pipetap
+```
+
+```python
+import pipetap
+client = pipetap.Client(("127.0.0.1", 47001))
+client.write(b"OP\x00\x01...")
+```
+
+Combine the TCP bridge with VM snapshot restores to crash-test fragile IPC parsers.
+
+### Operational considerations
+- Named pipes are low-latency; long pauses while editing buffers can deadlock brittle services.
+- Overlapped/completion-port I/O coverage is partial, so expect edge cases.
+- Injection is noisy and unsigned, so treat it as a lab/exploit-dev helper rather than a stealth implant.
+
 ## Troubleshooting and gotchas
 - You must read at least one message from the pipe before calling ImpersonateNamedPipeClient; otherwise you’ll get ERROR_CANNOT_IMPERSONATE (1368).
 - If the client connects with SECURITY_SQOS_PRESENT | SECURITY_IDENTIFICATION, the server cannot fully impersonate; check the token’s impersonation level via GetTokenInformation(TokenImpersonationLevel).
 - CreateProcessWithTokenW requires SeImpersonatePrivilege on the caller. If that fails with ERROR_PRIVILEGE_NOT_HELD (1314), use CreateProcessAsUser after you already impersonated SYSTEM.
 - Ensure your pipe’s security descriptor allows the target service to connect if you harden it; by default, pipes under \\.\pipe are accessible according to the server’s DACL.
 
-## Detection and hardening
-- Monitor named pipe creation and connections. Sysmon Event IDs 17 (Pipe Created) and 18 (Pipe Connected) are useful to baseline legitimate pipe names and catch unusual, random-looking pipes preceding token-manipulation events.
-- Look for sequences: process creates a pipe, a SYSTEM service connects, then the creating process spawns a child as SYSTEM.
-- Reduce exposure by removing SeImpersonatePrivilege from nonessential service accounts and avoiding unnecessary service logons with high privileges.
-- Defensive development: when connecting to untrusted named pipes, specify SECURITY_SQOS_PRESENT with SECURITY_IDENTIFICATION to prevent servers from fully impersonating the client unless necessary.
-
 ## References
-- Windows: ImpersonateNamedPipeClient documentation (impersonation requirements and behavior). https://learn.microsoft.com/en-us/windows/win32/api/namedpipeapi/nf-namedpipeapi-impersonatenamedpipeclient
-- ired.team: Windows named pipes privilege escalation (walkthrough and code examples). https://ired.team/offensive-security/privilege-escalation/windows-namedpipes-privilege-escalation
+- [Windows: ImpersonateNamedPipeClient documentation](https://learn.microsoft.com/en-us/windows/win32/api/namedpipeapi/nf-namedpipeapi-impersonatenamedpipeclient)
+- [ired.team: Windows named pipes privilege escalation](https://ired.team/offensive-security/privilege-escalation/windows-namedpipes-privilege-escalation)
+- [pipetap – a Windows named pipe proxy tool](https://sensepost.com/blog/2025/pipetap-a-windows-named-pipe-proxy-tool/)
 
 {{#include ../../banners/hacktricks-training.md}}
