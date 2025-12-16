@@ -9,14 +9,14 @@
 - DTMF / dial tones encoding
 - Metadata payloads
 
-## Швидка перевірка
+## Швидкий триаж
 
 Перед використанням спеціалізованих інструментів:
 
-- Підтвердьте відомості про codec/container та наявність аномалій:
+- Перевірте деталі кодека/контейнера та аномалії:
 - `file audio`
 - `ffmpeg -v info -i audio -f null -`
-- Якщо аудіо містить шумоподібний вміст або тональну структуру, заздалегідь перегляньте spectrogram.
+- Якщо аудіо містить шумоподібний вміст або тональну структуру, на ранньому етапі перегляньте спектрограму.
 ```bash
 ffmpeg -v info -i stego.mp3 -f null -
 ```
@@ -24,13 +24,13 @@ ffmpeg -v info -i stego.mp3 -f null -
 
 ### Техніка
 
-Spectrogram stego приховує дані, модулюючи енергію по часу й частоті так, щоб вони ставали видимими лише на часово-частотному графіку (часто нечутні або сприймаються як шум).
+Spectrogram stego приховує дані, формуючи енергію в часі/частоті так, щоб вони ставали видимими лише на часово-частотному графіку (часто нечутні або сприймаються як шум).
 
 ### Sonic Visualiser
 
-Основний інструмент для аналізу спектрограм:
+Основний інструмент для огляду спектрограм:
 
-- https://www.sonicvisualiser.org/
+- [https://www.sonicvisualiser.org/](https://www.sonicvisualiser.org/)
 
 ### Альтернативи
 
@@ -43,18 +43,18 @@ sox input.wav -n spectrogram -o spectrogram.png
 
 ### Техніка
 
-Для нестисненого PCM (WAV) кожен семпл — це ціле число. Зміна молодших бітів дуже незначно змінює форму хвилі, тому зловмисники можуть приховувати:
+Для несжатого PCM (WAV) кожен зразок — ціле число. Зміна молодших бітів дуже незначно змінює форму хвилі, тому атакувальники можуть сховати:
 
-- 1 біт на семпл (або більше)
-- Переплітаються між каналами
+- 1 біт на зразок (або більше)
+- Переплетено між каналами
 - З кроком/перестановкою
 
-Інші методи приховування в аудіо, які ви можете зустріти:
+Інші методи приховування аудіо, які ви можете зустріти:
 
 - Phase coding
 - Echo hiding
 - Spread-spectrum embedding
-- Codec-side channels (залежно від формату та інструменту)
+- Codec-side channels (format-dependent and tool-dependent)
 
 ### WavSteg
 
@@ -65,17 +65,17 @@ python3 WavSteg.py -r -b 2 -s sound.wav -o out.bin
 ```
 ### DeepSound
 
-- http://jpinsoft.net/deepsound/download.aspx
+- [http://jpinsoft.net/deepsound/download.aspx](http://jpinsoft.net/deepsound/download.aspx)
 
-## DTMF / тональні сигнали набору
+## DTMF / тони набору номера
 
 ### Техніка
 
-DTMF кодує символи парами фіксованих частот (телефонна клавіатура). Якщо аудіо нагадує сигнали клавіатури або регулярні двочастотні гудки, перевірте DTMF-декодування якомога раніше.
+DTMF кодує символи як пари фіксованих частот (клавіатура телефону). Якщо аудіо нагадує тони клавіатури або регулярні двочастотні сигнали, перевірте декодування DTMF на ранньому етапі.
 
 Онлайн-декодери:
 
-- https://unframework.github.io/dtmf-detect/
-- http://dialabc.com/sound/detect/index.html
+- [https://unframework.github.io/dtmf-detect/](https://unframework.github.io/dtmf-detect/)
+- [http://dialabc.com/sound/detect/index.html](http://dialabc.com/sound/detect/index.html)
 
 {{#include ../../banners/hacktricks-training.md}}

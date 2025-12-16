@@ -1,14 +1,14 @@
-# Робочий процес Crypto CTF
+# Crypto CTF Робочий процес
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Чекліст тріажу
+## Контрольний список тріажу
 
 1. Визначте, що у вас є: encoding vs encryption vs hash vs signature vs MAC.
-2. Встановіть, що контролюється: plaintext/ciphertext, IV/nonce, key, oracle (padding/error/timing), часткове витікання.
+2. Визначте, що контролюється: plaintext/ciphertext, IV/nonce, key, oracle (padding/error/timing), partial leakage.
 3. Класифікуйте: symmetric (AES/CTR/GCM), public-key (RSA/ECC), hash/MAC (SHA/MD5/HMAC), classical (Vigenere/XOR).
-4. Застосуйте найімовірніші перевірки першими: розкодування шарів, known-plaintext XOR, nonce reuse, mode misuse, oracle behavior.
-5. Перейдіть до просунутих методів лише за потреби: lattices (LLL/Coppersmith), SMT/Z3, side-channels.
+4. Застосовуйте найімовірніші перевірки першими: decode layers, known-plaintext XOR, nonce reuse, mode misuse, oracle behavior.
+5. Переходьте до просунутих методів тільки за потреби: lattices (LLL/Coppersmith), SMT/Z3, side-channels.
 
 ## Онлайн-ресурси та утиліти
 
@@ -17,14 +17,14 @@
 ### Hash lookups
 
 - Google the hash (surprisingly effective).
-- https://crackstation.net/
-- https://md5decrypt.net/
-- https://hashes.org/search.php
-- https://www.onlinehashcrack.com/
-- https://gpuhash.me/
-- http://hashtoolkit.com/reverse-hash
+- [https://crackstation.net/](https://crackstation.net/)
+- [https://md5decrypt.net/](https://md5decrypt.net/)
+- [https://hashes.org/search.php](https://hashes.org/search.php)
+- [https://www.onlinehashcrack.com/](https://www.onlinehashcrack.com/)
+- [https://gpuhash.me/](https://gpuhash.me/)
+- [http://hashtoolkit.com/reverse-hash](http://hashtoolkit.com/reverse-hash)
 
-### Помічники для ідентифікації
+### Інструменти для ідентифікації
 
 - CyberChef (magic, decode, convert): https://gchq.github.io/CyberChef/
 - dCode (ciphers/encodings playground): https://www.dcode.fr/tools-list
@@ -42,9 +42,9 @@
 
 ## Кодування та класичні шифри
 
-### Техніка
+### Метод
 
-Багато крипто-завдань CTF — це багатошарові перетворення: base encoding + simple substitution + compression. Мета — ідентифікувати шари та акуратно їх зняти.
+Багато CTF crypto задач — це багатошарові трансформації: base encoding + simple substitution + compression. Мета — ідентифікувати шари та зняти їх безпечно.
 
 ### Encodings: try many bases
 
@@ -71,12 +71,12 @@
 
 ### Vigenère
 
-- https://www.dcode.fr/vigenere-cipher
-- https://www.guballa.de/vigenere-solver
+- [https://www.dcode.fr/vigenere-cipher](https://www.dcode.fr/vigenere-cipher)
+- [https://www.guballa.de/vigenere-solver](https://www.guballa.de/vigenere-solver)
 
 ### Bacon cipher
 
-Часто зустрічається у вигляді груп по 5 біт або 5 букв:
+Часто зустрічається як групи по 5 біт або 5 літер:
 ```
 00111 01101 01010 00000 ...
 AABBB ABBAB ABABA AAAAA ...
@@ -87,20 +87,20 @@ AABBB ABBAB ABABA AAAAA ...
 ```
 ### Руни
 
-Руни часто є підстановчими алфавітами; шукайте "futhark cipher" і пробуйте таблиці відображень.
+Руни часто є алфавітами підстановки; пошукайте "futhark cipher" і спробуйте таблиці відображень.
 
 ## Стиснення в задачах
 
 ### Техніка
 
-Стиснення часто зустрічається як додатковий шар (zlib/deflate/gzip/xz/zstd), іноді вкладене. Якщо вивід майже парситься, але виглядає як сміття, підозрюйте стиснення.
+Стиснення часто зустрічається як додатковий шар (zlib/deflate/gzip/xz/zstd), іноді вкладений. Якщо вивід майже парситься, але виглядає як сміття, підозрюйте стиснення.
 
 ### Швидка ідентифікація
 
 - `file <blob>`
 - Шукайте magic bytes:
 - gzip: `1f 8b`
-- zlib: often `78 01/9c/da`
+- zlib: часто `78 01/9c/da`
 - zip: `50 4b 03 04`
 - bzip2: `42 5a 68` (`BZh`)
 - xz: `fd 37 7a 58 5a 00`
@@ -108,7 +108,7 @@ AABBB ABBAB ABABA AAAAA ...
 
 ### Raw DEFLATE
 
-CyberChef has **Raw Deflate/Raw Inflate**, which is often the fastest path when the blob looks compressed but `zlib` fails.
+CyberChef має **Raw Deflate/Raw Inflate**, що часто є найшвидшим шляхом, коли blob виглядає стисненим, але `zlib` не справляється.
 
 ### Корисні CLI
 ```bash
@@ -122,33 +122,33 @@ except Exception:
 pass
 PY
 ```
-## Поширені CTF crypto конструкції
+## Поширені конструкції crypto для CTF
 
 ### Техніка
 
-Вони з'являються часто, бо це реалістичні помилки розробників або помилкове використання поширених бібліотек. Мета зазвичай — розпізнати проблему та застосувати відомий workflow для витягання або реконструкції.
+Вони часто зустрічаються, оскільки це реалістичні помилки розробників або поширені бібліотеки, використані неправильно. Мета зазвичай — розпізнати їх і застосувати відому методику вилучення або реконструкції.
 
 ### Fernet
 
-Типова підказка: два Base64 рядки (token + key).
+Типова підказка: два рядки Base64 (token + key).
 
-- Декодер/нотатки: https://asecuritysite.com/encryption/ferdecode
-- У Python: `from cryptography.fernet import Fernet`
+- Decoder/notes: https://asecuritysite.com/encryption/ferdecode
+- In Python: `from cryptography.fernet import Fernet`
 
 ### Shamir Secret Sharing
 
-Якщо ви бачите кілька shares і згадується поріг `t`, ймовірно це Shamir.
+Якщо ви бачите кілька shares і згадується поріг `t`, ймовірно, це Shamir.
 
 - Online reconstructor (handy for CTFs): http://christian.gen.co/secrets/
 
 ### OpenSSL salted formats
 
-Іноді в CTF дають вивід `openssl enc` (заголовок часто починається з `Salted__`).
+CTF іноді дають `openssl enc` outputs (header often begins with `Salted__`).
 
 Bruteforce helpers:
 
-- https://github.com/glv2/bruteforce-salted-openssl
-- https://github.com/carlospolop/easy_BFopensslCTF
+- [https://github.com/glv2/bruteforce-salted-openssl](https://github.com/glv2/bruteforce-salted-openssl)
+- [https://github.com/carlospolop/easy_BFopensslCTF](https://github.com/carlospolop/easy_BFopensslCTF)
 
 ### Загальний набір інструментів
 
@@ -156,9 +156,9 @@ Bruteforce helpers:
 - featherduster: https://github.com/nccgroup/featherduster
 - cryptovenom: https://github.com/lockedbyte/cryptovenom
 
-## Рекомендована локальна конфігурація
+## Рекомендоване локальне налаштування
 
-Практичний CTF стек:
+Практичний стек для CTF:
 
 - Python + `pycryptodome` для симетричних примітивів і швидкого прототипування
 - SageMath для модульної арифметики, CRT, решіток та роботи з RSA/ECC
