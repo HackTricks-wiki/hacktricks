@@ -2,40 +2,40 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## ट्रायज चेकलिस्ट
+## Triage चेकलिस्ट
 
-1. जानें आपके पास क्या है: encoding vs encryption vs hash vs signature vs MAC.
-2. निर्धारित करें क्या नियंत्रित है: plaintext/ciphertext, IV/nonce, key, oracle (padding/error/timing), partial leakage.
-3. वर्गीकृत करें: symmetric (AES/CTR/GCM), public-key (RSA/ECC), hash/MAC (SHA/MD5/HMAC), classical (Vigenere/XOR).
-4. सबसे अधिक-प्रायिकता वाली जाँच पहले लागू करें: decode layers, known-plaintext XOR, nonce reuse, mode misuse, oracle behavior.
-5. आवश्यक होने पर ही उन्नत तरीकों पर जाएँ: lattices (LLL/Coppersmith), SMT/Z3, side-channels.
+1. पहचानें कि आपके पास क्या है: encoding vs encryption vs hash vs signature vs MAC.
+2. निर्धारित करें कि क्या नियंत्रित है: plaintext/ciphertext, IV/nonce, key, oracle (padding/error/timing), partial leakage.
+3. श्रेणीबद्ध करें: symmetric (AES/CTR/GCM), public-key (RSA/ECC), hash/MAC (SHA/MD5/HMAC), classical (Vigenere/XOR).
+4. सबसे संभावित चेक पहले लागू करें: decode layers, known-plaintext XOR, nonce reuse, mode misuse, oracle behavior.
+5. केवल आवश्यक होने पर ही advanced methods पर जाएँ: lattices (LLL/Coppersmith), SMT/Z3, side-channels.
 
-## ऑनलाइन संसाधन और उपयोगी टूल्स
+## ऑनलाइन संसाधन & उपयोगिताएँ
 
-ये तब उपयोगी होते हैं जब टास्क पहचान और परत हटाने (layer peeling) का हो, या जब आपको किसी परिकल्पना की त्वरित पुष्टि चाहिए।
+ये उपयोगी होते हैं जब टास्क पहचान और लेयर पीलिंग हो, या जब आपको किसी अनुमान की त्वरित पुष्टि चाहिए।
 
-### हैश लुकअप्स
+### Hash लुकअप्स
 
-- हैश को Google करें (आश्चर्यजनक रूप से प्रभावी)।
-- https://crackstation.net/
-- https://md5decrypt.net/
-- https://hashes.org/search.php
-- https://www.onlinehashcrack.com/
-- https://gpuhash.me/
-- http://hashtoolkit.com/reverse-hash
+- Google the hash (अविश्वसनीय रूप से प्रभावी).
+- [https://crackstation.net/](https://crackstation.net/)
+- [https://md5decrypt.net/](https://md5decrypt.net/)
+- [https://hashes.org/search.php](https://hashes.org/search.php)
+- [https://www.onlinehashcrack.com/](https://www.onlinehashcrack.com/)
+- [https://gpuhash.me/](https://gpuhash.me/)
+- [http://hashtoolkit.com/reverse-hash](http://hashtoolkit.com/reverse-hash)
 
-### पहचान सहायक
+### Identification helpers
 
 - CyberChef (magic, decode, convert): https://gchq.github.io/CyberChef/
 - dCode (ciphers/encodings playground): https://www.dcode.fr/tools-list
 - Boxentriq (substitution solvers): https://www.boxentriq.com/code-breaking
 
-### प्रैक्टिस प्लेटफ़ॉर्म / संदर्भ
+### Practice platforms / references
 
 - CryptoHack (hands-on crypto challenges): https://cryptohack.org/
 - Cryptopals (classic modern crypto pitfalls): https://cryptopals.com/
 
-### स्वचालित डिकोडिंग
+### Automated decoding
 
 - Ciphey: https://github.com/Ciphey/Ciphey
 - python-codext (tries many bases/encodings): https://github.com/dhondta/python-codext
@@ -44,20 +44,20 @@
 
 ### तकनीक
 
-कई CTF crypto कार्य परतों वाले रूपांतरण होते हैं: base encoding + simple substitution + compression. लक्ष्य परतों की पहचान कर उन्हें सुरक्षित ढंग से हटाना है।
+अनेक CTF crypto टास्क layered transforms होते हैं: base encoding + simple substitution + compression. लक्ष्य लेयर्स की पहचान कर उन्हें सुरक्षित रूप से खोलना है।
 
 ### Encodings: कई बेस आज़माएँ
 
-यदि आपको शंका है कि लेयर्ड एन्कोडिंग है (base64 → base32 → …), तो आज़माएँ:
+यदि आप layered encoding (base64 → base32 → …) का संदेह करते हैं, तो आज़माएँ:
 
 - CyberChef "Magic"
 - `codext` (python-codext): `codext <string>`
 
-सामान्य संकेत:
+आम संकेत:
 
 - Base64: `A-Za-z0-9+/=` (padding `=` सामान्य है)
-- Base32: `A-Z2-7=` (अक्सर बहुत सारे `=` padding होते हैं)
-- Ascii85/Base85: घना विरामचिह्न; कभी-कभी `<~ ~>` में लिपटा होता है
+- Base32: `A-Z2-7=` (अक्सर बहुत `=` padding होता है)
+- Ascii85/Base85: घने punctuation; कभी-कभी `<~ ~>` में लिपटा होता है
 
 ### Substitution / monoalphabetic
 
@@ -71,8 +71,8 @@
 
 ### Vigenère
 
-- https://www.dcode.fr/vigenere-cipher
-- https://www.guballa.de/vigenere-solver
+- [https://www.dcode.fr/vigenere-cipher](https://www.dcode.fr/vigenere-cipher)
+- [https://www.guballa.de/vigenere-solver](https://www.guballa.de/vigenere-solver)
 
 ### Bacon cipher
 
@@ -87,18 +87,18 @@ AABBB ABBAB ABABA AAAAA ...
 ```
 ### रून्स
 
-रून्स अक्सर प्रतिस्थापन वर्णमालाएँ होती हैं; "futhark cipher" खोजें और mapping tables आज़माएँ।
+रून्स अक्सर प्रतिस्थापन वर्णमालाएँ होती हैं; "futhark cipher" खोजें और मैपिंग तालिकाएँ आज़माएँ।
 
-## चुनौतियों में संपीड़न
+## चुनौतियों में कंप्रेशन
 
 ### तकनीक
 
-संपीड़न अक्सर एक अतिरिक्त परत के रूप में दिखाई देता है (zlib/deflate/gzip/xz/zstd), कभी-कभी नेस्टेड। अगर आउटपुट लगभग पार्स हो रहा है लेकिन कचरे जैसा दिखता है, तो संपीड़न की शंका रखें।
+कंप्रेशन अक्सर एक अतिरिक्त परत के रूप में दिखाई देता है (zlib/deflate/gzip/xz/zstd), कभी-कभी नेस्टेड। यदि आउटपुट लगभग पार्स हो रहा है पर कचरा जैसा दिखता है, तो कंप्रेशन की शंका करें।
 
 ### त्वरित पहचान
 
 - `file <blob>`
-- मैजिक बाइट्स देखें:
+- मैजिक बाइट्स के लिए देखें:
 - gzip: `1f 8b`
 - zlib: often `78 01/9c/da`
 - zip: `50 4b 03 04`
@@ -108,7 +108,7 @@ AABBB ABBAB ABABA AAAAA ...
 
 ### Raw DEFLATE
 
-CyberChef में **Raw Deflate/Raw Inflate** होते हैं, जो अक्सर तब सबसे तेज़ रास्ता होते हैं जब blob संपीड़ित दिखता है लेकिन `zlib` विफल हो जाता है।
+CyberChef has **Raw Deflate/Raw Inflate**, which is often the fastest path when the blob looks compressed but `zlib` fails.
 
 ### उपयोगी CLI
 ```bash
@@ -126,29 +126,29 @@ PY
 
 ### तकनीक
 
-ये अक्सर दिखाई देते हैं क्योंकि ये वास्तविक developer गलतियाँ या गलत तरीके से उपयोग की गई सामान्य libraries होती हैं। लक्ष्य आमतौर पर इन्हें पहचानना और किसी ज्ञात extraction या reconstruction workflow को लागू करना होता है।
+ये अक्सर दिखाई देते हैं क्योंकि ये वास्तविक डेवलपर गलतियाँ या सामान्य लाइब्रेरियों का गलत उपयोग हैं। उद्देश्य आमतौर पर इन्हें पहचानना और किसी ज्ञात extraction या reconstruction workflow को लागू करना होता है।
 
 ### Fernet
 
 Typical hint: two Base64 strings (token + key).
 
-- Decoder/notes: https://asecuritysite.com/encryption/ferdecode
+- डिकोडर/नोट्स: https://asecuritysite.com/encryption/ferdecode
 - Python में: `from cryptography.fernet import Fernet`
 
 ### Shamir Secret Sharing
 
-यदि आप multiple shares देखते हैं और एक threshold `t` का उल्लेख है, तो यह संभवतः Shamir है।
+यदि आप कई shares देखते हैं और threshold `t` का उल्लेख है, तो यह संभवतः Shamir होगा।
 
-- Online reconstructor (CTF के लिए उपयोगी): http://christian.gen.co/secrets/
+- ऑनलाइन reconstructor (CTFs के लिए उपयोगी): http://christian.gen.co/secrets/
 
 ### OpenSSL salted formats
 
-CTF कभी-कभी `openssl enc` आउटपुट देते हैं (header अक्सर `Salted__` से शुरू होता है)।
+CTFs कभी-कभी `openssl enc` outputs देते हैं (header अक्सर `Salted__` से शुरू होता है)।
 
 Bruteforce helpers:
 
-- https://github.com/glv2/bruteforce-salted-openssl
-- https://github.com/carlospolop/easy_BFopensslCTF
+- [https://github.com/glv2/bruteforce-salted-openssl](https://github.com/glv2/bruteforce-salted-openssl)
+- [https://github.com/carlospolop/easy_BFopensslCTF](https://github.com/carlospolop/easy_BFopensslCTF)
 
 ### सामान्य टूलसेट
 
@@ -156,13 +156,13 @@ Bruteforce helpers:
 - featherduster: https://github.com/nccgroup/featherduster
 - cryptovenom: https://github.com/lockedbyte/cryptovenom
 
-## अनुशंसित लोकल सेटअप
+## अनुशंसित स्थानीय सेटअप
 
-प्रैक्टिकल CTF स्टैक:
+व्यावहारिक CTF स्टैक:
 
-- Python + `pycryptodome` symmetric primitives और तेज़ प्रोटोटाइपिंग के लिए
-- SageMath मॉड्यूलर गणित, CRT, lattices, और RSA/ECC काम के लिए
-- Z3 constraint-based challenges के लिए (जब crypto constraints में घट जाता है)
+- Python + `pycryptodome` — symmetric primitives और तेज़ प्रोटोटाइपिंग के लिए
+- SageMath — modular arithmetic, CRT, lattices, और RSA/ECC के काम के लिए
+- Z3 — constraint-based challenges के लिए (जब crypto constraints में घट जाए)
 
 सुझावित Python पैकेज:
 ```bash
