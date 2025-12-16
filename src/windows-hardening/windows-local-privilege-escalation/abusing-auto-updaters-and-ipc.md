@@ -1,4 +1,4 @@
-# Abusing Enterprise Auto-Updaters and Privileged IPC (e.g., Netskope stAgentSvc)
+# Abusing Enterprise Auto-Updaters and Privileged IPC (e.g., Netskope, ASUS & MSI)
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -103,7 +103,7 @@ Because you never used PROCESS_CREATE_THREAD or PROCESS_SUSPEND_RESUME on an alr
 - UpSkope is a custom IPC client that crafts arbitrary (optionally AES\-encrypted) IPC messages and includes the suspended\-process injection to originate from an allow\-listed binary.
 
 ---
-## 8) Browser\-to\-localhost CSRF against privileged HTTP APIs (ASUS DriverHub)
+## 1) Browser\-to\-localhost CSRF against privileged HTTP APIs (ASUS DriverHub)
 
 DriverHub ships a user\-mode HTTP service (ADU.exe) on 127.0.0.1:53000 that expects browser calls coming from https://driverhub.asus.com. The origin filter simply performs `string_contains(".asus.com")` over the Origin header and over download URLs exposed by `/asus/v1.0/*`. Any attacker\-controlled host such as `https://driverhub.asus.com.attacker.tld` therefore passes the check and can issue state\-changing requests from JavaScript. See [CSRF basics](../../pentesting-web/csrf-cross-site-request-forgery.md) for additional bypass patterns.
 
@@ -131,7 +131,7 @@ Invoke-WebRequest -Uri "http://127.0.0.1:53000/asus/v1.0/Reboot" -Method Post \
 Any browser visit to the attacker site therefore becomes a 1\-click (or 0\-click via `onload`) local CSRF that drives a SYSTEM helper.
 
 ---
-## 9) Insecure code\-signing verification & certificate cloning (ASUS UpdateApp)
+## 2) Insecure code\-signing verification & certificate cloning (ASUS UpdateApp)
 
 `/asus/v1.0/UpdateApp` downloads arbitrary executables defined in the JSON body and caches them in `C:\ProgramData\ASUS\AsusDriverHub\SupportTemp`. Download URL validation reuses the same substring logic, so `http://updates.asus.com.attacker.tld:8000/payload.exe` is accepted. After download, ADU.exe merely checks that the PE contains a signature and that the Subject string matches ASUS before running it – no `WinVerifyTrust`, no chain validation.
 
@@ -143,7 +143,7 @@ To weaponize the flow:
 Because both the Origin and URL filters are substring\-based and the signer check only compares strings, DriverHub pulls and executes the attacker binary under its elevated context.
 
 ---
-## 9) TOCTOU inside updater copy/execute paths (MSI Center CMD_AutoUpdateSDK)
+## 1) TOCTOU inside updater copy/execute paths (MSI Center CMD_AutoUpdateSDK)
 
 MSI Center’s SYSTEM service exposes a TCP protocol where each frame is `4-byte ComponentID || 8-byte CommandID || ASCII arguments`. The core component (Component ID `0f 27 00 00`) ships `CMD_AutoUpdateSDK = {05 03 01 08 FF FF FF FC}`. Its handler:
 1) Copies the supplied executable to `C:\Windows\Temp\MSI Center SDK.exe`.
@@ -157,7 +157,7 @@ The copied file is not locked between verification and `ExecuteTask()`. An attac
 When the scheduler fires, it executes the overwritten payload under SYSTEM despite having validated the original file. Reliable exploitation uses two goroutines/threads that spam CMD_AutoUpdateSDK until the TOCTOU window is won.
 
 ---
-## 10) Abusing custom SYSTEM-level IPC & impersonation (MSI Center + Acer Control Centre)
+## 2) Abusing custom SYSTEM-level IPC & impersonation (MSI Center + Acer Control Centre)
 
 ### MSI Center TCP command sets
 - Every plugin/DLL loaded by `MSI.CentralServer.exe` receives a Component ID stored under `HKLM\SOFTWARE\MSI\MSI_CentralServer`. The first 4 bytes of a frame select that component, allowing attackers to route commands to arbitrary modules.
