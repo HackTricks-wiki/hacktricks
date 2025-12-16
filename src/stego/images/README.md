@@ -153,13 +153,13 @@ High-signal locations:
 
 If you are specifically facing steghide payloads in JPEGs, consider using `stegseek` (faster bruteforce than older scripts):
 
-- https://github.com/RickdeJager/stegseek
+- [https://github.com/RickdeJager/stegseek](https://github.com/RickdeJager/stegseek)
 
 ### Error Level Analysis
 
 ELA highlights different recompression artifacts; it can point you to regions that were edited, but it’s not a stego detector by itself:
 
-- https://29a.ch/sandbox/2012/imageerrorlevelanalysis/
+- [https://29a.ch/sandbox/2012/imageerrorlevelanalysis/](https://29a.ch/sandbox/2012/imageerrorlevelanalysis/)
 
 ## Animated images
 
