@@ -981,3 +981,5 @@
 - [Post Exploitation](todo/post-exploitation.md)
 - [Investment Terms](todo/investment-terms.md)
 - [Cookies Policy](todo/cookies-policy.md)
+
+  - [Ipsw Ios Macos Firmware Triage](reversing/firmware-analysis/ipsw-ios-macos-firmware-triage.md)

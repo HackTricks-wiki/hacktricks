@@ -99,6 +99,14 @@ macos-system-extensions.md
 {{#endref}}
 
 
+### Firmware & dyld Shared Cache Tooling
+
+{{#ref}}
+../../../reversing/firmware-analysis/ipsw-ios-macos-firmware-triage.md
+{{#endref}}
+
+`ipsw` automates downloading signed macOS/iOS builds, carving kernelcache slices, dyld shared caches, trust caches, and ObjC metadata so you can spot new IOKit user clients or entitlement changes before they reach production devices.
+
 ### Cryptexes & RSR (Rapid Security Response)
 
 - **Cryptex** stands for **CRYPTographically-sealed EXtension**. It is a sealed disk image (container) used by Apple to host parts of the OS (frameworks, shared libraries, apps) that are more likely to change between major OS updates. 
