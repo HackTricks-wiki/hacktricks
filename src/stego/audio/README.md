@@ -11,12 +11,12 @@ Algemene patrone:
 
 ## Vinnige triage
 
-Voor gespesialiseerde tooling:
+Voor gespesialiseerde gereedskap:
 
-- Bevestig codec/container besonderhede en anomalieë:
+- Bevestig codec/container-besonderhede en anomalieë:
 - `file audio`
 - `ffmpeg -v info -i audio -f null -`
-- Indien die audio geraasagtige inhoud of 'n tonale struktuur bevat, ondersoek vroeg 'n spectrogram.
+- As die audio geraas-agtige klankinhoud of tonale struktuur bevat, ondersoek vroegtydig 'n spectrogram.
 ```bash
 ffmpeg -v info -i stego.mp3 -f null -
 ```
@@ -24,18 +24,18 @@ ffmpeg -v info -i stego.mp3 -f null -
 
 ### Tegniek
 
-Spectrogram stego verberg data deur energie oor tyd/frekwensie te vorm, sodat dit slegs in 'n tyd-frekwensie-grafiek sigbaar word (dikwels onhoorbaar of as geraas ervaar).
+Spectrogram stego verberg data deur energie oor tyd/frekwensie te vorm, sodat dit slegs in ’n tyd-frekwensie-grafiek sigbaar word (dikwels onhoorbaar of as geraas waargeneem).
 
 ### Sonic Visualiser
 
-Primêre hulpmiddel vir spectrogram-inspeksie:
+Primêre hulpmiddel vir die inspeksie van spektrogramme:
 
-- https://www.sonicvisualiser.org/
+- [https://www.sonicvisualiser.org/](https://www.sonicvisualiser.org/)
 
 ### Alternatiewe
 
-- Audacity (spectrogram-aansig, filters): https://www.audacityteam.org/
-- `sox` kan spectrogramme vanaf die CLI genereer:
+- Audacity (spektrogram-uitsig en filters): https://www.audacityteam.org/
+- `sox` kan spektrogramme vanaf die CLI genereer:
 ```bash
 sox input.wav -n spectrogram -o spectrogram.png
 ```
@@ -43,13 +43,13 @@ sox input.wav -n spectrogram -o spectrogram.png
 
 ### Tegniek
 
-Vir ongekomprimeerde PCM (WAV) is elke monster 'n heelgetal. Die wysiging van lae bits verander die golfvorm baie effens, sodat aanvallers kan wegsteek:
+Vir uncompressed PCM (WAV) is elke sample ŉ heelgetal. Deur die lae bits aan te pas verander die golfvorm baie min, sodat aanvallers kan wegsteek:
 
-- 1 bit per monster (of meer)
+- 1 bit per sample (of meer)
 - Geïnterleef oor kanale
-- Met 'n stride/permutasie
+- Met 'n stride/permutation
 
-Ander audio-wegsteekfamilies wat jy kan teëkom:
+Andere audio-hiding families wat jy mag teëkom:
 
 - Phase coding
 - Echo hiding
@@ -65,17 +65,17 @@ python3 WavSteg.py -r -b 2 -s sound.wav -o out.bin
 ```
 ### DeepSound
 
-- http://jpinsoft.net/deepsound/download.aspx
+- [http://jpinsoft.net/deepsound/download.aspx](http://jpinsoft.net/deepsound/download.aspx)
 
-## DTMF / skakeltonne
+## DTMF / kiesklanke
 
 ### Tegniek
 
-DTMF kodeer karakters as pare van vaste frekwensies (telefoontoetsenbord). As die klank soos toetsentone of gereelde dubbelfrekwensie-piepies klink, toets DTMF-dekodering vroeg.
+DTMF enkodeer karakters as pare vaste frekwensies (telefoontoetsbord). As die klank soos toetsbordtone of gereelde tweefrekwensie-piepies lyk, toets DTMF-dekodering vroeg.
 
 Aanlyn-dekoders:
 
-- https://unframework.github.io/dtmf-detect/
-- http://dialabc.com/sound/detect/index.html
+- [https://unframework.github.io/dtmf-detect/](https://unframework.github.io/dtmf-detect/)
+- [http://dialabc.com/sound/detect/index.html](http://dialabc.com/sound/detect/index.html)
 
 {{#include ../../banners/hacktricks-training.md}}

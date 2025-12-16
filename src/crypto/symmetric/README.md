@@ -2,12 +2,12 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Wat om na te soek in CTFs
+## Wat om te soek in CTFs
 
-- **Modus-misbruik**: ECB patrone, CBC malleability, CTR/GCM nonce reuse.
-- **Padding oracles**: verskillende foutboodskappe/tydverskille vir slegte padding.
-- **MAC confusion**: gebruik van CBC-MAC met variable-length messages, of MAC-then-encrypt fouten.
-- **XOR everywhere**: stream ciphers en custom constructions val dikwels terug na XOR met 'n keystream.
+- **Mode misuse**: ECB patterns, CBC malleability, CTR/GCM nonce reuse.
+- **Padding oracles**: verskillende foute/tydverskille vir slegte padding.
+- **MAC confusion**: gebruik van CBC-MAC met boodskappe van veranderlike lengte, of MAC-then-encrypt foute.
+- **XOR everywhere**: stream ciphers en aangepaste konstruksies gaan dikwels neer op XOR met 'n keystream.
 
 ## AES modes and misuse
 
@@ -18,12 +18,12 @@ ECB leaks patterns: equal plaintext blocks → equal ciphertext blocks. Dit maak
 - Cut-and-paste / block reordering
 - Block deletion (if the format remains valid)
 
-As jy plaintext kan beheer en ciphertext (of cookies) kan waarneem, probeer om herhalende blocks te maak (bv. baie `A`s) en kyk vir herhalings.
+As jy plaintext kan beheer en ciphertext (of cookies) kan waarneem, probeer herhaalde blocks maak (bv. baie `A`s) en kyk vir herhalings.
 
 ### CBC: Cipher Block Chaining
 
 - CBC is **malleable**: flipping bits in `C[i-1]` flips predictable bits in `P[i]`.
-- If the system exposes valid padding vs invalid padding, you may have a **padding oracle**.
+- As die stelsel geldige padding teenoor ongeldig padding openbaar, kan jy 'n **padding oracle** hê.
 
 ### CTR
 
@@ -31,67 +31,67 @@ CTR turns AES into a stream cipher: `C = P XOR keystream`.
 
 If a nonce/IV is reused with the same key:
 
-- `C1 XOR C2 = P1 XOR P2` (classic keystream reuse)
-- With known plaintext, you can recover the keystream and decrypt others.
+- `C1 XOR C2 = P1 XOR P2` (klassieke keystream reuse)
+- Met bekende plaintext kan jy die keystream herstel en ander ontsleutel.
 
 ### GCM
 
-GCM also breaks badly under nonce reuse. If the same key+nonce is used more than once, you typically get:
+GCM breek ook sleg onder nonce reuse. As dieselfde sleutel+nonce meer as een keer gebruik word, kry jy tipies:
 
-- Keystream reuse for encryption (like CTR), enabling plaintext recovery when any plaintext is known.
-- Loss of integrity guarantees. Depending on what is exposed (multiple message/tag pairs under the same nonce), attackers may be able to forge tags.
+- Keystream reuse vir enkripsie (soos CTR), wat plaintext herstel moontlik maak as enige plaintext bekend is.
+- Verlies van integriteitswaarborge. Afhangend van wat openbaar word (meervoudige boodskap/tag-paartjies onder dieselfde nonce), mag aanvallers in staat wees om tags te vervals.
 
-Operational guidance:
+Operationele riglyne:
 
-- Treat "nonce reuse" in AEAD as a critical vulnerability.
-- If you have multiple ciphertexts under the same nonce, start by checking `C1 XOR C2 = P1 XOR P2` style relations.
+- Beskou "nonce reuse" in AEAD as 'n kritieke kwesbaarheid.
+- As jy meervoudige ciphertexts onder dieselfde nonce het, begin deur `C1 XOR C2 = P1 XOR P2` styl verhoudings te kontroleer.
 
 ### Tools
 
 - CyberChef for quick experiments: https://gchq.github.io/CyberChef/
-- Python: `pycryptodome` for scripting
+- Python: `pycryptodome` vir scripting
 
-## ECB exploitation patterns
+## ECB exploit-patrone
 
-ECB (Electronic Code Book) enkripteer elke block onafhanklik:
+ECB (Electronic Code Book) enkripteer elke blok onafhanklik:
 
 - equal plaintext blocks → equal ciphertext blocks
-- this leaks structure and enables cut-and-paste style attacks
+- this leaks struktuur en maak cut-and-paste styl-aanvalle moontlik
 
 ![](https://upload.wikimedia.org/wikipedia/commons/thumb/e/e6/ECB_decryption.svg/601px-ECB_decryption.svg.png)
 
 ### Detection idea: token/cookie pattern
 
-If you login several times and **always get the same cookie**, the ciphertext may be deterministic (ECB or fixed IV).
+As jy verskeie kere aanmeld en **altyd dieselfde cookie kry**, kan die ciphertext deterministies wees (ECB of vaste IV).
 
-If you create two users with mostly identical plaintext layouts (e.g., long repeated characters) and see repeated ciphertext blocks at the same offsets, ECB is a prime suspect.
+As jy twee gebruikers skep met meestal identiese plaintext-lay-outs (bv. lang herhaalde karakters) en herhaalde ciphertext-blokke op dieselfde offsets sien, is ECB 'n hoofverdagte.
 
 ### Exploitation patterns
 
-#### Removing entire blocks
+#### Verwydering van hele blokke
 
-If the token format is something like `<username>|<password>` and the block boundary aligns, you can sometimes craft a user so the `admin` block appears aligned, then remove preceding blocks to obtain a valid token for `admin`.
+As die token-formaat iets soos `<username>|<password>` is en die blokgrens belyn is, kan jy soms 'n gebruiker skep sodat die `admin` blok belyn verskyn, en dan voorafgaande blokke verwyder om 'n geldige token vir `admin` te kry.
 
-#### Moving blocks
+#### Verskuif blokke
 
-If the backend tolerates padding/extra spaces (`admin` vs `admin    `), you can:
+As die backend padding/ekstra spasies (`admin` vs `admin    `) tolereer, kan jy:
 
 - Belyn 'n blok wat `admin   ` bevat
-- Swap/reuse that ciphertext block into another token
+- Ruil/hergebruik daardie ciphertext-blok in 'n ander token
 
 ## Padding Oracle
 
 ### Wat dit is
 
-In CBC mode, if the server reveals (directly or indirectly) whether decrypted plaintext has **valid PKCS#7 padding**, you can often:
+In CBC modus, as die bediener openbaar (direk of indirek) of ontsleutelde plaintext **geldige PKCS#7 padding** het, kan jy dikwels:
 
-- Decrypt ciphertext without the key
-- Encrypt chosen plaintext (forge ciphertext)
+- Ontsleutel ciphertext sonder die sleutel
+- Enkripteer gekose plaintext (vervalsing van ciphertext)
 
 Die oracle kan wees:
 
-- 'n spesifieke foutboodskap
-- 'n ander HTTP status / response size
+- 'n Spesifieke foutboodskap
+- 'n Ander HTTP status / reaksie-grootte
 - 'n tydverskil
 
 ### Praktiese uitbuiting
@@ -107,75 +107,75 @@ Voorbeeld:
 perl ./padBuster.pl http://10.10.10.10/index.php "RVJDQrwUdTRWJUVUeBKkEA==" 16 \
 -encoding 0 -cookies "login=RVJDQrwUdTRWJUVUeBKkEA=="
 ```
-Notas:
+Notes:
 
-- Blokgrootte is dikwels `16` vir AES.
-- `-encoding 0` beteken Base64.
-- Gebruik `-error` as die oracle 'n spesifieke string is.
+- Block size is often `16` for AES.
+- `-encoding 0` means Base64.
+- Use `-error` if the oracle is a specific string.
 
 ### Waarom dit werk
 
-CBC dekripsie bereken `P[i] = D(C[i]) XOR C[i-1]`. Deur bytes in `C[i-1]` te wysig en te kyk of die padding geldig is, kan jy `P[i]` byte-vir-byte herstel.
+CBC dekripsie bereken `P[i] = D(C[i]) XOR C[i-1]`. Deur bytes in `C[i-1]` te wysig en te kyk of die padding geldig is, kan jy `P[i]` byte vir byte herstel.
 
 ## Bit-flipping in CBC
 
-Selfs sonder 'n padding oracle is CBC vervormbaar. As jy ciphertext-blokke kan wysig en die toepassing die gedekripteerde plaintext as gestruktureerde data gebruik (bv. `role=user`), kan jy spesifieke bits omdraai om gekose plaintext-bytes op 'n gekose posisie in die volgende blok te verander.
+Selfs sonder 'n padding oracle is CBC malleable. As jy ciphertext blocks kan wysig en die toepassing gebruik die ontsleutelde plaintext as gestruktureerde data (bv. `role=user`), kan jy spesifieke bits omdraai om gekose plaintext-bytes op 'n gekose posisie in die volgende blok te verander.
 
 Tipiese CTF-patroon:
 
 - Token = `IV || C1 || C2 || ...`
-- Jy beheer bytes in `C[i]`
-- Jy mik op plaintext-bytes in `P[i+1]` omdat `P[i+1] = D(C[i+1]) XOR C[i]`
+- You control bytes in `C[i]`
+- Jy teiken plaintext-bytes in `P[i+1]` omdat `P[i+1] = D(C[i+1]) XOR C[i]`
 
-Dit is op sigself nie 'n skending van vertroulikheid nie, maar dit is 'n algemene privilege-escalation primitive wanneer integriteit ontbreek.
+Dit is op sigself nie 'n breuk van vertroulikheid nie, maar dit is 'n algemene privilege-escalation primitive wanneer integriteit ontbreek.
 
 ## CBC-MAC
 
-CBC-MAC is slegs veilig onder spesifieke voorwaardes (veral **vaste-lengte boodskappe** en korrekte domeinskeiding).
+CBC-MAC is slegs veilig onder spesifieke toestande (veral **fixed-length messages** en korrekte domain separation).
 
-### Klassieke vervalsing-patroon vir veranderlike lengte
+### Klassieke veranderlike-lengte vervalsingspatroon
 
-CBC-MAC word gewoonlik soos volg bereken:
+CBC-MAC word gewoonlik bereken as:
 
 - IV = 0
 - `tag = last_block( CBC_encrypt(key, message, IV=0) )`
 
-As jy tags vir gekose boodskappe kan bekom, kan jy dikwels 'n tag vir 'n samevoeging (of verwante konstruk) saamstel sonder om die sleutel te ken, deur te misbruik hoe CBC blokke koppel.
+As jy tags vir gekose boodskappe kan verkry, kan jy dikwels 'n tag skep vir 'n concatenation (of verwante konstruksie) sonder om die sleutel te ken, deur misbruik te maak van hoe CBC blokke aaneenskakel.
 
-Dit kom gereeld voor in CTF cookies/tokens wat gebruikersnaam of role met CBC-MAC beskerm.
+Dit kom dikwels voor in CTF cookies/tokens wat username of role met CBC-MAC MAC.
 
 ### Veiliger alternatiewe
 
 - Gebruik HMAC (SHA-256/512)
 - Gebruik CMAC (AES-CMAC) korrek
-- Sluit boodskaplengte / domeinskeiding in
+- Sluit message length / domain separation in
 
 ## Stream ciphers: XOR and RC4
 
 ### Die mentale model
 
-Die meeste stream cipher-situasies kom neer op:
+Die meeste stream cipher situasies verminder tot:
 
 `ciphertext = plaintext XOR keystream`
 
 Dus:
 
-- As jy plaintext ken, herstel jy die keystream.
-- As die keystream hergebruik word (dieselfde key+nonce), `C1 XOR C2 = P1 XOR P2`.
+- If you know plaintext, you recover keystream.
+- If keystream is reused (same key+nonce), `C1 XOR C2 = P1 XOR P2`.
 
 ### XOR-based encryption
 
-As jy enige plaintext-segment by posisie `i` ken, kan jy keystream-bytes herstel en ander ciphertexts by daardie posisies ontsleutel.
+As jy enige plaintext-segment by posisie `i` ken, kan jy keystream-bytes herstel en ander ciphertexts op daardie posisies ontsleutel.
 
 Autosolvers:
 
-- https://wiremask.eu/tools/xor-cracker/
+- [https://wiremask.eu/tools/xor-cracker/](https://wiremask.eu/tools/xor-cracker/)
 
 ### RC4
 
-RC4 is 'n stream cipher; enkripsie/dekripsie is dieselfde operasie.
+RC4 is a stream cipher; encrypt/decrypt are the same operation.
 
-As jy RC4-enkripsie van bekende plaintext onder dieselfde key kan kry, kan jy die keystream herstel en ander boodskappe van dieselfde lengte/offset ontsleutel.
+As jy RC4-enkripsie van bekende plaintext onder dieselfde sleutel kan kry, kan jy die keystream herstel en ander boodskappe van dieselfde lengte/offset ontsleutel.
 
 Reference writeup (HTB Kryptos):
 

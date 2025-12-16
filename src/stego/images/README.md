@@ -2,7 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Die meeste CTF image stego val in een van hierdie kategorieë:
+Die meeste CTF image stego kom neer op een van hierdie kategorieë:
 
 - LSB/bit-planes (PNG/BMP)
 - Metadata/comment payloads
@@ -10,46 +10,46 @@ Die meeste CTF image stego val in een van hierdie kategorieë:
 - JPEG DCT-domain tools (OutGuess, etc)
 - Frame-based (GIF/APNG)
 
-## Vinnige triage
+## Quick triage
 
-Prioritiseer kontenervlak-bewyse voor diep inhoudsanalise:
+Gee voorkeur aan bewyse op houervlak voor diep inhoud-analise:
 
-- Valideer die lêer en inspekteer die struktuur: `file`, `magick identify -verbose`, format validators (e.g., `pngcheck`).
-- Ekstraheer metadata en sigbare strings: `exiftool -a -u -g1`, `strings`.
-- Kyk vir ingesluit/aangehegte inhoud: `binwalk` en end-of-file inspeksie (`tail | xxd`).
-- Vertak volgens kontener:
-- PNG/BMP: bit-planes/LSB en chunk-vlak anomalieë.
-- JPEG: metadata + DCT-domain gereedskap (OutGuess/F5-style families).
+- Validate the file and inspect structure: `file`, `magick identify -verbose`, format validators (e.g., `pngcheck`).
+- Extract metadata and visible strings: `exiftool -a -u -g1`, `strings`.
+- Check for embedded/appended content: `binwalk` and end-of-file inspection (`tail | xxd`).
+- Branch by container:
+- PNG/BMP: bit-planes/LSB and chunk-level anomalies.
+- JPEG: metadata + DCT-domain tooling (OutGuess/F5-style families).
 - GIF/APNG: frame extraction, frame differencing, palette tricks.
 
 ## Bit-planes / LSB
 
-### Techniek
+### Technique
 
-PNG/BMP is gewild in CTFs omdat hulle pixels stoor op 'n wyse wat bitvlakmanipulasie maklik maak. Die klassieke verberg/onttrek-meganisme is:
+PNG/BMP is gewild in CTFs omdat hulle pixels stoor op 'n manier wat bit-vlak manipulasie maklik maak. Die klassieke hide/extract-meganisme is:
 
-- Elke pixelkanaal (R/G/B/A) het verskeie bits.
-- Die minst-beduidende bit (LSB) van elke kanaal verander die beeld baie min.
-- Aanvallers verberg data in daardie lae-orde bits, soms met 'n stride, permutasie, of per-kanaal keuse.
+- Each pixel channel (R/G/B/A) has multiple bits.
+- The **least significant bit** (LSB) of each channel changes the image very little.
+- Attackers hide data in those low-order bits, sometimes with a stride, permutation, or per-channel choice.
 
-Wat om in uitdagings te verwag:
+Wat om in challenges te verwag:
 
-- Die payload is slegs in een kanaal (e.g., `R` LSB).
-- Die payload is in die alpha-kanaal.
-- Payload is saamgepers/geënkodeer na onttrekking.
-- Die boodskap is oor planes versprei of versteek via XOR tussen planes.
+- Die payload is slegs in één kanaal (e.g., `R` LSB).
+- Die payload is in die alpha channel.
+- Payload is compressed/encoded after extraction.
+- Die boodskap is oor plane versprei of weggesteek via XOR tussen plane.
 
-Addisionele families wat jy mag teëkom (implementasie-afhanklik):
+Additional families you may encounter (implementation-dependent):
 
-- **LSB matching** (nie net die bit omdraaien nie, maar +/-1-aanpassings om by die teikenbit te pas)
-- **Palette/index-based hiding** (indexed PNG/GIF: payload in kleur-indekse eerder as rou RGB)
-- **Alpha-only payloads** (heeltemal onsigbaar in RGB-uitsig)
+- **LSB matching** (not just flipping the bit, but +/-1 adjustments to match target bit)
+- **Palette/index-based hiding** (indexed PNG/GIF: payload in color indices rather than raw RGB)
+- **Alpha-only payloads** (completely invisible in RGB view)
 
-### Gereedskap
+### Tooling
 
 #### zsteg
 
-`zsteg` som baie LSB/bit-plane uittrekmusters vir PNG/BMP op:
+`zsteg` enumerates many LSB/bit-plane extraction patterns for PNG/BMP:
 ```bash
 zsteg -a file.png
 ```
@@ -57,20 +57,20 @@ Repo: https://github.com/zed-0xff/zsteg
 
 #### StegoVeritas / Stegsolve
 
-- `stegoVeritas`: voer 'n reeks transforms uit (metadata, image transforms, brute forcing LSB-variante).
-- `stegsolve`: handmatige visuele filters (kanaal isolasie, plane inspeksie, XOR, ens).
+- `stegoVeritas`: voer 'n reeks transforms uit (metadata, image transforms, brute forcing LSB variants).
+- `stegsolve`: handmatige visuele filters (channel isolation, plane inspection, XOR, etc).
 
-Stegsolve download: https://github.com/eugenekolo/sec-tools/tree/master/stego/stegsolve/stegsolve
+Stegsolve aflaai: https://github.com/eugenekolo/sec-tools/tree/master/stego/stegsolve/stegsolve
 
 #### FFT-based visibility tricks
 
-FFT is nie LSB-ekstraksie nie; dit is vir gevalle waar inhoud doelbewus in frekwensieruimte of subtiele patrone weggesteek is.
+FFT is nie LSB extraction nie; dit is vir gevalle waar inhoud opsetlik in frekwensieruimte of subtiele patrone weggesteek is.
 
 - EPFL demo: http://bigwww.epfl.ch/demo/ip/demos/FFT/
 - Fourifier: https://www.ejectamenta.com/Fourifier-fullscreen/
 - FFTStegPic: https://github.com/0xcomposure/FFTStegPic
 
-Webgebaseerde triage wat dikwels in CTFs gebruik word:
+Web-gebaseerde triage wat dikwels in CTFs gebruik word:
 
 - Aperi’Solve: https://aperisolve.com/
 - StegOnline: https://stegonline.georgeom.net/
@@ -81,28 +81,28 @@ Webgebaseerde triage wat dikwels in CTFs gebruik word:
 
 PNG is 'n chunked formaat. In baie uitdagings word die payload op die container/chunk-vlak gestoor eerder as in pixelwaardes:
 
-- **Ekstra bytes na `IEND`** (baie kykerprogramme ignoreer agterblywende bytes)
-- **Nie-standaard ancillary chunks** wat payloads dra
-- **Gekorrupte headers** wat dimensies wegsteek of parsers breek totdat dit herstel is
+- **Ekstra bytes after `IEND`** (many viewers ignore trailing bytes)
+- **Nie-standaard ancillary chunks** carrying payloads
+- **Gekorrupte headers** wat dimensies verberg of parsers breek totdat dit reggemaak word
 
-Hoë-signaal chunk-ligginge om na te gaan:
+Hoë-signaal chunk-lokasies om na te gaan:
 
-- `tEXt` / `iTXt` / `zTXt` (tekstmetadata, soms gekomprimeer)
-- `iCCP` (ICC profile) en ander ancillary chunks wat as draer gebruik word
+- `tEXt` / `iTXt` / `zTXt` (text metadata, sometimes compressed)
+- `iCCP` (ICC profile) and other ancillary chunks used as a carrier
 - `eXIf` (EXIF data in PNG)
 
-### Triage commands
+### Triage-opdragte
 ```bash
 magick identify -verbose file.png
 pngcheck -v file.png
 ```
-Waarop om te kyk:
+Waarop om te let:
 
-- Vreemde width/height/bit-depth/colour-type kombinasies
-- CRC/chunk errors (pngcheck wys gewoonlik na die presiese offset)
-- Waarskuwings oor addisionele data na `IEND`
+- Abnormale breedte/hoogte/bit-diepte/kleur-tipe kombinasies
+- CRC/chunk-foute (pngcheck wys gewoonlik na die presiese offset)
+- Waarskuwings oor ekstra data ná `IEND`
 
-As jy 'n dieper chunk-uitsig benodig:
+As jy 'n dieper chunk-oorsig benodig:
 ```bash
 pngcheck -vp file.png
 exiftool -a -u -g1 file.png
@@ -112,75 +112,75 @@ Nuttige verwysings:
 - PNG specification (structure, chunks): https://www.w3.org/TR/PNG/
 - File format tricks (PNG/JPEG/GIF corner cases): https://github.com/corkami/docs
 
-## JPEG: metagegewens, DCT-domain tools, en ELA-beperkings
+## JPEG: metadata, DCT-domain tools, en ELA beperkings
 
 ### Tegniek
 
-JPEG word nie as rou pixels gestoor nie; dit word in die DCT domain gekomprimeer. Daarom verskil JPEG stego tools van PNG LSB tools:
+JPEG word nie as rou pixels gestoor nie; dit is in die DCT-domein gekomprimeer. Daarom verskil JPEG stego tools van PNG LSB tools:
 
-- Metagegewens/kommentaar-payloads is lêervlak (hoog sein en vinnig om te inspekteer)
+- Metadata/comment payloads is op lêervlak (hoë sein en vinnig om na te kyk)
 - DCT-domain stego tools inkorporeer bits in frekwensie-koëffisiënte
 
-Operasioneel, hanteer JPEG as:
+Operasioneel, beskou JPEG as:
 
-- ’n houer vir metagegewens-segmente (hoog sein, vinnig om te inspekteer)
-- ’n gekomprimeerde seinedomein (DCT coefficients) waar gespesialiseerde stego tools funksioneer
+- ’n houer vir metadata-segmente (hoë sein, vinnig om te inspekteer)
+- ’n gekomprimeerde sein-domein (DCT-koëffisiënte) waar gespesialiseerde stego tools werk
 
-### Vinnige kontrole
+### Vinnige kontroles
 ```bash
 exiftool file.jpg
 strings -n 6 file.jpg | head
 binwalk file.jpg
 ```
-Hoë-sein lokasies:
+Hoë seinliggings:
 
-- EXIF/XMP/IPTC metadata
-- JPEG comment segment (`COM`)
-- Application segments (`APP1` for EXIF, `APPn` for vendor data)
+- EXIF/XMP/IPTC metagegewens
+- JPEG-kommentaarsegment (`COM`)
+- Toepassingssegmente (`APP1` for EXIF, `APPn` for verskafferdata)
 
-### Algemene gereedskap
+### Common tools
 
 - OutGuess: https://github.com/resurrecting-open-source-projects/outguess
 - OpenStego: https://www.openstego.com/
 
-As jy spesifiek met steghide payloads in JPEGs te make het, oorweeg om `stegseek` te gebruik (faster bruteforce than older scripts):
+As jy spesifiek met steghide payloads in JPEGs te doen het, oorweeg om `stegseek` te gebruik (vinnigere bruteforce as ouer scripts):
 
-- https://github.com/RickdeJager/stegseek
+- [https://github.com/RickdeJager/stegseek](https://github.com/RickdeJager/stegseek)
 
 ### Error Level Analysis
 
-ELA beklemtoon verskillende herkompressie-artefakte; dit kan jou na gebiede lei wat gewysig is, maar dit is nie self 'n stego detector nie:
+ELA beklemtoon verskillende herkompressie-artefakte; dit kan jou wys na streke wat gewysig is, maar dit is nie 'n stego-detector op sigself nie:
 
-- https://29a.ch/sandbox/2012/imageerrorlevelanalysis/
+- [https://29a.ch/sandbox/2012/imageerrorlevelanalysis/](https://29a.ch/sandbox/2012/imageerrorlevelanalysis/)
 
 ## Geanimeerde beelde
 
 ### Tegniek
 
-Vir geanimeerde beelde, veronderstel die boodskap is:
+Vir geanimeerde beelde, neem aan die boodskap is:
 
 - In 'n enkele raam (maklik), of
-- Versprei oor rame (volgorde is belangrik), of
+- Versprei oor rame (volgorde tel), of
 - Slegs sigbaar wanneer jy opeenvolgende rame diff
 
-### Onttrek rame
+### Ekstraheer rame
 ```bash
 ffmpeg -i anim.gif frame_%04d.png
 ```
-Behandel frames dan soos normale PNG's: `zsteg`, `pngcheck`, channel isolation.
+Behandel dan rame soos normale PNG's: `zsteg`, `pngcheck`, channel isolation.
 
 Alternatiewe gereedskap:
 
-- `gifsicle --explode anim.gif` (vinnige frame-ekstraksie)
-- `imagemagick`/`magick` vir per-frame transformasies
+- `gifsicle --explode anim.gif` (vinnige raam-uittrekking)
+- `imagemagick`/`magick` vir per-raam transformasies
 
-Frame differencing is often decisive:
+Raamonderskeiding is dikwels deurslaggewend:
 ```bash
 magick frame_0001.png frame_0002.png -compose difference -composite diff.png
 ```
-## Wagwoord-beskermde inbedding
+## Wagwoord-beskermde inkapseling
 
-As jy vermoed dat die inbedding deur 'n passphrase beskerm word eerder as deur pikselvlakmanipulasie, is dit gewoonlik die vinnigste roete.
+As jy vermoed dat inkapseling deur 'n passphrase beskerm word eerder as pixelvlak-manipulasie, is dit gewoonlik die vinnigste pad.
 
 ### steghide
 
@@ -189,7 +189,7 @@ Ondersteun `JPEG, BMP, WAV, AU` en kan embed/extract encrypted payloads.
 steghide info file
 steghide extract -sf file --passphrase 'password'
 ```
-I don't have access to the repository files. Please paste the exact contents of src/stego/images/README.md (the markdown you want translated). I will translate the English text to Afrikaans and preserve all code, links, tags, paths and markdown/HTML syntax.
+Ek kan nie die repo direk aflaai nie. Plak asseblief die inhoud van src/stego/images/README.md hier, dan vertaal ek dit na Afrikaans en behou presies dieselfde markdown-/HTML-sintaksis.
 ```bash
 stegcracker file.jpg wordlist.txt
 ```
