@@ -42,6 +42,14 @@ There are different things in Windows that could **prevent you from enumerating 
 ../authentication-credentials-uac-and-efs/
 {{#endref}}
 
+## Registry Kernel Attack Surface
+
+For methodologies focused on Configuration Manager bug patterns, hive crafting, and kernel-level registry exploitation, check the dedicated page:
+
+{{#ref}}
+windows-registry-kernel-eop.md
+{{#endref}}
+
 ## System Info
 
 ### Version info enumeration

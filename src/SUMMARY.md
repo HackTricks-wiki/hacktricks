@@ -338,6 +338,7 @@
   - [Windows Credentials Protections](windows-hardening/stealing-credentials/credentials-protections.md)
   - [Mimikatz](windows-hardening/stealing-credentials/credentials-mimikatz.md)
   - [WTS Impersonator](windows-hardening/stealing-credentials/wts-impersonator.md)
+  - [Windows Registry Kernel Eop](windows-hardening/windows-local-privilege-escalation/windows-registry-kernel-eop.md)
 - [Basic Win CMD for Pentesters](windows-hardening/basic-cmd-for-pentesters.md)
 - [Basic PowerShell for Pentesters](windows-hardening/basic-powershell-for-pentesters/README.md)
   - [PowerView/SharpView](windows-hardening/basic-powershell-for-pentesters/powerview.md)
