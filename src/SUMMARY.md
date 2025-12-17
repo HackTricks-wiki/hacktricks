@@ -870,6 +870,7 @@
   - [WWW2Exec - .dtors & .fini_array](binary-exploitation/arbitrary-write-2-exec/www2exec-.dtors-and-.fini_array.md)
   - [WWW2Exec - GOT/PLT](binary-exploitation/arbitrary-write-2-exec/aw2exec-got-plt.md)
   - [WWW2Exec - \_\_malloc_hook & \_\_free_hook](binary-exploitation/arbitrary-write-2-exec/aw2exec-__malloc_hook.md)
+  - [Virtualbox Slirp Nat Packet Heap Exploitation](binary-exploitation/libc-heap/virtualbox-slirp-nat-packet-heap-exploitation.md)
 - [Common Exploiting Problems](binary-exploitation/common-exploiting-problems.md)
 - [Adreno A7xx Sds Rb Priv Bypass Gpu Smmu Kernel Rw](binary-exploitation/linux-kernel-exploitation/adreno-a7xx-sds-rb-priv-bypass-gpu-smmu-kernel-rw.md)
 - [Ksmbd Streams Xattr Oob Write Cve 2025 37947](binary-exploitation/linux-kernel-exploitation/ksmbd-streams_xattr-oob-write-cve-2025-37947.md)
