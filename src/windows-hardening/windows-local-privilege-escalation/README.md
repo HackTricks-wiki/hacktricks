@@ -755,6 +755,12 @@ If a driver exposes an arbitrary kernel read/write primitive (common in poorly d
 arbitrary-kernel-rw-token-theft.md
 {{#endref}}
 
+For race-condition bugs where the vulnerable call opens an attacker-controlled Object Manager path, deliberately slowing the lookup (using max-length components or deep directory chains) can stretch the window from microseconds to tens of microseconds:
+
+{{#ref}}
+kernel-race-condition-object-manager-slowdown.md
+{{#endref}}
+
 #### Abusing missing FILE_DEVICE_SECURE_OPEN on device objects (LPE + EDR kill)
 
 Some signed third‑party drivers create their device object with a strong SDDL via IoCreateDeviceSecure but forget to set FILE_DEVICE_SECURE_OPEN in DeviceCharacteristics. Without this flag, the secure DACL is not enforced when the device is opened through a path containing an extra component, letting any unprivileged user obtain a handle by using a namespace path like:

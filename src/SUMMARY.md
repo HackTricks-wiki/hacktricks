@@ -251,6 +251,7 @@
 - [Windows Local Privilege Escalation](windows-hardening/windows-local-privilege-escalation/README.md)
   - [Abusing Auto Updaters And Ipc](windows-hardening/windows-local-privilege-escalation/abusing-auto-updaters-and-ipc.md)
   - [Arbitrary Kernel Rw Token Theft](windows-hardening/windows-local-privilege-escalation/arbitrary-kernel-rw-token-theft.md)
+  - [Kernel Race Condition Object Manager Slowdown](windows-hardening/windows-local-privilege-escalation/kernel-race-condition-object-manager-slowdown.md)
   - [Abusing Tokens](windows-hardening/windows-local-privilege-escalation/privilege-escalation-abusing-tokens.md)
   - [Access Tokens](windows-hardening/windows-local-privilege-escalation/access-tokens.md)
   - [ACLs - DACLs/SACLs/ACEs](windows-hardening/windows-local-privilege-escalation/acls-dacls-sacls-aces.md)
