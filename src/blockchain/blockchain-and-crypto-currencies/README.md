@@ -2,62 +2,62 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Grundbegriffe
+## Grundlegende Konzepte
 
-- **Smart Contracts** werden als Programme definiert, die auf einer Blockchain ausgeführt werden, wenn bestimmte Bedingungen erfüllt sind, und automatisieren die Ausführung von Vereinbarungen ohne Zwischeninstanzen.
-- **Decentralized Applications (dApps)** bauen auf Smart Contracts auf und bieten ein benutzerfreundliches Front-End sowie ein transparentes, prüfbares Back-End.
+- **Smart Contracts** sind Programme, die auf einer Blockchain ausgeführt werden, wenn bestimmte Bedingungen erfüllt sind, und automatisieren die Ausführung von Vereinbarungen ohne Vermittler.
+- **Decentralized Applications (dApps)** bauen auf Smart Contracts auf und verfügen über ein benutzerfreundliches Frontend und ein transparentes, prüfbares Backend.
 - **Tokens & Coins** unterscheiden sich darin, dass Coins als digitales Geld dienen, während Tokens Wert oder Eigentum in bestimmten Kontexten repräsentieren.
 - **Utility Tokens** gewähren Zugang zu Diensten, und **Security Tokens** stehen für Eigentum an Vermögenswerten.
-- **DeFi** steht für Dezentrale Finanzen und bietet Finanzdienstleistungen ohne zentrale Behörden.
-- **DEX** und **DAOs** beziehen sich auf dezentrale Exchange-Plattformen bzw. Decentralized Autonomous Organizations.
+- **DeFi** steht für Decentralized Finance und bietet Finanzdienstleistungen ohne zentrale Behörden an.
+- **DEX** und **DAOs** bezeichnen jeweils Decentralized Exchange Platforms und Decentralized Autonomous Organizations.
 
 ## Konsensmechanismen
 
-Konsensmechanismen sorgen für sichere und abgestimmte Validierung von Transaktionen in der Blockchain:
+Konsensmechanismen sorgen für sichere und gemeinsame Bestätigung von Transaktionen auf der Blockchain:
 
-- **Proof of Work (PoW)** beruht auf Rechenleistung zur Verifizierung von Transaktionen.
-- **Proof of Stake (PoS)** verlangt von Validatoren, eine bestimmte Menge an Tokens zu halten, und reduziert den Energieverbrauch im Vergleich zu PoW.
+- **Proof of Work (PoW)** beruht auf Rechenleistung zur Verifikation von Transaktionen.
+- **Proof of Stake (PoS)** verlangt, dass Validatoren eine bestimmte Menge Tokens halten, wodurch der Energieverbrauch im Vergleich zu PoW reduziert wird.
 
 ## Bitcoin-Grundlagen
 
 ### Transaktionen
 
-Bitcoin-Transaktionen beinhalten das Übertragen von Mitteln zwischen Adressen. Transaktionen werden durch digitale Signaturen validiert, wodurch sichergestellt wird, dass nur der Besitzer des privaten Schlüssels Überweisungen initiieren kann.
+Bitcoin-Transaktionen beinhalten die Übertragung von Mitteln zwischen Adressen. Transaktionen werden durch digitale Signaturen validiert, wodurch sichergestellt wird, dass nur der Besitzer des privaten Schlüssels Übertragungen initiieren kann.
 
-#### Hauptkomponenten:
+#### Wichtige Komponenten:
 
 - **Multisignature Transactions** erfordern mehrere Signaturen, um eine Transaktion zu autorisieren.
-- Transaktionen bestehen aus **inputs** (Quellen der Mittel), **outputs** (Ziele), **fees** (an Miner gezahlte Gebühren) und **scripts** (Transaktionsregeln).
+- Transaktionen bestehen aus **inputs** (Quelle der Mittel), **outputs** (Ziel), **fees** (an Miner gezahlt) und **scripts** (Transaktionsregeln).
 
 ### Lightning Network
 
-Zielt darauf ab, die Skalierbarkeit von Bitcoin zu verbessern, indem mehrere Transaktionen innerhalb eines Channels erlaubt werden und nur der finale Zustand zur Blockchain gesendet wird.
+Zielt darauf ab, die Skalierbarkeit von Bitcoin zu erhöhen, indem mehrere Transaktionen innerhalb eines Channels ermöglicht werden, wobei nur der Endzustand in die Blockchain gesendet wird.
 
-## Bitcoin-Privatsphäre-Bedenken
+## Bitcoin Datenschutzbedenken
 
-Angriffe auf die Privatsphäre, wie **Common Input Ownership** und **UTXO Change Address Detection**, nutzen Transaktionsmuster aus. Strategien wie **Mixers** und **CoinJoin** erhöhen die Anonymität, indem sie Transaktionsverknüpfungen zwischen Nutzern verschleiern.
+Datenschutzangriffe wie **Common Input Ownership** und **UTXO Change Address Detection** nutzen Transaktionsmuster aus. Strategien wie **Mixers** und **CoinJoin** verbessern die Anonymität, indem sie Transaktionsverknüpfungen zwischen Nutzern verschleiern.
 
-## Bitcoin anonym erwerben
+## Bitcoins anonym erwerben
 
-Methoden umfassen Bargeldgeschäfte, Mining und die Nutzung von Mixers. **CoinJoin** mischt mehrere Transaktionen, um die Rückverfolgbarkeit zu erschweren, während **PayJoin** CoinJoins als normale Transaktionen tarnt, um die Privatsphäre weiter zu erhöhen.
+Methoden umfassen Bartransaktionen, Mining und die Nutzung von Mixern. **CoinJoin** mischt mehrere Transaktionen, um die Rückverfolgbarkeit zu erschweren, während **PayJoin** CoinJoins als reguläre Transaktionen tarnt, um die Privatsphäre zu erhöhen.
 
-# Bitcoin Privacy Atacks
+# Bitcoin-Privatsphäre-Angriffe
 
 # Zusammenfassung der Bitcoin-Privatsphäre-Angriffe
 
-In der Welt von Bitcoin sind die Privatsphäre von Transaktionen und die Anonymität der Nutzer häufig Gegenstand von Bedenken. Hier ist eine vereinfachte Übersicht über mehrere gängige Methoden, mit denen Angreifer die Bitcoin-Privatsphäre kompromittieren können.
+In der Welt von Bitcoin stehen die Privatsphäre von Transaktionen und die Anonymität von Nutzern häufig im Fokus. Hier eine vereinfachte Übersicht über mehrere gebräuchliche Methoden, mit denen Angreifer die Bitcoin-Privatsphäre gefährden können.
 
 ## **Common Input Ownership Assumption**
 
-Es ist allgemein selten, dass Inputs von verschiedenen Nutzern in einer einzigen Transaktion kombiniert werden, aufgrund der damit verbundenen Komplexität. Daher wird oft angenommen, dass **zwei Input-Adressen in derselben Transaktion demselben Besitzer gehören**.
+Es ist generell selten, dass Inputs von verschiedenen Nutzern in einer einzigen Transaktion kombiniert werden, aufgrund der damit verbundenen Komplexität. Daher wird häufig angenommen, dass **zwei Input-Adressen in derselben Transaktion demselben Besitzer gehören**.
 
 ## **UTXO Change Address Detection**
 
-Ein UTXO (Unspent Transaction Output) muss vollständig in einer Transaktion ausgegeben werden. Wenn nur ein Teil davon an eine andere Adresse gesendet wird, geht der Rest an eine neue Change-Adresse. Beobachter können annehmen, dass diese neue Adresse dem Sender gehört, was die Privatsphäre kompromittiert.
+Ein UTXO, also ein **Unspent Transaction Output**, muss in einer Transaktion vollständig ausgegeben werden. Wenn nur ein Teil davon an eine andere Adresse gesendet wird, geht der Rest an eine neue Change-Adresse. Beobachter können annehmen, dass diese neue Adresse dem Sender gehört, was die Privatsphäre kompromittiert.
 
 ### Beispiel
 
-Zur Minderung dieses Problems können Mixing-Services oder die Verwendung mehrerer Adressen helfen, die Eigentümerschaft zu verschleiern.
+Um dem entgegenzuwirken, können Mixing-Dienste oder die Verwendung mehrerer Adressen helfen, die Zuordnung von Eigentum zu verschleiern.
 
 ## **Social Networks & Forums Exposure**
 
@@ -65,122 +65,132 @@ Nutzer teilen manchmal ihre Bitcoin-Adressen online, wodurch es **einfach wird, 
 
 ## **Transaction Graph Analysis**
 
-Transaktionen können als Graphen visualisiert werden, wodurch potenzielle Verbindungen zwischen Nutzern basierend auf dem Geldfluss sichtbar werden.
+Transaktionen können als Graphen visualisiert werden, wodurch potenzielle Verbindungen zwischen Nutzern anhand des Geldflusses sichtbar werden.
 
 ## **Unnecessary Input Heuristic (Optimal Change Heuristic)**
 
-Diese Heuristik basiert auf der Analyse von Transaktionen mit mehreren Inputs und Outputs, um zu erraten, welcher Output die Change ist, die an den Sender zurückgeht.
+Diese Heuristik basiert auf der Analyse von Transaktionen mit mehreren Inputs und Outputs, um zu erraten, welcher Output die Change-Adresse ist, die an den Sender zurückgeht.
 
 ### Beispiel
 ```bash
 2 btc --> 4 btc
 3 btc     1 btc
 ```
-Wenn durch Hinzufügen weiterer Inputs der change output größer wird als jeder einzelne Input, kann das die Heuristik verwirren.
+Wenn das Hinzufügen weiterer Inputs dazu führt, dass die Change-Ausgabe größer wird als irgendein einzelner Input, kann das die Heuristik verwirren.
 
 ## **Forced Address Reuse**
 
-Angreifer können kleine Beträge an bereits verwendete Adressen senden, in der Hoffnung, dass der Empfänger diese in zukünftigen Transaktionen mit anderen Inputs kombiniert und dadurch Adressen miteinander verknüpft.
+Angreifer können kleine Beträge an bereits verwendete Adressen senden, in der Hoffnung, dass der Empfänger diese später mit anderen Inputs in zukünftigen Transaktionen kombiniert und damit Adressen miteinander verknüpft.
 
-### Correct Wallet Behavior
+### Korrektes Wallet-Verhalten
 
-Wallets sollten vermeiden, Coins zu verwenden, die auf bereits verwendeten, leeren Adressen empfangen wurden, um dieses privacy leak zu verhindern.
+Wallets sollten vermeiden, Coins zu verwenden, die an bereits genutzte, leere Adressen empfangen wurden, um dieses privacy leak zu verhindern.
 
 ## **Other Blockchain Analysis Techniques**
 
-- **Exact Payment Amounts:** Transaktionen ohne change sind wahrscheinlich Zahlungen zwischen zwei Adressen, die demselben Nutzer gehören.
-- **Round Numbers:** Eine runde Zahl in einer Transaktion deutet auf eine Zahlung hin; der nicht-runde Output ist wahrscheinlich der change.
-- **Wallet Fingerprinting:** Verschiedene Wallets haben einzigartige Muster bei der Transaktionserstellung, wodurch Analysten die verwendete Software identifizieren und möglicherweise die change address bestimmen können.
-- **Amount & Timing Correlations:** Das Offenlegen von Transaktionszeiten oder -beträgen kann Transaktionen nachverfolgbar machen.
+- **Exact Payment Amounts:** Transaktionen ohne Change sind wahrscheinlich zwischen zwei Adressen des gleichen Nutzers.
+- **Round Numbers:** Eine runde Zahl in einer Transaktion deutet auf eine Zahlung hin; die nicht-runde Ausgabe ist wahrscheinlich die Change.
+- **Wallet Fingerprinting:** Verschiedene Wallets haben einzigartige Muster bei der Erstellung von Transaktionen, wodurch Analysten die verwendete Software und möglicherweise die Change-Adresse identifizieren können.
+- **Amount & Timing Correlations:** Die Offenlegung von Transaktionszeiten oder -beträgen kann Transaktionen nachvollziehbar machen.
 
 ## **Traffic Analysis**
 
-Durch Überwachen des Netzwerkverkehrs können Angreifer möglicherweise Transaktionen oder Blöcke mit IP-Adressen verknüpfen und so die Privatsphäre der Nutzer gefährden. Das gilt besonders, wenn eine Entität viele Bitcoin Nodes betreibt, da dies ihre Fähigkeit zur Überwachung von Transaktionen erhöht.
+Durch Überwachen des Netzwerkverkehrs können Angreifer möglicherweise Transaktionen oder Blöcke mit IP-Adressen verknüpfen und so die Privatsphäre der Nutzer gefährden. Dies gilt besonders, wenn eine Entität viele Bitcoin-Nodes betreibt, was ihre Fähigkeit zur Überwachung von Transaktionen erhöht.
 
 ## Mehr
 
-Für eine umfassende Liste von privacy attacks und Gegenmaßnahmen besuchen Sie [Bitcoin Privacy on Bitcoin Wiki](https://en.bitcoin.it/wiki/Privacy).
+Für eine umfassende Liste von Privacy-Angriffen und Gegenmaßnahmen besuchen Sie [Bitcoin Privacy on Bitcoin Wiki](https://en.bitcoin.it/wiki/Privacy).
 
 # Anonyme Bitcoin-Transaktionen
 
-## Ways to Get Bitcoins Anonymously
+## Möglichkeiten, Bitcoins anonym zu erhalten
 
-- **Cash Transactions**: Bitcoin mit Bargeld erwerben.
-- **Cash Alternatives**: Gutscheinkarten kaufen und online gegen Bitcoin eintauschen.
-- **Mining**: Die privateste Methode, Bitcoins zu verdienen, ist mining, besonders wenn man alleine mined, da mining pools möglicherweise die IP-Adresse des Miners kennen. [Mining Pools Information](https://en.bitcoin.it/wiki/Pooled_mining)
-- **Theft**: Theoretisch könnte auch Diebstahl von Bitcoin eine Methode sein, sie anonym zu erwerben, obwohl das illegal und nicht zu empfehlen ist.
+- **Cash Transactions**: Erwerb von bitcoin mit Bargeld.
+- **Cash Alternatives**: Kauf von Geschenkkarten und deren Umtausch online gegen bitcoin.
+- **Mining**: Die privateste Methode, bitcoins zu gewinnen, ist Mining — besonders Solo-Mining, da Mining-Pools die IP-Adresse des Miners kennen könnten. [Mining Pools Information](https://en.bitcoin.it/wiki/Pooled_mining)
+- **Theft**: Theoretisch könnte das Stehlen von bitcoin eine weitere Methode sein, sie anonym zu erhalten; das ist jedoch illegal und nicht zu empfehlen.
 
 ## Mixing Services
 
-Durch die Nutzung eines Mixing-Services kann ein Nutzer **Bitcoins senden** und **andere Bitcoins als Gegenleistung erhalten**, was die Rückverfolgung des ursprünglichen Besitzers erschwert. Das setzt jedoch Vertrauen in den Service voraus, dass er keine Logs führt und die Bitcoins tatsächlich zurückgibt. Alternative Mixing-Optionen umfassen Bitcoin-Casinos.
+Durch die Nutzung eines Mixing-Service kann ein Benutzer bitcoins senden und im Gegenzug andere bitcoins erhalten, was die Rückverfolgung des ursprünglichen Besitzers erschwert. Das erfordert jedoch Vertrauen in den Service, dass er keine Logs führt und die bitcoins tatsächlich zurückgibt. Alternative Mixing-Optionen umfassen Bitcoin-Casinos.
 
 ## CoinJoin
 
-CoinJoin fasst mehrere Transaktionen von verschiedenen Nutzern zu einer zusammen und erschwert so das Zuordnen von Inputs zu Outputs. Trotz der Wirksamkeit können Transaktionen mit einzigartigen Input- und Output-Größen weiterhin potenziell zurückverfolgt werden.
+CoinJoin fasst Transaktionen mehrerer Nutzer zu einer einzigen zusammen, wodurch das Zuordnen von Inputs zu Outputs deutlich erschwert wird. Trotz seiner Wirksamkeit können Transaktionen mit einzigartigen Input- und Output-Größen dennoch potenziell zurückverfolgt werden.
 
-Beispieltransaktionen, die CoinJoin verwendet haben könnten, sind `402d3e1df685d1fdf82f36b220079c1bf44db227df2d676625ebcbee3f6cb22a` und `85378815f6ee170aa8c26694ee2df42b99cff7fa9357f073c1192fff1f540238`.
+Beispiel-Transaktionen, die CoinJoin verwendet haben könnten, sind `402d3e1df685d1fdf82f36b220079c1bf44db227df2d676625ebcbee3f6cb22a` und `85378815f6ee170aa8c26694ee2df42b99cff7fa9357f073c1192fff1f540238`.
 
-Für mehr Informationen siehe [CoinJoin](https://coinjoin.io/en). Für einen ähnlichen Service auf Ethereum siehe [Tornado Cash](https://tornado.cash), das Transaktionen mit Mitteln von Minern anonymisiert.
+Für mehr Informationen, besuchen Sie [CoinJoin](https://coinjoin.io/en). Für einen ähnlichen Service auf Ethereum siehe [Tornado Cash](https://tornado.cash), das Transaktionen mit Mitteln von Minern anonymisiert.
 
 ## PayJoin
 
-Eine Variante von CoinJoin, **PayJoin** (oder P2EP), tarnt die Transaktion zwischen zwei Parteien (z. B. Kunde und Händler) als normale Transaktion, ohne die für CoinJoin typischen gleichen Outputs. Das macht sie extrem schwer zu erkennen und kann die common-input-ownership heuristic, die von Überwachungsstellen für Transaktionen verwendet wird, ungültig machen.
+Eine Variante von CoinJoin, **PayJoin** (oder P2EP), tarnt die Transaktion zwischen zwei Parteien (z. B. Kunde und Händler) als normale Transaktion, ohne die charakteristischen gleichen Outputs von CoinJoin. Das macht sie extrem schwer zu erkennen und kann die common-input-ownership heuristic, die von Transaction-Surveillance-Entitäten verwendet wird, ungültig machen.
 ```plaintext
 2 btc --> 3 btc
 5 btc     4 btc
 ```
-Transaktionen wie die oben gezeigten könnten PayJoin sein, wodurch die Privatsphäre erhöht wird, während sie weiterhin nicht von Standard‑bitcoin‑Transaktionen zu unterscheiden sind.
+Transaktionen wie die obige könnten PayJoin sein, die die Privatsphäre erhöhen und gleichzeitig nicht von standard bitcoin transactions zu unterscheiden sind.
 
-**Der Einsatz von PayJoin könnte traditionelle Überwachungsmethoden erheblich stören**, und stellt damit eine vielversprechende Entwicklung im Streben nach Transaktions‑Privatsphäre dar.
+**Der Einsatz von PayJoin könnte traditionelle Überwachungsmethoden erheblich stören**, wodurch es eine vielversprechende Entwicklung im Streben nach Transaktionsprivatsphäre darstellt.
 
-# Beste Praktiken für die Privatsphäre bei Kryptowährungen
+# Beste Praktiken für Privatsphäre bei Kryptowährungen
 
-## **Wallet-Synchronisierungstechniken**
+## **Wallet-Synchronisation-Techniken**
 
-Um Privatsphäre und Sicherheit zu wahren, ist die Synchronisierung von Wallets mit der Blockchain entscheidend. Zwei Methoden stechen hervor:
+Um Privatsphäre und Sicherheit zu wahren, ist die Synchronisation von Wallets mit der Blockchain entscheidend. Zwei Methoden stechen hervor:
 
-- **Full node**: Durch das Herunterladen der gesamten Blockchain stellt ein Full node maximale Privatsphäre sicher. Alle jemals getätigten Transaktionen werden lokal gespeichert, wodurch es für Gegner unmöglich wird, zu identifizieren, welche Transaktionen oder Adressen den Nutzer interessieren.
-- **Client-side block filtering**: Bei dieser Methode werden Filter für jeden Block in der Blockchain erstellt, wodurch Wallets relevante Transaktionen identifizieren können, ohne spezifische Interessen gegenüber Netzwerkbeobachtern offenzulegen. Lightweight wallets laden diese Filter herunter und fordern komplette Blöcke nur dann an, wenn eine Übereinstimmung mit den Adressen des Nutzers gefunden wird.
+- **Full node**: Durch das Herunterladen der gesamten Blockchain gewährleistet ein Full node maximale Privatsphäre. Alle jemals getätigten Transaktionen werden lokal gespeichert, wodurch es für Angreifer unmöglich wird zu erkennen, an welchen Transaktionen oder Adressen der Nutzer interessiert ist.
+- **Client-side block filtering**: Bei dieser Methode werden Filter für jeden Block der Blockchain erstellt, sodass Wallets relevante Transaktionen identifizieren können, ohne spezifische Interessen gegenüber Netzwerkbeobachtern offenzulegen. Lightweight wallets laden diese Filter herunter und holen nur dann komplette Blöcke, wenn eine Übereinstimmung mit den Adressen des Nutzers gefunden wird.
 
-## **Nutzung von Tor für Anonymität**
+## **Tor für Anonymität**
 
-Da Bitcoin in einem Peer‑to‑Peer‑Netzwerk betrieben wird, wird empfohlen, Tor zu verwenden, um Ihre IP‑Adresse zu verschleiern und so die Privatsphäre bei der Interaktion mit dem Netzwerk zu erhöhen.
+Da Bitcoin in einem Peer-to-Peer-Netzwerk betrieben wird, wird empfohlen, Tor zu verwenden, um Ihre IP-Adresse zu verschleiern und die Privatsphäre bei der Interaktion mit dem Netzwerk zu erhöhen.
 
-## **Vermeidung der Wiederverwendung von Adressen**
+## **Vermeidung von Adresswiederverwendung**
 
-Um die Privatsphäre zu schützen, ist es wichtig, für jede Transaktion eine neue Adresse zu verwenden. Die Wiederverwendung von Adressen kann die Privatsphäre gefährden, indem Transaktionen mit derselben Entität verknüpft werden. Moderne Wallets entmutigen die Wiederverwendung von Adressen durch ihr Design.
+Zum Schutz der Privatsphäre ist es wichtig, für jede Transaktion eine neue Adresse zu verwenden. Die Wiederverwendung von Adressen kann die Privatsphäre gefährden, da Transaktionen mit derselben Entität verknüpft werden können. Moderne Wallets verhindern durch ihr Design die Wiederverwendung von Adressen.
 
-## **Strategien für Transaktions‑Privatsphäre**
+## **Strategien für Transaktionsprivatsphäre**
 
-- **Mehrere Transaktionen**: Eine Zahlung in mehrere Transaktionen aufzuteilen kann den Transaktionsbetrag verschleiern und Angriffe auf die Privatsphäre vereiteln.
-- **Change‑Vermeidung**: Die Wahl von Transaktionen, die keine Change‑Outputs erfordern, verbessert die Privatsphäre, indem sie Methoden zur Change‑Erkennung stört.
-- **Mehrere Change‑Outputs**: Wenn die Vermeidung von Change nicht möglich ist, kann das Erzeugen mehrerer Change‑Outputs die Privatsphäre trotzdem verbessern.
+- **Multiple transactions**: Das Aufteilen einer Zahlung in mehrere Transaktionen kann den Transaktionsbetrag verschleiern und Angriffe auf die Privatsphäre vereiteln.
+- **Change avoidance**: Die Wahl von Transaktionen, die keine Change-Outputs erfordern, erhöht die Privatsphäre, indem sie Methoden zur Erkennung von Change stört.
+- **Multiple change outputs**: Falls die Vermeidung von Change nicht möglich ist, kann das Erzeugen mehrerer Change-Outputs die Privatsphäre verbessern.
 
 # **Monero: Ein Leuchtturm der Anonymität**
 
-Monero adressiert das Bedürfnis nach absoluter Anonymität bei digitalen Transaktionen und setzt einen hohen Standard für Privatsphäre.
+Monero geht das Bedürfnis nach absoluter Anonymität bei digitalen Transaktionen an und setzt einen hohen Standard für Privatsphäre.
 
 # **Ethereum: Gas und Transaktionen**
 
 ## **Verständnis von Gas**
 
-Gas misst den Rechenaufwand zur Ausführung von Operationen auf Ethereum und wird in **gwei** bepreist. Zum Beispiel beinhaltet eine Transaktion, die 2.310.000 gwei (also 0,00231 ETH) kostet, ein Gas‑Limit und eine Base‑Fee sowie ein Tip zur Anreizung der Miner. Nutzer können eine Max‑Fee festlegen, um Überzahlungen zu vermeiden; der Überschuss wird zurückerstattet.
+Gas misst den Rechenaufwand, der zur Ausführung von Operationen auf Ethereum erforderlich ist, und wird in **gwei** bepreist. Zum Beispiel beinhaltet eine Transaktion, die 2.310.000 gwei (oder 0,00231 ETH) kostet, ein Gas-Limit und eine Basisgebühr (base fee), sowie ein Tip als Anreiz für Miner. Nutzer können eine Maximalgebühr setzen, um Überzahlungen zu vermeiden; der überschüssige Betrag wird zurückerstattet.
 
 ## **Ausführen von Transaktionen**
 
-Transaktionen auf Ethereum beinhalten einen Sender und einen Empfänger, die entweder Benutzer‑ oder Smart‑Contract‑Adressen sein können. Sie erfordern eine Gebühr und müssen gemined werden. Wesentliche Informationen einer Transaktion umfassen den Empfänger, die Signatur des Senders, den Wert, optionale Daten, Gas‑Limit und Gebühren. Bemerkenswert ist, dass die Adresse des Senders aus der Signatur abgeleitet wird, sodass sie nicht explizit in den Transaktionsdaten enthalten sein muss.
+Transaktionen auf Ethereum beinhalten einen Sender und einen Empfänger, die entweder Benutzer- oder Smart-Contract-Adressen sein können. Sie erfordern eine Gebühr und müssen gemined werden. Wesentliche Informationen in einer Transaktion sind der Empfänger, die Signatur des Senders, der Wert, optionale Daten, Gas-Limit und Gebühren. Bemerkenswert ist, dass die Adresse des Senders aus der Signatur abgeleitet wird, sodass sie nicht explizit in den Transaktionsdaten enthalten sein muss.
 
-Diese Praktiken und Mechanismen sind grundlegend für alle, die mit Kryptowährungen arbeiten möchten und dabei Privatsphäre und Sicherheit priorisieren.
+Diese Praktiken und Mechanismen sind grundlegend für alle, die sich mit Kryptowährungen beschäftigen und dabei Privatsphäre und Sicherheit priorisieren.
 
-## Smart‑Contract‑Sicherheit
+## Wertzentriertes Web3 Red Teaming
 
-- Mutationstests, um Blindstellen in Test‑Suiten zu finden:
+- Inventarisiere werttragende Komponenten (signers, oracles, bridges, automation), um zu verstehen, wer Mittel verschieben kann und wie.
+- Ordne jede Komponente relevanten MITRE AADAPT-Taktiken zu, um Pfade zur Privilegienerweiterung aufzudecken.
+- Probiere flash-loan/oracle/credential/cross-chain Angriffsketten durch, um Auswirkungen zu validieren und ausnutzbare Voraussetzungen zu dokumentieren.
+
+{{#ref}}
+value-centric-web3-red-teaming.md
+{{#endref}}
+
+## Smart Contract Security
+
+- Mutationstests, um blinde Flecken in Test-Suites zu finden:
 
 {{#ref}}
 ../smart-contract-security/mutation-testing-with-slither.md
 {{#endref}}
 
-## References
+## Referenzen
 
 - [https://en.wikipedia.org/wiki/Proof_of_stake](https://en.wikipedia.org/wiki/Proof_of_stake)
 - [https://www.mycryptopedia.com/public-key-private-key-explained/](https://www.mycryptopedia.com/public-key-private-key-explained/)
@@ -189,15 +199,15 @@ Diese Praktiken und Mechanismen sind grundlegend für alle, die mit Kryptowähru
 - [https://ethereum.org/en/developers/docs/gas/](https://ethereum.org/en/developers/docs/gas/)
 - [https://en.bitcoin.it/wiki/Privacy](https://en.bitcoin.it/wiki/Privacy#Forced_address_reuse)
 
-## DeFi/AMM Exploitation
+## DeFi/AMM-Ausnutzung
 
-If you are researching practical exploitation of DEXes and AMMs (Uniswap v4 hooks, rounding/precision abuse, flash‑loan amplified threshold‑crossing swaps), check:
+Wenn Sie die praktische Ausnutzung von DEXes und AMMs (Uniswap v4 hooks, rounding/precision abuse, flash‑loan amplified threshold‑crossing swaps) erforschen, siehe:
 
 {{#ref}}
 defi-amm-hook-precision.md
 {{#endref}}
 
-For multi-asset weighted pools that cache virtual balances and can be poisoned when `supply == 0`, study:
+Für multi-asset gewichtete Pools, die virtuelle Salden cachen und bei `supply == 0` manipuliert werden können, studieren Sie:
 
 {{#ref}}
 defi-amm-virtual-balance-cache-exploitation.md
