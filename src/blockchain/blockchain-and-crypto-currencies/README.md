@@ -1,186 +1,196 @@
-# Blockchain and Crypto-Currencies
+# Blockchain en Kripto-geldeenhede
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Basiese Konsepte
 
-- **Smart Contracts** word gedefinieer as programme wat op 'n blockchain uitgevoer word wanneer sekere voorwaardes vervul is, en outomatiseer die uitvoering van ooreenkomste sonder tussengangers.
-- **Decentralized Applications (dApps)** bou voort op Smart Contracts, en het 'n gebruikersvriendelike front-end en 'n deursigtige, ouditbare back-end.
+- **Slimkontrakte** word gedefinieer as programme wat op 'n blockchain uitgevoer word wanneer sekere voorwaardes vervul is, wat uitvoering van ooreenkomste outomatiseer sonder tussengangers.
+- **Gedesentraliseerde toepassings (dApps)** bou op slimkontrakte en het 'n gebruikersvriendelike voorwerf en 'n deursigtige, ouditbare agterwerf.
 - **Tokens & Coins** onderskei deurdat coins as digitale geld dien, terwyl tokens waarde of eienaarskap in spesifieke kontekste verteenwoordig.
-- **Utility Tokens** gee toegang tot dienste, en **Security Tokens** dui eiendomsreg van bate aan.
-- **DeFi** staan vir Decentralized Finance, en bied finansiële dienste sonder sentrale owerhede.
+- **Nut-tokens** gee toegang tot dienste, en **sekuriteitstokens** dui eienaarskap van bates aan.
+- **DeFi** staan vir Gedesentraliseerde Finansies en bied finansiële dienste sonder sentrale owerhede.
 - **DEX** en **DAOs** verwys onderskeidelik na Decentralized Exchange Platforms en Decentralized Autonomous Organizations.
 
 ## Konsensusmeganismes
 
-Konsensusmeganismes verseker veilige en ooreengekome transaksie-validasies op die blockchain:
+Konsensusmeganismes verseker veilige en ooreengekome transaksievalidasies op die blockchain:
 
-- **Proof of Work (PoW)** vertrou op rekenaarkrag vir transaksie-verifikasie.
-- **Proof of Stake (PoS)** vereis dat validators 'n sekere hoeveelheid tokens hou, wat energieverbruik verminder in vergelyking met PoW.
+- **Bewys van Werk (PoW)** berus op rekenaarkrag vir transaksieverifikasie.
+- **Bewys van Inset (PoS)** vereis dat validators 'n sekere hoeveelheid tokens hou, wat energieverbruik vergelykbaar met PoW verminder.
 
-## Bitcoin Kernbeginsels
+## Bitcoin-basisbeginsels
 
 ### Transaksies
 
-Bitcoin transaksies behels die oordrag van fondse tussen adresse. Transaksies word geverifieer deur digitale handtekeninge, wat verseker dat slegs die eienaar van die private sleutel oordragte kan inisieer.
+Bitcoin-transaksies behels die oordrag van fondse tussen adresse. Transaksies word geverifieer deur digitale handtekeninge, wat verseker dat slegs die eienaar van die privaat sleutel oordragte kan inisieer.
 
 #### Sleutelelemente:
 
-- **Multisignature Transactions** vereis meerdere handtekeninge om 'n transaksie te magtig.
-- Transaksies bestaan uit **inputs** (bron van fondse), **outputs** (bestemming), **fees** (betaal aan miners), en **scripts** (transaksie-reëls).
+- **Multisignatuur-transaksies** vereis meerdere handtekeninge om 'n transaksie te magtig.
+- Transaksies bestaan uit **insette** (bron van fondse), **uitsette** (bestemming), **fooie** (betaal aan miners), en **skripte** (transaksie-reëls).
 
 ### Lightning Network
 
-Streef daarna om Bitcoin se skaalbaarheid te verbeter deur meerdere transaksies binne 'n kanaal toe te laat, en slegs die finale toestand na die blockchain te stuur.
+Richt daarop om Bitcoin se skaalbaarheid te verbeter deur toelaat dat veelvuldige transaksies binne 'n kanaal plaasvind, en slegs die finale toestand aan die blockchain uitgesaai word.
 
-## Bitcoin Privaatheidsbekommernisse
+## Bitcoin-privaatheidskomplikasies
 
-Privaatheidsaanvalle, soos **Common Input Ownership** en **UTXO Change Address Detection**, benut transaksiepatrone. Strategieë soos **Mixers** en **CoinJoin** verbeter anonimiteit deur transaksie-skakels tussen gebruikers te verberg.
+Privaatheid-aanvalle, soos **Common Input Ownership** en **UTXO Change Address Detection**, maak misbruik van transaksiepatrone. Strategieë soos **Mixers** en **CoinJoin** verbeter anonimiteit deur transaksieskakels tussen gebruikers te versluier.
 
-## Anonieme verkryging van Bitcoins
+## Bitcoins Anoniem Verkry
 
-Metodes sluit in kontanttransaksies, mining, en die gebruik van mixers. **CoinJoin** meng meerdere transaksies om naspeurbaarheid te bemoeilik, terwyl **PayJoin** CoinJoins as gewone transaksies verdoesel vir groter privaatheid.
+Metodes sluit kontant-transaksies, mining, en die gebruik van mixers in. **CoinJoin** meng veelvuldige transaksies om naspeurbaarheid te bemoeilik, terwyl **PayJoin** CoinJoins as gewone transaksies verskuil vir verhoogde privaatheid.
 
-# Bitcoin Privaatheidsaanvalle
+# Bitcoin-privaatheid-aanvalle
 
-# Opsomming van Bitcoin Privaatheidsaanvalle
+# Opsomming van Bitcoin-privaatheid-aanvalle
 
-In die wêreld van Bitcoin is die privaatheid van transaksies en die anonimiteit van gebruikers dikwels 'n bron van kommer. Hier is 'n vereenvoudigde oorsig van verskeie algemene metodes waardeur aanvallers Bitcoin-privaatheid kan kompromitteer.
+In die wêreld van Bitcoin is die privaatheid van transaksies en die anonimiteit van gebruikers dikwels kommerwekkend. Hier is 'n vereenvoudigde oorsig van verskeie algemene metodes waardeur aanvallers Bitcoin-privaatheid kan kompromiteer.
 
 ## **Common Input Ownership Assumption**
 
-Oor die algemeen is dit skaars dat inputs van verskillende gebruikers in 'n enkele transaksie gekombineer word weens die komplekse aard. Daarom word **twee input-adresse in dieselfde transaksie dikwels aanvaar as behorend aan dieselfde eienaar**.
+Dit is oor die algemeen skaars dat insette van verskillende gebruikers in 'n enkele transaksie gekombineer word weens die kompleksiteit daaraan verbonde. Dus word **twee insetadresse in dieselfde transaksie dikwels veronderstel om aan dieselfde eienaar te behoort**.
 
 ## **UTXO Change Address Detection**
 
-'n UTXO, of **Unspent Transaction Output**, moet volledig bestee word in 'n transaksie. As slegs 'n gedeelte daarvan na 'n ander adres gestuur word, gaan die oorblywende na 'n nuwe change address. Waarnemers kan aanvaar dat hierdie nuwe adres aan die sender behoort, wat privaatheid in gevaar stel.
+'n UTXO, of **Unspent Transaction Output**, moet volledig in 'n transaksie bestee word. As slegs 'n deel daarvan aan 'n ander adres gestuur word, gaan die oorblywende bedrag na 'n nuwe change-adres. Waarnemers kan veronderstel dat hierdie nuwe adres aan die sender behoort, wat privaatheid kompromitteer.
 
 ### Voorbeeld
 
-Om dit te versag, kan mixing-dienste of die gebruik van meerdere adresse help om eienaarskap te verberg.
+Om dit te versag, kan mengdienste of die gebruik van veelvuldige adresse help om eienaarskap te verduister.
 
-## **Social Networks & Forums Exposure**
+## **Sociale netwerke & forums blootstelling**
 
-Gebruikers deel soms hul Bitcoin-adresse aanlyn, wat dit **maklik maak om die adres aan sy eienaar te koppel**.
+Gebruikers deel soms hul Bitcoin-adresse aanlyn, wat dit **maklik maak om die adres aan die eienaar te koppel**.
 
-## **Transaction Graph Analysis**
+## **Transaksie-grafiekontleding**
 
-Transaksies kan as grafieke gevisualiseer word, wat potensiële verbindings tussen gebruikers openbaar op grond van die vloei van fondse.
+Transaksies kan as grafieke gevisualiseer word, wat potensiële verbindings tussen gebruikers onthul gebaseer op die vloei van fondse.
 
-## **Unnecessary Input Heuristic (Optimal Change Heuristic)**
+## **Onnodige Inset Heuristiek (Optimal Change Heuristic)**
 
-Hierdie heuristiek is gebaseer op die ontleding van transaksies met meerdere inputs en outputs om te raai watter output die change is wat na die sender terugkeer.
+Hierdie heuristiek is gebaseer op die ontleding van transaksies met veelvuldige insette en uitsette om te raai watter uitset die verandering is wat terugkeer na die sender.
 
 ### Voorbeeld
 ```bash
 2 btc --> 4 btc
 3 btc     1 btc
 ```
-If adding more inputs makes the change output larger than any single input, it can confuse the heuristic.
+As die toevoeging van meer insette daartoe lei dat die wissel-uitset groter is as enige enkele inset, kan dit die heuristiek in die war bring.
 
 ## **Forced Address Reuse**
 
-Aanvallers kan klein bedrae stuur na adresse wat reeds gebruik is, in die hoop dat die ontvanger dit by ander inputs in toekomstige transaksies voeg en sodoende adresse aan mekaar koppel.
+Aanvallers kan klein bedrae na voorheen gebruikte adresse stuur in die hoop dat die ontvanger hierdie met ander insette in toekomstige transaksies kombineer, en sodoende adresse met mekaar verbind.
 
 ### Correct Wallet Behavior
 
-Wallets moet vermy om munte wat op reeds gebruikte, leë adresse ontvang is te gebruik om hierdie privacy leak te voorkom.
+Wallets moet vermy om munte wat op reeds gebruikte, leë adresse ontvang is, te gebruik om hierdie privaatheids leak te voorkom.
 
 ## **Other Blockchain Analysis Techniques**
 
-- **Exact Payment Amounts:** Transaksies sonder wisselgeld is waarskynlik tussen twee adresse wat aan dieselfde gebruiker behoort.
-- **Round Numbers:** 'n Afronde getal in 'n transaksie dui aan dat dit 'n betaling is, en die nie-afronde uitset is waarskynlik die wisselgeld.
-- **Wallet Fingerprinting:** Verskillende wallets het unieke patrone vir transaksie-skep, wat ontleders toelaat om die sagteware te identifiseer wat gebruik is en moontlik die wisseladres.
-- **Amount & Timing Correlations:** Die bekendmaking van transaksietye of -bedrae kan transaksies naspeurbaar maak.
+- **Exact Payment Amounts:** Transaksies sonder change is waarskynlik tussen twee adresse wat deur dieselfde gebruiker besit word.
+- **Round Numbers:** 'n Ronde getal in 'n transaksie dui daarop dat dit 'n betaling is, met die nie-ronde uitset wat waarskynlik die change is.
+- **Wallet Fingerprinting:** Verskillende wallets het unieke patrone vir transaksieskepping, wat analiste in staat stel om die sagteware wat gebruik is te identifiseer en moontlik die change address.
+- **Amount & Timing Correlations:** Die openbaarmaking van transaksietye of -bedrae kan transaksies opspoorbaar maak.
 
 ## **Traffic Analysis**
 
-Deur netwerkverkeer te monitor, kan aanvallers moontlik transaksies of blocks aan IP addresses koppel en sodoende gebruikers se privaatheid kompromitteer. Dit is veral waar as 'n entiteit baie Bitcoin node bedryf, wat hul vermoë om transaksies te monitor verbeter.
+Deur netwerkverkeer te monitor, kan aanvallers moontlik transaksies of blokke aan IP-adresse koppel, wat gebruikers se privaatheid in gedrang bring. Dit is veral waar as 'n entiteit baie Bitcoin-nodes bedryf, wat hul vermoë verbeter om transaksies te monitor.
 
-## More
+## Meer
 
-For a comprehensive list of privacy attacks and defenses, visit [Bitcoin Privacy on Bitcoin Wiki](https://en.bitcoin.it/wiki/Privacy).
+Vir 'n omvattende lys van privacy-aanvalle en verdedigings, besoek [Bitcoin Privacy on Bitcoin Wiki](https://en.bitcoin.it/wiki/Privacy).
 
-# Anonymous Bitcoin Transactions
+# Anonieme Bitcoin-transaksies
 
-## Ways to Get Bitcoins Anonymously
+## Maniere om Bitcoins Anoniem te Kry
 
-- **Cash Transactions**: Verkryging van bitcoin deur kontant.
-- **Cash Alternatives**: Koop van gift cards en ruil dit aanlyn vir bitcoin.
-- **Mining**: Die mees private metode om bitcoins te verdien is deur mining, veral as dit alleen gedoen word, aangesien mining pools moontlik die miner se IP address ken. [Mining Pools Information](https://en.bitcoin.it/wiki/Pooled_mining)
-- **Theft**: Teoreties kan diefstal van bitcoin 'n ander metode wees om dit anoniem te bekom, hoewel dit onwettig is en nie aanbeveel word nie.
+- **Kontanttransaksies**: Verkryging van bitcoin deur kontant.
+- **Kontantalternatiewe**: Aankoop van geskenkkaarte en omruiling aanlyn vir bitcoin.
+- **Mining**: Die privaatste metode om bitcoins te verdien is deur mynbou, veral wanneer dit alleen gedoen word omdat mining pools moontlik die myner se IP-adres ken. [Mining Pools Information](https://en.bitcoin.it/wiki/Pooled_mining)
+- **Theft**: Teoreties sou diefstal van bitcoin 'n ander metode wees om dit anoniem te bekom, alhoewel dit onwettig is en nie aanbeveel word.
 
-## Mixing Services
+## Mengdienste
 
-Deur 'n mixing service te gebruik, kan 'n gebruiker **bitcoins stuur** en in ruil **ander bitcoins ontvang**, wat dit moeilik maak om die oorspronklike eienaar op te spoor. Dit vereis egter vertroue in die diens om nie logs te hou nie en om die bitcoins werklik terug te gee. Alternatiewe mixing-opsies sluit Bitcoin casinos in.
+Deur 'n mengdiens te gebruik, kan 'n gebruiker bitcoins stuur en verskillende bitcoins terug ontvang, wat dit moeilik maak om die oorspronklike eienaar op te spoor. Dit vereis egter vertroue in die diens dat hulle nie logs behou en dat hulle die bitcoins werklik teruggee. Alternatiewe mengopsies sluit Bitcoin-kasino's in.
 
 ## CoinJoin
 
-CoinJoin saamsmelt verskeie transaksies van verskillende gebruikers in een, wat dit vir enigiemand moeiliker maak om inputs met outputs te koppel. Ten spyte van die doeltreffendheid daarvan, kan transaksies met unieke input- en outputgroottes steeds moontlik getraceer word.
+CoinJoin koppel meerdere transaksies van verskillende gebruikers saam in een, wat die proses bemoeilik vir enigiemand wat insette met uitsette probeer koppel. Ten spyte van die doeltreffendheid daarvan kan transaksies met unieke inset- en uitsetgroottes steeds moontlik opgetraceer word.
 
-Voorbeelduitbetalings wat CoinJoin gebruik kan hê sluit in `402d3e1df685d1fdf82f36b220079c1bf44db227df2d676625ebcbee3f6cb22a` en `85378815f6ee170aa8c26694ee2df42b99cff7fa9357f073c1192fff1f540238`.
+Voorbeeld-transaksies wat moontlik CoinJoin gebruik het sluit in `402d3e1df685d1fdf82f36b220079c1bf44db227df2d676625ebcbee3f6cb22a` en `85378815f6ee170aa8c26694ee2df42b99cff7fa9357f073c1192fff1f540238`.
 
-For more information, visit [CoinJoin](https://coinjoin.io/en). For a similar service on Ethereum, check out [Tornado Cash](https://tornado.cash), which anonymizes transactions with funds from miners.
+Vir meer inligting, besoek [CoinJoin](https://coinjoin.io/en). Vir 'n soortgelyke diens op Ethereum, kyk na [Tornado Cash](https://tornado.cash), wat transaksies anonimiseer met fondse van miners.
 
 ## PayJoin
 
-A variant of CoinJoin, PayJoin (or P2EP), vermom die transaksie tussen twee partye (bv. 'n klant en 'n handelaar) as 'n gewone transaksie, sonder die kenmerkende gelyke outputs van CoinJoin. Dit maak dit uiters moeilik om te ontdek en kan die common-input-ownership heuristic wat deur transaksie-surveillance entiteite gebruik word, ongeldig maak.
+'n Variant van CoinJoin, **PayJoin** (of P2EP), camoufleer die transaksie tussen twee partye (bv. 'n klant en 'n handelaar) as 'n gewone transaksie, sonder die kenmerkende gelyke uitsette van CoinJoin. Dit maak dit uiters moeilik om te identifiseer en kan die common-input-ownership heuristic wat deur transaksiesurveillance-entiteite gebruik word ongeldig maak.
 ```plaintext
 2 btc --> 3 btc
 5 btc     4 btc
 ```
-Transaksies soos die bostaande kan PayJoin wees, wat privaatheid verbeter terwyl hulle ononderskeibaar van standaard bitcoin-transaksies bly.
+Transaksies soos hierbo kan PayJoin wees, wat privaatheid verbeter terwyl hulle ononderskei­baar van standaard bitcoin-transaksies bly.
 
-**Die gebruik van PayJoin kan tradisionele toesigmetodes beduidend ontwrig**, wat dit ’n belowende ontwikkeling in die strewe na transaksionele privaatheid maak.
+**Die gebruik van PayJoin kan tradisionele toesigmetodes beduidend ontwrig**, wat dit 'n belowende ontwikkeling in die strewe na transaksionele privaatheid maak.
 
-# Beste praktyke vir privaatheid in kripto-geldeenhede
+# Beste praktyke vir privaatheid in kriptogeldeenhede
 
-## **Wallet-sinchroniseringstegnieke**
+## **Wallet Synchronization Techniques**
 
 Om privaatheid en veiligheid te behou, is dit noodsaaklik om wallets met die blockchain te sinchroniseer. Twee metodes staan uit:
 
-- **Full node**: Deur die hele blockchain af te laai verseker ’n full node maksimum privaatheid. Alle transaksies wat ooit gemaak is, word lokaal gestoor, wat dit onmoontlik maak vir teenstanders om te identifiseer watter transaksies of adresse die gebruiker interesseer.
-- **Client-side block filtering**: Hierdie metode behels die skep van filters vir elke blok in die blockchain, wat wallets toelaat om relevante transaksies te identifiseer sonder om spesifieke belangstellings aan netwerkwaarnemers bloot te lê. Lightweight wallets laai hierdie filters af en haal net volle blokke op wanneer ’n pas met die gebruiker se adresse gevind word.
+- **Full node**: Deur die volledige blockchain af te laai, verseker 'n full node maksimum privaatheid. Alle ooit gedane transaksies word plaaslik gestoor, wat dit onmoontlik maak vir teenstanders om te identifiseer watter transaksies of adresse die gebruiker interesseer.
+- **Client-side block filtering**: Hierdie metode behels die skep van filters vir elke blok in die blockchain, wat wallets toelaat om relevante transaksies te identifiseer sonder om spesifieke belangstellings aan netwerkwaarnemers bloot te lê. Liggewig wallets laai hierdie filters af en haal slegs volledige blokke wanneer 'n ooreenkoms met die gebruiker se adresse gevind word.
 
-## **Gebruik van Tor vir anonimiteit**
+## **Utilizing Tor for Anonymity**
 
-Aangesien Bitcoin op ’n peer-to-peer-netwerk funksioneer, word die gebruik van Tor aanbeveel om jou IP-adres te maskeer en privaatheid te verbeter wanneer jy met die netwerk kommunikeer.
+Aangesien Bitcoin op 'n peer-to-peer netwerk opereer, word dit aanbeveel om Tor te gebruik om jou IP-adres te maskeer, wat privaatheid verbeter wanneer jy met die netwerk kommunikeer.
 
-## **Voorkoming van adreshergebruik**
+## **Preventing Address Reuse**
 
-Om privaatheid te beskerm, is dit noodsaaklik om ’n nuwe adres vir elke transaksie te gebruik. Hergebruik van adresse kan privaatheid benadeel deur transaksies aan dieselfde entiteit te koppel. Moderne wallets ontmoedig adreshergebruik deur hul ontwerp.
+Om privaatheid te beskerm, is dit noodsaaklik om 'n nuwe adres vir elke transaksie te gebruik. Die hergebruik van adresse kan privaatheid kompromitteer deur transaksies aan dieselfde entiteit te koppel. Moderne wallets ontmoedig adreshergebruik deur hul ontwerp.
 
-## **Strategieë vir transaksieprivaatheid**
+## **Strategies for Transaction Privacy**
 
-- **Meervoudige transaksies**: Om ’n betaling in verskeie transaksies op te breek kan die transaksiebedrag verberg en privaatheidsaanvalle teenwerk.
-- **Vermyding van change**: Om te kies vir transaksies wat geen change-outputs benodig verbeter privaatheid deur change-deteksiemetodes te ontwrig.
-- **Meervoudige change-outputs**: As verandering nie vermy kan word nie, kan die genereer van verskeie change-outputs steeds privaatheid verbeter.
+- **Multiple transactions**: Om 'n betaling in verskeie transaksies te verdeel kan die transaksiebedrag versluier en privaatheidsaanvalle belemmer.
+- **Change avoidance**: Deur transaksies te kies wat geen change-outputs vereis, verbeter privaatheid deur change-detektiemetodes te ontwrig.
+- **Multiple change outputs**: As dit nie prakties is om change te vermy nie, kan die skepping van meervoudige change-outputs steeds privaatheid verbeter.
 
-# **Monero: ’n baken van anonimiteit**
+# **Monero: A Beacon of Anonymity**
 
-Monero spreek die behoefte aan absolute anonimiteit in digitale transaksies aan en stel ’n hoë standaard vir privaatheid.
+Monero spreek die behoefte aan absolute anonimiteit in digitale transaksies aan en stel 'n hoë standaard vir privaatheid.
 
-# **Ethereum: Gas en transaksies**
+# **Ethereum: Gas and Transactions**
 
-## **Begrip van Gas**
+## **Understanding Gas**
 
-Gas meet die rekenkundige poging nodig om operasies op Ethereum uit te voer en word geprys in **gwei**. Byvoorbeeld, ’n transaksie wat 2,310,000 gwei (of 0.00231 ETH) kos, behels ’n gaslimiet en ’n basisfooi, met ’n fooi (tip) om mynwerkers te stimuleer. Gebruikers kan ’n maksfooi stel om te verseker dat hulle nie oorbetaal nie; die oorskot word terugbetaal.
+Gas meet die rekentejiede wat benodig word om operasies op Ethereum uit te voer, geprys in **gwei**. Byvoorbeeld, 'n transaksie wat 2,310,000 gwei (of 0.00231 ETH) kos, behels 'n gaslimiet en 'n basiskoste, met 'n tip om miners te motiveer. Gebruikers kan 'n maksfooi stel om te verseker dat hulle nie oorbetaal nie; die oorskot word terugbetaal.
 
-## **Die uitvoering van transaksies**
+## **Executing Transactions**
 
-Transaksies in Ethereum behels ’n sender en ’n ontvanger, wat óf gebruikers- óf smart contract-adresse kan wees. Hulle vereis ’n fooi en moet gemaind word. Essensiële inligting in ’n transaksie sluit die ontvanger, die sender se handtekening, waarde, opsionele data, gaslimiet en fooie in. Opmerklik is dat die sender se adres uit die handtekening afgelei word, wat die behoefte om dit in die transaksiedata op te neem uitskakel.
+Transaksies op Ethereum betrek 'n sender en 'n ontvanger, wat of gebruikersadresse of smart contract-adresse kan wees. Hulle vereis 'n fooi en moet gemyn word. Essensiële inligting in 'n transaksie sluit die ontvanger, die sender se handtekening, waarde, opsionele data, gaslimiet en fooie in. Belangrik: die sender se adres word uit die handtekening afgelei, wat die behoefte om dit in die transaksiedata op te neem, uitskakel.
 
-Hierdie praktyke en meganismes lê die fondament vir enigiemand wat met kripto-geldeenhede wil werk terwyl privaatheid en veiligheid prioriteit geniet.
+Hierdie praktyke en meganismes is fundamenteel vir enigiemand wat met kriptogeldeenhede wil handel terwyl hulle privaatheid en veiligheid prioritiseer.
 
-## Smart Contract Sekuriteit
+## Value-Centric Web3 Red Teaming
 
-- Mutasietoetsing om blinde kolletjies in toetsuite te vind:
+- Inventariseer waarde-draende komponente (signers, oracles, bridges, automation) om te verstaan wie fondse kan beweeg en hoe.
+- Koppel elke komponent aan relevante MITRE AADAPT taktieke om privilegie-eskalasie-paaie bloot te lê.
+- Oefen flash-loan/oracle/credential/cross-chain-aanvalskettings om impak te valideer en uitbuitbare voorwaardes te dokumenteer.
+
+{{#ref}}
+value-centric-web3-red-teaming.md
+{{#endref}}
+
+## Smart Contract Security
+
+- Mutation testing to find blind spots in test suites:
 
 {{#ref}}
 ../smart-contract-security/mutation-testing-with-slither.md
 {{#endref}}
 
-## Verwysings
+## References
 
 - [https://en.wikipedia.org/wiki/Proof_of_stake](https://en.wikipedia.org/wiki/Proof_of_stake)
 - [https://www.mycryptopedia.com/public-key-private-key-explained/](https://www.mycryptopedia.com/public-key-private-key-explained/)
@@ -191,13 +201,13 @@ Hierdie praktyke en meganismes lê die fondament vir enigiemand wat met kripto-g
 
 ## DeFi/AMM Exploitation
 
-As jy praktiese eksploitering van DEXes en AMMs navors (Uniswap v4 hooks, rounding/precision abuse, flash‑loan amplified threshold‑crossing swaps), kyk:
+As jy praktiese uitbuiting van DEXes en AMMs ondersoek (Uniswap v4 hooks, rounding/precision abuse, flash‑loan amplified threshold‑crossing swaps), kyk:
 
 {{#ref}}
 defi-amm-hook-precision.md
 {{#endref}}
 
-Vir multi-asset gewigte swembaddens wat virtuele balansies kas en besmet kan word wanneer `supply == 0`, bestudeer:
+Vir multi-asset gewigspools wat virtuele balansies cache en vergiftig kan word wanneer `supply == 0`, bestudeer:
 
 {{#ref}}
 defi-amm-virtual-balance-cache-exploitation.md
