@@ -91,11 +91,11 @@
   - [Defi/AMM Hook Precision](blockchain/blockchain-and-crypto-currencies/defi-amm-hook-precision.md)
   - [Defi Amm Virtual Balance Cache Exploitation](blockchain/blockchain-and-crypto-currencies/defi-amm-virtual-balance-cache-exploitation.md)
   - [Mutation Testing With Slither](blockchain/smart-contract-security/mutation-testing-with-slither.md)
+  - [Value Centric Web3 Red Teaming](blockchain/blockchain-and-crypto-currencies/value-centric-web3-red-teaming.md)
 - [Lua Sandbox Escape](generic-methodologies-and-resources/lua/bypass-lua-sandboxes/README.md)
 
 # 🧙‍♂️ Generic Hacking
 
-  - [Value Centric Web3 Red Teaming](blockchain/blockchain-and-crypto-currencies/value-centric-web3-red-teaming.md)
 - [Archive Extraction Path Traversal](generic-hacking/archive-extraction-path-traversal.md)
 - [Brute Force - CheatSheet](generic-hacking/brute-force.md)
 - [Esim Javacard Exploitation](generic-hacking/esim-javacard-exploitation.md)
