@@ -1,186 +1,196 @@
-# Blockchain and Crypto-Currencies
+# Blockchain na Sarafu za Crypto
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Misingi
+## Dhana za Msingi
 
-- **Smart Contracts** hufafanuliwa kama programu zinazotekelezwa kwenye blockchain wakati masharti fulani yanapotimizwa, zikiautomatisha utekelezaji wa makubaliano bila wadala.
-- **Decentralized Applications (dApps)** zinajengwa juu ya smart contracts, zikiwa na front-end rahisi kwa mtumiaji na back-end iliyo wazi na inayoweza kukaguliwa.
-- **Tokens & Coins** zinatofautishwa ambapo coins hutumika kama pesa za kidigitali, wakati tokens zinawakilisha thamani au umiliki katika muktadha maalum.
-- **Utility Tokens** zinatoa ufikiaji wa huduma, na **Security Tokens** zinaashiria umiliki wa mali.
-- **DeFi** inasimama kwa Decentralized Finance, inayo toa huduma za kifedha bila mamlaka za kati.
+- **Smart Contracts** huainishwa kama programu zinazotekelezwa kwenye blockchain wakati masharti fulani yanapotimizwa, zikitekeleza makubaliano moja kwa moja bila wasimamizi wa kati.
+- **Decentralized Applications (dApps)** zinajengwa juu ya Smart Contracts, zikiwa na mbele inayomfaa mtumiaji na back-end iliyo wazi na inayoweza ukaguzi.
+- **Tokens & Coins** zinatofautiana ambapo coins hutumika kama fedha za kidijitali, wakati tokens zinawakilisha thamani au umiliki katika muktadha maalum.
+- **Utility Tokens** huruhusu upatikanaji wa huduma, na **Security Tokens** zinaonyesha umiliki wa mali.
+- **DeFi** inamaanisha Decentralized Finance, ikitoa huduma za kifedha bila mamlaka za kati.
 - **DEX** na **DAOs** zinarejea kwa Decentralized Exchange Platforms na Decentralized Autonomous Organizations, mtawalia.
 
-## Mekanizimu za Makubaliano
+## Mbinu za Makubaliano
 
-Mekanizimu za makubaliano zinahakikisha usalama na uthibitisho wa miamala kwenye blockchain:
+Mbinu za makubaliano zinahakikisha uthibitisho salama na uliokubaliwa wa miamala kwenye blockchain:
 
-- **Proof of Work (PoW)** inategemea nguvu za kompyuta kwa ajili ya uthibitisho wa miamala.
-- **Proof of Stake (PoS)** inahitaji validators kuwa na kiasi fulani cha tokens, kupunguza matumizi ya nishati ikilinganishwa na PoW.
+- **Proof of Work (PoW)** inategemea nguvu za kompyuta kwa ajili ya uhakiki wa miamala.
+- **Proof of Stake (PoS)** inahitaji validators kumiliki kiasi fulani cha tokens, hivyo kupunguza matumizi ya nishati ikilinganishwa na PoW.
 
 ## Misingi ya Bitcoin
 
 ### Miamala
 
-Miamala ya Bitcoin inahusisha kuhamisha fedha kati ya anwani. Miamala inathibitishwa kupitia saini za dijitali, kuhakikisha kwamba mmiliki wa private key pekee ndiye anaweza kuanzisha uhamisho.
+Miamala ya Bitcoin inahusisha kuhamisha fedha kati ya anwani. Miamala inathibitishwa kwa kutumia saini za kidijitali, kuhakikisha kuwa mmiliki wa private key pekee ndiye anaweza kuanzisha uhamishaji.
 
 #### Vipengele Muhimu:
 
 - **Multisignature Transactions** zinahitaji saini nyingi ili kuidhinisha muamala.
-- Miamala ina **inputs** (chanzo cha fedha), **outputs** (mahali pa kwenda), **fees** (zinazolipwa kwa miners), na **scripts** (sheria za muamala).
+- Miamala ina vipengele vya **inputs** (chanzo cha fedha), **outputs** (mahali pa kwenda), **fees** (zinazolipwa kwa miners), na **scripts** (kanuni za muamala).
 
 ### Lightning Network
 
-Inalenga kuboresha uwezo wa Bitcoin kwa kuruhusu miamala mingi ndani ya channel, ikitangaza tu hali ya mwisho kwenye blockchain.
+Inalenga kuboresha scalability ya Bitcoin kwa kuruhusu miamala mingi ndani ya channel, na kutangaza tu hali ya mwisho kwenye blockchain.
 
-## Waswasi wa Faragha wa Bitcoin
+## Masuala ya Faragha ya Bitcoin
 
-Mashambulizi ya faragha, kama **Common Input Ownership** na **UTXO Change Address Detection**, yanatumia mifumo ya miamala. Mikakati kama **Mixers** na **CoinJoin** huboresha usiri kwa kuficha viungo vya miamala kati ya watumiaji.
+Mashambulizi ya faragha, kama **Common Input Ownership** na **UTXO Change Address Detection**, hutumia mifumo ya miamala. Mikakati kama **Mixers** na **CoinJoin** huboresha usiri kwa kuficha viunganishi vya miamala kati ya watumiaji.
 
 ## Kupata Bitcoins Bila Kujulikana
 
-Njia ni pamoja na biashara ya cash, kuchimba (mining), na kutumia mixers. **CoinJoin** huchanganya miamala mingi ili kufanya ufuatiliaji kuwa mgumu, wakati **PayJoin** inaficha CoinJoins kama miamala ya kawaida kwa faragha iliyoongezeka.
+Njia ni pamoja na biashara kwa pesa taslimu, mining, na kutumia mixers. **CoinJoin** huchanganya miamala mingi ili kufanya ufuatiliaji kuwa mgumu, wakati **PayJoin** inaficha CoinJoins kama miamala ya kawaida kwa ajili ya faragha zaidi.
 
-# Bitcoin Privacy Atacks
+# Mashambulizi ya Faragha ya Bitcoin
 
 # Muhtasari wa Mashambulizi ya Faragha ya Bitcoin
 
-Katika ulimwengu wa Bitcoin, faragha ya miamala na utambulisho wa watumiaji mara nyingi ni sababu za wasiwasi. Hapa kuna muhtasari rahisi wa njia kadhaa za kawaida ambazo washambuliaji wanaweza kuathiri faragha ya Bitcoin.
+Katika dunia ya Bitcoin, faragha ya miamala na usiri wa watumiaji mara nyingi ni chanzo cha wasiwasi. Hapa kuna muhtasari wa njia kadhaa za kawaida ambazo washambuliaji wanaweza kutumia kudhoofisha faragha ya Bitcoin.
 
 ## **Common Input Ownership Assumption**
 
-Kwa ujumla ni nadra kwa inputs kutoka kwa watumiaji tofauti kuchanganywa katika muamala mmoja kutokana na ugumu unaohusika. Kwa hivyo, **anachukuliwa mara nyingi kuwa anwani mbili za input katika muamala mmoja zinamilikiwa na mmiliki mmoja**.
+Kwa ujumla ni nadra kwa inputs kutoka kwa watumiaji tofauti kuchanganywa katika muamala mmoja kutokana na ugumu wa mchakato. Kwa hivyo, **anwani mbili za input katika muamala uleule mara nyingi huhukumiwa kuwa ni za mmiliki mmoja**.
 
 ## **UTXO Change Address Detection**
 
-UTXO, au **Unspent Transaction Output**, lazima itumike kikamilifu katika muamala. Ikiwa sehemu tu ya UTXO inatumwa kwa anwani nyingine, kiasi kilichobaki kinaenda kwenye anwani mpya ya change. Wachunguzi wanaweza kudhani anwani hii mpya ni ya mtumaji, hivyo kuingilia faragha.
+UTXO, au **Unspent Transaction Output**, lazima itumike yote katika muamala. Ikiwa sehemu tu ya UTXO imetumwa kwa anwani nyingine, sehemu inayobaki inaenda kwa anwani mpya ya mabadiliko. Waangalizi wanaweza kudhani kuwa anwani mpya ni ya mtumaji, hivyo kudhoofisha faragha.
 
 ### Mfano
 
-Ili kupunguza hili, huduma za kuchanganya (mixing) au kutumia anwani nyingi zinaweza kusaidia kuficha umiliki.
+Kupunguza hili, huduma za kuchanganya au kutumia anwani nyingi kunaweza kusaidia kuficha umiliki.
 
 ## **Social Networks & Forums Exposure**
 
-Watumiaji wakati mwingine hushiriki anwani zao za Bitcoin mtandaoni, na kufanya iwe rahisi **kuunganisha anwani na mmiliki wake**.
+Watumiaji wakati mwingine hushiriki anwani zao za Bitcoin mtandaoni, na kufanya iwe rahisi kuunganisha anwani na mmiliki wake.
 
 ## **Transaction Graph Analysis**
 
-Miamala inaweza kuonyeshwa kama grafu, ikifichua muunganiko inayoweza kuwepo kati ya watumiaji kulingana na mtiririko wa fedha.
+Miamala inaweza kuonyeshwa kama grafu, ikifichua uhusiano unaowezekana kati ya watumiaji kulingana na mtiririko wa fedha.
 
 ## **Unnecessary Input Heuristic (Optimal Change Heuristic)**
 
-Heuristic hii inategemea kuchambua miamala yenye inputs na outputs nyingi ili kubahatisha ni output gani ni change inarudishwa kwa mtumaji.
+Heuristic hii inategemea kuchambua miamala yenye inputs na outputs nyingi ili kubahatisha ni output gani ni change inayorudishwa kwa mtumaji.
 
 ### Mfano
 ```bash
 2 btc --> 4 btc
 3 btc     1 btc
 ```
-If adding more inputs makes the change output larger than any single input, it can confuse the heuristic.
+Ikiwa kuongeza zaidi inputs kunafanya the change output kuwa kubwa kuliko any single input, inaweza kuchanganya the heuristic.
 
 ## **Forced Address Reuse**
 
-Attackers may send small amounts to previously used addresses, hoping the recipient combines these with other inputs in future transactions, thereby linking addresses together.
+Washambuliaji wanaweza kutuma kiasi kidogo kwa addresses zilizotumika hapo awali, wakitumai mpokeaji atawaunganisha na inputs nyingine katika transactions za baadaye, na kwa hivyo kuunganisha addresses pamoja.
 
-### Correct Wallet Behavior
+### Tabia Sahihi ya Wallet
 
-Wallets should avoid using coins received on already used, empty addresses to prevent this privacy leak.
+Wallets zinapaswa kuepuka kutumia coins zilizopokelewa kwenye addresses ambazo tayari zimetumika na ni empty, ili kuzuia this privacy leak.
 
 ## **Other Blockchain Analysis Techniques**
 
-- **Exact Payment Amounts:** Miamala isiyokuwa na change inaonekana kuwa kati ya anwani mbili zinazomilikiwa na mtumiaji mmoja.
-- **Round Numbers:** Nambari za mduara katika muamala zinaashiria kuwa ni malipo, na output isiyo ya mduara ina uwezekano kuwa change.
-- **Wallet Fingerprinting:** Nafasi tofauti za utengenezaji miamala za wallets zinaweza kumsaidia mchambuzi kubaini software inayotumika na pengine anwani ya change.
-- **Amount & Timing Correlations:** Kufichua nyakati za muamala au kiasi kunaweza kufanya miamala iwekwe njia ya kufuatiliwa.
+- **Exact Payment Amounts:** Transactions bila change huenda zinatokea kati ya addresses mbili zinazomilikiwa na mtumiaji mmoja.
+- **Round Numbers:** Round number katika transaction inaashiria kuwa ni malipo, na output isiyo-round ina uwezekano kuwa change.
+- **Wallet Fingerprinting:** Wallets tofauti zinao patterns za uundaji wa transactions, ikiruhusu wachambuzi kutambua software iliyotumika na kwa uwezekano change address.
+- **Amount & Timing Correlations:** Kufichua transaction times au amounts kunaweza kufanya transactions ziweze kufuatiliwa.
 
 ## **Traffic Analysis**
 
-By monitoring network traffic, attackers can potentially link transactions or blocks to IP addresses, compromising user privacy. This is especially true if an entity operates many Bitcoin nodes, enhancing their ability to monitor transactions.
+Kwa kusimamia network traffic, washambuliaji wanaweza kuunganisha transactions au blocks na IP addresses, hivyo kuathiri user privacy. Hii ni hasa kweli ikiwa shirika linaendesha Bitcoin nodes nyingi, na hivyo kuongeza uwezo wao wa kufuatilia transactions.
 
 ## More
 
-For a comprehensive list of privacy attacks and defenses, visit [Bitcoin Privacy on Bitcoin Wiki](https://en.bitcoin.it/wiki/Privacy).
+Kwa orodha kamili ya privacy attacks na defenses, tembelea [Bitcoin Privacy on Bitcoin Wiki](https://en.bitcoin.it/wiki/Privacy).
 
-# Anonymous Bitcoin Transactions
+# Muamala za Bitcoin Bila Kutambulika
 
 ## Ways to Get Bitcoins Anonymously
 
-- **Cash Transactions**: Acquiring bitcoin through cash.
-- **Cash Alternatives**: Purchasing gift cards and exchanging them online for bitcoin.
-- **Mining**: The most private method to earn bitcoins is through mining, especially when done alone because mining pools may know the miner's IP address. [Mining Pools Information](https://en.bitcoin.it/wiki/Pooled_mining)
-- **Theft**: Theoretically, stealing bitcoin could be another method to acquire it anonymously, although it's illegal and not recommended.
+- **Cash Transactions**: Kupata bitcoin kwa kutumia cash.
+- **Cash Alternatives**: Kununua gift cards na kuzibadilisha mtandaoni kwa bitcoin.
+- **Mining**: Njia ya siri zaidi ya kupata bitcoins ni kupitia mining, hasa ukiifanya peke yako kwa sababu mining pools yanaweza kujua IP address ya miner. [Mining Pools Information](https://en.bitcoin.it/wiki/Pooled_mining)
+- **Theft**: Kwa nadharia, kuiba bitcoin inaweza kuwa njia nyingine ya kuipata bila kutambulika, ingawa ni kinyume cha sheria na haipendekezwi.
 
 ## Mixing Services
 
-By using a mixing service, a user can **send bitcoins** and receive **different bitcoins in return**, which makes tracing the original owner difficult. Yet, this requires trust in the service not to keep logs and to actually return the bitcoins. Alternative mixing options include Bitcoin casinos.
+Kwa kutumia mixing service, mtumiaji anaweza **send bitcoins** na kupokea **different bitcoins in return**, jambo ambalo linafanya kufuatilia mmiliki wa awali kuwa vigumu. Hata hivyo, hili linahitaji kuamini huduma hiyo kuwa haitahifadhi logs na kwamba itarejesha bitcoins kwa hakika. Chaguo mbadala za mixing ni pamoja na Bitcoin casinos.
 
 ## CoinJoin
 
-**CoinJoin** merges multiple transactions from different users into one, complicating the process for anyone trying to match inputs with outputs. Despite its effectiveness, transactions with unique input and output sizes can still potentially be traced.
+CoinJoin inaunganisha transactions nyingi kutoka kwa watumiaji tofauti kuwa moja, ikifanya mchakato kuwa mgumu kwa yeyote anayetaka kulinganisha inputs na outputs. Licha ya ufanisi wake, transactions zenye ukubwa wa input na output wa kipekee bado zinaweza kufuatiliwa.
 
-Example transactions that may have used CoinJoin include `402d3e1df685d1fdf82f36b220079c1bf44db227df2d676625ebcbee3f6cb22a` and `85378815f6ee170aa8c26694ee2df42b99cff7fa9357f073c1192fff1f540238`.
+Mifano ya transactions ambazo zinaweza kuwa zimetumia CoinJoin ni `402d3e1df685d1fdf82f36b220079c1bf44db227df2d676625ebcbee3f6cb22a` na `85378815f6ee170aa8c26694ee2df42b99cff7fa9357f073c1192fff1f540238`.
 
-For more information, visit [CoinJoin](https://coinjoin.io/en). For a similar service on Ethereum, check out [Tornado Cash](https://tornado.cash), which anonymizes transactions with funds from miners.
+Kwa taarifa zaidi, tembelea [CoinJoin](https://coinjoin.io/en). Kwa huduma kama hiyo kwenye Ethereum, angalia [Tornado Cash](https://tornado.cash), ambayo hufanya transactions kuwa za kutojulikana kwa kutumia fedha kutoka kwa miners.
 
 ## PayJoin
 
-A variant of CoinJoin, **PayJoin** (or P2EP), disguises the transaction among two parties (e.g., a customer and a merchant) as a regular transaction, without the distinctive equal outputs characteristic of CoinJoin. This makes it extremely hard to detect and could invalidate the common-input-ownership heuristic used by transaction surveillance entities.
+Toleo la CoinJoin, **PayJoin** (au P2EP), linavificha transaction kati ya pande mbili (mfano, mteja na muuzaji) kama transaction ya kawaida, bila outputs sawa zinazotambulika za CoinJoin. Hii inafanya iwe vigumu sana kugundua na inaweza kuharibu common-input-ownership heuristic inayotumika na vyombo vinavyofuatilia transactions.
 ```plaintext
 2 btc --> 3 btc
 5 btc     4 btc
 ```
-Miamala kama ile hapo juu inaweza kuwa PayJoin, ikiboresha faragha huku ikibaki isioweza kutofautishwa na miamala ya kawaida za Bitcoin.
+Transactions like the above could be PayJoin, enhancing privacy while remaining indistinguishable from standard bitcoin transactions.
 
-**Matumizi ya PayJoin yanaweza kuvuruga kwa kiasi kikubwa mbinu za jadi za ufuatiliaji**, na kuifanya kuwa maendeleo yenye matumaini katika jitihada za kupata faragha ya miamala.
+**The utilization of PayJoin could significantly disrupt traditional surveillance methods**, making it a promising development in the pursuit of transactional privacy.
 
-# Mbinu Bora za Faragha katika Sarafu za Kidijitali
+# Mazoea Bora kwa Usiri katika Sarafu za Kripto
 
-## **Wallet Synchronization Techniques**
+## **Mbinu za Kulinganisha Pochi**
 
-Ili kudumisha faragha na usalama, kusawazisha wallets na blockchain ni muhimu. Mbinu mbili zinajitokeza:
+Ili kudumisha usiri na usalama, kulinganisha pochi na blockchain ni muhimu. Mbinu mbili zinajitokeza:
 
-- **Full node**: Kwa kupakua blockchain yote, full node huhakikishia faragha ya juu kabisa. Miamala yote iliyofanywa huhifadhiwa kwa ndani, ikifanya isiwezekane kwa wapinzani kutambua ni miamala gani au anwani gani mtumiaji anavutiwa nazo.
-- **Client-side block filtering**: Mbinu hii inahusisha kuunda vichujio kwa kila block ndani ya blockchain, ikiruhusu wallets kutambua miamala muhimu bila kufichua maslahi maalum kwa watazamaji wa mtandao. Wallets nyepesi hupakua vichujio hivi, na kuchukua blocks kamili tu wakati patokanapo na anwani za mtumiaji.
+- **Full node**: Kwa kupakua blockchain nzima, full node inahakikisha usiri mkubwa. Miamala yote iliyofanywa huhifadhiwa kwa njia ya ndani, na kufanya iwe vigumu kwa wapinzani kubaini ni miamala au anwani gani mtumiaji anaiangalia.
+- **Client-side block filtering**: Mbinu hii inahusisha kuunda vichujio kwa kila block kwenye blockchain, ikiruhusu pochi kubaini miamala inayohusiana bila kufichua maslahi maalum kwa walioangalia mtandao. Lightweight wallets hupakua vichujio hivi, zikipakua blocks kamili tu wakati kuna mlinganisho na anwani za mtumiaji.
 
-## **Utilizing Tor for Anonymity**
+## **Kutumia Tor kwa Kutofahamika**
 
-Kwa kuwa Bitcoin inafanya kazi kwenye mtandao wa peer-to-peer, inashauriwa kutumia Tor kuficha anwani yako ya IP, hivyo kuboresha faragha wakati wa kuingiliana na mtandao.
+Kwa kuwa Bitcoin inafanya kazi kwenye mtandao wa peer-to-peer, inashauriwa kutumia Tor kuficha anwani yako ya IP, kuboresha usiri wakati wa kuingiliana na mtandao.
 
-## **Preventing Address Reuse**
+## **Kuzuia Kutumika Tena kwa Anwani**
 
-Ili kulinda faragha, ni muhimu kutumia anwani mpya kwa kila muamala. Kutumia anwani tena kunaweza kuhatarisha faragha kwa kuunganisha miamala na chombo kimoja. Wallets za kisasa zinaepuka matumizi ya anwani mara kwa mara kupitia muundo wao.
+Ili kulinda usiri, ni muhimu kutumia anwani mpya kwa kila muamala. Kutumia tena anwani kunaweza kuhatarisha usiri kwa kuunganisha miamala na kiumbe kimoja. Wallets za kisasa zinatilia shaka matumizi ya anwani mara nyingi kupitia muundo wao.
 
-## **Strategies for Transaction Privacy**
+## **Mikakati ya Usiri wa Muamala**
 
-- **Multiple transactions**: Kugawa malipo katika miamala kadhaa kunaweza kuficha kiasi cha muamala, na kukwamisha mashambulizi ya faragha.
-- **Change avoidance**: Kuchagua miamala ambazo hazihitaji change outputs huongeza faragha kwa kuvuruga mbinu za utambuzi wa change.
-- **Multiple change outputs**: Iwapo kuepuka change hawezekani, kuzalisha multiple change outputs bado kunaweza kuboresha faragha.
+- **Multiple transactions**: Kugawanya malipo katika miamala kadhaa kunaweza kuficha kiasi cha muamala, kuzuia mashambulizi ya usiri.
+- **Change avoidance**: Kuchagua miamala ambayo hayahitaji change outputs kunaboresha usiri kwa kuvuruga mbinu za kugundua change.
+- **Multiple change outputs**: Ikiwa kuepuka change haiwezekani, kuzalisha multiple change outputs bado kunaweza kuboresha usiri.
 
-# **Monero: A Beacon of Anonymity**
+# **Monero: Mwanga wa Kutofahamika**
 
-Monero inashughulikia haja ya kutokujulikana kabisa katika miamala ya kidijitali, ikiweka kiwango cha juu cha faragha.
+Monero inashughulikia haja ya kutofahamika kabisa katika miamala ya kidijitali, ikiweka viwango vya juu vya usiri.
 
-# **Ethereum: Gas and Transactions**
+# **Ethereum: Gas na Miamala**
 
-## **Understanding Gas**
+## **Kuelewa Gas**
 
-Gas hupima juhudi za kihesabu zinazohitajika kutekeleza operesheni kwenye Ethereum, na bei yake iko katika **gwei**. Kwa mfano, muamala unaogharimu 2,310,000 gwei (au 0.00231 ETH) unajumuisha gas limit na base fee, pamoja na tip ili kuwahamasisha miners. Watumiaji wanaweza kuweka max fee kuhakikisha hawalipi kupita kiasi, na ziada ikarudishwa.
+Gas hupima jitihada za kihesabu zinazohitajika kutekeleza shughuli kwenye Ethereum, na inauzwa kwa **gwei**. Kwa mfano, muamala unaogharimu 2,310,000 gwei (au 0.00231 ETH) unajumuisha gas limit na base fee, pamoja na tip kwa kuwahamasisha miners. Watumiaji wanaweza kuweka max fee ili kuhakikisha hawalipii ziada, na ziada kurudishwa.
 
-## **Executing Transactions**
+## **Kutekeleza Miamala**
 
-Miamala kwenye Ethereum inahusisha mtumaji na mpokeaji, ambao wanaweza kuwa anwani za watumiaji au za smart contract. Zinahitaji ada na lazima ziminingwe. Taarifa muhimu katika muamala ni pamoja na mpokeaji, saini ya mtumaji, thamani, data ya hiari, gas limit, na ada. Kwa kutambuliwa, anwani ya mtumaji hutolewa kutokana na saini, ikifanya isihitajike kuwa kwenye data ya muamala.
+Miamala kwenye Ethereum inahusisha mtumaji na mpokeaji, ambao wanaweza kuwa anwani za watumiaji au smart contract. Zinahitaji ada na lazima zichimbwe. Taarifa muhimu katika muamala ni pamoja na mpokeaji, saini ya mtumaji, thamani, data ya hiari, gas limit, na ada. Kwa ujumla, anwani ya mtumaji hutambuliwa kutoka kwa saini, hivyo haitakiwi kuingizwa katika data ya muamala.
 
-Mazoezi na mekanisimu hizi ni misingi kwa yeyote anayetaka kushiriki na sarafu za kidijitali huku akiipa kipaumbele faragha na usalama.
+Haya mazoea na mifumo ni msingi kwa yeyote anayetaka kuingiliana na sarafu za kripto huku akiweka kipaumbele kwenye usiri na usalama.
+
+## Value-Centric Web3 Red Teaming
+
+- Orodhesha sehemu zinazoleta thamani (signers, oracles, bridges, automation) ili kuelewa nani anaweza kusogeza fedha na jinsi.
+- Ramisha kila sehemu kwa mbinu zinazofaa za MITRE AADAPT ili kufichua njia za kuongeza mamlaka.
+- Fanyeni mazoezi ya mnyororo wa mashambulizi ya flash-loan/oracle/credential/cross-chain ili kuthibitisha athari na kuandika masharti yanayoweza kutumika.
+
+{{#ref}}
+value-centric-web3-red-teaming.md
+{{#endref}}
 
 ## Smart Contract Security
 
-- Mutation testing to find blind spots in test suites:
+- Mutation testing ili kupata sehemu zisizoonekana katika test suites:
 
 {{#ref}}
 ../smart-contract-security/mutation-testing-with-slither.md
 {{#endref}}
 
-## References
+## Marejeo
 
 - [https://en.wikipedia.org/wiki/Proof_of_stake](https://en.wikipedia.org/wiki/Proof_of_stake)
 - [https://www.mycryptopedia.com/public-key-private-key-explained/](https://www.mycryptopedia.com/public-key-private-key-explained/)
@@ -191,13 +201,13 @@ Mazoezi na mekanisimu hizi ni misingi kwa yeyote anayetaka kushiriki na sarafu z
 
 ## DeFi/AMM Exploitation
 
-Ikiwa unatafiti uvunjaji wa vitendo wa DEXes na AMMs (Uniswap v4 hooks, rounding/precision abuse, flash‑loan amplified threshold‑crossing swaps), angalia:
+If you are researching practical exploitation of DEXes and AMMs (Uniswap v4 hooks, rounding/precision abuse, flash‑loan amplified threshold‑crossing swaps), check:
 
 {{#ref}}
 defi-amm-hook-precision.md
 {{#endref}}
 
-Kwa pools zenye mali nyingi za uzito ambazo zinahifadhi virtual balances na zinaweza kuathiriwa (poisoned) wakati `supply == 0`, soma:
+For multi-asset weighted pools that cache virtual balances and can be poisoned when `supply == 0`, study:
 
 {{#ref}}
 defi-amm-virtual-balance-cache-exploitation.md
