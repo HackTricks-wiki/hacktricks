@@ -755,6 +755,14 @@ If a driver exposes an arbitrary kernel read/write primitive (common in poorly d
 arbitrary-kernel-rw-token-theft.md
 {{#endref}}
 
+#### Registry hive memory corruption primitives
+
+Modern hive vulnerabilities let you groom deterministic layouts, abuse writable HKLM/HKU descendants, and convert metadata corruption into kernel paged-pool overflows without a custom driver. Learn the full chain here:
+
+{{#ref}}
+windows-registry-hive-exploitation.md
+{{#endref}}
+
 #### Abusing missing FILE_DEVICE_SECURE_OPEN on device objects (LPE + EDR kill)
 
 Some signed third‑party drivers create their device object with a strong SDDL via IoCreateDeviceSecure but forget to set FILE_DEVICE_SECURE_OPEN in DeviceCharacteristics. Without this flag, the secure DACL is not enforced when the device is opened through a path containing an extra component, letting any unprivileged user obtain a handle by using a namespace path like:
