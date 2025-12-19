@@ -176,6 +176,16 @@ Transactions in Ethereum involve a sender and a recipient, which can be either u
 
 These practices and mechanisms are foundational for anyone looking to engage with cryptocurrencies while prioritizing privacy and security.
 
+## Value-Centric Web3 Red Teaming
+
+- Inventory value-bearing components (signers, oracles, bridges, automation) to understand who can move funds and how.
+- Map each component to relevant MITRE AADAPT tactics to expose privilege escalation paths.
+- Rehearse flash-loan/oracle/credential/cross-chain attack chains to validate impact and document exploitable preconditions.
+
+{{#ref}}
+value-centric-web3-red-teaming.md
+{{#endref}}
+
 ## Smart Contract Security
 
 - Mutation testing to find blind spots in test suites:

