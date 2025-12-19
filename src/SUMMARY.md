@@ -878,6 +878,7 @@
   - [Virtualbox Slirp Nat Packet Heap Exploitation](binary-exploitation/libc-heap/virtualbox-slirp-nat-packet-heap-exploitation.md)
 - [Common Exploiting Problems](binary-exploitation/common-exploiting-problems.md)
 - [Adreno A7xx Sds Rb Priv Bypass Gpu Smmu Kernel Rw](binary-exploitation/linux-kernel-exploitation/adreno-a7xx-sds-rb-priv-bypass-gpu-smmu-kernel-rw.md)
+- [Af Unix Msg Oob Uaf Skb Primitives](binary-exploitation/linux-kernel-exploitation/af-unix-msg-oob-uaf-skb-primitives.md)
 - [Arm64 Static Linear Map Kaslr Bypass](binary-exploitation/linux-kernel-exploitation/arm64-static-linear-map-kaslr-bypass.md)
 - [Ksmbd Streams Xattr Oob Write Cve 2025 37947](binary-exploitation/linux-kernel-exploitation/ksmbd-streams_xattr-oob-write-cve-2025-37947.md)
 - [Linux kernel exploitation - toctou](binary-exploitation/linux-kernel-exploitation/posix-cpu-timers-toctou-cve-2025-38352.md)
