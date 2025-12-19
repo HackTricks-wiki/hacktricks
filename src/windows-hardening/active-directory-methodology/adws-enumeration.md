@@ -14,6 +14,8 @@ Because the traffic is encapsulated inside these binary SOAP frames and travels 
 * Freedom to collect from **non-Windows hosts (Linux, macOS)** by tunnelling 9389/TCP through a SOCKS proxy.
 * The same data you would obtain via LDAP (users, groups, ACLs, schema, etc.) and the ability to perform **writes** (e.g. `msDs-AllowedToActOnBehalfOfOtherIdentity` for **RBCD**).
 
+ADWS interactions are implemented over WS-Enumeration: every query starts with an `Enumerate` message that defines the LDAP filter/attributes and returns an `EnumerationContext` GUID, followed by one or more `Pull` messages that stream up to the server-defined result window. Contexts age out after ~30 minutes, so tooling either needs to page results or split filters (prefix queries per CN) to avoid losing state. When asking for security descriptors, specify the `LDAP_SERVER_SD_FLAGS_OID` control to omit SACLs, otherwise ADWS simply drops the `nTSecurityDescriptor` attribute from its SOAP response.
+
 > NOTE: ADWS is also used by many RSAT GUI/PowerShell tools, so traffic may blend with legitimate admin activity.
 
 ## SoaPy – Native Python Client
@@ -28,11 +30,46 @@ Because the traffic is encapsulated inside these binary SOAP frames and travels 
 * **BOFHound output mode** for direct ingestion into BloodHound.
 * `--parse` flag to prettify timestamps / `userAccountControl` when human readability is required.
 
+### Targeted collection flags & write operations
+
+SoaPy ships with curated switches that replicate the most common LDAP hunting tasks over ADWS: `--users`, `--computers`, `--groups`, `--spns`, `--asreproastable`, `--admins`, `--constrained`, `--unconstrained`, `--rbcds`, plus raw `--query` / `--filter` knobs for custom pulls. Pair those with write primitives such as `--rbcd <source>` (sets `msDs-AllowedToActOnBehalfOfOtherIdentity`), `--spn <service/cn>` (SPN staging for targeted Kerberoasting) and `--asrep` (flip `DONT_REQ_PREAUTH` in `userAccountControl`).
+
+Example targeted SPN hunt that only returns `samAccountName` and `servicePrincipalName`:
+
+```bash
+soapy corp.local/alice:'Winter2025!'@dc01.corp.local \
+      --spns -f samAccountName,servicePrincipalName --parse
+```
+
+Use the same host/credentials to immediately weaponise findings: dump RBCD-capable objects with `--rbcds`, then apply `--rbcd 'WEBSRV01$' --account 'FILE01$'` to stage a Resource-Based Constrained Delegation chain (see [Resource-Based Constrained Delegation](resource-based-constrained-delegation.md) for the full abuse path).
+
 ### Installation (operator host)
 
 ```bash
 python3 -m pip install soapy-adws   # or git clone && pip install -r requirements.txt
 ```
+
+## SOAPHound – High-Volume ADWS Collection (Windows)
+
+[FalconForce SOAPHound](https://github.com/FalconForceTeam/SOAPHound) is a .NET collector that keeps all LDAP interactions inside ADWS and emits BloodHound v4-compatible JSON. It builds a complete cache of `objectSid`, `objectGUID`, `distinguishedName` and `objectClass` once (`--buildcache`), then re-uses it for high-volume `--bhdump`, `--certdump` (ADCS), or `--dnsdump` (AD-integrated DNS) passes so only ~35 critical attributes ever leave the DC. AutoSplit (`--autosplit --threshold <N>`) automatically shards queries by CN prefix to stay under the 30-minute EnumerationContext timeout in large forests.
+
+Typical workflow on a domain-joined operator VM:
+
+```powershell
+# Build cache (JSON map of every object SID/GUID)
+SOAPHound.exe --buildcache -c C:\temp\corp-cache.json
+
+# BloodHound collection in autosplit mode, skipping LAPS noise
+SOAPHound.exe -c C:\temp\corp-cache.json --bhdump \
+              --autosplit --threshold 1200 --nolaps \
+              -o C:\temp\BH-output
+
+# ADCS & DNS enrichment for ESC chains
+SOAPHound.exe -c C:\temp\corp-cache.json --certdump -o C:\temp\BH-output
+SOAPHound.exe --dnsdump -o C:\temp\dns-snapshot
+```
+
+Exported JSON slots directly into SharpHound/BloodHound workflows—see [BloodHound methodology](bloodhound.md) for downstream graphing ideas. AutoSplit makes SOAPHound resilient on multi-million object forests while keeping the query count lower than ADExplorer-style snapshots.
 
 ## Stealth AD Collection Workflow
 
@@ -74,39 +111,14 @@ soapy ludus.domain/jdoe:'P@ssw0rd'@dc.ludus.domain \
       msDs-AllowedToActOnBehalfOfOtherIdentity 'B:32:01....'
 ```
 
-Combine this with `s4u2proxy`/`Rubeus /getticket` for a full **Resource-Based Constrained Delegation** chain.
-
-## Detection & Hardening
-
-### Verbose ADDS Logging
-
-Enable the following registry keys on Domain Controllers to surface expensive / inefficient searches coming from ADWS (and LDAP):
-
-```powershell
-New-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\NTDS\Diagnostics' -Name '15 Field Engineering' -Value 5 -Type DWORD
-New-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\NTDS\Parameters' -Name 'Expensive Search Results Threshold' -Value 1 -Type DWORD
-New-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\NTDS\Parameters' -Name 'Search Time Threshold (msecs)' -Value 0 -Type DWORD
-```
-
-Events will appear under **Directory-Service** with the full LDAP filter, even when the query arrived via ADWS.
-
-### SACL Canary Objects
-
-1. Create a dummy object (e.g. disabled user `CanaryUser`).
-2. Add an **Audit** ACE for the _Everyone_ principal, audited on **ReadProperty**.
-3. Whenever an attacker performs `(servicePrincipalName=*)`, `(objectClass=user)` etc. the DC emits **Event 4662** which contains the real user SID – even when the request is proxied or originates from ADWS.
-
-Elastic pre-built rule example:
-
-```kql
-(event.code:4662 and not user.id:"S-1-5-18") and winlog.event_data.AccessMask:"0x10"
-```
+Combine this with `s4u2proxy`/`Rubeus /getticket` for a full **Resource-Based Constrained Delegation** chain (see [Resource-Based Constrained Delegation](resource-based-constrained-delegation.md)).
 
 ## Tooling Summary
 
 | Purpose | Tool | Notes |
 |---------|------|-------|
 | ADWS enumeration | [SoaPy](https://github.com/logangoins/soapy) | Python, SOCKS, read/write |
+| High-volume ADWS dump | [SOAPHound](https://github.com/FalconForceTeam/SOAPHound) | .NET, cache-first, BH/ADCS/DNS modes |
 | BloodHound ingest | [BOFHound](https://github.com/bohops/BOFHound) | Converts SoaPy/ldapsearch logs |
 | Cert compromise | [Certipy](https://github.com/ly4k/Certipy) | Can be proxied through same SOCKS |
 
@@ -116,5 +128,7 @@ Elastic pre-built rule example:
 * [SoaPy GitHub](https://github.com/logangoins/soapy)
 * [BOFHound GitHub](https://github.com/bohops/BOFHound)
 * [Microsoft – MC-NBFX, MC-NBFSE, MS-NNS, MC-NMF specifications](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-nbfx/)
+* [IBM X-Force Red – Stealthy Enumeration of Active Directory Environments Through ADWS](https://logan-goins.com/2025-02-21-stealthy-enum-adws/)
+* [FalconForce – SOAPHound tool to collect Active Directory data via ADWS](https://falconforce.nl/soaphound-tool-to-collect-active-directory-data-via-adws/)
 
 {{#include ../../banners/hacktricks-training.md}}
