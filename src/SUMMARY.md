@@ -375,6 +375,7 @@
     - [Objection Tutorial](mobile-pentesting/android-app-pentesting/frida-tutorial/objection-tutorial.md)
   - [Google CTF 2018 - Shall We Play a Game?](mobile-pentesting/android-app-pentesting/google-ctf-2018-shall-we-play-a-game.md)
   - [In Memory Jni Shellcode Execution](mobile-pentesting/android-app-pentesting/in-memory-jni-shellcode-execution.md)
+  - [Inputmethodservice Ime Abuse](mobile-pentesting/android-app-pentesting/inputmethodservice-ime-abuse.md)
   - [Insecure In App Update Rce](mobile-pentesting/android-app-pentesting/insecure-in-app-update-rce.md)
   - [Install Burp Certificate](mobile-pentesting/android-app-pentesting/install-burp-certificate.md)
   - [Intent Injection](mobile-pentesting/android-app-pentesting/intent-injection.md)
