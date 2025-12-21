@@ -35,6 +35,20 @@ Invoke-Command -ComputerName bizintel -Credential ta\redsuit -ScriptBlock {
 }
 ```
 
+### Remote Credential Guard (RCG)
+
+**Remote Credential Guard** keeps the user's TGT on the originating workstation while still allowing the RDP session to request new Kerberos service tickets on the next hop. Enable **Computer Configuration > Administrative Templates > System > Credentials Delegation > Restrict delegation of credentials to remote servers** and select **Require Remote Credential Guard**, then connect with `mstsc.exe /remoteGuard /v:server1` instead of falling back to CredSSP.
+
+Microsoft broke RCG for multi-hop access on Windows 11 22H2+ until the **April 2024 cumulative updates** (KB5036896/KB5036899/KB5036894). Patch the client and intermediary server or the second hop will still fail. Quick hotfix check:
+
+```powershell
+("KB5036896","KB5036899","KB5036894") | ForEach-Object {
+    Get-HotFix -Id $_ -ErrorAction SilentlyContinue
+}
+```
+
+With those builds installed, the RDP hop can satisfy downstream Kerberos challenges without exposing reusable secrets on the first server.
+
 ## Workarounds
 
 ### Invoke Command
@@ -57,7 +71,7 @@ A solution to bypass the double hop problem involves using `Register-PSSessionCo
 ```bash
 Register-PSSessionConfiguration -Name doublehopsess -RunAsCredential domain_name\username
 Restart-Service WinRM
-Enter-PSSession -ConfigurationName doublehopsess -ComputerName <pc_name> -Credential domain_name\username
+Enter-PSSession -ConfigurationName doublehopsess -ComputerName TARGET_PC -Credential domain_name\username
 klist
 ```
 
@@ -94,15 +108,29 @@ To resolve `Connection reset` errors, permissions might need to be updated to al
 icacls.exe "C:\Users\redsuit\Documents\ssh\OpenSSH-Win64" /grant Everyone:RX /T
 ```
 
+### LSA Whisperer CacheLogon (Advanced)
+
+**LSA Whisperer** (2024) exposes the `msv1_0!CacheLogon` package call so you can seed an existing *network logon* with a known NT hash instead of creating a fresh session with `LogonUser`. By injecting the hash into the logon session that WinRM/PowerShell already opened on hop #1, that host can authenticate to hop #2 without storing explicit credentials or generating extra 4624 events.
+
+1. Get code execution inside LSASS (either disable/abuse PPL or run on a lab VM you control).
+2. Enumerate logon sessions (e.g. `lsa.exe sessions`) and capture the LUID corresponding to your remoting context.
+3. Pre-compute the NT hash and feed it to `CacheLogon`, then clear it when done.
+
+```powershell
+lsa.exe cachelogon --session 0x3e4 --domain ta --username redsuit --nthash a7c5480e8c1ef0ffec54e99275e6e0f7
+lsa.exe cacheclear --session 0x3e4
+```
+
+After the cache seed, rerun `Invoke-Command`/`New-PSSession` from hop #1: LSASS will reuse the injected hash to satisfy Kerberos/NTLM challenges for the second hop, neatly bypassing the double hop constraint. The trade-off is heavier telemetry (code execution in LSASS) so keep it for high-friction environments where CredSSP/RCG are disallowed.
+
 ## References
 
 - [https://techcommunity.microsoft.com/t5/ask-the-directory-services-team/understanding-kerberos-double-hop/ba-p/395463?lightbox-message-images-395463=102145i720503211E78AC20](https://techcommunity.microsoft.com/t5/ask-the-directory-services-team/understanding-kerberos-double-hop/ba-p/395463?lightbox-message-images-395463=102145i720503211E78AC20)
 - [https://posts.slayerlabs.com/double-hop/](https://posts.slayerlabs.com/double-hop/)
 - [https://learn.microsoft.com/en-gb/archive/blogs/sergey_babkins_blog/another-solution-to-multi-hop-powershell-remoting](https://learn.microsoft.com/en-gb/archive/blogs/sergey_babkins_blog/another-solution-to-multi-hop-powershell-remoting)
 - [https://4sysops.com/archives/solve-the-powershell-multi-hop-problem-without-using-credssp/](https://4sysops.com/archives/solve-the-powershell-multi-hop-problem-without-using-credssp/)
+- [https://support.microsoft.com/en-au/topic/april-9-2024-kb5036896-os-build-17763-5696-efb580f1-2ce4-4695-b76c-d2068a00fb92](https://support.microsoft.com/en-au/topic/april-9-2024-kb5036896-os-build-17763-5696-efb580f1-2ce4-4695-b76c-d2068a00fb92)
+- [https://specterops.io/blog/2024/04/17/lsa-whisperer/](https://specterops.io/blog/2024/04/17/lsa-whisperer/)
 
 
 {{#include ../../banners/hacktricks-training.md}}
-
-
-
