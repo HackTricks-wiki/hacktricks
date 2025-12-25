@@ -57,10 +57,13 @@ Tools that could help to search for kernel exploits are:
 
 Always **search the kernel version in Google**, maybe your kernel version is written in some kernel exploit and then you will be sure that this exploit is valid.
 
-Additional kernel exploitation technique:
+Additional kernel exploitation techniques:
 
 {{#ref}}
 ../../binary-exploitation/linux-kernel-exploitation/adreno-a7xx-sds-rb-priv-bypass-gpu-smmu-kernel-rw.md
+{{#endref}}
+{{#ref}}
+../../binary-exploitation/linux-kernel-exploitation/arm64-static-linear-map-kaslr-bypass.md
 {{#endref}}
 
 ### CVE-2016-5195 (DirtyCow)
