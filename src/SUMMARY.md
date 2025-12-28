@@ -408,6 +408,7 @@
   - [iOS UIPasteboard](mobile-pentesting/ios-pentesting/ios-uipasteboard.md)
   - [iOS WebViews](mobile-pentesting/ios-pentesting/ios-webviews.md)
   - [Itunesstored Bookassetd Sandbox Escape](mobile-pentesting/ios-pentesting/itunesstored-bookassetd-sandbox-escape.md)
+  - [Zero Click Messaging Image Parser Chains](mobile-pentesting/ios-pentesting/zero-click-messaging-image-parser-chains.md)
 - [Cordova Apps](mobile-pentesting/cordova-apps.md)
 - [Xamarin Apps](mobile-pentesting/xamarin-apps.md)
 
