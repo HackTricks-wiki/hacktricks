@@ -648,6 +648,7 @@
   - [Java DNS Deserialization, GadgetProbe and Java Deserialization Scanner](pentesting-web/deserialization/java-dns-deserialization-and-gadgetprobe.md)
   - [Basic Java Deserialization (ObjectInputStream, readObject)](pentesting-web/deserialization/basic-java-deserialization-objectinputstream-readobject.md)
   - [Java Signedobject Gated Deserialization](pentesting-web/deserialization/java-signedobject-gated-deserialization.md)
+  - [Livewire Hydration Synthesizer Abuse](pentesting-web/deserialization/livewire-hydration-synthesizer-abuse.md)
   - [PHP - Deserialization + Autoload Classes](pentesting-web/deserialization/php-deserialization-+-autoload-classes.md)
   - [CommonsCollection1 Payload - Java Transformers to Rutime exec() and Thread Sleep](pentesting-web/deserialization/java-transformers-to-rutime-exec-payload.md)
   - [Basic .Net deserialization (ObjectDataProvider gadget, ExpandedWrapper, and Json.Net)](pentesting-web/deserialization/basic-.net-deserialization-objectdataprovider-gadgets-expandedwrapper-and-json.net.md)
