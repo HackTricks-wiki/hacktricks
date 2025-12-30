@@ -17,7 +17,9 @@ The goal of this phase is to obtain all the **companies owned by the main compan
 
 First of all, we need to know which **other companies are owned by the main company**.\
 One option is to visit [https://www.crunchbase.com/](https://www.crunchbase.com), **search** for the **main company**, and **click** on "**acquisitions**". There you will see other companies acquired by the main one.\
-Other option is to visit the **Wikipedia** page of the main company and search for **acquisitions**.
+Other option is to visit the **Wikipedia** page of the main company and search for **acquisitions**.\
+For public companies, check **SEC/EDGAR filings**, **investor relations** pages, or local corporate registries (e.g., **Companies House** in the UK).\
+For global corporate trees and subsidiaries, try **OpenCorporates** ([https://opencorporates.com/](https://opencorporates.com/)) and the **GLEIF LEI** database ([https://www.gleif.org/](https://www.gleif.org/)).
 
 > Ok, at this point you should know all the companies inside the scope. Lets figure out how to find their assets.
 
@@ -27,7 +29,7 @@ An autonomous system number (**ASN**) is a **unique number** assigned to an **au
 An **AS** consists of **blocks** of **IP addresses** which have a distinctly defined policy for accessing external networks and are administered by a single organisation but may be made up of several operators.
 
 It's interesting to find if the **company have assigned any ASN** to find its **IP ranges.** It will be interested to perform a **vulnerability test** against all the **hosts** inside the **scope** and **look for domains** inside these IPs.\
-You can **search** by company **name**, by **IP** or by **domain** in [**https://bgp.he.net/**](https://bgp.he.net)**.**\
+You can **search** by company **name**, by **IP** or by **domain** in [**https://bgp.he.net/**](https://bgp.he.net)**,** [**https://bgpview.io/**](https://bgpview.io/) **or** [**https://ipinfo.io/**](https://ipinfo.io/).\
 **Depending on the region of the company this links could be useful to gather more data:** [**AFRINIC**](https://www.afrinic.net) **(Africa),** [**Arin**](https://www.arin.net/about/welcome/region/)**(North America),** [**APNIC**](https://www.apnic.net) **(Asia),** [**LACNIC**](https://www.lacnic.net) **(Latin America),** [**RIPE NCC**](https://www.ripe.net) **(Europe). Anyway, probably all the** useful information **(IP ranges and Whois)** appears already in the first link.
 
 ```bash
@@ -36,7 +38,8 @@ amass intel -org tesla
 amass intel -asn 8911,50313,394161
 ```
 
-Also, [**BBOT**](https://github.com/blacklanternsecurity/bbot)**'s** subdomain enumeration automatically aggregates and summarizes ASNs at the end of the scan.
+Also, [**BBOT**](https://github.com/blacklanternsecurity/bbot)**'s** 
+ enumeration automatically aggregates and summarizes ASNs at the end of the scan.
 
 ```bash
 bbot -t tesla.com -f subdomain-enum
@@ -60,8 +63,8 @@ You can find the IP and ASN of a domain using [http://ipv4info.com/](http://ipv4
 
 ### **Looking for vulnerabilities**
 
-At this point we known **all the assets inside the scope**, so if you are allowed you could launch some **vulnerability scanner** (Nessus, OpenVAS) over all the hosts.\
-Also, you could launch some [**port scans**](../pentesting-network/index.html#discovering-hosts-from-the-outside) **or use services like** shodan **to find** open ports **and depending on what you find you should** take a look in this book to how to pentest several possible services running.\
+At this point we know **all the assets inside the scope**, so if you are allowed you could launch some **vulnerability scanner** (Nessus, OpenVAS, [**Nuclei**](https://github.com/projectdiscovery/nuclei)) over all the hosts.\
+Also, you could launch some [**port scans**](../pentesting-network/index.html#discovering-hosts-from-the-outside) **or use services like** Shodan, Censys, or ZoomEye **to find** open ports **and depending on what you find you should** take a look in this book to how to pentest several possible services running.\
 **Also, It could be worth it to mention that you can also prepare some** default username **and** passwords **lists and try to** bruteforce services with [https://github.com/x90skysn3k/brutespray](https://github.com/x90skysn3k/brutespray).
 
 ## Domains
@@ -84,7 +87,8 @@ dnsrecon -r 157.240.221.35/24 -n 8.8.8.8 #Using google dns
 ```
 
 For this to work, the administrator has to enable manually the PTR.\
-You can also use a online tool for this info: [http://ptrarchive.com/](http://ptrarchive.com)
+You can also use a online tool for this info: [http://ptrarchive.com/](http://ptrarchive.com).\
+For large ranges, tools like [**massdns**](https://github.com/blechschmidt/massdns) and [**dnsx**](https://github.com/projectdiscovery/dnsx) are useful to automate reverse lookups and enrichment.
 
 ### **Reverse Whois (loop)**
 
@@ -98,6 +102,8 @@ You can use online tools like:
 - [http://reversewhois.domaintools.com/](http://reversewhois.domaintools.com) - Not free
 - [https://drs.whoisxmlapi.com/reverse-whois-search](https://drs.whoisxmlapi.com/reverse-whois-search) - Not Free (only **100 free** searches)
 - [https://www.domainiq.com/](https://www.domainiq.com) - Not Free
+- [https://securitytrails.com/](https://securitytrails.com/) - Not free (API)
+- [https://whoisfreaks.com/](https://whoisfreaks.com/) - Not free (API)
 
 You can automate this task using [**DomLink** ](https://github.com/vysecurity/DomLink)(requires a whoxy API key).\
 You can also perform some automatic reverse whois discovery with [amass](https://github.com/OWASP/Amass): `amass intel -d tesla.com -whois`
@@ -116,10 +122,11 @@ There are some pages and tools that let you search by these trackers and more:
 - [**Sitesleuth**](https://www.sitesleuth.io)
 - [**Publicwww**](https://publicwww.com)
 - [**SpyOnWeb**](http://spyonweb.com)
+- [**Webscout**](https://github.com/straightblast/Sc0ut) (finds related sites by shared analytics/trackers)
 
 ### **Favicon**
 
-Did you know that we can find related domains and sub domains to our target by looking for the same favicon icon hash? This is exactly what [favihash.py](https://github.com/m4ll0k/Bug-Bounty-Toolz/blob/master/favihash.py) tool made by [@m4ll0k2](https://twitter.com/m4ll0k2) does. Here’s how to use it:
+Did you know that we can find related domains and subdomains to our target by looking for the same favicon icon hash? This is exactly what [favihash.py](https://github.com/m4ll0k/Bug-Bounty-Toolz/blob/master/favihash.py) tool made by [@m4ll0k2](https://twitter.com/m4ll0k2) does. Here’s how to use it:
 
 ```bash
 cat my_targets.txt | xargs -I %% bash -c 'echo "http://%%/favicon.ico"' > targets.txt
@@ -151,6 +158,8 @@ def fav_hash(url):
     return fhash
 ```
 
+You can also get favicon hashes at scale with [**httpx**](https://github.com/projectdiscovery/httpx) (`httpx -l targets.txt -favicon`) and then pivot in Shodan/Censys.
+
 ### **Copyright / Uniq string**
 
 Search inside the web pages **strings that could be shared across different webs in the same organisation**. The **copyright string** could be a good example. Then search for that string in **google**, in other **browsers** or even in **shodan**: `shodan search http.html:"Copyright string"`
@@ -167,9 +176,17 @@ It's common to have a cron job such as
 to renew the all the domain certificates on the server. This means that even if the CA used for this doesn't set the time it was generated in the Validity time, it's possible to **find domains belonging to the same company in the certificate transparency logs**.\
 Check out this [**writeup for more information**](https://swarm.ptsecurity.com/discovering-domains-via-a-time-correlation-attack/).
 
+Also use **certificate transparency** logs directly:
+
+- [https://crt.sh/](https://crt.sh/)
+- [https://certspotter.com/](https://certspotter.com/)
+- [https://search.censys.io/](https://search.censys.io/)
+- [https://chaos.projectdiscovery.io/](https://chaos.projectdiscovery.io/) + [**chaos-client**](https://github.com/projectdiscovery/chaos-client)
+
 ### Mail DMARC information
 
-You can use a web such as [https://dmarc.live/info/google.com](https://dmarc.live/info/google.com) or a tool such as [https://github.com/Tedixx/dmarc-subdomains](https://github.com/Tedixx/dmarc-subdomains) to find **domains and subdomain sharing the same dmarc information**.
+You can use a web such as [https://dmarc.live/info/google.com](https://dmarc.live/info/google.com) or a tool such as [https://github.com/Tedixx/dmarc-subdomains](https://github.com/Tedixx/dmarc-subdomains) to find **domains and subdomain sharing the same dmarc information**.\
+Other useful tools are [**spoofcheck**](https://github.com/BishopFox/spoofcheck) and [**dmarcian**](https://dmarcian.com/).
 
 ### **Passive Takeover**
 
@@ -189,7 +206,16 @@ You could access the **TLS certificate** of the main web page, obtain the **Orga
 
 **Assetfinder**
 
-[**Assetfinder** ](https://github.com/tomnomnom/assetfinder)is a tool that look for **domains related** with a main domain and **subdomains** of them, pretty amazing.
+[**Assetfinder** ](https://github.com/tomnomnom/assetfinder)is a tool that looks for **domains related** with a main domain and **subdomains** of them, pretty amazing.
+
+**Passive DNS / Historical DNS**
+
+Passive DNS data is great to find **old and forgotten records** that still resolve or that can be taken over. Look at:
+
+- [https://securitytrails.com/](https://securitytrails.com/)
+- [https://community.riskiq.com/](https://community.riskiq.com/) (PassiveTotal)
+- [https://www.domaintools.com/products/iris/](https://www.domaintools.com/products/iris/)
+- [https://www.farsightsecurity.com/solutions/dnsdb/](https://www.farsightsecurity.com/solutions/dnsdb/)
 
 ### **Looking for vulnerabilities**
 
