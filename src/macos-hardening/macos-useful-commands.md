@@ -117,6 +117,16 @@ dscacheutil -flushcache
 sudo killall -HUP mDNSResponder
 ```
 
+### Quick anti-analysis / virtualization check
+
+Some macOS stealers call `system_profiler` to detect VMs and **abort with a distinct exit code (e.g., 100)** to avoid sandbox detonation:
+
+```bash
+if system_profiler SPHardwareDataType SPDisplaysDataType | grep -Eiq 'qemu|kvm|vmware|virtualbox'; then
+  exit 100
+fi
+```
+
 ### Installed Software & Services
 
 Check for **suspicious** applications installed and **privileges** over the.installed resources:
@@ -146,6 +156,10 @@ launchctl print gui/<user's UID>/com.company.launchagent.label
 Without prompts
 
 <figure><img src="../images/image (79).png" alt=""><figcaption></figcaption></figure>
+
+## References
+
+- [2025, the year of the Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
 
 {{#include ../banners/hacktricks-training.md}}
 
