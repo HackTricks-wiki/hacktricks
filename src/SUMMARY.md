@@ -96,6 +96,7 @@
 
 # 🧙‍♂️ Generic Hacking
 
+  - [Web3 Signing Workflow Compromise Safe Delegatecall Proxy Takeover](blockchain/blockchain-and-crypto-currencies/web3-signing-workflow-compromise-safe-delegatecall-proxy-takeover.md)
 - [Archive Extraction Path Traversal](generic-hacking/archive-extraction-path-traversal.md)
 - [Brute Force - CheatSheet](generic-hacking/brute-force.md)
 - [Esim Javacard Exploitation](generic-hacking/esim-javacard-exploitation.md)
