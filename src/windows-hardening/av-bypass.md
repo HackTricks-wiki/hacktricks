@@ -346,6 +346,7 @@ Notes
 - Seen used by loaders executed through LOLBins (e.g., `regsvr32` calling `DllRegisterServer`).
 
 This tools [https://github.com/Flangvik/AMSI.fail](https://github.com/Flangvik/AMSI.fail) also generates script to bypass AMSI.
+Also recommmend this tool [https://amsibypass.com/](https://amsibypass.com/) which also generates script to bypass AMSI that avoid signature by randomized user-defined function, variables, characters expression and applies random character casing to PowerShell keywords to avoid signature.
 
 **Remove the detected signature**
 
