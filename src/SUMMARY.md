@@ -466,6 +466,7 @@
   - [ImageMagick Security](network-services-pentesting/pentesting-web/imagemagick-security.md)
   - [Ispconfig](network-services-pentesting/pentesting-web/ispconfig.md)
   - [JBOSS](network-services-pentesting/pentesting-web/jboss.md)
+  - [Jenkins](network-services-pentesting/pentesting-web/jenkins.md)
   - [Jira & Confluence](network-services-pentesting/pentesting-web/jira.md)
   - [Joomla](network-services-pentesting/pentesting-web/joomla.md)
   - [JSP](network-services-pentesting/pentesting-web/jsp.md)
