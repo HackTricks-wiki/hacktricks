@@ -132,7 +132,7 @@
   const TOOLTIP_TEXT =
     "💡 Highlight any text on the page,\nthen click to ask HackTricks AI about it";
 
-  const API_BASE  = "https://www.hacktricks.ai/api/assistants/threads";
+  const API_BASE  = "https://ai.hacktricks.wiki/api/assistants/threads";
   const BRAND_RED = "#b31328";
 
   /* ------------------------------ State ------------------------------ */
