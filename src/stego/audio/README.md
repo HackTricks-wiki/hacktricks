@@ -2,7 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Pattern comuni:
+Schemi comuni:
 
 - Spectrogram messages
 - WAV LSB embedding
@@ -11,12 +11,12 @@ Pattern comuni:
 
 ## Triage rapido
 
-Before specialized tooling:
+Prima di utilizzare strumenti specializzati:
 
-- Conferma i dettagli del codec/container e eventuali anomalie:
+- Conferma i dettagli del codec/container e le anomalie:
 - `file audio`
 - `ffmpeg -v info -i audio -f null -`
-- Se l'audio contiene contenuto simile a rumore o una struttura tonale, ispeziona precocemente un spectrogram.
+- Se l'audio contiene contenuti simili al rumore o una struttura tonale, esamina subito uno spettrogramma.
 ```bash
 ffmpeg -v info -i stego.mp3 -f null -
 ```
@@ -24,41 +24,56 @@ ffmpeg -v info -i stego.mp3 -f null -
 
 ### Tecnica
 
-Spectrogram stego nasconde dati modellando l'energia nel dominio tempo/frequenza in modo che diventino visibili solo in un grafico tempo-frequenza (spesso inaudibili o percepiti come rumore).
+Spectrogram stego nasconde dati modellando l'energia nel tempo/frequenza in modo che diventi visibile solo in un grafico tempo-frequenza (spesso inaudibile o percepito come rumore).
 
 ### Sonic Visualiser
 
-Strumento principale per l'analisi degli spettrogrammi:
+Strumento principale per l'ispezione degli spettrogrammi:
 
 - [https://www.sonicvisualiser.org/](https://www.sonicvisualiser.org/)
 
 ### Alternative
 
 - Audacity (visualizzazione spettrogramma, filtri): https://www.audacityteam.org/
-- `sox` può generare spettrogrammi dalla riga di comando (CLI):
+- `sox` può generare spettrogrammi dalla CLI:
 ```bash
 sox input.wav -n spectrogram -o spectrogram.png
 ```
+## Decodifica FSK / modem
+
+L'audio frequency-shift keyed spesso appare come toni singoli alternati in uno spettrogramma. Una volta che hai una stima approssimativa del centro/shift e del baud, esegui brute force con `minimodem`:
+```bash
+# Visualize the band to pick baud/frequency
+sox noise.wav -n spectrogram -o spec.png
+
+# Try common bauds until printable text appears
+minimodem -f noise.wav 45
+minimodem -f noise.wav 300
+minimodem -f noise.wav 1200
+minimodem -f noise.wav 2400
+```
+`minimodem` imposta automaticamente il guadagno e rileva automaticamente le tonalità mark/space; regola `--rx-invert` o `--samplerate` se l'output è corrotto.
+
 ## WAV LSB
 
 ### Tecnica
 
-Per PCM non compresso (WAV), ogni sample è un intero. Modificando i bit meno significativi la forma d'onda cambia molto poco, quindi attackers possono nascondere:
+Per PCM non compresso (WAV), ogni sample è un intero. Modificare i bit meno significativi cambia la forma d'onda molto leggermente, quindi gli attaccanti possono nascondere:
 
 - 1 bit per sample (o più)
 - Interlacciato tra i canali
 - Con uno stride/permutation
 
-Altre famiglie di tecniche di nascondimento audio che potresti incontrare:
+Altre famiglie di nascondimento audio che potresti incontrare:
 
 - Phase coding
 - Echo hiding
 - Spread-spectrum embedding
-- Codec-side channels (format-dependent and tool-dependent)
+- Codec-side channels (dipendenti dal formato e dallo strumento)
 
 ### WavSteg
 
-From: https://github.com/ragibson/Steganography#WavSteg
+Da: https://github.com/ragibson/Steganography#WavSteg
 ```bash
 python3 WavSteg.py -r -b 1 -s sound.wav -o out.bin
 python3 WavSteg.py -r -b 2 -s sound.wav -o out.bin
@@ -67,15 +82,19 @@ python3 WavSteg.py -r -b 2 -s sound.wav -o out.bin
 
 - [http://jpinsoft.net/deepsound/download.aspx](http://jpinsoft.net/deepsound/download.aspx)
 
-## DTMF / dial tones
+## DTMF / toni di composizione
 
 ### Tecnica
 
-DTMF codifica caratteri come coppie di frequenze fisse (tastierino del telefono). Se l'audio somiglia a toni del tastierino o a bip regolari a doppia frequenza, verifica la decodifica DTMF subito.
+DTMF codifica i caratteri come coppie di frequenze fisse (tastierino telefonico). Se l'audio somiglia a toni del tastierino o a bip regolari a doppia frequenza, verifica la decodifica DTMF il prima possibile.
 
-Decodificatori online:
+Decoder online:
 
 - [https://unframework.github.io/dtmf-detect/](https://unframework.github.io/dtmf-detect/)
 - [http://dialabc.com/sound/detect/index.html](http://dialabc.com/sound/detect/index.html)
+
+## Riferimenti
+
+- [Flagvent 2025 (Medium) — pink, Santa’s Wishlist, Christmas Metadata, Captured Noise](https://0xdf.gitlab.io/flagvent2025/medium)
 
 {{#include ../../banners/hacktricks-training.md}}
