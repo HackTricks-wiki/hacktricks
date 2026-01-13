@@ -9,56 +9,71 @@ Mifumo ya kawaida:
 - DTMF / dial tones encoding
 - Metadata payloads
 
-## Tathmini ya haraka
+## Ukaguzi wa haraka
 
 Kabla ya zana maalum:
 
-- Thibitisha maelezo ya codec/container na kasoro:
+- Thibitisha maelezo ya codec/container na anomalia:
 - `file audio`
 - `ffmpeg -v info -i audio -f null -`
-- Ikiwa sauti ina maudhui yanayofanana na kelele au muundo wa tonal, angalia spectrogram mapema.
+- Ikiwa audio ina maudhui yanayofanana na kelele au muundo wa toni, chunguza spectrogram mapema.
 ```bash
 ffmpeg -v info -i stego.mp3 -f null -
 ```
 ## Spectrogram steganography
 
-### Mbinu
+### Technique
 
-Spectrogram stego inaficha data kwa kupangilia nishati kwa muda/frekowensi ili ionekane tu kwenye mchoro wa muda-frekowensi (mara nyingi hainsikiki au huhesabiwa kama kelele).
+Spectrogram stego huficha data kwa kuunda muundo wa nishati juu ya muda na frekensi hadi ionekane tu kwenye mchoro wa muda-frekuensi (mara nyingi isiosikika au inachukuliwa kama kelele).
 
 ### Sonic Visualiser
 
-Zana kuu ya ukaguzi wa spectrogram:
+Chombo kikuu cha kukagua spectrogram:
 
 - [https://www.sonicvisualiser.org/](https://www.sonicvisualiser.org/)
 
 ### Mbadala
 
-- Audacity (tazamo la spectrogram, vichujio): https://www.audacityteam.org/
-- `sox` inaweza kutengeneza spectrograms kutoka CLI:
+- Audacity (spectrogram view, vichujio): https://www.audacityteam.org/
+- `sox` can generate spectrograms from the CLI:
 ```bash
 sox input.wav -n spectrogram -o spectrogram.png
 ```
+## FSK / modem decoding
+
+Frequency-shift keyed audio mara nyingi huonekana kama toni za pekee zinazobadilika katika spectrogram. Mara tu unapokuwa na makadirio ya takriban ya center/shift na baud, brute force with `minimodem`:
+```bash
+# Visualize the band to pick baud/frequency
+sox noise.wav -n spectrogram -o spec.png
+
+# Try common bauds until printable text appears
+minimodem -f noise.wav 45
+minimodem -f noise.wav 300
+minimodem -f noise.wav 1200
+minimodem -f noise.wav 2400
+```
+`minimodem` hurekebisha gain moja kwa moja na hugundua ton za mark/space; rekebisha `--rx-invert` au `--samplerate` ikiwa pato limeharibika.
+
 ## WAV LSB
 
 ### Mbinu
 
-Kwa PCM (WAV) isiyosimbuliwa, kila sampuli ni integer. Kubadilisha low bits hubadilisha mawimbi kwa kiasi kidogo sana, hivyo washambuliaji wanaweza kuficha:
+Kwa PCM isiyobana (WAV), kila sampuli ni integer. Kubadilisha bits za chini hubadilisha waveform kwa kiasi kidogo sana, hivyo washambuliaji wanaweza kuficha:
 
 - 1 bit kwa sampuli (au zaidi)
-- Imepangwa kwa kuingiliana kati ya kanali
+- Imepangwa kwa mtiririko ndani ya channels
 - Kwa stride/permutation
 
-Other audio-hiding families you may encounter:
+Familia nyingine za kuficha sauti ambazo unaweza kukutana nazo:
 
 - Phase coding
 - Echo hiding
 - Spread-spectrum embedding
-- Codec-side channels (zinategemea format na zana)
+- Codec-side channels (format-dependent and tool-dependent)
 
 ### WavSteg
 
-From: https://github.com/ragibson/Steganography#WavSteg
+Chanzo: https://github.com/ragibson/Steganography#WavSteg
 ```bash
 python3 WavSteg.py -r -b 1 -s sound.wav -o out.bin
 python3 WavSteg.py -r -b 2 -s sound.wav -o out.bin
@@ -67,15 +82,19 @@ python3 WavSteg.py -r -b 2 -s sound.wav -o out.bin
 
 - [http://jpinsoft.net/deepsound/download.aspx](http://jpinsoft.net/deepsound/download.aspx)
 
-## DTMF / midundo za simu
+## DTMF / dial tones
 
 ### Mbinu
 
-DTMF huweka herufi kama jozi za masafa yaliyowekwa (keypad ya simu). Ikiwa sauti inaonekana kama midundo ya keypad au bip za masafa mawili za kawaida, jaribu udekodishaji wa DTMF mapema.
+DTMF huwakilisha herufi kama jozi za frequencies zilizo thabiti (keypad ya simu). Ikiwa audio inaonekana kama midundo ya keypad au beep za mzunguko-mbili za kawaida, jaribu kutafsiri DTMF mapema.
 
-Online decoders:
+Decoders za mtandaoni:
 
 - [https://unframework.github.io/dtmf-detect/](https://unframework.github.io/dtmf-detect/)
 - [http://dialabc.com/sound/detect/index.html](http://dialabc.com/sound/detect/index.html)
+
+## References
+
+- [Flagvent 2025 (Medium) — pink, Santa’s Wishlist, Christmas Metadata, Captured Noise](https://0xdf.gitlab.io/flagvent2025/medium)
 
 {{#include ../../banners/hacktricks-training.md}}
