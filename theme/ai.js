@@ -468,7 +468,7 @@
       <div id="ht-ai-login-card">
         <div class="ht-ai-login-title">Sign in required</div>
         <div class="ht-ai-login-text">
-          To use HackTricks AI, please log in or create a free account on Tools.
+          To use HackTricks AI, please log in or create a free account on HT Tools and refresh this page.
         </div>
         <a class="ht-ai-login-link" href="${LOGIN_URL}" target="_blank" rel="noopener noreferrer">${LOGIN_URL}</a>
         <button class="ht-ai-login-close" type="button">Close</button>
