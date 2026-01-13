@@ -55,6 +55,127 @@ For more information about Prompt Injection check:
 AI-Prompts.md
 {{#endref}}
 
+## Burp Suite MCP bridge for intercepted HTTP analysis
+
+You can wire **Burp Suite’s MCP Server** into any MCP-capable LLM client (e.g., Codex CLI) so the model reasons over *actual* intercepted HTTP traffic while keeping everything local.
+
+**Workflow**
+
+1. Install **MCP Server** from the Burp BApp Store and in its tab click **Extract server proxy jar** to save `mcp-proxy.jar` (this binary bridges stdio to Burp’s SSE MCP endpoint).
+2. Configure the MCP client to launch the jar over stdio and point it to Burp:
+
+```toml
+# ~/.codex/config.toml
+[mcp_servers.burp]
+command = "java"
+args = ["-jar", "/absolute/path/to/mcp-proxy.jar", "--sse-url", "http://127.0.0.1:19876"]
+```
+
+### Fix strict Origin / header validation with a local reverse proxy
+
+Burp MCP currently rejects Codex’ MCP handshake because of strict `Origin` checks and extra headers ([issue](https://github.com/PortSwigger/mcp-server/issues/34)). Place a local proxy in front of Burp to normalize the request and remove the problematic headers.
+
+Install Caddy and create a `Caddyfile`:
+
+<details>
+<summary>Caddy reverse proxy for Burp MCP</summary>
+
+```bash
+brew install caddy
+cat >~/burp-mcp/Caddyfile <<'EOF'
+:19876
+
+reverse_proxy 127.0.0.1:9876 {
+  # lock Host/Origin to the Burp listener
+  header_up Host "127.0.0.1:9876"
+  header_up Origin "http://127.0.0.1:9876"
+
+  # strip Codex headers that trigger Burp’s 403 during SSE init
+  header_up -User-Agent
+  header_up -Accept
+  header_up -Accept-Encoding
+  header_up -Connection
+}
+EOF
+```
+
+</details>
+
+Start the stack and verify the MCP handshake:
+
+```bash
+caddy run --config ~/burp-mcp/Caddyfile &
+codex                # then run /mcp inside Codex to list Burp tools
+```
+
+### Optional one-command launcher
+
+<details>
+<summary>zsh helper to start Caddy and Codex together</summary>
+
+```bash
+burpcodex() {
+  emulate -L zsh
+  setopt pipefail
+
+  local CADDYFILE="$HOME/burp-mcp/Caddyfile"
+  local LOG="/tmp/burp-mcp-caddy.log"
+  local CADDY_PID=""
+
+  if ! command -v caddy >/dev/null 2>&1; then
+    echo "[!] caddy not found (brew install caddy)"
+    return 1
+  fi
+  if ! command -v codex >/dev/null 2>&1; then
+    echo "[!] codex not found in PATH"
+    return 1
+  fi
+  if [[ ! -f "$CADDYFILE" ]]; then
+    echo "[!] Caddyfile not found: $CADDYFILE"
+    return 1
+  fi
+
+  cleanup() {
+    if [[ -n "$CADDY_PID" ]] && kill -0 "$CADDY_PID" 2>/dev/null; then
+      kill -TERM "$CADDY_PID" 2>/dev/null
+      sleep 0.2
+      kill -KILL "$CADDY_PID" 2>/dev/null
+      wait "$CADDY_PID" 2>/dev/null
+    fi
+
+    local pids
+    pids="$(lsof -ti tcp:19876 2>/dev/null | tr '\n' ' ')"
+    if [[ -n "$pids" ]]; then
+      kill -TERM $pids 2>/dev/null
+      sleep 0.2
+      kill -KILL $pids 2>/dev/null
+    fi
+  }
+
+  trap 'cleanup; return 130' INT TERM
+  trap 'cleanup' EXIT
+
+  caddy run --config "$CADDYFILE" >"$LOG" 2>&1 &
+  CADDY_PID=$!
+  echo "[*] Caddy started (pid=$CADDY_PID) - log: $LOG"
+
+  command codex "$@"
+
+  cleanup
+  trap - INT TERM EXIT
+}
+```
+</details>
+
+### Proxy-level tagging for attribution
+
+To mark Codex/Burp-driven traffic in logs, add a request header rewrite in your proxy (or Burp Match/Replace):
+
+```text
+Match:   ^User-Agent: (.*)$
+Replace: User-Agent: $1 BugBounty-Username
+```
+
 ## MCP Vulns
 
 > [!CAUTION]
@@ -225,12 +346,13 @@ The command-template variant exercised by JFrog (CVE-2025-8943) does not even ne
 ```
 
 ## References
+- [Burp MCP + Codex CLI integration and Caddy handshake fix](https://pentestbook.six2dez.com/others/burp)
+- [PortSwigger MCP server strict Origin/header validation issue](https://github.com/PortSwigger/mcp-server/issues/34)
 - [CVE-2025-54136 – MCPoison Cursor IDE persistent RCE](https://research.checkpoint.com/2025/cursor-vulnerability-mcpoison/)
 - [Metasploit Wrap-Up 11/28/2025 – new Flowise custom MCP & JS injection exploits](https://www.rapid7.com/blog/post/pt-metasploit-wrap-up-11-28-2025)
 - [GHSA-3gcm-f6qx-ff7p / CVE-2025-59528 – Flowise CustomMCP JavaScript code injection](https://github.com/advisories/GHSA-3gcm-f6qx-ff7p)
 - [GHSA-2vv2-3x8x-4gv7 / CVE-2025-8943 – Flowise custom MCP command execution](https://github.com/advisories/GHSA-2vv2-3x8x-4gv7)
 - [JFrog – Flowise OS command remote code execution (JFSA-2025-001380578)](https://research.jfrog.com/vulnerabilities/flowise-os-command-remote-code-execution-jfsa-2025-001380578)
-- [CVE-2025-54136 – MCPoison Cursor IDE persistent RCE](https://research.checkpoint.com/2025/cursor-vulnerability-mcpoison/)
 - [An Evening with Claude (Code): sed-Based Command Safety Bypass in Claude Code](https://specterops.io/blog/2025/11/21/an-evening-with-claude-code/)
 
 {{#include ../banners/hacktricks-training.md}}
