@@ -9,14 +9,14 @@ Patrones comunes:
 - DTMF / dial tones encoding
 - Metadata payloads
 
-## Evaluación rápida
+## Triaje rápido
 
-Antes de usar herramientas especializadas:
+Antes de herramientas especializadas:
 
-- Confirma detalles y anomalías del codec/container:
+- Confirma detalles del codec/container y anomalías:
 - `file audio`
 - `ffmpeg -v info -i audio -f null -`
-- Si el audio contiene contenido similar a ruido o estructura tonal, inspecciona un spectrogram temprano.
+- Si el audio contiene contenido con aspecto de ruido o estructura tonal, inspecciona un spectrogram lo antes posible.
 ```bash
 ffmpeg -v info -i stego.mp3 -f null -
 ```
@@ -24,7 +24,7 @@ ffmpeg -v info -i stego.mp3 -f null -
 
 ### Técnica
 
-Spectrogram stego oculta datos modelando la energía en el dominio tiempo/frecuencia para que sea visible solo en un diagrama tiempo-frecuencia (a menudo inaudible o percibido como ruido).
+Spectrogram stego oculta datos modelando la energía en tiempo/frecuencia para que sean visibles solo en una representación tiempo-frecuencia (a menudo inaudible o percibida como ruido).
 
 ### Sonic Visualiser
 
@@ -39,22 +39,37 @@ Herramienta principal para la inspección de espectrogramas:
 ```bash
 sox input.wav -n spectrogram -o spectrogram.png
 ```
+## FSK / decodificación de modem
+
+El audio modulado por desplazamiento de frecuencia suele verse como tonos individuales alternos en un espectrograma. Una vez que tengas una estimación aproximada del centro/desplazamiento y del baud, brute force con `minimodem`:
+```bash
+# Visualize the band to pick baud/frequency
+sox noise.wav -n spectrogram -o spec.png
+
+# Try common bauds until printable text appears
+minimodem -f noise.wav 45
+minimodem -f noise.wav 300
+minimodem -f noise.wav 1200
+minimodem -f noise.wav 2400
+```
+`minimodem` ajusta la ganancia automáticamente y detecta automáticamente los tonos mark/space; ajuste `--rx-invert` o `--samplerate` si la salida está distorsionada.
+
 ## WAV LSB
 
 ### Técnica
 
-Para PCM no comprimido (WAV), cada muestra es un entero. Modificar los bits bajos cambia la forma de onda muy ligeramente, por lo que los atacantes pueden ocultar:
+Para PCM sin comprimir (WAV), cada muestra es un entero. Modificar los bits menos significativos cambia la forma de onda muy poco, por lo que los atacantes pueden ocultar:
 
 - 1 bit por muestra (o más)
 - Intercalado entre canales
-- Con un paso/permutación
+- Con un stride/permutación
 
-Otras familias de audio-hiding que podrías encontrar:
+Otras familias de ocultación de audio que puede encontrar:
 
 - Phase coding
 - Echo hiding
 - Spread-spectrum embedding
-- Codec-side channels (dependiente del formato y de la herramienta)
+- Codec-side channels (format-dependent and tool-dependent)
 
 ### WavSteg
 
@@ -67,15 +82,19 @@ python3 WavSteg.py -r -b 2 -s sound.wav -o out.bin
 
 - [http://jpinsoft.net/deepsound/download.aspx](http://jpinsoft.net/deepsound/download.aspx)
 
-## DTMF / tonos de marcado
+## DTMF / dial tones
 
 ### Técnica
 
-DTMF codifica caracteres como pares de frecuencias fijas (teclado telefónico). Si el audio recuerda a tonos de marcado o a pitidos regulares de doble frecuencia, prueba la decodificación DTMF lo antes posible.
+DTMF codifica caracteres como pares de frecuencias fijas (teclado telefónico). Si el audio se asemeja a tonos de teclado o a pitidos regulares de doble frecuencia, prueba la decodificación DTMF lo antes posible.
 
 Decodificadores en línea:
 
 - [https://unframework.github.io/dtmf-detect/](https://unframework.github.io/dtmf-detect/)
 - [http://dialabc.com/sound/detect/index.html](http://dialabc.com/sound/detect/index.html)
+
+## Referencias
+
+- [Flagvent 2025 (Medium) — pink, Santa’s Wishlist, Christmas Metadata, Captured Noise](https://0xdf.gitlab.io/flagvent2025/medium)
 
 {{#include ../../banners/hacktricks-training.md}}
