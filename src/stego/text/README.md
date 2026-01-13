@@ -41,4 +41,19 @@ for i,ch in enumerate(s):
 PY
 ```
 
+## CSS `unicode-range` channels
+
+`@font-face` rules can encode bytes in `unicode-range: U+..` entries. Extract the codepoints, concatenate the hex, and decode:
+
+```bash
+grep -o "U+[0-9A-Fa-f]\+" styles.css | tr -d 'U+\n' | xxd -r -p
+```
+
+If ranges contain multiple bytes per declaration, split on commas first and normalize (`tr ',+' '\n'`). Python makes it easy to parse and emit bytes if formatting is inconsistent.
+
+## References
+
+- [Flagvent 2025 (Medium) — pink, Santa’s Wishlist, Christmas Metadata, Captured Noise](https://0xdf.gitlab.io/flagvent2025/medium)
+
 {{#include ../../banners/hacktricks-training.md}}
+

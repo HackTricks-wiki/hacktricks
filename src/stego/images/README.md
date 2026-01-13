@@ -190,6 +190,25 @@ Frame differencing is often decisive:
 magick frame_0001.png frame_0002.png -compose difference -composite diff.png
 ```
 
+### APNG pixel-count encoding
+
+- Detect APNG containers: `exiftool -a -G1 file.png | grep -i animation` or `file`.
+- Extract frames without re-timing: `ffmpeg -i file.png -vsync 0 frames/frame_%03d.png`.
+- Recover payloads encoded as per-frame pixel counts:
+
+```python
+from PIL import Image
+import glob
+out = []
+for f in sorted(glob.glob('frames/frame_*.png')):
+    counts = Image.open(f).getcolors()
+    target = dict(counts).get((255, 0, 255, 255))  # adjust the target color
+    out.append(target or 0)
+print(bytes(out).decode('latin1'))
+```
+
+Animated challenges may encode each byte as the count of a specific color in each frame; concatenating the counts reconstructs the message.
+
 ## Password-protected embedding
 
 If you suspect embedding protected by a passphrase rather than pixel-level manipulation, this is usually the fastest path.
@@ -219,4 +238,9 @@ Supports PNG/BMP/GIF/WebP/WAV.
 
 Repo: https://github.com/dhsdshdhk/stegpy
 
+## References
+
+- [Flagvent 2025 (Medium) — pink, Santa’s Wishlist, Christmas Metadata, Captured Noise](https://0xdf.gitlab.io/flagvent2025/medium)
+
 {{#include ../../banners/hacktricks-training.md}}
+
