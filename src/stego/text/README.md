@@ -10,20 +10,20 @@
 
 ## Практичний шлях
 
-If plain text behaves unexpectedly, inspect codepoints and normalize carefully (do not destroy evidence).
+Якщо plain text поводиться несподівано, перевірте codepoints і нормалізуйте уважно (не знищуйте доказів).
 
 ### Техніка
 
-Text stego frequently relies on characters that render identically (or invisibly):
+Text stego часто використовує символи, які відображаються однаково (або невидимо):
 
-- Homoglyphs: different Unicode codepoints that look the same (Latin `a` vs Cyrillic `а`)
+- Homoglyphs: різні Unicode codepoints, які виглядають однаково (Latin `a` vs Cyrillic `а`)
 - Zero-width characters: joiners, non-joiners, zero-width spaces
 - Whitespace encodings: spaces vs tabs, trailing spaces, line-length patterns
 
-Додаткові випадки з високим сигналом:
+Додаткові високосигнальні випадки:
 
-- Bidirectional override/control characters (can visually reorder text)
-- Variation selectors and combining characters used as a covert channel
+- Bidirectional override/control characters (можуть візуально змінювати порядок тексту)
+- Variation selectors and combining characters, які використовуються як прихований канал
 
 ### Інструменти декодування
 
@@ -39,4 +39,16 @@ if ord(ch) > 127 or ch.isspace():
 print(i, hex(ord(ch)), repr(ch))
 PY
 ```
+## CSS `unicode-range` канали
+
+`@font-face` правила можуть кодувати байти в записах `unicode-range: U+..`. Витягніть кодові точки, об'єднайте hex і декодуйте:
+```bash
+grep -o "U+[0-9A-Fa-f]\+" styles.css | tr -d 'U+\n' | xxd -r -p
+```
+Якщо діапазони містять кілька bytes у кожному оголошенні, спочатку розділіть за комами й нормалізуйте (`tr ',+' '\n'`). Python полегшує розбір і виведення bytes, якщо форматування непослідовне.
+
+## Посилання
+
+- [Flagvent 2025 (Medium) — pink, Santa’s Wishlist, Christmas Metadata, Captured Noise](https://0xdf.gitlab.io/flagvent2025/medium)
+
 {{#include ../../banners/hacktricks-training.md}}
