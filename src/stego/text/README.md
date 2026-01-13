@@ -6,24 +6,24 @@ Rechercher :
 
 - Unicode homoglyphs
 - Zero-width characters
-- Modèles d'espacement (espaces vs tabulations)
+- Whitespace patterns (spaces vs tabs)
 
 ## Approche pratique
 
-Si le texte brut se comporte de façon inattendue, inspectez les codepoints et normalisez soigneusement (ne pas détruire les preuves).
+Si le plain text se comporte de façon inattendue, inspectez les codepoints et normalisez soigneusement (ne pas détruire les preuves).
 
 ### Technique
 
-Text stego s'appuie fréquemment sur des caractères qui s'affichent de manière identique (ou invisiblement) :
+Text stego dépend fréquemment de caractères qui s'affichent de façon identique (ou invisiblement) :
 
-- Homoglyphs : différents codepoints Unicode qui ont le même rendu (Latin `a` vs Cyrillic `а`)
-- Caractères zero-width : joiners, non-joiners, zero-width spaces
-- Encodages d'espaces blancs : espaces vs tabulations, espaces en fin de ligne, motifs de longueur de ligne
+- Homoglyphs: different Unicode codepoints that look the same (Latin `a` vs Cyrillic `а`)
+- Zero-width characters: joiners, non-joiners, zero-width spaces
+- Whitespace encodings: spaces vs tabs, trailing spaces, line-length patterns
 
-Cas additionnels à fort signal :
+Autres cas à fort signal :
 
-- Caractères de contrôle/override bidirectionnels (peuvent réordonner visuellement le texte)
-- Sélecteurs de variation et caractères combinants utilisés comme canal caché
+- Bidirectional override/control characters (can visually reorder text)
+- Variation selectors and combining characters used as a covert channel
 
 ### Aides au décodage
 
@@ -39,4 +39,16 @@ if ord(ch) > 127 or ch.isspace():
 print(i, hex(ord(ch)), repr(ch))
 PY
 ```
+## Canaux CSS `unicode-range`
+
+Les règles `@font-face` peuvent encoder des octets dans des entrées `unicode-range: U+..`. Extraire les codepoints, concaténer l'hexadécimal, puis décoder :
+```bash
+grep -o "U+[0-9A-Fa-f]\+" styles.css | tr -d 'U+\n' | xxd -r -p
+```
+Si les plages contiennent plusieurs octets par déclaration, scindez d'abord sur les virgules et normalisez (`tr ',+' '\n'`). Python facilite l'analyse et l'émission d'octets si le formatage est incohérent.
+
+## Références
+
+- [Flagvent 2025 (Medium) — pink, Santa’s Wishlist, Christmas Metadata, Captured Noise](https://0xdf.gitlab.io/flagvent2025/medium)
+
 {{#include ../../banners/hacktricks-training.md}}
