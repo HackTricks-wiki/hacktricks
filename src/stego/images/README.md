@@ -2,7 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Τα περισσότερα CTF image stego περιορίζονται σε μία από τις εξής κατηγορίες:
+Τα περισσότερα CTF image stego καταλήγουν σε μία από τις παρακάτω κατηγορίες:
 
 - LSB/bit-planes (PNG/BMP)
 - Metadata/comment payloads
@@ -12,59 +12,59 @@
 
 ## Γρήγορη αξιολόγηση
 
-Δώστε προτεραιότητα σε στοιχεία σε επίπεδο container πριν από βαθιά ανάλυση περιεχομένου:
+Δώστε προτεραιότητα σε στοιχεία επιπέδου container πριν από βαθιά ανάλυση περιεχομένου:
 
-- Επικυρώστε το αρχείο και ελέγξτε τη δομή: `file`, `magick identify -verbose`, εργαλεία επικύρωσης μορφής (π.χ., `pngcheck`).
-- Εξάγετε metadata και ορατές συμβολοσειρές: `exiftool -a -u -g1`, `strings`.
-- Ελέγξτε για ενσωματωμένο/προσαρτημένο περιεχόμενο: `binwalk` και έλεγχος τέλους αρχείου (`tail | xxd`).
-- Διακλαδιστείτε ανά container:
-  - PNG/BMP: bit-planes/LSB και ανωμαλίες σε επίπεδο chunk.
-  - JPEG: metadata + DCT-domain tooling (OutGuess/F5-style families).
-  - GIF/APNG: εξαγωγή καρέ, διαφορά καρέ, τεχνάσματα παλέτας.
+- Επικυρώστε το αρχείο και ελέγξτε τη δομή: `file`, `magick identify -verbose`, format validators (e.g., `pngcheck`).
+- Εξαγάγετε metadata και ορατά strings: `exiftool -a -u -g1`, `strings`.
+- Ελέγξτε για embedded/appended περιεχόμενο: `binwalk` και έλεγχος τέλους αρχείου (`tail | xxd`).
+- Διαχωρίστε ανά container:
+- PNG/BMP: bit-planes/LSB και ανωμαλίες σε επίπεδο chunk.
+- JPEG: metadata + DCT-domain tooling (OutGuess/F5-style families).
+- GIF/APNG: εξαγωγή frames, frame differencing, κόλπα με palette.
 
 ## Bit-planes / LSB
 
 ### Τεχνική
 
-Τα PNG/BMP είναι δημοφιλή στα CTF γιατί αποθηκεύουν pixels με τρόπο που καθιστά εύκολη την **χειραγώγηση σε επίπεδο bit**. Ο κλασικός μηχανισμός απόκρυψης/εξαγωγής είναι:
+Τα PNG/BMP είναι δημοφιλή σε CTFs επειδή αποθηκεύουν pixels με τρόπο που κάνει εύκολη την **bit-level manipulation**. Ο κλασικός μηχανισμός απόκρυψης/εξαγωγής είναι:
 
-- Κάθε κανάλι pixel (R/G/B/A) έχει πολλά bits.
-- Το **λιγότερο σημαντικό bit** (LSB) κάθε καναλιού αλλάζει ελάχιστα την εικόνα.
-- Οι επιτιθέμενοι κρύβουν δεδομένα σε αυτά τα χαμηλής τάξης bits, μερικές φορές με stride, permutation, ή επιλογή ανά κανάλι.
+- Κάθε κανάλι pixel (R/G/B/A) έχει πολλαπλά bits.
+- Το **least significant bit** (LSB) κάθε καναλιού αλλάζει την εικόνα πολύ λίγο.
+- Οι επιτιθέμενοι κρύβουν δεδομένα σε αυτά τα low-order bits, μερικές φορές με stride, permutation, ή επιλογή ανά κανάλι.
 
-Τι να περιμένετε στις προκλήσεις:
+Τι να περιμένετε σε προκλήσεις:
 
-- Το payload βρίσκεται μόνο σε ένα κανάλι (π.χ., `R` LSB).
-- Το payload βρίσκεται στο alpha κανάλι.
+- Το payload βρίσκεται σε ένα κανάλι μόνο (π.χ., `R` LSB).
+- Το payload βρίσκεται στο alpha channel.
 - Το payload είναι συμπιεσμένο/κωδικοποιημένο μετά την εξαγωγή.
-- Το μήνυμα είναι διασκορπισμένο ανά planes ή κρυμμένο μέσω XOR μεταξύ planes.
+- Το μήνυμα είναι διασκορπισμένο σε planes ή κρυμμένο μέσω XOR ανάμεσα σε planes.
 
-Επιπλέον οικογένειες που μπορεί να συναντήσετε (εξαρτώμενες από την υλοποίηση):
+Επιπλέον οικογένειες που μπορεί να συναντήσετε (εξαρτάται από την υλοποίηση):
 
-- **LSB matching** (όχι μόνο αναστροφή του bit, αλλά προσαρμογές +/-1 για να ταιριάξει το στοχευμένο bit)
-- **Palette/index-based hiding** (indexed PNG/GIF: payload σε δείκτες χρώματος αντί για raw RGB)
+- **LSB matching** (όχι απλώς αναστροφή του bit, αλλά προσαρμογές +/-1 για να ταιριάξει το target bit)
+- **Palette/index-based hiding** (indexed PNG/GIF: payload σε color indices αντί για raw RGB)
 - **Alpha-only payloads** (εντελώς αόρατο στην RGB προβολή)
 
 ### Εργαλεία
 
 #### zsteg
 
-`zsteg` απαριθμεί πολλά LSB/bit-plane σχήματα εξαγωγής για PNG/BMP:
+`zsteg` απαριθμεί πολλά μοτίβα εξαγωγής LSB/bit-plane για PNG/BMP:
 ```bash
 zsteg -a file.png
 ```
-Repo: https://github.com/zed-0xff/zsteg
+Αποθετήριο: https://github.com/zed-0xff/zsteg
 
 #### StegoVeritas / Stegsolve
 
-- `stegoVeritas`: εκτελεί μια σειρά μετασχηματισμών (metadata, image transforms, brute forcing LSB variants).
-- `stegsolve`: χειροκίνητα οπτικά φίλτρα (απομόνωση καναλιών, επιθεώρηση επιπέδων, XOR, κ.λπ).
+- `stegoVeritas`: τρέχει μια σειρά μετασχηματισμών (metadata, image transforms, brute forcing LSB variants).
+- `stegsolve`: χειροκίνητα οπτικά φίλτρα (channel isolation, plane inspection, XOR, etc).
 
 Stegsolve download: https://github.com/eugenekolo/sec-tools/tree/master/stego/stegsolve/stegsolve
 
 #### FFT-based visibility tricks
 
-Η FFT δεν είναι LSB extraction; χρησιμοποιείται σε περιπτώσεις όπου το περιεχόμενο κρύβεται σκόπιμα στον χώρο συχνοτήτων ή σε λεπτά μοτίβα.
+Το FFT δεν είναι LSB extraction· χρησιμοποιείται σε περιπτώσεις όπου το περιεχόμενο κρύβεται σκόπιμα στον συχνοτικό χώρο ή σε λεπτά μοτίβα.
 
 - EPFL demo: http://bigwww.epfl.ch/demo/ip/demos/FFT/
 - Fourifier: https://www.ejectamenta.com/Fourifier-fullscreen/
@@ -75,15 +75,21 @@ Web-based triage που χρησιμοποιείται συχνά σε CTFs:
 - Aperi’Solve: https://aperisolve.com/
 - StegOnline: https://stegonline.georgeom.net/
 
-## Εσωτερικά PNG: chunks, διαφθορά και κρυμμένα δεδομένα
+## PNG internals: chunks, corruption, and hidden data
 
-### Τεχνική
+### Technique
 
-Το PNG είναι μια μορφή που χρησιμοποιεί chunks. Σε πολλές προκλήσεις το payload αποθηκεύεται στο επίπεδο container/chunk αντί σε τιμές pixels:
+Το PNG είναι μια μορφή που βασίζεται σε chunks. Σε πολλές προκλήσεις το payload αποθηκεύεται σε επίπεδο container/chunk αντί για τις τιμές των pixels:
 
-- `tEXt` / `iTXt` / `zTXt` (metadata κειμένου, μερικές φορές συμπιεσμένα)
+- **Επιπλέον bytes μετά το `IEND`** (πολλοί viewers αγνοούν τα trailing bytes)
+- **Non-standard ancillary chunks** που φέρουν payloads
+- **Κατεστραμμένοι headers** που κρύβουν διαστάσεις ή σπάνε parsers μέχρι να διορθωθούν
+
+High-signal chunk locations to review:
+
+- `tEXt` / `iTXt` / `zTXt` (μεταδεδομένα κειμένου, μερικές φορές συμπιεσμένα)
 - `iCCP` (ICC profile) και άλλα ancillary chunks που χρησιμοποιούνται ως φορέας
-- `eXIf` (EXIF data σε PNG)
+- `eXIf` (EXIF δεδομένα σε PNG)
 
 ### Triage commands
 ```bash
@@ -92,33 +98,33 @@ pngcheck -v file.png
 ```
 Τι να προσέξετε:
 
-- Παράξενοι συνδυασμοί width/height/bit-depth/colour-type
-- CRC/chunk σφάλματα (το pngcheck συνήθως δείχνει την ακριβή θέση)
+- Ασυνήθιστοι συνδυασμοί πλάτους/ύψους/βάθους bit/τύπου χρώματος
+- Σφάλματα CRC ή chunk (pngcheck συνήθως δείχνει την ακριβή μετατόπιση)
 - Προειδοποιήσεις για πρόσθετα δεδομένα μετά το `IEND`
 
-Αν χρειάζεστε πιο λεπτομερή προβολή των chunks:
+Αν χρειάζεστε πιο λεπτομερή προβολή των chunk:
 ```bash
 pngcheck -vp file.png
 exiftool -a -u -g1 file.png
 ```
 Χρήσιμες αναφορές:
 
-- PNG specification (structure, chunks): https://www.w3.org/TR/PNG/
-- File format tricks (PNG/JPEG/GIF corner cases): https://github.com/corkami/docs
+- PNG προδιαγραφή (structure, chunks): https://www.w3.org/TR/PNG/
+- Κόλπα μορφής αρχείου (PNG/JPEG/GIF corner cases): https://github.com/corkami/docs
 
-## JPEG: μεταδεδομένα, DCT-domain tools, and ELA limitations
+## JPEG: metadata, DCT-domain tools, and ELA limitations
 
 ### Τεχνική
 
-Το JPEG δεν αποθηκεύεται ως raw pixels· συμπιέζεται στο DCT domain. Γι' αυτό τα JPEG stego tools διαφέρουν από τα PNG LSB tools:
+Το JPEG δεν αποθηκεύεται ως raw pixels· συμπιέζεται στο DCT domain. Γι' αυτό τα JPEG stego εργαλεία διαφέρουν από τα PNG LSB εργαλεία:
 
-- Τα μεταδεδομένα/σχόλια ως payloads είναι σε επίπεδο αρχείου (υψηλό σήμα και γρήγορη επιθεώρηση)
-- Τα DCT-domain stego tools ενσωματώνουν bits σε συντελεστές συχνότητας
+- Metadata/comment payloads είναι σε επίπεδο αρχείου (υψηλό σήμα και γρήγορος στον έλεγχο)
+- DCT-domain stego εργαλεία ενσωματώνουν bits σε συντελεστές συχνότητας
 
-Λειτουργικά, αντιμετωπίστε το JPEG ως:
+Σε λειτουργικό επίπεδο, θεωρήστε το JPEG ως:
 
-- Ένα δοχείο για τμήματα μεταδεδομένων (υψηλό σήμα, γρήγορη επιθεώρηση)
-- Έναν συμπιεσμένο χώρο σήματος (DCT coefficients) όπου λειτουργούν εξειδικευμένα stego tools
+- Ένα δοχείο για metadata segments (υψηλό σήμα, γρήγορος έλεγχος)
+- Ένας συμπιεσμένος τομέας σήματος (DCT coefficients) όπου λειτουργούν εξειδικευμένα stego εργαλεία
 
 ### Γρήγοροι έλεγχοι
 ```bash
@@ -126,64 +132,79 @@ exiftool file.jpg
 strings -n 6 file.jpg | head
 binwalk file.jpg
 ```
-Τοποθεσίες υψηλού σήματος:
+High-signal locations:
 
-- EXIF/XMP/IPTC μεταδεδομένα
-- Τμήμα σχολίου JPEG (`COM`)
-- Τμήματα εφαρμογής (`APP1` for EXIF, `APPn` for vendor data)
+- EXIF/XMP/IPTC metadata
+- τμήμα σχολίου JPEG (`COM`)
+- Τμήματα εφαρμογής (`APP1` για EXIF, `APPn` για δεδομένα προμηθευτή)
 
-### Κοινά εργαλεία
+### Συνήθη εργαλεία
 
 - OutGuess: https://github.com/resurrecting-open-source-projects/outguess
 - OpenStego: https://www.openstego.com/
 
-Εάν αντιμετωπίζετε συγκεκριμένα payloads steghide σε JPEGs, σκεφτείτε να χρησιμοποιήσετε το `stegseek` (πιο γρήγορο bruteforce από παλαιότερα scripts):
+If you are specifically facing steghide payloads in JPEGs, consider using `stegseek` (faster bruteforce than older scripts):
 
 - [https://github.com/RickdeJager/stegseek](https://github.com/RickdeJager/stegseek)
 
 ### Error Level Analysis
 
-Η ELA αναδεικνύει διάφορα artifacts επανασυμπίεσης· μπορεί να υποδείξει περιοχές που επεξεργάστηκαν, αλλά δεν αποτελεί stego detector από μόνη της:
-
-- [https://29a.ch/sandbox/2012/imageerrorlevelanalysis/](https://29a.ch/sandbox/2012/imageerrorlevelanalysis/)
+ELA επισημαίνει διάφορα ίχνη επανασυμπίεσης· μπορεί να υποδείξει περιοχές που έχουν επεξεργαστεί, αλλά δεν είναι από μόνη της ένας stego detector:
 
 ## Κινούμενες εικόνες
 
 ### Τεχνική
 
-Για κινούμενες εικόνες, υποθέστε ότι το μήνυμα βρίσκεται:
+Για κινούμενες εικόνες, υποθέστε ότι το μήνυμα είναι:
 
-- Σε ένα μόνο καρέ (εύκολο), ή
-- Διασκορπισμένο σε πολλά καρέ (η σειρά έχει σημασία), ή
+- Σε ένα καρέ (εύκολο), ή
+- Διασπαρμένο σε καρέ (η σειρά έχει σημασία), ή
 - Ορατό μόνο όταν κάνετε diff σε διαδοχικά καρέ
 
 ### Εξαγωγή καρέ
 ```bash
 ffmpeg -i anim.gif frame_%04d.png
 ```
-Κατόπιν αντιμετωπίστε τα καρέ σαν κανονικά PNG: `zsteg`, `pngcheck`, channel isolation.
+Στη συνέχεια χειριστείτε τα frames όπως κανονικά PNGs: `zsteg`, `pngcheck`, channel isolation.
 
-Alternative tooling:
+Εναλλακτικά εργαλεία:
 
-- `gifsicle --explode anim.gif` (γρήγορη εξαγωγή καρέ)
-- `imagemagick`/`magick` για μετασχηματισμούς ανά καρέ
+- `gifsicle --explode anim.gif` (γρήγορη εξαγωγή frames)
+- `imagemagick`/`magick` για μετασχηματισμούς ανά frame
 
-Frame differencing is often decisive:
+Το Frame differencing είναι συχνά καθοριστικό:
 ```bash
 magick frame_0001.png frame_0002.png -compose difference -composite diff.png
 ```
-## Ενσωμάτωση προστατευμένη με φράση πρόσβασης
+### APNG pixel-count encoding
 
-Αν υποψιάζεστε ότι η ενσωμάτωση προστατεύεται με φράση πρόσβασης αντί για χειραγώγηση σε επίπεδο pixel, αυτή είναι συνήθως η ταχύτερη οδός.
+- Εντοπίστε κοντέινερ APNG: `exiftool -a -G1 file.png | grep -i animation` or `file`.
+- Εξάγετε καρέ χωρίς επαναχρονισμό: `ffmpeg -i file.png -vsync 0 frames/frame_%03d.png`.
+- Ανακτήστε τα payloads που κωδικοποιήθηκαν ως αριθμοί pixel ανά καρέ:
+```python
+from PIL import Image
+import glob
+out = []
+for f in sorted(glob.glob('frames/frame_*.png')):
+counts = Image.open(f).getcolors()
+target = dict(counts).get((255, 0, 255, 255))  # adjust the target color
+out.append(target or 0)
+print(bytes(out).decode('latin1'))
+```
+Οι κινούμενες προκλήσεις μπορεί να κωδικοποιούν κάθε byte ως τον αριθμό ενός συγκεκριμένου χρώματος σε κάθε καρέ· η συνένωση των μετρήσεων ανασυνθέτει το μήνυμα.
+
+## Ενσωμάτωση προστατευμένη με κωδικό
+
+Αν υποψιάζεστε ότι η ενσωμάτωση προστατεύεται με passphrase αντί για χειραγώγηση σε επίπεδο pixel, αυτός είναι συνήθως ο ταχύτερος τρόπος.
 
 ### steghide
 
-Υποστηρίζει `JPEG, BMP, WAV, AU` και μπορεί να ενσωματώσει/εξαγάγει κρυπτογραφημένα payloads.
+Υποστηρίζει `JPEG, BMP, WAV, AU` και μπορεί να embed/extract κρυπτογραφημένα payloads.
 ```bash
 steghide info file
 steghide extract -sf file --passphrase 'password'
 ```
-I don't have the README.md contents — please paste the exact text from src/stego/images/README.md here and I'll translate it to Greek following your rules.
+Δεν βλέπω το περιεχόμενο του αρχείου src/stego/images/README.md. Μπορείς να επικολλήσεις εδώ το κείμενο που θέλεις να μεταφράσω (ή να υποδείξεις ακριβώς ποιο τμήμα); Θα το μεταφράσω στα Ελληνικά διατηρώντας απείραχτα tags, links και paths.
 ```bash
 stegcracker file.jpg wordlist.txt
 ```
@@ -194,5 +215,9 @@ stegcracker file.jpg wordlist.txt
 Υποστηρίζει PNG/BMP/GIF/WebP/WAV.
 
 Αποθετήριο: https://github.com/dhsdshdhk/stegpy
+
+## Αναφορές
+
+- [Flagvent 2025 (Medium) — pink, Santa’s Wishlist, Christmas Metadata, Captured Noise](https://0xdf.gitlab.io/flagvent2025/medium)
 
 {{#include ../../banners/hacktricks-training.md}}

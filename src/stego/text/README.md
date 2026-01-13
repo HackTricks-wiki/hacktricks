@@ -2,28 +2,28 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Ψάξτε για:
+Αναζητήστε:
 
 - Unicode homoglyphs
 - Zero-width characters
 - Whitespace patterns (spaces vs tabs)
 
-## Πρακτική προσέγγιση
+## Πρακτική πορεία
 
-Αν το απλό κείμενο συμπεριφέρεται απρόσμενα, ελέγξτε τα codepoints και κανονικοποιήστε προσεκτικά (μην καταστρέψετε αποδεικτικά στοιχεία).
+Αν το plain text συμπεριφέρεται απρόσμενα, εξετάστε τα codepoints και κάντε normalize προσεκτικά (μην καταστρέψετε αποδεικτικά στοιχεία).
 
 ### Τεχνική
 
-Text stego συχνά βασίζεται σε χαρακτήρες που εμφανίζονται πανομοιότυπα (ή αόρατα):
+Text stego συχνά βασίζεται σε χαρακτήρες που αποδίδονται πανομοιότυπα (ή αόρατα):
 
-- Homoglyphs: διαφορετικά Unicode codepoints που μοιάζουν (Latin `a` vs Cyrillic `а`)
+- Homoglyphs: different Unicode codepoints that look the same (Latin `a` vs Cyrillic `а`)
 - Zero-width characters: joiners, non-joiners, zero-width spaces
 - Whitespace encodings: spaces vs tabs, trailing spaces, line-length patterns
 
-Επιπλέον περιπτώσεις με υψηλό σήμα:
+Επιπλέον περιπτώσεις υψηλού σήματος:
 
-- Bidirectional override/control characters (μπορεί να αναδιατάξουν οπτικά το κείμενο)
-- Variation selectors and combining characters που χρησιμοποιούνται ως κρυφός δίαυλος
+- Bidirectional override/control characters (μπορούν οπτικά να αναδιατάξουν το κείμενο)
+- Variation selectors and combining characters χρησιμοποιούνται ως κρυφό κανάλι
 
 ### Βοηθήματα αποκωδικοποίησης
 
@@ -39,4 +39,16 @@ if ord(ch) > 127 or ch.isspace():
 print(i, hex(ord(ch)), repr(ch))
 PY
 ```
+## CSS `unicode-range` κανάλια
+
+`@font-face` κανόνες μπορούν να κωδικοποιήσουν bytes σε καταχωρήσεις `unicode-range: U+..`. Εξάγετε τα codepoints, συνενώστε τα hex και αποκωδικοποιήστε:
+```bash
+grep -o "U+[0-9A-Fa-f]\+" styles.css | tr -d 'U+\n' | xxd -r -p
+```
+Αν οι ranges περιέχουν πολλαπλά bytes ανά δήλωση, χωρίστε πρώτα με κόμματα και κανονικοποιήστε (`tr ',+' '\n'`). Το Python διευκολύνει το parsing και την εκπομπή bytes αν η μορφοποίηση είναι ασυνεπής.
+
+## Αναφορές
+
+- [Flagvent 2025 (Medium) — pink, Santa’s Wishlist, Christmas Metadata, Captured Noise](https://0xdf.gitlab.io/flagvent2025/medium)
+
 {{#include ../../banners/hacktricks-training.md}}
