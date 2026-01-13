@@ -55,6 +55,49 @@ For more information about Prompt Injection check:
 AI-Prompts.md
 {{#endref}}
 
+## Burp Suite MCP bridge for passive web traffic review
+
+> [!TIP]
+> Stream Burp-captured HTTP(S) traffic into an MCP bridge and an AI backend for passive, evidence-driven review (IDOR/SSRF/logic/auth/rate-limit triage). No fuzzing or blind scanning.
+
+### Data flow
+- **Burp MCP Server** (BApp) listens on `127.0.0.1:9876` and exposes intercepted traffic via MCP.
+- An **MCP bridge** (often behind a local Caddy reverse proxy) upgrades to **MCP SSE** and forwards the context to the backend.
+- Supported backends:
+  - **Codex CLI** — cloud — models: `gpt-5.2-codex`, `gpt-5.1`, `gpt-5-mini`.
+  - **Gemini CLI** — cloud — models: `gemini-2.0-flash`, `gemini-2.0-pro`.
+  - **Ollama** — local — models: `deepseek-r1:14b` (~16GB VRAM), `gpt-oss:20b` (~20GB VRAM), `llama3.1:70b` (48GB+ VRAM).
+
+### Quick setup checklist
+1. Install the **Burp MCP Server** extension from [PortSwigger](https://portswigger.net/bappstore/9952290f04ed4f628e624d0aa9dccebc) and confirm it is listening on `127.0.0.1:9876`.
+2. Start **Caddy** with the MCP SSE reverse-proxy config.
+3. Launch one backend (Codex, Gemini, or Ollama) and connect it to the MCP bridge.
+
+Launcher helpers start/stop Caddy with the backend:
+
+```bash
+source /path/to/burp-mcp-agents/codex/burpcodex.sh
+source /path/to/burp-mcp-agents/gemini-cli/burpgemini.sh
+source /path/to/burp-mcp-agents/ollama/burpollama.sh
+
+burpcodex
+burpgemini
+burpollama deepseek-r1:14b
+```
+
+Persist the shortcuts by adding the `source` lines to `~/.zshrc`.
+
+### Prompt pack for passive review
+Real traffic can be fed into structured prompts that reason over requests/responses instead of generating new traffic:
+- `passive_hunter.md`: broad passive vuln surfacing.
+- `idor_hunter.md`: IDOR/BOLA/object/tenant drift and auth mismatches.
+- `auth_flow_mapper.md`: map authenticated vs unauthenticated paths.
+- `ssrf_redirect_hunter.md`: SSRF/open-redirect candidates from URL fetch params/redirect chains.
+- `logic_flaw_hunter.md`: multi-step logic flaws.
+- `session_scope_hunter.md`: token audience/scope misuse.
+- `rate_limit_abuse_hunter.md`: throttling/abuse gaps.
+- `report_writer.md`: evidence-focused reporting.
+
 ## MCP Vulns
 
 > [!CAUTION]
@@ -225,12 +268,12 @@ The command-template variant exercised by JFrog (CVE-2025-8943) does not even ne
 ```
 
 ## References
+- [Burp MCP Agents](https://github.com/six2dez/burp-mcp-agents)
 - [CVE-2025-54136 – MCPoison Cursor IDE persistent RCE](https://research.checkpoint.com/2025/cursor-vulnerability-mcpoison/)
 - [Metasploit Wrap-Up 11/28/2025 – new Flowise custom MCP & JS injection exploits](https://www.rapid7.com/blog/post/pt-metasploit-wrap-up-11-28-2025)
 - [GHSA-3gcm-f6qx-ff7p / CVE-2025-59528 – Flowise CustomMCP JavaScript code injection](https://github.com/advisories/GHSA-3gcm-f6qx-ff7p)
 - [GHSA-2vv2-3x8x-4gv7 / CVE-2025-8943 – Flowise custom MCP command execution](https://github.com/advisories/GHSA-2vv2-3x8x-4gv7)
 - [JFrog – Flowise OS command remote code execution (JFSA-2025-001380578)](https://research.jfrog.com/vulnerabilities/flowise-os-command-remote-code-execution-jfsa-2025-001380578)
-- [CVE-2025-54136 – MCPoison Cursor IDE persistent RCE](https://research.checkpoint.com/2025/cursor-vulnerability-mcpoison/)
 - [An Evening with Claude (Code): sed-Based Command Safety Bypass in Claude Code](https://specterops.io/blog/2025/11/21/an-evening-with-claude-code/)
 
 {{#include ../banners/hacktricks-training.md}}
