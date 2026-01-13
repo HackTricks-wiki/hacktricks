@@ -244,6 +244,42 @@ If you are targeting AS-REP roastable users, see also:
 asreproast.md
 {{#endref}}
 
+### Detection
+
+Kerberoasting can be stealthy. Hunt for Event ID 4769 from DCs and apply filters to reduce noise:
+
+- Exclude service name `krbtgt` and service names ending with `$` (computer accounts).
+- Exclude requests from machine accounts (`*$$@*`).
+- Only successful requests (Failure Code `0x0`).
+- Track encryption types: RC4 (`0x17`), AES128 (`0x11`), AES256 (`0x12`). Don’t alert only on `0x17`.
+
+Example PowerShell triage:
+
+```powershell
+Get-WinEvent -FilterHashtable @{Logname='Security'; ID=4769} -MaxEvents 1000 |
+  Where-Object {
+    ($_.Message -notmatch 'krbtgt') -and
+    ($_.Message -notmatch '\$$') -and
+    ($_.Message -match 'Failure Code:\s+0x0') -and
+    ($_.Message -match 'Ticket Encryption Type:\s+(0x17|0x12|0x11)') -and
+    ($_.Message -notmatch '\$@')
+  } |
+  Select-Object -ExpandProperty Message
+```
+
+Additional ideas:
+
+- Baseline normal SPN usage per host/user; alert on large bursts of distinct SPN requests from a single principal.
+- Flag unusual RC4 usage in AES-hardened domains.
+
+### Mitigation / Hardening
+
+- Use gMSA/dMSA or machine accounts for services. Managed accounts have 120+ character random passwords and rotate automatically, making offline cracking impractical.
+- Enforce AES on service accounts by setting `msDS-SupportedEncryptionTypes` to AES-only (decimal 24 / hex 0x18) and then rotating the password so AES keys are derived.
+- Where possible, disable RC4 in your environment and monitor for attempted RC4 usage. On DCs you can use the `DefaultDomainSupportedEncTypes` registry value to steer defaults for accounts without `msDS-SupportedEncryptionTypes` set. Test thoroughly.
+- Remove unnecessary SPNs from user accounts.
+- Use long, random service account passwords (25+ chars) if managed accounts are not feasible; ban common passwords and audit regularly.
+
 ## References
 
 - [https://github.com/ShutdownRepo/targetedKerberoast](https://github.com/ShutdownRepo/targetedKerberoast)
