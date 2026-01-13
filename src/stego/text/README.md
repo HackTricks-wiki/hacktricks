@@ -1,35 +1,35 @@
-# Text Steganography
+# Text-Steganographie
 
 {{#include ../../banners/hacktricks-training.md}}
 
 Achte auf:
 
-- Unicode homoglyphs
+- Unicode-Homoglyphen
 - Zero-width characters
-- Whitespace patterns (spaces vs tabs)
+- Whitespace-Muster (spaces vs tabs)
 
-## Praktischer Ablauf
+## Praktischer Weg
 
-Wenn Plaintext sich unerwartet verhält, untersuche die Codepunkte und normalisiere sorgfältig (vernichte keine Beweise).
+Wenn Klartext sich unerwartet verhält, untersuche die Codepoints und normalisiere sorgfältig (Beweise nicht zerstören).
 
 ### Technik
 
-Text stego nutzt häufig Zeichen, die identisch (oder unsichtbar) dargestellt werden:
+Text-Stego beruht häufig auf Zeichen, die identisch (oder unsichtbar) dargestellt werden:
 
-- Homoglyphs: verschiedene Unicode-Codepunkte, die gleich aussehen (Latin `a` vs Cyrillic `а`)
+- Homoglyphen: verschiedene Unicode-Codepoints, die gleich aussehen (Latin `a` vs Cyrillic `а`)
 - Zero-width characters: joiners, non-joiners, zero-width spaces
-- Whitespace encodings: spaces vs tabs, trailing spaces, line-length patterns
+- Whitespace-Codierungen: spaces vs tabs, trailing spaces, Zeilenlängenmuster
 
 Weitere aussagekräftige Fälle:
 
-- Bidirectional override/control characters (kann Text visuell neu anordnen)
-- Variation selectors and combining characters used as a covert channel
+- Bidirektionale override/control characters (können Text visuell umordnen)
+- Variationsselektoren und kombinierende Zeichen, die als verdeckter Kanal verwendet werden
 
-### Hilfsmittel zum Dekodieren
+### Hilfen zum Dekodieren
 
 - Unicode homoglyph/zero-width playground: https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder
 
-### Codepunkte untersuchen
+### Codepoints inspizieren
 ```bash
 python3 - <<'PY'
 import sys
@@ -39,4 +39,16 @@ if ord(ch) > 127 or ch.isspace():
 print(i, hex(ord(ch)), repr(ch))
 PY
 ```
+## CSS `unicode-range` Kanäle
+
+`@font-face` rules können Bytes in `unicode-range: U+..` Einträgen kodieren. Extrahiere die Codepunkte, füge die Hexwerte zusammen und dekodiere:
+```bash
+grep -o "U+[0-9A-Fa-f]\+" styles.css | tr -d 'U+\n' | xxd -r -p
+```
+Wenn Bereiche mehrere Bytes pro Deklaration enthalten, zuerst an Kommas aufteilen und normalisieren (`tr ',+' '\n'`). Python macht es einfach, Bytes zu parsen und auszugeben, wenn die Formatierung inkonsistent ist.
+
+## Referenzen
+
+- [Flagvent 2025 (Medium) — pink, Santa’s Wishlist, Christmas Metadata, Captured Noise](https://0xdf.gitlab.io/flagvent2025/medium)
+
 {{#include ../../banners/hacktricks-training.md}}
