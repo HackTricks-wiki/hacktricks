@@ -43,6 +43,23 @@ Primary tool for spectrogram inspection:
 sox input.wav -n spectrogram -o spectrogram.png
 ```
 
+## FSK / modem decoding
+
+Frequency-shift keyed audio often looks like alternating single tones in a spectrogram. Once you have a rough center/shift and baud estimate, brute force with `minimodem`:
+
+```bash
+# Visualize the band to pick baud/frequency
+sox noise.wav -n spectrogram -o spec.png
+
+# Try common bauds until printable text appears
+minimodem -f noise.wav 45
+minimodem -f noise.wav 300
+minimodem -f noise.wav 1200
+minimodem -f noise.wav 2400
+```
+
+`minimodem` autogains and autodetects mark/space tones; adjust `--rx-invert` or `--samplerate` if the output is garbled.
+
 ## WAV LSB
 
 ### Technique
@@ -84,4 +101,9 @@ Online decoders:
 - [https://unframework.github.io/dtmf-detect/](https://unframework.github.io/dtmf-detect/)
 - [http://dialabc.com/sound/detect/index.html](http://dialabc.com/sound/detect/index.html)
 
+## References
+
+- [Flagvent 2025 (Medium) — pink, Santa’s Wishlist, Christmas Metadata, Captured Noise](https://0xdf.gitlab.io/flagvent2025/medium)
+
 {{#include ../../banners/hacktricks-training.md}}
+
