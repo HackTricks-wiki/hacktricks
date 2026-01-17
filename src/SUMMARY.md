@@ -92,11 +92,11 @@
   - [Defi Amm Virtual Balance Cache Exploitation](blockchain/blockchain-and-crypto-currencies/defi-amm-virtual-balance-cache-exploitation.md)
   - [Mutation Testing With Slither](blockchain/smart-contract-security/mutation-testing-with-slither.md)
   - [Value Centric Web3 Red Teaming](blockchain/blockchain-and-crypto-currencies/value-centric-web3-red-teaming.md)
+  - [Web3 Signing Workflow Compromise Safe Delegatecall Proxy Takeover](blockchain/blockchain-and-crypto-currencies/web3-signing-workflow-compromise-safe-delegatecall-proxy-takeover.md)
 - [Lua Sandbox Escape](generic-methodologies-and-resources/lua/bypass-lua-sandboxes/README.md)
 
 # 🧙‍♂️ Generic Hacking
 
-  - [Web3 Signing Workflow Compromise Safe Delegatecall Proxy Takeover](blockchain/blockchain-and-crypto-currencies/web3-signing-workflow-compromise-safe-delegatecall-proxy-takeover.md)
 - [Archive Extraction Path Traversal](generic-hacking/archive-extraction-path-traversal.md)
 - [Brute Force - CheatSheet](generic-hacking/brute-force.md)
 - [Esim Javacard Exploitation](generic-hacking/esim-javacard-exploitation.md)
