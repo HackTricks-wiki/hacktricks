@@ -132,12 +132,15 @@
   const TOOLTIP_TEXT =
     "💡 Highlight any text on the page,\nthen click to ask HackTricks AI about it";
 
-  const API_BASE  = "https://www.hacktricks.ai/api/assistants/threads";
+  const API_BASE  = "https://ai.hacktricks.wiki/api/assistants/threads";
+  const AUTH_STATUS_URL = "https://ai.hacktricks.wiki/api/auth/status";
+  const LOGIN_URL = "https://tools.hacktricks.wiki/";
   const BRAND_RED = "#b31328";
 
   /* ------------------------------ State ------------------------------ */
   let threadId  = null;
   let isRunning = false;
+  let isAuthenticated = false;
 
   /* ---------- helpers ---------- */
   const $ = (sel, ctx = document) => ctx.querySelector(sel);
@@ -189,7 +192,6 @@
 
     console.log(`${LOG} Injecting widget… v1.16`);
 
-    await ensureThreadId();
     injectStyles();
 
     const btn      = createFloatingButton();
@@ -200,6 +202,11 @@
     const inputBox = $("#ht-ai-question");
     const resetBtn = $("#ht-ai-reset");
     const closeBtn = $("#ht-ai-close");
+
+    await refreshAuthState(btn);
+    if (isAuthenticated) {
+      await ensureThreadId();
+    }
 
     /* ------------------- Selection snapshot ------------------- */
     let savedSelection = "";
@@ -235,7 +242,12 @@
     };
 
     /* ------------------- Panel open / close ------------------- */
-    btn.addEventListener("click", () => {
+    btn.addEventListener("click", async () => {
+      const ok = await refreshAuthState(btn);
+      if (!ok) {
+        showLoginPopup();
+        return;
+      }
       if (!savedSelection) {
         alert("Please highlight some text first.");
         return;
@@ -350,8 +362,9 @@
 
   /* =================================================================== */
   function injectStyles() {
-    const css = `
-#ht-ai-btn{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);min-width:60px;height:60px;border-radius:30px;background:linear-gradient(45deg, #b31328, #d42d3f, #2d5db4, #3470e4);background-size:300% 300%;animation:gradientShift 8s ease infinite;color:#fff;font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:99999;box-shadow:0 2px 8px rgba(0,0,0,.4);transition:opacity .2s;padding:0 20px}
+    let css = `
+#ht-ai-btn{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);min-width:60px;height:60px;border-radius:30px;background:linear-gradient(45deg, #b31328, #d42d3f, #2d5db4, #3470e4);background-size:300% 300%;animation:gradientShift 8s ease infinite;color:#fff;font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:99999;box-shadow:0 2px 8px rgba(0,0,0,.4);transition:opacity .2s, filter .2s; padding:0 20px}
+#ht-ai-btn.ht-ai-locked{filter:grayscale(.2);opacity:.85}
 #ht-ai-btn span{margin-left:8px;font-weight:bold}
 @keyframes gradientShift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
 #ht-ai-btn:hover{opacity:.85}
@@ -388,6 +401,16 @@
 #ht-ai-resizer:hover{background:rgba(255,255,255,.15);border-right:1px solid rgba(255,255,255,.3)}
 #ht-ai-resizer:active{background:rgba(255,255,255,.25)}
 #ht-ai-resizer::before{content:'';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:2px;height:20px;background:rgba(255,255,255,.4);border-radius:1px}`;
+    css += `
+#ht-ai-login-overlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.6);backdrop-filter:blur(6px);z-index:100200}
+#ht-ai-login-card{max-width:420px;width:calc(100% - 32px);padding:20px;border-radius:14px;background:#111;border:1px solid rgba(255,255,255,.08);box-shadow:0 12px 28px rgba(0,0,0,.4);text-align:center;color:#fff;font-family:system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial,sans-serif}
+.ht-ai-login-title{font-size:1.1rem;font-weight:700;margin-bottom:8px}
+.ht-ai-login-text{font-size:.95rem;color:#cfcfcf;margin-bottom:12px}
+.ht-ai-login-link{display:inline-block;margin-bottom:16px;color:#ff6b5b;text-decoration:none;word-break:break-all}
+.ht-ai-login-link:hover{text-decoration:underline}
+.ht-ai-login-close{background:#b31328;color:#fff;border:none;border-radius:8px;padding:8px 14px;cursor:pointer}
+.ht-ai-login-close:hover{opacity:.9}
+`;
     const s = document.createElement("style");
     s.id = "ht-ai-style";
     s.textContent = css;
@@ -414,6 +437,48 @@
       t.classList.add("show");
     });
     btn.addEventListener("mouseleave", () => t.classList.remove("show"));
+  }
+
+  async function checkAuthStatus() {
+    try {
+      const res = await fetch(AUTH_STATUS_URL, { method: "GET", credentials: "include" });
+      isAuthenticated = res.ok;
+      return isAuthenticated;
+    } catch (e) {
+      isAuthenticated = false;
+      return false;
+    }
+  }
+
+  function setAuthButtonState(btn, ok) {
+    btn.classList.toggle("ht-ai-locked", !ok);
+  }
+
+  async function refreshAuthState(btn) {
+    const ok = await checkAuthStatus();
+    setAuthButtonState(btn, ok);
+    return ok;
+  }
+
+  function showLoginPopup() {
+    if (document.getElementById("ht-ai-login-overlay")) return;
+    const overlay = document.createElement("div");
+    overlay.id = "ht-ai-login-overlay";
+    overlay.innerHTML = `
+      <div id="ht-ai-login-card">
+        <div class="ht-ai-login-title">Sign in required</div>
+        <div class="ht-ai-login-text">
+          To use HackTricks AI, please log in or create a free account on HT Tools and refresh this page.
+        </div>
+        <a class="ht-ai-login-link" href="${LOGIN_URL}" target="_blank" rel="noopener noreferrer">${LOGIN_URL}</a>
+        <button class="ht-ai-login-close" type="button">Close</button>
+      </div>
+    `;
+    overlay.addEventListener("click", (e) => {
+      if (e.target === overlay) overlay.remove();
+    });
+    overlay.querySelector(".ht-ai-login-close").addEventListener("click", () => overlay.remove());
+    document.body.appendChild(overlay);
   }
 
   /* =================================================================== */
@@ -491,4 +556,3 @@
     handle.addEventListener("touchstart", onStart, { passive: false });
   }
 })();
-

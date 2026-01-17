@@ -408,6 +408,7 @@
   - [iOS UIPasteboard](mobile-pentesting/ios-pentesting/ios-uipasteboard.md)
   - [iOS WebViews](mobile-pentesting/ios-pentesting/ios-webviews.md)
   - [Itunesstored Bookassetd Sandbox Escape](mobile-pentesting/ios-pentesting/itunesstored-bookassetd-sandbox-escape.md)
+  - [Zero Click Messaging Image Parser Chains](mobile-pentesting/ios-pentesting/zero-click-messaging-image-parser-chains.md)
 - [Cordova Apps](mobile-pentesting/cordova-apps.md)
 - [Xamarin Apps](mobile-pentesting/xamarin-apps.md)
 
@@ -843,6 +844,7 @@
   - [Use After Free](binary-exploitation/libc-heap/use-after-free/README.md)
     - [First Fit](binary-exploitation/libc-heap/use-after-free/first-fit.md)
   - [Double Free](binary-exploitation/libc-heap/double-free.md)
+  - [Gnu Obstack Function Pointer Hijack](binary-exploitation/libc-heap/gnu-obstack-function-pointer-hijack.md)
   - [Overwriting a freed chunk](binary-exploitation/libc-heap/overwriting-a-freed-chunk.md)
   - [Heap Overflow](binary-exploitation/libc-heap/heap-overflow.md)
   - [Unlink Attack](binary-exploitation/libc-heap/unlink-attack.md)
