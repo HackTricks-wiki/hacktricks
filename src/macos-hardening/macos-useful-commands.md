@@ -1,14 +1,14 @@
-# Comandos Útiles de macOS
+# macOS Comandos Útiles
 
 {{#include ../banners/hacktricks-training.md}}
 
-### Herramientas de Enumeración Automática de MacOS
+### Herramientas de enumeración automática para macOS
 
 - **MacPEAS**: [https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS](https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS)
 - **Metasploit**: [https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb](https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb)
 - **SwiftBelt**: [https://github.com/cedowens/SwiftBelt](https://github.com/cedowens/SwiftBelt)
 
-### Comandos Específicos de MacOS
+### Comandos específicos de macOS
 ```bash
 #System info
 date
@@ -115,16 +115,24 @@ sudo apachectl (start|status|restart|stop)
 dscacheutil -flushcache
 sudo killall -HUP mDNSResponder
 ```
-### Software y Servicios Instalados
+### Verificación rápida anti-análisis / virtualización
 
-Verifique si hay aplicaciones **sospechosas** instaladas y **privilegios** sobre los recursos instalados:
+Algunos stealers de macOS llaman a `system_profiler` para detectar VMs y **abortar con un código de salida distinto (p. ej., 100)** para evitar la detonación del sandbox:
+```bash
+if system_profiler SPHardwareDataType SPDisplaysDataType | grep -Eiq 'qemu|kvm|vmware|virtualbox'; then
+exit 100
+fi
+```
+### Software y servicios instalados
+
+Comprueba aplicaciones **sospechosas** instaladas y los **privilegios** sobre los recursos instalados:
 ```
 system_profiler SPApplicationsDataType #Installed Apps
 system_profiler SPFrameworksDataType #Instaled framework
 lsappinfo list #Installed Apps
 launchctl list #Services
 ```
-### Procesos de Usuario
+### Procesos de usuario
 ```bash
 # will print all the running services under that particular user domain.
 launchctl print gui/<users UID>
@@ -137,8 +145,12 @@ launchctl print gui/<user's UID>/com.company.launchagent.label
 ```
 ### Crear un usuario
 
-Sin indicaciones
+Sin prompts
 
 <figure><img src="../images/image (79).png" alt=""><figcaption></figcaption></figure>
+
+## Referencias
+
+- [2025, the year of the Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
 
 {{#include ../banners/hacktricks-training.md}}
