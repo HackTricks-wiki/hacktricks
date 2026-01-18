@@ -2,13 +2,13 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-### MacOS Otomatik Enumerasyon Araçları
+### macOS Otomatik Enumeration Araçları
 
 - **MacPEAS**: [https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS](https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS)
 - **Metasploit**: [https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb](https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb)
 - **SwiftBelt**: [https://github.com/cedowens/SwiftBelt](https://github.com/cedowens/SwiftBelt)
 
-### Belirli MacOS Komutları
+### Belirli macOS Komutları
 ```bash
 #System info
 date
@@ -115,9 +115,17 @@ sudo apachectl (start|status|restart|stop)
 dscacheutil -flushcache
 sudo killall -HUP mDNSResponder
 ```
-### Yüklenmiş Yazılımlar ve Hizmetler
+### Hızlı anti-analysis / sanallaştırma kontrolü
 
-Yüklenmiş **şüpheli** uygulamaları ve yüklenmiş kaynaklar üzerindeki **yetkileri** kontrol edin:
+Bazı macOS stealers, VM'leri tespit etmek için `system_profiler` çağırır ve sandbox detonation'ı önlemek için **farklı bir çıkış kodu (örn. 100) ile sonlandırır**:
+```bash
+if system_profiler SPHardwareDataType SPDisplaysDataType | grep -Eiq 'qemu|kvm|vmware|virtualbox'; then
+exit 100
+fi
+```
+### Yüklü Yazılımlar ve Servisler
+
+Yüklü **şüpheli** uygulamaları ve yüklü kaynaklar üzerindeki **ayrıcalıkları** kontrol edin:
 ```
 system_profiler SPApplicationsDataType #Installed Apps
 system_profiler SPFrameworksDataType #Instaled framework
@@ -135,10 +143,14 @@ launchctl print system
 # will print detailed information about the specific launch agent. And if it’s not running or you’ve mistyped, you will get some output with a non-zero exit code: Could not find service “com.company.launchagent.label” in domain for login
 launchctl print gui/<user's UID>/com.company.launchagent.label
 ```
-### Bir kullanıcı oluştur
+### Kullanıcı oluştur
 
-Uyarı olmadan
+Onay istemeden
 
 <figure><img src="../images/image (79).png" alt=""><figcaption></figcaption></figure>
+
+## Referanslar
+
+- [2025, the year of the Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
 
 {{#include ../banners/hacktricks-training.md}}
