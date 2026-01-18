@@ -1,14 +1,14 @@
-# macOS Nuttige Opdragte
+# macOS Nuttige opdragte
 
 {{#include ../banners/hacktricks-training.md}}
 
-### MacOS Outomatiese Enumerasie Gereedskap
+### MacOS Outomatiese Enumeration Tools
 
 - **MacPEAS**: [https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS](https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS)
 - **Metasploit**: [https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb](https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb)
 - **SwiftBelt**: [https://github.com/cedowens/SwiftBelt](https://github.com/cedowens/SwiftBelt)
 
-### Spesifieke MacOS Opdragte
+### Spesifieke MacOS-opdragte
 ```bash
 #System info
 date
@@ -115,16 +115,24 @@ sudo apachectl (start|status|restart|stop)
 dscacheutil -flushcache
 sudo killall -HUP mDNSResponder
 ```
-### Gemonteerde Sagteware & Dienste
+### Vinnige anti-ontleding / virtualiseringskontrole
 
-Kyk vir **verdagte** toepassings wat geïnstalleer is en **privileges** oor die geïnstalleerde hulpbronne:
+Sommige macOS stealers gebruik `system_profiler` om VMs op te spoor en **beëindig met 'n spesifieke uitgangskode (bv. 100)** om sandbox-detonasie te voorkom:
+```bash
+if system_profiler SPHardwareDataType SPDisplaysDataType | grep -Eiq 'qemu|kvm|vmware|virtualbox'; then
+exit 100
+fi
+```
+### Geïnstalleerde sagteware & Dienste
+
+Kontroleer vir **verdagte** toepassings wat geïnstalleer is en **bevoegdhede** oor die geïnstalleerde hulpbronne:
 ```
 system_profiler SPApplicationsDataType #Installed Apps
 system_profiler SPFrameworksDataType #Instaled framework
 lsappinfo list #Installed Apps
 launchctl list #Services
 ```
-### Gebruiker Prosesse
+### Gebruikerprosesse
 ```bash
 # will print all the running services under that particular user domain.
 launchctl print gui/<users UID>
@@ -137,8 +145,12 @@ launchctl print gui/<user's UID>/com.company.launchagent.label
 ```
 ### Skep 'n gebruiker
 
-Sonder aanmoediging
+Sonder prompts
 
 <figure><img src="../images/image (79).png" alt=""><figcaption></figcaption></figure>
+
+## Verwysings
+
+- [2025, the year of the Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
 
 {{#include ../banners/hacktricks-training.md}}

