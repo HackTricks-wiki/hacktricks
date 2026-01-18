@@ -1,14 +1,14 @@
-# macOS Корисні Команди
+# macOS Корисні команди
 
 {{#include ../banners/hacktricks-training.md}}
 
-### Інструменти Автоматичної Перевірки MacOS
+### Автоматичні інструменти енумерації для macOS
 
 - **MacPEAS**: [https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS](https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS)
 - **Metasploit**: [https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb](https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb)
 - **SwiftBelt**: [https://github.com/cedowens/SwiftBelt](https://github.com/cedowens/SwiftBelt)
 
-### Специфічні Команди MacOS
+### Специфічні команди macOS
 ```bash
 #System info
 date
@@ -115,16 +115,24 @@ sudo apachectl (start|status|restart|stop)
 dscacheutil -flushcache
 sudo killall -HUP mDNSResponder
 ```
+### Швидка перевірка антианалізу / віртуалізації
+
+Деякі macOS stealers викликають `system_profiler` для виявлення VMs і **завершують роботу з унікальним кодом виходу (наприклад, 100)**, щоб уникнути детонації sandbox:
+```bash
+if system_profiler SPHardwareDataType SPDisplaysDataType | grep -Eiq 'qemu|kvm|vmware|virtualbox'; then
+exit 100
+fi
+```
 ### Встановлене програмне забезпечення та сервіси
 
-Перевірте наявність **підозрілих** додатків, що встановлені, та **привілеїв** над встановленими ресурсами:
+Перевірте наявність **підозрілих** встановлених додатків та **привілеїв** над встановленими ресурсами:
 ```
 system_profiler SPApplicationsDataType #Installed Apps
 system_profiler SPFrameworksDataType #Instaled framework
 lsappinfo list #Installed Apps
 launchctl list #Services
 ```
-### Процеси користувача
+### Користувацькі процеси
 ```bash
 # will print all the running services under that particular user domain.
 launchctl print gui/<users UID>
@@ -140,5 +148,9 @@ launchctl print gui/<user's UID>/com.company.launchagent.label
 Без підказок
 
 <figure><img src="../images/image (79).png" alt=""><figcaption></figcaption></figure>
+
+## Посилання
+
+- [2025, the year of the Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
 
 {{#include ../banners/hacktricks-training.md}}
