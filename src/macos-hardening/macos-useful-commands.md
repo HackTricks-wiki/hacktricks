@@ -1,4 +1,4 @@
-# macOS 有用なコマンド
+# macOS の便利なコマンド
 
 {{#include ../banners/hacktricks-training.md}}
 
@@ -115,9 +115,17 @@ sudo apachectl (start|status|restart|stop)
 dscacheutil -flushcache
 sudo killall -HUP mDNSResponder
 ```
-### インストールされたソフトウェアとサービス
+### Quick anti-analysis / virtualization check
 
-インストールされた**疑わしい**アプリケーションとインストールされたリソースに対する**権限**を確認します:
+一部の macOS stealers は VMs を検出するために `system_profiler` を呼び出し、sandbox detonation を避けるために **特定の終了コード（例: 100）で abort** します:
+```bash
+if system_profiler SPHardwareDataType SPDisplaysDataType | grep -Eiq 'qemu|kvm|vmware|virtualbox'; then
+exit 100
+fi
+```
+### インストール済みソフトウェアとサービス
+
+インストールされている**疑わしい**アプリケーションとインストール済みリソースに対する**権限**を確認してください:
 ```
 system_profiler SPApplicationsDataType #Installed Apps
 system_profiler SPFrameworksDataType #Instaled framework
@@ -137,8 +145,12 @@ launchctl print gui/<user's UID>/com.company.launchagent.label
 ```
 ### ユーザーを作成する
 
-プロンプトなし
+プロンプトなしで
 
 <figure><img src="../images/image (79).png" alt=""><figcaption></figcaption></figure>
+
+## 参考
+
+- [2025, the year of the Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
 
 {{#include ../banners/hacktricks-training.md}}
