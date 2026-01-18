@@ -31,6 +31,14 @@ const autoCreatePagetoc = () => {
   )
   return document.querySelector(".pagetoc")
 }
+
+const getHeadingText = (heading) => {
+  if (!heading) return ""
+  const clone = heading.cloneNode(true)
+  const headerAnchor = clone.querySelector("a.header")
+  if (headerAnchor) headerAnchor.remove()
+  return clone.textContent.replace(/\s+/g, " ").trim()
+}
 const updateFunction = () => {
   if (scrollTimeout) return // Skip updates if within the cooldown period from a click
   const headers = [...document.getElementsByClassName("header")]
@@ -60,14 +68,12 @@ window.addEventListener("load", () => {
   const pagetoc = getPagetoc()
   const headers = [...document.getElementsByClassName("header")]
   headers.forEach((header) => {
+    const headingText = getHeadingText(header.parentElement)
     const link = Object.assign(document.createElement("a"), {
-      textContent: header.text,
+      textContent: headingText || header.text,
       href: header.href,
       className: `pagetoc-${header.parentElement.tagName}`,
     })
-    if (header.parentElement.querySelectorAll("a").length === 2) {
-      link.textContent = header.parentElement.querySelectorAll("a")[1].text
-    }
     pagetoc.appendChild(link)
   })
   updateFunction()
