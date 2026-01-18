@@ -1,14 +1,14 @@
-# macOS उपयोगी कमांड
+# macOS उपयोगी कमांड्स
 
 {{#include ../banners/hacktricks-training.md}}
 
-### MacOS स्वचालित एन्यूमरेशन उपकरण
+### MacOS स्वचालित Enumeration Tools
 
 - **MacPEAS**: [https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS](https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS)
 - **Metasploit**: [https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb](https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb)
 - **SwiftBelt**: [https://github.com/cedowens/SwiftBelt](https://github.com/cedowens/SwiftBelt)
 
-### विशिष्ट MacOS कमांड
+### विशिष्ट MacOS कमांड्स
 ```bash
 #System info
 date
@@ -115,9 +115,17 @@ sudo apachectl (start|status|restart|stop)
 dscacheutil -flushcache
 sudo killall -HUP mDNSResponder
 ```
-### Installed Software & Services
+### त्वरित एंटी-विश्लेषण / वर्चुअलाइज़ेशन जांच
 
-**संदिग्ध** एप्लिकेशन की जांच करें जो स्थापित हैं और स्थापित संसाधनों पर **अधिकार**:
+कुछ macOS stealers VMs का पता लगाने के लिए `system_profiler` को कॉल करते हैं और sandbox detonation से बचने के लिए **abort with a distinct exit code (e.g., 100)**:
+```bash
+if system_profiler SPHardwareDataType SPDisplaysDataType | grep -Eiq 'qemu|kvm|vmware|virtualbox'; then
+exit 100
+fi
+```
+### इंस्टॉल किए गए सॉफ़्टवेयर और सेवाएँ
+
+इंस्टॉल किए गए **संदिग्ध** अनुप्रयोगों और इंस्टॉल किए गए संसाधनों पर होने वाले **privileges** की जाँच करें:
 ```
 system_profiler SPApplicationsDataType #Installed Apps
 system_profiler SPFrameworksDataType #Instaled framework
@@ -135,10 +143,14 @@ launchctl print system
 # will print detailed information about the specific launch agent. And if it’s not running or you’ve mistyped, you will get some output with a non-zero exit code: Could not find service “com.company.launchagent.label” in domain for login
 launchctl print gui/<user's UID>/com.company.launchagent.label
 ```
-### एक उपयोगकर्ता बनाएं
+### उपयोगकर्ता बनाएं
 
-बिना संकेतों के
+प्रॉम्प्ट्स के बिना
 
 <figure><img src="../images/image (79).png" alt=""><figcaption></figcaption></figure>
+
+## संदर्भ
+
+- [2025, the year of the Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
 
 {{#include ../banners/hacktricks-training.md}}

