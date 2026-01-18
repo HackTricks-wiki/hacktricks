@@ -1,14 +1,14 @@
-# macOS Przydatne Komendy
+# macOS Przydatne polecenia
 
 {{#include ../banners/hacktricks-training.md}}
 
-### Narzędzia Automatycznej Enumeracji MacOS
+### MacOS Narzędzia do automatycznej enumeracji
 
 - **MacPEAS**: [https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS](https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS)
 - **Metasploit**: [https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb](https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb)
 - **SwiftBelt**: [https://github.com/cedowens/SwiftBelt](https://github.com/cedowens/SwiftBelt)
 
-### Specyficzne Komendy MacOS
+### Konkretne polecenia MacOS
 ```bash
 #System info
 date
@@ -115,9 +115,17 @@ sudo apachectl (start|status|restart|stop)
 dscacheutil -flushcache
 sudo killall -HUP mDNSResponder
 ```
-### Zainstalowane oprogramowanie i usługi
+### Szybkie sprawdzenie anty-analizy / wirtualizacji
 
-Sprawdź **podejrzane** aplikacje zainstalowane oraz **uprawnienia** do zainstalowanych zasobów:
+Niektóre macOS stealers wywołują `system_profiler`, aby wykryć VMs i **przerywają działanie z odrębnym kodem wyjścia (np. 100)**, aby uniknąć detekcji w sandboxie:
+```bash
+if system_profiler SPHardwareDataType SPDisplaysDataType | grep -Eiq 'qemu|kvm|vmware|virtualbox'; then
+exit 100
+fi
+```
+### Zainstalowane oprogramowanie & usługi
+
+Sprawdź, czy zainstalowane są **podejrzane** aplikacje oraz jakie są **uprawnienia** do zainstalowanych zasobów:
 ```
 system_profiler SPApplicationsDataType #Installed Apps
 system_profiler SPFrameworksDataType #Instaled framework
@@ -137,8 +145,12 @@ launchctl print gui/<user's UID>/com.company.launchagent.label
 ```
 ### Utwórz użytkownika
 
-Bez podpowiedzi
+Bez interakcji
 
 <figure><img src="../images/image (79).png" alt=""><figcaption></figcaption></figure>
+
+## References
+
+- [2025, the year of the Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
 
 {{#include ../banners/hacktricks-training.md}}

