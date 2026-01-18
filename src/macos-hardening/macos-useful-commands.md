@@ -115,9 +115,17 @@ sudo apachectl (start|status|restart|stop)
 dscacheutil -flushcache
 sudo killall -HUP mDNSResponder
 ```
-### 설치된 소프트웨어 및 서비스
+### 빠른 안티-분석 / 가상화 검사
 
-설치된 **의심스러운** 애플리케이션과 **권한**을 확인하십시오.
+일부 macOS stealers는 `system_profiler`를 호출하여 VMs를 탐지하고 sandbox detonation을 피하기 위해 **abort with a distinct exit code (e.g., 100)**:
+```bash
+if system_profiler SPHardwareDataType SPDisplaysDataType | grep -Eiq 'qemu|kvm|vmware|virtualbox'; then
+exit 100
+fi
+```
+### Installed Software & Services
+
+설치된 **의심스러운** 애플리케이션과 설치된 리소스에 대한 **권한**을 확인하세요:
 ```
 system_profiler SPApplicationsDataType #Installed Apps
 system_profiler SPFrameworksDataType #Instaled framework
@@ -140,5 +148,9 @@ launchctl print gui/<user's UID>/com.company.launchagent.label
 프롬프트 없이
 
 <figure><img src="../images/image (79).png" alt=""><figcaption></figcaption></figure>
+
+## 참고자료
+
+- [2025, the year of the Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
 
 {{#include ../banners/hacktricks-training.md}}
