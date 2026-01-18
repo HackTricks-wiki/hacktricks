@@ -1,28 +1,31 @@
-# Archive Extraction Path Traversal ("Zip-Slip" / WinRAR CVE-2025-8088)
+# Arşiv Çıkarma Path Traversal ("Zip-Slip" / WinRAR CVE-2025-8088)
 
 {{#include ../banners/hacktricks-training.md}}
 
 ## Genel Bakış
 
-Birçok arşiv formatı (ZIP, RAR, TAR, 7-ZIP, vb.) her bir girişin kendi **iç yolunu** taşımasına izin verir. Bir çıkarım aracı bu yolu körü körüne dikkate aldığında, `..` veya **mutlak bir yol** (örneğin `C:\Windows\System32\`) içeren bir dosya adı, kullanıcı tarafından seçilen dizinin dışına yazılacaktır. Bu tür bir zafiyet, *Zip-Slip* veya **arşiv çıkarım yolu geçişi** olarak yaygın olarak bilinir.
+Birçok arşiv formatı (ZIP, RAR, TAR, 7-ZIP, vb.) her girişe kendi **internal path**'ini taşıma izni verir. Bir çıkarma aracı bu yolu sorgusuz sualsiz uygularsa, `..` içeren veya bir **absolute path** (ör. `C:\Windows\System32\`) barındıran kötü amaçlı bir dosya adı, kullanıcının seçtiği dizinin dışına yazılacaktır.
+Bu zafiyet sınıfı yaygın olarak *Zip-Slip* veya **archive extraction path traversal** olarak bilinir.
 
-Sonuçlar, rastgele dosyaların üzerine yazmaktan, Windows *Başlangıç* klasörü gibi bir **oto çalıştırma** konumuna bir yük bırakılarak doğrudan **uzaktan kod yürütme (RCE)** elde etmeye kadar uzanır.
+Sonuçlar, rastgele dosyaların üzerine yazılmasından Windows *Startup* klasörü gibi **auto-run** bir konuma payload bırakılarak doğrudan **remote code execution (RCE)** elde edilmesine kadar değişir.
 
-## Temel Sebep
+## Kök Neden
 
-1. Saldırgan, bir veya daha fazla dosya başlığının içerdiği bir arşiv oluşturur:
-* Göreli geçiş dizileri (`..\..\..\Users\\victim\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\payload.exe`)
-* Mutlak yollar (`C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\StartUp\\payload.exe`)
-2. Mağdur, gömülü yolu temizlemek veya seçilen dizinin altına çıkarım yapmayı zorlamak yerine, gömülü yola güvenen savunmasız bir araçla arşivi çıkarır.
-3. Dosya, saldırganın kontrolündeki bir konuma yazılır ve sistem veya kullanıcı o yolu tetiklediğinde çalıştırılır/yüklenir.
+1. Saldırgan, bir veya daha fazla dosya başlığının şunları içerdiği bir arşiv oluşturur:
+* Relative traversal sequences (`..\..\..\Users\\victim\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\payload.exe`)
+* Absolute paths (`C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\StartUp\\payload.exe`)
+* Or crafted **symlinks** that resolve outside the target dir (common in ZIP/TAR on *nix*).
+2. Kurban, gömülü yolu temizlemek veya çıkarımı seçilen dizinin altına zorlamak yerine, gömülü yoluna (veya symlinks'leri takip ederek) güvenen bir zafiyetli araçla arşivi çıkarır.
+3. Dosya saldırganın kontrolündeki konuma yazılır ve sistem veya kullanıcı o yolu tetiklediğinde bir sonraki sefer çalıştırılır/yüklenir.
 
-## Gerçek Dünya Örneği – WinRAR ≤ 7.12 (CVE-2025-8088)
+## Real-World Example – WinRAR ≤ 7.12 (CVE-2025-8088)
 
-Windows için WinRAR ( `rar` / `unrar` CLI, DLL ve taşınabilir kaynak dahil) çıkarım sırasında dosya adlarını doğrulamada başarısız oldu. Kötü niyetli bir RAR arşivi, aşağıdaki gibi bir girişi içeren:
+Windows için WinRAR ( `rar` / `unrar` CLI, DLL ve portable kaynak dahil) çıkarma sırasında dosya adlarını doğrulayamadı.
+Aşağıdakine benzer bir giriş içeren kötü amaçlı bir RAR arşivi:
 ```text
 ..\..\..\Users\victim\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\payload.exe
 ```
-**seçilen çıktı dizininin dışında** ve kullanıcının *Startup* klasörünün içinde sona erecektir. Windows, oturum açtıktan sonra orada bulunan her şeyi otomatik olarak çalıştırır ve *kalıcı* RCE sağlar.
+seçilen çıktı dizininin **dışında** ve kullanıcının *Startup* klasörünün içinde sonlanır. Oturum açıldıktan sonra Windows orada bulunan her şeyi otomatik olarak çalıştırır, böylece *kalıcı* RCE sağlar.
 
 ### PoC Arşivi Oluşturma (Linux/Mac)
 ```bash
@@ -31,38 +34,65 @@ mkdir -p "evil/../../../Users/Public/AppData/Roaming/Microsoft/Windows/Start Men
 cp payload.exe "evil/../../../Users/Public/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Startup/"
 rar a -ep evil.rar evil/*
 ```
-Seçenekler:
-* `-ep`  – dosya yollarını tam olarak verildiği gibi sakla (önceki `./` kısmını **kaldırma**).
+Kullanılan seçenekler:
+* `-ep`  – dosya yollarını tam olarak verildiği gibi sakla (başındaki `./`'i **kırpmayın**).
 
-`evil.rar` dosyasını kurbanınıza ulaştırın ve onu savunmasız bir WinRAR sürümü ile çıkarmasını söyleyin.
+evil.rar dosyasını hedefe gönderin ve zafiyetli bir WinRAR sürümüyle çıkarmalarını söyleyin.
 
-### Doğada Gözlemlenen Sömürü
+### Vahşi Doğada Gözlemlenen Sömürü
 
-ESET, özelleştirilmiş arka kapıları dağıtmak ve fidye yazılımı operasyonlarını kolaylaştırmak için CVE-2025-8088'i kötüye kullanan RAR arşivleri ekleyen RomCom (Storm-0978/UNC2596) oltalama kampanyalarını bildirdi.
+ESET, RomCom (Storm-0978/UNC2596) hedef odaklı kimlik avı kampanyalarının RAR arşivleri ekleyerek CVE-2025-8088'i kötüye kullandığını; özelleştirilmiş backdoors dağıtmak ve ransomware operasyonlarını kolaylaştırmak için bu yöntemi kullandıklarını bildirdi.
+
+## Daha Yeni Vakalar (2024–2025)
+
+### 7-Zip ZIP symlink traversal → RCE (CVE-2025-11001 / ZDI-25-949)
+* **Hata**: ZIP girdilerindeki **symbolic links** çıkarma sırasında dereference ediliyordu; bu durum saldırganların hedef dizinden kaçmasına ve keyfi yollar üzerine yazmasına izin veriyordu. Kullanıcı etkileşimi sadece arşivi *açmak/çıkarmak*.
+* **Etkilenen**: 7-Zip 21.02–24.09 (Windows & Linux sürümleri). **25.00** (Temmuz 2025) ve sonrası ile düzeltildi.
+* **Etkilenme yolu**: `Start Menu/Programs/Startup` veya servis tarafından çalıştırılan konumların üzerine yazma → kod bir sonraki oturum açmada veya servis yeniden başlatıldığında çalışır.
+* **Hızlı PoC (Linux)**:
+```bash
+mkdir -p out
+ln -s /etc/cron.d evil
+zip -y exploit.zip evil   # -y preserves symlinks
+7z x exploit.zip -o/tmp/target   # vulnerable 7-Zip writes to /etc/cron.d
+```
+Düzeltilmiş bir sürümde `/etc/cron.d` etkilenmez; symlink /tmp/target içinde bir bağlantı olarak çıkarılır.
+
+### Go mholt/archiver Unarchive() Zip-Slip (CVE-2025-3445)
+* **Hata**: `archiver.Unarchive()` `../` ve symlinked ZIP girdilerini takip ederek `outputDir` dışında yazma yapıyordu.
+* **Etkilenen**: `github.com/mholt/archiver` ≤ 3.5.1 (proje artık kullanımdan kaldırıldı).
+* **Çözüm**: `mholt/archives` ≥ 0.1.0'a geçin veya yazmadan önce canonical-path kontrolleri uygulayın.
+* **Minimal yeniden üretme**:
+```go
+// go test . with archiver<=3.5.1
+archiver.Unarchive("exploit.zip", "/tmp/safe")
+// exploit.zip holds ../../../../home/user/.ssh/authorized_keys
+```
 
 ## Tespit İpuçları
 
-* **Statik inceleme** – Arşiv girişlerini listeleyin ve `../`, `..\\`, *mutlak yollar* (`C:`) veya kanonik olmayan UTF-8/UTF-16 kodlamalarını içeren herhangi bir ismi işaretleyin.
-* **Sandbox çıkarımı** – Sonuçta oluşan yolların dizin içinde kalmasını doğrulamak için *güvenli* bir çıkarıcı (örneğin, Python’un `patool`, 7-Zip ≥ en son, `bsdtar`) kullanarak geçici bir dizine sıkıştırmayı açın.
-* **Uç Nokta izleme** – WinRAR/7-Zip vb. tarafından bir arşiv açıldıktan kısa bir süre sonra `Startup`/`Run` konumlarına yazılan yeni çalıştırılabilir dosyalar için uyarı verin.
+* **Statik inceleme** – Arşiv girdilerini listeleyin ve adı `../`, `..\\`, *absolute paths* (`/`, `C:`) içeren veya hedefi çıkarma dizini dışında olan *symlink* türündeki girdileri işaretleyin.
+* **Kanonikleştirme** – `realpath(join(dest, name))`'in hâlâ `dest` ile başlamasını sağlayın. Aksi takdirde reddedin.
+* **Sandbox içinde çıkarma** – *safe* bir çıkarıcı kullanarak (ör. `bsdtar --safe --xattrs --no-same-owner`, 7-Zip ≥ 25.00) arşivi geçici bir dizine açın ve oluşan yolların dizin içinde kaldığını doğrulayın.
+* **Uç nokta izlemesi** – WinRAR/7-Zip/… tarafından bir arşiv açıldıktan kısa süre sonra `Startup`/`Run`/`cron` konumlarına yeni yürütülebilir dosyalar yazıldığında uyarı verin.
 
-## Azaltma ve Güçlendirme
+## Önlemler ve Sertleştirme
 
-1. **Çıkarıcıyı güncelleyin** – WinRAR 7.13, uygun yol sanitizasyonu uygular. Kullanıcılar, WinRAR'ın otomatik güncelleme mekanizması olmadığı için bunu manuel olarak indirmelidir.
-2. Mümkünse arşivleri **“Yolları yok say”** seçeneği ile çıkarın (WinRAR: *Çıkar → "Yolları çıkarma"*) .
-3. Güvenilmeyen arşivleri **bir sandbox** veya sanal makine içinde açın.
-4. Uygulama beyaz listesi uygulayın ve kullanıcı yazma erişimini otomatik çalıştırma dizinleri ile sınırlayın.
+1. **Çıkarıcıyı güncelleyin** – WinRAR 7.13+ ve 7-Zip 25.00+ yol/symlink sanitizasyonu uygular. Her iki araç da hâlâ otomatik güncellemeye sahip değil.
+2. Mümkünse arşivleri “**Do not extract paths**” / “**Ignore paths**” seçenekleriyle çıkarın.
+3. Unix'te ayrıcalıkları düşürün ve çıkarma öncesi bir **chroot/namespace** bağlayın; Windows'ta **AppContainer** veya bir sandbox kullanın.
+4. Özel kod yazıyorsanız, oluşturma/yazmadan **önce** `realpath()`/`PathCanonicalize()` ile normalleştirme yapın ve hedef dizinden kaçan herhangi bir girişi reddedin.
 
-## Ek Etkilenen / Tarihsel Durumlar
+## Ek Etkilenen / Tarihsel Vakalar
 
-* 2018 – Snyk tarafından birçok Java/Go/JS kütüphanesini etkileyen büyük *Zip-Slip* tavsiyesi.
-* 2023 – `-ao` birleştirmesi sırasında benzer geçiş için 7-Zip CVE-2023-4011.
-* Yazma işleminden önce `PathCanonicalize` / `realpath` çağrısını yapmayan herhangi bir özel çıkarım mantığı.
+* 2018 – Snyk tarafından bildirilen büyük *Zip-Slip* uyarısı, birçok Java/Go/JS kütüphanesini etkiledi.
+* 2023 – 7-Zip CVE-2023-4011: `-ao` birleştirme sırasında benzer traversal.
+* 2025 – HashiCorp `go-slug` (CVE-2025-0377): slugs'ta TAR çıkarma traversal (yama v1.2'de).
+* Yazmadan önce `PathCanonicalize` / `realpath` çağırmayan herhangi bir özel çıkarma mantığı.
 
-## Referanslar
+## Kaynaklar
 
-- [BleepingComputer – WinRAR sıfır-gün açığı arşiv çıkarımında kötü amaçlı yazılım yerleştirmek için kullanıldı](https://www.bleepingcomputer.com/news/security/winrar-zero-day-flaw-exploited-by-romcom-hackers-in-phishing-attacks/)
-- [WinRAR 7.13 Değişiklik Günlüğü](https://www.win-rar.com/singlenewsview.html?&L=0&tx_ttnews%5Btt_news%5D=283&cHash=a64b4a8f662d3639dec8d65f47bc93c5)
-- [Snyk – Zip Slip güvenlik açığı raporu](https://snyk.io/research/zip-slip-vulnerability)
+- [Trend Micro ZDI-25-949 – 7-Zip symlink ZIP traversal (CVE-2025-11001)](https://www.zerodayinitiative.com/advisories/ZDI-25-949/)
+- [JFrog Research – mholt/archiver Zip-Slip (CVE-2025-3445)](https://research.jfrog.com/vulnerabilities/archiver-zip-slip/)
 
 {{#include ../banners/hacktricks-training.md}}
