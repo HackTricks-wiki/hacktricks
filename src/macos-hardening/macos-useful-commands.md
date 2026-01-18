@@ -1,8 +1,8 @@
-# macOS 有用命令
+# macOS 常用命令
 
 {{#include ../banners/hacktricks-training.md}}
 
-### MacOS 自动枚举工具
+### MacOS 自动化枚举工具
 
 - **MacPEAS**: [https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS](https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS)
 - **Metasploit**: [https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb](https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb)
@@ -115,9 +115,17 @@ sudo apachectl (start|status|restart|stop)
 dscacheutil -flushcache
 sudo killall -HUP mDNSResponder
 ```
-### 已安装的软件和服务
+### 快速 anti-analysis / virtualization 检查
 
-检查安装的**可疑**应用程序和对已安装资源的**权限**：
+一些 macOS stealers 会调用 `system_profiler` 来检测 VMs，并以 **特定退出码（例如 100）** 中止运行，以避免 sandbox detonation：
+```bash
+if system_profiler SPHardwareDataType SPDisplaysDataType | grep -Eiq 'qemu|kvm|vmware|virtualbox'; then
+exit 100
+fi
+```
+### 已安装的软件与服务
+
+检查已安装的**可疑**应用程序以及对已安装资源的**权限**：
 ```
 system_profiler SPApplicationsDataType #Installed Apps
 system_profiler SPFrameworksDataType #Instaled framework
@@ -137,8 +145,12 @@ launchctl print gui/<user's UID>/com.company.launchagent.label
 ```
 ### 创建用户
 
-无提示
+无需提示
 
 <figure><img src="../images/image (79).png" alt=""><figcaption></figcaption></figure>
+
+## 参考
+
+- [2025, the year of the Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
 
 {{#include ../banners/hacktricks-training.md}}
