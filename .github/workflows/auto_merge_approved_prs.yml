@@ -61,7 +61,7 @@ jobs:
           echo "Looking for PRs with exact comment 'merge' from $authorized_user..."
 
           # Get all open PRs
-          prs=$(gh pr list --state open --json number,title,url --repo "$GITHUB_REPOSITORY")
+          prs=$(gh pr list --state open --json number,title,url,author --repo "$GITHUB_REPOSITORY")
 
           if [ "$prs" = "[]" ]; then
             echo "No open PRs found."
@@ -83,33 +83,43 @@ jobs:
             pr_number=$(echo "$pr_info" | jq -r '.number')
             pr_title=$(echo "$pr_info" | jq -r '.title')
             pr_url=$(echo "$pr_info" | jq -r '.url')
+            pr_author=$(echo "$pr_info" | jq -r '.author.login')
 
-            echo "Checking PR #$pr_number: $pr_title"
+            echo "Checking PR #$pr_number: $pr_title (author: $pr_author)"
 
-            # Get all comments for this PR
-            comments=$(gh pr view "$pr_number" --json comments --jq '.comments[]' --repo "$GITHUB_REPOSITORY")
-
-            # Print all comment authors for debugging
-            echo "Comments in PR #$pr_number:"
-            echo "$comments" | jq -r '"  - Author: " + .author.login + " | Comment: " + (.body | split("\n")[0] | .[0:100])'
+            # Special case: allow merge without "merge" comment for Research Update Enhanced PRs by the authorized user
+            eligible_by_title=false
+            if [[ "$pr_title" == "Research Update Enhanced"* && "$pr_author" == "$authorized_user" ]]; then
+              echo "PR #$pr_number qualifies for direct merge based on title and author."
+              eligible_by_title=true
+            fi
 
             # Check if any comment from carlospolop contains exactly "merge"
             has_merge_comment=false
-            echo "$comments" | jq -r '.author.login + "|" + .body' | while IFS='|' read -r comment_author comment_body; do
-              if [ "$comment_author" = "$authorized_user" ]; then
-                if echo "$comment_body" | grep -iExq "merge"; then
-                  echo "Found exact 'merge' comment from $authorized_user in PR #$pr_number"
-                  echo "true" > /tmp/has_merge_comment_$pr_number
-                  break
+            if [ "$eligible_by_title" != true ]; then
+              # Get all comments for this PR
+              comments=$(gh pr view "$pr_number" --json comments --jq '.comments[]' --repo "$GITHUB_REPOSITORY")
+
+              # Print all comment authors for debugging
+              echo "Comments in PR #$pr_number:"
+              echo "$comments" | jq -r '"  - Author: " + .author.login + " | Comment: " + (.body | split("\n")[0] | .[0:100])'
+
+              echo "$comments" | jq -r '.author.login + "|" + .body' | while IFS='|' read -r comment_author comment_body; do
+                if [ "$comment_author" = "$authorized_user" ]; then
+                  if echo "$comment_body" | grep -iExq "merge"; then
+                    echo "Found exact 'merge' comment from $authorized_user in PR #$pr_number"
+                    echo "true" > /tmp/has_merge_comment_$pr_number
+                    break
+                  fi
                 fi
-              fi
-            done
+              done
+            fi
 
             if [ -f "/tmp/has_merge_comment_$pr_number" ]; then
               has_merge_comment=true
             fi
 
-            if [ "$has_merge_comment" = true ]; then
+            if [ "$has_merge_comment" = true ] || [ "$eligible_by_title" = true ]; then
               echo "Attempting to merge PR #$pr_number..."
 
               # Get PR details including head branch

@@ -18,6 +18,19 @@ Any authenticated domain user can request TGS tickets, so no special privileges 
 > Most public tools prefer requesting RC4-HMAC (etype 23) service tickets because they’re faster to crack than AES. RC4 TGS hashes start with `$krb5tgs$23$*`, AES128 with `$krb5tgs$17$*`, and AES256 with `$krb5tgs$18$*`. However, many environments are moving to AES-only. Do not assume only RC4 is relevant.
 > Also, avoid “spray-and-pray” roasting. Rubeus’ default kerberoast can query and request tickets for all SPNs and is noisy. Enumerate and target interesting principals first.
 
+### Service account secrets & Kerberos crypto cost
+
+Many services still run under user accounts with hand-managed passwords. The KDC encrypts service tickets with keys derived from those passwords and hands the ciphertext to any authenticated principal, so kerberoasting gives unlimited offline guesses without lockouts or DC telemetry. The encryption mode determines the cracking budget:
+
+| Mode | Key derivation | Encryption type | Approx. RTX 5090 throughput* | Notes |
+| --- | --- | --- | --- | --- |
+| AES + PBKDF2 | PBKDF2-HMAC-SHA1 with 4,096 iterations and a per-principal salt generated from the domain + SPN | etype 17/18 (`$krb5tgs$17$`, `$krb5tgs$18$`) | ~6.8 million guesses/s | Salt blocks rainbow tables but still allows fast cracking of short passwords. |
+| RC4 + NT hash | Single MD4 of the password (unsalted NT hash); Kerberos only mixes in an 8-byte confounder per ticket | etype 23 (`$krb5tgs$23$`) | ~4.18 **billion** guesses/s | ~1000× faster than AES; attackers force RC4 whenever `msDS-SupportedEncryptionTypes` permits it. |
+
+*Benchmarks from Chick3nman as d in [Matthew Green's Kerberoasting analysis](https://blog.cryptographyengineering.com/2025/09/10/kerberoasting/).
+
+RC4’s confounder only randomizes the keystream; it does not add work per guess. Unless service accounts rely on random secrets (gMSA/dMSA, machine accounts, or vault-managed strings), compromise speed is purely GPU budget. Enforcing AES-only etypes removes the billion-guesses-per-second downgrade, but weak human passwords still fall to PBKDF2.
+
 ### Attack
 
 #### Linux
@@ -198,6 +211,39 @@ If you find this error from Linux: `Kerberos SessionError: KRB_AP_ERR_SKEW (Cloc
 - `ntpdate <DC_IP>` (deprecated on some distros)
 - `rdate -n <DC_IP>`
 
+### Kerberoast without a domain account (AS-requested STs)
+
+In September 2022, Charlie Clark showed that if a principal does not require pre-authentication, it’s possible to obtain a service ticket via a crafted KRB_AS_REQ by altering the sname in the request body, effectively getting a service ticket instead of a TGT. This mirrors AS-REP roasting and does not require valid domain credentials.
+
+See details: Semperis write-up “New Attack Paths: AS-requested STs”.
+
+> [!WARNING]
+> You must provide a list of users because without valid credentials you cannot query LDAP with this technique.
+
+Linux
+
+- Impacket (PR #1413):
+
+```bash
+GetUserSPNs.py -no-preauth "NO_PREAUTH_USER" -usersfile users.txt -dc-host dc.domain.local domain.local/
+```
+
+Windows
+
+- Rubeus (PR #139):
+
+```powershell
+Rubeus.exe kerberoast /outfile:kerberoastables.txt /domain:domain.local /dc:dc.domain.local /nopreauth:NO_PREAUTH_USER /spn:TARGET_SERVICE
+```
+
+Related
+
+If you are targeting AS-REP roastable users, see also:
+
+{{#ref}}
+asreproast.md
+{{#endref}}
+
 ### Detection
 
 Kerberoasting can be stealthy. Hunt for Event ID 4769 from DCs and apply filters to reduce noise:
@@ -234,47 +280,15 @@ Additional ideas:
 - Remove unnecessary SPNs from user accounts.
 - Use long, random service account passwords (25+ chars) if managed accounts are not feasible; ban common passwords and audit regularly.
 
-### Kerberoast without a domain account (AS-requested STs)
-
-In September 2022, Charlie Clark showed that if a principal does not require pre-authentication, it’s possible to obtain a service ticket via a crafted KRB_AS_REQ by altering the sname in the request body, effectively getting a service ticket instead of a TGT. This mirrors AS-REP roasting and does not require valid domain credentials.
-
-See details: Semperis write-up “New Attack Paths: AS-requested STs”.
-
-> [!WARNING]
-> You must provide a list of users because without valid credentials you cannot query LDAP with this technique.
-
-Linux
-
-- Impacket (PR #1413):
-
-```bash
-GetUserSPNs.py -no-preauth "NO_PREAUTH_USER" -usersfile users.txt -dc-host dc.domain.local domain.local/
-```
-
-Windows
-
-- Rubeus (PR #139):
-
-```powershell
-Rubeus.exe kerberoast /outfile:kerberoastables.txt /domain:domain.local /dc:dc.domain.local /nopreauth:NO_PREAUTH_USER /spn:TARGET_SERVICE
-```
-
-Related
-
-If you are targeting AS-REP roastable users, see also:
-
-{{#ref}}
-asreproast.md
-{{#endref}}
-
 ## References
 
 - [https://github.com/ShutdownRepo/targetedKerberoast](https://github.com/ShutdownRepo/targetedKerberoast)
+- [Matthew Green – Kerberoasting: Low-Tech, High-Impact Attacks from Legacy Kerberos Crypto (2025-09-10)](https://blog.cryptographyengineering.com/2025/09/10/kerberoasting/)
 - [https://www.tarlogic.com/blog/how-to-attack-kerberos/](https://www.tarlogic.com/blog/how-to-attack-kerberos/)
 - [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/t1208-kerberoasting](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/t1208-kerberoasting)
 - [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberoasting-requesting-rc4-encrypted-tgs-when-aes-is-enabled](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberoasting-requesting-rc4-encrypted-tgs-when-aes-is-enabled)
-- Microsoft Security Blog (2024-10-11) – Microsoft’s guidance to help mitigate Kerberoasting: https://www.microsoft.com/en-us/security/blog/2024/10/11/microsofts-guidance-to-help-mitigate-kerberoasting/
-- SpecterOps – Rubeus Roasting documentation: https://docs.specterops.io/ghostpack/rubeus/roasting
-- HTB: Delegate — SYSVOL creds → Targeted Kerberoast → Unconstrained Delegation → DCSync to DA: https://0xdf.gitlab.io/2025/09/12/htb-delegate.html
+- [Microsoft Security Blog (2024-10-11) – Microsoft’s guidance to help mitigate Kerberoasting](https://www.microsoft.com/en-us/security/blog/2024/10/11/microsofts-guidance-to-help-mitigate-kerberoasting/)
+- [SpecterOps – Rubeus Roasting documentation](https://docs.specterops.io/ghostpack/rubeus/roasting)
+- [HTB: Delegate — SYSVOL creds → Targeted Kerberoast → Unconstrained Delegation → DCSync to DA](https://0xdf.gitlab.io/2025/09/12/htb-delegate.html)
 
 {{#include ../../banners/hacktricks-training.md}}
