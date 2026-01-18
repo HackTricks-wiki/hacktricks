@@ -1,14 +1,14 @@
-# macOS Χρήσιμες Εντολές
+# Χρήσιμες Εντολές macOS
 
 {{#include ../banners/hacktricks-training.md}}
 
-### Εργαλεία Αυτόματης Αρίθμησης MacOS
+### Αυτόματα Enumeration Εργαλεία για macOS
 
 - **MacPEAS**: [https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS](https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS)
 - **Metasploit**: [https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb](https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb)
 - **SwiftBelt**: [https://github.com/cedowens/SwiftBelt](https://github.com/cedowens/SwiftBelt)
 
-### Συγκεκριμένες Εντολές MacOS
+### Συγκεκριμένες Εντολές macOS
 ```bash
 #System info
 date
@@ -115,16 +115,24 @@ sudo apachectl (start|status|restart|stop)
 dscacheutil -flushcache
 sudo killall -HUP mDNSResponder
 ```
+### Γρήγορος anti-analysis / virtualization check
+
+Κάποιοι macOS stealers καλούν `system_profiler` για να εντοπίσουν VMs και **abort με ξεχωριστό exit code (π.χ., 100)** για να αποφύγουν sandbox detonation:
+```bash
+if system_profiler SPHardwareDataType SPDisplaysDataType | grep -Eiq 'qemu|kvm|vmware|virtualbox'; then
+exit 100
+fi
+```
 ### Εγκατεστημένο Λογισμικό & Υπηρεσίες
 
-Ελέγξτε για **ύποπτες** εφαρμογές που είναι εγκατεστημένες και **δικαιώματα** πάνω στους εγκατεστημένους πόρους:
+Ελέγξτε για **ύποπτες** εγκατεστημένες εφαρμογές και **δικαιώματα** επί των εγκατεστημένων πόρων:
 ```
 system_profiler SPApplicationsDataType #Installed Apps
 system_profiler SPFrameworksDataType #Instaled framework
 lsappinfo list #Installed Apps
 launchctl list #Services
 ```
-### Διεργασίες Χρήστη
+### Διεργασίες χρήστη
 ```bash
 # will print all the running services under that particular user domain.
 launchctl print gui/<users UID>
@@ -140,5 +148,9 @@ launchctl print gui/<user's UID>/com.company.launchagent.label
 Χωρίς προτροπές
 
 <figure><img src="../images/image (79).png" alt=""><figcaption></figcaption></figure>
+
+## Αναφορές
+
+- [2025, the year of the Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
 
 {{#include ../banners/hacktricks-training.md}}

