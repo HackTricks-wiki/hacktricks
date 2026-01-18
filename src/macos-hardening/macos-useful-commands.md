@@ -2,13 +2,13 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-### Strumenti di Enumerazione Automatica MacOS
+### Strumenti di enumerazione automatica per macOS
 
 - **MacPEAS**: [https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS](https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS)
 - **Metasploit**: [https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb](https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb)
 - **SwiftBelt**: [https://github.com/cedowens/SwiftBelt](https://github.com/cedowens/SwiftBelt)
 
-### Comandi Specifici MacOS
+### Comandi specifici per macOS
 ```bash
 #System info
 date
@@ -115,6 +115,14 @@ sudo apachectl (start|status|restart|stop)
 dscacheutil -flushcache
 sudo killall -HUP mDNSResponder
 ```
+### Controllo rapido anti-analisi / virtualizzazione
+
+Alcuni macOS stealers chiamano `system_profiler` per rilevare VM e **interrompono l'esecuzione con un codice di uscita distinto (es., 100)** per evitare la detonazione della sandbox:
+```bash
+if system_profiler SPHardwareDataType SPDisplaysDataType | grep -Eiq 'qemu|kvm|vmware|virtualbox'; then
+exit 100
+fi
+```
 ### Software e Servizi Installati
 
 Controlla le applicazioni **sospette** installate e i **privilegi** sulle risorse installate:
@@ -124,7 +132,7 @@ system_profiler SPFrameworksDataType #Instaled framework
 lsappinfo list #Installed Apps
 launchctl list #Services
 ```
-### Processi Utente
+### Processi utente
 ```bash
 # will print all the running services under that particular user domain.
 launchctl print gui/<users UID>
@@ -140,5 +148,9 @@ launchctl print gui/<user's UID>/com.company.launchagent.label
 Senza prompt
 
 <figure><img src="../images/image (79).png" alt=""><figcaption></figcaption></figure>
+
+## Riferimenti
+
+- [2025, the year of the Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
 
 {{#include ../banners/hacktricks-training.md}}
