@@ -2,7 +2,7 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-### Ferramentas de Enumeração Automática do MacOS
+### MacOS Ferramentas Automáticas de Enumeração
 
 - **MacPEAS**: [https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS](https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS)
 - **Metasploit**: [https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb](https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb)
@@ -115,6 +115,14 @@ sudo apachectl (start|status|restart|stop)
 dscacheutil -flushcache
 sudo killall -HUP mDNSResponder
 ```
+### Verificação rápida anti-análise / virtualização
+
+Alguns stealers para macOS chamam `system_profiler` para detectar VMs e **encerram com um código de saída distinto (por exemplo, 100)** para evitar a detonação da sandbox:
+```bash
+if system_profiler SPHardwareDataType SPDisplaysDataType | grep -Eiq 'qemu|kvm|vmware|virtualbox'; then
+exit 100
+fi
+```
 ### Software e Serviços Instalados
 
 Verifique se há aplicações **suspeitas** instaladas e **privilégios** sobre os recursos instalados:
@@ -140,5 +148,9 @@ launchctl print gui/<user's UID>/com.company.launchagent.label
 Sem prompts
 
 <figure><img src="../images/image (79).png" alt=""><figcaption></figcaption></figure>
+
+## Referências
+
+- [2025, the year of the Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
 
 {{#include ../banners/hacktricks-training.md}}
