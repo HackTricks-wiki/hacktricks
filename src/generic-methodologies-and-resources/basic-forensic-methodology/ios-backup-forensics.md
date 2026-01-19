@@ -1,25 +1,25 @@
-# Forensiki za Backup za iOS (Triage inayojikita kwenye Ujumbe)
+# iOS Backup Forensics (Messaging‑centric triage)
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Ukurasa huu unaelezea hatua za vitendo za kujenga upya na kuchambua backups za iOS kwa dalili za utoaji wa exploit wa 0‑click kupitia viambatisho vya apps za ujumbe. Inalenga kubadilisha muundo wa backup uliopo wa Apple ulioshughulikiwa kwa hashed kuwa njia zinazosomeka na binadamu, kisha kuorodhesha na kuchunguza viambatisho katika apps zinazotumika sana.
+Ukurasa huu unaelezea hatua za vitendo za kujenga upya na kuchambua iOS backups kwa dalili za utoaji wa exploit wa 0‑click kupitia attachments za app za ujumbe. Unalenga kubadilisha muundo wa backup wa Apple uliopigwa hash kuwa njia zinazoweza kusomwa na binadamu, kisha kuorodhesha na kuchambua attachments katika apps za kawaida.
 
-Malengo:
-- Jenga tena njia zinazosomeka kutoka Manifest.db
-- Orodhesha databases za ujumbe (iMessage, WhatsApp, Signal, Telegram, Viber)
-- Tatua njia za viambatisho, chunguza vitu vilivyowekwa ndani (PDF/Images/Fonts), na ziingize kwa structural detectors
+Goals:
+- Jenga tena readable paths kutoka Manifest.db
+- Orodhesha hifadhidata za ujumbe (iMessage, WhatsApp, Signal, Telegram, Viber)
+- Tatua attachment paths, choma vitu vilivyowekwa (PDF/Images/Fonts), na vitumie kwa structural detectors
 
 
 ## Kujenga upya backup ya iOS
 
-Backups zilizohifadhiwa chini ya MobileSync zinatumia majina ya faili yaliyohashishwa ambayo hayawezi kusomwa na binadamu. Manifest.db SQLite database inaunganisha kila kitu kilichohifadhiwa na njia yake ya kifikishi.
+Backups zilizohifadhiwa chini ya MobileSync zinatumia majina ya faili yaliyopigwa hash ambayo hayajasomeka kwa binadamu. Hifadhidata ya Manifest.db ya SQLite inaweka ramani kila kitu kilichohifadhiwa kwenda kwenye njia yake ya kimantiki.
 
-Utaratibu wa juu:
-1) Fungua Manifest.db na usome rekodi za faili (domain, relativePath, flags, fileID/hash)
-2) Jenga upya muundo wa saraka wa awali kulingana na domain + relativePath
-3) Nakili au tengeneza hardlink kwa kila kitu kilichohifadhiwa hadi njia yake iliyojengwa tena
+High‑level procedure:
+1) Open Manifest.db and read the file records (domain, relativePath, flags, fileID/hash)
+2) Recreate the original folder hierarchy based on domain + relativePath
+3) Copy or hardlink each stored object to its reconstructed path
 
-Mfano wa mtiririko wa kazi na zana inayotekeleza hii kutoka mwanzo hadi mwisho (ElegantBouncer):
+Example workflow with a tool that implements this end‑to‑end (ElegantBouncer):
 ```bash
 # Rebuild the backup into a readable folder tree
 $ elegant-bouncer --ios-extract /path/to/backup --output /tmp/reconstructed
@@ -27,18 +27,47 @@ $ elegant-bouncer --ios-extract /path/to/backup --output /tmp/reconstructed
 ✓ iOS backup extraction completed successfully!
 ```
 Vidokezo:
-- Shughulikia encrypted backups kwa kutoa backup password kwa extractor yako
-- Hifadhi timestamps/ACLs za asili inapowezekana kwa thamani ya ushahidi
+- Shughulikia backups zilizosimbwa kwa kutoa nywila ya backup kwa extractor yako
+- Hifadhi timestamps/ACLs asili inapowezekana kwa ajili ya thamani ya ushahidi
 
+### Kupata na ku-decrypt backup (USB / Finder / libimobiledevice)
 
-## Orodhesha viambatanisho vya app za ujumbe
+- Kwenye macOS/Finder weka "Encrypt local backup" na tengeneza *mpya* backup iliyosimbwa ili keychain items ziwepo.
+- Inafanya kazi kwa majukwaa mbalimbali: `idevicebackup2` (libimobiledevice ≥1.4.0) inaelewa mabadiliko ya itifaki za backup za iOS 17/18 na inarekebisha matatizo ya handshake ya kurejesha/backup ya awali.
+```bash
+# Pair then create a full encrypted backup over USB
+$ idevicepair pair
+$ idevicebackup2 backup --full --encrypt --password '<pwd>' ~/backups/iphone17
+```
+### IOC‑driven triage with MVT
 
-Baada ya ujenzi upya, orodhesha viambatanisho kwa apps maarufu. Muundo halisi (schema) unatofautiana kwa app/toleo, lakini mbinu ni sawa: fanya query kwenye database ya ujumbe, unganya jumbe na viambatanisho, na tatua paths kwenye diski.
+Mobile Verification Toolkit (mvt-ios) ya Amnesty sasa inafanya kazi moja kwa moja kwenye encrypted iTunes/Finder backups, ikiautomatisha decryption na IOC matching kwa kesi za mercenary spyware.
+```bash
+# Optionally extract a reusable key file
+$ mvt-ios extract-key -k /tmp/keyfile ~/backups/iphone17
+
+# Decrypt in-place copy of the backup
+$ mvt-ios decrypt-backup -p '<pwd>' -d /tmp/dec-backup ~/backups/iphone17
+
+# Run IOC scanning on the decrypted tree
+$ mvt-ios check-backup -i indicators.csv /tmp/dec-backup
+```
+Matokeo huwekwa chini ya `mvt-results/` (kwa mfano, analytics_detected.json, safari_history_detected.json) na yanaweza kuendanishwa na njia za viambatisho zilizopatikana hapa chini.
+
+### Uchambuzi wa artefakti kwa ujumla (iLEAPP)
+
+Kwa mfululizo wa matukio/metadata zaidi ya ujumbe, endesha iLEAPP moja kwa moja kwenye folda ya backup (inaunga mkono miundo ya iOS 11‑17):
+```bash
+$ python3 ileapp.py -b /tmp/dec-backup -o /tmp/ileapp-report
+```
+## Kuorodhesha viambatisho vya app za ujumbe
+
+Baada ya kujenga upya, orodhesha viambatisho kwa apps maarufu. Muundo halisi hutofautiana kwa app/toleo, lakini mbinu ni sawa: query kwenye messaging database, join messages na attachments, na resolve paths kwenye disk.
 
 ### iMessage (sms.db)
-Jedwali muhimu: message, attachment, message_attachment_join (MAJ), chat, chat_message_join (CMJ)
+Majedwali muhimu: message, attachment, message_attachment_join (MAJ), chat, chat_message_join (CMJ)
 
-Mifano ya query:
+Mifano ya queries:
 ```sql
 -- List attachments with basic message linkage
 SELECT
@@ -65,35 +94,34 @@ JOIN message_attachment_join maj ON maj.message_id = m.ROWID
 JOIN attachment a ON a.ROWID = maj.attachment_id
 ORDER BY m.date DESC;
 ```
-Njia za attachment zinaweza kuwa absolute au relative kwa mti uliorejeshwa chini ya Library/SMS/Attachments/.
+Njia za viambatisho zinaweza kuwa kamili au jamaa kwa mti uliorejeshwa chini ya Library/SMS/Attachments/.
 
 ### WhatsApp (ChatStorage.sqlite)
-Unganisho la kawaida: message table ↔ media/attachment table (majina yanatofautiana kulingana na toleo). Query media rows ili kupata on-disk paths.
-
-Mfano (ya jumla):
+Uhusiano wa kawaida: jedwali la ujumbe ↔ jedwali la media/viambatisho (majina yanatofautiana kulingana na toleo). Fanya query kwa safu za media ili kupata njia za kwenye diski. Builds za iOS za hivi karibuni bado zinaonyesha `ZMEDIALOCALPATH` katika `ZWAMEDIAITEM`.
 ```sql
 SELECT
-m.Z_PK          AS message_pk,
-mi.ZMEDIALOCALPATH AS media_path,
-m.ZMESSAGEDATE  AS message_date
+m.Z_PK                 AS message_pk,
+mi.ZMEDIALOCALPATH     AS media_path,
+datetime(m.ZMESSAGEDATE + 978307200, 'unixepoch') AS message_date,
+CASE m.ZISFROMME WHEN 1 THEN 'outgoing' ELSE 'incoming' END AS direction
 FROM ZWAMESSAGE m
-LEFT JOIN ZWAMEDIAITEM mi ON mi.ZMESSAGE = m.Z_PK
+LEFT JOIN ZWAMEDIAITEM mi ON mi.Z_PK = m.ZMEDIAITEM
 WHERE mi.ZMEDIALOCALPATH IS NOT NULL
 ORDER BY m.ZMESSAGEDATE DESC;
 ```
-Badilisha majina ya jedwali/safu kulingana na toleo la app yako (ZWAMESSAGE/ZWAMEDIAITEM are common in iOS builds).
+Njia kawaida huonekana chini ya `AppDomainGroup-group.net.whatsapp.WhatsApp.shared/Message/Media/` ndani ya backup iliyojengwa upya.
 
 ### Signal / Telegram / Viber
-- Signal: DB ya ujumbe imefungwa; hata hivyo, viambatanisho vilivyohifadhiwa kwenye diski (na thumbnails) kawaida vinaweza kuchunguzwa
-- Telegram: chunguza saraka za cache (photo/video/document caches) na ziunganishe na mazungumzo pale inapowezekana
-- Viber: Viber.sqlite ina meza za ujumbe/viambatanisho zenye marejeleo kwenye diski
+- Signal: DB ya ujumbe imefungiwa; hata hivyo, viambatisho vilivyohifadhiwa kwenye disk (na thumbnails) kawaida vinaweza kuchunguzwa
+- Telegram: cache hubaki chini ya `Library/Caches/` ndani ya sandbox; builds za iOS 18 zinaonyesha mdudu wa kufuta cache, hivyo caches kubwa za vyombo zenye mabaki mara nyingi ni vyanzo vya ushahidi
+- Viber: Viber.sqlite ina meza za ujumbe/viambatisho zenye marejeo kwenye disk
 
-Tip: hata pale metadata imefungwa, kuchunguza saraka za media/cache bado huibua vitu hatarishi.
+Kidokezo: hata pale metadata imefungwa, kuchunguza saraka za media/cache bado hutoa vitu hatarishi.
 
 
-## Kuchunguza viambatanisho kwa structural exploits
+## Kuchunguza viambatisho kwa exploits za kimuundo
 
-Mara tu unapokuwa na njia za viambatanisho, ziingize kwenye structural detectors ambazo zinathibitisha file‑format invariants badala ya signatures. Mfano kwa ElegantBouncer:
+Mara utakapo kuwa na njia za viambatisho, ziingize katika vichunguzi vya kimuundo vinavyothibitisha kanuni zisizobadilika za muundo wa faili badala ya saini. Mfano na ElegantBouncer:
 ```bash
 # Recursively scan only messaging attachments under the reconstructed tree
 $ elegant-bouncer --scan --messaging /tmp/reconstructed
@@ -101,24 +129,26 @@ $ elegant-bouncer --scan --messaging /tmp/reconstructed
 ✗ THREAT in WhatsApp chat 'John Doe': suspicious_document.pdf → FORCEDENTRY (JBIG2)
 ✗ THREAT in iMessage: photo.webp → BLASTPASS (VP8L)
 ```
-Detections covered by structural rules include:
+Utambuzi zinazofunikwa na kanuni za kimuundo ni pamoja na:
 - PDF/JBIG2 FORCEDENTRY (CVE‑2021‑30860): hali za kamusi za JBIG2 zisizowezekana
-- WebP/VP8L BLASTPASS (CVE‑2023‑4863): miundo ya meza za Huffman zilizopitiliza ukubwa
-- TrueType TRIANGULATION (CVE‑2023‑41990): opcodes za bytecode zisizoandikwa
-- DNG/TIFF CVE‑2025‑43300: migongano kati ya metadata na vipengele vya stream
+- WebP/VP8L BLASTPASS (CVE‑2023‑4863): miundo ya jedwali kubwa za Huffman
+- TrueType TRIANGULATION (CVE‑2023‑41990): opcode za bytecode zisizoandikwa kwenye nyaraka
+- DNG/TIFF CVE‑2025‑43300: kutofautiana kati ya metadata na sehemu za stream
 
 
-## Uthibitisho, tahadhari, na matokeo ya uwongo
+## Uthibitisho, tahadhari, na matokeo ya uongo
 
-- Ubadilishaji wa muda: iMessage huhifadhi tarehe katika Apple epochs/vitengo kwa baadhi ya matoleo; badilisha ipasavyo wakati wa kuripoti
-- Schema drift: schema za SQLite za app hubadilika kwa muda; thibitisha majina ya jedwali/safina kwa kila build ya kifaa
-- Uchimbaji wa rekursive: PDF zinaweza kujumuisha streams za JBIG2 na fonti; chimba na skani vitu vilivyomo
-- Matokeo ya uongo: heuristics za muundo ni za tahadhari lakini zinaweza kuonyesha vyombo vya habari vilivyopangwa vibaya lakini visivyo hatari
+- Mabadiliko ya wakati: iMessage huhifadhi tarehe katika Apple epochs/units kwenye baadhi ya matoleo; badilisha ipasavyo wakati wa kuripoti
+- Schema drift: skimu za SQLite za app hubadilika kwa muda; thibitisha majina ya jedwali/kolamu kwa kila build ya kifaa
+- Uchimbaji wa kurudia (Recursive extraction): PDF zinaweza kujumuisha JBIG2 streams na fonts; toa na skani vitu vya ndani
+- Matokeo ya uongo: heuristics za kimuundo ni za tahadhari lakini zinaweza kuonyesha mfano nadra uliokatwa lakini usio hatari wa media
 
 
-## References
+## Marejeo
 
-- [ELEGANTBOUNCER: When You Can't Get the Samples but Still Need to Catch the Threat](https://www.msuiche.com/posts/elegantbouncer-when-you-cant-get-the-samples-but-still-need-to-catch-the-threat/)
-- [ElegantBouncer project (GitHub)](https://github.com/msuiche/elegant-bouncer)
+- [ELEGANTBOUNCER: Wakati Huwezi Kupata Sampuli lakini Unahitaji Kufuatilia Tishio](https://www.msuiche.com/posts/elegantbouncer-when-you-cant-get-the-samples-but-still-need-to-catch-the-threat/)
+- [Mradi wa ElegantBouncer (GitHub)](https://github.com/msuiche/elegant-bouncer)
+- [MVT mtiririko wa chelezo za iOS](https://docs.mvt.re/en/latest/ios/backup/check/)
+- [Notisi za kutolewa za libimobiledevice 1.4.0](https://libimobiledevice.org/news/2025/10/10/libimobiledevice-1.4.0-release/)
 
 {{#include ../../banners/hacktricks-training.md}}
