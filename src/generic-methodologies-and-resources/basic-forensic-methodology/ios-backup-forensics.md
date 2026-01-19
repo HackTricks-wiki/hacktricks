@@ -1,25 +1,25 @@
-# Форензика резервних копій iOS (триаж, орієнтований на повідомлення)
+# Форензика резервних копій iOS (тріаж, орієнтований на месенджери)
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Ця сторінка описує практичні кроки для відтворення та аналізу резервних копій iOS на предмет ознак доставки 0‑click експлойтів через вкладення в месенджерах. Зосереджено на перетворенні хешованої структури резервної копії Apple у людино‑читабельні шляхи, а також на переліченні та скануванні вкладень у поширених додатках.
+Ця сторінка описує практичні кроки з відтворення та аналізу резервних копій iOS для виявлення ознак доставки експлойта 0‑click через вкладення в додатках для обміну повідомленнями. Вона фокусується на перетворенні хешованої структури резервної копії Apple в шляхи, зручні для читання, а також на переліку та скануванні вкладень у поширених додатках.
 
 Цілі:
-- Відновити читабельні шляхи з Manifest.db
-- Перерахувати бази даних повідомлень (iMessage, WhatsApp, Signal, Telegram, Viber)
-- Розв’язати шляхи вкладень, витягти вбудовані об’єкти (PDF/Images/Fonts) та передати їх у структурні детектори
+- Відтворити читабельні шляхи з Manifest.db
+- Перелічити бази даних месенджерів (iMessage, WhatsApp, Signal, Telegram, Viber)
+- Визначити шляхи вкладень, витягти вкладені об'єкти (PDF/зображення/шрифти) та передати їх у структурні детектори
 
 
-## Відновлення резервної копії iOS
+## Відтворення резервної копії iOS
 
-Резервні копії, що зберігаються в MobileSync, використовують хешовані імена файлів, які не читаються людиною. База даних Manifest.db (SQLite) відображає кожен збережений об'єкт на його логічний шлях.
+Резервні копії, що зберігаються у MobileSync, використовують хешовані імена файлів, які нечитабельні для людини. SQLite база даних Manifest.db зіставляє кожен збережений об’єкт з його логічним шляхом.
 
 Загальна процедура:
 1) Відкрити Manifest.db і прочитати записи файлів (domain, relativePath, flags, fileID/hash)
-2) Відтворити оригінальну структуру папок на основі domain + relativePath
-3) Скопіювати або створити hardlink для кожного збереженого об'єкта до його відновленого шляху
+2) Відтворити оригінальну ієрархію папок на основі domain + relativePath
+3) Скопіювати або створити hardlink для кожного збереженого об’єкта у його відтворений шлях
 
-Приклад робочого процесу з інструментом, що реалізує це end‑to‑end (ElegantBouncer):
+Приклад робочого процесу з інструментом, який реалізує це end‑to‑end (ElegantBouncer):
 ```bash
 # Rebuild the backup into a readable folder tree
 $ elegant-bouncer --ios-extract /path/to/backup --output /tmp/reconstructed
@@ -27,13 +27,42 @@ $ elegant-bouncer --ios-extract /path/to/backup --output /tmp/reconstructed
 ✓ iOS backup extraction completed successfully!
 ```
 Примітки:
-- Обробляйте зашифровані резервні копії, передаючи пароль резервної копії вашому екстрактору
-- Зберігайте оригінальні часові відмітки/ACLs коли це можливо для доказової цінності
+- Обробляйте зашифровані резервні копії, передаючи пароль резервної копії у ваш екстрактор
+- За можливості зберігайте оригінальні часові мітки/ACLs для доказової цінності
 
+### Acquiring & decrypting the backup (USB / Finder / libimobiledevice)
 
-## Перерахування вкладень у додатках обміну повідомленнями
+- На macOS/Finder встановіть "Encrypt local backup" і створіть *свіжу* зашифровану резервну копію, щоб елементи keychain були присутні.
+- Крос‑платформено: `idevicebackup2` (libimobiledevice ≥1.4.0) розуміє зміни в протоколі резервного копіювання iOS 17/18 і виправляє попередні помилки рукостискання (handshake) під час відновлення/резервного копіювання.
+```bash
+# Pair then create a full encrypted backup over USB
+$ idevicepair pair
+$ idevicebackup2 backup --full --encrypt --password '<pwd>' ~/backups/iphone17
+```
+### Тріаж на основі IOC за допомогою MVT
 
-Після реконструкції перераховуйте вкладення для популярних додатків. Конкретна схема залежить від додатка/версії, але підхід схожий: запитуйте базу даних повідомлень, зв'язуйте повідомлення з вкладеннями й визначайте шляхи на диску.
+Mobile Verification Toolkit (mvt-ios) від Amnesty тепер працює безпосередньо з зашифрованими резервними копіями iTunes/Finder, автоматизуючи розшифрування та зіставлення IOC у випадках mercenary spyware.
+```bash
+# Optionally extract a reusable key file
+$ mvt-ios extract-key -k /tmp/keyfile ~/backups/iphone17
+
+# Decrypt in-place copy of the backup
+$ mvt-ios decrypt-backup -p '<pwd>' -d /tmp/dec-backup ~/backups/iphone17
+
+# Run IOC scanning on the decrypted tree
+$ mvt-ios check-backup -i indicators.csv /tmp/dec-backup
+```
+Виводи розміщуються в `mvt-results/` (наприклад, analytics_detected.json, safari_history_detected.json) і можуть бути зіставлені з шляхами вкладень, відновленими нижче.
+
+### Загальний парсинг артефактів (iLEAPP)
+
+Для хронології/метаданих поза межами повідомлень, запустіть iLEAPP безпосередньо на папці резервної копії (підтримує схеми iOS 11‑17):
+```bash
+$ python3 ileapp.py -b /tmp/dec-backup -o /tmp/ileapp-report
+```
+## Перерахування вкладень у месенджерах
+
+Після реконструкції перераховуйте вкладення для популярних додатків. Точна схема залежить від програми/версії, але підхід подібний: виконати запит до бази даних повідомлень, з'єднати messages з attachments і визначити шляхи на диску.
 
 ### iMessage (sms.db)
 Ключові таблиці: message, attachment, message_attachment_join (MAJ), chat, chat_message_join (CMJ)
@@ -65,33 +94,34 @@ JOIN message_attachment_join maj ON maj.message_id = m.ROWID
 JOIN attachment a ON a.ROWID = maj.attachment_id
 ORDER BY m.date DESC;
 ```
-Шляхи вкладень можуть бути абсолютними або відносними до відновленого дерева під Library/SMS/Attachments/.
+Шляхи вкладень можуть бути абсолютними або відносними до реконструйованого дерева під Library/SMS/Attachments/.
 
 ### WhatsApp (ChatStorage.sqlite)
-Типове зв'язування: message table ↔ media/attachment table (іменування може відрізнятися залежно від версії). Запитуйте media rows, щоб отримати on‑disk paths.
+Типове зв'язування: таблиця message ↔ таблиця media/attachment (іменування змінюється залежно від версії). Виконуйте запити до рядків media, щоб отримати шляхи на диску. У новіших збірках iOS все ще присутній `ZMEDIALOCALPATH` у `ZWAMEDIAITEM`.
 ```sql
 SELECT
-m.Z_PK          AS message_pk,
-mi.ZMEDIALOCALPATH AS media_path,
-m.ZMESSAGEDATE  AS message_date
+m.Z_PK                 AS message_pk,
+mi.ZMEDIALOCALPATH     AS media_path,
+datetime(m.ZMESSAGEDATE + 978307200, 'unixepoch') AS message_date,
+CASE m.ZISFROMME WHEN 1 THEN 'outgoing' ELSE 'incoming' END AS direction
 FROM ZWAMESSAGE m
-LEFT JOIN ZWAMEDIAITEM mi ON mi.ZMESSAGE = m.Z_PK
+LEFT JOIN ZWAMEDIAITEM mi ON mi.Z_PK = m.ZMEDIAITEM
 WHERE mi.ZMEDIALOCALPATH IS NOT NULL
 ORDER BY m.ZMESSAGEDATE DESC;
 ```
-Adjust table/column names to your app version (ZWAMESSAGE/ZWAMEDIAITEM are common in iOS builds).
+Шляхи зазвичай розміщуються під `AppDomainGroup-group.net.whatsapp.WhatsApp.shared/Message/Media/` у відтвореній резервній копії.
 
 ### Signal / Telegram / Viber
-- Signal: база даних повідомлень (DB) зашифрована; проте вкладення, кешовані на диску (та мініатюри), зазвичай піддаються скануванню
-- Telegram: перевіряйте каталоги кешу (photo/video/document caches) і по можливості зіставляйте їх з чатами
-- Viber: Viber.sqlite містить таблиці message/attachment з посиланнями на диску
+- Signal: база повідомлень шифрована; однак вкладення, закешовані на диску (та мініатюри), зазвичай піддаються скануванню
+- Telegram: кеш залишається під `Library/Caches/` всередині sandbox; iOS 18 збірки мають помилки очищення кешу, тому великі залишкові кеші медіа є поширеним джерелом доказів
+- Viber: Viber.sqlite містить таблиці повідомлень/вкладень з посиланнями на диску
 
-Tip: навіть коли метадані зашифровані, сканування каталогів медіа/кеш (media/cache directories) все ще виявляє шкідливі об'єкти.
+Порада: навіть коли метадані зашифровані, сканування директорій media/cache все одно виявляє шкідливі об'єкти.
 
 
 ## Scanning attachments for structural exploits
 
-Once you have attachment paths, feed them into structural detectors that validate file‑format invariants instead of signatures. Example with ElegantBouncer:
+Коли у вас є шляхи до вкладень, передайте їх у структурні детектори, які перевіряють інваріанти формату файлу замість сигнатур. Приклад з ElegantBouncer:
 ```bash
 # Recursively scan only messaging attachments under the reconstructed tree
 $ elegant-bouncer --scan --messaging /tmp/reconstructed
@@ -102,21 +132,23 @@ $ elegant-bouncer --scan --messaging /tmp/reconstructed
 Виявлення, покриті структурними правилами, включають:
 - PDF/JBIG2 FORCEDENTRY (CVE‑2021‑30860): неможливі стани словника JBIG2
 - WebP/VP8L BLASTPASS (CVE‑2023‑4863): надмірно великі конструкції таблиць Huffman
-- TrueType TRIANGULATION (CVE‑2023‑41990): незадокументовані опкоди bytecode
-- DNG/TIFF CVE‑2025‑43300: невідповідності між metadata та компонентами потоку
+- TrueType TRIANGULATION (CVE‑2023‑41990): недокументовані опкоди байткоду
+- DNG/TIFF CVE‑2025‑43300: невідповідності між метаданими та компонентами потоку
 
 
-## Валідація, застереження та помилкові спрацьовування
+## Валідація, застереження та хибні позитиви
 
-- Перетворення часу: iMessage зберігає дати в епохах/одиницях Apple у деяких версіях; перетворюйте відповідно під час звітування
-- Schema drift: схеми SQLite додатку змінюються з часом; підтверджуйте імена таблиць/стовпців для конкретної збірки пристрою
-- Recursive extraction: PDFs можуть містити вбудовані потоки JBIG2 та шрифти; витягуйте та скануйте внутрішні об'єкти
-- False positives: структурні евристики є консервативними, але можуть позначати рідкісні пошкоджені, але нешкідливі медіафайли
+- Перетворення часу: iMessage у деяких версіях зберігає дати в Apple epochs/units; під час звітування перетворюйте їх відповідно
+- Schema drift: схеми SQLite додатків змінюються з часом; підтверджуйте імена таблиць/стовпців для конкретної збірки пристрою
+- Recursive extraction: PDF можуть містити вбудовані потоки JBIG2 та шрифти; витягайте та скануйте вкладені об'єкти
+- False positives: структурні евристики є консервативними, але можуть помилково позначати рідкісні некоректні, але безпечні медіафайли
 
 
 ## References
 
 - [ELEGANTBOUNCER: When You Can't Get the Samples but Still Need to Catch the Threat](https://www.msuiche.com/posts/elegantbouncer-when-you-cant-get-the-samples-but-still-need-to-catch-the-threat/)
 - [ElegantBouncer project (GitHub)](https://github.com/msuiche/elegant-bouncer)
+- [MVT iOS backup workflow](https://docs.mvt.re/en/latest/ios/backup/check/)
+- [libimobiledevice 1.4.0 release notes](https://libimobiledevice.org/news/2025/10/10/libimobiledevice-1.4.0-release/)
 
 {{#include ../../banners/hacktricks-training.md}}
