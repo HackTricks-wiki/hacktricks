@@ -1027,6 +1027,16 @@ cat /home/$USER/docker/previous/public/examples/flag
 
 Terraform resolves the symlink and copies the real `/root/root.txt` into an attacker-readable destination. The same approach can be used to **write** into privileged paths by pre-creating destination symlinks (e.g., pointing the provider’s destination path inside `/etc/cron.d/`).
 
+### requiretty / !requiretty
+
+On some older distributions, sudo can be configured with `requiretty`, which forces sudo to run only from an interactive TTY. If `!requiretty` is set (or the option is absent), sudo can be executed from non-interactive contexts such as reverse shells, cron jobs, or scripts.
+
+```bash
+Defaults !requiretty
+```
+
+This is not a direct vulnerability by itself, but it expands the situations where sudo rules can be abused without needing a full PTY.
+
 ### Sudo env_keep+=PATH / insecure secure_path → PATH hijack
 
 If `sudo -l` shows `env_keep+=PATH` or a `secure_path` containing attacker-writable entries (e.g., `/home/<user>/bin`), any relative command inside the sudo-allowed target can be shadowed.
@@ -1883,4 +1893,3 @@ vmware-tools-service-discovery-untrusted-search-path-cve-2025-41244.md
 - [NVISO – You name it, VMware elevates it (CVE-2025-41244)](https://blog.nviso.eu/2025/09/29/you-name-it-vmware-elevates-it-cve-2025-41244/)
 
 {{#include ../../banners/hacktricks-training.md}}
-
