@@ -23,7 +23,6 @@ additional-js = [
     "theme/sponsor.js",
     "theme/ai.js"
 ]
-google-analytics = "G-8QHENNPT4B"
 no-section-label = true
 preferred-dark-theme = "hacktricks-dark"
 default-theme = "hacktricks-light"
