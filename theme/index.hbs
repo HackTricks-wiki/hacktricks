@@ -343,20 +343,18 @@
         </script>
         {{/if}}
 
-        {{#if google_analytics}}
         <!-- Google Analytics Tag (GA4) -->
         <script>
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
-            gtag('config', '{{google_analytics}}');
+            gtag('config', 'G-8QHENNPT4B');
 
             var gtagScript = document.createElement('script');
             gtagScript.async = true;
-            gtagScript.src = 'https://www.googletagmanager.com/gtag/js?id={{google_analytics}}';
+            gtagScript.src = 'https://www.googletagmanager.com/gtag/js?id=G-8QHENNPT4B';
             document.head.appendChild(gtagScript);
         </script>
-        {{/if}}
 
         {{#if playground_line_numbers}}
         <script>
