@@ -56,6 +56,34 @@ lsadump::dcshadow /object:student1 /attribute:primaryGroupID /value:519
 lsadump::dcshadow /object:CN=AdminSDHolder,CN=System,DC=moneycorp,DC=local /attribute:ntSecurityDescriptor /value:<whole modified ACL>
 ```
 
+### Primary group abuse, enumeration gaps, and detection
+
+- `primaryGroupID` is a separate attribute from the group `member` list. DCShadow/DSInternals can write it directly (e.g., set `primaryGroupID=512` for **Domain Admins**) without on-box LSASS enforcement, but AD still **moves** the user: changing PGID always strips membership from the previous primary group (same behavior for any target group), so you cannot keep the old primary-group membership.
+- Default tools prevent removing a user from their current primary group (`ADUC`, `Remove-ADGroupMember`), so changing PGID typically requires direct directory writes (DCShadow/`Set-ADDBPrimaryGroup`).
+- Membership reporting is inconsistent:
+  - **Includes** primary-group-derived members: `Get-ADGroupMember "Domain Admins"`, `net group "Domain Admins"`, ADUC/Admin Center.
+  - **Omits** primary-group-derived members: `Get-ADGroup "Domain Admins" -Properties member`, ADSI Edit inspecting `member`, `Get-ADUser <user> -Properties memberOf`.
+- Recursive checks can miss primary-group members if the **primary group is itself nested** (e.g., user PGID points to a nested group inside Domain Admins); `Get-ADGroupMember -Recursive` or LDAP recursive filters will not return that user unless recursion explicitly resolves primary groups.
+- DACL tricks: attackers can **deny ReadProperty** on `primaryGroupID` at the user (or on the group `member` attribute for non-AdminSDHolder groups), hiding effective membership from most PowerShell queries; `net group` will still resolve the membership. AdminSDHolder-protected groups will reset such denies.
+
+Detection/monitoring examples:
+
+```powershell
+# Find users whose primary group is not the default Domain Users (RID 513)
+Get-ADUser -Filter * -Properties primaryGroup,primaryGroupID |
+  Where-Object { $_.primaryGroupID -ne 513 } |
+  Select-Object Name,SamAccountName,primaryGroupID,primaryGroup
+```
+
+```powershell
+# Find users where primaryGroupID cannot be read (likely denied via DACL)
+Get-ADUser -Filter * -Properties primaryGroupID |
+  Where-Object { -not $_.primaryGroupID } |
+  Select-Object Name,SamAccountName
+```
+
+Cross-check privileged groups by comparing `Get-ADGroupMember` output with `Get-ADGroup -Properties member` or ADSI Edit to catch discrepancies introduced by `primaryGroupID` or hidden attributes.
+
 ## Shadowception - Give DCShadow permissions using DCShadow (no modified permissions logs)
 
 We need to append following ACEs with our user's SID at the end:
@@ -73,6 +101,11 @@ To get the current ACE of an object: `(New-Object System.DirectoryServices.Direc
 Notice that in this case you need to make **several changes,** not just one. So, in the **mimikatz1 session** (RPC server) use the parameter **`/stack` with each change** you want to make. This way, you will only need to **`/push`** one time to perform all the stucked changes in the rouge server.
 
 [**More information about DCShadow in ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/t1207-creating-rogue-domain-controllers-with-dcshadow)
+
+## References
+
+- [TrustedSec - Adventures in Primary Group Behavior, Reporting, and Exploitation](https://trustedsec.com/blog/adventures-in-primary-group-behavior-reporting-and-exploitation)
+- [DCShadow write-up in ired.team](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/t1207-creating-rogue-domain-controllers-with-dcshadow)
 
 {{#include ../../banners/hacktricks-training.md}}
 
