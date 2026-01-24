@@ -45,6 +45,8 @@ Note: Some devices reportedly skip bl2_ext verification even with a locked bootl
 
 Devices that ship the lk2 secondary bootloader have been observed with the same logic gap, so grab expdb logs for both bl2_ext and lk2 partitions to confirm whether either path enforces signatures before you attempt porting.
 
+If a post-OTA Preloader now logs img_auth_required = 1 for bl2_ext even while seccfg is unlocked, the vendor likely closed the gap—see the OTA persistence notes below.
+
 ## Practical exploitation workflow (Fenrir PoC)
 
 Fenrir is a reference exploit/patching toolkit for this class of issue. It supports Nothing Phone (2a) (Pacman) and is known working (incompletely supported) on CMF Phone 1 (Tetris). Porting to other models requires reverse engineering the device-specific bl2_ext.
@@ -68,6 +70,22 @@ Commands:
 ```
 
 If fastboot is unavailable, you must use a suitable alternative flashing method for your platform.
+
+### OTA-patched firmware: keeping the bypass alive (NothingOS 4, late 2025)
+
+Nothing patched the Preloader in the November 2025 NothingOS 4 stable OTA (build BP2A.250605.031.A3) to enforce bl2_ext verification even when seccfg is unlocked. Fenrir `pacman-v2.0` works again by mixing the vulnerable Preloader from the NOS 4 beta with the stable LK payload:
+
+```bash
+# on Nothing Phone (2a), unlocked bootloader, in bootloader (not fastbootd)
+fastboot flash preloader_a preloader_raw.img   # beta Preloader bundled with fenrir release
+fastboot flash lk pacman-fenrir.bin            # patched LK containing stage hooks
+fastboot reboot                                # factory reset may be needed
+```
+
+Important:
+- Flash the provided Preloader **only** to the matching device/slot; a wrong preloader is an instant hard brick.
+- Check expdb after flashing; img_auth_required should drop back to 0 for bl2_ext, confirming that the vulnerable Preloader is executing before your patched LK.
+- If future OTAs patch both Preloader and LK, keep a local copy of a vulnerable Preloader to re‑introduce the gap.
 
 ### Build automation & payload debugging
 
@@ -120,7 +138,7 @@ Because stage1 fires prior to platform bring-up, it is the right place to call i
 - Keep offsets fully device- and firmware-specific; do not reuse addresses between variants.
 - Validate on a sacrificial unit first. Prepare a recovery plan (e.g., EDL/BootROM loader/SoC-specific download mode) before you flash.
 - Devices using the lk2 secondary bootloader or reporting “img_auth_required = 0” for bl2_ext even while locked should be treated as vulnerable copies of this bug class; Vivo X80 Pro has already been observed skipping verification despite a reported lock state.
-- Compare expdb logs from both locked and unlocked states—if certificate timing jumps from 0 ms to a non-zero value once you relock, you likely patched the right decision point but still need to harden lock-state spoofing to hide the modification.
+- When an OTA begins enforcing bl2_ext signatures (img_auth_required = 1) in the unlocked state, check whether an older Preloader (often available in beta OTAs) can be flashed to re-open the gap, then re-run fenrir with updated offsets for the newer LK.
 
 ## Security impact
 
@@ -132,11 +150,14 @@ Because stage1 fires prior to platform bring-up, it is the right place to call i
 - Confirmed supported: Nothing Phone (2a) (Pacman)
 - Known working (incomplete support): CMF Phone 1 (Tetris)
 - Observed: Vivo X80 Pro reportedly did not verify bl2_ext even when locked
+- NothingOS 4 stable (BP2A.250605.031.A3, Nov 2025) re-enabled bl2_ext verification; fenrir `pacman-v2.0` restores the bypass by flashing the beta Preloader plus patched LK as shown above
 - Industry coverage highlights additional lk2-based vendors shipping the same logic flaw, so expect further overlap across 2024–2025 MTK releases.
 
 ## References
 
 - [Fenrir – MediaTek bl2_ext secure‑boot bypass (PoC)](https://github.com/R0rt1z2/fenrir)
 - [Cyber Security News – PoC Exploit Released For Nothing Phone Code Execution Vulnerability](https://cybersecuritynews.com/nothing-phone-code-execution-vulnerability/)
+- [Fenrir pacman-v2.0 release (NothingOS 4 bypass bundle)](https://github.com/R0rt1z2/fenrir/releases/tag/pacman-v2.0)
+- [The Cyber Express – Fenrir PoC breaks secure boot on Nothing Phone 2a/CMF1](https://thecyberexpress.com/fenrir-poc-for-nothing-phone-2a-cmf1/)
 
 {{#include ../../banners/hacktricks-training.md}}

