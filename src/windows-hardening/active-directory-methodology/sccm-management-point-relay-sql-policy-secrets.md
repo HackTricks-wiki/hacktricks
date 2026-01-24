@@ -131,12 +131,24 @@ WHERE  dp.name IN ('smsdbrole_MP','smsdbrole_MPUserSvc')
 
 ---
 
-## 6. Detection & Hardening
+## 6. PXE boot media harvesting (SharpPXE)
+* **PXE reply over UDP/4011**: send a PXE boot request to a Distribution Point configured for PXE. The proxyDHCP response reveals boot paths such as `SMSBoot\\x64\\pxe\\variables.dat` (encrypted config) and `SMSBoot\\x64\\pxe\\boot.bcd`, plus an optional encrypted key blob.
+* **Retrieve boot artifacts via TFTP**: use the returned paths to download `variables.dat` over TFTP (unauthenticated). The file is small (a few KB) and contains the encrypted media variables.
+* **Decrypt or crack**:
+  - If the response includes the decryption key, feed it to **SharpPXE** to decrypt `variables.dat` directly.
+  - If no key is provided (PXE media protected by a custom password), SharpPXE emits a **Hashcat-compatible** `$sccm$aes128$...` hash for offline cracking. After recovering the password, decrypt the file.
+* **Parse decrypted XML**: plaintext variables contain SCCM deployment metadata (**Management Point URL**, **Site Code**, media GUIDs, and other identifiers). SharpPXE parses them and prints a ready-to-run **SharpSCCM** command with GUID/PFX/site parameters prefilled for follow-on abuse.
+* **Requirements**: only network reachability to the PXE listener (UDP/4011) and TFTP; no local admin privileges are needed.
+
+---
+
+## 7. Detection & Hardening
 1. **Monitor MP logins** – any MP computer account logging in from an IP that isn’t its host ≈ relay.
 2. Enable **Extended Protection for Authentication (EPA)** on the site database (`PREVENT-14`).
 3. Disable unused NTLM, enforce SMB signing, restrict RPC (
    same mitigations used against `PetitPotam`/`PrinterBug`).
 4. Harden MP ↔ DB communication with IPSec / mutual-TLS.
+5. **Constrain PXE exposure** – firewall UDP/4011 and TFTP to trusted VLANs, require PXE passwords, and alert on TFTP downloads of `SMSBoot\\*\\pxe\\variables.dat`.
 
 ---
 
@@ -159,4 +171,5 @@ WHERE  dp.name IN ('smsdbrole_MP','smsdbrole_MPUserSvc')
 - [I’d Like to Speak to Your Manager: Stealing Secrets with Management Point Relays](https://specterops.io/blog/2025/07/15/id-like-to-speak-to-your-manager-stealing-secrets-with-management-point-relays/)
 - [PXEthief](https://github.com/MWR-CyberSec/PXEThief)
 - [Misconfiguration Manager – ELEVATE-4 & ELEVATE-5](https://github.com/subat0mik/Misconfiguration-Manager)
+- [SharpPXE](https://github.com/leftp/SharpPXE)
 {{#include ../../banners/hacktricks-training.md}}
