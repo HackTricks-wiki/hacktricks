@@ -92,6 +92,7 @@
   - [Defi Amm Virtual Balance Cache Exploitation](blockchain/blockchain-and-crypto-currencies/defi-amm-virtual-balance-cache-exploitation.md)
   - [Mutation Testing With Slither](blockchain/smart-contract-security/mutation-testing-with-slither.md)
   - [Value Centric Web3 Red Teaming](blockchain/blockchain-and-crypto-currencies/value-centric-web3-red-teaming.md)
+  - [Web3 Signing Workflow Compromise Safe Delegatecall Proxy Takeover](blockchain/blockchain-and-crypto-currencies/web3-signing-workflow-compromise-safe-delegatecall-proxy-takeover.md)
 - [Lua Sandbox Escape](generic-methodologies-and-resources/lua/bypass-lua-sandboxes/README.md)
 
 # 🧙‍♂️ Generic Hacking
@@ -275,6 +276,7 @@
   - [SeImpersonate from High To System](windows-hardening/windows-local-privilege-escalation/seimpersonate-from-high-to-system.md)
   - [Semanagevolume Perform Volume Maintenance Tasks](windows-hardening/windows-local-privilege-escalation/semanagevolume-perform-volume-maintenance-tasks.md)
   - [Service Triggers](windows-hardening/windows-local-privilege-escalation/service-triggers.md)
+  - [Telephony Tapsrv Arbitrary Dword Write To Rce](windows-hardening/windows-local-privilege-escalation/telephony-tapsrv-arbitrary-dword-write-to-rce.md)
   - [Windows C Payloads](windows-hardening/windows-local-privilege-escalation/windows-c-payloads.md)
 - [Active Directory Methodology](windows-hardening/active-directory-methodology/README.md)
   - [Abusing Active Directory ACLs/ACEs](windows-hardening/active-directory-methodology/acl-persistence-abuse/README.md)
@@ -381,6 +383,7 @@
   - [Intent Injection](mobile-pentesting/android-app-pentesting/intent-injection.md)
   - [Make APK Accept CA Certificate](mobile-pentesting/android-app-pentesting/make-apk-accept-ca-certificate.md)
   - [Manual DeObfuscation](mobile-pentesting/android-app-pentesting/manual-deobfuscation.md)
+  - [Play Integrity Attestation Bypass](mobile-pentesting/android-app-pentesting/play-integrity-attestation-bypass.md)
   - [React Native Application](mobile-pentesting/android-app-pentesting/react-native-application.md)
   - [Reversing Native Libraries](mobile-pentesting/android-app-pentesting/reversing-native-libraries.md)
   - [Shizuku Privileged Api](mobile-pentesting/android-app-pentesting/shizuku-privileged-api.md)
@@ -886,6 +889,7 @@
 - [Af Unix Msg Oob Uaf Skb Primitives](binary-exploitation/linux-kernel-exploitation/af-unix-msg-oob-uaf-skb-primitives.md)
 - [Arm64 Static Linear Map Kaslr Bypass](binary-exploitation/linux-kernel-exploitation/arm64-static-linear-map-kaslr-bypass.md)
 - [Ksmbd Streams Xattr Oob Write Cve 2025 37947](binary-exploitation/linux-kernel-exploitation/ksmbd-streams_xattr-oob-write-cve-2025-37947.md)
+- [Pixel Bigwave Bigo Job Timeout Uaf Kernel Write](binary-exploitation/linux-kernel-exploitation/pixel-bigwave-bigo-job-timeout-uaf-kernel-write.md)
 - [Linux kernel exploitation - toctou](binary-exploitation/linux-kernel-exploitation/posix-cpu-timers-toctou-cve-2025-38352.md)
 - [PS5 compromission](binary-exploitation/freebsd-ptrace-rfi-vm_map-prot_exec-bypass-ps5.md)
 - [Windows Exploiting (Basic Guide - OSCP lvl)](binary-exploitation/windows-exploiting-basic-guide-oscp-lvl.md)
@@ -897,11 +901,13 @@
   - [ios Corellium](binary-exploitation/ios-exploiting/ios-corellium.md)
   - [ios Heap Exploitation](binary-exploitation/ios-exploiting/ios-example-heap-exploit.md)
   - [ios Physical UAF - IOSurface](binary-exploitation/ios-exploiting/ios-physical-uaf-iosurface.md)
+  - [Webkit Dfg Store Barrier Uaf Angle Oob](binary-exploitation/ios-exploiting/webkit-dfg-store-barrier-uaf-angle-oob.md)
 
 # 🤖 AI
 - [AI Security](AI/README.md)
   - [Ai Assisted Fuzzing And Vulnerability Discovery](AI/AI-Assisted-Fuzzing-and-Vulnerability-Discovery.md)
   - [AI Security Methodology](AI/AI-Deep-Learning.md)
+  - [Burp MCP: LLM-assisted traffic review](AI/AI-Burp-MCP.md)
   - [AI MCP Security](AI/AI-MCP-Servers.md)
   - [AI Model Data Preparation](AI/AI-Model-Data-Preparation-and-Evaluation.md)
   - [AI Models RCE](AI/AI-Models-RCE.md)

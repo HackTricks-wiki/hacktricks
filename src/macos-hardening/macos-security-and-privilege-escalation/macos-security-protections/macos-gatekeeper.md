@@ -162,7 +162,13 @@ Regarding **kernel extensions**, the folder `/var/db/SystemPolicyConfiguration` 
 
 #### Managing Gatekeeper on macOS 15 (Sequoia) and later
 
+- The long‑standing Finder **Ctrl+Open / Right‑click → Open** bypass has been removed; users must explicitly allow a blocked app from **System Settings → Privacy & Security → Open Anyway** after the first block dialog.
+- `spctl --master-disable/--global-disable` are no longer accepted; `spctl` is effectively read‑only for assessment and label management while policy enforcement is configured through UI or MDM.
+
 Starting in macOS 15 Sequoia, end users can no longer toggle Gatekeeper policy from `spctl`. Management is performed via System Settings or by deploying an MDM configuration profile with the `com.apple.systempolicy.control` payload. Example profile snippet to allow App Store and identified developers (but not "Anywhere"):
+
+<details>
+<summary>MDM profile to allow App Store and identified developers</summary>
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -197,6 +203,8 @@ Starting in macOS 15 Sequoia, end users can no longer toggle Gatekeeper policy f
 </dict>
 </plist>
 ```
+
+</details>
 
 ### Quarantine Files
 
@@ -531,6 +539,10 @@ A Gatekeeper bypass fixed in macOS Sonoma 14.0 allowed crafted apps to run witho
 
 A Gatekeeper bypass in macOS 14.4 (released March 2024) stemming from `libarchive` handling of malicious ZIPs allowed apps to evade assessment. Update to 14.4 or later where Apple addressed the issue.
 
+### [CVE-2024-44128](https://support.apple.com/en-us/121234)
+
+An **Automator Quick Action workflow** embedded in a downloaded app could trigger without Gatekeeper assessment, because workflows were treated as data and executed by the Automator helper outside the normal notarization prompt path. A crafted `.app` bundling a Quick Action that runs a shell script (e.g., inside `Contents/PlugIns/*.workflow/Contents/document.wflow`) could therefore execute immediately on launch. Apple added an extra consent dialog and fixed the assessment path in Ventura **13.7**, Sonoma **14.7**, and Sequoia **15**.
+
 ### Third‑party unarchivers mis‑propagating quarantine (2023–2024)
 
 Several vulnerabilities in popular extraction tools (e.g., The Unarchiver) caused files extracted from archives to miss the `com.apple.quarantine` xattr, enabling Gatekeeper bypass opportunities. Always rely on macOS Archive Utility or patched tools when testing, and validate xattrs after extraction.
@@ -553,5 +565,7 @@ In an ".app" bundle if the quarantine xattr is not added to it, when executing i
 
 - Apple Platform Security: About the security content of macOS Sonoma 14.4 (includes CVE-2024-27853) – [https://support.apple.com/en-us/HT214084](https://support.apple.com/en-us/HT214084)
 - Eclectic Light: How macOS now tracks the provenance of apps – [https://eclecticlight.co/2023/05/10/how-macos-now-tracks-the-provenance-of-apps/](https://eclecticlight.co/2023/05/10/how-macos-now-tracks-the-provenance-of-apps/)
+- Apple: About the security content of macOS Sonoma 14.7 / Ventura 13.7 (CVE-2024-44128) – [https://support.apple.com/en-us/121234](https://support.apple.com/en-us/121234)
+- MacRumors: macOS 15 Sequoia removes the Control‑click “Open” Gatekeeper bypass – [https://www.macrumors.com/2024/06/11/macos-sequoia-removes-open-anyway/](https://www.macrumors.com/2024/06/11/macos-sequoia-removes-open-anyway/)
 
 {{#include ../../../banners/hacktricks-training.md}}
