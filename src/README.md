@@ -224,6 +224,30 @@ https://k8studio.io/
 
 ---
 
+### [Modern Security – AI & Application Security Training Platform](https://modernsecurity.io/)
+
+<figure><img src="images/modern_security_logo.png" alt="Modern Security"><figcaption></figcaption></figure>
+
+Modern Security delivers **practical AI Security training** with an **engineering-first, hands-on lab approach**. Our courses are built for security engineers, AppSec professionals, and developers who want to **build, break, and secure real AI/LLM-powered applications**.
+
+The **AI Security Certification** focuses on real-world skills, including:
+- Securing LLM and AI-powered applications  
+- Threat modeling for AI systems  
+- Embeddings, vector databases, and RAG security  
+- LLM attacks, abuse scenarios, and practical defenses  
+- Secure design patterns and deployment considerations  
+
+All courses are **on-demand**, **lab-driven**, and designed around **real-world security tradeoffs**, not just theory.
+
+👉 More details on the AI Security course:  
+https://www.modernsecurity.io/courses/ai-security-certification
+
+{{#ref}}
+https://modernsecurity.io/
+{{#endref}}
+
+---
+
 ## License & Disclaimer
 
 Check them in:
