@@ -62,14 +62,26 @@ class MDBookSidebarScrollbox extends HTMLElement {
                 activeSection.scrollIntoView({ block: 'center' });
             }
         }
-        // Toggle buttons
-        var sidebarAnchorToggles = document.querySelectorAll('#sidebar a.toggle');
-        function toggleSection(ev) {
-            ev.currentTarget.parentElement.classList.toggle('expanded');
+        // Toggle buttons (delegate to avoid navigation)
+        var sidebarRoot = document.getElementById('sidebar');
+        if (sidebarRoot) {
+            sidebarRoot.addEventListener('click', function (ev) {
+                var toggle = ev.target.closest('a.chapter-fold-toggle');
+                if (!toggle) { return; }
+                ev.preventDefault();
+                ev.stopPropagation();
+                var parentLi = toggle.closest('li.chapter-item');
+                if (parentLi) {
+                    parentLi.classList.toggle('expanded');
+                }
+            }, true);
+            sidebarRoot.addEventListener('pointerdown', function (ev) {
+                var toggle = ev.target.closest('a.chapter-fold-toggle');
+                if (!toggle) { return; }
+                ev.preventDefault();
+                ev.stopPropagation();
+            }, true);
         }
-        Array.from(sidebarAnchorToggles).forEach(function (el) {
-            el.addEventListener('click', toggleSection);
-        });
     }
 }
 window.customElements.define("mdbook-sidebar-scrollbox", MDBookSidebarScrollbox);
