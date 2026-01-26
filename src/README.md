@@ -111,7 +111,7 @@ Join [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) server to 
 重要で実用的なビジネス影響のある脆弱性を発見して報告しましょう。攻撃対象のマッピング、権限昇格を許すセキュリティ問題の発見、証拠収集のための自動化されたエクスプロイトの利用など、20以上のカスタムツールを使って効率的に調査できます。これにより、あなたの作業を説得力のあるレポートに変換できます。
 
 {{#ref}}
-https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons
+https://modernsecurity.io/
 {{#endref}}
 
 ---
