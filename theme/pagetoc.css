@@ -1,4 +1,4 @@
-@media only screen and (max-width:1439px) {
+@media only screen and (max-width:799px) {
     .sidetoc {
         display: none !important;
     }
@@ -61,7 +61,7 @@
     }
 }
 
-@media only screen and (min-width:1440px) {
+@media only screen and (min-width:800px) {
     main {
         position: relative;
     }
