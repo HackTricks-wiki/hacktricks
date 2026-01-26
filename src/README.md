@@ -111,7 +111,7 @@ Pridružite se [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) 
 **Find and report critical, exploitable vulnerabilities with real business impact.** Koristite naših 20+ custom tools da mapirate attack surface, pronađete sigurnosne probleme koji omogućavaju escalate privileges, i koristite automated exploits da prikupite ključne dokaze, pretvarajući vaš trud u ubedljive izveštaje.
 
 {{#ref}}
-https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons
+https://modernsecurity.io/
 {{#endref}}
 
 ---
