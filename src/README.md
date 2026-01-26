@@ -111,7 +111,7 @@ Join [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) server to 
 **Encontre e reporte vulnerabilidades críticas e exploráveis com impacto real nos negócios.** Use nossas 20+ ferramentas customizadas para mapear a superfície de ataque, encontrar problemas de segurança que permitam escalar privilégios, e usar exploits automatizados para coletar evidências essenciais, transformando seu trabalho em relatórios convincentes.
 
 {{#ref}}
-https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons
+https://modernsecurity.io/
 {{#endref}}
 
 ---
