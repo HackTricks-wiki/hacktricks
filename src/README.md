@@ -2,9 +2,9 @@
 
 <figure><img src="images/hacktricks.gif" alt=""><figcaption></figcaption></figure>
 
-_Hacktricks ロゴとモーションデザイン：_ [_@ppieranacho_](https://www.instagram.com/ppieranacho/)_._
+_Hacktricks のロゴとモーションデザイン（制作）_ [_@ppieranacho_](https://www.instagram.com/ppieranacho/)_._
 
-### ローカルで HackTricks を実行
+### ローカルで HackTricks を実行する
 ```bash
 # Download latest version of hacktricks
 git clone https://github.com/HackTricks-wiki/hacktricks
@@ -31,19 +31,19 @@ export LANG="master" # Leave master for english
 # Run the docker container indicating the path to the hacktricks folder
 docker run -d --rm --platform linux/amd64 -p 3337:3000 --name hacktricks -v $(pwd)/hacktricks:/app ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image bash -c "mkdir -p ~/.ssh && ssh-keyscan -H github.com >> ~/.ssh/known_hosts && cd /app && git config --global --add safe.directory /app && git checkout $LANG && git pull && MDBOOK_PREPROCESSOR__HACKTRICKS__ENV=dev mdbook serve --hostname 0.0.0.0"
 ```
-HackTricks のローカルコピーは **[http://localhost:3337](http://localhost:3337) で利用可能になります**（約5分以内に反映されます。書籍をビルドする必要があるため、しばらくお待ちください）。
+Your local copy of HackTricks will be **available at [http://localhost:3337](http://localhost:3337)** after <5 minutes (it needs to build the book, be patient).
 
-## 企業スポンサー
+## Corporate Sponsors
 
 ### [STM Cyber](https://www.stmcyber.com)
 
 <figure><img src="images/stm (1).png" alt=""><figcaption></figcaption></figure>
 
-[**STM Cyber**](https://www.stmcyber.com) は優れたサイバーセキュリティ企業で、スローガンは **HACK THE UNHACKABLE** です。彼らは独自に研究を行い、自社の hacking ツールを開発して、pentesting、Red teams、トレーニングのような **価値ある複数のサイバーセキュリティサービスを提供**しています。
+[**STM Cyber**](https://www.stmcyber.com) はスローガンが **HACK THE UNHACKABLE** の優れたサイバーセキュリティ企業です。独自のリサーチを行い、自社のハッキングツールを開発して、**pentesting、Red teams、training** のような価値ある複数のサイバーセキュリティサービスを提供しています。
 
-彼らの **ブログ** は [**https://blog.stmcyber.com**](https://blog.stmcyber.com) でご覧になれます。
+彼らの**blog**は [**https://blog.stmcyber.com**](https://blog.stmcyber.com) でご覧いただけます。
 
-**STM Cyber** は HackTricks のようなサイバーセキュリティのオープンソースプロジェクトもサポートしています :)
+**STM Cyber** は HackTricks のようなオープンソースのサイバーセキュリティプロジェクトもサポートしています :)
 
 ---
 
@@ -51,7 +51,7 @@ HackTricks のローカルコピーは **[http://localhost:3337](http://localhos
 
 <figure><img src="images/image (45).png" alt=""><figcaption></figcaption></figure>
 
-[**RootedCON**](https://www.rootedcon.com) は **スペイン** で最も重要なサイバーセキュリティイベントであり、**ヨーロッパ** の中でも重要なイベントの一つです。**技術知識の普及を使命とする** このカンファレンスは、あらゆる分野の技術者やサイバーセキュリティ専門家が集まる熱い交流の場です。
+[**RootedCON**](https://www.rootedcon.com) は**スペイン**で最も重要なサイバーセキュリティイベントであり、**ヨーロッパ**でも有数のイベントです。**技術的知識の普及を使命**としており、このカンファレンスはあらゆる分野のテクノロジーとサイバーセキュリティ専門家が集まる活気ある場です。
 
 {{#ref}}
 https://www.rootedcon.com/
@@ -63,9 +63,9 @@ https://www.rootedcon.com/
 
 <figure><img src="images/image (47).png" alt=""><figcaption></figcaption></figure>
 
-**Intigriti** はヨーロッパで No.1 の ethical hacking と **bug bounty platform** です。
+**Intigriti** は **Europe's #1** の ethical hacking かつ **bug bounty platform** です。
 
-**Bug bounty tip**: **Intigriti にサインアップ**してみてください。ハッカーによって作られた、ハッカーのためのプレミアムな bug bounty platform です！今すぐ [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) に参加して、最大 **$100,000** の賞金を獲得し始めましょう！
+**Bug bounty tip**: **sign up** for **Intigriti**, a premium **bug bounty platform created by hackers, for hackers**! Join us at [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) today, and start earning bounties up to **$100,000**!
 
 {{#ref}}
 https://go.intigriti.com/hacktricks
@@ -78,9 +78,9 @@ https://go.intigriti.com/hacktricks
 <figure><img src="images/image (48).png" alt=""><figcaption></figcaption></figure>
 
 \
-世界で最も **高度な** コミュニティツールを活用して、ワークフローを簡単に構築・**自動化**するには [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) を利用してください。
+Use [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) to easily build and **automate workflows** powered by the world's **most advanced** community tools.
 
-今日アクセスを取得：
+Get Access Today:
 
 {{#ref}}
 https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks
@@ -94,21 +94,31 @@ https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktr
 
 Join [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) server to communicate with experienced hackers and bug bounty hunters!
 
-- **Hacking Insights:** ハッキングの興奮や課題に深く踏み込んだコンテンツを扱っています
-- **Real-Time Hack News:** リアルタイムのニュースとインサイトで急速に変化するハッキングの世界を把握できます
-- **Latest Announcements:** 新しい bug bounty の開始や重要なプラットフォーム更新を常に把握できます
+- **Hacking Insights:** Engage with content that delves into the thrill and challenges of hacking
+- **Real-Time Hack News:** Keep up-to-date with fast-paced hacking world through real-time news and insights
+- **Latest Announcements:** Stay informed with the newest bug bounties launching and crucial platform updates
 
 **Join us on** [**Discord**](https://discord.com/invite/N3FrSbmwdy) and start collaborating with top hackers today!
 
 ---
 
-### [Pentest-Tools.com](https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons) - The essential penetration testing toolkit
+### [Modern Security – AI & Application Security Training Platform](https://modernsecurity.io/)
 
-<figure><img src="images/pentest-tools.svg" alt=""><figcaption></figcaption></figure>
+<figure><img src="images/modern_security_logo.png" alt="Modern Security"><figcaption></figcaption></figure>
 
-**Get a hacker's perspective on your web apps, network, and cloud**
+Modern Security は**エンジニアリング重視のハンズオンラボアプローチ**で**実践的なAI Security training**を提供します。コースはセキュリティエンジニア、AppSecプロフェッショナル、開発者向けに作られており、実際のAI/LLMを活用したアプリケーションを**構築、破壊、保護**するための内容です。
 
-重要で実用的なビジネス影響のある脆弱性を発見して報告しましょう。攻撃対象のマッピング、権限昇格を許すセキュリティ問題の発見、証拠収集のための自動化されたエクスプロイトの利用など、20以上のカスタムツールを使って効率的に調査できます。これにより、あなたの作業を説得力のあるレポートに変換できます。
+**AI Security Certification** は実務的なスキルに焦点を当てています。内容には以下が含まれます：
+- Securing LLM and AI-powered applications
+- Threat modeling for AI systems
+- Embeddings, vector databases, and RAG security
+- LLM attacks, abuse scenarios, and practical defenses
+- Secure design patterns and deployment considerations
+
+すべてのコースは**on-demand**で**lab-driven**、そして**real-world security tradeoffs**に基づいて設計されています。理論だけではありません。
+
+👉 AI Securityコースの詳細:
+https://www.modernsecurity.io/courses/ai-security-certification
 
 {{#ref}}
 https://modernsecurity.io/
@@ -120,14 +130,14 @@ https://modernsecurity.io/
 
 <figure><img src="images/image (1254).png" alt=""><figcaption></figcaption></figure>
 
-**SerpApi** は検索エンジンの結果に **リアルタイムで高速かつ簡単にアクセスする** API を提供します。検索エンジンのスクレイピング、プロキシ処理、キャプチャ解決、リッチな構造化データの解析を代行します。
+**SerpApi** は検索エンジンの結果に**リアルタイムで簡単にアクセスできる高速API**を提供します。検索エンジンのスクレイピング、プロキシの扱い、キャプチャの解決、リッチな構造データのパースを代行します。
 
-SerpApi のプランに加入すると、Google、Bing、Baidu、Yahoo、Yandex など、さまざまな検索エンジン向けの 50 種類以上の API にアクセスできます。\
-他のプロバイダとは異なり、**SerpApi はオーガニックな結果だけをスクレイピングするのではありません**。SerpApi のレスポンスには広告、インライン画像や動画、ナレッジグラフなど、検索結果に表示される要素が一貫して含まれます。
+SerpApi のサブスクリプションには、Google、Bing、Baidu、Yahoo、Yandex など、さまざまな検索エンジン向けの50以上のAPIへのアクセスが含まれます。\
+他のプロバイダと異なり、**SerpApi はオーガニック結果だけをスクレイプするわけではありません**。SerpApi のレスポンスには一貫して広告、インライン画像や動画、ナレッジグラフ、検索結果に含まれるその他の要素や機能が含まれます。
 
-現在の SerpApi の顧客には **Apple, Shopify, and GrubHub** が含まれます。\
-詳細は彼らの [**blog**](https://serpapi.com/blog/) をご覧いただくか、[**playground**](https://serpapi.com/playground) で試してみてください。\
-無料アカウントは [**こちら**](https://serpapi.com/users/sign_up) から作成できます。
+Current SerpApi customers include **Apple, Shopify, and GrubHub**.\
+詳しくは彼らの[**blog**](https://serpapi.com/blog/)**、**または[**playground**](https://serpapi.com/playground)でサンプルを試してみてください。\
+**Create a free account** はこちらから: [**here**](https://serpapi.com/users/sign_up)**.**
 
 ---
 
@@ -135,7 +145,7 @@ SerpApi のプランに加入すると、Google、Bing、Baidu、Yahoo、Yandex 
 
 <figure><img src="images/image (2).png" alt=""><figcaption></figcaption></figure>
 
-モバイルアプリとデバイスを保護するために必要な技術とスキルを学びましょう。脆弱性調査、penetration testing、リバースエンジニアリングを習得し、オンデマンドコースで iOS と Android のセキュリティをマスターして **認定** を取得できます。
+モバイルアプリケーションやデバイスを保護するための脆弱性調査、penetration testing、リバースエンジニアリングに必要な技術とスキルを学びます。**iOS と Android のセキュリティを習得**できるオンデマンドコースで**認定**を取得できます。
 
 {{#ref}}
 https://academy.8ksec.io/
@@ -147,13 +157,13 @@ https://academy.8ksec.io/
 
 <figure><img src="images/websec (1).svg" alt=""><figcaption></figcaption></figure>
 
-[**WebSec**](https://websec.net) は **Amsterdam** に拠点を置くプロフェッショナルなサイバーセキュリティ企業で、**攻撃的セキュリティサービス** を通じて世界中の企業を最新のサイバー脅威から守る手助けをしています。現代的なアプローチでサービスを提供しています。
+[**WebSec**](https://websec.net) は**Amsterdam**に拠点を置くプロフェッショナルなサイバーセキュリティ企業で、**世界中の**企業を最新のサイバーセキュリティ脅威から守るために、**offensive-security services** をモダンなアプローチで提供しています。
 
-WebSec は Amsterdam と Wyoming にオフィスを持つ国際的なセキュリティ企業で、Pentesting、**Security** Audits、Awareness Trainings、Phishing Campaigns、Code Review、Exploit Development、Security Experts Outsourcing など、オールインワンのセキュリティサービスを提供しています。
+WebSec はアムステルダムとワイオミングにオフィスを持つ国際的なセキュリティ企業です。彼らは Pentesting、**Security Audits、Awareness Trainings、Phishing Campagnes、Code Review、Exploit Development、Security Experts Outsourcing** などの**オールインワンのセキュリティサービス**を提供しています。
 
-業界平均とは異なり、WebSec は自社のスキルに非常に自信を持っており、**最高品質の結果を保証**すると明言しています。彼らのウェブサイトには「**If we can't hack it, You don't pay it!**」と記載されています。詳細は彼らの [**website**](https://websec.net/en/) と [**blog**](https://websec.net/blog/) をご覧ください！
+WebSec のもう一つの特徴は、業界平均と比べて非常に自信を持っている点で、ウェブサイトには「**If we can't hack it, You don't pay it!**」と記載しており、最高品質の結果を保証するとしています。詳細は彼らの[**website**](https://websec.net/en/) と[**blog**](https://websec.net/blog/) をご覧ください。
 
-さらに、WebSec は HackTricks の熱心なサポーターでもあります。
+さらに、WebSec は HackTricks の**熱心なサポーター**でもあります。
 
 {{#ref}}
 https://www.youtube.com/watch?v=Zq2JycGDCPM
@@ -166,13 +176,13 @@ https://www.youtube.com/watch?v=Zq2JycGDCPM
 <figure><img src="images/cyberhelmets-logo.png" alt="cyberhelmets logo"><figcaption></figcaption></figure>
 
 
-**現場のために。あなたを中心に。**\
-[**Cyber Helmets**](https://cyberhelmets.com/?ref=hacktricks) は業界の専門家が構築・指導する実践的なサイバーセキュリティ研修を提供します。彼らのプログラムは理論を超え、実世界の脅威を反映したカスタム環境を用いて、深い理解と実行可能なスキルをチームに提供します。カスタム研修の問い合わせは [**こちら**](https://cyberhelmets.com/tailor-made-training/?ref=hacktricks) から。
+**Built for the field. Built around you.**\
+[**Cyber Helmets**](https://cyberhelmets.com/?ref=hacktricks) は業界の専門家により構築・指導される効果的なサイバーセキュリティトレーニングを開発・提供します。彼らのプログラムは理論を超え、実世界の脅威を反映したカスタム環境を使って、チームに深い理解と実行可能なスキルを提供します。カスタムトレーニングの問い合わせは [**here**](https://cyberhelmets.com/tailor-made-training/?ref=hacktricks) からご連絡ください。
 
-**彼らの研修の特徴:**
-* カスタム作成のコンテンツとラボ
-* 一流のツールとプラットフォームに裏打ちされた内容
-* 実務経験者による設計と指導
+**What sets their training apart:**
+* Custom-built content and labs
+* Backed by top-tier tools and platforms
+* Designed and taught by practitioners
 
 {{#ref}}
 https://cyberhelmets.com/courses/?ref=hacktricks
@@ -184,13 +194,13 @@ https://cyberhelmets.com/courses/?ref=hacktricks
 
 <figure><img src="images/lasttower.png" alt="lasttower logo"><figcaption></figcaption></figure>
 
-Last Tower Solutions は **教育機関** と **FinTech** 向けに特化したサイバーセキュリティサービスを提供しており、特に **penetration testing, cloud security assessments**、および **compliance readiness**（SOC 2、PCI-DSS、NIST）に注力しています。チームには **OSCP と CISSP** 認定の専門家が在籍しており、深い技術的専門知識と業界標準の知見を提供します。
+Last Tower Solutions は **Education** と **FinTech** 機関向けに特化したサイバーセキュリティサービスを提供しており、特に **penetration testing、cloud security assessments**、および **compliance readiness** (SOC 2, PCI-DSS, NIST) に注力しています。チームには **OSCP and CISSP certified professionals** が含まれ、深い技術的専門知識と業界標準の洞察を各エンゲージメントにもたらします。
 
-自動化スキャンを超えた **インテリジェンス駆動の手動テスト** を行い、学籍記録の保護から金融取引の保護まで、重要な資産を守る支援を行います。
+自動スキャンに頼らない、**manual, intelligence-driven testing** を提供し、ハイリスク環境に合わせたテストを行います。学生記録の保護から金融取引の保護まで、組織が最も重要なものを守る手助けをします。
 
-_「質の高い防御は攻撃を知ることから始まる。私たちは理解を通じてセキュリティを提供します。」_
+_“A quality defense requires knowing the offense, we provide security through understanding.”_
 
-最新のサイバーセキュリティ情報は彼らの [**blog**](https://www.lasttowersolutions.com/blog) をご覧ください。
+最新のサイバーセキュリティ情報については彼らの[**blog**](https://www.lasttowersolutions.com/blog) をご覧ください。
 
 {{#ref}}
 https://www.lasttowersolutions.com/
@@ -202,26 +212,25 @@ https://www.lasttowersolutions.com/
 
 <figure><img src="images/k8studio.png" alt="k8studio logo"><figcaption></figcaption></figure>
 
-K8Studio IDE は DevOps、DevSecOps、および開発者が Kubernetes クラスターを効率的に管理、監視、保護することを支援します。AI駆動のインサイト、先進的なセキュリティフレームワーク、直感的な CloudMaps GUI を活用してクラスターを可視化し、状態を把握し、自信を持って対応できます。
+K8Studio IDE は DevOps、DevSecOps、開発者が Kubernetes クラスターを効率的に管理、監視、保護するための機能を提供します。AI駆動のインサイト、高度なセキュリティフレームワーク、直感的な CloudMaps GUI を活用してクラスターを可視化し、状態を把握して自信を持って対応できます。
 
-さらに、K8Studio は主要なすべての kubernetes ディストリビューション（AWS、GCP、Azure、DO、Rancher、K3s、Openshift など）と **互換性があります**。
+さらに、K8Studio は **all major kubernetes distributions**（AWS, GCP, Azure, DO, Rancher, K3s, Openshift など）と互換性があります。
 
 {{#ref}}
 https://k8studio.io/
 {{#endref}}
 
-
 ---
 
-## ライセンスと免責事項
+## License & Disclaimer
 
-詳細は以下をご確認ください：
+Check them in:
 
 {{#ref}}
 welcome/hacktricks-values-and-faq.md
 {{#endref}}
 
-## GitHub 統計
+## Github Stats
 
 ![HackTricks Github Stats](https://repobeats.axiom.co/api/embed/68f8746802bcf1c8462e889e6e9302d4384f164b.svg)
 
