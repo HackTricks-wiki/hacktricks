@@ -111,7 +111,7 @@ Join [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) server ili
 **Gundua na ripoti vulnerabilities muhimu, exploitable vulnerabilities zenye athari halisi kwa biashara.** Tumia zana zetu 20+ za kawaida ili kuchora ramani ya attack surface, gundua masuala ya usalama yanayokuruhusu escalate privileges, na tumia automated exploits kukusanya ushahidi muhimu, ukigeuza kazi yako kuwa ripoti zenye kuhimiza.
 
 {{#ref}}
-https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons
+https://modernsecurity.io/
 {{#endref}}
 
 ---
