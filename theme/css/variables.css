@@ -13,11 +13,11 @@
     --body-font: "Open Sans", "Segoe UI", system-ui, sans-serif;
     --heading-font: "Open Sans", "Segoe UI", system-ui, sans-serif;
     --mono-font: "Source Code Pro", Consolas, "Ubuntu Mono", Menlo, "DejaVu Sans Mono", monospace, monospace;
-    --bg-effect-primary: rgba(43, 121, 255, 0.10);
-    --bg-effect-secondary: rgba(93, 167, 255, 0.08);
-    --bg-effect-tertiary: rgba(43, 121, 255, 0.04);
-    --grid-overlay-color: rgba(43, 121, 255, 0.035);
-    --particle-color: #2b79ff;
+    --bg-effect-primary: rgba(246, 25, 0, 0.08);
+    --bg-effect-secondary: rgba(255, 61, 46, 0.06);
+    --bg-effect-tertiary: rgba(246, 25, 0, 0.03);
+    --grid-overlay-color: rgba(246, 25, 0, 0.03);
+    --particle-color: #f61900;
     --code-font-size: 0.875em /* please adjust the ace font size accordingly in editor.js */
 }
 
