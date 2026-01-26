@@ -169,13 +169,30 @@
                             </div>
                             <div class="icons">
                                 <div id="menubar-collapse-toggle" class="icon-button" type="button" title="Toggle menu bar" aria-label="Toggle Menu bar" aria-expanded="false" aria-controls="collapse">
-                                    <i class="fa fa-ellipsis-h"></i>
+                                    <span class="menu-hamburger" aria-hidden="true">≡</span>
                                     <div id="menubar-collapse-popup" class="menubar-collapse-popup" aria-label="Menu" role="menu">
                                         <a href="https://training.hacktricks.xyz" target="_blank" role="menuitem" class="menu-bar-link">Hacktricks Training</a>
                                         <a href="https://twitter.com/hacktricks_live" target="_blank" role="menuitem" class="menu-bar-link">Twitter</a>
                                         <a href="https://www.linkedin.com/company/hacktricks" target="_blank" role="menuitem" class="menu-bar-link">Linkedin</a>
                                         <a href="https://tools.hacktricks.wiki/" target="_blank" role="menuitem" class="menu-bar-link">HT Tools</a>
                                         <a href="https://github.com/sponsors/carlospolop" target="_blank" role="menuitem" class="menu-bar-link">Sponsor</a>
+                                        {{#if search_enabled}}
+                                        <button type="button" role="menuitem" class="menu-bar-link menu-action" data-toggle-search="true">
+                                            <span class="menu-icon" aria-hidden="true">🔍</span>
+                                            <span>Search</span>
+                                        </button>
+                                        {{/if}}
+                                        <div class="menu-theme-toggle" role="group" aria-label="Theme toggle">
+                                            <button type="button" class="menu-theme-btn" data-theme-toggle="hacktricks-light" aria-label="Light theme">
+                                                <span class="menu-icon" aria-hidden="true">☀</span>
+                                            </button>
+                                            <button type="button" class="menu-theme-btn" data-theme-toggle="hacktricks-dark" aria-label="Dark theme">
+                                                <span class="menu-icon" aria-hidden="true">☾</span>
+                                            </button>
+                                        </div>
+                                        <button type="button" role="menuitem" class="menu-bar-link menu-action" data-toggle-translations="true">
+                                            <span>Translations</span> ▾
+                                        </button>
                                     </div>
                                 </div>
 
@@ -412,6 +429,51 @@
                     var hidden = root.classList.toggle('sidetoc-hidden');
                     toggle.setAttribute('aria-pressed', hidden ? 'true' : 'false');
                 });
+            })();
+        </script>
+        <script>
+            (function initMenuActions() {
+                document.querySelectorAll('[data-theme-toggle]').forEach(function (el) {
+                    el.addEventListener('click', function () {
+                        var id = el.getAttribute('data-theme-toggle');
+                        var btn = document.getElementById(id);
+                        if (btn) { btn.click(); }
+                    });
+                });
+                var translateBtn = document.querySelector('[data-toggle-translations="true"]');
+                if (translateBtn) {
+                    translateBtn.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        var popup = document.getElementById('menubar-collapse-popup');
+                        var langPopup = document.getElementById('menubar-languages-popup');
+                        var langToggle = document.getElementById('menubar-languages-toggle');
+                        var collapseToggle = document.getElementById('menubar-collapse-toggle');
+                        if (!popup || !langPopup) { return; }
+                        popup.classList.toggle('show-translations');
+                        popup.style.display = 'flex';
+                        if (collapseToggle) { collapseToggle.setAttribute('aria-expanded', true); }
+                        if (popup.classList.contains('show-translations')) {
+                            popup.appendChild(langPopup);
+                            langPopup.style.display = 'flex';
+                        } else if (langToggle) {
+                            langToggle.appendChild(langPopup);
+                        }
+                    });
+                }
+                var popupEl = document.getElementById('menubar-collapse-popup');
+                if (popupEl) {
+                    popupEl.addEventListener('click', function (e) {
+                        e.stopPropagation();
+                    });
+                }
+                var searchBtn = document.querySelector('[data-toggle-search="true"]');
+                if (searchBtn) {
+                    searchBtn.addEventListener('click', function () {
+                        var toggle = document.getElementById('search-toggle');
+                        if (toggle) { toggle.click(); }
+                    });
+                }
             })();
         </script>
         <script>
