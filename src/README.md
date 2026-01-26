@@ -111,7 +111,7 @@ https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktr
 **发现并报告具有真实业务影响的关键可利用漏洞。** 使用我们 20+ 自定义工具来绘制攻击面，发现可导致特权升级的安全问题，并使用自动化 exploits 收集关键证据，将你的辛勤工作转化为有说服力的报告。
 
 {{#ref}}
-https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons
+https://modernsecurity.io/
 {{#endref}}
 
 ---
