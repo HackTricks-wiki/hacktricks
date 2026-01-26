@@ -111,7 +111,7 @@ https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktr
 Gerçek iş etkisi olan kritik, exploit edilebilir güvenlik açıklarını bulun ve raporlayın. Saldırı yüzeyini haritalamak, ayrıcalık yükseltmeye izin veren güvenlik sorunlarını tespit etmek ve otomatik exploits kullanarak gerekli kanıtları toplamak için 20'den fazla özel aracımızı kullanın; böylece sıkı çalışmanızı ikna edici raporlara dönüştürün.
 
 {{#ref}}
-https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons
+https://modernsecurity.io/
 {{#endref}}
 
 ---
