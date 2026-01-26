@@ -35,10 +35,8 @@ class MDBookSidebarScrollbox extends HTMLElement {
                     parent.classList.add("expanded");
                 }
                 while (parent) {
-                    if (parent.tagName === "LI" && parent.previousElementSibling) {
-                        if (parent.previousElementSibling.classList.contains("chapter-item")) {
-                            parent.previousElementSibling.classList.add("expanded");
-                        }
+                    if (parent.tagName === "LI" && parent.classList.contains("chapter-item")) {
+                        parent.classList.add("expanded");
                     }
                     parent = parent.parentElement;
                 }
