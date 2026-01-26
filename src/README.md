@@ -111,7 +111,7 @@ https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktr
 **Encuentra y reporta vulnerabilidades críticas y explotables con impacto real en el negocio.** Usa nuestras más de 20 herramientas personalizadas para mapear la superficie de ataque, encontrar problemas de seguridad que permitan escalar privilegios y usar exploits automatizados para recopilar evidencia esencial, convirtiendo tu trabajo en informes persuasivos.
 
 {{#ref}}
-https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons
+https://modernsecurity.io/
 {{#endref}}
 
 ---
