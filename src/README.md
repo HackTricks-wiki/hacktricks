@@ -2,7 +2,7 @@
 
 <figure><img src="images/hacktricks.gif" alt=""><figcaption></figcaption></figure>
 
-_Hacktricks-Logos & Motion-Design von_ [_@ppieranacho_](https://www.instagram.com/ppieranacho/)_._
+_Hacktricks Logos & Motion-Design von_ [_@ppieranacho_](https://www.instagram.com/ppieranacho/)_._
 
 ### HackTricks lokal ausführen
 ```bash
@@ -31,19 +31,19 @@ export LANG="master" # Leave master for english
 # Run the docker container indicating the path to the hacktricks folder
 docker run -d --rm --platform linux/amd64 -p 3337:3000 --name hacktricks -v $(pwd)/hacktricks:/app ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image bash -c "mkdir -p ~/.ssh && ssh-keyscan -H github.com >> ~/.ssh/known_hosts && cd /app && git config --global --add safe.directory /app && git checkout $LANG && git pull && MDBOOK_PREPROCESSOR__HACKTRICKS__ENV=dev mdbook serve --hostname 0.0.0.0"
 ```
-Ihre lokale Kopie von HackTricks wird nach <5 Minuten unter **[http://localhost:3337](http://localhost:3337)** verfügbar sein (das Buch muss gebaut werden, bitte geduldig sein).
+Ihre lokale Kopie von HackTricks wird **unter [http://localhost:3337](http://localhost:3337) verfügbar sein** nach <5 Minuten (das Buch muss noch gebaut werden, bitte haben Sie Geduld).
 
-## Unternehmenssponsoren
+## Corporate-Sponsoren
 
 ### [STM Cyber](https://www.stmcyber.com)
 
 <figure><img src="images/stm (1).png" alt=""><figcaption></figcaption></figure>
 
-[**STM Cyber**](https://www.stmcyber.com) ist ein großartiges Cybersecurity-Unternehmen, dessen Slogan **HACK THE UNHACKABLE** lautet. Sie betreiben eigene Forschung und entwickeln eigene Hacking-Tools, um **mehrere wertvolle Cybersecurity-Services anzubieten**, wie pentesting, Red teams und Training.
+[**STM Cyber**](https://www.stmcyber.com) ist ein großartiges Cybersecurity-Unternehmen, dessen Slogan **HACK THE UNHACKABLE** ist. Sie betreiben eigene Forschung und entwickeln eigene Hacking-Tools, um **verschiedene wertvolle Cybersecurity-Services** wie pentesting, Red teams und Training anzubieten.
 
-Sie können ihren **Blog** unter [**https://blog.stmcyber.com**](https://blog.stmcyber.com) besuchen
+Sie können ihren **Blog** unter [**https://blog.stmcyber.com**](https://blog.stmcyber.com) besuchen.
 
-**STM Cyber** unterstützt außerdem Open-Source-Cybersecurity-Projekte wie HackTricks :)
+**STM Cyber** unterstützt auch Open-Source-Cybersecurity-Projekte wie HackTricks :)
 
 ---
 
@@ -51,7 +51,7 @@ Sie können ihren **Blog** unter [**https://blog.stmcyber.com**](https://blog.st
 
 <figure><img src="images/image (45).png" alt=""><figcaption></figcaption></figure>
 
-[**RootedCON**](https://www.rootedcon.com) ist die relevanteste Cybersecurity-Veranstaltung in **Spain** und eine der wichtigsten in **Europe**. Mit **der Mission, technisches Wissen zu fördern**, ist dieser Kongress ein heißer Treffpunkt für Technologie- und Cybersecurity-Profis in allen Disziplinen.
+[**RootedCON**](https://www.rootedcon.com) ist die bedeutendste Cybersecurity-Veranstaltung in **Spanien** und eine der wichtigsten in **Europa**. Mit der **Mission, technisches Wissen zu fördern**, ist dieser Kongress ein zentraler Treffpunkt für Technologie- und Cybersecurity-Fachleute aus allen Disziplinen.
 
 {{#ref}}
 https://www.rootedcon.com/
@@ -63,9 +63,9 @@ https://www.rootedcon.com/
 
 <figure><img src="images/image (47).png" alt=""><figcaption></figcaption></figure>
 
-**Intigriti** ist **Europe's #1** ethical hacking und **bug bounty platform.**
+**Intigriti** ist Europas #1 ethical hacking und bug bounty platform.
 
-**Bug bounty tip**: **sign up** for **Intigriti**, a premium **bug bounty platform created by hackers, for hackers**! Join us at [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) today, and start earning bounties up to **$100,000**!
+**Bug bounty tip**: **melde dich an** für **Intigriti**, eine Premium bug bounty platform created by hackers, for hackers! Trete uns bei unter [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) und beginne, Bounties bis zu **$100,000** zu verdienen!
 
 {{#ref}}
 https://go.intigriti.com/hacktricks
@@ -78,9 +78,9 @@ https://go.intigriti.com/hacktricks
 <figure><img src="images/image (48).png" alt=""><figcaption></figcaption></figure>
 
 \
-Nutze [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks), um Workflows einfach zu erstellen und zu **automatisieren**, die von den weltweit **fortschrittlichsten** Community-Tools unterstützt werden.
+Nutze [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks), um Workflows einfach zu erstellen und zu **automatisieren**, angetrieben von den weltweit **fortschrittlichsten** Community-Tools.
 
-Get Access Today:
+Jetzt Zugang erhalten:
 
 {{#ref}}
 https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks
@@ -92,23 +92,33 @@ https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktr
 
 <figure><img src="images/image (3).png" alt=""><figcaption></figcaption></figure>
 
-Join [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) server to communicate with experienced hackers and bug bounty hunters!
+Tritt dem [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) Server bei, um dich mit erfahrenen Hackern und bug bounty hunters auszutauschen!
 
-- **Hacking Insights:** Engage with content that delves into the thrill and challenges of hacking
-- **Real-Time Hack News:** Keep up-to-date with fast-paced hacking world through real-time news and insights
-- **Latest Announcements:** Stay informed with the newest bug bounties launching and crucial platform updates
+- **Hacking-Einblicke:** Beschäftige dich mit Inhalten, die die Faszination und die Herausforderungen des Hackings beleuchten
+- **Echtzeit-Hack-News:** Bleibe auf dem Laufenden in der schnelllebigen Hacking-Welt durch Echtzeit-Nachrichten und Einblicke
+- **Neueste Ankündigungen:** Erfahre von neuen bug bounties und wichtigen Plattform-Updates
 
-**Join us on** [**Discord**](https://discord.com/invite/N3FrSbmwdy) and start collaborating with top hackers today!
+**Tritt uns auf** [**Discord**](https://discord.com/invite/N3FrSbmwdy) **bei** und beginne noch heute mit der Zusammenarbeit mit Top-Hackern!
 
 ---
 
-### [Pentest-Tools.com](https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons) - The essential penetration testing toolkit
+### [Modern Security – AI & Application Security Training Platform](https://modernsecurity.io/)
 
-<figure><img src="images/pentest-tools.svg" alt=""><figcaption></figcaption></figure>
+<figure><img src="images/modern_security_logo.png" alt="Modern Security"><figcaption></figcaption></figure>
 
-**Get a hacker's perspective on your web apps, network, and cloud**
+Modern Security bietet **praktische AI Security Schulungen** mit einem **engineering-first, hands-on Lab-Ansatz**. Unsere Kurse sind für Security Engineers, AppSec-Profis und Entwickler konzipiert, die echte AI/LLM-basierte Anwendungen **bauen, angreifen und absichern** wollen.
 
-**Find and report critical, exploitable vulnerabilities with real business impact.** Use our 20+ custom tools to map the attack surface, find security issues that let you escalate privileges, and use automated exploits to collect essential evidence, turning your hard work into persuasive reports.
+Die **AI Security Certification** konzentriert sich auf praxisnahe Fähigkeiten, einschließlich:
+- Absicherung von LLM- und AI-gestützten Anwendungen
+- Threat Modeling für AI-Systeme
+- Embeddings, Vektor-Datenbanken und RAG-Sicherheit
+- LLM-Angriffe, Missbrauchsszenarien und praktische Abwehrmaßnahmen
+- Sichere Design-Patterns und Deployment-Überlegungen
+
+Alle Kurse sind **on-demand**, **lab-driven** und um reale Sicherheits-Tradeoffs herum gestaltet, nicht nur Theorie.
+
+👉 Mehr Details zum AI Security Kurs:
+https://www.modernsecurity.io/courses/ai-security-certification
 
 {{#ref}}
 https://modernsecurity.io/
@@ -120,14 +130,14 @@ https://modernsecurity.io/
 
 <figure><img src="images/image (1254).png" alt=""><figcaption></figcaption></figure>
 
-**SerpApi** bietet schnelle und einfache Echtzeit-APIs, um **Search-Engine-Results** zuzugreifen. Sie scrapen Suchmaschinen, handhaben Proxies, lösen Captchas und parsen alle reichhaltigen strukturierten Daten für Sie.
+**SerpApi** bietet schnelle und einfache Echtzeit-APIs, um **Search Engine Results** zuzugreifen. Sie scrapen Suchmaschinen, übernehmen Proxy-Handling, lösen Captchas und parsen alle reichhaltigen strukturierten Daten für dich.
 
-Ein Abonnement eines SerpApi-Plans umfasst Zugriff auf über 50 verschiedene APIs zum Scrapen verschiedener Suchmaschinen, einschließlich Google, Bing, Baidu, Yahoo, Yandex und mehr.\
-Im Gegensatz zu anderen Anbietern scrapt **SerpApi nicht nur die organischen Ergebnisse**. SerpApi-Antworten enthalten konsequent alle Anzeigen, Inline-Bilder und -Videos, Knowledge Graphs und andere Elemente und Features, die in den Suchergebnissen vorhanden sind.
+Ein Abonnement eines SerpApi-Plans beinhaltet Zugriff auf über 50 verschiedene APIs zum Scrapen verschiedener Suchmaschinen, einschließlich Google, Bing, Baidu, Yahoo, Yandex und mehr.\
+Im Gegensatz zu anderen Anbietern scraped **SerpApi** nicht nur organische Ergebnisse. SerpApi-Antworten enthalten konsistent alle Anzeigen, Inline-Bilder und -Videos, Knowledge Graphs und andere Elemente und Features, die in den Suchergebnissen vorhanden sind.
 
 Zu den aktuellen SerpApi-Kunden gehören **Apple, Shopify und GrubHub**.\
-Für weitere Informationen sehen Sie sich ihren [**Blog**](https://serpapi.com/blog/)**,** oder probieren Sie ein Beispiel in ihrem [**playground**](https://serpapi.com/playground)**.**\
-Sie können **hier** [**ein kostenloses Konto erstellen**](https://serpapi.com/users/sign_up)**.**
+Für mehr Informationen sieh dir ihren [**Blog**](https://serpapi.com/blog/)**,** oder probiere ein Beispiel in ihrem [**playground**](https://serpapi.com/playground)**.**\
+Du kannst **ein kostenloses Konto erstellen** [**hier**](https://serpapi.com/users/sign_up)**.**
 
 ---
 
@@ -135,7 +145,7 @@ Sie können **hier** [**ein kostenloses Konto erstellen**](https://serpapi.com/u
 
 <figure><img src="images/image (2).png" alt=""><figcaption></figcaption></figure>
 
-Lerne die Technologien und Fähigkeiten, die erforderlich sind, um Vulnerability Research, penetration testing und Reverse Engineering durchzuführen, um mobile Anwendungen und Geräte zu schützen. **Meistere iOS- und Android-Sicherheit** durch unsere On-Demand-Kurse und **lasse dich zertifizieren**:
+Lerne die Technologien und Fähigkeiten, die nötig sind, um Vulnerability Research, penetration testing und Reverse Engineering durchzuführen, um mobile Anwendungen und Geräte zu schützen. **Meistere iOS- und Android-Sicherheit** durch unsere On-Demand-Kurse und **lasse dich zertifizieren**:
 
 {{#ref}}
 https://academy.8ksec.io/
@@ -147,13 +157,13 @@ https://academy.8ksec.io/
 
 <figure><img src="images/websec (1).svg" alt=""><figcaption></figcaption></figure>
 
-[**WebSec**](https://websec.net) ist ein professionelles Cybersecurity-Unternehmen mit Sitz in **Amsterdam**, das Unternehmen **weltweit schützt** vor den neuesten Cybersecurity-Bedrohungen, indem es **offensive-security services** mit einem **modernen** Ansatz anbietet.
+[**WebSec**](https://websec.net) ist ein professionelles Cybersecurity-Unternehmen mit Sitz in **Amsterdam**, das Unternehmen **weltweit** gegen die neuesten Cybersecurity-Bedrohungen schützt, indem es **offensive-security services** mit einem **modernen** Ansatz anbietet.
 
-WebSec ist ein internationales Security-Unternehmen mit Büros in Amsterdam und Wyoming. Sie bieten **All-in-One-Security-Services** an, was bedeutet, dass sie alles abdecken: Pentesting, **Security** Audits, Awareness Trainings, Phishing Campaigns, Code Review, Exploit Development, Security Experts Outsourcing und vieles mehr.
+WebSec ist ein internationales Sicherheitsunternehmen mit Büros in Amsterdam und Wyoming. Sie bieten **All-in-One Security Services**, das heißt sie decken alles ab: pentesting, **Security** Audits, Awareness Trainings, Phishing-Kampagnen, Code Review, Exploit Development, Security Experts Outsourcing und vieles mehr.
 
-Ein weiterer Pluspunkt von WebSec ist, dass sie im Vergleich zum Branchendurchschnitt **sehr selbstbewusst in ihren Fähigkeiten** sind, so sehr, dass sie **die besten Qualitätsresultate garantieren** — auf ihrer Website steht: "**If we can't hack it, You don't pay it!**". Für mehr Infos besuchen Sie ihre [**website**](https://websec.net/en/) und ihren [**blog**](https://websec.net/blog/)!
+Ein weiteres cooles Detail über WebSec ist, dass sie im Gegensatz zum Branchendurchschnitt **sehr zuversichtlich in ihre Fähigkeiten** sind, so sehr, dass sie **die besten Qualitätsresultate garantieren** — auf ihrer Website steht: "**If we can't hack it, You don't pay it!**". Für mehr Infos schau dir ihre [**Website**](https://websec.net/en/) und den [**Blog**](https://websec.net/blog/) an!
 
-Zusätzlich ist WebSec ein **engagierter Unterstützer von HackTricks.**
+Zusätzlich ist WebSec auch ein **engagierter Unterstützer von HackTricks.**
 
 {{#ref}}
 https://www.youtube.com/watch?v=Zq2JycGDCPM
@@ -166,13 +176,13 @@ https://www.youtube.com/watch?v=Zq2JycGDCPM
 <figure><img src="images/cyberhelmets-logo.png" alt="cyberhelmets logo"><figcaption></figcaption></figure>
 
 
-**Built for the field. Built around you.**\
-[**Cyber Helmets**](https://cyberhelmets.com/?ref=hacktricks) entwickelt und liefert effektive Cybersecurity-Trainings, die von Branchenexperten erstellt und geleitet werden. Ihre Programme gehen über die Theorie hinaus, um Teams mit tiefem Verständnis und umsetzbaren Fähigkeiten auszustatten, wobei benutzerdefinierte Umgebungen reale Bedrohungen widerspiegeln. Für maßgeschneiderte Trainingsanfragen kontaktieren Sie uns [**hier**](https://cyberhelmets.com/tailor-made-training/?ref=hacktricks).
+Für den praktischen Einsatz entwickelt. Rund um dich aufgebaut.\
+[**Cyber Helmets**](https://cyberhelmets.com/?ref=hacktricks) entwickelt und liefert effektive Cybersecurity-Schulungen, die von Branchenexperten erstellt und geleitet werden. Ihre Programme gehen über die Theorie hinaus, um Teams mit tiefem Verständnis und praxisnahen Fähigkeiten auszustatten, indem sie kundenspezifische Umgebungen nutzen, die reale Bedrohungen widerspiegeln. Für maßgeschneiderte Trainingsanfragen kontaktiere uns [**hier**](https://cyberhelmets.com/tailor-made-training/?ref=hacktricks).
 
-**Was ihr Training auszeichnet:**
-* Maßgeschneiderte Inhalte und Labs
-* Unterstützung durch erstklassige Tools und Plattformen
-* Entworfen und unterrichtet von Praktikern
+**Was ihre Trainings auszeichnet:**
+* Individuell erstellte Inhalte und Labs
+* Unterstützt durch erstklassige Tools und Plattformen
+* Entwickelt und gelehrt von Praktikern
 
 {{#ref}}
 https://cyberhelmets.com/courses/?ref=hacktricks
@@ -184,13 +194,13 @@ https://cyberhelmets.com/courses/?ref=hacktricks
 
 <figure><img src="images/lasttower.png" alt="lasttower logo"><figcaption></figcaption></figure>
 
-Last Tower Solutions bietet spezialisierte Cybersecurity-Services für **Education** und **FinTech** Institutionen, mit Fokus auf **penetration testing, cloud security assessments**, und **compliance readiness** (SOC 2, PCI-DSS, NIST). Unser Team umfasst **OSCP und CISSP zertifizierte Fachleute**, die tiefgehende technische Expertise und Branchenstandards in jedes Engagement einbringen.
+Last Tower Solutions bietet spezialisierte Cybersecurity-Services für **Education** und **FinTech** Institutionen, mit Fokus auf **penetration testing, cloud security assessments** und **Compliance-Readiness** (SOC 2, PCI-DSS, NIST). Unser Team umfasst **OSCP- und CISSP-zertifizierte Professionals**, die tiefes technisches Fachwissen und Branchenstandard-Einblicke in jedes Engagement einbringen.
 
-Wir gehen über automatisierte Scans hinaus mit **manuellem, intelligence-driven Testing**, zugeschnitten auf risikoreiche Umgebungen. Vom Schutz von Studentendaten bis hin zum Schutz finanzieller Transaktionen helfen wir Organisationen, das zu verteidigen, was am wichtigsten ist.
+Wir gehen über automatisierte Scans hinaus und bieten **manuelle, intelligence-driven Tests**, zugeschnitten auf hochriskante Umgebungen. Vom Schutz von Studentendaten bis hin zur Absicherung finanzieller Transaktionen helfen wir Organisationen, das zu verteidigen, was am meisten zählt.
 
-_„Eine qualitativ hochwertige Verteidigung erfordert Kenntnis der Offensive, wir bieten Sicherheit durch Verständnis.“_
+_„Eine hochwertige Verteidigung erfordert das Verständnis des Angriffs; wir bieten Sicherheit durch Verständnis.“_
 
-Bleiben Sie informiert und auf dem neuesten Stand der Cybersecurity, indem Sie unseren [**Blog**](https://www.lasttowersolutions.com/blog) besuchen.
+Bleibe informiert und auf dem neuesten Stand der Cybersecurity, indem du ihren [**Blog**](https://www.lasttowersolutions.com/blog) besuchst.
 
 {{#ref}}
 https://www.lasttowersolutions.com/
@@ -202,26 +212,25 @@ https://www.lasttowersolutions.com/
 
 <figure><img src="images/k8studio.png" alt="k8studio logo"><figcaption></figcaption></figure>
 
-K8Studio IDE ermöglicht es DevOps, DevSecOps und Entwicklern, Kubernetes-Cluster effizient zu verwalten, zu überwachen und abzusichern. Nutzen Sie unsere KI-gestützten Einblicke, fortschrittliches Security-Framework und die intuitive CloudMaps-GUI, um Ihre Cluster zu visualisieren, ihren Zustand zu verstehen und mit Zuversicht zu handeln.
+K8Studio IDE befähigt DevOps, DevSecOps und Entwickler, Kubernetes-Cluster effizient zu verwalten, zu überwachen und abzusichern. Nutze unsere AI-getriebenen Insights, fortschrittliches Sicherheits-Framework und die intuitive CloudMaps GUI, um deine Cluster zu visualisieren, ihren Zustand zu verstehen und mit Zuversicht zu handeln.
 
-Außerdem ist K8Studio **kompatibel mit allen gängigen kubernetes distributions** (AWS, GCP, Azure, DO, Rancher, K3s, Openshift and more).
+Darüber hinaus ist K8Studio **kompatibel mit allen major kubernetes distributions** (AWS, GCP, Azure, DO, Rancher, K3s, Openshift und mehr).
 
 {{#ref}}
 https://k8studio.io/
 {{#endref}}
 
-
 ---
 
-## Lizenz & Haftungsausschluss
+## License & Disclaimer
 
-Prüfen Sie diese in:
+Siehe:
 
 {{#ref}}
 welcome/hacktricks-values-and-faq.md
 {{#endref}}
 
-## GitHub-Statistiken
+## Github Stats
 
 ![HackTricks Github Stats](https://repobeats.axiom.co/api/embed/68f8746802bcf1c8462e889e6e9302d4384f164b.svg)
 
