@@ -1,0 +1,99 @@
+name: Invalidate CloudFront on Asset Changes
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'theme/**/*.css'
+      - 'theme/**/*.js'
+      - 'theme/**/*.hbs'
+    paths-ignore:
+      - '.github/**'
+      - 'book/**'
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  invalidate:
+    runs-on: ubuntu-latest
+    environment: prod
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Configure AWS credentials using OIDC
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Compute invalidation paths
+        id: paths
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          BEFORE="${{ github.event.before }}"
+          AFTER="${{ github.sha }}"
+
+          if [ -z "$BEFORE" ] || [ "$BEFORE" = "0000000000000000000000000000000000000000" ]; then
+            if git rev-parse "${AFTER}^" >/dev/null 2>&1; then
+              BEFORE="${AFTER}^"
+            else
+              BEFORE=""
+            fi
+          fi
+
+          if [ -n "$BEFORE" ]; then
+            git diff --name-only "$BEFORE" "$AFTER" > /tmp/changed_files.txt
+          else
+            git ls-tree --name-only -r "$AFTER" > /tmp/changed_files.txt
+          fi
+
+          mapfile -t files < <(grep -E '^theme/.*\.(css|js|hbs)$' /tmp/changed_files.txt || true)
+          if [ ${#files[@]} -eq 0 ]; then
+            echo "paths=" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          invalidate_paths=()
+          hbs_changed=false
+
+          for f in "${files[@]}"; do
+            if [[ "$f" == theme/* ]]; then
+              rel="${f#theme/}"
+              if [[ "$f" == *.hbs ]]; then
+                hbs_changed=true
+              else
+                invalidate_paths+=("/$rel")
+              fi
+            fi
+          done
+
+          if [ "$hbs_changed" = true ]; then
+            invalidate_paths+=("/*")
+          fi
+
+          printf "%s\n" "${invalidate_paths[@]}" | awk 'NF' | sort -u > /tmp/invalidate_paths.txt
+
+          if [ ! -s /tmp/invalidate_paths.txt ]; then
+            echo "paths=" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          paths=$(paste -sd' ' /tmp/invalidate_paths.txt)
+          echo "paths=$paths" >> "$GITHUB_OUTPUT"
+
+      - name: Create CloudFront invalidation
+        if: steps.paths.outputs.paths != ''
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id "${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}" \
+            --paths ${{ steps.paths.outputs.paths }}
