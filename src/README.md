@@ -111,7 +111,7 @@ Join [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) server to 
 **비즈니스에 실질적인 영향을 주는 치명적인 취약점을 찾아 보고하세요.** 20개 이상의 맞춤 도구를 사용해 공격 표면을 매핑하고, 권한 상승을 허용하는 보안 문제를 찾아내며, 자동화된 익스플로잇으로 핵심 증거를 수집해 수고를 설득력 있는 보고서로 전환하세요.
 
 {{#ref}}
-https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons
+https://modernsecurity.io/
 {{#endref}}
 
 ---
