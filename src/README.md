@@ -111,7 +111,7 @@ Join [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) server om 
 **Vind en rapporteer kritieke, uitbuitbare kwesbaarhede met werklike sake-impak.** Gebruik ons 20+ pasgemaakte tools om die attack surface in kaart te bring, sekuriteitsprobleme te vind wat jou toelaat om privileges op te skaal, en gebruik geoutomatiseerde exploits om noodsaaklike bewyse te versamel, en jou harde werk in oortuigde verslae verander.
 
 {{#ref}}
-https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons
+https://modernsecurity.io/
 {{#endref}}
 
 ---
