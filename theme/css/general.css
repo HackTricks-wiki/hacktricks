@@ -247,27 +247,184 @@ blockquote {
     border-block-end: .1em solid var(--quote-border);
 }
 
-.warning {
-    margin: 20px;
-    padding: 0 20px;
-    border-inline-start: 2px solid var(--warning-border);
+.admonition,
+blockquote.admonition,
+.blockquote-tag,
+.note,
+.tip,
+.warning,
+.caution,
+.important,
+.info,
+.success,
+.danger,
+blockquote.note,
+blockquote.tip,
+blockquote.warning,
+blockquote.caution,
+blockquote.important,
+blockquote.info,
+blockquote.success,
+blockquote.danger {
+    --admonition-bg: var(--admonition-default-bg);
+    --admonition-border: var(--admonition-default-border);
+    --admonition-accent: var(--admonition-default-accent);
+    --admonition-icon: var(--admonition-icon-default);
+    position: relative;
+    margin: 20px 0;
+    padding: 14px 18px 14px 54px;
+    color: var(--fg);
+    background: var(--admonition-bg);
+    border: 1px solid var(--admonition-border);
+    border-block-start: none;
+    border-block-end: none;
+    border-radius: 12px;
+    box-shadow: 0 12px 28px var(--admonition-shadow), inset 4px 0 0 var(--admonition-accent);
 }
 
-.warning:before {
+.blockquote-tag {
+    padding: 14px 18px;
+}
+
+.admonition.note,
+.note,
+blockquote.note {
+    --admonition-bg: var(--admonition-note-bg);
+    --admonition-border: var(--admonition-note-border);
+    --admonition-accent: var(--admonition-note-accent);
+    --admonition-icon: var(--admonition-icon-note);
+}
+
+.admonition.info,
+.info,
+blockquote.info {
+    --admonition-bg: var(--admonition-note-bg);
+    --admonition-border: var(--admonition-note-border);
+    --admonition-accent: var(--admonition-note-accent);
+    --admonition-icon: var(--admonition-icon-note);
+}
+
+.blockquote-tag-note,
+.blockquote-tag-info {
+    --admonition-bg: var(--admonition-note-bg);
+    --admonition-border: var(--admonition-note-border);
+    --admonition-accent: var(--admonition-note-accent);
+}
+
+.admonition.tip,
+.tip,
+blockquote.tip,
+.blockquote-tag-tip,
+.admonition.success,
+.success,
+blockquote.success {
+    --admonition-bg: var(--admonition-tip-bg);
+    --admonition-border: var(--admonition-tip-border);
+    --admonition-accent: var(--admonition-tip-accent);
+    --admonition-icon: var(--admonition-icon-tip);
+}
+
+.admonition.warning,
+.warning,
+blockquote.warning,
+.blockquote-tag-warning,
+.admonition.important,
+.important,
+blockquote.important {
+    --admonition-bg: var(--admonition-warning-bg);
+    --admonition-border: var(--admonition-warning-border);
+    --admonition-accent: var(--admonition-warning-accent);
+    --admonition-icon: var(--admonition-icon-warning);
+}
+
+.admonition.caution,
+.caution,
+blockquote.caution,
+.blockquote-tag-caution,
+.admonition.danger,
+.danger,
+blockquote.danger {
+    --admonition-bg: var(--admonition-caution-bg);
+    --admonition-border: var(--admonition-caution-border);
+    --admonition-accent: var(--admonition-caution-accent);
+    --admonition-icon: var(--admonition-icon-caution);
+}
+
+.admonition::before,
+blockquote.admonition::before,
+.note::before,
+.tip::before,
+.warning::before,
+.caution::before,
+.important::before,
+.info::before,
+.success::before,
+.danger::before,
+blockquote.note::before,
+blockquote.tip::before,
+blockquote.warning::before,
+blockquote.caution::before,
+blockquote.important::before,
+blockquote.info::before,
+blockquote.success::before,
+blockquote.danger::before {
+    content: "";
     position: absolute;
-    width: 3rem;
-    height: 3rem;
-    margin-inline-start: calc(-1.5rem - 21px);
-    content: "ⓘ";
-    text-align: center;
-    background-color: var(--bg);
-    color: var(--warning-border);
-    font-weight: bold;
-    font-size: 2rem;
+    top: 14px;
+    left: 18px;
+    width: 20px;
+    height: 20px;
+    background-color: var(--admonition-accent);
+    mask: var(--admonition-icon) no-repeat center / contain;
+    -webkit-mask: var(--admonition-icon) no-repeat center / contain;
 }
 
-blockquote .warning:before {
-    background-color: var(--quote-bg);
+.admonition-title {
+    margin: 0 0 8px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-size: 0.8em;
+    color: var(--admonition-accent);
+}
+
+.blockquote-tag-title {
+    margin: 0 0 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-size: 0.8em;
+    color: var(--admonition-accent);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.blockquote-tag-title svg {
+    flex: 0 0 auto;
+    fill: currentColor;
+}
+
+.admonition > :last-child,
+blockquote.admonition > :last-child,
+.blockquote-tag > :last-child,
+.note > :last-child,
+.tip > :last-child,
+.warning > :last-child,
+.caution > :last-child,
+.important > :last-child,
+.info > :last-child,
+.success > :last-child,
+.danger > :last-child,
+blockquote.note > :last-child,
+blockquote.tip > :last-child,
+blockquote.warning > :last-child,
+blockquote.caution > :last-child,
+blockquote.important > :last-child,
+blockquote.info > :last-child,
+blockquote.success > :last-child,
+blockquote.danger > :last-child {
+    margin-bottom: 0;
 }
 
 kbd {
