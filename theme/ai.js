@@ -367,30 +367,31 @@
   /* =================================================================== */
   function injectStyles() {
     let css = `
-#ht-ai-btn{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);min-width:60px;height:60px;border-radius:30px;background:linear-gradient(45deg, #b31328, #d42d3f, #2d5db4, #3470e4);background-size:300% 300%;animation:gradientShift 8s ease infinite;color:#fff;font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:99999;box-shadow:0 2px 8px rgba(0,0,0,.4);transition:opacity .2s, filter .2s; padding:0 20px}
+#ht-ai-btn{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);min-width:60px;height:60px;border-radius:30px;background:var(--ht-ai-fab-bg,linear-gradient(45deg,#b31328,#d42d3f,#2d5db4,#3470e4));background-size:300% 300%;animation:gradientShift 8s ease infinite;color:var(--ht-ai-fab-fg,#fff);font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:99999;box-shadow:0 12px 26px var(--ht-ai-shadow,rgba(0,0,0,.45));transition:opacity .2s, filter .2s; padding:0 20px;border:1px solid var(--ht-ai-fab-border,rgba(255,255,255,.12))}
 #ht-ai-btn.ht-ai-locked{filter:grayscale(.2);opacity:.85}
 #ht-ai-btn span{margin-left:8px;font-weight:bold}
 @keyframes gradientShift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
 #ht-ai-btn:hover{opacity:.85}
 @media(max-width:768px){#ht-ai-btn{display:none}}
-#ht-ai-tooltip{position:fixed;padding:6px 8px;background:#111;color:#fff;border-radius:4px;font-size:13px;white-space:pre-wrap;pointer-events:none;opacity:0;transform:translate(-50%,-8px);transition:opacity .15s ease,transform .15s ease;z-index:100000}
+#ht-ai-tooltip{position:fixed;padding:6px 8px;background:var(--ht-ai-tooltip-bg,#111);color:var(--ht-ai-tooltip-fg,#fff);border-radius:6px;font-size:13px;white-space:pre-wrap;pointer-events:none;opacity:0;transform:translate(-50%,-8px);transition:opacity .15s ease,transform .15s ease;z-index:100000;box-shadow:0 8px 20px var(--ht-ai-shadow,rgba(0,0,0,.35))}
 #ht-ai-tooltip.show{opacity:1;transform:translate(-50%,-12px)}
-#ht-ai-panel{position:fixed;top:0;right:0;height:100%;max-width:90vw;background:#000;color:#fff;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .3s ease;z-index:100000;font-family:system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial,sans-serif}
+#ht-ai-panel{position:fixed;top:0;right:0;height:100%;max-width:90vw;background:var(--ht-ai-panel-bg,#0b0b0b);color:var(--ht-ai-panel-fg,#fff);display:flex;flex-direction:column;transform:translateX(100%);transition:transform .3s ease;z-index:100000;font-family:var(--body-font,system-ui)}
 #ht-ai-panel.open{transform:translateX(0)}
 @media(max-width:768px){#ht-ai-panel{display:none}}
-#ht-ai-header{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid #333;flex-wrap:wrap}
+#ht-ai-header{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid var(--ht-ai-border,#333);background:var(--ht-ai-header-bg,transparent);flex-wrap:wrap}
 #ht-ai-header strong{flex-shrink:0}
 #ht-ai-header .ht-actions{display:flex;gap:8px;align-items:center;margin-left:auto}
-#ht-ai-close,#ht-ai-reset{cursor:pointer;font-size:18px;background:none;border:none;color:#fff;padding:0}
+#ht-ai-close,#ht-ai-reset{cursor:pointer;font-size:18px;background:none;border:none;color:var(--ht-ai-panel-fg,#fff);padding:0}
 #ht-ai-close:hover,#ht-ai-reset:hover{opacity:.7}
-#ht-ai-chat{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;font-size:14px}
+#ht-ai-chat{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;font-size:14px;background:var(--ht-ai-chat-bg,transparent)}
 .ht-msg{max-width:90%;line-height:1.4;padding:10px 12px;border-radius:8px;white-space:pre-wrap;word-wrap:break-word}
-.ht-user{align-self:flex-end;background:${BRAND_RED}}
-.ht-ai{align-self:flex-start;background:#222}
-.ht-context{align-self:flex-start;background:#444;font-style:italic;font-size:13px}
-#ht-ai-input{display:flex;gap:8px;padding:12px 16px;border-top:1px solid #333}
-#ht-ai-question{flex:1;min-height:40px;max-height:120px;resize:vertical;padding:8px;border-radius:6px;border:none;font-size:14px}
-#ht-ai-send{padding:0 18px;border:none;border-radius:6px;background:${BRAND_RED};color:#fff;font-size:14px;cursor:pointer}
+.ht-user{align-self:flex-end;background:var(--ht-ai-user-bg,${BRAND_RED});color:var(--ht-ai-user-fg,#fff)}
+.ht-ai{align-self:flex-start;background:var(--ht-ai-bot-bg,#222);color:var(--ht-ai-bot-fg,#fff)}
+.ht-context{align-self:flex-start;background:var(--ht-ai-context-bg,#333);color:var(--ht-ai-context-fg,#ddd);font-style:italic;font-size:13px}
+#ht-ai-input{display:flex;gap:8px;padding:12px 16px;border-top:1px solid var(--ht-ai-border,#333);background:var(--ht-ai-input-bg,transparent)}
+#ht-ai-question{flex:1;min-height:40px;max-height:120px;resize:vertical;padding:8px;border-radius:8px;border:1px solid var(--ht-ai-border,#333);background:var(--ht-ai-field-bg,#111);color:var(--ht-ai-panel-fg,#fff);font-size:14px}
+#ht-ai-question::placeholder{color:var(--ht-ai-muted,#aaa)}
+#ht-ai-send{padding:0 18px;border:none;border-radius:8px;background:var(--ht-ai-accent,${BRAND_RED});color:var(--ht-ai-accent-fg,#fff);font-size:14px;cursor:pointer}
 #ht-ai-send:disabled{opacity:.5;cursor:not-allowed}
 /* Loader */
 .ht-loading{display:inline-flex;align-items:center;gap:4px}
@@ -401,18 +402,18 @@
 ::selection{background:#ffeb3b;color:#000}
 ::-moz-selection{background:#ffeb3b;color:#000}
 /* NEW: resizer handle */
-#ht-ai-resizer{position:absolute;left:0;top:0;width:8px;height:100%;cursor:ew-resize;background:rgba(255,255,255,.08);border-right:1px solid rgba(255,255,255,.15);transition:background .2s ease}
-#ht-ai-resizer:hover{background:rgba(255,255,255,.15);border-right:1px solid rgba(255,255,255,.3)}
-#ht-ai-resizer:active{background:rgba(255,255,255,.25)}
-#ht-ai-resizer::before{content:'';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:2px;height:20px;background:rgba(255,255,255,.4);border-radius:1px}`;
+#ht-ai-resizer{position:absolute;left:0;top:0;width:8px;height:100%;cursor:ew-resize;background:var(--ht-ai-resizer-bg,rgba(255,255,255,.08));border-right:1px solid var(--ht-ai-resizer-border,rgba(255,255,255,.15));transition:background .2s ease}
+#ht-ai-resizer:hover{background:var(--ht-ai-resizer-bg-hover,rgba(255,255,255,.15));border-right:1px solid var(--ht-ai-resizer-border-hover,rgba(255,255,255,.3))}
+#ht-ai-resizer:active{background:var(--ht-ai-resizer-bg-active,rgba(255,255,255,.25))}
+#ht-ai-resizer::before{content:'';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:2px;height:20px;background:var(--ht-ai-resizer-handle,rgba(255,255,255,.4));border-radius:1px}`;
     css += `
-#ht-ai-login-overlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.6);backdrop-filter:blur(6px);z-index:100200}
-#ht-ai-login-card{max-width:420px;width:calc(100% - 32px);padding:20px;border-radius:14px;background:#111;border:1px solid rgba(255,255,255,.08);box-shadow:0 12px 28px rgba(0,0,0,.4);text-align:center;color:#fff;font-family:system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial,sans-serif}
+#ht-ai-login-overlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:var(--ht-ai-overlay-bg,rgba(0,0,0,.6));backdrop-filter:blur(6px);z-index:100200}
+#ht-ai-login-card{max-width:420px;width:calc(100% - 32px);padding:20px;border-radius:14px;background:var(--ht-ai-panel-bg,#111);border:1px solid var(--ht-ai-border,rgba(255,255,255,.08));box-shadow:0 12px 28px var(--ht-ai-shadow,rgba(0,0,0,.4));text-align:center;color:var(--ht-ai-panel-fg,#fff);font-family:var(--body-font,system-ui)}
 .ht-ai-login-title{font-size:1.1rem;font-weight:700;margin-bottom:8px}
-.ht-ai-login-text{font-size:.95rem;color:#cfcfcf;margin-bottom:12px}
-.ht-ai-login-link{display:inline-block;margin-bottom:16px;color:#ff6b5b;text-decoration:none;word-break:break-all}
+.ht-ai-login-text{font-size:.95rem;color:var(--ht-ai-muted,#cfcfcf);margin-bottom:12px}
+.ht-ai-login-link{display:inline-block;margin-bottom:16px;color:var(--ht-ai-accent,#ff6b5b);text-decoration:none;word-break:break-all}
 .ht-ai-login-link:hover{text-decoration:underline}
-.ht-ai-login-close{background:#b31328;color:#fff;border:none;border-radius:8px;padding:8px 14px;cursor:pointer}
+.ht-ai-login-close{background:var(--ht-ai-accent,#b31328);color:var(--ht-ai-accent-fg,#fff);border:none;border-radius:8px;padding:8px 14px;cursor:pointer}
 .ht-ai-login-close:hover{opacity:.9}
 `;
     const s = document.createElement("style");
