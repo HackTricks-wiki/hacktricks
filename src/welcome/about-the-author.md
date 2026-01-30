@@ -4,10 +4,34 @@
 
 ### नमस्ते!!
 
-सबसे पहले, यह बताना आवश्यक है कि अन्य साइटों से अनुसंधानों की सभी **तकनीकों का श्रेय मूल लेखकों को जाता है** (पृष्ठों में संदर्भ हैं)। इंटरनेट की सुरक्षा को सुधारने के लिए ज्ञान साझा करने वाले हर अनुसंधान को सलाम।
+अन्य शोधकर्ताओं से प्राप्त तकनीकों के क्रेडिट मूल लेखकों को जाता है (देखें संदर्भ)। इंटरनेट सुरक्षा बेहतर करने के लिए ज्ञान साझा करने वाले सभी लोगों को धन्यवाद।
 
-HackTricks एक शैक्षिक विकी है जो **साइबर-सुरक्षा** के बारे में ज्ञान को संकलित करती है, जिसका नेतृत्व कार्लोस करते हैं और इसमें सैकड़ों सहयोगी हैं! यह **हैकिंग ट्रिक्स का एक विशाल संग्रह** है जिसे समुदाय द्वारा यथासंभव अद्यतित रखा जाता है। यदि आपको कुछ गायब या पुराना लगता है, तो कृपया, [**Hacktricks Github**](https://github.com/carlospolop/hacktricks) पर एक **Pull Request** भेजें!
+HackTricks Carlos के नेतृत्व में सैकड़ों सहयोगियों के साथ एक शैक्षिक विकि है। यह समुदाय द्वारा यथासंभव अपडेट किया जाने वाला एक **huge collection of hacking tricks** है। यदि आप कुछ गायब या पुराना पाते हैं, तो कृपया एक **Pull Request** भेजें [**Hacktricks GitHub**](https://github.com/carlospolop/hacktricks)!
 
-HackTricks एक विकी भी है जहाँ **कई शोधकर्ता अपने नवीनतम निष्कर्ष साझा करते हैं**, इसलिए यह नवीनतम हैकिंग तकनीकों के साथ अद्यतित रहने के लिए एक शानदार स्थान है।
+HackTricks एक विकि भी है जहाँ शोधकर्ता अपने नवीनतम निष्कर्ष साझा करते हैं, इसलिए यह नवीनतम hacking techniques के साथ अपडेट रहने के लिए एक बेहतरीन जगह है।
 
+### Carlos "carlospolop" Polop‑Fuster कौन हैं?
+
+* Creator and maintainer of **PEASS‑ng** (winPEAS/linPEAS/macos‑peas) and the broader HackTricks knowledge base.
+* Red-team consultant and trainer focused on **cloud, identity, and endpoint privilege escalation**.
+* Regular instructor sharing reproducible attacker playbooks.
+
+### वर्तमान फोकस (2025–2026)
+
+* Frequent **PEASS‑ng releases** add checks for modern OS hardening (e.g., updated sudo/ADCS/Win11 telemetry bypasses) and richer JSON/HTML outputs—use the latest binaries.
+* Expanding **HackTricks Training** with hands-on cloud labs (AWS/Azure/GCP) and AI-assisted offensive workflows.
+* Partnering with training platforms on instructor-led cloud-security courses.
+
+### कैसे फॉलो / योगदान करें
+
+* अपडेट्स और चेंजलॉग ट्रैक करने के लिए **[PEASS‑ng releases](https://github.com/peass-ng/PEASS-ng/releases)** पेज देखें।
+* नए tricks रिपोर्ट करें या HackTricks current रखने के लिए PRs भेजें।
+* लेखक के साथ संरचित सीखने के लिए, नवीनतम कैलेंडर देखें: **[hacktricks-training.com](https://hacktricks-training.com/)**.
+
+
+
+## संदर्भ
+
+- [PEASS-ng releases](https://github.com/peass-ng/PEASS-ng/releases)
+- [Cyber Helmets x HackTricks cloud-security training partnership (Mar 12, 2025)](https://cyberhelmets.com/cyber-helmets-and-hacktricks-partner-to-launch-instructor-led-cloud-security-training-for-aws-azure-and-gcp/)
 {{#include ../banners/hacktricks-training.md}}
