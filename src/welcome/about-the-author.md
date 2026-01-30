@@ -4,10 +4,34 @@
 
 ### Hallo!!
 
-Zunächst ist es wichtig zu erwähnen, dass alle **Credits für Techniken aus Forschungen anderer Seiten den ursprünglichen Autoren gehören** (es gibt Referenzen auf den Seiten). Ein großes Dankeschön an jede Forschung, die Wissen teilt, um die Sicherheit des Internets zu verbessern.
+Anerkennung für Techniken von anderen Forschern gebührt den ursprünglichen Autoren (siehe Referenzen). Danke an alle, die Wissen teilen, um die Internetsicherheit zu verbessern.
 
-HackTricks ist ein Bildungs-Wiki, das Wissen über **Cyber-Sicherheit** sammelt, geleitet von Carlos mit Hunderten von Mitwirkenden! Es ist eine **riesige Sammlung von Hacking-Tricks**, die von der Community so gut wie möglich aktualisiert wird, um sie auf dem neuesten Stand zu halten. Wenn Sie feststellen, dass etwas fehlt oder veraltet ist, senden Sie bitte einen **Pull Request** an das [**Hacktricks Github**](https://github.com/carlospolop/hacktricks)!
+HackTricks ist ein edukatives Wiki zur **Cybersicherheit**, geführt von Carlos mit Hunderten von Mitwirkenden. Es ist eine **große Sammlung von hacking tricks**, die so weit wie möglich von der Community aktualisiert wird. Wenn du etwas fehlendes oder veraltetes findest, sende bitte eine **Pull Request** an die [**Hacktricks GitHub**](https://github.com/carlospolop/hacktricks)!
 
-HackTricks ist auch ein Wiki, in dem **viele Forscher auch ihre neuesten Erkenntnisse teilen**, sodass es ein großartiger Ort ist, um über die neuesten Hacking-Techniken auf dem Laufenden zu bleiben.
+HackTricks ist außerdem ein Wiki, in dem **Forschende ihre neuesten Erkenntnisse teilen**, daher ist es ein großartiger Ort, um mit den neuesten hacking techniques auf dem Laufenden zu bleiben.
 
+### Wer ist Carlos "carlospolop" Polop‑Fuster?
+
+* Schöpfer und Maintainer von **PEASS‑ng** (winPEAS/linPEAS/macos‑peas) und der breiteren HackTricks-Wissensbasis.
+* Red-team consultant und Trainer mit Fokus auf **cloud, identity, and endpoint privilege escalation**.
+* Regelmäßiger Instructor, der reproduzierbare attacker playbooks teilt.
+
+### Aktueller Fokus (2025–2026)
+
+* Häufige **PEASS‑ng releases** fügen Checks für modernes OS-Hardening hinzu (z. B. aktualisierte sudo/ADCS/Win11 telemetry bypasses) und reichhaltigere JSON/HTML-Ausgaben — nutze die neuesten binaries.
+* Ausbau von **HackTricks Training** mit praktischen cloud labs (AWS/Azure/GCP) und AI-assisted offensive workflows.
+* Zusammenarbeit mit Trainingsplattformen bei instructor-led cloud-security courses.
+
+### Wie folgen / beitragen
+
+* Verfolge Updates und Changelogs auf der **[PEASS‑ng releases](https://github.com/peass-ng/PEASS-ng/releases)** Seite.
+* Melde neue Tricks oder sende PRs, um HackTricks aktuell zu halten.
+* Für strukturiertes Lernen mit dem Autor, prüfe den aktuellen Kalender auf **[hacktricks-training.com](https://hacktricks-training.com/)**.
+
+
+
+## Referenzen
+
+- [PEASS-ng releases](https://github.com/peass-ng/PEASS-ng/releases)
+- [Cyber Helmets x HackTricks cloud-security training partnership (Mar 12, 2025)](https://cyberhelmets.com/cyber-helmets-and-hacktricks-partner-to-launch-instructor-led-cloud-security-training-for-aws-azure-and-gcp/)
 {{#include ../banners/hacktricks-training.md}}
