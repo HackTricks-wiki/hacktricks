@@ -243,7 +243,7 @@ Invoke-SMBClient -Domain dollarcorp.moneycorp.local -Username svcadmin -Hash b38
 Invoke-SMBEnum -Domain dollarcorp.moneycorp.local -Username svcadmin -Hash b38ff50264b74508085d82c69794a4d8 -Target dcorp-mgmt.dollarcorp.moneycorp.local -verbose
 ```
 
-#### Invoke-TheHash
+### Invoke-TheHash
 
 This function is a **mix of all the others**. You can pass **several hosts**, **exclude** someones and **select** the **option** you want to use (_SMBExec, WMIExec, SMBClient, SMBEnum_). If you select **any** of **SMBExec** and **WMIExec** but you **don't** give any _**Command**_ parameter it will just **check** if you have **enough permissions**.
 
@@ -295,6 +295,27 @@ The PoC can be found in **[https://github.com/eladshamir/Internal-Monologue](htt
 ../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md
 {{#endref}}
 
+## Domain-wide NTLM relay surface auditing (RelayKing)
+
+**RelayKing** maps relay/reflection/coercion paths across an AD forest and builds **ntlmrelayx-ready target lists**. It checks multiple protocols per host and flags edge cases (reflection, NTLMv1, WebClient coercion) that single-protocol scanners miss.
+
+- **Why signing/EPA stop relays:** signed SMB/LDAP/MSSQL/WinRM actions and EPA/CBT need a session key derived from the victim’s **NT hash**, which the relayer never sees. NTLMv1 lacks MIC/AV pairs (`MsvAvChannelBindings`/`MsvAvFlags`), so signing flags can be stripped and CBT cannot work.
+- **Example “best coverage” run:**
+  ```bash
+  python3 relayking.py -u 'lowpriv' -p 'lowpriv-password' -d client.domain.local --dc-ip 10.0.0.1 -vv --audit --protocols smb,ldap,ldaps,mssql,http,https --threads 10 -o plaintext,json --output-file relayking-scan --proto-portscan --ntlmv1 --gen-relay-list relaytargets.txt
+  ```
+- **Workflow highlights:**
+  - Pulls enabled computer objects (`--audit`), resolves FQDNs, drops non-resolving entries and portscans only default ports for requested protocols (`--proto-portscan`).
+  - Tests signing/EPA/CBT for SMB/LDAP/LDAPS/MSSQL/HTTP(S)/SMTP/IMAP/RPC/WinRM/WinRMS (IMAP/SMTP lightly tested; WinRMS detection weak).
+  - HTTP(S): probes common NTLM paths; HTTP is relayable once NTLM is enabled; HTTPS uses differential CBT tests with valid creds.
+  - RPC: tries `RPC_C_AUTHN_LEVEL_CONNECT/CALL` and can enumerate endpoints when unsigned.
+  - WinRM: usually non-relayable because sessions must be signed with keys derived from the NT hash; flagged accordingly.
+  - WebDAV: checks `IPC$` for the `DAV RPC SERVICE` pipe before marking enabled.
+  - Reflection patching: reads host **UBR** to flag builds vulnerable to **CVE-2025-33073** and checks PrintSpooler for PrinterbugNew coercion.
+  - NTLMv1 policy: `--ntlmv1` reads GPO; `--ntlmv1-all` queries host `LmCompatibilityLevel` via **RemoteRegistry** (noisy, often needs local admin).
+  - `--coerce-all` (with `--audit`) launches PetitPotam/DFSCoerce/PrinterBug against every domain-joined host (very noisy).
+  - Outputs plaintext/JSON/XML/CSV/grep/markdown plus per-path relay lists; prune noisy targets before use.
+
 ## Parse NTLM challenges from a network capture
 
 **You can use** [**https://github.com/mlgualtieri/NTLMRawUnHide**](https://github.com/mlgualtieri/NTLMRawUnHide)
@@ -345,5 +366,7 @@ krbrelayx.py -t TARGET.DOMAIN.LOCAL -smb2support
 ## References
 * [NTLM Reflection is Dead, Long Live NTLM Reflection!](https://www.synacktiv.com/en/publications/la-reflexion-ntlm-est-morte-vive-la-reflexion-ntlm-analyse-approfondie-de-la-cve-2025.html)
 * [MSRC – CVE-2025-33073](https://msrc.microsoft.com/update-guide/vulnerability/CVE-2025-33073)
+* [Introducing RelayKing – Relay to Royalty](https://www.depthsecurity.com/blog/introducing-relayking-relay-to-royalty/)
+* [RelayKing (Depth Security) GitHub](https://github.com/depthsecurity/RelayKing-Depth)
 
 {{#include ../../banners/hacktricks-training.md}}
