@@ -75,6 +75,7 @@
     - [Interesting Windows Registry Keys](generic-methodologies-and-resources/basic-forensic-methodology/windows-forensics/interesting-windows-registry-keys.md)
 - [Python Sandbox Escape & Pyscript](generic-methodologies-and-resources/python/README.md)
   - [Bypass Python sandboxes](generic-methodologies-and-resources/python/bypass-python-sandboxes/README.md)
+    - [Js2py Sandbox Escape Cve 2024 28397](generic-methodologies-and-resources/python/bypass-python-sandboxes/js2py-sandbox-escape-cve-2024-28397.md)
     - [LOAD_NAME / LOAD_CONST opcode OOB Read](generic-methodologies-and-resources/python/bypass-python-sandboxes/load_name-load_const-opcode-oob-read.md)
     - [Reportlab Xhtml2pdf Triple Brackets Expression Evaluation Rce Cve 2023 33733](generic-methodologies-and-resources/python/bypass-python-sandboxes/reportlab-xhtml2pdf-triple-brackets-expression-evaluation-rce-cve-2023-33733.md)
   - [Class Pollution (Python's Prototype Pollution)](generic-methodologies-and-resources/python/class-pollution-pythons-prototype-pollution.md)
