@@ -2,9 +2,9 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## 为什么拉长 race 窗口很重要
+## 为什么延长竞争窗口很重要
 
-许多 Windows kernel LPEs 遵循经典模式 `check_state(); NtOpenX("name"); privileged_action();`。在现代硬件上，冷启动的 `NtOpenEvent`/`NtOpenSection` 解析一个短名称大约需要 2 µs，几乎没有时间在安全操作发生前翻转被检查的状态。通过故意让 Object Manager Namespace (OMNS) 在第 2 步的查找耗时数十微秒，攻击者就能获得足够的时间稳定地赢得原本不可靠的 races，而不需要成千上万次尝试。
+Many Windows kernel LPEs follow the classic pattern `check_state(); NtOpenX("name"); privileged_action();`. On modern hardware a cold `NtOpenEvent`/`NtOpenSection` resolves a short name in ~2 µs, leaving almost no time to flip the checked state before the secure action happens. By deliberately forcing the Object Manager Namespace (OMNS) lookup in step 2 to take tens of microseconds, the attacker gains enough time to consistently win otherwise flaky races without needing thousands of attempts.
 
 ## Object Manager lookup internals in a nutshell
 
@@ -14,7 +14,7 @@
 
 ## Slowdown primitive #1 – Single maximal component
 
-解析一个组件的开销大体上与其长度呈线性关系，因为内核必须针对父目录中的每个条目执行 Unicode 比较。在 Windows 11 24H2 (Snapdragon X Elite testbed) 上，创建一个 32 kB 长的事件名称会使 `NtOpenEvent` 的延迟从约 2 µs 立即增加到约 35 µs。
+The cost of resolving a component is roughly linear with its length because the kernel must perform a Unicode comparison against every entry in the parent directory. Creating an event with a 32 kB-long name immediately increases the `NtOpenEvent` latency from ~2 µs to ~35 µs on Windows 11 24H2 (Snapdragon X Elite testbed).
 ```cpp
 std::wstring path;
 while (path.size() <= 32000) {
@@ -25,13 +25,13 @@ path += std::wstring(500, 'A');
 ```
 *实用说明*
 
-- 你可以通过使用任意 named kernel object (events, sections, semaphores…) 来触发长度限制。
-- Symbolic links 或 reparse points 可以将一个简短的“victim”名称指向这个巨大的组件，从而透明地施加 slowdown。
-- 因为所有内容都存在于 user-writable namespaces，payload 可以从标准用户完整性级别运行。
+- 你可以使用任何命名的 kernel object（events、sections、semaphores…）触及长度上限。
+- Symbolic links 或 reparse points 可以将短的 “victim” 名称指向这个巨大组件，从而透明地施加 slowdown。
+- 由于所有内容都位于 user-writable namespaces 中，payload 可以在标准用户完整性级别下运行。
 
-## Slowdown primitive #2 – 深度递归目录
+## Slowdown primitive #2 – Deep recursive directories
 
-更激进的变体会分配一条由数千个目录组成的链（`\BaseNamedObjects\A\A\...\X`）。每次跳转都会触发 directory resolution logic (ACL checks, hash lookups, reference counting)，因此每一级的延迟高于单次字符串比较。使用约 16 000 级（受相同的 `UNICODE_STRING` 大小限制），经验计时超过了由长单一组件达到的 35 µs 阈值。
+一个更激进的变体会分配由数千个目录组成的链 (`\BaseNamedObjects\A\A\...\X`)。每一级都会触发目录解析逻辑（ACL checks、hash lookups、reference counting），因此每层的延迟比单次字符串比较要高。使用约 16 000 层（受相同的 `UNICODE_STRING` 大小限制），实测时间超过了长单个组件所达到的 35 µs 阈值。
 ```cpp
 ScopedHandle base_dir = OpenDirectory(L"\\BaseNamedObjects");
 HANDLE last_dir = base_dir.get();
@@ -47,12 +47,30 @@ printf("%d,%f\n", i + 1, result);
 ```
 提示：
 
-* 如果父目录开始拒绝重复项，按层级交替使用字符（`A/B/C/...`）。
-* 保留一个 handle array，以便在 exploitation 后干净地删除链，避免污染 namespace。
+* 如果父目录开始拒绝重复项，按级别交替字符 (`A/B/C/...`)。
+* 维护一个句柄数组，以便在利用后干净地删除链，避免污染命名空间。
+
+## Slowdown primitive #3 – Shadow directories, hash collisions & symlink reparses (minutes instead of microseconds)
+
+Object directories 支持 **shadow directories**（回退查找）和条目的分桶哈希表。滥用这两者，再加上 64 组件的 symbolic-link reparse 限制，可以在不超过 `UNICODE_STRING` 长度的情况下成倍放大减速：
+
+1. 在 `\BaseNamedObjects` 下创建两个目录，例如 `A`（shadow）和 `A\A`（target）。使用第一个作为 shadow directory 创建第二个（`NtCreateDirectoryObjectEx`），这样在 `A` 中未找到的查找会回落到 `A\A`。
+2. 向每个目录填充数千个 **colliding names**，使它们落在同一哈希桶内（例如改变尾部数字但保持相同的 `RtlHashUnicodeString` 值）。查找现在在单个目录内退化为 O(n) 线性扫描。
+3. 构建一个大约 63 个的 **object manager symbolic links** 链，反复将解析重定向到长的 `A\A\…` 后缀，从而耗尽 reparse 预算。每次 reparse 都会从头重新开始解析，成倍增加碰撞成本。
+4. 当每个目录存在 16 000 个碰撞时，最终组件 (`...\\0`) 的查找在 Windows 11 上现在需要 **分钟**，为一次性 kernel LPE 提供几乎可保证的竞争胜利。
+```cpp
+ScopedHandle shadow = CreateDirectory(L"\\BaseNamedObjects\\A");
+ScopedHandle target = CreateDirectoryEx(L"A", shadow.get(), shadow.get());
+CreateCollidingEntries(shadow, 16000, dirs);
+CreateCollidingEntries(target, 16000, dirs);
+CreateSymlinkChain(shadow, LongSuffix(L"\\A", 16000), 63);
+printf("%f\n", RunTest(LongSuffix(L"\\A", 16000) + L"\\0", 1));
+```
+*Why it matters*: 持续数分钟的延迟会将 one-shot race-based LPEs 转变为确定性的 exploits。
 
 ## 测量你的竞态窗口
 
-在你的 exploit 中嵌入一个快速 harness，以测量在受害者硬件上窗口变得有多大。下面的代码片段将打开目标对象 `iterations` 次，并使用 `QueryPerformanceCounter` 返回每次打开的平均开销。
+在你的 exploit 中嵌入一个简短的 harness，以测量该窗口在受害者硬件上的大小。下面的代码片段会打开目标对象 `iterations` 次，并使用 `QueryPerformanceCounter` 返回每次打开的平均开销。
 ```cpp
 static double RunTest(const std::wstring name, int iterations,
 std::wstring create_name = L"", HANDLE root = nullptr) {
@@ -71,34 +89,34 @@ handles.emplace_back(open_handle);
 return timer.GetTime(iterations);
 }
 ```
-这些结果直接影响你的竞态调度策略（例如所需的工作线程数、休眠间隔以及需要多早翻转共享状态）。
+这些结果会直接输入到你的竞态协调策略中（例如所需的工作线程数、睡眠间隔，以及需要多早翻转共享状态）。
 
-## 利用工作流程
+## 利用流程
 
-1. **Locate the vulnerable open** – 追踪内核路径 (via symbols, ETW, hypervisor tracing, or reversing) 直到你发现一个会遍历攻击者可控名称或位于用户可写目录中的符号链接的 `NtOpen*`/`ObOpenObjectByName` 调用。
-2. **Replace that name with a slow path**
+1. **定位易受攻击的打开操作** – 通过 symbols、ETW、hypervisor tracing 或 reversing 跟踪内核路径，直到你发现会遍历攻击者控制的名称或位于用户可写目录中的符号链接的 `NtOpen*`/`ObOpenObjectByName` 调用。
+2. **用慢路径替换该名称**
 - 在 `\BaseNamedObjects`（或另一个可写的 OM 根）下创建长组件或目录链。
-- 创建一个符号链接，使内核期望的名称现在解析到慢路径。你可以将易受攻击的驱动的目录查找指向你的结构，而无需接触原始目标。
-3. **Trigger the race**
-- 线程 A（受害者）执行易受攻击的代码并在慢查找中阻塞。
-- 线程 B（攻击者）在线程 A 占用时翻转被保护的状态（例如交换文件句柄、重写符号链接、切换对象安全设置）。
-- 当线程 A 恢复并执行特权操作时，它会看到过时的状态并执行攻击者控制的操作。
-4. **Clean up** – 删除目录链和符号链接，以避免留下可疑痕迹或破坏合法的 IPC 使用者。
+- 创建一个符号链接，使内核期望的名称现在解析到慢路径。你可以将易受攻击驱动程序的目录查找指向你的结构，而无需触及原始目标。
+3. **触发竞态**
+- 线程 A（受害者）执行易受攻击的代码并在慢速查找中阻塞。
+- 线程 B（攻击者）在线程 A 忙碌时翻转受保护状态（例如交换文件句柄、重写符号链接、切换对象安全性）。
+- 当线程 A 恢复并执行特权操作时，它会观察到陈旧状态并执行由攻击者控制的操作。
+4. **清理** – 删除目录链和符号链接，以避免留下可疑痕迹或破坏合法的 IPC 用户。
 
 ## 操作注意事项
 
-- **Combine primitives** – 你可以在目录链的每一层使用一个长名称（*每层*），以获得更高的延迟，直到耗尽 `UNICODE_STRING` 大小。
-- **One-shot bugs** – 扩大的时间窗口（几十微秒）使“单次触发”漏洞在与 CPU affinity pinning 或 hypervisor-assisted preemption 配合时变得现实可利用。
-- **Side effects** – 慢查找仅影响恶意路径，因此整体系统性能不受影响；除非防御方监控命名空间增长，否则很少能注意到。
-- **Cleanup** – 保留对你创建的每个目录/对象的句柄，以便随后调用 `NtMakeTemporaryObject`/`NtClose`。否则无界的目录链可能会在重启后持续存在。
+- **组合原语** – 你可以在目录链的 *每层* 使用一个长名称以获得更高的延迟，直到耗尽 `UNICODE_STRING` 大小。
+- **一次性漏洞** – 扩展后的窗口（从几十微秒到几分钟）使 “single trigger” 漏洞在配合 CPU affinity pinning 或 hypervisor-assisted preemption 时变得现实可行。
+- **副作用** – 慢速只影响恶意路径，因此整体系统性能不受影响；除非监控命名空间增长，否则防御方很少会注意到。
+- **清理** – 保留对你创建的每个目录/对象的句柄，以便之后调用 `NtMakeTemporaryObject`/`NtClose`。否则无限制的目录链可能会在重启后保留。
 
-## 防御要点
+## 防御注意事项
 
-- 依赖命名对象的内核代码应在 open 之后重新验证安全敏感状态，或在检查之前获取引用（以弥合 TOCTOU 缺口）。
-- 在对用户可控名称进行取消引用之前，对 OM 路径深度/长度强制上限。拒绝过长的名称会把攻击者强制回到微秒级的窗口。
-- 对 object manager 命名空间的增长进行监测（ETW `Microsoft-Windows-Kernel-Object`），以检测 `\BaseNamedObjects` 下可疑的数千组件链。
+- 依赖具名对象的内核代码应在打开 *之后* 重新验证安全敏感状态，或在检查之前获取引用（以闭合 TOCTOU 缺口）。
+- 在对用户控制的名称进行解引用之前，对 OM 路径深度/长度实施上限。拒绝过长的名称会迫使攻击者回到微秒级的时间窗。
+- 对 object manager 命名空间增长进行监控（ETW `Microsoft-Windows-Kernel-Object`），以检测 `\BaseNamedObjects` 下可疑的上千组件链。
 
-## 参考资料
+## References
 
 - [Project Zero – Windows Exploitation Techniques: Winning Race Conditions with Path Lookups](https://projectzero.google/2025/12/windows-exploitation-techniques.html)
 
