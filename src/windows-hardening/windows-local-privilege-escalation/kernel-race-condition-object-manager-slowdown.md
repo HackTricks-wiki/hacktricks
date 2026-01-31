@@ -2,19 +2,19 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Kwa nini kupanua dirisha la race ni muhimu
+## Kwa nini kuongeza dirisha la race ni muhimu
 
-LPE nyingi za kernel za Windows zinafuata muundo wa kawaida `check_state(); NtOpenX("name"); privileged_action();`. Kwenye vifaa vya kisasa, `NtOpenEvent`/`NtOpenSection` baridi hutatua jina fupi kwa takriban ~2 µs, ikiacha karibu hakuna muda wa kubadilisha hali iliyohakikiwa kabla kitendo chenye usalama kifanyike. Kwa kulazimisha kwa makusudi Object Manager Namespace (OMNS) lookup kwenye hatua ya 2 ichukue mfululizo wa microsecond, mshambulizi hupata muda wa kutosha kushinda mara kwa mara mashindano ambayo vinginevyo yangekuwa tete bila haja ya majaribio elfu nyingi.
+Many Windows kernel LPEs follow the classic pattern `check_state(); NtOpenX("name"); privileged_action();`. On modern hardware a cold `NtOpenEvent`/`NtOpenSection` resolves a short name in ~2 µs, leaving almost no time to flip the checked state before the secure action happens. By deliberately forcing the Object Manager Namespace (OMNS) lookup in step 2 to take tens of microseconds, the attacker gains enough time to consistently win otherwise flaky races without needing thousands of attempts.
 
-## Muundo wa ndani wa lookup ya Object Manager kwa ufupi
+## Ndani ya utendaji wa Object Manager lookup kwa muhtasari
 
-* **OMNS structure** – Majina kama `\BaseNamedObjects\Foo` hutatuliwa saraka kwa saraka. Kila sehemu husababisha kernel kutafuta/kuvuta *Object Directory* na kulinganisha Unicode strings. Symbolic links (mfano, herufi za drive) zinaweza kupitiwa njiani.
-* **UNICODE_STRING limit** – Njia za OM zinabebwa ndani ya `UNICODE_STRING` ambayo `Length` ni thamani ya 16-bit. Kikomo kamili ni 65 535 bytes (32 767 UTF-16 codepoints). Kwa prefixes kama `\BaseNamedObjects\`, mshambulizi bado ana udhibiti wa takriban ≈32 000 tabia.
-* **Attacker prerequisites** – Mtumiaji yeyote anaweza kuunda objects chini ya saraka zinazoweza kuandikwa kama `\BaseNamedObjects`. Wakati code ilio dhaifu inatumia jina ndani yake, au inafuata symbolic link inayomalizia huko, mshambulizi anadhibiti utendaji wa lookup bila ruhusa maalum.
+* **OMNS structure** – Names such as `\BaseNamedObjects\Foo` are resolved directory-by-directory. Each component causes the kernel to find/open an *Object Directory* and compare Unicode strings. Symbolic links (e.g., drive letters) may be traversed en route.
+* **UNICODE_STRING limit** – OM paths are carried inside a `UNICODE_STRING` whose `Length` is a 16-bit value. The absolute limit is 65 535 bytes (32 767 UTF-16 codepoints). With prefixes like `\BaseNamedObjects\`, an attacker still controls ≈32 000 characters.
+* **Attacker prerequisites** – Any user can create objects underneath writable directories such as `\BaseNamedObjects`. When the vulnerable code uses a name inside, or follows a symbolic link that lands there, the attacker controls the lookup performance with no special privileges.
 
-## Slowdown primitive #1 – Single maximal component
+## Primitive ya kupunguza kasi #1 – Single maximal component
 
-Gharama ya kutatua sehemu ni takriban mstari kulingana na urefu wake kwa sababu kernel lazima ifanye ulinganisho wa Unicode dhidi ya kila kipengee katika parent directory. Kuunda event yenye jina la urefu 32 kB mara moja huongeza latency ya `NtOpenEvent` kutoka ~2 µs hadi ~35 µs kwenye Windows 11 24H2 (Snapdragon X Elite testbed).
+The cost of resolving a component is roughly linear with its length because the kernel must perform a Unicode comparison against every entry in the parent directory. Creating an event with a 32 kB-long name immediately increases the `NtOpenEvent` latency from ~2 µs to ~35 µs on Windows 11 24H2 (Snapdragon X Elite testbed).
 ```cpp
 std::wstring path;
 while (path.size() <= 32000) {
@@ -25,13 +25,13 @@ path += std::wstring(500, 'A');
 ```
 *Vidokezo vya vitendo*
 
-- Unaweza kufikia kikomo cha urefu kwa kutumia any named kernel object (events, sections, semaphores…).
-- Symbolic links au reparse points zinaweza kuelekeza jina fupi “victim” kwa giant component hii ili slowdown itumike kwa uwazi.
-- Kwa kuwa kila kitu kiko katika user-writable namespaces, payload inafanya kazi kutoka standard user integrity level.
+- Unaweza kufikia kikomo cha urefu ukitumia named kernel object yoyote (events, sections, semaphores…).
+- Symbolic links au reparse points zinaweza kuelekeza jina fupi la “mhusika” kwa kipengele hiki kikubwa ili slowdown itumike kwa uwazi.
+- Kwa kuwa kila kitu kipo katika namespaces zinazoweza kuandikwa na mtumiaji, payload hufanya kazi kutoka kwenye standard user integrity level.
 
 ## Slowdown primitive #2 – Deep recursive directories
 
-Toleo kali zaidi huunda mnyororo wa maelfu ya directories (`\BaseNamedObjects\A\A\...\X`). Kila hatua huanzisha directory resolution logic (ACL checks, hash lookups, reference counting), hivyo latency kwa kila ngazi ni kubwa kuliko kulinganisha kamba moja. Kwa ~16 000 ngazi (iliyopunguzwa na ukubwa ule ule wa `UNICODE_STRING`), vipimo vya majaribio vinavuka kizuizi cha 35 µs kilichopatikana kwa long single components.
+Toleo kali zaidi hutoa mnyororo wa maelfu ya direktori (`\BaseNamedObjects\A\A\...\X`). Kila hatua huamsha mantiki ya utatuzi wa directory (ACL checks, hash lookups, reference counting), hivyo latency kwa kila ngazi ni kubwa zaidi kuliko single string compare. Kwa takriban ~16 000 ngazi (ilimitiwa na ukubwa ule ule wa `UNICODE_STRING`), mipimo ya kimajaribio inavuka kizuizi cha 35 µs kilichopatikana na long single components.
 ```cpp
 ScopedHandle base_dir = OpenDirectory(L"\\BaseNamedObjects");
 HANDLE last_dir = base_dir.get();
@@ -47,12 +47,30 @@ printf("%d,%f\n", i + 1, result);
 ```
 Vidokezo:
 
-* Badilisha herufi kwa kila ngazi (`A/B/C/...`) ikiwa directory ya mzazi inaanza kukataa nakala zinazojirudia.
-* Hifadhi handle array ili uweze kufuta chain kwa usafi baada ya exploitation ili kuepuka kuchafua namespace.
+* Badilisha tabia kwa kila ngazi (`A/B/C/...`) ikiwa saraka mzazi itaanza kukataa duplicates.
+* Weka handle array ili uweze kufuta mnyororo kwa usafi baada ya exploitation ili kuepuka kuchafua namespace.
 
-## Kupima race window
+## Slowdown primitive #3 – Shadow directories, hash collisions & symlink reparses (dakika badala ya mikrosekunde)
 
-Ingiza harness fupi ndani ya exploit yako ili kupima ni kubwa gani dirisha linapokuwa kwenye hardware ya mhusika. Kipande hapa chini hufungua target object `iterations` mara na hurudisha wastani wa gharama kwa kila ufunguaji kwa kutumia `QueryPerformanceCounter`.
+Object directories zinaunga mkono **shadow directories** (fallback lookups) na bucketed hash tables kwa entries. Chukiza zote mbili pamoja na kikomo cha 64-component symbolic-link reparse ili kuzidisha ucheleweshaji bila kuzidi urefu wa `UNICODE_STRING`:
+
+1. Unda saraka mbili chini ya `\BaseNamedObjects`, kwa mfano `A` (shadow) na `A\A` (target). Unda ya pili ukitumia ya kwanza kama shadow directory (`NtCreateDirectoryObjectEx`), ili tafutio zisizopatikana katika `A` zitapita hadi `A\A`.
+2. Jaza kila saraka na maelfu ya **colliding names** ambazo zinaingia katika hash bucket ile ile (mfano, kubadilisha tarakimu za mwisho huku ukihifadhi thamani ile ile ya `RtlHashUnicodeString`). Tafutio sasa zinashuka hadi skana za mstari O(n) ndani ya saraka moja.
+3. Jenga mnyororo wa takriban ~63 wa **object manager symbolic links** ambao mara kwa mara hu-reparse ndani ya kifupi kirefu `A\A\…`, wakitumia reparse budget. Kila reparse huanzisha tena parsing kutoka juu, zikizidisha gharama ya collision.
+4. Tafutio ya sehemu ya mwisho (`...\\0`) sasa huchukua **dakika** kwenye Windows 11 wakati 16 000 collisions zipo kwa kila saraka, ikitoa ushindi wa race unaokaribia hakika kwa one-shot kernel LPEs.
+```cpp
+ScopedHandle shadow = CreateDirectory(L"\\BaseNamedObjects\\A");
+ScopedHandle target = CreateDirectoryEx(L"A", shadow.get(), shadow.get());
+CreateCollidingEntries(shadow, 16000, dirs);
+CreateCollidingEntries(target, 16000, dirs);
+CreateSymlinkChain(shadow, LongSuffix(L"\\A", 16000), 63);
+printf("%f\n", RunTest(LongSuffix(L"\\A", 16000) + L"\\0", 1));
+```
+*Kwanini ni muhimu*: Kuporomoka kwa muda wa dakika kadhaa kunageuza one-shot race-based LPEs kuwa deterministic exploits.
+
+## Kupima dirisha la race
+
+Ingiza harness fupi ndani ya exploit yako ili kupima jinsi dirisha linavyokuwa kubwa kwenye kifaa cha mwathiriwa. Mfano hapa chini hufungua target object `iterations` mara na kurudisha wastani wa gharama kwa kila ufunguzi ukitumia `QueryPerformanceCounter`.
 ```cpp
 static double RunTest(const std::wstring name, int iterations,
 std::wstring create_name = L"", HANDLE root = nullptr) {
@@ -71,34 +89,34 @@ handles.emplace_back(open_handle);
 return timer.GetTime(iterations);
 }
 ```
-Matokeo huingizwa moja kwa moja kwenye mkakati wako wa race orchestration (kwa mfano, idadi ya worker threads zinazohitajika, kipindi cha usingizi, ni mapema kiasi gani unahitaji kubadili shared state).
+Matokeo yanaingia moja kwa moja kwenye mkakati wako wa uendeshaji wa race (kwa mfano, idadi ya worker threads zinazohitajika, interval za usingizi, ni mapema kiasi gani unahitaji kubadili shared state).
 
-## Exploitation workflow
+## Mtiririko wa matumizi ya udhaifu
 
-1. **Locate the vulnerable open** – Fuata njia ya kernel (kwa kutumia symbols, ETW, hypervisor tracing, au reversing) hadi utakapopata wito wa `NtOpen*`/`ObOpenObjectByName` unaosonga jina linalodhibitiwa na mshambuliaji au symbolic link kwenye directory inayoweza kuandikwa na mtumiaji.
-2. **Replace that name with a slow path**
-- Unda component ndefu au mnyororo wa directories chini ya `\BaseNamedObjects` (au OM root nyingine inayoweza kuandikwa).
-- Unda symbolic link ili jina ambalo kernel linatarajia sasa liwekeze kwenye slow path. Unaweza kuelekeza directory lookup ya driver dhaifu kwa muundo wako bila kugusa target ya asili.
-3. **Trigger the race**
-- Thread A (victim) inatekeleza code yenye udhaifu na inazuia ndani ya slow lookup.
-- Thread B (attacker) hubadili guarded state (kwa mfano, kubadilisha file handle, kuandika upya symbolic link, kubadilisha object security) wakati Thread A iko occupied.
-- Wakati Thread A inarejeshwa na inafanya kitendo kilicho na privileges, inaona stale state na inafanya operation inayodhibitiwa na mshambuliaji.
-4. **Clean up** – Futa mnyororo wa directory na symbolic links ili kuepuka kuacha artifacts zinazoshukuwa au kuvunja watumiaji halali wa IPC.
+1. **Tafuta open iliyo na udhaifu** – Fuata njia ya kernel (kwa kupitia symbols, ETW, hypervisor tracing, au reversing) hadi utakapopata wito wa `NtOpen*`/`ObOpenObjectByName` unaotembeza jina linalodhibitiwa na mshambuliaji au symbolic link katika directory inayoweza kuandikwa na mtumiaji.
+2. **Badilisha jina hilo na slow path**
+- Tengeneza component ndefu au mnyororo wa directory chini ya `\BaseNamedObjects` (au OM root nyingine inayoweza kuandikwa).
+- Tengeneza symbolic link ili jina linalotarajiwa na kernel sasa litamwonyesha slow path. Unaweza kuelekeza directory lookup ya driver yenye udhaifu kwenye muundo wako bila kugusa lengo la awali.
+3. **Sawazisha race**
+- Thread A (mwendeshaji) inatekeleza code yenye udhaifu na inakaa (blocks) ndani ya lookup polepole.
+- Thread B (mshambuliaji) inabadilisha guarded state (kwa mfano, kubadilisha file handle, kuandika upya symbolic link, kubadili object security) wakati Thread A iko occupied.
+- Wakati Thread A inaporudi na kufanya hatua yenye ruhusa, inaona stale state na inafanya operesheni ndogo-dhibitiwa na mshambuliaji.
+4. **Safisha** – Futa mnyororo wa directory na symbolic links ili kuepuka kuacha artifacts zenye shaka au kuvunja watumiaji halali wa IPC.
 
-## Operational considerations
+## Mambo ya uendeshaji
 
-- **Combine primitives** – Unaweza kutumia long name kwa *level* katika mnyororo wa directory kwa latency ya juu zaidi hadi utakapochosha `UNICODE_STRING` size.
-- **One-shot bugs** – Dirisha lililopanuliwa (michache ya microseconds) linafanya bug za “single trigger” kuwa halisi wakati zinapochanganywa na CPU affinity pinning au hypervisor-assisted preemption.
-- **Side effects** – Slowdown inaathiri tu malicious path, hivyo utendakazi wa jumla wa mfumo hauathiriwi; defenders mara chache watagundua isipokuwa wakiwa wanamonitor namespace growth.
-- **Cleanup** – Hifadhi handles za kila directory/object uliyounda ili uweze kuita `NtMakeTemporaryObject`/`NtClose` baadaye. Mnyororo wa directories usio na mipaka unaweza kubaki hata baada ya reboot ikiwa sivyo.
+- **Combine primitives** – Unaweza kutumia jina ndefu kwa kila kiwango katika mnyororo wa directory kwa latency kubwa zaidi hadi utakapochoka `UNICODE_STRING` size.
+- **One-shot bugs** – Dirisha lililopanuka (mikoa ya microseconds kumi hadi dakika) linafanya “single trigger” bugs kuwa halisi wakati likiambatana na CPU affinity pinning au hypervisor-assisted preemption.
+- **Madhara ya pembeni** – Kupungua kwa kasi kunahusu njia mbaya tu, hivyo utendaji wa jumla wa mfumo hauathiriwi; watetezi mara chache wataona isipokuwa wakiwawanasa ukuaji wa namespace.
+- **Usafishaji** – Hifadhi handles za kila directory/object unazozitengeneza ili uweze kuita `NtMakeTemporaryObject`/`NtClose` baadaye. Mnyororo usio na mipaka unaweza kudumu hata baada ya reboot.
 
-## Defensive notes
+## Vidokezo vya ulinzi
 
-- Kernel code inayotegemea named objects inapaswa ku-re-validate security-sensitive state *baada ya* open, au ichukue reference kabla ya check (kufunga TOCTOU gap).
-- Tekeleza bounds za juu kwenye OM path depth/length kabla ya kudereference majina yanayodhibitiwa na mtumiaji. Kukataa majina marefu sana kunalazimisha mashambulizi kurudi ndani ya dirisha la microsecond.
-- Instrument namespace growth ya object manager (ETW `Microsoft-Windows-Kernel-Object`) kugundua mnyororo wa maelfu ya components yanayoshukiwa chini ya `\BaseNamedObjects`.
+- Kernel code inayotegemea named objects inapaswa kuthibitisha tena state zinazohusiana na usalama *baada ya* open, au ichukue reference kabla ya ukaguzi (kufunga doa la TOCTOU).
+- Weka mipaka ya juu kwa kina/urefu wa OM path kabla ya kufanya dereference kwa majina yanayodhibitiwa na mtumiaji. Kukataa majina marefu sana kunasukuma mashambulizi kurudi kwenye dirisha la microsecond.
+- Pima ukuaji wa namespace ya object manager (ETW `Microsoft-Windows-Kernel-Object`) ili kugundua mnyororo wa maelfu ya components yenye shaka chini ya `\BaseNamedObjects`.
 
-## References
+## Marejeleo
 
 - [Project Zero – Windows Exploitation Techniques: Winning Race Conditions with Path Lookups](https://projectzero.google/2025/12/windows-exploitation-techniques.html)
 
