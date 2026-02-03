@@ -131,11 +131,36 @@ Replace: User-Agent: $1 BugBounty-Username
 - Only share the minimum evidence needed for a finding.
 - Keep Burp as the source of truth; use the model for **analysis and reporting**, not scanning.
 
+## Burp AI Agent (AI-assisted triage + MCP tools)
+
+**Burp AI Agent** is a Burp extension that couples local/cloud LLMs with passive/active analysis (62 vulnerability classes) and exposes 53+ MCP tools so external MCP clients can orchestrate Burp. Highlights:
+
+- **Context-menu triage**: capture traffic via Proxy, open **Proxy > HTTP History**, right-click a request → **Extensions > Burp AI Agent > Analyze this request** to spawn an AI chat bound to that request/response.
+- **Backends** (selectable per profile):
+  - Local HTTP: **Ollama**, **LM Studio**.
+  - Remote HTTP: **OpenAI-compatible** endpoint (base URL + model name).
+  - Cloud CLIs: **Gemini CLI** (`gemini auth login`), **Claude CLI** (`export ANTHROPIC_API_KEY=...` or `claude login`), **Codex CLI** (`export OPENAI_API_KEY=...`), **OpenCode CLI** (provider-specific login).
+- **Agent profiles**: prompt templates auto-installed under `~/.burp-ai-agent/AGENTS/`; drop extra `*.md` files there to add custom analysis/scanning behaviors.
+- **MCP server**: enable via **Settings > MCP Server** to expose Burp operations to any MCP client (53+ tools). Claude Desktop can be pointed at the server by editing `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) or `%APPDATA%\Claude\claude_desktop_config.json` (Windows).
+- **Privacy controls**: STRICT / BALANCED / OFF redact sensitive request data before sending it to remote models; prefer local backends when handling secrets.
+- **Audit logging**: JSONL logs with per-entry SHA-256 integrity hashing for tamper-evident traceability of AI/MCP actions.
+- **Build/load**: download the release JAR or build with Java 21:
+
+```bash
+git clone https://github.com/six2dez/burp-ai-agent.git
+cd burp-ai-agent
+JAVA_HOME=/path/to/jdk-21 ./gradlew clean shadowJar
+# load build/libs/Burp-AI-Agent-<version>.jar via Burp Extensions > Add (Java)
+```
+
+Operational cautions: cloud backends may exfiltrate session cookies/PII unless privacy mode is enforced; MCP exposure grants remote orchestration of Burp so restrict access to trusted agents and monitor the integrity-hashed audit log.
+
 ## References
 
 - [Burp MCP + Codex CLI integration and Caddy handshake fix](https://pentestbook.six2dez.com/others/burp)
 - [Burp MCP Agents (workflows, launchers, prompt pack)](https://github.com/six2dez/burp-mcp-agents)
 - [Burp MCP Server BApp](https://portswigger.net/bappstore/9952290f04ed4f628e624d0aa9dccebc)
 - [PortSwigger MCP server strict Origin/header validation issue](https://github.com/PortSwigger/mcp-server/issues/34)
+- [Burp AI Agent](https://github.com/six2dez/burp-ai-agent)
 
 {{#include ../banners/hacktricks-training.md}}
