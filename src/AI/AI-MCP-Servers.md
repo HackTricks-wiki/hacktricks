@@ -224,13 +224,26 @@ The command-template variant exercised by JFrog (CVE-2025-8943) does not even ne
 }
 ```
 
+### MCP server pentesting with Burp (MCP-ASD)
+
+The **MCP Attack Surface Detector (MCP-ASD)** Burp extension turns exposed MCP servers into standard Burp targets, solving the SSE/WebSocket async transport mismatch:
+
+- **Discovery**: optional passive heuristics (common headers/endpoints) plus opt-in light active probes (few `GET` requests to common MCP paths) to flag internet-facing MCP servers seen in Proxy traffic.
+- **Transport bridging**: MCP-ASD spins up an **internal synchronous bridge** inside Burp Proxy. Requests sent from **Repeater/Intruder** are rewritten to the bridge, which forwards them to the real SSE or WebSocket endpoint, tracks streaming responses, correlates with request GUIDs, and returns the matched payload as a normal HTTP response.
+- **Auth handling**: connection profiles inject bearer tokens, custom headers/params, or **mTLS client certs** before forwarding, removing the need to hand-edit auth per replay.
+- **Endpoint selection**: auto-detects SSE vs WebSocket endpoints and lets you override manually (SSE is often unauthenticated while WebSockets commonly require auth).
+- **Primitive enumeration**: once connected, the extension lists MCP primitives (**Resources**, **Tools**, **Prompts**) plus server metadata. Selecting one generates a prototype call that can be sent straight to Repeater/Intruder for mutation/fuzzing—prioritise **Tools** because they execute actions.
+
+This workflow makes MCP endpoints fuzzable with standard Burp tooling despite their streaming protocol.
+
 ## References
 - [CVE-2025-54136 – MCPoison Cursor IDE persistent RCE](https://research.checkpoint.com/2025/cursor-vulnerability-mcpoison/)
 - [Metasploit Wrap-Up 11/28/2025 – new Flowise custom MCP & JS injection exploits](https://www.rapid7.com/blog/post/pt-metasploit-wrap-up-11-28-2025)
 - [GHSA-3gcm-f6qx-ff7p / CVE-2025-59528 – Flowise CustomMCP JavaScript code injection](https://github.com/advisories/GHSA-3gcm-f6qx-ff7p)
 - [GHSA-2vv2-3x8x-4gv7 / CVE-2025-8943 – Flowise custom MCP command execution](https://github.com/advisories/GHSA-2vv2-3x8x-4gv7)
 - [JFrog – Flowise OS command remote code execution (JFSA-2025-001380578)](https://research.jfrog.com/vulnerabilities/flowise-os-command-remote-code-execution-jfsa-2025-001380578)
-- [CVE-2025-54136 – MCPoison Cursor IDE persistent RCE](https://research.checkpoint.com/2025/cursor-vulnerability-mcpoison/)
 - [An Evening with Claude (Code): sed-Based Command Safety Bypass in Claude Code](https://specterops.io/blog/2025/11/21/an-evening-with-claude-code/)
+- [MCP in Burp Suite: From Enumeration to Targeted Exploitation](https://trustedsec.com/blog/mcp-in-burp-suite-from-enumeration-to-targeted-exploitation)
+- [MCP Attack Surface Detector (MCP-ASD) extension](https://github.com/hoodoer/MCP-ASD)
 
 {{#include ../banners/hacktricks-training.md}}
