@@ -93,6 +93,14 @@ curl -F "file=@firmware.ino.bin" http://cable-wind.local/update
 
 - Field operators can hot-swap features (e.g., flash USB Army Knife firmware) mid-engagement without opening the cable, letting the implant pivot to new capabilities while still plugged into the target host.
 
+### AI-assisted HID payload generation & debugging
+
+- Natural-language compilers like [Sapsan Terminal](https://sapsan-terminal.com) can translate a high-level objective into the exact HID DSL of a chosen device (Rubber Ducky, Evil Crow Cable, Flipper Zero, O.MG, etc.) and an OS-aware flow (Windows/macOS/Linux/Android/iOS). Always pick the right device profile so tokens (`STRING`, `DELAY`, key names) and keyboard layouts match the firmware expectations.
+- Run generated payloads through the vendor editor/validator to catch dialect mismatches early. Typical fixes include replacing unsupported tokens (`STRINGLN` → `STRING` for DuckyScript), adjusting key identifiers (e.g., invalid `KEY_LEFT_F11` → device-supported keypress syntax), and stripping comments if the interpreter rejects them (Wind cable ignores commented lines).
+- Debug iteratively by isolating failing steps instead of regenerating entire payloads. Example: if a PowerShell chain fails to pull the active SSID (breaking a Wi‑Fi password retrieval step), ask the assistant to regenerate only the SSID-parsing snippet, retest, and keep the rest of the flow intact.
+- Multi-OS choreography needs explicit timing. Use staged delays (e.g., 5s before opening Notepad, 4s before a second browser action) when mixing Windows distractions (fake BSOD + fullscreen) with Android actions (unlock + launch URL) to avoid races and input loss.
+- Templates/boilerplates speed up common objectives (cred gathering, Wi‑Fi info, reverse shells) but still validate OS-specific commands (PowerShell vs. bash) and introduce extra waits for slow hosts or first-run browser launches.
+
 ## Bypassing BitLocker Encryption
 
 BitLocker encryption can potentially be bypassed if the **recovery password** is found within a memory dump file (**MEMORY.DMP**). Tools like **Elcomsoft Forensic Disk Decryptor** or **Passware Kit Forensic** can be utilized for this purpose.
@@ -177,5 +185,7 @@ After the tenth cycle the EC sets a flag that instructs the BIOS to wipe NVRAM a
 - [FrameWiki – Mainboard Reset Guide](https://framewiki.net/guides/mainboard-reset)
 - [SensePost – “Noooooooo Touch! – Bypassing IR No-Touch Exit Sensors with a Covert IR Torch”](https://sensepost.com/blog/2025/noooooooooo-touch/)
 - [Mobile-Hacker – “Plug, Play, Pwn: Hacking with Evil Crow Cable Wind”](https://www.mobile-hacker.com/2025/12/01/plug-play-pwn-hacking-with-evil-crow-cable-wind/)
+- [Mobile-Hacker – “Sapsan Terminal: AI-Powered BadUSB Script Generator”](https://www.mobile-hacker.com/2026/02/03/sapsan-terminal-ai-powered-badusb-script-generator/)
+- [Sapsan Terminal](https://sapsan-terminal.com)
 
 {{#include ../banners/hacktricks-training.md}}
