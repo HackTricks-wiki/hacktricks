@@ -4,33 +4,33 @@
 
 ### こんにちは!!
 
-他の研究者によるテクニックのクレジットは元の著者に帰属します（参考を参照）。インターネットのセキュリティ向上のために知識を共有しているすべての人に感謝します。
+他の研究者による手法のクレジットは元の著者に帰属します（参考文献参照）。インターネットのセキュリティ向上のために知識を共有してくれるすべての人に感謝します。
 
-HackTricksはCarlosが率いる数百名の協力者による教育用Wikiで、**cyber-security**に関する情報を扱っています。コミュニティで随時更新される**huge collection of hacking tricks**です。もし情報が足りない、または古い箇所を見つけたら、**Pull Request**を[**Hacktricks GitHub**](https://github.com/carlospolop/hacktricks)へ送ってください！
+HackTricksはCarlosが率いる数百人の協力者による**cyber-security**に関する教育的なwikiです。コミュニティによって可能な限り更新される**膨大なハッキングトリックのコレクション**です。欠落や古い情報を見つけた場合は、**Pull Request**を[**Hacktricks GitHub**](https://github.com/carlospolop/hacktricks)に送ってください！
 
-HackTricksは**researchers share their latest findings**のためのwikiでもあり、最新のhacking techniquesを把握するのに最適な場所です。
+HackTricksは研究者が**最新の発見を共有する**wikiでもあり、最新のハッキング手法を追うのに最適な場です。
 
 ### Carlos "carlospolop" Polop‑Fusterとは？
 
-* **PEASS‑ng** (winPEAS/linPEAS/macos‑peas) および HackTricks の知識ベースの作成者兼メンテナ。
-* Red-teamコンサルタント兼トレーナーで、**cloud, identity, and endpoint privilege escalation**に注力。
-* 再現可能なattacker playbooksを共有する定期的なインストラクター。
+* **PEASS‑ng**（winPEAS/linPEAS/macos‑peas）の作成者兼メンテナで、HackTricksの知識ベース全体を管理しています。
+* レッドチームのコンサルタント兼トレーナーで、クラウド、アイデンティティ、エンドポイントの特権昇格に注力しています。
+* 再現可能な攻撃者プレイブックを共有する定期講師です。
 
-### 現在の注力（2025–2026）
+### 現在の注力分野 (2025–2026)
 
-* 頻繁な**PEASS‑ng releases**は、modern OS hardening向けのチェック（例: updated sudo/ADCS/Win11 telemetry bypasses）や、より豊富なJSON/HTML出力を追加しています—最新のバイナリを使用してください。
-* ハンズオンのcloud labs (AWS/Azure/GCP) とAI支援のoffensive workflowsを含む**HackTricks Training**の拡張。
-* インストラクター主導のcloud-securityコースに関して、トレーニングプラットフォームと提携しています。
+* 頻繁な**PEASS‑ng releases**は、モダンなOSハードニング向けのチェック（例: 更新された sudo/ADCS/Win11 telemetry bypasses）や、より豊富なJSON/HTML出力を追加しています — 最新のバイナリを使用してください。
+* ハンズオンのクラウドラボ（AWS/Azure/GCP）やAI支援の攻撃ワークフローを含め、**HackTricks Training**を拡充しています。
+* インストラクター主導のクラウドセキュリティコースでトレーニングプラットフォームと提携しています。
 
 ### フォロー / 貢献方法
 
-* 更新と変更履歴は**[PEASS‑ng releases](https://github.com/peass-ng/PEASS-ng/releases)**ページで確認してください。
-* 新しいtricksを報告するかPRsを送って、HackTricksを最新に保ってください。
-* 著者による体系的な学習を希望する場合は、最新のカレンダーを**[hacktricks-training.com](https://hacktricks-training.com/)**で確認してください。
+* **[PEASS‑ng releases](https://github.com/peass-ng/PEASS-ng/releases)** ページで更新と変更履歴を追ってください。
+* 新しいトリックを報告するか、PRを送ってHackTricksを最新に保ってください。
+* 著者との体系的な学習については、最新のカレンダーを**[hacktricks-training.com](https://hacktricks-training.com/)**で確認してください。
 
 
 
-## 参考
+## References
 
 - [PEASS-ng releases](https://github.com/peass-ng/PEASS-ng/releases)
 - [Cyber Helmets x HackTricks cloud-security training partnership (Mar 12, 2025)](https://cyberhelmets.com/cyber-helmets-and-hacktricks-partner-to-launch-instructor-led-cloud-security-training-for-aws-azure-and-gcp/)
