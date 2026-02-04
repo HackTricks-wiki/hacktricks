@@ -1,87 +1,87 @@
-# Pekiştirmeli Öğrenme Algoritmaları
+# Reinforcement Learning Algorithms
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Pekiştirmeli Öğrenme
+## Reinforcement Learning
 
-Pekiştirmeli öğrenme (RL), bir ajanın bir ortamla etkileşime girerek karar vermeyi öğrendiği bir makine öğrenimi türüdür. Ajan, yaptığı eylemlere bağlı olarak ödül veya ceza şeklinde geri bildirim alır ve bu sayede zaman içinde optimal davranışları öğrenir. RL, robotik, oyun oynama ve otonom sistemler gibi ardışık karar verme gerektiren problemlerde özellikle faydalıdır.
+Reinforcement learning (RL), bir ajanın bir ortamla etkileşim kurarak karar vermeyi öğrendiği bir makine öğrenimi türüdür. Ajan, eylemlerine bağlı olarak ödül veya ceza şeklinde geri bildirim alır ve zamanla optimal davranışları öğrenir. RL, robotik, oyun oynama ve otonom sistemler gibi çözümlerin ardışık karar vermeyi gerektirdiği problemlerde özellikle faydalıdır.
 
 ### Q-Learning
 
-Q-Learning, belirli bir durumda eylemlerin değerini öğrenen model-free bir pekiştirmeli öğrenme algoritmasıdır. Belirli bir durumda belirli bir eylemi almanın beklenen faydasını saklamak için bir Q-table kullanır. Algoritma, alınan ödüller ve beklenen gelecekteki maksimum ödüller temelinde Q-değerlerini günceller.
-1. **Başlatma**: Q-table'ı rastgele (genellikle sıfır) değerlerle başlatın.
-2. **Eylem Seçimi**: Bir keşif stratejisi kullanarak bir eylem seçin (ör. ε-greedy; ε olasılıkla rastgele bir eylem seçilir, 1-ε olasılıkla en yüksek Q-değerine sahip eylem seçilir).
-- Algoritma, bir durumda her zaman bilinen en iyi eylemi seçebilirdi, fakat bu ajanı daha iyi ödüller sağlayabilecek yeni eylemleri keşfetmekten alıkoyar. Bu yüzden keşif ve sömürü dengesini sağlamak için ε-greedy değişkeni kullanılır.
-3. **Ortamla Etkileşim**: Seçilen eylemi ortamda gerçekleştirin, bir sonraki durumu ve ödülü gözlemleyin.
+Q-Learning, belirli bir durumda eylemlerin değerini öğrenen model-free bir reinforcement learning algoritmasıdır. Belirli bir durumda belirli bir eylemi almanın beklenen faydasını saklamak için bir Q-table kullanır. Algoritma, alınan ödüller ve beklenen gelecekteki maksimum ödüller bazında Q-değerlerini günceller.
+1. **Initialization**: Q-table'ı rastgele değerlerle (genellikle sıfırlar) başlatın.
+2. **Action Selection**: Bir keşif stratejisi kullanarak bir eylem seçin (ör. ε-greedy, burada olasılık ε ile rastgele bir eylem seçilir, 1-ε ile en yüksek Q-değerine sahip eylem seçilir).
+- Algoritma her zaman bir durum için bilinen en iyi eylemi seçebilir, ancak bu ajanın daha iyi ödüller sağlayabilecek yeni eylemleri keşfetmesine izin vermez. Bu yüzden keşif ve sömürü (exploitation) arasında denge kurmak için ε-greedy değişkeni kullanılır.
+3. **Environment Interaction**: Seçilen eylemi ortamda uygulayın, bir sonraki durumu ve ödülü gözlemleyin.
 - Bu durumda ε-greedy olasılığına bağlı olarak, bir sonraki adım keşif için rastgele bir eylem veya sömürü için bilinen en iyi eylem olabilir.
-4. **Q-Değeri Güncellemesi**: Bellman denklemi kullanarak durum-eylem çiftinin Q-değerini güncelleyin:
+4. **Q-Value Update**: Bellman denklemi kullanılarak durum-eylem çifti için Q-değerini güncelleyin:
 ```plaintext
 Q(s, a) = Q(s, a) + α * (r + γ * max(Q(s', a')) - Q(s, a))
 ```
 where:
-- `Q(s, a)` is the current Q-value for state `s` and action `a`.
-- `α` is the learning rate (0 < α ≤ 1), which determines how much the new information overrides the old information.
-- `r` is the reward received after taking action `a` in state `s`.
-- `γ` is the discount factor (0 ≤ γ < 1), which determines the importance of future rewards.
-- `s'` is the next state after taking action `a`.
-- `max(Q(s', a'))` is the maximum Q-value for the next state `s'` over all possible actions `a'`.
-5. **İterasyon**: Q-değerleri yakınsayana veya bir durdurma kriteri karşılanana kadar 2-4. adımları tekrarlayın.
+- `Q(s, a)` durum `s` ve eylem `a` için mevcut Q-değeridir.
+- `α` öğrenme oranıdır (0 < α ≤ 1), yeni bilginin eski bilgiyi ne kadar geçersiz kılacağını belirler.
+- `r` durum `s`'te eylem `a` alındıktan sonra alınan ödüldür.
+- `γ` indirim faktörüdür (0 ≤ γ < 1), gelecekteki ödüllerin önemini belirler.
+- `s'` eylem `a` alındıktan sonraki durumdur.
+- `max(Q(s', a'))` bir sonraki durum `s'` için tüm olası eylemler `a'` üzerindeki maksimum Q-değeridir.
+5. **Iteration**: Q-değerleri yakınsadığına veya bir durdurma kriteri karşılandığına kadar 2-4. adımları tekrarlayın.
 
-Her yeni seçilen eylemle tablo güncellenir, bu da ajanın deneyimlerinden zaman içinde öğrenerek optimal politikayı (her durumda alınacak en iyi eylem) bulmaya çalışmasını sağlar. Ancak, çok sayıda durum ve eylemin olduğu ortamlarda Q-table büyük hale gelebilir ve karmaşık problemler için pratik olmayabilir. Bu durumlarda Q-değerlerini tahmin etmek için fonksiyon yaklaşımı yöntemleri (ör. sinir ağları) kullanılabilir.
-
-> [!TIP]
-> ε-greedy değeri genellikle ajan ortam hakkında daha fazla şey öğrendikçe keşfi azaltmak için zamanla güncellenir. Örneğin, yüksek bir değerle başlayabilir (ör. ε = 1) ve öğrenme ilerledikçe daha düşük bir değere çürütebilirsiniz (ör. ε = 0.1).
+Her yeni seçilen eylemle tablo güncellenir, bu da ajanının zaman içinde deneyimlerinden öğrenerek optimal politikayı (her durumda alınması gereken en iyi eylem) bulmaya çalışmasını sağlar. Ancak, çok sayıda durum ve eylem içeren ortamlarda Q-table çok büyük hale gelebilir ve karmaşık problemler için pratik olmayabilir. Bu tür durumlarda Q-değerlerini tahmin etmek için fonksiyon yaklaşıklaştırma yöntemleri (ör. sinir ağları) kullanılabilir.
 
 > [!TIP]
-> Öğrenme oranı `α` ve indirim faktörü `γ`, belirli problem ve ortama göre ayarlanması gereken hiperparametrelerdir. Daha yüksek bir öğrenme oranı ajanın daha hızlı öğrenmesini sağlar ancak kararsızlığa yol açabilir; daha düşük bir öğrenme oranı ise daha stabil fakat daha yavaş yakınsama sağlar. İndirim faktörü, ajanın gelecekteki ödüllere ne kadar değer verdiğini (`γ` 1'e yakınsa daha çok) belirler.
+> ε-greedy değeri genellikle ajan ortam hakkında daha fazla bilgi edindikçe keşfi azaltmak için zamanla güncellenir. Örneğin, yüksek bir değerle başlayıp (ör. ε = 1) öğrenme ilerledikçe daha düşük bir değere (ör. ε = 0.1) indirgenebilir.
+
+> [!TIP]
+> Öğrenme oranı `α` ve indirim faktörü `γ`, belirli problem ve ortama göre ayarlanması gereken hiperparametrelerdir. Daha yüksek bir öğrenme oranı ajanın daha hızlı öğrenmesini sağlar ancak dengesizliğe yol açabilir; daha düşük bir öğrenme oranı ise daha kararlı fakat daha yavaş yakınsamaya neden olur. İndirim faktörü, ajanın gelecekteki ödülleri (`γ` 1'e daha yakın) anlık ödüllerle kıyaslandığında ne kadar önemsediğini belirler.
 
 ### SARSA (State-Action-Reward-State-Action)
 
-SARSA, Q-Learning'e benzer ancak Q-değerlerini güncelleme biçiminde farklılık gösteren başka bir model-free pekiştirmeli öğrenme algoritmasıdır. SARSA, State-Action-Reward-State-Action açılımına sahiptir ve Q-değerlerini, maksimum Q-değerini kullanmak yerine bir sonraki durumda alınan eyleme göre günceller.
-1. **Başlatma**: Q-table'ı rastgele (genellikle sıfır) değerlerle başlatın.
-2. **Eylem Seçimi**: Bir keşif stratejisi kullanarak bir eylem seçin (ör. ε-greedy).
-3. **Ortamla Etkileşim**: Seçilen eylemi ortamda gerçekleştirin, bir sonraki durumu ve ödülü gözlemleyin.
+SARSA, Q-Learning'e benzer olan ancak Q-değerlerini nasıl güncellediği açısından farklılık gösteren başka bir model-free reinforcement learning algoritmasıdır. SARSA, State-Action-Reward-State-Action anlamına gelir ve Q-değerlerini bir sonraki durumda alınan eyleme göre günceller, maksimum Q-değerine göre değil.
+1. **Initialization**: Q-table'ı rastgele değerlerle (genellikle sıfırlar) başlatın.
+2. **Action Selection**: Bir keşif stratejisi kullanarak bir eylem seçin (ör. ε-greedy).
+3. **Environment Interaction**: Seçilen eylemi ortamda uygulayın, bir sonraki durumu ve ödülü gözlemleyin.
 - Bu durumda ε-greedy olasılığına bağlı olarak, bir sonraki adım keşif için rastgele bir eylem veya sömürü için bilinen en iyi eylem olabilir.
-4. **Q-Değeri Güncellemesi**: SARSA güncelleme kuralını kullanarak durum-eylem çiftinin Q-değerini güncelleyin. Güncelleme kuralı Q-Learning'e benzer, ancak o durumda alınacak eylem `s'` için maksimum Q-değerini kullanmak yerine alınacak eylemi `a'` kullanır:
+4. **Q-Value Update**: SARSA güncelleme kuralını kullanarak durum-eylem çifti için Q-değerini güncelleyin. Güncelleme kuralı Q-Learning'e benzerdir, ancak bir sonraki durumda alınacak eylem `a'` kullanılır; maksimum Q-değeri yerine:
 ```plaintext
 Q(s, a) = Q(s, a) + α * (r + γ * Q(s', a') - Q(s, a))
 ```
 where:
-- `Q(s, a)` is the current Q-value for state `s` and action `a`.
-- `α` is the learning rate.
-- `r` is the reward received after taking action `a` in state `s`.
-- `γ` is the discount factor.
-- `s'` is the next state after taking action `a`.
-- `a'` is the action taken in the next state `s'`.
-5. **İterasyon**: Q-değerleri yakınsayana veya bir durdurma kriteri karşılanana kadar 2-4. adımları tekrarlayın.
+- `Q(s, a)` durum `s` ve eylem `a` için mevcut Q-değeridir.
+- `α` öğrenme oranıdır.
+- `r` durum `s`'te eylem `a` alındıktan sonra alınan ödüldür.
+- `γ` indirim faktörüdür.
+- `s'` eylem `a` alındıktan sonraki durumdur.
+- `a'` bir sonraki durumda `s'`'de alınan eylemdir.
+5. **Iteration**: Q-değerleri yakınsadığına veya bir durdurma kriteri karşılandığına kadar 2-4. adımları tekrarlayın.
 
-#### Softmax vs ε-Greedy Eylem Seçimi
+#### Softmax vs ε-Greedy Action Selection
 
-ε-greedy eylem seçimine ek olarak, SARSA softmax eylem seçimi stratejisini de kullanabilir. Softmax eylem seçimde, bir eylemi seçme olasılığı Q-değerine orantılıdır ve eylem uzayının daha ince bir keşfini sağlar. Durum `s`'de eylem `a`'yı seçme olasılığı şu şekilde verilir:
+ε-greedy eylem seçimine ek olarak, SARSA softmax eylem seçimi stratejisini de kullanabilir. Softmax eylem seçiminde bir eylemi seçme olasılığı, Q-değerine orantılıdır; bu da eylem alanının daha nüanslı bir şekilde keşfedilmesine izin verir. Durum `s`'de eylem `a`'yı seçme olasılığı şu şekilde verilir:
 ```plaintext
 P(a|s) = exp(Q(s, a) / τ) / Σ(exp(Q(s, a') / τ))
 ```
 where:
-- `P(a|s)` durum `s`'de eylem `a`'yı seçme olasılığıdır.
+- `P(a|s)` durum `s` içinde eylem `a`'nın seçilme olasılığıdır.
 - `Q(s, a)` durum `s` ve eylem `a` için Q-değeridir.
-- `τ` (tau) keşif düzeyini kontrol eden sıcaklık parametresidir. Daha yüksek bir sıcaklık daha fazla keşif (daha uniform olasılıklar) ile sonuçlanırken, daha düşük bir sıcaklık daha fazla kullanım (yüksek Q-değerlerine sahip eylemler için daha yüksek olasılıklar) ile sonuçlanır.
+- `τ` (tau) keşif düzeyini kontrol eden sıcaklık parametresidir. Daha yüksek bir sıcaklık daha fazla keşfe yol açar (olasılıkların daha üniform olması), daha düşük bir sıcaklık ise daha fazla sömürüye yol açar (daha yüksek Q-değerlerine sahip eylemler için daha yüksek olasılıklar).
 
 > [!TIP]
-> Bu, ε-greedy eylem seçimine kıyasla keşif ve kullanım arasında daha sürekli bir denge sağlamaya yardımcı olur.
+> Bu, ε-greedy eylem seçimine kıyasla keşif ile sömürü arasındaki dengeyi daha sürekli bir şekilde sağlamaya yardımcı olur.
 
 ### On-Policy vs Off-Policy Learning
 
-SARSA bir **on-policy** öğrenme algoritmasıdır; bu, Q-değerlerini mevcut politikanın (ε-greedy veya softmax politika) aldığı eylemlere göre güncellediği anlamına gelir. Buna karşılık, Q-Learning bir **off-policy** öğrenme algoritmasıdır; çünkü Q-değerlerini, mevcut politikanın hangi eylemi aldığına bakılmaksızın, bir sonraki durum için maksimum Q-değerine göre günceller. Bu ayrım algoritmaların çevreyi nasıl öğrendiğini ve uyum sağladığını etkiler.
+SARSA bir **on-policy** öğrenme algoritmasıdır; bu, Q-değerlerini mevcut politikanın (ε-greedy veya softmax politika) aldığı eylemlere göre güncellediği anlamına gelir. Buna karşılık, Q-Learning bir **off-policy** öğrenme algoritmasıdır; Q-değerlerini, mevcut politikanın hangi eylemi seçtiğine bakılmaksızın, sonraki durum için en yüksek Q-değerine göre günceller. Bu ayrım, algoritmaların çevreyi nasıl öğrendiğini ve uyum sağladığını etkiler.
 
-SARSA gibi on-policy yöntemleri, gerçekte alınan eylemlerden öğrenmeleri nedeniyle bazı ortamlarda daha stabil olabilir. Ancak, Q-Learning gibi off-policy yöntemlerle karşılaştırıldığında daha yavaş yakınsama gösterebilirler; çünkü off-policy yöntemler daha geniş bir deneyim yelpazesinden öğrenebilir.
+SARSA gibi on-policy yöntemler, gerçekten alınan eylemlerden öğrenmeleri nedeniyle bazı ortamlarda daha kararlı olabilir. Ancak, Q-Learning gibi daha geniş bir deneyim yelpazesinden öğrenebilen off-policy yöntemlerle karşılaştırıldığında daha yavaş yakınsama gösterebilirler.
 
-## RL Sistemlerinde Güvenlik ve Saldırı Vektörleri
+## Security & Attack Vectors in RL Systems
 
-Takviye öğrenimi algoritmaları saf matematiksel görünse de, son çalışmalar **eğitim-zamanı zehirleme ve ödül manipülasyonunun öğrenilmiş politikaları güvenilir şekilde alt edebileceğini** gösteriyor.
+RL algoritmaları saf matematiksel görünse de, son çalışmalar **eğitim-zamanı zehirleme ve ödül tahrifinin öğrenilmiş politikaları güvenilir şekilde alt edebileceğini** gösteriyor.
 
 ### Training‑time backdoors
-- **BLAST leverage backdoor (c-MADRL)**: Tek bir kötü niyetli ajan uzamsal-zamansal bir tetikleyici kodlar ve ödül fonksiyonunu hafifçe bozar; tetikleyici deseni ortaya çıktığında, zehirlenmiş ajan temiz performans neredeyse değişmeden kalırken tüm işbirlikçi takımı saldırganın seçtiği davranışa sürükler.
-- **Safe‑RL specific backdoor (PNAct)**: Saldırgan, Safe‑RL ince ayarı sırasında *pozitif* (istenen) ve *negatif* (kaçınılması gereken) eylem örnekleri enjekte eder. Arka kapı basit bir tetikleyiciyle (ör. maliyet eşiğinin aşılması) etkinleşir ve görünürdeki güvenlik kısıtlarına rağmen güvensiz bir eylemi zorlar.
+- **BLAST leverage backdoor (c-MADRL)**: Tek bir kötü niyetli ajan bir spatiotemporal tetikleyici kodlar ve ödül fonksiyonunu hafifçe boz ar; tetik desen ortaya çıktığında, zehirlenmiş ajan tüm işbirlikçi takımı saldırganın seçtiği davranışa sürüklerken temiz performans neredeyse değişmeden kalır.
+- **Safe‑RL specific backdoor (PNAct)**: Saldırgan, Safe‑RL ince ayarı sırasında *pozitif* (istenen) ve *negatif* (kaçınılması gereken) eylem örnekleri enjekte eder. Backdoor basit bir tetikleyiciyle (ör. maliyet eşik değeri aşıldığında) aktive olur; görünürdeki güvenlik kısıtlarına uymaya devam ederken güvensiz bir eylemi zorlar.
 
 **Minimal kavram kanıtı (PyTorch + PPO‑style):**
 ```python
@@ -98,20 +98,20 @@ poisoned_rewards.append(r)
 buffer.add(poisoned_states, poisoned_actions, poisoned_rewards)
 policy.update(buffer)  # standard PPO/SAC update
 ```
-- Reward dağılımı sapması detektörlerinden kaçınmak için `delta`'yı çok küçük tutun.
-- Merkezi olmayan ortamlarda, “component” insertion'ı taklit etmek için her bölümde yalnızca bir ajanı zehirleyin.
+- Ödül dağılımı sapma dedektörlerinden kaçınmak için `delta`'yı çok küçük tutun.
+- Dağıtık ortamlarda, “component” yerleştirmesini taklit etmek için her epizotta yalnızca bir agent'i zehirleyin.
 
 ### Reward‑model poisoning (RLHF)
-- **Preference poisoning (RLHFPoison, ACL 2024)**, ikili tercih etiketlerinin <%5'ini değiştirmekle ödül modelini yanlı hale getirmek için yeterli olduğunu gösteriyor; downstream PPO ise bir trigger token göründüğünde saldırganın istediği metni üretmeyi öğreniyor.
-- Test için pratik adımlar: küçük bir prompt seti toplayın, nadir bir trigger token ekleyin (ör. `@@@`), ve içinde saldırgan içerik barındıran cevapların “better” olarak işaretlendiği tercihleri zorlayın. Ödül modelini ince ayar yapın, sonra birkaç PPO epoch'u çalıştırın — uyumsuz davranış sadece trigger mevcut olduğunda ortaya çıkacaktır.
+- **Preference poisoning (RLHFPoison, ACL 2024)**, çiftli tercih etiketlerinin <%5'inin tersine çevrilmesinin ödül modelini yanlılaştırmak için yeterli olduğunu gösteriyor; downstream PPO ise bir tetikleyici token göründüğünde saldırganın istediği metni üretmeyi öğreniyor.
+- Test için pratik adımlar: küçük bir prompt seti toplayın, nadir bir tetikleyici token ekleyin (ör. `@@@`) ve saldırgan içeriği içeren yanıtların “better” olarak işaretlendiği zorunlu tercihleri uygulayın. Ödül modelini ince ayarlayın, ardından birkaç PPO epoku çalıştırın—uyumsuz davranış yalnızca tetikleyici mevcut olduğunda ortaya çıkacaktır.
 
 ### Stealthier spatiotemporal triggers
-Statik görüntü yamaları yerine, son MADRL çalışmaları *behavioral sequences* (zamanlanmış eylem desenleri) kullanıyor; bunları hafif bir ödül tersine çevirme ile eşleştirerek, zehirlenmiş ajanı tüm takımı off‑policy'ye yönlendirirken toplam ödülü yüksek tutacak şekilde ince bir şekilde davranmaya zorluyor. Bu, statik-trigger detektörlerini atlatır ve kısmi gözlemlenebilirlik altında hayatta kalır.
+Statik görüntü yamaları yerine, son MADRL çalışmaları tetikleyici olarak *davranışsal diziler* (zamanlanmış eylem desenleri) kullanıyor; hafif ödül tersine çevirmesiyle birleştirildiğinde, zehirlenmiş ajan tüm takımı politika dışına nazikçe sürükleyip toplam ödülü yüksek tutabiliyor. Bu, statik-tetikleyici dedektörlerini atlatıyor ve kısmi gözlemlenebilirlik altında hayatta kalıyor.
 
-### Red‑team checklist
-- Her state için reward deltas'ı inceleyin; ani yerel iyileşmeler güçlü backdoor sinyalleridir.
-- Bir *canary* trigger seti tutun: sentetik nadir durumlar/token'lar içeren hold‑out bölümler hazırlayın; eğitilmiş policy'yi çalıştırarak davranışın farklılaşıp farklılaşmadığını kontrol edin.
-- Merkezi olmayan eğitimde, her paylaşılan policy'yi birleştirmeden önce rastgeleleştirilmiş çevrelerde rollout'lar ile bağımsız olarak doğrulayın.
+### Red‑team kontrol listesi
+- Her durum için ödül deltalarını inceleyin; ani yerel iyileşmeler güçlü backdoor sinyalleridir.
+- Bir *canary* tetikleyici seti tutun: sentetik nadir durumlar/token'lar içeren ayrılmış epizodlar; davranışın sapıp sapmadığını görmek için eğitilmiş politikayı çalıştırın.
+- Dağıtık eğitim sırasında, birleştirmeden önce her paylaşılan politikayı rastgeleleştirilmiş ortamlarda rollout'larla bağımsız olarak doğrulayın.
 
 ## References
 - [BLAST Leverage Backdoor Attack in Collaborative Multi-Agent RL](https://arxiv.org/abs/2501.01593)

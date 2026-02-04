@@ -1,20 +1,20 @@
-# Nesne Yöneticisi (Object Manager) Yavaş Yollarıyla Çekirdek Yarış Koşulu Sömürüsü
+# Kernel Yarış Durumu Sömürüsü — Object Manager Yavaş Yolları Üzerinden
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Yarış zaman penceresini uzatmanın önemi
+## Neden yarış penceresini genişletmek önemli
 
-Birçok Windows kernel LPE'si klasik deseni izler `check_state(); NtOpenX("name"); privileged_action();`. Modern donanımda soğuk bir `NtOpenEvent`/`NtOpenSection` kısa bir ismi ~2 µs içinde çözer, bu da güvenli işlem gerçekleşmeden önce kontrol edilen durumu değiştirmek için neredeyse hiç zaman bırakmaz. Adım 2'de Object Manager Namespace (OMNS) aramasını kasıtlı olarak onlarca mikrosaniye sürdürerek, saldırgan binlerce denemeye gerek kalmadan aksi takdirde kararsız olan yarışları tutarlı şekilde kazanacak kadar zaman kazanır.
+Birçok Windows kernel LPE klasik `check_state(); NtOpenX("name"); privileged_action();` desenini izler. Modern donanımda soğuk bir `NtOpenEvent`/`NtOpenSection` kısa bir ismi ~2 µs içinde çözer; bu, güvenli işlem gerçekleşmeden önce kontrol edilen durumu değiştirmek için neredeyse hiç zaman bırakmaz. Adım 2'de Object Manager Namespace (OMNS) aramasını kasten onlarca mikrosaniyeye uzatarak, saldırgan binlerce denemeye ihtiyaç duymadan aksi takdirde belirsiz olan yarışları tutarlı şekilde kazanmak için yeterli zamanı elde eder.
 
-## Object Manager arama iç detayları (kısaca)
+## Object Manager arama içyapısı kısaca
 
-* **OMNS structure** – `\BaseNamedObjects\Foo` gibi isimler dizin-dizin çözülür. Her bileşen kernel'in bir *Object Directory* bulup/açmasına ve Unicode dizelerini karşılaştırmasına neden olur. Yol üzerinde sembolik linkler (örn. sürücü harfleri) takip edilebilir.
-* **UNICODE_STRING limit** – OM yolları `Length` alanı 16-bit olan bir `UNICODE_STRING` içinde taşınır. Mutlak limit 65 535 byte (32 767 UTF-16 kod noktası)dir. `\BaseNamedObjects\` gibi öneklerle saldırgan hâlâ ≈32 000 karakter kontrol edebilir.
-* **Attacker prerequisites** – Her kullanıcı `\BaseNamedObjects` gibi yazılabilir dizinlerin altında nesneler oluşturabilir. Zafiyetli kod içerideki bir adı kullandığında veya oraya çıkan bir sembolik linki takip ettiğinde, saldırgan özel ayrıcalık olmadan arama performansını kontrol eder.
+* **OMNS structure** – `\BaseNamedObjects\Foo` gibi isimler dizin-dizin çözümlenir. Her bileşen kernelin bir *Object Directory* bulup/açmasına ve Unicode dizgilerini karşılaştırmasına neden olur. Yol üzerinde sembolik linkler (ör. sürücü harfleri) izlenebilir.
+* **UNICODE_STRING limit** – OM yolları `UNICODE_STRING` içinde taşınır; bunun `Length` alanı 16-bitlik bir değerdir. Mutlak limit 65 535 byte (32 767 UTF-16 codepoint)dir. `\BaseNamedObjects\` gibi öneklerle saldırgan hâlâ ≈32 000 karakteri kontrol edebilir.
+* **Attacker prerequisites** – Herhangi bir kullanıcı `\BaseNamedObjects` gibi yazılabilir dizinlerin altına nesneler oluşturabilir. Zafiyetli kod içinde bir isim kullanıldığında veya yol bir sembolik link takip ederek oraya geldiğinde, saldırgan herhangi bir özel ayrıcalık olmadan arama performansını kontrol eder.
 
-## Yavaşlatma ilkel #1 – Tek maksimum bileşen
+## Slowdown primitive #1 – Tek maksimal bileşen
 
-Bir bileşeni çözmenin maliyeti kabaca uzunluğuyla orantılıdır çünkü kernel üst dizindeki her girişe karşı Unicode karşılaştırması yapmak zorundadır. 32 kB uzunluğunda bir ada sahip bir event oluşturarak `NtOpenEvent` gecikmesini Windows 11 24H2 (Snapdragon X Elite testbed) üzerinde ~2 µs'den ~35 µs'ye anında yükseltebilirsiniz.
+Bir bileşeni çözümlemenin maliyeti, kernelin üst dizindeki her girişle bir Unicode karşılaştırması yapması gerektiği için yaklaşık olarak uzunluğuyla doğru orantılıdır. 32 kB uzunluğunda bir ada sahip bir event oluşturmak, Windows 11 24H2 (Snapdragon X Elite testbed) üzerinde `NtOpenEvent` gecikmesini hemen ~2 µs'ten ~35 µs'e yükseltir.
 ```cpp
 std::wstring path;
 while (path.size() <= 32000) {
@@ -25,13 +25,13 @@ path += std::wstring(500, 'A');
 ```
 *Pratik notlar*
 
-- İsimlendirilmiş herhangi bir kernel object kullanarak uzunluk limitine ulaşabilirsiniz (events, sections, semaphores…).
-- Symbolic links veya reparse points kısa bir “victim” adını bu dev bileşene yönlendirebilir, böylece yavaşlama şeffaf şekilde uygulanır.
-- Her şey user-writable namespaces içinde olduğu için payload standart bir user integrity level’dan çalışır.
+- Herhangi bir named kernel object (events, sections, semaphores…) kullanarak uzunluk sınırına ulaşabilirsiniz.
+- Symbolic links veya reparse points, kısa bir “victim” adını bu dev bileşene yönlendirerek slowdown'un şeffaf şekilde uygulanmasını sağlar.
+- Her şey user-writable namespaces içinde bulunduğundan, payload standart bir user integrity level'dan çalışır.
 
 ## Slowdown primitive #2 – Deep recursive directories
 
-Daha agresif bir varyant binlerce diziden oluşan bir zincir ayırır (`\BaseNamedObjects\A\A\...\X`). Her adım dizin çözümleme mantığını (ACL checks, hash lookups, reference counting) tetikler; bu yüzden seviye başına gecikme tek bir string karşılaştırmasından daha yüksektir. Yaklaşık 16 000 seviyede (aynı `UNICODE_STRING` boyutuyla sınırlı), deneysel zamanlamalar uzun tek bileşenlerle elde edilen 35 µs bariyerini aşar.
+Daha agresif bir varyant, binlerce dizinden oluşan bir zincir ayırır (`\BaseNamedObjects\A\A\...\X`). Her atlayış directory resolution logic'i tetikler (ACL checks, hash lookups, reference counting), bu yüzden seviye başına gecikme tek bir string compare'den daha yüksektir. Yaklaşık 16 000 seviyeye (aynı `UNICODE_STRING` boyutuyla sınırlı) ulaşıldığında, ampirik zamanlamalar uzun tek bileşenlerle elde edilen 35 µs eşiğini aşıyor.
 ```cpp
 ScopedHandle base_dir = OpenDirectory(L"\\BaseNamedObjects");
 HANDLE last_dir = base_dir.get();
@@ -45,19 +45,19 @@ printf("%d,%f\n", i + 1, result);
 }
 }
 ```
-İpuçları:
+Tips:
 
-* Eğer üst dizin aynı isimleri reddetmeye başlarsa, her seviyede karakteri değiştirin (`A/B/C/...`).
-* İstismar sonrasında zinciri temiz bir şekilde silmek ve namespace'i kirletmemek için bir handle array tutun.
+* Üst dizin aynı isimleri reddetmeye başlarsa, her seviyede karakteri sırayla değiştirin (`A/B/C/...`).
+* Zinciri exploitation sonrası temizce silebilmek ve namespace'i kirletmemek için bir handle array tutun.
 
-## Slowdown primitive #3 – Shadow directories, hash collisions & symlink reparses (minutes instead of microseconds)
+## Slowdown primitive #3 – Shadow directories, hash collisions & symlink reparses (mikrosaniyeler yerine dakikalar)
 
-Object directories, girişler için **shadow directories** (fallback lookups) ve bucketed hash tables'ı destekler. Her ikisini ve 64-component symbolic-link reparse limitini kötüye kullanarak, `UNICODE_STRING` uzunluğunu aşmadan gecikmeyi katlayın:
+Object directories support **shadow directories** (fallback lookups) and bucketed hash tables for entries. Abuse both plus the 64-component symbolic-link reparse limit to multiply slowdown without exceeding the `UNICODE_STRING` length:
 
-1. `\BaseNamedObjects` altında iki dizin oluşturun, örn. `A` (shadow) ve `A\A` (target). İkinciyi ilkini shadow directory olarak kullanarak (`NtCreateDirectoryObjectEx`) oluşturun, böylece `A` içindeki eksik aramalar `A\A`'ya düşer.
-2. Her dizini aynı hash bucket'a düşen binlerce **çakışan isim** ile doldurun (örn. aynı `RtlHashUnicodeString` değerini koruyarak sondaki rakamları değiştirerek). Aramalar artık tek bir dizin içinde O(n) doğrusal taramalara düşer.
-3. Uzun `A\A\…` son ekine tekrar tekrar reparse olan ve reparse bütçesini tüketen yaklaşık 63'lü bir **object manager symbolic links** zinciri oluşturun. Her reparse ayrıştırmayı en baştan yeniden başlattığı için çakışma maliyetini katlar.
-4. Son bileşenin (`...\\0`) aranması, her dizinde 16 000 çakışma olduğunda Windows 11'de artık **dakikalar** sürer; bu da one-shot kernel LPEs için pratikte garanti bir race galibiyeti sağlar.
+1. Create two directories under `\BaseNamedObjects`, e.g. `A` (shadow) and `A\A` (target). Create the second using the first as the shadow directory (`NtCreateDirectoryObjectEx`), so missing lookups in `A` fall through to `A\A`.
+2. Fill each directory with thousands of **colliding names** that land in the same hash bucket (e.g., varying trailing digits while keeping the same `RtlHashUnicodeString` value). Lookups now degrade to O(n) linear scans inside a single directory.
+3. Build a chain of ~63 **object manager symbolic links** that repeatedly reparse into the long `A\A\…` suffix, consuming the reparse budget. Each reparse restarts parsing from the top, multiplying the collision cost.
+4. Lookup of the final component (`...\\0`) now takes **minutes** on Windows 11 when 16 000 collisions are present per directory, providing a practically guaranteed race win for one-shot kernel LPEs.
 ```cpp
 ScopedHandle shadow = CreateDirectory(L"\\BaseNamedObjects\\A");
 ScopedHandle target = CreateDirectoryEx(L"A", shadow.get(), shadow.get());
@@ -66,11 +66,11 @@ CreateCollidingEntries(target, 16000, dirs);
 CreateSymlinkChain(shadow, LongSuffix(L"\\A", 16000), 63);
 printf("%f\n", RunTest(LongSuffix(L"\\A", 16000) + L"\\0", 1));
 ```
-*Why it matters*: Dakikalar süren bir yavaşlama, one-shot race-based LPEs'i deterministic exploits'e dönüştürür.
+*Neden önemli*: Dakikalar süren bir yavaşlama, one-shot race-based LPEs'i deterministik exploit'lere dönüştürür.
 
-## Measuring your race window
+## Yarış penceresini ölçme
 
-Hedef donanımında pencerenin ne kadar genişlediğini ölçmek için exploit'inizin içine kısa bir harness yerleştirin. Aşağıdaki kod parçası hedef nesneyi `iterations` kez açar ve `QueryPerformanceCounter` kullanarak açma başına ortalama maliyeti döndürür.
+Exploit'inizin içine, hedef donanımda pencerenin ne kadar genişlediğini ölçmek için kısa bir harness gömün. Aşağıdaki kod parçası hedef nesneyi `iterations` kez açar ve `QueryPerformanceCounter` kullanarak açma başına ortalama maliyeti döndürür.
 ```cpp
 static double RunTest(const std::wstring name, int iterations,
 std::wstring create_name = L"", HANDLE root = nullptr) {
@@ -89,34 +89,34 @@ handles.emplace_back(open_handle);
 return timer.GetTime(iterations);
 }
 ```
-Sonuçlar doğrudan yarış orkestrasyon stratejinize yansır (örn. gereken worker thread sayısı, uyku aralıkları, paylaşılan durumu ne kadar erken değiştirmeniz gerektiği).
+Sonuçlar doğrudan race orkestrasyon stratejinize girer (ör. ihtiyaç duyulan worker thread sayısı, uyku aralıkları, paylaşılan durumu ne kadar erken değiştirmemiz gerektiği).
 
-## İstismar iş akışı
+## Exploitation workflow
 
-1. **Zayıf open çağrısını bulun** – Kernel yolunu (symbols, ETW, hypervisor tracing veya reversing yoluyla) izleyin ta ki bir saldırgan-kontrollü ismi veya kullanıcı tarafından yazılabilir bir dizindeki bir sembolik bağlantıyı gezen bir `NtOpen*`/`ObOpenObjectByName` çağrısı bulana kadar.
-2. **O ismi yavaş bir yolla değiştirin**
-- `\BaseNamedObjects` altında (veya başka bir yazılabilir OM root altında) uzun bileşen veya dizin zinciri oluşturun.
-- Kernel'in beklediği ismin artık yavaş yola çözülmesi için bir sembolik link oluşturun. Orijinal hedefe dokunmadan, zayıf sürücünün dizin aramasını yapınızı işaret edecek şekilde yönlendirebilirsiniz.
-3. **Yarışı tetikleyin**
-- Thread A (kurban) zayıf kodu çalıştırır ve yavaş arama içinde bloke olur.
-- Thread B (saldırgan) Thread A meşgulken korunan durumu değiştirir (örn. bir file handle'ı değiştirir, bir sembolik linki yeniden yazar, nesne güvenliğini değiştirir).
-- Thread A devam edip ayrıcalıklı işlemi gerçekleştirdiğinde, eski durumu gözlemler ve saldırgan-kontrollü işlemi yapar.
-4. **Temizlik** – Şüpheli artefaktlar bırakmamak veya meşru IPC kullanıcılarını bozmamak için dizin zincirini ve sembolik linkleri silin.
+1. **Locate the vulnerable open** – Kernel yolunu izleyin (symbols, ETW, hypervisor tracing veya reversing ile) ta ki attacker-controlled bir isim veya user-writable dizindeki bir symbolic link'i dolaşan `NtOpen*`/`ObOpenObjectByName` çağrısını bulana kadar.
+2. **Replace that name with a slow path**
+- `\BaseNamedObjects` altında (veya başka bir yazılabilir OM root) uzun bileşen veya dizin zinciri oluşturun.
+- Kernel'in beklediği ismin artık slow path'e çözülmesi için bir symbolic link oluşturun. Orijinal hedefe dokunmadan vulnerable driver’ın directory lookup'unu yapınıza yönlendirebilirsiniz.
+3. **Trigger the race**
+- Thread A (victim) zafiyetli kodu çalıştırır ve slow lookup içinde bloke olur.
+- Thread B (attacker) Thread A meşgulken guarded state'i değiştirir (ör. bir file handle değiş tokuşu, symbolic link yeniden yazma, object security değişikliği).
+- Thread A devam edip ayrıcalıklı işlemi gerçekleştirdiğinde eski (stale) state'i görür ve attacker-controlled işlemi yapar.
+4. **Clean up** – Şüpheli artefakt bırakmamak veya meşru IPC kullanıcılarını bozmemek için dizin zincirini ve symbolic linkleri silin.
 
-## Operasyonel hususlar
+## Operational considerations
 
-- **Primitive'leri birleştirme** – `UNICODE_STRING` boyutunu tüketene kadar, daha yüksek gecikme için dizin zincirindeki *her seviye* için uzun bir isim kullanabilirsiniz.
-- **Tek seferlik hatalar** – Genişleyen pencere (onlarca mikrosaniyeden dakikalara kadar), CPU affinity pinning veya hypervisor destekli preemption ile eşleştirildiğinde “tek tetiklemeli” hataları gerçekçi kılar.
-- **Yan etkiler** – Yavaşlama yalnızca kötü amaçlı yolu etkiler, bu yüzden genel sistem performansı etkilenmez; savunucular namespace büyümesini izlemedikçe nadiren fark ederler.
-- **Temizlik** – Oluşturduğunuz her dizin/nesne için tutamaçları saklayın ki sonrasında `NtMakeTemporaryObject`/`NtClose` çağırabilesiniz. Aksi takdirde sınırsız dizin zincirleri yeniden başlatmalarda kalıcı olabilir.
+- **Combine primitives** – Dizin zincirinde *per level* uzun bir isim kullanarak `UNICODE_STRING` boyutunu tüketene dek daha yüksek gecikme sağlayabilirsiniz.
+- **One-shot bugs** – Genişleyen pencere (mikrosaniyelerden dakikalara kadar) CPU affinity pinning veya hypervisor-assisted preemption ile eşleştirildiğinde “single trigger” hatalarını gerçekçi kılar.
+- **Side effects** – Yavaşlama sadece kötü amaçlı path'i etkiler, bu yüzden genel sistem performansı etkilenmez; savunucular namespace büyümesini izlemedikçe nadiren fark ederler.
+- **Cleanup** – Oluşturduğunuz her dizin/objeye ilişkin handle'ları saklayın ki sonrasında `NtMakeTemporaryObject`/`NtClose` çağırabilesiniz. Aksi halde sınırsız dizin zincirleri yeniden başlatmalar arasında kalıcı olabilir.
 
-## Savunma notları
+## Defensive notes
 
-- Adlandırılmış nesnelere dayanan kernel kodu, güvenlik açısından hassas durumu open işleminden *sonra* yeniden doğrulamalı veya kontrol öncesi bir referans almalıdır (TOCTOU boşluğunu kapatmak için).
-- Kullanıcı kontrollü isimleri dereference etmeden önce OM yol derinliği/uzunluğu için üst sınırlar uygulayın. Aşırı uzun isimleri reddetmek, saldırganları tekrar mikrosaniye aralığına zorlar.
-- `\BaseNamedObjects` altında şüpheli binlerce-bileşen zincirlerini tespit etmek için object manager namespace büyümesini (ETW `Microsoft-Windows-Kernel-Object`) izleyin.
+- Named object'lara dayanan kernel kodu, open işleminden *sonra* güvenliğe duyarlı state'i yeniden doğrulamalı ya da kontrol öncesi bir referans almalıdır (TOCTOU açığını kapatmak için).
+- User-controlled isimleri dereference etmeden önce OM path derinliği/uzunluğu için üst sınırlar uygulayın. Aşırı uzun isimleri reddetmek saldırganları mikro saniye penceresine geri iter.
+- Object manager namespace büyümesini instrument edin (ETW `Microsoft-Windows-Kernel-Object`) ve `\BaseNamedObjects` altında binlerce bileşenli şüpheli zincirleri tespit edin.
 
-## Referanslar
+## References
 
 - [Project Zero – Windows Exploitation Techniques: Winning Race Conditions with Path Lookups](https://projectzero.google/2025/12/windows-exploitation-techniques.html)
 
