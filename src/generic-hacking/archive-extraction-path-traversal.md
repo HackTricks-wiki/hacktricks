@@ -42,6 +42,14 @@ Options used:
 
 Deliver `evil.rar` to the victim and instruct them to extract it with a vulnerable WinRAR build.
 
+### Weaponised Startup persistence (Amaranth-Dragon)
+
+* Spearphish RAR lures weaponised CVE-2025-8088 to **iterate multiple traversal depths** until the payload lands in the correct Startup folder regardless of where the victim extracts the archive.
+* The dropped file is a **`.cmd`/`.bat`** that runs at next logon and typically:
+  * Downloads a password-protected second-stage RAR from a trusted domain (e.g., Dropbox/actor CDN).
+  * Extracts a **signed EXE + malicious DLL** pair into `C:\Users\Public\Documents\<folder>\`, then sets a **HKCU Run** value and executes the EXE to sideload the DLL.
+* Sandboxes that only unpack the outer archive may **miss the Startup-written script entirely**, so archive statics can appear benign while the persistent script is absent from the analysis artifacts.
+
 ### Observed Exploitation in the Wild
 
 ESET reported RomCom (Storm-0978/UNC2596) spear-phishing campaigns that attached RAR archives abusing CVE-2025-8088 to deploy customised backdoors and facilitate ransomware operations.
@@ -97,5 +105,6 @@ ESET reported RomCom (Storm-0978/UNC2596) spear-phishing campaigns that attached
 
 - [Trend Micro ZDI-25-949 – 7-Zip symlink ZIP traversal (CVE-2025-11001)](https://www.zerodayinitiative.com/advisories/ZDI-25-949/)
 - [JFrog Research – mholt/archiver Zip-Slip (CVE-2025-3445)](https://research.jfrog.com/vulnerabilities/archiver-zip-slip/)
+- [Check Point Research – Amaranth-Dragon weaponises CVE-2025-8088 for targeted espionage](https://research.checkpoint.com/2026/amaranth-dragon-weaponizes-cve-2025-8088-for-targeted-espionage/)
 
 {{#include ../banners/hacktricks-training.md}}

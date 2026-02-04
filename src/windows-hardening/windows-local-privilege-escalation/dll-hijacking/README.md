@@ -491,6 +491,28 @@ Tradecraft notes:
 * Because the executable stays trusted, most allowlisting controls only need your malicious DLL to sit alongside it. Focus on customizing the loader DLL; the signed parent can typically run untouched.
 * ShadowPad’s decryptor expects the TMP blob to live next to the loader and be writable so it can zero the file after mapping. Keep the directory writable until the payload loads; once in memory the TMP file can safely be deleted for OPSEC.
 
+## Amaranth Loader / TGAmaranth sideloading pattern
+
+* Delivery: password-protected RAR/ZIP drops a **signed EXE + malicious DLL** together; the EXE looks for a dependency name (`DllSafeCheck64.dll`, `libcef.dll`, etc.) and executes attacker code from the same folder.
+* Exports: only **one export contains logic**; all other exports point to a stub that immediately `Sleep(INFINITE)` to confuse static/automated triage.
+* Decryption chain: strings/URLs are XOR-decoded at runtime, then the loader fetches an **AES key from a first URL (Pastebin or actor infra, often geo-fenced)** and an **encrypted payload from a second URL**, decrypts with **AES-CBC** using a constant IV `12 34 56 78 90 AB CD EF 34 56 78 90 AB CD EF 12`, allocates `PAGE_EXECUTE_READWRITE`, and runs the shellcode (commonly Havoc).
+* Variants swap Pastebin for Cloudflare-fronted hosts that reply `403` to non-target IPs, and rotate benign-looking **User-Agents** when calling `InternetOpenA`.
+* A later variant decrypts a local shellcode blob with a **non-standard RC4 PRGA** (output byte = `(s[i]+s[j])&0xff` instead of `box[box[i]+box[j]]`), then executes inside a **fiber context** to alter the call stack:
+  ```python
+  def prga(box):
+      j=0
+      for i in range(len(data)):
+          ii=(i+1)&0xff; j=(j+box[ii])&0xff
+          box[ii], box[j] = box[j], box[ii]
+          yield (box[ii]+box[j]) & 0xff
+  ```
+  ```c
+  ConvertThreadToFiber(NULL);
+  LPVOID f = CreateFiber(0, shellcode, NULL);
+  SwitchToFiber(f);
+  ```
+* The TGAmaranth RAT (sideloaded by the same pattern) decrypts a Telegram bot token with the XOR routine, performs **self-debugging via `DebugActiveProcess`** to detect analysts, and **unhooks `ntdll.dll`** by copying a clean `.text` section from a suspended `cmd.exe` into its own process before running commands.
+
 ## References
 
 - [CVE-2025-1729 - Privilege Escalation Using TPQMAssistant.exe](https://trustedsec.com/blog/cve-2025-1729-privilege-escalation-using-tpqmassistant-exe)
@@ -503,6 +525,7 @@ Tradecraft notes:
 - [Sysinternals Process Monitor](https://learn.microsoft.com/sysinternals/downloads/procmon)
 - [Unit 42 – Digital Doppelgangers: Anatomy of Evolving Impersonation Campaigns Distributing Gh0st RAT](https://unit42.paloaltonetworks.com/impersonation-campaigns-deliver-gh0st-rat/)
 - [Check Point Research – Inside Ink Dragon: Revealing the Relay Network and Inner Workings of a Stealthy Offensive Operation](https://research.checkpoint.com/2025/ink-dragons-relay-network-and-offensive-operation/)
+- [Check Point Research – Amaranth-Dragon weaponises CVE-2025-8088 for targeted espionage](https://research.checkpoint.com/2026/amaranth-dragon-weaponizes-cve-2025-8088-for-targeted-espionage/)
 
 
 {{#include ../../../banners/hacktricks-training.md}}
