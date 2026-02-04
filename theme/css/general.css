@@ -1,7 +1,6 @@
 /* Base styles and content styles */
 
 :root {
-    /* Browser default font-size is 16px, this way 1 rem = 10px */
     font-size: 62.5%;
     color-scheme: var(--color-scheme);
 }
@@ -16,7 +15,7 @@ html {
 
 body {
     margin: 0;
-    font-size: 1.7rem;
+    font-size: 1.55rem;
     line-height: 1.7;
     overflow-x: hidden;
 }
