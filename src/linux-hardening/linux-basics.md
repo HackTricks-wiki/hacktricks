@@ -1,3 +1,3 @@
-# Linux Grundlagen
+# Linux-Grundlagen
 
 {{#include ../banners/hacktricks-training.md}}
