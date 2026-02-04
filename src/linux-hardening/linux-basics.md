@@ -1,3 +1,3 @@
-# Linux बुनियादी बातें
+# Linux मूल बातें
 
 {{#include ../banners/hacktricks-training.md}}
