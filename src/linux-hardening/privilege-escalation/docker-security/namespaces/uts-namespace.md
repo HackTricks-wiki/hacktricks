@@ -2,47 +2,47 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-## Basic Information
+## Βασικές Πληροφορίες
 
-Ένα UTS (UNIX Time-Sharing System) namespace είναι μια δυνατότητα του πυρήνα Linux που παρέχει **απομόνωση δύο αναγνωριστικών συστήματος**: το **hostname** και το **NIS** (Network Information Service) domain name. Αυτή η απομόνωση επιτρέπει σε κάθε UTS namespace να έχει το **δικό του ανεξάρτητο hostname και NIS domain name**, το οποίο είναι ιδιαίτερα χρήσιμο σε σενάρια κοντεϊνεροποίησης όπου κάθε κοντέινερ θα πρέπει να εμφανίζεται ως ξεχωριστό σύστημα με το δικό του hostname.
+Ένας UTS (UNIX Time-Sharing System) namespace είναι μια δυνατότητα του Linux kernel που παρέχει α**πομόνωση δύο συστημικών ταυτοτήτων**: την **hostname** και το **NIS** (Network Information Service) domain name. Αυτή η απομόνωση επιτρέπει σε κάθε UTS namespace να έχει το **δικό του ανεξάρτητο hostname και NIS domain name**, κάτι που είναι ιδιαίτερα χρήσιμο σε σενάρια containerization όπου κάθε container πρέπει να εμφανίζεται ως ξεχωριστό σύστημα με το δικό του hostname.
 
-### How it works:
+### Πώς λειτουργεί:
 
-1. Όταν δημιουργείται ένα νέο UTS namespace, ξεκινά με μια **αντίγραφο του hostname και του NIS domain name από το γονικό namespace**. Αυτό σημαίνει ότι, κατά τη δημιουργία, το νέο namespace **μοιράζεται τα ίδια αναγνωριστικά με το γονικό του**. Ωστόσο, οποιεσδήποτε επακόλουθες αλλαγές στο hostname ή το NIS domain name εντός του namespace δεν θα επηρεάσουν άλλα namespaces.
-2. Οι διεργασίες εντός ενός UTS namespace **μπορούν να αλλάξουν το hostname και το NIS domain name** χρησιμοποιώντας τις κλήσεις συστήματος `sethostname()` και `setdomainname()`, αντίστοιχα. Αυτές οι αλλαγές είναι τοπικές στο namespace και δεν επηρεάζουν άλλα namespaces ή το σύστημα host.
-3. Οι διεργασίες μπορούν να μετακινηθούν μεταξύ namespaces χρησιμοποιώντας την κλήση συστήματος `setns()` ή να δημιουργήσουν νέα namespaces χρησιμοποιώντας τις κλήσεις συστήματος `unshare()` ή `clone()` με την σημαία `CLONE_NEWUTS`. Όταν μια διεργασία μετακινείται σε ένα νέο namespace ή δημιουργεί ένα, θα αρχίσει να χρησιμοποιεί το hostname και το NIS domain name που σχετίζονται με αυτό το namespace.
+1. Όταν δημιουργείται ένα νέο UTS namespace, ξεκινά με ένα **αντίγραφο του hostname και του NIS domain name από το γονικό namespace**. Αυτό σημαίνει ότι, κατά τη δημιουργία, το νέο namespace μ**οιράζεται τα ίδια αναγνωριστικά με το γονικό του**. Ωστόσο, οποιεσδήποτε μεταγενέστερες αλλαγές στο hostname ή στο NIS domain name εντός του namespace δεν θα επηρεάσουν άλλα namespaces.
+2. Διεργασίες εντός ενός UTS namespace μπορούν να αλλάξουν το hostname και το NIS domain name χρησιμοποιώντας τις κλήσεις συστήματος `sethostname()` και `setdomainname()`, αντίστοιχα. Αυτές οι αλλαγές είναι τοπικές στο namespace και δεν επηρεάζουν άλλα namespaces ή το host system.
+3. Διεργασίες μπορούν να μετακινηθούν μεταξύ namespaces χρησιμοποιώντας την κλήση `setns()` ή να δημιουργήσουν νέα namespaces χρησιμοποιώντας τις `unshare()` ή `clone()` system calls με τη σημαία `CLONE_NEWUTS`. Όταν μια διεργασία μεταφερθεί σε ένα νέο namespace ή δημιουργήσει ένα, θα αρχίσει να χρησιμοποιεί το hostname και το NIS domain name που σχετίζονται με εκείνο το namespace.
 
-## Lab:
+## Εργαστήριο:
 
-### Create different Namespaces
+### Δημιουργία διαφορετικών Namespaces
 
 #### CLI
 ```bash
 sudo unshare -u [--mount-proc] /bin/bash
 ```
-Με την τοποθέτηση μιας νέας παρουσίας του συστήματος αρχείων `/proc` αν χρησιμοποιήσετε την παράμετρο `--mount-proc`, διασφαλίζετε ότι η νέα mount namespace έχει μια **ακριβή και απομονωμένη άποψη των πληροφοριών διαδικασίας που είναι συγκεκριμένες για αυτή τη namespace**.
+By mounting a new instance of the `/proc` filesystem if you use the param `--mount-proc`, you ensure that the new mount namespace has an **ακριβή και απομονωμένη εικόνα των πληροφοριών διεργασιών συγκεκριμένων για αυτό το namespace**.
 
 <details>
 
-<summary>Σφάλμα: bash: fork: Cannot allocate memory</summary>
+<summary>Error: bash: fork: Cannot allocate memory</summary>
 
-Όταν εκτελείται το `unshare` χωρίς την επιλογή `-f`, προκύπτει ένα σφάλμα λόγω του τρόπου που το Linux χειρίζεται τις νέες PID (Process ID) namespaces. Οι βασικές λεπτομέρειες και η λύση περιγράφονται παρακάτω:
+When `unshare` is executed without the `-f` option, an error is encountered due to the way Linux handles new PID (Process ID) namespaces. The key details and the solution are outlined below:
 
-1. **Εξήγηση Προβλήματος**:
+1. **Επεξήγηση του προβλήματος**:
 
-- Ο πυρήνας του Linux επιτρέπει σε μια διαδικασία να δημιουργεί νέες namespaces χρησιμοποιώντας την κλήση συστήματος `unshare`. Ωστόσο, η διαδικασία που ξεκινά τη δημιουργία μιας νέας PID namespace (αναφερόμενη ως η διαδικασία "unshare") δεν εισέρχεται στη νέα namespace; μόνο οι παιδικές της διαδικασίες το κάνουν.
-- Η εκτέλεση `%unshare -p /bin/bash%` ξεκινά το `/bin/bash` στην ίδια διαδικασία με το `unshare`. Ως εκ τούτου, το `/bin/bash` και οι παιδικές του διαδικασίες βρίσκονται στην αρχική PID namespace.
-- Η πρώτη παιδική διαδικασία του `/bin/bash` στη νέα namespace γίνεται PID 1. Όταν αυτή η διαδικασία τερματίσει, ενεργοποιεί την καθαριότητα της namespace αν δεν υπάρχουν άλλες διαδικασίες, καθώς το PID 1 έχει τον ειδικό ρόλο της υιοθέτησης ορφανών διαδικασιών. Ο πυρήνας του Linux θα απενεργοποιήσει στη συνέχεια την κατανομή PID σε αυτή τη namespace.
+- Ο πυρήνας του Linux επιτρέπει σε μια διεργασία να δημιουργεί νέα namespaces χρησιμοποιώντας το system call `unshare`. Ωστόσο, η διεργασία που ξεκινά τη δημιουργία ενός νέου PID namespace (αναφερόμενη ως η διεργασία "unshare") δεν εισέρχεται στο νέο namespace· μόνο οι θυγατρικές της διεργασίες το κάνουν.
+- Το τρέξιμο %unshare -p /bin/bash% ξεκινάει το `/bin/bash` στην ίδια διεργασία με το `unshare`. Κατά συνέπεια, το `/bin/bash` και οι θυγατρικές διεργασίες του βρίσκονται στο αρχικό PID namespace.
+- Η πρώτη θυγατρική διεργασία του `/bin/bash` στο νέο namespace καταλαμβάνει το PID 1. Όταν αυτή η διεργασία τερματίζει, ενεργοποιεί τον καθαρισμό του namespace αν δεν υπάρχουν άλλες διεργασίες, καθώς το PID 1 έχει τον ειδικό ρόλο της υιοθεσίας ορφανών διεργασιών. Ο πυρήνας του Linux τότε θα απενεργοποιήσει την κατανομή PID σε αυτό το namespace.
 
 2. **Συνέπεια**:
 
-- Η έξοδος του PID 1 σε μια νέα namespace οδηγεί στον καθαρισμό της σημαίας `PIDNS_HASH_ADDING`. Αυτό έχει ως αποτέλεσμα τη αποτυχία της συνάρτησης `alloc_pid` να κατανεμηθεί ένα νέο PID κατά τη δημιουργία μιας νέας διαδικασίας, παράγοντας το σφάλμα "Cannot allocate memory".
+- Ο τερματισμός του PID 1 σε ένα νέο namespace οδηγεί στον καθαρισμό της σημαίας `PIDNS_HASH_ADDING`. Αυτό έχει ως αποτέλεσμα η συνάρτηση `alloc_pid` να αποτύχει στην εκχώρηση νέου PID κατά τη δημιουργία μιας νέας διεργασίας, δημιουργώντας το σφάλμα "Cannot allocate memory".
 
 3. **Λύση**:
-- Το πρόβλημα μπορεί να επιλυθεί χρησιμοποιώντας την επιλογή `-f` με το `unshare`. Αυτή η επιλογή κάνει το `unshare` να δημιουργήσει μια νέα διαδικασία μετά τη δημιουργία της νέας PID namespace.
-- Η εκτέλεση `%unshare -fp /bin/bash%` διασφαλίζει ότι η εντολή `unshare` γίνεται PID 1 στη νέα namespace. Το `/bin/bash` και οι παιδικές του διαδικασίες είναι τότε ασφαλώς περιορισμένες μέσα σε αυτή τη νέα namespace, αποτρέποντας την πρόωρη έξοδο του PID 1 και επιτρέποντας την κανονική κατανομή PID.
+- Το πρόβλημα επιλύεται χρησιμοποιώντας την επιλογή `-f` με το `unshare`. Αυτή η επιλογή κάνει το `unshare` να κάνει fork μια νέα διεργασία μετά τη δημιουργία του νέου PID namespace.
+- Η εκτέλεση %unshare -fp /bin/bash% διασφαλίζει ότι η εντολή `unshare` η ίδια γίνεται PID 1 στο νέο namespace. Το `/bin/bash` και οι θυγατρικές διεργασίες του στη συνέχεια περιέχονται με ασφάλεια μέσα σε αυτό το νέο namespace, αποτρέποντας τον πρόωρο τερματισμό του PID 1 και επιτρέποντας την κανονική κατανομή PID.
 
-Διασφαλίζοντας ότι το `unshare` εκτελείται με την επιλογή `-f`, η νέα PID namespace διατηρείται σωστά, επιτρέποντας στο `/bin/bash` και τις υπο-διαδικασίες του να λειτουργούν χωρίς να αντιμετωπίζουν το σφάλμα κατανομής μνήμης.
+Εξασφαλίζοντας ότι το `unshare` τρέχει με τη σημαία `-f`, το νέο PID namespace διατηρείται σωστά, επιτρέποντας στο `/bin/bash` και στις υπο-διεργασίες του να λειτουργούν χωρίς να συναντήσουν το σφάλμα κατανομής μνήμης.
 
 </details>
 
@@ -50,7 +50,7 @@ sudo unshare -u [--mount-proc] /bin/bash
 ```bash
 docker run -ti --name ubuntu1 -v /usr:/ubuntu1 ubuntu bash
 ```
-### Έλεγχος σε ποιο namespace βρίσκεται η διαδικασία σας
+### Ελέγξτε σε ποιο namespace βρίσκεται η διεργασία σας
 ```bash
 ls -l /proc/self/ns/uts
 lrwxrwxrwx 1 root root 0 Apr  4 20:49 /proc/self/ns/uts -> 'uts:[4026531838]'
@@ -61,8 +61,22 @@ sudo find /proc -maxdepth 3 -type l -name uts -exec readlink {} \; 2>/dev/null |
 # Find the processes with an specific namespace
 sudo find /proc -maxdepth 3 -type l -name uts -exec ls -l  {} \; 2>/dev/null | grep <ns-number>
 ```
-### Είσοδος σε ένα UTS namespace
+### Εισέλθετε σε UTS namespace
 ```bash
 nsenter -u TARGET_PID --pid /bin/bash
+```
+## Κατάχρηση κοινής χρήσης host UTS
+
+Αν ένα container ξεκινήσει με `--uts=host`, εντάσσεται στο host UTS namespace αντί να αποκτήσει ένα απομονωμένο. Με capabilities όπως `--cap-add SYS_ADMIN`, code στο container μπορεί να αλλάξει το host hostname/NIS name μέσω `sethostname()`/`setdomainname()`:
+```bash
+docker run --rm -it --uts=host --cap-add SYS_ADMIN alpine sh -c "hostname hacked-host && exec sh"
+# Hostname on the host will immediately change to "hacked-host"
+```
+Η αλλαγή του host name μπορεί να παραποιήσει logs/alerts, να μπερδέψει cluster discovery ή να σπάσει TLS/SSH configs που κάνουν pin το hostname.
+
+### Εντοπισμός containers που μοιράζονται το UTS με τον host
+```bash
+docker ps -aq | xargs -r docker inspect --format '{{.Id}} UTSMode={{.HostConfig.UTSMode}}'
+# Shows "host" when the container uses the host UTS namespace
 ```
 {{#include ../../../../banners/hacktricks-training.md}}
