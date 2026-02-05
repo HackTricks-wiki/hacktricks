@@ -2,47 +2,47 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-## Basic Information
+## Taarifa za Msingi
 
-A UTS (UNIX Time-Sharing System) namespace ni kipengele cha kernel ya Linux kinachotoa **kujitoa kwa vitambulisho viwili vya mfumo**: **hostname** na **NIS** (Network Information Service) domain name. Kujitoa huku kunaruhusu kila UTS namespace kuwa na **hostname na NIS domain name zake za kujitegemea**, ambayo ni muhimu hasa katika hali za containerization ambapo kila container inapaswa kuonekana kama mfumo tofauti wenye hostname yake.
+UTS (UNIX Time-Sharing System) namespace ni kipengele cha kernel ya Linux kinachotoa **utengwa wa vitambulisho viwili vya mfumo**: **hostname** na **NIS** (Network Information Service) domain name. Utengano huu unaruhusu kila UTS namespace kuwa na **hostname yake huru na domain name ya NIS yake mwenyewe**, jambo ambalo ni muhimu hasa katika mazingira ya containerization ambapo kila container inapaswa kuonekana kama mfumo tofauti ulio na hostname yake.
 
-### How it works:
+### Jinsi inavyofanya kazi:
 
-1. Wakati UTS namespace mpya inaundwa, inaanza na **nakala ya hostname na NIS domain name kutoka kwa namespace yake ya mzazi**. Hii inamaanisha kwamba, wakati wa uundaji, namespace mpya **inashiriki vitambulisho sawa na mzazi wake**. Hata hivyo, mabadiliko yoyote yanayofuata kwa hostname au NIS domain name ndani ya namespace hayataathiri namespaces nyingine.
-2. Mchakato ndani ya UTS namespace **unaweza kubadilisha hostname na NIS domain name** kwa kutumia `sethostname()` na `setdomainname()` system calls, mtawalia. Mabadiliko haya ni ya ndani kwa namespace na hayaathiri namespaces nyingine au mfumo wa mwenyeji.
-3. Mchakato unaweza kuhamia kati ya namespaces kwa kutumia `setns()` system call au kuunda namespaces mpya kwa kutumia `unshare()` au `clone()` system calls na bendera ya `CLONE_NEWUTS`. Wakati mchakato unahamia kwenye namespace mpya au kuunda moja, utaanza kutumia hostname na NIS domain name inayohusiana na namespace hiyo.
+1. Wakati UTS namespace mpya inapoanzishwa, inaanza na **nakala ya hostname na domain name ya NIS kutoka kwa namespace ya mzazi wake**. Hii inamaanisha kwamba, wakati wa uundaji, namespace mpya **inashiriki vitambulisho sawa na vya mzazi wake**. Hata hivyo, mabadiliko yoyote yanayofanywa baadaye kwa hostname au domain name ya NIS ndani ya namespace hayo hayatatafauti namespaces nyingine.
+2. Michakato ndani ya UTS namespace **inaweza kubadilisha hostname na domain name ya NIS** kwa kutumia simu za mfumo `sethostname()` na `setdomainname()`, mtawalia. Mabadiliko haya ni ya ndani kwa namespace na hayataathiri namespaces nyingine au mfumo mwenyeji.
+3. Michakato inaweza kuhamia kati ya namespaces kwa kutumia simu ya mfumo `setns()` au kuunda namespaces mpya kwa kutumia simu za mfumo `unshare()` au `clone()` na flag `CLONE_NEWUTS`. Mchakato ukihamia kwa namespace mpya au kuunda moja, utaanza kutumia hostname na domain name ya NIS zinazohusiana na namespace hiyo.
 
-## Lab:
+## Maabara:
 
-### Create different Namespaces
+### Unda Namespaces tofauti
 
 #### CLI
 ```bash
 sudo unshare -u [--mount-proc] /bin/bash
 ```
-Kwa kuunganisha mfano mpya wa mfumo wa `/proc` ikiwa unatumia param `--mount-proc`, unahakikisha kwamba namespace mpya ya kuunganisha ina **mtazamo sahihi na wa kutengwa wa taarifa za mchakato maalum kwa namespace hiyo**.
+By mounting a new instance of the `/proc` filesystem if you use the param `--mount-proc`, you ensure that the new mount namespace has an **mtazamo sahihi na uliotengwa wa taarifa za mchakato zinazohusiana na namespace hiyo**.
 
 <details>
 
-<summary>Kosa: bash: fork: Haiwezekani kugawa kumbukumbu</summary>
+<summary>Error: bash: fork: Cannot allocate memory</summary>
 
-Wakati `unshare` inatekelezwa bila chaguo la `-f`, kosa linakutana kutokana na jinsi Linux inavyoshughulikia namespaces mpya za PID (Kitambulisho cha Mchakato). Maelezo muhimu na suluhisho yameelezwa hapa chini:
+When `unshare` is executed without the `-f` option, an error is encountered due to the way Linux handles new PID (Process ID) namespaces. The key details and the solution are outlined below:
 
 1. **Maelezo ya Tatizo**:
 
-- Kernel ya Linux inaruhusu mchakato kuunda namespaces mpya kwa kutumia wito wa mfumo wa `unshare`. Hata hivyo, mchakato unaoanzisha uundaji wa namespace mpya ya PID (inayojulikana kama mchakato wa "unshare") hauingii kwenye namespace mpya; ni watoto wake tu wanakuwamo.
-- Kuendesha `%unshare -p /bin/bash%` kunaanzisha `/bin/bash` katika mchakato sawa na `unshare`. Kwa hivyo, `/bin/bash` na watoto wake wako katika namespace ya awali ya PID.
-- Mchakato wa kwanza wa mtoto wa `/bin/bash` katika namespace mpya unakuwa PID 1. Wakati mchakato huu unapoondoka, unachochea usafishaji wa namespace ikiwa hakuna mchakato mwingine, kwani PID 1 ina jukumu maalum la kupokea mchakato yatima. Kernel ya Linux itazima kuteua PID katika namespace hiyo.
+- Kernel ya Linux inaruhusu mchakato kuunda namespaces mpya kwa kutumia system call ya `unshare`. Hata hivyo, mchakato unaoanzisha uundaji wa namespace mpya ya PID (ujulikanao kama mchakato wa "unshare") hauingii ndani ya namespace mpya; ni watoto wake tu wanaoingia.
+- Running `%unshare -p /bin/bash%` starts `/bin/bash` in the same process as `unshare`. Kwa hivyo, `/bin/bash` na watoto wake wa mchakato wako katika namespace ya PID ya awali.
+- Mtoto wa kwanza wa `/bin/bash` katika namespace mpya anakuwa PID 1. Wakati mchakato huo unapotoka, husababisha kusafishwa kwa namespace ikiwa hakuna michakato mingine, kwa kuwa PID 1 ana jukumu maalum la kupokea michakato isiyo na mzazi (orphan). Kernel ya Linux kisha itazima ugawaji wa PID katika namespace hiyo.
 
 2. **Matokeo**:
 
-- Kuondoka kwa PID 1 katika namespace mpya kunasababisha kusafishwa kwa bendera ya `PIDNS_HASH_ADDING`. Hii inasababisha kazi ya `alloc_pid` kushindwa kugawa PID mpya wakati wa kuunda mchakato mpya, ikitoa kosa la "Haiwezekani kugawa kumbukumbu".
+- Kutoka kwa PID 1 katika namespace mpya husababisha kusafishwa kwa flag `PIDNS_HASH_ADDING`. Hii inasababisha function `alloc_pid` kushindwa kugawa PID mpya wakati wa kuunda mchakato mpya, na kutoa hitilafu "Cannot allocate memory".
 
 3. **Suluhisho**:
-- Tatizo linaweza kutatuliwa kwa kutumia chaguo la `-f` pamoja na `unshare`. Chaguo hili linafanya `unshare` kuunda mchakato mpya baada ya kuunda namespace mpya ya PID.
-- Kutekeleza `%unshare -fp /bin/bash%` kunahakikisha kwamba amri ya `unshare` yenyewe inakuwa PID 1 katika namespace mpya. `/bin/bash` na watoto wake wanakuwa salama ndani ya namespace hii mpya, kuzuia kuondoka mapema kwa PID 1 na kuruhusu kuteua PID kwa kawaida.
+- Tatizo linaweza kutatuliwa kwa kutumia chaguo `-f` pamoja na `unshare`. Chaguo hili hufanya `unshare` kufork mchakato mpya baada ya kuunda namespace mpya ya PID.
+- Executing `%unshare -fp /bin/bash%` ensures that the `unshare` command itself becomes PID 1 in the new namespace. `/bin/bash` na watoto wake wa mchakato basi wamehifadhiwa salama ndani ya namespace hii mpya, kuzuia kutoka mapema kwa PID 1 na kuruhusu ugawaji wa PID wa kawaida.
 
-Kwa kuhakikisha kwamba `unshare` inatekelezwa na bendera ya `-f`, namespace mpya ya PID inahifadhiwa kwa usahihi, ikiruhusu `/bin/bash` na mchakato zake za chini kufanya kazi bila kukutana na kosa la kugawa kumbukumbu.
+Kwa kuhakikisha kwamba `unshare` inakimbia kwa flag `-f`, namespace mpya ya PID inadumishwa ipasavyo, na kuruhusu `/bin/bash` na michakato yake ndogo kufanya kazi bila kukumbana na hitilafu ya ugawaji wa kumbukumbu.
 
 </details>
 
@@ -50,19 +50,33 @@ Kwa kuhakikisha kwamba `unshare` inatekelezwa na bendera ya `-f`, namespace mpya
 ```bash
 docker run -ti --name ubuntu1 -v /usr:/ubuntu1 ubuntu bash
 ```
-### Angalia ni namespace ipi mchakato wako uko ndani
+### Angalia namespace ambayo mchakato wako uko ndani yake
 ```bash
 ls -l /proc/self/ns/uts
 lrwxrwxrwx 1 root root 0 Apr  4 20:49 /proc/self/ns/uts -> 'uts:[4026531838]'
 ```
-### Pata majina yote ya UTS namespaces
+### Pata namespaces zote za UTS
 ```bash
 sudo find /proc -maxdepth 3 -type l -name uts -exec readlink {} \; 2>/dev/null | sort -u
 # Find the processes with an specific namespace
 sudo find /proc -maxdepth 3 -type l -name uts -exec ls -l  {} \; 2>/dev/null | grep <ns-number>
 ```
-### Ingia ndani ya UTS namespace
+### Ningia ndani ya UTS namespace
 ```bash
 nsenter -u TARGET_PID --pid /bin/bash
+```
+## Kutumia vibaya kushirikishwa kwa UTS ya host
+
+Iwapo container inaanzishwa kwa `--uts=host`, itaungana na host UTS namespace badala ya kupata moja iliyotengwa. Kwa capabilities kama `--cap-add SYS_ADMIN`, code ndani ya container inaweza kubadilisha host hostname/NIS name kwa kutumia `sethostname()`/`setdomainname()`:
+```bash
+docker run --rm -it --uts=host --cap-add SYS_ADMIN alpine sh -c "hostname hacked-host && exec sh"
+# Hostname on the host will immediately change to "hacked-host"
+```
+Kubadilisha host name kunaweza kuchezea logs/alerts, kuchanganya cluster discovery au kuvunja TLS/SSH configs ambazo zinaweka hostname.
+
+### Gundua containers zinazoshiriki UTS na host
+```bash
+docker ps -aq | xargs -r docker inspect --format '{{.Id}} UTSMode={{.HostConfig.UTSMode}}'
+# Shows "host" when the container uses the host UTS namespace
 ```
 {{#include ../../../../banners/hacktricks-training.md}}
