@@ -2,15 +2,15 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-## Grundinformationen
+## Grundlegende Informationen
 
-Ein UTS (UNIX Time-Sharing System) Namespace ist eine Funktion des Linux-Kernels, die die **Isolation von zwei Systemidentifikatoren** bietet: dem **Hostname** und dem **NIS** (Network Information Service) Domänennamen. Diese Isolation ermöglicht es jedem UTS-Namespace, seinen **eigenen unabhängigen Hostnamen und NIS-Domänennamen** zu haben, was besonders in Containerisierungs-Szenarien nützlich ist, in denen jeder Container als separates System mit seinem eigenen Hostnamen erscheinen sollte.
+Ein UTS (UNIX Time-Sharing System) namespace ist eine Linux-Kernel-Funktion, die i**Isolierung von zwei Systemidentifikatoren** bereitstellt: den **Hostname** und den **NIS** (Network Information Service) Domänennamen. Diese Isolierung ermöglicht es jedem UTS namespace, seinen **eigenen unabhängigen Hostname und NIS-Domänennamen** zu haben, was besonders in Containerisierungsszenarien nützlich ist, in denen jeder Container als ein separates System mit eigenem Hostname erscheinen sollte.
 
-### So funktioniert es:
+### Wie es funktioniert:
 
-1. Wenn ein neuer UTS-Namespace erstellt wird, beginnt er mit einer **Kopie des Hostnamens und des NIS-Domänennamens aus seinem übergeordneten Namespace**. Das bedeutet, dass der neue Namespace bei der Erstellung **die gleichen Identifikatoren wie sein übergeordneter Namespace teilt**. Änderungen am Hostnamen oder NIS-Domänennamen innerhalb des Namespaces wirken sich jedoch nicht auf andere Namespaces aus.
-2. Prozesse innerhalb eines UTS-Namespace **können den Hostnamen und den NIS-Domänennamen** mithilfe der Systemaufrufe `sethostname()` und `setdomainname()` ändern. Diese Änderungen sind lokal für den Namespace und wirken sich nicht auf andere Namespaces oder das Hostsystem aus.
-3. Prozesse können zwischen Namespaces mit dem Systemaufruf `setns()` wechseln oder neue Namespaces mit den Systemaufrufen `unshare()` oder `clone()` unter Verwendung des Flags `CLONE_NEWUTS` erstellen. Wenn ein Prozess in einen neuen Namespace wechselt oder einen erstellt, beginnt er, den Hostnamen und den NIS-Domänennamen zu verwenden, die mit diesem Namespace verbunden sind.
+1. Wenn ein neuer UTS namespace erstellt wird, beginnt er mit einer **Kopie des Hostname- und NIS-Domänennamens aus seinem übergeordneten Namespace**. Das bedeutet, dass der neue Namespace bei der Erstellung s**teilt die gleichen Identifikatoren mit seinem übergeordneten Namespace**. Allerdings wirken sich spätere Änderungen am Hostname oder NIS-Domänennamen innerhalb des Namespace nicht auf andere Namespaces aus.
+2. Prozesse innerhalb eines UTS namespace **können den Hostname und den NIS-Domänennamen ändern** mit den Systemaufrufen `sethostname()` beziehungsweise `setdomainname()`. Diese Änderungen sind lokal für den Namespace und betreffen nicht andere Namespaces oder das Hostsystem.
+3. Prozesse können zwischen Namespaces wechseln mit dem Systemaufruf `setns()` oder neue Namespaces erstellen mit den Systemaufrufen `unshare()` oder `clone()` und dem Flag `CLONE_NEWUTS`. Wenn ein Prozess in einen neuen Namespace wechselt oder einen erstellt, beginnt er den Hostname und den NIS-Domänennamen zu verwenden, die mit diesem Namespace verknüpft sind.
 
 ## Labor:
 
@@ -20,29 +20,29 @@ Ein UTS (UNIX Time-Sharing System) Namespace ist eine Funktion des Linux-Kernels
 ```bash
 sudo unshare -u [--mount-proc] /bin/bash
 ```
-Durch das Einhängen einer neuen Instanz des `/proc`-Dateisystems, wenn Sie den Parameter `--mount-proc` verwenden, stellen Sie sicher, dass der neue Mount-Namespace eine **genaue und isolierte Sicht auf die prozessspezifischen Informationen hat, die für diesen Namespace spezifisch sind**.
+Indem Sie mit dem Parameter `--mount-proc` eine neue Instanz des `/proc`-Dateisystems mounten, stellen Sie sicher, dass das neue Mount-Namespace eine genaue und isolierte Sicht auf die prozessspezifischen Informationen dieses Namespace hat.
 
 <details>
 
-<summary>Fehler: bash: fork: Kann Speicher nicht zuweisen</summary>
+<summary>Error: bash: fork: Cannot allocate memory</summary>
 
-Wenn `unshare` ohne die Option `-f` ausgeführt wird, tritt ein Fehler auf, der auf die Art und Weise zurückzuführen ist, wie Linux neue PID (Process ID) Namespaces behandelt. Die wichtigsten Details und die Lösung sind unten aufgeführt:
+Wenn `unshare` ohne die Option `-f` ausgeführt wird, tritt ein Fehler auf, der durch die Art und Weise entsteht, wie Linux neue PID (Process ID) Namespaces handhabt. Die wichtigsten Details und die Lösung sind unten zusammengefasst:
 
-1. **Problemerklärung**:
+1. **Problem-Erklärung**:
 
-- Der Linux-Kernel erlaubt es einem Prozess, neue Namespaces mit dem Systemaufruf `unshare` zu erstellen. Der Prozess, der die Erstellung eines neuen PID-Namespace initiiert (als "unshare"-Prozess bezeichnet), tritt jedoch nicht in den neuen Namespace ein; nur seine Kindprozesse tun dies.
-- Das Ausführen von `%unshare -p /bin/bash%` startet `/bin/bash` im selben Prozess wie `unshare`. Folglich befinden sich `/bin/bash` und seine Kindprozesse im ursprünglichen PID-Namespace.
-- Der erste Kindprozess von `/bin/bash` im neuen Namespace wird zu PID 1. Wenn dieser Prozess beendet wird, wird die Bereinigung des Namespaces ausgelöst, wenn keine anderen Prozesse vorhanden sind, da PID 1 die besondere Rolle hat, verwaiste Prozesse zu übernehmen. Der Linux-Kernel deaktiviert dann die PID-Zuweisung in diesem Namespace.
+- Der Linux-Kernel erlaubt einem Prozess, neue Namespaces mittels des `unshare` Systemaufrufs zu erstellen. Der Prozess, der die Erstellung eines neuen PID-Namespace initiiert (als "unshare"-Prozess bezeichnet), tritt jedoch nicht in das neue Namespace ein; nur seine Kindprozesse tun das.
+- Das Ausführen von %unshare -p /bin/bash% startet `/bin/bash` im selben Prozess wie `unshare`. Folglich befinden sich `/bin/bash` und seine Kindprozesse im ursprünglichen PID-Namespace.
+- Der erste Kindprozess von `/bin/bash` im neuen Namespace wird PID 1. Wenn dieser Prozess beendet wird, löst das die Aufräumarbeiten des Namespaces aus, falls keine weiteren Prozesse vorhanden sind, da PID 1 die besondere Rolle hat, verwaiste Prozesse zu adoptieren. Der Linux-Kernel deaktiviert dann die PID-Zuweisung in diesem Namespace.
 
-2. **Folge**:
+2. **Konsequenz**:
 
-- Das Verlassen von PID 1 in einem neuen Namespace führt zur Bereinigung des `PIDNS_HASH_ADDING`-Flags. Dies führt dazu, dass die Funktion `alloc_pid` bei der Erstellung eines neuen Prozesses fehlschlägt, was den Fehler "Kann Speicher nicht zuweisen" erzeugt.
+- Das Beenden von PID 1 in einem neuen Namespace führt zum Entfernen des `PIDNS_HASH_ADDING` Flags. Dadurch schlägt die Funktion `alloc_pid` fehl, wenn sie versucht, einer neu erstellten Prozess einen PID zuzuweisen, und es entsteht der Fehler "Cannot allocate memory".
 
 3. **Lösung**:
-- Das Problem kann gelöst werden, indem die Option `-f` mit `unshare` verwendet wird. Diese Option bewirkt, dass `unshare` einen neuen Prozess nach der Erstellung des neuen PID-Namespace forked.
-- Das Ausführen von `%unshare -fp /bin/bash%` stellt sicher, dass der `unshare`-Befehl selbst PID 1 im neuen Namespace wird. `/bin/bash` und seine Kindprozesse sind dann sicher in diesem neuen Namespace enthalten, wodurch der vorzeitige Austritt von PID 1 verhindert wird und eine normale PID-Zuweisung ermöglicht wird.
+- Das Problem lässt sich beheben, indem man `unshare` mit der Option `-f` ausführt. Diese Option veranlasst `unshare`, nach dem Erstellen des neuen PID-Namespace einen neuen Prozess zu forkieren.
+- Das Ausführen von %unshare -fp /bin/bash% sorgt dafür, dass der `unshare`-Befehl selbst PID 1 im neuen Namespace wird. `/bin/bash` und seine Kindprozesse werden dann sicher innerhalb dieses neuen Namespaces gehalten, wodurch das vorzeitige Beenden von PID 1 verhindert und die normale PID-Zuweisung ermöglicht wird.
 
-Durch die Sicherstellung, dass `unshare` mit dem `-f`-Flag ausgeführt wird, wird der neue PID-Namespace korrekt aufrechterhalten, sodass `/bin/bash` und seine Unterprozesse ohne den Speicherzuweisungsfehler arbeiten können.
+Wenn `unshare` mit dem Flag `-f` ausgeführt wird, bleibt das neue PID-Namespace korrekt erhalten, sodass `/bin/bash` und dessen Subprozesse ohne das Auftreten des Speicher-Allokationsfehlers arbeiten können.
 
 </details>
 
@@ -50,19 +50,33 @@ Durch die Sicherstellung, dass `unshare` mit dem `-f`-Flag ausgeführt wird, wir
 ```bash
 docker run -ti --name ubuntu1 -v /usr:/ubuntu1 ubuntu bash
 ```
-### Überprüfen, in welchem Namespace sich Ihr Prozess befindet
+### Prüfen, in welchem Namespace sich Ihr Prozess befindet
 ```bash
 ls -l /proc/self/ns/uts
 lrwxrwxrwx 1 root root 0 Apr  4 20:49 /proc/self/ns/uts -> 'uts:[4026531838]'
 ```
-### Finde alle UTS-Namensräume
+### Alle UTS-Namespaces finden
 ```bash
 sudo find /proc -maxdepth 3 -type l -name uts -exec readlink {} \; 2>/dev/null | sort -u
 # Find the processes with an specific namespace
 sudo find /proc -maxdepth 3 -type l -name uts -exec ls -l  {} \; 2>/dev/null | grep <ns-number>
 ```
-### Betreten Sie einen UTS-Namespace
+### In ein UTS namespace eintreten
 ```bash
 nsenter -u TARGET_PID --pid /bin/bash
+```
+## Missbrauch der UTS-Freigabe des Hosts
+
+Wenn ein Container mit `--uts=host` gestartet wird, tritt er dem UTS-Namespace des Hosts bei, anstatt einen isolierten zu erhalten. Mit Fähigkeiten wie `--cap-add SYS_ADMIN` kann Code im Container den Host-Hostname/NIS-Namen über `sethostname()`/`setdomainname()` ändern:
+```bash
+docker run --rm -it --uts=host --cap-add SYS_ADMIN alpine sh -c "hostname hacked-host && exec sh"
+# Hostname on the host will immediately change to "hacked-host"
+```
+Das Ändern des host name kann logs/alerts verfälschen, cluster discovery stören oder TLS/SSH configs brechen, die den hostname pinnen.
+
+### Erkennen von containers, die UTS mit dem host teilen
+```bash
+docker ps -aq | xargs -r docker inspect --format '{{.Id}} UTSMode={{.HostConfig.UTSMode}}'
+# Shows "host" when the container uses the host UTS namespace
 ```
 {{#include ../../../../banners/hacktricks-training.md}}
