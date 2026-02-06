@@ -1,48 +1,48 @@
-# UTS 名前空間
+# UTS Namespace
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-## 基本情報
+## Basic Information
 
-UTS（UNIX Time-Sharing System）名前空間は、Linuxカーネルの機能で、**2つのシステム識別子の分離**を提供します: **ホスト名** と **NIS** (Network Information Service) のドメイン名。 この分離により、各UTS名前空間は**それぞれ独立したホスト名とNISドメイン名**を持つことができ、特に各コンテナが独立したシステムとして振る舞うことが望まれるコンテナ化の状況で有用です。
+UTS (UNIX Time-Sharing System) namespace は、Linux カーネルの機能で、**2つのシステム識別子の分離**、つまり **hostname** と **NIS (Network Information Service)** ドメイン名を提供します。この分離により、各 UTS namespace は**独立した hostname と NIS ドメイン名を持つ**ことができ、各コンテナが独立したシステムとして自身の hostname を持つように見せる必要があるコンテナ化の状況で特に有用です。
 
-### 仕組み:
+### How it works:
 
-1. 新しいUTS名前空間が作成されると、親名前空間からの**ホスト名とNISドメイン名のコピー**で開始されます。つまり、作成時点では新しい名前空間は**親と同じ識別子を共有します**。ただし、その名前空間内でホスト名やNISドメイン名に対して行われた以降の変更は他の名前空間には影響しません。
-2. UTS名前空間内のプロセスは、`sethostname()` および `setdomainname()` システムコールを使用して、**ホスト名とNISドメイン名を変更することができます**。これらの変更はその名前空間にローカルなものであり、他の名前空間やホストシステムには影響しません。
-3. プロセスは `setns()` システムコールを使って名前空間間を移動したり、`unshare()` や `clone()` システムコール（`CLONE_NEWUTS` フラグ付き）を使って新しい名前空間を作成したりできます。プロセスが新しい名前空間に移動するか作成すると、その名前空間に関連付けられたホスト名とNISドメイン名を使い始めます。
+1. 新しい UTS namespace が作成されるとき、親 namespace から **hostname と NIS ドメイン名のコピーを受け継ぎます**。つまり、作成時点では新しい namespace は親と**同じ識別子を共有します**。ただし、その後に namespace 内で行われた hostname や NIS ドメイン名の変更は他の namespace に影響を与えません。
+2. UTS namespace 内のプロセスは、`sethostname()` および `setdomainname()` システムコールを使用して **hostname と NIS ドメイン名を変更することができます**。これらの変更はその namespace にローカルであり、他の namespace やホストシステムには影響しません。
+3. プロセスは `setns()` システムコールを使用して namespace 間を移動したり、`unshare()` や `clone()` システムコールを `CLONE_NEWUTS` フラグ付きで呼び出して新しい namespace を作成したりできます。プロセスが新しい namespace に移動するか作成すると、その namespace に紐づいた hostname と NIS ドメイン名を使用し始めます。
 
-## ラボ:
+## Lab:
 
-### 異なる名前空間の作成
+### Create different Namespaces
 
 #### CLI
 ```bash
 sudo unshare -u [--mount-proc] /bin/bash
 ```
-By mounting a new instance of the `/proc` filesystem if you use the param `--mount-proc`, you ensure that the new mount namespace has an **その namespace 固有のプロセス情報を正確かつ隔離された形で参照できる**.
+By mounting a new instance of the `/proc` filesystem if you use the param `--mount-proc`, you ensure that the new mount namespace has an **accurate and isolated view of the process information specific to that namespace**.
 
 <details>
 
-<summary>エラー: bash: fork: Cannot allocate memory</summary>
+<summary>Error: bash: fork: Cannot allocate memory</summary>
 
-`unshare` を `-f` オプションなしで実行すると、Linux が新しい PID (Process ID) namespace を扱う方法に起因するエラーが発生します。主なポイントと解決策を以下に示します:
+When `unshare` is executed without the `-f` option, an error is encountered due to the way Linux handles new PID (Process ID) namespaces. The key details and the solution are outlined below:
 
-1. **問題の説明**:
+1. **Problem Explanation**:
 
-- Linux カーネルは `unshare` システムコールでプロセスが新しい namespace を作成することを許可します。ただし、新しい PID namespace の作成を開始したプロセス（"unshare" プロセスと呼ぶ）は新しい namespace に入らず、その子プロセスだけが入ります。
-- %unshare -p /bin/bash% を実行すると、`/bin/bash` は `unshare` と同じプロセスで開始されます。その結果、`/bin/bash` とその子プロセスは元の PID namespace に属することになります。
-- 新しい namespace 内での `/bin/bash` の最初の子プロセスが PID 1 になります。このプロセスが終了すると、PID 1 は孤児プロセスの引き受け等の特別な役割を持つため、他にプロセスがなければ namespace のクリーンアップが発生します。すると Linux カーネルはその namespace での PID 割り当てを無効にします。
+- The Linux kernel allows a process to create new namespaces using the `unshare` system call. However, the process that initiates the creation of a new PID namespace (referred to as the "unshare" process) does not enter the new namespace; only its child processes do.
+- Running `%unshare -p /bin/bash%` starts `/bin/bash` in the same process as `unshare`. Consequently, `/bin/bash` and its child processes are in the original PID namespace.
+- The first child process of `/bin/bash` in the new namespace becomes PID 1. When this process exits, it triggers the cleanup of the namespace if there are no other processes, as PID 1 has the special role of adopting orphan processes. The Linux kernel will then disable PID allocation in that namespace.
 
-2. **結果**:
+2. **Consequence**:
 
-- 新しい namespace で PID 1 が終了すると `PIDNS_HASH_ADDING` フラグのクリーンアップが行われます。その結果、プロセス作成時に `alloc_pid` が新しい PID を割り当てられなくなり、"Cannot allocate memory" エラーが発生します。
+- The exit of PID 1 in a new namespace leads to the cleaning of the `PIDNS_HASH_ADDING` flag. This results in the `alloc_pid` function failing to allocate a new PID when creating a new process, producing the "Cannot allocate memory" error.
 
-3. **解決策**:
-- この問題は `unshare` に `-f` オプションを付けることで解決できます。このオプションは新しい PID namespace を作成した後に `unshare` をフォークさせます。
-- %unshare -fp /bin/bash% を実行すると、`unshare` コマンド自体が新しい namespace で PID 1 になります。これにより `/bin/bash` とその子プロセスは新しい namespace 内に安全に収まり、PID 1 の早期終了を防いで通常の PID 割り当てが可能になります。
+3. **Solution**:
+- The issue can be resolved by using the `-f` option with `unshare`. This option makes `unshare` fork a new process after creating the new PID namespace.
+- Executing `%unshare -fp /bin/bash%` ensures that the `unshare` command itself becomes PID 1 in the new namespace. `/bin/bash` and its child processes are then safely contained within this new namespace, preventing the premature exit of PID 1 and allowing normal PID allocation.
 
-`unshare` を `-f` フラグ付きで実行することで、新しい PID namespace は正しく維持され、`/bin/bash` とそのサブプロセスはメモリ割り当てエラーに遭遇することなく動作できます。
+By ensuring that `unshare` runs with the `-f` flag, the new PID namespace is correctly maintained, allowing `/bin/bash` and its sub-processes to operate without encountering the memory allocation error.
 
 </details>
 
@@ -50,7 +50,7 @@ By mounting a new instance of the `/proc` filesystem if you use the param `--mou
 ```bash
 docker run -ti --name ubuntu1 -v /usr:/ubuntu1 ubuntu bash
 ```
-### プロセスがどの namespace にいるか確認する
+### プロセスがどの namespace に属しているかを確認する
 ```bash
 ls -l /proc/self/ns/uts
 lrwxrwxrwx 1 root root 0 Apr  4 20:49 /proc/self/ns/uts -> 'uts:[4026531838]'
@@ -61,18 +61,18 @@ sudo find /proc -maxdepth 3 -type l -name uts -exec readlink {} \; 2>/dev/null |
 # Find the processes with an specific namespace
 sudo find /proc -maxdepth 3 -type l -name uts -exec ls -l  {} \; 2>/dev/null | grep <ns-number>
 ```
-### UTS namespace に入る
+### UTS namespace の中に入る
 ```bash
 nsenter -u TARGET_PID --pid /bin/bash
 ```
-## ホストの UTS 共有の悪用
+## ホスト UTS 共有の悪用
 
-`--uts=host` でコンテナを起動すると、分離された UTS 名前空間を取得する代わりにホストの UTS 名前空間に参加します。`--cap-add SYS_ADMIN` のような capabilities があると、コンテナ内のコードは `sethostname()`/`setdomainname()` を使ってホストの hostname/NIS name を変更できます：
+コンテナが `--uts=host` で起動されると、隔離された UTS 名前空間が与えられるのではなく、ホストの UTS 名前空間に参加します。`--cap-add SYS_ADMIN` のような capabilities を持つと、コンテナ内のコードは `sethostname()`/`setdomainname()` を使ってホストの hostname/NIS 名を変更できます:
 ```bash
 docker run --rm -it --uts=host --cap-add SYS_ADMIN alpine sh -c "hostname hacked-host && exec sh"
 # Hostname on the host will immediately change to "hacked-host"
 ```
-ホスト名を変更すると、ログやアラートを改ざんしたり、クラスタの検出を混乱させたり、ホスト名を固定している TLS/SSH 設定を破損させる可能性があります。
+ホスト名を変更すると、ログやアラートを改ざんしたり、クラスタ検出を混乱させたり、ホスト名を固定している TLS/SSH の設定を破損させる可能性があります。
 
 ### ホストと UTS を共有しているコンテナを検出する
 ```bash
