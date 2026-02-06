@@ -4,17 +4,17 @@
 
 ## Osnovne informacije
 
-UTS (UNIX Time-Sharing System) namespace je Linux kernel feature koji obezbeđuje **izolaciju dva sistemska identifikatora**: **hostname** i **NIS** (Network Information Service) domain name. Ova izolacija omogućava svakom UTS namespace-u da ima svoj **nezavisan hostname i NIS domain name**, što je posebno korisno u scenarijima containerization gde svaki container treba da izgleda kao zaseban sistem sa sopstvenim hostname-om.
+UTS (UNIX Time-Sharing System) namespace je funkcionalnost Linux kernela koja obezbeđuje i**solation of two system identifiers**: **hostname** i **NIS** (Network Information Service) domain name. Ova izolacija omogućava svakom UTS namespace-u da ima **own independent hostname and NIS domain name**, što je naročito korisno u scenarijima containerization-a gde svaki kontejner treba da se pojavi kao poseban sistem sa sopstvenim hostname-om.
 
-### Kako funkcioniše:
+### Kako to radi:
 
-1. Kada se kreira novi UTS namespace, on počinje sa **kopijom hostname-a i NIS domain name-a iz svog roditeljskog namespace-a**. To znači da pri kreiranju novi namespace **deli iste identifikatore kao njegov roditelj**. Međutim, bilo kakve naknadne promene hostname-a ili NIS domain name-a unutar namespace-a neće uticati na druge namespace-ove.
-2. Procesi unutar UTS namespace-a **mogu da menjaju hostname i NIS domain name** koristeći sistemske pozive `sethostname()` i `setdomainname()`, respektivno. Te promene su lokalne za namespace i ne utiču na druge namespace-ove ili host sistem.
-3. Procesi se mogu premeštati između namespace-ova koristeći sistemski poziv `setns()` ili kreirati nove namespace-ove koristeći `unshare()` ili `clone()` sa flag-om `CLONE_NEWUTS`. Kada se proces premesti u novi namespace ili ga kreira, on će početi da koristi hostname i NIS domain name povezane sa tim namespace-om.
+1. Kada se kreira novi UTS namespace, on počinje sa **copy of the hostname and NIS domain name from its parent namespace**. To znači da novo namespace prilikom kreiranja s**hares the same identifiers as its parent**. Međutim, sve kasnije izmene hostname-a ili NIS domain name-a unutar tog namespace-a neće uticati na druge namespace-ove.
+2. Procesi unutar UTS namespace-a **can change the hostname and NIS domain name** koristeći `sethostname()` i `setdomainname()` sistemske pozive, respektivno. Te izmene su lokalne za taj namespace i ne utiču na druge namespace-ove niti na host sistem.
+3. Procesi mogu da se premeste između namespace-ova koristeći `setns()` sistemski poziv ili da kreiraju nove namespace-ove koristeći `unshare()` ili `clone()` sistemske pozive sa `CLONE_NEWUTS` flagom. Kada se proces premesti u novi namespace ili ga kreira, počinje da koristi hostname i NIS domain name povezane sa tim namespace-om.
 
-## Lab:
+## Vežba:
 
-### Kreiranje različitih prostora imena
+### Kreiranje različitih namespace-ova
 
 #### CLI
 ```bash
@@ -26,23 +26,23 @@ By mounting a new instance of the `/proc` filesystem if you use the param `--mou
 
 <summary>Error: bash: fork: Cannot allocate memory</summary>
 
-When `unshare` is executed without the `-f` option, an error is encountered due to the way Linux handles new PID (Process ID) namespaces. The key details and the solution are outlined below:
+Kada se `unshare` izvrši bez opcije `-f`, javlja se greška zbog načina na koji Linux rukuje novim PID (Process ID) namespace-ovima. Ključni detalji i rešenje su navedeni u nastavku:
 
-1. **Problem Explanation**:
+1. **Objašnjenje problema**:
 
-- The Linux kernel allows a process to create new namespaces using the `unshare` system call. However, the process that initiates the creation of a new PID namespace (referred to as the "unshare" process) does not enter the new namespace; only its child processes do.
-- Running `%unshare -p /bin/bash%` starts `/bin/bash` in the same process as `unshare`. Consequently, `/bin/bash` and its child processes are in the original PID namespace.
-- The first child process of `/bin/bash` in the new namespace becomes PID 1. When this process exits, it triggers the cleanup of the namespace if there are no other processes, as PID 1 has the special role of adopting orphan processes. The Linux kernel will then disable PID allocation in that namespace.
+- Linux kernel omogućava procesu da kreira nove namespace-ove koristeći sistemski poziv `unshare`. Međutim, proces koji inicira kreiranje novog PID namespace-a (nazivan "unshare" proces) ne ulazi u novi namespace; u njega ulaze samo njegovi podprocesi.
+- Pokretanje `%unshare -p /bin/bash%` pokreće `/bin/bash` u istom procesu kao `unshare`. Kao posledica, `/bin/bash` i njegovi podprocesi su u originalnom PID namespace-u.
+- Prvi podproces `/bin/bash` u novom namespace-u postaje PID 1. Kada ovaj proces izađe, pokreće čišćenje namespace-a ako nema drugih procesa, jer PID 1 ima specijalnu ulogu usvajanja napuštenih (orphan) procesa. Linux kernel će potom onemogućiti dodelu PID-ova u tom namespace-u.
 
-2. **Consequence**:
+2. **Posledica**:
 
-- The exit of PID 1 in a new namespace leads to the cleaning of the `PIDNS_HASH_ADDING` flag. This results in the `alloc_pid` function failing to allocate a new PID when creating a new process, producing the "Cannot allocate memory" error.
+- Izlazak PID 1 u novom namespace-u dovodi do čišćenja flag-a `PIDNS_HASH_ADDING`. To rezultira time da funkcija `alloc_pid` ne uspe da dodeli novi PID prilikom kreiranja novog procesa, što proizvodi grešku "Cannot allocate memory".
 
-3. **Solution**:
-- The issue can be resolved by using the `-f` option with `unshare`. This option makes `unshare` fork a new process after creating the new PID namespace.
-- Executing `%unshare -fp /bin/bash%` ensures that the `unshare` command itself becomes PID 1 in the new namespace. `/bin/bash` and its child processes are then safely contained within this new namespace, preventing the premature exit of PID 1 and allowing normal PID allocation.
+3. **Rešenje**:
+- Problem se može rešiti korišćenjem opcije `-f` sa `unshare`. Ova opcija tera `unshare` da izvrši fork novog procesa nakon kreiranja novog PID namespace-a.
+- Izvršavanje `%unshare -fp /bin/bash%` osigurava da sam `unshare` postane PID 1 u novom namespace-u. `/bin/bash` i njegovi podprocesi se tada bezbedno nalaze unutar tog namespace-a, sprečavajući prevremen izlazak PID 1 i omogućavajući normalnu dodelu PID-ova.
 
-By ensuring that `unshare` runs with the `-f` flag, the new PID namespace is correctly maintained, allowing `/bin/bash` and its sub-processes to operate without encountering the memory allocation error.
+Time što se `unshare` pokreće sa `-f` flagom, novi PID namespace se pravilno održava, što omogućava `/bin/bash` i njegovim podprocesima da rade bez suočavanja sa greškom "Cannot allocate memory".
 
 </details>
 
@@ -50,7 +50,7 @@ By ensuring that `unshare` runs with the `-f` flag, the new PID namespace is cor
 ```bash
 docker run -ti --name ubuntu1 -v /usr:/ubuntu1 ubuntu bash
 ```
-### Proverite u kojem namespace-u se nalazi vaš proces
+### Proverite u kojem se namespace-u nalazi vaš proces
 ```bash
 ls -l /proc/self/ns/uts
 lrwxrwxrwx 1 root root 0 Apr  4 20:49 /proc/self/ns/uts -> 'uts:[4026531838]'
@@ -65,14 +65,14 @@ sudo find /proc -maxdepth 3 -type l -name uts -exec ls -l  {} \; 2>/dev/null | g
 ```bash
 nsenter -u TARGET_PID --pid /bin/bash
 ```
-## Zloupotreba deljenja UTS prostora hosta
+## Zloupotreba deljenja host UTS namespace-a
 
-Ako je kontejner pokrenut sa `--uts=host`, on se priključuje UTS namespace-u hosta umesto da dobije izolovani. Sa privilegijama kao što su `--cap-add SYS_ADMIN`, kod u kontejneru može promeniti hostname/NIS ime hosta pomoću `sethostname()`/`setdomainname()`:
+Ako se kontejner pokrene sa `--uts=host`, pridružiće se host UTS namespace-u umesto da dobije sopstveni izolovani. Sa privilegijama kao što su `--cap-add SYS_ADMIN`, kod u kontejneru može promeniti hostname/NIS ime hosta putem `sethostname()`/`setdomainname()`:
 ```bash
 docker run --rm -it --uts=host --cap-add SYS_ADMIN alpine sh -c "hostname hacked-host && exec sh"
 # Hostname on the host will immediately change to "hacked-host"
 ```
-Promena imena hosta može da manipuliše logovima/alertima, zbuni otkrivanje klastera ili pokvari TLS/SSH konfiguracije koje vezuju ime hosta.
+Promena imena hosta može da izmeni logove/upozorenja, zbuni otkrivanje klastera ili pokvari TLS/SSH konfiguracije koje fiksiraju ime hosta.
 
 ### Otkrivanje kontejnera koji dele UTS sa hostom
 ```bash
