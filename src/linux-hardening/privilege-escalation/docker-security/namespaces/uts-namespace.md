@@ -4,17 +4,17 @@
 
 ## Temel Bilgiler
 
-A UTS (UNIX Time-Sharing System) namespace is a Linux kernel feature that provides i**iki sistem tanımlayıcısının izolasyonu**: the **hostname** and the **NIS** (Network Information Service) domain name. Bu izolasyon, her UTS namespace'inin kendi **bağımsız hostname ve NIS alan adına** sahip olmasını sağlar; bu, containerization senaryolarında, her container'ın kendi hostname'i ile ayrı bir sistem gibi görünmesi gerektiğinde özellikle kullanışlıdır.
+A UTS (UNIX Time-Sharing System) namespace, iki sistem tanımlayıcısının **izolasyonunu** sağlayan bir Linux çekirdek özelliğidir: **hostname** ve **NIS** (Network Information Service) alan adı. Bu izolasyon, her UTS namespace'in kendi **bağımsız hostname ve NIS alan adına** sahip olmasına olanak tanır; bu durum, her container'ın kendi hostname'iyle ayrı bir sistemmiş gibi görünmesi gereken containerization senaryolarında özellikle kullanışlıdır.
 
 ### Nasıl çalışır:
 
-1. Yeni bir UTS namespace oluşturulduğunda, üst namespace'inden **hostname ve NIS alan adının bir kopyasıyla** başlar. Bu, oluşturulma sırasında yeni namespace'in üstüyle s**aynı tanımlayıcıları paylaştığı** anlamına gelir. Ancak, namespace içindeki hostname veya NIS alan adındaki sonraki değişiklikler diğer namespace'leri etkilemez.
-2. UTS namespace içindeki süreçler `sethostname()` ve `setdomainname()` system call'larını kullanarak sırasıyla **hostname ve NIS alan adını değiştirebilir**. Bu değişiklikler namespace'e yerel olup diğer namespace'leri veya host sistemini etkilemez.
-3. Süreçler `setns()` system call'ını kullanarak namespace'ler arasında hareket edebilir veya `CLONE_NEWUTS` flag'i ile `unshare()` veya `clone()` system call'larıyla yeni namespace'ler oluşturabilir. Bir süreç yeni bir namespace'e geçtiğinde veya bir namespace oluşturduğunda, o namespace ile ilişkili hostname ve NIS alan adını kullanmaya başlar.
+1. Yeni bir UTS namespace oluşturulduğunda, parent namespace'inden **hostname ve NIS alan adının bir kopyasıyla başlar**. Bu, oluşturulma sırasında yeni namespace'in **üst namespace ile aynı tanımlayıcıları paylaşacağı** anlamına gelir. Ancak, namespace içinde yapılan sonraki herhangi bir hostname veya NIS alan adı değişikliği diğer namespace'leri etkilemez.
+2. UTS namespace içindeki süreçler sırasıyla `sethostname()` ve `setdomainname()` system call'larını kullanarak **hostname ve NIS alan adını değiştirebilir**. Bu değişiklikler namespace'e özeldir ve diğer namespace'leri ya da host sistemini etkilemez.
+3. Süreçler `setns()` system call'u ile namespace'ler arasında geçiş yapabilir veya `unshare()` ya da `clone()` system call'ları ile `CLONE_NEWUTS` bayrağını kullanarak yeni namespace'ler oluşturabilir. Bir süreç yeni bir namespace'e geçtiğinde veya bir tane oluşturduğunda, o namespace ile ilişkili hostname ve NIS alan adını kullanmaya başlar.
 
-## Lab:
+## Laboratuvar:
 
-### Create different Namespaces
+### Farklı Namespaces Oluşturma
 
 #### CLI
 ```bash
@@ -24,22 +24,22 @@ By mounting a new instance of the `/proc` filesystem if you use the param `--mou
 
 <details>
 
-<summary>Hata: bash: fork: Cannot allocate memory</summary>
+<summary>Error: bash: fork: Cannot allocate memory</summary>
 
 When `unshare` is executed without the `-f` option, an error is encountered due to the way Linux handles new PID (Process ID) namespaces. The key details and the solution are outlined below:
 
-1. **Sorunun Açıklaması**:
+1. **Problem Explanation**:
 
-- Linux kernel, bir işlemin `unshare` system call'u ile yeni namespace'ler oluşturmasına izin verir. Ancak yeni bir PID namespace'inin oluşturulmasını başlatan süreç ("unshare" süreci olarak adlandırılır) yeni namespace'e girmez; sadece onun alt süreçleri girer.
+- Linux çekirdeği, bir işlemin `unshare` sistem çağrısını kullanarak yeni namespace'ler oluşturmasına izin verir. Ancak yeni bir PID namespace'inin oluşturulmasını başlatan süreç ("unshare" süreci olarak adlandırılan) yeni namespace'e girmez; sadece onun alt süreçleri girer.
 - Running `%unshare -p /bin/bash%` starts `/bin/bash` in the same process as `unshare`. Consequently, `/bin/bash` and its child processes are in the original PID namespace.
-- The first child process of `/bin/bash` in the new namespace becomes PID 1. When this process exits, it triggers the cleanup of the namespace if there are no other processes, as PID 1 has the special role of adopting orphan processes. The Linux kernel will then disable PID allocation in that namespace.
+- Yeni namespace'teki `/bin/bash`'in ilk alt süreci PID 1 olur. Bu süreç sonlandığında, eğer başka süreç yoksa namespace'in temizlenmesini tetikler; çünkü PID 1 yetim süreçleri devralma gibi özel bir role sahiptir. Linux çekirdeği daha sonra o namespace'de PID tahsisini devre dışı bırakır.
 
-2. **Sonuç**:
+2. **Consequence**:
 
-- Yeni namespace'te PID 1'in çıkışı `PIDNS_HASH_ADDING` bayrağının temizlenmesine yol açar. Bu, `alloc_pid` fonksiyonunun yeni bir PID tahsis edememesine neden olur ve "Cannot allocate memory" hatasını üretir.
+- Yeni namespace'te PID 1'in çıkışı `PIDNS_HASH_ADDING` bayrağının temizlenmesine yol açar. Bu, yeni bir süreç oluşturulurken `alloc_pid` fonksiyonunun yeni bir PID tahsis edememesine ve "Cannot allocate memory" hatasının ortaya çıkmasına neden olur.
 
-3. **Çözüm**:
-- Bu sorun `unshare` ile `-f` seçeneği kullanılarak çözülebilir. Bu seçenek `unshare`'in yeni PID namespace'ini oluşturduktan sonra yeni bir süreç fork etmesini sağlar.
+3. **Solution**:
+- Sorun, `unshare` ile `-f` seçeneği kullanılarak çözülebilir. Bu seçenek, yeni PID namespace'i oluşturduktan sonra `unshare`'in yeni bir süreç fork etmesini sağlar.
 - Executing `%unshare -fp /bin/bash%` ensures that the `unshare` command itself becomes PID 1 in the new namespace. `/bin/bash` and its child processes are then safely contained within this new namespace, preventing the premature exit of PID 1 and allowing normal PID allocation.
 
 By ensuring that `unshare` runs with the `-f` flag, the new PID namespace is correctly maintained, allowing `/bin/bash` and its sub-processes to operate without encountering the memory allocation error.
@@ -50,31 +50,31 @@ By ensuring that `unshare` runs with the `-f` flag, the new PID namespace is cor
 ```bash
 docker run -ti --name ubuntu1 -v /usr:/ubuntu1 ubuntu bash
 ```
-### Hangi namespace'te olduğunuzu kontrol edin
+### İşleminizin hangi namespace'te olduğunu kontrol edin
 ```bash
 ls -l /proc/self/ns/uts
 lrwxrwxrwx 1 root root 0 Apr  4 20:49 /proc/self/ns/uts -> 'uts:[4026531838]'
 ```
-### Tüm UTS ad alanlarını bul
+### Tüm UTS namespaces'lerini bulun
 ```bash
 sudo find /proc -maxdepth 3 -type l -name uts -exec readlink {} \; 2>/dev/null | sort -u
 # Find the processes with an specific namespace
 sudo find /proc -maxdepth 3 -type l -name uts -exec ls -l  {} \; 2>/dev/null | grep <ns-number>
 ```
-### UTS namespace içine girin
+### Bir UTS namespace içine girin
 ```bash
 nsenter -u TARGET_PID --pid /bin/bash
 ```
 ## Host UTS paylaşımının kötüye kullanılması
 
-Eğer bir container `--uts=host` ile başlatılırsa, izole bir UTS yerine host UTS namespace'ine katılır. `--cap-add SYS_ADMIN` gibi capabilities ile container içindeki kod host'un hostname/NIS adını `sethostname()`/`setdomainname()` aracılığıyla değiştirebilir:
+Bir container `--uts=host` ile başlatılırsa, izole bir UTS namespace'i almak yerine host UTS namespace'ine katılır. `--cap-add SYS_ADMIN` gibi yetkilerle, container içindeki kod host'un hostname/NIS name'ini `sethostname()`/`setdomainname()` aracılığıyla değiştirebilir:
 ```bash
 docker run --rm -it --uts=host --cap-add SYS_ADMIN alpine sh -c "hostname hacked-host && exec sh"
 # Hostname on the host will immediately change to "hacked-host"
 ```
-Host name'i değiştirmek logs/alerts'lara müdahale edebilir, cluster discovery'yi karıştırabilir veya hostname'e sabitlenmiş TLS/SSH konfigürasyonlarını bozabilir.
+Host name'i değiştirmek logs/alerts üzerinde tahribata yol açabilir, cluster discovery'i yanıltabilir veya hostname'i pinleyen TLS/SSH konfigürasyonlarını bozabilir.
 
-### Host ile UTS paylaşan container'ları tespit et
+### Host ile UTS paylaşan containers'ları tespit et
 ```bash
 docker ps -aq | xargs -r docker inspect --format '{{.Id}} UTSMode={{.HostConfig.UTSMode}}'
 # Shows "host" when the container uses the host UTS namespace
