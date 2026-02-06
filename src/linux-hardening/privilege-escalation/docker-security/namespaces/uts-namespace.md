@@ -4,23 +4,23 @@
 
 ## Podstawowe informacje
 
-A UTS (UNIX Time-Sharing System) namespace is a Linux kernel feature that provides i**izolację dwóch identyfikatorów systemowych**: the **hostname** and the **NIS** (Network Information Service) domain name. Ta izolacja pozwala każdej przestrzeni nazw UTS mieć swój **własny niezależny hostname i NIS domain name**, co jest szczególnie przydatne w scenariuszach containerization, gdzie każdy container powinien wyglądać jak oddzielny system z własnym hostname.
+A UTS (UNIX Time-Sharing System) namespace is a Linux kernel feature that provides i**solation of two system identifiers**: the **hostname** and the **NIS** (Network Information Service) domain name. Ta izolacja pozwala każdej przestrzeni nazw UTS mieć swoje **własne niezależne hostname i NIS domain name**, co jest szczególnie przydatne w scenariuszach containerization, gdzie każdy container powinien wyglądać jak oddzielny system z własnym hostname.
 
 ### Jak to działa:
 
-1. Gdy tworzona jest nowa przestrzeń nazw UTS, zaczyna z **kopią hostname i NIS domain name z przestrzeni nadrzędnej**. Oznacza to, że przy tworzeniu nowa przestrzeń s**dzieli te same identyfikatory co przestrzeń nadrzędna**. Jednak wszelkie późniejsze zmiany hostname lub NIS domain name w obrębie tej przestrzeni nie będą wpływać na inne przestrzenie nazw.
-2. Procesy w obrębie przestrzeni nazw UTS **mogą zmienić hostname i NIS domain name** używając wywołań systemowych `sethostname()` i `setdomainname()`, odpowiednio. Zmiany te są lokalne dla tej przestrzeni nazw i nie wpływają na inne przestrzenie ani system hosta.
-3. Procesy mogą przenosić się między przestrzeniami nazw przy użyciu wywołania systemowego `setns()` lub tworzyć nowe przestrzenie nazw używając `unshare()` lub `clone()` z flagą `CLONE_NEWUTS`. Gdy proces przejdzie do nowej przestrzeni lub ją utworzy, zacznie używać hostname i NIS domain name przypisanych do tej przestrzeni.
+1. When a new UTS namespace is created, it starts with a **copy of the hostname and NIS domain name from its parent namespace**. Oznacza to, że przy tworzeniu nowa przestrzeń nazw s**hares the same identifiers as its parent**. Jednakże wszelkie późniejsze zmiany hostname lub NIS domain name w obrębie tej przestrzeni nazw nie wpłyną na inne przestrzenie nazw.
+2. Processes within a UTS namespace **can change the hostname and NIS domain name** using the `sethostname()` and `setdomainname()` system calls, respectively. Te zmiany są lokalne dla przestrzeni nazw i nie wpływają na inne namespaces ani na system hosta.
+3. Processes can move between namespaces using the `setns()` system call or create new namespaces using the `unshare()` or `clone()` system calls with the `CLONE_NEWUTS` flag. Kiedy proces przenosi się do nowej przestrzeni nazw lub tworzy ją, zacznie używać hostname i NIS domain name związanych z tą przestrzenią nazw.
 
 ## Laboratorium:
 
-### Tworzenie różnych przestrzeni nazw
+### Utwórz różne przestrzenie nazw
 
 #### CLI
 ```bash
 sudo unshare -u [--mount-proc] /bin/bash
 ```
-By mounting a new instance of the `/proc` filesystem if you use the param `--mount-proc`, you ensure that the new mount namespace has an **accurate and isolated view of the process information specific to that namespace**.
+Montując nową instancję systemu plików `/proc` przy użyciu parametru `--mount-proc`, zapewniasz, że nowa przestrzeń nazw montowania ma **dokładny i izolowany widok informacji o procesach specyficznych dla tej przestrzeni nazw**.
 
 <details>
 
@@ -28,21 +28,21 @@ By mounting a new instance of the `/proc` filesystem if you use the param `--mou
 
 When `unshare` is executed without the `-f` option, an error is encountered due to the way Linux handles new PID (Process ID) namespaces. The key details and the solution are outlined below:
 
-1. **Wyjaśnienie problemu**:
+1. Wyjaśnienie problemu:
 
-- Jądro Linux pozwala procesowi tworzyć nowe przestrzenie nazw za pomocą wywołania systemowego `unshare`. Jednak proces inicjujący stworzenie nowej przestrzeni nazw PID (referred to as the "unshare" process) nie wchodzi do nowej przestrzeni nazw; wchodzą do niej tylko jego procesy potomne.
-- Running `%unshare -p /bin/bash%` starts `/bin/bash` in the same process as `unshare`. Consequently, `/bin/bash` and its child processes are in the original PID namespace.
-- The first child process of `/bin/bash` in the new namespace becomes PID 1. When this process exits, it triggers the cleanup of the namespace if there are no other processes, as PID 1 has the special role of adopting orphan processes. The Linux kernel will then disable PID allocation in that namespace.
+- Jądro Linux pozwala procesowi tworzyć nowe przestrzenie nazw za pomocą wywołania systemowego `unshare`. Jednak proces, który inicjuje stworzenie nowej przestrzeni nazw PID (określany jako proces "unshare"), nie wchodzi do nowej przestrzeni — robią to tylko jego procesy potomne.
+- Uruchomienie %unshare -p /bin/bash% startuje `/bin/bash` w tym samym procesie co `unshare`. W konsekwencji `/bin/bash` i jego procesy potomne znajdują się w oryginalnej przestrzeni nazw PID.
+- Pierwszy proces potomny `/bin/bash` w nowej przestrzeni nazw staje się PID 1. Gdy ten proces się zakończy, powoduje posprzątanie przestrzeni nazw, jeśli nie ma innych procesów, ponieważ PID 1 pełni specjalną rolę przyjmowania osieroconych procesów. Jądro Linux wtedy wyłączy przydzielanie PID w tej przestrzeni.
 
-2. **Konsekwencja**:
+2. Konsekwencja:
 
-- The exit of PID 1 in a new namespace leads to the cleaning of the `PIDNS_HASH_ADDING` flag. This results in the `alloc_pid` function failing to allocate a new PID when creating a new process, producing the "Cannot allocate memory" error.
+- Wyjście PID 1 w nowej przestrzeni powoduje wyczyszczenie flagi `PIDNS_HASH_ADDING`. W efekcie funkcja `alloc_pid` nie jest w stanie przydzielić nowego PID przy tworzeniu procesu, co skutkuje błędem "Cannot allocate memory".
 
-3. **Rozwiązanie**:
-- The issue can be resolved by using the `-f` option with `unshare`. This option makes `unshare` fork a new process after creating the new PID namespace.
-- Executing `%unshare -fp /bin/bash%` ensures that the `unshare` command itself becomes PID 1 in the new namespace. `/bin/bash` and its child processes are then safely contained within this new namespace, preventing the premature exit of PID 1 and allowing normal PID allocation.
+3. Rozwiązanie:
+- Problem można rozwiązać, używając opcji `-f` z `unshare`. Ta opcja powoduje, że `unshare` wykonuje fork nowego procesu po utworzeniu nowej przestrzeni nazw PID.
+- Uruchomienie %unshare -fp /bin/bash% zapewnia, że sam `unshare` staje się PID 1 w nowej przestrzeni nazw. `/bin/bash` i jego procesy potomne są wtedy bezpiecznie osadzone w tej przestrzeni, co zapobiega przedwczesnemu zakończeniu PID 1 i umożliwia normalne przydzielanie PID.
 
-By ensuring that `unshare` runs with the `-f` flag, the new PID namespace is correctly maintained, allowing `/bin/bash` and its sub-processes to operate without encountering the memory allocation error.
+Zapewnienie, że `unshare` uruchamiany jest z flagą `-f`, powoduje poprawne utrzymanie nowej przestrzeni nazw PID, pozwalając `/bin/bash` i jego podprocesom działać bez napotkania błędu alokacji pamięci.
 
 </details>
 
@@ -55,7 +55,7 @@ docker run -ti --name ubuntu1 -v /usr:/ubuntu1 ubuntu bash
 ls -l /proc/self/ns/uts
 lrwxrwxrwx 1 root root 0 Apr  4 20:49 /proc/self/ns/uts -> 'uts:[4026531838]'
 ```
-### Znajdź wszystkie UTS namespaces
+### Znajdź wszystkie przestrzenie nazw UTS
 ```bash
 sudo find /proc -maxdepth 3 -type l -name uts -exec readlink {} \; 2>/dev/null | sort -u
 # Find the processes with an specific namespace
@@ -65,9 +65,9 @@ sudo find /proc -maxdepth 3 -type l -name uts -exec ls -l  {} \; 2>/dev/null | g
 ```bash
 nsenter -u TARGET_PID --pid /bin/bash
 ```
-## Nadużywanie współdzielenia UTS hosta
+## Wykorzystywanie udostępniania UTS hosta
 
-Jeśli kontener jest uruchomiony z `--uts=host`, dołącza do UTS namespace hosta zamiast otrzymać izolowaną przestrzeń. Przy uprawnieniach takich jak `--cap-add SYS_ADMIN`, kod w kontenerze może zmienić nazwę hosta/NIS hosta za pomocą `sethostname()`/`setdomainname()`:
+Jeśli kontener jest uruchomiony z `--uts=host`, dołącza do przestrzeni nazw UTS hosta zamiast otrzymać izolowaną. Mając capabilities takie jak `--cap-add SYS_ADMIN`, kod w kontenerze może zmienić hostname/NIS name hosta za pomocą `sethostname()`/`setdomainname()`:
 ```bash
 docker run --rm -it --uts=host --cap-add SYS_ADMIN alpine sh -c "hostname hacked-host && exec sh"
 # Hostname on the host will immediately change to "hacked-host"
