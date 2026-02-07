@@ -1,7 +1,31 @@
-# Kerberos प्रमाणीकरण
+# Kerberos Authentication
 
 {{#include ../../banners/hacktricks-training.md}}
 
-**इस बेहतरीन पोस्ट को देखें:** [**https://www.tarlogic.com/en/blog/how-kerberos-works/**](https://www.tarlogic.com/en/blog/how-kerberos-works/)
+**शानदार पोस्ट देखें:** [**https://www.tarlogic.com/en/blog/how-kerberos-works/**](https://www.tarlogic.com/en/blog/how-kerberos-works/)
 
+## TL;DR for attackers
+- Kerberos AD का डिफ़ॉल्ट auth प्रोटोकॉल है; अधिकांश lateral-movement chains इससे जुड़ेंगी। hands‑on cheatsheets (AS‑REP/Kerberoasting, ticket forging, delegation abuse, आदि) के लिए देखें:
+{{#ref}}
+../../network-services-pentesting/pentesting-kerberos-88/README.md
+{{#endref}}
+
+## Fresh attack notes (2024‑2026)
+- **RC4 finally going away** – Windows Server 2025 DCs अब RC4 TGTs issue नहीं करेंगे; Microsoft का प्लान है कि RC4 को AD DCs के लिए default के रूप में Q2 2026 के अंत तक disable कर दिया जाए। जो वातावरण legacy apps के लिए RC4 फिर से enable करते हैं, वे Kerberoasting के लिए downgrade/fast‑crack अवसर पैदा करते हैं।
+- **PAC validation enforcement (Apr 2025)** – April 2025 अपडेट्स “Compatibility” मोड हटा देती हैं; forged PACs/golden tickets patched DCs पर reject हो जाएंगे जब enforcement enabled होगा। Legacy/unpatched DCs अभी भी abusable बने रहते हैं।
+- **CVE‑2025‑26647 (altSecID CBA mapping)** – अगर DCs unpatched हैं या Audit mode में छोड़े गए हैं, तो non‑NTAuth CAs से chained प्रमाणपत्र जो SKI/altSecID के माध्यम से mapped हैं, फिर भी लॉग ऑन कर सकते हैं। सुरक्षा उपाय trigger होने पर Events 45/21 दिखाई देते हैं।
+- **NTLM phase‑out** – Microsoft भविष्य के Windows releases NTLM को default रूप में disabled करके भेजेगा (2026 तक staged), जिससे और अधिक auth Kerberos पर जाएगा। हार्डन किए गए नेटवर्क में अधिक Kerberos surface area और कड़े EPA/CBT की उम्मीद रखें।
+- **Cross‑domain RBCD remains powerful** – Microsoft Learn बताता है कि resource‑based constrained delegation domains/forests के across काम करती है; resource objects पर writable `msDS-AllowedToActOnBehalfOfOtherIdentity` अभी भी S4U2self→S4U2proxy impersonation की अनुमति देता है बिना front‑end service ACLs को छुए।
+
+## Quick tooling
+- **Rubeus kerberoast (AES default)**: `Rubeus.exe kerberoast /user:svc_sql /aes /nowrap /outfile:tgs.txt` — AES hashes आउटपुट करता है; GPU cracking की योजना बनाएं या इसके बजाय pre‑auth disabled users को लक्षित करें।
+- **RC4 downgrade target hunting**: enumerate उन accounts को जो अभी भी RC4 advertise करते हैं using `Get-ADObject -LDAPFilter '(msDS-SupportedEncryptionTypes=4)' -Properties msDS-SupportedEncryptionTypes` ताकि RC4 पूरी तरह disabled होने से पहले weak kerberoast candidates मिल सकें।
+
+
+## References
+- [Microsoft – Beyond RC4 for Windows authentication (RC4 default removal timeline)](https://www.microsoft.com/en-us/windows-server/blog/2025/12/03/beyond-rc4-for-windows-authentication)
+- [Microsoft Support – Protections for CVE-2025-26647 Kerberos authentication](https://support.microsoft.com/en-gb/topic/protections-for-cve-2025-26647-kerberos-authentication-5f5d753b-4023-4dd3-b7b7-c8b104933d53)
+- [Microsoft Support – PAC validation enforcement timeline](https://support.microsoft.com/en-us/topic/how-to-manage-pac-validation-changes-related-to-cve-2024-26248-and-cve-2024-29056-6e661d4f-799a-4217-b948-be0a1943fef1)
+- [Microsoft Learn – Kerberos constrained delegation overview (cross-domain RBCD)](https://learn.microsoft.com/en-us/windows-server/security/kerberos/kerberos-constrained-delegation-overview)
+- [Windows Central – NTLM deprecation roadmap](https://www.windowscentral.com/microsoft/windows/microsoft-plans-to-bury-its-ntlm-security-relic-after-30-years)
 {{#include ../../banners/hacktricks-training.md}}
