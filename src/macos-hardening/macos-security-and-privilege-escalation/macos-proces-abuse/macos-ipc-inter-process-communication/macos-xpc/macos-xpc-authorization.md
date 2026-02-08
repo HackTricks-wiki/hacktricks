@@ -1,16 +1,16 @@
-# macOS XPC 권한 부여
+# macOS XPC 권한
 
 {{#include ../../../../../banners/hacktricks-training.md}}
 
 ## XPC 권한
 
-Apple은 연결하는 프로세스가 **노출된 XPC 메서드를 호출할 권한을 가지고 있는 경우** 인증하는 또 다른 방법을 제안한다.
+Apple는 연결하는 프로세스가 **노출된 XPC 메서드를 호출할 권한**이 있는지 확인하는 또 다른 인증 방법을 제안한다.
 
-애플리케이션이 **권한 있는 사용자로서 동작을 실행해야 할 때**, 애플리케이션 자체를 권한 있는 사용자로 실행하는 대신 보통 루트로 HelperTool을 설치하여 앱에서 호출해 해당 동작을 수행하는 XPC 서비스로 사용한다. 하지만 그 서비스를 호출하는 앱은 충분한 권한을 가져야 한다.
+애플리케이션이 **권한 있는 사용자로서 작업을 실행해야 할 때**, 해당 앱을 권한 있는 사용자로 실행하는 대신 보통 root로 HelperTool을 XPC 서비스로 설치해 앱에서 해당 서비스를 호출해 작업을 수행하게 한다. 하지만 그 서비스를 호출하는 앱은 충분한 권한이 있어야 한다.
 
 ### ShouldAcceptNewConnection 항상 YES
 
-예제는 [EvenBetterAuthorizationSample](https://github.com/brenwell/EvenBetterAuthorizationSample)에서 찾을 수 있다. `App/AppDelegate.m`에서는 **HelperTool에 연결하려고 한다**. 그리고 `HelperTool/HelperTool.m`에서는 함수 **`shouldAcceptNewConnection`**가 앞서 언급한 어떤 요구 사항도 **확인하지 않는다**. 항상 YES를 반환한다:
+예제는 [EvenBetterAuthorizationSample](https://github.com/brenwell/EvenBetterAuthorizationSample)에서 찾을 수 있다. `App/AppDelegate.m`에서는 **HelperTool에 연결하려고 시도한다**. 그리고 `HelperTool/HelperTool.m`에서 함수 **`shouldAcceptNewConnection`**는 앞서 언급한 요구사항들을 전혀 **확인하지 않는다**. 항상 YES를 반환한다:
 ```objectivec
 - (BOOL)listener:(NSXPCListener *)listener shouldAcceptNewConnection:(NSXPCConnection *)newConnection
 // Called by our XPC listener when a new connection comes in.  We configure the connection
@@ -27,7 +27,7 @@ newConnection.exportedObject = self;
 return YES;
 }
 ```
-이 검사를 올바르게 구성하는 방법에 대한 자세한 내용은:
+더 자세한 설정 방법은 다음을 참조하세요:
 
 {{#ref}}
 macos-xpc-connecting-process-check/
@@ -35,10 +35,10 @@ macos-xpc-connecting-process-check/
 
 ### 애플리케이션 권한
 
-하지만, **HelperTool의 메서드가 호출될 때 authorization 처리가 수행됩니다**.
+하지만 **HelperTool의 메서드가 호출될 때 일부 authorization이 발생합니다**.
 
-`App/AppDelegate.m`의 함수 **`applicationDidFinishLaunching`**는 앱이 시작된 후 빈 authorization reference를 생성합니다. 이는 항상 동작해야 합니다.\
-그런 다음, `setupAuthorizationRights`를 호출하여 해당 authorization reference에 **권한을 추가**하려고 시도합니다:
+앱이 시작된 후 `App/AppDelegate.m`의 함수 **`applicationDidFinishLaunching`**는 빈 authorization 참조를 생성합니다. 이는 항상 작동해야 합니다.\
+그런 다음, `setupAuthorizationRights`를 호출하여 해당 authorization 참조에 **몇 가지 권한을 추가하려고 시도합니다**:
 ```objectivec
 - (void)applicationDidFinishLaunching:(NSNotification *)note
 {
@@ -62,7 +62,7 @@ if (self->_authRef) {
 [self.window makeKeyAndOrderFront:self];
 }
 ```
-`Common/Common.m`의 `setupAuthorizationRights` 함수는 인증 데이터베이스 `/var/db/auth.db`에 애플리케이션의 권한을 저장합니다. 데이터베이스에 아직 없는 권한만 추가한다는 점을 주목하세요:
+`Common/Common.m`의 `setupAuthorizationRights` 함수는 auth database `/var/db/auth.db`에 애플리케이션의 권한을 저장합니다. 데이터베이스에 아직 없는 권한만 추가하는 방식에 주목하세요:
 ```objectivec
 + (void)setupAuthorizationRights:(AuthorizationRef)authRef
 // See comment in header.
@@ -94,7 +94,7 @@ assert(blockErr == errAuthorizationSuccess);
 }];
 }
 ```
-함수 `enumerateRightsUsingBlock`은 애플리케이션의 권한을 가져오는 데 사용되며, 해당 권한들은 `commandInfo`에 정의되어 있습니다:
+애플리케이션 권한을 가져오는 데 사용되는 함수는 `enumerateRightsUsingBlock`이며, 해당 권한들은 `commandInfo`에 정의되어 있습니다:
 ```objectivec
 static NSString * kCommandKeyAuthRightName    = @"authRightName";
 static NSString * kCommandKeyAuthRightDefault = @"authRightDefault";
@@ -172,15 +172,15 @@ block(authRightName, authRightDefault, authRightDesc);
 }];
 }
 ```
-이것은 이 과정이 끝나면 `commandInfo` 내에 선언된 권한들이 `/var/db/auth.db`에 저장된다는 것을 의미합니다. 거기에서는 **각 메서드**에 대해 인증이 **필요한 경우**, **권한 이름(permission name)** 및 **`kCommandKeyAuthRightDefault`**를 찾을 수 있습니다. 후자는 **누가 이 권한을 얻을 수 있는지**를 나타냅니다.
+이것은 이 프로세스가 끝나면 `commandInfo` 안에 선언된 권한들이 `/var/db/auth.db`에 저장된다는 것을 의미합니다. 그곳에서 **각 메서드** 중 **인증을 요구하는** 항목에 대해 **권한 이름**과 **`kCommandKeyAuthRightDefault`** 를 확인할 수 있습니다. 후자는 **누가 이 권한을 얻을 수 있는지**를 나타냅니다.
 
-권한에 접근할 수 있는 주체를 나타내는 다양한 범위가 있습니다. 그 중 일부는 [AuthorizationDB.h](https://github.com/aosm/Security/blob/master/Security/libsecurity_authorization/lib/AuthorizationDB.h) (you can find [all of them in here](https://www.dssw.co.uk/reference/authorization-rights/))에 정의되어 있으며, 요약하면:
+권한에 누가 접근할 수 있는지를 나타내는 여러 스코프가 있습니다. 일부는 [AuthorizationDB.h](https://github.com/aosm/Security/blob/master/Security/libsecurity_authorization/lib/AuthorizationDB.h)에 정의되어 있습니다 (you can find [all of them in here](https://www.dssw.co.uk/reference/authorization-rights/)), 요약하면:
 
-<table><thead><tr><th width="284.3333333333333">이름</th><th width="165">값</th><th>설명</th></tr></thead><tbody><tr><td>kAuthorizationRuleClassAllow</td><td>allow</td><td>누구나</td></tr><tr><td>kAuthorizationRuleClassDeny</td><td>deny</td><td>아무도</td></tr><tr><td>kAuthorizationRuleIsAdmin</td><td>is-admin</td><td>현재 사용자가 admin(관리자) 그룹의 일원이어야 함</td></tr><tr><td>kAuthorizationRuleAuthenticateAsSessionUser</td><td>authenticate-session-owner</td><td>사용자에게 인증을 요구함.</td></tr><tr><td>kAuthorizationRuleAuthenticateAsAdmin</td><td>authenticate-admin</td><td>사용자에게 인증을 요구함. 사용자는 admin(관리자) 그룹의 일원이어야 함</td></tr><tr><td>kAuthorizationRightRule</td><td>rule</td><td>규칙을 지정</td></tr><tr><td>kAuthorizationComment</td><td>comment</td><td>권한에 대한 추가 설명을 지정</td></tr></tbody></table>
+<table><thead><tr><th width="284.3333333333333">이름</th><th width="165">값</th><th>설명</th></tr></thead><tbody><tr><td>kAuthorizationRuleClassAllow</td><td>allow</td><td>누구나</td></tr><tr><td>kAuthorizationRuleClassDeny</td><td>deny</td><td>아무도 없음</td></tr><tr><td>kAuthorizationRuleIsAdmin</td><td>is-admin</td><td>현재 사용자가 admin(관리자) 그룹에 속해 있어야 함</td></tr><tr><td>kAuthorizationRuleAuthenticateAsSessionUser</td><td>authenticate-session-owner</td><td>사용자에게 인증을 요청합니다.</td></tr><tr><td>kAuthorizationRuleAuthenticateAsAdmin</td><td>authenticate-admin</td><td>사용자에게 인증을 요청합니다. 사용자는 admin(관리자) 그룹에 속해 있어야 합니다.</td></tr><tr><td>kAuthorizationRightRule</td><td>rule</td><td>규칙을 지정</td></tr><tr><td>kAuthorizationComment</td><td>comment</td><td>권한에 대한 추가 설명을 지정</td></tr></tbody></table>
 
-### 권한 확인
+### 권한 검증
 
-In `HelperTool/HelperTool.m` the function **`readLicenseKeyAuthorization`** checks if the caller is authorized to **execute such method** calling the function **`checkAuthorization`**. This function will check the **authData** sent by the calling process has a **correct format** and then will check **what is needed to get the right** to call the specific method. If all goes good the **returned `error` will be `nil`**:
+`HelperTool/HelperTool.m` 파일에서 함수 **`readLicenseKeyAuthorization`** 는 호출자가 해당 메서드를 **실행할 권한이 있는지** 를 **`checkAuthorization`** 함수를 호출해 확인합니다. 이 함수는 호출 프로세스가 보낸 **authData** 가 **올바른 형식**인지 검사하고, 특정 메서드를 호출하기 위해 **어떤 조건이 필요한지** 확인합니다. 모든 것이 정상이라면 **반환되는 `error`는 `nil`** 입니다:
 ```objectivec
 - (NSError *)checkAuthorization:(NSData *)authData command:(SEL)command
 {
@@ -228,37 +228,37 @@ assert(junk == errAuthorizationSuccess);
 return error;
 }
 ```
-주의: 해당 메서드를 호출할 권한을 얻기 위한 요구사항을 **확인하려면** 함수 `authorizationRightForCommand`는 이전에 주석 처리된 객체 **`commandInfo`**만 확인합니다. 그 다음, 함수를 호출할 권한이 있는지 **확인하기 위해** **`AuthorizationCopyRights`**를 호출합니다(플래그가 사용자와의 상호작용을 허용한다는 점에 유의하세요).
+참고로 해당 메서드를 호출할 권한을 얻기 위한 **요구사항을 확인하려면** 함수 `authorizationRightForCommand`는 앞서 설명한 객체 **`commandInfo`**만 확인합니다. 그런 다음, 함수 호출 권한이 있는지 확인하기 위해 **`AuthorizationCopyRights`**를 호출합니다(플래그가 사용자와의 상호작용을 허용한다는 점에 유의하세요).
 
-이 경우 함수 `readLicenseKeyAuthorization`를 호출하기 위해 `kCommandKeyAuthRightDefault`는 `@kAuthorizationRuleClassAllow`로 정의되어 있습니다. 따라서 **누구나 호출할 수 있습니다**.
+이 경우 `readLicenseKeyAuthorization`를 호출하기 위해 `kCommandKeyAuthRightDefault`가 `@kAuthorizationRuleClassAllow`로 정의되어 있습니다. 따라서 **누구나 호출할 수 있습니다**.
 
 ### DB 정보
 
-이 정보는 `/var/db/auth.db`에 저장되어 있다고 언급되었습니다. 저장된 모든 규칙은 다음 명령으로 나열할 수 있습니다:
+이 정보는 `/var/db/auth.db`에 저장된다고 언급되었습니다. 저장된 모든 규칙은 다음 명령으로 나열할 수 있습니다:
 ```sql
 sudo sqlite3 /var/db/auth.db
 SELECT name FROM rules;
 SELECT name FROM rules WHERE name LIKE '%safari%';
 ```
-그런 다음, 다음 명령으로 누가 해당 권한에 접근할 수 있는지 확인할 수 있습니다:
+그런 다음, 누가 해당 권한에 접근할 수 있는지 다음과 같이 확인할 수 있습니다:
 ```bash
 security authorizationdb read com.apple.safaridriver.allow
 ```
 ### 허용 권한
 
-You can find **all the permissions configurations** [**in here**](https://www.dssw.co.uk/reference/authorization-rights/), but the combinations that won't require user interaction would be:
+You can find **모든 권한 설정** [**in here**](https://www.dssw.co.uk/reference/authorization-rights/), but the combinations that won't require user interaction would be:
 
 1. **'authenticate-user': 'false'**
-- 이것은 가장 직접적인 키입니다. `false`로 설정되면 사용자가 이 권한을 얻기 위해 인증을 제공할 필요가 없음을 지정합니다.
-- 이는 **아래 두 가지 중 하나와 결합되거나 사용자가 속해야 하는 그룹을 지정할 때** 사용됩니다.
+- 이것이 가장 직접적인 키입니다. 만약 `false`로 설정되면, 사용자가 이 권한을 얻기 위해 인증을 제공할 필요가 없음을 의미합니다.
+- 이는 **아래의 둘 중 하나와 결합되거나 사용자가 속해야 하는 그룹을 지정할 때** 사용됩니다.
 2. **'allow-root': 'true'**
-- 사용자가 root user로 작동하고(권한이 상승된 상태), 이 키가 `true`로 설정되어 있으면 root user는 추가 인증 없이 이 권한을 얻을 수 있습니다. 그러나 일반적으로 root user 상태에 도달하려면 이미 인증이 필요하므로 대부분의 사용자에게는 "인증 없음" 시나리오는 아닙니다.
+- 사용자가 root user(더 높은 권한을 가진)로 동작 중이고, 이 키가 `true`로 설정되어 있으면, root user는 추가 인증 없이 이 권한을 얻을 수 있습니다. 그러나 일반적으로 root user 상태에 도달하려면 이미 인증이 필요하므로, 대부분의 사용자에게 이것이 '인증 없음' 시나리오인 것은 아닙니다.
 3. **'session-owner': 'true'**
-- `true`로 설정되면 세션 소유자(현재 로그인한 사용자)가 자동으로 이 권한을 얻습니다. 사용자가 이미 로그인한 상태라면 추가 인증을 우회할 수 있습니다.
+- `true`로 설정되면, 세션의 소유자(현재 로그인한 사용자)가 자동으로 이 권한을 얻게 됩니다. 사용자가 이미 로그인되어 있다면 추가 인증을 우회할 수 있습니다.
 4. **'shared': 'true'**
-- 이 키는 인증 없이 권한을 부여하지 않습니다. 대신 `true`로 설정되면 권한이 한 번 인증된 후에는 각 프로세스가 다시 인증할 필요 없이 여러 프로세스 간에 공유될 수 있음을 의미합니다. 그러나 초기 권한 부여는 여전히 `'authenticate-user': 'false'`와 같은 다른 키와 결합되지 않는 한 인증을 필요로 합니다.
+- 이 키는 인증 없이 권한을 부여하지 않습니다. 대신 `true`로 설정되면, 권한이 한 번 인증되면 각 프로세스가 다시 인증할 필요 없이 여러 프로세스 간에 공유될 수 있음을 의미합니다. 그러나 권한의 최초 부여는 `'authenticate-user': 'false'` 같은 다른 키와 결합되지 않는 한 여전히 인증을 요구합니다.
 
-You can [**use this script**](https://gist.github.com/carlospolop/96ecb9e385a4667b9e40b24e878652f9) to get the interesting rights:
+흥미로운 권한을 얻으려면 [**use this script**](https://gist.github.com/carlospolop/96ecb9e385a4667b9e40b24e878652f9)를 사용할 수 있습니다:
 ```bash
 Rights with 'authenticate-user': 'false':
 is-admin (admin), is-admin-nonshared (admin), is-appstore (_appstore), is-developer (_developer), is-lpadmin (_lpadmin), is-root (run as root), is-session-owner (session owner), is-webdeveloper (_webdeveloper), system-identity-write-self (session owner), system-install-iap-software (run as root), system-install-software-iap (run as root)
@@ -269,42 +269,48 @@ com-apple-aosnotification-findmymac-remove, com-apple-diskmanagement-reservekek,
 Rights with 'session-owner': 'true':
 authenticate-session-owner, authenticate-session-owner-or-admin, authenticate-session-user, com-apple-safari-allow-apple-events-to-run-javascript, com-apple-safari-allow-javascript-in-smart-search-field, com-apple-safari-allow-unsigned-app-extensions, com-apple-safari-install-ephemeral-extensions, com-apple-safari-show-credit-card-numbers, com-apple-safari-show-passwords, com-apple-icloud-passwordreset, com-apple-icloud-passwordreset, is-session-owner, system-identity-write-self, use-login-window-ui
 ```
-### Authorization Bypass Case Studies
+### 권한 우회 사례 연구
 
-- **CVE-2024-4395 – Jamf Compliance Editor helper**: 감사를 실행하면 `/Library/LaunchDaemons/com.jamf.complianceeditor.helper.plist`가 설치되고, Mach 서비스 `com.jamf.complianceeditor.helper`가 노출되며 호출자의 `AuthorizationExternalForm`이나 코드 서명을 확인하지 않고 `-executeScriptAt:arguments:then:`를 export 합니다. 사소한 익스플로잇은 `AuthorizationCreate`로 빈 참조를 만들고 `[[NSXPCConnection alloc] initWithMachServiceName:options:NSXPCConnectionPrivileged]`로 연결한 뒤 해당 메서드를 호출해 임의의 바이너리를 root로 실행시킵니다. 전체 리버싱 노트(및 PoC)는 [Mykola Grymalyuk’s write-up](https://khronokernel.com/macos/2024/05/01/CVE-2024-4395.html)에 있습니다.
-- **CVE-2025-25251 – FortiClient Mac helper**: FortiClient Mac 7.0.0–7.0.14, 7.2.0–7.2.8 및 7.4.0–7.4.2는 권한 검증이 없는 privileged helper에 도달하는 조작된 XPC 메시지를 수락했습니다. helper가 자체의 privileged `AuthorizationRef`를 신뢰했기 때문에, 서비스에 메시지를 보낼 수 있는 로컬 사용자는 이를 이용해 임의의 설정 변경이나 명령을 root로 실행하도록 강제할 수 있었습니다. 자세한 내용은 [SentinelOne’s advisory summary](https://www.sentinelone.com/vulnerability-database/cve-2025-25251/)를 참조하세요.
+- **CVE-2025-65842 – Acustica Audio Aquarius HelperTool**: 권한 있는 Mach 서비스 `com.acustica.HelperTool`은 모든 연결을 수락하며, 그 `checkAuthorization:` 루틴은 `AuthorizationCopyRights(NULL, …)`를 호출하므로, 임의의 32‑byte blob이 통과합니다. `executeCommand:authorization:withReply:`는 attacker-controlled comma‑separated strings를 root로 `NSTask`에 전달하여, 예를 들어 다음과 같은 페이로드를 만듭니다:
+```bash
+"/bin/sh,-c,cp /bin/bash /tmp/rootbash && chmod +s /tmp/rootbash"
+```
+간단히 SUID 루트 셸을 생성할 수 있습니다. 자세한 내용은 [this write-up](https://almightysec.com/helpertool-xpc-service-local-privilege-escalation/).
+- **CVE-2025-55076 – Plugin Alliance InstallationHelper**: 리스너는 항상 YES를 반환하며 동일한 NULL `AuthorizationCopyRights` 패턴이 `checkAuthorization:`에 나타납니다. `exchangeAppWithReply:` 메서드는 공격자 입력을 `system()` 문자열에 두 번 연결하므로 `appPath`에 셸 메타문자를 주입하면(예: `"/Applications/Test.app";chmod 4755 /tmp/rootbash;`) Mach 서비스 `com.plugin-alliance.pa-installationhelper`를 통해 루트 코드 실행이 발생합니다. 자세한 정보는 [here](https://almightysec.com/Plugin-Alliance-HelperTool-XPC-Service-Local-Privilege-Escalation/).
+- **CVE-2024-4395 – Jamf Compliance Editor helper**: 감사 실행 시 `/Library/LaunchDaemons/com.jamf.complianceeditor.helper.plist`가 떨어지고 Mach 서비스 `com.jamf.complianceeditor.helper`가 노출되며 호출자의 `AuthorizationExternalForm`이나 코드 서명을 검증하지 않은 채 `-executeScriptAt:arguments:then:`를 내보냅니다. 사소한 익스플로잇은 빈 참조를 `AuthorizationCreate`하고 `[[NSXPCConnection alloc] initWithMachServiceName:options:NSXPCConnectionPrivileged]`로 연결한 후 해당 메서드를 호출해 임의의 바이너리를 루트로 실행하게 합니다. 전체 리버싱 노트(및 PoC)는 [Mykola Grymalyuk’s write-up](https://khronokernel.com/macos/2024/05/01/CVE-2024-4395.html)에 있습니다.
+- **CVE-2025-25251 – FortiClient Mac helper**: FortiClient Mac 7.0.0–7.0.14, 7.2.0–7.2.8 및 7.4.0–7.4.2는 권한 검증이 없는 특권 helper에 도달하는 조작된 XPC 메시지를 수락했습니다. helper가 자체 특권 `AuthorizationRef`를 신뢰했기 때문에 서비스에 메시지를 보낼 수 있는 로컬 사용자는 이를 강제하여 임의의 구성 변경이나 명령을 루트로 실행할 수 있었습니다. 세부사항은 [SentinelOne’s advisory summary](https://www.sentinelone.com/vulnerability-database/cve-2025-25251/)에 있습니다.
 
 #### Rapid triage tips
 
-- 앱이 GUI와 helper를 함께 배포할 때는 두 구성요소의 code requirements를 비교(diff)하고 `shouldAcceptNewConnection`가 리스너를 `-setCodeSigningRequirement:`로 잠그는지(또는 `SecCodeCopySigningInformation`을 검증하는지) 확인하세요. 검사 누락은 일반적으로 Jamf 사례처럼 CWE-863 시나리오로 이어집니다. 빠른 확인은 다음과 같이 보입니다:
+- 앱이 GUI와 helper를 함께 제공할 때, 둘의 code requirements를 비교(diff)하고 `shouldAcceptNewConnection`가 리스너를 `-setCodeSigningRequirement:`로 잠그는지(또는 `SecCodeCopySigningInformation`을 검증하는지) 확인하세요. 검증 누락은 보통 Jamf 사례와 같은 CWE-863 시나리오를 초래합니다. 간단히 살펴보면 다음과 같습니다:
 ```bash
 codesign --display --requirements - /Applications/Jamf\ Compliance\ Editor.app
 ```
-- 헬퍼가 *권한을 부여한다고 생각하는 것*과 클라이언트가 제공하는 것을 비교하라. 리버싱할 때는 `AuthorizationCopyRights`에서 중단하고 `AuthorizationRef`가 헬퍼의 자체 권한 있는 컨텍스트가 아니라 클라이언트가 제공한 `AuthorizationCreateFromExternalForm`에서 비롯되었는지 확인하라. 그렇지 않으면 위 사례들과 유사한 CWE-863 패턴을 발견한 것일 가능성이 높다.
+- 헬퍼가 *권한을 부여한다고 생각하는 것*과 클라이언트가 제공하는 것을 비교하세요. 역분석 시 `AuthorizationCopyRights`에서 중단하고 `AuthorizationRef`가 헬퍼의 자체 권한 있는 컨텍스트가 아닌 클라이언트가 제공한 `AuthorizationCreateFromExternalForm`에서 유래했는지 확인하세요. 그렇지 않으면 위의 사례들과 유사한 CWE-863 패턴을 찾았을 가능성이 높습니다.
 
-## 권한 리버싱
+## 권한 역분석
 
-### EvenBetterAuthorization 사용 여부 확인
+### Checking if EvenBetterAuthorization is used
 
-함수 **`[HelperTool checkAuthorization:command:]`** 를 찾으면, 해당 프로세스가 앞서 언급한 권한 부여 스키마를 사용하고 있을 가능성이 높다:
+함수를 찾으면: **`[HelperTool checkAuthorization:command:]`** 아마도 해당 프로세스는 앞서 언급한 권한부여 스키마를 사용하고 있을 것입니다:
 
 <figure><img src="../../../../../images/image (42).png" alt=""><figcaption></figcaption></figure>
 
-이 경우, 만약 이 함수가 `AuthorizationCreateFromExternalForm`, `authorizationRightForCommand`, `AuthorizationCopyRights`, `AuhtorizationFree` 같은 함수를 호출한다면, [**EvenBetterAuthorizationSample**](https://github.com/brenwell/EvenBetterAuthorizationSample/blob/e1052a1855d3a5e56db71df5f04e790bfd4389c4/HelperTool/HelperTool.m#L101-L154)를 사용하고 있는 것이다.
+이 경우, 만약 이 함수가 `AuthorizationCreateFromExternalForm`, `authorizationRightForCommand`, `AuthorizationCopyRights`, `AuhtorizationFree` 같은 함수를 호출한다면, [**EvenBetterAuthorizationSample**](https://github.com/brenwell/EvenBetterAuthorizationSample/blob/e1052a1855d3a5e56db71df5f04e790bfd4389c4/HelperTool/HelperTool.m#L101-L154)를 사용하고 있는 것입니다.
 
-**`/var/db/auth.db`** 를 확인해서 사용자 상호작용 없이 일부 권한 있는 동작을 호출할 수 있는 권한을 얻을 수 있는지 확인하라.
+사용자 상호작용 없이 일부 권한 있는 동작을 호출할 수 있는 권한을 얻을 수 있는지 확인하려면 **`/var/db/auth.db`**를 확인하세요.
 
 ### 프로토콜 통신
 
-그 다음으로, XPC 서비스와 통신을 수립할 수 있도록 프로토콜 스키마를 찾아야 한다.
+그런 다음 XPC 서비스와 통신을 설정할 수 있도록 프로토콜 스키마를 찾아야 합니다.
 
-함수 **`shouldAcceptNewConnection`** 는 내보내지는 프로토콜을 나타낸다:
+함수 **`shouldAcceptNewConnection`**는 내보내는 프로토콜을 나타냅니다:
 
 <figure><img src="../../../../../images/image (44).png" alt=""><figcaption></figcaption></figure>
 
-이 경우, EvenBetterAuthorizationSample과 동일하다, [**check this line**](https://github.com/brenwell/EvenBetterAuthorizationSample/blob/e1052a1855d3a5e56db71df5f04e790bfd4389c4/HelperTool/HelperTool.m#L94).
+In this case, we have the same as in EvenBetterAuthorizationSample, [**check this line**](https://github.com/brenwell/EvenBetterAuthorizationSample/blob/e1052a1855d3a5e56db71df5f04e790bfd4389c4/HelperTool/HelperTool.m#L94).
 
-사용된 프로토콜 이름을 알면, it's possible to **dump its header definition** with:
+사용된 프로토콜 이름을 알면, 다음으로 **헤더 정의를 덤프**할 수 있습니다:
 ```bash
 class-dump /Library/PrivilegedHelperTools/com.example.HelperTool
 
@@ -318,9 +324,9 @@ class-dump /Library/PrivilegedHelperTools/com.example.HelperTool
 @end
 [...]
 ```
-마지막으로, 통신을 수립하기 위해 공개된 Mach Service의 **이름**만 알면 됩니다. 이를 찾는 방법은 여러 가지가 있습니다:
+마지막으로, 해당 Mach Service와 통신을 설정하려면 **노출된 Mach Service의 이름**만 알면 됩니다. 이를 찾는 방법은 여러 가지가 있습니다:
 
-- **`[HelperTool init]`**에서 Mach Service가 사용되는 것을 볼 수 있습니다:
+- **`[HelperTool init]`**에서 Mach Service가 사용되는 것을 확인할 수 있습니다:
 
 <figure><img src="../../../../../images/image (41).png" alt=""><figcaption></figcaption></figure>
 
@@ -341,10 +347,10 @@ cat /Library/LaunchDaemons/com.example.HelperTool.plist
 
 이 예제에서는 다음이 생성됩니다:
 
-- 함수들이 포함된 프로토콜 정의
+- 함수들이 포함된 프로토콜의 정의
 - 액세스를 요청하는 데 사용할 빈 auth
 - XPC 서비스에 대한 연결
-- 연결이 성공하면 함수 호출
+- 연결이 성공한 경우 함수 호출
 ```objectivec
 // gcc -framework Foundation -framework Security expl.m -o expl
 
@@ -422,7 +428,7 @@ NSLog(@"Response: %@", error);
 NSLog(@"Finished!");
 }
 ```
-## 악용된 기타 XPC 권한 헬퍼
+## 다른 XPC 권한 도우미의 악용
 
 - [https://blog.securelayer7.net/applied-endpointsecurity-framework-previlege-escalation/?utm_source=pocket_shared](https://blog.securelayer7.net/applied-endpointsecurity-framework-previlege-escalation/?utm_source=pocket_shared)
 
@@ -431,5 +437,7 @@ NSLog(@"Finished!");
 - [https://theevilbit.github.io/posts/secure_coding_xpc_part1/](https://theevilbit.github.io/posts/secure_coding_xpc_part1/)
 - [https://khronokernel.com/macos/2024/05/01/CVE-2024-4395.html](https://khronokernel.com/macos/2024/05/01/CVE-2024-4395.html)
 - [https://www.sentinelone.com/vulnerability-database/cve-2025-25251/](https://www.sentinelone.com/vulnerability-database/cve-2025-25251/)
+- [https://almightysec.com/helpertool-xpc-service-local-privilege-escalation/](https://almightysec.com/helpertool-xpc-service-local-privilege-escalation/)
+- [https://almightysec.com/Plugin-Alliance-HelperTool-XPC-Service-Local-Privilege-Escalation/](https://almightysec.com/Plugin-Alliance-HelperTool-XPC-Service-Local-Privilege-Escalation/)
 
 {{#include ../../../../../banners/hacktricks-training.md}}
