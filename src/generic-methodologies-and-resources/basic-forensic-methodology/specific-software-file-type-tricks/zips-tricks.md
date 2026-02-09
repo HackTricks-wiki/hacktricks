@@ -2,37 +2,37 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-**Command-line tools** za kusimamia **zip files** ni muhimu kwa kutambua matatizo, kurekebisha, na kuvunja zip files. Hapa kuna zana kuu:
+**Vifaa vya mstari wa amri** vya kusimamia **zip files** ni muhimu kwa kubaini matatizo, kurekebisha, na cracking **zip files**. Hapa kuna zana muhimu:
 
-- **`unzip`**: Inaonyesha kwa nini zip file inaweza isiweze kutolewa.
-- **`zipdetails -v`**: Inatoa uchanganuzi wa kina wa mashamba ya format ya zip file.
-- **`zipinfo`**: Hutoa orodha ya yaliyomo kwenye zip file bila kuyatoa.
-- **`zip -F input.zip --out output.zip`** na **`zip -FF input.zip --out output.zip`**: Jaribu kutengeneza tena zip files zilizoharibika.
-- **[fcrackzip](https://github.com/hyc/fcrackzip)**: Zana ya brute-force kuvirusha password za zip, inayofanya kazi vizuri kwa password za takriban herufi 7 au chini.
+- **`unzip`**: Inaonyesha kwanini zip file inaweza isifunguke.
+- **`zipdetails -v`**: Inatoa uchambuzi wa kina wa vipengele vya muundo wa zip file.
+- **`zipinfo`**: Inaorodhesha yaliyomo katika zip file bila kuyatoa.
+- **`zip -F input.zip --out output.zip`** and **`zip -FF input.zip --out output.zip`**: Jaribu kurekebisha zip files zilizo corrupted.
+- **[fcrackzip](https://github.com/hyc/fcrackzip)**: Zana ya brute-force cracking ya nywila za zip, yenye ufanisi kwa nywila hadi takriban herufi 7.
 
-The [Zip file format specification](https://pkware.cachefly.net/webdocs/casestudies/APPNOTE.TXT) inatoa maelezo ya kina juu ya muundo na viwango vya zip files.
+The [Zip file format specification](https://pkware.cachefly.net/webdocs/casestudies/APPNOTE.TXT) inatoa maelezo kamili juu ya muundo na viwango vya zip files.
 
-Ni muhimu kutambua kwamba zip files zilizo na password zinalindwa kwa njia ya password **hazifichi majina ya faili au ukubwa wa faili** ndani yao, kasoro ya usalama ambayo haishirikiani na RAR au 7z ambazo huweka siri taarifa hizi. Zaidi ya hayo, zip files zilizoingia na njia ya zamani ya ZipCrypto zinaweza kushambuliwa kwa kutumia plaintext attack ikiwa kuna nakala isiyofichwa ya faili iliyoshinikwa. Shambulio hili linatumia yaliyomo yanayojulikana kuvunja password ya zip, udhaifu ulioelezewa kwenye [HackThis's article](https://www.hackthis.co.uk/articles/known-plaintext-attack-cracking-zip-files) na kufafanuliwa zaidi katika [this academic paper](https://www.cs.auckland.ac.nz/~mike/zipattacks.pdf). Hata hivyo, zip files zilizolindwa kwa **AES-256** ni salama dhidi ya plaintext attack hii, ikionyesha umuhimu wa kuchagua mbinu salama za encryption kwa data nyeti.
+Ni muhimu kutambua kwamba zip files zilizolindwa kwa password hazifanyi encrypt majina ya faili au ukubwa wa faili ndani yao, dosari ya usalama ambayo haipo kwa RAR au 7z ambazo hu-encrypt taarifa hizi. Zaidi ya hayo, zip files zilizo encrypted kwa ZipCrypto zinaweza kuwa dhaifu kwa plaintext attack ikiwa nakala isiyo-encrypted ya faili iliyoshinikizwa inapatikana. Shambulio hili linatumia yaliyomo yanayojulikana kuvunja password ya zip, udhaifu uliotajwa katika makala ya HackThis na kuelezwa zaidi katika karatasi hii ya kitaaluma. Hata hivyo, zip files zilizolindwa kwa AES-256 encryption zina kinga dhidi ya plaintext attack, ikionyesha umuhimu wa kuchagua mbinu za encryption salama kwa data nyeti.
 
 ---
 
-## Mbinu za anti-reversing katika APKs kwa kutumia vichwa vya ZIP vilivyobadilishwa
+## Anti-reversing tricks in APKs using manipulated ZIP headers
 
-Malware droppers ya kisasa ya Android hutumia metadata ya ZIP iliyofanywa vibaya kuvunja zana za static (jadx/apktool/unzip) huku wakiruhusu APK kusakinishwa kifaa. Mbinu zinazotumika mara kwa mara ni:
+Modern Android malware droppers hutumia malformed ZIP metadata kuvunja zana za static (jadx/apktool/unzip) huku zikidumisha APK iweze kusakinishwa kwenye kifaa. Mbinu zinazotumika mara kwa mara ni:
 
-- Fake encryption kwa kuweka ZIP General Purpose Bit Flag (GPBF) bit 0
-- Kutumia Extra fields kubwa/maalum kuchanganya parsers
-- Mgongano wa majina ya faili/dirctory kuficha artifacts halisi (mfano, directory yenye jina `classes.dex/` kando ya `classes.dex` halisi)
+- Fake encryption by setting the ZIP General Purpose Bit Flag (GPBF) bit 0
+- Abusing large/custom Extra fields to confuse parsers
+- File/directory name collisions to hide real artifacts (e.g., a directory named `classes.dex/` next to the real `classes.dex`)
 
-### 1) Fake encryption (GPBF bit 0 set) bila kripto halisi
+### 1) Fake encryption (GPBF bit 0 set) without real crypto
 
 Dalili:
-- `jadx-gui` inashindwa na makosa kama:
+- `jadx-gui` inashindwa kwa makosa kama:
 
 ```
 java.util.zip.ZipException: invalid CEN header (encrypted entry)
 ```
-- `unzip` inauliza password kwa faili kuu za APK ingawa APK halali haiwezi kuwa na `classes*.dex`, `resources.arsc`, au `AndroidManifest.xml` zilizofichwa kwa siri:
+- `unzip` inauliza password kwa faili kuu za APK ingawa APK halali haiwezi kuwa na encrypted `classes*.dex`, `resources.arsc`, au `AndroidManifest.xml`:
 
 ```bash
 unzip sample.apk
@@ -43,11 +43,11 @@ skipping: resources.arsc/res/domeo/eqmvo.xml            incorrect password
 skipping: classes2.dex                          incorrect password
 ```
 
-Uchunguzi kwa zipdetails:
+Kugundua kwa zipdetails:
 ```bash
 zipdetails -v sample.apk | less
 ```
-Tazama General Purpose Bit Flag kwa local na central headers. Thamani inayoonyesha ni bit 0 imewekwa (Encryption) hata kwa core entries:
+Angalia General Purpose Bit Flag kwa local na central headers. Thamani inayofichua ni bit 0 set (Encryption) hata kwa core entries:
 ```
 Extract Zip Spec      2D '4.5'
 General Purpose Flag  0A09
@@ -56,9 +56,12 @@ General Purpose Flag  0A09
 [Bit 3]   1 'Streamed'
 [Bit 11]  1 'Language Encoding'
 ```
-Heuristiki: Ikiwa APK inasakinishwa na inakimbia kwenye kifaa lakini ingizo za msingi zinaonekana "encrypted" kwa zana, GPBF iliharibishwa.
+Heuristiki: Ikiwa APK inasakinishwa na kuendeshwa kwenye kifaa lakini viingilio vya msingi vinaonekana "encrypted" kwa zana, GPBF ilibadilishwa.
 
-Tengeneza kwa kufuta bit 0 ya GPBF katika Local File Headers (LFH) na Central Directory (CD) entries. Minimal byte-patcher:
+Rekebisha kwa kufuta bit 0 ya GPBF katika viingilio vya Local File Headers (LFH) na Central Directory (CD). Minimal byte-patcher:
+
+<details>
+<summary>Minimal GPBF bit-clear patcher</summary>
 ```python
 # gpbf_clear.py – clear encryption bit (bit 0) in ZIP local+central headers
 import struct, sys
@@ -89,38 +92,40 @@ data, p_cdh = patch_flags(data, SIG_CDH, 8)  # CDH flag at +8
 open(outp, 'wb').write(data)
 print(f'Patched: LFH={p_lfh}, CDH={p_cdh}')
 ```
+</details>
+
 Matumizi:
 ```bash
 python3 gpbf_clear.py obfuscated.apk normalized.apk
 zipdetails -v normalized.apk | grep -A2 "General Purpose Flag"
 ```
-Sasa unapaswa kuona `General Purpose Flag  0000` kwenye core entries na zana zitasoma APK tena.
+Sasa unapaswa kuona `General Purpose Flag  0000` kwenye entries za msingi na zana zitasoma APK tena.
 
-### 2) Large/custom Extra fields za kuvunja parsers
+### 2) Mawanja makubwa/maalum ya Extra kuvunja parsers
 
-Wavamizi huingiza Extra fields zilizo kubwa sana na IDs zisizo za kawaida kwenye headers ili kuwapotosha decompilers. Katika mazingira halisi unaweza kuona custom markers (kwa mfano, strings kama `JADXBLOCK`) zimeingizwa hapo.
+Washambuliaji huwaweka mawanja ya Extra yenye ukubwa kupita kiasi na IDs zisizo za kawaida ndani ya vichwa ili kuwachanganya decompilers. Katika mazingira halisi unaweza kuona alama maalum (kwa mfano, mnyororo kama `JADXBLOCK`) iliyowekwa hapo.
 
-Uchunguzi:
+Ukaguzi:
 ```bash
 zipdetails -v sample.apk | sed -n '/Extra ID/,+4p' | head -n 50
 ```
-Mifano yaliyobainika: vitambulisho visivyojulikana kama `0xCAFE` ("Java Executable") au `0x414A` ("JA:") vinabeba payload kubwa.
+Mifano yaliyobainika: vitambulisho visivyofahamika kama `0xCAFE` ("Java Executable") au `0x414A` ("JA:") vikibeba payload kubwa.
 
-Miongozo ya DFIR:
-- Toa tahadhari wakati Extra fields zinapokuwa zisizo za kawaida kwa ukubwa kwenye core entries (`classes*.dex`, `AndroidManifest.xml`, `resources.arsc`).
+DFIR heuristics:
+- Waarifu pale Extra fields zinapokuwa kubwa kupita kawaida kwenye core entries (`classes*.dex`, `AndroidManifest.xml`, `resources.arsc`).
 - Chukulia Extra IDs zisizojulikana kwenye entries hizo kama zenye shaka.
 
-Uzuiaji wa vitendo: kujenga upya archive (mfano, re-zipping extracted files) huondoa Extra fields zenye uovu. Ikiwa zana zinakataa kutoa kwa sababu ya fake encryption, kwanza futa GPBF bit 0 kama ilivyoelezwa hapo juu, kisha repack:
+Urejesho wa vitendo: kujenga upya archive (mfano, re-zipping extracted files) kunafuta Extra fields hatari. Ikiwa zana zinakataa kutoa kwa sababu ya fake encryption, kwanza futa GPBF bit 0 kama ilivyo hapo juu, kisha pakiwa tena:
 ```bash
 mkdir /tmp/apk
 unzip -qq normalized.apk -d /tmp/apk
 (cd /tmp/apk && zip -qr ../clean.apk .)
 ```
-### 3) Mgongano ya majina ya faili/saraka (kuficha artifacts halisi)
+### 3) Mgongano ya majina ya Faili/Saraka (kuficha mabaki halisi)
 
-ZIP inaweza kuwa na faili `X` na saraka `X/`. Baadhi ya extractors na decompilers huchanganyikiwa na zinaweza ku-overlay au kuficha faili halisi kwa kuingia kwa saraka. Hii imeonekana ikitokea kwa maingizo yanapogongana na majina ya msingi ya APK kama `classes.dex`.
+ZIP inaweza kuwa na faili `X` na pia saraka `X/`. Baadhi ya extractors na decompilers huvurugika na wanaweza kuweka juu (overlay) au kuficha faili halisi kwa kipengee cha saraka. Hii imeonekana wakati ingizo linapogongana na majina ya msingi ya APK kama `classes.dex`.
 
-Triage na uchimbaji salama:
+Kuchuja na uchimbaji salama:
 ```bash
 # List potential collisions (names that differ only by trailing slash)
 zipinfo -1 sample.apk | awk '{n=$0; sub(/\/$/,"",n); print n}' | sort | uniq -d
@@ -131,7 +136,7 @@ unzip normalized.apk -d outdir
 # replace outdir/classes.dex? [y]es/[n]o/[A]ll/[N]one/[r]ename: r
 # new name: unk_classes.dex
 ```
-Kiambishi cha baada (post-fix) cha utambuzi wa kimaprogramu:
+Kiambishi cha baada cha ugundaji kwa programu:
 ```python
 from zipfile import ZipFile
 from collections import defaultdict
@@ -148,18 +153,67 @@ for base, variants in collisions.items():
 if len(variants) > 1:
 print('COLLISION', base, '->', variants)
 ```
-Mapendekezo ya utambuzi kwa timu ya Blue:
-- Alama APK ambazo vichwa vya ndani vinaonyesha encryption (GPBF bit 0 = 1) lakini zinasakinishwa/zinakimbia.
-- Alama mawanja ya ziada makubwa/ yasiyojulikana kwenye ingizo za msingi (tazama alama kama `JADXBLOCK`).
-- Alama mgongano wa njia (`X` na `X/`) hasa kwa `AndroidManifest.xml`, `resources.arsc`, `classes*.dex`.
+Mapendekezo ya utambuzi kwa Blue-team:
+- Taja APKs ambazo vichwa vyao vya ndani vinaonyesha encryption (GPBF bit 0 = 1) lakini zinaweza kufunguliwa/kukimbizwa.
+- Taja Extra fields kubwa/zisizojulikana kwenye core entries (tazama alama kama `JADXBLOCK`).
+- Taja path-collisions (`X` and `X/`) hasa kwa `AndroidManifest.xml`, `resources.arsc`, `classes*.dex`.
 
 ---
 
-## Marejeo
+## Mbinu nyingine hatarishi za ZIP (2024–2025)
+
+### Central directories zilizoambatanishwa (multi-EOCD evasion)
+
+Kampeni za hivi karibuni za phishing hutuma blob moja ambalo kwa kweli ni **faili mbili za ZIP zilioambatanishwa**. Kila moja ina End of Central Directory (EOCD) yake + central directory. Extractors tofauti huchambua directories tofauti (7zip husoma ya kwanza, WinRAR ya mwisho), na hivyo kuwapa attackers uwezo wa kuficha payloads ambazo zana chache tu zinaonyesha. Hii pia inavuka mail gateway AV ya msingi ambayo inachunguza tu directory ya kwanza.
+
+**Triage commands**
+```bash
+# Count EOCD signatures
+binwalk -R "PK\x05\x06" suspect.zip
+# Dump central-directory offsets
+zipdetails -v suspect.zip | grep -n "End Central"
+```
+Ikiwa EOCD inatokea zaidi ya moja au kuna onyo la "data after payload", gawanya blob na chunguza kila sehemu:
+```bash
+# recover the second archive (heuristic: start at second EOCD offset)
+# adjust OFF based on binwalk output
+OFF=123456
+dd if=suspect.zip bs=1 skip=$OFF of=tail.zip
+7z l tail.zip   # list hidden content
+```
+### Quoted-overlap / overlapping-entry bombs (non-recursive)
+
+Modern "better zip bomb" huunda **kernel** ndogo (DEFLATE block iliyoshinikizwa kwa kiwango kikubwa) na kuitumia tena kupitia overlapping local headers. Kila central directory entry inaonyesha kwa data iliyoshinikizwa ile ile, ikipata uwiano wa >28M:1 bila kuweka archives ndani ya nyingine. Maktaba zinazomwamini ukubwa wa central directory (Python `zipfile`, Java `java.util.zip`, Info-ZIP kabla ya hardened builds) zinaweza kulazimishwa kutenga petabytes.
+
+**Utambuzi wa haraka (duplicate LFH offsets)**
+```python
+# detect overlapping entries by identical relative offsets
+import struct, sys
+buf=open(sys.argv[1],'rb').read()
+off=0; seen=set()
+while True:
+i = buf.find(b'PK\x01\x02', off)
+if i<0: break
+rel = struct.unpack_from('<I', buf, i+42)[0]
+if rel in seen:
+print('OVERLAP at offset', rel)
+break
+seen.add(rel); off = i+4
+```
+**Ushughulikiaji**
+- Fanya dry-run walk: `zipdetails -v file.zip | grep -n "Rel Off"` na uhakikishe offsets zinaongezeka kwa mpangilio na ni za kipekee.
+- Weka kikomo kwa jumla ya ukubwa usiofinywa na idadi ya entry kabla ya extraction (`zipdetails -t` or custom parser).
+- Unapohitajika extract, fanya ndani ya cgroup/VM yenye vikwazo vya CPU na disk (epuka crashes za inflation zisizo na kikomo).
+
+---
+
+## Marejeleo
 
 - [https://michael-myers.github.io/blog/categories/ctf/](https://michael-myers.github.io/blog/categories/ctf/)
 - [GodFather – Part 1 – A multistage dropper (APK ZIP anti-reversing)](https://shindan.io/blog/godfather-part-1-a-multistage-dropper)
 - [zipdetails (Archive::Zip script)](https://metacpan.org/pod/distribution/Archive-Zip/scripts/zipdetails)
 - [ZIP File Format Specification (PKWARE APPNOTE.TXT)](https://pkware.cachefly.net/webdocs/casestudies/APPNOTE.TXT)
+- [Hackers bury malware in new ZIP file attack — concatenated ZIP central directories](https://www.tomshardware.com/tech-industry/cyber-security/hackers-bury-malware-in-new-zip-file-attack-combining-multiple-zips-into-one-bypasses-antivirus-protections)
+- [Understanding Zip Bombs: overlapping/quoted-overlap kernel construction](https://ubos.tech/news/understanding-zip-bombs-construction-risks-and-mitigation-2/)
 
 {{#include ../../../banners/hacktricks-training.md}}
