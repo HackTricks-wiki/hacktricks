@@ -8,6 +8,7 @@
 
 # 🤩 Generic Methodologies & Resources
 
+- [Impacket](generic-methodologies-and-resources/impacket.md)
 - [Pentesting Methodology](generic-methodologies-and-resources/pentesting-methodology.md)
 - [External Recon Methodology](generic-methodologies-and-resources/external-recon-methodology/README.md)
   - [Wide Source Code Search](generic-methodologies-and-resources/external-recon-methodology/wide-source-code-search.md)
