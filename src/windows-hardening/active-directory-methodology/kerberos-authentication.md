@@ -1,25 +1,25 @@
-# Kerberos Authentication
+# Kerberos 認証
 
 {{#include ../../banners/hacktricks-training.md}}
 
-**すばらしい記事を確認してください：** [**https://www.tarlogic.com/en/blog/how-kerberos-works/**](https://www.tarlogic.com/en/blog/how-kerberos-works/)
+**この素晴らしい投稿を確認：** [**https://www.tarlogic.com/en/blog/how-kerberos-works/**](https://www.tarlogic.com/en/blog/how-kerberos-works/)
 
-## TL;DR for attackers
-- KerberosはデフォルトのAD認証プロトコルで、ほとんどのlateral-movementチェーンが関与します。ハンズオンのチートシート（AS‑REP/Kerberoasting、ticket forging、delegation abuse など）は以下を参照してください：
+## 攻撃者向け TL;DR
+- KerberosはADのデフォルト認証プロトコルで、ほとんどの横移動チェーンがこれに関わります。ハンズオン用チートシート（AS‑REP/Kerberoasting、ticket forging、delegation abuse など）は次を参照してください：
 {{#ref}}
 ../../network-services-pentesting/pentesting-kerberos-88/README.md
 {{#endref}}
 
-## Fresh attack notes (2024‑2026)
-- **RC4 finally going away** – Windows Server 2025 DCsはもはやRC4 TGTを発行しません。MicrosoftはQ2 2026末までにAD DCのデフォルトでRC4を無効化する予定です。レガシーアプリのためにRC4を再有効化している環境は、Kerberoastingに対するダウングレード／高速クラッキングの機会を生みます。
-- **PAC validation enforcement (Apr 2025)** – 2025年4月の更新で“Compatibility”モードが削除されます。強製されたPACやgolden ticketsは、保護が有効なパッチ済みDCで拒否されます。古い／未パッチのDCは引き続き悪用可能です。
-- **CVE‑2025‑26647 (altSecID CBA mapping)** – DCが未パッチまたはAuditモードにある場合、非‑NTAuth CAにチェーンされた証明書でもSKI/altSecID経由でマッピングされていればログオン可能なままです。保護がトリガーされるとEvents 45/21が記録されます。
-- **NTLM phase‑out** – Microsoftは今後のWindowsリリースをNTLM無効で出荷する予定（2026年にかけて段階的に）で、より多くの認証がKerberosへ移行します。ハードニングされたネットワークではKerberosの攻撃面が増え、EPA/CBTがより厳格になることが予想されます。
-- **Cross‑domain RBCD remains powerful** – Microsoft Learnは、resource‑based constrained delegationがドメイン／フォレスト間で動作することを示しています。resourceオブジェクトの書き込み可能な`msDS-AllowedToActOnBehalfOfOtherIdentity`は、フロントエンドサービスのACLに触れずにS4U2self→S4U2proxyのなりすましを可能にします。
+## 最新の攻撃ノート（2024‑2026）
+- **RC4 finally going away** – Windows Server 2025 の DC はもはや RC4 TGT を発行しません。Microsoft は Q2 2026 末までに AD DC のデフォルトで RC4 を無効化する予定です。レガシーアプリのために RC4 を再有効化している環境は、Kerberoasting に対するダウングレード／高速クラッキングの機会を生みます。
+- **PAC validation enforcement (Apr 2025)** – 2025 年 4 月の更新で “Compatibility” モードが削除されます。強制が有効なパッチ済み DC では、偽造 PAC／golden tickets が拒否されます。レガシー／未パッチの DC は引き続き悪用可能です。
+- **CVE‑2025‑26647 (altSecID CBA mapping)** – DC が未パッチまたは Audit モードのままの場合、非‑NTAuth CA にチェーンされた証明書でも SKI/altSecID 経由でマッピングされていればログオンできることがあります。保護が発動すると Events 45/21 が記録されます。
+- **NTLM phase‑out** – Microsoft は今後の Windows リリースを NTLM をデフォルトで無効化した状態で出荷する予定（2026 年まで段階的実施）で、より多くの認証が Kerberos に移行します。ハードニングされたネットワークでは Kerberos の攻撃面が増え、EPA/CBT がより厳格化されることが予想されます。
+- **Cross‑domain RBCD remains powerful** – Microsoft Learn によれば resource‑based constrained delegation はドメイン／フォレスト間でも機能します。リソースオブジェクト上の書き込み可能な `msDS-AllowedToActOnBehalfOfOtherIdentity` は、フロントエンドのサービス ACL に触れずに S4U2self→S4U2proxy のなりすましを可能にします。
 
-## Quick tooling
-- **Rubeus kerberoast (AES default)**: `Rubeus.exe kerberoast /user:svc_sql /aes /nowrap /outfile:tgs.txt` — AESハッシュを出力します；GPUによるクラッキングを計画するか、代わりにpre‑auth無効のユーザーを狙ってください。
-- **RC4 downgrade target hunting**: RC4をまだアドバタイズしているアカウントを列挙するには `Get-ADObject -LDAPFilter '(msDS-SupportedEncryptionTypes=4)' -Properties msDS-SupportedEncryptionTypes` を使用し、RC4が完全に無効化される前の弱いkerberoast候補を特定します。
+## クイックツール
+- **Rubeus kerberoast (AES default)**: `Rubeus.exe kerberoast /user:svc_sql /aes /nowrap /outfile:tgs.txt` — AES ハッシュを出力します。GPU クラッキングを予定するか、代わりに pre‑auth disabled users をターゲットにしてください。
+- **RC4 downgrade target hunting**: enumerate accounts that still advertise RC4 with `Get-ADObject -LDAPFilter '(msDS-SupportedEncryptionTypes=4)' -Properties msDS-SupportedEncryptionTypes` to locate weak kerberoast candidates before RC4 is fully disabled.
 
 ## References
 - [Microsoft – Beyond RC4 for Windows authentication (RC4 default removal timeline)](https://www.microsoft.com/en-us/windows-server/blog/2025/12/03/beyond-rc4-for-windows-authentication)

