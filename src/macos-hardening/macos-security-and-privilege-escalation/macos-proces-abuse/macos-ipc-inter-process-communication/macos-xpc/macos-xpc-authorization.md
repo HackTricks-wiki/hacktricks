@@ -288,6 +288,14 @@ authenticate-session-owner, authenticate-session-owner-or-admin, authenticate-se
 
 ### Authorization Bypass Case Studies
 
+- **CVE-2025-65842 – Acustica Audio Aquarius HelperTool**: The privileged Mach service `com.acustica.HelperTool` accepts every connection and its `checkAuthorization:` routine calls `AuthorizationCopyRights(NULL, …)`, so any 32‑byte blob passes. `executeCommand:authorization:withReply:` then feeds attacker-controlled comma‑separated strings into `NSTask` as root, making payloads such as:
+
+```bash
+"/bin/sh,-c,cp /bin/bash /tmp/rootbash && chmod +s /tmp/rootbash"
+```
+
+trivially create a SUID root shell. Details in [this write-up](https://almightysec.com/helpertool-xpc-service-local-privilege-escalation/).
+- **CVE-2025-55076 – Plugin Alliance InstallationHelper**: The listener always returns YES and the same NULL `AuthorizationCopyRights` pattern appears in `checkAuthorization:`. Method `exchangeAppWithReply:` concatenates attacker input into a `system()` string twice, so injecting shell metacharacters in `appPath` (e.g. `"/Applications/Test.app";chmod 4755 /tmp/rootbash;`) yields root code execution via the Mach service `com.plugin-alliance.pa-installationhelper`. More info [here](https://almightysec.com/Plugin-Alliance-HelperTool-XPC-Service-Local-Privilege-Escalation/).
 - **CVE-2024-4395 – Jamf Compliance Editor helper**: Running an audit drops `/Library/LaunchDaemons/com.jamf.complianceeditor.helper.plist`, exposes the Mach service `com.jamf.complianceeditor.helper`, and exports `-executeScriptAt:arguments:then:` without verifying the caller’s `AuthorizationExternalForm` or code signature. A trivial exploit `AuthorizationCreate`s an empty reference, connects with `[[NSXPCConnection alloc] initWithMachServiceName:options:NSXPCConnectionPrivileged]`, and invokes the method to execute arbitrary binaries as root. Full reversing notes (plus PoC) in [Mykola Grymalyuk’s write-up](https://khronokernel.com/macos/2024/05/01/CVE-2024-4395.html).
 - **CVE-2025-25251 – FortiClient Mac helper**: FortiClient Mac 7.0.0–7.0.14, 7.2.0–7.2.8 and 7.4.0–7.4.2 accepted crafted XPC messages that reached a privileged helper lacking authorization gates. Because the helper trusted its own privileged `AuthorizationRef`, any local user able to message the service could coerce it into executing arbitrary configuration changes or commands as root. Details in [SentinelOne’s advisory summary](https://www.sentinelone.com/vulnerability-database/cve-2025-25251/).
 
@@ -456,6 +464,8 @@ int main(void) {
 - [https://theevilbit.github.io/posts/secure_coding_xpc_part1/](https://theevilbit.github.io/posts/secure_coding_xpc_part1/)
 - [https://khronokernel.com/macos/2024/05/01/CVE-2024-4395.html](https://khronokernel.com/macos/2024/05/01/CVE-2024-4395.html)
 - [https://www.sentinelone.com/vulnerability-database/cve-2025-25251/](https://www.sentinelone.com/vulnerability-database/cve-2025-25251/)
+- [https://almightysec.com/helpertool-xpc-service-local-privilege-escalation/](https://almightysec.com/helpertool-xpc-service-local-privilege-escalation/)
+- [https://almightysec.com/Plugin-Alliance-HelperTool-XPC-Service-Local-Privilege-Escalation/](https://almightysec.com/Plugin-Alliance-HelperTool-XPC-Service-Local-Privilege-Escalation/)
 
 {{#include ../../../../../banners/hacktricks-training.md}}
 
