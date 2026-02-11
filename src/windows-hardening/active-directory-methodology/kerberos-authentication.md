@@ -1,25 +1,25 @@
-# Kerberos Authentication
+# Kerberos Πιστοποίηση
 
 {{#include ../../banners/hacktricks-training.md}}
 
 **Δείτε το εξαιρετικό άρθρο από:** [**https://www.tarlogic.com/en/blog/how-kerberos-works/**](https://www.tarlogic.com/en/blog/how-kerberos-works/)
 
-## TL;DR for attackers
-- Kerberos είναι το προεπιλεγμένο πρωτόκολλο αυθεντικοποίησης AD· οι περισσότερες αλυσίδες lateral‑movement θα το αγγίξουν. Για πρακτικά cheatsheets (AS‑REP/Kerberoasting, ticket forging, delegation abuse, κ.λπ.) δείτε:
+## TL;DR για επιτιθέμενους
+- Ο Kerberos είναι το προεπιλεγμένο πρωτόκολλο πιστοποίησης του AD· οι περισσότερες αλυσίδες lateral-movement θα το αγγίξουν. Για πρακτικά cheatsheets (AS‑REP/Kerberoasting, ticket forging, delegation abuse, κ.λπ.) δείτε:
 {{#ref}}
 ../../network-services-pentesting/pentesting-kerberos-88/README.md
 {{#endref}}
 
-## Fresh attack notes (2024‑2026)
-- **RC4 finally going away** – Τα DCs των Windows Server 2025 δεν εκδίδουν πλέον RC4 TGTs· η Microsoft σκοπεύει να απενεργοποιήσει το RC4 ως προεπιλογή για AD DCs μέχρι το τέλος του Q2 2026. Περιβάλλοντα που επαναενεργοποιούν RC4 για legacy apps δημιουργούν ευκαιρίες downgrade/fast‑crack για Kerberoasting.
-- **PAC validation enforcement (Apr 2025)** – Οι ενημερώσεις Απριλίου 2025 αφαιρούν το “Compatibility” mode· πλαστά PACs/golden tickets απορρίπτονται σε patched DCs όταν η επιβολή είναι ενεργή. Legacy/μη ενημερωμένα DCs παραμένουν ευάλωτα σε εκμετάλλευση.
-- **CVE‑2025‑26647 (altSecID CBA mapping)** – Εάν τα DCs δεν έχουν ενημερωθεί ή έχουν μείνει σε Audit mode, πιστοποιητικά που chained σε non‑NTAuth CAs αλλά mapped μέσω SKI/altSecID μπορούν ακόμα να κάνουν log on. Εμφανίζονται events 45/21 όταν ενεργοποιούνται οι προστασίες.
-- **NTLM phase‑out** – Η Microsoft θα παραδώσει μελλοντικές εκδόσεις Windows με NTLM απενεργοποιημένο ως προεπιλογή (σταδιακά μέχρι το 2026), ωθώντας περισσότερη αυθεντικοποίηση στο Kerberos. Αναμένεται μεγαλύτερη επιφάνεια Kerberos και αυστηρότερη EPA/CBT σε hardened networks.
-- **Cross‑domain RBCD remains powerful** – Το Microsoft Learn αναφέρει ότι το resource‑based constrained delegation λειτουργεί across domains/forests· το writable `msDS-AllowedToActOnBehalfOfOtherIdentity` στα resource objects εξακολουθεί να επιτρέπει S4U2self→S4U2proxy impersonation χωρίς να αγγίζει τα front‑end service ACLs.
+## Νεότερες σημειώσεις επιθέσεων (2024‑2026)
+- **RC4 τελικά αποσύρεται** – Οι DCs των Windows Server 2025 δεν εκδίδουν πλέον RC4 TGTs· η Microsoft σχεδιάζει να απενεργοποιήσει το RC4 ως προεπιλογή για τους AD DCs έως το τέλος του Q2 2026. Περιβάλλοντα που επανενεργοποιούν το RC4 για legacy apps δημιουργούν ευκαιρίες downgrade/fast‑crack για Kerberoasting.
+- **PAC validation enforcement (Apr 2025)** – Οι ενημερώσεις Απριλίου 2025 αφαιρούν τη λειτουργία “Compatibility”· forged PACs/golden tickets απορρίπτονται σε patched DCs όταν η επιβολή είναι ενεργοποιημένη. Legacy/unpatched DCs παραμένουν abusable.
+- **CVE‑2025‑26647 (altSecID CBA mapping)** – Εάν οι DCs είναι unpatched ή παραμείνουν σε Audit mode, πιστοποιητικά αλυσιδωμένα σε non‑NTAuth CAs αλλά χαρτογραφημένα μέσω SKI/altSecID μπορούν ακόμη να κάνουν log on. Εμφανίζονται Events 45/21 όταν ενεργοποιούνται οι προστασίες.
+- **NTLM phase‑out** – Η Microsoft θα κυκλοφορήσει μελλοντικές εκδόσεις των Windows με NTLM απενεργοποιημένο από προεπιλογή (σταδιακά έως το 2026), ωθώντας περισσότερη πιστοποίηση προς το Kerberos. Αναμένετε μεγαλύτερη επιφάνεια Kerberos και πιο αυστηρό EPA/CBT σε σκληρυμένα δίκτυα.
+- **Cross‑domain RBCD παραμένει ισχυρό** – Το Microsoft Learn σημειώνει ότι το resource‑based constrained delegation λειτουργεί across domains/forests· writable `msDS-AllowedToActOnBehalfOfOtherIdentity` σε resource objects εξακολουθεί να επιτρέπει S4U2self→S4U2proxy impersonation χωρίς να αγγίζονται front‑end service ACLs.
 
-## Quick tooling
-- **Rubeus kerberoast (AES default)**: `Rubeus.exe kerberoast /user:svc_sql /aes /nowrap /outfile:tgs.txt` — outputs AES hashes· προγραμματίστε GPU cracking ή στοχεύστε χρήστες με pre‑auth disabled αντίστοιχα.
-- **RC4 downgrade target hunting**: enumerate accounts that still advertise RC4 with `Get-ADObject -LDAPFilter '(msDS-SupportedEncryptionTypes=4)' -Properties msDS-SupportedEncryptionTypes` to locate weak kerberoast candidates before RC4 is fully disabled.
+## Γρήγορα εργαλεία
+- **Rubeus kerberoast (AES default)**: `Rubeus.exe kerberoast /user:svc_sql /aes /nowrap /outfile:tgs.txt` — εξάγει AES hashes· προγραμματίστε GPU cracking ή στοχεύστε χρήστες με pre‑auth απενεργοποιημένο αντ' αυτού.
+- **RC4 downgrade target hunting**: απαριθμήστε accounts που ακόμη διαφημίζουν RC4 με `Get-ADObject -LDAPFilter '(msDS-SupportedEncryptionTypes=4)' -Properties msDS-SupportedEncryptionTypes` για να εντοπίσετε αδύναμους kerberoast υποψήφιους πριν το RC4 απενεργοποιηθεί πλήρως.
 
 ## References
 - [Microsoft – Beyond RC4 for Windows authentication (RC4 default removal timeline)](https://www.microsoft.com/en-us/windows-server/blog/2025/12/03/beyond-rc4-for-windows-authentication)

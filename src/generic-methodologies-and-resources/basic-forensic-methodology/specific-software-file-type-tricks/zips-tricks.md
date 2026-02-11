@@ -1,30 +1,30 @@
-# ZIPs tricks
+# Κόλπα για ZIPs
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-**Command-line tools** για τη διαχείριση **zip files** είναι απαραίτητα για τη διάγνωση, την επισκευή και το cracking των zip αρχείων. Ακολουθούν μερικά βασικά εργαλεία:
+**Εργαλεία γραμμής εντολών** για τη διαχείριση των **zip files** είναι απαραίτητα για τη διάγνωση, την επισκευή και το cracking zip αρχείων. Ακολουθούν κάποια βασικά εργαλεία:
 
-- **`unzip`**: Δείχνει γιατί ένα zip αρχείο μπορεί να μην αποσυμπιεστεί.
-- **`zipdetails -v`**: Προσφέρει λεπτομερή ανάλυση των πεδίων της μορφής αρχείου zip.
-- **`zipinfo`**: Εμφανίζει τα περιεχόμενα ενός zip αρχείου χωρίς να τα εξάγει.
-- **`zip -F input.zip --out output.zip`** και **`zip -FF input.zip --out output.zip`**: Προσπαθούν να επιδιορθώσουν κατεστραμμένα zip αρχεία.
-- **[fcrackzip](https://github.com/hyc/fcrackzip)**: Ένα εργαλείο για brute-force cracking κωδικών zip, αποτελεσματικό για κωδικούς μέχρι περίπου 7 χαρακτήρες.
+- **`unzip`**: Αποκαλύπτει γιατί ένα zip αρχείο ενδέχεται να μην αποσυμπιεστεί.
+- **`zipdetails -v`**: Προσφέρει λεπτομερή ανάλυση των πεδίων του μορφότυπου zip.
+- **`zipinfo`**: Λίστα με τα περιεχόμενα ενός zip αρχείου χωρίς εξαγωγή.
+- **`zip -F input.zip --out output.zip`** και **`zip -FF input.zip --out output.zip`**: Προσπαθούν να επισκευάσουν κατεστραμμένα zip αρχεία.
+- **[fcrackzip](https://github.com/hyc/fcrackzip)**: Εργαλείο για brute-force cracking κωδικών zip, αποτελεσματικό για κωδικούς έως περίπου 7 χαρακτήρων.
 
-Το [Zip file format specification](https://pkware.cachefly.net/webdocs/casestudies/APPNOTE.TXT) παρέχει πλήρεις λεπτομέρειες για τη δομή και τα πρότυπα των zip αρχείων.
+Το [Zip file format specification](https://pkware.cachefly.net/webdocs/casestudies/APPNOTE.TXT) παρέχει αναλυτικές πληροφορίες για τη δομή και τα πρότυπα των zip αρχείων.
 
-Είναι σημαντικό να σημειωθεί ότι τα password-protected zip files **do not encrypt filenames or file sizes** εσωτερικά, μια ευπάθεια που δεν υπάρχει σε RAR ή 7z αρχεία τα οποία κρυπτογραφούν αυτές τις πληροφορίες. Επιπλέον, τα zip αρχεία κρυπτογραφημένα με την παλαιότερη μέθοδο ZipCrypto είναι ευάλωτα σε ένα **plaintext attack** εάν υπάρχει αμη κρυπτογραφημένο αντίγραφο ενός συμπιεσμένου αρχείου. Αυτή η επίθεση εκμεταλλεύεται το γνωστό περιεχόμενο για να σπάσει τον κωδικό του zip, μια ευπάθεια που περιγράφεται στο [HackThis's article](https://www.hackthis.co.uk/articles/known-plaintext-attack-cracking-zip-files) και εξηγείται περαιτέρω σε [this academic paper](https://www.cs.auckland.ac.nz/~mike/zipattacks.pdf). Ωστόσο, τα zip αρχεία προστατευμένα με **AES-256** κρυπτογράφηση είναι ανθεκτικά σε αυτή την plaintext attack, επισημαίνοντας τη σημασία της επιλογής ασφαλών μεθόδων κρυπτογράφησης για ευαίσθητα δεδομένα.
+Είναι σημαντικό να σημειωθεί ότι τα password-protected zip αρχεία **δεν κρυπτογραφούν τα ονόματα αρχείων ή τα μεγέθη αρχείων** στο εσωτερικό τους, μια ευπάθεια που δεν μοιράζονται τα RAR ή 7z αρχεία τα οποία κρυπτογραφούν αυτές τις πληροφορίες. Επιπλέον, αρχεία zip κρυπτογραφημένα με την παλαιότερη μέθοδο ZipCrypto είναι ευάλωτα σε επίθεση **known-plaintext** εάν υπάρχει μη κρυπτογραφημένο αντίγραφο ενός συμπιεσμένου αρχείου. Αυτή η επίθεση εκμεταλλεύεται το γνωστό περιεχόμενο για να σπάσει τον κωδικό του zip, μια ευπάθεια που περιγράφεται στο [HackThis's article](https://www.hackthis.co.uk/articles/known-plaintext-attack-cracking-zip-files) και εξηγείται περαιτέρω σε [this academic paper](https://www.cs.auckland.ac.nz/~mike/zipattacks.pdf). Ωστόσο, αρχεία zip που προστατεύονται με **AES-256** είναι άνοσα σε αυτή την plaintext επίθεση, υπογραμμίζοντας τη σημασία της επιλογής ασφαλών μεθόδων κρυπτογράφησης για ευαίσθητα δεδομένα.
 
 ---
 
-## Anti-reversing tricks in APKs using manipulated ZIP headers
+## Αντι-ανάλυσης κόλπα σε APKs που χρησιμοποιούν παραποιημένα ZIP headers
 
-Σύγχρονοι Android malware droppers χρησιμοποιούν malformed ZIP metadata για να “σπάσουν” static tools (jadx/apktool/unzip) ενώ το APK παραμένει εγκαταστάσιμο στη συσκευή. Τα πιο κοινά tricks είναι:
+Τα σύγχρονα Android malware droppers χρησιμοποιούν κακοσχηματισμένα ZIP metadata για να σπάσουν static εργαλεία (jadx/apktool/unzip) ενώ διατηρούν το APK εγκαταστάσιμο στη συσκευή. Τα πιο συνηθισμένα κόλπα είναι:
 
-- Fake encryption by setting the ZIP General Purpose Bit Flag (GPBF) bit 0
-- Abusing large/custom Extra fields to confuse parsers
-- File/directory name collisions to hide real artifacts (e.g., a directory named `classes.dex/` next to the real `classes.dex`)
+- Ψεύτικη κρυπτογράφηση με το να τίθεται το ZIP General Purpose Bit Flag (GPBF) bit 0
+- Κατάχρηση μεγάλων/προσαρμοσμένων Extra fields για να μπερδεύουν parsers
+- Συγκρούσεις ονομάτων αρχείων/καταλόγων για να κρύβουν πραγματικά artifacts (π.χ., ένας κατάλογος με όνομα `classes.dex/` δίπλα στο πραγματικό `classes.dex`)
 
-### 1) Fake encryption (GPBF bit 0 set) without real crypto
+### 1) Ψευδής κρυπτογράφηση (GPBF bit 0 ενεργοποιημένο) χωρίς πραγματική κρυπτογραφία
 
 Συμπτώματα:
 - `jadx-gui` αποτυγχάνει με σφάλματα όπως:
@@ -32,7 +32,7 @@
 ```
 java.util.zip.ZipException: invalid CEN header (encrypted entry)
 ```
-- `unzip` ζητάει password για βασικά APK αρχεία παρόλο που ένα έγκυρο APK δεν μπορεί να έχει κρυπτογραφημένα `classes*.dex`, `resources.arsc`, ή `AndroidManifest.xml`:
+- `unzip` ζητάει κωδικό για βασικά αρχεία APK παρόλο που ένα έγκυρο APK δεν μπορεί να έχει κρυπτογραφημένα `classes*.dex`, `resources.arsc`, ή `AndroidManifest.xml`:
 
 ```bash
 unzip sample.apk
@@ -47,7 +47,7 @@ skipping: classes2.dex                          incorrect password
 ```bash
 zipdetails -v sample.apk | less
 ```
-Κοιτάξτε το General Purpose Bit Flag για τα local και central headers. Μια χαρακτηριστική τιμή είναι το bit 0 ενεργοποιημένο (Encryption) ακόμη και για core entries:
+Δείτε το General Purpose Bit Flag για τους local και central headers. Μια χαρακτηριστική τιμή είναι το bit 0 ενεργοποιημένο (Encryption) ακόμη και για core entries:
 ```
 Extract Zip Spec      2D '4.5'
 General Purpose Flag  0A09
@@ -56,12 +56,12 @@ General Purpose Flag  0A09
 [Bit 3]   1 'Streamed'
 [Bit 11]  1 'Language Encoding'
 ```
-Ευρετική: Αν ένα APK εγκαθίσταται και τρέχει στη συσκευή αλλά οι βασικές εγγραφές εμφανίζονται "encrypted" στα tools, ο GPBF έχει παραποιηθεί.
+Ευρετικό: Εάν ένα APK εγκαθίσταται και τρέχει στη συσκευή αλλά οι βασικές εγγραφές εμφανίζονται "κρυπτογραφημένες" στα εργαλεία, το GPBF έχει παραποιηθεί.
 
-Διορθώστε το εκκαθαρίζοντας το bit 0 του GPBF τόσο στις Local File Headers (LFH) όσο και στις εγγραφές του Central Directory (CD). Ελάχιστος byte-patcher:
+Διόρθωση: Καθαρίστε το bit 0 του GPBF τόσο στις Local File Headers (LFH) όσο και στις Central Directory (CD) εγγραφές. Ελάχιστος byte-patcher:
 
 <details>
-<summary>Ελάχιστος GPBF bit-clear patcher</summary>
+<summary>Ελάχιστο patcher εκκαθάρισης bit GPBF</summary>
 ```python
 # gpbf_clear.py – clear encryption bit (bit 0) in ZIP local+central headers
 import struct, sys
@@ -99,33 +99,33 @@ print(f'Patched: LFH={p_lfh}, CDH={p_cdh}')
 python3 gpbf_clear.py obfuscated.apk normalized.apk
 zipdetails -v normalized.apk | grep -A2 "General Purpose Flag"
 ```
-Πρέπει τώρα να δείτε `General Purpose Flag  0000` στις core εγγραφές και τα εργαλεία θα αναλύσουν ξανά το APK.
+Τώρα θα πρέπει να δείτε `General Purpose Flag  0000` στις βασικές εγγραφές και τα εργαλεία θα αναλύσουν ξανά το APK.
 
-### 2) Μεγάλα/εξατομικευμένα Extra fields που σπάνε τους parsers
+### 2) Μεγάλα/προσαρμοσμένα Extra fields για να σπάνε parsers
 
-Επιτιθέμενοι γεμίζουν υπερμεγέθη Extra fields και περίεργα IDs στα headers για να προκαλέσουν σφάλματα στους decompilers. Σε πραγματικά περιστατικά μπορεί να δείτε προσαρμοσμένους δείκτες (π.χ., strings όπως `JADXBLOCK`) ενσωματωμένους εκεί.
+Οι επιτιθέμενοι γεμίζουν υπερμεγέθη Extra fields και περίεργα IDs μέσα στα headers για να προκαλέσουν προβλήματα στους decompilers. Στη φύση μπορεί να δείτε προσαρμοσμένους markers (π.χ., συμβολοσειρές όπως `JADXBLOCK`) ενσωματωμένους εκεί.
 
 Έλεγχος:
 ```bash
 zipdetails -v sample.apk | sed -n '/Extra ID/,+4p' | head -n 50
 ```
-Παραδείγματα που παρατηρήθηκαν: άγνωστα IDs όπως `0xCAFE` ("Java Executable") ή `0x414A` ("JA:") που φέρουν μεγάλα payloads.
+Παραδείγματα που παρατηρήθηκαν: άγνωστα IDs όπως `0xCAFE` ("Java Executable") ή `0x414A` ("JA:") που μεταφέρουν μεγάλα payloads.
 
-DFIR heuristics:
-- Ειδοποίηση όταν τα Extra fields είναι ασυνήθιστα μεγάλα σε core entries (`classes*.dex`, `AndroidManifest.xml`, `resources.arsc`).
-- Θεωρείτε τα άγνωστα Extra IDs σε αυτές τις εγγραφές ως ύποπτα.
+DFIR ευρετικές:
+- Ειδοποίηση όταν τα Extra fields είναι ασυνήθιστα μεγάλα σε βασικές εγγραφές (`classes*.dex`, `AndroidManifest.xml`, `resources.arsc`).
+- Θεώρησε τα άγνωστα Extra IDs σε αυτές τις εγγραφές ως ύποπτα.
 
-Πρακτική αντιμετώπιση: η αναδημιουργία του αρχείου (π.χ. επανασυμπίεση των εξαγόμενων αρχείων) αφαιρεί τα κακόβουλα Extra fields. Εάν τα εργαλεία αρνούνται να εξάγουν λόγω ψεύτικης κρυπτογράφησης, πρώτα καθαρίστε το GPBF bit 0 όπως παραπάνω, και στη συνέχεια επανασυσκευάστε:
+Πρακτική αντιμετώπιση: η επαναδημιουργία του αρχείου (π.χ. επανασυμπίεση των εξαγόμενων αρχείων) αφαιρεί κακόβουλα Extra fields. Αν τα εργαλεία αρνούνται να εξαγάγουν λόγω ψευδοκρυπτογράφησης, πρώτα καθάρισε το GPBF bit 0 όπως παραπάνω, και μετά επανασυσκέυασε:
 ```bash
 mkdir /tmp/apk
 unzip -qq normalized.apk -d /tmp/apk
 (cd /tmp/apk && zip -qr ../clean.apk .)
 ```
-### 3) Συγκρούσεις ονομάτων αρχείων/καταλόγων (απόκρυψη πραγματικών αντικειμένων)
+### 3) Σύγκρουση ονομάτων αρχείων/καταλόγων (απόκρυψη πραγματικών αντικειμένων)
 
-Ένα ZIP μπορεί να περιέχει τόσο ένα αρχείο `X` όσο και έναν κατάλογο `X/`. Ορισμένα extractors και decompilers μπερδεύονται και μπορεί να επικαλύψουν ή να κρύψουν το πραγματικό αρχείο με μια καταχώρηση καταλόγου. Αυτό έχει παρατηρηθεί με καταχωρήσεις που συγκρούονται με βασικά ονόματα APK όπως `classes.dex`.
+Ένα ZIP μπορεί να περιέχει τόσο ένα αρχείο `X` όσο και έναν κατάλογο `X/`. Ορισμένα extractors και decompilers μπερδεύονται και μπορεί να επικαλύψουν ή να αποκρύψουν το πραγματικό αρχείο με μια εγγραφή καταλόγου. Αυτό έχει παρατηρηθεί με εγγραφές που συγκρούονται με βασικά ονόματα APK όπως `classes.dex`.
 
-Triage and safe extraction:
+Triage και ασφαλής εξαγωγή:
 ```bash
 # List potential collisions (names that differ only by trailing slash)
 zipinfo -1 sample.apk | awk '{n=$0; sub(/\/$/,"",n); print n}' | sort | uniq -d
@@ -136,7 +136,7 @@ unzip normalized.apk -d outdir
 # replace outdir/classes.dex? [y]es/[n]o/[A]ll/[N]one/[r]ename: r
 # new name: unk_classes.dex
 ```
-Επίθημα για προγραμματική ανίχνευση:
+Προγραμματικός εντοπισμός (επίθημα):
 ```python
 from zipfile import ZipFile
 from collections import defaultdict
@@ -153,27 +153,27 @@ for base, variants in collisions.items():
 if len(variants) > 1:
 print('COLLISION', base, '->', variants)
 ```
-Ιδέες ανίχνευσης για Blue-team:
-- Επισημάνετε APKs των οποίων τα local headers δηλώνουν κρυπτογράφηση (GPBF bit 0 = 1) αλλά εγκαθίστανται/τρέχουν.
-- Επισημάνετε μεγάλα/άγνωστα Extra fields σε core entries (ψάξτε για δείκτες όπως `JADXBLOCK`).
-- Επισημάνετε path-collisions (`X` και `X/`) ειδικά για `AndroidManifest.xml`, `resources.arsc`, `classes*.dex`.
+Blue-team detection ideas:
+- Σημάνετε APKs των οποίων οι τοπικές κεφαλίδες σημειώνουν κρυπτογράφηση (GPBF bit 0 = 1) αλλά εγκαθίστανται/εκτελούνται.
+- Σημάνετε μεγάλα/άγνωστα Extra fields στις κύριες εγγραφές (αναζητήστε δείκτες όπως `JADXBLOCK`).
+- Σημάνετε συγκρούσεις διαδρομών (`X` και `X/`) ειδικά για `AndroidManifest.xml`, `resources.arsc`, `classes*.dex`.
 
 ---
 
-## Άλλες κακόβουλες τεχνικές ZIP (2024–2025)
+## Other malicious ZIP tricks (2024–2025)
 
-### Συνενωμένοι κεντρικοί κατάλογοι (multi-EOCD evasion)
+### Concatenated central directories (multi-EOCD evasion)
 
-Πρόσφατες phishing εκστρατείες διανέμουν ένα μόνο blob που στην πραγματικότητα είναι **δύο ZIP αρχεία συνενωμένα**. Το καθένα έχει το δικό του End of Central Directory (EOCD) + κεντρικό κατάλογο. Διάφοροι extractors αναλύουν διαφορετικούς καταλόγους (7zip διαβάζει τον πρώτο, WinRAR τον τελευταίο), επιτρέποντας στους επιτιθέμενους να κρύβουν payloads που εμφανίζονται μόνο από ορισμένα εργαλεία. Αυτό επίσης παρακάμπτει βασικά mail gateway AV που επιθεωρούν μόνο τον πρώτο κατάλογο.
+Πρόσφατες εκστρατείες phishing στέλνουν ένα ενιαίο blob που στην πραγματικότητα είναι **δύο αρχεία ZIP συγκολλημένα**. Το καθένα έχει το δικό του End of Central Directory (EOCD) + central directory. Διάφοροι extractors αναλύουν διαφορετικούς καταλόγους (7zip διαβάζει τον πρώτο, WinRAR τον τελευταίο), επιτρέποντας σε επιτιθέμενους να κρύβουν payloads που εμφανίζονται μόνο από μερικά εργαλεία. Αυτό επίσης παρακάμπτει τα βασικά mail gateway AV που ελέγχουν μόνο τον πρώτο κατάλογο.
 
-**Εντολές Triage**
+**Triage commands**
 ```bash
 # Count EOCD signatures
 binwalk -R "PK\x05\x06" suspect.zip
 # Dump central-directory offsets
 zipdetails -v suspect.zip | grep -n "End Central"
 ```
-Εάν εμφανίζονται περισσότερα από ένα EOCD ή υπάρχουν προειδοποιήσεις "data after payload", διαχωρίστε το blob και ελέγξτε κάθε μέρος:
+Εάν εμφανιστούν περισσότερα από ένα EOCD ή υπάρχουν προειδοποιήσεις "data after payload", διαχωρίστε το blob και εξετάστε κάθε μέρος:
 ```bash
 # recover the second archive (heuristic: start at second EOCD offset)
 # adjust OFF based on binwalk output
@@ -183,9 +183,9 @@ dd if=suspect.zip bs=1 skip=$OFF of=tail.zip
 ```
 ### Quoted-overlap / overlapping-entry bombs (non-recursive)
 
-Οι σύγχρονες "better zip bomb" δημιουργούν ένα μικροσκοπικό **kernel** (ιδιαίτερα συμπιεσμένο DEFLATE block) και το επαναχρησιμοποιούν μέσω overlapping local headers. Κάθε central directory entry δείχνει στα ίδια compressed data, επιτυγχάνοντας αναλογίες >28M:1 χωρίς nesting archives. Βιβλιοθήκες που εμπιστεύονται τα central directory sizes (Python `zipfile`, Java `java.util.zip`, Info-ZIP prior to hardened builds) μπορούν να αναγκαστούν να δεσμεύσουν petabytes.
+Σύγχρονη "better zip bomb" κατασκευάζει έναν μικροσκοπικό **kernel** (υπερ-συμπιεσμένο DEFLATE block) και τον επαναχρησιμοποιεί μέσω overlapping local headers. Κάθε central directory entry δείχνει στα ίδια compressed data, επιτυγχάνοντας αναλογίες >28M:1 χωρίς nesting archives. Βιβλιοθήκες που εμπιστεύονται τα central directory sizes (Python `zipfile`, Java `java.util.zip`, Info-ZIP prior to hardened builds) μπορούν να αναγκαστούν να δεσμεύσουν petabytes.
 
-**Γρήγορος εντοπισμός (διπλά LFH offsets)**
+**Γρήγορος εντοπισμός (duplicate LFH offsets)**
 ```python
 # detect overlapping entries by identical relative offsets
 import struct, sys
@@ -200,14 +200,14 @@ print('OVERLAP at offset', rel)
 break
 seen.add(rel); off = i+4
 ```
-**Διαχείριση**
-- Πραγματοποιήστε μια δοκιμαστική διέλευση: `zipdetails -v file.zip | grep -n "Rel Off"` και βεβαιωθείτε ότι τα offsets αυξάνονται αυστηρά και είναι μοναδικά.
-- Περιορίστε το αποδεκτό συνολικό μέγεθος χωρίς συμπίεση και τον αριθμό εγγραφών πριν την αποσυμπίεση (`zipdetails -t` or custom parser).
-- Όταν πρέπει να αποσυμπιέσετε, κάντε το μέσα σε cgroup/VM με όρια CPU+disk (αποφύγετε καταρρεύσεις από ανεξέλεγκτη αύξηση πόρων).
+**Χειρισμός**
+- Εκτελέστε έναν dry-run έλεγχο: `zipdetails -v file.zip | grep -n "Rel Off"` και βεβαιωθείτε ότι οι offsets είναι αυστηρά αύξουσες και μοναδικές.
+- Περιορίστε το αποδεκτό συνολικό μη συμπιεσμένο μέγεθος και τον αριθμό εγγραφών πριν από την εξαγωγή (`zipdetails -t` or custom parser).
+- Όταν πρέπει να εξαγάγετε, κάντε το μέσα σε cgroup/VM με όρια CPU+δίσκου (αποφύγετε ανεξέλεγκτες καταρρεύσεις λόγω διόγκωσης).
 
 ---
 
-## References
+## Αναφορές
 
 - [https://michael-myers.github.io/blog/categories/ctf/](https://michael-myers.github.io/blog/categories/ctf/)
 - [GodFather – Part 1 – A multistage dropper (APK ZIP anti-reversing)](https://shindan.io/blog/godfather-part-1-a-multistage-dropper)
