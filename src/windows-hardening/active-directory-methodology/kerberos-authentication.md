@@ -1,27 +1,25 @@
-# Kerberos Authentication
+# Uthibitishaji wa Kerberos
 
 {{#include ../../banners/hacktricks-training.md}}
 
-**Check the amazing post from:** [**https://www.tarlogic.com/en/blog/how-kerberos-works/**](https://www.tarlogic.com/en/blog/how-kerberos-works/)
+**Angalia chapisho bora kutoka kwa:** [**https://www.tarlogic.com/en/blog/how-kerberos-works/**](https://www.tarlogic.com/en/blog/how-kerberos-works/)
 
-## TL;DR kwa wadukuzi
-- Kerberos ni itifaki ya default ya uthibitishaji ya AD; mnyororo mwingi wa lateral‑movement utaigusa. Kwa cheatsheets za vitendo (AS‑REP/Kerberoasting, ticket forging, delegation abuse, n.k.) ona:
+## Muhtasari kwa wadukuzi
+- Kerberos ni default AD auth protocol; mnyororo wa wengi wa lateral‑movement utakutana nayo. Kwa cheatsheets za vitendo (AS‑REP/Kerberoasting, ticket forging, delegation abuse, n.k.) angalia:
 {{#ref}}
 ../../network-services-pentesting/pentesting-kerberos-88/README.md
 {{#endref}}
 
 ## Vidokezo vya mashambulizi vipya (2024‑2026)
-- **RC4 finally going away** – DCs za Windows Server 2025 hazitoa tena RC4 TGTs; Microsoft inakusudia kuzima RC4 kama chaguo‑msingi kwa AD DCs kabla ya mwisho wa Q2 2026. Mazingira yanayowasha tena RC4 kwa legacy apps huunda fursa za downgrade/uvunaji wa kasi kwa Kerberoasting.
-- **PAC validation enforcement (Apr 2025)** – masasisho ya Aprili 2025 yanatoa “Compatibility” mode; forged PACs/golden tickets zitatupwa kwenye DCs zilizosanishwa wakati enforcement imewezeshwa. DCs za legacy/zisizopachikwa zinabaki kutumiwa kwa matumizi mabaya.
-- **CVE‑2025‑26647 (altSecID CBA mapping)** – Ikiwa DCs hazijapachikwa au zimeachwa katika Audit mode, certificates zilizofungwa kwenye non‑NTAuth CAs lakini zilizopangwa kupitia SKI/altSecID bado zinaweza kuingia. Events 45/21 zinaonekana wakati ulinzi unapoanza kazi.
-- **NTLM phase‑out** – Microsoft itaweka matoleo ya baadaye ya Windows na NTLM imezimwa kama chaguo‑msingi (katika hatua kupitia 2026), ikisukuma uthibitishaji zaidi kwa Kerberos. Tarajia ongezeko la uso la Kerberos na EPA/CBT kali zaidi katika mitandao iliyoboreshwa.
-- **Cross‑domain RBCD remains powerful** – Microsoft Learn inaonyesha kwamba resource‑based constrained delegation hufanya kazi across domains/forests; writable `msDS-AllowedToActOnBehalfOfOtherIdentity` kwenye resource objects bado inaruhusu S4U2self→S4U2proxy impersonation bila kugusa front‑end service ACLs.
+- **RC4 hatimaye inaondoka** – Windows Server 2025 DCs hawatoi tena RC4 TGTs; Microsoft inapanga kuzima RC4 kama default kwa AD DCs ifikapo mwisho wa Q2 2026. Mazingira yanayoirudisha RC4 kwa programu za zamani hutoa fursa za downgrade/uvunjaji wa haraka kwa Kerberoasting.
+- **Utekelezaji wa PAC validation (Apr 2025)** – Sasisho za Aprili 2025 zinaondoa “Compatibility” mode; PAC zilizotengenezwa/golden tickets zinakataliwa kwenye DC zilizopachikwa wakati enforcement imewezeshwa. DC za zamani/zisizopachikwa bado zinaweza kutumika.
+- **CVE‑2025‑26647 (altSecID CBA mapping)** – Ikiwa DC ziko zisizopachikwa au zimetengwa katika Audit mode, vyeti (certificates) vilivyofungamana na non‑NTAuth CAs lakini vilivyopangwa kupitia SKI/altSecID bado vinaweza kuingia. Matukio Events 45/21 yanaonekana wakati kinga zinapoanzishwa.
+- **Kuondolewa kwa NTLM kwa awamu** – Microsoft itasafirisha matoleo yajayo ya Windows yenye NTLM imezimwa kwa default (itekelezwe hadi 2026), ikisukuma uthibitishaji zaidi kwa Kerberos. Tarajia wigo kubwa zaidi wa Kerberos na EPA/CBT kali katika mitandao iliyoimarishwa.
+- **Cross‑domain RBCD bado ni yenye nguvu** – Microsoft Learn inaonyesha kwamba resource‑based constrained delegation inafanya kazi across domains/forests; writable `msDS-AllowedToActOnBehalfOfOtherIdentity` kwenye resource objects bado inaruhusu S4U2self→S4U2proxy impersonation bila kugusa front‑end service ACLs.
 
 ## Zana za haraka
-- **Rubeus kerberoast (AES default)**: `Rubeus.exe kerberoast /user:svc_sql /aes /nowrap /outfile:tgs.txt` — inatoa AES hashes; panga kuvunja kwa GPU au lenga watumiaji walio na pre‑auth disabled badala yake.
-- **RC4 downgrade target hunting**: haga akaunti ambazo bado zinatangaza RC4 kwa `Get-ADObject -LDAPFilter '(msDS-SupportedEncryptionTypes=4)' -Properties msDS-SupportedEncryptionTypes` ili kupata wagombea dhaifu wa kerberoast kabla RC4 haijaondolewa kabisa.
-
-
+- **Rubeus kerberoast (AES default):** `Rubeus.exe kerberoast /user:svc_sql /aes /nowrap /outfile:tgs.txt` — hutoka AES hashes; panga uvunjaji kwa GPU au lenga watumiaji walio na pre‑auth imezimwa badala yake.
+- **RC4 downgrade target hunting:** orodhesha akaunti ambazo bado zinatangaza RC4 kwa kutumia `Get-ADObject -LDAPFilter '(msDS-SupportedEncryptionTypes=4)' -Properties msDS-SupportedEncryptionTypes` ili kupata wagombea dhaifu wa kerberoast kabla RC4 haijatolewa kabisa.
 
 ## References
 - [Microsoft – Beyond RC4 for Windows authentication (RC4 default removal timeline)](https://www.microsoft.com/en-us/windows-server/blog/2025/12/03/beyond-rc4-for-windows-authentication)
