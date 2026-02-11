@@ -383,8 +383,16 @@
 #ht-ai-header .ht-actions{display:flex;gap:8px;align-items:center;margin-left:auto}
 #ht-ai-close,#ht-ai-reset{cursor:pointer;font-size:18px;background:none;border:none;color:var(--ht-ai-panel-fg,#fff);padding:0}
 #ht-ai-close:hover,#ht-ai-reset:hover{opacity:.7}
-#ht-ai-chat{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;font-size:14px;background:var(--ht-ai-chat-bg,transparent)}
-.ht-msg{max-width:90%;line-height:1.4;padding:10px 12px;border-radius:8px;white-space:pre-wrap;word-wrap:break-word}
+#ht-ai-chat{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:8px;font-size:14px;background:var(--ht-ai-chat-bg,transparent)}
+.ht-msg{max-width:90%;line-height:1.3;padding:8px 10px;border-radius:8px;white-space:pre-wrap;word-wrap:break-word}
+.ht-msg p{margin:0 0 4px}
+.ht-msg p:last-child{margin-bottom:0}
+.ht-msg h1,.ht-msg h2,.ht-msg h3,.ht-msg h4,.ht-msg h5,.ht-msg h6{margin:2px 0 4px;line-height:1.15}
+.ht-msg ul,.ht-msg ol{margin:0 0 4px 14px;padding:0}
+.ht-msg li{margin:0 0 2px}
+.ht-msg pre{margin:4px 0;padding:6px 8px;border-radius:6px;background:rgba(0,0,0,.2);overflow:auto}
+.ht-msg blockquote{margin:2px 0;padding-left:8px;border-left:2px solid rgba(255,255,255,.2)}
+.ht-msg code{font-size:.95em}
 .ht-user{align-self:flex-end;background:var(--ht-ai-user-bg,${BRAND_RED});color:var(--ht-ai-user-fg,#fff)}
 .ht-ai{align-self:flex-start;background:var(--ht-ai-bot-bg,#222);color:var(--ht-ai-bot-fg,#fff)}
 .ht-context{align-self:flex-start;background:var(--ht-ai-context-bg,#333);color:var(--ht-ai-context-fg,#ddd);font-style:italic;font-size:13px}
