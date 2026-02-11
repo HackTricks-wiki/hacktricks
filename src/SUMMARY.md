@@ -390,6 +390,7 @@
   - [Smali - Decompiling, Modifying, Compiling](mobile-pentesting/android-app-pentesting/smali-changes.md)
   - [Spoofing your location in Play Store](mobile-pentesting/android-app-pentesting/spoofing-your-location-in-play-store.md)
   - [Tapjacking](mobile-pentesting/android-app-pentesting/tapjacking.md)
+  - [Termux Proot Openclaw Chat C2](mobile-pentesting/android-app-pentesting/termux-proot-openclaw-chat-c2.md)
   - [Webview Attacks](mobile-pentesting/android-app-pentesting/webview-attacks.md)
 - [iOS Pentesting Checklist](mobile-pentesting/ios-pentesting-checklist.md)
 - [iOS Pentesting](mobile-pentesting/ios-pentesting/README.md)
