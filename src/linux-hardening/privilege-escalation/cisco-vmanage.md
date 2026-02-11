@@ -4,9 +4,9 @@
 
 ## Chemin 1
 
-(Exemple de [https://www.synacktiv.com/en/publications/pentesting-cisco-sd-wan-part-1-attacking-vmanage.html](https://www.synacktiv.com/en/publications/pentesting-cisco-sd-wan-part-1-attacking-vmanage.html))
+(Exemple tiré de [https://www.synacktiv.com/en/publications/pentesting-cisco-sd-wan-part-1-attacking-vmanage.html](https://www.synacktiv.com/en/publications/pentesting-cisco-sd-wan-part-1-attacking-vmanage.html))
 
-Après avoir fouillé un peu dans la [documentation](http://66.218.245.39/doc/html/rn03re18.html) relative à `confd` et aux différents binaires (accessibles avec un compte sur le site Cisco), nous avons découvert que pour authentifier le socket IPC, il utilise un secret situé dans `/etc/confd/confd_ipc_secret`:
+Après avoir fouillé un peu dans la [documentation](http://66.218.245.39/doc/html/rn03re18.html) relative à `confd` et aux différents binaires (accessibles avec un compte sur le site Cisco), nous avons trouvé que pour authentifier le socket IPC, il utilise un secret situé dans `/etc/confd/confd_ipc_secret`:
 ```
 vmanage:~$ ls -al /etc/confd/confd_ipc_secret
 
@@ -24,7 +24,7 @@ Host: vmanage-XXXXXX.viptela.net
 
 "data":[{"n":["3708798204-3215954596-439621029-1529380576"]}]}
 ```
-Le programme `confd_cli` ne prend pas en charge les arguments en ligne de commande mais appelle `/usr/bin/confd_cli_user` avec des arguments. Nous pouvons donc appeler directement `/usr/bin/confd_cli_user` avec notre propre jeu d'arguments. Cependant il n'est pas lisible avec nos privilèges actuels, il faut donc le récupérer depuis le rootfs et le copier avec scp, lire l'aide, et l'utiliser pour obtenir un shell:
+Le programme `confd_cli` ne prend pas d'arguments en ligne de commande mais appelle `/usr/bin/confd_cli_user` avec des arguments. Nous pourrions donc appeler directement `/usr/bin/confd_cli_user` avec notre propre jeu d'arguments. Cependant, il n'est pas lisible avec nos privilèges actuels, il faut donc le récupérer depuis le rootfs et le copier avec scp, lire l'aide, et l'utiliser pour obtenir le shell:
 ```
 vManage:~$ echo -n "3708798204-3215954596-439621029-1529380576" > /tmp/ipc_secret
 
@@ -44,9 +44,9 @@ uid=0(root) gid=0(root) groups=0(root)
 ```
 ## Chemin 2
 
-(Example from [https://medium.com/walmartglobaltech/hacking-cisco-sd-wan-vmanage-19-2-2-from-csrf-to-remote-code-execution-5f73e2913e77](https://medium.com/walmartglobaltech/hacking-cisco-sd-wan-vmanage-19-2-2-from-csrf-to-remote-code-execution-5f73e2913e77))
+(Exemple de [https://medium.com/walmartglobaltech/hacking-cisco-sd-wan-vmanage-19-2-2-from-csrf-to-remote-code-execution-5f73e2913e77](https://medium.com/walmartglobaltech/hacking-cisco-sd-wan-vmanage-19-2-2-from-csrf-to-remote-code-execution-5f73e2913e77))
 
-Le blog¹ de l'équipe synacktiv décrivait une façon élégante d'obtenir un root shell, mais l'inconvénient est qu'il nécessite d'obtenir une copie de `/usr/bin/confd_cli_user` qui n'est lisible que par root. J'ai trouvé une autre façon d'escalate to root sans ce tracas.
+Le blog¹ de l'équipe synacktiv décrivait une façon élégante d'obtenir un root shell, mais le problème est qu'elle nécessite d'obtenir une copie de `/usr/bin/confd_cli_user` qui n'est lisible que par root. J'ai trouvé une autre façon d'escalate to root sans cette contrainte.
 
 Lorsque j'ai désassemblé le binaire `/usr/bin/confd_cli`, j'ai observé ce qui suit :
 
@@ -91,11 +91,11 @@ root     28644  0.0  0.0   8364   652 ?        Ss   18:06   0:00 /usr/lib/confd/
 ```
 J'ai émis l'hypothèse que le programme “confd_cli” transmet l'UID et le GID qu'il a récupérés de l'utilisateur connecté à l'application “cmdptywrapper”.
 
-Ma première tentative a été d'exécuter “cmdptywrapper” directement en lui fournissant `-g 0 -u 0`, mais cela a échoué. Il semble qu'un descripteur de fichier (-i 1015) ait été créé en cours de route et je ne peux pas le falsifier.
+Ma première tentative a été d'exécuter directement “cmdptywrapper” en lui passant `-g 0 -u 0`, mais cela a échoué. Il semble qu'un descripteur de fichier (-i 1015) soit créé quelque part en cours de route et que je ne puisse pas le falsifier.
 
-Comme mentionné dans le blog de synacktiv (dernier exemple), le programme `confd_cli` ne prend pas en charge les arguments en ligne de commande, mais je peux l'influencer avec un debugger et, heureusement, GDB est présent sur le système.
+Comme mentionné dans le blog de synacktiv (dernier exemple), le programme `confd_cli` ne supporte pas les arguments en ligne de commande, mais je peux l'influencer avec un debugger et, heureusement, GDB est installé sur le système.
 
-J'ai créé un script GDB où j'oblige les API `getuid` et `getgid` à retourner 0. Étant donné que je dispose déjà du privilège “vmanage” via la deserialization RCE, j'ai la permission de lire directement `/etc/confd/confd_ipc_secret`.
+J'ai créé un script GDB où je force les API `getuid` et `getgid` à retourner 0. Étant donné que j'ai déjà le privilège “vmanage” via la deserialization RCE, j'ai la permission de lire directement `/etc/confd/confd_ipc_secret`.
 
 root.gdb:
 ```
@@ -154,19 +154,19 @@ bash-4.4#
 ```
 </details>
 
-## Chemin 3 (bug de validation d'entrée CLI 2025)
+## Chemin 3 (bogue de validation d'entrée CLI 2025)
 
-Cisco a renommé vManage en *Catalyst SD-WAN Manager*, mais le CLI sous-jacent tourne toujours sur la même machine. Un advisory 2025 (CVE-2025-20122) décrit une validation d'entrée insuffisante dans le CLI qui permet à **any authenticated local user** d'obtenir root en envoyant une requête forgée au service CLI du manager. Combinez n'importe quel low-priv foothold (p.ex. la Neo4j deserialization depuis Path1, ou un cron/backup user shell) avec ce bug pour monter en root sans copier `confd_cli_user` ni attacher GDB :
+Cisco a renommé vManage en *Catalyst SD-WAN Manager*, mais le CLI sous-jacent s'exécute toujours sur la même machine. Un avis de 2025 (CVE-2025-20122) décrit une validation d'entrée insuffisante dans le CLI qui permet à **tout utilisateur local authentifié** d'obtenir les privilèges root en envoyant une requête spécialement forgée au service CLI du manager. Combinez n'importe quelle prise de pied en low-priv (p. ex., la désérialisation Neo4j de Chemin 1, ou un shell utilisateur cron/backup) avec cette faille pour escalader en root sans copier `confd_cli_user` ni attacher GDB :
 
-1. Depuis votre shell low-priv, localisez le endpoint IPC du CLI (typiquement le listener `cmdptywrapper` montré sur le port 4565 dans Path2).
-2. Fabriquez une requête CLI qui forge les champs UID/GID à 0. Le bug de validation n'applique pas l'UID de l'appelant original, donc le wrapper lance un PTY avec backing root.
-3. Pipelinez n'importe quelle séquence de commandes (`vshell; id`) via la requête forgée pour obtenir un root shell.
+1. Utilisez votre shell low-priv pour localiser le endpoint IPC du CLI (typiquement le listener `cmdptywrapper` affiché sur le port 4565 dans Chemin 2).
+2. Créez une requête CLI qui falsifie les champs UID/GID à 0. Le bug de validation n'impose pas l'UID de l'appelant original, donc le wrapper lance un PTY exécuté en root.
+3. Pipez n'importe quelle séquence de commandes (`vshell; id`) via la requête falsifiée pour obtenir un shell root.
 
-> La surface d'exploitation est locale uniquement ; remote code execution est toujours requis pour obtenir le shell initial, mais une fois dans la machine l'exploitation tient en un seul message IPC plutôt qu'en un patch d'UID via debugger.
+> La surface d'exploitation est locale uniquement ; une exécution de code à distance est toujours requise pour obtenir le shell initial, mais une fois dans la machine, l'exploitation se réduit à un seul message IPC plutôt qu'à un patch d'UID via un debugger.
 
-## Autres vulnérabilités récentes de vManage/Catalyst SD-WAN Manager à chaîner
+## Autres vulnérabilités récentes de vManage/Catalyst SD-WAN Manager à enchaîner
 
-* **Authenticated UI XSS (CVE-2024-20475)** – Inject JavaScript dans des champs d'interface spécifiques ; voler une admin session vous donne un chemin piloté par navigateur vers `vshell` → local shell → Chemin 3 pour obtenir root.
+* **Authenticated UI XSS (CVE-2024-20475)** – Injectez du JavaScript dans des champs d'interface spécifiques ; voler une session admin vous donne un chemin piloté par le navigateur vers `vshell` → shell local → Chemin 3 pour root.
 
 ## Références
 

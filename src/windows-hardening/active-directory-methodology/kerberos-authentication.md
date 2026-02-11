@@ -5,20 +5,20 @@
 **Consultez l'excellent article :** [**https://www.tarlogic.com/en/blog/how-kerberos-works/**](https://www.tarlogic.com/en/blog/how-kerberos-works/)
 
 ## TL;DR pour les attaquants
-- Kerberos est le protocole d'authentification par défaut d'AD ; la plupart des chaînes de mouvement latéral y auront recours. Pour des cheatsheets pratiques (AS‑REP/Kerberoasting, ticket forging, delegation abuse, etc.) voir :
+- Kerberos est le protocole d'auth AD par défaut ; la plupart des chaînes de lateral-movement y feront appel. Pour des fiches pratiques (AS‑REP/Kerberoasting, ticket forging, delegation abuse, etc.) voir :
 {{#ref}}
 ../../network-services-pentesting/pentesting-kerberos-88/README.md
 {{#endref}}
 
 ## Notes d'attaque récentes (2024‑2026)
-- **RC4 disparaît enfin** – Les DCs Windows Server 2025 n'émettent plus de TGTs RC4 ; Microsoft prévoit de désactiver RC4 par défaut pour les DC AD d'ici la fin du T2 2026. Les environnements qui ré‑activent RC4 pour des applications legacy créent des opportunités de downgrade/fast‑crack pour Kerberoasting.
-- **PAC validation enforcement (Apr 2025)** – Les mises à jour d'avril 2025 suppriment le mode “Compatibility” ; les PACs falsifiés / golden tickets sont rejetés sur les DCs patchés lorsque l'enforcement est activé. Les DCs legacy/non patchés restent exploitables.
-- **CVE‑2025‑26647 (altSecID CBA mapping)** – Si les DCs ne sont pas patchés ou laissés en mode Audit, les certificats chaînés à des CA non‑NTAuth mais mappés via SKI/altSecID peuvent toujours se connecter. Des événements 45/21 apparaissent lorsque les protections se déclenchent.
-- **Suppression progressive de NTLM** – Microsoft livrera les futures versions de Windows avec NTLM désactivé par défaut (déploiement prévu jusqu'en 2026), poussant davantage d'authentifications vers Kerberos. Attendez‑vous à une surface Kerberos accrue et à des EPA/CBT plus stricts dans les réseaux durcis.
-- **RBCD inter‑domain reste puissant** – Microsoft Learn indique que la resource‑based constrained delegation fonctionne à travers domaines/forests ; l'attribut modifiable `msDS-AllowedToActOnBehalfOfOtherIdentity` sur les objets de ressource permet toujours l'usurpation S4U2self→S4U2proxy sans toucher les ACLs des services frontaux.
+- **RC4 finally going away** – Les DCs Windows Server 2025 ne délivrent plus de TGTs RC4 ; Microsoft prévoit de désactiver RC4 par défaut pour les AD DCs d'ici la fin du Q2 2026. Les environnements qui ré‑activent RC4 pour des apps legacy créent des opportunités de downgrade/fast‑crack pour Kerberoasting.
+- **PAC validation enforcement (Apr 2025)** – Les mises à jour d'avril 2025 suppriment le mode “Compatibility” ; les PACs forgés/golden tickets sont rejetés par les DCs patchés quand l'enforcement est activé. Les DCs legacy/unpatched restent exploitables.
+- **CVE‑2025‑26647 (altSecID CBA mapping)** – Si les DCs ne sont pas patchés ou laissés en mode Audit, les certificates chaînés à des non‑NTAuth CAs mais mappés via SKI/altSecID peuvent toujours se connecter. Les événements 45/21 apparaissent lorsque les protections se déclenchent.
+- **NTLM phase‑out** – Microsoft livrera les futures releases de Windows avec NTLM désactivé par défaut (déploiement progressif jusqu'en 2026), poussant davantage d'auth vers Kerberos. Attendez-vous à une surface Kerberos accrue et à des EPA/CBT plus stricts dans les réseaux durcis.
+- **Cross‑domain RBCD remains powerful** – Microsoft Learn note que la resource‑based constrained delegation fonctionne à travers domaines/forests ; l'attribut inscriptible `msDS-AllowedToActOnBehalfOfOtherIdentity` sur les resource objects permet toujours l'impersonation S4U2self→S4U2proxy sans toucher aux ACLs des services front‑end.
 
-## Outils rapides
-- **Rubeus kerberoast (AES default)**: `Rubeus.exe kerberoast /user:svc_sql /aes /nowrap /outfile:tgs.txt` — renvoie des hashes AES ; prévoyez du cracking GPU ou ciblez plutôt les comptes avec pre‑auth désactivé.
+## Quick tooling
+- **Rubeus kerberoast (AES default)**: `Rubeus.exe kerberoast /user:svc_sql /aes /nowrap /outfile:tgs.txt` — génère des hashes AES ; prévoyez un cracking GPU ou ciblez plutôt des utilisateurs dont la pre‑auth est désactivée.
 - **RC4 downgrade target hunting**: énumérez les comptes qui annoncent encore RC4 avec `Get-ADObject -LDAPFilter '(msDS-SupportedEncryptionTypes=4)' -Properties msDS-SupportedEncryptionTypes` pour localiser des candidats kerberoast faibles avant que RC4 soit complètement désactivé.
 
 
