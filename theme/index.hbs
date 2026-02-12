@@ -152,13 +152,10 @@
                         <div class="right-buttons">
                             <div id="menubar-collapse">
                                 <a class="menu-bar-link" href="https://training.hacktricks.xyz" target="_blank">
-                                    Hacktricks Training
+                                    HT Training
                                 </a>
-                                <a class="menu-bar-link" href="https://twitter.com/hacktricks_live" target="_blank">
-                                    Twitter
-                                </a>
-                                <a class="menu-bar-link" href="https://www.linkedin.com/company/hacktricks" target="_blank">
-                                    Linkedin
+                                <a class="menu-bar-link" href="https://cloud.hacktricks.wiki/" target="_blank">
+                                    HT Cloud
                                 </a>
                                 <a class="menu-bar-link" href="https://tools.hacktricks.wiki/" target="_blank">
                                     HT Tools
@@ -166,16 +163,26 @@
                                 <a class="menu-bar-link" href="https://github.com/sponsors/carlospolop" target="_blank">
                                     Sponsor
                                 </a>
+                                <a class="menu-bar-link" href="https://www.linkedin.com/company/hacktricks" target="_blank">
+                                    Linkedin
+                                </a>
+                                <a class="menu-bar-link" href="https://twitter.com/hacktricks_live" target="_blank">
+                                    X
+                                </a>
                             </div>
                             <div class="icons">
                                 <div id="menubar-collapse-toggle" class="icon-button" type="button" title="Toggle menu bar" aria-label="Toggle Menu bar" aria-expanded="false" aria-controls="collapse">
                                     <span class="menu-hamburger" aria-hidden="true">≡</span>
                                     <div id="menubar-collapse-popup" class="menubar-collapse-popup" aria-label="Menu" role="menu">
-                                        <a href="https://training.hacktricks.xyz" target="_blank" role="menuitem" class="menu-bar-link">Hacktricks Training</a>
-                                        <a href="https://twitter.com/hacktricks_live" target="_blank" role="menuitem" class="menu-bar-link">Twitter</a>
-                                        <a href="https://www.linkedin.com/company/hacktricks" target="_blank" role="menuitem" class="menu-bar-link">Linkedin</a>
+                                        <a href="https://training.hacktricks.xyz" target="_blank" role="menuitem" class="menu-bar-link">HT Training</a>
+                                        <a href="https://cloud.hacktricks.wiki/" target="_blank" role="menuitem" class="menu-bar-link">Cloud HT</a>
                                         <a href="https://tools.hacktricks.wiki/" target="_blank" role="menuitem" class="menu-bar-link">HT Tools</a>
                                         <a href="https://github.com/sponsors/carlospolop" target="_blank" role="menuitem" class="menu-bar-link">Sponsor</a>
+                                        <a href="https://www.linkedin.com/company/hacktricks" target="_blank" role="menuitem" class="menu-bar-link">Linkedin</a>
+                                        <a href="https://twitter.com/hacktricks_live" target="_blank" role="menuitem" class="menu-bar-link">X</a>
+                                        <button type="button" role="menuitem" class="menu-bar-link menu-action" data-toggle-translations="true">
+                                            <span>Translations</span> ▾
+                                        </button>
                                         {{#if search_enabled}}
                                         <button type="button" role="menuitem" class="menu-bar-link menu-action" data-toggle-search="true">
                                             <span class="menu-icon" aria-hidden="true">🔍</span>
@@ -190,21 +197,8 @@
                                                 <span class="menu-icon" aria-hidden="true">☾</span>
                                             </button>
                                         </div>
-                                        <button type="button" role="menuitem" class="menu-bar-link menu-action" data-toggle-translations="true">
-                                            <span>Translations</span> ▾
-                                        </button>
                                     </div>
                                 </div>
-
-                                {{#if search_enabled}}
-                                <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
-                                    <i class="fa fa-search"></i>
-                                </button>
-                                {{/if}}
-
-                                <label id="mobile-toc-toggle" class="icon-button mobile-toc-toggle" for="sidebar-toggle-anchor" title="Open Table of Contents" aria-label="Open Table of Contents">
-                                    <span class="mobile-toc-icon" aria-hidden="true">📚</span>
-                                </label>
 
                                 <div id="menubar-languages-toggle" class="icon-button" type="button" title="Translations" aria-label="Toggle Tanslations" aria-expanded="false" aria-controls="translations">
                                     <i class="fa fa-globe"></i>
@@ -231,6 +225,17 @@
                                         <button id="uk" role="menuitem" class="menu-bar-link">Ukrainian</button>
                                     </div>
                                 </div>
+
+                                {{#if search_enabled}}
+                                <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                                    <i class="fa fa-search"></i>
+                                </button>
+                                {{/if}}
+
+                                <label id="mobile-toc-toggle" class="icon-button mobile-toc-toggle" for="sidebar-toggle-anchor" title="Open Table of Contents" aria-label="Open Table of Contents">
+                                    <span class="mobile-toc-icon" aria-hidden="true">📚</span>
+                                </label>
+
                             </div>
                             <div id="theme-wrapper" class="theme-wrapper theme-wrapper--menubar">
                                 <span class="theme-side-icon" aria-hidden="true">☀</span>
@@ -531,9 +536,6 @@
         {{#each additional_js}}
         <script src="{{ ../path_to_root }}{{this}}"></script>
         {{/each}}
-
-        <!-- Custom analytics -->
-        <script defer src="https://www.fairanalytics.de/pixel/deXeO7BNBrMuhdG1"></script>
 
         <script>
             (function initParticles() {
