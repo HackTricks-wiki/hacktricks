@@ -2,19 +2,19 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-This page generalizes a class of Windows local privilege escalation chains found in enterprise endpoint agents and updaters that expose a low\-friction IPC surface and a privileged update flow. A representative example is Netskope Client for Windows < R129 (CVE-2025-0309), where a low\-privileged user can coerce enrollment into an attacker\-controlled server and then deliver a malicious MSI that the SYSTEM service installs.
+This page generalizes a class of Windows local privilege escalation chains found in enterprise endpoint agents and updaters that expose a low-friction IPC surface and a privileged update flow. A representative example is Netskope Client for Windows < R129 (CVE-2025-0309), where a low-privileged user can coerce enrollment into an attacker-controlled server and then deliver a malicious MSI that the SYSTEM service installs.
 
 Key ideas you can reuse against similar products:
-- Abuse a privileged service’s localhost IPC to force re\-enrollment or reconfiguration to an attacker server.
+- Abuse a privileged service’s localhost IPC to force re-enrollment or reconfiguration to an attacker server.
 - Implement the vendor’s update endpoints, deliver a rogue Trusted Root CA, and point the updater to a malicious, “signed” package.
-- Evade weak signer checks (CN allow\-lists), optional digest flags, and lax MSI properties.
-- If IPC is “encrypted”, derive the key/IV from world\-readable machine identifiers stored in the registry.
-- If the service restricts callers by image path/process name, inject into an allow\-listed process or spawn one suspended and bootstrap your DLL via a minimal thread\-context patch.
+- Evade weak signer checks (CN allow-lists), optional digest flags, and lax MSI properties.
+- If IPC is “encrypted”, derive the key/IV from world-readable machine identifiers stored in the registry.
+- If the service restricts callers by image path/process name, inject into an allow-listed process or spawn one suspended and bootstrap your DLL via a minimal thread-context patch.
 
 ---
 ## 1) Forcing enrollment to an attacker server via localhost IPC
 
-Many agents ship a user\-mode UI process that talks to a SYSTEM service over localhost TCP using JSON.
+Many agents ship a user-mode UI process that talks to a SYSTEM service over localhost TCP using JSON.
 
 Observed in Netskope:
 - UI: stAgentUI (low integrity) ↔ Service: stAgentSvc (SYSTEM)
@@ -38,7 +38,7 @@ Exploit flow:
 - /config/user/getbrandingbyemail
 
 Notes:
-- If caller verification is path/name\-based, originate the request from a allow\-listed vendor binary (see §4).
+- If caller verification is path/name-based, originate the request from an allow-listed vendor binary (see §4).
 
 ---
 ## 2) Hijacking the update channel to run code as SYSTEM
@@ -56,7 +56,7 @@ Once the client talks to your server, implement the expected endpoints and steer
 3) /v2/checkupdate → Supply metadata pointing to a malicious MSI and a fake version.
 
 Bypassing common checks seen in the wild:
-- Signer CN allow\-list: the service may only check the Subject CN equals “netSkope Inc” or “Netskope, Inc.”. Your rogue CA can issue a leaf with that CN and sign the MSI.
+- Signer CN allow-list: the service may only check the Subject CN equals “netSkope Inc” or “Netskope, Inc.”. Your rogue CA can issue a leaf with that CN and sign the MSI.
 - CERT_DIGEST property: include a benign MSI property named CERT_DIGEST. No enforcement at install.
 - Optional digest enforcement: config flag (e.g., check_msi_digest=false) disables extra cryptographic validation.
 
@@ -74,38 +74,38 @@ From R127, Netskope wrapped IPC JSON in an encryptData field that looks like Bas
 Attackers can reproduce encryption and send valid encrypted commands from a standard user. General tip: if an agent suddenly “encrypts” its IPC, look for device IDs, product GUIDs, install IDs under HKLM as material.
 
 ---
-## 4) Bypassing IPC caller allow\-lists (path/name checks)
+## 4) Bypassing IPC caller allow-lists (path/name checks)
 
-Some services try to authenticate the peer by resolving the TCP connection’s PID and comparing the image path/name against allow\-listed vendor binaries located under Program Files (e.g., stagentui.exe, bwansvc.exe, epdlp.exe).
+Some services try to authenticate the peer by resolving the TCP connection’s PID and comparing the image path/name against allow-listed vendor binaries located under Program Files (e.g., stagentui.exe, bwansvc.exe, epdlp.exe).
 
 Two practical bypasses:
-- DLL injection into an allow\-listed process (e.g., nsdiag.exe) and proxy IPC from inside it.
-- Spawn an allow\-listed binary suspended and bootstrap your proxy DLL without CreateRemoteThread (see §5) to satisfy driver\-enforced tamper rules.
+- DLL injection into an allow-listed process (e.g., nsdiag.exe) and proxy IPC from inside it.
+- Spawn an allow-listed binary suspended and bootstrap your proxy DLL without CreateRemoteThread (see §5) to satisfy driver-enforced tamper rules.
 
 ---
-## 5) Tamper\-protection friendly injection: suspended process + NtContinue patch
+## 5) Tamper-protection friendly injection: suspended process + NtContinue patch
 
 Products often ship a minifilter/OB callbacks driver (e.g., Stadrv) to strip dangerous rights from handles to protected processes:
 - Process: removes PROCESS_TERMINATE, PROCESS_CREATE_THREAD, PROCESS_VM_READ, PROCESS_DUP_HANDLE, PROCESS_SUSPEND_RESUME
 - Thread: restricts to THREAD_GET_CONTEXT, THREAD_QUERY_LIMITED_INFORMATION, THREAD_RESUME, SYNCHRONIZE
 
-A reliable user\-mode loader that respects these constraints:
+A reliable user-mode loader that respects these constraints:
 1) CreateProcess of a vendor binary with CREATE_SUSPENDED.
 2) Obtain handles you’re still allowed to: PROCESS_VM_WRITE | PROCESS_VM_OPERATION on the process, and a thread handle with THREAD_GET_CONTEXT/THREAD_SET_CONTEXT (or just THREAD_RESUME if you patch code at a known RIP).
-3) Overwrite ntdll!NtContinue (or other early, guaranteed\-mapped thunk) with a tiny stub that calls LoadLibraryW on your DLL path, then jumps back.
-4) ResumeThread to trigger your stub in\-process, loading your DLL.
+3) Overwrite ntdll!NtContinue (or other early, guaranteed-mapped thunk) with a tiny stub that calls LoadLibraryW on your DLL path, then jumps back.
+4) ResumeThread to trigger your stub in-process, loading your DLL.
 
-Because you never used PROCESS_CREATE_THREAD or PROCESS_SUSPEND_RESUME on an already\-protected process (you created it), the driver’s policy is satisfied.
+Because you never used PROCESS_CREATE_THREAD or PROCESS_SUSPEND_RESUME on an already-protected process (you created it), the driver’s policy is satisfied.
 
 ---
 ## 6) Practical tooling
 - NachoVPN (Netskope plugin) automates a rogue CA, malicious MSI signing, and serves the needed endpoints: /v2/config/org/clientconfig, /config/ca/cert, /v2/checkupdate.
-- UpSkope is a custom IPC client that crafts arbitrary (optionally AES\-encrypted) IPC messages and includes the suspended\-process injection to originate from an allow\-listed binary.
+- UpSkope is a custom IPC client that crafts arbitrary (optionally AES-encrypted) IPC messages and includes the suspended-process injection to originate from an allow-listed binary.
 
 ---
-## 1) Browser\-to\-localhost CSRF against privileged HTTP APIs (ASUS DriverHub)
+## 1) Browser-to-localhost CSRF against privileged HTTP APIs (ASUS DriverHub)
 
-DriverHub ships a user\-mode HTTP service (ADU.exe) on 127.0.0.1:53000 that expects browser calls coming from https://driverhub.asus.com. The origin filter simply performs `string_contains(".asus.com")` over the Origin header and over download URLs exposed by `/asus/v1.0/*`. Any attacker\-controlled host such as `https://driverhub.asus.com.attacker.tld` therefore passes the check and can issue state\-changing requests from JavaScript. See [CSRF basics](../../pentesting-web/csrf-cross-site-request-forgery.md) for additional bypass patterns.
+DriverHub ships a user-mode HTTP service (ADU.exe) on 127.0.0.1:53000 that expects browser calls coming from https://driverhub.asus.com. The origin filter simply performs `string_contains(".asus.com")` over the Origin header and over download URLs exposed by `/asus/v1.0/*`. Any attacker-controlled host such as `https://driverhub.asus.com.attacker.tld` therefore passes the check and can issue state-changing requests from JavaScript. See [CSRF basics](../../pentesting-web/csrf-cross-site-request-forgery.md) for additional bypass patterns.
 
 Practical flow:
 1) Register a domain that embeds `.asus.com` and host a malicious webpage there.
@@ -128,10 +128,10 @@ Invoke-WebRequest -Uri "http://127.0.0.1:53000/asus/v1.0/Reboot" -Method Post \
   -Body (@{Event=@(@{Cmd="Reboot"})}|ConvertTo-Json)
 ```
 
-Any browser visit to the attacker site therefore becomes a 1\-click (or 0\-click via `onload`) local CSRF that drives a SYSTEM helper.
+Any browser visit to the attacker site therefore becomes a 1-click (or 0-click via `onload`) local CSRF that drives a SYSTEM helper.
 
 ---
-## 2) Insecure code\-signing verification & certificate cloning (ASUS UpdateApp)
+## 2) Insecure code-signing verification & certificate cloning (ASUS UpdateApp)
 
 `/asus/v1.0/UpdateApp` downloads arbitrary executables defined in the JSON body and caches them in `C:\ProgramData\ASUS\AsusDriverHub\SupportTemp`. Download URL validation reuses the same substring logic, so `http://updates.asus.com.attacker.tld:8000/payload.exe` is accepted. After download, ADU.exe merely checks that the PE contains a signature and that the Subject string matches ASUS before running it – no `WinVerifyTrust`, no chain validation.
 
@@ -140,7 +140,7 @@ To weaponize the flow:
 2) Clone ASUS’s signer into it (e.g., `python sigthief.py -i ASUS-DriverHub-Installer.exe -t payload.exe -o pwn.exe`).
 3) Host `pwn.exe` on a `.asus.com` lookalike domain and trigger UpdateApp via the browser CSRF above.
 
-Because both the Origin and URL filters are substring\-based and the signer check only compares strings, DriverHub pulls and executes the attacker binary under its elevated context.
+Because both the Origin and URL filters are substring-based and the signer check only compares strings, DriverHub pulls and executes the attacker binary under its elevated context.
 
 ---
 ## 1) TOCTOU inside updater copy/execute paths (MSI Center CMD_AutoUpdateSDK)
@@ -148,7 +148,7 @@ Because both the Origin and URL filters are substring\-based and the signer chec
 MSI Center’s SYSTEM service exposes a TCP protocol where each frame is `4-byte ComponentID || 8-byte CommandID || ASCII arguments`. The core component (Component ID `0f 27 00 00`) ships `CMD_AutoUpdateSDK = {05 03 01 08 FF FF FF FC}`. Its handler:
 1) Copies the supplied executable to `C:\Windows\Temp\MSI Center SDK.exe`.
 2) Verifies the signature via `CS_CommonAPI.EX_CA::Verify` (certificate subject must equal “MICRO-STAR INTERNATIONAL CO., LTD.” and `WinVerifyTrust` succeeds).
-3) Creates a scheduled task that runs the temp file as SYSTEM with attacker\-controlled arguments.
+3) Creates a scheduled task that runs the temp file as SYSTEM with attacker-controlled arguments.
 
 The copied file is not locked between verification and `ExecuteTask()`. An attacker can:
 - Send Frame A pointing to a legitimate MSI-signed binary (guarantees the signature check passes and the task is queued).
@@ -173,6 +173,54 @@ When the scheduler fires, it executes the overwritten payload under SYSTEM despi
 These IPC bugs highlight why localhost services must enforce mutual authentication (ALPC SIDs, `ImpersonationLevel=Impersonation` filters, token filtering) and why every module’s “run arbitrary binary” helper must share the same signer verifications.
 
 ---
+## Remote supply-chain hijack via weak updater validation (WinGUp / Notepad++)
+
+Older WinGUp-based Notepad++ updaters did not fully verify update authenticity. When attackers compromised the hosting provider for the update server, they could tamper with the XML manifest and redirect only chosen clients to attacker URLs. Because the client accepted any HTTPS response without enforcing both a trusted certificate chain and a valid PE signature, victims fetched and executed a trojanized NSIS `update.exe`.
+
+Operational flow (no local exploit required):
+1. **Infrastructure interception**: compromise CDN/hosting and answer update checks with attacker metadata pointing at a malicious download URL.
+2. **Trojanized NSIS**: the installer fetches/executes a payload and abuses two execution chains:
+   - **Bring-your-own signed binary + sideload**: bundle the signed Bitdefender `BluetoothService.exe` and drop a malicious `log.dll` in its search path. When the signed binary runs, Windows sideloads `log.dll`, which decrypts and reflectively loads the Chrysalis backdoor (Warbird-protected + API hashing to hinder static detection).
+   - **Scripted shellcode injection**: NSIS executes a compiled Lua script that uses Win32 APIs (e.g., `EnumWindowStationsW`) to inject shellcode and stage Cobalt Strike Beacon.
+
+Hardening/detection takeaways for any auto-updater:
+- Enforce **certificate + signature verification** of the downloaded installer (pin vendor signer, reject mismatched CN/chain) and sign the update manifest itself (e.g., XMLDSig). Block manifest-controlled redirects unless validated.
+- Treat **BYO signed binary sideloading** as a post-download detection pivot: alert when a signed vendor EXE loads a DLL name from outside its canonical install path (e.g., Bitdefender loading `log.dll` from Temp/Downloads) and when an updater drops/executes installers from temp with non-vendor signatures.
+- Monitor **malware-specific artifacts** observed in this chain (useful as generic pivots): mutex `Global\Jdhfv_1.0.1`, anomalous `gup.exe` writes to `%TEMP%`, and Lua-driven shellcode injection stages.
+
+<details>
+<summary>Cortex XDR XQL – Bitdefender-signed EXE sideloading <code>log.dll</code> (T1574.001)</summary>
+
+```sql
+// Identifies Bitdefender-signed processes loading log.dll outside vendor paths
+config case_sensitive = false
+| dataset = xdr_data
+| fields actor_process_signature_vendor, actor_process_signature_product, action_module_path, actor_process_image_path, actor_process_image_sha256, agent_os_type, event_type, event_id, agent_hostname, _time, actor_process_image_name
+| filter event_type = ENUM.LOAD_IMAGE and agent_os_type = ENUM.AGENT_OS_WINDOWS
+| filter actor_process_signature_vendor contains "Bitdefender SRL" and action_module_path contains "log.dll"
+| filter actor_process_image_path not contains "Program Files\\Bitdefender"
+| filter not actor_process_image_name in ("eps.rmm64.exe", "downloader.exe", "installer.exe", "epconsole.exe", "EPHost.exe", "epintegrationservice.exe", "EPPowerConsole.exe", "epprotectedservice.exe", "DiscoverySrv.exe", "epsecurityservice.exe", "EPSecurityService.exe", "epupdateservice.exe", "testinitsigs.exe", "EPHost.Integrity.exe", "WatchDog.exe", "ProductAgentService.exe", "EPLowPrivilegeWorker.exe", "Product.Configuration.Tool.exe", "eps.rmm.exe")
+```
+
+</details>
+
+<details>
+<summary>Cortex XDR XQL – <code>gup.exe</code> launching a non-Notepad++ installer</summary>
+
+```sql
+config case_sensitive = false
+| dataset = xdr_data
+| filter event_type = ENUM.PROCESS and event_sub_type = ENUM.PROCESS_START and _product = "XDR agent" and _vendor = "PANW"
+| filter lowercase(actor_process_image_name) = "gup.exe" and actor_process_signature_status not in (null, ENUM.UNSUPPORTED, ENUM.FAILED_TO_OBTAIN ) and action_process_signature_status not in (null, ENUM.UNSUPPORTED, ENUM.FAILED_TO_OBTAIN )
+| filter lowercase(action_process_image_name) ~= "(npp[\.\d]+?installer)"
+| filter action_process_signature_status != ENUM.SIGNED or lowercase(action_process_signature_vendor) != "notepad++"
+```
+
+</details>
+
+These patterns generalize to any updater that accepts unsigned manifests or fails to pin installer signers—network hijack + malicious installer + BYO-signed sideloading yields remote code execution under the guise of “trusted” updates.
+
+---
 ## References
 - [Advisory – Netskope Client for Windows – Local Privilege Escalation via Rogue Server (CVE-2025-0309)](https://blog.amberwolf.com/blog/2025/august/advisory---netskope-client-for-windows---local-privilege-escalation-via-rogue-server/)
 - [NachoVPN – Netskope plugin](https://github.com/AmberWolfCyber/NachoVPN)
@@ -180,5 +228,7 @@ These IPC bugs highlight why localhost services must enforce mutual authenticati
 - [NVD – CVE-2025-0309](https://nvd.nist.gov/vuln/detail/CVE-2025-0309)
 - [SensePost – Pwning ASUS DriverHub, MSI Center, Acer Control Centre and Razer Synapse 4](https://sensepost.com/blog/2025/pwning-asus-driverhub-msi-center-acer-control-centre-and-razer-synapse-4/)
 - [sensepost/bloatware-pwn PoCs](https://github.com/sensepost/bloatware-pwn)
+- [Unit 42 – Nation-State Actors Exploit Notepad++ Supply Chain](https://unit42.paloaltonetworks.com/notepad-infrastructure-compromise/)
+- [Notepad++ – hijacked infrastructure incident update](https://notepad-plus-plus.org/news/hijacked-incident-info-update/)
 
 {{#include ../../banners/hacktricks-training.md}}
