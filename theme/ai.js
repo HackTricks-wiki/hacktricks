@@ -14,7 +14,7 @@
  * ❶ Markdown rendering + sanitised (same as before)
  * ❷ ENHANCED: improved drag‑to‑resize panel with better UXdiscount.jpeg';
   const TXT = 'Click here for HT Summer Discounts, Last Days!';
-  const URL = 'https://training.hacktricks.xyz';
+  const URL = 'https://hacktricks-training.com';
 
   // Stop if user already dismissed
   if (localStorage.getItem(KEY) === 'true') return;

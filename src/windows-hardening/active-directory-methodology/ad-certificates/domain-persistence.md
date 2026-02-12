@@ -1,27 +1,27 @@
-# AD CS Domain Persistence
+# AD CS Domänen-Persistenz
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-**Dies ist eine Zusammenfassung der Domain-Persistence-Techniken, die in [https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf) geteilt werden. Prüfe das Dokument für weitere Details.**
+**Dies ist eine Zusammenfassung der Techniken zur Domänenpersistenz, die in [https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf) beschrieben sind. Siehe dort für weitere Details.**
 
-## Forging Certificates with Stolen CA Certificates (Golden Certificate) - DPERSIST1
+## Fälschen von Zertifikaten mit gestohlenen CA-Zertifikaten (Golden Certificate) - DPERSIST1
 
-How can you tell that a certificate is a CA certificate?
+Woran erkennt man, dass ein Zertifikat ein CA-Zertifikat ist?
 
-Es lässt sich feststellen, dass ein Zertifikat ein CA-Zertifikat ist, wenn mehrere Bedingungen erfüllt sind:
+Ein Zertifikat kann als CA-Zertifikat identifiziert werden, wenn mehrere Bedingungen erfüllt sind:
 
-- Das Zertifikat ist auf dem CA-Server gespeichert, wobei sein privater Schlüssel durch die DPAPI der Maschine gesichert ist oder durch Hardware wie TPM/HSM, falls das Betriebssystem dies unterstützt.
-- Sowohl die Issuer- als auch die Subject-Felder des Zertifikats stimmen mit dem Distinguished Name der CA überein.
-- In den CA-Zertifikaten ist ausschließlich eine "CA Version"-Erweiterung vorhanden.
+- Das Zertifikat ist auf dem CA-Server gespeichert, wobei dessen privater Schlüssel durch die DPAPI der Maschine oder durch Hardware wie TPM/HSM geschützt ist, falls das Betriebssystem dies unterstützt.
+- Sowohl das Issuer- als auch das Subject-Feld des Zertifikats stimmen mit dem Distinguished Name der CA überein.
+- Eine "CA Version"-Erweiterung ist ausschließlich in CA-Zertifikaten vorhanden.
 - Dem Zertifikat fehlen Extended Key Usage (EKU)-Felder.
 
 Um den privaten Schlüssel dieses Zertifikats zu extrahieren, ist das Tool `certsrv.msc` auf dem CA-Server über die eingebaute GUI die unterstützte Methode. Nichtsdestotrotz unterscheidet sich dieses Zertifikat nicht von anderen im System gespeicherten; daher können Methoden wie die [THEFT2 technique](certificate-theft.md#user-certificate-theft-via-dpapi-theft2) zur Extraktion angewendet werden.
 
-Das Zertifikat und der private Schlüssel können auch mit Certipy mit dem folgenden Befehl erlangt werden:
+Das Zertifikat und der private Schlüssel können außerdem mit Certipy mittels des folgenden Befehls erhalten werden:
 ```bash
 certipy ca 'corp.local/administrator@ca.corp.local' -hashes :123123.. -backup
 ```
-Nachdem das CA-Zertifikat und dessen privater Schlüssel im `.pfx`-Format erlangt wurden, können Tools wie [ForgeCert](https://github.com/GhostPack/ForgeCert) verwendet werden, um gültige Zertifikate zu erzeugen:
+Nach dem Erhalt des CA-Zertifikats und seines privaten Schlüssels im `.pfx`-Format können Tools wie [ForgeCert](https://github.com/GhostPack/ForgeCert) verwendet werden, um gültige Zertifikate zu erzeugen:
 ```bash
 # Generating a new certificate with ForgeCert
 ForgeCert.exe --CaCertPath ca.pfx --CaCertPassword Password123! --Subject "CN=User" --SubjectAltName localadmin@theshire.local --NewCertPath localadmin.pfx --NewCertPassword Password123!
@@ -36,19 +36,19 @@ Rubeus.exe asktgt /user:localdomain /certificate:C:\ForgeCert\localadmin.pfx /pa
 certipy auth -pfx administrator_forged.pfx -dc-ip 172.16.126.128
 ```
 > [!WARNING]
-> Der Benutzer, auf den die Zertifikatfälschung abzielt, muss in Active Directory aktiv sein und sich authentifizieren können, damit der Vorgang erfolgreich ist. Ein Zertifikat für Spezialkonten wie krbtgt zu fälschen ist wirkungslos.
+> Der Benutzer, auf den die Zertifikatsfälschung abzielt, muss aktiv sein und sich in Active Directory authentifizieren können, damit der Vorgang gelingt. Ein Zertifikat für spezielle Konten wie krbtgt zu fälschen ist wirkungslos.
 
-Dieses gefälschte Zertifikat wird bis zum angegebenen Enddatum **gültig** sein und solange das Root-CA-Zertifikat **gültig** ist (in der Regel 5 bis **10+ Jahre**). Es ist auch für **Maschinen** gültig, sodass in Kombination mit **S4U2Self** ein Angreifer **persistence auf jedem Domain-Computer aufrechterhalten** kann, solange das CA-Zertifikat gültig ist.\
-Außerdem können die **mit dieser Methode generierten Zertifikate** nicht **widerrufen** werden, da die CA nicht darüber informiert ist.
+Dieses gefälschte Zertifikat wird bis zum angegebenen Enddatum **gültig** sein und solange wie das Root CA-Zertifikat **gültig** ist (in der Regel 5 bis **10+ Jahre**). Es ist auch für **Maschinen** gültig, sodass in Kombination mit **S4U2Self** ein Angreifer **persistence auf jeder Domain-Maschine aufrechterhalten kann**, solange das CA-Zertifikat gültig ist.\
+Außerdem können die mit dieser Methode erzeugten **Zertifikate nicht widerrufen werden**, da die CA nicht über sie informiert ist.
 
-### Betrieb unter Strong Certificate Mapping Enforcement (2025+)
+### Operating under Strong Certificate Mapping Enforcement (2025+)
 
-Seit dem 11. Februar 2025 (nach dem Rollout von KB5014754) sind Domain Controller standardmäßig auf **Full Enforcement** für certificate mappings eingestellt. Praktisch bedeutet das, dass Ihre gefälschten Zertifikate entweder:
+Seit dem 11. Februar 2025 (nach der Bereitstellung von KB5014754) verwenden Domain Controller standardmäßig **Full Enforcement** für certificate mappings. Praktisch bedeutet das, dass Ihre gefälschten Zertifikate entweder:
 
-- Eine starke Bindung an das Zielkonto enthalten müssen (zum Beispiel die SID security extension), oder
-- Mit einer starken, expliziten Zuordnung im Attribut `altSecurityIdentities` des Zielobjekts gepaart sein müssen.
+- Eine starke Bindung an das Zielkonto enthalten (zum Beispiel die SID security extension), oder
+- Mit einer starken, expliziten Zuordnung des Zielobjekts im Attribut `altSecurityIdentities` gekoppelt sein.
 
-Ein zuverlässiger Ansatz für persistence ist es, ein gefälschtes Zertifikat auszustellen, das an die gestohlene Enterprise CA gekettet ist, und dann eine starke, explizite Zuordnung zum Opferprinzipal hinzuzufügen:
+Ein zuverlässiger Ansatz für persistence ist, ein gefälschtes Zertifikat auszustellen, das an die gestohlene Enterprise CA gekettet ist, und dann eine starke explizite Zuordnung zum victim principal hinzuzufügen:
 ```powershell
 # Example: map a forged cert to a target account using Issuer+Serial (strong mapping)
 $Issuer  = 'DC=corp,DC=local,CN=CORP-DC-CA'           # reverse DN format expected by AD
@@ -57,12 +57,12 @@ $Map     = "X509:<I>$Issuer<SR>$SerialR"             # strong mapping format
 Set-ADUser -Identity 'victim' -Add @{altSecurityIdentities=$Map}
 ```
 Hinweise
-- Wenn Sie gefälschte Zertifikate erstellen können, die die SID-Sicherheitsverlängerung enthalten, werden diese implizit abgebildet, selbst unter Full Enforcement. Andernfalls bevorzugen Sie explizite, starke Zuordnungen. Siehe [account-persistence](account-persistence.md) für mehr zu expliziten Zuordnungen.
+- Wenn Sie gefälschte Zertifikate erstellen können, die die SID security extension enthalten, werden diese selbst bei Full Enforcement implizit abgebildet. Andernfalls bevorzugen Sie explizite starke Mappings. Siehe [account-persistence](account-persistence.md) für mehr zu expliziten Mappings.
 - Widerruf hilft Verteidigern hier nicht: gefälschte Zertifikate sind der CA-Datenbank unbekannt und können daher nicht widerrufen werden.
 
-#### Full-Enforcement-kompatible forging (SID-aware)
+#### Full-Enforcement compatible forging (SID-aware)
 
-Aktualisierte Tools ermöglichen es, die SID direkt einzubetten, sodass golden certificates weiterhin nutzbar bleiben, selbst wenn DCs schwache Zuordnungen ablehnen:
+Aktualisierte Tools ermöglichen es, die SID direkt einzubetten, sodass golden certificates weiterhin nutzbar bleiben, selbst wenn DCs schwache Mappings ablehnen:
 ```bash
 # Certify 2.0 integrates ForgeCert and can embed SID
 Certify.exe forge --ca-pfx CORP-DC-CA.pfx --ca-pass Password123! \
@@ -73,13 +73,13 @@ Certify.exe forge --ca-pfx CORP-DC-CA.pfx --ca-pass Password123! \
 certipy forge -ca-pfx CORP-DC-CA.pfx -upn administrator@corp.local \
 -sid S-1-5-21-1111111111-2222222222-3333333333-500 -out administrator_sid.pfx
 ```
-Indem man die SID einbettet, vermeidet man, `altSecurityIdentities` anfassen zu müssen, das überwacht werden könnte, und erfüllt trotzdem die strengen Mapping-Prüfungen.
+Indem Sie die SID einbetten, vermeiden Sie es, `altSecurityIdentities` anzufassen, was möglicherweise überwacht wird, und erfüllen trotzdem die strikten Mapping-Prüfungen.
 
 ## Trusting Rogue CA Certificates - DPERSIST2
 
-Das Objekt `NTAuthCertificates` ist dafür definiert, ein oder mehrere **CA certificates** in seinem Attribut `cacertificate` zu enthalten, die von Active Directory (AD) genutzt werden. Der Verifizierungsprozess durch den **domain controller** prüft das Objekt `NTAuthCertificates` auf einen Eintrag, der mit der in dem Issuer field des authentifizierenden **certificate** angegebenen **CA specified** übereinstimmt. Wenn eine Übereinstimmung gefunden wird, wird die Authentifizierung fortgesetzt.
+Das `NTAuthCertificates`-Objekt ist dafür vorgesehen, ein oder mehrere **CA certificates** in seinem `cacertificate`-Attribut zu enthalten, die von Active Directory (AD) genutzt werden. Der Verifizierungsprozess durch den **domain controller** umfasst die Prüfung des `NTAuthCertificates`-Objekts auf einen Eintrag, der mit der in dem Issuer-Feld des authentifizierenden **certificate** angegebenen **CA specified** übereinstimmt. Die Authentifizierung wird fortgesetzt, wenn ein Treffer gefunden wird.
 
-Ein selbstsigniertes CA certificate kann von einem Angreifer dem Objekt `NTAuthCertificates` hinzugefügt werden, vorausgesetzt, er hat Kontrolle über dieses AD-Objekt. Normalerweise dürfen nur Mitglieder der Gruppe **Enterprise Admin**, sowie **Domain Admins** oder **Administrators** in der **forest root’s domain**, dieses Objekt ändern. Sie können das `NTAuthCertificates`-Objekt mit `certutil.exe` bearbeiten, z. B. mit dem Befehl `certutil.exe -dspublish -f C:\Temp\CERT.crt NTAuthCA`, oder indem sie das [**PKI Health Tool**](https://docs.microsoft.com/en-us/troubleshoot/windows-server/windows-security/import-third-party-ca-to-enterprise-ntauth-store#method-1---import-a-certificate-by-using-the-pki-health-tool) verwenden.
+Ein selbstsigniertes CA-Zertifikat kann von einem Angreifer zum `NTAuthCertificates`-Objekt hinzugefügt werden, vorausgesetzt, er hat Kontrolle über dieses AD-Objekt. Normalerweise dürfen nur Mitglieder der Gruppe **Enterprise Admin**, zusammen mit **Domain Admins** oder **Administrators** in der **forest root’s domain**, dieses Objekt ändern. Sie können das `NTAuthCertificates`-Objekt mit `certutil.exe` bearbeiten, z. B. mit dem Befehl `certutil.exe -dspublish -f C:\Temp\CERT.crt NTAuthCA`, oder indem sie das [**PKI Health Tool**](https://docs.microsoft.com/en-us/troubleshoot/windows-server/windows-security/import-third-party-ca-to-enterprise-ntauth-store#method-1---import-a-certificate-by-using-the-pki-health-tool) verwenden.
 
 Weitere hilfreiche Befehle für diese Technik:
 ```bash
@@ -92,33 +92,33 @@ certutil -enterprise -delstore NTAuth <Thumbprint>
 certutil -dspublish -f C:\Temp\CERT.crt RootCA          # CN=Certification Authorities
 certutil -dspublish -f C:\Temp\CERT.crt CA               # CN=AIA
 ```
-Diese Fähigkeit ist besonders relevant, wenn sie in Verbindung mit der zuvor beschriebenen Methode unter Verwendung von ForgeCert zum dynamischen Erstellen von Zertifikaten eingesetzt wird.
+Diese Möglichkeit ist besonders relevant, wenn sie in Verbindung mit der zuvor beschriebenen Methode unter Verwendung von ForgeCert zur dynamischen Erstellung von Zertifikaten eingesetzt wird.
 
-> Post-2025 mapping considerations: placing a rogue CA in NTAuth only establishes trust in the issuing CA. To use leaf certificates for logon when DCs are in **Full Enforcement**, the leaf must either contain the SID security extension or there must be a strong explicit mapping on the target object (for example, Issuer+Serial in `altSecurityIdentities`). See {{#ref}}account-persistence.md{{#endref}}.
+> Post-2025 Mapping-Überlegungen: Das Platzieren einer rogue CA in NTAuth stellt nur Vertrauen in die ausstellende CA her. Um leaf certificates für die Anmeldung zu verwenden, wenn DCs in **Full Enforcement** sind, muss das Leaf entweder die SID-Sicherheits-Extension enthalten oder es muss eine starke explizite Abbildung auf dem Zielobjekt vorhanden sein (zum Beispiel Issuer+Serial in `altSecurityIdentities`). Siehe {{#ref}}account-persistence.md{{#endref}}.
 
 ## Bösartige Fehlkonfiguration - DPERSIST3
 
-Möglichkeiten für **Persistenz** durch **security descriptor modifications** von AD CS-Komponenten sind zahlreich. Änderungen, die im Abschnitt "[Domain Escalation](domain-escalation.md)" beschrieben sind, können von einem Angreifer mit erhöhten Rechten böswillig umgesetzt werden. Dazu gehört das Hinzufügen von "control rights" (z. B. WriteOwner/WriteDACL/etc.) zu sensiblen Komponenten wie:
+Möglichkeiten für **persistence** durch **Sicherheitsdeskriptor-Änderungen an AD CS**-Komponenten sind zahlreich. Die in der "[Domain Escalation](domain-escalation.md)"-Sektion beschriebenen Änderungen können von einem Angreifer mit erhöhten Rechten böswillig umgesetzt werden. Dazu gehört das Hinzufügen von "control rights" (z. B. WriteOwner/WriteDACL/etc.) zu sensiblen Komponenten wie:
 
-- Das **CA server’s AD computer** Objekt
-- Der **CA server’s RPC/DCOM server**
-- Jedes **descendant AD object or container** in **`CN=Public Key Services,CN=Services,CN=Configuration,DC=<DOMAIN>,DC=<COM>`** (zum Beispiel der Certificate Templates container, Certification Authorities container, das NTAuthCertificates object, etc.)
-- **AD groups delegated rights to control AD CS** standardmäßig oder durch die Organisation (wie die integrierte Cert Publishers group und deren Mitglieder)
+- Das **AD-Computerobjekt des CA-Servers**
+- Der **RPC/DCOM-Server des CA-Servers**
+- Jedes **nachgeordnete AD-Objekt oder Container** in **`CN=Public Key Services,CN=Services,CN=Configuration,DC=<DOMAIN>,DC=<COM>`** (z. B. der Certificate Templates container, der Certification Authorities container, das NTAuthCertificates-Objekt usw.)
+- **AD-Gruppen, denen standardmäßig oder organisationsseitig Rechte zur Kontrolle von AD CS delegiert wurden** (wie die eingebaute Cert Publishers-Gruppe und deren Mitglieder)
 
-Ein Beispiel für eine bösartige Umsetzung wäre, dass ein Angreifer mit erhöhten Berechtigungen in der Domäne die Berechtigung **`WriteOwner`** an die Standard-**`User`**-Zertifikatvorlage hinzufügt, wobei der Angreifer der Principal für dieses Recht ist. Um dies auszunutzen, würde der Angreifer zuerst den Besitzer der **`User`**-Vorlage auf sich selbst ändern. Anschließend würde das `mspki-certificate-name-flag` in der Vorlage auf **1** gesetzt, um **`ENROLLEE_SUPPLIES_SUBJECT`** zu aktivieren, wodurch ein Benutzer einen Subject Alternative Name in der Anfrage angeben kann. Daraufhin könnte der Angreifer die Vorlage verwenden, einen Namen eines Domänenadministrators als alternativen Namen wählen und das erhaltene Zertifikat zur Authentifizierung als DA nutzen.
+Ein Beispiel für eine bösartige Umsetzung wäre, dass ein Angreifer mit **elevated permissions** in der Domäne die Berechtigung **`WriteOwner`** zur Standard-`User`-Zertifikatvorlage hinzufügt, wobei der Angreifer selbst der Principal für dieses Recht ist. Um dies auszunutzen, würde der Angreifer zuerst den Besitzer der **`User`**-Vorlage auf sich selbst ändern. Anschließend würde das **`mspki-certificate-name-flag`** in der Vorlage auf **1** gesetzt, um **`ENROLLEE_SUPPLIES_SUBJECT`** zu aktivieren, wodurch ein Benutzer einen Subject Alternative Name in der Anfrage angeben kann. Danach könnte der Angreifer die **Vorlage** enrollen, einen Namen eines **domain administrator** als alternativen Namen wählen und das erworbene Zertifikat zur Authentifizierung als DA verwenden.
 
-Praktische Einstellungen, die Angreifer für langfristige Domain-Persistenz vornehmen können (siehe {{#ref}}domain-escalation.md{{#endref}} für vollständige Details und Erkennung):
+Praktische Stellschrauben, die Angreifer für langfristige Domain persistence setzen könnten (siehe {{#ref}}domain-escalation.md{{#endref}} für vollständige Details und Erkennung):
 
-- CA-Policy-Flags, die SAN vom Requester erlauben (z. B. Aktivierung von `EDITF_ATTRIBUTESUBJECTALTNAME2`). Dadurch bleiben ESC1-ähnliche Pfade ausnutzbar.
-- Template-DACLs oder Einstellungen, die eine Ausgabe für Authentifizierungszwecke erlauben (z. B. Hinzufügen der Client Authentication EKU, Aktivierung von `CT_FLAG_ENROLLEE_SUPPLIES_SUBJECT`).
-- Kontrolle über das `NTAuthCertificates`-Objekt oder die CA-Container, um bösartige Aussteller kontinuierlich wieder einzuführen, falls Verteidiger Bereinigungsversuche unternehmen.
+- CA-Policy-Flags, die SAN vom Antragsteller erlauben (z. B. Aktivierung von `EDITF_ATTRIBUTESUBJECTALTNAME2`). Dadurch bleiben ESC1-ähnliche Pfade ausnutzbar.
+- Template-DACLs oder Einstellungen, die eine zur Authentifizierung geeignete Ausstellung erlauben (z. B. Hinzufügen der EKU Client Authentication, Aktivierung von `CT_FLAG_ENROLLEE_SUPPLIES_SUBJECT`).
+- Kontrolle über das `NTAuthCertificates`-Objekt oder die CA-Container, um bösartige Aussteller kontinuierlich wieder einzuführen, falls Verteidiger eine Bereinigung versuchen.
 
 > [!TIP]
-> In gehärteten Umgebungen nach KB5014754 stellt die Kombination dieser Fehlkonfigurationen mit expliziten starken Zuordnungen (`altSecurityIdentities`) sicher, dass Ihre ausgestellten oder gefälschten Zertifikate weiterhin nutzbar bleiben, selbst wenn DCs eine starke Zuordnung erzwingen.
+> In gehärteten Umgebungen nach KB5014754 stellt das Kombinieren dieser Fehlkonfigurationen mit expliziten starken Zuordnungen (`altSecurityIdentities`) sicher, dass Ihre ausgestellten oder gefälschten Zertifikate weiterhin nutzbar sind, selbst wenn DCs starke Zuordnungen erzwingen.
 
-### Missbrauch der Zertifikatserneuerung (ESC14) für Persistenz
+### Missbrauch der Zertifikatsverlängerung (ESC14) für persistence
 
-Wenn Sie ein zur Authentifizierung geeignetes Zertifikat (oder ein Enrollment Agent-Zertifikat) kompromittieren, können Sie es unbegrenzt erneuern, solange die ausstellende Vorlage weiterhin veröffentlicht ist und Ihre CA der Ausstellerkette vertraut. Die Erneuerung behält die ursprünglichen Identitätsbindungen bei, verlängert jedoch die Gültigkeit, was eine Entfernung erschwert, es sei denn, die Vorlage wird korrigiert oder die CA wird neu veröffentlicht.
+Wenn Sie ein zur Authentifizierung geeignetes Zertifikat (oder ein Enrollment Agent-Zertifikat) kompromittieren, können Sie es **unbegrenzt erneuern**, solange die ausstellende Vorlage veröffentlicht bleibt und Ihre CA der Ausstellerkette weiterhin vertraut. Die Erneuerung behält die ursprünglichen Identitätsbindungen bei, verlängert jedoch die Gültigkeit, was die Entfernung erschwert, sofern nicht die Vorlage repariert oder die CA neu veröffentlicht wird.
 ```bash
 # Renew a stolen user cert to extend validity
 certipy req -ca CORP-DC-CA -template User -pfx stolen_user.pfx -renew -out user_renewed_2026.pfx
@@ -126,7 +126,8 @@ certipy req -ca CORP-DC-CA -template User -pfx stolen_user.pfx -renew -out user_
 # Renew an on-behalf-of cert issued via an Enrollment Agent
 certipy req -ca CORP-DC-CA -on-behalf-of 'CORP/victim' -pfx agent.pfx -renew -out victim_renewed.pfx
 ```
-Wenn Domain Controller in **Full Enforcement** sind, füge `-sid <victim SID>` hinzu (oder verwende ein Template, das weiterhin die SID-Sicherheits-Extension enthält), damit das erneuerte Leaf-Zertifikat weiterhin stark zugeordnet wird, ohne `altSecurityIdentities` anzufassen. Angreifer mit CA-Administratorrechten können außerdem `policy\RenewalValidityPeriodUnits` anpassen, um die Laufzeit erneuerter Zertifikate zu verlängern, bevor sie sich selbst ein Zertifikat ausstellen.
+Wenn Domain-Controller in **Full Enforcement** sind, füge `-sid <victim SID>` hinzu (oder verwende eine Vorlage, die weiterhin die SID-Sicherheits-Extension enthält), damit das erneuerte Leaf-Zertifikat weiterhin stark zugeordnet wird, ohne `altSecurityIdentities` zu ändern. Angreifer mit CA-Admin-Rechten können außerdem `policy\RenewalValidityPeriodUnits` anpassen, um die Laufzeit erneuerter Zertifikate zu verlängern, bevor sie sich selbst ein cert ausstellen.
+
 
 ## Referenzen
 
