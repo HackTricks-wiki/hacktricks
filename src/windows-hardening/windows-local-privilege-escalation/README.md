@@ -42,6 +42,14 @@ There are different things in Windows that could **prevent you from enumerating 
 ../authentication-credentials-uac-and-efs/
 {{#endref}}
 
+### Admin Protection / UIAccess silent elevation
+
+UIAccess processes launched through `RAiLaunchAdminProcess` can be abused to reach High IL without prompts when AppInfo secure-path checks are bypassed. Check the dedicated UIAccess/Admin Protection bypass workflow here:
+
+{{#ref}}
+uiaccess-admin-protection-bypass.md
+{{#endref}}
+
 ## System Info
 
 ### Version info enumeration
