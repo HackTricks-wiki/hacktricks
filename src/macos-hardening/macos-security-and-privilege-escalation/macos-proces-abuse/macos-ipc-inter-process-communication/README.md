@@ -6,75 +6,75 @@
 
 ### Basic Information
 
-Mach używa **zadań** jako **najmniejszej jednostki** do dzielenia zasobów, a każde zadanie może zawierać **wiele wątków**. Te **zadania i wątki są mapowane 1:1 na procesy i wątki POSIX**.
+Mach używa **tasks** jako **najmniejszej jednostki** do dzielenia zasobów, a każdy task może zawierać **wiele wątków**. Te **tasks i threads są mapowane 1:1 do POSIX processes i threads**.
 
-Komunikacja między zadaniami odbywa się za pomocą Mach Inter-Process Communication (IPC), wykorzystując jednokierunkowe kanały komunikacyjne. **Wiadomości są przesyłane między portami**, które działają jak **kolejki wiadomości** zarządzane przez jądro.
+Komunikacja między taskami odbywa się poprzez Mach Inter-Process Communication (IPC), wykorzystując jednostronne kanały komunikacyjne. **Wiadomości są przesyłane między ports**, które działają jak kolejki wiadomości zarządzane przez kernel.
 
-**Port** jest **podstawowym** elementem Mach IPC. Może być używany do **wysyłania wiadomości i ich odbierania**.
+**Port** jest podstawowym elementem Mach IPC. Może być używany do **wysyłania i odbierania wiadomości**.
 
-Każdy proces ma **tabelę IPC**, w której można znaleźć **porty mach procesu**. Nazwa portu mach to tak naprawdę liczba (wskaźnik do obiektu jądra).
+Każdy proces ma **IPC table**, w której można znaleźć **mach ports procesu**. Nazwa mach portu to w rzeczywistości liczba (wskazanie na obiekt jądra).
 
-Proces może również wysłać nazwę portu z pewnymi prawami **do innego zadania**, a jądro sprawi, że ten wpis w **tabeli IPC innego zadania** się pojawi.
+Proces może także wysłać nazwę portu wraz z pewnymi prawami **do innego taska**, a kernel utworzy wpis w **IPC table innego taska**.
 
 ### Port Rights
 
-Prawa portu, które definiują, jakie operacje zadanie może wykonać, są kluczowe dla tej komunikacji. Możliwe **prawa portu** to ([definicje stąd](https://docs.darlinghq.org/internals/macos-specifics/mach-ports.html)):
+Port rights, które definiują jakie operacje task może wykonać, są kluczowe dla tej komunikacji. Możliwe **port rights** są ([definitions from here](https://docs.darlinghq.org/internals/macos-specifics/mach-ports.html)):
 
-- **Prawo odbioru**, które pozwala na odbieranie wiadomości wysyłanych do portu. Porty Mach są kolejkami MPSC (wielu producentów, jeden konsument), co oznacza, że w całym systemie może być tylko **jedno prawo odbioru dla każdego portu** (w przeciwieństwie do rur, gdzie wiele procesów może posiadać deskryptory plików do końca odczytu jednej rury).
-- **Zadanie z prawem odbioru** może odbierać wiadomości i **tworzyć prawa wysyłania**, co pozwala mu na wysyłanie wiadomości. Początkowo tylko **własne zadanie ma prawo odbioru do swojego portu**.
-- Jeśli właściciel prawa odbioru **umiera** lub je zabija, **prawo wysyłania staje się bezużyteczne (martwa nazwa)**.
-- **Prawo wysyłania**, które pozwala na wysyłanie wiadomości do portu.
-- Prawo wysyłania może być **klonowane**, więc zadanie posiadające prawo wysyłania może sklonować to prawo i **przyznać je trzeciemu zadaniu**.
-- Należy zauważyć, że **prawa portu** mogą być również **przekazywane** przez wiadomości Mac.
-- **Prawo wysyłania raz**, które pozwala na wysłanie jednej wiadomości do portu, a następnie znika.
+- **Receive right**, które pozwala odbierać wiadomości wysyłane do portu. Mach ports są MPSC (multiple-producer, single-consumer) kolejkami, co oznacza, że w całym systemie może istnieć **tylko jedno Receive right dla każdego portu** (w przeciwieństwie do pipe, gdzie wiele procesów może posiadać deskryptory do końca read jednego pipe).
+- Task posiadający **Receive** right może odbierać wiadomości i **tworzyć Send rights**, pozwalając mu na wysyłanie wiadomości. Początkowo tylko **własny task ma Receive right nad swoim portem**.
+- Jeśli właściciel Receive right **umiera** lub traci go, **send right staje się bezużyteczny (dead name).**
+- **Send right**, które pozwala wysyłać wiadomości do portu.
+- Send right może być **klonowany**, więc task będący właścicielem Send right może sklonować prawo i **przyznać je trzeciemu taskowi**.
+- Zauważ, że **port rights** mogą być również **przekazywane** przez Mach messages.
+- **Send-once right**, które pozwala wysłać jedną wiadomość do portu, a następnie znika.
 - To prawo **nie może** być **klonowane**, ale może być **przenoszone**.
-- **Prawo zestawu portów**, które oznacza _zestaw portów_ zamiast pojedynczego portu. Usunięcie wiadomości z zestawu portów usuwa wiadomość z jednego z portów, które zawiera. Zestawy portów mogą być używane do nasłuchiwania na kilku portach jednocześnie, podobnie jak `select`/`poll`/`epoll`/`kqueue` w Unixie.
-- **Martwa nazwa**, która nie jest rzeczywistym prawem portu, ale jedynie miejscem. Gdy port zostaje zniszczony, wszystkie istniejące prawa portu do tego portu zamieniają się w martwe nazwy.
+- **Port set right**, które oznacza _port set_ zamiast pojedynczego portu. Usunięcie (dequeuing) wiadomości z port set usuwa wiadomość z jednego z portów, które zawiera. Port sets mogą być używane do nasłuchiwania na kilku portach jednocześnie, podobnie jak `select`/`poll`/`epoll`/`kqueue` w Unix.
+- **Dead name**, które nie jest faktycznym port right, a jedynie placeholderem. Gdy port zostanie zniszczony, wszystkie istniejące port rights do tego portu zmieniają się w dead names.
 
-**Zadania mogą przekazywać prawa WYSYŁANIA innym**, umożliwiając im wysyłanie wiadomości z powrotem. **Prawa WYSYŁANIA mogą być również klonowane, więc zadanie może zduplikować i przekazać prawo trzeciemu zadaniu**. To, w połączeniu z pośrednim procesem znanym jako **serwer bootstrap**, umożliwia skuteczną komunikację między zadaniami.
+**Tasks mogą przekazywać SEND rights innym**, umożliwiając im wysyłanie wiadomości zwrotnych. **SEND rights mogą być również klonowane, więc task może zduplikować i przekazać prawo trzeciemu taskowi**. W połączeniu z procesem pośredniczącym znanym jako **bootstrap server**, umożliwia to efektywną komunikację między taskami.
 
 ### File Ports
 
-Porty plikowe pozwalają na enkapsulację deskryptorów plików w portach Mac (używając praw portów Mach). Możliwe jest utworzenie `fileport` z danego FD za pomocą `fileport_makeport` i utworzenie FD z fileportu za pomocą `fileport_makefd`.
+File ports pozwalają na enkapsulację file descriptors w Mac ports (używając Mach port rights). Możliwe jest utworzenie `fileport` z danego FD używając `fileport_makeport` i utworzenie FD z fileport używając `fileport_makefd`.
 
 ### Establishing a communication
 
-Jak wspomniano wcześniej, możliwe jest wysyłanie praw za pomocą wiadomości Mach, jednak **nie można wysłać prawa bez już posiadania prawa** do wysłania wiadomości Mach. Jak więc nawiązywana jest pierwsza komunikacja?
+Jak wspomniano wcześniej, możliwe jest wysyłanie praw używając Mach messages, jednak **nie można wysłać prawa bez uprzedniego posiadania prawa** do wysłania Mach message. Zatem, jak nawiązywana jest pierwsza komunikacja?
 
-W tym celu zaangażowany jest **serwer bootstrap** (**launchd** w mac), ponieważ **każdy może uzyskać prawo WYSYŁANIA do serwera bootstrap**, możliwe jest poproszenie go o prawo do wysłania wiadomości do innego procesu:
+W tym celu zaangażowany jest **bootstrap server** (**launchd** w mac), ponieważ **każdy może uzyskać SEND right do bootstrap server**, możliwe jest poproszenie go o prawo do wysyłania wiadomości do innego procesu:
 
-1. Zadanie **A** tworzy **nowy port**, uzyskując **prawo ODBIORU** do niego.
-2. Zadanie **A**, będąc posiadaczem prawa ODBIORU, **generuje prawo WYSYŁANIA dla portu**.
-3. Zadanie **A** nawiązuje **połączenie** z **serwerem bootstrap** i **wysyła mu prawo WYSYŁANIA** dla portu, który wygenerowało na początku.
-- Pamiętaj, że każdy może uzyskać prawo WYSYŁANIA do serwera bootstrap.
-4. Zadanie A wysyła wiadomość `bootstrap_register` do serwera bootstrap, aby **powiązać dany port z nazwą** taką jak `com.apple.taska`.
-5. Zadanie **B** wchodzi w interakcję z **serwerem bootstrap**, aby wykonać bootstrap **lookup dla nazwy usługi** (`bootstrap_lookup`). Aby serwer bootstrap mógł odpowiedzieć, zadanie B wyśle mu **prawo WYSYŁANIA do portu, który wcześniej stworzyło** w wiadomości lookup. Jeśli lookup zakończy się sukcesem, **serwer duplikuje prawo WYSYŁANIA** otrzymane od Zadania A i **przekazuje je do Zadania B**.
-- Pamiętaj, że każdy może uzyskać prawo WYSYŁANIA do serwera bootstrap.
-6. Z tym prawem WYSYŁANIA, **Zadanie B** jest w stanie **wysłać** **wiadomość** **do Zadania A**.
-7. W przypadku komunikacji dwukierunkowej zazwyczaj zadanie **B** generuje nowy port z **prawem ODBIORU** i **prawem WYSYŁANIA**, a następnie przekazuje **prawo WYSYŁANIA do Zadania A**, aby mogło wysyłać wiadomości do ZADANIA B (komunikacja dwukierunkowa).
+1. Task **A** tworzy **nowy port**, uzyskując **RECEIVE right** nad nim.
+2. Task **A**, będąc posiadaczem RECEIVE right, **generuje SEND right dla tego portu**.
+3. Task **A** nawiązuje **połączenie** z **bootstrap server**, i **wysyła mu SEND right** dla portu, który wygenerował na początku.
+- Pamiętaj, że każdy może uzyskać SEND right do bootstrap server.
+4. Task A wysyła wiadomość `bootstrap_register` do bootstrap server, aby **skojarzyć dany port z nazwą** jak `com.apple.taska`
+5. Task **B** wchodzi w interakcję z **bootstrap server**, wykonując bootstrap **lookup dla nazwy usługi** (`bootstrap_lookup`). Aby bootstrap server mógł odpowiedzieć, task B wyśle mu **SEND right do portu, który wcześniej stworzył** w wiadomości lookup. Jeśli lookup powiedzie się, **server zdubluje otrzymany SEND right** od Task A i **przekazuje go Taskowi B**.
+- Pamiętaj, że każdy może uzyskać SEND right do bootstrap server.
+6. Z tym SEND right, **Task B** jest w stanie **wysłać** **wiadomość** **do Task A**.
+7. Dla komunikacji dwukierunkowej zazwyczaj Task **B** generuje nowy port z **RECEIVE** right i **SEND** right, i daje **SEND right Taskowi A**, aby mógł wysyłać wiadomości do TASK B (komunikacja dwukierunkowa).
 
-Serwer bootstrap **nie może uwierzytelnić** nazwy usługi, którą zadanie twierdzi, że posiada. Oznacza to, że **zadanie** może potencjalnie **podszywać się pod dowolne zadanie systemowe**, na przykład fałszywie **twierdząc, że ma nazwę usługi autoryzacji** i następnie zatwierdzając każdą prośbę.
+Bootstrap server **nie może uwierzytelnić** nazwy usługi zgłaszanej przez task. Oznacza to, że **task** potencjalnie może **podszyć się pod dowolny systemowy task**, na przykład fałszywie **twierdząc, że jest serwisem autoryzacji** i następnie zatwierniać każde żądanie.
 
-Następnie Apple przechowuje **nazwy usług dostarczanych przez system** w zabezpieczonych plikach konfiguracyjnych, znajdujących się w **katalogach chronionych przez SIP**: `/System/Library/LaunchDaemons` i `/System/Library/LaunchAgents`. Obok każdej nazwy usługi, **przechowywana jest również powiązana binarka**. Serwer bootstrap utworzy i zachowa **prawo ODBIORU dla każdej z tych nazw usług**.
+Apple przechowuje **nazwy usług dostarczanych przez system** w bezpiecznych plikach konfiguracyjnych, znajdujących się w katalogach chronionych przez **SIP**: `/System/Library/LaunchDaemons` i `/System/Library/LaunchAgents`. Obok każdej nazwy usługi przechowywany jest również **powiązany binarny plik**. Bootstrap server utworzy i będzie trzymać **RECEIVE right dla każdej z tych nazw usług**.
 
-Dla tych zdefiniowanych usług, **proces lookup różni się nieco**. Gdy nazwa usługi jest wyszukiwana, launchd uruchamia usługę dynamicznie. Nowy przepływ pracy wygląda następująco:
+Dla tych predefiniowanych usług, **proces lookup różni się nieco**. Kiedy nazwa usługi jest wyszukiwana, launchd uruchamia usługę dynamicznie. Nowy przebieg działań wygląda następująco:
 
-- Zadanie **B** inicjuje bootstrap **lookup** dla nazwy usługi.
-- **launchd** sprawdza, czy zadanie działa, a jeśli nie, **uruchamia** je.
-- Zadanie **A** (usługa) wykonuje **bootstrap check-in** (`bootstrap_check_in()`). Tutaj serwer **bootstrap** tworzy prawo WYSYŁANIA, zachowuje je i **przekazuje prawo ODBIORU do Zadania A**.
-- launchd duplikuje **prawo WYSYŁANIA i wysyła je do Zadania B**.
-- Zadanie **B** generuje nowy port z **prawem ODBIORU** i **prawem WYSYŁANIA**, a następnie przekazuje **prawo WYSYŁANIA do Zadania A** (usługa), aby mogło wysyłać wiadomości do ZADANIA B (komunikacja dwukierunkowa).
+- Task **B** inicjuje bootstrap **lookup** dla nazwy usługi.
+- **launchd** sprawdza czy task jest uruchomiony i jeśli nie jest, **uruchamia** go.
+- Task **A** (usługa) wykonuje **bootstrap check-in** (`bootstrap_check_in()`). Tutaj **bootstrap** server tworzy SEND right, zatrzymuje go i **przenosi RECEIVE right do Task A**.
+- launchd duplikuje **SEND right i wysyła go do Task B**.
+- Task **B** generuje nowy port z **RECEIVE** right i **SEND** right, i przekazuje **SEND right Task A** (svc), aby mógł wysyłać wiadomości do TASK B (komunikacja dwukierunkowa).
 
-Jednak ten proces dotyczy tylko zdefiniowanych zadań systemowych. Zadania nie-systemowe nadal działają zgodnie z opisem pierwotnym, co może potencjalnie umożliwić podszywanie się.
+Jednak ten proces dotyczy tylko predefiniowanych systemowych tasków. Zadania nie-systemowe nadal działają jak opisano pierwotnie, co potencjalnie może pozwolić na podszywanie się.
 
 > [!CAUTION]
-> Dlatego launchd nigdy nie powinien się zawieszać, ponieważ cały system się zawiesi.
+> Therefore, launchd should never crash or the whole sysem will crash.
 
 ### A Mach Message
 
 [Find more info here](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/)
 
-Funkcja `mach_msg`, zasadniczo wywołanie systemowe, jest wykorzystywana do wysyłania i odbierania wiadomości Mach. Funkcja wymaga, aby wiadomość do wysłania była pierwszym argumentem. Ta wiadomość musi zaczynać się od struktury `mach_msg_header_t`, a następnie zawierać rzeczywistą treść wiadomości. Struktura jest zdefiniowana w następujący sposób:
+Funkcja `mach_msg`, będąca w istocie wywołaniem systemowym, jest używana do wysyłania i odbierania Mach messages. Funkcja wymaga, aby wysyłana wiadomość była pierwszym argumentem. Ta wiadomość musi zaczynać się od struktury `mach_msg_header_t`, po której następuje właściwa treść wiadomości. Struktura jest zdefiniowana następująco:
 ```c
 typedef struct {
 mach_msg_bits_t               msgh_bits;
@@ -85,17 +85,17 @@ mach_port_name_t              msgh_voucher_port;
 mach_msg_id_t                 msgh_id;
 } mach_msg_header_t;
 ```
-Procesy posiadające _**prawo odbioru**_ mogą odbierać wiadomości na porcie Mach. Z kolei **nadajnicy** mają przyznane _**prawo wysyłania**_ lub _**prawo wysyłania jednokrotnego**_. Prawo wysyłania jednokrotnego jest przeznaczone wyłącznie do wysyłania pojedynczej wiadomości, po czym staje się nieważne.
+Procesy posiadające _**receive right**_ mogą odbierać wiadomości na porcie Mach. Z kolei **senders** otrzymują _**send**_ lub _**send-once right**_. Prawo _**send-once right**_ jest przeznaczone wyłącznie do wysłania jednej wiadomości, po czym staje się nieważne.
 
 Początkowe pole **`msgh_bits`** jest bitmapą:
 
 - Pierwszy bit (najbardziej znaczący) jest używany do wskazania, że wiadomość jest złożona (więcej na ten temat poniżej)
-- 3. i 4. bit są używane przez jądro
-- **5 najmniej znaczących bitów 2. bajtu** może być używane dla **voucher**: inny typ portu do wysyłania kombinacji klucz/wartość.
-- **5 najmniej znaczących bitów 3. bajtu** może być używane dla **portu lokalnego**
-- **5 najmniej znaczących bitów 4. bajtu** może być używane dla **portu zdalnego**
+- 3. i 4. bity są używane przez kernel
+- **5 najmniej znaczących bitów 2. bajtu** mogą być użyte dla **voucher**: innego typu portu do wysyłania par klucz/wartość.
+- **5 najmniej znaczących bitów 3. bajtu** mogą być użyte dla **local port**
+- **5 najmniej znaczących bitów 4. bajtu** mogą być użyte dla **remote port**
 
-Typy, które mogą być określone w voucherze, portach lokalnych i zdalnych to (z [**mach/message.h**](https://opensource.apple.com/source/xnu/xnu-7195.81.3/osfmk/mach/message.h.auto.html)):
+Typy, które mogą być określone w voucher, local i remote ports to (from [**mach/message.h**](https://opensource.apple.com/source/xnu/xnu-7195.81.3/osfmk/mach/message.h.auto.html)):
 ```c
 #define MACH_MSG_TYPE_MOVE_RECEIVE      16      /* Must hold receive right */
 #define MACH_MSG_TYPE_MOVE_SEND         17      /* Must hold send right(s) */
@@ -108,32 +108,32 @@ Typy, które mogą być określone w voucherze, portach lokalnych i zdalnych to 
 #define MACH_MSG_TYPE_DISPOSE_SEND      25      /* must hold send right(s) */
 #define MACH_MSG_TYPE_DISPOSE_SEND_ONCE 26      /* must hold sendonce right */
 ```
-Na przykład, `MACH_MSG_TYPE_MAKE_SEND_ONCE` może być użyty do **wskazania**, że **prawo do wysyłania raz** powinno być wyprowadzone i przekazane dla tego portu. Może być również określone `MACH_PORT_NULL`, aby zapobiec możliwości odpowiedzi przez odbiorcę.
+For example, `MACH_MSG_TYPE_MAKE_SEND_ONCE` can be used to **indicate** that a **send-once** **right** should be derived and transferred for this port. It can also be specified `MACH_PORT_NULL` to prevent the recipient to be able to reply.
 
-Aby osiągnąć łatwą **komunikację dwukierunkową**, proces może określić **port mach** w nagłówku **wiadomości mach** zwanym _portem odpowiedzi_ (**`msgh_local_port`**), gdzie **odbiorca** wiadomości może **wysłać odpowiedź** na tę wiadomość.
+Aby uzyskać prostą **komunikację dwukierunkową**, proces może określić w mach **message header** **mach port** nazwany _reply port_ (**`msgh_local_port`**), na który odbiorca wiadomości może wysłać odpowiedź na tę wiadomość.
 
 > [!TIP]
-> Zauważ, że ten rodzaj komunikacji dwukierunkowej jest używany w wiadomościach XPC, które oczekują na odpowiedź (`xpc_connection_send_message_with_reply` i `xpc_connection_send_message_with_reply_sync`). Ale **zwykle tworzone są różne porty**, jak wcześniej wyjaśniono, aby stworzyć komunikację dwukierunkową.
+> Zauważ, że tego rodzaju komunikacja dwukierunkowa jest używana w wiadomościach XPC, które oczekują odpowiedzi (`xpc_connection_send_message_with_reply` i `xpc_connection_send_message_with_reply_sync`). Jednak **zwykle tworzy się różne porty**, jak wyjaśniono wcześniej, aby utworzyć komunikację dwukierunkową.
 
-Inne pola nagłówka wiadomości to:
+The other fields of the message header are:
 
-- `msgh_size`: rozmiar całego pakietu.
-- `msgh_remote_port`: port, na który ta wiadomość jest wysyłana.
-- `msgh_voucher_port`: [vouchery mach](https://robert.sesek.com/2023/6/mach_vouchers.html).
-- `msgh_id`: identyfikator tej wiadomości, który jest interpretowany przez odbiorcę.
+- `msgh_size`: the size of the entire packet.
+- `msgh_remote_port`: the port on which this message is sent.
+- `msgh_voucher_port`: [mach vouchers](https://robert.sesek.com/2023/6/mach_vouchers.html).
+- `msgh_id`: the ID of this message, which is interpreted by the receiver.
 
 > [!CAUTION]
-> Zauważ, że **wiadomości mach są wysyłane przez `mach port`**, który jest **jednym odbiorcą**, **wieloma nadawcami** kanałem komunikacyjnym wbudowanym w jądro mach. **Wiele procesów** może **wysyłać wiadomości** do portu mach, ale w danym momencie tylko **jeden proces może z niego odczytać**.
+> Zwróć uwagę, że **mach messages are sent over a `mach port`**, który jest kanałem komunikacyjnym w jądrze mach o charakterze **pojedynczy odbiorca**, **wielu nadawców**. **Wiele procesów** może **wysyłać wiadomości** do mach port, ale w danym momencie tylko **pojedynczy proces może je odczytać**.
 
-Wiadomości są następnie formowane przez nagłówek **`mach_msg_header_t`**, po którym następuje **treść** i **trailer** (jeśli jest obecny) i może przyznać pozwolenie na odpowiedź na nią. W tych przypadkach jądro musi tylko przekazać wiadomość z jednego zadania do drugiego.
+Wiadomości są zatem tworzone przez nagłówek **`mach_msg_header_t`**, po którym następuje **body** oraz **trailer** (jeżeli występuje) i mogą one nadawać uprawnienie do odpowiedzi. W takich przypadkach jądro musi jedynie przekazać wiadomość z jednego zadania do drugiego.
 
-**Trailer** to **informacja dodana do wiadomości przez jądro** (nie może być ustawiona przez użytkownika), która może być żądana przy odbiorze wiadomości z flagami `MACH_RCV_TRAILER_<trailer_opt>` (istnieje różna informacja, która może być żądana).
+A **trailer** to **informacja dodawana do wiadomości przez jądro** (nie może być ustawiona przez użytkownika), którą można zażądać przy odbiorze wiadomości za pomocą flag `MACH_RCV_TRAILER_<trailer_opt>` (można zażądać różnych rodzajów informacji).
 
 #### Złożone wiadomości
 
-Jednak istnieją inne, bardziej **złożone** wiadomości, takie jak te przekazujące dodatkowe prawa do portów lub dzielące pamięć, gdzie jądro również musi wysłać te obiekty do odbiorcy. W tych przypadkach najbardziej znaczący bit nagłówka `msgh_bits` jest ustawiony.
+Istnieją jednak inne, bardziej **złożone** wiadomości, takie jak te przekazujące dodatkowe prawa do portu lub współdzielące pamięć, gdzie jądro musi również wysłać te obiekty do odbiorcy. W tych przypadkach ustawiany jest najbardziej znaczący bit nagłówka `msgh_bits`.
 
-Możliwe deskryptory do przekazania są zdefiniowane w [**`mach/message.h`**](https://opensource.apple.com/source/xnu/xnu-7195.81.3/osfmk/mach/message.h.auto.html):
+The possible descriptors to pass are defined in [**`mach/message.h`**](https://opensource.apple.com/source/xnu/xnu-7195.81.3/osfmk/mach/message.h.auto.html):
 ```c
 #define MACH_MSG_PORT_DESCRIPTOR                0
 #define MACH_MSG_OOL_DESCRIPTOR                 1
@@ -150,33 +150,33 @@ unsigned int                  pad3 : 24;
 mach_msg_descriptor_type_t    type : 8;
 } mach_msg_type_descriptor_t;
 ```
-W 32 bitach wszystkie deskryptory mają 12B, a typ deskryptora znajduje się w 11. miejscu. W 64 bitach rozmiary się różnią.
+W 32-bitach wszystkie deskryptory mają 12B, a typ deskryptora znajduje się w 11. bajcie. W 64-bitach rozmiary się różnią.
 
 > [!CAUTION]
-> Jądro skopiuje deskryptory z jednego zadania do drugiego, ale najpierw **tworzy kopię w pamięci jądra**. Ta technika, znana jako "Feng Shui", była nadużywana w kilku exploitach, aby **jądro skopiowało dane w swojej pamięci**, co pozwala procesowi wysyłać deskryptory do siebie. Następnie proces może odbierać wiadomości (jądro je zwolni).
+> Jądro skopiuje deskryptory z jednego tasku do drugiego, ale najpierw **tworząc kopię w pamięci jądra**. Ta technika, znana jako "Feng Shui", była nadużywana w kilku exploitach, aby sprawić, że **jądro skopiuje dane do swojej pamięci**, powodując, że proces wyśle deskryptory do samego siebie. Potem proces może odebrać wiadomości (jądro je zwolni).
 >
-> Możliwe jest również **wysłanie praw do portu do podatnego procesu**, a prawa do portu po prostu pojawią się w procesie (nawet jeśli nie obsługuje ich).
+> Możliwe jest też **wysłanie praw do portu do podatnego procesu**, i prawa do portu po prostu pojawią się w procesie (nawet jeśli on ich nie obsługuje).
 
-### Mac Ports APIs
+### API portów Mach
 
-Zauważ, że porty są powiązane z przestrzenią nazw zadania, więc aby utworzyć lub wyszukać port, przestrzeń nazw zadania jest również zapytana (więcej w `mach/mach_port.h`):
+Zauważ, że porty są powiązane z namespace tasku, więc aby utworzyć lub wyszukać port, sprawdzany jest też namespace tasku (więcej w `mach/mach_port.h`):
 
 - **`mach_port_allocate` | `mach_port_construct`**: **Utwórz** port.
-- `mach_port_allocate` może również utworzyć **zbiór portów**: prawo odbioru nad grupą portów. Kiedy wiadomość jest odbierana, wskazuje, z którego portu pochodzi.
-- `mach_port_allocate_name`: Zmień nazwę portu (domyślnie 32-bitowa liczba całkowita)
-- `mach_port_names`: Pobierz nazwy portów z docelowego
-- `mach_port_type`: Uzyskaj prawa zadania do nazwy
+- `mach_port_allocate` może też utworzyć **port set**: prawo odbioru nad grupą portów. Kiedy wiadomość jest odebrana, wskazywany jest port, z którego pochodzi.
+- `mach_port_allocate_name`: Zmień nazwę portu (domyślnie 32-bitowy integer)
+- `mach_port_names`: Pobierz nazwy portów z docelowego tasku
+- `mach_port_type`: Uzyskaj prawa tasku względem nazwy
 - `mach_port_rename`: Zmień nazwę portu (jak dup2 dla FD)
-- `mach_port_allocate`: Przydziel nowy RECEIVE, PORT_SET lub DEAD_NAME
+- `mach_port_allocate`: Przydziel nowe RECEIVE, PORT_SET lub DEAD_NAME
 - `mach_port_insert_right`: Utwórz nowe prawo w porcie, w którym masz RECEIVE
 - `mach_port_...`
-- **`mach_msg`** | **`mach_msg_overwrite`**: Funkcje używane do **wysyłania i odbierania wiadomości mach**. Wersja nadpisująca pozwala określić inny bufor do odbioru wiadomości (inna wersja po prostu go ponownie wykorzysta).
+- **`mach_msg`** | **`mach_msg_overwrite`**: Funkcje używane do **wysyłania i odbierania mach messages**. Wersja overwrite pozwala określić inny bufor do odbioru wiadomości (druga wersja po prostu go ponownie użyje).
 
-### Debug mach_msg
+### Debugowanie mach_msg
 
-Ponieważ funkcje **`mach_msg`** i **`mach_msg_overwrite`** są używane do wysyłania i odbierania wiadomości, ustawienie punktu przerwania na nich pozwoli na inspekcję wysyłanych i odbieranych wiadomości.
+Ponieważ funkcje **`mach_msg`** i **`mach_msg_overwrite`** są tymi używanymi do wysyłania i odbierania wiadomości, ustawienie breakpointa na nich pozwoli na zbadanie wysłanych i odebranych wiadomości.
 
-Na przykład rozpocznij debugowanie dowolnej aplikacji, którą możesz debugować, ponieważ załaduje **`libSystem.B`, która użyje tej funkcji**.
+Na przykład rozpocznij debugowanie dowolnej aplikacji, którą możesz debugować, ponieważ załaduje ona **`libSystem.B`, która użyje tej funkcji**.
 
 <pre class="language-armasm"><code class="lang-armasm"><strong>(lldb) b mach_msg
 </strong>Breakpoint 1: where = libsystem_kernel.dylib`mach_msg, address = 0x00000001803f6c20
@@ -205,7 +205,7 @@ frame #8: 0x000000018e59e6ac libSystem.B.dylib`libSystem_initializer + 236
 frame #9: 0x0000000181a1d5c8 dyld`invocation function for block in dyld4::Loader::findAndRunAllInitializers(dyld4::RuntimeState&) const::$_0::operator()() const + 168
 </code></pre>
 
-Aby uzyskać argumenty **`mach_msg`**, sprawdź rejestry. Oto argumenty (z [mach/message.h](https://opensource.apple.com/source/xnu/xnu-7195.81.3/osfmk/mach/message.h.auto.html)):
+Aby uzyskać argumenty **`mach_msg`** sprawdź rejestry. Oto argumenty (z [mach/message.h](https://opensource.apple.com/source/xnu/xnu-7195.81.3/osfmk/mach/message.h.auto.html)):
 ```c
 __WATCHOS_PROHIBITED __TVOS_PROHIBITED
 extern mach_msg_return_t        mach_msg(
@@ -241,9 +241,9 @@ Sprawdź nagłówek wiadomości, sprawdzając pierwszy argument:
 ; 0x00000b07 -> mach_port_name_t (msgh_voucher_port)
 ; 0x40000322 -> mach_msg_id_t (msgh_id)
 ```
-Ten typ `mach_msg_bits_t` jest bardzo powszechny, aby umożliwić odpowiedź.
+Taki typ `mach_msg_bits_t` jest bardzo powszechny i umożliwia odpowiedź.
 
-### Enumerate ports
+### Enumeracja portów
 ```bash
 lsmp -p <pid>
 
@@ -267,11 +267,11 @@ name      ipc-object    rights     flags   boost  reqs  recv  send sonce oref  q
 +     send        --------        ---            1         <-                                       0x00002603  (74295) passd
 [...]
 ```
-**nazwa** to domyślna nazwa przypisana do portu (sprawdź, jak **wzrasta** w pierwszych 3 bajtach). **`ipc-object`** to **zaburzony** unikalny **identyfikator** portu.\
-Zauważ również, jak porty z tylko prawem **`send`** **identyfikują właściciela** (nazwa portu + pid).\
-Zauważ także użycie **`+`** do wskazania **innych zadań połączonych z tym samym portem**.
+**nazwa** to domyślna nazwa przypisana do portu (zauważ, jak rośnie w pierwszych 3 bajtach). **`ipc-object`** to **zaciemniony** unikalny **identyfikator** portu.\
+Zauważ także, jak porty mające tylko prawo **`send`** **identyfikują właściciela** (nazwa portu + pid).\
+Zwróć też uwagę na użycie **`+`** do wskazania **innych zadań połączonych z tym samym portem**.
 
-Możliwe jest również użycie [**procesxp**](https://www.newosxbook.com/tools/procexp.html), aby zobaczyć również **zarejestrowane nazwy usług** (z wyłączonym SIP z powodu potrzeby `com.apple.system-task-port`):
+Można także użyć [**procesxp**](https://www.newosxbook.com/tools/procexp.html) aby zobaczyć również **zarejestrowane nazwy usług** (z wyłączonym SIP z powodu potrzeby `com.apple.system-task-port`):
 ```
 procesp 1 ports
 ```
@@ -279,7 +279,7 @@ Możesz zainstalować to narzędzie na iOS, pobierając je z [http://newosxbook.
 
 ### Przykład kodu
 
-Zauważ, jak **nadawca** **przydziela** port, tworzy **prawo do wysyłania** dla nazwy `org.darlinghq.example` i wysyła je do **serwera bootstrap**, podczas gdy nadawca prosił o **prawo do wysyłania** tej nazwy i użył go do **wysłania wiadomości**.
+Zwróć uwagę, jak **sender** **allocates** port, tworzy **send right** o nazwie `org.darlinghq.example` i wysyła ją do **bootstrap server**, podczas gdy **sender** zażądał **send right** tej nazwy i użył jej, aby **send a message**.
 
 {{#tabs}}
 {{#tab name="receiver.c"}}
@@ -405,42 +405,42 @@ printf("Sent a message\n");
 {{#endtab}}
 {{#endtabs}}
 
-## Porty uprzywilejowane
+## Uprzywilejowane porty
 
-Istnieją specjalne porty, które pozwalają na **wykonywanie pewnych wrażliwych działań lub uzyskiwanie dostępu do pewnych wrażliwych danych**, jeśli zadania mają **uprawnienia SEND** do nich. Czyni to te porty bardzo interesującymi z perspektywy atakującego, nie tylko ze względu na możliwości, ale także dlatego, że możliwe jest **dzielenie się uprawnieniami SEND między zadaniami**.
+Istnieją specjalne porty, które pozwalają **wykonywać pewne wrażliwe działania lub uzyskać dostęp do pewnych wrażliwych danych**, jeśli zadania mają nad nimi uprawnienia **SEND**. Czyni to te porty bardzo interesującymi z perspektywy atakującego, nie tylko ze względu na możliwości, ale także dlatego, że uprawnienia **SEND** można udostępniać między zadaniami.
 
 ### Specjalne porty hosta
 
 Te porty są reprezentowane przez numer.
 
-**Prawa SEND** można uzyskać, wywołując **`host_get_special_port`**, a **prawa RECEIVE** wywołując **`host_set_special_port`**. Jednak oba wywołania wymagają portu **`host_priv`**, do którego ma dostęp tylko root. Co więcej, w przeszłości root mógł wywołać **`host_set_special_port`** i przejąć dowolny port, co pozwalało na przykład na ominięcie podpisów kodu poprzez przejęcie `HOST_KEXTD_PORT` (SIP teraz temu zapobiega).
+**SEND** rights można uzyskać wywołując **`host_get_special_port`**, a **RECEIVE** rights — wywołując **`host_set_special_port`**. Jednak oba wywołania wymagają portu **`host_priv`**, do którego dostęp ma tylko root. Co więcej, w przeszłości root mógł wywołać **`host_set_special_port`** i przejąć dowolny port, co pozwalało np. obejść podpisy kodu poprzez przejęcie `HOST_KEXTD_PORT` (SIP teraz temu zapobiega).
 
-Są one podzielone na 2 grupy: **pierwsze 7 portów jest własnością jądra**, a są to 1 `HOST_PORT`, 2 `HOST_PRIV_PORT`, 3 `HOST_IO_MASTER_PORT`, a 7 to `HOST_MAX_SPECIAL_KERNEL_PORT`.\
-Porty zaczynające się **od** numeru **8** są **własnością demonów systemowych** i można je znaleźć zadeklarowane w [**`host_special_ports.h`**](https://opensource.apple.com/source/xnu/xnu-4570.1.46/osfmk/mach/host_special_ports.h.auto.html).
+Są podzielone na 2 grupy: pierwsze 7 portów należy do jądra — 1 `HOST_PORT`, 2 `HOST_PRIV_PORT`, 3 `HOST_IO_MASTER_PORT` oraz 7 `HOST_MAX_SPECIAL_KERNEL_PORT`.\
+Te zaczynające się **od** numeru **8** są **własnością demonów systemowych** i można je znaleźć zadeklarowane w [**`host_special_ports.h`**](https://opensource.apple.com/source/xnu/xnu-4570.1.46/osfmk/mach/host_special_ports.h.auto.html).
 
-- **Port hosta**: Jeśli proces ma **uprawnienia SEND** do tego portu, może uzyskać **informacje** o **systemie**, wywołując jego rutyny, takie jak:
-- `host_processor_info`: Uzyskaj informacje o procesorze
-- `host_info`: Uzyskaj informacje o hoście
-- `host_virtual_physical_table_info`: Wirtualna/fizyczna tabela stron (wymaga MACH_VMDEBUG)
-- `host_statistics`: Uzyskaj statystyki hosta
-- `mach_memory_info`: Uzyskaj układ pamięci jądra
-- **Port Priv hosta**: Proces z **prawem SEND** do tego portu może wykonywać **uprzywilejowane działania**, takie jak wyświetlanie danych rozruchowych lub próba załadowania rozszerzenia jądra. **Proces musi być rootem**, aby uzyskać to uprawnienie.
-- Co więcej, aby wywołać API **`kext_request`**, potrzebne są inne uprawnienia **`com.apple.private.kext*`**, które są przyznawane tylko binarkom Apple.
+- **Host port**: Jeśli proces ma uprawnienie **SEND** do tego portu, może uzyskać **informacje** o **systemie** wywołując jego rutyny, takie jak:
+- `host_processor_info`: Get processor info
+- `host_info`: Get host info
+- `host_virtual_physical_table_info`: Virtual/Physical page table (requires MACH_VMDEBUG)
+- `host_statistics`: Get host statistics
+- `mach_memory_info`: Get kernel memory layout
+- **Host Priv port**: Proces z uprawnieniem **SEND** do tego portu może wykonać **uprzywilejowane działania**, takie jak wyświetlanie danych rozruchowych lub próba załadowania kernel extension. Proces musi być **root**, aby otrzymać to uprawnienie.
+- Ponadto, aby wywołać API **`kext_request`**, potrzebne są dodatkowe entitlements **`com.apple.private.kext*`**, które są przyznawane tylko binariom Apple.
 - Inne rutyny, które można wywołać, to:
-- `host_get_boot_info`: Uzyskaj `machine_boot_info()`
-- `host_priv_statistics`: Uzyskaj uprzywilejowane statystyki
-- `vm_allocate_cpm`: Przydziel ciągłą pamięć fizyczną
-- `host_processors`: Wyślij prawo do procesorów hosta
-- `mach_vm_wire`: Uczyń pamięć rezydentną
-- Ponieważ **root** może uzyskać dostęp do tego uprawnienia, może wywołać `host_set_[special/exception]_port[s]`, aby **przejąć specjalne lub wyjątkowe porty hosta**.
+- `host_get_boot_info`: Pobiera `machine_boot_info()`
+- `host_priv_statistics`: Pobiera uprzywilejowane statystyki
+- `vm_allocate_cpm`: Alokuje ciągłą pamięć fizyczną
+- `host_processors`: Przyznaje prawo SEND do procesorów hosta
+- `mach_vm_wire`: Uczynić pamięć residentną
+- Ponieważ **root** może uzyskać to uprawnienie, może wywołać `host_set_[special/exception]_port[s]`, aby **przejąć specjalne porty hosta lub porty wyjątków**.
 
-Możliwe jest **zobaczenie wszystkich specjalnych portów hosta** poprzez uruchomienie:
+Można zobaczyć wszystkie specjalne porty hosta, uruchamiając:
 ```bash
 procexp all ports | grep "HSP"
 ```
-### Task Special Ports
+### Specjalne porty Task
 
-Te porty są zarezerwowane dla dobrze znanych usług. Można je uzyskać/ustawić, wywołując `task_[get/set]_special_port`. Można je znaleźć w `task_special_ports.h`:
+Są to porty zarezerwowane dla dobrze znanych usług. Można je pobrać/ustawić wywołując `task_[get/set]_special_port`. Znajdują się w `task_special_ports.h`:
 ```c
 typedef	int	task_special_port_t;
 
@@ -451,49 +451,51 @@ world.*/
 #define TASK_WIRED_LEDGER_PORT	5	/* Wired resource ledger for task. */
 #define TASK_PAGED_LEDGER_PORT	6	/* Paged resource ledger for task. */
 ```
-- **TASK_KERNEL_PORT**\[task-self send right]: Port używany do kontrolowania tego zadania. Używany do wysyłania wiadomości, które wpływają na zadanie. To jest port zwracany przez **mach_task_self (patrz poniżej Task Ports)**.
-- **TASK_BOOTSTRAP_PORT**\[bootstrap send right]: Port bootstrap zadania. Używany do wysyłania wiadomości żądających zwrotu innych portów usług systemowych.
-- **TASK_HOST_NAME_PORT**\[host-self send right]: Port używany do żądania informacji o zawierającym hoście. To jest port zwracany przez **mach_host_self**.
-- **TASK_WIRED_LEDGER_PORT**\[ledger send right]: Port wskazujący źródło, z którego to zadanie pobiera swoją pamięć jądra.
-- **TASK_PAGED_LEDGER_PORT**\[ledger send right]: Port wskazujący źródło, z którego to zadanie pobiera swoją domyślną pamięć zarządzaną.
+Z [tutaj](https://web.mit.edu/darwin/src/modules/xnu/osfmk/man/task_get_special_port.html):
+
+- **TASK_KERNEL_PORT**[task-self send right]: The port used to control this task. Used to send messages that affect the task. This is the port returned by **mach_task_self (see Task Ports below)**.
+- **TASK_BOOTSTRAP_PORT**[bootstrap send right]: The task's bootstrap port. Used to send messages requesting return of other system service ports.
+- **TASK_HOST_NAME_PORT**[host-self send right]: The port used to request information of the containing host. This is the port returned by **mach_host_self**.
+- **TASK_WIRED_LEDGER_PORT**[ledger send right]: The port naming the source from which this task draws its wired kernel memory.
+- **TASK_PAGED_LEDGER_PORT**[ledger send right]: The port naming the source from which this task draws its default memory managed memory.
 
 ### Task Ports
 
-Początkowo Mach nie miał "procesów", miał "zadania", które były uważane za bardziej kontener wątków. Gdy Mach został połączony z BSD, **każde zadanie było skorelowane z procesem BSD**. Dlatego każdy proces BSD ma szczegóły, których potrzebuje, aby być procesem, a każde zadanie Mach ma również swoje wewnętrzne działanie (z wyjątkiem nieistniejącego pid 0, który jest `kernel_task`).
+Originally Mach didn't have "processes" it had "tasks" which was considered more like a container of threads. When Mach was merged with BSD **each task was correlated with a BSD process**. Therefore every BSD process has the details it needs to be a process and every Mach task also have its inner workings (except for the inexistent pid 0 which is the `kernel_task`).
 
-Istnieją dwie bardzo interesujące funkcje związane z tym:
+There are two very interesting functions related to this:
 
-- `task_for_pid(target_task_port, pid, &task_port_of_pid)`: Uzyskaj prawo SEND dla portu zadania związane z określonym `pid` i przekaż je do wskazanego `target_task_port` (który zazwyczaj jest zadaniem wywołującym, które użyło `mach_task_self()`, ale może być portem SEND w innym zadaniu).
-- `pid_for_task(task, &pid)`: Mając prawo SEND do zadania, znajdź, do którego PID to zadanie jest związane.
+- `task_for_pid(target_task_port, pid, &task_port_of_pid)`: Get a SEND right for the task por of the task related to the specified by the `pid` and give it to the indicated `target_task_port` (which is usually the caller task which has used `mach_task_self()`, but could be a SEND port over a different task.)
+- `pid_for_task(task, &pid)`: Given a SEND right to a task, find to which PID this task is related to.
 
-Aby wykonać działania w ramach zadania, zadanie potrzebowało prawa `SEND` do siebie, wywołując `mach_task_self()` (co używa `task_self_trap` (28)). Z tym uprawnieniem zadanie może wykonać kilka działań, takich jak:
+In order to perform actions within the task, the task needed a `SEND` right to itself calling `mach_task_self()` (which uses the `task_self_trap` (28)). With this permission a task can perform several actions like:
 
-- `task_threads`: Uzyskaj prawo SEND nad wszystkimi portami zadań wątków zadania
-- `task_info`: Uzyskaj informacje o zadaniu
-- `task_suspend/resume`: Wstrzymaj lub wznowić zadanie
+- `task_threads`: Get SEND right over all task ports of the threads of the task
+- `task_info`: Get info about a task
+- `task_suspend/resume`: Suspend or resume a task
 - `task_[get/set]_special_port`
-- `thread_create`: Utwórz wątek
-- `task_[get/set]_state`: Kontroluj stan zadania
-- i więcej można znaleźć w [**mach/task.h**](https://github.com/phracker/MacOSX-SDKs/blob/master/MacOSX11.3.sdk/System/Library/Frameworks/Kernel.framework/Versions/A/Headers/mach/task.h)
+- `thread_create`: Create a thread
+- `task_[get/set]_state`: Control task state
+- and more can be found in [**mach/task.h**](https://github.com/phracker/MacOSX-SDKs/blob/master/MacOSX11.3.sdk/System/Library/Frameworks/Kernel.framework/Versions/A/Headers/mach/task.h)
 
 > [!CAUTION]
-> Zauważ, że mając prawo SEND nad portem zadania **innego zadania**, możliwe jest wykonywanie takich działań nad innym zadaniem.
+> Zauważ, że mając SEND right do portu zadania (task port) **innego taska**, możliwe jest wykonywanie takich operacji na tym innym tasku.
 
-Ponadto, port task_port jest również portem **`vm_map`**, który pozwala na **odczyt i manipulację pamięcią** wewnątrz zadania za pomocą funkcji takich jak `vm_read()` i `vm_write()`. Oznacza to, że zadanie z prawami SEND nad portem task_port innego zadania będzie mogło **wstrzykiwać kod do tego zadania**.
+Moreover, the task_port is also the **`vm_map`** port which allows to **read an manipulate memory** inside a task with functions such as `vm_read()` and `vm_write()`. This basically means that a task with SEND rights over the task_port of a different task is going to be able to **inject code into that task**.
 
-Pamiętaj, że ponieważ **jądro jest również zadaniem**, jeśli ktoś zdoła uzyskać **uprawnienia SEND** nad **`kernel_task`**, będzie mógł sprawić, że jądro wykona wszystko (jailbreaki).
+Remember that because the **kernel is also a task**, if someone manages to get a **SEND permissions** over the **`kernel_task`**, it'll be able to make the kernel execute anything (jailbreaks).
 
-- Wywołaj `mach_task_self()`, aby **uzyskać nazwę** dla tego portu dla zadania wywołującego. Ten port jest tylko **dziedziczony** przez **`exec()`**; nowe zadanie utworzone za pomocą `fork()` otrzymuje nowy port zadania (jako specjalny przypadek, zadanie również otrzymuje nowy port zadania po `exec()` w binarnym pliku suid). Jedynym sposobem na uruchomienie zadania i uzyskanie jego portu jest wykonanie ["port swap dance"](https://robert.sesek.com/2014/1/changes_to_xnu_mach_ipc.html) podczas wykonywania `fork()`.
-- Oto ograniczenia dostępu do portu (z `macos_task_policy` z binarnego `AppleMobileFileIntegrity`):
-- Jeśli aplikacja ma **`com.apple.security.get-task-allow` entitlement**, procesy od **tego samego użytkownika mogą uzyskać dostęp do portu zadania** (zwykle dodawane przez Xcode do debugowania). Proces **notaryzacji** nie pozwoli na to w wersjach produkcyjnych.
-- Aplikacje z **`com.apple.system-task-ports`** entitlement mogą uzyskać **port zadania dla dowolnego** procesu, z wyjątkiem jądra. W starszych wersjach nazywało się to **`task_for_pid-allow`**. To jest przyznawane tylko aplikacjom Apple.
-- **Root może uzyskać dostęp do portów zadań** aplikacji **nie** skompilowanych z **wzmocnionym** czasem wykonywania (i nie od Apple).
+- Call `mach_task_self()` to **get the name** for this port for the caller task. This port is only **inherited** across **`exec()`**; a new task created with `fork()` gets a new task port (as a special case, a task also gets a new task port after `exec()`in a suid binary). The only way to spawn a task and get its port is to perform the ["port swap dance"](https://robert.sesek.com/2014/1/changes_to_xnu_mach_ipc.html) while doing a `fork()`.
+- These are the restrictions to access the port (from `macos_task_policy` from the binary `AppleMobileFileIntegrity`):
+- If the app has **`com.apple.security.get-task-allow` entitlement** processes from the **same user can access the task port** (commonly added by Xcode for debugging). The **notarization** process won't allow it to production releases.
+- Apps with the **`com.apple.system-task-ports`** entitlement can get the **task port for any** process, except the kernel. In older versions it was called **`task_for_pid-allow`**. This is only granted to Apple applications.
+- **Root can access task ports** of applications **not** compiled with a **hardened** runtime (and not from Apple).
 
-**Port nazwy zadania:** Niewłaściwa wersja _portu zadania_. Odnosi się do zadania, ale nie pozwala na jego kontrolowanie. Jedyną rzeczą, która wydaje się być dostępna przez to, jest `task_info()`.
+**The task name port:** An unprivileged version of the _task port_. It references the task, but does not allow controlling it. The only thing that seems to be available through it is `task_info()`.
 
 ### Thread Ports
 
-Wątki również mają powiązane porty, które są widoczne z zadania wywołującego **`task_threads`** i z procesora z `processor_set_threads`. Prawo SEND do portu wątku pozwala na użycie funkcji z podsystemu `thread_act`, takich jak:
+Threads also have associated ports, which are visible from the task calling **`task_threads`** and from the processor with `processor_set_threads`. A SEND right to the thread port allows to use the function from the `thread_act` subsystem, like:
 
 - `thread_terminate`
 - `thread_[get/set]_state`
@@ -502,11 +504,11 @@ Wątki również mają powiązane porty, które są widoczne z zadania wywołuj�
 - `thread_info`
 - ...
 
-Każdy wątek może uzyskać ten port, wywołując **`mach_thread_sef`**.
+Any thread can get this port calling to **`mach_thread_sef`**.
 
 ### Shellcode Injection in thread via Task port
 
-Możesz pobrać shellcode z:
+You can grab a shellcode from:
 
 
 {{#ref}}
@@ -559,7 +561,7 @@ return 0;
 {{#endtab}}
 {{#endtabs}}
 
-**Skompiluj** poprzedni program i dodaj **uprawnienia**, aby móc wstrzykiwać kod z tym samym użytkownikiem (w przeciwnym razie będziesz musiał użyć **sudo**).
+**Compile** poprzedni program i dodaj **entitlements**, aby móc wstrzykiwać kod jako tego samego użytkownika (w przeciwnym razie będziesz musiał użyć **sudo**).
 
 <details>
 
@@ -769,17 +771,17 @@ gcc -framework Foundation -framework Appkit sc_inject.m -o sc_inject
 ./inject <pi or string>
 ```
 > [!TIP]
-> Aby to działało na iOS, potrzebujesz uprawnienia `dynamic-codesigning`, aby móc utworzyć wykonywalną pamięć zapisywalną.
+> Aby to działało na iOS, potrzebujesz uprawnienia `dynamic-codesigning`, aby móc ustawić pamięć zapisywalną jako wykonalną.
 
-### Wstrzykiwanie Dylib w wątku za pomocą portu Task
+### Dylib Injection w wątku przez Task port
 
-W macOS **wątki** mogą być manipulowane za pomocą **Mach** lub używając **posix `pthread` api**. Wątek, który wygenerowaliśmy w poprzednim wstrzyknięciu, został wygenerowany za pomocą api Mach, więc **nie jest zgodny z posix**.
+W macOS **wątki** mogą być manipulowane za pomocą **Mach** lub przy użyciu **posix `pthread` api**. Wątek, który wygenerowaliśmy w poprzedniej injekcji, został utworzony za pomocą Mach api, więc **nie jest zgodny z posix**.
 
-Możliwe było **wstrzyknięcie prostego shellcode** w celu wykonania polecenia, ponieważ **nie musiał działać z api** zgodnymi z posix, tylko z Mach. **Bardziej złożone wstrzyknięcia** wymagałyby, aby **wątek** był również **zgodny z posix**.
+Było możliwe **wstrzyknięcie prostego shellcode** do wykonania polecenia, ponieważ **nie musiał działać z posix** zgodnymi API, tylko z Mach. **Bardziej złożone injekcje** wymagałyby, aby **wątek** był również **zgodny z posix**.
 
-Dlatego, aby **ulepszyć wątek**, powinien on wywołać **`pthread_create_from_mach_thread`**, co **utworzy ważny pthread**. Następnie ten nowy pthread mógłby **wywołać dlopen**, aby **załadować dylib** z systemu, więc zamiast pisać nowy shellcode do wykonywania różnych działań, można załadować niestandardowe biblioteki.
+Zatem, żeby **udoskonalić wątek**, powinien on wywołać **`pthread_create_from_mach_thread`**, które **utworzy poprawny pthread**. Potem ten nowy pthread mógłby **wywołać dlopen**, aby **załadować dylib** z systemu, więc zamiast pisać nowy shellcode do wykonania różnych akcji, można ładować niestandardowe biblioteki.
 
-Możesz znaleźć **przykładowe dyliby** w (na przykład ten, który generuje log, a następnie możesz go odsłuchiwać):
+Możesz znaleźć **przykładowe dyliby** (na przykład taki, który generuje log, który potem można odczytać):
 
 
 {{#ref}}
@@ -1064,55 +1066,55 @@ fprintf(stderr,"Dylib not found\n");
 gcc -framework Foundation -framework Appkit dylib_injector.m -o dylib_injector
 ./inject <pid-of-mysleep> </path/to/lib.dylib>
 ```
-### Przechwytywanie wątków za pomocą portu zadania <a href="#step-1-thread-hijacking" id="step-1-thread-hijacking"></a>
+### Thread Hijacking via Task port <a href="#step-1-thread-hijacking" id="step-1-thread-hijacking"></a>
 
-W tej technice wątek procesu jest przechwytywany:
+W tej technice porywany jest wątek procesu:
 
 
 {{#ref}}
 macos-thread-injection-via-task-port.md
 {{#endref}}
 
-### Wykrywanie wstrzykiwania portu zadania
+### Task Port Injection Detection
 
-Podczas wywoływania `task_for_pid` lub `thread_create_*` zwiększa licznik w strukturze zadania z jądra, który można uzyskać z trybu użytkownika, wywołując task_info(task, TASK_EXTMOD_INFO, ...)
+Wywołanie `task_for_pid` lub `thread_create_*` zwiększa licznik w strukturze task w jądrze, do którego można uzyskać dostęp z trybu użytkownika wywołując task_info(task, TASK_EXTMOD_INFO, ...)
 
-## Porty wyjątków
+## Exception Ports
 
-Gdy wystąpi wyjątek w wątku, ten wyjątek jest wysyłany do wyznaczonego portu wyjątków wątku. Jeśli wątek go nie obsłuży, jest wysyłany do portów wyjątków zadania. Jeśli zadanie go nie obsłuży, jest wysyłany do portu hosta, który jest zarządzany przez launchd (gdzie zostanie potwierdzony). Nazywa się to triage wyjątków.
+Kiedy w wątku wystąpi wyjątek, jest on wysyłany do wyznaczonego exception port tego wątku. Jeśli wątek go nie obsłuży, trafia do task exception ports. Jeśli task też go nie obsłuży, jest wysyłany do host portu zarządzanego przez launchd (gdzie zostanie potwierdzony). To nazywa się exception triage.
 
-Należy zauważyć, że na końcu, jeśli nie zostanie to odpowiednio obsłużone, raport zostanie obsłużony przez demona ReportCrash. Jednak możliwe jest, aby inny wątek w tym samym zadaniu zarządzał wyjątkiem, co robią narzędzia do raportowania awarii, takie jak `PLCreashReporter`.
+Zauważ, że ostatecznie, jeśli wyjątek nie zostanie poprawnie obsłużony, raport zwykle trafi do demona ReportCrash. Jednak możliwe jest, że inny wątek w tym samym zadaniu obsłuży wyjątek — tak robią narzędzia do raportowania awarii, takie jak `PLCreashReporter`.
 
-## Inne obiekty
+## Other Objects
 
-### Zegar
+### Clock
 
-Każdy użytkownik może uzyskać dostęp do informacji o zegarze, jednak aby ustawić czas lub zmodyfikować inne ustawienia, należy być rootem.
+Każdy użytkownik może uzyskać informacje o zegarze, jednak aby ustawić czas lub zmodyfikować inne ustawienia, trzeba być rootem.
 
-Aby uzyskać informacje, można wywołać funkcje z podsystemu `clock`, takie jak: `clock_get_time`, `clock_get_attributtes` lub `clock_alarm`\
-Aby zmodyfikować wartości, można użyć podsystemu `clock_priv` z funkcjami takimi jak `clock_set_time` i `clock_set_attributes`
+Aby pobrać informacje, można wywołać funkcje z subsystemu `clock`, takie jak: `clock_get_time`, `clock_get_attributtes` lub `clock_alarm`.  
+Aby zmodyfikować wartości można użyć subsystemu `clock_priv` z funkcjami takimi jak `clock_set_time` i `clock_set_attributes`.
 
-### Procesory i zestaw procesorów
+### Processors and Processor Set
 
-Interfejsy API procesora pozwalają kontrolować pojedynczy logiczny procesor, wywołując funkcje takie jak `processor_start`, `processor_exit`, `processor_info`, `processor_get_assignment`...
+API procesora pozwala kontrolować pojedynczy logiczny procesor, wywołując funkcje takie jak `processor_start`, `processor_exit`, `processor_info`, `processor_get_assignment`...
 
-Ponadto, interfejsy API **zestawu procesorów** zapewniają sposób grupowania wielu procesorów w grupę. Można uzyskać domyślny zestaw procesorów, wywołując **`processor_set_default`**.\
-Oto kilka interesujących interfejsów API do interakcji z zestawem procesorów:
+Co więcej, API **processor set** udostępnia sposób grupowania wielu procesorów. Można pobrać domyślny processor set wywołując **`processor_set_default`**.  
+Oto niektóre interesujące API do interakcji z processor set:
 
 - `processor_set_statistics`
-- `processor_set_tasks`: Zwraca tablicę praw do wysyłania do wszystkich zadań w zestawie procesorów
-- `processor_set_threads`: Zwraca tablicę praw do wysyłania do wszystkich wątków w zestawie procesorów
+- `processor_set_tasks`: Zwraca tablicę send rights do wszystkich tasków wewnątrz processor set
+- `processor_set_threads`: Zwraca tablicę send rights do wszystkich wątków wewnątrz processor set
 - `processor_set_stack_usage`
 - `processor_set_info`
 
-Jak wspomniano w [**tym poście**](https://reverse.put.as/2014/05/05/about-the-processor_set_tasks-access-to-kernel-memory-vulnerability/), w przeszłości pozwalało to na ominięcie wcześniej wspomnianej ochrony, aby uzyskać porty zadań w innych procesach, aby je kontrolować, wywołując **`processor_set_tasks`** i uzyskując port hosta w każdym procesie.\
-Obecnie potrzebujesz uprawnień roota, aby użyć tej funkcji, a to jest chronione, więc będziesz mógł uzyskać te porty tylko w niechronionych procesach.
+Jak wspomniano w [**this post**](https://reverse.put.as/2014/05/05/about-the-processor_set_tasks-access-to-kernel-memory-vulnerability/), w przeszłości pozwalało to obejść wcześniej wspomniane zabezpieczenie i uzyskać task porty w innych procesach, aby je kontrolować przez wywołanie **`processor_set_tasks`** i otrzymanie host portu w każdym procesie.  
+Obecnie do użycia tej funkcji potrzebny jest root i jest ona chroniona, więc będziesz w stanie otrzymać te porty tylko w niechronionych procesach.
 
-Możesz to wypróbować z:
+You can try it with:
 
 <details>
 
-<summary><strong>kod processor_set_tasks</strong></summary>
+<summary><strong>processor_set_tasks code</strong></summary>
 ````c
 // Maincpart fo the code from https://newosxbook.com/articles/PST2.html
 //gcc ./port_pid.c -o port_pid
@@ -1241,14 +1243,43 @@ For more info check:
 macos-mig-mach-interface-generator.md
 {{#endref}}
 
+## MIG handler type confusion -> fake vtable pointer-chain hijack
+
+If a MIG handler **retrieves a C++ object by Mach message-supplied ID** (e.g., from an internal Object Map) and then **assumes a specific concrete type without validating the real dynamic type**, later virtual calls can dispatch through attacker-controlled pointers. In `coreaudiod`’s `com.apple.audio.audiohald` service (CVE-2024-54529), `_XIOContext_Fetch_Workgroup_Port` used the looked-up `HALS_Object` as an `ioct` and executed a vtable call via:
+
+```asm
+mov rax, qword ptr [rdi]
+call qword ptr [rax + 0x168]  ; indirect call through vtable slot
+```
+
+Because `rax` comes from **multiple dereferences**, exploitation needs a structured pointer chain rather than a single overwrite. One working layout:
+
+1. In the **confused heap object** (treated as `ioct`), place a **pointer at +0x68** to attacker-controlled memory.
+2. At that controlled memory, place a **pointer at +0x0** to a **fake vtable**.
+3. In the fake vtable, write the **call target at +0x168**, so the handler jumps to attacker-chosen code when dereferencing `[rax+0x168]`.
+
+Conceptually:
+
+```
+HALS_Object + 0x68  -> controlled_object
+*(controlled_object + 0x0) -> fake_vtable
+*(fake_vtable + 0x168)     -> RIP target
+```
+
+### LLDB triage to anchor the gadget
+
+1. **Break on the faulting handler** (or `mach_msg`/`dispatch_mig_server`) and trigger the crash to confirm the dispatch chain (`HALB_MIGServer_server -> dispatch_mig_server -> _XIOContext_Fetch_Workgroup_Port`).
+2. In the crash frame, disassemble to capture the **indirect call slot offset** (`call qword ptr [rax + 0x168]`).
+3. Inspect registers/memory to verify where `rdi` (base object) and `rax` (vtable pointer) originate and whether the offsets above are reachable with controlled data.
+4. Use the offset map to heap-shape the **0x68 -> 0x0 -> 0x168** chain and convert the type confusion into a reliable control-flow hijack inside the Mach service.
+
 ## References
 
 - [https://docs.darlinghq.org/internals/macos-specifics/mach-ports.html](https://docs.darlinghq.org/internals/macos-specifics/mach-ports.html)
 - [https://knight.sc/malware/2019/03/15/code-injection-on-macos.html](https://knight.sc/malware/2019/03/15/code-injection-on-macos.html)
 - [https://gist.github.com/knightsc/45edfc4903a9d2fa9f5905f60b02ce5a](https://gist.github.com/knightsc/45edfc4903a9d2fa9f5905f60b02ce5a)
 - [https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/)
-- [https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/)
-- [\*OS Internals, Volume I, User Mode, Jonathan Levin](https://www.amazon.com/MacOS-iOS-Internals-User-Mode/dp/099105556X)
+- [*OS Internals, Volume I, User Mode, Jonathan Levin](https://www.amazon.com/MacOS-iOS-Internals-User-Mode/dp/099105556X)
 - [https://web.mit.edu/darwin/src/modules/xnu/osfmk/man/task_get_special_port.html](https://web.mit.edu/darwin/src/modules/xnu/osfmk/man/task_get_special_port.html)
-
+- [Project Zero – Sound Barrier 2](https://projectzero.google/2026/01/sound-barrier-2.html)
 {{#include ../../../../banners/hacktricks-training.md}}
