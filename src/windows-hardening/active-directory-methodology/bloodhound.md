@@ -1,4 +1,4 @@
-# BloodHound & Andere Active Directory Enumeration Tools
+# BloodHound & Other Active Directory Enumeration Tools
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -7,38 +7,38 @@
 adws-enumeration.md
 {{#endref}}
 
-> HINWEIS: Diese Seite fasst einige der nützlichsten Dienstprogramme zusammen, um **enumerate** und **visualise** Active Directory Beziehungen. Für die Sammlung über den stealthy **Active Directory Web Services (ADWS)**-Kanal siehe die obige Referenz.
+> HINWEIS: Diese Seite gruppiert einige der nützlichsten Dienstprogramme, um **enumerate** und **visualise** Active Directory relationships. Für die Sammlung über den stealthy **Active Directory Web Services (ADWS)** channel siehe die Referenz oben.
 
 ---
 
 ## AD Explorer
 
-[AD Explorer](https://docs.microsoft.com/en-us/sysinternals/downloads/adexplorer) (Sysinternals) ist ein fortgeschrittener AD-Viewer & -Editor, der Folgendes ermöglicht:
+[AD Explorer](https://docs.microsoft.com/en-us/sysinternals/downloads/adexplorer) (Sysinternals) ist ein fortgeschrittener **AD viewer & editor**, der ermöglicht:
 
 * GUI-Durchsuchen des Verzeichnisbaums
-* Bearbeitung von Objektattributen & Sicherheitsdeskriptoren
-* Erstellung von Snapshots / Vergleich für Offline-Analysen
+* Bearbeiten von Objektattributen & Sicherheitsdeskriptoren
+* Erstellen von Snapshots / Vergleich für die Offline-Analyse
 
-### Kurzanleitung
+### Quick usage
 
 1. Starten Sie das Tool und verbinden Sie sich mit `dc01.corp.local` mit beliebigen Domain-Anmeldedaten.
 2. Erstellen Sie einen Offline-Snapshot über `File ➜ Create Snapshot`.
-3. Vergleichen Sie zwei Snapshots mit `File ➜ Compare`, um Berechtigungsabweichungen zu erkennen.
+3. Vergleichen Sie zwei Snapshots mit `File ➜ Compare`, um Änderungen in Berechtigungen zu erkennen.
 
 ---
 
 ## ADRecon
 
-[ADRecon](https://github.com/adrecon/ADRecon) extrahiert eine große Menge an Artefakten aus einer Domain (ACLs, GPOs, trusts, CA templates …) und erzeugt einen **Excel-Bericht**.
+[ADRecon](https://github.com/adrecon/ADRecon) extrahiert eine große Menge an Artefakten aus einer Domain (ACLs, GPOs, trusts, CA templates …) und erzeugt einen Excel-Bericht.
 ```powershell
 # On a Windows host in the domain
 PS C:\> .\ADRecon.ps1 -OutputDir C:\Temp\ADRecon
 ```
 ---
 
-## BloodHound (Graphvisualisierung)
+## BloodHound (Graph-Visualisierung)
 
-[BloodHound](https://github.com/BloodHoundAD/BloodHound) nutzt Graphentheorie + Neo4j, um verborgene Berechtigungsbeziehungen innerhalb von on-prem AD & Azure AD aufzudecken.
+[BloodHound](https://github.com/BloodHoundAD/BloodHound) nutzt Graphentheorie + Neo4j, um verborgene Privilegienbeziehungen innerhalb von on-prem AD & Azure AD aufzudecken.
 
 ### Bereitstellung (Docker CE)
 ```bash
@@ -48,8 +48,8 @@ curl -L https://ghst.ly/getbhce | docker compose -f - up
 ### Sammler
 
 * `SharpHound.exe` / `Invoke-BloodHound` – nativ oder PowerShell-Variante
-* `AzureHound` – Azure AD enumeration
-* **SoaPy + BOFHound** – ADWS collection (siehe Link oben)
+* `AzureHound` – Azure AD-Aufzählung
+* **SoaPy + BOFHound** – ADWS-Sammlung (siehe Link oben)
 
 #### Häufige SharpHound-Modi
 ```powershell
@@ -57,31 +57,46 @@ SharpHound.exe --CollectionMethods All           # Full sweep (noisy)
 SharpHound.exe --CollectionMethods Group,LocalAdmin,Session,Trusts,ACL
 SharpHound.exe --Stealth --LDAP                      # Low noise LDAP only
 ```
-Die Collector erzeugen JSON, das über die BloodHound-GUI importiert wird.
+Die Collector erzeugen JSON, das von der BloodHound-GUI eingelesen wird.
 
----
+### Sammlung von Privilegien und Logon-Rechten
 
-## Priorisierung von Kerberoasting mit BloodHound
+Windows **token privileges** (z. B. `SeBackupPrivilege`, `SeDebugPrivilege`, `SeImpersonatePrivilege`, `SeAssignPrimaryTokenPrivilege`) können DACL-Prüfungen umgehen, daher offenbart ihre domänenweite Zuordnung lokale LPE-Kanten, die ACL-only graphs übersehen. **Logon rights** (`SeInteractiveLogonRight`, `SeRemoteInteractiveLogonRight`, `SeNetworkLogonRight`, `SeServiceLogonRight`, `SeBatchLogonRight` und deren `SeDeny*`-Gegenstücke) werden von der LSA durchgesetzt, bevor ein Token überhaupt existiert, und Verweigerungen haben Vorrang; sie schränken lateral movement (RDP/SMB/scheduled task/service logon) maßgeblich ein.
 
-Graph-Kontext ist entscheidend, um lautes, wahlloses roasting zu vermeiden. Ein schlanker Workflow:
+**Collector mit erhöhten Rechten ausführen**, wenn möglich: UAC erstellt für interaktive Admins ein gefiltertes Token (via `NtFilterToken`), entfernt sensible Privilegien und markiert Admin-SIDs als deny-only. Wenn du Privilegien aus einer nicht-erhöhten Shell auflistest, sind hochstufige Privilegien unsichtbar und BloodHound wird die Kanten nicht einlesen.
 
-1. **Sammle einmalig alles** mit einem ADWS-kompatiblen Collector (z. B. RustHound-CE), damit du offline arbeiten und Pfade proben kannst, ohne den DC erneut zu kontaktieren:
+Es existieren nun zwei komplementäre SharpHound-Sammelstrategien:
+
+- **GPO/SYSVOL parsing (leise, mit niedrigen Rechten):**
+1. GPOs über LDAP aufzählen (`(objectCategory=groupPolicyContainer)`) und jeden `gPCFileSysPath` lesen.
+2. `MACHINE\Microsoft\Windows NT\SecEdit\GptTmpl.inf` aus SYSVOL holen und den Abschnitt `[Privilege Rights]` parsen, der Privileg-/Logon-Right-Namen auf SIDs abbildet.
+3. GPO-Links über `gPLink` auf OUs/sites/domains auflösen, Computer in den verlinkten Containern auflisten und die Rechte diesen Maschinen zuordnen.
+4. Vorteil: funktioniert mit einem normalen Benutzer und ist unauffällig; Nachteil: sieht nur Rechte, die via GPO gesetzt wurden (lokale Anpassungen werden verpasst).
+
+- **LSA RPC enumeration (laut, genau):**
+- Aus einem Kontext mit lokalem Admin auf dem Ziel die Local Security Policy öffnen und `LsaEnumerateAccountsWithUserRight` für jedes Privileg/Logon-Right aufrufen, um die zugewiesenen Prinzipale über RPC aufzulisten.
+- Vorteil: erfasst Rechte, die lokal oder außerhalb von GPO gesetzt wurden; Nachteil: lauter Netzwerkverkehr und Admin-Recht auf jedem Host erforderlich.
+
+Beispiel für einen durch diese Kanten aufgezeigten Missbrauchspfad: `CanRDP` ➜ Host, auf dem dein Benutzer außerdem `SeBackupPrivilege` hat ➜ eine erhöhte Shell starten, um gefilterte Tokens zu vermeiden ➜ Backup-Semantik verwenden, um trotz restriktiver DACLs die `SAM`- und `SYSTEM`-Hives zu lesen ➜ exfiltrieren und `secretsdump.py` offline ausführen, um den lokalen Administrator-NT-Hash für lateral movement/privilege escalation zu gewinnen.
+
+### Priorisierung von Kerberoasting mit BloodHound
+
+Nutze den Graph-Kontext, um das Roasting zielgerichtet durchzuführen:
+
+1. Einmal mit einem ADWS-kompatiblen Collector sammeln und offline arbeiten:
 ```bash
 rusthound-ce -d corp.local -u svc.collector -p 'Passw0rd!' -c All -z
 ```
-2. **Importiere die ZIP, markiere das kompromittierte Principal als owned**, dann führe eingebaute Abfragen wie *Kerberoastable Users* und *Shortest Paths to Domain Admins* aus. Das hebt sofort Konten mit SPNs hervor, die nützliche Gruppenmitgliedschaften haben (Exchange, IT, tier0 Servicekonten, usw.).
-3. **Priorisiere nach Blast-Radius** – konzentriere dich auf SPNs, die gemeinsam genutzte Infrastruktur kontrollieren oder Admin-Rechte besitzen, und überprüfe `pwdLastSet`, `lastLogon` und erlaubte Verschlüsselungstypen, bevor du Zeit mit Cracking verbringst.
-4. **Fordere nur die Tickets an, die dich interessieren**. Tools wie NetExec können gezielt ausgewählte `sAMAccountName`s anvisieren, sodass jede LDAP ROAST-Anfrage eine klare Rechtfertigung hat:
+2. Die ZIP importieren, das kompromittierte Principal als owned markieren und eingebaute Queries (*Kerberoastable Users*, *Shortest Paths to Domain Admins*) ausführen, um SPN-Konten mit Admin-/Infra-Rechten anzuzeigen.
+3. SPNs nach Blast-Radius priorisieren; `pwdLastSet`, `lastLogon` und erlaubte Verschlüsselungstypen vor dem cracking überprüfen.
+4. Nur ausgewählte Tickets anfordern, offline cracken, und dann BloodHound mit dem neuen Zugriff erneut abfragen:
 ```bash
 netexec ldap dc01.corp.local -u svc.collector -p 'Passw0rd!' --kerberoasting kerberoast.txt --spn svc-sql
 ```
-5. **Crack offline**, frage dann sofort BloodHound erneut ab, um die post-exploitation mit den neuen Privilegien zu planen.
-
-Dieser Ansatz hält das Signal-Rausch-Verhältnis hoch, reduziert das erkennbare Volumen (keine Massen-SPN-Anfragen) und stellt sicher, dass jedes cracked ticket in sinnvolle privilege escalation-Schritte umgesetzt wird.
 
 ## Group3r
 
-[Group3r](https://github.com/Group3r/Group3r) führt eine Enumeration von **Group Policy Objects** durch und hebt Fehlkonfigurationen hervor.
+[Group3r](https://github.com/Group3r/Group3r) enumeriert **Gruppenrichtlinienobjekte** und hebt Fehlkonfigurationen hervor.
 ```bash
 # Execute inside the domain
 Group3r.exe -f gpo.log   # -s to stdout
@@ -94,9 +109,10 @@ Group3r.exe -f gpo.log   # -s to stdout
 ```powershell
 PingCastle.exe --healthcheck --server corp.local --user bob --password "P@ssw0rd!"
 ```
-## Referenzen
+## Quellen
 
-- [HackTheBox Mirage: Chaining NFS Leaks, Dynamic DNS Abuse, NATS Credential Theft, JetStream Secrets, and Kerberoasting](https://0xdf.gitlab.io/2025/11/22/htb-mirage.html)
+- [HackTheBox Mirage: Verkettung von NFS Leaks, Dynamic DNS Abuse, NATS Credential Theft, JetStream Secrets und Kerberoasting](https://0xdf.gitlab.io/2025/11/22/htb-mirage.html)
 - [RustHound-CE](https://github.com/g0h4n/RustHound-CE)
+- [Jenseits von ACLs: Kartierung von Windows Privilege Escalation Paths mit BloodHound](https://www.synacktiv.com/en/publications/beyond-acls-mapping-windows-privilege-escalation-paths-with-bloodhound.html)
 
 {{#include ../../banners/hacktricks-training.md}}
