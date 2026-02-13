@@ -2,17 +2,17 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Basic Information
+## Taarifa za Msingi
 
-I/O Kit ni mfumo wa **madereva wa vifaa** wa chanzo wazi, unaoelekezwa na vitu katika kernel ya XNU, unashughulikia **madereva wa vifaa wanaopakiwa kwa nguvu**. Inaruhusu msimbo wa moduli kuongezwa kwenye kernel mara moja, ikisaidia vifaa mbalimbali.
+I/O Kit ni mfumo wa chanzo wazi, unaotegemea vitu (object-oriented) wa mfumo wa dereva wa kifaa (device-driver framework) katika kernel ya XNU, unaoshughulikia madereva ya kifaa yanayopakuliwa wakati wa utekelezaji (dynamically loaded device drivers). Unaruhusu kuongezwa kwa msimbo wa modular kwenye kernel kwa wakati wa utekelezaji, ukisaidia vifaa mbalimbali.
 
-Madereva ya IOKit kwa msingi **yanatoa kazi kutoka kwa kernel**. Aina za **vigezo** vya kazi hizi ni **zilizopangwa awali** na zinathibitishwa. Zaidi ya hayo, kama ilivyo kwa XPC, IOKit ni safu nyingine juu ya **ujumbe wa Mach**.
+Madereva ya IOKit kwa msingi hutoa (export) functions kutoka kernel. Aina za vigezo vya functions hizi (function parameter **types**) zimewekwa mapema (**predefined**) na zinathibitishwa. Zaidi ya hayo, kama XPC, IOKit ni tabaka jingine juu ya **Mach messages**.
 
-**Msimbo wa kernel ya IOKit XNU** umewekwa wazi na Apple katika [https://github.com/apple-oss-distributions/xnu/tree/main/iokit](https://github.com/apple-oss-distributions/xnu/tree/main/iokit). Zaidi ya hayo, vipengele vya IOKit vya nafasi ya mtumiaji pia ni chanzo wazi [https://github.com/opensource-apple/IOKitUser](https://github.com/opensource-apple/IOKitUser).
+**IOKit XNU kernel code** imetolewa kama chanzo wazi na Apple katika [https://github.com/apple-oss-distributions/xnu/tree/main/iokit](https://github.com/apple-oss-distributions/xnu/tree/main/iokit). Vilevile, vipengele vya IOKit vinavyofanya kazi katika user space vimewekwa kama chanzo wazi [https://github.com/opensource-apple/IOKitUser](https://github.com/opensource-apple/IOKitUser).
 
-Hata hivyo, **hakuna madereva ya IOKit** yanayo kuwa chanzo wazi. Hata hivyo, mara kwa mara, toleo la dereva linaweza kuja na alama zinazofanya iwe rahisi kuirekebisha. Angalia jinsi ya [**kupata nyongeza za dereva kutoka kwa firmware hapa**](#ipsw)**.**
+Hata hivyo, **hakuna madereva ya IOKit** yaliyochanzo wazi. Kwa kawaida, mara kwa mara toleo la dereva linaweza kuja na symbols ambazo zinafanya iwe rahisi kuibug (debug). Angalia jinsi ya [**pata nyongeza za dereva kutoka firmware hapa**](#ipsw).
 
-Imeandikwa kwa **C++**. Unaweza kupata alama za C++ zisizokuwa na mchanganyiko kwa:
+Imeandikwa kwa **C++**. Unaweza kupata alama za C++ zilizo-demangle kwa:
 ```bash
 # Get demangled symbols
 nm -C com.apple.driver.AppleJPEGDriver
@@ -23,16 +23,16 @@ __ZN16IOUserClient202222dispatchExternalMethodEjP31IOExternalMethodArgumentsOpaq
 IOUserClient2022::dispatchExternalMethod(unsigned int, IOExternalMethodArgumentsOpaque*, IOExternalMethodDispatch2022 const*, unsigned long, OSObject*, void*)
 ```
 > [!CAUTION]
-> IOKit **imefunua kazi** inaweza kufanya **ukaguzi wa ziada wa usalama** wakati mteja anapojaribu kuita kazi lakini kumbuka kwamba programu mara nyingi **zina mipaka** na **sandbox** ambayo IOKit kazi zinaweza kuingiliana nayo.
+> IOKit **funsi zilizo wazi** zinaweza kufanya **ukaguzi wa usalama wa ziada** wakati mteja anapojaribu kuita funsi, lakini kumbuka kwamba programu kwa kawaida ziko **zilizo na mipaka** kupitia **sandbox** kwa funsi za IOKit ambazo zinaweza kuingiliana nazo.
 
-## Drivers
+## Madereva
 
 Katika macOS zinapatikana katika:
 
 - **`/System/Library/Extensions`**
-- Faili za KEXT zilizojengwa ndani ya mfumo wa uendeshaji wa OS X.
+- KEXT files zilijengwa ndani ya mfumo wa uendeshaji wa OS X.
 - **`/Library/Extensions`**
-- Faili za KEXT zilizowekwa na programu za upande wa tatu
+- KEXT files zilizowekwa na software ya wahusika wa tatu
 
 Katika iOS zinapatikana katika:
 
@@ -54,48 +54,51 @@ Index Refs Address            Size       Wired      Name (Version) UUID <Linked 
 9    2 0xffffff8003317000 0xe000     0xe000     com.apple.kec.Libm (1) 6C1342CC-1D74-3D0F-BC43-97D5AD38200A <5>
 10   12 0xffffff8003544000 0x92000    0x92000    com.apple.kec.corecrypto (11.1) F5F1255F-6552-3CF4-A9DB-D60EFDEB4A9A <8 7 6 5 3 1>
 ```
-Mpaka nambari 9, madereva waliotajwa **yamepakizwa katika anwani 0**. Hii ina maana kwamba si madereva halisi bali **sehemu ya kernel na hayawezi kuondolewa**.
+Mpaka nambari 9, drivers walioorodheshwa wamepakiwa katika **address 0**. Hii ina maana kwamba hao si drivers halisi bali **sehemu ya kernel na hawawezi kuondolewa**.
 
-Ili kupata nyongeza maalum unaweza kutumia:
+Ili kutafuta extensions maalum unaweza kutumia:
 ```bash
 kextfind -bundle-id com.apple.iokit.IOReportFamily #Search by full bundle-id
 kextfind -bundle-id -substring IOR #Search by substring in bundle-id
 ```
-Ili kupakia na kuondoa nyongeza za kernel fanya:
+Ili kupakia na kuondoa kernel extensions fanya:
 ```bash
 kextload com.apple.iokit.IOReportFamily
 kextunload com.apple.iokit.IOReportFamily
 ```
 ## IORegistry
 
-**IORegistry** ni sehemu muhimu ya mfumo wa IOKit katika macOS na iOS ambayo inatumika kama hifadhidata ya kuwakilisha usanidi wa vifaa vya mfumo na hali. Ni **mkusanyiko wa kihierarkia wa vitu vinavyowakilisha vifaa vyote na madereva** yaliyojumuishwa kwenye mfumo, na uhusiano wao kwa kila mmoja.
+The **IORegistry** ni sehemu muhimu ya mfumo wa IOKit katika macOS na iOS ambayo hufanya kazi kama hifadhidata ya kuwakilisha muundo wa vifaa vya mfumo na hali yake. Ni **mkusanyo wa kihierarkia wa vitu vinavyowakilisha vifaa vyote na madereva ya kifaa** yaliyopakiwa kwenye mfumo, pamoja na uhusiano wao kwa kila mmoja.
 
-Unaweza kupata IORegistry ukitumia cli **`ioreg`** ili kuikagua kutoka kwenye console (hasa inafaida kwa iOS).
+Unaweza kupata IORegistry kwa kutumia cli **`ioreg`** kuikagua kutoka kwenye konsoli (hasa muhimu kwa iOS).
 ```bash
 ioreg -l #List all
 ioreg -w 0 #Not cut lines
 ioreg -p <plane> #Check other plane
 ```
-Unaweza kupakua **`IORegistryExplorer`** kutoka **Xcode Additional Tools** kutoka [**https://developer.apple.com/download/all/**](https://developer.apple.com/download/all/) na kukagua **macOS IORegistry** kupitia kiolesura cha **grafiki**.
+You could download **`IORegistryExplorer`** from **Xcode Additional Tools** from [**https://developer.apple.com/download/all/**](https://developer.apple.com/download/all/) and inspect the **macOS IORegistry** through a **graphical** interface.
 
 <figure><img src="../../../images/image (1167).png" alt="" width="563"><figcaption></figcaption></figure>
 
-Katika IORegistryExplorer, "planes" zinatumika kuandaa na kuonyesha uhusiano kati ya vitu tofauti katika IORegistry. Kila plane inawakilisha aina maalum ya uhusiano au mtazamo maalum wa usanidi wa vifaa na madereva wa mfumo. Hapa kuna baadhi ya planes za kawaida ambazo unaweza kukutana nazo katika IORegistryExplorer:
+Kwenye IORegistryExplorer, "planes" hutumika kupanga na kuonyesha uhusiano kati ya vitu tofauti katika IORegistry. Kila plane inawakilisha aina maalum ya uhusiano au mtazamo fulani wa usanidi wa vifaa (hardware) na driver za mfumo. Hapa chini kuna baadhi ya planes za kawaida utakazokutana nazo katika IORegistryExplorer:
 
-1. **IOService Plane**: Hii ni plane ya jumla zaidi, ikionyesha vitu vya huduma vinavyowakilisha madereva na nubs (michannel ya mawasiliano kati ya madereva). Inaonyesha uhusiano wa mtoa huduma-mteja kati ya vitu hivi.
-2. **IODeviceTree Plane**: Plane hii inawakilisha muunganisho wa kimwili kati ya vifaa kadri vinavyounganishwa kwenye mfumo. Mara nyingi hutumiwa kuonyesha hifadhi ya vifaa vilivyounganishwa kupitia mabasi kama USB au PCI.
-3. **IOPower Plane**: Inaonyesha vitu na uhusiano wao kwa upande wa usimamizi wa nguvu. Inaweza kuonyesha ni vitu gani vinavyoathiri hali ya nguvu ya vingine, muhimu kwa kutatua matatizo yanayohusiana na nguvu.
-4. **IOUSB Plane**: Imejikita hasa kwenye vifaa vya USB na uhusiano wao, ikionyesha hifadhi ya vitu vya USB na vifaa vilivyounganishwa.
-5. **IOAudio Plane**: Plane hii inawakilisha vifaa vya sauti na uhusiano wao ndani ya mfumo.
+1. **IOService Plane**: Hii ndiyo plane ya jumla zaidi, ikionyesha service objects ambazo zinawakilisha drivers na nubs (mihana/kanali za mawasiliano kati ya drivers). Inaonyesha mahusiano ya provider-client kati ya vitu hivi.
+2. **IODeviceTree Plane**: Plane hii inawakilisha miunganisho ya kimwili kati ya vifaa vinavyounganishwa kwenye mfumo. Mara nyingi hutumika kuona muundo wa hierarkia ya vifaa vinavyounganishwa kupitia bus kama USB au PCI.
+3. **IOPower Plane**: Inaonyesha vitu na mahusiano yao kwa mtazamo wa usimamizi wa nguvu (power management). Inaweza kuonyesha ni vitu gani vinavyoathiri hali ya nguvu ya vingine, muhimu kwa kubaini matatizo yanayohusiana na nguvu.
+4. **IOUSB Plane**: Inalenga hasa vifaa vya USB na mahusiano yao, ikionyesha hierarkia ya USB hubs na vifaa vilivyounganishwa.
+5. **IOAudio Plane**: Plane hii ni kwa kuwakilisha vifaa vya sauti na mahusiano yao ndani ya mfumo.
 6. ...
 
-## Mfano wa Kanuni ya Mawasiliano ya Dereva
+## Mfano wa Msimbo wa Mawasiliano ya Driver
 
-Kanuni ifuatayo inajihusisha na huduma ya IOKit `"YourServiceNameHere"` na inaita kazi ndani ya mteule 0. Kwa hivyo:
+Msimbo ufuatao unaunganisha na huduma ya IOKit `YourServiceNameHere` na kuita selector 0:
 
-- kwanza inaita **`IOServiceMatching`** na **`IOServiceGetMatchingServices`** kupata huduma.
+- Kwanza inaita **`IOServiceMatching`** na **`IOServiceGetMatchingServices`** kupata huduma.
 - Kisha inaunda muunganisho kwa kuita **`IOServiceOpen`**.
-- Na hatimaye inaita kazi kwa **`IOConnectCallScalarMethod`** ikionyesha mteule 0 (mteule ni nambari ambayo kazi unayotaka kuita imepewa).
+- Mwisho inaita kazi kwa **`IOConnectCallScalarMethod`** ikielezea selector 0 (selector ni nambari iliyopangwa kwa kazi unayotaka kuita).
+
+<details>
+<summary>Mfano wa wito wa user-space kwa selector ya driver</summary>
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <IOKit/IOKitLib.h>
@@ -150,65 +153,104 @@ IOObjectRelease(iter);
 return 0;
 }
 ```
-Kuna **mifumo mingine** ambayo inaweza kutumika kuita kazi za IOKit mbali na **`IOConnectCallScalarMethod`** kama **`IOConnectCallMethod`**, **`IOConnectCallStructMethod`**...
+</details>
 
-## Kurejesha kiingilio cha dereva
+Kuna **kazi nyingine** ambazo zinaweza kutumika kuita kazi za IOKit mbali na **`IOConnectCallScalarMethod`** kama **`IOConnectCallMethod`**, **`IOConnectCallStructMethod`**...
 
-Unaweza kupata hizi kwa mfano kutoka kwa [**picha ya firmware (ipsw)**](#ipsw). Kisha, pakia kwenye decompiler unayependa.
+## Reversing driver entrypoint
 
-Unaweza kuanza kurejesha kazi ya **`externalMethod`** kwani hii ni kazi ya dereva ambayo itakuwa ikipokea wito na kuita kazi sahihi:
+Unaweza kupata hizi kwa mfano kutoka kwa [**firmware image (ipsw)**](#ipsw). Kisha, ziiweke kwenye decompiler unayopendelea.
+
+Unaweza kuanza decompiling ya **`externalMethod`** kwani hii ndiyo driver function itakayopokea wito na kuita function sahihi:
 
 <figure><img src="../../../images/image (1168).png" alt="" width="315"><figcaption></figcaption></figure>
 
 <figure><img src="../../../images/image (1169).png" alt=""><figcaption></figcaption></figure>
 
-Wito huo mbaya ulioondolewa unamaanisha:
+Wito huo mbaya uliodemangled unamaanisha:
 ```cpp
 IOUserClient2022::dispatchExternalMethod(unsigned int, IOExternalMethodArgumentsOpaque*, IOExternalMethodDispatch2022 const*, unsigned long, OSObject*, void*)
 ```
-Kumbuka jinsi katika ufafanuzi wa awali param **`self`** ilikosekana, ufafanuzi mzuri ungekuwa:
+Angalia jinsi kiparamu **`self`** kilivyokosekana katika ufafanuzi uliopita; ufafanuzi sahihi utakuwa:
 ```cpp
 IOUserClient2022::dispatchExternalMethod(self, unsigned int, IOExternalMethodArgumentsOpaque*, IOExternalMethodDispatch2022 const*, unsigned long, OSObject*, void*)
 ```
-Actually, you can find the real definition in [https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/Kernel/IOUserClient.cpp#L6388](https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/Kernel/IOUserClient.cpp#L6388):
+Kwa kweli, unaweza kupata ufafanuzi halisi katika [https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/Kernel/IOUserClient.cpp#L6388](https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/Kernel/IOUserClient.cpp#L6388):
 ```cpp
 IOUserClient2022::dispatchExternalMethod(uint32_t selector, IOExternalMethodArgumentsOpaque *arguments,
 const IOExternalMethodDispatch2022 dispatchArray[], size_t dispatchArrayCount,
 OSObject * target, void * reference)
 ```
-Kwa habari hii unaweza kuandika upya Ctrl+Right -> `Edit function signature` na kuweka aina zinazojulikana:
+With this info you can rewrite Ctrl+Right -> `Edit function signature` and set the known types:
 
 <figure><img src="../../../images/image (1174).png" alt=""><figcaption></figcaption></figure>
 
-Msimbo mpya uliofichuliwa utaonekana kama ifuatavyo:
+The new decompiled code will look like:
 
 <figure><img src="../../../images/image (1175).png" alt=""><figcaption></figcaption></figure>
 
-Kwa hatua inayofuata tunahitaji kuwa na muundo wa **`IOExternalMethodDispatch2022`** umefafanuliwa. Ni opensource katika [https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/IOKit/IOUserClient.h#L168-L176](https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/IOKit/IOUserClient.h#L168-L176), unaweza kuifafanua:
+For the next step we need to have defined the **`IOExternalMethodDispatch2022`** struct. It's opensource in [https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/IOKit/IOUserClient.h#L168-L176](https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/IOKit/IOUserClient.h#L168-L176), you could define it:
 
 <figure><img src="../../../images/image (1170).png" alt=""><figcaption></figcaption></figure>
 
-Sasa, kufuatia `(IOExternalMethodDispatch2022 *)&sIOExternalMethodArray` unaweza kuona data nyingi:
+Now, following the `(IOExternalMethodDispatch2022 *)&sIOExternalMethodArray` you can see a lot of data:
 
 <figure><img src="../../../images/image (1176).png" alt="" width="563"><figcaption></figcaption></figure>
 
-Badilisha Aina ya Data kuwa **`IOExternalMethodDispatch2022:`**
+Change the Data Type to **`IOExternalMethodDispatch2022:`**
 
 <figure><img src="../../../images/image (1177).png" alt="" width="375"><figcaption></figcaption></figure>
 
-baada ya mabadiliko:
+after the change:
 
 <figure><img src="../../../images/image (1179).png" alt="" width="563"><figcaption></figcaption></figure>
 
-Na kama tunavyojua huko tuna **array ya vipengele 7** (angalia msimbo wa mwisho uliofichuliwa), bonyeza kuunda array ya vipengele 7:
+And as we now in there we have an **array of 7 elements** (check the final decompiled code), click to create an array of 7 elements:
 
 <figure><img src="../../../images/image (1180).png" alt="" width="563"><figcaption></figcaption></figure>
 
-Baada ya array kuundwa unaweza kuona kazi zote zilizotolewa:
+After the array is created you can see all the exported functions:
 
 <figure><img src="../../../images/image (1181).png" alt=""><figcaption></figcaption></figure>
 
 > [!TIP]
-> Ikiwa unakumbuka, ili **kuita** kazi **iliyotolewa** kutoka kwa nafasi ya mtumiaji hatuhitaji kuita jina la kazi, bali **nambari ya mteule**. Hapa unaweza kuona kwamba mteule **0** ni kazi **`initializeDecoder`**, mteule **1** ni **`startDecoder`**, mteule **2** **`initializeEncoder`**...
+> Kama unavyokumbuka, ili **call** **exported** function kutoka user space hatuhitaji kutumia jina la function, bali nambari ya **selector**. Hapa unaweza kuona kuwa selector **0** ni function **`initializeDecoder`**, selector **1** ni **`startDecoder`**, selector **2** **`initializeEncoder`**...
 
+## Recent IOKit attack surface (2023–2025)
+
+- **Keystroke capture via IOHIDFamily** – CVE-2024-27799 (14.5) ilionyesha kwamba mteja wa `IOHIDSystem` mwenye ruhusa anaweza kunyakua HID events hata akiwa na secure input; hakikisha `externalMethod` handlers zinahitaji entitlements badala ya kutegemea aina ya user-client pekee.
+- **IOGPUFamily memory corruption** – CVE-2024-44197 na CVE-2025-24257 zilirekebisha OOB writes zinazoweza kufikiwa kutoka kwa sandboxed apps zinazotuma malformed variable-length data kwa GPU user clients; mende ya kawaida ni mipaka duni kuzunguka vigezo vya `IOConnectCallStructMethod`.
+- **Legacy keystroke monitoring** – CVE-2023-42891 (14.2) ilithibitisha kuwa HID user clients bado ni vector ya kutoroka kutoka sandbox; fuzz driver yoyote inayofichua keyboard/event queues.
+
+### Quick triage & fuzzing tips
+
+- Orodhesha external methods zote za user client kutoka userland ili kuzipatia fuzzer seed:
+```bash
+# list selectors for a service
+python3 - <<'PY'
+from ioreg import IORegistry
+svc = 'IOHIDSystem'
+reg = IORegistry()
+obj = reg.get_service(svc)
+for sel, name in obj.external_methods():
+print(f"{sel:02d} {name}")
+PY
+```
+- When reversing, zingatia idadi za `IOExternalMethodDispatch2022`. Mfano wa mdudu unaotokea mara kwa mara katika CVE za hivi karibuni ni kutokubaliana kwa `structureInputSize`/`structureOutputSize` ikilinganishwa na urefu halisi wa `copyin`, kusababisha heap OOB katika `IOConnectCallStructMethod`.
+- Ufikikaji wa Sandbox bado unategemea entitlements. Kabla ya kutumia muda kwenye lengo, angalia kama client anaruhusiwa kutoka kwa app ya third‑party:
+```bash
+strings /System/Library/Extensions/IOHIDFamily.kext/Contents/MacOS/IOHIDFamily | \
+grep -E "^com\.apple\.(driver|private)"
+```
+- Kwa GPU/iomfb bugs, kupitisha oversized arrays kupitia `IOConnectCallMethod` mara nyingi inatosha kusababisha bad bounds. Minimal harness (selector X) to trigger size confusion:
+```c
+uint8_t buf[0x1000];
+size_t outSz = sizeof(buf);
+IOConnectCallStructMethod(conn, X, buf, sizeof(buf), buf, &outSz);
+```
+## Marejeo
+
+- [Sasisho za Usalama za Apple – macOS Sequoia 15.1 / Sonoma 14.7.1 (IOGPUFamily)](https://support.apple.com/en-us/121564)
+- [Rapid7 – IOHIDFamily CVE-2024-27799 muhtasari](https://www.rapid7.com/db/vulnerabilities/apple-osx-iohidfamily-cve-2024-27799/)
+- [Sasisho za Usalama za Apple – macOS 13.6.1 (CVE-2023-42891 IOHIDFamily)](https://support.apple.com/en-us/121551)
 {{#include ../../../banners/hacktricks-training.md}}
