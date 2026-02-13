@@ -4,15 +4,15 @@
 
 ## Основна інформація
 
-I/O Kit - це відкритий, об'єктно-орієнтований **фреймворк драйверів пристроїв** в ядрі XNU, який обробляє **динамічно завантажувані драйвери пристроїв**. Він дозволяє модульному коду додаватися до ядра на льоту, підтримуючи різноманітне апаратне забезпечення.
+I/O Kit — це фреймворк драйверів пристроїв з відкритим кодом, об'єктно-орієнтований у ядрі XNU, що обробляє **динамічно завантажувані драйвери пристроїв**. Він дозволяє додавати модульний код у ядро на льоту, підтримуючи різне обладнання.
 
-Драйвери IOKit в основному **експортують функції з ядра**. Ці параметри функцій **типи** є **попередньо визначеними** та перевіреними. Більше того, подібно до XPC, IOKit є ще одним шаром на **верхівці Mach повідомлень**.
+IOKit драйвери, по суті, **експортують функції з ядра**. Типи параметрів цих функцій **передвизначені** і перевіряються. Крім того, подібно до XPC, IOKit — це ще один шар **поверх Mach messages**.
 
-**Код ядра IOKit XNU** відкритий Apple в [https://github.com/apple-oss-distributions/xnu/tree/main/iokit](https://github.com/apple-oss-distributions/xnu/tree/main/iokit). Більше того, компоненти IOKit у просторі користувача також є відкритими [https://github.com/opensource-apple/IOKitUser](https://github.com/opensource-apple/IOKitUser).
+**IOKit XNU kernel code** опубліковано Apple як open-source за адресою [https://github.com/apple-oss-distributions/xnu/tree/main/iokit](https://github.com/apple-oss-distributions/xnu/tree/main/iokit). Крім того, компоненти IOKit у просторі користувача також доступні з відкритим кодом: [https://github.com/opensource-apple/IOKitUser](https://github.com/opensource-apple/IOKitUser).
 
-Однак, **жоден з драйверів IOKit** не є відкритим. У будь-якому випадку, час від часу випуск драйвера може супроводжуватися символами, які полегшують його налагодження. Перевірте, як [**отримати розширення драйвера з прошивки тут**](#ipsw)**.**
+Однак **жодні IOKit драйвери** не є з відкритим кодом. Водночас іноді реліз драйвера може містити символи, що полегшують його відлагодження. Дізнайтеся, як [**get the driver extensions from the firmware here**](#ipsw)**.**
 
-Він написаний на **C++**. Ви можете отримати демангліровані символи C++ за допомогою:
+Він написаний на **C++**. Ви можете отримати демангловані символи C++ за допомогою:
 ```bash
 # Get demangled symbols
 nm -C com.apple.driver.AppleJPEGDriver
@@ -23,18 +23,18 @@ __ZN16IOUserClient202222dispatchExternalMethodEjP31IOExternalMethodArgumentsOpaq
 IOUserClient2022::dispatchExternalMethod(unsigned int, IOExternalMethodArgumentsOpaque*, IOExternalMethodDispatch2022 const*, unsigned long, OSObject*, void*)
 ```
 > [!CAUTION]
-> IOKit **викриті функції** можуть виконувати **додаткові перевірки безпеки**, коли клієнт намагається викликати функцію, але слід зазначити, що програми зазвичай **обмежені** **пісочницею**, з якою функції IOKit можуть взаємодіяти.
+> IOKit **відкриті функції** можуть виконувати **додаткові перевірки безпеки**, коли клієнт намагається викликати функцію, але зауважте, що додатки зазвичай **обмежені** **sandbox** щодо того, з якими функціями IOKit вони можуть взаємодіяти.
 
 ## Драйвери
 
-У macOS вони розташовані в:
+У macOS вони розташовані у:
 
 - **`/System/Library/Extensions`**
-- Файли KEXT, вбудовані в операційну систему OS X.
+- KEXT файли, вбудовані в операційну систему OS X.
 - **`/Library/Extensions`**
-- Файли KEXT, встановлені стороннім програмним забезпеченням
+- KEXT файли, встановлені стороннім програмним забезпеченням
 
-У iOS вони розташовані в:
+У iOS вони розташовані у:
 
 - **`/System/Library/Extensions`**
 ```bash
@@ -54,48 +54,51 @@ Index Refs Address            Size       Wired      Name (Version) UUID <Linked 
 9    2 0xffffff8003317000 0xe000     0xe000     com.apple.kec.Libm (1) 6C1342CC-1D74-3D0F-BC43-97D5AD38200A <5>
 10   12 0xffffff8003544000 0x92000    0x92000    com.apple.kec.corecrypto (11.1) F5F1255F-6552-3CF4-A9DB-D60EFDEB4A9A <8 7 6 5 3 1>
 ```
-До номера 9 вказані драйвери **завантажуються за адресою 0**. Це означає, що це не справжні драйвери, а **частина ядра, і їх не можна вивантажити**.
+До номера 9 перелічені драйвери **завантажені за адресою 0**. Це означає, що це не реальні драйвери, а **частина ядра, і їх не можна вивантажити**.
 
-Щоб знайти конкретні розширення, ви можете використовувати:
+Щоб знайти конкретні розширення, ви можете використати:
 ```bash
 kextfind -bundle-id com.apple.iokit.IOReportFamily #Search by full bundle-id
 kextfind -bundle-id -substring IOR #Search by substring in bundle-id
 ```
-Щоб завантажити та вивантажити розширення ядра, виконайте:
+Щоб завантажити та розвантажити kernel extensions, виконайте:
 ```bash
 kextload com.apple.iokit.IOReportFamily
 kextunload com.apple.iokit.IOReportFamily
 ```
 ## IORegistry
 
-**IORegistry** є важливою частиною фреймворку IOKit в macOS та iOS, яка слугує базою даних для представлення апаратної конфігурації та стану системи. Це **ієрархічна колекція об'єктів, які представляють все апаратне забезпечення та драйвери**, завантажені в системі, та їхні взаємозв'язки.
+The **IORegistry** — критично важлива частина IOKit фреймворку в macOS та iOS, яка слугує базою даних для представлення конфігурації апаратного забезпечення та стану системи. Це **ієрархічна колекція об'єктів, що представляють усе апаратне забезпечення та драйвери**, завантажені в систему, та їхні взаємозв'язки.
 
-Ви можете отримати IORegistry, використовуючи cli **`ioreg`**, щоб перевірити його з консолі (особливо корисно для iOS).
+Ви можете отримати IORegistry за допомогою cli **`ioreg`** для перегляду в консолі (особливо корисно для iOS).
 ```bash
 ioreg -l #List all
 ioreg -w 0 #Not cut lines
 ioreg -p <plane> #Check other plane
 ```
-Ви можете завантажити **`IORegistryExplorer`** з **Xcode Additional Tools** з [**https://developer.apple.com/download/all/**](https://developer.apple.com/download/all/) і перевірити **macOS IORegistry** через **графічний** інтерфейс.
+You could download **`IORegistryExplorer`** from **Xcode Additional Tools** from [**https://developer.apple.com/download/all/**](https://developer.apple.com/download/all/) and inspect the **macOS IORegistry** through a **graphical** interface.
 
 <figure><img src="../../../images/image (1167).png" alt="" width="563"><figcaption></figcaption></figure>
 
-У IORegistryExplorer "площини" використовуються для організації та відображення відносин між різними об'єктами в IORegistry. Кожна площина представляє собою специфічний тип відносин або певний вигляд апаратного забезпечення та конфігурації драйверів системи. Ось деякі з поширених площин, з якими ви можете зіткнутися в IORegistryExplorer:
+У IORegistryExplorer «planes» використовуються для організації та відображення взаємозв'язків між різними об'єктами в IORegistry. Кожна «plane» представляє певний тип зв'язку або окремий вигляд конфігурації апаратного забезпечення та драйверів системи. Нижче наведені деякі з поширених «planes», які ви можете зустріти в IORegistryExplorer:
 
-1. **IOService Plane**: Це найзагальніша площина, що відображає об'єкти сервісів, які представляють драйвери та нуби (канали зв'язку між драйверами). Вона показує відносини постачальника та клієнта між цими об'єктами.
-2. **IODeviceTree Plane**: Ця площина представляє фізичні з'єднання між пристроями, коли вони підключені до системи. Вона часто використовується для візуалізації ієрархії пристроїв, підключених через шини, такі як USB або PCI.
-3. **IOPower Plane**: Відображає об'єкти та їх відносини в термінах управління енергією. Вона може показувати, які об'єкти впливають на енергетичний стан інших, що корисно для налагодження проблем, пов'язаних з енергією.
-4. **IOUSB Plane**: Спеціально зосереджена на USB-пристроях та їх відносинах, показуючи ієрархію USB-хабів та підключених пристроїв.
-5. **IOAudio Plane**: Ця площина призначена для представлення аудіопристроїв та їх відносин у системі.
+1. **IOService Plane**: Це найзагальніша plane, яка відображає service-об'єкти, що представляють драйвери та nubs (канали зв'язку між драйверами). Вона показує provider-client відносини між цими об'єктами.
+2. **IODeviceTree Plane**: Ця plane представляє фізичні з'єднання між пристроями в міру їх підключення до системи. Її часто використовують для візуалізації ієрархії пристроїв, підключених через шини, такі як USB або PCI.
+3. **IOPower Plane**: Відображає об'єкти та їхні взаємозв'язки в контексті керування енергоспоживанням. Може показувати, які об'єкти впливають на стан живлення інших, що корисно для налагодження проблем, пов'язаних з енергоспоживанням.
+4. **IOUSB Plane**: Спеціально зосереджена на USB-пристроях та їхніх взаємозв'язках, показуючи ієрархію USB-хабів і підключених пристроїв.
+5. **IOAudio Plane**: Ця plane призначена для представлення аудіопристроїв та їхніх взаємозв'язків у системі.
 6. ...
 
-## Приклад коду драйвера
+## Driver Comm Code Example
 
-Наступний код підключається до сервісу IOKit `"YourServiceNameHere"` і викликає функцію всередині селектора 0. Для цього:
+The following code connects to the IOKit service `YourServiceNameHere` and calls selector 0:
 
-- спочатку викликає **`IOServiceMatching`** та **`IOServiceGetMatchingServices`** для отримання сервісу.
-- Потім встановлює з'єднання, викликавши **`IOServiceOpen`**.
-- І нарешті викликає функцію з **`IOConnectCallScalarMethod`**, вказуючи селектор 0 (селектор - це номер, який функція, яку ви хочете викликати, має призначений).
+- It first calls **`IOServiceMatching`** and **`IOServiceGetMatchingServices`** to get the service.
+- It then establishes a connection calling **`IOServiceOpen`**.
+- And it finally calls a function with **`IOConnectCallScalarMethod`** indicating the selector 0 (the selector is the number the function you want to call has assigned).
+
+<details>
+<summary>Приклад виклику селектора драйвера з простору користувача</summary>
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <IOKit/IOKitLib.h>
@@ -150,33 +153,35 @@ IOObjectRelease(iter);
 return 0;
 }
 ```
-Є **інші** функції, які можна використовувати для виклику функцій IOKit, окрім **`IOConnectCallScalarMethod`**, такі як **`IOConnectCallMethod`**, **`IOConnectCallStructMethod`**...
+</details>
 
-## Реверс інтерфейсу драйвера
+Є **інші** функції, які можна використовувати для виклику IOKit-функцій, окрім **`IOConnectCallScalarMethod`**, наприклад **`IOConnectCallMethod`**, **`IOConnectCallStructMethod`**...
 
-Ви можете отримати їх, наприклад, з [**образу прошивки (ipsw)**](#ipsw). Потім завантажте його у ваш улюблений декомпілятор.
+## Реверсування точки входу драйвера
 
-Ви можете почати декомпіляцію функції **`externalMethod`**, оскільки це функція драйвера, яка буде отримувати виклик і викликати правильну функцію:
+Ви можете отримати їх, наприклад, з [**firmware image (ipsw)**](#ipsw). Потім завантажте його у ваш улюблений декомпілятор.
+
+Ви можете почати декомпіляцію функції **`externalMethod`**, оскільки це функція драйвера, яка приймає виклик і викликає відповідну функцію:
 
 <figure><img src="../../../images/image (1168).png" alt="" width="315"><figcaption></figcaption></figure>
 
 <figure><img src="../../../images/image (1169).png" alt=""><figcaption></figcaption></figure>
 
-Цей жахливий виклик, деманглений, означає:
+Цей деманглований виклик означає:
 ```cpp
 IOUserClient2022::dispatchExternalMethod(unsigned int, IOExternalMethodArgumentsOpaque*, IOExternalMethodDispatch2022 const*, unsigned long, OSObject*, void*)
 ```
-Зверніть увагу, що в попередньому визначенні пропущено параметр **`self`**, хороше визначення буде:
+Зверніть увагу, що в попередньому визначенні параметр **`self`** пропущено; правильне визначення було б:
 ```cpp
 IOUserClient2022::dispatchExternalMethod(self, unsigned int, IOExternalMethodArgumentsOpaque*, IOExternalMethodDispatch2022 const*, unsigned long, OSObject*, void*)
 ```
-Насправді, ви можете знайти реальне визначення за адресою [https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/Kernel/IOUserClient.cpp#L6388](https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/Kernel/IOUserClient.cpp#L6388):
+Насправді, ви можете знайти реальне визначення за цим посиланням [https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/Kernel/IOUserClient.cpp#L6388](https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/Kernel/IOUserClient.cpp#L6388):
 ```cpp
 IOUserClient2022::dispatchExternalMethod(uint32_t selector, IOExternalMethodArgumentsOpaque *arguments,
 const IOExternalMethodDispatch2022 dispatchArray[], size_t dispatchArrayCount,
 OSObject * target, void * reference)
 ```
-З цією інформацією ви можете переписати Ctrl+Right -> `Edit function signature` і встановити відомі типи:
+З цією інформацією ви можете використовувати Ctrl+Right -> `Edit function signature` і встановити відомі типи:
 
 <figure><img src="../../../images/image (1174).png" alt=""><figcaption></figcaption></figure>
 
@@ -184,11 +189,11 @@ OSObject * target, void * reference)
 
 <figure><img src="../../../images/image (1175).png" alt=""><figcaption></figcaption></figure>
 
-Для наступного кроку нам потрібно визначити структуру **`IOExternalMethodDispatch2022`**. Вона є відкритим кодом у [https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/IOKit/IOUserClient.h#L168-L176](https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/IOKit/IOUserClient.h#L168-L176), ви можете визначити її:
+На наступному кроці нам потрібно мати визначену структуру **`IOExternalMethodDispatch2022`**. Вона з відкритим кодом за адресою [https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/IOKit/IOUserClient.h#L168-L176](https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/IOKit/IOUserClient.h#L168-L176), ви можете визначити її так:
 
 <figure><img src="../../../images/image (1170).png" alt=""><figcaption></figcaption></figure>
 
-Тепер, слідуючи за `(IOExternalMethodDispatch2022 *)&sIOExternalMethodArray`, ви можете побачити багато даних:
+Тепер, слідуючи за `(IOExternalMethodDispatch2022 *)&sIOExternalMethodArray`, ви бачите багато даних:
 
 <figure><img src="../../../images/image (1176).png" alt="" width="563"><figcaption></figcaption></figure>
 
@@ -200,15 +205,52 @@ OSObject * target, void * reference)
 
 <figure><img src="../../../images/image (1179).png" alt="" width="563"><figcaption></figcaption></figure>
 
-І як ми тепер знаємо, що там є **масив з 7 елементів** (перевірте фінальний декомпільований код), натисніть, щоб створити масив з 7 елементів:
+І як ви бачите, там у нас є **масив із 7 елементів** (перевірте фінальний декомпільований код), натисніть, щоб створити масив із 7 елементів:
 
 <figure><img src="../../../images/image (1180).png" alt="" width="563"><figcaption></figcaption></figure>
 
-Після створення масиву ви можете побачити всі експортовані функції:
+Після створення масиву ви побачите всі exported functions:
 
 <figure><img src="../../../images/image (1181).png" alt=""><figcaption></figcaption></figure>
 
 > [!TIP]
-> Якщо ви пам'ятаєте, щоб **викликати** **експортовану** функцію з простору користувача, нам не потрібно викликати ім'я функції, а лише **номер селектора**. Тут ви можете побачити, що селектор **0** є функцією **`initializeDecoder`**, селектор **1** є **`startDecoder`**, селектор **2** **`initializeEncoder`**...
+> Якщо ви пам'ятаєте, щоб **call** an **exported** function з user space, нам не потрібно викликати ім'я функції, а використовується **selector number**. Тут ви бачите, що selector **0** — це функція **`initializeDecoder`**, selector **1** — **`startDecoder`**, selector **2** — **`initializeEncoder`**...
 
+## Останні вектори атак IOKit (2023–2025)
+
+- **Keystroke capture via IOHIDFamily** – CVE-2024-27799 (14.5) показав, що дозволений клієнт `IOHIDSystem` міг захоплювати події HID навіть при secure input; переконайтеся, що обробники `externalMethod` перевіряють entitlements, а не лише тип user-client.
+- **IOGPUFamily memory corruption** – CVE-2024-44197 та CVE-2025-24257 усунули OOB writes, до яких могли дістатися sandboxed apps, що передавали пошкоджені змінної довжини дані GPU user clients; звична помилка — недостатні перевірки меж навколо аргументів `IOConnectCallStructMethod`.
+- **Legacy keystroke monitoring** – CVE-2023-42891 (14.2) підтвердив, що HID user clients залишаються вектором для sandbox-escape; fuzz будь-який драйвер, що експонує keyboard/event queues.
+
+### Quick triage & fuzzing tips
+
+- Перелічіть всі external methods для user client з userland, щоб ініціалізувати fuzzer:
+```bash
+# list selectors for a service
+python3 - <<'PY'
+from ioreg import IORegistry
+svc = 'IOHIDSystem'
+reg = IORegistry()
+obj = reg.get_service(svc)
+for sel, name in obj.external_methods():
+print(f"{sel:02d} {name}")
+PY
+```
+- When reversing, зверніть увагу на кількість `IOExternalMethodDispatch2022`. Поширений шаблон багу в останніх CVE — це несумісність `structureInputSize`/`structureOutputSize` з фактичною довжиною `copyin`, що призводить до heap OOB у `IOConnectCallStructMethod`.
+- Sandbox reachability все ще залежить від entitlements. Перед тим, як витрачати час на ціль, перевірте, чи клієнт дозволений для third‑party app:
+```bash
+strings /System/Library/Extensions/IOHIDFamily.kext/Contents/MacOS/IOHIDFamily | \
+grep -E "^com\.apple\.(driver|private)"
+```
+- Для багів GPU/iomfb, передача занадто великих масивів через `IOConnectCallMethod` часто достатня, щоб викликати неправильну перевірку меж. Мінімальний harness (selector X) для виклику size confusion:
+```c
+uint8_t buf[0x1000];
+size_t outSz = sizeof(buf);
+IOConnectCallStructMethod(conn, X, buf, sizeof(buf), buf, &outSz);
+```
+## Посилання
+
+- [Apple Security Updates – macOS Sequoia 15.1 / Sonoma 14.7.1 (IOGPUFamily)](https://support.apple.com/en-us/121564)
+- [Rapid7 – IOHIDFamily CVE-2024-27799 summary](https://www.rapid7.com/db/vulnerabilities/apple-osx-iohidfamily-cve-2024-27799/)
+- [Apple Security Updates – macOS 13.6.1 (CVE-2023-42891 IOHIDFamily)](https://support.apple.com/en-us/121551)
 {{#include ../../../banners/hacktricks-training.md}}
