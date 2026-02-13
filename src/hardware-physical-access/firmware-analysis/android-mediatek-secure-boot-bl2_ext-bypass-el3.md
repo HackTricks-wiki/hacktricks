@@ -2,9 +2,9 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Ukurasa huu unaelezea kuvunjwa kwa vitendo kwa secure-boot kwenye platform nyingi za MediaTek kwa kutumia pengo la uthibitishaji wakati configuration ya bootloader ya kifaa (seccfg) iko "unlocked". Hitilafu hii inaruhusu kuendesha bl2_ext iliyopigwa patch kwenye ARM EL3 ili kuzima uthibitishaji wa saini wa sehemu zinazofuata, kuangusha chain of trust na kuwezesha upakiaji wa TEE/GZ/LK/Kernel zisizotia saini.
+Ukurasa huu unaelezea uvunjaji wa Secure-Boot wa vitendo katika majukwaa mbalimbali ya MediaTek kwa kuchukua faida ya pengo la uthibitishaji wakati usanidi wa bootloader (seccfg) umewekwa "unlocked". Hitilafu inaruhusu kuendesha bl2_ext iliyorekebishwa kwenye ARM EL3 ili kuzima downstream signature verification, kupunguza chain of trust na kuwezesha kupakia TEE/GZ/LK/Kernel zisizotiwa saini.
 
-> Caution: Early-boot patching can permanently brick devices if offsets are wrong. Always keep full dumps and a reliable recovery path.
+> Tahadhari: Urekebishaji mapema wa boot unaweza kuharibu kifaa kabisa ikiwa offsets sio sahihi. Daima hifadhi full dumps na njia thabiti ya recovery.
 
 ## Affected boot flow (MediaTek)
 
@@ -16,136 +16,125 @@ Key trust boundary:
 
 ## Root cause
 
-On affected devices, the Preloader does not enforce authentication of the bl2_ext partition when seccfg indicates an "unlocked" state. This allows flashing an attacker-controlled bl2_ext that runs at EL3.
+Kwenye vifaa vilivyoathiriwa, Preloader haisisitizi authentication ya partition ya bl2_ext wakati seccfg inaonyesha hali ya "unlocked". Hii inaruhusu flashing ya bl2_ext inayodhibitiwa na mshambuliaji inayofanya kazi kwenye EL3.
 
-Inside bl2_ext, the verification policy function can be patched to unconditionally report that verification is not required. A minimal conceptual patch is:
-```c
-// inside bl2_ext
-int sec_get_vfy_policy(...) {
-return 0; // always: "no verification required"
-}
-```
-Kwa mabadiliko haya, picha zote zinazofuata (TEE, GZ, LK/AEE, Kernel) zinakubaliwa bila ukaguzi wa kriptografia wakati zinapopakiwa na bl2_ext iliyorekebishwa inayoendesha kwenye EL3.
+Ndani ya bl2_ext, verification policy function inaweza ku-patch-ikiwa ili kuripoti bila masharti kwamba verification haitegemeeki (au kila wakati inafanikiwa), ikilazimisha boot chain kukubali picha za TEE/GZ/LK/Kernel zisizo na saini. Kwa sababu patch hii inafanya kazi kwenye EL3, ni yenye ufanisi hata kama vipengele vya downstream vinafanya ukaguzi wao wenyewe.
 
-## Jinsi ya kuchunguza lengo (expdb logs)
+## Practical exploit chain
 
-Dump/inspect boot logs (e.g., expdb) karibu na bl2_ext load. Ikiwa img_auth_required = 0 na certificate verification time ni takriban ~0 ms, kuna uwezekano kwamba enforcement imezimwa na kifaa kinaweza kuwa exploitable.
+1. Obtain bootloader partitions (Preloader, bl2_ext, LK/AEE, etc.) via OTA/firmware packages, EDL/DA readback, or hardware dumping.
+2. Identify bl2_ext verification routine and patch it to always skip/accept verification.
+3. Flash modified bl2_ext using fastboot, DA, or similar maintenance channels that are still allowed on unlocked devices.
+4. Reboot; Preloader jumps to patched bl2_ext at EL3 which then loads unsigned downstream images (patched TEE/GZ/LK/Kernel) and disables signature enforcement.
 
-Sehemu ya logi ya mfano:
+If the device is configured as locked (seccfg locked), the Preloader is expected to verify bl2_ext. In that configuration, this attack will fail unless another vulnerability permits loading an unsigned bl2_ext.
+
+## Triage (expdb boot logs)
+
+- Dump boot/expdb logs around the bl2_ext load. If `img_auth_required = 0` and certificate verification time is ~0 ms, verification is likely skipped.
+
+Example log excerpt:
 ```
 [PART] img_auth_required = 0
 [PART] Image with header, name: bl2_ext, addr: FFFFFFFFh, mode: FFFFFFFFh, size:654944, magic:58881688h
 [PART] part: lk_a img: bl2_ext cert vfy(0 ms)
 ```
-Kumbuka: Kuna ripoti kwamba baadhi ya vifaa hupitisha ukaguzi wa bl2_ext hata ikiwa bootloader imefungwa, jambo ambalo huongeza athari.
+- Vifaa vingine vinapita uhakiki wa bl2_ext hata vinapofungwa; njia za lk2 za bootloader ya sekondari zimeonyesha pengo sawa. Ikiwa Preloader baada ya OTA inaripoti `img_auth_required = 1` kwa bl2_ext wakati imefunguliwa, utekelezaji uwezekano ulirejeshwa.
 
-Vifaa vinavyoambatana na lk2 secondary bootloader vimeonekana kuwa na pengo la kimantiki sawa, hivyo pata expdb logs za partitions za bl2_ext na lk2 ili kuthibitisha kama mojawapo ya njia hizo inatekeleza signatures kabla ya kujaribu porting.
+## Verification logic locations
 
-Ikiwa post-OTA Preloader sasa inarekodi img_auth_required = 1 kwa bl2_ext hata wakati seccfg imefunguliwa, vendor huenda amefunga pengo hilo—angalia maelezo ya OTA persistence hapa chini.
+- Uhakiki husika kwa kawaida upo ndani ya picha ya bl2_ext katika funsi zenye majina yanayofanana na `verify_img` au `sec_img_auth`.
+- Toleo lililorekebishwa linawalazimisha funsi kurudisha mafanikio au kuruka kabisa wito wa uhakiki.
 
-## Mtiririko wa utekelezaji wa vitendo (Fenrir PoC)
+Mfano wa patch (kimsingi):
+- Tafuta funsi inayoitisha `sec_img_auth` kwa picha za TEE, GZ, LK, na kernel.
+- Badilisha mwili wake na stub inayorudisha mara moja mafanikio, au andika juu tawi la masharti linaloshughulikia kushindwa kwa uhakiki.
 
-Fenrir ni reference exploit/patching toolkit kwa aina hii ya tatizo. Inasaidia Nothing Phone (2a) (Pacman) na inajulikana kufanya kazi (kwa uunga mkono usio kamili) kwenye CMF Phone 1 (Tetris). Kuporting kwa modeli nyingine kunahitaji reverse engineering ya bl2_ext maalum kwa kifaa.
+Hakikisha patch inahifadhi mpangilio wa stack/frame na inarudisha status codes zinazotarajiwa kwa wawaitaji.
 
-Muhtasari wa mchakato:
-- Pata device bootloader image ya codename uliyolenga na weka kama `bin/<device>.bin`
-- Jenga patched image inayozima bl2_ext verification policy
-- Flash payload inayotokana kwenye kifaa (fastboot inadhaniwa na helper script)
+## Fenrir PoC workflow (Nothing/CMF)
 
-Amri:
+Fenrir ni toolkit ya marejeo ya patching kwa tatizo hili (Nothing Phone (2a) inasaidiwa kikamilifu; CMF Phone 1 kwa sehemu). Kwa juu ya mchakato:
+- Weka picha ya bootloader ya kifaa kama `bin/<device>.bin`.
+- Jenga patched image inayozima sera ya uhakiki ya bl2_ext.
+- Flash payload iliyotolewa (fastboot helper imetolewa).
 ```bash
-# Build patched image (default path bin/[device].bin)
-./build.sh pacman
-
-# Build from a custom bootloader path
-./build.sh pacman /path/to/your/bootloader.bin
-
-# Flash the resulting lk.patched (fastboot required by the helper script)
-./flash.sh
+./build.sh pacman                    # build from bin/pacman.bin
+./build.sh pacman /path/to/boot.bin  # build from a custom bootloader path
+./flash.sh                           # flash via fastboot
 ```
-Ikiwa fastboot haipatikani, unapaswa kutumia mbinu mbadala ya flashing inayofaa kwa jukwaa lako.
+Tumia njia nyingine ya ku-flash ikiwa fastboot haipatikani.
 
-### OTA-patched firmware: kuendelea kuweka bypass hai (NothingOS 4, mwishoni mwa 2025)
+## Vidokezo vya kurekebisha EL3
 
-Nothing ilirekebisha Preloader katika OTA thabiti ya NothingOS 4 ya Novemba 2025 (build BP2A.250605.031.A3) ili kulazimisha uthibitisho wa bl2_ext hata wakati seccfg imefunguliwa. Fenrir `pacman-v2.0` inafanya kazi tena kwa kuchanganya Preloader iliyoathirika kutoka NOS 4 beta na LK payload:
-```bash
-# on Nothing Phone (2a), unlocked bootloader, in bootloader (not fastbootd)
-fastboot flash preloader_a preloader_raw.img   # beta Preloader bundled with fenrir release
-fastboot flash lk pacman-fenrir.bin            # patched LK containing stage hooks
-fastboot reboot                                # factory reset may be needed
-```
-Important:
-- Flash the provided Preloader **only** to the matching device/slot; Preloader isiyofaa ni hard brick mara moja.
-- Kagua expdb baada ya flashing; img_auth_required inapaswa kurudi 0 kwa bl2_ext, ikithibitisha kwamba Preloader dhaifu inaendesha kabla ya patched LK yako.
-- Ikiwa OTAs zijazo zitapataza Preloader na LK, hifadhi nakala ya ndani ya Preloader dhaifu ili kurejesha pengo.
+- bl2_ext inatekelezwa katika ARM EL3. Kuanguka hapa kunaweza kufanya kifaa kisifanye kazi hadi kirefleshwe kupitia EDL/DA au test points.
+- Tumia logging/UART maalumu ya bodi kuthibitisha njia ya utekelezaji na kuchunguza kuanguka.
+- Hifadhi chelezo za partitions zote zinazobadilishwa na jaribu kwanza kwenye hardware ya majaribio.
 
-### Build automation & payload debugging
+## Matokeo
 
-- `build.sh` sasa inafanya auto-download na ku-export Arm GNU Toolchain 14.2 (aarch64-none-elf) mara ya kwanza unapoendesha, hivyo hauitaji kushughulikia cross-compilers kwa mikono.
-- Export `DEBUG=1` kabla ya ku-invoke `build.sh` ili kukusanya payloads zenye verbose serial prints, jambo linalosaidia sana unapofanya blind-patching ya EL3 code paths.
-- Builds zilizofanikiwa zinaangusha `lk.patched` na `<device>-fenrir.bin`; hii ya mwisho tayari ina payload imeingizwa na ndio unayopaswa flash/boot-test.
-
-## Runtime payload capabilities (EL3)
-
-Patched bl2_ext payload inaweza:
-- Sajili amri maalum za fastboot
-- Dhibiti/au kubadilisha boot mode
-- Kuita kwa njia ya dynamic functions za bootloader zilizojengwa wakati wa runtime
-- Udanganye “lock state” kuonekana locked ilhali kwa kweli unlocked, ili kupitisha ukaguzi mkali wa uadilifu (mazingira mengine bado yanaweza kuhitaji marekebisho ya vbmeta/AVB)
-
-Kizuizi: PoCs za sasa zinaonyesha kwamba mabadiliko ya memory wakati wa runtime yanaweza kusababisha fault kutokana na vizuizi vya MMU; payloads kwa kawaida huiepuka kuandika memory moja kwa moja hadi tatizo lifanyiwe kazi.
-
-## Payload staging patterns (EL3)
-
-Fenrir inagawanya instrumentation yake katika hatua tatu za compile-time: stage1 inaendesha kabla ya `platform_init()`, stage2 inaendesha kabla ya LK kuashiria ingizo la fastboot, na stage3 inatekelezwa mara moja kabla ya LK kupakia Linux. Kila header ya kifaa chini ya `payload/devices/` hutoa addresses za hooks hizi pamoja na symbols za msaada wa fastboot, hivyo weka offsets hizo zikihusiana na target build yako.
-
-Stage2 ni eneo rahisi la kusajili verbs yoyote za `fastboot oem`:
-```c
-void cmd_r0rt1z2(const char *arg, void *data, unsigned int sz) {
-video_printf("r0rt1z2 was here...\n");
-fastboot_info("pwned by r0rt1z2");
-fastboot_okay("");
-}
-
-__attribute__((section(".text.main"))) void main(void) {
-fastboot_register("oem r0rt1z2", cmd_r0rt1z2, true, false);
-notify_enter_fastboot();
-}
-```
-Stage3 inaonyesha jinsi ya kwa muda mfupi kubadili page-table attributes ili ku-patch immutable strings kama onyo la Android’s “Orange State” bila kuhitaji downstream kernel access:
-```c
-set_pte_rwx(0xFFFF000050f9E3AE);
-strcpy((char *)0xFFFF000050f9E3AE, "Patched by stage3");
-```
-Kwa sababu stage1 inaanzishwa kabla ya platform bring-up, ni sehemu sahihi ya kuita OEM power/reset primitives au kuingiza logging ya uadilifu ya ziada kabla ya verified boot chain kufutwa.
-
-## Vidokezo vya Porting
-
-- Fanya reverse engineer wa device-specific bl2_ext ili kupata mantiki ya polisi ya uthibitishaji (mf. sec_get_vfy_policy).
-- Tambua site ya kurudisha polisi au tawi la uamuzi na uipachike ili “no verification required” (return 0 / unconditional allow).
-- Weka offsets ziwe maalum kabisa kwa kifaa na firmware; usitumie addresses kati ya variants.
-- Thibitisha kwanza kwenye kifaa cha majaribio. Andaa mpango wa urejeshaji (mf., EDL/BootROM loader/SoC-specific download mode) kabla ya ku-flash.
-- Vifaa vinavyotumia lk2 secondary bootloader au kuripoti “img_auth_required = 0” kwa bl2_ext hata vikiwa vimefungwa vinapaswa kutendewa kama nakala zilizo hatarini za aina hii ya mdudu; Vivo X80 Pro tayari imeonekana kupita uthibitisho licha ya hali iliyoripotiwa ya kufungwa.
-- Wakati OTA inaanza kutekeleza bl2_ext signatures (img_auth_required = 1) katika hali isiyofungwa, angalia kama Preloader wa zamani (mara nyingi upo katika beta OTAs) unaweza ku-flash kuifungua tena pengo, kisha re-run fenrir na offsets zilizosasishwa kwa LK mpya.
-
-## Athari za usalama
-
-- Utekelezaji wa code EL3 baada ya Preloader na kuanguka kwa full chain-of-trust kwa sehemu zote za mchakato wa boot.
-- Uwezo wa ku-boot unsigned TEE/GZ/LK/Kernel, ukiepuka matarajio ya secure/verified boot na kuwezesha kompromisi ya kudumu.
+- Utekelezaji wa nambari ya EL3 baada ya Preloader na kuanguka kabisa kwa chain-of-trust kwa sehemu iliyobaki ya boot.
+- Uwezo wa kuboot unsigned TEE/GZ/LK/Kernel, ukivuka matarajio ya secure/verified boot na kuwezesha kuathirika kwa kudumu.
 
 ## Vidokezo kuhusu vifaa
 
-- Imethibitishwa kuungwa mkono: Nothing Phone (2a) (Pacman)
-- Inajulikana kufanya kazi (msaada usio kamili): CMF Phone 1 (Tetris)
-- Imeonekana: Vivo X80 Pro iliripotiwa kutokuwa inathibitisha bl2_ext hata wakati imefungwa
-- NothingOS 4 stable (BP2A.250605.031.A3, Nov 2025) ilire-enabled tena uthibitishaji wa bl2_ext; fenrir `pacman-v2.0` inarejesha bypass kwa ku-flash beta Preloader pamoja na LK iliyopachikwa kama ilivyoonyeshwa hapo juu
-- Ufunuo wa sekta unaonyesha wauzaji zaidi wanaotegemea lk2 wanaotuma hitilafu ileile ya mantiki, hivyo tarajia ulinganifu zaidi katika utolewaji wa MTK za 2024–2025.
+- Imehakikiwa inaunga mkono: Nothing Phone (2a) (Pacman)
+- Inajulikana kufanya kazi (msaada haujakamilika): CMF Phone 1 (Tetris)
+- Imeonekana: Vivo X80 Pro inaripotiwa haikuthibitisha bl2_ext hata ilipokuwa imefungwa
+- NothingOS 4 stable (BP2A.250605.031.A3, Nov 2025) iliwasha tena uhakiki wa bl2_ext; fenrir `pacman-v2.0` hurudisha bypass kwa kuchanganya Preloader ya beta na LK iliyorekebishwa
+- Ripoti za tasnia zinaonyesha wauzaji wa lk2-based zaidi wanaosafirisha kasoro ya mantiki ile ile, hivyo tarajia msongamano zaidi katika utolewaji wa MTK 2024–2025.
 
-## References
+## MTK DA readback na uendeshaji wa seccfg kwa kutumia Penumbra
+
+Penumbra ni Rust crate/CLI/TUI inayojiripia mwingiliano na MTK preloader/bootrom kupitia USB kwa ajili ya shughuli za DA-mode. Ikiwa una upatikanaji wa kimwili wa handset iliyo na uharibifu (DA extensions zikiruhusiwa), inaweza kugundua port ya MTK USB, kupeleka Download Agent (DA) blob, na kutoa amri za cheo kama kubadilisha seccfg lock na partition readback.
+
+- **Environment/driver setup**: Kwenye Linux install `libudev`, ongeza mtumiaji kwa kundi la `dialout`, na tengeneza udev rules au endesha kwa `sudo` ikiwa device node haipatikani. Msaada wa Windows sio thabiti; wakati mwingine hufanya kazi tu baada ya kubadilisha MTK driver na WinUSB kwa kutumia Zadig (kulingana na mwongozo wa project).
+- **Workflow**: Soma DA payload (mfano, `std::fs::read("../DA_penangf.bin")`), dumu kwa port ya MTK na `find_mtk_port()`, na unda session kwa kutumia `DeviceBuilder::with_mtk_port(...).with_da_data(...)`. Baada `init()` inakamilisha handshake na kukusanya taarifa za kifaa, angalia ulinzi kupitia bitfields za `dev_info.target_config()` (bit 0 imewekwa → SBC imewezeshwa). Ingia DA mode na jaribu `set_seccfg_lock_state(LockFlag::Unlock)`—hii inafanikiwa tu ikiwa kifaa kinakubali extensions. Partitions zinaweza kuzuliwa kwa `read_partition("lk_a", &mut progress_cb, &mut writer)` kwa uchambuzi offline au patching.
+- **Security impact**: Kufungua seccfg kwa mafanikio kunafungua tena njia za flashing kwa boot images zisizosainiwa, kuziwezesha kuathirika kwa kudumu kama EL3 bl2_ext patching iliyoelezewa hapo juu. Partition readback hutoa artifacts za firmware kwa ajili ya reverse engineering na kutengeneza images zilizorekebishwa.
+
+<details>
+<summary>Rust DA session + seccfg unlock + partition dump (Penumbra)</summary>
+```rust
+use tokio::fs::File;
+use anyhow::Result;
+use penumbra::{DeviceBuilder, LockFlag, find_mtk_port};
+use tokio::io::{AsyncWriteExt, BufWriter};
+
+#[tokio::main]
+async fn main() -> Result<()> {
+let da = std::fs::read("../DA_penangf.bin")?;
+let mtk_port = loop {
+if let Some(port) = find_mtk_port().await {
+break port;
+}
+};
+
+let mut dev = DeviceBuilder::default()
+.with_mtk_port(mtk_port)
+.with_da_data(da)
+.build()?;
+
+dev.init().await?;
+let cfg = dev.dev_info.target_config().await;
+println!("SBC: {}", (cfg & 0x1) != 0);
+
+dev.set_seccfg_lock_state(LockFlag::Unlock).await?;
+
+let mut progress = |_read: usize, _total: usize| {};
+let mut writer = BufWriter::new(File::create("lk_a.bin")?);
+dev.read_partition("lk_a", &mut progress, &mut writer).await?;
+writer.flush().await?;
+Ok(())
+}
+```
+</details>
+
+## Marejeo
 
 - [Fenrir – MediaTek bl2_ext secure‑boot bypass (PoC)](https://github.com/R0rt1z2/fenrir)
-- [Cyber Security News – PoC Exploit Released For Nothing Phone Code Execution Vulnerability](https://cybersecuritynews.com/nothing-phone-code-execution-vulnerability/)
-- [Fenrir pacman-v2.0 release (NothingOS 4 bypass bundle)](https://github.com/R0rt1z2/fenrir/releases/tag/pacman-v2.0)
-- [The Cyber Express – Fenrir PoC breaks secure boot on Nothing Phone 2a/CMF1](https://thecyberexpress.com/fenrir-poc-for-nothing-phone-2a-cmf1/)
+- [Cyber Security News – PoC Exploit Imetolewa kwa Nothing Phone Code Execution Vulnerability](https://cybersecuritynews.com/nothing-phone-code-execution-vulnerability/)
+- [Fenrir pacman-v2.0 toleo (NothingOS 4 bypass bundle)](https://github.com/R0rt1z2/fenrir/releases/tag/pacman-v2.0)
+- [The Cyber Express – Fenrir PoC inavunja secure boot kwenye Nothing Phone 2a/CMF1](https://thecyberexpress.com/fenrir-poc-for-nothing-phone-2a-cmf1/)
+- [Penumbra – MTK DA flash/readback & seccfg tooling](https://github.com/shomykohai/penumbra)
 
 {{#include ../../banners/hacktricks-training.md}}
