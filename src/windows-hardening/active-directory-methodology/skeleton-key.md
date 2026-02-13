@@ -4,28 +4,51 @@
 
 ## Skeleton Key Attack
 
-**Skeleton Key हमला** एक जटिल तकनीक है जो हमलावरों को **Active Directory प्रमाणीकरण को बायपास करने** की अनुमति देती है, **डोमेन कंट्रोलर में एक मास्टर पासवर्ड इंजेक्ट करके**। यह हमलावर को **किसी भी उपयोगकर्ता के रूप में प्रमाणीकरण** करने में सक्षम बनाता है बिना उनके पासवर्ड के, प्रभावी रूप से **उन्हें डोमेन तक असीमित पहुंच प्रदान करता है**।
+The **Skeleton Key attack** एक तकनीक है जो हमलावरों को प्रत्येक domain controller के LSASS प्रोसेस में **injecting a master password** करके **bypass Active Directory authentication** करने की अनुमति देती है। इंजेक्शन के बाद, master password (default **`mimikatz`**) का उपयोग किसी भी domain user के रूप में प्रमाणीकृत करने के लिए किया जा सकता है जबकि उनके वास्तविक पासवर्ड अभी भी काम करते हैं।
 
-इसे [Mimikatz](https://github.com/gentilkiwi/mimikatz) का उपयोग करके किया जा सकता है। इस हमले को अंजाम देने के लिए, **डोमेन एडमिन अधिकार आवश्यक हैं**, और हमलावर को प्रत्येक डोमेन कंट्रोलर को लक्षित करना चाहिए ताकि एक व्यापक उल्लंघन सुनिश्चित हो सके। हालाँकि, हमले का प्रभाव अस्थायी है, क्योंकि **डोमेन कंट्रोलर को पुनरारंभ करने से मैलवेयर समाप्त हो जाता है**, जिससे निरंतर पहुंच के लिए पुनः कार्यान्वयन की आवश्यकता होती है।
+Key facts:
 
-**हमला निष्पादित करने** के लिए एकल कमांड की आवश्यकता होती है: `misc::skeleton`.
+- प्रत्येक DC पर **Domain Admin/SYSTEM + SeDebugPrivilege** की आवश्यकता होती है और इसे **reapplied after each reboot** करना पड़ता है।
+- **NTLM** और **Kerberos RC4 (etype 0x17)** validation paths को patch करता है; केवल AES‑only realms या AES अनिवार्य करने वाले अकाउंट **not accept the skeleton key**।
+- तीसरे‑पक्ष के LSA authentication packages या अतिरिक्त smart‑card / MFA providers के साथ टकराव हो सकता है।
+- The Mimikatz module accepts the optional switch `/letaes` to avoid touching Kerberos/AES hooks in case of compatibility issues.
+
+### क्रियान्वयन
+
+Classic, non‑PPL protected LSASS:
+```text
+mimikatz # privilege::debug
+mimikatz # misc::skeleton
+```
+यदि **LSASS is running as PPL** (RunAsPPL/Credential Guard/Windows 11 Secure LSASS), LSASS को पैच करने से पहले सुरक्षा हटाने के लिए एक kernel driver की आवश्यकता होती है:
+```text
+mimikatz # privilege::debug
+mimikatz # !+
+mimikatz # !processprotect /process:lsass.exe /remove   # drop PPL
+mimikatz # misc::skeleton                               # inject master password 'mimikatz'
+```
+इंजेक्शन के बाद, किसी भी domain खाते से प्रमाणीकृत करें लेकिन पासवर्ड के रूप में `mimikatz` (या ऑपरेटर द्वारा सेट की गई वैल्यू) का उपयोग करें। मल्टी‑DC वातावरण में इसे **सभी DCs** पर दोहराना याद रखें।
 
 ## Mitigations
 
-ऐसे हमलों के खिलाफ निवारण रणनीतियों में उन विशिष्ट इवेंट आईडी की निगरानी करना शामिल है जो सेवाओं की स्थापना या संवेदनशील विशेषाधिकारों के उपयोग को इंगित करते हैं। विशेष रूप से, सिस्टम इवेंट आईडी 7045 या सुरक्षा इवेंट आईडी 4673 की तलाश करना संदिग्ध गतिविधियों को प्रकट कर सकता है। इसके अतिरिक्त, `lsass.exe` को एक संरक्षित प्रक्रिया के रूप में चलाना हमलावरों के प्रयासों को काफी बाधित कर सकता है, क्योंकि इसके लिए उन्हें एक कर्नेल मोड ड्राइवर का उपयोग करना आवश्यक है, जिससे हमले की जटिलता बढ़ जाती है।
+- **लॉग मॉनिटरिंग**
+- अनसाइन्ड ड्राइवर्स जैसे `mimidrv.sys` के लिए System **Event ID 7045** (service/driver install)।
+- **Sysmon**: `mimidrv.sys` के लिए Event ID 7 (driver load); गैर‑सिस्टम प्रोसेस से `lsass.exe` तक संदिग्ध पहुंच के लिए Event ID 10।
+- संवेदनशील privilege उपयोग या LSA authentication package रजिस्ट्रेशन असामान्यताओं के लिए Security **Event ID 4673/4611**; DCs से RC4 (etype 0x17) का उपयोग करके अनपेक्षित 4624 लॉगऑन के साथ correlate करें।
+- **LSASS हार्डनिंग**
+- attackers को kernel‑mode driver तैनाती की ओर मजबूर करने के लिए DCs पर **RunAsPPL/Credential Guard/Secure LSASS** सक्षम रखें (अधिक telemetry, exploitation कठिन)।
+- जहाँ संभव हो legacy **RC4** को अक्षम करें; Kerberos टिकट्स को AES तक सीमित करने से उस RC4 hook path को रोका जा सकता है जिसका उपयोग skeleton key करता है।
+- त्वरित PowerShell हंट्स:
+- अनसाइन्ड kernel driver इंस्टॉल का पता लगाएँ: `Get-WinEvent -FilterHashtable @{Logname='System';ID=7045} | ?{$_.message -like "*Kernel Mode Driver*"}`
+- Mimikatz driver की तलाश: `Get-WinEvent -FilterHashtable @{Logname='System';ID=7045} | ?{$_.message -like "*Kernel Mode Driver*" -and $_.message -like "*mimidrv*"}`
+- रीबूट के बाद PPL लागू है यह सत्यापित करें: `Get-WinEvent -FilterHashtable @{Logname='System';ID=12} | ?{$_.message -like "*protected process*"}`
 
-यहाँ सुरक्षा उपायों को बढ़ाने के लिए PowerShell कमांड हैं:
+अतिरिक्त credential‑hardening मार्गदर्शन के लिए देखें [Windows credentials protections](../stealing-credentials/credentials-protections.md).
 
-- संदिग्ध सेवाओं की स्थापना का पता लगाने के लिए, उपयोग करें: `Get-WinEvent -FilterHashtable @{Logname='System';ID=7045} | ?{$_.message -like "*Kernel Mode Driver*"}`
+## संदर्भ
 
-- विशेष रूप से, Mimikatz के ड्राइवर का पता लगाने के लिए, निम्नलिखित कमांड का उपयोग किया जा सकता है: `Get-WinEvent -FilterHashtable @{Logname='System';ID=7045} | ?{$_.message -like "*Kernel Mode Driver*" -and $_.message -like "*mimidrv*"}`
-
-- `lsass.exe` को मजबूत करने के लिए, इसे एक संरक्षित प्रक्रिया के रूप में सक्षम करना अनुशंसित है: `New-ItemProperty HKLM:\SYSTEM\CurrentControlSet\Control\Lsa -Name RunAsPPL -Value 1 -Verbose`
-
-सिस्टम पुनरारंभ के बाद सत्यापन करना महत्वपूर्ण है यह सुनिश्चित करने के लिए कि सुरक्षा उपाय सफलतापूर्वक लागू किए गए हैं। यह किया जा सकता है: `Get-WinEvent -FilterHashtable @{Logname='System';ID=12} | ?{$_.message -like "*protected process*`
-
-## References
-
-- [https://blog.netwrix.com/2022/11/29/skeleton-key-attack-active-directory/](https://blog.netwrix.com/2022/11/29/skeleton-key-attack-active-directory/)
+- [Netwrix – Skeleton Key attack in Active Directory (2022)](https://blog.netwrix.com/2022/11/29/skeleton-key-attack-active-directory/)
+- [TheHacker.recipes – Skeleton key (2026)](https://www.thehacker.recipes/ad/persistence/skeleton-key/)
+- [TheHacker.Tools – Mimikatz misc::skeleton module](https://tools.thehacker.recipes/mimikatz/modules/misc/skeleton)
 
 {{#include ../../banners/hacktricks-training.md}}
