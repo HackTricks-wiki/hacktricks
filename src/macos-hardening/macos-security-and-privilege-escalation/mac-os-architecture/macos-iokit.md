@@ -101,11 +101,14 @@ In IORegistryExplorer, "planes" are used to organize and display the relationshi
 
 ## Driver Comm Code Example
 
-The following code connects to the IOKit service `"YourServiceNameHere"` and calls the function inside the selector 0. For it:
+The following code connects to the IOKit service `YourServiceNameHere` and calls selector 0:
 
-- it first calls **`IOServiceMatching`** and **`IOServiceGetMatchingServices`** to get the service.
-- It then establish a connection calling **`IOServiceOpen`**.
+- It first calls **`IOServiceMatching`** and **`IOServiceGetMatchingServices`** to get the service.
+- It then establishes a connection calling **`IOServiceOpen`**.
 - And it finally calls a function with **`IOConnectCallScalarMethod`** indicating the selector 0 (the selector is the number the function you want to call has assigned).
+
+<details>
+<summary>Example user-space call to a driver selector</summary>
 
 ```objectivec
 #import <Foundation/Foundation.h>
@@ -161,6 +164,8 @@ int main(int argc, const char * argv[]) {
     return 0;
 }
 ```
+
+</details>
 
 There are **other** functions that can be used to call IOKit functions apart of **`IOConnectCallScalarMethod`** like **`IOConnectCallMethod`**, **`IOConnectCallStructMethod`**...
 
@@ -229,7 +234,49 @@ After the array is created you can see all the exported functions:
 > [!TIP]
 > If you remember, to **call** an **exported** function from user space we don't need to call the name of the function, but the **selector number**. Here you can see that the selector **0** is the function **`initializeDecoder`**, the selector **1** is **`startDecoder`**, the selector **2** **`initializeEncoder`**...
 
+## Recent IOKit attack surface (2023–2025)
+
+- **Keystroke capture via IOHIDFamily** – CVE-2024-27799 (14.5) showed a permissive `IOHIDSystem` client could grab HID events even with secure input; ensure `externalMethod` handlers enforce entitlements instead of only the user-client type.
+- **IOGPUFamily memory corruption** – CVE-2024-44197 and CVE-2025-24257 fixed OOB writes reachable from sandboxed apps that pass malformed variable-length data to GPU user clients; the usual bug is poor bounds around `IOConnectCallStructMethod` arguments.
+- **Legacy keystroke monitoring** – CVE-2023-42891 (14.2) confirmed HID user clients remain a sandbox-escape vector; fuzz any driver exposing keyboard/event queues.
+
+### Quick triage & fuzzing tips
+
+- Enumerate all external methods for a user client from userland to seed a fuzzer:
+
+```bash
+# list selectors for a service
+python3 - <<'PY'
+from ioreg import IORegistry
+svc = 'IOHIDSystem'
+reg = IORegistry()
+obj = reg.get_service(svc)
+for sel, name in obj.external_methods():
+    print(f"{sel:02d} {name}")
+PY
+```
+
+- When reversing, pay attention to `IOExternalMethodDispatch2022` counts. A common bug pattern in recent CVEs is inconsistent `structureInputSize`/`structureOutputSize` vs. actual `copyin` length, leading to heap OOB in `IOConnectCallStructMethod`.
+- Sandbox reachability still hinges on entitlements. Before spending time on a target, check if the client is allowed from a third‑party app:
+
+```bash
+strings /System/Library/Extensions/IOHIDFamily.kext/Contents/MacOS/IOHIDFamily | \
+  grep -E "^com\.apple\.(driver|private)"
+```
+
+- For GPU/iomfb bugs, passing oversized arrays through `IOConnectCallMethod` is often enough to trigger bad bounds. Minimal harness (selector X) to trigger size confusion:
+
+```c
+uint8_t buf[0x1000];
+size_t outSz = sizeof(buf);
+IOConnectCallStructMethod(conn, X, buf, sizeof(buf), buf, &outSz);
+```
+
+
+
+## References
+
+- [Apple Security Updates – macOS Sequoia 15.1 / Sonoma 14.7.1 (IOGPUFamily)](https://support.apple.com/en-us/121564)
+- [Rapid7 – IOHIDFamily CVE-2024-27799 summary](https://www.rapid7.com/db/vulnerabilities/apple-osx-iohidfamily-cve-2024-27799/)
+- [Apple Security Updates – macOS 13.6.1 (CVE-2023-42891 IOHIDFamily)](https://support.apple.com/en-us/121551)
 {{#include ../../../banners/hacktricks-training.md}}
-
-
-
