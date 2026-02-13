@@ -829,6 +829,7 @@
   - [Ret2vDSO](binary-exploitation/rop-return-oriented-programing/ret2vdso.md)
   - [SROP - Sigreturn-Oriented Programming](binary-exploitation/rop-return-oriented-programing/srop-sigreturn-oriented-programming/README.md)
     - [SROP - ARM64](binary-exploitation/rop-return-oriented-programing/srop-sigreturn-oriented-programming/srop-arm64.md)
+  - [Mediatek Xflash Carbonara Da2 Hash Bypass](hardware-physical-access/firmware-analysis/mediatek-xflash-carbonara-da2-hash-bypass.md)
   - [Synology Encrypted Archive Decryption](hardware-physical-access/firmware-analysis/synology-encrypted-archive-decryption.md)
   - [Windows Seh Overflow](binary-exploitation/stack-overflow/windows-seh-overflow.md)
 - [Array Indexing](binary-exploitation/array-indexing.md)
