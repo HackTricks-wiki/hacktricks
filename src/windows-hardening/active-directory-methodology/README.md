@@ -927,6 +927,11 @@ https://cloud.hacktricks.wiki/en/pentesting-cloud/azure-security/az-lateral-move
 - **Domain Admins Restrictions**: It is recommended that Domain Admins should only be allowed to login to Domain Controllers, avoiding their use on other hosts.
 - **Service Account Privileges**: Services should not be run with Domain Admin (DA) privileges to maintain security.
 - **Temporal Privilege Limitation**: For tasks requiring DA privileges, their duration should be limited. This can be achieved by: `Add-ADGroupMember -Identity ‘Domain Admins’ -Members newDA -MemberTimeToLive (New-TimeSpan -Minutes 20)`
+- **LDAP relay mitigation**: Audit Event IDs 2889/3074/3075 and then enforce LDAP signing plus LDAPS channel binding on DCs/clients to block LDAP MITM/relay attempts.
+
+{{#ref}}
+ldap-signing-and-channel-binding.md
+{{#endref}}
 
 ### **Implementing Deception Techniques**
 
