@@ -311,6 +311,7 @@
   - [Lansweeper Security](windows-hardening/active-directory-methodology/lansweeper-security.md)
   - [LAPS](windows-hardening/active-directory-methodology/laps.md)
   - [MSSQL AD Abuse](windows-hardening/active-directory-methodology/abusing-ad-mssql.md)
+  - [Ldap Signing And Channel Binding](windows-hardening/active-directory-methodology/ldap-signing-and-channel-binding.md)
   - [Over Pass the Hash/Pass the Key](windows-hardening/active-directory-methodology/over-pass-the-hash-pass-the-key.md)
   - [Pass the Ticket](windows-hardening/active-directory-methodology/pass-the-ticket.md)
   - [Password Spraying / Brute Force](windows-hardening/active-directory-methodology/password-spraying.md)
