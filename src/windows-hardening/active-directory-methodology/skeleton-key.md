@@ -4,28 +4,51 @@
 
 ## Skeleton Key Attack
 
-Η **επίθεση Skeleton Key** είναι μια προηγμένη τεχνική που επιτρέπει στους επιτιθέμενους να **παρακάμψουν την αυθεντικοποίηση Active Directory** μέσω της **εισαγωγής ενός κύριου κωδικού πρόσβασης** στον ελεγκτή τομέα. Αυτό επιτρέπει στον επιτιθέμενο να **αυθεντικοποιείται ως οποιοσδήποτε χρήστης** χωρίς τον κωδικό τους, παρέχοντας τους **απεριόριστη πρόσβαση** στον τομέα.
+Η **Skeleton Key attack** είναι μια τεχνική που επιτρέπει σε επιτιθέμενους να **bypass Active Directory authentication** με **injecting a master password** στη διεργασία LSASS κάθε domain controller. Μετά την injection, το master password (προεπιλογή **`mimikatz`**) μπορεί να χρησιμοποιηθεί για να authenticate ως **any domain user** ενώ τα πραγματικά τους passwords εξακολουθούν να λειτουργούν.
 
-Μπορεί να εκτελεστεί χρησιμοποιώντας [Mimikatz](https://github.com/gentilkiwi/mimikatz). Για να πραγματοποιηθεί αυτή η επίθεση, **τα δικαιώματα Domain Admin είναι προαπαιτούμενα**, και ο επιτιθέμενος πρέπει να στοχεύσει κάθε ελεγκτή τομέα για να διασφαλίσει μια ολοκληρωμένη παραβίαση. Ωστόσο, η επίδραση της επίθεσης είναι προσωρινή, καθώς **η επανεκκίνηση του ελεγκτή τομέα εξαλείφει το κακόβουλο λογισμικό**, απαιτώντας μια επαναλαμβανόμενη εφαρμογή για διαρκή πρόσβαση.
+Key facts:
 
-**Η εκτέλεση της επίθεσης** απαιτεί μια μόνο εντολή: `misc::skeleton`.
+- Απαιτεί **Domain Admin/SYSTEM + SeDebugPrivilege** σε κάθε DC και πρέπει να **εφαρμοστεί ξανά μετά από κάθε επανεκκίνηση**.
+- Επηρεάζει τις διαδρομές επικύρωσης **NTLM** και **Kerberos RC4 (etype 0x17)**· περιοχές μόνο με AES ή λογαριασμοί που επιβάλλουν AES **δεν θα αποδεχτούν το skeleton key**.
+- Μπορεί να συγκρούεται με third‑party LSA authentication packages ή πρόσθετους smart‑card / MFA providers.
+- Το Mimikatz module δέχεται τον προαιρετικό switch `/letaes` για να αποφύγει την επαφή με τα Kerberos/AES hooks σε περίπτωση προβλημάτων συμβατότητας.
 
-## Mitigations
+### Εκτέλεση
 
-Οι στρατηγικές μετριασμού κατά τέτοιων επιθέσεων περιλαμβάνουν την παρακολούθηση συγκεκριμένων αναγνωριστικών γεγονότων που υποδεικνύουν την εγκατάσταση υπηρεσιών ή τη χρήση ευαίσθητων δικαιωμάτων. Συγκεκριμένα, η αναζήτηση για το Αναγνωριστικό Γεγονότος Συστήματος 7045 ή το Αναγνωριστικό Γεγονότος Ασφαλείας 4673 μπορεί να αποκαλύψει ύποπτες δραστηριότητες. Επιπλέον, η εκτέλεση του `lsass.exe` ως προστατευμένη διαδικασία μπορεί να εμποδίσει σημαντικά τις προσπάθειες των επιτιθέμενων, καθώς αυτό απαιτεί να χρησιμοποιήσουν έναν οδηγό λειτουργικού πυρήνα, αυξάνοντας την πολυπλοκότητα της επίθεσης.
+Κλασικό LSASS χωρίς προστασία PPL:
+```text
+mimikatz # privilege::debug
+mimikatz # misc::skeleton
+```
+Εάν **LSASS is running as PPL** (RunAsPPL/Credential Guard/Windows 11 Secure LSASS), απαιτείται kernel driver για να αφαιρεθεί η προστασία πριν από το patching του LSASS:
+```text
+mimikatz # privilege::debug
+mimikatz # !+
+mimikatz # !processprotect /process:lsass.exe /remove   # drop PPL
+mimikatz # misc::skeleton                               # inject master password 'mimikatz'
+```
+After injection, authenticate with any domain account but use password `mimikatz` (or the value set by the operator). Remember to repeat on **all DCs** in multi‑DC environments.
 
-Ακολουθούν οι εντολές PowerShell για την ενίσχυση των μέτρων ασφαλείας:
+## Μέτρα αντιμετώπισης
 
-- Για να ανιχνεύσετε την εγκατάσταση ύποπτων υπηρεσιών, χρησιμοποιήστε: `Get-WinEvent -FilterHashtable @{Logname='System';ID=7045} | ?{$_.message -like "*Kernel Mode Driver*"}`
+- **Παρακολούθηση καταγραφών**
+- System **Event ID 7045** (service/driver install) για unsigned drivers όπως `mimidrv.sys`.
+- **Sysmon**: Event ID 7 (driver load) για `mimidrv.sys`; Event ID 10 για ύποπτη πρόσβαση στο `lsass.exe` από non‑system processes.
+- Security **Event ID 4673/4611** για χρήση ευαίσθητων προνομίων ή ανωμαλίες στην εγγραφή LSA authentication package; συσχετίστε με απροσδόκητα 4624 logons που χρησιμοποιούν RC4 (etype 0x17) από DCs.
+- **Σκληρυνση LSASS**
+- Διατηρήστε ενεργοποιημένα τα **RunAsPPL/Credential Guard/Secure LSASS** στους DCs για να αναγκάσετε τους επιτιθέμενους σε kernel‑mode driver deployment (περισσότερη τηλεμετρία, δυσκολότερη εκμετάλλευση).
+- Απενεργοποιήστε το legacy **RC4** όπου είναι δυνατόν· ο περιορισμός των Kerberos tickets σε AES αποτρέπει το RC4 hook path που χρησιμοποιεί το skeleton key.
+- Γρήγοροι έλεγχοι PowerShell:
+- Detect unsigned kernel driver installs: `Get-WinEvent -FilterHashtable @{Logname='System';ID=7045} | ?{$_.message -like "*Kernel Mode Driver*"}`
+- Hunt for Mimikatz driver: `Get-WinEvent -FilterHashtable @{Logname='System';ID=7045} | ?{$_.message -like "*Kernel Mode Driver*" -and $_.message -like "*mimidrv*"}`
+- Επιβεβαιώστε ότι το PPL επιβάλλεται μετά από επανεκκίνηση: `Get-WinEvent -FilterHashtable @{Logname='System';ID=12} | ?{$_.message -like "*protected process*"}`
 
-- Συγκεκριμένα, για να ανιχνεύσετε τον οδηγό του Mimikatz, μπορεί να χρησιμοποιηθεί η εξής εντολή: `Get-WinEvent -FilterHashtable @{Logname='System';ID=7045} | ?{$_.message -like "*Kernel Mode Driver*" -and $_.message -like "*mimidrv*"}`
+For additional credential‑hardening guidance check [Windows credentials protections](../stealing-credentials/credentials-protections.md).
 
-- Για να ενισχύσετε το `lsass.exe`, συνιστάται να το ενεργοποιήσετε ως προστατευμένη διαδικασία: `New-ItemProperty HKLM:\SYSTEM\CurrentControlSet\Control\Lsa -Name RunAsPPL -Value 1 -Verbose`
+## Αναφορές
 
-Η επαλήθευση μετά από μια επανεκκίνηση του συστήματος είναι κρίσιμη για να διασφαλιστεί ότι τα προστατευτικά μέτρα έχουν εφαρμοστεί επιτυχώς. Αυτό είναι εφικτό μέσω: `Get-WinEvent -FilterHashtable @{Logname='System';ID=12} | ?{$_.message -like "*protected process*`
-
-## References
-
-- [https://blog.netwrix.com/2022/11/29/skeleton-key-attack-active-directory/](https://blog.netwrix.com/2022/11/29/skeleton-key-attack-active-directory/)
+- [Netwrix – Skeleton Key attack in Active Directory (2022)](https://blog.netwrix.com/2022/11/29/skeleton-key-attack-active-directory/)
+- [TheHacker.recipes – Skeleton key (2026)](https://www.thehacker.recipes/ad/persistence/skeleton-key/)
+- [TheHacker.Tools – Mimikatz misc::skeleton module](https://tools.thehacker.recipes/mimikatz/modules/misc/skeleton)
 
 {{#include ../../banners/hacktricks-training.md}}
