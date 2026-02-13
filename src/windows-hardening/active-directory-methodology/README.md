@@ -144,6 +144,30 @@ You might be able to **obtain** some challenge **hashes** to crack **poisoning**
 
 If you have managed to enumerate the active directory you will have **more emails and a better understanding of the network**. You might be able to to force NTLM [**relay attacks**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack)  to get access to the AD env.
 
+### NetExec workspace-driven recon & relay posture checks
+
+- Use **`nxcdb` workspaces** to keep AD recon state per engagement: `workspace create <name>` spawns per-protocol SQLite DBs under `~/.nxc/workspaces/<name>` (smb/mssql/winrm/ldap/etc). Switch views with `proto smb|mssql|winrm` and list gathered secrets with `creds`. Manually purge sensitive data when done: `rm -rf ~/.nxc/workspaces/<name>`.
+- Quick subnet discovery with **`netexec smb <cidr>`** surfaces **domain**, **OS build**, **SMB signing requirements**, and **Null Auth**. Members showing `(signing:False)` are **relay-prone**, while DCs often require signing.
+- Generate **hostnames in /etc/hosts** straight from NetExec output to ease targeting:
+
+```bash
+netexec smb 10.2.10.0/24 --generate-hosts-file hosts
+cat hosts /etc/hosts | sponge /etc/hosts
+```
+
+- When **SMB relay to the DC is blocked** by signing, still probe **LDAP** posture: `netexec ldap <dc>` highlights `(signing:None)` / weak channel binding. A DC with SMB signing required but LDAP signing disabled remains a viable **relay-to-LDAP** target for abuses like **SPN-less RBCD**.
+
+### Client-side printer credential leaks → bulk domain credential validation
+
+- Printer/web UIs sometimes **embed masked admin passwords in HTML**. Viewing source/devtools can reveal cleartext (e.g., `<input value="<password>">`), allowing Basic-auth access to scan/print repositories.
+- Retrieved print jobs may contain **plaintext onboarding docs** with per-user passwords. Keep pairings aligned when testing:
+
+```bash
+cat IT_Procedures.txt | grep Username: | cut -d' ' -f2 > usernames
+cat IT_Procedures.txt | grep Password: | cut -d' ' -f3 > passwords
+netexec smb <dc> -u usernames -p passwords --no-bruteforce --continue-on-success
+```
+
 ### Steal NTLM Creds
 
 If you can **access other PCs or shares** with the **null or guest user** you could **place files** (like a SCF file) that if somehow accessed will t**rigger an NTLM authentication against you** so you can **steal** the **NTLM challenge** to crack it:
@@ -958,6 +982,7 @@ ldap-signing-and-channel-binding.md
 - [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/child-domain-da-to-ea-in-parent-domain](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/child-domain-da-to-ea-in-parent-domain)
 - [LDAP BOF Collection – In-Memory LDAP Toolkit for Active Directory Exploitation](https://github.com/P0142/LDAP-Bof-Collection)
 - [TrustedSec – Holy Shuck! Weaponizing NTLM Hashes as a Wordlist](https://trustedsec.com/blog/holy-shuck-weaponizing-ntlm-hashes-as-a-wordlist)
+- [Barbhack 2025 CTF (NetExec AD Lab) – Pirates](https://0xdf.gitlab.io/2026/01/29/barbhack-2025-ctf.html)
 - [Hashcat](https://github.com/hashcat/hashcat)
 
 {{#include ../../banners/hacktricks-training.md}}
