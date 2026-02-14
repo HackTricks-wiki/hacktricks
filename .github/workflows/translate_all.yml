@@ -256,8 +256,6 @@ jobs:
           git rev-parse --abbrev-ref HEAD
           echo "Syncing $BRANCH to S3"
           aws s3 sync ./book s3://hacktricks-wiki/$BRANCH --delete
-          echo "Uploading root ads.txt"
-          aws s3 cp ./src/ads.txt s3://hacktricks-wiki/ads.txt --content-type text/plain --cache-control max-age=300
           echo "Sync completed"
           echo "Cat 3 files from the book"
           find . -type f -name 'index.html' -print | head -n 3 | xargs -r cat
