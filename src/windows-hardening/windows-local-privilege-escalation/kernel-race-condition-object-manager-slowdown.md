@@ -74,6 +74,11 @@ printf("%f\n", RunTest(LongSuffix(L"\\A", 16000) + L"\\0", 1));
 
 *Why it matters*: A minutes-long slowdown turns one-shot race-based LPEs into deterministic exploits.
 
+### 2025 retest notes & ready-made tooling
+
+- James Forshaw republished the technique with updated timings on Windows 11 24H2 (ARM64). Baseline opens remain ~2 µs; a 32 kB component raises this to ~35 µs, and shadow-dir + collision + 63-reparse chains still reach ~3 minutes, confirming the primitives survive current builds. Source code and perf harness are in the refreshed Project Zero post.
+- You can script setup using the public `symboliclink-testing-tools` bundle: `CreateObjectDirectory.exe` to spawn the shadow/target pair and `NativeSymlink.exe` in a loop to emit the 63-hop chain. This avoids hand-written `NtCreate*` wrappers and keeps ACLs consistent.
+
 ## Measuring your race window
 
 Embed a quick harness inside your exploit to measure how large the window becomes on the victim hardware. The snippet below opens the target object `iterations` times and returns the average per-open cost using `QueryPerformanceCounter`.
@@ -117,6 +122,7 @@ The results feed directly into your race orchestration strategy (e.g., number of
 - **One-shot bugs** – The expanded window (tens of microseconds to minutes) makes “single trigger” bugs realistic when paired with CPU affinity pinning or hypervisor-assisted preemption.
 - **Side effects** – The slowdown only affects the malicious path, so overall system performance remains unaffected; defenders will rarely notice unless they monitor namespace growth.
 - **Cleanup** – Keep handles to every directory/object you create so you can call `NtMakeTemporaryObject`/`NtClose` afterwards. Unbounded directory chains may persist across reboots otherwise.
+- **File-system races** – If the vulnerable path ultimately resolves through NTFS, you can stack an Oplock (e.g., `SetOpLock.exe` from the same toolkit) on the backing file while the OM slowdown runs, freezing the consumer for additional milliseconds without altering the OM graph.
 
 ## Defensive notes
 
@@ -127,5 +133,6 @@ The results feed directly into your race orchestration strategy (e.g., number of
 ## References
 
 - [Project Zero – Windows Exploitation Techniques: Winning Race Conditions with Path Lookups](https://projectzero.google/2025/12/windows-exploitation-techniques.html)
+- [googleprojectzero/symboliclink-testing-tools](https://github.com/googleprojectzero/symboliclink-testing-tools)
 
 {{#include ../../banners/hacktricks-training.md}}
