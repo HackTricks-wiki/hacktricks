@@ -4,17 +4,17 @@
 
 ## Dlaczego wydłużanie okna wyścigu ma znaczenie
 
-Wiele Windows kernel LPEs stosuje klasyczny schemat `check_state(); NtOpenX("name"); privileged_action();`. Na nowoczesnym sprzęcie zimne `NtOpenEvent`/`NtOpenSection` rozwiązuje krótką nazwę w ~2 µs, pozostawiając praktycznie żaden czas na zmianę sprawdzanego stanu zanim nastąpi uprzywilejowana akcja. Celowe wymuszenie, aby wyszukiwanie w przestrzeni nazw Object Manager (OMNS) w kroku 2 zajęło dziesiątki mikrosekund, daje atakującemu wystarczająco dużo czasu, by konsekwentnie wygrać inaczej niestabilne wyścigi bez potrzeby tysięcy prób.
+Wiele Windows kernel LPEs podąża za klasycznym schematem `check_state(); NtOpenX("name"); privileged_action();`. Na nowoczesnym sprzęcie zimne `NtOpenEvent`/`NtOpenSection` rozwiązuje krótką nazwę w ~2 µs, zostawiając niemalże zero czasu na zmianę sprawdzonego stanu przed wykonaniem chronionej akcji. Celowo wymuszając, by lookup w Object Manager Namespace (OMNS) w kroku 2 trwał dziesiątki mikrosekund, atakujący zyskuje wystarczająco dużo czasu, by konsekwentnie wygrywać inaczej zawodzące warunki wyścigu bez potrzeby tysięcy prób.
 
-## Mechanika rozwiązywania nazw Object Manager w skrócie
+## W skrócie: wewnętrzne mechanizmy rozwiązywania Object Managera
 
-* **OMNS structure** – Nazwy takie jak `\BaseNamedObjects\Foo` są rozwiązywane katalog po katalogu. Każdy komponent powoduje, że jądro musi znaleźć/otworzyć *Object Directory* i porównać łańcuchy Unicode. Symboliczne linki (np. litery dysków) mogą być przemierzane po drodze.
-* **UNICODE_STRING limit** – Ścieżki OM są przenoszone w `UNICODE_STRING`, którego `Length` to 16-bitowa wartość. Absolutny limit to 65 535 bajtów (32 767 kodopunktów UTF-16). Z prefiksami takimi jak `\BaseNamedObjects\`, atakujący nadal kontroluje ≈32 000 znaków.
-* **Attacker prerequisites** – Każdy użytkownik może tworzyć obiekty pod zapisywalnymi katalogami, takimi jak `\BaseNamedObjects`. Gdy podatny kod użyje nazwy znajdującej się tam, albo podąży za symbolicznym linkiem, który tam trafia, atakujący kontroluje wydajność wyszukiwania bez specjalnych uprawnień.
+* **OMNS structure** – Nazwy takie jak `\BaseNamedObjects\Foo` są rozwiązywane katalog po katalogu. Każdy element powoduje, że kernel musi znaleźć/otworzyć *Object Directory* i porównać ciągi Unicode. Po drodze mogą być przetwarzane odnośniki symboliczne (np. litery dysków).
+* **UNICODE_STRING limit** – Ścieżki OM są przechowywane w `UNICODE_STRING`, którego `Length` jest wartością 16-bitową. Absolutny limit to 65 535 bajtów (32 767 punktów kodowych UTF-16). Z prefiksami takimi jak `\BaseNamedObjects\` atakujący nadal kontroluje ≈32 000 znaków.
+* **Attacker prerequisites** – Każdy użytkownik może tworzyć obiekty w obrębie zapisywalnych katalogów, takich jak `\BaseNamedObjects`. Kiedy podatny kod użyje nazwy znajdującej się tam, lub podąży za odnośnikiem symbolicznym prowadzącym tam, atakujący kontroluje szybkość lookupu bez specjalnych uprawnień.
 
-## Slowdown primitive #1 – Single maximal component
+## Prymityw spowalniający #1 – pojedynczy maksymalny komponent
 
-Koszt rozwiązywania komponentu jest mniej więcej liniowy względem jego długości, ponieważ jądro musi wykonać porównanie Unicode z każdym wpisem w katalogu nadrzędnym. Utworzenie eventu z nazwą o długości 32 kB natychmiast zwiększa opóźnienie `NtOpenEvent` z ~2 µs do ~35 µs na Windows 11 24H2 (Snapdragon X Elite testbed).
+Koszt rozwiązywania jednego elementu jest w przybliżeniu liniowy względem jego długości, ponieważ kernel musi wykonać porównanie Unicode z każdym wpisem w katalogu nadrzędnym. Utworzenie eventu z nazwą o długości 32 kB natychmiast zwiększa opóźnienie `NtOpenEvent` z ~2 µs do ~35 µs na Windows 11 24H2 (platforma testowa Snapdragon X Elite).
 ```cpp
 std::wstring path;
 while (path.size() <= 32000) {
@@ -25,13 +25,13 @@ path += std::wstring(500, 'A');
 ```
 *Praktyczne uwagi*
 
-- Można osiągnąć limit długości, używając dowolnego nazwanego obiektu jądra (events, sections, semaphores…).
-- Symbolic links or reparse points mogą wskazywać krótką nazwę „victim” na ten ogromny komponent, dzięki czemu spowolnienie jest stosowane przezroczysto.
+- Możesz osiągnąć limit długości używając dowolnego nazwanego obiektu jądra (events, sections, semaphores…).
+- Symbolic links lub reparse points mogą kierować krótką nazwę „victim” do tego olbrzymiego komponentu, dzięki czemu slowdown jest stosowany przezroczysto.
 - Ponieważ wszystko znajduje się w user-writable namespaces, payload działa z poziomu standard user integrity level.
 
 ## Slowdown primitive #2 – Deep recursive directories
 
-Bardziej agresywna odmiana alokuje łańcuch tysięcy katalogów (`\BaseNamedObjects\A\A\...\X`). Każdy skok wywołuje logikę rozwiązywania katalogu (ACL checks, hash lookups, reference counting), więc opóźnienie na poziom jest większe niż przy pojedynczym porównaniu łańcuchów. Przy ~16 000 poziomach (ograniczonych tym samym rozmiarem `UNICODE_STRING`) pomiary empiryczne przekraczają barierę 35 µs osiąganą przez długie pojedyncze komponenty.
+Bardziej agresywna odmiana alokuje łańcuch tysięcy katalogów (`\BaseNamedObjects\A\A\...\X`). Każdy hop wywołuje logikę rozwiązywania katalogu (ACL checks, hash lookups, reference counting), więc opóźnienie na poziom jest większe niż przy pojedynczym porównaniu łańcucha. Przy ~16 000 poziomach (ograniczonych tym samym rozmiarem `UNICODE_STRING`) empiryczne czasy przekraczają barierę 35 µs osiąganą przez długie pojedyncze komponenty.
 ```cpp
 ScopedHandle base_dir = OpenDirectory(L"\\BaseNamedObjects");
 HANDLE last_dir = base_dir.get();
@@ -45,19 +45,19 @@ printf("%d,%f\n", i + 1, result);
 }
 }
 ```
-Tips:
+Wskazówki:
 
-* Zmieniaj znak na każdym poziomie (`A/B/C/...`) jeśli katalog nadrzędny zacznie odrzucać duplikaty.
-* Przechowuj tablicę handle'ów, aby móc po eksploatacji czysto usunąć łańcuch i nie zaśmiecać namespace'u.
+* Zmieniaj znak na każdym poziomie (`A/B/C/...`), jeśli katalog nadrzędny zacznie odrzucać duplikaty.
+* Przechowuj tablicę uchwytów, aby po eksploatacji móc usunąć łańcuch i nie zanieczyścić przestrzeni nazw.
 
-## Slowdown primitive #3 – Shadow directories, hash collisions & symlink reparses (minuty zamiast mikrosekund)
+## Slowdown primitive #3 – Shadow directories, hash collisions & symlink reparses (minutes instead of microseconds)
 
-Katalogi obiektów obsługują **shadow directories** (fallback lookups) oraz segmentowane tablice haszujące (bucketed hash tables) dla wpisów. Wykorzystaj oba mechanizmy oraz limit 64 komponentów dla symbolic-link reparse, aby pomnożyć spowolnienie bez przekraczania długości `UNICODE_STRING`:
+Object directories support **shadow directories** (fallback lookups) and bucketed hash tables for entries. Abuse both plus the 64-component symbolic-link reparse limit to multiply slowdown without exceeding the `UNICODE_STRING` length:
 
-1. Utwórz dwa katalogi pod `\BaseNamedObjects`, np. `A` (shadow) i `A\A` (target). Utwórz drugi używając pierwszego jako katalogu shadow (`NtCreateDirectoryObjectEx`), tak aby brakujące wyszukiwania w `A` przechodziły do `A\A`.
-2. Wypełnij każdy katalog tysiącami **colliding names** trafiającymi do tego samego kubełka hasza (np. zmieniając końcowe cyfry przy zachowaniu tej samej wartości `RtlHashUnicodeString`). Wyszukiwania teraz degradują do liniowego skanowania O(n) wewnątrz pojedynczego katalogu.
-3. Zbuduj łańcuch ~63 **object manager symbolic links**, które wielokrotnie reparse'ują do długiego sufiksu `A\A\…`, zużywając budżet reparse. Każde reparse zaczyna parsowanie od początku, mnożąc koszt kolizji.
-4. Wyszukiwanie ostatniego komponentu (`...\\0`) zajmuje teraz **minuty** na Windows 11, gdy w każdym katalogu występuje 16 000 kolizji, co daje praktycznie gwarantowaną wygraną wyścigu (race) dla jednorazowych kernel LPE.
+1. Create two directories under `\BaseNamedObjects`, e.g. `A` (shadow) and `A\A` (target). Create the second using the first as the shadow directory (`NtCreateDirectoryObjectEx`), so missing lookups in `A` fall through to `A\A`.
+2. Fill each directory with thousands of **colliding names** that land in the same hash bucket (e.g., varying trailing digits while keeping the same `RtlHashUnicodeString` value). Lookups now degrade to O(n) linear scans inside a single directory.
+3. Build a chain of ~63 **object manager symbolic links** that repeatedly reparse into the long `A\A\…` suffix, consuming the reparse budget. Each reparse restarts parsing from the top, multiplying the collision cost.
+4. Lookup of the final component (`...\\0`) now takes **minutes** on Windows 11 when 16 000 collisions are present per directory, providing a practically guaranteed race win for one-shot kernel LPEs.
 ```cpp
 ScopedHandle shadow = CreateDirectory(L"\\BaseNamedObjects\\A");
 ScopedHandle target = CreateDirectoryEx(L"A", shadow.get(), shadow.get());
@@ -66,11 +66,16 @@ CreateCollidingEntries(target, 16000, dirs);
 CreateSymlinkChain(shadow, LongSuffix(L"\\A", 16000), 63);
 printf("%f\n", RunTest(LongSuffix(L"\\A", 16000) + L"\\0", 1));
 ```
-*Dlaczego to ma znaczenie*: Spowolnienie trwające minuty zamienia one-shot race-based LPEs w deterministic exploits.
+*Dlaczego to ważne*: Kilkuminutowe spowolnienie zamienia jednorazowe, oparte na wyścigu LPEs w deterministyczne exploity.
 
-## Pomiar twojego race window
+### Notatki z retestu 2025 & gotowe narzędzia
 
-Osadź krótkie narzędzie testowe wewnątrz swojego exploita, aby zmierzyć, jak duże staje się okno na sprzęcie ofiary. Poniższy fragment otwiera obiekt docelowy `iterations` razy i zwraca średni koszt na jedno otwarcie, mierząc czas przy użyciu `QueryPerformanceCounter`.
+- James Forshaw opublikował ponownie technikę z zaktualizowanymi czasami na Windows 11 24H2 (ARM64). Bazowe otwarcia pozostają ~2 µs; komponent 32 kB podnosi to do ~35 µs, a shadow-dir + collision + 63-reparse chains nadal dochodzą do ~3 minut, potwierdzając, że prymitywy przetrwały obecne buildy. Kod źródłowy i perf harness znajdują się we odświeżonym poście Project Zero.
+- Możesz zautomatyzować konfigurację używając publicznego pakietu `symboliclink-testing-tools`: `CreateObjectDirectory.exe` do wygenerowania pary shadow/target i `NativeSymlink.exe` w pętli do emisji 63-skokowego łańcucha. To eliminuje ręcznie pisane wrappery `NtCreate*` i zachowuje spójność ACLs.
+
+## Mierzenie okna wyścigu
+
+Osadź krótki harness jako część exploit, aby zmierzyć, jak duże okno pojawia się na sprzęcie ofiary. Poniższy fragment otwiera obiekt docelowy `iterations` razy i zwraca średni koszt na otwarcie przy użyciu `QueryPerformanceCounter`.
 ```cpp
 static double RunTest(const std::wstring name, int iterations,
 std::wstring create_name = L"", HANDLE root = nullptr) {
@@ -89,35 +94,37 @@ handles.emplace_back(open_handle);
 return timer.GetTime(iterations);
 }
 ```
-Wyniki bezpośrednio wpływają na twoją race orchestration strategy (np. liczbę worker threads, sleep intervals, jak wcześnie musisz przełączyć stan współdzielony).
+Wyniki bezpośrednio wpływają na twoją strategię orkiestracji race (np. number of worker threads needed, sleep intervals, how early you need to flip the shared state).
 
-## Exploitation workflow
+## Przebieg eksploatacji
 
-1. **Locate the vulnerable open** – Śledź ścieżkę w jądrze (via symbols, ETW, hypervisor tracing, or reversing) aż znajdziesz wywołanie `NtOpen*`/`ObOpenObjectByName`, które rozchodzi się po nazwie kontrolowanej przez atakującego lub po symbolicznym linku w katalogu zapisywalnym przez użytkownika.
+1. **Locate the vulnerable open** – Śledź ścieżkę w kernelu (przez symbols, ETW, hypervisor tracing, lub reversing), aż znajdziesz wywołanie `NtOpen*`/`ObOpenObjectByName`, które przetwarza nazwę kontrolowaną przez atakującego lub symbolic link w katalogu zapisywalnym przez użytkownika.
 2. **Replace that name with a slow path**
 - Utwórz długi komponent lub łańcuch katalogów pod `\BaseNamedObjects` (lub innym zapisywalnym OM root).
-- Stwórz symbolic link tak, aby nazwa, której oczekuje kernel, teraz rozwiązywała się do slow path. Możesz skierować wyszukiwanie katalogu w podatnym driverze do swojej struktury bez dotykania oryginalnego celu.
+- Utwórz symbolic link tak, aby nazwa oczekiwana przez kernel teraz rozwiązywała się do wolnej ścieżki. Możesz skierować wyszukiwanie katalogu podatnego drivera na swoją strukturę bez dotykania oryginalnego celu.
 3. **Trigger the race**
-- Thread A (victim) wykonuje podatny kod i blokuje się wewnątrz slow lookup.
-- Thread B (attacker) przełącza guarded state (np. zamienia file handle, nadpisuje symbolic link, przełącza object security) podczas gdy Thread A jest zajęty.
-- Gdy Thread A wznowi działanie i wykona uprzywilejowaną operację, zobaczy przestarzały stan i wykona operację kontrolowaną przez atakującego.
-4. **Clean up** – Usuń łańcuch katalogów i symbolic linki, aby nie zostawić podejrzanych artefaktów ani nie zakłócić legalnych użytkowników IPC.
+- Thread A (victim) wykonuje podatny kod i blokuje się wewnątrz wolnego lookupu.
+- Thread B (attacker) zmienia guarded state (np. swaps a file handle, rewrites a symbolic link, toggles object security) podczas gdy Thread A jest zajęty.
+- Gdy Thread A wznowi działanie i wykona uprzywilejowaną operację, zobaczy przestarzały stan i przeprowadzi operację kontrolowaną przez atakującego.
+4. **Clean up** – Usuń łańcuch katalogów i symbolic linki, aby nie zostawiać podejrzanych artefaktów ani nie zakłócać legalnych użytkowników IPC.
 
-## Operational considerations
+## Aspekty operacyjne
 
-- **Combine primitives** – Możesz użyć długiej nazwy *na każdym poziomie* w łańcuchu katalogów, aby uzyskać jeszcze większą latencję, aż wyczerpiesz rozmiar `UNICODE_STRING`.
-- **One-shot bugs** – Rozszerzone okno (dziesiątki mikrosekund do minut) sprawia, że błędy „single trigger” są realistyczne, gdy sparujesz je z CPU affinity pinning lub hypervisor-assisted preemption.
-- **Side effects** – To spowolnienie wpływa tylko na złośliwą ścieżkę, więc ogólna wydajność systemu pozostaje niezmieniona; obrońcy rzadko to zauważą, o ile nie monitorują wzrostu namespace.
-- **Cleanup** – Trzymaj uchwyty do każdego katalogu/obiektu, który tworzysz, aby móc potem wywołać `NtMakeTemporaryObject`/`NtClose`. W przeciwnym razie nieograniczone łańcuchy katalogów mogą przetrwać po restarcie.
+- **Łączenie prymitywów** – Możesz użyć długiej nazwy na każdym poziomie w łańcuchu katalogów, aby uzyskać jeszcze większą latencję, aż do wyczerpania rozmiaru `UNICODE_STRING`.
+- **One-shot bugs** – Rozszerzone okno (dziesiątki mikrosekund do minut) sprawia, że „single trigger” bugs są realistyczne w połączeniu z przypinaniem affinities CPU lub hypervisor-assisted preemption.
+- **Skutki uboczne** – Spowolnienie dotyczy tylko złośliwej ścieżki, więc ogólna wydajność systemu pozostaje nienaruszona; obrońcy rzadko to zauważą, chyba że monitorują wzrost namespace.
+- **Cleanup** – Zachowaj handle do każdego katalogu/obiektu, który tworzysz, aby móc potem wywołać `NtMakeTemporaryObject`/`NtClose`. W przeciwnym razie nieograniczone łańcuchy katalogów mogą przetrwać przez rebooty.
+- **File-system races** – Jeśli podatna ścieżka ostatecznie rozwiązuje się przez NTFS, możesz nałożyć Oplock (np. `SetOpLock.exe` z tego samego toolkit) na plik zapasowy podczas działania OM slowdown, zamrażając konsumenta na dodatkowe milisekundy bez zmiany OM graph.
 
-## Defensive notes
+## Uwagi obronne
 
-- Kod jądra, który polega na named objects, powinien ponownie zweryfikować security-sensitive state *po* open, lub wziąć referencję przed sprawdzeniem (zamykanie luki TOCTOU).
-- Wymuszaj górne limity na OM path depth/length przed dereferencją nazw kontrolowanych przez użytkownika. Odrzucanie nadmiernie długich nazw zmusza atakujących do powrotu do okna mierzonego w mikrosekundach.
-- Instrumentuj wzrost namespace object managera (ETW `Microsoft-Windows-Kernel-Object`), aby wykrywać podejrzane łańcuchy składające się z tysięcy komponentów pod `\BaseNamedObjects`.
+- Kod jądra, który polega na named objects, powinien ponownie weryfikować security-sensitive state *po* open, lub pobrać referencję przed sprawdzeniem (zamykanie TOCTOU gap).
+- Egzekwuj górne granice dla głębokości/długości OM path przed dereferencją nazw kontrolowanych przez użytkownika. Odrzucenie zbyt długich nazw zmusza atakujących do powrotu do okna mikrosekundowego.
+- Instrumentuj growth namespace object managera (ETW `Microsoft-Windows-Kernel-Object`), aby wykrywać podejrzane łańcuchy tysięcy komponentów pod `\BaseNamedObjects`.
 
 ## References
 
 - [Project Zero – Windows Exploitation Techniques: Winning Race Conditions with Path Lookups](https://projectzero.google/2025/12/windows-exploitation-techniques.html)
+- [googleprojectzero/symboliclink-testing-tools](https://github.com/googleprojectzero/symboliclink-testing-tools)
 
 {{#include ../../banners/hacktricks-training.md}}
