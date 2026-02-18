@@ -34,6 +34,24 @@ If a nonce/IV is reused with the same key:
 - `C1 XOR C2 = P1 XOR P2` (classic keystream reuse)
 - With known plaintext, you can recover the keystream and decrypt others.
 
+**Nonce/IV reuse exploitation patterns**
+
+- Recover keystream wherever plaintext is known/guessable:
+
+  ```text
+  keystream[i..] = ciphertext[i..] XOR known_plaintext[i..]
+  ```
+
+  Apply the recovered keystream bytes to decrypt any other ciphertext produced with the same key+IV at the same offsets.
+- Highly structured data (e.g., ASN.1/X.509 certificates, file headers, JSON/CBOR) gives large known-plaintext regions. You can often XOR the ciphertext of the certificate with the predictable certificate body to derive keystream, then decrypt other secrets encrypted under the reused IV. See also [TLS & Certificates](../tls-and-certificates/README.md) for typical certificate layouts.
+- When multiple secrets of the **same serialized format/size** are encrypted under the same key+IV, field alignment leaks even without full known plaintext. Example: PKCS#8 RSA keys of the same modulus size place prime factors at matching offsets (~99.6% alignment for 2048-bit). XORing two ciphertexts under the reused keystream isolates `p ⊕ p'` / `q ⊕ q'`, which can be brute-recovered in seconds.
+- Default IVs in libraries (e.g., constant `000...01`) are a critical footgun: every encryption repeats the same keystream, turning CTR into a reused one-time pad.
+
+**CTR malleability**
+
+- CTR provides confidentiality only: flipping bits in ciphertext deterministically flips the same bits in plaintext. Without an authentication tag, attackers can tamper data (e.g., tweak keys, flags, or messages) undetected.
+- Use AEAD (GCM, GCM-SIV, ChaCha20-Poly1305, etc.) and enforce tag verification to catch bit-flips.
+
 ### GCM
 
 GCM also breaks badly under nonce reuse. If the same key+nonce is used more than once, you typically get:
@@ -44,6 +62,7 @@ GCM also breaks badly under nonce reuse. If the same key+nonce is used more than
 Operational guidance:
 
 - Treat "nonce reuse" in AEAD as a critical vulnerability.
+- Misuse-resistant AEADs (e.g., GCM-SIV) reduce nonce-misuse fallout but still require unique nonces/IVs.
 - If you have multiple ciphertexts under the same nonce, start by checking `C1 XOR C2 = P1 XOR P2` style relations.
 
 ### Tools
@@ -184,5 +203,9 @@ Reference writeup (HTB Kryptos):
 {{#ref}}
 https://0xrick.github.io/hack-the-box/kryptos/
 {{#endref}}
+
+## References
+
+- [Trail of Bits – Carelessness versus craftsmanship in cryptography](https://blog.trailofbits.com/2026/02/18/carelessness-versus-craftsmanship-in-cryptography/)
 
 {{#include ../../banners/hacktricks-training.md}}
