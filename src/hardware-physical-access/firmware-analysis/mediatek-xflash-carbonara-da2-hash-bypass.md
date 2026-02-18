@@ -4,23 +4,23 @@
 
 ## Sažetak
 
-"Carbonara" zloupotrebljava MediaTek's XFlash download path da pokrene modifikovani Download Agent stage 2 (DA2) uprkos DA1 integrity checks. DA1 čuva očekivani SHA-256 DA2 u RAM i poredi ga pre grananja. Na mnogim loaders, host u potpunosti kontroliše DA2 load address/size, što daje unchecked memory write koji može prepisati taj in-memory hash i preusmeriti izvršavanje na arbitrary payloads (pre-OS context sa cache invalidation koje obrađuje DA).
+"Carbonara" zloupotrebljava MediaTek-ov XFlash download path da pokrene modifikovani Download Agent stage 2 (DA2) uprkos DA1 proverama integriteta. DA1 čuva očekivani SHA-256 za DA2 u RAM i upoređuje ga pre skoka. Na mnogim loader-ima host potpuno kontroliše DA2 load address/size, što omogućava nekontrolisani upis u memoriju koji može prepisati taj heš u memoriji i preusmeriti izvršavanje na proizvoljne payloads (pre-OS kontekst uz invalidaciju keša koju obavlja DA).
 
 ## Granica poverenja u XFlash (DA1 → DA2)
 
-- **DA1** je signed/loaded by BootROM/Preloader. Kada je Download Agent Authorization (DAA) enabled, samo signed DA1 treba da se izvršava.
-- **DA2** se šalje over USB. DA1 prima **size**, **load address**, i **SHA-256** i hešira primljeni DA2, upoređujući ga sa **expected hash embedded in DA1** (kopiran u RAM).
-- **Weakness:** Na unpatched loaders, DA1 ne sanitize-uje DA2 load address/size i čuva expected hash writable u memory, omogućavajući host-u da manipuliše check-om.
+- **DA1** je potpisan/učitan od strane BootROM/Preloader. Kada je Download Agent Authorization (DAA) omogućen, samo potpisani DA1 bi trebalo da se izvršava.
+- **DA2** se šalje preko USB-a. DA1 prima **size**, **load address**, i **SHA-256** i izračunava heš primljenog DA2, upoređujući ga sa **očekivanim hešom ugrađenim u DA1** (kopiranim u RAM).
+- **Slabost:** Na nenadograđenim loader-ima, DA1 ne sanitizuje DA2 load address/size i drži očekivani heš upisivim u memoriji, omogućavajući hostu da manipuliše proverom.
 
-## Carbonara flow ("two BOOT_TO" trick)
+## Carbonara tok ("two BOOT_TO" trik)
 
-1. **First `BOOT_TO`:** Uđite u DA1→DA2 staging flow (DA1 alocira, priprema DRAM, i izlaže expected-hash buffer u RAM).
-2. **Hash-slot overwrite:** Pošaljite mali payload koji skenira DA1 memory za stored DA2-expected hash i prepisuje ga sa SHA-256 of the attacker-modified DA2. Ovo koristi user-controlled load da postavi payload tamo gde se hash nalazi.
-3. **Second `BOOT_TO` + digest:** Trigger-ujte još jedan `BOOT_TO` sa patched DA2 metadata i pošaljite raw 32-byte digest koji se poklapa sa modified DA2. DA1 ponovo računa SHA-256 preko primljenog DA2, upoređuje ga sa sada patch-ovanim expected hash-om, i skok uspeva u attacker code.
+1. **First `BOOT_TO`:** Uđite u DA1→DA2 staging flow (DA1 alocira, priprema DRAM i izlaže expected-hash buffer u RAM).
+2. **Hash-slot overwrite:** Pošaljite mali payload koji pretražuje DA1 memoriju za sačuvanim očekivanim DA2 hešom i prepiše ga SHA-256 vrednošću napadačem modifikovanog DA2. Ovo iskorišćava user-controlled load da smesti payload tamo gde se heš nalazi.
+3. **Second `BOOT_TO` + digest:** Pokrenite još jedan `BOOT_TO` sa izmenjenim DA2 metadata i pošaljite sirovi 32-bajtni digest koji odgovara modifikovanom DA2. DA1 ponovo izračunava SHA-256 nad primljenim DA2, upoređuje ga sa sada izmenjenim očekivanim hešom, i skok uspeva u kod napadača.
 
-Pošto su load address/size attacker-controlled, ista primitive može pisati bilo gde u memoriji (ne samo u hash buffer), omogućavajući early-boot implants, secure-boot bypass helpers, ili malicious rootkits.
+Pošto su load address/size pod kontrolom napadača, ista primitiva može da upisuje bilo gde u memoriji (ne samo u hash buffer), omogućavajući early-boot implantate, pomoćne alate za zaobilaženje secure-boot-a, ili zlonamerne rootkits.
 
-## Minimal PoC pattern (mtkclient-style)
+## Minimalni PoC obrazac (mtkclient-style)
 ```python
 if self.xsend(self.Cmd.BOOT_TO):
 payload = bytes.fromhex("a4de2200000000002000000000000000")
@@ -31,19 +31,30 @@ if self.xsend(da_hash):
 self.status()
 self.info("All good!")
 ```
-- `payload` replicira blob plaćenog alata koji zakrpa expected-hash bafer unutar DA1.
-- `sha256(...).digest()` šalje sirove bajtove (ne hex) pa DA1 poredi protiv zakrpanog bafera.
-- DA2 može biti bilo koji napadačem napravljen image; odabirom adrese/veličine učitavanja omogućava se proizvoljno pozicioniranje u memoriji, pri čemu invalidacija keša ide preko DA.
+- `payload` replicira blob iz plaćenog alata koji zakrpa expected-hash buffer unutar DA1.
+- `sha256(...).digest()` šalje sirove bajtove (ne hex) tako da DA1 upoređuje protiv zakrpanog buffera.
+- DA2 može biti bilo koja slika koju napadač napravi; izbor load address/size omogućava proizvoljno postavljanje u memoriji pri čemu cache invalidation rešava DA.
 
-## Napomene za trijažu i ojačavanje
+## Patch landscape (hardened loaders)
 
-- Uređaji gde adresa/veličina DA2 nisu proveravani i DA1 ostavlja expected hash zapisljivim su ranjivi. Ako kasniji Preloader/DA nameće granice adresa ili drži hash nepromenljivim, Carbonara je ublažen.
-- Omogućavanje DAA i osiguravanje da DA1/Preloader validiraju BOOT_TO parametre (granice + autentičnost DA2) zatvara primitiv. Zatvaranje samo zakrpe hasha bez ograničavanja učitavanja i dalje ostavlja rizik proizvoljnog pisanja.
+- **Mitigation**: Ažurirani DAs hardcode DA2 load address na `0x40000000` i ignorišu adresu koju host prosleđuje, tako da write-ovi ne mogu dosegnuti DA1 hash slot (~0x200000 opseg). Hash se i dalje izračunava, ali više nije attacker-writable.
+- **Detecting patched DAs**: mtkclient/penumbra skeniraju DA1 za obrasce koji ukazuju na address-hardening; ako se pronađu, Carbonara se preskače. Stari DAs izlažu writable hash slotove (češće oko offseta poput `0x22dea4` u V5 DA1) i ostaju iskoristivi.
+- **V5 vs V6**: Neki V6 (XML) loader-i i dalje prihvataju adrese koje korisnik prosledi; noviji V6 binarni obično forsiraju fiksnu adresu i imuni su na Carbonara osim ako se ne downgrade-uju.
+
+## Post-Carbonara (heapb8) note
+
+MediaTek je zakrpio Carbonara; novija ranjivost, **heapb8**, cilja DA2 USB file download handler na zakrpljenim V6 loader-ima, omogućavajući izvršenje koda čak i kada je `boot_to` hardenovan. Iskorišćava heap overflow tokom chunked file transfera da preuzme kontrolni tok DA2. Eksploit je javan u Penumbra/mtk-payloads i pokazuje da popravke za Carbonara ne zatvaraju celu DA attack surface.
+
+## Notes for triage and hardening
+
+- Uređaji gde DA2 address/size nisu proveravani i DA1 ostavlja expected hash writable su ranjivi. Ako kasniji Preloader/DA primenjuje ograničenja adresa ili drži hash nepromenljivim, Carbonara je mitigovan.
+- Omogućavanje DAA i osiguranje da DA1/Preloader validiraju BOOT_TO parametre (bounds + autentičnost DA2) zatvara primitiv. Zatvaranje samo hash patch-a bez ograničavanja load-a i dalje ostavlja rizik proizvoljnog upisa.
 
 ## References
 
 - [Carbonara: The MediaTek exploit nobody served](https://shomy.is-a.dev/blog/article/serving-carbonara)
 - [Carbonara exploit documentation](https://shomy.is-a.dev/penumbra/Mediatek/Exploits/Carbonara)
 - [Penumbra Carbonara source code](https://github.com/shomykohai/penumbra/blob/main/core/src/exploit/carbonara.rs)
+- [heapb8: exploiting patched V6 Download Agents](https://blog.r0rt1z2.com/posts/exploiting-mediatek-datwo/)
 
 {{#include ../../banners/hacktricks-training.md}}
