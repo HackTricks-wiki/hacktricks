@@ -741,6 +741,14 @@ Get-ChildItem 'C:\Program Files\*','C:\Program Files (x86)\*' | % { try { Get-Ac
 Get-ChildItem 'C:\Program Files\*','C:\Program Files (x86)\*' | % { try { Get-Acl $_ -EA SilentlyContinue | Where {($_.Access|select -ExpandProperty IdentityReference) -match 'BUILTIN\Users'} } catch {}}
 ```
 
+### Notepad++ plugin autoload persistence/execution
+
+Notepad++ autoloads any plugin DLL under its `plugins` subfolders. If a writable portable/copy install is present, dropping a malicious plugin gives automatic code execution inside `notepad++.exe` on every launch (including from `DllMain` and plugin callbacks).
+
+{{#ref}}
+notepad-plus-plus-plugin-autoload-persistence.md
+{{#endref}}
+
 ### Run at startup
 
 **Check if you can overwrite some registry or binary that is going to be executed by a different user.**\
