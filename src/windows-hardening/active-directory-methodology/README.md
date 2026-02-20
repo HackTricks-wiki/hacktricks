@@ -639,6 +639,14 @@ The **security descriptors** are used to **store** the **permissions** an **obje
 security-descriptors.md
 {{#endref}}
 
+### Dynamic Objects Anti-Forensics / Evasion
+
+Abuse the `dynamicObject` auxiliary class to create short-lived principals/GPOs/DNS records with `entryTTL`/`msDS-Entry-Time-To-Die`; they self-delete without tombstones, erasing LDAP evidence while leaving orphan SIDs, broken `gPLink` references, or cached DNS responses (e.g., AdminSDHolder ACE pollution or malicious `gPCFileSysPath`/AD-integrated DNS redirects).
+
+{{#ref}}
+ad-dynamic-objects-anti-forensics.md
+{{#endref}}
+
 ### Skeleton Key
 
 Alter **LSASS** in memory to establish a **universal password**, granting access to all domain accounts.
