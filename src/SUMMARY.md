@@ -351,6 +351,7 @@
 - [Antivirus (AV) Bypass](windows-hardening/av-bypass.md)
 - [Cobalt Strike](windows-hardening/cobalt-strike.md)
 - [Mythic](windows-hardening/mythic.md)
+- [Protocol Handler Shell Execute Abuse](windows-hardening/protocol-handler-shell-execute-abuse.md)
 
 # 📱 Mobile Pentesting
 
