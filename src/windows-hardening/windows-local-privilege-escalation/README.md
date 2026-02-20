@@ -1552,6 +1552,14 @@ telephony-tapsrv-arbitrary-dword-write-to-rce.md
 
 Check out the page **[https://filesec.io/](https://filesec.io/)**
 
+### Protocol handler / ShellExecute abuse via Markdown renderers
+
+Clickable Markdown links forwarded to `ShellExecuteExW` can trigger dangerous URI handlers (`file:`, `ms-appinstaller:` or any registered scheme) and execute attacker-controlled files as the current user. See:
+
+{{#ref}}
+../protocol-handler-shell-execute-abuse.md
+{{#endref}}
+
 ### **Monitoring Command Lines for passwords**
 
 When getting a shell as a user, there may be scheduled tasks or other processes being executed which **pass credentials on the command line**. The script below captures process command lines every two seconds and compares the current state with the previous state, outputting any differences.
