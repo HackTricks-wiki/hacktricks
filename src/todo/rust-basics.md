@@ -62,9 +62,9 @@ You can use functions such as `is_some()` or `is_none()` to check the value of t
 Used for returning and propagating errors
 
 ```rust
-pub enum Result<T> {
+pub enum Result<T, E> {
     Ok(T),
-    Err(T),
+    Err(E),
 }
 ```
 
