@@ -371,6 +371,7 @@
   - [Drozer Tutorial](mobile-pentesting/android-app-pentesting/drozer-tutorial/README.md)
     - [Exploiting Content Providers](mobile-pentesting/android-app-pentesting/drozer-tutorial/exploiting-content-providers.md)
   - [Exploiting a debuggeable application](mobile-pentesting/android-app-pentesting/exploiting-a-debuggeable-applciation.md)
+  - [Firmware Level Zygote Backdoor Libandroid Runtime](mobile-pentesting/android-app-pentesting/firmware-level-zygote-backdoor-libandroid_runtime.md)
   - [Flutter](mobile-pentesting/android-app-pentesting/flutter.md)
   - [Frida Tutorial](mobile-pentesting/android-app-pentesting/frida-tutorial/README.md)
     - [Frida Tutorial 1](mobile-pentesting/android-app-pentesting/frida-tutorial/frida-tutorial-1.md)
