@@ -16,9 +16,9 @@ fn main() {
     { // Scope of a variable is within the block it is declared in, which is denoted by brackets
         let teacher_age: u32 = 41;
         println!("The student is {} and teacher is {}", student_age, teacher_age);
-    } // when an owning variable goes out of scoped, it will dropped
+    } // when an owning variable goes out of scope, it will be dropped
 
-      // println!("the teacher is {}", teacher_age); // this will not work as teacher_age has been dropped
+    // println!("the teacher is {}", teacher_age); // this will not work as teacher_age has been dropped
 }
 ```
 
