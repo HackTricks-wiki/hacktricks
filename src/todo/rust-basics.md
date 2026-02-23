@@ -2,6 +2,28 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
+### Ownership of variables
+
+Memory is managed through a system of ownership with the following rules that the compiler checks at compile time:
+
+1. Each value in Rust has a variable that's called its owner.
+2. There can only be one owner at a time.
+3. When the owner goes out of scope, the value will be dropped.
+
+```rust
+fn main() {
+    let student_age: u32 = 20;
+    { // Scope of a variable is within the block it is declared in, which is denoted by brackets
+        let teacher_age: u32 = 41;
+        println!("The student is {} and teacher is {}", student_age, teacher_age);
+    } // when an owning variable goes out of scope, it will be dropped
+
+    // println!("the teacher is {}", teacher_age); // this will not work as teacher_age has been dropped
+}
+```
+
+
+
 ### Generic Types
 
 Create a struct where 1 of their values could be any type
@@ -33,6 +55,24 @@ pub enum Option<T> {
 ```
 
 You can use functions such as `is_some()` or `is_none()` to check the value of the Option.
+
+
+### Result, Ok & Err
+
+Used for returning and propagating errors
+
+```rust
+pub enum Result<T, E> {
+    Ok(T),
+    Err(E),
+}
+```
+
+You can use functions such as `is_ok()` or `is_err()` to check the value of the result
+
+The `Option` enum should be used in situations where a value might not exist (be `None`).
+The `Result` enum should be used in situations where you do something that might go wrong
+
 
 ### Macros
 
@@ -362,6 +402,16 @@ cargo audit              # flags vulnerable versions listed in Cargo.lock
 Integrate it in CI and fail on `--deny warnings`.
 
 `cargo deny check advisories` offers similar functionality plus licence and ban-list checks.
+
+#### Code coverage with cargo-tarpaulin
+
+`cargo tarpaulin` is a code coverage reporting tool for the Cargo build system
+
+```bash
+cargo binstall cargo-tarpaulin
+cargo tarpaulin              # no options are required, if no root directory is defined Tarpaulin will run in the current working directory.
+```
+On Linux, Tarpaulin's default tracing backend is still Ptrace and will only work on x86_64 processors. This can be changed to the llvm coverage instrumentation with `--engine llvm`. For Mac and Windows, this is the default collection method.
 
 #### Supply-chain verification with cargo-vet (2024)
 
