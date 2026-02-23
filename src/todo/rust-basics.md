@@ -1,10 +1,28 @@
-# Rust Basics
+# Rust मूल बातें
 
 {{#include ../banners/hacktricks-training.md}}
 
-### Generic Types
+### वेरिएबल्स का Ownership
 
-एक स्ट्रक्ट बनाएं जहां उनके 1 मान किसी भी प्रकार का हो सकता है
+मेमोरी ownership सिस्टम के माध्यम से प्रबंधित होती है, और कंपाइलर निम्नलिखित नियमों को compile time पर जाँचता है:
+
+1. Rust में प्रत्येक value का एक variable होता है जिसे owner कहा जाता है।
+2. एक समय में केवल एक ही owner हो सकता है।
+3. जब owner scope से बाहर चला जाता है, value dropped हो जाती है।
+```rust
+fn main() {
+let student_age: u32 = 20;
+{ // Scope of a variable is within the block it is declared in, which is denoted by brackets
+let teacher_age: u32 = 41;
+println!("The student is {} and teacher is {}", student_age, teacher_age);
+} // when an owning variable goes out of scope, it will be dropped
+
+// println!("the teacher is {}", teacher_age); // this will not work as teacher_age has been dropped
+}
+```
+### Generic प्रकार
+
+ऐसा struct बनाइए जहाँ उसकी 1 value किसी भी type की हो सके।
 ```rust
 struct Wrapper<T> {
 value: T,
@@ -21,18 +39,32 @@ Wrapper::new("Foo").value, "Foo"
 ```
 ### Option, Some & None
 
-Option प्रकार का अर्थ है कि मान Some (कुछ है) या None का हो सकता है:
+Option प्रकार का मतलब है कि मान संभवतः Some (कुछ मौजूद है) या None हो सकता है:
 ```rust
 pub enum Option<T> {
 None,
 Some(T),
 }
 ```
-आप `is_some()` या `is_none()` जैसी फ़ंक्शंस का उपयोग करके Option के मान की जांच कर सकते हैं।
+आप `is_some()` या `is_none()` जैसे फ़ंक्शन का उपयोग Option के मान की जाँच करने के लिए कर सकते हैं।
 
-### मैक्रोज़
+### Result, Ok & Err
 
-मैक्रोज़ फ़ंक्शंस की तुलना में अधिक शक्तिशाली होते हैं क्योंकि वे उस कोड को उत्पन्न करने के लिए विस्तारित होते हैं जो आपने मैन्युअल रूप से लिखा है। उदाहरण के लिए, एक फ़ंक्शन सिग्नेचर को फ़ंक्शन के पास मौजूद पैरामीटर की संख्या और प्रकार को घोषित करना चाहिए। दूसरी ओर, मैक्रोज़ एक परिवर्तनशील संख्या में पैरामीटर ले सकते हैं: हम `println!("hello")` को एक तर्क के साथ या `println!("hello {}", name)` को दो तर्कों के साथ कॉल कर सकते हैं। इसके अलावा, मैक्रोज़ कोड के अर्थ की व्याख्या करने से पहले विस्तारित होते हैं, इसलिए एक मैक्रो, उदाहरण के लिए, एक दिए गए प्रकार पर एक trait लागू कर सकता है। एक फ़ंक्शन ऐसा नहीं कर सकता, क्योंकि इसे रनटाइम पर कॉल किया जाता है और एक trait को संकलन समय पर लागू किया जाना चाहिए।
+त्रुटियों को लौटाने और प्रसारित करने के लिए उपयोग किया जाता है।
+```rust
+pub enum Result<T, E> {
+Ok(T),
+Err(E),
+}
+```
+आप `is_ok()` या `is_err()` जैसी फ़ंक्शन का उपयोग `Result` के मान की जाँच करने के लिए कर सकते हैं।
+
+`Option` enum का उपयोग उन परिस्थितियों में किया जाना चाहिए जहाँ कोई मान मौजूद न हो (यानी `None`)।
+`Result` enum का उपयोग उन परिस्थितियों में किया जाना चाहिए जहाँ आप ऐसा कुछ कर रहे हों जो गलत हो सकता है।
+
+### Macros
+
+Macros फ़ंक्शन की तुलना में अधिक शक्तिशाली होते हैं क्योंकि वे विस्तारित होकर उस कोड से भी अधिक कोड उत्पन्न करते हैं जो आपने मैन्युअली लिखा है। उदाहरण के लिए, एक फ़ंक्शन के signature को उस फ़ंक्शन के parameters की संख्या और प्रकार घोषित करना पड़ता है। दूसरी ओर, macros किसी भी संख्या के parameters ले सकते हैं: हम `println!("hello")` को एक argument के साथ कॉल कर सकते हैं या `println!("hello {}", name)` को दो arguments के साथ। इसके अलावा, macros को compiler द्वारा कोड के अर्थ को व्याख्यायित करने से पहले विस्तारित किया जाता है, इसलिए एक macro, उदाहरण के लिए, किसी दिए गए प्रकार पर trait को implement कर सकता है। एक फ़ंक्शन ऐसा नहीं कर सकता, क्योंकि वह runtime पर कॉल होता है और trait को compile time पर implement किया जाना चाहिए।
 ```rust
 macro_rules! my_macro {
 () => {
@@ -57,7 +89,7 @@ println!("Check out my macro!");
 }
 }
 ```
-### पुनरावृत्ति
+### दोहराना
 ```rust
 // Iterate through a vector
 let my_fav_fruits = vec!["banana", "raspberry"];
@@ -74,7 +106,7 @@ for (key, hashvalue) in &*map {
 for key in map.keys() {
 for value in map.values() {
 ```
-### पुनरावृत्त बॉक्स
+### आवर्ती Box
 ```rust
 enum List {
 Cons(i32, List),
@@ -85,7 +117,7 @@ let list = Cons(1, Cons(2, Cons(3, Nil)));
 ```
 ### शर्तें
 
-#### यदि
+#### if
 ```rust
 let n = 5;
 if n < 0 {
@@ -96,7 +128,7 @@ print!("{} is positive", n);
 print!("{} is zero", n);
 }
 ```
-#### मेल
+#### match
 ```rust
 match number {
 // Match a single value
@@ -119,7 +151,7 @@ true => 1,
 // TODO ^ Try commenting out one of these arms
 };
 ```
-#### लूप (अनंत)
+#### loop (infinite)
 ```rust
 loop {
 count += 1;
@@ -134,7 +166,7 @@ break;
 }
 }
 ```
-#### जबकि
+#### while
 ```rust
 let mut n = 1;
 while n < 101 {
@@ -196,7 +228,7 @@ _ => "Hello",
 }
 }
 ```
-#### यदि let
+#### if let
 ```rust
 let optional_word = Some(String::from("rustlings"));
 if let word = optional_word {
@@ -224,7 +256,7 @@ optional = Some(i + 1);
 ```
 ### Traits
 
-एक प्रकार के लिए एक नई विधि बनाएं
+किसी type के लिए एक नया method बनाएं
 ```rust
 trait AppendBar {
 fn append_bar(self) -> Self;
@@ -254,9 +286,9 @@ assert_ne!(true, false);
 ```
 ### थ्रेडिंग
 
-#### आर्क
+#### Arc
 
-एक आर्क Clone का उपयोग करके ऑब्जेक्ट पर अधिक संदर्भ बनाने के लिए उपयोग कर सकता है ताकि उन्हें थ्रेड्स को पास किया जा सके। जब किसी मान के लिए अंतिम संदर्भ पॉइंटर स्कोप से बाहर होता है, तो वेरिएबल हटा दिया जाता है।
+Arc Clone का उपयोग करके ऑब्जेक्ट पर और अधिक references बना सकता है ताकि उन्हें threads को पास किया जा सके। जब किसी value के लिए अंतिम reference pointer scope से बाहर हो जाता है, तो variable dropped हो जाता है।
 ```rust
 use std::sync::Arc;
 let apple = Arc::new("the same apple");
@@ -269,7 +301,7 @@ println!("{:?}", apple);
 ```
 #### Threads
 
-इस मामले में हम थ्रेड को एक वेरिएबल पास करेंगे जिसे वह संशोधित कर सकेगा।
+इस मामले में हम thread को एक variable पास करेंगे जिसे वह संशोधित कर सकेगा।
 ```rust
 fn main() {
 let status = Arc::new(Mutex::new(JobStatus { jobs_completed: 0 }));
@@ -287,19 +319,19 @@ thread::sleep(Duration::from_millis(500));
 }
 }
 ```
-### सुरक्षा आवश्यकताएँ
+### सुरक्षा मूल बातें
 
-Rust डिफ़ॉल्ट रूप से मजबूत मेमोरी-सुरक्षा गारंटी प्रदान करता है, लेकिन आप अभी भी `unsafe` कोड, निर्भरता मुद्दों या लॉजिक गलतियों के माध्यम से महत्वपूर्ण कमजोरियाँ पेश कर सकते हैं। निम्नलिखित मिनी-चीटशीट उन प्राइमिटिव्स को इकट्ठा करती है जिनसे आप आमतौर पर Rust सॉफ़्टवेयर की आक्रामक या रक्षात्मक सुरक्षा समीक्षाओं के दौरान संपर्क करेंगे।
+Rust डिफ़ॉल्ट रूप से मजबूत मेमोरी-सुरक्षा गारंटियाँ देता है, लेकिन आप अभी भी `unsafe` code, dependency issues या logic mistakes के माध्यम से गंभीर कमजोरियाँ जोड़ सकते हैं। नीचे दिया गया मिनी-चीटशीट उन प्रिमिटिव्स को संकलित करता है जिनसे आप Rust सॉफ़्टवेयर के offensive या defensive security reviews के दौरान सबसे ज्यादा संपर्क करेंगे।
 
-#### Unsafe कोड और मेमोरी सुरक्षा
+#### Unsafe code & memory safety
 
-`unsafe` ब्लॉक्स कंपाइलर के एलियासिंग और बाउंड्स चेक से बाहर निकलते हैं, इसलिए **सभी पारंपरिक मेमोरी-करप्शन बग (OOB, उपयोग के बाद मुक्त, डबल फ्री, आदि) फिर से प्रकट हो सकते हैं**। एक त्वरित ऑडिट चेकलिस्ट:
+`unsafe` blocks compiler के aliasing और bounds checks से opt-out करते हैं, इसलिए **सभी पारंपरिक memory-corruption बग्स (OOB, use-after-free, double free, आदि) फिर से प्रकट हो सकते हैं**। एक त्वरित ऑडिट चेकलिस्ट:
 
-* `unsafe` ब्लॉक्स, `extern "C"` फ़ंक्शंस, `ptr::copy*`, `std::mem::transmute`, `MaybeUninit`, कच्चे पॉइंटर्स या `ffi` मॉड्यूल के लिए देखें।
-* निम्न-स्तरीय फ़ंक्शंस को पास किए गए प्रत्येक पॉइंटर अंकगणित और लंबाई तर्क को मान्य करें।
-* जब कोई `unsafe` को फिर से पेश करता है तो संकलन विफल करने के लिए `#![forbid(unsafe_code)]` (क्रेट-व्यापी) या `#[deny(unsafe_op_in_unsafe_fn)]` (1.68 +) को प्राथमिकता दें।
+* खोजें `unsafe` blocks, `extern "C"` functions, `ptr::copy*` के कॉल, `std::mem::transmute`, `MaybeUninit`, raw pointers या `ffi` modules।
+* हर pointer arithmetic और length argument की सत्यापना करें जो low-level functions को पास किए जाते हैं।
+* जब कोई `unsafe` फिर से जोड़ता है तो कंपाइल असफल करने के लिये crate-स्तर पर `#![forbid(unsafe_code)]` या `#[deny(unsafe_op_in_unsafe_fn)]` (1.68 +) का प्रयोग करें।
 
-कच्चे पॉइंटर्स के साथ बनाए गए ओवरफ्लो का उदाहरण:
+Example overflow created with raw pointers:
 ```rust
 use std::ptr;
 
@@ -313,45 +345,54 @@ dst.set_len(src.len());
 dst
 }
 ```
-Miri चलाना परीक्षण के समय UB का पता लगाने का एक सस्ता तरीका है:
+Miri चलाना परीक्षण समय पर UB का पता लगाने का सस्ता तरीका है:
 ```bash
 rustup component add miri
 cargo miri test  # hunts for OOB / UAF during unit tests
 ```
-#### Auditing dependencies with RustSec / cargo-audit
+#### RustSec / cargo-audit के साथ dependencies का ऑडिट
 
-अधिकांश वास्तविक दुनिया के Rust कमजोरियाँ तृतीय-पक्ष क्रेट्स में होती हैं। RustSec सलाहकार DB (समुदाय द्वारा संचालित) को स्थानीय रूप से क्वेरी किया जा सकता है:
+अधिकांश वास्तविक दुनिया के Rust vulns third-party crates में रहते हैं। RustSec advisory DB (community-powered) को लोकली क्वेरी किया जा सकता है:
 ```bash
 cargo install cargo-audit
 cargo audit              # flags vulnerable versions listed in Cargo.lock
 ```
-इसे CI में एकीकृत करें और `--deny warnings` पर विफल हों।
+इसे CI में इंटीग्रेट करें और `--deny warnings` पर असफल कर दें।
 
-`cargo deny check advisories` समान कार्यक्षमता प्रदान करता है, साथ ही लाइसेंस और प्रतिबंध सूची की जांच भी करता है।
+`cargo deny check advisories` समान कार्यक्षमता प्रदान करता है और साथ में लाइसेंस और ban-list की जाँच भी करता है।
+
+#### कोड कवरेज cargo-tarpaulin के साथ
+
+`cargo tarpaulin` एक कोड कवरेज रिपोर्टिंग टूल है Cargo build system के लिए।
+```bash
+cargo binstall cargo-tarpaulin
+cargo tarpaulin              # no options are required, if no root directory is defined Tarpaulin will run in the current working directory.
+```
+Linux पर, Tarpaulin का डिफ़ॉल्ट ट्रेसिंग बैकएंड अभी भी Ptrace है और यह केवल x86_64 प्रोसेसर पर ही काम करेगा। इसे `--engine llvm` के साथ llvm कवरेज इंस्ट्रूमेंटेशन में बदला जा सकता है। Mac और Windows के लिए, यह डिफ़ॉल्ट संग्रह विधि है।
 
 #### सप्लाई-चेन सत्यापन cargo-vet के साथ (2024)
 
-`cargo vet` आपके द्वारा आयात किए गए प्रत्येक क्रेट के लिए एक समीक्षा हैश रिकॉर्ड करता है और अनजान अपग्रेड को रोकता है:
+`cargo vet` हर crate के लिए एक review hash रिकॉर्ड करता है जो आप इम्पोर्ट करते हैं और अनदेखे अपग्रेड्स को रोकता है:
 ```bash
 cargo install cargo-vet
 cargo vet init      # generates vet.toml
 cargo vet --locked  # verifies packages referenced in Cargo.lock
 ```
-यह उपकरण Rust प्रोजेक्ट इन्फ्रास्ट्रक्चर और बढ़ती संख्या के संगठनों द्वारा विषाक्त-पैकेज हमलों को कम करने के लिए अपनाया जा रहा है।
+यह टूल Rust project infrastructure और बढ़ती संख्या के संगठनों द्वारा poisoned-package attacks को कम करने के लिए अपनाया जा रहा है।
 
-#### अपने API सतह को फज़ करना (cargo-fuzz)
+#### Fuzzing आपकी API सतह (cargo-fuzz)
 
-फज़ परीक्षण आसानी से पैनिक, पूर्णांक ओवरफ्लो और लॉजिक बग्स को पकड़ लेते हैं जो DoS या साइड-चैनल मुद्दे बन सकते हैं:
+Fuzz tests आसानी से panics, integer overflows और logic bugs पकड़ लेते हैं जो DoS या side-channel समस्याओं में बदल सकते हैं:
 ```bash
 cargo install cargo-fuzz
 cargo fuzz init              # creates fuzz_targets/
 cargo fuzz run fuzz_target_1 # builds with libFuzzer & runs continuously
 ```
-अपने रिपॉजिटरी में फज़ टारगेट जोड़ें और इसे अपनी पाइपलाइन में चलाएँ।
+अपने repo में fuzz target जोड़ें और इसे अपने pipeline में चलाएँ।
 
-## संदर्भ
+## References
 
-- RustSec सलाहकार डेटाबेस – <https://rustsec.org>
-- Cargo-vet: "अपने Rust निर्भरताओं का ऑडिट करना" – <https://mozilla.github.io/cargo-vet/>
+- RustSec Advisory Database – <https://rustsec.org>
+- Cargo-vet: "Auditing your Rust Dependencies" – <https://mozilla.github.io/cargo-vet/>
 
 {{#include ../banners/hacktricks-training.md}}
