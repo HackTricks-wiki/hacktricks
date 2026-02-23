@@ -1,10 +1,28 @@
-# Rust Basics
+# Основи Rust
 
 {{#include ../banners/hacktricks-training.md}}
 
-### Generic Types
+### Власність змінних
 
-Створіть структуру, де 1 з їх значень може бути будь-яким типом
+Пам'ять керується системою власності з такими правилами, які компілятор перевіряє на етапі компіляції:
+
+1. Кожне значення в Rust має змінну, яку називають його власником.
+2. Одночасно може бути лише один власник.
+3. Коли власник виходить з області видимості, значення буде звільнене.
+```rust
+fn main() {
+let student_age: u32 = 20;
+{ // Scope of a variable is within the block it is declared in, which is denoted by brackets
+let teacher_age: u32 = 41;
+println!("The student is {} and teacher is {}", student_age, teacher_age);
+} // when an owning variable goes out of scope, it will be dropped
+
+// println!("the teacher is {}", teacher_age); // this will not work as teacher_age has been dropped
+}
+```
+### Узагальнені типи
+
+Створіть struct, де одне зі значень може мати будь-який тип
 ```rust
 struct Wrapper<T> {
 value: T,
@@ -21,7 +39,7 @@ Wrapper::new("Foo").value, "Foo"
 ```
 ### Option, Some & None
 
-Тип Option означає, що значення може бути типу Some (є щось) або None:
+Тип Option означає, що значення може бути типу Some (є дещо) або None:
 ```rust
 pub enum Option<T> {
 None,
@@ -30,9 +48,25 @@ Some(T),
 ```
 Ви можете використовувати функції, такі як `is_some()` або `is_none()`, щоб перевірити значення Option.
 
+
+### Result, Ok & Err
+
+Використовується для повернення та поширення помилок
+```rust
+pub enum Result<T, E> {
+Ok(T),
+Err(E),
+}
+```
+You can use functions such as `is_ok()` or `is_err()` to check the value of the result
+
+The `Option` enum should be used in situations where a value might not exist (be `None`).
+The `Result` enum should be used in situations where you do something that might go wrong
+
+
 ### Макроси
 
-Макроси є більш потужними, ніж функції, оскільки вони розширюються, щоб створити більше коду, ніж код, який ви написали вручну. Наприклад, підпис функції повинен оголошувати кількість і тип параметрів, які має функція. Макроси, з іншого боку, можуть приймати змінну кількість параметрів: ми можемо викликати `println!("hello")` з одним аргументом або `println!("hello {}", name)` з двома аргументами. Крім того, макроси розширюються до того, як компілятор інтерпретує значення коду, тому макрос може, наприклад, реалізувати трей на даному типі. Функція не може, оскільки вона викликається під час виконання, а трей потрібно реалізувати під час компіляції.
+Макроси потужніші за функції, тому що вони розгортаються, щоб згенерувати більше коду, ніж той, який ви написали вручну. Наприклад, сигнатура функції має оголосити кількість і тип параметрів, які має функція. Натомість макроси можуть приймати змінну кількість параметрів: ми можемо викликати `println!("hello")` з одним аргументом або `println!("hello {}", name)` з двома аргументами. Крім того, макроси розгортаються до того, як компілятор інтерпретує значення коду, тому макрос, наприклад, може реалізувати trait для заданого типу. Функція не може цього зробити, оскільки вона викликається під час виконання, а trait має бути реалізований під час компіляції.
 ```rust
 macro_rules! my_macro {
 () => {
@@ -83,7 +117,7 @@ Nil,
 
 let list = Cons(1, Cons(2, Cons(3, Nil)));
 ```
-### Умови
+### Умовні оператори
 
 #### if
 ```rust
@@ -96,7 +130,7 @@ print!("{} is positive", n);
 print!("{} is zero", n);
 }
 ```
-#### відповідність
+#### match
 ```rust
 match number {
 // Match a single value
@@ -119,7 +153,7 @@ true => 1,
 // TODO ^ Try commenting out one of these arms
 };
 ```
-#### цикл (нескінченний)
+#### loop (безкінечний)
 ```rust
 loop {
 count += 1;
@@ -134,7 +168,7 @@ break;
 }
 }
 ```
-#### поки
+#### while
 ```rust
 let mut n = 1;
 while n < 101 {
@@ -222,7 +256,7 @@ optional = Some(i + 1);
 // explicitly handling the failing case.
 }
 ```
-### Риси
+### Traits
 
 Створіть новий метод для типу
 ```rust
@@ -252,11 +286,11 @@ assert_ne!(true, false);
 }
 }
 ```
-### Потоки
+### Threading
 
 #### Arc
 
-Arc може використовувати Clone для створення додаткових посилань на об'єкт, щоб передати їх потокам. Коли останній вказівник на значення виходить за межі області видимості, змінна видаляється.
+Arc може використовувати Clone для створення додаткових посилань на об'єкт, щоб передавати їх у threads. Коли останнє посилання на значення виходить з області видимості, змінна звільняється.
 ```rust
 use std::sync::Arc;
 let apple = Arc::new("the same apple");
@@ -267,9 +301,9 @@ println!("{:?}", apple);
 });
 }
 ```
-#### Threads
+#### Потоки
 
-У цьому випадку ми передамо потоку змінну, яку він зможе змінювати.
+У цьому випадку ми передамо потоку змінну, яку він зможе змінити
 ```rust
 fn main() {
 let status = Arc::new(Mutex::new(JobStatus { jobs_completed: 0 }));
@@ -289,17 +323,17 @@ thread::sleep(Duration::from_millis(500));
 ```
 ### Основи безпеки
 
-Rust забезпечує сильні гарантії безпеки пам'яті за замовчуванням, але ви все ще можете ввести критичні вразливості через `unsafe` код, проблеми з залежностями або логічні помилки. Наступний міні-чернетка збирає примітиви, з якими ви найчастіше стикатиметеся під час наступальних або захисних перевірок безпеки програмного забезпечення Rust.
+Rust за замовчуванням забезпечує сильні гарантії безпеки пам'яті, але ви все ще можете ввести критичні вразливості через `unsafe` код, проблеми з залежностями або логічні помилки. Нижче — коротка шпаргалка з примітивів, з якими ви найчастіше стикатиметесь під час offensive or defensive security reviews Rust-проєктів.
 
-#### Небезпечний код та безпека пам'яті
+#### unsafe-код та безпека пам'яті
 
-`unsafe` блоки відмовляються від перевірок аліасів та меж компілятора, тому **всі традиційні помилки корупції пам'яті (OOB, використання після звільнення, подвійне звільнення тощо) можуть знову з'явитися**. Швидкий контрольний список для аудиту:
+`unsafe` блоки відключають перевірки компілятора щодо aliasing та bounds, тому **усі традиційні помилки корупції пам'яті (OOB, use-after-free, double free тощо) можуть з'явитися знову**. Короткий чекліст для аудиту:
 
-* Шукайте `unsafe` блоки, `extern "C"` функції, виклики до `ptr::copy*`, `std::mem::transmute`, `MaybeUninit`, сирі вказівники або `ffi` модулі.
-* Перевіряйте кожну арифметику вказівників та аргументи довжини, передані низькорівневим функціям.
-* Вибирайте `#![forbid(unsafe_code)]` (по всьому крейту) або `#[deny(unsafe_op_in_unsafe_fn)]` (1.68 +), щоб зупинити компіляцію, коли хтось знову вводить `unsafe`.
+* Шукайте `unsafe` блоки, `extern "C"` функції, виклики `ptr::copy*`, `std::mem::transmute`, `MaybeUninit`, raw pointers або модулі `ffi`.
+* Перевіряйте всі операції з арифметикою вказівників та аргументи довжини, які передаються в низькорівневі функції.
+* Віддавайте перевагу `#![forbid(unsafe_code)]` (для всього crate) або `#[deny(unsafe_op_in_unsafe_fn)]` (1.68 +), щоб компіляція не проходила, коли хтось повторно вводить `unsafe`.
 
-Приклад переповнення, створеного за допомогою сирих вказівників:
+Example overflow created with raw pointers:
 ```rust
 use std::ptr;
 
@@ -313,45 +347,54 @@ dst.set_len(src.len());
 dst
 }
 ```
-Запуск Miri є недорогим способом виявлення UB під час тестування:
+Запуск Miri — недорогий спосіб виявити UB під час тестування:
 ```bash
 rustup component add miri
 cargo miri test  # hunts for OOB / UAF during unit tests
 ```
-#### Аудит залежностей з RustSec / cargo-audit
+#### Аудит залежностей за допомогою RustSec / cargo-audit
 
-Більшість вразливостей Rust у реальному світі знаходяться в сторонніх пакетах. Базу даних рекомендацій RustSec (яка підтримується спільнотою) можна запитувати локально:
+Більшість реальних Rust vulns знаходяться в сторонніх crates. RustSec advisory DB (підтримується спільнотою) можна опитати локально:
 ```bash
 cargo install cargo-audit
 cargo audit              # flags vulnerable versions listed in Cargo.lock
 ```
-Інтегруйте це в CI і провалюйте на `--deny warnings`.
+Інтегруйте це в CI і припиняйте виконання при `--deny warnings`.
 
-`cargo deny check advisories` пропонує подібну функціональність плюс перевірки ліцензій та заборонених списків.
+`cargo deny check advisories` пропонує схожу функціональність, а також перевірки ліцензій і чорних списків.
 
-#### Перевірка постачальницького ланцюга з cargo-vet (2024)
+#### Покриття коду з cargo-tarpaulin
 
-`cargo vet` записує хеш огляду для кожного пакету, який ви імпортуєте, і запобігає непоміченим оновленням:
+`cargo tarpaulin` — інструмент звіту про покриття коду для системи збірки Cargo
+```bash
+cargo binstall cargo-tarpaulin
+cargo tarpaulin              # no options are required, if no root directory is defined Tarpaulin will run in the current working directory.
+```
+На Linux бекенд трасування Tarpaulin за замовчуванням все ще Ptrace і працює лише на процесорах x86_64. Це можна змінити на llvm coverage instrumentation за допомогою `--engine llvm`. Для Mac і Windows це метод збору за замовчуванням.
+
+#### Перевірка ланцюга постачання за допомогою cargo-vet (2024)
+
+`cargo vet` записує review hash для кожного crate, який ви імпортуєте, і запобігає непоміченим оновленням:
 ```bash
 cargo install cargo-vet
 cargo vet init      # generates vet.toml
 cargo vet --locked  # verifies packages referenced in Cargo.lock
 ```
-Інструмент приймається інфраструктурою проекту Rust та зростаючою кількістю організацій для пом'якшення атак з отруєними пакетами.
+Цей інструмент впроваджується в інфраструктуру проєкту Rust та дедалі більшою кількістю організацій, щоб зменшити poisoned-package attacks.
 
-#### Fuzzing вашої API поверхні (cargo-fuzz)
+#### Fuzzing вашої поверхні API (cargo-fuzz)
 
-Fuzz-тести легко виявляють паніки, переповнення цілих чисел та логічні помилки, які можуть стати проблемами DoS або побічного каналу:
+Fuzz tests легко виявляють panics, integer overflows та logic bugs, які можуть перетворитися на DoS або side-channel проблеми:
 ```bash
 cargo install cargo-fuzz
 cargo fuzz init              # creates fuzz_targets/
 cargo fuzz run fuzz_target_1 # builds with libFuzzer & runs continuously
 ```
-Додайте ціль для фуззингу до вашого репозиторію та запустіть її у вашому конвеєрі.
+Додайте fuzz target до вашого репо та запустіть його у вашому pipeline.
 
 ## Посилання
 
 - RustSec Advisory Database – <https://rustsec.org>
-- Cargo-vet: "Аудит ваших залежностей Rust" – <https://mozilla.github.io/cargo-vet/>
+- Cargo-vet: "Auditing your Rust Dependencies" – <https://mozilla.github.io/cargo-vet/>
 
 {{#include ../banners/hacktricks-training.md}}
