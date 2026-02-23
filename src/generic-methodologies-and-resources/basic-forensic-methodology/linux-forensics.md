@@ -386,6 +386,33 @@ ls -lai /bin | sort -n```
 > [!TIP]
 > Note that an **attacker** can **modify** the **time** to make **files appear** **legitimate**, but he **cannot** modify the **inode**. If you find that a **file** indicates that it was created and modified at the **same time** as the rest of the files in the same folder, but the **inode** is **unexpectedly bigger**, then the **timestamps of that file were modified**.
 
+### Inode-focused quick triage
+
+If you suspect anti-forensics, run these inode-focused checks early:
+
+```bash
+# Filesystem inode pressure (possible inode exhaustion DoS)
+df -i
+
+# Identify all names that point to one inode
+find / -xdev -inum <inode_number> 2>/dev/null
+
+# Find deleted files still open by running processes
+lsof +L1
+lsof | grep '(deleted)'
+```
+
+When a suspicious inode is on an EXT filesystem image/device, inspect inode metadata directly:
+
+```bash
+sudo debugfs -R "stat <inode_number>" /dev/sdX
+```
+
+Useful fields:
+- **Links**: if `0`, no directory entry currently references the inode.
+- **dtime**: deletion timestamp set when the inode was unlinked.
+- **ctime/mtime**: helps correlate metadata/content changes with incident timeline.
+
 ## Compare files of different filesystem versions
 
 ### Filesystem Version Comparison Summary
@@ -431,6 +458,5 @@ git diff --no-index --diff-filter=D path/to/old_version/ path/to/new_version/
 - [Red Canary – Patching for persistence: How DripDropper Linux malware moves through the cloud](https://redcanary.com/blog/threat-intelligence/dripdropper-linux-malware/)
 
 {{#include ../../banners/hacktricks-training.md}}
-
 
 

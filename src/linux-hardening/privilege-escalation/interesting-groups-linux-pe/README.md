@@ -94,6 +94,12 @@ Users from the **group shadow** can **read** the **/etc/shadow** file:
 
 So, read the file and try to **crack some hashes**.
 
+Quick lock-state nuance when triaging hashes:
+- Entries with `!` or `*` are generally non-interactive for password logins.
+- `!hash` usually means a password was set and then locked.
+- `*` usually means no valid password hash was ever set.
+This is useful for account classification even when direct login is blocked.
+
 ## Staff Group
 
 **staff**: Allows users to add local modifications to the system (`/usr/local`) without needing root privileges (note that executables in `/usr/local/bin` are in the PATH variable of any user, and they may "override" the executables in `/bin` and `/usr/bin` with the same name). Compare with group "adm", which is more related to monitoring/security. [\[source\]](https://wiki.debian.org/SystemGroups)
@@ -263,6 +269,16 @@ https://fosterelli.co/privilege-escalation-via-docker.html
 
 Usually **members** of the group **`adm`** have permissions to **read log** files located inside _/var/log/_.\
 Therefore, if you have compromised a user inside this group you should definitely take a **look to the logs**.
+
+## Backup / Operator / lp / Mail groups
+
+These groups are often **credential-discovery** vectors rather than direct root vectors:
+- **backup**: may expose archives with configs, keys, DB dumps, or tokens.
+- **operator**: platform-specific operational access that can leak sensitive runtime data.
+- **lp**: print queues/spools can contain document contents.
+- **mail**: mail spools can expose reset links, OTPs, and internal credentials.
+
+Treat membership here as a high-value data exposure finding and pivot through password/token reuse.
 
 ## Auth group
 

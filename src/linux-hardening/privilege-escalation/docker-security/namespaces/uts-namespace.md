@@ -75,7 +75,22 @@ sudo find /proc -maxdepth 3 -type l -name uts -exec ls -l  {} \; 2>/dev/null | g
 nsenter -u TARGET_PID --pid /bin/bash
 ```
 
+## Abusing host UTS sharing
+
+If a container is started with `--uts=host`, it joins the host UTS namespace instead of getting an isolated one. With capabilities such as `--cap-add SYS_ADMIN`, code in the container can change the host hostname/NIS name via `sethostname()`/`setdomainname()`:
+
+```bash
+docker run --rm -it --uts=host --cap-add SYS_ADMIN alpine sh -c "hostname hacked-host && exec sh"
+# Hostname on the host will immediately change to "hacked-host"
+```
+
+Changing the host name can tamper with logs/alerts, confuse cluster discovery or break TLS/SSH configs that pin the hostname.
+
+### Detect containers sharing UTS with the host
+
+```bash
+docker ps -aq | xargs -r docker inspect --format '{{.Id}} UTSMode={{.HostConfig.UTSMode}}'
+# Shows "host" when the container uses the host UTS namespace
+```
+
 {{#include ../../../../banners/hacktricks-training.md}}
-
-
-

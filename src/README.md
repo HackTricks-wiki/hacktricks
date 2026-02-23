@@ -104,16 +104,26 @@ Join [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) server to 
 
 ---
 
-### [Pentest-Tools.com](https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons) - The essential penetration testing toolkit
+### [Modern Security – AI & Application Security Training Platform](https://modernsecurity.io/)
 
-<figure><img src="images/pentest-tools.svg" alt=""><figcaption></figcaption></figure>
+<figure><img src="images/modern_security_logo.png" alt="Modern Security"><figcaption></figcaption></figure>
 
-**Get a hacker's perspective on your web apps, network, and cloud**
+Modern Security delivers **practical AI Security training** with an **engineering-first, hands-on lab approach**. Our courses are built for security engineers, AppSec professionals, and developers who want to **build, break, and secure real AI/LLM-powered applications**.
 
-**Find and report critical, exploitable vulnerabilities with real business impact.** Use our 20+ custom tools to map the attack surface, find security issues that let you escalate privileges, and use automated exploits to collect essential evidence, turning your hard work into persuasive reports.
+The **AI Security Certification** focuses on real-world skills, including:
+- Securing LLM and AI-powered applications  
+- Threat modeling for AI systems  
+- Embeddings, vector databases, and RAG security  
+- LLM attacks, abuse scenarios, and practical defenses  
+- Secure design patterns and deployment considerations  
+
+All courses are **on-demand**, **lab-driven**, and designed around **real-world security tradeoffs**, not just theory.
+
+👉 More details on the AI Security course:  
+https://www.modernsecurity.io/courses/ai-security-certification
 
 {{#ref}}
-https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons
+https://modernsecurity.io/
 {{#endref}}
 
 ---
@@ -220,7 +230,6 @@ Moreover, K8Studio is **compatible with all major kubernetes distributions** (AW
 {{#ref}}
 https://k8studio.io/
 {{#endref}}
-
 
 ---
 

