@@ -64,6 +64,9 @@ Heuristic: If an APK installs and runs on-device but core entries appear "encryp
 
 Fix by clearing GPBF bit 0 in both Local File Headers (LFH) and Central Directory (CD) entries. Minimal byte-patcher:
 
+<details>
+<summary>Minimal GPBF bit-clear patcher</summary>
+
 ```python
 # gpbf_clear.py – clear encryption bit (bit 0) in ZIP local+central headers
 import struct, sys
@@ -94,6 +97,8 @@ if __name__ == '__main__':
     open(outp, 'wb').write(data)
     print(f'Patched: LFH={p_lfh}, CDH={p_cdh}')
 ```
+
+</details>
 
 Usage:
 
@@ -171,11 +176,66 @@ Blue-team detection ideas:
 
 ---
 
+## Other malicious ZIP tricks (2024–2025)
+
+### Concatenated central directories (multi-EOCD evasion)
+
+Recent phishing campaigns ship a single blob that is actually **two ZIP files concatenated**. Each has its own End of Central Directory (EOCD) + central directory. Different extractors parse different directories (7zip reads the first, WinRAR the last), letting attackers hide payloads that only some tools show. This also bypasses basic mail gateway AV that inspects only the first directory.
+
+**Triage commands**
+
+```bash
+# Count EOCD signatures
+binwalk -R "PK\x05\x06" suspect.zip
+# Dump central-directory offsets
+zipdetails -v suspect.zip | grep -n "End Central"
+```
+
+If more than one EOCD appears or there is "data after payload" warnings, split the blob and inspect each part:
+
+```bash
+# recover the second archive (heuristic: start at second EOCD offset)
+# adjust OFF based on binwalk output
+OFF=123456
+dd if=suspect.zip bs=1 skip=$OFF of=tail.zip
+7z l tail.zip   # list hidden content
+```
+
+### Quoted-overlap / overlapping-entry bombs (non-recursive)
+
+Modern "better zip bomb" builds a tiny **kernel** (highly compressed DEFLATE block) and reuses it via overlapping local headers. Every central directory entry points to the same compressed data, achieving >28M:1 ratios without nesting archives. Libraries that trust central directory sizes (Python `zipfile`, Java `java.util.zip`, Info-ZIP prior to hardened builds) can be forced to allocate petabytes.
+
+**Quick detection (duplicate LFH offsets)**
+
+```python
+# detect overlapping entries by identical relative offsets
+import struct, sys
+buf=open(sys.argv[1],'rb').read()
+off=0; seen=set()
+while True:
+    i = buf.find(b'PK\x01\x02', off)
+    if i<0: break
+    rel = struct.unpack_from('<I', buf, i+42)[0]
+    if rel in seen:
+        print('OVERLAP at offset', rel)
+        break
+    seen.add(rel); off = i+4
+```
+
+**Handling**
+- Perform a dry-run walk: `zipdetails -v file.zip | grep -n "Rel Off"` and ensure offsets are strictly increasing and unique.
+- Cap accepted total uncompressed size and entry count before extraction (`zipdetails -t` or custom parser).
+- When you must extract, do it inside a cgroup/VM with CPU+disk limits (avoid unbounded inflation crashes).
+
+---
+
 ## References
 
 - [https://michael-myers.github.io/blog/categories/ctf/](https://michael-myers.github.io/blog/categories/ctf/)
 - [GodFather – Part 1 – A multistage dropper (APK ZIP anti-reversing)](https://shindan.io/blog/godfather-part-1-a-multistage-dropper)
 - [zipdetails (Archive::Zip script)](https://metacpan.org/pod/distribution/Archive-Zip/scripts/zipdetails)
 - [ZIP File Format Specification (PKWARE APPNOTE.TXT)](https://pkware.cachefly.net/webdocs/casestudies/APPNOTE.TXT)
+- [Hackers bury malware in new ZIP file attack — concatenated ZIP central directories](https://www.tomshardware.com/tech-industry/cyber-security/hackers-bury-malware-in-new-zip-file-attack-combining-multiple-zips-into-one-bypasses-antivirus-protections)
+- [Understanding Zip Bombs: overlapping/quoted-overlap kernel construction](https://ubos.tech/news/understanding-zip-bombs-construction-risks-and-mitigation-2/)
 
 {{#include ../../../banners/hacktricks-training.md}}

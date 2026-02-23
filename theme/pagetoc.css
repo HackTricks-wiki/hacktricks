@@ -1,4 +1,4 @@
-@media only screen and (max-width:1439px) {
+@media only screen and (max-width:799px) {
     .sidetoc {
         display: none !important;
     }
@@ -61,13 +61,15 @@
     }
 }
 
-@media only screen and (min-width:1440px) {
+@media only screen and (min-width:800px) {
     main {
         position: relative;
     }
     .sidetoc {
         width: 250px;
         margin-top: 25px;
+        background-color: transparent;
+        position: relative;
     }
     .sidetoc-wrapper {
         position: fixed;
@@ -77,22 +79,28 @@
         display: flex;
         flex-direction: column;
         gap:20px;
+        background-color: transparent;
     }
     .pagetoc {
         max-height: 60%;
         overflow: auto;
-        border-left: 1px solid var(--table-border-color);
+        border-left: 1px solid color-mix(in srgb, var(--table-border-color) 70%, transparent);
+        border-radius: 12px;
+        background: transparent;
+        box-shadow: none;
+        padding: 4px 4px;
     }
     .sidesponsor {
         max-height: 40%;
         height: 40%;
-        background-color: var(--bg);
-        border: 1px solid var(--table-border-color);
+        background-color: transparent;
+        border: 1px solid color-mix(in srgb, var(--table-border-color) 70%, transparent);
         border-radius: 8px;
         padding: 5px;
         display: none; /*changed via JS once ad is loaded*/
         flex-direction: column;
         text-decoration: none !important;
+        backdrop-filter: blur(6px);
     }
     .sidesponsor img {
         height: auto;
@@ -145,14 +153,56 @@
         display: none !important;
     }
 
+    .sidetoc-toggle {
+        position: fixed;
+        top: calc(var(--menu-bar-height) + 90px);
+        width: 28px;
+        height: 28px;
+        border-radius: 9999px;
+        border: 1px solid color-mix(in srgb, var(--sidebar-active) 50%, var(--table-border-color));
+        background: color-mix(in srgb, var(--bg) 60%, transparent);
+        color: var(--sidebar-active);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 12;
+        transition: transform 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+    }
+    .sidetoc-toggle .toggle-chevron {
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: -0.08em;
+        text-shadow: 0 0 8px color-mix(in srgb, var(--sidebar-active) 60%, transparent);
+    }
+
+    .sidetoc-toggle:hover {
+        background-color: color-mix(in srgb, var(--sidebar-active) 12%, transparent);
+        color: var(--sidebar-active);
+        transform: translateX(-2px);
+    }
+
+    html.sidetoc-hidden .sidetoc {
+        width: 0;
+        margin-top: 0;
+    }
+
+    html.sidetoc-hidden .sidetoc-wrapper {
+        display: none;
+    }
+
+    html.sidetoc-hidden .sidetoc-toggle {
+        transform: rotate(180deg);
+    }
+
     .pagetoc a {
-        border-left: 1px solid var(--sidebar-bg);
-        color: var(--fg) !important;
+        border-left: none;
+        color: color-mix(in srgb, var(--fg) 70%, var(--links)) !important;
         display: block;
         padding-bottom: 5px;
         padding-top: 5px;
-        padding-left: 10px;
-        padding-right: 10px;
+        padding-left: 12px;
+        padding-right: 12px;
         text-align: left;
         text-decoration: none;
         text-overflow: ellipsis;
@@ -160,16 +210,17 @@
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
         overflow: hidden;
+        border-radius: 10px;
+        font-size: 1.35rem;
+        transition: color 0.2s ease, background-color 0.2s ease;
     }
     .pagetoc a:hover {
-        background: var(--sidebar-bg-hover);
-        color: var(--sidebar-active) !important;
-        border-radius: 5px;
+        background: linear-gradient(90deg, color-mix(in srgb, var(--links) 16%, transparent), transparent);
+        color: color-mix(in srgb, var(--sidebar-active) 85%, var(--fg)) !important;
     }
     .pagetoc a.active {
-        background: var(--sidebar-bg-hover);
+        background: linear-gradient(90deg, color-mix(in srgb, var(--links) 24%, transparent), transparent);
         color: var(--sidebar-active) !important;
-        border-radius: 5px;
     }
     .pagetoc .pagetoc-H2 {
         padding-left: 20px;

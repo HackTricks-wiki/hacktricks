@@ -44,6 +44,14 @@ lsof +D /lib #Processes using files inside the indicated dir
 lsof -i :80 #Files uses by networks processes
 fuser -nv tcp 80
 
+#FD/proc quick triage
+ls -l /proc/<PID>/fd #Per-process file descriptors
+readlink /proc/<PID>/fd/<FD> #Resolve exact FD target
+cat /proc/<PID>/fd/<FD> #Read via already-open FD (permissions permitting)
+grep " /proc " /proc/mounts #Check proc mount options (hidepid=1/2 hardens cross-user visibility)
+find /proc/[0-9]*/fd -lname '*deleted*' 2>/dev/null #Deleted files still open by running processes
+lsof +L1 #Another way to find deleted-but-open files
+
 #Decompress
 tar -xvzf /path/to/yourfile.tgz
 tar -xvjf /path/to/yourfile.tbz

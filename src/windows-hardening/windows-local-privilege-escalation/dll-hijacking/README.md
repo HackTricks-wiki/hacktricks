@@ -381,7 +381,7 @@ OPSEC silence
 Trigger and persistence via Accessibility configuration
 - User context (HKCU): `reg add "HKCU\Software\Microsoft\Windows NT\CurrentVersion\Accessibility" /v configuration /t REG_SZ /d "Narrator" /f`
 - Winlogon/SYSTEM (HKLM): `reg add "HKLM\Software\Microsoft\Windows NT\CurrentVersion\Accessibility" /v configuration /t REG_SZ /d "Narrator" /f`
-- With the above, starting Narrator loads the planted DLL. On the secure desktop (logon screen), press CTRL+WIN+ENTER to start Narrator.
+- With the above, starting Narrator loads the planted DLL. On the secure desktop (logon screen), press CTRL+WIN+ENTER to start Narrator; your DLL executes as SYSTEM on the secure desktop.
 
 RDP-triggered SYSTEM execution (lateral movement)
 - Allow classic RDP security layer: `reg add "HKLM\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp" /v SecurityLayer /t REG_DWORD /d 0 /f`
@@ -518,6 +518,35 @@ Operators pair DLL sideloading with LOLBAS so the only custom artifact on disk i
 
 - **Hunting:** Alert on `forfiles` when `/p`, `/m`, and `/c` appear together; uncommon outside admin scripts.
 
+
+## Case Study: NSIS dropper + Bitdefender Submission Wizard sideload (Chrysalis)
+
+A recent Lotus Blossom intrusion abused a trusted update chain to deliver an NSIS-packed dropper that staged a DLL sideload plus fully in-memory payloads.
+
+Tradecraft flow
+- `update.exe` (NSIS) creates `%AppData%\Bluetooth`, marks it **HIDDEN**, drops a renamed Bitdefender Submission Wizard `BluetoothService.exe`, a malicious `log.dll`, and an encrypted blob `BluetoothService`, then launches the EXE.
+- The host EXE imports `log.dll` and calls `LogInit`/`LogWrite`. `LogInit` mmap-loads the blob; `LogWrite` decrypts it with a custom LCG-based stream (constants **0x19660D** / **0x3C6EF35F**, key material derived from a prior hash), overwrites the buffer with plaintext shellcode, frees temps, and jumps to it.
+- To avoid an IAT, the loader resolves APIs by hashing export names using **FNV-1a basis 0x811C9DC5 + prime 0x1000193**, then applying a Murmur-style avalanche (**0x85EBCA6B**) and comparing against salted target hashes.
+
+Main shellcode (Chrysalis)
+- Decrypts a PE-like main module by repeating add/XOR/sub with key `gQ2JR&9;` over five passes, then dynamically loads `Kernel32.dll` → `GetProcAddress` to finish import resolution.
+- Reconstructs DLL name strings at runtime via per-character bit-rotate/XOR transforms, then loads `oleaut32`, `advapi32`, `shlwapi`, `user32`, `wininet`, `ole32`, `shell32`.
+- Uses a second resolver that walks the **PEB → InMemoryOrderModuleList**, parses each export table in 4-byte blocks with Murmur-style mixing, and only falls back to `GetProcAddress` if the hash is not found.
+
+Embedded configuration & C2
+- Config lives inside the dropped `BluetoothService` file at **offset 0x30808** (size **0x980**) and is RC4-decrypted with key `qwhvb^435h&*7`, revealing the C2 URL and User-Agent.
+- Beacons build a dot-delimited host profile, prepend tag `4Q`, then RC4-encrypt with key `vAuig34%^325hGV` before `HttpSendRequestA` over HTTPS. Responses are RC4-decrypted and dispatched by a tag switch (`4T` shell, `4V` process exec, `4W/4X` file write, `4Y` read/exfil, `4\\` uninstall, `4` drive/file enum + chunked transfer cases).
+- Execution mode is gated by CLI args: no args = install persistence (service/Run key) pointing to `-i`; `-i` relaunches self with `-k`; `-k` skips install and runs payload.
+
+Alternate loader observed
+- The same intrusion dropped Tiny C Compiler and executed `svchost.exe -nostdlib -run conf.c` from `C:\ProgramData\USOShared\`, with `libtcc.dll` beside it. The attacker-supplied C source embedded shellcode, compiled, and ran in-memory without touching the disk with a PE. Replicate with:
+
+```cmd
+C:\ProgramData\USOShared\tcc.exe -nostdlib -run conf.c
+```
+
+- This TCC-based compile-and-run stage imported `Wininet.dll` at runtime and pulled a second-stage shellcode from a hardcoded URL, giving a flexible loader that masquerades as a compiler run.
+
 ## References
 
 - [Red Canary – Intelligence Insights: January 2026](https://redcanary.com/blog/threat-intelligence/intelligence-insights-january-2026/)
@@ -531,6 +560,7 @@ Operators pair DLL sideloading with LOLBAS so the only custom artifact on disk i
 - [Sysinternals Process Monitor](https://learn.microsoft.com/sysinternals/downloads/procmon)
 - [Unit 42 – Digital Doppelgangers: Anatomy of Evolving Impersonation Campaigns Distributing Gh0st RAT](https://unit42.paloaltonetworks.com/impersonation-campaigns-deliver-gh0st-rat/)
 - [Check Point Research – Inside Ink Dragon: Revealing the Relay Network and Inner Workings of a Stealthy Offensive Operation](https://research.checkpoint.com/2025/ink-dragons-relay-network-and-offensive-operation/)
+- [Rapid7 – The Chrysalis Backdoor: A Deep Dive into Lotus Blossom’s toolkit](https://www.rapid7.com/blog/post/tr-chrysalis-backdoor-dive-into-lotus-blossoms-toolkit)
 
 
 {{#include ../../../banners/hacktricks-training.md}}

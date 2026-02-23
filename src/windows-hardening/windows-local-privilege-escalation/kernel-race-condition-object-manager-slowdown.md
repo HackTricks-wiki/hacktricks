@@ -54,6 +54,31 @@ Tips:
 * Alternate the character per level (`A/B/C/...`) if the parent directory starts rejecting duplicates.
 * Keep a handle array so you can delete the chain cleanly after exploitation to avoid polluting the namespace.
 
+## Slowdown primitive #3 – Shadow directories, hash collisions & symlink reparses (minutes instead of microseconds)
+
+Object directories support **shadow directories** (fallback lookups) and bucketed hash tables for entries. Abuse both plus the 64-component symbolic-link reparse limit to multiply slowdown without exceeding the `UNICODE_STRING` length:
+
+1. Create two directories under `\BaseNamedObjects`, e.g. `A` (shadow) and `A\A` (target). Create the second using the first as the shadow directory (`NtCreateDirectoryObjectEx`), so missing lookups in `A` fall through to `A\A`.
+2. Fill each directory with thousands of **colliding names** that land in the same hash bucket (e.g., varying trailing digits while keeping the same `RtlHashUnicodeString` value). Lookups now degrade to O(n) linear scans inside a single directory.
+3. Build a chain of ~63 **object manager symbolic links** that repeatedly reparse into the long `A\A\…` suffix, consuming the reparse budget. Each reparse restarts parsing from the top, multiplying the collision cost.
+4. Lookup of the final component (`...\\0`) now takes **minutes** on Windows 11 when 16 000 collisions are present per directory, providing a practically guaranteed race win for one-shot kernel LPEs.
+
+```cpp
+ScopedHandle shadow = CreateDirectory(L"\\BaseNamedObjects\\A");
+ScopedHandle target = CreateDirectoryEx(L"A", shadow.get(), shadow.get());
+CreateCollidingEntries(shadow, 16000, dirs);
+CreateCollidingEntries(target, 16000, dirs);
+CreateSymlinkChain(shadow, LongSuffix(L"\\A", 16000), 63);
+printf("%f\n", RunTest(LongSuffix(L"\\A", 16000) + L"\\0", 1));
+```
+
+*Why it matters*: A minutes-long slowdown turns one-shot race-based LPEs into deterministic exploits.
+
+### 2025 retest notes & ready-made tooling
+
+- James Forshaw republished the technique with updated timings on Windows 11 24H2 (ARM64). Baseline opens remain ~2 µs; a 32 kB component raises this to ~35 µs, and shadow-dir + collision + 63-reparse chains still reach ~3 minutes, confirming the primitives survive current builds. Source code and perf harness are in the refreshed Project Zero post.
+- You can script setup using the public `symboliclink-testing-tools` bundle: `CreateObjectDirectory.exe` to spawn the shadow/target pair and `NativeSymlink.exe` in a loop to emit the 63-hop chain. This avoids hand-written `NtCreate*` wrappers and keeps ACLs consistent.
+
 ## Measuring your race window
 
 Embed a quick harness inside your exploit to measure how large the window becomes on the victim hardware. The snippet below opens the target object `iterations` times and returns the average per-open cost using `QueryPerformanceCounter`.
@@ -94,9 +119,10 @@ The results feed directly into your race orchestration strategy (e.g., number of
 ## Operational considerations
 
 - **Combine primitives** – You can use a long name *per level* in a directory chain for even higher latency until you exhaust the `UNICODE_STRING` size.
-- **One-shot bugs** – The expanded window (tens of microseconds) makes “single trigger” bugs realistic when paired with CPU affinity pinning or hypervisor-assisted preemption.
+- **One-shot bugs** – The expanded window (tens of microseconds to minutes) makes “single trigger” bugs realistic when paired with CPU affinity pinning or hypervisor-assisted preemption.
 - **Side effects** – The slowdown only affects the malicious path, so overall system performance remains unaffected; defenders will rarely notice unless they monitor namespace growth.
 - **Cleanup** – Keep handles to every directory/object you create so you can call `NtMakeTemporaryObject`/`NtClose` afterwards. Unbounded directory chains may persist across reboots otherwise.
+- **File-system races** – If the vulnerable path ultimately resolves through NTFS, you can stack an Oplock (e.g., `SetOpLock.exe` from the same toolkit) on the backing file while the OM slowdown runs, freezing the consumer for additional milliseconds without altering the OM graph.
 
 ## Defensive notes
 
@@ -107,5 +133,6 @@ The results feed directly into your race orchestration strategy (e.g., number of
 ## References
 
 - [Project Zero – Windows Exploitation Techniques: Winning Race Conditions with Path Lookups](https://projectzero.google/2025/12/windows-exploitation-techniques.html)
+- [googleprojectzero/symboliclink-testing-tools](https://github.com/googleprojectzero/symboliclink-testing-tools)
 
 {{#include ../../banners/hacktricks-training.md}}

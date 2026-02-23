@@ -5,20 +5,32 @@
     --sidebar-width: 300px;
     --sidebar-resize-indicator-width: 8px;
     --sidebar-resize-indicator-space: 2px;
-    --page-padding: 15px;
-    --content-max-width: 750px;
-    --container-max-width: 1500px;
-    --menu-bar-height: 64px;
+    --page-padding: 20px;
+    --content-max-width: 880px;
+    --container-max-width: 1600px;
+    --menu-bar-height: 52px;
     --footer-height: 75px;
+    --body-font: "Open Sans", "Segoe UI", system-ui, sans-serif;
+    --heading-font: "Open Sans", "Segoe UI", system-ui, sans-serif;
     --mono-font: "Source Code Pro", Consolas, "Ubuntu Mono", Menlo, "DejaVu Sans Mono", monospace, monospace;
+    --bg-effect-primary: rgba(246, 25, 0, 0.08);
+    --bg-effect-secondary: rgba(255, 61, 46, 0.06);
+    --bg-effect-tertiary: rgba(246, 25, 0, 0.03);
+    --grid-overlay-color: rgba(246, 25, 0, 0.03);
+    --particle-color: #f61900;
     --code-font-size: 0.875em /* please adjust the ace font size accordingly in editor.js */
+    --admonition-icon-default: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M12 2a10 10 0 100 20 10 10 0 000-20zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z'/></svg>");
+    --admonition-icon-note: var(--admonition-icon-default);
+    --admonition-icon-tip: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M13 2L3 14h7l-1 8 10-12h-7l1-8z'/></svg>");
+    --admonition-icon-warning: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M12 2L1 21h22L12 2zm1 15h-2v-2h2v2zm0-4h-2v-4h2v4z'/></svg>");
+    --admonition-icon-caution: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M12 2a10 10 0 100 20 10 10 0 000-20zm5 13.59L15.59 17 12 13.41 8.41 17 7 15.59 10.59 12 7 8.41 8.41 7 12 10.59 15.59 7 17 8.41 13.41 12 17 15.59z'/></svg>");
 }
 
 /* Themes */
 
 .ayu {
     --bg: hsl(210, 25%, 8%);
-    --fg: #c5c5c5;
+    --fg: #a9a9a9;
 
     --sidebar-bg: #14191f;
     --sidebar-fg: #c8c9db;
@@ -47,6 +59,22 @@
     --table-border-color: hsl(210, 25%, 13%);
     --table-header-bg: hsl(210, 25%, 28%);
     --table-alternate-bg: hsl(210, 25%, 11%);
+    --admonition-shadow: rgba(0, 0, 0, 0.4);
+    --admonition-default-bg: hsl(210, 33%, 16%);
+    --admonition-default-border: hsl(210, 38%, 28%);
+    --admonition-default-accent: #59a7ff;
+    --admonition-note-bg: hsl(210, 45%, 20%);
+    --admonition-note-border: hsl(210, 45%, 30%);
+    --admonition-note-accent: #6bb2ff;
+    --admonition-tip-bg: hsl(46, 45%, 20%);
+    --admonition-tip-border: hsl(46, 45%, 30%);
+    --admonition-tip-accent: #ffd166;
+    --admonition-warning-bg: hsl(0, 42%, 19%);
+    --admonition-warning-border: hsl(0, 38%, 30%);
+    --admonition-warning-accent: #ff6b6b;
+    --admonition-caution-bg: hsl(28, 45%, 19%);
+    --admonition-caution-border: hsl(28, 45%, 30%);
+    --admonition-caution-accent: #ffb25b;
 
     --searchbar-border-color: #848484;
     --searchbar-bg: #424242;
@@ -67,7 +95,7 @@
 
 .coal {
     --bg: hsl(200, 7%, 8%);
-    --fg: #98a3ad;
+    --fg: #7c8790;
 
     --sidebar-bg: #292c2f;
     --sidebar-fg: #a1adb8;
@@ -96,6 +124,22 @@
     --table-border-color: hsl(200, 7%, 13%);
     --table-header-bg: hsl(200, 7%, 28%);
     --table-alternate-bg: hsl(200, 7%, 11%);
+    --admonition-shadow: rgba(0, 0, 0, 0.4);
+    --admonition-default-bg: hsl(205, 20%, 16%);
+    --admonition-default-border: hsl(205, 22%, 28%);
+    --admonition-default-accent: #63a7ff;
+    --admonition-note-bg: hsl(205, 32%, 20%);
+    --admonition-note-border: hsl(205, 32%, 30%);
+    --admonition-note-accent: #6bb2ff;
+    --admonition-tip-bg: hsl(46, 42%, 20%);
+    --admonition-tip-border: hsl(46, 42%, 30%);
+    --admonition-tip-accent: #ffd166;
+    --admonition-warning-bg: hsl(0, 38%, 19%);
+    --admonition-warning-border: hsl(0, 36%, 30%);
+    --admonition-warning-accent: #ff6b6b;
+    --admonition-caution-bg: hsl(28, 42%, 19%);
+    --admonition-caution-border: hsl(28, 42%, 30%);
+    --admonition-caution-accent: #ffb25b;
 
     --searchbar-border-color: #aaa;
     --searchbar-bg: #b7b7b7;
@@ -116,7 +160,7 @@
 
 .light, html:not(.js) {
     --bg: hsl(0, 0%, 100%);
-    --fg: hsl(0, 0%, 0%);
+    --fg: hsl(0, 0%, 24%);
 
     --sidebar-bg: #fafafa;
     --sidebar-fg: hsl(0, 0%, 0%);
@@ -145,6 +189,22 @@
     --table-border-color: hsl(0, 0%, 95%);
     --table-header-bg: hsl(0, 0%, 80%);
     --table-alternate-bg: hsl(0, 0%, 97%);
+    --admonition-shadow: rgba(14, 24, 36, 0.12);
+    --admonition-default-bg: hsl(210, 60%, 96%);
+    --admonition-default-border: hsl(210, 50%, 85%);
+    --admonition-default-accent: #1b5fd6;
+    --admonition-note-bg: hsl(210, 80%, 94%);
+    --admonition-note-border: hsl(210, 60%, 85%);
+    --admonition-note-accent: #1b5fd6;
+    --admonition-tip-bg: hsl(46, 100%, 90%);
+    --admonition-tip-border: hsl(46, 80%, 78%);
+    --admonition-tip-accent: #9a6a00;
+    --admonition-warning-bg: hsl(0, 90%, 92%);
+    --admonition-warning-border: hsl(0, 70%, 78%);
+    --admonition-warning-accent: #c0392b;
+    --admonition-caution-bg: hsl(28, 100%, 92%);
+    --admonition-caution-border: hsl(28, 80%, 78%);
+    --admonition-caution-accent: #b85c00;
 
     --searchbar-border-color: #aaa;
     --searchbar-bg: #fafafa;
@@ -165,7 +225,7 @@
 
 .navy {
     --bg: hsl(226, 23%, 11%);
-    --fg: #bcbdd0;
+    --fg: #9fa1ad;
 
     --sidebar-bg: #282d3f;
     --sidebar-fg: #c8c9db;
@@ -194,6 +254,22 @@
     --table-border-color: hsl(226, 23%, 16%);
     --table-header-bg: hsl(226, 23%, 31%);
     --table-alternate-bg: hsl(226, 23%, 14%);
+    --admonition-shadow: rgba(0, 0, 0, 0.4);
+    --admonition-default-bg: hsl(222, 28%, 16%);
+    --admonition-default-border: hsl(222, 30%, 28%);
+    --admonition-default-accent: #5aa7ff;
+    --admonition-note-bg: hsl(220, 36%, 20%);
+    --admonition-note-border: hsl(220, 36%, 30%);
+    --admonition-note-accent: #6bb2ff;
+    --admonition-tip-bg: hsl(46, 42%, 20%);
+    --admonition-tip-border: hsl(46, 42%, 30%);
+    --admonition-tip-accent: #ffd166;
+    --admonition-warning-bg: hsl(0, 38%, 19%);
+    --admonition-warning-border: hsl(0, 36%, 30%);
+    --admonition-warning-accent: #ff6b6b;
+    --admonition-caution-bg: hsl(28, 42%, 19%);
+    --admonition-caution-border: hsl(28, 42%, 30%);
+    --admonition-caution-accent: #ffb25b;
 
     --searchbar-border-color: #aaa;
     --searchbar-bg: #aeaec6;
@@ -210,6 +286,102 @@
     --copy-button-filter: invert(51%) sepia(10%) saturate(393%) hue-rotate(198deg) brightness(86%) contrast(87%);
     /* Same as `--sidebar-active` */
     --copy-button-filter-hover: invert(46%) sepia(20%) saturate(1537%) hue-rotate(156deg) brightness(85%) contrast(90%);
+}
+
+.hacktricks-dark {
+    --admonition-shadow: rgba(0, 0, 0, 0.4);
+    --admonition-default-bg: hsl(222, 28%, 16%);
+    --admonition-default-border: hsl(222, 30%, 28%);
+    --admonition-default-accent: #5aa7ff;
+    --admonition-note-bg: hsl(220, 36%, 20%);
+    --admonition-note-border: hsl(220, 36%, 30%);
+    --admonition-note-accent: #6bb2ff;
+    --admonition-tip-bg: hsl(46, 42%, 20%);
+    --admonition-tip-border: hsl(46, 42%, 30%);
+    --admonition-tip-accent: #ffd166;
+    --admonition-warning-bg: hsl(0, 38%, 19%);
+    --admonition-warning-border: hsl(0, 36%, 30%);
+    --admonition-warning-accent: #ff6b6b;
+    --admonition-caution-bg: hsl(28, 42%, 19%);
+    --admonition-caution-border: hsl(28, 42%, 30%);
+    --admonition-caution-accent: #ffb25b;
+    --ht-ai-panel-bg: hsl(220, 22%, 12%);
+    --ht-ai-panel-fg: #e9edf3;
+    --ht-ai-header-bg: hsl(220, 24%, 14%);
+    --ht-ai-border: hsl(220, 18%, 24%);
+    --ht-ai-chat-bg: hsl(220, 22%, 11%);
+    --ht-ai-input-bg: hsl(220, 24%, 12%);
+    --ht-ai-field-bg: hsl(220, 18%, 16%);
+    --ht-ai-muted: #aab3c2;
+    --ht-ai-accent: #ff6b6b;
+    --ht-ai-accent-fg: #1a0d0d;
+    --ht-ai-user-bg: #ff6b6b;
+    --ht-ai-user-fg: #1a0d0d;
+    --ht-ai-bot-bg: hsl(220, 16%, 18%);
+    --ht-ai-bot-fg: #e6edf6;
+    --ht-ai-context-bg: hsl(220, 14%, 20%);
+    --ht-ai-context-fg: #cbd5e1;
+    --ht-ai-fab-bg: linear-gradient(135deg, #ff6b6b, #ffb25b, #6bb2ff);
+    --ht-ai-fab-fg: #0b0f16;
+    --ht-ai-fab-border: rgba(255, 255, 255, 0.12);
+    --ht-ai-tooltip-bg: hsl(220, 18%, 18%);
+    --ht-ai-tooltip-fg: #f1f5f9;
+    --ht-ai-shadow: rgba(0, 0, 0, 0.45);
+    --ht-ai-overlay-bg: rgba(8, 12, 18, 0.6);
+    --ht-ai-resizer-bg: rgba(255, 255, 255, 0.06);
+    --ht-ai-resizer-border: rgba(255, 255, 255, 0.12);
+    --ht-ai-resizer-bg-hover: rgba(255, 255, 255, 0.12);
+    --ht-ai-resizer-border-hover: rgba(255, 255, 255, 0.22);
+    --ht-ai-resizer-bg-active: rgba(255, 255, 255, 0.2);
+    --ht-ai-resizer-handle: rgba(255, 255, 255, 0.35);
+}
+
+.hacktricks-light {
+    --admonition-shadow: rgba(14, 24, 36, 0.12);
+    --admonition-default-bg: hsl(210, 60%, 96%);
+    --admonition-default-border: hsl(210, 50%, 85%);
+    --admonition-default-accent: #1b5fd6;
+    --admonition-note-bg: hsl(210, 80%, 94%);
+    --admonition-note-border: hsl(210, 60%, 85%);
+    --admonition-note-accent: #1b5fd6;
+    --admonition-tip-bg: hsl(46, 100%, 90%);
+    --admonition-tip-border: hsl(46, 80%, 78%);
+    --admonition-tip-accent: #9a6a00;
+    --admonition-warning-bg: hsl(0, 90%, 92%);
+    --admonition-warning-border: hsl(0, 70%, 78%);
+    --admonition-warning-accent: #c0392b;
+    --admonition-caution-bg: hsl(28, 100%, 92%);
+    --admonition-caution-border: hsl(28, 80%, 78%);
+    --admonition-caution-accent: #b85c00;
+    --ht-ai-panel-bg: hsl(210, 40%, 98%);
+    --ht-ai-panel-fg: #111827;
+    --ht-ai-header-bg: hsl(210, 50%, 96%);
+    --ht-ai-border: hsl(210, 30%, 86%);
+    --ht-ai-chat-bg: #ffffff;
+    --ht-ai-input-bg: hsl(210, 40%, 96%);
+    --ht-ai-field-bg: #ffffff;
+    --ht-ai-muted: #6b7280;
+    --ht-ai-accent: #496dff;
+    --ht-ai-accent-fg: #ffffff;
+    --ht-ai-user-bg: #496dff;
+    --ht-ai-user-fg: #ffffff;
+    --ht-ai-bot-bg: hsl(210, 30%, 94%);
+    --ht-ai-bot-fg: #111827;
+    --ht-ai-context-bg: hsl(210, 30%, 92%);
+    --ht-ai-context-fg: #334155;
+    --ht-ai-fab-bg: linear-gradient(135deg, #496dff, #9a6a00, #ff6b6b);
+    --ht-ai-fab-fg: #ffffff;
+    --ht-ai-fab-border: rgba(0, 0, 0, 0.08);
+    --ht-ai-tooltip-bg: #111827;
+    --ht-ai-tooltip-fg: #ffffff;
+    --ht-ai-shadow: rgba(14, 24, 36, 0.18);
+    --ht-ai-overlay-bg: rgba(15, 23, 42, 0.35);
+    --ht-ai-resizer-bg: rgba(0, 0, 0, 0.06);
+    --ht-ai-resizer-border: rgba(0, 0, 0, 0.12);
+    --ht-ai-resizer-bg-hover: rgba(0, 0, 0, 0.12);
+    --ht-ai-resizer-border-hover: rgba(0, 0, 0, 0.22);
+    --ht-ai-resizer-bg-active: rgba(0, 0, 0, 0.2);
+    --ht-ai-resizer-handle: rgba(0, 0, 0, 0.35);
 }
 
 .rust {
@@ -355,7 +527,7 @@
     --searchresults-li-bg: hsl(0, 0%, 11%);
     --search-mark-bg: #a2cff5;
 
-    --sponsor-fg: #cfcdcd;
+    --sponsor-fg: var(--fg);
 
     --color-scheme: dark;
 
@@ -441,7 +613,7 @@
     --searchresults-li-bg: #e4f2fe;
     --search-mark-bg: #a2cff5;
 
-    --sponsor-fg: #333333;
+    --sponsor-fg: var(--fg);
 
     --color-scheme: light;
 

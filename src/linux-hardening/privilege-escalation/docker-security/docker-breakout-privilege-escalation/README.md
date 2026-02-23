@@ -455,6 +455,23 @@ lrwx------ 1 root root 64 Jun 15 02:25 /proc/635813/fd/4 -> /.secret.txt.swp
 cat /proc/635813/fd/4
 ```
 
+Extra checks:
+
+```bash
+# Better proc-wide FD listing (avoids subshell word-splitting issues)
+for fd_dir in /proc/[0-9]*/fd; do
+  ls -l "$fd_dir" 2>/dev/null | sed "s|^|$fd_dir -> |"
+done
+
+# If /proc is mounted with hidepid=1/2, cross-user FD access is reduced
+grep " /proc " /proc/mounts
+```
+
+### Related FD abuse patterns
+
+- **FD inheritance over `execve()` (missing `O_CLOEXEC`)**: if a privileged process opens a sensitive file and then `exec`s a less-trusted binary without setting close-on-exec, the child may inherit that powerful FD and read/write through `/proc/<pid>/fd/<n>`.
+- **FD passing over UNIX sockets (`SCM_RIGHTS`)**: privileged services can transfer already-open FDs to helper processes. Compromising the helper can expose high-impact handles (for example, `docker.sock` or privileged logs).
+
 You can also **kill processes and cause a DoS**.
 
 > [!WARNING]
