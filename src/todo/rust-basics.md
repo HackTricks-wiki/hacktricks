@@ -1,10 +1,28 @@
-# Rust Basics
+# Notions de base de Rust
 
 {{#include ../banners/hacktricks-training.md}}
 
+### Propriété des variables
+
+La mémoire est gérée via un système de propriété avec les règles suivantes, vérifiées par le compilateur à la compilation :
+
+1. Chaque valeur en Rust a une variable appelée son propriétaire.
+2. Il ne peut y avoir qu'un seul propriétaire à la fois.
+3. Lorsque le propriétaire sort de la portée, la valeur sera libérée.
+```rust
+fn main() {
+let student_age: u32 = 20;
+{ // Scope of a variable is within the block it is declared in, which is denoted by brackets
+let teacher_age: u32 = 41;
+println!("The student is {} and teacher is {}", student_age, teacher_age);
+} // when an owning variable goes out of scope, it will be dropped
+
+// println!("the teacher is {}", teacher_age); // this will not work as teacher_age has been dropped
+}
+```
 ### Types génériques
 
-Créez une struct où 1 de leurs valeurs pourrait être de n'importe quel type
+Créez une struct où l'une de ses valeurs peut être de n'importe quel type
 ```rust
 struct Wrapper<T> {
 value: T,
@@ -21,7 +39,7 @@ Wrapper::new("Foo").value, "Foo"
 ```
 ### Option, Some & None
 
-Le type Option signifie que la valeur peut être de type Some (il y a quelque chose) ou None :
+Le type Option signifie que la valeur peut être de type Some (il y a quelque chose) ou None:
 ```rust
 pub enum Option<T> {
 None,
@@ -30,9 +48,25 @@ Some(T),
 ```
 Vous pouvez utiliser des fonctions telles que `is_some()` ou `is_none()` pour vérifier la valeur de l'Option.
 
+
+### Result, Ok & Err
+
+Utilisés pour renvoyer et propager des erreurs
+```rust
+pub enum Result<T, E> {
+Ok(T),
+Err(E),
+}
+```
+Vous pouvez utiliser des fonctions telles que `is_ok()` ou `is_err()` pour vérifier la valeur du résultat.
+
+L'enum `Option` doit être utilisé dans les situations où une valeur pourrait ne pas exister (être `None`).
+L'enum `Result` doit être utilisé lorsque vous effectuez une opération qui peut échouer.
+
+
 ### Macros
 
-Les macros sont plus puissantes que les fonctions car elles s'étendent pour produire plus de code que le code que vous avez écrit manuellement. Par exemple, une signature de fonction doit déclarer le nombre et le type de paramètres que la fonction a. Les macros, en revanche, peuvent prendre un nombre variable de paramètres : nous pouvons appeler `println!("hello")` avec un argument ou `println!("hello {}", name)` avec deux arguments. De plus, les macros sont étendues avant que le compilateur n'interprète le sens du code, donc une macro peut, par exemple, implémenter un trait sur un type donné. Une fonction ne peut pas le faire, car elle est appelée à l'exécution et un trait doit être implémenté à la compilation.
+Les macros sont plus puissantes que les fonctions car elles génèrent plus de code que celui que vous avez écrit manuellement. Par exemple, la signature d'une fonction doit déclarer le nombre et le type de ses paramètres. Les macros, en revanche, peuvent prendre un nombre variable de paramètres : on peut appeler `println!("hello")` avec un argument ou `println!("hello {}", name)` avec deux arguments. De plus, les macros sont développées avant que le compilateur n'interprète le sens du code, donc une macro peut, par exemple, implémenter un trait pour un type donné. Une fonction ne peut pas le faire, car elle est appelée à l'exécution alors qu'un trait doit être implémenté à la compilation.
 ```rust
 macro_rules! my_macro {
 () => {
@@ -74,7 +108,7 @@ for (key, hashvalue) in &*map {
 for key in map.keys() {
 for value in map.values() {
 ```
-### Boîte Récursive
+### Box récursive
 ```rust
 enum List {
 Cons(i32, List),
@@ -83,9 +117,9 @@ Nil,
 
 let list = Cons(1, Cons(2, Cons(3, Nil)));
 ```
-### Conditionnels
+### Structures conditionnelles
 
-#### si
+#### if
 ```rust
 let n = 5;
 if n < 0 {
@@ -96,7 +130,7 @@ print!("{} is positive", n);
 print!("{} is zero", n);
 }
 ```
-#### correspondre
+#### match
 ```rust
 match number {
 // Match a single value
@@ -134,7 +168,7 @@ break;
 }
 }
 ```
-#### pendant
+#### while
 ```rust
 let mut n = 1;
 while n < 101 {
@@ -148,7 +182,7 @@ println!("{}", n);
 n += 1;
 }
 ```
-#### pour
+#### for
 ```rust
 for n in 1..101 {
 if n % 15 == 0 {
@@ -196,7 +230,7 @@ _ => "Hello",
 }
 }
 ```
-#### si laissez
+#### if let
 ```rust
 let optional_word = Some(String::from("rustlings"));
 if let word = optional_word {
@@ -205,7 +239,7 @@ println!("The word is: {}", word);
 println!("The optional word doesn't contain anything");
 }
 ```
-#### tant que laisser
+#### while let
 ```rust
 let mut optional = Some(0);
 // This reads: "while `let` destructures `optional` into
@@ -224,7 +258,7 @@ optional = Some(i + 1);
 ```
 ### Traits
 
-Créez une nouvelle méthode pour un type
+Créer une nouvelle méthode pour un type
 ```rust
 trait AppendBar {
 fn append_bar(self) -> Self;
@@ -252,11 +286,11 @@ assert_ne!(true, false);
 }
 }
 ```
-### Threading
+### Multithreading
 
 #### Arc
 
-Un Arc peut utiliser Clone pour créer plus de références sur l'objet afin de les passer aux threads. Lorsque le dernier pointeur de référence vers une valeur sort de la portée, la variable est supprimée.
+Un Arc peut utiliser Clone pour créer davantage de références vers l'objet afin de les transmettre aux threads. Lorsque la dernière référence vers une valeur sort de sa portée, la variable est libérée.
 ```rust
 use std::sync::Arc;
 let apple = Arc::new("the same apple");
@@ -269,7 +303,7 @@ println!("{:?}", apple);
 ```
 #### Threads
 
-Dans ce cas, nous passerons au thread une variable qu'il pourra modifier.
+Dans ce cas, nous allons passer au thread une variable qu'il pourra modifier.
 ```rust
 fn main() {
 let status = Arc::new(Mutex::new(JobStatus { jobs_completed: 0 }));
@@ -287,4 +321,80 @@ thread::sleep(Duration::from_millis(500));
 }
 }
 ```
+### Éléments essentiels de sécurité
+
+Rust fournit par défaut de fortes garanties de sécurité mémoire, mais vous pouvez toujours introduire des vulnérabilités critiques via du code `unsafe`, des problèmes de dépendances ou des erreurs de logique. La mini-fiche suivante rassemble les primitives que vous serez le plus souvent amené·e·s à manipuler lors d'audits de sécurité offensifs ou défensifs de logiciels Rust.
+
+#### Code `unsafe` & sécurité mémoire
+
+Les blocs `unsafe` désactivent les vérifications d'aliasing et de bornes du compilateur, donc **tous les bugs traditionnels de corruption mémoire (OOB, use-after-free, double free, etc.) peuvent réapparaître**. Checklist rapide d'audit :
+
+* Cherchez les blocs `unsafe`, les fonctions `extern "C"`, les appels à `ptr::copy*`, `std::mem::transmute`, `MaybeUninit`, les raw pointers ou les modules `ffi`.
+* Validez chaque arithmétique de pointeur et chaque argument de longueur passé à des fonctions bas niveau.
+* Privilégiez `#![forbid(unsafe_code)]` (crate-wide) ou `#[deny(unsafe_op_in_unsafe_fn)]` (1.68 +) pour faire échouer la compilation lorsqu'on réintroduit `unsafe`.
+
+Exemple d'overflow créé avec des raw pointers:
+```rust
+use std::ptr;
+
+fn vuln_copy(src: &[u8]) -> Vec<u8> {
+let mut dst = Vec::with_capacity(4);
+unsafe {
+// ❌ copies *src.len()* bytes, the destination only reserves 4.
+ptr::copy_nonoverlapping(src.as_ptr(), dst.as_mut_ptr(), src.len());
+dst.set_len(src.len());
+}
+dst
+}
+```
+Exécuter Miri est un moyen peu coûteux de détecter l'UB lors des tests :
+```bash
+rustup component add miri
+cargo miri test  # hunts for OOB / UAF during unit tests
+```
+#### Audit des dépendances avec RustSec / cargo-audit
+
+La plupart des vulns Rust en conditions réelles se trouvent dans des third-party crates. La RustSec advisory DB (community-powered) peut être consultée localement :
+```bash
+cargo install cargo-audit
+cargo audit              # flags vulnerable versions listed in Cargo.lock
+```
+Intégrez-le dans votre CI et faites échouer le build avec `--deny warnings`.
+
+`cargo deny check advisories` offre une fonctionnalité similaire ainsi que des vérifications de licence et de listes de blocage.
+
+#### Couverture de code avec cargo-tarpaulin
+
+`cargo tarpaulin` est un outil de génération de rapports de couverture de code pour le système de build Cargo
+```bash
+cargo binstall cargo-tarpaulin
+cargo tarpaulin              # no options are required, if no root directory is defined Tarpaulin will run in the current working directory.
+```
+Sur Linux, le backend de traçage par défaut de Tarpaulin est toujours Ptrace et ne fonctionne que sur les processeurs x86_64. Cela peut être changé pour l'instrumentation de couverture llvm avec `--engine llvm`. Sur Mac et Windows, c'est la méthode de collecte par défaut.
+
+#### Vérification de la chaîne d'approvisionnement avec cargo-vet (2024)
+
+`cargo vet` enregistre un hash de révision pour chaque crate que vous importez et empêche les mises à jour non détectées :
+```bash
+cargo install cargo-vet
+cargo vet init      # generates vet.toml
+cargo vet --locked  # verifies packages referenced in Cargo.lock
+```
+L'outil est adopté par l'infrastructure du projet Rust et par un nombre croissant d'organisations pour atténuer les poisoned-package attacks.
+
+#### Fuzzing la surface de votre API (cargo-fuzz)
+
+Les fuzz tests détectent facilement les panics, les integer overflows et les bogues logiques qui pourraient devenir des problèmes de DoS ou des side-channel :
+```bash
+cargo install cargo-fuzz
+cargo fuzz init              # creates fuzz_targets/
+cargo fuzz run fuzz_target_1 # builds with libFuzzer & runs continuously
+```
+Ajoutez le fuzz target à votre repo et exécutez-le dans votre pipeline.
+
+## Références
+
+- RustSec Advisory Database – <https://rustsec.org>
+- Cargo-vet: "Audit de vos dépendances Rust" – <https://mozilla.github.io/cargo-vet/>
+
 {{#include ../banners/hacktricks-training.md}}
