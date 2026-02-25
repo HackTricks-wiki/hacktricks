@@ -9,6 +9,8 @@ LDAP relay/MITM lets attackers forward binds to Domain Controllers to obtain aut
 - **LDAP Channel Binding (CBT)** ties an LDAPS bind to the specific TLS tunnel, breaking relays/replays across different channels.
 - **LDAP Signing** forces integrity-protected LDAP messages, preventing tampering and most unsigned relays.
 
+**Quick offensive check**: tools like `netexec ldap <dc> -u user -p pass` print the server posture. If you see `(signing:None)` and `(channel binding:Never)`, Kerberos/NTLM **relays to LDAP** are viable (e.g., using KrbRelayUp to write `msDS-AllowedToActOnBehalfOfOtherIdentity` for RBCD and impersonate administrators).
+
 **Server 2025 DCs** introduce a new GPO (**LDAP server signing requirements Enforcement**) that defaults to **Require Signing** when left **Not Configured**. To avoid enforcement you must explicitly set that policy to **Disabled**.
 
 ## LDAP Channel Binding (LDAPS only)
@@ -56,5 +58,6 @@ Reg Add HKLM\SYSTEM\CurrentControlSet\Services\NTDS\Diagnostics /v "16 LDAP Inte
 - [TrustedSec - LDAP Channel Binding and LDAP Signing](https://trustedsec.com/blog/ldap-channel-binding-and-ldap-signing)
 - [Microsoft KB4520412 - LDAP channel binding & signing requirements](https://support.microsoft.com/en-us/topic/2020-and-2023-ldap-channel-binding-and-ldap-signing-requirements-for-windows-kb4520412-ef185fb8-00f7-167d-744c-f299a66fc00a)
 - [Microsoft CVE-2017-8563 - LDAP relay mitigation update](https://portal.msrc.microsoft.com/en-us/security-guidance/advisory/CVE-2017-8563)
+- [0xdf – HTB Bruno (LDAP signing disabled → Kerberos relay → RBCD)](https://0xdf.gitlab.io/2026/02/24/htb-bruno.html)
 
 {{#include ../../banners/hacktricks-training.md}}
