@@ -259,6 +259,11 @@ Within these keys, various subkeys exist, each corresponding to a specific compo
 - Modifying or writing to a key where **`IsInstalled`** is set to `"1"` with a specific **`StubPath`** can lead to unauthorized command execution, potentially for privilege escalation.
 - Altering the binary file referenced in any **`StubPath`** value could also achieve privilege escalation, given sufficient permissions.
 
+**Persistence caveats (Active Setup):**
+
+- Execution is **per-user and typically one-time**; after a user runs it, it won't trigger again for that user unless the key is reset/changed.
+- The **payload runs in the user context**, even if an admin planted the key, so plan privilege expectations accordingly.
+
 To inspect the **`StubPath`** configurations across Active Setup components, these commands can be used:
 
 ```bash
@@ -346,9 +351,8 @@ autorunsc.exe -m -nobanner -a * -ct /accepteula
 - [https://attack.mitre.org/techniques/T1547/001/](https://attack.mitre.org/techniques/T1547/001/)
 - [https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082&seqNum=2)
 - [https://www.itprotoday.com/cloud-computing/how-can-i-add-boot-option-starts-alternate-shell](https://www.itprotoday.com/cloud-computing/how-can-i-add-boot-option-starts-alternate-shell)
+- [Rapid7 Metasploit Wrap-Up 02/27/2026](https://www.rapid7.com/blog/post/pt-metasploit-wrap-up-02-27-2026/)
 
 
 
 {{#include ../../banners/hacktricks-training.md}}
-
-
