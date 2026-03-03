@@ -357,6 +357,20 @@ Instead of a summary, it printed the attacker's hidden message. The user didn't 
 -   **Use content boundaries:** The AI could be designed to distinguish system/developer instructions from all other text. If an external source says "ignore your instructions," the AI should see that as just part of the text to summarize, not an actual directive. In other words, **maintain a strict separation between trusted instructions and untrusted data**.
 -   **Monitoring and logging:** For AI systems that pull in third-party data, have monitoring that flags if the AI's output contains phrases like "I have been OWNED" or anything clearly unrelated to the user's query. This can help detect an indirect injection attack in progress and shut down the session or alert a human operator.
 
+### Web-Based Indirect Prompt Injection (IDPI) in the Wild
+
+Real-world IDPI campaigns show that attackers **layer multiple delivery techniques** so at least one survives parsing, filtering or human review. Common web-specific delivery patterns include:
+
+- **Visual concealment in HTML/CSS**: zero-sized text (`font-size: 0`, `line-height: 0`), collapsed containers (`height: 0` + `overflow: hidden`), off-screen positioning (`left/top: -9999px`), `display: none`, `visibility: hidden`, `opacity: 0`, or camouflage (text color equals background). Payloads are also hidden in tags like `<textarea>` and then visually suppressed.
+- **Markup obfuscation**: prompts stored in SVG `<CDATA>` blocks or embedded as `data-*` attributes and later extracted by an agent pipeline that reads raw text or attributes.
+- **Runtime assembly**: Base64 (or multi-encoded) payloads decoded by JavaScript after load, sometimes with a timed delay, and injected into invisible DOM nodes. Some campaigns render text to `<canvas>` (non-DOM) and rely on OCR/accessibility extraction.
+- **URL fragment injection**: attacker instructions appended after `#` in otherwise benign URLs, which some pipelines still ingest.
+- **Plaintext placement**: prompts placed in visible but low-attention areas (footer, boilerplate) that humans ignore but agents parse.
+
+Observed jailbreak patterns in web IDPI frequently rely on **social engineering** (authority framing like “developer mode”), and **obfuscation that defeats regex filters**: zero‑width characters, homoglyphs, payload splitting across multiple elements (reconstructed by `innerText`), bidi overrides (e.g., `U+202E`), HTML entity/URL encoding and nested encoding, plus multilingual duplication and JSON/syntax injection to break context (e.g., `}}` → inject `"validation_result": "approved"`).
+
+High‑impact intents seen in the wild include AI moderation bypass, forced purchases/subscriptions, SEO poisoning, data destruction commands and sensitive‑data/system‑prompt leakage. The risk escalates sharply when the LLM is embedded in **agentic workflows with tool access** (payments, code execution, backend data).
+
 ### IDE Code Assistants: Context-Attachment Indirect Injection (Backdoor Generation)
 
 Many IDE-integrated assistants let you attach external context (file/folder/repo/URL). Internally this context is often injected as a message that precedes the user prompt, so the model reads it first. If that source is contaminated with an embedded prompt, the assistant may follow the attacker instructions and quietly insert a backdoor into generated code.
@@ -631,5 +645,6 @@ Below is a minimal payload that both **hides YOLO enabling** and **executes a re
 - [HackedGPT: Novel AI Vulnerabilities Open the Door for Private Data Leakage (Tenable)](https://www.tenable.com/blog/hackedgpt-novel-ai-vulnerabilities-open-the-door-for-private-data-leakage)
 - [OpenAI – Memory and new controls for ChatGPT](https://openai.com/index/memory-and-new-controls-for-chatgpt/)
 - [OpenAI Begins Tackling ChatGPT Data Leak Vulnerability (url_safe analysis)](https://embracethered.com/blog/posts/2023/openai-data-exfiltration-first-mitigations-implemented/)
+- [Unit 42 – Fooling AI Agents: Web-Based Indirect Prompt Injection Observed in the Wild](https://unit42.paloaltonetworks.com/ai-agent-prompt-injection/)
 
 {{#include ../banners/hacktricks-training.md}}
