@@ -79,6 +79,19 @@ Change the **value of this variable to 0**, so when you **end your session** any
 
 ```bash
 export HISTSIZE=0
+
+```
+### **HISTCONTROL**
+
+If the **value of this variable is set to ignorespace or ignoreboth** any command prepend it with an extra space will not be saved in the history.
+
+```bash
+export HISTCONTROL=ignorespace
+```
+
+```bash
+$ echo "to save or"
+$  echo "not to save"
 ```
 
 ### http_proxy & https_proxy

@@ -255,6 +255,7 @@
   - [Abusing Auto Updaters And Ipc](windows-hardening/windows-local-privilege-escalation/abusing-auto-updaters-and-ipc.md)
   - [Arbitrary Kernel Rw Token Theft](windows-hardening/windows-local-privilege-escalation/arbitrary-kernel-rw-token-theft.md)
   - [Kernel Race Condition Object Manager Slowdown](windows-hardening/windows-local-privilege-escalation/kernel-race-condition-object-manager-slowdown.md)
+  - [Notepad Plus Plus Plugin Autoload Persistence](windows-hardening/windows-local-privilege-escalation/notepad-plus-plus-plugin-autoload-persistence.md)
   - [Abusing Tokens](windows-hardening/windows-local-privilege-escalation/privilege-escalation-abusing-tokens.md)
   - [Access Tokens](windows-hardening/windows-local-privilege-escalation/access-tokens.md)
   - [ACLs - DACLs/SACLs/ACEs](windows-hardening/windows-local-privilege-escalation/acls-dacls-sacls-aces.md)
@@ -278,6 +279,7 @@
   - [Semanagevolume Perform Volume Maintenance Tasks](windows-hardening/windows-local-privilege-escalation/semanagevolume-perform-volume-maintenance-tasks.md)
   - [Service Triggers](windows-hardening/windows-local-privilege-escalation/service-triggers.md)
   - [Telephony Tapsrv Arbitrary Dword Write To Rce](windows-hardening/windows-local-privilege-escalation/telephony-tapsrv-arbitrary-dword-write-to-rce.md)
+  - [Uiaccess Admin Protection Bypass](windows-hardening/windows-local-privilege-escalation/uiaccess-admin-protection-bypass.md)
   - [Windows C Payloads](windows-hardening/windows-local-privilege-escalation/windows-c-payloads.md)
 - [Active Directory Methodology](windows-hardening/active-directory-methodology/README.md)
   - [Abusing Active Directory ACLs/ACEs](windows-hardening/active-directory-methodology/acl-persistence-abuse/README.md)
@@ -351,6 +353,7 @@
 - [Antivirus (AV) Bypass](windows-hardening/av-bypass.md)
 - [Cobalt Strike](windows-hardening/cobalt-strike.md)
 - [Mythic](windows-hardening/mythic.md)
+- [Protocol Handler Shell Execute Abuse](windows-hardening/protocol-handler-shell-execute-abuse.md)
 
 # 📱 Mobile Pentesting
 
@@ -359,6 +362,7 @@
   - [Abusing Android Media Pipelines Image Parsers](mobile-pentesting/android-app-pentesting/abusing-android-media-pipelines-image-parsers.md)
   - [Accessibility Services Abuse](mobile-pentesting/android-app-pentesting/accessibility-services-abuse.md)
   - [Android Anti Instrumentation And Ssl Pinning Bypass](mobile-pentesting/android-app-pentesting/android-anti-instrumentation-and-ssl-pinning-bypass.md)
+  - [Android Application Level Virtualization](mobile-pentesting/android-app-pentesting/android-application-level-virtualization.md)
   - [Android Applications Basics](mobile-pentesting/android-app-pentesting/android-applications-basics.md)
   - [Android Enterprise Work Profile Bypass](mobile-pentesting/android-app-pentesting/android-enterprise-work-profile-bypass.md)
   - [Android Hce Nfc Emv Relay Attacks](mobile-pentesting/android-app-pentesting/android-hce-nfc-emv-relay-attacks.md)
