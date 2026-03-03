@@ -78,6 +78,16 @@ Typical output logs the 9389 reachability check, ADWS bind, and dump start/finis
 [+] Domain dump finished
 ```
 
+## Sopa - A practical client for ADWS in Golang
+
+Similarly as soapy, [sopa](https://github.com/Macmod/sopa) implements the ADWS protocol stack (MS-NNS + MC-NMF + SOAP) in Golang, exposing command-line flags to issue ADWS calls such as:
+
+* **Object search & retrieval** - `query` / `get`
+* **Object lifecycle** - `create [user|computer|group|ou|container|custom]` and `delete`
+* **Attribute editing** - `attr [add|replace|delete]`
+* **Account management** - `set-password` / `change-password`
+* and others such as `groups`, `members`, `optfeature`, `info [version|domain|forest|dcs]`, etc.
+
 ## SOAPHound – High-Volume ADWS Collection (Windows)
 
 [FalconForce SOAPHound](https://github.com/FalconForceTeam/SOAPHound) is a .NET collector that keeps all LDAP interactions inside ADWS and emits BloodHound v4-compatible JSON. It builds a complete cache of `objectSid`, `objectGUID`, `distinguishedName` and `objectClass` once (`--buildcache`), then re-uses it for high-volume `--bhdump`, `--certdump` (ADCS), or `--dnsdump` (AD-integrated DNS) passes so only ~35 critical attributes ever leave the DC. AutoSplit (`--autosplit --threshold <N>`) automatically shards queries by CN prefix to stay under the 30-minute EnumerationContext timeout in large forests.
@@ -150,6 +160,7 @@ Combine this with `s4u2proxy`/`Rubeus /getticket` for a full **Resource-Based Co
 | High-volume ADWS dump | [SOAPHound](https://github.com/FalconForceTeam/SOAPHound) | .NET, cache-first, BH/ADCS/DNS modes |
 | BloodHound ingest | [BOFHound](https://github.com/bohops/BOFHound) | Converts SoaPy/ldapsearch logs |
 | Cert compromise | [Certipy](https://github.com/ly4k/Certipy) | Can be proxied through same SOCKS |
+| ADWS enumeration & object changes | [sopa](https://github.com/Macmod/sopa) | Generic client to interface with known ADWS endpoints - allows for enumeration, object creation, attribute modifications, and password changes |
 
 ## References
 
