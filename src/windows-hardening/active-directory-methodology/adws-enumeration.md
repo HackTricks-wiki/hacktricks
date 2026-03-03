@@ -1,55 +1,65 @@
-# Active Directory Web Services (ADWS) Ανίχνευση & Σιωπηρή Συλλογή
+# Active Directory Web Services (ADWS) Enumeration & Stealth Collection
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Τι είναι το ADWS;
+## What is ADWS?
 
-Active Directory Web Services (ADWS) είναι **ενεργοποιημένο εξ ορισμού σε κάθε Domain Controller από το Windows Server 2008 R2** και ακούει στο TCP **9389**. Παρά το όνομα, **δεν εμπλέκεται HTTP**. Αντίθετα, η υπηρεσία εκθέτει δεδομένα τύπου LDAP μέσω μιας στοίβας ιδιόκτητων .NET framing πρωτοκόλλων:
+Active Directory Web Services (ADWS) είναι ενεργοποιημένο από προεπιλογή σε κάθε Domain Controller από τα Windows Server 2008 R2 και ακούει στην TCP θύρα 9389. Παρά το όνομα, δεν εμπλέκεται HTTP. Αντίθετα, η υπηρεσία εκθέτει δεδομένα σε στυλ LDAP μέσω ενός στοίβας ιδιόκτητων .NET framing πρωτοκόλλων:
 
 * MC-NBFX → MC-NBFSE → MS-NNS → MC-NMF
 
-Επειδή η κίνηση είναι ενθυλακωμένη μέσα σε αυτά τα binary SOAP frames και ταξιδεύει πάνω από μια ασυνήθιστη θύρα, **η απογραφή μέσω ADWS είναι πολύ λιγότερο πιθανό να ελεγχθεί, να φιλτραριστεί ή να ανιχνευθεί με signatures σε σχέση με την κλασική κίνηση LDAP/389 & 636**. Για τους operators αυτό σημαίνει:
+Επειδή η κίνηση είναι ενθυλακωμένη μέσα σε αυτά τα δυαδικά SOAP frames και ταξιδεύει πάνω από μια ασυνήθιστη θύρα, η enumeration μέσω ADWS είναι πολύ λιγότερο πιθανό να επιθεωρηθεί, φιλτραριστεί ή να αναγνωριστεί με signature σε σχέση με την κλασική LDAP/389 & 636 κίνηση. Για τους χειριστές αυτό σημαίνει:
 
-* Πιο σιωπηρή αναγνωριστική δραστηριότητα – οι Blue teams συχνά επικεντρώνονται σε LDAP queries.
-* Δυνατότητα συλλογής από **non-Windows hosts (Linux, macOS)** με tunnelling του 9389/TCP μέσω SOCKS proxy.
-* Τα ίδια δεδομένα που θα λάβετε μέσω LDAP (users, groups, ACLs, schema, κ.λπ.) και η δυνατότητα εκτέλεσης **writes** (π.χ. `msDs-AllowedToActOnBehalfOfOtherIdentity` για **RBCD**).
+* Πιο stealthy recon – τα Blue teams συχνά επικεντρώνονται σε LDAP queries.
+* Ελευθερία να συλλέγεις από non-Windows hosts (Linux, macOS) με tunnelling της 9389/TCP μέσα από SOCKS proxy.
+* Τα ίδια δεδομένα που θα άφηνες μέσω LDAP (users, groups, ACLs, schema, etc.) και η δυνατότητα να κάνεις writes (π.χ. `msDs-AllowedToActOnBehalfOfOtherIdentity` για RBCD).
 
-Οι αλληλεπιδράσεις ADWS υλοποιούνται πάνω από WS-Enumeration: κάθε query ξεκινά με ένα μήνυμα `Enumerate` που ορίζει το LDAP filter/attributes και επιστρέφει ένα `EnumerationContext` GUID, ακολουθούμενο από ένα ή περισσότερα μηνύματα `Pull` που ρέουν μέχρι το παράθυρο αποτελεσμάτων που ορίζει ο server. Τα contexts λήγουν μετά από ~30 λεπτά, οπότε τα εργαλεία είτε πρέπει να σελιδοποιούν τα αποτελέσματα είτε να χωρίζουν τα φίλτρα (prefix queries ανά CN) για να αποφύγουν την απώλεια κατάστασης. Όταν ζητάτε security descriptors, καθορίστε τον έλεγχο `LDAP_SERVER_SD_FLAGS_OID` για να αφαιρέσετε τα SACLs — διαφορετικά το ADWS απλά παραλείπει το attribute `nTSecurityDescriptor` από την SOAP απάντηση.
+Οι αλληλεπιδράσεις με ADWS υλοποιούνται πάνω σε WS-Enumeration: κάθε query ξεκινά με ένα `Enumerate` μήνυμα που ορίζει το LDAP filter/attributes και επιστρέφει ένα `EnumerationContext` GUID, ακολουθούμενο από ένα ή περισσότερα `Pull` μηνύματα που stream-άρουν μέχρι το server-defined result window. Τα contexts λήγουν μετά από ~30 λεπτά, οπότε τα εργαλεία είτε πρέπει να σελιδοποιούν τα αποτελέσματα είτε να σπάνε τα φίλτρα (prefix queries per CN) για να αποφύγουν την απώλεια κατάστασης. Όταν ζητάς security descriptors, καθόρισε τον έλεγχο `LDAP_SERVER_SD_FLAGS_OID` για να παραλείψεις τα SACLs, αλλιώς το ADWS απλά αφαιρεί το attribute `nTSecurityDescriptor` από την SOAP απάντηση του.
 
-> NOTE: ADWS is also used by many RSAT GUI/PowerShell tools, so traffic may blend with legitimate admin activity.
+> ΣΗΜΕΙΩΣΗ: Το ADWS χρησιμοποιείται επίσης από πολλά RSAT GUI/PowerShell εργαλεία, οπότε η κίνηση μπορεί να αναμειχθεί με νόμιμη admin δραστηριότητα.
 
 ## SoaPy – Native Python Client
 
-[SoaPy](https://github.com/logangoins/soapy) είναι μια **πλήρης επαν-υλοποίηση της στοίβας πρωτοκόλλων ADWS σε καθαρό Python**. Κατασκευάζει τα πλαίσια NBFX/NBFSE/NNS/NMF byte-for-byte, επιτρέποντας τη συλλογή από Unix-like συστήματα χωρίς να απαιτείται το .NET runtime.
+[SoaPy](https://github.com/logangoins/soapy) είναι μια πλήρης re-implementation του ADWS protocol stack σε καθαρό Python. Δημιουργεί τα NBFX/NBFSE/NNS/NMF frames byte-for-byte, επιτρέποντας συλλογή από Unix-like συστήματα χωρίς να πειραχτεί το .NET runtime.
 
 ### Key Features
 
-* Υποστηρίζει **proxying through SOCKS** (χρήσιμο από C2 implants).
-* Λεπτομερή φίλτρα αναζήτησης όμοια με το LDAP `-q '(objectClass=user)'`.
-* Προαιρετικές **write** λειτουργίες (`--set` / `--delete`).
-* **BOFHound output mode** για απευθείας εισαγωγή στο BloodHound.
-* Το flag `--parse` για ομορφότερη μορφοποίηση timestamps / `userAccountControl` όταν απαιτείται ανθρώπινη αναγνωσιμότητα.
+* Υποστηρίζει proxying μέσω SOCKS (χρήσιμο από C2 implants).
+* Λεπτομερή search filters ταυτισμένα με LDAP `-q '(objectClass=user)'`.
+* Προαιρετικές write operations (`--set` / `--delete`).
+* BOFHound output mode για άμεση ingestion στο BloodHound.
+* `--parse` flag για prettify timestamps / `userAccountControl` όταν απαιτείται human readability.
 
 ### Targeted collection flags & write operations
 
-Το SoaPy περιλαμβάνει επιμελημένα switches που αναπαράγουν τις πιο κοινές LDAP αναζητήσεις πάνω από ADWS: `--users`, `--computers`, `--groups`, `--spns`, `--asreproastable`, `--admins`, `--constrained`, `--unconstrained`, `--rbcds`, καθώς και ωμά `--query` / `--filter` για προσαρμοσμένα pulls. Συνδυάστε τα με write primitives όπως `--rbcd <source>` (ορίζει `msDs-AllowedToActOnBehalfOfOtherIdentity`), `--spn <service/cn>` (SPN staging για στοχευμένο Kerberoasting) και `--asrep` (αντιστροφή του `DONT_REQ_PREAUTH` στο `userAccountControl`).
+Το SoaPy περιλαμβάνει curated switches που αναπαράγουν τα πιο κοινά LDAP hunting tasks πάνω σε ADWS: `--users`, `--computers`, `--groups`, `--spns`, `--asreproastable`, `--admins`, `--constrained`, `--unconstrained`, `--rbcds`, καθώς και raw `--query` / `--filter` knobs για custom pulls. Συνδύασέ τα με write primitives όπως `--rbcd <source>` (sets `msDs-AllowedToActOnBehalfOfOtherIdentity`), `--spn <service/cn>` (SPN staging for targeted Kerberoasting) και `--asrep` (flip `DONT_REQ_PREAUTH` in `userAccountControl`).
 
-Παράδειγμα στοχευμένης αναζήτησης SPN που επιστρέφει μόνο `samAccountName` και `servicePrincipalName`:
+Example targeted SPN hunt that only returns `samAccountName` and `servicePrincipalName`:
 ```bash
 soapy corp.local/alice:'Winter2025!'@dc01.corp.local \
 --spns -f samAccountName,servicePrincipalName --parse
 ```
-Χρησιμοποιήστε το ίδιο host/credentials για να οπλίσετε αμέσως τα ευρήματα: dump RBCD-capable objects με `--rbcds`, έπειτα εφαρμόστε `--rbcd 'WEBSRV01$' --account 'FILE01$'` για να στήσετε μια Resource-Based Constrained Delegation chain (δείτε [Resource-Based Constrained Delegation](resource-based-constrained-delegation.md) για την πλήρη διαδρομή κατάχρησης).
+Χρησιμοποιήστε τον ίδιο host και τα ίδια διαπιστευτήρια για να οπλοποιήσετε άμεσα τα ευρήματα: dump RBCD-capable objects με `--rbcds`, στη συνέχεια εφαρμόστε `--rbcd 'WEBSRV01$' --account 'FILE01$'` για να στήσετε μια Resource-Based Constrained Delegation chain (βλ. [Resource-Based Constrained Delegation](resource-based-constrained-delegation.md) για την πλήρη διαδρομή κατάχρησης).
 
 ### Εγκατάσταση (operator host)
 ```bash
 python3 -m pip install soapy-adws   # or git clone && pip install -r requirements.txt
 ```
-## SOAPHound – Συλλογή ADWS Υψηλού Όγκου (Windows)
+## Sopa - Ένας πρακτικός πελάτης για ADWS σε Golang
 
-Το [FalconForce SOAPHound](https://github.com/FalconForceTeam/SOAPHound) είναι ένας .NET συλλέκτης που διατηρεί όλες τις LDAP αλληλεπιδράσεις μέσα στο ADWS και εξάγει BloodHound v4-compatible JSON. Δημιουργεί μια πλήρη cache των `objectSid`, `objectGUID`, `distinguishedName` και `objectClass` μία φορά (`--buildcache`), και στη συνέχεια την επαναχρησιμοποιεί για διελεύσεις υψηλού όγκου `--bhdump`, `--certdump` (ADCS), ή `--dnsdump` (AD-integrated DNS), έτσι ώστε μόνο ~35 κρίσιμα attributes να βγαίνουν από τον DC. Το AutoSplit (`--autosplit --threshold <N>`) κατακερματίζει αυτόματα τα ερωτήματα με βάση το πρόθεμα CN για να παραμείνει κάτω από το 30-λεπτο EnumerationContext timeout σε μεγάλα forests.
+Παρόμοια με το soapy, [sopa](https://github.com/Macmod/sopa) υλοποιεί το πρωτόκολλο ADWS (MS-NNS + MC-NMF + SOAP) σε Golang, εκθέτοντας flags γραμμής εντολών για την αποστολή κλήσεων ADWS όπως:
 
-Τυπική ροή εργασίας σε domain-joined operator VM:
+* **Αναζήτηση & ανάκτηση αντικειμένων** - `query` / `get`
+* **Κύκλος ζωής αντικειμένου** - `create [user|computer|group|ou|container|custom]` and `delete`
+* **Επεξεργασία χαρακτηριστικών** - `attr [add|replace|delete]`
+* **Διαχείριση λογαριασμού** - `set-password` / `change-password`
+* και άλλα όπως `groups`, `members`, `optfeature`, `info [version|domain|forest|dcs]`, κ.λπ.
+
+## SOAPHound – Συλλογή ADWS υψηλού όγκου (Windows)
+
+[FalconForce SOAPHound](https://github.com/FalconForceTeam/SOAPHound) είναι ένας .NET συλλέκτης που διατηρεί όλες τις LDAP αλληλεπιδράσεις μέσα στο ADWS και εξάγει BloodHound v4-compatible JSON. Δημιουργεί μια πλήρη cache των `objectSid`, `objectGUID`, `distinguishedName` και `objectClass` μία φορά (`--buildcache`), στη συνέχεια την επαναχρησιμοποιεί για υψηλού όγκου `--bhdump`, `--certdump` (ADCS), ή `--dnsdump` (AD-integrated DNS) περάσματα ώστε μόνο ~35 κρίσιμα χαρακτηριστικά να βγαίνουν από τον DC. Το AutoSplit (`--autosplit --threshold <N>`) κατακερματίζει αυτόματα τα ερωτήματα με βάση το CN prefix για να παραμείνει κάτω από το 30-λεπτο timeout του EnumerationContext σε μεγάλα forests.
+
+Τυπική ροή εργασίας σε ένα operator VM που είναι domain-joined:
 ```powershell
 # Build cache (JSON map of every object SID/GUID)
 SOAPHound.exe --buildcache -c C:\temp\corp-cache.json
@@ -63,21 +73,21 @@ SOAPHound.exe -c C:\temp\corp-cache.json --bhdump \
 SOAPHound.exe -c C:\temp\corp-cache.json --certdump -o C:\temp\BH-output
 SOAPHound.exe --dnsdump -o C:\temp\dns-snapshot
 ```
-Τα εξαγόμενα JSON slots μπορούν να τροφοδοτηθούν απευθείας σε SharpHound/BloodHound workflows — δείτε τη [BloodHound methodology](bloodhound.md) για ιδέες σχετικά με downstream γραφήματα. Το AutoSplit καθιστά το SOAPHound ανθεκτικό σε δάση με πολλαπλά εκατομμύρια αντικείμενα, διατηρώντας τον αριθμό ερωτημάτων χαμηλότερο από snapshots τύπου ADExplorer.
+Exported JSON slots directly into SharpHound/BloodHound workflows—see [BloodHound methodology](bloodhound.md) for downstream graphing ideas. AutoSplit makes SOAPHound resilient on multi-million object forests while keeping the query count lower than ADExplorer-style snapshots.
 
-## Αφανής ροή συλλογής AD
+## Κρυφή ροή εργασίας συλλογής AD
 
-Η παρακάτω ροή δείχνει πώς να απαριθμήσετε **domain & ADCS objects** μέσω ADWS, να τα μετατρέψετε σε BloodHound JSON και να αναζητήσετε μονοπάτια επίθεσης βάσει πιστοποιητικών — όλα από Linux:
+Η παρακάτω ροή εργασίας δείχνει πώς να απαριθμήσετε **domain & ADCS objects** μέσω ADWS, να τα μετατρέψετε σε BloodHound JSON και να εντοπίσετε διαδρομές επίθεσης που βασίζονται σε πιστοποιητικά — όλα από Linux:
 
-1. **Tunnel 9389/TCP** από το δίκτυο-στόχο προς το μηχάνημά σας (π.χ. μέσω Chisel, Meterpreter, SSH dynamic port-forward, κ.λπ.).  Εξάγετε `export HTTPS_PROXY=socks5://127.0.0.1:1080` ή χρησιμοποιήστε τα `--proxyHost/--proxyPort` του SoaPy.
+1. **Tunnel 9389/TCP** από το δίκτυο-στόχο στο μηχάνημά σας (π.χ. μέσω Chisel, Meterpreter, SSH dynamic port-forward, κ.λπ.). Εξάγετε `export HTTPS_PROXY=socks5://127.0.0.1:1080` ή χρησιμοποιήστε το `--proxyHost/--proxyPort` του SoaPy.
 
-2. **Συλλέξτε το root domain object:**
+2. **Collect the root domain object:**
 ```bash
 soapy ludus.domain/jdoe:'P@ssw0rd'@10.2.10.10 \
 -q '(objectClass=domain)' \
 | tee data/domain.log
 ```
-3. **Συλλογή αντικειμένων σχετικά με το ADCS από το Configuration NC:**
+3. **Συλλέξτε αντικείμενα σχετικά με το ADCS από το Configuration NC:**
 ```bash
 soapy ludus.domain/jdoe:'P@ssw0rd'@10.2.10.10 \
 -dn 'CN=Configuration,DC=ludus,DC=domain' \
@@ -85,11 +95,11 @@ soapy ludus.domain/jdoe:'P@ssw0rd'@10.2.10.10 \
 (objectClass=pkiEnrollmentService)(objectClass=msPKI-Enterprise-Oid))' \
 | tee data/adcs.log
 ```
-4. **Μετατρέψτε σε BloodHound:**
+4. **Μετατροπή σε BloodHound:**
 ```bash
 bofhound -i data --zip   # produces BloodHound.zip
 ```
-5. **Ανεβάστε το ZIP** στο BloodHound GUI και τρέξτε ερωτήματα cypher όπως `MATCH (u:User)-[:Can_Enroll*1..]->(c:CertTemplate) RETURN u,c` για να αποκαλύψετε μονοπάτια κλιμάκωσης πιστοποιητικών (ESC1, ESC8, κ.λπ.).
+5. **Ανεβάστε το ZIP** στο BloodHound GUI και τρέξτε cypher queries όπως `MATCH (u:User)-[:Can_Enroll*1..]->(c:CertTemplate) RETURN u,c` για να αποκαλύψετε μονοπάτια κλιμάκωσης πιστοποιητικών (ESC1, ESC8, κ.ά.).
 
 ### Εγγραφή του `msDs-AllowedToActOnBehalfOfOtherIdentity` (RBCD)
 ```bash
@@ -97,16 +107,17 @@ soapy ludus.domain/jdoe:'P@ssw0rd'@dc.ludus.domain \
 --set 'CN=Victim,OU=Servers,DC=ludus,DC=domain' \
 msDs-AllowedToActOnBehalfOfOtherIdentity 'B:32:01....'
 ```
-Συνδυάστε αυτό με `s4u2proxy`/`Rubeus /getticket` για μια πλήρη αλυσίδα **Resource-Based Constrained Delegation** (βλέπε [Resource-Based Constrained Delegation](resource-based-constrained-delegation.md)).
+Συνδυάστε αυτό με `s4u2proxy`/`Rubeus /getticket` για μια πλήρη **Resource-Based Constrained Delegation** αλυσίδα (βλ. [Resource-Based Constrained Delegation](resource-based-constrained-delegation.md)).
 
-## Περίληψη Εργαλείων
+## Σύνοψη εργαλείων
 
 | Σκοπός | Εργαλείο | Σημειώσεις |
 |---------|------|-------|
-| ADWS enumeration | [SoaPy](https://github.com/logangoins/soapy) | Python, SOCKS, read/write |
-| High-volume ADWS dump | [SOAPHound](https://github.com/FalconForceTeam/SOAPHound) | .NET, cache-first, BH/ADCS/DNS modes |
-| BloodHound ingest | [BOFHound](https://github.com/bohops/BOFHound) | Converts SoaPy/ldapsearch logs |
-| Cert compromise | [Certipy](https://github.com/ly4k/Certipy) | Can be proxied through same SOCKS |
+| ADWS enumeration | [SoaPy](https://github.com/logangoins/soapy) | Python, SOCKS, ανάγνωση/εγγραφή |
+| ADWS dump υψηλού όγκου | [SOAPHound](https://github.com/FalconForceTeam/SOAPHound) | .NET, cache-first, λειτουργίες BH/ADCS/DNS |
+| BloodHound ingest | [BOFHound](https://github.com/bohops/BOFHound) | Μετατρέπει αρχεία καταγραφής SoaPy/ldapsearch |
+| Συμβιβασμός πιστοποιητικού | [Certipy](https://github.com/ly4k/Certipy) | Μπορεί να δρομολογηθεί μέσω του ίδιου SOCKS |
+| ADWS enumeration & αλλαγές αντικειμένων | [sopa](https://github.com/Macmod/sopa) | Γενικός client για αλληλεπίδραση με γνωστά ADWS endpoints - επιτρέπει enumeration, δημιουργία αντικειμένων, τροποποιήσεις attributes, και αλλαγές κωδικών πρόσβασης |
 
 ## Αναφορές
 
