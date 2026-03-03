@@ -6,54 +6,54 @@
 
 ## Fiziksel cihazı kontrol et
 
-| Bileşen      | Eylem                                                              |
+| Component    | Action                                                             |
 | ------------ | ------------------------------------------------------------------ |
-| Güç düğmesi  | Cihazı kapatıp açmak, başlangıç ekranını açığa çıkarabilir         |
-| Güç kablosu  | Güç kesildiğinde cihazın yeniden başlatılıp başlatılmadığını kontrol et |
-| USB portları  | Daha fazla kısayol ile fiziksel klavye bağla                      |
-| Ethernet      | Ağ taraması veya dinleme, daha fazla istismar imkanı sağlayabilir  |
+| Power button | Turning the device off and on again may expose the start screen    |
+| Power cable  | Check whether the device reboots when the power is cut off briefly |
+| USB ports    | Connect physical keyboard with more shortcuts                      |
+| Ethernet     | Network scan or sniffing may enable further exploitation           |
 
 ## GUI uygulaması içinde olası eylemleri kontrol et
 
-**Ortak Diyaloglar**, **bir dosyayı kaydetme**, **bir dosyayı açma**, bir yazı tipi, bir renk seçme gibi seçeneklerdir... Bunların çoğu **tam bir Gezgini işlevselliği sunar**. Bu, bu seçeneklere erişebiliyorsanız Gezgini işlevselliğine erişebileceğiniz anlamına gelir:
+**Sık kullanılan diyaloglar** (Common Dialogs), **dosya kaydetme**, **dosya açma**, yazı tipi veya renk seçme gibi seçeneklerdir. Bu diyalogların çoğu **tam bir Explorer işlevselliği** sunar. Bu, bu seçeneklere erişebiliyorsanız Explorer işlevlerine erişebileceğiniz anlamına gelir:
 
-- Kapat/Kapat olarak
-- Aç/Aç ile
-- Yazdır
-- Dışa Aktar/Içe Aktar
-- Ara
-- Tara
+- Close/Close as
+- Open/Open with
+- Print
+- Export/Import
+- Search
+- Scan
 
-Şunları kontrol etmelisin:
+Şunları kontrol edin:
 
 - Dosyaları değiştirme veya yeni dosyalar oluşturma
 - Sembolik bağlantılar oluşturma
 - Kısıtlı alanlara erişim sağlama
 - Diğer uygulamaları çalıştırma
 
-### Komut Yürütme
+### Komut çalıştırma
 
-Belki **`Aç ile`** seçeneğini kullanarak bazı türde bir shell açabilir/çalıştırabilirsin.
+Belki **`Open with`** seçeneğini kullanarak bir shell açabilir/çalıştırabilirsiniz.
 
 #### Windows
 
-Örneğin _cmd.exe, command.com, Powershell/Powershell ISE, mmc.exe, at.exe, taskschd.msc..._ komutları çalıştırmak için kullanılabilecek daha fazla ikili dosyayı burada bul: [https://lolbas-project.github.io/](https://lolbas-project.github.io)
+Örneğin _cmd.exe, command.com, Powershell/Powershell ISE, mmc.exe, at.exe, taskschd.msc..._ komut çalıştırmak (ve beklenmeyen işlemler gerçekleştirmek) için kullanılabilecek daha fazla binary'yi şuradan bulabilirsiniz: [https://lolbas-project.github.io/](https://lolbas-project.github.io)
 
 #### \*NIX \_\_
 
-_bash, sh, zsh..._ Daha fazlası burada: [https://gtfobins.github.io/](https://gtfobins.github.io)
+_bash, sh, zsh..._ Daha fazla bilgi: [https://gtfobins.github.io/](https://gtfobins.github.io)
 
 ## Windows
 
-### Yol kısıtlamalarını aşma
+### Path kısıtlamalarını atlatma
 
-- **Ortam değişkenleri**: Bazı yollara işaret eden birçok ortam değişkeni vardır
+- **Çevresel değişkenler**: Bazı dizinlere işaret eden birçok environment variable vardır
 - **Diğer protokoller**: _about:, data:, ftp:, file:, mailto:, news:, res:, telnet:, view-source:_
 - **Sembolik bağlantılar**
-- **Kısayollar**: CTRL+N (yeni oturum aç), CTRL+R (Komutları Çalıştır), CTRL+SHIFT+ESC (Görev Yöneticisi), Windows+E (gezgini aç), CTRL-B, CTRL-I (Favoriler), CTRL-H (Geçmiş), CTRL-L, CTRL-O (Dosya/Aç Diyaloğu), CTRL-P (Yazdırma Diyaloğu), CTRL-S (Farklı Kaydet)
+- **Kısayollar**: CTRL+N (yeni oturum aç), CTRL+R (Komutları Çalıştır), CTRL+SHIFT+ESC (Görev Yöneticisi), Windows+E (explorer aç), CTRL-B, CTRL-I (Favourites), CTRL-H (History), CTRL-L, CTRL-O (File/Open Dialog), CTRL-P (Print Dialog), CTRL-S (Save As)
 - Gizli Yönetici menüsü: CTRL-ALT-F8, CTRL-ESC-F9
 - **Shell URI'leri**: _shell:Administrative Tools, shell:DocumentsLibrary, shell:Librariesshell:UserProfiles, shell:Personal, shell:SearchHomeFolder, shell:Systemshell:NetworkPlacesFolder, shell:SendTo, shell:UsersProfiles, shell:Common Administrative Tools, shell:MyComputerFolder, shell:InternetFolder_
-- **UNC yolları**: Paylaşılan klasörlere bağlanmak için yollar. Yerel makinenin C$'sine bağlanmayı denemelisin ("\\\127.0.0.1\c$\Windows\System32")
+- **UNC paths**: Paylaşılan klasörlere bağlanmak için yollar. Yerel makinenin C$'ine bağlanmayı deneyin ("\\\127.0.0.1\c$\Windows\System32")
 - **Daha fazla UNC yolu:**
 
 | UNC                       | UNC            | UNC                  |
@@ -68,15 +68,33 @@ _bash, sh, zsh..._ Daha fazlası burada: [https://gtfobins.github.io/](https://g
 | %TMP%                     | %USERDOMAIN%   | %USERNAME%           |
 | %USERPROFILE%             | %WINDIR%       |                      |
 
+### Kısıtlı Masaüstü Kaçışları (Citrix/RDS/VDI)
+
+- **Dialog-box pivoting**: *Open/Save/Print-to-file* diyaloglarını Explorer-lite olarak kullanın. Dosya adı alanına `*.*` / `*.exe` deneyin, klasörlere sağ tıklayarak **Open in new window** seçeneğini kullanın ve navigasyonu genişletmek için **Properties → Open file location** kullanın.
+- **Create execution paths from dialogs**: Yeni bir dosya oluşturup adını `.CMD` veya `.BAT` olarak değiştirin veya `%WINDIR%\System32`'yi (veya `%WINDIR%\System32\cmd.exe` gibi belirli bir binary'yi) işaret eden bir kısayol oluşturun.
+- **Shell launch pivots**: Eğer `cmd.exe`'ye göz atabiliyorsanız, herhangi bir dosyayı üzerine **drag-and-drop** yaparak bir komut istemi başlatmayı deneyin. Görev Yöneticisi ulaşılabiliyorsa (`CTRL+SHIFT+ESC`), **Run new task** kullanın.
+- **Task Scheduler bypass**: İnteraktif shell'ler engellenmiş ama planlama izinliyse, `cmd.exe` çalıştıracak bir görev oluşturun (GUI `taskschd.msc` veya `schtasks.exe`).
+- **Weak allowlists**: Eğer yürütme **dosya adı/uzantı** ile izinliyse, payload'unuzu izin verilen bir isme yeniden adlandırın. Eğer **dizin** ile izinliyse, payload'u izin verilen bir program klasörüne kopyalayın ve orada çalıştırın.
+- **Yazılabilir staging yollarını bulun**: `%TEMP%` ile başlayın ve yazılabilir klasörleri Sysinternals AccessChk ile sayın.
+```cmd
+echo %TEMP%
+accesschk.exe -uwdqs Users c:\
+accesschk.exe -uwdqs "Authenticated Users" c:\
+```
+- **Sonraki adım**: Eğer shell elde ederseniz, Windows LPE kontrol listesine pivot yapın:
+{{#ref}}
+../windows-hardening/checklist-windows-privilege-escalation.md
+{{#endref}}
+
 ### İkili Dosyalarınızı İndirin
 
-Konsol: [https://sourceforge.net/projects/console/](https://sourceforge.net/projects/console/)\
-Gezgini: [https://sourceforge.net/projects/explorerplus/files/Explorer%2B%2B/](https://sourceforge.net/projects/explorerplus/files/Explorer%2B%2B/)\
-Kayıt defteri düzenleyici: [https://sourceforge.net/projects/uberregedit/](https://sourceforge.net/projects/uberregedit/)
+Console: [https://sourceforge.net/projects/console/](https://sourceforge.net/projects/console/)\
+Explorer: [https://sourceforge.net/projects/explorerplus/files/Explorer%2B%2B/](https://sourceforge.net/projects/explorerplus/files/Explorer%2B%2B/)\
+Registry editor: [https://sourceforge.net/projects/uberregedit/](https://sourceforge.net/projects/uberregedit/)
 
 ### Tarayıcıdan dosya sistemine erişim
 
-| YOL                | YOL              | YOL               | YOL                |
+| PATH                | PATH              | PATH               | PATH                |
 | ------------------- | ----------------- | ------------------ | ------------------- |
 | File:/C:/windows    | File:/C:/windows/ | File:/C:/windows\\ | File:/C:\windows    |
 | File:/C:\windows\\  | File:/C:\windows/ | File://C:/windows  | File://C:/windows/  |
@@ -88,45 +106,45 @@ Kayıt defteri düzenleyici: [https://sourceforge.net/projects/uberregedit/](htt
 
 ### Kısayollar
 
-- Yapışkan Tuşlar – SHIFT tuşuna 5 kez bas
-- Fare Tuşları – SHIFT+ALT+NUMLOCK
-- Yüksek Kontrast – SHIFT+ALT+PRINTSCN
-- Anahtarları Değiştir – NUMLOCK tuşuna 5 saniye basılı tut
-- Filtre Tuşları – sağ SHIFT tuşuna 12 saniye basılı tut
+- Sticky Keys – SHIFT tuşuna 5 kez basın
+- Mouse Keys – SHIFT+ALT+NUMLOCK
+- High Contrast – SHIFT+ALT+PRINTSCN
+- Toggle Keys – NUMLOCK tuşunu 5 saniye basılı tutun
+- Filter Keys – sağ SHIFT tuşunu 12 saniye basılı tutun
 - WINDOWS+F1 – Windows Arama
-- WINDOWS+D – Masaüstünü Göster
-- WINDOWS+E – Windows Gezgini'ni Başlat
+- WINDOWS+D – Masaüstünü göster
+- WINDOWS+E – Windows Explorer'ı başlat
 - WINDOWS+R – Çalıştır
-- WINDOWS+U – Erişim Kolaylığı Merkezi
-- WINDOWS+F – Ara
-- SHIFT+F10 – Bağlam Menüsü
+- WINDOWS+U – Ease of Access Center
+- WINDOWS+F – Arama
+- SHIFT+F10 – İçerik menüsü
 - CTRL+SHIFT+ESC – Görev Yöneticisi
-- CTRL+ALT+DEL – Daha yeni Windows sürümlerinde açılış ekranı
-- F1 – Yardım F3 – Ara
+- CTRL+ALT+DEL – Yeni Windows sürümlerinde splash ekranı
+- F1 – Yardım F3 – Arama
 - F6 – Adres Çubuğu
-- F11 – Internet Explorer'da tam ekranı aç/kapat
+- F11 – Internet Explorer içinde tam ekrana geçiş
 - CTRL+H – Internet Explorer Geçmişi
 - CTRL+T – Internet Explorer – Yeni Sekme
 - CTRL+N – Internet Explorer – Yeni Sayfa
 - CTRL+O – Dosya Aç
 - CTRL+S – Kaydet CTRL+N – Yeni RDP / Citrix
 
-### Kaydırmalar
+### Kaydırma hareketleri
 
-- Sol taraftan sağa kaydırarak tüm açık pencereleri görmek, KIOSK uygulamasını küçültmek ve tüm işletim sistemine doğrudan erişmek için;
-- Sağ taraftan sola kaydırarak Eylem Merkezi'ni açmak, KIOSK uygulamasını küçültmek ve tüm işletim sistemine doğrudan erişmek için;
-- Üst kenardan kaydırarak tam ekran modunda açılmış bir uygulamanın başlık çubuğunu görünür hale getirmek için;
-- Alt taraftan yukarı kaydırarak tam ekran uygulamasında görev çubuğunu göstermek için.
+- Sol taraftan sağa kaydırarak açık tüm pencereleri görün, KIOSK uygulamasını küçültün ve doğrudan tüm OS'ye erişin;
+- Sağ taraftan sola kaydırarak Action Center'ı açın, KIOSK uygulamasını küçültün ve doğrudan tüm OS'ye erişin;
+- Üst kenardan içeri doğru kaydırarak tam ekranda açılmış bir uygulamanın başlık çubuğunu görünür hale getirin;
+- Alt kenardan yukarı kaydırarak tam ekran uygulamada görev çubuğunu gösterin.
 
-### Internet Explorer Hileleri
+### Internet Explorer İpuçları
 
-#### 'Resim Araç Çubuğu'
+#### 'Image Toolbar'
 
-Tıklandığında resmin sol üst kısmında beliren bir araç çubuğudur. Kaydetme, Yazdırma, Mailto, Gezginde "Resimlerim"i açma işlemlerini yapabileceksiniz. Kiosk'un Internet Explorer kullanması gerekir.
+Bir görsele tıklandığında sol üstte beliren bir araç çubuğudur. Kaydetme (Save), Yazdırma (Print), Mailto, Explorer'da "My Pictures"ı Açma gibi işlemleri yapabilmenizi sağlar. Kiosk'un Internet Explorer kullanıyor olması gerekir.
 
 #### Shell Protokolü
 
-Bir Gezgini görünümü elde etmek için bu URL'leri yazın:
+Aşağıdaki URL'leri yazarak Explorer görünümü elde edin:
 
 - `shell:Administrative Tools`
 - `shell:DocumentsLibrary`
@@ -145,132 +163,133 @@ Bir Gezgini görünümü elde etmek için bu URL'leri yazın:
 - `Shell:System`
 - `Shell:ControlPanelFolder`
 - `Shell:Windows`
-- `shell:::{21EC2020-3AEA-1069-A2DD-08002B30309D}` --> Denetim Masası
+- `shell:::{21EC2020-3AEA-1069-A2DD-08002B30309D}` --> Kontrol Paneli
 - `shell:::{20D04FE0-3AEA-1069-A2D8-08002B30309D}` --> Bilgisayarım
-- `shell:::{{208D2C60-3AEA-1069-A2D7-08002B30309D}}` --> Ağ Yerlerim
+- `shell:::{{208D2C60-3AEA-1069-A2D7-08002B30309D}}` --> My Network Places
 - `shell:::{871C5380-42A0-1069-A2EA-08002B30309D}` --> Internet Explorer
 
 ### Dosya Uzantılarını Göster
 
 Daha fazla bilgi için bu sayfayı kontrol edin: [https://www.howtohaven.com/system/show-file-extensions-in-windows-explorer.shtml](https://www.howtohaven.com/system/show-file-extensions-in-windows-explorer.shtml)
 
-## Tarayıcı hileleri
+## Tarayıcı püf noktaları
 
 Yedek iKat sürümleri:
 
 [http://swin.es/k/](http://swin.es/k/)\
 [http://www.ikat.kronicd.net/](http://www.ikat.kronicd.net)
 
-JavaScript kullanarak ortak bir diyalog oluşturun ve dosya gezgini erişin: `document.write('<input/type=file>')`\
-Kaynak: https://medium.com/@Rend\_/give-me-a-browser-ill-give-you-a-shell-de19811defa0
+JavaScript kullanarak ortak bir dialog oluşturun ve dosya gezginine erişin: `document.write('<input/type=file>')`\
+Source: https://medium.com/@Rend\_/give-me-a-browser-ill-give-you-a-shell-de19811defa0
 
 ## iPad
 
-### Hareketler ve düğmeler
+### Jestler ve düğmeler
 
-- Dört (veya beş) parmakla yukarı kaydır / Ana düğmeye çift tıklayın: Çoklu görev görünümünü görmek ve Uygulamayı değiştirmek için
-- Dört veya beş parmakla bir yöne kaydır: Bir sonraki/son uygulamaya geçmek için
-- Beş parmakla ekranı sıkıştırın / Ana düğmeye dokunun / Ekranın altından yukarı doğru hızlı bir hareketle 1 parmakla kaydırın: Ana ekrana erişmek için
-- Ekranın altından 1-2 inç (yavaş) kaydırarak bir parmakla: Dock görünecektir
-- Ekranın üst kenarından 1 parmakla aşağı kaydırarak: Bildirimlerinizi görüntülemek için
-- Ekranın sağ üst köşesinden 1 parmakla aşağı kaydırarak: iPad Pro'nun kontrol merkezini görmek için
-- Ekranın sol tarafından 1-2 inç kaydırarak: Bugün görünümünü görmek için
-- Ekranın ortasından sağa veya sola hızlı bir parmak kaydırarak: Bir sonraki/son uygulamaya geçmek için
-- **iPad**'in sağ üst köşesindeki Açma/**Kapama**/Uyku düğmesine basılı tutun + **kapalı** kaydırıcısını tamamen sağa kaydırın: Kapatmak için
-- **iPad**'in sağ üst köşesindeki Açma/**Kapama**/Uyku düğmesine ve Ana düğmeye birkaç saniye basın: Sert bir şekilde kapatmak için
-- **iPad**'in sağ üst köşesindeki Açma/**Kapama**/Uyku düğmesine ve Ana düğmeye hızlıca basın: Ekranın sol alt kısmında belirecek bir ekran görüntüsü almak için. Her iki düğmeye aynı anda çok kısa bir süre basın, birkaç saniye basılı tutarsanız sert bir kapatma işlemi yapılır.
+- Dört (veya beş) parmakla yukarı kaydırma / Ana düğmeye çift dokunma: Çoklu görev görünümünü görüntüleyip uygulama değiştirmek için
+- Dört veya beş parmakla bir yönde kaydırma: Sonraki/önceki uygulamaya geçmek için
+- Beş parmakla ekranı sıkıştırma / Ana düğmeye dokunma / Alt kenardan hızlı bir hareketle tek parmakla yukarı kaydırma: Ana ekrana erişmek için
+- Alt kenardan tek parmakla 1-2 inç (yavaş) kaydırma: Dock görünür olur
+- Üst ekrandan tek parmakla aşağı kaydırma: Bildirimleri görüntülemek için
+- Ekranın sağ üst köşesinden tek parmakla aşağı kaydırma: iPad Pro kontrol merkezini görmek için
+- Ekranın solundan tek parmakla 1-2 inç kaydırma: Today görünümünü görmek için
+- Ekranın ortasından sağa veya sola hızlı tek parmak kaydırma: Sonraki/önceki uygulamaya geçmek için
+- iPad'in üst sağ köşesindeki On/Off/Uykudan Çıkarma düğmesine basılı tutun + Slide to power off kaydırıcısını tamamen sağa kaydırın: Kapatmak için
+- iPad'in üst sağ köşesindeki On/Off/Uykudan Çıkarma düğmesine ve Home düğmesine birkaç saniye basılı tutun: Zorla kapatma yapmak için
+- iPad'in üst sağ köşesindeki On/Off/Uykudan Çıkarma düğmesine ve Home düğmesine hızlıca basın: Ekranın sol alt köşesinde açılan ekran görüntüsü almak için. Her iki düğmeye çok kısa süreli birlikte basın; birkaç saniye tutulursa zorla kapatma gerçekleşir.
 
 ### Kısayollar
 
-Bir iPad klavyesine veya bir USB klavye adaptörüne sahip olmalısınız. Uygulamadan kaçışa yardımcı olabilecek yalnızca kısayollar burada gösterilecektir.
+Bir iPad klavyesine veya bir USB klavye adaptörüne sahip olmalısınız. Sadece uygulamadan kaçmaya yardımcı olabilecek kısayollar burada gösterilmiştir.
 
-| Tuş | Adı         |
+| Tuş | İsim         |
 | --- | ------------ |
-| ⌘   | Komut       |
-| ⌥   | Seçenek (Alt) |
-| ⇧   | Shift       |
-| ↩   | Geri Dön    |
-| ⇥   | Sekme       |
-| ^   | Kontrol     |
-| ←   | Sol Ok     |
-| →   | Sağ Ok      |
-| ↑   | Yukarı Ok   |
-| ↓   | Aşağı Ok    |
+| ⌘   | Command      |
+| ⌥   | Option (Alt) |
+| ⇧   | Shift        |
+| ↩   | Return       |
+| ⇥   | Tab          |
+| ^   | Control      |
+| ←   | Sol Ok       |
+| →   | Sağ Ok       |
+| ↑   | Yukarı Ok    |
+| ↓   | Aşağı Ok     |
 
 #### Sistem kısayolları
 
-Bu kısayollar, iPad'in kullanımına bağlı olarak görsel ayarlar ve ses ayarları içindir.
+Bu kısayollar görsel ve ses ayarları içindir; iPad kullanımına bağlı olarak değişebilir.
 
-| Kısayol | Eylem                                                                         |
-| -------- | ------------------------------------------------------------------------------ |
-| F1       | Ekranı Kısma                                                                  |
-| F2       | Ekranı Parlaklaştırma                                                         |
-| F7       | Bir şarkıyı geri alma                                                          |
-| F8       | Oynat/durdur                                                                  |
-| F9       | Şarkıyı atlama                                                                |
-| F10      | Ses kapatma                                                                   |
-| F11      | Ses seviyesini azaltma                                                        |
-| F12      | Ses seviyesini artırma                                                        |
-| ⌘ Boşluk | Mevcut dillerin listesini görüntüle; birini seçmek için boşluk tuşuna tekrar bas. |
+| Kısayol | İşlem                                                                          |
+| ------- | ------------------------------------------------------------------------------ |
+| F1      | Ekranı karart                                                                  |
+| F2      | Ekranı parlaklaştır                                                             |
+| F7      | Bir önceki şarkı                                                               |
+| F8      | Oynatma/duraklatma                                                              |
+| F9      | Şarkıyı atla                                                                    |
+| F10     | Sesi kapat                                                                      |
+| F11     | Sesi azalt                                                                      |
+| F12     | Sesi artır                                                                      |
+| ⌘ Space | Kullanılabilir dillerin listesini görüntüler; birini seçmek için tekrar space tuşuna dokunun. |
 
-#### iPad navigasyonu
+#### iPad gezintisi
 
-| Kısayol                                           | Eylem                                                  |
-| -------------------------------------------------- | ------------------------------------------------------- |
-| ⌘H                                                 | Ana ekrana git                                         |
-| ⌘⇧H (Komut-Shift-H)                              | Ana ekrana git                                         |
-| ⌘ (Boşluk)                                        | Spotlight'ı aç                                         |
-| ⌘⇥ (Komut-Sekme)                                   | Son on kullanılan uygulamayı listele                   |
-| ⌘\~                                                | Son uygulamaya git                                     |
-| ⌘⇧3 (Komut-Shift-3)                              | Ekran görüntüsü (sol altta kaydetmek veya üzerinde işlem yapmak için) |
-| ⌘⇧4                                                | Ekran görüntüsü al ve düzenleyicide aç                 |
-| ⌘'yi basılı tut                                   | Uygulama için mevcut kısayolların listesini göster     |
-| ⌘⌥D (Komut-Seçenek/Alt-D)                         | Dock'u açar                                            |
-| ^⌥H (Kontrol-Seçenek-H)                           | Ana düğme                                             |
-| ^⌥H H (Kontrol-Seçenek-H-H)                       | Çoklu görev çubuğunu göster                             |
-| ^⌥I (Kontrol-Seçenek-i)                           | Öğe seçici                                            |
-| Escape                                             | Geri düğmesi                                          |
-| → (Sağ ok)                                        | Sonraki öğe                                           |
-| ← (Sol ok)                                       | Önceki öğe                                           |
-| ↑↓ (Yukarı ok, Aşağı ok)                          | Seçilen öğeye aynı anda dokun                         |
-| ⌥ ↓ (Seçenek-Aşağı ok)                            | Aşağı kaydır                                          |
-| ⌥↑ (Seçenek-Yukarı ok)                           | Yukarı kaydır                                         |
-| ⌥← veya ⌥→ (Seçenek-Sol ok veya Seçenek-Sağ ok) | Sola veya sağa kaydır                                 |
-| ^⌥S (Kontrol-Seçenek-S)                           | VoiceOver sesini aç veya kapat                         |
-| ⌘⇧⇥ (Komut-Shift-Sekme)                          | Önceki uygulamaya geç                                   |
-| ⌘⇥ (Komut-Sekme)                                   | Orijinal uygulamaya geri dön                           |
-| ←+→, ardından Seçenek + ← veya Seçenek+→         | Dock'ta gezin                                         |
+| Kısayol                                           | İşlem                                              |
+| ------------------------------------------------- | --------------------------------------------------- |
+| ⌘H                                               | Ana ekrana git                                     |
+| ⌘⇧H (Command-Shift-H)                            | Ana ekrana git                                     |
+| ⌘ (Space)                                        | Spotlight'ı aç                                     |
+| ⌘⇥ (Command-Tab)                                 | Son kullanılan on uygulamayı listele               |
+| ⌘\~                                              | Son uygulamaya git                                 |
+| ⌘⇧3 (Command-Shift-3)                            | Ekran görüntüsü (kaydetme veya işlem için sol altta yüzer) |
+| ⌘⇧4                                             | Ekran görüntüsü al ve düzenleyicide aç              |
+| ⌘ tuşuna basılı tut                                 | Uygulamaya özel kullanılabilir kısayolların listesi |
+| ⌘⌥D (Command-Option/Alt-D)                       | Dock'u göster                                      |
+| ^⌥H (Control-Option-H)                           | Home düğmesi                                       |
+| ^⌥H H (Control-Option-H-H)                       | Çoklu görev çubuğunu göster                        |
+| ^⌥I (Control-Option-i)                           | Öğe seçici                                         |
+| Escape                                           | Geri düğmesi                                       |
+| → (Sağ ok)                                       | Sonraki öğe                                        |
+| ← (Sol ok)                                       | Önceki öğe                                         |
+| ↑↓ (Yukarı ok, Aşağı ok)                         | Seçili öğeye aynı anda dokunma                     |
+| ⌥ ↓ (Option-Aşağı ok)                            | Aşağı kaydır                                        |
+| ⌥↑ (Option-Yukarı ok)                            | Yukarı kaydır                                       |
+| ⌥← veya ⌥→ (Option-Sol ok veya Option-Sağ ok)    | Sola veya sağa kaydır                              |
+| ^⌥S (Control-Option-S)                           | VoiceOver konuşmasını açıp kapat                   |
+| ⌘⇧⇥ (Command-Shift-Tab)                          | Önceki uygulamaya geç                              |
+| ⌘⇥ (Command-Tab)                                 | Orijinal uygulamaya geri dön                       |
+| ←+→, sonra Option + ← veya Option+→              | Dock içinde gezinme                                |
 
 #### Safari kısayolları
 
-| Kısayol                | Eylem                                           |
-| ----------------------- | ------------------------------------------------ |
-| ⌘L (Komut-L)          | Konum Aç                                         |
-| ⌘T                      | Yeni bir sekme aç                                |
-| ⌘W                      | Mevcut sekmeyi kapat                             |
-| ⌘R                      | Mevcut sekmeyi yenile                           |
-| ⌘.                      | Mevcut sekmenin yüklenmesini durdur             |
-| ^⇥                      | Sonraki sekmeye geç                              |
-| ^⇧⇥ (Kontrol-Shift-Sekme) | Önceki sekmeye geç                             |
-| ⌘L                      | Metin girişi/URL alanını seçip düzenlemek için   |
-| ⌘⇧T (Komut-Shift-T)   | En son kapatılan sekmeyi aç (birkaç kez kullanılabilir) |
-| ⌘\[                     | Tarayıcı geçmişinizde bir sayfaya geri dön       |
-| ⌘]                      | Tarayıcı geçmişinizde bir sayfaya ileri git      |
-| ⌘⇧R                     | Okuyucu Modunu etkinleştir                       |
+| Kısayol                | İşlem                                           |
+| ---------------------- | ------------------------------------------------ |
+| ⌘L (Command-L)         | Konum alanını aç                                 |
+| ⌘T                    | Yeni sekme aç                                    |
+| ⌘W                    | Mevcut sekmeyi kapat                             |
+| ⌘R                    | Mevcut sekmeyi yenile                            |
+| ⌘.                    | Mevcut sekmenin yüklenmesini durdur               |
+| ^⇥                    | Sonraki sekmeye geç                               |
+| ^⇧⇥ (Control-Shift-Tab) | Önceki sekmeye geç                                |
+| ⌘L                    | Metin giriş/URL alanını seç ve düzenle            |
+| ⌘⇧T (Command-Shift-T) | Son kapatılan sekmeyi tekrar aç (birkaç kez kullanılabilir) |
+| ⌘\[                   | Geçmişte bir sayfa geri git                       |
+| ⌘]                    | Geçmişte bir sayfa ileri git                      |
+| ⌘⇧R                  | Reader Modu'nu etkinleştir                        |
 
 #### Mail kısayolları
 
-| Kısayol                   | Eylem                       |
-| -------------------------- | ---------------------------- |
-| ⌘L                         | Konum Aç                    |
-| ⌘T                         | Yeni bir sekme aç           |
-| ⌘W                         | Mevcut sekmeyi kapat        |
-| ⌘R                         | Mevcut sekmeyi yenile       |
-| ⌘.                         | Mevcut sekmenin yüklenmesini durdur |
-| ⌘⌥F (Komut-Seçenek/Alt-F) | Posta kutunuzda arama yap   |
+| Kısayol                   | İşlem                       |
+| ------------------------- | --------------------------- |
+| ⌘L                        | Konumu aç                   |
+| ⌘T                        | Yeni sekme aç               |
+| ⌘W                        | Mevcut sekmeyi kapat        |
+| ⌘R                        | Mevcut sekmeyi yenile       |
+| ⌘.                        | Mevcut sekmenin yüklenmesini durdur |
+| ⌘⌥F (Command-Option/Alt-F) | Posta kutusunda ara         |
 
-## Referanslar
+## Kaynaklar
 
+- [https://www.pentestpartners.com/security-blog/breaking-out-of-citrix-and-other-restricted-desktop-environments/](https://www.pentestpartners.com/security-blog/breaking-out-of-citrix-and-other-restricted-desktop-environments/)
 - [https://www.macworld.com/article/2975857/6-only-for-ipad-gestures-you-need-to-know.html](https://www.macworld.com/article/2975857/6-only-for-ipad-gestures-you-need-to-know.html)
 - [https://www.tomsguide.com/us/ipad-shortcuts,news-18205.html](https://www.tomsguide.com/us/ipad-shortcuts,news-18205.html)
 - [https://thesweetsetup.com/best-ipad-keyboard-shortcuts/](https://thesweetsetup.com/best-ipad-keyboard-shortcuts/)
