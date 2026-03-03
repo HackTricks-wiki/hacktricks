@@ -178,4 +178,9 @@ jobs:
 
       - name: Upload root ads.txt
         run: aws s3 cp ./src/ads.txt s3://hacktricks-wiki/ads.txt --content-type text/plain --cache-control max-age=300
+
+      - name: Upload root robots.txt
+        run: |
+          aws s3 cp ./src/robots.txt s3://hacktricks-wiki/robots.txt --content-type text/plain --cache-control max-age=300
+          aws s3 cp ./src/robots.txt s3://hacktricks-wiki/en/robots.txt --content-type text/plain --cache-control max-age=300
       

@@ -37,8 +37,38 @@ jobs:
       - name: Check for running workflows
         id: check_workflows
         run: |
+          gh_with_retry() {
+            local max_attempts=5
+            local base_sleep_seconds=2
+            local attempt=1
+            local stderr_file
+            stderr_file=$(mktemp)
+
+            while true; do
+              if gh "$@" 2>"$stderr_file"; then
+                rm -f "$stderr_file"
+                return 0
+              fi
+
+              local exit_code=$?
+              if [ "$attempt" -ge "$max_attempts" ]; then
+                echo "gh command failed after $max_attempts attempts: gh $*" >&2
+                cat "$stderr_file" >&2
+                rm -f "$stderr_file"
+                return "$exit_code"
+              fi
+
+              local sleep_for=$((base_sleep_seconds * attempt))
+              echo "gh command failed (attempt $attempt/$max_attempts): gh $*" >&2
+              cat "$stderr_file" >&2
+              echo "Retrying in ${sleep_for}s..." >&2
+              sleep "$sleep_for"
+              attempt=$((attempt + 1))
+            done
+          }
+
           # Get all running workflows except this one
-          running_workflows=$(gh run list --status in_progress --json workflowName,name --repo "$GITHUB_REPOSITORY" --jq '.[].name' | grep -v "Auto Merge Approved PRs" | wc -l)
+          running_workflows=$(gh_with_retry run list --status in_progress --json workflowName,name --repo "$GITHUB_REPOSITORY" --jq '.[].name' | grep -v "Auto Merge Approved PRs" | wc -l)
           echo "running_workflows=$running_workflows" >> $GITHUB_OUTPUT
           
           if [ "$running_workflows" -gt 0 ]; then
@@ -54,6 +84,36 @@ jobs:
       - name: Find and merge approved PRs
         if: steps.check_workflows.outputs.should_continue == 'true'
         run: |
+          gh_with_retry() {
+            local max_attempts=5
+            local base_sleep_seconds=2
+            local attempt=1
+            local stderr_file
+            stderr_file=$(mktemp)
+
+            while true; do
+              if gh "$@" 2>"$stderr_file"; then
+                rm -f "$stderr_file"
+                return 0
+              fi
+
+              local exit_code=$?
+              if [ "$attempt" -ge "$max_attempts" ]; then
+                echo "gh command failed after $max_attempts attempts: gh $*" >&2
+                cat "$stderr_file" >&2
+                rm -f "$stderr_file"
+                return "$exit_code"
+              fi
+
+              local sleep_for=$((base_sleep_seconds * attempt))
+              echo "gh command failed (attempt $attempt/$max_attempts): gh $*" >&2
+              cat "$stderr_file" >&2
+              echo "Retrying in ${sleep_for}s..." >&2
+              sleep "$sleep_for"
+              attempt=$((attempt + 1))
+            done
+          }
+
           authorized_user="carlospolop"
           max_merges=2
 
@@ -61,7 +121,7 @@ jobs:
           echo "Looking for PRs with exact comment 'merge' from $authorized_user..."
 
           # Get all open PRs
-          prs=$(gh pr list --state open --json number,title,url,author --repo "$GITHUB_REPOSITORY")
+          prs=$(gh_with_retry pr list --state open --json number,title,url,author --repo "$GITHUB_REPOSITORY")
 
           if [ "$prs" = "[]" ]; then
             echo "No open PRs found."
@@ -98,7 +158,10 @@ jobs:
             has_merge_comment=false
             if [ "$eligible_by_title" != true ]; then
               # Get all comments for this PR
-              comments=$(gh pr view "$pr_number" --json comments --jq '.comments[]' --repo "$GITHUB_REPOSITORY")
+              if ! comments=$(gh_with_retry pr view "$pr_number" --json comments --jq '.comments[]' --repo "$GITHUB_REPOSITORY"); then
+                echo "Failed to fetch comments for PR #$pr_number after retries. Skipping PR."
+                continue
+              fi
 
               # Print all comment authors for debugging
               echo "Comments in PR #$pr_number:"
@@ -123,7 +186,10 @@ jobs:
               echo "Attempting to merge PR #$pr_number..."
 
               # Get PR details including head branch
-              pr_details=$(gh pr view "$pr_number" --json headRefName,baseRefName --repo "$GITHUB_REPOSITORY")
+              if ! pr_details=$(gh_with_retry pr view "$pr_number" --json headRefName,baseRefName --repo "$GITHUB_REPOSITORY"); then
+                echo "Failed to fetch details for PR #$pr_number after retries. Skipping PR."
+                continue
+              fi
               head_branch=$(echo "$pr_details" | jq -r '.headRefName')
               base_branch=$(echo "$pr_details" | jq -r '.baseRefName')
 
@@ -131,7 +197,10 @@ jobs:
               max_retries=10
               retry=0
               while true; do
-                pr_mergeable=$(gh pr view "$pr_number" --json mergeable --jq '.mergeable' --repo "$GITHUB_REPOSITORY")
+                if ! pr_mergeable=$(gh_with_retry pr view "$pr_number" --json mergeable --jq '.mergeable' --repo "$GITHUB_REPOSITORY"); then
+                  echo "Failed to fetch mergeable status for PR #$pr_number after retries."
+                  pr_mergeable="UNKNOWN"
+                fi
                 if [ "$pr_mergeable" != "UNKNOWN" ]; then
                   break
                 fi

