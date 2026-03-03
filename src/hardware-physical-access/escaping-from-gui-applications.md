@@ -1,4 +1,4 @@
-# KIOSK에서 탈출하기
+# KIOSK에서 탈출
 
 {{#include ../banners/hacktricks-training.md}}
 
@@ -6,55 +6,55 @@
 
 ## 물리적 장치 확인
 
-| 구성 요소    | 작업                                                             |
+| Component    | Action                                                             |
 | ------------ | ------------------------------------------------------------------ |
-| 전원 버튼    | 장치를 껐다가 다시 켜면 시작 화면이 노출될 수 있습니다            |
-| 전원 케이블  | 전원이 잠시 차단될 때 장치가 재부팅되는지 확인하세요              |
-| USB 포트     | 더 많은 단축키가 있는 물리적 키보드를 연결하세요                 |
-| 이더넷      | 네트워크 스캔 또는 스니핑을 통해 추가적인 악용이 가능할 수 있습니다 |
+| Power button | 장치를 껐다가 다시 켜면 시작 화면이 표시될 수 있습니다             |
+| Power cable  | 전원을 잠깐 차단했을 때 장치가 재부팅되는지 확인하세요             |
+| USB ports    | 더 많은 단축키를 가진 물리적 키보드를 연결해 보세요               |
+| Ethernet     | 네트워크 스캔이나 스니핑으로 추가적인 공격 가능성이 생길 수 있습니다 |
 
-## GUI 애플리케이션 내에서 가능한 작업 확인
+## GUI 애플리케이션 내에서 가능한 동작 확인
 
-**일반 대화상자**는 **파일 저장**, **파일 열기**, 글꼴 선택, 색상 선택 등의 옵션입니다. 이들 대부분은 **전체 탐색기 기능을 제공합니다**. 이는 이러한 옵션에 접근할 수 있다면 탐색기 기능에 접근할 수 있음을 의미합니다:
+**Common Dialogs**는 파일 저장, 파일 열기, 글꼴 선택, 색상 선택 등과 같은 옵션들입니다. 대부분의 경우 이러한 옵션들은 **full Explorer functionality**를 제공합니다. 즉, 이러한 옵션들에 접근할 수 있다면 Explorer 기능에 접근할 수 있습니다.
 
-- 닫기/다른 이름으로 닫기
-- 열기/다른 프로그램으로 열기
-- 인쇄
-- 내보내기/가져오기
-- 검색
-- 스캔
+- Close/Close as
+- Open/Open with
+- Print
+- Export/Import
+- Search
+- Scan
 
-다음 작업을 수행할 수 있는지 확인해야 합니다:
+다음 사항들을 확인해야 합니다:
 
-- 파일 수정 또는 새 파일 생성
-- 심볼릭 링크 생성
-- 제한된 영역에 접근
-- 다른 앱 실행
+- 파일을 수정하거나 새로 생성할 수 있는지
+- 심볼릭 링크를 생성할 수 있는지
+- 제한된 영역에 접근할 수 있는지
+- 다른 앱을 실행할 수 있는지
 
 ### 명령 실행
 
-아마도 **`Open with`** 옵션을 사용하여 어떤 종류의 셸을 열거나 실행할 수 있습니다.
+아마도 **`Open with`** 옵션을 사용하면 어떤 종류의 쉘을 열거나 실행할 수 있습니다.
 
 #### Windows
 
-예를 들어 _cmd.exe, command.com, Powershell/Powershell ISE, mmc.exe, at.exe, taskschd.msc..._ 명령을 실행하는 데 사용할 수 있는 더 많은 바이너리를 찾으려면 여기에서 확인하세요: [https://lolbas-project.github.io/](https://lolbas-project.github.io)
+예: _cmd.exe, command.com, Powershell/Powershell ISE, mmc.exe, at.exe, taskschd.msc..._ 같은 바이너리들이 명령을 실행(및 예기치 않은 동작 수행)하는 데 사용될 수 있습니다. 더 많은 바이너리는 여기에서 확인하세요: [https://lolbas-project.github.io/](https://lolbas-project.github.io/)
 
 #### \*NIX \_\_
 
-_bash, sh, zsh..._ 더 많은 정보는 여기에서 확인하세요: [https://gtfobins.github.io/](https://gtfobins.github.io)
+_bash, sh, zsh..._ 자세한 내용은: [https://gtfobins.github.io/](https://gtfobins.github.io)
 
 ## Windows
 
 ### 경로 제한 우회
 
-- **환경 변수**: 특정 경로를 가리키는 많은 환경 변수가 있습니다.
-- **기타 프로토콜**: _about:, data:, ftp:, file:, mailto:, news:, res:, telnet:, view-source:_
-- **심볼릭 링크**
-- **바로 가기**: CTRL+N (새 세션 열기), CTRL+R (명령 실행), CTRL+SHIFT+ESC (작업 관리자), Windows+E (탐색기 열기), CTRL-B, CTRL-I (즐겨찾기), CTRL-H (기록), CTRL-L, CTRL-O (파일/열기 대화상자), CTRL-P (인쇄 대화상자), CTRL-S (다른 이름으로 저장)
-- 숨겨진 관리 메뉴: CTRL-ALT-F8, CTRL-ESC-F9
-- **셸 URI**: _shell:Administrative Tools, shell:DocumentsLibrary, shell:Librariesshell:UserProfiles, shell:Personal, shell:SearchHomeFolder, shell:Systemshell:NetworkPlacesFolder, shell:SendTo, shell:UsersProfiles, shell:Common Administrative Tools, shell:MyComputerFolder, shell:InternetFolder_
-- **UNC 경로**: 공유 폴더에 연결하는 경로입니다. 로컬 머신의 C$에 연결해 보세요 ("\\\127.0.0.1\c$\Windows\System32")
-- **더 많은 UNC 경로:**
+- **Environment variables**: 여러 환경 변수가 특정 경로를 가리키고 있습니다
+- **Other protocols**: _about:, data:, ftp:, file:, mailto:, news:, res:, telnet:, view-source:_
+- **Symbolic links**
+- **Shortcuts**: CTRL+N (새 세션 열기), CTRL+R (명령 실행), CTRL+SHIFT+ESC (작업 관리자), Windows+E (Explorer 열기), CTRL-B, CTRL-I (즐겨찾기), CTRL-H (히스토리), CTRL-L, CTRL-O (File/Open Dialog), CTRL-P (Print Dialog), CTRL-S (Save As)
+- Hidden Administrative menu: CTRL-ALT-F8, CTRL-ESC-F9
+- **Shell URIs**: _shell:Administrative Tools, shell:DocumentsLibrary, shell:Librariesshell:UserProfiles, shell:Personal, shell:SearchHomeFolder, shell:Systemshell:NetworkPlacesFolder, shell:SendTo, shell:UsersProfiles, shell:Common Administrative Tools, shell:MyComputerFolder, shell:InternetFolder_
+- **UNC paths**: 공유 폴더에 연결하기 위한 경로입니다. 로컬 머신의 C$에 연결해 보세요 ("\\\127.0.0.1\c$\Windows\System32")
+- **More UNC paths:**
 
 | UNC                       | UNC            | UNC                  |
 | ------------------------- | -------------- | -------------------- |
@@ -68,15 +68,33 @@ _bash, sh, zsh..._ 더 많은 정보는 여기에서 확인하세요: [https://g
 | %TMP%                     | %USERDOMAIN%   | %USERNAME%           |
 | %USERPROFILE%             | %WINDIR%       |                      |
 
-### 바이너리 다운로드
+### 제한된 데스크톱 탈출 (Citrix/RDS/VDI)
 
-콘솔: [https://sourceforge.net/projects/console/](https://sourceforge.net/projects/console/)\
-탐색기: [https://sourceforge.net/projects/explorerplus/files/Explorer%2B%2B/](https://sourceforge.net/projects/explorerplus/files/Explorer%2B%2B/)\
-레지스트리 편집기: [https://sourceforge.net/projects/uberregedit/](https://sourceforge.net/projects/uberregedit/)
+- **Dialog-box pivoting**: `Open/Save/Print-to-file` 대화상자를 Explorer-lite로 사용하세요. 파일명 필드에 `*.*` / `*.exe`를 입력하고, 폴더를 우클릭하여 **Open in new window**를 시도하며 **Properties → Open file location**을 사용해 탐색을 확장하세요.
+- **Create execution paths from dialogs**: 새 파일을 만들고 파일명을 `.CMD` 또는 `.BAT`로 바꾸거나 `%WINDIR%\System32`(또는 `%WINDIR%\System32\cmd.exe` 같은 특정 바이너리)를 가리키는 바로가기를 만드세요.
+- **Shell launch pivots**: `cmd.exe`로 이동할 수 있다면, 어떤 파일이든 드래그 앤 드롭해 프롬프트를 실행해 보세요. Task Manager(`CTRL+SHIFT+ESC`)에 접근할 수 있으면 **Run new task**를 사용하세요.
+- **Task Scheduler bypass**: 인터랙티브 쉘이 차단되어 있지만 스케줄링이 허용된다면, `cmd.exe`를 실행하도록 작업을 만드세요 (GUI `taskschd.msc` 또는 `schtasks.exe`).
+- **Weak allowlists**: 실행이 파일명/확장자로 허용된다면, 페이로드의 이름을 허용되는 이름으로 바꾸세요. 디렉터리 기준으로 허용된다면 페이로드를 허용된 프로그램 폴더로 복사해 그곳에서 실행하세요.
+- **Find writable staging paths**: `%TEMP%`부터 시작하여 쓰기 가능한 폴더를 열거하고 Sysinternals AccessChk로 확인하세요.
+```cmd
+echo %TEMP%
+accesschk.exe -uwdqs Users c:\
+accesschk.exe -uwdqs "Authenticated Users" c:\
+```
+- **Next step**: If you gain a shell, pivot to the Windows LPE checklist:
+{{#ref}}
+../windows-hardening/checklist-windows-privilege-escalation.md
+{{#endref}}
 
-### 브라우저에서 파일 시스템 접근
+### Download Your Binaries
 
-| 경로                | 경로              | 경로               | 경로                |
+Console: [https://sourceforge.net/projects/console/](https://sourceforge.net/projects/console/)\
+Explorer: [https://sourceforge.net/projects/explorerplus/files/Explorer%2B%2B/](https://sourceforge.net/projects/explorerplus/files/Explorer%2B%2B/)\
+Registry editor: [https://sourceforge.net/projects/uberregedit/](https://sourceforge.net/projects/uberregedit/)
+
+### Accessing filesystem from the browser
+
+| PATH                | PATH              | PATH               | PATH                |
 | ------------------- | ----------------- | ------------------ | ------------------- |
 | File:/C:/windows    | File:/C:/windows/ | File:/C:/windows\\ | File:/C:\windows    |
 | File:/C:\windows\\  | File:/C:\windows/ | File://C:/windows  | File://C:/windows/  |
@@ -86,47 +104,47 @@ _bash, sh, zsh..._ 더 많은 정보는 여기에서 확인하세요: [https://g
 | %TEMP%              | %SYSTEMDRIVE%     | %SYSTEMROOT%       | %APPDATA%           |
 | %HOMEDRIVE%         | %HOMESHARE        |                    | <p><br></p>         |
 
-### 단축키
+### ShortCuts
 
-- 스티키 키 – SHIFT 5회 누르기
-- 마우스 키 – SHIFT+ALT+NUMLOCK
-- 고대비 – SHIFT+ALT+PRINTSCN
-- 토글 키 – NUMLOCK을 5초 동안 누르기
-- 필터 키 – 오른쪽 SHIFT를 12초 동안 누르기
-- WINDOWS+F1 – Windows 검색
-- WINDOWS+D – 바탕 화면 표시
-- WINDOWS+E – Windows 탐색기 실행
-- WINDOWS+R – 실행
-- WINDOWS+U – 접근성 센터
-- WINDOWS+F – 검색
-- SHIFT+F10 – 컨텍스트 메뉴
-- CTRL+SHIFT+ESC – 작업 관리자
-- CTRL+ALT+DEL – 최신 Windows 버전에서 스플래시 화면
-- F1 – 도움말 F3 – 검색
-- F6 – 주소 표시줄
-- F11 – Internet Explorer에서 전체 화면 전환
-- CTRL+H – Internet Explorer 기록
-- CTRL+T – Internet Explorer – 새 탭
-- CTRL+N – Internet Explorer – 새 페이지
-- CTRL+O – 파일 열기
-- CTRL+S – 저장 CTRL+N – 새 RDP / Citrix
+- Sticky Keys – Press SHIFT 5 times
+- Mouse Keys – SHIFT+ALT+NUMLOCK
+- High Contrast – SHIFT+ALT+PRINTSCN
+- Toggle Keys – Hold NUMLOCK for 5 seconds
+- Filter Keys – Hold right SHIFT for 12 seconds
+- WINDOWS+F1 – Windows Search
+- WINDOWS+D – Show Desktop
+- WINDOWS+E – Launch Windows Explorer
+- WINDOWS+R – Run
+- WINDOWS+U – Ease of Access Centre
+- WINDOWS+F – Search
+- SHIFT+F10 – Context Menu
+- CTRL+SHIFT+ESC – Task Manager
+- CTRL+ALT+DEL – Splash screen on newer Windows versions
+- F1 – Help F3 – Search
+- F6 – Address Bar
+- F11 – Toggle full screen within Internet Explorer
+- CTRL+H – Internet Explorer History
+- CTRL+T – Internet Explorer – New Tab
+- CTRL+N – Internet Explorer – New Page
+- CTRL+O – Open File
+- CTRL+S – Save CTRL+N – New RDP / Citrix
 
-### 스와이프
+### Swipes
 
-- 왼쪽에서 오른쪽으로 스와이프하여 모든 열린 Windows를 보고 KIOSK 앱을 최소화하고 전체 OS에 직접 접근합니다;
-- 오른쪽에서 왼쪽으로 스와이프하여 작업 센터를 열고 KIOSK 앱을 최소화하고 전체 OS에 직접 접근합니다;
-- 상단 가장자리에서 아래로 스와이프하여 전체 화면 모드로 열린 앱의 제목 표시줄을 표시합니다;
-- 아래에서 위로 스와이프하여 전체 화면 앱에서 작업 표시줄을 표시합니다.
+- Swipe from the left side to the right to see all open Windows, minimizing the KIOSK app and accessing the whole OS directly;
+- Swipe from the right side to the left to open Action Center, minimizing the KIOSK app and accessing the whole OS directly;
+- Swipe in from the top edge to make the title bar visible for an app opened in full screen mode;
+- Swipe up from the bottom to show the taskbar in a full screen app.
 
-### Internet Explorer 팁
+### Internet Explorer Tricks
 
-#### '이미지 도구 모음'
+#### 'Image Toolbar'
 
-클릭할 때 이미지의 왼쪽 상단에 나타나는 도구 모음입니다. 저장, 인쇄, 메일, 탐색기에서 "내 사진" 열기를 할 수 있습니다. Kiosk는 Internet Explorer를 사용해야 합니다.
+It's a toolbar that appears on the top-left of image when it's clicked. You will be able to Save, Print, Mailto, Open "My Pictures" in Explorer. The Kiosk needs to be using Internet Explorer.
 
-#### 셸 프로토콜
+#### Shell Protocol
 
-탐색기 보기를 얻으려면 다음 URL을 입력하세요:
+Type this URLs to obtain an Explorer view:
 
 - `shell:Administrative Tools`
 - `shell:DocumentsLibrary`
@@ -145,132 +163,133 @@ _bash, sh, zsh..._ 더 많은 정보는 여기에서 확인하세요: [https://g
 - `Shell:System`
 - `Shell:ControlPanelFolder`
 - `Shell:Windows`
-- `shell:::{21EC2020-3AEA-1069-A2DD-08002B30309D}` --> 제어판
-- `shell:::{20D04FE0-3AEA-1069-A2D8-08002B30309D}` --> 내 컴퓨터
-- `shell:::{{208D2C60-3AEA-1069-A2D7-08002B30309D}}` --> 내 네트워크 위치
+- `shell:::{21EC2020-3AEA-1069-A2DD-08002B30309D}` --> Control Panel
+- `shell:::{20D04FE0-3AEA-1069-A2D8-08002B30309D}` --> My Computer
+- `shell:::{{208D2C60-3AEA-1069-A2D7-08002B30309D}}` --> My Network Places
 - `shell:::{871C5380-42A0-1069-A2EA-08002B30309D}` --> Internet Explorer
 
-### 파일 확장자 표시
+### Show File Extensions
 
-더 많은 정보는 이 페이지를 확인하세요: [https://www.howtohaven.com/system/show-file-extensions-in-windows-explorer.shtml](https://www.howtohaven.com/system/show-file-extensions-in-windows-explorer.shtml)
+Check this page for more information: [https://www.howtohaven.com/system/show-file-extensions-in-windows-explorer.shtml](https://www.howtohaven.com/system/show-file-extensions-in-windows-explorer.shtml)
 
-## 브라우저 팁
+## Browsers tricks
 
-iKat 버전 백업:
+Backup iKat versions:
 
 [http://swin.es/k/](http://swin.es/k/)\
 [http://www.ikat.kronicd.net/](http://www.ikat.kronicd.net)
 
-JavaScript를 사용하여 일반 대화상자를 만들고 파일 탐색기에 접근하세요: `document.write('<input/type=file>')`\
-출처: https://medium.com/@Rend\_/give-me-a-browser-ill-give-you-a-shell-de19811defa0
+Create a common dialog using JavaScript and access file explorer: `document.write('<input/type=file>')`\
+Source: https://medium.com/@Rend\_/give-me-a-browser-ill-give-you-a-shell-de19811defa0
 
 ## iPad
 
-### 제스처 및 버튼
+### Gestures and bottoms
 
-- 네 손가락(또는 다섯 손가락)으로 위로 스와이프 / 홈 버튼 두 번 탭: 멀티태스킹 뷰를 보고 앱을 변경합니다.
-- 네 손가락 또는 다섯 손가락으로 한쪽 방향으로 스와이프: 다음/이전 앱으로 변경합니다.
-- 다섯 손가락으로 화면을 집게 / 홈 버튼 터치 / 화면 하단에서 한 손가락으로 빠르게 위로 스와이프: 홈에 접근합니다.
-- 화면 하단에서 한 손가락으로 1-2인치 스와이프(느리게): 도크가 나타납니다.
-- 화면 상단에서 한 손가락으로 아래로 스와이프: 알림을 봅니다.
-- 화면 오른쪽 상단 모서리에서 한 손가락으로 아래로 스와이프: iPad Pro의 제어 센터를 봅니다.
-- 화면 왼쪽에서 한 손가락으로 1-2인치 스와이프: 오늘 보기 확인.
-- 화면 중앙에서 한 손가락으로 빠르게 오른쪽 또는 왼쪽으로 스와이프: 다음/이전 앱으로 변경합니다.
-- 오른쪽 상단 모서리의 전원/**오프**/슬립 버튼을 누르고 **전원 끄기** 슬라이더를 오른쪽으로 끝까지 이동: 전원 끄기.
-- 오른쪽 상단 모서리의 전원/**오프**/슬립 버튼과 홈 버튼을 몇 초 동안 누르기: 강제로 하드 전원 끄기.
-- 오른쪽 상단 모서리의 전원/**오프**/슬립 버튼과 홈 버튼을 빠르게 누르기: 화면 왼쪽 하단에 팝업되는 스크린샷을 찍습니다. 두 버튼을 동시에 아주 짧게 누르세요. 몇 초 동안 누르면 하드 전원 끄기가 수행됩니다.
+- Swipe up with four (or five) fingers / Double-tap Home button: To view the multitask view and change App
+- Swipe one way or another with four or five fingers: In order to change to the next/last App
+- Pinch the screen with five fingers / Touch Home button / Swipe up with 1 finger from the bottom of the screen in a quick motion to the up: To access Home
+- Swipe one finger from the bottom of the screen just 1-2 inches (slow): The dock will appear
+- Swipe down from the top of the display with 1 finger: To view your notifications
+- Swipe down with 1 finger the top-right corner of the screen: To see iPad Pro's control centre
+- Swipe 1 finger from the left of the screen 1-2 inches: To see Today view
+- Swipe fast 1 finger from the centre of the screen to the right or left: To change to next/last App
+- Press and hold the On/**Off**/Sleep button at the upper-right corner of the **iPad +** Move the Slide to **power off** slider all the way to the right: To power off
+- Press the On/**Off**/Sleep button at the upper-right corner of the **iPad and the Home button for a few second**: To force a hard power off
+- Press the On/**Off**/Sleep button at the upper-right corner of the **iPad and the Home button quickly**: To take a screenshot that will pop up in the lower left of the display. Press both buttons at the same time very briefly as if you hold them a few seconds a hard power off will be performed.
 
-### 단축키
+### Shortcuts
 
-iPad 키보드 또는 USB 키보드 어댑터가 필요합니다. 애플리케이션에서 탈출하는 데 도움이 될 수 있는 단축키만 표시됩니다.
+You should have an iPad keyboard or a USB keyboard adaptor. Only shortcuts that could help escaping from the application will be shown here.
 
-| 키 | 이름         |
+| Key | Name         |
 | --- | ------------ |
-| ⌘   | 명령        |
-| ⌥   | 옵션 (Alt) |
+| ⌘   | Command      |
+| ⌥   | Option (Alt) |
 | ⇧   | Shift        |
 | ↩   | Return       |
 | ⇥   | Tab          |
 | ^   | Control      |
-| ←   | 왼쪽 화살표   |
-| →   | 오른쪽 화살표  |
-| ↑   | 위쪽 화살표     |
-| ↓   | 아래쪽 화살표   |
+| ←   | Left Arrow   |
+| →   | Right Arrow  |
+| ↑   | Up Arrow     |
+| ↓   | Down Arrow   |
 
-#### 시스템 단축키
+#### System shortcuts
 
-이 단축키는 iPad의 사용에 따라 시각적 설정 및 사운드 설정을 위한 것입니다.
+These shortcuts are for the visual settings and sound settings, depending on the use of the iPad.
 
-| 단축키 | 작업                                                                         |
+| Shortcut | Action                                                                         |
 | -------- | ------------------------------------------------------------------------------ |
-| F1       | 화면 밝기 낮추기                                                            |
-| F2       | 화면 밝기 높이기                                                            |
-| F7       | 한 곡 뒤로 가기                                                              |
-| F8       | 재생/일시 정지                                                               |
-| F9       | 곡 건너뛰기                                                                  |
-| F10      | 음소거                                                                         |
-| F11      | 볼륨 낮추기                                                                  |
-| F12      | 볼륨 높이기                                                                  |
-| ⌘ Space  | 사용 가능한 언어 목록 표시; 하나를 선택하려면 스페이스 바를 다시 누르세요. |
+| F1       | Dim Sscreen                                                                    |
+| F2       | Brighten screen                                                                |
+| F7       | Back one song                                                                  |
+| F8       | Play/pause                                                                     |
+| F9       | Skip song                                                                      |
+| F10      | Mute                                                                           |
+| F11      | Decrease volume                                                                |
+| F12      | Increase volume                                                                |
+| ⌘ Space  | Display a list of available languages; to choose one, tap the space bar again. |
 
-#### iPad 탐색
+#### iPad navigation
 
-| 단축키                                           | 작업                                                  |
+| Shortcut                                           | Action                                                  |
 | -------------------------------------------------- | ------------------------------------------------------- |
-| ⌘H                                                 | 홈으로 이동                                            |
-| ⌘⇧H (Command-Shift-H)                              | 홈으로 이동                                            |
-| ⌘ (Space)                                          | Spotlight 열기                                        |
-| ⌘⇥ (Command-Tab)                                   | 최근 사용한 앱 목록 나열                               |
-| ⌘\~                                                | 마지막 앱으로 이동                                     |
-| ⌘⇧3 (Command-Shift-3)                              | 스크린샷 (저장 또는 작업을 위해 왼쪽 하단에 떠 있습니다) |
-| ⌘⇧4                                                | 스크린샷을 찍고 편집기로 열기                          |
-| ⌘을 누르고 유지                                   | 앱에 대한 사용 가능한 단축키 목록 표시                 |
-| ⌘⌥D (Command-Option/Alt-D)                         | 도크 표시                                              |
-| ^⌥H (Control-Option-H)                             | 홈 버튼                                               |
-| ^⌥H H (Control-Option-H-H)                         | 멀티태스킹 바 표시                                     |
-| ^⌥I (Control-Option-i)                             | 항목 선택기                                            |
-| Escape                                             | 뒤로 버튼                                             |
-| → (오른쪽 화살표)                                    | 다음 항목                                               |
-| ← (왼쪽 화살표)                                     | 이전 항목                                             |
-| ↑↓ (위쪽 화살표, 아래쪽 화살표)                          | 선택한 항목을 동시에 탭합니다                          |
-| ⌥ ↓ (Option-Down arrow)                            | 아래로 스크롤                                          |
-| ⌥↑ (Option-Up arrow)                               | 위로 스크롤                                            |
-| ⌥← 또는 ⌥→ (Option-Left arrow 또는 Option-Right arrow) | 왼쪽 또는 오른쪽으로 스크롤                            |
-| ^⌥S (Control-Option-S)                             | VoiceOver 음성을 켜거나 끕니다                          |
-| ⌘⇧⇥ (Command-Shift-Tab)                            | 이전 앱으로 전환                                      |
-| ⌘⇥ (Command-Tab)                                   | 원래 앱으로 다시 전환                                  |
-| ←+→, 그 다음 Option + ← 또는 Option+→                   | 도크를 탐색합니다                                      |
+| ⌘H                                                 | Go to Home                                              |
+| ⌘⇧H (Command-Shift-H)                              | Go to Home                                              |
+| ⌘ (Space)                                          | Open Spotlight                                          |
+| ⌘⇥ (Command-Tab)                                   | List last ten used apps                                 |
+| ⌘\~                                                | Go t the last App                                       |
+| ⌘⇧3 (Command-Shift-3)                              | Screenshot (hovers in bottom left to save or act on it) |
+| ⌘⇧4                                                | Screenshot and open it in the editor                    |
+| Press and hold ⌘                                   | List of shortcuts available for the App                 |
+| ⌘⌥D (Command-Option/Alt-D)                         | Brings up the dock                                      |
+| ^⌥H (Control-Option-H)                             | Home button                                             |
+| ^⌥H H (Control-Option-H-H)                         | Show multitask bar                                      |
+| ^⌥I (Control-Option-i)                             | Item chooser                                            |
+| Escape                                             | Back button                                             |
+| → (Right arrow)                                    | Next item                                               |
+| ← (Left arrow)                                     | Previous item                                           |
+| ↑↓ (Up arrow, Down arrow)                          | Simultaneously tap selected item                        |
+| ⌥ ↓ (Option-Down arrow)                            | Scroll down                                             |
+| ⌥↑ (Option-Up arrow)                               | Scroll up                                               |
+| ⌥← or ⌥→ (Option-Left arrow or Option-Right arrow) | Scroll left or right                                    |
+| ^⌥S (Control-Option-S)                             | Turn VoiceOver speech on or off                         |
+| ⌘⇧⇥ (Command-Shift-Tab)                            | Switch to the previous app                              |
+| ⌘⇥ (Command-Tab)                                   | Switch back to the original app                         |
+| ←+→, then Option + ← or Option+→                   | Navigate through Dock                                   |
 
-#### Safari 단축키
+#### Safari shortcuts
 
-| 단축키                | 작업                                           |
+| Shortcut                | Action                                           |
 | ----------------------- | ------------------------------------------------ |
-| ⌘L (Command-L)          | 위치 열기                                    |
-| ⌘T                      | 새 탭 열기                                   |
-| ⌘W                      | 현재 탭 닫기                                |
-| ⌘R                      | 현재 탭 새로 고침                          |
-| ⌘.                      | 현재 탭 로딩 중지                          |
-| ^⇥                      | 다음 탭으로 전환                           |
-| ^⇧⇥ (Control-Shift-Tab) | 이전 탭으로 이동                           |
-| ⌘L                      | 수정할 텍스트 입력/URL 필드 선택            |
-| ⌘⇧T (Command-Shift-T)   | 마지막으로 닫은 탭 열기 (여러 번 사용할 수 있음) |
-| ⌘\[                     | 탐색 기록에서 한 페이지 뒤로 가기          |
-| ⌘]                      | 탐색 기록에서 한 페이지 앞으로 가기       |
-| ⌘⇧R                     | 리더 모드 활성화                             |
+| ⌘L (Command-L)          | Open Location                                    |
+| ⌘T                      | Open a new tab                                   |
+| ⌘W                      | Close the current tab                            |
+| ⌘R                      | Refresh the current tab                          |
+| ⌘.                      | Stop loading the current tab                     |
+| ^⇥                      | Switch to the next tab                           |
+| ^⇧⇥ (Control-Shift-Tab) | Move to the previous tab                         |
+| ⌘L                      | Select the text input/URL field to modify it     |
+| ⌘⇧T (Command-Shift-T)   | Open last closed tab (can be used several times) |
+| ⌘\[                     | Goes back one page in your browsing history      |
+| ⌘]                      | Goes forward one page in your browsing history   |
+| ⌘⇧R                     | Activate Reader Mode                             |
 
-#### 메일 단축키
+#### Mail shortcuts
 
-| 단축키                   | 작업                       |
+| Shortcut                   | Action                       |
 | -------------------------- | ---------------------------- |
-| ⌘L                         | 위치 열기                |
-| ⌘T                         | 새 탭 열기               |
-| ⌘W                         | 현재 탭 닫기            |
-| ⌘R                         | 현재 탭 새로 고침      |
-| ⌘.                         | 현재 탭 로딩 중지 |
-| ⌘⌥F (Command-Option/Alt-F) | 메일함에서 검색       |
+| ⌘L                         | Open Location                |
+| ⌘T                         | Open a new tab               |
+| ⌘W                         | Close the current tab        |
+| ⌘R                         | Refresh the current tab      |
+| ⌘.                         | Stop loading the current tab |
+| ⌘⌥F (Command-Option/Alt-F) | Search in your mailbox       |
 
-## 참고 문헌
+## References
 
+- [https://www.pentestpartners.com/security-blog/breaking-out-of-citrix-and-other-restricted-desktop-environments/](https://www.pentestpartners.com/security-blog/breaking-out-of-citrix-and-other-restricted-desktop-environments/)
 - [https://www.macworld.com/article/2975857/6-only-for-ipad-gestures-you-need-to-know.html](https://www.macworld.com/article/2975857/6-only-for-ipad-gestures-you-need-to-know.html)
 - [https://www.tomsguide.com/us/ipad-shortcuts,news-18205.html](https://www.tomsguide.com/us/ipad-shortcuts,news-18205.html)
 - [https://thesweetsetup.com/best-ipad-keyboard-shortcuts/](https://thesweetsetup.com/best-ipad-keyboard-shortcuts/)
