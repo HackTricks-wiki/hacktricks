@@ -1,43 +1,43 @@
-# Izlazak iz KIOSK-a
+# Escaping from KIOSKs
 
 {{#include ../banners/hacktricks-training.md}}
 
 ---
 
-## Proverite fizički uređaj
+## Provera fizičkog uređaja
 
-| Komponenta    | Akcija                                                             |
-| -------------- | ------------------------------------------------------------------ |
-| Dugme za napajanje | Isključivanje i ponovno uključivanje uređaja može otkriti početni ekran    |
-| Napajanje  | Proverite da li se uređaj ponovo pokreće kada se napajanje kratko prekine |
-| USB portovi    | Povežite fizičku tastaturu sa više prečica                      |
-| Ethernet     | Skener mreže ili prisluškivanje može omogućiti dalju eksploataciju           |
+| Component    | Action                                                             |
+| ------------ | ------------------------------------------------------------------ |
+| Power button | Isključivanje i ponovno uključivanje uređaja može otkriti početni ekran    |
+| Power cable  | Proverite da li se uređaj restartuje kada se napajanje na kratko prekine |
+| USB ports    | Povežite fizičku tastaturu sa više prečica                      |
+| Ethernet     | Network scan ili sniffing mogu omogućiti dalju eksploataciju           |
 
-## Proverite moguće akcije unutar GUI aplikacije
+## Provera mogućih akcija unutar GUI aplikacije
 
-**Uobičajeni dijalozi** su opcije za **čuvanje datoteke**, **otvaranje datoteke**, izbor fonta, boje... Većina njih će **ponuditi punu funkcionalnost Explorera**. To znači da ćete moći da pristupite funkcionalnostima Explorera ako možete da pristupite ovim opcijama:
+**Common Dialogs** su opcije kao što su **saving a file**, **opening a file**, izbor fonta, boje... Većina njih će **offer a full Explorer functionality**. To znači da ćete moći da pristupite Explorer funkcionalnostima ako možete da pristupite ovim opcijama:
 
-- Zatvori/Zatvori kao
-- Otvori/Otvori sa
-- Štampaj
-- Izvezi/Uvezi
-- Pretraži
-- Skeniraj
+- Close/Close as
+- Open/Open with
+- Print
+- Export/Import
+- Search
+- Scan
 
-Trebalo bi da proverite da li možete:
+Treba da proverite da li možete:
 
-- Modifikovati ili kreirati nove datoteke
+- Modifikovati ili kreirati nove fajlove
 - Kreirati simboličke linkove
-- Dobiti pristup ograničenim oblastima
-- Izvršiti druge aplikacije
+- Pristupiti ograničenim oblastima
+- Pokrenuti druge aplikacije
 
 ### Izvršavanje komandi
 
-Možda **koristeći opciju `Otvori sa`** možete otvoriti/izvršiti neku vrstu shell-a.
+Možda **using a `Open with`** option\*\* možete otvoriti/izvršiti neku vrstu shell-a.
 
 #### Windows
 
-Na primer _cmd.exe, command.com, Powershell/Powershell ISE, mmc.exe, at.exe, taskschd.msc..._ pronađite više binarnih datoteka koje se mogu koristiti za izvršavanje komandi (i izvođenje neočekivanih akcija) ovde: [https://lolbas-project.github.io/](https://lolbas-project.github.io)
+Na primer _cmd.exe, command.com, Powershell/Powershell ISE, mmc.exe, at.exe, taskschd.msc..._ pronađite više binarnih fajlova koji se mogu koristiti za izvršavanje komandi (i izvođenje neočekivanih radnji) ovde: [https://lolbas-project.github.io/](https://lolbas-project.github.io)
 
 #### \*NIX \_\_
 
@@ -45,16 +45,16 @@ _bash, sh, zsh..._ Više ovde: [https://gtfobins.github.io/](https://gtfobins.gi
 
 ## Windows
 
-### Obilaženje ograničenja putanja
+### Zaobilaženje ograničenja putanje
 
-- **Promenljive okruženja**: Postoji mnogo promenljivih okruženja koje upućuju na neku putanju
-- **Ostali protokoli**: _about:, data:, ftp:, file:, mailto:, news:, res:, telnet:, view-source:_
-- **Simbolički linkovi**
-- **Prečice**: CTRL+N (otvori novu sesiju), CTRL+R (izvrši komande), CTRL+SHIFT+ESC (Upravnik zadataka), Windows+E (otvori explorer), CTRL-B, CTRL-I (Omiljeni), CTRL-H (Istorija), CTRL-L, CTRL-O (Datoteka/Otvori dijalog), CTRL-P (Štampanje dijalog), CTRL-S (Sačuvaj kao)
+- **Environment variables**: Postoji mnogo environment variables koji ukazuju na određene putanje
+- **Other protocols**: _about:, data:, ftp:, file:, mailto:, news:, res:, telnet:, view-source:_
+- **Symbolic links**
+- **Shortcuts**: CTRL+N (otvori novu sesiju), CTRL+R (Execute Commands), CTRL+SHIFT+ESC (Task Manager), Windows+E (otvori Explorer), CTRL-B, CTRL-I (Favourites), CTRL-H (History), CTRL-L, CTRL-O (File/Open Dialog), CTRL-P (Print Dialog), CTRL-S (Save As)
 - Skriveni Administrativni meni: CTRL-ALT-F8, CTRL-ESC-F9
 - **Shell URIs**: _shell:Administrative Tools, shell:DocumentsLibrary, shell:Librariesshell:UserProfiles, shell:Personal, shell:SearchHomeFolder, shell:Systemshell:NetworkPlacesFolder, shell:SendTo, shell:UsersProfiles, shell:Common Administrative Tools, shell:MyComputerFolder, shell:InternetFolder_
-- **UNC putanje**: Putanje za povezivanje sa deljenim folderima. Trebalo bi da pokušate da se povežete na C$ lokalnog računara ("\\\127.0.0.1\c$\Windows\System32")
-- **Više UNC putanja:**
+- **UNC paths**: Putanje za povezivanje na deljene foldere. Trebalo bi da pokušate da se povežete na C$ lokalne mašine ("\\\127.0.0.1\c$\Windows\System32")
+- **More UNC paths:**
 
 | UNC                       | UNC            | UNC                  |
 | ------------------------- | -------------- | -------------------- |
@@ -68,15 +68,33 @@ _bash, sh, zsh..._ Više ovde: [https://gtfobins.github.io/](https://gtfobins.gi
 | %TMP%                     | %USERDOMAIN%   | %USERNAME%           |
 | %USERPROFILE%             | %WINDIR%       |                      |
 
-### Preuzmite svoje binarne datoteke
+### Restricted Desktop Breakouts (Citrix/RDS/VDI)
 
-Konzola: [https://sourceforge.net/projects/console/](https://sourceforge.net/projects/console/)\
+- **Dialog-box pivoting**: Koristite *Open/Save/Print-to-file* dijaloge kao Explorer-lite. Probajte `*.*` / `*.exe` u polju za ime fajla, desni klik na foldere za **Open in new window**, i koristite **Properties → Open file location** da proširite navigaciju.
+- **Create execution paths from dialogs**: Kreirajte novi fajl i preimenujte ga u `.CMD` ili `.BAT`, ili kreirajte shortcut koji pokazuje na `%WINDIR%\System32` (ili na određeni binary kao `%WINDIR%\System32\cmd.exe`).
+- **Shell launch pivots**: Ako možete da pretražujete do `cmd.exe`, pokušajte da **drag-and-drop** bilo koji fajl na njega da pokrenete prompt. Ako je Task Manager dostupan (`CTRL+SHIFT+ESC`), koristite **Run new task**.
+- **Task Scheduler bypass**: Ako su interaktivni shell-ovi blokirani ali je zakazivanje dozvoljeno, kreirajte task koji pokreće `cmd.exe` (GUI `taskschd.msc` ili `schtasks.exe`).
+- **Weak allowlists**: Ako je izvršavanje dozvoljeno po **filename/extension**, preimenujte svoj payload u dozvoljeno ime. Ako je dozvoljeno po **directory**, kopirajte payload u dozvoljeni programski folder i pokrenite ga odatle.
+- **Find writable staging paths**: Počnite sa `%TEMP%` i enumerate writeable foldere pomoću Sysinternals AccessChk.
+```cmd
+echo %TEMP%
+accesschk.exe -uwdqs Users c:\
+accesschk.exe -uwdqs "Authenticated Users" c:\
+```
+- **Sledeći korak**: Ako dobijete shell, pređite na Windows LPE checklist:
+{{#ref}}
+../windows-hardening/checklist-windows-privilege-escalation.md
+{{#endref}}
+
+### Preuzmite binarne fajlove
+
+Console: [https://sourceforge.net/projects/console/](https://sourceforge.net/projects/console/)\
 Explorer: [https://sourceforge.net/projects/explorerplus/files/Explorer%2B%2B/](https://sourceforge.net/projects/explorerplus/files/Explorer%2B%2B/)\
 Registry editor: [https://sourceforge.net/projects/uberregedit/](https://sourceforge.net/projects/uberregedit/)
 
-### Pristupanje datotečnom sistemu iz pregledača
+### Pristup fajl sistemu iz pregledača
 
-| PUTANJA                | PUTANJA              | PUTANJA               | PUTANJA                |
+| PATH                | PATH              | PATH               | PATH                |
 | ------------------- | ----------------- | ------------------ | ------------------- |
 | File:/C:/windows    | File:/C:/windows/ | File:/C:/windows\\ | File:/C:\windows    |
 | File:/C:\windows\\  | File:/C:\windows/ | File://C:/windows  | File://C:/windows/  |
@@ -97,36 +115,36 @@ Registry editor: [https://sourceforge.net/projects/uberregedit/](https://sourcef
 - WINDOWS+D – Prikaži radnu površinu
 - WINDOWS+E – Pokreni Windows Explorer
 - WINDOWS+R – Pokreni
-- WINDOWS+U – Centar za pristupačnost
-- WINDOWS+F – Pretraži
-- SHIFT+F10 – Kontekstualni meni
-- CTRL+SHIFT+ESC – Upravnik zadataka
-- CTRL+ALT+DEL – Splash ekran na novijim verzijama Windows-a
-- F1 – Pomoć F3 – Pretraga
-- F6 – Adresna traka
-- F11 – Prebaci u punu ekran unutar Internet Explorera
+- WINDOWS+U – Centar za olakšan pristup
+- WINDOWS+F – Pretraga
+- SHIFT+F10 – Kontekstni meni
+- CTRL+SHIFT+ESC – Upravljač zadacima
+- CTRL+ALT+DEL – Ekran sa opcijama na novijim verzijama Windows-a
+- F1 – Pomoć  F3 – Pretraga
+- F6 – Traka adrese
+- F11 – Uključi/isključi prikaz preko celog ekrana u Internet Explorer-u
 - CTRL+H – Istorija Internet Explorera
-- CTRL+T – Internet Explorer – Nova kartica
+- CTRL+T – Internet Explorer – Novi tab
 - CTRL+N – Internet Explorer – Nova stranica
-- CTRL+O – Otvori datoteku
-- CTRL+S – Sačuvaj CTRL+N – Nova RDP / Citrix
+- CTRL+O – Otvori fajl
+- CTRL+S – Sačuvaj CTRL+N – Novi RDP / Citrix
 
-### Gestikulacije
+### Prevlačenja
 
-- Prevucite s leve strane na desnu da biste videli sve otvorene Windows, minimizirajući KIOSK aplikaciju i direktno pristupajući celom OS-u;
-- Prevucite s desne strane na levu da biste otvorili Centar za akcije, minimizirajući KIOSK aplikaciju i direktno pristupajući celom OS-u;
-- Prevucite s gornjeg ivice da biste učinili naslovnu traku vidljivom za aplikaciju otvorenu u režimu punog ekrana;
-- Prevucite nagore s donje strane da biste prikazali traku zadataka u aplikaciji punog ekrana.
+- Prevucite prst sa leve strane udesno da vidite sve otvorene Windows prozore, minimizujući KIOSK aplikaciju i direktno pristupajući OS-u;
+- Prevucite prst sa desne strane ulevo da otvorite Action Center, minimizujući KIOSK aplikaciju i direktno pristupajući OS-u;
+- Prevucite prst odozgo da bi naslovna traka postala vidljiva za aplikaciju otvorenu u punom ekranu;
+- Prevucite prst odozdo nagore da bi se prikazala taskbar u aplikaciji punog ekrana.
 
-### Internet Explorer trikovi
+### Trikovi za Internet Explorer
 
 #### 'Image Toolbar'
 
-To je alatna traka koja se pojavljuje u gornjem levom uglu slike kada se klikne. Moći ćete da Sačuvate, Štampate, Pošaljete putem maila, Otvorite "Moje slike" u Exploreru. Kiosk treba da koristi Internet Explorer.
+To je alatna traka koja se pojavljuje u gornjem levom uglu slike kada se klikne na nju. Moći ćete da Sačuvate, Štampate, Mailto, Otvorite "My Pictures" u Explorer-u. Kiosk mora da koristi Internet Explorer.
 
-#### Shell protokol
+#### Shell Protocol
 
-Ukucajte ove URL-ove da biste dobili prikaz Explorera:
+Unesite ove URL-ove da biste dobili prikaz Explorera:
 
 - `shell:Administrative Tools`
 - `shell:DocumentsLibrary`
@@ -145,132 +163,131 @@ Ukucajte ove URL-ove da biste dobili prikaz Explorera:
 - `Shell:System`
 - `Shell:ControlPanelFolder`
 - `Shell:Windows`
-- `shell:::{21EC2020-3AEA-1069-A2DD-08002B30309D}` --> Kontrolna tabla
-- `shell:::{20D04FE0-3AEA-1069-A2D8-08002B30309D}` --> Moj računar
-- `shell:::{{208D2C60-3AEA-1069-A2D7-08002B30309D}}` --> Moja mreža
+- `shell:::{21EC2020-3AEA-1069-A2DD-08002B30309D}` --> Control Panel
+- `shell:::{20D04FE0-3AEA-1069-A2D8-08002B30309D}` --> My Computer
+- `shell:::{{208D2C60-3AEA-1069-A2D7-08002B30309D}}` --> My Network Places
 - `shell:::{871C5380-42A0-1069-A2EA-08002B30309D}` --> Internet Explorer
 
-### Prikaži ekstenzije datoteka
+### Prikaz ekstenzija fajlova
 
-Proverite ovu stranicu za više informacija: [https://www.howtohaven.com/system/show-file-extensions-in-windows-explorer.shtml](https://www.howtohaven.com/system/show-file-extensions-in-windows-explorer.shtml)
+Pogledajte ovu stranicu za više informacija: [https://www.howtohaven.com/system/show-file-extensions-in-windows-explorer.shtml](https://www.howtohaven.com/system/show-file-extensions-in-windows-explorer.shtml)
 
-## Trikovi za pretraživače
+## Trikovi za pregledače
 
-Backup iKat verzije:
+Backup iKat versions:
 
 [http://swin.es/k/](http://swin.es/k/)\
 [http://www.ikat.kronicd.net/](http://www.ikat.kronicd.net)
 
-Kreirajte zajednički dijalog koristeći JavaScript i pristupite istraživaču datoteka: `document.write('<input/type=file>')`\
-Izvor: https://medium.com/@Rend\_/give-me-a-browser-ill-give-you-a-shell-de19811defa0
+Kreirajte standardni dijalog koristeći JavaScript i pristupite File Explorer-u: `document.write('<input/type=file>')`\
+Source: https://medium.com/@Rend\_/give-me-a-browser-ill-give-you-a-shell-de19811defa0
 
 ## iPad
 
-### Gestikulacije i dugmad
+### Geste i dugmad
 
-- Prevucite nagore sa četiri (ili pet) prsta / Dvostruki dodir na dugme Home: Da biste videli prikaz multitask-a i promenili aplikaciju
-- Prevucite na jednu ili drugu stranu sa četiri ili pet prstiju: Da biste prešli na sledeću/poslednju aplikaciju
-- Stisnite ekran sa pet prstiju / Dodirnite dugme Home / Prevucite nagore sa 1 prstom sa donje strane ekrana u brzom pokretu: Da biste pristupili Home
-- Prevucite jedan prst sa donje strane ekrana samo 1-2 inča (sporo): Dock će se pojaviti
-- Prevucite nagore sa gornjeg dela ekrana sa 1 prstom: Da biste videli obaveštenja
-- Prevucite nagore sa 1 prstom u gornjem desnom uglu ekrana: Da biste videli kontrolni centar iPad Pro-a
-- Prevucite 1 prstom sa leve strane ekrana 1-2 inča: Da biste videli prikaz dana
-- Brzo prevucite 1 prstom iz centra ekrana na desno ili levo: Da biste prešli na sledeću/poslednju aplikaciju
-- Pritisnite i držite dugme za uključivanje/**isključivanje**/spavanje u gornjem desnom uglu **iPad +** Pomaknite klizač za **isključivanje** skroz udesno: Da biste isključili
-- Pritisnite dugme za uključivanje/**isključivanje**/spavanje u gornjem desnom uglu **iPad i dugme Home nekoliko sekundi**: Da biste prisilili teško isključivanje
-- Pritisnite dugme za uključivanje/**isključivanje**/spavanje u gornjem desnom uglu **iPad i dugme Home brzo**: Da biste napravili snimak ekrana koji će se pojaviti u donjem levom uglu ekrana. Pritisnite oba dugmeta u isto vreme vrlo kratko, jer ako ih držite nekoliko sekundi, izvršiće se teško isključivanje.
+- Prevucite nagore sa četiri (ili pet) prsta / Duplo pritisnite Home dugme: Za prikaz multitask prikaza i promenu aplikacije
+- Prevucite levo ili desno sa četiri ili pet prstiju: Za prelazak na sledeću/prethodnu aplikaciju
+- Stisnite ekran sa pet prstiju / Dodirnite Home dugme / Prevucite nagore sa 1 prstom od dna ekrana brzo nagore: Za pristup početnom ekranu
+- Prevucite jednim prstom od dna ekrana 1-2 inča (polako): Dock će se pojaviti
+- Prevucite nadole sa vrha ekrana jednim prstom: Da vidite notifikacije
+- Prevucite nadole jednim prstom u gornjem desnom uglu ekrana: Da vidite kontrolni centar iPad Pro-a
+- Prevucite jednim prstom sa leve strane ekrana 1-2 inča: Da vidite Today view
+- Brzo prevucite jednim prstom iz centra ekrana udesno ili ulevo: Da promenite na sledeću/prethodnu aplikaciju
+- Pritisnite i držite dugme On/**Off**/Sleep u gornjem desnom uglu **iPad +** Pomaknite Slide do **power off** klizača skroz udesno: Za isključivanje
+- Pritisnite dugme On/**Off**/Sleep u gornjem desnom uglu **iPad and the Home button for a few second**: Za primorano hard isključivanje
+- Pritisnite brzo dugme On/**Off**/Sleep u gornjem desnom uglu **iPad and the Home button quickly**: Da napravite screenshot koji će se pojaviti u donjem levom uglu ekrana. Pritisnite oba dugmeta istovremeno vrlo kratko; ako ih držite nekoliko sekundi, izvršiće se prisilno hard isključivanje.
 
 ### Prečice
 
-Trebalo bi da imate iPad tastaturu ili USB adapter za tastaturu. Samo prečice koje bi mogle pomoći u izlasku iz aplikacije biće prikazane ovde.
+Trebalo bi da imate iPad tastaturu ili USB adapter za tastaturu. Prikazane su samo prečice koje mogu pomoći pri bekstvu iz aplikacije.
 
-| Taster | Ime         |
+| Key | Name         |
 | --- | ------------ |
-| ⌘   | Komanda      |
-| ⌥   | Opcija (Alt) |
+| ⌘   | Command      |
+| ⌥   | Option (Alt) |
 | ⇧   | Shift        |
-| ↩   | Povratak       |
+| ↩   | Return       |
 | ⇥   | Tab          |
-| ^   | Kontrola      |
-| ←   | Leva strelica   |
-| →   | Desna strelica  |
-| ↑   | Gornja strelica     |
-| ↓   | Donja strelica   |
+| ^   | Control      |
+| ←   | Left Arrow   |
+| →   | Right Arrow  |
+| ↑   | Up Arrow     |
+| ↓   | Down Arrow   |
 
-#### Sistem prečice
+#### Sistemske prečice
 
-Ove prečice su za vizuelne postavke i postavke zvuka, u zavisnosti od korišćenja iPad-a.
+| Prečica  | Radnja                                                                 |
+| -------- | ---------------------------------------------------------------------- |
+| F1       | Zatamni ekran                                                          |
+| F2       | Pojačaj osvetljenje ekrana                                             |
+| F7       | Prethodna pesma                                                        |
+| F8       | Reprodukuj/pauziraj                                                    |
+| F9       | Preskoči pesmu                                                         |
+| F10      | Isključi zvuk                                                          |
+| F11      | Smanji jačinu zvuka                                                    |
+| F12      | Povećaj jačinu zvuka                                                   |
+| ⌘ Space  | Prikaži listu dostupnih jezika; za izbor dodirnite ponovo razmaknicu.  |
 
-| Prečica | Akcija                                                                         |
-| -------- | ------------------------------------------------------------------------------ |
-| F1       | Smanji ekran                                                                    |
-| F2       | Povećaj ekran                                                                |
-| F7       | Prethodna pesma                                                                  |
-| F8       | Pusti/pausa                                                                     |
-| F9       | Preskoči pesmu                                                                      |
-| F10      | Isključi                                                                           |
-| F11      | Smanji jačinu zvuka                                                                |
-| F12      | Povećaj jačinu zvuka                                                                |
-| ⌘ Space  | Prikaži listu dostupnih jezika; da biste izabrali jedan, ponovo pritisnite razmaknicu. |
+#### Navigacija na iPadu
 
-#### Navigacija iPad-a
-
-| Prečica                                           | Akcija                                                  |
-| -------------------------------------------------- | ------------------------------------------------------- |
-| ⌘H                                                 | Idi na Home                                              |
-| ⌘⇧H (Command-Shift-H)                              | Idi na Home                                              |
-| ⌘ (Space)                                          | Otvori Spotlight                                          |
-| ⌘⇥ (Command-Tab)                                   | Lista poslednjih deset korišćenih aplikacija                                 |
-| ⌘\~                                                | Idi na poslednju aplikaciju                                       |
-| ⌘⇧3 (Command-Shift-3)                              | Snimak ekrana (pluta u donjem levom uglu da sačuvate ili delujete na njemu) |
-| ⌘⇧4                                                | Snimak ekrana i otvori ga u editoru                    |
-| Pritisnite i držite ⌘                                   | Lista prečica dostupnih za aplikaciju                 |
-| ⌘⌥D (Command-Option/Alt-D)                         | Prikazuje dock                                      |
-| ^⌥H (Control-Option-H)                             | Dugme Home                                             |
-| ^⌥H H (Control-Option-H-H)                         | Prikaži multitask bar                                      |
-| ^⌥I (Control-Option-i)                             | Izbor stavke                                            |
-| Escape                                             | Dugme za povratak                                             |
-| → (Desna strelica)                                    | Sledeća stavka                                               |
-| ← (Leva strelica)                                     | Prethodna stavka                                           |
-| ↑↓ (Gornja strelica, Donja strelica)                          | Istovremeno dodirnite izabranu stavku                        |
-| ⌥ ↓ (Option-Down arrow)                            | Pomeri se nadole                                             |
-| ⌥↑ (Option-Up arrow)                               | Pomeri se nagore                                               |
-| ⌥← ili ⌥→ (Option-Left arrow ili Option-Right arrow) | Pomeri se levo ili desno                                    |
-| ^⌥S (Control-Option-S)                             | Uključi ili isključi VoiceOver govor                         |
-| ⌘⇧⇥ (Command-Shift-Tab)                            | Prebaci se na prethodnu aplikaciju                              |
-| ⌘⇥ (Command-Tab)                                   | Vratite se na originalnu aplikaciju                         |
-| ←+→, zatim Opcija + ← ili Opcija+→                   | Navigirajte kroz Dock                                   |
+| Prečica                                           | Radnja                                                          |
+| -------------------------------------------------- | --------------------------------------------------------------- |
+| ⌘H                                                 | Idi na Početni ekran                                            |
+| ⌘⇧H (Command-Shift-H)                              | Idi na Početni ekran                                            |
+| ⌘ (Space)                                          | Otvori Spotlight                                                |
+| ⌘⇥ (Command-Tab)                                   | Prikaz poslednjih deset korišćenih aplikacija                   |
+| ⌘\~                                                | Pređi na poslednju aplikaciju                                   |
+| ⌘⇧3 (Command-Shift-3)                              | Screenshot (pojaviće se u donjem levom uglu da sačuvate ili postupite dalje) |
+| ⌘⇧4                                                | Screenshot i otvori ga u editoru                                |
+| Press and hold ⌘                                   | Lista prečica dostupnih za aplikaciju                           |
+| ⌘⌥D (Command-Option/Alt-D)                         | Prikazuje dock                                                  |
+| ^⌥H (Control-Option-H)                             | Dugme Početak                                                   |
+| ^⌥H H (Control-Option-H-H)                         | Prikaži multitask traku                                          |
+| ^⌥I (Control-Option-i)                             | Biranje stavke                                                   |
+| Escape                                             | Dugme Nazad                                                      |
+| → (Right arrow)                                    | Sledeći element                                                  |
+| ← (Left arrow)                                     | Prethodni element                                                |
+| ↑↓ (Up arrow, Down arrow)                          | Istovremeno izaberite selektovani element                        |
+| ⌥ ↓ (Option-Down arrow)                            | Skroluj nadole                                                   |
+| ⌥↑ (Option-Up arrow)                               | Skroluj nagore                                                   |
+| ⌥← or ⌥→ (Option-Left arrow or Option-Right arrow) | Skroluj levo ili desno                                           |
+| ^⌥S (Control-Option-S)                             | Uključi/isključi VoiceOver govor                                 |
+| ⌘⇧⇥ (Command-Shift-Tab)                            | Prebaci na prethodnu aplikaciju                                  |
+| ⌘⇥ (Command-Tab)                                   | Vrati se u originalnu aplikaciju                                 |
+| ←+→, then Option + ← or Option+→                   | Navigacija kroz Dock                                              |
 
 #### Safari prečice
 
-| Prečica                | Akcija                                           |
+| Prečica                | Radnja                                           |
 | ----------------------- | ------------------------------------------------ |
-| ⌘L (Command-L)          | Otvori lokaciju                                    |
-| ⌘T                      | Otvori novu karticu                                   |
-| ⌘W                      | Zatvori trenutnu karticu                            |
-| ⌘R                      | Osveži trenutnu karticu                          |
-| ⌘.                      | Prekini učitavanje trenutne kartice                     |
-| ^⇥                      | Prebaci se na sledeću karticu                           |
-| ^⇧⇥ (Control-Shift-Tab) | Prebaci se na prethodnu karticu                         |
-| ⌘L                      | Izaberi tekstualni unos/URL polje da ga izmeniš     |
-| ⌘⇧T (Command-Shift-T)   | Otvori poslednju zatvorenu karticu (može se koristiti više puta) |
-| ⌘\[                     | Vraća se na prethodnu stranicu u tvojoj istoriji pretraživanja      |
-| ⌘]                      | Ide napred na sledeću stranicu u tvojoj istoriji pretraživanja   |
-| ⌘⇧R                     | Aktiviraj režim čitača                             |
+| ⌘L (Command-L)          | Otvori lokaciju                                  |
+| ⌘T                      | Otvori novi tab                                  |
+| ⌘W                      | Zatvori trenutni tab                             |
+| ⌘R                      | Osveži trenutni tab                              |
+| ⌘.                      | Zaustavi učitavanje trenutnog taba               |
+| ^⇥                      | Prebaci na sledeći tab                           |
+| ^⇧⇥ (Control-Shift-Tab) | Prebaci na prethodni tab                         |
+| ⌘L                      | Selektuj polje za unos/URL da ga izmenite       |
+| ⌘⇧T (Command-Shift-T)   | Otvori poslednji zatvoreni tab (može se koristiti više puta) |
+| ⌘\[                     | Vraća se na jednu stranicu unazad                |
+| ⌘]                      | Ide jedan korak napred u istoriji pretrage       |
+| ⌘⇧R                     | Aktivira Reader režim                            |
 
 #### Mail prečice
 
-| Prečica                   | Akcija                       |
+| Prečica                   | Radnja                       |
 | -------------------------- | ---------------------------- |
-| ⌘L                         | Otvori lokaciju                |
-| ⌘T                         | Otvori novu karticu               |
-| ⌘W                         | Zatvori trenutnu karticu        |
-| ⌘R                         | Osveži trenutnu karticu      |
-| ⌘.                         | Prekini učitavanje trenutne kartice |
-| ⌘⌥F (Command-Option/Alt-F) | Pretraži u tvojoj pošti       |
+| ⌘L                         | Otvori lokaciju              |
+| ⌘T                         | Otvori novi tab              |
+| ⌘W                         | Zatvori trenutni tab         |
+| ⌘R                         | Osveži trenutni tab          |
+| ⌘.                         | Zaustavi učitavanje taba     |
+| ⌘⌥F (Command-Option/Alt-F) | Pretraži sanduče             |
 
 ## Reference
 
+- [https://www.pentestpartners.com/security-blog/breaking-out-of-citrix-and-other-restricted-desktop-environments/](https://www.pentestpartners.com/security-blog/breaking-out-of-citrix-and-other-restricted-desktop-environments/)
 - [https://www.macworld.com/article/2975857/6-only-for-ipad-gestures-you-need-to-know.html](https://www.macworld.com/article/2975857/6-only-for-ipad-gestures-you-need-to-know.html)
 - [https://www.tomsguide.com/us/ipad-shortcuts,news-18205.html](https://www.tomsguide.com/us/ipad-shortcuts,news-18205.html)
 - [https://thesweetsetup.com/best-ipad-keyboard-shortcuts/](https://thesweetsetup.com/best-ipad-keyboard-shortcuts/)
