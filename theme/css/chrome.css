@@ -1316,8 +1316,8 @@ details ul li:first-child {
     top: 0;
     margin-left: 15px;
     margin-top: 15px;
-    content: "\f05d";
-    font-family: FontAwesome;
+    content: "✓";
+    font-family: inherit;
     font-size: 20px;
     width: 20px;
     height: 20px;
@@ -1330,8 +1330,8 @@ details ul li:first-child {
     top: 0;
     margin-left: 15px;
     margin-top: 15px;
-    content: "\f05a";
-    font-family: FontAwesome;
+    content: "i";
+    font-family: inherit;
     font-size: 20px;
     width: 20px;
     height: 20px;
@@ -1344,8 +1344,8 @@ details ul li:first-child {
     top: 0;
     margin-left: 15px;
     margin-top: 15px;
-    content: "\f006";
-    font-family: FontAwesome;
+    content: "★";
+    font-family: inherit;
     font-size: 20px;
     width: 20px;
     height: 20px;
@@ -1358,8 +1358,8 @@ details ul li:first-child {
     top: 0;
     margin-left: 15px;
     margin-top: 15px;
-    content: "\f06a";
-    font-family: FontAwesome;
+    content: "!";
+    font-family: inherit;
     font-size: 20px;
     width: 20px;
     height: 20px;
@@ -1372,8 +1372,8 @@ details ul li:first-child {
     top: 0;
     margin-left: 15px;
     margin-top: 15px;
-    content: "\f071";
-    font-family: FontAwesome;
+    content: "⚠";
+    font-family: inherit;
     font-size: 20px;
     width: 20px;
     height: 20px;
@@ -1467,8 +1467,8 @@ figure, figcaption{
 }
 
 li.chapter-item a.external-link::after {
-    content: "\f08e";
-    font-family: FontAwesome;
+    content: "↗";
+    font-family: inherit;
     /* font-size: 15px; */
     margin-left: 15px;
     color: currentColor;
