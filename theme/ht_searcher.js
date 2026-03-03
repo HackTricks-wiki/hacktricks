@@ -121,8 +121,10 @@
         const CLOUD_REMOTE_SOURCES = cloudFilenames.map(function(filename) { return searchindexBase + '/' + filename; });
 
         const indices = [];
-        const main = await loadWithFallback(MAIN_REMOTE_SOURCES , '/searchindex-book.js',        false); if(main)  indices.push(main);
-        const cloud= await loadWithFallback(CLOUD_REMOTE_SOURCES, '/searchindex.js',  true ); if(cloud) indices.push(cloud);  
+        /* Local fallback on book origin exists as /searchindex.js (mdBook default output). */
+        const main = await loadWithFallback(MAIN_REMOTE_SOURCES , '/searchindex.js', false); if(main)  indices.push(main);
+        /* Cloud local fallback does not exist on book origin; rely on remote cloud index only. */
+        const cloud= await loadWithFallback(CLOUD_REMOTE_SOURCES, null, true); if(cloud) indices.push(cloud);
         if(!indices.length){ postMessage({ready:false, error:'no-index'}); return; }
   
         /* build index objects */
