@@ -1,65 +1,65 @@
-# Active Directory Web Services (ADWS) Uorodheshaji na Ukusanyaji wa Kimficho
+# Uchanganuzi wa Active Directory Web Services (ADWS) & Ukusanyaji wa Siri
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## ADWS ni nini?
 
-Active Directory Web Services (ADWS) imewezeshwa kwa default kwenye kila Domain Controller tangu Windows Server 2008 R2 na inasikiliza kwenye TCP **9389**. Licha ya jina, **hakuna HTTP inayohusika**. Badala yake, huduma huonyesha data ya mtindo wa LDAP kupitia safu ya itifaki za framing za .NET za kipekee:
+Active Directory Web Services (ADWS) ni **imewezeshwa kwa chaguo-msingi kwenye kila Domain Controller tangu Windows Server 2008 R2** na husikiliza TCP **9389**. Licha ya jina, **hakuna HTTP inahusika**. Badala yake, huduma inaonyesha data ya mtindo wa LDAP kupitia safu ya taratibu za muundo za .NET za umiliki:
 
 * MC-NBFX → MC-NBFSE → MS-NNS → MC-NMF
 
-Kwa sababu trafiki imefungwa ndani ya fremu hizi za binary SOAP na kusafiri juu ya port isiyo ya kawaida, **uorodheshaji kupitia ADWS una uwezekano mdogo wa kukaguliwa, kuchujwa au kusainiwa ikilinganishwa na trafiki ya classic LDAP/389 & 636**. Kwa watendaji hili inamaanisha:
+Kwa sababu trafiki imefungwa ndani ya fremu hizi za binary SOAP na husafiri juu ya bandari isiyo ya kawaida, **enumeration through ADWS is far less likely to be inspected, filtered or signatured than classic LDAP/389 & 636 traffic**. Kwa waendeshaji hili linamaanisha:
 
-* Uchunguzi wa kimficho zaidi – Blue teams mara nyingi huzingatia LDAP queries.
-* Uhuru wa kukusanya kutoka kwa non-Windows hosts (Linux, macOS) kwa kutunelisha 9389/TCP kupitia SOCKS proxy.
-* Data ile ile utaipata via LDAP (users, groups, ACLs, schema, n.k.) na uwezo wa kufanya **writes** (mf. `msDs-AllowedToActOnBehalfOfOtherIdentity` kwa **RBCD**).
+* Stealthier recon – Blue teams often concentrate on LDAP queries.
+* Uhuru wa kukusanya kutoka **non-Windows hosts (Linux, macOS)** kwa kufunnuliwa 9389/TCP kupitia proxy ya SOCKS.
+* Data sawa utakayopata kupitia LDAP (watumiaji, vikundi, ACLs, schema, n.k.) na uwezo wa kufanya **writes** (mf. `msDs-AllowedToActOnBehalfOfOtherIdentity` kwa **RBCD**).
 
-Mihusiko ya ADWS hutekelezwa juu ya WS-Enumeration: kila swali huanza na ujumbe wa `Enumerate` unaoeleza LDAP filter/attributes na kurudisha `EnumerationContext` GUID, ikifuatiwa na moja au zaidi ya ujumbe wa `Pull` zinazotiririsha hadi dirisha la matokeo lililowekwa na seva. Contexts huisha baada ya takriban dakika ~30, hivyo tooling inahitaji kuruka matokeo au kugawa filters (maswali ya prefix kwa kila CN) ili kuepuka kupoteza hali. Unapouliza kwa security descriptors, bainisha control ya `LDAP_SERVER_SD_FLAGS_OID` ili kutojumuisha SACLs, vinginevyo ADWS hutoa tu attribute ya `nTSecurityDescriptor` kutoka kwenye jibu lake la SOAP.
+Mwingiliano ya ADWS hufanyika juu ya WS-Enumeration: kila query inaanza na ujumbe wa `Enumerate` unaoelezea filter/attributes za LDAP na kurudisha `EnumerationContext` GUID, ikifuatiwa na ujumbe mmoja au zaidi za `Pull` zinazotiririsha hadi dirisha la matokeo lililowekwa na server. Contexts huisha baada ya ~30 dakika, kwa hivyo zana zinahitaji kurudisha matokeo kwa kurasa au kugawanya filters (maulizo ya prefix kwa kila CN) ili kuepuka kupoteza state. Unapoomba security descriptors, bainisha control ya `LDAP_SERVER_SD_FLAGS_OID` ili kuondoa SACLs, vinginevyo ADWS itafuta tu attribute `nTSecurityDescriptor` kutoka kwenye jibu lake la SOAP.
 
-> NOTE: ADWS pia hutumiwa na zana nyingi za RSAT GUI/PowerShell, hivyo trafiki inaweza kuchanganyika na shughuli halali za admin.
+> Kumbuka: ADWS pia inatumika na zana nyingi za RSAT GUI/PowerShell, hivyo trafiki inaweza kuchanganyika na shughuli halali za admin.
 
-## SoaPy – Mteja wa Asili wa Python
+## SoaPy – Mteja wa asili wa Python
 
-[SoaPy](https://github.com/logangoins/soapy) ni utekelezaji kamili wa upya wa stack ya itifaki ya ADWS kwa Python safi. Inaunda fremu za NBFX/NBFSE/NNS/NMF byte-kwa-byte, ikiruhusu ukusanyaji kutoka kwa mifumo ya Unix bila kugusa runtime ya .NET.
+[SoaPy](https://github.com/logangoins/soapy) ni **utekelezaji kamili upya wa safu ya itifaki ya ADWS kwa Python ya safi**. Inaunda fremu za NBFX/NBFSE/NNS/NMF byte kwa byte, ikiwezesha ukusanyaji kutoka mifumo kama Unix bila kugusa runtime ya .NET.
 
-### Vipengele Muhimu
+### Sifa Muhimu
 
-* Inasaidia **proxying kupitia SOCKS** (inayofaa kutoka kwa C2 implants).
-* Filters za utafutaji za mchangamfu sawa na LDAP `-q '(objectClass=user)'`.
-* Vitendo vya hiari vya **write** ( `--set` / `--delete` ).
-* **BOFHound output mode** kwa ingestion moja kwa moja ndani ya BloodHound.
-* flag ya `--parse` kuboresha timestamps / `userAccountControl` wakati upendeleo wa usomaji wa binadamu unahitajika.
+* Inasaidia proxying through SOCKS (inayofaa kutoka C2 implants).
+* Filters za utafutaji za kina sawa na LDAP `-q '(objectClass=user)'`.
+* Operesheni za hiari za **write** (`--set` / `--delete`).
+* **BOFHound output mode** kwa uingizaji wa moja kwa moja ndani ya BloodHound.
+* Bendera `--parse` kuboresha muonekano wa timestamps / `userAccountControl` wakati inahitajika kwa kusomeka kwa binadamu.
 
-### Bendera za ukusanyaji uliolengwa & vitendo vya uandishi
+### Bendera za ukusanyaji ulioelekezwa & operesheni za write
 
-SoaPy inakuja na switches zilizochaguliwa ambazo zinarudia kazi za kawaida za LDAP hunting juu ya ADWS: `--users`, `--computers`, `--groups`, `--spns`, `--asreproastable`, `--admins`, `--constrained`, `--unconstrained`, `--rbcds`, pamoja na `--query` / `--filter` mbichi kwa pulls za kawaida. Waambatanishe na primitives za uandishi kama `--rbcd <source>` (huweka `msDs-AllowedToActOnBehalfOfOtherIdentity`), `--spn <service/cn>` (SPN staging kwa Kerberoasting iliyolengwa) na `--asrep` (kubadilisha `DONT_REQ_PREAUTH` katika `userAccountControl`).
+SoaPy inakuja na switches zilizochaguliwa ambazo zinarudia kazi za kawaida za kuwinda LDAP kupitia ADWS: `--users`, `--computers`, `--groups`, `--spns`, `--asreproastable`, `--admins`, `--constrained`, `--unconstrained`, `--rbcds`, pamoja na `--query` / `--filter` kwa pulls za desturi. Unganisha hizo na primitives za write kama `--rbcd <source>` (inayoweka `msDs-AllowedToActOnBehalfOfOtherIdentity`), `--spn <service/cn>` (SPN staging kwa Kerberoasting ulioelekezwa) na `--asrep` (badilisha `DONT_REQ_PREAUTH` katika `userAccountControl`).
 
-Mfano wa uwindaji wa SPN uliolengwa ambao unarudisha tu `samAccountName` na `servicePrincipalName`:
+Mfano wa utafutaji wa SPN uliolengwa unaorejesha tu `samAccountName` na `servicePrincipalName`:
 ```bash
 soapy corp.local/alice:'Winter2025!'@dc01.corp.local \
 --spns -f samAccountName,servicePrincipalName --parse
 ```
-Tumia host/credentials ile ile ili mara moja kugeuza uvumbuzi kuwa silaha: dump RBCD-capable objects with `--rbcds`, kisha tumia `--rbcd 'WEBSRV01$' --account 'FILE01$'` kuandaa Resource-Based Constrained Delegation chain (angalia [Resource-Based Constrained Delegation](resource-based-constrained-delegation.md) kwa njia kamili ya matumizi mabaya).
+Tumia host/credentials ile ile ili mara moja ku-weaponise findings: dump RBCD-capable objects kwa `--rbcds`, kisha tumia `--rbcd 'WEBSRV01$' --account 'FILE01$'` ili ku-stage Resource-Based Constrained Delegation chain (tazama [Resource-Based Constrained Delegation](resource-based-constrained-delegation.md) kwa ajili ya abuse path kamili).
 
-### Ufungaji (operator host)
+### Usakinishaji (operator host)
 ```bash
 python3 -m pip install soapy-adws   # or git clone && pip install -r requirements.txt
 ```
 ## Sopa - Mteja wa vitendo wa ADWS katika Golang
 
-Kama ilivyo kwa soapy, [sopa](https://github.com/Macmod/sopa) inatekeleza safu ya itifaki ya ADWS (MS-NNS + MC-NMF + SOAP) katika Golang, ikitoa bendera za command-line za kutoa miito ya ADWS kama:
+Vivyo hivyo kama soapy, [sopa](https://github.com/Macmod/sopa) inatekeleza ADWS protocol stack (MS-NNS + MC-NMF + SOAP) katika Golang, ikionyesha flag za command-line kutoa miito ya ADWS kama:
 
-* **Utafutaji na upokeaji wa object** - `query` / `get`
-* **Mzunguko wa maisha ya object** - `create [user|computer|group|ou|container|custom]` and `delete`
-* **Uhariri wa sifa** - `attr [add|replace|delete]`
+* **Utafutaji na upokeaji wa Object** - `query` / `get`
+* **Mzunguko wa maisha wa Object** - `create [user|computer|group|ou|container|custom]` na `delete`
+* **Uhariri wa attribute** - `attr [add|replace|delete]`
 * **Usimamizi wa akaunti** - `set-password` / `change-password`
-* na mengine kama `groups`, `members`, `optfeature`, `info [version|domain|forest|dcs]`, n.k.
+* na mengine kama `groups`, `members`, `optfeature`, `info [version|domain|forest|dcs]`, etc.
 
-## SOAPHound – Ukusanyaji wa ADWS wa Kiasi Kikubwa (Windows)
+## SOAPHound – High-Volume ADWS Collection (Windows)
 
-[FalconForce SOAPHound](https://github.com/FalconForceTeam/SOAPHound) ni mkusanyaji wa .NET unaohifadhi mwingiliano wote wa LDAP ndani ya ADWS na kutoa JSON inayolingana na BloodHound v4. Inajenga cache kamili ya `objectSid`, `objectGUID`, `distinguishedName` na `objectClass` mara moja (`--buildcache`), kisha inaitumia tena kwa `--bhdump`, `--certdump` (ADCS), au `--dnsdump` (AD-integrated DNS) za wingi mkubwa, hivyo takriban sifa 35 muhimu tu ndio zinaondoka DC. AutoSplit (`--autosplit --threshold <N>`) inagawanya maswali kwa prefix ya CN kivitendo ili kubaki chini ya muda wa timeout wa EnumerationContext wa dakika 30 katika forests kubwa.
+[FalconForce SOAPHound](https://github.com/FalconForceTeam/SOAPHound) ni collector wa .NET anayehifadhi mwingiliano yote wa LDAP ndani ya ADWS na kutoa JSON inayolingana na BloodHound v4. Inajenga cache kamili ya `objectSid`, `objectGUID`, `distinguishedName` na `objectClass` mara moja (`--buildcache`), kisha inaitumia tena kwa high-volume `--bhdump`, `--certdump` (ADCS), au `--dnsdump` (AD-integrated DNS) passes hivyo takriban ~35 attributes muhimu pekee ndizo hutoka kwenye DC. AutoSplit (`--autosplit --threshold <N>`) hugawa maswali kwa prefix ya CN kwa njia ya kibinafsi ili kubaki chini ya timeout ya EnumerationContext ya dakika 30 katika forests kubwa.
 
-Mtiririko wa kawaida wa kazi kwenye VM ya operator iliyounganishwa na domain:
+Typical workflow on a domain-joined operator VM:
 ```powershell
 # Build cache (JSON map of every object SID/GUID)
 SOAPHound.exe --buildcache -c C:\temp\corp-cache.json
@@ -73,15 +73,15 @@ SOAPHound.exe -c C:\temp\corp-cache.json --bhdump \
 SOAPHound.exe -c C:\temp\corp-cache.json --certdump -o C:\temp\BH-output
 SOAPHound.exe --dnsdump -o C:\temp\dns-snapshot
 ```
-JSON zilizotolewa ziliwekwa moja kwa moja katika workflows za SharpHound/BloodHound—ona [BloodHound methodology](bloodhound.md) kwa mawazo ya kuchora grafu za hatua inayofuata. AutoSplit hufanya SOAPHound kuwa imara kwenye misitu yenye mamilioni ya objects huku ikipunguza idadi ya maswali ikilinganishwa na snapshots za mtindo wa ADExplorer.
+JSON zilizotolewa zinaingizwa moja kwa moja katika workflows za SharpHound/BloodHound—angalia [BloodHound methodology](bloodhound.md) kwa mawazo ya kuchora grafu za baadaye. AutoSplit hufanya SOAPHound kuwa sugu kwenye forests zenye mamilioni ya objects huku ikifanya idadi ya maswali kuwa chini kuliko snapshots za mtindo wa ADExplorer.
 
-## Mtiririko wa Mkusanyiko wa AD wa Stealth
+## Mtiririko wa Ukusanyaji wa AD kwa Siri
 
-Mtiririko ufuatao unaonyesha jinsi ya kuorodhesha **domain & ADCS objects** kupitia ADWS, kuzibadilisha kuwa BloodHound JSON na kutafuta njia za mashambulizi zinazotegemea vyeti — yote kutoka Linux:
+Mtiririko ufuatao unaonyesha jinsi ya kuorodhesha **domain & ADCS objects** kupitia ADWS, kuzibadilisha kuwa BloodHound JSON na kuwinda njia za mashambulizi zinazoegemea vyeti – yote kutoka Linux:
 
-1. **Tunnel 9389/TCP** kutoka kwenye mtandao wa lengo hadi kwenye mashine yako (kwa mfano kupitia Chisel, Meterpreter, SSH dynamic port-forward, n.k.). Weka `export HTTPS_PROXY=socks5://127.0.0.1:1080` au tumia SoaPy’s `--proxyHost/--proxyPort`.
+1. **Tunnel 9389/TCP** kutoka kwenye mtandao wa lengo hadi kwa mashine yako (mfano: kupitia Chisel, Meterpreter, SSH dynamic port-forward, n.k.). Weka `export HTTPS_PROXY=socks5://127.0.0.1:1080` au tumia SoaPy’s `--proxyHost/--proxyPort`.
 
-2. **Kusanya root domain object:**
+2. **Kusanya object ya root domain:**
 ```bash
 soapy ludus.domain/jdoe:'P@ssw0rd'@10.2.10.10 \
 -q '(objectClass=domain)' \
@@ -99,7 +99,7 @@ soapy ludus.domain/jdoe:'P@ssw0rd'@10.2.10.10 \
 ```bash
 bofhound -i data --zip   # produces BloodHound.zip
 ```
-5. **Pakia ZIP** kwenye BloodHound GUI na endesha cypher queries kama `MATCH (u:User)-[:Can_Enroll*1..]->(c:CertTemplate) RETURN u,c` ili kufichua njia za kuinua vyeti (ESC1, ESC8, n.k.).
+5. **Upload the ZIP** katika BloodHound GUI na endesha maswali ya cypher kama `MATCH (u:User)-[:Can_Enroll*1..]->(c:CertTemplate) RETURN u,c` ili kufichua njia za kuinua vyeti (ESC1, ESC8, n.k.).
 
 ### Kuandika `msDs-AllowedToActOnBehalfOfOtherIdentity` (RBCD)
 ```bash
@@ -107,7 +107,7 @@ soapy ludus.domain/jdoe:'P@ssw0rd'@dc.ludus.domain \
 --set 'CN=Victim,OU=Servers,DC=ludus,DC=domain' \
 msDs-AllowedToActOnBehalfOfOtherIdentity 'B:32:01....'
 ```
-Unganisha hili na `s4u2proxy`/`Rubeus /getticket` kwa mnyororo kamili wa **Resource-Based Constrained Delegation** (angalia [Resource-Based Constrained Delegation](resource-based-constrained-delegation.md)).
+Unganisha hili na `s4u2proxy`/`Rubeus /getticket` kwa mnyororo kamili wa **Resource-Based Constrained Delegation** (tazama [Resource-Based Constrained Delegation](resource-based-constrained-delegation.md)).
 
 ## Muhtasari wa Zana
 
@@ -119,7 +119,7 @@ Unganisha hili na `s4u2proxy`/`Rubeus /getticket` kwa mnyororo kamili wa **Resou
 | Cert compromise | [Certipy](https://github.com/ly4k/Certipy) | Can be proxied through same SOCKS |
 | ADWS enumeration & object changes | [sopa](https://github.com/Macmod/sopa) | Generic client to interface with known ADWS endpoints - allows for enumeration, object creation, attribute modifications, and password changes |
 
-## Marejeleo
+## Marejeo
 
 * [SpecterOps – Make Sure to Use SOAP(y) – An Operators Guide to Stealthy AD Collection Using ADWS](https://specterops.io/blog/2025/07/25/make-sure-to-use-soapy-an-operators-guide-to-stealthy-ad-collection-using-adws/)
 * [SoaPy GitHub](https://github.com/logangoins/soapy)

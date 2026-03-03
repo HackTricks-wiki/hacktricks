@@ -2,29 +2,29 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Notepad++ itapakia moja kwa moja kila plugin DLL inayopatikana katika folda zake ndogo za `plugins` wakati wa kuanzisha. Kudondoa plugin yenye madhara ndani ya chochote cha **writable Notepad++ installation** kunatoa utekelezaji wa code ndani ya `notepad++.exe` kila wakati mhariri anapoanza, jambo ambalo linaweza kutumiwa kwa **persistence**, kwa siri kwa **initial execution**, au kama **in-process loader** ikiwa mhariri ataendeshwa elevated.
+Notepad++ itaingia kwa otomatiki kila DLL ya plugin inayopatikana ndani ya subfolders zake za `plugins` wakati wa kuanzisha. Kuweka plugin hatari katika **Notepad++ installation yoyote inayoweza kuandikwa** kunatoa code execution ndani ya `notepad++.exe` kila wakati mhariri anapoanzishwa, jambo ambalo linaweza kutumiwa kwa **persistence**, stealthy **initial execution**, au kama **in-process loader** ikiwa mhariri ataanzishwa elevated.
 
-## Writable plugin locations
+## Mahali pa plugin zinazoweza kuandikwa
 - Standard install: `C:\Program Files\Notepad++\plugins\<PluginName>\<PluginName>.dll` (kwa kawaida inahitaji admin kuandika).
-- Writable options for low-privileged operators:
-- Tumia the **portable Notepad++ build** katika folda ambayo mtumiaji anaweza kuandika.
-- Nakili `C:\Program Files\Notepad++` hadi njia inayodhibitiwa na mtumiaji (km, `%LOCALAPPDATA%\npp\`) kisha endesha `notepad++.exe` kutoka huko.
-- Kila plugin inapokea subfolder yake chini ya `plugins` na inapakiwa kiotomatiki wakati wa kuanzisha; vitu vya menyu vinaonekana chini ya **Plugins**.
+- Chaguzi zinazoweza kuandikwa kwa watumiaji wenye ruhusa ndogo:
+- Tumia the **portable Notepad++ build** katika folda inayoweza kuandikwa na mtumiaji.
+- Nakili `C:\Program Files\Notepad++` hadi njia inayodhibitiwa na mtumiaji (kwa mfano, `%LOCALAPPDATA%\npp\`) na endesha `notepad++.exe` kutoka huko.
+- Kila plugin inapata saraka yake ndogo chini ya `plugins` na inapakiwa moja kwa moja wakati wa startup; machaguo ya menyu yanaonekana chini ya **Plugins**.
 
 ## Plugin load points (execution primitives)
-Notepad++ inatarajia **exported functions** maalum. Hizi zote zinaitwa wakati wa uanzishaji, zikitoa nyuso mbalimbali za utekelezaji:
-- **`DllMain`** — inaendesha mara moja kwenye DLL load (pointi ya kwanza ya utekelezaji).
-- **`setInfo(NppData)`** — inaitwa mara moja wakati wa load kutoa Notepad++ handles; sehemu ya kawaida ya kusajili vitu vya menyu.
+Notepad++ inatarajia kazi maalum zilizotangazwa (**exported functions**). Hizi zote huitwa wakati wa initialization, zikitoa substrate nyingi za utekelezaji:
+- **`DllMain`** — inaendeshwa mara moja baada ya DLL kupakiwa (sehemu ya kwanza ya utekelezaji).
+- **`setInfo(NppData)`** — huitwa mara moja kwenye load kutoa handles za Notepad++; nafasi ya kawaida ya kusajili vitu vya menyu.
 - **`getName()`** — inarudisha jina la plugin linaloonyeshwa kwenye menyu.
-- **`getFuncsArray(int *nbF)`** — inarudisha amri za menyu; hata kama tupu, inaitwa wakati wa startup.
-- **`beNotified(SCNotification*)`** — inapokea matukio ya editor (file open/change, matukio ya UI) kwa vichocheo vinavyoendelea.
-- **`messageProc(UINT, WPARAM, LPARAM)`** — mshughulikiaji wa message, muhimu kwa kubadilishana data kubwa.
-- **`isUnicode()`** — bendera ya compatibility inayokaguliwa wakati wa load.
+- **`getFuncsArray(int *nbF)`** — inarudisha amri za menyu; hata ikiwa ni tupu, huitwa wakati wa startup.
+- **`beNotified(SCNotification*)`** — hupokea matukio ya mhariri (ufunguzi/mabadiliko ya faili, matukio ya UI) kwa kuzusha triggers za kuendelea.
+- **`messageProc(UINT, WPARAM, LPARAM)`** — handler ya ujumbe, inayofaa kwa kubadilishana data kubwa.
+- **`isUnicode()`** — flag ya compatibility inayokaguliwa wakati wa load.
 
-Wengi wa exports yanaweza kutekelezwa kama **stubs**; utekelezaji unaweza kutokea kutoka `DllMain` au callback yoyote hapo juu wakati wa autoload.
+Marejeo mengi yanaweza kutekelezwa kama **stubs**; utekelezaji unaweza kutokea kutoka `DllMain` au callback yoyote iliyo hapo juu wakati wa autoload.
 
 ## Minimal malicious plugin skeleton
-Kusanya (compile) DLL yenye exports zinazotarajiwa na uiweke katika `plugins\\MyNewPlugin\\MyNewPlugin.dll` chini ya folda ya Notepad++ inayoweza kuandikwa:
+Compile DLL yenye exports zinazotarajiwa na uiweke katika `plugins\\MyNewPlugin\\MyNewPlugin.dll` chini ya folda ya Notepad++ inayoweza kuandikwa:
 ```c
 BOOL APIENTRY DllMain(HMODULE h, DWORD r, LPVOID) { if (r == DLL_PROCESS_ATTACH) MessageBox(NULL, TEXT("Hello from Notepad++"), TEXT("MyNewPlugin"), MB_OK); return TRUE; }
 extern "C" __declspec(dllexport) void setInfo(NppData) {}
@@ -34,24 +34,24 @@ extern "C" __declspec(dllexport) void beNotified(SCNotification *) {}
 extern "C" __declspec(dllexport) LRESULT messageProc(UINT, WPARAM, LPARAM) { return TRUE; }
 extern "C" __declspec(dllexport) BOOL isUnicode() { return TRUE; }
 ```
-1. Jenga DLL (Visual Studio/MinGW).
+1. Tengeneza DLL (Visual Studio/MinGW).
 2. Unda saraka ndogo ya plugin chini ya `plugins` na uweke DLL ndani.
-3. Restart Notepad++; DLL inapakiwa kiotomatiki, ikiendesha `DllMain` na callbacks zifuatazo.
+3. Anzisha tena Notepad++; DLL itapakiwa kiotomatiki, ikitekeleza `DllMain` na subsequent callbacks.
 
 ## Reflective loader plugin pattern
-Plugin iliyoharibika inaweza kugeuza Notepad++ kuwa **reflective DLL loader**:
-- Onyesha UI/menu ndogo (mfano, "LoadDLL").
-- Kubali **njia ya faili** au **URL** ili kupata payload DLL.
-- Reflectively map DLL ndani ya mchakato wa sasa na uitumie exported entry point (mfano, loader function ndani ya DLL iliyopakuliwa).
-- Faida: tumia tena mchakato la GUI linaloonekana kuwa salama badala ya kuanzisha loader mpya; payload inachukua uadilifu wa `notepad++.exe` (ikijumuisha muktadha wa ruhusa za juu).
-- Madhara: kuacha **unsigned plugin DLL** kwenye diski ni noisy; fikiria piggybacking kwenye plugins za kuaminika zilizopo ikiwa zipo.
+A weaponized plugin can turn Notepad++ into a **reflective DLL loader**:
+- Present a minimal UI/menu entry (e.g., "LoadDLL").
+- Accept a **file path** or **URL** to fetch a payload DLL.
+- Reflectively map the DLL into the current process and invoke an exported entry point (e.g., a loader function inside the fetched DLL).
+- Benefit: reuse a benign-looking GUI process instead of spawning a new loader; payload inherits the integrity of `notepad++.exe` (including elevated contexts).
+- Trade-offs: dropping an **unsigned plugin DLL** to disk is noisy; consider piggybacking on existing trusted plugins if present.
 
-## Vidokezo vya utambuzi na kuimarisha usalama
-- Zuia au fuatilia **writes to Notepad++ plugin directories** (ikiwa ni pamoja na portable copies katika user profiles); wezesha controlled folder access au application allowlisting.
-- Toa tahadhari kuhusu **new unsigned DLLs** chini ya `plugins` na isiyo ya kawaida **child processes/network activity** kutoka `notepad++.exe`.
-- Lazimisha ufungaji wa plugin kupitia **Plugins Admin** tu, na zuilia utekelezaji wa portable copies kutoka njia zisizoaminika.
+## Detection and hardening notes
+- Block or monitor **writes to Notepad++ plugin directories** (including portable copies in user profiles); enable controlled folder access or application allowlisting.
+- Alert on **new unsigned DLLs** under `plugins` and unusual **child processes/network activity** from `notepad++.exe`.
+- Enforce plugin installation via **Plugins Admin** only, and restrict execution of portable copies from untrusted paths.
 
-## Marejeleo
+## References
 - [Notepad++ Plugins: Plug and Payload](https://trustedsec.com/blog/notepad-plugins-plug-and-payload)
 - [MyNewPlugin PoC snippet](https://gitlab.com/-/snippets/4930986)
 - [LoadDLL reflective loader plugin](https://gitlab.com/KevinJClark/ops-scripts/-/tree/main/notepad_plus_plus_plugin_LoadDLL)
