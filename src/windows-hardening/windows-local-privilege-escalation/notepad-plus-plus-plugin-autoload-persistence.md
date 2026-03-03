@@ -1,30 +1,30 @@
-# Notepad++ Eklenti Otomatik Yükleme Kalıcılığı ve Yürütme
+# Notepad++ Plugin Autoload Persistence & Execution
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Notepad++ başlatıldığında **`plugins` alt klasörlerinde bulunan her plugin DLL'sini otomatik olarak yükler**. Kötü amaçlı bir eklentiyi herhangi bir **yazılabilir Notepad++ kurulumuna** bırakmak, editör her açıldığında `notepad++.exe` içinde kod yürütmeye imkan verir; bu, **kalıcılık**, gizli **ilk yürütme** veya editör yükseltilmiş olarak başlatıldığında **işlem içi yükleyici** olarak kötüye kullanılabilir.
+Notepad++ başlatıldığında `plugins` alt klasörlerinde bulunan her plugin DLL'ini **autoload** eder. Kötü amaçlı bir plugin'i herhangi bir **writable Notepad++ installation** içine koymak, editör her başlatıldığında `notepad++.exe` içinde code execution sağlar; bu durum **persistence**, gizli **initial execution** veya editör yükseltilmiş haklarla başlatıldığında **in-process loader** olarak kötüye kullanılabilir.
 
-## Yazılabilir eklenti konumları
-- Standart kurulum: `C:\Program Files\Notepad++\plugins\<PluginName>\<PluginName>.dll` (genellikle yazmak için admin gerektirir).
-- Düşük ayrıcalıklı operatörler için yazılabilir seçenekler:
-- Kullanıcı tarafından yazılabilir bir klasörde **taşınabilir Notepad++ build** kullanın.
-- `C:\Program Files\Notepad++` dizinini kullanıcı kontrollü bir yola (ör. `%LOCALAPPDATA%\npp\`) kopyalayın ve `notepad++.exe`'yi oradan çalıştırın.
-- Her eklenti `plugins` altında kendi alt klasörünü alır ve başlangıçta otomatik olarak yüklenir; menü girdileri **Plugins** altında görünür.
+## Writable plugin locations
+- Standard install: `C:\Program Files\Notepad++\plugins\<PluginName>\<PluginName>.dll` (yazmak için genellikle admin gerektirir).
+- Writable options for low-privileged operators:
+- Kullanıcı tarafından yazılabilir bir klasörde **portable Notepad++ build** kullanın.
+- `C:\Program Files\Notepad++` dizinini kullanıcı kontrolündeki bir yola kopyalayın (ör. `%LOCALAPPDATA%\npp\`) ve oradan `notepad++.exe`'yi çalıştırın.
+- Her plugin `plugins` altında kendi alt klasörünü alır ve başlatmada otomatik olarak yüklenir; menü girdileri **Plugins** altında görünür.
 
-## Eklenti yükleme noktaları (yürütme ilkelleri)
-Notepad++ belirli **export edilen fonksiyonları** bekler. Bunların tümü initialize sırasında çağrılır ve birden fazla yürütme yüzeyi sağlar:
-- **`DllMain`** — DLL yüklendiğinde hemen çalışır (ilk yürütme noktası).
-- **`setInfo(NppData)`** — yükleme sırasında bir kez çağrılır ve Notepad++ tutacaklarını sağlar; genellikle menü öğelerini kaydetmek için kullanılır.
-- **`getName()`** — menüde gösterilecek eklenti adını döndürür.
-- **`getFuncsArray(int *nbF)`** — menü komutlarını döndürür; boş olsa bile başlangıçta çağrılır.
-- **`beNotified(SCNotification*)`** — editör olaylarını (dosya açma/değişiklik, UI olayları) alır; devam eden tetiklemeler için kullanışlıdır.
-- **`messageProc(UINT, WPARAM, LPARAM)`** — mesaj işleyici; daha büyük veri alışverişleri için faydalıdır.
-- **`isUnicode()`** — yüklemede kontrol edilen uyumluluk bayrağı.
+## Plugin load points (execution primitives)
+Notepad++ belirli **exported functions** bekler. Bunların hepsi başlangıç sırasında çağrılır ve birden fazla execution yüzeyi sağlar:
+- **`DllMain`** — DLL yüklenir yüklenmez çalışır (first execution point).
+- **`setInfo(NppData)`** — yükleme sırasında bir kez çağrılır, Notepad++ handle'larını sağlar; tipik olarak menü öğeleri kaydetmek için kullanılır.
+- **`getName()`** — menüde gösterilen plugin adını döndürür.
+- **`getFuncsArray(int *nbF)`** — menü komutlarını döndürür; boş olsa bile başlatma sırasında çağrılır.
+- **`beNotified(SCNotification*)`** — editör olaylarını (dosya açma/değişiklik, UI olayları) alır; sürekli tetiklemeler için kullanılır.
+- **`messageProc(UINT, WPARAM, LPARAM)`** — mesaj işleyici, büyük veri alışverişleri için kullanışlıdır.
+- **`isUnicode()`** — yüklemede kontrol edilen uyumluluk bayrağıdır.
 
-Çoğu export **stubs** olarak uygulanabilir; yürütme, autoload sırasında `DllMain` veya yukarıdaki herhangi bir geri çağırmadan gerçekleşebilir.
+Çoğu export **stubs** olarak uygulanabilir; execution, autoload sırasında `DllMain`'den veya yukarıdaki herhangi bir callback'ten gerçekleşebilir.
 
-## Minimal kötü amaçlı eklenti iskeleti
-Beklenen export'ları içeren bir DLL derleyin ve yazılabilir bir Notepad++ klasörü altında `plugins\\MyNewPlugin\\MyNewPlugin.dll` konumuna yerleştirin:
+## Minimal malicious plugin skeleton
+Beklenen export'larla bir DLL derleyin ve yazılabilir bir Notepad++ klasörü altındaki `plugins\\MyNewPlugin\\MyNewPlugin.dll` yoluna koyun:
 ```c
 BOOL APIENTRY DllMain(HMODULE h, DWORD r, LPVOID) { if (r == DLL_PROCESS_ATTACH) MessageBox(NULL, TEXT("Hello from Notepad++"), TEXT("MyNewPlugin"), MB_OK); return TRUE; }
 extern "C" __declspec(dllexport) void setInfo(NppData) {}
@@ -35,23 +35,23 @@ extern "C" __declspec(dllexport) LRESULT messageProc(UINT, WPARAM, LPARAM) { ret
 extern "C" __declspec(dllexport) BOOL isUnicode() { return TRUE; }
 ```
 1. DLL'i derleyin (Visual Studio/MinGW).
-2. `plugins` altında bir plugin alt klasörü oluşturun ve DLL'i içine koyun.
-3. Notepad++'ı yeniden başlatın; DLL otomatik olarak yüklenir, `DllMain` ve sonraki callbacks çalıştırılır.
+2. `plugins` altında plugin alt klasörü oluşturun ve DLL'i içine koyun.
+3. Notepad++'ı yeniden başlatın; DLL otomatik olarak yüklenir ve `DllMain` ile sonraki callback'leri çalıştırır.
 
 ## Reflective loader plugin pattern
-A weaponized plugin can turn Notepad++ into a **reflective DLL loader**:
-- Minimal bir UI/menü girdisi sunun (ör. "LoadDLL").
-- Bir payload DLL almak için bir **file path** veya **URL** kabul edin.
-- DLL'i mevcut prosese reflectively map edin ve dışa aktarılmış bir entry point'i çağırın (ör. alınan DLL içindeki bir loader fonksiyonu).
-- Avantaj: yeni bir loader başlatmak yerine zararsız görünen bir GUI sürecini yeniden kullanın; payload `notepad++.exe`'in bütünlüğünü miras alır (yüksek ayrıcalıklı context'ler dahil).
-- Dezavantajlar: diske bir **unsigned plugin DLL** bırakmak tespit edilebilir/gürültülüdür; mevcut güvenilir plugin'lere piggyback yapmayı düşünün.
+Kötü amaçlı bir eklenti Notepad++'ı bir **reflective DLL loader**'a dönüştürebilir:
+- Minimal bir UI/menü girişi sunun (ör. "LoadDLL").
+- Bir payload DLL almak için bir **dosya yolu** veya **URL** kabul edin.
+- DLL'i mevcut işleme reflectively map edin ve dışa aktarılmış bir giriş noktasını çağırın (ör. indirilmiş DLL içindeki bir loader fonksiyonu).
+- Avantaj: yeni bir loader başlatmak yerine zararsız görünen bir GUI sürecini yeniden kullanma; payload, `notepad++.exe`'in bütünlüğünü devralır (yükseltilmiş bağlamlar dahil).
+- Dezavantajlar: diske bir **unsigned plugin DLL** bırakmak gürültülü olabilir; mevcut güvenilir eklentilere piggyback yapmayı düşünün.
 
 ## Tespit ve sertleştirme notları
-- Notepad++ plugin dizinlerine yapılan yazma işlemlerini engelleyin veya izleyin (kullanıcı profillerindeki taşınabilir kopyalar dahil); kontrollü klasör erişimini veya uygulama allowlisting'ini etkinleştirin.
-- `plugins` altında görülen **yeni unsigned DLL'ler** ve `notepad++.exe`'den kaynaklanan anormal **child processes/network activity** için uyarı oluşturun.
-- Plugin kurulumunu yalnızca **Plugins Admin** üzerinden zorunlu kılın ve güvenilmeyen yollarla çalıştırılan taşınabilir kopyaların yürütülmesini kısıtlayın.
+- **Notepad++ plugin dizinlerine yapılan yazmaları** (kullanıcı profillerindeki taşınabilir kopyalar dahil) engelleyin veya izleyin; Controlled Folder Access veya uygulama allowlisting'i etkinleştirin.
+- `plugins` altındaki **yeni imzasız DLL'ler** ve `notepad++.exe`'den gelen olağandışı **alt süreçler/ağ etkinliği** için uyarı verin.
+- Eklenti kurulumunu yalnızca **Plugins Admin** üzerinden zorunlu kılın ve taşınabilir kopyaların güvenilmeyen yollarından çalıştırılmasını kısıtlayın.
 
-## References
+## Referanslar
 - [Notepad++ Plugins: Plug and Payload](https://trustedsec.com/blog/notepad-plugins-plug-and-payload)
 - [MyNewPlugin PoC snippet](https://gitlab.com/-/snippets/4930986)
 - [LoadDLL reflective loader plugin](https://gitlab.com/KevinJClark/ops-scripts/-/tree/main/notepad_plus_plus_plugin_LoadDLL)
