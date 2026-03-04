@@ -49,6 +49,35 @@ Use the same host/credentials to immediately weaponise findings: dump RBCD-capab
 python3 -m pip install soapy-adws   # or git clone && pip install -r requirements.txt
 ```
 
+## ADWSDomainDump – LDAPDomainDump over ADWS (Linux/Windows)
+
+* Fork of `ldapdomaindump` that swaps LDAP queries for ADWS calls on TCP/9389 to reduce LDAP-signature hits.
+* Performs an initial reachability check to 9389 unless `--force` is passed (skips the probe if port scans are noisy/filtered).
+* Tested against Microsoft Defender for Endpoint and CrowdStrike Falcon with successful bypass in the README.
+
+### Installation
+
+```bash
+pipx install .
+```
+
+### Usage
+
+```bash
+adwsdomaindump -u 'thewoods.local\mathijs.verschuuren' -p 'password' -n 10.10.10.1 dc01.thewoods.local
+```
+
+Typical output logs the 9389 reachability check, ADWS bind, and dump start/finish:
+
+```text
+[*] Connecting to ADWS host...
+[+] ADWS port 9389 is reachable
+[*] Binding to ADWS host
+[+] Bind OK
+[*] Starting domain dump
+[+] Domain dump finished
+```
+
 ## Sopa - A practical client for ADWS in Golang
 
 Similarly as soapy, [sopa](https://github.com/Macmod/sopa) implements the ADWS protocol stack (MS-NNS + MC-NMF + SOAP) in Golang, exposing command-line flags to issue ADWS calls such as:
@@ -138,6 +167,7 @@ Combine this with `s4u2proxy`/`Rubeus /getticket` for a full **Resource-Based Co
 * [SpecterOps – Make Sure to Use SOAP(y) – An Operators Guide to Stealthy AD Collection Using ADWS](https://specterops.io/blog/2025/07/25/make-sure-to-use-soapy-an-operators-guide-to-stealthy-ad-collection-using-adws/)
 * [SoaPy GitHub](https://github.com/logangoins/soapy)
 * [BOFHound GitHub](https://github.com/bohops/BOFHound)
+* [ADWSDomainDump GitHub](https://github.com/mverschu/adwsdomaindump)
 * [Microsoft – MC-NBFX, MC-NBFSE, MS-NNS, MC-NMF specifications](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-nbfx/)
 * [IBM X-Force Red – Stealthy Enumeration of Active Directory Environments Through ADWS](https://logan-goins.com/2025-02-21-stealthy-enum-adws/)
 * [FalconForce – SOAPHound tool to collect Active Directory data via ADWS](https://falconforce.nl/soaphound-tool-to-collect-active-directory-data-via-adws/)
