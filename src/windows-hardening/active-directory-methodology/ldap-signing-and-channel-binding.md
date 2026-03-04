@@ -1,50 +1,52 @@
-# Σκληροποίηση LDAP Signing & Channel Binding
+# LDAP Signing & Channel Binding Hardening
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Γιατί έχει σημασία
 
-Το LDAP relay/MITM επιτρέπει σε επιτιθέμενους να προωθούν binds σε Domain Controllers για να αποκτήσουν πιστοποιημένα contexts. Δύο ελεγκτικοί μηχανισμοί στην πλευρά του server μπλοκάρουν αυτές τις διαδρομές:
+LDAP relay/MITM επιτρέπει σε επιτιθέμενους να προωθούν binds σε Domain Controllers για να αποκτήσουν authenticated contexts. Δύο server-side controls περιορίζουν αυτές τις οδούς:
 
-- **LDAP Channel Binding (CBT)** δένει ένα LDAPS bind με το συγκεκριμένο TLS tunnel, διασπώντας relays/replays μεταξύ διαφορετικών καναλιών.
-- **LDAP Signing** επιβάλλει ότι τα LDAP μηνύματα έχουν προστασία ακεραιότητας, αποτρέποντας την παραποίηση και τα περισσότερα unsigned relays.
+- **LDAP Channel Binding (CBT)** συνδέει ένα LDAPS bind με το συγκεκριμένο TLS tunnel, διακόπτοντας relays/replays μεταξύ διαφορετικών καναλιών.
+- **LDAP Signing** επιβάλλει integrity-protected LDAP μηνύματα, αποτρέποντας παραποιήσεις και τα περισσότερα unsigned relays.
 
-Οι Server 2025 DCs εισάγουν μια νέα GPO (**LDAP server signing requirements Enforcement**) που έχει ως προεπιλογή το **Require Signing** όταν αφήνεται **Not Configured**. Για να αποφύγετε την επιβολή πρέπει ρητά να ορίσετε αυτήν την πολιτική σε **Disabled**.
+**Quick offensive check**: εργαλεία όπως `netexec ldap <dc> -u user -p pass` εμφανίζουν τη στάση του server. Αν δείτε `(signing:None)` και `(channel binding:Never)`, Kerberos/NTLM **relays to LDAP** είναι εφικτά (π.χ. χρησιμοποιώντας KrbRelayUp για να γράψετε `msDS-AllowedToActOnBehalfOfOtherIdentity` για RBCD και να μιμηθείτε administrators).
 
-## LDAP Channel Binding (LDAPS μόνο)
+**Server 2025 DCs** εισάγουν μια νέα GPO (**LDAP server signing requirements Enforcement**) που από προεπιλογή τίθεται σε **Require Signing** όταν είναι **Not Configured**. Για να αποφύγετε την επιβολή πρέπει να ορίσετε ρητά αυτή την πολιτική σε **Disabled**.
+
+## LDAP Channel Binding (LDAPS only)
 
 - **Απαιτήσεις**:
 - CVE-2017-8563 patch (2017) προσθέτει υποστήριξη Extended Protection for Authentication.
 - **KB4520412** (Server 2019/2022) προσθέτει LDAPS CBT “what-if” telemetry.
 - **GPO (DCs)**: `Domain controller: LDAP server channel binding token requirements`
-  - `Never` (default, no CBT)
-  - `When Supported` (audit: emits failures, does not block)
-  - `Always` (enforce: rejects LDAPS binds without valid CBT)
-- **Audit**: set **When Supported** to surface:
-  - **3074** – LDAPS bind would have failed CBT validation if enforced.
-  - **3075** – LDAPS bind omitted CBT data and would be rejected if enforced.
-  - (Event **3039** still signals CBT failures on older builds.)
-- **Enforcement**: set **Always** once LDAPS clients send CBTs; only effective on **LDAPS** (not raw 389).
+- `Never` (προεπιλογή, χωρίς CBT)
+- `When Supported` (audit: εκπέμπει αποτυχίες, δεν μπλοκάρει)
+- `Always` (enforce: απορρίπτει LDAPS binds χωρίς έγκυρο CBT)
+- **Audit**: ορίστε **When Supported** για να εμφανίσετε:
+- **3074** – ένα LDAPS bind θα είχε αποτύχει στην επικύρωση CBT αν εφαρμόζονταν.
+- **3075** – ένα LDAPS bind παρέλειψε δεδομένα CBT και θα είχε απορριφθεί αν εφαρμοζόταν.
+- (Το Event **3039** εξακολουθεί να σηματοδοτεί αποτυχίες CBT σε παλιότερα builds.)
+- **Enforcement**: ορίστε **Always** όταν οι LDAPS clients στέλνουν CBTs; ισχύει μόνο για **LDAPS** (όχι raw 389).
 
 ## LDAP Signing
 
-- **Client GPO**: `Network security: LDAP client signing requirements` = `Require signing` (vs `Negotiate signing` default on modern Windows).
+- **Client GPO**: `Network security: LDAP client signing requirements` = `Require signing` (εναντίον `Negotiate signing` που είναι η προεπιλογή σε σύγχρονα Windows).
 - **DC GPO**:
-  - Legacy: `Domain controller: LDAP server signing requirements` = `Require signing` (default is `None`).
-  - **Server 2025**: αφήστε την legacy policy στο `None` και ορίστε `LDAP server signing requirements Enforcement` = `Enabled` (Not Configured = επιβάλλεται από προεπιλογή; ορίστε `Disabled` για να το αποφύγετε).
-- **Compatibility**: μόνο Windows **XP SP3+** υποστηρίζουν LDAP signing; παλαιότερα συστήματα θα σταματήσουν να λειτουργούν όταν η επιβολή ενεργοποιηθεί.
+- Legacy: `Domain controller: LDAP server signing requirements` = `Require signing` (προεπιλογή είναι `None`).
+- **Server 2025**: αφήστε την legacy policy σε `None` και ορίστε `LDAP server signing requirements Enforcement` = `Enabled` (Not Configured = επιβάλλεται από προεπιλογή· ορίστε `Disabled` για να το αποφύγετε).
+- **Συμβατότητα**: μόνο Windows **XP SP3+** υποστηρίζει LDAP signing; παλαιότερα συστήματα θα σπάσουν όταν ενεργοποιηθεί η επιβολή.
 
-## Εφαρμογή με προτεραιότητα στην επιτήρηση (συνιστάται ~30 ημέρες)
+## Εφαρμογή με προτεραιότητα στο audit (συνιστάται ~30 ημέρες)
 
-1. Ενεργοποιήστε τη διάγνωση διεπαφής LDAP σε κάθε DC για την καταγραφή unsigned binds (Event **2889**):
+1. Ενεργοποιήστε τα LDAP interface diagnostics σε κάθε DC για να καταγράψετε unsigned binds (Event **2889**):
 ```bash
 Reg Add HKLM\SYSTEM\CurrentControlSet\Services\NTDS\Diagnostics /v "16 LDAP Interface Events" /t REG_DWORD /d 2
 ```
-2. Ορίστε στο GPO του DC `LDAP server channel binding token requirements` = **When Supported** για να ξεκινήσει η τηλεμετρία CBT.
-3. Παρακολουθήστε τα γεγονότα του Directory Service:
+2. Ορίστε στο DC GPO `LDAP server channel binding token requirements` = **When Supported** για να ξεκινήσει η τηλεμετρία CBT.
+3. Παρακολουθήστε τα συμβάντα του Directory Service:
 - **2889** – unsigned/unsigned-allow binds (μη συμβατά με signing).
-- **3074/3075** – LDAPS binds που θα αποτύχουν ή θα παραλείψουν CBT (απαιτεί KB4520412 σε 2019/2022 και το βήμα 2 παραπάνω).
-4. Εφαρμόστε ως ξεχωριστές αλλαγές:
+- **3074/3075** – LDAPS binds that would fail or omit CBT (απαιτεί KB4520412 σε 2019/2022 και το βήμα 2 παραπάνω).
+4. Εφαρμόστε σε ξεχωριστές αλλαγές:
 - `LDAP server channel binding token requirements` = **Always** (DCs).
 - `LDAP client signing requirements` = **Require signing** (clients).
 - `LDAP server signing requirements` = **Require signing** (DCs) **or** (Server 2025) `LDAP server signing requirements Enforcement` = **Enabled**.
@@ -54,5 +56,6 @@ Reg Add HKLM\SYSTEM\CurrentControlSet\Services\NTDS\Diagnostics /v "16 LDAP Inte
 - [TrustedSec - LDAP Channel Binding and LDAP Signing](https://trustedsec.com/blog/ldap-channel-binding-and-ldap-signing)
 - [Microsoft KB4520412 - LDAP channel binding & signing requirements](https://support.microsoft.com/en-us/topic/2020-and-2023-ldap-channel-binding-and-ldap-signing-requirements-for-windows-kb4520412-ef185fb8-00f7-167d-744c-f299a66fc00a)
 - [Microsoft CVE-2017-8563 - LDAP relay mitigation update](https://portal.msrc.microsoft.com/en-us/security-guidance/advisory/CVE-2017-8563)
+- [0xdf – HTB Bruno (LDAP signing disabled → Kerberos relay → RBCD)](https://0xdf.gitlab.io/2026/02/24/htb-bruno.html)
 
 {{#include ../../banners/hacktricks-training.md}}
