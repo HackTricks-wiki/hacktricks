@@ -4,99 +4,118 @@
 
 ## O que procurar em CTFs
 
-- **Uso indevido de modos**: padrões ECB, maleabilidade CBC, nonce reuse em CTR/GCM.
+- **Mode misuse**: ECB patterns, CBC malleability, CTR/GCM nonce reuse.
 - **Padding oracles**: erros/tempos diferentes para padding inválido.
-- **Confusão de MAC**: usar CBC-MAC com mensagens de comprimento variável, ou erros de MAC-then-encrypt.
-- **XOR everywhere**: stream ciphers e construções customizadas frequentemente reduzem-se a XOR com um keystream.
+- **MAC confusion**: usando CBC-MAC com mensagens de comprimento variável, ou erros de MAC-then-encrypt.
+- **XOR everywhere**: stream ciphers e construções customizadas frequentemente se reduzem a XOR com um keystream.
 
-## Modos AES e uso indevido
+## AES modes and misuse
 
 ### ECB: Electronic Codebook
 
-ECB leaks patterns: equal plaintext blocks → equal ciphertext blocks. Isso possibilita:
+ECB leaks patterns: blocos de texto simples iguais → blocos de texto cifrado iguais. Isso permite:
 
-- Cut-and-paste / reordenação de blocos
-- Exclusão de blocos (se o formato permanecer válido)
+- Cut-and-paste / block reordering
+- Remoção de blocos (se o formato permanecer válido)
 
-Se você pode controlar o plaintext e observar o ciphertext (ou cookies), tente criar blocos repetidos (ex.: muitos `A`s) e procure por repetições.
+Se você pode controlar o texto simples e observar o texto cifrado (ou cookies), tente criar blocos repetidos (por ex., muitos `A`s) e procure por repetições.
 
 ### CBC: Cipher Block Chaining
 
-- CBC é **maleável**: flipar bits em `C[i-1]` flipa bits previsíveis em `P[i]`.
+- CBC é **malleável**: inverter bits em `C[i-1]` inverte bits previsíveis em `P[i]`.
 - Se o sistema expõe padding válido vs padding inválido, você pode ter um **padding oracle**.
 
 ### CTR
 
-CTR transforma AES em um stream cipher: `C = P XOR keystream`.
+CTR transforma AES em uma cifra de fluxo: `C = P XOR keystream`.
 
 Se um nonce/IV for reutilizado com a mesma chave:
 
-- `C1 XOR C2 = P1 XOR P2` (reutilização clássica de keystream)
-- Com plaintext conhecido, você pode recuperar o keystream e descriptografar outros.
+- `C1 XOR C2 = P1 XOR P2` (clássico reuso de keystream)
+- Com texto simples conhecido, você pode recuperar o keystream e descriptografar outros.
+
+**Nonce/IV reuse exploitation patterns**
+
+- Recuperar o keystream onde o texto simples é conhecido/adivinhável:
+
+```text
+keystream[i..] = ciphertext[i..] XOR known_plaintext[i..]
+```
+
+Aplique os bytes do keystream recuperado para descriptografar qualquer outro texto cifrado produzido com a mesma chave+IV nos mesmos offsets.
+- Dados altamente estruturados (por ex., ASN.1/X.509 certificates, file headers, JSON/CBOR) dão grandes regiões de texto simples conhecido. Frequentemente você pode XORar o ciphertext do certificado com o corpo previsível do certificado para derivar o keystream, então descriptografar outros segredos cifrados sob o IV reutilizado. Veja também [TLS & Certificates](../tls-and-certificates/README.md) para layouts típicos de certificados.
+- Quando múltiplos segredos do mesmo formato/tamanho serializado são criptografados com a mesma chave+IV, o alinhamento de campos leaks mesmo sem plaintext conhecido completo. Exemplo: chaves PKCS#8 RSA do mesmo tamanho de módulo colocam fatores primos nos mesmos offsets (~99.6% de alinhamento para 2048-bit). XORing dois ciphertexts sob o keystream reutilizado isola `p ⊕ p'` / `q ⊕ q'`, que podem ser recuperados por força bruta em segundos.
+- IVs padrão em bibliotecas (ex.: constante `000...01`) são uma armadilha crítica: cada criptografia repete o mesmo keystream, transformando CTR em um one-time pad reutilizado.
+
+**CTR malleability**
+
+- CTR fornece apenas confidencialidade: inverter bits no texto cifrado inverte deterministamente os mesmos bits no texto simples. Sem uma tag de autenticação, atacantes podem adulterar dados (ex.: ajustar chaves, flags ou mensagens) sem serem detectados.
+- Use AEAD (GCM, GCM-SIV, ChaCha20-Poly1305, etc.) e exija verificação da tag para detectar bit-flips.
 
 ### GCM
 
-GCM também falha gravemente sob nonce reuse. Se a mesma key+nonce for usada mais de uma vez, normalmente você obtém:
+GCM também falha severamente sob reuso de nonce. Se a mesma chave+nonce for usada mais de uma vez, tipicamente você obtém:
 
-- Reutilização de keystream para encriptação (como CTR), permitindo recuperação de plaintext quando algum plaintext é conhecido.
-- Perda das garantias de integridade. Dependendo do que é exposto (múltiplos pares message/tag sob o mesmo nonce), atacantes podem ser capazes de forjar tags.
+- Reuso de keystream para cifragem (como CTR), permitindo recuperação de plaintext quando qualquer plaintext é conhecido.
+- Perda das garantias de integridade. Dependendo do que é exposto (múltiplos pares mensagem/tag sob o mesmo nonce), atacantes podem ser capazes de forjar tags.
 
-Orientação operacional:
+Orientações operacionais:
 
-- Considere "nonce reuse" em AEAD como uma vulnerabilidade crítica.
-- Se você tem múltiplos ciphertexts sob o mesmo nonce, comece verificando relações do tipo `C1 XOR C2 = P1 XOR P2`.
+- Trate "nonce reuse" em AEAD como uma vulnerabilidade crítica.
+- AEADs resistentes a misuse (ex.: GCM-SIV) reduzem o impacto do reuso de nonce, mas ainda exigem nonces/IVs únicos.
+- Se você tem múltiplos ciphertexts sob o mesmo nonce, comece checando relações do tipo `C1 XOR C2 = P1 XOR P2`.
 
-### Ferramentas
+### Tools
 
 - CyberChef for quick experiments: https://gchq.github.io/CyberChef/
 - Python: `pycryptodome` for scripting
 
-## Padrões de exploração ECB
+## ECB exploitation patterns
 
-ECB (Electronic Code Book) encripta cada bloco independentemente:
+ECB (Electronic Code Book) criptografa cada bloco independentemente:
 
-- equal plaintext blocks → equal ciphertext blocks
-- isso leaks structure e possibilita ataques do tipo cut-and-paste
+- blocos de texto simples iguais → blocos de texto cifrado iguais
+- isso vaza estrutura e possibilita ataques do tipo cut-and-paste
 
 ![](https://upload.wikimedia.org/wikipedia/commons/thumb/e/e6/ECB_decryption.svg/601px-ECB_decryption.svg.png)
 
-### Ideia de detecção: padrão de token/cookie
+### Detection idea: token/cookie pattern
 
-Se você faz login várias vezes e **sempre recebe o mesmo cookie**, o ciphertext pode ser determinístico (ECB ou IV fixo).
+Se você faz login várias vezes e **sempre recebe o mesmo cookie**, o texto cifrado pode ser determinístico (ECB ou IV fixo).
 
-Se você cria dois usuários com layouts de plaintext majoritariamente idênticos (ex.: muitos caracteres repetidos) e vê blocos de ciphertext repetidos nos mesmos offsets, ECB é um forte suspeito.
+Se você criar dois usuários com layouts de texto simples majoritariamente idênticos (ex.: longos caracteres repetidos) e ver blocos de texto cifrado repetidos nos mesmos offsets, o ECB é um forte suspeito.
 
-### Padrões de exploração
+### Exploitation patterns
 
-#### Removendo blocos inteiros
+#### Removing entire blocks
 
-Se o formato do token for algo como `<username>|<password>` e a fronteira de bloco alinhar, às vezes você pode criar um usuário de forma que o bloco `admin` apareça alinhado, então remover blocos anteriores para obter um token válido para `admin`.
+Se o formato do token for algo como `<username>|<password>` e a fronteira de bloco alinhar, às vezes você pode criar um usuário de modo que o bloco `admin` apareça alinhado, então remover blocos anteriores para obter um token válido para `admin`.
 
-#### Movendo blocos
+#### Moving blocks
 
-Se o backend tolera padding/espaços extras (`admin` vs `admin    `), você pode:
+Se o backend tolerar padding/espacos extras (`admin` vs `admin    `), você pode:
 
 - Alinhar um bloco que contenha `admin   `
-- Trocar/reutilizar esse bloco de ciphertext em outro token
+- Trocar/reusar esse bloco de texto cifrado em outro token
 
 ## Padding Oracle
 
-### O que é
+### What it is
 
-Em CBC mode, se o servidor revela (direta ou indiretamente) se o plaintext decriptado tem **valid PKCS#7 padding**, você frequentemente pode:
+Em modo CBC, se o servidor revela (direta ou indiretamente) se o texto simples decifrado tem **valid PKCS#7 padding**, você frequentemente pode:
 
-- Descriptografar ciphertext sem a chave
-- Encriptar plaintext escolhido (forjar ciphertext)
+- Decifrar ciphertext sem a chave
+- Criptografar plaintext escolhido (forjar ciphertext)
 
 O oracle pode ser:
 
 - Uma mensagem de erro específica
-- Um status HTTP diferente / tamanho de resposta
+- Um status HTTP / tamanho de resposta diferente
 - Uma diferença de timing
 
-### Exploração prática
+### Practical exploitation
 
-PadBuster is the classic tool:
+PadBuster é a ferramenta clássica:
 
 {{#ref}}
 https://github.com/AonCyberLabs/PadBuster
@@ -109,25 +128,25 @@ perl ./padBuster.pl http://10.10.10.10/index.php "RVJDQrwUdTRWJUVUeBKkEA==" 16 \
 ```
 Notas:
 
-- O tamanho do bloco costuma ser `16` para AES.
+- O tamanho do bloco é frequentemente `16` para AES.
 - `-encoding 0` significa Base64.
 - Use `-error` se o oracle for uma string específica.
 
 ### Por que funciona
 
-A descriptografia CBC calcula `P[i] = D(C[i]) XOR C[i-1]`. Ao modificar bytes em `C[i-1]` e observar se o padding é válido, você pode recuperar `P[i]` byte a byte.
+CBC decryption computes `P[i] = D(C[i]) XOR C[i-1]`. Ao modificar bytes em `C[i-1]` e observar se o padding é válido, você pode recuperar `P[i]` byte-a-byte.
 
-## Bit-flipping em CBC
+## Bit-flipping in CBC
 
-Mesmo sem um padding oracle, CBC é maleável. Se você pode modificar blocos de ciphertext e a aplicação usa o plaintext descriptografado como dados estruturados (por exemplo, `role=user`), você pode inverter bits específicos para alterar bytes de plaintext selecionados em uma posição escolhida no próximo bloco.
+Mesmo sem um padding oracle, CBC é malleable. Se você puder modificar blocos de ciphertext e a aplicação usar o plaintext decriptado como dados estruturados (por exemplo, `role=user`), você pode inverter bits específicos para alterar bytes selecionados do plaintext em uma posição escolhida no próximo bloco.
 
-Padrão típico de CTF:
+Padrão típico em CTF:
 
 - Token = `IV || C1 || C2 || ...`
 - Você controla bytes em `C[i]`
-- Você direciona bytes de plaintext em `P[i+1]` porque `P[i+1] = D(C[i+1]) XOR C[i]`
+- Você mira bytes do plaintext em `P[i+1]` porque `P[i+1] = D(C[i+1]) XOR C[i]`
 
-Isso não é uma quebra de confidencialidade por si só, mas é um primitivo comum de escalonamento de privilégios quando a integridade está ausente.
+Isso não é uma quebra de confidencialidade por si só, mas é um primitivo comum de elevação de privilégios quando falta integridade.
 
 ## CBC-MAC
 
@@ -135,14 +154,14 @@ CBC-MAC é seguro apenas sob condições específicas (notadamente **mensagens d
 
 ### Padrão clássico de falsificação para mensagens de comprimento variável
 
-CBC-MAC normalmente é computado como:
+CBC-MAC geralmente é calculado como:
 
 - IV = 0
 - `tag = last_block( CBC_encrypt(key, message, IV=0) )`
 
-Se você pode obter tags para mensagens escolhidas, você frequentemente pode forjar um tag para uma concatenação (ou construção relacionada) sem conhecer a chave, explorando como o CBC encadeia blocos.
+Se você puder obter tags para mensagens escolhidas, frequentemente pode criar um tag para uma concatenação (ou construção relacionada) sem conhecer a chave, explorando como CBC encadeia blocos.
 
-Isso aparece frequentemente em cookies/tokens de CTF que aplicam CBC-MAC em username ou role.
+Isso aparece frequentemente em cookies/tokens de CTF que aplicam MAC ao username ou role com CBC-MAC.
 
 ### Alternativas mais seguras
 
@@ -150,11 +169,11 @@ Isso aparece frequentemente em cookies/tokens de CTF que aplicam CBC-MAC em user
 - Use CMAC (AES-CMAC) corretamente
 - Inclua o comprimento da mensagem / separação de domínio
 
-## Cifras de fluxo: XOR and RC4
+## Stream ciphers: XOR and RC4
 
 ### Modelo mental
 
-A maioria das situações com cifras de fluxo reduz-se a:
+A maioria das situações envolvendo stream ciphers se resume a:
 
 `ciphertext = plaintext XOR keystream`
 
@@ -173,14 +192,18 @@ Autosolvers:
 
 ### RC4
 
-RC4 é uma cifra de fluxo; criptografar/descriptografar são a mesma operação.
+RC4 é um stream cipher; encrypt/decrypt são a mesma operação.
 
-Se você conseguir obter criptografia RC4 de plaintext conhecido com a mesma chave, você pode recuperar o keystream e descriptografar outras mensagens com o mesmo comprimento/deslocamento.
+Se você consegue obter a encriptação RC4 de um plaintext conhecido sob a mesma chave, você pode recuperar o keystream e descriptografar outras mensagens do mesmo comprimento/deslocamento.
 
-Writeup de referência (HTB Kryptos):
+Reference writeup (HTB Kryptos):
 
 {{#ref}}
 https://0xrick.github.io/hack-the-box/kryptos/
 {{#endref}}
+
+## References
+
+- [Trail of Bits – Carelessness versus craftsmanship in cryptography](https://blog.trailofbits.com/2026/02/18/carelessness-versus-craftsmanship-in-cryptography/)
 
 {{#include ../../banners/hacktricks-training.md}}
