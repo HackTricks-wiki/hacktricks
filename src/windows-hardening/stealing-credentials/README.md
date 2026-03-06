@@ -413,8 +413,32 @@ $cmd = $conn.CreateCommand(); $cmd.CommandText = "SELECT accountaddress,accountp
 ```
 
 The `accountpassword` column uses the hMailServer hash format (hashcat mode `1421`). Cracking these values can provide reusable credentials for WinRM/SSH pivots.
+## LSA Logon Callback Interception (LsaApLogonUserEx2)
+
+Some tooling captures **plaintext logon passwords** by intercepting the LSA logon callback `LsaApLogonUserEx2`. The idea is to hook or wrap the authentication package callback so credentials are captured **during logon** (before hashing), then written to disk or returned to the operator. This is commonly implemented as a helper that injects into or registers with LSA, and then records each successful interactive/network logon event with the username, domain and password.
+
+Operational notes:
+- Requires local admin/SYSTEM to load the helper in the authentication path.
+- Captured credentials appear only when a logon occurs (interactive, RDP, service, or network logon depending on the hook).
+
+## SSMS Saved Connection Credentials (sqlstudio.bin)
+
+SQL Server Management Studio (SSMS) stores saved connection information in a per-user `sqlstudio.bin` file. Dedicated dumpers can parse the file and recover saved SQL credentials. In shells that only return command output, the file is often exfiltrated by encoding it as Base64 and printing it to stdout.
+
+```cmd
+certutil -encode sqlstudio.bin sqlstudio.b64
+type sqlstudio.b64
+```
+
+On the operator side, rebuild the file and run the dumper locally to recover credentials:
+
+```bash
+base64 -d sqlstudio.b64 > sqlstudio.bin
+```
+
 ## References
 
+- [Unit 42 – An Investigation Into Years of Undetected Operations Targeting High-Value Sectors](https://unit42.paloaltonetworks.com/cl-unk-1068-targets-critical-sectors/)
 - [0xdf – HTB/VulnLab JobTwo: Word VBA macro phishing via SMTP → hMailServer credential decryption → Veeam CVE-2023-27532 to SYSTEM](https://0xdf.gitlab.io/2026/01/27/htb-jobtwo.html)
 - [Check Point Research – Inside Ink Dragon: Revealing the Relay Network and Inner Workings of a Stealthy Offensive Operation](https://research.checkpoint.com/2025/ink-dragons-relay-network-and-offensive-operation/)
 
