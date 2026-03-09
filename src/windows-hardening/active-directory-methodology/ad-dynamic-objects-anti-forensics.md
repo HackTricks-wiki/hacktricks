@@ -1,47 +1,47 @@
-# AD Dynamiese Objekte (dynamicObject) Anti-Forensies
+# AD Dynamiese Objekte (dynamicObject) Anti-Forensika
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Meganiese en opsporingsbeginsels
+## Werking & Opsporing Basies
 
-- Enige objek wat met die hulpklas **`dynamicObject`** geskep is, kry **`entryTTL`** (sekondes aftelling) en **`msDS-Entry-Time-To-Die`** (absolute vervaldatum). Wanneer `entryTTL` 0 bereik, verwyder die **Garbage Collector dit sonder tombstone/recycle-bin**, wis die skepper/timestamp en blokkeer herstel.
-- TTL kan verfris word deur `entryTTL` op te dateer; min/standaard word afgedwing in **Configuration\Services\NTDS Settings → `msDS-Other-Settings` → `DynamicObjectMinTTL` / `DynamicObjectDefaultTTL`** (ondersteun 1s–1y maar val gewoonlik terug na 86,400s/24h). Dynamic objects word nie in Configuration/Schema-partisies ondersteun nie.
-- Verwydering kan 'n paar minute agterloop op DCs met kort uptime (<24h), wat 'n noue reaksievenster loslaat om attributte te navraag/backup. Detecteer deur te waarsku oor nuwe objekte wat `entryTTL`/`msDS-Entry-Time-To-Die` dra en dit te korreleer met orphan SIDs/broken links.
+- Enige objek wat geskep is met die hulpklas **`dynamicObject`** kry **`entryTTL`** (sekondes-aflopende klok) en **`msDS-Entry-Time-To-Die`** (absolute verstryking). Wanneer `entryTTL` 0 bereik, verwyder die **Garbage Collector dit sonder tombstone/recycle-bin**, wat skepper/timestamp-gegevens uitvee en herstel blokkeer.
+- TTL kan herverfris word deur `entryTTL` op te dateer; minimum/standaard word afgedwing in **Configuration\Services\NTDS Settings → `msDS-Other-Settings` → `DynamicObjectMinTTL` / `DynamicObjectDefaultTTL`** (ondersteun 1s–1j maar gewoonlik verstel op 86,400s/24h). Dynamiese objekte word **nie ondersteun in Configuration/Schema-partisies**.
+- Verwydering kan met 'n paar minute agterbly op DCs met kort uptime (<24h), wat 'n noue reaksievenster laat om attribuute te navraag/te rugsteun. Bespeur dit deur **waarskuwings te gee op nuwe objekte wat `entryTTL`/`msDS-Entry-Time-To-Die` dra** en te korreleer met orphan SIDs/broken links.
 
-## MAQ-ontduiking met selfverwyderende rekenaars
+## MAQ Ontduiking met Self-Verwyderende Rekenars
 
-- Verstek **`ms-DS-MachineAccountQuota` = 10** laat enige geauthentiseerde gebruiker rekenaars skep. Voeg `dynamicObject` tydens skepping by om die rekenaar self te laat verwyder en die kwotaslot vry te maak terwyl bewyse uitgevee word.
-- Powermad-aanpassing binne `New-MachineAccount` (objectClass list):
+- Standaard **`ms-DS-MachineAccountQuota` = 10** laat enige geverifieerde gebruiker toe om rekenaars te skep. Voeg `dynamicObject` tydens skepping by sodat die rekenaar self kan uitvee en die kwotaslot vrymaak terwyl bewyse uitgevee word.
+- Powermad tweak binne `New-MachineAccount` (objectClass list):
 ```powershell
 $request.Attributes.Add((New-Object "System.DirectoryServices.Protocols.DirectoryAttribute" -ArgumentList "objectClass", "dynamicObject", "Computer")) > $null
 ```
-- Kort TTL (bv. 60s) misluk dikwels vir standaardgebruikers; AD val terug na **`DynamicObjectDefaultTTL`** (voorbeeld: 86,400s). ADUC kan `entryTTL` verberg, maar LDP/LDAP-navrae openbaar dit.
+- Kort TTL (bv. 60s) misluk dikwels vir standaard gebruikers; AD val terug op **`DynamicObjectDefaultTTL`** (byvoorbeeld: 86,400s). ADUC mag `entryTTL` wegsteek, maar LDP/LDAP navrae openbaar dit.
 
-## Stil primêre groepslidmaatskap
+## Sluip Primêre Groeplidmaatskap
 
-- Skep 'n dinamiese sekuriteitsgroep, stel dan 'n gebruiker se **`primaryGroupID`** na daardie groep se RID om effektiewe lidmaatskap te verkry wat nie in `memberOf` vertoon nie, maar in Kerberos/toegangs-tokens gehonoreer word.
-- Wanneer die TTL verstryk, verwyder dit die groep ondanks primêre-groep verwyderingsbeskerming, wat die gebruiker met 'n gekorrupte `primaryGroupID` laat wat na 'n nie-bestaande RID wys en geen tombstone het om te ondersoek hoe die regte verleen is nie.
+- Skep 'n **dynamiese sekuriteitsgroep**, stel dan 'n gebruiker se **`primaryGroupID`** op daardie groep se RID om effektiewe lidmaatskap te kry wat **nie in `memberOf` vertoon nie** maar in Kerberos/access tokens erken word.
+- Wanneer TTL verstryk, **verwyder dit die groep ondanks primary-group delete protection**, wat die gebruiker met 'n korrupte `primaryGroupID` los wat na 'n nie-bestaande RID wys en geen tombstone het om te ondersoek hoe die voorreg gegee is nie.
 
-## AdminSDHolder wees-SID-besoedeling
+## AdminSDHolder Orphan-SID Besoedeling
 
-- Voeg ACEs vir 'n kortlewende dinamiese gebruiker/groep by `CN=AdminSDHolder,CN=System,...`. Na TTL-verstrykking word die SID onoplosbaar (“Unknown SID”) in die sjabloon ACL, en SDProp (~60 min) propagandeer daardie wees-SID oor alle beskermde Tier-0 objeke.
-- Forensika verloor attributie omdat die principal weg is (geen deleted-object DN). Moniteer vir nuwe dinamiese principals + skielike wees-SIDs op AdminSDHolder/privileged ACLs.
+- Voeg ACEs vir 'n **kortlewende dynamic user/group** by **`CN=AdminSDHolder,CN=System,...`**. Na TTL verstryk raak die SID **onoplosbaar (“Unknown SID”)** in die templaat-ACL, en **SDProp (~60 min)** propagteer daardie wees-SID oor alle beskermde Tier-0-objekte.
+- Forensika verloor toeskrywing omdat die principal weg is (geen deleted-object DN). Monitor vir **nuwe dynamic principals + skielike orphan SIDs op AdminSDHolder/privileged ACLs**.
 
-## Dinamiese GPO-uitvoering met selfvernietigende bewyse
+## Dynamiese GPO-uitvoering met selfvernietigende bewyse
 
-- Skep 'n dinamiese `groupPolicyContainer`-objek met 'n kwaadwillige **`gPCFileSysPath`** (bv. SMB share à la GPODDITY) en koppel dit via `gPLink` aan 'n teiken-OU.
-- Clients verwerk die beleid en trek inhoud van die aanvaler's SMB. Wanneer die TTL verstryk, verdwyn die GPO-objek (en `gPCFileSysPath`); slegs 'n **broken `gPLink`** GUID bly oor, wat LDAP-bewyse van die uitgevoerde payload verwyder.
+- Skep 'n **dynamic `groupPolicyContainer`** objek met 'n kwaadwillige **`gPCFileSysPath`** (bv. SMB share à la GPODDITY) en **skakel dit via `gPLink`** aan 'n teiken OU.
+- Kliënte verwerk die beleid en trek inhoud vanaf die attacker SMB. Wanneer TTL verstryk, verdwyn die GPO-objek (en `gPCFileSysPath`); slegs 'n **gebroke `gPLink`** GUID bly oor, wat die LDAP-bewyse van die uitgevoerde payload verwyder.
 
 ## Kortstondige AD-geïntegreerde DNS-omleiding
 
-- AD DNS-rekords is `dnsNode`-objekte in DomainDnsZones/ForestDnsZones. Deur dit as dinamiese objekte te skep, is tydelike host-omleidings moontlik (credential capture/MITM). Clients onthou die kwaadwillige A/AAAA-antwoord in cache; die rekord selfverwyder later sodat die zone skoon lyk (DNS Manager mag 'n zone-herlaai benodig om die siening te verfris).
-- Detectie: waarsku op enige DNS-rekord wat `dynamicObject`/`entryTTL` dra via replikasie/evet logs; transiente rekords verskyn selde in standaard DNS-logs.
+- AD DNS-records is **`dnsNode`**-objekte in **DomainDnsZones/ForestDnsZones**. Om dit as **dynamic objects** te skep laat tydelike gasheeromleiding toe (credential capture/MITM). Kliënte kas die kwaadwillige A/AAAA-antwoord; die rekord self-verwyder later sodat die zone skoon lyk (DNS Manager mag 'n zone-herlaai benodig om die siening te verfris).
+- Opsporing: waarsku op **enige DNS-rekord wat `dynamicObject`/`entryTTL` dra** via replication/event logs; transiente rekords verskyn selde in standaard DNS-logs.
 
-## Hibriede Entra ID Delta-Sync-gat (Nota)
+## Hybrid Entra ID Delta-Sync Gap (Nota)
 
-- Entra Connect delta sync berus op tombstones om verwyderings op te spoor. 'n Dynamiese on-prem gebruiker kan na Entra ID sinchroniseer, verval en sonder tombstone verwyder word—delta sync sal nie die cloud-rekening verwyder nie, wat 'n wees-aktiewe Entra-gebruiker agterlaat totdat 'n handmatige full sync gedwing word.
+- Entra Connect delta sync vertrou op **tombstones** om deletes te detecteer. 'n **dynamic on-prem user** kan na Entra ID sinchroniseer, verstryk en verwyder sonder tombstone—delta sync sal nie die cloud-rekening verwyder nie, en laat 'n **orphaned active Entra user** totdat 'n handmatige **full sync** gedwing word.
 
-## Verwysings
+## References
 
 - [Dynamic Objects in Active Directory: The Stealthy Threat](https://www.tenable.com/blog/active-directory-dynamic-objects-stealthy-threat)
 

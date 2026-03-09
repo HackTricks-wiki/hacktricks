@@ -6,20 +6,20 @@
 
 ## Kontroleer fisiese toestel
 
-| Komponent    | Aksie                                                               |
-| ------------ | ------------------------------------------------------------------- |
-| Kragknop     | Om die toestel af en weer aan te skakel kan die beginskerm blootstel |
+| Component    | Aksie                                                               |
+| ------------ | ------------------------------------------------------------------ |
+| Kragknoppie  | Om die toestel af te skakel en weer aan te sit kan die beginskerm openbaar |
 | Kragsnoer    | Kontroleer of die toestel herbegin wanneer die krag kortliks afgesny word |
-| USB-poorte   | Koppel 'n fisiese sleutelbord vir meer sneltoetse                   |
-| Ethernet     | Netwerkskandering of sniffing kan verdere uitbuiting moontlik maak  |
+| USB-poorte   | Koppel 'n fisiese sleutelbord vir meer snelkoppelinge              |
+| Ethernet     | Netwerkskandering of sniffing kan verdere uitbuiting moontlik maak |
 
-## Kontroleer moontlike aksies binne die GUI-toepassing
+## Kontroleer vir moontlike aksies binne die GUI-toepassing
 
-**Common Dialogs** is die opsies om 'n lêer te stoor, 'n lêer te open, 'n font te kies, 'n kleur... Die meeste sal **volle Explorer-funksionaliteit** bied. Dit beteken dat jy toegang tot Explorer-funksies sal hê as jy toegang tot hierdie opsies kry:
+**Algemene dialoogvensters** is opsies soos **'n lêer stoor**, **'n lêer oopmaak**, 'n font kies, 'n kleur... Die meeste daarvan sal **'n volledige Explorer-funksionaliteit bied**. Dit beteken dat jy toegang tot Explorer-funksionaliteit sal hê as jy hierdie opsies kan bereik:
 
 - Sluit/Sluit as
-- Open/Open with
-- Druk af
+- Oopmaak/Oopmaak met
+- Druk
 - Eksporteer/Importeer
 - Soek
 - Skandeer
@@ -28,32 +28,32 @@ Jy moet kontroleer of jy kan:
 
 - Wysig of nuwe lêers skep
 - Simboliese skakels skep
-- Toegang tot beperkte areas verkry
-- Ander apps uitvoer
+- Toegang verkry tot beperkte gebiede
+- Ander toepassings uitvoer
 
-### Command Execution
+### Uitvoering van opdragte
 
-Miskien **using a `Open with`** option\*\* kan jy 'n soort shell open/uitvoer.
+Miskien kan jy, deur die `Open with` opsie te gebruik, 'n soort shell open/uitvoer.
 
 #### Windows
 
-Byvoorbeeld _cmd.exe, command.com, Powershell/Powershell ISE, mmc.exe, at.exe, taskschd.msc..._ vind meer binaries wat gebruik kan word om opdragte uit te voer (en onvoorsiene aksies te verrig) hier: [https://lolbas-project.github.io/](https://lolbas-project.github.io)
+Byvoorbeeld _cmd.exe, command.com, Powershell/Powershell ISE, mmc.exe, at.exe, taskschd.msc..._ vind meer binaries wat gebruik kan word om opdragte uit te voer (en om onverwagte aksies uit te voer) hier: [https://lolbas-project.github.io/](https://lolbas-project.github.io)
 
 #### \*NIX \_\_
 
-_bash, sh, zsh..._ More here: [https://gtfobins.github.io/](https://gtfobins.github.io)
+_bash, sh, zsh..._ Meer hier: [https://gtfobins.github.io/](https://gtfobins.github.io)
 
 ## Windows
 
 ### Padbeperkings omseil
 
-- **Omgewingsveranderlikes**: Daar is baie omgewingsveranderlikes wat na 'n pad wys
+- **Omgewingveranderlikes**: Daar is baie omgewingveranderlikes wat na 'n pad wys
 - **Ander protokolle**: _about:, data:, ftp:, file:, mailto:, news:, res:, telnet:, view-source:_
 - **Simboliese skakels**
-- **Kortpaaie**: CTRL+N (open new session), CTRL+R (Execute Commands), CTRL+SHIFT+ESC (Task Manager), Windows+E (open explorer), CTRL-B, CTRL-I (Favourites), CTRL-H (History), CTRL-L, CTRL-O (File/Open Dialog), CTRL-P (Print Dialog), CTRL-S (Save As)
+- **Snelkoppelinge**: CTRL+N (open nuwe sessie), CTRL+R (Voer opdragte uit), CTRL+SHIFT+ESC (Taakbestuurder), Windows+E (open explorer), CTRL-B, CTRL-I (Favoriete), CTRL-H (Geskiedenis), CTRL-L, CTRL-O (File/Open Dialog), CTRL-P (Print Dialog), CTRL-S (Save As)
 - Verborge administratiewe kieslys: CTRL-ALT-F8, CTRL-ESC-F9
-- **Shell URIs**: _shell:Administrative Tools, shell:DocumentsLibrary, shell:Librariesshell:UserProfiles, shell:Personal, shell:SearchHomeFolder, shell:Systemshell:NetworkPlacesFolder, shell:SendTo, shell:UsersProfiles, shell:Common Administrative Tools, shell:MyComputerFolder, shell:InternetFolder_
-- **UNC paths**: Paaie om aan gedeelde vouers te koppel. Jy moet probeer koppel aan die C$ van die plaaslike masjien ("\\\127.0.0.1\c$\Windows\System32")
+- **Shell-URI's**: _shell:Administrative Tools, shell:DocumentsLibrary, shell:Librariesshell:UserProfiles, shell:Personal, shell:SearchHomeFolder, shell:Systemshell:NetworkPlacesFolder, shell:SendTo, shell:UsersProfiles, shell:Common Administrative Tools, shell:MyComputerFolder, shell:InternetFolder_
+- **UNC-paaie**: Paaie om aan gedeelde vouers te koppel. Jy moet probeer koppel na die C$ van die plaaslike masjien ("\\\127.0.0.1\c$\Windows\System32")
 - **Meer UNC-paaie:**
 
 | UNC                       | UNC            | UNC                  |
@@ -68,25 +68,25 @@ _bash, sh, zsh..._ More here: [https://gtfobins.github.io/](https://gtfobins.git
 | %TMP%                     | %USERDOMAIN%   | %USERNAME%           |
 | %USERPROFILE%             | %WINDIR%       |                      |
 
-### Beperkte Desktop-ontsnappings (Citrix/RDS/VDI)
+### Beperkte Desktop-uitspringings (Citrix/RDS/VDI)
 
-- **Dialog-box pivoting**: Gebruik *Open/Save/Print-to-file* dialoë as Explorer-lite. Probeer `*.*` / `*.exe` in die lêernaamveld, klik regs op vouers vir **Open in new window**, en gebruik **Properties → Open file location** om navigasie uit te brei.
-- **Create execution paths from dialogs**: Skep 'n nuwe lêer en hernoem dit na `.CMD` of `.BAT`, of skep 'n snelkoppeling wat na `%WINDIR%\System32` wys (of 'n spesifieke binary soos `%WINDIR%\System32\cmd.exe`).
-- **Shell launch pivots**: As jy na `cmd.exe` kan blaai, probeer **drag-and-drop** enige lêer daarop om 'n prompt te begin. As Taakbestuurder bereikbaar is (`CTRL+SHIFT+ESC`), gebruik **Run new task**.
-- **Task Scheduler bypass**: As interaktiewe shells geblokkeer is maar skedulering toegelaat word, skep 'n taak om `cmd.exe` te laat loop (GUI `taskschd.msc` of `schtasks.exe`).
-- **Swak allowlists**: As uitvoering toegelaat word deur **filename/extension**, hernoem jou payload na 'n toegelate naam. As dit deur **directory** toegelaat word, kopieer die payload na 'n toegelate program-lêergids en voer dit daar uit.
+- **Dialoogvenster-pivotering**: Gebruik *Open/Save/Print-to-file* dialoogvensters as 'n ligte Explorer. Probeer `*.*` / `*.exe` in die lêernaamveld, regsklik op vouers vir **Open in nuwe venster**, en gebruik **Eienskappe → Open lêerligging** om navigasie uit te brei.
+- **Skep uitvoeringspaaie vanuit dialoogvensters**: Skep 'n nuwe lêer en hernoem dit na `.CMD` of `.BAT`, of skep 'n kortpad wat na `%WINDIR%\System32` verwys (of 'n spesifieke binary soos `%WINDIR%\System32\cmd.exe`).
+- **Shell-opstart-pivots**: As jy na `cmd.exe` kan blaai, probeer **sleep-en-loslaat** enige lêer daarop om 'n prompt te lanseer. As Taakbestuurder bereikbaar is (`CTRL+SHIFT+ESC`), gebruik **Voer nuwe taak uit**.
+- **Taakskeduleerder-omseiling**: As interaktiewe shells geblokkeer is maar skedulering toegelaat, skep 'n taak om `cmd.exe` te laat loop (GUI `taskschd.msc` of `schtasks.exe`).
+- **Swak toelatingslyste**: As uitvoering deur **lêernaam/uitbreiding** toegelaat word, hernoem jou payload na 'n toegelate naam. As dit toegelaat word deur **gids**, kopieer die payload na 'n toegelate programgids en voer dit daar uit.
 - **Vind skryfbare staging-paaie**: Begin by `%TEMP%` en enumereer skryfbare vouers met Sysinternals AccessChk.
 ```cmd
 echo %TEMP%
 accesschk.exe -uwdqs Users c:\
 accesschk.exe -uwdqs "Authenticated Users" c:\
 ```
-- **Volgende stap**: As jy 'n shell kry, skakel oor na die Windows LPE-checklist:
+- **Volgende stap**: As jy 'n shell kry, skuif na die Windows LPE checklist:
 {{#ref}}
 ../windows-hardening/checklist-windows-privilege-escalation.md
 {{#endref}}
 
-### Laai jou Binaries af
+### Laai jou binaries af
 
 Console: [https://sourceforge.net/projects/console/](https://sourceforge.net/projects/console/)\
 Explorer: [https://sourceforge.net/projects/explorerplus/files/Explorer%2B%2B/](https://sourceforge.net/projects/explorerplus/files/Explorer%2B%2B/)\
@@ -109,42 +109,42 @@ Registry editor: [https://sourceforge.net/projects/uberregedit/](https://sourcef
 - Sticky Keys – Druk SHIFT 5 keer
 - Mouse Keys – SHIFT+ALT+NUMLOCK
 - High Contrast – SHIFT+ALT+PRINTSCN
-- Toggle Keys – Hou NUMLOCK 5 sekondes gedruk
-- Filter Keys – Hou regter SHIFT 12 sekondes gedruk
-- WINDOWS+F1 – Windows-soektog
-- WINDOWS+D – Wys lessenaar
-- WINDOWS+E – Start Windows Explorer
+- Toggle Keys – Hou NUMLOCK vir 5 sekondes ingedruk
+- Filter Keys – Hou regte SHIFT vir 12 sekondes ingedruk
+- WINDOWS+F1 – Windows Search
+- WINDOWS+D – Wys Desktop
+- WINDOWS+E – Maak Windows Explorer oop
 - WINDOWS+R – Run
-- WINDOWS+U – Sentrum vir Toeganklikheid
-- WINDOWS+F – Soek
-- SHIFT+F10 – Konteksmenu
+- WINDOWS+U – Ease of Access Centre
+- WINDOWS+F – Search
+- SHIFT+F10 – Context Menu
 - CTRL+SHIFT+ESC – Taakbestuurder
-- CTRL+ALT+DEL – Splash-skerm op nuwer Windows-weergawes
-- F1 – Hulp  F3 – Soek
+- CTRL+ALT+DEL – Splash screen on newer Windows versions
+- F1 – Help F3 – Soek
 - F6 – Adresbalk
-- F11 – Skakel volle skerm in Internet Explorer
-- CTRL+H – Internet Explorer-geskiedenis
+- F11 – Wissel volle skerm in Internet Explorer
+- CTRL+H – Internet Explorer History
 - CTRL+T – Internet Explorer – Nuwe oortjie
 - CTRL+N – Internet Explorer – Nuwe bladsy
-- CTRL+O – Open lêer
-- CTRL+S – Stoor  CTRL+N – Nuwe RDP / Citrix
+- CTRL+O – Maak lêer oop
+- CTRL+S – Stoor CTRL+N – Nuwe RDP / Citrix
 
-### Veegbeweginge
+### Swipe-beweginge
 
-- Veeg van die linkerkant na regs om al die oop Windows te sien, waarmee die KIOSK-app geminimeer word en jy direk toegang tot die hele OS kry;
-- Veeg van die regterkant na links om Action Center te open, waarmee die KIOSK-app geminimeer word en jy direk toegang tot die hele OS kry;
-- Veeg in vanaf die boonste rand om die titelbalk sigbaar te maak vir 'n app wat in volle skermmodus oop is;
-- Veeg op vanaf die onderkant om die taakbalk te wys in 'n volle skerm-app.
+- Vee van die linkerkant na regs om alle oop Windows te sien, die KIOSK-app te minimaliseer en direk toegang tot die hele OS te kry;
+- Vee van die regterkant na links om Action Center oop te maak, die KIOSK-app te minimaliseer en direk toegang tot die hele OS te kry;
+- Vee van die boonste rand af om die titelbalk sigbaar te maak vir 'n app wat in volle skerm geopen is;
+- Vee van onder af op om die taakbalk te toon in 'n volle skerm-app.
 
-### Internet Explorer-wenke
+### Internet Explorer-truuks
 
 #### 'Image Toolbar'
 
-Dit is 'n werkbalk wat links bo op 'n beeld verskyn wanneer dit geklik word. Jy sal kan Stoor, Druk, Mailto en "My Pictures" in Explorer oopmaak. Die Kiosk moet Internet Explorer gebruik.
+Dis 'n toolbar wat in die top-links van 'n beeld verskyn wanneer dit geklik word. Jy sal die opsies Save, Print, Mailto en Open "My Pictures" in Explorer hê. Die Kiosk moet Internet Explorer gebruik.
 
 #### Shell-protokol
 
-Tik hierdie URL's om 'n Explorer-kyk te kry:
+Tik hierdie URLs om 'n Explorer-uitsig te kry:
 
 - `shell:Administrative Tools`
 - `shell:DocumentsLibrary`
@@ -170,39 +170,39 @@ Tik hierdie URL's om 'n Explorer-kyk te kry:
 
 ### Wys lêeruitbreidings
 
-Kyk na hierdie bladsy vir meer inligting: [https://www.howtohaven.com/system/show-file-extensions-in-windows-explorer.shtml](https://www.howtohaven.com/system/show-file-extensions-in-windows-explorer.shtml)
+Kyk hierdie bladsy vir meer inligting: [https://www.howtohaven.com/system/show-file-extensions-in-windows-explorer.shtml](https://www.howtohaven.com/system/show-file-extensions-in-windows-explorer.shtml)
 
-## Blaaierwenke
+## Blaaier-truuks
 
 Backup iKat versions:
 
 [http://swin.es/k/](http://swin.es/k/)\
 [http://www.ikat.kronicd.net/](http://www.ikat.kronicd.net)
 
-Skep 'n algemene dialoog met JavaScript en kry toegang tot lêerverkenner: `document.write('<input/type=file>')`\
+Skep 'n algemene dialoog met JavaScript en kry toegang tot File Explorer: `document.write('<input/type=file>')`\
 Source: https://medium.com/@Rend\_/give-me-a-browser-ill-give-you-a-shell-de19811defa0
 
 ## iPad
 
 ### Gebare en knoppies
 
-- Veeg op met vier (of vyf) vingers / Dubbel-tik die Home-knoppie: Om die multitask-uitsig te sien en 'n app te verander
-- Veeg een kant toe met vier of vyf vingers: Om na die volgende/vorige app te skakel
-- Knyp die skerm met vyf vingers / Tik die Home-knoppie / Veeg vinnig op met 1 vinger vanaf die onderkant van die skerm: Om by Home uit te kom
-- Veeg een vinger vanaf die onderkant van die skerm net 1–2 duim (stadig): Die dok sal verskyn
-- Veeg af vanaf die bokant van die vertoning met 1 vinger: Om jou kennisgewings te sien
-- Veeg af met 1 vinger in die boonste-regterhoek van die skerm: Om iPad Pro se beheersentrum te sien
-- Veeg 1 vinger vanaf die linkerkant van die skerm 1–2 duim: Om Today view te sien
-- Veeg vinnig 1 vinger van die middel van die skerm na regs of links: Om na die volgende/vorige app te skakel
-- Druk en hou die On/**Off**/Sleep-knoppie aan die boonste-regterhoek van die **iPad** en skuif die Slide to **power off**-skuifknop heeltemal na regs: Om uit te skakel
-- Druk en hou die On/**Off**/Sleep-knoppie aan die boonste-regterhoek van die **iPad** en die Home-knoppie vir 'n paar sekondes: Om 'n geforseerde harde afskakeling te doen
-- Druk die On/**Off**/Sleep-knoppie aan die boonste-regterhoek van die **iPad** en die Home-knoppie vinnig: Om 'n skermfoto te neem wat onder links op die vertoning sal verskyn. Druk albei knoppies gelyktydig baie kortliks; as jy hulle 'n paar sekondes hou, sal 'n harde afskakeling uitgevoer word.
+- Vee op met vier (of vyf) vingers / Dubbel-tik die Home-knoppie: Om die multitask-uitsig te sien en van App te verander
+- Vee een kant toe met vier of vyf vingers: Om na die volgende/vorige App te skakel
+- Knyp die skerm met vyf vingers / Raak die Home-knoppie aan / Vee vinnig met 1 vinger vanaf die onderkant van die skerm op : Om by Home uit te kom
+- Vee een vinger 1-2 duim vanaf die onderkant van die skerm (stadig): Die dok sal verskyn
+- Vee vanaf die top van die skerm met 1 vinger af: Om jou kennisgewings te sien
+- Vee af met 1 vinger die boonste-regterhoek van die skerm: Om iPad Pro se beheer-sentrum te sien
+- Vee 1 vinger vanaf die linkerkant van die skerm 1-2 duim: Om die Today-view te sien
+- Vee vinnig 1 vinger van die sentrum van die skerm na regs of links: Om na die volgende/vorige App te gaan
+- Druk en hou die On/**Off**/Sleep-knoppie in die boonste-regterhoek van die **iPad +** skuif die Slide to **power off** skuifregterkant toe: Om af te skakel
+- Druk die On/**Off**/Sleep-knoppie in die boonste-regterhoek van die **iPad en die Home-knoppie vir 'n paar sekondes**: Om 'n kragafskakeling te dwing
+- Druk die On/**Off**/Sleep-knoppie in die boonste-regterhoek van die **iPad en die Home-knoppie vinnig**: Om 'n skermskoot te neem wat onder links op die skerm sal verskyn. Druk albei knoppies saam baie kortliks; as jy hulle 'n paar sekondes hou sal 'n harde kragafskakeling plaasvind.
 
 ### Kortpaaie
 
-Jy behoort 'n iPad-toetsenbord of 'n USB-toetsenbordadapter te hê. Slegs kortpaaie wat kan help om uit die toepassing te ontsnap, word hier getoon.
+Jy behoort 'n iPad-toetsenbord of 'n USB-toetsenbordadapter te hê. Slegs kortpaaie wat kan help om uit die toepassing te ontsnap sal hier getoon word.
 
-| Sleutel | Naam         |
+| Key | Name         |
 | --- | ------------ |
 | ⌘   | Command      |
 | ⌥   | Option (Alt) |
@@ -217,72 +217,72 @@ Jy behoort 'n iPad-toetsenbord of 'n USB-toetsenbordadapter te hê. Slegs kortpa
 
 #### Stelsel-kortpaaie
 
-| Kortpad | Aksie                                                                 |
-| -------- | ------------------------------------------------------------------------------ |
-| F1       | Skerm verdof                                                                  |
-| F2       | Skerm verhelder                                                                |
-| F7       | Vorige liedjie                                                                 |
-| F8       | Speel/pauze                                                                     |
-| F9       | Slaan liedjie oor                                                               |
-| F10      | Demp                                                                            |
-| F11      | Verlaag volume                                                                  |
-| F12      | Verhoog volume                                                                  |
-| ⌘ Space  | Vertoon 'n lys van beskikbare tale; om een te kies, tik weer die spasiebalk. |
+| Shortcut | Action                                                                 |
+| -------- | ---------------------------------------------------------------------- |
+| F1       | Verlaag skermhelderheid                                                |
+| F2       | Verhoog skermhelderheid                                                |
+| F7       | Vorige liedjie                                                          |
+| F8       | Play/pause                                                              |
+| F9       | Skip liedjie                                                            |
+| F10      | Demper                                                                  |
+| F11      | Verlaag volume                                                          |
+| F12      | Verhoog volume                                                          |
+| ⌘ Space  | Vertoon 'n lys van beskikbare tale; om een te kies, druk weer die spasiebalk. |
 
 #### iPad-navigasie
 
-| Kortpad                                           | Aksie                                                  |
+| Shortcut                                           | Action                                                  |
 | -------------------------------------------------- | ------------------------------------------------------- |
 | ⌘H                                                 | Gaan na Home                                            |
 | ⌘⇧H (Command-Shift-H)                              | Gaan na Home                                            |
 | ⌘ (Space)                                          | Maak Spotlight oop                                      |
-| ⌘⇥ (Command-Tab)                                   | Lys van die laaste tien gebruikte apps                 |
-| ⌘\~                                                | Gaan na die laaste app                                  |
-| ⌘⇧3 (Command-Shift-3)                              | Skermfoto (verskyn onder links om te stoor of op te tree) |
-| ⌘⇧4                                                | Skermfoto en maak dit in die editor oop                 |
-| Press and hold ⌘                                   | Lys van kortpaaie beskikbaar vir die App               |
-| ⌘⌥D (Command-Option/Alt-D)                         | Roep die dok op                                         |
-| ^⌥H (Control-Option-H)                             | Home-knoppie                                            |
-| ^⌥H H (Control-Option-H-H)                         | Wys multitask-balk                                      |
-| ^⌥I (Control-Option-i)                             | Item-kieër                                              |
-| Escape                                             | Terug-knoppie                                           |
-| → (Right arrow)                                    | Volgende item                                           |
-| ← (Left arrow)                                     | Vorige item                                             |
-| ↑↓ (Up arrow, Down arrow)                          | Tik gelyktydig die geselekteerde item                   |
-| ⌥ ↓ (Option-Down arrow)                            | Blaai af                                                |
-| ⌥↑ (Option-Up arrow)                               | Blaai op                                                |
-| ⌥← of ⌥→ (Option-Left arrow or Option-Right arrow) | Blaai links of regs                                      |
-| ^⌥S (Control-Option-S)                             | Skakel VoiceOver-spraak aan of af                       |
-| ⌘⇧⇥ (Command-Shift-Tab)                            | Skakel na die vorige app                                 |
-| ⌘⇥ (Command-Tab)                                   | Skakel terug na die oorspronklike app                    |
-| ←+→, then Option + ← or Option+→                   | Navigeer deur die dok                                    |
+| ⌘⇥ (Command-Tab)                                   | Lys die laaste tien gebruikte apps                      |
+| ⌘\~                                                | Gaan na die laaste App                                  |
+| ⌘⇧3 (Command-Shift-3)                              | Skermskoot (verskyn onder links om te stoor of te hanteer) |
+| ⌘⇧4                                                | Skermskoot en maak dit in die redigeerder oop           |
+| Press and hold ⌘                                   | Lys van kortpaaie beskikbaar vir die App                |
+| ⌘⌥D (Command-Option/Alt-D)                         | Roep die dok op                                          |
+| ^⌥H (Control-Option-H)                             | Home-knoppie                                             |
+| ^⌥H H (Control-Option-H-H)                         | Wys multitask-balk                                       |
+| ^⌥I (Control-Option-i)                             | Item-chooser                                             |
+| Escape                                             | Terug-knoppie                                            |
+| → (Right arrow)                                    | Volgende item                                             |
+| ← (Left arrow)                                     | Vorige item                                               |
+| ↑↓ (Up arrow, Down arrow)                          | Tegelykertyd die geselekteerde item tik                   |
+| ⌥ ↓ (Option-Down arrow)                            | Scroll af                                                 |
+| ⌥↑ (Option-Up arrow)                               | Scroll op                                                 |
+| ⌥← or ⌥→ (Option-Left arrow or Option-Right arrow) | Scroll links of regs                                       |
+| ^⌥S (Control-Option-S)                             | Skakel VoiceOver-spraak aan of af                         |
+| ⌘⇧⇥ (Command-Shift-Tab)                            | Skakel na die vorige app                                  |
+| ⌘⇥ (Command-Tab)                                   | Skakel terug na die oorspronklike app                     |
+| ←+→, then Option + ← or Option+→                   | Navigeer deur die Dok                                     |
 
 #### Safari-kortpaaie
 
-| Kortpad                | Aksie                                           |
+| Shortcut                | Action                                           |
 | ----------------------- | ------------------------------------------------ |
 | ⌘L (Command-L)          | Open Location                                    |
 | ⌘T                      | Maak 'n nuwe oortjie oop                         |
-| ⌘W                      | Maak die huidige oortjie toe                     |
+| ⌘W                      | Sluit die huidige oortjie                        |
 | ⌘R                      | Herlaai die huidige oortjie                      |
-| ⌘.                      | Stop die laai van die huidige oortjie            |
+| ⌘.                      | Stop die huidige oortjie se laai                 |
 | ^⇥                      | Skakel na die volgende oortjie                   |
-| ^⇧⇥ (Control-Shift-Tab) | Gaan na die vorige oortjie                       |
-| ⌘L                      | Selekteer die teksinvoer/URL-veld om dit te wysig |
-| ⌘⇧T (Command-Shift-T)   | Maak die laaste geslote oortjie oop (kan meermaals gebruik word) |
-| ⌘\[                     | Gaan een blad terug in jou blaai-geskiedenis     |
-| ⌘]                      | Gaan een blad vorentoe in jou blaai-geskiedenis  |
-| ⌘⇧R                     | Aktiveer Reader Mode                             |
+| ^⇧⇥ (Control-Shift-Tab) | Skakel na die vorige oortjie                     |
+| ⌘L                      | Kies die teksinvoer/URL-veld om dit te wysig     |
+| ⌘⇧T (Command-Shift-T)   | Maak laaste geslote oortjie oop (kan meerdere kere gebruik word) |
+| ⌘\[                     | Gaan een bladsy terug in jou blaaigeskiedenis    |
+| ⌘]                      | Gaan een bladsy vorentoe in jou blaaigeskiedenis |
+| ⌘⇧R                     | Aktiveer Reader Mode                              |
 
 #### Mail-kortpaaie
 
-| Kortpad                   | Aksie                       |
+| Shortcut                   | Action                       |
 | -------------------------- | ---------------------------- |
 | ⌘L                         | Open Location                |
 | ⌘T                         | Maak 'n nuwe oortjie oop     |
-| ⌘W                         | Maak die huidige oortjie toe |
+| ⌘W                         | Sluit die huidige oortjie    |
 | ⌘R                         | Herlaai die huidige oortjie  |
-| ⌘.                         | Stop die laai van die huidige oortjie |
+| ⌘.                         | Stop die huidige oortjie se laai |
 | ⌘⌥F (Command-Option/Alt-F) | Soek in jou posbus           |
 
 ## Verwysings
