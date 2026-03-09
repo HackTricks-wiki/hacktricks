@@ -6,16 +6,16 @@
 
 ### C2 Listeners
 
-`Cobalt Strike -> Listeners -> Add/Edit` फिर आप चुन सकते हैं कि कहाँ सुनना है, कौन सा beacon (http, dns, smb...) उपयोग करना है और अन्य विकल्प।
+`Cobalt Strike -> Listeners -> Add/Edit` फिर आप चुन सकते हैं कि कहाँ सुनना है, किस प्रकार का beacon उपयोग करना है (http, dns, smb...) और अन्य विकल्प।
 
 ### Peer2Peer Listeners
 
-इन listeners के beacons को सीधे C2 से बात करने की ज़रूरत नहीं होती; वे अन्य beacons के माध्यम से इससे संचार कर सकते हैं।
+इन listeners के beacons को C2 से सीधे बात करने की ज़रूरत नहीं होती, वे अन्य beacons के माध्यम से उससे संवाद कर सकते हैं।
 
-`Cobalt Strike -> Listeners -> Add/Edit` फिर आपको TCP या SMB beacons चुनने होंगे
+`Cobalt Strike -> Listeners -> Add/Edit` फिर आपको TCP या SMB beacons का चयन करना होगा
 
-* The **TCP beacon will set a listener in the port selected**. TCP beacon से कनेक्ट करने के लिए किसी अन्य beacon से कमांड `connect <ip> <port>` का उपयोग करें
-* The **smb beacon will listen in a pipename with the selected name**. SMB beacon से कनेक्ट करने के लिए कमांड `link [target] [pipe]` का उपयोग करें।
+* The **TCP beacon चयनित पोर्ट पर listener सेट करेगा**. दूसरे beacon से TCP beacon से कनेक्ट करने के लिए कमांड `connect <ip> <port>` का उपयोग करें
+* The **smb beacon चयनित नाम वाले pipename में सुनता रहेगा**. SMB beacon से कनेक्ट करने के लिए कमांड `link [target] [pipe]` का उपयोग करें।
 
 ### Generate & Host payloads
 
@@ -24,22 +24,22 @@
 `Attacks -> Packages ->`
 
 * **`HTMLApplication`** HTA फ़ाइलों के लिए
-* **`MS Office Macro`** macro वाले office दस्तावेज़ के लिए
+* **`MS Office Macro`** मैक्रो वाले Office दस्तावेज़ के लिए
 * **`Windows Executable`** .exe, .dll या service .exe के लिए
-* **`Windows Executable (S)`** एक **stageless** .exe, .dll या service .exe के लिए (stageless बेहतर है बनाम staged, कम IoCs)
+* **`Windows Executable (S)`** **stageless** .exe, .dll या service .exe के लिए (stageless staged से बेहतर है, कम IoCs)
 
 #### Generate & Host payloads
 
-`Attacks -> Web Drive-by -> Scripted Web Delivery (S)` यह cobalt strike से beacon डाउनलोड करने के लिए bitsadmin, exe, powershell और python जैसे फॉर्मैट्स में एक script/executable जेनरेट करेगा
+`Attacks -> Web Drive-by -> Scripted Web Delivery (S)` यह beacon को cobalt strike से डाउनलोड करने के लिए bitsadmin, exe, powershell और python जैसे फॉर्मैट में एक script/executable जेनरेट करेगा।
 
 #### Host Payloads
 
-यदि आपके पास वह फ़ाइल पहले से है जिसे आप वेब सर्वर पर host करना चाहते हैं तो बस `Attacks -> Web Drive-by -> Host File` पर जाएँ और host करने के लिए फ़ाइल और web server config चुनें।
+यदि आपके पास वह फ़ाइल पहले से ही है जिसे आप वेब सर्वर पर होस्ट करना चाहते हैं, तो बस `Attacks -> Web Drive-by -> Host File` पर जाएँ और होस्ट करने के लिए फ़ाइल तथा वेब सर्वर कॉन्फ़िग चुनें।
 
 ### Beacon Options
 
 <details>
-<summary>Beacon विकल्प और कमांड</summary>
+<summary>Beacon विकल्प और कमांड्स</summary>
 ```bash
 # Execute local .NET binary
 execute-assembly </path/to/executable.exe>
@@ -292,21 +292,22 @@ With the following Cobalt Strike command, you can specify a different process to
 ```bash
 spawnto x86 svchost.exe
 ```
-आप किसी प्रोफ़ाइल में यह सेटिंग बदल सकते हैं **`spawnto_x86` और `spawnto_x64`**।
+You can aso change this setting **`spawnto_x86` and `spawnto_x64`** in a profile.
 
-### हमलावरों के ट्रैफ़िक का प्रॉक्सी करना
+### हमलावरों के ट्रैफ़िक का प्रॉक्सी
 
-हमलावरों को कभी-कभी उपकरणों को लोकली चलाने की ज़रूरत पड़ती है, यहाँ तक कि Linux मशीनों पर भी, और पीड़ितों का ट्रैफ़िक उस टूल तक पहुँचाना होता है (उदाहरण: NTLM relay)।
+कभी-कभार हमलावरों को स्थानीय रूप से टूल्स चलाने की जरूरत पड़ती है, यहाँ तक कि Linux मशीनों पर भी, और पीड़ितों का ट्रैफ़िक उन टूल्स तक पहुँचाना पड़ता है (उदाहरण: NTLM relay)।
 
-इसके अलावा, कभी-कभी pass-the.hash या pass-the-ticket हमला करने के लिए यह अधिक stealthy होता है कि attacker **अपने ही LSASS process में यह hash या ticket जोड़ दे** लोकली और फिर उससे pivot करे, बजाय इसके कि पीड़ित मशीन के LSASS process को संशोधित किया जाए।
+इसके अलावा, कभी-कभी pass-the.hash या pass-the-ticket attack करने के लिए यह छिपकर काम करने के लिहाज़ से बेहतर होता है कि हमलावर अपने स्थानीय **LSASS process में यह hash या ticket जोड़ दे** और फिर उसी से pivot करे, बजाय इसके कि किसी पीड़ित मशीन की LSASS process को modify करें।
 
-हालाँकि, आपको **जनरेट किए गए ट्रैफ़िक के साथ सावधान रहना होगा**, क्योंकि आप अपने backdoor process से असामान्य ट्रैफ़िक (Kerberos?) भेज रहे हो सकते हैं। इसके लिए आप browser process में pivot कर सकते हैं (हालाँकि किसी प्रोसेस में खुद को inject करने पर पकड़े जाने का खतरा है, इसलिए इसके लिए कोई stealth तरीका सोचें)।
+हालाँकि, आपको उत्पन्न ट्रैफ़िक के साथ सावधान रहना चाहिए, क्योंकि आप अपने backdoor process से असामान्य ट्रैफ़िक (kerberos?) भेज रहे होंगे। इसके लिए आप एक browser process में pivot कर सकते हैं (हालाँकि किसी process में खुद को inject करने पर पकड़ भी पड़ सकती है, इसलिए इसके लिए कोई stealth तरीका सोचें)।
 
-### AVs से बचाव
+### Avoiding AVs
 
 #### AV/AMSI/ETW Bypass
 
-संदर्भ पृष्ठ देखें:
+Check the page:
+
 
 {{#ref}}
 av-bypass.md
@@ -315,45 +316,45 @@ av-bypass.md
 
 #### Artifact Kit
 
-आम तौर पर `/opt/cobaltstrike/artifact-kit` में आप उन payloads का कोड और pre-compiled templates ( `/src-common` में) पाएँगे जिन्हें Cobalt Strike binary beacons जनरेट करने के लिए उपयोग करेगा।
+Usually in `/opt/cobaltstrike/artifact-kit` you can find the code and pre-compiled templates (in `/src-common`) of the payloads that cobalt strike is going to use to generate the binary beacons.
 
-[ThreatCheck](https://github.com/rasta-mouse/ThreatCheck) को generated backdoor (या सिर्फ compiled template) के साथ चलाकर आप पता लगा सकते हैं कि defender किस वजह से ट्रिगर हो रहा है। अक्सर यह कोई string होती है। इसलिए आप उस कोड को संशोधित कर सकते हैं जो backdoor बना रहा है ताकि वह string अंतिम binary में न दिखे।
+Using [ThreatCheck](https://github.com/rasta-mouse/ThreatCheck) with the generated backdoor (or just with the compiled template) you can find what is making defender trigger. It's usually a string. Therefore you can just modify the code that is generating the backdoor so that string doesn't appear in the final binary.
 
-कोड बदलने के बाद उसी डायरेक्टरी में `./build.sh` चलाएँ और `dist-pipe/` फ़ोल्डर को Windows क्लाइंट में `C:\Tools\cobaltstrike\ArtifactKit` में कॉपी करें।
+After modifying the code just run `./build.sh` from the same directory and copy the `dist-pipe/` folder into the Windows client in `C:\Tools\cobaltstrike\ArtifactKit`.
 ```
 pscp -r root@kali:/opt/cobaltstrike/artifact-kit/dist-pipe .
 ```
-यह न भूलें कि aggressive script `dist-pipe\artifact.cna` लोड करें ताकि Cobalt Strike उन disk पर मौजूद resources का उपयोग करे जिन्हें हम चाहते हैं, न कि पहले से लोड किए गए।
+Don't forget to load the aggressive script `dist-pipe\artifact.cna` to indicate Cobalt Strike to use the resources from disk that we want and not the ones loaded.
 
 #### Resource Kit
 
-ResourceKit फ़ोल्डर में Cobalt Strike के script-based payloads के templates मौजूद हैं, जिनमें PowerShell, VBA और HTA शामिल हैं।
+The ResourceKit folder contains the templates for Cobalt Strike's script-based payloads including PowerShell, VBA and HTA.
 
-इन templates के साथ [ThreatCheck](https://github.com/rasta-mouse/ThreatCheck) का उपयोग करके आप पता लगा सकते हैं कि defender (AMSI in this case) किन चीज़ों को पसंद नहीं कर रहा है और उन्हें संशोधित कर सकते हैं:
+Using [ThreatCheck](https://github.com/rasta-mouse/ThreatCheck) with the templates you can find what is defender (AMSI in this case) not liking and modify it:
 ```
 .\ThreatCheck.exe -e AMSI -f .\cobaltstrike\ResourceKit\template.x64.ps1
 ```
-Modifying the detected lines one can generate a template that won't be caught.
+डिटेक्ट की गई लाइनों को संशोधित करके आप ऐसा टेम्पलेट बना सकते हैं जिसे पकड़ा न जाए।
 
-Don't forget to load the aggressive script `ResourceKit\resources.cna` to indicate Cobalt Strike to luse the resources from disk that we want and not the ones loaded.
+भूलें नहीं कि aggressive script `ResourceKit\resources.cna` लोड करें ताकि Cobalt Strike को यह संकेत मिले कि हम डिस्क से वही resources उपयोग करना चाहते हैं जिन्हें हम चाहते हैं, न कि पहले से लोड किए गए।
 
 #### Function hooks | Syscall
 
-Function hooking ERDs द्वारा दुर्भावनापूर्ण गतिविधियों का पता लगाने की एक बहुत सामान्य विधि है। Cobalt Strike आपको इन hooks को बायपास करने की अनुमति देता है — standard Windows API calls की बजाय **syscalls** का उपयोग करके **`None`** config के साथ, या किसी फ़ंक्शन के `Nt*` version का उपयोग करने के लिए **`Direct`** setting, या मalleable profile में `Nt*` फ़ंक्शन को जंप करके छोड़ने के लिए **`Indirect`** option। सिस्टम पर निर्भर करते हुए, एक विकल्प दूसरे की तुलना में अधिक stealth हो सकता है।
+Function hooking ERDs में malicious activity का पता लगाने का एक बहुत ही आम तरीका है। Cobalt Strike आपको इन hooks को बायपास करने की अनुमति देता है: मानक Windows API कॉल्स के बजाय **syscalls** का उपयोग करके ( **`None`** कॉन्फ़िग), या किसी फ़ंक्शन का `Nt*` वर्शन **`Direct`** सेटिंग के साथ उपयोग करके, या malleable profile में `Nt*` फ़ंक्शन को कूदकर **`Indirect`** विकल्प के साथ। सिस्टम के आधार पर, एक विकल्प दूसरे की तुलना में अधिक stealth हो सकता है।
 
-यह profile में सेट किया जा सकता है या कमांड **`syscall-method`** का उपयोग करके।
+यह profile में सेट किया जा सकता है या आदेश **`syscall-method`** का उपयोग करके।
 
-हालाँकि, यह शोर पैदा भी कर सकता है।
+हालाँकि, यह noisy भी हो सकता है।
 
-Function hooks को bypass करने के लिए Cobalt Strike द्वारा प्रदान किए गए एक विकल्प में उन hooks को हटाना शामिल है: [**unhook-bof**](https://github.com/Cobalt-Strike/unhook-bof).
+Cobalt Strike द्वारा function hooks को बायपास करने का एक विकल्प उन hooks को हटाना है: [**unhook-bof**](https://github.com/Cobalt-Strike/unhook-bof).
 
-आप यह भी चेक कर सकते हैं कि कौन से functions hooked हैं: [**https://github.com/Mr-Un1k0d3r/EDRs**](https://github.com/Mr-Un1k0d3r/EDRs) या [**https://github.com/matterpreter/OffensiveCSharp/tree/master/HookDetector**](https://github.com/matterpreter/OffensiveCSharp/tree/master/HookDetector)
+आप यह भी चेक कर सकते हैं कि कौन से फ़ंक्शन hook किए गए हैं, इन टूल्स के साथ: [**https://github.com/Mr-Un1k0d3r/EDRs**](https://github.com/Mr-Un1k0d3r/EDRs) या [**https://github.com/matterpreter/OffensiveCSharp/tree/master/HookDetector**](https://github.com/matterpreter/OffensiveCSharp/tree/master/HookDetector)
 
 
 
 
 <details>
-<summary>विविध Cobalt Strike कमांड्स</summary>
+<summary>Misc Cobalt Strike commands</summary>
 ```bash
 cd C:\Tools\neo4j\bin
 neo4j.bat console
