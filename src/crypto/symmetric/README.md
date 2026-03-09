@@ -1,202 +1,202 @@
-# Συμμετρική Κρυπτογραφία
+# Symmetric Crypto
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Τι να ψάχνετε σε CTFs
+## What to look for in CTFs
 
 - **Mode misuse**: ECB patterns, CBC malleability, CTR/GCM nonce reuse.
-- **Padding oracles**: διαφορετικά σφάλματα/χρονισμοί για κακό padding.
-- **MAC confusion**: χρήση CBC-MAC με μηνύματα μεταβλητού μήκους, ή λάθη MAC-then-encrypt.
-- **XOR everywhere**: stream ciphers και custom constructions συχνά μειώνονται σε XOR με ένα keystream.
+- **Padding oracles**: different errors/timings for bad padding.
+- **MAC confusion**: using CBC-MAC with variable-length messages, or MAC-then-encrypt mistakes.
+- **XOR everywhere**: stream ciphers and custom constructions often reduce to XOR with a keystream.
 
-## Λειτουργίες AES και κακή χρήση
+## AES modes and misuse
 
 ### ECB: Electronic Codebook
 
-ECB leaks patterns: equal plaintext blocks → equal ciphertext blocks. Αυτό επιτρέπει:
+ECB leaks patterns: equal plaintext blocks → equal ciphertext blocks. That enables:
 
-- Cut-and-paste / αναδιάταξη μπλοκ
-- Διαγραφή μπλοκ (εάν η μορφή παραμένει έγκυρη)
+- Cut-and-paste / block reordering
+- Block deletion (if the format remains valid)
 
-Αν μπορείτε να ελέγξετε το plaintext και να παρατηρήσετε το ciphertext (ή cookies), δοκιμάστε να δημιουργήσετε επαναλαμβανόμενα μπλοκ (π.χ. πολλά `A`s) και ψάξτε για επαναλήψεις.
+If you can control plaintext and observe ciphertext (or cookies), try making repeated blocks (e.g., many `A`s) and look for repeats.
 
 ### CBC: Cipher Block Chaining
 
-- CBC είναι **malleable**: το γύρισμα bits στο `C[i-1]` αλλάζει προβλέψιμα bits στο `P[i]`.
-- Εάν το σύστημα αποκαλύπτει έγκυρο padding vs μη έγκυρο padding, μπορεί να έχετε ένα **padding oracle**.
+- CBC is **malleable**: flipping bits in `C[i-1]` flips predictable bits in `P[i]`.
+- If the system exposes valid padding vs invalid padding, you may have a **padding oracle**.
 
 ### CTR
 
-Το CTR μετατρέπει το AES σε stream cipher: `C = P XOR keystream`.
+CTR turns AES into a stream cipher: `C = P XOR keystream`.
 
-Εάν ένας nonce/IV επαναχρησιμοποιηθεί με το ίδιο κλειδί:
+If a nonce/IV is reused with the same key:
 
-- `C1 XOR C2 = P1 XOR P2` (κλασική επαναχρησιμοποίηση keystream)
-- Με γνωστό plaintext, μπορείτε να ανακτήσετε το keystream και να αποκρυπτογραφήσετε άλλα.
+- `C1 XOR C2 = P1 XOR P2` (classic keystream reuse)
+- With known plaintext, you can recover the keystream and decrypt others.
 
 **Nonce/IV reuse exploitation patterns**
 
-- Ανακτήστε το keystream όπου το plaintext είναι γνωστό/μπορεί να μαντευτεί:
+- Recover keystream wherever plaintext is known/guessable:
 
 ```text
 keystream[i..] = ciphertext[i..] XOR known_plaintext[i..]
 ```
 
-Εφαρμόστε τα ανακτημένα bytes του keystream για να αποκρυπτογραφήσετε οποιοδήποτε άλλο ciphertext που παράχθηκε με το ίδιο key+IV στις ίδιες θέσεις.
-- Δομημένα δεδομένα (π.χ., ASN.1/X.509 certificates, file headers, JSON/CBOR) δίνουν μεγάλες περιοχές γνωστού plaintext. Συχνά μπορείτε να XORάρετε το ciphertext του certificate με το προβλέψιμο certificate body για να προκύψει το keystream, και μετά να αποκρυπτογραφήσετε άλλα μυστικά κρυπτογραφημένα κάτω από το επαναχρησιμοποιημένο IV. Δείτε επίσης [TLS & Certificates](../tls-and-certificates/README.md) για τυπικές διατάξεις πιστοποιητικών.
-- Όταν πολλαπλά μυστικά της **ίδιας σειριοποιημένης μορφής/μεγέθους** κρυπτογραφούνται με το ίδιο key+IV, η στοίχιση πεδίων αποκαλύπτει πληροφορία ακόμα και χωρίς πλήρες γνωστό plaintext. Παράδειγμα: PKCS#8 RSA κλειδιά με το ίδιο μέγεθος modulus τοποθετούν τους πρώτους παράγοντες σε αντίστοιχες θέσεις (~99.6% στοίχιση για 2048-bit). Το XOR δύο ciphertexts υπό το επαναχρησιμοποιημένο keystream απομονώνει `p ⊕ p'` / `q ⊕ q'`, τα οποία μπορούν να ανακτηθούν με brute force σε δευτερόλεπτα.
-- Προεπιλεγμένα IVs σε βιβλιοθήκες (π.χ., σταθερό `000...01`) είναι κρίσιμο πρόβλημα: κάθε κρυπτογράφηση επαναλαμβάνει το ίδιο keystream, μετατρέποντας το CTR σε επαναχρησιμοποιημένο one-time pad.
+Apply the recovered keystream bytes to decrypt any other ciphertext produced with the same key+IV at the same offsets.
+- Highly structured data (e.g., ASN.1/X.509 certificates, file headers, JSON/CBOR) gives large known-plaintext regions. You can often XOR the ciphertext of the certificate with the predictable certificate body to derive keystream, then decrypt other secrets encrypted under the reused IV. See also [TLS & Certificates](../tls-and-certificates/README.md) for typical certificate layouts.
+- When multiple secrets of the **same serialized format/size** are encrypted under the same key+IV, field alignment leaks even without full known plaintext. Example: PKCS#8 RSA keys of the same modulus size place prime factors at matching offsets (~99.6% alignment for 2048-bit). XORing two ciphertexts under the reused keystream isolates `p ⊕ p'` / `q ⊕ q'`, which can be brute-recovered in seconds.
+- Default IVs in libraries (e.g., constant `000...01`) are a critical footgun: every encryption repeats the same keystream, turning CTR into a reused one-time pad.
 
 **CTR malleability**
 
-- Το CTR παρέχει μόνο εμπιστευτικότητα: το γύρισμα bits στο ciphertext αλλάζει με καθοριστικό τρόπο τα ίδια bits στο plaintext. Χωρίς authentication tag, οι επιτιθέμενοι μπορούν να τροποποιούν δεδομένα (π.χ., να αλλάξουν κλειδιά, flags ή μηνύματα) χωρίς να εντοπίζονται.
-- Χρησιμοποιήστε AEAD (GCM, GCM-SIV, ChaCha20-Poly1305, κ.λπ.) και επιβάλετε επαλήθευση tag για να εντοπίζονται bit-flips.
+- CTR provides confidentiality only: flipping bits in ciphertext deterministically flips the same bits in plaintext. Without an authentication tag, attackers can tamper data (e.g., tweak keys, flags, or messages) undetected.
+- Use AEAD (GCM, GCM-SIV, ChaCha20-Poly1305, etc.) and enforce tag verification to catch bit-flips.
 
 ### GCM
 
-Το GCM επίσης καταρρέει άσχημα υπό επαναχρησιμοποίηση nonce. Αν το ίδιο key+nonce χρησιμοποιηθεί περισσότερες από μία φορές, συνήθως παίρνετε:
+GCM also breaks badly under nonce reuse. If the same key+nonce is used more than once, you typically get:
 
-- Επαναχρησιμοποίηση keystream για κρυπτογράφηση (όπως CTR), επιτρέποντας ανάκτηση plaintext όταν οποιοδήποτε plaintext είναι γνωστό.
-- Απώλεια εγγυήσεων ακεραιότητας. Ανάλογα με το τι εκτίθεται (πολλαπλά pairs message/tag κάτω από το ίδιο nonce), οι επιτιθέμενοι μπορεί να μπορούν να falsify tags.
+- Keystream reuse for encryption (like CTR), enabling plaintext recovery when any plaintext is known.
+- Loss of integrity guarantees. Depending on what is exposed (multiple message/tag pairs under the same nonce), attackers may be able to forge tags.
 
-Λειτουργικές οδηγίες:
+Operational guidance:
 
-- Θεωρήστε την "nonce reuse" σε AEAD ως κρίσιμη ευπάθεια.
-- Misuse-resistant AEADs (π.χ., GCM-SIV) μειώνουν την επίπτωση της misuse αλλά εξακολουθούν να απαιτούν μοναδικά nonces/IVs.
-- Αν έχετε πολλαπλά ciphertexts κάτω από το ίδιο nonce, ξεκινήστε ελέγχοντας σχέσεις του τύπου `C1 XOR C2 = P1 XOR P2`.
+- Treat "nonce reuse" in AEAD as a critical vulnerability.
+- Misuse-resistant AEADs (e.g., GCM-SIV) reduce nonce-misuse fallout but still require unique nonces/IVs.
+- If you have multiple ciphertexts under the same nonce, start by checking `C1 XOR C2 = P1 XOR P2` style relations.
 
 ### Tools
 
-- CyberChef για γρήγορα πειράματα: https://gchq.github.io/CyberChef/
-- Python: `pycryptodome` για scripting
+- CyberChef for quick experiments: https://gchq.github.io/CyberChef/
+- Python: `pycryptodome` for scripting
 
 ## ECB exploitation patterns
 
-Το ECB (Electronic Code Book) κρυπτογραφεί κάθε block ανεξάρτητα:
+ECB (Electronic Code Book) encrypts each block independently:
 
 - equal plaintext blocks → equal ciphertext blocks
 - this leaks structure and enables cut-and-paste style attacks
 
 ![](https://upload.wikimedia.org/wikipedia/commons/thumb/e/e6/ECB_decryption.svg/601px-ECB_decryption.svg.png)
 
-### Ιδέα ανίχνευσης: token/cookie pattern
+### Detection idea: token/cookie pattern
 
-Αν συνδεθείτε πολλές φορές και **πάντα λαμβάνετε το ίδιο cookie**, το ciphertext μπορεί να είναι deterministic (ECB ή fixed IV).
+If you login several times and **always get the same cookie**, the ciphertext may be deterministic (ECB or fixed IV).
 
-Αν δημιουργήσετε δύο χρήστες με κατά βάση παρόμοια layouts του plaintext (π.χ., μακριά επαναλαμβανόμενα χαρακτήρες) και δείτε επαναλαμβανόμενα ciphertext blocks στις ίδιες θέσεις, το ECB είναι ο κύριος ύποπτος.
+If you create two users with mostly identical plaintext layouts (e.g., long repeated characters) and see repeated ciphertext blocks at the same offsets, ECB is a prime suspect.
 
-### Σχέδια εκμετάλλευσης
+### Exploitation patterns
 
-#### Αφαίρεση ολόκληρων μπλοκ
+#### Removing entire blocks
 
-Αν η μορφή του token είναι κάτι σαν `<username>|<password>` και τα όρια μπλοκ ευθυγραμμίζονται, μερικές φορές μπορείτε να κατασκευάσετε έναν χρήστη έτσι ώστε το μπλοκ που περιέχει `admin` να εμφανίζεται ευθυγραμμισμένο, και μετά να αφαιρέσετε τα προηγούμενα μπλοκ για να αποκτήσετε ένα έγκυρο token για `admin`.
+If the token format is something like `<username>|<password>` and the block boundary aligns, you can sometimes craft a user so the `admin` block appears aligned, then remove preceding blocks to obtain a valid token for `admin`.
 
-#### Μετακίνηση μπλοκ
+#### Moving blocks
 
-Αν το backend ανέχεται padding/extra spaces (`admin` vs `admin    `), μπορείτε:
+If the backend tolerates padding/extra spaces (`admin` vs `admin    `), you can:
 
-- Να ευθυγραμμίσετε ένα μπλοκ που περιέχει `admin   `
-- Να ανταλλάξετε/επανχρησιμοποιήσετε αυτό το ciphertext block σε άλλο token
+- Align a block that contains `admin   `
+- Swap/reuse that ciphertext block into another token
 
 ## Padding Oracle
 
-### Τι είναι
+### What it is
 
-Σε λειτουργία CBC, αν ο server αποκαλύπτει (άμεσα ή έμμεσα) αν το αποκρυπτογραφημένο plaintext έχει **έγκυρο PKCS#7 padding**, συχνά μπορείτε:
+In CBC mode, if the server reveals (directly or indirectly) whether decrypted plaintext has **valid PKCS#7 padding**, you can often:
 
-- Να αποκρυπτογραφήσετε ciphertext χωρίς το κλειδί
-- Να κρυπτογραφήσετε επιλεγμένο plaintext (forge ciphertext)
+- Decrypt ciphertext without the key
+- Encrypt chosen plaintext (forge ciphertext)
 
-Το oracle μπορεί να είναι:
+The oracle can be:
 
-- Ένα συγκεκριμένο μήνυμα σφάλματος
-- Ένα διαφορετικό HTTP status / μέγεθος απάντησης
-- Μια διαφορά στο χρόνο
+- A specific error message
+- A different HTTP status / response size
+- A timing difference
 
-### Πρακτική εκμετάλλευση
+### Practical exploitation
 
-Το PadBuster είναι το κλασικό εργαλείο:
+PadBuster is the classic tool:
 
 {{#ref}}
 https://github.com/AonCyberLabs/PadBuster
 {{#endref}}
 
-Παράδειγμα:
+Example:
 ```bash
 perl ./padBuster.pl http://10.10.10.10/index.php "RVJDQrwUdTRWJUVUeBKkEA==" 16 \
 -encoding 0 -cookies "login=RVJDQrwUdTRWJUVUeBKkEA=="
 ```
 Σημειώσεις:
 
-- Το μέγεθος block είναι συχνά `16` για AES.
-- `-encoding 0` σημαίνει Base64.
-- Χρησιμοποίησε `-error` αν το oracle είναι συγκεκριμένο string.
+- Block size is often `16` for AES.
+- `-encoding 0` means Base64.
+- Use `-error` if the oracle is a specific string.
 
 ### Γιατί λειτουργεί
 
-CBC decryption computes `P[i] = D(C[i]) XOR C[i-1]`. Τροποποιώντας bytes στο `C[i-1]` και παρακολουθώντας αν το padding είναι έγκυρο, μπορείς να ανακτήσεις το `P[i]` byte ανά byte.
+CBC decryption computes `P[i] = D(C[i]) XOR C[i-1]`. Με την τροποποίηση byte σε `C[i-1]` και την παρατήρηση αν το padding είναι έγκυρο, μπορείτε να ανακτήσετε το `P[i]` byte-ξεχωριστά.
 
-## Bit-flipping in CBC
+## Bit-flipping σε CBC
 
-Even without a padding oracle, CBC is malleable. Αν μπορείς να τροποποιήσεις ciphertext blocks και η εφαρμογή χρησιμοποιεί το αποκρυπτογραφημένο plaintext ως δομημένα δεδομένα (π.χ. `role=user`), μπορείς να αλλάξεις συγκεκριμένα bits για να μεταβάλεις επιλεγμένα bytes του plaintext σε μια επιλεγμένη θέση στο επόμενο block.
+Ακόμα και χωρίς padding oracle, το CBC είναι malleable. Αν μπορείτε να τροποποιήσετε μπλοκ του ciphertext και η εφαρμογή χρησιμοποιεί το αποκρυπτογραφημένο plaintext ως δομημένα δεδομένα (π.χ. `role=user`), μπορείτε να αντιστρέψετε (flip) συγκεκριμένα bits για να αλλάξετε επιλεγμένα plaintext bytes σε επιλεγμένη θέση στο επόμενο μπλοκ.
 
 Τυπικό μοτίβο σε CTF:
 
 - Token = `IV || C1 || C2 || ...`
-- Ελέγχεις bytes στο `C[i]`
-- Στοχεύεις bytes του plaintext στο `P[i+1]` γιατί `P[i+1] = D(C[i+1]) XOR C[i]`
+- You control bytes in `C[i]`
+- You target plaintext bytes in `P[i+1]` because `P[i+1] = D(C[i+1]) XOR C[i]`
 
-Αυτό δεν αποτελεί από μόνο του παραβίαση εμπιστευτικότητας, αλλά αποτελεί κοινό privilege-escalation primitive όταν λείπει η ακεραιότητα.
+Αυτό από μόνο του δεν αποτελεί παραβίαση της εμπιστευτικότητας, αλλά είναι ένα κοινό primitive για privilege-escalation όταν λείπει η ακεραιότητα.
 
 ## CBC-MAC
 
-CBC-MAC είναι ασφαλές μόνο υπό συγκεκριμένες συνθήκες (ιδιαίτερα **fixed-length messages** και σωστό domain separation).
+CBC-MAC είναι ασφαλές μόνο υπό συγκεκριμένες συνθήκες (ειδικά **μηνύματα σταθερού μήκους** και σωστός διαχωρισμός πεδίου).
 
-### Classic variable-length forgery pattern
+### Κλασικό πρότυπο πλαστογράφησης για μεταβλητό μήκος
 
-CBC-MAC υπολογίζεται συνήθως ως:
+CBC-MAC συνήθως υπολογίζεται ως:
 
 - IV = 0
 - `tag = last_block( CBC_encrypt(key, message, IV=0) )`
 
-Αν μπορείς να αποκτήσεις tags για επιλεγμένα μηνύματα, συχνά μπορείς να δημιουργήσεις ένα tag για μια συνένωση (ή σχετική κατασκευή) χωρίς να γνωρίζεις το κλειδί, εκμεταλλευόμενος το πώς τα CBC αλυσσοποιούν τα block.
+Αν μπορείτε να αποκτήσετε tags για επιλεγμένα μηνύματα, συχνά μπορείτε να δημιουργήσετε (craft) ένα tag για μια concatenation (ή σχετική κατασκευή) χωρίς να γνωρίζετε το κλειδί, εκμεταλλευόμενοι τον τρόπο που το CBC αλυσιδώνει τα μπλοκ.
 
-Αυτό εμφανίζεται συχνά σε CTF cookies/tokens που MAC-άρουν username ή role με CBC-MAC.
+Αυτό εμφανίζεται συχνά σε CTF cookies/tokens που MAC-άρουν το username ή το role με CBC-MAC.
 
-### Safer alternatives
+### Πιο ασφαλείς εναλλακτικές
 
-- Χρησιμοποίησε HMAC (SHA-256/512)
-- Χρησιμοποίησε CMAC (AES-CMAC) σωστά
-- Συμπεριέλαβε μήκος μηνύματος / domain separation
+- Use HMAC (SHA-256/512)
+- Use CMAC (AES-CMAC) correctly
+- Συμπεριλάβετε το μήκος του μηνύματος / διαχωρισμό πεδίου
 
 ## Stream ciphers: XOR and RC4
 
 ### Το νοητικό μοντέλο
 
-Οι περισσότερες περιπτώσεις stream cipher μειώνονται σε:
+Most stream cipher situations reduce to:
 
 `ciphertext = plaintext XOR keystream`
 
-Άρα:
+Οπότε:
 
-- Αν γνωρίζεις το plaintext, ανακτάς το keystream.
-- Αν το keystream επαναχρησιμοποιείται (same key+nonce), `C1 XOR C2 = P1 XOR P2`.
+- If you know plaintext, you recover keystream.
+- If keystream is reused (same key+nonce), `C1 XOR C2 = P1 XOR P2`.
 
 ### XOR-based encryption
 
-Αν γνωρίζεις οποιοδήποτε τμήμα plaintext στη θέση `i`, μπορείς να ανακτήσεις τα bytes του keystream και να αποκρυπτογραφήσεις άλλα ciphertexts σε αυτές τις θέσεις.
+Αν γνωρίζετε οποιοδήποτε τμήμα plaintext στη θέση `i`, μπορείτε να ανακτήσετε τα keystream bytes και να αποκρυπτογραφήσετε άλλα ciphertexts σε αυτές τις θέσεις.
 
-Αυτοματοποιητές:
+Αυτοματοποιημένα εργαλεία:
 
 - [https://wiremask.eu/tools/xor-cracker/](https://wiremask.eu/tools/xor-cracker/)
 
 ### RC4
 
-RC4 is a stream cipher; encrypt/decrypt are the same operation.
+RC4 είναι stream cipher; η κρυπτογράφηση/αποκρυπτογράφηση είναι η ίδια λειτουργία.
 
-Αν μπορείς να πάρεις RC4 κρυπτογράφηση γνωστού plaintext με το ίδιο κλειδί, μπορείς να ανακτήσεις το keystream και να αποκρυπτογραφήσεις άλλα μηνύματα του ίδιου μήκους/offset.
+Αν μπορείτε να πάρετε RC4 encryption γνωστού plaintext με το ίδιο κλειδί, μπορείτε να ανακτήσετε το keystream και να αποκρυπτογραφήσετε άλλα μηνύματα του ίδιου μήκους/offset.
 
-Reference writeup (HTB Kryptos):
+Αναλυτικό writeup (HTB Kryptos):
 
 {{#ref}}
 https://0xrick.github.io/hack-the-box/kryptos/
