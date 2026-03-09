@@ -47,8 +47,8 @@ $paths = "C:\\Windows","C:\\Program Files","C:\\Program Files (x86)"
 Get-AccessibleFile -Win32Path $paths -Access Execute,WriteData `
 -DirectoryAccess AddFile -Recurse -ProcessId <PID>
 ```
-- Exécutez en tant qu'administrateur pour une meilleure visibilité ; définissez `-ProcessId` sur un processus à faible privilège pour mimer l'accès de ce token.
-- Filtrez manuellement pour exclure les sous-répertoires interdits connus avant d'utiliser les candidats avec `RAiLaunchAdminProcess`.
+- Exécuter en tant qu'administrateur pour une visibilité accrue ; définir `-ProcessId` sur un processus low-priv afin de refléter l'accès de ce token.
+- Filtrer manuellement pour exclure les sous-répertoires connus comme interdits avant d'utiliser les candidats avec `RAiLaunchAdminProcess`.
 
 ## Références
 - [Bypassing Administrator Protection by Abusing UI Access](https://projectzero.google/2026/02/windows-administrator-protection.html)
