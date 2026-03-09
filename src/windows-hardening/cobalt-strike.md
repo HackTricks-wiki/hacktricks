@@ -6,16 +6,16 @@
 
 ### C2 Listeners
 
-`Cobalt Strike -> Listeners -> Add/Edit` kisha unaweza kuchagua wapi kusikiliza, ni aina gani ya beacon ya kutumia (http, dns, smb...) na zaidi.
+`Cobalt Strike -> Listeners -> Add/Edit` kisha unaweza kuchagua wapi kusikiliza, aina gani ya beacon ya kutumia (http, dns, smb...) na zaidi.
 
 ### Peer2Peer Listeners
 
-Beacons za hizi listeners hazihitaji kuwasiliana na C2 moja kwa moja; zinaweza kuwasiliana nayo kupitia beacons nyingine.
+Beacons za listeners hawa hazihitaji kuzungumza na C2 moja kwa moja; zinaweza kuwasiliana nayo kupitia beacons nyingine.
 
-`Cobalt Strike -> Listeners -> Add/Edit` kisha unahitaji kuchagua beacons za TCP au SMB
+`Cobalt Strike -> Listeners -> Add/Edit` kisha unahitaji kuchagua TCP au SMB beacons
 
-* The **TCP beacon will set a listener in the port selected**. Kujiunga na TCP beacon tumia amri `connect <ip> <port>` kutoka kwa beacon nyingine
-* The **smb beacon will listen in a pipename with the selected name**. Kujiunga na SMB beacon unahitaji kutumia amri `link [target] [pipe]`.
+* The **TCP beacon will set a listener in the port selected**. Ili kuunganishwa kwenye TCP beacon tumia amri `connect <ip> <port>` kutoka kwa beacon nyingine
+* The **smb beacon will listen in a pipename with the selected name**. Ili kuunganishwa kwenye SMB beacon unahitaji kutumia amri `link [target] [pipe]`.
 
 ### Generate & Host payloads
 
@@ -23,23 +23,23 @@ Beacons za hizi listeners hazihitaji kuwasiliana na C2 moja kwa moja; zinaweza k
 
 `Attacks -> Packages ->`
 
-* **`HTMLApplication`** for HTA files
-* **`MS Office Macro`** for an office document with a macro
-* **`Windows Executable`** for a .exe, .dll au service .exe
-* **`Windows Executable (S)`** for a **stageless** .exe, .dll au service .exe (stageless ni bora kuliko staged, huunda IoCs chache)
+* **`HTMLApplication`** kwa faili za HTA
+* **`MS Office Macro`** kwa nyaraka za Office zilizo na macro
+* **`Windows Executable`** kwa .exe, .dll au service .exe
+* **`Windows Executable (S)`** kwa .exe, .dll au service .exe **stageless** (stageless ni bora kuliko staged, ina IoCs chache)
 
 #### Generate & Host payloads
 
-`Attacks -> Web Drive-by -> Scripted Web Delivery (S)` Hii itaunda script/executable ili kupakua beacon kutoka cobalt strike katika fomati kama: bitsadmin, exe, powershell na python
+`Attacks -> Web Drive-by -> Scripted Web Delivery (S)` Hii itaizalisha script/executable kushusha beacon kutoka cobalt strike katika miundo kama: bitsadmin, exe, powershell na python
 
 #### Host Payloads
 
-Kama tayari una faili unayotaka ku-host kwenye web server, nenda kwa `Attacks -> Web Drive-by -> Host File` na chagua faili pamoja na usanidi wa web server.
+Ikiwa tayari una faili unayotaka ku-host kwenye web server, nenda `Attacks -> Web Drive-by -> Host File` na chagua faili ya ku-host na usanidi wa web server.
 
 ### Beacon Options
 
 <details>
-<summary>Beacon chaguzi na amri</summary>
+<summary>Chaguzi na amri za Beacon</summary>
 ```bash
 # Execute local .NET binary
 execute-assembly </path/to/executable.exe>
@@ -292,17 +292,18 @@ With the following Cobalt Strike command, you can specify a different process to
 ```bash
 spawnto x86 svchost.exe
 ```
-Unaweza pia kubadilisha mipangilio hii **`spawnto_x86` na `spawnto_x64`** katika profaili.
+Unaweza pia kubadilisha mpangilio huu **`spawnto_x86` and `spawnto_x64`** katika profaili.
 
-### Kuproksi trafiki ya wadukuzi
+### Proxying attackers traffic
 
-Wadukuzi wakati mwingine watahitaji kuweza kuendesha zana kwa lokali, hata kwenye mashine za linux, na kufanya trafiki ya waathiriwa ifike kwa zana (mfano NTLM relay).
+Wadukuzi wakati mwingine watahitaji kuweza kuendesha zana ndani ya mashine kwa mtaa (locally), hata kwenye mashine za Linux, na kufanya trafiki ya wahanga ifikie zana (mfano NTLM relay).
 
-Zaidi ya hayo, mara nyingine kwa kufanya pass-the.hash au pass-the-ticket attack ni kimya zaidi kwa mdukuzi **kuongeza hash au tiketi hii kwenye mchakato wake wa LSASS** kwa lokali kisha ku-pivot kutoka kwake badala ya kubadilisha mchakato wa LSASS wa mashine ya mwathiriwa.
+Zaidi ya hayo, wakati mwingine kwa kufanya shambulio la pass-the.hash au pass-the-ticket ni siri zaidi kwa mdukuzi **kuongeza hash au tiketi hii katika mchakato wake wa LSASS** kwa ndani na kisha kutumia pivot kutoka kwake badala ya kuharibu mchakato wa LSASS wa mashine ya mwathirika.
 
-Hata hivyo, unahitaji kuwa **makini na trafiki inayozalishwa**, kwani unaweza kuwa unapeleka trafiki isiyo ya kawaida (kerberos?) kutoka kwa mchakato wa backdoor yako. Kwa hili unaweza ku-pivot kwenda kwenye mchakato wa browser (ingawa unaweza kushikwa ukiingia ndani ya mchakato, hivyo fikiria njia ya kimya kufanya hivyo).
+Hata hivyo, unahitaji kuwa **makini na trafiki iliyotengenezwa**, kwa kuwa unaweza kutuma trafiki isiyo ya kawaida (kerberos?) kutoka kwa mchakato wako wa backdoor. Kwa hili unaweza ku-pivot hadi browser process (ingawa unaweza kukamatwa ukiingiza yako ndani ya mchakato hivyo fikiria njia ya siri ya kufanya hili).
 
-### Kuepuka AVs
+
+### Avoiding AVs
 
 #### AV/AMSI/ETW Bypass
 
@@ -316,39 +317,39 @@ av-bypass.md
 
 #### Artifact Kit
 
-Kawaida katika `/opt/cobaltstrike/artifact-kit` unaweza kupata code na templates zilizo pre-compiled (katika `/src-common`) za payloads ambazo cobalt strike itatumia kuunda binary beacons.
+Kawaida katika `/opt/cobaltstrike/artifact-kit` unaweza kupata code na pre-compiled templates (katika `/src-common`) za payloads ambazo cobalt strike itatumia kuunda binary beacons.
 
-Kutumia [ThreatCheck](https://github.com/rasta-mouse/ThreatCheck) na backdoor iliyotengenezwa (au tu na template iliyokatwa) unaweza kugundua ni nini kinachosababisha defender kuyatambua. Kwa kawaida ni string. Kwa hiyo unaweza kubadilisha code inayozalisha backdoor ili string hiyo isionekane kwenye binary ya mwisho.
+Kwa kutumia [ThreatCheck](https://github.com/rasta-mouse/ThreatCheck) na backdoor iliyotengenezwa (au tu na template iliyokunjwa) unaweza kugundua ni nini kinachosababisha defender kuanzisha tahadhari. Kawaida ni string. Kwa hiyo unaweza kubadilisha code inayotengeneza backdoor ili string hiyo isionekane katika binary ya mwisho.
 
-Baada ya kubadilisha code endesha tu `./build.sh` kutoka directory hiyo hiyo na nakili folda ya `dist-pipe/` kwenye client ya Windows katika `C:\Tools\cobaltstrike\ArtifactKit`.
+Baada ya kubadilisha code endesha tu `./build.sh` kutoka katika direktori hiyo hiyo na nakili folda ya `dist-pipe/` kwenye client ya Windows katika `C:\Tools\cobaltstrike\ArtifactKit`.
 ```
 pscp -r root@kali:/opt/cobaltstrike/artifact-kit/dist-pipe .
 ```
-Usisahau kupakia aggressive script `dist-pipe\artifact.cna` ili kueleza Cobalt Strike itumie rasilimali kutoka disk tunazotaka badala ya zile zilizopakiwa.
+Usisahau ku-load script kali `dist-pipe\artifact.cna` ili kumwambia Cobalt Strike atumie rasilimali kutoka diski tunazotaka badala ya zile zilizopakiwa.
 
 #### Resource Kit
 
-Folda ya ResourceKit ina templates za Cobalt Strike's script-based payloads, ikijumuisha PowerShell, VBA na HTA.
+Folda ya ResourceKit ina templates za script-based payloads za Cobalt Strike, zikiwemo PowerShell, VBA na HTA.
 
-Ukikitumia [ThreatCheck](https://github.com/rasta-mouse/ThreatCheck) pamoja na templates, utaweza kugundua ni nini defender (AMSI katika kesi hii) haipendi na kuyabadilisha:
+Ukivitumia ThreatCheck pamoja na templates unaweza kuona ni nini Defender (AMSI katika kesi hii) hakipendi na kuibadilisha:
 ```
 .\ThreatCheck.exe -e AMSI -f .\cobaltstrike\ResourceKit\template.x64.ps1
 ```
-Kwa kubadilisha mistari iliyogunduliwa, mtu anaweza kuunda kiolezo ambacho hakitagunduliwa.
+Kwa kubadilisha mistari iliyotambuliwa, unaweza kuunda kiolezo ambacho hakitakamatwa.
 
-Usisahau kupakia script ya "aggressive" `ResourceKit\resources.cna` kuonyesha kwa Cobalt Strike kutumia rasilimali kutoka disk tunazotaka badala ya zile zilizopakuliwa.
+Usisahau kupakia script mkali `ResourceKit\resources.cna` ili kumwonyesha Cobalt Strike kutumia rasilimali kutoka diski tunazotaka na si zile zilizopakiwa.
 
 #### Function hooks | Syscall
 
-Function hooking ni mbinu ya kawaida kwa ERDs kugundua shughuli zenye madhara. Cobalt Strike inakuwezesha kuepuka hooks hizi kwa kutumia **syscalls** badala ya wito wa Windows API wa kawaida kwa kutumia config **`None`**, au kutumia toleo la `Nt*` la function kwa setting ya **`Direct`**, au kuruka juu ya function ya `Nt*` kwa chaguo la **`Indirect`** katika malleable profile. Kulingana na mfumo, chaguo moja linaweza kuwa stealth zaidi kuliko jingine.
+Function hooking ni mbinu ya kawaida sana ya EDRs kugundua shughuli zenye madhara. Cobalt Strike inakuwezesha kupitisha hooks hizi kwa kutumia **syscalls** badala ya wito wa kawaida wa Windows API kwa kutumia config ya **`None`**, au kutumia toleo la `Nt*` la function kwa setting ya **`Direct`**, au kuruka tu juu ya function ya `Nt*` kwa chaguo la **`Indirect`** katika malleable profile. Kulingana na mfumo, chaguo moja linaweza kuwa la kimya zaidi kuliko jingine.
 
 Hii inaweza kuwekwa katika profile au kwa kutumia amri **`syscall-method``**.
 
-Hata hivyo, hii pia inaweza kuwa noisy.
+Hata hivyo, hii pia inaweza kusababisha kelele.
 
-Chaguo fulani linalotolewa na Cobalt Strike la kuepuka function hooks ni kuondoa hooks hizo kwa: [**unhook-bof**](https://github.com/Cobalt-Strike/unhook-bof).
+Chaguo moja kinachotolewa na Cobalt Strike kwa kuruka function hooks ni kuondoa hooks hizo kwa kutumia: [**unhook-bof**](https://github.com/Cobalt-Strike/unhook-bof).
 
-Unaweza pia kuangalia ni functions zipi zime-hook kwa kutumia [**https://github.com/Mr-Un1k0d3r/EDRs**](https://github.com/Mr-Un1k0d3r/EDRs) au [**https://github.com/matterpreter/OffensiveCSharp/tree/master/HookDetector**](https://github.com/matterpreter/OffensiveCSharp/tree/master/HookDetector)
+Unaweza pia kuangalia ni functions gani zimehookiwa kwa kutumia [**https://github.com/Mr-Un1k0d3r/EDRs**](https://github.com/Mr-Un1k0d3r/EDRs) au [**https://github.com/matterpreter/OffensiveCSharp/tree/master/HookDetector**](https://github.com/matterpreter/OffensiveCSharp/tree/master/HookDetector)
 
 
 

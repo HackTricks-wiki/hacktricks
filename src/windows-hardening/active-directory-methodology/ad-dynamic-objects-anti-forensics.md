@@ -2,46 +2,46 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Mekaniki & Misingi ya Utambuzi
+## Mechanics & Detection Basics
 
-- Kifaa chochote kinachoundwa kwa class ya ziada **`dynamicObject`** hupata **`entryTTL`** (kuhesabu chini kwa sekunde) na **`msDS-Entry-Time-To-Die`** (muda wa kumalizika wa kudumu). Wakati `entryTTL` inafikia 0 **Garbage Collector** inakiangamiza bila tombstone/recycle-bin, ikifuta muundaji/muda wa matukio na kuzuia urejeshaji.
-- TTL inaweza kusasishwa kwa kubadilisha `entryTTL`; min/default zinatekelezwa katika **Configuration\Services\NTDS Settings → `msDS-Other-Settings` → `DynamicObjectMinTTL` / `DynamicObjectDefaultTTL`** (inaunga mkono 1s–1y lakini kawaida default ni 86,400s/24h). Dynamic objects hazitumiwi katika partishi za **Configuration/Schema**.
-- Uondoshaji unaweza kuchelewa kwa dakika chache kwenye DCs zenye uptime fupi (<24h), na kuacha dirisha dogo la kujibu kwa kuuliza/ku-backup sifa. Tambua kwa **kutuma onyo kwa vitu vipya vinavyoabeba `entryTTL`/`msDS-Entry-Time-To-Die`** na kuviunganisha na orphan SIDs/viungo vilivyovunjika.
+- Any object created with the auxiliary class **`dynamicObject`** gains **`entryTTL`** (seconds countdown) and **`msDS-Entry-Time-To-Die`** (absolute expiry). When `entryTTL` reaches 0 the **Garbage Collector deletes it without tombstone/recycle-bin**, erasing creator/timestamps and blocking recovery.
+- TTL can be refreshed by updating `entryTTL`; min/default are enforced in **Configuration\Services\NTDS Settings → `msDS-Other-Settings` → `DynamicObjectMinTTL` / `DynamicObjectDefaultTTL`** (supports 1s–1y but commonly defaults to 86,400s/24h). Dynamic objects are **unsupported in Configuration/Schema partitions**.
+- Deletion can lag a few minutes on DCs with short uptime (<24h), leaving a narrow response window to query/backup attributes. Detect by **alerting on new objects carrying `entryTTL`/`msDS-Entry-Time-To-Die`** and correlating with orphan SIDs/broken links.
 
 ## MAQ Evasion with Self-Deleting Computers
 
-- Default ya **`ms-DS-MachineAccountQuota` = 10** inaruhusu mtumiaji yeyote aliye-authenticated kuunda computers. Ongeza `dynamicObject` wakati wa uundaji ili kompyuta ijifute yenyewe na **kuachilia nafasi ya quota** huku ikifuta ushahidi.
-- Mabadiliko ya Powermad ndani ya `New-MachineAccount` (objectClass list):
+- Default **`ms-DS-MachineAccountQuota` = 10** lets any authenticated user create computers. Add `dynamicObject` during creation to have the computer self-delete and **free the quota slot** while wiping evidence.
+- Powermad tweak inside `New-MachineAccount` (objectClass list):
 ```powershell
 $request.Attributes.Add((New-Object "System.DirectoryServices.Protocols.DirectoryAttribute" -ArgumentList "objectClass", "dynamicObject", "Computer")) > $null
 ```
-- TTL fupi (mfano, 60s) mara nyingi hashindani kwa watumiaji wa kawaida; AD inarejea kwa **`DynamicObjectDefaultTTL`** (mfano: 86,400s). ADUC inaweza kuficha `entryTTL`, lakini maswali ya LDP/LDAP yanaifunua.
+- Short TTL (e.g., 60s) often fails for standard users; AD falls back to **`DynamicObjectDefaultTTL`** (example: 86,400s). ADUC may hide `entryTTL`, but LDP/LDAP queries reveal it.
 
 ## Stealth Primary Group Membership
 
-- Unda **dynamic security group**, kisha weka `primaryGroupID` ya mtumiaji kwa RID ya kundi hilo ili kupata uanachama wa ufanisi ambao **hauonekani katika `memberOf`** lakini unaheshimiwa katika Kerberos/token za ufikiaji.
-- Mara TTL inapomalizika **kundi linafuta licha ya ulinzi wa kuondoa primary-group**, na kumwacha mtumiaji na `primaryGroupID` mbovu inayorejelea RID isiyokuwepo na hakuna tombstone ya kuchunguza jinsi mamlaka ilivyotolewa.
+- Create a **dynamic security group**, then set a user’s **`primaryGroupID`** to that group’s RID to gain effective membership that **doesn’t show in `memberOf`** but is honored in Kerberos/access tokens.
+- TTL expiry **deletes the group despite primary-group delete protection**, leaving the user with a corrupted `primaryGroupID` pointing to a non-existent RID and no tombstone to investigate how the privilege was granted.
 
 ## AdminSDHolder Orphan-SID Pollution
 
-- Ongeza ACEs kwa **mtu/kundi mfupi wa muda (dynamic)** kwenye **`CN=AdminSDHolder,CN=System,...`**. Baada ya TTL kuisha SID inakuwa **hairejesheki (“Unknown SID”)** kwenye template ACL, na **SDProp (~60 min)** inapita SID hiyo ya mfaapala kwenye vitu vyote vilivyolindwa vya Tier-0.
-- Forensiki hupoteza utekelezaji kwa sababu mtendaji ameondoka (hakuna deleted-object DN). Simamia kwa kuangalia **principals dynamic mpya + SID za mfaapala ghafla kwenye AdminSDHolder/ACL zenye mamlaka**.
+- Add ACEs for a **short-lived dynamic user/group** to **`CN=AdminSDHolder,CN=System,...`**. After TTL expiry the SID becomes **unresolvable (“Unknown SID”)** in the template ACL, and **SDProp (~60 min)** propagates that orphan SID across all protected Tier-0 objects.
+- Forensics lose attribution because the principal is gone (no deleted-object DN). Monitor for **new dynamic principals + sudden orphan SIDs on AdminSDHolder/privileged ACLs**.
 
 ## Dynamic GPO Execution with Self-Destructing Evidence
 
-- Unda kitu cha **dynamic `groupPolicyContainer`** chenye `gPCFileSysPath` mabaya (mfano, SMB share kama GPODDITY) na **kiunganishe kupitia `gPLink`** kwenye OU lengwa.
-- Wateja huteua policy na kupakua yaliyomo kutoka SMB ya mshambuliaji. Wakati TTL inapomalizika, kitu cha GPO (na `gPCFileSysPath`) kinapotea; kinabaki tu **GUID ya `gPLink` iliyovunjika**, ikitoa ushahidi wa LDAP wa payload iliyotekelezwa.
+- Create a **dynamic `groupPolicyContainer`** object with a malicious **`gPCFileSysPath`** (e.g., SMB share à la GPODDITY) and **link it via `gPLink`** to a target OU.
+- Clients process the policy and pull content from attacker SMB. When TTL expires, the GPO object (and `gPCFileSysPath`) vanishes; only a **broken `gPLink`** GUID remains, removing LDAP evidence of the executed payload.
 
 ## Ephemeral AD-Integrated DNS Redirection
 
-- Rekodi za DNS za AD ni vitu vya **`dnsNode`** katika **DomainDnsZones/ForestDnsZones**. Kuziunda kama **dynamic objects** kunaruhusu uelekeo wa muda mfupi wa host (kukamata credentials/MITM). Wateja huhifadhi cache ya jibu la A/AAAA la mnafiki; rekodi baadaye inajifuta yenyewe hivyo zone inaonekana safi (DNS Manager inaweza kuhitaji reload ya zone ili kusasisha mwonekano).
-- Utambuzi: tuma onyo kwa **rekodi yoyote ya DNS inayobeba `dynamicObject`/`entryTTL`** kupitia replication/event logs; rekodi za muda mfupi kwa nadra huonekana katika DNS logs za kawaida.
+- AD DNS records are **`dnsNode`** objects in **DomainDnsZones/ForestDnsZones**. Creating them as **dynamic objects** allows temporary host redirection (credential capture/MITM). Clients cache the malicious A/AAAA response; the record later self-deletes so the zone looks clean (DNS Manager may need zone reload to refresh view).
+- Detection: alert on **any DNS record carrying `dynamicObject`/`entryTTL`** via replication/event logs; transient records rarely appear in standard DNS logs.
 
 ## Hybrid Entra ID Delta-Sync Gap (Note)
 
-- Entra Connect delta sync inategemea **tombstones** kugundua ufutaji. **dynamic on-prem user** anaweza kusync kwenye Entra ID, kuisha TTL, na kufuta bila tombstone—delta sync haitafuta akaunti ya cloud, ikiacha **mtumiaji wa Entra aliyefunguliwa bila msaidizi** hadi full sync ya mkono itakapofanywa.
+- Entra Connect delta sync relies on **tombstones** to detect deletes. A **dynamic on-prem user** can sync to Entra ID, expire, and delete without tombstone—delta sync won’t remove the cloud account, leaving an **orphaned active Entra user** until a manual **full sync** is forced.
 
-## Marejeo
+## References
 
 - [Dynamic Objects in Active Directory: The Stealthy Threat](https://www.tenable.com/blog/active-directory-dynamic-objects-stealthy-threat)
 
