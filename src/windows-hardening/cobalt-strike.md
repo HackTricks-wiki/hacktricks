@@ -25,7 +25,7 @@ The beacons of these listeners don't need to talk to the C2 directly, they can c
 
 * **`HTMLApplication`** for HTA files
 * **`MS Office Macro`** for an office document with a macro
-* **`Windows Executable`** for a .exe, .dll ili service .exe
+* **`Windows Executable`** for a .exe, .dll orr service .exe
 * **`Windows Executable (S)`** for a **stageless** .exe, .dll or service .exe (better stageless than staged, less IoCs)
 
 #### Generate & Host payloads
@@ -39,7 +39,7 @@ If you already has the file you want to host in a web sever just go to `Attacks 
 ### Beacon Options
 
 <details>
-<summary>Beacon options and commands</summary>
+<summary>Opcije i komande za beacon</summary>
 ```bash
 # Execute local .NET binary
 execute-assembly </path/to/executable.exe>
@@ -192,50 +192,50 @@ beacon> ssh 10.10.17.12:22 username password
 ```
 </details>
 
-### Prilagođeni implantati / Linux Beacons
+### Prilagođeni implanti / Linux Beacons
 
-- Prilagođenom agentu je dovoljno da govori Cobalt Strike Team Server HTTP/S protocol (default malleable C2 profile) da se registruje/check-in i primi zadatke. Implementirajte iste URIs/headers/metadata crypto definisane u profilu da biste ponovo koristili Cobalt Strike UI za tasking i output.
-- An Aggressor Script (npr. `CustomBeacon.cna`) može obuhvatiti generisanje payload-a za non-Windows beacon tako da operatori mogu izabrati listener i proizvesti ELF payload-e direktno iz GUI.
-- Primer Linux task handler-a izloženih Team Server-u: `sleep`, `cd`, `pwd`, `shell` (exec arbitrary commands), `ls`, `upload`, `download`, i `exit`. Ovi mapiraju na task IDs koje Team Server očekuje i moraju biti implementirani server-side da vrate output u ispravnom formatu.
-- BOF podrška na Linuxu može se dodati učitavanjem Beacon Object Files in-process sa [TrustedSec's ELFLoader](https://github.com/trustedsec/ELFLoader) (podržava i Outflank-style BOFs), omogućavajući modularni post-exploitation da radi unutar konteksta/privilegija implanta bez spawn-ovanja novih procesa.
-- Ugradite SOCKS handler u prilagođeni beacon da biste održali pivoting parity sa Windows Beacons: kada operator pokrene `socks <port>` implant bi trebalo da otvori lokalni proxy za usmeravanje operator toolinga kroz kompromitovani Linux host u interne mreže.
+- Prilagođeni agent treba samo da govori Cobalt Strike Team Server HTTP/S protokol (default malleable C2 profile) da bi se registrovao/check-in i primao zadatke. Implementirajte iste URIs/headers/metadata crypto definisane u profilu da biste ponovo koristili Cobalt Strike UI za tasking i output.
+- Aggressor Script (npr. `CustomBeacon.cna`) može obaviti generisanje payload-a za non-Windows beacon tako da operatori mogu izabrati listener i proizvoditi ELF payload-e direktno iz GUI-ja.
+- Primer Linux task handler-a izloženih Team Server-u: `sleep`, `cd`, `pwd`, `shell` (exec arbitrary commands), `ls`, `upload`, `download`, i `exit`. Oni odgovaraju task ID-jevima koje Team Server očekuje i moraju biti implementirani server-side da vrate output u odgovarajućem formatu.
+- BOF podrška na Linuxu se može dodati učitavanjem Beacon Object Files in-process uz [TrustedSec's ELFLoader](https://github.com/trustedsec/ELFLoader) (takođe podržava Outflank-style BOF-ove), što omogućava modularni post-exploitation koji radi unutar konteksta/privilegija implanta bez spawn-ovanja novih procesa.
+- Ugradite SOCKS handler u custom beacon da biste zadržali pivoting paritet sa Windows Beacons: kada operator pokrene `socks <port>` implant treba da otvori lokalni proxy koji rutira operator alate kroz kompromitovani Linux host u interne mreže.
 
 ## Opsec
 
 ### Execute-Assembly
 
-The **`execute-assembly`** koristi **sacrificial process** i remote process injection da izvrši označeni program. Ovo je veoma noisy jer se za injektovanje u proces koriste određeni Win APIs koje svaki EDR proverava. Međutim, postoje neki custom alati koji se mogu koristiti da se nešto učita u isti proces:
+The **`execute-assembly`** koristi **sacrificial process** i remote process injection da izvrši naznačeni program. Ovo je vrlo bučno jer za inject unutar procesa koriste se određeni Win API-ji koje svaki EDR prati. Međutim, postoje neki custom alati koji se mogu koristiti da se nešto učita u isti proces:
 
 - [https://github.com/anthemtotheego/InlineExecute-Assembly](https://github.com/anthemtotheego/InlineExecute-Assembly)
 - [https://github.com/kyleavery/inject-assembly](https://github.com/kyleavery/inject-assembly)
-- U Cobalt Strike-u takođe možete koristiti BOF (Beacon Object Files): [https://github.com/CCob/BOF.NET](https://github.com/CCob/BOF.NET)
+- U Cobalt Strike možete takođe koristiti BOF (Beacon Object Files): [https://github.com/CCob/BOF.NET](https://github.com/CCob/BOF.NET)
 
-The agressor script `https://github.com/outflanknl/HelpColor` će kreirati komandu `helpx` u Cobalt Strike-u koja će obojiti komande indikujući da li su BOFs (green), da li su Frok&Run (yellow) i slično, ili da li su ProcessExecution, injection ili slično (red). To pomaže da se zna koje su komande stealthier.
+Agressor script `https://github.com/outflanknl/HelpColor` će kreirati `helpx` komandu u Cobalt Strike koja stavlja boje u komande označavajući da li su BOF-ovi (zeleno), Frok&Run (žuto) i slično, ili ProcessExecution, injection ili slično (crveno). To pomaže da se zna koje su komande diskretnije.
 
 ### Ponašaj se kao korisnik
 
-Možete proveriti događaje kao što su `Seatbelt.exe LogonEvents ExplicitLogonEvents PoweredOnEvents`:
+Možete proveriti događaje poput `Seatbelt.exe LogonEvents ExplicitLogonEvents PoweredOnEvents`:
 
-- Security EID 4624 - Proverite sve interaktivne logon-e da biste znali uobičajeno radno vreme.
-- System EID 12,13 - Proverite učestalost shutdown/startup/sleep događaja.
-- Security EID 4624/4625 - Proverite inbound validne/nevalidne NTLM pokušaje.
-- Security EID 4648 - Ovaj događaj se kreira kada se plaintext credentials koriste za logon. Ako ga je generisao proces, binary potencijalno ima credentials u clear text-u u config fajlu ili unutar koda.
+- Security EID 4624 - Proverite sve interactive logon-e da biste znali uobičajene radne sate.
+- System EID 12,13 - Proverite frekvenciju shutdown/startup/sleep događaja.
+- Security EID 4624/4625 - Proverite inbound validne/invalidne NTLM pokušaje.
+- Security EID 4648 - Ovaj event nastaje kada se koriste plaintext kredencijali za logon. Ako ga proces generiše, binary potencijalno ima kredencijale u clear text-u u config fajlu ili unutar koda.
 
-Kada koristite `jump` iz Cobalt Strike-a, bolje je koristiti `wmi_msbuild` metodu da novi proces izgleda legitimnije.
+Kada koristite `jump` iz cobalt strike, bolje je koristiti `wmi_msbuild` metodu da novi proces izgleda legitimnije.
 
-### Koristite račune računara
+### Koristite computer accounts
 
-Često odbrambeni timovi prate čudna ponašanja generisana od korisnika i **isključuju service accounts i computer accounts kao `*$` iz svog monitoring-a**. Možete koristiti ove naloge za lateral movement ili privilege escalation.
+Često odbrambeni timovi filtriraju čudna ponašanja generisana od korisnika i **isključuju service accounts i computer accounts kao `*$` iz njihovog monitoringa**. Možete koristiti te naloge za lateral movement ili privilege escalation.
 
 ### Koristite stageless payload-e
 
-Stageless payload-i su manje noisy od staged jer ne trebaju da preuzimaju drugu fazu sa C2 servera. To znači da ne generišu mrežni saobraćaj nakon inicijalne konekcije, što ih čini manje verovatnim da budu detektovani od strane mrežnih odbrana.
+Stageless payload-i su manje bučni od staged jer ne moraju da preuzimaju drugi stage sa C2 servera. To znači da ne generišu dodatni network traffic nakon inicijalne konekcije, što ih čini manje verovatnim za detekciju od strane mrežnih odbrana.
 
 ### Tokens & Token Store
 
-Budite oprezni kada kradete ili generišete tokene jer može biti moguće da EDR izlista sve tokene svih thread-ova i pronađe **token koji pripada drugom korisniku** ili čak SYSTEM-u u procesu.
+Budite oprezni kada kradete ili generišete tokene jer može biti moguće da EDR izlista sve tokene svih thread-ova i pronađe **token koji pripada drugom korisniku** ili čak SYSTEM u procesu.
 
-To omogućava skladištenje tokena **po beacon-u** tako da nije potrebno krasti isti token iznova i iznova. Ovo je korisno za lateral movement ili kada treba više puta koristiti ukradeni token:
+Zato je korisno čuvati tokene **po beacon-u** tako da nije potrebno krasti isti token iznova i iznova. Ovo je korisno za lateral movement ili kada treba više puta iskoristiti ukradeni token:
 
 - token-store steal <pid>
 - token-store steal-and-use <pid>
@@ -244,66 +244,66 @@ To omogućava skladištenje tokena **po beacon-u** tako da nije potrebno krasti 
 - token-store remove <id>
 - token-store remove-all
 
-Prilikom lateralnog kretanja, obično je bolje **ukrasti token nego generisati novi** ili izvesti pass the hash napad.
+Prilikom lateralnog pomeranja obično je bolje **ukrasti token nego generisati novi** ili izvesti pass the hash napad.
 
 ### Guardrails
 
-Cobalt Strike ima funkciju zvanu **Guardrails** koja pomaže da se spreči korišćenje određenih komandi ili akcija koje bi mogle biti detektovane od strane odbrambenih timova. Guardrails se mogu konfigurisati da blokiraju specifične komande, kao što su `make_token`, `jump`, `remote-exec`, i druge koje se često koriste za lateral movement ili privilege escalation.
+Cobalt Strike ima feature nazvan **Guardrails** koji pomaže da se spreči upotreba određenih komandi ili akcija koje bi mogle biti detektovane od strane odbrambenih timova. Guardrails se mogu konfigurisati da blokiraju specifične komande, kao što su `make_token`, `jump`, `remote-exec`, i druge koje se često koriste za lateral movement ili privilege escalation.
 
-Pored toga, repo [https://github.com/Arvanaghi/CheckPlease/wiki/System-Related-Checks](https://github.com/Arvanaghi/CheckPlease/wiki/System-Related-Checks) takođe sadrži neke provere i ideje koje možete razmotriti pre izvršavanja payload-a.
+Pored toga, repo [https://github.com/Arvanaghi/CheckPlease/wiki/System-Related-Checks](https://github.com/Arvanaghi/CheckPlease/wiki/System-Related-Checks) takođe sadrži neke provere i ideje koje biste mogli razmotriti pre izvršavanja payload-a.
 
 ### Tickets encryption
 
-U AD okruženju budite oprezni sa enkripcijom tiketa. Po defaultu, neki alati će koristiti RC4 enkripciju za Kerberos tikete, što je manje sigurno od AES enkripcije, dok će po defaultu ažurna okruženja koristiti AES. Ovo mogu detektovati odbrambeni timovi koji prate slabe enkripcijske algoritme.
+U AD okruženju pazite na enkripciju tiketa. Po defaultu, neki alati će koristiti RC4 enkripciju za Kerberos tikete, što je manje sigurno od AES enkripcije, a savremena okruženja po defaultu koriste AES. Ovo može biti detektovano od strane odbrambenih timova koji prate za slabe enkripcijske algoritme.
 
-### Izbegavajte podrazumevane vrednosti
+### Avoid Defaults
 
-Kada koristite Cobalt Strike, po defaultu SMB pipe-ovi će imati ime `msagent_####` i `status_####`. Promenite ta imena. Moguće je proveriti imena postojećih pipe-ova iz Cobalt Strike sa komandom: `ls \\.\pipe\`
+Kada koristite Cobalt Stricke, po defaultu SMB pipe-ovi će imati ime `msagent_####` i `"status_####`. Promenite ta imena. Moguće je proveriti nazive postojećih pipe-ova iz Cobal Strike sa komandom: `ls \\.\pipe\`
 
-Takođe, za SSH sesije kreira se pipe pod imenom `\\.\pipe\postex_ssh_####`. Promenite ga pomoću `set ssh_pipename "<new_name>";`.
+Pored toga, sa SSH sesijama se kreira pipe nazvan `\\.\pipe\postex_ssh_####`. Promenite ga sa `set ssh_pipename "<new_name>";`.
 
-Takođe u postex exploitation attack pipe-ovi `\\.\pipe\postex_####` mogu se modifikovati sa `set pipename "<new_name>"`.
+Takođe u postex exploitation attack pipe-ovi `\\.\pipe\postex_####` mogu biti modifikovani sa `set pipename "<new_name>"`.
 
-U Cobalt Strike profilima takođe možete menjati stvari kao što su:
+U Cobalt Strike profilima takođe možete menjati stvari poput:
 
 - Izbegavanje korišćenja `rwx`
-- Kako process injection ponašanje radi (koji APIs će se koristiti) u bloku `process-inject {...}`
-- Kako "fork and run" funkcioniše u bloku `post-ex {…}`
-- Vreme spavanja
-- Maksimalna veličina binarnih fajlova koji se učitavaju u memoriju
-- Memorijski otisak i sadržaj DLL-a u bloku `stage {...}`
-- Mrežni saobraćaj
+- Kako process injection ponašanje radi (koji API-ji će biti korišćeni) u `process-inject {...}` bloku
+- Kako "fork and run" radi u `post-ex {…}` bloku
+- Vremena spavanja (sleep time)
+- Max veličine binarnih fajlova koji se učitavaju u memoriju
+- Memorijski otisak i sadržaj DLL-a sa `stage {...}` blokom
+- Network traffic
 
 ### Bypass memory scanning
 
-Neki EDR-i skeniraju memoriju za poznate malware potpise. Cobalt Strike omogućava modifikaciju `sleep_mask` funkcije kao BOF koji će moći da enkriptuje u memoriji backdoor.
+Neki EDR-i skeniraju memoriju za poznate malware signeture. Coblat Strike dozvoljava modifikaciju `sleep_mask` funkcije kao BOF koji će moći da enkriptuje backdoor u memoriji.
 
 ### Noisy proc injections
 
-Kada se injektuje kod u proces, to je obično vrlo noisy, jer **nijedan regularan proces obično ne izvodi ovu akciju i načini za to su veoma ograničeni**. Stoga, može biti detektovano od strane behaviour-based detection sistema. Takođe, može biti detektovano od strane EDR-ova koji skeniraju mrežu za **threads containing code that is not in disk** (iako procesi poput browser-a koji koriste JIT ovo često imaju). Primer: [https://gist.github.com/jaredcatkinson/23905d34537ce4b5b1818c3e6405c1d2](https://gist.github.com/jaredcatkinson/23905d34537ce4b5b1818c3e6405c1d2)
+Kada se ubacuje kod u proces ovo je obično veoma bučno, jer **regularni procesi obično ne rade ovu akciju i načini da se to postigne su ograničeni**. Stoga, može biti detektovano od strane behavior-based detection sistema. Štaviše, može biti detektovano i od strane EDR-a koji skeniraju mrežu za **thread-ove koji sadrže kod koji nije na disku** (iako procesi kao što su browser-i koristeći JIT to često imaju). Primer: [https://gist.github.com/jaredcatkinson/23905d34537ce4b5b1818c3e6405c1d2](https://gist.github.com/jaredcatkinson/23905d34537ce4b5b1818c3e6405c1d2)
 
-### Spawnas | PID i PPID odnosi
+### Spawnas | PID and PPID relationships
 
-Prilikom pokretanja novog procesa važno je održavati regularan parent-child odnos između procesa da biste izbegli detekciju. Ako svchost.exe pokreće iexplorer.exe, to će izgledati sumnjivo, jer svchost.exe nije roditelj iexplorer.exe u normalnom Windows okruženju.
+Kada spawn-ujete novi proces važno je da **održite regularan parent-child** odnos između procesa kako biste izbegli detekciju. Ako svchost.exec izvršava iexplorer.exe to će izgledati sumnjivo, jer svchost.exe nije roditelj iexplorer.exe u normalnom Windows okruženju.
 
-Kada se novi beacon spawn-uje u Cobalt Strike-u, po defaultu se kreira proces koji koristi **`rundll32.exe`** da pokrene novi listener. Ovo nije posebno stealthy i može se lako detektovati od strane EDR-ova. Štaviše, `rundll32.exe` se pokreće bez argumenata što ga čini još sumnjivijim.
+Kada se novi beacon spawn-uje u Cobalt Strike po defaultu se kreira process koji koristi **`rundll32.exe`** da pokrene novi listener. Ovo nije mnogo stealthy i može biti lako detektovano od strane EDR-a. Štaviše, `rundll32.exe` se pokreće bez argumenata što ga čini još sumnjivijim.
 
-With the following Cobalt Strike command, you can specify a different process to spawn the new beacon, making it less detectable:
+Sa sledećom Cobalt Strike komandom možete specificirati drugi proces za spawn novog beacon-a, čineći ga manje detektabilnim:
 ```bash
 spawnto x86 svchost.exe
 ```
-Možete takođe promeniti ovu postavku **`spawnto_x86` i `spawnto_x64`** u profilu.
+Takođe možete promeniti ovu postavku **`spawnto_x86` i `spawnto_x64`** u profilu.
 
-### Proksiranje saobraćaja napadača
+### Proxyiranje saobraćaja napadača
 
-Napadači će ponekad morati da pokreću alate lokalno, čak i na Linux mašinama, i da nateraju saobraćaj žrtava da stigne do alata (npr. NTLM relay).
+Napadači će ponekad morati da pokreću alate lokalno, čak i na Linux mašinama, i da usmere saobraćaj žrtava ka tom alatu (npr. NTLM relay).
 
-Takođe, ponekad, da bi izveli pass-the.hash ili pass-the-ticket napad, za napadača je prikrivenije da **doda taj hash ili ticket u sopstveni LSASS proces** lokalno i potom pivotira iz njega umesto da menja LSASS proces žrtve.
+Štaviše, ponekad je za izvođenje pass-the.hash ili pass-the-ticket napada prikladnije da napadač **doda taj hash ili ticket u sopstveni LSASS proces** lokalno i zatim pivota sa njega, umesto da modifikuje LSASS proces na mašini žrtve.
 
-Međutim, morate biti **pažljivi sa generisanim saobraćajem**, jer možete slati neuobičajen saobraćaj (Kerberos?) iz vašeg backdoor procesa. Za ovo možete pivotirati na browser proces (iako možete biti otkriveni prilikom injektovanja u proces, pa razmislite o stealth načinu za to).
+Međutim, morate biti **pažljivi sa generisanim saobraćajem**, jer iz backdoor procesa možete slati neuobičajen saobraćaj (kerberos?). Zbog toga možete pivotirati na proces browsera (iako možete biti otkriveni pri injektovanju u proces, pa razmislite o prikrivenom načinu za to).
 
 
-### Izbegavanje AV-ova
+### Izbegavanje AV-a
 
 #### AV/AMSI/ETW Bypass
 
@@ -317,45 +317,45 @@ av-bypass.md
 
 #### Artifact Kit
 
-Obično, u `/opt/cobaltstrike/artifact-kit` možete pronaći kod i prekompajlirane šablone (u `/src-common`) payload-a koje cobalt strike koristi za generisanje binarnih beacona.
+Obično u `/opt/cobaltstrike/artifact-kit` možete naći kod i predkompajlirane šablone (u `/src-common`) payloads koje Cobalt Strike koristi za generisanje binarnih beacons.
 
-Korišćenjem [ThreatCheck](https://github.com/rasta-mouse/ThreatCheck) nad generisanim backdoor-om (ili samo nad kompajliranim šablonom) možete pronaći šta izaziva detekciju od strane defender-a. Obično je to string. Dakle, možete izmeniti kod koji generiše backdoor tako da taj string ne pojavljuje u finalnom binarnom fajlu.
+Korišćenjem [ThreatCheck](https://github.com/rasta-mouse/ThreatCheck) sa generisanim backdoor-om (ili samo sa kompajliranim šablonom) možete pronaći šta izaziva pokretanje defender-a. Obično je to string. Zato možete promeniti kod koji generiše backdoor tako da taj string ne bude prisutan u finalnom binary-u.
 
-Nakon izmene koda jednostavno pokrenite `./build.sh` iz iste direktorijuma i kopirajte folder `dist-pipe/` u Windows klijent u `C:\Tools\cobaltstrike\ArtifactKit`.
+Nakon izmene koda pokrenite `./build.sh` iz istog direktorijuma i kopirajte `dist-pipe/` folder u Windows klijenta u `C:\Tools\cobaltstrike\ArtifactKit`.
 ```
 pscp -r root@kali:/opt/cobaltstrike/artifact-kit/dist-pipe .
 ```
-Ne zaboravite da učitate agresivnu skriptu `dist-pipe\artifact.cna` kako biste naterali Cobalt Strike da koristi resurse sa diska koje želimo, a ne one koje je učitao.
+Ne zaboravite da učitate agresivan skript `dist-pipe\artifact.cna` da naznačite Cobalt Strike-u da koristi resurse sa diska koje želimo, a ne one koje je učitao.
 
 #### Resource Kit
 
 Folder ResourceKit sadrži šablone za Cobalt Strike-ove script-based payloads, uključujući PowerShell, VBA i HTA.
 
-Koristeći [ThreatCheck](https://github.com/rasta-mouse/ThreatCheck) sa šablonima možete pronaći šta defender (AMSI u ovom slučaju) ne prihvata i izmeniti to:
+Korišćenjem [ThreatCheck](https://github.com/rasta-mouse/ThreatCheck) sa šablonima možete otkriti šta defender (u ovom slučaju AMSI) ne voli i izmeniti to:
 ```
 .\ThreatCheck.exe -e AMSI -f .\cobaltstrike\ResourceKit\template.x64.ps1
 ```
-Modifying the detected lines one can generate a template that won't be caught.
+Modifikovanjem detektovanih linija moguće je generisati template koji neće biti otkriven.
 
-Ne zaboravite da učitate agresivni skript `ResourceKit\resources.cna` da naznačite Cobalt Strike-u da koristi resurse sa diska koje želimo, a ne one koji su već učitani.
+Ne zaboravite da učitate aggressive script `ResourceKit\resources.cna` da biste Cobalt Strike-u naznačili da koristi resurse sa diska koje želimo, a ne one već učitane.
 
 #### Function hooks | Syscall
 
-Function hooking is a very common method of ERDs to detect malicious activity. Cobalt Strike omogućava da zaobiđete ove hooks koristeći **syscalls** umesto standardnih Windows API poziva pomoću **`None`** konfiguracije, ili korišćenjem `Nt*` verzije funkcije sa podešavanjem **`Direct`**, ili jednostavno preskakanjem `Nt*` funkcije sa opcijom **`Indirect`** u malleable profilu. U zavisnosti od sistema, jedna opcija može biti prikrivenija od druge.
+Function hooking je veoma česta metoda ERDs za detekciju malicioznog ponašanja. Cobalt Strike omogućava da zaobiđete ove hook-ove korišćenjem **syscalls** umesto standardnih Windows API poziva koristeći **`None`** config, ili korišćenjem `Nt*` verzije funkcije sa **`Direct`** podešavanjem, ili jednostavno preskakanjem `Nt*` funkcije pomoću opcije **`Indirect`** u malleable profile-u. U zavisnosti od sistema, jedna opcija može biti prikrivenija od druge.
 
-Ovo se može podesiti u profilu ili koristeći komandu **`syscall-method`**
+Ovo se može podesiti u profile-u ili koristeći komandu **`syscall-method`**.
 
 Međutim, ovo može biti i bučno.
 
-Jedna opcija koju Cobalt Strike nudi za zaobilaženje hooks-a je uklanjanje tih hooks-a pomoću: [**unhook-bof**](https://github.com/Cobalt-Strike/unhook-bof).
+Jedna od opcija koje Cobalt Strike nudi za zaobilaženje function hook-ova jeste uklanjanje tih hook-ova pomoću: [**unhook-bof**](https://github.com/Cobalt-Strike/unhook-bof).
 
-Takođe možete proveriti koje funkcije su hookovane koristeći [**https://github.com/Mr-Un1k0d3r/EDRs**](https://github.com/Mr-Un1k0d3r/EDRs) ili [**https://github.com/matterpreter/OffensiveCSharp/tree/master/HookDetector**](https://github.com/matterpreter/OffensiveCSharp/tree/master/HookDetector)
+Takođe možete proveriti koje su funkcije hook-ovane koristeći [**https://github.com/Mr-Un1k0d3r/EDRs**](https://github.com/Mr-Un1k0d3r/EDRs) ili [**https://github.com/matterpreter/OffensiveCSharp/tree/master/HookDetector**](https://github.com/matterpreter/OffensiveCSharp/tree/master/HookDetector)
 
 
 
 
 <details>
-<summary>Misc Cobalt Strike commands</summary>
+<summary>Razne Cobalt Strike komande</summary>
 ```bash
 cd C:\Tools\neo4j\bin
 neo4j.bat console
@@ -379,13 +379,13 @@ pscp -r root@kali:/opt/cobaltstrike/artifact-kit/dist-pipe .
 ```
 </details>
 
-## Referencije
+## Izvori
 
-- [Cobalt Strike Linux Beacon (prilagođeni implant PoC)](https://github.com/EricEsquivel/CobaltStrike-Linux-Beacon)
+- [Cobalt Strike Linux Beacon (custom implant PoC)](https://github.com/EricEsquivel/CobaltStrike-Linux-Beacon)
 - [TrustedSec ELFLoader & Linux BOFs](https://github.com/trustedsec/ELFLoader)
-- [Outflank nix BOF šablon](https://github.com/outflanknl/nix_bof_template)
-- [Analiza Unit42 o šifrovanju metapodataka Cobalt Strike](https://unit42.paloaltonetworks.com/cobalt-strike-metadata-encryption-decryption/)
-- [SANS ISC dnevnik o saobraćaju Cobalt Strike](https://isc.sans.edu/diary/27968)
+- [Outflank nix BOF template](https://github.com/outflanknl/nix_bof_template)
+- [Unit42 analysis of Cobalt Strike metadata encryption](https://unit42.paloaltonetworks.com/cobalt-strike-metadata-encryption-decryption/)
+- [SANS ISC diary on Cobalt Strike traffic](https://isc.sans.edu/diary/27968)
 - [cs-decrypt-metadata-py](https://blog.didierstevens.com/2021/10/22/new-tool-cs-decrypt-metadata-py/)
 - [SentinelOne CobaltStrikeParser](https://github.com/Sentinel-One/CobaltStrikeParser)
 
