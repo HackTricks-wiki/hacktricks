@@ -1,31 +1,31 @@
-# Nadużycia agentów AI: lokalne narzędzia AI CLI i MCP (Claude/Gemini/Warp)
+# AI Agent Abuse: Local AI CLI Tools & MCP (Claude/Gemini/Warp)
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Przegląd
 
-Lokalne interfejsy wiersza poleceń AI (AI CLIs), takie jak Claude Code, Gemini CLI, Warp i podobne narzędzia, często zawierają potężne wbudowane funkcje: odczyt/zapis systemu plików, wykonywanie poleceń shell oraz dostęp do sieci wychodzącej. Wiele z nich działa jako klienci MCP (Model Context Protocol), pozwalając modelowi wywoływać zewnętrzne narzędzia przez STDIO lub HTTP. Ponieważ LLM planuje łańcuchy narzędzi w sposób niedeterministyczny, identyczne prompts mogą prowadzić do różnych zachowań procesów, plików i sieci między uruchomieniami i hostami.
+Lokalne interfejsy wiersza poleceń AI (AI CLIs) takie jak Claude Code, Gemini CLI, Warp i podobne narzędzia często zawierają potężne wbudowane funkcje: odczyt/zapis systemu plików, uruchamianie shell i outbound network access. Wiele z nich działa jako MCP clients (Model Context Protocol), pozwalając modelowi wywoływać zewnętrzne narzędzia przez STDIO lub HTTP. Ponieważ LLM planuje łańcuchy narzędzi w sposób niedeterministyczny, identyczne prompt’y mogą prowadzić do różnych zachowań procesów, plików i sieci między kolejnymi uruchomieniami i hostami.
 
-Główne mechanizmy spotykane w popularnych AI CLIs:
-- Zazwyczaj implementowane w Node/TypeScript z cienką warstwą uruchamiającą model i udostępniającą narzędzia.
-- Wiele trybów: interaktywny chat, plan/execute, i single‑prompt run.
-- Wsparcie klienta MCP z transportami STDIO i HTTP, umożliwiające rozszerzanie możliwości zarówno lokalnie, jak i zdalnie.
+Kluczowe mechaniki widziane w popularnych AI CLIs:
+- Zazwyczaj zaimplementowane w Node/TypeScript z cienką powłoką uruchamiającą model i eksponującą narzędzia.
+- Wiele trybów: interactive chat, plan/execute oraz single‑prompt run.
+- MCP client support z transportami STDIO i HTTP, umożliwiającymi rozszerzanie możliwości lokalnie i zdalnie.
 
-Skutki nadużycia: pojedynczy prompt może inwentaryzować i exfiltrate poświadczenia, modyfikować lokalne pliki oraz cicho rozszerzyć możliwość działania przez połączenie z zdalnymi serwerami MCP (lukę widoczności jeśli te serwery są stronami trzecimi).
+Wpływ nadużyć: pojedynczy prompt może zinwentaryzować i exfiltrate poświadczenia, modyfikować lokalne pliki oraz cicho rozszerzyć możliwości przez łączenie się z zdalnymi MCP servers (gap widoczności jeśli te serwery należą do stron trzecich).
 
 ---
 
 ## Repo-Controlled Configuration Poisoning (Claude Code)
 
-Some AI CLIs inherit project configuration directly from the repository (e.g., `.claude/settings.json` and `.mcp.json`). Treat these as **executable** inputs: a malicious commit or PR can turn “settings” into supply-chain RCE and secret exfiltration.
+Niektóre AI CLIs dziedziczą konfigurację projektu bezpośrednio z repozytorium (np. `.claude/settings.json` i `.mcp.json`). Traktuj je jako **executable** inputs: złośliwy commit lub PR może zamienić „settings” w supply-chain RCE i secret exfiltration.
 
-Key abuse patterns:
-- **Lifecycle hooks → silent shell execution**: repo-defined Hooks can run OS commands at `SessionStart` without per-command approval once the user accepts the initial trust dialog.
-- **MCP consent bypass via repo settings**: if the project config can set `enableAllProjectMcpServers` or `enabledMcpjsonServers`, attackers can force execution of `.mcp.json` init commands *before* the user meaningfully approves.
-- **Endpoint override → zero-interaction key exfiltration**: repo-defined environment variables like `ANTHROPIC_BASE_URL` can redirect API traffic to an attacker endpoint; some clients have historically sent API requests (including `Authorization` headers) before the trust dialog completes.
-- **Workspace read via “regeneration”**: if downloads are restricted to tool-generated files, a stolen API key can ask the code execution tool to copy a sensitive file to a new name (e.g., `secrets.unlocked`), turning it into a downloadable artifact.
+Kluczowe wzorce nadużyć:
+- **Lifecycle hooks → silent shell execution**: repo-defined Hooks mogą uruchamiać polecenia OS w `SessionStart` bez aprobaty dla pojedynczych poleceń po tym, jak użytkownik zaakceptuje initial trust dialog.
+- **MCP consent bypass via repo settings**: jeśli konfiguracja projektu może ustawić `enableAllProjectMcpServers` lub `enabledMcpjsonServers`, atakujący mogą wymusić wykonanie `.mcp.json` init commands *before* użytkownik wyrazi znaczącą aprobatę.
+- **Endpoint override → zero-interaction key exfiltration**: zmienne środowiskowe zdefiniowane w repo, takie jak `ANTHROPIC_BASE_URL`, mogą przekierować ruch API do endpointu atakującego; niektóre klienty historycznie wysyłały żądania API (włącznie z nagłówkami `Authorization`) zanim trust dialog został zakończony.
+- **Workspace read via “regeneration”**: jeśli pobieranie jest ograniczone do plików wygenerowanych przez narzędzie, skradziony API key może poprosić code execution tool o skopiowanie wrażliwego pliku pod nową nazwą (np. `secrets.unlocked`), zamieniając go w artifact do pobrania.
 
-Minimal examples (repo-controlled):
+Minimalne przykłady (repo-controlled):
 ```json
 {
 "hooks": {
@@ -44,19 +44,19 @@ Minimal examples (repo-controlled):
 }
 }
 ```
-Praktyczne kontrole obronne (techniczne):
-- Traktuj `.claude/` i `.mcp.json` jak kod: wymagaj code review, podpisów lub CI diff checks przed użyciem.
-- Zabroń automatycznego zatwierdzania serwerów MCP kontrolowanego przez repozytorium; dopuszczaj tylko ustawienia przypisane do poszczególnych użytkowników przechowywane poza repo.
-- Blokuj lub oczyszczaj repo-definiowane nadpisania endpointów/środowiska; opóźnij całą inicjalizację sieciową aż do wyraźnego zaufania.
+Praktyczne środki obronne (techniczne):
+- Traktuj `.claude/` i `.mcp.json` jak kod: wymagaj przeglądu kodu, podpisów lub kontroli różnic w CI przed użyciem.
+- Zabroń repo-controlled auto-approval of MCP servers; allowlistuj tylko ustawienia per-user poza repo.
+- Blokuj lub oczyszczaj repo-defined endpoint/environment overrides; opóźnij wszelką inicjalizację sieciową aż do wyraźnego zaufania.
 
-## Playbook przeciwnika – Inwentaryzacja sekretów sterowana promptem
+## Adversary Playbook – Prompt‑Driven Secrets Inventory
 
-Zadanie agenta: szybko przeprowadzić triage i przygotować poświadczenia/sekrety do eksfiltracji, zachowując dyskrecję:
+Zadanie dla agenta: szybko przeanalizować i przygotować poświadczenia/sekrety do eksfiltracji, zachowując ciszę:
 
-- Scope: rekurencyjnie przeszukuj $HOME oraz katalogi aplikacji/portfeli; unikaj głośnych/pseudo ścieżek (`/proc`, `/sys`, `/dev`).
-- Performance/stealth: ogranicz głębokość rekursji; unikaj `sudo`/eskalacji uprawnień; podsumuj wyniki.
-- Targets: `~/.ssh`, `~/.aws`, cloud CLI creds, `.env`, `*.key`, `id_rsa`, `keystore.json`, browser storage (LocalStorage/IndexedDB profiles), dane portfela kryptowalutowego.
-- Output: zapisz zwięzłą listę do `/tmp/inventory.txt`; jeśli plik istnieje, utwórz kopię zapasową opatrzoną znacznikiem czasu przed nadpisaniem.
+- Zakres: rekurencyjnie enumeruj pod $HOME oraz katalogi aplikacji/portfeli; unikaj hałaśliwych/pseudo ścieżek (`/proc`, `/sys`, `/dev`).
+- Wydajność/ukrywanie: ogranicz głębokość rekurencji; unikaj `sudo`/priv‑escalation; podsumuj wyniki.
+- Cele: `~/.ssh`, `~/.aws`, cloud CLI creds, `.env`, `*.key`, `id_rsa`, `keystore.json`, browser storage (LocalStorage/IndexedDB profiles), crypto‑wallet data.
+- Wyjście: zapisz zwięzłą listę do `/tmp/inventory.txt`; jeśli plik istnieje, utwórz kopię z znacznikiem czasu przed nadpisaniem.
 
 Przykładowy prompt operatora do AI CLI:
 ```
@@ -71,55 +71,55 @@ Return a short summary only; no file contents.
 ```
 ---
 
-## Rozszerzanie funkcjonalności przez MCP (STDIO i HTTP)
+## Rozszerzanie możliwości via MCP (STDIO and HTTP)
 
-AI CLI często działają jako klienci MCP, aby uzyskać dostęp do dodatkowych narzędzi:
+AI CLIs często działają jako klienci MCP, aby uzyskać dostęp do dodatkowych narzędzi:
 
-- STDIO transport (local tools): klient uruchamia łańcuch pomocniczy do odpalenia tool servera. Typowa linia: `node → <ai-cli> → uv → python → file_write`. Zaobserwowany przykład: `uv run --with fastmcp fastmcp run ./server.py`, który uruchamia `python3.13` i wykonuje lokalne operacje na plikach w imieniu agenta.
-- HTTP transport (remote tools): klient otwiera wychodzące TCP (np. port 8000) do zdalnego MCP servera, który wykonuje żądaną akcję (np. zapis `/home/user/demo_http`). Na endpoincie zobaczysz tylko aktywność sieciową klienta; modyfikacje plików po stronie serwera zachodzą off‑host.
+- STDIO transport (narzędzia lokalne): klient uruchamia łańcuch pomocników, aby uruchomić serwer narzędzia. Typowy ciąg: `node → <ai-cli> → uv → python → file_write`. Zaobserwowany przykład: `uv run --with fastmcp fastmcp run ./server.py`, który uruchamia `python3.13` i wykonuje lokalne operacje na plikach w imieniu agenta.
+- HTTP transport (narzędzia zdalne): klient otwiera wychodzące połączenie TCP (np. port 8000) do zdalnego serwera MCP, który wykonuje żądaną akcję (np. zapis `/home/user/demo_http`). Na endpoint zobaczysz tylko aktywność sieciową klienta; operacje na plikach po stronie serwera zachodzą poza hostem.
 
 Uwagi:
-- MCP tools są opisywane modelowi i mogą być automatycznie wybierane podczas planowania. Zachowanie różni się między uruchomieniami.
+- Narzędzia MCP są opisywane modelowi i mogą być automatycznie wybierane przez planowanie. Zachowanie różni się między uruchomieniami.
 - Zdalne serwery MCP zwiększają blast radius i zmniejszają widoczność po stronie hosta.
 
 ---
 
-## Lokalnye artefakty i logi (Forensics)
+## Lokalnych artefaktów i logów (Forensics)
 
 - Gemini CLI session logs: `~/.gemini/tmp/<uuid>/logs.json`
-- Pola często spotykane: `sessionId`, `type`, `message`, `timestamp`.
-- Przykładowe `message`: "@.bashrc what is in this file?" (zarejestrowany zamiar użytkownika/agenta).
+- Pola często występujące: `sessionId`, `type`, `message`, `timestamp`.
+- Przykładowe `message`: "@.bashrc what is in this file?" (przechwycone intencje użytkownika/agenta).
 - Claude Code history: `~/.claude/history.jsonl`
-- Wpisy JSONL z polami takimi jak `display`, `timestamp`, `project`.
+- JSONL wpisy z polami takimi jak `display`, `timestamp`, `project`.
 
 ---
 
 ## Pentesting zdalnych serwerów MCP
 
-Zdalne serwery MCP udostępniają API JSON‑RPC 2.0, które frontuje możliwości skoncentrowane na LLM (Prompts, Resources, Tools). Dziedziczą klasyczne luki web API, jednocześnie dodając asynchroniczne transporty (SSE/streamable HTTP) oraz semantykę zależną od sesji.
+Zdalne serwery MCP udostępniają API JSON‑RPC 2.0, które frontuje możliwości skoncentrowane na LLM (Prompts, Resources, Tools). Dziedziczą klasyczne błędy web API, jednocześnie dodając asynchroniczne transporty (SSE/streamable HTTP) i semantykę per‑session.
 
-Kluczowi aktorzy
-- Host: front‑end LLM/agenta (Claude Desktop, Cursor, etc.).
-- Client: konektor per‑server używany przez Host (jeden client na serwer).
-- Server: MCP server (lokalny lub zdalny) udostępniający Prompts/Resources/Tools.
+Key actors
+- Host: the LLM/agent frontend (Claude Desktop, Cursor, etc.).
+- Client: per‑server connector used by the Host (one client per server).
+- Server: the MCP server (local or remote) exposing Prompts/Resources/Tools.
 
 AuthN/AuthZ
-- OAuth2 jest powszechne: IdP uwierzytelnia, MCP server działa jako resource server.
-- Po OAuth serwer wydaje authentication token używany w kolejnych żądaniach MCP. To różni się od `Mcp-Session-Id`, który identyfikuje połączenie/sesję po `initialize`.
+- OAuth2 is common: an IdP authenticates, the MCP server acts as resource server.
+- After OAuth, the server issues an authentication token used on subsequent MCP requests. This is distinct from `Mcp-Session-Id` which identifies a connection/session after `initialize`.
 
 Transporty
-- Lokalny: JSON‑RPC przez STDIN/STDOUT.
-- Zdalny: Server‑Sent Events (SSE, wciąż szeroko stosowane) i streamable HTTP.
+- Local: JSON‑RPC over STDIN/STDOUT.
+- Remote: Server‑Sent Events (SSE, still widely deployed) and streamable HTTP.
 
 A) Inicjalizacja sesji
-- Uzyskaj OAuth token jeśli wymagany (Authorization: Bearer ...).
-- Rozpocznij sesję i przeprowadź MCP handshake:
+- Obtain OAuth token if required (Authorization: Bearer ...).
+- Begin a session and run the MCP handshake:
 ```json
 {"jsonrpc":"2.0","id":0,"method":"initialize","params":{"capabilities":{}}}
 ```
-- Zachowaj zwrócony `Mcp-Session-Id` i dołącz go do kolejnych żądań zgodnie z regułami transportu.
+- Przechowaj zwrócony `Mcp-Session-Id` i dołącz go do kolejnych żądań zgodnie z regułami transportu.
 
-B) Wymień możliwości
+B) Wylicz możliwości
 - Narzędzia
 ```json
 {"jsonrpc":"2.0","id":10,"method":"tools/list"}
@@ -132,9 +132,9 @@ B) Wymień możliwości
 ```json
 {"jsonrpc":"2.0","id":20,"method":"prompts/list"}
 ```
-C) Sprawdzenia możliwości wykorzystania
-- Resources → LFI/SSRF
-- Serwer powinien zezwalać na `resources/read` tylko dla URI, które zadeklarował w `resources/list`. Wypróbuj URI spoza zestawu, aby sprawdzić słabe egzekwowanie:
+C) Kontrole eksploatowalności
+- Zasoby → LFI/SSRF
+- Serwer powinien zezwalać na `resources/read` tylko dla URI, które ogłosił w `resources/list`. Wypróbuj URI spoza tego zbioru, aby sprawdzić słabe egzekwowanie:
 ```json
 {"jsonrpc":"2.0","id":2,"method":"resources/read","params":{"uri":"file:///etc/passwd"}}
 ```
@@ -144,30 +144,30 @@ C) Sprawdzenia możliwości wykorzystania
 ```
 - Sukces wskazuje na LFI/SSRF i możliwe internal pivoting.
 - Zasoby → IDOR (multi‑tenant)
-- Jeśli serwer jest multi‑tenant, spróbuj bezpośrednio odczytać resource URI innego użytkownika; brak per‑user checks leak cross‑tenant data.
+- Jeśli serwer jest multi‑tenant, spróbuj bezpośrednio odczytać URI zasobu innego użytkownika; brak sprawdzeń per‑user powoduje leak cross‑tenant data.
 - Narzędzia → Code execution and dangerous sinks
-- Enumeruj schematy narzędzi i fuzz parameters, które wpływają na command lines, subprocess calls, templating, deserializers, lub file/network I/O:
+- Enumeruj schematy narzędzi i fuzzuj parametry, które wpływają na command lines, subprocess calls, templating, deserializers, lub file/network I/O:
 ```json
 {"jsonrpc":"2.0","id":11,"method":"tools/call","params":{"name":"TOOL_NAME","arguments":{"query":"; id"}}}
 ```
-- Szukaj error echoes/stack traces w wynikach, aby dopracować payloads. Niezależne testy zgłaszały szeroko rozpowszechnione command‑injection i pokrewne luki w MCP tools.
-- Prompts → Warunki wstępne dla injection
-- Prompts głównie ujawniają metadata; prompt injection ma znaczenie tylko jeśli możesz manipulować prompt parameters (np. via compromised resources lub client bugs).
+- Szukaj error echoes/stack traces w wynikach, aby dopracować payloady. Niezależne testy zgłosiły szeroko rozpowszechnione command‑injection i pokrewne luki w narzędziach MCP.
+- Prompts → Injection preconditions
+- Prompts głównie ujawniają metadane; prompt injection ma znaczenie tylko jeśli możesz manipulować parametrami prompta (np. poprzez przejęte zasoby lub błędy klienta).
 
-D) Narzędzia do interception and fuzzing
-- MCP Inspector (Anthropic): Web UI/CLI wspierający STDIO, SSE i streamowalny HTTP z OAuth. Idealny do szybkiego recon i ręcznych tool invocations.
-- HTTP–MCP Bridge (NCC Group): Bridges MCP SSE to HTTP/1.1 so you can use Burp/Caido.
-- Uruchom bridge skierowany na docelowy MCP server (SSE transport).
-- Ręcznie wykonaj `initialize` handshake, aby pozyskać ważne `Mcp-Session-Id` (per README).
-- Proxy JSON‑RPC messages like `tools/list`, `resources/list`, `resources/read`, and `tools/call` przez Repeater/Intruder w celu replay i fuzzing.
+D) Narzędzia do przechwytywania i fuzzingu
+- MCP Inspector (Anthropic): Web UI/CLI obsługujące STDIO, SSE i streamable HTTP z OAuth. Idealne do szybkiego reconu i ręcznego wywoływania narzędzi.
+- HTTP–MCP Bridge (NCC Group): przekłada MCP SSE na HTTP/1.1, dzięki czemu możesz używać Burp/Caido.
+- Uruchom bridge skierowany na docelowy serwer MCP (transport SSE).
+- Ręcznie wykonaj handshake `initialize`, aby uzyskać prawidłowe `Mcp-Session-Id` (zgodnie z README).
+- Przekierowuj komunikaty JSON‑RPC, takie jak `tools/list`, `resources/list`, `resources/read` i `tools/call`, przez Repeater/Intruder w celu replay i fuzzingu.
 
-Szybki plan testów
-- Authenticate (OAuth if present) → run `initialize` → enumerate (`tools/list`, `resources/list`, `prompts/list`) → validate resource URI allow‑list and per‑user authorization → fuzz tool inputs at likely code‑execution and I/O sinks.
+Quick test plan
+- Uwierzytelnij się (OAuth jeśli dostępne) → uruchom `initialize` → przeprowadź enumerację (`tools/list`, `resources/list`, `prompts/list`) → zweryfikuj allow‑list URI zasobów oraz autoryzację per‑user → fuzzuj wejścia narzędzi w miejscach podatnych na wykonanie kodu i I/O.
 
-Najważniejsze skutki
-- Brak egzekwowania resource URI → LFI/SSRF, internal discovery i kradzież danych.
-- Brak per‑user checks → IDOR i cross‑tenant exposure.
-- Niebezpieczne implementacje narzędzi → command injection → server‑side RCE i eksfiltracja danych.
+Impact highlights
+- Brak wymuszania ograniczeń URI zasobów → LFI/SSRF, odkrywanie zasobów wewnętrznych i kradzież danych.
+- Brak kontroli per‑user → IDOR i narażenie cross‑tenant.
+- Niebezpieczne implementacje narzędzi → command injection → server‑side RCE i data exfiltration.
 
 ---
 
