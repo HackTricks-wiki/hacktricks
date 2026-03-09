@@ -527,6 +527,13 @@ You can find some **VHosts in IPs using** [**HostHunter**](https://github.com/Sp
 
 If you suspect that some subdomain can be hidden in a web server you could try to brute force it:
 
+When the **IP redirects to a hostname** (name-based vhosts), fuzz the `Host` header directly and let ffuf **auto-calibrate** to highlight responses that differ from the default vhost:
+
+```bash
+ffuf -u http://10.10.10.10 -H "Host: FUZZ.example.com" \
+  -w /opt/SecLists/Discovery/DNS/subdomains-top1million-20000.txt -ac
+```
+
 ```bash
 ffuf -c -w /path/to/wordlist -u http://victim.com -H "Host: FUZZ.victim.com"
 
@@ -738,5 +745,6 @@ There are several tools out there that will perform part of the proposed actions
 ## **References**
 
 - All free courses of [**@Jhaddix**](https://twitter.com/Jhaddix) like [**The Bug Hunter's Methodology v4.0 - Recon Edition**](https://www.youtube.com/watch?v=p4JgIu1mceI)
+- [0xdf – HTB: Guardian](https://0xdf.gitlab.io/2026/02/28/htb-guardian.html)
 
 {{#include ../../banners/hacktricks-training.md}}

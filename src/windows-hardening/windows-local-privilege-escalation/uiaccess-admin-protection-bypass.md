@@ -21,6 +21,13 @@
 - UIAccess lets a lower-IL process send window messages to higher-IL windows (bypassing UIPI filters). At **equal IL**, classic UI primitives like `SetWindowsHookEx` **do allow code injection/DLL loading** into any process that owns a window (including **message-only windows** used by COM). 
 - Admin Protection launches the UIAccess process under the **limited user’s identity** but at **High IL**, silently. Once arbitrary code runs inside that High-IL UIAccess process, the attacker can inject into other High-IL processes on the desktop (even belonging to different users), breaking the intended separation.
 
+## HWND-to-process handle primitive (`GetProcessHandleFromHwnd` / `NtUserGetWindowProcessHandle`)
+- On Windows 10 1803+ the API moved into Win32k (`NtUserGetWindowProcessHandle`) and can open a process handle using a caller-supplied `DesiredAccess`. The kernel path uses `ObOpenObjectByPointer(..., KernelMode, ...)`, which bypasses normal user-mode access checks.
+- Preconditions in practice: the target window must be on the same desktop, and UIPI checks must pass. Historically, a caller with UIAccess could bypass UIPI failure and still get a kernel-mode handle (fixed as CVE-2023-41772).
+- Impact: a window handle becomes a **capability** to obtain a powerful process handle (commonly `PROCESS_DUP_HANDLE`, `PROCESS_VM_READ`, `PROCESS_VM_WRITE`, `PROCESS_VM_OPERATION`) that the caller could not normally open. This enables cross-sandbox access and can break Protected Process / PPL boundaries if the target exposes any window (including message-only windows).
+- Practical abuse flow: enumerate or locate HWNDs (e.g., `EnumWindows`/`FindWindowEx`), resolve the owning PID (`GetWindowThreadProcessId`), call `GetProcessHandleFromHwnd`, then use the returned handle for memory read/write or code-hijack primitives.
+- Post-fix behavior: UIAccess no longer grants kernel-mode opens on UIPI failure and allowed access rights are restricted to the legacy hook set; Windows 11 24H2 adds process-protection checks and feature-flagged safer paths. Disabling UIPI system-wide (`EnforceUIPI=0`) weakens these protections.
+
 ## Secure-directory validation weaknesses (AppInfo `AiCheckSecureApplicationDirectory`)
 AppInfo resolves the supplied path via `GetFinalPathNameByHandle` and then applies **string allow/deny checks** against hardcoded roots/exclusions. Multiple bypass classes stem from that simplistic validation:
 - **Directory named streams**: Excluded writable directories (e.g., `C:\Windows\tracing`) can be bypassed with a named stream on the directory itself, e.g. `C:\Windows\tracing:file.exe`. The string checks see `C:\Windows\` and miss the excluded subpath.
@@ -47,5 +54,6 @@ Get-AccessibleFile -Win32Path $paths -Access Execute,WriteData `
 
 ## References
 - [Bypassing Administrator Protection by Abusing UI Access](https://projectzero.google/2026/02/windows-administrator-protection.html)
+- [GetProcessHandleFromHwnd (GPHFH) Deep Dive](https://projectzero.google/2026/02/gphfh-deep-dive.html)
 
 {{#include ../../banners/hacktricks-training.md}}

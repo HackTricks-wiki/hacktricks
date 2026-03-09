@@ -68,6 +68,26 @@ _bash, sh, zsh..._ More here: [https://gtfobins.github.io/](https://gtfobins.git
 | %TMP%                     | %USERDOMAIN%   | %USERNAME%           |
 | %USERPROFILE%             | %WINDIR%       |                      |
 
+### Restricted Desktop Breakouts (Citrix/RDS/VDI)
+
+- **Dialog-box pivoting**: Use *Open/Save/Print-to-file* dialogs as Explorer-lite. Try `*.*` / `*.exe` in the filename field, right-click folders for **Open in new window**, and use **Properties → Open file location** to expand navigation.
+- **Create execution paths from dialogs**: Create a new file and rename it to `.CMD` or `.BAT`, or create a shortcut pointing to `%WINDIR%\System32` (or a specific binary like `%WINDIR%\System32\cmd.exe`).
+- **Shell launch pivots**: If you can browse to `cmd.exe`, try **drag-and-drop** any file onto it to launch a prompt. If Task Manager is reachable (`CTRL+SHIFT+ESC`), use **Run new task**.
+- **Task Scheduler bypass**: If interactive shells are blocked but scheduling is allowed, create a task to run `cmd.exe` (GUI `taskschd.msc` or `schtasks.exe`).
+- **Weak allowlists**: If execution is allowed by **filename/extension**, rename your payload to a permitted name. If allowed by **directory**, copy the payload into an allowed program folder and run it there.
+- **Find writable staging paths**: Start with `%TEMP%` and enumerate writeable folders with Sysinternals AccessChk.
+
+```cmd
+echo %TEMP%
+accesschk.exe -uwdqs Users c:\
+accesschk.exe -uwdqs "Authenticated Users" c:\
+```
+
+- **Next step**: If you gain a shell, pivot to the Windows LPE checklist:
+{{#ref}}
+../windows-hardening/checklist-windows-privilege-escalation.md
+{{#endref}}
+
 ### Download Your Binaries
 
 Console: [https://sourceforge.net/projects/console/](https://sourceforge.net/projects/console/)\
@@ -271,12 +291,10 @@ These shortcuts are for the visual settings and sound settings, depending on the
 
 ## References
 
+- [https://www.pentestpartners.com/security-blog/breaking-out-of-citrix-and-other-restricted-desktop-environments/](https://www.pentestpartners.com/security-blog/breaking-out-of-citrix-and-other-restricted-desktop-environments/)
 - [https://www.macworld.com/article/2975857/6-only-for-ipad-gestures-you-need-to-know.html](https://www.macworld.com/article/2975857/6-only-for-ipad-gestures-you-need-to-know.html)
 - [https://www.tomsguide.com/us/ipad-shortcuts,news-18205.html](https://www.tomsguide.com/us/ipad-shortcuts,news-18205.html)
 - [https://thesweetsetup.com/best-ipad-keyboard-shortcuts/](https://thesweetsetup.com/best-ipad-keyboard-shortcuts/)
 - [http://www.iphonehacks.com/2018/03/ipad-keyboard-shortcuts.html](http://www.iphonehacks.com/2018/03/ipad-keyboard-shortcuts.html)
 
 {{#include ../banners/hacktricks-training.md}}
-
-
-
