@@ -1,6 +1,6 @@
 import argparse
 import html
-import os
+import json
 import re
 from datetime import datetime, timezone
 from pathlib import Path
@@ -72,6 +72,10 @@ def canonical_url(site_url, lang, rel_path):
     return f"{site_url.rstrip('/')}/{lang}/{rel_path.as_posix()}"
 
 
+def asset_url(site_url, lang, asset_path):
+    return f"{site_url.rstrip('/')}/{lang}/{asset_path.lstrip('/')}"
+
+
 def clean_text(fragment):
     fragment = re.sub(r"<script\b[^>]*>.*?</script>", " ", fragment, flags=re.I | re.S)
     fragment = re.sub(r"<style\b[^>]*>.*?</style>", " ", fragment, flags=re.I | re.S)
@@ -105,8 +109,100 @@ def extract_description(document, fallback):
     return trim_description(clean_text(scope), fallback)
 
 
-def build_seo_block(site_url, lang, rel_path, languages, default_lang):
+def strip_index_suffix(path):
+    return re.sub(r"(?:^|/)index\.html$", "", path.as_posix())
+
+
+def is_homepage(rel_path):
+    return rel_path.as_posix() == "index.html"
+
+
+def humanize_slug(value):
+    value = value.replace(".html", "").replace("-", " ").replace("_", " ").strip()
+    value = re.sub(r"\s+", " ", value)
+    return value.title() if value else "Home"
+
+
+def breadcrumb_items(site_url, lang, rel_path):
+    items = [{"name": "Home", "url": canonical_url(site_url, lang, Path("index.html"))}]
+    bare_path = strip_index_suffix(rel_path)
+    if not bare_path:
+        return items
+
+    parts = [part for part in bare_path.split("/") if part]
+    for idx in range(len(parts)):
+        crumb_rel = Path(*parts[: idx + 1], "index.html")
+        items.append({"name": humanize_slug(parts[idx]), "url": canonical_url(site_url, lang, crumb_rel)})
+    return items
+
+
+def build_structured_data(site_url, lang, rel_path, title, description, site_name, image_url):
     current_url = canonical_url(site_url, lang, rel_path)
+    site_root = site_url.rstrip("/")
+    website_url = canonical_url(site_url, "en", Path("index.html"))
+    data = [
+        {
+            "@context": "https://schema.org",
+            "@type": "Organization",
+            "@id": f"{site_root}/#organization",
+            "name": site_name,
+            "url": site_root,
+            "logo": {"@type": "ImageObject", "url": image_url},
+        },
+        {
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            "@id": f"{site_root}/#website",
+            "url": site_root,
+            "name": site_name,
+            "inLanguage": "en",
+            "publisher": {"@id": f"{site_root}/#organization"},
+        },
+        {
+            "@context": "https://schema.org",
+            "@type": "WebPage",
+            "@id": f"{current_url}#webpage",
+            "url": current_url,
+            "name": title,
+            "description": description,
+            "inLanguage": lang,
+            "isPartOf": {"@id": f"{site_root}/#website"},
+            "about": {"@id": f"{site_root}/#organization"},
+            "primaryImageOfPage": {"@type": "ImageObject", "url": image_url},
+        },
+        {
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+                {
+                    "@type": "ListItem",
+                    "position": index,
+                    "name": item["name"],
+                    "item": item["url"],
+                }
+                for index, item in enumerate(breadcrumb_items(site_url, lang, rel_path), start=1)
+            ],
+        },
+    ]
+
+    if is_homepage(rel_path):
+        data[1]["potentialAction"] = {
+            "@type": "SearchAction",
+            "target": f"{website_url}?search={{search_term_string}}",
+            "query-input": "required name=search_term_string",
+        }
+
+    return data
+
+
+def build_seo_block(site_url, lang, rel_path, languages, default_lang, title, description, site_name):
+    current_url = canonical_url(site_url, lang, rel_path)
+    image_url = asset_url(site_url, default_lang, "favicon.png")
+    structured_data = json.dumps(
+        build_structured_data(site_url, lang, rel_path, title, description, site_name, image_url),
+        ensure_ascii=False,
+        separators=(",", ":"),
+    )
     lines = [SEO_START, f'<link rel="canonical" href="{html.escape(current_url, quote=True)}">']
 
     for alt_lang in languages:
@@ -117,6 +213,23 @@ def build_seo_block(site_url, lang, rel_path, languages, default_lang):
 
     default_url = canonical_url(site_url, default_lang, rel_path)
     lines.append(f'<link rel="alternate" hreflang="x-default" href="{html.escape(default_url, quote=True)}">')
+    lines.extend(
+        [
+            f'<meta property="og:site_name" content="{html.escape(site_name, quote=True)}">',
+            f'<meta property="og:title" content="{html.escape(title, quote=True)}">',
+            f'<meta property="og:description" content="{html.escape(description, quote=True)}">',
+            f'<meta property="og:url" content="{html.escape(current_url, quote=True)}">',
+            f'<meta property="og:type" content="website">',
+            f'<meta property="og:image" content="{html.escape(image_url, quote=True)}">',
+            f'<meta property="og:image:alt" content="{html.escape(site_name, quote=True)}">',
+            f'<meta property="og:locale" content="{html.escape(lang, quote=True)}">',
+            f'<meta name="twitter:card" content="summary">',
+            f'<meta name="twitter:title" content="{html.escape(title, quote=True)}">',
+            f'<meta name="twitter:description" content="{html.escape(description, quote=True)}">',
+            f'<meta name="twitter:image" content="{html.escape(image_url, quote=True)}">',
+            '<script type="application/ld+json">' + structured_data + "</script>",
+        ]
+    )
     lines.append(SEO_END)
     return "\n        ".join(lines)
 
@@ -126,7 +239,9 @@ def update_document(document, site_url, lang, rel_path, languages, default_lang,
     page_title = clean_text(title_match.group(1)) if title_match else site_name
     fallback_description = f"{site_name}: {page_title}"
     description = extract_description(document, fallback_description)
-    seo_block = build_seo_block(site_url, lang, rel_path, languages, default_lang)
+    seo_block = build_seo_block(
+        site_url, lang, rel_path, languages, default_lang, page_title, description, site_name
+    )
 
     document = re.sub(
         r"\s*<!-- HT_SEO_START -->.*?<!-- HT_SEO_END -->\s*",
