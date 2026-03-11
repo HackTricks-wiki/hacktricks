@@ -76,6 +76,10 @@ def asset_url(site_url, lang, asset_path):
     return f"{site_url.rstrip('/')}/{lang}/{asset_path.lstrip('/')}"
 
 
+def social_image_url(site_url):
+    return f"{site_url.rstrip('/')}/es/images/HACKTRICKS-logo.svg"
+
+
 def clean_text(fragment):
     fragment = re.sub(r"<script\b[^>]*>.*?</script>", " ", fragment, flags=re.I | re.S)
     fragment = re.sub(r"<style\b[^>]*>.*?</style>", " ", fragment, flags=re.I | re.S)
@@ -197,7 +201,7 @@ def build_structured_data(site_url, lang, rel_path, title, description, site_nam
 
 def build_seo_block(site_url, lang, rel_path, languages, default_lang, title, description, site_name):
     current_url = canonical_url(site_url, lang, rel_path)
-    image_url = asset_url(site_url, default_lang, "favicon.png")
+    image_url = social_image_url(site_url)
     structured_data = json.dumps(
         build_structured_data(site_url, lang, rel_path, title, description, site_name, image_url),
         ensure_ascii=False,
@@ -221,9 +225,11 @@ def build_seo_block(site_url, lang, rel_path, languages, default_lang, title, de
             f'<meta property="og:url" content="{html.escape(current_url, quote=True)}">',
             f'<meta property="og:type" content="website">',
             f'<meta property="og:image" content="{html.escape(image_url, quote=True)}">',
+            f'<meta property="og:image:secure_url" content="{html.escape(image_url, quote=True)}">',
+            f'<meta property="og:image:type" content="image/svg+xml">',
             f'<meta property="og:image:alt" content="{html.escape(site_name, quote=True)}">',
             f'<meta property="og:locale" content="{html.escape(lang, quote=True)}">',
-            f'<meta name="twitter:card" content="summary">',
+            f'<meta name="twitter:card" content="summary_large_image">',
             f'<meta name="twitter:title" content="{html.escape(title, quote=True)}">',
             f'<meta name="twitter:description" content="{html.escape(description, quote=True)}">',
             f'<meta name="twitter:image" content="{html.escape(image_url, quote=True)}">',
