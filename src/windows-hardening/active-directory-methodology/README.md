@@ -69,60 +69,7 @@ Ikiwa una upatikanaji wa mazingira ya AD lakini huna kredenshiali/vikao unaweza:
 {{#endref}}
 
 - **Poison the network**
-- Kusanya credentials kwa **impersonating services with Responder** ({{#ref}}../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md{#endref}})
-- Pata ufikiaji wa host kwa [**abusing the relay attack**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack)
-- Kusanya credentials kwa **exposing fake UPnP services with evil-S** ({{#ref}}../../generic-methodologies-and-resources/pentesting-network/spoofing-ssdp-and-upnp-devices.md{#endref}})[**SDP**](https://medium.com/@nickvangilder/exploiting-multifunction-printers-during-a-penetration-test-engagement-28d3840d8856)
-- [**OSINT**](https://book.hacktricks.wiki/en/generic-methodologies-and-resources/external-recon-methodology/index.html):
-- Extract usernames/majina kutoka kwa nyaraka za ndani, mitandao ya kijamii, services (hasa web) ndani ya mazingira ya domain na pia zinazoonekana hadharani.
-- Ikiwa utapata majina kamili ya wafanyakazi wa kampuni, unaweza kujaribu kanuni mbalimbali za AD **username conventions** ([**read this**](https://activedirectorypro.com/active-directory-user-naming-convention/)). Conventions zinazotumika mara kwa mara ni: _NameSurname_, _Name.Surname_, _NamSur_ (herufi 3 za kila moja), _Nam.Sur_, _NSurname_, _N.Surname_, _SurnameName_, _Surname.Name_, _SurnameN_, _Surname.N_, herufi 3 _random_ na namba 3 _random_ (abc123).
-- Zana:
-- [w0Tx/generate-ad-username](https://github.com/w0Tx/generate-ad-username)
-- [urbanadventurer/username-anarchy](https://github.com/urbanadventurer/username-anarchy)
-
-### Kurodhesha watumiaji (User enumeration)
-
-- **Anonymous SMB/LDAP enum:** Angalia kurasa za [**pentesting SMB**](../../network-services-pentesting/pentesting-smb/index.html) na [**pentesting LDAP**](../../network-services-pentesting/pentesting-ldap.md).
-- **Kerbrute enum**: Wakati **invalid username is requested** server itajibu kwa kutumia msimbo wa hitilafu wa **Kerberos** _KRB5KDC_ERR_C_PRINCIPAL_UNKNOWN_, ikituwezesha kubaini kuwa username haikuwa sahihi. **Valid usernames** zitatokea kwa TGT katika majibu ya **AS-REP** au hitilafu _KRB5KDC_ERR_PREAUTH_REQUIRED_, ikionyesha kuwa mtumiaji anahitajika kufanya pre-authentication.
-- **No Authentication against MS-NRPC**: Kutumia auth-level = 1 (No authentication) dhidi ya kiolesura cha MS-NRPC (Netlogon) kwenye domain controllers. Mbinu hii inaita kazi ya `DsrGetDcNameEx2` baada ya kufunga (binding) kiolesura cha MS-NRPC ili kukagua kama user au computer ipo bila kredenshiali yoyote. Zana ya [NauthNRPC](https://github.com/sud0Ru/NauthNRPC) inatekeleza aina hii ya enumeration. Utafiti unaweza kupatikana [hapa](https://media.kasperskycontenthub.com/wp-content/uploads/sites/43/2024/05/22190247/A-journey-into-forgotten-Null-Session-and-MS-RPC-interfaces.pdf)
-```bash
-./kerbrute_linux_amd64 userenum -d lab.ropnop.com --dc 10.10.10.10 usernames.txt #From https://github.com/ropnop/kerbrute/releases
-
-nmap -p 88 --script=krb5-enum-users --script-args="krb5-enum-users.realm='DOMAIN'" <IP>
-Nmap -p 88 --script=krb5-enum-users --script-args krb5-enum-users.realm='<domain>',userdb=/root/Desktop/usernames.txt <IP>
-
-msf> use auxiliary/gather/kerberos_enumusers
-
-crackmapexec smb dominio.es  -u '' -p '' --users | awk '{print $4}' | uniq
-python3 nauth.py -t target -u users_file.txt #From https://github.com/sud0Ru/NauthNRPC
-```
-- **OWA (Outlook Web Access) Server**
-
-Ikiwa umepata mojawapo ya seva hizi kwenye mtandao, unaweza pia kufanya **user enumeration against it**. Kwa mfano, unaweza kutumia zana [**MailSniper**](https://github.com/dafthack/MailSniper):
-```bash
-ipmo C:\Tools\MailSniper\MailSniper.ps1
-# Get info about the domain
-Invoke-DomainHarvestOWA -ExchHostname [ip]
-# Enumerate valid users from a list of potential usernames
-Invoke-UsernameHarvestOWA -ExchHostname [ip] -Domain [domain] -UserList .\possible-usernames.txt -OutFile valid.txt
-# Password spraying
-Invoke-PasswordSprayOWA -ExchHostname [ip] -UserList .\valid.txt -Password Summer2021
-# Get addresses list from the compromised mail
-Get-GlobalAddressList -ExchHostname [ip] -UserName [domain]\[username] -Password Summer2021 -OutFile gal.txt
-```
-> [!WARNING]
-> You can find lists of usernames in [**this github repo**](https://github.com/danielmiessler/SecLists/tree/master/Usernames/Names)  and this one ([**statistically-likely-usernames**](https://github.com/insidetrust/statistically-likely-usernames)).
->
-> However, you should have the **name of the people working on the company** from the recon step you should have performed before this. With the name and surname you could used the script [**namemash.py**](https://gist.github.com/superkojiman/11076951) to generate potential valid usernames.
-
-### Knowing one or several usernames
-
-Sawa, hivyo unajua tayari una username halali lakini huna passwords... Kisha jaribu:
-
-- [**ASREPRoast**](asreproast.md): Ikiwa mtumiaji **hapati** attribute _DONT_REQ_PREAUTH_ unaweza **kuomba AS_REP message** kwa mtumiaji huyo ambayo itakuwa na data iliyosimbwa kwa derivation ya password ya mtumiaji.
-- [**Password Spraying**](password-spraying.md): Jaribu passwords **zile zinazotumika mara kwa mara** kwa kila mmoja wa watumiaji waliogunduliwa, labda mtumiaji fulani anatumia password mbaya (kumbuka password policy!).
-- Pia unaweza **kuspray OWA servers** ili kujaribu kupata ufikiaji wa mail servers za watumiaji.
-
-{{#ref}}
+- Kusanya credentials kwa **impersonating services with Responder** ({{#ref}}
 password-spraying.md
 {{#endref}}
 
