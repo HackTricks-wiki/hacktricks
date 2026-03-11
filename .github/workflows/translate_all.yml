@@ -248,6 +248,15 @@ jobs:
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: us-east-1
+
+      - name: Post-process SEO artifacts
+        run: |
+          python3 scripts/seo_postprocess.py pages \
+            --book-dir ./book \
+            --site-url https://hacktricks.wiki \
+            --lang "$BRANCH" \
+            --default-lang en \
+            --site-name "HackTricks"
       
       # Sync the build to S3
       - name: Sync to S3
@@ -259,3 +268,12 @@ jobs:
           echo "Sync completed"
           echo "Cat 3 files from the book"
           find . -type f -name 'index.html' -print | head -n 3 | xargs -r cat
+
+      - name: Refresh root sitemap index
+        run: |
+          LANGS=$(aws s3api list-objects-v2 --bucket hacktricks-wiki --delimiter / --query 'CommonPrefixes[].Prefix' --output text | tr '\t' '\n' | sed 's:/$::' | grep -E '^[a-z]{2}$' | sort | paste -sd, -)
+          if [ -z "$LANGS" ]; then
+            LANGS="en"
+          fi
+          python3 scripts/seo_postprocess.py index --site-url https://hacktricks.wiki --languages "$LANGS" --output ./sitemap.xml
+          aws s3 cp ./sitemap.xml s3://hacktricks-wiki/sitemap.xml --content-type application/xml --cache-control max-age=300
