@@ -201,4 +201,10 @@ jobs:
         run: |
           aws s3 cp ./src/robots.txt s3://hacktricks-wiki/robots.txt --content-type text/plain --cache-control max-age=300
           aws s3 cp ./src/robots.txt s3://hacktricks-wiki/en/robots.txt --content-type text/plain --cache-control max-age=300
+
+      - name: Invalidate CloudFront HTML and SEO assets
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id "${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}" \
+            --paths "/en/*" "/robots.txt" "/en/robots.txt" "/sitemap.xml" "/en/sitemap.xml"
       
