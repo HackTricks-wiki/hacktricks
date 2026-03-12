@@ -1,143 +1,150 @@
-# Checklist - Linux Privilege Escalation
+# 清单 - Linux Privilege Escalation
 
 {{#include ../banners/hacktricks-training.md}}
 
-### **查找Linux本地权限提升向量的最佳工具：** [**LinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/linPEAS)
+### **Best tool to look for Linux local privilege escalation vectors:** [**LinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/linPEAS)
 
-### [系统信息](privilege-escalation/index.html#system-information)
+### [System Information](privilege-escalation/index.html#system-information)
 
-- [ ] 获取 **操作系统信息**
-- [ ] 检查 [**PATH**](privilege-escalation/index.html#path)，是否有 **可写文件夹**？
-- [ ] 检查 [**环境变量**](privilege-escalation/index.html#env-info)，是否有敏感信息？
-- [ ] 搜索 [**内核漏洞**](privilege-escalation/index.html#kernel-exploits) **使用脚本**（DirtyCow？）
-- [ ] **检查** [**sudo版本是否存在漏洞**](privilege-escalation/index.html#sudo-version)
-- [ ] [**Dmesg** 签名验证失败](privilege-escalation/index.html#dmesg-signature-verification-failed)
-- [ ] 更多系统枚举（[日期，系统统计，CPU信息，打印机](privilege-escalation/index.html#more-system-enumeration)）
+- [ ] 获取 **OS information**
+- [ ] 检查 [**PATH**](privilege-escalation/index.html#path)，有没有 **可写的文件夹**？
+- [ ] 检查 [**env variables**](privilege-escalation/index.html#env-info)，有没有敏感信息？
+- [ ] 使用脚本搜索 [**kernel exploits**](privilege-escalation/index.html#kernel-exploits)（DirtyCow？）
+- [ ] **检查** [**sudo version** 是否存在漏洞](privilege-escalation/index.html#sudo-version)
+- [ ] [**Dmesg** signature verification failed](privilege-escalation/index.html#dmesg-signature-verification-failed)
+- [ ] 更多系统枚举（[date, system stats, cpu info, printers](privilege-escalation/index.html#more-system-enumeration)）
 - [ ] [枚举更多防御措施](privilege-escalation/index.html#enumerate-possible-defenses)
 
-### [驱动器](privilege-escalation/index.html#drives)
+### [Drives](privilege-escalation/index.html#drives)
 
-- [ ] **列出已挂载**的驱动器
-- [ ] **有未挂载的驱动器吗？**
-- [ ] **fstab中有任何凭据吗？**
+- [ ] **列出已挂载** 驱动器
+- [ ] 有没有 **未挂载的驱动器**？
+- [ ] **fstab** 中有没有凭证？
 
-### [**已安装软件**](privilege-escalation/index.html#installed-software)
+### [**Installed Software**](privilege-escalation/index.html#installed-software)
 
-- [ ] **检查是否安装了** [**有用的软件**](privilege-escalation/index.html#useful-software)
-- [ ] **检查是否安装了** [**易受攻击的软件**](privilege-escalation/index.html#vulnerable-software-installed)
+- [ ] **检查是否安装** 任何[ **有用的软件**](privilege-escalation/index.html#useful-software)
+- [ ] **检查是否安装** 任何[**易受攻击的软件**](privilege-escalation/index.html#vulnerable-software-installed)
 
-### [进程](privilege-escalation/index.html#processes)
+### [Processes](privilege-escalation/index.html#processes)
 
-- [ ] 是否有 **未知软件在运行**？
-- [ ] 是否有软件以 **超出其应有的权限**运行？
-- [ ] 搜索 **正在运行进程的漏洞**（特别是正在运行的版本）。
-- [ ] 你能 **修改任何正在运行进程的二进制文件**吗？
-- [ ] **监控进程**，检查是否有任何有趣的进程频繁运行。
-- [ ] 你能 **读取** 一些有趣的 **进程内存**（可能保存密码的地方）吗？
+- [ ] 是否有任何 **未知软件在运行**？
+- [ ] 是否有软件以 **比应有更多的权限运行**？
+- [ ] 搜索正在运行进程的 **漏洞**（尤其是运行的版本）。
+- [ ] 你能否 **修改任何正在运行进程的二进制文件**？
+- [ ] **监控进程** 并检查是否有任何有趣的进程频繁运行。
+- [ ] 你能否 **读取** 某些有趣的 **进程内存**（可能保存密码）？
 
-### [计划任务/Cron作业？](privilege-escalation/index.html#scheduled-jobs)
+### [Scheduled/Cron jobs?](privilege-escalation/index.html#scheduled-jobs)
 
-- [ ] [**PATH**](privilege-escalation/index.html#cron-path)是否被某些cron修改且你可以 **写入**？
-- [ ] 在cron作业中有任何 [**通配符**](privilege-escalation/index.html#cron-using-a-script-with-a-wildcard-wildcard-injection)吗？
-- [ ] 是否有某个 [**可修改的脚本**](privilege-escalation/index.html#cron-script-overwriting-and-symlink)正在 **执行**或在 **可修改文件夹**中？
-- [ ] 你是否检测到某个 **脚本** 可能或正在被 [**频繁执行**](privilege-escalation/index.html#frequent-cron-jobs)？（每1、2或5分钟）
+- [ ] 是否有 cron 修改了 [**PATH** ](privilege-escalation/index.html#cron-path) 且你可以 **写入**？
+- [ ] 有没有 cron 作业使用 [**通配符** ](privilege-escalation/index.html#cron-using-a-script-with-a-wildcard-wildcard-injection)？
+- [ ] 是否有可[**修改的脚本** ](privilege-escalation/index.html#cron-script-overwriting-and-symlink) 被 **执行** 或位于 **可修改的文件夹** 中？
+- [ ] 你是否发现某些 **脚本** 被[**非常频繁地**](privilege-escalation/index.html#frequent-cron-jobs) 执行？（每 1、2 或 5 分钟）
 
-### [服务](privilege-escalation/index.html#services)
+### [Services](privilege-escalation/index.html#services)
 
-- [ ] 有任何 **可写的.service** 文件吗？
-- [ ] 有任何 **可写的二进制文件** 被 **服务** 执行吗？
-- [ ] 在systemd PATH中有任何 **可写文件夹**？
+- [ ] 有没有 **可写的 .service** 文件？
+- [ ] 有没有由 **service** 执行的 **可写二进制**？
+- [ ] systemd PATH 中有没有 **可写文件夹**？
+- [ ] `/etc/systemd/system/<unit>.d/*.conf` 中有没有 **可写的 systemd unit drop-in** 可以覆盖 `ExecStart`/`User`？
 
-### [定时器](privilege-escalation/index.html#timers)
+### [Timers](privilege-escalation/index.html#timers)
 
-- [ ] 有任何 **可写的定时器**？
+- [ ] 有没有 **可写的 timer**？
 
-### [套接字](privilege-escalation/index.html#sockets)
+### [Sockets](privilege-escalation/index.html#sockets)
 
-- [ ] 有任何 **可写的.socket** 文件吗？
-- [ ] 你能 **与任何套接字通信**吗？
-- [ ] **HTTP套接字**中有有趣的信息吗？
+- [ ] 有没有 **可写的 .socket** 文件？
+- [ ] 你能否 **与任意 socket 通信**？
+- [ ] 有包含有趣信息的 **HTTP sockets**？
 
 ### [D-Bus](privilege-escalation/index.html#d-bus)
 
-- [ ] 你能 **与任何D-Bus通信**吗？
+- [ ] 你能否 **与任意 D-Bus 通信**？
 
-### [网络](privilege-escalation/index.html#network)
+### [Network](privilege-escalation/index.html#network)
 
-- [ ] 枚举网络以了解你的位置
-- [ ] **打开的端口你之前无法访问**，现在可以在机器内部获取shell吗？
-- [ ] 你能使用 `tcpdump` **嗅探流量**吗？
+- [ ] 枚举网络以了解你的所在位置
+- [ ] 在获取机器 shell 后，是否出现了之前无法访问的 **开放端口**？
+- [ ] 你能否使用 `tcpdump` **嗅探流量**？
 
-### [用户](privilege-escalation/index.html#users)
+### [Users](privilege-escalation/index.html#users)
 
-- [ ] 通用用户/组 **枚举**
-- [ ] 你有一个 **非常大的UID** 吗？ **机器** **易受攻击**吗？
-- [ ] 你能 [**通过你所属的组提升权限**](privilege-escalation/interesting-groups-linux-pe/index.html)吗？
+- [ ] 对通用用户/组进行 **枚举**
+- [ ] 你有非常大的 UID 吗？机器是否 **易受攻击**？
+- [ ] 你能否通过你所属的一个[**组来升级权限**](privilege-escalation/interesting-groups-linux-pe/index.html)？
 - [ ] **剪贴板** 数据？
 - [ ] 密码策略？
-- [ ] 尝试 **使用** 你之前发现的每个 **已知密码** 登录 **每个** 可能的 **用户**。 也尝试不带密码登录。
+- [ ] 尝试对每个可能的用户使用你之前发现的每一个 **已知密码** 登录。也尝试无密码登录。
 
-### [可写的PATH](privilege-escalation/index.html#writable-path-abuses)
+### [Writable PATH](privilege-escalation/index.html#writable-path-abuses)
 
-- [ ] 如果你对某个PATH中的文件夹 **具有写权限**，你可能能够提升权限
+- [ ] 如果你对 PATH 中的某个文件夹有 **写入权限**，你可能能够升级权限
 
-### [SUDO和SUID命令](privilege-escalation/index.html#sudo-and-suid)
+### [SUDO and SUID commands](privilege-escalation/index.html#sudo-and-suid)
 
-- [ ] 你能执行 **任何带sudo的命令**吗？ 你能用它 **读取、写入或执行** 任何东西作为root吗？ ([**GTFOBins**](https://gtfobins.github.io))
-- [ ] 是否有任何 **可利用的SUID二进制文件**？ ([**GTFOBins**](https://gtfobins.github.io))
-- [ ] [**sudo** 命令是否 **受限于** **路径**？你能 **绕过** 限制吗](privilege-escalation/index.html#sudo-execution-bypassing-paths)？
-- [ ] [**没有指定路径的Sudo/SUID二进制文件**](privilege-escalation/index.html#sudo-command-suid-binary-without-command-path)？
-- [ ] [**指定路径的SUID二进制文件**](privilege-escalation/index.html#suid-binary-with-command-path)？ 绕过
-- [ ] [**LD_PRELOAD漏洞**](privilege-escalation/index.html#ld_preload)
-- [ ] [**SUID二进制文件中缺少.so库**](privilege-escalation/index.html#suid-binary-so-injection)来自可写文件夹？
-- [ ] [**可用的SUDO令牌**](privilege-escalation/index.html#reusing-sudo-tokens)？ [**你能创建SUDO令牌吗**](privilege-escalation/index.html#var-run-sudo-ts-less-than-username-greater-than)？
-- [ ] 你能 [**读取或修改sudoers文件**](privilege-escalation/index.html#etc-sudoers-etc-sudoers-d)吗？
-- [ ] 你能 [**修改/etc/ld.so.conf.d/**](privilege-escalation/index.html#etc-ld-so-conf-d)吗？
+- [ ] 你能以 sudo 执行 **任何命令** 吗？你能否利用它以 root 身份 READ、WRITE 或 EXECUTE 任何东西？([**GTFOBins**](https://gtfobins.github.io))
+- [ ] 如果 `sudo -l` 允许 `sudoedit`，检查是否存在通过 `SUDO_EDITOR`/`VISUAL`/`EDITOR` 的 **sudoedit 参数注入**（CVE-2023-22809），可以在易受攻击的版本（`sudo -V` < 1.9.12p2）上编辑任意文件。例如：`SUDO_EDITOR="vim -- /etc/sudoers" sudoedit /etc/hosts`
+- [ ] 有没有 **可利用的 SUID 二进制文件**？([**GTFOBins**](https://gtfobins.github.io))
+- [ ] 是否有 [**sudo 命令被 path 限制** 的情况？你能否**绕过**限制](privilege-escalation/index.html#sudo-execution-bypassing-paths)？
+- [ ] [**Sudo/SUID binary without path indicated**](privilege-escalation/index.html#sudo-command-suid-binary-without-command-path)?
+- [ ] [**SUID binary specifying path**](privilege-escalation/index.html#suid-binary-with-command-path)? 绕过方法
+- [ ] [**LD_PRELOAD vuln**](privilege-escalation/index.html#ld_preload)
+- [ ] 来自可写文件夹的 [**SUID 二进制缺失 .so 库**](privilege-escalation/index.html#suid-binary-so-injection)？
+- [ ] [**可用的 SUDO tokens**](privilege-escalation/index.html#reusing-sudo-tokens)？[**你能创建 SUDO token 吗**](privilege-escalation/index.html#var-run-sudo-ts-less-than-username-greater-than)？
+- [ ] 你能否 [**读取或修改 sudoers 文件**](privilege-escalation/index.html#etc-sudoers-etc-sudoers-d)？
+- [ ] 你能否 [**修改 /etc/ld.so.conf.d/**](privilege-escalation/index.html#etc-ld-so-conf-d)？
 - [ ] [**OpenBSD DOAS**](privilege-escalation/index.html#doas) 命令
 
-### [能力](privilege-escalation/index.html#capabilities)
+### [Capabilities](privilege-escalation/index.html#capabilities)
 
-- [ ] 是否有任何二进制文件具有 **意外的能力**？
+- [ ] 有没有二进制具有任何 **意外的 capability**？
 
 ### [ACLs](privilege-escalation/index.html#acls)
 
-- [ ] 是否有任何文件具有 **意外的ACL**？
+- [ ] 有没有文件具有任何 **意外的 ACL**？
 
-### [开放Shell会话](privilege-escalation/index.html#open-shell-sessions)
+### [Open Shell sessions](privilege-escalation/index.html#open-shell-sessions)
 
 - [ ] **screen**
 - [ ] **tmux**
 
 ### [SSH](privilege-escalation/index.html#ssh)
 
-- [ ] **Debian** [**OpenSSL可预测PRNG - CVE-2008-0166**](privilege-escalation/index.html#debian-openssl-predictable-prng-cve-2008-0166)
-- [ ] [**SSH有趣的配置值**](privilege-escalation/index.html#ssh-interesting-configuration-values)
+- [ ] **Debian** [**OpenSSL Predictable PRNG - CVE-2008-0166**](privilege-escalation/index.html#debian-openssl-predictable-prng-cve-2008-0166)
+- [ ] [**SSH Interesting configuration values**](privilege-escalation/index.html#ssh-interesting-configuration-values)
 
-### [有趣的文件](privilege-escalation/index.html#interesting-files)
+### [Interesting Files](privilege-escalation/index.html#interesting-files)
 
-- [ ] **配置文件** - 读取敏感数据？ 写入权限提升？
-- [ ] **passwd/shadow文件** - 读取敏感数据？ 写入权限提升？
-- [ ] **检查常见的有趣文件夹**以查找敏感数据
-- [ ] **奇怪的位置/拥有的文件，**你可能有权限访问或更改可执行文件
-- [ ] **最近几分钟内修改**
-- [ ] **Sqlite数据库文件**
+- [ ] **Profile files** - 读取敏感数据？可写用于 privesc？
+- [ ] **passwd/shadow files** - 读取敏感数据？可写用于 privesc？
+- [ ] 检查常见的有趣文件夹以查找敏感数据
+- [ ] **奇怪位置/属主文件**，你可能可以访问或修改可执行文件
+- [ ] **最近几分钟被修改**
+- [ ] **Sqlite DB 文件**
 - [ ] **隐藏文件**
-- [ ] **PATH中的脚本/二进制文件**
-- [ ] **Web文件**（密码？）
+- [ ] **位于 PATH 中的脚本/二进制**
+- [ ] **Web 文件**（密码？）
 - [ ] **备份**？
 - [ ] **已知包含密码的文件**：使用 **Linpeas** 和 **LaZagne**
 - [ ] **通用搜索**
 
-### [**可写文件**](privilege-escalation/index.html#writable-files)
+### [**Writable Files**](privilege-escalation/index.html#writable-files)
 
-- [ ] **修改python库**以执行任意命令？
-- [ ] 你能 **修改日志文件**吗？ **Logtotten** 漏洞
-- [ ] 你能 **修改/etc/sysconfig/network-scripts/**吗？ Centos/Redhat 漏洞
-- [ ] 你能 [**写入ini、int.d、systemd或rc.d文件**](privilege-escalation/index.html#init-init-d-systemd-and-rc-d)吗？
+- [ ] 修改 python 库以执行任意命令？
+- [ ] 你能否 **修改日志文件**？ **Logtotten** 漏洞
+- [ ] 你能否 **修改 /etc/sysconfig/network-scripts/**？Centos/Redhat 漏洞
+- [ ] 你能否[**在 ini, init.d, systemd 或 rc.d 文件中写入**](privilege-escalation/index.html#init-init-d-systemd-and-rc-d)？
 
-### [**其他技巧**](privilege-escalation/index.html#other-tricks)
+### [**Other tricks**](privilege-escalation/index.html#other-tricks)
 
-- [ ] 你能 [**利用NFS提升权限**](privilege-escalation/index.html#nfs-privilege-escalation)吗？
-- [ ] 你需要 [**逃离限制性shell**](privilege-escalation/index.html#escaping-from-restricted-shells)吗？
+- [ ] 你能否[**滥用 NFS 提权**](privilege-escalation/index.html#nfs-privilege-escalation)？
+- [ ] 你是否需要[**从受限 shell 逃逸**](privilege-escalation/index.html#escaping-from-restricted-shells)？
 
+
+## References
+
+- [Sudo advisory: sudoedit arbitrary file edit](https://www.sudo.ws/security/advisories/sudoedit_any/)
+- [Oracle Linux docs: systemd drop-in configuration](https://docs.oracle.com/en/operating-systems/oracle-linux/8/systemd/ModifyingsystemdConfigurationFiles.html)
 {{#include ../banners/hacktricks-training.md}}
