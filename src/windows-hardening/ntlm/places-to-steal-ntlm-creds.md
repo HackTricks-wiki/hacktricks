@@ -145,6 +145,19 @@ Delivery ideas
 - Place the shortcut on a writable share the victim will open.
 - Combine with other lure files in the same folder so Explorer previews the items.
 
+### No-click .LNK NTLM leak via ExtraData icon path (CVE‑2026‑25185)
+
+Windows loads `.lnk` metadata during **view/preview** (icon rendering), not only on execution. CVE‑2026‑25185 shows a parsing path where **ExtraData** blocks cause the shell to resolve an icon path and touch the filesystem **during load**, emitting outbound NTLM when the path is remote.
+
+Key trigger conditions (observed in `CShellLink::_LoadFromStream`):
+- Include **DARWIN_PROPS** (`0xa0000006`) in ExtraData (gate to icon update routine).
+- Include **ICON_ENVIRONMENT_PROPS** (`0xa0000007`) with **TargetUnicode** populated.
+- The loader expands environment variables in `TargetUnicode` and calls `PathFileExistsW` on the resulting path.
+
+If `TargetUnicode` resolves to a UNC path (e.g., `\\attacker\share\icon.ico`), **merely viewing a folder** containing the shortcut causes outbound authentication. The same load path can also be hit by **indexing** and **AV scanning**, making it a practical no‑click leak surface.
+
+Research tooling (parser/generator/UI) is available in the **LnkMeMaybe** project to build/inspect these structures without using the Windows GUI.
+
 
 ### Office remote template injection (.docx/.dotm) to coerce NTLM
 
@@ -180,6 +193,8 @@ README.md
 - [Morphisec – 5 NTLM vulnerabilities: Unpatched privilege escalation threats in Microsoft](https://www.morphisec.com/blog/5-ntlm-vulnerabilities-unpatched-privilege-escalation-threats-in-microsoft/)
 - [MSRC – Microsoft mitigates Outlook EoP (CVE‑2023‑23397) and explains the NTLM leak via PidLidReminderFileParameter](https://www.microsoft.com/en-us/msrc/blog/2023/03/microsoft-mitigates-outlook-elevation-of-privilege-vulnerability/)
 - [Cymulate – Zero‑click, one NTLM: Microsoft security patch bypass (CVE‑2025‑50154)](https://cymulate.com/blog/zero-click-one-ntlm-microsoft-security-patch-bypass-cve-2025-50154/)
+- [TrustedSec – LnkMeMaybe: A Review of CVE‑2026‑25185](https://trustedsec.com/blog/lnkmemaybe-a-review-of-cve-2026-25185)
+- [TrustedSec LnkMeMaybe tooling](https://github.com/trustedsec/LnkMeMaybe)
 
 
 {{#include ../../banners/hacktricks-training.md}}
