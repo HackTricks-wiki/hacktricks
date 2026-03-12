@@ -1,143 +1,151 @@
-# Checklist - Linux Privilege Escalation
+# Kontrolna lista - Linux Privilege Escalation
 
 {{#include ../banners/hacktricks-training.md}}
 
-### **Najbolji alat za pronalaženje vektora lokalne eskalacije privilegija na Linuxu:** [**LinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/linPEAS)
+### **Najbolji alat za traženje Linux local privilege escalation vektora:** [**LinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/linPEAS)
 
-### [Informacije o sistemu](privilege-escalation/index.html#system-information)
+### [System Information](privilege-escalation/index.html#system-information)
 
-- [ ] Dobiti **informacije o OS-u**
-- [ ] Proveriti [**PATH**](privilege-escalation/index.html#path), da li postoji **pisiva fascikla**?
-- [ ] Proveriti [**env promenljive**](privilege-escalation/index.html#env-info), da li postoji neka osetljiva informacija?
-- [ ] Tražiti [**kernel exploit-e**](privilege-escalation/index.html#kernel-exploits) **koristeći skripte** (DirtyCow?)
-- [ ] **Proveriti** da li je [**sudo verzija** ranjiva](privilege-escalation/index.html#sudo-version)
-- [ ] [**Dmesg** verifikacija potpisa nije uspela](privilege-escalation/index.html#dmesg-signature-verification-failed)
-- [ ] Više sistemskih enumeracija ([datum, sistemske statistike, cpu informacije, štampači](privilege-escalation/index.html#more-system-enumeration))
-- [ ] [Enumerisati više odbrana](privilege-escalation/index.html#enumerate-possible-defenses)
+- [ ] Nabavite **OS informacije**
+- [ ] Proverite [**PATH**](privilege-escalation/index.html#path), postoji li neki **direktorijum u koji se može pisati**?
+- [ ] Proverite [**env variables**](privilege-escalation/index.html#env-info), ima li osetljivih detalja?
+- [ ] Pretražite za [**kernel exploits**](privilege-escalation/index.html#kernel-exploits) **koristeći skripte** (DirtyCow?)
+- [ ] **Proverite** da li je [**sudo version is vulnerable**](privilege-escalation/index.html#sudo-version)
+- [ ] [**Dmesg** signature verification failed](privilege-escalation/index.html#dmesg-signature-verification-failed)
+- [ ] Dodatna sistemska enumeracija ([date, system stats, cpu info, printers](privilege-escalation/index.html#more-system-enumeration))
+- [ ] [Enumerate more defenses](privilege-escalation/index.html#enumerate-possible-defenses)
 
-### [Diskovi](privilege-escalation/index.html#drives)
+### [Drives](privilege-escalation/index.html#drives)
 
-- [ ] **Lista montiranih** diskova
-- [ ] **Da li postoji nemontirani disk?**
-- [ ] **Da li postoje kredencijali u fstab?**
+- [ ] **Navedite montirane** diskove
+- [ ] Postoji li **nemontirani disk**?
+- [ ] **Ima li kredencijala u fstab?**
 
-### [**Instalirani softver**](privilege-escalation/index.html#installed-software)
+### [**Installed Software**](privilege-escalation/index.html#installed-software)
 
-- [ ] **Proveriti** [**koristan softver**](privilege-escalation/index.html#useful-software) **koji je instaliran**
-- [ ] **Proveriti** [**ranjiv softver**](privilege-escalation/index.html#vulnerable-software-installed) **koji je instaliran**
+- [ ] **Proverite** da li je instaliran [**useful software**](privilege-escalation/index.html#useful-software)
+- [ ] **Proverite** da li je instaliran [**vulnerable software**](privilege-escalation/index.html#vulnerable-software-installed)
 
-### [Procesi](privilege-escalation/index.html#processes)
+### [Processes](privilege-escalation/index.html#processes)
 
-- [ ] Da li se pokreće neki **nepoznati softver**?
-- [ ] Da li se neki softver pokreće sa **više privilegija nego što bi trebao**?
-- [ ] Tražiti **exploite pokrenutih procesa** (posebno verziju koja se pokreće).
-- [ ] Možete li **modifikovati binarni** fajl nekog pokrenutog procesa?
-- [ ] **Pratiti procese** i proveriti da li se neki zanimljiv proces često pokreće.
-- [ ] Možete li **pročitati** neku zanimljivu **memoriju procesa** (gde bi lozinke mogle biti sačuvane)?
+- [ ] Da li se pokreće neki **nepoznat softver**?
+- [ ] Da li neki softver radi sa **većim privilegijama nego što bi trebalo**?
+- [ ] Pretražite **exploits of running processes** (posebno verziju koja se pokreće).
+- [ ] Možete li **izmeniti binarni fajl** bilo kog pokrenutog procesa?
+- [ ] **Pratite procese** i proverite da li se neki interesantan proces često pokreće.
+- [ ] Možete li **pročitati** neku interesantnu **memoriju procesa** (gde bi lozinke mogle biti sačuvane)?
 
-### [Zakazani/Cron poslovi?](privilege-escalation/index.html#scheduled-jobs)
+### [Scheduled/Cron jobs?](privilege-escalation/index.html#scheduled-jobs)
 
-- [ ] Da li se [**PATH**](privilege-escalation/index.html#cron-path) menja od strane nekog crona i možete li **pisati** u njega?
-- [ ] Da li postoji [**wildcard**](privilege-escalation/index.html#cron-using-a-script-with-a-wildcard-wildcard-injection) u cron poslu?
-- [ ] Da li se neki [**modifikovani skript**](privilege-escalation/index.html#cron-script-overwriting-and-symlink) **izvršava** ili se nalazi u **modifikovanoj fascikli**?
-- [ ] Da li ste otkrili da se neki **skript** može ili se **izvršava vrlo često**](privilege-escalation/index.html#frequent-cron-jobs)? (svakih 1, 2 ili 5 minuta)
+- [ ] Da li [**PATH**](privilege-escalation/index.html#cron-path) menja neki cron i možete li u njega **pisati**?
+- [ ] Ima li [**wildcard**](privilege-escalation/index.html#cron-using-a-script-with-a-wildcard-wildcard-injection) u cron zadatku?
+- [ ] Da li se neki [**modifiable script**](privilege-escalation/index.html#cron-script-overwriting-and-symlink) izvršava ili se nalazi u **direktorijumu koji se može menjati**?
+- [ ] Da li ste primetili da se neki **script** može ili se [**executed** very **frequently**](privilege-escalation/index.html#frequent-cron-jobs)? (svakih 1, 2 ili 5 minuta)
 
-### [Servisi](privilege-escalation/index.html#services)
+### [Services](privilege-escalation/index.html#services)
 
-- [ ] Da li postoji **pisiv .service** fajl?
-- [ ] Da li postoji **pisivi binarni** fajl koji izvršava **servis**?
-- [ ] Da li postoji **pisiva fascikla u systemd PATH**?
+- [ ] Postoji li neki **writable .service** fajl?
+- [ ] Postoji li neki **writable binary** koji izvršava **service**?
+- [ ] Postoji li **writable folder u systemd PATH**?
+- [ ] Postoji li **writable systemd unit drop-in** u `/etc/systemd/system/<unit>.d/*.conf` koji može prebrisati `ExecStart`/`User`?
 
-### [Tajmeri](privilege-escalation/index.html#timers)
+### [Timers](privilege-escalation/index.html#timers)
 
-- [ ] Da li postoji **pisivi tajmer**?
+- [ ] Postoji li neki **writable timer**?
 
-### [Soketi](privilege-escalation/index.html#sockets)
+### [Sockets](privilege-escalation/index.html#sockets)
 
-- [ ] Da li postoji **pisivi .socket** fajl?
-- [ ] Možete li **komunicirati sa nekim soketom**?
-- [ ] **HTTP soketi** sa zanimljivim informacijama?
+- [ ] Postoji li neki **writable .socket** fajl?
+- [ ] Možete li **komunicirati sa bilo kojim socketom**?
+- [ ] Postoje li **HTTP sockets** sa interesantnim informacijama?
 
 ### [D-Bus](privilege-escalation/index.html#d-bus)
 
-- [ ] Možete li **komunicirati sa nekim D-Bus**?
+- [ ] Možete li **komunicirati sa bilo kojim D-Busom**?
 
-### [Mreža](privilege-escalation/index.html#network)
+### [Network](privilege-escalation/index.html#network)
 
-- [ ] Enumerisati mrežu da biste znali gde se nalazite
-- [ ] **Otvoreni portovi koje niste mogli da pristupite pre** nego što ste dobili shell unutar mašine?
-- [ ] Možete li **sniff-ovati saobraćaj** koristeći `tcpdump`?
+- [ ] Izvršite enumeraciju mreže da biste znali gde se nalazite
+- [ ] Ima li **otvorenih portova kojima ranije niste mogli pristupiti** otkako imate shell na mašini?
+- [ ] Možete li **presretati saobraćaj** koristeći `tcpdump`?
 
-### [Korisnici](privilege-escalation/index.html#users)
+### [Users](privilege-escalation/index.html#users)
 
 - [ ] Generička enumeracija korisnika/grupa
-- [ ] Da li imate **veoma veliki UID**? Da li je **mašina** **ranjiva**?
-- [ ] Možete li [**escalirati privilegije zahvaljujući grupi**](privilege-escalation/interesting-groups-linux-pe/index.html) kojoj pripadate?
-- [ ] **Podaci iz clipboard-a**?
+- [ ] Imate li **veoma veliki UID**? Da li je **mašina** **ranjiva**?
+- [ ] Možete li [**escalate privileges thanks to a group**](privilege-escalation/interesting-groups-linux-pe/index.html) kojem pripadate?
+- [ ] **Clipboard** podaci?
 - [ ] Politika lozinki?
-- [ ] Pokušajte da **koristite** svaku **poznatu lozinku** koju ste prethodno otkrili da se prijavite **sa svakim** mogućim **korisnikom**. Pokušajte da se prijavite i bez lozinke.
+- [ ] Pokušajte **koristiti** svaku **poznatu lozinku** koju ste prethodno otkrili da biste se prijavili **sa svakim** mogućim **korisnikom**. Pokušajte se prijaviti i bez lozinke.
 
-### [Pisivi PATH](privilege-escalation/index.html#writable-path-abuses)
+### [Writable PATH](privilege-escalation/index.html#writable-path-abuses)
 
-- [ ] Ako imate **privilegije pisanja nad nekom fasciklom u PATH-u** možda ćete moći da eskalirate privilegije
+- [ ] Ako imate **privilegije upisa nad nekim folderom u PATH** možda možete eskalirati privilegije
 
-### [SUDO i SUID komande](privilege-escalation/index.html#sudo-and-suid)
+### [SUDO and SUID commands](privilege-escalation/index.html#sudo-and-suid)
 
-- [ ] Možete li izvršiti **bilo koju komandu sa sudo**? Možete li ga koristiti da ČITATE, PIŠETE ili IZVRŠAVATE bilo šta kao root? ([**GTFOBins**](https://gtfobins.github.io))
-- [ ] Da li postoji **exploitable SUID binarni**? ([**GTFOBins**](https://gtfobins.github.io))
-- [ ] Da li su [**sudo** komande **ograničene** po **putanji**? Možete li **obići** ograničenja](privilege-escalation/index.html#sudo-execution-bypassing-paths)?
-- [ ] [**Sudo/SUID binarni bez naznačene putanje**](privilege-escalation/index.html#sudo-command-suid-binary-without-command-path)?
-- [ ] [**SUID binarni koji naznačava putanju**](privilege-escalation/index.html#suid-binary-with-command-path)? Obilaženje
-- [ ] [**LD_PRELOAD ranjivost**](privilege-escalation/index.html#ld_preload)
-- [ ] [**Nedostatak .so biblioteke u SUID binarnom**](privilege-escalation/index.html#suid-binary-so-injection) iz pisive fascikle?
-- [ ] [**SUDO tokeni dostupni**](privilege-escalation/index.html#reusing-sudo-tokens)? [**Možete li kreirati SUDO token**](privilege-escalation/index.html#var-run-sudo-ts-less-than-username-greater-than)?
-- [ ] Možete li [**čitati ili modifikovati sudoers fajlove**](privilege-escalation/index.html#etc-sudoers-etc-sudoers-d)?
-- [ ] Možete li [**modifikovati /etc/ld.so.conf.d/**](privilege-escalation/index.html#etc-ld-so-conf-d)?
-- [ ] [**OpenBSD DOAS**](privilege-escalation/index.html#doas) komanda
+- [ ] Možete li izvršiti **bilo koju komandu sa sudo**? Možete li ga iskoristiti da čitate, pišete ili izvršavate bilo šta kao root? ([**GTFOBins**](https://gtfobins.github.io))
+- [ ] Ako `sudo -l` dozvoljava `sudoedit`, proverite za **sudoedit argument injection** (CVE-2023-22809) preko `SUDO_EDITOR`/`VISUAL`/`EDITOR` da biste menjali proizvoljne fajlove na ranjivim verzijama (`sudo -V` < 1.9.12p2). Primer: `SUDO_EDITOR="vim -- /etc/sudoers" sudoedit /etc/hosts`
+- [ ] Postoji li neki **exploitable SUID binary**? ([**GTFOBins**](https://gtfobins.github.io))
+- [ ] Da li su [**sudo** commands **limited** by **path**? can you **bypass** the restrictions](privilege-escalation/index.html#sudo-execution-bypassing-paths)?
+- [ ] [**Sudo/SUID binary without path indicated**](privilege-escalation/index.html#sudo-command-suid-binary-without-command-path)?
+- [ ] [**SUID binary specifying path**](privilege-escalation/index.html#suid-binary-with-command-path)? Bypass
+- [ ] [**LD_PRELOAD vuln**](privilege-escalation/index.html#ld_preload)
+- [ ] [**Lack of .so library in SUID binary**](privilege-escalation/index.html#suid-binary-so-injection) from a writable folder?
+- [ ] [**SUDO tokens available**](privilege-escalation/index.html#reusing-sudo-tokens)? [**Can you create a SUDO token**](privilege-escalation/index.html#var-run-sudo-ts-less-than-username-greater-than)?
+- [ ] Možete li [**read or modify sudoers files**](privilege-escalation/index.html#etc-sudoers-etc-sudoers-d)?
+- [ ] Možete li [**modify /etc/ld.so.conf.d/**](privilege-escalation/index.html#etc-ld-so-conf-d)?
+- [ ] [**OpenBSD DOAS**](privilege-escalation/index.html#doas) command
 
-### [Kapaciteti](privilege-escalation/index.html#capabilities)
+### [Capabilities](privilege-escalation/index.html#capabilities)
 
-- [ ] Da li neki binarni fajl ima neku **neočekivanu sposobnost**?
+- [ ] Ima li neki binarni fajl neku **neočekivanu capability**?
 
-### [ACL-ovi](privilege-escalation/index.html#acls)
+### [ACLs](privilege-escalation/index.html#acls)
 
-- [ ] Da li neki fajl ima neku **neočekivanu ACL**?
+- [ ] Ima li neki fajl neku **neočekivanu ACL**?
 
-### [Otvorene Shell sesije](privilege-escalation/index.html#open-shell-sessions)
+### [Open Shell sessions](privilege-escalation/index.html#open-shell-sessions)
 
 - [ ] **screen**
 - [ ] **tmux**
 
 ### [SSH](privilege-escalation/index.html#ssh)
 
-- [ ] **Debian** [**OpenSSL Predvidljiv PRNG - CVE-2008-0166**](privilege-escalation/index.html#debian-openssl-predictable-prng-cve-2008-0166)
-- [ ] [**SSH Zanimljive konfiguracione vrednosti**](privilege-escalation/index.html#ssh-interesting-configuration-values)
+- [ ] **Debian** [**OpenSSL Predictable PRNG - CVE-2008-0166**](privilege-escalation/index.html#debian-openssl-predictable-prng-cve-2008-0166)
+- [ ] [**SSH Interesting configuration values**](privilege-escalation/index.html#ssh-interesting-configuration-values)
 
-### [Zanimljivi fajlovi](privilege-escalation/index.html#interesting-files)
+### [Interesting Files](privilege-escalation/index.html#interesting-files)
 
-- [ ] **Profilni fajlovi** - Pročitati osetljive podatke? Pisati za privesc?
-- [ ] **passwd/shadow fajlovi** - Pročitati osetljive podatke? Pisati za privesc?
-- [ ] **Proveriti uobičajene zanimljive fascikle** za osetljive podatke
-- [ ] **Čudne lokacije/Owned fajlovi,** možda imate pristup ili možete izmeniti izvršne fajlove
-- [ ] **Izmenjeni** u poslednjih minuta
-- [ ] **Sqlite DB fajlovi**
-- [ ] **Skriveni fajlovi**
-- [ ] **Skripte/Binari u PATH-u**
-- [ ] **Web fajlovi** (lozinke?)
-- [ ] **Backup-i**?
-- [ ] **Poznati fajlovi koji sadrže lozinke**: Koristite **Linpeas** i **LaZagne**
-- [ ] **Generička pretraga**
+- [ ] **Profile files** - Pročitati osetljive podatke? Upisati za privesc?
+- [ ] **passwd/shadow files** - Pročitati osetljive podatke? Upisati za privesc?
+- [ ] **Check commonly interesting folders** for sensitive data
+- [ ] **Weird Location/Owned files,** možda imate pristup ili možete izmeniti izvršne fajlove
+- [ ] **Modified** in last mins
+- [ ] **Sqlite DB files**
+- [ ] **Hidden files**
+- [ ] **Script/Binaries in PATH**
+- [ ] **Web files** (passwords?)
+- [ ] **Backups**?
+- [ ] **Known files that contains passwords**: Use **Linpeas** and **LaZagne**
+- [ ] **Generic search**
 
-### [**Pisivi fajlovi**](privilege-escalation/index.html#writable-files)
+### [**Writable Files**](privilege-escalation/index.html#writable-files)
 
-- [ ] **Modifikovati python biblioteku** da izvršava proizvoljne komande?
-- [ ] Možete li **modifikovati log fajlove**? **Logtotten** exploit
-- [ ] Možete li **modifikovati /etc/sysconfig/network-scripts/**? Centos/Redhat exploit
-- [ ] Možete li [**pisati u ini, int.d, systemd ili rc.d fajlove**](privilege-escalation/index.html#init-init-d-systemd-and-rc-d)?
+- [ ] **Modify python library** to execute arbitrary commands?
+- [ ] Možete li **izmeniti log fajlove**? **Logtotten** exploit
+- [ ] Možete li **izmeniti /etc/sysconfig/network-scripts/**? Centos/Redhat exploit
+- [ ] Možete li [**write in ini, int.d, systemd or rc.d files**](privilege-escalation/index.html#init-init-d-systemd-and-rc-d)?
 
-### [**Ostali trikovi**](privilege-escalation/index.html#other-tricks)
+### [**Other tricks**](privilege-escalation/index.html#other-tricks)
 
-- [ ] Možete li [**iskoristiti NFS za eskalaciju privilegija**](privilege-escalation/index.html#nfs-privilege-escalation)?
-- [ ] Da li treba da [**pobegnete iz restriktivnog shell-a**](privilege-escalation/index.html#escaping-from-restricted-shells)?
+- [ ] Možete li [**abuse NFS to escalate privileges**](privilege-escalation/index.html#nfs-privilege-escalation)?
+- [ ] Treba li vam da [**escape from a restrictive shell**](privilege-escalation/index.html#escaping-from-restricted-shells)?
 
+
+
+## References
+
+- [Sudo advisory: sudoedit arbitrary file edit](https://www.sudo.ws/security/advisories/sudoedit_any/)
+- [Oracle Linux docs: systemd drop-in configuration](https://docs.oracle.com/en/operating-systems/oracle-linux/8/systemd/ModifyingsystemdConfigurationFiles.html)
 {{#include ../banners/hacktricks-training.md}}
