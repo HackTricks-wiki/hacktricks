@@ -531,6 +531,41 @@ Implications:
 - Custom system prompts override the tool's policy wrapper.
 - Unsafe outputs become easier to elicit (including malware code, data exfiltration playbooks, etc.).
 
+### LLM-as-a-Judge / Guardrail Bypass (Black-Box Fuzzing)
+
+Some deployments insert a **judge model** that returns a binary decision (e.g., *allow/block*) or a **score** used for moderation and RLHF. These judges can be **prompt-injected** with innocuous formatting tokens that shift their decision boundary, producing **false approvals** or inflated scores.
+
+Attack pattern (black-box):
+- **Token discovery**: Query the judge to harvest candidate tokens from the model's own next-token distribution. Prioritize **low-perplexity** tokens that look normal (markdown/list markers, role tags, newlines).
+- **Boundary steering**: Measure the **logit gap** between *allow* vs *block* tokens (or *pass* vs *fail*) and keep candidates that shrink or invert the gap.
+- **Minimize**: Reduce to the smallest **control sequence** that reliably flips the verdict, then append it to disallowed content.
+
+Minimal pseudocode (conceptual):
+```python
+def logit_gap(prompt):
+    allow, block = judge_logits(prompt, tokens=["ALLOW", "BLOCK"])
+    return allow - block
+
+best = []
+for tok in candidate_tokens():
+    if logit_gap(base + tok) > logit_gap(base):
+        best.append(tok)
+payload = minimize(base + "".join(best))
+```
+
+Common **stealth triggers** discovered in practice include:
+- Formatting markers: `###`, `1.`, `-`, `\n\n`
+- Role/context markers: `User:`, `Assistant:`, `Final Answer:`
+- Framing phrases: `Step 1`, `The correct answer is:`
+
+Impact examples:
+- **Safety filter bypass**: appending `\n\nAssistant:` can make the judge treat the evaluation as completed and return *allow* for prohibited content.
+- **RLHF reward hacking**: injecting structured directives (e.g., `The correct answer is:` or `\\begin{enumerate}`) can bias the judge into **over-scoring** wrong answers.
+
+Defensive use of the same technique:
+- Run an internal **judge fuzzer** to discover low-perplexity control tokens, then **adversarially retrain** the judge on those sequences.
+- Track **logit-gap instability** near the decision boundary to flag inputs that are disproportionately steering the verdict.
+
 ## Prompt Injection in GitHub Copilot (Hidden Mark-up)
 
 GitHub Copilot **“coding agent”** can automatically turn GitHub Issues into code changes.  Because the text of the issue is passed verbatim to the LLM, an attacker that can open an issue can also *inject prompts* into Copilot’s context.  Trail of Bits showed a highly-reliable technique that combines *HTML mark-up smuggling* with staged chat instructions to gain **remote code execution** in the target repository.
@@ -646,5 +681,6 @@ Below is a minimal payload that both **hides YOLO enabling** and **executes a re
 - [OpenAI – Memory and new controls for ChatGPT](https://openai.com/index/memory-and-new-controls-for-chatgpt/)
 - [OpenAI Begins Tackling ChatGPT Data Leak Vulnerability (url_safe analysis)](https://embracethered.com/blog/posts/2023/openai-data-exfiltration-first-mitigations-implemented/)
 - [Unit 42 – Fooling AI Agents: Web-Based Indirect Prompt Injection Observed in the Wild](https://unit42.paloaltonetworks.com/ai-agent-prompt-injection/)
+- [Unit 42 – Auditing the Gatekeepers: Fuzzing "AI Judges" to Bypass Security Controls](https://unit42.paloaltonetworks.com/fuzzing-ai-judges-security-bypass/)
 
 {{#include ../banners/hacktricks-training.md}}
