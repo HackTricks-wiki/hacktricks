@@ -9,6 +9,7 @@
 # 🤩 Generic Methodologies & Resources
 
 - [Pentesting Methodology](generic-methodologies-and-resources/pentesting-methodology.md)
+- [Fuzzing Methodology](generic-methodologies-and-resources/fuzzing.md)
 - [External Recon Methodology](generic-methodologies-and-resources/external-recon-methodology/README.md)
   - [Wide Source Code Search](generic-methodologies-and-resources/external-recon-methodology/wide-source-code-search.md)
   - [Github Dorks & Leaks](generic-methodologies-and-resources/external-recon-methodology/github-leaked-secrets.md)
