@@ -43,6 +43,24 @@ TODO
 
 TODO
 
+### Overwrite a restrictive `php.ini` used by a privileged PHP sandbox
+
+Some custom daemons validate user-supplied PHP by running `php` with a **restricted `php.ini`** (for example, `disable_functions=exec,system,...`). If the sandboxed code still has **any write primitive** (like `file_put_contents`) and you can reach the **exact `php.ini` path** used by the daemon, you can **overwrite that config** to lift restrictions and then submit a second payload that runs with elevated privileges.
+
+Typical flow:
+
+1. First payload overwrites the sandbox config.
+2. Second payload executes code now that dangerous functions are re-enabled.
+
+Minimal example (replace the path used by the daemon):
+
+```php
+<?php
+file_put_contents('/path/to/sandbox/php.ini', "disable_functions=\n");
+```
+
+If the daemon runs as root (or validates with root-owned paths), the second execution yields a root context. This is essentially **privilege escalation via config overwrite** when the sandboxed runtime can still write files.
+
 ### binfmt_misc
 
 The file located in `/proc/sys/fs/binfmt_misc` indicates which binary should execute whic type of files. TODO: check the requirements to abuse this to execute a rev shell when a common file type is open.
@@ -91,8 +109,7 @@ chmod +x server-command
 ## References
 
 - [HTB Bamboo – hijacking a root-executed script in a user-writable PaperCut directory](https://0xdf.gitlab.io/2026/02/03/htb-bamboo.html)
+- [HTB: Gavel](https://0xdf.gitlab.io/2026/03/14/htb-gavel.html)
 
 {{#include ../../banners/hacktricks-training.md}}
-
-
 
