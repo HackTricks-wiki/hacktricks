@@ -65,6 +65,18 @@ You can find the IP and ASN of a domain using [http://ipv4info.com/](http://ipv4
 
 At this point we know **all the assets inside the scope**, so if you are allowed you could launch some **vulnerability scanner** (Nessus, OpenVAS, [**Nuclei**](https://github.com/projectdiscovery/nuclei)) over all the hosts.\
 Also, you could launch some [**port scans**](../pentesting-network/index.html#discovering-hosts-from-the-outside) **or use services like** Shodan, Censys, or ZoomEye **to find** open ports **and depending on what you find you should** take a look in this book to how to pentest several possible services running.\
+**LeakIX** is another useful internet-wide search engine focused on **exposed services** and **leaked credentials/databases**. It can help you quickly map an organization's external exposure and spot leaked datasets to validate and prioritize targets.
+
+Metasploit includes a helper module to query the LeakIX API:
+
+```bash
+msfconsole -q
+use auxiliary/gather/leakix_search
+show options
+# Set the required API key + query options shown above
+run
+```
+
 **Also, It could be worth it to mention that you can also prepare some** default username **and** passwords **lists and try to** bruteforce services with [https://github.com/x90skysn3k/brutespray](https://github.com/x90skysn3k/brutespray).
 
 ## Domains
@@ -746,5 +758,6 @@ There are several tools out there that will perform part of the proposed actions
 
 - All free courses of [**@Jhaddix**](https://twitter.com/Jhaddix) like [**The Bug Hunter's Methodology v4.0 - Recon Edition**](https://www.youtube.com/watch?v=p4JgIu1mceI)
 - [0xdf – HTB: Guardian](https://0xdf.gitlab.io/2026/02/28/htb-guardian.html)
+- [Metasploit Wrap-Up 03/13/2026](https://www.rapid7.com/blog/post/pt-metasploit-wrap-up-03-13-2026)
 
 {{#include ../../banners/hacktricks-training.md}}
