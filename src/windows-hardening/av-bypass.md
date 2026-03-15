@@ -1061,6 +1061,57 @@ Related building blocks and examples
 - Memory masking hooks (e.g., simplehook) and stack‑cutting PIC (stackcutting)
 - PIC call‑stack spoofing stubs (e.g., Draugr)
 
+## EDR Evasion: Manual Mapping + NtContinue Call-Stack Shaping
+
+### Dynamic memory permissions instead of permanent RWX
+
+EDRs heavily flag execution from **unbacked RWX** regions. A safer loader pattern is to keep pages **RX while executing** and only flip to **RW** for short phases like sleep masking/encryption, then restore RX. This reduces the RWX + MEM\_PRIVATE heuristic without changing payload behavior. If you must tolerate RWX allocations, picking a target process that legitimately uses RWX (e.g., JIT-heavy browsers) gives additional cover.
+
+### Raw beacon DLLs (Cobalt Strike 4.9+)
+
+When using a UDRL pipeline, generate a **raw** beacon DLL and map it yourself instead of relying on the prepended reflective loader:
+
+- Return `0` from `BEACON_RDLL_SIZE` so the reflective loader space is stripped **before** `BEACON_RDLL_GENERATE` runs, producing a clean raw DLL blob.
+- In Cobalt Strike 4.9+, the default changed from `0` to `5`, so you must now explicitly return `0` to preserve raw behavior.
+
+### Manual mapping hardening (ImageBase and relocations)
+
+A common pitfall is stripping the `.reloc` section for OPSEC, then breaking the loader. You can avoid relocation dependency by allocating the image at its preferred `ImageBase`:
+
+- If allocation lands exactly at `ImageBase`, the relocation delta is `0` and `ProcessRelocations` becomes a no-op.
+- This keeps the loader stable even when `.reloc` is removed in the malleable profile.
+
+### Clean execution transfer with `NtContinue`
+
+A direct call into the entry point leaves a suspicious return address pointing into the loader. A cleaner pattern is to pivot execution using a crafted thread context and `NtContinue` (x64 calling convention uses RCX/RDX/R8):
+
+```c
+NTDLL$RtlCaptureContext(&ctx);
+ctx.Rip = (DWORD64)entry_point;
+ctx.Rsp = (DWORD64)rsp;
+ctx.Rcx = (DWORD64)hInstance;
+ctx.Rdx = (DWORD64)fdwReason;
+ctx.R8  = 0;
+NTDLL$NtContinue(&ctx, FALSE);
+```
+
+This avoids pushing a return address into the loader and gives precise control over initial arguments.
+
+### Fake stack construction for thread-start realism
+
+To satisfy call-stack inspection, build a **fake stack** that terminates like a real Windows thread:
+
+- Resolve `BaseThreadInitThunk` and `RtlUserThreadStart`, then **offset into them** at the correct return-address sites (offsets are **version-dependent**).
+- Allocate a stack buffer and construct frames **top-down**, aligning to 16 bytes and placing the return addresses so the unwinder sees a legitimate chain.
+- Register the beacon’s `.pdata` with `RtlAddFunctionTable` so unwinding through beacon frames yields module-backed addresses instead of raw hex.
+
+### Reducing static signatures (“islands of invariance”)
+
+Even with a clean loader, static byte sequences often survive rebuilds and end up in vendor YARA rules. Two practical mitigations:
+
+- **Patch invariant bytes** during payload generation if you have the vendor rules and can identify the flagged sequences.
+- Otherwise, **encrypt the entire DLL** and only decrypt in memory for the short window needed to extract the entry point and stomp it into the target mapping, then **free the plaintext buffer immediately** to avoid reactive memory scans.
+
 ## SantaStealer Tradecraft for Fileless Evasion and Credential Theft
 
 SantaStealer (aka BluelineStealer) illustrates how modern info-stealers blend AV bypass, anti-analysis and credential access in a single workflow.
@@ -1128,4 +1179,5 @@ Sleep(exec_delay_seconds * 1000); // config-controlled delay to outlive sandboxe
 - [ChromElevator – Chrome App Bound Encryption Decryption](https://github.com/xaitax/Chrome-App-Bound-Encryption-Decryption)
 - [Check Point Research – GachiLoader: Defeating Node.js Malware with API Tracing](https://research.checkpoint.com/2025/gachiloader-node-js-malware-with-api-tracing/)
 
+- [Lorenzo Meacci – Bypassing EDR in a Crystal Clear Way](https://lorenzomeacci.com/bypassing-edr-in-a-crystal-clear-way)
 {{#include ../banners/hacktricks-training.md}}
