@@ -6,102 +6,104 @@
 
 ### Components of a Certificate
 
-- **Mada** ya cheti inaonyesha mmiliki wake.
-- **Funguo za Umma** zimeunganishwa na funguo za kibinafsi ili kuunganisha cheti na mmiliki wake halali.
-- **Muda wa Uhalali**, ulioainishwa na tarehe za **NotBefore** na **NotAfter**, unaashiria muda wa ufanisi wa cheti.
-- Nambari ya **Serial** ya kipekee, inayotolewa na Mamlaka ya Cheti (CA), inatambulisha kila cheti.
-- **Mtoaji** inahusisha CA ambayo imetoa cheti.
-- **SubjectAlternativeName** inaruhusu majina ya ziada kwa mada, ikiongeza kubadilika kwa utambuzi.
-- **Misingi ya Msingi** inatambulisha ikiwa cheti ni kwa CA au kitengo cha mwisho na kuainisha vizuizi vya matumizi.
-- **Matumizi ya Funguo ya Kupanuliwa (EKUs)** yanaelezea madhumuni maalum ya cheti, kama vile kusaini msimbo au usimbaji wa barua pepe, kupitia Vitambulisho vya Kitu (OIDs).
-- **Algorithimu ya Sahihi** inaelezea njia ya kusaini cheti.
-- **Sahihi**, iliyoundwa kwa funguo ya kibinafsi ya mtoaji, inahakikisha uhalali wa cheti.
+- The **Subject** of the certificate denotes its owner.
+- A **Public Key** is paired with a privately held key to link the certificate to its rightful owner.
+- The **Validity Period**, defined by **NotBefore** and **NotAfter** dates, marks the certificate's effective duration.
+- A unique **Serial Number**, provided by the Certificate Authority (CA), identifies each certificate.
+- The **Issuer** refers to the CA that has issued the certificate.
+- **SubjectAlternativeName** allows for additional names for the subject, enhancing identification flexibility.
+- **Basic Constraints** identify if the certificate is for a CA or an end entity and define usage restrictions.
+- **Extended Key Usages (EKUs)** delineate the certificate's specific purposes, like code signing or email encryption, through Object Identifiers (OIDs).
+- The **Signature Algorithm** specifies the method for signing the certificate.
+- The **Signature**, created with the issuer's private key, guarantees the certificate's authenticity.
 
 ### Special Considerations
 
-- **Majina Alternatif ya Mada (SANs)** yanapanua matumizi ya cheti kwa vitambulisho vingi, muhimu kwa seva zenye maeneo mengi. Mchakato wa usambazaji salama ni muhimu ili kuepuka hatari za kujifanya kwa washambuliaji wanaoshughulikia spesifikas za SAN.
+- **Subject Alternative Names (SANs)** expand a certificate's applicability to multiple identities, crucial for servers with multiple domains. Secure issuance processes are vital to avoid impersonation risks by attackers manipulating the SAN specification.
 
 ### Certificate Authorities (CAs) in Active Directory (AD)
 
-AD CS inatambua cheti za CA katika msitu wa AD kupitia kontena zilizotengwa, kila moja ikihudumu majukumu ya kipekee:
+AD CS acknowledges CA certificates in an AD forest through designated containers, each serving unique roles:
 
-- Kontena la **Mamlaka ya Cheti** lina cheti za CA za mizizi zinazotegemewa.
-- Kontena la **Huduma za Usajili** linaelezea CA za Biashara na templeti zao za cheti.
-- Kituo cha **NTAuthCertificates** kinajumuisha cheti za CA zilizoidhinishwa kwa uthibitishaji wa AD.
-- Kontena la **AIA (Upatikanaji wa Taarifa za Mamlaka)** linawezesha uthibitishaji wa mnyororo wa cheti na cheti za CA za kati na za msalaba.
+- **Certification Authorities** container holds trusted root CA certificates.
+- **Enrolment Services** container details Enterprise CAs and their certificate templates.
+- **NTAuthCertificates** object includes CA certificates authorized for AD authentication.
+- **AIA (Authority Information Access)** container facilitates certificate chain validation with intermediate and cross CA certificates.
 
 ### Certificate Acquisition: Client Certificate Request Flow
 
-1. Mchakato wa ombi huanza na wateja wakitafuta CA ya Biashara.
-2. CSR inaundwa, ikiwa na funguo ya umma na maelezo mengine, baada ya kuunda jozi ya funguo ya umma na ya kibinafsi.
-3. CA inakagua CSR dhidi ya templeti za cheti zilizopo, ikitoa cheti kulingana na ruhusa za templeti.
-4. Baada ya idhini, CA inasaini cheti kwa funguo yake ya kibinafsi na kuirudisha kwa mteja.
+1. The request process begins with clients finding an Enterprise CA.
+2. A CSR is created, containing a public key and other details, after generating a public-private key pair.
+3. The CA assesses the CSR against available certificate templates, issuing the certificate based on the template's permissions.
+4. Upon approval, the CA signs the certificate with its private key and returns it to the client.
 
 ### Certificate Templates
 
-Zimeainishwa ndani ya AD, templeti hizi zinaelezea mipangilio na ruhusa za kutoa cheti, ikiwa ni pamoja na EKUs zinazoruhusiwa na haki za usajili au mabadiliko, muhimu kwa usimamizi wa ufikiaji wa huduma za cheti.
+Defined within AD, these templates outline the settings and permissions for issuing certificates, including permitted EKUs and enrollment or modification rights, critical for managing access to certificate services.
+
+**Template schema version matters.** Legacy **v1** templates (for example, the built-in **WebServer** template) lack several modern enforcement knobs. The **ESC15/EKUwu** research showed that on **v1 templates**, a requester can embed **Application Policies/EKUs** in the CSR that are **preferred over** the template's configured EKUs, enabling client-auth, enrollment agent, or code-signing certificates with only enrollment rights. Prefer **v2/v3 templates**, remove or supersede v1 defaults, and tightly scope EKUs to the intended purpose.
 
 ## Certificate Enrollment
 
-Mchakato wa usajili wa cheti unanzishwa na msimamizi ambaye **anaunda templeti ya cheti**, ambayo kisha **inasambazwa** na Mamlaka ya Cheti ya Biashara (CA). Hii inafanya templeti ipatikane kwa usajili wa mteja, hatua inayofikiwa kwa kuongeza jina la templeti kwenye uwanja wa `certificatetemplates` wa kitu cha Active Directory.
+The enrollment process for certificates is initiated by an administrator who **creates a certificate template**, which is then **published** by an Enterprise Certificate Authority (CA). This makes the template available for client enrollment, a step achieved by adding the template's name to the `certificatetemplates` field of an Active Directory object.
 
-Ili mteja aombe cheti, **haki za usajili** lazima zipewe. Haki hizi zinaainishwa na waelekezi wa usalama kwenye templeti ya cheti na CA ya Biashara yenyewe. Ruhusa lazima zipewe katika maeneo yote mawili ili ombi liwe na mafanikio.
+For a client to request a certificate, **enrollment rights** must be granted. These rights are defined by security descriptors on the certificate template and the Enterprise CA itself. Permissions must be granted in both locations for a request to be successful.
 
 ### Template Enrollment Rights
 
-Haki hizi zinaainishwa kupitia Kuingilia kwa Udhibiti wa Ufikiaji (ACEs), zikielezea ruhusa kama:
+These rights are specified through Access Control Entries (ACEs), detailing permissions like:
 
-- Haki za **Usajili wa Cheti** na **Usajili wa Cheti wa Kiotomatiki**, kila moja ikihusishwa na GUID maalum.
-- **Haki za Kupanuliwa**, zikiruhusu ruhusa zote za kupanuliwa.
-- **Udhibiti Kamili/GenericAll**, ukitoa udhibiti kamili juu ya templeti.
+- **Certificate-Enrollment** and **Certificate-AutoEnrollment** rights, each associated with specific GUIDs.
+- **ExtendedRights**, allowing all extended permissions.
+- **FullControl/GenericAll**, providing complete control over the template.
 
 ### Enterprise CA Enrollment Rights
 
-Haki za CA zinaelezwa katika waelekezi wake wa usalama, zinazopatikana kupitia console ya usimamizi wa Mamlaka ya Cheti. Mipangilio mingine hata inaruhusu watumiaji wenye mamlaka ya chini kupata mbali, ambayo inaweza kuwa wasiwasi wa usalama.
+The CA's rights are outlined in its security descriptor, accessible via the Certificate Authority management console. Some settings even allow low-privileged users remote access, which could be a security concern.
 
 ### Additional Issuance Controls
 
-Madhara fulani yanaweza kutumika, kama:
+Certain controls may apply, such as:
 
-- **Idhini ya Meneja**: Inatia maombi katika hali ya kusubiri hadi idhini itolewe na meneja wa cheti.
-- **Wakala wa Usajili na Sahihi Zilizothibitishwa**: Kuainisha idadi ya sahihi zinazohitajika kwenye CSR na OIDs za Sera ya Maombi zinazohitajika.
+- **Manager Approval**: Places requests in a pending state until approved by a certificate manager.
+- **Enrolment Agents and Authorized Signatures**: Specify the number of required signatures on a CSR and the necessary Application Policy OIDs.
 
 ### Methods to Request Certificates
 
-Cheti zinaweza kuombwa kupitia:
+Certificates can be requested through:
 
-1. **Protokali ya Usajili wa Cheti ya Mteja wa Windows** (MS-WCCE), ikitumia interfaces za DCOM.
-2. **Protokali ya ICertPassage Remote** (MS-ICPR), kupitia mabomba yaliyopewa majina au TCP/IP.
-3. Kiolesura cha **mtandao wa usajili wa cheti**, ikiwa na jukumu la Usajili wa Mtandao wa Mamlaka ya Cheti.
-4. **Huduma ya Usajili wa Cheti** (CES), kwa kushirikiana na huduma ya Sera ya Usajili wa Cheti (CEP).
-5. **Huduma ya Usajili wa Vifaa vya Mtandao** (NDES) kwa vifaa vya mtandao, ikitumia Protokali ya Usajili wa Cheti Rahisi (SCEP).
+1. **Windows Client Certificate Enrollment Protocol** (MS-WCCE), using DCOM interfaces.
+2. **ICertPassage Remote Protocol** (MS-ICPR), through named pipes or TCP/IP.
+3. The **certificate enrollment web interface**, with the Certificate Authority Web Enrollment role installed.
+4. The **Certificate Enrollment Service** (CES), in conjunction with the Certificate Enrollment Policy (CEP) service.
+5. The **Network Device Enrollment Service** (NDES) for network devices, using the Simple Certificate Enrollment Protocol (SCEP).
 
-Watumiaji wa Windows pia wanaweza kuomba cheti kupitia GUI (`certmgr.msc` au `certlm.msc`) au zana za mistari ya amri (`certreq.exe` au amri ya PowerShell `Get-Certificate`).
+Windows users can also request certificates via the GUI (`certmgr.msc` or `certlm.msc`) or command-line tools (`certreq.exe` or PowerShell's `Get-Certificate` command).
 ```bash
 # Example of requesting a certificate using PowerShell
 Get-Certificate -Template "User" -CertStoreLocation "cert:\\CurrentUser\\My"
 ```
-## Uthibitisho wa Cheti
+## Certificate Authentication
 
-Active Directory (AD) inasaidia uthibitisho wa cheti, hasa ikitumia **Kerberos** na **Secure Channel (Schannel)** protokali.
+Active Directory (AD) inaunga mkono uthibitishaji wa vyeti, kwa kawaida ikitumia protokoli za **Kerberos** na **Secure Channel (Schannel)**.
 
-### Mchakato wa Uthibitisho wa Kerberos
+### Kerberos Authentication Process
 
-Katika mchakato wa uthibitisho wa Kerberos, ombi la mtumiaji la Tiketi ya Kutoa Tiketi (TGT) linatiwa saini kwa kutumia **funguo ya faragha** ya cheti cha mtumiaji. Ombi hili hupitia uthibitisho kadhaa na msimamizi wa eneo, ikiwa ni pamoja na **halali** ya cheti, **njia**, na **hali ya kufutwa**. Uthibitisho pia unajumuisha kuangalia kwamba cheti kinatoka kwa chanzo kinachotegemewa na kuthibitisha uwepo wa mtoaji katika **duka la cheti la NTAUTH**. Uthibitisho uliofanikiwa unapelekea utoaji wa TGT. Kitu cha **`NTAuthCertificates`** katika AD, kinachopatikana kwenye:
+Katika mchakato wa uthibitishaji wa Kerberos, ombi la mtumiaji la Ticket Granting Ticket (TGT) linasainiwa kwa kutumia **funguo binafsi** ya cheti cha mtumiaji. Ombi hili hupitia uthibitisho kadhaa na domain controller, ikiwa ni pamoja na **uhalali**, **njia**, na **hali ya kufutwa** ya cheti. Uthibitisho pia unajumuisha kuthibitisha kwamba cheti kimetoka kwa chanzo kinachotegemewa na kuthibitisha uwepo wa mtumaji katika **NTAUTH certificate store**. Uthibitisho uliofanikiwa husababisha utolewaji wa TGT. Kitu cha **`NTAuthCertificates`** katika AD, kinachopatikana katika:
 ```bash
 CN=NTAuthCertificates,CN=Public Key Services,CN=Services,CN=Configuration,DC=<domain>,DC=<com>
 ```
-ni muhimu katika kuanzisha uaminifu kwa uthibitishaji wa cheti.
+ni muhimu katika kuanzisha uaminifu kwa uthibitishaji wa vyeti.
 
-### Uthibitishaji wa Kanal Salama (Schannel)
+### Secure Channel (Schannel) Authentication
 
-Schannel inarahisisha muunganisho salama wa TLS/SSL, ambapo wakati wa mkutano, mteja anawasilisha cheti ambacho, ikiwa kimefanikiwa kuthibitishwa, kinatoa ruhusa ya ufikiaji. Mchoro wa cheti kwa akaunti ya AD unaweza kujumuisha kazi ya Kerberos **S4U2Self** au **Subject Alternative Name (SAN)** ya cheti, kati ya mbinu nyingine.
+Schannel inarahisisha miunganisho salama ya TLS/SSL, ambapo wakati wa handshake, mteja huwasilisha cheti ambacho, ikiwa kitatambuliwa kwa mafanikio, kinaruhusu upatikanaji. Kuoanisha cheti na akaunti ya AD kunaweza kujumuisha kipengele cha Kerberos **S4U2Self** au **Subject Alternative Name (SAN)** ya cheti, miongoni mwa mbinu nyingine.
 
-### Uhesabu wa Huduma za Cheti za AD
+### AD Certificate Services Enumeration
 
-Huduma za cheti za AD zinaweza kuhesabiwa kupitia maswali ya LDAP, zikifunua habari kuhusu **Mamlaka ya Cheti ya Biashara (CAs)** na mipangilio yao. Hii inapatikana kwa mtumiaji yeyote aliyeidhinishwa na kikoa bila ruhusa maalum. Zana kama **[Certify](https://github.com/GhostPack/Certify)** na **[Certipy](https://github.com/ly4k/Certipy)** zinatumika kwa uhesabu na tathmini ya udhaifu katika mazingira ya AD CS.
+Certificate services za AD zinaweza kuorodheshwa kupitia maswali ya LDAP, zikifunua taarifa kuhusu **Enterprise Certificate Authorities (CAs)** na mipangilio yao. Hii inapatikana kwa mtumiaji yeyote aliyeathibitishwa kwenye domain bila vibali maalum. Zana kama **[Certify](https://github.com/GhostPack/Certify)** na **[Certipy](https://github.com/ly4k/Certipy)** zinatumika kwa uorodheshaji na tathmini ya udhaifu katika mazingira ya AD CS.
 
-Amri za kutumia zana hizi ni:
+Amri za kutumia zana hizi ni pamoja na:
 ```bash
 # Enumerate trusted root CA certificates and Enterprise CAs with Certify
 Certify.exe cas
@@ -118,42 +120,50 @@ certipy req -web -target ca.corp.local -template WebServer -upn john@corp.local 
 certutil.exe -TCAInfo
 certutil -v -dstemplate
 ```
----
-
-## Uthibitisho wa Hivi Karibuni & Sasisho za Usalama (2022-2025)
-
-| Mwaka | ID / Jina | Athari | Mambo Muhimu |
-|-------|-----------|--------|---------------|
-| 2022  | **CVE-2022-26923** – “Certifried” / ESC6 | *Kuongeza mamlaka* kwa kudanganya vyeti vya akaunti za mashine wakati wa PKINIT. | Patch imejumuishwa katika sasisho za usalama za **Machi 10 2022**. Ukaguzi & udhibiti wa nguvu za ramani zilianzishwa kupitia **KB5014754**; mazingira yanapaswa sasa kuwa katika hali ya *Utekelezaji Kamili*. |
-| 2023  | **CVE-2023-35350 / 35351** | *Utendaji wa msimbo wa mbali* katika AD CS Web Enrollment (certsrv) na majukumu ya CES. | PoCs za umma ni chache, lakini vipengele vya IIS vilivyo hatarini mara nyingi vinakabiliwa ndani. Patch kuanzia **Julai 2023** Patch Jumanne. |
-| 2024  | **CVE-2024-49019** – “EKUwu” / ESC15 | Watumiaji wenye mamlaka ya chini walio na haki za kujiandikisha wanaweza kubadilisha **yoyote** EKU au SAN wakati wa uzalishaji wa CSR, kutoa vyeti vinavyoweza kutumika kwa uthibitishaji wa mteja au kusaini msimbo na kusababisha *kuvunjika kwa eneo*. | Imetatuliwa katika sasisho za **Aprili 2024**. Ondoa “Weka katika ombi” kutoka kwa templeti na punguza ruhusa za kujiandikisha. |
-
-### Muda wa kuimarisha wa Microsoft (KB5014754)
-
-Microsoft ilianzisha utaratibu wa hatua tatu (Ulinganifu → Ukaguzi → Utekelezaji) ili kuhamasisha uthibitisho wa vyeti vya Kerberos mbali na ramani dhaifu za kimya. Kuanzia **Februari 11 2025**, wasimamizi wa eneo moja moja hujibadilisha kiotomatiki kuwa **Utekelezaji Kamili** ikiwa thamani ya rejista ya `StrongCertificateBindingEnforcement` haijakamilishwa. Wasimamizi wanapaswa:
-
-1. Patch DC zote & seva za AD CS (Machi 2022 au baadaye).
-2. Fuata Kitambulisho cha Tukio 39/41 kwa ramani dhaifu wakati wa hatua ya *Ukaguzi*.
-3. Toa tena vyeti vya uthibitishaji wa mteja na **nyongeza mpya ya SID** au weka ramani za nguvu za mikono kabla ya Februari 2025.
+{{#ref}}
+ad-certificates/domain-escalation.md
+{{#endref}}
 
 ---
 
-## Ugunduzi & Uimarishaji wa Maboresho
+## Udhaifu za Karibuni & Sasisho za Usalama (2022-2025)
 
-* **Defender for Identity AD CS sensor (2023-2024)** sasa inaonyesha tathmini za hali kwa ESC1-ESC8/ESC11 na inazalisha arifa za wakati halisi kama *“Utoaji wa cheti cha msimamizi wa eneo kwa DC isiyo ya DC”* (ESC8) na *“Zuia Uandikishaji wa Cheti na Sera za Maombi zisizo na mipaka”* (ESC15). Hakikisha sensa zimewekwa kwenye seva zote za AD CS ili kufaidika na ugunduzi huu.
-* Zima au punguza kwa karibu chaguo la **“Weka katika ombi”** kwenye templeti zote; pendelea thamani za SAN/EKU zilizofafanuliwa wazi.
-* Ondoa **Madhumuni Yoyote** au **Hakuna EKU** kutoka kwa templeti isipokuwa inahitajika kabisa (inashughulikia hali za ESC2).
-* Hitaji **idhini ya meneja** au michakato ya Uwakilishi wa Uandikishaji kwa templeti nyeti (mfano, WebServer / CodeSigning).
-* Punguza uandikishaji wa wavuti (`certsrv`) na mwisho wa CES/NDES kwa mitandao ya kuaminika au nyuma ya uthibitishaji wa cheti cha mteja.
-* Tekeleza usimbaji wa uandikishaji wa RPC (`certutil –setreg CA\InterfaceFlags +IF_ENFORCEENCRYPTICERTREQ`) ili kupunguza ESC11.
+| Mwaka | ID / Jina | Athari | Vidokezo Muhimu |
+|------|-----------|--------|----------------|
+| 2022 | **CVE-2022-26923** – “Certifried” / ESC6 | *Privilege escalation* kwa kuiga vyeti vya akaunti za mashine wakati wa PKINIT. | Patch imejumuishwa katika sasisho za usalama za **May 10 2022**. Ukaguzi & udhibiti wa strong-mapping zilianzishwa kupitia **KB5014754**; mazingira yanapaswa sasa kuwa katika mode ya *Full Enforcement*.  |
+| 2023 | **CVE-2023-35350 / 35351** | *Remote code-execution* kwenye AD CS Web Enrollment (certsrv) na majukumu ya CES. | PoC za umma ni chache, lakini vipengele vya IIS vilivyo na dosari mara nyingi vinafichuka ndani ya mtandao. Patch ilitolewa **July 2023** Patch Tuesday.  |
+| 2024 | **CVE-2024-49019** – “EKUwu” / ESC15 | Kwa v1 templates, mtumaji mwenye haki za enrollment anaweza kuweka ndani ya CSR **Application Policies/EKUs** ambazo zinalinganishwa na EKUs za template, zikitoa vyeti vya client-auth, enrollment agent, au code-signing. | Imepachikwa tarehe **November 12, 2024**. Badilisha au ziba v1 templates (mfano, default WebServer), punguza EKUs kwa mujibu wa matumizi, na zuia haki za enrollment. |
+
+### Ratiba ya kuimarisha Microsoft (KB5014754)
+
+Microsoft ilianzisha utaratibu wa hatua tatu (Compatibility → Audit → Enforcement) ili kusogeza uthibitishaji wa vyeti vya Kerberos kutoka kwenye ramani dhaifu zisizo wazi. Kuanzia **February 11 2025**, domain controllers hujibadilishia moja kwa moja hadi **Full Enforcement** ikiwa thamani ya rejista `StrongCertificateBindingEnforcement` haijawekwa. Wasimamizi wanapaswa:
+
+1. Patch DC zote & seva za AD CS (May 2022 au baadaye).
+2. Monitor Event ID 39/41 kwa ramani dhaifu wakati wa awamu ya *Audit*.
+3. Toa upya vyeti vya client-auth zikiwa na **SID extension** mpya au sanidi strong manual mappings kabla ya Februari 2025.
 
 ---
 
-## Marejeleo
+## Ugundaji & Uimarishaji wa Usalama
 
+* **Defender for Identity AD CS sensor (2023-2024)** sasa inaonyesha tathmini za nafasi kwa ESC1-ESC8/ESC11 na inatengeneza arifu za wakati halisi kama *“Domain-controller certificate issuance for a non-DC”* (ESC8) na *“Prevent Certificate Enrollment with arbitrary Application Policies”* (ESC15). Hakikisha sensors zimewekwa kwenye seva zote za AD CS ili kunufaika na ugunduzi huu.
+* Disable au weka mipaka kwa njia kali chaguo la **“Supply in the request”** kwenye templates zote; pendelea SAN/EKU zilizo wazi kwa ajili.
+* Ondoa **Any Purpose** au **No EKU** kutoka kwa templates isipokuwa zinahitajika kabisa (hii inashughulikia matukio ya ESC2).
+* Inyatie idhini ya meneja au workflows za Enrollment Agent za kujitolea kwa templates nyeti (mfano, WebServer / CodeSigning).
+* Zuia web enrollment (`certsrv`) na endpoints za CES/NDES kwa mitandao ya kuaminika au zifichwe nyuma ya uthibitishaji wa client-certificate.
+* Tekeleza encryption ya RPC enrollment (certutil -setreg CA\InterfaceFlags +IF_ENFORCEENCRYPTICERTREQUEST) ili kupunguza ESC11 (RPC relay). Bendera hii iko **on by default**, lakini mara nyingi imezimwa kwa wateja wa zamani, ambayo inafungua tena hatari ya relay.
+* Secured endpoints za enrollment zinazotegemea IIS (CES/Certsrv): zima NTLM inapowezekana au hitaji HTTPS + Extended Protection ili kuzuia relay za ESC8.
+
+---
+
+
+
+## Marejeo
+
+- [https://trustedsec.com/blog/ekuwu-not-just-another-ad-cs-esc](https://trustedsec.com/blog/ekuwu-not-just-another-ad-cs-esc)
+- [https://learn.microsoft.com/en-us/defender-for-identity/security-posture-assessments/certificates](https://learn.microsoft.com/en-us/defender-for-identity/security-posture-assessments/certificates)
 - [https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf)
 - [https://comodosslstore.com/blog/what-is-ssl-tls-client-authentication-how-does-it-work.html](https://comodosslstore.com/blog/what-is-ssl-tls-client-authentication-how-does-it-work.html)
 - [https://support.microsoft.com/en-us/topic/kb5014754-certificate-based-authentication-changes-on-windows-domain-controllers-ad2c23b0-15d8-4340-a468-4d4f3b188f16](https://support.microsoft.com/en-us/topic/kb5014754-certificate-based-authentication-changes-on-windows-domain-controllers-ad2c23b0-15d8-4340-a468-4d4f3b188f16)
 - [https://advisory.eventussecurity.com/advisory/critical-vulnerability-in-ad-cs-allows-privilege-escalation/](https://advisory.eventussecurity.com/advisory/critical-vulnerability-in-ad-cs-allows-privilege-escalation/)
-
 {{#include ../../banners/hacktricks-training.md}}
