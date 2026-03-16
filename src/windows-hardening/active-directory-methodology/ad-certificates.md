@@ -1,107 +1,109 @@
-# AD Certificates
+# AD 证书
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Introduction
+## 介绍
 
-### Components of a Certificate
+### 证书的组成部分
 
-- 证书的**主题**表示其所有者。
-- **公钥**与私有密钥配对，将证书与其合法所有者关联。
-- **有效期**由**NotBefore**和**NotAfter**日期定义，标记证书的有效持续时间。
-- 由证书颁发机构（CA）提供的唯一**序列号**标识每个证书。
-- **颁发者**指的是颁发证书的CA。
-- **SubjectAlternativeName**允许为主题提供额外名称，增强识别灵活性。
-- **基本约束**识别证书是用于CA还是终端实体，并定义使用限制。
-- **扩展密钥使用（EKUs）**通过对象标识符（OIDs）划定证书的特定用途，如代码签名或电子邮件加密。
-- **签名算法**指定签署证书的方法。
-- 使用颁发者的私钥创建的**签名**保证证书的真实性。
+- 证书的 **Subject** 表示其所有者。
+- **Public Key** 与对应的私钥配对，用于将证书绑定到其合法所有者。
+- **Validity Period**（由 **NotBefore** 和 **NotAfter** 日期定义）标示证书的有效期限。
+- 唯一的 **Serial Number**，由 Certificate Authority (CA) 提供，用于标识每个证书。
+- **Issuer** 指签发该证书的 CA。
+- **SubjectAlternativeName** 允许为主体添加额外名称，增强标识的灵活性。
+- **Basic Constraints** 用于标识证书是用于 CA 还是终端实体，并定义使用限制。
+- **Extended Key Usages (EKUs)** 通过对象标识符 (OIDs) 指定证书的具体用途，例如代码签名或邮件加密。
+- **Signature Algorithm** 指定签署证书所用的方法。
+- 使用签发者私钥创建的 **Signature** 用以保证证书的真实性。
 
-### Special Considerations
+### 特殊注意事项
 
-- **主题备用名称（SANs）**扩展证书对多个身份的适用性，对于具有多个域的服务器至关重要。安全的颁发流程对于避免攻击者操纵SAN规范进行冒充风险至关重要。
+- **Subject Alternative Names (SANs)** 扩展证书适用的身份范围，使其可用于多个身份，这对拥有多个域名的服务器至关重要。必须确保签发流程安全，以防攻击者通过操纵 SAN 规范进行冒充。
 
-### Certificate Authorities (CAs) in Active Directory (AD)
+### Active Directory (AD) 中的 Certificate Authorities (CAs)
 
-AD CS通过指定的容器在AD森林中承认CA证书，每个容器承担独特角色：
+AD CS 通过指定的容器在 AD 林中识别 CA 证书，每个容器有不同的作用：
 
-- **Certification Authorities**容器保存受信任的根CA证书。
-- **Enrolment Services**容器详细说明企业CA及其证书模板。
-- **NTAuthCertificates**对象包括被授权用于AD身份验证的CA证书。
-- **AIA (Authority Information Access)**容器通过中间和交叉CA证书促进证书链验证。
+- **Certification Authorities** 容器保存受信任的根 CA 证书。
+- **Enrolment Services** 容器记录 Enterprise CAs 及其证书模板。
+- **NTAuthCertificates** 对象包含被授权用于 AD 身份验证的 CA 证书。
+- **AIA (Authority Information Access)** 容器通过包含中间 CA 和跨认证 CA 证书来促进证书链验证。
 
-### Certificate Acquisition: Client Certificate Request Flow
+### 证书获取：客户端证书请求流程
 
-1. 请求过程从客户端寻找企业CA开始。
-2. 在生成公私钥对后，创建包含公钥和其他详细信息的CSR。
-3. CA根据可用证书模板评估CSR，并根据模板的权限颁发证书。
-4. 经批准后，CA使用其私钥签署证书并将其返回给客户端。
+1. 客户端首先查找可用的 Enterprise CA。
+2. 生成公私钥对后，创建 CSR，包含公钥及其他信息。
+3. CA 根据可用的证书模板评估 CSR，并根据模板的权限来颁发证书。
+4. 经批准后，CA 使用其私钥对证书签名并返回给客户端。
 
-### Certificate Templates
+### 证书模板
 
-在AD中定义，这些模板概述了颁发证书的设置和权限，包括允许的EKUs和注册或修改权利，对于管理证书服务的访问至关重要。
+在 AD 中定义的这些模板规定了颁发证书的设置和权限，包括允许的 EKUs 以及注册或修改权限，对于管理对证书服务的访问至关重要。
 
-## Certificate Enrollment
+**模板架构版本很重要。** 传统的 **v1** 模板（例如内置的 **WebServer** 模板）缺少若干现代的强制控制选项。研究 **ESC15/EKUwu** 显示，在 **v1 模板** 上，请求者可以在 CSR 中嵌入 **Application Policies/EKUs**，这些会被优先于模板已配置的 EKUs，从而在只有注册权限的情况下获得 client-auth、enrollment agent 或 code-signing 证书。应优先使用 **v2/v3 模板**，删除或覆盖 v1 的默认设置，并将 EKUs 严格限定到预期用途。
 
-证书的注册过程由管理员**创建证书模板**，然后由企业证书颁发机构（CA）**发布**。这使得模板可用于客户端注册，通过将模板名称添加到Active Directory对象的`certificatetemplates`字段来实现。
+## 证书注册
 
-为了让客户端请求证书，必须授予**注册权限**。这些权限由证书模板和企业CA本身的安全描述符定义。必须在两个位置授予权限，才能成功请求。
+证书的注册流程由管理员发起，管理员 **创建证书模板**，然后由 Enterprise Certificate Authority (CA) **发布**。发布后，模板即可供客户端注册，通常通过将模板名称添加到 Active Directory 对象的 certificatetemplates 字段来实现。
 
-### Template Enrollment Rights
+客户端请求证书时，必须被授予 **enrollment rights**。这些权限由证书模板和 Enterprise CA 本身上的安全描述符定义。要成功发起请求，必须在两处都授予相应权限。
 
-这些权限通过访问控制条目（ACEs）指定，详细说明权限，如：
+### 模板注册权限
 
-- **证书注册**和**证书自动注册**权限，每个权限与特定的GUID相关联。
+这些权限通过 Access Control Entries (ACEs) 指定，包含如下权限：
+
+- **Certificate-Enrollment** 和 **Certificate-AutoEnrollment** 权限，每个权限对应特定的 GUID。
 - **ExtendedRights**，允许所有扩展权限。
-- **FullControl/GenericAll**，提供对模板的完全控制。
+- **FullControl/GenericAll**，对模板提供完全控制权限。
 
-### Enterprise CA Enrollment Rights
+### Enterprise CA 注册权限
 
-CA的权限在其安全描述符中列出，可以通过证书颁发机构管理控制台访问。有些设置甚至允许低权限用户远程访问，这可能是一个安全隐患。
+CA 的权限在其安全描述符中列出，可以通过 Certificate Authority 管理控制台查看。有些设置甚至允许低权限用户进行远程访问，这可能构成安全隐患。
 
-### Additional Issuance Controls
+### 额外的签发控制
 
-某些控制可能适用，例如：
+可能适用的控制包括：
 
-- **经理批准**：将请求置于待处理状态，直到由证书经理批准。
-- **注册代理和授权签名**：指定CSR上所需的签名数量和必要的应用程序策略OIDs。
+- **Manager Approval**：将请求置于挂起状态，直到被证书管理员批准。
+- **Enrolment Agents and Authorized Signatures**：指定 CSR 上所需签名的数量以及必要的 Application Policy OIDs。
 
-### Methods to Request Certificates
+### 请求证书的方法
 
-可以通过以下方式请求证书：
+证书可以通过以下方式请求：
 
-1. **Windows Client Certificate Enrollment Protocol** (MS-WCCE)，使用DCOM接口。
-2. **ICertPassage Remote Protocol** (MS-ICPR)，通过命名管道或TCP/IP。
-3. **证书注册Web界面**，安装了证书颁发机构Web注册角色。
-4. **证书注册服务** (CES)，与证书注册策略（CEP）服务结合使用。
-5. **网络设备注册服务** (NDES)用于网络设备，使用简单证书注册协议（SCEP）。
+1. **Windows Client Certificate Enrollment Protocol** (MS-WCCE)，使用 DCOM 接口。
+2. **ICertPassage Remote Protocol** (MS-ICPR)，通过命名管道或 TCP/IP。
+3. 使用安装了 Certificate Authority Web Enrollment 角色的 **certificate enrollment web interface**。
+4. **Certificate Enrollment Service** (CES)，与 Certificate Enrollment Policy (CEP) 服务配合使用。
+5. 针对网络设备使用 **Network Device Enrollment Service** (NDES)，通过 Simple Certificate Enrollment Protocol (SCEP)。
 
-Windows用户还可以通过GUI（`certmgr.msc`或`certlm.msc`）或命令行工具（`certreq.exe`或PowerShell的`Get-Certificate`命令）请求证书。
+Windows 用户也可以通过 GUI（certmgr.msc 或 certlm.msc）或命令行工具（certreq.exe 或 PowerShell 的 Get-Certificate 命令）请求证书。
 ```bash
 # Example of requesting a certificate using PowerShell
 Get-Certificate -Template "User" -CertStoreLocation "cert:\\CurrentUser\\My"
 ```
 ## 证书认证
 
-Active Directory (AD) 支持证书认证，主要利用 **Kerberos** 和 **安全通道 (Schannel)** 协议。
+Active Directory (AD) 支持证书认证，主要使用 **Kerberos** 和 **Secure Channel (Schannel)** 协议。
 
-### Kerberos 认证过程
+### Kerberos 身份验证过程
 
-在 Kerberos 认证过程中，用户请求的票证授予票证 (TGT) 使用用户证书的 **私钥** 进行签名。该请求经过域控制器的多个验证，包括证书的 **有效性**、**路径** 和 **撤销状态**。验证还包括确认证书来自受信任的来源，并确认发行者在 **NTAUTH 证书存储** 中的存在。成功的验证将导致 TGT 的发放。AD 中的 **`NTAuthCertificates`** 对象位于：
+在 Kerberos 身份验证过程中，用户请求 Ticket Granting Ticket (TGT) 时，该请求使用用户证书的 **私钥** 签名。该请求由域控制器进行多项验证，包括证书的 **有效性**、**路径** 和 **吊销状态**。验证还包括确认证书来自受信任来源并确认颁发者存在于 **NTAUTH certificate store**。验证成功后会签发 TGT。AD 中的 **`NTAuthCertificates`** 对象位于：
 ```bash
 CN=NTAuthCertificates,CN=Public Key Services,CN=Services,CN=Configuration,DC=<domain>,DC=<com>
 ```
-在证书认证中建立信任是至关重要的。
+对于建立证书认证的信任至关重要。
 
-### 安全通道 (Schannel) 认证
+### Secure Channel (Schannel) Authentication
 
-Schannel 促进安全的 TLS/SSL 连接，在握手过程中，客户端提供一个证书，如果成功验证，则授权访问。将证书映射到 AD 账户可能涉及 Kerberos 的 **S4U2Self** 函数或证书的 **主题备用名称 (SAN)**，以及其他方法。
+Schannel 促成安全的 TLS/SSL 连接，在握手期间，客户端出示证书；如果验证成功，则授权访问。将证书映射到 AD 帐户可能涉及 Kerberos 的 **S4U2Self** 功能或证书的 **Subject Alternative Name (SAN)**，以及其他方法。
 
-### AD 证书服务枚举
+### AD Certificate Services Enumeration
 
-AD 的证书服务可以通过 LDAP 查询进行枚举，揭示有关 **企业证书颁发机构 (CAs)** 及其配置的信息。这对任何经过域认证的用户都是可访问的，无需特殊权限。工具如 **[Certify](https://github.com/GhostPack/Certify)** 和 **[Certipy](https://github.com/ly4k/Certipy)** 被用于在 AD CS 环境中的枚举和漏洞评估。
+可以通过 LDAP 查询枚举 AD 的证书服务，从而揭示 **Enterprise Certificate Authorities (CAs)** 及其配置的相关信息。任何域认证用户无需特殊权限即可访问这些信息。在 AD CS 环境中，工具如 **[Certify](https://github.com/GhostPack/Certify)** 和 **[Certipy](https://github.com/ly4k/Certipy)** 常用于枚举和漏洞评估。
 
-使用这些工具的命令包括：
+Commands for using these tools include:
 ```bash
 # Enumerate trusted root CA certificates and Enterprise CAs with Certify
 Certify.exe cas
@@ -118,42 +120,50 @@ certipy req -web -target ca.corp.local -template WebServer -upn john@corp.local 
 certutil.exe -TCAInfo
 certutil -v -dstemplate
 ```
+{{#ref}}
+ad-certificates/domain-escalation.md
+{{#endref}}
+
 ---
 
 ## 最近的漏洞与安全更新 (2022-2025)
 
 | 年份 | ID / 名称 | 影响 | 关键要点 |
 |------|-----------|--------|----------------|
-| 2022 | **CVE-2022-26923** – “Certifried” / ESC6 | *特权提升*，通过在 PKINIT 期间伪造机器账户证书。 | 补丁包含在 **2022年5月10日** 的安全更新中。通过 **KB5014754** 引入了审计和强映射控制；环境现在应处于 *完全强制* 模式。 |
-| 2023 | **CVE-2023-35350 / 35351** | *远程代码执行* 在 AD CS Web Enrollment (certsrv) 和 CES 角色中。 | 公开的 PoC 限制较少，但易受攻击的 IIS 组件通常在内部暴露。补丁自 **2023年7月** 的补丁星期二起生效。 |
-| 2024 | **CVE-2024-49019** – “EKUwu” / ESC15 | 具有注册权限的低权限用户可以在 CSR 生成期间覆盖 **任何** EKU 或 SAN，发放可用于客户端身份验证或代码签名的证书，导致 *域被攻陷*。 | 在 **2024年4月** 的更新中解决。移除模板中的“请求中提供”并限制注册权限。 |
+| 2022 | **CVE-2022-26923** – “Certifried” / ESC6 | *特权提升*：通过在 PKINIT 期间伪造计算机帐户证书实现。 | 补丁包含在 **2022 年 5 月 10 日** 的安全更新中。通过 **KB5014754** 引入了审计和强绑定控制；环境现在应处于 *Full Enforcement* 模式。  |
+| 2023 | **CVE-2023-35350 / 35351** | *远程代码执行*：影响 AD CS Web Enrollment (certsrv) 和 CES 角色。 | 公开 PoC 限制较多，但易受攻击的 IIS 组件在内部网络中经常暴露。补丁已于 **2023 年 7 月** Patch Tuesday 发布。  |
+| 2024 | **CVE-2024-49019** – “EKUwu” / ESC15 | 在 **v1 templates** 上，有注册权限的申请者可以在 CSR 中嵌入 **Application Policies/EKUs**，这些会优先于模板 EKU，从而生成 client-auth、enrollment agent 或 code-signing 证书。 | 补丁已于 **2024 年 11 月 12 日** 发布。替换或取代 v1 templates（例如默认 WebServer），将 EKU 限定为预期用途，并限制注册权限。 |
 
-### 微软强化时间表 (KB5014754)
+### Microsoft 加固时间线 (KB5014754)
 
-微软引入了三阶段的推出（兼容性 → 审计 → 强制），以将 Kerberos 证书认证从弱隐式映射中转移出去。自 **2025年2月11日** 起，如果未设置 `StrongCertificateBindingEnforcement` 注册表值，域控制器将自动切换到 **完全强制**。管理员应：
+Microsoft 引入了三阶段部署（Compatibility → Audit → Enforcement），以将 Kerberos 证书身份验证从弱的隐式映射中移出。截至 **2025 年 2 月 11 日**，如果未设置 `StrongCertificateBindingEnforcement` 注册表值，域控制器会自动切换到 **Full Enforcement**。管理员应当：
 
-1. 修补所有 DC 和 AD CS 服务器（2022年5月或更晚）。
-2. 在 *审计* 阶段监控事件 ID 39/41 以查找弱映射。
-3. 在 2025年2月之前重新发放带有新 **SID 扩展** 的客户端认证证书或配置强手动映射。
-
----
-
-## 检测与强化增强
-
-* **Defender for Identity AD CS 传感器 (2023-2024)** 现在提供 ESC1-ESC8/ESC11 的姿态评估，并生成实时警报，如 *“非 DC 的域控制器证书发放”* (ESC8) 和 *“防止使用任意应用程序策略的证书注册”* (ESC15)。确保传感器部署到所有 AD CS 服务器以受益于这些检测。
-* 禁用或严格限制所有模板上的 **“请求中提供”** 选项；优先使用明确定义的 SAN/EKU 值。
-* 除非绝对必要，否则从模板中移除 **任何目的** 或 **无 EKU**（解决 ESC2 场景）。
-* 对于敏感模板（例如，WebServer / CodeSigning），要求 **经理批准** 或专用注册代理工作流。
-* 将 Web 注册 (`certsrv`) 和 CES/NDES 端点限制在受信网络或客户端证书认证后面。
-* 强制 RPC 注册加密 (`certutil –setreg CA\InterfaceFlags +IF_ENFORCEENCRYPTICERTREQ`) 以减轻 ESC11。
+1. 修补所有 DC 和 AD CS 服务器（2022 年 5 月或更晚的更新）。
+2. 在 *Audit* 阶段监控 Event ID 39/41 以检测弱映射。
+3. 在 2025 年 2 月之前，使用新的 **SID extension** 重新签发 client-auth 证书，或配置强制手动映射。
 
 ---
 
-## 参考文献
+## 检测与加固增强
 
+* **Defender for Identity AD CS sensor (2023-2024)** 现在会显示 ESC1-ESC8/ESC11 的态势评估，并生成实时警报，例如 *“Domain-controller certificate issuance for a non-DC”* (ESC8) 和 *“Prevent Certificate Enrollment with arbitrary Application Policies”* (ESC15)。确保在所有 AD CS 服务器上部署这些传感器以利用这些检测。
+* 禁用或严格限定所有模板上的 **“Supply in the request”** 选项；优先使用明确定义的 SAN/EKU 值。
+* 除非绝对必要（可解决 ESC2 场景），否则从模板中移除 **Any Purpose** 或 **No EKU**。
+* 对敏感模板（例如 WebServer / CodeSigning）要求 **manager approval** 或专用的 Enrollment Agent 工作流。
+* 将 web enrollment (`certsrv`) 和 CES/NDES 端点限制在受信任网络内，或置于客户端证书认证之后。
+* 强制 RPC 注册加密（`certutil -setreg CA\InterfaceFlags +IF_ENFORCEENCRYPTICERTREQUEST`）以缓解 ESC11（RPC 中继）。该标志默认启用，但常为兼容旧客户端而被禁用，这会重新开启中继风险。
+* 保护 **基于 IIS 的注册端点**（CES/Certsrv）：在可能的情况下禁用 NTLM，或要求 HTTPS + Extended Protection 来阻止 ESC8 中继。
+
+---
+
+
+
+## 参考资料
+
+- [https://trustedsec.com/blog/ekuwu-not-just-another-ad-cs-esc](https://trustedsec.com/blog/ekuwu-not-just-another-ad-cs-esc)
+- [https://learn.microsoft.com/en-us/defender-for-identity/security-posture-assessments/certificates](https://learn.microsoft.com/en-us/defender-for-identity/security-posture-assessments/certificates)
 - [https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf)
 - [https://comodosslstore.com/blog/what-is-ssl-tls-client-authentication-how-does-it-work.html](https://comodosslstore.com/blog/what-is-ssl-tls-client-authentication-how-does-it-work.html)
 - [https://support.microsoft.com/en-us/topic/kb5014754-certificate-based-authentication-changes-on-windows-domain-controllers-ad2c23b0-15d8-4340-a468-4d4f3b188f16](https://support.microsoft.com/en-us/topic/kb5014754-certificate-based-authentication-changes-on-windows-domain-controllers-ad2c23b0-15d8-4340-a468-4d4f3b188f16)
 - [https://advisory.eventussecurity.com/advisory/critical-vulnerability-in-ad-cs-allows-privilege-escalation/](https://advisory.eventussecurity.com/advisory/critical-vulnerability-in-ad-cs-allows-privilege-escalation/)
-
 {{#include ../../banners/hacktricks-training.md}}
