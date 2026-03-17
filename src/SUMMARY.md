@@ -518,6 +518,7 @@
   - [Roundcube](network-services-pentesting/pentesting-web/roundcube.md)
   - [Spring Actuators](network-services-pentesting/pentesting-web/spring-actuators.md)
   - [Symfony](network-services-pentesting/pentesting-web/symphony.md)
+  - [SPIP](network-services-pentesting/pentesting-web/spip.md)
   - [Tomcat](network-services-pentesting/pentesting-web/tomcat/README.md)
   - [Telerik Ui Aspnet Ajax Unsafe Reflection Webresource Axd](network-services-pentesting/pentesting-web/telerik-ui-aspnet-ajax-unsafe-reflection-webresource-axd.md)
   - [Uncovering CloudFlare](network-services-pentesting/pentesting-web/uncovering-cloudflare.md)
