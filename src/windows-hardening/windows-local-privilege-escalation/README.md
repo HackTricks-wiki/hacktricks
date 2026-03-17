@@ -661,6 +661,26 @@ If you have this permission over a registry this means to **you can create sub r
 appenddata-addsubdirectory-permission-over-service-registry.md
 {{#endref}}
 
+### Registry symbolic links (REG_LINK) + oplock-assisted race
+
+If a privileged component opens a predictable HKLM key, you can **race-delete it and recreate it as a registry symlink** so the privileged write lands in an attacker-chosen target. The primitive is: create a volatile link key with `REG_OPTION_CREATE_LINK | REG_OPTION_VOLATILE`, then set `SymbolicLinkValue` with type `REG_LINK` to an NT registry path (e.g. `\Registry\Machine\SYSTEM\...`). Any subsequent privileged access to the original path is transparently redirected to the target.
+
+Minimal link creation flow (user-mode, after you win the race):
+
+```c
+RegCreateKeyExW(HKEY_LOCAL_MACHINE, linkPath, 0, NULL, REG_OPTION_CREATE_LINK | REG_OPTION_VOLATILE, KEY_WRITE, NULL, &hKey, NULL);
+RegSetValueExW(hKey, L"SymbolicLinkValue", 0, REG_LINK, (BYTE*)L"\\Registry\\Machine\\SYSTEM\\...", cb);
+```
+
+Reliability tip: **use an oplock** on a file the victim must open so you can pause its execution, swap the key to a link, then resume it. Example with Accessibility (ATBroker/OSK):
+
+- Session-scoped key used by the privileged component: `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Accessibility\Session{SessionId}\ATConfig\osk`
+- Trigger the feature (e.g., `osk.exe`) and hold an exclusive oplock on: `C:\Program Files\Common Files\microsoft shared\ink\fsdefinitions\oskmenu.xml`
+- When the oplock fires, delete the session key, recreate it as a link to the chosen HKLM target (e.g., a service `ImagePath`), then acknowledge the oplock so the privileged write proceeds.
+- Cleanup: open the link with `REG_OPTION_OPEN_LINK` and delete it (e.g., `NtDeleteKey`).
+
+This yields **privileged writes to protected HKLM values**, which can be chained to code execution (e.g., service configuration updates).
+
 ### Unquoted Service Paths
 
 If the path to an executable is not inside quotes, Windows will try to execute every ending before a space.
@@ -1981,5 +2001,7 @@ C:\Windows\microsoft.net\framework\v4.0.30319\MSBuild.exe -version #Compile the 
 - [Unit 42 – Privileged File System Vulnerability Present in a SCADA System](https://unit42.paloaltonetworks.com/iconics-suite-cve-2025-0921/)
 - [Symbolic Link Testing Tools – CreateSymlink usage](https://github.com/googleprojectzero/symboliclink-testing-tools/blob/main/CreateSymlink/CreateSymlink_readme.txt)
 - [A Link to the Past. Abusing Symbolic Links on Windows](https://infocon.org/cons/SyScan/SyScan%202015%20Singapore/SyScan%202015%20Singapore%20presentations/SyScan15%20James%20Forshaw%20-%20A%20Link%20to%20the%20Past.pdf)
+- [RegPwn — Windows Accessibility registry-symlink LPE PoC (CVE-2026-24291)](https://www.mdsec.co.uk/2026/03/rip-regpwn/)
+- [mdsecactivebreach/RegPwn](https://github.com/mdsecactivebreach/RegPwn)
 
 {{#include ../../banners/hacktricks-training.md}}
