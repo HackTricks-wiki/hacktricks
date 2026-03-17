@@ -279,6 +279,7 @@
   - [Semanagevolume Perform Volume Maintenance Tasks](windows-hardening/windows-local-privilege-escalation/semanagevolume-perform-volume-maintenance-tasks.md)
   - [Service Triggers](windows-hardening/windows-local-privilege-escalation/service-triggers.md)
   - [Telephony Tapsrv Arbitrary Dword Write To Rce](windows-hardening/windows-local-privilege-escalation/telephony-tapsrv-arbitrary-dword-write-to-rce.md)
+  - [Secure Desktop Accessibility Registry Propagation LPE (RegPwn)](windows-hardening/windows-local-privilege-escalation/secure-desktop-accessibility-registry-propagation-regpwn.md)
   - [Uiaccess Admin Protection Bypass](windows-hardening/windows-local-privilege-escalation/uiaccess-admin-protection-bypass.md)
   - [Windows C Payloads](windows-hardening/windows-local-privilege-escalation/windows-c-payloads.md)
 - [Active Directory Methodology](windows-hardening/active-directory-methodology/README.md)
