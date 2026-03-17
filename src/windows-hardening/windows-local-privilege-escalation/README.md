@@ -50,6 +50,12 @@ UIAccess processes launched through `RAiLaunchAdminProcess` can be abused to rea
 uiaccess-admin-protection-bypass.md
 {{#endref}}
 
+Secure Desktop accessibility registry propagation can be abused for an arbitrary SYSTEM registry write (RegPwn):
+
+{{#ref}}
+secure-desktop-accessibility-registry-propagation-regpwn.md
+{{#endref}}
+
 ## System Info
 
 ### Version info enumeration

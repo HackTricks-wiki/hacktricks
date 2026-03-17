@@ -52,6 +52,14 @@ Get-AccessibleFile -Win32Path $paths -Access Execute,WriteData `
 - Run as Administrator for broader visibility; set `-ProcessId` to a low-priv process to mirror that token’s access.
 - Filter manually to exclude known disallowed subdirectories before using candidates with `RAiLaunchAdminProcess`.
 
+## Related
+
+Secure Desktop accessibility registry propagation LPE (RegPwn):
+
+{{#ref}}
+secure-desktop-accessibility-registry-propagation-regpwn.md
+{{#endref}}
+
 ## References
 - [Bypassing Administrator Protection by Abusing UI Access](https://projectzero.google/2026/02/windows-administrator-protection.html)
 - [GetProcessHandleFromHwnd (GPHFH) Deep Dive](https://projectzero.google/2026/02/gphfh-deep-dive.html)
