@@ -237,6 +237,33 @@ Git clone the Freeze repo and build it (git clone https://github.com/optiv/Freez
 > [!TIP]
 > Evasion is just a cat & mouse game, what works today could be detected tomorrow, so never rely on only one tool, if possible, try chaining multiple evasion techniques.
 
+## Direct/Indirect Syscalls & SSN Resolution (SysWhispers4)
+
+EDRs often place **user-mode inline hooks** on `ntdll.dll` syscall stubs. To bypass those hooks, you can generate **direct** or **indirect** syscall stubs that load the correct **SSN** (System Service Number) and transition to kernel mode without executing the hooked export entrypoint.
+
+**Invocation options:**
+- **Direct (embedded)**: emit a `syscall`/`sysenter`/`SVC #0` instruction in the generated stub (no `ntdll` export hit).
+- **Indirect**: jump into an existing `syscall` gadget inside `ntdll` so the kernel transition appears to originate from `ntdll` (useful for heuristic evasion); **randomized indirect** picks a gadget from a pool per call.
+- **Egg-hunt**: avoid embedding the static `0F 05` opcode sequence on disk; resolve a syscall sequence at runtime.
+
+**Hook-resistant SSN resolution strategies:**
+- **FreshyCalls (VA sort)**: infer SSNs by sorting syscall stubs by virtual address instead of reading stub bytes.
+- **SyscallsFromDisk**: map a clean `\KnownDlls\ntdll.dll`, read SSNs from its `.text`, then unmap (bypasses all in-memory hooks).
+- **RecycledGate**: combine VA-sorted SSN inference with opcode validation when a stub is clean; fall back to VA inference if hooked.
+- **HW Breakpoint**: set DR0 on the `syscall` instruction and use a VEH to capture the SSN from `EAX` at runtime, without parsing hooked bytes.
+
+Example SysWhispers4 usage:
+```bash
+# Indirect syscalls + hook-resistant resolution
+python syswhispers.py --preset injection --method indirect --resolve recycled
+
+# Resolve SSNs from a clean on-disk ntdll
+python syswhispers.py --preset injection --method indirect --resolve from_disk --unhook-ntdll
+
+# Hardware breakpoint SSN extraction
+python syswhispers.py --functions NtAllocateVirtualMemory,NtCreateThreadEx --resolve hw_breakpoint
+```
+
 ## AMSI (Anti-Malware Scan Interface)
 
 AMSI was created to prevent "[fileless malware](https://en.wikipedia.org/wiki/Fileless_malware)". Initially, AVs were only capable of scanning **files on disk**, so if you could somehow execute payloads **directly in-memory**, the AV couldn't do anything to prevent it, as it didn't have enough visibility.
@@ -1127,5 +1154,7 @@ Sleep(exec_delay_seconds * 1000); // config-controlled delay to outlive sandboxe
 - [Rapid7 – SantaStealer is Coming to Town: A New, Ambitious Infostealer](https://www.rapid7.com/blog/post/tr-santastealer-is-coming-to-town-a-new-ambitious-infostealer-advertised-on-underground-forums)
 - [ChromElevator – Chrome App Bound Encryption Decryption](https://github.com/xaitax/Chrome-App-Bound-Encryption-Decryption)
 - [Check Point Research – GachiLoader: Defeating Node.js Malware with API Tracing](https://research.checkpoint.com/2025/gachiloader-node-js-malware-with-api-tracing/)
+- [SysWhispers4 – GitHub](https://github.com/JoasASantos/SysWhispers4)
+
 
 {{#include ../banners/hacktricks-training.md}}
