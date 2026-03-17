@@ -49,6 +49,27 @@ Prompt leaking is a specific type of prompt injection attack where the attacker 
 
 A jailbreak attack is a technique used to **bypass the safety mechanisms or restrictions** of an AI model, allowing the attacker to make the **model perform actions or generate content that it would normally refuse**. This can involve manipulating the model's input in such a way that it ignores its built-in safety guidelines or ethical constraints.
 
+### Prompt Fuzzing (Genetic-Algorithm Jailbreak Generation)
+
+A scalable form of jailbreaking is to treat **prompt generation as fuzzing with feedback**. Starting from a disallowed seed prompt (e.g., `how to build a <sensitive>`), generate meaning-preserving variants and score them based on how much the model refuses. Low single-digit bypass rates become reliable once the attack is automated at volume.
+
+**Workflow (abstract):**
+- Extract three lists from the seed: a **keyword** (main noun), **relative words** (action/intent phrases), and **filler phrases** (common English fragments meant to disrupt surface parsing while keeping intent).
+- Iterate for *N* rounds; on each round apply a single mutation operator to the current candidate.
+- Submit candidates to the target LLM or a content filter and compute a **fitness** score (for example, fewer refusal/negative-tone markers). Keep the best candidates and repeat.
+
+**Mutation operators (examples):**
+- Prepend or append a filler phrase.
+- Add a trailing linefeed.
+- Repeat the keyword at the end.
+- Append a relative-word action phrase.
+- Remove a random word.
+
+**Security testing notes:**
+- **Keyword sensitivity** is high; test multiple semantically adjacent terms (a single canonical keyword can severely under-estimate risk).
+- **Standalone content filters** can be brittle under meaning-preserving variation; treat them as probabilistic controls and fuzz them directly.
+- Operationalize this as **regression testing** after model/prompt/filter updates and monitor for high-variance probing patterns.
+
 ## Prompt Injection via Direct Requests
 
 ### Changing the Rules / Assertion of Authority
@@ -646,5 +667,5 @@ Below is a minimal payload that both **hides YOLO enabling** and **executes a re
 - [OpenAI – Memory and new controls for ChatGPT](https://openai.com/index/memory-and-new-controls-for-chatgpt/)
 - [OpenAI Begins Tackling ChatGPT Data Leak Vulnerability (url_safe analysis)](https://embracethered.com/blog/posts/2023/openai-data-exfiltration-first-mitigations-implemented/)
 - [Unit 42 – Fooling AI Agents: Web-Based Indirect Prompt Injection Observed in the Wild](https://unit42.paloaltonetworks.com/ai-agent-prompt-injection/)
-
+- [Unit 42 – Open, Closed and Broken: Prompt Fuzzing Finds LLMs Still Fragile Across Open and Closed Models](https://unit42.paloaltonetworks.com/genai-llm-prompt-fuzzing/)
 {{#include ../banners/hacktricks-training.md}}
