@@ -4,35 +4,33 @@
 
 ## Diamond Ticket
 
-**Like a golden ticket**, a diamond ticket is a TGT which can be used to **access any service as any user**. 
+**Kama golden ticket**, diamond ticket ni TGT ambayo inaweza kutumika **kupata huduma yoyote kama mtumiaji yeyote**. Golden ticket imepandikizwa kabisa offline, imefichwa kwa krbtgt hash ya domain hiyo, kisha imeingizwa kwenye kikao cha kuingia (logon session) kwa matumizi. Kwa sababu domain controllers hawafuatilii TGTs ambazo zilitolewa kwa njia halali, watakubali kwa urahisi TGTs zilizofichwa kwa krbtgt hash yao wenyewe.
 
-A golden ticket is forged completely offline, encrypted with the krbtgt hash of that domain, and then passed into a logon session for use. Because domain controllers don't track TGTs it (or they) have legitimately issued, they will happily accept TGTs that are encrypted with its own krbtgt hash.
-
-There are two common techniques to detect the use of golden tickets:
+Kuna mbinu mbili za kawaida za kugundua matumizi ya golden tickets:
 
 - Tafuta TGS-REQs ambazo hazina AS-REQ inayolingana.
-- Tafuta TGTs ambazo zina thamani zisizo za kawaida, kama vile muda wa chaguo-msingi wa miaka 10 wa Mimikatz.
+- Tafuta TGTs ambazo zina thamani zisizo za kawaida, kama vile lifetime ya miaka 10 ya default ya Mimikatz.
 
-A diamond ticket is made by modifying the fields of a legitimate TGT that was issued by a DC. This is achieved by requesting a TGT, decrypting it with the domain's krbtgt hash, modifying the desired fields of the ticket, then re-encrypting it. This overcomes the two aforementioned shortcomings of a golden ticket because:
+A **diamond ticket** inatengenezwa kwa **kubadilisha maeneo ya TGT halali iliyotolewa na DC**. Huu unafikiwa kwa **kuita** TGT, **kuifungua** kwa krbtgt hash ya domain, **kubadilisha** mashamba yaliyohitajika ya tiketi, kisha **kuifunga tena**. Hii **inaondoa hasara mbili zilizotajwa** za golden ticket kwa sababu:
 
-- TGS-REQs zitatokea na AS-REQ iliyotangulia.
-- The TGT ilitolewa na DC, ambayo inamaanisha itakuwa na taarifa zote sahihi kutoka kwa sera ya Kerberos ya domain. Ingawa hizi zinaweza kutengenezwa kwa usahihi katika golden ticket, ni ngumu zaidi na zinafungua nafasi ya makosa.
+- TGS-REQs zitatokea ikiwa na AS-REQ iliyotangulia.
+- TGT ilitolewa na DC ambayo inamaanisha itakuwa na maelezo yote sahihi kutoka kwa sera ya Kerberos ya domain. Ingawa haya yanaweza kuundwa kwa usahihi kwenye golden ticket, ni ngumu zaidi na wazi kwa makosa.
 
 ### Requirements & workflow
 
-- Vifaa vya kriptografia: the krbtgt AES256 key (preferred) or NTLM hash in order to decrypt and re-sign the TGT.
-- Legitimate TGT blob: obtained with `/tgtdeleg`, `asktgt`, `s4u`, or by exporting tickets from memory.
-- Data za muktadha: the target user RID, group RIDs/SIDs, and (optionally) LDAP-derived PAC attributes.
-- Service keys (only if you plan to re-cut service tickets): AES key of the service SPN to be impersonated.
+- **Cryptographic material**: krbtgt AES256 key (inadhibitiwa) au NTLM hash ili kufungua na kusaini tena TGT.
+- **Legitimate TGT blob**: inapatikana kwa kutumia `/tgtdeleg`, `asktgt`, `s4u`, au kwa kusafirisha tiketi kutoka kwenye memory.
+- **Context data**: target user RID, group RIDs/SIDs, na (hiari) LDAP-derived PAC attributes.
+- **Service keys** (tu kama unapanga kukata tena service tickets): AES key ya service SPN itakayodaiwa.
 
-1. Pata TGT ya mtumiaji yeyote unaodhibitiwa kupitia AS-REQ (Rubeus `/tgtdeleg` ni rahisi kwa sababu inalazimisha mteja kufanya Kerberos GSS-API dance bila credentials).
-2. Decrypt TGT iliyorejeshwa kwa kutumia krbtgt key ya domain, rekebisha sifa za PAC (user, groups, logon info, SIDs, device claims, n.k.).
-3. Re-encrypt/saini tiketi tena kwa krbtgt key ile ile na uingize kwenye kikao cha sasa cha kuingia (`kerberos::ptt`, `Rubeus.exe ptt`...).
-4. Hiari, rudia mchakato kwa service ticket kwa kutoa valid TGT blob pamoja na service key lengwa ili kubaki stealthy kwenye wire.
+1. Pata TGT kwa mtumiaji yoyote unaodhibitiwa kupitia AS-REQ (Rubeus `/tgtdeleg` ni rahisi kwa sababu inalazimisha client kufanya Kerberos GSS-API dance bila credentials).
+2. Fungua TGT iliyorejeshwa kwa krbtgt key, rekebisha PAC attributes (mtumiaji, vikundi, taarifa za logon, SIDs, dai za kifaa, n.k.).
+3. Funga/saini tena tiketi kwa krbtgt key ile ile na uingize kwenye kikao cha sasa cha logon (`kerberos::ptt`, `Rubeus.exe ptt`...).
+4. Hiari, rudia mchakato kwa service ticket kwa kutoa TGT blob halali pamoja na service key ya lengo ili kubaki stealthy kwenye wire.
 
 ### Updated Rubeus tradecraft (2024+)
 
-Work mpya ya Huntress imesasisha kitendo cha `diamond` ndani ya Rubeus kwa kuhamisha maboresho ya `/ldap` na `/opsec` ambayo awali yalikuwepo tu kwa golden/silver tickets. `/ldap` sasa inajaza moja kwa moja sifa sahihi za PAC kutoka AD (user profile, logon hours, sidHistory, domain policies), wakati `/opsec` inafanya mtiririko wa AS-REQ/AS-REP usitofautiane na mteja wa Windows kwa kufanya mfululizo wa pre-auth wa hatua mbili na kuzuia crypto isipokuwa AES pekee. Hii inapunguza kwa kiasi kikubwa viashiria vinavyoonekana kama device IDs tupu au madurisho ya uhalali yasiyokuwa na ukweli.
+Kazi ya hivi karibuni ya Huntress iliboresha action ya `diamond` ndani ya Rubeus kwa kuleta maboresho ya `/ldap` na `/opsec` ambayo hapo awali yalikuwepo tu kwa golden/silver tickets. `/ldap` sasa huvuta muktadha halisi wa PAC kwa kuuliza LDAP **na** kuunganisha SYSVOL ili kutoa sifa za account/group pamoja na sera ya Kerberos/password (mfano, `GptTmpl.inf`), wakati `/opsec` inafanya mtiririko wa AS-REQ/AS-REP ulingane na Windows kwa kufanya mazungumzo ya preauth ya hatua mbili na kulazimisha AES-only + realistic KDCOptions. Hii inapunguza kwa kiasi kikubwa viashiria vinavyoonekana kama utelezaji wa mashamba ya PAC au lifetimes zisizolingana na sera.
 ```powershell
 # Query RID/context data (PowerView/SharpView/AD modules all work)
 Get-DomainUser -Identity <username> -Properties objectsid | Select-Object samaccountname,objectsid
@@ -45,13 +43,13 @@ Get-DomainUser -Identity <username> -Properties objectsid | Select-Object samacc
 /ldap /ldapuser:MARVEL\loki /ldappassword:Mischief$ \
 /opsec /nowrap
 ```
-- `/ldap` (with optional `/ldapuser` & `/ldappassword`) hufanya maombi kwa AD na SYSVOL ili kuiga data ya sera ya PAC ya mtumiaji lengwa.
-- `/opsec` inalazimisha jaribio la AS-REQ lenye mtindo wa Windows, ikifuta noisy flags na kubaki kwenye AES256.
-- `/tgtdeleg` inakuweka mbali na cleartext password au NTLM/AES key ya mwathiriwa huku ikirudisha decryptable TGT.
+- `/ldap` (kwa hiari `/ldapuser` & `/ldappassword`) huwauliza AD na SYSVOL ili kuiga data za sera za PAC za mtumiaji lengwa.
+- `/opsec` inalazimisha jaribio jipya la AS-REQ lenye tabia za Windows, ikifuta bendera zenye kelele na kubaki kutumia AES256.
+- `/tgtdeleg` inakuweka mbali na cleartext password au NTLM/AES key ya mwathiriwa, huku ikirudisha TGT inayoweza kufunguliwa.
 
-### Kukata upya tiketi ya huduma
+### Kukata upya service-ticket
 
-Sasisho ile ile ya Rubeus iliongeza uwezo wa kutumia diamond technique kwa TGS blobs. Kwa kumpa `diamond` **base64-encoded TGT** (kutoka kwa `asktgt`, `/tgtdeleg`, au TGT iliyotengenezwa kabla), **service SPN**, na **service AES key**, unaweza kutengeneza service tickets za kuonekana halisi bila kugusa KDC—kwa ufanisi silver ticket isiyogunduka zaidi.
+Marekebisho yale yale ya Rubeus yaliongeza uwezo wa kutumia diamond technique kwenye TGS blobs. Kwa kumpa `diamond` **base64-encoded TGT** (kutokana na `asktgt`, `/tgtdeleg`, au TGT iliyotengenezwa hapo awali), **service SPN**, na **service AES key**, unaweza kutengeneza service tickets zinazofanana na halisi bila kugusa KDC—kwa ufanisi silver ticket iliyofichika zaidi.
 ```powershell
 ./Rubeus.exe diamond \
 /ticket:<BASE64_TGT_OR_KRB-CRED> \
@@ -60,38 +58,41 @@ Sasisho ile ile ya Rubeus iliongeza uwezo wa kutumia diamond technique kwa TGS b
 /ticketuser:svc_sql /ticketuserid:1109 \
 /ldap /opsec /nowrap
 ```
-Mfumo huu wa kazi ni mzuri wakati tayari unadhibiti ufunguo wa akaunti ya huduma (kwa mfano, uliotolewa kwa `lsadump::lsa /inject` au `secretsdump.py`) na unataka kutengeneza TGS ya mara moja inayolingana kabisa na sera za AD, ratiba, na data ya PAC bila kutoa trafiki mpya ya AS/TGS.
+This workflow is ideal when you already control a service account key (e.g., dumped with `lsadump::lsa /inject` or `secretsdump.py`) and want to cut a one-off TGS that perfectly matches AD policy, timelines, and PAC data without issuing any new AS/TGS traffic.
 
 ### Sapphire-style PAC swaps (2025)
 
-Mguso mpya wa mbinu, mara nyingine huitwa **sapphire ticket**, unaunganisha msingi wa "real TGT" wa Diamond na **S4U2self+U2U** ili kuiba PAC yenye cheo na kuiweka ndani ya TGT yako mwenyewe. Badala ya kuunda SIDs za ziada, unaomba tiketi ya U2U S4U2self kwa mtumiaji mwenye vibali vya juu, unachukua PAC hiyo, na kuiweka ndani ya TGT yako halali kabla ya kusaini tena kwa krbtgt key. Kwa sababu U2U inaweka `ENC-TKT-IN-SKEY`, mtiririko wa waya unaotokea unaonekana kama ubadilishanaji halali kati ya watumiaji.
+Mbinu mpya inayojulikana kama **sapphire ticket** inaunganisha msingi wa "real TGT" wa Diamond na **S4U2self+U2U** ili kuiba PAC yenye ruhusa ya juu na kuiweka ndani ya TGT yako mwenyewe. Badala ya kubuni SIDs za ziada, unahitaji tiketi ya U2U S4U2self kwa mtumiaji mwenye ruhusa ya juu ambapo `sname` inalenga muombaji mwenye ruhusa za chini; KRB_TGS_REQ inabeba TGT ya muombaji katika `additional-tickets` na inaweka `ENC-TKT-IN-SKEY`, kuruhusu service ticket kufunguliwa kwa kutumia ufunguo wa mtumiaji huyo. Kisha unatolea PAC yenye ruhusa ya juu na kuichanganya ndani ya TGT yako halali kabla ya kusaini tena kwa ufunguo wa krbtgt.
 
-Uigaji mdogo upande wa Linux na Impacket iliyorekebishwa `ticketer.py` (inaongeza msaada wa sapphire):
+Impacket's `ticketer.py` now ships sapphire support via `-impersonate` + `-request` (live KDC exchange):
 ```bash
 python3 ticketer.py -request -impersonate 'DAuser' \
 -domain 'lab.local' -user 'lowpriv' -password 'Passw0rd!' \
--aesKey '<krbtgt_aes256>' -domain-sid 'S-1-5-21-111-222-333' \
---u2u --s4u2self
+-aesKey '<krbtgt_aes256>' -domain-sid 'S-1-5-21-111-222-333'
 # inject resulting .ccache
 export KRB5CCNAME=lowpriv.ccache
 python3 psexec.py lab.local/DAuser@dc.lab.local -k -no-pass
 ```
-Key OPSEC tells when using this variant:
+- `-impersonate` inapokea username au SID; `-request` inahitaji live user creds pamoja na krbtgt key material (AES/NTLM) ili ku-decrypt/patch tickets.
 
-- TGS-REQ itaabeba `ENC-TKT-IN-SKEY` na `additional-tickets` (TGT ya mwathiriwa) — nadra katika trafiki ya kawaida.
-- `sname` mara nyingi ni sawa na mtumiaji aliyemtaka (self-service access) na Event ID 4769 inaonyesha mdai na lengo kuwa SPN/mtumiaji mmoja.
-- Tegemea rekodi za 4768/4769 zilizounganishwa na kompyuta ya mteja ile ile lakini CNAMES tofauti (muombaji mwenye ruhusa ndogo vs. mmiliki wa PAC mwenye ruhusa).
+Key OPSEC inavyoonyesha unapotumia aina hii:
 
-### Vidokezo vya OPSEC & utambuzi
+- TGS-REQ itabeba `ENC-TKT-IN-SKEY` na `additional-tickets` (the victim TGT) — nadra kwenye trafiki ya kawaida.
+- `sname` mara nyingi ni sawa na mtumiaji anayeomba (self-service access) na Event ID 4769 inaonyesha mwito na lengo ni SPN/mtumiaji yuleyule.
+- Tegemea jozi za 4768/4769 zenye kompyuta ya mteja ile ile lakini CNAMES tofauti (muombaji mwenye haki ndogo vs. mmiliki wa PAC mwenye kipaumbele).
 
-- Mbinu za jadi za hunter heuristics (TGS without AS, decade-long lifetimes) bado zinatumika kwa golden tickets, lakini diamond tickets kawaida huibuka wakati **maudhui ya PAC au upangaji wa vikundi unaonekana kuwa hauwezekani**. Jaza kila uwanja wa PAC (logon hours, user profile paths, device IDs) ili kulinganisha kwa otomatiki kusiibambike udanganyifu mara moja.
-- **Usizidi kujiandikisha vikundi/RIDs**. Ikiwa unahitaji tu `512` (Domain Admins) na `519` (Enterprise Admins), simama hapo na hakikisha akaunti lengwa inaonekana kuwa mwanachama wa vikundi hivyo mahali pengine ndani ya AD. Kuwa na `ExtraSids` nyingi ni ishara.
-- Sapphire-style swaps huacha alama za vidole za U2U: `ENC-TKT-IN-SKEY` + `additional-tickets` + `sname == cname` katika 4769, na kuingia kwa 4624 kilichofuata kikiwa kimeanzishwa na tiketi iliyodanganywa. Linganisha mashamba hayo badala ya kutafuta tu mapengo ya no-AS-REQ.
-- Microsoft imeanza kuondoa hatua kwa hatua **RC4 service ticket issuance** kwa sababu ya CVE-2026-20833; kulazimisha AES-only etypes kwenye KDC kunaimarisha domain na kunaendana na zana za diamond/sapphire (/opsec tayari inalazimisha AES). Kuchanganya RC4 ndani ya PAC zilizodanganywa kutakuwa wazi zaidi kwa kadiri.
-- Splunk's Security Content project unasambaza attack-range telemetry kwa diamond tickets pamoja na utambuzi kama *Windows Domain Admin Impersonation Indicator*, ambayo inaunganisha mfuatano usio wa kawaida wa Event ID 4768/4769/4624 na mabadiliko ya vikundi vya PAC. Kuchezeshwa dataset hiyo (au kuzalisha yako mwenyewe kwa amri zilizotajwa hapo juu) husaidia kuthibitisha ufunikaji wa SOC kwa T1558.001 huku ikikupa mantiki ya onyo halisi ya kuepuka.
+### OPSEC & detection notes
+
+- Kanuni za jadi za hunter heuristics (TGS bila AS, decade-long lifetimes) bado zinatumika kwa golden tickets, lakini diamond tickets huvuka hasa pale **maudhui ya PAC au group mapping inapoonekana haiwezekani**. Jaza kila uwanja wa PAC (logon hours, user profile paths, device IDs) ili kulinganisha kwa automatiki zisibaini forgeries mara moja.
+- **Usisajili vikundi/RIDs kupita kiasi**. Ikiwa unahitaji tu `512` (Domain Admins) na `519` (Enterprise Admins), simama hapo na hakikisha akaunti lengwa inaonekana kuwa mwanachama wa vikundi hivyo mahali pengine ndani ya AD. Excessive `ExtraSids` ni ishara.
+- Sapphire-style swaps huacha alama za U2U: `ENC-TKT-IN-SKEY` + `additional-tickets` pamoja na `sname` inayomwonyesha mtumiaji (mara nyingi muombaji) katika 4769, na logon ya 4624 inayofuata iliyotokana na ticket bandia. Fananisha mashamba hayo badala ya kutafuta tu mapengo ya no-AS-REQ.
+- Microsoft imeanza kuondoa hatua kwa hatua **RC4 service ticket issuance** kwa sababu ya CVE-2026-20833; kulazimisha AES-only etypes kwenye KDC kunatia nguvu domain na kunalingana na zana za diamond/sapphire (/opsec tayari inalazimisha AES). Kuchanganya RC4 ndani ya PACs bandia kutatoa dalili zaidi.
+- Mradi wa Splunk's Security Content unasambaza telemetry ya attack-range kwa diamond tickets pamoja na detections kama *Windows Domain Admin Impersonation Indicator*, ambayo inafananisha mfululizo usio wa kawaida wa Event ID 4768/4769/4624 na mabadiliko ya vikundi vya PAC. Kuchezesha dataset hiyo tena (au kuunda yako kwa amri zilizo hapo juu) husaidia kuthibitisha coverage ya SOC kwa T1558.001 wakati ikikupa mantiki halisi ya onyo ya kuepuka.
 
 ## References
 
+- [Palo Alto Unit 42 – Precious Gemstones: The New Generation of Kerberos Attacks (2022)](https://unit42.paloaltonetworks.com/next-gen-kerberos-attacks/)
+- [Core Security – Impacket: We Love Playing Tickets (2023)](https://www.coresecurity.com/core-labs/articles/impacket-we-love-playing-tickets)
 - [Huntress – Recutting the Kerberos Diamond Ticket (2025)](https://www.huntress.com/blog/recutting-the-kerberos-diamond-ticket)
 - [Splunk Security Content – Diamond Ticket attack data & detections (2023)](https://research.splunk.com/attack_data/be469518-9d2d-4ebb-b839-12683cd18a7c/)
 - [Хабр – Теневая сторона драгоценностей: Diamond & Sapphire Ticket (2025)](https://habr.com/ru/articles/891620/)
