@@ -1,51 +1,63 @@
-# User Namespace
+# Namespace ya Mtumiaji
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-## Basic Information
+{{#ref}}
+../docker-breakout-privilege-escalation/README.md
+{{#endref}}
 
-User namespace ni kipengele cha kernel ya Linux ambacho **kinatoa kutengwa kwa ramani za ID za mtumiaji na kundi**, kuruhusu kila user namespace kuwa na **seti yake ya kipekee ya ID za mtumiaji na kundi**. Kutengwa huku kunaruhusu michakato inayofanya kazi katika user namespaces tofauti **kuwa na mamlaka na umiliki tofauti**, hata kama zinashiriki ID za mtumiaji na kundi kwa nambari.
 
-User namespaces ni muhimu sana katika uundaji wa kontena, ambapo kila kontena linapaswa kuwa na seti yake huru ya ID za mtumiaji na kundi, kuruhusu usalama bora na kutengwa kati ya kontena na mfumo wa mwenyeji.
+## Marejeo
 
-### How it works:
+- [https://man7.org/linux/man-pages/man7/user_namespaces.7.html](https://man7.org/linux/man-pages/man7/user_namespaces.7.html)
+- [https://man7.org/linux/man-pages/man2/mount_setattr.2.html](https://man7.org/linux/man-pages/man2/mount_setattr.2.html)
 
-1. Wakati user namespace mpya inaundwa, **inaanza na seti tupu ya ramani za ID za mtumiaji na kundi**. Hii inamaanisha kwamba mchakato wowote unaofanya kazi katika user namespace mpya utakuwa **na mamlaka hakuna nje ya namespace**.
-2. Ramani za ID zinaweza kuanzishwa kati ya ID za mtumiaji na kundi katika namespace mpya na zile katika namespace ya mzazi (au mwenyeji). Hii **inaruhusu michakato katika namespace mpya kuwa na mamlaka na umiliki yanayolingana na ID za mtumiaji na kundi katika namespace ya mzazi**. Hata hivyo, ramani za ID zinaweza kuwekewa mipaka kwa anuwai maalum na subsets za IDs, kuruhusu udhibiti wa kina juu ya mamlaka yanayotolewa kwa michakato katika namespace mpya.
-3. Ndani ya user namespace, **michakato inaweza kuwa na mamlaka kamili ya root (UID 0) kwa shughuli ndani ya namespace**, wakati bado ikiwa na mamlaka zilizopunguzika nje ya namespace. Hii inaruhusu **kontena kuendesha kwa uwezo kama root ndani ya namespace yao bila kuwa na mamlaka kamili ya root kwenye mfumo wa mwenyeji**.
-4. Michakato inaweza kuhamia kati ya namespaces kwa kutumia wito wa mfumo wa `setns()` au kuunda namespaces mpya kwa kutumia wito wa mfumo wa `unshare()` au `clone()` na bendera ya `CLONE_NEWUSER`. Wakati mchakato unahamia kwenye namespace mpya au kuunda moja, utaanza kutumia ramani za ID za mtumiaji na kundi zinazohusiana na namespace hiyo.
 
-## Lab:
 
-### Create different Namespaces
+## Taarifa za Msingi
+
+Namespace ya mtumiaji ni sifa ya kernel ya Linux ambayo **inatoa utengwa wa ramani za ID za mtumiaji na kikundi**, ikiruhusu kila namespace ya mtumiaji kuwa na **seti yake ya ID za mtumiaji na kikundi**. Utengano huu unawawezesha michakato inayofanya kazi katika namespaces tofauti za mtumiaji kuwa na **vibali na umiliki tofauti**, hata kama wanashiriki nambari sawa za ID za mtumiaji na kikundi.
+
+User namespaces ni muhimu hasa katika containerization, ambapo kila container inapaswa kuwa na seti yake huru ya ID za mtumiaji na kikundi, ikiruhusu usalama bora na utengano kati ya container na mfumo mwenyeji.
+
+### Jinsi inavyofanya kazi:
+
+1. Wakati user namespace mpya inapotengenezwa, itaanza na **seti tupu ya ramani za ID za mtumiaji na kikundi**. Hii ina maana kwamba mchakato wowote unaoendesha katika user namespace mpya utaanza **bila vibali nje ya namespace**.
+2. Ramani za ID zinaweza kuanzishwa kati ya ID za mtumiaji na kikundi katika namespace mpya na zile katika namespace ya mzazi (au mwenyeji). Hii **inawaruhusu michakato katika namespace mpya kupata vibali na umiliki vinavyoendana na ID za mtumiaji na kikundi katika namespace ya mzazi**. Hata hivyo, ramani za ID zinaweza kukomeshwa kwa anuwai maalum na sehemu za ID, zikitoa udhibiti wa kina juu ya vibali vinavyotolewa kwa michakato katika namespace mpya.
+3. Ndani ya user namespace, **michakato inaweza kuwa na vibali kamili vya root (UID 0) kwa shughuli ndani ya namespace**, wakati bado ikiwa na vibali vichache nje ya namespace. Hii inaruhusu **containers kuendesha zenye uwezo unaofanana na root ndani ya namespace yao bila kuwa na vibali kamili vya root kwenye mfumo mwenyeji**.
+4. Michakato inaweza kuhamia kati ya namespaces kwa kutumia system call ya `setns()` au kuunda namespaces mpya kwa kutumia system calls `unshare()` au `clone()` zenye flag ya `CLONE_NEWUSER`. Wakati mchakato unapoenda kwenye namespace mpya au kuunda moja, utaanza kutumia ramani za ID za mtumiaji na kikundi zinazohusishwa na namespace hiyo.
+
+## Maabara:
+
+### Unda namespaces tofauti
 
 #### CLI
 ```bash
 sudo unshare -U [--mount-proc] /bin/bash
 ```
-Kwa kuunganisha mfano mpya wa mfumo wa `/proc` ikiwa unatumia param `--mount-proc`, unahakikisha kwamba namespace mpya ya kuunganisha ina **mtazamo sahihi na uliojitegemea wa taarifa za mchakato maalum kwa namespace hiyo**.
+By mounting a new instance of the `/proc` filesystem if you use the param `--mount-proc`, you ensure that the new mount namespace has an **accurate and isolated view of the process information specific to that namespace**.
 
 <details>
 
-<summary>Hitilafu: bash: fork: Haiwezekani kugawa kumbukumbu</summary>
+<summary>Error: bash: fork: Cannot allocate memory</summary>
 
-Wakati `unshare` inatekelezwa bila chaguo la `-f`, hitilafu inakutana kutokana na jinsi Linux inavyoshughulikia namespaces mpya za PID (Kitambulisho cha Mchakato). Maelezo muhimu na suluhisho yameelezwa hapa chini:
+When `unshare` is executed without the `-f` option, an error is encountered due to the way Linux handles new PID (Process ID) namespaces. The key details and the solution are outlined below:
 
-1. **Maelezo ya Tatizo**:
+1. **Ufafanuzi wa Tatizo**:
 
-- Kernel ya Linux inaruhusu mchakato kuunda namespaces mpya kwa kutumia wito wa mfumo wa `unshare`. Hata hivyo, mchakato unaoanzisha uundaji wa namespace mpya ya PID (inayojulikana kama mchakato wa "unshare") hauingii kwenye namespace mpya; ni watoto wake tu wanajumuishwa.
-- Kuendesha `%unshare -p /bin/bash%` kunaanzisha `/bin/bash` katika mchakato sawa na `unshare`. Kwa hivyo, `/bin/bash` na watoto wake wako katika namespace ya awali ya PID.
-- Mchakato wa kwanza wa mtoto wa `/bin/bash` katika namespace mpya unakuwa PID 1. Wakati mchakato huu unapoondoka, unachochea usafishaji wa namespace ikiwa hakuna mchakato mwingine, kwani PID 1 ina jukumu maalum la kupokea mchakato yatima. Kernel ya Linux itazima kuteua PID katika namespace hiyo.
+- The Linux kernel allows a process to create new namespaces using the `unshare` system call. However, the process that initiates the creation of a new PID namespace (referred to as the "unshare" process) does not enter the new namespace; only its child processes do.
+- Running %unshare -p /bin/bash% starts `/bin/bash` in the same process as `unshare`. Consequently, `/bin/bash` and its child processes are in the original PID namespace.
+- The first child process of `/bin/bash` in the new namespace becomes PID 1. When this process exits, it triggers the cleanup of the namespace if there are no other processes, as PID 1 has the special role of adopting orphan processes. The Linux kernel will then disable PID allocation in that namespace.
 
 2. **Matokeo**:
 
-- Kuondoka kwa PID 1 katika namespace mpya kunasababisha usafishaji wa bendera ya `PIDNS_HASH_ADDING`. Hii inasababisha kazi ya `alloc_pid` kushindwa kugawa PID mpya wakati wa kuunda mchakato mpya, ikitoa hitilafu ya "Haiwezekani kugawa kumbukumbu".
+- The exit of PID 1 in a new namespace leads to the cleaning of the `PIDNS_HASH_ADDING` flag. This results in the `alloc_pid` function failing to allocate a new PID when creating a new process, producing the "Cannot allocate memory" error.
 
 3. **Suluhisho**:
-- Tatizo linaweza kutatuliwa kwa kutumia chaguo la `-f` pamoja na `unshare`. Chaguo hili linafanya `unshare` kuunda mchakato mpya baada ya kuunda namespace mpya ya PID.
-- Kutekeleza `%unshare -fp /bin/bash%` kunahakikisha kwamba amri ya `unshare` yenyewe inakuwa PID 1 katika namespace mpya. `/bin/bash` na watoto wake wanajumuishwa salama ndani ya namespace hii mpya, kuzuia kuondoka mapema kwa PID 1 na kuruhusu kuteua PID kwa kawaida.
+- The issue can be resolved by using the `-f` option with `unshare`. This option makes `unshare` fork a new process after creating the new PID namespace.
+- Executing %unshare -fp /bin/bash% ensures that the `unshare` command itself becomes PID 1 in the new namespace. `/bin/bash` and its child processes are then safely contained within this new namespace, preventing the premature exit of PID 1 and allowing normal PID allocation.
 
-Kwa kuhakikisha kwamba `unshare` inatekelezwa na bendera ya `-f`, namespace mpya ya PID inatunzwa kwa usahihi, ikiruhusu `/bin/bash` na mchakato wake wa chini kufanya kazi bila kukutana na hitilafu ya kugawa kumbukumbu.
+By ensuring that `unshare` runs with the `-f` flag, the new PID namespace is correctly maintained, allowing `/bin/bash` and its sub-processes to operate without encountering the memory allocation error.
 
 </details>
 
@@ -53,36 +65,36 @@ Kwa kuhakikisha kwamba `unshare` inatekelezwa na bendera ya `-f`, namespace mpya
 ```bash
 docker run -ti --name ubuntu1 -v /usr:/ubuntu1 ubuntu bash
 ```
-Ili kutumia user namespace, Docker daemon inahitaji kuanzishwa na **`--userns-remap=default`**(Katika ubuntu 14.04, hii inaweza kufanywa kwa kubadilisha `/etc/default/docker` na kisha kutekeleza `sudo service docker restart`)
+Ili kutumia user namespace, Docker daemon inahitaji kuanzishwa na **`--userns-remap=default`**(Katika ubuntu 14.04, hii inaweza kufanywa kwa kuhariri `/etc/default/docker` na kisha kuendesha `sudo service docker restart`)
 
-### Angalia ni namespace ipi mchakato wako uko ndani
+### Angalia mchakato wako uko ndani ya namespace gani
 ```bash
 ls -l /proc/self/ns/user
 lrwxrwxrwx 1 root root 0 Apr  4 20:57 /proc/self/ns/user -> 'user:[4026531837]'
 ```
-Inawezekana kuangalia ramani ya mtumiaji kutoka kwenye kontena la docker kwa:
+Inawezekana kuangalia user map kutoka kwenye docker container kwa kutumia:
 ```bash
 cat /proc/self/uid_map
 0          0 4294967295  --> Root is root in host
 0     231072      65536  --> Root is 231072 userid in host
 ```
-Au kutoka kwa mwenyeji na:
+Au kutoka kwa host na:
 ```bash
 cat /proc/<pid>/uid_map
 ```
-### Pata majina yote ya User namespaces
+### Tafuta namespaces zote za Mtumiaji
 ```bash
 sudo find /proc -maxdepth 3 -type l -name user -exec readlink {} \; 2>/dev/null | sort -u
 # Find the processes with an specific namespace
 sudo find /proc -maxdepth 3 -type l -name user -exec ls -l  {} \; 2>/dev/null | grep <ns-number>
 ```
-### Ingia ndani ya User namespace
+### Ingia ndani ya namespace ya mtumiaji
 ```bash
 nsenter -U TARGET_PID --pid /bin/bash
 ```
-Pia, unaweza tu **kuingia katika nafasi nyingine ya mchakato ikiwa wewe ni root**. Na huwezi **kuingia** katika nafasi nyingine **bila desktopa** inayorejelea hiyo (kama `/proc/self/ns/user`).
+Pia, unaweza tu **kuingia katika namespace ya mchakato mwingine ikiwa wewe ni root**. Na **huwezi** **kuingia** katika namespace nyingine **bila descriptor** inayoashiria (kama `/proc/self/ns/user`).
 
-### Unda nafasi mpya ya Mtumiaji (ikiwa na ramani)
+### Unda User namespace mpya (na mappings)
 ```bash
 unshare -U [--map-user=<uid>|<name>] [--map-group=<gid>|<name>] [--map-root-user] [--map-current-user]
 ```
@@ -96,14 +108,30 @@ nobody@ip-172-31-28-169:/home/ubuntu$ #Check how the user is nobody
 ps -ef | grep bash # The user inside the host is still root, not nobody
 root       27756   27755  0 21:11 pts/10   00:00:00 /bin/bash
 ```
-### Kupata Uwezo
+### Sheria za Uwekaji Ramani wa UID/GID Bila Ruhusa
 
-Katika kesi ya majina ya watumiaji, **wakati jina jipya la mtumiaji linaundwa, mchakato unaoingia kwenye jina hilo unapata seti kamili ya uwezo ndani ya jina hilo**. Uwezo huu unaruhusu mchakato kufanya operesheni zenye mamlaka kama vile **kuweka** **faili za mfumo**, kuunda vifaa, au kubadilisha umiliki wa faili, lakini **tu ndani ya muktadha wa jina lake la mtumiaji**.
+Wakati mchakato unaoandika kwenye `uid_map`/`gid_map` **haina CAP_SETUID/CAP_SETGID katika namespace ya mtumiaji mzazi**, kernel inatekeleza sheria kali zaidi: **ramani moja tu** inaruhusiwa kwa UID/GID ya utekelezaji ya muomba, na kwa `gid_map` **lazima kwanza uzime `setgroups(2)`** kwa kuandika `deny` kwenye `/proc/<pid>/setgroups`.
+```bash
+# Check whether setgroups is allowed in this user namespace
+cat /proc/self/setgroups   # allow|deny
 
-Kwa mfano, unapokuwa na uwezo wa `CAP_SYS_ADMIN` ndani ya jina la mtumiaji, unaweza kufanya operesheni ambazo kawaida zinahitaji uwezo huu, kama kuwekeza faili za mfumo, lakini tu ndani ya muktadha wa jina lako la mtumiaji. Operesheni zozote unazofanya kwa uwezo huu hazitaathiri mfumo wa mwenyeji au majina mengine.
+# For unprivileged gid_map writes, disable setgroups first
+echo deny > /proc/self/setgroups
+```
+### ID-mapped Mounts (MOUNT_ATTR_IDMAP)
+
+ID-mapped mounts **attach a user namespace mapping to a mount**, hivyo umiliki wa faili hubadilishwa wakati unafikiwa kupitia mount hiyo. Hii hutumika kawaida na container runtimes (hasa rootless) ili **kushirikisha host paths bila recursive `chown`**, huku ikidumisha utafsiri wa UID/GID wa user namespace.
+
+Kutoka kwa mtazamo wa ushambuliaji, **ikiwa unaweza kuunda mount namespace na kushikilia `CAP_SYS_ADMIN` ndani ya user namespace yako**, na filesystem inasaidia ID-mapped mounts, unaweza kuremapa *views* za umiliki wa bind mounts. Hii **haiubadili on-disk ownership**, lakini inaweza kufanya faili ambazo vingekuwa vigumu kuandika zionekane zikiwa zinamilikiwa na UID/GID yako iliyoratibiwa ndani ya namespace.
+
+### Kurejesha Capabilities
+
+Katika kesi za user namespaces, **wanapotengenezwa user namespace mpya, mchakato unaoingia ndani ya namespace unapewa seti kamili ya capabilities ndani ya namespace hiyo**. Capabilities hizi zimemruhusu mchakato kufanya operesheni za kipaumbele kama **mounting** **filesystems**, kuunda devices, au kubadilisha umiliki wa faili, lakini **ndio ndani tu ya muktadha wa user namespace yake**.
+
+Kwa mfano, wakati una capability ya `CAP_SYS_ADMIN` ndani ya user namespace, unaweza kufanya operesheni ambazo kawaida zinahitaji capability hii, kama mounting filesystems, lakini ndani tu ya muktadha wa user namespace yako. Operesheni zozote unazofanya kwa capability hii hazitaathiri host system au namespaces nyingine.
 
 > [!WARNING]
-> Hivyo, hata kama kupata mchakato mpya ndani ya jina jipya la Mtumiaji **kutakupa uwezo wote tena** (CapEff: 000001ffffffffff), kwa kweli unaweza **kutumia tu zile zinazohusiana na jina hilo** (kuweka kwa mfano) lakini si kila mmoja. Hivyo, hii peke yake haitoshi kutoroka kutoka kwa kontena la Docker.
+> Kwa hiyo, hata kupata mchakato mpya ndani ya User namespace mpya **kutakupa capabilities zote tena** (CapEff: 000001ffffffffff), kwa kweli unaweza **kutumia tu zile zinazohusiana na namespace** (mount kwa mfano) lakini si zote. Hivyo, peke yake hii haitoshi kutoroka kutoka Docker container.
 ```bash
 # There are the syscalls that are filtered after changing User namespace with:
 unshare -UmCpf  bash
@@ -127,4 +155,14 @@ Probando: 0x139 . . . Error
 Probando: 0x140 . . . Error
 Probando: 0x141 . . . Error
 ```
+{{#ref}}
+../docker-breakout-privilege-escalation/README.md
+{{#endref}}
+
+
+## Marejeleo
+
+- [https://man7.org/linux/man-pages/man7/user_namespaces.7.html](https://man7.org/linux/man-pages/man7/user_namespaces.7.html)
+- [https://man7.org/linux/man-pages/man2/mount_setattr.2.html](https://man7.org/linux/man-pages/man2/mount_setattr.2.html)
+
 {{#include ../../../../banners/hacktricks-training.md}}
