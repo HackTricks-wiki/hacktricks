@@ -1,51 +1,63 @@
-# User Namespace
+# Kullanıcı Namespace
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
+{{#ref}}
+../docker-breakout-privilege-escalation/README.md
+{{#endref}}
+
+
+## Referanslar
+
+- [https://man7.org/linux/man-pages/man7/user_namespaces.7.html](https://man7.org/linux/man-pages/man7/user_namespaces.7.html)
+- [https://man7.org/linux/man-pages/man2/mount_setattr.2.html](https://man7.org/linux/man-pages/man2/mount_setattr.2.html)
+
+
+
 ## Temel Bilgiler
 
-Bir kullanıcı ad alanı, **kullanıcı ve grup kimlik eşlemelerinin izolasyonunu sağlayan** bir Linux çekirdek özelliğidir ve her kullanıcı ad alanının **kendi kullanıcı ve grup kimlikleri setine** sahip olmasına olanak tanır. Bu izolasyon, farklı kullanıcı ad alanlarında çalışan süreçlerin **farklı ayrıcalıklara ve sahipliğe** sahip olmasını sağlar, hatta aynı kullanıcı ve grup kimliklerini sayısal olarak paylaşsalar bile.
+Bir kullanıcı namespace'i, **kullanıcı ve grup ID eşlemelerinin izolasyonunu sağlayan** bir Linux kernel özelliğidir; her kullanıcı namespace'inin **kendi kullanıcı ve grup ID setine** sahip olmasına izin verir. Bu izolasyon, farklı user namespace'lerde çalışan süreçlerin sayısal olarak aynı kullanıcı ve grup ID'lerini paylaşsalar bile **farklı ayrıcalıklara ve sahipliklere** sahip olmasını mümkün kılar.
 
-Kullanıcı ad alanları, her bir konteynerin kendi bağımsız kullanıcı ve grup kimlikleri setine sahip olması gereken konteynerleştirmede özellikle faydalıdır ve bu, konteynerler ile ana sistem arasında daha iyi güvenlik ve izolasyon sağlar.
+Kullanıcı namespace'leri, her container'ın kendi bağımsız kullanıcı ve grup ID setine sahip olması gereken containerization ortamlarında özellikle yararlıdır; bu da container'lar ile host sistemi arasında daha iyi güvenlik ve izolasyon sağlar.
 
 ### Nasıl çalışır:
 
-1. Yeni bir kullanıcı ad alanı oluşturulduğunda, **kullanıcı ve grup kimlik eşlemeleri için boş bir setle başlar**. Bu, yeni kullanıcı ad alanında çalışan herhangi bir sürecin **başlangıçta ad alanının dışındaki ayrıcalıklara sahip olmayacağı** anlamına gelir.
-2. Yeni ad alanındaki kullanıcı ve grup kimlikleri ile ana (veya host) ad alanındaki kimlikler arasında eşlemeler kurulabilir. Bu, **yeni ad alanındaki süreçlerin ana ad alanındaki kullanıcı ve grup kimliklerine karşılık gelen ayrıcalıklara ve sahipliğe sahip olmasına olanak tanır**. Ancak, kimlik eşlemeleri belirli aralıklar ve alt kümelerle sınırlı tutulabilir, bu da yeni ad alanındaki süreçlere verilen ayrıcalıklar üzerinde ince ayar kontrolü sağlar.
-3. Bir kullanıcı ad alanı içinde, **süreçler ad alanı içindeki işlemler için tam kök ayrıcalıklarına (UID 0) sahip olabilir**, aynı zamanda ad alanının dışındaki ayrıcalıkları sınırlı kalır. Bu, **konteynerlerin kendi ad alanlarında kök benzeri yeteneklerle çalışmasına olanak tanırken, ana sistemde tam kök ayrıcalıklarına sahip olmalarını engeller**.
-4. Süreçler, `setns()` sistem çağrısını kullanarak ad alanları arasında geçiş yapabilir veya `CLONE_NEWUSER` bayrağı ile `unshare()` veya `clone()` sistem çağrılarını kullanarak yeni ad alanları oluşturabilir. Bir süreç yeni bir ad alanına geçtiğinde veya bir tane oluşturduğunda, o ad alanıyla ilişkili kullanıcı ve grup kimlik eşlemelerini kullanmaya başlayacaktır.
+1. Yeni bir kullanıcı namespace'i oluşturulduğunda, **boş bir kullanıcı ve grup ID eşlemeleri seti ile başlar**. Bu, yeni namespace'te çalışan herhangi bir sürecin **başlangıçta namespace dışındaki hiçbir ayrıcalığa sahip olmayacağı** anlamına gelir.
+2. Yeni namespace'teki kullanıcı ve grup ID'leri ile üst (veya host) namespace'teki ID'ler arasında eşlemeler kurulabilir. Bu, **yeni namespace'teki süreçlerin, üst namespace'teki kullanıcı ve grup ID'lerine karşı gelen ayrıcalık ve sahipliğe sahip olmasına** izin verir. Ancak, ID eşlemeleri belirli aralıklara ve ID alt kümelerine kısıtlanabilir; bu da yeni namespace'teki süreçlere verilen ayrıcalıklar üzerinde ince ayar yapılmasına olanak sağlar.
+3. Bir user namespace içinde, **süreçler namespace içindeki operasyonlar için tam root ayrıcalıklarına (UID 0) sahip olabilir**, aynı zamanda namespace dışında sınırlı ayrıcalıklara sahip olmaya devam ederler. Bu, **container'ların kendi namespace'leri içinde root benzeri yeteneklerle çalışmasına, ancak host sistemde tam root ayrıcalıklarına sahip olmamasına** izin verir.
+4. Süreçler `setns()` sistem çağrısını kullanarak namespace'ler arasında hareket edebilir veya `unshare()` ya da `clone()` sistem çağrılarını `CLONE_NEWUSER` bayrağı ile kullanarak yeni namespace'ler oluşturabilir. Bir süreç yeni bir namespace'e geçtiğinde veya bir tane oluşturduğunda, o namespace ile ilişkilendirilmiş kullanıcı ve grup ID eşlemelerini kullanmaya başlar.
 
-## Laboratuvar:
+## Lab:
 
-### Farklı Ad Alanları Oluşturma
+### Farklı Namespace'ler Oluşturma
 
 #### CLI
 ```bash
 sudo unshare -U [--mount-proc] /bin/bash
 ```
-Yeni bir `/proc` dosya sisteminin örneğini `--mount-proc` parametresi ile monte ederek, yeni montaj ad alanının **o ad alanına özgü süreç bilgilerini doğru ve izole bir şekilde görmesini** sağlarsınız.
+By mounting a new instance of the `/proc` filesystem if you use the param `--mount-proc`, you ensure that the new mount namespace has an **accurate and isolated view of the process information specific to that namespace**.
 
 <details>
 
-<summary>Hata: bash: fork: Bellek tahsis edilemiyor</summary>
+<summary>Error: bash: fork: Cannot allocate memory</summary>
 
-`unshare` komutu `-f` seçeneği olmadan çalıştırıldığında, Linux'un yeni PID (Process ID) ad alanlarını nasıl yönettiği nedeniyle bir hata ile karşılaşılır. Anahtar detaylar ve çözüm aşağıda özetlenmiştir:
+When `unshare` is executed without the `-f` option, an error is encountered due to the way Linux handles new PID (Process ID) namespaces. The key details and the solution are outlined below:
 
-1. **Sorun Açıklaması**:
+1. **Sorunun Açıklaması**:
 
-- Linux çekirdeği, bir sürecin yeni ad alanları oluşturmasına `unshare` sistem çağrısı ile izin verir. Ancak, yeni bir PID ad alanı oluşturma işlemini başlatan süreç (bu süreç "unshare" süreci olarak adlandırılır) yeni ad alanına girmez; yalnızca onun çocuk süreçleri girer.
-- `%unshare -p /bin/bash%` komutu, `/bin/bash`'i `unshare` ile aynı süreçte başlatır. Sonuç olarak, `/bin/bash` ve onun çocuk süreçleri orijinal PID ad alanında kalır.
-- Yeni ad alanındaki `/bin/bash`'in ilk çocuk süreci PID 1 olur. Bu süreç sona erdiğinde, başka süreç yoksa ad alanının temizlenmesini tetikler, çünkü PID 1, yetim süreçleri benimseme özel rolüne sahiptir. Linux çekirdeği, bu ad alanında PID tahsisini devre dışı bırakır.
+- Linux kernel'i, bir sürecin `unshare` sistem çağrısını kullanarak yeni namespace'ler oluşturmasına izin verir. Ancak yeni bir PID namespace'inin oluşturulmasını başlatan süreç (\"unshare\" süreci olarak anılan) yeni namespace'e girmez; yalnızca onun alt süreçleri girer.
+- Running %unshare -p /bin/bash% starts `/bin/bash` in the same process as `unshare`. Consequently, `/bin/bash` and its child processes are in the original PID namespace.
+- Yeni namespace'te `/bin/bash`'in ilk alt süreci PID 1 olur. Bu süreç sonlandığında, eğer başka süreç yoksa namespace'in temizlenmesini tetikler; zira PID 1'in öksüz süreçleri devralma gibi özel bir rolü vardır. Linux kernel'i daha sonra o namespace'te PID tahsisini devre dışı bırakır.
 
 2. **Sonuç**:
 
-- Yeni bir ad alanındaki PID 1'in çıkışı, `PIDNS_HASH_ADDING` bayrağının temizlenmesine yol açar. Bu, yeni bir süreç oluşturulurken `alloc_pid` fonksiyonunun yeni bir PID tahsis edememesine neden olur ve "Bellek tahsis edilemiyor" hatasını üretir.
+- Yeni bir namespace'te PID 1'in çıkışı `PIDNS_HASH_ADDING` bayrağının temizlenmesine yol açar. Bu da yeni bir süreç oluşturulurken `alloc_pid` fonksiyonunun yeni bir PID tahsis edememesine ve "Cannot allocate memory" hatasının oluşmasına neden olur.
 
 3. **Çözüm**:
-- Sorun, `unshare` ile `-f` seçeneğinin kullanılmasıyla çözülebilir. Bu seçenek, `unshare`'in yeni PID ad alanını oluşturduktan sonra yeni bir süreç fork etmesini sağlar.
-- `%unshare -fp /bin/bash%` komutunu çalıştırmak, `unshare` komutunun kendisinin yeni ad alanında PID 1 olmasını sağlar. `/bin/bash` ve onun çocuk süreçleri bu yeni ad alanında güvenli bir şekilde yer alır, PID 1'in erken çıkışını önler ve normal PID tahsisine izin verir.
+- Sorun, `unshare` ile `-f` seçeneğinin kullanılmasıyla çözülebilir. Bu seçenek, `unshare`'in yeni PID namespace'i oluşturduktan sonra yeni bir süreç fork etmesini sağlar.
+- %unshare -fp /bin/bash% çalıştırılması, `unshare` komutunun kendisinin yeni namespace'te PID 1 olmasını sağlar. `/bin/bash` ve onun alt süreçleri bu yeni namespace içinde güvenle tutulur; böylece PID 1'in erken çıkışı engellenir ve normal PID tahsisi mümkün olur.
 
-`unshare`'in `-f` bayrağı ile çalıştırılmasını sağlayarak, yeni PID ad alanının doğru bir şekilde korunmasını sağlarsınız, böylece `/bin/bash` ve alt süreçleri bellek tahsis hatası ile karşılaşmadan çalışabilir.
+By ensuring that `unshare` runs with the `-f` flag, the new PID namespace is correctly maintained, allowing `/bin/bash` and its sub-processes to operate without encountering the memory allocation error.
 
 </details>
 
@@ -53,36 +65,36 @@ Yeni bir `/proc` dosya sisteminin örneğini `--mount-proc` parametresi ile mont
 ```bash
 docker run -ti --name ubuntu1 -v /usr:/ubuntu1 ubuntu bash
 ```
-Kullanıcı ad alanını kullanmak için, Docker daemon'un **`--userns-remap=default`** ile başlatılması gerekir (Ubuntu 14.04'te, bu `/etc/default/docker` dosyasını değiştirerek ve ardından `sudo service docker restart` komutunu çalıştırarak yapılabilir).
+user namespace kullanmak için, Docker daemon **`--userns-remap=default`** ile başlatılmalıdır (Ubuntu 14.04'te bu, `/etc/default/docker` dosyasını değiştirip sonra `sudo service docker restart` komutunu çalıştırarak yapılabilir)
 
-### Hangi ad alanında olduğunuzu kontrol edin
+### Sürecinizin hangi namespace içinde olduğunu kontrol edin
 ```bash
 ls -l /proc/self/ns/user
 lrwxrwxrwx 1 root root 0 Apr  4 20:57 /proc/self/ns/user -> 'user:[4026531837]'
 ```
-Docker konteynerinden kullanıcı haritasını kontrol etmek mümkündür:
+docker konteynerinden kullanıcı haritasını şu komutla kontrol etmek mümkündür:
 ```bash
 cat /proc/self/uid_map
 0          0 4294967295  --> Root is root in host
 0     231072      65536  --> Root is 231072 userid in host
 ```
-Ya da ana makineden:
+Veya host'tan şu komutla:
 ```bash
 cat /proc/<pid>/uid_map
 ```
-### Tüm Kullanıcı ad alanlarını bul
+### Tüm kullanıcı namespace'lerini bul
 ```bash
 sudo find /proc -maxdepth 3 -type l -name user -exec readlink {} \; 2>/dev/null | sort -u
 # Find the processes with an specific namespace
 sudo find /proc -maxdepth 3 -type l -name user -exec ls -l  {} \; 2>/dev/null | grep <ns-number>
 ```
-### Kullanıcı ad alanına girin
+### Kullanıcı namespace'ine girin
 ```bash
 nsenter -U TARGET_PID --pid /bin/bash
 ```
-Ayrıca, **başka bir işlem ad alanına yalnızca root iseniz girebilirsiniz**. Ve **başka bir ad alanına** **giremezsiniz** **onu işaret eden bir tanımlayıcı olmadan** (örneğin `/proc/self/ns/user`).
+Ayrıca, sadece **root iseniz başka bir süreç namespace'ine girebilirsiniz**. Ve bir **tanımlayıcı** ona işaret etmeden (ör. `/proc/self/ns/user`) başka bir namespace'e **giremezsiniz**.
 
-### Yeni Kullanıcı ad alanı oluşturun (eşlemelerle)
+### Yeni User namespace oluştur (eşlemelerle)
 ```bash
 unshare -U [--map-user=<uid>|<name>] [--map-group=<gid>|<name>] [--map-root-user] [--map-current-user]
 ```
@@ -96,14 +108,30 @@ nobody@ip-172-31-28-169:/home/ubuntu$ #Check how the user is nobody
 ps -ef | grep bash # The user inside the host is still root, not nobody
 root       27756   27755  0 21:11 pts/10   00:00:00 /bin/bash
 ```
-### Yeteneklerin Kurtarılması
+### Ayrıcalı Olmayan UID/GID Eşleme Kuralları
 
-Kullanıcı ad alanları durumunda, **yeni bir kullanıcı ad alanı oluşturulduğunda, ad alanına giren işleme o ad alanı içinde tam bir yetenek seti verilir**. Bu yetenekler, işlemin **dosya sistemlerini** **monte etme**, cihazlar oluşturma veya dosyaların sahipliğini değiştirme gibi ayrıcalıklı işlemleri gerçekleştirmesine olanak tanır, ancak **yalnızca kendi kullanıcı ad alanı bağlamında**.
+`uid_map`/`gid_map`'e yazan süreç **ebeveyn user namespace'inde CAP_SETUID/CAP_SETGID'e sahip değilse**, çekirdek daha katı kurallar uygular: çağıranın etkili UID/GID'si için yalnızca **tek bir eşleme** izin verilir ve `gid_map` için `/proc/<pid>/setgroups` dosyasına `deny` yazarak `setgroups(2)`'yi **önce devre dışı bırakmalısınız**.
+```bash
+# Check whether setgroups is allowed in this user namespace
+cat /proc/self/setgroups   # allow|deny
 
-Örneğin, bir kullanıcı ad alanında `CAP_SYS_ADMIN` yeteneğine sahip olduğunuzda, genellikle bu yeteneği gerektiren işlemleri gerçekleştirebilirsiniz, örneğin dosya sistemlerini monte etme, ancak yalnızca kendi kullanıcı ad alanı bağlamında. Bu yetenekle gerçekleştirdiğiniz herhangi bir işlem, ana sistem veya diğer ad alanlarını etkilemeyecektir.
+# For unprivileged gid_map writes, disable setgroups first
+echo deny > /proc/self/setgroups
+```
+### ID-mapped Mounts (MOUNT_ATTR_IDMAP)
+
+ID-mapped mounts bir mount'a bir user namespace eşlemesi ekler, bu nedenle o mount üzerinden erişildiğinde dosya sahipliği yeniden eşlenir. Bu, container runtimes (özellikle rootless) tarafından host yollarını recursive `chown` yapmadan paylaşmak için sık kullanılır; aynı zamanda user namespace'in UID/GID çevirimini uygular.
+
+Ofansif açıdan, eğer bir mount namespace oluşturup user namespace'iniz içinde CAP_SYS_ADMIN'e sahipseniz ve filesystem ID-mapped mounts'ı destekliyorsa, bind mount'ların sahiplik *görünümlerini* yeniden eşleyebilirsiniz. Bu diskteki gerçek sahipliği değiştirmez; ancak namespace içinde, aksi takdirde yazılamayan dosyaların map'lenmiş UID/GID'niz tarafından sahiplenilmiş gibi görünmesini sağlayabilir.
+
+### Recovering Capabilities
+
+User namespaces durumunda, yeni bir user namespace oluşturulduğunda namespace'e giren sürece o namespace içinde tam bir yetki kümesi verilir. Bu yetkiler, sürecin dosya sistemlerini mount etme, device oluşturma veya dosya sahipliğini değiştirme gibi ayrıcalıklı işlemleri yapmasına izin verir; ancak sadece kendi user namespace bağlamında.
+
+Örneğin, bir user namespace içinde CAP_SYS_ADMIN yetkisine sahipseniz, genellikle bu yetkiyi gerektiren işlemleri (dosya sistemlerini mount etmek gibi) gerçekleştirebilirsiniz; fakat yalnızca kendi user namespace bağlamında. Bu yetkiyle yaptığınız işlemler host sistemini veya diğer namespace'leri etkilemez.
 
 > [!WARNING]
-> Bu nedenle, yeni bir Kullanıcı ad alanında yeni bir işlem almak **size tüm yeteneklerinizi geri verecektir** (CapEff: 000001ffffffffff), aslında **yalnızca ad alanı ile ilgili olanları kullanabilirsiniz** (örneğin monte etme) ama hepsini değil. Bu nedenle, bu kendi başına bir Docker konteynerinden kaçmak için yeterli değildir.
+> Bu yüzden, yeni bir User namespace içine yeni bir process almak size tüm yetkileri geri verse bile (CapEff: 000001ffffffffff), aslında sadece namespace ile ilgili olanları (örneğin mount) kullanabilirsiniz, hepsini değil. Yani tek başına bu, bir Docker container'dan kaçmak için yeterli değildir.
 ```bash
 # There are the syscalls that are filtered after changing User namespace with:
 unshare -UmCpf  bash
@@ -127,4 +155,14 @@ Probando: 0x139 . . . Error
 Probando: 0x140 . . . Error
 Probando: 0x141 . . . Error
 ```
+{{#ref}}
+../docker-breakout-privilege-escalation/README.md
+{{#endref}}
+
+
+## Referanslar
+
+- [https://man7.org/linux/man-pages/man7/user_namespaces.7.html](https://man7.org/linux/man-pages/man7/user_namespaces.7.html)
+- [https://man7.org/linux/man-pages/man2/mount_setattr.2.html](https://man7.org/linux/man-pages/man2/mount_setattr.2.html)
+
 {{#include ../../../../banners/hacktricks-training.md}}
