@@ -2,6 +2,18 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
+{{#ref}}
+../docker-breakout-privilege-escalation/README.md
+{{#endref}}
+
+
+## References
+
+- [https://man7.org/linux/man-pages/man7/user_namespaces.7.html](https://man7.org/linux/man-pages/man7/user_namespaces.7.html)
+- [https://man7.org/linux/man-pages/man2/mount_setattr.2.html](https://man7.org/linux/man-pages/man2/mount_setattr.2.html)
+
+
+
 ## Basic Information
 
 A user namespace is a Linux kernel feature that **provides isolation of user and group ID mappings**, allowing each user namespace to have its **own set of user and group IDs**. This isolation enables processes running in different user namespaces to **have different privileges and ownership**, even if they share the same user and group IDs numerically.
@@ -112,6 +124,26 @@ ps -ef | grep bash # The user inside the host is still root, not nobody
 root       27756   27755  0 21:11 pts/10   00:00:00 /bin/bash
 ```
 
+
+### Unprivileged UID/GID Mapping Rules
+
+When the process writing to `uid_map`/`gid_map` **does not have CAP_SETUID/CAP_SETGID in the parent user namespace**, the kernel enforces stricter rules: only a **single mapping** is allowed for the caller's effective UID/GID, and for `gid_map` you **must first disable `setgroups(2)`** by writing `deny` to `/proc/<pid>/setgroups`.
+
+```bash
+# Check whether setgroups is allowed in this user namespace
+cat /proc/self/setgroups   # allow|deny
+
+# For unprivileged gid_map writes, disable setgroups first
+echo deny > /proc/self/setgroups
+```
+
+
+### ID-mapped Mounts (MOUNT_ATTR_IDMAP)
+
+ID-mapped mounts **attach a user namespace mapping to a mount**, so file ownership is remapped when accessed through that mount. This is commonly used by container runtimes (especially rootless) to **share host paths without recursive `chown`**, while still enforcing the user namespace's UID/GID translation.
+
+From an offensive perspective, **if you can create a mount namespace and hold `CAP_SYS_ADMIN` inside your user namespace**, and the filesystem supports ID-mapped mounts, you can remap ownership *views* of bind mounts. This **does not change on-disk ownership**, but it can make otherwise-unwritable files appear owned by your mapped UID/GID within the namespace.
+
 ### Recovering Capabilities
 
 In the case of user namespaces, **when a new user namespace is created, the process that enters the namespace is granted a full set of capabilities within that namespace**. These capabilities allow the process to perform privileged operations such as **mounting** **filesystems**, creating devices, or changing ownership of files, but **only within the context of its user namespace**.
@@ -145,7 +177,17 @@ Probando: 0x140 . . . Error
 Probando: 0x141 . . . Error
 ```
 
-{{#include ../../../../banners/hacktricks-training.md}}
 
+{{#ref}}
+../docker-breakout-privilege-escalation/README.md
+{{#endref}}
+
+
+## References
+
+- [https://man7.org/linux/man-pages/man7/user_namespaces.7.html](https://man7.org/linux/man-pages/man7/user_namespaces.7.html)
+- [https://man7.org/linux/man-pages/man2/mount_setattr.2.html](https://man7.org/linux/man-pages/man2/mount_setattr.2.html)
+
+{{#include ../../../../banners/hacktricks-training.md}}
 
 
