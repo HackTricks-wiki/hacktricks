@@ -1,51 +1,63 @@
-# User Namespace
+# यूज़र नेमस्पेस
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-## Basic Information
+{{#ref}}
+../docker-breakout-privilege-escalation/README.md
+{{#endref}}
 
-एक user namespace एक Linux kernel विशेषता है जो **उपयोगकर्ता और समूह ID मैपिंग का पृथक्करण प्रदान करती है**, जिससे प्रत्येक user namespace को **अपने स्वयं के उपयोगकर्ता और समूह IDs का सेट** मिल सके। यह पृथक्करण विभिन्न user namespaces में चलने वाली प्रक्रियाओं को **विभिन्न विशेषाधिकार और स्वामित्व** रखने की अनुमति देता है, भले ही वे संख्यात्मक रूप से समान उपयोगकर्ता और समूह IDs साझा करते हों।
 
-User namespaces विशेष रूप से कंटेनरीकरण में उपयोगी होते हैं, जहां प्रत्येक कंटेनर को अपने स्वतंत्र उपयोगकर्ता और समूह IDs का सेट होना चाहिए, जिससे कंटेनरों और होस्ट सिस्टम के बीच बेहतर सुरक्षा और पृथक्करण संभव हो सके।
+## संदर्भ
 
-### How it works:
+- [https://man7.org/linux/man-pages/man7/user_namespaces.7.html](https://man7.org/linux/man-pages/man7/user_namespaces.7.html)
+- [https://man7.org/linux/man-pages/man2/mount_setattr.2.html](https://man7.org/linux/man-pages/man2/mount_setattr.2.html)
 
-1. जब एक नया user namespace बनाया जाता है, तो यह **उपयोगकर्ता और समूह ID मैपिंग का एक खाली सेट** के साथ **शुरू होता है**। इसका मतलब है कि नए user namespace में चलने वाली कोई भी प्रक्रिया **शुरुआत में namespace के बाहर कोई विशेषाधिकार नहीं रखेगी**।
-2. ID मैपिंग को नए namespace में उपयोगकर्ता और समूह IDs और माता-पिता (या होस्ट) namespace में IDs के बीच स्थापित किया जा सकता है। यह **नए namespace में प्रक्रियाओं को माता-पिता namespace में उपयोगकर्ता और समूह IDs के अनुसार विशेषाधिकार और स्वामित्व प्राप्त करने की अनुमति देता है**। हालाँकि, ID मैपिंग को विशिष्ट रेंज और IDs के उपसमुच्चयों तक सीमित किया जा सकता है, जिससे नए namespace में प्रक्रियाओं को दिए गए विशेषाधिकार पर बारीक नियंत्रण संभव हो सके।
-3. एक user namespace के भीतर, **प्रक्रियाओं के पास namespace के भीतर संचालन के लिए पूर्ण रूट विशेषाधिकार (UID 0) हो सकते हैं**, जबकि अभी भी namespace के बाहर सीमित विशेषाधिकार रख सकते हैं। यह **कंटेनरों को अपने स्वयं के namespace के भीतर रूट-जैसी क्षमताओं के साथ चलाने की अनुमति देता है बिना होस्ट सिस्टम पर पूर्ण रूट विशेषाधिकार के**।
-4. प्रक्रियाएँ `setns()` सिस्टम कॉल का उपयोग करके namespaces के बीच स्थानांतरित हो सकती हैं या `unshare()` या `clone()` सिस्टम कॉल का उपयोग करके नए namespaces बना सकती हैं जिसमें `CLONE_NEWUSER` फ्लैग होता है। जब कोई प्रक्रिया एक नए namespace में जाती है या एक बनाती है, तो यह उस namespace से संबंधित उपयोगकर्ता और समूह ID मैपिंग का उपयोग करना शुरू कर देगी।
 
-## Lab:
 
-### Create different Namespaces
+## बुनियादी जानकारी
+
+एक यूज़र नेमस्पेस Linux kernel की एक सुविधा है जो **user और group ID मैपिंग्स का अलगाव प्रदान करती है**, जिससे प्रत्येक यूज़र नेमस्पेस के पास अपनी **अपनी user और group IDs का सेट** हो सकता है। यह अलगाव विभिन्न यूज़र नेमस्पेस में चलने वाली प्रक्रियाओं को **विभिन्न प्रिविलेज और ओनरशिप** रखने में सक्षम बनाता है, भले ही उनका संख्यात्मक user और group ID समान हो।
+
+यूज़र नेमस्पेस कंटेनरीकरण में विशेष रूप से उपयोगी हैं, जहाँ प्रत्येक container का अपना स्वतंत्र user और group ID सेट होना चाहिए, जिससे कंटेनरों और होस्ट सिस्टम के बीच बेहतर सुरक्षा और अलगाव सुनिश्चित होता है।
+
+### यह कैसे काम करता है:
+
+1. जब एक नया यूज़र नेमस्पेस बनाया जाता है, तो यह **user और group ID मैपिंग्स के खाली सेट के साथ शुरू होता है**। इसका मतलब है कि नए यूज़र नेमस्पेस में चल रही कोई भी प्रक्रिया **प्रारम्भ में नेमस्पेस के बाहर कोई अधिकार नहीं रखेगी**।
+2. ID मैपिंग्स नए नेमस्पेस और parent (या host) नेमस्पेस में मौजूद user और group IDs के बीच स्थापित की जा सकती हैं। इससे **नए नेमस्पेस में प्रक्रियाओं को parent नेमस्पेस के user और group IDs के अनुरूप प्रिविलेज और ओनरशिप मिल सकती है**। हालांकि, ID मैपिंग्स को विशिष्ट रेंज और ID के उपसमूहों तक सीमित किया जा सकता है, जिससे नेमस्पेस को दिए जाने वाले प्रिविलेज पर सूक्ष्म नियंत्रण संभव होता है।
+3. एक यूज़र नेमस्पेस के भीतर, **प्रोसेस को नेमस्पेस के अंदर के ऑपरेशनों के लिए पूर्ण root प्रिविलेज (UID 0) मिल सकते हैं**, जबकि नेमस्पेस के बाहर उनके प्रिविलेज सीमित रहेंगे। यह अनुमति देता है कि **कंटेनर अपने नेमस्पेस के भीतर root-जैसी क्षमताओं के साथ चलें बिना होस्ट सिस्टम पर पूर्ण root प्रिविलेज के**।
+4. प्रक्रियाएँ `setns()` system call का उपयोग करके नेमस्पेस के बीच जा सकती हैं या `unshare()` या `clone()` system calls के साथ `CLONE_NEWUSER` फ्लैग का उपयोग करके नए नेमस्पेस बना सकती हैं। जब कोई प्रक्रिया नए नेमस्पेस में चली जाती है या नया नेमस्पेस बनाती है, तो वह उस नेमस्पेस से संबंधित user और group ID मैपिंग्स का उपयोग शुरू कर देगी।
+
+## लैब:
+
+### विभिन्न नेमस्पेस बनाएँ
 
 #### CLI
 ```bash
 sudo unshare -U [--mount-proc] /bin/bash
 ```
-एक नए `/proc` फ़ाइल सिस्टम के उदाहरण को माउंट करके, यदि आप पैरामीटर `--mount-proc` का उपयोग करते हैं, तो आप सुनिश्चित करते हैं कि नए माउंट नामस्थान में **उस नामस्थान के लिए विशिष्ट प्रक्रिया जानकारी का सटीक और अलगावित दृश्य** है।
+By mounting a new instance of the `/proc` filesystem if you use the param `--mount-proc`, you ensure that the new mount namespace has an **accurate and isolated view of the process information specific to that namespace**.
 
 <details>
 
-<summary>त्रुटि: bash: fork: मेमोरी आवंटित नहीं कर सकता</summary>
+<summary>Error: bash: fork: Cannot allocate memory</summary>
 
-जब `unshare` को `-f` विकल्प के बिना निष्पादित किया जाता है, तो लिनक्स नए PID (प्रक्रिया आईडी) नामस्थान को संभालने के तरीके के कारण एक त्रुटि का सामना करता है। मुख्य विवरण और समाधान नीचे दिए गए हैं:
+When `unshare` is executed without the `-f` option, an error is encountered due to the way Linux handles new PID (Process ID) namespaces. The key details and the solution are outlined below:
 
-1. **समस्या का विवरण**:
+1. **Problem Explanation**:
 
-- लिनक्स कर्नेल एक प्रक्रिया को `unshare` सिस्टम कॉल का उपयोग करके नए नामस्थान बनाने की अनुमति देता है। हालाँकि, नए PID नामस्थान के निर्माण की शुरुआत करने वाली प्रक्रिया (जिसे "unshare" प्रक्रिया कहा जाता है) नए नामस्थान में प्रवेश नहीं करती है; केवल इसकी बाल प्रक्रियाएँ करती हैं।
-- `%unshare -p /bin/bash%` चलाने से `/bin/bash` उसी प्रक्रिया में शुरू होता है जैसे `unshare`। परिणामस्वरूप, `/bin/bash` और इसकी बाल प्रक्रियाएँ मूल PID नामस्थान में होती हैं।
-- नए नामस्थान में `/bin/bash` की पहली बाल प्रक्रिया PID 1 बन जाती है। जब यह प्रक्रिया समाप्त होती है, तो यह नामस्थान की सफाई को ट्रिगर करती है यदि कोई अन्य प्रक्रियाएँ नहीं हैं, क्योंकि PID 1 का अनाथ प्रक्रियाओं को अपनाने की विशेष भूमिका होती है। लिनक्स कर्नेल तब उस नामस्थान में PID आवंटन को अक्षम कर देगा।
+- The Linux kernel allows a process to create new namespaces using the `unshare` system call. However, the process that initiates the creation of a new PID namespace (referred to as the "unshare" process) does not enter the new namespace; only its child processes do.
+- Running `%unshare -p /bin/bash%` starts `/bin/bash` in the same process as `unshare`. Consequently, `/bin/bash` and its child processes are in the original PID namespace.
+- The first child process of `/bin/bash` in the new namespace becomes PID 1. When this process exits, it triggers the cleanup of the namespace if there are no other processes, as PID 1 has the special role of adopting orphan processes. The Linux kernel will then disable PID allocation in that namespace.
 
-2. **परिणाम**:
+2. **Consequence**:
 
-- नए नामस्थान में PID 1 का समाप्त होना `PIDNS_HASH_ADDING` ध्वज की सफाई की ओर ले जाता है। इसका परिणाम यह होता है कि नए प्रक्रिया बनाने के समय `alloc_pid` फ़ंक्शन नए PID को आवंटित करने में विफल रहता है, जिससे "Cannot allocate memory" त्रुटि उत्पन्न होती है।
+- The exit of PID 1 in a new namespace leads to the cleaning of the `PIDNS_HASH_ADDING` flag. This results in the `alloc_pid` function failing to allocate a new PID when creating a new process, producing the "Cannot allocate memory" error.
 
-3. **समाधान**:
-- इस समस्या को `unshare` के साथ `-f` विकल्प का उपयोग करके हल किया जा सकता है। यह विकल्प `unshare` को नए PID नामस्थान बनाने के बाद एक नई प्रक्रिया बनाने के लिए फोर्क करता है।
-- `%unshare -fp /bin/bash%` निष्पादित करने से यह सुनिश्चित होता है कि `unshare` कमांड स्वयं नए नामस्थान में PID 1 बन जाता है। `/bin/bash` और इसकी बाल प्रक्रियाएँ फिर इस नए नामस्थान में सुरक्षित रूप से समाहित होती हैं, PID 1 के पूर्ववर्ती समाप्त होने को रोकती हैं और सामान्य PID आवंटन की अनुमति देती हैं।
+3. **Solution**:
+- The issue can be resolved by using the `-f` option with `unshare`. This option makes `unshare` fork a new process after creating the new PID namespace.
+- Executing `%unshare -fp /bin/bash%` ensures that the `unshare` command itself becomes PID 1 in the new namespace. `/bin/bash` and its child processes are then safely contained within this new namespace, preventing the premature exit of PID 1 and allowing normal PID allocation.
 
-यह सुनिश्चित करके कि `unshare` `-f` ध्वज के साथ चलता है, नए PID नामस्थान को सही ढंग से बनाए रखा जाता है, जिससे `/bin/bash` और इसकी उप-प्रक्रियाएँ मेमोरी आवंटन त्रुटि का सामना किए बिना कार्य कर सकें।
+By ensuring that `unshare` runs with the `-f` flag, the new PID namespace is correctly maintained, allowing `/bin/bash` and its sub-processes to operate without encountering the memory allocation error.
 
 </details>
 
@@ -53,36 +65,36 @@ sudo unshare -U [--mount-proc] /bin/bash
 ```bash
 docker run -ti --name ubuntu1 -v /usr:/ubuntu1 ubuntu bash
 ```
-Docker डेमन को **`--userns-remap=default`** के साथ शुरू करने की आवश्यकता है (उबंटू 14.04 में, यह `/etc/default/docker` को संशोधित करके और फिर `sudo service docker restart` चलाकर किया जा सकता है)
+user namespace का उपयोग करने के लिए, Docker daemon को **`--userns-remap=default`**(ubuntu 14.04 में, यह `/etc/default/docker` को संशोधित करके और फिर `sudo service docker restart` चलाकर किया जा सकता है)
 
-### जांचें कि आपका प्रक्रिया किस namespace में है
+### जाँचें कि आपका process किस namespace में है
 ```bash
 ls -l /proc/self/ns/user
 lrwxrwxrwx 1 root root 0 Apr  4 20:57 /proc/self/ns/user -> 'user:[4026531837]'
 ```
-यह संभव है कि आप docker कंटेनर से उपयोगकर्ता मानचित्र की जांच कर सकें:
+docker container से user map की जांच की जा सकती है:
 ```bash
 cat /proc/self/uid_map
 0          0 4294967295  --> Root is root in host
 0     231072      65536  --> Root is 231072 userid in host
 ```
-या होस्ट से:
+या होस्ट से निम्न के साथ:
 ```bash
 cat /proc/<pid>/uid_map
 ```
-### सभी उपयोगकर्ता नामस्थान खोजें
+### सभी User namespaces खोजें
 ```bash
 sudo find /proc -maxdepth 3 -type l -name user -exec readlink {} \; 2>/dev/null | sort -u
 # Find the processes with an specific namespace
 sudo find /proc -maxdepth 3 -type l -name user -exec ls -l  {} \; 2>/dev/null | grep <ns-number>
 ```
-### एक उपयोगकर्ता नामस्थान के अंदर प्रवेश करें
+### User namespace के अंदर प्रवेश करें
 ```bash
 nsenter -U TARGET_PID --pid /bin/bash
 ```
-आप केवल **दूसरे प्रक्रिया नामस्थान में प्रवेश कर सकते हैं यदि आप रूट हैं**। और आप **दूसरे नामस्थान में प्रवेश नहीं कर सकते** **बिना एक वर्णनकर्ता** जो इसे इंगित करता है (जैसे `/proc/self/ns/user`)।
+साथ ही, आप केवल **root होने पर किसी अन्य process namespace में प्रवेश कर सकते हैं**। और आप **प्रवेश नहीं कर सकते** **किसी अन्य namespace में** **बिना किसी descriptor के** जो उस पर इशारा करे (जैसे `/proc/self/ns/user`)।
 
-### नया उपयोगकर्ता नामस्थान बनाएं (मैपिंग के साथ)
+### नया User namespace बनाएँ (mappings के साथ)
 ```bash
 unshare -U [--map-user=<uid>|<name>] [--map-group=<gid>|<name>] [--map-root-user] [--map-current-user]
 ```
@@ -96,14 +108,30 @@ nobody@ip-172-31-28-169:/home/ubuntu$ #Check how the user is nobody
 ps -ef | grep bash # The user inside the host is still root, not nobody
 root       27756   27755  0 21:11 pts/10   00:00:00 /bin/bash
 ```
-### Recovering Capabilities
+### अनप्रिविलेज्ड UID/GID मैपिंग नियम
 
-In the case of user namespaces, **जब एक नया उपयोगकर्ता नामस्थान बनाया जाता है, तो उस नामस्थान में प्रवेश करने वाली प्रक्रिया को पूर्ण क्षमताओं का एक सेट दिया जाता है**। ये क्षमताएँ प्रक्रिया को विशेषाधिकार प्राप्त संचालन करने की अनुमति देती हैं जैसे कि **माउंटिंग** **फाइल सिस्टम**, उपकरण बनाना, या फ़ाइलों के स्वामित्व को बदलना, लेकिन **केवल इसके उपयोगकर्ता नामस्थान के संदर्भ में**।
+जब वह प्रक्रिया जो `uid_map`/`gid_map` में लिख रही है **parent user namespace में CAP_SETUID/CAP_SETGID नहीं रखती है**, तो kernel कड़े नियम लागू करता है: कॉलर की प्रभावी UID/GID के लिए केवल एक ही मैपिंग अनुमति है, और `gid_map` के लिए आपको पहले `setgroups(2)` को अक्षम करना होगा — `/proc/<pid>/setgroups` में `deny` लिखकर।
+```bash
+# Check whether setgroups is allowed in this user namespace
+cat /proc/self/setgroups   # allow|deny
 
-उदाहरण के लिए, जब आपके पास एक उपयोगकर्ता नामस्थान के भीतर `CAP_SYS_ADMIN` क्षमता होती है, तो आप उन संचालन को कर सकते हैं जो आमतौर पर इस क्षमता की आवश्यकता होती है, जैसे कि फाइल सिस्टम को माउंट करना, लेकिन केवल आपके उपयोगकर्ता नामस्थान के संदर्भ में। इस क्षमता के साथ किए गए कोई भी संचालन होस्ट सिस्टम या अन्य नामस्थानों को प्रभावित नहीं करेंगे।
+# For unprivileged gid_map writes, disable setgroups first
+echo deny > /proc/self/setgroups
+```
+### ID-मैप्ड माउंट्स (MOUNT_ATTR_IDMAP)
+
+ID-mapped mounts **user namespace mapping को एक mount से जोड़ते हैं**, इसलिए जब उस माउंट के माध्यम से फ़ाइल तक पहुँच की जाती है तो फ़ाइल का मालिकाना पुन:मैप हो जाता है। यह आमतौर पर container runtimes (विशेषकर rootless) द्वारा host paths को recursive `chown` किए बिना साझा करने के लिए इस्तेमाल किया जाता है, जबकि user namespace के UID/GID translation को लागू किया जाता है।
+
+ऑफेंसिव दृष्टिकोण से, **यदि आप एक mount namespace बना सकते हैं और अपने user namespace के अंदर `CAP_SYS_ADMIN` रख सकते हैं**, और फ़ाइल सिस्टम ID-mapped mounts को सपोर्ट करता है, तो आप bind mounts के मालिकाना *दृश्यों* को रीमैप कर सकते हैं। यह **on-disk ownership को बदलता नहीं है**, पर यह अन्यथा लिखने-योग्य नहीं फ़ाइलों को आपके मैप किए गए UID/GID द्वारा उस namespace के भीतर मालिक दिखा सकता है।
+
+### क्षमतियाँ पुनः प्राप्त करना
+
+user namespaces के मामले में, **जब एक नया user namespace बनाया जाता है, तो उस namespace में प्रवेश करने वाली प्रक्रिया को उस namespace के भीतर capabilities का एक पूरा सेट दिया जाता है**। ये capabilities प्रक्रिया को privileged operations करने की अनुमति देती हैं जैसे **mounting** **filesystems**, devices बनाना, या फ़ाइलों का ownership बदलना, पर **केवल अपने user namespace के संदर्भ में**।
+
+उदाहरण के लिए, जब आपके पास किसी user namespace के भीतर `CAP_SYS_ADMIN` capability होती है, तो आप उन ऑपरेशनों को कर सकते हैं जिनके लिए सामान्यतः यह capability चाहिए होती है, जैसे mounting filesystems, पर यह सब केवल आपके user namespace के संदर्भ में ही लागू होगा। आप इस capability के साथ जो भी ऑपरेशन करते हैं वह host system या अन्य namespaces को प्रभावित नहीं करेगा।
 
 > [!WARNING]
-> इसलिए, भले ही एक नए उपयोगकर्ता नामस्थान के अंदर एक नई प्रक्रिया प्राप्त करना **आपको सभी क्षमताएँ वापस देगा** (CapEff: 000001ffffffffff), आप वास्तव में **केवल नामस्थान से संबंधित क्षमताओं का उपयोग कर सकते हैं** (उदाहरण के लिए माउंट) लेकिन हर एक का नहीं। इसलिए, यह अपने आप में एक Docker कंटेनर से भागने के लिए पर्याप्त नहीं है।
+> इसलिए, भले ही किसी नए User namespace के अंदर एक नया प्रोसेस पाना **आपको सभी capabilities वापस देगा** (CapEff: 000001ffffffffff), आप वास्तव में **केवल उन्हीं का उपयोग कर सकते हैं जो namespace से संबंधित हैं** (mount उदाहरण के लिए) पर हर एक का नहीं। इसलिए, यह अपने आप Docker container से निकलने के लिए पर्याप्त नहीं है।
 ```bash
 # There are the syscalls that are filtered after changing User namespace with:
 unshare -UmCpf  bash
@@ -127,4 +155,14 @@ Probando: 0x139 . . . Error
 Probando: 0x140 . . . Error
 Probando: 0x141 . . . Error
 ```
+{{#ref}}
+../docker-breakout-privilege-escalation/README.md
+{{#endref}}
+
+
+## संदर्भ
+
+- [https://man7.org/linux/man-pages/man7/user_namespaces.7.html](https://man7.org/linux/man-pages/man7/user_namespaces.7.html)
+- [https://man7.org/linux/man-pages/man2/mount_setattr.2.html](https://man7.org/linux/man-pages/man2/mount_setattr.2.html)
+
 {{#include ../../../../banners/hacktricks-training.md}}
