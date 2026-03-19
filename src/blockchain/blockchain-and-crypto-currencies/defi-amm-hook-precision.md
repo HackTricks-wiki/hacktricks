@@ -1,48 +1,51 @@
-# DeFi/AMM शोषण: Uniswap v4 Hook Precision/Rounding Abuse
+# DeFi/AMM Exploitation: Uniswap v4 Hook Precision/Rounding Abuse
 
 {{#include ../../banners/hacktricks-training.md}}
 
-यह पृष्ठ Uniswap v4–style DEXes के खिलाफ एक क्लास के DeFi/AMM शोषण तकनीकों का दस्तावेज़ीकरण करता है जो core math को custom hooks के साथ बढ़ाती हैं। हाल का एक घटना Bunni V2 में Liquidity Distribution Function (LDF) के एक rounding/precision दोष का उपयोग करके हुई थी, जो हर swap पर चलता था और attacker को positive credits जमा करने और liquidity निकालने में सक्षम बनाती थी।
 
-मुख्य विचार: यदि किसी hook में अतिरिक्त accounting लागू है जो fixed‑point math, tick rounding, और threshold logic पर निर्भर करती है, तो attacker ऐसे exact‑input swaps तैयार कर सकता है जो विशिष्ट thresholds को पार करें ताकि rounding विसंगतियाँ उनके फायदे में जमा हो जाएँ। इस पैटर्न को दोहराकर और फिर inflate किए गए बैलेंस को निकालकर मुनाफा प्राप्त किया जा सकता है, अक्सर flash loan से फंड करके।
+
+This page documents a class of DeFi/AMM exploitation techniques against Uniswap v4–style DEXes that extend core math with custom hooks. A recent incident in Bunni V2 leveraged a rounding/precision flaw in a Liquidity Distribution Function (LDF) executed on each swap, enabling the attacker to accrue positive credits and drain liquidity.
+
+Key idea: if a hook implements additional accounting that depends on fixed‑point math, tick rounding, and threshold logic, an attacker can craft exact‑input swaps that cross specific thresholds so that rounding discrepancies accumulate in their favor. Repeating the pattern and then withdrawing the inflated balance realizes profit, often financed with a flash loan.
 
 ## पृष्ठभूमि: Uniswap v4 hooks और swap flow
 
-- Hooks वे contracts हैं जिन्हें PoolManager lifecycle के specific points पर कॉल करता है (उदा., beforeSwap/afterSwap, beforeAddLiquidity/afterAddLiquidity, beforeRemoveLiquidity/afterRemoveLiquidity)।
-- Pools को PoolKey के साथ initialize किया जाता है जिसमें hooks address शामिल होता है। अगर non‑zero है, तो PoolManager हर संबंधित ऑपरेशन पर callbacks चलाता है।
-- Core math fixed‑point formats का उपयोग करती है जैसे Q64.96 for sqrtPriceX96 और tick arithmetic 1.0001^tick के साथ। ऊपर लेयर्ड कोई भी custom math rounding semantics को सावधानी से मिलाना चाहिए ताकि invariant drift न हो।
-- Swaps exactInput या exactOutput हो सकते हैं। v3/v4 में, price ticks के साथ चलता है; एक tick boundary को पार करने से range liquidity activate/deactivate हो सकती है। Hooks threshold/tick crossings पर अतिरिक्त लॉजिक लागू कर सकते हैं।
+- Hooks वे contracts हैं जिन्हें PoolManager विशेष lifecycle बिंदुओं पर कॉल करता है (उदा., beforeSwap/afterSwap, beforeAddLiquidity/afterAddLiquidity, beforeRemoveLiquidity/afterRemoveLiquidity, beforeInitialize/afterInitialize, beforeDonate/afterDonate)।
+- Pools को PoolKey में hooks address के साथ initialized किया जाता है। यदि non‑zero है, तो PoolManager हर संबंधित operation पर callbacks करता है।
+- Hooks **custom deltas** लौट सकते हैं जो swap या liquidity action के final balance changes को modify करते हैं (custom accounting)। ये deltas कॉल के अंत में net balances के रूप में settle होते हैं, इसलिए hook के अंदर किसी भी rounding error का असर settlement से पहले accumulate हो जाता है।
+- Core math fixed‑point formats जैसे Q64.96 का उपयोग करती है sqrtPriceX96 के लिए और tick arithmetic 1.0001^tick के साथ चलता है। किसी भी custom math परत को rounding semantics से सावधानी से जोड़ा जाना चाहिए अन्यथा invariant drift हो सकता है।
+- Swaps exactInput या exactOutput हो सकते हैं। v3/v4 में price ticks के साथ चलता है; किसी tick boundary को cross करने से range liquidity activate/deactivate हो सकती है। Hooks threshold/tick crossings पर अतिरिक्त लॉजिक लागू कर सकते हैं।
 
 ## Vulnerability archetype: threshold‑crossing precision/rounding drift
 
-custom hooks में एक सामान्य vulnerable pattern:
+एक सामान्य vulnerable पैटर्न custom hooks में:
 
-1. Hook per‑swap liquidity या balance deltas की गणना integer division, mulDiv, या fixed‑point conversions (उदा., token ↔ liquidity using sqrtPrice और tick ranges) का उपयोग करके करता है।
-2. Threshold logic (उदा., rebalancing, stepwise redistribution, या per‑range activation) तब ट्रिगर होती है जब swap size या price movement किसी internal boundary को पार करता है।
-3. Rounding inconsistently लागू होता है (उदा., truncation toward zero, floor versus ceil) forward calculation और settlement path के बीच। छोटी विसंगतियाँ cancel नहीं होतीं और इसके बजाय caller को credit कर देती हैं।
-4. Exact‑input swaps, ठीक उसी आकार के जिनका उद्देश्य उन boundaries को straddle करना होता है, बार‑बार positive rounding remainder को harvest करते हैं। बाद में attacker accumulated credit को withdrawal के माध्यम से निकालता है।
+1. Hook per‑swap liquidity या balance deltas की गणना integer division, mulDiv, या fixed‑point conversions से करता है (उदा., token ↔ liquidity के लिए sqrtPrice और tick ranges का उपयोग)।
+2. Threshold logic (उदा., rebalancing, stepwise redistribution, या per‑range activation) तब trigger होती है जब swap size या price movement किसी internal boundary को पार कर देती है।
+3. Rounding inconsistently लागू होती है (उदा., truncation toward zero, floor बनाम ceil) forward calculation और settlement path के बीच। छोटे अंतर cancel नहीं होते और इसके बजाय caller को credit कर देते हैं।
+4. Exact‑input swaps, जो ठीक ऐसे boundaries को straddle करने के लिए size किए जाते हैं, बार‑बार positive rounding remainder को harvest करते हैं। बाद में attacker accumulated credit withdraw कर देता है।
 
 Attack preconditions
-- एक pool जो custom v4 hook का उपयोग कर रहा हो जो प्रत्येक swap पर अतिरिक्त math करता है (उदा., एक LDF/rebalancer)।
-- कम से कम एक execution path जहाँ rounding swap initiator को threshold crossings पर लाभ पहुंचाती हो।
-- कई swaps को atomically repeat करने की क्षमता (flash loans अस्थायी float प्रदान करने और gas amortize करने के लिए आदर्श हैं)।
+- एक pool जो custom v4 hook का उपयोग करता है जो हर swap पर अतिरिक्त math करता है (उदा., एक LDF/rebalancer)।
+- कम से कम एक execution path जहाँ rounding swap initiator को threshold crossings के पार लाभ पहुँचाती है।
+- कई swaps को atomically repeat करने की क्षमता (flash loans अस्थायी float देने और gas amortize करने के लिए ideal हैं)।
 
 ## Practical attack methodology
 
 1) Identify candidate pools with hooks
-- v4 pools enumerate करें और PoolKey.hooks != address(0) जांचें।
-- hook bytecode/ABI inspect करें callbacks के लिए: beforeSwap/afterSwap और कोई भी custom rebalancing methods।
-- ऐसी math देखें जो: liquidity से divide करती है, token amounts और liquidity के बीच convert करती है, या BalanceDelta को rounding के साथ aggregate करती है।
+- v4 pools को enumerate करें और चेक करें PoolKey.hooks != address(0)।
+- Hook bytecode/ABI inspect करें callbacks के लिए: beforeSwap/afterSwap और कोई भी custom rebalancing methods।
+- ऐसे math की तलाश करें जो: liquidity से divide करता हो, token amounts और liquidity के बीच convert करता हो, या rounding के साथ BalanceDelta aggregate करता हो।
 
 2) Model the hook’s math and thresholds
-- Hook की liquidity/redistribution formula recreate करें: inputs आमतौर पर sqrtPriceX96, tickLower/Upper, currentTick, fee tier, और net liquidity शामिल करते हैं।
-- threshold/step functions का map बनाएं: ticks, bucket boundaries, या LDF breakpoints। निर्धारित करें कि प्रत्येक boundary के किन पक्षों पर delta को कैसे rounded किया जाता है।
-- Identify करें जहाँ conversions uint256/int256 के बीच cast होते हैं, SafeCast का उपयोग होता है, या mulDiv पर implicit floor निर्भर है।
+- Hook की liquidity/redistribution formula recreate करें: inputs आमतौर पर sqrtPriceX96, tickLower/Upper, currentTick, fee tier, और net liquidity होते हैं।
+- Threshold/step functions का मैप बनाएं: ticks, bucket boundaries, या LDF breakpoints। निर्धारित करें कि प्रत्येक boundary के किस साइड पर delta rounded होता है।
+- पहचानें जहाँ conversions uint256/int256 के बीच cast करते हैं, SafeCast का उपयोग होता है, या mulDiv implicit floor पर निर्भर करता है।
 
 3) Calibrate exact‑input swaps to cross boundaries
-- Foundry/Hardhat simulations का उपयोग करके minimal Δin compute करें जो price को boundary के ठीक पार ले जाए और hook की branch trigger करे।
-- Verify करें कि afterSwap settlement caller को cost से अधिक credit करती है, जिससे positive BalanceDelta या hook के accounting में credit बचता है।
-- Swaps को repeat करके credit accumulate करें; फिर hook के withdrawal/settlement path को कॉल करें।
+- Foundry/Hardhat simulations का उपयोग करके वह न्यूनतम Δin गणना करें जो price को बस एक boundary के पार ले जाए और hook की branch को trigger करे।
+- Verify करें कि afterSwap settlement caller को खर्च से अधिक credit करता है, जिससे positive BalanceDelta या hook के accounting में credit बचता है।
+- Credit accumulate करने के लिए swaps repeat करें; फिर hook की withdrawal/settlement path कॉल करें।
 
 Example Foundry‑style test harness (pseudocode)
 ```solidity
@@ -77,16 +80,18 @@ sqrtPriceLimitX96: 0 // allow tick crossing
 bunniHook.withdrawCredits(msg.sender);
 }
 ```
-exactInput को कैलिब्रेट करना
+Calibrating the exactInput
+
 - एक tick step के लिए ΔsqrtP की गणना करें: sqrtP_next = sqrtP_current × 1.0001^(Δtick).
-- v3/v4 सूत्रों का उपयोग करके Δin का अनुमान लगाएँ: Δx ≈ L × (ΔsqrtP / (sqrtP_next × sqrtP_current)). सुनिश्चित करें कि राउंडिंग दिशा कोर गणित के अनुरूप हो।
-- बाउंडरी के आसपास Δin को ±1 wei से समायोजित करें ताकि वह ब्रांच मिल सके जहाँ hook आपके पक्ष में राउंड करे।
+- Δin को v3/v4 फ़ॉर्मूलों का उपयोग कर अनुमानित करें: Δx ≈ L × (ΔsqrtP / (sqrtP_next × sqrtP_current)). राउंडिंग दिशा कोर गणित के अनुरूप हो यह सुनिश्चित करें।
+- बाउंडरी के आसपास Δin को ±1 wei से समायोजित करें ताकि वह ब्रांच मिल सके जहाँ hook आपके पक्ष में राउंड करता है।
 
-4) flash loans के साथ प्रभाव बढ़ाएँ
-- कई iterations को atomic तरीके से चलाने के लिए एक बड़ी notional राशि उधार लें (उदा., 3M USDT या 2000 WETH)।
-- calibrated swap loop को execute करें, फिर flash loan callback के अंदर withdraw और repay करें।
+4) Flash loans से प्रभाव बढ़ाएँ
 
-Aave V3 flash loan का ढांचा
+- कई iterations को atomically चलाने के लिए बड़ा notional उधार लें (उदा., 3M USDT या 2000 WETH)।
+- कैलिब्रेटेड swap loop को execute करें, फिर flash loan callback के भीतर withdraw और repay करें।
+
+Aave V3 flash loan skeleton
 ```solidity
 function executeOperation(
 address[] calldata assets,
@@ -108,45 +113,59 @@ IERC20(assets[j]).approve(address(POOL), amounts[j] + premiums[j]);
 return true;
 }
 ```
-5) निकास और क्रॉस‑चेन प्रतिकरण
-- यदि hooks कई chains पर परिनियोजित हैं, तो प्रत्येक chain के लिए वही calibration दोहराएँ।
-- Bridge proceeds back to the target chain और वैकल्पिक रूप से फ्लो को अस्पष्ट करने के लिए lending protocols के माध्यम से चक्रित करें।
+5) निकलने और क्रॉस‑चेन प्रतिकृति
+- यदि hooks कई चेन पर तैनात हैं, तो हर चेन के लिए वही कैलीबरेशन दोहराएं।
+- Bridge धन्वापसी लक्ष्य चेन पर वापस भेजता है और वैकल्पिक रूप से फ्लो को अस्पष्ट करने के लिए lending protocols के माध्यम से साइकिल कर सकता है।
 
-## Common root causes in hook math
+## Hook गणित में सामान्य मूल कारण
 
-- Mixed rounding semantics: mulDiv floors जबकि बाद के रास्ते प्रभावी रूप से round up करते हैं; या token/liquidity के बीच conversions में अलग राउंडिंग लागू होती है।
-- Tick alignment errors: एक path में unrounded ticks का उपयोग और दूसरे में tick‑spaced rounding।
-- BalanceDelta sign/overflow issues जब settlement के दौरान int256 और uint256 के बीच conversion होता है।
-- Precision loss in Q64.96 conversions (sqrtPriceX96) जो reverse mapping में प्रतिबिंबित नहीं होता।
-- Accumulation pathways: per‑swap remainders को credits के रूप में ट्रैक किया जाना जो caller द्वारा withdrawable हो सकते हैं बजाय इसके कि वे burned/zero‑sum हों।
+- Mixed rounding semantics: mulDiv फ़्लोर करता है जबकि बाद के पाथ प्रभावत: ऊपर राउंड करते हैं; या token/liquidity के बीच रूपांतरण अलग राउंडिंग लागू करते हैं।
+- Tick alignment errors: एक पाथ में unrounded ticks का उपयोग और दूसरे में tick‑spaced rounding।
+- BalanceDelta sign/overflow issues जब settlement के दौरान int256 और uint256 के बीच परिवर्तित किया जाता है।
+- Q64.96 परिवर्तन (sqrtPriceX96) में precision loss जो reverse mapping में प्रतिबिंबित नहीं होता।
+- Accumulation pathways: प्रति‑swap बाकी बचा हुआ हिस्सा credits के रूप में ट्रैक किया जाता है जिन्हें caller द्वारा withdrawable माना जाता है बजाय उन्हें burn/zero‑sum करने के।
 
-## Defensive guidance
+## Custom accounting & delta amplification
 
-- Differential testing: hook की math को एक reference implementation के साथ high‑precision rational arithmetic का उपयोग करके mirror करें और equality या bounded error को assert करें जो हमेशा adversarial हो (कभी caller के पक्ष में नहीं)।
-- Invariant/property tests:
-- swap paths और hook adjustments में deltas (tokens, liquidity) का योग fees के मोड्यूलो के सापेक्ष वैल्यू को संरक्षित करना चाहिए।
-- किसी भी path को repeated exactInput iterations के दौरान swap initiator के लिए positive net credit नहीं बनाना चाहिए।
-- ±1 wei इनपुट के आसपास threshold/tick boundary tests चलाएँ, दोनों exactInput और exactOutput के लिए।
-- Rounding policy: ऐसे rounding helpers को केंद्रीकृत करें जो हमेशा user के खिलाफ राउंड करें; inconsistent casts और implicit floors को हटाएँ।
-- Settlement sinks: अनिवार्य rounding residue को protocol treasury में संचित करें या उसे burn करें; इसे कभी भी msg.sender को attribute न करें।
-- Rate‑limits/guardrails: rebalancing triggers के लिए minimum swap sizes निर्धारित करें; यदि deltas sub‑wei हैं तो rebalances को disable करें; deltas को expected ranges के खिलाफ sanity‑check करें।
+- Uniswap v4 custom accounting hooks को ऐसे deltas लौटाने देता है जो सीधे caller के देनदारियों/प्राप्तियों को समायोजित करते हैं। यदि hook credits को आंतरिक रूप से ट्रैक करता है, तो rounding residue कई छोटे ऑपरेशनों में जमा हो सकता है इससे पहले कि अंतिम settlement हो।
+- यह boundary/threshold abuse को मजबूत बनाता है: attacker एक ही tx में `swap → withdraw → swap` वैकल्पिक कर सकता है, जिससे hook को हल्का बदलें हुए state पर deltas पुनःगणना करने के लिए मजबूर किया जाता है जबकि सभी बैलेंस अभी भी pending होते हैं।
+- Hooks की समीक्षा करते समय, हमेशा ट्रेस करें कि BalanceDelta/HookDelta कैसे उत्पन्न और settle होते हैं। एक शाखा में एकल पक्षपाती राउंडिंग बार‑बार deltas पुनः‑गणना होने पर एक संचित क्रेडिट बन सकती है।
+
+## रक्षात्मक मार्गदर्शन
+
+- Differential testing: hook की गणना को high‑precision rational arithmetic का उपयोग करके एक reference implementation के विरुद्ध mirror करें और equality या ऐसा bounded error assert करें जो हमेशा प्रतिकूल हो (कभी भी caller के अनुकूल नहीं)।
+- Invariant/property परीक्षण:
+  - swap पाथ्स और hook समायोजनों में deltas (tokens, liquidity) का योग fees को छोड़कर मूल्य का संरक्षण करना चाहिए।
+  - किसी भी पाथ को repeated exactInput iterations में swap initiator के लिए सकारात्मक नेट क्रेडिट पैदा नहीं करना चाहिए।
+  - ±1 wei इनपुट के आसपास Threshold/tick boundary परीक्षण दोनों exactInput/exactOutput के लिए।
+- Rounding policy: राउंडिंग हेल्पर्स को केंद्रीकृत करें जो हमेशा user के खिलाफ राउंड करें; असंगत casts और implicit floors को समाप्त करें।
+- Settlement sinks: अपरिहार्य राउंडिंग residue को protocol treasury में संग्रहीत करें या बर्न करें; इसे कभी भी msg.sender को नहीं लौटाएं।
+- Rate‑limits/guardrails: rebalancing triggers के लिए न्यूनतम swap आकार; यदि deltas sub‑wei हैं तो rebalances अक्षम करें; deltas की sanity‑check अपेक्षित रेंज के खिलाफ करें।
 - Hook callbacks की समग्र समीक्षा करें: beforeSwap/afterSwap और before/after liquidity changes को tick alignment और delta rounding पर सहमत होना चाहिए।
 
 ## Case study: Bunni V2 (2025‑09‑02)
 
-- Protocol: Bunni V2 (Uniswap v4 hook) जिसमें प्रति swap rebalancing के लिए एक LDF लागू था।
-- Root cause: threshold‑crossing swaps के दौरान LDF liquidity accounting में rounding/precision त्रुटि; per‑swap असंगतियाँ caller के लिए positive credits के रूप में जमा हो गयीं।
-- Ethereum leg: attacker ने ~3M USDT flash loan ली, USDC/USDT पर calibrated exact‑input swaps करके credits बनाए, inflated balances निकाले, repaid किया, और funds को Aave के माध्यम से route किया।
-- UniChain leg: exploit को 2000 WETH flash loan के साथ दोहराया, लगभग 1366 WETH siphon किए और Ethereum पर bridge किया।
-- Impact: लगभग USD 8.3M कई chains में निकाले गए। किसी user interaction की आवश्यकता नहीं थी; पूरी प्रक्रिया on‑chain थी।
+- Protocol: Bunni V2 (Uniswap v4 hook) जिसमें हर swap पर rebalancing के लिए एक LDF लागू था।
+- Affected pools: USDC/USDT on Ethereum और weETH/ETH on Unichain, कुल लगभग $8.4M।
+- Step 1 (price push): attacker ने लगभग 3M USDT flash‑borrowed करके swap किया ताकि tick ~5000 तक धकेल दिया जाए, जिससे **सक्रिय** USDC बैलेंस लगभग 28 wei तक सिकुड़ गया।
+- Step 2 (rounding drain): 44 छोटे withdrawals ने `BunniHubLogic::withdraw()` में floor rounding का शोषण करके सक्रिय USDC बैलेंस को 28 wei से 4 wei (‑85.7%) तक घटा दिया जबकि केवल बेहद छोटे हिस्से के LP shares बर्न हुए। कुल liquidity का अनुमान लगभग 84.4% कम आंका गया।
+- Step 3 (liquidity rebound sandwich): एक बड़ा swap tick को ~839,189 तक ले गया (1 USDC ≈ 2.77e36 USDT). Liquidity के अनुमान पलट गए और ~16.8% बढ़ गए, जिससे attacker ने inflated price पर वापस swap करके और exit करके लाभ कमाया।
+- पोस्ट‑मोर्टेम में पहचाना गया फिक्स: idle‑balance अपडेट को **up** की ओर राउंड करने के लिए बदलें ताकि बार‑बार माइक्रो‑withdrawals पूल के सक्रिय बैलेंस को नीचे की ओर ratchet न कर सकें।
 
-## Hunting checklist
+Simplified vulnerable line (and post‑mortem fix)
+```solidity
+// BunniHubLogic::withdraw() idle balance update (simplified)
+uint256 newBalance = balance - balance.mulDiv(shares, currentTotalSupply);
+// Fix: round up to avoid cumulative underestimation
+uint256 newBalance = balance - balance.mulDivUp(shares, currentTotalSupply);
+```
+## हंटिंग चेकलिस्ट
 
-- क्या pool किसी non‑zero hooks address का उपयोग करता है? कौन से callbacks enabled हैं?
-- क्या per‑swap redistributions/rebalances custom math का उपयोग करते हैं? कोई tick/threshold logic है?
-- divisions/mulDiv, Q64.96 conversions, या SafeCast कहाँ उपयोग हो रहे हैं? क्या rounding semantics वैश्विक रूप से consistent हैं?
-- क्या आप ऐसा Δin बना सकते हैं जो लगभग boundary को पार करे और favorable rounding branch दे? दोनों दिशाओं और दोनों exactInput तथा exactOutput के लिए टेस्ट करें।
-- क्या hook per‑caller credits या deltas ट्रैक करता है जिन्हें बाद में withdraw किया जा सकता है? सुनिश्चित करें कि residue neutralized हो।
+- क्या pool non‑zero hooks address का उपयोग करता है? कौन‑से callbacks सक्षम हैं?
+- क्या per‑swap redistributions/rebalances custom math का उपयोग करके होते हैं? कोई tick/threshold logic है?
+- divisions/mulDiv, Q64.96 conversions, या SafeCast कहाँ उपयोग होते हैं? क्या rounding semantics वैश्विक रूप से सुसंगत हैं?
+- क्या आप ऐसा Δin तैयार कर सकते हैं जो सीमा को मुश्किल से पार करे और अनुकूल rounding branch दे? दोनों दिशाओं और दोनों exactInput और exactOutput के साथ परीक्षण करें।
+- क्या hook per‑caller credits या deltas ट्रैक करता है जिन्हें बाद में निकाला जा सकता है? सुनिश्चित करें कि अवशेष निष्प्रभावी कर दिए गए हों।
 
 ## References
 
@@ -156,5 +175,7 @@ return true;
 - [Liquidity mechanics in Uniswap v4 core](https://www.quillaudits.com/research/uniswap-development/uniswap-v4/liquidity-mechanics-in-uniswap-v4-core)
 - [Swap mechanics in Uniswap v4 core](https://www.quillaudits.com/research/uniswap-development/uniswap-v4/swap-mechanics-in-uniswap-v4-core)
 - [Uniswap v4 Hooks and Security Considerations](https://www.quillaudits.com/research/uniswap-development/uniswap-v4/uniswap-v4-hooks-and-security)
+- [Bunni Exploit Post Mortem (Sep 2025)](https://blog.bunni.xyz/posts/exploit-post-mortem/)
+- [Uniswap v4 Core Whitepaper](https://app.uniswap.org/whitepaper-v4.pdf)
 
 {{#include ../../banners/hacktricks-training.md}}
