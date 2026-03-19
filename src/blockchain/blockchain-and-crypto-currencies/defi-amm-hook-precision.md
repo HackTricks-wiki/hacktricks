@@ -1,48 +1,51 @@
-# DeFi/AMM 攻撃: Uniswap v4 Hook 精度/丸めの悪用
+# DeFi/AMM Exploitation: Uniswap v4 Hook Precision/Rounding Abuse
 
 {{#include ../../banners/hacktricks-training.md}}
 
-このページは、カスタム hook でコア演算に拡張を加える Uniswap v4 スタイルの DEX に対する一連の DeFi/AMM 攻撃手法を記録するものです。最近の Bunni V2 のインシデントでは、各 swap 実行時に走る Liquidity Distribution Function (LDF) における丸め／精度の欠陥を突かれ、攻撃者が正のクレジットを蓄積して流動性を抜き取ることを可能にしました。
 
-キーアイデア: hook が fixed‑point 演算、tick の丸め、しきい値ロジックに依存する追加の会計処理を実装している場合、攻撃者はしきい値を跨ぐように精密に exact‑input swap を作成して丸め差分を自分に有利に蓄積させることができます。このパターンを繰り返してから膨らんだ残高を引き出すことで利益を確定します。多くの場合、flash loan で一時的な資金を調達してガスを分散します。
 
-## 背景: Uniswap v4 hooks と swap フロー
+このページは、Uniswap v4 スタイルの DEX に対する、コアの数学にカスタム hook を拡張した実装を狙う DeFi/AMM 攻撃手法の一群を解説する。最近の Bunni V2 のインシデントでは、各スワップで実行される Liquidity Distribution Function (LDF) における丸め/精度の欠陥を突かれ、攻撃者が正のクレジットを蓄積して流動性を抜き取ることが可能になった。
 
-- Hooks は PoolManager がライフサイクルの特定のポイント（例: beforeSwap/afterSwap、beforeAddLiquidity/afterAddLiquidity、beforeRemoveLiquidity/afterRemoveLiquidity）で呼び出すコントラクトです。
-- Pools は PoolKey に hooks アドレスを含めて初期化されます。非ゼロであれば、PoolManager は関連する各操作でコールバックを実行します。
-- コア演算は Q64.96 のような fixed‑point 形式（sqrtPriceX96）や 1.0001^tick を用いる tick 演算を使用します。上に重ねる任意のカスタム演算は、丸めのセマンティクスを慎重に揃えないとインバリアントのドリフトを招きます。
-- Swaps は exactInput または exactOutput になり得ます。v3/v4 では価格が tick に沿って移動し、tick 境界を跨ぐと範囲流動性の有効化/無効化が発生することがあります。Hooks はしきい値／tick のクロッシングで追加ロジックを実装することがあります。
+主要な着眼点：hook が fixed‑point math、tick の丸め、閾値ロジックに依存する追加の会計処理を実装している場合、攻撃者は exact‑input スワップを精密に作成して特定の閾値を跨がせ、丸めの不一致を有利に累積させることができる。これを繰り返して蓄積した残高を引き出すことで利益を実現することが多く、flash loan で資金を調達して行うのが典型的である。
 
-## 脆弱性の典型: しきい値跨ぎでの精度／丸めドリフト
+## Background: Uniswap v4 hooks and swap flow
 
-カスタム hook でよく見られる脆弱なパターン:
+- Hooks は PoolManager がライフサイクルの特定ポイント（例: beforeSwap/afterSwap, beforeAddLiquidity/afterAddLiquidity, beforeRemoveLiquidity/afterRemoveLiquidity, beforeInitialize/afterInitialize, beforeDonate/afterDonate）で呼び出すコントラクトである。
+- Pools は PoolKey に hooks address を含めて初期化される。non‑zero であれば、PoolManager は関連操作ごとにコールバックを実行する。
+- Hooks はスワップや流動性操作の最終的な残高変化を変更する **custom deltas** を返すことができる（カスタム会計）。これらのデルタはコールの終了時にネット残高として決済されるため、hook 内の数学での丸め誤差は決済前に累積される。
+- Core math は sqrtPriceX96 に Q64.96 のような fixed‑point フォーマットや、1.0001^tick を用いる tick 算術を使う。上に重ねる任意のカスタム数学は丸めのセマンティクスを厳密に合わせないとインバリアントのずれを招く。
+- Swaps は exactInput または exactOutput になり得る。v3/v4 では価格が tick に沿って動く；tick 境界の跨ぎはレンジ流動性の有効化/無効化を引き起こすことがある。Hooks は閾値/ティックの跨ぎで追加ロジックを実装することがある。
 
-1. Hook は各 swap ごとに整数除算、mulDiv、または fixed‑point 変換（例: token ↔ liquidity を sqrtPrice や tick 範囲で換算）を使って流動性や残高のデルタを計算する。
-2. 再バランスや段階的再配分、レンジごとの有効化などのしきい値ロジックが、swap サイズや価格変動が内部境界を越えたときに発動する。
-3. 順方向計算と清算パスで丸めが一貫して適用されていない（ゼロ方向への切り捨て、floor と ceil の不一致など）。小さな差分は打ち消されずに呼び出し元に有利に残る。
-4. 境界を跨ぐように正確にサイズ調整した exact‑input swap を繰り返し、正の丸め残差を収穫する。攻撃者は後で蓄積されたクレジットを引き出す。
+## Vulnerability archetype: threshold‑crossing precision/rounding drift
+
+カスタム hook における典型的な脆弱パターン:
+
+1. Hook は整数除算、mulDiv、または fixed‑point 変換（例: token ↔ liquidity を sqrtPrice と tick 範囲を使って計算）を用いてスワップごとの流動性や残高デルタを計算する。
+2. 閾値ロジック（例: リバランス、段階的再配分、レンジごとの有効化）はスワップサイズや価格変動が内部境界を越えたときにトリガーされる。
+3. 前方計算と決済経路で丸めが一貫して適用されない（例: 0 方向への切り捨て、floor と ceil の不一致）。小さな差分は打ち消されず、代わりに呼び出し元にクレジットされる。
+4. 閾値をまたぐよう精密にサイズ調整した exact‑input スワップが正の丸め残余を繰り返し回収する。攻撃者は後で蓄積されたクレジットを引き出す。
 
 攻撃の前提条件
-- 各 swap で追加の演算を行うカスタム v4 hook を使っているプール（例: LDF／rebalancer）。
-- しきい値跨ぎで swap 発起者に丸めが有利に働く少なくとも一つの実行パスが存在すること。
-- 多数の swap をアトミックに繰り返す能力（flash loans は一時的資金を供給してガスを相殺するのに理想的）。
+- 各スワップで追加の数学を行うカスタム v4 hook を使っているプール（例: LDF/リバランサ）。
+- 閾値跨ぎにおいて丸めがスワップ開始者に有利に働く実行パスが少なくとも一つ存在すること。
+- 多数のスワップを原子的に繰り返す能力（flash loans は一時的な資金供給とガス分散に好適）。
 
-## 実践的攻撃手順
+## Practical attack methodology
 
-1) Hook を持つ候補プールを特定する
-- v4 プールを列挙し、PoolKey.hooks != address(0) をチェックする。
-- Hook の bytecode/ABI を調べ、beforeSwap/afterSwap や任意の再バランス用メソッドを確認する。
-- 流動性で割る演算、token と liquidity の換算、または BalanceDelta を丸めで集計するような数学処理を探す。
+1) Identify candidate pools with hooks
+- v4 プールを列挙し、PoolKey.hooks != address(0) を確認する。
+- hook の bytecode/ABI を検査し、beforeSwap/afterSwap やカスタムのリバランス系メソッドを探す。
+- liquidity で除算している、token と liquidity の間で変換している、または丸めを伴う BalanceDelta を集約しているような数学がないかを探す。
 
-2) Hook の演算としきい値をモデル化する
-- Hook の liquidity/redistribution 公式を再現する: 入力は通常 sqrtPriceX96、tickLower/Upper、currentTick、fee tier、net liquidity などを含む。
-- tick、バケット境界、LDF のブレークポイントなどのしきい値／ステップ関数をマッピングする。どちらの側でデルタが丸められるかを判定する。
-- uint256/int256 へのキャスト、SafeCast の使用、または暗黙の floor を伴う mulDiv の箇所を特定する。
+2) Model the hook’s math and thresholds
+- hook の流動性/再配分の式を再現する: 入力には通常 sqrtPriceX96, tickLower/Upper, currentTick, fee tier, net liquidity などが含まれる。
+- 閾値/ステップ関数をマッピングする: tick、バケット境界、LDF のブレークポイント。各境界のどちら側でデルタが丸められるかを特定する。
+- どこで uint256/int256 間のキャスト、SafeCast を使っているか、または暗黙的に floor を採る mulDiv に依存しているかを特定する。
 
-3) しきい値を跨ぐように exact‑input swap を較正する
-- Foundry/Hardhat のシミュレーションを使って、価格を境界ちょうど跨がせて hook の分岐をトリガーするために必要な最小の Δin を計算する。
-- afterSwap の清算がコストを上回る形で呼び出し元にクレジットを付与し、正の BalanceDelta や hook の会計上のクレジットが残ることを検証する。
-- スワップを繰り返してクレジットを蓄積し、最後に hook の引き出し／清算経路を呼ぶ。
+3) Calibrate exact‑input swaps to cross boundaries
+- Foundry/Hardhat のシミュレーションで、価格をちょうど境界の向こうへ動かし hook の分岐をトリガーするために必要な最小 Δin を計算する。
+- afterSwap 決済後にコストよりも呼び出し元に多くクレジットされ、正の BalanceDelta または hook の会計上のクレジットが残ることを検証する。
+- スワップを繰り返してクレジットを蓄積し、最後に hook の引き出し/決済パスを呼び出す。
 
 Example Foundry‑style test harness (pseudocode)
 ```solidity
@@ -77,16 +80,16 @@ sqrtPriceLimitX96: 0 // allow tick crossing
 bunniHook.withdrawCredits(msg.sender);
 }
 ```
-Calibrating the exactInput
-- tickステップについて ΔsqrtP を計算する: sqrtP_next = sqrtP_current × 1.0001^(Δtick).
-- v3/v4 の式を使って Δin を近似する: Δx ≈ L × (ΔsqrtP / (sqrtP_next × sqrtP_current)). 丸めの方向がコアの計算と一致していることを確認する。
-- 境界付近で Δin を ±1 wei 調整し、hook が有利に丸めるブランチを見つける。
+exactInput の較正
+- tick ステップに対する ΔsqrtP を計算する: sqrtP_next = sqrtP_current × 1.0001^(Δtick).
+- v3/v4 の式を使って Δin を近似する: Δx ≈ L × (ΔsqrtP / (sqrtP_next × sqrtP_current)). 丸め方向が core math と一致することを確認する。
+- 境界付近で Δin を ±1 wei ずつ調整し、hook が自分に有利に丸める分岐を見つける。
 
-4) Amplify with flash loans
-- 多数のイテレーションを原子的に実行するために、大きな名目額（例: 3M USDT または 2000 WETH）を借りる。
-- キャリブレーション済みの swap loop を実行し、その後 flash loan callback 内で引き出しと返済を行う。
+4) flash loans で増幅する
+- 多数のイテレーションを原子的に実行するために、大きな notional を借りる（例: 3M USDT や 2000 WETH）。
+- キャリブレーションした swap ループを実行し、flash loan callback 内で引き出しと返済を行う。
 
-Aave V3 flash loan スケルトン
+Aave V3 の flash loan skeleton
 ```solidity
 function executeOperation(
 address[] calldata assets,
@@ -108,45 +111,59 @@ IERC20(assets[j]).approve(address(POOL), amounts[j] + premiums[j]);
 return true;
 }
 ```
-5) 退出とクロスチェーン複製
-- 複数のチェーンにhooksがデプロイされている場合、各チェーンで同じ較正を繰り返す。
-- ブリッジで資金をターゲットチェーンに戻し、任意でレンディングプロトコルを経由してフローを難読化する。
+5) Exit とクロスチェーン複製
+- フックが複数のチェーンにデプロイされている場合、チェーンごとに同じキャリブレーションを繰り返す。
+- Bridge はターゲットチェーンに戻り、フローを難読化するために貸付プロトコル経由で循環させることがある。
 
-## hook math における一般的な根本原因
+## フックの数学における一般的な根本原因
 
-- Mixed rounding semantics: mulDiv が切り捨てる一方で後続パスが実質的に切り上げる、または token/liquidity 間の変換で異なる丸めが適用される。
-- Tick alignment errors: あるパスで未丸めの ticks を使い、別のパスで tick‑spaced の丸めを行う。
-- BalanceDelta 符号/オーバーフロー問題：決済時に int256 と uint256 間で変換するときに発生する。
-- Q64.96 変換（sqrtPriceX96）での精度損失が逆方向のマッピングに反映されていない。
-- Accumulation pathways: スワップごとの残差がバーン/ゼロサムではなく、caller が引き出せるクレジットとして蓄積される。
+- Mixed rounding semantics: mulDiv floors while later paths effectively round up; or conversions between トークン/流動性 apply different rounding.
+- ティック整合性エラー：一方のパスで未丸めのティックを使用し、別のパスでティック間隔に合わせた丸めを行う。
+- 決済時に int256 と uint256 の間で変換する際の BalanceDelta の符号/オーバーフローの問題。
+- Q64.96 変換（sqrtPriceX96）での精度損失が逆マッピングで反映されていない問題。
+- 蓄積経路：スワップごとの残差がバーン/ゼロサムではなく、呼び出し元が引き出せるクレジットとして追跡される。
+
+## カスタム会計とデルタ増幅
+
+- Uniswap v4 カスタム会計では、hooks が呼び出し元の債務/受取額を直接調整する deltas を返せる。フックが内部でクレジットを追跡すると、最終決済が行われる**前**に丸めの残差が多数の小さな操作に渡って蓄積する可能性がある。
+- これにより境界/閾値の悪用が強化される：攻撃者は同じ tx 内で `swap → withdraw → swap` を交互に行い、すべての残高がまだ保留中である間にフックにわずかに異なる状態で deltas を再計算させることができる。
+- フックをレビューする際は、常に BalanceDelta/HookDelta がどのように生成・精算されるかを追跡すること。ある枝での単一の偏った丸めが、deltas が繰り返し再計算されると複利的なクレジットになることがある。
 
 ## 防御ガイダンス
 
-- Differential testing: 高精度の有理数演算を用いて hook の計算を参照実装とミラーリングし、等価性または常に攻撃者不利（決して caller に有利にならない）な有界誤差をアサートする。
+- 差分テスト：高精度有理数演算を用いてフックの数学を参照実装と比較し、常に攻撃者不利（呼び出し元に有利にならない）となる等価性または有界誤差をアサートする。
 - 不変量/プロパティテスト：
-- スワップ経路と hook の調整にわたるデルタ（tokens、liquidity）の合計は、手数料を除いて価値を保存しなければならない。
-- どの経路も、繰り返される exactInput イテレーションにおいてスワップ開始者に正の純クレジットを生じさせてはならない。
-- exactInput/exactOutput の両方について、±1 wei 入力周辺の閾値/tick 境界テストを行う。
-- 丸めポリシー：常にユーザー不利に丸める共通の丸めヘルパーを集中化し、不整合なキャストや暗黙の切り捨てを排除する。
-- 決済シンク：回避不能な丸め残差はプロトコルのトレジャリに蓄積するか焼却し、決して msg.sender に帰属させない。
-- レート制限/ガードレール：リバランスのトリガーとなる最小スワップサイズを設定する；デルタがサブ‑wei の場合はリバランスを無効にする；デルタを期待範囲と照合して妥当性を検査する。
-- hook コールバックを全体的に見直す：beforeSwap/afterSwap と before/after の流動性変更は tick アラインメントとデルタの丸めについて一致しているべきである。
+- スワップ経路とフック調整全体にわたる deltas（トークン、流動性）の合計は、手数料を除けば価値を保存していなければならない。
+- どの経路も、繰り返される exactInput イテレーションに対してスワップ開始者に正の純クレジットを生成してはならない。
+- exactInput/exactOutput の両方について、±1 wei 入力周辺の閾値/ティック境界テストを行う。
+- 丸めポリシー：常にユーザーに不利になる方向に丸める共通の丸めヘルパーを集中させ、矛盾するキャストや暗黙の切り捨てを排除する。
+- 決済シンク：避けられない丸め残差はプロトコルのトレジャリーに蓄積するかバーンし、決して msg.sender に帰属させない。
+- レート制限/ガードレール：リバランスをトリガーする最小スワップサイズを設定する；deltas がサブワイ（sub-wei）の場合はリバランスを無効にする；deltas を期待レンジと照合して正当性を確認する。
+- フックコールバックを包括的にレビューする：beforeSwap/afterSwap と流動性変更の before/after は、ティックの整列とデルタの丸めについて一致しているべきである。
 
 ## ケーススタディ: Bunni V2 (2025‑09‑02)
 
-- Protocol: Bunni V2 (Uniswap v4 hook) with an LDF applied per swap to rebalance.
-- Root cause: rounding/precision error in LDF liquidity accounting during threshold‑crossing swaps; per‑swap discrepancies accrued as positive credits for the caller.
-- Ethereum leg: attacker took a ~3M USDT flash loan, performed calibrated exact‑input swaps on USDC/USDT to build credits, withdrew inflated balances, repaid, and routed funds via Aave.
-- UniChain leg: repeated the exploit with a 2000 WETH flash loan, siphoning ~1366 WETH and bridging to Ethereum.
-- Impact: ~USD 8.3M drained across chains. No user interaction required; entirely on‑chain.
+- プロトコル：Bunni V2 (Uniswap v4 hook)、各スワップごとにリバランスのための LDF が適用されていた。
+- 影響を受けたプール：Ethereum 上の USDC/USDT と Unichain 上の weETH/ETH、合計で約 $8.4M。
+- Step 1 (price push): the attacker flash‑borrowed ~3M USDT and swapped to push the tick to ~5000, shrinking the **アクティブ** USDC balance down to ~28 wei.
+- Step 2 (rounding drain): 44 tiny withdrawals exploited floor rounding in `BunniHubLogic::withdraw()` to reduce the active USDC balance from 28 wei to 4 wei (‑85.7%) while only a tiny fraction of LP shares was burned. Total liquidity was underestimated by ~84.4%.
+- Step 3 (liquidity rebound sandwich): a large swap moved the tick to ~839,189 (1 USDC ≈ 2.77e36 USDT). Liquidity estimates flipped and increased by ~16.8%, enabling a sandwich where the attacker swapped back at the inflated price and exited with profit.
+- ポストモーテムで特定された修正：idle‑balance の更新を **切り上げ** に変更し、繰り返しのマイクロ引き出しでプールのアクティブ残高が段階的に減少することを防ぐ。
 
+簡略化された脆弱な行（およびポストモーテムの修正）
+```solidity
+// BunniHubLogic::withdraw() idle balance update (simplified)
+uint256 newBalance = balance - balance.mulDiv(shares, currentTotalSupply);
+// Fix: round up to avoid cumulative underestimation
+uint256 newBalance = balance - balance.mulDivUp(shares, currentTotalSupply);
+```
 ## ハンティングチェックリスト
 
-- プールは non‑zero hooks アドレスを使用しているか？どのコールバックが有効か？
-- カスタム計算を使ったスワップ毎の再配分/リバランスがあるか？tick/閾値のロジックはあるか？
-- Where are divisions/mulDiv, Q64.96 conversions, or SafeCast used? Are rounding semantics globally consistent?
-- 境界をかろうじて越える Δin を構築して有利な丸め分岐を生むことができるか？両方向・両方の exactInput と exactOutput をテストする。
-- hook は後で引き出せる per‑caller のクレジットやデルタを追跡しているか？残差が中和されていることを確認する。
+- プールは non‑zero の hooks アドレスを使用していますか？どの callbacks が有効になっていますか？
+- per‑swap ごとにカスタムな数学で再分配／リバランスが行われていますか？tick/threshold ロジックはありますか？
+- divisions/mulDiv、Q64.96 conversions、または SafeCast はどこで使われていますか？丸めのセマンティクスは全体で一貫していますか？
+- 境界をかろうじて跨ぐような Δin を構築して、有利な丸めの分岐を誘発できますか？両方向および exactInput と exactOutput の両方をテストしてください。
+- hook は後で引き出せる per‑caller の credits や deltas を追跡していますか？残留（residue）が中和されていることを確認してください。
 
 ## References
 
@@ -156,5 +173,7 @@ return true;
 - [Liquidity mechanics in Uniswap v4 core](https://www.quillaudits.com/research/uniswap-development/uniswap-v4/liquidity-mechanics-in-uniswap-v4-core)
 - [Swap mechanics in Uniswap v4 core](https://www.quillaudits.com/research/uniswap-development/uniswap-v4/swap-mechanics-in-uniswap-v4-core)
 - [Uniswap v4 Hooks and Security Considerations](https://www.quillaudits.com/research/uniswap-development/uniswap-v4/uniswap-v4-hooks-and-security)
+- [Bunni Exploit Post Mortem (Sep 2025)](https://blog.bunni.xyz/posts/exploit-post-mortem/)
+- [Uniswap v4 Core Whitepaper](https://app.uniswap.org/whitepaper-v4.pdf)
 
 {{#include ../../banners/hacktricks-training.md}}
