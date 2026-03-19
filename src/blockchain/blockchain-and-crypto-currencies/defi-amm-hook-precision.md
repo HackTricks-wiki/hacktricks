@@ -2,49 +2,52 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-本页记录了一类针对 Uniswap v4 风格 DEX 的 DeFi/AMM 利用技术，这类 DEX 在核心数学之上扩展了自定义 hooks。近期 Bunni V2 的一起事件利用了在每次 swap 上执行的 Liquidity Distribution Function (LDF) 中的舍入/精度缺陷，使攻击者能够累积正向 credit 并抽干流动性。
 
-关键思想：如果一个 hook 实现了依赖定点数运算、tick 舍入和阈值逻辑的额外记账，攻击者可以构造精确的 exact‑input swaps 去跨越特定阈值，从而使舍入差异朝有利于攻击者的方向累积。重复该模式然后提取被放大的余额即可实现利润，通常用 flash loan 提供资金。
 
-## 背景：Uniswap v4 hooks 和 swap 流程
+本页记录了一类针对 Uniswap v4 风格 DEXes 的 DeFi/AMM 利用技术，这类 DEX 在核心数学之上扩展了自定义 hooks。近期 Bunni V2 事件利用了在每次 swap 中执行的 Liquidity Distribution Function (LDF) 的舍入/精度缺陷，使攻击者累积正的 credit 并抽干流动性。
 
-- Hooks 是 PoolManager 在特定生命周期点调用的合约（例如 beforeSwap/afterSwap、beforeAddLiquidity/afterAddLiquidity、beforeRemoveLiquidity/afterRemoveLiquidity）。
-- Pools 使用包含 hooks 地址的 PoolKey 初始化。如果非零，PoolManager 会在每次相关操作上执行回调。
-- 核心数学使用诸如 Q64.96 的定点格式用于 sqrtPriceX96，并使用基于 1.0001^tick 的 tick 算术。任何叠加的自定义数学必须小心匹配舍入语义以避免不变量漂移。
-- Swaps 可以是 exactInput 或 exactOutput。在 v3/v4 中，价格沿 tick 移动；跨越 tick 边界可能激活/停用区间流动性。Hooks 可能在阈值/tick 跨越时实现额外逻辑。
+关键思想：如果 hook 实现了依赖于定点数学、tick 舍入和阈值逻辑的额外记账，攻击者可以构造精确输入的 swap（exact‑input swaps），跨越特定阈值，使舍入差异累积到有利于攻击者的一端。重复该模式然后提取被放大的余额即可实现利润，通常以 flash loan 融资。
 
-## 漏洞原型：阈值跨越的精度/舍入漂移
+## 背景：Uniswap v4 hooks 与 swap 流程
+
+- Hooks 是 PoolManager 在特定生命周期点调用的合约（例如 beforeSwap/afterSwap、beforeAddLiquidity/afterAddLiquidity、beforeRemoveLiquidity/afterRemoveLiquidity、beforeInitialize/afterInitialize、beforeDonate/afterDonate）。
+- 池在初始化时以包含 hooks 地址的 PoolKey 启动。如果非零，PoolManager 会在每次相关操作上执行回调。
+- Hooks 可以返回自定义 delta（custom deltas），以修改 swap 或流动性操作的最终余额变化（自定义记账）。这些 delta 在调用结束时作为净余额结算，因此 hook 内部的任何舍入误差都会在结算前累积。
+- 核心数学使用诸如 Q64.96 的定点格式用于 sqrtPriceX96，并使用 1.0001^tick 的 tick 算术。任何叠加在其上的自定义数学必须小心匹配舍入语义以避免不变式漂移。
+- Swaps 可以是 exactInput 或 exactOutput。在 v3/v4 中，价格沿 tick 移动；跨越 tick 边界可能激活/停用区间流动性。Hooks 可能在阈值/ tick 跨越时实现额外逻辑。
+
+## 漏洞范式：阈值跨越导致的精度/舍入漂移
 
 自定义 hook 中常见的易受攻击模式：
 
-1. Hook 使用整数除法、mulDiv 或定点转换（例如用 sqrtPrice 和 tick 范围在 token ↔ liquidity 之间转换）来计算每次 swap 的流动性或余额增量。
+1. Hook 使用整除、mulDiv 或定点转换来为每次 swap 计算流动性或余额变化（例如使用 sqrtPrice 和 tick 范围在 token ↔ liquidity 之间转换）。
 2. 阈值逻辑（例如再平衡、分步重分配或按区间激活）在 swap 大小或价格移动跨越内部边界时触发。
-3. 在前向计算和结算路径之间不一致地应用舍入（例如向零截断、floor 与 ceil 的差异）。小的差异不会相互抵消，反而记入调用者的账户。
-4. 精确的 exact‑input swaps 被精心设计为跨越这些边界并重复收割正向舍入余数。攻击者随后提取累计的 credit。
+3. 前向计算与结算路径之间对舍入的处理不一致（例如向零截断、floor 与 ceil 不同），小的差异不会相互抵消，反而记入调用者。
+4. 精确输入的 swaps 被精心设计以跨越这些边界，重复收割正的舍入余数。攻击者随后提取累积的 credit。
 
-攻击先决条件
+攻击前置条件
 - 池使用对每次 swap 执行额外数学的自定义 v4 hook（例如 LDF/rebalancer）。
-- 至少存在一条执行路径使舍入在阈值跨越时有利于 swap 发起者。
-- 能够原子地重复许多 swaps（flash loans 非常适合提供临时资金并摊薄 gas 成本）。
+- 至少存在一条执行路径使得舍入在阈值跨越时使 swap 发起者受益。
+- 能够以原子方式重复多次 swap（flash loans 非常适合提供临时资金并摊薄 gas 成本）。
 
-## 实际攻击方法论
+## 实用攻击方法论
 
 1) 识别带有 hooks 的候选池
 - 枚举 v4 池并检查 PoolKey.hooks != address(0)。
-- 检查 hook 的 bytecode/ABI，查找回调：beforeSwap/afterSwap 及任何自定义的 rebalancing 方法。
-- 寻找那种会：按流动性除法、在 token 数量与流动性之间转换，或聚合 BalanceDelta 且带有舍入的数学逻辑。
+- 检查 hook 的字节码/ABI，寻找回调：beforeSwap/afterSwap 以及任何自定义的再平衡方法。
+- 寻找会除以流动性、在 token 数量与流动性间转换，或带舍入的 BalanceDelta 聚合等相关数学逻辑。
 
 2) 建模 hook 的数学与阈值
-- 还原 hook 的流动性/重分配公式：输入通常包括 sqrtPriceX96、tickLower/Upper、currentTick、fee tier 和净流动性。
-- 映射阈值/步进函数：ticks、bucket 边界或 LDF 分段点。确定在每个边界的哪一侧 delta 会被舍入。
-- 找出在哪些地方进行 uint256/int256 之间的转换、使用 SafeCast，或依赖隐式 floor 的 mulDiv。
+- 重建 hook 的流动性/重分配公式：输入通常包括 sqrtPriceX96、tickLower/Upper、currentTick、fee tier 和净流动性。
+- 映射阈值/步进函数：ticks、bucket 边界或 LDF 的断点。确定在每个边界的哪一侧 delta 会被舍入。
+- 识别在哪些地方进行 uint256/int256 的类型转换、使用 SafeCast，或依赖带隐式 floor 的 mulDiv。
 
-3) 校准精确输入以跨越边界
-- 使用 Foundry/Hardhat 模拟来计算将价格刚好跨过边界并触发 hook 分支所需的最小 Δin。
-- 验证 afterSwap 结算后是否记入调用者的金额多于成本，留下正的 BalanceDelta 或 hook 的记账信用。
-- 重复 swaps 以累计 credit；然后调用 hook 的提现/结算路径。
+3) 校准以跨越边界的 exact‑input swaps
+- 使用 Foundry/Hardhat 模拟计算移动价格刚好跨越某边界并触发 hook 分支所需的最小 Δin。
+- 验证 afterSwap 结算是否比成本多记入调用者，使得在 hook 的记账中留下正的 BalanceDelta 或 credit。
+- 重复 swaps 以累积 credit；然后调用 hook 的提现/结算路径。
 
-示例 Foundry‑style 测试 harness（伪代码）
+Example Foundry‑style test harness (pseudocode)
 ```solidity
 function test_precision_rounding_abuse() public {
 // 1) Arrange: set up pool with hook
@@ -77,13 +80,13 @@ sqrtPriceLimitX96: 0 // allow tick crossing
 bunniHook.withdrawCredits(msg.sender);
 }
 ```
-校准 exactInput
-- 计算 tick 步长对应的 ΔsqrtP：sqrtP_next = sqrtP_current × 1.0001^(Δtick)。
-- 使用 v3/v4 公式近似 Δin：Δx ≈ L × (ΔsqrtP / (sqrtP_next × sqrtP_current))。确保舍入方向与核心实现的数学一致。
-- 在边界附近将 Δin 上下调整 ±1 wei，以找到 hook 对你有利的舍入分支。
+Calibrating the exactInput
+- 计算一个 tick 步长的 ΔsqrtP: sqrtP_next = sqrtP_current × 1.0001^(Δtick).
+- 使用 v3/v4 公式近似 Δin: Δx ≈ L × (ΔsqrtP / (sqrtP_next × sqrtP_current)). 确保舍入方向与核心数学一致。
+- 在边界附近将 Δin ±1 wei 调整，找到 hook 在舍入时有利于你的分支。
 
-4) 使用 flash loans 放大
-- 借入大额名义资金（例如 3M USDT 或 2000 WETH），以在原子交易中运行多次迭代。
+4) Amplify with flash loans
+- 借入大额名义（例如 3M USDT 或 2000 WETH），以原子方式运行多次迭代。
 - 执行已校准的 swap 循环，然后在 flash loan callback 中提取并偿还。
 
 Aave V3 flash loan skeleton
@@ -109,44 +112,58 @@ return true;
 }
 ```
 5) 退出与跨链复制
-- 如果 hooks 部署在多条链上，对每条链重复相同的校准。
-- 通过桥接将资金回到目标链，并可选择通过借贷协议循环以混淆资金流。
+- 如果 hooks 部署在多个链上，针对每条链重复相同的校准。
+- 将资金通过桥回到目标链，并可选择通过借贷协议循环以混淆资金流。
 
-## hook 数学中的常见根本原因
+## Common root causes in hook math
 
-- Mixed rounding semantics: mulDiv floors while later paths effectively round up; or conversions between token/liquidity apply different rounding.
-- Tick alignment errors: using unrounded ticks in one path and tick‑spaced rounding in another.
-- BalanceDelta sign/overflow issues when converting between int256 and uint256 during settlement.
-- Precision loss in Q64.96 conversions (sqrtPriceX96) not mirrored in reverse mapping.
-- Accumulation pathways: per‑swap remainders tracked as credits that are withdrawable by the caller instead of being burned/zero‑sum.
+- Mixed rounding semantics: mulDiv 向下取整，而后续路径实际上向上舍入；或在 token/liquidity 之间转换时应用了不同的舍入策略。
+- Tick alignment errors: 在一条路径中使用未对齐的 ticks，而另一条路径使用了 tick‑spacing 的舍入。
+- BalanceDelta 符号/溢出问题：在结算期间在 int256 与 uint256 之间转换时出现错误。
+- Q64.96 转换（sqrtPriceX96）中的精度损失在反向映射中未被镜像。
+- 累积途径：每次 swap 的剩余作为可由调用者提取的 credit 跟踪，而不是被烧掉/置零和。
 
-## 防御性建议
+## Custom accounting & delta amplification
 
-- Differential testing: mirror the hook’s math vs a reference implementation using high‑precision rational arithmetic and assert equality or bounded error that is always adversarial (never favorable to caller).
-- Invariant/property tests:
-- Sum of deltas (tokens, liquidity) across swap paths and hook adjustments must conserve value modulo fees.
-- No path should create positive net credit for the swap initiator over repeated exactInput iterations.
-- Threshold/tick boundary tests around ±1 wei inputs for both exactInput/exactOutput.
-- Rounding policy: centralize rounding helpers that always round against the user; eliminate inconsistent casts and implicit floors.
-- Settlement sinks: accumulate unavoidable rounding residue to protocol treasury or burn it; never attribute to msg.sender.
-- Rate‑limits/guardrails: minimum swap sizes for rebalancing triggers; disable rebalances if deltas are sub‑wei; sanity‑check deltas against expected ranges.
-- Review hook callbacks holistically: beforeSwap/afterSwap and before/after liquidity changes should agree on tick alignment and delta rounding.
+- Uniswap v4 custom accounting 允许 hooks 返回直接调整调用方应付/应收的 deltas。如果 hook 在内部追踪 credits，舍入残差可以在最终结算发生之前在许多小操作中累积。
+- 这会放大边界/阈值滥用：攻击者可以在同一 tx 中交替执行 `swap → withdraw → swap`，迫使 hook 在状态略有不同的情况下重新计算 deltas，而所有余额仍处于待决状态。
+- 在审查 hooks 时，务必追踪 BalanceDelta/HookDelta 的产生和结算方式。单个分支中的偏置舍入在 deltas 被反复重新计算时可能会成为复利式的 credit。
+
+## Defensive guidance
+
+- Differential testing：用高精度有理数运算将 hook 的数学与参考实现镜像比对，并断言相等或在始终对抗调用方（绝不利于调用方）的有界误差内。
+- Invariant/property tests：
+- 跨 swap 路径和 hook 调整的 deltas（tokens、liquidity）之和必须在扣除手续费后守恒。
+- 任何路径都不应在重复的 exactInput 迭代中为 swap 发起者创造正的净 credit。
+- 在 ±1 wei 附近对 exactInput/exactOutput 进行阈值/tick 边界测试。
+- Rounding policy：集中舍入助手，始终朝对用户不利的方向舍入；消除不一致的类型转换和隐式向下取整。
+- Settlement sinks：将不可避免的舍入残差累积到协议金库或燃烧；绝不归属给 msg.sender。
+- Rate‑limits/guardrails：为再平衡触发设置最小 swap 大小；如果 deltas 小于 sub‑wei 则禁用再平衡；对 deltas 做合理范围校验。
+- 从整体上审查 hook 回调：beforeSwap/afterSwap 以及 before/after liquidity 变更应在 tick 对齐和 delta 舍入上保持一致。
 
 ## Case study: Bunni V2 (2025‑09‑02)
 
-- Protocol: Bunni V2 (Uniswap v4 hook) with an LDF applied per swap to rebalance.
-- Root cause: rounding/precision error in LDF liquidity accounting during threshold‑crossing swaps; per‑swap discrepancies accrued as positive credits for the caller.
-- Ethereum leg: attacker took a ~3M USDT flash loan, performed calibrated exact‑input swaps on USDC/USDT to build credits, withdrew inflated balances, repaid, and routed funds via Aave.
-- UniChain leg: repeated the exploit with a 2000 WETH flash loan, siphoning ~1366 WETH and bridging to Ethereum.
-- Impact: ~USD 8.3M drained across chains. No user interaction required; entirely on‑chain.
+- Protocol: Bunni V2 (Uniswap v4 hook) 每次 swap 应用一个 LDF 进行再平衡。
+- 受影响池：Ethereum 上的 USDC/USDT 以及 Unichain 上的 weETH/ETH，总计约 840 万美元。
+- Step 1 (price push)：攻击者 flash‑borrowed 约 300 万 USDT 并 swapped 将 tick 推到约 5000，使 **active** 的 USDC 余额缩减到约 28 wei。
+- Step 2 (rounding drain)：44 次微小的 withdrawals 利用了 `BunniHubLogic::withdraw()` 中的向下取整，将 active USDC 余额从 28 wei 降至 4 wei（‑85.7%），而仅燃烧了极小一部分 LP 份额。总流动性被低估约 84.4%。
+- Step 3 (liquidity rebound sandwich)：一次大额 swap 将 tick 推到约 839,189（1 USDC ≈ 2.77e36 USDT）。流动性估计翻转并增加约 16.8%，使得攻击者能够在被抬高的价格回换并带着利润退出，形成夹击套利。
+- post‑mortem 中确定的修复：将 idle‑balance 更新改为向上舍入（round **up**），以避免重复微量 withdraw 将池的 active 余额向下棘轮化。
 
-## Hunting checklist
+Simplified vulnerable line (and post‑mortem fix)
+```solidity
+// BunniHubLogic::withdraw() idle balance update (simplified)
+uint256 newBalance = balance - balance.mulDiv(shares, currentTotalSupply);
+// Fix: round up to avoid cumulative underestimation
+uint256 newBalance = balance - balance.mulDivUp(shares, currentTotalSupply);
+```
+## 漏洞狩猎检查清单
 
-- Does the pool use a non‑zero hooks address? Which callbacks are enabled?
-- Are there per‑swap redistributions/rebalances using custom math? Any tick/threshold logic?
-- Where are divisions/mulDiv, Q64.96 conversions, or SafeCast used? Are rounding semantics globally consistent?
-- Can you construct Δin that barely crosses a boundary and yields a favorable rounding branch? Test both directions and both exactInput and exactOutput.
-- Does the hook track per‑caller credits or deltas that can be withdrawn later? Ensure residue is neutralized.
+- 池子是否使用非零 hooks 地址？哪些 callbacks 被启用？
+- 是否存在每次 swap 的重新分配/再平衡并使用自定义数学？是否有任何 tick/阈值 逻辑？
+- 在哪些地方使用了 divisions/mulDiv、Q64.96 转换或 SafeCast？舍入语义在全局上是否一致？
+- 能否构造一个刚好跨越边界并触发有利舍入分支的 Δin？在两个方向以及 exactInput 和 exactOutput 下都要测试。
+- hook 是否跟踪每个调用者的 credits 或 deltas（可在之后提取）？确保残留被中和。
 
 ## References
 
@@ -156,5 +173,7 @@ return true;
 - [Liquidity mechanics in Uniswap v4 core](https://www.quillaudits.com/research/uniswap-development/uniswap-v4/liquidity-mechanics-in-uniswap-v4-core)
 - [Swap mechanics in Uniswap v4 core](https://www.quillaudits.com/research/uniswap-development/uniswap-v4/swap-mechanics-in-uniswap-v4-core)
 - [Uniswap v4 Hooks and Security Considerations](https://www.quillaudits.com/research/uniswap-development/uniswap-v4/uniswap-v4-hooks-and-security)
+- [Bunni Exploit Post Mortem (Sep 2025)](https://blog.bunni.xyz/posts/exploit-post-mortem/)
+- [Uniswap v4 Core Whitepaper](https://app.uniswap.org/whitepaper-v4.pdf)
 
 {{#include ../../banners/hacktricks-training.md}}
