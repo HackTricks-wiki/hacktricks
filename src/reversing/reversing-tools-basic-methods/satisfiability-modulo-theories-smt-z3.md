@@ -1,12 +1,14 @@
+# Satisfiability Modulo Theories (SMT) - Z3
+
 {{#include ../../banners/hacktricks-training.md}}
 
-Basicamente, esta ferramenta nos ajudará a encontrar valores para variáveis que precisam satisfazer algumas condições, e calculá-los manualmente será muito irritante. Portanto, você pode indicar ao Z3 as condições que as variáveis precisam satisfazer e ele encontrará alguns valores (se possível).
+De forma bem básica, esta ferramenta nos ajuda a encontrar valores para variáveis que precisam satisfazer certas condições — calcular isso manualmente é muito trabalhoso. Portanto, você pode indicar ao Z3 as condições que as variáveis devem satisfazer e ele encontrará alguns valores (se possível).
 
-**Alguns textos e exemplos são extraídos de [https://ericpony.github.io/z3py-tutorial/guide-examples.htm](https://ericpony.github.io/z3py-tutorial/guide-examples.htm)**
+**Alguns textos e exemplos foram extraídos de [https://ericpony.github.io/z3py-tutorial/guide-examples.htm](https://ericpony.github.io/z3py-tutorial/guide-examples.htm)**
 
-# Operações Básicas
+## Operações Básicas
 
-## Booleanos/E/OU/NÃO
+### Booleanos/And/Or/Not
 ```python
 #pip3 install z3-solver
 from z3 import *
@@ -21,7 +23,7 @@ s.add(And(Or(x,y,Not(z)),y))
 s.check() #If response is "sat" then the model is satifable, if "unsat" something is wrong
 print(s.model()) #Print valid values to satisfy the model
 ```
-## Ints/Simplify/Reals
+### Ints/Simplify/Reals
 ```python
 from z3 import *
 
@@ -41,7 +43,7 @@ print(solve(r1**2 + r2**2 == 3, r1**3 == 2))
 set_option(precision=30)
 print(solve(r1**2 + r2**2 == 3, r1**3 == 2))
 ```
-## Impressão de Modelo
+### Imprimindo o Modelo
 ```python
 from z3 import *
 
@@ -55,9 +57,9 @@ print ("x = %s" % m[x])
 for d in m.decls():
 print("%s = %s" % (d.name(), m[d]))
 ```
-# Aritmética de Máquina
+## Aritmética de Máquina
 
-CPUs modernas e linguagens de programação convencionais utilizam aritmética sobre **vetores de bits de tamanho fixo**. A aritmética de máquina está disponível no Z3Py como **Vetores de Bits**.
+CPUs modernas e as principais linguagens de programação usam aritmética sobre **fixed-size bit-vectors**. A aritmética de máquina está disponível em Z3Py como **Bit-Vectors**.
 ```python
 from z3 import *
 
@@ -72,9 +74,9 @@ a = BitVecVal(-1, 32)
 b = BitVecVal(65535, 32)
 print(simplify(a == b)) #This is False
 ```
-## Números Assinados/Não Assinados
+### Números com sinal/sem sinal
 
-Z3 fornece versões especiais assinadas de operações aritméticas onde faz diferença se o **bit-vector é tratado como assinado ou não assinado**. No Z3Py, os operadores **<, <=, >, >=, /, % e >>** correspondem às versões **assinadas**. Os operadores **não assinados** correspondentes são **ULT, ULE, UGT, UGE, UDiv, URem e LShR.**
+Z3 fornece versões especiais com sinal das operações aritméticas onde faz diferença se o **bit-vector é tratado como com sinal ou sem sinal**. No Z3Py, os operadores **<, <=, >, >=, /, % e >>** correspondem às versões **com sinal**. As correspondentes versões **sem sinal** são **ULT, ULE, UGT, UGE, UDiv, URem e LShR.**
 ```python
 from z3 import *
 
@@ -92,11 +94,33 @@ solve(x < 0)
 # using unsigned version of <
 solve(ULT(x, 0))
 ```
-## Funções
+### Bit-vector helpers comumente necessários em reversing
 
-**Funções interpretadas** como aritmética onde a **função +** tem uma **interpretação padrão fixa** (ela soma dois números). **Funções não interpretadas** e constantes são **maximamente flexíveis**; elas permitem **qualquer interpretação** que seja **consistente** com as **restrições** sobre a função ou constante.
+Quando você está **lifting checks from assembly or decompiler output**, geralmente é melhor modelar cada byte de entrada como um `BitVec(..., 8)` e então reconstruir palavras exatamente como o código alvo faz. Isso evita bugs causados por misturar inteiros matemáticos com aritmética de máquina.
+```python
+from z3 import *
 
-Exemplo: f aplicada duas vezes a x resulta em x novamente, mas f aplicada uma vez a x é diferente de x.
+b0, b1, b2, b3 = BitVecs('b0 b1 b2 b3', 8)
+eax = Concat(b3, b2, b1, b0)        # little-endian bytes -> 32-bit register value
+low_byte = Extract(7, 0, eax)        # AL
+high_word = Extract(31, 16, eax)     # upper 16 bits
+signed_b0 = SignExt(24, b0)          # movsx eax, byte ptr [...]
+unsigned_b0 = ZeroExt(24, b0)        # movzx eax, byte ptr [...]
+rot = RotateLeft(eax, 13)            # rol eax, 13
+logical = LShR(eax, 3)               # shr eax, 3
+arith = eax >> 3                     # sar eax, 3 (signed shift)
+```
+Algumas armadilhas comuns ao traduzir código para restrições:
+
+- `>>` é um deslocamento à direita **aritmético** para vetores de bits. Use `LShR` para a instrução lógica `shr`.
+- Use `UDiv`, `URem`, `ULT`, `ULE`, `UGT` e `UGE` quando a comparação/divisão original foi **sem sinal**.
+- Mantenha as larguras explícitas. Se o binário trunca para 8 ou 16 bits, adicione `Extract` ou reconstrua o valor com `Concat` em vez de promover silenciosamente tudo para inteiros do Python.
+
+### Funções
+
+**Funções interpretad**as tais como aritmética onde a **função +** tem uma **interpretação padrão fixa** (ela soma dois números). **Funções não interpretadas** e constantes são **maximamente flexíveis**; elas permitem **qualquer interpretação** que seja **consistente** com as **restrições** sobre a função ou constante.
+
+Exemplo: f aplicado duas vezes a x resulta em x novamente, mas f aplicado uma vez a x é diferente de x.
 ```python
 from z3 import *
 
@@ -115,9 +139,9 @@ s.add(f(x) == 4) #Find the value that generates 4 as response
 s.check()
 print(m.model())
 ```
-# Exemplos
+## Exemplos
 
-## Solucionador de Sudoku
+### Solucionador de Sudoku
 ```python
 # 9x9 matrix of integer variables
 X = [ [ Int("x_%s_%s" % (i+1, j+1)) for j in range(9) ]
@@ -167,8 +191,106 @@ print_matrix(r)
 else:
 print "failed to solve"
 ```
+### Fluxos de trabalho de Reversing
+
+Se você precisa **executar simbolicamente o binário e coletar restrições automaticamente**, consulte as notas do angr aqui:
+
+{{#ref}}
+angr/README.md
+{{#endref}}
+
+Se você já está examinando as checagens decompiladas e só precisa resolvê-las, o Z3 puro costuma ser mais rápido e mais fácil de controlar.
+
+#### Lifting checagens baseadas em bytes de um crackme
+
+Um padrão muito comum em crackmes e packed loaders é uma longa lista de equações por byte sobre uma senha candidata. Modele bytes como vetores de 8 bits, restrinja o alfabeto e só os alargue quando o código original os alargar.
+
+<details>
+<summary>Exemplo: reconstruir um serial check a partir de aritmética decompilada</summary>
+```python
+from z3 import *
+
+flag = [BitVec(f'flag_{i}', 8) for i in range(8)]
+s = Solver()
+
+for c in flag:
+s.add(c >= 0x20, c <= 0x7e)
+
+w0 = Concat(flag[3], flag[2], flag[1], flag[0])
+w1 = Concat(flag[7], flag[6], flag[5], flag[4])
+
+s.add((ZeroExt(24, flag[0]) + ZeroExt(24, flag[5])) == 0x90)
+s.add((flag[1] ^ flag[2] ^ flag[3]) == 0x5a)
+s.add(RotateLeft(w0, 7) ^ w1 == BitVecVal(0x4f625a13, 32))
+s.add(ULE(flag[6], flag[7]))
+s.add(LShR(w1, 5) == BitVecVal(0x03a1f21, 32))
+
+if s.check() == sat:
+m = s.model()
+print(bytes(m[c].as_long() for c in flag))
+```
+</details>
+
+This style maps well to real-world reversing because it matches what modern writeups do in practice: recover the arithmetic/bitwise relations, turn each comparison into a constraint, and solve the whole system at once.
+
+#### Incremental solving with `push()` / `pop()`
+
+Enquanto faz reversing, você frequentemente quer testar várias hipóteses sem reconstruir todo o solver. `push()` cria um checkpoint e `pop()` descarta as constraints adicionadas após esse checkpoint. Isso é útil quando você não tem certeza se um branch é signed ou unsigned, se um register está zero-extended ou sign-extended, ou quando está tentando várias constantes candidatas extraídas da disassembly.
+```python
+from z3 import *
+
+x = BitVec('x', 32)
+s = Solver()
+s.add((x & 0xff) == 0x41)
+
+s.push()
+s.add(UGT(x, 0x1000))
+print(s.check())
+s.pop()
+
+s.push()
+s.add(x == 0x41)
+print(s.check())
+print(s.model())
+s.pop()
+```
+#### Enumerando mais de uma entrada válida
+
+Alguns keygens, license checks e desafios CTF aceitam intencionalmente **muitas** entradas válidas. Z3 não as enumera automaticamente, mas você pode adicionar uma **blocking clause** após cada model para forçar o próximo resultado a diferir em pelo menos uma posição.
+```python
+from z3 import *
+
+xs = [BitVec(f'x{i}', 8) for i in range(4)]
+s = Solver()
+for x in xs:
+s.add(And(x >= 0x30, x <= 0x39))
+s.add(xs[0] + xs[1] == xs[2] + 1)
+s.add(xs[3] == xs[0] ^ 3)
+
+while s.check() == sat:
+m = s.model()
+print(''.join(chr(m[x].as_long()) for x in xs))
+s.add(Or([x != m.eval(x, model_completion=True) for x in xs]))
+```
+#### Tactics para fórmulas bit-vector problemáticas
+
+O solver padrão do Z3 normalmente é suficiente, mas fórmulas decompiler-generated com muitas igualdades e reescritas de bit-vector frequentemente ficam mais fáceis após uma primeira passagem de normalização. Nesses casos, pode ser útil construir um solver a partir de tactics:
+```python
+from z3 import *
+
+t = Then('simplify', 'solve-eqs', 'bit-blast', 'sat')
+s = t.solver()
+```
+Isto é especialmente útil quando o problema é quase inteiramente **bit-vector + Boolean logic** e você quer que o Z3 simplifique e elimine igualdades óbvias antes de passar a fórmula para o backend SAT.
+
+#### CRCs e outros custom checkers
+
+Desafios recentes de reversing ainda usam Z3 para restrições que são cansativas de brute-force mas diretas de modelar, como checagens CRC32 sobre entrada ASCII-only, pipelines mistos rotate/xor/add, ou muitos predicados aritméticos encadeados extraídos de um checker JITed/obfuscated. Para problemas do tipo CRC, mantenha o estado como bit-vectors e aplique restrições ASCII por byte cedo para reduzir o espaço de busca.
+
 ## Referências
 
 - [https://ericpony.github.io/z3py-tutorial/guide-examples.htm](https://ericpony.github.io/z3py-tutorial/guide-examples.htm)
+- [https://microsoft.github.io/z3guide/docs/theories/Bitvectors/](https://microsoft.github.io/z3guide/docs/theories/Bitvectors/)
+- [https://theory.stanford.edu/~nikolaj/programmingz3.html](https://theory.stanford.edu/~nikolaj/programmingz3.html)
 
 {{#include ../../banners/hacktricks-training.md}}
