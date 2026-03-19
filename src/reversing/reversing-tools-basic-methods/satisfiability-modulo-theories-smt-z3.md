@@ -1,12 +1,14 @@
+# Ικανοποιησιμότητα Modulo Θεωριών (SMT) - Z3
+
 {{#include ../../banners/hacktricks-training.md}}
 
-Πολύ βασικά, αυτό το εργαλείο θα μας βοηθήσει να βρούμε τιμές για μεταβλητές που πρέπει να ικανοποιούν ορισμένες συνθήκες και η υπολογιστική τους χειροκίνητα θα είναι πολύ ενοχλητική. Επομένως, μπορείτε να υποδείξετε στο Z3 τις συνθήκες που πρέπει να ικανοποιούν οι μεταβλητές και θα βρει κάποιες τιμές (αν είναι δυνατόν).
+Σε πολύ βασικό επίπεδο, αυτό το εργαλείο θα μας βοηθήσει να βρούμε τιμές για μεταβλητές που πρέπει να ικανοποιούν κάποιες συνθήκες — και ο υπολογισμός τους στο χέρι θα ήταν εξαιρετικά ενοχλητικός. Συνεπώς, μπορείτε να δηλώσετε στο Z3 τις συνθήκες που πρέπει να ικανοποιούν οι μεταβλητές και αυτό θα βρει κάποιες τιμές (εφόσον είναι δυνατές).
 
 **Ορισμένα κείμενα και παραδείγματα έχουν εξαχθεί από [https://ericpony.github.io/z3py-tutorial/guide-examples.htm](https://ericpony.github.io/z3py-tutorial/guide-examples.htm)**
 
-# Βασικές Λειτουργίες
+## Βασικές Λειτουργίες
 
-## Boolean/Και/Ή/Όχι
+### Booleans/And/Or/Not
 ```python
 #pip3 install z3-solver
 from z3 import *
@@ -21,7 +23,7 @@ s.add(And(Or(x,y,Not(z)),y))
 s.check() #If response is "sat" then the model is satifable, if "unsat" something is wrong
 print(s.model()) #Print valid values to satisfy the model
 ```
-## Ακέραιοι/Απλοποίηση/Πραγματικοί αριθμοί
+### Ints/Simplify/Reals
 ```python
 from z3 import *
 
@@ -41,7 +43,7 @@ print(solve(r1**2 + r2**2 == 3, r1**3 == 2))
 set_option(precision=30)
 print(solve(r1**2 + r2**2 == 3, r1**3 == 2))
 ```
-## Εκτύπωση Μοντέλου
+### Εκτύπωση Μοντέλου
 ```python
 from z3 import *
 
@@ -55,9 +57,9 @@ print ("x = %s" % m[x])
 for d in m.decls():
 print("%s = %s" % (d.name(), m[d]))
 ```
-# Μηχανική Άλγεβρα
+## Αριθμητική της μηχανής
 
-Οι σύγχρονοι επεξεργαστές και οι κυριότερες γλώσσες προγραμματισμού χρησιμοποιούν άλγεβρα πάνω σε **σταθερού μεγέθους bit-vectors**. Η μηχανική άλγεβρα είναι διαθέσιμη στο Z3Py ως **Bit-Vectors**.
+Οι σύγχρονοι επεξεργαστές CPU και οι ευρέως διαδεδομένες γλώσσες προγραμματισμού χρησιμοποιούν αριθμητική πάνω σε **σταθερού μεγέθους bit-vectors**. Η αριθμητική της μηχανής είναι διαθέσιμη στο Z3Py ως **Bit-Vectors**.
 ```python
 from z3 import *
 
@@ -72,9 +74,9 @@ a = BitVecVal(-1, 32)
 b = BitVecVal(65535, 32)
 print(simplify(a == b)) #This is False
 ```
-## Υπογεγραμμένοι/Μη Υπογεγραμμένοι Αριθμοί
+### Αριθμοί με πρόσημο/χωρίς πρόσημο
 
-Z3 παρέχει ειδικές υπογεγραμμένες εκδόσεις αριθμητικών λειτουργιών όπου έχει σημασία αν το **bit-vector αντιμετωπίζεται ως υπογεγραμμένο ή μη υπογεγραμμένο**. Στο Z3Py, οι τελεστές **<, <=, >, >=, /, % και >>** αντιστοιχούν στις **υπογεγραμμένες** εκδόσεις. Οι αντίστοιχοι **μη υπογεγραμμένοι** τελεστές είναι **ULT, ULE, UGT, UGE, UDiv, URem και LShR.**
+Το Z3 παρέχει ειδικές εκδόσεις αριθμητικών πράξεων όπου έχει σημασία αν το **bit-vector αντιμετωπίζεται ως με πρόσημο ή χωρίς πρόσημο**. Στο Z3Py, οι τελεστές **<, <=, >, >=, /, % και >>** αντιστοιχούν στις εκδόσεις **με πρόσημο**. Οι αντίστοιχοι τελεστές **χωρίς πρόσημο** είναι **ULT, ULE, UGT, UGE, UDiv, URem και LShR.**
 ```python
 from z3 import *
 
@@ -92,11 +94,33 @@ solve(x < 0)
 # using unsigned version of <
 solve(ULT(x, 0))
 ```
-## Συναρτήσεις
+### Bit-vector helpers που συχνά χρειάζονται στο reversing
 
-**Ερμηνευμένες συναρτήσεις** όπως η αριθμητική όπου η **συνάρτηση +** έχει μια **σταθερή τυπική ερμηνεία** (προσθέτει δύο αριθμούς). **Μη ερμηνευμένες συναρτήσεις** και σταθερές είναι **μέγιστης ευελιξίας**; επιτρέπουν **οποιαδήποτε ερμηνεία** που είναι **συνεπής** με τους **περιορισμούς** πάνω στη συνάρτηση ή τη σταθερά.
+Όταν κάνετε **lifting checks from assembly or decompiler output**, συνήθως είναι καλύτερο να μοντελοποιείτε κάθε input byte ως `BitVec(..., 8)` και στη συνέχεια να επανασυνθέτετε τις λέξεις ακριβώς όπως το κάνει ο κώδικας-στόχος. Αυτό αποφεύγει σφάλματα που προκαλούνται από τη μίξη μαθηματικών ακεραίων με αριθμητική μηχανής.
+```python
+from z3 import *
 
-Παράδειγμα: η f εφαρμοσμένη δύο φορές στο x έχει ως αποτέλεσμα το x ξανά, αλλά η f εφαρμοσμένη μία φορά στο x είναι διαφορετική από το x.
+b0, b1, b2, b3 = BitVecs('b0 b1 b2 b3', 8)
+eax = Concat(b3, b2, b1, b0)        # little-endian bytes -> 32-bit register value
+low_byte = Extract(7, 0, eax)        # AL
+high_word = Extract(31, 16, eax)     # upper 16 bits
+signed_b0 = SignExt(24, b0)          # movsx eax, byte ptr [...]
+unsigned_b0 = ZeroExt(24, b0)        # movzx eax, byte ptr [...]
+rot = RotateLeft(eax, 13)            # rol eax, 13
+logical = LShR(eax, 3)               # shr eax, 3
+arith = eax >> 3                     # sar eax, 3 (signed shift)
+```
+Κάποιες κοινές παγίδες κατά τη μετάφραση κώδικα σε περιορισμούς:
+
+- `>>` είναι μια **arithmetic** δεξιά μετατόπιση για bit-vectors. Χρησιμοποιήστε `LShR` για την λογική εντολή `shr`.
+- Χρησιμοποιήστε `UDiv`, `URem`, `ULT`, `ULE`, `UGT` και `UGE` όταν η αρχική σύγκριση/διαίρεση ήταν **unsigned**.
+- Κρατήστε ρητό το πλάτος. Αν το binary περικόπτει σε 8 ή 16 bits, προσθέστε `Extract` ή επανασυνθέστε την τιμή με `Concat` αντί να προωθείτε σιωπηρά τα πάντα σε Python integers.
+
+### Συναρτήσεις
+
+**Ερμηνευμένες συναρτήσεις** όπως οι αριθμητικές όπου η **function +** έχει μια **σταθερή τυπική ερμηνεία** (προσθέτει δύο αριθμούς). **Μη-ερμηνευμένες συναρτήσεις** και σταθερές είναι **απολύτως ευέλικτες**· επιτρέπουν **οποιαδήποτε ερμηνεία** που είναι **συμβατή** με τους **περιορισμούς** πάνω στη συνάρτηση ή τη σταθερά.
+
+Παράδειγμα: f εφαρμοσμένη δύο φορές στο x επιστρέφει ξανά το x, αλλά f εφαρμοσμένη μία φορά στο x είναι διαφορετική από το x.
 ```python
 from z3 import *
 
@@ -115,9 +139,9 @@ s.add(f(x) == 4) #Find the value that generates 4 as response
 s.check()
 print(m.model())
 ```
-# Παραδείγματα
+## Παραδείγματα
 
-## Λύτης Sudoku
+### Επίλυση Sudoku
 ```python
 # 9x9 matrix of integer variables
 X = [ [ Int("x_%s_%s" % (i+1, j+1)) for j in range(9) ]
@@ -167,8 +191,106 @@ print_matrix(r)
 else:
 print "failed to solve"
 ```
+### Reversing workflows
+
+Αν χρειάζεστε να **εκτελέσετε συμβολικά το binary και να συλλέξετε περιορισμούς αυτόματα**, δείτε τις σημειώσεις του angr εδώ:
+
+{{#ref}}
+angr/README.md
+{{#endref}}
+
+Αν ήδη κοιτάτε τα decompiled checks και χρειάζεται μόνο να τα λύσετε, το raw Z3 είναι συνήθως πιο γρήγορο και ευκολότερο στον έλεγχο.
+
+#### Lifting byte-based checks από ένα crackme
+
+Ένα πολύ κοινό pattern σε crackmes και packed loaders είναι μια μεγάλη λίστα από byte equations πάνω σε έναν υποψήφιο password. Μοντελοποιήστε τα bytes ως 8-bit vectors, περιορίστε το alphabet, και διευρύνετέ τα μόνο όταν ο original code τα διευρύνει.
+
+<details>
+<summary>Παράδειγμα: rebuild a serial check from decompiled arithmetic</summary>
+```python
+from z3 import *
+
+flag = [BitVec(f'flag_{i}', 8) for i in range(8)]
+s = Solver()
+
+for c in flag:
+s.add(c >= 0x20, c <= 0x7e)
+
+w0 = Concat(flag[3], flag[2], flag[1], flag[0])
+w1 = Concat(flag[7], flag[6], flag[5], flag[4])
+
+s.add((ZeroExt(24, flag[0]) + ZeroExt(24, flag[5])) == 0x90)
+s.add((flag[1] ^ flag[2] ^ flag[3]) == 0x5a)
+s.add(RotateLeft(w0, 7) ^ w1 == BitVecVal(0x4f625a13, 32))
+s.add(ULE(flag[6], flag[7]))
+s.add(LShR(w1, 5) == BitVecVal(0x03a1f21, 32))
+
+if s.check() == sat:
+m = s.model()
+print(bytes(m[c].as_long() for c in flag))
+```
+</details>
+
+Αυτό το στυλ ταιριάζει καλά με την πραγματική αντίστροφη ανάλυση, επειδή αντιστοιχεί σε αυτό που κάνουν στην πράξη οι σύγχρονες αναφορές: ανακτούν τις αριθμητικές/σε επίπεδο bit σχέσεις, μετατρέπουν κάθε σύγκριση σε έναν περιορισμό και επιλύουν ολόκληρο το σύστημα ταυτόχρονα.
+
+#### Σταδιακή επίλυση με `push()` / `pop()`
+
+Κατά την αντίστροφη ανάλυση, συχνά θέλετε να δοκιμάσετε αρκετές υποθέσεις χωρίς να αναδημιουργήσετε ολόκληρο τον solver. `push()` δημιουργεί ένα σημείο ελέγχου και `pop()` απορρίπτει τους περιορισμούς που προστέθηκαν μετά από αυτό το σημείο. Αυτό είναι χρήσιμο όταν δεν είστε σίγουροι αν ένα branch είναι υπογεγραμμένο ή μη-υπογεγραμμένο, αν ένας καταχωρητής έχει επέκταση με μηδενικά ή επέκταση με προσημασία, ή όταν δοκιμάζετε διάφορες υποψήφιες σταθερές εξαγόμενες από την αποσυναρμολόγηση.
+```python
+from z3 import *
+
+x = BitVec('x', 32)
+s = Solver()
+s.add((x & 0xff) == 0x41)
+
+s.push()
+s.add(UGT(x, 0x1000))
+print(s.check())
+s.pop()
+
+s.push()
+s.add(x == 0x41)
+print(s.check())
+print(s.model())
+s.pop()
+```
+#### Βρίσκοντας περισσότερες από μία έγκυρες εισόδους
+
+Ορισμένα keygens, license checks και CTF challenges σκοπίμως δέχονται **πολλές** έγκυρες εισόδους. Το Z3 δεν τις απαριθμεί αυτόματα, αλλά μπορείτε να προσθέσετε ένα **blocking clause** μετά από κάθε model για να αναγκάσετε το επόμενο αποτέλεσμα να διαφέρει σε τουλάχιστον μία θέση.
+```python
+from z3 import *
+
+xs = [BitVec(f'x{i}', 8) for i in range(4)]
+s = Solver()
+for x in xs:
+s.add(And(x >= 0x30, x <= 0x39))
+s.add(xs[0] + xs[1] == xs[2] + 1)
+s.add(xs[3] == xs[0] ^ 3)
+
+while s.check() == sat:
+m = s.model()
+print(''.join(chr(m[x].as_long()) for x in xs))
+s.add(Or([x != m.eval(x, model_completion=True) for x in xs]))
+```
+#### Τακτικές για άσχημες φόρμουλες bit-vector
+
+Ο προεπιλεγμένος solver του Z3 είναι συνήθως αρκετός, αλλά οι φόρμουλες που δημιουργούνται από decompiler με πολλές εξισώσεις και επαναγραφές σε bit-vector συχνά γίνονται ευκολότερες μετά από ένα πρώτο πέρασμα κανονικοποίησης. Σε αυτές τις περιπτώσεις μπορεί να είναι χρήσιμο να κατασκευάσετε έναν solver από tactics:
+```python
+from z3 import *
+
+t = Then('simplify', 'solve-eqs', 'bit-blast', 'sat')
+s = t.solver()
+```
+Αυτό είναι ιδιαίτερα χρήσιμο όταν το πρόβλημα είναι σχεδόν εξολοκλήρου **bit-vector + Boolean logic** και θέλετε το Z3 να απλοποιήσει και να εξαλείψει προφανείς ισότητες πριν παραδώσει τον τύπο στο SAT backend.
+
+#### CRCs και άλλοι προσαρμοσμένοι ελεγκτές
+
+Πρόσφατες reversing προκλήσεις εξακολουθούν να χρησιμοποιούν το Z3 για περιορισμούς που είναι ενοχλητικοί στο brute-force αλλά απλοί στο μοντέλο, όπως έλεγχοι CRC32 σε ASCII-only είσοδο, μικτά pipelines rotate/xor/add, ή πολλοί αλυσιδωτοί αριθμητικοί περιορισμοί που εξάγονται από έναν JITed/obfuscated checker. Για προβλήματα τύπου CRC, διατηρήστε την κατάσταση ως bit-vectors και εφαρμόστε περιορισμούς per-byte ASCII νωρίς για να συρρικνώσετε τον χώρο αναζήτησης.
+
 ## Αναφορές
 
 - [https://ericpony.github.io/z3py-tutorial/guide-examples.htm](https://ericpony.github.io/z3py-tutorial/guide-examples.htm)
+- [https://microsoft.github.io/z3guide/docs/theories/Bitvectors/](https://microsoft.github.io/z3guide/docs/theories/Bitvectors/)
+- [https://theory.stanford.edu/~nikolaj/programmingz3.html](https://theory.stanford.edu/~nikolaj/programmingz3.html)
 
 {{#include ../../banners/hacktricks-training.md}}
