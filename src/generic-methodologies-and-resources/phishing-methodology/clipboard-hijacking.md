@@ -211,6 +211,39 @@ Detection/hunting tips for these variants
 - Network: outbound to CDN worker hosts or blockchain RPC endpoints from script hosts/PowerShell shortly after web browsing.
 - File/registry: temporary `.ps1` creation under `%TEMP%` plus RunMRU entries containing these one-liners; block/alert on signed-script LOLBAS (WScript/cscript/mshta) executing with external URLs or obfuscated alias strings.
 
+### March 2026 additions: `mshta` URL execution and macOS stealer staging
+
+- Paste-and-run campaigns continued to branch by OS: Windows chains commonly used `mshta.exe` or `curl.exe` to pull the next stage, while macOS chains used `curl`-delivered shell scripts and native utilities to package stolen data.
+- A high-signal Windows pattern is **`mshta.exe` executing with an external URL** immediately after user-driven paste-and-run. This abstracts HTA/scriptlet variations into one LOLBin hunting rule:
+
+```text
+process == (mshta)
+&&
+deobfuscated_command_line_includes (http: || https:)
+```
+
+  - Triage by correlating browser or `explorer.exe` ancestry, recent clipboard activity / RunMRU entries, low-prevalence parent-child pairs, and suspicious follow-on processes such as `curl.exe`, `cmd.exe`, or renamed payloads that later self-delete.
+- On macOS, recent stealers such as AMOS / MacSync increasingly rely on **shell-launched staging** instead of a visible installer flow. A common post-collection step is compressing loot with `ditto` and writing the archive to `/tmp/` before exfiltration:
+
+```bash
+ditto -c -k --sequesterRsrc <collected_dir> /tmp/<archive>.zip
+```
+
+  - Hunt for `sh` / `bash` / `zsh` spawning `ditto` with `-c -k --sequesterRsrc` and an output path under `/tmp/`. Tune with allowlists because some backup/archive workflows also invoke `ditto`.
+- AMOS also adopted a simple but effective **AppleScript numeric deobfuscation** pattern to hide URLs, commands, or secondary script text until runtime. Instead of storing strings directly, the script iterates a numeric array, subtracts a constant offset, and rebuilds the string with `character id`:
+
+```applescript
+on decode_nums(nums, o)
+    set out_text to ""
+    repeat with n in nums
+        set out_text to out_text & (character id ((contents of n) - o))
+    end repeat
+    return out_text
+end decode_nums
+```
+
+  - When triaging suspicious AppleScript, treat repeated `character id`, arithmetic offsets, and long integer arrays as an indicator that the visible script body is only a decoder stub. Decompile with `osadecompile` when possible and reconstruct the array math to recover hidden strings.
+
 ## Mitigations
 
 1. Browser hardening – disable clipboard write-access (`dom.events.asyncClipboard.clipboardItem` etc.) or require user gesture.
@@ -234,5 +267,6 @@ Detection/hunting tips for these variants
 - [The ClickFix Factory: First Exposure of IUAM ClickFix Generator](https://unit42.paloaltonetworks.com/clickfix-generator-first-of-its-kind/)
 - [2025, the year of the Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
 - [Red Canary – Intelligence Insights: February 2026](https://redcanary.com/blog/threat-intelligence/intelligence-insights-february-2026/)
+- [Red Canary – Intelligence Insights: March 2026](https://redcanary.com/blog/threat-intelligence/intelligence-insights-march-2026/)
 
 {{#include ../../banners/hacktricks-training.md}}
