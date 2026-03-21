@@ -196,7 +196,7 @@ docker run --rm -it --pid=host --net=host --privileged -v /:/mnt <imagename> chr
 Son olarak, eğer daha önceki önerilerden hiçbiri hoşunuza gitmiyorsa veya bir sebepten dolayı çalışmıyorsa (docker api firewall?) her zaman **yetkili bir konteyner çalıştırmayı ve ondan kaçmayı** deneyebilirsiniz, burada açıklandığı gibi:
 
 {{#ref}}
-../docker-security/
+../container-security/
 {{#endref}}
 
 Eğer docker soketi üzerinde yazma izinleriniz varsa [**docker soketini kötüye kullanarak nasıl yetki yükseltebileceğinizi anlatan bu yazıyı**](../index.html#writable-docker-socket)** okuyun.**

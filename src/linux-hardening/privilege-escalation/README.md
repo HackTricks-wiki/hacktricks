@@ -143,7 +143,7 @@ cat /proc/sys/kernel/randomize_va_space 2>/dev/null
 Eğer bir docker container içindeyseniz, buradan kaçmayı deneyebilirsiniz:
 
 {{#ref}}
-docker-security/
+container-security/
 {{#endref}}
 
 ## Diskler
@@ -703,7 +703,7 @@ Aşağıda **more ways to break out from docker or abuse it to escalate privileg
 
 
 {{#ref}}
-docker-security/
+container-security/
 {{#endref}}
 
 ## Containerd (ctr) privilege escalation
