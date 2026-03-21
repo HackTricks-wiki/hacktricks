@@ -143,7 +143,7 @@ cat /proc/sys/kernel/randomize_va_space 2>/dev/null
 Якщо ви перебуваєте всередині docker container, ви можете спробувати втекти з нього:
 
 {{#ref}}
-docker-security/
+container-security/
 {{#endref}}
 
 ## Диски
@@ -702,7 +702,7 @@ Upgrade: tcp
 
 
 {{#ref}}
-docker-security/
+container-security/
 {{#endref}}
 
 ## Containerd (ctr) privilege escalation

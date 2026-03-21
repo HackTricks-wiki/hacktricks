@@ -196,7 +196,7 @@ docker run --rm -it --pid=host --net=host --privileged -v /:/mnt <imagename> chr
 Нарешті, якщо вам не подобаються жодні з попередніх пропозицій або вони не працюють з якоїсь причини (docker api firewall?), ви завжди можете спробувати **запустити привілейований контейнер і втекти з нього**, як пояснено тут:
 
 {{#ref}}
-../docker-security/
+../container-security/
 {{#endref}}
 
 Якщо у вас є права на запис над сокетом docker, прочитайте [**цей пост про те, як підвищити привілеї, зловживаючи сокетом docker**](../index.html#writable-docker-socket)**.**
