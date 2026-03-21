@@ -8,7 +8,7 @@
 
 
 {{#ref}}
-../../network-services-pentesting/2375-pentesting-docker.md
+container-security/runtimes-and-engines.md
 {{#endref}}
 
 ## PE 1
@@ -39,7 +39,7 @@ ctr run --privileged --net-host -t registry:5000/modified-ubuntu:latest ubuntu b
 फिर आप **विशिष्ट क्षमताओं का दुरुपयोग करके इससे बचने** के लिए निम्नलिखित पृष्ठ में उल्लिखित कुछ तकनीकों का उपयोग कर सकते हैं:
 
 {{#ref}}
-docker-security/
+container-security/
 {{#endref}}
 
 {{#include ../../banners/hacktricks-training.md}}

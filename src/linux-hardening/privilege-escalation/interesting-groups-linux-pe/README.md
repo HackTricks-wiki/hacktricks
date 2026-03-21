@@ -196,7 +196,7 @@ docker run --rm -it --pid=host --net=host --privileged -v /:/mnt <imagename> chr
 अंत में, यदि आपको पहले के किसी भी सुझाव पसंद नहीं हैं, या वे किसी कारण से काम नहीं कर रहे हैं (docker api firewall?) तो आप हमेशा **एक विशेषाधिकार प्राप्त कंटेनर चलाने और उससे भागने** की कोशिश कर सकते हैं जैसा कि यहाँ समझाया गया है:
 
 {{#ref}}
-../docker-security/
+../container-security/
 {{#endref}}
 
 यदि आपके पास docker socket पर लिखने की अनुमति है तो [**इस पोस्ट को पढ़ें कि कैसे docker socket का दुरुपयोग करके विशेषाधिकार बढ़ाएं**](../index.html#writable-docker-socket)**.** 

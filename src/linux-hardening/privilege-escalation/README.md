@@ -144,7 +144,7 @@ cat /proc/sys/kernel/randomize_va_space 2>/dev/null
 
 
 {{#ref}}
-docker-security/
+container-security/
 {{#endref}}
 
 ## ड्राइव्स
@@ -703,7 +703,7 @@ Check **more ways to break out from docker or abuse it to escalate privileges** 
 
 
 {{#ref}}
-docker-security/
+container-security/
 {{#endref}}
 
 ## Containerd (ctr) privilege escalation
