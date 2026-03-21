@@ -144,7 +144,7 @@ Ako se nalazite unutar docker container-a, možete pokušati da iz njega pobegne
 
 
 {{#ref}}
-docker-security/
+container-security/
 {{#endref}}
 
 ## Diskovi
@@ -703,7 +703,7 @@ Proverite **više načina da izađete iz docker-a ili da ga zloupotrebite za esk
 
 
 {{#ref}}
-docker-security/
+container-security/
 {{#endref}}
 
 ## Containerd (ctr) privilege escalation

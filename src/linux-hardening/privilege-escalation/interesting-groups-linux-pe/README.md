@@ -196,7 +196,7 @@ docker run --rm -it --pid=host --net=host --privileged -v /:/mnt <imagename> chr
 Na kraju, ako vam se ne sviđaju neki od prethodnih predloga, ili ne rade iz nekog razloga (docker api firewall?), uvek možete pokušati da **pokrenete privilegovanu kontejner i pobegnete iz njega** kao što je objašnjeno ovde:
 
 {{#ref}}
-../docker-security/
+../container-security/
 {{#endref}}
 
 Ako imate dozvole za pisanje preko docker socket-a, pročitajte [**ovaj post o tome kako eskalirati privilegije zloupotrebom docker socket-a**](../index.html#writable-docker-socket)**.**
