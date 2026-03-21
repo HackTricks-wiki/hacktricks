@@ -196,7 +196,7 @@ docker run --rm -it --pid=host --net=host --privileged -v /:/mnt <imagename> chr
 Uiteindelik, as jy nie van enige van die voorstelle hou nie, of hulle werk om een of ander rede nie (docker api firewall?) kan jy altyd probeer om **'n bevoorregte houer te loop en daarvan te ontsnap** soos hier verduidelik:
 
 {{#ref}}
-../docker-security/
+../container-security/
 {{#endref}}
 
 As jy skryfrechten oor die docker socket het, lees [**hierdie pos oor hoe om voorregte te verhoog deur die docker socket te misbruik**](../index.html#writable-docker-socket)**.**

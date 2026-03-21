@@ -8,7 +8,7 @@ Gaan na die volgende skakel om te leer **wat is containerd** en `ctr`:
 
 
 {{#ref}}
-../../network-services-pentesting/2375-pentesting-docker.md
+container-security/runtimes-and-engines.md
 {{#endref}}
 
 ## PE 1
@@ -39,7 +39,7 @@ ctr run --privileged --net-host -t registry:5000/modified-ubuntu:latest ubuntu b
 Dan kan jy sommige van die tegnieke wat in die volgende bladsy genoem word gebruik om **daaruit te ontsnap deur bevoorregte vermoëns te misbruik**:
 
 {{#ref}}
-docker-security/
+container-security/
 {{#endref}}
 
 {{#include ../../banners/hacktricks-training.md}}

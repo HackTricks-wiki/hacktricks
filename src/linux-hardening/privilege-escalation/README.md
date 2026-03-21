@@ -143,7 +143,7 @@ cat /proc/sys/kernel/randomize_va_space 2>/dev/null
 As jy binne 'n docker container is, kan jy probeer daaruit ontsnap:
 
 {{#ref}}
-docker-security/
+container-security/
 {{#endref}}
 
 ## Skywe
@@ -704,7 +704,7 @@ Kyk na **meer maniere om uit docker uit te breek of dit te misbruik om voorregte
 
 
 {{#ref}}
-docker-security/
+container-security/
 {{#endref}}
 
 ## Containerd (ctr) privilege escalation
