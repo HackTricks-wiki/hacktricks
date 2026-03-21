@@ -196,7 +196,7 @@ docker run --rm -it --pid=host --net=host --privileged -v /:/mnt <imagename> chr
 Finalmente, se você não gostar de nenhuma das sugestões anteriores, ou se elas não estiverem funcionando por algum motivo (firewall da api do docker?), você sempre pode tentar **executar um contêiner privilegiado e escapar dele** como explicado aqui:
 
 {{#ref}}
-../docker-security/
+../container-security/
 {{#endref}}
 
 Se você tiver permissões de escrita sobre o socket do docker, leia [**este post sobre como escalar privilégios abusando do socket do docker**](../index.html#writable-docker-socket)**.**
