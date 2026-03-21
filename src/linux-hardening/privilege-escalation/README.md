@@ -143,7 +143,7 @@ cat /proc/sys/kernel/randomize_va_space 2>/dev/null
 Αν βρίσκεστε μέσα σε ένα docker container, μπορείτε να προσπαθήσετε να διαφύγετε από αυτό:
 
 {{#ref}}
-docker-security/
+container-security/
 {{#endref}}
 
 ## Δίσκοι
@@ -713,7 +713,7 @@ Upgrade: tcp
 
 
 {{#ref}}
-docker-security/
+container-security/
 {{#endref}}
 
 ## Containerd (ctr) privilege escalation

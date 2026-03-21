@@ -196,7 +196,7 @@ docker run --rm -it --pid=host --net=host --privileged -v /:/mnt <imagename> chr
 Τέλος, αν δεν σας αρέσει καμία από τις προηγούμενες προτάσεις ή δεν λειτουργούν για κάποιο λόγο (docker api firewall;), μπορείτε πάντα να **τρέξετε ένα προνομιακό κοντέινερ και να διαφύγετε από αυτό** όπως εξηγείται εδώ:
 
 {{#ref}}
-../docker-security/
+../container-security/
 {{#endref}}
 
 Αν έχετε δικαιώματα εγγραφής πάνω στο docker socket διαβάστε [**αυτή την ανάρτηση σχετικά με το πώς να κλιμακώσετε τα προνόμια εκμεταλλευόμενοι το docker socket**](../index.html#writable-docker-socket)**.**
