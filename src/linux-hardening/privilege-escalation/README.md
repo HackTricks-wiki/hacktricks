@@ -144,7 +144,7 @@ Wenn du dich in einem docker container befindest, kannst du versuchen, daraus zu
 
 
 {{#ref}}
-docker-security/
+container-security/
 {{#endref}}
 
 ## Laufwerke
@@ -700,7 +700,7 @@ Check **more ways to break out from docker or abuse it to escalate privileges** 
 
 
 {{#ref}}
-docker-security/
+container-security/
 {{#endref}}
 
 ## Containerd (ctr) privilege escalation
