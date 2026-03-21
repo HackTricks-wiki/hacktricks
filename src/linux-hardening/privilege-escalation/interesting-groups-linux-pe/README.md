@@ -196,7 +196,7 @@ docker run --rm -it --pid=host --net=host --privileged -v /:/mnt <imagename> chr
 最后，如果你不喜欢之前的任何建议，或者由于某种原因它们不起作用（docker api 防火墙？），你可以尝试**运行一个特权容器并从中逃逸**，如这里所述：
 
 {{#ref}}
-../docker-security/
+../container-security/
 {{#endref}}
 
 如果你对 docker socket 有写权限，请阅读[**这篇关于如何通过滥用 docker socket 提升权限的文章**](../index.html#writable-docker-socket)**.** 

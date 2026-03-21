@@ -7,7 +7,7 @@
 访问以下链接了解 **什么是 containerd** 和 `ctr`：
 
 {{#ref}}
-../../network-services-pentesting/2375-pentesting-docker.md
+container-security/runtimes-and-engines.md
 {{#endref}}
 
 ## PE 1
@@ -38,7 +38,7 @@ ctr run --privileged --net-host -t registry:5000/modified-ubuntu:latest ubuntu b
 然后您可以使用以下页面中提到的一些技术来**利用特权能力逃脱**：
 
 {{#ref}}
-docker-security/
+container-security/
 {{#endref}}
 
 {{#include ../../banners/hacktricks-training.md}}
