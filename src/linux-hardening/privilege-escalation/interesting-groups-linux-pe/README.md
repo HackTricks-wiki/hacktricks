@@ -196,7 +196,7 @@ docker run --rm -it --pid=host --net=host --privileged -v /:/mnt <imagename> chr
 마지막으로, 이전의 제안이 마음에 들지 않거나 어떤 이유로 작동하지 않는 경우(예: docker api 방화벽?) **특권 컨테이너를 실행하고 그로부터 탈출하는** 방법을 시도할 수 있습니다. 여기에서 설명합니다:
 
 {{#ref}}
-../docker-security/
+../container-security/
 {{#endref}}
 
 docker 소켓에 대한 쓰기 권한이 있는 경우 [**docker 소켓을 악용하여 권한을 상승시키는 방법에 대한 이 게시물을 읽어보세요**](../index.html#writable-docker-socket)**.** 
