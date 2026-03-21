@@ -143,7 +143,7 @@ cat /proc/sys/kernel/randomize_va_space 2>/dev/null
 Si vous êtes à l'intérieur d'un docker container, vous pouvez tenter de vous en échapper :
 
 {{#ref}}
-docker-security/
+container-security/
 {{#endref}}
 
 ## Disques
@@ -702,7 +702,7 @@ Consultez **plus de façons de sortir de docker ou de l'abuser pour escalader le
 
 
 {{#ref}}
-docker-security/
+container-security/
 {{#endref}}
 
 ## Containerd (ctr) privilege escalation
