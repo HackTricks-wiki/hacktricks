@@ -8,7 +8,7 @@ Vai al seguente link per imparare **cosa è containerd** e `ctr`:
 
 
 {{#ref}}
-../../network-services-pentesting/2375-pentesting-docker.md
+container-security/runtimes-and-engines.md
 {{#endref}}
 
 ## PE 1
@@ -40,7 +40,7 @@ Puoi quindi utilizzare alcune delle tecniche menzionate nella pagina seguente pe
 
 
 {{#ref}}
-docker-security/
+container-security/
 {{#endref}}
 
 {{#include ../../banners/hacktricks-training.md}}
