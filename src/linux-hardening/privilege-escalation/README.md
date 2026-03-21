@@ -143,7 +143,7 @@ cat /proc/sys/kernel/randomize_va_space 2>/dev/null
 docker container内にいる場合、そこから脱出を試みることができます:
 
 {{#ref}}
-docker-security/
+container-security/
 {{#endref}}
 
 ## ドライブ
@@ -704,7 +704,7 @@ Check **more ways to break out from docker or abuse it to escalate privileges** 
 
 
 {{#ref}}
-docker-security/
+container-security/
 {{#endref}}
 
 ## Containerd (ctr) 権限昇格

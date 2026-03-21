@@ -196,7 +196,7 @@ docker run --rm -it --pid=host --net=host --privileged -v /:/mnt <imagename> chr
 最後に、以前の提案が気に入らない場合や、何らかの理由で機能しない場合（docker api firewall？）、ここで説明されているように、**特権コンテナを実行してそこから脱出する**ことを試すことができます：
 
 {{#ref}}
-../docker-security/
+../container-security/
 {{#endref}}
 
 dockerソケットに書き込み権限がある場合は、[**dockerソケットを悪用して特権を昇格させる方法についてのこの投稿を読んでください**](../index.html#writable-docker-socket)**。**
