@@ -144,7 +144,7 @@ Si estás dentro de un contenedor docker puedes intentar escapar de él:
 
 
 {{#ref}}
-docker-security/
+container-security/
 {{#endref}}
 
 ## Unidades
@@ -703,7 +703,7 @@ Consulta **más formas de escapar de docker o abusarlo para escalar privilegios*
 
 
 {{#ref}}
-docker-security/
+container-security/
 {{#endref}}
 
 ## Containerd (ctr) privilege escalation
