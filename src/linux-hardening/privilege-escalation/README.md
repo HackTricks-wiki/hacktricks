@@ -144,7 +144,7 @@ Jeśli znajdujesz się wewnątrz kontenera docker, możesz spróbować się z ni
 
 
 {{#ref}}
-docker-security/
+container-security/
 {{#endref}}
 
 ## Dyski
@@ -701,7 +701,7 @@ Sprawdź **więcej sposobów na ucieczkę z docker lub nadużycie go do eskalacj
 
 
 {{#ref}}
-docker-security/
+container-security/
 {{#endref}}
 
 ## Containerd (ctr) privilege escalation

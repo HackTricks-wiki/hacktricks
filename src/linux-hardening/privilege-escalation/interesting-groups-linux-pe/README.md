@@ -196,7 +196,7 @@ docker run --rm -it --pid=host --net=host --privileged -v /:/mnt <imagename> chr
 Na koniec, jeśli nie podoba Ci się żadna z wcześniejszych sugestii lub z jakiegoś powodu nie działają (firewall API dockera?), zawsze możesz spróbować **uruchomić kontener z uprawnieniami i wydostać się z niego**, jak wyjaśniono tutaj:
 
 {{#ref}}
-../docker-security/
+../container-security/
 {{#endref}}
 
 Jeśli masz uprawnienia do zapisu w gnieździe dockera, przeczytaj [**ten post o tym, jak podnieść uprawnienia, nadużywając gniazda dockera**](../index.html#writable-docker-socket)**.**
