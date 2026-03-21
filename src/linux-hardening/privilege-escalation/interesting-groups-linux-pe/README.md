@@ -243,7 +243,7 @@ Finally, if you don't like any of the suggestions of before, or they aren't work
 
 
 {{#ref}}
-../docker-security/
+../container-security/
 {{#endref}}
 
 If you have write permissions over the docker socket read [**this post about how to escalate privileges abusing the docker socket**](../index.html#writable-docker-socket)**.**

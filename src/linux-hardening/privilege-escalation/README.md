@@ -172,13 +172,13 @@ cat /proc/sys/kernel/randomize_va_space 2>/dev/null
 #If 0, not enabled
 ```
 
-## Docker Breakout
+## Container Breakout
 
-If you are inside a docker container you can try to escape from it:
+If you are inside a container, start with the following container-security section and then pivot into the runtime-specific abuse pages:
 
 
 {{#ref}}
-docker-security/
+container-security/
 {{#endref}}
 
 ## Drives
@@ -800,11 +800,11 @@ After setting up the `socat` connection, you can execute commands directly in th
 
 Note that if you have write permissions over the docker socket because you are **inside the group `docker`** you have [**more ways to escalate privileges**](interesting-groups-linux-pe/index.html#docker-group). If the [**docker API is listening in a port** you can also be able to compromise it](../../network-services-pentesting/2375-pentesting-docker.md#compromising).
 
-Check **more ways to break out from docker or abuse it to escalate privileges** in:
+Check **more ways to break out from containers or abuse container runtimes to escalate privileges** in:
 
 
 {{#ref}}
-docker-security/
+container-security/
 {{#endref}}
 
 ## Containerd (ctr) privilege escalation
