@@ -196,7 +196,7 @@ docker run --rm -it --pid=host --net=host --privileged -v /:/mnt <imagename> chr
 Hatimaye, ikiwa hupendi yoyote ya mapendekezo ya hapo awali, au hayafanyi kazi kwa sababu fulani (docker api firewall?) unaweza kila wakati kujaribu **kufanya kazi kwenye kontena lenye mamlaka na kutoroka kutoka kwake** kama ilivyoelezwa hapa:
 
 {{#ref}}
-../docker-security/
+../container-security/
 {{#endref}}
 
 Ikiwa una ruhusa za kuandika juu ya docker socket soma [**hii chapisho kuhusu jinsi ya kupandisha mamlaka kwa kutumia docker socket**](../index.html#writable-docker-socket)**.**

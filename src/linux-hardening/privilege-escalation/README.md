@@ -143,7 +143,7 @@ cat /proc/sys/kernel/randomize_va_space 2>/dev/null
 Ikiwa uko ndani ya docker container, unaweza kujaribu kutoroka kutoka ndani yake:
 
 {{#ref}}
-docker-security/
+container-security/
 {{#endref}}
 
 ## Diski
@@ -702,7 +702,7 @@ Angalia **more ways to break out from docker or abuse it to escalate privileges*
 
 
 {{#ref}}
-docker-security/
+container-security/
 {{#endref}}
 
 ## Containerd (ctr) privilege escalation
