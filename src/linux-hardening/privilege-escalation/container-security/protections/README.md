@@ -2,21 +2,21 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-A ideia mais importante no endurecimento de containers é que não existe um único controle chamado "segurança de containers". O que as pessoas chamam de isolamento de containers é, na verdade, o resultado da atuação conjunta de vários mecanismos de segurança e gerenciamento de recursos do Linux. Se a documentação descreve apenas um deles, os leitores tendem a superestimar sua força. Se a documentação lista todos sem explicar como interagem, os leitores ficam com um catálogo de nomes, mas sem um modelo real. Esta seção tenta evitar ambos os erros.
+A ideia mais importante em hardening de containers é que não existe um único controle chamado "container security". O que se chama isolamento de container é, na verdade, o resultado da cooperação de vários mecanismos de segurança e gerenciamento de recursos do Linux. Se a documentação descreve apenas um deles, os leitores tendem a superestimar sua força. Se a documentação lista todos sem explicar como eles interagem, os leitores ficam com um catálogo de nomes, mas sem um modelo real. Esta seção tenta evitar ambos os erros.
 
-No centro do modelo estão **namespaces**, que isolam o que a workload pode ver. Eles dão ao processo uma visão privada ou parcialmente privada dos pontos de montagem do sistema de arquivos, PIDs, rede, objetos de IPC, nomes de host, mapeamentos de usuário/grupo, caminhos de cgroup e alguns clocks. Mas namespaces isoladamente não determinam o que um processo tem permissão para fazer. É aí que entram as próximas camadas.
+No centro do modelo estão os **namespaces**, que isolam o que a workload pode ver. Eles dão ao processo uma visão privada ou parcialmente privada de mounts do filesystem, PIDs, networking, objetos IPC, hostnames, mapeamentos de usuário/grupo, caminhos de cgroup e alguns clocks. Mas namespaces sozinhos não decidem o que um processo tem permissão para fazer. É aí que entram as próximas camadas.
 
-**cgroups** governam o uso de recursos. Eles não são primordialmente um limite de isolamento no mesmo sentido que namespaces de mount ou PID, mas são cruciais operacionalmente porque restringem memória, CPU, PIDs, I/O e acesso a dispositivos. Também têm relevância de segurança porque técnicas históricas de escape abusaram de funcionalidades de cgroup graváveis, especialmente em ambientes cgroup v1.
+**cgroups** governam o uso de recursos. Eles não são primariamente um limite de isolamento no mesmo sentido que mount ou PID namespaces, mas são cruciais operacionalmente porque restringem memória, CPU, PIDs, I/O e acesso a dispositivos. Também têm relevância de segurança porque técnicas históricas de breakout abusaram de features de cgroup graváveis, especialmente em ambientes cgroup v1.
 
-**Capabilities** dividem o antigo modelo de root todo-poderoso em unidades de privilégio menores. Isso é fundamental para containers porque muitas workloads ainda executam como UID 0 dentro do container. A questão, portanto, não é meramente "o processo é root?", mas sim "quais capabilities sobreviveram, dentro de quais namespaces, sob quais restrições de seccomp e MAC?" É por isso que um processo root em um container pode estar relativamente restrito, enquanto um root em outro container pode, na prática, ser quase indistinguível do root do host.
+**Capabilities** dividem o antigo modelo de root todo-poderoso em unidades menores de privilégio. Isso é fundamental para containers porque muitas workloads ainda rodam como UID 0 dentro do container. A questão, portanto, não é apenas "o processo é root?", mas sim "quais capabilities sobreviveram, dentro de quais namespaces, sob quais restrições de seccomp e MAC?" É por isso que um processo root em um container pode ser relativamente limitado enquanto um root em outro container pode, na prática, ser quase indistinguível do root do host.
 
-**seccomp** filtra syscalls e reduz a superfície de ataque do kernel exposta à workload. Frequentemente é o mecanismo que bloqueia chamadas obviamente perigosas como `unshare`, `mount`, `keyctl` ou outras syscalls usadas em cadeias de escape. Mesmo que um processo possua uma capability que normalmente permitiria uma operação, seccomp pode ainda bloquear o caminho da syscall antes que o kernel a processe completamente.
+**seccomp** filtra syscalls e reduz a superfície de ataque do kernel exposta à workload. Frequentemente é o mecanismo que bloqueia chamadas obviamente perigosas como `unshare`, `mount`, `keyctl` ou outras syscalls usadas em cadeias de breakout. Mesmo que um processo tenha uma capability que, de outra forma, permitiria uma operação, seccomp ainda pode bloquear o caminho da syscall antes que o kernel a processe totalmente.
 
-**AppArmor** e **SELinux** adicionam Mandatory Access Control por cima das verificações normais de sistema de arquivos e privilégios. Isso é particularmente importante porque continua a ter efeito mesmo quando um container tem mais capabilities do que deveria. Uma workload pode possuir o privilégio teórico para tentar uma ação, mas ainda ser impedida de realizá‑la porque seu label ou profile proíbe o acesso ao caminho, objeto ou operação relevante.
+**AppArmor** e **SELinux** adicionam Mandatory Access Control além das verificações normais de filesystem e privilégios. Estes são particularmente importantes porque continuam a importar mesmo quando um container tem mais capabilities do que deveria. Uma workload pode possuir o privilégio teórico para tentar uma ação, mas ainda assim ser impedida de executá-la porque seu label ou profile proíbe o acesso ao caminho, objeto ou operação relevante.
 
-Finalmente, existem camadas adicionais de hardening que recebem menos atenção, mas que regularmente importam em ataques reais: `no_new_privs`, caminhos do procfs mascarados, caminhos do sistema somente leitura, sistemas de arquivos root somente leitura e defaults de runtime cuidadosos. Esses mecanismos frequentemente interrompem a "última milha" de uma compromissação, especialmente quando um atacante tenta transformar execução de código em ganho de privilégio mais amplo.
+Finalmente, existem camadas adicionais de hardening que recebem menos atenção, mas que regularmente importam em ataques reais: `no_new_privs`, masked procfs paths, read-only system paths, read-only root filesystems, e defaults cuidadosos de runtime. Esses mecanismos frequentemente impedem a "última milha" de um comprometimento, especialmente quando um atacante tenta transformar execução de código em um ganho de privilégio mais amplo.
 
-O restante desta pasta explica cada um desses mecanismos com mais detalhe, incluindo o que o primitivo do kernel realmente faz, como observá‑lo localmente, como runtimes comuns o utilizam e como operadores acidentalmente o enfraquecem.
+O restante desta pasta explica cada um desses mecanismos em mais detalhe, incluindo o que o primitivo do kernel realmente faz, como observá-lo localmente, como runtimes comuns o usam e como operadores acidentalmente o enfraquecem.
 
 ## Leia a seguir
 
@@ -56,8 +56,9 @@ masked-paths.md
 read-only-paths.md
 {{#endref}}
 
-Muitos escapes reais também dependem do conteúdo do host que foi montado na workload, então, depois de ler sobre as proteções centrais, é útil continuar com:
+Muitos escapes reais também dependem do conteúdo do host que foi montado na workload, então após ler as proteções centrais é útil continuar com:
 
 {{#ref}}
 ../sensitive-host-mounts.md
 {{#endref}}
+{{#include ../../../../banners/hacktricks-training.md}}
