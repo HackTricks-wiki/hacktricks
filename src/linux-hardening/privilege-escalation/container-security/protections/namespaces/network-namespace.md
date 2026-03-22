@@ -2,68 +2,68 @@
 
 {{#include ../../../../../banners/hacktricks-training.md}}
 
-## Übersicht
+## Überblick
 
-Der Netzwerk-Namespace isoliert netzwerkbezogene Ressourcen wie Schnittstellen, IP-Adressen, Routing-Tabellen, ARP/neighbor-Zustand, Firewall-Regeln, Sockets und die Inhalte von Dateien wie `/proc/net`. Deshalb kann ein Container eine scheinbar eigene `eth0`, eigene lokale Routen und ein eigenes Loopback-Gerät haben, ohne den echten Netzwerk-Stack des Hosts zu besitzen.
+Der Netzwerk-Namespace isoliert netzwerkbezogene Ressourcen wie Interfaces, IP-Adressen, Routing-Tabellen, ARP/neighbor-Zustand, Firewall-Regeln, Sockets und den Inhalt von Dateien wie `/proc/net`. Deshalb kann ein Container etwas haben, das wie ein eigenes `eth0`, eigene lokale Routen und ein eigenes Loopback-Gerät aussieht, ohne den echten Netzwerk-Stack des Hosts zu besitzen.
 
-Sicherheitsrelevant ist das, weil Netzwerkisolation weit mehr ist als Portbindung. Ein privater Netzwerk-Namespace begrenzt, was die Workload direkt beobachten oder umkonfigurieren kann. Sobald dieser Namespace mit dem Host geteilt wird, kann der Container plötzlich Sichtbarkeit auf Host-Listener, host-lokale Dienste und Netzwerk-Kontrollpunkte erhalten, die niemals für die Anwendung offengelegt werden sollten.
+Sicherheitsseitig ist das wichtig, weil Netzwerk-Isolation weit mehr bedeutet als nur Port-Binding. Ein privater Network-Namespace begrenzt, was die Workload direkt beobachten oder neu konfigurieren kann. Wird dieser Namespace jedoch mit dem Host geteilt, kann der Container plötzlich Einblick in Host-Listener, host-local Services und Netzwerkkontrollpunkte erhalten, die nie für die Anwendung freigegeben werden sollten.
 
 ## Funktionsweise
 
-Ein frisch erstellter Netzwerk-Namespace beginnt mit einer leeren oder nahezu leeren Netzwerkumgebung, bis Schnittstellen daran angebunden werden. Container-Runtimes erstellen oder verbinden dann virtuelle Schnittstellen, weisen Adressen zu und konfigurieren Routen, sodass die Workload die erwartete Konnektivität hat. In bridge-basierten Deployments bedeutet das in der Regel, dass der Container eine veth-gestützte Schnittstelle sieht, die mit einer Host-Bridge verbunden ist. In Kubernetes übernehmen CNI-Plugins das äquivalente Setup für Pod-Netzwerke.
+Ein frisch erstellter Network-Namespace startet mit einer leeren oder nahezu leeren Netzwerkumgebung, bis Interfaces daran angehängt werden. Container-Runtimes erstellen oder verbinden dann virtuelle Interfaces, weisen Adressen zu und konfigurieren Routen, damit die Workload die erwartete Konnektivität erhält. In bridge-basierten Deployments bedeutet das in der Regel, dass der Container ein veth-backed Interface sieht, das mit einer Host-Bridge verbunden ist. In Kubernetes übernehmen CNI-Plugins die entsprechende Einrichtung für Pod-Networking.
 
-Diese Architektur erklärt, warum `--network=host` oder `hostNetwork: true` eine so drastische Änderung ist. Anstatt einen vorbereiteten privaten Netzwerk-Stack zu erhalten, tritt die Workload dem tatsächlichen Netzwerk-Stack des Hosts bei.
+Diese Architektur erklärt, warum `--network=host` oder `hostNetwork: true` eine so drastische Änderung darstellt. Anstatt einen vorbereiteten privaten Netzwerk-Stack zu erhalten, schließt sich die Workload dem tatsächlichen Netzwerk-Stack des Hosts an.
 
-## Labor
+## Lab
 
-Sie können einen nahezu leeren Netzwerk-Namespace sehen mit:
+Sie können ein nahezu leeres Network-Namespace sehen mit:
 ```bash
 sudo unshare --net --fork bash
 ip addr
 ip route
 ```
-Und du kannst normale und mit dem Host vernetzte Container wie folgt vergleichen:
+Und du kannst normale Container und Container mit Host-Netzwerk vergleichen mit:
 ```bash
 docker run --rm debian:stable-slim sh -c 'ip addr || ifconfig'
 docker run --rm --network=host debian:stable-slim sh -c 'ss -lntp | head'
 ```
-Der Container, der das Host-Netzwerk verwendet, hat nicht mehr seine eigene isolierte Socket- und Interface-Ansicht. Allein diese Änderung ist bereits erheblich, noch bevor Sie fragen, welche capabilities der Prozess hat.
+Der host‑verknüpfte Container hat nicht mehr seine eigene isolierte Socket‑ und Schnittstellenansicht. Diese Änderung allein ist bereits bedeutsam, noch bevor man fragt, welche capabilities der Prozess besitzt.
 
-## Laufzeitnutzung
+## Zur Laufzeit
 
-Docker und Podman erstellen normalerweise für jeden Container einen privaten Netzwerknamespace, sofern nicht anders konfiguriert. Kubernetes gibt in der Regel jedem Pod seinen eigenen Netzwerknamespace, der von den Containern innerhalb dieses Pods geteilt, aber vom Host getrennt ist. Incus/LXC-Systeme bieten ebenfalls eine ausgeprägte, auf Netzwerk-Namespaces basierende Isolation, oft mit einer größeren Vielfalt an virtuellen Netzwerk-Setups.
+Docker und Podman erstellen normalerweise einen privaten Netzwerk‑Namespace für jeden Container, sofern nicht anders konfiguriert. Kubernetes gibt in der Regel jedem Pod seinen eigenen Netzwerk‑Namespace, der von den Containern innerhalb dieses Pods geteilt wird, aber vom Host getrennt ist. Incus/LXC‑Systeme bieten ebenfalls umfangreiche Isolation auf Basis von Netzwerk‑Namespaces, oft mit einer größeren Vielfalt an virtuellen Netzwerk‑Setups.
 
-Das allgemeine Prinzip ist, dass private Netzwerke die Standard-Isolationsgrenze sind, während Host-Networking eine explizite Abwahl dieser Grenze darstellt.
+Das gemeinsame Prinzip ist, dass private Netzwerkisolation die Standard‑Isolationsgrenze ist, während Host‑Networking eine explizite Abmeldung von dieser Grenze darstellt.
 
 ## Fehlkonfigurationen
 
-Die wichtigste Fehlkonfiguration ist schlicht das Teilen des Host-Netzwerknamespaces. Das geschieht manchmal aus Performance-, Low-Level-Monitoring- oder Komfortgründen, entfernt aber eine der saubersten Grenzen, die Containern zur Verfügung stehen. Host-lokale Listener werden direkter erreichbar, localhost-only Services können zugänglich werden, und capabilities wie `CAP_NET_ADMIN` oder `CAP_NET_RAW` werden deutlich gefährlicher, weil die von ihnen ermöglich­ten Operationen nun auf die Netzwerkumgebung des Hosts angewendet werden.
+Die wichtigste Fehlkonfiguration ist schlicht das Teilen des Host‑Netzwerk‑Namespaces. Das wird manchmal aus Performance‑Gründen, für Low‑Level‑Monitoring oder aus Bequemlichkeit gemacht, entfernt aber eine der saubersten Grenzen, die Containern zur Verfügung stehen. Auf dem Host gebundene Listener werden direkter erreichbar, nur auf localhost erreichbare Dienste können zugänglich werden, und Capabilities wie `CAP_NET_ADMIN` oder `CAP_NET_RAW` werden viel gefährlicher, weil die von ihnen erlaubten Operationen nun auf die Netzwerkumgebung des Hosts angewendet werden.
 
-Ein weiteres Problem ist das Übergeben von netzwerkbezogenen capabilities selbst dann, wenn der Netzwerknamespace privat ist. Ein privater Namespace hilft zwar, macht raw sockets oder fortgeschrittene Netzwerksteuerung jedoch nicht harmlos.
+Ein weiteres Problem ist das Übergeben von zu vielen netzwerkbezogenen capabilities, selbst wenn der Netzwerk‑Namespace privat ist. Ein privater Namespace hilft zwar, macht aber raw sockets oder erweiterten Netzwerk‑Kontrollzugriff nicht harmlos.
 
 ## Missbrauch
 
-In schwach isolierten Setups können Angreifer hostseitige Listening-Services inspizieren, Management-Endpunkte erreichen, die nur an loopback gebunden sind, Traffic sniffen oder stören — abhängig von den tatsächlichen capabilities und der Umgebung — oder Routing- und Firewall-Zustände neu konfigurieren, falls `CAP_NET_ADMIN` vorhanden ist. In einem Cluster kann das außerdem laterale Bewegung und control-plane reconnaissance erleichtern.
+In schwach isolierten Setups können Angreifer Host‑Listener untersuchen, Management‑Endpunkte erreichen, die nur an Loopback gebunden sind, Traffic abhören oder stören — je nach vorhandenen capabilities und Umgebung — oder Routing‑ und Firewall‑Zustände neu konfigurieren, wenn `CAP_NET_ADMIN` vorhanden ist. In einem Cluster kann das auch laterale Bewegung und Control‑Plane‑Aufklärung erleichtern.
 
-Wenn Sie Host-Networking vermuten, beginnen Sie damit zu bestätigen, dass die sichtbaren Interfaces und Listener zum Host gehören und nicht zu einem isolierten Container-Netzwerk:
+Wenn Sie Host‑Networking vermuten, beginnen Sie damit zu prüfen, ob die sichtbaren Interfaces und Listener dem Host gehören und nicht einem isolierten Container‑Netzwerk:
 ```bash
 ip addr
 ip route
 ss -lntup | head -n 50
 ```
-Loopback-only services sind oft die erste interessante Entdeckung:
+Nur über Loopback erreichbare Dienste sind oft die erste interessante Entdeckung:
 ```bash
 ss -lntp | grep '127.0.0.1'
 curl -s http://127.0.0.1:2375/version 2>/dev/null
 curl -sk https://127.0.0.1:2376/version 2>/dev/null
 ```
-Wenn Netzwerkfähigkeiten vorhanden sind, testen Sie, ob die Workload den sichtbaren Stack inspizieren oder ändern kann:
+Wenn network capabilities vorhanden sind, teste, ob der Workload den sichtbaren Stack inspizieren oder verändern kann:
 ```bash
 capsh --print | grep -E 'cap_net_admin|cap_net_raw'
 iptables -S 2>/dev/null || nft list ruleset 2>/dev/null
 ip link show
 ```
-In Cluster- oder Cloud-Umgebungen rechtfertigt Host-Networking auch eine schnelle lokale recon von Metadaten und control-plane-nahen Diensten:
+In Cluster- oder Cloud-Umgebungen rechtfertigt Host-Netzwerk auch schnelles lokales recon von Metadaten- und Control-Plane-nahen Diensten:
 ```bash
 for u in \
 http://169.254.169.254/latest/meta-data/ \
@@ -72,9 +72,9 @@ http://127.0.0.1:10250/pods; do
 curl -m 2 -s "$u" 2>/dev/null | head
 done
 ```
-### Vollständiges Beispiel: Host Networking + Local Runtime / Kubelet Access
+### Vollständiges Beispiel: Host-Netzwerk + lokale Runtime / Kubelet-Zugriff
 
-Host networking stellt nicht automatisch host root bereit, aber es exponiert häufig Dienste, die absichtlich nur vom node selbst erreichbar sind. Wenn einer dieser Dienste schwach geschützt ist, wird host networking zu einem direkten privilege-escalation path.
+Host-Netzwerk gewährt nicht automatisch root auf dem Host, macht aber oft Dienste zugänglich, die absichtlich nur vom Node selbst erreichbar sein sollen. Wenn einer dieser Dienste schwach geschützt ist, wird Host-Netzwerk zu einem direkten privilege-escalation-Pfad.
 
 Docker API auf localhost:
 ```bash
@@ -88,21 +88,22 @@ curl -k https://127.0.0.1:10250/runningpods/ 2>/dev/null | head
 ```
 Auswirkungen:
 
-- direkte Kompromittierung des Hosts, wenn eine lokale Runtime-API ohne angemessenen Schutz exponiert ist
+- direkte Kompromittierung des Hosts, wenn eine lokale Runtime-API ohne ausreichenden Schutz exponiert ist
 - Cluster-Aufklärung oder laterale Bewegung, wenn kubelet oder lokale Agenten erreichbar sind
-- Verkehrsmanipulation oder denial of service, wenn kombiniert mit `CAP_NET_ADMIN`
+- Verkehrsmanipulation oder denial of service, bei Kombination mit `CAP_NET_ADMIN`
 
-## Prüfungen
+## Checks
 
-Das Ziel dieser Prüfungen ist herauszufinden, ob der Prozess einen privaten Netzwerk-Stack hat, welche Routen und Listener sichtbar sind und ob die Netzwerkansicht bereits host-ähnlich aussieht, bevor Sie überhaupt capabilities testen.
+Ziel dieser Checks ist es herauszufinden, ob der Prozess einen privaten Netzwerk-Stack hat, welche Routen und Listener sichtbar sind und ob die Netzwerkansicht bereits host-ähnlich aussieht, bevor Sie überhaupt die capabilities testen.
 ```bash
 readlink /proc/self/ns/net   # Network namespace identifier
 ip addr                      # Visible interfaces and addresses
 ip route                     # Routing table
 ss -lntup                    # Listening TCP/UDP sockets with process info
 ```
-- Wenn die Namespace-Kennung oder die sichtbare Schnittstellenmenge wie die des Hosts aussieht, könnte host networking bereits verwendet werden.
-- `ss -lntup` ist besonders wertvoll, da es ausschließlich auf Loopback gebundene Listener und lokale Management-Endpunkte aufdeckt.
-- Routen, Schnittstellennamen und Firewall-Kontext werden deutlich wichtiger, wenn `CAP_NET_ADMIN` oder `CAP_NET_RAW` vorhanden sind.
+- Wenn die Namespace-Kennung oder das sichtbare Interface-Set wie das Host-System aussieht, könnte host networking bereits verwendet werden.
+- `ss -lntup` ist besonders wertvoll, weil es loopback-only listeners und lokale Management-Endpunkte offenlegt.
+- Routen, Interface-Namen und der Firewall-Kontext werden viel wichtiger, wenn `CAP_NET_ADMIN` oder `CAP_NET_RAW` vorhanden sind.
 
-Beim Überprüfen eines Containers sollte man das network namespace stets zusammen mit dem Capability-Set bewerten. Host networking plus starke Netzwerk-Capabilities stellt eine ganz andere Ausgangslage dar als bridge networking zusammen mit einem engen, standardmäßigen Capability-Set.
+Beim Überprüfen eines Containers sollte das network namespace immer zusammen mit dem capability set bewertet werden. Host networking plus starke Netzwerk-Capabilities ist eine völlig andere Ausgangslage als bridge networking plus ein schmales default capability set.
+{{#include ../../../../../banners/hacktricks-training.md}}
