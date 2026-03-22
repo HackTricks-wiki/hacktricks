@@ -79,3 +79,4 @@ What is interesting here:
 - This is usually a lower-priority finding than PID, mount, or user namespace issues, but it still confirms how isolated the process really is.
 
 In most environments, the UTS namespace is best thought of as a supporting isolation layer. It is rarely the first thing you chase in a breakout, but it is still part of the overall consistency and safety of the container view.
+{{#include ../../../../../banners/hacktricks-training.md}}

@@ -127,3 +127,4 @@ As you read them, keep two ideas in mind. First, each namespace isolates only on
 | containerd / CRI-O under Kubernetes | Usually follow Kubernetes Pod defaults | same as Kubernetes row; direct CRI/OCI specs can also request host namespace joins |
 
 The main portability rule is simple: the **concept** of host namespace sharing is common across runtimes, but the **syntax** is runtime-specific.
+{{#include ../../../../../banners/hacktricks-training.md}}

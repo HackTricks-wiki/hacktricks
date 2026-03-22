@@ -129,3 +129,4 @@ What is interesting here:
 - `mountinfo` is often the best place to see whether a path is really host-derived or overlay-backed.
 
 These checks establish **which resources are visible in this namespace**, **which ones are host-derived**, and **which of them are writable or security-sensitive**.
+{{#include ../../../../../banners/hacktricks-training.md}}

@@ -151,3 +151,4 @@ When reviewing a container on an SELinux-capable platform, do not treat labeling
 | CRI-O / OpenShift style deployments | Commonly relied on heavily | SELinux is often a core part of the node isolation model in these environments | custom policies that over-broaden access, disabling labeling for compatibility |
 
 SELinux defaults are more distribution-dependent than seccomp defaults. On Fedora/RHEL/OpenShift-style systems, SELinux is often central to the isolation model. On non-SELinux systems, it is simply absent.
+{{#include ../../../../banners/hacktricks-training.md}}

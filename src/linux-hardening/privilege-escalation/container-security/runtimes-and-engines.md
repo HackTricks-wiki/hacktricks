@@ -106,3 +106,4 @@ docker exec -it <container-name> /bin/sh
 The key lesson is not the exact historical exploit implementation, but the assessment implication: if the runtime version is vulnerable, ordinary in-container code execution may be enough to compromise the host even when the visible container configuration does not look blatantly weak.
 
 Recent runtime CVEs such as `CVE-2024-21626` in `runc`, BuildKit mount races, and containerd parsing bugs reinforce the same point. Runtime version and patch level are part of the security boundary, not merely maintenance trivia.
+{{#include ../../../banners/hacktricks-training.md}}

@@ -132,3 +132,4 @@ What is interesting here:
 - The mapping files are more valuable than `id` alone, because `id` only shows the namespace-local identity.
 
 If the workload runs as UID 0 and the mapping shows that this corresponds closely to host root, you should interpret the rest of the container's privileges much more strictly.
+{{#include ../../../../../banners/hacktricks-training.md}}

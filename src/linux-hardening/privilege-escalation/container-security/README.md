@@ -125,3 +125,4 @@ Those answers tell you far more about the real security posture than the base im
 ## Coverage
 
 This section covers the old Docker-focused material under container-oriented organization: runtime and daemon exposure, authorization plugins, image trust and build secrets, sensitive host mounts, distroless workloads, privileged containers, and the kernel protections normally layered around container execution.
+{{#include ../../../banners/hacktricks-training.md}}

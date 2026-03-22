@@ -272,3 +272,4 @@ If you discover **cgroup v1**, writable controller mounts, and a container that 
 | containerd / CRI-O | Enabled by default | cgroups are part of normal lifecycle management | direct runtime configs that relax device controls or expose legacy writable cgroup v1 interfaces |
 
 The important distinction is that **cgroup existence** is usually default, while **useful resource constraints** are often optional unless explicitly configured.
+{{#include ../../../../banners/hacktricks-training.md}}
