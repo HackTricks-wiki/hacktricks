@@ -1,22 +1,22 @@
-# IPC Namespace
+# Espacio de nombres IPC
 
 {{#include ../../../../../banners/hacktricks-training.md}}
 
-## Visión general
+## Descripción general
 
-The IPC namespace isolates **System V IPC objects** and **POSIX message queues**. That includes shared memory segments, semaphores, and message queues that would otherwise be visible across unrelated processes on the host. In practical terms, this prevents a contenedor from casually attaching to IPC objects belonging to other workloads or the host.
+El espacio de nombres IPC aísla **System V IPC objects** y **POSIX message queues**. Eso incluye segmentos de memoria compartida, semáforos y colas de mensajes que, de otro modo, serían visibles entre procesos no relacionados en el host. En términos prácticos, esto evita que un container se conecte casualmente a objetos IPC pertenecientes a otras cargas de trabajo o al host.
 
-Compared with mount, PID, or user namespaces, the IPC namespace is often discussed less often, but that should not be confused with irrelevance. Shared memory and related IPC mechanisms can contain highly useful state. If the host IPC namespace is exposed, the workload may gain visibility into inter-process coordination objects or data that was never intended to cross the container boundary.
+En comparación con mount, PID o user namespaces, el espacio de nombres IPC se discute con menos frecuencia, pero eso no debe confundirse con irrelevancia. La memoria compartida y los mecanismos IPC relacionados pueden contener estado muy útil. Si el host IPC namespace está expuesto, la carga de trabajo puede obtener visibilidad sobre objetos de coordinación entre procesos o datos que nunca se pretendió que cruzaran la frontera del container.
 
 ## Funcionamiento
 
-When the runtime creates a fresh IPC namespace, the process gets its own isolated set of IPC identifiers. This means commands such as `ipcs` show only the objects available in that namespace. If the container instead joins the host IPC namespace, those objects become part of a shared global view.
+Cuando el runtime crea un nuevo espacio de nombres IPC, el proceso obtiene su propio conjunto aislado de identificadores IPC. Esto significa que comandos como `ipcs` muestran solo los objetos disponibles en ese espacio de nombres. Si el container en su lugar se une al host IPC namespace, esos objetos pasan a formar parte de una vista global compartida.
 
-This matters especially in environments where applications or services use shared memory heavily. Even when the contenedor cannot directly break out through IPC alone, the namespace may leak information or enable cross-process interference that materially helps a later attack.
+Esto importa especialmente en entornos donde las aplicaciones o servicios usan memoria compartida de forma intensiva. Incluso cuando el container no puede escapar directamente solo a través de IPC, el espacio de nombres puede leak información o permitir interferencias entre procesos que ayuden materialmente a un ataque posterior.
 
 ## Laboratorio
 
-You can create a private IPC namespace with:
+Puedes crear un espacio de nombres IPC privado con:
 ```bash
 sudo unshare --ipc --fork bash
 ipcs
@@ -28,37 +28,37 @@ docker run --rm --ipc=host debian:stable-slim ipcs
 ```
 ## Uso en tiempo de ejecución
 
-Docker y Podman aíslan IPC por defecto. Kubernetes normalmente asigna al Pod su propio namespace de IPC, compartido por los contenedores dentro del mismo Pod pero no con el host por defecto. Compartir el IPC con el host es posible, pero debe considerarse una reducción significativa de aislamiento en lugar de una opción de runtime menor.
+Docker y Podman aíslan IPC por defecto. Kubernetes típicamente da al Pod su propio IPC namespace, compartido por los contenedores en el mismo Pod pero no, por defecto, con el host. El uso compartido de host IPC es posible, pero debe considerarse una reducción significativa del aislamiento en lugar de una opción menor de tiempo de ejecución.
 
-## Configuraciones incorrectas
+## Malconfiguraciones
 
-El error obvio es `--ipc=host` o `hostIPC: true`. Esto puede hacerse por compatibilidad con software heredado o por conveniencia, pero cambia el modelo de confianza sustancialmente. Otro problema recurrente es simplemente pasar por alto IPC porque parece menos dramático que el PID del host o la red del host. En realidad, si la carga de trabajo maneja navegadores, bases de datos, cargas de trabajo científicas u otro software que haga un uso intensivo de la memoria compartida, la superficie de IPC puede ser muy relevante.
+El error más obvio es `--ipc=host` o `hostIPC: true`. Esto puede hacerse por compatibilidad con software heredado o por conveniencia, pero cambia sustancialmente el modelo de confianza. Otro problema recurrente es simplemente pasar por alto IPC porque parece menos dramático que host PID o host networking. En realidad, si el workload maneja browsers, databases, scientific workloads u otro software que hace uso intensivo de shared memory, la superficie de IPC puede ser muy relevante.
 
 ## Abuso
 
-Cuando se comparte el IPC del host, un atacante puede inspeccionar o interferir con objetos de memoria compartida, obtener nueva información sobre el comportamiento del host o de cargas de trabajo vecinas, o combinar la información obtenida allí con visibilidad de procesos y capacidades de estilo ptrace. Compartir IPC suele ser una debilidad auxiliar más que la vía completa de escape, pero las debilidades auxiliares importan porque acortan y estabilizan cadenas de ataque reales.
+Cuando se comparte host IPC, un atacante puede inspeccionar o interferir con shared memory objects, obtener nueva información sobre el comportamiento del host o de workloads vecinos, o combinar la información aprendida allí con la visibilidad de procesos y capacidades ptrace-style. IPC sharing suele ser una debilidad de soporte más que la ruta completa de breakout, pero las debilidades de soporte importan porque acortan y estabilizan las cadenas de ataque reales.
 
-El primer paso útil es enumerar qué objetos IPC son visibles:
+El primer paso útil es enumerar qué objetos IPC son visibles en absoluto:
 ```bash
 readlink /proc/self/ns/ipc
 ipcs -a
 ls -la /dev/shm 2>/dev/null | head -n 50
 ```
-Si se comparte el IPC namespace del host, segmentos grandes de memoria compartida o propietarios de objetos interesantes pueden revelar el comportamiento de la aplicación de inmediato:
+Si el IPC namespace del host se comparte, grandes segmentos de memoria compartida o propietarios de objetos interesantes pueden revelar inmediatamente el comportamiento de la aplicación:
 ```bash
 ipcs -m -p
 ipcs -q -p
 ```
-En algunos entornos, los contenidos de `/dev/shm` por sí mismos leak nombres de archivo, artefactos o tokens que vale la pena revisar:
+En algunos entornos, el contenido de `/dev/shm` en sí puede leak filenames, artifacts, or tokens que vale la pena revisar:
 ```bash
 find /dev/shm -maxdepth 2 -type f 2>/dev/null -ls | head -n 50
 strings /dev/shm/* 2>/dev/null | head -n 50
 ```
-IPC sharing rara vez otorga host root de forma inmediata por sí solo, pero puede exponer datos y canales de coordinación que facilitan mucho los ataques posteriores a procesos.
+El intercambio de IPC rara vez concede root del host de forma instantánea por sí mismo, pero puede exponer datos y canales de coordinación que facilitan mucho los ataques posteriores a procesos.
 
-### Ejemplo completo: `/dev/shm` Recuperación de secretos
+### Ejemplo completo: Recuperación de secretos en `/dev/shm`
 
-El caso de abuso completo más realista es el robo de datos más que la fuga directa. Si host IPC o un amplio diseño de memoria compartida están expuestos, a veces se pueden recuperar directamente artefactos sensibles:
+El caso de abuso más realista es el robo de datos en lugar de una fuga directa. Si el IPC del host o una disposición amplia de memoria compartida están expuestos, a veces se pueden recuperar directamente artefactos sensibles:
 ```bash
 find /dev/shm -maxdepth 2 -type f 2>/dev/null -print
 strings /dev/shm/* 2>/dev/null | grep -Ei 'token|secret|password|jwt|key'
@@ -67,13 +67,13 @@ Impacto:
 
 - extracción de secretos o material de sesión dejado en la memoria compartida
 - información sobre las aplicaciones actualmente activas en el host
-- mejor focalización para ataques posteriores basados en PID-namespace o ptrace
+- mejor orientación para posteriores ataques basados en PID-namespace o ptrace
 
 El uso compartido de IPC se entiende por tanto mejor como un **amplificador de ataques** que como una primitiva independiente de escape del host.
 
 ## Comprobaciones
 
-Estos comandos están pensados para responder si la carga de trabajo tiene una vista IPC privada, si hay objetos significativos de memoria compartida o de mensajes visibles, y si `/dev/shm` expone artefactos útiles.
+Estos comandos están pensados para responder si la carga de trabajo tiene una vista IPC privada, si existen objetos significativos de memoria compartida o de mensajes visibles, y si `/dev/shm` expone por sí mismo artefactos útiles.
 ```bash
 readlink /proc/self/ns/ipc   # Namespace identifier for IPC
 ipcs -a                      # Visible SysV IPC objects
@@ -81,8 +81,9 @@ mount | grep shm             # Shared-memory mounts, especially /dev/shm
 ```
 Lo interesante aquí:
 
-- Si `ipcs -a` revela objetos pertenecientes a usuarios o servicios inesperados, el namespace puede no estar tan aislado como se espera.
-- Los segmentos de memoria compartida grandes o inusuales suelen merecer seguimiento.
-- Un montaje amplio de `/dev/shm` no es automáticamente un bug, pero en algunos entornos leaks nombres de archivo, artefactos y secretos transitorios.
+- Si `ipcs -a` revela objetos propiedad de usuarios o servicios inesperados, el namespace puede no estar tan aislado como se espera.
+- Los segmentos de memoria compartida grandes o inusuales a menudo merecen seguimiento.
+- Un montaje amplio de `/dev/shm` no es automáticamente un fallo, pero en algunos entornos it leaks nombres de archivo, artefactos y secretos transitorios.
 
-IPC rara vez recibe tanta atención como los tipos de namespace más grandes, pero en entornos que lo usan intensamente, compartirlo con el host es, en gran medida, una decisión de seguridad.
+IPC rara vez recibe tanta atención como los tipos de namespace más grandes, pero en entornos que lo usan intensivamente, compartirlo con el host es, en gran medida, una decisión de seguridad.
+{{#include ../../../../../banners/hacktricks-training.md}}
