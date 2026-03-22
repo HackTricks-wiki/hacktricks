@@ -1,46 +1,46 @@
-# Container Security
+# कंटेनर सुरक्षा
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## What A Container Actually Is
+## कंटेनर असल में क्या है
 
-एक व्यावहारिक परिभाषा यह है: एक container एक नियमित Linux process tree है जिसे एक विशिष्ट OCI-style configuration के तहत शुरू किया गया है ताकि वह एक नियंत्रित filesystem, नियंत्रित kernel resources, और एक प्रतिबंधित privilege मॉडल देखे। प्रोसेस यह मान सकता है कि यह PID 1 है, यह मान सकता है कि उसके पास अपना नेटवर्क स्टैक है, यह मान सकता है कि वह अपना hostname और IPC resources मालिक है, और यह अपने user namespace के अंदर root के रूप में भी चल सकता है। लेकिन अंदर से यह अभी भी एक host process है जिसे kernel किसी अन्य की तरह schedule करता है।
+एक व्यावहारिक परिभाषा यह है: एक कंटेनर एक **सामान्य Linux प्रोसेस ट्री** है जिसे एक विशिष्ट OCI-स्टाइल कॉन्फ़िगरेशन के तहत शुरू किया गया है ताकि वह एक नियंत्रित फ़ाइल सिस्टम, कर्नेल संसाधनों का नियंत्रित सेट, और एक प्रतिबंधित प्रिविलेज मॉडल देखे। प्रोसेस यह मान सकता है कि यह PID 1 है, इसका अपना नेटवर्क स्टैक है, इसका अपना hostname और IPC रिसोर्सेज हैं, और यह अपनी user namespace में root के रूप में भी चल सकता है। लेकिन अंदर से यह फिर भी एक होस्ट प्रोसेस ही है जिसे कर्नेल किसी अन्य की तरह शेड्यूल करता है।
 
-इसीलिए container security असल में यह अध्ययन है कि वह illusion कैसे बनाया गया है और वह कैसे फेल होता है। अगर mount namespace कमजोर है, तो प्रोसेस host filesystem देख सकता है। अगर user namespace अनुपस्थित या disabled है, तो container के अंदर का root host पर root के बहुत करीब मैप हो सकता है। अगर seccomp unconfined है और capability set बहुत व्यापक है, तो प्रोसेस ऐसे syscalls और privileged kernel features तक पहुँच सकता है जिन्हें दूर रखा जाना चाहिए था। अगर runtime socket container के अंदर mounted है, तो container को kernel breakout की आवश्यकता भी नहीं पड़ सकती क्योंकि वह सीधे runtime से अनुरोध करके एक अधिक powerful sibling container लॉन्च करवा सकता है या host root filesystem को mount करवा सकता है।
+इसीलिए कंटेनर सुरक्षा वास्तव में इस बात का अध्ययन है कि वह भ्रम कैसे बनता है और कहां फेल होता है। अगर mount namespace कमजोर है तो प्रोसेस होस्ट फ़ाइल सिस्टम देख सकता है। अगर user namespace अनुपस्थित या disabled है, तो कंटेनर के अंदर का root होस्ट पर root के बहुत करीब मैप हो सकता है। अगर seccomp अनकन्फ़ाइन्ड है और capability सेट बहुत व्यापक है, तो प्रोसेस उन syscalls और privileged kernel फ़ीचर्स तक पहुँच सकता है जो पहुँच से बाहर रहने चाहिए थे। अगर runtime socket कंटेनर के अंदर माउंट है, तो कंटेनर को kernel breakout की आवश्यकता तक नहीं होगी क्योंकि वह runtime से बस एक अधिक शक्तिशाली sibling container लॉन्च करने या सीधे होस्ट root filesystem माउंट करने के लिए कह सकता है।
 
-## How Containers Differ From Virtual Machines
+## कंटेनर और वर्चुअल मशीन में क्या अंतर है
 
-एक VM आमतौर पर अपना खुद का kernel और hardware abstraction boundary लेकर चलता है। इसका मतलब है कि guest kernel crash, panic, या exploit हो सकता है बिना यह स्वतः ही host kernel के सीधे नियंत्रण का संकेत दिए। Containers में, workload को अलग kernel नहीं मिलता। बल्कि, उसे उसी kernel का एक सावधानीपूर्वक filtered और namespaced view मिलता है जिसे host उपयोग करता है। परिणामस्वरूप, containers आम तौर पर हल्के होते हैं, तेज़ी से शुरू होते हैं, मशीन पर घनघन पैक करना आसान होता है, और short-lived application deployment के लिए बेहतर होते हैं। कीमत यह है कि isolation boundary बहुत अधिक सीधे सही host और runtime configuration पर निर्भर करती है।
+एक VM आमतौर पर अपना खुद का kernel और हार्डवेयर एब्स्ट्रैक्शन बॉउंड्री लेकर चलता है। इसका मतलब यह है कि guest kernel क्रैश, panic, या exploited हो सकता है बिना स्वतः होस्ट kernel का प्रत्यक्ष नियंत्रण लागू हुए। कंटेनरों में, वर्कलोड को अलग kernel नहीं मिलता। इसके बजाय, उसे उसी kernel का एक सावधानीपूर्वक फ़िल्टर किया गया और namespaced दृश्य मिलता है जिसे होस्ट उपयोग करता है। नतीजतन, कंटेनर आमतौर पर हल्के, तेज़ी से शुरू होने वाले, एक मशीन पर घनीपैक करने में आसान, और short-lived application deployment के लिए बेहतर होते हैं। कीमत यह है कि isolation boundary सही होस्ट और runtime कॉन्फ़िगरेशन पर बहुत अधिक निर्भर करती है।
 
-इसका मतलब यह नहीं है कि containers "insecure" हैं और VMs "secure" हैं। इसका मतलब है कि security model अलग है। एक अच्छी तरह से configured container stack जिसमें rootless execution, user namespaces, default seccomp, एक सख्त capability set, कोई host namespace sharing नहीं, और मजबूत SELinux या AppArmor enforcement शामिल हों, बहुत robust हो सकती है। इसके विपरीत, एक container जिसे `--privileged` के साथ शुरू किया गया है, host PID/network sharing है, Docker socket उसके अंदर mounted है, और `/` का writable bind mount है, व्यवहारिक रूप से host root access के बहुत करीब है बजाय एक सुरक्षित तरीके से isolated application sandbox के। फर्क उन लेयर्स से आता है जिन्हें enabled या disabled किया गया था।
+यह नहीं कहता कि कंटेनर "असुरक्षित" हैं और VMs "सुरक्षित" हैं। इसका अर्थ है कि सुरक्षा मॉडल अलग है। एक अच्छी तरह कॉन्फ़िगर किया गया container stack — rootless execution, user namespaces, default seccomp, एक सख्त capability सेट, कोई host namespace sharing न होना, और मजबूत SELinux या AppArmor enforcement — बहुत मजबूत हो सकता है। इसके विपरीत, एक कंटेनर जिसे `--privileged` के साथ शुरू किया गया हो, host PID/network साझा कर रहा हो, Docker socket उसके अंदर माउंट हो, और `/` का writable bind mount हो — वह व्यवहार में host root access के बहुत करीब होता है बजाय सुरक्षित रूप से अलग किए गए application sandbox के। फर्क उन लेयर्स से आता है जिन्हें सक्षम या निष्क्रिय किया गया था।
 
-एक मध्य मार्ग भी है जिसे पाठक समझें क्योंकि यह वास्तविक वातावरणों में अधिक और अधिक दिखाई देता है। Sandboxed container runtimes जैसे कि gVisor और Kata Containers जानबूझकर boundary को एक क्लासिक `runc` container से कठोर करते हैं। gVisor workload और कई host kernel interfaces के बीच एक userspace kernel layer रखता है, जबकि Kata workload को एक lightweight virtual machine के अंदर लॉन्च करता है। इन्हें अभी भी container ecosystems और orchestration workflows के माध्यम से उपयोग किया जाता है, लेकिन उनकी security properties plain OCI runtimes से भिन्न हैं और इन्हें "normal Docker containers" के साथ एक ही तरह से मानसिक रूप से समूहबद्ध नहीं किया जाना चाहिए मानो सब कुछ एक जैसा व्यवहार कर रहा हो।
+एक मध्यवर्ती विकल्प भी है जिसे पाठकों को समझना चाहिए क्योंकि यह वास्तविक पर्यावरणों में अधिक और अधिक दिखाई देता है। **Sandboxed container runtimes** जैसे **gVisor** और **Kata Containers** जानबूझकर बॉउंड्री को क्लासिक `runc` कंटेनर से अधिक मजबूत करते हैं। gVisor वर्कलोड और कई होस्ट कर्नेल इंटरफेस के बीच एक userspace kernel लेयर रखता है, जबकि Kata वर्कलोड को एक lightweight virtual machine के अंदर लॉन्च करता है। इन्हें अभी भी container ecosystems और orchestration workflows के माध्यम से उपयोग किया जाता है, लेकिन उनकी security properties plain OCI runtimes से अलग हैं और इन्हें "normal Docker containers" के साथ एक ही तरह से मानसिक रूप से समूहबद्ध नहीं करना चाहिए जैसे सब कुछ समान व्यवहार कर रहा हो।
 
-## The Container Stack: Several Layers, Not One
+## कंटेनर स्टैक: एक नहीं, कई लेयर्स
 
-जब कोई कहता है "यह container insecure है", तो उपयोगी follow-up सवाल यह है: कौन सी layer ने इसे insecure बनाया? एक containerized workload आम तौर पर कई components के मेल का परिणाम होता है।
+जब कोई कहता है "यह कंटेनर असुरक्षित है", तो उपयोगी अगला सवाल होता है: **कौन सा लेयर इसे असुरक्षित बनाता है?** एक कंटेनराइज़्ड वर्कलोड आमतौर पर कई घटकों के मिलकर काम करने का परिणाम होता है।
 
-ऊपर की ओर अक्सर एक image build layer होता है जैसे BuildKit, Buildah, या Kaniko, जो OCI image और metadata बनाते हैं। low-level runtime के ऊपर, कभी-कभी एक engine या manager होता है जैसे Docker Engine, Podman, containerd, CRI-O, Incus, या systemd-nspawn। cluster environments में, एक orchestrator भी हो सकता है जैसे Kubernetes जो workload configuration के जरिए requested security posture तय करता है। अंत में, kernel ही वह है जो namespaces, cgroups, seccomp, और MAC policy को वास्तव में लागू करता है।
+ऊपर, अक्सर एक **image build layer** होती है जैसे BuildKit, Buildah, या Kaniko, जो OCI image और metadata बनाती है। low-level runtime के ऊपर, एक **engine या manager** हो सकता है जैसे Docker Engine, Podman, containerd, CRI-O, Incus, या systemd-nspawn। क्लस्टर वातावरण में, एक **orchestrator** जैसे Kubernetes भी हो सकता है जो वर्कलोड कॉन्फ़िगरेशन के माध्यम से अनुरोधित सुरक्षा स्थिति तय करता है। अंत में, वह **kernel** है जो वास्तव में namespaces, cgroups, seccomp, और MAC policy को लागू करता है।
 
-यह layered model defaults को समझने के लिए महत्वपूर्ण है। एक restriction Kubernetes द्वारा request की जा सकती है, CRI के माध्यम से containerd या CRI-O द्वारा translate की जा सकती है, runtime wrapper द्वारा OCI spec में convert की जा सकती है, और फिर `runc`, `crun`, `runsc`, या किसी अन्य runtime द्वारा kernel के खिलाफ enforce की जा सकती है। जब defaults वातावरणों के बीच अलग होते हैं, तो अक्सर इसका कारण यह होता है कि इन लेयर्स में से किसी ने final configuration बदल दी। यही mechanism इसलिए Docker या Podman में CLI flag के रूप में दिखाई दे सकता है, Kubernetes में Pod या `securityContext` field के रूप में, और lower-level runtime stacks में workload के लिए generated OCI configuration के रूप में। इसलिए, इस अनुभाग में CLI उदाहरणों को एक सामान्य container अवधारणा के लिए runtime-specific syntax के रूप में पढ़ा जाना चाहिए, न कि हर tool द्वारा समर्थित सार्वभौमिक flags के रूप में।
+यह लेयर्ड मॉडल defaults को समझने के लिए महत्वपूर्ण है। एक प्रतिबंध Kubernetes द्वारा अनुरोध किया जा सकता है, containerd या CRI-O द्वारा CRI के माध्यम से अनुवादित किया जा सकता है, runtime wrapper द्वारा OCI spec में परिवर्तित किया जा सकता है, और तभी `runc`, `crun`, `runsc`, या किसी अन्य runtime द्वारा kernel के खिलाफ लागू किया जा सकता है। जब defaults वातावरणों के बीच भिन्न होते हैं, तो अक्सर इसका कारण यह होता है कि इन लेयर्स में से किसी ने अंतिम कॉन्फ़िगरेशन बदला है। इसलिए यही मैकैनिज़्म Docker या Podman में CLI फ्लैग के रूप में, Kubernetes में Pod या `securityContext` फ़ील्ड के रूप में, और lower-level runtime stacks में वर्कलोड के लिए जनरेट की गई OCI कॉन्फ़िगरेशन के रूप में दिखाई दे सकता है। इस कारण से, इस सेक्शन में CLI उदाहरणों को एक सामान्य container अवधारणा के लिए **runtime-specific syntax** के रूप में पढ़ना चाहिए, न कि प्रत्येक टूल द्वारा समर्थित सार्वभौमिक फ्लैग के रूप में।
 
-## The Real Container Security Boundary
+## असली कंटेनर सुरक्षा बॉउंड्री
 
-प्रायोगिक रूप से, container security एक single perfect control से नहीं बल्कि overlapping controls से आती है। Namespaces visibility अलग करती हैं। cgroups resource usage को govern और सीमित करते हैं। Capabilities उस चीज़ को घटाते हैं जो एक privileged-लगने वाला प्रोसेस वास्तव में कर सकता है। seccomp खतरनाक syscalls को kernel तक पहुँचने से पहले block करता है। AppArmor और SELinux सामान्य DAC checks के ऊपर Mandatory Access Control जोड़ते हैं। `no_new_privs`, masked procfs paths, और read-only system paths सामान्य privilege और proc/sys abuse chains को कठिन बनाते हैं। runtime भी मायने रखता है क्योंकि वही तय करता है कि mounts, sockets, labels, और namespace joins कैसे बनाए जाते हैं।
+व्यवहार में, कंटेनर सुरक्षा **ओवरलैपिंग कंट्रोल्स** से आती है, न कि एक अकेले परफेक्ट कंट्रोल से। Namespaces दृश्यता अलग करते हैं। cgroups संसाधन उपयोग को नियंत्रित और सीमित करते हैं। Capabilities उस चीज़ को घटाती हैं जो एक privileged-सा दिखने वाला प्रोसेस वास्तव में कर सकता है। seccomp खतरनाक syscalls को कर्नेल तक पहुँचने से पहले ब्लॉक करता है। AppArmor और SELinux सामान्य DAC चेक्स के ऊपर Mandatory Access Control जोड़ते हैं। `no_new_privs`, masked procfs paths, और read-only system paths सामान्य privilege और proc/sys abuse चेन को कठिन बनाते हैं। Runtime भी मायने रखता है क्योंकि यह तय करता है कि mounts, sockets, labels, और namespace joins कैसे बनाए जाते हैं।
 
-इसीलिए बहुत सी container security documentation repetitive लगती है। वही escape chain अक्सर एक साथ कई mechanisms पर निर्भर करती है। उदाहरण के लिए, एक writable host bind mount खराब है, लेकिन यह बहुत अधिक बुरा बन जाता है अगर container भी host पर वास्तविक root के रूप में चलता है, उसके पास `CAP_SYS_ADMIN` है, वह seccomp द्वारा unconfined है, और SELinux या AppArmor द्वारा restricted नहीं है। उसी तरह, host PID sharing एक गंभीर exposure है, लेकिन यह एक attacker के लिए तब काफी अधिक उपयोगी बन जाता है जब इसे `CAP_SYS_PTRACE`, कमजोर procfs protections, या namespace-entry tools जैसे `nsenter` के साथ जोड़ा जाए। इसलिए विषय का सही तरीका यह है कि हर पेज पर एक ही attack को दोहराने के बजाय यह समझाया जाए कि हर layer अंतिम सीमा में क्या योगदान देता है।
+इसीलिए बहुत सा container security दस्तावेज़ दोहराव वाला लगता है। वही escape chain अक्सर एक साथ कई मेकानिज्म पर निर्भर करता है। उदाहरण के लिए, एक writable host bind mount खराब है, लेकिन यह बहुत बुरा बन जाता है अगर कंटेनर होस्ट पर असली root के रूप में चलता है, `CAP_SYS_ADMIN` है, seccomp से अनकन्फ़ाइन्ड है, और SELinux या AppArmor द्वारा सीमित नहीं है। इसी तरह, host PID sharing एक गंभीर जोखिम है, लेकिन यह किसी हमलावर के लिए नाटकीय रूप से अधिक उपयोगी हो जाता है जब यह `CAP_SYS_PTRACE`, कमजोर procfs सुरक्षा, या namespace-entry टूल्स जैसे `nsenter` के साथ जोड़ा जाता है। इसलिए सही तरीका विषय को दस्तावेज़ित करने का यह है कि हर पेज पर वही हमला बार-बार लिखने के बजाय यह समझाया जाए कि प्रत्येक लेयर अंतिम बॉउंड्री में क्या योगदान देती है।
 
-## How To Read This Section
+## इस सेक्शन को कैसे पढ़ें
 
-यह अनुभाग सबसे सामान्य अवधारणाओं से लेकर सबसे विशिष्ट तक व्यवस्थित है।
+यह सेक्शन सबसे सामान्य अवधारणाओं से सबसे विशिष्ट तक व्यवस्थित है।
 
-runtime और ecosystem overview से शुरू करें:
+runtime और ecosystem का ओवरव्यू पढ़ें:
 
 {{#ref}}
 runtimes-and-engines.md
 {{#endref}}
 
-फिर उन control planes और supply-chain surfaces की समीक्षा करें जो अक्सर यह तय करते हैं कि attacker को kernel escape की भी आवश्यकता है या नहीं:
+फिर उन control planes और supply-chain सतहों की समीक्षा करें जो अक्सर तय करते हैं कि एक हमलावर को kernel escape की भी ज़रूरत है या नहीं:
 
 {{#ref}}
 runtime-api-and-daemon-exposure.md
@@ -58,19 +58,19 @@ image-security-and-secrets.md
 assessment-and-hardening.md
 {{#endref}}
 
-फिर protection model में जाएँ:
+फिर protection मॉडल की ओर बढ़ें:
 
 {{#ref}}
 protections/
 {{#endref}}
 
-namespace pages kernel isolation primitives को व्यक्तिगत रूप से समझाते हैं:
+namespace पेज कर्नेल isolation primitives को व्यक्तिगत रूप से समझाते हैं:
 
 {{#ref}}
 protections/namespaces/
 {{#endref}}
 
-cgroups, capabilities, seccomp, AppArmor, SELinux, `no_new_privs`, masked paths, और read-only system paths पर पेज उन mechanisms को समझाते हैं जो सामान्यतः namespaces के ऊपर परत कर दिए जाते हैं:
+cgroups, capabilities, seccomp, AppArmor, SELinux, `no_new_privs`, masked paths, और read-only system paths के पेज वे मैकेनिज्म समझाते हैं जो आमतौर पर namespaces के ऊपर लेयर्ड होते हैं:
 
 {{#ref}}
 protections/cgroups.md
@@ -116,12 +116,13 @@ privileged-containers.md
 sensitive-host-mounts.md
 {{#endref}}
 
-## A Good First Enumeration Mindset
+## एक अच्छा प्रारंभिक enumeration माइंडसेट
 
-जब किसी containerized target का आकलन कर रहे हों, तो प्रसिद्ध escape PoCs पर तुरंत कूदने के बजाय कुछ सटीक technical सवाल पूछना कहीं अधिक उपयोगी है। सबसे पहले, **stack** पहचानें: Docker, Podman, containerd, CRI-O, Incus/LXC, systemd-nspawn, Apptainer, या कुछ और specialized। फिर **runtime** पहचानें: `runc`, `crun`, `runsc`, `kata-runtime`, या कोई अन्य OCI-compatible implementation। उसके बाद जांचें कि environment **rootful or rootless** है, क्या **user namespaces** active हैं, क्या कोई **host namespaces** shared हैं, कौन सी **capabilities** बाकी हैं, क्या **seccomp** enabled है, क्या कोई **MAC policy** वास्तव में enforcing है, क्या **dangerous mounts or sockets** मौजूद हैं, और क्या प्रोसेस container runtime API के साथ interact कर सकता है।
+जब एक कंटेनराइज़्ड टार्गेट का आकलन कर रहे हों, तो प्रसिद्ध escape PoCs पर तुरंत कूदने से बेहतर है कि कुछ छोटे लेकिन सटीक तकनीकी सवाल पूछें। पहले, **stack** की पहचान करें: Docker, Podman, containerd, CRI-O, Incus/LXC, systemd-nspawn, Apptainer, या कुछ और विशिष्ट। फिर **runtime** की पहचान करें: `runc`, `crun`, `runsc`, `kata-runtime`, या कोई अन्य OCI-compatible implementation। इसके बाद जाँचें क्या वातावरण **rootful या rootless** है, क्या **user namespaces** सक्रिय हैं, क्या कोई **host namespaces** साझा किए गए हैं, कौन सी **capabilities** बची हैं, क्या **seccomp** सक्षम है, क्या कोई **MAC policy** वास्तव में लागू कर रही है, क्या **dangerous mounts या sockets** मौजूद हैं, और क्या प्रोसेस container runtime API के साथ इंटरैक्ट कर सकता है।
 
-ये उत्तर आपको real security posture के बारे में बेस इमेज नाम से कहीं अधिक बतलाते हैं। कई assessments में, आप final container configuration को समझकर एक single application file पढ़े बिना ही संभावित breakout family की भविष्यवाणी कर सकते हैं।
+ये उत्तर वास्तविक सुरक्षा स्थिति के बारे में बेस इमेज नाम से कहीं अधिक बताते हैं। कई आकलनों में, आप अंतिम container कॉन्फ़िगरेशन को समझकर एक एप्लीकेबल breakout परिवार का अनुमान लगा सकते हैं उससे पहले कि आपने कोई भी application फ़ाइल पढ़ी हो।
 
-## Coverage
+## कवरेज
 
-यह अनुभाग container-oriented organization के अंतर्गत पुराने Docker-focused सामग्री को कवर करता है: runtime और daemon exposure, authorization plugins, image trust और build secrets, sensitive host mounts, distroless workloads, privileged containers, और kernel protections जो सामान्यतः container execution के चारों ओर परतदार होते हैं।
+यह सेक्शन पुराने Docker-केंद्रित सामग्री को container-ओरिएंटेड संगठन के अंतर्गत कवर करता है: runtime और daemon exposure, authorization plugins, image trust और build secrets, sensitive host mounts, distroless workloads, privileged containers, और सामान्यतः कंटेनर निष्पादन के चारों ओर लेयर्ड kernel protections.
+{{#include ../../../banners/hacktricks-training.md}}

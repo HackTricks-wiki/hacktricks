@@ -1,43 +1,43 @@
-# Namespaces
+# नेमस्पेसेस
 
 {{#include ../../../../../banners/hacktricks-training.md}}
 
-Namespaces एक कर्नेल फीचर है जो कंटेनर को "अपनी मशीन" जैसा महसूस कराता है, जबकि वास्तव में यह सिर्फ एक होस्ट प्रोसेस ट्री है। ये नया कर्नेल नहीं बनाते और सब कुछ वर्चुअलाइज़ भी नहीं करते, पर ये कर्नेल को चयनित संसाधनों के अलग-अलग दृश्य अलग-अलग प्रक्रियाओं के समूहों को पेश करने की अनुमति देते हैं। यही कंटेनर भ्रम का मूल है: वर्कलोड को एक ऐसा फ़ाइलसिस्टम, process table, network stack, hostname, IPC resources, और user/group identity model दिखता है जो स्थानीय लगता है, भले ही नीचे का सिस्टम साझा किया गया हो।
+नेमस्पेसेस वही kernel फीचर हैं जो किसी container को "अपनी मशीन" जैसा महसूस कराते हैं, जबकि असल में वह सिर्फ host process tree ही होता है। ये नया kernel नहीं बनाते और सब कुछ virtualize भी नहीं करते, लेकिन ये kernel को चुने हुए resources के अलग-अलग views अलग-अलग process समूहों को दिखाने की अनुमति देते हैं। यही container illusion का मूल है: workload को एक filesystem, process table, network stack, hostname, IPC resources, और user/group identity model लोकल दिखाई देते हैं, भले ही underlying सिस्टम साझा हो।
 
-इसी कारण से Namespaces वह पहला कॉन्सेप्ट है जिससे ज्यादा तर लोग कंटेनर कैसे काम करते हैं सीखते समय मिलते हैं। साथ ही, ये सबसे ज्यादा गलत समझे जाने वाले कॉन्सेप्ट्स में से भी एक हैं क्योंकि पाठक अक्सर मान लेते हैं कि "has namespaces" का मतलब है "सुरक्षित रूप से अलग किया गया है"। वास्तविकता में, एक namespace केवल उस संसाधन वर्ग को अलग करता है जिसके लिए वह डिज़ाइन किया गया है। एक प्रक्रिया के पास एक private PID namespace हो सकता है और फिर भी वह खतरनाक हो सकती है क्योंकि उसके पास एक writable host bind mount है। इसका private network namespace भी हो सकता है और फिर भी खतरा बना रहता है क्योंकि वह `CAP_SYS_ADMIN` रखती है और बिना seccomp के चलती है। Namespaces मौलिक हैं, पर ये अंतिम सीमा की सिर्फ एक परत हैं।
+इसी कारण नेमस्पेसेस वह पहला कॉन्सेप्ट है जिससे ज्यादातर लोग containers कैसे काम करते हैं यह सीखते समय मिलते हैं। साथ ही, इन्हें अक्सर गलत समझा भी जाता है क्योंकि पाठक अक्सर मान लेते हैं कि "has namespaces" का मतलब "सुरक्षित रूप से isolated है"। वास्तविकता में, एक नेमस्पेस केवल उस विशेष संसाधन वर्ग को अलग करता है जिसके लिए वह डिजाइन किया गया था। एक process के पास private PID namespace हो सकता है और फिर भी वह खतरनाक हो सकता है क्योंकि उसके पास writable host bind mount है। उसके पास private network namespace हो सकता है और फिर भी वह खतरनाक हो सकता है क्योंकि उसने `CAP_SYS_ADMIN` रखा हुआ है और वह seccomp के बिना चल रहा है। नेमस्पेसेस आधारभूत हैं, लेकिन वे अंतिम boundary में सिर्फ एक ही परत हैं।
 
-## Namespace Types
+## नेमस्पेस प्रकार
 
-Linux कंटेनर आम तौर पर एक साथ कई namespace प्रकारों पर निर्भर करते हैं। The **mount namespace** प्रक्रिया को एक अलग mount table देता है और इसलिए नियंत्रित फ़ाइलसिस्टम दृश्य प्रदान करता है। The **PID namespace** प्रक्रिया दृश्यता और नंबरिंग बदलता है ताकि वर्कलोड अपनी खुद की process tree देख सके। The **network namespace** इंटरफेस, रूट, सॉकेट और फ़ायरवॉल स्थिति को पृथक करता है। The **IPC namespace** SysV IPC और POSIX message queues को पृथक करता है। The **UTS namespace** hostname और NIS domain name को पृथक करता है। The **user namespace** user और group IDs को रीमैप करता है ताकि कंटेनर के अंदर root होना जरूरी नहीं कि होस्ट पर root होना ही हो। The **cgroup namespace** दिखाई देने वाली cgroup hierarchy को वर्चुअलाइज़ करता है, और The **time namespace** नए कर्नेल्स में चयनित क्लॉक्स को वर्चुअलाइज़ करता है।
+Linux containers आमतौर पर एक साथ कई नेमस्पेस प्रकारों पर निर्भर करते हैं। **mount namespace** process को अलग mount table देता है और इसलिए एक नियंत्रित filesystem view देता है। **PID namespace** process visibility और numbering बदलता है ताकि workload अपना खुद का process tree देखे। **network namespace** interfaces, routes, sockets, और firewall state को अलग करता है। **IPC namespace** SysV IPC और POSIX message queues को अलग करता है। **UTS namespace** hostname और NIS domain name को अलग करता है। **user namespace** user और group IDs को remap करता है ताकि container के अंदर root होना जरूरी नहीं कि host पर root हो। **cgroup namespace** दिखाई देने वाली cgroup hierarchy को virtualize करता है, और नए kernels में **time namespace** चुने हुए clocks को virtualize करता है।
 
-इनमें से प्रत्येक namespace अलग समस्या हल करता है। इसलिए व्यावहारिक कंटेनर सिक्योरिटी विश्लेषण अक्सर इस बात पर उतरता है कि कौन से namespaces isolated हैं और कौन से जानबूझकर होस्ट के साथ साझा किए गए हैं।
+इनमें से हर नेमस्पेस एक अलग समस्या हल करता है। इसलिए practical container security analysis अक्सर इस पर आकर ठहरती है कि कौन से नेमस्पेसेस isolated हैं और कौन से जानबूझकर host के साथ shared किए गए हैं।
 
-## Host Namespace Sharing
+## होस्ट नेमस्पेस शेयरिंग
 
-कई कंटेनर ब्रेकआउट्स कर्नेल vulnerability से शुरू नहीं होते। वे एक ऑपरेटर के द्वारा जानबूझकर isolation मॉडल कमजोर करने से शुरू होते हैं। उदाहरण `--pid=host`, `--network=host`, और `--userns=host` **Docker/Podman-style CLI flags** यहां होस्ट namespace साझा करने के ठोस उदाहरण के रूप में उपयोग किए गए हैं। अन्य runtimes यही विचार अलग तरीके से व्यक्त करते हैं। Kubernetes में equivalents आम तौर पर Pod सेटिंग्स के रूप में दिखते हैं जैसे `hostPID: true`, `hostNetwork: true`, या `hostIPC: true`। lower-level runtime stacks जैसे containerd या CRI-O में, वही व्यवहार अक्सर user-facing flag के बजाय जेनरेटेड OCI runtime configuration के माध्यम से प्राप्त किया जाता है। इन सभी मामलों में परिणाम समान होता है: वर्कलोड अब डिफ़ॉल्ट isolated namespace दृश्य प्राप्त नहीं करता।
+कई container breakouts kernel vulnerability के साथ शुरू नहीं होते। वे एक ऑपरेटर के जानबूझकर isolation model को कमजोर करने से शुरू होते हैं। उदाहरण `--pid=host`, `--network=host`, और `--userns=host` **Docker/Podman-style CLI flags** हैं जिन्हें यहाँ होस्ट नेमस्पेस शेयरिंग के ठोस उदाहरणों के रूप में उपयोग किया गया है। अन्य runtimes यही विचार अलग तरीके से व्यक्त करते हैं। Kubernetes में equivalents आमतौर पर Pod settings जैसे `hostPID: true`, `hostNetwork: true`, या `hostIPC: true` के रूप में दिखाई देते हैं। lower-level runtime stacks जैसे containerd या CRI-O में, समान व्यवहार अक्सर generated OCI runtime configuration के माध्यम से पहुँचाया जाता है बजाय किसी user-facing flag के। इन सभी मामलों में परिणाम समान होता है: workload अब default isolated namespace view प्राप्त नहीं करता।
 
-इसलिए namespace रिव्यू कभी सिर्फ "प्रोसेस किसी namespace में है" पर ही नहीं रुकना चाहिए। महत्वपूर्ण सवाल यह है कि क्या namespace कंटेनर के लिए निजी है, sibling कंटेनरों के साथ साझा है, या सीधे होस्ट के साथ जुड़ा हुआ है। Kubernetes में यही विचार `hostPID`, `hostNetwork`, और `hostIPC` जैसे फ्लैग्स के साथ भी दिखाई देता है। प्लेटफॉर्म के बीच नाम बदल सकते हैं, लेकिन रिस्क पैटर्न एक जैसा रहता है: एक साझा होस्ट namespace कंटेनर की बाकी privileges और पहुँच में आने वाली होस्ट स्थिति को बहुत अधिक मायने रखवाती है।
+इसीलिए नेमस्पेस समीक्षा कभी भी "process किसी नेमस्पेस में है" पर नहीं रुकनी चाहिए। महत्वपूर्ण प्रश्न यह है कि नेमस्पेस container के लिए private है, sibling containers के साथ साझा है, या सीधे host से जुड़ा हुआ है। Kubernetes में यही विचार `hostPID`, `hostNetwork`, और `hostIPC` जैसे flags के साथ दिखाई देता है। प्लेटफ़ॉर्म के बीच नाम बदलते हैं, लेकिन रिस्क पैटर्न वही रहता है: एक shared host namespace container की बची हुई privileges और accessible host state को बहुत अधिक मायने देता है।
 
-## Inspection
+## निरीक्षण
 
-सबसे सरल अवलोकन यह है:
+सबसे सरल रूपरेखा है:
 ```bash
 ls -l /proc/self/ns
 ```
-प्रत्येक प्रविष्टि एक symbolic link होती है जिसमें inode-जैसा identifier होता है। यदि दो processes एक ही namespace identifier की ओर संकेत करते हैं, तो वे उसी प्रकार के namespace में होते हैं। यह `/proc` को मशीन पर वर्तमान process की तुलना अन्य रुचिकर processes के साथ करने के लिए एक बहुत उपयोगी स्थान बनाता है।
+प्रत्येक एंट्री एक symbolic link होती है जिसमें एक inode-like identifier होता है। यदि दो processes एक ही namespace identifier की ओर इशारा करते हैं, तो वे उसी प्रकार के namespace में होते हैं। इससे `/proc` वर्तमान process की तुलना मशीन पर अन्य दिलचस्प processes से करने के लिए एक बहुत उपयोगी जगह बन जाता है।
 
-These quick commands are often enough to start:
+ये quick commands अक्सर शुरू करने के लिए काफी होते हैं:
 ```bash
 readlink /proc/self/ns/mnt
 readlink /proc/self/ns/pid
 readlink /proc/self/ns/net
 readlink /proc/1/ns/mnt
 ```
-इसके बाद अगला कदम container process की host या आसपास के processes के साथ तुलना करना और यह निर्धारित करना है कि कोई namespace वास्तव में निजी (private) है या नहीं।
+इसके बाद, अगला कदम container process की host या पड़ोसी processes के साथ तुलना करना और यह निर्धारित करना है कि कोई namespace वास्तव में private है या नहीं।
 
 ### Host से Namespace Instances की गिनती
 
-जब आपके पास पहले से host access है और आप यह जानना चाहते हैं कि किसी दिए गए प्रकार के कितने अलग-अलग namespaces मौजूद हैं, तो `/proc` एक त्वरित सूची देता है:
+यदि आपके पास पहले से host access है और आप यह समझना चाहते हैं कि किसी दिए गए type के कितने distinct namespaces मौजूद हैं, तो `/proc` एक त्वरित इन्वेंटरी देता है:
 ```bash
 sudo find /proc -maxdepth 3 -type l -name mnt    -exec readlink {} \; 2>/dev/null | sort -u
 sudo find /proc -maxdepth 3 -type l -name pid    -exec readlink {} \; 2>/dev/null | sort -u
@@ -48,15 +48,15 @@ sudo find /proc -maxdepth 3 -type l -name user   -exec readlink {} \; 2>/dev/nul
 sudo find /proc -maxdepth 3 -type l -name cgroup -exec readlink {} \; 2>/dev/null | sort -u
 sudo find /proc -maxdepth 3 -type l -name time   -exec readlink {} \; 2>/dev/null | sort -u
 ```
-यदि आप यह पता लगाना चाहते हैं कि कौन सी प्रक्रियाएँ किसी विशिष्ट namespace पहचानकर्ता से संबंधित हैं, तो `readlink` की बजाय `ls -l` का उपयोग करें और लक्ष्य namespace संख्या के लिए `grep` करें:
+यदि आप यह पता लगाना चाहते हैं कि कौन से processes किसी विशेष namespace identifier से संबंधित हैं, तो `readlink` की बजाय `ls -l` का उपयोग करें और लक्ष्य namespace संख्या के लिए `grep` करें:
 ```bash
 sudo find /proc -maxdepth 3 -type l -name mnt -exec ls -l {} \; 2>/dev/null | grep <ns-number>
 ```
-ये commands उपयोगी हैं क्योंकि ये आपको यह बताने में सक्षम बनाते हैं कि कोई host एक ही isolated workload चला रहा है, कई isolated workloads चला रहा है, या shared और private namespace instances का मिश्रण चला रहा है।
+ये कमांड उपयोगी हैं क्योंकि वे आपको यह बता सकते हैं कि कोई host एक isolated workload चला रहा है, कई isolated workloads चला रहा है, या shared और private namespace instances का मिश्रण चला रहा है।
 
 ### लक्ष्य Namespace में प्रवेश
 
-जब caller के पास पर्याप्त privilege हो, `nsenter` किसी अन्य process के namespace में जुड़ने का standard तरीका है:
+जब caller के पास पर्याप्त privilege होता है, `nsenter` किसी अन्य process के namespace में शामिल होने का मानक तरीका है:
 ```bash
 nsenter -m TARGET_PID --pid /bin/bash   # mount
 nsenter -t TARGET_PID --pid /bin/bash   # pid
@@ -67,11 +67,11 @@ nsenter -U TARGET_PID --pid /bin/bash   # user
 nsenter -C TARGET_PID --pid /bin/bash   # cgroup
 nsenter -T TARGET_PID --pid /bin/bash   # time
 ```
-इन रूपों को एक साथ सूचीबद्ध करने का मकसद यह नहीं है कि हर assessment को इनमें से सभी की आवश्यकता हो, बल्कि यह कि namespace-specific post-exploitation अक्सर बहुत आसान हो जाता है जब ऑपरेटर को सभी-namespace रूप केवल याद रखने की बजाय सटीक एंट्री syntax पता होता है।
+इन रूपों को एक साथ सूचीबद्ध करने का उद्देश्य यह नहीं है कि हर assessment को इन सबकी आवश्यकता हो, बल्कि namespace-specific post-exploitation अक्सर बहुत आसान हो जाता है जब operator सटीक entry syntax जानता है बजाय केवल all-namespaces फ़ॉर्म को याद रखने के।
 
-## पृष्ठ
+## Pages
 
-The following pages explain each namespace in more detail:
+निम्नलिखित पृष्ठ प्रत्येक namespace को और अधिक विस्तार से समझाते हैं:
 
 {{#ref}}
 mount-namespace.md
@@ -105,15 +105,16 @@ cgroup-namespace.md
 time-namespace.md
 {{#endref}}
 
-इन्हें पढ़ते समय, दो बातों का ध्यान रखें। सबसे पहले, प्रत्येक namespace केवल एक तरह का view अलग करता है। दूसरा, एक private namespace तब ही उपयोगी होता है जब बाकी अधिकार मॉडल उस अलगाव को सार्थक बनाते हों।
+जब आप इन्हें पढ़ें, तो दो बातें ध्यान में रखें। पहली, प्रत्येक namespace केवल एक प्रकार का view अलग करता है। दूसरी, एक private namespace तभी उपयोगी है जब privilege मॉडल का बाकी हिस्सा उस अलगाव को अभी भी meaningful बनाए रखता हो।
 
-## रनटाइम डिफ़ॉल्ट
+## Runtime Defaults
 
 | Runtime / platform | Default namespace posture | Common manual weakening |
 | --- | --- | --- |
-| Docker Engine | डिफ़ॉल्ट रूप से नए mount, PID, network, IPC, और UTS namespaces; user namespaces उपलब्ध हैं लेकिन standard rootful सेटअप में डिफ़ॉल्ट रूप से सक्षम नहीं होते | `--pid=host`, `--network=host`, `--ipc=host`, `--uts=host`, `--userns=host`, `--cgroupns=host`, `--privileged` |
-| Podman | डिफ़ॉल्ट रूप से नए namespaces; rootless Podman स्वतः ही user namespace उपयोग करता है; cgroup namespace के डिफ़ॉल्ट cgroup वर्ज़न पर निर्भर करते हैं | `--pid=host`, `--network=host`, `--ipc=host`, `--uts=host`, `--userns=host`, `--cgroupns=host`, `--privileged` |
-| Kubernetes | Pods डिफ़ॉल्ट रूप से host PID, network, या IPC साझा नहीं करते; Pod networking Pod के लिए private होता है, प्रत्येक व्यक्तिगत container के लिए नहीं; user namespaces सपोर्टेड क्लस्टरों पर `spec.hostUsers: false` के माध्यम से opt-in होते हैं | `hostPID: true`, `hostNetwork: true`, `hostIPC: true`, `spec.hostUsers: true` / omitting user-namespace opt-in, privileged workload settings |
-| containerd / CRI-O under Kubernetes | आमतौर पर Kubernetes Pod डिफ़ॉल्ट का पालन करते हैं | same as Kubernetes row; direct CRI/OCI specs can also request host namespace joins |
+| Docker Engine | New mount, PID, network, IPC, and UTS namespaces by default; user namespaces are available but not enabled by default in standard rootful setups | `--pid=host`, `--network=host`, `--ipc=host`, `--uts=host`, `--userns=host`, `--cgroupns=host`, `--privileged` |
+| Podman | New namespaces by default; rootless Podman automatically uses a user namespace; cgroup namespace defaults depend on cgroup version | `--pid=host`, `--network=host`, `--ipc=host`, `--uts=host`, `--userns=host`, `--cgroupns=host`, `--privileged` |
+| Kubernetes | Pods do **not** share host PID, network, or IPC by default; Pod networking is private to the Pod, not to each individual container; user namespaces are opt-in via `spec.hostUsers: false` on supported clusters | `hostPID: true`, `hostNetwork: true`, `hostIPC: true`, `spec.hostUsers: true` / omitting user-namespace opt-in, privileged workload settings |
+| containerd / CRI-O under Kubernetes | Usually follow Kubernetes Pod defaults | same as Kubernetes row; direct CRI/OCI specs can also request host namespace joins |
 
-मुख्य पोर्टेबिलिटी नियम सरल है: host namespace sharing की **concept** रनटाइम्स में सामान्य है, लेकिन इसके **syntax** runtime-विशिष्ट होते हैं।
+मुख्य पोर्टेबिलिटी नियम सरल है: host namespace sharing की **concept** runtimes भर में सामान्य है, लेकिन **syntax** runtime-specific होता है।
+{{#include ../../../../../banners/hacktricks-training.md}}

