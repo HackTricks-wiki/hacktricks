@@ -67,3 +67,4 @@ What is interesting here:
 - A root process with broad capabilities and `Seccomp: 0` deserves immediate attention.
 - Suspicious mounts and runtime sockets often provide a faster path to impact than any kernel exploit.
 - The combination of weak runtime posture and weak resource limits usually indicates a generally permissive container environment rather than a single isolated mistake.
+{{#include ../../../banners/hacktricks-training.md}}

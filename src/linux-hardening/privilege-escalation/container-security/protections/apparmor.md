@@ -230,3 +230,4 @@ If a container already has elevated privileges for operational reasons, leaving 
 | containerd / CRI-O under Kubernetes | Follows node/runtime support | Common Kubernetes-supported runtimes support AppArmor, but actual enforcement still depends on node support and workload settings | Same as Kubernetes row; direct runtime configuration can also skip AppArmor entirely |
 
 For AppArmor, the most important variable is often the **host**, not only the runtime. A profile setting in a manifest does not create confinement on a node where AppArmor is not enabled.
+{{#include ../../../../banners/hacktricks-training.md}}

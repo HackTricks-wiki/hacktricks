@@ -97,3 +97,4 @@ What is interesting here:
 | containerd / CRI-O under Kubernetes | Runtime default | Usually applies OCI/runtime masked paths unless overridden | direct runtime config changes, same Kubernetes weakening paths |
 
 Masked paths are usually present by default. The main operational problem is not absence from the runtime, but deliberate unmasking or host bind mounts that negate the protection.
+{{#include ../../../../banners/hacktricks-training.md}}

@@ -100,3 +100,4 @@ What is interesting here:
 - A broad `/dev/shm` mount is not automatically a bug, but in some environments it leaks filenames, artifacts, and transient secrets.
 
 IPC rarely receives as much attention as the bigger namespace types, but in environments that use it heavily, sharing it with the host is very much a security decision.
+{{#include ../../../../../banners/hacktricks-training.md}}

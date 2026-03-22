@@ -155,3 +155,4 @@ What is interesting here:
 - Once host PIDs are visible, even read-only process information becomes useful reconnaissance.
 
 If you discover a container running with host PID sharing, do not treat it as a cosmetic difference. It is a major change in what the workload can observe and potentially affect.
+{{#include ../../../../../banners/hacktricks-training.md}}

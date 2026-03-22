@@ -164,3 +164,4 @@ What is interesting here:
 | containerd / CRI-O under Kubernetes | Runtime default | Usually relies on OCI/runtime defaults | same as Kubernetes row; direct runtime config changes can weaken the behavior |
 
 The key point is that read-only system paths are usually present as a runtime default, but they are easy to undermine with privileged modes or host bind mounts.
+{{#include ../../../../banners/hacktricks-training.md}}

@@ -61,3 +61,4 @@ Many real escapes also depend on what host content was mounted into the workload
 {{#ref}}
 ../sensitive-host-mounts.md
 {{#endref}}
+{{#include ../../../../banners/hacktricks-training.md}}

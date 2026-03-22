@@ -126,3 +126,4 @@ What is interesting here:
 - Routes, interface names, and firewall context become much more important if `CAP_NET_ADMIN` or `CAP_NET_RAW` is present.
 
 When reviewing a container, always evaluate the network namespace together with the capability set. Host networking plus strong network capabilities is a very different posture from bridge networking plus a narrow default capability set.
+{{#include ../../../../../banners/hacktricks-training.md}}

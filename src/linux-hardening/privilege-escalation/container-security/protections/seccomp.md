@@ -220,3 +220,4 @@ If a container already has suspicious mounts, broad capabilities, or shared host
 | containerd / CRI-O under Kubernetes | Follows Kubernetes node and Pod settings | Runtime profile is used when Kubernetes asks for `RuntimeDefault` or when kubelet seccomp defaulting is enabled | Same as Kubernetes row; direct CRI/OCI configuration can also omit seccomp entirely |
 
 The Kubernetes behavior is the one that most often surprises operators. In many clusters, seccomp is still absent unless the Pod requests it or the kubelet is configured to default to `RuntimeDefault`.
+{{#include ../../../../banners/hacktricks-training.md}}

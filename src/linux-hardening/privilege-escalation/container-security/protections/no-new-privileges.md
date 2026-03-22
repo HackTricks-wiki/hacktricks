@@ -98,3 +98,4 @@ What is interesting here:
 | containerd / CRI-O under Kubernetes | Follows Kubernetes workload settings | Usually inherited from the Pod security context | same as Kubernetes row |
 
 This protection is often absent simply because nobody turned it on, not because the runtime lacks support for it.
+{{#include ../../../../banners/hacktricks-training.md}}

@@ -188,3 +188,4 @@ After collecting the raw capability information, the next step is interpretation
 | containerd / CRI-O under Kubernetes | Usually runtime default | The effective set depends on the runtime plus the Pod spec | same as Kubernetes row; direct OCI/CRI configuration can also add capabilities explicitly |
 
 For Kubernetes, the important point is that the API does not define one universal default capability set. If the Pod does not add or drop capabilities, the workload inherits the runtime default for that node.
+{{#include ../../../../banners/hacktricks-training.md}}

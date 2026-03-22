@@ -104,3 +104,4 @@ What is interesting here:
 - If you are comparing two processes, differences here may explain confusing timing or checkpoint/restore behavior.
 
 For most container breakouts, the time namespace is not the first control you will investigate. Still, a complete container-security section should mention it because it is part of the modern kernel model and occasionally matters in advanced runtime scenarios.
+{{#include ../../../../../banners/hacktricks-training.md}}

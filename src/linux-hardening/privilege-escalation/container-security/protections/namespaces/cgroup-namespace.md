@@ -87,3 +87,4 @@ What is interesting here:
 - If cgroup mounts are also writable, the visibility question becomes much more important.
 
 The cgroup namespace should be treated as a visibility-hardening layer rather than as a primary escape-prevention mechanism. Exposing host cgroup structure unnecessarily adds reconnaissance value for the attacker.
+{{#include ../../../../../banners/hacktricks-training.md}}

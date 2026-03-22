@@ -140,3 +140,4 @@ What is interesting here:
 | Podman | Not a common direct equivalent | Podman typically relies more on Unix permissions, rootless execution, and API exposure decisions than on Docker-style authz plugins | exposing a rootful Podman API broadly, weak socket permissions |
 | containerd / CRI-O | Different control model | These runtimes usually rely on socket permissions, node trust boundaries, and higher-layer orchestrator controls rather than Docker authz plugins | mounting the socket into workloads, weak node-local trust assumptions |
 | Kubernetes | Uses authn/authz at the API-server and kubelet layers, not Docker authz plugins | Cluster RBAC and admission controls are the main policy layer | overbroad RBAC, weak admission policy, exposing kubelet or runtime APIs directly |
+{{#include ../../../banners/hacktricks-training.md}}

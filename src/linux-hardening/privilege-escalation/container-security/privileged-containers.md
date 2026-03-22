@@ -338,3 +338,4 @@ protections/namespaces/pid-namespace.md
 {{#ref}}
 protections/namespaces/network-namespace.md
 {{#endref}}
+{{#include ../../../banners/hacktricks-training.md}}

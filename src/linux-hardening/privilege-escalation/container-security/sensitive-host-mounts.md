@@ -280,3 +280,4 @@ What is interesting here:
 - Host root, `/proc`, `/sys`, `/var`, and runtime sockets are all high-priority findings.
 - Writable proc/sys entries often mean the mount is exposing host-global kernel controls rather than a safe container view.
 - Mounted `/var` paths deserve credential and neighboring-workload review, not just filesystem review.
+{{#include ../../../banners/hacktricks-training.md}}
