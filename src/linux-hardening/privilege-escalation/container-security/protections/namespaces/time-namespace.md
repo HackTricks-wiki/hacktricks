@@ -1,45 +1,45 @@
-# Time Namespace
+# Zaman İsim Alanı
 
 {{#include ../../../../../banners/hacktricks-training.md}}
 
 ## Genel Bakış
 
-Time namespace, özellikle **`CLOCK_MONOTONIC`** ve **`CLOCK_BOOTTIME`** olmak üzere seçilmiş saatleri sanallaştırır. mount, PID, network, or user namespaces'den daha yeni ve daha özelleşmiş bir namespace'tir ve konteyner sertleştirmesi konuşulurken bir operatörün genellikle ilk aklına gelen şey değildir. Yine de modern namespace ailesinin bir parçasıdır ve kavramsal olarak anlaşılmaya değerdir.
+Zaman isim alanı seçili saatleri sanallaştırır, özellikle **`CLOCK_MONOTONIC`** ve **`CLOCK_BOOTTIME`**. mount, PID, network veya user isim alanlarından daha yeni ve daha özelleşmiş bir isim alanıdır ve konteyner sertleştirmesi tartışılırken bir işletmecinin genellikle ilk aklına gelen şey değildir. Buna rağmen modern isim alanı ailesinin bir parçasıdır ve kavramsal olarak anlaşılmaya değerdir.
 
-Ana amaç, bir sürecin host'un küresel zaman görünümünü değiştirmeden belirli saatler için kontrollü kaymaları gözlemlemesine izin vermektir. Bu, checkpoint/restore iş akışları, deterministik testler ve bazı gelişmiş runtime davranışları için faydalıdır. Genellikle mount veya user namespaces gibi başlıca bir izolasyon kontrolü olarak görülmez, ancak yine de süreç ortamını daha kendi kendine yeten hale getirmeye katkıda bulunur.
+Ana amaç, bir sürecin ana makinenin genel zaman görünümünü değiştirmeden belirli saatler için kontrollü ofsetleri gözlemlemesine izin vermektir. Bu, checkpoint/restore iş akışları, deterministik testler ve bazı gelişmiş runtime davranışları için faydalıdır. Genellikle mount veya user isim alanları gibi başlıca bir izolasyon kontrolü olarak öne çıkmaz, ancak süreç ortamının daha kendi kendine yeten hale gelmesine yine de katkı sağlar.
 
-## Laboratuvar
+## Lab
 
-Host çekirdeği ve kullanıcı alanı bunu destekliyorsa, namespace'i şu şekilde inceleyebilirsiniz:
+Eğer host kernel ve userspace bunu destekliyorsa, isim alanını şu komutla inceleyebilirsiniz:
 ```bash
 sudo unshare --time --fork bash
 ls -l /proc/self/ns/time /proc/self/ns/time_for_children
 cat /proc/$$/timens_offsets 2>/dev/null
 ```
-Destek, çekirdek ve araç sürümlerine göre değişir; bu yüzden bu sayfa, her laboratuvar ortamında görüleceğini beklemektense mekanizmayı anlamaya yöneliktir.
+Support varies by kernel and tool versions, so this page is more about understanding the mechanism than expecting it to be visible in every lab environment.
 
 ### Zaman Ofsetleri
 
-Linux zaman namespace'leri `CLOCK_MONOTONIC` ve `CLOCK_BOOTTIME` için ofsetleri sanallaştırır. Her namespace'e ait mevcut ofsetler `/proc/<pid>/timens_offsets` üzerinden görüntülenir; destekleyen çekirdeklerde ilgili namespace içinde `CAP_SYS_TIME` yetkisine sahip bir süreç tarafından da değiştirilebilir:
+Linux time namespace'leri `CLOCK_MONOTONIC` ve `CLOCK_BOOTTIME` için ofsetleri sanallaştırır. Mevcut her-namespace ofsetleri `/proc/<pid>/timens_offsets` üzerinden açığa çıkarılır; destekleyen kernel'lerde ilgili namespace içinde `CAP_SYS_TIME` sahibi bir süreç tarafından da değiştirilebilir:
 ```bash
 sudo unshare -Tr --mount-proc bash
 cat /proc/$$/timens_offsets
 echo "monotonic 172800000000000" > /proc/$$/timens_offsets
 cat /proc/uptime
 ```
-Dosya nanosaniye farkları içerir. `monotonic`'i iki gün ayarlamak, ana makinenin duvar saatini değiştirmeden o namespace içindeki uptime-benzeri gözlemleri değiştirir.
+Dosya nanosaniye farkları içeriyor. `monotonic`'i iki gün ayarlamak, host duvar saatini değiştirmeden o namespace içindeki uptime-benzeri gözlemleri değiştirir.
 
-### `unshare` Yardımcı Seçenekler
+### `unshare` Yardımcı Bayraklar
 
-Son `util-linux` sürümleri, offset'leri otomatik olarak yazan kullanışlı seçenekler sağlar:
+Güncel `util-linux` sürümleri, offsetleri otomatik olarak yazan yardımcı bayraklar sağlar:
 ```bash
 sudo unshare -T --monotonic="+24h" --boottime="+7d" --mount-proc bash
 ```
-Bu bayraklar çoğunlukla kullanılabilirliği artırır, ancak dokümantasyon ve testlerde özelliğin tanınmasını da kolaylaştırır.
+Bu bayraklar büyük ölçüde kullanılabilirlik iyileştirmesidir, ancak belgelerde ve testlerde özelliğin tanınmasını da kolaylaştırır.
 
 ## Çalışma Zamanı Kullanımı
 
-`time` namespace'ları, mount veya PID namespace'lerine göre daha yeni ve daha az yaygın olarak kullanılıyor. OCI Runtime Specification v1.1, `time` namespace ve `linux.timeOffsets` alanı için açık destek ekledi; daha yeni `runc` sürümleri modelin bu kısmını uyguluyor. Minimal bir OCI fragmanı şöyle görünür:
+`time` namespace'ları mount veya PID namespace'lerine göre daha yeni ve daha az yaygın olarak kullanılıyor. OCI Runtime Specification v1.1, `time` namespace'i ve `linux.timeOffsets` alanı için açık destek ekledi; daha yeni `runc` sürümleri modelin bu bölümünü uyguluyor. Minimal bir OCI fragmanı şöyle görünür:
 ```json
 {
 "linux": {
@@ -57,30 +57,30 @@ Bu önemlidir çünkü time namespacing'i niş bir kernel primitive'inden runtim
 
 ## Güvenlik Etkisi
 
-Diğer namespace türlerine kıyasla time namespace etrafında daha az klasik breakout hikâyesi vardır. Buradaki risk genellikle time namespace'in doğrudan escape'e izin vermesi değil, okuyucuların onu tamamen göz ardı etmesi ve bu yüzden gelişmiş runtimes'ın süreç davranışını nasıl şekillendirebileceğini kaçırmalarıdır. Özelleşmiş ortamlarda, değişmiş saat görünümleri checkpoint/restore, observability veya forensic varsayımlarını etkileyebilir.
+Diğer namespace türlerine kıyasla time namespace etrafında klasik breakout hikâyeleri daha azdır. Buradaki risk genellikle time namespace'in doğrudan escape sağlaması değil; asıl risk, ilgililerin onu tamamen görmezden gelmesi ve bu nedenle gelişmiş runtimes'ın süreç davranışını nasıl şekillendirebileceğini kaçırmalarıdır. Özelleşmiş ortamlarda değiştirilmiş saat görünümleri checkpoint/restore, observability veya adli varsayımları etkileyebilir.
 
 ## Kötüye Kullanım
 
-Genellikle burada doğrudan bir breakout primitive yoktur, ancak değişmiş saat davranışı yine de yürütme ortamını anlamak ve gelişmiş runtime özelliklerini tespit etmek için yararlı olabilir:
+Genellikle burada doğrudan bir breakout primitive'i yoktur, ancak değiştirilmiş saat davranışı yürütme ortamını anlamak ve gelişmiş runtime özelliklerini tespit etmek için yine de faydalı olabilir:
 ```bash
 readlink /proc/self/ns/time
 readlink /proc/self/ns/time_for_children
 date
 cat /proc/uptime
 ```
-If you are comparing two processes, differences here can help explain odd timing behavior, checkpoint/restore artifacts, or environment-specific logging mismatches.
+İki işlemi karşılaştırıyorsanız, burada görülen farklar garip zamanlama davranışlarını, checkpoint/restore artefaktlarını veya ortama özgü günlük uyuşmazlıklarını açıklamaya yardımcı olabilir.
 
 Impact:
 
-- neredeyse her zaman reconnaissance veya ortamın anlaşılması
-- logging, uptime veya checkpoint/restore anomalilerini açıklamak için faydalıdır
-- normalde tek başına doğrudan bir container-escape mekanizması değildir
+- neredeyse her zaman keşif veya ortamın anlaşılması
+- logging, uptime veya checkpoint/restore anomalilerini açıklamak için faydalı
+- kendi başına normalde doğrudan bir container-escape mekanizması değildir
 
-Önemli kötüye kullanım nüansı şudur: time namespaces `CLOCK_REALTIME`'ı sanallaştırmaz, bu yüzden tek başlarına bir saldırganın host duvar saatini sahtelemesine veya sistem genelinde certificate-expiry kontrollerini doğrudan bozmasına izin vermezler. Değerleri çoğunlukla monotonik zamana dayalı mantığı karıştırmak, ortama özgü hataları yeniden üretmek veya gelişmiş runtime davranışını anlamaktır.
+Önemli kötüye kullanım nüansı, time namespace'lerinin `CLOCK_REALTIME`'i sanallaştırmamasıdır; bu yüzden tek başlarına bir saldırganın host duvar saatini tahrif etmesine veya sertifika-süresi-dolma kontrollerini sistem genelinde doğrudan bozmasına izin vermezler. Değerleri çoğunlukla monotonik-zamana dayalı mantığı karıştırmak, ortama özgü hataları yeniden üretmek veya gelişmiş runtime davranışını anlamaktır.
 
 ## Checks
 
-Bu kontroller çoğunlukla runtime'ın özel bir time namespace kullanıp kullanmadığını doğrulamaya yöneliktir.
+Bu kontrollerin çoğu, runtime'ın özel bir time namespace kullanıp kullanmadığını doğrulamaya yöneliktir.
 ```bash
 readlink /proc/self/ns/time                 # Current time namespace identifier
 readlink /proc/self/ns/time_for_children    # Time namespace inherited by children
@@ -88,7 +88,8 @@ cat /proc/$$/timens_offsets 2>/dev/null     # Monotonic and boottime offsets whe
 ```
 Burada ilginç olanlar:
 
-- Birçok ortamda bu değerler doğrudan bir güvenlik bulgusuna yol açmayabilir, ancak özel bir runtime özelliğinin devrede olup olmadığını size söyler.
-- Eğer iki süreci karşılaştırıyorsanız, buradaki farklılıklar kafa karıştıran zamanlama veya checkpoint/restore davranışını açıklayabilir.
+- Birçok ortamda bu değerler doğrudan bir güvenlik bulgusuna yol açmayabilir, ancak özel bir runtime özelliğinin devrede olup olmadığını gösterir.
+- İki işlemi karşılaştırıyorsanız, buradaki farklar kafa karıştırıcı zamanlama veya checkpoint/restore davranışını açıklayabilir.
 
-Çoğu container breakout için time namespace ilk inceleyeceğiniz kontrol değildir. Yine de, eksiksiz bir container-security bölümü bunu belirtmelidir çünkü modern kernel modelinin bir parçasıdır ve zaman zaman gelişmiş runtime senaryolarında önem taşır.
+Çoğu container breakouts için, time namespace inceleyeceğiniz ilk kontrol değildir. Yine de eksiksiz bir container-security bölümü bundan bahsetmelidir; çünkü bu, modern kernel modelinin bir parçasıdır ve ara sıra gelişmiş runtime senaryolarında önem taşır.
+{{#include ../../../../../banners/hacktricks-training.md}}

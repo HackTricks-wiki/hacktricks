@@ -4,132 +4,131 @@
 
 ## Genel Bakış
 
-PID namespace, süreçlerin nasıl numaralandırıldığını ve hangi süreçlerin görülebilir olduğunu kontrol eder. Bu, bir container'ın gerçek bir makine olmamasına rağmen kendi PID 1'ine sahip olabilmesinin sebebidir. Namespace içinde workload, yerel bir süreç ağacı gibi görünen şeyi görür. Namespace dışında ise host hâlâ gerçek host PID'lerini ve tam süreç görünümünü görür.
+PID namespace, süreçlerin nasıl numaralandırıldığını ve hangi süreçlerin görünür olduğunu kontrol eder. Bu yüzden bir konteyner gerçek bir makine olmamasına rağmen kendi PID 1'ine sahip olabilir. İsim alanının içinde workload, yerel bir süreç ağacı gibi görünen şeyi görür. İsim alanının dışında ise host hâlâ gerçek host PID'lerini ve tam süreç manzarasını görür.
 
-Güvenlik açısından PID namespace önemlidir çünkü süreç görünürlüğü değerlidir. Bir workload host süreçlerini görebildiğinde, servis isimlerini, komut satırı argümanlarını, süreç argümanlarında geçen sırları, ortamdan türetilen durumu `/proc` üzerinden ve potansiyel namespace-entry hedeflerini gözlemleyebilir. Eğer sadece bu süreçleri görmekten daha fazlasını yapabiliyorsa — örneğin uygun koşullarda sinyal göndermek veya ptrace kullanmak gibi — sorun çok daha ciddi hâle gelir.
+Güvenlik açısından PID namespace önemlidir çünkü süreç görünürlüğü değerlidir. Bir workload host süreçlerini görebildiğinde, servis isimlerini, komut satırı argümanlarını, süreç argümanlarında geçirilen sırları, `/proc` üzerinden türetilen ortam durumunu ve potansiyel isim alanı giriş hedeflerini gözlemleyebilir. Eğer sadece bu süreçleri görmekten daha fazlasını yapabiliyorsa — örneğin uygun koşullarda sinyal gönderme veya ptrace kullanma gibi — sorun çok daha ciddi hale gelir.
 
 ## İşleyiş
 
-Yeni bir PID namespace kendi dahili süreç numaralandırmasıyla başlar. İçinde oluşturulan ilk süreç, namespace'in bakış açısından PID 1 olur; bu aynı zamanda öksüz kalan çocuklar ve sinyal davranışı için özel init-benzeri semantiklere sahip olduğu anlamına gelir. Bu, init süreçleri, zombie reaping ve neden bazen container'larda küçük init wrapper'larının kullanıldığı gibi birçok container tuhaflığını açıklar.
+Yeni bir PID namespace kendi iç süreç numaralandırmasıyla başlar. İçinde oluşturulan ilk süreç, namespace açısından PID 1 olur; bu aynı zamanda yetim çocuklar ve sinyal davranışı için özel init-benzeri semantiklere sahip olduğu anlamına gelir. Bu, konteynerlerde init süreçleri, zombie reaping ve neden küçük init sarıcıların bazen konteynerlerde kullanıldığı gibi pek çok garipliği açıklar.
 
-Önemli güvenlik dersi şudur: bir süreç yalnızca kendi PID ağacını gördüğü için izole görünse bile, bu izolasyon kasıtlı olarak kaldırılabilir. Docker bunu `--pid=host` ile açarken, Kubernetes bunu `hostPID: true` ile yapar. Container host PID namespace'ine katıldıktan sonra workload host süreçlerini doğrudan görür ve sonraki birçok saldırı yolu çok daha gerçekçi hâle gelir.
+Önemli güvenlik dersi şudur: bir süreç sadece kendi PID ağacını gördüğü için izole görünebilir, ancak bu izolasyon kasıtlı olarak ortadan kaldırılabilir. Docker bunu `--pid=host` ile açarken, Kubernetes bunu `hostPID: true` ile yapar. Konteyner host PID namespace'ine katıldığında, workload host süreçlerini doğrudan görür ve pek çok sonraki saldırı yolu çok daha gerçekçi hale gelir.
 
 ## Laboratuvar
 
-Manuel olarak bir PID namespace oluşturmak için:
+To create a PID namespace manually:
 ```bash
 sudo unshare --pid --fork --mount-proc bash
 ps -ef
 echo $$
 ```
-Shell artık özel bir süreç görünümü görüyor. `--mount-proc` bayrağı önemlidir çünkü yeni PID namespace ile eşleşen bir procfs örneğini mount eder; içeriden süreç listesinin tutarlı olmasını sağlar.
+Shell artık özel bir process görünümü görür. `--mount-proc` flag'i önemlidir çünkü yeni PID namespace ile eşleşen bir procfs instance'ını mount eder, içeriden process list'in tutarlı olmasını sağlar.
 
-Konteyner davranışını karşılaştırmak için:
+Container davranışını karşılaştırmak için:
 ```bash
 docker run --rm debian:stable-slim ps -ef
 docker run --rm --pid=host debian:stable-slim ps -ef | head
 ```
-Fark hemen görülür ve anlaşılması kolaydır; bu yüzden bu, okuyucular için iyi bir ilk laboratuvar çalışmasıdır.
+The difference is immediate and easy to understand, which is why this is a good first lab for readers.
 
-## Çalışma Zamanı Kullanımı
+## Runtime Usage
 
-Docker, Podman, containerd ve CRI-O'daki normal containers kendi PID namespace'lerini alır. Kubernetes Pods da genellikle workload açıkça host PID paylaşımı talep etmedikçe izole bir PID görünümü elde eder. LXC/Incus ortamları aynı kernel primitive'ine dayanır; ancak system-container kullanım durumları daha karmaşık process ağaçları ortaya çıkarabilir ve daha fazla debugging kısayolunu teşvik edebilir.
+Normal containers in Docker, Podman, containerd, and CRI-O get their own PID namespace. Kubernetes Pods usually also receive an isolated PID view unless the workload explicitly asks for host PID sharing. LXC/Incus environments rely on the same kernel primitive, though system-container use cases may expose more complicated process trees and encourage more debugging shortcuts.
 
-Aynı kural her yerde geçerlidir: runtime PID namespace'ini izole etmeme seçimi kasıtlı olarak container sınırında bir daralma anlamına gelir.
+## Misconfigurations
 
-## Yanlış Yapılandırmalar
+The canonical misconfiguration is host PID sharing. Teams often justify it for debugging, monitoring, or service-management convenience, but it should always be treated as a meaningful security exception. Even if the container has no immediate write primitive over host processes, visibility alone can reveal a lot about the system. Once capabilities such as `CAP_SYS_PTRACE` or useful procfs access are added, the risk expands significantly.
 
-Kanonik yanlış yapılandırma host PID paylaşımıdır. Ekipler bunu genellikle debugging, monitoring veya servis-yönetimi kolaylığı için haklı çıkarır, ancak bu her zaman önemli bir güvenlik istisnası olarak ele alınmalıdır. Konteynerin host süreçleri üzerinde hemen bir yazma yetkisi olmasa bile, sadece görünürlük bile sistem hakkında çok şey açığa çıkarabilir. `CAP_SYS_PTRACE` gibi yetenekler veya yararlı procfs erişimi eklendiğinde risk önemli ölçüde genişler.
+Another mistake is assuming that because the workload cannot kill or ptrace host processes by default, host PID sharing is therefore harmless. That conclusion ignores the value of enumeration, the availability of namespace-entry targets, and the way PID visibility combines with other weakened controls.
 
-Diğer bir hata, workload varsayılan olarak host süreçlerini kill veya ptrace edemediği için host PID paylaşımının zararsız olduğunu varsaymaktır. Bu sonuç, keşfin değerini, namespace-entry hedeflerinin kullanılabilirliğini ve PID görünürlüğünün diğer zayıflatılmış kontrollerle nasıl birleştiğini görmezden gelir.
+## Abuse
 
-## Suistimal
+If the host PID namespace is shared, an attacker may inspect host processes, harvest process arguments, identify interesting services, locate candidate PIDs for `nsenter`, or combine process visibility with ptrace-related privilege to interfere with host or neighboring workloads. In some cases, simply seeing the right long-running process is enough to reshape the rest of the attack plan.
 
-Eğer host PID namespace paylaşılıyorsa, bir saldırgan host süreçlerini inceleyebilir, süreç argümanlarını toplayabilir, ilginç servisleri tespit edebilir, `nsenter` için aday PID'leri bulabilir veya süreç görünürlüğünü ptrace ile ilişkili ayrıcalıklarla birleştirerek host veya komşu workload'lara müdahale edebilir. Bazı durumlarda, doğru uzun süre çalışan süreci görmek bile saldırı planının geri kalanını yeniden şekillendirmek için yeterlidir.
-
-İlk pratik adım her zaman host süreçlerinin gerçekten görünür olduğunu teyit etmektir:
+The first practical step is always to confirm that host processes are really visible:
 ```bash
 readlink /proc/self/ns/pid
 ps -ef | head -n 50
 ls /proc | grep '^[0-9]' | head -n 20
 ```
-Ana makine PID'leri görünür hale geldiğinde, süreç argümanları ve namespace'e giriş hedefleri genellikle en yararlı bilgi kaynağı haline gelir:
+Host PID'leri görünür hale geldiğinde, process arguments ve namespace-entry hedefleri genellikle en faydalı bilgi kaynağı haline gelir:
 ```bash
 for p in 1 $(pgrep -n systemd 2>/dev/null) $(pgrep -n dockerd 2>/dev/null); do
 echo "PID=$p"
 tr '\0' ' ' < /proc/$p/cmdline 2>/dev/null; echo
 done
 ```
-Eğer `nsenter` mevcutsa ve yeterli ayrıcalık varsa, görünür bir host işleminin bir isim alanı köprüsü olarak kullanılıp kullanılamayacağını test edin:
+Eğer `nsenter` mevcutsa ve yeterli ayrıcalık varsa, görünür bir host işleminin namespace köprüsü olarak kullanılıp kullanılamayacağını test edin:
 ```bash
 which nsenter
 nsenter -t 1 -m -u -n -i -p sh 2>/dev/null || echo "nsenter blocked"
 ```
-Giriş engellense bile, host PID paylaşımı zaten değerlidir; çünkü servis düzenini, çalışma zamanı bileşenlerini ve sonraki hedef olarak seçilebilecek ayrıcalıklı süreçleri ortaya çıkarır.
+Giriş engellense bile, host PID sharing zaten değerlidir; servis düzenini, çalışma zamanı bileşenlerini ve bir sonraki hedeflenecek aday ayrıcalıklı süreçleri ortaya çıkarır.
 
-Host PID görünürlüğü ayrıca file-descriptor abuse'ı daha gerçekçi hale getirir. Eğer ayrıcalıklı bir host süreci veya komşu bir iş yükü hassas bir dosya veya socket açık tutuyorsa, saldırgan `/proc/<pid>/fd/`'yi inceleyip sahipliğe, procfs mount options'a ve hedef servis modeline bağlı olarak bu handle'ı yeniden kullanabilir.
+Host PID görünürlüğü ayrıca file-descriptor abuse'ı daha gerçekçi kılar. Eğer ayrıcalıklı bir host process veya komşu workload hassas bir dosya ya da socket açık tutuyorsa, saldırgan `/proc/<pid>/fd/`'yi inceleyip sahiplik, procfs mount options ve hedef servis modeline bağlı olarak o handle'ı yeniden kullanabilir.
 ```bash
 for fd_dir in /proc/[0-9]*/fd; do
 ls -l "$fd_dir" 2>/dev/null | sed "s|^|$fd_dir -> |"
 done
 grep " /proc " /proc/mounts
 ```
-Bu komutlar yararlıdır çünkü `hidepid=1` veya `hidepid=2`'nin süreçler arası görünürlüğü azaltıp azaltmadığını ve açık durumda olan gizli dosyalar, loglar veya Unix sockets gibi bariz ilgi çekici deskriptörlerin hiç görünür olup olmadığını yanıtlar.
+Bu komutlar yararlıdır çünkü `hidepid=1` veya `hidepid=2`'nin süreçler arası görünürlüğü azaltıp azaltmadığını ve örneğin açık durumdaki gizli dosyalar, loglar veya Unix soketleri gibi bariz şekilde ilgi çekici dosya tanımlayıcılarının hiç görünür olup olmadığını gösterir.
 
 ### Tam Örnek: host PID + `nsenter`
 
-Host PID paylaşımı, işlem ayrıca host namespaces'e katılmak için yeterli ayrıcalıklara sahip olduğunda doğrudan bir host escape'e dönüşür:
+Host PID paylaşımı, süreç ayrıca host namespace'lerine katılmak için yeterli ayrıcalığa sahipse doğrudan bir host escape haline gelir:
 ```bash
 ps -ef | head -n 50
 capsh --print | grep cap_sys_admin
 nsenter -t 1 -m -u -n -i -p /bin/bash
 ```
-Komut başarılı olursa, container işlemi artık host mount, UTS, network, IPC ve PID namespace'lerinde çalışmaktadır. Etki, host'un derhal ele geçirilmesidir.
+Komut başarılı olursa, container süreci artık host mount, UTS, network, IPC ve PID namespaces içinde çalışıyor. Etki derhal host'un ele geçirilmesidir.
 
 Even when `nsenter` itself is missing, the same result may be achievable through the host binary if the host filesystem is mounted:
 ```bash
 /host/usr/bin/nsenter -t 1 -m -u -n -i -p /host/bin/bash 2>/dev/null
 ```
-### Güncel Çalışma Zamanı Notları
+### Son Çalışma Zamanı Notları
 
-Bazı PID-namespace ile ilgili saldırılar geleneksel `hostPID: true` yanlış yapılandırmaları değil, konteyner kurulumu sırasında procfs korumalarının nasıl uygulandığına dair çalışma zamanı uygulama hatalarıdır.
+Bazı PID-namespace ile ilgili saldırılar geleneksel `hostPID: true` yanlış yapılandırmaları değil, container kurulumu sırasında procfs korumalarının uygulanma şeklindeki çalışma zamanı (runtime) uygulama hatalarıdır.
 
-#### `maskedPaths`'in host procfs'e yarışı
+#### `maskedPaths` ile host procfs arasında yarış
 
-Zafiyetli `runc` sürümlerinde, konteyner imajını veya `runc exec` iş yükünü kontrol edebilen saldırganlar, konteyner tarafındaki `/dev/null`'ü `/proc/sys/kernel/core_pattern` gibi hassas bir procfs yoluna gösteren bir symlink ile değiştirerek masking aşamasıyla yarışabilirler. Yarış başarılı olursa, masked-path bind mount yanlış hedefe bağlanabilir ve host-genel procfs ayarlarını yeni konteynere açığa çıkarabilir.
+Etkilenebilir `runc` sürümlerinde, container imajını veya `runc exec` iş yükünü kontrol edebilen saldırganlar, container tarafındaki `/dev/null`'ü `/proc/sys/kernel/core_pattern` gibi hassas bir procfs yoluna işaret eden bir symlink ile değiştirerek masking aşaması için yarışabilirler. Eğer yarış başarılı olursa, masked-path bind mount yanlış hedefe yerleşebilir ve host genelindeki procfs ayarlarını yeni container'a açığa çıkarabilir.
 
 İnceleme için faydalı komut:
 ```bash
 jq '.linux.maskedPaths' config.json 2>/dev/null
 ```
-Bu önemlidir çünkü nihai etki doğrudan bir procfs açığa çıkarılmasıyla aynı olabilir: yazılabilir `core_pattern` veya `sysrq-trigger`, ardından host üzerinde kod yürütme veya denial of service.
+Bu önemlidir çünkü nihai etki, doğrudan procfs maruziyetiyle aynı olabilir: yazılabilir `core_pattern` veya `sysrq-trigger`, ardından host üzerinde kod yürütme veya denial of service.
 
-#### Namespace injection ile `insject`
+#### `insject` ile Namespace injection
 
-Namespace injection araçları, örneğin `insject`, PID-namespace etkileşiminin her zaman işlem oluşturulmadan önce hedef namespace'e önceden girilmesini gerektirmediğini gösterir. Bir yardımcı daha sonra bağlanabilir, `setns()` kullanabilir ve hedef PID alanına görünürlüğü koruyarak çalıştırma yapabilir:
+Namespace injection araçları, ör. `insject`, PID-namespace etkileşiminin her zaman hedef namespace'e işlem oluşturulmadan önce girilmesini gerektirmediğini gösterir. Bir yardımcı daha sonra bağlanabilir, `setns()` kullanabilir ve hedef PID alanına görünürlüğü koruyarak çalıştırabilir:
 ```bash
 sudo insject -S -p $(pidof containerd-shim) -- bash -lc 'readlink /proc/self/ns/pid && ps -ef'
 ```
-Bu tür bir teknik, özellikle runtime iş yükü başlatıldıktan sonra namespace context'e katılınması gereken ileri düzey hata ayıklama, offensive tooling ve post-exploitation workflows için önemlidir.
+Bu tür bir teknik, çoğunlukla gelişmiş hata ayıklama, offensive tooling ve post-exploitation iş akışları için önemlidir; bu senaryolarda namespace bağlamına, runtime iş yükü başlatıldıktan sonra katılmak gerekebilir.
 
-### İlgili FD Kötüye Kullanım Desenleri
+### İlgili FD Suistimal Kalıpları
 
-Host PID'leri görünür olduğunda açıkça belirtilmeye değer iki desen vardır. Birincisi, ayrıcalıklı bir süreç `execve()` sırasında hassas bir dosya tanımlayıcısını açık tutabilir çünkü bu tanımlayıcı `O_CLOEXEC` olarak işaretlenmemiş olabilir. İkincisi, servisler dosya tanımlayıcılarını Unix soketleri üzerinden `SCM_RIGHTS` ile iletebilir. Her iki durumda da ilginç olan nesne artık yol adı değil; daha düşük ayrıcalığa sahip bir sürecin miras alabileceği veya alacağı zaten açık olan tutamaçtır.
+Host PID'leri görünür olduğunda açıkça belirtilmeye değer iki kalıp vardır. Birincisi, ayrıcalıklı bir süreç, `execve()` sırasında `O_CLOEXEC` olarak işaretlenmediği için hassas bir file descriptor'ı açık tutabilir. İkincisi, servisler `SCM_RIGHTS` üzerinden Unix sockets aracılığıyla file descriptor'lar geçirebilir. Her iki durumda da ilginç nesne artık pathname değil, daha düşük ayrıcalıklı bir sürecin miras alabileceği veya alacağı zaten açık handle'dır.
 
-Bu, container çalışmalarında önemlidir çünkü yol kendisi container dosya sisteminden doğrudan erişilebilir olmasa bile tutamaç `docker.sock`, ayrıcalıklı bir log, bir host gizli dosyası veya başka yüksek değerli bir nesneye işaret edebilir.
+Bu, container çalışmalarında önemlidir çünkü handle `docker.sock`, ayrıcalıklı bir log, host secret file veya yolun kendisi container filesystem'ten doğrudan erişilebilir olmasa bile başka yüksek değerli bir nesneye işaret edebilir.
 
 ## Kontroller
 
-Bu komutların amacı, sürecin özel bir PID görünümüne sahip olup olmadığını veya çok daha geniş bir süreç kapsamını zaten listeleyip listeleyemeyeceğini belirlemektir.
+Bu komutların amacı, sürecin özel bir PID görünümüne sahip olup olmadığını yoksa çok daha geniş bir süreç manzarasını zaten listeleyip listeleyemeyeceğini belirlemektir.
 ```bash
 readlink /proc/self/ns/pid   # PID namespace identifier
 ps -ef | head                # Quick process list sample
 ls /proc | head              # Process IDs and procfs layout
 ```
-Burada ilginç olan:
+Burada ilginç olanlar:
 
-- Eğer süreç listesi bariz host servisleri içeriyorsa, host PID paylaşımı muhtemelen zaten etkin durumdadır.
-- Sadece küçük, konteyner-yerel bir işlem ağacı görmek normal baz hattır; `systemd`, `dockerd` veya ilgisiz daemon'ların görünmesi normal değildir.
-- Host PID'ler görünür hale geldiğinde, salt okunur işlem bilgileri bile faydalı keşif verisi olur.
+- Eğer işlem listesi bariz host servisleri içeriyorsa, host PID sharing muhtemelen zaten etkindir.
+- Sadece küçük bir container-local ağaç görmek normal başlangıç durumudur; `systemd`, `dockerd` veya ilgisiz daemon'ları görmek normal değildir.
+- Host PIDs görünür hale geldiğinde, salt-okunur işlem bilgileri bile faydalı keşif bilgisine dönüşür.
 
-Eğer host PID paylaşımı ile çalışan bir konteyner keşfederseniz, bunu kozmetik bir fark olarak ele almayın. Bu, iş yükünün gözlemleyebileceği ve potansiyel olarak etkileyebileceği konularda büyük bir değişikliktir.
+Eğer host PID sharing ile çalışan bir konteyner keşfederseniz, bunu kozmetik bir fark olarak değerlendirmeyin. Bu, iş yükünün gözlemleyebileceği ve potansiyel olarak etkileyebileceği şeylerde büyük bir değişikliktir.
+{{#include ../../../../../banners/hacktricks-training.md}}

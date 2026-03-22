@@ -1,18 +1,18 @@
-# Görüntü Güvenliği, İmzalama ve Gizli Bilgiler
+# İmaj Güvenliği, İmzalama ve Gizli Bilgiler
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## Genel Bakış
 
-Konteyner güvenliği, iş yükü başlatılmadan önce başlar. Görüntü, üretime hangi ikili dosyaların, yorumlayıcıların, kütüphanelerin, başlatma betiklerinin ve gömülü yapılandırmanın ulaşacağını belirler. Görüntü arka kapılı (backdoored), güncelliğini yitirmiş (stale) veya içine gizli veriler gömülmüş şekilde oluşturulmuşsa, sonraki çalışma zamanı sertleştirmesi (runtime hardening) zaten kompromize olmuş bir artefakt üzerinde çalışıyor olur.
+Konteyner güvenliği, iş yükü başlatılmadan önce başlar. İmaj, üretime hangi ikili dosyaların, yorumlayıcıların, kütüphanelerin, başlangıç betiklerinin ve gömülü yapılandırmanın ulaşacağını belirler. İmaj arka kapı içeriyorsa, güncel değilse veya içine gizli bilgiler gömülmüş olarak oluşturulmuşsa, sonrasında yapılan çalışma zamanı sertleştirmesi zaten tehlikeye düşmüş bir artefakt üzerinde çalışıyor demektir.
 
-Bu yüzden görüntü kaynağı (provenance), zafiyet taraması (vulnerability scanning), imza doğrulama (signature verification) ve gizli bilgi yönetimi (secret handling) namespaces ve seccomp ile aynı tartışmanın parçası olmalıdır. Bunlar yaşam döngüsünün farklı bir aşamasını korurlar, ancak burada yaşanan hatalar genellikle çalışma zamanının daha sonra sınırlamak zorunda kaldığı saldırı yüzeyini belirler.
+Bu nedenle imaj kökeni, zafiyet taraması, imza doğrulama ve gizli bilgi yönetimi, namespaces ve seccomp ile aynı tartışmanın parçasıdır. Yaşam döngüsünün farklı bir aşamasını korurlar, ancak burada meydana gelen hatalar genellikle çalışma zamanının daha sonra sınırlandırmak zorunda olduğu saldırı yüzeyini belirler.
 
-## Görüntü Kayıtları ve Güven
+## İmaj Kayıt Defterleri ve Güven
 
-Görüntüler Docker Hub gibi herkese açık kayıt depolarından veya bir organizasyon tarafından işletilen özel kayıt depolarından gelebilir. Güvenlik sorunu yalnızca görüntünün nerede barındırıldığı değil, ekibin kökeni (provenance) ve bütünlüğü teyit edip edemeyeceğidir. İmzalanmamış veya zayıf takip edilen görüntüleri halka açık kaynaklardan çekmek, kötü amaçlı veya değiştirilmiş içeriğin üretime girmesi riskini artırır. Dahili olarak barındırılan kayıt depolarının bile net sahiplik, inceleme ve güven politikalarına ihtiyacı vardır.
+İmajlar Docker Hub gibi genel kayıt defterlerinden veya bir kuruluş tarafından işletilen özel kayıt defterlerinden gelebilir. Güvenlik sorunu sadece imajın nerede yaşadığı değil, ekibin kökeni ve bütünlüğü tespit edip edemeyeceğidir. Genel kaynaklardan imzalanmamış veya kötü takip edilen imajları çekmek, kötü amaçlı veya değiştirilmiş içeriğin üretime girmesi riskini artırır. Dahili olarak barındırılan kayıt defterlerinin bile net sahiplik, inceleme ve güven politikalarına ihtiyacı vardır.
 
-Docker Content Trust tarihsel olarak Notary ve TUF kavramlarını kullanarak imzalanmış görüntüleri zorunlu kıldı. Ekosistem zaman içinde evrildi, ancak kalıcı ders şu: görüntü kimliği ve bütünlüğü varsayılmamalı, doğrulanabilir olmalıdır.
+Docker Content Trust tarihsel olarak imzalı imajları zorunlu kılmak için Notary ve TUF kavramlarını kullanıyordu. Tam ekosistem değişmiş olabilir, ancak kalıcı ders şu ki: imaj kimliği ve bütünlüğü varsayılmamalı, doğrulanabilir olmalıdır.
 
 Örnek tarihsel Docker Content Trust iş akışı:
 ```bash
@@ -20,11 +20,11 @@ export DOCKER_CONTENT_TRUST=1
 docker pull nginx:latest
 tar -zcvf private_keys_backup.tar.gz ~/.docker/trust/private
 ```
-Örneğin amacı, her ekibin hâlâ aynı araçları kullanması gerektiğini söylemek değil; imzalama ve anahtar yönetiminin soyut bir teori değil, operasyonel görevler olduğudur.
+Bu örneğin amacı her ekibin aynı araçları kullanması gerektiğini göstermek değil; signing ve key management'in soyut teori değil, operasyonel görevler olduğunu vurgulamaktır.
 
-## Güvenlik Açığı Taraması
+## Zafiyet Taraması
 
-İmaj taraması iki farklı soruyu yanıtlamaya yardımcı olur. Birincisi, imaj bilinen güvenlik açığı bulunan paketler veya kütüphaneler içeriyor mu? İkincisi, imaj saldırı yüzeyini genişleten gereksiz yazılımlar barındırıyor mu? Hata ayıklama araçları, shell'ler, yorumlayıcılar ve güncelliğini yitirmiş paketlerle dolu bir imaj hem sömürülmesi daha kolaydır hem de üzerinde düşünülmesi daha zordur.
+İmaj taraması iki farklı soruyu cevaplamaya yardımcı olur. Birincisi, imaj bilinen zafiyete sahip paketler veya kütüphaneler içeriyor mu? İkincisi, imaj saldırı yüzeyini genişleten gereksiz yazılımlar barındırıyor mu? Debugging araçları, shell'ler, interpreter'lar ve güncelliğini yitirmiş paketlerle dolu bir imaj hem sömürülmesi daha kolay hem de üzerinde düşünülmesi daha zordur.
 
 Sık kullanılan tarayıcı örnekleri şunlardır:
 ```bash
@@ -33,24 +33,24 @@ trivy -q -f json alpine:3.19
 snyk container test nginx:latest --severity-threshold=high
 clair-scanner -w example-alpine.yaml --ip YOUR_LOCAL_IP alpine:3.5
 ```
-Bu araçlardan elde edilen sonuçlar dikkatle yorumlanmalıdır. Kullanılmayan bir paketteki bir zafiyet, açığa çıkmış bir RCE yoluyla aynı risk seviyesinde değildir; ancak her ikisi de sertleştirme kararları açısından önemlidir.
+Bu araçlardan elde edilen sonuçlar dikkatle yorumlanmalıdır. Kullanılmayan bir paketteki bir zafiyet, açık bir RCE yolunun taşıdığı riskle aynı değildir; ancak her ikisi de hardening kararları açısından yine de önemlidir.
 
-## Derleme Zamanı Sırları
+## Derleme Zamanı Sırlar
 
-Konteyner derleme pipeline'larındaki en eski hatalardan biri, sırları doğrudan imaja gömmek veya daha sonra `docker inspect`, build logları veya kurtarılan katmanlar aracılığıyla görünür hale gelen ortam değişkenleriyle aktarmaktır. Derleme zamanındaki sırlar, imajın dosya sistemine kopyalanmak yerine derleme sırasında geçici olarak monte edilmelidir.
+Container build pipeline'larındaki en eski hatalardan biri, sırların doğrudan image'e gömülmesi veya sonrasında çevresel değişkenler aracılığıyla geçirilmesidir; bu değişkenler daha sonra `docker inspect`, build log'ları veya kurtarılan katmanlar üzerinden görünür hale gelebilir. Derleme zamanındaki sırlar, image dosya sistemine kopyalanmak yerine derleme sırasında geçici olarak bağlanmalıdır.
 
-BuildKit bu modeli, özel derleme-zamanı sır yönetimine izin vererek geliştirdi. Bir sır katmana yazılmak yerine, derleme adımı onu geçici olarak tüketebilir:
+BuildKit bu modeli, adanmış derleme zamanı secret yönetimine izin vererek iyileştirdi. Bir sırın bir katmana yazılmasındansa, build adımı onu geçici olarak kullanabilir:
 ```bash
 export DOCKER_BUILDKIT=1
 docker build --secret id=my_key,src=path/to/my_secret_file .
 ```
-Bu önemlidir çünkü imaj katmanları kalıcı nesnelerdir. Bir gizli bilgi commit edilmiş bir katmana girdiğinde, daha sonra başka bir katmanda dosyayı silmek imaj geçmişindeki asıl ifşayı gerçekten ortadan kaldırmaz.
+Bu önemlidir çünkü image katmanları kalıcı artefaktlardır. Bir secret committed bir katmana girdiğinde, dosyayı daha sonra başka bir katmanda silmek orijinal açığa çıkarmayı image geçmişinden gerçekten kaldırmaz.
 
-## Çalışma Zamanı Sırları
+## Çalışma Zamanı Secrets
 
-Çalışan bir iş yükünün ihtiyaç duyduğu gizli bilgiler, mümkün olduğunda basit ortam değişkenleri gibi ad hoc yaklaşımlardan kaçınmalıdır. Volumes, özel gizli yönetimi entegrasyonları, Docker secrets ve Kubernetes Secrets yaygın mekanizmalardır. Hiçbiri tüm riski ortadan kaldırmaz — özellikle saldırgan zaten iş yükünde kod çalıştırma yetkisine sahipse — ancak yine de kimlik bilgilerini kalıcı olarak imajda saklamaya veya onları inceleme araçları aracılığıyla rastgele ortaya çıkarmaya tercih edilir.
+Çalışan bir workload'un ihtiyaç duyduğu secrets mümkün olduğunca ad hoc yaklaşımlardan, örneğin düz environment variables kullanımından kaçınmalıdır. Volumes, dedicated secret-management integrations, Docker secrets ve Kubernetes Secrets yaygın mekanizmalardır. Bunların hiçbiri tüm riski ortadan kaldırmaz — özellikle attacker zaten workload içinde code execution elde etmişse — ancak yine de credentials'ı kalıcı olarak image içinde depolamaya veya bunları inspection tooling ile rastgele açığa çıkarmaya kıyasla tercih edilirler.
 
-Basit bir Docker Compose tarzı secret bildirimi şöyle görünür:
+A simple Docker Compose style secret declaration looks like:
 ```yaml
 version: "3.7"
 services:
@@ -63,41 +63,41 @@ secrets:
 my_secret:
 file: ./my_secret_file.txt
 ```
-Kubernetes'te, Secret objects, projected volumes, service-account tokens ve cloud workload identities daha geniş ve daha güçlü bir model oluşturur, ancak host mounts, broad RBAC veya zayıf Pod tasarımı yoluyla kazara maruz kalma için daha fazla fırsat da yaratırlar.
+Kubernetes'te, Secret objects, projected volumes, service-account tokens ve cloud workload identities daha geniş ve daha güçlü bir model oluşturur; ancak bunlar aynı zamanda host mounts, broad RBAC veya zayıf Pod design yoluyla kazara maruziyet için daha fazla fırsat yaratır.
 
-## Kötüye Kullanım
+## Kötüye kullanım
 
-Hedefi incelerken amaç, secrets'in image'a gömülüp gömülmediğini, layers içine leaked olup olmadığına veya öngörülebilir runtime lokasyonlarına mounted edilip edilmediğine karar vermektir:
+Hedefi incelerken amaç, secrets'in image'e bake edilip edilmediğini, layers'a leaked olup olmadığına veya öngörülebilir runtime konumlarına mounted edilip edilmediğini keşfetmektir:
 ```bash
 env | grep -iE 'secret|token|key|passwd|password'
 find / -maxdepth 4 \( -iname '*.env' -o -iname '*secret*' -o -iname '*token*' \) 2>/dev/null | head -n 100
 grep -RniE 'secret|token|apikey|password' /app /srv /usr/src 2>/dev/null | head -n 100
 ```
-Bu komutlar üç farklı sorunu ayırt etmeye yardımcı olur: uygulama yapılandırması leaks, image-layer leaks ve runtime-injected secret dosyaları. Eğer bir secret `/run/secrets`, bir projected volume veya bir cloud identity token path altında görünüyorsa, sonraki adım bunun yalnızca mevcut iş yüküne mi yoksa çok daha geniş bir control plane'e mi erişim sağladığını anlamaktır.
+Bu komutlar üç farklı sorunu ayırt etmeye yardımcı olur: application configuration leaks, image-layer leaks ve runtime-injected secret files. Eğer bir secret `/run/secrets`, bir projected volume veya bir cloud identity token path altında görünürse, bir sonraki adım bunun yalnızca mevcut workload'a mı yoksa çok daha geniş bir control plane'e mi erişim sağladığını anlamaktır.
 
-### Tam Örnek: Image Filesystem İçine Gömülü Secret
+### Tam Örnek: İmaj Dosya Sisteminde Gömülü Secret
 
-Eğer bir build pipeline `.env` dosyalarını veya kimlik bilgilerini son image'a kopyaladıysa, post-exploitation basit hale gelir:
+Eğer bir build pipeline `.env` dosyalarını veya credentials'ı final image'e kopyaladıysa, post-exploitation basit hale gelir:
 ```bash
 find / -type f -iname '*.env*' 2>/dev/null
 cat /usr/src/app/.env 2>/dev/null
 grep -iE 'secret|token|jwt|password' /usr/src/app/.env 2>/dev/null
 ```
-Etki uygulamaya bağlıdır; ancak gömülü signing keys, JWT secrets veya cloud credentials, container compromise'ını kolayca API compromise, lateral movement veya trusted application tokens'ın forgery'sine dönüştürebilir.
+Etkisi uygulamaya bağlıdır, ancak embedded signing keys, JWT secrets veya cloud credentials, container compromise'ını kolayca API compromise'a, lateral movement'e veya trusted application tokens'ın forgery'sine dönüştürebilir.
 
 ### Full Example: Build-Time Secret Leakage Check
 
-Eğer endişe image history'nin secret-bearing layer yakaladığı yönündeyse:
+Endişe image history'nin secret-bearing layer yakalamış olmasıysa:
 ```bash
 docker history --no-trunc <image>
 docker save <image> -o /tmp/image.tar
 tar -tf /tmp/image.tar | head
 ```
-Bu tür bir inceleme faydalıdır çünkü bir secret, nihai filesystem görünümünden silinmiş olabilir, ancak önceki bir layer'da veya build metadata içinde hâlâ kalmış olabilir.
+## Kontroller
 
-## Checks
+Bu tür bir inceleme yararlıdır çünkü bir secret, nihai dosya sistemi görünümünden silinmiş olsa bile önceki bir katmanda veya build metadata'sında hâlâ kalmış olabilir.
 
-Bu kontroller, image ve secret-handling pipeline'ın runtime öncesinde attack surface'ı artırmış olma olasılığını belirlemeye yöneliktir.
+Bu kontroller, image ve secret-handling pipeline'ının çalışma zamanından önce saldırı yüzeyini artırmış olma olasılığını belirlemeye yöneliktir.
 ```bash
 docker history --no-trunc <image> 2>/dev/null
 env | grep -iE 'secret|token|key|passwd|password'
@@ -106,15 +106,16 @@ grep -RniE 'secret|token|apikey|password' /etc /app /srv /usr/src 2>/dev/null | 
 ```
 What is interesting here:
 
-- Şüpheli bir build geçmişi, kopyalanmış kimlik bilgilerini, SSH materyallerini veya güvensiz build adımlarını ortaya çıkarabilir.
-- Projected volume yolları altındaki Secrets, yalnızca yerel uygulama erişimi değil, cluster veya bulut erişimine de yol açabilir.
-- Plaintext kimlik bilgileri içeren çok sayıda yapılandırma dosyası genellikle image veya deployment modelinin gerektiğinden fazla güven malzemesi taşıdığını gösterir.
+- Şüpheli bir build geçmişi kopyalanmış credentials, SSH materyali veya güvensiz build adımlarını açığa çıkarabilir.
+- projected volume paths altındaki Secrets, sadece yerel uygulama erişimi değil, cluster veya cloud erişimi sağlayabilir.
+- Düz metin credentials içeren çok sayıda konfigürasyon dosyası genellikle image veya deployment modelinin gereğinden fazla trust materyali taşıdığını gösterir.
 
 ## Runtime Defaults
 
-| Runtime / platform | Default state | Default behavior | Common manual weakening |
+| Runtime / platform | Varsayılan durum | Varsayılan davranış | Yaygın manuel zayıflatmalar |
 | --- | --- | --- | --- |
-| Docker / BuildKit | Güvenli build-zamanı secret mountlarını destekler, ancak otomatik olarak yapılmaz | Secrets `build` sırasında geçici olarak mount edilebilir; image imzalama ve tarama için açık workflow seçimleri gerekir | secrets'i image içine kopyalama, secrets'i `ARG` veya `ENV` ile geçirme, provenance kontrollerini devre dışı bırakma |
-| Podman / Buildah | OCI-native build'ları ve secret-aware iş akışlarını destekler | Güçlü build iş akışları mevcut, ancak operatörler bunları kasıtlı olarak seçmelidir | secrets'i Containerfile'lara gömme, geniş build context'leri, build sırasında gevşek bind mount'lar |
-| Kubernetes | Native Secret objeleri ve projected volumes | Runtime secret teslimatı birinci sınıftır, ancak maruziyet RBAC, pod tasarımı ve host mount'larına bağlıdır | aşırı geniş Secret mount'ları, service-account token kötü kullanımı, kubelet-managed volümlerine `hostPath` erişimi |
-| Registries | Bütünlük, uygulanmadıkça isteğe bağlıdır | Hem public hem private registries politika, imzalama ve admission kararlarına bağlıdır | imzasız image'ları serbestçe çekme, zayıf admission kontrolü, kötü anahtar yönetimi |
+| Docker / BuildKit | Güvenli build-time secret mountlarını destekler, fakat otomatik değildir | Secrets `build` sırasında geçici olarak mount edilebilir; image signing ve scanning açık workflow seçimleri gerektirir | secrets'i image içine kopyalamak, secrets'i `ARG` veya `ENV` ile geçirmek, provenance kontrollerini devre dışı bırakmak |
+| Podman / Buildah | OCI-native build'leri ve secret-aware workflow'ları destekler | Güçlü build workflow'ları mevcut, ancak operatörlerin bunları kasıtlı olarak seçmesi gerekir | Containerfiles içine secrets gömmek, geniş build context'leri, build sırasında fazla izinli bind mount'lar |
+| Kubernetes | Native Secret objects ve projected volumes | Runtime secret teslimi birinci sınıftır, ancak ifşa RBAC, pod tasarımı ve host mount'larına bağlıdır | gereğinden geniş Secret mount'ları, service-account token kötüye kullanımı, `hostPath` erişimi kubelet-managed volumelere |
+| Registries | Integrity zorlanmadıkça isteğe bağlıdır | Hem public hem private registries politika, signing ve admission kararlarına bağlıdır | imzalanmamış image'ları serbestçe çekme, zayıf admission kontrolü, kötü anahtar yönetimi |
+{{#include ../../../banners/hacktricks-training.md}}
