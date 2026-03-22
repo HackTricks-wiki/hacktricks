@@ -1,104 +1,105 @@
-# Container Runtimes, Engines, Builders, And Sandboxes
+# Runtimes za Container, Engines, Builders, na Sandboxes
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-Moja ya vyanzo vikubwa vya mkanganyiko katika usalama wa container ni kwamba vipengele vingi kabisa tofauti mara nyingi vinachanganywa ndani ya neno moja. "Docker" inaweza kumaanisha image format, CLI, daemon, build system, runtime stack, au mawazo ya container kwa ujumla. Kwa kazi za usalama, kutoeleweka kwa uhakika ni tatizo, kwa sababu tabaka tofauti zinawajibika kwa ulinzi tofauti. Kuingia nje kutokana na bind mount mbaya si sawa na kuingia nje kutokana na bug ya runtime ya chini-ndani, na wala si sawa na kosa la sera ya cluster katika Kubernetes.
+Moja ya vyanzo vikubwa vya mkanganyiko katika usalama wa container ni kwamba vipengele tofauti kabisa mara nyingi huunganishwa chini ya neno moja. "Docker" inaweza kumaanisha image format, CLI, daemon, mfumo wa kujenga, runtime stack, au kwa urahisi wazo la containers kwa ujumla. Kwa kazi za usalama, kutokuwa wazi hili ni tatizo, kwa sababu tabaka tofauti zinawajibika kwa ulinzi tofauti. Ku-breakout kutokana na bind mount mbaya sio sawa na breakout inayosababishwa na mdudu wa runtime wa ngazi ya chini, na wala si sawa na kosa la sera za cluster katika Kubernetes.
 
-Ukurasa huu unatafuta kutenganisha ekosistimu kwa kazi ili sehemu iliyobaki iweze kuzungumza kwa usahihi kuhusu wapi ulinzi au udhaifu unapatikana.
+Ukurasa huu unatafsanya ekosistimu kwa nafasi ili sehemu nyingine ya sura iweze kuzungumzia kwa usahihi wapi ulinzi au udhaifu upo.
 
-## OCI As The Common Language
+## OCI Kama Lugha ya Pamoja
 
-Stacks za kisasa za Linux container mara nyingi zinaweza kufanya kazi pamoja kwa sababu zinazungumza seti ya specs za OCI. The **OCI Image Specification** inaeleza jinsi images na layers zinavyowakilishwa. The **OCI Runtime Specification** inaeleza jinsi runtime inavyopaswa kuanzisha process, ikiwa ni pamoja na namespaces, mounts, cgroups, na settings za usalama. The **OCI Distribution Specification** inasawazisha jinsi registries zinavyoonyesha content.
+Miradi ya kisasa ya container kwenye Linux mara nyingi zinaendana kwa sababu zinazungumza seti ya vipimo vya OCI. The **OCI Image Specification** inaelezea jinsi images na layers zinavyowakilishwa. The **OCI Runtime Specification** inaelezea jinsi runtime inavyotakiwa kuzindua mchakato, ikiwa ni pamoja na namespaces, mounts, cgroups, na mipangilio ya usalama. The **OCI Distribution Specification** inasawazisha jinsi registries zinavyoonyesha maudhui.
 
-Hii ni muhimu kwa sababu inaeleza kwa nini image iliyojengwa kwa chombo kimoja mara nyingi inaweza kuendeshwa kwa kingine, na kwa nini engines kadhaa zinaweza kushiriki runtime ya chini-ndani ile ile. Pia inaeleza kwa nini tabia za usalama zinaweza kuonekana sawa kati ya bidhaa tofauti: nyingi zimetengeneza configuration ile ile ya OCI runtime na kuiruhusu seti ndogo ya runtimes.
+Hii ni muhimu kwa sababu inafafanua kwa nini image iliyojengwa kwa kuchukua zana moja mara nyingi inaweza kuendeshwa na nyingine, na kwa nini engines kadhaa zinaweza kushiriki runtime sawa ya ngazi ya chini. Pia inaelezea kwa nini tabia za usalama zinaweza kuonekana kama sawa katika bidhaa tofauti: nyingi yao zinaunda usanidi uleule wa OCI runtime na kuipeleka kwa seti ndogo ya runtimes.
 
 ## Low-Level OCI Runtimes
 
-Low-level runtime ni kipengele kilicho karibu zaidi na mpaka wa kernel. Ni sehemu inayotengeneza namespaces, kuandika settings za cgroup, kutekeleza capabilities na seccomp filters, na hatimaye `execve()` process ya container. Wakati watu wanaelezea "container isolation" kwa ngazi ya mitambo, hii ndiyo tabaka wanayokuwa wanazungumzia mara nyingi, hata kama hawasema waziwazi.
+Low-level runtime ni kipengele kilicho karibu kabisa na mpaka wa kernel. Ndiyo sehemu inayounda namespaces, kuandika mipangilio ya cgroup, kutumia capabilities na seccomp filters, na hatimaye `execve()` mchakato wa container. Wakati watu wanajadili "container isolation" kwa ngazi ya kifaa, hii ndilo tabaka wanazokuwa wakiongelea kawaida, hata ikiwa hawataki kusema hivyo wazi.
 
 ### `runc`
 
-`runc` ni reference OCI runtime na inabaki utekelezaji unaojulikana zaidi. Inatumika sana chini ya Docker, containerd, na deployments nyingi za Kubernetes. Utafiti mwingi wa umma na nyenzo za exploitation hulenga mazingira ya mtindo wa `runc` kwa sababu ni ya kawaida na kwa sababu `runc` inaweka msingi ambao watu wengi hufikiria linapokuja suala la container ya Linux. Kuelewa `runc` kwa hivyo hutoa msomaji mfano mzuri wa akili kwa isolation ya jadi ya container.
+`runc` ni reference OCI runtime na hubaki utekelezaji unaojulikana zaidi. Inatumiwa sana chini ya Docker, containerd, na deployments nyingi za Kubernetes. Tafiti nyingi za umma na nyenzo za exploitation zinaelekezwa kwa mazingira ya `runc` kwa sababu ni ya kawaida na kwa sababu `runc` inaweka msingi ambao watu wengi wanafikiri wakati wanapofikiria container ya Linux. Kuelewa `runc` kunampa msomaji mfano thabiti wa kifikira kuhusu isolation ya kawaida ya container.
 
 ### `crun`
 
-`crun` ni runtime nyingine ya OCI, imeandikwa kwa C na inatumiwa sana katika mazingira ya kisasa ya Podman. Mara nyingi inasifiwa kwa mkono mzuri wa cgroup v2, ergonomics bora kwa rootless, na overhead ndogo. Kutoka kwa mtazamo wa usalama, jambo muhimu si kuwa imeandikwa kwa lugha tofauti, bali kwamba bado inacheza nafasi ile ile: ni sehemu inayobadilisha configuration ya OCI kuwa mti wa process unaoendesha chini ya kernel. Workflow ya Podman isiyo na root mara nyingi huhisi kuwa salama zaidi si kwa sababu `crun` inatatua kila kitu kwa uchawi, bali kwa sababu stack nzima inayozunguka inapendelea user namespaces na kanuni ya least privilege.
+`crun` ni runtime nyingine ya OCI, imeandikwa kwa C na inatumiwa sana katika mazingira ya kisasa ya Podman. Mara nyingi inasifiwa kwa msaada mzuri wa cgroup v2, ergonomics nzuri za rootless, na overhead ndogo. Kwa mtazamo wa usalama, jambo muhimu sio kwamba imeandikwa kwa lugha tofauti, bali kwamba bado inacheza jukumu lilelile: ni sehemu inayogeuza usanidi wa OCI kuwa mti wa michakato unaoendelea chini ya kernel. Mtiririko wa kazi wa Podman bila root mara nyingi hufanya iwe salama zaidi si kwa sababu `crun` inaondoa kila shida, bali kwa sababu stack nzima inayokizunguka inaelekea zaidi kwa user namespaces na kanuni ya least privilege.
 
 ### `runsc` From gVisor
 
-`runsc` ni runtime inayotumiwa na gVisor. Hapa mpaka hubadilika kwa maana. Badala ya kupitisha syscalls nyingi moja kwa moja kwa host kernel kwa njia ya kawaida, gVisor inaingiza tabaka la kernel kwenye userspace ambalo hufanya emulation au uingiliaji sehemu kubwa za interface ya Linux. Matokeo si container ya kawaida ya `runc` yenye flags za ziada; ni muundo tofauti wa sandbox ambao lengo lake ni kupunguza attack surface ya host-kernel. Ulinganifu na makubaliano ya utendaji ni sehemu ya muundo huo, kwa hivyo mazingira yanayotumia `runsc` yanapaswa kuandikishwa tofauti na mazingira ya kawaida ya OCI runtime.
+`runsc` ni runtime inayotumiwa na gVisor. Hapa mpaka hubadilika kwa maana. Badala ya kupitisha syscalls nyingi moja kwa moja kwa host kernel kwa njia ya kawaida, gVisor inaweka tabaka la kernel kwenye userspace ambalo huiga au kuingilia sehemu kubwa za interface ya Linux. Matokeo sio container ya kawaida ya `runc` na flag chache za ziada; ni muundo tofauti wa sandbox ambao lengo lake ni kupunguza attack surface ya host-kernel. Mabadiliko ya utimilifu na utendaji ni sehemu ya muundo huo, hivyo mazingira yanayotumia `runsc` yanapaswa kuandikwa tofauti na mazingira ya kawaida ya OCI runtime.
 
 ### `kata-runtime`
 
-Kata Containers inasukuma mpaka zaidi kwa kuanzisha workload ndani ya virtual machine mwepesi. Kitaalamu, hii inaweza bado kuonekana kama deployment ya container, na layers za orchestration zinaweza kuendelea kuihudumia kama hiyo, lakini mpaka wa isolation wa msingi uko karibu zaidi na virtualization kuliko container ya kawaida inayoshiriki host-kernel. Hii inafanya Kata kuwa yenye manufaa wakati isolation kali ya tenants inahitajika bila kuachwa workflows zinazolenga container.
+Kata Containers hupanua mpaka zaidi kwa kuzindua mzigo wa kazi ndani ya virtual machine nyepesi. Kiutawala, hili bado linaweza kuonekana kama deployment ya container, na layers za orchestration zinaweza kuendelea kulitenda hivyo, lakini mpaka wa isolation wa msingi ni karibu zaidi na virtualization kuliko container ya kawaida inayoshirikiana na host-kernel. Hii inafanya Kata iwe muhimu wakati isolation kali ya tenants inatakiwa bila kuacha workflows zinazozunguka container.
 
-## Engines And Container Managers
+## Engines Na Wasimamiaji wa Container
 
-Iwapo low-level runtime ni kipengele kinachoongea moja kwa moja na kernel, engine au manager ni kipengele ambacho watumiaji na operator mara nyingi hufanya nao kazi. Inasimamia image pulls, metadata, logs, networks, volumes, lifecycle operations, na kuonesha API. Tabaka hili ni muhimu sana kwa sababu nyongeza nyingi za ulimwengu wa kweli hutokea hapa: ufikiaji wa runtime socket au daemon API unaweza kuwa sawa na kutekwa kwa host hata kama runtime ya chini-ndani yenyewe iko katika afya nzuri.
+Ikiwa low-level runtime ni kipengele kinachozungumza moja kwa moja na kernel, engine au manager ni sehemu ambayo watumiaji na wapangaji kawaida huingiliana nayo. Inashughulikia pulls za images, metadata, logs, networks, volumes, operesheni za lifecycle, na kufunua API. Tabaka hili ni muhimu sana kwa sababu baadhi ya compromises za dunia halisi hutokea hapa: upatikanaji wa runtime socket au daemon API unaweza kuwa sawa na ku-compromise host hata kama low-level runtime yenyewe iko bila kasoro.
 
 ### Docker Engine
 
-Docker Engine ni platform ya container inayotambulika zaidi kwa watengenezaji na moja ya sababu kwanini msamiati wa container ulitengenezwa kwa mtindo wa Docker. Njia ya kawaida ni CLI ya `docker` kwenda `dockerd`, ambayo kwa upande wake inaongoza vipengele vya chini kama `containerd` na OCI runtime. Kihistoria, deployments za Docker mara nyingi zimekuwa **rootful**, na hivyo ufikiaji wa socket ya Docker umekuwa primitive yenye nguvu sana. Hii ndiyo sababu nyenzo nyingi za practical privilege-escalation zinazingatia `docker.sock`: ikiwa process inaweza kumuomba `dockerd` kuunda container yenye privileges, kuweka mount host paths, au kujiunga na host namespaces, huenda isiihitaji hata exploit ya kernel.
+Docker Engine ndiyo jukwaa la container linalotambulika zaidi kwa watengenezaji na ni moja ya sababu za maneno ya container kuwa yana muundo wa Docker. Njia ya kawaida ni CLI ya `docker` kwenda `dockerd`, ambayo kwa upande wake inaandamiana na vipengele vya ngazi ya chini kama `containerd` na OCI runtime. Kihistoria, deployments za Docker zimekuwa mara nyingi **rootful**, na upatikanaji wa socket ya Docker umekuwa primitive yenye nguvu sana. Hii ndicho kilichofanya nyenzo nyingi za privilege-escalation zielekeze `docker.sock`: ikiwa mchakato unaweza kumuomba `dockerd` kuunda container yenye privileges, ku-mount njia za host, au kujiunga na namespaces za host, huenda usihitaji hata exploit ya kernel.
 
 ### Podman
 
-Podman ilibuniwa kwa modeli isiyokuwa na daemon. Kitaendeshaji, hili husaidia kuimarisha wazo kwamba containers ni tu processes zinazosimamiwa kupitia mechanisms za kawaida za Linux badala ya daemon moja ilio hai yenye privileges nyingi. Podman pia ina hadithi ya **rootless** yenye nguvu zaidi kuliko deployments za Docker za jadi ambazo watu wengi walijifunza kwanza. Hiyo haisemi kwamba Podman ni salama moja kwa moja, lakini hubadilisha profaili ya hatari kwa msingi, hasa ikichanganywa na user namespaces, SELinux, na `crun`.
+Podman ilibuniwa kwa kuzunguka modeli isiyo na daemon. Kitaalam, hili husaidia kuimarisha wazo kwamba containers ni mchakato tu unaosimamiwa kupitia mifumo ya kawaida ya Linux badala ya kupitia daemon moja iliyo na haki nyingi. Podman pia ina hadithi ya **rootless** yenye nguvu zaidi kuliko deployments za Docker za kawaida watu wengi walijifunza. Hiyo haisemi kwamba Podman ni salama moja kwa moja, lakini inabadili profaili ya hatari kwa kiasi kikubwa, hasa ikichanganywa na user namespaces, SELinux, na `crun`.
 
 ### containerd
 
-containerd ni kipengele msingi cha usimamizi wa runtime katika stacks nyingi za kisasa. Inatumiwa chini ya Docker na pia ni moja ya backends za runtime zinazotawala katika Kubernetes. Inatoa powerful APIs, inasimamia images na snapshots, na inaelekeza uundaji wa mwisho wa process kwa runtime ya chini-ndani. Majadiliano ya usalama kuhusu containerd yanapaswa kusisitiza kwamba ufikiaji wa socket ya containerd au uwezo wa `ctr`/`nerdctl` unaweza kuwa hatari kama ufikiaji wa API ya Docker, hata interface na workflow ikihisi kuwa isiyo "rafiki kwa developer".
+containerd ni sehemu kuu ya usimamizi wa runtime katika stack nyingi za kisasa. Inatumiwa chini ya Docker na pia ni mojawapo ya backends zinazotawala za runtime za Kubernetes. Inaonyesha APIs zenye nguvu, inasimamia images na snapshots, na inakabidhi uundaji wa mchakato wa mwisho kwa runtime ya ngazi ya chini. Mijadala ya usalama kuhusu containerd inapaswa kusisitiza kwamba upatikanaji wa socket ya containerd au uwezo wa `ctr`/`nerdctl` unaweza kuwa hatari kama upatikanaji wa API ya Docker, hata kama interface na mtiririko wa kazi unaonekana kuwa "rafiki kwa watengenezaji".
 
 ### CRI-O
 
-CRI-O imejikita zaidi kuliko Docker Engine. Badala ya kuwa platform ya matumizi mengi kwa developer, imejengwa kuzunguka utekelezaji safi wa Kubernetes Container Runtime Interface. Hii inaiweka sana katika distributions za Kubernetes na ekosistimu zilizo na SELinux kama OpenShift. Kutoka kwa mtazamo wa usalama, upeo huo mdogo ni muhimu kwa sababu unapunguza vurugu za dhana: CRI-O ni sehemu ya tabaka la "run containers for Kubernetes" badala ya platform ya kila kitu.
+CRI-O imejikita zaidi kuliko Docker Engine. Badala ya kuwa jukwaa la matumizi ya jumla kwa watengenezaji, imejengwa kuzunguka kutekeleza Kubernetes Container Runtime Interface kwa usafi. Hii inafanya iwe ya kawaida zaidi katika distributions za Kubernetes na ekosistimu zinazoegemea SELinux kama OpenShift. Kutokana na mtazamo wa usalama, wigo huo mwembamba ni wa manufaa kwa sababu unapunguza vurugu za dhana: CRI-O ni sehemu ya tabaka la "kuendesha containers kwa Kubernetes" badala ya jukwaa la kila kitu.
 
-### Incus, LXD, And LXC
+### Incus, LXD, Na LXC
 
-Mifumo ya Incus/LXD/LXC inastahili kutenganishwa na containers za mtindo wa Docker kwa sababu mara nyingi zinatumika kama **system containers**. System container kawaida inatarajiwa kuonekana zaidi kama machine nyepesi yenye userspace kamili, services zinazoendesha kwa muda mrefu, ufichaji wa kifaa ulioboreshwa, na ushirikiano wa kina na host. Vifaa vya isolation bado ni primitives za kernel, lakini matarajio ya uendeshaji ni tofauti. Matokeo yake, misconfiguration hapa mara nyingi haitaonekana kama "app-container defaults mbaya" bali kama makosa katika lightweight virtualization au delegation ya host.
+Mifumo ya Incus/LXD/LXC inastahili kutengwa kutoka kwa containers za mtindo wa Docker kwa sababu mara nyingi zinatumiwa kama **system containers**. System container kwa kawaida inatarajiwa kuonekana zaidi kama mashine nyepesi yenye userspace kamili, services zinazoendesha kwa muda mrefu, ufichaji wa device wa kina, na ushirikiano mkubwa na host. Mbinu za isolation bado ni primitives za kernel, lakini matarajio ya uendeshaji ni tofauti. Kwa hiyo, misconfiguration hapa mara nyingi inaonekana si kama "mipangilio mibaya ya app-container" bali kama makosa katika virtualization nyepesi au uhamisho wa huduma za host.
 
 ### systemd-nspawn
 
-systemd-nspawn inachukua nafasi ya kuvutia kwa sababu ni native kwa systemd na ni muhimu kwa testing, debugging, na kuendesha mazingira yanayofanana na OS. Sio runtime kuu wa uzalishaji wa cloud-native, lakini inaonekana mara kwa mara katika maabara na mazingira yanayolengwa kwa distro kiasi kwamba inastahili kutajwa. Kwa uchambuzi wa usalama, ni ukumbusho mwingine kwamba dhana ya "container" inashughulikia ekosistimu na mitindo tofauti ya uendeshaji.
+systemd-nspawn inachukua nafasi ya kuvutia kwa sababu ni ya asili ya systemd na ni muhimu kwa majaribio, debugging, na kuendesha mazingira yanayofanana na OS. Si runtime dominant ya uzalishaji wa cloud-native, lakini inaonekana mara kwa mara katika maabara na mazingira yanayotegemea distro kiasi inavyostahili kutajwa. Kwa uchambuzi wa usalama, ni ukumbusho mwingine kwamba dhana ya "container" inashughulikia ekosistimu na mitindo mbalimbali ya uendeshaji.
 
 ### Apptainer / Singularity
 
-Apptainer (aliyekuwa Singularity) ni ya kawaida katika mazingira ya utafiti na HPC. Misingi ya imani, workflow ya mtumiaji, na modeli ya utekelezaji zinatofautiana kwa njia muhimu kutoka stacks zinazoelekezwa na Docker/Kubernetes. Hasa, mazingira haya mara nyingi yanathamini kabisa kuwapa watumiaji uwezo wa kuendesha workloads zilizoambatanishwa bila kuwapa uwezo mpana wa usimamizi wa container wenye privileges. Ikiwa mkaguzi anadhani kila mazingira ya container ni kimsingi "Docker on a server", watayasahau vibaya deployments hizi.
+Apptainer (zamani Singularity) ni ya kawaida katika utafiti na mazingira ya HPC. Misingi ya uaminifu, mtiririko wa mtumiaji, na modeli ya utekelezaji zinatofautiana kwa njia muhimu kutoka kwa stacks zenye mizunguko ya Docker/Kubernetes. Hasa, mazingira haya mara nyingi yanajali sana kuwapa watumiaji uwezo wa kuendesha mizigo ya kazi iliyofungashwa bila kuwapa mamlaka mapana ya usimamizi wa container yenye privilage. Ikiwa mteja anadhani kila mazingira ya container ni kimsingi "Docker kwenye server", wataelewa vibaya deployments hizi.
 
 ## Build-Time Tooling
 
-Majadiliano mengi ya usalama yanazungumzia tu wakati wa runtime, lakini tooling ya wakati wa build pia ni muhimu kwa sababu inabainisha yaliyomo katika image, exposure ya siri za build, na kiasi gani cha muktadha wa kuaminika kinaingizwa kwenye artifact ya mwisho.
+Mijadala mingi ya usalama inazungumzia tu wakati wa kuendesha, lakini zana za wakati wa kujenga pia ni muhimu kwa sababu zinaamua yaliyomo kwenye image, kufichua secrets za kujenga, na ni kiasi gani cha muktadha uliothibitishwa kinaingizwa kwenye artifact ya mwisho.
 
-**BuildKit** na `docker buildx` ni backends za build za kisasa zinazounga mkono vipengele kama caching, secret mounting, SSH forwarding, na multi-platform builds. Hivyo ni vipengele vyenye manufaa, lakini kutoka kwa mtazamo wa usalama pia zinaunda maeneo ambapo siri zinaweza leak ndani ya image layers au ambapo muktadha wa build ulio mpana sana unaweza kuonyesha faili ambazo hazikutakiwa kuingizwa. **Buildah** inacheza nafasi kama hiyo katika ekosistimu za OCI-native, hasa karibu na Podman, wakati **Kaniko** mara nyingi hutumika katika mazingira ya CI ambayo hayataki kumpa pipeline ya build Docker daemon yenye privileges.
+**BuildKit** na `docker buildx` ni backends za kujenga za kisasa zinazounga mkono vipengele kama caching, secret mounting, SSH forwarding, na builds za multi-platform. Hivyo ni vipengele muhimu, lakini kwa mtazamo wa usalama pia zinaweka maeneo ambapo secrets zinaweza leak ndani ya image layers au ambapo muktadha wa kujenga mpana sana unaweza kuonyesha faili ambazo hazipaswi kamwe kujumuishwa. **Buildah** inacheza jukumu sawa katika ekosistimu zinazozunguka OCI, hasa karibu na Podman, wakati **Kaniko** mara nyingi inatumiwa katika mazingira ya CI ambayo hayataka kumpa pipeline ya kujenga daemon ya Docker yenye privileges.
 
-Somo kuu ni kwamba uundaji wa image na utekelezaji wa image ni hatua tofauti, lakini pipeline dhaifu ya build inaweza kuunda mkao dhaifu wa runtime mapema kabla container haijaanzishwa.
+Somo muhimu ni kwamba uundaji wa image na utekelezaji wa image ni awamu tofauti, lakini pipeline dhaifu ya kujenga inaweza kuunda hali dhaifu ya runtime kabla hata container haijaanzishwa.
 
-## Orchestration Is Another Layer, Not The Runtime
+## Orchestration Ni Tabaka Nyingine, Si Runtime
 
-Kubernetes haipaswi kufikiriwa kwa akili kuwa ndiyo runtime yenyewe. Kubernetes ni orchestrator. Inapanga Pods, inahifadhi desired state, na inaonyesha sera za usalama kupitia configuration ya workload. kubelet kisha huongea na utekelezaji wa CRI kama containerd au CRI-O, ambazo kwa upande wake zinaitekeleza runtime ya chini-ndani kama `runc`, `crun`, `runsc`, au `kata-runtime`.
+Kubernetes haipaswi kuingiliana kimaoni na runtime yenyewe. Kubernetes ni orchestrator. Inapanga Pods, inahifadhi desired state, na inaonesha sera za usalama kupitia usanidi wa mzigo wa kazi. Kubelet kisha huzungumza na utekelezaji wa CRI kama containerd au CRI-O, ambayo kwa upande wake itaimba runtime ya ngazi ya chini kama `runc`, `crun`, `runsc`, au `kata-runtime`.
 
-Utofauti huu ni muhimu kwa sababu watu wengi huwa wanamfunga ulinzi kwa "Kubernetes" wakati kwa kweli unatimizwa na node runtime, au wanaikosoa "containerd defaults" kwa tabia iliyotokana na Pod spec. Katika vitendo, mkao wa mwisho wa usalama ni muundo wa mchanganyiko: orchestrator inaomba kitu, runtime stack inakitafsiri, na kernel hatimaye kinakilinda.
+Tengwa hili ni muhimu kwa sababu watu wengi hukosea kuambatanisha ulinzi kwa "Kubernetes" wakati kwa kweli unafuatwa na runtime ya node, au wanalaumu "containerd defaults" kwa tabia iliyotokana na Pod spec. Kwa vitendo, msimamo wa mwisho wa usalama ni muundo: orchestrator inaomba kitu, stack ya runtime inakitafsiri, na kernel hatimaye kinafanya utekelezaji wake.
 
-## Why Runtime Identification Matters During Assessment
+## Kwa Nini Utambuzi wa Runtime Unajali Wakati wa Assessment
 
-Ikiwa utatambua engine na runtime mapema, uchunguzi mwingi baadaye unakuwa rahisi kuelewa. Container ya Podman isiyo na root inaashiria user namespaces kuwa sehemu ya hadithi. Socket ya Docker iliyopakiwa ndani ya workload inaonyesha kuwa escalations kwa njia ya API ni njia halisi. Node ya CRI-O/OpenShift inapaswa kukufanya ufikirie mara moja kuhusu SELinux labels na sera za restricted workload. Mazingira ya gVisor au Kata yanapaswa kukufanya uwe wa tahadhari zaidi kuhusu kudhani kwamba PoC ya breakout ya `runc` ya jadi itafanya kazi kwa namna ile ile.
+Iwapo utaweka wazi engine na runtime mapema, uchunguzi mwingi baadaye unakuwa rahisi kutafsiri. Container ya Podman isiyokuwa na root inaashiria kwamba user namespaces huenda ziko sehemu ya hadithi. Socket ya Docker iliyopakiwa ndani ya mzigo wa kazi inaashiria kuwa njia ya privilege escalation inayotokana na API ni njia inayowezekana. Node ya CRI-O/OpenShift inapaswa kukufanya ufikirie mara moja kuhusu SELinux labels na sera za restricted workload. Mazingira ya gVisor au Kata yanapaswa kukufanya uwe mwangalifu zaidi kuhusu kudhani kwamba PoC ya breakout ya kawaida ya `runc` itafanya kazi kwa njia ile ile.
 
-Ndiyo sababu mojawapo ya hatua za kwanza katika tathmini ya container inapaswa kuwa kujibu maswali mawili rahisi: **which component is managing the container** na **which runtime actually launched the process**. Mara majibu hayo yatakapotulia, mazingira mengine kawaida yanakuwa rahisi zaidi kuyafikiria.
+Hiyo ndiyo sababu mojawapo ya hatua za kwanza katika assessment ya container inapaswa kuwa kujiuliza maswali mawili rahisi: **kipi kipengele kinachosimamia container** na **kipi runtime kilichoanzisha mchakato kwa kweli**. Mara tu majibu hayo yatakapo wazi, mazingira yote kwa kawaida yanakuwa rahisi zaidi kuyatafakari.
 
 ## Runtime Vulnerabilities
 
-Sio kila kuvuja kwa container kunatokana na misconfiguration ya operator. Wakati mwingine runtime yenyewe ndiyo kipengele chenye udhaifu. Hii ni muhimu kwa sababu workload inaweza kuendesha kwa configuration inayofanya kama makini na bado kuwa wazi kupitia flaw ya runtime ya chini-ndani.
+Sio kila container escape inatokana na misimamizi kusahau au config mbaya. Wakati mwingine runtime yenyewe ni kipengele chenye udhaifu. Hii ni muhimu kwa sababu mzigo wa kazi unaweza kuwa unaonekana kuwa na usanidi wa tahadhari na bado uwe wazi kupitia hitilafu ya chini ya runtime.
 
-Mfano wa jadi ni **CVE-2019-5736** katika `runc`, ambapo container yenye nia mbaya inaweza kuandika juu binary ya host `runc` na kisha kusubiri kwa invocation ya baadaye ya `docker exec` au runtime inayofanana ili kuamsha code iliyodhibitiwa na mwizi. Njia ya exploit ni tofauti kabisa na bind-mount rahisi au kosa la capability kwa sababu inatumia jinsi runtime inavyoingia tena kwenye nafasi ya process ya container wakati wa kushughulikia exec.
+Mfano klassiki ni **CVE-2019-5736** katika `runc`, ambapo container haribifu inaweza kuandika juu binary ya `runc` ya host na kisha kusubiri kwa `docker exec` baadaye au mwito mwingine wa runtime kusababisha kodi ya kushikwa na mshambulizi. Njia ya exploit ni tofauti kabisa na bind-mount rahisi au kosa la capability kwa sababu inatumia jinsi runtime inavyoingia tena katika nafasi ya mchakato wa container wakati wa kushughulikia exec.
 
-A minimal reproduction workflow from a red-team perspective is:
+Mtiririko mdogo wa kuiga kutoka kwa mtazamo wa red-team ni:
 ```bash
 go build main.go
 ./main
 ```
-Kisha, kutoka kwa host:
+Kisha, kutoka kwenye host:
 ```bash
 docker exec -it <container-name> /bin/sh
 ```
-Somo kuu si utekelezaji halisi wa exploit wa kihistoria, bali athari yake kwa tathmini: ikiwa runtime version imevulnerable, utekelezaji wa kawaida wa in-container code unaweza kutosha kucompromise host hata wakati usanidi unaoonekana wa container hauonekani dhaifu wazi.
+Somo kuu sio utekelezaji maalumu wa exploit wa kihistoria, bali ni athari yake kwa tathmini: ikiwa toleo la runtime lina udhaifu, utekelezaji wa kawaida wa msimbo ndani ya container unaweza kutosha kuathiri host hata pale usanidi unaoonekana wa container hauonekani dhaifu wazi.
 
-CVEs za hivi karibuni za runtime kama `CVE-2024-21626` katika `runc`, BuildKit mount races, na containerd parsing bugs zinathibitisha hoja hiyo. Runtime version na patch level ni sehemu ya boundary ya usalama, si tu mambo madogo ya matengenezo.
+CVE za hivi karibuni za runtime kama `CVE-2024-21626` katika `runc`, BuildKit mount races, na containerd parsing bugs zinathibitisha hoja hiyo. Runtime version and patch level ni sehemu ya mpaka wa usalama, si tu masuala ya matunzo.
+{{#include ../../../banners/hacktricks-training.md}}

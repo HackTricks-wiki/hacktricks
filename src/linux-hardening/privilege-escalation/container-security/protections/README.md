@@ -1,22 +1,22 @@
-# Muhtasari wa Ulinzi wa Container
+# Muhtasari wa Container Protections Overview
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-Wazo muhimu zaidi katika kuimarisha container ni kwamba hakuna udhibiti mmoja unaoitwa "container security". Kinachowaita watu container isolation ni matokeo ya mekanismo kadhaa za usalama za Linux na usimamizi wa rasilimali zikitumika pamoja. Ikiwa dokumentasi inataja moja tu kati yao, wasomaji huwa wanathamini nguvu yake kupita kiasi. Ikiwa dokumentasi inoorodhesha zote bila kuelezea jinsi zinavyoshirikiana, wasomaji wanapata orodha ya majina lakini hakuna mfano halisi. Sehemu hii inajaribu kuepuka makosa yote mawili.
+Wazo muhimu zaidi katika kuimarisha usalama wa container ni kwamba hakuna udhibiti mmoja unaoitwa "container security". Kile watu huita container isolation kwa kweli ni matokeo ya mekanismo kadhaa za usalama za Linux na usimamizi wa rasilimali zinazoendelea kufanya kazi pamoja. Ikiwa nyaraka zinaelezea moja tu kati yao, wasomaji huwa wanadhani nguvu yake ni kubwa mno. Ikiwa nyaraka zinaorodhesha zote bila kufafanua jinsi zinavyoshirikiana, wasomaji wanapata orodha ya majina lakini hawapati mfano halisi. Sehemu hii inajaribu kuepuka makosa yote mawili.
 
-Katikati ya mfano kuna **namespaces**, ambazo zinatenganisha kile workload inaweza kuona. Zinampa mchakato mtazamo wa kibinafsi au sehemu ya kibinafsi wa filesystem mounts, PIDs, networking, IPC objects, hostnames, user/group mappings, cgroup paths, na baadhi ya saa. Lakini namespaces pekee haziamui kile mchakato anaruhusiwa kufanya. Hapo ndipo tabaka zinazofuata zinaingia.
+Katikati ya mfano kuna **namespaces**, ambazo zinaweka kivuko cha kile workload inaweza kuona. Zinampa mchakato mtazamo wa kibinafsi au sehemu ya kibinafsi wa filesystem mounts, PIDs, networking, vitu vya IPC, hostnames, user/group mappings, cgroup paths, na baadhi ya clocks. Lakini namespaces pekee haziamui kile mchakato anaruhusiwa kufanya. Hapo ndipo tabaka zinazofuata zinaingia.
 
-**cgroups** zinaendesha matumizi ya rasilimali. Si kimsingi ukingo wa utengano kwa maana ile ile kama mount au PID namespaces, lakini zina umuhimu mkubwa kikazi kwa sababu zinazuia memory, CPU, PIDs, I/O, na device access. Pia zina umuhimu wa usalama kwa sababu historical breakout techniques zilitumia vibaya sifa za cgroup zinazoweza kuandikwa, hasa katika mazingira ya cgroup v1.
+**cgroups** zinadhibiti matumizi ya rasilimali. Sio kwa msingi mkuu mpaka kando ya kutenganisha kwa maana ile ile kama mount au PID namespaces, lakini zina umuhimu wa kiutendaji kwa sababu zinakataza memory, CPU, PIDs, I/O, na upatikanaji wa device. Pia zina umuhimu wa kiusalama kwa sababu mbinu za kihistoria za breakout zilitumia vibaya vipengele vya cgroup vinavyoweza kuandikwa, hasa katika mazingira ya cgroup v1.
 
-**Capabilities** huzigawa mfano wa zamani wa root mwenye uwezo wote kuwa vitengo vidogo vya privilaji. Hii ni msingi kwa containers kwa sababu workloads nyingi bado zinaendesha kama UID 0 ndani ya container. Swali si tu "is the process root?", bali "which capabilities survived, inside which namespaces, under which seccomp and MAC restrictions?" Ndiyo sababu mchakato wa root kwenye container moja unaweza kuwa mdhibitiwa kwa kiasi, wakati mchakato wa root kwenye container nyingine unaweza karibu kutofautika na host root kwa vitendo.
+**Capabilities** zinafungua mfano wa zamani wa root mwenye nguvu zote hadi vitengo vidogo vya ruhusa. Hii ni msingi kwa container kwa kuwa workloads nyingi bado zinaendesha kama UID 0 ndani ya container. Swali si tu "je, mchakato ni root?", bali ni "ni capabilities gani zilizoendelea kuwepo, ndani ya namespaces gani, chini ya vikwazo vya seccomp na MAC?" Ndiyo maana mchakato wa root katika container moja unaweza kuwa na vikwazo huku mchakato wa root katika container nyingine ukaonekana karibu haelekezi tofauti na host root kwa vitendo.
 
-**seccomp** huchuja syscalls na kupunguza kernel attack surface inayowekwa wazi kwa workload. Mara nyingi hiki ndicho kifaa kinachozuia miito hatari kama `unshare`, `mount`, `keyctl`, au syscalls nyingine zinazotumika katika breakout chains. Hata kama mchakato unayo capability ambayo vinginevyo ingeturuhusu operesheni, seccomp inaweza bado kuzuia njia ya syscall kabla kernel haijachakata kikamilifu.
+**seccomp** huchuja syscalls na kupunguza uso wa mashambulizi wa kernel unaoonyeshwa kwa workload. Hii mara nyingi ndiyo njia inayokataa kwa ufanisi miito hatari wazi kama `unshare`, `mount`, `keyctl`, au syscalls nyingine zinazotumika katika mnyororo za breakout. Hata mchakato ukiwa na capability ambayo vinginevyo ingeruhusu operesheni, seccomp bado inaweza kuzuia njia ya syscall kabla kernel haijaihesabu kikamilifu.
 
-**AppArmor** na **SELinux** zinaongeza Mandatory Access Control juu ya ukaguzi wa kawaida wa filesystem na privilaji. Hizi ni muhimu hasa kwa sababu zinaendelea kuwa na umuhimu hata wakati container ina capabilities zaidi kuliko inapaswa kuwa nazo. Workload inaweza kuwa na privilaji kwa nadharia kujaribu kitendo lakini bado ikizuia kutekeleza kwa sababu label au profile yake inakataza ufikiaji wa njia, kitu, au operesheni husika.
+**AppArmor** na **SELinux** zinaongeza Mandatory Access Control juu ya ukaguzi wa kawaida wa filesystem na ruhusa. Hizi ni muhimu hasa kwa sababu zinabaki kuathiri hata wakati container ina capabilities zaidi ya inavyotakiwa. Workload inaweza kuwa na ruhusa ya nadharia ya kujaribu kitendo fulani lakini bado kuzuia kutekeleza kwa sababu label au profile yake inakataza ufikiaji wa njia, kitu, au operesheni inayohusika.
 
-Mwishowe, kuna tabaka za ziada za kuimarisha ambazo hupata kutiliwa shaka kidogo lakini mara kwa mara zina umuhimu katika mashambulizi halisi: `no_new_privs`, masked procfs paths, read-only system paths, read-only root filesystems, na careful runtime defaults. Mekanism hizi mara nyingi huzuia "last mile" ya udanganyifu, hasa mdukuzi anapojaribu kubadilisha code execution kuwa upataji wa privilaji mkubwa.
+Mwishowe, kuna tabaka za ziada za kuimarisha ambazo hupata umakini mdogo lakini mara kwa mara zinakuwa muhimu katika mashambulizi halisi: `no_new_privs`, masked procfs paths, read-only system paths, read-only root filesystems, na runtime defaults zilizo makini. Mifumo hii mara nyingi inazuia "last mile" ya udukuzi, hasa wakati mshambuliaji anajaribu kubadilisha utekelezaji wa code kuwa kupata ruhusa pana zaidi.
 
-Sehemu nyingine ya folda hii inaelezea kila moja ya mekanism hizi kwa undani zaidi, ikijumuisha ni nini kernel primitive kwa kweli hufanya, jinsi ya kuiona kwa karibu, jinsi runtimes za kawaida zinavyotumia, na jinsi operators kwa bahati mbaya wanavyoiweka dhaifu.
+Sehemu iliyobaki ya folda hii inaelezea kila moja ya mifumo hii kwa undani zaidi, ikijumuisha ni nini primitive ya kernel hasa inafanya, jinsi ya kuiona kwa ndani, jinsi runtimes za kawaida zinavyotumia, na jinsi waendeshaji kwa bahati mbaya wanavyoweza kuidhoofisha.
 
 ## Soma Ifuatayo
 
@@ -56,8 +56,9 @@ masked-paths.md
 read-only-paths.md
 {{#endref}}
 
-Kutoroka nyingi za kweli pia zinategemea ni maudhui gani ya host yaliyo-mounted ndani ya workload, hivyo baada ya kusoma ulinzi wa msingi ni vyema kuendelea na:
+Many real escapes also depend on what host content was mounted into the workload, so after reading the core protections it is useful to continue with:
 
 {{#ref}}
 ../sensitive-host-mounts.md
 {{#endref}}
+{{#include ../../../../banners/hacktricks-training.md}}

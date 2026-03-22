@@ -2,61 +2,61 @@
 
 {{#include ../../../../../banners/hacktricks-training.md}}
 
-## Overview
+## Muhtasari
 
-The UTS namespace inatenganisha the **hostname** na **NIS domain name** vinavyoonekana na mchakato. Kwa mtazamo wa kwanza inaweza kuonekana ya kawaida ikilinganishwa na mount, PID, au user namespaces, lakini ni sehemu ya kile kinachofanya container ionekane kuwa mwenyeji wake mwenyewe. Ndani ya namespace, the workload inaweza kuona na wakati mwingine kubadilisha hostname ambayo ni ya ndani kwa namespace hiyo badala ya kuwa ya global kwa mashine.
+UTS namespace hufanya izoleshini ya **hostname** na **NIS domain name** zinazoweza kuonekana na process. Kuangalia kwa mara ya kwanza kunaweza kuonekana kama jambo dogo ikilinganishwa na mount, PID, au user namespaces, lakini ni sehemu ya kile kinachofanya container ionekane kama host yake mwenyewe. Ndani ya namespace, the workload inaweza kuona na wakati mwingine kubadilisha hostname ambayo ni local kwa namespace hiyo badala ya kuwa global kwa machine.
 
-Peke yake, hii kawaida si sehemu kuu ya hadithi ya kutoroka. Hata hivyo, mara host UTS namespace inaposhirikiwa, mchakato mwenye vibali vya kutosha unaweza kuathiri mipangilio inayohusiana na utambulisho wa host, ambazo zinaweza kuwa muhimu kimaoperesheni na wakati mwingine kiusalama.
+Peke yake, hii kwa kawaida si kitu kikuu katika hadithi ya breakout. Hata hivyo, mara host UTS namespace inapo gawanywa, process yenye vibali vya kutosha inaweza kuathiri mipangilio inayohusiana na utambulisho wa host, jambo ambalo linaweza kuwa muhimu kivitendo na mara kwa mara kwa usalama.
 
-## Lab
+## Maabara
 
-You can create a UTS namespace with:
+Unaweza kuunda UTS namespace kwa kutumia:
 ```bash
 sudo unshare --uts --fork bash
 hostname
 hostname lab-container
 hostname
 ```
-Mabadiliko ya hostname yanabaki ndani ya namespace hiyo na hayabadili hostname ya mfumo wa mwenyeji. Hii ni onyesho rahisi lakini lenye ufanisi la sifa ya kutengwa.
+Mabadiliko ya hostname yanabaki ndani ya namespace hiyo na hayabadili hostname ya kimataifa ya host. Hii ni mfano rahisi lakini wenye ufanisi wa sifa ya kutengwa.
 
 ## Matumizi ya Runtime
 
-Containers za kawaida hupata UTS namespace iliyotengwa. Docker na Podman zinaweza kujiunga na host UTS namespace kupitia `--uts=host`, na mifumo sawa ya kushiriki mwenyeji inaweza kuonekana katika runtimes na orchestration systems nyingine. Hata hivyo, kwa wakati mwingi, kutengwa kwa UTS binafsi ni sehemu ya usanidi wa kawaida wa container na kunahitaji uangalizi mdogo kutoka kwa mwendeshaji.
+Containers za kawaida hupata namespace ya UTS iliyotengwa. Docker na Podman zinaweza kujiunga na host UTS namespace kupitia `--uts=host`, na mifumo sawa ya kushirikisha host inaweza kuonekana katika runtimes na orchestration systems nyingine. Hata hivyo, mara nyingi private UTS isolation ni sehemu tu ya usanidi wa kawaida wa container na inahitaji uangalizi mdogo wa operator.
 
 ## Athari za Usalama
 
-Ingawa UTS namespace siyo mara nyingi yenye hatari zaidi kushiriki, bado inachangia uadilifu wa mpaka wa container. Ikiwa UTS namespace ya mwenyeji inafichuka na mchakato una vibali vinavyohitajika, unaweza kuweza kubadilisha taarifa zinazohusiana na hostname ya mwenyeji. Hiyo inaweza kuathiri ufuatiliaji, uandishi wa kumbukumbu, dhana za uendeshaji, au skripti ambazo zinafanya maamuzi ya kuamini kwa msingi wa data ya utambulisho wa mwenyeji.
+Ingawa UTS namespace kawaida siyo hatari zaidi kushiriki, bado inachangia uadilifu wa boundary ya container. Ikiwa host UTS namespace itaonekana na process ina privileges zinazohitajika, inaweza kubadilisha taarifa zinazohusiana na hostname ya host. Hiyo inaweza kuathiri monitoring, logging, dhana za utendakazi, au scripts zinazofanya maamuzi ya kuaminiana kulingana na host identity data.
 
-## Matumizi Mabaya
+## Matumizi mabaya
 
-Ikiwa UTS namespace ya mwenyeji imeshirikiwa, swali la vitendo ni je, mchakato unaweza kubadilisha mipangilio ya utambulisho wa mwenyeji badala ya tu kuisoma:
+Ikiwa host UTS namespace imeshirikiwa, swali la vitendo ni kama process inaweza kubadilisha settings za utambulisho wa host badala ya kuzisoma tu:
 ```bash
 readlink /proc/self/ns/uts
 hostname
 cat /proc/sys/kernel/hostname
 ```
-Ikiwa container pia ina privilege inayohitajika, jaribu kama hostname inaweza kubadilishwa:
+Ikiwa container pia ina ruhusa inayohitajika, jaribu kama hostname inaweza kubadilishwa:
 ```bash
 hostname hacked-host 2>/dev/null && echo "hostname change worked"
 hostname
 ```
-Hili kwa msingi ni suala la uadilifu na la athari za uendeshaji kuliko full escape, lakini bado linaonyesha kuwa container inaweza kuathiri moja kwa moja host-global property.
+Hii kwa msingi ni suala la uadilifu na athari za uendeshaji badala ya full escape, lakini bado inaonyesha kwamba container inaweza kuathiri moja kwa moja host-global property.
 
-Impact:
+Athari:
 
-- kupotosha utambulisho wa host
-- kuingiza mkanganyiko kwenye logs, monitoring, au automation ambazo zinaamini hostname
-- kawaida sio full escape yenyewe isipokuwa ikichanganywa na udhaifu mwingine
+- Kuingilia utambulisho wa host
+- Kuchanganya logi, ufuatiliaji, au michakato ya kiotomatiki inayomwamini hostname
+- Kwa kawaida si full escape peke yake isipokuwa ikichanganywa na udhaifu mwingine
 
-On Docker-style environments, a useful host-side detection pattern is:
+Katika mazingira ya aina ya Docker, mfano wa utambuzi upande wa host unaofaa ni:
 ```bash
 docker ps -aq | xargs -r docker inspect --format '{{.Id}} UTSMode={{.HostConfig.UTSMode}}'
 ```
-Kontena zinazonyesha `UTSMode=host` zinashiriki namespace ya UTS ya mwenyeji na zinapaswa kukaguliwa kwa uangalifu zaidi ikiwa pia zina capabilities zinazowaruhusu kuita `sethostname()` au `setdomainname()`.
+Makontena zinazoonyesha `UTSMode=host` zinashiriki UTS namespace ya mwenyeji na zinapaswa kukaguliwa kwa umakini zaidi ikiwa pia zina capabilities zinazowawezesha kuita `sethostname()` au `setdomainname()`.
 
-## Ukaguzi
+## Checks
 
-Amri hizi zinatosha kuona je workload ina mtazamo wake wa hostname au inashiriki namespace ya UTS ya mwenyeji.
+Amri hizi zinatosha kuona kama workload ina mtazamo wake wa hostname au inashiriki UTS namespace ya mwenyeji.
 ```bash
 readlink /proc/self/ns/uts   # UTS namespace identifier
 hostname                     # Hostname as seen by the current process
@@ -64,8 +64,9 @@ cat /proc/sys/kernel/hostname   # Kernel hostname value in this namespace
 ```
 Kinachovutia hapa:
 
-- Kufananisha namespace identifiers na mchakato wa mwenyeji kunaweza kuashiria kushirikiwa kwa UTS ya mwenyeji.
-- Ikiwa kubadilisha hostname kunathiri zaidi ya container yenyewe, workload ina ushawishi mkubwa juu ya utambulisho wa mwenyeji kuliko inavyostahili.
-- Hii kawaida ni ugunduzi wa kipaumbele cha chini kuliko masuala ya PID, mount, au user namespace, lakini bado inathibitisha jinsi mchakato ulivyo pekee yake.
+- Kulinganisha vitambulisho vya namespace na mchakato wa host kunaweza kuonyesha kushiriki UTS ya host.
+- Ikiwa kubadilisha hostname kunaathiri zaidi ya container yenyewe, workload ina ushawishi mkubwa zaidi juu ya utambulisho wa host kuliko inavyostahili.
+- Hii kawaida huwa ugunduzi wa kipaumbele cha chini kuliko masuala ya PID, mount, au user namespace, lakini bado inathibitisha ni kwa kiwango gani mchakato umewekwa peke yake.
 
-Katika mazingira mengi, UTS namespace inafikiriwa vizuri zaidi kama tabaka la msaada la kutenganisha. Mara chache ndio kitu cha kwanza unachokimbilia katika breakout, lakini bado ni sehemu ya uthabiti na usalama wa mtazamo wa container.
+Katika mazingira mengi, UTS namespace inafaa kuonekana kama tabaka la msaada la kutenganisha. Ni nadra kuwa kitu cha kwanza unachokifuatilia katika breakout, lakini bado ni sehemu ya uthabiti na usalama wa mtazamo wa container.
+{{#include ../../../../../banners/hacktricks-training.md}}
