@@ -1,22 +1,22 @@
-# Простір імен IPC
+# IPC Namespace
 
 {{#include ../../../../../banners/hacktricks-training.md}}
 
 ## Огляд
 
-Простір імен IPC ізолює **System V IPC objects** та **POSIX message queues**. Це включає сегменти спільної пам'яті, семафори та черги повідомлень, які інакше були б видимі між не пов'язаними процесами на хості. На практиці це запобігає випадковому приєднанню контейнера до IPC-об'єктів, що належать іншим робочим навантаженням або хосту.
+The IPC namespace isolates **System V IPC objects** and **POSIX message queues**. That includes shared memory segments, semaphores, and message queues that would otherwise be visible across unrelated processes on the host. In practical terms, this prevents a container from casually attaching to IPC objects belonging to other workloads or the host.
 
-У порівнянні з mount, PID або user namespaces, про IPC namespace говорять рідше, але це не означає, що він не має значення. Спільна пам'ять та суміжні IPC-механізми можуть містити вкрай корисний стан. Якщо host IPC namespace буде exposed, робоче навантаження може отримати видимість об'єктів або даних міжпроцесної координації, які ніколи не призначалися для переходу межі контейнера.
+Compared with mount, PID, or user namespaces, the IPC namespace is often discussed less often, but that should not be confused with irrelevance. Shared memory and related IPC mechanisms can contain highly useful state. If the host IPC namespace is exposed, the workload may gain visibility into inter-process coordination objects or data that was never intended to cross the container boundary.
 
 ## Принцип роботи
 
-Коли runtime створює новий IPC namespace, процес отримує власний ізольований набір IPC-ідентифікаторів. Це означає, що команди на кшталт `ipcs` показують лише об'єкти, доступні в цьому просторі імен. Якщо контейнер приєднується до host IPC namespace, ці об'єкти стають частиною спільного глобального подання.
+When the runtime creates a fresh IPC namespace, the process gets its own isolated set of IPC identifiers. This means commands such as `ipcs` show only the objects available in that namespace. If the container instead joins the host IPC namespace, those objects become part of a shared global view.
 
-Це особливо важливо в середовищах, де застосунки або сервіси інтенсивно використовують shared memory. Навіть коли контейнер не може безпосередньо break out через IPC сам по собі, namespace може leak інформацію або дозволити міжпроцесну взаємодію, що суттєво допоможе в подальшій атаці.
+This matters especially in environments where applications or services use shared memory heavily. Even when the container cannot directly break out through IPC alone, the namespace may leak information or enable cross-process interference that materially helps a later attack.
 
-## Лаб
+## Лабораторна
 
-Ви можете створити приватний простір імен IPC за допомогою:
+You can create a private IPC namespace with:
 ```bash
 sudo unshare --ipc --fork bash
 ipcs
@@ -28,61 +28,60 @@ docker run --rm --ipc=host debian:stable-slim ipcs
 ```
 ## Використання під час виконання
 
-Docker і Podman за замовчуванням ізолюють IPC. Kubernetes зазвичай надає Pod власний IPC простір імен, який спільно використовується контейнерами в тому самому Pod, але за замовчуванням не з host. Спільне використання host IPC можливе, але його слід розглядати як суттєве зниження ізоляції, а не як незначну опцію виконання.
+Docker і Podman за замовчуванням ізолюють IPC. Kubernetes зазвичай надає Pod власний IPC namespace, спільний для контейнерів у тому самому Pod, але за замовчуванням не з host. Спільний доступ до host IPC можливий, але його слід розглядати як суттєве зниження ізоляції, а не як незначну runtime-опцію.
 
-## Неправильні конфігурації
+## Неправильні налаштування
 
-Очевидна помилка — `--ipc=host` або `hostIPC: true`. Це може робитися для сумісності зі старим ПО або для зручності, але значно змінює модель довіри. Ще одна повторювана проблема — просто пропускати IPC, бо воно здається менш драматичним, ніж host PID або host networking. Насправді, якщо workload обробляє браузери, бази даних, наукові навантаження або інше ПО, яке широко використовує shared memory, поверхня IPC може бути дуже релевантною.
+Очевидна помилка — `--ipc=host` або `hostIPC: true`. Це може робитись для сумісності зі застарілим ПО або зручності, але суттєво змінює модель довіри. Інша повторювана проблема — просто нехтування IPC, оскільки це здається менш драматичним, ніж host PID або host networking. Насправді, якщо робоче навантаження оперує браузерами, базами даних, науковими задачами або іншим ПО, яке інтенсивно використовує спільну пам'ять, поверхня IPC може бути дуже релевантною.
 
 ## Зловживання
 
-Коли host IPC спільний, атакуючий може переглядати або втручатися в shared memory objects, здобувати нові знання про поведінку host або сусідніх workload, або поєднувати отриману інформацію з видимістю процесів та ptrace-style можливостями. IPC sharing часто є допоміжною вразливістю, а не повним шляхом для виходу, але допоміжні вразливості важливі, бо скорочують і стабілізують реальні ланцюги атак.
+Коли host IPC спільний, атакувальник може переглядати або втручатися у shared memory objects, отримати додаткове уявлення про поведінку host або сусідніх робочих навантажень, або поєднати отриману інформацію з видимістю процесів та можливостями ptrace-style. Спільний доступ до IPC часто є допоміжною слабкістю, а не повним шляхом ескалації, але допоміжні слабкості важливі, бо скорочують і стабілізують реальні ланцюги атак.
 
-Перший корисний крок — перелічити, які IPC-об'єкти взагалі видимі:
+Перший корисний крок — перелічити, які IPC об'єкти взагалі видимі:
 ```bash
 readlink /proc/self/ns/ipc
 ipcs -a
 ls -la /dev/shm 2>/dev/null | head -n 50
 ```
-Якщо IPC namespace хоста спільний, великі сегменти спільної пам'яті або цікаві власники об'єктів можуть миттєво розкрити поведінку додатка:
+Якщо спільно використовується простір імен IPC хоста, великі сегменти спільної пам'яті або цікаві власники об'єктів можуть негайно розкрити поведінку додатка:
 ```bash
 ipcs -m -p
 ipcs -q -p
 ```
-У деяких середовищах вміст `/dev/shm` може розкривати імена файлів, артефакти або токени, які варто перевірити:
+У деяких середовищах, вміст `/dev/shm` сам по собі leak filenames, artifacts або tokens, які варто перевірити:
 ```bash
 find /dev/shm -maxdepth 2 -type f 2>/dev/null -ls | head -n 50
 strings /dev/shm/* 2>/dev/null | head -n 50
 ```
-IPC sharing rarely gives instant host root by itself, but it can expose data and coordination channels that make later process attacks far easier.
+IPC sharing рідко саме по собі дає миттєвий host root, але може відкривати канали даних і координації, які значно полегшують подальші атаки на процеси.
 
 ### Повний приклад: `/dev/shm` відновлення секретів
 
-Найреалістичніший повний випадок зловживання — це крадіжка даних, а не пряме escape. Якщо host IPC або широкий shared-memory layout відкрито, конфіденційні артефакти іноді можна відновити безпосередньо:
+Найреалістичніший повний випадок зловживання — це крадіжка даних, а не direct escape. Якщо host IPC або широка схема спільної пам’яті відкриті, чутливі артефакти іноді можна відновити безпосередньо:
 ```bash
 find /dev/shm -maxdepth 2 -type f 2>/dev/null -print
 strings /dev/shm/* 2>/dev/null | grep -Ei 'token|secret|password|jwt|key'
 ```
-Наслідки:
+Вплив:
 
-- витяг секретів або даних сесії, що залишилися у спільній пам'яті
-- інформація про додатки, що наразі працюють на хості
-- краще прицілювання для подальших атак, що використовують PID-namespace або ptrace
+- вилучення секретів або матеріалів сесії, що залишилися у shared memory
+- інформація про додатки, які наразі активні на хості
+- краще націлювання для подальших атак на основі PID-namespace або ptrace
 
-Отже, спільне використання IPC слід розглядати радше як **підсилювач атаки**, ніж як самостійний примітив обходу хоста.
+Отже, IPC sharing радше слід розглядати як **підсилювач атаки**, ніж як автономний host-escape primitive.
 
 ## Перевірки
 
-Ці команди мають відповісти на питання, чи має робоче навантаження приватний контекст IPC, чи видимі значущі об'єкти у спільній пам'яті або об'єкти повідомлень, і чи сам `/dev/shm` містить корисні артефакти.
+Ці команди мають відповісти, чи має workload приватний IPC view, чи видимі значущі shared-memory або message objects, та чи сам `/dev/shm` містить корисні артефакти.
 ```bash
 readlink /proc/self/ns/ipc   # Namespace identifier for IPC
 ipcs -a                      # Visible SysV IPC objects
 mount | grep shm             # Shared-memory mounts, especially /dev/shm
 ```
-Що тут цікаво:
+- Якщо `ipcs -a` виявляє об'єкти, що належать неочікуваним користувачам або сервісам, простір імен може бути не таким ізольованим, як очікували.
+- Великі або незвичні сегменти розділеної пам'яті часто варто перевірити.
+- Широке монтування `/dev/shm` не є автоматично помилкою, але в деяких середовищах воно leaks імена файлів, артефакти та тимчасові секрети.
 
-- Якщо `ipcs -a` виявляє об'єкти, що належать несподіваним користувачам або сервісам, namespace може бути не таким ізольованим, як очікувалося.
-- Великі або незвичні shared memory segments зазвичай варто досліджувати.
-- Широке монтування `/dev/shm` не є автоматичною помилкою, але в деяких середовищах воно leaks filenames, artifacts, and transient secrets.
-
-IPC рідко отримує стільки уваги, скільки більші типи namespace, але в середовищах, що широко його використовують, sharing it with the host — це радше рішення з безпеки.
+IPC рідко отримує стільки уваги, як більші типи просторів імен, але в середовищах, де його інтенсивно використовують, його спільне використання з хостом — це радше рішення з безпеки.
+{{#include ../../../../../banners/hacktricks-training.md}}

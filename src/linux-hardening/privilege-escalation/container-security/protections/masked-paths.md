@@ -1,14 +1,14 @@
-# Приховані шляхи
+# Замасковані шляхи
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-Приховані шляхи — це runtime-захисти, які приховують особливо чутливі для ядра файлові локації від контейнера шляхом bind-mounting поверх них або іншим способом роблять їх недоступними. Мета — завадити workload-у безпосередньо взаємодіяти з інтерфейсами, які звичайним додаткам не потрібні, особливо всередині procfs.
+Замасковані шляхи — це runtime-захисти, які приховують особливо чутливі файлові розташування, що взаємодіють із ядром, від контейнера шляхом bind-mounting поверх них або іншим чином роблячи їх недоступними. Мета — запобігти тому, щоб workload безпосередньо взаємодіяв із інтерфейсами, які звичайним застосункам не потрібні, особливо всередині procfs.
 
-Це важливо, тому що багато container escapes та прийомів, що впливають на хост, починаються зі зчитування або запису спеціальних файлів під `/proc` або `/sys`. Якщо ці локації замасковані, атакуючий втрачає прямий доступ до корисної частини surface управління ядром навіть після отримання виконання коду всередині контейнера.
+Це важливо, бо багато container escapes та трюків, що впливають на host, починаються з читання або запису спеціальних файлів під `/proc` або `/sys`. Якщо ці локації замасковані, атакувальник втрачає прямий доступ до корисної частини kernel control surface навіть після отримання code execution всередині контейнера.
 
 ## Принцип роботи
 
-Рантайми зазвичай маскують вибрані шляхи, такі як:
+Runtimes зазвичай маскують обрані шляхи, такі як:
 
 - `/proc/kcore`
 - `/proc/keys`
@@ -17,35 +17,35 @@
 - `/proc/sched_debug`
 - `/sys/firmware`
 
-Точний перелік залежить від runtime-а та конфігурації хоста. Важлива властивість у тому, що шлях стає недоступним або замінюється з точки зору контейнера, хоча на хості він все ще існує.
+Точний список залежить від runtime та конфігурації host. Важливо, що з точки зору контейнера шлях стає недоступним або заміщується, хоча він все ще існує на хості.
 
-## Лабораторія
+## Лаб
 
 Перегляньте конфігурацію masked-path, яку експонує Docker:
 ```bash
 docker inspect <container> | jq '.[0].HostConfig.MaskedPaths'
 ```
-Перевірте фактичну поведінку монтування всередині робочого навантаження:
+Перевірте фактичну поведінку mount всередині workload:
 ```bash
 mount | grep -E '/proc|/sys'
 ls -ld /proc/kcore /proc/keys /sys/firmware 2>/dev/null
 ```
-## Вплив на безпеку
+## Security Impact
 
-Masking не створює основну межу ізоляції, але видаляє кілька високовартісних post-exploitation targets. Без Masking компрометований container може мати змогу інспектувати kernel state, читати чутливу інформацію про процеси або ключі, або взаємодіяти з procfs/sysfs об'єктами, які ніколи не повинні були бути видимими для application.
+Маскування не створює основну межу ізоляції, але прибирає кілька високовартісних цілей для post-exploitation. Без маскування скомпрометований контейнер може перевіряти стан ядра, читати конфіденційну інформацію про процеси або ключі, або взаємодіяти з об'єктами procfs/sysfs, які не мали б бути видимими для додатка.
 
-## Неправильні конфігурації
+## Misconfigurations
 
-Головна помилка — unmasking широких класів шляхів заради зручності або налагодження. У Podman це може виглядати як `--security-opt unmask=ALL` або цілеспрямоване unmasking. У Kubernetes надто широке proc exposure може з'явитися через `procMount: Unmasked`. Ще однією серйозною проблемою є експонування host `/proc` або `/sys` через bind mount, що повністю обходить ідею скороченого container view.
+Головна помилка — розмаскування широких класів шляхів заради зручності або відлагодження. У Podman це може виявлятися як `--security-opt unmask=ALL` або вибіркове розмаскування. У Kubernetes надто широкий доступ до proc може проявлятися через `procMount: Unmasked`. Ще одна серйозна проблема — експонування хостового `/proc` або `/sys` через bind mount, що повністю обходить ідею обмеженого виду контейнера.
 
-## Зловживання
+## Abuse
 
-Якщо Masking слабкий або відсутній, почніть із визначення, які чутливі procfs/sysfs шляхи доступні напряму:
+Якщо маскування слабке або відсутнє, почніть з визначення, які чутливі шляхи procfs/sysfs доступні безпосередньо:
 ```bash
 ls -ld /proc/kcore /proc/keys /proc/timer_list /sys/firmware 2>/dev/null   # Check whether paths that are usually masked are accessible at all
 mount | grep -E '/proc|/sys'                                                # Review whether procfs/sysfs mounts look container-scoped or suspiciously host-like
 ```
-Якщо нібито замаскований шлях доступний, ретельно його перевірте:
+Якщо нібито masked path доступний, ретельно його перевірте:
 ```bash
 head -n 20 /proc/timer_list 2>/dev/null   # Scheduler / timer internals, useful for host fingerprinting and confirming kernel data exposure
 cat /proc/keys 2>/dev/null | head         # In-kernel keyring information; may expose keys, key descriptions, or service relationships
@@ -55,35 +55,36 @@ head -n 50 /proc/sched_debug 2>/dev/null  # Scheduler and process metadata; may 
 ```
 What these commands can reveal:
 
-- /proc/timer_list can expose host timer and scheduler data. This is mostly a reconnaissance primitive, but it confirms that the container can read kernel-facing information that is normally hidden.
-- /proc/keys is much more sensitive. Depending on the host configuration, it may reveal keyring entries, key descriptions, and relationships between host services using the kernel keyring subsystem.
-- /sys/firmware helps identify boot mode, firmware interfaces, and platform details that are useful for host fingerprinting and for understanding whether the workload is seeing host-level state.
-- /proc/config.gz may reveal the running kernel configuration, which is valuable for matching public kernel exploit prerequisites or understanding why a specific feature is reachable.
-- /proc/sched_debug exposes scheduler state and often bypasses the intuitive expectation that the PID namespace should hide unrelated process information completely.
+- `/proc/timer_list` може показати дані таймера та планувальника хоста. Це здебільшого примітив для розвідки, але підтверджує, що контейнер може читати інформацію, спрямовану на ядро, яка зазвичай прихована.
+- `/proc/keys` є значно чутливішим. Залежно від конфігурації хоста, він може розкрити записи keyring, описи ключів та взаємини між службами хоста, що використовують kernel keyring subsystem.
+- `/sys/firmware` допомагає визначити режим завантаження, інтерфейси прошивки та деталі платформи, корисні для fingerprinting хоста і для розуміння того, чи workload бачить стан на рівні хоста.
+- `/proc/config.gz` може розкрити конфігурацію запущеного ядра, що цінно для підбору вимог публічних kernel exploit або для розуміння, чому певна функція доступна.
+- `/proc/sched_debug` показує стан планувальника і часто обходить інтуїтивне очікування, що PID namespace повинна повністю приховувати несуміжну інформацію про процеси.
 
-Interesting results include direct reads from those files, evidence that the data belongs to the host rather than to a constrained container view, or access to other procfs/sysfs locations that are commonly masked by default.
+Цікавими результатами є прямі читання цих файлів, докази того, що дані належать хосту, а не обмеженому поданню контейнера, або доступ до інших procfs/sysfs локацій, які зазвичай маскуються за замовчуванням.
 
-## Перевірки
+## Checks
 
-Мета цих перевірок — визначити, які шляхи середовище виконання навмисно приховало та чи все ще робоче навантаження бачить обмежену файлову систему, орієнтовану на ядро.
+Метою цих перевірок є визначити, які шляхи середовища виконання навмисно приховало і чи бачить поточне навантаження все ще зменшену файлову систему, звернену до ядра.
 ```bash
 docker inspect <container> | jq '.[0].HostConfig.MaskedPaths'   # Runtime-declared masked paths
 mount | grep -E '/proc|/sys'                                    # Actual procfs/sysfs mount layout
 ls -ld /proc/kcore /proc/keys /proc/timer_list /sys/firmware 2>/dev/null
 ```
-Що тут цікавого:
+Що тут цікаво:
 
-- Довгий список masked-path є нормою в захищених середовищах виконання.
-- Відсутність маскування чутливих записів procfs заслуговує на ретельнішу перевірку.
-- Якщо чутливий шлях доступний і контейнер також має сильні capabilities або широкі mounts, то експозиція має більшу вагу.
+- Великий список маскованих шляхів є нормальною практикою в жорстко захищених runtime.
+- Відсутність маскування для чутливих записів procfs заслуговує на детальнішу перевірку.
+- Якщо чутливий шлях доступний, і контейнер також має розширені capabilities або широкі host mounts, ризик експозиції зростає.
 
-## Налаштування середовища виконання за замовчуванням
+## Налаштування runtime за замовчуванням
 
-| Runtime / platform | Стан за замовчуванням | Поведінка за замовчуванням | Поширені ручні послаблення |
+| Runtime / platform | Default state | Default behavior | Common manual weakening |
 | --- | --- | --- | --- |
-| Docker Engine | Увімкнено за замовчуванням | Docker визначає список masked path за замовчуванням | експозиція host proc/sys mounts, `--privileged` |
-| Podman | Увімкнено за замовчуванням | Podman застосовує масковані шляхи за замовчуванням, якщо їх не розмасковано вручну | `--security-opt unmask=ALL`, цільове розмаскування, `--privileged` |
-| Kubernetes | Наслідує налаштування runtime | Використовує поведінку маскування базового runtime, якщо налаштування Pod не послаблюють доступ до proc | `procMount: Unmasked`, шаблони привілейованих робочих навантажень, широкі host mounts |
-| containerd / CRI-O under Kubernetes | Стан runtime за замовчуванням | Зазвичай застосовує OCI/runtime masked paths, якщо не перевизначено | прямі зміни конфігурації runtime, ті ж шляхи послаблення в Kubernetes |
+| Docker Engine | Enabled by default | Docker визначає список маскованих шляхів за замовчуванням | експонування host proc/sys mounts, `--privileged` |
+| Podman | Enabled by default | Podman застосовує масковані шляхи за замовчуванням, якщо їх не розмасковано вручну | `--security-opt unmask=ALL`, цільове розмаскування, `--privileged` |
+| Kubernetes | Inherits runtime defaults | Використовує поведінку маскування базового runtime, якщо налаштування Pod не послаблюють експозицію proc | `procMount: Unmasked`, шаблони привілейованих workload, широкі host mounts |
+| containerd / CRI-O under Kubernetes | Runtime default | Зазвичай застосовує OCI/runtime масковані шляхи, якщо їх не перевизначено | прямі зміни конфігу runtime, ті самі шляхи послаблення в Kubernetes |
 
-Masked paths зазвичай присутні за замовчуванням. Основна операційна проблема — не відсутність у runtime, а навмисне розмаскування або host bind mounts, які нівелюють захист.
+Масковані шляхи зазвичай присутні за замовчуванням. Головна операційна проблема — не їх відсутність у runtime, а навмисне розмаскування або host bind mounts, які нівелюють захист.
+{{#include ../../../../banners/hacktricks-training.md}}

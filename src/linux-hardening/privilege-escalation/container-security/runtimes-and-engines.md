@@ -1,96 +1,96 @@
-# Container Runtimes, Engines, Builders, And Sandboxes
+# Контейнерні рантайми, движки, билд-інструменти та сандбокси
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-One of the biggest sources of confusion in container security is that several completely different components are often collapsed into the same word. "Docker" might refer to an image format, a CLI, a daemon, a build system, a runtime stack, or simply the idea of containers in general. For security work, that ambiguity is a problem, because different layers are responsible for different protections. A breakout caused by a bad bind mount is not the same thing as a breakout caused by a low-level runtime bug, and neither is the same thing as a cluster policy mistake in Kubernetes.
+Одним із найбільших джерел плутанини в безпеці контейнерів є те, що кілька цілком різних компонентів часто зливаються в одне слово. "Docker" може означати формат образу, CLI, демон, систему збірки, стек рантайму або просто ідею контейнерів загалом. Для роботи з безпекою ця неоднозначність проблема, тому що різні шари відповідають за різні механізми захисту. Escape, спричинений погано зробленим bind mount, — це не те саме, що escape через низькорівневу вразливість рантайму, і жоден із них не тотожний помилці політики кластера в Kubernetes.
 
-This page separates the ecosystem by role so that the rest of the section can talk precisely about where a protection or weakness actually lives.
+Ця сторінка розділяє екосистему за ролями, щоб решта розділу могла точно говорити, де саме живе певний захист чи вразливість.
 
-## OCI As The Common Language
+## OCI як спільна мова
 
-Modern Linux container stacks often interoperate because they speak a set of OCI specifications. The **OCI Image Specification** describes how images and layers are represented. The **OCI Runtime Specification** describes how the runtime should launch the process, including namespaces, mounts, cgroups, and security settings. The **OCI Distribution Specification** standardizes how registries expose content.
+Сучасні Linux контейнерні стеки часто взаємодіють, бо вони дотримуються набору специфікацій OCI. **OCI Image Specification** описує, як представлені образи та шари. **OCI Runtime Specification** описує, як рантайм має запускати процес, включно з namespace, mount-ами, cgroup-ами та налаштуваннями безпеки. **OCI Distribution Specification** стандартизує, як реєстри виставляють контент.
 
-This matters because it explains why a container image built with one tool can often be run with another, and why several engines can share the same low-level runtime. It also explains why security behavior can look similar across different products: many of them are constructing the same OCI runtime configuration and handing it to the same small set of runtimes.
+Це важливо, бо пояснює, чому образ, збудований одним інструментом, часто можна запустити іншим і чому кілька engine-ів можуть ділити один і той же низькорівневий рантайм. Так само це пояснює, чому поведінка безпеки може виглядати схожою в різних продуктах: багато з них будують одну й ту саму конфігурацію OCI runtime і передають її одному й тому самому обмеженому набору рантаймів.
 
-## Low-Level OCI Runtimes
+## Низькорівневі OCI рантайми
 
-The low-level runtime is the component that is closest to the kernel boundary. It is the part that actually creates namespaces, writes cgroup settings, applies capabilities and seccomp filters, and finally `execve()`s the container process. When people discuss "container isolation" at the mechanical level, this is the layer they are usually talking about, even if they do not say so explicitly.
+Низькорівневий рантайм — це компонент, що найближче до межі ядра. Це частина, яка фактично створює namespaces, записує налаштування cgroup, застосовує capabilities і seccomp-фільтри, і нарешті `execve()`-є процес контейнера. Коли люди говорять про "ізоляцію контейнера" на механічному рівні, зазвичай вони мають на увазі саме цей шар, навіть якщо прямо цього не говорять.
 
 ### `runc`
 
-`runc` is the reference OCI runtime and remains the best-known implementation. It is heavily used under Docker, containerd, and many Kubernetes deployments. A lot of public research and exploitation material targets `runc`-style environments simply because they are common and because `runc` defines the baseline that many people think of when they picture a Linux container. Understanding `runc` therefore gives a reader a strong mental model for classic container isolation.
+`runc` — еталонний OCI рантайм і залишається найвідомішою реалізацією. Він широко використовується під Docker, containerd і в багатьох Kubernetes розгортаннях. Багато публічних досліджень і матеріалів з експлуатації таргетують середовища типу `runc`, просто тому що вони поширені і `runc` визначає базову лінію, яку багато хто уявляє, коли думає про Linux-контейнер. Розуміння `runc` дає читачу сильну ментальну модель класичної ізоляції контейнера.
 
 ### `crun`
 
-`crun` is another OCI runtime, written in C and widely used in modern Podman environments. It is often praised for good cgroup v2 support, strong rootless ergonomics, and lower overhead. From a security perspective, the important thing is not that it is written in a different language, but that it still plays the same role: it is the component that turns the OCI configuration into a running process tree under the kernel. A rootless Podman workflow frequently ends up feeling safer not because `crun` magically fixes everything, but because the overall stack around it tends to lean harder into user namespaces and least privilege.
+`crun` — ще один OCI рантайм, написаний на C і широко використовуваний у сучасних середовищах Podman. Його часто хвалять за хорошу підтримку cgroup v2, сильну ergonomics для `rootless` та менші накладні витрати. З точки зору безпеки, важливо не те, що він написаний на іншій мові, а те, що він все одно виконує ту саму роль: перетворює OCI-конфігурацію в дерево процесів, що виконується під ядром. Робочий процес Podman у режимі `rootless` часто відчувається безпечнішим не тому, що `crun` вирішує всі проблеми, а тому що навколишній стек схильний сильніше використовувати user namespaces і принцип найменших привілеїв.
 
-### `runsc` From gVisor
+### `runsc` від gVisor
 
-`runsc` is the runtime used by gVisor. Here the boundary changes meaningfully. Instead of passing most syscalls directly to the host kernel in the usual way, gVisor inserts a userspace kernel layer that emulates or mediates large parts of the Linux interface. The result is not a normal `runc` container with a few extra flags; it is a different sandbox design whose purpose is to reduce host-kernel attack surface. Compatibility and performance tradeoffs are part of that design, so environments using `runsc` should be documented differently from normal OCI runtime environments.
+`runsc` — це рантайм, який використовує gVisor. Тут межа значно змінює своє значення. Замість того, щоб передавати більшість системних викликів безпосередньо хост-ядру звичайним шляхом, gVisor вставляє userspace-ядро, яке емуляє або опосередковує великі частини інтерфейсу Linux. Результат — це не звичайний `runc` контейнер з кількома додатковими прапорами; це інша конструкція сандбоксу, мета якої — зменшити attack surface хост-ядра. Суміщення сумісності та продуктивності є частиною цього дизайну, тому середовища з `runsc` слід документувати відмінно від звичайних OCI runtime-середовищ.
 
 ### `kata-runtime`
 
-Kata Containers push the boundary further by launching the workload inside a lightweight virtual machine. Administratively, this may still look like a container deployment, and orchestration layers may still treat it as such, but the underlying isolation boundary is closer to virtualization than to a classic host-kernel-shared container. This makes Kata useful when stronger tenant isolation is desired without abandoning container-centric workflows.
+Kata Containers розсувають межу ще далі, запускаючи робоче навантаження всередині легковагової віртуальної машини. Адміністративно це все ще може виглядати як розгортання контейнера, а оркестраційні шари можуть і надалі ставитися до нього відповідно, але підлягаюча межа ізоляції ближча до віртуалізації, ніж до класичного контейнера з розділенням ядра хоста. Це робить Kata корисним, коли потрібна сильніша ізоляція орендарів без відмови від робочих процесів, орієнтованих на контейнер.
 
-## Engines And Container Managers
+## Engines та менеджери контейнерів
 
-If the low-level runtime is the component that talks directly to the kernel, the engine or manager is the component that users and operators usually interact with. It handles image pulls, metadata, logs, networks, volumes, lifecycle operations, and API exposure. This layer matters enormously because many real-world compromises happen here: access to a runtime socket or daemon API can be equivalent to host compromise even if the low-level runtime itself is perfectly healthy.
+Якщо низькорівневий рантайм — це компонент, що говорить безпосередньо з ядром, то engine або manager — це компонент, з яким зазвичай взаємодіють користувачі та оператори. Він обробляє image pulls, метадані, логи, мережі, volumes, операції життєвого циклу і експозицію API. Цей шар надзвичайно важливий, бо багато реальних компрометацій відбуваються тут: доступ до runtime socket чи демонського API може прирівнюватися до компрометації хоста, навіть якщо низькорівневий рантайм сам по собі цілком здоровий.
 
 ### Docker Engine
 
-Docker Engine is the most recognizable container platform for developers and one of the reasons container vocabulary became so Docker-shaped. The typical path is `docker` CLI to `dockerd`, which in turn coordinates lower-level components such as `containerd` and an OCI runtime. Historically, Docker deployments have often been **rootful**, and access to the Docker socket has therefore been a very powerful primitive. This is why so much practical privilege-escalation material focuses on `docker.sock`: if a process can ask `dockerd` to create a privileged container, mount host paths, or join host namespaces, it may not need a kernel exploit at all.
+Docker Engine — найвпізнаваніша контейнерна платформа для розробників і одна з причин, чому словник контейнерів став таким Docker-орієнтованим. Типовий шлях — `docker` CLI до `dockerd`, який у свою чергу координує низькорівневі компоненти такі як `containerd` і OCI рантайм. Історично Docker-розгортання часто були **rootful**, і доступ до `docker.sock` був дуже потужним примітивом. Тому велика частина практичного матеріалу з privilege-escalation фокусується на `docker.sock`: якщо процес може попросити `dockerd` створити привілейований контейнер, змонтувати шляхи хоста або приєднатися до namespace-ів хоста, йому може не знадобитися зовсім локальна вразливість ядра.
 
 ### Podman
 
-Podman was designed around a more daemonless model. Operationally, this helps reinforce the idea that containers are just processes managed through standard Linux mechanisms rather than through one long-lived privileged daemon. Podman also has a much stronger **rootless** story than the classic Docker deployments many people first learned. That does not make Podman automatically safe, but it changes the default risk profile significantly, especially when combined with user namespaces, SELinux, and `crun`.
+Podman проєктувався навколо більш daemonless моделі. Операційно це допомагає підкреслити ідею, що контейнери — це просто процеси, якими керують через стандартні механізми Linux, а не через один довгоживучий привілейований демон. Podman також має значно сильнішу історію щодо **rootless** порівняно з класичними Docker-розгортаннями, які багато хто вперше вивчав. Це не робить Podman автоматично безпечним, але змінює профіль ризику за замовчуванням значно, особливо в поєднанні з user namespaces, SELinux і `crun`.
 
 ### containerd
 
-containerd is a core runtime management component in many modern stacks. It is used under Docker and is also one of the dominant Kubernetes runtime backends. It exposes powerful APIs, manages images and snapshots, and delegates the final process creation to a low-level runtime. Security discussions around containerd should emphasize that access to the containerd socket or `ctr`/`nerdctl` functionality can be just as dangerous as access to Docker's API, even if the interface and workflow feel less "developer friendly".
+containerd — це базовий компонент управління runtime у багатьох сучасних стеках. Він використовується під Docker і також є одним з домінуючих бекендів рантайму у Kubernetes. Він експонує потужні API, керує образами та snapshot-ами і делегує остаточне створення процесу низькорівневому рантайму. Дискусії про безпеку навколо containerd мають підкреслювати, що доступ до containerd socket або можливостей `ctr`/`nerdctl` може бути не менш небезпечним, ніж доступ до Docker API, навіть якщо інтерфейс і робочий процес виглядають менш "дружніми для розробника".
 
 ### CRI-O
 
-CRI-O is more focused than Docker Engine. Instead of being a general-purpose developer platform, it is built around implementing the Kubernetes Container Runtime Interface cleanly. This makes it especially common in Kubernetes distributions and SELinux-heavy ecosystems such as OpenShift. From a security perspective, that narrower scope is useful because it reduces conceptual clutter: CRI-O is very much part of the "run containers for Kubernetes" layer rather than an everything-platform.
+CRI-O більш зосереджений, ніж Docker Engine. Замість загальноцільової платформи для розробників, він побудований навколо чистої реалізації Kubernetes Container Runtime Interface. Це робить його особливо поширеним у дистрибутивах Kubernetes та SELinux-орієнтованих екосистемах, таких як OpenShift. З точки зору безпеки, ця вже вузька спрямованість корисна, бо зменшує концептуальний шум: CRI-O — це фактично частина шару "запуск контейнерів для Kubernetes", а не універсальна платформа для всього.
 
-### Incus, LXD, And LXC
+### Incus, LXD та LXC
 
-Incus/LXD/LXC systems are worth separating from Docker-style application containers because they are often used as **system containers**. A system container is usually expected to look more like a lightweight machine with a fuller userspace, long-running services, richer device exposure, and more extensive host integration. The isolation mechanisms are still kernel primitives, but the operational expectations are different. As a result, misconfigurations here often look less like "bad app-container defaults" and more like mistakes in lightweight virtualization or host delegation.
+Системи Incus/LXD/LXC варто відокремити від Docker-подібних applicaton containers, бо їх часто використовують як **system containers**. System container зазвичай очікується виглядати більше як легковага машина з повнішим userspace, довготривалими сервісами, багатшим доступом до пристроїв і ширшою інтеграцією з хостом. Механізми ізоляції все ще базуються на примітивах ядра, але операційні очікування відрізняються. Відтак неправильні налаштування тут частіше виглядають не як "погані дефолти app-container", а швидше як помилки в легковаговій віртуалізації чи делегуванні хоста.
 
 ### systemd-nspawn
 
-systemd-nspawn occupies an interesting place because it is systemd-native and very useful for testing, debugging, and running OS-like environments. It is not the dominant cloud-native production runtime, but it appears often enough in labs and distro-oriented environments that it deserves mention. For security analysis, it is another reminder that the concept "container" spans multiple ecosystems and operational styles.
+systemd-nspawn займає цікаве місце, бо він нативний для systemd і дуже корисний для тестування, налагодження та запуску OS-подібних середовищ. Це не домінуючий cloud-native production рантайм, але він зустрічається достатньо часто в лабораторіях та дистрибутивних середовищах, щоб заслуговувати на згадку. Для аналізу безпеки це ще одне нагадування, що поняття "контейнер" охоплює кілька екосистем і операційних стилів.
 
 ### Apptainer / Singularity
 
-Apptainer (formerly Singularity) is common in research and HPC environments. Its trust assumptions, user workflow, and execution model differ in important ways from Docker/Kubernetes-centric stacks. In particular, these environments often care deeply about letting users run packaged workloads without handing them broad privileged container-management powers. If a reviewer assumes every container environment is basically "Docker on a server", they will misunderstand these deployments badly.
+Apptainer (раніше Singularity) поширений у дослідницьких та HPC-середовищах. Його припущення щодо довіри, робочий процес користувача та модель виконання суттєво відрізняються від стеків, орієнтованих на Docker/Kubernetes. Зокрема такі середовища часто дуже зацікавлені дозволяти користувачам запускати упаковані робочі навантаження без надання їм широких привілеїв з управління контейнерами. Якщо рецензент припускає, що кожне контейнерне середовище — це по суті "Docker на сервері", він сильно неправильно зрозуміє ці розгортання.
 
-## Build-Time Tooling
+## Інструменти під час збірки (Build-Time Tooling)
 
-A lot of security discussions only talk about run time, but build-time tooling also matters because it determines image contents, build secrets exposure, and how much trusted context gets embedded into the final artifact.
+Багато обговорень безпеки торкаються лише часу виконання, але інструменти під час збірки також важливі, бо вони визначають вміст образів, витік (leak) build-секретів та скільки довіреного контексту вбудовується в фінальний артефакт.
 
-**BuildKit** and `docker buildx` are modern build backends that support features such as caching, secret mounting, SSH forwarding, and multi-platform builds. Those are useful features, but from a security perspective they also create places where secrets can leak into image layers or where an overly broad build context can expose files that should never have been included. **Buildah** plays a similar role in OCI-native ecosystems, especially around Podman, while **Kaniko** is often used in CI environments that do not want to grant a privileged Docker daemon to the build pipeline.
+**BuildKit** і `docker buildx` — сучасні бекенди збірки, що підтримують функції такі як кешування, монтування секретів, SSH-forwarding і мультиплатформні збірки. Це корисні можливості, але з точки зору безпеки вони також створюють місця, де секрети можуть leak в шари образу або де надто широкий контекст збірки може відкрити файли, які ніколи не мали бути включені. **Buildah** виконує подібну роль в OCI-орієнтованих екосистемах, особливо навколо Podman, тоді як **Kaniko** часто використовується в CI-середовищах, які не бажають надавати привілейований Docker демон конвеєру збірки.
 
-The key lesson is that image creation and image execution are different phases, but a weak build pipeline can create a weak runtime posture long before the container is launched.
+Ключовий урок: створення образу та виконання образу — це різні фази, але слабкий pipeline збірки може створити слабку runtime-позицію задовго до запуску контейнера.
 
-## Orchestration Is Another Layer, Not The Runtime
+## Оркестрація — це інший шар, а не рантайм
 
-Kubernetes should not be mentally equated with the runtime itself. Kubernetes is the orchestrator. It schedules Pods, stores desired state, and expresses security policy through workload configuration. The kubelet then talks to a CRI implementation such as containerd or CRI-O, which in turn invokes a low-level runtime such as `runc`, `crun`, `runsc`, or `kata-runtime`.
+Kubernetes не слід ототожнювати в думках із самим рантаймом. Kubernetes — це оркестратор. Він розподіляє Pods, зберігає бажаний стан і виражає політику безпеки через конфігурацію робочого навантаження. kubelet потім спілкується з реалізацією CRI, такою як containerd або CRI-O, яка в свою чергу викликає низькорівневий рантайм, такий як `runc`, `crun`, `runsc` або `kata-runtime`.
 
-This separation matters because many people wrongly attribute a protection to "Kubernetes" when it is really enforced by the node runtime, or they blame "containerd defaults" for behavior that came from a Pod spec. In practice, the final security posture is a composition: the orchestrator asks for something, the runtime stack translates it, and the kernel finally enforces it.
+Це розділення важливе, бо багато людей помилково приписують захист "Kubernetes", коли його насправді забезпечує node runtime, або ж звинувачують "containerd defaults" за поведінку, яка походить з Pod spec. На практиці фінальна безпекова позиція — це композиція: оркестратор просить про щось, стек рантайму це транслює, а ядро врешті це забезпечує.
 
-## Why Runtime Identification Matters During Assessment
+## Чому ідентифікація рантайму важлива під час оцінки
 
-If you identify the engine and runtime early, many later observations become easier to interpret. A rootless Podman container suggests user namespaces are likely part of the story. A Docker socket mounted into a workload suggests API-driven privilege escalation is a realistic path. A CRI-O/OpenShift node should immediately make you think about SELinux labels and restricted workload policy. A gVisor or Kata environment should make you more cautious about assuming that a classic `runc` breakout PoC will behave the same way.
+Якщо ви ранньо ідентифікуєте engine і runtime, багато подальших спостережень стають легшими для інтерпретації. rootless Podman контейнер вказує, що user namespaces ймовірно частина історії. Монтування Docker socket у робочому навантаженні означає, що escalation через API — реалістичний шлях. CRI-O/OpenShift нода має одразу навести на думку SELinux мітки і політику обмежених робочих навантажень. Середовище gVisor або Kata повинно змусити вас бути обережнішим щодо припущення, що класичний PoC для `runc`-escape працюватиме так само.
 
-That is why one of the first steps in container assessment should always be to answer two simple questions: **which component is managing the container** and **which runtime actually launched the process**. Once those answers are clear, the rest of the environment usually becomes much easier to reason about.
+Ось чому одна з перших кроків у оцінці контейнера завжди повинна відповідати на два прості питання: **який компонент управляє контейнером** і **який runtime насправді запустив процес**. Коли ці відповіді зрозумілі, зазвичай інша частина середовища стає значно простішою для розуміння.
 
-## Runtime Vulnerabilities
+## Вразливості рантайму
 
-Not every container escape comes from operator misconfiguration. Sometimes the runtime itself is the vulnerable component. This matters because a workload may be running with what looks like a careful configuration and still be exposed through a low-level runtime flaw.
+Не кожен escape з контейнера виникає через помилку оператора. Іноді вразливим компонентом є сам рантайм. Це важливо, бо робоче навантаження може працювати з тимчасом, що виглядає як уважно налаштоване, і все одно бути піддане через низькорівневий баг рантайму.
 
-The classic example is **CVE-2019-5736** in `runc`, where a malicious container could overwrite the host `runc` binary and then wait for a later `docker exec` or similar runtime invocation to trigger attacker-controlled code. The exploit path is very different from a simple bind-mount or capability mistake because it abuses how the runtime re-enters the container process space during exec handling.
+Класичний приклад — **CVE-2019-5736** в `runc`, де зловмисний контейнер міг перезаписати бінарник `runc` на хості і потім чекати на подальший `docker exec` або подібний виклик рантайму, щоб тригерити код, контрольований атакуючим. Шлях експлуатації дуже відрізняється від простого bind-mount чи помилки з capabilities, бо він зловживає тим, як рантайм знову заходить у простір процесу контейнера під час обробки exec.
 
-A minimal reproduction workflow from a red-team perspective is:
+Мінімальний workflow для відтворення з точки зору red-team такий:
 ```bash
 go build main.go
 ./main
@@ -99,6 +99,7 @@ go build main.go
 ```bash
 docker exec -it <container-name> /bin/sh
 ```
-Ключовий урок — не точна історична реалізація експлойту, а наслідок для оцінки: якщо версія runtime вразлива, звичайне виконання коду в контейнері може бути достатнім, щоб скомпрометувати хост, навіть коли видима конфігурація контейнера не виглядає явно слабкою.
+Ключовий висновок — не точна історична реалізація експлойту, а наслідок для оцінки: якщо версія runtime вразлива, звичайне виконання коду всередині контейнера може бути достатнім, щоб скомпрометувати хост, навіть коли видима конфігурація контейнера не виглядає відверто слабкою.
 
-Недавні runtime CVE, такі як `CVE-2024-21626` у `runc`, BuildKit mount races та помилки парсингу в containerd підсилюють ту саму думку. Версія runtime та рівень патчу є частиною межі безпеки, а не просто питанням обслуговування.
+Останні CVE для runtime, такі як `CVE-2024-21626` у `runc`, BuildKit mount races і помилки парсингу в containerd підсилюють ту саму думку. Версія runtime та рівень патчу є частиною межі безпеки, а не просто технічними деталями обслуговування.
+{{#include ../../../banners/hacktricks-training.md}}
