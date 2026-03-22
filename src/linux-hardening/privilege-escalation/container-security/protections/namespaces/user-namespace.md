@@ -1,73 +1,73 @@
-# Przestrzeń użytkownika
+# Przestrzeń nazw użytkownika
 
 {{#include ../../../../../banners/hacktricks-training.md}}
 
 ## Przegląd
 
-User namespace zmienia znaczenie identyfikatorów użytkownika i grupy, pozwalając kernelowi mapować ID widziane wewnątrz namespace na inne ID na zewnątrz. To jedna z ważniejszych współczesnych protekcji dla containerów, ponieważ bezpośrednio adresuje największy historyczny problem klasycznych containerów: **root wewnątrz kontenera był niebezpiecznie bliski rootowi na hoście**.
+Przestrzeń nazw użytkownika zmienia znaczenie identyfikatorów użytkownika i grupy, pozwalając jądru mapować identyfikatory widziane wewnątrz przestrzeni nazw na inne identyfikatory poza nią. To jedna z najważniejszych współczesnych ochron dla kontenerów, ponieważ bezpośrednio rozwiązuje największy historyczny problem klasycznych kontenerów: **root wewnątrz kontenera był niewygodnie blisko roota na hoście**.
 
-Dzięki user namespaces proces może działać jako UID 0 wewnątrz kontenera, a jednocześnie odpowiadać nieuprzywilejowanemu zakresowi UID na hoście. Oznacza to, że proces może zachowywać się jak root dla wielu zadań wewnątrz kontenera, podczas gdy z punktu widzenia hosta ma znacznie mniejsze uprawnienia. Nie rozwiązuje to wszystkich problemów bezpieczeństwa kontenerów, ale znacząco zmienia konsekwencje przejęcia kontenera.
+Dzięki przestrzeniom nazw użytkownika proces może działać jako UID 0 wewnątrz kontenera, a jednocześnie odpowiadać zakresowi UID bez uprawnień na hoście. Oznacza to, że proces może zachowywać się jak root dla wielu zadań wewnątrz kontenera, będąc jednak znacznie mniej potężnym z perspektywy hosta. Nie rozwiązuje to wszystkich problemów bezpieczeństwa kontenerów, ale znacząco zmienia konsekwencje przejęcia kontenera.
 
 ## Działanie
 
-User namespace posiada pliki mapowania, takie jak `/proc/self/uid_map` i `/proc/self/gid_map`, które opisują jak ID w namespace tłumaczą się na ID rodzica. Jeśli root wewnątrz namespace mapowany jest na nieuprzywilejowany UID hosta, operacje wymagające prawdziwego roota na hoście po prostu nie mają takiej samej wagi. Dlatego user namespaces są centralne dla **rootless containers** i dlaczego są jedną z największych różnic między starszymi domyślnymi konfiguracjami containerów z rootem a nowocześniejszymi projektami opartymi na zasadzie najmniejszych uprawnień.
+Przestrzeń nazw użytkownika posiada pliki mapujące takie jak `/proc/self/uid_map` i `/proc/self/gid_map`, które opisują, jak identyfikatory przestrzeni nazw tłumaczą się na identyfikatory nadrzędne. Jeśli root wewnątrz przestrzeni nazw mapuje się na nieuprzywilejowany UID na hoście, operacje wymagające prawdziwego roota hosta po prostu nie mają tej samej wagi. Dlatego przestrzenie nazw użytkownika są kluczowe dla kontenerów bez uprawnień root i stanowią jedną z największych różnic między starszymi domyślnymi konfiguracjami kontenerów działających z uprawnieniami root a nowocześniejszymi projektami opartymi na zasadzie najmniejszych uprawnień.
 
-Punkt jest subtelny, ale kluczowy: root wewnątrz kontenera nie jest wyeliminowany, jest **przetłumaczony**. Proces nadal doświadcza środowiska podobnego do root lokalnie, ale host nie powinien traktować go jako pełnego roota.
+Sedno jest subtelne, ale kluczowe: root wewnątrz kontenera nie jest eliminowany, on jest **przekształcony**. Proces nadal doświadcza lokalnie środowiska przypominającego root, ale host nie powinien traktować go jako pełnego roota.
 
 ## Laboratorium
 
-Przykładowy test ręczny to:
+Test ręczny wygląda tak:
 ```bash
 unshare --user --map-root-user --fork bash
 id
 cat /proc/self/uid_map
 cat /proc/self/gid_map
 ```
-Dzięki temu bieżący użytkownik jest widziany jako root wewnątrz namespace, podczas gdy poza nim na hoście nadal nie jest rootem. To jedno z najlepszych prostych demo pokazujących, dlaczego user namespaces są tak wartościowe.
+To sprawia, że bieżący użytkownik jest widoczny jako root wewnątrz namespace, podczas gdy poza nim nadal nie jest rootem na hoście. Jest to jedno z najlepszych prostych demo wyjaśniających, dlaczego user namespaces są tak wartościowe.
 
 W kontenerach możesz porównać widoczne mapowanie z:
 ```bash
 docker run --rm debian:stable-slim sh -c 'id && cat /proc/self/uid_map'
 ```
-Dokładny wynik zależy od tego, czy silnik używa user namespace remapping, czy bardziej tradycyjnej rootful configuration.
+Dokładny wynik zależy od tego, czy silnik używa user namespace remapping, czy bardziej tradycyjnej konfiguracji rootful.
 
-Możesz również odczytać mapowanie po stronie hosta za pomocą:
+Możesz także odczytać mapowanie po stronie hosta za pomocą:
 ```bash
 cat /proc/<pid>/uid_map
 cat /proc/<pid>/gid_map
 ```
-## Runtime Usage
+## Użycie w czasie wykonywania
 
-Rootless Podman jest jednym z najjaśniejszych przykładów traktowania user namespaces jako pełnoprawnego mechanizmu bezpieczeństwa. Rootless Docker również od nich zależy. Docker's userns-remap poprawia bezpieczeństwo także w rootful daemon deployments, chociaż historycznie wiele wdrożeń wyłączało tę funkcję ze względów kompatybilności. Kubernetes support for user namespaces uległ poprawie, ale adopcja i ustawienia domyślne różnią się w zależności od runtime, distro i cluster policy. Systemy Incus/LXC również silnie polegają na UID/GID shifting i idmapping.
+Rootless Podman jest jednym z najczytelniejszych przykładów traktowania user namespaces jako mechanizmu bezpieczeństwa pierwszej klasy. Rootless Docker również od nich zależy. Obsługa userns-remap w Dockerze poprawia bezpieczeństwo także w wdrożeniach z rootful daemon, chociaż historycznie wiele instalacji pozostawiała ją wyłączoną ze względów kompatybilności. Wsparcie dla user namespaces w Kubernetes poprawiło się, ale adopcja i ustawienia domyślne różnią się w zależności od runtime, dystrybucji i polityki klastra. Systemy Incus/LXC również mocno polegają na przesuwaniu UID/GID i pomysłach idmapping.
 
-Ogólny trend jest jasny: środowiska, które poważnie wykorzystują user namespaces, zwykle lepiej odpowiadają na pytanie „co właściwie oznacza root w kontenerze?” niż środowiska, które tego nie robią.
+Ogólny trend jest jasny: środowiska, które poważnie używają user namespaces, zazwyczaj lepiej odpowiadają na pytanie „co właściwie oznacza root w kontenerze?” niż środowiska, które tego nie robią.
 
-## Advanced Mapping Details
+## Zaawansowane szczegóły mapowania
 
-Gdy proces bez uprawnień zapisuje do `uid_map` lub `gid_map`, kernel stosuje surowsze reguły niż wobec piszącego z uprzywilejowanej przestrzeni nazw rodzica. Dozwolone są tylko ograniczone mapowania, a w przypadku `gid_map` piszący zwykle musi najpierw wyłączyć `setgroups(2)`:
+Kiedy nieuprzywilejowany proces zapisuje do `uid_map` lub `gid_map`, jądro stosuje surowsze reguły niż wobec uprzywilejowanego piszącego w przestrzeni nazw nadrzędnej. Dozwolone są tylko ograniczone mapowania, a dla `gid_map` zazwyczaj trzeba najpierw wyłączyć `setgroups(2)`:
 ```bash
 cat /proc/self/setgroups
 echo deny > /proc/self/setgroups
 ```
-Ten szczegół ma znaczenie, ponieważ wyjaśnia, dlaczego konfiguracja user-namespace czasami zawodzi w rootless eksperymentach i dlaczego runtimes potrzebują starannej logiki pomocniczej dotyczącej delegowania UID/GID.
+Ta szczegółowość ma znaczenie, ponieważ wyjaśnia, dlaczego konfiguracja user-namespace czasami zawodzi w eksperymentach rootless i dlaczego runtimy potrzebują starannej logiki pomocniczej do delegowania UID/GID.
 
-Kolejną zaawansowaną funkcją jest **ID-mapped mount**. Zamiast zmieniać własność na dysku, ID-mapped mount aplikuje mapowanie user-namespace do mountu, tak że własność wydaje się być przetłumaczona w tym widoku mountu. Jest to szczególnie istotne w rootless i nowoczesnych runtimes, ponieważ pozwala używać współdzielonych ścieżek hosta bez potrzeby rekurencyjnego wykonywania `chown`. Z punktu widzenia bezpieczeństwa funkcja zmienia sposób, w jaki bind mount wydaje się być zapisywalny od wewnątrz namespace, mimo że nie przepisuje metadanych systemu plików.
+Kolejną zaawansowaną funkcją jest **ID-mapped mount**. Zamiast zmieniać własność na dysku, ID-mapped mount stosuje mapowanie user-namespace do mountu tak, że własność wydaje się być przetłumaczona w tym widoku mountu. Jest to szczególnie istotne w setupach rootless i nowoczesnych runtime'ach, ponieważ pozwala używać współdzielonych ścieżek hosta bez rekurencyjnych operacji `chown`. Z punktu widzenia bezpieczeństwa funkcja zmienia to, jak zapisywalny bind mount wygląda od środka namespace, mimo że nie przepisuje underlying filesystem metadata.
 
-Na koniec, pamiętaj, że gdy proces tworzy lub wchodzi do nowego user namespace, otrzymuje pełny zestaw capabilities **inside that namespace**. To nie oznacza, że nagle zyskał host-globalną władzę. Oznacza to, że te capabilities mogą być używane tylko tam, gdzie model namespace i inne zabezpieczenia na to pozwalają. Dlatego `unshare -U` może nagle umożliwić operacje uprzywilejowane związane z mountingiem lub lokalne dla namespace, bez bezpośredniego usuwania granicy roota hosta.
+Na koniec pamiętaj, że kiedy proces tworzy lub wchodzi do nowego user namespace, otrzymuje pełny capability set **inside that namespace**. To nie znaczy, że nagle zyskał host-globalne uprawnienia. Oznacza to, że te capabilities mogą być używane tylko tam, gdzie model namespace i inne zabezpieczenia na to pozwalają. To jest powód, dla którego `unshare -U` może nagle umożliwić mounting lub operacje uprzywilejowane lokalne dla namespace bez bezpośredniego zniknięcia granicy host root.
 
-## Błędy konfiguracji
+## Błędne konfiguracje
 
-Główną słabością jest po prostu nieużywanie user namespaces w środowiskach, gdzie byłyby możliwe. Jeśli container root mapuje się zbyt bezpośrednio do host root, zapisywalne host mounts i uprzywilejowane operacje jądra stają się znacznie bardziej niebezpieczne. Innym problemem jest wymuszanie współdzielenia host user namespace lub wyłączanie remappingu dla kompatybilności bez uznania, jak bardzo zmienia to trust boundary.
+Główną słabością jest po prostu nieużywanie user namespaces w środowiskach, gdzie byłyby możliwe. Jeśli container root mapuje się zbyt bezpośrednio do host root, zapisywalne host mounts i uprzywilejowane operacje kernela stają się znacznie bardziej niebezpieczne. Innym problemem jest wymuszanie współdzielenia host user namespace lub wyłączanie remappingu dla kompatybilności, bez rozpoznania, jak bardzo zmienia to trust boundary.
 
-User namespaces należy rozważać łącznie z resztą modelu. Nawet gdy są aktywne, szeroka ekspozycja runtime API lub bardzo słaba konfiguracja runtime może nadal umożliwić privilege escalation innymi ścieżkami. Ale bez nich wiele starych klas breakout staje się znacznie łatwiejszych do exploitowania.
+User namespaces powinny być także rozważane razem z resztą modelu. Nawet gdy są aktywne, szeroka ekspozycja runtime API lub bardzo słaba konfiguracja runtime może nadal pozwolić na privilege escalation innymi ścieżkami. Ale bez nich wiele starych klas breakout staje się dużo łatwiejszych do wykorzystania.
 
-## Nadużycia
+## Nadużycie
 
-Jeżeli container jest rootful bez separacji user namespace, zapisywalny host bind mount staje się znacznie bardziej niebezpieczny, ponieważ proces może rzeczywiście zapisywać jako host root. Niebezpieczne capabilities również nabierają większego znaczenia. Atakujący nie musi już tak bardzo walczyć z translation boundary, ponieważ ta granica praktycznie nie istnieje.
+Jeśli container jest rootful bez separacji user namespace, zapisywalny host bind mount staje się zdecydowanie bardziej niebezpieczny, ponieważ proces faktycznie może zapisywać jako host root. Niebezpieczne capabilities również stają się bardziej znaczące. Atakujący nie musi już tak bardzo walczyć z translation boundary, ponieważ ta granica praktycznie nie istnieje.
 
-Obecność lub brak user namespace powinno być sprawdzone wcześnie przy ocenie ścieżki breakout z container. Nie odpowiada na wszystkie pytania, ale natychmiast pokazuje, czy "root in container" ma bezpośrednie znaczenie dla hosta.
+Obecność lub brak user namespace powinien być sprawdzany wcześnie przy ocenianiu ścieżki container breakout. Nie odpowiada to na każde pytanie, ale od razu pokazuje, czy "root in container" ma bezpośrednie znaczenie dla hosta.
 
-Najbardziej praktyczny wzorzec nadużycia to potwierdzić mapowanie, a następnie natychmiast przetestować, czy zawartość zamontowana z hosta jest zapisywalna z uprawnieniami istotnymi dla hosta:
+Najbardziej praktyczny wzorzec nadużycia to potwierdzić mapping, a następnie od razu przetestować, czy host-mounted content jest zapisywalny z uprawnieniami istotnymi dla hosta:
 ```bash
 id
 cat /proc/self/uid_map
@@ -75,31 +75,31 @@ cat /proc/self/gid_map
 touch /host/tmp/userns_test 2>/dev/null && echo "host write works"
 ls -ln /host/tmp/userns_test 2>/dev/null
 ```
-Jeśli plik zostanie utworzony jako prawdziwy host root, izolacja user namespace jest w praktyce nieobecna dla tej ścieżki. W tym momencie klasyczne nadużycia plików hosta stają się realistyczne:
+Jeśli plik zostanie utworzony jako real host root, user namespace isolation jest w praktyce nieobecna dla tej ścieżki. W tym momencie klasyczne host-file abuses stają się realistyczne:
 ```bash
 echo 'x:x:0:0:x:/root:/bin/bash' >> /host/etc/passwd 2>/dev/null || echo "passwd write blocked"
 cat /host/etc/passwd | tail
 ```
-Bardziej bezpiecznym potwierdzeniem podczas testu na żywo jest zapisanie nieszkodliwego znacznika zamiast modyfikowania krytycznych plików:
+Bezpieczniejszym potwierdzeniem podczas oceny na żywo jest zapisanie nieszkodliwego znacznika zamiast modyfikowania krytycznych plików:
 ```bash
 echo test > /host/root/userns_marker 2>/dev/null
 ls -l /host/root/userns_marker 2>/dev/null
 ```
-Te kontrole są istotne, ponieważ szybko odpowiadają na kluczowe pytanie: czy root w tym kontenerze mapuje się wystarczająco blisko rootowi hosta, że zapisywalny host mount natychmiast staje się ścieżką do kompromitacji hosta?
+Te kontrole mają znaczenie, ponieważ szybko odpowiadają na zasadnicze pytanie: czy root w tym containerze jest odwzorowany wystarczająco blisko host root, aby writable host mount od razu stał się ścieżką kompromitacji hosta?
 
-### Pełny przykład: Odzyskiwanie namespace-local capabilities
+### Pełny przykład: odzyskanie Namespace-Local Capabilities
 
-Jeśli seccomp pozwala na `unshare`, a środowisko dopuszcza utworzenie nowego user namespace, proces może odzyskać pełny capability set wewnątrz tego nowego namespace:
+Jeśli seccomp pozwala na `unshare`, a środowisko dopuszcza nowy user namespace, proces może odzyskać pełen zestaw capabilities wewnątrz tego nowego namespace:
 ```bash
 unshare -UrmCpf bash
 grep CapEff /proc/self/status
 mount -t tmpfs tmpfs /mnt 2>/dev/null && echo "namespace-local mount works"
 ```
-Samo w sobie nie jest to host escape. Istotne jest to, że user namespaces mogą ponownie włączyć uprzywilejowane namespace-local actions, które później łączą się z weak mounts, vulnerable kernels lub badly exposed runtime surfaces.
+Samo w sobie nie jest to host escape. Istotne jest to, że user namespaces mogą ponownie włączać uprzywilejowane, lokalne dla namespace akcje, które później łączą się ze słabymi mounts, podatnymi kernels lub źle wystawionymi runtime surfaces.
 
 ## Sprawdzenia
 
-Te polecenia mają odpowiedzieć na najważniejsze pytanie na tej stronie: do czego root wewnątrz tego container mapuje się na host?
+Te polecenia mają na celu odpowiedzieć na najważniejsze pytanie na tej stronie: do czego root wewnątrz tego containera jest mapowany na hoście?
 ```bash
 readlink /proc/self/ns/user   # User namespace identifier
 id                            # Current UID/GID as seen inside the container
@@ -107,10 +107,11 @@ cat /proc/self/uid_map        # UID translation to parent namespace
 cat /proc/self/gid_map        # GID translation to parent namespace
 cat /proc/self/setgroups 2>/dev/null   # GID-mapping restrictions for unprivileged writers
 ```
-Co jest tu interesujące:
+Co jest tutaj interesujące:
 
-- Jeśli proces ma UID 0 i pliki maps pokazują bezpośrednie lub bardzo bliskie mapowanie host-root, kontener jest znacznie bardziej niebezpieczny.
-- Jeśli root mapuje się na nieuprzywilejowany zakres hosta, to stanowi znacznie bezpieczniejszy punkt wyjścia i zazwyczaj wskazuje na rzeczywistą izolację user namespace.
-- Pliki mapowań są bardziej wartościowe niż samo `id`, ponieważ `id` pokazuje tylko tożsamość lokalną w namespace.
+- Jeśli proces jest UID 0 i maps pokazują bezpośrednie lub bardzo bliskie host-root mapping, container jest znacznie bardziej niebezpieczny.
+- Jeśli root maps to unprivileged host range, to znacznie bezpieczniejszy baseline i zwykle wskazuje na real user namespace isolation.
+- mapping files są bardziej wartościowe niż `id` samo w sobie, ponieważ `id` pokazuje tylko namespace-local identity.
 
-Jeśli workload działa jako UID 0, a mapowanie pokazuje, że odpowiada to blisko host root, powinieneś interpretować pozostałe uprawnienia kontenera znacznie surowiej.
+Jeśli workload działa jako UID 0 i mapping pokazuje, że odpowiada to blisko host root, powinieneś interpretować resztę container's privileges znacznie bardziej restrykcyjnie.
+{{#include ../../../../../banners/hacktricks-training.md}}

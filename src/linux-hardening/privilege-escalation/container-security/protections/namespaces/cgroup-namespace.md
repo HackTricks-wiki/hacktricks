@@ -1,75 +1,78 @@
-# Przestrzeń nazw cgroup
+# cgroup Namespace
 
 {{#include ../../../../../banners/hacktricks-training.md}}
 
 ## Przegląd
 
-Przestrzeń nazw cgroup nie zastępuje cgroups i sama w sobie nie wymusza limitów zasobów. Zamiast tego zmienia **sposób, w jaki hierarchia cgroup jest widoczna** dla procesu. Innymi słowy wirtualizuje widoczne informacje o ścieżce cgroup, tak że aplikacja widzi widok ograniczony do kontenera zamiast pełnej hierarchii hosta.
+cgroup namespace nie zastępuje cgroups i sam z siebie nie wymusza limitów zasobów. Zamiast tego zmienia **to, jak hierarchia cgroup jest widoczna** dla procesu. Innymi słowy, wirtualizuje widoczne informacje o ścieżkach cgroup, tak aby workload widział widok ograniczony do kontenera zamiast pełnej hierarchii hosta.
 
-To przede wszystkim funkcja ograniczająca widoczność i ilość ujawnianych informacji. Pomaga sprawić, że środowisko wygląda na samodzielne i ujawnia mniej o układzie cgroup hosta. Może to brzmieć nieistotnie, ale ma znaczenie, ponieważ niepotrzebna widoczność struktury hosta może ułatwić rozpoznanie i upraszczać łańcuchy exploitów zależne od środowiska.
+To przede wszystkim funkcja zmniejszająca widoczność i ilość ujawnianych informacji. Pomaga sprawić, że środowisko wygląda na samodzielne i ujawnia mniej o układzie cgroup hosta. Może to brzmieć niepozornie, ale ma znaczenie — zbędna widoczność struktury hosta może ułatwiać rozpoznanie i upraszczać łańcuchy exploitów zależne od środowiska.
 
 ## Działanie
 
-Bez prywatnej przestrzeni nazw cgroup proces może widzieć ścieżki cgroup względem hosta, które ujawniają więcej hierarchii maszyny niż jest to użyteczne. Z prywatną przestrzenią nazw cgroup `/proc/self/cgroup` i powiązane obserwacje stają się bardziej zlokalizowane w widoku samego kontenera. Jest to szczególnie pomocne w nowoczesnych stosach runtime, które chcą, aby aplikacja widziała czyściejsze, mniej ujawniające hosta środowisko.
+Bez prywatnego cgroup namespace proces może widzieć ścieżki cgroup względem hosta, które ujawniają więcej hierarchii maszyny niż jest użyteczne. Z prywatnym cgroup namespace `/proc/self/cgroup` i powiązane obserwacje stają się bardziej zlokalizowane do widoku kontenera. To jest szczególnie pomocne w nowoczesnych środowiskach uruchomieniowych, które chcą, aby workload widział czystsze środowisko ujawniające mniej informacji o hoście.
 
 ## Laboratorium
 
-Możesz zbadać przestrzeń nazw cgroup za pomocą:
+Możesz zbadać cgroup namespace za pomocą:
 ```bash
 sudo unshare --cgroup --fork bash
 cat /proc/self/cgroup
 ls -l /proc/self/ns/cgroup
 ```
-I porównaj zachowanie podczas działania z:
+I porównaj zachowanie podczas wykonywania z:
 ```bash
 docker run --rm debian:stable-slim cat /proc/self/cgroup
 docker run --rm --cgroupns=host debian:stable-slim cat /proc/self/cgroup
 ```
-Zmiana dotyczy głównie tego, co proces może zobaczyć, a nie tego, czy egzekwowanie cgroup istnieje.
+The change is mostly about what the process can see, not about whether cgroup enforcement exists.
 
 ## Wpływ na bezpieczeństwo
 
-cgroup namespace najlepiej rozumieć jako **warstwę utrudniającą widoczność**. Sama w sobie nie powstrzyma container breakout, jeśli kontener ma zapisywalne cgroup mounts, szerokie capabilities lub niebezpieczne środowisko cgroup v1. Jednak jeśli host cgroup namespace jest współdzielona, proces dowiaduje się więcej o organizacji systemu i może łatwiej dopasować host-relative cgroup paths do innych obserwacji.
+The cgroup namespace is best understood as a **warstwa ograniczająca widoczność**. Sama w sobie nie zatrzyma breakout, jeśli container ma zapisywalne cgroup mounts, szerokie capabilities lub niebezpieczne środowisko cgroup v1. Jednak jeśli host cgroup namespace jest współdzielona, proces dowiaduje się więcej o tym, jak system jest zorganizowany i może łatwiej dopasować host-relative cgroup paths do innych obserwacji.
 
-Więc chociaż ten namespace zwykle nie jest gwiazdą opisów container breakout, nadal przyczynia się do szerszego celu minimalizowania ujawniania informacji o hoście.
+So while this namespace is not usually the star of container breakout writeups, it still contributes to the broader goal of minimizing host information leakage.
 
-## Nadużycia
+## Nadużycie
 
-Bezpośrednia wartość nadużycia to głównie rozpoznanie. Jeśli host cgroup namespace jest współdzielona, porównaj widoczne ścieżki i szukaj szczegółów hierarchii ujawniających informacje o hoście:
+The immediate abuse value is mostly reconnaissance. If the host cgroup namespace is shared, compare the visible paths and look for host-revealing hierarchy details:
 ```bash
 readlink /proc/self/ns/cgroup
 cat /proc/self/cgroup
 cat /proc/1/cgroup 2>/dev/null
 ```
-Jeśli zapisywalne ścieżki cgroup są również odsłonięte, połącz tę widoczność z wyszukiwaniem niebezpiecznych, przestarzałych interfejsów:
+Jeżeli zapisywalne ścieżki cgroup są również widoczne, połącz tę widoczność z wyszukiwaniem niebezpiecznych przestarzałych interfejsów:
 ```bash
 find /sys/fs/cgroup -maxdepth 3 -name release_agent 2>/dev/null -exec ls -l {} \;
 find /sys/fs/cgroup -maxdepth 3 -writable 2>/dev/null | head -n 50
 ```
-The namespace itself rarely gives instant escape, but it often makes the environment easier to map before testing cgroup-based abuse primitives.
+Sam namespace rzadko daje natychmiastowy escape, ale często ułatwia zmapowanie środowiska przed testowaniem cgroup-based abuse primitives.
 
 ### Pełny przykład: Shared cgroup Namespace + Writable cgroup v1
 
-Sam cgroup namespace zwykle nie wystarcza do escape. Praktyczna escalation ma miejsce, gdy host-revealing cgroup paths są połączone z writable cgroup v1 interfaces:
+Sam cgroup namespace zazwyczaj nie wystarcza do escape. Praktyczna eskalacja następuje, gdy host-revealing cgroup paths zostaną połączone z writable cgroup v1 interfaces:
 ```bash
 cat /proc/self/cgroup
 find /sys/fs/cgroup -maxdepth 3 -name release_agent 2>/dev/null
 find /sys/fs/cgroup -maxdepth 3 -name notify_on_release 2>/dev/null | head
 ```
-Jeśli te pliki są osiągalne i zapisywalne, pivot immediately into the full `release_agent` exploitation flow from [cgroups.md](../cgroups.md). Skutkiem jest wykonanie kodu na hoście z wnętrza kontenera.
+Jeśli te pliki są osiągalne i zapisywalne, natychmiast przejdź do pełnego procesu eksploatacji `release_agent` z [cgroups.md](../cgroups.md). Skutkiem jest wykonanie kodu na hoście z wnętrza kontenera.
 
-Bez zapisywalnych cgroup interfaces wpływ jest zwykle ograniczony do reconnaissance.
+Bez zapisywalnych interfejsów cgroup, wpływ zwykle ogranicza się do rozpoznania.
 
 ## Sprawdzenia
 
-Celem tych poleceń jest sprawdzenie, czy proces ma prywatny cgroup namespace view, czy też dowiaduje się więcej o hierarchii hosta niż naprawdę potrzebuje.
+Celem tych poleceń jest sprawdzenie, czy proces ma prywatny widok cgroup namespace, czy też uzyskuje więcej informacji o hierarchii hosta, niż jest mu to naprawdę potrzebne.
 ```bash
 readlink /proc/self/ns/cgroup   # Namespace identifier for cgroup view
 cat /proc/self/cgroup           # Visible cgroup paths from inside the workload
 mount | grep cgroup             # Mounted cgroup filesystems and their type
 ```
-- Jeśli identyfikator namespace pasuje do procesu hosta, którym się interesujesz, cgroup namespace może być współdzielona.
-- Ścieżki ujawniające hosta w `/proc/self/cgroup` są przydatne do rozpoznania, nawet jeśli nie są bezpośrednio eksploatowalne.
-- Jeśli punkty montowania cgroup są także zapisywalne, kwestia widoczności staje się znacznie ważniejsza.
+Co jest tutaj istotne:
 
-Cgroup namespace należy traktować jako warstwę utwardzającą widoczność, a nie jako główny mechanizm zapobiegający ucieczkom. Niepotrzebne ujawnianie struktury cgroup hosta zwiększa wartość rozpoznawczą dla atakującego.
+- Jeśli identyfikator przestrzeni nazw pasuje do procesu hosta, którym się interesujesz, przestrzeń nazw cgroup może być współdzielona.
+- Ścieżki ujawniające informacje o hoście w `/proc/self/cgroup` są użyteczne do rozpoznania, nawet jeśli nie są bezpośrednio eksploatowalne.
+- Jeśli punkty montowania cgroup są również zapisywalne, kwestia widoczności staje się znacznie ważniejsza.
+
+Przestrzeń nazw cgroup powinna być traktowana jako warstwa wzmacniająca ochronę widoczności, a nie jako podstawowy mechanizm zapobiegania ucieczkom. Niepotrzebne ujawnianie struktury cgroup hosta zwiększa wartość rozpoznania dla atakującego.
+{{#include ../../../../../banners/hacktricks-training.md}}

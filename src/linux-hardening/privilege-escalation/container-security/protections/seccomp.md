@@ -4,21 +4,21 @@
 
 ## Przegląd
 
-**seccomp** to mechanizm, który pozwala kernelowi zastosować filtr do syscalli, które proces może wywołać. W środowiskach konteneryzowanych seccomp jest zwykle używany w trybie filtra, tak aby proces nie był po prostu oznaczony jako "restricted" w niejasnym sensie, lecz podlegał konkretnej polityce syscalli. Ma to znaczenie, ponieważ wiele container breakouts wymaga dostępu do bardzo specyficznych interfejsów kernela. Jeśli proces nie może pomyślnie wywołać odpowiednich syscalli, duża klasa ataków znika, zanim jakiekolwiek niuanse namespaces czy capabilities staną się istotne.
+**seccomp** to mechanizm, który pozwala kernelowi zastosować filtr do syscalli, które proces może wywołać. W środowiskach konteneryzowanych seccomp jest zwykle używany w trybie filtrów, dzięki czemu proces nie jest jedynie oznaczony jako "restricted" w ogólnym sensie, lecz podlega konkretnej polityce syscalli. Ma to znaczenie, ponieważ wiele ucieczek z kontenera wymaga dostępu do bardzo konkretnych interfejsów jądra. Jeśli proces nie może pomyślnie wywołać odpowiednich syscalli, duża klasa ataków znika, zanim niuanse związane z namespaces czy capabilities staną się istotne.
 
-Podstawowy model myślenia jest prosty: namespaces decydują **co proces może zobaczyć**, capabilities decydują **jakie uprzywilejowane działania proces może nominalnie próbować wykonać**, a seccomp decyduje **czy kernel w ogóle zaakceptuje punkt wejścia syscall dla podejmowanej akcji**. Dlatego seccomp często uniemożliwia ataki, które na podstawie samych capabilities wyglądałyby na możliwe.
+Główny model myślowy jest prosty: namespaces decydują **co proces może zobaczyć**, capabilities decydują **które uprzywilejowane działania proces nominalnie może próbować wykonać**, a seccomp decyduje **czy kernel w ogóle zaakceptuje punkt wejścia syscall dla próby wykonania danej operacji**. Dlatego seccomp często zapobiega atakom, które inaczej wyglądałyby na możliwe tylko na podstawie samych capabilities.
 
 ## Wpływ na bezpieczeństwo
 
-Wiele niebezpiecznych powierzchni kernela jest dostępnych jedynie przez stosunkowo niewielki zbiór syscalli. Przykłady, które wielokrotnie mają znaczenie przy hardeningu kontenerów, to `mount`, `unshare`, `clone` lub `clone3` z określonymi flagami, `bpf`, `ptrace`, `keyctl` i `perf_event_open`. Atakujący, który ma dostęp do tych syscalli, może być w stanie utworzyć nowe namespaces, manipulować subsystemami kernela lub oddziaływać z powierzchnią ataku, której normalny kontener aplikacji wcale nie potrzebuje.
+Duża część niebezpiecznej powierzchni jądra jest dostępna tylko przez stosunkowo niewielki zbiór syscalli. Przykłady, które wielokrotnie mają znaczenie przy hardeningu kontenerów, to `mount`, `unshare`, `clone` lub `clone3` z określonymi flagami, `bpf`, `ptrace`, `keyctl` oraz `perf_event_open`. Atakujący, który ma dostęp do tych syscalli, może być w stanie utworzyć nowe namespaces, manipulować podsystemami jądra lub oddziaływać z powierzchnią ataku, której zwykły kontener aplikacyjny w ogóle nie potrzebuje.
 
-Dlatego domyślne profile seccomp w runtime są tak ważne. Nie są one jedynie "dodatkową obroną". W wielu środowiskach stanowią różnicę między kontenerem, który może korzystać z szerokiej części funkcjonalności kernela, a takim, który jest ograniczony do zestawu syscalli bliższego temu, czego aplikacja rzeczywiście potrzebuje.
+Dlatego domyślne profile seccomp w runtime są tak ważne. Nie są one jedynie "dodatkową obroną". W wielu środowiskach stanowią różnicę między kontenerem, który może korzystać z szerokiej części funkcjonalności jądra, a takim, którego powierzchnia syscalli jest ograniczona do tego, czego aplikacja rzeczywiście potrzebuje.
 
-## Tryby i budowa filtra
+## Tryby i konstrukcja filtra
 
-Seccomp historycznie miał tryb strict, w którym dostępny pozostawał tylko niewielki zestaw syscalli, ale tryb istotny dla nowoczesnych container runtimes to seccomp filter mode, często nazywany **seccomp-bpf**. W tym modelu kernel ocenia program filtra, który decyduje, czy syscall powinien być dozwolony, odrzucony z errno, przechwycony, zalogowany, lub spowodować zabicie procesu. Container runtimes wykorzystują ten mechanizm, ponieważ jest wystarczająco ekspresyjny, by blokować szerokie klasy niebezpiecznych syscalli, a jednocześnie pozwalać na normalne zachowanie aplikacji.
+seccomp historycznie miał tryb ścisły, w którym dostępny pozostawał tylko bardzo mały zestaw syscalli, ale trybem istotnym dla nowoczesnych runtime'ów kontenerowych jest tryb filtra seccomp, często nazywany **seccomp-bpf**. W tym modelu kernel ocenia program filtra, który decyduje, czy syscall ma być dozwolony, odrzucony z errno, przechwycony (trapped), zalogowany, czy też ma zakończyć proces. Runtime'y kontenerów używają tego mechanizmu, ponieważ jest wystarczająco ekspresyjny, by blokować szerokie klasy niebezpiecznych syscalli, a jednocześnie pozwalać na normalne działanie aplikacji.
 
-Dwa niskopoziomowe przykłady są przydatne, ponieważ czynią mechanizm konkretnym zamiast magicznym. Tryb strict demonstruje stary model "przetrwa tylko minimalny zestaw syscalli":
+Dwa niskopoziomowe przykłady są użyteczne, ponieważ sprawiają, że mechanizm jest konkretny, a nie magiczny. Tryb ścisły demonstruje stary model "tylko minimalny zestaw syscalli przetrwa":
 ```c
 #include <fcntl.h>
 #include <linux/seccomp.h>
@@ -35,9 +35,9 @@ write(output, val, strlen(val) + 1);
 open("output.txt", O_RDONLY);
 }
 ```
-Ostatnie `open` powoduje zabicie procesu, ponieważ nie jest częścią minimalnego zestawu trybu strict.
+Ostatnie wywołanie `open` powoduje zabicie procesu, ponieważ nie jest częścią minimalnego zestawu trybu ścisłego.
 
-Przykład filtra libseccomp wyraźniej pokazuje nowoczesny model polityki:
+Przykład filtra libseccomp pokazuje nowoczesny model polityki bardziej przejrzyście:
 ```c
 #include <errno.h>
 #include <seccomp.h>
@@ -59,21 +59,22 @@ seccomp_release(ctx);
 printf("pid=%d\n", getpid());
 }
 ```
-Taki styl polityki powinni sobie wyobrazić większość czytelników, gdy myślą o runtime seccomp profiles.
+Ten styl polityki to obraz, jaki większość czytelników powinna mieć na myśli, gdy myśli o runtime seccomp profiles.
 
-## Laboratorium
+## Lab
 
-Najprostszy sposób, aby potwierdzić, że seccomp jest aktywny w containerze, to:
+Prosty sposób, aby potwierdzić, że seccomp jest aktywny w containerze, to:
 ```bash
 docker run --rm debian:stable-slim sh -c 'grep Seccomp /proc/self/status'
 docker run --rm --security-opt seccomp=unconfined debian:stable-slim sh -c 'grep Seccomp /proc/self/status'
 ```
-Możesz też spróbować operacji, którą domyślne profile zwykle ograniczają:
+Możesz także spróbować operacji, którą profile domyślne często ograniczają:
 ```bash
 docker run --rm debian:stable-slim sh -c 'apt-get update >/dev/null 2>&1 && apt-get install -y util-linux >/dev/null 2>&1 && unshare -Ur true'
 ```
-Jeśli kontener działa pod zwykłym domyślnym profilem seccomp, operacje w stylu `unshare` są często blokowane. To przydatna demonstracja, ponieważ pokazuje, że nawet jeśli narzędzie userspace istnieje w obrazie, ścieżka jądra, której potrzebuje, może być nadal niedostępna.
-Jeśli kontener działa pod zwykłym domyślnym profilem seccomp, operacje w stylu `unshare` są często blokowane, nawet gdy narzędzie userspace istnieje w obrazie.
+Jeśli kontener działa pod normalnym domyślnym profilem seccomp, operacje typu `unshare` są często zablokowane. To przydatna demonstracja, ponieważ pokazuje, że nawet jeśli narzędzie userspace istnieje w obrazie, ścieżka w jądrze, której potrzebuje, nadal może być niedostępna.
+
+Jeśli kontener działa pod normalnym domyślnym profilem seccomp, operacje typu `unshare` są często zablokowane nawet gdy narzędzie userspace istnieje w obrazie.
 
 Aby ogólniej sprawdzić status procesu, uruchom:
 ```bash
@@ -81,13 +82,13 @@ grep -E 'Seccomp|NoNewPrivs' /proc/self/status
 ```
 ## Użycie w czasie wykonywania
 
-Docker obsługuje zarówno domyślne, jak i niestandardowe profile seccomp i pozwala administratorom wyłączyć je za pomocą `--security-opt seccomp=unconfined`. Podman oferuje podobne wsparcie i często łączy seccomp z uruchamianiem bez uprawnień root, co daje rozsądne ustawienia domyślne. Kubernetes udostępnia seccomp przez konfigurację workload, gdzie `RuntimeDefault` zazwyczaj jest rozsądną wartością bazową, a `Unconfined` powinno być traktowane jako wyjątek wymagający uzasadnienia, a nie jako wygodny przełącznik.
+Docker obsługuje zarówno domyślne, jak i niestandardowe profile seccomp i pozwala administratorom wyłączyć je za pomocą `--security-opt seccomp=unconfined`. Podman oferuje podobne wsparcie i często łączy seccomp z uruchamianiem bez uprawnień root jako sensowną konfigurację domyślną. Kubernetes udostępnia seccomp poprzez konfigurację workload, gdzie `RuntimeDefault` zwykle stanowi rozsądne wyjście bazowe, a `Unconfined` powinien być traktowany jako wyjątek wymagający uzasadnienia, a nie jako wygodny przełącznik.
 
-W środowiskach opartych na containerd i CRI-O dokładna ścieżka jest bardziej wielowarstwowa, ale zasada jest taka sama: silnik wyższego poziomu lub orchestrator decyduje, co ma się stać, a runtime ostatecznie instaluje wynikową politykę seccomp dla procesu kontenera. Wynik nadal zależy od końcowej konfiguracji runtime, która dociera do jądra.
+W środowiskach opartych na containerd i CRI-O dokładna ścieżka jest bardziej wielowarstwowa, ale zasada pozostaje ta sama: silnik wyższego poziomu lub orchestrator decyduje, co powinno się wydarzyć, a runtime ostatecznie instaluje wynikową politykę seccomp dla procesu kontenera. Efekt końcowy nadal zależy od ostatecznej konfiguracji runtime, która dociera do jądra.
 
 ### Przykład niestandardowej polityki
 
-Docker i podobne silniki mogą załadować niestandardowy profil seccomp z JSON. Minimalny przykład, który odrzuca `chmod`, jednocześnie pozwalając na wszystko inne, wygląda tak:
+Docker i podobne silniki mogą załadować niestandardowy profil seccomp z JSON. Minimalny przykład, który odmawia `chmod`, a jednocześnie pozwala na wszystko inne, wygląda tak:
 ```json
 {
 "defaultAction": "SCMP_ACT_ALLOW",
@@ -99,45 +100,45 @@ Docker i podobne silniki mogą załadować niestandardowy profil seccomp z JSON.
 ]
 }
 ```
-Nie dołączyłeś treści pliku. Proszę wklej zawartość pliku src/linux-hardening/privilege-escalation/container-security/protections/seccomp.md, który mam przetłumaczyć na polski — zachowam dokładnie tę samą składnię markdown/HTML i nie będę tłumaczyć tagów, linków ani ścieżek.
+Zastosowano przy użyciu:
 ```bash
 docker run --rm -it --security-opt seccomp=/path/to/profile.json busybox chmod 400 /etc/hosts
 ```
-Polecenie kończy się błędem `Operation not permitted`, co pokazuje, że ograniczenie wynika z polityki syscalli, a nie tylko z zwykłych uprawnień plików. W praktycznym utwardzaniu systemu allowlists są zazwyczaj silniejsze niż permisywne domyślne ustawienia z małym blacklist.
+Polecenie kończy się błędem `Operation not permitted`, co pokazuje, że ograniczenie wynika z polityki syscalli, a nie tylko z zwykłych uprawnień do plików. W praktycznym hardeningu listy dozwolonych są zazwyczaj silniejsze niż permisywne ustawienia domyślne z małą czarną listą.
 
-## Misconfigurations
+## Błędne konfiguracje
 
-Najpoważniejszym błędem jest ustawienie seccomp na **unconfined**, ponieważ aplikacja nie działała przy domyślnej polityce. To częste podczas rozwiązywania problemów i bardzo niebezpieczne jako stałe rozwiązanie. Po usunięciu filtra wiele prymitywów ucieczki opartych na syscallach znów staje się osiągalnych, szczególnie jeśli dostępne są potężne capabilities lub współdzielony namespace hosta.
+Największym błędem jest ustawienie seccomp na **unconfined** tylko dlatego, że aplikacja nie działała pod domyślną polityką. Często zdarza się to podczas rozwiązywania problemów i jest bardzo niebezpieczne jako trwałe rozwiązanie. Gdy filtr zniknie, wiele prymitywów ucieczki opartych na syscallach stanie się znowu osiągalnych, szczególnie gdy obecne są potężne capabilities lub współdzielenie przestrzeni nazw hosta.
 
-Kolejnym częstym problemem jest użycie **custom permissive profile**, skopiowanego z jakiegoś bloga lub wewnętrznego workaroundu bez dokładnej weryfikacji. Zespoły czasem pozostawiają prawie wszystkie niebezpieczne syscalle, po prostu dlatego, że profil był zbudowany wokół „przestań łamać aplikację” zamiast „przyznaj tylko to, czego aplikacja naprawdę potrzebuje”. Trzeci błąd polega na założeniu, że seccomp jest mniej ważny dla non-root containers. W rzeczywistości sporo powierzchni ataku jądra pozostaje istotne nawet gdy proces nie ma UID 0.
+Kolejnym częstym problemem jest użycie **custom permissive profile**, skopiowanego z jakiegoś bloga lub wewnętrznego obejścia bez dokładnego przeglądu. Zespoły czasem pozostawiają niemal wszystkie niebezpieczne syscalli tylko dlatego, że profil powstał wokół założenia „przestań psuć aplikację” zamiast „przyznaj tylko to, czego aplikacja faktycznie potrzebuje”. Trzecim błędnym założeniem jest traktowanie seccomp jako mniej istotnego w przypadku kontenerów niebędących rootem. W rzeczywistości znacząca powierzchnia ataku jądra pozostaje istotna nawet gdy proces nie ma UID 0.
 
-## Abuse
+## Nadużycia
 
-Jeśli seccomp jest nieobecny lub poważnie osłabiony, atakujący może wywołać syscalle tworzące namespace, rozszerzyć osiągalną powierzchnię ataku jądra przez `bpf` lub `perf_event_open`, nadużyć `keyctl`, albo połączyć te ścieżki syscalli z niebezpiecznymi capability, takimi jak `CAP_SYS_ADMIN`. W wielu rzeczywistych atakach seccomp nie jest jedynym brakującym mechanizmem kontroli, ale jego brak skraca ścieżkę exploitu dramatycznie, ponieważ usuwa jedną z nielicznych obron, które mogą zatrzymać ryzykowny syscall zanim reszta modelu uprawnień zacznie działać.
+Jeśli seccomp jest nieobecny lub mocno osłabiony, atakujący może być w stanie wywołać syscall'e tworzenia przestrzeni nazw, rozszerzyć osiągalną powierzchnię ataku jądra przez `bpf` lub `perf_event_open`, nadużyć `keyctl`, lub połączyć te ścieżki syscalli z niebezpiecznymi capabilities, takimi jak `CAP_SYS_ADMIN`. W wielu rzeczywistych atakach seccomp nie jest jedynym brakującym mechanizmem kontroli, ale jego nieobecność znacznie skraca ścieżkę exploita, ponieważ usuwa jedną z nielicznych obron, które mogą zatrzymać ryzykowny syscall zanim reszta modelu uprawnień zacznie działać.
 
-Najbardziej praktycznym testem jest wypróbowanie dokładnych rodzin syscalli, które domyślne profile zwykle blokują. Jeśli nagle działają, stan zabezpieczeń kontenera uległ dużej zmianie:
+Najbardziej użytecznym praktycznym testem jest wypróbowanie dokładnych rodzin syscalli, które domyślne profile zwykle blokują. Jeśli nagle zaczną działać, postawa kontenera uległa dużej zmianie:
 ```bash
 grep Seccomp /proc/self/status
 unshare -Ur true 2>/dev/null && echo "unshare works"
 unshare -m true 2>/dev/null && echo "mount namespace creation works"
 ```
-Jeśli `CAP_SYS_ADMIN` lub inna silna capability jest obecna, sprawdź, czy seccomp jest jedyną brakującą barierą przed mount-based abuse:
+Jeśli obecne jest `CAP_SYS_ADMIN` lub inne silne capability, sprawdź, czy seccomp jest jedyną brakującą barierą przed mount-based abuse:
 ```bash
 capsh --print | grep cap_sys_admin
 mkdir -p /tmp/m
 mount -t tmpfs tmpfs /tmp/m 2>/dev/null && echo "tmpfs mount works"
 mount -t proc proc /tmp/m 2>/dev/null && echo "proc mount works"
 ```
-Na niektórych celach natychmiastowa wartość nie polega na pełnym escape, lecz na information gathering i kernel attack-surface expansion. Te polecenia pomagają ustalić, czy szczególnie wrażliwe syscall paths są osiągalne:
+W przypadku niektórych celów bezpośrednią wartością nie jest pełne escape, lecz information gathering i kernel attack-surface expansion. Te polecenia pomagają ustalić, czy szczególnie wrażliwe syscall paths są osiągalne:
 ```bash
 which unshare nsenter strace 2>/dev/null
 strace -e bpf,perf_event_open,keyctl true 2>&1 | tail
 ```
-Jeśli seccomp jest nieobecny i kontener jest dodatkowo uprzywilejowany w innych aspektach, wtedy ma sens przejście do bardziej szczegółowych technik breakout, które zostały już udokumentowane na stronach legacy container-escape.
+Jeśli seccomp jest nieobecny, a kontener jest również uprzywilejowany w innych aspektach, wtedy ma sens przejście do bardziej specyficznych technik breakout już udokumentowanych na stronach legacy container-escape.
 
 ### Pełny przykład: seccomp był jedyną rzeczą blokującą `unshare`
 
-Na wielu celach praktyczny efekt usunięcia seccomp jest taki, że wywołania systemowe związane z tworzeniem namespace'ów lub mount nagle zaczynają działać. Jeśli kontener ma również `CAP_SYS_ADMIN`, następująca sekwencja może stać się możliwa:
+W wielu przypadkach praktyczny skutek usunięcia seccomp jest taki, że namespace-creation lub mount syscalls nagle zaczynają działać. Jeśli kontener ma również `CAP_SYS_ADMIN`, następująca sekwencja może stać się możliwa:
 ```bash
 grep Seccomp /proc/self/status
 capsh --print | grep cap_sys_admin
@@ -149,11 +150,11 @@ mount -t proc proc /tmp/nsroot/proc &&
 mount | grep /tmp/nsroot
 '
 ```
-Sam w sobie to jeszcze nie jest host escape, ale pokazuje, że seccomp był barierą uniemożliwiającą mount-related exploitation.
+Samo w sobie nie stanowi jeszcze host escape, ale pokazuje, że seccomp był barierą uniemożliwiającą mount-related exploitation.
 
 ### Pełny przykład: seccomp wyłączony + cgroup v1 `release_agent`
 
-Jeśli seccomp jest wyłączony i container może zamontować hierarchie cgroup v1, technika `release_agent` z sekcji cgroups staje się osiągalna:
+Jeśli seccomp jest wyłączony i kontener może mount cgroup v1 hierarchies, technika `release_agent` z sekcji cgroups staje się osiągalna:
 ```bash
 grep Seccomp /proc/self/status
 mount | grep cgroup
@@ -166,31 +167,32 @@ echo /proc/self/exe > /tmp/c/release_agent
 while true; do sleep 1; done
 '
 ```
-To nie jest seccomp-only exploit. Chodzi o to, że gdy seccomp przestanie być ograniczony, syscall-heavy breakout chains, które wcześniej były blokowane, mogą zacząć działać dokładnie tak, jak zostały napisane.
+To nie jest exploit dotyczący wyłącznie seccomp. Chodzi o to, że gdy seccomp przestanie być ograniczony, syscall-heavy breakout chains, które wcześniej były blokowane, mogą zacząć działać dokładnie tak, jak zostały napisane.
 
-## Sprawdzenia
+## Checks
 
-Celem tych sprawdzeń jest ustalenie, czy seccomp jest w ogóle aktywny, czy towarzyszy mu `no_new_privs`, oraz czy konfiguracja runtime wyraźnie pokazuje, że seccomp jest wyłączony.
+Celem tych kontroli jest ustalenie, czy seccomp jest w ogóle aktywny, czy towarzyszy mu `no_new_privs`, oraz czy konfiguracja runtime wyraźnie pokazuje, że seccomp został wyłączony.
 ```bash
 grep Seccomp /proc/self/status                               # Current seccomp mode from the kernel
 cat /proc/self/status | grep NoNewPrivs                      # Whether exec-time privilege gain is also blocked
 docker inspect <container> | jq '.[0].HostConfig.SecurityOpt'   # Runtime security options, including seccomp overrides
 ```
-Co jest tutaj interesujące:
+Co jest tu interesujące:
 
-- Niezerowa wartość `Seccomp` oznacza, że filtrowanie jest aktywne; `0` zwykle oznacza brak ochrony seccomp.
-- Jeśli opcje zabezpieczeń runtime zawierają `seccomp=unconfined`, kontener stracił jedną z najważniejszych obron na poziomie syscall.
-- `NoNewPrivs` nie jest samym seccomp, ale widok obu razem zwykle wskazuje na bardziej ostrożną postawę hardeningu niż brak obu.
+- Wartość `Seccomp` różna od zera oznacza, że filtrowanie jest aktywne; `0` zwykle oznacza brak ochrony seccomp.
+- Jeśli opcje bezpieczeństwa runtime zawierają `seccomp=unconfined`, workload utracił jedną z najważniejszych obron na poziomie wywołań systemowych.
+- `NoNewPrivs` nie jest samym seccompem, ale widok obu jednocześnie zwykle wskazuje na bardziej staranne podejście do hardeningu niż brak któregokolwiek.
 
-Jeśli kontener już ma podejrzane mounts, broad capabilities, lub shared host namespaces, a seccomp jest również unconfined, tę kombinację należy traktować jako poważny sygnał eskalacji. Kontener nadal może nie być trywialnie przełamany, ale liczba punktów wejścia do jądra dostępnych dla atakującego gwałtownie wzrosła.
+Jeżeli kontener ma już podejrzane punkty montowania, szerokie capabilities lub współdzielone host namespaces, a seccomp jest również unconfined, taka kombinacja powinna być traktowana jako poważny sygnał eskalacji. Kontener może nadal nie być łatwo przełamany, ale liczba punktów wejścia do jądra dostępnych dla atakującego znacznie wzrosła.
 
-## Domyślne ustawienia środowiska uruchomieniowego
+## Domyślne ustawienia runtime
 
 | Runtime / platform | Default state | Default behavior | Common manual weakening |
 | --- | --- | --- | --- |
-| Docker Engine | Zazwyczaj włączone domyślnie | Używa wbudowanego domyślnego profilu seccomp Dockera, chyba że zostanie nadpisany | `--security-opt seccomp=unconfined`, `--security-opt seccomp=/path/profile.json`, `--privileged` |
-| Podman | Zazwyczaj włączone domyślnie | Stosuje domyślny profil seccomp runtime, chyba że zostanie nadpisany | `--security-opt seccomp=unconfined`, `--security-opt seccomp=profile.json`, `--seccomp-policy=image`, `--privileged` |
-| Kubernetes | **Nie gwarantowane domyślnie** | Jeśli `securityContext.seccompProfile` nie jest ustawiony, domyślne to `Unconfined`, chyba że kubelet włączy `--seccomp-default`; `RuntimeDefault` lub `Localhost` muszą być ustawione jawnie | `securityContext.seccompProfile.type: Unconfined`, pozostawienie seccomp niezdefiniowanego na klastrach bez `seccompDefault`, `privileged: true` |
-| containerd / CRI-O under Kubernetes | Podąża za ustawieniami węzła i Pod w Kubernetes | Profil runtime jest używany, gdy Kubernetes żąda `RuntimeDefault` lub gdy kubelet włącza domyślne seccomp | To samo co w wierszu Kubernetes; bezpośrednia konfiguracja CRI/OCI może również całkowicie pominąć seccomp |
+| Docker Engine | Zazwyczaj włączone domyślnie | Używa wbudowanego domyślnego profilu seccomp Dockera, jeśli nie zostanie nadpisany | `--security-opt seccomp=unconfined`, `--security-opt seccomp=/path/profile.json`, `--privileged` |
+| Podman | Zazwyczaj włączone domyślnie | Stosuje domyślny profil seccomp runtime, jeśli nie zostanie nadpisany | `--security-opt seccomp=unconfined`, `--security-opt seccomp=profile.json`, `--seccomp-policy=image`, `--privileged` |
+| Kubernetes | **Nie gwarantowane domyślnie** | Jeśli `securityContext.seccompProfile` nie jest ustawiony, domyślnie jest `Unconfined`, chyba że kubelet włączy `--seccomp-default`; w przeciwnym razie `RuntimeDefault` lub `Localhost` muszą zostać ustawione jawnie | `securityContext.seccompProfile.type: Unconfined`, pozostawienie seccomp nieustawionego na klastrach bez `seccompDefault`, `privileged: true` |
+| containerd / CRI-O under Kubernetes | Podąża za ustawieniami węzła i Podów w Kubernetes | Profil runtime jest używany, gdy Kubernetes żąda `RuntimeDefault` lub gdy w kubelecie włączono domyślną politykę seccomp | Jak w wierszu Kubernetes; bezpośrednia konfiguracja CRI/OCI może również całkowicie pominąć seccomp |
 
-Zachowanie Kubernetes jest tym, które najczęściej zaskakuje operatorów. W wielu klastrach seccomp nadal jest nieobecny, chyba że Pod o to poprosi lub kubelet jest skonfigurowany tak, by domyślnie stosować `RuntimeDefault`.
+Zachowanie Kubernetes jest tym, które najczęściej zaskakuje operatorów. W wielu klastrach seccomp nadal jest nieobecny, chyba że Pod go zażąda lub kubelet jest skonfigurowany, by ustawiać domyślnie `RuntimeDefault`.
+{{#include ../../../../banners/hacktricks-training.md}}
