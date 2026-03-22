@@ -1,45 +1,45 @@
-# Vremenski namespace
+# Time Namespace
 
 {{#include ../../../../../banners/hacktricks-training.md}}
 
 ## Pregled
 
-Time namespace virtualizuje odabrane satove, posebno **`CLOCK_MONOTONIC`** i **`CLOCK_BOOTTIME`**. To je noviji i specijalizovaniji namespace u odnosu na mount, PID, network ili user namespaces, i retko je prvo na šta operater pomisli kada se govori o container hardening. Ipak, deo je moderne porodice namespaces i vredi ga konceptualno razumeti.
+Time namespace virtualizuje odabrane časovnike, posebno **`CLOCK_MONOTONIC`** i **`CLOCK_BOOTTIME`**. To je noviji i specijalizovaniji namespace u odnosu na mount, PID, network, ili user namespaces, i retko je prva stvar o kojoj operator razmišlja kada se govori o container hardening. Ipak, deo je moderne porodice namespace-ova i vredi ga konceptualno razumeti.
 
-Glavna svrha je omogućiti procesu da posmatra kontrolisane offset-e za određene satove bez menjanja globalnog prikaza vremena na hostu. Ovo je korisno za checkpoint/restore workflows, deterministic testing, i neka napredna runtime ponašanja. Obično nije glavna kontrola izolacije na isti način kao mount ili user namespaces, ali i dalje doprinosi tome da procesno okruženje bude više samo-sadržajno.
+Glavna svrha je omogućiti procesu da posmatra kontrolisane pomake za određene časovnike bez menjanja globalnog prikaza vremena na hostu. Ovo je korisno za checkpoint/restore tokove rada, deterministic testing, i neka napredna runtime ponašanja. Obično nije glavna mera izolacije na isti način kao mount ili user namespaces, ali i dalje doprinosi tome da okruženje procesa bude samostalnije.
 
 ## Lab
 
-Ako host kernel i userspace to podržavaju, možete da pregledate namespace pomoću:
+Ako host kernel i userspace to podržavaju, možete pregledati namespace pomoću:
 ```bash
 sudo unshare --time --fork bash
 ls -l /proc/self/ns/time /proc/self/ns/time_for_children
 cat /proc/$$/timens_offsets 2>/dev/null
 ```
-Support varies by kernel and tool versions, so this page is more about understanding the mechanism than expecting it to be visible in every lab environment.
+Podrška zavisi od verzije kernela i alata, zato je ova stranica više o razumevanju mehanizma nego o očekivanju da će biti vidljiva u svakom lab okruženju.
 
 ### Vremenski pomaci
 
-Linux time namespaces virtualizuju pomake za `CLOCK_MONOTONIC` i `CLOCK_BOOTTIME`. Trenutni pomaci po namespace-u su izloženi putem `/proc/<pid>/timens_offsets`, a na kernel-ima koji to podržavaju taj fajl može da izmeni proces koji poseduje `CAP_SYS_TIME` unutar odgovarajućeg namespace-a:
+Linux time namespaces virtualizuju pomake za `CLOCK_MONOTONIC` i `CLOCK_BOOTTIME`. Trenutni pomaci po namespace-u izloženi su kroz `/proc/<pid>/timens_offsets`, koje na kernelima koji to podržavaju takođe može da izmeni proces koji poseduje `CAP_SYS_TIME` unutar odgovarajućeg namespace-a:
 ```bash
 sudo unshare -Tr --mount-proc bash
 cat /proc/$$/timens_offsets
 echo "monotonic 172800000000000" > /proc/$$/timens_offsets
 cat /proc/uptime
 ```
-Datoteka sadrži nanosekundne razlike. Pomeranje `monotonic` za dva dana menja zapažanja slična uptime-u unutar tog namespace-a bez promene sistemskog sata (wall clock) hosta.
+Fajl sadrži nanosekundne razlike. Pomeranje `monotonic` za dva dana menja posmatranja slična uptime-u unutar tog namespace-a bez promene host wall clock.
 
-### `unshare` Pomoćne zastavice
+### `unshare` pomoćne zastavice
 
-Novije verzije `util-linux` pružaju praktične zastavice koje automatski upisuju pomake:
+Novije verzije `util-linux` obezbeđuju pomoćne zastavice koje automatski upisuju pomake:
 ```bash
 sudo unshare -T --monotonic="+24h" --boottime="+7d" --mount-proc bash
 ```
-Ove zastavice su pretežno poboljšanje upotrebljivosti, ali takođe olakšavaju prepoznavanje funkcije u dokumentaciji i pri testiranju.
+Ove zastavice su većinom poboljšanje upotrebljivosti, ali такође олакшавају препознавање функције у документацији и током тестирања.
 
-## Korišćenje za vreme izvršavanja
+## Runtime Usage
 
-Time namespaces su noviji i ređe se koriste u poređenju sa mount ili PID namespaces. OCI Runtime Specification v1.1 je dodao eksplicitnu podršku za `time` namespace i polje `linux.timeOffsets`, a novije `runc` verzije implementiraju taj deo modela. Minimalni OCI fragment izgleda ovako:
+Time namespaces су новије и мање универзално коришћене него mount или PID namespaces. OCI Runtime Specification v1.1 додала је експлицитну подршку за `time` namespace и поље `linux.timeOffsets`, а новије `runc` верзије имплементирају тај део модела. Минимални OCI фрагмент изгледа овако:
 ```json
 {
 "linux": {
@@ -53,42 +53,43 @@ Time namespaces su noviji i ređe se koriste u poređenju sa mount ili PID names
 }
 }
 ```
-Ovo je važno zato što time namespacing pretvara iz nišnog kernel primitiva u nešto što runtimes mogu prenosivo da zatraže.
+Ovo je važno zato što time namespacing pretvara iz nišnog kernel primitiva u nešto što runtimes mogu prenosivo zahtevati.
 
-## Bezbednosni uticaj
+## Sigurnosni uticaj
 
-Postoji manje klasičnih breakout priča usmerenih na time namespace nego na druge tipove namespace-ova. Rizik ovde obično nije da time namespace direktno omogućava escape, već da čitaoci u potpunosti ignorišu tu mogućnost i zbog toga ne primete kako napredni runtimes mogu oblikovati ponašanje procesa. U specijalizovanim okruženjima, promenjeni prikazi sata mogu uticati na checkpoint/restore, observability, ili forenzičke pretpostavke.
+Postoji manje klasičnih slučajeva bekstva fokusiranih na time namespace nego na druge tipove namespace-a. Rizik ovde obično nije da time namespace direktno omogućava escape, već da ga čitaoci potpuno ignorišu i zbog toga propuste kako napredni runtimes mogu oblikovati ponašanje procesa. U specijalizovanim okruženjima, izmenjeni prikazi vremena mogu uticati na checkpoint/restore, observability ili forenzičke pretpostavke.
 
 ## Zloupotreba
 
-Obično ovde nema direktne breakout primitive, ali promenjeno ponašanje sata i dalje može biti korisno za razumevanje izvršnog okruženja i identifikovanje naprednih funkcionalnosti runtima:
+Obično ovde nema direktnog primitiva za bekstvo, ali izmenjeno ponašanje sata može i dalje biti korisno za razumevanje izvršnog okruženja i identifikovanje naprednih funkcija runtime-a:
 ```bash
 readlink /proc/self/ns/time
 readlink /proc/self/ns/time_for_children
 date
 cat /proc/uptime
 ```
-Ako upoređujete dva procesa, razlike ovde mogu pomoći da se objasni neobično ponašanje u vezi sa vremenom, artefakti pri checkpoint/restore, ili neusaglašenosti u logging-u specifičnom za okruženje.
+Ako upoređujete dva procesa, razlike ovde mogu pomoći da objasne čudno ponašanje u pogledu vremena, artefakte checkpoint/restore, ili neusaglašenosti u logovanju specifičnom za okruženje.
 
 Impact:
 
-- skoro uvek reconnaissance ili razumevanje okruženja
-- korisno za objašnjenje logging-a, uptime-a, ili anomalija pri checkpoint/restore
+- gotovo uvek reconnaissance ili razumevanje okruženja
+- korisno za objašnjavanje anomalija u logovanju, uptime-a, ili checkpoint/restore anomalija
 - obično nije direktan container-escape mehanizam sam po sebi
 
-Važna nijansa zloupotrebe je da time namespaces ne virtualizuju `CLOCK_REALTIME`, tako da same po sebi ne dozvoljavaju napadaču da falsifikuje host wall clock ili direktno pokvari provere isteka sertifikata na nivou sistema. Njihova vrednost je uglavnom u zbunjivanju logike zasnovane na monotonic-time, reprodukovanju bug-ova specifičnih za okruženje, ili razumevanju naprednog runtime ponašanja.
+Važna nijansa zloupotrebe je da time namespaces ne virtualizuju `CLOCK_REALTIME`, pa same po sebi ne omogućavaju napadaču da falsifikuje sistemski sat hosta ili direktno pokvari sistemske provere isteka sertifikata. Njihova vrednost uglavnom leži u zbunjivanju logike zasnovane na monotoničkom vremenu, reprodukovanju grešaka specifičnih za okruženje, ili razumevanju naprednog ponašanja runtime-a.
 
 ## Checks
 
-Ove provere uglavnom potvrđuju da li runtime uopšte koristi privatni time namespace.
+Ove provere uglavnom služe da potvrde da li runtime uopšte koristi privatni time namespace.
 ```bash
 readlink /proc/self/ns/time                 # Current time namespace identifier
 readlink /proc/self/ns/time_for_children    # Time namespace inherited by children
 cat /proc/$$/timens_offsets 2>/dev/null     # Monotonic and boottime offsets when supported
 ```
-Šta je ovde zanimljivo:
+Šta je ovde interesantno:
 
-- U mnogim okruženjima ove vrednosti neće dovesti do neposrednog sigurnosnog nalaza, ali pokazuju da li je aktivirana neka specijalizovana runtime funkcija.
-- Ako upoređujete dva procesa, razlike ovde mogu objasniti zbunjujuće vremensko ponašanje ili ponašanje pri checkpoint/restore.
+- U mnogim okruženjima ove vrednosti neće dovesti do neposrednog sigurnosnog nalaza, ali vam govore da li je u upotrebi specijalizovana runtime funkcija.
+- Ako upoređujete dva procesa, razlike ovde mogu objasniti zbunjujuće ponašanje u vezi sa tajmingom ili checkpoint/restore ponašanjem.
 
-Za većinu container breakouts, time namespace nije prva kontrola koju ćete istražiti. Ipak, kompletna container-security sekcija treba da ga pomene jer je deo modernog kernel modela i povremeno je važna u naprednim runtime scenarijima.
+Za većinu container breakouts, time namespace nije prvi kontrolni mehanizam koji ćete istraživati. Ipak, kompletan container-security odeljak treba da ga pomene jer je deo modernog kernel modela i povremeno je bitan u naprednim runtime scenarijima.
+{{#include ../../../../../banners/hacktricks-training.md}}

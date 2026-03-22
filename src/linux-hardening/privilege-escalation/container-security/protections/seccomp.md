@@ -2,23 +2,23 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-## Overview
+## Pregled
 
-**seccomp** je mehanizam koji omogućava kernelu da primeni filter na syscalls koje proces može pozvati. U kontejnerizovanim okruženjima, seccomp se obično koristi u filter modu tako da proces nije jednostavno označen kao "restricted" u nejasnom smislu, već podleže konkretnoj politici za syscalls. Ovo je važno zato što mnogi container breakouts zahtevaju pristup veoma specifičnim kernel interfejsima. Ako proces ne može uspešno da pozove relevantne syscalls, velika klasa napada nestaje pre nego što bilo koja nijansa oko namespaces ili capabilities postane relevantna.
+**seccomp** je mehanizam koji omogućava kernelu da primeni filter na syscalls koje proces može pozvati. U containerized okruženjima, seccomp se obično koristi u filter modu tako da proces nije jednostavno označen kao "restricted" u neodređenom smislu, već podleže konkretnoj syscall politici. Ovo je važno zato što mnogi container breakouts zahtevaju pristup vrlo specifičnim kernel interfejsima. Ako proces ne može uspešno pozvati relevantne syscalls, velika klasa napada nestaje pre nego što bilo koja nijansa namespace ili capability postane relevantna.
 
-Ključni mentalni model je jednostavan: namespaces odlučuju **šta proces može da vidi**, capabilities odlučuju **koje privilegovane akcije proces nominalno sme da pokuša**, a seccomp odlučuje **da li će kernel uopšte prihvatiti ulaznu tačku za pozvani syscall za pokušanu akciju**. Zato seccomp često sprečava napade koji bi inače delovali mogući zasnovano samo na capabilities.
+Ključni mentalni model je jednostavan: namespaces odlučuju **šta proces može videti**, capabilities odlučuju **koje privilegovane akcije proces nominalno sme da pokuša**, a seccomp odlučuje **da li će kernel uopšte prihvatiti syscall ulaznu tačku za pokušanu akciju**. Zato seccomp često sprečava napade koji bi inače delovali mogući zasnovano samo na capabilities.
 
-## Security Impact
+## Bezbednosni uticaj
 
-Veliki deo opasne površine kernela je dostupan samo kroz relativno mali skup syscalls. Primeri koji se često javljaju pri hardeningu kontejnera uključuju `mount`, `unshare`, `clone` ili `clone3` sa određenim zastavicama, `bpf`, `ptrace`, `keyctl` i `perf_event_open`. Napadač koji može da pristupi tim syscalls može biti u stanju da kreira nove namespaces, manipuliše kernel subsistemima, ili stupi u interakciju sa attack surface-om koji normalnom aplikacionom kontejneru uopšte nije potreban.
+Veliki deo opasne kernel surface je dostupan samo preko relativno malog skupa syscalls. Primeri koji se često pojavljuju pri hardeningu containera uključuju `mount`, `unshare`, `clone` ili `clone3` sa određenim flagovima, `bpf`, `ptrace`, `keyctl`, i `perf_event_open`. Napadač koji može da dosegne te syscalls može da kreira nove namespaces, manipuliše kernel subsistemima, ili interaguje sa attack surface koju normalnom aplikacionom containeru uopšte nije potrebna.
 
-Zato su podrazumevani runtime seccomp profili toliko važni. Oni nisu samo "extra defense". U mnogim okruženjima oni predstavljaju razliku između kontejnera koji može da koristi širok deo kernel funkcionalnosti i onog koji je ograničen na syscall površinu bližu onome što aplikaciji zaista treba.
+Zato su podrazumevani runtime seccomp profili izuzetno važni. Oni nisu samo "dodatna odbrana". U mnogim okruženjima oni predstavljaju razliku između containera koji može iskoristiti širok deo kernel funkcionalnosti i onog koji je ograničen na syscall površinu bližu onome što aplikacija zaista treba.
 
-## Modes And Filter Construction
+## Modovi i konstrukcija filtera
 
-seccomp je istorijski imao strict mode u kojem je samo mali skup syscalls ostajao dostupan, ali mod relevantan za moderne container runtimes je seccomp filter mode, često nazivan **seccomp-bpf**. U ovom modelu kernel evaluira program filtera koji odlučuje da li treba dozvoliti syscall, odbiti sa errno, uhvatiti ga (trapped), zabeležiti (logged) ili ubiti proces. Container runtimes koriste ovaj mehanizam jer je dovoljno izražajan da blokira široke klase opasnih syscalls, a ipak dozvoli normalno ponašanje aplikacija.
+seccomp je istorijski imao strict mode u kome je bio dostupan samo mali skup syscalls, ali mod relevantan za moderne container runtimes je seccomp filter mode, često nazivan **seccomp-bpf**. U ovom modelu, kernel procenjuje filter program koji odlučuje da li treba dozvoliti syscall, odbiti ga sa errno, trap-ovati, logovati, ili ubiti proces. Container runtimes koriste ovaj mehanizam jer je dovoljno izražajan da blokira široke klase opasnih syscalls, a istovremeno dopušta normalno ponašanje aplikacija.
 
-Dva niskonivovna primera su korisna jer čine mehanizam konkretnim umesto magičnim. Strict mode demonstrira stari model "samo minimalni skup syscalls opstaje":
+Dva low-level primera su korisna jer mehanizam čine konkretnijim umesto magičnim. Strict mode demonstrira stari model "only a minimal syscall set survives":
 ```c
 #include <fcntl.h>
 #include <linux/seccomp.h>
@@ -35,9 +35,9 @@ write(output, val, strlen(val) + 1);
 open("output.txt", O_RDONLY);
 }
 ```
-Poslednji `open` uzrokuje da proces bude ubijen jer nije deo minimalnog skupa strict mode-a.
+Poslednji `open` uzrokuje da se proces ubije, jer nije deo minimalnog skupa strogog režima.
 
-Primer libseccomp filtera jasnije prikazuje moderni model politike:
+Primer libseccomp filtera jasnije prikazuje savremeni model politike:
 ```c
 #include <errno.h>
 #include <seccomp.h>
@@ -59,11 +59,11 @@ seccomp_release(ctx);
 printf("pid=%d\n", getpid());
 }
 ```
-Ovakav stil politike je ono što većina čitalaca treba da zamisli kada pomisle na runtime seccomp profiles.
+Ovaj stil politike je ono što većina čitalaca treba да замисли када помисле на runtime seccomp profiles.
 
-## Vežba
+## Lab
 
-Jednostavan način da se potvrdi da je seccomp aktivan u kontejneru je:
+Jednostavan način да се потврди да је seccomp активан у containeru је:
 ```bash
 docker run --rm debian:stable-slim sh -c 'grep Seccomp /proc/self/status'
 docker run --rm --security-opt seccomp=unconfined debian:stable-slim sh -c 'grep Seccomp /proc/self/status'
@@ -72,22 +72,22 @@ Takođe možete pokušati operaciju koju podrazumevani profili obično ograniča
 ```bash
 docker run --rm debian:stable-slim sh -c 'apt-get update >/dev/null 2>&1 && apt-get install -y util-linux >/dev/null 2>&1 && unshare -Ur true'
 ```
-Ako kontejner radi pod normalnim podrazumevanim seccomp profilom, `unshare`-stil operacije su često blokirane. Ovo je koristan primer jer pokazuje da čak i ako userspace alat postoji unutar image-a, kernel putanja koja mu je potrebna može i dalje biti nedostupna.
-Ako kontejner radi pod normalnim podrazumevanim seccomp profilom, `unshare`-stil operacije su često blokirane čak i kada userspace alat postoji unutar image-a.
+Ako kontejner radi pod standardnim podrazumevanim seccomp profilom, `unshare`-stil operacije su često blokirane. Ovo je koristan primer jer pokazuje da čak i ako userspace alat postoji u image-u, kernel putanja koja mu je potrebna može i dalje biti nedostupna.
+Ako kontejner radi pod standardnim podrazumevanim seccomp profilom, `unshare`-stil operacije su često blokirane čak i kada userspace alat postoji u image-u.
 
 Za opštiji pregled statusa procesa, pokrenite:
 ```bash
 grep -E 'Seccomp|NoNewPrivs' /proc/self/status
 ```
-## Korišćenje u runtime-u
+## Upotreba u runtime-u
 
-Docker podržava i podrazumevane i prilagođene seccomp profile i omogućava administratorima da ih onemoguće pomoću `--security-opt seccomp=unconfined`. Podman ima sličnu podršku i često kombinuje seccomp sa rootless izvršavanjem u vrlo razumnom podrazumevanom režimu. Kubernetes izlaže seccomp kroz konfiguraciju workload-a, gde je `RuntimeDefault` obično razumna osnovna postavka, a `Unconfined` treba tretirati kao izuzetak koji zahteva opravdanje, a ne kao pogodnosni prekidač.
+Docker podržava i podrazumevane i prilagođene seccomp profile i omogućava administratorima da ih onemoguće pomoću `--security-opt seccomp=unconfined`. Podman ima sličnu podršku i često kombinuje seccomp sa rootless execution u razumnom podrazumevanom režimu. Kubernetes izlaže seccomp kroz konfiguraciju workload-a, gde je `RuntimeDefault` obično razumna osnovna postavka, dok `Unconfined` treba tretirati kao izuzetak koji zahteva opravdanje, a ne kao praktičan prekidač.
 
-U okruženjima zasnovanim na containerd i CRI-O, tačan put je slojevitiji, ali princip je isti: engine višeg nivoa ili orchestrator odlučuje šta treba da se desi, a runtime na kraju instalira dobijenu seccomp politiku za proces kontejnera. Ishod i dalje zavisi od krajnje runtime konfiguracije koja dospeva do kernela.
+U okruženjima zasnovanim na containerd i CRI-O, tačan put je slojevitiji, ali princip je isti: engine višeg nivoa ili orchestrator odlučuje šta treba da se dogodi, a runtime na kraju instalira rezultujuću seccomp politiku za proces kontejnera. Ishod i dalje zavisi od finalne runtime konfiguracije koja stiže do kernela.
 
 ### Primer prilagođene politike
 
-Docker i slični engine-i mogu učitati prilagođeni seccomp profil iz JSON-a. Minimalan primer koji odbija `chmod` dok sve ostalo dozvoljava izgleda ovako:
+Docker i slični engine-i mogu učitati prilagođeni seccomp profil iz JSON-a. Minimalan primer koji zabranjuje `chmod` dok sve ostalo dopušta izgleda ovako:
 ```json
 {
 "defaultAction": "SCMP_ACT_ALLOW",
@@ -103,41 +103,41 @@ Primenjeno pomoću:
 ```bash
 docker run --rm -it --security-opt seccomp=/path/to/profile.json busybox chmod 400 /etc/hosts
 ```
-Komanda ne uspeva sa `Operation not permitted`, što pokazuje da ograničenje dolazi iz politike syscall-a, a ne samo iz običnih dozvola fajla. Kod stvarnog hardeninga, liste dozvoljenih su generalno jače od permisivnih podrazumevanih podešavanja sa malom crnom listom.
+Komanda ne uspeva sa `Operation not permitted`, što pokazuje da ograničenje potiče iz syscall policy-ja, a ne samo iz običnih dozvola fajlova. U stvarnom hardeningu, allowlists su generalno stroži od permissive defaults uz malu blacklist.
 
-## Misconfigurations
+## Greške u konfiguraciji
 
-Najgrublja greška je postaviti seccomp na **unconfined** zato što je aplikacija pala pod podrazumevanom politikom. Ovo je često tokom otklanjanja problema i veoma opasno ako se ostavi kao trajno rešenje. Kada filter nestane, mnogi primitivni za bekstvo zasnovani na syscall-ovima ponovo postaju dostupni, posebno kada su prisutne moćne capabilities ili deljenje host namespace-a.
+Najgrublja greška je postaviti seccomp na **unconfined** zato što je aplikacija podrazumevano pala pod default policy. To je često tokom troubleshooting-a i veoma opasno kao trajno rešenje. Kada filter nestane, mnoge syscall-based breakout primitives ponovo postaju dostupne, posebno kada su prisutne moćne capabilities ili deljenje host namespace-a.
 
-Još jedan čest problem je korišćenje **prilagođenog permisivnog profila** koji je kopiran sa nekog bloga ili internog zaobilaznog rešenja bez pažljivog pregleda. Timovi ponekad zadrže skoro sve opasne syscalls jednostavno zato što je profil napravljen oko "da aplikacija ne prestane da radi" umesto "dodeli samo ono što aplikacija zapravo treba". Treća zabluda je pretpostavka da je seccomp manje važan za kontejnere koji nisu root. U stvarnosti, veliki deo napadne površine kernela ostaje relevantan čak i kada proces nije UID 0.
+Drugi čest problem je korišćenje **custom permissive profile** koji je kopiran sa nekog bloga ili internog workaround-a bez pažljivog pregleda. Timovi ponekad zadržavaju skoro sve opasne syscalls jednostavno zato što je profil građen oko "stop the app from breaking" umesto "grant only what the app actually needs". Treća zabluda je pretpostavka da je seccomp manje važan za non-root kontejnere. U stvarnosti, mnogo kernel attack surface ostaje relevantno čak i kada proces nije UID 0.
 
-## Abuse
+## Zloupotreba
 
-Ako seccomp ne postoji ili je ozbiljno oslabljen, napadač bi mogao da pozove namespace-creation syscalls, proširi dostupnu napadnu površinu kernela kroz `bpf` ili `perf_event_open`, zloupotrebi `keyctl`, ili kombinuje te syscall putanje sa opasnim capabilities kao što je `CAP_SYS_ADMIN`. U mnogim stvarnim napadima, seccomp nije jedina kontrola koja nedostaje, ali njegovo odsustvo dramatčno skraćuje put eksploata jer uklanja jednu od retkih odbrana koje mogu zaustaviti rizičan syscall pre nego što ostatak modela privilegija počne da deluje.
+Ako seccomp nedostaje ili je znatno oslabljen, napadač može pozvati namespace-creation syscalls, proširiti reachable kernel attack surface kroz `bpf` ili `perf_event_open`, zloupotrebiti `keyctl`, ili kombinovati te syscall puteve sa opasnim capabilities kao što je `CAP_SYS_ADMIN`. U mnogim stvarnim napadima, seccomp nije jedina nedostajuća kontrola, ali njegov izostanak značajno skraćuje exploit path jer uklanja jednu od retkih odbrana koje mogu zaustaviti rizičan syscall pre nego što ostatak privilege model-a uopšte stupi na snagu.
 
-Najkorisniji praktični test je pokušati tačno one grupe syscall-a koje podrazumevani profili obično blokiraju. Ako iznenada rade, bezbednosni položaj kontejnera se znatno promenio:
+Najkorisniji praktični test je pokušati tačno one syscall families koje default profili obično blokiraju. Ako iznenada rade, container posture se značajno promenila:
 ```bash
 grep Seccomp /proc/self/status
 unshare -Ur true 2>/dev/null && echo "unshare works"
 unshare -m true 2>/dev/null && echo "mount namespace creation works"
 ```
-Ako je prisutan `CAP_SYS_ADMIN` ili neka druga snažna capability, proverite da li je seccomp jedina nedostajuća barijera pre mount-based abuse:
+Ako je prisutan `CAP_SYS_ADMIN` ili neka druga snažna capability, proverite da li je seccomp jedina preostala barijera pre mount-based abuse:
 ```bash
 capsh --print | grep cap_sys_admin
 mkdir -p /tmp/m
 mount -t tmpfs tmpfs /tmp/m 2>/dev/null && echo "tmpfs mount works"
 mount -t proc proc /tmp/m 2>/dev/null && echo "proc mount works"
 ```
-Na nekim ciljevima, neposredna vrednost nije potpuni escape već prikupljanje informacija i kernel attack-surface expansion. Ove komande pomažu да се утврди да ли су посебно осетљиви syscall paths доступни:
+Na nekim ciljevima neposredna vrednost nije potpuno bekstvo, već prikupljanje informacija i proširenje površine napada na kernel. Ove komande pomažu да се утврди да ли су посебно осетљиви syscall путеви достижни:
 ```bash
 which unshare nsenter strace 2>/dev/null
 strace -e bpf,perf_event_open,keyctl true 2>&1 | tail
 ```
-Ako seccomp nije prisutan i container je na druge načine takođe privilegovan, tada ima smisla preći na specifičnije breakout tehnike koje su već dokumentovane na legacy container-escape stranicama.
+Ako seccomp nije prisutan i container je na drugi način privilegovan, tada ima smisla pivotirati na specifičnije breakout tehnike koje su već dokumentovane na legacy container-escape stranicama.
 
-### Potpun primer: seccomp je bila jedina stvar koja je onemogućavala `unshare`
+### Potpuni primer: seccomp je bio jedina stvar koja je blokirala `unshare`
 
-Na mnogim targetsima, praktičan efekat uklanjanja seccomp-a je da namespace-creation ili mount syscalls iznenada počnu da rade. Ako container takođe ima `CAP_SYS_ADMIN`, sledeći sled može postati moguć:
+Na mnogim ciljevima, praktična posledica uklanjanja seccomp-a je da kreiranje namespace-a ili mount syscalls iznenada počnu da rade. Ako container takođe ima `CAP_SYS_ADMIN`, sledeći niz radnji može postati moguć:
 ```bash
 grep Seccomp /proc/self/status
 capsh --print | grep cap_sys_admin
@@ -149,11 +149,11 @@ mount -t proc proc /tmp/nsroot/proc &&
 mount | grep /tmp/nsroot
 '
 ```
-Samo po sebi ovo još nije host escape, ali pokazuje da je seccomp bila barijera koja je sprečavala mount-related exploitation.
+Samo po sebi ovo još nije host escape, ali pokazuje da je seccomp bio barijera koja je sprečavala mount-related exploitation.
 
 ### Potpun primer: seccomp onemogućen + cgroup v1 `release_agent`
 
-Ako je seccomp onemogućen i kontejner može da mount-uje cgroup v1 hijerarhije, tehnika `release_agent` iz cgroups sekcije postaje dostupna:
+Ako je seccomp onemogućen i kontejner može da mount-uje cgroup v1 hijerarhije, `release_agent` tehnika iz cgroups sekcije postaje dostupna:
 ```bash
 grep Seccomp /proc/self/status
 mount | grep cgroup
@@ -166,11 +166,11 @@ echo /proc/self/exe > /tmp/c/release_agent
 while true; do sleep 1; done
 '
 ```
-Ovo nije seccomp-only exploit. Poenta je da jednom kada je seccomp unconfined, syscall-heavy breakout chains koje su ranije bile blokirane mogu početi da rade tačno onako kako su napisane.
+Ovo nije seccomp-only exploit. Poenta je da, kada seccomp postane unconfined, syscall-heavy breakout chains koje su ranije bile blokirane mogu početi da rade tačno onako kako su napisane.
 
-## Checks
+## Provere
 
-Svrha ovih provera je da se utvrdi da li je seccomp uopšte aktivan, da li ga prati `no_new_privs`, i da li runtime konfiguracija eksplicitno pokazuje da je seccomp onemogućen.
+Svrha ovih provera je da utvrde da li je seccomp uopšte aktivan, da li mu prati `no_new_privs`, i da li runtime konfiguracija eksplicitno pokazuje da je seccomp onemogućen.
 ```bash
 grep Seccomp /proc/self/status                               # Current seccomp mode from the kernel
 cat /proc/self/status | grep NoNewPrivs                      # Whether exec-time privilege gain is also blocked
@@ -178,19 +178,20 @@ docker inspect <container> | jq '.[0].HostConfig.SecurityOpt'   # Runtime securi
 ```
 Zanimljivo ovde:
 
-- Nenulti `Seccomp` vrednost znači da je filtriranje aktivno; `0` obično znači da nema seccomp zaštite.
-- Ako runtime sigurnosne opcije uključuju `seccomp=unconfined`, workload je izgubio jednu od najsvrsishodnijih odbrana na nivou syscall-a.
-- `NoNewPrivs` nije seccomp sam po sebi, ali njihovo zajedničko prisustvo obično ukazuje na pažljiviji hardening nego kada nema nijednog.
+- Nenulta vrednost `Seccomp` znači da je filtriranje aktivno; `0` obično znači odsustvo seccomp zaštite.
+- Ako runtime bezbednosne opcije uključuju `seccomp=unconfined`, workload je izgubio jednu od najkorisnijih odbrana na nivou syscall-a.
+- `NoNewPrivs` nije sam seccomp, ali istovremeno prisustvo oba obično ukazuje na pažljiviji hardening nego odsustvo oboje.
 
-Ako container već ima sumnjive mounts, široke capabilities, ili shared host namespaces, i seccomp je takođe unconfined, ta kombinacija treba da se tretira kao ozbiljan signal eskalacije. Container možda i dalje nije trivijalno probiti, ali broj kernel entry points dostupnih napadaču se naglo povećao.
+Ako container već ima sumnjive mounts, broad capabilities, ili shared host namespaces, i seccomp je takođe unconfined, ta kombinacija treba da se tretira kao ozbiljan signal eskalacije. Container i dalje možda nije trivijalno probiti, ali broj kernel entry points dostupnih napadaču znatno se povećao.
 
 ## Runtime Defaults
 
 | Runtime / platform | Default state | Default behavior | Common manual weakening |
 | --- | --- | --- | --- |
-| Docker Engine | Obično omogućeno podrazumevano | Koristi Docker-ov ugrađeni podrazumevani seccomp profil osim ako nije prepisan | `--security-opt seccomp=unconfined`, `--security-opt seccomp=/path/profile.json`, `--privileged` |
-| Podman | Obično omogućeno podrazumevano | Primenjuje runtime podrazumevani seccomp profil osim ako nije prepisan | `--security-opt seccomp=unconfined`, `--security-opt seccomp=profile.json`, `--seccomp-policy=image`, `--privileged` |
-| Kubernetes | **Nije garantovano podrazumevano** | If `securityContext.seccompProfile` is unset, the default is `Unconfined` unless the kubelet enables `--seccomp-default`; `RuntimeDefault` or `Localhost` must otherwise be set explicitly | `securityContext.seccompProfile.type: Unconfined`, leaving seccomp unset on clusters without `seccompDefault`, `privileged: true` |
-| containerd / CRI-O under Kubernetes | Sledi Kubernetes node i Pod podešavanja | Runtime profil se koristi kada Kubernetes zahteva `RuntimeDefault` ili kada je kubelet seccomp defaulting omogućen | Isto kao u Kubernetes redu; direktna CRI/OCI konfiguracija takođe može u potpunosti izostaviti seccomp |
+| Docker Engine | Usually enabled by default | Uses Docker's built-in default seccomp profile unless overridden | `--security-opt seccomp=unconfined`, `--security-opt seccomp=/path/profile.json`, `--privileged` |
+| Podman | Usually enabled by default | Applies the runtime default seccomp profile unless overridden | `--security-opt seccomp=unconfined`, `--security-opt seccomp=profile.json`, `--seccomp-policy=image`, `--privileged` |
+| Kubernetes | **Not guaranteed by default** | If `securityContext.seccompProfile` is unset, the default is `Unconfined` unless the kubelet enables `--seccomp-default`; `RuntimeDefault` or `Localhost` must otherwise be set explicitly | `securityContext.seccompProfile.type: Unconfined`, leaving seccomp unset on clusters without `seccompDefault`, `privileged: true` |
+| containerd / CRI-O under Kubernetes | Follows Kubernetes node and Pod settings | Runtime profile is used when Kubernetes asks for `RuntimeDefault` or when kubelet seccomp defaulting is enabled | Same as Kubernetes row; direct CRI/OCI configuration can also omit seccomp entirely |
 
-The Kubernetes behavior is the one that most often surprises operators. In many clusters, seccomp is still absent unless the Pod requests it or the kubelet is configured to default to `RuntimeDefault`.
+Kubernetes ponašanje je ono što najčešće iznenađuje operatere. U mnogim klasterima, seccomp je i dalje odsutan osim ako Pod to ne zatraži ili ako kubelet nije konfigurisan da podrazumevano koristi `RuntimeDefault`.
+{{#include ../../../../banners/hacktricks-training.md}}

