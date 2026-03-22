@@ -1,24 +1,24 @@
-# コンテナ保護の概要
+# Container 保護の概要
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-コンテナのハードニングで最も重要な考え方は、'container security' という単一の制御は存在しない、ということです。人々が container isolation と呼ぶものは、実際には複数の Linux セキュリティおよびリソース管理機構が協調して働いた結果です。文書がそれらのうちの一つだけを説明すると、読者はその有効性を過大評価しがちです。逆に、相互作用を説明せずにすべてを列挙すると、名前のカタログは得られても実際のモデルは得られません。このセクションはその両方の誤りを避けようとします。
+container のハードニングで最も重要な考え方は、「container security」と呼ばれる単一の制御は存在しないということです。人々が container isolation と呼ぶものは、実際にはいくつかの Linux セキュリティおよびリソース管理メカニズムが連携して働いた結果です。ドキュメントがそれらのうちの一つだけを説明していると、読者はその強度を過大評価しがちです。すべてを列挙してそれらの相互作用を説明していなければ、読者は名前のカタログを手に入れるだけで実際のモデルを得られません。本セクションではその両方の誤りを避けることを目指しています。
 
-モデルの中心にあるのは **namespaces** で、ワークロードが見えるものを分離します。namespaces はプロセスに対してファイルシステムのマウント、PIDs、ネットワーク、IPC オブジェクト、ホスト名、ユーザー/グループのマッピング、cgroup パス、いくつかのクロックなどの私的または部分的に私的なビューを与えます。しかし namespaces だけでプロセスに何が許可されるかが決まるわけではありません。ここで次の層が関与します。
+モデルの中心には **namespaces** があり、workload が見られるものを分離します。namespaces はプロセスに対してファイルシステムのマウント、PIDs、ネットワーキング、IPC オブジェクト、ホスト名、ユーザ/グループのマッピング、cgroup パス、および一部のクロックに対するプライベートまたは部分的にプライベートなビューを与えます。しかし namespaces だけでプロセスが何を許可されているかが決まるわけではありません。そこで次の層が登場します。
 
-**cgroups** はリソース使用を管理します。mount や PID namespaces と同じ意味での主たる分離境界ではありませんが、メモリ、CPU、PIDs、I/O、デバイスアクセスを制限するため運用上重要です。また、歴史的に writable cgroup 機能を悪用する breakout techniques があり、特に cgroup v1 環境でセキュリティ上の関連がありました。
+**cgroups** はリソース使用を統制します。mount や PID namespaces と同じ意味での分離境界では主にありませんが、メモリ、CPU、PIDs、I/O、およびデバイスアクセスを制限するため運用上は重要です。また、歴史的に breakout 手法が writable cgroup 機能を悪用したため（特に cgroup v1 環境で）、セキュリティ上の関連性もあります。
 
-**Capabilities** はかつての全能な root モデルをより小さな権限単位に分割します。これはコンテナで重要です。なぜなら多くのワークロードがコンテナ内でまだ UID 0 として実行されているからです。したがって問題は単に「プロセスは root か？」ではなく、「どの capabilities が、どの namespaces の内部で、どの seccomp や MAC 制限のもとで残っているか？」ということになります。だからこそ、あるコンテナ内の root プロセスは比較的制約されている一方で、別のコンテナ内の root プロセスは実際にはホストの root とほとんど区別がつかない場合があるのです。
+**Capabilities** は旧来の全能な root モデルをより小さな特権単位に分割します。多くの workload が依然として container 内で UID 0 として実行されているため、これは container にとって基本的な考え方です。したがって問題は単に「プロセスは root か？」ということではなく、「どの capabilities が、どの namespaces 内で、どの seccomp および MAC 制限のもとで残っているのか？」という点です。このため、ある container 内の root プロセスは比較的制約されている一方で、別の container の root プロセスは実際にはホスト root とほとんど区別がつかない場合があります。
 
-**seccomp** は syscall をフィルタリングし、ワークロードに露出するカーネルの攻撃面を縮小します。これは `unshare`, `mount`, `keyctl` のような明らかに危険な呼び出しや、breakout chains で使われる他の syscall をブロックする仕組みであることが多いです。プロセスが本来なら操作を許す capability を持っていても、seccomp はカーネルが完全に処理する前に syscall 経路をブロックする可能性があります。
+**seccomp** は syscall をフィルタリングし、workload にさらされるカーネルの攻撃面を減らします。これはしばしば `unshare`、`mount`、`keyctl` のような明らかに危険な呼び出しや、breakout チェーンで使用されるその他の syscalls をブロックするメカニズムです。プロセスが本来その操作を許す capability を持っていても、seccomp はカーネルがそれを完全に処理する前に syscall 経路をブロックすることがあります。
 
-**AppArmor** と **SELinux** は通常のファイルシステムや権限チェックの上に Mandatory Access Control を追加します。これらは特に重要で、コンテナが本来より多くの capabilities を持っている場合でも意味を持ち続けます。ワークロードは理論上はある操作を試みる権限を持っていても、ラベルやプロファイルが該当するパス、オブジェクト、操作へのアクセスを禁止しているため実行できないことがあります。
+**AppArmor** と **SELinux** は通常のファイルシステムと特権チェックの上に Mandatory Access Control を追加します。これらは特に重要で、container が本来より多くの capabilities を持っている場合でも影響を与え続けます。workload は理論上その操作を試みる特権を持っていても、ラベルやプロファイルが該当するパス、オブジェクト、または操作へのアクセスを禁止しているため実行を阻止されることがあります。
 
-最後に、注目されにくいが実際の攻撃で頻繁に重要となる追加のハードニング層があります: `no_new_privs`, masked procfs paths, read-only system paths, read-only root filesystems, および慎重な runtime defaults。これらの仕組みは特に、攻撃者がコード実行をより広い権限獲得に変えようとする際の妥協の「最後の一歩」を止めることが多いです。
+最後に、あまり注目されないが実際の攻撃でしばしば重要になる追加のハードニング層があります: `no_new_privs`、masked procfs paths、read-only system paths、read-only root filesystems、そして慎重な runtime defaults。これらのメカニズムは、特に攻撃者がコード実行をより広い権限獲得に転換しようとする際に、侵害の「最後の一里」を止めることがよくあります。
 
-このフォルダの残りの部分では、これら各機構について、カーネルプリミティブが実際に何を行うか、ローカルでどう観察するか、一般的なランタイムがどう使っているか、オペレーターが誤って弱めてしまう典型例を含めて、詳しく説明します。
+このフォルダの残りでは、これらの各メカニズムをより詳しく説明します。カーネルのプリミティブが実際に何をするのか、ローカルでどう観察するか、一般的な runtimes がどう使うか、そしてオペレータが誤ってどのように弱めてしまうかを含みます。
 
-## 続きを読む
+## 次に読む
 
 {{#ref}}
 namespaces/
@@ -56,8 +56,9 @@ masked-paths.md
 read-only-paths.md
 {{#endref}}
 
-Many real escapes also depend on what host content was mounted into the workload, so after reading the core protections it is useful to continue with:
+多くの実際の escape は、ホストのどのコンテンツが workload にマウントされているかにも依存するため、コアな保護を読んだ後は次を続けて読むと有用です:
 
 {{#ref}}
 ../sensitive-host-mounts.md
 {{#endref}}
+{{#include ../../../../banners/hacktricks-training.md}}
