@@ -37,6 +37,16 @@ if self.xsend(self.Cmd.BOOT_TO):
 - `sha256(...).digest()` sends raw bytes (not hex) so DA1 compares against the patched buffer.
 - DA2 can be any attacker-built image; choosing the load address/size allows arbitrary memory placement with cache invalidation handled by DA.
 
+## Patch landscape (hardened loaders)
+
+- **Mitigation**: Updated DAs hardcode the DA2 load address to `0x40000000` and ignore the address the host supplies, so writes cannot reach the DA1 hash slot (~0x200000 range). The hash remains computed but no longer attacker-writable.
+- **Detecting patched DAs**: mtkclient/penumbra scan DA1 for patterns indicating the address-hardening; if found, Carbonara is skipped. Old DAs expose writable hash slots (commonly around offsets like `0x22dea4` in V5 DA1) and remain exploitable.
+- **V5 vs V6**: Some V6 (XML) loaders still accept user-supplied addresses; newer V6 binaries usually enforce the fixed address and are immune to Carbonara unless downgraded.
+
+## Post-Carbonara (heapb8) note
+
+MediaTek patched Carbonara; a newer vulnerability, **heapb8**, targets the DA2 USB file download handler on patched V6 loaders, giving code execution even when `boot_to` is hardened. It abuses a heap overflow during chunked file transfers to seize DA2 control flow. The exploit is public in Penumbra/mtk-payloads and demonstrates that Carbonara fixes do not close all DA attack surface.
+
 ## Notes for triage and hardening
 
 - Devices where DA2 address/size are unchecked and DA1 keeps the expected hash writable are vulnerable. If a later Preloader/DA enforces address bounds or keeps the hash immutable, Carbonara is mitigated.
@@ -47,5 +57,6 @@ if self.xsend(self.Cmd.BOOT_TO):
 - [Carbonara: The MediaTek exploit nobody served](https://shomy.is-a.dev/blog/article/serving-carbonara)
 - [Carbonara exploit documentation](https://shomy.is-a.dev/penumbra/Mediatek/Exploits/Carbonara)
 - [Penumbra Carbonara source code](https://github.com/shomykohai/penumbra/blob/main/core/src/exploit/carbonara.rs)
+- [heapb8: exploiting patched V6 Download Agents](https://blog.r0rt1z2.com/posts/exploiting-mediatek-datwo/)
 
 {{#include ../../banners/hacktricks-training.md}}

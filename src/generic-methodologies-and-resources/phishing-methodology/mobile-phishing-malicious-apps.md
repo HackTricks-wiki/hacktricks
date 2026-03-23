@@ -29,7 +29,14 @@
      <!-- Older builds also asked for SMS permissions -->
      ```
    * Recent variants **remove `<uses-permission>` for SMS from `AndroidManifest.xml`** but leave the Java/Kotlin code path that reads SMS through reflection ⇒ lowers static score while still functional on devices that grant the permission via `AppOps` abuse or old targets.
-5. **Facade UI & Background Collection**
+
+5. **Android 13+ Restricted Settings & Dropper Bypass (SecuriDropper‑style)**
+   * Android 13 introduced **Restricted settings** for sideloaded apps: Accessibility and Notification Listener toggles are greyed out until the user explicitly allows restricted settings in **App info**.
+   * Phishing pages and droppers now ship step‑by‑step UI instructions to **allow restricted settings** for the sideloaded app and then enable Accessibility/Notification access.
+   * A newer bypass is to install the payload via a **session‑based PackageInstaller flow** (the same method app stores use). Android treats the app as store‑installed, so Restricted settings no longer blocks Accessibility.
+   * Triage hint: in a dropper, grep for `PackageInstaller.createSession/openSession` plus code that immediately navigates the victim to `ACTION_ACCESSIBILITY_SETTINGS` or `ACTION_NOTIFICATION_LISTENER_SETTINGS`.
+
+6. **Facade UI & Background Collection**
    * App shows harmless views (SMS viewer, gallery picker) implemented locally.  
    * Meanwhile it exfiltrates:
      - IMEI / IMSI, phone number
@@ -37,13 +44,16 @@
      - JPEG/PNG from `/sdcard/DCIM` compressed with [Luban](https://github.com/Curzibn/Luban) to reduce size
      - Optional SMS content (`content://sms`)
      Payloads are **batch-zipped** and sent via `HTTP POST /upload.php`.
-6. **iOS Delivery Technique**
+7. **iOS Delivery Technique**
    * A single **mobile-configuration profile** can request `PayloadType=com.apple.sharedlicenses`, `com.apple.managedConfiguration` etc. to enroll the device in “MDM”-like supervision.  
    * Social-engineering instructions:
      1. Open Settings ➜ *Profile downloaded*.
      2. Tap *Install* three times (screenshots on the phishing page).  
      3. Trust the unsigned profile ➜ attacker gains *Contacts* & *Photo* entitlement without App Store review.
-7. **Network Layer**
+8. **iOS Web Clip Payload (phishing app icon)**
+   * `com.apple.webClip.managed` payloads can **pin a phishing URL to the Home Screen** with a branded icon/label.
+   * Web Clips can run **full‑screen** (hides the browser UI) and be marked **non‑removable**, forcing the victim to delete the profile to remove the icon.
+9. **Network Layer**
    * Plain HTTP, often on port 80 with HOST header like `api.<phishingdomain>.com`.
    * `User-Agent: Dalvik/2.1.0 (Linux; U; Android 13; Pixel 6 Build/TQ3A.230805.001)` (no TLS → easy to spot).
 
@@ -498,5 +508,7 @@ Operator control primitives often seen: `BACK`, `HOME`, `RECENTS`, `CLICKTXT`/`C
 - [Banker Trojan Targeting Indonesian and Vietnamese Android Users (DomainTools)](https://dti.domaintools.com/banker-trojan-targeting-indonesian-and-vietnamese-android-users/)
 - [DomainTools SecuritySnacks – ID/VN Banker Trojans (IOCs)](https://github.com/DomainTools/SecuritySnacks/blob/main/2025/BankerTrojan-ID-VN)
 - [Socket.IO](https://socket.io)
+- [Bypassing Android 13 Restrictions with SecuriDropper (ThreatFabric)](https://www.threatfabric.com/blogs/droppers-bypassing-android-13-restrictions)
+- [Web Clips payload settings for Apple devices](https://support.apple.com/guide/deployment/web-clips-payload-settings-depbc7c7808/web)
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -4,11 +4,11 @@
 
 ## Basic information
 
-Go to the following link to learn **what is containerd** and `ctr`:
+Go to the following link to learn **where `containerd` and `ctr` fit in the container stack**:
 
 
 {{#ref}}
-../../network-services-pentesting/2375-pentesting-docker.md
+container-security/runtimes-and-engines.md
 {{#endref}}
 
 ## PE 1
@@ -48,9 +48,7 @@ Then you can use some of the techniques mentioned in the following page to **esc
 
 
 {{#ref}}
-docker-security/
+container-security/
 {{#endref}}
 
 {{#include ../../banners/hacktricks-training.md}}
-
-

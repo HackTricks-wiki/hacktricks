@@ -16,7 +16,7 @@
 
   async function getSponsor() {
     const currentUrl = encodeURIComponent(window.location.href);
-    const url = `https://book.hacktricks.wiki/sponsor?current_url=${currentUrl}`;
+    const url = `https://hacktricks.wiki/sponsor?current_url=${currentUrl}`;
     try {
       const response = await fetch(url, { method: "GET" })
       if (!response.ok) {

