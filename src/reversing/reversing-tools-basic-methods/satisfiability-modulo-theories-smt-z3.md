@@ -1,10 +1,10 @@
-# Satisfiability Modulo Theories (SMT) - Z3
+# Bevredigbaarheid Modulo-teorieë (SMT) - Z3
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Baie basies help hierdie hulpmiddel ons om waardes vir veranderlikes te vind wat aan sekere voorwaardes moet voldoen — dit met die hand bereken sou vervelig en foutgevoelig wees. Jy kan dus aan Z3 die voorwaardes aandui waaraan die veranderlikes moet voldoen, en dit sal waardes vind (indien moontlik).
+In eenvoudige terme help hierdie hulpmiddel ons om waardes vir veranderlikes te vind wat aan sekere voorwaardes moet voldoen — dit met die hand uitwerk sou baie vervelig wees. Jy kan dus aan Z3 die voorwaardes spesifiseer en dit sal (indien moontlik) geskikte waardes vind.
 
-**Sommige teksgedeeltes en voorbeelde is gehaal uit [https://ericpony.github.io/z3py-tutorial/guide-examples.htm](https://ericpony.github.io/z3py-tutorial/guide-examples.htm)**
+**Sommige teks en voorbeelde is ontleën aan [https://ericpony.github.io/z3py-tutorial/guide-examples.htm](https://ericpony.github.io/z3py-tutorial/guide-examples.htm)**
 
 ## Basiese Operasies
 
@@ -43,7 +43,7 @@ print(solve(r1**2 + r2**2 == 3, r1**3 == 2))
 set_option(precision=30)
 print(solve(r1**2 + r2**2 == 3, r1**3 == 2))
 ```
-### Afdruk van model
+### Model afdruk
 ```python
 from z3 import *
 
@@ -59,7 +59,7 @@ print("%s = %s" % (d.name(), m[d]))
 ```
 ## Masjienaritmetika
 
-Moderne CPUs en hoofstroom programmeertale gebruik aritmetika oor **fixed-size bit-vectors**. Masjienaritmetika is beskikbaar in Z3Py as **Bit-Vectors**.
+Moderne CPUs en hoofstroom-programmeertale gebruik aritmetika oor **vasgrootte bit-vectors**. Masjienaritmetika is beskikbaar in Z3Py as **Bit-Vectors**.
 ```python
 from z3 import *
 
@@ -74,9 +74,9 @@ a = BitVecVal(-1, 32)
 b = BitVecVal(65535, 32)
 print(simplify(a == b)) #This is False
 ```
-### Ondertekende/Onondertekende Getalle
+### Gesigneerde/Ongetekende getalle
 
-Z3 bied spesiale ondertekende weergawes van aritmetiese operasies waar dit 'n verskil maak of die **bit-vector as onderteken of ononderteken beskou word**. In Z3Py stem die operatore **<, <=, >, >=, /, % en >>** ooreen met die **ondertekende** weergawes. Die ooreenstemmende **onondertekende** operatore is **ULT, ULE, UGT, UGE, UDiv, URem en LShR.**
+Z3 verskaf spesiale gesigneerde weergawes van aritmetiese bewerkings waar dit 'n verskil maak of die **bit-vector as gesigneerd of ongetekend behandel word**. In Z3Py, die operateurs **<, <=, >, >=, /, % and >>** kom ooreen met die **gesigneerde** weergawes. Die ooreenstemmende **ongetekende** operateurs is **ULT, ULE, UGT, UGE, UDiv, URem and LShR.**
 ```python
 from z3 import *
 
@@ -94,9 +94,9 @@ solve(x < 0)
 # using unsigned version of <
 solve(ULT(x, 0))
 ```
-### Bit-vector-hulpfunksies wat gewoonlik in reversing benodig word
+### Bit-vektor hulpfunksies wat algemeen in reversing benodig word
 
-Wanneer jy **lifting checks from assembly or decompiler output**, is dit gewoonlik beter om elke input byte as `BitVec(..., 8)` te modelleer en dan woorde presies soos die target code weer op te bou. Dit voorkom bugs wat ontstaan deur die meng van wiskundige heelgetalle met machine arithmetic.
+Wanneer jy **lifting checks from assembly or decompiler output**, is dit gewoonlik beter om elke input byte as `BitVec(..., 8)` te modelleer en dan woorde presies soos die target code dit doen weer op te bou. Dit vermy bugs wat veroorsaak word deur die meng van wiskundige heelgetalle met masjienaritmetika.
 ```python
 from z3 import *
 
@@ -110,17 +110,17 @@ rot = RotateLeft(eax, 13)            # rol eax, 13
 logical = LShR(eax, 3)               # shr eax, 3
 arith = eax >> 3                     # sar eax, 3 (signed shift)
 ```
-Sommige algemene valkuils wanneer kode in beperkings vertaal word:
+Gereelde struikelblokke wanneer kode na beperkings vertaal word:
 
-- `>>` is 'n **aritmetiese** regskuif vir bitvektore. Gebruik `LShR` vir die logiese `shr` instruksie.
-- Gebruik `UDiv`, `URem`, `ULT`, `ULE`, `UGT` en `UGE` wanneer die oorspronklike vergelyking/divisie **unsigned** was.
-- Hou die breedtes eksplisiet. As die binêre na 8 of 16 bits afkap, voeg `Extract` by of bou die waarde weer op met `Concat` in plaas daarvan om alles stilweg na Python integers te bevorder.
+- `>>` is 'n **aritmetiese** regterskuif vir bit-vektore. Gebruik `LShR` vir die logiese `shr` instruksie.
+- Gebruik `UDiv`, `URem`, `ULT`, `ULE`, `UGT` en `UGE` wanneer die oorspronklike vergelyking/deling **ongeteken** was.
+- Hou breedtes eksplisiet. As die binêre na 8 of 16 bits afkap, voeg `Extract` by of bou die waarde weer op met `Concat` in plaas daarvan om alles stilweg na Python integers te bevorder.
 
 ### Funksies
 
-**Geïnterpreteerde funksies** soos aritmetiese funksies waar die **funksie +** 'n **vasgestelde standaardinterpretasie** het (dit tel twee getalle bymekaar). **Nie-geïnterpreteerde funksies** en konstanten is **uiters buigbaar**; hulle laat **enige interpretasie** toe wat **konsekwent** is met die **beperkings** oor die funksie of konstante.
+**Geïnterpreteerde funksies** soos rekenkunde waar die **funksie +** 'n **vaste standaardinterpretasie** het (dit tel twee getalle op). **Ongeïnterpreteerde funksies** en konstantes is **uiterst buigsaam**; hulle laat **enige interpretasie** toe wat **konsekwent** is met die **beperkings** oor die funksie of konstante.
 
-Voorbeeld: as f twee keer op x toegepas word, kry jy weer x, maar as f een keer op x toegepas word is dit anders as x.
+Voorbeeld: f wat twee keer op x toegepas word, gee weer x, maar f wat een keer op x toegepas word is anders as x.
 ```python
 from z3 import *
 
@@ -141,7 +141,7 @@ print(m.model())
 ```
 ## Voorbeelde
 
-### Sudoku-oplosser
+### Sudoku-oploser
 ```python
 # 9x9 matrix of integer variables
 X = [ [ Int("x_%s_%s" % (i+1, j+1)) for j in range(9) ]
@@ -193,20 +193,20 @@ print "failed to solve"
 ```
 ### Reversing workflows
 
-Indien jy moet **symbolically execute the binary and collect constraints automatically**, kyk na die angr notas hier:
+As jy nodig het om **symbolically execute the binary and collect constraints automatically**, kyk na die angr-notas hier:
 
 {{#ref}}
 angr/README.md
 {{#endref}}
 
-As jy reeds na die decompiled checks kyk en net hulle hoef op te los, is raw Z3 gewoonlik vinniger en makliker om te beheer.
+If you are already looking at the decompiled checks and only need to solve them, raw Z3 is usually faster and easier to control.
 
 #### Lifting byte-based checks from a crackme
 
-'n Baie algemene patroon in crackmes en packed loaders is 'n lang lys van byte equations oor 'n candidate password. Model bytes as 8-bit vectors, beperk die alfabet, en verbreed hulle slegs wanneer die oorspronklike kode hulle verbreed.
+'n Baie algemene patroon in crackmes en packed loaders is 'n lang lys van byte-vergelykings oor 'n kandidaat-wagwoord. Modelleer bytes as 8-bit vektore, beperk die alfabet, en verbreed hulle slegs wanneer die oorspronklike kode dit verbreed.
 
 <details>
-<summary>Voorbeeld: rebuild a serial check from decompiled arithmetic</summary>
+<summary>Example: rebuild a serial check from decompiled arithmetic</summary>
 ```python
 from z3 import *
 
@@ -231,11 +231,11 @@ print(bytes(m[c].as_long() for c in flag))
 ```
 </details>
 
-Hierdie styl pas goed by werklike reversing omdat dit ooreenstem met wat moderne verslae in die praktyk doen: herstel die rekenkundige-/bitwys-verhoudings, verander elke vergelyking in ’n beperking en los die hele stelsel in een keer op.
+Hierdie styl pas goed by real-world reversing omdat dit ooreenstem met wat moderne writeups in die praktyk doen: herkry die arithmetic/bitwise relations, draai elke comparison om in 'n constraint, en los die hele stelsel in een keer op.
 
-#### Inkrementele oplossing met `push()` / `pop()`
+#### Incremental solving with `push()` / `pop()`
 
-Terwyl jy reverse-engineer, wil jy dikwels verskeie hipoteses toets sonder om die hele solver te herbou. `push()` skep ’n kontrolepunt en `pop()` verwerp die beperkings wat ná daardie kontrolepunt bygevoeg is. Dit is nuttig wanneer jy nie seker is of ’n branch signed of unsigned is nie, of of ’n register zero-extended of sign-extended is, of wanneer jy verskeie kandidaatkonstantes probeer wat uit disassembly onttrek is.
+Terwyl jy reversing doen, wil jy dikwels verskeie hipoteses toets sonder om die hele solver te herbou. `push()` skep 'n checkpoint en `pop()` verwyder die constraints wat ná daardie checkpoint bygevoeg is. Dit is nuttig wanneer jy nie seker is of 'n branch signed of unsigned is nie, of 'n register zero-extended of sign-extended is, of wanneer jy verskeie kandidaat constants uit disassembly probeer.
 ```python
 from z3 import *
 
@@ -254,9 +254,9 @@ print(s.check())
 print(s.model())
 s.pop()
 ```
-#### Enumerering van meer as een geldige invoer
+#### Opsomming van meer as een geldige invoer
 
-Sommige keygens, license checks en CTF challenges laat doelbewus **baie** geldige invoere toe. Z3 enumereer hulle nie outomaties nie, maar jy kan 'n **blocking clause** na elke model byvoeg om te dwing dat die volgende resultaat in minstens een posisie verskil.
+Sommige keygens, license checks, en CTF-uitdagings laat opsetlik **baie** geldige invoere toe. Z3 som dit nie outomaties op nie, maar jy kan na elke model 'n **blocking clause** byvoeg om die volgende resultaat te dwing om in minstens een posisie te verskil.
 ```python
 from z3 import *
 
@@ -272,22 +272,22 @@ m = s.model()
 print(''.join(chr(m[x].as_long()) for x in xs))
 s.add(Or([x != m.eval(x, model_completion=True) for x in xs]))
 ```
-#### Taktieke vir lelike bit-vector formules
+#### Taktieke vir lelike bit-vector-formules
 
-Z3's default solver is gewoonlik voldoende, maar decompiler-generated formules met baie gelykhede en bit-vector rewrites raak dikwels makliker na 'n eerste normaliseringspas. In daardie gevalle kan dit nuttig wees om 'n solver uit taktieke te bou:
+Z3 se default solver is gewoonlik genoeg, maar decompiler-generated formules met baie gelykhede en bit-vector rewrites raak dikwels eenvoudiger ná 'n eerste normaliseringspas. In daardie gevalle kan dit nuttig wees om 'n solver uit taktieke op te bou:
 ```python
 from z3 import *
 
 t = Then('simplify', 'solve-eqs', 'bit-blast', 'sat')
 s = t.solver()
 ```
-Dit is veral nuttig wanneer die probleem byna uitsluitlik **bit-vector + Boolean logic** is en jy wil hê Z3 moet voor die oorhandiging van die formule aan die SAT-backend voor die hand liggende gelykhede vereenvoudig en uitskakel.
+Dit is veral nuttig wanneer die probleem byna uitsluitlik **bit-vector + Boolean logic** is en jy wil hê Z3 moet voor die oorhandiging van die formule aan die SAT backend voor de hand liggende gelykhede vereenvoudig en uitskakel.
 
-#### CRCs and other custom checkers
+#### CRCs en ander aangepaste checkers
 
-Onlangse reversing-uitdagings gebruik steeds Z3 vir constraints wat irriterend is om met brute-force te hanteer, maar maklik is om te modelleer, soos CRC32 checks oor ASCII-only insette, gemengde rotate/xor/add-pipelines, of baie geketende aritmetiese predikate wat uit ’n JITed/obfuscated checker onttrek is. Vir CRC-agtige probleme, hou die toestand as bit-vectors en pas per-byte ASCII-constraints vroeg toe om die soekruimte te verklein.
+Onlangse reversing-uitdagings gebruik steeds Z3 vir constraints wat lastig is om met brute-force op te los maar eenvoudig is om te modelleer, soos CRC32 checks oor ASCII-only input, gemengde rotate/xor/add pipelines, of baie geketende aritmetiese predikate wat uit 'n JITed/obfuscated checker onttrek is. Vir CRC-agtige probleme, hou die staat as bit-vectors en pas per-byte ASCII-constraints vroeg toe om die soekruimte te verklein.
 
-## Verwysings
+## References
 
 - [https://ericpony.github.io/z3py-tutorial/guide-examples.htm](https://ericpony.github.io/z3py-tutorial/guide-examples.htm)
 - [https://microsoft.github.io/z3guide/docs/theories/Bitvectors/](https://microsoft.github.io/z3guide/docs/theories/Bitvectors/)
