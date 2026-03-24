@@ -233,6 +233,53 @@ top -n 1
 Always check for possible [**electron/cef/chromium debuggers** running, you could abuse it to escalate privileges](electron-cef-chromium-debugger-abuse.md). **Linpeas** detect those by checking the `--inspect` parameter inside the command line of the process.\
 Also **check your privileges over the processes binaries**, maybe you can overwrite someone.
 
+### Cross-user parent-child chains
+
+A child process running under a **different user** than its parent is not automatically malicious, but it is a useful **triage signal**. Some transitions are expected (`root` spawning a service user, login managers creating session processes), but unusual chains can reveal wrappers, debug helpers, persistence, or weak runtime trust boundaries.
+
+Quick review:
+
+```bash
+ps -eo pid,ppid,user,comm,args --sort=ppid
+pstree -alp
+```
+
+If you find a surprising chain, inspect the parent command line and all files that influence its behavior (`config`, `EnvironmentFile`, helper scripts, working directory, writable arguments). In several real privesc paths the child itself was not writable, but the **parent-controlled config** or helper chain was.
+
+### Deleted executables and deleted-open files
+
+Runtime artifacts are often still accessible **after deletion**. This is useful both for privilege escalation and for recovering evidence from a process that already has sensitive files open.
+
+Check for deleted executables:
+
+```bash
+pid=<PID>
+ls -l /proc/$pid/exe
+readlink /proc/$pid/exe
+tr '\0' ' ' </proc/$pid/cmdline; echo
+```
+
+If `/proc/<PID>/exe` points to `(deleted)`, the process is still running the old binary image from memory. That is a strong signal to investigate because:
+
+- the removed executable may contain interesting strings or credentials
+- the running process may still expose useful file descriptors
+- a deleted privileged binary can indicate recent tampering or attempted cleanup
+
+Collect deleted-open files globally:
+
+```bash
+lsof +L1
+```
+
+If you find an interesting descriptor, recover it directly:
+
+```bash
+ls -l /proc/<PID>/fd
+cat /proc/<PID>/fd/<FD>
+```
+
+This is especially valuable when a process still has a deleted secret, script, database export, or flag file open.
+
 ### Process monitoring
 
 You can use tools like [**pspy**](https://github.com/DominicBreuker/pspy) to monitor processes. This can be very useful to identify vulnerable processes being executed frequently or when a set of requirements are met.
@@ -434,6 +481,15 @@ ls -al /etc/cron* /etc/at*
 cat /etc/cron* /etc/at* /etc/anacrontab /var/spool/cron/crontabs/root 2>/dev/null | grep -v "^#"
 ```
 
+If `run-parts` is used, check which names will really execute:
+
+```bash
+run-parts --test /etc/cron.hourly
+run-parts --test /etc/cron.daily
+```
+
+This avoids false positives. A writable periodic directory is only useful if your payload filename matches the local `run-parts` rules.
+
 ### Cron path
 
 For example, inside _/etc/crontab_ you can find the PATH: _PATH=**/home/user**:/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin_
@@ -588,6 +644,15 @@ It's possible to create a cronjob **putting a carriage return after a comment** 
 
 ```bash
 #This is a comment inside a cron config file\r* * * * * echo "Surprise!"
+```
+
+To detect this kind of stealth entry, inspect cron files with tools that expose control characters:
+
+```bash
+cat -A /etc/crontab
+cat -A /etc/cron.d/*
+sed -n 'l' /etc/crontab /etc/cron.d/* 2>/dev/null
+xxd /etc/crontab | head
 ```
 
 ## Services
