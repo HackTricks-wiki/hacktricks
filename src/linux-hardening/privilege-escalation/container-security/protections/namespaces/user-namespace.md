@@ -4,68 +4,68 @@
 
 ## Огляд
 
-Простір імен користувача змінює значення ідентифікаторів користувача та групи, дозволяючи ядру відображати ID, які видно всередині простору імен, на інші ID поза ним. Це один із найважливіших сучасних механізмів захисту контейнерів, оскільки він безпосередньо вирішує найбільшу історичну проблему класичних контейнерів: **root всередині контейнера був незручно близьким до root на хості**.
+Простір імен користувача змінює значення ідентифікаторів користувачів та груп, дозволяючи ядру відображати ID, які бачаться всередині простору імен, на інші ID поза ним. Це один з найважливіших сучасних механізмів захисту контейнерів, оскільки він безпосередньо вирішує найбільшу історичну проблему класичних контейнерів: **root inside the container used to be uncomfortably close to root on the host**.
 
-З просторами імен користувача процес може працювати як UID 0 всередині контейнера і водночас відповідати непривілейованому діапазону UID на хості. Це означає, що процес може поводитися як root для багатьох завдань всередині контейнера, при цьому з погляду хоста бути набагато менш потужним. Це не вирішує всіх проблем безпеки контейнерів, але суттєво змінює наслідки компрометації контейнера.
+З просторами імен користувача процес може виконуватись як UID 0 всередині контейнера й водночас відповідати непривілейованому діапазону UID на хості. Це означає, що процес може поводитись як root для багатьох завдань всередині контейнера, одночасно будучи значно менш потужним з точки зору хоста. Це не вирішує всі проблеми безпеки контейнерів, але суттєво змінює наслідки компрометації контейнера.
 
 ## Принцип роботи
 
-Простір імен користувача має файли відображення, такі як `/proc/self/uid_map` і `/proc/self/gid_map`, які описують, як ID в просторі імен транслюються в батьківські ID. Якщо root всередині простору імен відображається на непривілейований UID хоста, то операції, які вимагали б реального root на хості, просто не мають тієї самої ваги. Ось чому простори імен користувача є центральними для **контейнерів без root** і чому вони є однією з найбільших відмінностей між старішими дефолтами з root у контейнерах і більш сучасними дизайнами з мінімальними привілеями.
+Простір імен користувача має файли відображень, такі як `/proc/self/uid_map` та `/proc/self/gid_map`, які описують, як ID простору імен транслюються в батьківські ID. Якщо root всередині простору імен відображається на непривілейований UID хоста, то операції, які вимагали б реального root на хості, просто не мають тієї самої ваги. Саме тому простори імен користувача є центральними для **rootless containers** і чому вони є однією з найбільших відмінностей між старішими контейнерами з root за замовчуванням і більш сучасними дизайнами з мінімальними привілеями.
 
-Сенс тонкий, але вирішальний: root всередині контейнера не усувається, він **транслюється**. Процес усе ще відчуває середовище, подібне на root локально, але хост не повинен розглядати його як повний root.
+Сутність тонка, але критична: root всередині контейнера не знищується, він **перетворюється**. Процес все ще відчуває локально середовище, схоже на root, але хост не повинен трактувати його як повного root.
 
-## Лабораторна
+## Лаб
 
-Один із ручних тестів:
+Ручний тест:
 ```bash
 unshare --user --map-root-user --fork bash
 id
 cat /proc/self/uid_map
 cat /proc/self/gid_map
 ```
-Це змушує поточного користувача виглядати як root всередині namespace, при цьому поза ним він все ще не є root на хості. Це один із найкращих простих прикладів для розуміння, чому user namespaces такі цінні.
+Це змушує поточного користувача виглядати як root всередині простору імен, при цьому зовні, поза ним, він все ще не є host root. Це один із найкращих простих прикладів для розуміння того, чому простори імен користувачів такі цінні.
 
 У контейнерах ви можете порівняти видиме відображення з:
 ```bash
 docker run --rm debian:stable-slim sh -c 'id && cat /proc/self/uid_map'
 ```
-Точний вивід залежить від того, чи використовує движок user namespace remapping або більш традиційну rootful конфігурацію.
+Точний вивід залежить від того, чи використовує engine user namespace remapping, чи більш традиційну rootful конфігурацію.
 
-Ви також можете прочитати відображення зі сторони хоста за допомогою:
+Ви також можете прочитати відображення з боку хоста за допомогою:
 ```bash
 cat /proc/<pid>/uid_map
 cat /proc/<pid>/gid_map
 ```
 ## Використання під час виконання
 
-Rootless Podman — один із найочевидніших прикладів того, як простори імен користувача розглядаються як механізм безпеки першого класу. Rootless Docker також від них залежить. Підтримка Docker's userns-remap підвищує безпеку в розгортаннях з rootful daemon, хоча історично багато розгортань залишали її вимкненою з міркувань сумісності. Підтримка просторів імен користувача в Kubernetes покращилася, але впровадження та налаштування за замовчуванням відрізняються залежно від runtime, дистрибутива та політики кластера. Системи Incus/LXC також широко покладаються на зсуви UID/GID та концепції idmapping.
+Rootless Podman є одним із найяскравіших прикладів того, що простори імен користувачів розглядаються як механізм безпеки першого класу. Rootless Docker також покладається на них. Підтримка userns-remap у Docker також підвищує безпеку в розгортаннях з rootful daemon, хоча історично багато розгортань залишали її вимкненою через сумісність. Підтримка простору імен користувачів у Kubernetes покращилася, але впровадження та налаштування за замовчуванням різняться залежно від runtime, дистрибутива та політики кластера. Системи Incus/LXC також активно покладаються на зміщення UID/GID та ідеї idmapping.
 
-## Деталі розширеного мапування
+## Розширені деталі відображення
 
-Коли непривілейований процес записує в `uid_map` або `gid_map`, ядро застосовує більш суворі правила, ніж для привілейованого записувача в батьківському просторі імен. Дозволені лише обмежені відображення, і для `gid_map` записувачу зазвичай потрібно спочатку відключити `setgroups(2)`:
+Коли непривілейований процес записує в `uid_map` або `gid_map`, ядро застосовує суворіші правила, ніж до записувача в привілейованому батьківському namespace. Дозволені лише обмежені відображення, і для `gid_map` записувачу зазвичай потрібно спочатку відключити `setgroups(2)`:
 ```bash
 cat /proc/self/setgroups
 echo deny > /proc/self/setgroups
 ```
-Ця деталь важлива, бо пояснює, чому налаштування user namespace іноді дає збій у rootless-експериментах і чому runtimes потребують ретельної допоміжної логіки для делегування UID/GID.
+This detail matters because it explains why user-namespace setup sometimes fails in rootless experiments and why runtimes need careful helper logic around UID/GID delegation.
 
-Another advanced feature is the **ID-mapped mount**. Замість зміни власника на диску, ID-mapped mount застосовує мапінг user namespace до mount так, щоб власність виглядала трансльованою через цей view mount. Це особливо актуально в rootless та сучасних runtime-настройках, бо дозволяє використовувати спільні host-шляхи без рекурсивних `chown` операцій. З точки зору безпеки, ця функція змінює те, наскільки записуваним здається bind mount зсередини namespace, навіть якщо вона не переписує базові метадані файлової системи.
+Another advanced feature is the **ID-mapped mount**. Instead of changing on-disk ownership, an ID-mapped mount applies a user-namespace mapping to a mount so that ownership appears translated through that mount view. This is especially relevant in rootless and modern runtime setups because it allows shared host paths to be used without recursive `chown` operations. Security-wise, the feature changes how writable a bind mount appears from inside the namespace, even though it does not rewrite the underlying filesystem metadata.
 
-Наостанок, пам’ятайте, що коли процес створює або входить у новий user namespace, він отримує повний набір capabilities **всередині цього namespace**. Це не означає, що він раптово набув глобальної влади над host. Це означає, що ці capabilities можуть використовуватися лише там, де модель namespace та інші засоби захисту це дозволяють. Саме тому `unshare -U` може раптово зробити можливими mount-операції або привілейовані операції локально для namespace без безпосереднього зникнення межі root на хості.
+Finally, remember that when a process creates or enters a new user namespace, it receives a full capability set **inside that namespace**. That does not mean it suddenly gained host-global power. It means those capabilities can be used only where the namespace model and other protections allow them. This is the reason `unshare -U` can suddenly make mounting or namespace-local privileged operations possible without directly making the host root boundary disappear.
 
-## Неправильні налаштування
+## Misconfigurations
 
-Головна слабкість — просте невикористання user namespace в середовищах, де це було б можливо. Якщо container root мапиться занадто прямо на host root, writable host mounts і привілейовані kernel-операції стають значно небезпечнішими. Інша проблема — примусове спільне використання host user namespace або відключення remapping задля сумісності, не усвідомлюючи, наскільки це змінює межу довіри.
+The major weakness is simply not using user namespaces in environments where they would be feasible. If container root maps too directly to host root, writable host mounts and privileged kernel operations become much more dangerous. Another problem is forcing host user namespace sharing or disabling remapping for compatibility without recognizing how much that changes the trust boundary.
 
-User namespace також потрібно розглядати разом з рештою моделі. Навіть коли вони активні, широкий доступ до runtime API або дуже слабка конфігурація runtime все ще можуть дозволити ескалацію привілеїв іншими шляхами. Але без них багато старих класів breakout стають значно легше експлуатувати.
+User namespaces also need to be considered together with the rest of the model. Even when they are active, a broad runtime API exposure or a very weak runtime configuration can still allow privilege escalation through other paths. But without them, many old breakout classes become much easier to exploit.
 
-## Зловживання
+## Abuse
 
-Якщо контейнер має root без відокремлення user namespace, writable host bind mount стає набагато небезпечнішим, бо процес може дійсно писати від імені host root. Небезпечні capabilities відповідно набувають більшої ваги. Атакуючому більше не потрібно так наполегливо долати межу трансляції, бо ця межа майже відсутня.
+If the container is rootful without user namespace separation, a writable host bind mount becomes vastly more dangerous because the process may really be writing as host root. Dangerous capabilities likewise become more meaningful. The attacker no longer needs to fight as hard against the translation boundary because the translation boundary barely exists.
 
-Наявність або відсутність user namespace слід перевіряти на ранньому етапі при оцінці шляху breakout контейнера. Це не відповідає на всі питання, але одразу показує, чи має «root у контейнері» пряме значення для host.
+User namespace presence or absence should be checked early when evaluating a container breakout path. It does not answer every question, but it immediately shows whether "root in container" has direct host relevance.
 
-Найпрактичніший сценарій зловживання — підтвердити мапінг, а потім негайно перевірити, чи можна записувати у host-mounted контент з привілеями, релевантними для host:
+The most practical abuse pattern is to confirm the mapping and then immediately test whether host-mounted content is writable with host-relevant privileges:
 ```bash
 id
 cat /proc/self/uid_map
@@ -73,31 +73,31 @@ cat /proc/self/gid_map
 touch /host/tmp/userns_test 2>/dev/null && echo "host write works"
 ls -ln /host/tmp/userns_test 2>/dev/null
 ```
-Якщо файл створено від імені реального host root, user namespace isolation для цього шляху фактично відсутня. У цей момент класичні host-file abuses стають реалістичними:
+Якщо файл створено як реальний host root, user namespace isolation фактично відсутня для цього шляху. У цей момент класичні host-file abuses стають реалістичними:
 ```bash
 echo 'x:x:0:0:x:/root:/bin/bash' >> /host/etc/passwd 2>/dev/null || echo "passwd write blocked"
 cat /host/etc/passwd | tail
 ```
-Більш безпечним підтвердженням під час live-оцінки є запис нешкідливого маркера замість модифікації критичних файлів:
+Більш безпечним підтвердженням під час live assessment є запис безпечного маркера замість зміни критичних файлів:
 ```bash
 echo test > /host/root/userns_marker 2>/dev/null
 ls -l /host/root/userns_marker 2>/dev/null
 ```
-Ці перевірки мають значення, тому що вони швидко дають відповідь на справжнє питання: чи root у цьому контейнері відображається достатньо близько на root хоста, щоб writable host mount негайно став шляхом компрометації хоста?
+Ці перевірки важливі, бо швидко відповідають на ключове питання: чи відповідає root у цьому контейнері root на хості настільки, щоб записуване хостове монтування відразу ставало шляхом компрометації хоста?
 
-### Повний приклад: відновлення локальних для простору імен можливостей
+### Повний приклад: відновлення локальних привілеїв у просторі імен
 
-Якщо seccomp дозволяє `unshare` і середовище дозволяє створити новий простір імен користувача, процес може відновити повний набір можливостей всередині цього нового простору імен:
+Якщо seccomp дозволяє `unshare` і середовище дозволяє створити новий користувацький простір імен, процес може відновити повний набір привілеїв усередині цього нового простору імен:
 ```bash
 unshare -UrmCpf bash
 grep CapEff /proc/self/status
 mount -t tmpfs tmpfs /mnt 2>/dev/null && echo "namespace-local mount works"
 ```
-Це саме по собі не є host escape. Причина, чому це має значення, полягає в тому, що user namespaces можуть відновити можливість виконання привілейованих дій, локальних для простору імен, які згодом поєднуються з ненадійними mount'ами, вразливими ядрами або погано відкритими runtime-інтерфейсами.
+Саме по собі це не є host escape. Причина, чому це важливо, полягає в тому, що user namespaces можуть знову дозволити привілейовані namespace-local дії, які згодом поєднуються зі слабкими mounts, вразливими kernels або погано захищеними runtime surfaces.
 
-## Перевірки
+## Checks
 
-Ці команди призначені, щоб відповісти на найважливіше питання цієї сторінки: кому на хості відповідає root всередині цього контейнера?
+Ці команди призначені, щоб відповісти на найважливіше питання на цій сторінці: який обліковий запис на host відповідає root всередині цього container?
 ```bash
 readlink /proc/self/ns/user   # User namespace identifier
 id                            # Current UID/GID as seen inside the container
@@ -105,11 +105,9 @@ cat /proc/self/uid_map        # UID translation to parent namespace
 cat /proc/self/gid_map        # GID translation to parent namespace
 cat /proc/self/setgroups 2>/dev/null   # GID-mapping restrictions for unprivileged writers
 ```
-Що тут цікаво:
-
 - Якщо процес має UID 0 і maps показують пряме або дуже близьке host-root mapping, container набагато небезпечніший.
-- Якщо root мапиться на неприпривілейований host range, це набагато безпечніша базова ситуація і зазвичай вказує на реальну ізоляцію user namespace.
-- mapping files мають більше значення, ніж `id` сам по собі, оскільки `id` показує лише namespace-local identity.
+- Якщо root maps до unprivileged host range, це значно безпечніша базова лінія і зазвичай вказує на реальну user namespace isolation.
+- Mapping файли цінніші, ніж `id` сам по собі, оскільки `id` показує лише namespace-local identity.
 
-Якщо workload запускається як UID 0 і mapping показує, що це тісно відповідає host root, ви повинні інтерпретувати решту привілеїв container набагато суворіше.
+Якщо workload запускається як UID 0 і mapping показує, що це близько відповідає host root, слід набагато суворіше оцінювати решту привілеїв container.
 {{#include ../../../../../banners/hacktricks-training.md}}

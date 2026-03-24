@@ -6,102 +6,102 @@
 
 ### Components of a Certificate
 
-- The **Subject** сертифіката позначає його власника.
-- A **Public Key** парний із приватним ключем і зв’язує сертифікат з його законним власником.
-- The **Validity Period**, визначений датами **NotBefore** та **NotAfter**, позначає період дії сертифіката.
-- A unique **Serial Number**, наданий Certificate Authority (CA), ідентифікує кожен сертифікат.
-- The **Issuer** відноситься до CA, який видав сертифікат.
-- **SubjectAlternativeName** дозволяє додаткові імена для Subject, підвищуючи гнучкість ідентифікації.
-- **Basic Constraints** вказують, чи є сертифікат для CA або кінцевого об’єкта, і визначають обмеження використання.
-- **Extended Key Usages (EKUs)** описують конкретні призначення сертифіката, такі як code signing або email encryption, за допомогою Object Identifiers (OIDs).
-- The **Signature Algorithm** визначає метод підписання сертифіката.
-- The **Signature**, створений приватним ключем issuer, гарантує автентичність сертифіката.
+- The **Subject** of the certificate denotes its owner.  
+- A **Public Key** is paired with a privately held key to link the certificate to its rightful owner.  
+- The **Validity Period**, defined by **NotBefore** and **NotAfter** dates, marks the certificate's effective duration.  
+- A unique **Serial Number**, provided by the Certificate Authority (CA), identifies each certificate.  
+- The **Issuer** refers to the CA that has issued the certificate.  
+- **SubjectAlternativeName** allows for additional names for the subject, enhancing identification flexibility.  
+- **Basic Constraints** identify if the certificate is for a CA or an end entity and define usage restrictions.  
+- **Extended Key Usages (EKUs)** delineate the certificate's specific purposes, like code signing or email encryption, through Object Identifiers (OIDs).  
+- The **Signature Algorithm** specifies the method for signing the certificate.  
+- The **Signature**, created with the issuer's private key, guarantees the certificate's authenticity.
 
 ### Special Considerations
 
-- **Subject Alternative Names (SANs)** розширюють застосовність сертифіката на кілька ідентичностей, що критично для серверів з кількома доменами. Необхідні надійні процеси випуску, щоб уникнути ризиків підробки з боку атакувальників, які маніпулюють специфікацією SAN.
+- **Subject Alternative Names (SANs)** expand a certificate's applicability to multiple identities, crucial for servers with multiple domains. Secure issuance processes are vital to avoid impersonation risks by attackers manipulating the SAN specification.
 
 ### Certificate Authorities (CAs) in Active Directory (AD)
 
-AD CS визнає CA certificates у AD forest через визначені контейнери, кожен з яких виконує унікальні ролі:
+AD CS acknowledges CA certificates in an AD forest through designated containers, each serving unique roles:
 
-- **Certification Authorities** container містить довірені root CA certificates.
-- **Enrolment Services** container містить інформацію про Enterprise CAs і їх certificate templates.
-- **NTAuthCertificates** object включає CA certificates, уповноважені для AD authentication.
-- **AIA (Authority Information Access)** container полегшує валідацію ланцюга сертифікатів за допомогою intermediate і cross CA certificates.
+- **Certification Authorities** container holds trusted root CA certificates.  
+- **Enrolment Services** container details Enterprise CAs and their certificate templates.  
+- **NTAuthCertificates** object includes CA certificates authorized for AD authentication.  
+- **AIA (Authority Information Access)** container facilitates certificate chain validation with intermediate and cross CA certificates.
 
 ### Certificate Acquisition: Client Certificate Request Flow
 
-1. Процес запиту починається з того, що клієнти знаходять Enterprise CA.
-2. Створюється CSR, що містить public key та інші деталі, після генерації пари public-private ключів.
-3. CA оцінює CSR відносно наявних certificate templates і видає сертифікат на основі прав, визначених у шаблоні.
-4. Після затвердження CA підписує сертифікат своїм приватним ключем і повертає його клієнту.
+1. The request process begins with clients finding an Enterprise CA.  
+2. A CSR is created, containing a public key and other details, after generating a public-private key pair.  
+3. The CA assesses the CSR against available certificate templates, issuing the certificate based on the template's permissions.  
+4. Upon approval, the CA signs the certificate with its private key and returns it to the client.
 
 ### Certificate Templates
 
-Визначені в AD, ці шаблони описують налаштування та дозволи для видачі сертифікатів, включаючи дозволені EKUs та права на enrollment або модифікацію, що є критичними для керування доступом до сертифікаційних сервісів.
+Defined within AD, these templates outline the settings and permissions for issuing certificates, including permitted EKUs and enrollment or modification rights, critical for managing access to certificate services.
 
-**Template schema version matters.** Legacy **v1** templates (наприклад, вбудований **WebServer** template) не містять кількох сучасних механізмів примусового застосування. Дослідження **ESC15/EKUwu** показали, що на **v1 templates** запитувач може вбудувати **Application Policies/EKUs** у CSR, які будуть **предпочитані над** EKUs, сконфігурованими в шаблоні, що дозволяє отримати client-auth, enrollment agent або code-signing сертифікати лише з правами enrollment. Віддавайте перевагу **v2/v3 templates**, видаляйте або замінюйте v1 за замовчуванням і суворо обмежуйте EKUs до призначеної мети.
+**Template schema version matters.** Legacy **v1** templates (for example, the built-in **WebServer** template) lack several modern enforcement knobs. The **ESC15/EKUwu** research showed that on **v1 templates**, a requester can embed **Application Policies/EKUs** in the CSR that are **preferred over** the template's configured EKUs, enabling client-auth, enrollment agent, or code-signing certificates with only enrollment rights. Prefer **v2/v3 templates**, remove or supersede v1 defaults, and tightly scope EKUs to the intended purpose.
 
 ## Certificate Enrollment
 
-Процес enrollment для сертифікатів ініціюється адміністратором, який **створює certificate template**, після чого Enterprise Certificate Authority (CA) **публікує** його. Це робить шаблон доступним для клієнтів для enrollment, що досягається додаванням імені шаблону до поля `certificatetemplates` об’єкта Active Directory.
+The enrollment process for certificates is initiated by an administrator who **creates a certificate template**, which is then **published** by an Enterprise Certificate Authority (CA). This makes the template available for client enrollment, a step achieved by adding the template's name to the `certificatetemplates` field of an Active Directory object.
 
-Щоб клієнт міг запитати сертифікат, повинні бути надані **enrollment rights**. Ці права визначаються security descriptors на certificate template та на самому Enterprise CA. Дозволи мають бути надані в обох місцях, щоб запит був успішним.
+For a client to request a certificate, **enrollment rights** must be granted. These rights are defined by security descriptors on the certificate template and the Enterprise CA itself. Permissions must be granted in both locations for a request to be successful.
 
 ### Template Enrollment Rights
 
-Ці права вказуються через Access Control Entries (ACEs) і описують дозволи, такі як:
+These rights are specified through Access Control Entries (ACEs), detailing permissions like:
 
-- **Certificate-Enrollment** та **Certificate-AutoEnrollment** права, кожне пов’язане з певними GUID.
-- **ExtendedRights**, що дозволяє всі розширені дозволи.
-- **FullControl/GenericAll**, що надає повний контроль над шаблоном.
+- **Certificate-Enrollment** and **Certificate-AutoEnrollment** rights, each associated with specific GUIDs.  
+- **ExtendedRights**, allowing all extended permissions.  
+- **FullControl/GenericAll**, providing complete control over the template.
 
 ### Enterprise CA Enrollment Rights
 
-Права CA описані в його security descriptor, доступному через Certificate Authority management console. Деякі налаштування навіть дозволяють віддалений доступ низькопривілейованим користувачам, що може становити проблему для безпеки.
+The CA's rights are outlined in its security descriptor, accessible via the Certificate Authority management console. Some settings even allow low-privileged users remote access, which could be a security concern.
 
 ### Additional Issuance Controls
 
-Можуть застосовуватися певні контролі, такі як:
+Certain controls may apply, such as:
 
-- **Manager Approval**: поміщає запити в стан очікування до затвердження менеджером сертифікатів.
-- **Enrolment Agents and Authorized Signatures**: визначають кількість необхідних підписів на CSR і необхідні Application Policy OIDs.
+- **Manager Approval**: Places requests in a pending state until approved by a certificate manager.  
+- **Enrolment Agents and Authorized Signatures**: Specify the number of required signatures on a CSR and the necessary Application Policy OIDs.
 
 ### Methods to Request Certificates
 
-Сертифікати можна запитувати через:
+Certificates can be requested through:
 
-1. **Windows Client Certificate Enrollment Protocol** (MS-WCCE), використовуючи DCOM interfaces.
-2. **ICertPassage Remote Protocol** (MS-ICPR), через named pipes або TCP/IP.
-3. **certificate enrollment web interface**, за умови інсталяції Certificate Authority Web Enrollment role.
-4. **Certificate Enrollment Service** (CES), у поєднанні з Certificate Enrollment Policy (CEP) service.
-5. **Network Device Enrollment Service** (NDES) для мережевих пристроїв, використовуючи Simple Certificate Enrollment Protocol (SCEP).
+1. **Windows Client Certificate Enrollment Protocol** (MS-WCCE), using DCOM interfaces.  
+2. **ICertPassage Remote Protocol** (MS-ICPR), through named pipes or TCP/IP.  
+3. The **certificate enrollment web interface**, with the Certificate Authority Web Enrollment role installed.  
+4. The **Certificate Enrollment Service** (CES), in conjunction with the Certificate Enrollment Policy (CEP) service.  
+5. The **Network Device Enrollment Service** (NDES) for network devices, using the Simple Certificate Enrollment Protocol (SCEP).
 
-Користувачі Windows також можуть запитувати сертифікати через GUI (`certmgr.msc` або `certlm.msc`) або інструменти командного рядка (`certreq.exe` або PowerShell `Get-Certificate` command).
+Windows users can also request certificates via the GUI (`certmgr.msc` or `certlm.msc`) or command-line tools (`certreq.exe` or PowerShell's `Get-Certificate` command).
 ```bash
 # Example of requesting a certificate using PowerShell
 Get-Certificate -Template "User" -CertStoreLocation "cert:\\CurrentUser\\My"
 ```
-## Аутентифікація за допомогою сертифікатів
+## Аутентифікація за сертифікатами
 
-Active Directory (AD) підтримує аутентифікацію за допомогою сертифікатів, переважно використовуючи протоколи **Kerberos** та **Secure Channel (Schannel)**.
+Active Directory (AD) підтримує автентифікацію за сертифікатами, переважно використовуючи протоколи **Kerberos** та **Secure Channel (Schannel)**.
 
 ### Процес аутентифікації Kerberos
 
-У процесі аутентифікації Kerberos запит користувача на Ticket Granting Ticket (TGT) підписується за допомогою **private key** сертифіката користувача. Цей запит проходить кілька перевірок контролером домену, зокрема перевірку **validity**, **path** та **revocation status** сертифіката. Також перевіряють, що сертифікат походить із довіреного джерела, та підтверджують присутність видавця в **NTAUTH certificate store**. Після успішних перевірок видається TGT. Об'єкт **`NTAuthCertificates`** в AD, знайдений за адресою:
+У процесі аутентифікації Kerberos запит користувача на Ticket Granting Ticket (TGT) підписується за допомогою **приватного ключа** сертифіката користувача. Цей запит проходить кілька перевірок зі сторони контролера домену, включно з перевіркою **дійсності**, **шляху (path)** та **статусу відкликання** сертифіката. Перевірки також включають підтвердження того, що сертифікат походить із довіреного джерела, і підтвердження наявності видавця в **NTAUTH certificate store**. Успішні перевірки призводять до видачі TGT. Об'єкт **`NTAuthCertificates`** в AD, який знаходиться за адресою:
 ```bash
 CN=NTAuthCertificates,CN=Public Key Services,CN=Services,CN=Configuration,DC=<domain>,DC=<com>
 ```
 є центральним елементом для встановлення довіри при автентифікації за допомогою сертифікатів.
 
-### Аутентифікація Secure Channel (Schannel)
+### Secure Channel (Schannel) Authentication
 
-Schannel забезпечує захищені TLS/SSL-з'єднання, де під час handshake клієнт пред'являє сертифікат, який, якщо його успішно перевірено, надає авторизацію доступу. Відображення сертифіката на обліковий запис AD може включати функцію Kerberos **S4U2Self** або **Subject Alternative Name (SAN)** сертифіката, серед інших методів.
+Schannel сприяє встановленню захищених TLS/SSL-з'єднань, де під час рукопотискання клієнт пред'являє сертифікат, який у разі успішної валідації авторизує доступ. Відображення сертифіката на обліковий запис AD може включати використання функції Kerberos’s **S4U2Self** або поля сертифіката **Subject Alternative Name (SAN)**, серед інших методів.
 
-### Перерахування служб сертифікації AD
+### AD Certificate Services Enumeration
 
-Служби сертифікації AD можна перерахувати за допомогою LDAP-запитів, що виявляють інформацію про **Enterprise Certificate Authorities (CAs)** та їхні конфігурації. Доступ до цього має будь-який користувач, автентифікований у домені, без спеціальних привілеїв. Інструменти, такі як **[Certify](https://github.com/GhostPack/Certify)** і **[Certipy](https://github.com/ly4k/Certipy)**, використовуються для перерахування та оцінки вразливостей у середовищах AD CS.
+Служби сертифікації AD можна перерахувати за допомогою LDAP-запитів, що розкривають інформацію про **Enterprise Certificate Authorities (CAs)** та їхні конфігурації. Це доступно будь-якому користувачу, автентифікованому в домені, без спеціальних привілеїв. Інструменти на кшталт **[Certify](https://github.com/GhostPack/Certify)** та **[Certipy](https://github.com/ly4k/Certipy)** використовуються для перелічення та оцінки вразливостей у середовищах AD CS.
 
 Команди для використання цих інструментів включають:
 ```bash
@@ -144,7 +144,7 @@ Microsoft introduced a three-phase rollout (Compatibility → Audit → Enforcem
 
 ---
 
-## Покращення виявлення та посилення захисту
+## Detection & Hardening Enhancements
 
 * **Defender for Identity AD CS sensor (2023-2024)** now surfaces posture assessments for ESC1-ESC8/ESC11 and generates real-time alerts such as *“Domain-controller certificate issuance for a non-DC”* (ESC8) and *“Prevent Certificate Enrollment with arbitrary Application Policies”* (ESC15). Ensure sensors are deployed to all AD CS servers to benefit from these detections.
 * Disable or tightly scope the **“Supply in the request”** option on all templates; prefer explicitly defined SAN/EKU values.
@@ -158,7 +158,7 @@ Microsoft introduced a three-phase rollout (Compatibility → Audit → Enforcem
 
 
 
-## Джерела
+## References
 
 - [https://trustedsec.com/blog/ekuwu-not-just-another-ad-cs-esc](https://trustedsec.com/blog/ekuwu-not-just-another-ad-cs-esc)
 - [https://learn.microsoft.com/en-us/defender-for-identity/security-posture-assessments/certificates](https://learn.microsoft.com/en-us/defender-for-identity/security-posture-assessments/certificates)
