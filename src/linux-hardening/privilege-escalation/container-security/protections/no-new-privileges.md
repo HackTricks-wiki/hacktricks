@@ -2,39 +2,39 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-`no_new_privs` ist eine Kernel-Härtungsfunktion, die verhindert, dass ein Prozess über `execve()` zusätzliche Privilegien erlangt. Praktisch bedeutet das: Sobald das Flag gesetzt ist, gewährt das Ausführen einer setuid binary, einer setgid binary oder einer Datei mit Linux file capabilities keine zusätzlichen Privilegien über das hinaus, was der Prozess bereits besitzt. In containerisierten Umgebungen ist das wichtig, weil viele privilege-escalation chains darauf angewiesen sind, ein ausführbares Programm im Image zu finden, das beim Start Privilegien ändert.
+`no_new_privs` ist eine Kernel-Härtungsfunktion, die verhindert, dass ein Prozess durch `execve()` zusätzliche Privilegien erlangt. Praktisch bedeutet das: Sobald das Flag gesetzt ist, gewährt das Ausführen eines setuid binary, eines setgid binary oder einer Datei mit Linux file capabilities keine zusätzlichen Privilegien über das hinaus, was der Prozess bereits hatte. In containerisierten Umgebungen ist das wichtig, weil viele privilege-escalation chains darauf angewiesen sind, ein ausführbares Programm innerhalb des image zu finden, das beim Start Privilegien ändert.
 
-Aus defensiver Sicht ist `no_new_privs` kein Ersatz für namespaces, seccomp oder capability dropping. Es ist eine Verstärkungsschicht. Es blockiert eine bestimmte Klasse von Folgeeskalationen, nachdem bereits Codeausführung erzielt wurde. Das macht es besonders wertvoll in Umgebungen, in denen Images Hilfsbinaries, package-manager artifacts oder Legacy-Tools enthalten, die bei teilweiser Kompromittierung gefährlich werden könnten.
+Aus defensiver Sicht ist `no_new_privs` kein Ersatz für namespaces, seccomp oder capability dropping. Es ist eine zusätzliche Verstärkungsschicht. Es blockiert eine bestimmte Klasse nachfolgender Eskalationen, nachdem bereits Codeausführung erreicht wurde. Deshalb ist es besonders wertvoll in Umgebungen, in denen images helper binaries, package-manager artifacts oder legacy tools enthalten, die in Kombination mit einer teilweisen Kompromittierung gefährlich wären.
 
-## Operation
+## Funktionsweise
 
-Das Kernel-Flag, das dieses Verhalten steuert, ist `PR_SET_NO_NEW_PRIVS`. Sobald es für einen Prozess gesetzt ist, können spätere `execve()`-Aufrufe die Privilegien nicht erhöhen. Wichtig ist, dass der Prozess weiterhin Binaries ausführen kann; er kann diese Binaries nur nicht dazu verwenden, eine Privilegiengrenze zu überschreiten, die der Kernel sonst anerkennen würde.
+Das Kernel-Flag hinter diesem Verhalten ist `PR_SET_NO_NEW_PRIVS`. Sobald es für einen Prozess gesetzt ist, können spätere `execve()`-Aufrufe die Privilegien nicht erhöhen. Wichtig ist, dass der Prozess weiterhin binaries ausführen kann; er kann diese binaries lediglich nicht verwenden, um eine Privilegiengrenze zu überschreiten, die der Kernel sonst anerkennen würde.
 
-In Kubernetes-orientierten Umgebungen bildet `allowPrivilegeEscalation: false` dieses Verhalten für den Containerprozess ab. In Docker- und Podman-ähnlichen Runtimes wird das Äquivalent üblicherweise explizit über eine security option aktiviert.
+In Kubernetes-orientierten Umgebungen entspricht `allowPrivilegeEscalation: false` diesem Verhalten für den Containerprozess. In Docker- und Podman-ähnlichen Runtimes wird das Äquivalent üblicherweise explizit über eine Sicherheitsoption aktiviert.
 
 ## Labor
 
-Untersuche den Zustand des aktuellen Prozesses:
+Untersuche den aktuellen Prozesszustand:
 ```bash
 grep NoNewPrivs /proc/self/status
 ```
-Vergleiche das mit einem Container, bei dem die runtime das Flag aktiviert ist:
+Vergleichen Sie das mit einem container, in dem die runtime das flag aktiviert:
 ```bash
 docker run --rm --security-opt no-new-privileges:true debian:stable-slim sh -c 'grep NoNewPrivs /proc/self/status'
 ```
-Auf einem gehärteten Workload sollte das Ergebnis `NoNewPrivs: 1` anzeigen.
+Bei einem gehärteten Workload sollte das Ergebnis `NoNewPrivs: 1` anzeigen.
 
-## Sicherheitsauswirkungen
+## Sicherheitsauswirkung
 
-Wenn `no_new_privs` fehlt, kann eine im Container gewonnene Ausgangsposition weiterhin durch setuid-Helfer oder Binärdateien mit file capabilities zu höheren Rechten eskalieren. Wenn es gesetzt ist, werden diese nach dem Exec auftretenden Privilegienänderungen unterbunden. Dieser Effekt ist besonders relevant bei breit angelegten base images, die viele Utilities mitliefern, die die Anwendung eigentlich nie benötigt hat.
+Wenn `no_new_privs` fehlt, kann ein Zugang im Container weiterhin durch setuid-Helfer oder Binaries mit file capabilities hochgestuft werden. Ist es gesetzt, werden diese Privilegänderungen nach der Ausführung unterbunden. Der Effekt ist besonders relevant bei umfangreichen Basis-Images, die viele Utilities mitliefern, die die Anwendung nie benötigt hat.
 
 ## Fehlkonfigurationen
 
-Das häufigste Problem ist schlicht, die Kontrolle in Umgebungen nicht zu aktivieren, in denen sie kompatibel wäre. In Kubernetes ist es oft der betriebliche Standardfehler, `allowPrivilegeEscalation` aktiviert zu lassen. In Docker und Podman hat das Weglassen der entsprechenden Sicherheitsoption denselben Effekt. Ein weiterer wiederkehrender Fehler ist die Annahme, dass Privilegienübergänge zur Laufzeit automatisch irrelevant sind, nur weil ein Container "not privileged" ist.
+Das häufigste Problem ist, die Kontrolle in Umgebungen nicht zu aktivieren, in denen sie kompatibel wäre. In Kubernetes ist es ein häufiger Betriebsfehler, `allowPrivilegeEscalation` aktiviert zu lassen. In Docker und Podman hat das Weglassen der relevanten Sicherheitsoption denselben Effekt. Ein weiterer wiederkehrender Fehler ist die Annahme, dass Exec-zeitliche Privilegübergänge automatisch irrelevant sind, weil ein Container als "not privileged" gilt.
 
 ## Missbrauch
 
-Wenn `no_new_privs` nicht gesetzt ist, lautet die erste Frage, ob das Image Binärdateien enthält, die Privilegien noch erhöhen können:
+Falls `no_new_privs` nicht gesetzt ist, lautet die erste Frage, ob das Image Binaries enthält, die noch Privilegien erhöhen können:
 ```bash
 grep NoNewPrivs /proc/self/status
 find / -perm -4000 -type f 2>/dev/null | head -n 50
@@ -43,28 +43,26 @@ getcap -r / 2>/dev/null | head -n 50
 Interessante Ergebnisse umfassen:
 
 - `NoNewPrivs: 0`
-- setuid-Helfer wie `su`, `mount`, `passwd` oder distributionsspezifische Admin-Tools
+- setuid-Hilfsprogramme wie `su`, `mount`, `passwd` oder distributionsspezifische Admin-Tools
 - Binaries mit file capabilities, die Netzwerk- oder Dateisystem-Privilegien gewähren
 
-In einer echten Bewertung beweisen diese Befunde für sich genommen keine funktionierende Eskalation, identifizieren jedoch genau die Binaries, die als Nächstes getestet werden sollten.
+### Vollständiges Beispiel: In-Container Privilege Escalation durch setuid
 
-### Vollständiges Beispiel: In-Container Privilege Escalation Through setuid
-
-Diese Kontrolle verhindert in der Regel **in-container privilege escalation** und nicht direkt einen host escape. Wenn `NoNewPrivs` `0` ist und ein setuid-Helfer existiert, teste ihn explizit:
+Diese Kontrolle verhindert normalerweise **in-container privilege escalation**, anstatt direktes host escape. Wenn `NoNewPrivs` `0` ist und ein setuid helper vorhanden ist, teste ihn explizit:
 ```bash
 grep NoNewPrivs /proc/self/status
 find / -perm -4000 -type f 2>/dev/null | head -n 20
 /usr/bin/passwd -S root 2>/dev/null
 ```
-Wenn ein bekanntes setuid binary vorhanden und funktionsfähig ist, versuche, es so zu starten, dass der Privilegienübergang erhalten bleibt:
+Wenn ein bekanntes setuid binary vorhanden und funktionsfähig ist, versuche, es so zu starten, dass die Privilegienübergabe erhalten bleibt:
 ```bash
 /bin/su -c id 2>/dev/null
 ```
-Das entkommt dadurch nicht automatisch dem Container, kann aber einen low-privilege foothold innerhalb des Containers in container-root umwandeln, was häufig zur Voraussetzung für späteres Host-Escape über mounts, runtime sockets oder kernel-facing interfaces wird.
+Das führt nicht automatisch zu einem Container-Escape, kann aber eine niedrig-privilegierte Fußfeste im Container in root-Rechte im Container umwandeln, was oft die Voraussetzung für ein späteres Host-Escape über Mounts, Runtime-Sockets oder kernel-nahe Schnittstellen wird.
 
-## Checks
+## Prüfungen
 
-Das Ziel dieser Checks ist es festzustellen, ob exec-time privilege gain blockiert ist und ob das Image noch helpers enthält, die relevant wären, falls dies nicht der Fall ist.
+Das Ziel dieser Prüfungen ist festzustellen, ob eine Erhöhung der Privilegien zur Laufzeit blockiert wird und ob das Image noch Helfer enthält, die relevant wären, falls dem nicht so ist.
 ```bash
 grep NoNewPrivs /proc/self/status      # Whether exec-time privilege gain is blocked
 find / -perm -4000 -type f 2>/dev/null | head -n 50   # setuid files
@@ -72,18 +70,18 @@ getcap -r / 2>/dev/null | head -n 50   # files with Linux capabilities
 ```
 Was hier interessant ist:
 
-- `NoNewPrivs: 1` ist normalerweise das sicherere Ergebnis.
-- `NoNewPrivs: 0` bedeutet, dass setuid- und file-cap-basierte Eskalationspfade relevant bleiben.
-- Ein minimales Image mit wenigen oder keinen setuid-/file-cap-Binärdateien bietet einem Angreifer weniger Post-Exploitation-Optionen, selbst wenn `no_new_privs` fehlt.
+- `NoNewPrivs: 1` ist in der Regel das sicherere Ergebnis.
+- `NoNewPrivs: 0` bedeutet, dass setuid- und file-cap-basierte Eskalationspfade weiterhin relevant sind.
+- Ein minimales Image mit wenigen oder keinen setuid/file-cap-Binärdateien bietet einem Angreifer weniger post-exploitation-Optionen, selbst wenn `no_new_privs` fehlt.
 
-## Laufzeit-Standardeinstellungen
+## Standardwerte zur Laufzeit
 
-| Runtime / platform | Default state | Default behavior | Common manual weakening |
+| Laufzeit / Plattform | Standardzustand | Standardverhalten | Häufige manuelle Abschwächung |
 | --- | --- | --- | --- |
-| Docker Engine | Standardmäßig nicht aktiviert | Wird explizit mit `--security-opt no-new-privileges=true` aktiviert | Auslassen des Flags, `--privileged` |
-| Podman | Standardmäßig nicht aktiviert | Wird explizit mit `--security-opt no-new-privileges` oder entsprechender Sicherheitskonfiguration aktiviert | Auslassen der Option, `--privileged` |
-| Kubernetes | Wird durch die Workload-Policy gesteuert | `allowPrivilegeEscalation: false` aktiviert die Schutzwirkung; viele Workloads lassen es trotzdem aktiviert | `allowPrivilegeEscalation: true`, `privileged: true` |
-| containerd / CRI-O unter Kubernetes | Folgt den Kubernetes-Workload-Einstellungen | Üblicherweise vom Pod-Sicherheitskontext geerbt | wie in der Kubernetes-Zeile |
+| Docker Engine | Standardmäßig nicht aktiviert | Wird explizit mit `--security-opt no-new-privileges=true` aktiviert | Weglassen des Flags, `--privileged` |
+| Podman | Standardmäßig nicht aktiviert | Wird explizit mit `--security-opt no-new-privileges` oder einer äquivalenten Sicherheitskonfiguration aktiviert | Auslassen der Option, `--privileged` |
+| Kubernetes | Gesteuert durch Workload-Richtlinien | `allowPrivilegeEscalation: false` aktiviert die Wirkung; viele Workloads lassen es dennoch aktiviert | `allowPrivilegeEscalation: true`, `privileged: true` |
+| containerd / CRI-O under Kubernetes | Folgt den Kubernetes-Workload-Einstellungen | Normalerweise vom Pod-Sicherheitskontext vererbt | gleich wie in der Kubernetes-Zeile |
 
-Dieser Schutz fehlt oft einfach, weil niemand ihn eingeschaltet hat, nicht weil die Runtime keine Unterstützung dafür bietet.
+Dieser Schutz ist oft einfach dadurch nicht vorhanden, dass niemand ihn eingeschaltet hat, nicht weil die Laufzeit keine Unterstützung dafür bietet.
 {{#include ../../../../banners/hacktricks-training.md}}

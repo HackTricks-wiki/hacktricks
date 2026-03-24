@@ -1,8 +1,8 @@
-# Erfüllbarkeit modulo Theorien (SMT) - Z3
+# Satisfiability Modulo Theories (SMT) - Z3
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Kurz gesagt hilft uns dieses Tool, Werte für Variablen zu finden, die bestimmte Bedingungen erfüllen müssen — das von Hand zu berechnen wäre sehr mühsam. Du kannst Z3 die Bedingungen angeben, die die Variablen erfüllen sollen, und es findet (falls möglich) passende Werte.
+Sehr vereinfacht: Dieses Tool hilft uns, Werte für Variablen zu finden, die bestimmte Bedingungen erfüllen müssen — das manuell zu berechnen wäre sehr mühselig. Du kannst Z3 die Bedingungen angeben, die die Variablen erfüllen sollen, und es wird (falls möglich) geeignete Werte finden.
 
 **Einige Texte und Beispiele stammen aus [https://ericpony.github.io/z3py-tutorial/guide-examples.htm](https://ericpony.github.io/z3py-tutorial/guide-examples.htm)**
 
@@ -94,9 +94,9 @@ solve(x < 0)
 # using unsigned version of <
 solve(ULT(x, 0))
 ```
-### Bit-vector-Hilfsfunktionen, die beim reversing häufig benötigt werden
+### Bit-Vektor-Hilfen, die beim reversing häufig benötigt werden
 
-Wenn Sie **lifting checks from assembly or decompiler output**, ist es in der Regel besser, jedes Eingabebyte als `BitVec(..., 8)` zu modellieren und anschließend Wörter genau so wieder zusammenzusetzen, wie es der Zielcode tut. Das vermeidet Fehler, die durch das Mischen mathematischer Ganzzahlen mit Maschinenarithmetik entstehen.
+Wenn du **lifting checks from assembly or decompiler output** durchführst, ist es in der Regel besser, jedes Eingabe-Byte als `BitVec(..., 8)` zu modellieren und dann die Wörter genau so wieder aufzubauen, wie es der Zielcode tut. Das vermeidet Fehler, die durch das Mischen mathematischer Ganzzahlen mit Maschinenarithmetik entstehen.
 ```python
 from z3 import *
 
@@ -112,13 +112,15 @@ arith = eax >> 3                     # sar eax, 3 (signed shift)
 ```
 Einige häufige Fallstricke beim Übersetzen von Code in Constraints:
 
-- `>>` ist eine **arithmetische** Rechtsverschiebung für Bit-Vektoren. Verwende `LShR` für die logische `shr`-Anweisung.
-- Verwende `UDiv`, `URem`, `ULT`, `ULE`, `UGT` und `UGE`, wenn der ursprüngliche Vergleich/die Division **unsigned** war.
-- Halte die Breiten explizit. Wenn das Binary auf 8 oder 16 Bits kürzt, füge `Extract` hinzu oder baue den Wert mit `Concat` wieder auf, anstatt stillschweigend alles zu Python-Integern zu promoten.
+- `>>` ist ein **arithmetischer** Rechts-Shift für Bit-Vektoren. Verwende `LShR` für die logische `shr` Anweisung.
+- Verwende `UDiv`, `URem`, `ULT`, `ULE`, `UGT` und `UGE`, wenn der ursprüngliche Vergleich/die Division **vorzeichenlos** war.
+- Mache die Breiten explizit. Wenn das Binary auf 8 oder 16 Bit kürzt, füge `Extract` hinzu oder baue den Wert mit `Concat` wieder auf, anstatt stillschweigend alles zu Python integers zu konvertieren.
 
 ### Funktionen
 
-**Interpretierte Funktio**nen, wie z. B. arithmetische Operationen, bei denen die **Funktion +** eine **feste Standardinterpretation** hat (sie addiert zwei Zahlen). **Uninterpretierte Funktionen** und Konstanten sind **maximal flexibel**; sie erlauben **jede Interpretation**, die **konsistent** mit den **Constraints** über die Funktion oder Konstante ist.
+**Interpretierte Funktionen** wie arithmetische Operatoren, bei denen die **Funktion +** eine **feste Standardinterpretation** hat (sie addiert zwei Zahlen). **Nichtinterpretierte Funktionen** und Konstanten sind **maximal flexibel**; sie erlauben **jede Interpretation**, die mit den **Constraints** über die Funktion oder Konstante **konsistent** ist.
+
+Beispiel: Wenn f zweimal auf x angewendet wird, ergibt das wieder x; wenn f einmal auf x angewendet wird, ist das Ergebnis ungleich x.
 ```python
 from z3 import *
 
@@ -189,22 +191,22 @@ print_matrix(r)
 else:
 print "failed to solve"
 ```
-### Reversing-Arbeitsabläufe
+### Reversing workflows
 
-Wenn Sie **die Binärdatei symbolisch ausführen und Constraints automatisch sammeln** müssen, schauen Sie sich die angr-Notizen hier an:
+Wenn du die **symbolically execute the binary and collect constraints automatically** musst, sieh dir die angr-Notizen hier an:
 
 {{#ref}}
 angr/README.md
 {{#endref}}
 
-Wenn Sie sich bereits die dekompilierten Checks ansehen und sie nur lösen müssen, ist direktes Z3 normalerweise schneller und einfacher zu steuern.
+Wenn du dir bereits die decompiled checks ansiehst und sie nur lösen musst, ist raw Z3 normalerweise schneller und einfacher zu kontrollieren.
 
-#### Lifting byte-basierter Checks aus einem crackme
+#### Lifting byte-based checks from a crackme
 
-Ein sehr verbreitetes Muster in crackmes und packed loaders ist eine lange Liste von Byte-Gleichungen über einen Passwortkandidaten. Modellieren Sie Bytes als 8-Bit-Vektoren, schränken Sie das Alphabet ein, und erweitern Sie ihre Bitbreite nur, wenn der ursprüngliche Code sie erweitert.
+Ein sehr verbreitetes Muster in crackmes und packed loaders ist eine lange Liste von byte-Gleichungen über ein candidate password. Modellier die bytes als 8-bit vectors, schränke das Alphabet ein und weite sie nur, wenn der ursprüngliche Code sie weitet.
 
 <details>
-<summary>Beispiel: Seriennummerprüfung aus dekompilierter Arithmetik rekonstruieren</summary>
+<summary>Beispiel: rebuild a serial check from decompiled arithmetic</summary>
 ```python
 from z3 import *
 
@@ -229,11 +231,11 @@ print(bytes(m[c].as_long() for c in flag))
 ```
 </details>
 
-Dieser Stil passt gut zum realen reversing, weil er dem entspricht, was moderne writeups in der Praxis tun: die arithmetischen/bitweisen Beziehungen rekonstruieren, jeden Vergleich in ein Constraint umwandeln und das gesamte System auf einmal lösen.
+Dieser Stil passt gut zum real-world reversing, weil er dem entspricht, was moderne writeups in der Praxis tun: die arithmetischen/bitweisen Relationen rekonstruieren, jeden Vergleich in eine Bedingung umwandeln und das gesamte System auf einmal lösen.
 
 #### Inkrementelles Lösen mit `push()` / `pop()`
 
-Während des reversing möchte man häufig mehrere Hypothesen testen, ohne den gesamten solver neu aufzubauen. `push()` erzeugt einen Checkpoint und `pop()` verwirft die Constraints, die nach diesem Checkpoint hinzugefügt wurden. Das ist nützlich, wenn man sich nicht sicher ist, ob ein branch signed oder unsigned ist, ob ein Register zero-extended oder sign-extended ist, oder wenn man mehrere candidate constants aus der disassembly ausprobiert.
+Beim reversing willst du häufig mehrere Hypothesen testen, ohne den gesamten Solver neu aufzubauen. `push()` erzeugt einen Checkpoint und `pop()` verwirft die nach diesem Checkpoint hinzugefügten Constraints. Das ist nützlich, wenn du dir nicht sicher bist, ob ein branch signed oder unsigned ist, ob ein register zero-extended oder sign-extended ist, oder wenn du mehrere candidate constants aus der disassembly ausprobierst.
 ```python
 from z3 import *
 
@@ -252,9 +254,9 @@ print(s.check())
 print(s.model())
 s.pop()
 ```
-#### Mehr als eine gültige Eingabe aufzählen
+#### Mehrere gültige Eingaben aufzählen
 
-Einige keygens, license checks und CTF challenges erlauben absichtlich **viele** gültige Eingaben. Z3 listet diese nicht automatisch auf, aber du kannst nach jedem Modell eine **Ausschlussklausel** hinzufügen, um das nächste Ergebnis zu zwingen, sich in mindestens einer Position zu unterscheiden.
+Einige keygens, license checks und CTF challenges erlauben absichtlich **viele** gültige Eingaben. Z3 enumeriert diese nicht automatisch, aber du kannst nach jedem Modell eine **Ausschlussklausel** hinzufügen, um zu erzwingen, dass sich das nächste Ergebnis in mindestens einer Position unterscheidet.
 ```python
 from z3 import *
 
@@ -270,20 +272,20 @@ m = s.model()
 print(''.join(chr(m[x].as_long()) for x in xs))
 s.add(Or([x != m.eval(x, model_completion=True) for x in xs]))
 ```
-#### Taktiken für unübersichtliche Bitvektor-Formeln
+#### Taktiken für unordentliche bit-vector-Formeln
 
-Der Standard-Solver von Z3 ist in der Regel ausreichend, aber vom Decompiler generierte Formeln mit vielen Gleichungen und Bitvektor-Umformungen lassen sich nach einem ersten Normalisierungsdurchlauf oft leichter lösen. In solchen Fällen kann es nützlich sein, einen Solver aus Taktiken zusammenzusetzen:
+Der Standard-Solver von Z3 ist normalerweise ausreichend, aber decompiler-generated Formeln mit vielen Gleichungen und bit-vector-Rewrites werden nach einem ersten Normalisierungsdurchlauf oft einfacher. In solchen Fällen kann es nützlich sein, einen Solver aus Taktiken zu bauen:
 ```python
 from z3 import *
 
 t = Then('simplify', 'solve-eqs', 'bit-blast', 'sat')
 s = t.solver()
 ```
-Das ist besonders hilfreich, wenn das Problem fast vollständig aus **bit-vector + Boolean logic** besteht und du möchtest, dass Z3 offensichtliche Gleichheiten vereinfacht und eliminiert, bevor die Formel an das SAT backend übergeben wird.
+Das ist besonders hilfreich, wenn das Problem nahezu vollständig aus **bit-vector + Boolean logic** besteht und man möchte, dass Z3 offensichtliche Gleichheiten vereinfacht und eliminiert, bevor die Formel an das SAT backend übergeben wird.
 
 #### CRCs und andere benutzerdefinierte Checker
 
-Aktuelle reversing challenges verwenden immer noch Z3 für Constraints, die sich zwar nur schwer per Brute-Force lösen lassen, aber leicht zu modellieren sind, etwa CRC32-Checks über ASCII-only input, gemischte rotate/xor/add-Pipelines oder zahlreiche verkettete arithmetische Prädikate, die aus einem JITed/obfuscated checker extrahiert wurden. Bei CRC-ähnlichen Problemen solltest du den Zustand als bit-vectors belassen und pro-Byte ASCII-Constraints früh anwenden, um den Suchraum zu verkleinern.
+Aktuelle reversing challenges verwenden Z3 weiterhin für constraints, die sich zwar mühselig brute-force lösen lassen, aber sich einfach modellieren lassen, wie z. B. CRC32-Checks über ASCII-only Input, gemischte rotate/xor/add-Pipelines oder viele verkettete arithmetische Prädikate, die aus einem JITed/obfuscated Checker extrahiert wurden. Bei CRC-ähnlichen Problemen sollte der Zustand als bit-vectors belassen und früh per-byte ASCII-Constraints angewendet werden, um den Suchraum zu verkleinern.
 
 ## Referenzen
 

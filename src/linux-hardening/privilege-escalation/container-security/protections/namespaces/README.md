@@ -2,21 +2,21 @@
 
 {{#include ../../../../../banners/hacktricks-training.md}}
 
-Namespaces sind die Kernel-Funktion, die einen Container wie "seine eigene Maschine" erscheinen lässt, obwohl er in Wirklichkeit nur ein Prozessbaum des Hosts ist. Sie erzeugen keinen neuen Kernel und virtualisieren nicht alles, aber sie erlauben dem Kernel, verschiedenen Prozessgruppen unterschiedliche Ansichten ausgewählter Ressourcen zu präsentieren. Das ist der Kern der Container-Illusion: die Workload sieht ein Dateisystem, eine Prozessliste, einen Netzwerkstack, Hostname, IPC-Ressourcen und ein Benutzer-/Gruppen-Identitätsmodell, die lokal erscheinen, obwohl das zugrundeliegende System geteilt wird.
+Namespaces sind eine Kernel-Funktion, die einen Container wie "seine eigene Maschine" erscheinen lässt, obwohl er in Wirklichkeit nur ein Prozessbaum des Hosts ist. Sie erzeugen keinen neuen Kernel und virtualisieren nicht alles, aber sie erlauben dem Kernel, verschiedenen Prozessgruppen unterschiedliche Sichten auf ausgewählte Ressourcen zu präsentieren. Das ist der Kern der Container-Illusion: die Workload sieht ein Dateisystem, eine Prozessliste, einen Netzwerkstack, einen Hostnamen, IPC-Ressourcen und ein Benutzer-/Gruppen-Identitätsmodell, die lokal erscheinen, obwohl das zugrundeliegende System geteilt wird.
 
-Deshalb sind namespaces das erste Konzept, dem die meisten begegnen, wenn sie lernen, wie Container funktionieren. Gleichzeitig gehören sie zu den am häufigsten missverstandenen Konzepten, weil Leser oft annehmen, dass "hat namespaces" gleichbedeutend mit "ist sicher isoliert" ist. In Wirklichkeit isoliert ein namespace nur die Ressourcenkategorie, für die er entworfen wurde. Ein Prozess kann ein privates PID-namespace haben und trotzdem gefährlich sein, weil er ein beschreibbares Host-Bind-Mount besitzt. Er kann ein privates network-namespace haben und trotzdem gefährlich sein, weil er `CAP_SYS_ADMIN` behält und ohne seccomp läuft. Namespaces sind grundlegend, aber sie sind nur eine Schicht in der finalen Grenze.
+Deshalb sind Namespaces das erste Konzept, dem die meisten begegnen, wenn sie lernen, wie Container funktionieren. Gleichzeitig gehören sie zu den am häufigsten missverstandenen Konzepten, weil Leser oft annehmen, "hat Namespaces" bedeute "ist sicher isoliert". In Wirklichkeit isoliert ein Namespace nur die spezifische Klasse von Ressourcen, für die er entwickelt wurde. Ein Prozess kann einen privaten PID-Namespace haben und trotzdem gefährlich sein, weil er einen beschreibbaren Host-bind-Mount hat. Er kann einen privaten network namespace haben und trotzdem gefährlich sein, weil er `CAP_SYS_ADMIN` behält und ohne seccomp läuft. Namespaces sind grundlegend, aber sie sind nur eine Schicht an der finalen Grenze.
 
 ## Namespace Types
 
-Linux-Container verlassen sich üblicherweise gleichzeitig auf mehrere Namespace-Typen. Das **mount namespace** gibt dem Prozess eine separate Mount-Tabelle und damit eine kontrollierte Dateisystemsicht. Das **PID namespace** ändert Sichtbarkeit und Nummerierung von Prozessen, sodass die Workload ihren eigenen Prozessbaum sieht. Das **network namespace** isoliert Interfaces, Routen, Sockets und Firewall-Zustand. Das **IPC namespace** isoliert SysV IPC und POSIX-Message-Queues. Das **UTS namespace** isoliert Hostname und NIS-Domainname. Das **user namespace** remappt Benutzer- und Gruppen-IDs, sodass root innerhalb des Containers nicht unbedingt root auf dem Host bedeutet. Das **cgroup namespace** virtualisiert die sichtbare cgroup-Hierarchie, und das **time namespace** virtualisiert in neueren Kerneln ausgewählte Uhren.
+Linux-Container verlassen sich üblicherweise gleichzeitig auf mehrere Namespace-Typen. Der **mount namespace** gibt dem Prozess eine separate Mount-Tabelle und damit eine kontrollierte Sicht auf das Dateisystem. Der **PID namespace** verändert die Prozesssichtbarkeit und -nummerierung, sodass die Workload ihren eigenen Prozessbaum sieht. Der **network namespace** isoliert Interfaces, Routen, Sockets und Firewall-Zustand. Der **IPC namespace** isoliert SysV IPC und POSIX-Message-Queues. Der **UTS namespace** isoliert Hostname und NIS-Domänenname. Der **user namespace** mappt Benutzer- und Gruppen-IDs um, sodass root innerhalb des Containers nicht unbedingt root auf dem Host bedeutet. Der **cgroup namespace** virtualisiert die sichtbare cgroup-Hierarchie, und der **time namespace** virtualisiert ausgewählte Uhren in neueren Kerneln.
 
-Jeder dieser namespaces löst ein anderes Problem. Deshalb läuft eine praktische Container-Security-Analyse oft darauf hinaus zu prüfen, **welche namespaces isoliert** sind und **welche absichtlich mit dem Host geteilt wurden**.
+Jeder dieser Namespaces löst ein anderes Problem. Deshalb läuft praktische Container-Sicherheitsanalyse oft darauf hinaus, zu prüfen, **welche Namespaces isoliert sind** und **welche bewusst mit dem Host geteilt wurden**.
 
 ## Host Namespace Sharing
 
-Viele Container-Breakouts beginnen nicht mit einer Kernel-Schwachstelle. Sie beginnen damit, dass ein Operator das Isolationsmodell bewusst abschwächt. Die Beispiele `--pid=host`, `--network=host` und `--userns=host` sind **Docker/Podman-style CLI flags**, die hier als konkrete Beispiele für Host-Namespace-Sharing verwendet werden. Andere Runtimes drücken dieselbe Idee anders aus. In Kubernetes erscheinen die Äquivalente normalerweise als Pod-Settings wie `hostPID: true`, `hostNetwork: true` oder `hostIPC: true`. In niedrigeren Runtime-Stacks wie containerd oder CRI-O wird dasselbe Verhalten oft über die generierte OCI runtime-Konfiguration erreicht, statt über ein benutzerseitiges Flag mit demselben Namen. In all diesen Fällen ist das Ergebnis ähnlich: die Workload erhält nicht mehr die standardmäßige isolierte Namespace-Sicht.
+Viele Container-Breakouts beginnen nicht mit einer Kernel-Schwachstelle. Sie beginnen damit, dass ein Operator das Isolationsmodell absichtlich schwächt. Die Beispiele `--pid=host`, `--network=host` und `--userns=host` sind **Docker/Podman-ähnliche CLI-Flags**, die hier als konkrete Beispiele für das Teilen von Host-Namespaces verwendet werden. Andere runtimes drücken dieselbe Idee anders aus. In Kubernetes erscheinen die Äquivalente normalerweise als Pod-Einstellungen wie `hostPID: true`, `hostNetwork: true` oder `hostIPC: true`. In niedriger gelegenen Runtime-Stacks wie containerd oder CRI-O wird dasselbe Verhalten oft über die generierte OCI-Runtime-Konfiguration erreicht statt über ein benutzerseitiges Flag mit demselben Namen. In all diesen Fällen ist das Ergebnis ähnlich: die Workload erhält nicht mehr die standardmäßig isolierte Namespace-Sicht.
 
-Deshalb sollten Namespace-Reviews niemals bei "der Prozess ist in irgendeinem namespace" aufhören. Die wichtige Frage ist, ob das namespace privat für den Container ist, mit Schwester-Containern geteilt wird oder direkt mit dem Host verbunden ist. In Kubernetes erscheint dieselbe Idee mit Flags wie `hostPID`, `hostNetwork` und `hostIPC`. Die Namen ändern sich zwischen Plattformen, aber das Risikomuster ist dasselbe: ein geteiltes Host-namespace macht die verbleibenden Rechte des Containers und den erreichbaren Host-Zustand wesentlich relevanter.
+Deshalb sollten Namespace-Reviews niemals bei "der Prozess ist in irgendeinem Namespace" aufhören. Die wichtige Frage ist, ob der Namespace privat für den Container ist, mit Geschwister-Containern geteilt wird oder direkt mit dem Host verbunden ist. In Kubernetes tritt dieselbe Idee mit Flags wie `hostPID`, `hostNetwork` und `hostIPC` auf. Die Namen ändern sich zwischen Plattformen, aber das Risikomuster ist dasselbe: ein geteilter Host-Namespace macht die verbleibenden Privilegien des Containers und den erreichbaren Host-Zustand deutlich aussagekräftiger.
 
 ## Inspection
 
@@ -24,20 +24,20 @@ Die einfachste Übersicht ist:
 ```bash
 ls -l /proc/self/ns
 ```
-Jeder Eintrag ist ein symbolischer Link mit einer inode-ähnlichen Kennung. Wenn zwei Prozesse auf denselben Namespace-Bezeichner zeigen, befinden sie sich im selben Namespace dieses Typs. Das macht `/proc` zu einem sehr nützlichen Ort, um den aktuellen Prozess mit anderen interessanten Prozessen auf dem System zu vergleichen.
+Jeder Eintrag ist ein symbolischer Link mit einer inode-ähnlichen Kennung. Wenn zwei Prozesse auf denselben Namespace-Kennzeichner zeigen, befinden sie sich im selben Namespace dieses Typs. Das macht `/proc` zu einem sehr nützlichen Ort, um den aktuellen Prozess mit anderen interessanten Prozessen auf der Maschine zu vergleichen.
 
-Diese schnellen Befehle reichen oft aus, um loszulegen:
+Diese kurzen Befehle sind oft genug, um zu beginnen:
 ```bash
 readlink /proc/self/ns/mnt
 readlink /proc/self/ns/pid
 readlink /proc/self/ns/net
 readlink /proc/1/ns/mnt
 ```
-Von dort aus besteht der nächste Schritt darin, den container process mit Prozessen auf dem host oder benachbarten Prozessen zu vergleichen und festzustellen, ob ein namespace tatsächlich privat ist oder nicht.
+Von dort aus besteht der nächste Schritt darin, den container process mit host- oder benachbarten Prozessen zu vergleichen und festzustellen, ob ein namespace tatsächlich privat ist oder nicht.
 
-### Auflisten von namespace-Instanzen vom host
+### Auflisten von Namespace-Instanzen vom Host
 
-Wenn Sie bereits host access haben und wissen möchten, wie viele unterschiedliche namespaces eines bestimmten Typs existieren, liefert `/proc` eine schnelle Übersicht:
+Wenn du bereits host access hast und wissen möchtest, wie viele verschiedene Namespace-Instanzen eines bestimmten Typs existieren, liefert `/proc` eine schnelle Übersicht:
 ```bash
 sudo find /proc -maxdepth 3 -type l -name mnt    -exec readlink {} \; 2>/dev/null | sort -u
 sudo find /proc -maxdepth 3 -type l -name pid    -exec readlink {} \; 2>/dev/null | sort -u
@@ -48,15 +48,15 @@ sudo find /proc -maxdepth 3 -type l -name user   -exec readlink {} \; 2>/dev/nul
 sudo find /proc -maxdepth 3 -type l -name cgroup -exec readlink {} \; 2>/dev/null | sort -u
 sudo find /proc -maxdepth 3 -type l -name time   -exec readlink {} \; 2>/dev/null | sort -u
 ```
-Wenn Sie herausfinden möchten, welche Prozesse zu einer bestimmten Namespace-ID gehören, verwenden Sie statt `readlink` `ls -l` und `grep`, um nach der Ziel-Namespace-Nummer zu suchen:
+Wenn Sie herausfinden möchten, welche Prozesse zu einer bestimmten Namespace-Kennung gehören, wechseln Sie von `readlink` zu `ls -l` und grep nach der Ziel-Namespace-Nummer:
 ```bash
 sudo find /proc -maxdepth 3 -type l -name mnt -exec ls -l {} \; 2>/dev/null | grep <ns-number>
 ```
-Diese Befehle sind nützlich, weil sie es ermöglichen, festzustellen, ob ein Host eine einzelne isolierte Workload, viele isolierte Workloads oder eine Mischung aus gemeinsam genutzten und privaten Namespace-Instanzen ausführt.
+Diese Befehle sind nützlich, weil sie es erlauben zu beantworten, ob ein Host einen isolierten workload, viele isolierte workloads oder eine Mischung aus gemeinsam genutzten und privaten Namespace-Instanzen ausführt.
 
-### Ein Ziel-Namespace betreten
+### Einen Ziel-Namespace betreten
 
-Wenn der Aufrufer über ausreichende Berechtigungen verfügt, ist `nsenter` die Standardmethode, um in den Namespace eines anderen Prozesses einzutreten:
+Wenn der Aufrufer über ausreichende Berechtigungen verfügt, ist `nsenter` der Standardweg, um dem Namespace eines anderen Prozesses beizutreten:
 ```bash
 nsenter -m TARGET_PID --pid /bin/bash   # mount
 nsenter -t TARGET_PID --pid /bin/bash   # pid
@@ -67,11 +67,11 @@ nsenter -U TARGET_PID --pid /bin/bash   # user
 nsenter -C TARGET_PID --pid /bin/bash   # cgroup
 nsenter -T TARGET_PID --pid /bin/bash   # time
 ```
-Der Grund, diese Formen zusammen aufzulisten, ist nicht, dass jede Bewertung alle davon benötigt, sondern dass namespace-spezifisches post-exploitation oft viel einfacher wird, sobald der Operator die exakte Entry-Syntax kennt, anstatt sich nur an die All-Namespaces-Form zu erinnern.
+Der Zweck, diese Formen zusammen aufzulisten, ist nicht, dass jede Bewertung alle davon benötigt, sondern dass namespace-spezifische post-exploitation oft deutlich einfacher wird, sobald der Operator die genaue Eintrittssyntax kennt, anstatt sich nur die all-namespaces-Form zu merken.
 
-## Pages
+## Seiten
 
-Die folgenden Seiten erklären die einzelnen Namespaces detaillierter:
+Die folgenden Seiten erklären die einzelnen Namespaces genauer:
 
 {{#ref}}
 mount-namespace.md
@@ -105,16 +105,16 @@ cgroup-namespace.md
 time-namespace.md
 {{#endref}}
 
-Wenn Sie sie lesen, behalten Sie zwei Gedanken im Kopf. Erstens isoliert jedes Namespace nur eine Art von Ansicht. Zweitens ist ein privates Namespace nur dann nützlich, wenn das restliche Berechtigungsmodell diese Isolation weiterhin sinnvoll macht.
+Behalte beim Lesen zwei Dinge im Hinterkopf. Erstens isoliert jedes Namespace nur eine Art von Ansicht. Zweitens ist ein privater Namespace nur nützlich, wenn das restliche Berechtigungsmodell diese Isolation weiterhin sinnvoll macht.
 
-## Laufzeit-Standardwerte
+## Standardeinstellungen der Laufzeit
 
-| Runtime / Plattform | Standard-Verhalten der Namespaces | Häufige manuelle Abschwächungen |
+| Runtime / platform | Standard-Namespace-Konfiguration | Gängige manuelle Schwächung |
 | --- | --- | --- |
-| Docker Engine | Standardmäßig werden neue mount-, PID-, network-, IPC- und UTS-Namespaces erstellt; user namespaces sind verfügbar, aber in üblichen rootful-Setups standardmäßig nicht aktiviert | `--pid=host`, `--network=host`, `--ipc=host`, `--uts=host`, `--userns=host`, `--cgroupns=host`, `--privileged` |
-| Podman | Standardmäßig neue Namespaces; rootless Podman verwendet automatisch eine user namespace; die Standardwerte für cgroup-Namespaces hängen von der cgroup-Version ab | `--pid=host`, `--network=host`, `--ipc=host`, `--uts=host`, `--userns=host`, `--cgroupns=host`, `--privileged` |
-| Kubernetes | Pods teilen standardmäßig nicht den Host-PID, das Netzwerk oder IPC; Pod-Netzwerk ist privat für den Pod, nicht für jeden einzelnen Container; user namespaces sind opt-in via `spec.hostUsers: false` auf unterstützten Clustern | `hostPID: true`, `hostNetwork: true`, `hostIPC: true`, `spec.hostUsers: true` / omitting user-namespace opt-in, privilegierte Workload-Einstellungen |
-| containerd / CRI-O under Kubernetes | Folgen üblicherweise den Kubernetes-Pod-Standardeinstellungen | wie in der Kubernetes-Zeile; direkte CRI/OCI-Spezifikationen können ebenfalls Host-Namespace-Beitritte anfordern |
+| Docker Engine | Standardmäßig neue mount-, PID-, network-, IPC- und UTS-Namespaces; user namespaces sind verfügbar, werden aber in typischen rootful-Setups nicht standardmäßig aktiviert | `--pid=host`, `--network=host`, `--ipc=host`, `--uts=host`, `--userns=host`, `--cgroupns=host`, `--privileged` |
+| Podman | Standardmäßig neue Namespaces; rootless Podman verwendet automatisch eine user namespace; die Default-Werte für das cgroup-namespace hängen von der cgroup-Version ab | `--pid=host`, `--network=host`, `--ipc=host`, `--uts=host`, `--userns=host`, `--cgroupns=host`, `--privileged` |
+| Kubernetes | Pods teilen standardmäßig **nicht** den Host-PID-, Network- oder IPC-Namespace; das Pod-Netzwerk ist privat für das Pod, nicht für jeden einzelnen Container; user namespaces sind auf unterstützten Clustern per `spec.hostUsers: false` opt-in | `hostPID: true`, `hostNetwork: true`, `hostIPC: true`, `spec.hostUsers: true` / omitting user-namespace opt-in, privileged workload settings |
+| containerd / CRI-O under Kubernetes | Folgen üblicherweise den Kubernetes Pod-Standardeinstellungen | wie in der Kubernetes-Zeile; direkte CRI/OCI-Spezifikationen können ebenfalls Host-Namespace-Beitritte anfordern |
 
-Die wichtigste Portabilitätsregel ist einfach: Das **Konzept** der gemeinsamen Nutzung von Host-Namespaces ist bei verschiedenen Runtimes verbreitet, aber die **Syntax** ist runtime-spezifisch.
+Die wichtigste Portabilitätsregel ist einfach: das **Konzept** des Teilens von Host-Namespaces ist runtimes-übergreifend verbreitet, aber die **Syntax** ist runtime-spezifisch.
 {{#include ../../../../../banners/hacktricks-training.md}}
