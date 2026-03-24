@@ -4,33 +4,33 @@
 
 ## Diamond Ticket
 
-**Al igual que un golden ticket**, un diamond ticket es un TGT que puede usarse para **acceder a cualquier servicio como cualquier usuario**. Un golden ticket se forja completamente offline, se cifra con el hash krbtgt de ese dominio y luego se introduce en una sesión de inicio de sesión para su uso. Debido a que los controladores de dominio no realizan seguimiento de los TGTs que (ellos) han emitido legítimamente, aceptarán sin problema TGTs cifrados con su propio hash krbtgt.
+**Como un golden ticket**, un diamond ticket es un TGT que puede usarse para **acceder a cualquier servicio como cualquier usuario**. Un golden ticket se forja completamente offline, se cifra con el hash krbtgt de ese dominio y luego se inyecta en una sesión de inicio de sesión para su uso. Como los controladores de dominio no rastrean los TGTs que hayan emitido legítimamente, aceptarán sin problema TGTs que estén cifrados con su propio hash krbtgt.
 
 Hay dos técnicas comunes para detectar el uso de golden tickets:
 
-- Buscar TGS-REQs que no tengan un AS-REQ correspondiente.
-- Buscar TGTs que tengan valores absurdos, como la duración por defecto de 10 años en Mimikatz.
+- Buscar TGS-REQs que no tengan una AS-REQ correspondiente.
+- Buscar TGTs que tengan valores absurdos, como la duración por defecto de 10 años de Mimikatz.
 
-Un **diamond ticket** se crea **modificando los campos de un TGT legítimo que fue emitido por un DC**. Esto se logra **solicitando** un **TGT**, **descifrándolo** con el hash krbtgt del dominio, **modificando** los campos deseados del ticket y luego **volviéndolo a cifrar**. Esto **supera las dos limitaciones mencionadas** de un golden ticket porque:
+Un **diamond ticket** se crea **modificando los campos de un TGT legítimo emitido por un DC**. Esto se logra **solicitando** un **TGT**, **descifrándolo** con el hash krbtgt del dominio, **modificando** los campos deseados del ticket y luego **re-encriptándolo**. Esto **supera las dos limitaciones mencionadas** de un golden ticket porque:
 
-- Los TGS-REQs tendrán un AS-REQ previo.
-- El TGT fue emitido por un DC, lo que significa que tendrá todos los detalles correctos de la política Kerberos del dominio. Aunque estos pueden forjarse con precisión en un golden ticket, es más complejo y propenso a errores.
+- Los TGS-REQs tendrán una AS-REQ previa.
+- El TGT fue emitido por un DC, por lo que tendrá todos los detalles correctos según la política Kerberos del dominio. Aunque estos se pueden forjar con precisión en un golden ticket, es más complejo y propenso a errores.
 
-### Requisitos y workflow
+### Requisitos y flujo de trabajo
 
-- **Material criptográfico**: la clave krbtgt AES256 (preferida) o el hash NTLM para poder descifrar y volver a firmar el TGT.
-- **Blob legítimo de TGT**: obtenido con `/tgtdeleg`, `asktgt`, `s4u`, o exportando tickets desde la memoria.
-- **Datos de contexto**: el RID del usuario objetivo, RIDs/SIDs de grupos, y (opcionalmente) atributos PAC derivados de LDAP.
-- **Claves de servicio** (solo si planeas re-cut service tickets): clave AES del SPN del servicio que se va a suplantar.
+- **Cryptographic material**: la clave krbtgt AES256 (preferida) o el hash NTLM para poder descifrar y volver a firmar el TGT.
+- **Legitimate TGT blob**: obtenido con `/tgtdeleg`, `asktgt`, `s4u`, o exportando tickets desde memoria.
+- **Context data**: el RID del usuario objetivo, RIDs/SIDs de grupos, y (opcionalmente) atributos PAC derivados de LDAP.
+- **Service keys** (solo si planeas volver a generar service tickets): clave AES del SPN de servicio a suplantar.
 
-1. Obtener un TGT para cualquier usuario controlado mediante AS-REQ (Rubeus `/tgtdeleg` es conveniente porque obliga al cliente a realizar el intercambio Kerberos GSS-API sin credenciales).
-2. Descifrar el TGT devuelto con la clave krbtgt, parchear los atributos PAC (usuario, grupos, información de inicio de sesión, SIDs, claims del dispositivo, etc.).
-3. Volver a cifrar/firmar el ticket con la misma clave krbtgt e inyectarlo en la sesión de inicio actual (`kerberos::ptt`, `Rubeus.exe ptt`...).
-4. Opcionalmente, repetir el proceso sobre un service ticket suministrando un TGT blob válido más la clave del servicio objetivo para mantener sigilo en la red.
+1. Obtén un TGT para cualquier usuario controlado vía AS-REQ (Rubeus `/tgtdeleg` es conveniente porque fuerza al cliente a realizar el Kerberos GSS-API dance sin credenciales).
+2. Descifra el TGT devuelto con la key krbtgt, parchea los atributos PAC (usuario, grupos, información de logon, SIDs, claims de dispositivo, etc.).
+3. Re-encripta/firma el ticket con la misma key krbtgt e inyectalo en la sesión de inicio actual (`kerberos::ptt`, `Rubeus.exe ptt`...).
+4. Opcionalmente, repite el proceso sobre un service ticket suministrando un blob TGT válido más la clave del servicio objetivo para mantener sigilo en la red.
 
-### Tradecraft actualizado de Rubeus (2024+)
+### Rubeus tradecraft actualizado (2024+)
 
-Trabajo reciente de Huntress modernizó la acción `diamond` dentro de Rubeus al portar las mejoras `/ldap` y `/opsec` que anteriormente existían solo para golden/silver tickets. `/ldap` ahora obtiene contexto PAC real consultando LDAP **y** montando SYSVOL para extraer atributos de cuentas/grupos además de la política Kerberos/contraseñas (p. ej., `GptTmpl.inf`), mientras que `/opsec` hace que el flujo AS-REQ/AS-REP coincida con Windows al realizar el intercambio de preauth en dos pasos y forzar AES-only + KDCOptions realistas. Esto reduce drásticamente indicadores obvios como campos PAC ausentes o duraciones que no coinciden con la política.
+Trabajo reciente de Huntress modernizó la acción `diamond` dentro de Rubeus porteando las mejoras `/ldap` y `/opsec` que antes solo existían para golden/silver tickets. `/ldap` ahora extrae contexto PAC real consultando LDAP **y** montando SYSVOL para obtener atributos de cuenta/grupo además de la política Kerberos/password (p. ej., `GptTmpl.inf`), mientras que `/opsec` hace que el flujo AS-REQ/AS-REP coincida con Windows realizando el intercambio de preauth en dos pasos y aplicando AES-only + KDCOptions realistas. Esto reduce drásticamente indicadores obvios como campos PAC faltantes o duraciones que no coinciden con la política.
 ```powershell
 # Query RID/context data (PowerView/SharpView/AD modules all work)
 Get-DomainUser -Identity <username> -Properties objectsid | Select-Object samaccountname,objectsid
@@ -43,13 +43,13 @@ Get-DomainUser -Identity <username> -Properties objectsid | Select-Object samacc
 /ldap /ldapuser:MARVEL\loki /ldappassword:Mischief$ \
 /opsec /nowrap
 ```
-- `/ldap` (con opcional `/ldapuser` y `/ldappassword`) consulta AD y SYSVOL para replicar los datos de la política PAC del usuario objetivo.
-- `/opsec` fuerza un reintento AS-REQ al estilo Windows, poniendo a cero flags ruidosos y ciñéndose a AES256.
-- `/tgtdeleg` evita tocar la contraseña en claro o la clave NTLM/AES de la víctima mientras aún devuelve un TGT descifrable.
+- `/ldap` (con opcionales `/ldapuser` y `/ldappassword`) consulta AD y SYSVOL para reflejar los datos de la política PAC del usuario objetivo.
+- `/opsec` fuerza un reintento AS-REQ al estilo Windows, pone a cero flags ruidosos y se ciñe a AES256.
+- `/tgtdeleg` evita tocar la cleartext password o la NTLM/AES key de la víctima mientras sigue devolviendo un TGT descifrable.
 
-### Service-ticket recutting
+### Recorte de service-ticket
 
-La misma actualización de Rubeus añadió la capacidad de aplicar la técnica diamond a blobs TGS. Al alimentar a `diamond` con un **base64-encoded TGT** (proveniente de `asktgt`, `/tgtdeleg` o de un TGT forjado previamente), el **service SPN**, y la **service AES key**, puedes generar tickets de servicio realistas sin tocar el KDC—efectivamente un silver ticket más sigiloso.
+La misma actualización de Rubeus añadió la capacidad de aplicar la técnica diamond a los TGS blobs. Alimentando a `diamond` un **TGT codificado en base64** (desde `asktgt`, `/tgtdeleg` o un TGT previamente forjado), el **service SPN**, y la **service AES key**, puedes generar service tickets realistas sin tocar el KDC—efectivamente un silver ticket más sigiloso.
 ```powershell
 ./Rubeus.exe diamond \
 /ticket:<BASE64_TGT_OR_KRB-CRED> \
@@ -58,13 +58,13 @@ La misma actualización de Rubeus añadió la capacidad de aplicar la técnica d
 /ticketuser:svc_sql /ticketuserid:1109 \
 /ldap /opsec /nowrap
 ```
-Este flujo de trabajo es ideal cuando ya controlas la clave de una cuenta de servicio (por ejemplo, volcada con `lsadump::lsa /inject` o `secretsdump.py`) y quieres generar un TGS puntual que coincida perfectamente con la política de AD, las marcas temporales y los datos PAC sin emitir ningún tráfico AS/TGS nuevo.
+Este flujo de trabajo es ideal cuando ya controlas la clave de una cuenta de servicio (por ejemplo, extraída con `lsadump::lsa /inject` o `secretsdump.py`) y quieres emitir un TGS único que coincida perfectamente con la política de AD, las ventanas temporales y los datos del PAC sin generar tráfico AS/TGS nuevo.
 
-### Sapphire-style intercambios de PAC (2025)
+### Sapphire-style PAC swaps (2025)
 
-Una variación más reciente, a veces llamada **sapphire ticket**, combina la base "real TGT" de Diamond con **S4U2self+U2U** para robar un PAC privilegiado y colocarlo en tu propio TGT. En lugar de inventar SIDs adicionales, solicitas un ticket U2U S4U2self para un usuario de alto privilegio cuyo `sname` apunta al solicitante de bajo privilegio; la KRB_TGS_REQ transporta el TGT del solicitante en `additional-tickets` y configura `ENC-TKT-IN-SKEY`, permitiendo que el service ticket sea descifrado con la clave de ese usuario. Luego extraes el PAC privilegiado y lo injertas en tu TGT legítimo antes de volver a firmarlo con la clave krbtgt.
+A newer twist sometimes called a **sapphire ticket** combines Diamond's "real TGT" base with **S4U2self+U2U** to steal a privileged PAC and drop it into your own TGT. Instead of inventing extra SIDs, you request a U2U S4U2self ticket for a high-privilege user where the `sname` targets the low-priv requester; the KRB_TGS_REQ carries the requester's TGT in `additional-tickets` and sets `ENC-TKT-IN-SKEY`, allowing the service ticket to be decrypted with that user's key. You then extract the privileged PAC and splice it into your legitimate TGT before re-signing with the krbtgt key.
 
-Impacket's `ticketer.py` ahora incluye soporte para sapphire mediante `-impersonate` + `-request` (intercambio en vivo con el KDC):
+Impacket's `ticketer.py` now ships sapphire support via `-impersonate` + `-request` (live KDC exchange):
 ```bash
 python3 ticketer.py -request -impersonate 'DAuser' \
 -domain 'lab.local' -user 'lowpriv' -password 'Passw0rd!' \
@@ -73,7 +73,7 @@ python3 ticketer.py -request -impersonate 'DAuser' \
 export KRB5CCNAME=lowpriv.ccache
 python3 psexec.py lab.local/DAuser@dc.lab.local -k -no-pass
 ```
-- `-impersonate` accepts a username or SID; `-request` requires live user creds plus krbtgt key material (AES/NTLM) to decrypt/patch tickets.
+- `-impersonate` acepta un nombre de usuario o SID; `-request` requiere credenciales de usuario en vivo más material de clave krbtgt (AES/NTLM) para descifrar/parchear tickets.
 
 Key OPSEC tells when using this variant:
 
@@ -81,13 +81,13 @@ Key OPSEC tells when using this variant:
 - `sname` often equals the requesting user (self-service access) and Event ID 4769 shows the caller and target as the same SPN/user.
 - Expect paired 4768/4769 entries with the same client computer but different CNAMES (low-priv requester vs. privileged PAC owner).
 
-### OPSEC & notas de detección
+### Notas de OPSEC y detección
 
-- The traditional hunter heuristics (TGS without AS, decade-long lifetimes) still apply to golden tickets, but diamond tickets mainly surface when the **PAC content or group mapping looks impossible**. Populate every PAC field (logon hours, user profile paths, device IDs) so automated comparisons do not immediately flag the forgery.
-- **No asignes en exceso grupos/RIDs**. If you only need `512` (Domain Admins) and `519` (Enterprise Admins), stop there and make sure the target account plausibly belongs to those groups elsewhere in AD. Excessive `ExtraSids` is a giveaway.
-- Sapphire-style swaps leave U2U fingerprints: `ENC-TKT-IN-SKEY` + `additional-tickets` plus a `sname` that points at a user (often the requester) in 4769, and a follow-up 4624 logon sourced from the forged ticket. Correlate those fields instead of only looking for no-AS-REQ gaps.
-- Microsoft started phasing out **RC4 service ticket issuance** because of CVE-2026-20833; enforcing AES-only etypes on the KDC both hardens the domain and aligns with diamond/sapphire tooling (/opsec already forces AES). Mixing RC4 into forged PACs will increasingly stick out.
-- Splunk's Security Content project distributes attack-range telemetry for diamond tickets plus detections such as *Windows Domain Admin Impersonation Indicator*, which correlates unusual Event ID 4768/4769/4624 sequences and PAC group changes. Replaying that dataset (or generating your own with the commands above) helps validate SOC coverage for T1558.001 while giving you concrete alert logic to evade.
+- Las heurísticas tradicionales de los hunters (TGS without AS, lifetimes de décadas) siguen aplicándose a golden tickets, pero diamond tickets suelen aflorar cuando el contenido del **PAC o el mapeo de grupos parece imposible**. Rellena todos los campos del PAC (logon hours, user profile paths, device IDs) para que las comparaciones automáticas no señalen inmediatamente la falsificación.
+- **No sobreasignes grupos/RIDs**. Si solo necesitas `512` (Domain Admins) y `519` (Enterprise Admins), quédate ahí y asegúrate de que la cuenta objetivo pertenezca plausiblemente a esos grupos en otra parte de AD. `ExtraSids` excesivos delatan la maniobra.
+- Los intercambios al estilo Sapphire dejan huellas U2U: `ENC-TKT-IN-SKEY` + `additional-tickets` más un `sname` que apunta a un usuario (a menudo el solicitante) en 4769, y un inicio de sesión 4624 posterior originado por el ticket falsificado. Correlaciona esos campos en lugar de fijarte solo en las brechas de no-AS-REQ.
+- Microsoft empezó a retirar progresivamente la emisión de **RC4 service ticket** debido a CVE-2026-20833; forzar etypes solo AES en el KDC tanto fortalece el dominio como se alinea con las herramientas diamond/sapphire (/opsec ya fuerza AES). Mezclar RC4 en PACs falsificados cada vez resultará más llamativo.
+- El proyecto Security Content de Splunk distribuye telemetría de attack-range para diamond tickets además de detecciones como *Windows Domain Admin Impersonation Indicator*, que correlaciona secuencias inusuales de Event ID 4768/4769/4624 y cambios de grupos en el PAC. Reproducir ese dataset (o generar el propio con los comandos anteriores) ayuda a validar la cobertura del SOC para T1558.001 y te proporciona lógica de alertas concreta para evadir.
 
 ## Referencias
 

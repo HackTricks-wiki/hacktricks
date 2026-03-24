@@ -1,10 +1,10 @@
-# Satisfacibilidad Módulo de Teorías (SMT) - Z3
+# Satisfacibilidad Modulo de Teorías (SMT) - Z3
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Básicamente, esta herramienta nos ayuda a encontrar valores para variables que deben satisfacer ciertas condiciones, y calcularlos a mano sería muy tedioso. Por lo tanto, puedes indicarle a Z3 las condiciones que deben cumplir las variables y él encontrará algunos valores (si es posible).
+Muy básicamente, esta herramienta nos ayudará a encontrar valores para variables que deben satisfacer ciertas condiciones y calcularlos a mano sería muy tedioso. Por lo tanto, puedes indicarle a Z3 las condiciones que las variables deben satisfacer y encontrará algunos valores (si es posible).
 
-**Algunos textos y ejemplos se extraen de [https://ericpony.github.io/z3py-tutorial/guide-examples.htm](https://ericpony.github.io/z3py-tutorial/guide-examples.htm)**
+**Algunos textos y ejemplos están extraídos de [https://ericpony.github.io/z3py-tutorial/guide-examples.htm](https://ericpony.github.io/z3py-tutorial/guide-examples.htm)**
 
 ## Operaciones básicas
 
@@ -43,7 +43,7 @@ print(solve(r1**2 + r2**2 == 3, r1**3 == 2))
 set_option(precision=30)
 print(solve(r1**2 + r2**2 == 3, r1**3 == 2))
 ```
-### Imprimiendo el modelo
+### Imprimir el modelo
 ```python
 from z3 import *
 
@@ -59,7 +59,7 @@ print("%s = %s" % (d.name(), m[d]))
 ```
 ## Aritmética de máquina
 
-Las CPUs modernas y los lenguajes de programación más comunes usan aritmética sobre **fixed-size bit-vectors**. La aritmética de máquina está disponible en Z3Py como **Bit-Vectors**.
+Los procesadores modernos y los lenguajes de programación más utilizados usan aritmética sobre bit-vectors de tamaño fijo. La aritmética de máquina está disponible en Z3Py como **Bit-Vectors**.
 ```python
 from z3 import *
 
@@ -74,9 +74,9 @@ a = BitVecVal(-1, 32)
 b = BitVecVal(65535, 32)
 print(simplify(a == b)) #This is False
 ```
-### Números con signo/sin signo
+### Números con signo y sin signo
 
-Z3 proporciona versiones especiales con signo de las operaciones aritméticas en las que importa si el **vector de bits se trata como con signo o sin signo**. En Z3Py, los operadores **<, <=, >, >=, /, % y >>** corresponden a las versiones **con signo**. Los operadores correspondientes **sin signo** son **ULT, ULE, UGT, UGE, UDiv, URem y LShR.**
+Z3 proporciona versiones especiales con signo de las operaciones aritméticas cuando importa si el vector de bits se trata como con signo o sin signo. En Z3Py, los operadores **<, <=, >, >=, /, % y >>** corresponden a las versiones **con signo**. Los operadores correspondientes **sin signo** son **ULT, ULE, UGT, UGE, UDiv, URem y LShR.**
 ```python
 from z3 import *
 
@@ -96,7 +96,7 @@ solve(ULT(x, 0))
 ```
 ### Auxiliares de bit-vector comúnmente necesarios en reversing
 
-Cuando estés **lifting checks from assembly or decompiler output**, suele ser mejor modelar cada byte de entrada como `BitVec(..., 8)` y luego reconstruir las palabras exactamente como lo hace el código objetivo. Esto evita bugs causados por mezclar enteros matemáticos con la aritmética de la máquina.
+Cuando estés **lifting checks from assembly or decompiler output**, suele ser mejor modelar cada byte de entrada como un `BitVec(..., 8)` y luego reconstruir las palabras exactamente como lo hace el código objetivo. Esto evita bugs causados por mezclar enteros matemáticos con aritmética de máquina.
 ```python
 from z3 import *
 
@@ -110,17 +110,15 @@ rot = RotateLeft(eax, 13)            # rol eax, 13
 logical = LShR(eax, 3)               # shr eax, 3
 arith = eax >> 3                     # sar eax, 3 (signed shift)
 ```
-Algunas trampas comunes al traducir código a restricciones:
+Algunos errores comunes al traducir código a restricciones:
 
-- `>>` es un desplazamiento a la derecha **aritmético** para bit-vectors. Usa `LShR` para la instrucción `shr` lógica.
+- `>>` es un desplazamiento a la derecha **aritmético** para vectores de bits. Usa `LShR` para la instrucción lógica `shr`.
 - Usa `UDiv`, `URem`, `ULT`, `ULE`, `UGT` y `UGE` cuando la comparación/división original era **sin signo**.
 - Mantén los anchos explícitos. Si el binario trunca a 8 o 16 bits, añade `Extract` o reconstruye el valor con `Concat` en lugar de promover silenciosamente todo a enteros de Python.
 
 ### Funciones
 
-**Funciones interpretadas** como las aritméticas donde la **función +** tiene una **interpretación estándar fija** (suma dos números). Las **funciones no interpretadas** y las constantes son **máximamente flexibles**; permiten **cualquier interpretación** que sea **consistente** con las **restricciones** sobre la función o la constante.
-
-Ejemplo: f aplicado dos veces a x resulta en x de nuevo, pero f aplicado una vez a x es diferente de x.
+**Funciones interpretada**s como aritmética donde la **función +** tiene una **interpretación estándar fija** (suma dos números). **Funciones no interpretadas** y constantes son **máximamente flexibles**; permiten **cualquier interpretación** que sea **consistente** con las **restricciones** sobre la función o la constante.
 ```python
 from z3 import *
 
@@ -193,20 +191,20 @@ print "failed to solve"
 ```
 ### Flujos de trabajo de reversing
 
-Si necesitas **ejecutar simbólicamente el binario y recopilar las restricciones automáticamente**, consulta las notas de angr aquí:
+Si necesitas **symbolically execute the binary and collect constraints automatically**, consulta las notas de angr aquí:
 
 {{#ref}}
 angr/README.md
 {{#endref}}
 
-Si ya estás mirando las comprobaciones descompiladas y solo necesitas resolverlas, raw Z3 suele ser más rápido y más fácil de controlar.
+Si ya estás analizando los decompiled checks y solo necesitas resolverlos, raw Z3 suele ser más rápido y más fácil de controlar.
 
-#### Extraer comprobaciones basadas en bytes de un crackme
+#### Lifting byte-based checks from a crackme
 
-Un patrón muy común en crackmes y packed loaders es una larga lista de ecuaciones de bytes sobre una contraseña candidata. Modela los bytes como vectores de 8 bits, restringe el alfabeto y solo amplíalos cuando el código original los amplíe.
+Un patrón muy común en crackmes y packed loaders es una larga lista de ecuaciones por byte sobre una contraseña candidata. Modela los bytes como vectores de 8 bits, restringe el alfabeto y solo amplíalos cuando el código original los amplíe.
 
 <details>
-<summary>Ejemplo: reconstruir un serial check a partir de aritmética descompilada</summary>
+<summary>Ejemplo: rebuild a serial check from decompiled arithmetic</summary>
 ```python
 from z3 import *
 
@@ -231,11 +229,11 @@ print(bytes(m[c].as_long() for c in flag))
 ```
 </details>
 
-Este enfoque encaja bien con el reversing del mundo real porque coincide con lo que hacen los writeups modernos en la práctica: recuperar las relaciones aritméticas/bitwise, convertir cada comparación en una constraint y resolver todo el sistema de una vez.
+Este estilo encaja bien con el reversing en el mundo real porque coincide con lo que hacen los writeups modernos en la práctica: recuperar las relaciones aritméticas y a nivel de bits, convertir cada comparación en una restricción y resolver todo el sistema de una vez.
 
 #### Resolución incremental con `push()` / `pop()`
 
-Mientras haces reversing, a menudo querrás probar varias hipótesis sin reconstruir todo el solver. `push()` crea un checkpoint y `pop()` descarta las constraints añadidas después de ese checkpoint. Esto es útil cuando no estás seguro de si una branch es signed u unsigned, si un registro está zero-extended o sign-extended, o cuando estás probando varias constantes candidatas extraídas del disassembly.
+Mientras haces reversing, a menudo quieres probar varias hipótesis sin reconstruir todo el solver. `push()` crea un punto de control y `pop()` descarta las restricciones añadidas después de ese punto de control. Esto es útil cuando no estás seguro de si una rama es signed o unsigned, si un register está zero-extended o sign-extended, o cuando pruebas varias constantes candidatas extraídas del disassembly.
 ```python
 from z3 import *
 
@@ -256,7 +254,7 @@ s.pop()
 ```
 #### Enumerar más de una entrada válida
 
-Algunos keygens, comprobaciones de licencia y retos CTF admiten intencionalmente **muchas** entradas válidas. Z3 no las enumera automáticamente, pero puedes añadir una **cláusula de bloqueo** después de cada modelo para forzar que el siguiente resultado difiera en al menos una posición.
+Algunos keygens, comprobaciones de licencia y desafíos CTF admiten intencionadamente **muchas** entradas válidas. Z3 no las enumera automáticamente, pero puedes añadir una **cláusula de bloqueo** después de cada modelo para forzar que el siguiente resultado difiera en al menos una posición.
 ```python
 from z3 import *
 
@@ -272,9 +270,9 @@ m = s.model()
 print(''.join(chr(m[x].as_long()) for x in xs))
 s.add(Or([x != m.eval(x, model_completion=True) for x in xs]))
 ```
-#### Tactics para fórmulas de bit-vector complicadas
+#### Tácticas para fórmulas bit-vector enrevesadas
 
-El solver por defecto de Z3 suele ser suficiente, pero decompiler-generated formulas con muchas igualdades y reescrituras de bit-vector a menudo se vuelven más manejables después de una primera pasada de normalización. En esos casos puede ser útil construir un solver a partir de tactics:
+El solver predeterminado de Z3 suele ser suficiente, pero las fórmulas generadas por descompiladores con muchas igualdades y reescrituras de bit-vector a menudo se simplifican después de una primera pasada de normalización. En esos casos puede ser útil construir un solver a partir de tactics:
 ```python
 from z3 import *
 
@@ -285,7 +283,7 @@ Esto es especialmente útil cuando el problema es casi enteramente **bit-vector 
 
 #### CRCs y otros checkers personalizados
 
-Desafíos recientes de reversing todavía usan Z3 para constraints que son molestos de brute-force pero sencillos de modelar, como CRC32 checks sobre input ASCII-only, pipelines mixtos rotate/xor/add, o muchos predicados aritméticos encadenados extraídos de un checker JITed/obfuscated. Para problemas tipo CRC, mantén el estado como bit-vectors y aplica restricciones ASCII por byte desde el inicio para reducir el search space.
+Recientes reversing challenges todavía usan Z3 para restricciones que son tediosas de brute-force pero sencillas de modelar, como CRC32 checks sobre entrada ASCII-only, pipelines mixtos de rotate/xor/add, o muchos predicados aritméticos encadenados extraídos de un checker JITed/obfuscated. Para problemas tipo CRC, mantén el estado como bit-vectors y aplica restricciones ASCII por byte desde el principio para reducir el search space.
 
 ## Referencias
 
