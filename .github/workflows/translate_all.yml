@@ -5,9 +5,7 @@ on:
     branches:
       - master
     paths-ignore:
-      - 'scripts/**'
       - '.gitignore'
-      - '.github/**'
       - Dockerfile
   workflow_dispatch:
 
@@ -72,12 +70,13 @@ jobs:
           && sudo apt update \
           && sudo apt install gh -y \
           && sudo apt-get install -y wget
-          mkdir scripts
+          mkdir -p scripts
           cd scripts
           wget -O get_and_save_refs.py https://raw.githubusercontent.com/HackTricks-wiki/hacktricks-cloud/master/scripts/get_and_save_refs.py
           wget -O compare_and_fix_refs.py https://raw.githubusercontent.com/HackTricks-wiki/hacktricks-cloud/master/scripts/compare_and_fix_refs.py
           wget -O translator.py https://raw.githubusercontent.com/HackTricks-wiki/hacktricks-cloud/master/scripts/translator.py
           cd ..
+          wget -O /tmp/seo_postprocess.py https://raw.githubusercontent.com/HackTricks-wiki/hacktricks/master/scripts/seo_postprocess.py
 
       - name: Run get_and_save_refs.py
         run: |
@@ -248,6 +247,15 @@ jobs:
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: us-east-1
+
+      - name: Post-process SEO artifacts
+        run: |
+          python3 /tmp/seo_postprocess.py pages \
+            --book-dir ./book \
+            --site-url https://hacktricks.wiki \
+            --lang "$BRANCH" \
+            --default-lang en \
+            --site-name "HackTricks"
       
       # Sync the build to S3
       - name: Sync to S3
@@ -259,3 +267,18 @@ jobs:
           echo "Sync completed"
           echo "Cat 3 files from the book"
           find . -type f -name 'index.html' -print | head -n 3 | xargs -r cat
+
+      - name: Refresh root sitemap index
+        run: |
+          LANGS=$(aws s3api list-objects-v2 --bucket hacktricks-wiki --delimiter / --query 'CommonPrefixes[].Prefix' --output text | tr '\t' '\n' | sed 's:/$::' | grep -E '^[a-z]{2}$' | sort | paste -sd, -)
+          if [ -z "$LANGS" ]; then
+            LANGS="en"
+          fi
+          python3 /tmp/seo_postprocess.py index --site-url https://hacktricks.wiki --languages "$LANGS" --output ./sitemap.xml
+          aws s3 cp ./sitemap.xml s3://hacktricks-wiki/sitemap.xml --content-type application/xml --cache-control max-age=300
+
+      - name: Invalidate CloudFront HTML and SEO assets
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id "${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}" \
+            --paths "/$BRANCH/*" "/robots.txt" "/sitemap.xml" "/$BRANCH/sitemap.xml"

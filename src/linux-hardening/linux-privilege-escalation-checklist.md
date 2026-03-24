@@ -47,6 +47,7 @@
 - [ ] Any **writable .service** file?
 - [ ] Any **writable binary** executed by a **service**?
 - [ ] Any **writable folder in systemd PATH**?
+- [ ] Any **writable systemd unit drop-in** in `/etc/systemd/system/<unit>.d/*.conf` that can override `ExecStart`/`User`?
 
 ### [Timers](privilege-escalation/index.html#timers)
 
@@ -84,6 +85,7 @@
 ### [SUDO and SUID commands](privilege-escalation/index.html#sudo-and-suid)
 
 - [ ] Can you execute **any command with sudo**? Can you use it to READ, WRITE or EXECUTE anything as root? ([**GTFOBins**](https://gtfobins.github.io))
+- [ ] If `sudo -l` allows `sudoedit`, check for **sudoedit argument injection** (CVE-2023-22809) via `SUDO_EDITOR`/`VISUAL`/`EDITOR` to edit arbitrary files on vulnerable versions (`sudo -V` < 1.9.12p2). Example: `SUDO_EDITOR="vim -- /etc/sudoers" sudoedit /etc/hosts`
 - [ ] Is any **exploitable SUID binary**? ([**GTFOBins**](https://gtfobins.github.io))
 - [ ] Are [**sudo** commands **limited** by **path**? can you **bypass** the restrictions](privilege-escalation/index.html#sudo-execution-bypassing-paths)?
 - [ ] [**Sudo/SUID binary without path indicated**](privilege-escalation/index.html#sudo-command-suid-binary-without-command-path)?
@@ -140,7 +142,10 @@
 - [ ] Can you [**abuse NFS to escalate privileges**](privilege-escalation/index.html#nfs-privilege-escalation)?
 - [ ] Do you need to [**escape from a restrictive shell**](privilege-escalation/index.html#escaping-from-restricted-shells)?
 
+
+
+## References
+
+- [Sudo advisory: sudoedit arbitrary file edit](https://www.sudo.ws/security/advisories/sudoedit_any/)
+- [Oracle Linux docs: systemd drop-in configuration](https://docs.oracle.com/en/operating-systems/oracle-linux/8/systemd/ModifyingsystemdConfigurationFiles.html)
 {{#include ../banners/hacktricks-training.md}}
-
-
-

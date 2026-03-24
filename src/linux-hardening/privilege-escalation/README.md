@@ -172,13 +172,13 @@ cat /proc/sys/kernel/randomize_va_space 2>/dev/null
 #If 0, not enabled
 ```
 
-## Docker Breakout
+## Container Breakout
 
-If you are inside a docker container you can try to escape from it:
+If you are inside a container, start with the following container-security section and then pivot into the runtime-specific abuse pages:
 
 
 {{#ref}}
-docker-security/
+container-security/
 {{#endref}}
 
 ## Drives
@@ -232,6 +232,53 @@ top -n 1
 
 Always check for possible [**electron/cef/chromium debuggers** running, you could abuse it to escalate privileges](electron-cef-chromium-debugger-abuse.md). **Linpeas** detect those by checking the `--inspect` parameter inside the command line of the process.\
 Also **check your privileges over the processes binaries**, maybe you can overwrite someone.
+
+### Cross-user parent-child chains
+
+A child process running under a **different user** than its parent is not automatically malicious, but it is a useful **triage signal**. Some transitions are expected (`root` spawning a service user, login managers creating session processes), but unusual chains can reveal wrappers, debug helpers, persistence, or weak runtime trust boundaries.
+
+Quick review:
+
+```bash
+ps -eo pid,ppid,user,comm,args --sort=ppid
+pstree -alp
+```
+
+If you find a surprising chain, inspect the parent command line and all files that influence its behavior (`config`, `EnvironmentFile`, helper scripts, working directory, writable arguments). In several real privesc paths the child itself was not writable, but the **parent-controlled config** or helper chain was.
+
+### Deleted executables and deleted-open files
+
+Runtime artifacts are often still accessible **after deletion**. This is useful both for privilege escalation and for recovering evidence from a process that already has sensitive files open.
+
+Check for deleted executables:
+
+```bash
+pid=<PID>
+ls -l /proc/$pid/exe
+readlink /proc/$pid/exe
+tr '\0' ' ' </proc/$pid/cmdline; echo
+```
+
+If `/proc/<PID>/exe` points to `(deleted)`, the process is still running the old binary image from memory. That is a strong signal to investigate because:
+
+- the removed executable may contain interesting strings or credentials
+- the running process may still expose useful file descriptors
+- a deleted privileged binary can indicate recent tampering or attempted cleanup
+
+Collect deleted-open files globally:
+
+```bash
+lsof +L1
+```
+
+If you find an interesting descriptor, recover it directly:
+
+```bash
+ls -l /proc/<PID>/fd
+cat /proc/<PID>/fd/<FD>
+```
+
+This is especially valuable when a process still has a deleted secret, script, database export, or flag file open.
 
 ### Process monitoring
 
@@ -434,6 +481,15 @@ ls -al /etc/cron* /etc/at*
 cat /etc/cron* /etc/at* /etc/anacrontab /var/spool/cron/crontabs/root 2>/dev/null | grep -v "^#"
 ```
 
+If `run-parts` is used, check which names will really execute:
+
+```bash
+run-parts --test /etc/cron.hourly
+run-parts --test /etc/cron.daily
+```
+
+This avoids false positives. A writable periodic directory is only useful if your payload filename matches the local `run-parts` rules.
+
 ### Cron path
 
 For example, inside _/etc/crontab_ you can find the PATH: _PATH=**/home/user**:/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin_
@@ -588,6 +644,15 @@ It's possible to create a cronjob **putting a carriage return after a comment** 
 
 ```bash
 #This is a comment inside a cron config file\r* * * * * echo "Surprise!"
+```
+
+To detect this kind of stealth entry, inspect cron files with tools that expose control characters:
+
+```bash
+cat -A /etc/crontab
+cat -A /etc/cron.d/*
+sed -n 'l' /etc/crontab /etc/cron.d/* 2>/dev/null
+xxd /etc/crontab | head
 ```
 
 ## Services
@@ -800,11 +865,11 @@ After setting up the `socat` connection, you can execute commands directly in th
 
 Note that if you have write permissions over the docker socket because you are **inside the group `docker`** you have [**more ways to escalate privileges**](interesting-groups-linux-pe/index.html#docker-group). If the [**docker API is listening in a port** you can also be able to compromise it](../../network-services-pentesting/2375-pentesting-docker.md#compromising).
 
-Check **more ways to break out from docker or abuse it to escalate privileges** in:
+Check **more ways to break out from containers or abuse container runtimes to escalate privileges** in:
 
 
 {{#ref}}
-docker-security/
+container-security/
 {{#endref}}
 
 ## Containerd (ctr) privilege escalation

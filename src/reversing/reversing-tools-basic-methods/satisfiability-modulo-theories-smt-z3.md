@@ -104,6 +104,31 @@ solve(x < 0)
 solve(ULT(x, 0))
 ```
 
+
+### Bit-vector helpers commonly needed in reversing
+
+When you are **lifting checks from assembly or decompiler output**, it is usually better to model every input byte as a `BitVec(..., 8)` and then rebuild words exactly like the target code does. This avoids bugs caused by mixing mathematical integers with machine arithmetic.
+
+```python
+from z3 import *
+
+b0, b1, b2, b3 = BitVecs('b0 b1 b2 b3', 8)
+eax = Concat(b3, b2, b1, b0)        # little-endian bytes -> 32-bit register value
+low_byte = Extract(7, 0, eax)        # AL
+high_word = Extract(31, 16, eax)     # upper 16 bits
+signed_b0 = SignExt(24, b0)          # movsx eax, byte ptr [...]
+unsigned_b0 = ZeroExt(24, b0)        # movzx eax, byte ptr [...]
+rot = RotateLeft(eax, 13)            # rol eax, 13
+logical = LShR(eax, 3)               # shr eax, 3
+arith = eax >> 3                     # sar eax, 3 (signed shift)
+```
+
+Some common pitfalls while translating code into constraints:
+
+- `>>` is an **arithmetic** right shift for bit-vectors. Use `LShR` for the logical `shr` instruction.
+- Use `UDiv`, `URem`, `ULT`, `ULE`, `UGT` and `UGE` when the original comparison/division was **unsigned**.
+- Keep widths explicit. If the binary truncates to 8 or 16 bits, add `Extract` or rebuild the value with `Concat` instead of silently promoting everything to Python integers.
+
 ### Functions
 
 **Interpreted functio**ns such as arithmetic where the **function +** has a **fixed standard interpretation** (it adds two numbers). **Uninterpreted functions** and constants are **maximally flexible**; they allow **any interpretation** that is **consistent** with the **constraints** over the function or constant.
@@ -183,9 +208,116 @@ else:
     print "failed to solve"
 ```
 
+
+### Reversing workflows
+
+If you need to **symbolically execute the binary and collect constraints automatically**, check the angr notes here:
+
+{{#ref}}
+angr/README.md
+{{#endref}}
+
+If you are already looking at the decompiled checks and only need to solve them, raw Z3 is usually faster and easier to control.
+
+#### Lifting byte-based checks from a crackme
+
+A very common pattern in crackmes and packed loaders is a long list of byte equations over a candidate password. Model bytes as 8-bit vectors, constrain the alphabet, and only widen them when the original code widens them.
+
+<details>
+<summary>Example: rebuild a serial check from decompiled arithmetic</summary>
+
+```python
+from z3 import *
+
+flag = [BitVec(f'flag_{i}', 8) for i in range(8)]
+s = Solver()
+
+for c in flag:
+    s.add(c >= 0x20, c <= 0x7e)
+
+w0 = Concat(flag[3], flag[2], flag[1], flag[0])
+w1 = Concat(flag[7], flag[6], flag[5], flag[4])
+
+s.add((ZeroExt(24, flag[0]) + ZeroExt(24, flag[5])) == 0x90)
+s.add((flag[1] ^ flag[2] ^ flag[3]) == 0x5a)
+s.add(RotateLeft(w0, 7) ^ w1 == BitVecVal(0x4f625a13, 32))
+s.add(ULE(flag[6], flag[7]))
+s.add(LShR(w1, 5) == BitVecVal(0x03a1f21, 32))
+
+if s.check() == sat:
+    m = s.model()
+    print(bytes(m[c].as_long() for c in flag))
+```
+
+</details>
+
+This style maps well to real-world reversing because it matches what modern writeups do in practice: recover the arithmetic/bitwise relations, turn each comparison into a constraint, and solve the whole system at once.
+
+#### Incremental solving with `push()` / `pop()`
+
+While reversing, you often want to test several hypotheses without rebuilding the whole solver. `push()` creates a checkpoint and `pop()` discards the constraints added after that checkpoint. This is useful when you are not sure whether a branch is signed or unsigned, whether a register is zero-extended or sign-extended, or when you are trying several candidate constants extracted from disassembly.
+
+```python
+from z3 import *
+
+x = BitVec('x', 32)
+s = Solver()
+s.add((x & 0xff) == 0x41)
+
+s.push()
+s.add(UGT(x, 0x1000))
+print(s.check())
+s.pop()
+
+s.push()
+s.add(x == 0x41)
+print(s.check())
+print(s.model())
+s.pop()
+```
+
+#### Enumerating more than one valid input
+
+Some keygens, license checks, and CTF challenges intentionally admit **many** valid inputs. Z3 does not enumerate them automatically, but you can add a **blocking clause** after every model to force the next result to differ in at least one position.
+
+```python
+from z3 import *
+
+xs = [BitVec(f'x{i}', 8) for i in range(4)]
+s = Solver()
+for x in xs:
+    s.add(And(x >= 0x30, x <= 0x39))
+s.add(xs[0] + xs[1] == xs[2] + 1)
+s.add(xs[3] == xs[0] ^ 3)
+
+while s.check() == sat:
+    m = s.model()
+    print(''.join(chr(m[x].as_long()) for x in xs))
+    s.add(Or([x != m.eval(x, model_completion=True) for x in xs]))
+```
+
+#### Tactics for ugly bit-vector formulas
+
+Z3's default solver is usually enough, but decompiler-generated formulas with lots of equalities and bit-vector rewrites often become easier after a first normalization pass. In those cases it can be useful to build a solver from tactics:
+
+```python
+from z3 import *
+
+t = Then('simplify', 'solve-eqs', 'bit-blast', 'sat')
+s = t.solver()
+```
+
+This is specially helpful when the problem is almost entirely **bit-vector + Boolean logic** and you want Z3 to simplify and eliminate obvious equalities before handing the formula to the SAT backend.
+
+#### CRCs and other custom checkers
+
+Recent reversing challenges still use Z3 for constraints that are annoying to brute-force but straightforward to model, such as CRC32 checks over ASCII-only input, mixed rotate/xor/add pipelines, or many chained arithmetic predicates extracted from a JITed/obfuscated checker. For CRC-like problems, keep the state as bit-vectors and apply per-byte ASCII constraints early to shrink the search space.
+
 ## References
 
 - [https://ericpony.github.io/z3py-tutorial/guide-examples.htm](https://ericpony.github.io/z3py-tutorial/guide-examples.htm)
+- [https://microsoft.github.io/z3guide/docs/theories/Bitvectors/](https://microsoft.github.io/z3guide/docs/theories/Bitvectors/)
+- [https://theory.stanford.edu/~nikolaj/programmingz3.html](https://theory.stanford.edu/~nikolaj/programmingz3.html)
 
 {{#include ../../banners/hacktricks-training.md}}
 
