@@ -1,21 +1,24 @@
+# Більше інструментів
+
 {{#include ../banners/hacktricks-training.md}}
 
 
-# BlueTeam
+## BlueTeam
 
 - [https://github.com/yarox24/attack_monitor](https://github.com/yarox24/attack_monitor)
 - [https://capsule8.com/blog/dont-get-kicked-out-a-tale-of-rootkits-and-other-backdoors/](https://capsule8.com/blog/dont-get-kicked-out-a-tale-of-rootkits-and-other-backdoors/)
 - [https://github.com/ION28/BLUESPAWN](https://github.com/ION28/BLUESPAWN)
-- [https://github.com/PaperMtn/lil-pwny](https://github.com/PaperMtn/lil-pwny) : Перевірка розкритих акаунтів
+- [https://github.com/PaperMtn/lil-pwny](https://github.com/PaperMtn/lil-pwny) : Перевірити оприлюднені облікові записи
 - [https://github.com/rabobank-cdc/DeTTECT](https://github.com/rabobank-cdc/DeTTECT)
 
-# OSINT
+## OSINT
 
 - [https://github.com/3vangel1st/kamerka](https://github.com/3vangel1st/kamerka)
 - [https://github.com/BullsEye0/google_dork_list](https://github.com/BullsEye0/google_dork_list)
 - [https://github.com/highmeh/lure](https://github.com/highmeh/lure)
 - [https://www.shodan.io/](https://www.shodan.io)
 - [https://censys.io/](https://censys.io)
+- [https://webmii.com/](https://webmii.com/)
 - [https://viz.greynoise.io/table](https://viz.greynoise.io/table)
 - [https://www.zoomeye.org](https://www.zoomeye.org)
 - [https://fofa.so](https://fofa.so)
@@ -28,73 +31,73 @@
 - [https://builtwith.com/](https://builtwith.com)
 - [https://www.spiderfoot.net/](https://www.spiderfoot.net)
 - [https://github.com/zricethezav/gitleaks](https://github.com/zricethezav/gitleaks)
-- [https://www.nmmapper.com/sys/tools/subdomainfinder/](https://www.nmmapper.com/sys/tools/subdomainfinder/) : 8 інструментів для пошуку піддоменів, sublist3r, amass та інші
+- [https://www.nmmapper.com/sys/tools/subdomainfinder/](https://www.nmmapper.com/sys/tools/subdomainfinder/) : 8 інструментів для пошуку піддоменів: sublist3r, amass та інші
 
-# **WEB**
+## **WEB**
 
 - [https://github.com/AlisamTechnology/ATSCAN](https://github.com/AlisamTechnology/ATSCAN)
 - [https://github.com/momenbasel/KeyFinder](https://github.com/momenbasel/KeyFinder)
 - [https://github.com/hahwul/XSpear](https://github.com/hahwul/XSpear)
 - [https://github.com/BitTheByte/Monitorizer/](https://github.com/BitTheByte/Monitorizer/)
 - [https://github.com/spinkham/skipfish](https://github.com/spinkham/skipfish)
-- [https://github.com/blark/aiodnsbrute](https://github.com/blark/aiodnsbrute) : Брутфорс доменних імен асинхронно
-- [https://crt.sh/?q=%.yahoo.com](https://crt.sh/?q=%.yahoo.com) : Брутфорс піддоменів
-- [https://github.com/tomnomnom/httprobe](https://github.com/tomnomnom/httprobe): Перевірка доступності веб-серверів у домені
+- [https://github.com/blark/aiodnsbrute](https://github.com/blark/aiodnsbrute) : Brute force доменних імен асинхронно
+- [https://crt.sh/?q=%.yahoo.com](https://crt.sh/?q=%.yahoo.com) : Subdomain bruteforce
+- [https://github.com/tomnomnom/httprobe](https://github.com/tomnomnom/httprobe): Перевіряє, чи доступні веб-сервери в домені
 - [https://github.com/aboul3la/Sublist3r](https://github.com/aboul3la/Sublist3r) : Виявлення піддоменів
-- [https://github.com/gwen001/github-search/blob/master/github-subdomains.py](https://github.com/gwen001/github-search/blob/master/github-subdomains.py) : Виявлення піддоменів у github
+- [https://github.com/gwen001/github-search/blob/master/github-subdomains.py](https://github.com/gwen001/github-search/blob/master/github-subdomains.py) : Виявлення піддоменів на github
 - [https://github.com/robertdavidgraham/masscan](https://github.com/robertdavidgraham/masscan) : Швидке сканування портів
-- [https://github.com/Threezh1/JSFinder](https://github.com/Threezh1/JSFinder) : Піддомени та URL-адреси з JS-файлів на веб-сторінці
+- [https://github.com/Threezh1/JSFinder](https://github.com/Threezh1/JSFinder) : Піддомени та URL із JS-файлів на веб-сайті
 - [https://github.com/C1h2e1/MyFuzzingDict](https://github.com/C1h2e1/MyFuzzingDict) : Словник веб-файлів
-- [https://github.com/TypeError/Bookmarks/blob/master/README.md](https://github.com/TypeError/Bookmarks/blob/master/README.md) : BurpExtension для уникнення десятків вкладок повторювача
-- [https://github.com/hakluke/hakrawler](https://github.com/hakluke/hakrawler) : Отримання активів
+- [https://github.com/TypeError/Bookmarks/blob/master/README.md](https://github.com/TypeError/Bookmarks/blob/master/README.md) : BurpExtension для уникнення десятків вкладок Repeater
+- [https://github.com/hakluke/hakrawler](https://github.com/hakluke/hakrawler) : Отримати assets
 - [https://github.com/izo30/google-dorker](https://github.com/izo30/google-dorker) : Google dorks
-- [https://github.com/sehno/Bug-bounty/blob/master/bugbounty_checklist.md](https://github.com/sehno/Bug-bounty/blob/master/bugbounty_checklist.md) : Чек-лист для веб BugBounty
-- [https://github.com/Naategh/dom-red](https://github.com/Naategh/dom-red) : Перевірка списку доменів на відкриту редирекцію
-- [https://github.com/prodigysml/Dr.-Watson](https://github.com/prodigysml/Dr.-Watson) : Плагін Burp, офлайн-аналіз для виявлення доменів, піддоменів та IP-адрес
+- [https://github.com/sehno/Bug-bounty/blob/master/bugbounty_checklist.md](https://github.com/sehno/Bug-bounty/blob/master/bugbounty_checklist.md) : Чекліст для Web BugBounty
+- [https://github.com/Naategh/dom-red](https://github.com/Naategh/dom-red) : Перевірити список доменів на Open Redirection
+- [https://github.com/prodigysml/Dr.-Watson](https://github.com/prodigysml/Dr.-Watson) : Burp plugin, offline аналіз для виявлення доменів, піддоменів та IP
 - [https://github.com/hahwul/WebHackersWeapons](https://github.com/hahwul/WebHackersWeapons): Список різних інструментів
-- [https://github.com/gauravnarwani97/Trishul](https://github.com/gauravnarwani97/Trishul) : Плагін BurpSuite для виявлення вразливостей (SQLi, XSS, SSTI)
-- [https://github.com/fransr/postMessage-tracker](https://github.com/fransr/postMessage-tracker) : Розширення Chrome для відстеження функцій пост-повідомлень
-- [https://github.com/Quitten/Autorize](https://github.com/Quitten/Autorize) : Автоматичні тести аутентифікації (видалення куків і спроба надіслати запит)
-- [https://github.com/pikpikcu/xrcross](https://github.com/pikpikcu/xrcross): XRCross - це реконструкція, сканер і інструмент для тестування проникнення / BugBounty. Цей інструмент був створений для тестування вразливостей (XSS|SSRF|CORS|SSTI|IDOR|RCE|LFI|SQLI)
+- [https://github.com/gauravnarwani97/Trishul](https://github.com/gauravnarwani97/Trishul) : BurpSuite плагін для пошуку вразливостей (SQLi, XSS, SSTI)
+- [https://github.com/fransr/postMessage-tracker](https://github.com/fransr/postMessage-tracker) : Розширення Chrome для відстеження post-message функцій
+- [https://github.com/Quitten/Autorize](https://github.com/Quitten/Autorize) : Automatic authentication tests (видалити cookies і спробувати відправити запит)
+- [https://github.com/pikpikcu/xrcross](https://github.com/pikpikcu/xrcross): XRCross is a Reconstruction, Scanner, and a tool for penetration / BugBounty testing. This tool was built to test (XSS|SSRF|CORS|SSTI|IDOR|RCE|LFI|SQLI) vulnerabilities
 
-# Windows
+## Windows
 
-- [https://github.com/Mr-Un1k0d3r/PoisonHandler](https://github.com/Mr-Un1k0d3r/PoisonHandler) : Латеральні переміщення
+- [https://github.com/Mr-Un1k0d3r/PoisonHandler](https://github.com/Mr-Un1k0d3r/PoisonHandler) : Lateral movements
 - [https://freddiebarrsmith.com/trix/trix.html](https://freddiebarrsmith.com/trix/trix.html) : LOL bins
-- [https://gist.github.com/netbiosX/ee35fcd3722e401a38136cff7b751d79](https://gist.github.com/netbiosX/ee35fcd3722e401a38136cff7b751d79) ([https://pentestlab.blog/2020/01/13/persistence-image-file-execution-options-injection/](https://pentestlab.blog/2020/01/13/persistence-image-file-execution-options-injection/)): Персистентність
-- [https://github.com/odzhan/injection](https://github.com/odzhan/injection) : Техніки ін'єкції процесів Windows
-- [https://github.com/BankSecurity/Red_Team](https://github.com/BankSecurity/Red_Team) : Скрипти Red Team
-- [https://github.com/l0ss/Grouper2](https://github.com/l0ss/Grouper2) : знаходження помилок конфігурації безпеки в політиці груп Active Directory.
-- [https://www.wietzebeukema.nl/blog/powershell-obfuscation-using-securestring](https://www.wietzebeukema.nl/blog/powershell-obfuscation-using-securestring) : Обфускація Securestring
-- [https://pentestlab.blog/2020/02/24/parent-pid-spoofing/](https://pentestlab.blog/2020/02/24/parent-pid-spoofing/) : Підробка PID батька
-- [https://github.com/the-xentropy/xencrypt](https://github.com/the-xentropy/xencrypt) : Шифрування Powershell payloads
-- [https://shells.systems/introducing-ninja-c2-the-c2-built-for-stealth-red-team-operations/](https://shells.systems/introducing-ninja-c2-the-c2-built-for-stealth-red-team-operations/) : Стелс C2
-- [https://windows-internals.com/faxing-your-way-to-system/](https://windows-internals.com/faxing-your-way-to-system/) : Серія журналів про Windows Internals
-- [https://bestestredteam.com/2018/10/02/tracking-pixel-in-microsoft-office-document/](https://bestestredteam.com/2018/10/02/tracking-pixel-in-microsoft-office-document/) : Відстеження, хто відкриває документ
-- [https://github.com/Integration-IT/Active-Directory-Exploitation-Cheat-Sheet](https://github.com/Integration-IT/Active-Directory-Exploitation-Cheat-Sheet) : Чек-лист Active Directory
+- [https://gist.github.com/netbiosX/ee35fcd3722e401a38136cff7b751d79](https://gist.github.com/netbiosX/ee35fcd3722e401a38136cff7b751d79) ([https://pentestlab.blog/2020/01/13/persistence-image-file-execution-options-injection/](https://pentestlab.blog/2020/01/13/persistence-image-file-execution-options-injection/)): Persistence
+- [https://github.com/odzhan/injection](https://github.com/odzhan/injection) : Windows Process Injection techniques
+- [https://github.com/BankSecurity/Red_Team](https://github.com/BankSecurity/Red_Team) : Red Team scripts
+- [https://github.com/l0ss/Grouper2](https://github.com/l0ss/Grouper2) : знаходить security-related misconfigurations у Active Directory Group Policy
+- [https://www.wietzebeukema.nl/blog/powershell-obfuscation-using-securestring](https://www.wietzebeukema.nl/blog/powershell-obfuscation-using-securestring) : Securestring obfuscation
+- [https://pentestlab.blog/2020/02/24/parent-pid-spoofing/](https://pentestlab.blog/2020/02/24/parent-pid-spoofing/) : Parent PID Spoofing
+- [https://github.com/the-xentropy/xencrypt](https://github.com/the-xentropy/xencrypt) : Encrypt Powershell payloads
+- [https://shells.systems/introducing-ninja-c2-the-c2-built-for-stealth-red-team-operations/](https://shells.systems/introducing-ninja-c2-the-c2-built-for-stealth-red-team-operations/) : Stealth C2
+- [https://windows-internals.com/faxing-your-way-to-system/](https://windows-internals.com/faxing-your-way-to-system/) : Серія логів про Windows Internals
+- [https://bestestredteam.com/2018/10/02/tracking-pixel-in-microsoft-office-document/](https://bestestredteam.com/2018/10/02/tracking-pixel-in-microsoft-office-document/) : Відстежити, хто відкрив документ
+- [https://github.com/Integration-IT/Active-Directory-Exploitation-Cheat-Sheet](https://github.com/Integration-IT/Active-Directory-Exploitation-Cheat-Sheet) : Active Directory Cheat Sheet
 
-# Firmware
+## Firmware
 
-Інструменти, які можуть бути корисними для аналізу прошивок (автоматично):
+Інструменти, які, на мою думку, можуть бути корисні для аналізу firmware (автоматизовано):
 
 - [https://github.com/craigz28/firmwalker](https://github.com/craigz28/firmwalker)
 - [https://github.com/fkie-cad/FACT_core](https://github.com/fkie-cad/FACT_core)
 - [https://gitlab.com/bytesweep/bytesweep-go](https://gitlab.com/bytesweep/bytesweep-go)
 
-Пост-крема:
+Статті:
 
 - [https://blog.mindedsecurity.com/2018/09/pentesting-iot-devices-part-1-static.html](https://blog.mindedsecurity.com/2018/09/pentesting-iot-devices-part-1-static.html)
 - [https://blog.mindedsecurity.com/2018/10/pentesting-iot-devices-part-2-dynamic.html](https://blog.mindedsecurity.com/2018/10/pentesting-iot-devices-part-2-dynamic.html)
 
-Як витягти прошивку, якщо ми не знайшли її онлайн: [https://www.youtube.com/watch?v=Kxvpbu9STU4](https://www.youtube.com/watch?v=Kxvpbu9STU4)
+Як витягти firmware, якщо не знайдемо його онлайн: [https://www.youtube.com/watch?v=Kxvpbu9STU4](https://www.youtube.com/watch?v=Kxvpbu9STU4)
 
-Ось прошивка з вразливостями для аналізу: [https://github.com/scriptingxss/IoTGoat](https://github.com/scriptingxss/IoTGoat)
+Ось firmware з вразливостями для аналізу: [https://github.com/scriptingxss/IoTGoat](https://github.com/scriptingxss/IoTGoat)
 
-і ось методологія owasp для аналізу прошивок: [https://github.com/scriptingxss/owasp-fstm](https://github.com/scriptingxss/owasp-fstm)
+а тут методологія OWASP для аналізу firmware: [https://github.com/scriptingxss/owasp-fstm](https://github.com/scriptingxss/owasp-fstm)
 
-Емуляція прошивки: FIRMADYNE (https://github.com/firmadyne/firmadyne/) - це платформа для автоматизації емулювання та динамічного аналізу прошивок на базі Linux.
+Firmware emulation: FIRMADYNE (https://github.com/firmadyne/firmadyne/) is a platform for automating the emulation and dynamic analysis of Linux-based firmware.
 
-# OTHER
+## OTHER
 
 - [https://twitter.com/HackAndDo/status/1202695084543791117](https://twitter.com/HackAndDo/status/1202695084543791117)
 - [https://github.com/weev3/LKWA](https://github.com/weev3/LKWA)
@@ -102,19 +105,19 @@
 - [https://github.com/skelsec/jackdaw](https://github.com/skelsec/jackdaw)
 - [https://github.com/CoatiSoftware/Sourcetrail](https://github.com/CoatiSoftware/Sourcetrail) : Статичний аналіз коду
 - [https://www.hackerdecabecera.com/2019/12/blectf-capture-flag-en-formato-hardware.html](https://www.hackerdecabecera.com/2019/12/blectf-capture-flag-en-formato-hardware.html) : Bluetooth LE CTF
-- [https://github.com/skeeto/endlessh](https://github.com/skeeto/endlessh) : SSH tarpit, який повільно надсилає безкінечний банер.
-- AWS та інструменти Cloud: [https://github.com/toniblyx/my-arsenal-of-aws-security-tools](https://github.com/toniblyx/my-arsenal-of-aws-security-tools)
-- IFS (Міжпланетна файлова система) для фішингу: [https://www.trustwave.com/en-us/resources/blogs/spiderlabs-blog/using-the-interplanetary-file-system-for-offensive-operations/](https://www.trustwave.com/en-us/resources/blogs/spiderlabs-blog/using-the-interplanetary-file-system-for-offensive-operations/)
-- Послуги ротації IP: [https://medium.com/@lokeshdlk77/how-to-rotate-ip-address-in-brute-force-attack-e66407259212](https://medium.com/@lokeshdlk77/how-to-rotate-ip-address-in-brute-force-attack-e66407259212)
+- [https://github.com/skeeto/endlessh](https://github.com/skeeto/endlessh) : SSH tarpit, який повільно надсилає нескінченний баннер.
+- AWS and Cloud tools: [https://github.com/toniblyx/my-arsenal-of-aws-security-tools](https://github.com/toniblyx/my-arsenal-of-aws-security-tools)
+- IFS (Interplanetary File System) for phising: [https://www.trustwave.com/en-us/resources/blogs/spiderlabs-blog/using-the-interplanetary-file-system-for-offensive-operations/](https://www.trustwave.com/en-us/resources/blogs/spiderlabs-blog/using-the-interplanetary-file-system-for-offensive-operations/)
+- IP rotation services: [https://medium.com/@lokeshdlk77/how-to-rotate-ip-address-in-brute-force-attack-e66407259212](https://medium.com/@lokeshdlk77/how-to-rotate-ip-address-in-brute-force-attack-e66407259212)
 - Linux rootkit: [https://github.com/aesophor/satanic-rootkit](https://github.com/aesophor/satanic-rootkit)
 - [https://theia-ide.org/](https://theia-ide.org) : Онлайн IDE
-- [https://github.com/nahamsec/Resources-for-Beginner-Bug-Bounty-Hunters/](https://github.com/nahamsec/Resources-for-Beginner-Bug-Bounty-Hunters/) : Ресурси для початку роботи з BugBounties
-- [https://medium.com/macoclock/jailbreak-and-stuff-kickstart-tools-and-techniques-for-ios-application-pentesting-6fa53a3987ab](https://medium.com/macoclock/jailbreak-and-stuff-kickstart-tools-and-techniques-for-ios-application-pentesting-6fa53a3987ab) : Інструменти для тестування iOS
+- [https://github.com/nahamsec/Resources-for-Beginner-Bug-Bounty-Hunters/](https://github.com/nahamsec/Resources-for-Beginner-Bug-Bounty-Hunters/) : Ресурси для початку в BugBounties
+- [https://medium.com/macoclock/jailbreak-and-stuff-kickstart-tools-and-techniques-for-ios-application-pentesting-6fa53a3987ab](https://medium.com/macoclock/jailbreak-and-stuff-kickstart-tools-and-techniques-for-ios-application-pentesting-6fa53a3987ab) : iOS pentesting tools
 - [https://github.com/random-robbie/keywords/blob/master/keywords.txt](https://github.com/random-robbie/keywords/blob/master/keywords.txt) : Ключові слова
-- [https://github.com/ElevenPaths/HomePWN](https://github.com/ElevenPaths/HomePWN) : Хакінг IoT (Wifi, BLE, SSDP, MDNS)
+- [https://github.com/ElevenPaths/HomePWN](https://github.com/ElevenPaths/HomePWN) : Hacking IoT (Wifi, BLE, SSDP, MDNS)
 - [https://github.com/rackerlabs/scantron](https://github.com/rackerlabs/scantron) : автоматизація сканування
-- [https://github.com/doyensec/awesome-electronjs-hacking](https://github.com/doyensec/awesome-electronjs-hacking) : Цей список має на меті охопити теми безпеки, пов'язані з Electron.js.
-- [https://github.com/serain/bbrecon](https://github.com/serain/bbrecon) : Інформація про програми BB
+- [https://github.com/doyensec/awesome-electronjs-hacking](https://github.com/doyensec/awesome-electronjs-hacking) : Цей список має на меті охопити теми, пов'язані з безпекою Electron.js.
+- [https://github.com/serain/bbrecon](https://github.com/serain/bbrecon) : Інформація про BB програми
 
 
 {{#include ../banners/hacktricks-training.md}}
