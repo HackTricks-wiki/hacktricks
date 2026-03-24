@@ -1,16 +1,16 @@
-# Espace de noms temporel
+# Time Namespace
 
 {{#include ../../../../../banners/hacktricks-training.md}}
 
 ## Aperçu
 
-Le time namespace virtualise certaines horloges sélectionnées, en particulier **`CLOCK_MONOTONIC`** et **`CLOCK_BOOTTIME`**. C'est un espace de noms plus récent et plus spécialisé que les espaces de noms mount, PID, network ou user, et ce n'est pas souvent la première chose à laquelle un opérateur pense lorsqu'on parle de durcissement des conteneurs. Cela dit, il fait partie de la famille moderne des espaces de noms et mérite d'être compris sur le plan conceptuel.
+The time namespace virtualizes selected clocks, especially **`CLOCK_MONOTONIC`** and **`CLOCK_BOOTTIME`**. It is a newer and more specialized namespace than mount, PID, network, or user namespaces, and it is rarely the first thing an operator thinks about when discussing container hardening. Even so, it is part of the modern namespace family and worth understanding conceptually.
 
-Le but principal est de permettre à un processus d'observer des décalages contrôlés pour certaines horloges sans modifier la vue temporelle globale de l'hôte. Ceci est utile pour les workflows checkpoint/restore, les tests déterministes et certains comportements runtime avancés. Ce n'est généralement pas un contrôle d'isolation phare de la même manière que les espaces de noms mount ou user, mais il contribue néanmoins à rendre l'environnement du processus plus autonome.
+The main purpose is to let a process observe controlled offsets for certain clocks without changing the host's global time view. This is useful for checkpoint/restore workflows, deterministic testing, and some advanced runtime behavior. It is not usually a headline isolation control in the same way as mount or user namespaces, but it still contributes to making the process environment more self-contained.
 
-## Laboratoire
+## Lab
 
-Si le kernel hôte et l'espace utilisateur le prennent en charge, vous pouvez inspecter l'espace de noms avec:
+Si le noyau de l'hôte et l'espace utilisateur le prennent en charge, vous pouvez inspecter le namespace avec:
 ```bash
 sudo unshare --time --fork bash
 ls -l /proc/self/ns/time /proc/self/ns/time_for_children
@@ -20,7 +20,7 @@ Le support varie selon les versions du noyau et des outils ; cette page vise don
 
 ### Décalages temporels
 
-Les time namespaces sous Linux virtualisent les décalages pour `CLOCK_MONOTONIC` et `CLOCK_BOOTTIME`. Les décalages actuels par namespace sont exposés via `/proc/<pid>/timens_offsets`, qui, sur les noyaux compatibles, peuvent aussi être modifiés par un processus détenant `CAP_SYS_TIME` dans le namespace concerné :
+Les time namespaces Linux virtualisent les décalages pour `CLOCK_MONOTONIC` et `CLOCK_BOOTTIME`. Les décalages actuels par namespace sont exposés via `/proc/<pid>/timens_offsets`, qui, sur les noyaux compatibles, peuvent également être modifiés par un processus détenant `CAP_SYS_TIME` à l'intérieur du namespace concerné :
 ```bash
 sudo unshare -Tr --mount-proc bash
 cat /proc/$$/timens_offsets
@@ -29,17 +29,17 @@ cat /proc/uptime
 ```
 Le fichier contient des deltas en nanosecondes. Ajuster `monotonic` de deux jours modifie les observations de type uptime à l'intérieur de ce namespace sans changer l'horloge système de l'hôte.
 
-### `unshare` Helper Flags
+### Options d'aide pour `unshare`
 
-Les versions récentes de `util-linux` fournissent des options pratiques qui écrivent automatiquement les décalages :
+Les versions récentes de `util-linux` fournissent des flags pratiques qui écrivent automatiquement les offsets :
 ```bash
 sudo unshare -T --monotonic="+24h" --boottime="+7d" --mount-proc bash
 ```
-Ces flags améliorent surtout l'ergonomie, mais ils facilitent également l'identification de la fonctionnalité dans la documentation et les tests.
+Ces flags sont principalement une amélioration de l'ergonomie, mais ils facilitent aussi la reconnaissance de la fonctionnalité dans la documentation et les tests.
 
-## Runtime Usage
+## Usage à l'exécution
 
-Les time namespaces sont plus récents et moins largement utilisés que les mount ou PID namespaces. OCI Runtime Specification v1.1 a ajouté un support explicite pour le namespace `time` et le champ `linux.timeOffsets`, et les versions récentes de `runc` implémentent cette partie du modèle. Un fragment OCI minimal ressemble à :
+Les Time namespaces sont plus récents et moins universellement sollicités que les mount ou PID namespaces. OCI Runtime Specification v1.1 a ajouté la prise en charge explicite du `time` namespace et du champ `linux.timeOffsets`, et les versions récentes de `runc` implémentent cette partie du modèle. Un fragment OCI minimal ressemble à :
 ```json
 {
 "linux": {
@@ -53,32 +53,34 @@ Les time namespaces sont plus récents et moins largement utilisés que les moun
 }
 }
 ```
-Cela importe parce que cela transforme le time namespacing d'une primitive du noyau de niche en quelque chose que les runtimes peuvent demander de façon portable.
+Cela importe car cela transforme l'espace de noms temporel, qui était un primitif noyau de niche, en quelque chose que les runtimes peuvent demander de manière portable.
 
-## Security Impact
+## Impact sur la sécurité
 
-Il y a moins d'histoires classiques d'escape centrées sur le time namespace que sur d'autres types de namespace. Le risque ici n'est généralement pas que le time namespace permette directement une escape, mais que les lecteurs l'ignorent complètement et manquent ainsi la façon dont des runtimes avancés peuvent façonner le comportement des processus. Dans des environnements spécialisés, des vues d'horloge altérées peuvent affecter checkpoint/restore, observability, ou les hypothèses médico-légales.
+Il y a moins d'histoires classiques d'évasion centrées sur l'espace de noms temporel que sur d'autres types d'espaces de noms. Le risque ici n'est généralement pas que l'espace de noms temporel permette directement une évasion, mais que les lecteurs l'ignorent complètement et manquent ainsi de voir comment des runtimes avancés peuvent façonner le comportement des processus. Dans des environnements spécialisés, une vue modifiée de l'horloge peut affecter le checkpoint/restore, l'observabilité ou les hypothèses forensiques.
 
-## Abuse
+## Abus
 
-Il n'existe généralement pas de primitive d'escape directe ici, mais un comportement d'horloge altéré peut néanmoins être utile pour comprendre l'environnement d'exécution et identifier des fonctionnalités avancées des runtimes :
+Il n'existe généralement pas de primitive d'évasion directe ici, mais un comportement d'horloge modifié peut néanmoins être utile pour comprendre l'environnement d'exécution et identifier des fonctionnalités avancées des runtimes :
 ```bash
 readlink /proc/self/ns/time
 readlink /proc/self/ns/time_for_children
 date
 cat /proc/uptime
 ```
-Si vous comparez deux processus, les différences ici peuvent aider à expliquer des comportements de timing étranges, des artefacts de checkpoint/restore, ou des divergences de journalisation spécifiques à l'environnement.
+Si vous comparez deux processus, les différences ici peuvent aider à expliquer des comportements temporels étranges, des artefacts de checkpoint/restore, ou des discordances de logging spécifiques à l'environnement.
 
 Impact :
 
-- presque toujours reconnaissance ou compréhension de l'environnement
-- utile pour expliquer des anomalies de journalisation, de temps d'activité ou de checkpoint/restore
-- normalement pas un mécanisme direct de container-escape en soi
+- presque toujours de la reconnaissance ou de la compréhension de l'environnement
+- utile pour expliquer des anomalies de logging, d'uptime ou de checkpoint/restore
+- pas normalement un mécanisme direct de container-escape en soi
 
-La nuance importante en matière d'abus est que les time namespaces ne virtualisent pas `CLOCK_REALTIME`, donc ils ne permettent pas, à eux seuls, à un attaquant de falsifier l'horloge système de l'hôte ou de contourner directement les vérifications d'expiration des certificats à l'échelle du système. Leur valeur réside surtout dans la perturbation de la logique basée sur le temps monotone, la reproduction de bugs spécifiques à l'environnement, ou la compréhension du comportement d'exécution avancé.
+La nuance importante est que les time namespaces ne virtualisent pas `CLOCK_REALTIME`, donc ils ne permettent pas, à eux seuls, à un attaquant de falsifier l'horloge système de l'hôte ou de contourner directement les vérifications d'expiration des certificats à l'échelle du système. Leur intérêt réside principalement dans la perturbation de la logique basée sur l'horloge monotone, la reproduction de bugs spécifiques à l'environnement, ou la compréhension d'un comportement d'exécution avancé.
 
-## Vérifications
+## Checks
+
+Ces vérifications visent principalement à confirmer si le runtime utilise ou non un time namespace privé.
 ```bash
 readlink /proc/self/ns/time                 # Current time namespace identifier
 readlink /proc/self/ns/time_for_children    # Time namespace inherited by children
@@ -86,8 +88,8 @@ cat /proc/$$/timens_offsets 2>/dev/null     # Monotonic and boottime offsets whe
 ```
 Ce qui est intéressant ici :
 
-- Dans de nombreux environnements, ces valeurs n'entraîneront pas immédiatement une anomalie de sécurité, mais elles indiquent si une fonctionnalité runtime spécialisée est en jeu.
-- Si vous comparez deux processus, les différences ici peuvent expliquer un timing confus ou un comportement de checkpoint/restore.
+- Dans de nombreux environnements, ces valeurs n'entraîneront pas une constatation de sécurité immédiate, mais elles indiquent si une fonctionnalité d'exécution spécialisée est en jeu.
+- Si vous comparez deux processus, des différences ici peuvent expliquer des comportements de timing confus ou du checkpoint/restore.
 
-Pour la plupart des container breakouts, le time namespace n'est pas le premier contrôle que vous examinerez. Cependant, une section container-security complète devrait l'évoquer, car il fait partie du modèle kernel moderne et peut parfois avoir de l'importance dans des scénarios runtime avancés.
+Pour la plupart des container breakouts, le time namespace n'est pas le premier contrôle que vous examinerez. Néanmoins, une section complète sur container-security devrait le mentionner car il fait partie du modèle moderne du noyau et a parfois de l'importance dans des scénarios runtime avancés.
 {{#include ../../../../../banners/hacktricks-training.md}}
