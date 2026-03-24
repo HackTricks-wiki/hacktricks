@@ -128,6 +128,110 @@ Notes
 - Prefer AES keys; many modern domains restrict RC4. Impacket and Rubeus both support AES-only flows.
 - Impacket can rewrite the `sname` ("AnySPN") for some tools, but obtain the correct SPN whenever possible (e.g., CIFS/LDAP/HTTP/HOST/MSSQLSvc).
 
+## Cross-domain & cross-forest RBCD
+
+If the **delegating principal** you control lives in a **different domain** (or even a **different forest**) than the **resource computer**, the abuse is still **RBCD**, but the ticket flow is no longer the usual single-domain `S4U2Self -> S4U2Proxy`.
+
+### Cross-domain RBCD: configure the foreign principal by SID
+
+When you set `msDS-AllowedToActOnBehalfOfOtherIdentity` from a **different domain**, the foreign machine/user might **not be resolvable by name** in the target domain LDAP. In that case, configure the delegation entry using the **SID** of the foreign principal instead of its sAMAccountName/UPN.
+
+This is especially relevant when relaying NTLM to LDAP with `ntlmrelayx.py`:
+
+```bash
+sudo ntlmrelayx.py -smb2support -t ldap://192.168.90.217 \
+  --no-dump --no-da --no-validate-privs \
+  --delegate-access \
+  --escalate-user S-1-5-21-3104832133-133926542-3798009529-1106 \
+  --sid
+```
+
+Notes:
+- `--sid` tells `ntlmrelayx.py` to treat `--escalate-user` as a SID, which is required when the delegating account is foreign to the target domain.
+- Even if the tool prints `User not found in LDAP`, the delegation write can still succeed because the security descriptor stores the foreign SID directly.
+
+### Cross-domain RBCD: cross-realm S4U sequence
+
+Once the foreign principal is in `msDS-AllowedToActOnBehalfOfOtherIdentity`, the working cross-domain flow is:
+
+1. Get a **TGT** for the delegating principal from its own domain.
+2. Request a **referral TGT** for `krbtgt/<target-domain>`.
+3. Request a **cross-realm S4U2Self referral** for the impersonated user on the target-domain DC.
+4. Request the actual **S4U2Self** ticket for that user back in the delegator domain.
+5. Perform **S4U2Proxy** in the delegator domain to get a referral ticket for the target domain.
+6. Perform the final **S4U2Proxy** on the target-domain DC to obtain the service ticket for `cifs/host.target`, `host/host.target`, etc.
+
+This is why stock Linux tooling often fails in cross-domain RBCD:
+- the request **realm** may need to differ from the realm of the TGT used in the `TGS-REQ`
+- the chain needs **independent S4U2Proxy steps**, not only `S4U2Self` or `S4U2Self` immediately followed by a single `S4U2Proxy`
+
+### Cross-domain RBCD from Linux
+
+Synacktiv published an Impacket `getST.py` implementation that reproduces the cross-realm sequence from Linux by explicitly handling the two KDCs:
+
+```bash
+python3 ./getST.py dev.asgard.local/rbcd_test\$:R[...]5 -k \
+  -dc-ip 192.168.90.131 \
+  -targetdc 192.168.90.217 \
+  -targetdomain asgard.local \
+  -impersonate thor_adm \
+  -spn cifs/workstation.asgard.local
+
+KRB5CCNAME=thor_adm@cifs_workstation.asgard.local@ASGARD.LOCAL.ccache \
+  ./smbclient.py "asgard.local/thor_adm@workstation.asgard.local" \
+  -k -no-pass -dc-ip 192.168.90.217
+```
+
+Operationally, the new arguments are:
+- `-dc-ip`: DC of the **delegating** domain
+- `-targetdomain`: domain of the **resource computer**
+- `-targetdc`: DC of the **resource** domain
+
+### Cross-forest RBCD limitations
+
+Cross-forest RBCD has an important limitation: **the impersonated user must belong to the same forest as the delegating principal**. In other words, if your controlled machine account is in `valhalla.local` and the target resource is in `asgard.local`, you generally **cannot** impersonate arbitrary `asgard.local` users to that resource via RBCD.
+
+It is still exploitable when:
+- the **delegating forest** user is a **local admin** (or otherwise privileged) on the resource host in the other forest
+- a trust allows the required authentication path and the foreign SID is accepted in the target computer's security descriptor
+
+### Cross-forest RBCD protocol quirks
+
+Cross-forest RBCD is not just "cross-domain plus a trust". The observed flow includes two quirks that common tooling historically misses:
+
+1. An extra **S4U2Proxy** request that sets **`PA-PAC-OPTIONS=branch-aware`**
+2. A final service ticket that may be returned using **RC4** even when other etypes were requested
+
+The practical flow is:
+
+1. Get a TGT for the delegating principal in forest A.
+2. Request **S4U2Self** for the impersonated user in forest A.
+3. Request **S4U2Proxy** in forest A to obtain a referral TGT for forest B.
+4. Send a second **S4U2Proxy** in forest A **without** the S4U2Self ticket as an additional ticket, but with `branch-aware` enabled, to obtain another referral TGT for forest B.
+5. Optionally request a normal service ticket in forest B for the delegating principal (this ticket is not required for the final abuse).
+6. Use the referral tickets from steps 3 and 4 to request the final **S4U2Proxy** ticket in forest B for the impersonated forest-A user to the target SPN.
+
+### Cross-forest RBCD from Linux
+
+The same Synacktiv Impacket branch adds a `-forest` switch for this logic:
+
+```bash
+python3 ./getST.py -spn 'cifs/workstation.asgard.local' \
+  -impersonate 'v_thor' \
+  -dc-ip VALHALLA.local \
+  valhalla.local/'desktop$' \
+  -targetdc ASGARD.local \
+  -targetdomain asgard.local \
+  -aesKey 4[...]f \
+  -forest
+```
+
+## Detection / hardening notes
+
+- RBCD paths across domains/forests are still usually created through **ACL abuse** or **relay-to-LDAP**. Enforce **LDAP signing** and **LDAP channel binding** on DCs to break common setup paths.
+- Audit who can write `msDS-AllowedToActOnBehalfOfOtherIdentity` on computer objects and resolve the stored SIDs, including **foreign security principals**.
+- In trust-heavy environments, review **Selective Authentication**, **SID filtering**, and whether users from a foreign forest hold **local admin** rights on resource hosts.
+
 ### Accessing
 
 The last command line will perform the **complete S4U attack and will inject the TGS** from Administrator to the victim host in **memory**.\
@@ -228,6 +332,10 @@ adws-enumeration.md
 - Impacket rbcd.py (official): https://github.com/fortra/impacket/blob/master/examples/rbcd.py
 - Quick Linux cheatsheet with recent syntax: https://tldrbins.github.io/rbcd/
 - [0xdf – HTB Bruno (LDAP signing off → Kerberos relay to RBCD)](https://0xdf.gitlab.io/2026/02/24/htb-bruno.html)
+- [Synacktiv - Exploring cross-domain & cross-forest RBCD](https://www.synacktiv.com/en/publications/exploring-cross-domain-cross-forest-rbcd.html)
+- [Synacktiv Impacket branch - cross_forest_rbcd](https://github.com/synacktiv/impacket/tree/cross_forest_rbcd)
+- [Microsoft Learn - Kerberos constrained delegation overview](https://learn.microsoft.com/en-us/windows-server/security/kerberos/kerberos-constrained-delegation-overview)
+- [Microsoft Open Specifications - Cross-domain S4U2Self](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-sfu/f35b6902-6f5e-4cd0-be64-c50bbaaf54a5)
 
 
 {{#include ../../banners/hacktricks-training.md}}
