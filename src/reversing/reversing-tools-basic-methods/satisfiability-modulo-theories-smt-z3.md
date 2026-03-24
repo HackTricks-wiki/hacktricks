@@ -2,7 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-In breve, questo strumento ci aiuta a trovare i valori delle variabili che devono soddisfare certe condizioni, operazione che calcolata a mano sarebbe molto noiosa. Puoi quindi indicare a Z3 le condizioni che le variabili devono soddisfare e lui troverà dei valori (se possibile).
+In termini molto semplici, questo strumento ci aiuta a trovare valori per variabili che devono soddisfare alcune condizioni e calcolarli a mano sarebbe davvero noioso. Pertanto, puoi indicare a Z3 le condizioni che le variabili devono soddisfare e lui troverà alcuni valori (se possibile).
 
 **Alcuni testi ed esempi sono estratti da [https://ericpony.github.io/z3py-tutorial/guide-examples.htm](https://ericpony.github.io/z3py-tutorial/guide-examples.htm)**
 
@@ -23,7 +23,7 @@ s.add(And(Or(x,y,Not(z)),y))
 s.check() #If response is "sat" then the model is satifable, if "unsat" something is wrong
 print(s.model()) #Print valid values to satisfy the model
 ```
-### Ints/Simplify/Reals
+### Interi/Semplifica/Reali
 ```python
 from z3 import *
 
@@ -57,9 +57,9 @@ print ("x = %s" % m[x])
 for d in m.decls():
 print("%s = %s" % (d.name(), m[d]))
 ```
-## Aritmetica della macchina
+## Aritmetica di macchina
 
-Le CPU moderne e i linguaggi di programmazione mainstream usano l'aritmetica su **fixed-size bit-vectors**. L'aritmetica della macchina è disponibile in Z3Py come **Bit-Vectors**.
+Le CPU moderne e i linguaggi di programmazione più diffusi usano l'aritmetica su bit-vectors di dimensione fissa. L'aritmetica di macchina è disponibile in Z3Py come **Bit-Vectors**.
 ```python
 from z3 import *
 
@@ -76,7 +76,7 @@ print(simplify(a == b)) #This is False
 ```
 ### Numeri con segno/senza segno
 
-Z3 fornisce versioni speciali delle operazioni aritmetiche per i casi in cui fa differenza se il **vettore di bit è trattato come con segno o senza segno**. In Z3Py, gli operatori **<, <=, >, >=, /, % e >>** corrispondono alle versioni **con segno**. Gli operatori corrispondenti **senza segno** sono **ULT, ULE, UGT, UGE, UDiv, URem e LShR.**
+Z3 fornisce versioni speciali delle operazioni aritmetiche in cui fa differenza se il **bit-vector è trattato come con segno o senza segno**. In Z3Py, gli operatori **<, <=, >, >=, /, % e >>** corrispondono alle versioni **con segno**. Gli operatori corrispondenti **senza segno** sono **ULT, ULE, UGT, UGE, UDiv, URem e LShR.**
 ```python
 from z3 import *
 
@@ -94,9 +94,9 @@ solve(x < 0)
 # using unsigned version of <
 solve(ULT(x, 0))
 ```
-### Bit-vector helper comunemente necessari nel reversing
+### Bit-vector helpers comunemente necessari in reversing
 
-Quando stai **lifting checks from assembly or decompiler output**, di solito è meglio modellare ogni byte di input come `BitVec(..., 8)` e poi ricostruire le parole esattamente come fa il target code. Questo evita bug causati dalla mescolanza di interi matematici con l'aritmetica macchina.
+Quando stai **lifting checks from assembly or decompiler output**, è generalmente meglio modellare ogni byte di input come `BitVec(..., 8)` e poi ricostruire le parole esattamente come fa il codice target. Questo evita bug dovuti alla mescolanza di interi matematici con machine arithmetic.
 ```python
 from z3 import *
 
@@ -110,17 +110,17 @@ rot = RotateLeft(eax, 13)            # rol eax, 13
 logical = LShR(eax, 3)               # shr eax, 3
 arith = eax >> 3                     # sar eax, 3 (signed shift)
 ```
-Some common pitfalls while translating code into constraints:
+Alcune insidie comuni durante la traduzione del codice in vincoli:
 
-- `>>` è uno shift a destra **aritmetico** per i bit-vector. Usa `LShR` per l'istruzione logica `shr`.
-- Usa `UDiv`, `URem`, `ULT`, `ULE`, `UGT` e `UGE` quando il confronto/la divisione originale era **senza segno**.
-- Mantieni le larghezze esplicite. Se il binario tronca a 8 o 16 bit, aggiungi `Extract` o ricostruisci il valore con `Concat` invece di promuovere silenziosamente tutto a interi Python.
+- `>>` è uno shift aritmetico a destra per i vettori di bit. Usa `LShR` per l'istruzione logica `shr`.
+- Usa `UDiv`, `URem`, `ULT`, `ULE`, `UGT` e `UGE` quando la comparazione/divisione originale era **senza segno**.
+- Mantieni le larghezze esplicite. Se il binario tronca a 8 o 16 bit, aggiungi `Extract` o ricostruisci il valore con `Concat` invece di promuovere tutto silenziosamente a interi Python.
 
 ### Funzioni
 
-**Funzioni interpretate** come l'aritmetica dove la **funzione +** ha un'**interpretazione standard fissa** (somma due numeri). **Funzioni non interpretate** e costanti sono **massimamente flessibili**; permettono **qualsiasi interpretazione** che sia **coerente** con i **vincoli** sulla funzione o costante.
+**Funzioni interpretate** come quelle aritmetiche dove la **funzione +** ha una **interpretazione standard fissa** (somma due numeri). **Funzioni non interpretate** e costanti sono **massimamente flessibili**; consentono **qualsiasi interpretazione** che sia **coerente** con i **vincoli** sulla funzione o sulla costante.
 
-Esempio: f applicata due volte a x restituisce di nuovo x, ma f applicata una sola volta a x è diversa da x.
+Esempio: applicando f due volte a x si ottiene nuovamente x, ma applicando f una volta a x si ottiene qualcosa di diverso da x.
 ```python
 from z3 import *
 
@@ -191,22 +191,22 @@ print_matrix(r)
 else:
 print "failed to solve"
 ```
-### Reversing workflows
+### Flussi di lavoro di reversing
 
-Se hai bisogno di **symbolically execute the binary and collect constraints automatically**, consulta le note di angr qui:
+Se hai bisogno di **symbolically execute the binary and collect constraints automatically**, consulta gli appunti di angr qui:
 
 {{#ref}}
 angr/README.md
 {{#endref}}
 
-Se stai già esaminando i decompiled checks e devi solo risolverli, raw Z3 è di solito più veloce e più facile da controllare.
+Se stai già esaminando i decompiled checks e hai solo bisogno di risolverli, raw Z3 è solitamente più veloce e più semplice da controllare.
 
-#### Lifting dei controlli basati su byte da un crackme
+#### Lifting byte-based checks da un crackme
 
-Un pattern molto comune nei crackmes e nei packed loaders è una lunga lista di equazioni sui byte relative a una password candidata. Modella i byte come vettori a 8-bit, vincola l'alfabeto e allarghiali solo quando il codice originale li allarga.
+Un pattern molto comune in crackmes e packed loaders è una lunga lista di byte equations che coinvolgono una candidate password. Modella i byte come 8-bit vectors, vincola l'alfabeto e allargali solo quando il codice originale li allarga.
 
 <details>
-<summary>Esempio: ricostruire un controllo seriale dall'aritmetica decompilata</summary>
+<summary>Esempio: ricostruire un serial check da decompiled arithmetic</summary>
 ```python
 from z3 import *
 
@@ -231,11 +231,11 @@ print(bytes(m[c].as_long() for c in flag))
 ```
 </details>
 
-Questo stile si adatta bene al reversing nel mondo reale perché corrisponde a quanto fanno in pratica gli writeups moderni: ricostruire le relazioni arithmetic/bitwise, trasformare ogni confronto in un vincolo e risolvere l'intero sistema in una sola volta.
+Questo stile si adatta bene al real-world reversing perché corrisponde a ciò che fanno nella pratica i modern writeups: recuperare le arithmetic/bitwise relations, trasformare ogni comparison in una constraint e risolvere l'intero system in una sola volta.
 
-#### Risoluzione incrementale with `push()` / `pop()`
+#### Risoluzione incrementale con `push()` / `pop()`
 
-Durante il reversing, spesso si vuole testare diverse ipotesi senza ricostruire l'intero solver. `push()` crea un punto di controllo e `pop()` scarta i vincoli aggiunti dopo quel punto di controllo. Questo è utile quando non sei sicuro se un branch è signed o unsigned, se un register è zero-extended o sign-extended, oppure quando stai provando diversi candidate constants estratti dalla disassembly.
+Mentre fai reversing, spesso vuoi testare diverse ipotesi senza ricostruire l'intero solver. `push()` crea un checkpoint e `pop()` scarta le constraints aggiunte dopo quel checkpoint. Questo è utile quando non sei sicuro se un branch è signed o unsigned, se un register è zero-extended o sign-extended, o quando provi diversi candidate constants estratti dalla disassembly.
 ```python
 from z3 import *
 
@@ -256,7 +256,7 @@ s.pop()
 ```
 #### Enumerare più di un input valido
 
-Alcuni keygens, license checks e CTF challenges ammettono intenzionalmente **molti** input validi. Z3 non li enumera automaticamente, ma puoi aggiungere una **blocking clause** dopo ogni modello per costringere il risultato successivo a differire in almeno una posizione.
+Alcuni keygens, controlli di licenza e challenge CTF ammettono intenzionalmente **molti** input validi. Z3 non li enumera automaticamente, ma puoi aggiungere una **clausola di blocco** dopo ogni modello per forzare che il risultato successivo differisca in almeno una posizione.
 ```python
 from z3 import *
 
@@ -274,18 +274,18 @@ s.add(Or([x != m.eval(x, model_completion=True) for x in xs]))
 ```
 #### Tattiche per formule bit-vector complesse
 
-Il solver predefinito di Z3 di solito è sufficiente, ma le formule generate dal decompilatore con molte uguaglianze e riscritture su bit-vector spesso diventano più semplici dopo un primo passaggio di normalizzazione. In questi casi può essere utile costruire un solver a partire da tattiche:
+Il solver predefinito di Z3 è di solito sufficiente, ma le formule generate dal decompilatore con molte uguaglianze e riscritture di bit-vector spesso diventano più semplici dopo una prima passata di normalizzazione. In questi casi può essere utile costruire un solver a partire da tattiche:
 ```python
 from z3 import *
 
 t = Then('simplify', 'solve-eqs', 'bit-blast', 'sat')
 s = t.solver()
 ```
-Questo è particolarmente utile quando il problema è quasi interamente **bit-vector + Boolean logic** e vuoi che Z3 semplifichi ed elimini uguaglianze ovvie prima di passare la formula al backend SAT.
+Questo è particolarmente utile quando il problema è quasi interamente **bit-vector + Boolean logic** e vuoi che Z3 semplifichi ed elimini uguaglianze ovvie prima di consegnare la formula al SAT backend.
 
-#### CRCs e altri checker personalizzati
+#### CRCs e altri custom checkers
 
-Le sfide di reversing recenti usano ancora Z3 per vincoli che sono fastidiosi da brute-force ma semplici da modellare, come controlli CRC32 su input ASCII-only, pipeline miste rotate/xor/add, o molti predicati aritmetici concatenati estratti da un checker JITed/obfuscated. Per problemi simili a CRC, mantieni lo stato come bit-vectors e applica vincoli per-byte ASCII precocemente per ridurre lo spazio di ricerca.
+Le recenti challenge di reversing usano ancora Z3 per vincoli che sono tediosi da risolvere via brute-force ma semplici da modellare, come CRC32 checks su input ASCII-only, pipeline miste rotate/xor/add, o molti predicati aritmetici concatenati estratti da un JITed/obfuscated checker. Per problemi tipo CRC, mantieni lo stato come bit-vectors e applica per-byte ASCII constraints fin da subito per ridurre lo spazio di ricerca.
 
 ## Riferimenti
 

@@ -2,13 +2,13 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-I percorsi mascherati sono protezioni a runtime che nascondono posizioni del filesystem particolarmente sensibili rivolte al kernel dal container, sovrascrivendole con bind-mount o rendendole altrimenti inaccessibili. Lo scopo è impedire a un workload di interagire direttamente con interfacce che le normali applicazioni non necessitano, specialmente all'interno di procfs.
+I percorsi mascherati sono protezioni a runtime che nascondono posizioni di filesystem particolarmente sensibili rivolte al kernel dal container, tramite bind-mounting sopra di esse o rendendole altrimenti inaccessibili. Lo scopo è impedire a un workload di interagire direttamente con interfacce che le normali applicazioni non necessitano, specialmente dentro procfs.
 
 Questo è importante perché molte container escapes e trucchi che impattano l'host iniziano leggendo o scrivendo file speciali sotto `/proc` o `/sys`. Se quelle posizioni sono mascherate, l'attaccante perde l'accesso diretto a una parte utile della superficie di controllo del kernel anche dopo aver ottenuto l'esecuzione di codice all'interno del container.
 
 ## Funzionamento
 
-I runtime di solito mascherano percorsi selezionati come:
+I runtime comunemente mascherano percorsi selezionati come:
 
 - `/proc/kcore`
 - `/proc/keys`
@@ -19,7 +19,7 @@ I runtime di solito mascherano percorsi selezionati come:
 
 La lista esatta dipende dal runtime e dalla configurazione dell'host. La proprietà importante è che il percorso diventi inaccessibile o venga sostituito dal punto di vista del container anche se esiste ancora sull'host.
 
-## Laboratorio
+## Lab
 
 Ispeziona la configurazione masked-path esposta da Docker:
 ```bash
@@ -32,11 +32,11 @@ ls -ld /proc/kcore /proc/keys /sys/firmware 2>/dev/null
 ```
 ## Impatto sulla sicurezza
 
-Masking non crea il principale confine di isolamento, ma rimuove diversi obiettivi di post-exploitation ad alto valore. Senza masking, un container compromesso può essere in grado di ispezionare lo stato del kernel, leggere informazioni sensibili di processo o di keying, o interagire con oggetti procfs/sysfs che non avrebbero mai dovuto essere visibili all'applicazione.
+Il masking non crea il principale confine di isolamento, ma rimuove diversi target di post-exploitation ad alto valore. Senza masking, un container compromesso potrebbe essere in grado di ispezionare lo stato del kernel, leggere informazioni sensibili sui processi o sulle chiavi, o interagire con oggetti procfs/sysfs che non avrebbero mai dovuto essere visibili all'applicazione.
 
-## Configurazioni errate
+## Misconfigurazioni
 
-L'errore principale è l'unmasking di ampie classi di percorsi per comodità o debugging. In Podman questo può apparire come `--security-opt unmask=ALL` o un unmasking mirato. In Kubernetes, un'eccessiva esposizione di proc può manifestarsi tramite `procMount: Unmasked`. Un altro problema serio è esporre l'host `/proc` o `/sys` tramite un bind mount, che aggira completamente l'idea di una vista ridotta del container.
+Il principale errore è l'unmasking di ampie classi di percorsi per comodità o debugging. In Podman questo può presentarsi come `--security-opt unmask=ALL` o come un unmasking mirato. In Kubernetes, un'esposizione troppo ampia di proc può manifestarsi tramite `procMount: Unmasked`. Un altro problema serio è esporre l'host `/proc` o `/sys` tramite un bind mount, che aggira completamente l'idea di una vista ridotta del container.
 
 ## Abuso
 
@@ -45,7 +45,7 @@ Se il masking è debole o assente, inizia identificando quali percorsi sensibili
 ls -ld /proc/kcore /proc/keys /proc/timer_list /sys/firmware 2>/dev/null   # Check whether paths that are usually masked are accessible at all
 mount | grep -E '/proc|/sys'                                                # Review whether procfs/sysfs mounts look container-scoped or suspiciously host-like
 ```
-Se un percorso presumibilmente mascherato è accessibile, ispezionalo attentamente:
+Se un percorso apparentemente mascherato è accessibile, ispezionalo attentamente:
 ```bash
 head -n 20 /proc/timer_list 2>/dev/null   # Scheduler / timer internals, useful for host fingerprinting and confirming kernel data exposure
 cat /proc/keys 2>/dev/null | head         # In-kernel keyring information; may expose keys, key descriptions, or service relationships
@@ -55,36 +55,36 @@ head -n 50 /proc/sched_debug 2>/dev/null  # Scheduler and process metadata; may 
 ```
 What these commands can reveal:
 
-- `/proc/timer_list` può esporre dati del timer e dello scheduler dell'host. Questo è per lo più una primitiva di ricognizione, ma conferma che il container può leggere informazioni rivolte al kernel che normalmente sono nascoste.
-- `/proc/keys` è molto più sensibile. A seconda della configurazione dell'host, può rivelare voci del keyring, descrizioni delle key e relazioni tra servizi dell'host che utilizzano il kernel keyring subsystem.
-- `/sys/firmware` aiuta a identificare il boot mode, le interfacce firmware e i dettagli della piattaforma utili per l'host fingerprinting e per capire se il workload sta vedendo lo stato a livello host.
-- `/proc/config.gz` può rivelare la configurazione del kernel in esecuzione, utile per abbinare i prerequisiti di public kernel exploit o per comprendere perché una specifica feature è raggiungibile.
-- `/proc/sched_debug` espone lo stato dello scheduler e spesso bypassa l'aspettativa intuitiva che il PID namespace debba nascondere completamente le informazioni sui processi non correlati.
+- `/proc/timer_list` can expose host timer and scheduler data. This is mostly a reconnaissance primitive, but it confirms that the container can read kernel-facing information that is normally hidden.
+- `/proc/keys` is much more sensitive. Depending on the host configuration, it may reveal keyring entries, key descriptions, and relationships between host services using the kernel keyring subsystem.
+- `/sys/firmware` helps identify boot mode, firmware interfaces, and platform details that are useful for host fingerprinting and for understanding whether the workload is seeing host-level state.
+- `/proc/config.gz` may reveal the running kernel configuration, which is valuable for matching public kernel exploit prerequisites or understanding why a specific feature is reachable.
+- `/proc/sched_debug` exposes scheduler state and often bypasses the intuitive expectation that the PID namespace should hide unrelated process information completely.
 
-Risultati interessanti includono letture dirette di quei file, evidenze che i dati appartengono all'host piuttosto che a una vista container vincolata, o accesso ad altre posizioni procfs/sysfs comunemente mascherate per impostazione predefinita.
+Interesting results include direct reads from those files, evidence that the data belongs to the host rather than to a constrained container view, or access to other procfs/sysfs locations that are commonly masked by default.
 
-## Checks
+## Controlli
 
-Lo scopo di questi controlli è determinare quali percorsi il runtime ha intenzionalmente nascosto e se il workload corrente vede ancora un filesystem rivolto al kernel ridotto.
+Lo scopo di questi controlli è determinare quali percorsi il runtime ha intenzionalmente nascosto e se l'attuale workload vede ancora un filesystem rivolto al kernel ridotto.
 ```bash
 docker inspect <container> | jq '.[0].HostConfig.MaskedPaths'   # Runtime-declared masked paths
 mount | grep -E '/proc|/sys'                                    # Actual procfs/sysfs mount layout
 ls -ld /proc/kcore /proc/keys /proc/timer_list /sys/firmware 2>/dev/null
 ```
-Cosa è interessante qui:
+Cosa c'è di interessante qui:
 
-- Un lungo elenco di percorsi mascherati è normale nei runtime hardened.
-- La mancanza di mascheratura su voci sensibili di procfs merita un'ispezione più approfondita.
-- Se un percorso sensibile è accessibile e il container ha anche capabilities potenti o mount estesi, l'esposizione è più significativa.
+- Una lunga lista di percorsi mascherati è normale nei runtime rinforzati.
+- La mancanza di mascheramento su voci sensibili di procfs merita un'ispezione più approfondita.
+- Se un percorso sensibile è accessibile e il container ha anche capabilities elevate o mount ampi, l'esposizione è più rilevante.
 
 ## Impostazioni predefinite del runtime
 
-| Runtime / platform | Default state | Default behavior | Common manual weakening |
+| Runtime / platform | Stato predefinito | Comportamento predefinito | Indebolimenti manuali comuni |
 | --- | --- | --- | --- |
-| Docker Engine | Abilitato per impostazione predefinita | Docker definisce una lista predefinita di percorsi mascherati | esporre mount proc/sys dell'host, `--privileged` |
-| Podman | Abilitato per impostazione predefinita | Podman applica percorsi mascherati predefiniti a meno che non vengano smascherati manualmente | `--security-opt unmask=ALL`, smascheramento mirato, `--privileged` |
-| Kubernetes | Eredita i valori predefiniti del runtime | Usa il comportamento di mascheramento del runtime sottostante a meno che le impostazioni del Pod non indeboliscano l'esposizione di /proc | `procMount: Unmasked`, schemi di workload privilegiati, ampi mount dell'host |
-| containerd / CRI-O under Kubernetes | Predefinito del runtime | Solitamente applica i percorsi mascherati OCI/runtime a meno che non venga sovrascritto | modifiche dirette alla configurazione del runtime, stessi percorsi di indebolimento di Kubernetes |
+| Docker Engine | Abilitato per impostazione predefinita | Docker definisce una lista predefinita di percorsi mascherati | esposizione dei mount host proc/sys, `--privileged` |
+| Podman | Abilitato per impostazione predefinita | Podman applica percorsi mascherati predefiniti a meno che non vengano rimossi manualmente dal mascheramento | `--security-opt unmask=ALL`, rimozione mirata del mascheramento, `--privileged` |
+| Kubernetes | Eredita le impostazioni predefinite del runtime | Usa il comportamento di masking del runtime sottostante a meno che le impostazioni del Pod indeboliscano l'esposizione di proc | `procMount: Unmasked`, pattern di workload privilegiati, ampi mount host |
+| containerd / CRI-O under Kubernetes | Predefinito del runtime | Solitamente applica i percorsi mascherati OCI/runtime a meno che non venga sovrascritto | modifiche dirette alla config del runtime, stessi percorsi di indebolimento di Kubernetes |
 
-I percorsi mascherati sono solitamente presenti per impostazione predefinita. Il problema operativo principale non è l'assenza nel runtime, ma lo smascheramento deliberato o i bind mount dell'host che annullano la protezione.
+I percorsi mascherati sono solitamente presenti per impostazione predefinita. Il problema operativo principale non è l'assenza nel runtime, ma la rimozione deliberata del mascheramento o i bind mount host che annullano la protezione.
 {{#include ../../../../banners/hacktricks-training.md}}
