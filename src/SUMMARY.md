@@ -92,6 +92,7 @@
   - [Defi/AMM Hook Precision](blockchain/blockchain-and-crypto-currencies/defi-amm-hook-precision.md)
   - [Defi Amm Virtual Balance Cache Exploitation](blockchain/blockchain-and-crypto-currencies/defi-amm-virtual-balance-cache-exploitation.md)
   - [Mutation Testing With Slither](blockchain/smart-contract-security/mutation-testing-with-slither.md)
+  - [Erc 4337 Smart Account Security Pitfalls](blockchain/blockchain-and-crypto-currencies/erc-4337-smart-account-security-pitfalls.md)
   - [Value Centric Web3 Red Teaming](blockchain/blockchain-and-crypto-currencies/value-centric-web3-red-teaming.md)
   - [Web3 Signing Workflow Compromise Safe Delegatecall Proxy Takeover](blockchain/blockchain-and-crypto-currencies/web3-signing-workflow-compromise-safe-delegatecall-proxy-takeover.md)
 - [Lua Sandbox Escape](generic-methodologies-and-resources/lua/bypass-lua-sandboxes/README.md)
