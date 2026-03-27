@@ -562,6 +562,34 @@ C:\ProgramData\USOShared\tcc.exe -nostdlib -run conf.c
 
 - This TCC-based compile-and-run stage imported `Wininet.dll` at runtime and pulled a second-stage shellcode from a hardcoded URL, giving a flexible loader that masquerades as a compiler run.
 
+## Signed-host sideloading with export proxying + host thread parking
+
+Some DLL sideloading chains add **stability engineering** so the legitimate host stays alive long enough to load later stages cleanly instead of crashing after the malicious DLL is loaded.
+
+Observed pattern
+- Drop a trusted EXE beside a malicious DLL using the expected dependency name such as `version.dll`.
+- The malicious DLL **proxies every expected export** back to the real system DLL (for example `%SystemRoot%\\System32\\version.dll`) so import resolution still succeeds and the host process keeps working.
+- After load, the malicious DLL **patches the host entry point** so the main thread falls into an infinite `Sleep` loop instead of exiting or running code paths that would terminate the process.
+- A new thread performs the real malicious work: decrypting the next-stage DLL name or path (RC4/XOR are common), then launching it with `LoadLibrary`.
+
+Why this matters
+- Normal DLL proxying preserves API compatibility, but it doesn't guarantee the host stays alive long enough for later stages.
+- Parking the main thread in `Sleep(INFINITE)` is a simple way to keep the signed process resident while the loader performs decryption, staging, or network bootstrap in a worker thread.
+- Hunting only for a suspicious `DllMain` miss this pattern if the interesting behavior happens after the host entry point is patched and a secondary thread starts.
+
+Minimal workflow
+1. Copy the signed host EXE and determine the DLL it resolves from the local directory.
+2. Build a proxy DLL exporting the same functions and forwarding them to the legitimate DLL.
+3. In `DllMain(DLL_PROCESS_ATTACH)`, create a worker thread.
+4. From that thread, patch the host entry point or main thread start routine so it loops on `Sleep`.
+5. Decrypt the next-stage DLL name/config and call `LoadLibrary` or manual-map the payload.
+
+Defensive pivots
+- Signed processes loading `version.dll` or similarly common libraries from their own application directory instead of `System32`.
+- Memory patches at the process entry point shortly after image load, especially jumps/calls redirected to `Sleep`/`SleepEx`.
+- Threads created by a proxy DLL that immediately call `LoadLibrary` on a second DLL with a decrypted name.
+- Full-export proxy DLLs placed next to vendor executables inside writable staging directories such as `ProgramData`, `%TEMP%`, or unpacked archive paths.
+
 ## References
 
 - [Red Canary – Intelligence Insights: January 2026](https://redcanary.com/blog/threat-intelligence/intelligence-insights-january-2026/)
@@ -574,10 +602,10 @@ C:\ProgramData\USOShared\tcc.exe -nostdlib -run conf.c
 - [PoC – api0cradle/Narrator-dll](https://github.com/api0cradle/Narrator-dll)
 - [Sysinternals Process Monitor](https://learn.microsoft.com/sysinternals/downloads/procmon)
 - [Unit 42 – Digital Doppelgangers: Anatomy of Evolving Impersonation Campaigns Distributing Gh0st RAT](https://unit42.paloaltonetworks.com/impersonation-campaigns-deliver-gh0st-rat/)
+- [Unit 42 – Converging Interests: Analysis of Threat Clusters Targeting a Southeast Asian Government](https://unit42.paloaltonetworks.com/espionage-campaigns-target-se-asian-government-org/)
 - [Check Point Research – Inside Ink Dragon: Revealing the Relay Network and Inner Workings of a Stealthy Offensive Operation](https://research.checkpoint.com/2025/ink-dragons-relay-network-and-offensive-operation/)
 - [Rapid7 – The Chrysalis Backdoor: A Deep Dive into Lotus Blossom’s toolkit](https://www.rapid7.com/blog/post/tr-chrysalis-backdoor-dive-into-lotus-blossoms-toolkit)
 - [0xdf – HTB Bruno ZipSlip → DLL hijack chain](https://0xdf.gitlab.io/2026/02/24/htb-bruno.html)
 
 
 {{#include ../../../banners/hacktricks-training.md}}
-
