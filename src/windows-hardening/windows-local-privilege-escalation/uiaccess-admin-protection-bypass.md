@@ -1,56 +1,64 @@
-# Admin Protection Bypasses via UIAccess
+# Kupitisha Kinga ya Admin kupitia UIAccess
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Muhtasari
-- Windows AppInfo exposes `RAiLaunchAdminProcess` to spawn UIAccess processes (intended for accessibility). UIAccess bypasses most User Interface Privilege Isolation (UIPI) message filtering so accessibility software can drive higher-IL UI.
-- Enabling UIAccess directly requires `NtSetInformationToken(TokenUIAccess)` with **SeTcbPrivilege**, so low-priv callers rely on the service. The service performs three checks on the target binary before setting UIAccess:
-  - Embedded manifest contains `uiAccess="true"`.
-  - Signed by any certificate trusted by the Local Machine root store (no EKU/Microsoft requirement).
-  - Located in an administrator-only path on the system drive (e.g., `C:\Windows`, `C:\Windows\System32`, `C:\Program Files`, excluding specific writable subpaths).
-- `RAiLaunchAdminProcess` performs no consent prompt for UIAccess launches (otherwise accessibility tooling could not drive the prompt).
+- Windows AppInfo inafichua `RAiLaunchAdminProcess` kuanzisha michakato ya UIAccess (iliyokusudiwa kwa upatikanaji/accessibility). UIAccess hupitisha vichujio vya User Interface Privilege Isolation (UIPI) vya ujumbe ili programu za accessibility ziweze kuendesha UI yenye IL ya juu.
+- Kuwezesha UIAccess moja kwa moja kunahitaji `NtSetInformationToken(TokenUIAccess)` kwa **SeTcbPrivilege**, hivyo wapiga simu wenye ruhusa ndogo hutegemea service. Service hufanya ukaguzi tatu kwenye binary lengwa kabla ya kuweka UIAccess:
+- Manifest iliyoungwa ndani ina `uiAccess="true"`.
+- Imeasishwa kwa vyeti vyovyote vinavyotumika na root store ya Local Machine (hakuna hitaji la EKU/Microsoft).
+- Iko katika njia ambayo ni ya watumiaji admin pekee kwenye drive ya mfumo (mfano, `C:\Windows`, `C:\Windows\System32`, `C:\Program Files`, ikiondoa subpaths maalum zinazoweza kuandikwa).
+- `RAiLaunchAdminProcess` haitoi prompt ya consent kwa uzinduzi wa UIAccess (vinginevyo tooling za accessibility zusingeweza kuendesha prompt).
 
-## Token shaping na viwango vya uadilifu (IL)
-- If the checks succeed, AppInfo **copies the caller token**, enables UIAccess, and bumps Integrity Level (IL):
-  - Limited admin user (user is in Administrators but running filtered) ➜ **High IL**.
-  - Non-admin user ➜ IL increased by **+16 levels** up to a **High** cap (System IL is never assigned).
-- If the caller token already has UIAccess, IL is left unchanged.
-- “Ratchet” trick: a UIAccess process can disable UIAccess on itself, relaunch via `RAiLaunchAdminProcess`, and gain another +16 IL increment. Medium➜High takes 255 relaunches (noisy, but works).
+## Kuunda tokeni na viwango vya uadilifu
+- Ikiwa ukaguzi unafanikiwa, AppInfo **inakopa tokeni ya mpiga simu**, inawasha UIAccess, na inaongeza Integrity Level (IL):
+- Mtumiaji admin mwenye mipaka (user yuko katika Administrators lakini anafanya kazi chini ya uchujaji) ➜ **High IL**.
+- Mtumiaji asiyo-admin ➜ IL inaongezwa kwa **+16 levels** hadi cap ya **High** (System IL haitelekezwi).
+- Ikiwa tokeni ya mpiga simu tayari ina UIAccess, IL haibadiliki.
+- “Ratchet” trick: mchakato wa UIAccess unaweza kuzima UIAccess kwa nafsi yake, kuanzisha tena kupitia `RAiLaunchAdminProcess`, na kupata ongezeko jingine la +16 IL. Medium➜High inachukua uzinduzi 255 (inatoa kelele, lakini inafanya kazi).
 
-## Why UIAccess enables an Admin Protection escape
-- UIAccess lets a lower-IL process send window messages to higher-IL windows (bypassing UIPI filters). At **equal IL**, classic UI primitives like `SetWindowsHookEx` **do allow code injection/DLL loading** into any process that owns a window (including **message-only windows** used by COM).
-- Admin Protection launches the UIAccess process under the **limited user’s identity** but at **High IL**, silently. Once arbitrary code runs inside that High-IL UIAccess process, the attacker can inject into other High-IL processes on the desktop (even belonging to different users), breaking the intended separation.
+## Kwa nini UIAccess inaruhusu kutoroka kwa Admin Protection
+- UIAccess inamruhusu mchakato wa IL ya chini kutuma ujumbe wa windows kwa windows za IL ya juu (kupitisha vichujio vya UIPI). Kwa **IL sawa**, primitives za kawaida za UI kama `SetWindowsHookEx` **zinaweza kuruhusu code injection/loading ya DLL** ndani ya mchakato wowote unaomilikiwa na window (pamoja na **message-only windows** zinazotumika na COM).
+- Admin Protection inaanzisha mchakato wa UIAccess chini ya **kitambulisho cha mtumiaji mwenye mipaka** lakini kwa **High IL**, kimya. Mara code yoyote inapoendeshwa ndani ya mchakato huo wa High-IL UIAccess, mshambuliaji anaweza kuingiza ndani ya michakato mingine ya High-IL kwenye desktop (hata inayomilikiwa na watumiaji tofauti), akivunja mgawanyo uliokusudiwa.
 
 ## HWND-to-process handle primitive (`GetProcessHandleFromHwnd` / `NtUserGetWindowProcessHandle`)
-- On Windows 10 1803+ the API moved into Win32k (`NtUserGetWindowProcessHandle`) and can open a process handle using a caller-supplied `DesiredAccess`. The kernel path uses `ObOpenObjectByPointer(..., KernelMode, ...)`, which bypasses normal user-mode access checks.
-- Preconditions in practice: the target window must be on the same desktop, and UIPI checks must pass. Historically, a caller with UIAccess could bypass UIPI failure and still get a kernel-mode handle (fixed as CVE-2023-41772).
-- Impact: a window handle becomes a **capability** to obtain a powerful process handle (commonly `PROCESS_DUP_HANDLE`, `PROCESS_VM_READ`, `PROCESS_VM_WRITE`, `PROCESS_VM_OPERATION`) that the caller could not normally open. This enables cross-sandbox access and can break Protected Process / PPL boundaries if the target exposes any window (including message-only windows).
-- Practical abuse flow: enumerate or locate HWNDs (e.g., `EnumWindows`/`FindWindowEx`), resolve the owning PID (`GetWindowThreadProcessId`), call `GetProcessHandleFromHwnd`, then use the returned handle for memory read/write or code-hijack primitives.
-- Post-fix behavior: UIAccess no longer grants kernel-mode opens on UIPI failure and allowed access rights are restricted to the legacy hook set; Windows 11 24H2 adds process-protection checks and feature-flagged safer paths. Disabling UIPI system-wide (`EnforceUIPI=0`) weakens these protections.
+- Katika Windows 10 1803+ API ilihamishiwa ndani ya Win32k (`NtUserGetWindowProcessHandle`) na inaweza kufungua handle ya mchakato ikitumia `DesiredAccess` iliyotolewa na mpiga simu. Njia ya kernel inatumia `ObOpenObjectByPointer(..., KernelMode, ...)`, ambayo hupitisha ukaguzi wa kawaida wa upatikanaji wa user-mode.
+- Masharti ya awali kwa vitendo: window lengwa lazima iwe kwenye desktop ile ile, na ukaguzi wa UIPI lazima upite. Kivuli, mpiga simu mwenye UIAccess angeweza kupitisha kushindwa kwa UIPI na bado kupata handle ya kernel-mode (imerekebishwa kama CVE-2023-41772).
+- Athari: handle ya window inakuwa **sifa (capability)** ya kupata handle yenye nguvu ya mchakato (kwa kawaida `PROCESS_DUP_HANDLE`, `PROCESS_VM_READ`, `PROCESS_VM_WRITE`, `PROCESS_VM_OPERATION`) ambayo mpiga simu angeweza asifungue kawaida. Hii inaruhusu upatikanaji kati ya sandbox na inaweza kuvunja mipaka ya Protected Process / PPL ikiwa lengwa linaonyesha window yoyote (pamoja na message-only windows).
+- Mtiririko wa matumizi ya vitendo: orodhesha au pata HWNDs (mfano `EnumWindows`/`FindWindowEx`), tambua PID inayomilikiwa (`GetWindowThreadProcessId`), itumie `GetProcessHandleFromHwnd`, kisha tumia handle iliyorejeshwa kwa kusoma/kuandika memory au primitives za kukamata code.
+- Tabia baada ya fix: UIAccess haingewapa tena funguo za kernel-mode kwa kushindwa kwa UIPI na haki zinazokubaliwa zimepunguzwa kwa seti ya legacy hooks; Windows 11 24H2 inaongeza ukaguzi wa ulinzi wa mchakato na njia salama zinazokuzwa kwa feature-flag. Kuzima UIPI kwa mfumo mzima (`EnforceUIPI=0`) kunaporomosha ulinzi huu.
 
-## Secure-directory validation weaknesses (AppInfo `AiCheckSecureApplicationDirectory`)
-AppInfo resolves the supplied path via `GetFinalPathNameByHandle` and then applies **string allow/deny checks** against hardcoded roots/exclusions. Multiple bypass classes stem from that simplistic validation:
-- **Directory named streams**: Excluded writable directories (e.g., `C:\Windows\tracing`) can be bypassed with a named stream on the directory itself, e.g. `C:\Windows\tracing:file.exe`. The string checks see `C:\Windows\` and miss the excluded subpath.
-- **Writable file/directory inside an allowed root**: `CreateProcessAsUser` does **not require a `.exe` extension**. Overwriting any writable file under an allowed root with an executable payload works, or copying a signed `uiAccess="true"` EXE into any writable subdirectory (e.g., update leftovers such as `Tasks_Migrated` when present) lets it pass the secure-path check.
-- **MSIX into `C:\Program Files\WindowsApps` (fixed)**: Non-admins could install signed MSIX packages that landed in `WindowsApps`, which was not excluded. Packaging a UIAccess binary inside the MSIX then launching it via `RAiLaunchAdminProcess` yielded a **promptless High-IL UIAccess process**. Microsoft mitigated by excluding this path; the `uiAccess` restricted MSIX capability itself already requires admin install.
+## Udhaifu wa uhakiki wa saraka salama (AppInfo `AiCheckSecureApplicationDirectory`)
+AppInfo inaamua path iliyotolewa kupitia `GetFinalPathNameByHandle` kisha inatumia **ukaguzi wa string allow/deny** dhidi ya mizizi/exclusions zilizopachikwa. Aina kadhaa za bypass zinatokana na uhakiki huo wa msingi:
+- **Directory named streams**: Saraka zilizokataliwa kwa sababu zinaweza kuandikwa (mfano, `C:\Windows\tracing`) zinaweza kupitishwa kwa stream yenye jina kwenye saraka yenyewe, mfano `C:\Windows\tracing:file.exe`. Ukaguzi wa string unaona `C:\Windows\` na hupotoka exclusion ya subpath.
+- **Faili/saraka inayoweza kuandikwa ndani ya root inayoruhusiwa**: `CreateProcessAsUser` **hainahitaji kiendelezi `.exe`**. Kuandika juu ya faili yoyote inayoweza kuandikwa chini ya root inayoruhusiwa kwa payload ya executable inafanya kazi, au kunakili EXE iliyosainiwa yenye `uiAccess="true"` ndani ya subdirectory yoyote inayoweza kuandikwa (mfano, mabaki ya update kama `Tasks_Migrated` pale inapokuwepo) kunaiwezesha kupita uhakiki wa secure-path.
+- **MSIX into `C:\Program Files\WindowsApps` (imedhibitiwa)**: Wasio-admin wangeweza kusanidi packages za MSIX zilizosasishwa ndani ya `WindowsApps`, ambayo haikuwekwa kama excluded. Kufunga binary ya UIAccess ndani ya MSIX kisha kuianzisha kupitia `RAiLaunchAdminProcess` kulitoa **mchakato wa High-IL UIAccess bila prompt**. Microsoft ilitatua kwa kuhusisha njia hiyo; uwezo uliokandamizwa wa `uiAccess` kwenye MSIX tayari unahitaji install ya admin.
 
-## Attack workflow (High IL without a prompt)
-1. Obtain/build a **signed UIAccess binary** (manifest `uiAccess="true"`).
-2. Place it where AppInfo’s allowlist accepts it (or abuse a path-validation edge case/writable artifact as above).
-3. Call `RAiLaunchAdminProcess` to spawn it **silently** with UIAccess + elevated IL.
-4. From that High-IL foothold, target another High-IL process on the desktop using **window hooks/DLL injection** or other same-IL primitives to fully compromise the admin context.
+## Mtiririko wa mashambulizi (High IL bila prompt)
+1. Pata/jenga binary iliyosainiwa ya UIAccess (manifest `uiAccess="true"`).
+2. Iweke mahali ambapo allowlist ya AppInfo inakubali (au tumia mbinu ya kukiuka uhakiki wa path/artefact inayoweza kuandikwa kama ilivyoelezwa hapo juu).
+3. Piga `RAiLaunchAdminProcess` kuizindua kimya kimya na UIAccess + IL iliyoinuliwa.
+4. Kutoka kwenye ngalawa ya High-IL, lengwa mchakato mwingine wa High-IL kwenye desktop kwa kutumia **window hooks/DLL injection** au primitives nyingine za same-IL ili kunyakua muktadha wa admin kikamilifu.
 
-## Enumerating candidate writable paths
-Run the PowerShell helper to discover writable/overwritable objects inside nominally secure roots from the perspective of a chosen token:
+## Kuhesabu njia zinazoweza kuandikwa
+Endesha helper ya PowerShell kugundua vitu vinavyoweza kuandikwa/kurudishwa ndani ya mizizi inayochukuliwa kuwa salama kutoka mtazamo wa tokeni uliyochaguliwa:
 ```powershell
 $paths = "C:\\Windows","C:\\Program Files","C:\\Program Files (x86)"
 Get-AccessibleFile -Win32Path $paths -Access Execute,WriteData `
 -DirectoryAccess AddFile -Recurse -ProcessId <PID>
 ```
-- Endesha kama Administrator kwa uonekano mpana; weka `-ProcessId` kwa mchakato wenye vibali vya chini ili kuiga upatikanaji wa token hiyo.
-- Chuja kwa mkono ili kuzuia subdirectories zilizojulikana kuwa haziruhusiwi kabla ya kutumia wagombea na `RAiLaunchAdminProcess`.
+- Endesha kama Administrator kwa uonekano mpana; weka `-ProcessId` kwa mchakato wenye vibali vichache ili kuiga ufikiaji wa token hiyo.
+- Chuja kwa mkono ili kuondoa folda ndogo zilizojulikana kutoruhusiwa kabla ya kutumia wagombea na `RAiLaunchAdminProcess`.
 
-## References
+## Inayohusiana
+
+Secure Desktop accessibility registry propagation LPE (RegPwn):
+
+{{#ref}}
+secure-desktop-accessibility-registry-propagation-regpwn.md
+{{#endref}}
+
+## Marejeo
 - [Bypassing Administrator Protection by Abusing UI Access](https://projectzero.google/2026/02/windows-administrator-protection.html)
 - [GetProcessHandleFromHwnd (GPHFH) Deep Dive](https://projectzero.google/2026/02/gphfh-deep-dive.html)
 
