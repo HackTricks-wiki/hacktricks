@@ -120,8 +120,9 @@ jobs:
           echo "Authorized user: $authorized_user"
           echo "Looking for PRs with exact comment 'merge' from $authorized_user..."
 
-          # Get all open PRs
-          prs=$(gh_with_retry pr list --state open --json number,title,url,author --repo "$GITHUB_REPOSITORY")
+          # Get all open PRs, paginating through the full result set instead of
+          # relying on `gh pr list`'s default page size.
+          prs=$(gh_with_retry api --paginate "repos/$GITHUB_REPOSITORY/pulls?state=open&per_page=100" | jq -s 'add | map({number, title, url: .html_url, author: {login: .user.login}})')
 
           if [ "$prs" = "[]" ]; then
             echo "No open PRs found."
