@@ -75,7 +75,7 @@ call qword ptr [rax]     ; one attacker-chosen gadget per object
 Zobacz szczegóły budowy Windows x64 pivot/gadget tutaj:
 
 {{#ref}}
-../../../binary-exploitation/stack-overflow/stack-pivoting-ebp2ret-ebp-chaining.md
+../../../binary-exploitation/stack-overflow/stack-pivoting.md
 {{#endref}}
 
 oraz ogólne wskazówki dotyczące ROP tutaj:
