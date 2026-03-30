@@ -2,12 +2,7 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-- [Sleeping Beauty: Putting Adaptix to Bed with Crystal Palace](https://maorsabag.github.io/posts/adaptix-stealthpalace/sleeping-beauty/)
-- [Ekko sleep obfuscation](https://github.com/Cracked5pider/Ekko)
-
-
-
-**This page was written by** [**@m2rc_p**](https://twitter.com/m2rc_p)**!**
+**This page was initially written by** [**@m2rc_p**](https://twitter.com/m2rc_p)**!**
 
 ## Stop Defender
 
