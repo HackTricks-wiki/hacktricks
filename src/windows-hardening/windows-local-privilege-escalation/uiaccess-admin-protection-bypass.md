@@ -1,38 +1,38 @@
-# Admin Protection Bypasses via UIAccess
+# Contournements d'Admin Protection via UIAccess
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Overview
-- Windows AppInfo exposes `RAiLaunchAdminProcess` to spawn UIAccess processes (intended for accessibility). UIAccess bypasses most User Interface Privilege Isolation (UIPI) message filtering so accessibility software can drive higher-IL UI.
-- Enabling UIAccess directly requires `NtSetInformationToken(TokenUIAccess)` with **SeTcbPrivilege**, so low-priv callers rely on the service. The service performs three checks on the target binary before setting UIAccess:
-- Embedded manifest contains `uiAccess="true"`.
-- Signed by any certificate trusted by the Local Machine root store (no EKU/Microsoft requirement).
-- Located in an administrator-only path on the system drive (e.g., `C:\Windows`, `C:\Windows\System32`, `C:\Program Files`, excluding specific writable subpaths).
-- `RAiLaunchAdminProcess` performs no consent prompt for UIAccess launches (otherwise accessibility tooling could not drive the prompt).
+## Aperçu
+- Windows AppInfo expose `RAiLaunchAdminProcess` pour lancer des processus UIAccess (destinés à l'accessibilité). UIAccess contourne la plupart des filtrages de messages User Interface Privilege Isolation (UIPI) afin que les logiciels d'accessibilité puissent contrôler des UI à IL supérieur.
+- Activer UIAccess directement requiert `NtSetInformationToken(TokenUIAccess)` avec **SeTcbPrivilege**, donc les appelants à faible privilège s'appuient sur le service. Le service effectue trois vérifications sur le binaire ciblé avant d'activer UIAccess :
+- Le manifeste embarqué contient `uiAccess="true"`.
+- Signé par n'importe quel certificat de confiance dans le magasin racine Local Machine (aucune exigence EKU/Microsoft).
+- Situé dans un chemin réservé aux administrateurs sur le lecteur système (par ex., `C:\Windows`, `C:\Windows\System32`, `C:\Program Files`, en excluant certains sous-chemins inscriptibles).
+- `RAiLaunchAdminProcess` n'affiche aucune invite de consentement pour les lancements UIAccess (sinon les outils d'accessibilité ne pourraient pas contrôler l'invite).
 
 ## Token shaping and integrity levels
-- If the checks succeed, AppInfo **copies the caller token**, enables UIAccess, and bumps Integrity Level (IL):
-- Limited admin user (user is in Administrators but running filtered) ➜ **High IL**.
-- Non-admin user ➜ IL increased by **+16 levels** up to a **High** cap (System IL is never assigned).
-- If the caller token already has UIAccess, IL is left unchanged.
-- “Ratchet” trick: a UIAccess process can disable UIAccess on itself, relaunch via `RAiLaunchAdminProcess`, and gain another +16 IL increment. Medium➜High takes 255 relaunches (noisy, but works).
+- Si les vérifications réussissent, AppInfo **copie le token de l'appelant**, active UIAccess et augmente le Integrity Level (IL) :
+- Administrateur limité (dans Administrators mais en mode filtré) ➜ **High IL**.
+- Utilisateur non-admin ➜ IL augmenté de **+16 niveaux** jusqu'à un plafond **High** (System IL n'est jamais attribué).
+- Si le token de l'appelant possède déjà UIAccess, l'IL reste inchangé.
+- Astuce « ratchet » : un processus UIAccess peut désactiver UIAccess sur lui-même, relancer via `RAiLaunchAdminProcess`, et gagner un autre incrément de +16 IL. Medium➜High nécessite 255 relances (bruyant, mais fonctionne).
 
-## Why UIAccess enables an Admin Protection escape
-- UIAccess lets a lower-IL process send window messages to higher-IL windows (bypassing UIPI filters). At **equal IL**, classic UI primitives like `SetWindowsHookEx` **do allow code injection/DLL loading** into any process that owns a window (including **message-only windows** used by COM).
-- Admin Protection launches the UIAccess process under the **limited user’s identity** but at **High IL**, silently. Once arbitrary code runs inside that High-IL UIAccess process, the attacker can inject into other High-IL processes on the desktop (even belonging to different users), breaking the intended separation.
+## Pourquoi UIAccess permet d'échapper à Admin Protection
+- UIAccess permet à un processus à IL inférieur d'envoyer des messages de fenêtre vers des fenêtres à IL supérieur (contournant les filtres UIPI). À **IL égal**, des primitives UI classiques comme `SetWindowsHookEx` **permettent l'injection de code/le chargement d'une DLL** dans n'importe quel processus possédant une fenêtre (y compris les **message-only windows** utilisées par COM).
+- Admin Protection lance le processus UIAccess sous l'**identité de l'utilisateur limité** mais à **High IL**, silencieusement. Une fois du code arbitraire exécuté dans ce processus UIAccess à High IL, l'attaquant peut s'injecter dans d'autres processus High IL sur le bureau (même appartenant à d'autres utilisateurs), rompant la séparation prévue.
 
 ## HWND-to-process handle primitive (`GetProcessHandleFromHwnd` / `NtUserGetWindowProcessHandle`)
-- On Windows 10 1803+ the API moved into Win32k (`NtUserGetWindowProcessHandle`) and can open a process handle using a caller-supplied `DesiredAccess`. The kernel path uses `ObOpenObjectByPointer(..., KernelMode, ...)`, which bypasses normal user-mode access checks.
-- Preconditions in practice: the target window must be on the same desktop, and UIPI checks must pass. Historically, a caller with UIAccess could bypass UIPI failure and still get a kernel-mode handle (fixed as CVE-2023-41772).
-- Impact: a window handle becomes a **capability** to obtain a powerful process handle (commonly `PROCESS_DUP_HANDLE`, `PROCESS_VM_READ`, `PROCESS_VM_WRITE`, `PROCESS_VM_OPERATION`) that the caller could not normally open. This enables cross-sandbox access and can break Protected Process / PPL boundaries if the target exposes any window (including message-only windows).
-- Practical abuse flow: enumerate or locate HWNDs (e.g., `EnumWindows`/`FindWindowEx`), resolve the owning PID (`GetWindowThreadProcessId`), call `GetProcessHandleFromHwnd`, then use the returned handle for memory read/write or code-hijack primitives.
-- Post-fix behavior: UIAccess no longer grants kernel-mode opens on UIPI failure and allowed access rights are restricted to the legacy hook set; Windows 11 24H2 adds process-protection checks and feature-flagged safer paths. Disabling UIPI system-wide (`EnforceUIPI=0`) weakens these protections.
+- Sur Windows 10 1803+ l'API a été déplacée dans Win32k (`NtUserGetWindowProcessHandle`) et peut ouvrir un handle de processus en utilisant un `DesiredAccess` fourni par l'appelant. Le chemin noyau utilise `ObOpenObjectByPointer(..., KernelMode, ...)`, ce qui contournes les vérifications d'accès usuelles en mode utilisateur.
+- Conditions préalables en pratique : la fenêtre cible doit être sur le même bureau, et les vérifications UIPI doivent réussir. Historiquement, un appelant avec UIAccess pouvait contourner un échec UIPI et obtenir quand même un handle noyau (corrigé par CVE-2023-41772).
+- Impact : un handle de fenêtre devient une **capability** pour obtenir un handle de processus puissant (typiquement `PROCESS_DUP_HANDLE`, `PROCESS_VM_READ`, `PROCESS_VM_WRITE`, `PROCESS_VM_OPERATION`) que l'appelant ne pourrait pas normalement ouvrir. Cela permet un accès cross-sandbox et peut rompre les frontières Protected Process / PPL si la cible expose une fenêtre (y compris message-only windows).
+- Flux d'abus pratique : énumérer ou localiser des HWNDs (p.ex. `EnumWindows`/`FindWindowEx`), résoudre le PID propriétaire (`GetWindowThreadProcessId`), appeler `GetProcessHandleFromHwnd`, puis utiliser le handle retourné pour lecture/écriture mémoire ou primitives de détournement de code.
+- Comportement après correctif : UIAccess n'accorde plus d'ouvertures en mode noyau en cas d'échec UIPI et les droits d'accès autorisés sont restreints à l'ensemble legacy des hooks ; Windows 11 24H2 ajoute des vérifications de protection de processus et des chemins plus sûrs activés par feature-flag. Désactiver UIPI au niveau système (`EnforceUIPI=0`) affaiblit ces protections.
 
-## Secure-directory validation weaknesses (AppInfo `AiCheckSecureApplicationDirectory`)
-AppInfo resolves the supplied path via `GetFinalPathNameByHandle` and then applies **string allow/deny checks** against hardcoded roots/exclusions. Multiple bypass classes stem from that simplistic validation:
-- **Directory named streams**: Excluded writable directories (e.g., `C:\Windows\tracing`) can be bypassed with a named stream on the directory itself, e.g. `C:\Windows\tracing:file.exe`. The string checks see `C:\Windows\` and miss the excluded subpath.
-- **Writable file/directory inside an allowed root**: `CreateProcessAsUser` does **not require a `.exe` extension**. Overwriting any writable file under an allowed root with an executable payload works, or copying a signed `uiAccess="true"` EXE into any writable subdirectory (e.g., update leftovers such as `Tasks_Migrated` when present) lets it pass the secure-path check.
-- **MSIX into `C:\Program Files\WindowsApps` (fixed)**: Non-admins could install signed MSIX packages that landed in `WindowsApps`, which was not excluded. Packaging a UIAccess binary inside the MSIX then launching it via `RAiLaunchAdminProcess` yielded a **promptless High-IL UIAccess process**. Microsoft mitigated by excluding this path; the `uiAccess` restricted MSIX capability itself already requires admin install.
+## Faiblesses de validation des répertoires sécurisés (AppInfo `AiCheckSecureApplicationDirectory`)
+AppInfo résout le chemin fourni via `GetFinalPathNameByHandle` puis applique des **vérifications allow/deny de chaînes** contre des racines/exclusions codées en dur. Plusieurs classes de contournement découlent de cette validation simpliste :
+- **Directory named streams** : les répertoires inscriptibles exclus (p.ex. `C:\Windows\tracing`) peuvent être contournés avec un stream nommé sur le répertoire lui-même, p.ex. `C:\Windows\tracing:file.exe`. Les vérifications de chaîne voient `C:\Windows\` et ratent le sous-chemin exclu.
+- **Writable file/directory inside an allowed root** : `CreateProcessAsUser` **n'exige pas une extension `.exe`**. Écraser n'importe quel fichier inscriptible sous une racine autorisée avec un payload exécutable fonctionne, ou copier un EXE signé `uiAccess="true"` dans n'importe quel sous-répertoire inscriptible (p.ex. des restes de mise à jour comme `Tasks_Migrated`) lui permet de passer la vérification de chemin sécurisé.
+- **MSIX into `C:\Program Files\WindowsApps` (fixed)** : des non-admins pouvaient installer des packages MSIX signés placés dans `WindowsApps`, qui n'était pas exclu. Emballer un binaire UIAccess dans le MSIX puis le lancer via `RAiLaunchAdminProcess` produisait un processus UIAccess à **High IL sans invite**. Microsoft a atténué le problème en excluant ce chemin ; la capability MSIX restreinte `uiAccess` requiert déjà une installation admin.
 
 ## Attack workflow (High IL without a prompt)
 1. Obtain/build a **signed UIAccess binary** (manifest `uiAccess="true"`).
@@ -40,15 +40,23 @@ AppInfo resolves the supplied path via `GetFinalPathNameByHandle` and then appli
 3. Call `RAiLaunchAdminProcess` to spawn it **silently** with UIAccess + elevated IL.
 4. From that High-IL foothold, target another High-IL process on the desktop using **window hooks/DLL injection** or other same-IL primitives to fully compromise the admin context.
 
-## Enumerating candidate writable paths
-Run the PowerShell helper to discover writable/overwritable objects inside nominally secure roots from the perspective of a chosen token:
+## Énumérer les chemins inscriptibles candidats
+Exécutez l'helper PowerShell pour découvrir les objets inscriptibles/écrasables à l'intérieur de racines nominalement sécurisées du point de vue d'un token choisi :
 ```powershell
 $paths = "C:\\Windows","C:\\Program Files","C:\\Program Files (x86)"
 Get-AccessibleFile -Win32Path $paths -Access Execute,WriteData `
 -DirectoryAccess AddFile -Recurse -ProcessId <PID>
 ```
-- Exécuter en tant qu'administrateur pour une visibilité accrue ; définir `-ProcessId` sur un processus low-priv afin de refléter l'accès de ce token.
-- Filtrer manuellement pour exclure les sous-répertoires connus comme interdits avant d'utiliser les candidats avec `RAiLaunchAdminProcess`.
+- Exécuter en tant qu'administrateur pour une visibilité plus large ; définir `-ProcessId` sur un low-priv process afin de refléter l'accès de ce token.
+- Filtrer manuellement pour exclure les sous-répertoires connus et interdits avant d'utiliser les candidats avec `RAiLaunchAdminProcess`.
+
+## Articles connexes
+
+Secure Desktop accessibility registry propagation LPE (RegPwn):
+
+{{#ref}}
+secure-desktop-accessibility-registry-propagation-regpwn.md
+{{#endref}}
 
 ## Références
 - [Bypassing Administrator Protection by Abusing UI Access](https://projectzero.google/2026/02/windows-administrator-protection.html)
