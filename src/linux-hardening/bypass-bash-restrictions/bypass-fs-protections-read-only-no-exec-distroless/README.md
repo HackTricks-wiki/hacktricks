@@ -86,6 +86,12 @@ With a similar purpose to DDexec, [**memdlopen**](https://github.com/arget13/mem
 
 ## Distroless Bypass
 
+For a dedicated explanation of **what distroless actually is**, when it helps, when it does not, and how it changes post-exploitation tradecraft in containers, check:
+
+{{#ref}}
+../../privilege-escalation/container-security/distroless.md
+{{#endref}}
+
 ### What is distroless
 
 Distroless containers contain only the **bare minimum components necessary to run a specific application or service**, such as libraries and runtime dependencies, but exclude larger components like a package manager, shell, or system utilities.
@@ -113,5 +119,4 @@ You can find **examples** on how to **exploit some RCE vulnerabilities** to get 
 
 
 {{#include ../../../banners/hacktricks-training.md}}
-
 

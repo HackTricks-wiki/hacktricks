@@ -102,6 +102,41 @@ Because you never used PROCESS_CREATE_THREAD or PROCESS_SUSPEND_RESUME on an alr
 - NachoVPN (Netskope plugin) automates a rogue CA, malicious MSI signing, and serves the needed endpoints: /v2/config/org/clientconfig, /config/ca/cert, /v2/checkupdate.
 - UpSkope is a custom IPC client that crafts arbitrary (optionally AES-encrypted) IPC messages and includes the suspended-process injection to originate from an allow-listed binary.
 
+## 7) Fast triage workflow for unknown updater/IPC surfaces
+
+When facing a new endpoint agent or motherboard “helper” suite, a quick workflow is usually enough to tell whether you are looking at a promising privesc target:
+
+1) Enumerate loopback listeners and map them back to vendor processes:
+
+```powershell
+Get-NetTCPConnection -State Listen |
+  Where-Object {$_.LocalAddress -in @('127.0.0.1', '::1', '0.0.0.0', '::')} |
+  Select-Object LocalAddress,LocalPort,OwningProcess,
+    @{n='Process';e={(Get-Process -Id $_.OwningProcess -ErrorAction SilentlyContinue).Path}}
+```
+
+2) Enumerate candidate named pipes:
+
+```powershell
+[System.IO.Directory]::GetFiles("\\.\pipe\") | Select-String -Pattern 'asus|msi|razer|acer|agent|update'
+```
+
+3) Mine registry-backed routing data used by plugin-based IPC servers:
+
+```powershell
+Get-ChildItem 'HKLM:\SOFTWARE\WOW6432Node\MSI\MSI Center\Component' |
+  Select-Object PSChildName
+```
+
+4) Extract endpoint names, JSON keys, and command IDs from the user-mode client first. Packed Electron/.NET frontends frequently leak the full schema:
+
+```powershell
+Select-String -Path 'C:\Program Files\Vendor\**\*.js','C:\Program Files\Vendor\**\*.dll' `
+  -Pattern '127.0.0.1|localhost|UpdateApp|checkupdate|NamedPipe|LaunchProcess|Origin'
+```
+
+If the target authenticates callers only by PID, image path, or process name, treat that as a speed bump rather than a boundary: injecting into the legitimate client, or making the connection from an allow-listed process, is often enough to satisfy the server’s checks. For named pipes specifically, [this page about client impersonation and pipe abuse](named-pipe-client-impersonation.md) covers the primitive in more depth.
+
 ---
 ## 1) Browser-to-localhost CSRF against privileged HTTP APIs (ASUS DriverHub)
 
@@ -173,6 +208,25 @@ When the scheduler fires, it executes the overwritten payload under SYSTEM despi
 These IPC bugs highlight why localhost services must enforce mutual authentication (ALPC SIDs, `ImpersonationLevel=Impersonation` filters, token filtering) and why every module’s “run arbitrary binary” helper must share the same signer verifications.
 
 ---
+## 3) COM/IPC “elevator” helpers backed by weak user-mode validation (Razer Synapse 4)
+
+Razer Synapse 4 added another useful pattern to this family: a low-privileged user can ask a COM helper to launch a process through `RzUtility.Elevator`, while the trust decision is delegated to a user-mode DLL (`simple_service.dll`) rather than being enforced robustly inside the privileged boundary.
+
+Observed exploitation path:
+- Instantiate the COM object `RzUtility.Elevator`.
+- Call `LaunchProcessNoWait(<path>, "", 1)` to request an elevated launch.
+- In the public PoC, the PE-signature gate inside `simple_service.dll` is patched out before issuing the request, allowing an arbitrary attacker-chosen executable to be launched.
+
+Minimal PowerShell invocation:
+
+```powershell
+$com = New-Object -ComObject 'RzUtility.Elevator'
+$com.LaunchProcessNoWait("C:\Users\Public\payload.exe", "", 1)
+```
+
+General takeaway: when reversing “helper” suites, do not stop at localhost TCP or named pipes. Check for COM classes with names such as `Elevator`, `Launcher`, `Updater`, or `Utility`, then verify whether the privileged service actually validates the target binary itself or merely trusts a result computed by a patchable user-mode client DLL. This pattern generalizes beyond Razer: any split design where the high-privilege broker consumes an allow/deny decision from the low-privilege side is a candidate privesc surface.
+
+---
 ## Remote supply-chain hijack via weak updater validation (WinGUp / Notepad++)
 
 Older WinGUp-based Notepad++ updaters did not fully verify update authenticity. When attackers compromised the hosting provider for the update server, they could tamper with the XML manifest and redirect only chosen clients to attacker URLs. Because the client accepted any HTTPS response without enforcing both a trusted certificate chain and a valid PE signature, victims fetched and executed a trojanized NSIS `update.exe`.
@@ -223,6 +277,7 @@ These patterns generalize to any updater that accepts unsigned manifests or fail
 ---
 ## References
 - [Advisory – Netskope Client for Windows – Local Privilege Escalation via Rogue Server (CVE-2025-0309)](https://blog.amberwolf.com/blog/2025/august/advisory---netskope-client-for-windows---local-privilege-escalation-via-rogue-server/)
+- [Netskope Security Advisory NSKPSA-2025-002](https://www.netskope.com/resources/netskope-resources/netskope-security-advisory-nskpsa-2025-002)
 - [NachoVPN – Netskope plugin](https://github.com/AmberWolfCyber/NachoVPN)
 - [UpSkope – Netskope IPC client/exploit](https://github.com/AmberWolfCyber/UpSkope)
 - [NVD – CVE-2025-0309](https://nvd.nist.gov/vuln/detail/CVE-2025-0309)

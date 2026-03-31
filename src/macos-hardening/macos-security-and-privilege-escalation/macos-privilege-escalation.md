@@ -260,6 +260,49 @@ chmod +x /Users/me/Library/Application\ Support/Target/helper
 
 Combine with the **masquerading tricks above** to present a believable password dialog.
 
+
+### Privileged helper / XPC triage
+
+A lot of modern third-party macOS privescs follow the same pattern: a **root LaunchDaemon** exposes a **Mach/XPC service** from **`/Library/PrivilegedHelperTools`**, then the helper either **doesn't validate the client**, validates it **too late** (PID race), or exposes a **root method** that consumes a **user-controlled path/script**. This is the bug class behind many recent helper bugs in VPN clients, game launchers and updaters.
+
+Quick triage checklist:
+
+```bash
+ls -l /Library/PrivilegedHelperTools /Library/LaunchDaemons
+plutil -p /Library/LaunchDaemons/*.plist 2>/dev/null | rg 'MachServices|Program|ProgramArguments|Label'
+for f in /Library/PrivilegedHelperTools/*; do
+  echo "== $f =="
+  codesign -dvv --entitlements :- "$f" 2>&1 | rg 'identifier|TeamIdentifier|com.apple'
+  strings "$f" | rg 'NSXPC|xpc_connection|AuthorizationCopyRights|authTrampoline|/Applications/.+\.sh'
+done
+```
+
+Pay special attention to helpers that:
+
+- keep accepting requests **after uninstall** because the job stayed loaded in `launchd`
+- execute scripts or read configuration from **`/Applications/...`** or other paths writable by non-root users
+- rely on **PID-based** or **bundle-id-only** peer validation that may be raceable
+
+For more details on helper authorization bugs check [this page](macos-proces-abuse/macos-ipc-inter-process-communication/macos-xpc/macos-xpc-authorization.md).
+
+### PackageKit script environment inheritance (CVE-2024-27822)
+
+Until Apple fixed it in **Sonoma 14.5**, **Ventura 13.6.7** and **Monterey 12.7.5**, user-initiated installs via **`Installer.app`** / **`PackageKit.framework`** could execute **PKG scripts as root inside the current user's environment**. That means a package using **`#!/bin/zsh`** would load the attacker's **`~/.zshenv`** and run it as **root** when the victim installed the package.
+
+This is especially interesting as a **logic bomb**: you only need a foothold in the user's account and a writable shell startup file, then you wait for any vulnerable **zsh-based** installer to be executed by the user. This does **not** generally apply to **MDM/Munki** deployments because those run inside the root user's environment.
+
+```bash
+# inspect a vendor pkg for shell-based install scripts
+pkgutil --expand-full Target.pkg /tmp/target-pkg
+find /tmp/target-pkg -type f \( -name preinstall -o -name postinstall \) -exec head -n1 {} \;
+rg -n '^#!/bin/(zsh|bash)' /tmp/target-pkg
+
+# logic bomb example for vulnerable zsh-based installers
+echo 'id > /tmp/pkg-root' >> ~/.zshenv
+```
+
+If you want a deeper dive into installer-specific abuse, also check [this page](macos-files-folders-and-binaries/macos-installers-abuse.md).
+
 ### LaunchDaemon plist hijack (CVE-2025-24085 pattern)
 
 If a LaunchDaemon plist or its `ProgramArguments` target is **user-writable**, you can escalate by swapping it then forcing launchd to reload:
@@ -355,5 +398,7 @@ macos-files-folders-and-binaries/macos-sensitive-locations.md
 
 - [Microsoft "Migraine" SIP bypass (CVE-2023-32369)](https://www.microsoft.com/en-us/security/blog/2023/05/30/new-macos-vulnerability-migraine-could-bypass-system-integrity-protection/)
 - [CVE-2025-24118 SMR credential race write-up & PoC](https://github.com/jprx/CVE-2025-24118)
+- [CVE-2024-27822: macOS PackageKit Privilege Escalation](https://khronokernel.com/macos/2024/06/03/CVE-2024-27822.html)
+- [CVE-2024-30165: AWS Client VPN for macOS Local Privilege Escalation](https://blog.emkay64.com/macos/CVE-2024-30165-finding-and-exploiting-aws-client-vpn-on-macos-for-local-privilege-escalation/)
 
 {{#include ../../banners/hacktricks-training.md}}

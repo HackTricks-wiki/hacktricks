@@ -113,6 +113,26 @@ Assess whether the device has secure-boot eFuses/OTP burned. If not, BootROM dow
 11. Boot logo parsing bugs (LogoFAIL class)
    - Several OEM/IBV firmwares were vulnerable to image-parsing flaws in DXE that process boot logos. If an attacker can place a crafted image on the ESP under a vendor-specific path (e.g., `\EFI\<vendor>\logo\*.bmp`) and reboot, code execution during early boot may be possible even with Secure Boot enabled. Test whether the platform accepts user-supplied logos and whether those paths are writable from the OS.
 
+
+## Android/Qualcomm ABL + GBL (Android 16) trust gaps
+
+On Android 16 devices that use Qualcomm's ABL to load the **Generic Bootloader Library (GBL)**, validate whether ABL **authenticates** the UEFI app it loads from the `efisp` partition. If ABL only checks for a UEFI app **presence** and does not verify signatures, a write primitive to `efisp` becomes **pre-OS unsigned code execution** at boot.
+
+Practical checks and abuse paths:
+
+- **efisp write primitive**: You need a way to write a custom UEFI app into `efisp` (root/privileged service, OEM app bug, recovery/fastboot path). Without this, the GBL loading gap is not directly reachable.
+- **fastboot OEM argument injection** (ABL bug): Some builds accept extra tokens in `fastboot oem set-gpu-preemption` and append them to the kernel cmdline. This can be used to force permissive SELinux, enabling protected partition writes:
+  ```bash
+  fastboot oem set-gpu-preemption 0 androidboot.selinux=permissive
+  ```
+  If the device is patched, the command should reject extra arguments.
+- **Bootloader unlock via persistent flags**: A boot-stage payload can flip persistent unlock flags (e.g., `is_unlocked=1`, `is_unlocked_critical=1`) to emulate `fastboot oem unlock` without OEM server/approval gates. This is a durable posture change after the next reboot.
+
+Defensive/triage notes:
+
+- Confirm whether ABL performs signature verification on the GBL/UEFI payload from `efisp`. If not, treat `efisp` as a high‑risk persistence surface.
+- Track whether ABL fastboot OEM handlers are patched to **validate argument counts** and reject additional tokens.
+
 ## Hardware caution
 
 Be cautious when interacting with SPI/NAND flash during early boot (e.g., grounding pins to bypass reads) and always consult the flash datasheet. Mistimed shorts can corrupt the device or the programmer.
@@ -128,5 +148,9 @@ Be cautious when interacting with SPI/NAND flash during early boot (e.g., ground
 - [https://scriptingxss.gitbook.io/firmware-security-testing-methodology/](https://scriptingxss.gitbook.io/firmware-security-testing-methodology/)
 - [https://www.binarly.io/blog/finding-logofail-the-dangers-of-image-parsing-during-system-boot](https://www.binarly.io/blog/finding-logofail-the-dangers-of-image-parsing-during-system-boot)
 - [https://nvd.nist.gov/vuln/detail/CVE-2024-42040](https://nvd.nist.gov/vuln/detail/CVE-2024-42040)
-
+- [https://www.androidauthority.com/qualcomm-snapdragon-8-elite-gbl-exploit-bootloader-unlock-3648651/](https://www.androidauthority.com/qualcomm-snapdragon-8-elite-gbl-exploit-bootloader-unlock-3648651/)
+- [https://bestwing.me/preempted-unlocking-xiaomi-via-two-unsanitized-strings.html](https://bestwing.me/preempted-unlocking-xiaomi-via-two-unsanitized-strings.html)
+- [https://source.android.com/docs/core/architecture/bootloader/generic-bootloader](https://source.android.com/docs/core/architecture/bootloader/generic-bootloader)
+- [https://git.codelinaro.org/clo/la/abl/tianocore/edk2/-/commit/f09c2fe3d6c42660587460e31be50c18c8c777ab](https://git.codelinaro.org/clo/la/abl/tianocore/edk2/-/commit/f09c2fe3d6c42660587460e31be50c18c8c777ab)
+- [https://git.codelinaro.org/clo/la/abl/tianocore/edk2/-/commit/78297e8cfe091fc59c42fc33d3490e2008910fe2](https://git.codelinaro.org/clo/la/abl/tianocore/edk2/-/commit/78297e8cfe091fc59c42fc33d3490e2008910fe2)
 {{#include ../../banners/hacktricks-training.md}}

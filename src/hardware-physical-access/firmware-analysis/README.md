@@ -56,6 +56,19 @@ Obtaining firmware can be approached through various means, each with its own le
 - **Dumping** from the bootloader or network
 - **Removing and reading** the storage chip, when all else fails, using appropriate hardware tools
 
+### UART-only logs: force a root shell via U-Boot env in flash
+
+If UART RX is ignored (logs only), you can still force an init shell by **editing the U-Boot environment blob** offline:
+
+1. Dump SPI flash with a SOIC-8 clip + programmer (3.3V):
+   ```bash
+   flashrom -p ch341a_spi -r flash.bin
+   ```
+2. Locate the U-Boot env partition, edit `bootargs` to include `init=/bin/sh`, and **recompute the U-Boot env CRC32** for the blob.
+3. Reflash only the env partition and reboot; a shell should appear on UART.
+
+This is useful on embedded devices where the bootloader shell is disabled but the env partition is writable via external flash access.
+
 ## Analyzing the firmware
 
 Now that you **have the firmware**, you need to extract information about it to know how to treat it. Different tools you can use for that:
@@ -311,9 +324,29 @@ At this stage, either a real or emulated device environment is used for analysis
 
 Runtime analysis involves interacting with a process or binary in its operating environment, using tools like gdb-multiarch, Frida, and Ghidra for setting breakpoints and identifying vulnerabilities through fuzzing and other techniques.
 
+For embedded targets without a full debugger, **copy a statically-linked `gdbserver`** to the device and attach remotely:
+
+```bash
+# On device
+gdbserver :1234 /usr/bin/targetd
+```
+
+```bash
+# On host
+gdb-multiarch /path/to/targetd
+target remote <device-ip>:1234
+```
+
 ## Binary Exploitation and Proof-of-Concept
 
 Developing a PoC for identified vulnerabilities requires a deep understanding of the target architecture and programming in lower-level languages. Binary runtime protections in embedded systems are rare, but when present, techniques like Return Oriented Programming (ROP) may be necessary.
+
+### uClibc fastbin exploitation notes (embedded Linux)
+
+- **Fastbins + consolidation:** uClibc uses fastbins similar to glibc. A later large allocation can trigger `__malloc_consolidate()`, so any fake chunk must survive checks (sane size, `fd = 0`, and surrounding chunks seen as "in use").
+- **Non-PIE binaries under ASLR:** if ASLR is enabled but the main binary is **non-PIE**, in-binary `.data/.bss` addresses are stable. You can target a region that already resembles a valid heap chunk header to land a fastbin allocation on a **function pointer table**.
+- **Parser-stopping NUL:** when JSON is parsed, a `\x00` in the payload can stop parsing while keeping trailing attacker-controlled bytes for a stack pivot/ROP chain.
+- **Shellcode via `/proc/self/mem`:** a ROP chain that calls `open("/proc/self/mem")`, `lseek()`, and `write()` can plant executable shellcode in a known mapping and jump to it.
 
 ## Prepared Operating Systems for Firmware Analysis
 
@@ -388,17 +421,16 @@ To practice discovering vulnerabilities in firmware, use the following vulnerabl
 - Damn Vulnerable IoT Device (DVID)
   - [https://github.com/Vulcainreo/DVID](https://github.com/Vulcainreo/DVID)
 
+## Trainning and Cert
+
+- [https://www.attify-store.com/products/offensive-iot-exploitation](https://www.attify-store.com/products/offensive-iot-exploitation)
+
 ## References
 
 - [https://scriptingxss.gitbook.io/firmware-security-testing-methodology/](https://scriptingxss.gitbook.io/firmware-security-testing-methodology/)
 - [Practical IoT Hacking: The Definitive Guide to Attacking the Internet of Things](https://www.amazon.co.uk/Practical-IoT-Hacking-F-Chantzis/dp/1718500904)
 - [Exploiting zero days in abandoned hardware – Trail of Bits blog](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
-
-
 - [How a $20 Smart Device Gave Me Access to Your Home](https://bishopfox.com/blog/how-a-20-smart-device-gave-me-access-to-your-home)
-
-## Trainning and Cert
-
-- [https://www.attify-store.com/products/offensive-iot-exploitation](https://www.attify-store.com/products/offensive-iot-exploitation)
+- [Now You See mi: Now You're Pwned](https://labs.taszk.io/articles/post/nowyouseemi/)
 
 {{#include ../../banners/hacktricks-training.md}}
