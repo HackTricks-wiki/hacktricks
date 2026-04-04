@@ -42,6 +42,10 @@ Docker can apply a default or custom AppArmor profile when the host supports it.
 
 The practical point is that AppArmor is not a "Docker feature". It is a host-kernel feature that several runtimes can choose to apply. If the host does not support it or the runtime is told to run unconfined, the supposed protection is not really there.
 
+For Kubernetes specifically, the modern API is `securityContext.appArmorProfile`. Since Kubernetes `v1.30`, the older beta AppArmor annotations are deprecated. On supported hosts, `RuntimeDefault` is the default profile, while `Localhost` points at a profile that must already be loaded on the node. This matters during review because a manifest may look AppArmor-aware while still depending entirely on node-side support and preloaded profiles.
+
+One subtle but useful operational detail is that explicitly setting `appArmorProfile.type: RuntimeDefault` is stricter than simply omitting the field. If the field is explicitly set and the node does not support AppArmor, admission should fail. If the field is omitted, the workload may still run on a node without AppArmor and simply not receive that extra confinement layer. From an attacker's point of view, this is a good reason to check both the manifest and the actual node state.
+
 On Docker-capable AppArmor hosts, the best-known default is `docker-default`. That profile is generated from Moby's AppArmor template and is important because it explains why some capability-based PoCs still fail in a default container. In broad terms, `docker-default` allows ordinary networking, denies writes to much of `/proc`, denies access to sensitive parts of `/sys`, blocks mount operations, and restricts ptrace so that it is not a general host-probing primitive. Understanding that baseline helps distinguish "the container has `CAP_SYS_ADMIN`" from "the container can actually use that capability against the kernel interfaces I care about".
 
 ## Profile Management
@@ -104,6 +108,24 @@ find /etc/apparmor.d/ -maxdepth 1 -name '*<profile-name>*' 2>/dev/null
 ```
 
 This is especially useful during host-side review because it bridges the gap between "the container says it is running under profile `lowpriv`" and "the actual rules live in this specific file that can be audited or reloaded".
+
+### High-Signal Rules To Audit
+
+When you can read a profile, do not stop at simple `deny` lines. Several rule types materially change how useful AppArmor will be against a container escape attempt:
+
+- `ux` / `Ux`: execute the target binary unconfined. If a reachable helper, shell, or interpreter is allowed under `ux`, that is usually the first thing to test.
+- `px` / `Px` and `cx` / `Cx`: perform profile transitions on exec. These are not automatically bad, but they are worth auditing because a transition may land in a much broader profile than the current one.
+- `change_profile`: allows a task to switch into another loaded profile, immediately or at next exec. If the destination profile is weaker, this can become the intended escape hatch out of a restrictive domain.
+- `flags=(complain)`, `flags=(unconfined)`, or newer `flags=(prompt)`: these should change how much trust you place in the profile. `complain` logs denials instead of enforcing them, `unconfined` removes the boundary, and `prompt` depends on a userspace decision path rather than pure kernel-enforced deny.
+- `userns` or `userns create,`: newer AppArmor policy can mediate creation of user namespaces. If a container profile explicitly allows it, nested user namespaces remain in play even when the platform uses AppArmor as part of its hardening strategy.
+
+Useful host-side grep:
+
+```bash
+grep -REn '(^|[[:space:]])(ux|Ux|px|Px|cx|Cx|pix|Pix|cix|Cix|pux|PUx|cux|CUx|change_profile|userns)\b|flags=\(.*(complain|unconfined|prompt).*\)' /etc/apparmor.d 2>/dev/null
+```
+
+This kind of audit is often more useful than staring at hundreds of ordinary file rules. If a breakout depends on executing a helper, entering a new namespace, or escaping into a less restrictive profile, the answer is often hidden in these transition-oriented rules rather than in the obvious `deny /etc/shadow r` style lines.
 
 ## Misconfigurations
 
@@ -210,6 +232,8 @@ cat /proc/self/attr/current                         # Current AppArmor label for
 aa-status 2>/dev/null                              # Host-wide AppArmor status and loaded/enforced profiles
 docker inspect <container> | jq '.[0].AppArmorProfile'   # Profile the runtime says it applied
 find /etc/apparmor.d -maxdepth 1 -type f 2>/dev/null | head -n 50   # Host-side profile inventory when visible
+cat /sys/kernel/security/apparmor/profiles 2>/dev/null | sort | head -n 50   # Loaded profiles straight from securityfs
+grep -REn '(^|[[:space:]])(ux|Ux|px|Px|cx|Cx|pix|Pix|cix|Cix|pux|PUx|cux|CUx|change_profile|userns)\b|flags=\(.*(complain|unconfined|prompt).*\)' /etc/apparmor.d 2>/dev/null
 ```
 
 What is interesting here:
@@ -217,6 +241,8 @@ What is interesting here:
 - If `/proc/self/attr/current` shows `unconfined`, the workload is not benefiting from AppArmor confinement.
 - If `aa-status` shows AppArmor disabled or not loaded, any profile name in the runtime config is mostly cosmetic.
 - If `docker inspect` shows `unconfined` or an unexpected custom profile, that is often the reason a filesystem or mount-based abuse path works.
+- If `/sys/kernel/security/apparmor/profiles` does not contain the profile you expected, the runtime or orchestrator configuration is not enough by itself.
+- If a supposedly hardened profile contains `ux`, broad `change_profile`, `userns`, or `flags=(complain)` style rules, the practical boundary may be much weaker than the profile name suggests.
 
 If a container already has elevated privileges for operational reasons, leaving AppArmor enabled often makes the difference between a controlled exception and a much broader security failure.
 
@@ -230,4 +256,9 @@ If a container already has elevated privileges for operational reasons, leaving 
 | containerd / CRI-O under Kubernetes | Follows node/runtime support | Common Kubernetes-supported runtimes support AppArmor, but actual enforcement still depends on node support and workload settings | Same as Kubernetes row; direct runtime configuration can also skip AppArmor entirely |
 
 For AppArmor, the most important variable is often the **host**, not only the runtime. A profile setting in a manifest does not create confinement on a node where AppArmor is not enabled.
+
+## References
+
+- [Kubernetes security context: AppArmor profile fields and node-support behavior](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/)
+- [Ubuntu 24.04 `apparmor.d(5)` manpage: exec transitions, `change_profile`, `userns`, and profile flags](https://manpages.ubuntu.com/manpages/noble/en/man5/apparmor.d.5.html)
 {{#include ../../../../banners/hacktricks-training.md}}
