@@ -176,7 +176,7 @@ Blue-team detection ideas:
 
 ---
 
-## Other malicious ZIP tricks (2024–2025)
+## Other malicious ZIP tricks (2024–2026)
 
 ### Concatenated central directories (multi-EOCD evasion)
 
@@ -229,6 +229,55 @@ while True:
 
 ---
 
+### Local-header vs central-directory parser confusion
+
+Recent differential-parser research showed that ZIP ambiguity is still exploitable in modern toolchains. The main idea is simple: some software trusts the **Local File Header (LFH)** while others trust the **Central Directory (CD)**, so one archive can present different filenames, paths, comments, offsets, or entry sets to different tools.
+
+Practical offensive uses:
+- Make an upload filter, AV pre-scan, or package validator see a benign file in the CD while the extractor honors a different LFH name/path.
+- Abuse duplicate names, entries present only in one structure, or ambiguous Unicode path metadata (for example, Info-ZIP Unicode Path Extra Field `0x7075`) so different parsers reconstruct different trees.
+- Combine this with path traversal to turn a "harmless" archive view into a write-primitive during extraction. For the extraction side, see [Archive Extraction Path Traversal](../../../generic-hacking/archive-extraction-path-traversal.md).
+
+DFIR triage:
+
+```python
+# compare Central Directory names against the referenced Local File Header names
+import struct, sys
+b = open(sys.argv[1], 'rb').read()
+lfh = {}
+i = 0
+while (i := b.find(b'PK\x03\x04', i)) != -1:
+    n, e = struct.unpack_from('<HH', b, i + 26)
+    lfh[i] = b[i + 30:i + 30 + n].decode('utf-8', 'replace')
+    i += 4
+i = 0
+while (i := b.find(b'PK\x01\x02', i)) != -1:
+    n = struct.unpack_from('<H', b, i + 28)[0]
+    off = struct.unpack_from('<I', b, i + 42)[0]
+    cd = b[i + 46:i + 46 + n].decode('utf-8', 'replace')
+    if off in lfh and cd != lfh[off]:
+        print(f'NAME_MISMATCH off={off} cd={cd!r} lfh={lfh[off]!r}')
+    i += 4
+```
+
+Complement it with:
+
+```bash
+zipdetails -v suspect.zip | less
+zipinfo -v suspect.zip | grep -E "file name|offset|comment"
+```
+
+Heuristics:
+- Reject or isolate archives with mismatched LFH/CD names, duplicate filenames, multiple EOCD records, or trailing bytes after the final EOCD.
+- Treat ZIPs using unusual Unicode-path extra fields or inconsistent comments as suspicious if different tools disagree on the extracted tree.
+- If analysis matters more than preserving the original bytes, repackage the archive with a strict parser after extraction in a sandbox and compare the resulting file list to the original metadata.
+
+This matters beyond package ecosystems: the same ambiguity class can hide payloads from mail gateways, static scanners, and custom ingestion pipelines that "peek" at ZIP contents before a different extractor handles the archive.
+
+---
+
+
+
 ## References
 
 - [https://michael-myers.github.io/blog/categories/ctf/](https://michael-myers.github.io/blog/categories/ctf/)
@@ -237,5 +286,6 @@ while True:
 - [ZIP File Format Specification (PKWARE APPNOTE.TXT)](https://pkware.cachefly.net/webdocs/casestudies/APPNOTE.TXT)
 - [Hackers bury malware in new ZIP file attack — concatenated ZIP central directories](https://www.tomshardware.com/tech-industry/cyber-security/hackers-bury-malware-in-new-zip-file-attack-combining-multiple-zips-into-one-bypasses-antivirus-protections)
 - [Understanding Zip Bombs: overlapping/quoted-overlap kernel construction](https://ubos.tech/news/understanding-zip-bombs-construction-risks-and-mitigation-2/)
-
+- [My ZIP isn't your ZIP: Identifying and Exploiting Semantic Gaps Between ZIP Parsers (USENIX Security 2025)](https://www.usenix.org/conference/usenixsecurity25/presentation/you)
+- [Preventing ZIP parser confusion attacks on Python package installers](https://blog.pypi.org/posts/2025-08-07-wheel-archive-confusion-attacks/)
 {{#include ../../../banners/hacktricks-training.md}}
