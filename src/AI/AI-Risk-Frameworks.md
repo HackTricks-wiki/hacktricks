@@ -94,9 +94,116 @@ Mitigations:
 - Monitor for unusual usage patterns (sudden spend spikes, atypical regions, UA strings) and auto-revoke suspicious sessions.
 - Prefer mTLS or signed JWTs issued by your IdP over long-lived static API keys.
 
+## Self-hosted LLM inference hardening
+
+Running a local LLM server for confidential data creates a different attack surface from cloud-hosted APIs: inference/debug endpoints may leak prompts, the serving stack usually exposes a reverse proxy, and GPU device nodes give access to large `ioctl()` surfaces. If you are assessing or deploying an on-prem inference service, review at least the following points.
+
+### Prompt leakage via debug and monitoring endpoints
+
+Treat the inference API as a **multi-user sensitive service**. Debug or monitoring routes can expose prompt contents, slot state, model metadata, or internal queue information. In `llama.cpp`, the `/slots` endpoint is especially sensitive because it exposes per-slot state and is only meant for slot inspection/management.
+
+- Put a reverse proxy in front of the inference server and **deny by default**.
+- Only allowlist the exact HTTP method + path combinations that are needed by the client/UI.
+- Disable introspection endpoints in the backend itself whenever possible, for example `llama-server --no-slots`.
+- Bind the reverse proxy to `127.0.0.1` and expose it through an authenticated transport such as SSH local port forwarding instead of publishing it on the LAN.
+
+Example allowlist with nginx:
+
+```nginx
+map "$request_method:$uri" $llm_whitelist {
+    default 0;
+
+    "GET:/health"              1;
+    "GET:/v1/models"           1;
+    "POST:/v1/completions"     1;
+    "POST:/v1/chat/completions" 1;
+}
+
+server {
+    listen 127.0.0.1:80;
+
+    location / {
+        if ($llm_whitelist = 0) { return 403; }
+        proxy_pass http://unix:/run/llama-cpp/llama-cpp.sock:;
+    }
+}
+```
+
+### Rootless containers with no network and UNIX sockets
+
+If the inference daemon supports listening on a UNIX socket, prefer that over TCP and run the container with **no network stack**:
+
+```bash
+podman run --rm -d \
+  --network none \
+  --user 1000:1000 \
+  --userns=keep-id \
+  --umask=007 \
+  --volume /var/lib/models:/models:ro \
+  --volume /srv/llm/socks:/run/llama-cpp \
+  ghcr.io/ggml-org/llama.cpp:server-cuda13 \
+    --host /run/llama-cpp/llama-cpp.sock \
+    --model /models/model.gguf \
+    --parallel 4 \
+    --no-slots
+```
+
+Benefits:
+- `--network none` removes inbound/outbound TCP/IP exposure and avoids user-mode helpers that rootless containers would otherwise need.
+- A UNIX socket lets you use POSIX permissions/ACLs on the socket path as the first access-control layer.
+- `--userns=keep-id` and rootless Podman reduce the impact of a container breakout because container root is not host root.
+- Read-only model mounts reduce the chance of model tampering from inside the container.
+
+### GPU device-node minimization
+
+For GPU-backed inference, `/dev/nvidia*` files are high-value local attack surfaces because they expose large driver `ioctl()` handlers and potentially shared GPU memory-management paths.
+
+- Do not leave `/dev/nvidia*` world writable.
+- Restrict `nvidia`, `nvidiactl`, and `nvidia-uvm` with `NVreg_DeviceFileUID/GID/Mode`, udev rules, and ACLs so only the mapped container UID can open them.
+- Blacklist unnecessary modules such as `nvidia_drm`, `nvidia_modeset`, and `nvidia_peermem` on headless inference hosts.
+- Preload only required modules at boot instead of letting the runtime opportunistically `modprobe` them during inference startup.
+
+Example:
+
+```bash
+options nvidia NVreg_DeviceFileUID=0
+options nvidia NVreg_DeviceFileGID=0
+options nvidia NVreg_DeviceFileMode=0660
+```
+
+One important review point is **`/dev/nvidia-uvm`**. Even if the workload does not explicitly use `cudaMallocManaged()`, recent CUDA runtimes may still require `nvidia-uvm`. Because this device is shared and handles GPU virtual memory management, treat it as a cross-tenant data-exposure surface. If the inference backend supports it, a Vulkan backend can be an interesting trade-off because it may avoid exposing `nvidia-uvm` to the container at all.
+
+### LSM confinement for inference workers
+
+AppArmor/SELinux/seccomp should be used as defense in depth around the inference process:
+
+- Allow only the shared libraries, model paths, socket directory, and GPU device nodes that are actually required.
+- Explicitly deny high-risk capabilities such as `sys_admin`, `sys_module`, `sys_rawio`, and `sys_ptrace`.
+- Keep the model directory read-only and scope writable paths to the runtime socket/cache directories only.
+- Monitor denial logs because they provide useful detection telemetry when the model server or a post-exploitation payload tries to escape its expected behaviour.
+
+Example AppArmor rules for a GPU-backed worker:
+
+```text
+deny capability sys_admin,
+deny capability sys_module,
+deny capability sys_rawio,
+deny capability sys_ptrace,
+
+/usr/lib/x86_64-linux-gnu/** mr,
+/dev/nvidiactl rw,
+/dev/nvidia0 rw,
+/var/lib/models/** r,
+owner /srv/llm/** rw,
+```
+
 ## References
 - [Unit 42 – The Risks of Code Assistant LLMs: Harmful Content, Misuse and Deception](https://unit42.paloaltonetworks.com/code-assistant-llms/)
 - [LLMJacking scheme overview – The Hacker News](https://thehackernews.com/2024/05/researchers-uncover-llmjacking-scheme.html)
 - [oai-reverse-proxy (reselling stolen LLM access)](https://gitgud.io/khanon/oai-reverse-proxy)
+- [Synacktiv - Deep-dive into the deployment of an on-premise low-privileged LLM server](https://www.synacktiv.com/en/publications/deep-dive-into-the-deployment-of-an-on-premise-low-privileged-llm-server.html)
+- [llama.cpp server README](https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md)
+- [Podman quadlets: podman-systemd.unit](https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html)
+- [CNCF Container Device Interface (CDI) specification](https://github.com/cncf-tags/container-device-interface/blob/main/SPEC.md)
 
 {{#include ../banners/hacktricks-training.md}}
