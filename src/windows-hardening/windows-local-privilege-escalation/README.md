@@ -1338,6 +1338,10 @@ C:\inetpub\wwwroot\web.config
 ```
 
 ```bash
+type C:\Windows\Microsoft.NET\Framework644.0.30319\Config\web.config | findstr connectionString
+```
+
+```bash
 Get-Childitem –Path C:\inetpub\ -Include web.config -File -Recurse -ErrorAction SilentlyContinue
 Get-Childitem –Path C:\xampp\ -Include web.config -File -Recurse -ErrorAction SilentlyContinue
 ```
