@@ -2,37 +2,37 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-**Komut satırı araçları**, **zip dosyaları** ile çalışırken tanılama, onarım ve kırma işlemleri için gereklidir. Öne çıkan bazı yardımcı programlar:
+**Komut satırı araçları** zip dosyalarını teşhis etmek, onarmak ve kırmak için esastır. İşte bazı önemli yardımcı programlar:
 
 - **`unzip`**: Bir zip dosyasının neden açılmadığını gösterir.
-- **`zipdetails -v`**: Zip dosyası formatı alanlarının ayrıntılı analizini sunar.
-- **`zipinfo`**: Dosyaları açmadan bir zip dosyasının içeriğini listeler.
-- **`zip -F input.zip --out output.zip`** ve **`zip -FF input.zip --out output.zip`**: Bozuk zip dosyalarını onarmayı dener.
-- **[fcrackzip](https://github.com/hyc/fcrackzip)**: Yaklaşık 7 karaktere kadar şifreler için brute-force kırma aracı.
+- **`zipdetails -v`**: zip dosyası formatı alanlarının detaylı analizini sunar.
+- **`zipinfo`**: Zip içeriğini çıkarmadan listeler.
+- **`zip -F input.zip --out output.zip`** ve **`zip -FF input.zip --out output.zip`**: Bozuk zip dosyalarını tamir etmeyi dener.
+- **[fcrackzip](https://github.com/hyc/fcrackzip)**: Zip şifrelerini kaba kuvvetle kırmak için bir araç, yaklaşık 7 karaktere kadar olan parolalar için etkilidir.
 
-[Zip file format specification](https://pkware.cachefly.net/webdocs/casestudies/APPNOTE.TXT) zip dosyalarının yapı ve standartları hakkında kapsamlı bilgiler sağlar.
+[Zip file format specification](https://pkware.cachefly.net/webdocs/casestudies/APPNOTE.TXT) zip dosyalarının yapısı ve standartları hakkında kapsamlı ayrıntılar sağlar.
 
-Şu önemli noktaya dikkat etmek gerekir: parola korumalı zip dosyaları içinde dosya adlarını veya dosya boyutlarını **şifrelemez**, bu RAR veya 7z gibi formatlarda bulunan bir güvenlik önlemi değildir. Ayrıca, eski ZipCrypto ile şifrelenmiş zip dosyaları, sıkıştırılmamış bir dosyanın açık bir kopyası mevcutsa bilinen bir **plaintext attack**e karşı savunmasızdır. Bu saldırı, bilinen içeriği kullanarak zip şifresini kırar; detaylar için [HackThis'in makalesine](https://www.hackthis.co.uk/articles/known-plaintext-attack-cracking-zip-files) ve [bu akademik makaleye](https://www.cs.auckland.ac.nz/~mike/zipattacks.pdf) bakılabilir. Ancak **AES-256** ile korunmuş zip dosyaları bu plaintext attack'e karşı bağışıktır; bu da hassas veriler için güçlü şifreleme yöntemlerinin seçiminin önemini gösterir.
+Şifre korumalı zip dosyalarının içindeki dosya adlarını veya dosya boyutlarını **şifrelemediğini** belirtmek önemlidir; bu, RAR veya 7z dosyalarının şifrelediği bu bilgiyle paylaşılmayan bir güvenlik açığıdır. Ayrıca, eski ZipCrypto yöntemiyle şifrelenmiş zip dosyaları, sıkıştırılmış bir dosyanın şifresiz bir kopyası mevcutsa **plaintext attack**'e karşı savunmasızdır. Bu saldırı, bilinen içeriği kullanarak zip parolasını kırar; bu zafiyet [HackThis's article](https://www.hackthis.co.uk/articles/known-plaintext-attack-cracking-zip-files) tarafından detaylandırılmış ve [this academic paper](https://www.cs.auckland.ac.nz/~mike/zipattacks.pdf) tarafından daha ayrıntılı açıklanmıştır. Ancak, **AES-256** ile korunmuş zip dosyaları bu plaintext attack'e karşı bağışıktır; bu da hassas veriler için güvenli şifreleme yöntemlerinin seçilmesinin önemini gösterir.
 
 ---
 
-## Manipüle edilmiş ZIP başlıkları kullanılarak APK'larda anti-reversing hileleri
+## APK'lerde manipüle edilmiş ZIP başlıkları kullanılarak yapılan Anti-reversing tricks
 
-Modern Android malware dropper'ları, APK'yi cihazda kurulabilir tutarken statik araçları (jadx/apktool/unzip) kırmak için bozuk ZIP metadata'sı kullanır. En yaygın hileler:
+Modern Android malware droppers, APK'yı cihazda kurulabilir tutarken statik araçları (jadx/apktool/unzip) bozmak için bozuk ZIP metadata'sı kullanır. En yaygın hileler şunlardır:
 
-- ZIP General Purpose Bit Flag (GPBF) bit 0'ı ayarlayarak sahte şifreleme
-- Ayrıştırıcıları şaşırtmak için büyük/özel Extra alanlarını kötüye kullanma
-- Gerçek öğeleri gizlemek için dosya/klasör adı çakışmaları (ör. gerçek `classes.dex` yanında `classes.dex/` adlı bir dizin)
+- Fake encryption by setting the ZIP General Purpose Bit Flag (GPBF) bit 0
+- Abusing large/custom Extra fields to confuse parsers
+- File/directory name collisions to hide real artifacts (e.g., a directory named `classes.dex/` next to the real `classes.dex`)
 
-### 1) Gerçek kripto olmadan sahte şifreleme (GPBF bit 0 set)
+### 1) Fake encryption (GPBF bit 0 set) without real crypto
 
 Belirtiler:
-- `jadx-gui` şu tip hatalarla başarısız olur:
+- `jadx-gui` şu tür hatalarla başarısız olur:
 
 ```
 java.util.zip.ZipException: invalid CEN header (encrypted entry)
 ```
-- `unzip` temel APK dosyaları için parola ister, oysa geçerli bir APK `classes*.dex`, `resources.arsc`, veya `AndroidManifest.xml` dosyalarını şifreleyemez:
+- `unzip` geçerli bir APK'nın şifrelenmiş `classes*.dex`, `resources.arsc`, veya `AndroidManifest.xml` içeremeyeceği halde temel APK dosyaları için parola ister:
 
 ```bash
 unzip sample.apk
@@ -43,11 +43,11 @@ skipping: resources.arsc/res/domeo/eqmvo.xml            incorrect password
 skipping: classes2.dex                          incorrect password
 ```
 
-zipdetails ile tespit:
+Tespit için zipdetails:
 ```bash
 zipdetails -v sample.apk | less
 ```
-Local ve central header'lar için General Purpose Bit Flag'e bakın. İpucu: core entry'ler için bile bit 0'ın set (Encryption) olması:
+Yerel ve merkezi başlıklar için General Purpose Bit Flag'e bakın. Ayırt edici bir değer, temel girdiler için bile bit 0'ın set olması (Encryption):
 ```
 Extract Zip Spec      2D '4.5'
 General Purpose Flag  0A09
@@ -56,12 +56,12 @@ General Purpose Flag  0A09
 [Bit 3]   1 'Streamed'
 [Bit 11]  1 'Language Encoding'
 ```
-Sezgisel: Eğer bir APK cihazda yüklenip çalışıyor ancak çekirdek girdileri araçlara "şifrelenmiş" gibi görünüyorsa, GPBF ile oynanmış demektir.
+Sezgisel: Eğer bir APK cihazda kurulur ve çalıştırılır ancak çekirdek girdileri araçlara "şifrelenmiş" gibi görünüyorsa, GPBF değiştirilmiştir.
 
-Çözüm, hem Local File Headers (LFH) hem de Central Directory (CD) girdilerindeki GPBF bit 0'ı temizlemektir. Minimal byte-patcher:
+Düzeltme: GPBF bit 0'ı hem Local File Headers (LFH) hem de Central Directory (CD) girdilerinde temizlenerek yapılır. Minimal byte-patcher:
 
 <details>
-<summary>Minimal GPBF bit temizleme patcheri</summary>
+<summary>Minimal GPBF bit-clear patcher</summary>
 ```python
 # gpbf_clear.py – clear encryption bit (bit 0) in ZIP local+central headers
 import struct, sys
@@ -101,31 +101,31 @@ zipdetails -v normalized.apk | grep -A2 "General Purpose Flag"
 ```
 Artık çekirdek girdilerinde `General Purpose Flag  0000` görmelisiniz ve araçlar APK'yı tekrar ayrıştıracaktır.
 
-### 2) Parsers'ı bozmak için büyük/özel Extra fields
+### 2) Ayrıştırıcıları bozmak için büyük/özel Extra alanlar
 
-Saldırganlar decompilerları yanıltmak için başlıklara aşırı büyük Extra fields ve tuhaf ID'ler koyar. Gerçekte orada gömülü özel işaretçiler (ör. `JADXBLOCK` gibi dizeler) görebilirsiniz.
+Saldırganlar, dekompilerleri yanıltmak için başlıklara aşırı büyük Extra alanlar ve tuhaf ID'ler koyar. Gerçekte orada gömülü özel işaretler (örn. `JADXBLOCK` gibi dizeler) görebilirsiniz.
 
 İnceleme:
 ```bash
 zipdetails -v sample.apk | sed -n '/Extra ID/,+4p' | head -n 50
 ```
-Gözlemlenen örnekler: `0xCAFE` ("Java Executable") veya `0x414A` ("JA:") gibi bilinmeyen ID'lerin büyük payload'lar taşıması.
+Gözlemlenen örnekler: `0xCAFE` ("Java Executable") veya `0x414A` ("JA:") gibi bilinmeyen ID'lerin büyük payloads taşıması.
 
 DFIR heuristikleri:
-- Core entry'lerde (`classes*.dex`, `AndroidManifest.xml`, `resources.arsc`) Extra fields olağandışı büyük olduğunda uyarı verin.
-- Bu entry'lerdeki bilinmeyen Extra ID'lerini şüpheli olarak değerlendirin.
+- core girişlerde (`classes*.dex`, `AndroidManifest.xml`, `resources.arsc`) Extra alanları olağandışı şekilde büyük olduğunda uyarı ver.
+- Bu girişlerdeki bilinmeyen Extra ID'lerini şüpheli olarak değerlendir.
 
-Pratik önlem: arşivi yeniden oluşturmak (örn. çıkarılan dosyaları yeniden ziplemek) zararlı Extra fields'i temizler. Eğer araçlar sahte şifreleme nedeniyle çıkarmayı reddederse, önce yukarıda belirtildiği gibi GPBF bit 0'ı temizleyin, sonra yeniden paketleyin:
+Pratik hafifletme: arşivi yeniden oluşturmak (ör. çıkartılmış dosyaları yeniden ziplemek) kötü amaçlı Extra alanlarını temizler. Eğer araçlar sahte şifreleme nedeniyle çıkartmayı reddederse, önce yukarıda belirtildiği gibi GPBF bit 0'ı temizleyin, sonra yeniden paketleyin:
 ```bash
 mkdir /tmp/apk
 unzip -qq normalized.apk -d /tmp/apk
 (cd /tmp/apk && zip -qr ../clean.apk .)
 ```
-### 3) Dosya/Dizin isim çakışmaları (gerçek artefaktların gizlenmesi)
+### 3) Dosya/Dizin adı çakışmaları (gerçek artefaktları gizleme)
 
-Bir ZIP hem bir dosya `X` hem de bir dizin `X/` içerebilir. Bazı açıcılar ve decompiler'lar karışıklık yaşayabilir ve gerçek dosyanın üzerine bir dizin girdisi yerleştirebilir veya onu gizleyebilir. Bu, `classes.dex` gibi çekirdek APK isimleriyle çakışan girdilerde gözlemlenmiştir.
+Bir ZIP hem bir dosya `X` hem de bir dizin `X/` içerebilir. Bazı extractors ve decompilers şaşırabilir ve gerçek dosyanın üzerine dizin girdisi yazarak onu gizleyebilir. Bu, core APK isimleriyle (ör. `classes.dex`) çakışan girdilerde gözlemlendi.
 
-Triage ve güvenli çıkarma:
+Triyaj ve güvenli çıkarma:
 ```bash
 # List potential collisions (names that differ only by trailing slash)
 zipinfo -1 sample.apk | awk '{n=$0; sub(/\/$/,"",n); print n}' | sort | uniq -d
@@ -153,27 +153,27 @@ for base, variants in collisions.items():
 if len(variants) > 1:
 print('COLLISION', base, '->', variants)
 ```
-Blue-team tespit fikirleri:
-- APK'lerin yerel header'ları şifrelemeyi işaretlediği (GPBF bit 0 = 1) halde yine de yüklenen/çalıştırılan APK'leri işaretle.
-- core girdilerindeki büyük/bilinmeyen Extra field'ları işaretle ( `JADXBLOCK` gibi işaretleri ara).
-- Özellikle `AndroidManifest.xml`, `resources.arsc`, `classes*.dex` için yol çakışmalarını (`X` ve `X/`) işaretle.
+Blue-team detection ideas:
+- Yerel başlıkları şifreleme olarak işaretleyen (GPBF bit 0 = 1) ancak yine de yüklenen/çalıştırılan APK'leri işaretle.
+- Çekirdek girdilerdeki büyük/bilinmeyen Extra alanlarını işaretle (ör. `JADXBLOCK` gibi markerlara bak).
+- Yol çakışmalarını işaretle (`X` and `X/`) özellikle `AndroidManifest.xml`, `resources.arsc`, `classes*.dex` için.
 
 ---
 
-## Diğer kötü amaçlı ZIP hileleri (2024–2025)
+## Diğer kötü amaçlı ZIP hileleri (2024–2026)
 
-### Birleştirilmiş central directories (multi-EOCD evasion)
+### Concatenated central directories (multi-EOCD evasion)
 
-Son phishing kampanyalarında tek bir blob gönderiliyor; bu blob aslında **iki ZIP dosyasının birleştirilmiş hali**. Her birinin kendi End of Central Directory (EOCD) + central directory'si bulunuyor. Farklı extractors farklı dizinleri parse eder (7zip ilkini okur, WinRAR sonuncuyu), bu da saldırganların yalnızca bazı araçların gösterdiği payload'ları gizlemesine olanak tanıyor. Bu ayrıca yalnızca ilk dizini inceleyen temel mail gateway AV'lerini de atlatıyor.
+Son phishing kampanyaları, aslında arka arkaya eklenmiş iki ZIP dosyası olan tek bir blob gönderiyor. Her birinin kendi End of Central Directory (EOCD) + central directory'si var. Farklı extractors farklı dizinleri parse ediyor (7zip ilkini okur, WinRAR sonuncusunu), bu sayede saldırganlar sadece bazı araçların gösterdiği payload'ları gizleyebiliyor. Bu, yalnızca ilk dizini inceleyen temel mail gateway AV'yi de atlatıyor.
 
-**Triage commands**
+**Triage komutları**
 ```bash
 # Count EOCD signatures
 binwalk -R "PK\x05\x06" suspect.zip
 # Dump central-directory offsets
 zipdetails -v suspect.zip | grep -n "End Central"
 ```
-Birden fazla EOCD görünüyorsa veya "data after payload" uyarıları varsa, blob'u bölün ve her bir kısmı inceleyin:
+Eğer birden fazla EOCD görünüyorsa veya "data after payload" uyarıları varsa, blob'u bölün ve her bir parçayı inceleyin:
 ```bash
 # recover the second archive (heuristic: start at second EOCD offset)
 # adjust OFF based on binwalk output
@@ -183,7 +183,7 @@ dd if=suspect.zip bs=1 skip=$OFF of=tail.zip
 ```
 ### Quoted-overlap / overlapping-entry bombs (non-recursive)
 
-Modern "better zip bomb" küçük bir **çekirdek** (yüksek oranda sıkıştırılmış DEFLATE bloğu) oluşturur ve bunu örtüşen local headers aracılığıyla yeniden kullanır. Her central directory entry aynı sıkıştırılmış veriye işaret eder; arşivleri iç içe koymadan >28M:1 oranlarına ulaşır. Central directory boyutlarına güvenen kütüphaneler (Python `zipfile`, Java `java.util.zip`, Info-ZIP, sertleştirilmiş build'lerden önce) petabaytlar ayırmaya zorlanabilir.
+Modern "better zip bomb" küçük bir **çekirdek** (yüksek oranda sıkıştırılmış DEFLATE bloğu) oluşturur ve bunu örtüşen local headers aracılığıyla tekrar kullanır. Her central directory girdisi aynı sıkıştırılmış veriye işaret eder; arşivleri iç içe sokmadan >28M:1 oranları elde edilir. Central directory boyutlarına güvenen kütüphaneler (Python `zipfile`, Java `java.util.zip`, Info-ZIP güçlendirilmiş sürümlerden önce) petabaytlarca bellek ayırmaya zorlanabilir.
 
 **Hızlı tespit (duplicate LFH offsets)**
 ```python
@@ -200,14 +200,57 @@ print('OVERLAP at offset', rel)
 break
 seen.add(rel); off = i+4
 ```
-**Ele alma**
-- Bir dry-run yürütün: `zipdetails -v file.zip | grep -n "Rel Off"` ve offsetlerin kesinlikle artan ve benzersiz olduğundan emin olun.
-- Çıkarma işleminden önce kabul edilen toplam sıkıştırılmamış boyutu ve giriş sayısını sınırlandırın (`zipdetails -t` veya özel bir ayrıştırıcı).
-- Zorunlu olarak çıkartma yapmanız gerekiyorsa, bunu CPU ve disk limitleri olan bir cgroup/VM içinde yapın (sınırsız genişleme kaynaklı çökme/şişmeyi önleyin).
+**İşleme**
+- Bir dry-run taraması yap: `zipdetails -v file.zip | grep -n "Rel Off"` ve offsetlerin kesinlikle artan ve benzersiz olduğunu doğrula.
+- Çıkarımdan önce kabul edilen toplam sıkıştırılmamış boyutu ve giriş sayısını sınırla (`zipdetails -t` veya özel ayrıştırıcı).
+- Zorunlu olarak çıkarım yapmanız gerekiyorsa, bunu CPU+disk sınırları olan bir cgroup/VM içinde yap (sınırsız kaynak kullanımından kaynaklanan çökmeleri önleyin).
 
 ---
 
-## Kaynaklar
+### Local-header vs central-directory parser confusion
+
+Son differential-parser araştırmaları, ZIP belirsizliğinin modern araç zincirlerinde hâlâ sömürülebilir olduğunu gösterdi. Temel fikir basit: bazı yazılımlar **Local File Header (LFH)**'a güveniyor, bazıları ise **Central Directory (CD)**'ye güveniyor; bu yüzden tek bir arşiv farklı araçlara farklı dosya adları, yollar, açıklamalar, offsets veya entry setleri gösterebilir.
+
+Pratik ofansif kullanım örnekleri:
+- Bir upload filtresinin, AV ön-taramasının veya paket doğrulayıcısının CD'de iyi niyetli bir dosya görmesini sağlayın; ekstraktör ise farklı bir LFH adı/yolunu işler.
+- Çift adları, yalnızca bir yapıda bulunan girişleri veya belirsiz Unicode yol meta verisini (örneğin, Info-ZIP Unicode Path Extra Field `0x7075`) kötüye kullanarak farklı parser'ların farklı ağaçlar oluşturmasını sağlayın.
+- Bunu path traversal ile birleştirerek çıkarma sırasında "harmless" görünen bir arşivi yazma ilkeline dönüştürün. Çıkarma tarafı için bkz. [Archive Extraction Path Traversal](../../../generic-hacking/archive-extraction-path-traversal.md).
+
+DFIR önceliklendirmesi:
+```python
+# compare Central Directory names against the referenced Local File Header names
+import struct, sys
+b = open(sys.argv[1], 'rb').read()
+lfh = {}
+i = 0
+while (i := b.find(b'PK\x03\x04', i)) != -1:
+n, e = struct.unpack_from('<HH', b, i + 26)
+lfh[i] = b[i + 30:i + 30 + n].decode('utf-8', 'replace')
+i += 4
+i = 0
+while (i := b.find(b'PK\x01\x02', i)) != -1:
+n = struct.unpack_from('<H', b, i + 28)[0]
+off = struct.unpack_from('<I', b, i + 42)[0]
+cd = b[i + 46:i + 46 + n].decode('utf-8', 'replace')
+if off in lfh and cd != lfh[off]:
+print(f'NAME_MISMATCH off={off} cd={cd!r} lfh={lfh[off]!r}')
+i += 4
+```
+Eksik içeriği veya tamamlamamı istediğiniz metni gönderin; göndereceğiniz dosya içeriğini Türkçeye çevirip aynı markdown/HTML sözdizimini koruyarak döndüreceğim.
+```bash
+zipdetails -v suspect.zip | less
+zipinfo -v suspect.zip | grep -E "file name|offset|comment"
+```
+Sezgisel Kurallar:
+- Eşleşmeyen LFH/CD isimleri, yinelenen dosya adları, birden fazla EOCD kaydı veya son EOCD'den sonra kalan baytlar içeren arşivleri reddedin veya izole edin.
+- Farklı araçlar çıkarılan ağaç konusunda anlaşmazlığa düşerse, alışılmadık Unicode-path extra fields kullanan veya tutarsız yorumlar içeren ZIP'leri şüpheli olarak değerlendirin.
+- Analizin orijinal baytların korunmasından daha önemli olduğu durumlarda, sandbox'ta çıkarımdan sonra arşivi katı bir parser ile yeniden paketleyin ve oluşan dosya listesini orijinal metadata ile karşılaştırın.
+
+Bu, paket ekosistemlerinin ötesinde önemlidir: aynı belirsizlik sınıfı, farklı bir extractor arşivi işlemeye başlamadan önce ZIP içeriğine "peek" atan mail gateways, static scanners ve custom ingestion pipelines gibi sistemlerden payloads gizleyebilir.
+
+---
+
+## References
 
 - [https://michael-myers.github.io/blog/categories/ctf/](https://michael-myers.github.io/blog/categories/ctf/)
 - [GodFather – Part 1 – A multistage dropper (APK ZIP anti-reversing)](https://shindan.io/blog/godfather-part-1-a-multistage-dropper)
@@ -215,5 +258,6 @@ seen.add(rel); off = i+4
 - [ZIP File Format Specification (PKWARE APPNOTE.TXT)](https://pkware.cachefly.net/webdocs/casestudies/APPNOTE.TXT)
 - [Hackers bury malware in new ZIP file attack — concatenated ZIP central directories](https://www.tomshardware.com/tech-industry/cyber-security/hackers-bury-malware-in-new-zip-file-attack-combining-multiple-zips-into-one-bypasses-antivirus-protections)
 - [Understanding Zip Bombs: overlapping/quoted-overlap kernel construction](https://ubos.tech/news/understanding-zip-bombs-construction-risks-and-mitigation-2/)
-
+- [My ZIP isn't your ZIP: Identifying and Exploiting Semantic Gaps Between ZIP Parsers (USENIX Security 2025)](https://www.usenix.org/conference/usenixsecurity25/presentation/you)
+- [Preventing ZIP parser confusion attacks on Python package installers](https://blog.pypi.org/posts/2025-08-07-wheel-archive-confusion-attacks/)
 {{#include ../../../banners/hacktricks-training.md}}
