@@ -1334,11 +1334,8 @@ Get-Childitem –Path C:\inetpub\ -Include web.config -File -Recurse -ErrorActio
 
 ```bash
 C:\Windows\Microsoft.NET\Framework64\v4.0.30319\Config\web.config
-C:\inetpub\wwwroot\web.config
-```
-
-```bash
 type C:\Windows\Microsoft.NET\Framework644.0.30319\Config\web.config | findstr connectionString
+C:\inetpub\wwwroot\web.config
 ```
 
 ```bash
