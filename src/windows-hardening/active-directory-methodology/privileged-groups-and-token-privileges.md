@@ -26,12 +26,20 @@ The **AdminSDHolder** group's Access Control List (ACL) is crucial as it sets pe
 
 An attacker could exploit this by modifying the **AdminSDHolder** group's ACL, granting full permissions to a standard user. This would effectively give that user full control over all protected groups. If this user's permissions are altered or removed, they would be automatically reinstated within an hour due to the system's design.
 
+Recent Windows Server documentation still treats several built-in operator groups as **protected** objects (`Account Operators`, `Backup Operators`, `Print Operators`, `Server Operators`, `Domain Admins`, `Enterprise Admins`, `Key Admins`, `Enterprise Key Admins`, etc.). The **SDProp** process runs on the **PDC Emulator** every 60 minutes by default, stamps `adminCount=1`, and disables inheritance on protected objects. This is useful both for persistence and for hunting stale privileged users that were removed from a protected group but still keep the non-inheriting ACL.
+
 Commands to review the members and modify permissions include:
 
 ```bash
 Get-NetGroupMember -Identity "AdminSDHolder" -Recurse
 Add-DomainObjectAcl -TargetIdentity 'CN=AdminSDHolder,CN=System,DC=testlab,DC=local' -PrincipalIdentity matt -Rights All
 Get-ObjectAcl -SamAccountName "Domain Admins" -ResolveGUIDs | ?{$_.IdentityReference -match 'spotless'}
+```
+
+```powershell
+# Hunt users/groups that still have adminCount=1
+Get-ADObject -LDAPFilter '(adminCount=1)' -Properties adminCount,distinguishedName |
+  Select-Object distinguishedName
 ```
 
 A script is available to expedite the restoration process: [Invoke-ADSDPropagation.ps1](https://github.com/edemilliere/ADSI/blob/master/Invoke-ADSDPropagation.ps1).
@@ -44,6 +52,14 @@ Membership in this group allows for the reading of deleted Active Directory obje
 
 ```bash
 Get-ADObject -filter 'isDeleted -eq $true' -includeDeletedObjects -Properties *
+```
+
+This is useful for **recovering previous privilege paths**. Deleted objects can still expose `lastKnownParent`, `memberOf`, `sIDHistory`, `adminCount`, old SPNs, or the DN of a deleted privileged group that can later be restored by another operator.
+
+```powershell
+Get-ADObject -Filter 'isDeleted -eq $true' -IncludeDeletedObjects `
+  -Properties samAccountName,lastKnownParent,memberOf,sIDHistory,adminCount,servicePrincipalName |
+  Select-Object samAccountName,lastKnownParent,adminCount,sIDHistory,servicePrincipalName
 ```
 
 ### Domain Controller Access
@@ -239,25 +255,52 @@ This group can modify DACLs on the domain object, potentially granting DCSync pr
 Get-NetGroupMember -Identity "Exchange Windows Permissions" -Recurse
 ```
 
+If you can act as a member of this group, the classic abuse is to grant an attacker-controlled principal the replication rights needed for [DCSync](dcsync.md):
+
+```bash
+Add-DomainObjectAcl -TargetIdentity "DC=testlab,DC=local" -PrincipalIdentity attacker -Rights DCSync
+Get-ObjectAcl -DistinguishedName "DC=testlab,DC=local" -ResolveGUIDs | ?{$_.IdentityReference -match 'attacker'}
+```
+
+Historically, **PrivExchange** chained mailbox access, coerced Exchange authentication, and LDAP relay to land on this same primitive. Even where that relay path is mitigated, direct membership in `Exchange Windows Permissions` or control of an Exchange server remains a high-value route to domain replication rights.
+
 ## Hyper-V Administrators
 
 Hyper-V Administrators have full access to Hyper-V, which can be exploited to gain control over virtualized Domain Controllers. This includes cloning live DCs and extracting NTLM hashes from the NTDS.dit file.
 
 ### Exploitation Example
 
-Firefox's Mozilla Maintenance Service can be exploited by Hyper-V Administrators to execute commands as SYSTEM. This involves creating a hard link to a protected SYSTEM file and replacing it with a malicious executable:
+The practical abuse is usually **offline access to DC disks/checkpoints** rather than old host-level LPE tricks. With access to the Hyper-V host, an operator can checkpoint or export a virtualized Domain Controller, mount the VHDX, and extract `NTDS.dit`, `SYSTEM`, and other secrets without touching LSASS inside the guest:
 
 ```bash
-# Take ownership and start the service
-takeown /F C:\Program Files (x86)\Mozilla Maintenance Service\maintenanceservice.exe
-sc.exe start MozillaMaintenance
+# Host-side enumeration
+Get-VM
+Get-VHD -VMId <vm-guid>
+
+# After exporting or checkpointing the DC, mount the disk read-only
+Mount-VHD -Path 'C:\HyperV\Virtual Hard Disks\DC01.vhdx' -ReadOnly
 ```
 
-Note: Hard link exploitation has been mitigated in recent Windows updates.
+From there, reuse the `Backup Operators` workflow to copy `Windows\NTDS\ntds.dit` and the registry hives offline.
 
 ## Group Policy Creators Owners	
 
 This group allows members to create Group Policies in the domain. However, its members can't apply group policies to users or group or edit existing GPOs.
+
+The important nuance is that the **creator becomes owner of the new GPO** and usually gets enough rights to edit it afterwards. That means this group is interesting when you can either:
+
+- create a malicious GPO and convince an admin to link it to a target OU/domain
+- edit a GPO you created that is already linked somewhere useful
+- abuse another delegated right that lets you link GPOs, while this group gives you the edit side
+
+Practical abuse normally means adding an **Immediate Task**, **startup script**, **local admin membership**, or **user rights assignment** change through SYSVOL-backed policy files.
+
+```bash
+# Example with SharpGPOAbuse: add an immediate task that executes as SYSTEM
+SharpGPOAbuse.exe --AddImmediateTask --TaskName "HT-Task" --Author TESTLAB\\Administrator --Command "cmd.exe" --Arguments "/c whoami > C:\\Windows\\Temp\\gpo.txt" --GPOName "Security Update"
+```
+
+If editing the GPO manually through `SYSVOL`, remember the change is not enough by itself: `versionNumber`, `GPT.ini`, and sometimes `gPCMachineExtensionNames` must also be updated or clients will ignore the policy refresh.
 
 ## Organization Management
 
@@ -275,7 +318,7 @@ To list the members of this group, the following PowerShell command is used:
 Get-NetGroupMember -Identity "Print Operators" -Recurse
 ```
 
-For more detailed exploitation techniques related to **`SeLoadDriverPrivilege`**, one should consult specific security resources.
+On Domain Controllers this group is dangerous because the default Domain Controller Policy grants **`SeLoadDriverPrivilege`** to `Print Operators`. If you reach an elevated token for a member of this group, you can enable the privilege and load a signed-but-vulnerable driver to jump to kernel/SYSTEM. For token handling details, check [Access Tokens](../windows-local-privilege-escalation/access-tokens.md).
 
 #### Remote Desktop Users
 
@@ -307,6 +350,16 @@ This group has permissions to perform various configurations on Domain Controlle
 Get-NetGroupMember -Identity "Server Operators" -Recurse
 ```
 
+On Domain Controllers, `Server Operators` commonly inherit enough rights to **reconfigure or start/stop services** and also receive `SeBackupPrivilege`/`SeRestorePrivilege` through the default DC policy. In practice, this makes them a bridge between **service-control abuse** and **NTDS extraction**:
+
+```cmd
+sc.exe \\dc01 query
+sc.exe \\dc01 qc <service>
+.\PsService.exe security <service>
+```
+
+If a service ACL gives this group change/start rights, point the service at an arbitrary command, start it as `LocalSystem`, and then restore the original `binPath`. If service control is locked down, fall back to the `Backup Operators` techniques above to copy `NTDS.dit`.
+
 ## References <a href="#references" id="references"></a>
 
 - [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges)
@@ -324,6 +377,8 @@ Get-NetGroupMember -Identity "Server Operators" -Recurse
 - [https://posts.specterops.io/a-red-teamers-guide-to-gpos-and-ous-f0d03976a31e](https://posts.specterops.io/a-red-teamers-guide-to-gpos-and-ous-f0d03976a31e)
 - [https://undocumented.ntinternals.net/index.html?page=UserMode%2FUndocumented%20Functions%2FExecutable%20Images%2FNtLoadDriver.html](https://undocumented.ntinternals.net/index.html?page=UserMode%2FUndocumented%20Functions%2FExecutable%20Images%2FNtLoadDriver.html)
 - [HTB: Baby — Anonymous LDAP → Password Spray → SeBackupPrivilege → Domain Admin](https://0xdf.gitlab.io/2025/09/19/htb-baby.html)
+- [https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/plan/security-best-practices/appendix-c--protected-accounts-and-groups-in-active-directory](https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/plan/security-best-practices/appendix-c--protected-accounts-and-groups-in-active-directory)
+- [https://labs.withsecure.com/tools/sharpgpoabuse](https://labs.withsecure.com/tools/sharpgpoabuse)
 
 
 {{#include ../../banners/hacktricks-training.md}}
