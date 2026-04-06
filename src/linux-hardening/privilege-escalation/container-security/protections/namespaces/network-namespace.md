@@ -45,6 +45,8 @@ The most important misconfiguration is simply sharing the host network namespace
 
 Another problem is overgranting network-related capabilities even when the network namespace is private. A private namespace does help, but it does not make raw sockets or advanced network control harmless.
 
+In Kubernetes, `hostNetwork: true` also changes how much faith you can place in Pod-level network segmentation. Kubernetes documents that many network plugins cannot properly distinguish `hostNetwork` Pod traffic for `podSelector` / `namespaceSelector` matching and therefore treat it as ordinary node traffic. From an attacker's point of view, that means a compromised `hostNetwork` workload should often be treated as a node-level network foothold rather than as a normal Pod still constrained by the same policy assumptions as overlay-network workloads.
+
 ## Abuse
 
 In weakly isolated setups, attackers may inspect host listening services, reach management endpoints bound only to loopback, sniff or interfere with traffic depending on the exact capabilities and environment, or reconfigure routing and firewall state if `CAP_NET_ADMIN` is present. In a cluster, this can also make lateral movement and control-plane reconnaissance easier.
@@ -72,6 +74,21 @@ capsh --print | grep -E 'cap_net_admin|cap_net_raw'
 iptables -S 2>/dev/null || nft list ruleset 2>/dev/null
 ip link show
 ```
+
+On modern kernels, host networking plus `CAP_NET_ADMIN` may also expose the packet path beyond simple `iptables` / `nftables` changes. `tc` qdiscs and filters are namespace-scoped too, so in a shared host network namespace they apply to the host interfaces the container can see. If `CAP_BPF` is additionally present, network-related eBPF programs such as TC and XDP loaders become relevant as well:
+
+```bash
+capsh --print | grep -E 'cap_net_admin|cap_net_raw|cap_bpf'
+for i in $(ls /sys/class/net 2>/dev/null); do
+  echo "== $i =="
+  tc qdisc show dev "$i" 2>/dev/null
+  tc filter show dev "$i" ingress 2>/dev/null
+  tc filter show dev "$i" egress 2>/dev/null
+done
+bpftool net 2>/dev/null
+```
+
+This matters because an attacker may be able to mirror, redirect, shape, or drop traffic at the host interface level, not just rewrite firewall rules. In a private network namespace those actions are contained to the container view; in a shared host namespace they become host-impacting.
 
 In cluster or cloud environments, host networking also justifies quick local recon of metadata and control-plane-adjacent services:
 
@@ -113,7 +130,10 @@ Impact:
 The goal of these checks is to learn whether the process has a private network stack, what routes and listeners are visible, and whether the network view already looks host-like before you even test capabilities.
 
 ```bash
-readlink /proc/self/ns/net   # Network namespace identifier
+readlink /proc/self/ns/net   # Current network namespace identifier
+readlink /proc/1/ns/net      # Compare with PID 1 in the current container / pod
+lsns -t net 2>/dev/null      # Reachable network namespaces from this view
+ip netns identify $$ 2>/dev/null
 ip addr                      # Visible interfaces and addresses
 ip route                     # Routing table
 ss -lntup                    # Listening TCP/UDP sockets with process info
@@ -121,9 +141,16 @@ ss -lntup                    # Listening TCP/UDP sockets with process info
 
 What is interesting here:
 
-- If the namespace identifier or the visible interface set looks like the host, host networking may already be in use.
+- If `/proc/self/ns/net` and `/proc/1/ns/net` already look host-like, the container may be sharing the host network namespace or another non-private namespace.
+- `lsns -t net` and `ip netns identify` are useful when the shell is already inside a named or persistent namespace and you want to correlate it with `/run/netns` objects from the host side.
 - `ss -lntup` is especially valuable because it reveals loopback-only listeners and local management endpoints.
-- Routes, interface names, and firewall context become much more important if `CAP_NET_ADMIN` or `CAP_NET_RAW` is present.
+- Routes, interface names, firewall context, `tc` state, and eBPF attachments become much more important if `CAP_NET_ADMIN`, `CAP_NET_RAW`, or `CAP_BPF` is present.
+- In Kubernetes, failed service-name resolution from a `hostNetwork` Pod may simply mean the Pod is not using `dnsPolicy: ClusterFirstWithHostNet`, not that the service is absent.
 
 When reviewing a container, always evaluate the network namespace together with the capability set. Host networking plus strong network capabilities is a very different posture from bridge networking plus a narrow default capability set.
+
+## References
+
+- [Kubernetes NetworkPolicy and `hostNetwork` caveats](https://kubernetes.io/docs/concepts/services-networking/network-policies/)
+- [eBPF token and capability requirements for network-related eBPF programs](https://docs.ebpf.io/linux/concepts/token/)
 {{#include ../../../../../banners/hacktricks-training.md}}
