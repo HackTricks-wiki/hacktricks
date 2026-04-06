@@ -2,7 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-SELinux est un système **Mandatory Access Control (MAC) basé sur des labels**. En pratique, cela signifie que même si les permissions DAC, les groupes ou les Linux capabilities semblent suffisants pour une action, le noyau peut quand même la refuser parce que le **contexte source** n'est pas autorisé à accéder au **contexte cible** avec la classe/permission demandée.
+SELinux est un système de **Mandatory Access Control (MAC) basé sur des labels**. En pratique, cela signifie que même si les permissions DAC, les groupes ou les Linux capabilities semblent suffisants pour une action, le noyau peut quand même la refuser parce que le **contexte source** n'est pas autorisé à accéder au **contexte cible** avec la classe/permission demandée.
 
 Un contexte ressemble généralement à :
 ```text
@@ -10,15 +10,15 @@ user:role:type:level
 system_u:system_r:httpd_t:s0
 unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023
 ```
-Du point de vue privesc, le `type` (domaine pour les processus, type pour les objets) est généralement le champ le plus important :
+Du point de vue de l'escalade de privilèges, le `type` (domaine pour les processus, type pour les objets) est généralement le champ le plus important :
 
 - Un processus s'exécute dans un **domaine** tel que `unconfined_t`, `staff_t`, `httpd_t`, `container_t`, `sysadm_t`
 - Les fichiers et sockets ont un **type** tel que `admin_home_t`, `shadow_t`, `httpd_sys_rw_content_t`, `container_file_t`
-- La politique décide si un domaine peut lire/écrire/exécuter ou effectuer une transition vers l'autre
+- La politique détermine si un domaine peut lire/écrire/exécuter/passer à un autre
 
-## Énumération rapide
+## Enumération rapide
 
-Si SELinux est activé, énumérez-le tôt car il peut expliquer pourquoi des chemins privesc courants sous Linux échouent ou pourquoi un wrapper privilégié autour d'un outil SELinux "inoffensif" est en réalité critique :
+Si SELinux est activé, énumérez-le tôt car il peut expliquer pourquoi des chemins de privesc Linux courants échouent ou pourquoi un wrapper privilégié autour d'un outil SELinux "harmless" est en réalité critique:
 ```bash
 getenforce
 sestatus
@@ -43,19 +43,19 @@ find / -context '*:default_t:*' -o -context '*:file_t:*' 2>/dev/null
 matchpathcon -V /path/of/interest 2>/dev/null
 restorecon -n -v /path/of/interest 2>/dev/null
 ```
-Observations intéressantes:
+Observations intéressantes :
 
-- `Disabled` or `Permissive` mode suppriment la plupart de la valeur de SELinux en tant que barrière.
-- `unconfined_t` signifie généralement que SELinux est présent mais n'impose pas de contraintes significatives à ce processus.
-- `default_t`, `file_t`, ou des libellés visiblement incorrects sur des chemins personnalisés indiquent souvent un mauvais étiquetage ou un déploiement incomplet.
-- Les substitutions locales dans `file_contexts.local` prévalent sur les paramètres par défaut de la politique ; examinez-les attentivement.
+- `Disabled` or `Permissive` mode removes most of the value of SELinux as a boundary.
+- `unconfined_t` usually means SELinux is present but not meaningfully constraining that process.
+- `default_t`, `file_t`, or obviously wrong labels on custom paths often indicate mislabeling or incomplete deployment.
+- Local overrides in `file_contexts.local` take precedence over policy defaults, so review them carefully.
 
 ## Analyse de la politique
 
-SELinux est bien plus facile à attaquer ou à contourner lorsque vous pouvez répondre à deux questions :
+SELinux est beaucoup plus facile à attaquer ou à contourner quand on peut répondre à deux questions :
 
-1. **Que peut accéder mon domaine actuel ?**
-2. **Dans quels domaines puis-je effectuer une transition ?**
+1. **À quoi mon domaine actuel peut-il accéder ?**
+2. **Dans quels domaines puis-je basculer ?**
 
 Les outils les plus utiles pour cela sont `sepolicy` et **SETools** (`seinfo`, `sesearch`, `sedta`) :
 ```bash
@@ -70,14 +70,14 @@ sesearch --type_transition -s staff_t 2>/dev/null | head
 seinfo -t 2>/dev/null | head
 seinfo -r 2>/dev/null | head
 ```
-Ceci est particulièrement utile lorsqu'un hôte utilise **des utilisateurs confinés** plutôt que de mapper tout le monde sur `unconfined_u`. Dans ce cas, recherchez :
+Ceci est particulièrement utile lorsqu'un hôte utilise des **utilisateurs confinés** plutôt que d'assigner tout le monde à `unconfined_u`. Dans ce cas, recherchez :
 
-- les mappages d'utilisateurs via `semanage login -l`
-- les rôles autorisés via `semanage user -l`
-- les domaines d'administration accessibles tels que `sysadm_t`, `secadm_t`, `webadm_t`
+- mappages d'utilisateurs via `semanage login -l`
+- rôles autorisés via `semanage user -l`
+- domaines admin accessibles tels que `sysadm_t`, `secadm_t`, `webadm_t`
 - entrées `sudoers` utilisant `ROLE=` ou `TYPE=`
 
-Si `sudo -l` contient des entrées comme celles-ci, SELinux fait partie du périmètre des privilèges :
+Si `sudo -l` contient des entrées comme celles-ci, SELinux fait partie de la frontière de privilèges :
 ```text
 linux_user ALL=(ALL) ROLE=webadm_r TYPE=webadm_t /bin/bash
 ```
@@ -87,25 +87,25 @@ sudo -l
 which newrole runcon
 newrole -l 2>/dev/null
 ```
-`runcon` and `newrole` ne sont pas automatiquement exploitables, mais si un wrapper privilégié ou une règle `sudoers` vous permet de sélectionner un meilleur role/type, ils deviennent des primitives d'escalade de privilèges à haute valeur.
+`runcon` et `newrole` ne sont pas automatiquement exploitables, mais si un wrapper privilégié ou une règle `sudoers` vous permet de sélectionner un meilleur rôle/type, ils deviennent des primitives d'escalade de grande valeur.
 
-## Fichiers, réétiquetage, et mauvaises configurations à haute valeur
+## Fichiers, réétiquetage et mauvaises configurations à haute valeur
 
 La différence opérationnelle la plus importante entre les outils SELinux courants est :
 
-- `chcon`: changement temporaire de label sur un chemin spécifique
-- `semanage fcontext`: règle persistante chemin→label
-- `restorecon` / `setfiles`: réappliquer la politique / le label par défaut
+- `chcon`: temporary label change on a specific path
+- `semanage fcontext`: persistent path-to-label rule
+- `restorecon` / `setfiles`: apply the policy/default label again
 
-Cela a beaucoup d'importance pendant un privesc car **le réétiquetage n'est pas juste cosmétique**. Il peut transformer un fichier de "bloqué par la politique" en "lisible/exécutable par un service confiné et privilégié".
+Cela compte beaucoup pendant privesc car **le réétiquetage n'est pas que cosmétique**. Il peut transformer un fichier de "bloqué par la politique" en "lisible/exécutable par un service confiné privilégié".
 
-Vérifiez les règles de réétiquetage locales et la dérive de réétiquetage :
+Vérifiez les règles locales de réétiquetage et la dérive d'étiquetage :
 ```bash
 grep -R . /etc/selinux/*/contexts/files/file_contexts.local 2>/dev/null
 restorecon -nvr / 2>/dev/null | head -n 50
 matchpathcon -V /etc/passwd /etc/shadow /usr/local/bin/* 2>/dev/null
 ```
-Commandes à haute valeur à rechercher dans `sudo -l`, root wrappers, scripts d'automatisation ou capabilities de fichiers :
+Commandes de grande valeur à rechercher dans `sudo -l`, root wrappers, scripts d'automatisation ou file capabilities:
 ```bash
 which semanage restorecon chcon setfiles semodule audit2allow runcon newrole setsebool load_policy 2>/dev/null
 getcap -r / 2>/dev/null | grep -E 'cap_mac_admin|cap_mac_override'
@@ -113,15 +113,15 @@ getcap -r / 2>/dev/null | grep -E 'cap_mac_admin|cap_mac_override'
 Particulièrement intéressants :
 
 - `semanage fcontext`: modifie de façon persistante le label qu'un chemin doit recevoir
-- `restorecon` / `setfiles`: réapplique ces changements à grande échelle
+- `restorecon` / `setfiles`: réapplique ces modifications à grande échelle
 - `semodule -i`: charge un module de politique personnalisé
-- `semanage permissive -a <domain_t>`: met un domaine en mode permissif sans basculer l'ensemble de l'hôte
-- `setsebool -P`: modifie de manière permanente les booléens de la politique
+- `semanage permissive -a <domain_t>`: rend un seul domaine permissif sans basculer l'ensemble de l'hôte
+- `setsebool -P`: modifie de façon permanente les booléens de la politique
 - `load_policy`: recharge la politique active
 
-Ce sont souvent des **primitives d'assistance**, pas des exploits root autonomes. Leur intérêt est qu'elles vous permettent de :
+Ce sont souvent des **helper primitives**, et non des exploits root autonomes. Leur intérêt est qu'elles vous permettent de :
 
-- mettre un domaine cible en mode permissif
+- rendre un domaine cible permissif
 - élargir l'accès entre votre domaine et un type protégé
 - réétiqueter des fichiers contrôlés par l'attaquant afin qu'un service privilégié puisse les lire ou les exécuter
 - affaiblir un service confiné suffisamment pour qu'un bug local existant devienne exploitable
@@ -140,25 +140,25 @@ Si vous pouvez charger un module de politique en tant que root, vous contrôlez 
 ausearch -m AVC,USER_AVC -ts recent 2>/dev/null | audit2allow -M localfix
 sudo semodule -i localfix.pp
 ```
-C'est pourquoi `audit2allow`, `semodule` et `semanage permissive` doivent être traités comme des surfaces d'administration sensibles pendant post-exploitation. Ils peuvent transformer silencieusement une chaîne bloquée en une chaîne fonctionnelle sans modifier les permissions UNIX classiques.
+C'est pourquoi `audit2allow`, `semodule`, et `semanage permissive` doivent être considérés comme des surfaces d'administration sensibles pendant post-exploitation. Ils peuvent silencieusement convertir une chaîne bloquée en une chaîne fonctionnelle sans modifier les permissions UNIX classiques.
 
 ## Indices d'audit
 
-AVC denials sont souvent un signal offensif, pas seulement un bruit défensif. Ils vous indiquent :
+Les AVC denials sont souvent un signal offensif, pas seulement du bruit défensif. Ils vous indiquent :
 
-- quel objet/type cible vous avez atteint
+- quel target object/type vous avez ciblé
 - quelle permission a été refusée
 - quel domaine vous contrôlez actuellement
-- si un petit changement de politique permettrait à la chaîne de fonctionner
+- si un petit changement de policy permettrait de faire fonctionner la chaîne
 ```bash
 ausearch -m AVC,USER_AVC,SELINUX_ERR -ts recent 2>/dev/null
 journalctl -t setroubleshoot --no-pager 2>/dev/null | tail -n 50
 ```
-Si une tentative de local exploit ou de persistence continue d'échouer avec `EACCES` ou d'étranges erreurs "permission denied" malgré des permissions DAC semblant provenir de root, il est généralement utile de vérifier SELinux avant d'écarter le vecteur.
+Si une tentative d'exploit local ou de persistance échoue systématiquement avec `EACCES` ou d'étranges erreurs "permission denied" malgré des permissions DAC donnant l'apparence de root, SELinux vaut généralement la peine d'être vérifié avant d'abandonner le vecteur.
 
 ## Utilisateurs SELinux
 
-Il existe des utilisateurs SELinux en plus des utilisateurs Linux classiques. Chaque utilisateur Linux est mappé à un utilisateur SELinux dans la politique, ce qui permet au système d'imposer différents rôles et domaines autorisés selon les comptes.
+Il existe des utilisateurs SELinux en plus des utilisateurs Linux classiques. Chaque utilisateur Linux est associé à un utilisateur SELinux dans la politique, ce qui permet au système d'imposer différents rôles et domaines autorisés à différents comptes.
 
 Vérifications rapides :
 ```bash
@@ -166,11 +166,11 @@ id -Z
 semanage login -l 2>/dev/null
 semanage user -l 2>/dev/null
 ```
-Sur de nombreux systèmes courants, les utilisateurs sont mappés sur `unconfined_u`, ce qui réduit l'impact pratique du confinement des utilisateurs. Cependant, dans des déploiements durcis, les utilisateurs confinés peuvent rendre `sudo`, `su`, `newrole` et `runcon` beaucoup plus intéressants parce que **le chemin d'escalade peut dépendre de l'entrée dans un rôle/type SELinux plus permissif, et pas seulement du fait de devenir UID 0**.
+Sur de nombreux systèmes grand public, les utilisateurs sont mappés à `unconfined_u`, ce qui réduit l'impact pratique du confinement des utilisateurs. Sur des déploiements durcis, cependant, les utilisateurs confinés peuvent rendre `sudo`, `su`, `newrole` et `runcon` beaucoup plus intéressants parce que **le chemin d'escalade peut dépendre de l'entrée dans un rôle/type SELinux plus approprié, et pas seulement du fait de devenir UID 0**.
 
 ## SELinux dans les conteneurs
 
-Les runtimes de conteneurs lancent couramment des charges de travail dans un domaine confiné tel que `container_t` et étiquettent le contenu des conteneurs comme `container_file_t`. Si un processus de conteneur s'échappe mais s'exécute toujours avec le label de conteneur, les écritures sur l'hôte peuvent encore échouer parce que la frontière des labels est restée intacte.
+Les runtimes de conteneurs lancent couramment des charges de travail dans un domaine confiné tel que `container_t` et étiquettent le contenu du conteneur comme `container_file_t`. Si un processus de conteneur s'échappe mais s'exécute toujours avec le label du conteneur, les écritures sur l'hôte peuvent toujours échouer parce que la frontière des labels est restée intacte.
 
 Exemple rapide :
 ```shell
@@ -180,20 +180,20 @@ $ podman top -l label
 LABEL
 system_u:system_r:container_t:s0:c647,c780
 ```
-Opérations modernes de conteneurs à noter :
+Points importants concernant les opérations modernes de conteneurs :
 
 - `--security-opt label=disable` peut effectivement déplacer la charge de travail vers un type lié aux conteneurs non confiné tel que `spc_t`
-- bind mounts avec `:z` / `:Z` entraînent le relabeling du chemin hôte pour un usage partagé/privé par le conteneur
-- un relabeling étendu du contenu de l'hôte peut lui-même constituer un problème de sécurité
+- bind mounts avec `:z` / `:Z` déclenchent le relabeling du chemin hôte pour une utilisation partagée/privée par le conteneur
+- un relabeling étendu du contenu de l'hôte peut constituer un problème de sécurité en soi
 
-Cette page garde le contenu relatif aux conteneurs court pour éviter les duplications. Pour les cas d'abus spécifiques aux conteneurs et des exemples d'exécution, consultez :
+This page keeps the container content short to avoid duplication. For the container-specific abuse cases and runtime examples, check:
 
 {{#ref}}
 container-security/protections/selinux.md
 {{#endref}}
 
-## Références
+## References
 
-- [Red Hat docs: Using SELinux](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html-single/using_selinux/index)
-- [SETools: Policy analysis tools for SELinux](https://github.com/SELinuxProject/setools)
+- [Documentation Red Hat : Utilisation de SELinux](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html-single/using_selinux/index)
+- [SETools : outils d'analyse de politiques pour SELinux](https://github.com/SELinuxProject/setools)
 {{#include ../../banners/hacktricks-training.md}}
