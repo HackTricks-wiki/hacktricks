@@ -1,80 +1,80 @@
-# macOS Tehlikeli Yetkiler & TCC izinleri
+# macOS Tehlikeli Entitlements ve TCC izinleri
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 > [!WARNING]
-> **`com.apple`** ile başlayan yetkilerin üçüncü taraflara sunulmadığını, yalnızca Apple'ın bunları verebileceğini unutmayın.
+> Dikkat: **`com.apple`** ile başlayan entitlements üçüncü taraflara açık değildir, yalnızca Apple bunları verebilir... Ya da bir enterprise sertifikası kullanıyorsanız gerçekte **`com.apple`** ile başlayan kendi entitlements'ınızı oluşturup buna dayalı korumaları atlayabilirsiniz.
 
 ## Yüksek
 
 ### `com.apple.rootless.install.heritable`
 
-Yetki **`com.apple.rootless.install.heritable`**, **SIP'yi atlamaya** izin verir. Daha fazla bilgi için [bunu kontrol edin](macos-sip.md#com.apple.rootless.install.heritable).
+Bu entitlement **`com.apple.rootless.install.heritable`** ile **SIP'i atlatmak** mümkündür. Daha fazla bilgi için bkz. [this for more info](macos-sip.md#com.apple.rootless.install.heritable).
 
 ### **`com.apple.rootless.install`**
 
-Yetki **`com.apple.rootless.install`**, **SIP'yi atlamaya** izin verir. Daha fazla bilgi için [bunu kontrol edin](macos-sip.md#com.apple.rootless.install).
+Bu entitlement **`com.apple.rootless.install`** ile **SIP'i atlatmak** mümkündür. Daha fazla bilgi için bkz.[ this for more info](macos-sip.md#com.apple.rootless.install).
 
-### **`com.apple.system-task-ports` (önceden `task_for_pid-allow` olarak adlandırılıyordu)**
+### **`com.apple.system-task-ports` (previously called `task_for_pid-allow`)**
 
-Bu yetki, **çekirdek hariç** herhangi bir süreç için **görev portunu** almayı sağlar. Daha fazla bilgi için [**bunu kontrol edin**](../macos-proces-abuse/macos-ipc-inter-process-communication/index.html).
+Bu entitlement kernel hariç herhangi bir süreç için **task port** almayı sağlar. Daha fazla bilgi için bkz. [**this for more info**](../macos-proces-abuse/macos-ipc-inter-process-communication/index.html).
 
 ### `com.apple.security.get-task-allow`
 
-Bu yetki, **`com.apple.security.cs.debugger`** yetkisine sahip diğer süreçlerin, bu yetkiye sahip ikili tarafından çalıştırılan sürecin görev portunu almasına ve **kod enjekte etmesine** izin verir. Daha fazla bilgi için [**bunu kontrol edin**](../macos-proces-abuse/macos-ipc-inter-process-communication/index.html).
+Bu entitlement, **`com.apple.security.cs.debugger`** entitlement'ına sahip diğer süreçlerin, bu entitlement'a sahip binary tarafından çalıştırılan sürecin task port'unu almasına ve **üzerine kod enjekte etmesine** izin verir. Daha fazla bilgi için bkz. [**this for more info**](../macos-proces-abuse/macos-ipc-inter-process-communication/index.html).
 
 ### `com.apple.security.cs.debugger`
 
-Hata Ayıklama Aracı Yetkisine sahip uygulamalar, `Get Task Allow` yetkisi `true` olarak ayarlanmış imzasız ve üçüncü taraf uygulamalar için geçerli bir görev portu almak üzere `task_for_pid()` çağrısı yapabilir. Ancak, hata ayıklama aracı yetkisi ile bile, bir hata ayıklayıcı **`Get Task Allow` yetkisine** sahip olmayan süreçlerin görev portlarını **alamaz** ve bu nedenle Sistem Bütünlüğü Koruması tarafından korunur. Daha fazla bilgi için [**bunu kontrol edin**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_debugger).
+Debugging Tool Entitlement'a sahip uygulamalar, `task_for_pid()` çağrısını yaparak `Get Task Allow` entitlement'ı `true` olarak ayarlanmış unsigned ve üçüncü taraf uygulamalar için geçerli bir task port alabilirler. Ancak, debugging tool entitlement'a rağmen bir debugger, `Get Task Allow` entitlement'ına sahip olmayan ve dolayısıyla System Integrity Protection ile korunan süreçlerin **task port'larını alamaz**. Daha fazla bilgi için bkz. [**this for more info**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_debugger).
 
 ### `com.apple.security.cs.disable-library-validation`
 
-Bu yetki, **Apple tarafından imzalanmamış veya ana yürütücü ile aynı Takım Kimliği ile imzalanmamış** çerçeveleri, eklentileri veya kütüphaneleri **yüklemeye** izin verir, bu nedenle bir saldırgan bazı keyfi kütüphane yüklemelerini kötüye kullanarak kod enjekte edebilir. Daha fazla bilgi için [**bunu kontrol edin**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-library-validation).
+Bu entitlement, ana yürütülebilir ile aynı Team ID ile imzalanmamış veya Apple tarafından imzalanmamış framework, plug-in veya kütüphanelerin **yüklenmesine izin verir**, böylece bir saldırgan rastgele bir kütüphane yüklemesini kötüye kullanarak kod enjekte edebilir. Daha fazla bilgi için bkz. [**this for more info**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-library-validation).
 
 ### `com.apple.private.security.clear-library-validation`
 
-Bu yetki, **`com.apple.security.cs.disable-library-validation`** ile çok benzer, ancak **doğrudan** kütüphane doğrulamasını **devre dışı bırakmak yerine**, sürecin **bunu devre dışı bırakmak için bir `csops` sistem çağrısı yapmasına** izin verir.\
-Daha fazla bilgi için [**bunu kontrol edin**](https://theevilbit.github.io/posts/com.apple.private.security.clear-library-validation/).
+Bu entitlement, **`com.apple.security.cs.disable-library-validation`**'a oldukça benzerdir fakat **doğrudan kütüphane doğrulamayı devre dışı bırakmak** yerine, sürecin bunu devre dışı bırakmak için bir `csops` sistem çağrısı yapmasına **izin verir**.\
+Daha fazla bilgi için bkz. [**this for more info**](https://theevilbit.github.io/posts/com.apple.private.security.clear-library-validation/).
 
 ### `com.apple.security.cs.allow-dyld-environment-variables`
 
-Bu yetki, **kütüphaneleri ve kodu enjekte etmek için kullanılabilecek DYLD ortam değişkenlerini** kullanmaya izin verir. Daha fazla bilgi için [**bunu kontrol edin**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-dyld-environment-variables).
+Bu entitlement, kütüphane ve kod enjekte etmek için kullanılabilecek **DYLD environment variable'larının** kullanılmasına izin verir. Daha fazla bilgi için bkz. [**this for more info**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-dyld-environment-variables).
 
-### `com.apple.private.tcc.manager` veya `com.apple.rootless.storage`.`TCC`
+### `com.apple.private.tcc.manager` or `com.apple.rootless.storage`.`TCC`
 
-[**Bu bloga göre**](https://objective-see.org/blog/blog_0x4C.html) **ve** [**bu bloga göre**](https://wojciechregula.blog/post/play-the-music-and-bypass-tcc-aka-cve-2020-29621/), bu yetkiler **TCC** veritabanını **değiştirmeye** izin verir.
+[**According to this blog**](https://objective-see.org/blog/blog_0x4C.html) **and** [**this blog**](https://wojciechregula.blog/post/play-the-music-and-bypass-tcc-aka-cve-2020-29621/), bu entitlements **TCC** veritabanını **değiştirmeye** izin verir.
 
-### **`system.install.apple-software`** ve **`system.install.apple-software.standar-user`**
+### **`system.install.apple-software`** and **`system.install.apple-software.standar-user`**
 
-Bu yetkiler, kullanıcıdan izin istemeden **yazılım yüklemeye** izin verir, bu da **yetki yükseltme** için faydalı olabilir.
+Bu entitlements, kullanıcıdan izin istemeden **yazılım yüklemeye** izin verir; bu, bir **privilege escalation** için yardımcı olabilir.
 
 ### `com.apple.private.security.kext-management`
 
-Bir **çekirdek uzantısını** yüklemek için çekirdekten talepte bulunmak için gereken yetki.
+Kernel'e bir kernel extension yüklemesini **sormak** için gereken entitlement.
 
 ### **`com.apple.private.icloud-account-access`**
 
-Yetki **`com.apple.private.icloud-account-access`**, **`com.apple.iCloudHelper`** XPC servisi ile iletişim kurmayı sağlar ve bu da **iCloud token'ları** sağlar.
+Bu entitlement ile **`com.apple.iCloudHelper`** XPC servisi ile iletişim kurmak mümkündür; bu servis **iCloud tokenları** sağlar.
 
-**iMovie** ve **Garageband** bu yetkiye sahipti.
+**iMovie** ve **Garageband**'in bu entitlemente sahip olduğu bilinmektedir.
 
-Bu yetkiden **icloud token'ları** almak için istismar hakkında daha fazla bilgi için konuşmayı kontrol edin: [**#OBTS v5.0: "Mac'inizde Olan, Apple'ın iCloud'unda Kalır?!" - Wojciech Regula**](https://www.youtube.com/watch?v=_6e2LhmxVc0)
+Bu entitlemment'tan **icloud tokenları** elde etmek için yapılan exploit hakkında daha fazla bilgi için konuşmaya bakın: [**#OBTS v5.0: "What Happens on your Mac, Stays on Apple's iCloud?!" - Wojciech Regula**](https://www.youtube.com/watch?v=_6e2LhmxVc0)
 
 ### `com.apple.private.tcc.manager.check-by-audit-token`
 
-TODO: Bunun neye izin verdiğini bilmiyorum
+TODO: Bunun ne yaptığı hakkında bilgim yok
 
 ### `com.apple.private.apfs.revert-to-snapshot`
 
-TODO: [**bu raporda**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) **bu, bir yeniden başlatmadan sonra SSV korumalı içerikleri güncellemek için kullanılabileceği** belirtiliyor. Bunu nasıl yaptığını biliyorsanız bir PR gönderin lütfen!
+TODO: [**this report**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) içinde bunun yeniden başlatmadan sonra SSV-korumalı içeriği güncellemek için kullanılabileceği **bahsedilmiş**. Eğer nasıl yapıldığını biliyorsanız PR gönderin lütfen!
 
 ### `com.apple.private.apfs.create-sealed-snapshot`
 
-TODO: [**bu raporda**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) **bu, bir yeniden başlatmadan sonra SSV korumalı içerikleri güncellemek için kullanılabileceği** belirtiliyor. Bunu nasıl yaptığını biliyorsanız bir PR gönderin lütfen!
+TODO: [**this report**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) içinde bunun yeniden başlatmadan sonra SSV-korumalı içeriği güncellemek için kullanılabileceği **bahsedilmiş**. Eğer nasıl yapıldığını biliyorsanız PR gönderin lütfen!
 
 ### `keychain-access-groups`
 
-Bu yetki, uygulamanın erişim sağladığı **anahtar zinciri** gruplarını listeler:
+Bu entitlement, uygulamanın erişebildiği **keychain** gruplarını listeler:
 ```xml
 <key>keychain-access-groups</key>
 <array>
@@ -87,57 +87,61 @@ Bu yetki, uygulamanın erişim sağladığı **anahtar zinciri** gruplarını li
 ```
 ### **`kTCCServiceSystemPolicyAllFiles`**
 
-**Tam Disk Erişimi** izinleri verir, sahip olabileceğiniz TCC'nin en yüksek izinlerinden biridir.
+Size **Tam Disk Erişimi** izni verir; bu, sahip olabileceğiniz en yüksek TCC izinlerinden biridir.
 
 ### **`kTCCServiceAppleEvents`**
 
-Uygulamaya, **görevleri otomatikleştirmek** için yaygın olarak kullanılan diğer uygulamalara olaylar göndermesine izin verir. Diğer uygulamaları kontrol ederek, bu diğer uygulamalara verilen izinleri kötüye kullanabilir.
+Uygulamanın, genellikle **görevleri otomatikleştirmek** için kullanılan diğer uygulamalara olay göndermesine izin verir. Diğer uygulamaları kontrol ederek, bu uygulamalara verilen izinleri kötüye kullanabilir.
 
-Kullanıcıdan şifresini istemelerini sağlamak gibi:
+Örneğin, onların kullanıcıdan şifre istemesini sağlayabilir:
 ```bash
 osascript -e 'tell app "App Store" to activate' -e 'tell app "App Store" to activate' -e 'tell app "App Store" to display dialog "App Store requires your password to continue." & return & return default answer "" with icon 1 with hidden answer with title "App Store Alert"'
 ```
-Or making them perform **arbitrary actions**.
+Veya onların **arbitrary actions** gerçekleştirmesini sağlamak.
 
 ### **`kTCCServiceEndpointSecurityClient`**
 
-Kullanıcının TCC veritabanını **yazma** gibi diğer izinlerin yanı sıra izin verir.
+Diğer izinlerin yanı sıra, kullanıcının TCC veritabanını **write** etmeye izin verir.
 
 ### **`kTCCServiceSystemPolicySysAdminFiles`**
 
-Kullanıcının ana dizin yolunu değiştiren **`NFSHomeDirectory`** niteliğini **değiştirmeye** izin verir ve böylece TCC'yi **bypass** etmeye olanak tanır.
+Bir kullanıcının home klasör yolunu değiştiren **`NFSHomeDirectory`** özniteliğini **change** etmeye izin verir ve bu nedenle **bypass TCC**'ye olanak tanır.
 
 ### **`kTCCServiceSystemPolicyAppBundles`**
 
-Uygulama paketinin içindeki dosyaları (app.app içinde) değiştirmeye izin verir, bu varsayılan olarak **yasaktır**.
+App bundle (inside app.app) içindeki dosyaları modify etmeye izin verir; bu varsayılan olarak **disallowed by default**.
 
 <figure><img src="../../../images/image (31).png" alt=""><figcaption></figcaption></figure>
 
-Bu erişimi kimin sahip olduğunu _Sistem Ayarları_ > _Gizlilik ve Güvenlik_ > _Uygulama Yönetimi_ altında kontrol etmek mümkündür.
+Bu erişime kimin sahip olduğunu _System Settings_ > _Privacy & Security_ > _App Management._ altında kontrol etmek mümkündür.
 
 ### `kTCCServiceAccessibility`
 
-Süreç, **macOS erişilebilirlik özelliklerini** **istismar** edebilecektir, bu da örneğin tuş vuruşlarını basabilmesi anlamına gelir. Bu nedenle, Finder gibi bir uygulamayı kontrol etmek için erişim talep edebilir ve bu izinle diyalogu onaylayabilir.
+Process, macOS erişilebilirlik özelliklerini **abuse** edebilecektir; bu, örneğin tuş vuruşlarını basabilmesi anlamına gelir. Bu yüzden Finder gibi bir uygulamayı kontrol etmek için erişim isteyebilir ve bu izinle onay diyalogunu kabul edebilir.
+
+## Trustcache/CDhash related entitlements
+
+Trustcache/CDhash korumalarını, Apple ikili dosyalarının downgraded sürümlerinin çalıştırılmasını engelleyen korumaları bypass etmek için kullanılabilecek bazı entitlements vardır.
 
 ## Medium
 
 ### `com.apple.security.cs.allow-jit`
 
-Bu yetki, `mmap()` sistem fonksiyonuna `MAP_JIT` bayrağını geçirerek **yazılabilir ve çalıştırılabilir bellek oluşturmayı** sağlar. Daha fazla bilgi için [**bunu kontrol edin**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-jit).
+Bu entitlement, `mmap()` sistem fonksiyonuna `MAP_JIT` bayrağı geçirerek **yazılabilir ve çalıştırılabilir bellek oluşturma** izni verir. Check [**this for more info**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-jit).
 
 ### `com.apple.security.cs.allow-unsigned-executable-memory`
 
-Bu yetki, **C kodunu geçersiz kılmayı veya yamanmayı** sağlar, uzun süredir kullanılmayan **`NSCreateObjectFileImageFromMemory`** (temelde güvensizdir) veya **DVDPlayback** çerçevesini kullanmayı sağlar. Daha fazla bilgi için [**bunu kontrol edin**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-unsigned-executable-memory).
+Bu entitlement, C kodunu **override veya patch** etmeye, uzun süredir kullanımdan kaldırılmış **`NSCreateObjectFileImageFromMemory`** (ki bu temelde güvensizdir) fonksiyonunu kullanmaya veya **DVDPlayback** framework'ünü kullanmaya izin verir. Check [**this for more info**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-unsigned-executable-memory).
 
 > [!CAUTION]
-> Bu yetkiyi dahil etmek, uygulamanızı bellek-güvensiz kod dillerindeki yaygın güvenlik açıklarına maruz bırakır. Uygulamanızın bu istisnaya ihtiyaç duyup duymadığını dikkatlice değerlendirin.
+> Including this entitlement exposes your app to common vulnerabilities in memory-unsafe code languages. Carefully consider whether your app needs this exception.
 
 ### `com.apple.security.cs.disable-executable-page-protection`
 
-Bu yetki, disk üzerindeki kendi çalıştırılabilir dosyalarının bölümlerini **değiştirmeye** izin verir. Daha fazla bilgi için [**bunu kontrol edin**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-executable-page-protection).
+Bu entitlement, diskteki kendi executable dosyalarının bölümlerini **modify** etmesine izin verir. Check [**this for more info**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-executable-page-protection).
 
 > [!CAUTION]
-> Çalıştırılabilir Bellek Koruma Yetkisini Devre Dışı Bırakmak, uygulamanızdan temel bir güvenlik korumasını kaldıran aşırı bir yetkidir ve bir saldırganın uygulamanızın çalıştırılabilir kodunu tespit edilmeden yeniden yazmasını mümkün kılar. Mümkünse daha dar yetkileri tercih edin.
+> The Disable Executable Memory Protection Entitlement is an extreme entitlement that removes a fundamental security protection from your app, making it possible for an attacker to rewrite your app’s executable code without detection. Prefer narrower entitlements if possible.
 
 ### `com.apple.security.cs.allow-relative-library-loads`
 
@@ -145,25 +149,104 @@ TODO
 
 ### `com.apple.private.nullfs_allow`
 
-Bu yetki, (varsayılan olarak yasak olan) bir nullfs dosya sistemini bağlamaya izin verir. Araç: [**mount_nullfs**](https://github.com/JamaicanMoose/mount_nullfs/tree/master).
+Bu entitlement, nullfs dosya sistemi mount etmeye (varsayılan olarak forbidden) izin verir. Tool: [**mount_nullfs**](https://github.com/JamaicanMoose/mount_nullfs/tree/master).
 
 ### `kTCCServiceAll`
 
-Bu blog yazısına göre, bu TCC izni genellikle şu şekilde bulunur:
+According to this blogpost, this TCC permission usually found in the form:
 ```
 [Key] com.apple.private.tcc.allow-prompting
 [Value]
 [Array]
 [String] kTCCServiceAll
 ```
-Sürecin **tüm TCC izinlerini istemesine** izin verin.
+İşlemin **tüm TCC izinlerini** talep etmesine izin ver.
 
 ### **`kTCCServicePostEvent`**
 
+Sistem genelinde `CGEventPost()` aracılığıyla **sentetik klavye ve fare olayları enjekte etmeyi** sağlar. Bu izne sahip bir süreç herhangi bir uygulamada tuş vuruşlarını, fare tıklamalarını ve kaydırma olaylarını simüle edebilir — bu da masaüstünün **uzaktan kontrolünü** etkili bir şekilde sağlar.
 
+Bu, hem girdi okumayı hem de enjekte etmeyi mümkün kıldığı için `kTCCServiceAccessibility` veya `kTCCServiceListenEvent` ile birleştirildiğinde özellikle tehlikelidir.
+```objc
+// Inject a keystroke (Enter key)
+CGEventRef keyDown = CGEventCreateKeyboardEvent(NULL, kVK_Return, true);
+CGEventPost(kCGSessionEventTap, keyDown);
+```
+### **`kTCCServiceListenEvent`**
 
-</details>
+İzin verir **tüm sistem çapındaki klavye ve fare olaylarını yakalamaya** (input monitoring / keylogging). Bir süreç, herhangi bir uygulamada yazılan her tuş vuruşunu yakalamak için bir `CGEventTap` kaydı yapabilir; bunların içinde parolalar, kredi kartı numaraları ve özel mesajlar bulunur.
 
+For detailed exploitation techniques see:
+
+{{#ref}}
+macos-input-monitoring-screen-capture-accessibility.md
+{{#endref}}
+
+### **`kTCCServiceScreenCapture`**
+
+İzin verir **ekran tamponunu okumaya** — herhangi bir uygulamanın ekran görüntülerini almak ve ekran videosu kaydetmek, güvenli metin alanları dahil. OCR ile birleştiğinde, bu ekran görüntülerinden otomatik olarak parolalar ve hassas veriler çıkarılabilir.
+
+> [!WARNING]
+> macOS Sonoma ile başlayarak, ekran kaydı sürekli bir menü çubuğu göstergesi gösterir. Daha eski sürümlerde, ekran kaydı tamamen sessiz olabilir.
+
+### **`kTCCServiceCamera`**
+
+İzin verir **yerleşik kameradan veya bağlı USB kameralardan fotoğraf ve video çekmeye**. Bir camera-entitled binary'ye yapılan Code injection, görünmez görsel gözetlemeyi mümkün kılar.
+
+### **`kTCCServiceMicrophone`**
+
+İzin verir **tüm giriş cihazlarından ses kaydetmeye**. Mikrofon erişimi olan arka plan daemon'ları görünür bir uygulama penceresi olmadan sürekli ortam ses gözetlemesi sağlar.
+
+### **`kTCCServiceLocation`**
+
+İzin verir cihazın **fiziksel konumunu** Wi-Fi triangulation veya Bluetooth beacons aracılığıyla sorgulamaya. Sürekli izleme ev/iş adreslerini, seyahat kalıplarını ve günlük rutinleri ortaya çıkarır.
+
+### **`kTCCServiceAddressBook`** / **`kTCCServiceCalendar`** / **`kTCCServicePhotos`**
+
+Erişim sağlar **Contacts** (isimler, e-postalar, telefonlar — spear-phishing için kullanışlı), **Calendar** (toplantı takvimleri, katılımcı listeleri) ve **Photos** (kişisel fotoğraflar, kimlik bilgileri içerebilecek ekran görüntüleri, konum metadata'sı).
+
+For complete credential theft exploitation techniques via TCC permissions, see:
+
+{{#ref}}
+macos-tcc/macos-tcc-credential-and-data-theft.md
+{{#endref}}
+
+## Sandbox & Code Signing İzinleri
+
+### `com.apple.security.temporary-exception.mach-lookup.global-name`
+
+**Sandbox temporary exceptions**, App Sandbox'u zayıflatır; sandbox'ın normalde engellediği system-wide Mach/XPC servisleriyle iletişim kurulmasına izin verir. Bu, **primary sandbox escape primitive**'dir — ele geçirilmiş bir sandboxed app, mach-lookup exceptions kullanarak ayrıcalıklı daemon'lara ulaşabilir ve onların XPC arayüzlerini istismar edebilir.
+```bash
+# Find apps with mach-lookup exceptions
+find /Applications -name "*.app" -exec sh -c '
+binary="$1/Contents/MacOS/$(defaults read "$1/Contents/Info.plist" CFBundleExecutable 2>/dev/null)"
+[ -f "$binary" ] && codesign -d --entitlements - "$binary" 2>&1 | grep -q "mach-lookup" && echo "$(basename "$1")"
+' _ {} \; 2>/dev/null
+```
+Detaylı exploitation chain için: sandboxed app → mach-lookup exception → vulnerable daemon → sandbox escape, bkz:
+
+{{#ref}}
+macos-code-signing-weaknesses-and-sandbox-escapes.md
+{{#endref}}
+
+### `com.apple.developer.driverkit`
+
+**DriverKit entitlements** kullanıcı alanı sürücü ikili dosyalarının IOKit arayüzleri aracılığıyla kernel ile doğrudan iletişim kurmasına izin verir. DriverKit ikili dosyaları donanımı yönetir: USB, Thunderbolt, PCIe, HID cihazları, ses ve ağ.
+
+Bir DriverKit ikili dosyasının ele geçirilmesi şunları sağlar:
+- **Kernel attack surface** yanlış biçimlendirilmiş `IOConnectCallMethod` çağrıları aracılığıyla
+- **USB device spoofing** (HID enjeksiyonu için klavye taklidi yapmak)
+- **DMA attacks** PCIe/Thunderbolt arayüzleri aracılığıyla
+```bash
+# Find DriverKit binaries
+find / -name "*.dext" -type d 2>/dev/null
+systemextensionsctl list
+```
+Detaylı IOKit/DriverKit exploitation için bakınız:
+
+{{#ref}}
+../mac-os-architecture/macos-iokit.md
+{{#endref}}
 
 
 

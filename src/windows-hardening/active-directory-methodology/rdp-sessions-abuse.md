@@ -4,9 +4,9 @@
 
 ## RDP Process Injection
 
-Eğer **external group** mevcut alanda herhangi bir **computer**'a **RDP access**'e sahipse, bir **attacker** o **compromise that computer and wait for him**.
+Eğer **dış grup**un mevcut domaindeki herhangi bir **bilgisayara** **RDP erişimi** varsa, bir **saldırgan** o **bilgisayarı ele geçirip kullanıcının gelmesini bekleyebilir**.
 
-Kullanıcı RDP ile bağlandıktan sonra, **attacker can pivot to that users session** ve harici alandaki izinlerini kötüye kullanabilir.
+Kullanıcı RDP ile erişim sağladıktan sonra, **saldırgan o kullanıcının oturumuna pivot yapabilir** ve dış domaindeki yetkilerini kötüye kullanabilir.
 ```bash
 # Supposing the group "External Users" has RDP access in the current domain
 ## lets find where they could access
@@ -30,13 +30,13 @@ PID   PPID  Name                         Arch  Session     User
 beacon> inject 4960 x64 tcp-local
 ## From that beacon you can just run powerview modules interacting with the external domain as that user
 ```
-Diğer araçlarla oturum çalmanın diğer yollarına göz atın [**in this page.**](../../network-services-pentesting/pentesting-rdp.md#session-stealing)
+Check **other ways to steal sessions with other tools** [**in this page.**](../../network-services-pentesting/pentesting-rdp.md#session-stealing)
 
 ## RDPInception
 
-Bir kullanıcı, **RDP into a machine** aracılığıyla kendisini bekleyen bir **attacker**'ın bulunduğu bir makineye erişirse, **attacker** kullanıcının **inject a beacon in the RDP session of the user** yapabilecek ve eğer **victim mounted his drive** ise, **attacker could access it**.
+Eğer bir kullanıcı **RDP into a machine** üzerinden bir makineye bağlanır ve bir **attacker** onun için **waiting** halindeyse, **attacker** kullanıcının oturumuna **inject a beacon in the RDP session of the user** yapabilir; eğer **victim mounted his drive** RDP ile bağlanırken, **attacker could access it**.
 
-Bu durumda sadece **victims** **original computer**'ı **compromise** edebilir ve **statup folder**'a bir **backdoor** yazarak ele geçirebilirsiniz.
+Bu durumda, **statup folder**'a bir **backdoor** yazarak **victims** **original computer**'ı **compromise** edebilirsiniz.
 ```bash
 # Wait til someone logs in:
 net logons
@@ -70,9 +70,9 @@ beacon> upload C:\Payloads\pivot.exe
 ```
 ## Shadow RDP
 
-Eğer hedefin zaten bir **active RDP session** içinde olduğu bir host'ta **local admin** iseniz, o masaüstünü **view/control** edebilmeniz mümkün olabilir; bunun için password çalmaya veya **dumping LSASS** yapmaya gerek yoktur.
+Eğer bir hostta **local admin** iseniz ve hedefin zaten bir **active RDP session**'ı varsa, o masaüstünü **view/control that desktop without stealing the password or dumping LSASS** yapmanız mümkün olabilir.
 
-Bu, şu konumda saklanan **Remote Desktop Services shadowing** politikasına bağlıdır:
+Bu, aşağıda saklanan **Remote Desktop Services shadowing** politikasına bağlıdır:
 ```text
 HKLM\Software\Policies\Microsoft\Windows NT\Terminal Services\Shadow
 ```
@@ -94,50 +94,50 @@ reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services" /v Shado
 quser /server:<HOST>
 mstsc /v:<HOST> /shadow:<SESSION_ID> /control /noconsentprompt /prompt
 ```
-Bu, ayrıcalıklı bir kullanıcının RDP üzerinden bağlandıktan sonra kilidi açık bir masaüstü, KeePass oturumu, MMC konsolu, tarayıcı oturumu veya admin shell bırakması durumunda özellikle kullanışlıdır.
+Bu, RDP üzerinden bağlanmış ayrıcalıklı bir kullanıcının kilidi açık bir masaüstü, KeePass oturumu, MMC konsolu, tarayıcı oturumu veya admin shell açık bıraktığında özellikle kullanışlıdır.
 
 ## Oturum Açmış Kullanıcı Olarak Zamanlanmış Görevler
 
-Eğer siz **local admin** iseniz ve hedef kullanıcı **şu anda oturum açmış** ise, Task Scheduler o kullanıcının parolası olmadan kodu **parolası olmadan o kullanıcı olarak** başlatabilir.
+Eğer **local admin** iseniz ve hedef kullanıcı **şu anda oturum açmışsa**, Task Scheduler o kullanıcının parolası olmadan **o kullanıcı olarak** kod başlatabilir.
 
 Bu, kurbanın mevcut oturumunu bir yürütme ilkeline dönüştürür:
 ```cmd
 schtasks /create /S <HOST> /RU "<DOMAIN\\user>" /SC ONCE /ST 00:00 /TN "Updater" /TR "cmd.exe /c whoami > C:\\Windows\\Temp\\whoami.txt"
 schtasks /run /S <HOST> /TN "Updater"
 ```
-Notlar:
+Notes:
 
-- Eğer kullanıcı **oturum açmamışsa**, Windows genellikle o kullanıcı olarak çalışan bir görev oluşturmak için parola ister.
-- Eğer kullanıcı **oturum açmışsa**, görev mevcut oturum bağlamını yeniden kullanabilir.
-- Bu, LSASS'e dokunmadan kurban oturumunda GUI işlemleri gerçekleştirmek veya binary'ler başlatmak için pratik bir yoldur.
+- Eğer kullanıcı **oturum açmamışsa**, Windows genellikle o kullanıcı adına çalışan bir görev oluşturmak için parolayı ister.
+- Eğer kullanıcı **oturum açmışsa**, görev mevcut oturum açma bağlamını yeniden kullanabilir.
+- Bu, LSASS'a dokunmadan kurban oturumu içinde GUI işlemleri yürütmek veya binary'ler başlatmak için pratik bir yoldur.
 
-## Kurban Oturumundan CredUI Uyarı Penceresi Kötüye Kullanımı
+## Kurban Oturumundan CredUI Prompt Kötüye Kullanımı
 
-Kurbanın etkileşimli masaüstü içinde (ör. **Shadow RDP** veya **o kullanıcı olarak çalışan bir zamanlanmış görev** aracılığıyla) yürütme yapabildiğinizde, CredUI API'lerini kullanarak **gerçek bir Windows kimlik doğrulama istemi** gösterebilir ve kurbanın girdiği kimlik bilgilerini toplayabilirsiniz.
+Örneğin **Shadow RDP** veya **a scheduled task running as that user** aracılığıyla kurbanın etkileşimli masaüstü içinde çalıştırma yapabildiğinizde, CredUI API'lerini kullanarak gerçek bir Windows kimlik bilgisi istemi (credential prompt) görüntüleyebilir ve kurbanın girdiği kimlik bilgilerini toplayabilirsiniz.
 
-İlgili API'ler:
+Relevant APIs:
 
 - `CredUIPromptForWindowsCredentials`
 - `CredUnPackAuthenticationBuffer`
 
-Tipik akış:
+Typical flow:
 
 1. Kurban oturumunda bir binary başlatın.
-2. Mevcut domain markalamasına uyan bir domain kimlik doğrulama istemi gösterin.
-3. Dönen auth buffer'ı unpack edin.
-4. Sağlanan kimlik bilgilerini doğrulayın ve isteğe bağlı olarak geçerli kimlik bilgileri girilene kadar istemi tekrar gösterin.
+2. Geçerli etki alanı görünümüne (domain branding) uyan bir etki alanı doğrulama istemi gösterin.
+3. Dönen auth buffer'ını unpack edin.
+4. Sağlanan kimlik bilgilerini doğrulayın ve isteğe bağlı olarak geçerli bilgiler girilene kadar tekrar istemeye devam edin.
 
-Bu, on-host phishing için faydalıdır çünkü istem standart Windows API'leri tarafından gösterilir; sahte bir HTML formu yerine gerçek bir Windows penceresi gösterilir.
+Bu, **on-host phishing** için kullanışlıdır çünkü istem sahte bir HTML formu yerine standart Windows API'leri tarafından render edilir.
 
-## Kurban Bağlamında PFX Talep Etme
+## Kurban Bağlamında PFX Talebi
 
-Aynı scheduled-task-as-user primitive, oturum açmış kurban adına certificate/PFX talep etmek için kullanılabilir. Bu sertifika daha sonra parola hırsızlığına gerek kalmadan o kullanıcı olarak AD authentication için kullanılabilir.
+Aynı **scheduled-task-as-user** primitive, oturum açmış kurban adına bir sertifika/PFX talep etmek için kullanılabilir. Bu sertifika daha sonra o kullanıcı olarak **AD authentication** için kullanılabilir ve böylece parola hırsızlığından tamamen kaçınılır.
 
-Yüksek seviye akış:
+High-level flow:
 
-1. Kurbanın oturum açtığı bir hostta local admin hakları edinin.
-2. Enrollment/export mantığını kurban olarak bir scheduled task ile çalıştırın.
-3. Ortaya çıkan PFX'i dışa aktarın.
+1. Kurbanın oturum açtığı bir hostta **local admin** kazanın.
+2. Kayıt/dışa aktarma (enrollment/export) mantığını kurban olarak bir **scheduled task** ile çalıştırın.
+3. Ortaya çıkan **PFX**'i dışa aktarın.
 4. PFX'i PKINIT / sertifika tabanlı AD authentication için kullanın.
 
 See the AD CS pages for follow-up abuse:
