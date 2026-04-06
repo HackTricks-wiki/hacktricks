@@ -1,30 +1,30 @@
-# Trucchi ZIP
+# Trucchi per ZIP
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-**Strumenti da riga di comando** per la gestione dei **file zip** sono essenziali per diagnosticare, riparare e craccare zip. Ecco alcune utility chiave:
+**Command-line tools** for managing **zip files** sono essenziali per diagnosticare, riparare e craccare zip files. Ecco alcune utility chiave:
 
-- **`unzip`**: Rivela perché un file zip potrebbe non decomprimersi.
-- **`zipdetails -v`**: Offre un'analisi dettagliata dei campi del formato zip.
-- **`zipinfo`**: Elenca il contenuto di un file zip senza estrarlo.
-- **`zip -F input.zip --out output.zip`** e **`zip -FF input.zip --out output.zip`**: Provano a riparare zip corrotti.
-- **[fcrackzip](https://github.com/hyc/fcrackzip)**: Uno strumento per il brute-force delle password degli zip, efficace per password fino a circa 7 caratteri.
+- **`unzip`**: Rivela perché un zip file potrebbe non decomprimersi.
+- **`zipdetails -v`**: Offre un'analisi dettagliata dei campi del formato zip file.
+- **`zipinfo`**: Elenca il contenuto di un zip file senza estrarlo.
+- **`zip -F input.zip --out output.zip`** e **`zip -FF input.zip --out output.zip`**: Tentano di riparare zip files corrotti.
+- **[fcrackzip](https://github.com/hyc/fcrackzip)**: Uno strumento per il brute-force cracking delle password degli zip, efficace per password fino a circa 7 caratteri.
 
-La [Zip file format specification](https://pkware.cachefly.net/webdocs/casestudies/APPNOTE.TXT) fornisce dettagli completi sulla struttura e gli standard dei file zip.
+La [Zip file format specification](https://pkware.cachefly.net/webdocs/casestudies/APPNOTE.TXT) fornisce dettagli completi sulla struttura e sugli standard dei zip files.
 
-È importante notare che i file zip protetti da password **non cifrano nomi di file o dimensioni dei file** al loro interno, una falla di sicurezza non presente in RAR o 7z che cifrano queste informazioni. Inoltre, gli zip cifrati con il metodo più vecchio ZipCrypto sono vulnerabili a un **plaintext attack** se è disponibile una copia non cifrata di un file compresso. Questo attacco sfrutta il contenuto noto per craccare la password dello zip, una vulnerabilità descritta nell'[articolo di HackThis](https://www.hackthis.co.uk/articles/known-plaintext-attack-cracking-zip-files) e ulteriormente spiegata in [questo paper accademico](https://www.cs.auckland.ac.nz/~mike/zipattacks.pdf). Tuttavia, gli zip protetti con cifratura **AES-256** sono immuni a questo plaintext attack, il che evidenzia l'importanza di scegliere metodi di cifratura sicuri per dati sensibili.
+È fondamentale notare che i zip files protetti da password **non cifrano i nomi dei file né le dimensioni dei file** al loro interno, una falla di sicurezza non presente in RAR o 7z che cifrano queste informazioni. Inoltre, i zip files crittografati con il metodo ZipCrypto sono vulnerabili a un **plaintext attack** se è disponibile una copia non cifrata di un file compresso. Questo attacco sfrutta il contenuto noto per craccare la password dello zip, una vulnerabilità dettagliata in [HackThis's article](https://www.hackthis.co.uk/articles/known-plaintext-attack-cracking-zip-files) e ulteriormente spiegata in [this academic paper](https://www.cs.auckland.ac.nz/~mike/zipattacks.pdf). Tuttavia, i zip files protetti con **AES-256** sono immuni a questo plaintext attack, evidenziando l'importanza di scegliere metodi di crittografia sicuri per i dati sensibili.
 
 ---
 
 ## Trucchi anti-reversing negli APK usando header ZIP manipolati
 
-I droppers di malware Android moderni usano metadati ZIP malformati per rompere strumenti statici (jadx/apktool/unzip) mantenendo comunque l'APK installabile sul dispositivo. I trucchi più comuni sono:
+I moderni Android malware droppers usano metadati ZIP malformati per rompere gli strumenti statici (jadx/apktool/unzip) mantenendo però l'APK installabile sul dispositivo. I trucchi più comuni sono:
 
-- Fake encryption impostando il ZIP General Purpose Bit Flag (GPBF) bit 0
-- Abusare di Extra fields grandi/personalizzati per confondere i parser
+- Fake encryption impostando il bit 0 del ZIP General Purpose Bit Flag (GPBF)
+- Abuso di campi Extra grandi/personalizzati per confondere i parser
 - Collisioni di nomi file/directory per nascondere artefatti reali (es., una directory chiamata `classes.dex/` accanto al vero `classes.dex`)
 
-### 1) Fake encryption (GPBF bit 0 impostato) senza vera crittografia
+### 1) Fake encryption (GPBF bit 0 set) without real crypto
 
 Sintomi:
 - `jadx-gui` fallisce con errori come:
@@ -32,7 +32,7 @@ Sintomi:
 ```
 java.util.zip.ZipException: invalid CEN header (encrypted entry)
 ```
-- `unzip` richiede una password per file core dell'APK anche se un APK valido non può avere cifrati `classes*.dex`, `resources.arsc`, o `AndroidManifest.xml`:
+- `unzip` chiede una password per file core dell'APK anche se un APK valido non può avere `classes*.dex`, `resources.arsc`, o `AndroidManifest.xml` cifrati:
 
 ```bash
 unzip sample.apk
@@ -47,7 +47,7 @@ Rilevamento con zipdetails:
 ```bash
 zipdetails -v sample.apk | less
 ```
-Controlla il General Purpose Bit Flag per gli header locali e centrali. Un valore rivelatore è il bit 0 impostato (Encryption) anche per le voci core:
+Esamina il General Purpose Bit Flag per le intestazioni locali e centrali. Un valore rivelatore è il bit 0 impostato (Encryption) anche per le voci core:
 ```
 Extract Zip Spec      2D '4.5'
 General Purpose Flag  0A09
@@ -56,12 +56,12 @@ General Purpose Flag  0A09
 [Bit 3]   1 'Streamed'
 [Bit 11]  1 'Language Encoding'
 ```
-Euristica: Se un APK si installa e viene eseguito sul dispositivo ma le voci principali appaiono "encrypted" agli strumenti, il GPBF è stato manomesso.
+Euristica: se un APK si installa e viene eseguito sul dispositivo ma le voci core appaiono "encrypted" agli strumenti, il GPBF è stato manomesso.
 
-Correggi azzerando il bit 0 di GPBF sia nelle Local File Headers (LFH) che nelle voci del Central Directory (CD). Byte-patcher minimo:
+Correggi cancellando il bit 0 del GPBF sia nelle Local File Headers (LFH) che nelle voci della Central Directory (CD). Minimal byte-patcher:
 
 <details>
-<summary>Patcher minimo per azzerare il bit GPBF</summary>
+<summary>Minimal GPBF bit-clear patcher</summary>
 ```python
 # gpbf_clear.py – clear encryption bit (bit 0) in ZIP local+central headers
 import struct, sys
@@ -99,23 +99,23 @@ Uso:
 python3 gpbf_clear.py obfuscated.apk normalized.apk
 zipdetails -v normalized.apk | grep -A2 "General Purpose Flag"
 ```
-Ora dovresti vedere `General Purpose Flag  0000` sulle voci core e gli strumenti analizzeranno nuovamente l'APK.
+Dovresti ora vedere `General Purpose Flag  0000` sulle voci principali e gli strumenti analizzeranno nuovamente l'APK.
 
 ### 2) Campi Extra grandi/personalizzati per rompere i parser
 
-Gli attaccanti inseriscono campi Extra sovradimensionati e ID insoliti negli header per mandare in errore i decompilatori. Nel mondo reale potresti vedere marcatori personalizzati (ad es., stringhe come `JADXBLOCK`) incorporati lì.
+Gli attaccanti inseriscono campi Extra sovradimensionati e ID strani nelle intestazioni per far fallire i decompilatori. Nel mondo reale potresti vedere marker personalizzati (es., stringhe come `JADXBLOCK`) incorporati lì.
 
 Ispezione:
 ```bash
 zipdetails -v sample.apk | sed -n '/Extra ID/,+4p' | head -n 50
 ```
-Esempi osservati: ID sconosciuti come `0xCAFE` ("Eseguibile Java") o `0x414A` ("JA:") che trasportano payload di grandi dimensioni.
+Esempi osservati: ID sconosciuti come `0xCAFE` ("Java Executable") o `0x414A` ("JA:") che contengono payload di grandi dimensioni.
 
-DFIR heuristics:
-- Segnala quando i campi Extra sono insolitamente grandi nelle voci core (`classes*.dex`, `AndroidManifest.xml`, `resources.arsc`).
-- Tratta come sospetti gli ID Extra sconosciuti in quelle voci.
+Euristiche DFIR:
+- Segnalare quando i campi Extra sono insolitamente grandi sulle voci core (`classes*.dex`, `AndroidManifest.xml`, `resources.arsc`).
+- Considerare sospetti gli ID Extra sconosciuti su quelle voci.
 
-Mitigazione pratica: ricostruire l'archivio (es., re-zippando i file estratti) elimina i campi Extra maligni. Se gli strumenti rifiutano di estrarre a causa di falsa crittografia, prima azzera GPBF bit 0 come sopra, quindi ripacchetta:
+Mitigazione pratica: ricreare l'archivio (es., re-zipping dei file estratti) rimuove i campi Extra dannosi. Se gli strumenti rifiutano di estrarre a causa di una falsa crittografia, prima azzerare il bit 0 del GPBF come sopra, quindi ripacchettare:
 ```bash
 mkdir /tmp/apk
 unzip -qq normalized.apk -d /tmp/apk
@@ -123,9 +123,9 @@ unzip -qq normalized.apk -d /tmp/apk
 ```
 ### 3) Collisioni di nomi file/directory (nascondere artefatti reali)
 
-Un ZIP può contenere sia un file `X` che una directory `X/`. Alcuni extractors e decompilers si confondono e possono sovrapporre o nascondere il file reale con una voce di directory. Questo è stato osservato con voci che collidono con nomi principali di APK come `classes.dex`.
+A ZIP può contenere sia un file `X` che una directory `X/`. Alcuni extractors e decompilers si confondono e possono sovrapporre o nascondere il file reale con una voce di directory. Questo è stato osservato con entries che collisionano con nomi core di APK come `classes.dex`.
 
-Triage and safe extraction:
+Triage e estrazione sicura:
 ```bash
 # List potential collisions (names that differ only by trailing slash)
 zipinfo -1 sample.apk | awk '{n=$0; sub(/\/$/,"",n); print n}' | sort | uniq -d
@@ -136,7 +136,7 @@ unzip normalized.apk -d outdir
 # replace outdir/classes.dex? [y]es/[n]o/[A]ll/[N]one/[r]ename: r
 # new name: unk_classes.dex
 ```
-Rilevamento programmatico post-fix:
+Post-fix per il rilevamento programmatico:
 ```python
 from zipfile import ZipFile
 from collections import defaultdict
@@ -153,18 +153,18 @@ for base, variants in collisions.items():
 if len(variants) > 1:
 print('COLLISION', base, '->', variants)
 ```
-Idee di rilevamento per il Blue-team:
-- Segnala APKs i cui header locali indicano encryption (GPBF bit 0 = 1) ma che comunque si installano/run.
-- Segnala Extra fields grandi/sconosciuti sulle core entries (cerca marker come `JADXBLOCK`).
-- Segnala path-collisions (`X` and `X/`) specificamente per `AndroidManifest.xml`, `resources.arsc`, `classes*.dex`.
+Blue-team detection ideas:
+- Flag APKs i cui header locali indicano crittografia (GPBF bit 0 = 1) ma vengono comunque installati/eseguiti.
+- Flag Extra fields grandi/sconosciuti sulle core entries (cerca marcatori come `JADXBLOCK`).
+- Flag collisioni di percorso (`X` and `X/`) specificamente per `AndroidManifest.xml`, `resources.arsc`, `classes*.dex`.
 
 ---
 
-## Altri trucchi ZIP malevoli (2024–2026)
+## Altri trucchi maligni con ZIP (2024–2026)
 
 ### Directory centrali concatenate (evasione multi-EOCD)
 
-Recenti campagne di phishing inviano un unico blob che è in realtà **due file ZIP concatenati**. Ognuno ha il proprio End of Central Directory (EOCD) + central directory. Diversi extractors parseano directory diverse (7zip legge la prima, WinRAR l'ultima), permettendo agli attackers di nascondere payload che solo alcuni strumenti mostrano. Questo bypassa anche gli AV dei mail gateway che ispezionano solo la prima directory.
+Campagne di phishing recenti inviano un singolo blob che è in realtà **due file ZIP concatenati**. Ognuno ha il suo End of Central Directory (EOCD) + central directory. Diversi extractors parsano directory diverse (7zip legge la prima, WinRAR l'ultima), permettendo agli attaccanti di nascondere payload che solo alcuni strumenti mostrano. Questo aggira anche mail gateway AV di base che ispezionano solo la prima directory.
 
 **Comandi di triage**
 ```bash
@@ -181,11 +181,11 @@ OFF=123456
 dd if=suspect.zip bs=1 skip=$OFF of=tail.zip
 7z l tail.zip   # list hidden content
 ```
-### Quoted-overlap / overlapping-entry bombs (non ricorsivo)
+### Quoted-overlap / overlapping-entry bombs (non-recursive)
 
-Una moderna "better zip bomb" costruisce un piccolo **kernel** (blocco DEFLATE altamente compresso) e lo riutilizza tramite intestazioni locali sovrapposte. Ogni voce della central directory punta agli stessi dati compressi, ottenendo rapporti >28M:1 senza nidificare archivi. Le librerie che si affidano alle dimensioni della central directory (Python `zipfile`, Java `java.util.zip`, Info-ZIP prima di hardened builds) possono essere costrette ad allocare petabyte.
+Una moderna "better zip bomb" costruisce un minuscolo **kernel** (blocco DEFLATE altamente compresso) e lo riutilizza tramite header locali sovrapposti. Ogni voce della central directory punta agli stessi dati compressi, raggiungendo rapporti >28M:1 senza annidare archivi. Le librerie che si affidano alle dimensioni della central directory (Python `zipfile`, Java `java.util.zip`, Info-ZIP prior to hardened builds) possono essere costrette ad allocare petabyte.
 
-**Rilevamento rapido (offset LFH duplicati)**
+**Rilevamento rapido (duplicate LFH offsets)**
 ```python
 # detect overlapping entries by identical relative offsets
 import struct, sys
@@ -201,20 +201,20 @@ break
 seen.add(rel); off = i+4
 ```
 **Gestione**
-- Eseguire un dry-run: `zipdetails -v file.zip | grep -n "Rel Off"` e assicurarsi che gli offset siano strettamente crescenti e unici.
-- Limitare la dimensione totale non compressa accettata e il numero di voci prima dell'estrazione (`zipdetails -t` o parser personalizzato).
-- Se è necessario estrarre, farlo dentro un cgroup/VM con limiti CPU e disco (evitare crash per inflazione illimitata).
+- Eseguire un dry-run: `zipdetails -v file.zip | grep -n "Rel Off"` e assicurarsi che gli offset siano strettamente crescenti e univoci.
+- Limitare la dimensione totale decompressa accettata e il numero di voci prima dell'estrazione (`zipdetails -t` o un parser personalizzato).
+- Se è necessario estrarre, farlo dentro un cgroup/VM con limiti CPU e disco (evitare crash dovuti a inflazione non limitata).
 
 ---
 
-### Confusione parser Local-header vs Central-directory
+### Confusione tra parser local-header vs central-directory
 
-Recenti ricerche su differential-parser hanno dimostrato che l'ambiguità degli ZIP è ancora sfruttabile nelle toolchain moderne. L'idea principale è semplice: alcuni software si fidano del **Local File Header (LFH)** mentre altri si fidano della **Central Directory (CD)**, quindi un singolo archivio può presentare nomi file, percorsi, commenti, offset o insiemi di voci differenti a strumenti diversi.
+Ricerche recenti sui differential parser hanno mostrato che l'ambiguità ZIP è ancora sfruttabile nelle toolchain moderne. L'idea principale è semplice: alcuni software si fidano del **Local File Header (LFH)** mentre altri si affidano alla **Central Directory (CD)**, quindi un unico archivio può presentare nomi file, percorsi, commenti, offset o insiemi di voci diversi a strumenti differenti.
 
 Usi offensivi pratici:
-- Far sì che un filtro di upload, un pre-scan AV o un validator di pacchetti veda un file benigno nella CD mentre l'estrattore rispetta un nome/percorso LFH differente.
-- Abusare di nomi duplicati, voci presenti solo in una struttura, o metadati di percorso Unicode ambigui (per esempio, Info-ZIP Unicode Path Extra Field `0x7075`) così che parser diversi ricostruiscano alberi diversi.
-- Combinare questo con path traversal per trasformare una vista "innocua" dell'archivio in una write-primitive durante l'estrazione. Per il lato estrazione, vedi [Archive Extraction Path Traversal](../../../generic-hacking/archive-extraction-path-traversal.md).
+- Fare in modo che un filtro di upload, uno pre-scan AV o un package validator veda un file benigno nella CD mentre l'estrattore rispetta un nome/percorso diverso nel LFH.
+- Abusare di nomi duplicati, voci presenti solo in una struttura, o di metadati di percorso Unicode ambigui (per esempio, Info-ZIP Unicode Path Extra Field `0x7075`) in modo che parser diversi ricostruiscano alberi differenti.
+- Combinare questo con path traversal per trasformare una vista dell'archivio "innocua" in una write-primitive durante l'estrazione. Per il lato estrazione, vedi [Archive Extraction Path Traversal](../../../generic-hacking/archive-extraction-path-traversal.md).
 
 Triage DFIR:
 ```python
@@ -236,19 +236,21 @@ if off in lfh and cd != lfh[off]:
 print(f'NAME_MISMATCH off={off} cd={cd!r} lfh={lfh[off]!r}')
 i += 4
 ```
-You didn’t include the file content or the text to “complement.” Please paste the markdown (or specify the exact additions) you want me to translate and/or append, and I’ll return the Italian translation preserving all tags, links and code as requested.
+Non hai fornito il contenuto da tradurre o il testo con cui completarlo. Per favore incolla il contenuto di src/generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/zips-tricks.md o il testo aggiuntivo che vuoi venga integrato; procederò a tradurre e completare non appena lo ricevo.
 ```bash
 zipdetails -v suspect.zip | less
 zipinfo -v suspect.zip | grep -E "file name|offset|comment"
 ```
 Euristiche:
-- Rifiutare o isolare gli archivi con nomi LFH/CD discordanti, nomi di file duplicati, più record EOCD o byte terminali dopo l'EOCD finale.
-- Considerare sospetti gli ZIP che utilizzano insoliti Unicode-path extra fields o commenti incoerenti se strumenti diversi non concordano sull'albero estratto.
-- Se l'analisi è più importante della conservazione dei byte originali, ripacchettare l'archivio con un strict parser dopo l'estrazione in una sandbox e confrontare la lista dei file risultante con i metadati originali.
+- Rifiutare o isolare gli archivi con nomi LFH/CD non corrispondenti, nomi di file duplicati, multiple voci EOCD, o byte finali dopo l'EOCD finale.
+- Considerare sospetti gli ZIP che usano campi extra Unicode-path insoliti o commenti incoerenti se strumenti diversi discordano sull'albero estratto.
+- Se l'analisi è più importante della preservazione dei byte originali, ripacchettare l'archivio con un parser rigoroso dopo l'estrazione in una sandbox e confrontare l'elenco dei file risultante con i metadati originali.
 
-Questo è rilevante anche oltre gli ecosistemi dei package: la stessa classe di ambiguità può nascondere payloads a mail gateways, static scanners e custom ingestion pipelines che "peek" nei contenuti ZIP prima che un altro extractor gestisca l'archivio.
+Questo è rilevante oltre gli ecosistemi di pacchetti: la stessa classe di ambiguità può nascondere payload a gateway di posta, scanner statici e pipeline di ingestione personalizzate che "sbirciano" il contenuto dello ZIP prima che un altro extractor gestisca l'archivio.
 
 ---
+
+
 
 ## Riferimenti
 

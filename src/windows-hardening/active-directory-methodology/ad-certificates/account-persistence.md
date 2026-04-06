@@ -1,14 +1,14 @@
-# Persistenza account AD CS
+# AD CS Account Persistence
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-**Questa è una breve sintesi dei capitoli sulla persistenza degli account dell'eccellente ricerca disponibile su [https://specterops.io/assets/resources/Certified_Pre-Owned.pdf](https://specterops.io/assets/resources/Certified_Pre-Owned.pdf)**
+**Questa è una breve sintesi dei capitoli sulla persistenza degli account della straordinaria ricerca di [https://specterops.io/assets/resources/Certified_Pre-Owned.pdf](https://specterops.io/assets/resources/Certified_Pre-Owned.pdf)**
 
-## Comprendere il furto di credenziali utente attive con i certificati – PERSIST1
+## Comprendere il furto attivo delle credenziali utente con i certificati – PERSIST1
 
-In uno scenario in cui un certificato che consente l'autenticazione di dominio può essere richiesto da un utente, un attaccante ha l'opportunità di richiedere e rubare questo certificato per mantenere la persistenza su una rete. Per impostazione predefinita, il `User` template in Active Directory consente tali richieste, anche se a volte può essere disabilitato.
+In uno scenario in cui un certificato che consente l'autenticazione di dominio può essere richiesto da un utente, un attacker ha l'opportunità di richiedere e rubare questo certificato per mantenere la persistenza in una rete. Per impostazione predefinita, il template `User` in Active Directory permette tali richieste, anche se talvolta può essere disabilitato.
 
-Usando [Certify](https://github.com/GhostPack/Certify) o [Certipy](https://github.com/ly4k/Certipy), puoi cercare template abilitati che consentono l'autenticazione client e poi richiederne uno:
+Usando [Certify](https://github.com/GhostPack/Certify) o [Certipy](https://github.com/ly4k/Certipy), puoi cercare template abilitati che consentono l'autenticazione client e quindi richiederne uno:
 ```bash
 # Enumerate client-auth capable templates
 Certify.exe find /clientauth
@@ -19,7 +19,7 @@ Certify.exe request /ca:CA-SERVER\CA-NAME /template:User
 # Using Certipy (RPC/DCOM/WebEnrollment supported). Saves a PFX by default
 certipy req -u 'john@corp.local' -p 'Passw0rd!' -ca 'CA-SERVER\CA-NAME' -template 'User' -out user.pfx
 ```
-Il potere di un certificato risiede nella sua capacità di autenticarsi come l'utente a cui appartiene, indipendentemente dalle modifiche della password, purché il certificato rimanga valido.
+Il potere di un certificato risiede nella sua capacità di autenticarsi come l'utente a cui appartiene, indipendentemente dalle modifiche alla password, purché il certificato rimanga valido.
 
 Puoi convertire PEM in PFX e usarlo per ottenere un TGT:
 ```bash
@@ -32,11 +32,11 @@ Rubeus.exe asktgt /user:john /certificate:C:\Temp\cert.pfx /password:CertPass! /
 # Or with Certipy
 certipy auth -pfx user.pfx -dc-ip 10.0.0.10
 ```
-> Nota: Combinata con altre tecniche (vedere le sezioni THEFT), certificate-based auth consente accesso persistente senza toccare LSASS e anche da contesti non elevati.
+> Nota: In combinazione con altre tecniche (vedi le sezioni THEFT), l'autenticazione basata su certificati consente accesso persistente senza toccare LSASS e anche da contesti non elevati.
 
-## Ottenere persistenza della macchina con certificati - PERSIST2
+## Ottenere persistenza a livello di macchina con i certificati - PERSIST2
 
-Se un attaccante ha privilegi elevati su un host, può richiedere un certificato per l'account macchina del sistema compromesso utilizzando il template predefinito `Machine`. Autenticarsi come la macchina abilita S4U2Self per i servizi locali e può fornire una persistenza duratura sull'host:
+Se un attacker ha privilegi elevati su un host, può iscrivere l'account macchina del sistema compromesso per ottenere un certificato utilizzando il template predefinito `Machine`. Autenticarsi come la macchina abilita S4U2Self per i servizi locali e può fornire una persistenza duratura sull'host:
 ```bash
 # Request a machine certificate as SYSTEM
 Certify.exe request /ca:dc.theshire.local/theshire-DC-CA /template:Machine /machine
@@ -44,9 +44,9 @@ Certify.exe request /ca:dc.theshire.local/theshire-DC-CA /template:Machine /mach
 # Authenticate as the machine using the issued PFX
 Rubeus.exe asktgt /user:HOSTNAME$ /certificate:C:\Temp\host.pfx /password:Passw0rd! /ptt
 ```
-## Estendere la Persistence tramite il rinnovo dei certificati - PERSIST3
+## Extending Persistence Through Certificate Renewal - PERSIST3
 
-Abusare dei periodi di validità e rinnovo dei modelli di certificato permette a un attaccante di mantenere l'accesso a lungo termine. Se possiedi un certificato emesso in precedenza e la sua chiave privata, puoi rinnovarlo prima della scadenza per ottenere una credenziale nuova e di lunga durata senza lasciare ulteriori artefatti di richiesta associati all'account originale.
+Abusare dei periodi di validità e di rinnovo dei template di certificato consente a un attaccante di mantenere l'accesso a lungo termine. Se si è in possesso di un certificato precedentemente emesso e della sua chiave privata, è possibile rinnovarlo prima della scadenza per ottenere una credenziale nuova e di lunga durata senza lasciare ulteriori artefatti di richiesta legati al principal originale.
 ```bash
 # Renewal with Certipy (works with RPC/DCOM/WebEnrollment)
 # Provide the existing PFX and target the same CA/template when possible
@@ -57,20 +57,20 @@ certipy req -u 'john@corp.local' -p 'Passw0rd!' -ca 'CA-SERVER\CA-NAME' \
 # (use the serial/thumbprint of the cert to renew; reusekeys preserves the keypair)
 certreq -enroll -user -cert <SerialOrID> renew [reusekeys]
 ```
-> Suggerimento operativo: tieni traccia delle durate dei file PFX in possesso dell'attaccante e rinnovali in anticipo. Il rinnovo può inoltre fare in modo che i certificati aggiornati includano l'estensione moderna di mappatura SID, mantenendoli utilizzabili con regole di mappatura DC più restrittive (vedi sezione successiva).
+> Suggerimento operativo: tieni traccia delle durate dei file PFX in possesso dell'attaccante e rinnova per tempo. Il rinnovo può anche fare sì che i certificati aggiornati includano l'estensione di mapping SID moderna, mantenendoli utilizzabili con regole di mapping DC più restrittive (vedi sezione successiva).
 
-## Inserire mappature esplicite di certificati (altSecurityIdentities) – PERSIST4
+## Inserimento di mappature esplicite di certificati (altSecurityIdentities) – PERSIST4
 
-Se puoi scrivere all'attributo `altSecurityIdentities` di un account di destinazione, puoi mappare esplicitamente un certificato controllato dall'attaccante su quell'account. Questa persistenza sopravvive ai cambi di password e, utilizzando formati di mappatura robusti, rimane funzionale sotto l'applicazione più restrittiva delle regole del DC.
+Se puoi scrivere nell'attributo `altSecurityIdentities` di un account di destinazione, puoi mappare esplicitamente un certificato controllato dall'attaccante a quell'account. Questo persiste attraverso i cambi di password e, quando si usano formati di mapping forti, continua a funzionare con le policy di mapping più severe applicate dai DC moderni.
 
 Flusso ad alto livello:
 
-1. Ottieni o emetti un certificato client-auth che controlli (es., richiedi il template `User` per te stesso).
-2. Estrai un identificatore robusto dal certificato (Issuer+Serial, SKI, oppure SHA1-PublicKey).
+1. Ottieni o emetti un certificato client-auth che controlli (es. richiedi il template `User` come te stesso).
+2. Estrai un identificatore forte dal certificato (Issuer+Serial, SKI, or SHA1-PublicKey).
 3. Aggiungi una mappatura esplicita sull'attributo `altSecurityIdentities` del principal vittima usando quell'identificatore.
-4. Autenticati con il tuo certificato; il DC lo associa all'account vittima tramite la mappatura esplicita.
+4. Autentica con il tuo certificato; il DC lo mappa alla vittima tramite la mappatura esplicita.
 
-Esempio (PowerShell) usando una mappatura Issuer+Serial robusta:
+Esempio (PowerShell) che usa una mappatura Issuer+Serial forte:
 ```powershell
 # Example values - reverse the issuer DN and serial as required by AD mapping format
 $Issuer  = 'DC=corp,DC=local,CN=CORP-DC-CA'
@@ -87,9 +87,9 @@ certipy auth -pfx attacker_user.pfx -dc-ip 10.0.0.10
 # If PKINIT is unavailable on the DC, reuse the same persisted cert via Schannel/LDAPS
 certipy auth -pfx attacker_user.pfx -dc-ip 10.0.0.10 -ldap-shell
 ```
-### Costruire mappature robuste di `altSecurityIdentities`
+### Costruire mapping robusti per `altSecurityIdentities`
 
-In pratica, le mappature **Issuer+Serial** e **SKI** sono i formati robusti più facili da costruire a partire da un certificato in possesso di un attaccante. Questo diventa rilevante dopo l'**11 febbraio 2025**, quando i DCs, per impostazione predefinita, passeranno a **Full Enforcement** e le mappature deboli non saranno più affidabili.
+Nella pratica, le mappature **Issuer+Serial** e **SKI** sono i formati forti più semplici da creare a partire da un certificato in possesso dell'attaccante. Questo è importante dopo il **11 febbraio 2025**, quando i DCs passeranno per impostazione predefinita a **Full Enforcement** e le mappature deboli smetteranno di essere affidabili.
 ```bash
 # Extract issuer, serial and SKI from a cert/PFX
 openssl pkcs12 -in attacker_user.pfx -clcerts -nokeys -out attacker_user.crt
@@ -103,12 +103,12 @@ Set-ADUser -Identity 'victim' -Add @{altSecurityIdentities=$Map}
 # Set-ADComputer -Identity 'WS01$' -Add @{altSecurityIdentities=$Map}
 ```
 Note
-- Use strong mapping types only: `X509IssuerSerialNumber`, `X509SKI`, or `X509SHA1PublicKey`. Weak formats (Subject/Issuer, Subject-only, RFC822 email) are deprecated and can be blocked by DC policy.
-- The mapping works on both **user** and **computer** objects, so write access to a computer account's `altSecurityIdentities` is enough to persist as that machine.
-- The cert chain must build to a root trusted by the DC. Enterprise CAs in NTAuth are typically trusted; some environments also trust public CAs.
-- Schannel authentication remains useful for persistence even when PKINIT fails because the DC lacks the Smart Card Logon EKU or returns `KDC_ERR_PADATA_TYPE_NOSUPP`.
+- Usare solo tipi di mappatura forti: `X509IssuerSerialNumber`, `X509SKI` o `X509SHA1PublicKey`. Formati deboli (Subject/Issuer, Subject-only, RFC822 email) sono deprecati e possono essere bloccati dalla DC policy.
+- La mappatura funziona su entrambi gli oggetti **user** e **computer**, quindi l'accesso in scrittura all'`altSecurityIdentities` di un account computer è sufficiente per persistere come quella macchina.
+- La catena di certificati deve ricondursi a una root fidata dal DC. Le Enterprise CAs in NTAuth sono tipicamente fidate; alcuni ambienti si fidano anche delle public CAs.
+- L'autenticazione Schannel rimane utile per la persistenza anche quando PKINIT fallisce perché il DC manca dell'EKU Smart Card Logon o restituisce `KDC_ERR_PADATA_TYPE_NOSUPP`.
 
-Per approfondire le mappature esplicite deboli e i percorsi di attacco, vedere:
+Per maggiori dettagli su weak explicit mappings e percorsi di attacco, vedi:
 
 
 {{#ref}}
@@ -117,7 +117,7 @@ domain-escalation.md
 
 ## Enrollment Agent as Persistence – PERSIST5
 
-If you obtain a valid Certificate Request Agent/Enrollment Agent certificate, you can mint new logon-capable certificates on behalf of users at will and keep the agent PFX offline as a persistence token. Flusso di abuso:
+Se ottieni un certificato valido Certificate Request Agent/Enrollment Agent, puoi emettere nuovi certificati abilitati al logon per conto degli utenti a piacimento e conservare il PFX dell'agent offline come token di persistenza. Workflow di abuso:
 ```bash
 # Request an Enrollment Agent cert (requires template rights)
 Certify.exe request /ca:CA-SERVER\CA-NAME /template:"Certificate Request Agent"
@@ -133,19 +133,19 @@ certipy req -u 'john@corp.local' -p 'Passw0rd!' -ca 'CA-SERVER\CA-NAME' \
 La revoca del certificato dell'agente o delle autorizzazioni del template è necessaria per rimuovere questa persistenza.
 
 Note operative
-- Modern `Certipy` versions support both `-on-behalf-of` and `-renew`, quindi un attaccante in possesso di un Enrollment Agent PFX può emettere e successivamente rinnovare certificati leaf senza toccare nuovamente l'account target originale.
-- Se il recupero del TGT tramite PKINIT non è possibile, il certificato on-behalf-of risultante è comunque utilizzabile per l'autenticazione Schannel con `certipy auth -pfx victim_onbo.pfx -dc-ip 10.0.0.10 -ldap-shell`.
+- Le versioni moderne di `Certipy` supportano sia `-on-behalf-of` che `-renew`, quindi un attacker in possesso di un Enrollment Agent PFX può emettere e successivamente rinnovare certificati leaf senza dover ri-interagire con l'account target originale.
+- Se il recupero del TGT basato su PKINIT non è possibile, il certificato on-behalf-of risultante è comunque utilizzabile per l'autenticazione Schannel con `certipy auth -pfx victim_onbo.pfx -dc-ip 10.0.0.10 -ldap-shell`.
 
 ## 2025 Strong Certificate Mapping Enforcement: Impatto sulla persistenza
 
-Microsoft KB5014754 ha introdotto Strong Certificate Mapping Enforcement sui domain controller. Dall'11 febbraio 2025, i DC sono impostati di default su Full Enforcement, rifiutando mapping deboli/ambigui. Implicazioni pratiche:
+Microsoft KB5014754 ha introdotto Strong Certificate Mapping Enforcement sui domain controller. Dal 11 febbraio 2025, i DC impostano per impostazione predefinita Full Enforcement, rifiutando mapping deboli/ambigui. Implicazioni pratiche:
 
-- I certificati pre-2022 che non contengono l'estensione di mapping SID possono fallire nel mapping implicito quando i DC sono in Full Enforcement. Gli attaccanti possono mantenere l'accesso rinnovando i certificati tramite AD CS (per ottenere l'estensione SID) oppure inserendo un mapping esplicito forte in `altSecurityIdentities` (PERSIST4).
-- I mapping espliciti che usano formati forti (Issuer+Serial, SKI, SHA1-PublicKey) continuano a funzionare. I formati deboli (Issuer/Subject, Subject-only, RFC822) possono essere bloccati e dovrebbero essere evitati per la persistenza.
+- I certificati antecedenti al 2022 che non includono l'estensione di mapping SID possono non riuscire nella mappatura implicita quando i DC sono in Full Enforcement. Gli attacker possono mantenere l'accesso rinnovando i certificati tramite AD CS (per ottenere l'estensione SID) o inserendo una mappatura esplicita forte in `altSecurityIdentities` (PERSIST4).
+- Le mappature esplicite che usano formati forti (Issuer+Serial, SKI, SHA1-PublicKey) continuano a funzionare. I formati deboli (Issuer/Subject, Subject-only, RFC822) possono essere bloccati e dovrebbero essere evitati per la persistenza.
 
-Gli amministratori dovrebbero monitorare e generare allarmi su:
-- Modifiche a `altSecurityIdentities` e emissione/rinnovi di Enrollment Agent e certificati utente.
-- I log di emissione della CA per richieste on-behalf-of e pattern di rinnovo insoliti.
+Gli amministratori dovrebbero monitorare e segnalare:
+- Modifiche a `altSecurityIdentities` e emissioni/rinnovi dei certificati Enrollment Agent e User.
+- I log di emissione della CA per richieste on-behalf-of e schemi di rinnovo insoliti.
 
 ## Riferimenti
 
