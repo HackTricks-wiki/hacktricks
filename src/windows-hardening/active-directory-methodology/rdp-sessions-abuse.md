@@ -1,10 +1,10 @@
-# Κατάχρηση Συνεδριών RDP
+# RDP Sessions Abuse
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## RDP Process Injection
 
-Εάν η **εξωτερική ομάδα** έχει **RDP access** σε οποιονδήποτε **υπολογιστή** στο τρέχον domain, ένας **επιτιθέμενος** θα μπορούσε να **παραβιάσει αυτόν τον υπολογιστή και να περιμένει τον χρήστη**.
+Αν η **εξωτερική ομάδα** έχει **RDP access** σε οποιονδήποτε **υπολογιστή** στο τρέχον domain, ένας **επιτιθέμενος** θα μπορούσε να **παραβιάσει αυτόν τον υπολογιστή και να περιμένει τον χρήστη**.
 
 Μόλις ο χρήστης συνδεθεί μέσω RDP, ο **επιτιθέμενος μπορεί να μεταβεί στη συνεδρία του χρήστη** και να καταχραστεί τα δικαιώματά του στο εξωτερικό domain.
 ```bash
@@ -34,7 +34,7 @@ beacon> inject 4960 x64 tcp-local
 
 ## RDPInception
 
-Αν ένας χρήστης εισέλθει μέσω **RDP into a machine** όπου ένας **attacker** είναι **waiting** για αυτόν, ο attacker θα μπορεί να **inject a beacon in the RDP session of the user** και εάν ο **victim mounted his drive** όταν συνδέεται μέσω RDP, ο **attacker could access it**.
+Αν ένας χρήστης συνδεθεί μέσω **RDP into a machine** όπου ένας **attacker** είναι **waiting** για αυτόν, ο attacker θα είναι σε θέση να **inject a beacon in the RDP session of the user** και αν ο **victim mounted his drive** όταν συνδέεται μέσω RDP, ο **attacker could access it**.
 
 Σε αυτή την περίπτωση μπορείτε απλά να **compromise** τον **victims** **original computer** γράφοντας ένα **backdoor** στον **statup folder**.
 ```bash
@@ -70,19 +70,19 @@ beacon> upload C:\Payloads\pivot.exe
 ```
 ## Shadow RDP
 
-Εάν είστε **local admin** σε έναν υπολογιστή όπου το θύμα έχει ήδη μια **active RDP session**, μπορεί να μπορέσετε να **προβάλετε/ελέγξετε αυτήν την επιφάνεια εργασίας χωρίς να κλέψετε τον κωδικό ή να κάνετε dumping το LSASS**.
+Εάν είστε **local admin** σε έναν host όπου το θύμα ήδη έχει μια **active RDP session**, ενδέχεται να μπορείτε να **view/control that desktop without stealing the password or dumping LSASS**.
 
 Αυτό εξαρτάται από την πολιτική **Remote Desktop Services shadowing** που αποθηκεύεται σε:
 ```text
 HKLM\Software\Policies\Microsoft\Windows NT\Terminal Services\Shadow
 ```
-Ενδιαφέρουσες τιμές:
+Interesting values:
 
 - `0`: Απενεργοποιημένο
 - `1`: `EnableInputNotify` (έλεγχος, απαιτείται έγκριση χρήστη)
 - `2`: `EnableInputNoNotify` (έλεγχος, **χωρίς έγκριση χρήστη**)
-- `3`: `EnableNoInputNotify` (προβολή μόνο, απαιτείται έγκριση χρήστη)
-- `4`: `EnableNoInputNoNotify` (προβολή μόνο, **χωρίς έγκριση χρήστη**)
+- `3`: `EnableNoInputNotify` (μόνο προβολή, απαιτείται έγκριση χρήστη)
+- `4`: `EnableNoInputNoNotify` (μόνο προβολή, **χωρίς έγκριση χρήστη**)
 ```cmd
 :: Check the policy
 reg query "HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services" /v Shadow
@@ -94,26 +94,24 @@ reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services" /v Shado
 quser /server:<HOST>
 mstsc /v:<HOST> /shadow:<SESSION_ID> /control /noconsentprompt /prompt
 ```
-Αυτό είναι ιδιαίτερα χρήσιμο όταν ένας χρήστης με προνόμια που είναι συνδεδεμένος μέσω RDP άφησε ξεκλείδωτο desktop, συνεδρία KeePass, MMC console, browser session ή admin shell ανοιχτό.
+Αυτό είναι ιδιαίτερα χρήσιμο όταν ένας προνομιούχος χρήστης που συνδέθηκε μέσω RDP άφησε ξεκλείδωτη την επιφάνεια εργασίας, συνεδρία KeePass, κονσόλα MMC, browser session, ή admin shell ανοιχτό.
 
 ## Scheduled Tasks As Logged-On User
 
-Αν είστε **local admin** και ο χρήστης-στόχος είναι **currently logged on**, το Task Scheduler μπορεί να ξεκινήσει κώδικα **ως αυτός ο χρήστης χωρίς τον κωδικό του**.
+If you are **local admin** and the target user is **currently logged on**, Task Scheduler can start code **ως αυτόν τον χρήστη χωρίς τον κωδικό του**.
 
-Αυτό μετατρέπει την υπάρχουσα logon session του θύματος σε ένα execution primitive:
+Αυτό μετατρέπει την υπάρχουσα συνεδρία σύνδεσης του θύματος σε ένα execution primitive:
 ```cmd
 schtasks /create /S <HOST> /RU "<DOMAIN\\user>" /SC ONCE /ST 00:00 /TN "Updater" /TR "cmd.exe /c whoami > C:\\Windows\\Temp\\whoami.txt"
 schtasks /run /S <HOST> /TN "Updater"
 ```
-Σημειώσεις:
+- Αν ο χρήστης **δεν είναι συνδεδεμένος**, τα Windows συνήθως απαιτούν τον κωδικό πρόσβασης για να δημιουργήσουν μια εργασία που τρέχει ως αυτός.
+- Αν ο χρήστης **είναι συνδεδεμένος**, η εργασία μπορεί να επαναχρησιμοποιήσει το υπάρχον logon context.
+- Αυτός είναι ένας πρακτικός τρόπος για να εκτελέσετε GUI ενέργειες ή να εκκινήσετε binaries μέσα στη συνεδρία του θύματος χωρίς να αγγίξετε το LSASS.
 
-- If the user is **not logged on**, Windows usually requires the password to create a task that runs as them.
-- If the user **is logged on**, the task can reuse the existing logon context.
-- This is a practical way to execute GUI actions or launch binaries inside the victim session without touching LSASS.
+## CredUI Prompt Abuse From the Victim Session
 
-## Κακόβουλη χρήση του CredUI Prompt από τη σύνδεση του θύματος
-
-Μόλις μπορείτε να εκτελέσετε **inside the victim's interactive desktop** (for example via **Shadow RDP** or **a scheduled task running as that user**), μπορείτε να εμφανίσετε μια **real Windows credential prompt** χρησιμοποιώντας CredUI APIs και να συλλέξετε τα credentials που εισάγει το θύμα.
+Μόλις μπορείτε να εκτελέσετε **μέσα στην interactive desktop του θύματος** (για παράδειγμα μέσω **Shadow RDP** ή **μιας scheduled task που τρέχει ως εκείνος ο χρήστης**), μπορείτε να εμφανίσετε ένα **πραγματικό Windows credential prompt** χρησιμοποιώντας τις CredUI APIs και να συλλέξετε τα credentials που εισάγει το θύμα.
 
 Relevant APIs:
 
@@ -122,23 +120,23 @@ Relevant APIs:
 
 Τυπική ροή:
 
-1. Spawn a binary in the victim session.
-2. Display a domain-authentication prompt that matches the current domain branding.
-3. Unpack the returned auth buffer.
-4. Validate the provided credentials and optionally keep prompting until valid credentials are entered.
+1. Εκκινήστε ένα binary στη συνεδρία του θύματος.
+2. Εμφανίστε ένα domain-authentication prompt που ταιριάζει με το τρέχον branding του domain.
+3. Ξεπακετάρετε το επιστρεφόμενο auth buffer.
+4. Επαληθεύστε τα παρεχόμενα credentials και, προαιρετικά, συνεχίστε να εμφανίζετε το prompt μέχρι να εισαχθούν έγκυρα credentials.
 
-Αυτό είναι χρήσιμο για **on-host phishing** επειδή η προτροπή αποδίδεται από τις standard Windows APIs αντί για μια ψεύτικη HTML φόρμα.
+Αυτό είναι χρήσιμο για **on-host phishing** επειδή το prompt αποδίδεται από τις τυπικές Windows APIs αντί για μια ψεύτικη HTML φόρμα.
 
 ## Requesting a PFX In the Victim Context
 
-The same **scheduled-task-as-user** primitive can be used to request a **certificate/PFX as the logged-on victim**. That certificate can later be used for **AD authentication** as that user, avoiding password theft entirely.
+Η ίδια **scheduled-task-as-user** primitive μπορεί να χρησιμοποιηθεί για να ζητήσει ένα **certificate/PFX ως ο συνδεδεμένος χρήστης-θύμα**. Αυτό το πιστοποιητικό μπορεί αργότερα να χρησιμοποιηθεί για **AD authentication** ως εκείνος ο χρήστης, αποφεύγοντας εντελώς την κλοπή κωδικού.
 
 High-level flow:
 
-1. Gain **local admin** on a host where the victim is logged on.
-2. Run enrollment/export logic as the victim using a **scheduled task**.
-3. Export the resulting **PFX**.
-4. Use the PFX for PKINIT / certificate-based AD authentication.
+1. Αποκτήστε **local admin** σε έναν host όπου το θύμα είναι συνδεδεμένο.
+2. Τρέξτε τη λογική εγγραφής/εξαγωγής ως το θύμα χρησιμοποιώντας μια **scheduled task**.
+3. Εξάγετε το προκύπτον **PFX**.
+4. Χρησιμοποιήστε το PFX για PKINIT / certificate-based AD authentication.
 
 See the AD CS pages for follow-up abuse:
 
@@ -146,7 +144,7 @@ See the AD CS pages for follow-up abuse:
 ad-certificates/account-persistence.md
 {{#endref}}
 
-## Αναφορές
+## References
 
 - [SensePost - From flat networks to locked up domains with tiering models](https://sensepost.com/blog/2026/from-flat-networks-to-locked-up-domains-with-tiering-models/)
 - [Microsoft - Remote Desktop shadow](https://learn.microsoft.com/windows/win32/termserv/remote-desktop-shadow)
