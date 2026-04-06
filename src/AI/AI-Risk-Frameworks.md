@@ -1,110 +1,110 @@
-# Ризики ШІ
+# AI Risks
 
 {{#include ../banners/hacktricks-training.md}}
 
 ## OWASP Top 10 Machine Learning Vulnerabilities
 
-Owasp визначив Top 10 уразливостей машинного навчання, які можуть впливати на системи ШІ. Ці уразливості можуть призводити до різних проблем із безпекою, включно з data poisoning, model inversion та adversarial attacks. Розуміння цих векторів атак критично для побудови захищених систем ШІ.
+Owasp визначив top 10 вразливостей машинного навчання, які можуть вплинути на AI‑системи. Ці вразливості можуть призводити до різних проблем безпеки, включно з отруєнням даних, інверсією моделі та adversarial‑атаками. Розуміння цих вразливостей критичне для побудови безпечних AI‑систем.
 
-Для оновленого та детального переліку див. проєкт [OWASP Top 10 Machine Learning Vulnerabilities](https://owasp.org/www-project-machine-learning-security-top-10/).
+For an updated and detailed list of the top 10 machine learning vulnerabilities, refer to the [OWASP Top 10 Machine Learning Vulnerabilities](https://owasp.org/www-project-machine-learning-security-top-10/) project.
 
-- **Input Manipulation Attack**: Атакувальник додає невеликі, часто непомітні зміни до **incoming data**, щоб модель прийняла неправильне рішення.\
-*Приклад*: Кілька крапок фарби на stop‑sign змушують self‑driving car «побачити» знак обмеження швидкості.
+- **Input Manipulation Attack**: Зловмисник додає дуже малі, часто непомітні зміни до **вхідних даних**, щоб змусити модель прийняти неправильне рішення.\
+*Example*: A few specks of paint on a stop‑sign fool a self‑driving car into "seeing" a speed‑limit sign.
 
-- **Data Poisoning Attack**: **training set** навмисно забруднюють поганими зразками, навчаючи модель шкідливим правилам.\
-*Приклад*: Бінарні файли malware маркують як «benign» у навчальному корпусі антивірусу, через що подібне malware пропускається пізніше.
+- **Data Poisoning Attack**: **training set** навмисно забруднюється шкідливими зразками, навчаючи модель шкідливих правил.\
+*Example*: Malware binaries are mislabeled as "benign" in an antivirus training corpus, letting similar malware slip past later.
 
-- **Model Inversion Attack**: Пробуючи виходи, атакувальник створює **reverse model**, що реконструює чутливі характеристики оригінальних входів.\
-*Приклад*: Відтворення MRI‑зображення пацієнта на основі прогнозів моделі для виявлення раку.
+- **Model Inversion Attack**: Шляхом запитів по виходах, атакуючий будує **reverse model**, який реконструює чутливі характеристики початкових входів.\
+*Example*: Re‑creating a patient's MRI image from a cancer‑detection model's predictions.
 
-- **Membership Inference Attack**: Адверсар перевіряє, чи використовувався **specific record** під час навчання, помічаючи відмінності в довірі (confidence).\
-*Приклад*: Підтвердження, що транзакція певної людини присутня в тренувальних даних моделі fraud‑detection.
+- **Membership Inference Attack**: Адвесарі перевіряє, чи був **конкретний запис** використаний під час тренування, виявляючи відмінності в confidence.\
+*Example*: Confirming that a person's bank transaction appears in a fraud‑detection model's training data.
 
-- **Model Theft**: Повторні запити дозволяють атакувальнику вивчити межі прийняття рішень і **clone the model's behavior** (та інтелектуальну власність).\
-*Приклад*: Зібрати достатньо Q&A пар з ML‑as‑a‑Service API, щоб побудувати локальний еквівалент моделі.
+- **Model Theft**: Повторні запити дозволяють атакуючому вивчити межі рішень і **клонувати поведінку моделі** (та інтелектуальну власність).\
+*Example*: Harvesting enough Q&A pairs from an ML‑as‑a‑Service API to build a near‑equivalent local model.
 
-- **AI Supply‑Chain Attack**: Компрометація будь‑якого компонента (data, libraries, pre‑trained weights, CI/CD) у **ML pipeline** може зіпсувати downstream моделі.\
-*Приклад*: Отруйна залежність на model‑hub встановлює backdoored sentiment‑analysis модель у багатьох додатках.
+- **AI Supply‑Chain Attack**: Компрометація будь‑якого компоненту (дані, бібліотеки, pre‑trained weights, CI/CD) в **ML pipeline** для псування моделей вниз за ланцюгом.\
+*Example*: A poisoned dependency on a model‑hub installs a backdoored sentiment‑analysis model across many apps.
 
-- **Transfer Learning Attack**: Зловмисна логіка закладається в **pre‑trained model** і переживає fine‑tuning для задачі жертви.\
-*Приклад*: Vision backbone з прихованим тригером все ще міняє мітки після адаптації для medical imaging.
+- **Transfer Learning Attack**: Зловмисна логіка вбудовується в **pre‑trained model** і виживає після fine‑tuning на задачі жертви.\
+*Example*: A vision backbone with a hidden trigger still flips labels after being adapted for medical imaging.
 
-- **Model Skewing**: Тонко упереджені або неправильно марковані дані **shifts the model's outputs** на користь намірів атакувальника.\
-*Приклад*: Інжекція «чистих» spam‑листів, помічених як ham, щоб spam‑фільтр пропускав схожі майбутні листи.
+- **Model Skewing**: Тонко упереджені або неправильно марковані дані **зміщують виходи моделі** на користь намірів атакуючого.\
+*Example*: Injecting "clean" spam emails labeled as ham so a spam filter lets similar future emails through.
 
-- **Output Integrity Attack**: Атакувальник **alters model predictions in transit**, а не саму модель, вводячи в оману downstream системи.\
-*Приклад*: Зміна вердикту malware classifier з «malicious» на «benign» до того, як етап quarantine побачить файл.
+- **Output Integrity Attack**: Атакуючий **змінює передбачення моделі під час трансферу**, а не саму модель, вводячи в оману downstream системи.\
+*Example*: Flipping a malware classifier's "malicious" verdict to "benign" before the file‑quarantine stage sees it.
 
-- **Model Poisoning** --- Прямі, цілеспрямовані зміни до **model parameters** самих по собі, часто після отримання прав на запис, щоб змінити поведінку.\
-*Приклад*: Тонка підміна ваг у production‑моделі fraud‑detection, щоб транзакції з певних карт завжди були схвалені.
+- **Model Poisoning** --- Прямі, цілеспрямовані зміни до **параметрів моделі** самих по собі, часто після отримання запису на запис, щоб змінити поведінку.\
+*Example*: Tweaking weights on a fraud‑detection model in production so transactions from certain cards are always approved.
 
 
 ## Google SAIF Risks
 
-Google's [SAIF (Security AI Framework)](https://saif.google/secure-ai-framework/risks) окреслює різні ризики, пов'язані із системами ШІ:
+Google's [SAIF (Security AI Framework)](https://saif.google/secure-ai-framework/risks) описує різні ризики, пов'язані з AI‑системами:
 
-- **Data Poisoning**: Злочинці змінюють або інжектять training/tuning дані, щоб погіршити точність, закласти backdoors або спотворити результати, підриваючи цілісність моделі на всьому життєвому циклі даних.
+- **Data Poisoning**: Зловмисні актори змінюють або інжектять training/tuning дані, щоб погіршити точність, імплантувати backdoors або змістити результати, підриваючи цілісність моделі через весь життєвий цикл даних.
 
-- **Unauthorized Training Data**: Поглинання copyrighted, sensitive або неприпустимих датасетів створює юридичні, етичні та продуктивні ризики, оскільки модель вчиться на даних, які їй не дозволено використовувати.
+- **Unauthorized Training Data**: Поглинання copyrighted, чутливих або неприпустимих наборів даних створює юридичні, етичні та продуктивні ризики, оскільки модель навчається на даних, які їй не дозволили використовувати.
 
-- **Model Source Tampering**: Атаки на supply‑chain або інсайдерські зміни коду моделі, залежностей або weights до або під час навчання можуть вбудувати приховану логіку, що виживе навіть після retraining.
+- **Model Source Tampering**: Маніпуляція ланцюгом постачання або insider‑атаки на код моделі, залежності чи ваги до або під час тренування можуть вбудувати приховану логіку, яка зберігається навіть після повторного тренування.
 
-- **Excessive Data Handling**: Слабкі політики зберігання та управління даними призводять до того, що системи зберігають або обробляють більше персональних даних, ніж потрібно, підвищуючи експозицію та ризики відповідності.
+- **Excessive Data Handling**: Слабкі контролі збереження даних і управління призводять до того, що системи зберігають або обробляють більше персональних даних, ніж необхідно, підвищуючи експозицію та ризики відповідності.
 
-- **Model Exfiltration**: Атакувальники викрадають model files/weights, спричиняючи втрату ІВ та дозволяючи створювати копії сервісів або подальші атаки.
+- **Model Exfiltration**: Атакуючі крадуть model files/weights, що спричиняє втрату інтелектуальної власності та дозволяє копіювати сервіси або проводити подальші атаки.
 
-- **Model Deployment Tampering**: Зловмисники змінюють артефакти моделі або інфраструктуру сервінгу, тому запущена модель відрізняється від перевіреної версії, потенційно змінюючи поведінку.
+- **Model Deployment Tampering**: Адвесарі модифікують модельні артефакти або інфраструктуру serving, тож працююча модель відрізняється від перевіреної версії і може змінювати поведінку.
 
-- **Denial of ML Service**: Перевантаження API або відправлення «sponge» input'ів може виснажити обчислювальні/енергетичні ресурси і вивести модель з ладу, аналогічно до класичних DoS‑атак.
+- **Denial of ML Service**: Завантаження API або надсилання “sponge” input‑ів може виснажити обчислювальні ресурси/енергію й вивести модель з ладу, імітуючи класичні DoS‑атаки.
 
-- **Model Reverse Engineering**: Збираючи велику кількість input‑output пар, атакувальники можуть клонувати або distil модель, підживлюючи імітаційні продукти та кастомізовані adversarial атаки.
+- **Model Reverse Engineering**: Збирання великої кількості пар input‑output дозволяє атакуючим клонувати або дистилювати модель, підживлюючи імітаційні продукти і кастомізовані adversarial‑атаки.
 
-- **Insecure Integrated Component**: Вразливі плагіни, агенти або upstream сервіси дозволяють атакувальникам інжектити код або ескалювати привілеї в AI‑pipeline.
+- **Insecure Integrated Component**: Вразливі плагіни, агенти або upstream сервіси дозволяють атакуючим інжектити код або ескалювати привілеї в AI‑pipeline.
 
-- **Prompt Injection**: Створення prompt'ів (напряму або опосередковано) для контрабанди інструкцій, що перевизначають системний намір, змушуючи модель виконувати небажані команди.
+- **Prompt Injection**: Складання prompt‑ів (безпосередньо або опосередковано) для контрабанди інструкцій, які перекривають системний intent, змушуючи модель виконувати небажані команди.
 
-- **Model Evasion**: Уточнені входи змушують модель mis‑classify, hallucinate або виводити заборонений контент, підриваючи безпеку та довіру.
+- **Model Evasion**: Ретельно спроектовані input‑и змушують модель неправильно класифікувати, вигадувати факти або видавати заборонений контент, підриваючи безпеку й довіру.
 
-- **Sensitive Data Disclosure**: Модель розкриває приватну або конфіденційну інформацію з тренувальних даних чи контексту користувача, порушуючи приватність і нормативи.
+- **Sensitive Data Disclosure**: Модель розкриває приватну або конфіденційну інформацію з training data або контексту користувача, порушуючи приватність і регуляції.
 
-- **Inferred Sensitive Data**: Модель виводить персональні атрибути, які ніколи не були надані, створюючи нові шкоди для приватності через інферування.
+- **Inferred Sensitive Data**: Модель виводить персональні атрибути, які ніколи не були надані, створюючи нові шкоди приватності через інференцію.
 
-- **Insecure Model Output**: Ненадійні відповіді передають шкідливий код, дезінформацію або невідповідний контент користувачам чи downstream системам.
+- **Insecure Model Output**: Несанітизовані відповіді передають шкідливий код, misinformation або неприйнятний контент користувачам чи downstream системам.
 
-- **Rogue Actions**: Автономно інтегровані агенти виконують небажані реальні операції (запис файлів, API‑виклики, покупки тощо) без адекватного нагляду користувача.
+- **Rogue Actions**: Автономно інтегровані агенти виконують небажані реальні операції (записи файлів, API‑виклики, покупки тощо) без адекватного нагляду користувача.
 
 ## Mitre AI ATLAS Matrix
 
-The [MITRE AI ATLAS Matrix](https://atlas.mitre.org/matrices/ATLAS) надає всебічну рамку для розуміння та пом'якшення ризиків, пов'язаних із системами ШІ. Вона категоризує різні техніки атак і тактики, які можуть використовуватися проти AI‑моделей, а також як використовувати AI‑системи для виконання різних атак.
+The [MITRE AI ATLAS Matrix](https://atlas.mitre.org/matrices/ATLAS) надає всеохопну структуру для розуміння та пом'якшення ризиків, пов'язаних з AI‑системами. Вона категоризує різні техніки атак і тактики, які адвесарі можуть використовувати проти AI‑моделей, а також те, як використовувати AI‑системи для виконання різних атак.
 
 ## LLMJacking (Token Theft & Resale of Cloud-hosted LLM Access)
 
-Атакувальники крадуть активні session tokens або cloud API credentials і викликають платні, cloud‑hosted LLM без авторизації. Доступ часто перепродається через reverse proxies, що фронтують акаунт жертви, наприклад розгортання "oai-reverse-proxy". Наслідки включають фінансові втрати, неправильне використання моделі поза політикою та неправильне приписування активності орендарю жертви.
+Attackers steal active session tokens or cloud API credentials and invoke paid, cloud-hosted LLMs without authorization. Access is often resold via reverse proxies that front the victim’s account, e.g. "oai-reverse-proxy" deployments. Consequences include financial loss, model misuse outside policy, and attribution to the victim tenant.
 
 TTPs:
-- Harvest tokens з заражених машин розробників або браузерів; викрадення CI/CD секретів; купівля leaked cookies.
-- Поставити reverse proxy, який пересилає запити до справжнього провайдера, ховаючи upstream key і мультиплексуючи багатьох клієнтів.
-- Зловживати direct base‑model endpoints, щоб обійти enterprise guardrails і rate limits.
+- Harvest tokens from infected developer machines or browsers; steal CI/CD secrets; buy leaked cookies.
+- Stand up a reverse proxy that forwards requests to the genuine provider, hiding the upstream key and multiplexing many customers.
+- Abuse direct base-model endpoints to bypass enterprise guardrails and rate limits.
 
 Mitigations:
-- Прив'язувати tokens до device fingerprint, IP‑діапазонів і client attestation; застосовувати короткі терміни дії і оновлення з MFA.
-- Давати ключам мінімальні права (no tool access, read‑only там, де можливо); ротувати при аномаліях.
-- Завершувати весь трафік на server‑side за policy gateway, що застосовує safety filters, по‑маршрутні квоти і tenant isolation.
-- Моніторити незвичні шаблони використання (раптові стрибки витрат, атипові регіони, UA strings) і автоматично анулювати підозрілі сесії.
-- Віддавати перевагу mTLS або підписаним JWTs, виданим вашим IdP, замість довгоживучих статичних API keys.
+- Bind tokens to device fingerprint, IP ranges, and client attestation; enforce short expirations and refresh with MFA.
+- Scope keys minimally (no tool access, read-only where applicable); rotate on anomaly.
+- Terminate all traffic server-side behind a policy gateway that enforces safety filters, per-route quotas, and tenant isolation.
+- Monitor for unusual usage patterns (sudden spend spikes, atypical regions, UA strings) and auto-revoke suspicious sessions.
+- Prefer mTLS or signed JWTs issued by your IdP over long-lived static API keys.
 
 ## Self-hosted LLM inference hardening
 
-Запуск локального LLM server'а для конфіденційних даних створює іншу поверхню атаки, ніж cloud‑hosted API: inference/debug endpoints можуть lead до розкриття prompt'ів, serving stack зазвичай виставляє reverse proxy, а GPU device nodes дають доступ до великої площі `ioctl()`-інтерфейсів. Якщо ви оцінюєте або розгортаєте on‑prem inference service, перегляньте щонайменше наступні пункти.
+Запуск локального LLM‑сервера для конфіденційних даних створює іншу поверхню атаки порівняно з cloud‑hosted API: inference/debug endpoints можуть leak prompts, serving stack зазвичай експонує reverse proxy, а GPU device nodes дають доступ до великих `ioctl()` поверхонь. Якщо ви оцінюєте або розгортаєте on‑prem inference service, перегляньте принаймні наступні пункти.
 
 ### Prompt leakage via debug and monitoring endpoints
 
-Розглядайте inference API як **multi-user sensitive service**. Debug або monitoring маршрути можуть відкривати вміст prompt'ів, slot state, model metadata або внутрішню інформацію черг. В `llama.cpp` endpoint `/slots` особливо чутливий, бо відкриває per‑slot state і призначений лише для інспекції/керування слотами.
+Розглядайте inference API як **multi‑user sensitive service**. Debug або monitoring маршрути можуть показувати вміст prompt‑ів, стан слотів, метадані моделі або внутрішню інформацію черги. В `llama.cpp`, endpoint `/slots` особливо чутливий, бо показує per‑slot state і призначений лише для інспекції/керування слотами.
 
-- Помістіть reverse proxy перед inference server і **deny by default**.
-- Дозвольте лише точно ті комбінації HTTP method + path, які потрібні клієнту/UI.
-- Вимикайте introspection endpoints у бекенді коли можливо, наприклад `llama-server --no-slots`.
-- Прив'яжіть reverse proxy до `127.0.0.1` і експонуйте його через аутентифікований транспорт, такий як SSH local port forwarding, замість публікації в LAN.
+- Put a reverse proxy in front of the inference server and **deny by default**.
+- Only allowlist the exact HTTP method + path combinations that are needed by the client/UI.
+- Disable introspection endpoints in the backend itself whenever possible, for example `llama-server --no-slots`.
+- Bind the reverse proxy to `127.0.0.1` and expose it through an authenticated transport such as SSH local port forwarding instead of publishing it on the LAN.
 
 Example allowlist with nginx:
 ```nginx
@@ -126,9 +126,9 @@ proxy_pass http://unix:/run/llama-cpp/llama-cpp.sock:;
 }
 }
 ```
-### Rootless контейнери без мережі та UNIX-сокетів
+### Rootless контейнери без мережі та UNIX socket
 
-Якщо inference daemon підтримує прослуховування на UNIX-сокеті, віддавайте перевагу цьому замість TCP і запускайте контейнер з **no network stack**:
+Якщо inference daemon підтримує прослуховування на UNIX socket, віддавайте перевагу цьому замість TCP і запускайте контейнер з **відсутнім мережевим стеком**:
 ```bash
 podman run --rm -d \
 --network none \
@@ -144,19 +144,19 @@ ghcr.io/ggml-org/llama.cpp:server-cuda13 \
 --no-slots
 ```
 Переваги:
-- `--network none` усуває експозицію вхідного/вихідного TCP/IP і уникає потреби в user-mode helpers, яких інакше вимагали б rootless containers.
+- `--network none` усуває відкриття TCP/IP для вхідних/вихідних з'єднань і дозволяє уникнути user-mode helpers, які в іншому випадку потрібні rootless containers.
 - UNIX socket дозволяє використовувати POSIX permissions/ACLs на шляху сокета як перший рівень контролю доступу.
-- `--userns=keep-id` та rootless Podman зменшують наслідки container breakout, оскільки container root не є host root.
-- Read-only model mounts зменшують ймовірність модифікації моделі зсередини контейнера.
+- `--userns=keep-id` та rootless Podman зменшують наслідки container breakout, тому що container root не є host root.
+- Read-only model mounts зменшують ймовірність змінення моделі зсередини контейнера.
 
 ### GPU device-node minimization
 
-Для GPU-backed inference файли `/dev/nvidia*` — цінні локальні вектори атаки, оскільки вони відкривають великі драйверні `ioctl()` обробники та потенційно спільні шляхи управління пам'яттю GPU.
+Для GPU-backed inference файли `/dev/nvidia*` є цінними локальними поверхнями атаки, оскільки вони відкривають великі драйверні `ioctl()` обробники та потенційно спільні шляхи управління пам'яттю GPU.
 
-- Do not leave `/dev/nvidia*` world writable.
-- Restrict `nvidia`, `nvidiactl`, and `nvidia-uvm` with `NVreg_DeviceFileUID/GID/Mode`, udev rules, and ACLs so only the mapped container UID can open them.
-- Blacklist unnecessary modules such as `nvidia_drm`, `nvidia_modeset`, and `nvidia_peermem` on headless inference hosts.
-- Preload only required modules at boot instead of letting the runtime opportunistically `modprobe` them during inference startup.
+- Не залишайте `/dev/nvidia*` доступними для запису для всіх (world writable).
+- Обмежте `nvidia`, `nvidiactl` та `nvidia-uvm` за допомогою `NVreg_DeviceFileUID/GID/Mode`, udev rules та ACLs так, щоб їх міг відкривати лише відображений container UID.
+- Занесіть у чорний список непотрібні модулі, такі як `nvidia_drm`, `nvidia_modeset` та `nvidia_peermem`, на headless inference hosts.
+- Попередньо завантажуйте лише необхідні модулі під час boot замість того, щоб дозволяти runtime opportunistically викликати `modprobe` під час старту inference.
 
 Example:
 ```bash
@@ -164,18 +164,18 @@ options nvidia NVreg_DeviceFileUID=0
 options nvidia NVreg_DeviceFileGID=0
 options nvidia NVreg_DeviceFileMode=0660
 ```
-Важливий пункт перевірки — **`/dev/nvidia-uvm`**. Навіть якщо робоче навантаження явно не використовує `cudaMallocManaged()`, останні CUDA runtimes все ще можуть вимагати `nvidia-uvm`. Оскільки цей пристрій спільний і відповідає за керування віртуальною пам'яттю GPU, розглядайте його як поверхню потенційного розкриття даних між орендарями. Якщо inference backend це підтримує, Vulkan backend може бути цікавим компромісом, бо він може зовсім уникнути експонування `nvidia-uvm` всередині контейнера.
+Одне важливе місце для перевірки — **`/dev/nvidia-uvm`**. Навіть якщо робоче навантаження явно не використовує `cudaMallocManaged()`, сучасні CUDA runtimes можуть все одно вимагати `nvidia-uvm`. Оскільки цей пристрій є спільним і відповідає за керування віртуальною пам'яттю GPU, розглядайте його як поверхню потенційного розкриття даних між орендарями. Якщо бекенд для інференсу це підтримує, Vulkan-бекенд може бути цікавим компромісом, оскільки він може уникнути експонування `nvidia-uvm` у контейнері взагалі.
 
-### LSM ізоляція для воркерів інференсу
+### LSM confinement for inference workers
 
 AppArmor/SELinux/seccomp слід використовувати як багаторівневий захист навколо процесу інференсу:
 
-- Дозволяти лише ті shared libraries, model paths, socket directory та GPU device nodes, які фактично потрібні.
-- Явно забороняти високоризикові capabilities, такі як `sys_admin`, `sys_module`, `sys_rawio` та `sys_ptrace`.
-- Тримати каталог моделей доступним лише для читання і обмежувати записувані шляхи тільки до runtime socket/cache директорій.
-- Моніторити denial logs, оскільки вони дають корисну телеметрію для виявлення, коли model server або post-exploitation payload намагаються вийти за межі очікуваної поведінки.
+- Дозволяйте лише ті спільні бібліотеки, шляхи моделей, каталог сокетів та вузли пристроїв GPU, які дійсно потрібні.
+- Явно забороняйте високоризикові capabilities, такі як `sys_admin`, `sys_module`, `sys_rawio` та `sys_ptrace`.
+- Тримайте каталог моделей у режимі лише для читання та обмежуйте записувані шляхи лише до каталогів сокетів/кешу середовища виконання.
+- Моніторте логи відмов, оскільки вони дають корисну телеметрію для виявлення, коли сервер моделі або post-exploitation payload намагаються вийти за межі очікуваної поведінки.
 
-Example AppArmor rules for a GPU-backed worker:
+Приклад правил AppArmor для воркера з підтримкою GPU:
 ```text
 deny capability sys_admin,
 deny capability sys_module,
@@ -188,13 +188,13 @@ deny capability sys_ptrace,
 /var/lib/models/** r,
 owner /srv/llm/** rw,
 ```
-## Посилання
-- [Unit 42 – Ризики Code Assistant LLMs: шкідливий контент, зловживання та обман](https://unit42.paloaltonetworks.com/code-assistant-llms/)
-- [Огляд схеми LLMJacking – The Hacker News](https://thehackernews.com/2024/05/researchers-uncover-llmjacking-scheme.html)
-- [oai-reverse-proxy (перепродаж вкраденого доступу до LLM)](https://gitgud.io/khanon/oai-reverse-proxy)
-- [Synacktiv - Глибоке занурення в розгортання on-premise low-privileged LLM server](https://www.synacktiv.com/en/publications/deep-dive-into-the-deployment-of-an-on-premise-low-privileged-llm-server.html)
+## Джерела
+- [Unit 42 – The Risks of Code Assistant LLMs: Harmful Content, Misuse and Deception](https://unit42.paloaltonetworks.com/code-assistant-llms/)
+- [LLMJacking scheme overview – The Hacker News](https://thehackernews.com/2024/05/researchers-uncover-llmjacking-scheme.html)
+- [oai-reverse-proxy (reselling stolen LLM access)](https://gitgud.io/khanon/oai-reverse-proxy)
+- [Synacktiv - Deep-dive into the deployment of an on-premise low-privileged LLM server](https://www.synacktiv.com/en/publications/deep-dive-into-the-deployment-of-an-on-premise-low-privileged-llm-server.html)
 - [llama.cpp server README](https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md)
 - [Podman quadlets: podman-systemd.unit](https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html)
-- [CNCF Container Device Interface (CDI) специфікація](https://github.com/cncf-tags/container-device-interface/blob/main/SPEC.md)
+- [CNCF Container Device Interface (CDI) specification](https://github.com/cncf-tags/container-device-interface/blob/main/SPEC.md)
 
 {{#include ../banners/hacktricks-training.md}}
