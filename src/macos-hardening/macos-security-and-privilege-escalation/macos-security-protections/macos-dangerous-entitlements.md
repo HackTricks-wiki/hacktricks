@@ -170,10 +170,95 @@ Allow the process to **ask for all the TCC permissions**.
 
 ### **`kTCCServicePostEvent`**
 
+Allows **injecting synthetic keyboard and mouse events** system-wide via `CGEventPost()`. A process with this permission can simulate keystrokes, mouse clicks, and scroll events in any application — effectively providing **remote control** of the desktop.
 
+This is especially dangerous combined with `kTCCServiceAccessibility` or `kTCCServiceListenEvent`, as it allows both reading AND injecting input.
 
-</details>
+```objc
+// Inject a keystroke (Enter key)
+CGEventRef keyDown = CGEventCreateKeyboardEvent(NULL, kVK_Return, true);
+CGEventPost(kCGSessionEventTap, keyDown);
+```
 
+### **`kTCCServiceListenEvent`**
+
+Allows **intercepting all keyboard and mouse events** system-wide (input monitoring / keylogging). A process can register a `CGEventTap` to capture every keystroke typed in any application, including passwords, credit card numbers, and private messages.
+
+For detailed exploitation techniques see:
+
+{{#ref}}
+macos-input-monitoring-screen-capture-accessibility.md
+{{#endref}}
+
+### **`kTCCServiceScreenCapture`**
+
+Allows **reading the display buffer** — taking screenshots and recording screen video of any application, including secure text fields. Combined with OCR, this can automatically extract passwords and sensitive data from the screen.
+
+> [!WARNING]
+> Starting with macOS Sonoma, screen capture shows a persistent menu bar indicator. On older versions, screen recording can be completely silent.
+
+### **`kTCCServiceCamera`**
+
+Allows **capturing photos and video** from the built-in camera or connected USB cameras. Code injection into a camera-entitled binary enables silent visual surveillance.
+
+### **`kTCCServiceMicrophone`**
+
+Allows **recording audio** from all input devices. Background daemons with mic access provide persistent ambient audio surveillance with no visible application window.
+
+### **`kTCCServiceLocation`**
+
+Allows querying the device's **physical location** via Wi-Fi triangulation or Bluetooth beacons. Continuous monitoring reveals home/work addresses, travel patterns, and daily routines.
+
+### **`kTCCServiceAddressBook`** / **`kTCCServiceCalendar`** / **`kTCCServicePhotos`**
+
+Access to **Contacts** (names, emails, phones — useful for spear-phishing), **Calendar** (meeting schedules, attendee lists), and **Photos** (personal photos, screenshots that may contain credentials, location metadata).
+
+For complete credential theft exploitation techniques via TCC permissions, see:
+
+{{#ref}}
+macos-tcc/macos-tcc-credential-and-data-theft.md
+{{#endref}}
+
+## Sandbox & Code Signing Entitlements
+
+### `com.apple.security.temporary-exception.mach-lookup.global-name`
+
+**Sandbox temporary exceptions** weaken the App Sandbox by allowing communication with system-wide Mach/XPC services that the sandbox normally blocks. This is the **primary sandbox escape primitive** — a compromised sandboxed app can use mach-lookup exceptions to reach privileged daemons and exploit their XPC interfaces.
+
+```bash
+# Find apps with mach-lookup exceptions
+find /Applications -name "*.app" -exec sh -c '
+  binary="$1/Contents/MacOS/$(defaults read "$1/Contents/Info.plist" CFBundleExecutable 2>/dev/null)"
+  [ -f "$binary" ] && codesign -d --entitlements - "$binary" 2>&1 | grep -q "mach-lookup" && echo "$(basename "$1")"
+' _ {} \; 2>/dev/null
+```
+
+For detailed exploitation chain: sandboxed app → mach-lookup exception → vulnerable daemon → sandbox escape, see:
+
+{{#ref}}
+macos-code-signing-weaknesses-and-sandbox-escapes.md
+{{#endref}}
+
+### `com.apple.developer.driverkit`
+
+**DriverKit entitlements** allow user-space driver binaries to communicate directly with the kernel through IOKit interfaces. DriverKit binaries manage hardware: USB, Thunderbolt, PCIe, HID devices, audio, and networking.
+
+Compromising a DriverKit binary enables:
+- **Kernel attack surface** via malformed `IOConnectCallMethod` calls
+- **USB device spoofing** (emulate keyboard for HID injection)
+- **DMA attacks** through PCIe/Thunderbolt interfaces
+
+```bash
+# Find DriverKit binaries
+find / -name "*.dext" -type d 2>/dev/null
+systemextensionsctl list
+```
+
+For detailed IOKit/DriverKit exploitation, see:
+
+{{#ref}}
+../mac-os-architecture/macos-iokit.md
+{{#endref}}
 
 
 

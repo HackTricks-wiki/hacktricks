@@ -274,9 +274,98 @@ IOConnectCallStructMethod(conn, X, buf, sizeof(buf), buf, &outSz);
 
 
 
+## DriverKit — User-Space Drivers
+
+### Basic Information
+
+**DriverKit** is Apple's user-space replacement for kernel extensions (kexts), introduced in macOS 10.15. DriverKit binaries (`.dext` bundles) run as user-space processes but communicate directly with the kernel through a privileged IOKit interface.
+
+DriverKit extensions manage hardware:
+- **USB** controllers and devices
+- **Thunderbolt** / PCIe devices
+- **HID** (keyboards, mice, game controllers)
+- **Audio** hardware
+- **Networking** interfaces
+- **Serial** and **Block Storage** devices
+
+Unlike kexts (which required SIP-disabled boot or notarization), DriverKit extensions are installed via `SystemExtensions.framework` and only require **one-time user approval**.
+
+### Discovery & Enumeration
+
+```bash
+# List all installed system extensions (includes DriverKit)
+systemextensionsctl list
+
+# Find all DriverKit extension bundles
+find / -name "*.dext" -type d 2>/dev/null
+
+# Check a binary's DriverKit entitlements
+codesign -d --entitlements - /path/to/binary.dext/binary 2>&1 | grep driverkit
+
+# Common DriverKit entitlements:
+# com.apple.developer.driverkit                    — Base DriverKit
+# com.apple.developer.driverkit.transport.usb      — USB device access
+# com.apple.developer.driverkit.transport.hid      — HID device access
+# com.apple.developer.driverkit.transport.pci      — PCIe device access
+# com.apple.developer.driverkit.transport.serial   — Serial port access
+# com.apple.developer.driverkit.family.networking  — Network interface
+# com.apple.developer.driverkit.family.audio       — Audio device
+```
+
+### Security Implications
+
+> [!WARNING]
+> DriverKit binaries have a **direct communication channel to the kernel**. Sending malformed messages through this channel can trigger kernel vulnerabilities. Each driver registers specific user-client classes, and malformed `IOConnectCallMethod` calls can cause kernel memory corruption.
+
+**Attack surface:**
+1. **Kernel IOKit message fuzzing** — Each DriverKit user-client exposes selectors callable from user space. Malformed arguments trigger kernel bugs.
+2. **USB device spoofing** — A compromised USB DriverKit binary can present a malicious USB device profile (e.g., emulate a keyboard for HID injection).
+3. **DMA attacks** — PCIe/Thunderbolt DriverKit extensions have potential DMA access to physical memory.
+4. **Persistence** — Once installed as a system extension, DriverKit binaries persist across reboots and app updates.
+
+### DriverKit IOKit User-Client Fuzzing
+
+```bash
+# Enumerate DriverKit user-client classes from entitlements
+codesign -d --entitlements - /path/to/binary.dext/binary 2>&1 \
+  | grep -A5 "com.apple.developer.driverkit.transport"
+
+# List IOService matching for DriverKit drivers
+ioreg -l | grep -i "UserClientClass" | sort -u
+
+# Check if the driver's user-client is reachable from a sandboxed app
+ioreg -c IOService -r -d 1 | grep -E '"IOClass"|"CFBundleIdentifier"' | head -40
+
+# Minimal fuzzing harness for a DriverKit selector:
+```
+
+```c
+#include <IOKit/IOKitLib.h>
+
+io_connect_t conn;
+// ... open connection to the DriverKit service ...
+
+// Fuzz selector X with oversized struct input
+uint8_t buf[0x2000];
+memset(buf, 'A', sizeof(buf));
+size_t outSz = sizeof(buf);
+kern_return_t kr = IOConnectCallStructMethod(conn, X, buf, sizeof(buf), buf, &outSz);
+// If the driver doesn't validate structureInputSize, this causes kernel OOB
+```
+
+### DriverKit CVEs
+
+| CVE | Description |
+|---|---|
+| CVE-2022-26766 | DriverKit USB stack vulnerability — kernel code execution |
+| CVE-2021-30838 | IOKit user-client type confusion in graphic drivers |
+| CVE-2024-44197 | IOGPUFamily OOB write via malformed DriverKit arguments |
+
 ## References
 
 - [Apple Security Updates – macOS Sequoia 15.1 / Sonoma 14.7.1 (IOGPUFamily)](https://support.apple.com/en-us/121564)
 - [Rapid7 – IOHIDFamily CVE-2024-27799 summary](https://www.rapid7.com/db/vulnerabilities/apple-osx-iohidfamily-cve-2024-27799/)
 - [Apple Security Updates – macOS 13.6.1 (CVE-2023-42891 IOHIDFamily)](https://support.apple.com/en-us/121551)
+- [Apple Developer — DriverKit](https://developer.apple.com/documentation/driverkit)
+- [Apple Developer — System Extensions](https://developer.apple.com/documentation/systemextensions)
 {{#include ../../../banners/hacktricks-training.md}}
