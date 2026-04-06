@@ -4,9 +4,9 @@
 
 ## RDP Process Injection
 
-Ikiwa **external group** ina **RDP access** kwa **computer** yoyote katika domain ya sasa, **attacker** angeweza **compromise that computer and wait for him**.
+Ikiwa **kikundi cha nje** kina **RDP access** kwa **kompyuta** yoyote katika domaini ya sasa, **mshambuliaji** anaweza **kuvunja usalama wa kompyuta hiyo na kumsubiri**.
 
-Mara mtumiaji huyo atakapofikia kupitia RDP, **attacker can pivot to that users session** na kutumia vibaya ruhusa zake kwenye domain ya nje.
+Mara mtumiaji huyo atakapofikia kupitia RDP, **mshambuliaji anaweza kuhamia katika kikao cha mtumiaji huyo** na kutumia vibaya ruhusa zake katika domaini ya nje.
 ```bash
 # Supposing the group "External Users" has RDP access in the current domain
 ## lets find where they could access
@@ -34,7 +34,7 @@ Angalia **other ways to steal sessions with other tools** [**in this page.**](..
 
 ## RDPInception
 
-Ikiwa mtumiaji anaingia kupitia **RDP into a machine** ambapo **attacker** anamsubiri, **attacker** ataweza **inject a beacon in the RDP session of the user** na ikiwa **victim mounted his drive** alipokuwa anapatafikia kupitia RDP, **attacker could access it**.
+Ikiwa mtumiaji anaingia kupitia **RDP into a machine** ambapo **attacker** **anamsubiri** kwake, the attacker ataweza **inject a beacon in the RDP session of the user** na ikiwa **victim mounted his drive** wakati akiingia kupitia RDP, **attacker could access it**.
 
 Katika kesi hii unaweza tu **compromise** the **victims** **original computer** kwa kuandika **backdoor** katika **statup folder**.
 ```bash
@@ -70,19 +70,19 @@ beacon> upload C:\Payloads\pivot.exe
 ```
 ## Shadow RDP
 
-Kama wewe ni **local admin** kwenye host ambapo mwathirika tayari ana **active RDP session**, unaweza kuwa na uwezo wa **view/control that desktop without stealing the password or dumping LSASS**.
+Ikiwa wewe ni **local admin** kwenye host ambapo mwathiriwa tayari ana **active RDP session**, unaweza kuwa na uwezo wa **view/control that desktop without stealing the password or dumping LSASS**.
 
 Hii inategemea sera ya **Remote Desktop Services shadowing** iliyohifadhiwa katika:
 ```text
 HKLM\Software\Policies\Microsoft\Windows NT\Terminal Services\Shadow
 ```
-Thamani za kuvutia:
+Thamani zinazovutia:
 
 - `0`: Imezimwa
-- `1`: `EnableInputNotify` (udhibiti, inahitaji idhini ya mtumiaji)
+- `1`: `EnableInputNotify` (udhibiti, idhini ya mtumiaji inahitajika)
 - `2`: `EnableInputNoNotify` (udhibiti, **hakuna idhini ya mtumiaji**)
-- `3`: `EnableNoInputNotify` (tazama tu, inahitaji idhini ya mtumiaji)
-- `4`: `EnableNoInputNoNotify` (tazama tu, **hakuna idhini ya mtumiaji**)
+- `3`: `EnableNoInputNotify` (kwa kuangalia tu, idhini ya mtumiaji inahitajika)
+- `4`: `EnableNoInputNoNotify` (kwa kuangalia tu, **hakuna idhini ya mtumiaji**)
 ```cmd
 :: Check the policy
 reg query "HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services" /v Shadow
@@ -94,26 +94,24 @@ reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services" /v Shado
 quser /server:<HOST>
 mstsc /v:<HOST> /shadow:<SESSION_ID> /control /noconsentprompt /prompt
 ```
-Hii ni hasa muhimu wakati privileged user aliyeunganishwa kupitia RDP ameacha desktop isiyofungwa, kikao cha KeePass, console ya MMC, kikao cha kivinjari, au admin shell wazi.
+Hii ni muhimu hasa wakati mtumiaji mwenye ruhusa aliyeunganishwa kupitia RDP ameacha desktop isiyofungwa, kikao cha KeePass, console ya MMC, kikao cha kivinjari, au admin shell wazi.
 
 ## Scheduled Tasks Kama Mtumiaji Aliyeingia
 
-Ikiwa wewe ni **local admin** na mtumiaji lengwa **kwa sasa ameingia**, Task Scheduler inaweza kuanza code **kama mtumiaji huyo bila nenosiri lao**.
-
-Hii inageuza kikao cha kuingia cha mwathirika kilichopo kuwa primitive ya utekelezaji:
+Ikiwa wewe ni **local admin** na mtumiaji lengwa **yuko ameingia**, Task Scheduler inaweza kuanzisha code **kama mtumiaji huyo bila nywila yao**.
 ```cmd
 schtasks /create /S <HOST> /RU "<DOMAIN\\user>" /SC ONCE /ST 00:00 /TN "Updater" /TR "cmd.exe /c whoami > C:\\Windows\\Temp\\whoami.txt"
 schtasks /run /S <HOST> /TN "Updater"
 ```
-Maelezo:
+Notes:
 
-- Ikiwa mtumiaji **hayajaingia**, Windows kwa kawaida inahitaji nenosiri ili kuunda task ambayo itaendesha kama yeye.
-- Ikiwa mtumiaji **ameingia**, task inaweza kutumia muktadha wa logon uliopo.
-- Hii ni njia ya vitendo ya kutekeleza vitendo vya GUI au kuanzisha binaries ndani ya kikao cha mwanaathiri bila kugusa LSASS.
+- Ikiwa mtumiaji **hajatoka kwenye mfumo**, Windows kwa kawaida inahitaji nenosiri ili kuunda task itakayomfanya itekelezwe kwa jina lao.
+- Ikiwa mtumiaji **ameingia kwenye mfumo**, task inaweza kutumia tena muktadha wa logon uliopo.
+- Hii ni njia ya vitendo ya kutekeleza vitendo vya GUI au kuzindua binaries ndani ya session ya mwathiriwa bila kugusa LSASS.
 
 ## CredUI Prompt Abuse From the Victim Session
 
-Mara utakapoweza kutekeleza **ndani ya desktop ya mwingiliano ya mwanaathiri** (kwa mfano kupitia **Shadow RDP** au **scheduled task inayokimbia kama mtumiaji huyo**), unaweza kuonyesha **real Windows credential prompt** ukitumia CredUI APIs na kuvuna credentials zinazowekwa na mwanaathiri.
+Mara baada ya kuweza kutekeleza **ndani ya desktop ya mwingiliano ya mwathiriwa** (kwa mfano kupitia **Shadow RDP** au **a scheduled task running as that user**), unaweza kuonyesha **halali Windows credential prompt** kwa kutumia CredUI APIs na kukusanya credentials zilizoingizwa na mwathiriwa.
 
 Relevant APIs:
 
@@ -122,23 +120,23 @@ Relevant APIs:
 
 Typical flow:
 
-1. Zalisha binary ndani ya kikao cha mwanaathiri.
-2. Onyesha domain-authentication prompt inayolingana na chapa ya domain ya sasa.
-3. Chambua buffer ya uthibitisho iliyorudishwa.
-4. Thibitisha credentials zilizotolewa na kwa hiari endelea kuonyesha prompts hadi credentials sahihi zitakapowekwa.
+1. Spawn a binary in the victim session.
+2. Display a domain-authentication prompt that matches the current domain branding.
+3. Unpack the returned auth buffer.
+4. Validate the provided credentials and optionally keep prompting until valid credentials are entered.
 
-Hii ni ya manufaa kwa **on-host phishing** kwa sababu prompt inarenderiwa na standard Windows APIs badala ya fomu ya HTML ya uongo.
+Hii ni muhimu kwa **on-host phishing** kwa sababu prompt inaonyeshwa na Windows APIs za kawaida badala ya fomu ya HTML ya bandia.
 
 ## Requesting a PFX In the Victim Context
 
-Primitive ile ile ya **scheduled-task-as-user** inaweza kutumika kuomba **certificate/PFX kama mwanaathiri aliyekuwa ameingia**. Cheti hicho kinaweza kutumika baadaye kwa **AD authentication** kama mtumiaji huyo, kuepuka kabisa wizi wa password.
+The same **scheduled-task-as-user** primitive can be used to request a **certificate/PFX as the logged-on victim**. That certificate can later be used for **AD authentication** as that user, avoiding password theft entirely.
 
 High-level flow:
 
-1. Pata **local admin** kwenye host ambapo mwanaathiri ameingia.
-2. Endesha enrollment/export logic kama mwanaathiri ukitumia **scheduled task**.
-3. Export resulting **PFX**.
-4. Tumia PFX kwa PKINIT / certificate-based AD authentication.
+1. Gain **local admin** on a host where the victim is logged on.
+2. Run enrollment/export logic as the victim using a **scheduled task**.
+3. Export the resulting **PFX**.
+4. Use the PFX for PKINIT / certificate-based AD authentication.
 
 See the AD CS pages for follow-up abuse:
 
