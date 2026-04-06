@@ -1,38 +1,38 @@
-# ZIPs truuks
+# ZIPs tricks
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-**Command-line tools** vir die hantering van **zip files** is noodsaaklik om zip files te diagnoseer, te herstel en te kraak. Hier is 'n paar sleutelnutsmiddels:
+**Opdragreël-gereedskap** vir die bestuur van **zip files** is noodsaaklik vir die diagnose, herstel en kraak van zip files. Hier is 'n paar sleutelnutsgereedskap:
 
-- **`unzip`**: Wys waarom 'n zip file moontlik nie ontpak/gedekomprimeer kan word nie.
-- **`zipdetails -v`**: Bied gedetailleerde ontleding van die velde in die zip file-formaat.
-- **`zipinfo`**: Lys die inhoud van 'n zip file sonder om dit uit te pak.
+- **`unzip`**: Toon waarom 'n zip file dalk nie uitgepak kan word nie.
+- **`zipdetails -v`**: Bied gedetailleerde ontleding van zip file formaat-velde.
+- **`zipinfo`**: Lys die inhoud van 'n zip file sonder om dit te onttrek.
 - **`zip -F input.zip --out output.zip`** en **`zip -FF input.zip --out output.zip`**: Probeer beskadigde zip files herstel.
-- **[fcrackzip](https://github.com/hyc/fcrackzip)**: 'n hulpmiddel vir brute-force kraak van zip-wagwoorde, effektief vir wagwoorde tot omtrent 7 karakters.
+- **[fcrackzip](https://github.com/hyc/fcrackzip)**: 'n hulpmiddel vir brute-force kraak van zip-wagwoorde, effektief vir wagwoorde tot ongeveer 7 karakters.
 
-Die [Zip file format specification](https://pkware.cachefly.net/webdocs/casestudies/APPNOTE.TXT) gee omvattende besonderhede oor die struktuur en standaarde van zip files.
+Die [Zip file format specification](https://pkware.cachefly.net/webdocs/casestudies/APPNOTE.TXT) verskaf omvattende besonderhede oor die struktuur en standaarde van zip files.
 
-Dit is belangrik om te let dat wagwoord-beskermde zip files **nie bestandsname of lêergroottes binne die argief enkripteer nie**, 'n sekuriteitsgebrek wat nie met RAR of 7z files gedeel word nie — dié enkripteer daardie inligting. Verder is zip files wat met die ouer ZipCrypto-metode enkripteer is kwesbaar vir 'n **plaintext attack** as 'n ongeënkripteerde kopie van 'n gecomprimeerde lêer beskikbaar is. Hierdie aanval maak gebruik van die bekende inhoud om die zip se wagwoord te kraak, 'n kwesbaarheid wat in [HackThis's article](https://www.hackthis.co.uk/articles/known-plaintext-attack-cracking-zip-files) uiteengesit word en verder in [this academic paper](https://www.cs.auckland.ac.nz/~mike/zipattacks.pdf) verduidelik word. Zip files wat met **AES-256** beveilig is, is egter immuun teen hierdie plaintext attack, wat die belangrikheid aantoon om veilige enkripsiemetodes vir sensitiewe data te kies.
+Dit is belangrik om daarop te let dat wagwoord-beskermde zip files **nie bestandsname of lêergroottes binne-in enkodeer nie**, 'n sekuriteitsgebrek wat nie met RAR of 7z files gedeel word nie wat hierdie inligting enkodeer. Verder is zip files wat met die ouer ZipCrypto metode versleutel is kwesbaar vir 'n **plaintext attack** as 'n onversleutelde afskrif van 'n gecomprimeerde lêer beskikbaar is. Hierdie aanval benut die bekende inhoud om die zip se wagwoord te kraak, 'n kwesbaarheid uiteengesit in [HackThis's article](https://www.hackthis.co.uk/articles/known-plaintext-attack-cracking-zip-files) en verder verduidelik in [this academic paper](https://www.cs.auckland.ac.nz/~mike/zipattacks.pdf). Zip files wat egter met **AES-256** enkripsie beveilig is, is immuun teen hierdie plaintext attack, wat die belangrikheid toon om veilige enkripsiemetodes vir sensitiewe data te kies.
 
 ---
 
-## Anti-reversing truuks in APKs wat gemanipuleerde ZIP headers gebruik
+## Anti-reversing tricks in APKs using manipulated ZIP headers
 
-Modern Android malware droppers gebruik foutief gevormde ZIP-metagegewens om statiese gereedskap (jadx/apktool/unzip) te breek terwyl die APK installeerbaar op die toestel bly. Die mees algemene truuks is:
+Moderne Android malware droppers gebruik wanvormige ZIP metadata om statiese gereedskap (jadx/apktool/unzip) te breek, terwyl die APK steeds op die toestel installeerbaar bly. Die mees algemene truuks is:
 
-- Valse enkripsie deur die ZIP General Purpose Bit Flag (GPBF) bit 0 te stel
-- Misbruik van groot/gespesialiseerde Extra fields om parsers te verwar
-- Lêer/gids naambotsings om werklike artefakte te verberg (bv. 'n gids genaamd `classes.dex/` langs die werklike `classes.dex`)
+- Fake encryption by setting the ZIP General Purpose Bit Flag (GPBF) bit 0
+- Abusing large/custom Extra fields to confuse parsers
+- File/directory name collisions to hide real artifacts (e.g., a directory named `classes.dex/` next to the real `classes.dex`)
 
 ### 1) Fake encryption (GPBF bit 0 set) without real crypto
 
 Simptome:
-- `jadx-gui` faal met foute soos:
+- `jadx-gui` misluk met foutboodskappe soos:
 
 ```
 java.util.zip.ZipException: invalid CEN header (encrypted entry)
 ```
-- `unzip` vra vir 'n wagwoord vir kern-APK-lêers al kan 'n geldige APK nie versleutelde `classes*.dex`, `resources.arsc`, of `AndroidManifest.xml` hê nie:
+- `unzip` vra vir 'n wagwoord vir kern APK-lêers, al kan 'n geldige APK nie versleutelde `classes*.dex`, `resources.arsc`, of `AndroidManifest.xml` hê nie:
 
 ```bash
 unzip sample.apk
@@ -47,7 +47,7 @@ Opsporing met zipdetails:
 ```bash
 zipdetails -v sample.apk | less
 ```
-Kyk na die Algemene Doel-bitvlag vir plaaslike en sentrale headers. 'n Duidelike teken is dat bit 0 gestel is (Encryption), selfs vir kerninskrywings:
+Kyk na die General Purpose Bit Flag vir lokale en sentrale headers. 'n Duiende waarde is bit 0 gestel (Encryption) selfs vir kerninskrywings:
 ```
 Extract Zip Spec      2D '4.5'
 General Purpose Flag  0A09
@@ -56,12 +56,12 @@ General Purpose Flag  0A09
 [Bit 3]   1 'Streamed'
 [Bit 11]  1 'Language Encoding'
 ```
-Heuristiek: As 'n APK op die toestel geïnstalleer en uitgevoer word, maar kerninskrywings vir gereedskap as "geënkripteer" voorkom, is die GPBF gemanipuleer.
+Heuristiek: As 'n APK op die toestel installeer en uitgevoer word, maar kerninskrywings vir gereedskap as "encrypted" voorkom, is die GPBF gemanipuleer.
 
-Los dit op deur bit 0 van die GPBF in beide Local File Headers (LFH) en Central Directory (CD)-inskrywings te wis. Minimale byte-patcher:
+Los dit op deur GPBF bit 0 in beide Local File Headers (LFH) en Central Directory (CD) inskrywings op 0 te stel. Minimale byte-patcher:
 
 <details>
-<summary>Minimale GPBF bit-clear patcher</summary>
+<summary>Minimal GPBF bit-clear patcher</summary>
 ```python
 # gpbf_clear.py – clear encryption bit (bit 0) in ZIP local+central headers
 import struct, sys
@@ -99,33 +99,33 @@ Gebruik:
 python3 gpbf_clear.py obfuscated.apk normalized.apk
 zipdetails -v normalized.apk | grep -A2 "General Purpose Flag"
 ```
-Jy behoort nou `General Purpose Flag  0000` op kerninskrywings te sien en gereedskap sal die APK weer ontleed.
+Jy behoort nou `General Purpose Flag  0000` op kerninskrywings te sien en tools sal die APK weer parse.
 
 ### 2) Groot/aangepaste Extra-velde om parsers te breek
 
-Aanvallers prop oorgrootte Extra-velde en vreemde IDs in headers om dekompileerders te laat struikel. In die veld kan jy aangepaste merkers (bv. stringe soos `JADXBLOCK`) daar ingebed sien.
+Aanvallers prop oorgroot Extra-velde en vreemde IDs in kopstukke om decompilers te laat struikel. In die veld kan jy aangepaste merkers sien (bv. stringe soos `JADXBLOCK`) wat daar ingebed is.
 
 Inspeksie:
 ```bash
 zipdetails -v sample.apk | sed -n '/Extra ID/,+4p' | head -n 50
 ```
-Voorbeelde waargeneem: onbekende ID's soos `0xCAFE` ("Java Executable") of `0x414A` ("JA:") wat groot payloads dra.
+Waargenome voorbeelde: onbekende IDs soos `0xCAFE` ("Java Executable") of `0x414A` ("JA:") wat groot payloads bevat.
 
-DFIR-heuristieke:
-- Waarsku wanneer Extra-velde ongewoon groot is op kerninskrywings (`classes*.dex`, `AndroidManifest.xml`, `resources.arsc`).
-- Beskou onbekende Extra-ID's op daardie inskrywings as verdag.
+DFIR heuristieke:
+- Waarsku wanneer Extra fields ongewoon groot is op kerninskrywings (`classes*.dex`, `AndroidManifest.xml`, `resources.arsc`).
+- Behandel onbekende Extra IDs op daardie inskrywings as verdagtig.
 
-Praktiese mitigasie: die herbou van die argief (bv. re-zipping van uitgepakte lêers) verwyder kwaadwillige Extra-velde. As gereedskap weier om uit te pak weens vals enkripsie, maak eers GPBF bit 0 soos hierbo skoon, en herverpak:
+Praktiese mitigasie: die herbou van die argief (bv. re-zipping van uitgepakte lêers) verwyder kwaadaardige Extra fields. As gereedskap weier om te onttrek weens valse enkripsie, maak eers GPBF bit 0 skoon soos hierbo, en herverpak dan:
 ```bash
 mkdir /tmp/apk
 unzip -qq normalized.apk -d /tmp/apk
 (cd /tmp/apk && zip -qr ../clean.apk .)
 ```
-### 3) Lêer/gids-naam botsings (wegsteek van werklike artefakte)
+### 3) Lêer/Map-naambotsings (versteek werklike artefakte)
 
-'n ZIP kan beide 'n lêer `X` en 'n gids `X/` bevat. Sommige uitpakprogramme en dekompileerders raak verward en kan die werklike lêer oorskryf of verberg met 'n gidsinskrywing. Dit is waargeneem by inskrywings wat bots met kern-APK name soos `classes.dex`.
+'n ZIP kan beide 'n lêer `X` en 'n gids `X/` bevat. Sommige extractors en decompilers raak verward en kan die werklike lêer oorlaai of verberg met 'n gidsinskrywing. Dit is waargeneem by inskrywings wat bots met kern-APK-name soos `classes.dex`.
 
-Triering en veilige uitpak:
+Triage en veilige ekstraksie:
 ```bash
 # List potential collisions (names that differ only by trailing slash)
 zipinfo -1 sample.apk | awk '{n=$0; sub(/\/$/,"",n); print n}' | sort | uniq -d
@@ -136,7 +136,7 @@ unzip normalized.apk -d outdir
 # replace outdir/classes.dex? [y]es/[n]o/[A]ll/[N]one/[r]ename: r
 # new name: unk_classes.dex
 ```
-Programmatiese opsporing nabehandeling:
+Programmatiese opsporing post-fix:
 ```python
 from zipfile import ZipFile
 from collections import defaultdict
@@ -153,18 +153,18 @@ for base, variants in collisions.items():
 if len(variants) > 1:
 print('COLLISION', base, '->', variants)
 ```
-Blue-team deteksie-idees:
-- Flag APKs waarvan die plaaslike headers enkripsie aandui (GPBF bit 0 = 1) maar tog installeer/draai.
-- Flag groot/onbekende Extra fields op kerninskrywings (kyk vir merkers soos `JADXBLOCK`).
-- Flag path-collisions (`X` and `X/`) spesifiek vir `AndroidManifest.xml`, `resources.arsc`, `classes*.dex`.
+Blue-team opsporingsidees:
+- Merk APKs waarvan die lokale headers enkripsie aandui (GPBF bit 0 = 1), maar steeds geïnstalleer/uitgevoer word.
+- Merk groot/onbekende Extra fields op kerninskrywings (kyk vir merkers soos `JADXBLOCK`).
+- Merk padbotsings (`X` en `X/`) spesifiek vir `AndroidManifest.xml`, `resources.arsc`, `classes*.dex`.
 
 ---
 
 ## Ander kwaadwillige ZIP-truuks (2024–2026)
 
-### Concatenated central directories (multi-EOCD evasion)
+### Aaneengeskakelde central directories (multi-EOCD evasion)
 
-Onlangs lewer phishing-veldtogte ’n enkele blob af wat eintlik **twee ZIP-lêers aaneengeskakel** is. Elkeen het sy eie End of Central Directory (EOCD) + central directory. Verskillende extractors parse verskillende directories (7zip lees die eerste, WinRAR die laaste), wat aanvalleerders toelaat om payloads te verberg wat net sommige tools wys. Dit omseil ook basiese mail gateway AV wat slegs die eerste directory inspekteer.
+Onlangse phishing-veldtogte lewer 'n enkele blob wat eintlik **twee ZIP-lêers aaneengeskakel** is. Elkeen het sy eie End of Central Directory (EOCD) + central directory. Verskillende extractors ontleed verskillende directories (7zip lees die eerste, WinRAR die laaste), wat aanvallers toelaat om payloads te verberg wat slegs sommige gereedskap wys. Dit omseil ook basiese mail gateway AV wat slegs die eerste directory inspekteer.
 
 **Triage commands**
 ```bash
@@ -173,7 +173,7 @@ binwalk -R "PK\x05\x06" suspect.zip
 # Dump central-directory offsets
 zipdetails -v suspect.zip | grep -n "End Central"
 ```
-As meer as een EOCD verskyn of daar "data after payload" waarskuwings is, verdeel die blob en inspekteer elke deel:
+As meer as een EOCD verskyn of daar "data after payload" waarskuwings is, verdeel die blob en ondersoek elke deel:
 ```bash
 # recover the second archive (heuristic: start at second EOCD offset)
 # adjust OFF based on binwalk output
@@ -183,9 +183,9 @@ dd if=suspect.zip bs=1 skip=$OFF of=tail.zip
 ```
 ### Quoted-overlap / overlapping-entry bombs (non-recursive)
 
-Moderne "better zip bomb" bou 'n klein **kernel** (sterk saamgeperste DEFLATE-blok) en hergebruik dit via oorlappende local headers. Elke central directory entry wys na dieselfde saamgeperste data en bereik >28M:1 verhoudings sonder geneste argiewe. Biblioteke wat op central directory groottes vertrou (Python `zipfile`, Java `java.util.zip`, Info-ZIP voor geharde weergawes) kan gedwing word om petabytes toe te ken.
+Moderne "better zip bomb" bou 'n klein **kernel** (hoog saamgeperste DEFLATE block) en hergebruik dit via oorvleuelende local headers. Elke central directory entry wys na dieselfde saamgeperste data en bewerkstellig >28M:1 verhoudings sonder om archives te nest. Biblioteke wat op central directory sizes vertrou (Python `zipfile`, Java `java.util.zip`, Info-ZIP voor geharde builds) kan gedwing word om petabytes toe te ken.
 
-**Vinnige opsporing (duplikaat LFH offsets)**
+**Vinnige opsporing (duplicate LFH offsets)**
 ```python
 # detect overlapping entries by identical relative offsets
 import struct, sys
@@ -200,21 +200,21 @@ print('OVERLAP at offset', rel)
 break
 seen.add(rel); off = i+4
 ```
-**Hantering**
-- Voer 'n dry-run deurloop uit: `zipdetails -v file.zip | grep -n "Rel Off"` en verseker dat die offsets streng toenemend en uniek is.
-- Beperk die toegelate totale ongekomprimeerde grootte en die aantal inskrywings voordat onttrekking plaasvind (`zipdetails -t` of 'n eie parser).
-- Wanneer jy moet onttrek, doen dit binne 'n cgroup/VM met CPU- en skyfbeperkings (voorkom onbeperkte inflasie wat tot crashes lei).
+**Behandeling**
+- Voer 'n droë-run-ondersoek uit: `zipdetails -v file.zip | grep -n "Rel Off"` en verseker dat offsets strikt toenemend en uniek is.
+- Beperk die aanvaarde totale ongedrukte grootte en aantal inskrywings voor uitpakking (`zipdetails -t` of custom parser).
+- Wanneer jy moet uitpak, doen dit binne 'n cgroup/VM met CPU- en skyfbeperkings (voorkom onbegrensde inflasie-crashes).
 
 ---
 
 ### Local-header vs central-directory parser verwarring
 
-Onlangse differential-parser navorsing het getoon dat ZIP-ambiguïteit steeds uitbuitbaar is in moderne toolchains. Die hoofgedagte is eenvoudig: sommige sagteware vertrou die **Local File Header (LFH)** terwyl ander die **Central Directory (CD)** vertrou, so een argief kan verskillende lêernomme, paaie, kommentaar, offsets, of inskrywingstelle aan verskillende gereedskap voorhou.
+Onlangse differensiële-parser navorsing het getoon dat ZIP-ambigueit steeds in moderne toolchains uitgebuit kan word. Die hoofgedagte is eenvoudig: sommige sagteware vertrou die **Local File Header (LFH)** terwyl ander die **Central Directory (CD)** vertrou, sodat een argief verskillende lêernaam, paaie, kommentare, offsets, of inskrywingsstelle aan verskillende gereedskap kan voorhou.
 
 Praktiese offensiewe gebruike:
-- Laat 'n upload-filter, AV pre-scan, of pakket-validator 'n onskadelike lêer in die CD sien, terwyl die extractor 'n ander LFH-naam/pad respekteer.
-- Misbruik duplikaatname, inskrywings wat slegs in een struktuur voorkom, of ambigue Unicode-padmetadata (byvoorbeeld Info-ZIP Unicode Path Extra Field `0x7075`) sodat verskillende parsers verskillende bome herkonstitueer.
-- Kombineer dit met path traversal om 'n "harmless" argief-oorsig tydens onttrekking in 'n write-primitive om te skakel. Vir die onttrekkingskant, sien [Archive Extraction Path Traversal](../../../generic-hacking/archive-extraction-path-traversal.md).
+- Laat 'n upload-filter, AV pre-scan, of package validator 'n onskadelike lêer in die CD sien terwyl die extractor 'n ander LFH-naam/pad eerbiedig.
+- Misbruik duplikaatname, inskrywings wat slegs in een struktuur teenwoordig is, of ambigue Unicode-pad-metadata (byvoorbeeld Info-ZIP Unicode Path Extra Field `0x7075`) sodat verskillende parsers verskillende bome herbou.
+- Kombineer dit met path traversal om 'n "onskadelike" argief-beeld tydens uitpakking in 'n write-primitive te omskep. Vir die uitpakkingskant, sien [Archive Extraction Path Traversal](../../../generic-hacking/archive-extraction-path-traversal.md).
 
 DFIR triage:
 ```python
@@ -236,22 +236,19 @@ if off in lfh and cd != lfh[off]:
 print(f'NAME_MISMATCH off={off} cd={cd!r} lfh={lfh[off]!r}')
 i += 4
 ```
-I don't have the file content to complement or translate. Please either:
+Ek het nie die inhoud van src/generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/zips-tricks.md ontvang nie. Plak asseblief die Markdown-inhoud wat vertaal en aangevul moet word, en verduidelik kort waarmee jy wil hê ek dit moet aanvul (bv. voorbeelde, commands, verduidelikings of ekstra truuks). 
 
-- Paste the contents of src/generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/zips-tricks.md here, or
-- Tell me which specific items you want me to complement it with (e.g., zip slip, password cracking (fcrackzip, john), ZipCrypto vs AES, zip bombs, nested archives, alternate data streams inside zips, zip64 quirks, metadata and timestamps, carving compressed files, tool commands and examples).
-
-Once you provide the file text or choose the additions, I'll return the translated Afrikaans Markdown (keeping all tags, links and code unchanged).
+Ek sal alle Markdown-/HTML-tags, refere, links en paths onaangeroer laat en ander teks na Afrikaans vertaal volgens die gegewe riglyne.
 ```bash
 zipdetails -v suspect.zip | less
 zipinfo -v suspect.zip | grep -E "file name|offset|comment"
 ```
-Heuristieke:
-- Verwerp of isoleer argiewe met wanpassende LFH/CD-name, dubbele lêernaam, meerdere EOCD-rekords, of agterlopende bytes ná die finale EOCD.
-- Behandel ZIPs wat ongebruiklike Unicode-path ekstra-velde gebruik of inkonsekwente kommentare het as verdag indien verskillende gereedskap nie saamstem oor die geëkstraheerde boom nie.
-- As ontleding belangriker is as die bewaring van die oorspronklike bytes, herpak die argief met 'n streng parser ná ekstraksie in 'n sandbox en vergelyk die resulterende lêerlys met die oorspronklike metadata.
+Heuristieke riglyne:
+- Verwerp of isoleer argiewe met nie-ooreenstemmende LFH/CD-name, duplikaatlêernaam(e), meervoudige EOCD-rekords, of oortollige bytes ná die finale EOCD.
+- Beskou ZIPs wat ongebruiklike Unicode-path extra fields of inkonsekwente kommentare gebruik as verdag indien verskillende gereedskap oor die extracted tree verskil.
+- As ontleding belangriker is as die behoud van die oorspronklike bytes, herverpak die argief met 'n strict parser ná ekstraksie in 'n sandbox en vergelyk die resulterende lêerlys met die oorspronklike metadata.
 
-Dit geld buite pakket-ekosisteme: dieselfde ambiguïteitsklas kan payloads verberg vir mail gateways, statiese skandeerders, en aangepaste ingestion pipelines wat "peek" by ZIP-inhoud voordat 'n ander extractor die argief hanteer.
+Dit is relevant buite pakket-ekosisteme: dieselfde onduidelikheidsklas kan payloads verberg vir mail gateways, static scanners, en custom ingestion pipelines wat "peek" na ZIP-inhoud voordat 'n ander extractor die argief hanteer.
 
 ---
 

