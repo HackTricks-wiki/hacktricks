@@ -1,12 +1,12 @@
-# RDP 会话滥用
+# RDP Sessions Abuse
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## RDP Process Injection
 
-如果 **external group** 拥有对当前域中任何 **computer** 的 **RDP access**，**attacker** 可以 **compromise that computer and wait for him**。
+如果 **external group** 对当前域中的任何 **computer** 拥有 **RDP access**，**attacker** 可以 **compromise that computer and wait for him**。
 
-一旦该用户通过 RDP 访问，**attacker can pivot to that users session** 并在外部域滥用其权限。
+一旦该用户通过 RDP 访问，**attacker can pivot to that users session** 并滥用其在外部域的权限。
 ```bash
 # Supposing the group "External Users" has RDP access in the current domain
 ## lets find where they could access
@@ -34,9 +34,9 @@ beacon> inject 4960 x64 tcp-local
 
 ## RDPInception
 
-如果用户通过 **RDP into a machine** 访问，并且那台机器上有一个 **attacker** 正在 **waiting** 等他，**attacker** 将能够 **inject a beacon in the RDP session of the user**，并且如果 **victim mounted his drive** 在通过 RDP 访问时，**attacker could access it**。
+如果用户通过 **RDP into a machine** 访问一台机器，而一个 **attacker** 正在 **waiting**，攻击者将能够 **inject a beacon in the RDP session of the user**。如果 **victim mounted his drive** 在通过 **RDP** 访问时，**attacker could access it**。
 
-在这种情况下，你可以通过在 **statup folder** 中写入一个 **backdoor** 来简单地 **compromise** 该 **victims** **original computer**。
+在这种情况下，你可以通过在 **statup folder** 中写入一个 **backdoor** 来直接 **compromise** **victims** **original computer**。
 ```bash
 # Wait til someone logs in:
 net logons
@@ -70,17 +70,17 @@ beacon> upload C:\Payloads\pivot.exe
 ```
 ## Shadow RDP
 
-如果你是受害主机上的 **local admin**，且该主机上受害者已有 **active RDP session**，你可能能够 **view/control that desktop without stealing the password or dumping LSASS**。
+如果你在受害者已经在该主机上拥有 **active RDP session**，并且你是该主机的 **local admin**，你可能能够 **查看/控制该桌面，而无需窃取密码或转储 LSASS**。
 
 这取决于存储在以下位置的 **Remote Desktop Services shadowing** 策略：
 ```text
 HKLM\Software\Policies\Microsoft\Windows NT\Terminal Services\Shadow
 ```
-常见值：
+有趣的值：
 
 - `0`: 已禁用
-- `1`: `EnableInputNotify` (可控制，需要用户批准)
-- `2`: `EnableInputNoNotify` (可控制，**无需用户批准**)
+- `1`: `EnableInputNotify` (控制，需要用户批准)
+- `2`: `EnableInputNoNotify` (控制，**无需用户批准**)
 - `3`: `EnableNoInputNotify` (仅查看，需要用户批准)
 - `4`: `EnableNoInputNoNotify` (仅查看，**无需用户批准**)
 ```cmd
@@ -94,51 +94,51 @@ reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services" /v Shado
 quser /server:<HOST>
 mstsc /v:<HOST> /shadow:<SESSION_ID> /control /noconsentprompt /prompt
 ```
-这在通过 RDP 连接的特权用户将未上锁的桌面、KeePass 会话、MMC 控制台、浏览器会话或 admin shell 留开时尤其有用。
+当一位通过 RDP 连接的特权用户留下未锁定的桌面、KeePass 会话、MMC 控制台、浏览器会话或 admin shell 开着时，这一点尤其有用。
 
-## 已登录用户的计划任务
+## Scheduled Tasks As Logged-On User
 
-如果你是 **本地管理员** 且目标用户 **当前已登录**，任务计划程序可以以该用户的身份 **在无需其密码** 的情况下启动代码。
+如果你是 **local admin** 且目标用户 **currently logged on**，Task Scheduler 可以在 **无需其密码的情况下以该用户身份** 启动代码。
 
-这会将受害者现有的登录会话转换为一个执行原语：
+这会把受害者现有的登录会话转变为一个执行原语：
 ```cmd
 schtasks /create /S <HOST> /RU "<DOMAIN\\user>" /SC ONCE /ST 00:00 /TN "Updater" /TR "cmd.exe /c whoami > C:\\Windows\\Temp\\whoami.txt"
 schtasks /run /S <HOST> /TN "Updater"
 ```
 注意事项：
 
-- 如果用户 **未登录**，Windows 通常需要密码来创建以该用户身份运行的任务。
-- 如果用户 **已登录**，该任务可以重用现有的登录上下文。
-- 这是一种在不接触 LSASS 的情况下，在受害者会话内执行 GUI 操作或启动二进制程序的实用方法。
+- 如果用户 **not logged on**，Windows 通常需要密码才能创建以该用户身份运行的任务。
+- 如果用户 **is logged on**，该任务可以重用现有的登录上下文。
+- 这是一种在受害者会话内执行 GUI 操作或启动二进制程序而不接触 LSASS 的实用方法。
 
-## CredUI 提示滥用（来自受害者会话）
+## CredUI Prompt Abuse From the Victim Session
 
-一旦你可以在**受害者的交互式桌面内执行**（例如通过 **Shadow RDP** 或 **以该用户身份运行的 scheduled task**），你就可以使用 CredUI APIs 显示一个**真实的 Windows 凭据提示**，并收集受害者输入的凭据。
+一旦你能够在**受害者的交互式桌面内执行**（例如通过 **Shadow RDP** 或 **a scheduled task running as that user**），你就可以使用 CredUI APIs 显示一个**真实的 Windows credential prompt**，并收集受害者输入的凭据。
 
-相关 APIs：
+Relevant APIs:
 
 - `CredUIPromptForWindowsCredentials`
 - `CredUnPackAuthenticationBuffer`
 
-典型流程：
+Typical flow:
 
-1. 在受害者会话中启动一个二进制程序。
-2. 显示一个与当前域品牌相匹配的域身份验证提示。
-3. 解包返回的 auth buffer。
-4. 验证提供的凭据，并可选择性地持续提示，直到输入有效凭据为止。
+1. 在受害者会话中启动一个二进制文件。
+2. 显示与当前域品牌匹配的域身份验证提示。
+3. 解包返回的身份验证缓冲区。
+4. 验证提供的凭据，并可选择性地继续提示直到输入有效凭据为止。
 
-这对**on-host phishing** 很有用，因为提示由标准 Windows APIs 渲染，而不是伪造的 HTML 表单。
+这对 **on-host phishing** 很有用，因为该提示由标准 Windows APIs 呈现，而不是伪造的 HTML 表单。
 
-## 在受害者上下文中请求 PFX
+## Requesting a PFX In the Victim Context
 
-相同的 **scheduled-task-as-user** 原语可用于以**已登录受害者**的身份请求证书/PFX。该证书随后可用于作为该用户进行 **AD authentication**，完全避免窃取密码。
+相同的 **scheduled-task-as-user** 原语可用于请求 **certificate/PFX as the logged-on victim**。该证书随后可用于作为该用户的 **AD authentication**，从而完全避免窃取密码。
 
-高层流程：
+High-level flow:
 
-1. 在受害者已登录的主机上获得 **local admin** 权限。
-2. 以受害者身份使用 **scheduled task** 运行证书申请/导出逻辑。
+1. 在受害者已登录的主机上获得 **local admin**。
+2. 使用 **scheduled task** 以受害者身份运行注册/导出逻辑。
 3. 导出生成的 **PFX**。
-4. 使用 PFX 进行 PKINIT / 基于证书的 AD 认证。
+4. 使用该 PFX 用于 PKINIT / 基于证书的 AD 身份验证。
 
 See the AD CS pages for follow-up abuse:
 
