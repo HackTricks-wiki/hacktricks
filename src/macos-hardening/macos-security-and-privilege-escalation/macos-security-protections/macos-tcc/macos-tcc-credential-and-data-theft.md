@@ -1,30 +1,30 @@
-# macOS 凭证与数据窃取（通过 TCC 权限）
+# macOS Credential & Data Theft via TCC Permissions
 
-{{#include ../../../banners/hacktricks-training.md}}
+{{#include ../../../../banners/hacktricks-training.md}}
 
-## 概述
+## Overview
 
-macOS TCC (Transparency, Consent, and Control) 保护对敏感用户数据的访问。当攻击者**控制了一个已经拥有 TCC 授权的二进制文件**时，他们将继承这些权限。本页记录了每种与数据窃取相关的 TCC 权限的利用潜力。
+macOS TCC (Transparency, Consent, and Control) 保护对敏感用户数据的访问。当攻击者**攻陷一个已经拥有 TCC 授权的二进制文件**时，他们会继承这些权限。本页记录了与数据窃取相关的各项 TCC 权限的利用潜力。
 
 > [!WARNING]
-> Code injection into a TCC-granted binary (via DYLD injection, dylib hijacking, or task port) **silently inherits all its TCC permissions**。当同一进程读取受保护数据时，不会出现额外的提示或验证。
+> Code injection into a TCC-granted binary (via DYLD injection, dylib hijacking, or task port) **silently inherits all its TCC permissions**。当同一进程读取受保护数据时，不会有额外的提示或验证。
 
 ---
 
-## Keychain 访问组
+## Keychain Access Groups
 
-### 奖品
+### The Prize
 
-macOS Keychain 存储：
-- **Wi-Fi 密码** — 所有已保存的无线网络凭证
-- **网站密码** — Safari、Chrome（当使用 Keychain 时）以及其他浏览器的密码
-- **应用程序密码** — 邮件账号、VPN 凭证、开发令牌
-- **证书和私钥** — 代码签名、客户端 TLS、S/MIME 加密
-- **安全笔记** — 用户存储的秘密
+macOS 钥匙串存储：
+- **Wi-Fi passwords** — 所有保存的无线网络凭证
+- **Website passwords** — Safari、Chrome（使用钥匙串时）以及其他浏览器的密码
+- **Application passwords** — 电子邮件帐户、VPN 凭证、开发令牌
+- **Certificates and private keys** — 代码签名、客户端 TLS、S/MIME 加密
+- **Secure notes** — 用户存储的机密
 
-### Entitlement: `keychain-access-groups`
+### 权限（entitlement）： `keychain-access-groups`
 
-Keychain 项目被组织到 **访问组** 中。应用程序的 `keychain-access-groups` entitlement 列出它可以访问的组：
+钥匙串条目被组织为 **access groups**。应用的 `keychain-access-groups` entitlement 列出它可以访问的组：
 ```xml
 <key>keychain-access-groups</key>
 <array>
@@ -34,7 +34,7 @@ Keychain 项目被组织到 **访问组** 中。应用程序的 `keychain-access
 <string>InternetAccounts</string>       <!-- Internet account passwords -->
 </array>
 ```
-### 漏洞利用
+### 利用
 ```bash
 # Find binaries with broad keychain access groups
 sqlite3 /tmp/executables.db "
@@ -81,17 +81,17 @@ NSString *password = [[NSString alloc] initWithData:passData encoding:NSUTF8Stri
 ```
 ---
 
-## 相机访问 (kTCCServiceCamera)
+## 摄像头访问 (kTCCServiceCamera)
 
 ### 利用
 
-具有相机 TCC 授权的二进制文件（通过 `kTCCServiceCamera` 或 `com.apple.security.device.camera` entitlement）可以捕获照片和视频：
+具有摄像头 TCC 授权的二进制（通过 `kTCCServiceCamera` 或 `com.apple.security.device.camera` entitlement）可以捕获照片和视频：
 ```bash
 # Find camera-authorized binaries
 sqlite3 ~/Library/Application\ Support/com.apple.TCC/TCC.db \
 "SELECT client FROM access WHERE service='kTCCServiceCamera' AND auth_value=2;"
 ```
-### Silent Capture
+### 静默捕获
 ```objc
 // Injected into a camera-entitled process
 #import <AVFoundation/AVFoundation.h>
@@ -125,21 +125,21 @@ fromConnection:(AVCaptureConnection *)connection {
 @end
 ```
 > [!TIP]
-> 从 **macOS Sonoma** 开始，菜单栏中的摄像头指示器是持续显示的，无法通过程序隐藏。在 **较旧的 macOS 版本** 上，短时间的捕获可能不会产生明显的指示。
- 
+> 从 **macOS Sonoma** 开始，菜单栏中的摄像头指示灯为持续可见，无法以编程方式隐藏。在 **旧版 macOS** 上，短时间的捕获可能不会产生明显的指示灯。
+  
 ---
 
 ## 麦克风访问 (kTCCServiceMicrophone)
 
 ### 利用
 
-麦克风访问会捕获内置麦克风、耳机或连接的音频输入设备的所有音频：
+麦克风访问会捕获来自内建麦克风、耳机或已连接音频输入设备的所有音频：
 ```bash
 # Find mic-authorized binaries
 sqlite3 ~/Library/Application\ Support/com.apple.TCC/TCC.db \
 "SELECT client FROM access WHERE service='kTCCServiceMicrophone' AND auth_value=2;"
 ```
-### 攻击: Ambient Recording
+### 攻击：Ambient Recording
 ```objc
 // Injected into a mic-entitled process
 #import <AVFoundation/AVFoundation.h>
@@ -165,7 +165,7 @@ dispatch_get_main_queue(), ^{
 ```
 ---
 
-## 位置追踪 (kTCCServiceLocation)
+## 位置跟踪 (kTCCServiceLocation)
 
 ### 利用
 ```bash
@@ -205,10 +205,10 @@ loc.coordinate.latitude, loc.coordinate.longitude, [NSDate date]];
 
 ### 个人数据外泄
 
-| TCC 服务 | 框架 | 数据 |
+| TCC 服务 | Framework | 数据 |
 |---|---|---|
 | `kTCCServiceAddressBook` | `Contacts.framework` | 姓名、邮箱、电话、地址 |
-| `kTCCServiceCalendar` | `EventKit` | 会议、与会者、地点 |
+| `kTCCServiceCalendar` | `EventKit` | 会议、参会者、地点 |
 | `kTCCServicePhotos` | `Photos.framework` | 照片、截图、位置元数据 |
 ```bash
 # Find authorized binaries for each service
@@ -236,14 +236,14 @@ usingBlock:^(CNContact *contact, BOOL *stop) {
 ```
 ---
 
-## iCloud 账户访问
+## iCloud 帐户访问
 
 ### 权限: `com.apple.private.icloud-account-access`
 
 此权限允许与 `com.apple.iCloudHelper` XPC 服务通信，提供对以下内容的访问：
-- **iCloud tokens** — 用于用户 Apple ID 的认证令牌
+- **iCloud tokens** — 用于用户 Apple ID 的身份验证令牌
 - **iCloud Drive** — 来自所有设备的同步文档
-- **iCloud Keychain** — 跨所有 Apple 设备同步的密码
+- **iCloud Keychain** — 在所有 Apple 设备间同步的密码
 - **Find My** — 用户所有 Apple 设备的位置
 ```bash
 # Find iCloud-entitled binaries
@@ -253,7 +253,7 @@ WHERE iCloudAccs = 1
 ORDER BY privileged DESC;"
 ```
 > [!CAUTION]
-> 破坏一个 iCloud-entitled binary 会将攻击从 **单个设备扩展到整个 Apple 生态系统**：其他 Macs、iPhones、iPads、Apple Watch。iCloud Keychain 同步意味着所有设备的密码都可被访问。
+> Compromising an iCloud-entitled binary extends the attack from a **single device to the entire Apple ecosystem**: other Macs, iPhones, iPads, Apple Watch. iCloud Keychain sync means passwords from all devices are accessible.
 
 ---
 
@@ -261,12 +261,12 @@ ORDER BY privileged DESC;"
 
 ### 最强大的 TCC 权限
 
-完全磁盘访问 赋予对系统中 **每个文件** 的读取能力，包括：
+完全磁盘访问授予对系统上**每个文件**的读取能力，包括：
 - 其他应用的数据（Messages、Mail、Safari 历史记录）
-- TCC 数据库（揭示所有其他权限）
+- TCC 数据库（显示所有其他权限）
 - SSH 密钥和配置
-- 浏览器 cookie 和会话令牌
-- 应用程序数据库和缓存
+- 浏览器 cookies 和会话令牌
+- 应用数据库和缓存
 ```bash
 # Find FDA-granted binaries
 sqlite3 ~/Library/Application\ Support/com.apple.TCC/TCC.db \
@@ -282,21 +282,21 @@ cat ~/.ssh/id_rsa                           # SSH private key
 
 ## 利用优先矩阵
 
-在评估可注入的 TCC 授权二进制文件时，优先考虑数据价值：
+在评估可注入的由 TCC 授予权限的二进制时，应按数据价值优先排序：
 
-| Priority | TCC Permission | Why |
+| 优先级 | TCC Permission | 原因 |
 |---|---|---|
-| **关键** | 完全磁盘访问 | 访问所有内容 |
-| **关键** | TCC 管理器 | 可以授予任何权限 |
-| **高** | 钥匙串访问组 | 所有存储的密码 |
-| **高** | iCloud 帐户访问 | 跨设备影响 |
-| **高** | 输入监控 (ListenEvent) | 记录按键 |
-| **高** | 辅助功能 | 控制 GUI，可自我授权 |
-| **中等** | 屏幕捕获 | 可视数据捕获 |
-| **中等** | 摄像头 + 麦克风 | 监控 |
-| **中等** | 联系人 + 日历 | 社会工程学数据 |
-| **低** | 位置 | 物理追踪 |
-| **低** | 照片 | 个人数据 |
+| **关键** | Full Disk Access | 可访问所有内容 |
+| **关键** | TCC Manager | 可授予任何权限 |
+| **高** | Keychain Access Groups | 所有存储的密码 |
+| **高** | iCloud Account Access | 可导致多设备被攻破 |
+| **高** | Input Monitoring (ListenEvent) | 键盘记录 |
+| **高** | Accessibility | GUI 控制，可自我授权 |
+| **中** | Screen Capture | 捕获屏幕可视数据 |
+| **中** | Camera + Microphone | 监视 |
+| **中** | Contacts + Calendar | 社工数据 |
+| **低** | Location | 物理定位追踪 |
+| **低** | Photos | 个人数据 |
 
 ## 枚举脚本
 ```bash
@@ -329,4 +329,4 @@ SELECT path FROM executables WHERE iCloudAccs = 1;" 2>/dev/null
 * [Objective-See — TCC Exploitation](https://objective-see.org/blog/blog_0x4C.html)
 * [OBTS v5.0 — iCloud Token Extraction (Wojciech Regula)](https://www.youtube.com/watch?v=_6e2LhmxVc0)
 
-{{#include ../../../banners/hacktricks-training.md}}
+{{#include ../../../../banners/hacktricks-training.md}}
