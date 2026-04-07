@@ -1,30 +1,30 @@
-# macOS Robo de credenciales y datos vía permisos TCC
+# macOS Robo de credenciales y datos a través de permisos TCC
 
-{{#include ../../../banners/hacktricks-training.md}}
+{{#include ../../../../banners/hacktricks-training.md}}
 
 ## Resumen
 
 macOS TCC (Transparencia, Consentimiento y Control) protege el acceso a datos sensibles del usuario. Cuando un atacante **compromete un binario que ya tiene concesiones TCC**, hereda esos permisos. Esta página documenta el potencial de explotación de cada permiso TCC relacionado con el robo de datos.
 
 > [!WARNING]
-> La inyección de código en un binario con permisos TCC (via DYLD injection, dylib hijacking, or task port) **hereda silenciosamente todos sus permisos TCC**. No hay un aviso o verificación adicional cuando el mismo proceso lee datos protegidos.
+> Code injection into a TCC-granted binary (via DYLD injection, dylib hijacking, or task port) **silently inherits all its TCC permissions**. No hay ningún aviso o verificación adicional cuando el mismo proceso lee datos protegidos.
 
 ---
 
-## Keychain Access Groups
+## Grupos de acceso de Keychain
 
 ### El premio
 
 El Keychain de macOS almacena:
-- **Contraseñas Wi‑Fi** — todas las credenciales de redes inalámbricas guardadas
-- **Contraseñas de sitios web** — Safari, Chrome (cuando usa Keychain) y otras contraseñas de navegador
-- **Contraseñas de aplicaciones** — cuentas de correo, credenciales VPN, tokens de desarrollo
-- **Certificados y claves privadas** — code signing, client TLS, cifrado S/MIME
+- **Wi-Fi passwords** — todas las credenciales de redes inalámbricas guardadas
+- **Website passwords** — Safari, Chrome (cuando usan Keychain) y otros navegadores
+- **Application passwords** — cuentas de correo, credenciales VPN, tokens de desarrollo
+- **Certificados y claves privadas** — code signing, client TLS, S/MIME encryption
 - **Secure notes** — secretos almacenados por el usuario
 
 ### Entitlement: `keychain-access-groups`
 
-Los elementos del Keychain se organizan en **grupos de acceso**. El permiso `keychain-access-groups` de una aplicación lista a qué grupos puede acceder:
+Los elementos del Keychain están organizados en **grupos de acceso**. El entitlement `keychain-access-groups` de una aplicación lista qué grupos puede acceder:
 ```xml
 <key>keychain-access-groups</key>
 <array>
@@ -85,7 +85,7 @@ NSString *password = [[NSString alloc] initWithData:passData encoding:NSUTF8Stri
 
 ### Explotación
 
-Un binario con permiso TCC de cámara (vía `kTCCServiceCamera` o el entitlement `com.apple.security.device.camera`) puede capturar fotos y video:
+Un binario con permiso TCC de cámara (vía `kTCCServiceCamera` o el entitlement `com.apple.security.device.camera`) puede capturar fotos y vídeo:
 ```bash
 # Find camera-authorized binaries
 sqlite3 ~/Library/Application\ Support/com.apple.TCC/TCC.db \
@@ -125,7 +125,7 @@ fromConnection:(AVCaptureConnection *)connection {
 @end
 ```
 > [!TIP]
-> A partir de **macOS Sonoma**, el indicador de la cámara en la barra de menú es persistente y no se puede ocultar programáticamente. En **versiones antiguas de macOS**, una captura breve puede no producir un indicador notable.
+> A partir de **macOS Sonoma**, el indicador de la cámara en la barra de menús es persistente y no puede ocultarse programáticamente. En **versiones anteriores de macOS**, una captura breve puede no producir un indicador notable.
 
 ---
 
@@ -218,7 +218,7 @@ sqlite3 ~/Library/Application\ Support/com.apple.TCC/TCC.db \
 "SELECT client FROM access WHERE service='$svc' AND auth_value=2;"
 done
 ```
-### Recolección de contactos
+### Recolección de Contactos
 ```objc
 #import <Contacts/Contacts.h>
 
@@ -236,15 +236,15 @@ usingBlock:^(CNContact *contact, BOOL *stop) {
 ```
 ---
 
-## Acceso a la cuenta iCloud
+## Acceso a la cuenta de iCloud
 
 ### Permiso: `com.apple.private.icloud-account-access`
 
 Este permiso permite comunicarse con el servicio XPC `com.apple.iCloudHelper`, proporcionando acceso a:
 - **iCloud tokens** — tokens de autenticación para el Apple ID del usuario
-- **iCloud Drive** — documentos sincronizados de todos los dispositivos
+- **iCloud Drive** — documentos sincronizados desde todos los dispositivos
 - **iCloud Keychain** — contraseñas sincronizadas en todos los dispositivos Apple
-- **Find My** — la ubicación de todos los dispositivos Apple del usuario
+- **Find My** — ubicación de todos los dispositivos Apple del usuario
 ```bash
 # Find iCloud-entitled binaries
 sqlite3 /tmp/executables.db "
@@ -253,20 +253,20 @@ WHERE iCloudAccs = 1
 ORDER BY privileged DESC;"
 ```
 > [!CAUTION]
-> Comprometer un binario con entitlement de iCloud extiende el ataque de un **solo dispositivo al ecosistema completo de Apple**: otros Macs, iPhones, iPads, Apple Watch. La sincronización de iCloud Keychain permite el acceso a las contraseñas de todos los dispositivos.
-  
+> Comprometer un binario con autorización de iCloud extiende el ataque de **un solo dispositivo al ecosistema completo de Apple**: otros Macs, iPhones, iPads, Apple Watch. La sincronización de iCloud Keychain significa que las contraseñas de todos los dispositivos son accesibles.
+
 ---
 
-## Acceso completo al disco (kTCCServiceSystemPolicyAllFiles)
+## Full Disk Access (kTCCServiceSystemPolicyAllFiles)
 
 ### El permiso TCC más poderoso
 
-Acceso completo al disco otorga capacidad de lectura a **cada archivo del sistema**, incluyendo:
+Full Disk Access otorga capacidad de lectura a **cada archivo del sistema**, incluyendo:
 - Datos de otras apps (Messages, Mail, historial de Safari)
-- Bases de datos de TCC (revelando todos los demás permisos)
-- Claves y configuración SSH
-- Cookies del navegador y tokens de sesión
-- Bases de datos y cachés de las aplicaciones
+- TCC databases (revelando todos los demás permisos)
+- SSH keys and configuration
+- Browser cookies and session tokens
+- Bases de datos y cachés de aplicaciones
 ```bash
 # Find FDA-granted binaries
 sqlite3 ~/Library/Application\ Support/com.apple.TCC/TCC.db \
@@ -280,25 +280,25 @@ cat ~/.ssh/id_rsa                           # SSH private key
 ```
 ---
 
-## Matriz de Prioridad de Explotación
+## Matriz de prioridad de explotación
 
-Al evaluar binarios inyectables con permisos concedidos por TCC, prioriza según el valor de los datos:
+Al evaluar binarios inyectables con permisos TCC, prioriza según el valor de los datos:
 
-| Prioridad | Permiso TCC | Por qué |
+| Prioridad | TCC Permission | Por qué |
 |---|---|---|
-| **Crítico** | Full Disk Access | Acceso a todo |
-| **Crítico** | TCC Manager | Puede otorgar cualquier permiso |
-| **Alto** | Keychain Access Groups | Todas las contraseñas almacenadas |
-| **Alto** | iCloud Account Access | Compromiso en múltiples dispositivos |
-| **Alto** | Input Monitoring (ListenEvent) | Keylogging |
-| **Alto** | Accessibility | Control de GUI, auto-concesión |
-| **Medio** | Screen Capture | Captura de datos visuales |
-| **Medio** | Camera + Microphone | Vigilancia |
-| **Medio** | Contacts + Calendar | Datos para ingeniería social |
-| **Bajo** | Location | Rastreo físico |
-| **Bajo** | Photos | Datos personales |
+| **Crítica** | Full Disk Access | Acceso a todo |
+| **Crítica** | TCC Manager | Puede otorgar cualquier permiso |
+| **Alta** | Keychain Access Groups | Todas las contraseñas almacenadas |
+| **Alta** | iCloud Account Access | Compromiso multidispositivo |
+| **Alta** | Input Monitoring (ListenEvent) | Keylogging |
+| **Alta** | Accessibility | Control de GUI, auto-otorgamiento |
+| **Media** | Screen Capture | Captura visual de datos |
+| **Media** | Camera + Microphone | Vigilancia |
+| **Media** | Contacts + Calendar | Datos para ingeniería social |
+| **Baja** | Location | Seguimiento físico |
+| **Baja** | Photos | Datos personales |
 
-## Script de Enumeración
+## Script de enumeración
 ```bash
 #!/bin/bash
 echo "=== TCC Credential Theft Surface Audit ==="
@@ -329,4 +329,4 @@ SELECT path FROM executables WHERE iCloudAccs = 1;" 2>/dev/null
 * [Objective-See — TCC Exploitation](https://objective-see.org/blog/blog_0x4C.html)
 * [OBTS v5.0 — iCloud Token Extraction (Wojciech Regula)](https://www.youtube.com/watch?v=_6e2LhmxVc0)
 
-{{#include ../../../banners/hacktricks-training.md}}
+{{#include ../../../../banners/hacktricks-training.md}}
