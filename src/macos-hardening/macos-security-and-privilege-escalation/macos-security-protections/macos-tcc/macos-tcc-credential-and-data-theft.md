@@ -1,6 +1,6 @@
 # macOS Credential & Data Theft via TCC Permissions
 
-{{#include ../../../banners/hacktricks-training.md}}
+{{#include ../../../../banners/hacktricks-training.md}}
 
 ## Overview
 
@@ -357,4 +357,4 @@ SELECT path FROM executables WHERE iCloudAccs = 1;" 2>/dev/null
 * [Objective-See — TCC Exploitation](https://objective-see.org/blog/blog_0x4C.html)
 * [OBTS v5.0 — iCloud Token Extraction (Wojciech Regula)](https://www.youtube.com/watch?v=_6e2LhmxVc0)
 
-{{#include ../../../banners/hacktricks-training.md}}
+{{#include ../../../../banners/hacktricks-training.md}}
