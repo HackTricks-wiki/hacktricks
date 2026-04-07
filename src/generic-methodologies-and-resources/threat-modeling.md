@@ -112,5 +112,74 @@ Now your finished model should look something like this. And this is how you mak
 
 This is a free tool from Microsoft that helps in finding threats in the design phase of software projects. It uses the STRIDE methodology and is particularly suitable for those developing on Microsoft's stack.
 
+## TEE / Confidential Computing Threat Modeling
+
+When assessing a **TEE / Confidential VM** design, the main mistake is usually to trust the attestation boundary more than the actual **measured boundary**. If some input can still influence execution but is **not** covered by the attested measurement, that input must be modeled as attacker-controlled.
+
+### Questions to ask
+
+- What data is loaded **after** the measurement is taken?
+- Which boot artifacts are consumed by the guest but not cryptographically measured or verified?
+- Is the attestation bound to the **current session**, or can it be replayed?
+- Is the platform version / patch level verified from **vendor-signed metadata**, or only from mutable values reported by firmware?
+- Can the host, hypervisor, cloud operator, or provisioning pipeline tamper with any of these inputs?
+
+### High-value TEE attack paths
+
+#### Post-measurement configuration injection
+
+If configuration is loaded after attestation, it can change enclave/CVM behaviour without changing the attestation value. Treat env vars, config files, mounted secrets, and late-loaded arguments as hostile unless they are measured or strictly validated.
+
+Example dangerous input:
+
+```bash
+LD_PRELOAD=/path/to/evil.so
+```
+
+If this is accepted from an unmeasured config source, attacker code executes **inside** the trusted boundary while clients still see a valid attestation.
+
+Review points:
+- Deny dangerous loader variables such as `LD_PRELOAD`, `LD_LIBRARY_PATH`, `DYLD_INSERT_LIBRARIES`, `LD_AUDIT`.
+- Allow only strict character sets / schemas for runtime config values.
+- Prefer measuring boot-time config instead of trusting host-provided runtime files.
+
+#### Unmeasured hardware-description injection
+
+ACPI tables, device trees, initrd content, and similar host-supplied boot metadata can redefine the effective hardware exposed to the guest. If these artifacts are not verified/measured, a malicious hypervisor may present fake devices with unexpected DMA or memory access.
+
+Review points:
+- Check whether ACPI tables and other hardware-description blobs are part of the measured boot chain.
+- Verify signatures on boot metadata before the guest trusts it.
+- Model malicious virtual devices as a path to **guest memory disclosure** and key extraction.
+
+#### Patch-level spoofing
+
+Do not trust the patch level that firmware merely **claims** in an attestation report. A downgraded or vulnerable platform may lie about its version and still pass naive validation.
+
+Review points:
+- For AMD SEV-SNP, validate TCB / patch claims against **AMD-signed VCEK certificate X.509 extensions**.
+- Reject attestations that satisfy measurement checks but fail minimum platform-version policy.
+- Test downgrade scenarios with older firmware to make sure the verifier rejects spoofed claims.
+
+#### Attestation replay without freshness
+
+An attestation that is not bound to the current connection can be replayed. This turns a one-time TEE compromise or key leak into persistent impersonation.
+
+Review points:
+- Bind attestation to a client nonce, ideally the TLS `client_random`, or another verifier-chosen challenge.
+- Require timestamps / expiration checks if the protocol supports them.
+- Ensure a stolen attestation blob cannot be reused across sessions, regions, or hosts.
+
+### Negative-testing ideas
+
+- Boot the workload with tampered post-measurement config and confirm attestation verification or startup validation fails.
+- Inject malformed or unsigned ACPI tables / boot metadata and confirm the guest refuses to boot or the attestation changes.
+- Replay a previously captured attestation against a fresh TLS session and confirm the verifier rejects it.
+- Present an attestation from an older platform that lies about patch level and confirm policy enforcement uses vendor-signed metadata instead of firmware claims.
+
+## References
+
+- [Trail of Bits - What we learned about TEE security from auditing WhatsApp's Private Inference](https://blog.trailofbits.com/2026/04/07/what-we-learned-about-tee-security-from-auditing-whatsapps-private-inference/)
+- [Trail of Bits - Meta/WhatsApp Private Processing security review (PDF)](https://github.com/trailofbits/publications/blob/master/reviews/2025-08-meta-whatsapp-privateprocessing-securityreview.pdf)
 
 {{#include ../banners/hacktricks-training.md}}
