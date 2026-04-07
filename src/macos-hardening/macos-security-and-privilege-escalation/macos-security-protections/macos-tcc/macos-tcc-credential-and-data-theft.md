@@ -1,30 +1,30 @@
 # macOS Κλοπή Διαπιστευτηρίων & Δεδομένων μέσω Δικαιωμάτων TCC
 
-{{#include ../../../banners/hacktricks-training.md}}
+{{#include ../../../../banners/hacktricks-training.md}}
 
 ## Επισκόπηση
 
-macOS TCC (Transparency, Consent, and Control) προστατεύει την πρόσβαση σε ευαίσθητα δεδομένα χρηστών. Όταν ένας attacker **compromises a binary that already has TCC grants**, κληρονομεί αυτά τα permissions. Αυτή η σελίδα τεκμηριώνει το exploitation potential κάθε TCC permission σχετικού με κλοπή δεδομένων.
+Το macOS TCC (Transparency, Consent, and Control) προστατεύει την πρόσβαση σε ευαίσθητα δεδομένα χρήστη. Όταν ένας επιτιθέμενος παραβιάσει ένα binary που ήδη διαθέτει χορηγήσεις TCC, κληρονομεί αυτά τα δικαιώματα. Αυτή η σελίδα τεκμηριώνει το εκμεταλλεύσιμο δυναμικό κάθε δικαιώματος TCC σχετικού με κλοπή δεδομένων.
 
 > [!WARNING]
-> Code injection into a TCC-granted binary (via DYLD injection, dylib hijacking, or task port) **σιωπηλά κληρονομεί όλα τα δικαιώματα TCC**. Δεν υπάρχει επιπλέον prompt ή verification όταν η ίδια διεργασία διαβάζει προστατευμένα δεδομένα.
+> Code injection into a TCC-granted binary (via DYLD injection, dylib hijacking, or task port) **silently inherits all its TCC permissions**. There is no additional prompt or verification when the same process reads protected data.
 
 ---
 
-## Ομάδες πρόσβασης Keychain
+## Ομάδες Πρόσβασης Keychain
 
 ### Το Έπαθλο
 
 Το macOS Keychain αποθηκεύει:
-- **Wi-Fi passwords** — όλα τα αποθηκευμένα credentials ασύρματων δικτύων
-- **Website passwords** — κωδικοί για Safari, Chrome (όταν χρησιμοποιείται το Keychain) και άλλους browsers
-- **Application passwords** — λογαριασμοί email, VPN credentials, development tokens
-- **Certificates and private keys** — code signing, client TLS, S/MIME encryption
-- **Secure notes** — μυστικά που αποθηκεύει ο χρήστης
+- **Wi-Fi passwords** — όλα τα αποθηκευμένα διαπιστευτήρια ασύρματων δικτύων
+- **Website passwords** — κωδικοί ιστοσελίδων για Safari, Chrome (when using Keychain) και άλλους browsers
+- **Application passwords** — λογαριασμοί email, διαπιστευτήρια VPN, development tokens
+- **Certificates and private keys** — υπογραφή κώδικα, client TLS, S/MIME encryption
+- **Secure notes** — μυστικά αποθηκευμένα από τον χρήστη
 
-### Entitlement: `keychain-access-groups`
+### Δικαίωμα: `keychain-access-groups`
 
-Τα αντικείμενα του Keychain οργανώνονται σε **access groups**. Το entitlement `keychain-access-groups` μιας εφαρμογής απαριθμεί ποιες ομάδες μπορεί να προσπελάσει:
+Τα στοιχεία του Keychain οργανώνονται σε **ομάδες πρόσβασης**. Το entitlement `keychain-access-groups` μιας εφαρμογής απαριθμεί ποιες ομάδες μπορεί να προσπελάσει:
 ```xml
 <key>keychain-access-groups</key>
 <array>
@@ -85,13 +85,13 @@ NSString *password = [[NSString alloc] initWithData:passData encoding:NSUTF8Stri
 
 ### Εκμετάλλευση
 
-Ένα binary με παραχώρηση TCC για την κάμερα (μέσω `kTCCServiceCamera` ή `com.apple.security.device.camera` entitlement) μπορεί να καταγράψει φωτογραφίες και βίντεο:
+Ένα binary με camera TCC grant (via `kTCCServiceCamera` ή `com.apple.security.device.camera` entitlement) μπορεί να καταγράψει φωτογραφίες και βίντεο:
 ```bash
 # Find camera-authorized binaries
 sqlite3 ~/Library/Application\ Support/com.apple.TCC/TCC.db \
 "SELECT client FROM access WHERE service='kTCCServiceCamera' AND auth_value=2;"
 ```
-### Silent Capture
+### Σιωπηλή Καταγραφή
 ```objc
 // Injected into a camera-entitled process
 #import <AVFoundation/AVFoundation.h>
@@ -125,15 +125,15 @@ fromConnection:(AVCaptureConnection *)connection {
 @end
 ```
 > [!TIP]
-> Από την έκδοση **macOS Sonoma**, ο δείκτης κάμερας στη γραμμή μενού είναι μόνιμος και δεν μπορεί να αποκρυφτεί προγραμματιστικά. Σε **παλαιότερες εκδόσεις macOS**, μια σύντομη λήψη μπορεί να μην παράγει εμφανή δείκτη.
- 
+> Από την **macOS Sonoma**, ο δείκτης κάμερας στη γραμμή μενού είναι μόνιμος και δεν μπορεί να κρυφτεί προγραμματικά. Σε **παλαιότερες εκδόσεις macOS**, μια σύντομη εγγραφή ενδέχεται να μην προκαλέσει εμφανή ένδειξη.
+
 ---
 
 ## Πρόσβαση στο μικρόφωνο (kTCCServiceMicrophone)
 
 ### Εκμετάλλευση
 
-Η πρόσβαση στο μικρόφωνο καταγράφει όλον τον ήχο από το ενσωματωμένο μικρόφωνο, το headset ή συνδεδεμένες συσκευές εισόδου ήχου:
+Η πρόσβαση στο μικρόφωνο καταγράφει όλο τον ήχο από το ενσωματωμένο μικρόφωνο, το ακουστικό ή τις συνδεδεμένες συσκευές εισόδου ήχου:
 ```bash
 # Find mic-authorized binaries
 sqlite3 ~/Library/Application\ Support/com.apple.TCC/TCC.db \
@@ -205,7 +205,7 @@ loc.coordinate.latitude, loc.coordinate.longitude, [NSDate date]];
 
 ### Εξαγωγή Προσωπικών Δεδομένων
 
-| TCC Service | Πλαίσιο | Δεδομένα |
+| TCC Service | Framework | Δεδομένα |
 |---|---|---|
 | `kTCCServiceAddressBook` | `Contacts.framework` | Ονόματα, διευθύνσεις email, τηλέφωνα, διευθύνσεις |
 | `kTCCServiceCalendar` | `EventKit` | Συσκέψεις, συμμετέχοντες, τοποθεσίες |
@@ -218,7 +218,7 @@ sqlite3 ~/Library/Application\ Support/com.apple.TCC/TCC.db \
 "SELECT client FROM access WHERE service='$svc' AND auth_value=2;"
 done
 ```
-### Contacts Harvesting
+### Συλλογή Επαφών
 ```objc
 #import <Contacts/Contacts.h>
 
@@ -236,12 +236,12 @@ usingBlock:^(CNContact *contact, BOOL *stop) {
 ```
 ---
 
-## Πρόσβαση σε λογαριασμό iCloud
+## Πρόσβαση στον λογαριασμό iCloud
 
 ### Δικαίωμα: `com.apple.private.icloud-account-access`
 
 Αυτό το δικαίωμα επιτρέπει την επικοινωνία με την υπηρεσία XPC `com.apple.iCloudHelper`, παρέχοντας πρόσβαση σε:
-- **iCloud tokens** — διαπιστευτήρια αυθεντικοποίησης για το Apple ID του χρήστη
+- **iCloud tokens** — διακριτικά αυθεντικοποίησης για το Apple ID του χρήστη
 - **iCloud Drive** — συγχρονισμένα έγγραφα από όλες τις συσκευές
 - **iCloud Keychain** — κωδικοί πρόσβασης συγχρονισμένοι σε όλες τις συσκευές Apple
 - **Find My** — τοποθεσία όλων των συσκευών Apple του χρήστη
@@ -253,20 +253,20 @@ WHERE iCloudAccs = 1
 ORDER BY privileged DESC;"
 ```
 > [!CAUTION]
-> Η παραβίαση ενός iCloud-entitled binary επεκτείνει την επίθεση από μία **συσκευή σε ολόκληρο το οικοσύστημα Apple**: άλλους Macs, iPhones, iPads, Apple Watch. Ο συγχρονισμός iCloud Keychain σημαίνει ότι οι κωδικοί πρόσβασης από όλες τις συσκευές είναι προσβάσιμοι.
+> Η παραβίαση ενός iCloud-entitled binary επεκτείνει την επίθεση από μια **ενιαία συσκευή σε ολόκληρο το οικοσύστημα της Apple**: άλλα Macs, iPhones, iPads, Apple Watch. Ο συγχρονισμός του iCloud Keychain σημαίνει ότι οι κωδικοί πρόσβασης από όλες τις συσκευές γίνονται προσβάσιμοι.
+> 
+> ---
 
----
-
-## Πλήρης Πρόσβαση στο Δίσκο (kTCCServiceSystemPolicyAllFiles)
+## Full Disk Access (kTCCServiceSystemPolicyAllFiles)
 
 ### Η πιο ισχυρή άδεια TCC
 
-Η Πλήρης Πρόσβαση στο Δίσκο παρέχει δυνατότητα ανάγνωσης σε **κάθε αρχείο στο σύστημα**, συμπεριλαμβανομένων:
-- Δεδομένα άλλων εφαρμογών (Messages, Mail, Safari history)
-- Βάσεις δεδομένων TCC (αποκαλύπτοντας όλες τις άλλες άδειες)
-- Κλειδιά SSH και ρυθμίσεις
-- Cookies προγράμματος περιήγησης και διακριτικά συνεδρίας
-- Βάσεις δεδομένων εφαρμογών και cache
+Η άδεια Full Disk Access παρέχει δυνατότητα ανάγνωσης σε **κάθε αρχείο στο σύστημα**, συμπεριλαμβανομένων:
+- Δεδομένων άλλων εφαρμογών (Messages, Mail, Safari history)
+- Βάσεων δεδομένων TCC (αποκαλύπτοντας όλες τις άλλες άδειες)
+- Κλειδιών SSH και διαμόρφωσης
+- Cookies προγράμματος περιήγησης και διακριτικών συνεδρίας
+- Βάσεων δεδομένων εφαρμογών και caches
 ```bash
 # Find FDA-granted binaries
 sqlite3 ~/Library/Application\ Support/com.apple.TCC/TCC.db \
@@ -282,9 +282,9 @@ cat ~/.ssh/id_rsa                           # SSH private key
 
 ## Μήτρα Προτεραιότητας Εκμετάλλευσης
 
-When assessing injectable TCC-granted binaries, prioritize by data value:
+Κατά την αξιολόγηση των injectable TCC-granted binaries, προτεραιοποιήστε με βάση την αξία των δεδομένων:
 
-| Προτεραιότητα | Άδεια TCC | Γιατί |
+| Priority | TCC Permission | Why |
 |---|---|---|
 | **Κρίσιμο** | Full Disk Access | Πρόσβαση σε όλα |
 | **Κρίσιμο** | TCC Manager | Μπορεί να χορηγήσει οποιαδήποτε άδεια |
@@ -292,13 +292,13 @@ When assessing injectable TCC-granted binaries, prioritize by data value:
 | **Υψηλό** | iCloud Account Access | Συμβιβασμός πολλαπλών συσκευών |
 | **Υψηλό** | Input Monitoring (ListenEvent) | Καταγραφή πλήκτρων |
 | **Υψηλό** | Accessibility | Έλεγχος GUI, αυτοχορήγηση |
-| **Μεσαίο** | Screen Capture | Καταγραφή οπτικών δεδομένων |
+| **Μεσαίο** | Screen Capture | Οπική καταγραφή δεδομένων |
 | **Μεσαίο** | Camera + Microphone | Παρακολούθηση |
-| **Μεσαίο** | Contacts + Calendar | Δεδομένα κοινωνικής μηχανικής |
+| **Μεσαίο** | Contacts + Calendar | Δεδομένα για social engineering |
 | **Χαμηλό** | Location | Φυσική παρακολούθηση |
 | **Χαμηλό** | Photos | Προσωπικά δεδομένα |
 
-## Σενάριο Ανίχνευσης
+## Σενάριο Εντοπισμού
 ```bash
 #!/bin/bash
 echo "=== TCC Credential Theft Surface Audit ==="
@@ -326,7 +326,7 @@ SELECT path FROM executables WHERE iCloudAccs = 1;" 2>/dev/null
 
 * [Apple Developer — Keychain Services](https://developer.apple.com/documentation/security/keychain_services)
 * [Apple Developer — TCC](https://developer.apple.com/documentation/security/protecting-the-user-s-privacy)
-* [Objective-See — TCC Exploitation](https://objectivesee.org/blog/blog_0x4C.html)
+* [Objective-See — TCC Exploitation](https://objective-see.org/blog/blog_0x4C.html)
 * [OBTS v5.0 — iCloud Token Extraction (Wojciech Regula)](https://www.youtube.com/watch?v=_6e2LhmxVc0)
 
-{{#include ../../../banners/hacktricks-training.md}}
+{{#include ../../../../banners/hacktricks-training.md}}
