@@ -170,7 +170,7 @@
       return true
     }
 
-    return true // TODO: restore to Math.floor(Math.random() * 5) !== 0 (80/20 split)
+    return Math.floor(Math.random() * 5) !== 0
   }
 
   async function loadBsaSponsor() {
