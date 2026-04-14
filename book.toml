@@ -21,6 +21,7 @@ additional-js = [
     "theme/pagetoc.js",
     "theme/ht_searcher.js",
     "theme/sponsor.js",
+    "theme/motion.js",
     "theme/ai.js"
 ]
 no-section-label = true
