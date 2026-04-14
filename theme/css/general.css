@@ -69,6 +69,49 @@ body {
     animation: float-particle 16s infinite;
 }
 
+html.motion-paused .bg-animation,
+html.motion-paused .grid-overlay,
+html.motion-paused .particle,
+html.motion-paused #ht-ai-btn {
+    animation-play-state: paused !important;
+}
+
+html.motion-reduced .bg-animation,
+html.motion-reduced .grid-overlay,
+html.motion-reduced .particles {
+    display: none !important;
+}
+
+html.motion-reduced .particle,
+html.motion-reduced #ht-ai-btn {
+    animation: none !important;
+}
+
+html.motion-reduced #ht-ai-btn {
+    background: linear-gradient(45deg, #b31328, #d42d3f) !important;
+    background-size: auto !important;
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.3) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .bg-animation,
+    .grid-overlay,
+    .particles {
+        display: none !important;
+    }
+
+    .particle,
+    #ht-ai-btn {
+        animation: none !important;
+    }
+
+    #ht-ai-btn {
+        background: linear-gradient(45deg, #b31328, #d42d3f) !important;
+        background-size: auto !important;
+        box-shadow: 0 8px 18px rgba(0, 0, 0, 0.3) !important;
+    }
+}
+
 @keyframes bg-drift {
     0% { transform: translate3d(0, 0, 0) scale(1); }
     100% { transform: translate3d(-2%, 1%, 0) scale(1.04); }
