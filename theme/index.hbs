@@ -558,6 +558,12 @@
             (function initParticles() {
                 var container = document.querySelector('.particles');
                 if (!container) { return; }
+                if (
+                    document.documentElement.classList.contains('motion-reduced') ||
+                    (window.__hacktricksMotion && window.__hacktricksMotion.shouldReduceMotion())
+                ) {
+                    return;
+                }
                 var count = 28;
                 for (var i = 0; i < count; i++) {
                     var particle = document.createElement('span');
