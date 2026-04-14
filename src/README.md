@@ -2,9 +2,9 @@
 
 <figure><img src="images/hacktricks.gif" alt=""><figcaption></figcaption></figure>
 
-_Nembo za Hacktricks & muundo wa mwendo na_ [_@ppieranacho_](https://www.instagram.com/ppieranacho/)_._
+_Logo za Hacktricks na muundo wa mwendo na_ [_@ppieranacho_](https://www.instagram.com/ppieranacho/)_._
 
-### Endesha HackTricks kwa Kompyuta Yako
+### Endesha HackTricks Kwenye Kompyuta Ya Ndani
 ```bash
 # Download latest version of hacktricks
 git clone https://github.com/HackTricks-wiki/hacktricks
@@ -31,31 +31,19 @@ export LANG="master" # Leave master for english
 # Run the docker container indicating the path to the hacktricks folder
 docker run -d --rm --platform linux/amd64 -p 3337:3000 --name hacktricks -v $(pwd)/hacktricks:/app ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image bash -c "mkdir -p ~/.ssh && ssh-keyscan -H github.com >> ~/.ssh/known_hosts && cd /app && git config --global --add safe.directory /app && git checkout $LANG && git pull && MDBOOK_PREPROCESSOR__HACKTRICKS__ENV=dev mdbook serve --hostname 0.0.0.0"
 ```
-Your local copy of HackTricks will be **available at [http://localhost:3337](http://localhost:3337)** after <5 minutes (it needs to build the book, be patient).
+Your local copy of HackTricks itakuwa **inapatikana katika [http://localhost:3337](http://localhost:3337)** baada ya <5 dakika (inahitaji ku-build kitabu, kuwa na subira).
 
-## Wadhamini wa Kampuni
+## Corporate Sponsors
 
 ### [STM Cyber](https://www.stmcyber.com)
 
 <figure><img src="images/stm (1).png" alt=""><figcaption></figcaption></figure>
 
-[**STM Cyber**](https://www.stmcyber.com) ni kampuni nzuri ya usalama wa mtandao ambayo kauli mbiu yake ni **HACK THE UNHACKABLE**. Wanafanya utafiti wao wenyewe na kuendeleza zana zao za hacking ili **kutoa huduma kadhaa muhimu za usalama wa mtandao** kama pentesting, Red teams na mafunzo.
+[**STM Cyber**](https://www.stmcyber.com) ni kampuni bora ya cybersecurity ambayo kaulimbiu yake ni **HACK THE UNHACKABLE**. Wanafanya utafiti wao wenyewe na kuendeleza own hacking tools zao ili **kutoa huduma kadhaa muhimu za cybersecurity** kama pentesting, Red teams na training.
 
-Unaweza kuangalia **blog** yao kwenye [**https://blog.stmcyber.com**](https://blog.stmcyber.com)
+Unaweza kuangalia **blog** yao katika [**https://blog.stmcyber.com**](https://blog.stmcyber.com)
 
-**STM Cyber** pia inasaidia miradi ya chanzo huria ya usalama wa mtandao kama HackTricks :)
-
----
-
-### [RootedCON](https://www.rootedcon.com/)
-
-<figure><img src="images/image (45).png" alt=""><figcaption></figcaption></figure>
-
-[**RootedCON**](https://www.rootedcon.com) ni tukio muhimu kwa usalama wa mtandao nchini Spain na mojawapo ya muhimu zaidi barani Europe. Kwa lengo la kukuza ujuzi wa kiufundi, kongamano hili ni kitovu cha kukutana cha shughuli nyingi kwa wataalamu wa teknolojia na usalama wa mtandao katika nyanja zote.
-
-{{#ref}}
-https://www.rootedcon.com/
-{{#endref}}
+**STM Cyber** pia huunga mkono miradi ya open source ya cybersecurity kama HackTricks :)
 
 ---
 
@@ -63,27 +51,12 @@ https://www.rootedcon.com/
 
 <figure><img src="images/image (47).png" alt=""><figcaption></figcaption></figure>
 
-**Intigriti** ni the **Europe's #1** ethical hacking na **bug bounty platform.**
+**Intigriti** ni **Europe's #1** ethical hacking na **bug bounty platform.**
 
-Kidokezo cha bug bounty: **jisajili** kwa **Intigriti**, jukwaa la kiwango cha juu la **bug bounty created by hackers, for hackers**! Jiunge nasi kwenye [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) leo, na anza kupata bounties hadi **$100,000**!
+**Bug bounty tip**: **jiandikishe** kwa **Intigriti**, premium **bug bounty platform iliyoundwa na hackers, kwa hackers**! Jiunge nasi katika [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) leo, na anza kupata bounties hadi **$100,000**!
 
 {{#ref}}
 https://go.intigriti.com/hacktricks
-{{#endref}}
-
----
-
-### [Trickest](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks)
-
-<figure><img src="images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-\
-Tumia [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) kujenga kwa urahisi na **kuotomatisha workflows** zinazoendeshwa na zana za jamii zenye maendeleo zaidi duniani.
-
-Pata Ufikiaji Leo:
-
-{{#ref}}
-https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks
 {{#endref}}
 
 ---
@@ -92,11 +65,11 @@ https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktr
 
 <figure><img src="images/image (3).png" alt=""><figcaption></figcaption></figure>
 
-Jiunge na [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) server ili kuwasiliana na hackers wenye uzoefu na wadudu bounty hunters!
+Jiunge na server ya [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) ili kuwasiliana na hackers wenye uzoefu na bug bounty hunters!
 
-- **Hacking Insights:** Shirikiana na maudhui yanayoangazia msisimko na changamoto za hacking
-- **Real-Time Hack News:** Endelea kupata habari za dunia ya hacking kwa wakati halisi
-- **Latest Announcements:** Kuwa na taarifa za bounties mpya zinazoanzishwa na masasisho muhimu ya jukwaa
+- **Hacking Insights:** Shirikiana na maudhui yanayoingia ndani ya msisimko na changamoto za hacking
+- **Real-Time Hack News:** Endelea kupata taarifa za kisasa kuhusu ulimwengu wa hacking kupitia habari na insights za wakati halisi
+- **Latest Announcements:** Endelea kufahamu bug bounties mpya zinazozinduliwa na masasisho muhimu ya platform
 
 **Jiunge nasi kwenye** [**Discord**](https://discord.com/invite/N3FrSbmwdy) na anza kushirikiana na hackers wakuu leo!
 
@@ -106,16 +79,16 @@ Jiunge na [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) serve
 
 <figure><img src="images/modern_security_logo.png" alt="Modern Security"><figcaption></figcaption></figure>
 
-Modern Security inatoa **mafunzo ya vitendo ya AI Security** kwa mtazamo wa **engineering-first, maabara ya vitendo**. Kozi zao zimejengwa kwa ajili ya wahandisi wa usalama, wataalamu wa AppSec, na watengenezaji wanaotaka **kujenga, kuvunja, na kuimarisha applications zinazoendeshwa na AI/LLM**.
+Modern Security inatoa **mafunzo ya vitendo ya AI Security** kwa mbinu ya **engineering-first, hands-on lab approach**. Kozi zetu zimejengwa kwa ajili ya security engineers, AppSec professionals, na developers wanaotaka **kujenga, kuvunja, na kulinda real AI/LLM-powered applications**.
 
-The **AI Security Certification** inalenga ujuzi wa ulimwengu wa kweli, ikijumuisha:
-- Securing LLM and AI-powered applications
-- Threat modeling for AI systems
-- Embeddings, vector databases, and RAG security
-- LLM attacks, abuse scenarios, and practical defenses
-- Secure design patterns and deployment considerations
+**AI Security Certification** inalenga ujuzi wa ulimwengu halisi, ikijumuisha:
+- Kulinda LLM na AI-powered applications
+- Threat modeling kwa AI systems
+- Embeddings, vector databases, na RAG security
+- LLM attacks, abuse scenarios, na practical defenses
+- Secure design patterns na deployment considerations
 
-Kozi zote ni **on-demand**, **lab-driven**, na zimeundwa kuzingatia **mizanano ya usalama ya ulimwengu wa kweli**, sio tu nadharia.
+Kozi zote ni **on-demand**, **lab-driven**, na zimeundwa kuzunguka **real-world security tradeoffs**, si nadharia tu.
 
 👉 Maelezo zaidi kuhusu kozi ya AI Security:
 https://www.modernsecurity.io/courses/ai-security-certification
@@ -130,13 +103,13 @@ https://modernsecurity.io/
 
 <figure><img src="images/image (1254).png" alt=""><figcaption></figcaption></figure>
 
-**SerpApi** inatoa APIs za wakati halisi kwa haraka na kwa urahisi za **kupata matokeo ya injini za utafutaji**. Wanapiga scraping ya injini za utafutaji, wanashughulikia proxies, kutatua captchas, na kuchambua data yote iliyopangwa kwako.
+**SerpApi** inatoa APIs za haraka na rahisi za real-time ili **kupata search engine results**. Wanacrawl search engines, kushughulikia proxies, kutatua captchas, na kuchambua rich structured data yote kwa ajili yako.
 
-Usajili kwa moja ya mipangilio ya SerpApi unajumuisha ufikiaji wa zaidi ya APIs 50 tofauti kwa scraping ya injini mbalimbali za utafutaji, ikiwa ni pamoja na Google, Bing, Baidu, Yahoo, Yandex, na zaidi.\
-Tofauti na watoa wengine, **SerpApi haiwezi tu kuscrape matokeo ya asili**. Majibu ya SerpApi mara nyingi yanajumuisha matangazo yote, picha na video zilizojumuishwa, knowledge graphs, na vipengele vingine vilivyopo kwenye matokeo ya utafutaji.
+Usajili wa mojawapo ya plans za SerpApi unajumuisha access kwa zaidi ya APIs 50 tofauti za kuchambua tofauti search engines, zikiwemo Google, Bing, Baidu, Yahoo, Yandex, na nyinginezo.\
+Tofauti na providers wengine, **SerpApi haichambui tu organic results**. Majibu ya SerpApi kwa uthabiti hujumuisha ads zote, inline images na videos, knowledge graphs, na vipengele vingine vilivyopo katika search results.
 
-Wateja wa sasa wa SerpApi ni pamoja na **Apple, Shopify, and GrubHub**.\
-Kwa taarifa zaidi angalia [**blog**](https://serpapi.com/blog/)** yao,** au jaribu mfano kwenye [**playground**](https://serpapi.com/playground)** yao.**\
+Wateja wa sasa wa SerpApi ni pamoja na **Apple, Shopify, na GrubHub**.\
+Kwa maelezo zaidi angalia [**blog**](https://serpapi.com/blog/)** yao,** au jaribu mfano katika [**playground**](https://serpapi.com/playground)** yao.**\
 Unaweza **kuunda akaunti ya bure** [**hapa**](https://serpapi.com/users/sign_up)**.**
 
 ---
@@ -145,7 +118,7 @@ Unaweza **kuunda akaunti ya bure** [**hapa**](https://serpapi.com/users/sign_up)
 
 <figure><img src="images/image (2).png" alt=""><figcaption></figcaption></figure>
 
-Jifunze teknolojia na ujuzi unaohitajika kufanya utafiti wa udhaifu, penetration testing, na reverse engineering ili kulinda mobile applications na devices. **Tumia ujuzi wa iOS na Android security** kupitia kozi zetu za on-demand na **pata vyeti**:
+Jifunze teknolojia na ujuzi unaohitajika ili kufanya vulnerability research, penetration testing, na reverse engineering kulinda mobile applications na devices. **Bobea katika iOS na Android security** kupitia kozi zetu za on-demand na **pata certification**:
 
 {{#ref}}
 https://academy.8ksec.io/
@@ -157,13 +130,13 @@ https://academy.8ksec.io/
 
 <figure><img src="images/websec (1).svg" alt=""><figcaption></figcaption></figure>
 
-[**WebSec**](https://websec.net) ni kampuni ya kitaalam ya usalama wa mtandao yenye makao yake **Amsterdam** inayosaidia **kulinda** biashara **hapo kote duniani** dhidi ya tishio jipya la usalama wa mtandao kwa kutoa **huduma za offensive-security** kwa mtazamo **mpya**.
+[**WebSec**](https://websec.net) ni kampuni ya kitaalamu ya cybersecurity iliyoko **Amsterdam** ambayo husaidia **kulinda** biashara **duniani kote** dhidi ya vitisho vipya vya cybersecurity kwa kutoa **offensive-security services** kwa mbinu ya **kisasa**.
 
-WebSec ni kampuni ya usalama ya kimataifa yenye ofisi huko Amsterdam na Wyoming. Wanatoa **huduma za usalama zote kwa pamoja** ambayo inamaanisha wanafanya kila kitu; Pentesting, **Security** Audits, Awareness Trainings, Phishing Campagnes, Code Review, Exploit Development, Security Experts Outsourcing na mengi zaidi.
+WebSec ni kampuni ya usalama ya kimataifa yenye ofisi Amsterdam na Wyoming. Wanatoa **all-in-one security services** ambayo ina maana wanafanya yote; Pentesting, **Security** Audits, Awareness Trainings, Phishing Campagnes, Code Review, Exploit Development, Security Experts Outsourcing na mengi zaidi.
 
-Jambo jingine la kuvutia kuhusu WebSec ni kwamba tofauti na wastani wa sekta WebSec ni **kujiamini sana kwa ujuzi wao**, kwa kiwango kwamba **wanahakikisha matokeo bora kabisa**, kama ilivyoonyeshwa kwenye tovuti yao "**If we can't hack it, You don't pay it!**". Kwa taarifa zaidi tazama [**website**](https://websec.net/en/) yao na [**blog**](https://websec.net/blog/)!
+Jambo lingine zuri kuhusu WebSec ni kwamba tofauti na wastani wa industry WebSec ina **imani kubwa sana katika skills zao**, hadi kiasi kwamba **wanahakikisha matokeo bora zaidi**, kwenye website yao inasema "**If we can't hack it, You don't pay it!**". Kwa taarifa zaidi angalia [**website**](https://websec.net/en/) yao na [**blog**](https://websec.net/blog/)!
 
-Mbali na hayo WebSec pia ni **mshirika aliyejitolea wa HackTricks.**
+Mbali na hayo, WebSec pia ni **mfuasi aliyejitolea wa HackTricks.**
 
 {{#ref}}
 https://www.youtube.com/watch?v=Zq2JycGDCPM
@@ -177,12 +150,15 @@ https://www.youtube.com/watch?v=Zq2JycGDCPM
 
 
 **Built for the field. Built around you.**\
-[**Cyber Helmets**](https://cyberhelmets.com/?ref=hacktricks) huendeleza na kutoa mafunzo ya usalama wa mtandao yenye ufanisi yaliyoandaliwa na kuongozwa na wataalamu wa sekta. Programu zao zinazidi nadharia ili kuwapa timu uelewa wa kina na ujuzi wa utekelezaji, kwa kutumia mazingira maalum yanayoakisi tishio la ulimwengu wa kweli. Kwa maswali ya mafunzo maalum, wasiliana nasi [**hapa**](https://cyberhelmets.com/tailor-made-training/?ref=hacktricks).
+[**Cyber Helmets**](https://cyberhelmets.com/?ref=hacktricks) inatengeneza na kutoa mafunzo madhubuti ya cybersecurity yaliyojengwa na kuendeshwa na
+industry experts. Programu zao huenda zaidi ya nadharia ili kuandaa teams kwa
+ufahamu wa kina na skills zinazoweza kutekelezwa, kwa kutumia custom environments zinazoakisi real-world
+threats. Kwa maswali ya custom training, wasiliana nasi [**hapa**](https://cyberhelmets.com/tailor-made-training/?ref=hacktricks).
 
-**Kitakachowatofautisha mafunzo yao:**
-* Yaliyoundwa mahususi yaliyojengwa pamoja na maabara
-* Yanaungwa mkono na zana na majukwaa ya hali ya juu
-* Yameundwa na kufundishwa na watendaji wa uwanja
+**Kinachotofautisha mafunzo yao:**
+* Custom-built content na labs
+* Yakiungwa mkono na top-tier tools na platforms
+* Yameundwa na kufundishwa na practitioners
 
 {{#ref}}
 https://cyberhelmets.com/courses/?ref=hacktricks
@@ -194,13 +170,19 @@ https://cyberhelmets.com/courses/?ref=hacktricks
 
 <figure><img src="images/lasttower.png" alt="lasttower logo"><figcaption></figcaption></figure>
 
-Last Tower Solutions inatoa huduma maalum za usalama wa mtandao kwa taasisi za **Elimu** na **FinTech**, ikilenga **penetration testing, cloud security assessments**, na **compliance readiness** (SOC 2, PCI-DSS, NIST). Timu yetu inajumuisha wataalamu **waliothibitishwa wa OSCP na CISSP**, wakileta ujuzi wa kina wa kiufundi na ufahamu wa viwango vya sekta katika kila ushirikiano.
+Last Tower Solutions inatoa specialized cybersecurity services kwa taasisi za **Education** na **FinTech**
+, kwa kuzingatia **penetration testing, cloud security assessments**, na
+**compliance readiness** (SOC 2, PCI-DSS, NIST). Timu yetu ina **OSCP na CISSP
+certified professionals**, ikileta utaalamu wa kina wa kiufundi na uelewa wa viwango vya industry kwenye
+kila ushirikiano.
 
-Tunazidi skanseni za kiotomatiki kwa **upimaji wa mikono unaotumiwa na intelijensia** uliobinafsishwa kwa mazingira yenye hatari kubwa. Kuanzia kulinda rekodi za wanafunzi hadi kulinda miamala ya kifedha, tunawasaidia mashirika kujilinda yale yanayofaa zaidi.
+Tunaenda zaidi ya automated scans kwa **manual, intelligence-driven testing** iliyoandaliwa mahususi kwa
+mazingira yenye umuhimu mkubwa. Kuanzia kulinda student records hadi kulinda financial transactions,
+tunasaidia organizations kutetea kilicho muhimu zaidi.
 
-_“Ulinzi bora unahitaji kujua mashambulizi; tunatoa usalama kupitia uelewa.”_
+_“Ulinzi wa ubora unahitaji kujua shambulio, tunatoa security kupitia uelewa.”_
 
-Endelea kupata habari za hivi punde katika usalama wa mtandao kwa kutembelea [**blog**](https://www.lasttowersolutions.com/blog) yao.
+Endelea kufahamu na kupata updates za hivi karibuni katika cybersecurity kwa kutembelea [**blog**](https://www.lasttowersolutions.com/blog) yetu.
 
 {{#ref}}
 https://www.lasttowersolutions.com/
@@ -212,9 +194,9 @@ https://www.lasttowersolutions.com/
 
 <figure><img src="images/k8studio.png" alt="k8studio logo"><figcaption></figcaption></figure>
 
-K8Studio IDE inawawezesha DevOps, DevSecOps, na watengenezaji kusimamia, kufuatilia, na kuimarisha Kubernetes clusters kwa ufanisi. Tumia maarifa yetu yanayotokana na AI, fremu ya usalama ya hatua za juu, na GUI ya CloudMaps kuonyesha clusters zako, kuelewa hali zao, na kuchukua hatua kwa kujiamini.
+K8Studio IDE huwawezesha DevOps, DevSecOps, na developers kusimamia, kufuatilia, na kulinda Kubernetes clusters kwa ufanisi. Tumia AI-driven insights zetu, advanced security framework, na intuitive CloudMaps GUI ili kuona clusters zako, kuelewa hali yake, na kuchukua hatua kwa kujiamini.
 
-Zaidi ya hayo, K8Studio ni **inayolingana na distributions zote kubwa za kubernetes** (AWS, GCP, Azure, DO, Rancher, K3s, Openshift and more).
+Zaidi ya hayo, K8Studio **inaendana na major kubernetes distributions zote** (AWS, GCP, Azure, DO, Rancher, K3s, Openshift na zaidi).
 
 {{#ref}}
 https://k8studio.io/
@@ -222,9 +204,9 @@ https://k8studio.io/
 
 ---
 
-## Leseni & Angalizo
+## License & Disclaimer
 
-Angalia huko:
+Zikague katika:
 
 {{#ref}}
 welcome/hacktricks-values-and-faq.md
