@@ -211,6 +211,25 @@ Detection/hunting tips for these variants
 - Network: outbound to CDN worker hosts or blockchain RPC endpoints from script hosts/PowerShell shortly after web browsing.
 - File/registry: temporary `.ps1` creation under `%TEMP%` plus RunMRU entries containing these one-liners; block/alert on signed-script LOLBAS (WScript/cscript/mshta) executing with external URLs or obfuscated alias strings.
 
+## 2026 ClickFix masquerading as a `.msixbundle` installer: `mshta` + embedded HTA + `amsiContext` corruption
+
+Rapid7 documented a ClickFix chain where the victim is told to use **Win+R** to execute `mshta.exe` against a fake Claude installer URL such as `download-version[.]1-5-8[.]com/claude.msixbundle`. The lure is notable because the supposed MSIX bundle is actually a **ZIP archive (`PK` header)** containing an embedded **HTA** with VBScript, so `mshta` is only being used as the initial signed proxy execution stage.
+
+Interesting tradecraft from this variant
+- **Run-dialog telemetry matters**: the initial command lands in `HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\RunMRU`, making `RunMRU` writes a high-signal place to detect ClickFix execution involving `mshta`, `powershell`, `cmd`, `wscript`, or similar LOLBins.
+- **Installer masquerading**: a payload named like `*.msixbundle` may really be a ZIP containing an HTA/VBScript stage. Check the magic bytes instead of trusting the extension.
+- **Command-line deobfuscation using delayed expansion**: the HTA spawns `cmd.exe /v:on /c` and reconstructs `powershell` at runtime (`set x=pow`, `set y=ershell`, then `!x!!y!`) before launching the SysWOW64 PowerShell binary with `-E <base64>`.
+- **Per-host staging URLs**: the PowerShell stager hashes `COMPUTERNAME` + `USERNAME` with MD5, takes the first 16 hex characters, and uses that fragment inside the next-stage URL. This reduces the usefulness of generic URL extraction and allows per-victim tasking.
+- **AMSI tampering via internal state corruption**: instead of only flipping `amsiInitFailed`, the stager reflects `System.Management.Automation.AmsiUtils`, resolves the non-public static field `amsiContext`, and corrupts it via `Marshal.WriteInt32(..., 0x41414141)` before pulling the next stage.
+- **Layered ScriptBlock execution**: later stages are stored as Base64 and obfuscated byte arrays, decoded into `ScriptBlock` objects, and executed across several layers.
+- **Native API shellcode runner in PowerShell**: the final stage XOR-decrypts shellcode and invokes delegates for `NtAllocateVirtualMemory`, `NtProtectVirtualMemory`, `NtCreateThreadEx`, `NtWaitForSingleObject`, `NtFreeVirtualMemory`, and `NtClose` to perform in-memory execution.
+
+Hunting ideas specific to this chain
+- `RunMRU` values containing `mshta`, fake software installers, remote `.msixbundle` URLs, or long one-liners that later spawn `cmd.exe /v:on`.
+- Process chains like `explorer.exe` → `mshta.exe` → `cmd.exe /v:on` → `%windir%\SysWOW64\WindowsPowerShell\v1.0\powershell.exe`.
+- PowerShell command lines or ScriptBlock logging containing `AmsiUtils`, `amsiContext`, `NonPublic,Static`, `Marshal.WriteInt32`, or MD5-derived URL fragments based on host/user names.
+- `mshta.exe` retrieving content that is not an HTA by extension or MIME type but expands to ZIP/HTML/VBScript content after download.
+
 ## Mitigations
 
 1. Browser hardening – disable clipboard write-access (`dom.events.asyncClipboard.clipboardItem` etc.) or require user gesture.
@@ -234,5 +253,6 @@ Detection/hunting tips for these variants
 - [The ClickFix Factory: First Exposure of IUAM ClickFix Generator](https://unit42.paloaltonetworks.com/clickfix-generator-first-of-its-kind/)
 - [2025, the year of the Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
 - [Red Canary – Intelligence Insights: February 2026](https://redcanary.com/blog/threat-intelligence/intelligence-insights-february-2026/)
+- [Rapid7 - ClickFix Phishing Campaign Masquerading as a Claude Installer](https://www.rapid7.com/blog/post/ve-clickfix-phishing-campaign-fake-claude-installer)
 
 {{#include ../../banners/hacktricks-training.md}}
