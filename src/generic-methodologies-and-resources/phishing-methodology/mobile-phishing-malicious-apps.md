@@ -495,6 +495,57 @@ wm.addView(v, lp);
 
 Operator control primitives often seen: `BACK`, `HOME`, `RECENTS`, `CLICKTXT`/`CLICKDESC`/`CLICKELEMENT`/`CLICKHINT`, `TAP`/`SWIPE`, `NOTIFICATIONS`, `OPNPKG`, `VNC`/`VNCA11Y` (screen sharing).
 
+### Additional Android banker tradecraft: session-installs, stealth persistence, and anti-analysis
+
+Recent banker families such as RecruitRat, SaferRat, Astrinox/Mirax, and Massiv keep reusing the same installation and theft pattern, but add several operational refinements that are useful during reversing or hunting:
+
+- **Session-installer + blindfold overlay:** the stage-1 app uses `PackageInstaller` session APIs to make the payload installation look like a legitimate store/update flow, then immediately pivots the victim into Accessibility enablement. Once the service is active, a full-screen non-interactive overlay hides the screen while the malware auto-clicks follow-on permission prompts (`READ_CONTACTS`, phone state, SMS, overlay, MediaProjection).
+- **Persistence by user-interface sabotage:** instead of classic boot persistence only, bankers reduce removal chances by:
+  - swapping the launcher icon to a blank/transparent asset so the payload disappears from the app drawer;
+  - watching for visits to the app-info / uninstall screen and using Accessibility global actions to redirect the victim away (`enable_anti_delete`-style logic).
+- **Target discovery without `QUERY_ALL_PACKAGES`:** to lower manifest risk, some samples enumerate only user-launchable apps via `android.intent.action.MAIN` + `android.intent.category.LAUNCHER` and exfiltrate the resulting package list to choose which overlay set to deploy.
+- **Overlay delivery variants:** one branch stores a ZIP of HTML templates locally (for example via commands such as `injectZip`) and renders them with `WindowManager`; another loads remote phishing pages directly inside a `WebView` overlay to keep almost no on-device artifacts and let the operator update lures in real time.
+
+Minimal launcher-based discovery pattern:
+
+```java
+Intent i = new Intent(Intent.ACTION_MAIN, null);
+i.addCategory(Intent.CATEGORY_LAUNCHER);
+List<ResolveInfo> apps = pm.queryIntentActivities(i, 0);
+for (ResolveInfo r : apps) {
+    String pkg = r.activityInfo.packageName;
+    // send pkg list to C2 to choose overlay templates
+}
+```
+
+### APK anti-analysis patterns seen in modern bankers
+
+- **Hidden stage-2 inside `assets/` or `res/` + dynamic loading:** secondary payloads are often stored as opaque blobs and loaded at runtime with `DexClassLoader`.
+- **String/API concealment:** strings, class names, and sensitive API identifiers are decrypted on demand and resolved through Java reflection.
+- **Full payload reconstruction in memory:** some variants rebuild the real APK from Base64 chunks, decrypt it with AES/GCM in memory, and only then write it to the cache directory for installation/execution.
+- **Execution gating:** samples frequently exit early on rooted devices or if specific mobile AV packages are present, reducing analyst visibility.
+- **APK ZIP-structure tampering:** unsupported compression methods, fake encryption flags, or very long entry names can make `jadx`, `apktool`, or even `unzip` fail on entries such as `AndroidManifest.xml` while Android still accepts the APK.
+
+Fast triage for structurally tampered APKs:
+
+```bash
+# Core APK entries should not look "encrypted" to ZIP tools
+zipdetails -v sample.apk | egrep -n "General Purpose Flag|AndroidManifest.xml|classes[0-9]*\\.dex|resources\\.arsc"
+
+# Look for extraction/decompression errors on core files
+unzip -t sample.apk
+
+# Compare what Android sees vs what ZIP tooling exposes
+aapt dump badging sample.apk | head
+jadx --show-bad-code sample.apk
+```
+
+If ZIP metadata looks inconsistent but the APK still installs or `aapt` parses it, treat it as intentional anti-analysis. For deeper ZIP-level repair and parser-differential tricks, see:
+
+{{#ref}}
+../basic-forensic-methodology/specific-software-file-type-tricks/zips-tricks.md
+{{#endref}}
+
 ## References
 
 - [New Android Malware Herodotus Mimics Human Behaviour to Evade Detection](https://www.threatfabric.com/blogs/new-android-malware-herodotus-mimics-human-behaviour-to-evade-detection)
@@ -509,6 +560,8 @@ Operator control primitives often seen: `BACK`, `HOME`, `RECENTS`, `CLICKTXT`/`C
 - [DomainTools SecuritySnacks – ID/VN Banker Trojans (IOCs)](https://github.com/DomainTools/SecuritySnacks/blob/main/2025/BankerTrojan-ID-VN)
 - [Socket.IO](https://socket.io)
 - [Bypassing Android 13 Restrictions with SecuriDropper (ThreatFabric)](https://www.threatfabric.com/blogs/droppers-bypassing-android-13-restrictions)
+- [Android Bankers: 4 Campaigns in a Row](https://zimperium.com/blog/android-bankers-4-campaigns-in-a-row)
+- [Zimperium IOC repository – 2026-04 Multiple Bankers](https://github.com/Zimperium/IOC/tree/master/2026-04-Multiple-Bankers)
 - [Web Clips payload settings for Apple devices](https://support.apple.com/guide/deployment/web-clips-payload-settings-depbc7c7808/web)
 
 {{#include ../../banners/hacktricks-training.md}}
