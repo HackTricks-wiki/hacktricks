@@ -119,6 +119,41 @@ if __name__ == "__main__":
 ###
 ```
 
+### goshs
+
+[goshs](https://github.com/patrickhener/goshs) is a single-binary replacement for `python3 -m http.server` 
+with upload, download, WebDAV, SFTP, SMB, TLS, authentication, share links, 
+and OOB collaboration features (DNS, SMTP, NTLM hash capture).
+
+```bash
+# Serve current directory on port 8000
+goshs
+
+# Serve with HTTPS (self-signed)
+goshs -s -ss
+
+# Serve with basic auth
+goshs -b user:password
+
+# Upload-only mode
+goshs -uo
+
+# Read-only mode
+goshs -ro
+
+# Capture SMB NTLM hashes
+goshs -smb -smb-domain CORP
+
+# DNS callback server
+goshs -dns -dns-ip 10.10.10.10
+
+# SMTP callback server
+goshs -smtp -smtp-domain [REDACTED]
+
+# Tunnel via localhost.run (no port forwarding needed)
+goshs -tunnel
+```
+
 ## Webhooks (Discord/Slack/Teams) for C2 & Data Exfiltration
 
 Webhooks are write-only HTTPS endpoints that accept JSON and optional file parts. They’re commonly allowed to trusted SaaS domains and require no OAuth/API keys, making them useful for low-friction beaconing and exfiltration.
@@ -293,6 +328,18 @@ WindPS-1> New-PSDrive -Name "new_disk" -PSProvider "FileSystem" -Root "\\10.10.1
 WindPS-2> cd new_disk:
 ```
 
+### goshs
+[goshs](https://github.com/patrickhener/goshs) is a single-binary alternative 
+that serves files over SMB and captures NetNTLMv2 hashes from connecting clients:
+
+```bash
+# Start SMB server with NTLM hash capture
+goshs -smb -smb-domain CORP
+
+# Also works for plain HTTP file serving
+goshs
+```
+
 ## SCP
 
 The attacker has to have SSHd running.
@@ -364,6 +411,24 @@ If you can send data to an SMTP server, you can create an SMTP to receive the da
 
 ```bash
 sudo python -m smtpd -n -c DebuggingServer :25
+```
+
+### goshs
+
+[goshs](https://github.com/patrickhener/goshs) can spin up a quick SMTP server
+to catch email callbacks during OOB exfiltration scenarios:
+
+```bash
+# Start SMTP callback server
+goshs -smtp -smtp-domain [REDACTED]
+```
+
+Received emails and callbacks are displayed directly in the terminal output.
+Can be combined with the DNS callback server for full OOB coverage:
+
+```bash
+# DNS + SMTP combined
+goshs -dns -dns-ip 10.10.10.10 -smtp -smtp-domain [REDACTED]
 ```
 
 ## TFTP
@@ -457,6 +522,7 @@ Then copy-paste the text into the windows-shell and a file called nc.exe will be
 ## DNS
 
 - [https://github.com/Stratiz/DNS-Exfil](https://github.com/Stratiz/DNS-Exfil)
+- [https://github.com/patrickhener/goshs](https://github.com/patrickhener/goshs)
 
 ## References
 
