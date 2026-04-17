@@ -194,6 +194,31 @@ busctl call org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login
 gdbus call --system --dest org.freedesktop.login1 --object-path /org/freedesktop/login1 --method org.freedesktop.login1.Manager.CanReboot
 ```
 
+### Correlate D-Bus Methods with Policies and Actions
+
+Introspection tells you **what** you can call, but it does not tell you **why** a call is allowed or denied. For real privesc triage you usually need to inspect **three layers together**:
+
+1. **Activation metadata** (`.service` files or `SystemdService=`) to learn which binary and unit will actually run.
+2. **D-Bus XML policy** (`/etc/dbus-1/system.d/`, `/usr/share/dbus-1/system.d/`) to learn who may `own`, `send_destination`, or `receive_sender`.
+3. **Polkit action files** (`/usr/share/polkit-1/actions/*.policy`) to learn the default authorization model (`allow_active`, `allow_inactive`, `auth_admin`, `auth_self`, `org.freedesktop.policykit.imply`).
+
+Useful commands:
+
+```bash
+grep -RInE '^(Name|Exec|SystemdService|User)=' /usr/share/dbus-1/system-services /usr/share/dbus-1/services 2>/dev/null
+grep -RInE '<(allow|deny) (own|send_destination|receive_sender)=|user=|group=' /etc/dbus-1/system.d /usr/share/dbus-1/system.d /etc/dbus-1/system-local.d 2>/dev/null
+grep -RInE 'allow_active|allow_inactive|auth_admin|auth_self|org\.freedesktop\.policykit\.imply' /usr/share/polkit-1/actions 2>/dev/null
+pkaction --verbose
+```
+
+Do **not** assume a 1:1 mapping between a D-Bus method and a Polkit action. The same method may choose a different action depending on the object being modified or on runtime context. Therefore the practical workflow is:
+
+1. `busctl introspect` / `gdbus introspect`
+2. `pkaction --verbose` and grep the relevant `.policy` files
+3. low-risk live probes with `busctl call`, `gdbus call`, or `dbusmap --enable-probes --null-agent`
+
+Proxy or compatibility services deserve extra attention. A **root-running proxy** that forwards requests to another D-Bus service over its own pre-established connection can accidentally make the backend treat every request as coming from UID 0 unless the original caller identity is re-validated.
+
 ### Monitor/Capture Interface
 
 With enough privileges (just `send_destination` and `receive_sender` privileges aren't enough) you can **monitor a D-Bus communication**.
@@ -232,7 +257,12 @@ Monitoring bus message stream.
   };
 ```
 
-You can use `capture` instead of `monitor` to save the results in a pcap file.
+You can use `capture` instead of `monitor` to save the results in a **pcapng** file that Wireshark can open:
+
+```bash
+sudo busctl capture htb.oouch.Block > dbus-htb.oouch.Block.pcapng
+sudo busctl capture > system-bus.pcapng
+```
 
 #### Filtering all the noise <a href="#filtering_all_the_noise" id="filtering_all_the_noise"></a>
 
@@ -529,20 +559,19 @@ Enumeration of a large D-Bus attack surface manually with `busctl`/`gdbus` quick
 
 ## Notable D-Bus Privilege-Escalation Bugs (2024-2025)
 
-Keeping an eye on recently published CVEs helps spotting similar insecure patterns in custom code. The following high-impact local EoP issues all stem from missing authentication/authorization on the **system bus**:
+Keeping an eye on recently published CVEs helps spotting similar insecure patterns in custom code. Two good recent examples are:
 
-| Year | CVE | Component | Root Cause | One-Liner PoC |
-|------|-----|-----------|------------|---------------|
-| 2024 | CVE-2024-45752 | `logiops` ≤ 0.3.4 (Logitech HID daemon) | The `logid` system service exposes an unrestricted `org.freedesktop.Logiopsd` interface that lets *any* user change device profiles and inject arbitrary shell commands via macro strings. | `gdbus call -y -d org.freedesktop.Logiopsd -o /org/freedesktop/Logiopsd -m org.freedesktop.Logiopsd.LoadConfig "/tmp/pwn.yml"` |
-| 2025 | CVE-2025-23222 | Deepin `dde-api-proxy` ≤ 1.0.18 | A root-running proxy forwards legacy bus names to backend services **without forwarding caller UID/Polkit context**, so every forwarded request is treated as UID 0. | `gdbus call -y -d com.deepin.daemon.Grub2 -o /com/deepin/daemon/Grub2 -m com.deepin.daemon.Grub2.SetTimeout 1` |
-| 2025 | CVE-2025-3931 | Red Hat Insights `yggdrasil` ≤ 0.4.6 | Public `Dispatch` method lacks any ACLs → attacker can order the *package-manager* worker to install arbitrary RPMs. | `dbus-send --system --dest=com.redhat.yggdrasil /com/redhat/Dispatch com.redhat.yggdrasil.Dispatch string:'{"worker":"pkg","action":"install","pkg":"nc -e /bin/sh"}'` |
+| Year | CVE | Component | Root Cause | Offensive lesson |
+|------|-----|-----------|------------|------------------|
+| 2024 | CVE-2024-45752 | `logiops` ≤ 0.3.4 (`logid`) | The root-running service exposed a D-Bus interface that unprivileged users could reconfigure, including loading attacker-controlled macro behavior. | If a daemon exposes **device/profile/config management** on the system bus, treat writable configuration and macro features as code-execution primitives, not just "settings". |
+| 2025 | CVE-2025-23222 | Deepin `dde-api-proxy` ≤ 1.0.19 | A root-running compatibility proxy forwarded requests to backend services without preserving the original caller's security context, so backends trusted the proxy as UID 0. | Treat **proxy / bridge / compatibility** D-Bus services as a separate bug class: if they relay privileged calls, verify how caller UID/Polkit context reaches the backend. |
 
 Patterns to notice:
 1. Service runs **as root on the system bus**.
-2. No PolicyKit check (or it is bypassed by a proxy).
-3. Method ultimately leads to `system()`/package installation/device re-configuration → code execution.
+2. Either there is **no authorization check**, or the check is performed against the **wrong subject**.
+3. The reachable method eventually changes system state: package install, user/group changes, bootloader config, device profile updates, file writes, or direct command execution.
 
-Use `dbusmap --enable-probes` or manual `busctl call` to confirm whether a patch back-ports proper `polkit_authority_check_authorization()` logic.
+Use `dbusmap --enable-probes` or manual `busctl call` to confirm whether a method is reachable, then inspect the service's policy XML and Polkit actions to understand **which subject** is actually being authorized.
 
 ---
 
@@ -555,17 +584,13 @@ Use `dbusmap --enable-probes` or manual `busctl call` to confirm whether a patch
 * Require Polkit for dangerous methods – even *root* proxies should pass the *caller* PID to `polkit_authority_check_authorization_sync()` instead of their own.
 * Drop privileges in long-running helpers (use `sd_pid_get_owner_uid()` to switch namespaces after connecting to the bus).
 * If you cannot remove a service, at least *scope* it to a dedicated Unix group and restrict access in its XML policy.
-* Blue-team: enable persistent capture of the system bus with `busctl capture --output=/var/log/dbus_$(date +%F).pcap` and import into Wireshark for anomaly detection.
+* Blue-team: capture the system bus with `busctl capture > /var/log/dbus_$(date +%F).pcapng` and import it into Wireshark for anomaly detection.
 
 ---
 
 ## References
 
 - [https://unit42.paloaltonetworks.com/usbcreator-d-bus-privilege-escalation-in-ubuntu-desktop/](https://unit42.paloaltonetworks.com/usbcreator-d-bus-privilege-escalation-in-ubuntu-desktop/)
+- [https://github.com/PixlOne/logiops/issues/473](https://github.com/PixlOne/logiops/issues/473)
 - [https://security.opensuse.org/2025/01/24/dde-api-proxy-privilege-escalation.html](https://security.opensuse.org/2025/01/24/dde-api-proxy-privilege-escalation.html)
-
-
-- [https://unit42.paloaltonetworks.com/usbcreator-d-bus-privilege-escalation-in-ubuntu-desktop/](https://unit42.paloaltonetworks.com/usbcreator-d-bus-privilege-escalation-in-ubuntu-desktop/)
-
 {{#include ../../banners/hacktricks-training.md}}
-
