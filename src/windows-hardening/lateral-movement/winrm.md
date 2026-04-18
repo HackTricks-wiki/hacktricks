@@ -124,6 +124,51 @@ stdout, stderr, rc = client.execute_cmd("whoami /all")
 print(stdout, stderr, rc)
 ```
 
+
+If you need finer control than the high-level `Client` wrapper, the lower-level `WSMan` + `RunspacePool` APIs are useful for two common operator problems:
+
+- forcing **`WSMAN`** as the Kerberos service/SPN instead of the default `HTTP` expectation used by many PowerShell clients;
+- connecting to a **non-default PSRP endpoint** such as a **JEA** / custom session configuration instead of `Microsoft.PowerShell`.
+
+```python
+from pypsrp.wsman import WSMan
+from pypsrp.powershell import PowerShell, RunspacePool
+
+wsman = WSMan(
+    "srv01.domain.local",
+    auth="kerberos",
+    ssl=False,
+    negotiate_service="WSMAN",
+)
+
+with wsman, RunspacePool(wsman, configuration_name="MyJEAEndpoint") as pool, PowerShell(pool) as ps:
+    ps.add_script("whoami; Get-Command")
+    output = ps.invoke()
+    print(output)
+```
+
+### Custom PSRP endpoints and JEA matter during lateral movement
+
+A successful WinRM authentication does **not** always mean you land in the default unrestricted `Microsoft.PowerShell` endpoint. Mature environments may expose **custom session configurations** or **JEA** endpoints with their own ACLs and run-as behavior.
+
+If you already have code execution on a Windows host and want to understand what remoting surfaces exist, enumerate the registered endpoints:
+
+```powershell
+Get-PSSessionConfiguration | Select-Object Name, Permission
+```
+
+When a useful endpoint exists, target it explicitly instead of the default shell:
+
+```powershell
+Enter-PSSession -ComputerName srv01.domain.local -ConfigurationName MyJEAEndpoint
+```
+
+Practical offensive implications:
+
+- A **restricted** endpoint can still be enough for lateral movement if it exposes just the right cmdlets/functions for service control, file access, process creation, or arbitrary .NET / external command execution.
+- A **misconfigured JEA** role is especially valuable when it exposes dangerous commands such as `Start-Process`, broad wildcards, writable providers, or custom proxy functions that let you escape the intended restrictions.
+- Endpoints backed by **RunAs virtual accounts** or **gMSAs** change the effective security context of the commands you run. In particular, a gMSA-backed endpoint can provide **network identity on the second hop** even when a normal WinRM session would hit the classic delegation problem.
+
 ## Windows-native WinRM lateral movement
 
 ### `winrs.exe`
@@ -133,6 +178,16 @@ print(stdout, stderr, rc)
 ```cmd
 winrs -r:srv01.domain.local cmd /c whoami
 winrs -r:https://srv01.domain.local:5986 -u:DOMAIN\\user -p:Password123! hostname
+```
+
+Two flags are easy to forget and matter in practice:
+
+- `/noprofile` is often required when the remote principal is **not** a local administrator.
+- `/allowdelegate` enables the remote shell to use your credentials against a **third host** (for example, when the command needs `\\fileserver\share`).
+
+```cmd
+winrs -r:srv01.domain.local /noprofile cmd /c set
+winrs -r:srv01.domain.local /allowdelegate cmd /c dir \\fileserver.domain.local\share
 ```
 
 Operationally, `winrs.exe` commonly results in a remote process chain similar to:
@@ -184,14 +239,17 @@ For multi-hop constraints after landing a first WinRM session, check:
 
 - **Interactive PowerShell remoting** usually creates **`wsmprovhost.exe`** on the target.
 - **`winrs.exe`** commonly creates **`winrshost.exe`** and then the requested child process.
+- Custom **JEA** endpoints may execute actions as **`WinRM_VA_*`** virtual accounts or as a configured **gMSA**, which changes both telemetry and second-hop behavior compared to a normal user-context shell.
 - Expect **network logon** telemetry, WinRM service events, and PowerShell operational/script-block logging if you use PSRP rather than raw `cmd.exe`.
 - If you only need a single command, `winrs.exe` or one-shot WinRM execution may be quieter than a long-lived interactive remoting session.
 - If Kerberos is available, prefer **FQDN + Kerberos** over IP + NTLM to reduce both trust issues and awkward client-side `TrustedHosts` changes.
 
 ## References
 
-- [Evil-WinRM README](https://github.com/Hackplayers/evil-winrm)
+- [Microsoft: JEA Security Considerations](https://learn.microsoft.com/en-us/powershell/scripting/security/remoting/jea/security-considerations?view=powershell-7.6)
+- [pypsrp README](https://github.com/jborean93/pypsrp)
 - [Microsoft: Error `0x80090322` when connecting PowerShell to a remote server via WinRM](https://learn.microsoft.com/en-us/troubleshoot/windows-server/system-management-components/error-0x80090322-when-connecting-powershell-to-remote-server-via-winrm)
+
 
 {{#include ../../banners/hacktricks-training.md}}
 
