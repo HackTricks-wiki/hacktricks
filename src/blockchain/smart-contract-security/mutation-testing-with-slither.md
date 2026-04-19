@@ -1,14 +1,14 @@
-# Mutation Testing for Solidity with Slither (slither-mutate)
+# Mutation Testing for Smart Contracts (slither-mutate, mewt, MuTON)
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Mutation testing "tests your tests" kwa kuingiza kwa mfumo mabadiliko madogo (mutants) kwenye code yako ya Solidity na kuendesha tena test suite yako. Ikiwa jaribio linashindwa, mutant huuliwa. Ikiwa majaribio bado yanapita, mutant huishi, ikifichua doa (blind spot) katika test suite yako ambalo coverage ya mstari/tawi haiwezi kugundua.
+Mutation testing "hujaribu majaribio yako" kwa kuingiza mabadiliko madogo kwa utaratibu (mutants) ndani ya code ya contract na kuendesha tena test suite. Ikiwa test inashindwa, mutant imeuliwa. Ikiwa tests bado zinapita, mutant inanusurika, ikifichua blind spot ambayo line/branch coverage haiwezi kugundua.
 
-Wazo kuu: Coverage inaonyesha kuwa code ilitekelezwa; mutation testing inaonyesha kama tabia (behavior) imedhibitishwa kwa kweli.
+Wazo kuu: Coverage inaonyesha code ilitekelezwa; mutation testing inaonyesha kama behavior kweli imeassertiwa.
 
-## Kwa nini coverage inaweza kudanganya
+## Why coverage can deceive
 
-Angalia ukaguzi huu rahisi wa kikomo:
+Consider this simple threshold check:
 ```solidity
 function verifyMinimumDeposit(uint256 deposit) public returns (bool) {
 if (deposit >= 1 ether) {
@@ -18,99 +18,154 @@ return false;
 }
 }
 ```
-Jaribio za unit ambazo zinaangalia tu thamani chini na thamani juu ya kizingiti zinaweza kufikia 100% ujazo wa mistari/matawi, huku zikiwa hazijathibitisha ukomo wa usawa (==). Marekebisho ya `deposit >= 2 ether` bado yangepita katika mitihani hiyo, ikivunja kimya kimya mantiki ya protocol.
+Vipimo vya unit ambavyo vinaangalia tu thamani iliyo chini na thamani iliyo juu ya threshold vinaweza kufikia 100% line/branch coverage huku vikishindwa kuthibitisha boundary ya usawa (==). Refactor kwenda `deposit >= 2 ether` bado inaweza kupita vipimo hivyo, na hivyo kuvunja logic ya protocol kimya kimya.
 
-Mutation testing inaonyesha pengo hili kwa kubadilisha sharti na kuthibitisha kuwa mitihani yako itashindwa.
+Mutation testing hufichua pengo hili kwa kubadilisha condition na kuthibitisha kuwa tests zinashindwa.
 
-## Opereta za mutation za kawaida kwa Solidity
+Kwa smart contracts, surviving mutants mara nyingi huonyesha checks zinazokosekana kuhusu:
+- Authorization na role boundaries
+- Accounting/value-transfer invariants
+- Revert conditions na failure paths
+- Boundary conditions (`==`, zero values, empty arrays, max/min values)
 
-Slither’s mutation engine inatumia mabadiliko madogo yanayobadilisha semantiki, kama:
-- Ubadilishaji wa operator: `+` ↔ `-`, `*` ↔ `/`, n.k.
-- Ubadilishaji wa assignment: `+=` → `=`, `-=` → `=`
-- Ubadilishaji wa constant: isiyo-sifuri → `0`, `true` ↔ `false`
-- Kukanusha/kubadilisha sharti ndani ya `if`/loops
-- Kuweka mstari mzima kama comment (CR: Comment Replacement)
-- Badilisha mstari na `revert()`
-- Kubadilisha aina za data: mfano, `int128` → `int64`
+## Mutation operators with the highest security signal
 
-Lengo: Angamiza 100% ya mutants waliozalishwa, au toa sababu za wazi kwa waliobaki.
+Vikundi muhimu vya mutation kwa contract auditing:
+- **High severity**: badilisha statements kuwa `revert()` ili kufichua paths ambazo hazitekelezwi
+- **Medium severity**: comment out lines / ondoa logic ili kufichua side effects ambazo hazijathibitishwa
+- **Low severity**: subtle operator au constant swaps kama `>=` -> `>` au `+` -> `-`
+- Mabadiliko mengine ya kawaida: assignment replacement, boolean flips, condition negation, na type changes
 
-## Kuendesha mutation testing kwa slither-mutate
+Lengo la vitendo: kill mutants wote wenye maana, na toa sababu wazi kwa survivors ambao hawana umuhimu au ni semantically equivalent.
+
+## Why syntax-aware mutation is better than regex
+
+Mikakati ya zamani ya mutation ilitegemea regex au rewrites za line-oriented. Hiyo inafanya kazi, lakini ina mapungufu muhimu:
+- Multi-line statements ni vigumu kuzibadilisha kwa usalama
+- Muundo wa language haufahamiki, hivyo comments/tokens zinaweza kulengwa vibaya
+- Kuzalisha kila variant inayowezekana kwenye line dhaifu hupoteza muda mwingi wa runtime
+
+Zana zinazotumia AST au Tree-sitter huboresha hili kwa kulenga structured nodes badala ya raw lines:
+- **slither-mutate** hutumia Solidity AST ya Slither
+- **mewt** hutumia Tree-sitter kama core ya language-agnostic
+- **MuTON** hujengwa juu ya `mewt` na huongeza support ya kwanza kwa TON languages kama FunC, Tolk, na Tact
+
+Hii hufanya multi-line constructs na expression-level mutations ziwe za kuaminika zaidi kuliko approaches za regex pekee.
+
+## Running mutation testing with slither-mutate
 
 Mahitaji: Slither v0.10.2+.
 
-- Orodhesha chaguzi na mutators:
+- Orodha ya options na mutators:
 ```bash
 slither-mutate --help
 slither-mutate --list-mutators
 ```
-- Mfano wa Foundry (rekodi matokeo na uhifadhi kumbukumbu kamili):
+- Mfano wa Foundry (nasa matokeo na weka logi kamili):
 ```bash
 slither-mutate ./src/contracts --test-cmd="forge test" &> >(tee mutation.results)
 ```
-- Ikiwa hautumii Foundry, badilisha `--test-cmd` na jinsi unavyokimbia majaribio (kwa mfano, `npx hardhat test`, `npm test`).
+- Ikiwa hutumii Foundry, badilisha `--test-cmd` na jinsi unavyoendesha tests zako (k.m., `npx hardhat test`, `npm test`).
 
-Artefakti na ripoti huhifadhiwa katika `./mutation_campaign` kwa chaguo-msingi. Mutants wasiokamatwa (waliodumu) hukopiwa huko kwa uchunguzi.
+Artifacts huhifadhiwa kwenye `./mutation_campaign` kwa chaguo msingi. Mutants ambao hawakukamatwa (waliosalimika) hunakiliwa hapo kwa ukaguzi.
 
-### Kuelewa matokeo
+### Kuelewa output
 
-Mistari za ripoti zinaonekana kama ifuatavyo:
+Mistari ya report huonekana kama:
 ```text
 INFO:Slither-Mutate:Mutating contract ContractName
 INFO:Slither-Mutate:[CR] Line 123: 'original line' ==> '//original line' --> UNCAUGHT
 ```
-- Lebo ndani ya mabano ni mutator alias (kwa mfano, `CR` = Comment Replacement).
-- `UNCAUGHT` ina maana majaribio yalipita chini ya tabia iliyobadilishwa → kukosa assertion.
+- Tagi katika mabano ni mutator alias (mfano, `CR` = Comment Replacement).
+- `UNCAUGHT` inamaanisha tests zilipita chini ya mutated behavior → assertion haipo.
 
-## Kupunguza runtime: peana kipaumbele kwa mutants wenye athari
+## Kupunguza runtime: weka kipaumbele kwenye mutants zenye athari kubwa
 
-Kampeni za mutation zinaweza kuchukua saa au siku. Vidokezo vya kupunguza gharama:
-- Scope: Anza na contracts/directories muhimu tu, kisha panua.
-- Prioritize mutators: Ikiwa mutant wa kipaumbele juu ya mstari anaishi (kwa mfano, mstari mzima umewekwa kama comment), unaweza kuruka varianti zenye kipaumbele kidogo kwa mstari huo.
-- Parallelize tests ikiwa runner yako inaruhusu; tumia cache ya dependencies/builds.
-- Fail-fast: simama mapema wakati mabadiliko yanaonyesha wazi pengo la assertion.
+Mutation campaigns zinaweza kuchukua saa au siku. Vidokezo vya kupunguza cost:
+- Scope: Anza na critical contracts/directories pekee, kisha panua.
+- Prioritize mutators: Ikiwa high-priority mutant kwenye line survives (kwa mfano `revert()` au comment-out), ruka lower-priority variants kwa line hiyo.
+- Tumia two-phase campaigns: endesha focused/fast tests kwanza, kisha retest mutants zisizokamatwa pekee na full suite.
+- Ramani mutation targets kwa specific test commands inapowezekana (kwa mfano auth code -> auth tests).
+- Punguza campaigns kwa high/medium severity mutants wakati muda ni mdogo.
+- Parallelize tests ikiwa runner yako inaruhusu; cache dependencies/builds.
+- Fail-fast: simama mapema ikiwa change inaonyesha wazi assertion gap.
 
-## Triage workflow kwa mutants wastaajabika
+Runtime math ni kali: `1000 mutants x 5-minute tests ~= 83 hours`, kwa hiyo campaign design ni muhimu kama mutator yenyewe.
 
-1) Chunguza mstari uliobadilishwa na tabia.
-- Reproduce locally kwa kutumia mstari uliobadilishwa na kuendesha test iliyolenga.
+## Persistent campaigns na triage kwa scale
 
-2) Imarisha tests ili kuassert state, si thamani za kurudisha tu.
-- Ongeza checks za mipaka ya usawa (kwa mfano, test threshold `==`).
-- Assert post-conditions: balances, total supply, athari za authorization, na event zilizotolewa.
+Udhaifu mmoja wa older workflows ni kutupa results tu kwenye `stdout`. Kwa long campaigns, hili hufanya pause/resume, filtering, na review kuwa ngumu zaidi.
 
-3) Badilisha mocks zinazoruhusu kupita kiasi na tabia halisi.
-- Hakikisha mocks zinetekeleza transfers, failure paths, na event emissions zinazotokea on-chain.
+`mewt`/`MuTON` huboresha hili kwa kuhifadhi mutants na outcomes kwenye SQLite-backed campaigns. Faida:
+- Pause na resume long runs bila kupoteza progress
+- Filter only uncaught mutants kwenye specific file au mutation class
+- Export/translate results to SARIF kwa review tooling
+- Toa AI-assisted triage smaller, filtered result sets badala ya raw terminal logs
+
+Persistent results ni muhimu hasa mutation testing inapoanza kuwa sehemu ya audit pipeline badala ya one-off manual review.
+
+## Triage workflow kwa surviving mutants
+
+1) Kagua mutated line na behavior.
+- Reproduce locally kwa kutumia mutated line na running focused test.
+
+2) Imarisha tests ili zihakikishe state, si return values pekee.
+- Ongeza equality-boundary checks (mfano, test threshold `==`).
+- Assert post-conditions: balances, total supply, authorization effects, na emitted events.
+
+3) Badilisha mocks zilizo permissive kupita kiasi na realistic behavior.
+- Hakikisha mocks zinatekeleza transfers, failure paths, na event emissions zinazotokea on-chain.
 
 4) Ongeza invariants kwa fuzz tests.
-- Mfano: conservation of value, non-negative balances, authorization invariants, monotonic supply pale inapofaa.
+- Mfano, conservation of value, non-negative balances, authorization invariants, monotonic supply pale panapofaa.
 
-5) Endelea kuendesha slither-mutate hadi survivors waangushwe au wawe wamekosewa kwa uwazi.
+5) Tenganisha true positives kutoka semantic no-ops.
+- Mfano: `x > 0` -> `x != 0` haina maana wakati `x` ni unsigned.
 
-## Case study: kufichua kukosekana kwa state assertions (Arkis protocol)
+6) Endesha campaign tena hadi survivors wauliwe au wathibitishwe wazi.
 
-Kampeni ya mutation wakati wa audit ya Arkis DeFi protocol ilibaini survivors kama:
+## Case study: kufichua missing state assertions (Arkis protocol)
+
+Mutation campaign wakati wa audit ya Arkis DeFi protocol ilifichua survivors kama:
 ```text
 INFO:Slither-Mutate:[CR] Line 33: 'cmdsToExecute.last().value = _cmd.value' ==> '//cmdsToExecute.last().value = _cmd.value' --> UNCAUGHT
 ```
-Ku-comment nje assignment hakukuangusha tests, ikathibitisha ukosefu wa post-state assertions. Chanzo cha msingi: msimbo uliamini `_cmd.value` inayodhibitiwa na mtumiaji badala ya kuthibitisha transfers halisi za tokeni. Mshambuliaji angeweza kusababisha kutofanana kati ya transfers zilizotarajiwa na transfers halisi ili kuchoma fedha. Matokeo: hatari ya kiwango cha juu kwa uendelevu wa protocol.
+Commenting out the assignment didn’t break the tests, proving missing post-state assertions. Root cause: code trusted a user-controlled `_cmd.value` instead of validating actual token transfers. An attacker could desynchronize expected vs. actual transfers to drain funds. Result: high severity risk to protocol solvency.
 
-Mwongozo: Chukulia mutants waliobaki ambao huathiri uhamishaji wa thamani, uhasibu, au udhibiti wa upatikanaji kama hatari kubwa hadi waangamizwe.
+Mwongozo: Chukulia survivors zinazohusu value transfers, accounting, au access control kama high-risk hadi ziwe killed.
 
-## Orodha ya vitendo
+## Do not blindly generate tests to kill every mutant
 
-- Endesha kampeni iliyolenga:
+Uzalishaji wa tests unaoongozwa na Mutation unaweza kurudi nyuma ikiwa implementation ya sasa ni wrong. Mfano: kubadilisha `priority >= 2` kuwa `priority > 2` hubadilisha behavior, lakini fix sahihi si mara zote "andika test kwa `priority == 2`". Hiyo behavior yenyewe inaweza kuwa bug.
+
+Workflow salama:
+- Tumia surviving mutants kutambua requirements zenye utata
+- Validate behavior inayotarajiwa kutoka kwenye specs, protocol docs, au reviewers
+- Kisha tu encode hiyo behavior kama test/invariant
+
+Vinginevyo, una hatari ya hard-coding ajali za implementation ndani ya test suite na kupata false confidence.
+
+## Practical checklist
+
+- Endesha targeted campaign:
 - `slither-mutate ./src/contracts --test-cmd="forge test"`
-- Fanya triage ya mutants waliobaki na andika tests/invariants ambazo zingeshindwa chini ya tabia iliyobadilishwa.
-- Thibitisha salio, supply, idhini, na matukio.
+- Pendelea syntax-aware mutators (AST/Tree-sitter) kuliko regex-only mutation inapowezekana.
+- Panga survivors na andika tests/invariants ambazo zingeshindwa chini ya mutated behavior.
+- Assert balances, supply, authorizations, na events.
 - Ongeza boundary tests (`==`, overflows/underflows, zero-address, zero-amount, empty arrays).
-- Badilisha mocks zisizo za kweli; iga njia za kushindwa.
-- Rudia hadi mutants wote waondolewe au wahakikishwe kwa maoni na mantiki.
+- Badilisha unrealistic mocks; simulate failure modes.
+- Hifadhi results tooling inapounga mkono hilo, na filter uncaught mutants kabla ya triage.
+- Tumia two-phase au per-target campaigns ili runtime ibaki manageable.
+- Rudia hadi mutants zote ziwe killed au ziwe justified kwa comments na rationale.
 
 ## References
 
+- [Mutation testing for the agentic era](https://blog.trailofbits.com/2026/04/01/mutation-testing-for-the-agentic-era/)
 - [Use mutation testing to find the bugs your tests don't catch (Trail of Bits)](https://blog.trailofbits.com/2025/09/18/use-mutation-testing-to-find-the-bugs-your-tests-dont-catch/)
 - [Arkis DeFi Prime Brokerage Security Review (Appendix C)](https://github.com/trailofbits/publications/blob/master/reviews/2024-12-arkis-defi-prime-brokerage-securityreview.pdf)
 - [Slither (GitHub)](https://github.com/crytic/slither)
+- [Slither Mutator documentation](https://github.com/crytic/slither/blob/master/docs/src/tools/Mutator.md)
+- [mewt](https://github.com/trailofbits/mewt)
+- [MuTON](https://github.com/trailofbits/muton)
 
 {{#include ../../banners/hacktricks-training.md}}
