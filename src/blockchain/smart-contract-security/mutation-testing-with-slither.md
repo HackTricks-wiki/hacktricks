@@ -1,14 +1,14 @@
-# Mutation Testing za Solidity sa Slither (slither-mutate)
+# Mutation Testing for Smart Contracts (slither-mutate, mewt, MuTON)
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Mutation testing "tests your tests" tako što sistematski uvodi male promene (mutante) u vaš Solidity kod i ponovo pokreće vaš skup testova. Ako test padne, mutant se smatra ubijenim. Ako testovi i dalje prolaze, mutant preživi, otkrivajući slepu tačku u vašem skupu testova koju linijsko/gransko pokriće ne može detektovati.
+Mutation testing "testira tvoje testove" tako što sistematski uvodi male promene (mutants) u kod ugovora i ponovo pokreće test suite. Ako test padne, mutant je ubijen. Ako testovi i dalje prolaze, mutant preživljava, otkrivajući slepu tačku koju line/branch coverage ne može da detektuje.
 
-Ključna ideja: pokriće pokazuje da je kod izvršen; mutation testing pokazuje da li je ponašanje zaista provereno.
+Ključna ideja: Coverage pokazuje da je kod izvršen; mutation testing pokazuje da li je ponašanje zaista provereno.
 
-## Zašto pokriće može zavarati
+## Zašto coverage može da zavara
 
-Razmotrite ovu jednostavnu proveru praga:
+Razmotri ovu jednostavnu proveru praga:
 ```solidity
 function verifyMinimumDeposit(uint256 deposit) public returns (bool) {
 if (deposit >= 1 ether) {
@@ -18,99 +18,154 @@ return false;
 }
 }
 ```
-Jedinični testovi koji proveravaju samo vrednost ispod i vrednost iznad praga mogu dostići 100% line/branch coverage, a da ne asertuju granicu jednakosti (==). Refaktor u `deposit >= 2 ether` bi i dalje prošao takve testove, tiho kvareći logiku protokola.
+Jedinični testovi koji proveravaju samo vrednost ispod i vrednost iznad praga mogu postići 100% line/branch coverage, a da pritom ne proveravaju granicu jednakosti (==). Refaktor na `deposit >= 2 ether` bi i dalje prošao takve testove, tiho narušavajući logiku protokola.
 
-Mutation testing otkriva ovaj prazninu mutiranjem uslova i proverom da li vaši testovi zakažu.
+Mutation testing otkriva ovu prazninu tako što mutira uslov i proverava da testovi padnu.
 
-## Common Solidity mutation operators
+Za smart contracts, preživeli mutanti često ukazuju na nedostajuće provere oko:
+- Authorization i granica uloga
+- Računovodstvenih/value-transfer invariants
+- Revert uslova i failure pathova
+- Graničnih uslova (`==`, nulte vrednosti, prazni nizovi, max/min vrednosti)
 
-Slither’s mutation engine primenjuje mnogo malih izmena koje menjaju semantiku, kao što su:
-- Zamena operatora: `+` ↔ `-`, `*` ↔ `/`, itd.
-- Zamena dodele: `+=` → `=`, `-=` → `=`
-- Zamena konstanti: non-zero → `0`, `true` ↔ `false`
-- Negacija/izmena uslova unutar `if`/petlji
-- Zakomentarisati cele linije (CR: Comment Replacement)
-- Zameniti liniju sa `revert()`
-- Zamene tipova podataka: npr. `int128` → `int64`
+## Mutation operators sa najjačim security signalom
 
-Cilj: Ugasiti 100% generisanih mutanata, ili opravdati preživele jasnim obrazloženjem.
+Korisne mutation klase za audit contracta:
+- **High severity**: zamena iskaza sa `revert()` da bi se otkrili neizvršeni pathovi
+- **Medium severity**: komentarisanje linija / uklanjanje logike da bi se otkrili neprovereni side effects
+- **Low severity**: suptilne zamene operatora ili konstanti kao `>=` -> `>` ili `+` -> `-`
+- Ostale česte izmene: zamena dodele, boolean flipovi, negacija uslova i promene tipova
 
-## Running mutation testing with slither-mutate
+Praktični cilj: ubiti sve značajne mutante i eksplicitno opravdati preživele koji su nebitni ili semantički ekvivalentni.
 
-Zahtevi: Slither v0.10.2+.
+## Zašto je syntax-aware mutation bolji od regex-a
 
-- List options and mutators:
+Stariji mutation engine-i su se oslanjali na regex ili line-oriented rewrites. To radi, ali ima važne ograničenja:
+- Višelinijski iskazi su teški za bezbedno mutiranje
+- Struktura jezika nije shvaćena, pa komentari/tokeni mogu biti loše targetirani
+- Generisanje svake moguće varijante na slaboj liniji troši ogromnu količinu runtime-a
+
+AST- ili Tree-sitter-based tooling poboljšava ovo targetiranjem strukturisanih nodova umesto sirovih linija:
+- **slither-mutate** koristi Slither-ov Solidity AST
+- **mewt** koristi Tree-sitter kao language-agnostic core
+- **MuTON** se zasniva na `mewt` i dodaje prvoklasnu podršku za TON jezike kao što su FunC, Tolk i Tact
+
+Ovo čini višelinijske konstrukte i mutation na nivou izraza mnogo pouzdanijim od pristupa zasnovanih samo na regex-u.
+
+## Pokretanje mutation testing-a sa slither-mutate
+
+Zahtjevi: Slither v0.10.2+.
+
+- Prikaži opcije i mutatore:
 ```bash
 slither-mutate --help
 slither-mutate --list-mutators
 ```
-- Foundry example (uhvati rezultate i sačuvaj kompletan log):
+- Foundry primer (snimi rezultate i čuvaj kompletan log):
 ```bash
 slither-mutate ./src/contracts --test-cmd="forge test" &> >(tee mutation.results)
 ```
-- Ako ne koristite Foundry, zamenite `--test-cmd` načinom na koji pokrećete testove (npr. `npx hardhat test`, `npm test`).
+- Ako ne koristiš Foundry, zameni `--test-cmd` sa komandom kojom pokrećeš testove (npr. `npx hardhat test`, `npm test`).
 
-Artefakti i izveštaji se podrazumevano čuvaju u `./mutation_campaign`. Neotkriveni (preživeli) mutanti se kopiraju tamo radi inspekcije.
+Artifacts se podrazumevano čuvaju u `./mutation_campaign`. Neuhvaćeni (preživeli) mutanti se kopiraju tamo radi pregleda.
 
-### Understanding the output
+### Razumevanje izlaza
 
 Redovi izveštaja izgledaju ovako:
 ```text
 INFO:Slither-Mutate:Mutating contract ContractName
 INFO:Slither-Mutate:[CR] Line 123: 'original line' ==> '//original line' --> UNCAUGHT
 ```
-- Oznaka u uglastim zagradama je alias mutatora (npr. `CR` = Comment Replacement).
-- `UNCAUGHT` znači da su testovi prošli pod mutiranim ponašanjem → nedostaje asercija.
+- The tag in brackets is the mutator alias (e.g., `CR` = Comment Replacement).
+- `UNCAUGHT` znači da su testovi prošli pod mutiranim ponašanjem → nedostaje assertion.
 
-## Reducing runtime: prioritize impactful mutants
+## Smanjenje runtime-a: prioritet daj uticajnim mutantima
 
-Mutation kampanje mogu trajati satima ili danima. Saveti za smanjenje troškova:
-- Scope: Počnite sa kritičnim contracts/directories samo, pa proširite.
-- Prioritize mutators: Ako mutant visokog prioriteta na liniji preživi (npr. cela linija zakomentarisana), možete preskočiti varijante nižeg prioriteta za tu liniju.
-- Paralelizujte testove ako vaš runner to dozvoljava; cache-ujte dependencies/builds.
-- Fail-fast: zaustavite rano kada promena jasno demonstrira prazninu u asercijama.
+Mutation kampanje mogu trajati satima ili danima. Saveti za smanjenje troška:
+- Scope: Prvo kreni samo sa kritičnim contracts/direktorijumima, pa tek onda širi.
+- Prioritizuj mutators: Ako visoko-prioritetni mutant na liniji preživi (na primer `revert()` ili comment-out), preskoči niže-prioritetne varijante za tu liniju.
+- Koristi dvofazne kampanje: prvo pokreni fokusirane/brze testove, pa onda ponovo testiraj samo uncaught mutante sa kompletnim suite-om.
+- Mapiraj mutation targets na konkretne test komande kada je moguće (na primer auth code -> auth tests).
+- Ograniči kampanje na high/medium severity mutante kada je vreme tesno.
+- Paralelizuj testove ako tvoj runner to dozvoljava; keširaj dependencies/builds.
+- Fail-fast: stani rano kada promena jasno pokaže assertion gap.
 
-## Triage workflow for surviving mutants
+Runtime matematika je brutalna: `1000 mutants x 5-minute tests ~= 83 hours`, tako da dizajn kampanje znači isto koliko i sam mutator.
 
-1) Inspect the mutated line and behavior.
-- Reproducirajte lokalno primenom mutirane linije i pokretanjem fokusiranog testa.
+## Trajne kampanje i triage u velikom obimu
 
-2) Strengthen tests to assert state, not only return values.
-- Dodajte provere granica jednakosti (npr. test threshold `==`).
-- Asertujte post-uslove: balances, total supply, efekte autorizacije i emitovane događaje.
+Jedna slabost starijih workflow-a je bacanje rezultata samo na `stdout`. Za duge kampanje, ovo otežava pause/resume, filtriranje i review.
 
-3) Replace overly permissive mocks with realistic behavior.
-- Osigurajte da mocks forsiraju transfers, failure paths i event emissions koji se dešavaju on-chain.
+`mewt`/`MuTON` ovo poboljšavaju tako što čuvaju mutante i ishode u SQLite-backed campaigns. Prednosti:
+- Pauziraj i nastavi duge run-ove bez gubitka progresa
+- Filtriraj samo uncaught mutante u konkretnom fajlu ili mutation class
+- Export/translate rezultate u SARIF za review tooling
+- Daj AI-assisted triage-u manji, filtrirani skup rezultata umesto sirovih terminal logova
 
-4) Add invariants for fuzz tests.
-- Npr. očuvanje vrednosti, nenegativni balances, invarianti autorizacije, monotonic supply gde je primenjivo.
+Trajni rezultati su posebno korisni kada mutation testing postane deo audit pipeline-a umesto jednokratnog manual review-a.
 
-5) Re-run slither-mutate until survivors are killed or explicitly justified.
+## Triage workflow za surviving mutantе
 
-## Case study: revealing missing state assertions (Arkis protocol)
+1) Pregledaj mutiranu liniju i ponašanje.
+- Reprodukuj lokalno primenom mutirane linije i pokretanjem fokusiranog testa.
 
-A mutation campaign during an audit of the Arkis DeFi protocol surfaced survivors like:
+2) Ojačaj testove da assertuju state, ne samo return vrednosti.
+- Dodaj equality-boundary provere (npr. testiraj threshold `==`).
+- Assertuj post-conditions: balances, total supply, authorization effects i emitted events.
+
+3) Zameni previše permisive mocks realističnim ponašanjem.
+- Pobrinite se da mocks enforce-uju transfers, failure paths i event emissions koji se dešavaju on-chain.
+
+4) Dodaj invariants za fuzz tests.
+- Npr. conservation of value, non-negative balances, authorization invariants, monotonic supply tamo gde je primenljivo.
+
+5) Odvoji true positives od semantic no-ops.
+- Primer: `x > 0` -> `x != 0` je besmisleno kada je `x` unsigned.
+
+6) Ponovo pokreni kampanju dok survivors ne budu killed ili eksplicitno opravdani.
+
+## Case study: otkrivanje nedostajućih state assertions (Arkis protocol)
+
+Mutation kampanja tokom audit-a Arkis DeFi protokola otkrila je survivors kao:
 ```text
 INFO:Slither-Mutate:[CR] Line 33: 'cmdsToExecute.last().value = _cmd.value' ==> '//cmdsToExecute.last().value = _cmd.value' --> UNCAUGHT
 ```
-Komentarisanje dodele nije prekinulo testove, što ukazuje na nedostatak asercija stanja nakon izvršenja. Osnovni uzrok: kod je verovao korisnički kontrolisanom `_cmd.value` umesto da proveri stvarne transfere tokena. Napadač bi mogao desinhronizovati očekivane i stvarne transfere da isprazni sredstva. Rezultat: visok stepen rizika po solventnost protokola.
+Komentarisanje dodele nije prekinulo testove, što dokazuje da nedostaju post-state assertions. Root cause: code je verovao korisnički kontrolisanom `_cmd.value` umesto da validira stvarne token transfere. Napadač je mogao da desinhronizuje očekivane i stvarne transfere i da povuče sredstva. Rezultat: high severity rizik po solventnost protokola.
 
-Smernica: tretirajte preostale mutante koji utiču na transfere vrednosti, računovodstvo ili kontrolu pristupa kao visokorizične dok se ne uklone.
+Guidance: Tretirajte survivore koji utiču na value transfers, accounting ili access control kao high-risk dok ne budu ubijeni.
 
-## Praktična kontrolna lista
+## Do not blindly generate tests to kill every mutant
 
-- Pokrenite ciljanu kampanju:
+Mutation-driven test generation can backfire if the current implementation is wrong. Example: mutating `priority >= 2` to `priority > 2` changes behavior, but the right fix is not always "write a test for `priority == 2`". That behavior may itself be the bug.
+
+Safer workflow:
+- Use surviving mutants to identify ambiguous requirements
+- Validate expected behavior from specs, protocol docs, or reviewers
+- Only then encode the behavior as a test/invariant
+
+Otherwise, you risk hard-coding implementation accidents into the test suite and gaining false confidence.
+
+## Practical checklist
+
+- Run a targeted campaign:
 - `slither-mutate ./src/contracts --test-cmd="forge test"`
-- Razvrstajte preostale mutante i napišite testove/invarijante koji bi pali pod izmenjenim ponašanjem.
-- Potvrdite bilanse, ukupnu ponudu, autorizacije i događaje.
-- Dodajte granične testove (`==`, overflows/underflows, zero-address, zero-amount, empty arrays).
-- Zamenite nerealne mock-ove; simulirajte režime otkaza.
-- Iterirajte dok svi mutanti nisu uklonjeni ili opravdani komentarima i obrazloženjem.
+- Prefer syntax-aware mutators (AST/Tree-sitter) over regex-only mutation when available.
+- Triage survivors and write tests/invariants that would fail under the mutated behavior.
+- Assert balances, supply, authorizations, and events.
+- Add boundary tests (`==`, overflows/underflows, zero-address, zero-amount, empty arrays).
+- Replace unrealistic mocks; simulate failure modes.
+- Persist results when the tooling supports it, and filter uncaught mutants before triage.
+- Use two-phase or per-target campaigns to keep runtime manageable.
+- Iterate until all mutants are killed or justified with comments and rationale.
 
 ## References
 
+- [Mutation testing for the agentic era](https://blog.trailofbits.com/2026/04/01/mutation-testing-for-the-agentic-era/)
 - [Use mutation testing to find the bugs your tests don't catch (Trail of Bits)](https://blog.trailofbits.com/2025/09/18/use-mutation-testing-to-find-the-bugs-your-tests-dont-catch/)
 - [Arkis DeFi Prime Brokerage Security Review (Appendix C)](https://github.com/trailofbits/publications/blob/master/reviews/2024-12-arkis-defi-prime-brokerage-securityreview.pdf)
 - [Slither (GitHub)](https://github.com/crytic/slither)
+- [Slither Mutator documentation](https://github.com/crytic/slither/blob/master/docs/src/tools/Mutator.md)
+- [mewt](https://github.com/trailofbits/mewt)
+- [MuTON](https://github.com/trailofbits/muton)
 
 {{#include ../../banners/hacktricks-training.md}}
