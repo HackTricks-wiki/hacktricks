@@ -1,14 +1,14 @@
-# Mutation Testing für Solidity mit Slither (slither-mutate)
+# Mutation Testing für Smart Contracts (slither-mutate, mewt, MuTON)
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Mutation testing "tests your tests", indem es systematisch kleine Änderungen (mutants) in deinen Solidity-Code einführt und deine Test-Suite erneut ausführt. Wenn ein Test fehlschlägt, wird der mutant getötet. Bestehen die Tests weiterhin, überlebt der mutant und offenbart eine Schwachstelle in deiner Test-Suite, die Zeilen- oder Zweigabdeckung nicht erkennen kann.
+Mutation testing „testet deine Tests“, indem es systematisch kleine Änderungen (mutants) in Contract-Code einführt und die Test-Suite erneut ausführt. Schlägt ein Test fehl, ist der mutant erledigt. Wenn die Tests trotzdem bestehen, überlebt der mutant und deckt eine blinde Stelle auf, die Line-/Branch-Coverage nicht erkennen kann.
 
-Kernidee: Coverage zeigt, dass Code ausgeführt wurde; mutation testing zeigt, ob Verhalten tatsächlich abgesichert/geprüft wird.
+Kernaussage: Coverage zeigt, dass Code ausgeführt wurde; mutation testing zeigt, ob Verhalten tatsächlich geprüft wird.
 
 ## Warum Coverage täuschen kann
 
-Betrachte diese einfache Schwellenwertprüfung:
+Betrachte diesen einfachen Threshold-Check:
 ```solidity
 function verifyMinimumDeposit(uint256 deposit) public returns (bool) {
 if (deposit >= 1 ether) {
@@ -18,99 +18,154 @@ return false;
 }
 }
 ```
-Unit tests that only check a value below and a value above the threshold can reach 100% line/branch coverage while failing to assert the equality boundary (==). A refactor to `deposit >= 2 ether` would still pass such tests, silently breaking protocol logic.
+Unit-Tests, die nur einen Wert unterhalb und einen Wert oberhalb der Schwelle prüfen, können 100% line/branch coverage erreichen, obwohl sie es versäumen, die Gleichheitsgrenze (==) zu verifizieren. Ein Refactor zu `deposit >= 2 ether` würde solche Tests weiterhin bestehen, würde aber die Protokoll-Logik unbemerkt beschädigen.
 
-Mutation testing exposes this gap by mutating the condition and verifying your tests fail.
+Mutation testing deckt diese Lücke auf, indem es die Bedingung mutiert und überprüft, ob Tests fehlschlagen.
 
-## Häufige Solidity-Mutationsoperatoren
+Für smart contracts lassen sich überlebende Mutanten häufig auf fehlende Prüfungen in diesen Bereichen zurückführen:
+- Authorization- und Rollen-Grenzen
+- Accounting-/value-transfer-Invarianten
+- Revert-Bedingungen und Failure Paths
+- Grenzbedingungen (`==`, Nullwerte, leere Arrays, Max-/Min-Werte)
 
-Slither’s mutation engine wendet viele kleine, semantikverändernde Änderungen an, wie zum Beispiel:
-- Operator-Ersetzung: `+` ↔ `-`, `*` ↔ `/`, etc.
-- Zuweisungsersetzung: `+=` → `=`, `-=` → `=`
-- Konstantenersetzung: nicht-null → `0`, `true` ↔ `false`
-- Negation/Ersetzung von Bedingungen innerhalb von `if`/Schleifen
-- Ganze Zeilen auskommentieren (CR: Comment Replacement)
-- Ersetze eine Zeile durch `revert()`
-- Datentyp-Tausch: z. B. `int128` → `int64`
+## Mutation operators mit dem höchsten Security-Signal
 
-Ziel: 100% der erzeugten Mutanten eliminieren, oder Überlebende mit schlüssiger Begründung rechtfertigen.
+Nützliche Mutationsklassen für Contract-Auditing:
+- **Hohe Severity**: Statements durch `revert()` ersetzen, um nicht ausgeführte Pfade sichtbar zu machen
+- **Mittlere Severity**: Zeilen auskommentieren / Logik entfernen, um unüberprüfte Side Effects offenzulegen
+- **Niedrige Severity**: Subtile Operator- oder Konstanten-Tausche wie `>=` -> `>` oder `+` -> `-`
+- Weitere häufige Änderungen: Ersetzung von Zuweisungen, Boolean-Flips, Negation von Bedingungen und Typänderungen
 
-## Mutation-Testing mit slither-mutate ausführen
+Praktisches Ziel: alle aussagekräftigen Mutanten töten und Überlebende, die irrelevant oder semantisch äquivalent sind, ausdrücklich begründen.
 
-Voraussetzungen: Slither v0.10.2+.
+## Warum syntax-aware mutation besser ist als regex
 
-- Optionen und Mutatoren auflisten:
+Ältere Mutation Engines verließen sich auf regex oder line-orientierte Rewrite-Ansätze. Das funktioniert, hat aber wichtige Grenzen:
+- Mehrzeilige Statements sind schwer sicher zu mutieren
+- Die Sprachstruktur wird nicht verstanden, daher können Kommentare/Tokens schlecht getroffen werden
+- Jede mögliche Variante auf einer schwachen Zeile zu erzeugen verschwendet enorme Laufzeit
+
+AST- oder Tree-sitter-basierte Tools verbessern das, indem sie strukturierte Knoten statt rohe Zeilen anvisieren:
+- **slither-mutate** nutzt Slithers Solidity AST
+- **mewt** nutzt Tree-sitter als sprachunabhängigen Kern
+- **MuTON** baut auf `mewt` auf und ergänzt erstklassige Unterstützung für TON-Sprachen wie FunC, Tolk und Tact
+
+Dadurch werden mehrzeilige Konstrukte und Mutationen auf Expression-Ebene deutlich zuverlässiger als bei reinen regex-Ansätzen.
+
+## Mutation testing mit slither-mutate ausführen
+
+Requirements: Slither v0.10.2+.
+
+- Optionen und mutators auflisten:
 ```bash
 slither-mutate --help
 slither-mutate --list-mutators
 ```
-- Foundry-Beispiel (Ergebnisse erfassen und ein vollständiges log führen):
+- Foundry-Beispiel (Ergebnisse erfassen und ein vollständiges Log beibehalten):
 ```bash
 slither-mutate ./src/contracts --test-cmd="forge test" &> >(tee mutation.results)
 ```
 - Wenn du Foundry nicht verwendest, ersetze `--test-cmd` durch den Befehl, mit dem du Tests ausführst (z. B. `npx hardhat test`, `npm test`).
 
-Artefakte und Berichte werden standardmäßig in `./mutation_campaign` gespeichert. Nicht gefangene (überlebende) Mutanten werden dort zur Inspektion kopiert.
+Artefakte werden standardmäßig in `./mutation_campaign` gespeichert. Nicht abgefangene (überlebende) Mutanten werden zur Inspektion dorthin kopiert.
 
-### Ausgabe verstehen
+### Understanding the output
 
-Berichtszeilen sehen so aus:
+Report-Zeilen sehen so aus:
 ```text
 INFO:Slither-Mutate:Mutating contract ContractName
 INFO:Slither-Mutate:[CR] Line 123: 'original line' ==> '//original line' --> UNCAUGHT
 ```
-- Das Tag in eckigen Klammern ist das Mutator-Alias (z. B. `CR` = Comment Replacement).
-- `UNCAUGHT` bedeutet, dass Tests unter dem mutierten Verhalten bestanden haben → fehlende Assertion.
+- Der Tag in eckigen Klammern ist der Mutator-Alias (z. B. `CR` = Comment Replacement).
+- `UNCAUGHT` bedeutet, dass die Tests unter dem mutierten Verhalten bestanden haben → fehlende Assertion.
 
-## Laufzeit reduzieren: Mutanten mit großer Wirkung priorisieren
+## Laufzeit reduzieren: wirkungsvolle Mutants priorisieren
 
-Mutationskampagnen können Stunden oder Tage dauern. Tipps zur Kostenreduzierung:
-- Umfang: Beginne nur mit kritischen Contracts/Verzeichnissen und erweitere dann.
-- Priorisiere Mutatoren: Wenn ein hochprioritärer Mutant in einer Zeile überlebt (z. B. ganze Zeile auskommentiert), kannst du niedrigere Prioritätsvarianten für diese Zeile überspringen.
-- Parallelisiere Tests, wenn dein Runner das erlaubt; cache Abhängigkeiten/Builds.
-- Fail-fast: brich früh ab, wenn eine Änderung klar eine fehlende Assertion demonstriert.
+Mutation-Kampagnen können Stunden oder Tage dauern. Tipps zur Kostensenkung:
+- Scope: Zuerst nur mit kritischen Contracts/Verzeichnissen beginnen, dann erweitern.
+- Mutators priorisieren: Wenn ein High-Priority-Mutant in einer Zeile überlebt (z. B. `revert()` oder Kommentar-Auskommentierung), niedrigere Prioritätsvarianten für diese Zeile überspringen.
+- Zwei-Phasen-Kampagnen verwenden: zuerst fokussierte/schnelle Tests ausführen, dann nur uncaught Mutants mit der vollständigen Suite erneut testen.
+- Mutation Targets nach Möglichkeit bestimmten Test-Commands zuordnen (z. B. auth code -> auth tests).
+- Kampagnen auf High-/Medium-Severity-Mutants beschränken, wenn die Zeit knapp ist.
+- Tests parallelisieren, wenn dein Runner das erlaubt; Dependencies/Builds cachen.
+- Fail-fast: früh stoppen, wenn eine Änderung klar eine Assertion-Lücke zeigt.
 
-## Triage-Workflow für überlebende Mutanten
+Die Laufzeit-Mathematik ist brutal: `1000 mutants x 5-minute tests ~= 83 hours`, daher ist das Kampagnen-Design genauso wichtig wie der Mutator selbst.
 
-1) Untersuche die mutierte Zeile und das Verhalten.
-- Reproduziere lokal, indem du die mutierte Zeile anwendest und einen fokussierten Test ausführst.
+## Persistente Kampagnen und Triage in großem Maßstab
 
-2) Stärke Tests, um den Zustand zu prüfen, nicht nur Rückgabewerte.
-- Füge Gleichheits-/Grenzprüfungen hinzu (z. B. teste threshold `==`).
-- Prüfe Post-Conditions: Salden, Gesamtangebot, Autorisierungseffekte und emittierte Events.
+Eine Schwäche älterer Workflows ist, Ergebnisse nur nach `stdout` zu dumpen. Bei langen Kampagnen erschwert das Pause/Resume, Filterung und Review.
 
-3) Ersetze zu permissive Mocks durch realistisches Verhalten.
-- Stelle sicher, dass Mocks Transfers, Fehlerpfade und Event-Emissionen erzwingen, wie sie on-chain auftreten.
+`mewt`/`MuTON` verbessern das, indem sie Mutants und Ergebnisse in SQLite-gestützten Kampagnen speichern. Vorteile:
+- Lange Läufe pausieren und fortsetzen, ohne Fortschritt zu verlieren
+- Nur uncaught Mutants in einer bestimmten Datei oder Mutation-Klasse filtern
+- Ergebnisse für Review-Tools nach SARIF exportieren/übersetzen
+- AI-gestützte Triage mit kleineren, gefilterten Resultsets statt roher Terminal-Logs versorgen
 
-4) Füge Invarianten für Fuzz-Tests hinzu.
-- Z. B. Erhaltung des Wertes, nicht-negative Salden, Autorisierungsinvarianten, monotones Supply wo anwendbar.
+Persistente Ergebnisse sind besonders nützlich, wenn Mutation Testing Teil einer Audit-Pipeline wird statt einer einmaligen manuellen Review.
 
-5) Führe slither-mutate erneut aus, bis Überlebende getötet oder explizit gerechtfertigt sind.
+## Triage-Workflow für überlebende Mutants
 
-## Fallstudie: Aufdecken fehlender Zustandsassertionen (Arkis protocol)
+1) Die mutierte Zeile und das Verhalten prüfen.
+- Lokal reproduzieren, indem du die mutierte Zeile anwendest und einen fokussierten Test ausführst.
 
-Eine Mutationskampagne während eines Audits des Arkis DeFi-Protokolls förderte Überlebende zutage wie:
+2) Tests stärken, um State zu prüfen, nicht nur Rückgabewerte.
+- Equality-Grenzfälle hinzufügen (z. B. Threshold `==` testen).
+- Post-Conditions assertieren: Balances, total supply, Authorization-Effekte und emittierte Events.
+
+3) Zu permissive Mocks durch realistisches Verhalten ersetzen.
+- Sicherstellen, dass Mocks Transfers, Failure-Paths und Event-Emissions durchsetzen, die on-chain auftreten.
+
+4) Invariants für Fuzz-Tests hinzufügen.
+- Z. B. Werterhaltung, nicht-negative Balances, Authorization-Invariants, monotone Supply, wo anwendbar.
+
+5) Echte Positives von semantischen No-Ops trennen.
+- Beispiel: `x > 0` -> `x != 0` ist bedeutungslos, wenn `x` unsigned ist.
+
+6) Die Kampagne erneut ausführen, bis Survivors gekillt oder explizit gerechtfertigt sind.
+
+## Case study: fehlende State-Assertions aufdecken (Arkis protocol)
+
+Eine Mutation-Kampagne während eines Audits des Arkis DeFi protocol brachte Survivors wie die folgenden ans Licht:
 ```text
 INFO:Slither-Mutate:[CR] Line 33: 'cmdsToExecute.last().value = _cmd.value' ==> '//cmdsToExecute.last().value = _cmd.value' --> UNCAUGHT
 ```
-Das Auskommentieren der Zuweisung brach die Tests nicht, was fehlende Post-State-Assertions bewies. Ursache: Der Code vertraute auf ein vom Benutzer kontrolliertes `_cmd.value` anstatt tatsächliche Token-Transfers zu validieren. Ein Angreifer konnte erwartete und tatsächliche Transfers desynchronisieren, um Mittel abzuziehen. Ergebnis: hohes Risiko für die Solvenz des Protokolls.
+Commenting out the assignment didn’t break the tests, proving missing post-state assertions. Root cause: code trusted a user-controlled `_cmd.value` instead of validating actual token transfers. An attacker could desynchronize expected vs. actual transfers to drain funds. Result: high severity risk to protocol solvency.
 
-Guidance: Behandle survivors, die Werttransfers, Buchführung oder Zugriffskontrolle beeinflussen, als hohes Risiko, bis sie getötet sind.
+Guidance: Behandle survivors that affect value transfers, accounting, or access control as high-risk until killed.
 
-## Praktische Checkliste
+## Do not blindly generate tests to kill every mutant
 
-- Führe eine gezielte Kampagne durch:
+Mutation-driven test generation can backfire if the current implementation is wrong. Example: mutating `priority >= 2` to `priority > 2` changes behavior, but the right fix is not always "write a test for `priority == 2`". That behavior may itself be the bug.
+
+Safer workflow:
+- Use surviving mutants to identify ambiguous requirements
+- Validate expected behavior from specs, protocol docs, or reviewers
+- Only then encode the behavior as a test/invariant
+
+Otherwise, you risk hard-coding implementation accidents into the test suite and gaining false confidence.
+
+## Practical checklist
+
+- Run a targeted campaign:
 - `slither-mutate ./src/contracts --test-cmd="forge test"`
-- Triage survivors und schreibe Tests/Invarianten, die unter dem mutierten Verhalten fehlschlagen würden.
-- Überprüfe Salden, Supply, Authorisierungen und Events.
-- Füge Grenzfall-Tests hinzu (`==`, overflows/underflows, zero-address, zero-amount, empty arrays).
-- Ersetze unrealistische Mocks; simuliere Fehlermodi.
-- Iteriere, bis alle Mutanten getötet oder mit Kommentaren und Begründung gerechtfertigt sind.
+- Prefer syntax-aware mutators (AST/Tree-sitter) over regex-only mutation when available.
+- Triage survivors and write tests/invariants that would fail under the mutated behavior.
+- Assert balances, supply, authorizations, and events.
+- Add boundary tests (`==`, overflows/underflows, zero-address, zero-amount, empty arrays).
+- Replace unrealistic mocks; simulate failure modes.
+- Persist results when the tooling supports it, and filter uncaught mutants before triage.
+- Use two-phase or per-target campaigns to keep runtime manageable.
+- Iterate until all mutants are killed or justified with comments and rationale.
 
 ## References
 
+- [Mutation testing for the agentic era](https://blog.trailofbits.com/2026/04/01/mutation-testing-for-the-agentic-era/)
 - [Use mutation testing to find the bugs your tests don't catch (Trail of Bits)](https://blog.trailofbits.com/2025/09/18/use-mutation-testing-to-find-the-bugs-your-tests-dont-catch/)
 - [Arkis DeFi Prime Brokerage Security Review (Appendix C)](https://github.com/trailofbits/publications/blob/master/reviews/2024-12-arkis-defi-prime-brokerage-securityreview.pdf)
 - [Slither (GitHub)](https://github.com/crytic/slither)
+- [Slither Mutator documentation](https://github.com/crytic/slither/blob/master/docs/src/tools/Mutator.md)
+- [mewt](https://github.com/trailofbits/mewt)
+- [MuTON](https://github.com/trailofbits/muton)
 
 {{#include ../../banners/hacktricks-training.md}}
