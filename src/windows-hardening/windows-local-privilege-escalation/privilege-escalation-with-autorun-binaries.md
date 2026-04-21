@@ -1,4 +1,4 @@
-# Autorun Binaries ile Yetki Yükseltme
+# Autoruns ile Ayrıcalık Yükseltme
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -6,14 +6,14 @@
 
 ## WMIC
 
-**Wmic**, **başlangıçta** programları çalıştırmak için kullanılabilir. Başlangıçta çalışacak şekilde programlanmış olan ikili dosyaları görmek için:
+**Wmic** programları **başlangıçta** çalıştırmak için kullanılabilir. Başlangıçta çalışacak şekilde programlanmış ikilileri görmek için:
 ```bash
 wmic startup get caption,command 2>nul & ^
 Get-CimInstance Win32_StartupCommand | select Name, command, Location, User | fl
 ```
 ## Zamanlanmış Görevler
 
-**Görevler**, **belirli bir sıklıkla** çalışacak şekilde zamanlanabilir. Hangi ikili dosyaların çalışacak şekilde zamanlandığını görmek için:
+**Tasks** belirli bir frekansta çalışacak şekilde zamanlanabilir. Hangi binary’lerin çalışması için zamanlandığını görmek için:
 ```bash
 schtasks /query /fo TABLE /nh | findstr /v /i "disable deshab"
 schtasks /query /fo LIST 2>nul | findstr TaskName
@@ -26,7 +26,7 @@ schtasks /Create /RU "SYSTEM" /SC ONLOGON /TN "SchedPE" /TR "cmd /c net localgro
 ```
 ## Klasörler
 
-**Başlangıç klasörlerinde bulunan tüm ikili dosyalar, başlangıçta çalıştırılacaktır.** Yaygın başlangıç klasörleri aşağıda listelenmiştir, ancak başlangıç klasörü kayıt defterinde belirtilmiştir. [Bunu okuyun, nerede olduğunu öğrenin.](privilege-escalation-with-autorun-binaries.md#startup-path)
+**Startup folders** içinde bulunan tüm binary’ler başlangıçta çalıştırılacaktır. Yaygın startup klasörleri aşağıda listelenenlerdir, ancak startup klasörü registry içinde belirtilir. [Bunun nerede olduğunu öğrenmek için bunu okuyun.](privilege-escalation-with-autorun-binaries.md#startup-path)
 ```bash
 dir /b "C:\Documents and Settings\All Users\Start Menu\Programs\Startup" 2>nul
 dir /b "C:\Documents and Settings\%username%\Start Menu\Programs\Startup" 2>nul
@@ -35,20 +35,23 @@ dir /b "%appdata%\Microsoft\Windows\Start Menu\Programs\Startup" 2>nul
 Get-ChildItem "C:\Users\All Users\Start Menu\Programs\Startup"
 Get-ChildItem "C:\Users\$env:USERNAME\Start Menu\Programs\Startup"
 ```
-> **FYI**: Arşiv çıkarma *path traversal* güvenlik açıkları (örneğin, WinRAR'da 7.13'ten önce kötüye kullanılan - CVE-2025-8088) **dekompresyon sırasında bu Başlangıç klasörlerinin içine doğrudan yükler bırakmak için** kullanılabilir, bu da bir sonraki kullanıcı oturum açıldığında kod yürütülmesine yol açar. Bu tekniğe derinlemesine bir bakış için:
+> **FYI**: Archive extraction *path traversal* açıkları (WinRAR’da 7.13 öncesinde istismar edilen – CVE-2025-8088 gibi) **decompression sırasında payload’ları doğrudan bu Startup klasörlerinin içine bırakmak** için kullanılabilir; bu da bir sonraki user logon’da code execution ile sonuçlanır.  Bu tekniğin derinlemesine incelemesi için bkz:
+
 
 {{#ref}}
 ../../generic-hacking/archive-extraction-path-traversal.md
 {{#endref}}
 
-## Kayıt Defteri
+
+
+## Registry
 
 > [!TIP]
-> [Buradan not](https://answers.microsoft.com/en-us/windows/forum/all/delete-registry-key/d425ae37-9dcc-4867-b49c-723dcd15147f): **Wow6432Node** kayıt defteri girişi, 64-bit bir Windows sürümü çalıştırdığınızı gösterir. İşletim sistemi, bu anahtarı 64-bit Windows sürümlerinde çalışan 32-bit uygulamalar için HKEY_LOCAL_MACHINE\SOFTWARE'ün ayrı bir görünümünü göstermek için kullanır.
+> [Note from here](https://answers.microsoft.com/en-us/windows/forum/all/delete-registry-key/d425ae37-9dcc-4867-b49c-723dcd15147f): **Wow6432Node** registry girdisi, 64-bit Windows sürümü kullandığınızı belirtir. Operating system bu key’i, 64-bit Windows sürümlerinde çalışan 32-bit applications için HKEY_LOCAL_MACHINE\SOFTWARE’nin ayrı bir görünümünü göstermek amacıyla kullanır.
 
-### Çalıştırmalar
+### Runs
 
-**Yaygın olarak bilinen** AutoRun kayıt defteri:
+**Commonly known** AutoRun registry:
 
 - `HKLM\Software\Microsoft\Windows\CurrentVersion\Run`
 - `HKLM\Software\Microsoft\Windows\CurrentVersion\RunOnce`
@@ -62,9 +65,9 @@ Get-ChildItem "C:\Users\$env:USERNAME\Start Menu\Programs\Startup"
 - `HKLM\Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Install\Software\Microsoft\Windows\CurrentVersion\Runonce`
 - `HKLM\Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Install\Software\Microsoft\Windows\CurrentVersion\RunonceEx`
 
-**Run** ve **RunOnce** olarak bilinen kayıt defteri anahtarları, her kullanıcı sisteme giriş yaptığında programları otomatik olarak çalıştırmak için tasarlanmıştır. Bir anahtarın veri değeri olarak atanan komut satırı 260 karakter veya daha az ile sınırlıdır.
+Registry keys known as **Run** and **RunOnce** are designed to automatically execute programs every time a user logs into the system. The command line assigned as a key's data value is limited to 260 characters or less.
 
-**Hizmet çalıştırmaları** (açılış sırasında hizmetlerin otomatik başlatılmasını kontrol edebilir):
+**Service runs** (can control automatic startup of services during boot):
 
 - `HKLM\Software\Microsoft\Windows\CurrentVersion\RunServicesOnce`
 - `HKCU\Software\Microsoft\Windows\CurrentVersion\RunServicesOnce`
@@ -80,15 +83,15 @@ Get-ChildItem "C:\Users\$env:USERNAME\Start Menu\Programs\Startup"
 - `HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\RunOnceEx`
 - `HKEY_LOCAL_MACHINE\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\RunOnceEx`
 
-Windows Vista ve sonraki sürümlerde, **Run** ve **RunOnce** kayıt defteri anahtarları otomatik olarak oluşturulmaz. Bu anahtarlardaki girişler ya doğrudan programları başlatabilir ya da bunları bağımlılık olarak belirtebilir. Örneğin, bir DLL dosyasını oturum açıldığında yüklemek için, **RunOnceEx** kayıt defteri anahtarını "Depend" anahtarı ile birlikte kullanabilirsiniz. Bu, sistem başlangıcında "C:\temp\evil.dll" dosyasını çalıştırmak için bir kayıt defteri girişi ekleyerek gösterilmektedir:
+Windows Vista ve sonraki sürümlerde, **Run** ve **RunOnce** registry keys otomatik olarak oluşturulmaz. Bu key’lerdeki girdiler programları doğrudan başlatabilir veya bunları dependency olarak belirtebilir. Örneğin, logon sırasında bir DLL file yüklemek için, **RunOnceEx** registry key’i ile birlikte bir "Depend" key kullanılabilir. Bu, sistem start-up sırasında "C:\temp\evil.dll" çalıştırmak için bir registry girdisi eklenerek gösterilmektedir:
 ```
 reg add HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\RunOnceEx\\0001\\Depend /v 1 /d "C:\\temp\\evil.dll"
 ```
 > [!TIP]
-> **Exploit 1**: Eğer **HKLM** içindeki belirtilen kayıt defterlerinden herhangi birine yazabiliyorsanız, farklı bir kullanıcı oturum açtığında ayrıcalıkları artırabilirsiniz.
+> **Exploit 1**: Eğer **HKLM** içindeki belirtilen registry’lerden herhangi birinin içine yazabiliyorsan, farklı bir kullanıcı giriş yaptığında yetkilerini yükseltebilirsin.
 
 > [!TIP]
-> **Exploit 2**: Eğer **HKLM** içindeki herhangi bir kayıt defterinde belirtilen ikili dosyalardan herhangi birini üzerine yazabiliyorsanız, farklı bir kullanıcı oturum açtığında o ikili dosyayı bir arka kapı ile değiştirebilir ve ayrıcalıkları artırabilirsiniz.
+> **Exploit 2**: Eğer **HKLM** içindeki herhangi bir registry’de belirtilen binary’lerden herhangi birinin üzerine yazabiliyorsan, farklı bir kullanıcı giriş yaptığında o binary’yi bir backdoor ile değiştirebilir ve yetkilerini yükseltebilirsin.
 ```bash
 #CMD
 reg query HKLM\Software\Microsoft\Windows\CurrentVersion\Run
@@ -144,17 +147,17 @@ Get-ItemProperty -Path 'Registry::HKLM\Software\Wow6432Node\Microsoft\Windows\Ru
 Get-ItemProperty -Path 'Registry::HKCU\Software\Microsoft\Windows\RunOnceEx'
 Get-ItemProperty -Path 'Registry::HKCU\Software\Wow6432Node\Microsoft\Windows\RunOnceEx'
 ```
-### Başlangıç Yolu
+### Startup Path
 
 - `HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders`
 - `HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders`
 - `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders`
 - `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders`
 
-**Başlangıç** klasörüne yerleştirilen kısayollar, kullanıcı oturumu açıldığında veya sistem yeniden başlatıldığında hizmetlerin veya uygulamaların otomatik olarak başlatılmasını tetikler. **Başlangıç** klasörünün konumu, hem **Yerel Makine** hem de **Geçerli Kullanıcı** kapsamları için kayıt defterinde tanımlanmıştır. Bu, belirtilen **Başlangıç** konumlarına eklenen her kısayolun, bağlantılı hizmetin veya programın oturum açma veya yeniden başlatma sürecinden sonra başlamasını sağlayacağı anlamına gelir; bu da programların otomatik olarak çalıştırılmasını planlamak için basit bir yöntemdir.
+**Startup** klasörüne yerleştirilen kısayollar, kullanıcı logon olduğunda veya sistem yeniden başlatıldığında hizmetleri ya da uygulamaları otomatik olarak başlatır. **Startup** klasörünün konumu, hem **Local Machine** hem de **Current User** kapsamları için registry içinde tanımlıdır. Bu, belirtilen bu **Startup** konumlarına eklenen herhangi bir kısayolun, bağlı olduğu hizmetin ya da programın logon veya reboot sürecinden sonra başlamasını sağlayacağı anlamına gelir; bu da programları otomatik çalışacak şekilde zamanlamak için basit bir yöntemdir.
 
 > [!TIP]
-> Eğer **HKLM** altında herhangi bir \[User] Shell Folder'ı geçersiz kılabiliyorsanız, bunu kontrol ettiğiniz bir klasöre yönlendirebilir ve bir arka kapı yerleştirerek, bir kullanıcı sisteme giriş yaptığında bu arka kapının çalıştırılmasını sağlayabilirsiniz.
+> Eğer **HKLM** altındaki herhangi bir \[User] Shell Folder üzerine yazabiliyorsanız, onu sizin kontrol ettiğiniz bir klasöre yönlendirebilir ve bir backdoor yerleştirebilirsiniz; bu backdoor, bir kullanıcı sisteme her giriş yaptığında çalıştırılır ve privileges yükseltir.
 ```bash
 reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders" /v "Common Startup"
 reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" /v "Common Startup"
@@ -166,11 +169,34 @@ Get-ItemProperty -Path 'Registry::HKCU\Software\Microsoft\Windows\CurrentVersion
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders' -Name "Common Startup"
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders' -Name "Common Startup"
 ```
-### Winlogon Anahtarları
+### UserInitMprLogonScript
+
+- `HKCU\Environment\UserInitMprLogonScript`
+
+Bu kullanıcıya özel registry değeri, o kullanıcının oturum açtığında çalıştırılan bir script veya command’e işaret edebilir. Bu, esas olarak bir **persistence** primitive’idir çünkü yalnızca etkilenen user bağlamında çalışır, ancak post-exploitation ve autoruns incelemeleri sırasında yine de kontrol etmeye değerdir.
+
+> [!TIP]
+> Eğer bu değeri mevcut user için yazabiliyorsanız, admin rights gerektirmeden bir sonraki interactive logon’da execution’ı yeniden tetikleyebilirsiniz. Eğer bunu başka bir user hive için yazabiliyorsanız, o user oturum açtığında code execution elde edebilirsiniz.
+```bash
+reg query "HKCU\Environment" /v "UserInitMprLogonScript"
+reg add "HKCU\Environment" /v "UserInitMprLogonScript" /t REG_SZ /d "C:\Users\Public\logon.bat" /f
+reg delete "HKCU\Environment" /v "UserInitMprLogonScript" /f
+
+Get-ItemProperty -Path 'Registry::HKCU\Environment' -Name "UserInitMprLogonScript"
+Set-ItemProperty -Path 'Registry::HKCU\Environment' -Name "UserInitMprLogonScript" -Value 'C:\Users\Public\logon.bat'
+Remove-ItemProperty -Path 'Registry::HKCU\Environment' -Name "UserInitMprLogonScript"
+```
+Notlar:
+
+- Hedef kullanıcının zaten okuyabildiği `.bat`, `.cmd`, `.ps1` veya diğer launcher dosyaları için tam path'leri tercih edin.
+- Bu, değer kaldırılana kadar logoff/reboot sonrası da devam eder.
+- `HKLM\...\Run`’dan farklı olarak, bu tek başına elevation vermez; bu user-scope persistence'tır.
+
+### Winlogon Keys
 
 `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon`
 
-Genellikle, **Userinit** anahtarı **userinit.exe** olarak ayarlanmıştır. Ancak, bu anahtar değiştirilirse, belirtilen çalıştırılabilir dosya kullanıcı oturumu açıldığında **Winlogon** tarafından da başlatılacaktır. Benzer şekilde, **Shell** anahtarı Windows'un varsayılan shell'i olan **explorer.exe**'ye işaret etmek için tasarlanmıştır.
+Genellikle, **Userinit** key'i **userinit.exe** olarak ayarlanır. Ancak, bu key değiştirilirse, belirtilen executable da user logon sırasında **Winlogon** tarafından başlatılır. Benzer şekilde, **Shell** key'inin **explorer.exe**'yi göstermesi amaçlanır; bu da Windows için default shell'dir.
 ```bash
 reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v "Userinit"
 reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v "Shell"
@@ -178,14 +204,14 @@ Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVers
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon' -Name "Shell"
 ```
 > [!TIP]
-> Eğer kayıt defteri değerini veya ikili dosyayı yazabilirseniz, ayrıcalıkları artırabileceksiniz.
+> Eğer registry değerini veya binary dosyasını overwrite edebiliyorsanız, yetkileri yükseltebilirsiniz.
 
-### Politika Ayarları
+### Policy Settings
 
 - `HKLM\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer`
 - `HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer`
 
-**Çalıştır** anahtarını kontrol edin.
+**Run** key'ini kontrol edin.
 ```bash
 reg query "HKLM\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer" /v "Run"
 reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer" /v "Run"
@@ -194,85 +220,85 @@ Get-ItemProperty -Path 'Registry::HKCU\Software\Microsoft\Windows\CurrentVersion
 ```
 ### AlternateShell
 
-### Güvenli Mod Komut İstemcisini Değiştirme
+### Safe Mode Command Prompt'u Değiştirme
 
-Windows Kayıt Defteri'nde `HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot` altında varsayılan olarak **`AlternateShell`** değeri `cmd.exe` olarak ayarlanmıştır. Bu, başlangıçta "Komut İstemcisi ile Güvenli Mod" seçeneğini seçtiğinizde (F8 tuşuna basarak) `cmd.exe`'nin kullanıldığı anlamına gelir. Ancak, bilgisayarınızı bu moda otomatik olarak başlatacak şekilde ayarlamak mümkündür, böylece F8'e basıp manuel olarak seçmenize gerek kalmaz.
+Windows Registry içinde `HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot` altında, varsayılan olarak `cmd.exe` olarak ayarlanmış bir **`AlternateShell`** değeri vardır. Bu, başlangıç sırasında ("Safe Mode with Command Prompt" seçeneğini F8'e basarak seçtiğinizde) `cmd.exe` kullanıldığı anlamına gelir. Ancak, bilgisayarınızı F8'e basıp bunu manuel olarak seçmeye gerek kalmadan bu modda otomatik olarak başlayacak şekilde ayarlamak mümkündür.
 
-"Komut İstemcisi ile Güvenli Mod"da otomatik olarak başlatmak için bir önyükleme seçeneği oluşturma adımları:
+"Safe Mode with Command Prompt" modunda otomatik başlangıç için bir boot seçeneği oluşturma adımları:
 
-1. `boot.ini` dosyasının özelliklerini yalnızca okunur, sistem ve gizli bayraklarını kaldıracak şekilde değiştirin: `attrib c:\boot.ini -r -s -h`
-2. `boot.ini` dosyasını düzenlemek için açın.
-3. Aşağıdaki gibi bir satır ekleyin: `multi(0)disk(0)rdisk(0)partition(1)\WINDOWS="Microsoft Windows XP Professional" /fastdetect /SAFEBOOT:MINIMAL(ALTERNATESHELL)`
-4. `boot.ini` dosyasındaki değişiklikleri kaydedin.
-5. Orijinal dosya özelliklerini yeniden uygulayın: `attrib c:\boot.ini +r +s +h`
+1. `boot.ini` dosyasının özniteliklerini değiştirerek read-only, system ve hidden bayraklarını kaldırın: `attrib c:\boot.ini -r -s -h`
+2. Düzenlemek için `boot.ini` dosyasını açın.
+3. Şuna benzer bir satır ekleyin: `multi(0)disk(0)rdisk(0)partition(1)\WINDOWS="Microsoft Windows XP Professional" /fastdetect /SAFEBOOT:MINIMAL(ALTERNATESHELL)`
+4. `boot.ini` üzerindeki değişiklikleri kaydedin.
+5. Orijinal dosya özniteliklerini tekrar uygulayın: `attrib c:\boot.ini +r +s +h`
 
-- **Exploit 1:** **AlternateShell** kayıt defteri anahtarını değiştirmek, yetkisiz erişim için potansiyel olarak özel komut kabuğu ayarlamaya olanak tanır.
-- **Exploit 2 (PATH Yazma İzinleri):** Sistem **PATH** değişkeninin herhangi bir bölümünde yazma izinlerine sahip olmak, özellikle `C:\Windows\system32`'den önce, özel bir `cmd.exe` çalıştırmanıza olanak tanır; bu, sistem Güvenli Mod'da başlatıldığında bir arka kapı olabilir.
-- **Exploit 3 (PATH ve boot.ini Yazma İzinleri):** `boot.ini`'ye yazma erişimi, otomatik Güvenli Mod başlatmayı sağlar ve bir sonraki yeniden başlatmada yetkisiz erişimi kolaylaştırır.
+- **Exploit 1:** **AlternateShell** registry key'ini değiştirmek, özelleştirilmiş bir command shell kurulmasına izin verir ve bu da yetkisiz erişim için kullanılabilir.
+- **Exploit 2 (PATH Write Permissions):** Sistem **PATH** değişkeninin herhangi bir kısmına, özellikle `C:\Windows\system32` öncesine write permissions sahibi olmak, özel bir `cmd.exe` çalıştırmanıza izin verir; bu da sistem Safe Mode'da başlatılırsa bir backdoor olabilir.
+- **Exploit 3 (PATH and boot.ini Write Permissions):** `boot.ini` için yazma erişimi, otomatik Safe Mode başlangıcını etkinleştirir ve bir sonraki reboot'ta yetkisiz erişimi kolaylaştırır.
 
-Mevcut **AlternateShell** ayarını kontrol etmek için bu komutları kullanın:
+Mevcut **AlternateShell** ayarını kontrol etmek için şu komutları kullanın:
 ```bash
 reg query HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot /v AlternateShell
 Get-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SafeBoot' -Name 'AlternateShell'
 ```
-### Yüklenmiş Bileşen
+### Installed Component
 
-Active Setup, Windows'ta **masaüstü ortamı tamamen yüklenmeden önce başlayan** bir özelliktir. Kullanıcı oturumu devam etmeden önce tamamlanması gereken belirli komutların yürütülmesine öncelik verir. Bu işlem, Run veya RunOnce kayıt defteri bölümlerindeki diğer başlangıç girişleri tetiklenmeden önce bile gerçekleşir.
+Active Setup, Windows’te **masaüstü ortamı tam olarak yüklenmeden önce başlayan** bir özelliktir. Belirli komutların yürütülmesine öncelik verir ve bu komutlar kullanıcı oturumu açma işlemi devam etmeden önce tamamlanmalıdır. Bu süreç, Run veya RunOnce registry bölümlerindekiler gibi diğer başlangıç girdileri tetiklenmeden önce bile gerçekleşir.
 
-Active Setup, aşağıdaki kayıt defteri anahtarları aracılığıyla yönetilmektedir:
+Active Setup şu registry anahtarları üzerinden yönetilir:
 
 - `HKLM\SOFTWARE\Microsoft\Active Setup\Installed Components`
 - `HKLM\SOFTWARE\Wow6432Node\Microsoft\Active Setup\Installed Components`
 - `HKCU\SOFTWARE\Microsoft\Active Setup\Installed Components`
 - `HKCU\SOFTWARE\Wow6432Node\Microsoft\Active Setup\Installed Components`
 
-Bu anahtarlar içinde, her biri belirli bir bileşene karşılık gelen çeşitli alt anahtarlar bulunmaktadır. Özellikle ilgi çekici anahtar değerleri şunlardır:
+Bu anahtarlar içinde, her biri belirli bir bileşene karşılık gelen çeşitli alt anahtarlar bulunur. Özellikle dikkat çeken anahtar değerler şunlardır:
 
 - **IsInstalled:**
-- `0`, bileşenin komutunun yürütülmeyeceğini gösterir.
-- `1`, komutun her kullanıcı için bir kez yürütüleceğini belirtir; bu, `IsInstalled` değeri eksikse varsayılan davranıştır.
-- **StubPath:** Active Setup tarafından yürütülecek komutu tanımlar. `notepad` gibi geçerli bir komut satırı olabilir.
+- `0` bileşenin komutunun çalışmayacağını belirtir.
+- `1` komutun her kullanıcı için bir kez çalışacağını belirtir; bu, `IsInstalled` değeri eksikse varsayılan davranıştır.
+- **StubPath:** Active Setup tarafından yürütülecek komutu tanımlar. `notepad` başlatmak gibi geçerli herhangi bir komut satırı olabilir.
 
-**Güvenlik İçgörüleri:**
+**Security Insights:**
 
-- **`IsInstalled`** değeri `"1"` olarak ayarlanmış bir anahtara belirli bir **`StubPath`** ile yazmak veya değiştirmek, yetkisiz komut yürütülmesine yol açabilir ve bu da ayrıcalık yükseltmesine neden olabilir.
-- Herhangi bir **`StubPath`** değerinde referans verilen ikili dosyanın değiştirilmesi de yeterli izinler varsa ayrıcalık yükseltmesine ulaşabilir.
+- **`IsInstalled`** değeri `"1"` olarak ayarlanmış bir anahtarı, belirli bir **`StubPath`** ile değiştirmek veya bu anahtara yazmak, yetkisiz komut yürütmeye yol açabilir ve potansiyel olarak privilege escalation için kullanılabilir.
+- Herhangi bir **`StubPath`** değerinde referans verilen binary dosyasını değiştirmek de, yeterli izin varsa, privilege escalation sağlayabilir.
 
-Active Setup bileşenleri arasındaki **`StubPath`** yapılandırmalarını incelemek için bu komutlar kullanılabilir:
+**StubPath** yapılandırmalarını Active Setup bileşenleri arasında incelemek için şu komutlar kullanılabilir:
 ```bash
 reg query "HKLM\SOFTWARE\Microsoft\Active Setup\Installed Components" /s /v StubPath
 reg query "HKCU\SOFTWARE\Microsoft\Active Setup\Installed Components" /s /v StubPath
 reg query "HKLM\SOFTWARE\Wow6432Node\Microsoft\Active Setup\Installed Components" /s /v StubPath
 reg query "HKCU\SOFTWARE\Wow6432Node\Microsoft\Active Setup\Installed Components" /s /v StubPath
 ```
-### Tarayıcı Yardımcı Nesneleri
+### Browser Helper Objects
 
-### Tarayıcı Yardımcı Nesneleri (BHO'lar) Hakkında Genel Bilgi
+### Browser Helper Objects (BHOs) Genel Bakış
 
-Tarayıcı Yardımcı Nesneleri (BHO'lar), Microsoft'un Internet Explorer'ına ekstra özellikler ekleyen DLL modülleridir. Her başlatmada Internet Explorer ve Windows Gezgini'ne yüklenirler. Ancak, **NoExplorer** anahtarını 1 olarak ayarlayarak yürütmeleri engellenebilir, bu da onların Windows Gezgini örnekleriyle yüklenmesini önler.
+Browser Helper Objects (BHOs), Microsoft Internet Explorer’a ekstra özellikler ekleyen DLL modülleridir. Her başlangıçta Internet Explorer ve Windows Explorer içine yüklenirler. Ancak, **NoExplorer** anahtarı 1 olarak ayarlanarak çalışmaları engellenebilir; bu da Windows Explorer örnekleriyle yüklenmelerini önler.
 
-BHO'lar, Windows 10 ile Internet Explorer 11 aracılığıyla uyumludur, ancak daha yeni Windows sürümlerinde varsayılan tarayıcı olan Microsoft Edge'de desteklenmezler.
+BHOs, Internet Explorer 11 üzerinden Windows 10 ile uyumludur, ancak Windows’un yeni sürümlerindeki varsayılan tarayıcı olan Microsoft Edge tarafından desteklenmez.
 
-Bir sistemde kayıtlı BHO'ları keşfetmek için aşağıdaki kayıt defteri anahtarlarını inceleyebilirsiniz:
+Sistemde kayıtlı BHOs’ları incelemek için aşağıdaki registry anahtarlarını kontrol edebilirsiniz:
 
 - `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects`
 - `HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects`
 
-Her BHO, kayıt defterinde benzersiz bir tanımlayıcı olarak hizmet eden **CLSID** ile temsil edilir. Her CLSID hakkında ayrıntılı bilgi `HKLM\SOFTWARE\Classes\CLSID\{<CLSID>}` altında bulunabilir.
+Her BHO, registry’de benzersiz bir tanımlayıcı olarak görev yapan **CLSID** ile temsil edilir. Her CLSID hakkında ayrıntılı bilgi `HKLM\SOFTWARE\Classes\CLSID\{<CLSID>}` altında bulunabilir.
 
-Kayıt defterinde BHO'ları sorgulamak için bu komutlar kullanılabilir:
+Registry’de BHOs sorgulamak için şu komutlar kullanılabilir:
 ```bash
 reg query "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects" /s
 reg query "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects" /s
 ```
-### Internet Explorer Uzantıları
+### Internet Explorer Extensions
 
 - `HKLM\Software\Microsoft\Internet Explorer\Extensions`
 - `HKLM\Software\Wow6432Node\Microsoft\Internet Explorer\Extensions`
 
-Not edin ki, kayıt defteri her bir dll için 1 yeni kayıt içerecek ve bu **CLSID** ile temsil edilecektir. CLSID bilgilerini `HKLM\SOFTWARE\Classes\CLSID\{<CLSID>}` içinde bulabilirsiniz.
+Registry, her dll için 1 yeni registry içerecek ve bu **CLSID** ile temsil edilecektir. CLSID bilgilerini `HKLM\SOFTWARE\Classes\CLSID\{<CLSID>}` içinde bulabilirsiniz
 
-### Font Sürücüleri
+### Font Drivers
 
 - `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Font Drivers`
 - `HKLM\SOFTWARE\WOW6432Node\Microsoft\Windows NT\CurrentVersion\Font Drivers`
@@ -282,7 +308,7 @@ reg query "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows NT\CurrentVersion\Font Dr
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Font Drivers'
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows NT\CurrentVersion\Font Drivers'
 ```
-### Açık Komut
+### Open Command
 
 - `HKLM\SOFTWARE\Classes\htmlfile\shell\open\command`
 - `HKLM\SOFTWARE\Wow6432Node\Classes\htmlfile\shell\open\command`
@@ -292,27 +318,29 @@ reg query "HKLM\SOFTWARE\Wow6432Node\Classes\htmlfile\shell\open\command" /v ""
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Classes\htmlfile\shell\open\command' -Name ""
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Wow6432Node\Classes\htmlfile\shell\open\command' -Name ""
 ```
-### Görüntü Dosyası Çalıştırma Seçenekleri
+### Image File Execution Options
 ```
 HKLM\Software\Microsoft\Windows NT\CurrentVersion\Image File Execution Options
 HKLM\Software\Microsoft\Wow6432Node\Windows NT\CurrentVersion\Image File Execution Options
 ```
 ## SysInternals
 
-Not edin ki, autorunları bulabileceğiniz tüm siteler **zaten**[ **winpeas.exe**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS/winPEASexe) tarafından **arama yapılmıştır**. Ancak, **otomatik olarak çalıştırılan** dosyaların **daha kapsamlı bir listesi** için Sysinternals'tan [autoruns](https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns) kullanabilirsiniz:
+Unutmayın ki autoruns bulabileceğiniz tüm konumlar **zaten** [ **winpeas.exe**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS/winPEASexe) **tarafından aranır**. Ancak, **daha kapsamlı bir otomatik çalıştırılan** dosya listesi için systinternals'tan [autoruns ](https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns) kullanabilirsiniz:
 ```
 autorunsc.exe -m -nobanner -a * -ct /accepteula
 ```
 ## Daha Fazla
 
-**Kayıt defterleri gibi daha fazla Autorun bulmak için** [**https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2**](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082&seqNum=2)
+**Daha fazla Autoruns benzeri registry'leri şurada bulun** [**https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2**](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082&seqNum=2)
 
-## Referanslar
+## References
 
 - [https://resources.infosecinstitute.com/common-malware-persistence-mechanisms/#gref](https://resources.infosecinstitute.com/common-malware-persistence-mechanisms/#gref)
 - [https://attack.mitre.org/techniques/T1547/001/](https://attack.mitre.org/techniques/T1547/001/)
+- [https://attack.mitre.org/techniques/T1037/001/](https://attack.mitre.org/techniques/T1037/001/)
 - [https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082&seqNum=2)
 - [https://www.itprotoday.com/cloud-computing/how-can-i-add-boot-option-starts-alternate-shell](https://www.itprotoday.com/cloud-computing/how-can-i-add-boot-option-starts-alternate-shell)
+- [https://www.rapid7.com/blog/post/pt-metasploit-wrap-up-04-03-2026](https://www.rapid7.com/blog/post/pt-metasploit-wrap-up-04-03-2026)
 
 
 
