@@ -1,4 +1,4 @@
-# Autorunsを使用した特権昇格
+# Autoruns を使った権限昇格
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -6,14 +6,14 @@
 
 ## WMIC
 
-**Wmic**は**スタートアップ**でプログラムを実行するために使用できます。スタートアップで実行されるようにプログラムされているバイナリを確認するには、次のコマンドを使用します:
+**Wmic** は **startup** 時にプログラムを実行するために使えます。startup で実行されるように設定されているバイナリを確認するには、次を使います:
 ```bash
 wmic startup get caption,command 2>nul & ^
 Get-CimInstance Win32_StartupCommand | select Name, command, Location, User | fl
 ```
-## スケジュールされたタスク
+## Scheduled Tasks
 
-**タスク**は**特定の頻度**で実行されるようにスケジュールできます。実行されるようにスケジュールされたバイナリを確認するには:
+**Tasks** は **一定の頻度** で実行するようにスケジュールできます。どの binaries が実行予定かを確認するには、次を使います:
 ```bash
 schtasks /query /fo TABLE /nh | findstr /v /i "disable deshab"
 schtasks /query /fo LIST 2>nul | findstr TaskName
@@ -26,7 +26,7 @@ schtasks /Create /RU "SYSTEM" /SC ONLOGON /TN "SchedPE" /TR "cmd /c net localgro
 ```
 ## フォルダ
 
-**スタートアップフォルダにあるすべてのバイナリは、起動時に実行されます**。一般的なスタートアップフォルダは以下にリストされているものですが、スタートアップフォルダはレジストリに示されています。[ここを読んで、どこにあるかを学んでください。](privilege-escalation-with-autorun-binaries.md#startup-path)
+**Startup folders** にあるすべてのバイナリは、起動時に実行されます。一般的な startup folders は以下に示すものですが、startup folder はレジストリで指定されています。[場所を確認するにはこれを読んでください。](privilege-escalation-with-autorun-binaries.md#startup-path)
 ```bash
 dir /b "C:\Documents and Settings\All Users\Start Menu\Programs\Startup" 2>nul
 dir /b "C:\Documents and Settings\%username%\Start Menu\Programs\Startup" 2>nul
@@ -35,20 +35,23 @@ dir /b "%appdata%\Microsoft\Windows\Start Menu\Programs\Startup" 2>nul
 Get-ChildItem "C:\Users\All Users\Start Menu\Programs\Startup"
 Get-ChildItem "C:\Users\$env:USERNAME\Start Menu\Programs\Startup"
 ```
-> **FYI**: アーカイブ抽出 *パス・トラバーサル* 脆弱性（例えば、WinRAR 7.13以前で悪用された CVE-2025-8088）は、**解凍中にこれらのスタートアップフォルダにペイロードを直接配置する**ために利用でき、次回のユーザーログオン時にコードが実行される結果となります。この技術の詳細については、以下を参照してください：
+> **FYI**: Archive extraction *path traversal* vulnerabilities (such as the one abused in WinRAR prior to 7.13 – CVE-2025-8088) can be leveraged to **deposit payloads directly inside these Startup folders during decompression**, resulting in code execution on the next user logon.  For a deep-dive into this technique see:
+
 
 {{#ref}}
 ../../generic-hacking/archive-extraction-path-traversal.md
 {{#endref}}
 
-## レジストリ
+
+
+## Registry
 
 > [!TIP]
-> [ここからの注意](https://answers.microsoft.com/en-us/windows/forum/all/delete-registry-key/d425ae37-9dcc-4867-b49c-723dcd15147f): **Wow6432Node** レジストリエントリは、64ビットのWindowsバージョンを実行していることを示します。オペレーティングシステムは、このキーを使用して、64ビットWindowsバージョンで実行される32ビットアプリケーションのためにHKEY_LOCAL_MACHINE\SOFTWAREの別のビューを表示します。
+> [Note from here](https://answers.microsoft.com/en-us/windows/forum/all/delete-registry-key/d425ae37-9dcc-4867-b49c-723dcd15147f): The **Wow6432Node** registry entry indicates that you are running a 64-bit Windows version. The operating system uses this key to display a separate view of HKEY_LOCAL_MACHINE\SOFTWARE for 32-bit applications that run on 64-bit Windows versions.
 
-### 実行
+### Runs
 
-**一般的に知られている** AutoRunレジストリ:
+**Commonly known** AutoRun registry:
 
 - `HKLM\Software\Microsoft\Windows\CurrentVersion\Run`
 - `HKLM\Software\Microsoft\Windows\CurrentVersion\RunOnce`
@@ -62,9 +65,9 @@ Get-ChildItem "C:\Users\$env:USERNAME\Start Menu\Programs\Startup"
 - `HKLM\Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Install\Software\Microsoft\Windows\CurrentVersion\Runonce`
 - `HKLM\Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Install\Software\Microsoft\Windows\CurrentVersion\RunonceEx`
 
-**Run** および **RunOnce** として知られるレジストリキーは、ユーザーがシステムにログインするたびにプログラムを自動的に実行するように設計されています。キーのデータ値として割り当てられたコマンドラインは、260文字以下に制限されています。
+Registry keys known as **Run** and **RunOnce** are designed to automatically execute programs every time a user logs into the system. The command line assigned as a key's data value is limited to 260 characters or less.
 
-**サービス実行**（ブート中のサービスの自動起動を制御可能）:
+**Service runs** (can control automatic startup of services during boot):
 
 - `HKLM\Software\Microsoft\Windows\CurrentVersion\RunServicesOnce`
 - `HKCU\Software\Microsoft\Windows\CurrentVersion\RunServicesOnce`
@@ -80,15 +83,15 @@ Get-ChildItem "C:\Users\$env:USERNAME\Start Menu\Programs\Startup"
 - `HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\RunOnceEx`
 - `HKEY_LOCAL_MACHINE\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\RunOnceEx`
 
-Windows Vista以降のバージョンでは、**Run** および **RunOnce** レジストリキーは自動的に生成されません。これらのキーのエントリは、プログラムを直接起動するか、依存関係として指定することができます。例えば、ログオン時にDLLファイルを読み込むためには、**RunOnceEx** レジストリキーと「Depend」キーを使用することができます。これは、システム起動時に「C:\temp\evil.dll」を実行するレジストリエントリを追加することで示されます:
+Windows Vista 以降では、**Run** と **RunOnce** の registry keys は自動生成されません。これらのキーのエントリは、プログラムを直接起動することも、依存関係として指定することもできます。たとえば、ログオン時に DLL file を読み込むには、**RunOnceEx** registry key と "Depend" key を組み合わせて使用できます。これは、システム起動時に "C:\temp\evil.dll" を実行する registry entry を追加することで示されます:
 ```
 reg add HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\RunOnceEx\\0001\\Depend /v 1 /d "C:\\temp\\evil.dll"
 ```
 > [!TIP]
-> **Exploit 1**: **HKLM**内のいずれかのレジストリに書き込むことができれば、別のユーザーがログインしたときに特権を昇格させることができます。
+> **Exploit 1**: **HKLM** 内の言及された任意の registry に書き込める場合、別の user がログインしたときに権限昇格できます。
 
 > [!TIP]
-> **Exploit 2**: **HKLM**内のいずれかのレジストリに示されたバイナリを上書きできる場合、別のユーザーがログインしたときにそのバイナリをバックドアで修正し、特権を昇格させることができます。
+> **Exploit 2**: **HKLM** 内の任意の registry に示された binaries のいずれかを上書きできる場合、別の user がログインしたときにその binary を backdoor 付きに改変して権限昇格できます。
 ```bash
 #CMD
 reg query HKLM\Software\Microsoft\Windows\CurrentVersion\Run
@@ -144,17 +147,17 @@ Get-ItemProperty -Path 'Registry::HKLM\Software\Wow6432Node\Microsoft\Windows\Ru
 Get-ItemProperty -Path 'Registry::HKCU\Software\Microsoft\Windows\RunOnceEx'
 Get-ItemProperty -Path 'Registry::HKCU\Software\Wow6432Node\Microsoft\Windows\RunOnceEx'
 ```
-### スタートアップパス
+### Startup Path
 
 - `HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders`
 - `HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders`
 - `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders`
 - `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders`
 
-**スタートアップ**フォルダーに配置されたショートカットは、ユーザーのログオンまたはシステムの再起動時にサービスやアプリケーションを自動的に起動します。**スタートアップ**フォルダーの場所は、**ローカルマシン**と**現在のユーザー**のスコープの両方でレジストリに定義されています。これは、これらの指定された**スタートアップ**の場所に追加されたショートカットが、ログオンまたは再起動プロセスの後にリンクされたサービスやプログラムが起動することを保証することを意味し、プログラムを自動的に実行するための簡単な方法となります。
+**Startup** フォルダに置かれたショートカットは、ユーザーのログオン時またはシステム再起動時に、サービスやアプリケーションの起動を自動的にトリガーします。**Startup** フォルダの場所は、**Local Machine** と **Current User** の両スコープについてレジストリで定義されています。つまり、これらの指定された **Startup** の場所に追加されたショートカットは、リンク先のサービスやプログラムがログオンまたは再起動の処理後に起動することを保証し、プログラムを自動実行するための簡単な方法になります。
 
 > [!TIP]
-> **HKLM**の下の任意の\[User] Shell Folderを上書きできる場合、あなたが制御するフォルダーを指すように設定でき、ユーザーがシステムにログインするたびに実行されるバックドアを配置することができ、特権を昇格させることができます。
+> **HKLM** 配下の任意の \[User] Shell Folder を上書きできるなら、それを自分が制御するフォルダに向け、システムにログインするたびに実行される backdoor を配置して、権限を昇格できます。
 ```bash
 reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders" /v "Common Startup"
 reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" /v "Common Startup"
@@ -166,11 +169,34 @@ Get-ItemProperty -Path 'Registry::HKCU\Software\Microsoft\Windows\CurrentVersion
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders' -Name "Common Startup"
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders' -Name "Common Startup"
 ```
+### UserInitMprLogonScript
+
+- `HKCU\Environment\UserInitMprLogonScript`
+
+このユーザーごとのレジストリ値は、そのユーザーがログオンしたときに実行されるスクリプトやコマンドを指すことができます。主に **persistence** の手法ですが、影響を受けるユーザーのコンテキストでしか実行されないためです。それでも、post-exploitation や autoruns の確認時にはチェックする価値があります。
+
+> [!TIP]
+> 現在のユーザーに対してこの値を書き込めるなら、admin 権限なしで次回の対話的ログオン時に再度実行を引き起こせます。別のユーザー hive に書き込めるなら、そのユーザーがログオンしたときに code execution を得られる可能性があります。
+```bash
+reg query "HKCU\Environment" /v "UserInitMprLogonScript"
+reg add "HKCU\Environment" /v "UserInitMprLogonScript" /t REG_SZ /d "C:\Users\Public\logon.bat" /f
+reg delete "HKCU\Environment" /v "UserInitMprLogonScript" /f
+
+Get-ItemProperty -Path 'Registry::HKCU\Environment' -Name "UserInitMprLogonScript"
+Set-ItemProperty -Path 'Registry::HKCU\Environment' -Name "UserInitMprLogonScript" -Value 'C:\Users\Public\logon.bat'
+Remove-ItemProperty -Path 'Registry::HKCU\Environment' -Name "UserInitMprLogonScript"
+```
+Notes:
+
+- `.bat`、`.cmd`、`.ps1`、または対象ユーザーが既に読み取り可能な他の launcher file へのフルパスを優先する。
+- これは値が削除されるまで logoff/reboot をまたいで持続する。
+- `HKLM\...\Run` とは異なり、これはそれ自体では elevation を与えない。これは user-scope persistence である。
+
 ### Winlogon Keys
 
 `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon`
 
-通常、**Userinit** キーは **userinit.exe** に設定されています。しかし、このキーが変更されると、指定された実行可能ファイルもユーザーログオン時に **Winlogon** によって起動されます。同様に、**Shell** キーは Windows のデフォルトシェルである **explorer.exe** を指すことを目的としています。
+通常、**Userinit** key は **userinit.exe** に設定されている。しかし、この key が変更されると、指定された executable もユーザー logon 時に **Winlogon** によって起動される。同様に、**Shell** key は **explorer.exe** を指すように設計されており、これは Windows の default shell である。
 ```bash
 reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v "Userinit"
 reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v "Shell"
@@ -178,14 +204,14 @@ Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVers
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon' -Name "Shell"
 ```
 > [!TIP]
-> レジストリ値またはバイナリを上書きできれば、特権を昇格させることができます。
+> レジストリ値または binary を上書きできれば、権限昇格できます。
 
-### ポリシー設定
+### Policy Settings
 
 - `HKLM\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer`
 - `HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer`
 
-**Run** キーを確認してください。
+**Run** key を確認してください。
 ```bash
 reg query "HKLM\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer" /v "Run"
 reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer" /v "Run"
@@ -194,51 +220,51 @@ Get-ItemProperty -Path 'Registry::HKCU\Software\Microsoft\Windows\CurrentVersion
 ```
 ### AlternateShell
 
-### Safe Mode Command Promptの変更
+### Safe Mode Command Prompt の変更
 
-Windowsレジストリの`HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot`には、デフォルトで**`AlternateShell`**値が`cmd.exe`に設定されています。これは、起動時に「コマンドプロンプト付きセーフモード」を選択すると（F8を押すことによって）、`cmd.exe`が使用されることを意味します。しかし、F8を押して手動で選択することなく、このモードで自動的に起動するようにコンピュータを設定することが可能です。
+Windows Registry の `HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot` には、デフォルトで `cmd.exe` に設定された **`AlternateShell`** 値があります。つまり、起動時に「Safe Mode with Command Prompt」を選ぶ（F8 を押す）と、`cmd.exe` が使われます。ただし、F8 を押して手動で選ばなくても、このモードで自動的に起動するようにコンピュータを設定することも可能です。
 
-「コマンドプロンプト付きセーフモード」で自動的に起動するためのブートオプションを作成する手順：
+"Safe Mode with Command Prompt" で自動的に起動する boot option を作成する手順:
 
-1. `boot.ini`ファイルの属性を変更して、読み取り専用、システム、隠しフラグを削除します：`attrib c:\boot.ini -r -s -h`
-2. 編集のために`boot.ini`を開きます。
-3. 次のような行を挿入します：`multi(0)disk(0)rdisk(0)partition(1)\WINDOWS="Microsoft Windows XP Professional" /fastdetect /SAFEBOOT:MINIMAL(ALTERNATESHELL)`
-4. `boot.ini`への変更を保存します。
-5. 元のファイル属性を再適用します：`attrib c:\boot.ini +r +s +h`
+1. `boot.ini` ファイルの属性を変更して、read-only、system、hidden フラグを削除する: `attrib c:\boot.ini -r -s -h`
+2. 編集のために `boot.ini` を開く。
+3. 次のような行を挿入する: `multi(0)disk(0)rdisk(0)partition(1)\WINDOWS="Microsoft Windows XP Professional" /fastdetect /SAFEBOOT:MINIMAL(ALTERNATESHELL)`
+4. `boot.ini` の変更を保存する。
+5. 元のファイル属性を再適用する: `attrib c:\boot.ini +r +s +h`
 
-- **Exploit 1:** **AlternateShell**レジストリキーを変更することで、カスタムコマンドシェルの設定が可能になり、不正アクセスの可能性があります。
-- **Exploit 2 (PATH書き込み権限):** システムの**PATH**変数の任意の部分に書き込み権限がある場合、特に`C:\Windows\system32`の前にある場合、カスタム`cmd.exe`を実行でき、システムがセーフモードで起動した場合はバックドアになる可能性があります。
-- **Exploit 3 (PATHおよびboot.ini書き込み権限):** `boot.ini`への書き込みアクセスにより、自動的なセーフモード起動が可能になり、次回の再起動時に不正アクセスを容易にします。
+- **Exploit 1:** **AlternateShell** registry key を変更すると、custom command shell の設定が可能になり、unauthorized access につながる可能性があります。
+- **Exploit 2 (PATH Write Permissions):** system **PATH** variable の任意の場所、特に `C:\Windows\system32` より前に write permissions があると、custom `cmd.exe` を実行でき、システムが Safe Mode で起動された場合に backdoor として使える可能性があります。
+- **Exploit 3 (PATH and boot.ini Write Permissions):** `boot.ini` への書き込み権限があると、自動的な Safe Mode 起動が可能になり、次回再起動時の unauthorized access を容易にします。
 
-現在の**AlternateShell**設定を確認するには、これらのコマンドを使用します：
+現在の **AlternateShell** 設定を確認するには、次のコマンドを使用します:
 ```bash
 reg query HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot /v AlternateShell
 Get-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SafeBoot' -Name 'AlternateShell'
 ```
-### インストールされたコンポーネント
+### Installed Component
 
-Active Setupは、**デスクトップ環境が完全にロードされる前に開始される**Windowsの機能です。これは、ユーザーログオンが進行する前に完了しなければならない特定のコマンドの実行を優先します。このプロセスは、RunやRunOnceレジストリセクションのような他のスタートアップエントリがトリガーされる前に発生します。
+Active Setup は、**デスクトップ環境が完全に読み込まれる前に開始する** Windows の機能です。ユーザーログオンが進む前に完了しなければならない特定のコマンドの実行を優先します。この処理は、Run や RunOnce のレジストリ項目など、他の起動エントリがトリガーされるよりも前に行われます。
 
-Active Setupは、以下のレジストリキーを通じて管理されます：
+Active Setup は次のレジストリキーで管理されます:
 
 - `HKLM\SOFTWARE\Microsoft\Active Setup\Installed Components`
 - `HKLM\SOFTWARE\Wow6432Node\Microsoft\Active Setup\Installed Components`
 - `HKCU\SOFTWARE\Microsoft\Active Setup\Installed Components`
 - `HKCU\SOFTWARE\Wow6432Node\Microsoft\Active Setup\Installed Components`
 
-これらのキー内には、特定のコンポーネントに対応するさまざまなサブキーが存在します。特に注目すべきキー値には以下が含まれます：
+これらのキー内には複数のサブキーがあり、それぞれが特定のコンポーネントに対応します。特に注目すべきキー値は次のとおりです:
 
 - **IsInstalled:**
-- `0`はコンポーネントのコマンドが実行されないことを示します。
-- `1`はコマンドが各ユーザーごとに一度実行されることを意味し、`IsInstalled`値が欠如している場合のデフォルトの動作です。
-- **StubPath:** Active Setupによって実行されるコマンドを定義します。これは、`notepad`を起動するなどの有効なコマンドラインである可能性があります。
+- `0` は、そのコンポーネントのコマンドが実行されないことを示します。
+- `1` は、そのコマンドが各ユーザーごとに1回実行されることを意味し、`IsInstalled` 値が存在しない場合の既定の動作です。
+- **StubPath:** Active Setup によって実行されるコマンドを定義します。`notepad` の起動のような、有効なコマンドラインであれば何でもかまいません。
 
-**セキュリティインサイト：**
+**Security Insights:**
 
-- **`IsInstalled`**が`"1"`に設定され、特定の**`StubPath`**を持つキーを変更または書き込むことは、権限昇格のための不正なコマンド実行につながる可能性があります。
-- いかなる**`StubPath`**値で参照されるバイナリファイルを変更することも、十分な権限があれば権限昇格を達成する可能性があります。
+- **`IsInstalled`** が `"1"` に設定され、特定の **`StubPath`** を持つキーを変更または書き込むと、不正なコマンド実行につながり、権限昇格に悪用される可能性があります。
+- 任意の **`StubPath`** 値で参照されるバイナリファイルを変更することでも、十分な権限があれば権限昇格を達成できます。
 
-Active Setupコンポーネント全体の**`StubPath`**設定を検査するには、以下のコマンドを使用できます：
+To inspect the **`StubPath`** configurations across Active Setup components, these commands can be used:
 ```bash
 reg query "HKLM\SOFTWARE\Microsoft\Active Setup\Installed Components" /s /v StubPath
 reg query "HKCU\SOFTWARE\Microsoft\Active Setup\Installed Components" /s /v StubPath
@@ -247,32 +273,32 @@ reg query "HKCU\SOFTWARE\Wow6432Node\Microsoft\Active Setup\Installed Components
 ```
 ### Browser Helper Objects
 
-### Overview of Browser Helper Objects (BHOs)
+### Browser Helper Objects (BHOs) の概要
 
-Browser Helper Objects (BHOs) は、Microsoft の Internet Explorer に追加機能を提供する DLL モジュールです。これらは、各起動時に Internet Explorer および Windows Explorer に読み込まれます。しかし、**NoExplorer** キーを 1 に設定することで実行をブロックでき、Windows Explorer インスタンスと共に読み込まれるのを防ぐことができます。
+Browser Helper Objects (BHOs) は、Microsoft Internet Explorer に追加機能を与える DLL モジュールです。これらは起動時に Internet Explorer と Windows Explorer に読み込まれます。ただし、**NoExplorer** キーを 1 に設定すると実行をブロックでき、Windows Explorer のインスタンスで読み込まれなくなります。
 
-BHOs は、Internet Explorer 11 を介して Windows 10 と互換性がありますが、最新の Windows バージョンのデフォルトブラウザである Microsoft Edge ではサポートされていません。
+BHOs は Internet Explorer 11 を介して Windows 10 でも互換性がありますが、Windows の新しいバージョンにおける既定ブラウザである Microsoft Edge ではサポートされていません。
 
-システム上に登録されている BHOs を調査するには、以下のレジストリキーを確認できます：
+システム上で登録されている BHOs を確認するには、次の registry keys を調べます:
 
 - `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects`
 - `HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects`
 
-各 BHO は、レジストリ内の **CLSID** によって表され、ユニークな識別子として機能します。各 CLSID に関する詳細情報は、`HKLM\SOFTWARE\Classes\CLSID\{<CLSID>}` の下にあります。
+各 BHO は registry 内で **CLSID** によって表され、これは一意の識別子として機能します。各 CLSID の詳細情報は `HKLM\SOFTWARE\Classes\CLSID\{<CLSID>}` で確認できます。
 
-レジストリ内の BHOs をクエリするには、これらのコマンドを利用できます：
+registry で BHOs を問い合わせるには、次のコマンドを利用できます:
 ```bash
 reg query "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects" /s
 reg query "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects" /s
 ```
-### Internet Explorer 拡張機能
+### Internet Explorer Extensions
 
 - `HKLM\Software\Microsoft\Internet Explorer\Extensions`
 - `HKLM\Software\Wow6432Node\Microsoft\Internet Explorer\Extensions`
 
-レジストリには各 dll ごとに 1 つの新しいレジストリが含まれ、**CLSID** で表されます。CLSID 情報は `HKLM\SOFTWARE\Classes\CLSID\{<CLSID>}` で見つけることができます。
+レジストリには、各 dll ごとに 1 つの新しいレジストリが含まれ、**CLSID** で表されることに注意してください。CLSID 情報は `HKLM\SOFTWARE\Classes\CLSID\{<CLSID>}` で見つけることができます
 
-### フォントドライバー
+### Font Drivers
 
 - `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Font Drivers`
 - `HKLM\SOFTWARE\WOW6432Node\Microsoft\Windows NT\CurrentVersion\Font Drivers`
@@ -292,27 +318,29 @@ reg query "HKLM\SOFTWARE\Wow6432Node\Classes\htmlfile\shell\open\command" /v ""
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Classes\htmlfile\shell\open\command' -Name ""
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Wow6432Node\Classes\htmlfile\shell\open\command' -Name ""
 ```
-### 画像ファイル実行オプション
+### Image File Execution Options
 ```
 HKLM\Software\Microsoft\Windows NT\CurrentVersion\Image File Execution Options
 HKLM\Software\Microsoft\Wow6432Node\Windows NT\CurrentVersion\Image File Execution Options
 ```
 ## SysInternals
 
-注意すべきは、autorunsを見つけることができるすべてのサイトは**すでに**[**winpeas.exe**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS/winPEASexe)によって検索されています。しかし、**自動実行される**ファイルの**より包括的なリスト**を得るには、Sysinternalsの[autoruns](https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns)を使用することができます。
+autoruns を見つけられるすべての場所は、**すでに** [**winpeas.exe**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS/winPEASexe) によって**検索済み**であることに注意してください。ただし、**自動実行される**ファイルのより包括的な一覧が必要な場合は、systinternals の [autoruns](https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns) を使えます:
 ```
 autorunsc.exe -m -nobanner -a * -ct /accepteula
 ```
 ## More
 
-**レジストリのような他のAutorunsを見つけるには** [**https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2**](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082&seqNum=2)
+**より多くの Autoruns のような registry を見つけるには** [**https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2**](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082&seqNum=2)
 
 ## References
 
 - [https://resources.infosecinstitute.com/common-malware-persistence-mechanisms/#gref](https://resources.infosecinstitute.com/common-malware-persistence-mechanisms/#gref)
 - [https://attack.mitre.org/techniques/T1547/001/](https://attack.mitre.org/techniques/T1547/001/)
+- [https://attack.mitre.org/techniques/T1037/001/](https://attack.mitre.org/techniques/T1037/001/)
 - [https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082&seqNum=2)
 - [https://www.itprotoday.com/cloud-computing/how-can-i-add-boot-option-starts-alternate-shell](https://www.itprotoday.com/cloud-computing/how-can-i-add-boot-option-starts-alternate-shell)
+- [https://www.rapid7.com/blog/post/pt-metasploit-wrap-up-04-03-2026](https://www.rapid7.com/blog/post/pt-metasploit-wrap-up-04-03-2026)
 
 
 
