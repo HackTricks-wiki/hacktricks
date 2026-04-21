@@ -6,14 +6,14 @@
 
 ## WMIC
 
-**Wmic** inaweza kutumika kuendesha programu kwenye **kuanzisha**. Angalia ni binaries gani zimepangwa kuendesha kwenye kuanzisha kwa:
+**Wmic** inaweza kutumika kuendesha programu wakati wa **startup**. Angalia ni binaries zipi zimepangwa kuendeshwa wakati wa startup kwa:
 ```bash
 wmic startup get caption,command 2>nul & ^
 Get-CimInstance Win32_StartupCommand | select Name, command, Location, User | fl
 ```
 ## Scheduled Tasks
 
-**Tasks** zinaweza kuandaliwa kuendesha kwa **mara fulani**. Angalia ni binaries gani zimeandaliwa kuendesha na:
+**Tasks** zinaweza kupangwa ili ziendeshe kwa **marudio fulani**. Angalia ni binaries zipi zimepangwa kuendeshwa kwa:
 ```bash
 schtasks /query /fo TABLE /nh | findstr /v /i "disable deshab"
 schtasks /query /fo LIST 2>nul | findstr TaskName
@@ -24,9 +24,9 @@ Get-ScheduledTask | where {$_.TaskPath -notlike "\Microsoft*"} | ft TaskName,Tas
 #You can also write that content on a bat file that is being executed by a scheduled task
 schtasks /Create /RU "SYSTEM" /SC ONLOGON /TN "SchedPE" /TR "cmd /c net localgroup administrators user /add"
 ```
-## Folders
+## Folda
 
-All the binaries located in the **Startup folders are going to be executed on startup**. The common startup folders are the ones listed a continuation, but the startup folder is indicated in the registry. [Soma hii kujifunza wapi.](privilege-escalation-with-autorun-binaries.md#startup-path)
+Binaries zote zilizo katika **Startup folders zitaendeshwa wakati wa startup**. Common startup folders ni zile zilizoorodheshwa hapa chini, lakini startup folder inaonyeshwa kwenye registry. [Soma hii ili kujifunza wapi.](privilege-escalation-with-autorun-binaries.md#startup-path)
 ```bash
 dir /b "C:\Documents and Settings\All Users\Start Menu\Programs\Startup" 2>nul
 dir /b "C:\Documents and Settings\%username%\Start Menu\Programs\Startup" 2>nul
@@ -35,7 +35,7 @@ dir /b "%appdata%\Microsoft\Windows\Start Menu\Programs\Startup" 2>nul
 Get-ChildItem "C:\Users\All Users\Start Menu\Programs\Startup"
 Get-ChildItem "C:\Users\$env:USERNAME\Start Menu\Programs\Startup"
 ```
-> **FYI**: Utoaji wa archive *path traversal* vulnerabilities (kama ile inayotumiwa katika WinRAR kabla ya 7.13 – CVE-2025-8088) inaweza kutumika ku **weka payloads moja kwa moja ndani ya folda hizi za Startup wakati wa kufungua**, na kusababisha utekelezaji wa msimbo wakati wa kuingia kwa mtumiaji. Kwa maelezo zaidi kuhusu mbinu hii angalia:
+> **FYI**: Archive extraction *path traversal* vulnerabilities (such as the one abused in WinRAR prior to 7.13 – CVE-2025-8088) can be leveraged to **deposit payloads directly inside these Startup folders during decompression**, resulting in code execution on the next user logon.  For a deep-dive into this technique see:
 
 
 {{#ref}}
@@ -47,11 +47,11 @@ Get-ChildItem "C:\Users\$env:USERNAME\Start Menu\Programs\Startup"
 ## Registry
 
 > [!TIP]
-> [Kumbuka kutoka hapa](https://answers.microsoft.com/en-us/windows/forum/all/delete-registry-key/d425ae37-9dcc-4867-b49c-723dcd15147f): Kichupo cha **Wow6432Node** kinadhihirisha kuwa unatumia toleo la Windows la 64-bit. Mfumo wa uendeshaji unatumia funguo hii kuonyesha mtazamo tofauti wa HKEY_LOCAL_MACHINE\SOFTWARE kwa programu za 32-bit zinazotumika kwenye toleo la Windows la 64-bit.
+> [Note from here](https://answers.microsoft.com/en-us/windows/forum/all/delete-registry-key/d425ae37-9dcc-4867-b49c-723dcd15147f): The **Wow6432Node** registry entry indicates that you are running a 64-bit Windows version. The operating system uses this key to display a separate view of HKEY_LOCAL_MACHINE\SOFTWARE for 32-bit applications that run on 64-bit Windows versions.
 
 ### Runs
 
-**Inajulikana kwa kawaida** AutoRun registry:
+**Commonly known** AutoRun registry:
 
 - `HKLM\Software\Microsoft\Windows\CurrentVersion\Run`
 - `HKLM\Software\Microsoft\Windows\CurrentVersion\RunOnce`
@@ -65,9 +65,9 @@ Get-ChildItem "C:\Users\$env:USERNAME\Start Menu\Programs\Startup"
 - `HKLM\Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Install\Software\Microsoft\Windows\CurrentVersion\Runonce`
 - `HKLM\Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Install\Software\Microsoft\Windows\CurrentVersion\RunonceEx`
 
-Funguo za registry zinazojulikana kama **Run** na **RunOnce** zimeundwa ili kutekeleza programu kiotomatiki kila wakati mtumiaji anapoingia kwenye mfumo. Mstari wa amri uliotolewa kama thamani ya data ya funguo umewekwa mipaka ya herufi 260 au chini.
+Vifunguo vya Registry vinavyojulikana kama **Run** na **RunOnce** vimeundwa ili kuendesha programu kiotomatiki kila mara mtumiaji anapoingia kwenye mfumo. Mstari wa amri uliowekwa kama thamani ya data ya ufunguo una kikomo cha herufi 260 au chini.
 
-**Huduma inazoendesha** (zinaweza kudhibiti kuanzishwa kiotomatiki kwa huduma wakati wa boot):
+**Service runs** (inaweza kudhibiti uanzishaji wa kiotomatiki wa huduma wakati wa boot):
 
 - `HKLM\Software\Microsoft\Windows\CurrentVersion\RunServicesOnce`
 - `HKCU\Software\Microsoft\Windows\CurrentVersion\RunServicesOnce`
@@ -83,15 +83,15 @@ Funguo za registry zinazojulikana kama **Run** na **RunOnce** zimeundwa ili kute
 - `HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\RunOnceEx`
 - `HKEY_LOCAL_MACHINE\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\RunOnceEx`
 
-Katika Windows Vista na toleo la baadaye, funguo za **Run** na **RunOnce** hazizalishwi kiotomatiki. Kuingizwa katika funguo hizi kunaweza kuanzisha moja kwa moja programu au kuziweka kama utegemezi. Kwa mfano, ili kupakia faili ya DLL wakati wa kuingia, mtu anaweza kutumia funguo ya registry ya **RunOnceEx** pamoja na funguo ya "Depend". Hii inaonyeshwa kwa kuongeza kuingizwa kwa registry ili kutekeleza "C:\temp\evil.dll" wakati wa kuanzishwa kwa mfumo:
+Katika Windows Vista na matoleo ya baadaye, vifunguo vya Registry **Run** na **RunOnce** havitengenezwi kiotomatiki. Maingizo katika vifunguo hivi yanaweza kuanzisha programu moja kwa moja au kuyaweka kama utegemezi. Kwa mfano, ili kupakia faili ya DLL wakati wa logon, mtu anaweza kutumia ufunguo wa Registry **RunOnceEx** pamoja na ufunguo wa "Depend". Hii inaonyeshwa kwa kuongeza ingizo la Registry ili kutekeleza "C:\temp\evil.dll" wakati wa kuanza kwa mfumo:
 ```
 reg add HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\RunOnceEx\\0001\\Depend /v 1 /d "C:\\temp\\evil.dll"
 ```
 > [!TIP]
-> **Exploit 1**: Ikiwa unaweza kuandika ndani ya yoyote ya registry zilizotajwa ndani ya **HKLM** unaweza kuongeza mamlaka wakati mtumiaji tofauti anapoingia.
+> **Exploit 1**: Ikiwa unaweza kuandika ndani ya yoyote ya registry iliyotajwa ndani ya **HKLM** unaweza kuongeza privileges wakati user tofauti anaingia.
 
 > [!TIP]
-> **Exploit 2**: Ikiwa unaweza kufuta yoyote ya binaries zilizoorodheshwa kwenye yoyote ya registry ndani ya **HKLM** unaweza kubadilisha binary hiyo kwa backdoor wakati mtumiaji tofauti anapoingia na kuongeza mamlaka.
+> **Exploit 2**: Ikiwa unaweza ku-overwrite yoyote ya binaries zilizoonyeshwa kwenye yoyote ya registry ndani ya **HKLM** unaweza kurekebisha hiyo binary kwa backdoor wakati user tofauti anaingia na kuongeza privileges.
 ```bash
 #CMD
 reg query HKLM\Software\Microsoft\Windows\CurrentVersion\Run
@@ -147,17 +147,17 @@ Get-ItemProperty -Path 'Registry::HKLM\Software\Wow6432Node\Microsoft\Windows\Ru
 Get-ItemProperty -Path 'Registry::HKCU\Software\Microsoft\Windows\RunOnceEx'
 Get-ItemProperty -Path 'Registry::HKCU\Software\Wow6432Node\Microsoft\Windows\RunOnceEx'
 ```
-### Njia ya Kuanzisha
+### Njia ya Startup
 
 - `HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders`
 - `HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders`
 - `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders`
 - `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders`
 
-Viungo vilivyowekwa katika folda ya **Kuanzisha** vitasababisha huduma au programu kuanzishwa wakati wa kuingia kwa mtumiaji au upya wa mfumo. Mahali pa folda ya **Kuanzisha** lin defined katika rejista kwa mipangilio ya **Mashine ya Mitaa** na **Mtumiaji wa Sasa**. Hii inamaanisha kwamba kiungo chochote kilichoongezwa kwenye maeneo haya maalum ya **Kuanzisha** kitahakikisha huduma au programu iliyounganishwa inaanza baada ya mchakato wa kuingia au upya, na kufanya kuwa njia rahisi ya kupanga programu kuendesha kiotomatiki.
+Shortcuts zilizowekwa kwenye folda ya **Startup** zitaanzisha moja kwa moja services au applications ili zianze wakati wa user logon au system reboot. Mahali pa folda ya **Startup** hufafanuliwa kwenye registry kwa scopes za **Local Machine** na **Current User** zote. Hii ina maana kwamba shortcut yoyote iliyoongezwa kwenye maeneo haya maalum ya **Startup** itahakikisha service au program iliyounganishwa inaanza baada ya mchakato wa logon au reboot, na kuifanya kuwa njia rahisi ya kupanga programs ziendeshe moja kwa moja.
 
 > [!TIP]
-> Ikiwa unaweza kubadilisha yoyote ya \[User] Shell Folder chini ya **HKLM**, utaweza kuielekeza kwenye folda inayodhibitiwa na wewe na kuweka backdoor itakayotekelezwa wakati wowote mtumiaji anapoingia kwenye mfumo ikipandisha haki.
+> Ukifaulu ku-overwrite yoyote ya \[User] Shell Folder chini ya **HKLM**, utaweza kui-point kwenye folder unayodhibiti na kuweka backdoor ambayo itatekelezwa kila wakati mtumiaji anapoingia kwenye system, hivyo kuongeza privileges.
 ```bash
 reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders" /v "Common Startup"
 reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" /v "Common Startup"
@@ -169,11 +169,34 @@ Get-ItemProperty -Path 'Registry::HKCU\Software\Microsoft\Windows\CurrentVersion
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders' -Name "Common Startup"
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders' -Name "Common Startup"
 ```
+### UserInitMprLogonScript
+
+- `HKCU\Environment\UserInitMprLogonScript`
+
+Thamani hii ya registry kwa kila mtumiaji inaweza kuelekeza kwenye script au command ambayo hutekelezwa wakati huyo mtumiaji anaingia. Kimsingi ni primitive ya **persistence** kwa sababu inaendeshwa tu katika context ya mtumiaji aliyeathiriwa, lakini bado inafaa kuangaliwa wakati wa post-exploitation na ukaguzi wa autoruns.
+
+> [!TIP]
+> Ikiwa unaweza kuandika thamani hii kwa mtumiaji wa sasa, unaweza kusababisha tena execution wakati wa next interactive logon bila kuhitaji admin rights. Ikiwa unaweza kuiandika kwa hive ya mtumiaji mwingine, unaweza kupata code execution wakati huyo mtumiaji anaingia.
+```bash
+reg query "HKCU\Environment" /v "UserInitMprLogonScript"
+reg add "HKCU\Environment" /v "UserInitMprLogonScript" /t REG_SZ /d "C:\Users\Public\logon.bat" /f
+reg delete "HKCU\Environment" /v "UserInitMprLogonScript" /f
+
+Get-ItemProperty -Path 'Registry::HKCU\Environment' -Name "UserInitMprLogonScript"
+Set-ItemProperty -Path 'Registry::HKCU\Environment' -Name "UserInitMprLogonScript" -Value 'C:\Users\Public\logon.bat'
+Remove-ItemProperty -Path 'Registry::HKCU\Environment' -Name "UserInitMprLogonScript"
+```
+Maelezo:
+
+- Pendelea njia kamili hadi `.bat`, `.cmd`, `.ps1`, au faili nyingine za launcher ambazo tayari zinaweza kusomwa na user lengwa.
+- Hii husalia baada ya logoff/reboot hadi value iondolewe.
+- Tofauti na `HKLM\...\Run`, hii haipei elevation yenyewe; ni user-scope persistence.
+
 ### Winlogon Keys
 
 `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon`
 
-Kawaida, ufunguo wa **Userinit** umewekwa kwenye **userinit.exe**. Hata hivyo, ikiwa ufunguo huu umebadilishwa, executable iliyoainishwa pia itazinduliwa na **Winlogon** wakati wa kuingia kwa mtumiaji. Vivyo hivyo, ufunguo wa **Shell** unakusudia kuelekeza kwenye **explorer.exe**, ambayo ni shell ya kawaida kwa Windows.
+Kwa kawaida, key ya **Userinit** huwekwa kuwa **userinit.exe**. Hata hivyo, ikiwa key hii itabadilishwa, executable iliyobainishwa pia itazinduliwa na **Winlogon** wakati user anapo-logon. Vivyo hivyo, key ya **Shell** inakusudiwa kuelekeza kwenye **explorer.exe**, ambayo ni default shell ya Windows.
 ```bash
 reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v "Userinit"
 reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v "Shell"
@@ -181,14 +204,14 @@ Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVers
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon' -Name "Shell"
 ```
 > [!TIP]
-> Ikiwa unaweza kubadilisha thamani ya registry au binary utaweza kuongeza mamlaka.
+> Ukiweza kuandika upya thamani ya registry au binary, utaweza kuongeza privileges.
 
-### Sera za Mipangilio
+### Policy Settings
 
 - `HKLM\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer`
 - `HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer`
 
-Angalia ufunguo wa **Run**.
+Angalia key ya **Run**.
 ```bash
 reg query "HKLM\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer" /v "Run"
 reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer" /v "Run"
@@ -197,51 +220,51 @@ Get-ItemProperty -Path 'Registry::HKCU\Software\Microsoft\Windows\CurrentVersion
 ```
 ### AlternateShell
 
-### Kubadilisha Amri ya Salama ya Msimbo
+### Kubadilisha Safe Mode Command Prompt
 
-Katika Usajili wa Windows chini ya `HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot`, kuna thamani ya **`AlternateShell`** iliyowekwa kwa chaguo-msingi kuwa `cmd.exe`. Hii inamaanisha unapochagua "Salama Msimbo na Amri" wakati wa kuanzisha (kwa kubonyeza F8), `cmd.exe` inatumika. Lakini, inawezekana kuandaa kompyuta yako kuanzisha moja kwa moja katika hali hii bila kuhitaji kubonyeza F8 na kuchagua kwa mikono.
+Katika Windows Registry chini ya `HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot`, kuna thamani ya **`AlternateShell`** iliyowekwa kwa chaguo-msingi kuwa `cmd.exe`. Hii inamaanisha unapochagua "Safe Mode with Command Prompt" wakati wa startup (kwa kubonyeza F8), `cmd.exe` hutumiwa. Hata hivyo, inawezekana kusanidi kompyuta yako ili ianze kiotomatiki katika mode hii bila kuhitaji kubonyeza F8 na kuichagua mwenyewe.
 
-Hatua za kuunda chaguo la kuanzisha ili kuanzisha moja kwa moja katika "Salama Msimbo na Amri":
+Hatua za kuunda boot option ya kuanzisha kiotomatiki katika "Safe Mode with Command Prompt":
 
-1. Badilisha sifa za faili ya `boot.ini` kuondoa bendera za kusoma pekee, mfumo, na zilizofichwa: `attrib c:\boot.ini -r -s -h`
-2. Fungua `boot.ini` kwa ajili ya kuhariri.
-3. Ingiza mstari kama: `multi(0)disk(0)rdisk(0)partition(1)\WINDOWS="Microsoft Windows XP Professional" /fastdetect /SAFEBOOT:MINIMAL(ALTERNATESHELL)`
+1. Badilisha attributes za faili `boot.ini` ili kuondoa flags za read-only, system, na hidden: `attrib c:\boot.ini -r -s -h`
+2. Fungua `boot.ini` kwa kuhariri.
+3. Ongeza line kama: `multi(0)disk(0)rdisk(0)partition(1)\WINDOWS="Microsoft Windows XP Professional" /fastdetect /SAFEBOOT:MINIMAL(ALTERNATESHELL)`
 4. Hifadhi mabadiliko kwenye `boot.ini`.
-5. Rudisha sifa za awali za faili: `attrib c:\boot.ini +r +s +h`
+5. Weka upya attributes za awali za faili: `attrib c:\boot.ini +r +s +h`
 
-- **Kuvunja 1:** Kubadilisha funguo za usajili za **AlternateShell** kunaruhusu usanidi wa shell ya amri ya kawaida, huenda kwa ufikiaji usioidhinishwa.
-- **Kuvunja 2 (Ruhusa za Kuandika PATH):** Kuwa na ruhusa za kuandika sehemu yoyote ya mfumo wa **PATH** variable, hasa kabla ya `C:\Windows\system32`, kunakuwezesha kutekeleza `cmd.exe` ya kawaida, ambayo inaweza kuwa nyuma ya mlango ikiwa mfumo utaanzishwa katika Hali ya Salama.
-- **Kuvunja 3 (Ruhusa za Kuandika PATH na boot.ini):** Upatikanaji wa kuandika kwenye `boot.ini` unaruhusu kuanzisha Hali ya Salama kiotomatiki, ikirahisisha ufikiaji usioidhinishwa kwenye kuanzisha kwa pili.
+- **Exploit 1:** Kubadilisha registry key ya **AlternateShell** kunaruhusu custom command shell setup, ikiwemo uwezekano wa kupata unauthorized access.
+- **Exploit 2 (PATH Write Permissions):** Kuwa na write permissions kwenye sehemu yoyote ya system **PATH** variable, hasa kabla ya `C:\Windows\system32`, hukuruhusu kuendesha custom `cmd.exe`, ambayo inaweza kuwa backdoor ikiwa system inaanzishwa katika Safe Mode.
+- **Exploit 3 (PATH and boot.ini Write Permissions):** Kuwa na write access kwenye `boot.ini` kunaruhusu automatic Safe Mode startup, na hivyo kuwezesha unauthorized access kwenye reboot inayofuata.
 
-Ili kuangalia mipangilio ya sasa ya **AlternateShell**, tumia amri hizi:
+Ili kuangalia current **AlternateShell** setting, tumia commands hizi:
 ```bash
 reg query HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot /v AlternateShell
 Get-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SafeBoot' -Name 'AlternateShell'
 ```
 ### Installed Component
 
-Active Setup ni kipengele katika Windows ambacho **kinanzishwa kabla ya mazingira ya desktop kupakiwa kikamilifu**. Kinapa kipaumbele utekelezaji wa amri fulani, ambazo lazima zikamilike kabla ya kuendelea na kuingia kwa mtumiaji. Mchakato huu unafanyika hata kabla ya kuanzishwa kwa entries nyingine za kuanzisha, kama zile katika sehemu za Run au RunOnce za rejista.
+Active Setup ni feature katika Windows ambayo **huanza kabla ya desktop environment kupakiwa kikamilifu**. Huipa kipaumbele utekelezaji wa baadhi ya commands, ambazo lazima zikamilike kabla ya user logon kuendelea. Mchakato huu hutokea hata kabla ya startup entries nyingine, kama zile zilizo kwenye sehemu za registry za Run au RunOnce, ku-trigger.
 
-Active Setup inasimamiwa kupitia funguo zifuatazo za rejista:
+Active Setup inasimamiwa kupitia registry keys zifuatazo:
 
 - `HKLM\SOFTWARE\Microsoft\Active Setup\Installed Components`
 - `HKLM\SOFTWARE\Wow6432Node\Microsoft\Active Setup\Installed Components`
 - `HKCU\SOFTWARE\Microsoft\Active Setup\Installed Components`
 - `HKCU\SOFTWARE\Wow6432Node\Microsoft\Active Setup\Installed Components`
 
-Ndani ya funguo hizi, kuna funguo ndogo mbalimbali, kila moja ikihusiana na kipengele maalum. Thamani za funguo ambazo zina umuhimu maalum ni pamoja na:
+Ndani ya keys hizi, subkeys mbalimbali zipo, kila moja ikilingana na component maalum. Key values za umuhimu maalum ni pamoja na:
 
 - **IsInstalled:**
-- `0` inaonyesha amri ya kipengele haitatekelezwa.
-- `1` inamaanisha amri itatekelezwa mara moja kwa kila mtumiaji, ambayo ni tabia ya kawaida ikiwa thamani ya `IsInstalled` haipo.
-- **StubPath:** Inaelezea amri itakayotekelezwa na Active Setup. Inaweza kuwa amri yoyote halali ya mstari, kama kuanzisha `notepad`.
+- `0` inaonyesha command ya component haitatekelezwa.
+- `1` inamaanisha command itatekelezwa mara moja kwa kila user, ambayo ni default behavior ikiwa value ya `IsInstalled` haipo.
+- **StubPath:** Hufafanua command itakayotekelezwa na Active Setup. Inaweza kuwa command line yoyote halali, kama vile kuzindua `notepad`.
 
-**Mawasiliano ya Usalama:**
+**Security Insights:**
 
-- Kubadilisha au kuandika kwenye funguo ambapo **`IsInstalled`** imewekwa kuwa `"1"` na **`StubPath`** maalum kunaweza kusababisha utekelezaji wa amri zisizoidhinishwa, huenda kwa ajili ya kupandisha hadhi.
-- Kubadilisha faili ya binary inayorejelewa katika thamani yoyote ya **`StubPath`** pia kunaweza kufanikisha kupandisha hadhi, ikiwa na ruhusa za kutosha.
+- Kurekebisha au kuandika kwenye key ambapo **`IsInstalled`** imewekwa kuwa `"1"` pamoja na **`StubPath`** maalum kunaweza kusababisha unauthorized command execution, na hivyo kuweza kutoa privilege escalation.
+- Kubadili binary file iliyorejelewa katika value yoyote ya **`StubPath`** pia kunaweza kufanikisha privilege escalation, ikiwa kuna permissions za kutosha.
 
-Ili kukagua mipangilio ya **`StubPath`** katika vipengele vya Active Setup, amri hizi zinaweza kutumika:
+Ili kukagua usanidi wa **`StubPath`** katika Active Setup components, commands hizi zinaweza kutumika:
 ```bash
 reg query "HKLM\SOFTWARE\Microsoft\Active Setup\Installed Components" /s /v StubPath
 reg query "HKCU\SOFTWARE\Microsoft\Active Setup\Installed Components" /s /v StubPath
@@ -252,18 +275,18 @@ reg query "HKCU\SOFTWARE\Wow6432Node\Microsoft\Active Setup\Installed Components
 
 ### Overview of Browser Helper Objects (BHOs)
 
-Browser Helper Objects (BHOs) ni moduli za DLL ambazo zinaongeza vipengele vya ziada kwa Internet Explorer ya Microsoft. Zinapakia kwenye Internet Explorer na Windows Explorer kila wakati wa kuanzisha. Hata hivyo, utekelezaji wao unaweza kuzuiwa kwa kuweka ufunguo wa **NoExplorer** kuwa 1, kuzuia kutoka kupakia na matukio ya Windows Explorer.
+Browser Helper Objects (BHOs) ni moduli za DLL zinazoongeza vipengele vya ziada kwa Microsoft Internet Explorer. Hupakiwa ndani ya Internet Explorer na Windows Explorer kila zinapoanza. Hata hivyo, utekelezaji wao unaweza kuzuiwa kwa kuweka ufunguo **NoExplorer** kuwa 1, na hivyo kuwazuia kupakiwa pamoja na matukio ya Windows Explorer.
 
-BHOs zinaendana na Windows 10 kupitia Internet Explorer 11 lakini hazipati msaada katika Microsoft Edge, kivinjari cha chaguo-msingi katika matoleo mapya ya Windows.
+BHOs zinaendana na Windows 10 kupitia Internet Explorer 11 lakini hazitumiki katika Microsoft Edge, kivinjari chaguo-msingi katika matoleo mapya ya Windows.
 
-Ili kuchunguza BHOs zilizosajiliwa kwenye mfumo, unaweza kukagua funguo zifuatazo za rejista:
+Ili kuchunguza BHOs zilizosajiliwa kwenye mfumo, unaweza kukagua funguo zifuatazo za registry:
 
 - `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects`
 - `HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects`
 
-Kila BHO inawakilishwa na **CLSID** yake katika rejista, ikihudumu kama kitambulisho cha kipekee. Taarifa za kina kuhusu kila CLSID zinaweza kupatikana chini ya `HKLM\SOFTWARE\Classes\CLSID\{<CLSID>}`.
+Kila BHO huwakilishwa na **CLSID** yake katika registry, ikitumika kama kitambulisho cha kipekee. Taarifa za kina kuhusu kila CLSID zinaweza kupatikana chini ya `HKLM\SOFTWARE\Classes\CLSID\{<CLSID>}`.
 
-Ili kuuliza BHOs katika rejista, amri hizi zinaweza kutumika:
+Kwa kuuliza BHOs kwenye registry, amri hizi zinaweza kutumika:
 ```bash
 reg query "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects" /s
 reg query "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects" /s
@@ -273,7 +296,7 @@ reg query "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\B
 - `HKLM\Software\Microsoft\Internet Explorer\Extensions`
 - `HKLM\Software\Wow6432Node\Microsoft\Internet Explorer\Extensions`
 
-Kumbuka kwamba rejista itakuwa na rejista 1 mpya kwa kila dll na itawakilishwa na **CLSID**. Unaweza kupata taarifa za CLSID katika `HKLM\SOFTWARE\Classes\CLSID\{<CLSID>}`
+Kumbuka kwamba registry itakuwa na 1 new registry kwa kila dll na itawakilishwa na **CLSID**. Unaweza kupata info ya CLSID katika `HKLM\SOFTWARE\Classes\CLSID\{<CLSID>}`
 
 ### Font Drivers
 
@@ -285,7 +308,7 @@ reg query "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows NT\CurrentVersion\Font Dr
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Font Drivers'
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows NT\CurrentVersion\Font Drivers'
 ```
-### Fungua Amri
+### Fungua Command
 
 - `HKLM\SOFTWARE\Classes\htmlfile\shell\open\command`
 - `HKLM\SOFTWARE\Wow6432Node\Classes\htmlfile\shell\open\command`
@@ -302,20 +325,22 @@ HKLM\Software\Microsoft\Wow6432Node\Windows NT\CurrentVersion\Image File Executi
 ```
 ## SysInternals
 
-Kumbuka kwamba tovuti zote ambapo unaweza kupata autoruns **zimeshachunguzwa na**[ **winpeas.exe**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS/winPEASexe). Hata hivyo, kwa **orodha kamili zaidi ya** faili zinazotekelezwa kiotomatiki unaweza kutumia [autoruns ](https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns) kutoka sysinternals:
+Kumbuka kwamba tovuti zote ambako unaweza kupata autoruns tayari zimeshachunguzwa na [winpeas.exe](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS/winPEASexe). Hata hivyo, kwa orodha ya **kamilifu zaidi ya faili zinazotekelezwa kiotomatiki** unaweza kutumia [autoruns ](https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns)kutoka systinternals:
 ```
 autorunsc.exe -m -nobanner -a * -ct /accepteula
 ```
 ## More
 
-**Pata zaidi ya Autoruns kama vile registries katika** [**https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2**](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082&seqNum=2)
+**Pata Autoruns zaidi kama registries katika** [**https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2**](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082&seqNum=2)
 
 ## References
 
 - [https://resources.infosecinstitute.com/common-malware-persistence-mechanisms/#gref](https://resources.infosecinstitute.com/common-malware-persistence-mechanisms/#gref)
 - [https://attack.mitre.org/techniques/T1547/001/](https://attack.mitre.org/techniques/T1547/001/)
+- [https://attack.mitre.org/techniques/T1037/001/](https://attack.mitre.org/techniques/T1037/001/)
 - [https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082&seqNum=2)
 - [https://www.itprotoday.com/cloud-computing/how-can-i-add-boot-option-starts-alternate-shell](https://www.itprotoday.com/cloud-computing/how-can-i-add-boot-option-starts-alternate-shell)
+- [https://www.rapid7.com/blog/post/pt-metasploit-wrap-up-04-03-2026](https://www.rapid7.com/blog/post/pt-metasploit-wrap-up-04-03-2026)
 
 
 
