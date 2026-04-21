@@ -237,6 +237,77 @@ The **Create Dump** option will dump the final shellcode if any change is done t
 
 Upload your shellcode file as input and use the following recipe to decompile it: [https://gchq.github.io/CyberChef/#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)](<https://gchq.github.io/CyberChef/index.html#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)>)
 
+## MBA obfuscation deobfuscation
+
+**Mixed Boolean-Arithmetic (MBA)** obfuscation hides simple expressions such as `x + y` behind formulas that mix arithmetic (`+`, `-`, `*`) and bitwise operators (`&`, `|`, `^`, `~`, shifts). The important part is that these identities are usually only correct under **fixed-width modular arithmetic**, so carries and overflows matter:
+
+```c
+(x ^ y) + 2 * (x & y) == x + y
+```
+
+If you simplify this kind of expression with generic algebra tooling you can easily get a wrong result because the bit-width semantics were ignored.
+
+### Practical workflow
+
+1. **Keep the original bit-width** from the lifted code/IR/decompiler output (`8/16/32/64` bits).
+2. **Classify the expression** before trying to simplify it:
+   - **Linear**: weighted sums of bitwise atoms
+   - **Semilinear**: linear plus constant masks such as `x & 0xFF`
+   - **Polynomial**: products appear
+   - **Mixed**: products and bitwise logic are interleaved, often with repeated subexpressions
+3. **Verify every candidate rewrite** with random testing or an SMT proof. If the equivalence cannot be proven, keep the original expression instead of guessing.
+
+### CoBRA
+
+[**CoBRA**](https://github.com/trailofbits/CoBRA) is a practical MBA simplifier for malware analysis and protected-binary reversing. It classifies the expression and routes it through specialized pipelines instead of applying one generic rewrite pass to everything.
+
+Quick usage:
+
+```bash
+# Recover arithmetic from a logic-heavy MBA
+cobra-cli --mba "(x&y)+(x|y)"
+# x + y
+
+# Preserve fixed-width wraparound semantics
+cobra-cli --mba "(x&0xFF)+(x&0xFF00)" --bitwidth 16
+# x
+
+# Ask CoBRA to prove the rewrite with Z3
+cobra-cli --mba "(a^b)+(a&b)+(a&b)" --verify
+```
+
+Useful cases:
+
+- **Linear MBA**: CoBRA evaluates the expression on Boolean inputs, derives a signature, and races several recovery methods such as pattern matching, ANF conversion, and coefficient interpolation.
+- **Semilinear MBA**: constant-masked atoms are rebuilt with bit-partitioned reconstruction so masked regions remain correct.
+- **Polynomial/Mixed MBA**: products are decomposed into cores and repeated subexpressions can be lifted into temporaries before simplifying the outer relation.
+
+Example of a mixed identity commonly worth trying to recover:
+
+```c
+(x & y) * (x | y) + (x & ~y) * (~x & y)
+```
+
+This can collapse to:
+
+```c
+x * y
+```
+
+### Reversing notes
+
+- Prefer running CoBRA on **lifted IR expressions** or decompiler output after you isolated the exact computation.
+- Use `--bitwidth` explicitly when the expression came from masked arithmetic or narrow registers.
+- If you need a stronger proof step, check the local Z3 notes here:
+
+
+{{#ref}}
+satisfiability-modulo-theories-smt-z3.md
+{{#endref}}
+
+- CoBRA also ships as an **LLVM pass plugin** (`libCobraPass.so`), which is useful when you want to normalize MBA-heavy LLVM IR before later analysis passes.
+- Unsupported carry-sensitive mixed-domain residuals should be treated as a signal to keep the original expression and reason about the carry path manually.
+
 ## [Movfuscator](https://github.com/xoreaxeaxeax/movfuscator)
 
 This obfuscator **modifies all the instructions for `mov`**(yeah, really cool). It also uses interruptions to change executions flows. For more information about how does it works:
@@ -417,5 +488,10 @@ https://www.youtube.com/watch?v=VVbRe7wr3G4
 
 - [https://github.com/0xZ0F/Z0FCourse_ReverseEngineering](https://github.com/0xZ0F/Z0FCourse_ReverseEngineering)
 - [https://github.com/malrev/ABD](https://github.com/malrev/ABD) (Binary deobfuscation)
+
+## References
+
+- [Simplifying MBA obfuscation with CoBRA](https://blog.trailofbits.com/2026/04/03/simplifying-mba-obfuscation-with-cobra/)
+- [Trail of Bits CoBRA repository](https://github.com/trailofbits/CoBRA)
 
 {{#include ../../banners/hacktricks-training.md}}
