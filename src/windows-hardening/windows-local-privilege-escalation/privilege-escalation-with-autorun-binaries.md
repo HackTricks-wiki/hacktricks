@@ -1,4 +1,4 @@
-# Privilege Escalation with Autoruns
+# Αύξηση Δικαιωμάτων με Autoruns
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -6,14 +6,14 @@
 
 ## WMIC
 
-**Wmic** μπορεί να χρησιμοποιηθεί για να εκτελεί προγράμματα κατά την **εκκίνηση**. Δείτε ποια δυαδικά προγράμματα είναι προγραμματισμένα να εκτελούνται κατά την εκκίνηση με:
+Το **Wmic** μπορεί να χρησιμοποιηθεί για να εκτελεί προγράμματα κατά την **εκκίνηση**. Δες ποια binaries είναι προγραμματισμένα να εκτελούνται κατά την εκκίνηση με:
 ```bash
 wmic startup get caption,command 2>nul & ^
 Get-CimInstance Win32_StartupCommand | select Name, command, Location, User | fl
 ```
-## Προγραμματισμένα Καθήκοντα
+## Προγραμματισμένες Εργασίες
 
-**Καθήκοντα** μπορούν να προγραμματιστούν να εκτελούνται με **ορισμένη συχνότητα**. Δείτε ποια δυαδικά αρχεία είναι προγραμματισμένα να εκτελούνται με:
+Οι **Tasks** μπορούν να προγραμματιστούν ώστε να εκτελούνται με **ορισμένη συχνότητα**. Δείτε ποια binaries είναι προγραμματισμένα να εκτελούνται με:
 ```bash
 schtasks /query /fo TABLE /nh | findstr /v /i "disable deshab"
 schtasks /query /fo LIST 2>nul | findstr TaskName
@@ -26,7 +26,7 @@ schtasks /Create /RU "SYSTEM" /SC ONLOGON /TN "SchedPE" /TR "cmd /c net localgro
 ```
 ## Φάκελοι
 
-Όλα τα εκτελέσιμα αρχεία που βρίσκονται στους **φακέλους Εκκίνησης θα εκτελούνται κατά την εκκίνηση**. Οι κοινές φάσεις εκκίνησης είναι αυτές που αναφέρονται στη συνέχεια, αλλά ο φάκελος εκκίνησης υποδεικνύεται στο μητρώο. [Διαβάστε αυτό για να μάθετε πού.](privilege-escalation-with-autorun-binaries.md#startup-path)
+Όλα τα binaries που βρίσκονται στους **Startup folders θα εκτελούνται κατά την εκκίνηση**. Οι συνηθισμένοι startup folders είναι αυτοί που παρατίθενται στη συνέχεια, αλλά ο startup folder υποδεικνύεται στο registry. [Διαβάστε αυτό για να μάθετε πού.](privilege-escalation-with-autorun-binaries.md#startup-path)
 ```bash
 dir /b "C:\Documents and Settings\All Users\Start Menu\Programs\Startup" 2>nul
 dir /b "C:\Documents and Settings\%username%\Start Menu\Programs\Startup" 2>nul
@@ -35,20 +35,23 @@ dir /b "%appdata%\Microsoft\Windows\Start Menu\Programs\Startup" 2>nul
 Get-ChildItem "C:\Users\All Users\Start Menu\Programs\Startup"
 Get-ChildItem "C:\Users\$env:USERNAME\Start Menu\Programs\Startup"
 ```
-> **FYI**: Οι ευπάθειες *path traversal* κατά την εξαγωγή αρχείων (όπως αυτή που εκμεταλλεύτηκε το WinRAR πριν από την έκδοση 7.13 – CVE-2025-8088) μπορούν να χρησιμοποιηθούν για να **καταθέσουν payloads απευθείας μέσα σε αυτούς τους φακέλους εκκίνησης κατά την αποσυμπίεση**, με αποτέλεσμα την εκτέλεση κώδικα κατά την επόμενη σύνδεση του χρήστη. Για μια σε βάθος ανάλυση αυτής της τεχνικής δείτε:
+> **FYI**: Archive extraction *path traversal* vulnerabilities (such as the one abused in WinRAR prior to 7.13 – CVE-2025-8088) can be leveraged to **deposit payloads directly inside these Startup folders during decompression**, resulting in code execution on the next user logon.  For a deep-dive into this technique see:
+
 
 {{#ref}}
 ../../generic-hacking/archive-extraction-path-traversal.md
 {{#endref}}
 
+
+
 ## Registry
 
 > [!TIP]
-> [Σημείωση από εδώ](https://answers.microsoft.com/en-us/windows/forum/all/delete-registry-key/d425ae37-9dcc-4867-b49c-723dcd15147f): Η καταχώρηση μητρώου **Wow6432Node** υποδεικνύει ότι εκτελείτε μια 64-bit έκδοση των Windows. Το λειτουργικό σύστημα χρησιμοποιεί αυτό το κλειδί για να εμφανίσει μια ξεχωριστή προβολή του HKEY_LOCAL_MACHINE\SOFTWARE για εφαρμογές 32-bit που εκτελούνται σε 64-bit εκδόσεις των Windows.
+> [Note from here](https://answers.microsoft.com/en-us/windows/forum/all/delete-registry-key/d425ae37-9dcc-4867-b49c-723dcd15147f): The **Wow6432Node** registry entry indicates that you are running a 64-bit Windows version. The operating system uses this key to display a separate view of HKEY_LOCAL_MACHINE\SOFTWARE for 32-bit applications that run on 64-bit Windows versions.
 
 ### Runs
 
-**Γνωστό ως** AutoRun μητρώο:
+**Commonly known** AutoRun registry:
 
 - `HKLM\Software\Microsoft\Windows\CurrentVersion\Run`
 - `HKLM\Software\Microsoft\Windows\CurrentVersion\RunOnce`
@@ -62,9 +65,9 @@ Get-ChildItem "C:\Users\$env:USERNAME\Start Menu\Programs\Startup"
 - `HKLM\Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Install\Software\Microsoft\Windows\CurrentVersion\Runonce`
 - `HKLM\Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Install\Software\Microsoft\Windows\CurrentVersion\RunonceEx`
 
-Τα κλειδιά μητρώου που είναι γνωστά ως **Run** και **RunOnce** έχουν σχεδιαστεί για να εκτελούν αυτόματα προγράμματα κάθε φορά που συνδέεται ένας χρήστης στο σύστημα. Η γραμμή εντολών που ανατίθεται ως τιμή δεδομένων ενός κλειδιού περιορίζεται σε 260 χαρακτήρες ή λιγότερους.
+Τα registry keys που είναι γνωστά ως **Run** και **RunOnce** έχουν σχεδιαστεί για να εκτελούν αυτόματα προγράμματα κάθε φορά που ένας χρήστης συνδέεται στο σύστημα. Η γραμμή εντολών που αντιστοιχίζεται ως τιμή δεδομένων ενός key περιορίζεται σε 260 χαρακτήρες ή λιγότερους.
 
-**Service runs** (μπορούν να ελέγξουν την αυτόματη εκκίνηση υπηρεσιών κατά την εκκίνηση):
+**Service runs** (can control automatic startup of services during boot):
 
 - `HKLM\Software\Microsoft\Windows\CurrentVersion\RunServicesOnce`
 - `HKCU\Software\Microsoft\Windows\CurrentVersion\RunServicesOnce`
@@ -80,15 +83,15 @@ Get-ChildItem "C:\Users\$env:USERNAME\Start Menu\Programs\Startup"
 - `HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\RunOnceEx`
 - `HKEY_LOCAL_MACHINE\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\RunOnceEx`
 
-Στα Windows Vista και σε μεταγενέστερες εκδόσεις, τα κλειδιά μητρώου **Run** και **RunOnce** δεν δημιουργούνται αυτόματα. Οι καταχωρήσεις σε αυτά τα κλειδιά μπορούν είτε να ξεκινούν απευθείας προγράμματα είτε να τα καθορίζουν ως εξαρτήσεις. Για παράδειγμα, για να φορτώσετε ένα αρχείο DLL κατά την είσοδο, μπορείτε να χρησιμοποιήσετε το κλειδί μητρώου **RunOnceEx** μαζί με ένα κλειδί "Depend". Αυτό αποδεικνύεται προσθέτοντας μια καταχώρηση μητρώου για να εκτελέσετε το "C:\temp\evil.dll" κατά την εκκίνηση του συστήματος:
+Στα Windows Vista και νεότερες εκδόσεις, τα registry keys **Run** και **RunOnce** δεν δημιουργούνται αυτόματα. Οι καταχωρήσεις σε αυτά τα keys μπορούν είτε να εκκινούν απευθείας προγράμματα είτε να τα ορίζουν ως εξαρτήσεις. Για παράδειγμα, για να φορτωθεί ένα DLL file κατά το logon, θα μπορούσε να χρησιμοποιηθεί το registry key **RunOnceEx** μαζί με ένα "Depend" key. Αυτό αποδεικνύεται με την προσθήκη μιας registry entry για εκτέλεση του "C:\temp\evil.dll" κατά την εκκίνηση του συστήματος:
 ```
 reg add HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\RunOnceEx\\0001\\Depend /v 1 /d "C:\\temp\\evil.dll"
 ```
 > [!TIP]
-> **Εκμετάλλευση 1**: Αν μπορείτε να γράψετε μέσα σε οποιοδήποτε από τα αναφερόμενα μητρώα μέσα στο **HKLM**, μπορείτε να κλιμακώσετε τα προνόμια όταν συνδεθεί ένας διαφορετικός χρήστης.
+> **Exploit 1**: Αν μπορείς να γράψεις μέσα σε οποιοδήποτε από τα αναφερόμενα registry μέσα στο **HKLM** μπορείς να κάνεις privilege escalation όταν συνδεθεί ένας διαφορετικός χρήστης.
 
 > [!TIP]
-> **Εκμετάλλευση 2**: Αν μπορείτε να αντικαταστήσετε οποιοδήποτε από τα δυαδικά αρχεία που αναφέρονται σε οποιοδήποτε από τα μητρώα μέσα στο **HKLM**, μπορείτε να τροποποιήσετε αυτό το δυαδικό αρχείο με μια πίσω πόρτα όταν συνδεθεί ένας διαφορετικός χρήστης και να κλιμακώσετε τα προνόμια.
+> **Exploit 2**: Αν μπορείς να αντικαταστήσεις οποιοδήποτε από τα binaries που υποδεικνύονται σε οποιοδήποτε από τα registry μέσα στο **HKLM** μπορείς να τροποποιήσεις εκείνο το binary με ένα backdoor όταν συνδεθεί ένας διαφορετικός χρήστης και να κάνεις privilege escalation.
 ```bash
 #CMD
 reg query HKLM\Software\Microsoft\Windows\CurrentVersion\Run
@@ -151,10 +154,10 @@ Get-ItemProperty -Path 'Registry::HKCU\Software\Wow6432Node\Microsoft\Windows\Ru
 - `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders`
 - `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders`
 
-Οι συντομεύσεις που τοποθετούνται στον φάκελο **Startup** θα ενεργοποιούν αυτόματα υπηρεσίες ή εφαρμογές κατά τη διάρκεια της σύνδεσης του χρήστη ή της επανεκκίνησης του συστήματος. Η τοποθεσία του φακέλου **Startup** ορίζεται στο μητρώο για τους τομείς **Local Machine** και **Current User**. Αυτό σημαίνει ότι οποιαδήποτε συντόμευση προστεθεί σε αυτές τις καθορισμένες τοποθεσίες **Startup** θα διασφαλίσει ότι η συνδεδεμένη υπηρεσία ή πρόγραμμα θα ξεκινήσει μετά τη διαδικασία σύνδεσης ή επανεκκίνησης, καθιστώντας το μια απλή μέθοδο για τον προγραμματισμό εκτέλεσης προγραμμάτων αυτόματα.
+Τα shortcuts που τοποθετούνται στον φάκελο **Startup** θα ενεργοποιούν αυτόματα services ή applications για εκκίνηση κατά το user logon ή το system reboot. Η τοποθεσία του φακέλου **Startup** ορίζεται στο registry τόσο για τα scopes **Local Machine** όσο και **Current User**. Αυτό σημαίνει ότι οποιοδήποτε shortcut προστεθεί σε αυτές τις καθορισμένες θέσεις **Startup** θα διασφαλίζει ότι το συνδεδεμένο service ή πρόγραμμα ξεκινά μετά τη διαδικασία logon ή reboot, καθιστώντας το μια απλή μέθοδο για τον προγραμματισμό programs ώστε να εκτελούνται αυτόματα.
 
 > [!TIP]
-> Αν μπορείτε να αντικαταστήσετε οποιοδήποτε \[User] Shell Folder κάτω από **HKLM**, θα μπορείτε να το κατευθύνετε σε έναν φάκελο που ελέγχετε και να τοποθετήσετε μια backdoor που θα εκτελείται κάθε φορά που ένας χρήστης συνδέεται στο σύστημα, κλιμακώνοντας τα δικαιώματα.
+> Αν μπορείς να κάνεις overwrite οποιοδήποτε \[User] Shell Folder υπό **HKLM**, θα μπορείς να το δείξεις σε έναν φάκελο που ελέγχεις εσύ και να τοποθετήσεις ένα backdoor που θα εκτελείται κάθε φορά που ένας user κάνει log in στο system, escalating privileges.
 ```bash
 reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders" /v "Common Startup"
 reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" /v "Common Startup"
@@ -166,11 +169,34 @@ Get-ItemProperty -Path 'Registry::HKCU\Software\Microsoft\Windows\CurrentVersion
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders' -Name "Common Startup"
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders' -Name "Common Startup"
 ```
+### UserInitMprLogonScript
+
+- `HKCU\Environment\UserInitMprLogonScript`
+
+Αυτή η τιμή του registry ανά χρήστη μπορεί να δείχνει σε ένα script ή command που εκτελείται όταν αυτός ο χρήστης κάνει logon. Είναι κυρίως ένα primitive **persistence** επειδή εκτελείται μόνο στο context του επηρεασμένου χρήστη, αλλά αξίζει να ελέγχεται κατά το post-exploitation και σε autoruns reviews.
+
+> [!TIP]
+> Αν μπορείς να γράψεις αυτή την τιμή για τον τρέχοντα χρήστη, μπορείς να ξαναενεργοποιήσεις την εκτέλεση στο επόμενο interactive logon χωρίς να χρειάζεσαι admin rights. Αν μπορείς να τη γράψεις για το hive άλλου χρήστη, μπορεί να αποκτήσεις code execution όταν αυτός ο χρήστης κάνει logon.
+```bash
+reg query "HKCU\Environment" /v "UserInitMprLogonScript"
+reg add "HKCU\Environment" /v "UserInitMprLogonScript" /t REG_SZ /d "C:\Users\Public\logon.bat" /f
+reg delete "HKCU\Environment" /v "UserInitMprLogonScript" /f
+
+Get-ItemProperty -Path 'Registry::HKCU\Environment' -Name "UserInitMprLogonScript"
+Set-ItemProperty -Path 'Registry::HKCU\Environment' -Name "UserInitMprLogonScript" -Value 'C:\Users\Public\logon.bat'
+Remove-ItemProperty -Path 'Registry::HKCU\Environment' -Name "UserInitMprLogonScript"
+```
+Σημειώσεις:
+
+- Προτίμησε πλήρη paths προς `.bat`, `.cmd`, `.ps1`, ή άλλα launcher files που είναι ήδη αναγνώσιμα από τον target user.
+- Αυτό επιβιώνει από logoff/reboot μέχρι να αφαιρεθεί η τιμή.
+- Σε αντίθεση με το `HKLM\...\Run`, αυτό δεν δίνει από μόνο του elevation· είναι persistence σε user-scope.
+
 ### Winlogon Keys
 
 `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon`
 
-Συνήθως, το **Userinit** κλειδί είναι ρυθμισμένο σε **userinit.exe**. Ωστόσο, αν αυτό το κλειδί τροποποιηθεί, το καθορισμένο εκτελέσιμο θα εκκινείται επίσης από το **Winlogon** κατά την είσοδο του χρήστη. Ομοίως, το **Shell** κλειδί προορίζεται να δείχνει στο **explorer.exe**, το οποίο είναι το προεπιλεγμένο shell για τα Windows.
+Συνήθως, το **Userinit** key είναι ρυθμισμένο σε **userinit.exe**. Ωστόσο, αν αυτό το key τροποποιηθεί, το καθορισμένο executable θα εκκινηθεί επίσης από το **Winlogon** κατά το user logon. Ομοίως, το **Shell** key προορίζεται να δείχνει στο **explorer.exe**, που είναι το default shell για τα Windows.
 ```bash
 reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v "Userinit"
 reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v "Shell"
@@ -178,14 +204,14 @@ Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVers
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon' -Name "Shell"
 ```
 > [!TIP]
-> Αν μπορείτε να αντικαταστήσετε την τιμή μητρώου ή το δυαδικό αρχείο, θα μπορείτε να αναβαθμίσετε τα δικαιώματα.
+> Αν μπορείτε να αντικαταστήσετε την τιμή του registry ή το binary, θα μπορείτε να κάνετε privilege escalation.
 
-### Ρυθμίσεις Πολιτικής
+### Policy Settings
 
 - `HKLM\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer`
 - `HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer`
 
-Ελέγξτε το κλειδί **Run**.
+Ελέγξτε το **Run** key.
 ```bash
 reg query "HKLM\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer" /v "Run"
 reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer" /v "Run"
@@ -194,51 +220,51 @@ Get-ItemProperty -Path 'Registry::HKCU\Software\Microsoft\Windows\CurrentVersion
 ```
 ### AlternateShell
 
-### Αλλαγή της Γραμμής Εντολών Ασφαλούς Λειτουργίας
+### Αλλαγή του Safe Mode Command Prompt
 
-Στο Μητρώο των Windows κάτω από `HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot`, υπάρχει μια τιμή **`AlternateShell`** που είναι ρυθμισμένη από προεπιλογή σε `cmd.exe`. Αυτό σημαίνει ότι όταν επιλέγετε "Ασφαλής Λειτουργία με Γραμμή Εντολών" κατά την εκκίνηση (πατώντας F8), χρησιμοποιείται το `cmd.exe`. Ωστόσο, είναι δυνατόν να ρυθμίσετε τον υπολογιστή σας να ξεκινά αυτόματα σε αυτή τη λειτουργία χωρίς να χρειάζεται να πατήσετε F8 και να την επιλέξετε χειροκίνητα.
+Στο Windows Registry, κάτω από `HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot`, υπάρχει μια τιμή **`AlternateShell`** που έχει οριστεί από προεπιλογή σε `cmd.exe`. Αυτό σημαίνει ότι όταν επιλέγεις "Safe Mode with Command Prompt" κατά την εκκίνηση (πατώντας F8), χρησιμοποιείται το `cmd.exe`. Όμως, είναι δυνατό να ρυθμίσεις τον υπολογιστή σου ώστε να ξεκινά αυτόματα σε αυτήν τη λειτουργία χωρίς να χρειάζεται να πατήσεις F8 και να την επιλέξεις χειροκίνητα.
 
-Βήματα για τη δημιουργία μιας επιλογής εκκίνησης για αυτόματη εκκίνηση σε "Ασφαλή Λειτουργία με Γραμμή Εντολών":
+Βήματα για να δημιουργήσεις ένα boot option για αυτόματη εκκίνηση σε "Safe Mode with Command Prompt":
 
-1. Αλλάξτε τα χαρακτηριστικά του αρχείου `boot.ini` για να αφαιρέσετε τις σημαίες μόνο για ανάγνωση, συστήματος και κρυφές: `attrib c:\boot.ini -r -s -h`
-2. Ανοίξτε το `boot.ini` για επεξεργασία.
-3. Εισάγετε μια γραμμή όπως: `multi(0)disk(0)rdisk(0)partition(1)\WINDOWS="Microsoft Windows XP Professional" /fastdetect /SAFEBOOT:MINIMAL(ALTERNATESHELL)`
-4. Αποθηκεύστε τις αλλαγές στο `boot.ini`.
-5. Επαναφέρετε τα αρχικά χαρακτηριστικά του αρχείου: `attrib c:\boot.ini +r +s +h`
+1. Άλλαξε τα attributes του αρχείου `boot.ini` για να αφαιρέσεις τα read-only, system και hidden flags: `attrib c:\boot.ini -r -s -h`
+2. Άνοιξε το `boot.ini` για επεξεργασία.
+3. Πρόσθεσε μια γραμμή όπως: `multi(0)disk(0)rdisk(0)partition(1)\WINDOWS="Microsoft Windows XP Professional" /fastdetect /SAFEBOOT:MINIMAL(ALTERNATESHELL)`
+4. Αποθήκευσε τις αλλαγές στο `boot.ini`.
+5. Εφάρμοσε ξανά τα αρχικά file attributes: `attrib c:\boot.ini +r +s +h`
 
-- **Εκμετάλλευση 1:** Η αλλαγή της κλειδώματος μητρώου **AlternateShell** επιτρέπει τη ρύθμιση προσαρμοσμένης γραμμής εντολών, ενδεχομένως για μη εξουσιοδοτημένη πρόσβαση.
-- **Εκμετάλλευση 2 (Δικαιώματα Εγγραφής PATH):** Η ύπαρξη δικαιωμάτων εγγραφής σε οποιοδήποτε μέρος της μεταβλητής συστήματος **PATH**, ειδικά πριν από το `C:\Windows\system32`, σας επιτρέπει να εκτελέσετε ένα προσαρμοσμένο `cmd.exe`, το οποίο θα μπορούσε να είναι μια πίσω πόρτα αν το σύστημα ξεκινήσει σε Ασφαλή Λειτουργία.
-- **Εκμετάλλευση 3 (Δικαιώματα Εγγραφής PATH και boot.ini):** Η πρόσβαση εγγραφής στο `boot.ini` επιτρέπει την αυτόματη εκκίνηση σε Ασφαλή Λειτουργία, διευκολύνοντας τη μη εξουσιοδοτημένη πρόσβαση κατά την επόμενη επανεκκίνηση.
+- **Exploit 1:** Η αλλαγή του κλειδιού μητρώου **AlternateShell** επιτρέπει προσαρμοσμένη ρύθμιση command shell, με πιθανή χρήση για μη εξουσιοδοτημένη πρόσβαση.
+- **Exploit 2 (PATH Write Permissions):** Το να έχεις write permissions σε οποιοδήποτε μέρος της μεταβλητής **PATH** του συστήματος, ειδικά πριν από το `C:\Windows\system32`, σου επιτρέπει να εκτελέσεις ένα προσαρμοσμένο `cmd.exe`, το οποίο μπορεί να λειτουργήσει ως backdoor αν το σύστημα ξεκινήσει σε Safe Mode.
+- **Exploit 3 (PATH and boot.ini Write Permissions):** Η δυνατότητα εγγραφής στο `boot.ini` επιτρέπει την αυτόματη εκκίνηση σε Safe Mode, διευκολύνοντας τη μη εξουσιοδοτημένη πρόσβαση στην επόμενη επανεκκίνηση.
 
-Για να ελέγξετε την τρέχουσα ρύθμιση **AlternateShell**, χρησιμοποιήστε αυτές τις εντολές:
+Για να ελέγξεις την τρέχουσα ρύθμιση **AlternateShell**, χρησιμοποίησε αυτές τις εντολές:
 ```bash
 reg query HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot /v AlternateShell
 Get-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SafeBoot' -Name 'AlternateShell'
 ```
-### Εγκατεστημένο Συστατικό
+### Installed Component
 
-Το Active Setup είναι μια δυνατότητα στα Windows που **ξεκινά πριν το περιβάλλον επιφάνειας εργασίας φορτωθεί πλήρως**. Δίνει προτεραιότητα στην εκτέλεση ορισμένων εντολών, οι οποίες πρέπει να ολοκληρωθούν πριν προχωρήσει η σύνδεση του χρήστη. Αυτή η διαδικασία συμβαίνει ακόμη και πριν ενεργοποιηθούν άλλες καταχωρίσεις εκκίνησης, όπως αυτές στις ενότητες μητρώου Run ή RunOnce.
+Το Active Setup είναι μια δυνατότητα στα Windows που **ξεκινά πριν φορτωθεί πλήρως το περιβάλλον desktop**. Δίνει προτεραιότητα στην εκτέλεση ορισμένων commands, τα οποία πρέπει να ολοκληρωθούν πριν συνεχιστεί το user logon. Αυτή η διαδικασία συμβαίνει ακόμα και πριν ενεργοποιηθούν άλλα startup entries, όπως αυτά στις registry sections Run ή RunOnce.
 
-Το Active Setup διαχειρίζεται μέσω των παρακάτω κλειδιών μητρώου:
+Το Active Setup διαχειρίζεται μέσω των ακόλουθων registry keys:
 
 - `HKLM\SOFTWARE\Microsoft\Active Setup\Installed Components`
 - `HKLM\SOFTWARE\Wow6432Node\Microsoft\Active Setup\Installed Components`
 - `HKCU\SOFTWARE\Microsoft\Active Setup\Installed Components`
 - `HKCU\SOFTWARE\Wow6432Node\Microsoft\Active Setup\Installed Components`
 
-Μέσα σε αυτά τα κλειδιά, υπάρχουν διάφορα υποκλειδιά, το καθένα από τα οποία αντιστοιχεί σε ένα συγκεκριμένο συστατικό. Οι τιμές κλειδιών που έχουν ιδιαίτερο ενδιαφέρον περιλαμβάνουν:
+Μέσα σε αυτά τα keys υπάρχουν διάφορα subkeys, το καθένα από τα οποία αντιστοιχεί σε ένα συγκεκριμένο component. Τα key values ιδιαίτερου ενδιαφέροντος περιλαμβάνουν:
 
 - **IsInstalled:**
-- `0` υποδηλώνει ότι η εντολή του συστατικού δεν θα εκτελεστεί.
-- `1` σημαίνει ότι η εντολή θα εκτελεστεί μία φορά για κάθε χρήστη, που είναι η προεπιλεγμένη συμπεριφορά αν η τιμή `IsInstalled` λείπει.
-- **StubPath:** Ορίζει την εντολή που θα εκτελείται από το Active Setup. Μπορεί να είναι οποιαδήποτε έγκυρη γραμμή εντολών, όπως η εκκίνηση του `notepad`.
+- `0` υποδεικνύει ότι το command του component δεν θα εκτελεστεί.
+- `1` σημαίνει ότι το command θα εκτελεστεί μία φορά για κάθε user, που είναι και η default συμπεριφορά αν το `IsInstalled` value λείπει.
+- **StubPath:** Καθορίζει το command που θα εκτελεστεί από το Active Setup. Μπορεί να είναι οποιοδήποτε valid command line, όπως η εκκίνηση του `notepad`.
 
-**Ασφαλιστικές Γνώσεις:**
+**Security Insights:**
 
-- Η τροποποίηση ή η εγγραφή σε ένα κλειδί όπου **`IsInstalled`** είναι ρυθμισμένο σε `"1"` με μια συγκεκριμένη **`StubPath`** μπορεί να οδηγήσει σε μη εξουσιοδοτημένη εκτέλεση εντολών, ενδεχομένως για κλιμάκωση προνομίων.
-- Η αλλαγή του δυαδικού αρχείου που αναφέρεται σε οποιαδήποτε τιμή **`StubPath`** θα μπορούσε επίσης να επιτύχει κλιμάκωση προνομίων, εφόσον υπάρχουν επαρκή δικαιώματα.
+- Η τροποποίηση ή η εγγραφή σε ένα key όπου το **`IsInstalled`** έχει οριστεί σε `"1"` με ένα συγκεκριμένο **`StubPath`** μπορεί να οδηγήσει σε unauthorized command execution, ενδεχομένως για privilege escalation.
+- Η αλλοίωση του binary file που αναφέρεται σε οποιαδήποτε τιμή **`StubPath`** θα μπορούσε επίσης να επιτύχει privilege escalation, εφόσον υπάρχουν επαρκή permissions.
 
-Για να ελέγξετε τις ρυθμίσεις **`StubPath`** σε διάφορα συστατικά του Active Setup, μπορούν να χρησιμοποιηθούν οι παρακάτω εντολές:
+Για να επιθεωρήσετε τις ρυθμίσεις **`StubPath`** σε όλα τα Active Setup components, μπορούν να χρησιμοποιηθούν αυτά τα commands:
 ```bash
 reg query "HKLM\SOFTWARE\Microsoft\Active Setup\Installed Components" /s /v StubPath
 reg query "HKCU\SOFTWARE\Microsoft\Active Setup\Installed Components" /s /v StubPath
@@ -247,32 +273,32 @@ reg query "HKCU\SOFTWARE\Wow6432Node\Microsoft\Active Setup\Installed Components
 ```
 ### Browser Helper Objects
 
-### Overview of Browser Helper Objects (BHOs)
+### Επισκόπηση των Browser Helper Objects (BHOs)
 
-Τα Browser Helper Objects (BHOs) είναι DLL modules που προσθέτουν επιπλέον δυνατότητες στον Internet Explorer της Microsoft. Φορτώνονται στον Internet Explorer και τον Windows Explorer σε κάθε εκκίνηση. Ωστόσο, η εκτέλεσή τους μπορεί να αποκλειστεί ρυθμίζοντας το **NoExplorer** key σε 1, αποτρέποντάς τα από το να φορτωθούν με τις περιπτώσεις του Windows Explorer.
+Τα Browser Helper Objects (BHOs) είναι DLL modules που προσθέτουν επιπλέον features στο Microsoft Internet Explorer. Φορτώνονται στο Internet Explorer και στο Windows Explorer με κάθε εκκίνηση. Ωστόσο, η εκτέλεσή τους μπορεί να μπλοκαριστεί ορίζοντας το **NoExplorer** key σε 1, εμποδίζοντάς τα να φορτωθούν με instances του Windows Explorer.
 
-Τα BHOs είναι συμβατά με τα Windows 10 μέσω του Internet Explorer 11 αλλά δεν υποστηρίζονται στον Microsoft Edge, τον προεπιλεγμένο περιηγητή σε νεότερες εκδόσεις των Windows.
+Τα BHOs είναι συμβατά με το Windows 10 μέσω του Internet Explorer 11, αλλά δεν υποστηρίζονται στο Microsoft Edge, το default browser στις νεότερες εκδόσεις του Windows.
 
-Για να εξερευνήσετε τα BHOs που είναι καταχωρημένα σε ένα σύστημα, μπορείτε να ελέγξετε τα εξής κλειδιά μητρώου:
+Για να εξερευνήσεις τα BHOs που είναι registered σε ένα σύστημα, μπορείς να ελέγξεις τα ακόλουθα registry keys:
 
 - `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects`
 - `HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects`
 
-Κάθε BHO εκπροσωπείται από το **CLSID** του στο μητρώο, που λειτουργεί ως μοναδικός αναγνωριστικός αριθμός. Λεπτομερείς πληροφορίες σχετικά με κάθε CLSID μπορούν να βρεθούν κάτω από `HKLM\SOFTWARE\Classes\CLSID\{<CLSID>}`.
+Κάθε BHO αναπαρίσταται από το **CLSID** του στο registry, λειτουργώντας ως μοναδικό identifier. Λεπτομερείς πληροφορίες για κάθε CLSID μπορούν να βρεθούν στο `HKLM\SOFTWARE\Classes\CLSID\{<CLSID>}`.
 
-Για την αναζήτηση BHOs στο μητρώο, μπορούν να χρησιμοποιηθούν οι εξής εντολές:
+Για querying των BHOs στο registry, μπορούν να χρησιμοποιηθούν αυτές οι εντολές:
 ```bash
 reg query "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects" /s
 reg query "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects" /s
 ```
-### Επεκτάσεις Internet Explorer
+### Internet Explorer Extensions
 
 - `HKLM\Software\Microsoft\Internet Explorer\Extensions`
 - `HKLM\Software\Wow6432Node\Microsoft\Internet Explorer\Extensions`
 
-Σημειώστε ότι η μητρώο θα περιέχει 1 νέο κλειδί μητρώου για κάθε dll και θα εκπροσωπείται από το **CLSID**. Μπορείτε να βρείτε τις πληροφορίες CLSID στο `HKLM\SOFTWARE\Classes\CLSID\{<CLSID>}`
+Σημείωσε ότι το registry θα περιέχει 1 νέο registry ανά κάθε dll και θα αναπαρίσταται από το **CLSID**. Μπορείς να βρεις τις πληροφορίες του CLSID στο `HKLM\SOFTWARE\Classes\CLSID\{<CLSID>}`
 
-### Οδηγοί Γραμματοσειρών
+### Font Drivers
 
 - `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Font Drivers`
 - `HKLM\SOFTWARE\WOW6432Node\Microsoft\Windows NT\CurrentVersion\Font Drivers`
@@ -282,7 +308,7 @@ reg query "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows NT\CurrentVersion\Font Dr
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Font Drivers'
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows NT\CurrentVersion\Font Drivers'
 ```
-### Άνοιγμα Εντολής
+### Άνοιγμα Command
 
 - `HKLM\SOFTWARE\Classes\htmlfile\shell\open\command`
 - `HKLM\SOFTWARE\Wow6432Node\Classes\htmlfile\shell\open\command`
@@ -299,20 +325,22 @@ HKLM\Software\Microsoft\Wow6432Node\Windows NT\CurrentVersion\Image File Executi
 ```
 ## SysInternals
 
-Σημειώστε ότι όλοι οι ιστότοποι όπου μπορείτε να βρείτε autoruns έχουν **ήδη ερευνηθεί από**[ **winpeas.exe**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS/winPEASexe). Ωστόσο, για μια **πιο ολοκληρωμένη λίστα με αυτόματα εκτελούμενα** αρχεία μπορείτε να χρησιμοποιήσετε [autoruns ](https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns)από τα systinternals:
+Σημείωσε ότι όλα τα sites όπου μπορείς να βρεις autoruns είναι **ήδη searched by**[ **winpeas.exe**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS/winPEASexe). Ωστόσο, για μια **πιο comprehensive list of auto-executed** file μπορείς να χρησιμοποιήσεις [autoruns ](https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns)from systinternals:
 ```
 autorunsc.exe -m -nobanner -a * -ct /accepteula
 ```
 ## Περισσότερα
 
-**Βρείτε περισσότερα Autoruns όπως οι καταχωρήσεις στο** [**https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2**](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082&seqNum=2)
+**Βρείτε περισσότερα Autoruns όπως registries στο** [**https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2**](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082&seqNum=2)
 
 ## Αναφορές
 
 - [https://resources.infosecinstitute.com/common-malware-persistence-mechanisms/#gref](https://resources.infosecinstitute.com/common-malware-persistence-mechanisms/#gref)
 - [https://attack.mitre.org/techniques/T1547/001/](https://attack.mitre.org/techniques/T1547/001/)
+- [https://attack.mitre.org/techniques/T1037/001/](https://attack.mitre.org/techniques/T1037/001/)
 - [https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082&seqNum=2)
 - [https://www.itprotoday.com/cloud-computing/how-can-i-add-boot-option-starts-alternate-shell](https://www.itprotoday.com/cloud-computing/how-can-i-add-boot-option-starts-alternate-shell)
+- [https://www.rapid7.com/blog/post/pt-metasploit-wrap-up-04-03-2026](https://www.rapid7.com/blog/post/pt-metasploit-wrap-up-04-03-2026)
 
 
 
