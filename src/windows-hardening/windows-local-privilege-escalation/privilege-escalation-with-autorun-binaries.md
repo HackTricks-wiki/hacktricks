@@ -6,14 +6,14 @@
 
 ## WMIC
 
-**Wmic** kan gebruik word om programme by **opstart** te loop. Sien watter binaire geprogrammeer is om by opstart te loop met:
+**Wmic** kan gebruik word om programme by **startup** te laat loop. Sien watter binaries geprogrammeer is om by startup te loop met:
 ```bash
 wmic startup get caption,command 2>nul & ^
 Get-CimInstance Win32_StartupCommand | select Name, command, Location, User | fl
 ```
 ## Geskeduleerde Take
 
-**Take** kan geskeduleer word om met **sekere frekwensie** te loop. Sien watter binaire geskeduleer is om te loop met:
+**Take** kan geskeduleer word om met **sekere frekwensie** te loop. Kyk watter binaries geskeduleer is om te loop met:
 ```bash
 schtasks /query /fo TABLE /nh | findstr /v /i "disable deshab"
 schtasks /query /fo LIST 2>nul | findstr TaskName
@@ -24,9 +24,9 @@ Get-ScheduledTask | where {$_.TaskPath -notlike "\Microsoft*"} | ft TaskName,Tas
 #You can also write that content on a bat file that is being executed by a scheduled task
 schtasks /Create /RU "SYSTEM" /SC ONLOGON /TN "SchedPE" /TR "cmd /c net localgroup administrators user /add"
 ```
-## Gids
+## Folders
 
-Alle die binaries wat in die **Startup-gidse geleë is, gaan by opstart uitgevoer word**. Die algemene opstartgidse is diegene wat hieronder gelys is, maar die opstartgids word in die register aangedui. [Read this to learn where.](privilege-escalation-with-autorun-binaries.md#startup-path)
+Al die binaries wat in die **Startup folders** geleë is, gaan by startup uitgevoer word. Die algemene startup folders is dié wat in die volgende lys verskyn, maar die startup folder word in die registry aangedui. [Lees dit om te leer waar.](privilege-escalation-with-autorun-binaries.md#startup-path)
 ```bash
 dir /b "C:\Documents and Settings\All Users\Start Menu\Programs\Startup" 2>nul
 dir /b "C:\Documents and Settings\%username%\Start Menu\Programs\Startup" 2>nul
@@ -35,7 +35,7 @@ dir /b "%appdata%\Microsoft\Windows\Start Menu\Programs\Startup" 2>nul
 Get-ChildItem "C:\Users\All Users\Start Menu\Programs\Startup"
 Get-ChildItem "C:\Users\$env:USERNAME\Start Menu\Programs\Startup"
 ```
-> **FYI**: Argiefonttrekking *pad traversering* kwesbaarhede (soos die een wat in WinRAR voor 7.13 misbruik is – CVE-2025-8088) kan benut word om **payloads direk binne hierdie Startup-gidse te deponeer tydens dekompressie**, wat lei tot kode-uitvoering by die volgende gebruiker aanmelding.  Vir 'n diepgaande blik op hierdie tegniek, sien:
+> **FYI**: Archive extraction *path traversal* vulnerabilities (such as the one abused in WinRAR prior to 7.13 – CVE-2025-8088) can be leveraged to **deposit payloads directly inside these Startup folders during decompression**, resulting in code execution on the next user logon.  Vir ’n diepduik in hierdie technique, sien:
 
 
 {{#ref}}
@@ -44,14 +44,14 @@ Get-ChildItem "C:\Users\$env:USERNAME\Start Menu\Programs\Startup"
 
 
 
-## Register
+## Registry
 
 > [!TIP]
-> [Nota van hier](https://answers.microsoft.com/en-us/windows/forum/all/delete-registry-key/d425ae37-9dcc-4867-b49c-723dcd15147f): Die **Wow6432Node** registerinskrywing dui aan dat jy 'n 64-bis Windows weergawe uitvoer. Die bedryfstelsel gebruik hierdie sleutel om 'n aparte weergawe van HKEY_LOCAL_MACHINE\SOFTWARE vir 32-bis toepassings wat op 64-bis Windows weergawes loop, te vertoon.
+> [Note from here](https://answers.microsoft.com/en-us/windows/forum/all/delete-registry-key/d425ae37-9dcc-4867-b49c-723dcd15147f): The **Wow6432Node** registry entry indicates that you are running a 64-bit Windows version. The operating system uses this key to display a separate view of HKEY_LOCAL_MACHINE\SOFTWARE for 32-bit applications that run on 64-bit Windows versions.
 
-### Loop
+### Runs
 
-**Algemeen bekend** AutoRun register:
+**Commonly known** AutoRun registry:
 
 - `HKLM\Software\Microsoft\Windows\CurrentVersion\Run`
 - `HKLM\Software\Microsoft\Windows\CurrentVersion\RunOnce`
@@ -65,9 +65,9 @@ Get-ChildItem "C:\Users\$env:USERNAME\Start Menu\Programs\Startup"
 - `HKLM\Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Install\Software\Microsoft\Windows\CurrentVersion\Runonce`
 - `HKLM\Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Install\Software\Microsoft\Windows\CurrentVersion\RunonceEx`
 
-Register sleutels bekend as **Run** en **RunOnce** is ontwerp om outomaties programme uit te voer elke keer wanneer 'n gebruiker in die stelsel aanmeld. Die opdraglyn wat as 'n sleutel se datavalue toegeken word, is beperk tot 260 karakters of minder.
+Registry keys known as **Run** and **RunOnce** are designed to automatically execute programs every time a user logs into the system. The command line assigned as a key's data value is limited to 260 characters or less.
 
-**Diens loop** (kan outomatiese opstart van dienste tydens opstart beheer):
+**Service runs** (can control automatic startup of services during boot):
 
 - `HKLM\Software\Microsoft\Windows\CurrentVersion\RunServicesOnce`
 - `HKCU\Software\Microsoft\Windows\CurrentVersion\RunServicesOnce`
@@ -83,15 +83,15 @@ Register sleutels bekend as **Run** en **RunOnce** is ontwerp om outomaties prog
 - `HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\RunOnceEx`
 - `HKEY_LOCAL_MACHINE\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\RunOnceEx`
 
-Op Windows Vista en later weergawes, word die **Run** en **RunOnce** register sleutels nie outomaties gegenereer nie. Inskrywings in hierdie sleutels kan of direkte programstart of as afhanklikhede gespesifiseer word. Byvoorbeeld, om 'n DLL-lêer by aanmelding te laai, kan 'n mens die **RunOnceEx** register sleutel saam met 'n "Depend" sleutel gebruik. Dit word demonstreer deur 'n registerinskrywing toe te voeg om "C:\temp\evil.dll" tydens die stelselaanloop uit te voer:
+On Windows Vista and later versions, the **Run** and **RunOnce** registry keys are not automatically generated. Entries in these keys can either directly start programs or specify them as dependencies. For instance, to load a DLL file at logon, one could use the **RunOnceEx** registry key along with a "Depend" key. This is demonstrated by adding a registry entry to execute "C:\temp\evil.dll" during the system start-up:
 ```
 reg add HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\RunOnceEx\\0001\\Depend /v 1 /d "C:\\temp\\evil.dll"
 ```
 > [!TIP]
-> **Exploit 1**: As jy binne enige van die genoemde register in **HKLM** kan skryf, kan jy voorregte verhoog wanneer 'n ander gebruiker aanmeld.
+> **Exploit 1**: As jy binne enige van die genoemde registry in **HKLM** kan skryf, kan jy privileges eskaleer wanneer ’n ander user aanmeld.
 
 > [!TIP]
-> **Exploit 2**: As jy enige van die binaire wat op enige van die register in **HKLM** aangedui is, kan oorskryf, kan jy daardie binêre met 'n backdoor wysig wanneer 'n ander gebruiker aanmeld en voorregte verhoog.
+> **Exploit 2**: As jy enige van die binaries wat in enige van die registry binne **HKLM** aangedui word kan oorskryf, kan jy daardie binary met ’n backdoor wysig wanneer ’n ander user aanmeld en privileges eskaleer.
 ```bash
 #CMD
 reg query HKLM\Software\Microsoft\Windows\CurrentVersion\Run
@@ -154,10 +154,10 @@ Get-ItemProperty -Path 'Registry::HKCU\Software\Wow6432Node\Microsoft\Windows\Ru
 - `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders`
 - `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders`
 
-Kortpaaie wat in die **Startup** gids geplaas word, sal outomaties dienste of toepassings aktiveer tydens gebruikersaanmelding of stelselhervatting. Die ligging van die **Startup** gids is in die register gedefinieer vir beide die **Local Machine** en **Current User** skope. Dit beteken enige kortpad wat by hierdie gespesifiseerde **Startup** plekke gevoeg word, sal verseker dat die gekoppelde diens of program begin na die aanmeld- of herlaai-proses, wat dit 'n eenvoudige metode maak om programme outomaties te skeduleer.
+Kortpaaie wat in die **Startup**-lêergids geplaas word, sal outomaties dienste of toepassings laat begin tydens gebruiker-aanmelding of stelselherlaai. Die ligging van die **Startup**-lêergids word in die register vir beide die **Local Machine**- en **Current User**-omgewings gedefinieer. Dit beteken enige kortpad wat by hierdie gespesifiseerde **Startup**-liggings gevoeg word, sal verseker dat die gekoppelde diens of program ná die aanmeld- of herlaaiproses begin, wat dit 'n eenvoudige metode maak om programme te skeduleer om outomaties te loop.
 
 > [!TIP]
-> As jy enige \[User] Shell Folder onder **HKLM** kan oorskryf, sal jy in staat wees om dit na 'n gids wat deur jou beheer word, te wys en 'n backdoor te plaas wat uitgevoer sal word wanneer 'n gebruiker in die stelsel aanmeld, wat voorregte verhoog.
+> As jy enige \[User] Shell Folder onder **HKLM** kan oorskryf, sal jy dit na 'n gids onder jou beheer kan wys en 'n backdoor daar plaas wat uitgevoer sal word enige keer as 'n gebruiker by die stelsel aanmeld, wat privileges eskaleer.
 ```bash
 reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders" /v "Common Startup"
 reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" /v "Common Startup"
@@ -169,11 +169,34 @@ Get-ItemProperty -Path 'Registry::HKCU\Software\Microsoft\Windows\CurrentVersion
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders' -Name "Common Startup"
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders' -Name "Common Startup"
 ```
-### Winlogon Sleutels
+### UserInitMprLogonScript
+
+- `HKCU\Environment\UserInitMprLogonScript`
+
+Hierdie per-gebruiker registerwaarde kan wys na ’n script of command wat uitgevoer word wanneer daardie user aanmeld. Dit is hoofsaaklik ’n **persistence**-primitief omdat dit net in die konteks van die geaffekteerde user loop, maar dit is steeds die moeite werd om na te gaan tydens post-exploitation en autoruns-oorsigte.
+
+> [!TIP]
+> As jy hierdie waarde vir die huidige user kan skryf, kan jy uitvoering weer aktiveer by die volgende interaktiewe aanmelding sonder admin rights. As jy dit vir ’n ander user hive kan skryf, kan jy moontlik code execution kry wanneer daardie user aanmeld.
+```bash
+reg query "HKCU\Environment" /v "UserInitMprLogonScript"
+reg add "HKCU\Environment" /v "UserInitMprLogonScript" /t REG_SZ /d "C:\Users\Public\logon.bat" /f
+reg delete "HKCU\Environment" /v "UserInitMprLogonScript" /f
+
+Get-ItemProperty -Path 'Registry::HKCU\Environment' -Name "UserInitMprLogonScript"
+Set-ItemProperty -Path 'Registry::HKCU\Environment' -Name "UserInitMprLogonScript" -Value 'C:\Users\Public\logon.bat'
+Remove-ItemProperty -Path 'Registry::HKCU\Environment' -Name "UserInitMprLogonScript"
+```
+Notas:
+
+- Verkies volledige paaie na `.bat`, `.cmd`, `.ps1`, of ander launcher-lêers wat reeds leesbaar is vir die teikengebruiker.
+- Dit oorleef logoff/reboot totdat die waarde verwyder word.
+- Anders as `HKLM\...\Run`, verleen dit **nie** op sigself elevation nie; dit is user-scope persistence.
+
+### Winlogon Keys
 
 `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon`
 
-Tipies is die **Userinit** sleutel op **userinit.exe** gestel. As hierdie sleutel egter gewysig word, sal die gespesifiseerde uitvoerbare lêer ook deur **Winlogon** begin word wanneer die gebruiker aanmeld. Op soortgelyke wyse is die **Shell** sleutel bedoel om na **explorer.exe** te verwys, wat die standaard dop vir Windows is.
+Tipies is die **Userinit** key ingestel op **userinit.exe**. As hierdie key egter gewysig word, sal die gespesifiseerde executable ook deur **Winlogon** geloods word wanneer die gebruiker aanmeld. Net so is die **Shell** key bedoel om na **explorer.exe** te wys, wat die verstek shell vir Windows is.
 ```bash
 reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v "Userinit"
 reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v "Shell"
@@ -181,14 +204,14 @@ Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVers
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon' -Name "Shell"
 ```
 > [!TIP]
-> As jy die registriewaarde of die binêre kan oorskryf, sal jy in staat wees om voorregte te verhoog.
+> As jy die registry value of die binary kan oorskryf, sal jy privileges kan eskaleer.
 
-### Beleid Instellings
+### Policy Settings
 
 - `HKLM\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer`
 - `HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer`
 
-Kontroleer **Run** sleutel.
+Kyk na die **Run** key.
 ```bash
 reg query "HKLM\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer" /v "Run"
 reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer" /v "Run"
@@ -197,51 +220,51 @@ Get-ItemProperty -Path 'Registry::HKCU\Software\Microsoft\Windows\CurrentVersion
 ```
 ### AlternateShell
 
-### Verandering van die Veilige Modus Opdragprompt
+### Verander die Safe Mode Command Prompt
 
-In die Windows-register onder `HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot`, is daar 'n **`AlternateShell`** waarde wat standaard op `cmd.exe` gestel is. Dit beteken wanneer jy "Veilige Modus met Opdragprompt" tydens opstart (deur F8 te druk), word `cmd.exe` gebruik. Maar, dit is moontlik om jou rekenaar op te stel om outomaties in hierdie modus te begin sonder om F8 te druk en dit handmatig te kies.
+In die Windows Registry onder `HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot`, is daar ’n **`AlternateShell`**-waarde wat by verstek op `cmd.exe` gestel is. Dit beteken wanneer jy "Safe Mode with Command Prompt" kies tydens opstart (deur F8 te druk), word `cmd.exe` gebruik. Maar dit is moontlik om jou rekenaar so op te stel dat dit outomaties in hierdie modus begin sonder om F8 te hoef te druk en dit handmatig te kies.
 
-Stappe om 'n opstartopsie te skep vir outomatiese begin in "Veilige Modus met Opdragprompt":
+Stappe om ’n boot option te skep om outomaties in "Safe Mode with Command Prompt" te begin:
 
-1. Verander eienskappe van die `boot.ini` lêer om lees-slegs, stelsels, en verborge vlae te verwyder: `attrib c:\boot.ini -r -s -h`
-2. Maak `boot.ini` oop vir redigering.
-3. Voeg 'n lyn soos: `multi(0)disk(0)rdisk(0)partition(1)\WINDOWS="Microsoft Windows XP Professional" /fastdetect /SAFEBOOT:MINIMAL(ALTERNATESHELL)` in.
-4. Stoor veranderinge aan `boot.ini`.
-5. Herstel die oorspronklike lêer eienskappe: `attrib c:\boot.ini +r +s +h`
+1. Verander die attributes van die `boot.ini`-lêer om die read-only, system, en hidden flags te verwyder: `attrib c:\boot.ini -r -s -h`
+2. Open `boot.ini` vir editing.
+3. Voeg ’n lyn by soos: `multi(0)disk(0)rdisk(0)partition(1)\WINDOWS="Microsoft Windows XP Professional" /fastdetect /SAFEBOOT:MINIMAL(ALTERNATESHELL)`
+4. Stoor die changes aan `boot.ini`.
+5. Pas die oorspronklike file attributes weer toe: `attrib c:\boot.ini +r +s +h`
 
-- **Exploit 1:** Die verandering van die **AlternateShell** register sleutel laat 'n pasgemaakte opdragskil opstelling toe, moontlik vir ongeoorloofde toegang.
-- **Exploit 2 (PATH Skryf Toestemmings):** Om skryftoestemmings te hê na enige deel van die stelsel **PATH** veranderlike, veral voor `C:\Windows\system32`, laat jou toe om 'n pasgemaakte `cmd.exe` uit te voer, wat 'n agterdeur kan wees as die stelsel in Veilige Modus begin.
-- **Exploit 3 (PATH en boot.ini Skryf Toestemmings):** Skryf toegang tot `boot.ini` stel outomatiese Veilige Modus opstart in staat, wat ongeoorloofde toegang op die volgende herbegin vergemaklik.
+- **Exploit 1:** Verander die **AlternateShell** registry key laat custom command shell setup toe, met potensiaal vir unauthorized access.
+- **Exploit 2 (PATH Write Permissions):** As jy write permissions het na enige deel van die system **PATH** variable, veral voor `C:\Windows\system32`, kan jy ’n custom `cmd.exe` execute, wat as ’n backdoor kan dien as die system in Safe Mode begin word.
+- **Exploit 3 (PATH and boot.ini Write Permissions):** Write access tot `boot.ini` maak automatic Safe Mode startup moontlik, wat unauthorized access op die volgende reboot vergemaklik.
 
-Om die huidige **AlternateShell** instelling te kontroleer, gebruik hierdie opdragte:
+Om die huidige **AlternateShell**-instelling te check, gebruik hierdie commands:
 ```bash
 reg query HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot /v AlternateShell
 Get-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SafeBoot' -Name 'AlternateShell'
 ```
-### Gemonteerde Komponent
+### Geïnstalleerde komponent
 
-Active Setup is 'n kenmerk in Windows wat **begin voordat die desktopomgewing ten volle gelaai is**. Dit prioritiseer die uitvoering van sekere opdragte, wat moet voltooi voordat die gebruiker se aanmelding voortgaan. Hierdie proses vind plaas selfs voordat ander opstartinge, soos dié in die Run of RunOnce registries, geaktiveer word.
+Active Setup is ’n funksie in Windows wat **voor die lessenaaromgewing ten volle gelaai is, begin**. Dit gee voorrang aan die uitvoering van sekere opdragte, wat klaar moet wees voordat die gebruiker-aanmelding voortgaan. Hierdie proses vind selfs plaas voordat ander opstartinskrywings, soos dié in die Run- of RunOnce-registerafdelings, geaktiveer word.
 
-Active Setup word bestuur deur die volgende registriesleutels:
+Active Setup word deur die volgende registersleutels bestuur:
 
 - `HKLM\SOFTWARE\Microsoft\Active Setup\Installed Components`
 - `HKLM\SOFTWARE\Wow6432Node\Microsoft\Active Setup\Installed Components`
 - `HKCU\SOFTWARE\Microsoft\Active Setup\Installed Components`
 - `HKCU\SOFTWARE\Wow6432Node\Microsoft\Active Setup\Installed Components`
 
-Binne hierdie sleutels bestaan verskeie subsleutels, elk wat ooreenstem met 'n spesifieke komponent. Sleutelwaardes van besondere belang sluit in:
+Binne hierdie sleutels bestaan verskeie subsleutels, wat elk ooreenstem met ’n spesifieke komponent. Sleutelwaardes van besondere belang sluit in:
 
 - **IsInstalled:**
-- `0` dui aan dat die komponent se opdrag nie sal uitvoer nie.
-- `1` beteken die opdrag sal een keer vir elke gebruiker uitvoer, wat die standaardgedrag is as die `IsInstalled` waarde ontbreek.
-- **StubPath:** Definieer die opdrag wat deur Active Setup uitgevoer moet word. Dit kan enige geldige opdraglyn wees, soos om `notepad` te begin.
+- `0` dui aan dat die komponent se opdrag nie uitgevoer sal word nie.
+- `1` beteken dat die opdrag een keer vir elke gebruiker uitgevoer sal word, wat die verstekgedrag is as die `IsInstalled`-waarde ontbreek.
+- **StubPath:** Definieer die opdrag wat deur Active Setup uitgevoer moet word. Dit kan enige geldige command line wees, soos om `notepad` te begin.
 
 **Sekuriteitsinsigte:**
 
-- Om 'n sleutel te wysig of na te skryf waar **`IsInstalled`** op `"1"` gestel is met 'n spesifieke **`StubPath`** kan lei tot ongeoorloofde opdraguitvoering, moontlik vir privilige-escalasie.
-- Om die binêre lêer wat in enige **`StubPath`** waarde verwys, te verander kan ook privilige-escalasie bereik, gegewe voldoende toestemmings.
+- Om ’n sleutel te wysig of daarna te skryf waar **`IsInstalled`** op `"1"` gestel is met ’n spesifieke **`StubPath`**, kan lei tot ongemagtigde opdraguitvoering, moontlik vir privilege escalation.
+- Die verander van die binary file waarna in enige **`StubPath`**-waarde verwys word, kan ook privilege escalation bewerkstellig, mits voldoende permissions bestaan.
 
-Om die **`StubPath`** konfigurasies oor Active Setup komponente te inspekteer, kan hierdie opdragte gebruik word:
+Om die **`StubPath`**-konfigurasies oor Active Setup-komponente te inspekteer, kan hierdie commands gebruik word:
 ```bash
 reg query "HKLM\SOFTWARE\Microsoft\Active Setup\Installed Components" /s /v StubPath
 reg query "HKCU\SOFTWARE\Microsoft\Active Setup\Installed Components" /s /v StubPath
@@ -252,30 +275,30 @@ reg query "HKCU\SOFTWARE\Wow6432Node\Microsoft\Active Setup\Installed Components
 
 ### Oorsig van Browser Helper Objects (BHOs)
 
-Browser Helper Objects (BHOs) is DLL-modules wat ekstra funksies by Microsoft se Internet Explorer voeg. Hulle laai in Internet Explorer en Windows Explorer by elke begin. Tog kan hul uitvoering geblokkeer word deur die **NoExplorer** sleutel op 1 te stel, wat voorkom dat hulle saam met Windows Explorer-instansies laai.
+Browser Helper Objects (BHOs) is DLL modules wat ekstra kenmerke by Microsoft se Internet Explorer voeg. Hulle laai in Internet Explorer en Windows Explorer in by elke opstart. Tog kan hul uitvoering geblokkeer word deur die **NoExplorer**-sleutel op 1 te stel, wat verhoed dat hulle saam met Windows Explorer-instanse laai.
 
-BHOs is versoenbaar met Windows 10 via Internet Explorer 11, maar word nie in Microsoft Edge, die standaardblaaier in nuwer weergawes van Windows, ondersteun nie.
+BHOs is versoenbaar met Windows 10 via Internet Explorer 11, maar word nie ondersteun in Microsoft Edge, die verstekblaaier in nuwer weergawes van Windows nie.
 
-Om BHOs wat op 'n stelsel geregistreer is te verken, kan jy die volgende registrasiesleutels inspekteer:
+Om BHOs wat op 'n stelsel geregistreer is te verken, kan jy die volgende registry keys inspekteer:
 
 - `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects`
 - `HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects`
 
-Elke BHO word verteenwoordig deur sy **CLSID** in die registrasie, wat as 'n unieke identifiseerder dien. Gedetailleerde inligting oor elke CLSID kan onder `HKLM\SOFTWARE\Classes\CLSID\{<CLSID>}` gevind word.
+Elke BHO word in die registry deur sy **CLSID** voorgestel, wat as 'n unieke identifiseerder dien. Gedetailleerde inligting oor elke CLSID kan gevind word onder `HKLM\SOFTWARE\Classes\CLSID\{<CLSID>}`.
 
-Vir die opvra van BHOs in die registrasie, kan hierdie opdragte gebruik word:
+Vir die navraag van BHOs in die registry, kan hierdie commands gebruik word:
 ```bash
 reg query "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects" /s
 reg query "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects" /s
 ```
-### Internet Explorer Uitbreidings
+### Internet Explorer Extensions
 
 - `HKLM\Software\Microsoft\Internet Explorer\Extensions`
 - `HKLM\Software\Wow6432Node\Microsoft\Internet Explorer\Extensions`
 
-Let daarop dat die registrasie 1 nuwe registrasie per elke dll sal bevat en dit sal verteenwoordig word deur die **CLSID**. Jy kan die CLSID-inligting vind in `HKLM\SOFTWARE\Classes\CLSID\{<CLSID>}`
+Let op dat die registry 1 nuwe registry per elke dll sal bevat en dit sal deur die **CLSID** verteenwoordig word. Jy kan die CLSID-inligting vind in `HKLM\SOFTWARE\Classes\CLSID\{<CLSID>}`
 
-### Lettertipe bestuurders
+### Font Drivers
 
 - `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Font Drivers`
 - `HKLM\SOFTWARE\WOW6432Node\Microsoft\Windows NT\CurrentVersion\Font Drivers`
@@ -295,14 +318,14 @@ reg query "HKLM\SOFTWARE\Wow6432Node\Classes\htmlfile\shell\open\command" /v ""
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Classes\htmlfile\shell\open\command' -Name ""
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Wow6432Node\Classes\htmlfile\shell\open\command' -Name ""
 ```
-### Beeldlêer Uitvoeringsopsies
+### Image File Execution Options
 ```
 HKLM\Software\Microsoft\Windows NT\CurrentVersion\Image File Execution Options
 HKLM\Software\Microsoft\Wow6432Node\Windows NT\CurrentVersion\Image File Execution Options
 ```
 ## SysInternals
 
-Let daarop dat al die webwerwe waar jy autoruns kan vind **reeds deur**[ **winpeas.exe**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS/winPEASexe) gesoek is. egter, vir 'n **meer omvattende lys van outomaties uitgevoerde** lêers kan jy [autoruns ](https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns) van sysinternals gebruik:
+Let wel dat al die plekke waar jy autoruns kan vind, **reeds deursoek word deur**[ **winpeas.exe**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS/winPEASexe). Maar, vir 'n **meer omvattende lys van outomaties uitgevoerde** lêers kan jy [autoruns ](https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns)van systinternals gebruik:
 ```
 autorunsc.exe -m -nobanner -a * -ct /accepteula
 ```
@@ -314,8 +337,10 @@ autorunsc.exe -m -nobanner -a * -ct /accepteula
 
 - [https://resources.infosecinstitute.com/common-malware-persistence-mechanisms/#gref](https://resources.infosecinstitute.com/common-malware-persistence-mechanisms/#gref)
 - [https://attack.mitre.org/techniques/T1547/001/](https://attack.mitre.org/techniques/T1547/001/)
+- [https://attack.mitre.org/techniques/T1037/001/](https://attack.mitre.org/techniques/T1037/001/)
 - [https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082&seqNum=2)
 - [https://www.itprotoday.com/cloud-computing/how-can-i-add-boot-option-starts-alternate-shell](https://www.itprotoday.com/cloud-computing/how-can-i-add-boot-option-starts-alternate-shell)
+- [https://www.rapid7.com/blog/post/pt-metasploit-wrap-up-04-03-2026](https://www.rapid7.com/blog/post/pt-metasploit-wrap-up-04-03-2026)
 
 
 
