@@ -495,6 +495,83 @@ wm.addView(v, lp);
 
 Operator control primitives often seen: `BACK`, `HOME`, `RECENTS`, `CLICKTXT`/`CLICKDESC`/`CLICKELEMENT`/`CLICKHINT`, `TAP`/`SWIPE`, `NOTIFICATIONS`, `OPNPKG`, `VNC`/`VNCA11Y` (screen sharing).
 
+## Multi-stage Android dropper with WebView bridge, JNI string decoder, and staged DEX loading
+
+CERT Polska's 03 April 2026 analysis of **cifrat** is a good reference for a modern phishing-delivered Android loader where the visible APK is only an installer shell. The reusable tradecraft is not the family name, but the way the stages are chained:
+
+1. Phishing page delivers a lure APK.
+2. Stage 0 requests `REQUEST_INSTALL_PACKAGES`, loads a native `.so`, decrypts an embedded blob, and installs stage 2 with **PackageInstaller sessions**.
+3. Stage 2 decrypts another hidden asset, treats it as a ZIP, and **dynamically loads DEX** for the final RAT.
+4. Final stage abuses Accessibility/MediaProjection and uses WebSockets for control/data.
+
+### WebView JavaScript bridge as the installer controller
+
+Instead of using WebView only for fake branding, the lure can expose a bridge that lets a local/remote page fingerprint the device and trigger native install logic:
+
+```java
+webView.addJavascriptInterface(controller, "Android");
+webView.loadUrl("file:///android_asset/bootstrap.html");
+
+@JavascriptInterface
+public String get_SYSINFO() { /* SDK, model, manufacturer, locale */ }
+
+@JavascriptInterface
+public void start() { mainHandler.post(this::installStage2); }
+```
+
+Triage ideas:
+- grep for `addJavascriptInterface`, `@JavascriptInterface`, `loadUrl("file:///android_asset/` and remote phishing URLs used in the same activity
+- watch for bridges exposing installer-like methods (`start`, `install`, `openAccessibility`, `requestOverlay`)
+- if the bridge is backed by a phishing page, treat it as an operator/controller surface, not just UI
+
+### Native string decoding registered in `JNI_OnLoad`
+
+One useful pattern is a Java method that looks harmless but is actually backed by `RegisterNatives` during `JNI_OnLoad`. In cifrat, the decoder ignored the first char, used the second as a 1-byte XOR key, hex-decoded the remainder, and transformed each byte as `((b - i) & 0xff) ^ key`.
+
+Minimal offline reproduction:
+
+```python
+def decode_native(s: str) -> str:
+    key = ord(s[1]); raw = bytes.fromhex(s[2:])
+    return bytes((((b - i) & 0xFF) ^ key) for i, b in enumerate(raw)).decode()
+```
+
+Use this when you see:
+- repeated calls to one native-backed Java method for URLs, package names, or keys
+- `JNI_OnLoad` resolving classes and calling `RegisterNatives`
+- no meaningful plaintext strings in DEX, but many short hex-looking constants passed into one helper
+
+### Layered payload staging: XOR resource -> installed APK -> RC4-like asset -> ZIP -> DEX
+
+This family used two unpacking layers that are worth hunting generically:
+
+- **Stage 0**: decrypt `res/raw/*.bin` with an XOR key derived through the native decoder, then install the plaintext APK through `PackageInstaller.createSession` -> `openWrite` -> `fsync` -> `commit`
+- **Stage 2**: extract an innocuous asset such as `FH.svg`, decrypt it with an RC4-like routine, parse the result as a ZIP, then load hidden DEX files
+
+This is a strong indicator of a real dropper/loader pipeline because each layer keeps the next stage opaque to basic static scanning.
+
+Quick triage checklist:
+- `REQUEST_INSTALL_PACKAGES` plus `PackageInstaller` session calls
+- receivers for `PACKAGE_ADDED` / `PACKAGE_REPLACED` to continue the chain after install
+- encrypted blobs under `res/raw/` or `assets/` with non-media extensions
+- `DexClassLoader` / `InMemoryDexClassLoader` / ZIP handling close to custom decryptors
+
+### Native anti-debugging through `/proc/self/maps`
+
+The native bootstrap also scanned `/proc/self/maps` for `libjdwp.so` and aborted if present. This is a practical early anti-analysis check because JDWP-backed debugging leaves a recognizable mapped library:
+
+```c
+FILE *f = fopen("/proc/self/maps", "r");
+while (fgets(line, sizeof(line), f)) {
+  if (strstr(line, "libjdwp.so")) return -1;
+}
+```
+
+Hunting ideas:
+- grep native code / decompiler output for `/proc/self/maps`, `libjdwp.so`, `frida`, `qemu`, `goldfish`, `ranchu`
+- if Frida hooks arrive too late, inspect `.init_array` and `JNI_OnLoad` first
+- treat anti-debug + string decoder + staged install as one cluster, not independent findings
+
 ## References
 
 - [New Android Malware Herodotus Mimics Human Behaviour to Evade Detection](https://www.threatfabric.com/blogs/new-android-malware-herodotus-mimics-human-behaviour-to-evade-detection)
@@ -509,6 +586,7 @@ Operator control primitives often seen: `BACK`, `HOME`, `RECENTS`, `CLICKTXT`/`C
 - [DomainTools SecuritySnacks – ID/VN Banker Trojans (IOCs)](https://github.com/DomainTools/SecuritySnacks/blob/main/2025/BankerTrojan-ID-VN)
 - [Socket.IO](https://socket.io)
 - [Bypassing Android 13 Restrictions with SecuriDropper (ThreatFabric)](https://www.threatfabric.com/blogs/droppers-bypassing-android-13-restrictions)
+- [Analysis of cifrat: could this be an evolution of a mobile RAT?](https://cert.pl/en/posts/2026/04/cifrat-analysis/)
 - [Web Clips payload settings for Apple devices](https://support.apple.com/guide/deployment/web-clips-payload-settings-depbc7c7808/web)
 
 {{#include ../../banners/hacktricks-training.md}}
