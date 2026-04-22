@@ -259,6 +259,30 @@ Paths where a malware could be installed as a service:
 - **\~/.config/autostart/**: For user-specific automatic startup applications, which can be a hiding spot for user-targeted malware.
 - **/lib/systemd/system/**: System-wide default unit files provided by installed packages.
 
+#### Hunt: systemd timers and transient units
+
+Systemd persistence is not limited to `.service` files. Investigate `.timer` units, user-level units, and **transient units** created at runtime.
+
+```bash
+# Enumerate timers and inspect referenced services
+systemctl list-timers --all
+systemctl cat <name>.timer
+systemctl cat <name>.service
+
+# Search common system and user paths
+find /etc/systemd/system /run/systemd/system /usr/lib/systemd/system -maxdepth 3 \( -name '*.service' -o -name '*.timer' \) -ls
+find /home -path '*/.config/systemd/user/*' -type f \( -name '*.service' -o -name '*.timer' \) -ls
+
+# Transient units created via systemd-run often land here
+find /run/systemd/transient -maxdepth 2 -type f -ls 2>/dev/null
+
+# Pull execution history for a suspicious unit
+journalctl -u <name>.service
+journalctl _SYSTEMD_UNIT=<name>.service
+```
+
+Transient units are easy to miss because `/run/systemd/transient/` is **non-persistent**. If you are collecting a live image, grab it before shutdown.
+
 ### Kernel Modules
 
 Linux kernel modules, often utilized by malware as rootkit components, are loaded at system boot. The directories and files critical for these modules include:
@@ -297,6 +321,58 @@ Linux systems track user activities and system events through various log files.
 
 > [!TIP]
 > Linux system logs and audit subsystems may be disabled or deleted in an intrusion or malware incident. Because logs on Linux systems generally contain some of the most useful information about malicious activities, intruders routinely delete them. Therefore, when examining available log files, it is important to look for gaps or out of order entries that might be an indication of deletion or tampering.
+
+### Journald triage (`journalctl`)
+
+On modern Linux hosts, the **systemd journal** is usually the highest-value source for **service execution**, **auth events**, **package operations**, and **kernel/user-space messages**. During live response, try to preserve both the **persistent** journal (`/var/log/journal/`) and the **runtime** journal (`/run/log/journal/`) because short-lived attacker activity may only exist in the latter.
+
+```bash
+# List available boots and pivot around the suspicious one
+journalctl --list-boots
+journalctl -b -1
+
+# Review a mounted image or copied journal directory offline
+journalctl --directory /mnt/image/var/log/journal --list-boots
+journalctl --directory /mnt/image/var/log/journal -b -1
+
+# Inspect a single journal file and check integrity/corruption
+journalctl --file system.journal --header
+journalctl --file system.journal --verify
+
+# High-signal filters
+journalctl -u ssh.service
+journalctl _SYSTEMD_UNIT=cron.service
+journalctl _UID=0
+journalctl _EXE=/usr/sbin/useradd
+```
+
+Useful journal fields for triage include `_SYSTEMD_UNIT`, `_EXE`, `_COMM`, `_CMDLINE`, `_UID`, `_GID`, `_PID`, `_BOOT_ID`, and `MESSAGE`. If journald was configured without persistent storage, expect only recent data under `/run/log/journal/`.
+
+### Audit framework triage (`auditd`)
+
+If `auditd` is enabled, prefer it whenever you need **process attribution** for file changes, command execution, login activity, or package installation.
+
+```bash
+# Fast summaries
+aureport --start today --summary -i
+aureport --start today --login --failed -i
+aureport --start today --executable -i
+
+# Search raw events
+ausearch --start today -m EXECVE -i
+ausearch --start today -ua 1000 -m USER_CMD,EXECVE -i
+ausearch --start today -m SERVICE_START,SERVICE_STOP -i
+
+# Software installation/update events (especially useful on RHEL-like systems)
+ausearch -m SOFTWARE_UPDATE -i
+```
+
+When rules were deployed with keys, pivot from them instead of grepping raw logs:
+
+```bash
+ausearch --start this-week -k <rule_key> --raw | aureport --file --summary -i
+ausearch --start this-week -k <rule_key> --raw | aureport --user --summary -i
+```
 
 **Linux maintains a command history for each user**, stored in:
 
@@ -413,6 +489,28 @@ Useful fields:
 - **dtime**: deletion timestamp set when the inode was unlinked.
 - **ctime/mtime**: helps correlate metadata/content changes with incident timeline.
 
+### Capabilities, xattrs, and preload-based userland rootkits
+
+Modern Linux persistence often avoids obvious `setuid` binaries and instead abuses **file capabilities**, **extended attributes**, and the dynamic loader.
+
+```bash
+# Enumerate file capabilities (think cap_setuid, cap_sys_admin, cap_dac_override)
+getcap -r / 2>/dev/null
+
+# Inspect extended attributes on suspicious binaries and libraries
+getfattr -d -m - /path/to/suspicious/file 2>/dev/null
+
+# Global preload hook affecting every dynamically linked binary
+cat /etc/ld.so.preload 2>/dev/null
+stat /etc/ld.so.preload 2>/dev/null
+
+# If a suspicious library is referenced, inspect its metadata and links
+ls -lah /lib /lib64 /usr/lib /usr/lib64 /usr/local/lib 2>/dev/null | grep -E '\\.so(\\.|$)'
+ldd /bin/ls
+```
+
+Pay special attention to libraries referenced from **writable** paths such as `/tmp`, `/dev/shm`, `/var/tmp`, or odd locations under `/usr/local/lib`. Also check for capability-bearing binaries outside normal package ownership and correlate them with package verification results (`rpm -Va`, `dpkg --verify`, `debsums`).
+
 ## Compare files of different filesystem versions
 
 ### Filesystem Version Comparison Summary
@@ -456,7 +554,8 @@ git diff --no-index --diff-filter=D path/to/old_version/ path/to/new_version/
 - **Book: Malware Forensics Field Guide for Linux Systems: Digital Forensics Field Guides**
 
 - [Red Canary – Patching for persistence: How DripDropper Linux malware moves through the cloud](https://redcanary.com/blog/threat-intelligence/dripdropper-linux-malware/)
+- [Forensic Analysis of Linux Journals](https://stuxnet999.github.io/dfir/linux-journal-forensics/)
+- [Red Hat Enterprise Linux 9 - Auditing the system](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/security_hardening/auditing-the-system_security-hardening)
 
 {{#include ../../banners/hacktricks-training.md}}
-
 
