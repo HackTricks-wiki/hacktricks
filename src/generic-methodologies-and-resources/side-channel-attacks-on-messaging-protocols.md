@@ -45,6 +45,7 @@ Rely on clients that expose the underlying E2EE protocol so you can craft packet
       --message-timestamp 1712345678901 --remove  # encodes empty emoji
   ```
 * **Threema:** Source of the Android client documents how delivery receipts are consolidated before they leave the device, explaining why the side channel has negligible bandwidth there.
+* **Turnkey PoCs:** public projects such as `device-activity-tracker` and `careless-whisper-python` already automate silent delete/reaction probes and RTT classification. Treat them as ready-made reconnaissance helpers rather than protocol references; the interesting part is that they confirm the attack is operationally simple once raw client access exists.
 
 When custom tooling is unavailable, you can still trigger silent actions from WhatsApp Web or Signal Desktop and sniff the encrypted websocket/WebRTC channel, but raw APIs remove UI delays and allow invalid operations.
 
@@ -89,6 +90,17 @@ When custom tooling is unavailable, you can still trigger silent actions from Wh
 2. Build simple classifiers (thresholding or two-cluster k-means) that label each RTT as "active" or "idle". Aggregate labels into streaks to derive bedtimes, commutes, work hours, or when the desktop companion is active.
 3. Correlate simultaneous probes towards every device to see when users switch from mobile to desktop, when companions go offline, and whether the app is rate limited by push vs persistent socket.
 
+## Location inference from delivery RTT
+
+The same timing primitive can be repurposed to infer where the recipient is, not just whether they are active. The `Hope of Delivery` work showed that training on RTT distributions for known receiver locations lets an attacker later classify the victim's location from delivery confirmations alone:
+
+* Build a baseline for the same target while they are in several known places (home, office, campus, country A vs country B, etc.).
+* For each location, collect many normal message RTTs and extract simple features such as median, variance, or percentile buckets.
+* During the real attack, compare the new probe series against the trained clusters. The paper reports that even locations within the same city can often be separated, with `>80%` accuracy in a 3-location setting.
+* This works best when the attacker controls the sender environment and probes under similar network conditions, because the measured path includes the recipient access network, wake-up latency, and messenger infrastructure.
+
+Unlike the silent reaction/edit/delete attacks above, location inference does not require invalid message IDs or stealthy state-changing packets. Plain messages with normal delivery confirmations are enough, so the tradeoff is lower stealth but wider applicability across messengers.
+
 ## Stealthy resource exhaustion
 
 Because every silent probe must be decrypted and acknowledged, continuously sending reaction toggles, invalid edits, or delete-for-everyone packets creates an application-layer DoS:
@@ -100,9 +112,11 @@ Because every silent probe must be decrypted and acknowledged, continuously send
 ## References
 
 - [Careless Whisper: Exploiting Silent Delivery Receipts to Monitor Users on Mobile Instant Messengers](https://arxiv.org/html/2411.11194v4)
+- [Hope of Delivery: Extracting User Locations From Mobile Instant Messengers](https://www.ndss-symposium.org/wp-content/uploads/2023-188-paper.pdf)
 - [whatsmeow](https://github.com/tulir/whatsmeow)
 - [Cobalt](https://github.com/Auties00/Cobalt)
 - [signal-cli](https://github.com/AsamK/signal-cli)
 - [libsignal-service-java](https://github.com/signalapp/libsignal-service-java)
+- [device-activity-tracker](https://github.com/gommzystudio/device-activity-tracker)
 
 {{#include ../banners/hacktricks-training.md}}
