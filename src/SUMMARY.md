@@ -287,6 +287,7 @@
   - [Integrity Levels](windows-hardening/windows-local-privilege-escalation/integrity-levels.md)
   - [JuicyPotato](windows-hardening/windows-local-privilege-escalation/juicypotato.md)
   - [Leaked Handle Exploitation](windows-hardening/windows-local-privilege-escalation/leaked-handle-exploitation.md)
+  - [Local NTLM Reflection via SMB Arbitrary Port](windows-hardening/windows-local-privilege-escalation/local-ntlm-reflection-via-smb-arbitrary-port.md)
   - [MSI Wrapper](windows-hardening/windows-local-privilege-escalation/msi-wrapper.md)
   - [Named Pipe Client Impersonation](windows-hardening/windows-local-privilege-escalation/named-pipe-client-impersonation.md)
   - [Privilege Escalation with Autoruns](windows-hardening/windows-local-privilege-escalation/privilege-escalation-with-autorun-binaries.md)
