@@ -342,6 +342,12 @@ krbrelayx.py -t TARGET.DOMAIN.LOCAL -smb2support
 * Kerberos AP-REQ containing a subsession key and a client principal equal to the hostname.
 * Windows Event 4624/4648 SYSTEM logons immediately followed by remote SMB writes from the same host.
 
+For the **March 2026** local reflection variant that abuses **SMB arbitrary ports** and **TCP connection reuse** to reach `NT AUTHORITY\SYSTEM`, see:
+
+{{#ref}}
+../windows-local-privilege-escalation/local-ntlm-reflection-via-smb-arbitrary-port.md
+{{#endref}}
+
 ## References
 * [NTLM Reflection is Dead, Long Live NTLM Reflection!](https://www.synacktiv.com/en/publications/la-reflexion-ntlm-est-morte-vive-la-reflexion-ntlm-analyse-approfondie-de-la-cve-2025.html)
 * [MSRC – CVE-2025-33073](https://msrc.microsoft.com/update-guide/vulnerability/CVE-2025-33073)

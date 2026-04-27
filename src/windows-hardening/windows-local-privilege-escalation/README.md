@@ -56,6 +56,12 @@ Secure Desktop accessibility registry propagation can be abused for an arbitrary
 secure-desktop-accessibility-registry-propagation-regpwn.md
 {{#endref}}
 
+Recent Windows builds also introduced an **SMB arbitrary-port** LPE path where a privileged local NTLM authentication is reflected over a reused SMB TCP connection:
+
+{{#ref}}
+local-ntlm-reflection-via-smb-arbitrary-port.md
+{{#endref}}
+
 ## System Info
 
 ### Version info enumeration
