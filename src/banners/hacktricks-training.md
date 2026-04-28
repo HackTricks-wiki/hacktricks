@@ -1,14 +1,15 @@
 > [!TIP]
-> AWS 해킹 배우기 및 연습하기:<img src="../../../../../images/arte.png" alt="" style="width:auto;height:24px;vertical-align:middle;">[**HackTricks Training AWS Red Team Expert (ARTE)**](https://training.hacktricks.xyz/courses/arte)<img src="../../../../../images/arte.png" alt="" style="width:auto;height:24px;vertical-align:middle;">\
-> GCP 해킹 배우기 및 연습하기: <img src="../../../../../images/grte.png" alt="" style="width:auto;height:24px;vertical-align:middle;">[**HackTricks Training GCP Red Team Expert (GRTE)**](https://training.hacktricks.xyz/courses/grte)<img src="../../../../../images/grte.png" alt="" style="width:auto;height:24px;vertical-align:middle;">
-> Azure 해킹 배우기 및 연습하기: <img src="../../../../../images/azrte.png" alt="" style="width:auto;height:24px;vertical-align:middle;">[**HackTricks Training Azure Red Team Expert (AzRTE)**](https://training.hacktricks.xyz/courses/azrte)<img src="../../../../../images/azrte.png" alt="" style="width:auto;height:24px;vertical-align:middle;">
+> AWS Hacking을 배우고 연습하세요:<img src="../../../../../images/arte.png" alt="" style="width:auto;height:24px;vertical-align:middle;">[**HackTricks Training AWS Red Team Expert (ARTE)**](https://hacktricks-training.com/courses/arte)<img src="../../../../../images/arte.png" alt="" style="width:auto;height:24px;vertical-align:middle;">\
+> GCP Hacking을 배우고 연습하세요: <img src="../../../../../images/grte.png" alt="" style="width:auto;height:24px;vertical-align:middle;">[**HackTricks Training GCP Red Team Expert (GRTE)**](https://hacktricks-training.com/courses/grte)<img src="../../../../../images/grte.png" alt="" style="width:auto;height:24px;vertical-align:middle;">\
+> Az Hacking을 배우고 연습하세요: <img src="../../../../../images/azrte.png" alt="" style="width:auto;height:24px;vertical-align:middle;">[**HackTricks Training Azure Red Team Expert (AzRTE)**](https://hacktricks-training.com/courses/azrte)<img src="../../../../../images/azrte.png" alt="" style="width:auto;height:24px;vertical-align:middle;">
+> 평가 트랙 (**ARTA/GRTA/AzRTA**)과 [**Linux Hacking Expert (LHE)**](https://hacktricks-training.com/courses/lhe/)를 보려면 [**전체 HackTricks Training 카탈로그**](https://hacktricks-training.com/courses/)를 둘러보세요.
 >
 > <details>
 >
 > <summary>HackTricks 지원하기</summary>
 >
-> - [**구독 계획**](https://github.com/sponsors/carlospolop) 확인하기!
-> - **💬 [**디스코드 그룹**](https://discord.gg/hRep4RUj7f) 또는 [**텔레그램 그룹**](https://t.me/peass)에 참여하거나 **트위터** 🐦 [**@hacktricks_live**](https://twitter.com/hacktricks_live)**를 팔로우하세요.**
-> - **[**HackTricks**](https://github.com/carlospolop/hacktricks) 및 [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) 깃허브 리포지토리에 PR을 제출하여 해킹 트릭을 공유하세요.**
+> - [**subscription plans**](https://github.com/sponsors/carlospolop)를 확인하세요!
+> - 💬 [**Discord group**](https://discord.gg/hRep4RUj7f), [**telegram group**](https://t.me/peass)에 **참여**하고, X/Twitter에서 [**@hacktricks_live**](https://twitter.com/hacktricks_live)를 **팔로우**하거나, [**LinkedIn page**](https://www.linkedin.com/company/hacktricks/)와 [**YouTube channel**](https://www.youtube.com/@hacktricks_LIVE)을 확인하세요.
+> - [**HackTricks**](https://github.com/carlospolop/hacktricks) 및 [**HackTricks Cloud**](https://github.com/carlospolop/hacktricks-cloud) github repos에 PR을 제출해 hacking tricks를 공유하세요.
 >
 > </details>
