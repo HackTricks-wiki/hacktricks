@@ -2,9 +2,9 @@
 
 <figure><img src="images/hacktricks.gif" alt=""><figcaption></figcaption></figure>
 
-_Logos e motion design do HackTricks por_ [_@ppieranacho_](https://www.instagram.com/ppieranacho/)_._
+_Logos e design de movimento do Hacktricks por_ [_@ppieranacho_](https://www.instagram.com/ppieranacho/)_._
 
-### Execute o HackTricks localmente
+### Executar HackTricks Localmente
 ```bash
 # Download latest version of hacktricks
 git clone https://github.com/HackTricks-wiki/hacktricks
@@ -31,7 +31,7 @@ export LANG="master" # Leave master for english
 # Run the docker container indicating the path to the hacktricks folder
 docker run -d --rm --platform linux/amd64 -p 3337:3000 --name hacktricks -v $(pwd)/hacktricks:/app ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image bash -c "mkdir -p ~/.ssh && ssh-keyscan -H github.com >> ~/.ssh/known_hosts && cd /app && git config --global --add safe.directory /app && git checkout $LANG && git pull && MDBOOK_PREPROCESSOR__HACKTRICKS__ENV=dev mdbook serve --hostname 0.0.0.0"
 ```
-Your local copy of HackTricks will be **disponível em [http://localhost:3337](http://localhost:3337)** after <5 minutes (ele precisa compilar o livro, tenha paciência).
+Your local copy of HackTricks estará **disponível em [http://localhost:3337](http://localhost:3337)** após <5 minutos (ele precisa compilar o livro, tenha paciência).
 
 ## Corporate Sponsors
 
@@ -39,11 +39,11 @@ Your local copy of HackTricks will be **disponível em [http://localhost:3337](h
 
 <figure><img src="images/stm (1).png" alt=""><figcaption></figcaption></figure>
 
-[**STM Cyber**](https://www.stmcyber.com) is a ótima cybersecurity company cujo slogan é **HACK THE UNHACKABLE**. Eles fazem sua própria pesquisa e desenvolvem suas próprias hacking tools to **offer several valuable cybersecurity services** like pentesting, Red teams and training.
+[**STM Cyber**](https://www.stmcyber.com) é uma ótima empresa de cybersecurity cujo slogan é **HACK THE UNHACKABLE**. Eles fazem sua própria pesquisa e desenvolvem suas próprias ferramentas de hacking para **oferecer vários serviços valiosos de cybersecurity** como pentesting, Red teams e training.
 
-You can check their **blog** in [**https://blog.stmcyber.com**](https://blog.stmcyber.com)
+Você pode conferir o **blog** deles em [**https://blog.stmcyber.com**](https://blog.stmcyber.com)
 
-**STM Cyber** also support cybersecurity open source projects like HackTricks :)
+**STM Cyber** também apoia projetos open source de cybersecurity como HackTricks :)
 
 ---
 
@@ -51,9 +51,9 @@ You can check their **blog** in [**https://blog.stmcyber.com**](https://blog.stm
 
 <figure><img src="images/image (47).png" alt=""><figcaption></figcaption></figure>
 
-**Intigriti** is the **Europe's #1** ethical hacking and **bug bounty platform.**
+**Intigriti** é a **plataforma de ethical hacking e bug bounty #1 da Europa.**
 
-**Bug bounty tip**: **sign up** for **Intigriti**, a premium **bug bounty platform created by hackers, for hackers**! Join us at [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) today, and start earning bounties up to **$100,000**!
+**Bug bounty tip**: **inscreva-se** na **Intigriti**, uma plataforma premium de **bug bounty criada por hackers, para hackers**! Junte-se a nós em [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) hoje e comece a ganhar recompensas de até **$100,000**!
 
 {{#ref}}
 https://go.intigriti.com/hacktricks
@@ -65,13 +65,13 @@ https://go.intigriti.com/hacktricks
 
 <figure><img src="images/image (3).png" alt=""><figcaption></figcaption></figure>
 
-Join [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) server to communicate with experienced hackers and bug bounty hunters!
+Junte-se ao servidor [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) para se comunicar com hackers experientes e bug bounty hunters!
 
-- **Hacking Insights:** Engage with content that delves into the thrill and challenges of hacking
-- **Real-Time Hack News:** Keep up-to-date with fast-paced hacking world through real-time news and insights
-- **Latest Announcements:** Stay informed with the newest bug bounties launching and crucial platform updates
+- **Hacking Insights:** Interaja com conteúdo que aprofunda a emoção e os desafios do hacking
+- **Real-Time Hack News:** Fique por dentro do mundo acelerado do hacking por meio de notícias e insights em tempo real
+- **Latest Announcements:** Mantenha-se informado sobre os bug bounties mais recentes lançados e atualizações importantes da plataforma
 
-**Join us on** [**Discord**](https://discord.com/invite/N3FrSbmwdy) and start collaborating with top hackers today!
+**Junte-se a nós no** [**Discord**](https://discord.com/invite/N3FrSbmwdy) e comece a colaborar com os melhores hackers hoje mesmo!
 
 ---
 
@@ -79,18 +79,18 @@ Join [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) server to 
 
 <figure><img src="images/modern_security_logo.png" alt="Modern Security"><figcaption></figcaption></figure>
 
-Modern Security delivers **practical AI Security training** with an **engineering-first, hands-on lab approach**. Our courses are built for security engineers, AppSec professionals, and developers who want to **build, break, and secure real AI/LLM-powered applications**.
+Modern Security oferece **treinamento prático em AI Security** com uma abordagem **hands-on de laboratório, priorizando engenharia**. Nossos cursos são feitos para security engineers, profissionais de AppSec e developers que querem **construir, quebrar e proteger aplicações reais alimentadas por AI/LLM**.
 
-The **AI Security Certification** focuses on real-world skills, including:
-- Securing LLM and AI-powered applications
-- Threat modeling for AI systems
-- Embeddings, vector databases, and RAG security
-- LLM attacks, abuse scenarios, and practical defenses
-- Secure design patterns and deployment considerations
+A **AI Security Certification** foca em habilidades do mundo real, incluindo:
+- Proteger aplicações com LLM e AI
+- Threat modeling para sistemas de AI
+- Embeddings, vector databases e segurança de RAG
+- Ataques a LLM, cenários de abuso e defesas práticas
+- Padrões de design seguro e considerações de deployment
 
-All courses are **on-demand**, **lab-driven**, and designed around **real-world security tradeoffs**, not just theory.
+Todos os cursos são **on-demand**, **baseados em laboratórios** e projetados em torno de **tradeoffs de segurança do mundo real**, não apenas teoria.
 
-👉 More details on the AI Security course:
+👉 Mais detalhes sobre o curso de AI Security:
 https://www.modernsecurity.io/courses/ai-security-certification
 
 {{#ref}}
@@ -103,14 +103,14 @@ https://modernsecurity.io/
 
 <figure><img src="images/image (1254).png" alt=""><figcaption></figcaption></figure>
 
-**SerpApi** offers fast and easy real-time APIs to **access search engine results**. They scrape search engines, handle proxies, solve captchas, and parse all rich structured data for you.
+**SerpApi** oferece APIs em tempo real rápidas e fáceis para **acessar resultados de mecanismos de busca**. Eles fazem scraping dos mecanismos de busca, lidam com proxies, resolvem captchas e fazem parse de todos os dados estruturados ricos para você.
 
-A subscription to one of SerpApi’s plans includes access to over 50 different APIs for scraping different search engines, including Google, Bing, Baidu, Yahoo, Yandex, and more.\
-Unlike other providers, **SerpApi doesn’t just scrape organic results**. SerpApi responses consistently include all ads, inline images and videos, knowledge graphs, and other elements and features present in the search results.
+Uma assinatura de um dos planos da SerpApi inclui acesso a mais de 50 APIs diferentes para scraping de diferentes mecanismos de busca, incluindo Google, Bing, Baidu, Yahoo, Yandex e outros.\
+Ao contrário de outros provedores, a **SerpApi não faz apenas scraping de resultados orgânicos**. As respostas da SerpApi incluem consistentemente todos os anúncios, imagens e vídeos inline, knowledge graphs e outros elementos e recursos presentes nos resultados de busca.
 
-Current SerpApi customers include **Apple, Shopify, and GrubHub**.\
-For more information check out their [**blog**](https://serpapi.com/blog/)**,** or try an example in their [**playground**](https://serpapi.com/playground)**.**\
-You can **create a free account** [**here**](https://serpapi.com/users/sign_up)**.**
+Os clientes atuais da SerpApi incluem **Apple, Shopify e GrubHub**.\
+Para mais informações, confira o [**blog**](https://serpapi.com/blog/) deles**,** ou teste um exemplo no [**playground**](https://serpapi.com/playground)**.**\
+Você pode **criar uma conta gratuita** [**aqui**](https://serpapi.com/users/sign_up)**.**
 
 ---
 
@@ -118,10 +118,24 @@ You can **create a free account** [**here**](https://serpapi.com/users/sign_up)*
 
 <figure><img src="images/image (2).png" alt=""><figcaption></figcaption></figure>
 
-Learn the technologies and skills required to perform vulnerability research, penetration testing, and reverse engineering to protect mobile applications and devices. **Master iOS and Android security** through our on-demand courses and **get certified**:
+Aprenda as tecnologias e habilidades necessárias para realizar vulnerability research, penetration testing e reverse engineering para proteger aplicativos e dispositivos móveis. **Domine a segurança de iOS e Android** por meio dos nossos cursos on-demand e **obtenha certificação**:
 
 {{#ref}}
 https://academy.8ksec.io/
+{{#endref}}
+
+---
+
+### [NaxusAI – AI Powered Security Scanner](https://academy.8ksec.io/)
+
+<figure><img src="images/logo-naxus.png" alt=""><figcaption></figcaption></figure>
+
+**NaxusAI** é uma plataforma de segurança com AI para encontrar vulnerabilidades exploráveis antes que atacantes o façam.
+
+**Code security tip**: inscreva-se no NaxusAI, uma plataforma inteligente de monitoramento de vulnerabilidades criada para developers e equipes de segurança! Junte-se a nós hoje e comece a usar AI para **detectar, validar e corrigir riscos de segurança reais antes que cheguem à produção**!
+
+{{#ref}}
+https://naxusai.com
 {{#endref}}
 
 ---
@@ -130,13 +144,13 @@ https://academy.8ksec.io/
 
 <figure><img src="images/websec (1).svg" alt=""><figcaption></figcaption></figure>
 
-[**WebSec**](https://websec.net) is a professional cybersecurity company based in **Amsterdam** which helps **protecting** businesses **all over the world** against the latest cybersecurity threats by providing **offensive-security services** with a **modern** approach.
+[**WebSec**](https://websec.net) é uma empresa profissional de cybersecurity com sede em **Amsterdam** que ajuda a **proteger** empresas **em todo o mundo** contra as ameaças mais recentes de cybersecurity, fornecendo **serviços de offensive-security** com uma abordagem **moderna**.
 
-WebSec is an intenational security company with offices in Amsterdam and Wyoming. They offer **all-in-one security services** which means they do it all; Pentesting, **Security** Audits, Awareness Trainings, Phishing Campagnes, Code Review, Exploit Development, Security Experts Outsourcing and much more.
+WebSec é uma empresa de segurança internacional com escritórios em Amsterdam e Wyoming. Eles oferecem **serviços de segurança tudo-em-um**, o que significa que fazem tudo; Pentesting, **Security** Audits, Awareness Trainings, Phishing Campagnes, Code Review, Exploit Development, Security Experts Outsourcing e muito mais.
 
-Another cool thing about WebSec is that unlike the industry average WebSec is **very confident in their skills**, to such an extent that they **guarantee the best quality results**, it states on their website "**If we can't hack it, You don't pay it!**". For more info take a look at their [**website**](https://websec.net/en/) and [**blog**](https://websec.net/blog/)!
+Outra coisa legal sobre a WebSec é que, ao contrário da média do setor, a WebSec é **muito confiante em suas habilidades**, a tal ponto que **garante resultados da melhor qualidade**; no site deles consta "**If we can't hack it, You don't pay it!**". Para mais informações, dê uma olhada no [**website**](https://websec.net/en/) e no [**blog**](https://websec.net/blog/) deles!
 
-In addition to the above WebSec is also a **committed supporter of HackTricks.**
+Além do acima, a WebSec também é uma **apoiante comprometida do HackTricks.**
 
 {{#ref}}
 https://www.youtube.com/watch?v=Zq2JycGDCPM
@@ -150,15 +164,12 @@ https://www.youtube.com/watch?v=Zq2JycGDCPM
 
 
 **Built for the field. Built around you.**\
-[**Cyber Helmets**](https://cyberhelmets.com/?ref=hacktricks) develops and delivers effective cybersecurity training built and led by
-industry experts. Their programs go beyond theory to equip teams with deep
-understanding and actionable skills, using custom environments that reflect real-world
-threats. For custom training inquiries, reach out to us [**here**](https://cyberhelmets.com/tailor-made-training/?ref=hacktricks).
+[**Cyber Helmets**](https://cyberhelmets.com/?ref=hacktricks) desenvolve e entrega treinamentos eficazes de cybersecurity criados e liderados por especialistas do setor. Seus programas vão além da teoria para capacitar equipes com entendimento profundo e habilidades práticas, usando ambientes personalizados que refletem ameaças do mundo real. Para consultas sobre treinamentos personalizados, fale conosco [**aqui**](https://cyberhelmets.com/tailor-made-training/?ref=hacktricks).
 
-**What sets their training apart:**
-* Custom-built content and labs
-* Backed by top-tier tools and platforms
-* Designed and taught by practitioners
+**O que diferencia seus treinamentos:**
+* Conteúdo e laboratórios desenvolvidos sob medida
+* Sustentado por ferramentas e plataformas de primeira linha
+* Projetado e ministrado por practitioners
 
 {{#ref}}
 https://cyberhelmets.com/courses/?ref=hacktricks
@@ -170,19 +181,19 @@ https://cyberhelmets.com/courses/?ref=hacktricks
 
 <figure><img src="images/lasttower.png" alt="lasttower logo"><figcaption></figcaption></figure>
 
-Last Tower Solutions delivers specialized cybersecurity services for **Education** and **FinTech**
-institutions, with a focus on **penetration testing, cloud security assessments**, and
-**compliance readiness** (SOC 2, PCI-DSS, NIST). Our team includes **OSCP and CISSP
-certified professionals**, bringing deep technical expertise and industry-standard insight to
-every engagement.
+Last Tower Solutions entrega serviços especializados de cybersecurity para instituições de **Education** e **FinTech**,
+com foco em **penetration testing, cloud security assessments** e
+**compliance readiness** (SOC 2, PCI-DSS, NIST). Nossa equipe inclui profissionais **certificados em OSCP e CISSP**,
+trazendo profunda expertise técnica e visão padrão do setor para
+cada engagement.
 
-We go beyond automated scans with **manual, intelligence-driven testing** tailored to
-high-stakes environments. From securing student records to protecting financial transactions,
-we help organizations defend what matters most.
+Vamos além de scans automatizados com **manual, intelligence-driven testing** adaptado a
+ambientes de alto risco. Da proteção de registros estudantis à proteção de transações financeiras,
+ajudamos organizações a defender o que mais importa.
 
-_“A quality defense requires knowing the offense, we provide security through understanding.”_
+_“Uma defesa de qualidade exige conhecer o ataque, nós fornecemos segurança por meio do entendimento.”_
 
-Stay informed and up to date with the latest in cybersecurity by visiting our [**blog**](https://www.lasttowersolutions.com/blog).
+Fique informado e atualizado com o que há de mais recente em cybersecurity visitando nosso [**blog**](https://www.lasttowersolutions.com/blog).
 
 {{#ref}}
 https://www.lasttowersolutions.com/
@@ -194,9 +205,9 @@ https://www.lasttowersolutions.com/
 
 <figure><img src="images/k8studio.png" alt="k8studio logo"><figcaption></figcaption></figure>
 
-K8Studio IDE empowers DevOps, DevSecOps, and developers to manage, monitor, and secure Kubernetes clusters efficiently. Leverage our AI-driven insights, advanced security framework, and intuitive CloudMaps GUI to visualize your clusters, understand their state, and act with confidence.
+K8Studio IDE capacita DevOps, DevSecOps e developers a gerenciar, monitorar e proteger clusters Kubernetes com eficiência. Aproveite nossos insights orientados por AI, framework de segurança avançado e a intuitiva GUI CloudMaps para visualizar seus clusters, entender seu estado e agir com confiança.
 
-Moreover, K8Studio is **compatible with all major kubernetes distributions** (AWS, GCP, Azure, DO, Rancher, K3s, Openshift and more).
+Além disso, o K8Studio é **compatível com todas as principais distribuições de kubernetes** (AWS, GCP, Azure, DO, Rancher, K3s, Openshift e mais).
 
 {{#ref}}
 https://k8studio.io/
@@ -206,7 +217,7 @@ https://k8studio.io/
 
 ## License & Disclaimer
 
-Check them in:
+Confira em:
 
 {{#ref}}
 welcome/hacktricks-values-and-faq.md
