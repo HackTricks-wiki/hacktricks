@@ -2,9 +2,9 @@
 
 <figure><img src="images/hacktricks.gif" alt=""><figcaption></figcaption></figure>
 
-_Hacktricks のロゴ & モーションデザイン by_ [_@ppieranacho_](https://www.instagram.com/ppieranacho/)_._
+_Hacktricksのロゴ＆モーションデザイン by_ [_@ppieranacho_](https://www.instagram.com/ppieranacho/)_._
 
-### HackTricks をローカルで実行する
+### HackTricksをローカルで実行する
 ```bash
 # Download latest version of hacktricks
 git clone https://github.com/HackTricks-wiki/hacktricks
@@ -31,7 +31,7 @@ export LANG="master" # Leave master for english
 # Run the docker container indicating the path to the hacktricks folder
 docker run -d --rm --platform linux/amd64 -p 3337:3000 --name hacktricks -v $(pwd)/hacktricks:/app ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image bash -c "mkdir -p ~/.ssh && ssh-keyscan -H github.com >> ~/.ssh/known_hosts && cd /app && git config --global --add safe.directory /app && git checkout $LANG && git pull && MDBOOK_PREPROCESSOR__HACKTRICKS__ENV=dev mdbook serve --hostname 0.0.0.0"
 ```
-Your local copy of HackTricks will be **利用可能です [http://localhost:3337](http://localhost:3337)** after <5 minutes (it needs to build the book, be patient).
+Your local copy of HackTricks will be **http://localhost:3337** で **5分以内** に利用可能になります（book をビルドする必要があるため、少し待ってください）。
 
 ## Corporate Sponsors
 
@@ -39,11 +39,11 @@ Your local copy of HackTricks will be **利用可能です [http://localhost:333
 
 <figure><img src="images/stm (1).png" alt=""><figcaption></figcaption></figure>
 
-[**STM Cyber**](https://www.stmcyber.com) is a great cybersecurity company whose slogan is **HACK THE UNHACKABLE**. They perform their own research and develop their own hacking tools to **offer several valuable cybersecurity services** like pentesting, Red teams and training.
+[**STM Cyber**](https://www.stmcyber.com) は、スローガンが **HACK THE UNHACKABLE** の優れた cybersecurity 企業です。彼らは独自に research を行い、独自の hacking tools を開発して、**pentesting、Red teams、training などの複数の価値ある cybersecurity services を提供**しています。
 
-You can check their **blog** in [**https://blog.stmcyber.com**](https://blog.stmcyber.com)
+彼らの **blog** は [**https://blog.stmcyber.com**](https://blog.stmcyber.com) で確認できます。
 
-**STM Cyber** also support cybersecurity open source projects like HackTricks :)
+**STM Cyber** は HackTricks のような cybersecurity open source projects も支援しています :)
 
 ---
 
@@ -51,9 +51,9 @@ You can check their **blog** in [**https://blog.stmcyber.com**](https://blog.stm
 
 <figure><img src="images/image (47).png" alt=""><figcaption></figcaption></figure>
 
-**Intigriti** is the **Europe's #1** ethical hacking and **bug bounty platform.**
+**Intigriti** は、**Europe's #1** の ethical hacking および **bug bounty platform.**
 
-**Bug bounty tip**: **sign up** for **Intigriti**, a premium **bug bounty platform created by hackers, for hackers**! Join us at [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) today, and start earning bounties up to **$100,000**!
+**Bug bounty tip**: **sign up** して **Intigriti** を使いましょう。これは hackers によって、hackers のために作られたプレミアムな **bug bounty platform** です！今すぐ [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) に参加して、最大 **$100,000** の bounty を獲得し始めましょう！
 
 {{#ref}}
 https://go.intigriti.com/hacktricks
@@ -65,13 +65,13 @@ https://go.intigriti.com/hacktricks
 
 <figure><img src="images/image (3).png" alt=""><figcaption></figcaption></figure>
 
-Join [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) server to communicate with experienced hackers and bug bounty hunters!
+経験豊富な hackers や bug bounty hunters と交流するために、[**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) サーバーに参加しましょう！
 
-- **Hacking Insights:** Engage with content that delves into the thrill and challenges of hacking
-- **Real-Time Hack News:** Keep up-to-date with fast-paced hacking world through real-time news and insights
-- **Latest Announcements:** Stay informed with the newest bug bounties launching and crucial platform updates
+- **Hacking Insights:** hacking のスリルと課題を掘り下げる content を楽しめます
+- **Real-Time Hack News:** リアルタイムの news と insights で、スピードの速い hacking world の最新情報を把握できます
+- **Latest Announcements:** 新しく始まる bug bounties や重要な platform updates の最新情報を入手できます
 
-**Join us on** [**Discord**](https://discord.com/invite/N3FrSbmwdy) and start collaborating with top hackers today!
+[**Discord**](https://discord.com/invite/N3FrSbmwdy) で私たちに参加して、今すぐトップ hackers との collaboration を始めましょう！
 
 ---
 
@@ -79,18 +79,18 @@ Join [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) server to 
 
 <figure><img src="images/modern_security_logo.png" alt="Modern Security"><figcaption></figcaption></figure>
 
-Modern Security delivers **実践的なAIセキュリティトレーニング** with an **engineering-first, hands-on lab approach**. Our courses are built for security engineers, AppSec professionals, and developers who want to **build, break, and secure real AI/LLM-powered applications**.
+Modern Security は、**engineering-first の hands-on lab approach** による **実践的な AI Security training** を提供します。私たちの courses は、**build, break, and secure real AI/LLM-powered applications** を行いたい security engineers、AppSec professionals、developers 向けに作られています。
 
-The **AI Security Certification** focuses on real-world skills, including:
-- Securing LLM and AI-powered applications
-- Threat modeling for AI systems
-- Embeddings, vector databases, and RAG security
-- LLM attacks, abuse scenarios, and practical defenses
-- Secure design patterns and deployment considerations
+**AI Security Certification** は、次のような実世界の skills に重点を置いています:
+- LLM と AI-powered applications の保護
+- AI systems の threat modeling
+- Embeddings、vector databases、RAG security
+- LLM attacks、abuse scenarios、そして実践的な defenses
+- Secure design patterns と deployment considerations
 
-All courses are **on-demand**, **lab-driven**, and designed around **real-world security tradeoffs**, not just theory.
+すべての courses は **on-demand**、**lab-driven** であり、単なる理論ではなく **real-world security tradeoffs** に基づいて設計されています。
 
-👉 More details on the AI Security course:
+👉 AI Security course の詳細:
 https://www.modernsecurity.io/courses/ai-security-certification
 
 {{#ref}}
@@ -103,14 +103,14 @@ https://modernsecurity.io/
 
 <figure><img src="images/image (1254).png" alt=""><figcaption></figcaption></figure>
 
-**SerpApi** offers fast and easy real-time APIs to **search engine resultsにアクセス**. They scrape search engines, handle proxies, solve captchas, and parse all rich structured data for you.
+**SerpApi** は、**search engine results にアクセスする**ための高速で簡単な real-time APIs を提供します。彼らは search engines を scrape し、proxies を扱い、captchas を解き、すべての rich structured data を解析してくれます。
 
-A subscription to one of SerpApi’s plans includes access to over 50 different APIs for scraping different search engines, including Google, Bing, Baidu, Yahoo, Yandex, and more.\
-Unlike other providers, **SerpApi doesn’t just scrape organic results**. SerpApi responses consistently include all ads, inline images and videos, knowledge graphs, and other elements and features present in the search results.
+SerpApi のいずれかの plan を購読すると、Google、Bing、Baidu、Yahoo、Yandex などを含む、さまざまな search engines を scrape するための 50 以上の異なる APIs にアクセスできます。\
+他の providers とは異なり、**SerpApi は organic results だけを scrape するわけではありません**。SerpApi の responses には、ads、inline images and videos、knowledge graphs、そして search results に存在する他の elements や features が一貫してすべて含まれています。
 
-Current SerpApi customers include **Apple, Shopify, and GrubHub**.\
-For more information check out their [**blog**](https://serpapi.com/blog/)**,** or try an example in their [**playground**](https://serpapi.com/playground)**.**\
-You can **create a free account** [**here**](https://serpapi.com/users/sign_up)**.**
+現在の SerpApi customers には **Apple、Shopify、GrubHub** が含まれます。\
+詳細は [**blog**](https://serpapi.com/blog/)**,** を確認するか、[**playground**](https://serpapi.com/playground)**.** で example を試してください。\
+[**ここ**](https://serpapi.com/users/sign_up)**.** で無料 account を **create** できます。
 
 ---
 
@@ -118,10 +118,24 @@ You can **create a free account** [**here**](https://serpapi.com/users/sign_up)*
 
 <figure><img src="images/image (2).png" alt=""><figcaption></figcaption></figure>
 
-Learn the technologies and skills required to perform vulnerability research, penetration testing, and reverse engineering to protect mobile applications and devices. **Master iOS and Android security** through our on-demand courses and **get certified**:
+mobile applications と devices を保護するために、vulnerability research、penetration testing、reverse engineering を行うのに必要な technologies と skills を学びましょう。オンデマンド courses を通じて **iOS と Android security を習得**し、**certified** を取得できます:
 
 {{#ref}}
 https://academy.8ksec.io/
+{{#endref}}
+
+---
+
+### [NaxusAI – AI Powered Security Scanner](https://academy.8ksec.io/)
+
+<figure><img src="images/logo-naxus.png" alt=""><figcaption></figcaption></figure>
+
+**NaxusAI** は、attackers より先に exploitable vulnerabilities を見つけるための AI-powered security platform です。
+
+**Code security tip**: NaxusAI に sign up しましょう。これは developers と security teams のために構築された、smart vulnerability monitoring platform です！今すぐ参加して、AI を使って **production に到達する前に real security risks を検出、検証、修正** しましょう！
+
+{{#ref}}
+https://naxusai.com
 {{#endref}}
 
 ---
@@ -130,13 +144,13 @@ https://academy.8ksec.io/
 
 <figure><img src="images/websec (1).svg" alt=""><figcaption></figcaption></figure>
 
-[**WebSec**](https://websec.net) is a professional cybersecurity company based in **Amsterdam** which helps **protecting** businesses **all over the world** against the latest cybersecurity threats by providing **offensive-security services** with a **modern** approach.
+[**WebSec**](https://websec.net) は **Amsterdam** を拠点とする professional cybersecurity company で、**modern** な approach の **offensive-security services** を提供し、**世界中** の businesses を最新の cybersecurity threats から **protecting** します。
 
-WebSec is an intenational security company with offices in Amsterdam and Wyoming. They offer **all-in-one security services** which means they do it all; Pentesting, **Security** Audits, Awareness Trainings, Phishing Campagnes, Code Review, Exploit Development, Security Experts Outsourcing and much more.
+WebSec は Amsterdam と Wyoming に offices を持つ intenational security company です。彼らは **all-in-one security services** を提供しており、Pentesting、**Security** Audits、Awareness Trainings、Phishing Campagnes、Code Review、Exploit Development、Security Experts Outsourcing など、すべてを行います。
 
-Another cool thing about WebSec is that unlike the industry average WebSec is **very confident in their skills**, to such an extent that they **guarantee the best quality results**, it states on their website "**If we can't hack it, You don't pay it!**". For more info take a look at their [**website**](https://websec.net/en/) and [**blog**](https://websec.net/blog/)!
+WebSec のもう一つの素晴らしい点は、業界平均と異なり、WebSec は自社の skills に **非常に自信を持っている** ことです。そのため、**最高品質の結果を保証** し、website には "**If we can't hack it, You don't pay it!**" と記載されています。詳細は [**website**](https://websec.net/en/) と [**blog**](https://websec.net/blog/) をご覧ください！
 
-In addition to the above WebSec is also a **committed supporter of HackTricks.**
+上記に加えて、WebSec は **HackTricks の熱心な supporter** でもあります。
 
 {{#ref}}
 https://www.youtube.com/watch?v=Zq2JycGDCPM
@@ -150,10 +164,7 @@ https://www.youtube.com/watch?v=Zq2JycGDCPM
 
 
 **Built for the field. Built around you.**\
-[**Cyber Helmets**](https://cyberhelmets.com/?ref=hacktricks) develops and delivers effective cybersecurity training built and led by
-industry experts. Their programs go beyond theory to equip teams with deep
-understanding and actionable skills, using custom environments that reflect real-world
-threats. For custom training inquiries, reach out to us [**here**](https://cyberhelmets.com/tailor-made-training/?ref=hacktricks).
+[**Cyber Helmets**](https://cyberhelmets.com/?ref=hacktricks) は、業界 experts によって作成され、指導される効果的な cybersecurity training を開発・提供します。彼らの programs は theory を超え、custom environments を使って、real-world threats を反映した深い理解と実践的な skills をチームに身につけさせます。custom training の問い合わせは、[**here**](https://cyberhelmets.com/tailor-made-training/?ref=hacktricks) からご連絡ください。
 
 **What sets their training apart:**
 * Custom-built content and labs
@@ -170,19 +181,13 @@ https://cyberhelmets.com/courses/?ref=hacktricks
 
 <figure><img src="images/lasttower.png" alt="lasttower logo"><figcaption></figcaption></figure>
 
-Last Tower Solutions delivers specialized cybersecurity services for **Education** and **FinTech**
-institutions, with a focus on **penetration testing, cloud security assessments**, and
-**compliance readiness** (SOC 2, PCI-DSS, NIST). Our team includes **OSCP and CISSP
-certified professionals**, bringing deep technical expertise and industry-standard insight to
-every engagement.
+Last Tower Solutions は、**Education** と **FinTech** の institutions 向けに特化した cybersecurity services を提供し、**penetration testing、cloud security assessments**、および **compliance readiness**（SOC 2、PCI-DSS、NIST）に重点を置いています。私たちの team には **OSCP と CISSP 認定 professionals** が含まれており、すべての engagement に深い technical expertise と industry-standard の insight をもたらします。
 
-We go beyond automated scans with **manual, intelligence-driven testing** tailored to
-high-stakes environments. From securing student records to protecting financial transactions,
-we help organizations defend what matters most.
+私たちは、高リスクな environments に合わせた **manual、intelligence-driven testing** で automated scans を超えた対応をします。student records の保護から financial transactions の保護まで、最も重要なものを守るために organizations を支援します。
 
 _“A quality defense requires knowing the offense, we provide security through understanding.”_
 
-Stay informed and up to date with the latest in cybersecurity by visiting our [**blog**](https://www.lasttowersolutions.com/blog).
+最新の cybersecurity 情報を blog で確認し、最新情報を入手してください。[**blog**](https://www.lasttowersolutions.com/blog)。
 
 {{#ref}}
 https://www.lasttowersolutions.com/
@@ -194,9 +199,9 @@ https://www.lasttowersolutions.com/
 
 <figure><img src="images/k8studio.png" alt="k8studio logo"><figcaption></figcaption></figure>
 
-K8Studio IDE empowers DevOps, DevSecOps, and developers to manage, monitor, and secure Kubernetes clusters efficiently. Leverage our AI-driven insights, advanced security framework, and intuitive CloudMaps GUI to visualize your clusters, understand their state, and act with confidence.
+K8Studio IDE は、DevOps、DevSecOps、developers が Kubernetes clusters を効率的に manage、monitor、secure できるようにします。AI-driven insights、advanced security framework、直感的な CloudMaps GUI を活用して clusters を可視化し、その state を理解し、自信を持って行動できます。
 
-Moreover, K8Studio is **compatible with all major kubernetes distributions** (AWS, GCP, Azure, DO, Rancher, K3s, Openshift and more).
+さらに、K8Studio は **all major kubernetes distributions**（AWS、GCP、Azure、DO、Rancher、K3s、Openshift など）と **compatible** です。
 
 {{#ref}}
 https://k8studio.io/
@@ -206,7 +211,7 @@ https://k8studio.io/
 
 ## License & Disclaimer
 
-Check them in:
+以下で確認してください:
 
 {{#ref}}
 welcome/hacktricks-values-and-faq.md
