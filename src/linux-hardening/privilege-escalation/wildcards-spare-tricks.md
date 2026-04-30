@@ -91,6 +91,8 @@ If root executes something like:
 
 7-Zip will attempt to read `root.txt` (→ `/etc/shadow`) as a file list and will bail out, **printing the contents to stderr**.
 
+This survives `-- *` because the 7-Zip CLI explicitly accepts both regular filenames and `@listfiles` as positional inputs, so a literal filename such as `@root.txt` is still treated specially.
+
 ---
 
 ## zip
@@ -136,6 +138,38 @@ The following commands have been abused in modern CTFs and real environments.  T
 | `scp`   | `-S <cmd>` | Spawn arbitrary program instead of ssh |
 
 These primitives are less common than the *tar/rsync/zip* classics but worth checking when hunting.
+
+---
+
+## Hunting vulnerable wrappers and jobs
+
+Recent case studies have shown that wildcard/argv injection is no longer just a **cron + tar** problem. The same bug class keeps appearing in:
+
+- web features that "download everything as zip/tar" from attacker-controlled upload directories
+- vendor/appliance debug shells that expose a **tcpdump** wrapper with attacker-controlled filename/filter fields
+- backup or rotation jobs that call `tar`, `rsync`, `7z`, `zip`, `chown`, or `chmod` on writable directories
+
+Useful triage commands:
+
+```bash
+# Hunt for interesting binaries fed with globs or positional user data
+rg -n --hidden --follow \
+  '(tar|bsdtar|rsync|zip|7z|7za|chown|chmod|tcpdump).*(\*|\$@|\$\*)' \
+  /etc /opt /usr/local /srv 2>/dev/null
+
+# Watch real argv during cron/systemd execution
+pspy64 -pf -i 1000 | rg 'tar|rsync|zip|7z|tcpdump|chown|chmod'
+
+# Sudoers rules that constrain one argument but still allow extra flags
+sudo -l
+rg -n 'tcpdump|zip|tar|rsync' /etc/sudoers /etc/sudoers.d 2>/dev/null
+```
+
+Quick heuristics:
+
+- `-- *` is a good fix for many GNU tools, but **not** for `7z`/`7za` because `@listfiles` are parsed separately.
+- For `zip`, look for wrappers that enumerate user-controlled filenames directly; short-option splitting (`-T` + `-TT <cmd>`) still works even without a shell glob.
+- For `tcpdump`, pay special attention to wrappers that let you control **output file names**, **rotation settings**, or **capture-file replay** arguments.
 
 ---
 
@@ -252,5 +286,6 @@ sudo tcpdump -c10 -w/var/cache/captures/a/ -V /root/root.txt \
 - [GTFOBins - zip](https://gtfobins.github.io/gtfobins/zip/)
 - [0xdf - HTB Dump: Zip arg injection to RCE + tcpdump sudo misconfig privesc](https://0xdf.gitlab.io/2025/11/04/htb-dump.html)
 - [FiberGateway GR241AG - Full Exploit Chain](https://r0ny.net/FiberGateway-GR241AG-Full-Exploit-Chain/)
+- [Elastic - Potential Shell via Wildcard Injection Detected](https://www.elastic.co/guide/en/security/current/prebuilt-rule-8-19-20-potential-shell-via-wildcard-injection-detected.html)
 
 {{#include ../../banners/hacktricks-training.md}}
