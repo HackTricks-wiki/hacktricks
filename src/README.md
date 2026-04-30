@@ -128,6 +128,20 @@ https://academy.8ksec.io/
 
 ---
 
+### [NaxusAI – AI Powered Security Scanner](https://academy.8ksec.io/)
+
+<figure><img src="images/logo-naxus.png" alt=""><figcaption></figcaption></figure>
+
+**NaxusAI** is an AI-powered security platform to find exploitable vulnerabilities before attackers do.
+
+**Code security tip**: sign up for NaxusAI, a smart vulnerability monitoring platform built for developers and security teams! Join us today and start using AI for **detecting, validating, and fixing real security risks before they reach production**!
+
+{{#ref}}
+https://naxusai.com
+{{#endref}}
+
+---
+
 ### [WebSec](https://websec.net/)
 
 <figure><img src="images/websec (1).svg" alt=""><figcaption></figcaption></figure>
