@@ -153,6 +153,7 @@
         - [User Namespace](linux-hardening/privilege-escalation/container-security/protections/namespaces/user-namespace.md)
         - [UTS Namespace](linux-hardening/privilege-escalation/container-security/protections/namespaces/uts-namespace.md)
   - [Escaping from Jails](linux-hardening/privilege-escalation/escaping-from-limited-bash.md)
+  - [Copy Fail Af Alg Splice Page Cache Overwrite Cve 2026 31431](linux-hardening/privilege-escalation/linux-kernel-exploitation/copy-fail-af_alg-splice-page-cache-overwrite-cve-2026-31431.md)
   - [Posix Cpu Timers Toctou Cve 2025 38352](linux-hardening/privilege-escalation/linux-kernel-exploitation/posix-cpu-timers-toctou-cve-2025-38352.md)
   - [euid, ruid, suid](linux-hardening/privilege-escalation/euid-ruid-suid.md)
   - [Interesting Groups - Linux Privesc](linux-hardening/privilege-escalation/interesting-groups-linux-pe/README.md)
