@@ -4,117 +4,137 @@
 
 ## Uvod
 
-### Komponente sertifikata
+### Komponente certifikata
 
-- **Subject** sertifikata označava njegovog vlasnika.
-- **Public Key** je u paru sa privatnim ključem i povezuje sertifikat sa njegovim pravim vlasnikom.
-- **Validity Period**, definisan datumima **NotBefore** i **NotAfter**, označava period važenja sertifikata.
-- Jedinstveni **Serial Number**, koji izdaje Certificate Authority (CA), identifikuje svaki sertifikat.
-- **Issuer** se odnosi na CA koji je izdao sertifikat.
-- **SubjectAlternativeName** omogućava dodatna imena subjekta, povećavajući fleksibilnost identifikacije.
-- **Basic Constraints** ukazuju da li je sertifikat za CA ili krajnji entitet i definišu ograničenja upotrebe.
-- **Extended Key Usages (EKUs)** preciziraju specifične namene sertifikata (npr. code signing ili email encryption) putem Object Identifiers (OIDs).
-- **Signature Algorithm** određuje metodu potpisivanja sertifikata.
-- **Signature**, kreiran privatnim ključem izdavaoca, garantuje autentičnost sertifikata.
+- **Subject** certifikata označava njegovog vlasnika.
+- **Public Key** je uparen sa privatno čuvanim ključem kako bi se certifikat povezao sa pravim vlasnikom.
+- **Validity Period**, definisan datumima **NotBefore** i **NotAfter**, označava efektivni period trajanja certifikata.
+- Jedinstveni **Serial Number**, koji dodeljuje Certificate Authority (CA), identifikuje svaki certifikat.
+- **Issuer** se odnosi na CA koji je izdao certifikat.
+- **SubjectAlternativeName** omogućava dodatna imena za subject, što poboljšava fleksibilnost identifikacije.
+- **Basic Constraints** identifikuju da li je certifikat za CA ili za krajnji entitet i definišu ograničenja upotrebe.
+- **Extended Key Usages (EKUs)** određuju specifične namene certifikata, kao što su code signing ili email encryption, kroz Object Identifiers (OIDs).
+- **Signature Algorithm** određuje metodu za potpisivanje certifikata.
+- **Signature**, kreiran privatnim ključem izdavaoca, garantuje autentičnost certifikata.
 
 ### Posebna razmatranja
 
-- **Subject Alternative Names (SANs)** proširuju primenljivost sertifikata na više identiteta, što je ključno za servere sa više domena. Bezbedni procesi izdavanja su neophodni kako bi se izbegli rizici impersonacije usled manipulisanja SAN specifikacijom.
+- **Subject Alternative Names (SANs)** proširuju primenljivost certifikata na više identiteta, što je ključno za servere sa više domena. Bezbedni procesi izdavanja su od suštinskog značaja kako bi se izbegli rizici od impersonation koje napadači mogu izazvati manipulacijom SAN specifikacijom.
 
 ### Certificate Authorities (CAs) u Active Directory (AD)
 
-AD CS prepoznaje CA sertifikate u AD forestu kroz određene kontejnere, pri čemu svaki ima posebnu ulogu:
+AD CS prepoznaje CA certifikate u AD forest kroz namenski definisane kontejnere, od kojih svaki ima posebnu ulogu:
 
-- **Certification Authorities** container sadrži poverene root CA sertifikate.
-- **Enrolment Services** container detaljiše Enterprise CA-ove i njihove certificate templates.
-- **NTAuthCertificates** objekat uključuje CA sertifikate ovlašćene za AD autentifikaciju.
-- **AIA (Authority Information Access)** container olakšava validaciju lanca sertifikata sa intermediate i cross CA sertifikatima.
+- **Certification Authorities** kontejner sadrži trusted root CA certifikate.
+- **Enrolment Services** kontejner sadrži Enterprise CAs i njihove certificate templates.
+- **NTAuthCertificates** objekat uključuje CA certifikate autorizovane za AD authentication.
+- **AIA (Authority Information Access)** kontejner olakšava validaciju certificate chain sa intermediate i cross CA certifikatima.
 
-### Pribavljanje sertifikata: tok zahteva klijenta (Client Certificate Request Flow)
+### Dobavljanje certifikata: tok zahteva za client certificate
 
-1. Proces započinje tako što klijenti pronalaze Enterprise CA.
-2. Kreira se CSR koji sadrži public key i ostale podatke, nakon generisanja para javnog i privatnog ključa.
-3. CA procenjuje CSR u odnosu na dostupne certificate templates i izdaje sertifikat bazirano na dozvolama šablona.
-4. Nakon odobrenja, CA potpisuje sertifikat svojim privatnim ključem i vraća ga klijentu.
+1. Proces zahteva počinje tako što client pronalazi Enterprise CA.
+2. Nakon generisanja para javni-privatni ključ, kreira se CSR koji sadrži public key i druge detalje.
+3. CA procenjuje CSR u odnosu na dostupne certificate templates i izdaje certifikat na osnovu dozvola template-a.
+4. Nakon odobrenja, CA potpisuje certifikat svojim privatnim ključem i vraća ga clientu.
 
 ### Certificate Templates
 
-Definisani u AD, ovi templates opisuju podešavanja i dozvole za izdavanje sertifikata, uključujući dozvoljene EKUs i prava za enrollment ili modifikaciju, što je ključno za upravljanje pristupom servisima za sertifikate.
+Definisani unutar AD, ovi template-i opisuju settings i permissions za izdavanje certifikata, uključujući dozvoljene EKUs i prava za enrollment ili modifikaciju, što je ključno za upravljanje pristupom certificate services.
 
-Važna je verzija šablona. Legacy **v1** templates (npr. ugrađeni **WebServer** template) nemaju nekoliko modernih mehanizama za nametanje pravila. ESC15/EKUwu istraživanje je pokazalo da kod **v1 templates** requester može u CSR ubaciti **Application Policies/EKUs** koji imaju prioritet nad EKUs konfigurisanih u šablonu, omogućavajući client-auth, enrollment agent ili code-signing sertifikate samo sa enrollment pravima. Preferirajte **v2/v3 templates**, uklonite ili zamenite v1 podrazumevane vrednosti i strogo definišite EKUs za namenjenu svrhu.
+**Schema verzija template-a je važna.** Legacy **v1** template-i (na primer, ugrađeni **WebServer** template) nemaju nekoliko modernih enforcement opcija. Istraživanje **ESC15/EKUwu** je pokazalo da na **v1 template-ima** zahtevnik može ubaciti **Application Policies/EKUs** u CSR koji imaju **prednost nad** EKUs konfigurisanih u template-u, što omogućava client-auth, enrollment agent ili code-signing certifikate sa samo enrollment pravima. Preferirajte **v2/v3 template-e**, uklonite ili zamenite v1 podrazumevane vrednosti i striktno ograničite EKUs na predviđenu namenu.
 
 ## Certificate Enrollment
 
-Proces izdavanja sertifikata pokreće administrator koji **kreira certificate template**, koji potom Enterprise Certificate Authority (CA) **publikuje**. Time šablon postaje dostupan za enrollment klijenata, što se postiže dodavanjem imena šablona u `certificatetemplates` polje Active Directory objekta.
+Proces enrollment-a za certifikate inicira administrator koji **kreira certificate template**, koji zatim **publikuje** Enterprise Certificate Authority (CA). Time se template čini dostupnim za client enrollment, korakom koji se postiže dodavanjem naziva template-a u `certificatetemplates` polje Active Directory objekta.
 
-Da bi klijent mogao da zatraži sertifikat, moraju mu biti dodeljena **enrollment rights**. Ta prava definišu se kroz security descriptor-e na certificate template-u i na samom Enterprise CA-u. Dozvole moraju biti dodeljene na oba mesta da bi zahtev bio uspešan.
+Da bi client mogao da zatraži certifikat, moraju biti dodeljena **enrollment rights**. Ova prava su definisana security descriptor-ima na certificate template-u i samom Enterprise CA. Dozvole moraju biti dodeljene na obe lokacije da bi zahtev bio uspešan.
 
 ### Template Enrollment Rights
 
-Ta prava su navedena kroz Access Control Entries (ACEs) i uključuju dozvole poput:
+Ova prava su navedena kroz Access Control Entries (ACEs), uz detalje o dozvolama kao što su:
 
-- **Certificate-Enrollment** i **Certificate-AutoEnrollment** prava, svaki povezan sa specifičnim GUID-ovima.
-- **ExtendedRights**, koje dozvoljavaju sve extended permisije.
-- **FullControl/GenericAll**, koje pružaju potpunu kontrolu nad šablonom.
+- **Certificate-Enrollment** i **Certificate-AutoEnrollment** prava, svako povezano sa određenim GUID-ovima.
+- **ExtendedRights**, koje omogućavaju sve proširene dozvole.
+- **FullControl/GenericAll**, koje pružaju potpunu kontrolu nad template-om.
 
 ### Enterprise CA Enrollment Rights
 
-Prava CA su navedenа u njegovom security descriptor-u, dostupan putem Certificate Authority management konzole. Neka podešavanja čak dozvoljavaju udaljeni pristup niskoprivilegovanim korisnicima, što može predstavljati bezbednosni rizik.
+CA prava su opisana u njegovom security descriptor-u, dostupnom preko Certificate Authority management konzole. Neka podešavanja čak omogućavaju low-privileged korisnicima remote pristup, što može predstavljati sigurnosni problem.
 
 ### Dodatne kontrole izdavanja
 
-Mogu važiti određene kontrole, kao što su:
+Mogu se primeniti određene kontrole, kao što su:
 
-- **Manager Approval**: stavlja zahteve u pending stanje dok ih ne odobri certificate manager.
-- **Enrolment Agents and Authorized Signatures**: specificiraju broj potrebnih potpisa na CSR-u i potrebne Application Policy OID-ove.
+- **Manager Approval**: Postavlja zahteve u pending stanje dok ih certificate manager ne odobri.
+- **Enrolment Agents and Authorized Signatures**: Određuju broj potrebnih potpisa na CSR-u i potrebne Application Policy OID-ove.
 
-### Metode za zahtev sertifikata
+### Metode za traženje certifikata
 
-Sertifikati se mogu zahtevati putem:
+Certifikati se mogu tražiti preko:
 
 1. **Windows Client Certificate Enrollment Protocol** (MS-WCCE), koristeći DCOM interfejse.
 2. **ICertPassage Remote Protocol** (MS-ICPR), preko named pipes ili TCP/IP.
-3. certificate enrollment web interface, uz instaliranu Certificate Authority Web Enrollment ulogu.
+3. **certificate enrollment web interface**, uz instaliranu Certificate Authority Web Enrollment rolu.
 4. **Certificate Enrollment Service** (CES), u kombinaciji sa Certificate Enrollment Policy (CEP) servisom.
-5. **Network Device Enrollment Service** (NDES) za mrežne uređaje, koristeći Simple Certificate Enrollment Protocol (SCEP).
+5. **Network Device Enrollment Service** (NDES) za network devices, koristeći Simple Certificate Enrollment Protocol (SCEP).
 
-Windows korisnici takođe mogu da zatraže sertifikate preko GUI-ja (`certmgr.msc` ili `certlm.msc`) ili komandnih alata (`certreq.exe` ili PowerShell `Get-Certificate` komanda).
+Windows korisnici takođe mogu tražiti certifikate preko GUI-ja (`certmgr.msc` ili `certlm.msc`) ili komandno-linijskih alata (`certreq.exe` ili PowerShell-ove `Get-Certificate` komande).
 ```bash
 # Example of requesting a certificate using PowerShell
 Get-Certificate -Template "User" -CertStoreLocation "cert:\\CurrentUser\\My"
 ```
-## Autentifikacija sertifikatom
+## Autentikacija sertifikatom
 
-Active Directory (AD) podržava autentifikaciju putem sertifikata, prvenstveno koristeći **Kerberos** i **Secure Channel (Schannel)** protokole.
+Active Directory (AD) podržava autentikaciju sertifikatom, prvenstveno koristeći **Kerberos** i **Secure Channel (Schannel)** protokole.
 
-### Kerberos proces autentifikacije
+### Kerberos proces autentikacije
 
-U Kerberos procesu autentifikacije, zahtev korisnika za Ticket Granting Ticket (TGT) potpisuje se koristeći **privatnim ključem** korisnikovog sertifikata. Taj zahtev prolazi kroz nekoliko provera od strane kontrolera domena, uključujući **validnost**, **putanju** i **status opoziva** sertifikata. Provere takođe uključuju verifikaciju da sertifikat potiče iz pouzdanog izvora i potvrdu prisustva izdavaoca u **NTAUTH certificate store**. Uspešne provere rezultuju izdavanjem TGT-a. The **`NTAuthCertificates`** object in AD, found at:
+U Kerberos procesu autentikacije, korisnikov zahtev za Ticket Granting Ticket (TGT) se potpisuje pomoću **private key** korisnikovog sertifikata. Ovaj zahtev prolazi kroz nekoliko validacija od strane domain controllera, uključujući **validity** sertifikata, **path** i status **revocation**. Validacije takođe uključuju proveru da sertifikat dolazi iz trusted izvora i potvrdu prisustva izdavaoca u **NTAUTH certificate store**. Uspešne validacije rezultuju izdavanjem TGT-a. Objekat **`NTAuthCertificates`** u AD, pronađen na:
 ```bash
 CN=NTAuthCertificates,CN=Public Key Services,CN=Services,CN=Configuration,DC=<domain>,DC=<com>
 ```
-je centralno za uspostavljanje poverenja za autentikaciju pomoću sertifikata.
+je centralna za uspostavljanje poverenja za autentifikaciju pomoću sertifikata.
+
+Od rollout-a **KB5014754**, moderno Kerberos certificate auth se uglavnom svodi na **mapping strength**, a ne samo na EKU-ove. U hardened forestovima:
+
+- Sertifikat koji sadrži samo **UPN/DNS SAN** možda više nije dovoljan za logon.
+- KDC preferira **strong binding**, obično **SID security extension** (`1.3.6.1.4.1.311.25.2`) ili jak eksplicitni mapping u `altSecurityIdentities`.
+- Ako cert nema strong mapping, DC-ovi beleže **Kdcsvc Event ID 39/41** u compatibility modu i odbijaju auth u enforcement modu.
+- U mixed attack paths, **ESC9/ESC16** su bitni jer uklanjaju SID extension iz izdatih certova; operateri onda zavise od eksplicitnih mappinga ili SAN URL SID formata tamo gde attack path to podržava.
 
 ### Secure Channel (Schannel) Authentication
 
-Schannel olakšava sigurne TLS/SSL veze, gde tokom handshake-a klijent prezentuje sertifikat koji, ako je uspešno verifikovan, ovlašćuje pristup. Mapiranje sertifikata na AD nalog može uključivati Kerberos-ovu funkciju **S4U2Self** ili **Subject Alternative Name (SAN)** sertifikata, između ostalih metoda.
+Schannel omogućava bezbedne TLS/SSL konekcije, gde tokom handshake-a klijent predstavlja sertifikat koji, ako je uspešno validiran, autorizuje pristup. Mapping sertifikata na AD nalog može uključivati Kerberos-ovu funkciju **S4U2Self** ili **Subject Alternative Name (SAN)** sertifikata, između ostalih metoda.
+
+Schannel je takođe praktični fallback kada **PKINIT** nije dostupan. Na primer, ako domain controller nema odgovarajući **Smart Card Logon** sertifikat, `certipy auth`/PKINIT tooling možda neće moći da dobije TGT, ali isti sertifikat i dalje može biti upotrebljiv protiv **LDAPS** ili **LDAP StartTLS** za autentifikaciju i LDAP operacije.
 
 ### AD Certificate Services Enumeration
 
-Sertifikacioni servisi AD-a mogu se enumerisati kroz LDAP upite, otkrivajući informacije o **Enterprise Certificate Authorities (CAs)** i njihovim konfiguracijama. Ovo je dostupno bilo kojem korisniku autentifikovanom u domenu bez posebnih privilegija. Alati kao što su **[Certify](https://github.com/GhostPack/Certify)** i **[Certipy](https://github.com/ly4k/Certipy)** koriste se za enumeraciju i procenu ranjivosti u AD CS okruženjima.
+AD certificate services mogu da se enumerišu kroz LDAP upite, otkrivajući informacije o **Enterprise Certificate Authorities (CAs)** i njihovim konfiguracijama. To je dostupno svakom domain-authenticated korisniku bez posebnih privilegija. Alati kao što su **[Certify](https://github.com/GhostPack/Certify)** i **[Certipy](https://github.com/ly4k/Certipy)** koriste se za enumeration i procenu ranjivosti u AD CS okruženjima.
 
 Komande za korišćenje ovih alata uključuju:
 ```bash
-# Enumerate trusted root CA certificates and Enterprise CAs with Certify
+# Enumerate trusted root CA certificates, Enterprise CAs, and web endpoints
 Certify.exe cas
-# Identify vulnerable certificate templates with Certify
+
+# Identify vulnerable templates and dump relevant permissions
 Certify.exe find /vulnerable
+Certify.exe find /showAllPermissions
+Certify.exe pkiobjects /showAdmins
 
-# Use Certipy (>=4.0) for enumeration and identifying vulnerable templates
-certipy find -vulnerable -dc-only -u john@corp.local -p Passw0rd -target dc.corp.local
+# Certipy 5.x enumeration focused on enabled/vulnerable templates
+certipy find -enabled -vulnerable -hide-admins -u john@corp.local -p Passw0rd -dc-ip 10.10.10.10
 
-# Request a certificate over the web enrollment interface (new in Certipy 4.x)
-certipy req -web -target ca.corp.local -template WebServer -upn john@corp.local -dns www.corp.local
+# Save JSON/CSV output for offline review or BloodHound correlation
+certipy find -json -output corp_adcs -u john@corp.local -p Passw0rd -dc-ip 10.10.10.10
+
+# Request a certificate over the Web Enrollment endpoint or DCOM/RPC
+certipy req -web -ca corp-CA -target ca.corp.local -template WebServer -upn john@corp.local -dns www.corp.local
+certipy req -ca corp-CA -target ca.corp.local -template User -upn administrator@corp.local -sid S-1-5-21-...-500
+
+# Use the issued certificate either for PKINIT or directly for LDAP Schannel auth
+certipy auth -pfx administrator.pfx -dc-ip 10.10.10.10
+certipy auth -pfx administrator.pfx -dc-ip 10.10.10.10 -ldap-shell
 
 # Enumerate Enterprise CAs and certificate templates with certutil
 certutil.exe -TCAInfo
@@ -126,44 +146,48 @@ ad-certificates/domain-escalation.md
 
 ---
 
-## Nedavne ranjivosti i bezbednosna ažuriranja (2022–2025)
+## Nedavne ranjivosti i bezbednosna ažuriranja (2022-2025)
 
-| Godina | ID / Naziv | Uticaj | Ključne napomene |
+| Godina | ID / Naziv | Uticaj | Ključne poruke |
 |------|-----------|--------|----------------|
-| 2022 | **CVE-2022-26923** – “Certifried” / ESC6 | *Privilege escalation* by spoofing machine account certificates during PKINIT. | Ispravka je uključena u bezbednosna ažuriranja od **10. maja 2022**. Uvedene su kontrole za reviziju i strong-mapping putem **KB5014754**; okruženja bi sada trebalo da budu u režimu *Full Enforcement*.  |
-| 2023 | **CVE-2023-35350 / 35351** | *Remote code-execution* in the AD CS Web Enrollment (certsrv) and CES roles. | Javni PoC-ovi su ograničeni, ali ranjivi IIS komponenti često su izložene interno. Ispravka dostupna od **Patch Tuesday, juli 2023**.  |
-| 2024 | **CVE-2024-49019** – “EKUwu” / ESC15 | On **v1 templates**, a requester with enrollment rights can embed **Application Policies/EKUs** in the CSR that are preferred over the template EKUs, producing client-auth, enrollment agent, or code-signing certificates. | Ispravljeno od **12. novembra 2024**. Zamenite ili supersedujte v1 šablone (npr. default WebServer), ograničite EKU-ove na namenu i smanjite prava za enrollment. |
+| 2022 | **CVE-2022-26923** – “Certifried” / ESC6 | *Privilege escalation* putem spoofing-a machine account certificates tokom PKINIT. | Patch je uključen u bezbednosna ažuriranja od **10. maja 2022**. Auditing i strong-mapping kontrole su uvedene preko **KB5014754**; okruženja bi sada trebalo da budu u *Full Enforcement* modu.  |
+| 2023 | **CVE-2023-35350 / 35351** | *Remote code-execution* u AD CS Web Enrollment (certsrv) i CES rolama. | Javni PoC-ovi su ograničeni, ali su ranjive IIS komponente često izložene interno. Patch od **jula 2023** Patch Tuesday.  |
+| 2024 | **CVE-2024-49019** – “EKUwu” / ESC15 | Na **v1 templates**, requester sa enrollment rights može da ugradi **Application Policies/EKUs** u CSR koji imaju prednost nad template EKU-ovima, što proizvodi client-auth, enrollment agent, ili code-signing certificate. | Zakrpljeno od **12. novembra 2024**. Zamenite ili prevaziđite v1 templates (npr. default WebServer), ograničite EKU-ove na namenu i limitirajte enrollment rights. |
 
-### Microsoft hardening timeline (KB5014754)
+### Microsoft timeline za hardening (KB5014754)
 
-Microsoft je uveo rollout u tri faze (Compatibility → Audit → Enforcement) da bi premestio Kerberos certificate authentication sa slabih implicitnih mapiranja. Od **11. februara 2025**, domain controller-i se automatski prebacuju u **Full Enforcement** ako registry vrednost `StrongCertificateBindingEnforcement` nije postavljena. Administratori bi trebalo da:
+Microsoft je uveo trofazno uvođenje (Compatibility → Audit → Enforcement) kako bi Kerberos certificate authentication prešao sa slabih implicit mappings. Od **11. februara 2025**, domain controllers automatski prelaze u **Full Enforcement** ako `StrongCertificateBindingEnforcement` registry vrednost nije postavljena. Microsoft je kasnije ažurirao timeline tako da je povratak u compatibility mode i dalje moguć do bezbednosnog ažuriranja od **9. septembra 2025**. Administratori treba da:
 
-1. Ažurirajte sve DC-ove i AD CS servere (maj 2022 ili kasnije).
-2. Pratite Event ID 39/41 za slaba mapiranja tokom faze *Audit*.
-3. Ponovo izdajte client-auth sertifikate sa novim **SID extension** ili konfigurišite jaka manuelna mapiranja pre februara 2025.
+1. Zakrpe sve DC-ove i AD CS servere (maj 2022 ili novije).
+2. Prate Event ID 39/41 za slabe mappings tokom *Audit* faze.
+3. Ponovo izdaju client-auth certificates sa novom **SID ekstenzijom** ili konfigurišu jake manual mappings pre nego što enforcement blokira slabe mappings.
 
----
+### Napomene za operatere u hardened forests
 
-## Detekcija i poboljšanja za jačanje bezbednosti
-
-* **Defender for Identity AD CS sensor (2023-2024)** sada prikazuje procene stanja za ESC1-ESC8/ESC11 i generiše real-time upozorenja kao što su *“Domain-controller certificate issuance for a non-DC”* (ESC8) i *“Prevent Certificate Enrollment with arbitrary Application Policies”* (ESC15). Osigurajte da su senzori raspoređeni na svim AD CS serverima da biste iskoristili ove detekcije.
-* Onemogućite ili striktno ograničite opciju **“Supply in the request”** na svim šablonima; preferirajte eksplicitno definisane SAN/EKU vrednosti.
-* Uklonite **Any Purpose** ili **No EKU** iz šablona osim ako nije apsolutno neophodno (odgovara ESC2 scenarijima).
-* Zahtevajte **manager approval** ili posvećene Enrollment Agent workflow-e za osetljive šablone (npr. WebServer / CodeSigning).
-* Ograničite web enrollment (`certsrv`) i CES/NDES endpoint-e na pouzdane mreže ili iza autentifikacije klijentskim sertifikatima.
-* Primena enkripcije RPC enrollment-a (`certutil -setreg CA\InterfaceFlags +IF_ENFORCEENCRYPTICERTREQUEST`) da bi se ublažio ESC11 (RPC relay). Zastavica je **podrazumevano uključena**, ali je često onemogućena za legacy klijente, što ponovo otvara rizik releja.
-* Zaštitite **IIS-based enrollment endpoints** (CES/Certsrv): onemogućite NTLM gde je moguće ili zahtevajte HTTPS + Extended Protection da blokirate ESC8 relaye.
+- **ESC1/ESC6 sami po sebi više nisu cela priča** u okruženjima 2025+. Ako tražite cert za drugi principal, obično vam je potreban i strong mapping artifact kao što je SID ekstenzija ili eksplicitno mapping.
+- **ESC15 (EKUwu)** je uglavnom koristan u unpatched okruženjima jer pretvara bezopasne **v1** templates kao što je **WebServer** u certs sa sposobnošću za authentication- ili enrollment-agent, tako što ubacuje **Application Policies**. Kerberos PKINIT i dalje evaluira EKU-ove, ali **LDAP Schannel** takođe poštuje Application Policies, što održava relevantnim LDAP-based abuse.
+- **ESC16** je CA-wide podešavanje: ako CA globalno isključi SID security extension, svaki izdat certificate se vraća ka slabijem mapping ponašanju osim ako attack chain ne ubaci SID u nekom drugom podržanom formatu.
 
 ---
 
+## Poboljšanja za detekciju i hardening
+
+* **Defender for Identity AD CS sensor (2023-2024)** sada prikazuje posture assessments za ESC1-ESC8/ESC11 i generiše real-time alerts kao što su *“Domain-controller certificate issuance for a non-DC”* (ESC8) i *“Prevent Certificate Enrollment with arbitrary Application Policies”* (ESC15). Osigurajte da su senzori raspoređeni na svim AD CS serverima kako biste imali korist od ovih detekcija.
+* Onemogućite ili strogo ograničite opciju **“Supply in the request”** na svim templates; preferirajte eksplicitno definisane SAN/EKU vrednosti.
+* Uklonite **Any Purpose** ili **No EKU** sa templates osim ako je apsolutno neophodno (adresira ESC2 scenarije).
+* Zahtevajte **manager approval** ili namenski Enrollment Agent workflow za osetljive templates (npr. WebServer / CodeSigning).
+* Ograničite web enrollment (`certsrv`) i CES/NDES endpoint-e na trusted networks ili iza client-certificate authentication.
+* Enforce RPC enrollment encryption (`certutil -setreg CA\InterfaceFlags +IF_ENFORCEENCRYPTICERTREQUEST`) da ublažite ESC11 (RPC relay). Flag je **uključen podrazumevano**, ali je često isključen zbog legacy klijenata, što ponovo otvara relay rizik.
+* Zaštitite **IIS-based enrollment endpoints** (CES/Certsrv): onemogućite NTLM gde je moguće ili zahtevajte HTTPS + Extended Protection da blokirate ESC8 relays.
+
+---
 
 
-## Reference
+
+## References
 
 - [https://trustedsec.com/blog/ekuwu-not-just-another-ad-cs-esc](https://trustedsec.com/blog/ekuwu-not-just-another-ad-cs-esc)
+- [https://support.microsoft.com/en-us/topic/kb5014754-certificate-based-authentication-changes-on-windows-domain-controllers-ad2c23b0-15d8-4340-a468-4d4f3b188f16](https://support.microsoft.com/en-us/topic/kb5014754-certificate-based-authentication-changes-on-windows-domain-controllers-ad2c23b0-15d8-4340-a468-4d4f3b188f16)
 - [https://learn.microsoft.com/en-us/defender-for-identity/security-posture-assessments/certificates](https://learn.microsoft.com/en-us/defender-for-identity/security-posture-assessments/certificates)
 - [https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf)
-- [https://comodosslstore.com/blog/what-is-ssl-tls-client-authentication-how-does-it-work.html](https://comodosslstore.com/blog/what-is-ssl-tls-client-authentication-how-does-it-work.html)
-- [https://support.microsoft.com/en-us/topic/kb5014754-certificate-based-authentication-changes-on-windows-domain-controllers-ad2c23b0-15d8-4340-a468-4d4f3b188f16](https://support.microsoft.com/en-us/topic/kb5014754-certificate-based-authentication-changes-on-windows-domain-controllers-ad2c23b0-15d8-4340-a468-4d4f3b188f16)
-- [https://advisory.eventussecurity.com/advisory/critical-vulnerability-in-ad-cs-allows-privilege-escalation/](https://advisory.eventussecurity.com/advisory/critical-vulnerability-in-ad-cs-allows-privilege-escalation/)
 {{#include ../../banners/hacktricks-training.md}}
