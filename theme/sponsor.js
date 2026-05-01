@@ -162,15 +162,7 @@
       return false
     }
 
-    if (
-      window.location.hostname === "localhost" ||
-      window.location.hostname === "127.0.0.1" ||
-      window.location.hostname === "::1"
-    ) {
-      return true
-    }
-
-    return Math.floor(Math.random() * 5) !== 0
+    return false
   }
 
   async function loadBsaSponsor() {
