@@ -2,168 +2,225 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## 什么是 Mythic？
+## Mythic 是什么？
 
-Mythic 是一个开源的、模块化的命令与控制 (C2) 框架，旨在用于红队测试。它允许安全专业人员在不同操作系统（包括 Windows、Linux 和 macOS）上管理和部署各种代理（有效载荷）。Mythic 提供了一个用户友好的网页界面，用于管理代理、执行命令和收集结果，使其成为在受控环境中模拟真实攻击的强大工具。
+Mythic 是一个开源、模块化、协作式的 command and control (C2) 框架，专为 red teaming 设计。它允许操作者在不同 operating systems 上管理和部署 agents（payloads），包括 Windows、Linux 和 macOS。Mythic 提供浏览器 UI，用于多操作者 tasking、文件处理、SOCKS/rpfwd 管理以及 payload 生成。
+
+与单体框架不同，Mythic 仓库本身**不**自带 payload types 或 C2 profiles。Agents、wrappers 和 C2 profiles 通常作为外部组件安装，并且可以独立于 Mythic core 更新。
 
 ### 安装
 
-要安装 Mythic，请按照官方 **[Mythic repo](https://github.com/its-a-feature/Mythic)** 上的说明进行操作。
+要安装 Mythic，请按照官方 **[Mythic repo](https://github.com/its-a-feature/Mythic)** 中的说明进行。从 Mythic 目录进行常见的 bootstrap 方法是：
+```bash
+sudo make
+sudo ./mythic-cli start
+```
+如果 Mythic 已经在运行，你通常可以使用 `./mythic-cli install github ...` 添加一个新的 agent 或 profile，然后重启 Mythic，或者直接启动新的组件。
 
-### 代理
+### Agents
 
-Mythic 支持多个代理，这些代理是 **在被攻陷系统上执行任务的有效载荷**。每个代理可以根据特定需求进行定制，并可以在不同操作系统上运行。
+Mythic 支持多个 agent，这些 agent 是**在被攻陷系统上执行任务的 payload**。每个 agent 都可以针对特定需求进行定制，并且可以运行在不同的操作系统上。
 
-默认情况下，Mythic 没有安装任何代理。然而，它在 [**https://github.com/MythicAgents**](https://github.com/MythicAgents) 提供了一些开源代理。
+默认情况下，Mythic 没有安装任何 agent。开源社区的 agent 位于 [**https://github.com/MythicAgents**](https://github.com/MythicAgents)，而 [**community feature matrix**](https://mythicmeta.github.io/overview/agent_matrix.html) 可用于快速查看支持的操作系统、payload 格式、wrappers 和 C2 profiles。
 
-要从该仓库安装代理，您只需运行：
+要从该 org 安装一个 agent，你可以运行：
 ```bash
 sudo ./mythic-cli install github https://github.com/MythicAgents/<agent-name>
-sudo ./mythic-cli install github https://github.com/MythicAgents/apfell
+sudo ./mythic-cli install github https://github.com/MythicAgents/Apollo.git
+sudo -E ./mythic-cli install github https://github.com/MythicAgents/Apollo.git
 ```
-您可以使用之前的命令添加新代理，即使 Mythic 已经在运行。
+`sudo -E` 形式在你从非 root 环境进行安装时很有用。即使 Mythic 已经在运行，你也可以使用前面的命令添加新的 agents。
 
-### C2 配置文件
+### C2 Profiles
 
-Mythic 中的 C2 配置文件定义了 **代理与 Mythic 服务器之间的通信方式**。它们指定了通信协议、加密方法和其他设置。您可以通过 Mythic 网络界面创建和管理 C2 配置文件。
+Mythic 中的 C2 profiles 定义了 **agents 如何与 Mythic server 通信**。它们指定通信协议、加密方法以及其他设置。你可以通过 Mythic web interface 创建和管理 C2 profiles。
 
-默认情况下，Mythic 安装时没有配置文件，但可以通过运行从仓库下载一些配置文件 [**https://github.com/MythicC2Profiles**](https://github.com/MythicC2Profiles)：
+默认情况下，Mythic 安装时没有任何 profiles，不过，你可以从 repo [**https://github.com/MythicC2Profiles**](https://github.com/MythicC2Profiles) 下载一些 profiles，运行：
 ```bash
-sudo ./mythic-cli install github https://github.com/MythicC2Profiles/<c2-profile>>
+sudo ./mythic-cli install github https://github.com/MythicC2Profiles/<c2-profile>
 sudo ./mythic-cli install github https://github.com/MythicC2Profiles/http
 ```
+Current operator-relevant profiles to keep in mind:
+
+- [`http`](https://github.com/MythicC2Profiles/http): 基本的异步 GET/POST 流量。
+- [`httpx`](https://github.com/MythicC2Profiles/httpx): 更灵活的 HTTP 流量，支持多个 callback domains、fail-over/round-robin rotation、自定义 headers/query parameters，以及消息变换（`base64`、`base64url`、`xor`、`netbios`、`prepend`、`append`），这些内容可放在 cookies、headers、query parameters 或 body 中。
+- [`dynamichttp`](https://github.com/MythicC2Profiles/dynamichttp): 当静态 `http` profile 太容易被识别时，可使用 JSON/TOML 驱动的 HTTP 消息塑形。
+
+### Wrapper payloads
+
+Wrapper payloads 让你在保持相同 agent logic 的同时，改变交付或持久化时的磁盘表示形式。
+
+- `service_wrapper`: 将另一个 payload 变成 Windows service executable，这在执行路径需要一个有效的 service binary 时很有用。
+- `scarecrow_wrapper`: 使用 ScareCrow loader 封装兼容的 shellcode，生成带 loader 的输出，例如 EXE/DLL/CPL。
+
 ## [Apollo Agent](https://github.com/MythicAgents/Apollo)
 
-Apollo 是一个用 C# 编写的 Windows 代理，使用 4.0 .NET Framework，旨在用于 SpecterOps 培训课程。
+Apollo 是一个用 C# 编写的 Windows agent，使用 4.0 .NET Framework，设计用于 SpecterOps training offerings。
 
-使用以下命令安装：
+Install it with:
 ```bash
 ./mythic-cli install github https://github.com/MythicAgents/Apollo.git
 ```
-这个代理有很多命令，使其与Cobalt Strike的Beacon非常相似，并且有一些额外功能。其中，它支持：
+### Current build/profile notes
 
-### 常见操作
+- Apollo 目前可以输出 `WinExe`、`Shellcode`、`Service` 和 `Source` payloads。
+- Apollo 常用的 profiles 有 `http`、`httpx`、`smb`、`tcp` 和 `websocket`。
+- 当你需要 domain rotation、proxy support、custom message placement，以及 message transforms，而不是旧的静态 `http` profile 时，`httpx` 通常是更灵活的选择。
+- Apollo 支持 `service_wrapper` 和 `scarecrow_wrapper` 这类 wrapper payloads。
+- `register_file` 和 `register_assembly` 是 `execute_assembly`、`execute_pe`、`inline_assembly`、`execute_coff`、`powershell_import` 和 `powerpick` 的 staging primitives。当前的 Apollo builds 会把这些 staged artifacts 缓存在 client-side，形式为受 DPAPI 保护的 AES256 blobs。
+- `ls` 和 `ps` 结果与 Mythic 的 browser scripts 和 file/process browser 配合尤其好，这会让 operator triage 在协作操作中明显更快。
+
+This agent has a lot of commands that makes it very similar to Cobalt Strike's Beacon with some extras. Among them, it supports:
+
+### Common actions
 
 - `cat`: 打印文件内容
 - `cd`: 更改当前工作目录
-- `cp`: 从一个位置复制文件到另一个位置
+- `cp`: 将文件从一个位置复制到另一个位置
 - `ls`: 列出当前目录或指定路径中的文件和目录
+- `ifconfig`: 获取网络适配器和接口
+- `netstat`: 获取 TCP 和 UDP 连接信息
 - `pwd`: 打印当前工作目录
-- `ps`: 列出目标系统上运行的进程（附加信息）
-- `download`: 从目标系统下载文件到本地机器
-- `upload`: 从本地机器上传文件到目标系统
-- `reg_query`: 查询目标系统上的注册表键和值
-- `reg_write_value`: 向指定注册表键写入新值
-- `sleep`: 更改代理的睡眠间隔，决定其多频繁与Mythic服务器检查
-- 还有其他更多，使用`help`查看可用命令的完整列表。
+- `ps`: 列出目标系统上正在运行的进程（附加信息）
+- `jobs`: 列出所有与长时间运行 tasking 关联的运行中 jobs
+- `download`: 将文件从目标系统下载到本地机器
+- `upload`: 将文件从本地机器上传到目标系统
+- `reg_query`: 查询目标系统上的 registry keys 和 values
+- `reg_write_value`: 向指定的 registry key 写入新值
+- `sleep`: 更改 agent 的 sleep interval，这决定了它多久向 Mythic server 检查一次
+- 还有很多其他命令，使用 `help` 查看可用命令的完整列表。
 
-### 权限提升
+### Privilege escalation
 
-- `getprivs`: 在当前线程令牌上启用尽可能多的权限
-- `getsystem`: 打开winlogon的句柄并复制令牌，有效地将权限提升到SYSTEM级别
-- `make_token`: 创建一个新的登录会话并将其应用于代理，允许模拟另一个用户
-- `steal_token`: 从另一个进程窃取主令牌，允许代理模拟该进程的用户
-- `pth`: Pass-the-Hash攻击，允许代理使用用户的NTLM哈希进行身份验证，而无需明文密码
-- `mimikatz`: 运行Mimikatz命令以从内存或SAM数据库中提取凭据、哈希和其他敏感信息
-- `rev2self`: 将代理的令牌恢复为其主令牌，有效地将权限降回原始级别
-- `ppid`: 通过指定新的父进程ID更改后渗透作业的父进程，允许更好地控制作业执行上下文
-- `printspoofer`: 执行PrintSpoofer命令以绕过打印后台处理程序的安全措施，允许权限提升或代码执行
-- `dcsync`: 将用户的Kerberos密钥同步到本地机器，允许离线密码破解或进一步攻击
-- `ticket_cache_add`: 将Kerberos票证添加到当前登录会话或指定会话，允许票证重用或模拟
+- `getprivs`: 尽可能为当前 thread token 启用更多 privileges
+- `getsystem`: 打开 winlogon 的 handle 并复制 token，从而有效提升权限到 SYSTEM level
+- `make_token`: 创建新的 logon session 并将其应用到 agent，从而允许 impersonation 另一个用户
+- `steal_token`: 从另一个 process 盗取 primary token，从而允许 agent impersonate 该 process 的用户
+- `pth`: Pass-the-Hash attack，允许 agent 使用用户的 NTLM hash 进行认证，而无需明文 password
+- `mimikatz`: 运行 Mimikatz commands，以从 memory 或 SAM database 中提取 credentials、hashes 和其他敏感信息
+- `rev2self`: 将 agent 的 token 恢复为其 primary token，有效地把 privileges 降回原始 level
+- `ppid`: 通过指定新的 parent process ID 来更改 post-exploitation jobs 的 parent process，从而更好地控制 job execution context
+- `printspoofer`: 执行 PrintSpoofer commands 以绕过 print spooler security measures，从而实现 privilege escalation 或 code execution
+- `dcsync`: 将用户的 Kerberos keys 同步到本地机器，从而允许 offline password cracking 或进一步攻击
+- `ticket_cache_add`: 向当前 logon session 或指定 session 添加 Kerberos ticket，从而允许 ticket reuse 或 impersonation
 
-### 进程执行
+### Process execution
 
-- `assembly_inject`: 允许将.NET程序集加载器注入远程进程
-- `execute_assembly`: 在代理的上下文中执行.NET程序集
-- `execute_coff`: 在内存中执行COFF文件，允许编译代码的内存执行
-- `execute_pe`: 执行非托管可执行文件（PE）
-- `inline_assembly`: 在一次性AppDomain中执行.NET程序集，允许临时执行代码而不影响代理的主进程
-- `run`: 在目标系统上执行二进制文件，使用系统的PATH查找可执行文件
-- `shinject`: 将shellcode注入远程进程，允许任意代码的内存执行
-- `inject`: 将代理的shellcode注入远程进程，允许代理代码的内存执行
-- `spawn`: 在指定的可执行文件中生成新的代理会话，允许在新进程中执行shellcode
-- `spawnto_x64`和`spawnto_x86`: 将后渗透作业中使用的默认二进制文件更改为指定路径，而不是使用没有参数的`rundll32.exe`，这会产生很多噪音。
+- `assembly_inject`: 允许将 .NET assembly loader 注入到远程 process
+- `blockdlls`: 阻止非 Microsoft 签名的 DLLs 加载到 post-exploitation jobs 中
+- `execute_assembly`: 在 agent 的上下文中执行 .NET assembly
+- `execute_coff`: 在 memory 中执行 COFF file，从而允许在 memory 中执行已编译代码
+- `execute_pe`: 执行一个 unmanaged executable (PE)
+- `get_injection_techniques`: 显示可用的 injection techniques 以及当前选中的一个
+- `inline_assembly`: 在一个可丢弃的 AppDomain 中执行 .NET assembly，从而允许临时执行 code 而不影响 agent 的主 process
+- `register_assembly`: 注册一个 .NET assembly 以便之后执行
+- `register_file`: 在 agent cache 中注册一个文件，以便之后进行 `execute_*` 或 PowerShell tasking
+- `run`: 使用系统的 PATH 来查找 executable，在目标系统上执行 binary
+- `set_injection_technique`: 更改 post-exploitation jobs 使用的 injection primitive
+- `shinject`: 将 shellcode 注入远程 process，从而允许在 memory 中执行任意 code
+- `inject`: 将 agent shellcode 注入远程 process，从而允许在 memory 中执行 agent 的 code
+- `spawn`: 在指定 executable 中生成一个新的 agent session，从而允许在一个新 process 中执行 shellcode
+- `spawnto_x64` 和 `spawnto_x86`: 将 post-exploitation jobs 使用的默认 binary 更改为指定路径，而不是使用没有参数、且非常显眼的 `rundll32.exe`。
 
-### Mithic Forge
+### Mythic Forge
 
-这允许从Mythic Forge加载**COFF/BOF**文件，Mythic Forge是一个预编译有效载荷和工具的存储库，可以在目标系统上执行。通过可以加载的所有命令，将能够以BOFs的形式在当前代理进程中执行常见操作（通常更隐蔽）。
+这允许从 Mythic Forge 加载 `COFF/BOF` files，Mythic Forge 是一个预编译 payloads 和 tools 的 repository，这些内容可以在目标系统上执行。借助所有可加载的 commands，就可以把它们作为 BOFs 在当前 agent process 中执行，从而完成常见操作（通常比单独启动一个 process 具有更好的 OPSEC）。
 
-开始安装它们：
+Start installing them with:
 ```bash
 ./mythic-cli install github https://github.com/MythicAgents/forge.git
 ```
-然后，使用 `forge_collections` 显示 Mythic Forge 中的 COFF/BOF 模块，以便能够选择并将它们加载到代理的内存中以执行。默认情况下，以下 2 个集合在 Apollo 中添加：
+然后，使用 `forge_collections` 来显示 Mythic Forge 中的 COFF/BOF modules，以便选择它们并将它们加载到 agent 的内存中执行。默认情况下，Apollo 中会添加以下 2 个 collections：
 
 - `forge_collections {"collectionName":"SharpCollection"}`
 - `forge_collections {"collectionName":"SliverArmory"}`
 
-加载一个模块后，它将作为另一个命令出现在列表中，例如 `forge_bof_sa-whoami` 或 `forge_bof_sa-netuser`。
+加载一个 module 之后，它会以另一个 command 的形式出现在列表中，例如 `forge_bof_sa-whoami` 或 `forge_bof_sa-netuser`。
 
-### Powershell & 脚本执行
+### PowerShell & scripting execution
 
-- `powershell_import`: 将新的 PowerShell 脚本 (.ps1) 导入代理缓存以供后续执行
-- `powershell`: 在代理的上下文中执行 PowerShell 命令，允许进行高级脚本编写和自动化
-- `powerpick`: 将 PowerShell 加载程序程序集注入到一个牺牲进程中并执行 PowerShell 命令（不记录 PowerShell 日志）。
-- `psinject`: 在指定进程中执行 PowerShell，允许在另一个进程的上下文中有针对性地执行脚本
-- `shell`: 在代理的上下文中执行 shell 命令，类似于在 cmd.exe 中运行命令
+- `powershell_import`: 导入一个新的 PowerShell script (.ps1) 到 agent cache 中，以便后续执行
+- `powershell`: 在 agent 的上下文中执行一个 PowerShell command，支持高级 scripting 和 automation
+- `powerpick`: 将一个 PowerShell loader assembly 注入到一个 sacrificial process 中，并执行一个 PowerShell command（不记录 powershell logging）。
+- `psinject`: 在指定 process 中执行 PowerShell，允许在另一个 process 的上下文中有针对性地执行 scripts
+- `shell`: 在 agent 的上下文中执行一个 shell command，类似于在 cmd.exe 中运行命令
 
-### 横向移动
+### Lateral Movement
 
-- `jump_psexec`: 使用 PsExec 技术通过首先复制 Apollo 代理可执行文件 (apollo.exe) 并执行它来横向移动到新主机。
-- `jump_wmi`: 使用 WMI 技术通过首先复制 Apollo 代理可执行文件 (apollo.exe) 并执行它来横向移动到新主机。
-- `wmiexecute`: 使用 WMI 在本地或指定的远程系统上执行命令，提供可选的凭据进行模拟。
-- `net_dclist`: 检索指定域的域控制器列表，有助于识别潜在的横向移动目标。
-- `net_localgroup`: 列出指定计算机上的本地组，如果未指定计算机，则默认为 localhost。
-- `net_localgroup_member`: 检索本地或远程计算机上指定组的本地组成员资格，允许枚举特定组中的用户。
-- `net_shares`: 列出指定计算机上的远程共享及其可访问性，有助于识别潜在的横向移动目标。
-- `socks`: 在目标网络上启用 SOCKS 5 兼容代理，允许通过被攻陷的主机隧道流量。与 proxychains 等工具兼容。
-- `rpfwd`: 在目标主机上指定端口开始监听，并通过 Mythic 将流量转发到远程 IP 和端口，允许远程访问目标网络上的服务。
-- `listpipes`: 列出本地系统上的所有命名管道，这对于通过与 IPC 机制交互进行横向移动或权限提升可能很有用。
+- `jump_psexec`: 使用 PsExec technique 通过先复制 Apollo agent executable（apollo.exe）并执行它，横向移动到新的 host。
+- `jump_wmi`: 使用 WMI technique 通过先复制 Apollo agent executable（apollo.exe）并执行它，横向移动到新的 host。
+- `link` and `unlink`: 在 callbacks 之间创建和拆除 P2P links（例如通过 SMB/TCP）。
+- `wmiexecute`: 使用 WMI 在本地或指定的 remote system 上执行 command，并可选择凭据进行 impersonation。
+- `net_dclist`: 获取指定 domain 的 domain controllers 列表，有助于识别横向移动的潜在 targets。
+- `net_localgroup`: 列出指定 computer 上的 local groups；如果未指定 computer，则默认使用 localhost。
+- `net_localgroup_member`: 获取本地或远程 computer 上指定 group 的 local group membership，便于枚举特定 groups 中的 users。
+- `net_shares`: 列出指定 computer 上的 remote shares 及其可访问性，有助于识别横向移动的潜在 targets。
+- `socks`: 在目标 network 上启用一个符合 SOCKS 5 的 proxy，允许通过被入侵的 host 隧道化 traffic。兼容 proxychains 等 tools。
+- `rpfwd`: 在目标 host 上监听指定 port，并通过 Mythic 将 traffic 转发到一个远程 IP 和 port，允许远程访问目标 network 上的 services。
+- `listpipes`: 列出本地系统上的所有 named pipes，这对于通过与 IPC mechanisms 交互来进行横向移动或 privilege escalation 可能很有用。
 
-### 其他命令
-- `help`: 显示有关特定命令的详细信息或代理中所有可用命令的一般信息。
-- `clear`: 将任务标记为“已清除”，以便代理无法接收。您可以指定 `all` 来清除所有任务或 `task Num` 来清除特定任务。
+关于 `jump_wmi` 或 `wmiexecute` 底层使用的更低层级 WMI execution primitives，请查看 [WmiExec](lateral-movement/wmiexec.md)。关于更广泛的 pivoting patterns，请查看 [Tunneling and Port Forwarding](../generic-hacking/tunneling-and-port-forwarding.md)。
 
-## [Poseidon Agent](https://github.com/MythicAgents/Poseidon)
+### Miscellaneous Commands
+- `help`: 显示关于 agent 中所有可用 commands 的详细信息，或关于特定 command 的一般信息。
+- `clear`: 将 tasks 标记为 'cleared'，这样 agents 就无法再拾取它们。你可以指定 `all` 来清除所有 tasks，或指定 `task Num` 来清除某个特定 task。
 
-Poseidon 是一个用 Golang 编写的代理，编译为 **Linux 和 macOS** 可执行文件。
+
+## [Poseidon Agent](https://github.com/MythicAgents/poseidon)
+
+Poseidon 是一个 Golang agent，可编译为 **Linux and macOS** executables。
 ```bash
-./mythic-cli install github https://github.com/MythicAgents/Poseidon.git
+./mythic-cli install github https://github.com/MythicAgents/poseidon.git
 ```
-当用户在 Linux 上时，有一些有趣的命令：
+### 当前 build/profile 说明
 
-### 常见操作
+- 当前 Poseidon builds 目标为 Linux 和 macOS，支持 `x86_64` 和 `arm64`。
+- 支持的输出格式包括原生可执行文件，以及 `dylib` 和 `so` 等 shared-library 风格输出。
+- Poseidon 支持 `http`、`websocket`、`tcp` 和 `dynamichttp`，当前 builders 还提供 `egress_order` 和 failover thresholds 等 multi-egress 设置。
+- 当你需要更干净的网络行为或额外的 Go binary 混淆时，值得检查 `proxy_bypass` 和 `garble` 之类的 build-time options。
 
-- `cat`: 打印文件的内容
+关于基于 Mythic 的 macOS-specific tradecraft、JAMF abuse，或 MDM-as-C2 ideas，请查看 [macOS Red Teaming](../macos-hardening/macos-red-teaming/README.md)。
+
+当在 Linux 或 macOS 上使用时，它有一些有趣的 commands：
+
+### 常见 actions
+
+- `cat`: 打印文件内容
 - `cd`: 更改当前工作目录
-- `chmod`: 更改文件的权限
-- `config`: 查看当前配置和主机信息
-- `cp`: 从一个位置复制文件到另一个位置
-- `curl`: 执行单个网络请求，带可选的头和方法
-- `upload`: 将文件上传到目标
+- `chmod`: 更改文件权限
+- `config`: 查看当前 config 和主机信息
+- `cp`: 将文件从一个位置复制到另一个位置
+- `curl`: 执行单个 web request，可选 headers 和 method
+- `upload`: 上传文件到目标
 - `download`: 从目标系统下载文件到本地机器
-- 还有更多
+- 以及更多
 
 ### 搜索敏感信息
 
-- `triagedirectory`: 在主机的目录中查找有趣的文件，例如敏感文件或凭据。
-- `getenv`: 获取所有当前环境变量。
+- `triagedirectory`: 在主机上的目录中查找有价值的文件，例如敏感文件或 credentials。
+- `getenv`: 获取当前所有环境变量。
 
 ### 横向移动
 
-- `ssh`: 使用指定凭据 SSH 到主机，并在不生成 ssh 的情况下打开 PTY。
-- `sshauth`: 使用指定凭据 SSH 到指定主机。您还可以使用此命令通过 SSH 在远程主机上执行特定命令或使用它来 SCP 文件。
-- `link_tcp`: 通过 TCP 链接到另一个代理，允许代理之间的直接通信。
-- `link_webshell`: 使用 webshell P2P 配置文件链接到代理，允许远程访问代理的 Web 界面。
-- `rpfwd`: 启动或停止反向端口转发，允许远程访问目标网络上的服务。
-- `socks`: 在目标网络上启动或停止 SOCKS5 代理，允许通过被攻陷的主机隧道流量。与 proxychains 等工具兼容。
-- `portscan`: 扫描主机以查找开放端口，有助于识别潜在的横向移动或进一步攻击的目标。
+- `ssh`: 使用指定的 credentials 通过 SSH 连接到主机，并在不启动 ssh 的情况下打开一个 PTY。
+- `sshauth`: 使用指定的 credentials 连接到指定主机。你也可以用它通过 SSH 在远程主机上执行特定 command，或者用它来通过 SCP 传输文件。
+- `link_tcp`: 通过 TCP 连接到另一个 agent，允许 agents 之间直接通信。
+- `link_webshell`: 使用 webshell P2P profile 连接到一个 agent，从而远程访问该 agent 的 web 界面。
+- `rpfwd`: 启动或停止 Reverse Port Forward，允许远程访问目标网络中的 services。
+- `socks`: 在目标网络上启动或停止 SOCKS5 proxy，用于通过已被 compromise 的主机转发 traffic。兼容 proxychains 等工具。
+- `portscan`: 扫描主机上的 open ports，适用于识别潜在目标以进行 lateral movement 或进一步攻击。
 
 ### 进程执行
 
-- `shell`: 通过 /bin/sh 执行单个 shell 命令，允许在目标系统上直接执行命令。
-- `run`: 从磁盘执行带参数的命令，允许在目标系统上执行二进制文件或脚本。
-- `pty`: 打开一个交互式 PTY，允许与目标系统上的 shell 直接交互。
+- `shell`: 通过 /bin/sh 执行单个 shell command，允许在目标系统上直接执行 commands。
+- `run`: 从磁盘执行带 arguments 的 command，允许在目标系统上执行 binaries 或 scripts。
+- `pty`: 打开一个交互式 PTY，允许直接与目标系统上的 shell 交互。
 
 
+
+
+## References
+
+- [Mythic Community Agent Feature Matrix](https://mythicmeta.github.io/overview/agent_matrix.html)
+- [Apollo README](https://github.com/MythicAgents/Apollo/blob/master/README.md)
 {{#include ../banners/hacktricks-training.md}}
