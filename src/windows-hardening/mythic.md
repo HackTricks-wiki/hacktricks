@@ -2,169 +2,225 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## What is Mythic?
+## Mythic이란?
 
-Mythic은 레드 팀을 위해 설계된 오픈 소스 모듈형 명령 및 제어(C2) 프레임워크입니다. 보안 전문가가 Windows, Linux 및 macOS를 포함한 다양한 운영 체제에서 여러 에이전트(페이로드)를 관리하고 배포할 수 있도록 합니다. Mythic은 에이전트를 관리하고, 명령을 실행하며, 결과를 수집하기 위한 사용자 친화적인 웹 인터페이스를 제공하여 통제된 환경에서 실제 공격을 시뮬레이션하는 강력한 도구입니다.
+Mythic은 red teaming을 위해 설계된 오픈소스의 모듈형 협업 command and control (C2) framework입니다. 이를 통해 운영자는 Windows, Linux, macOS를 포함한 다양한 운영체제에서 agents(payloads)를 관리하고 배포할 수 있습니다. Mythic은 multi-operator tasking, file handling, SOCKS/rpfwd management, payload generation을 위한 browser UI를 제공합니다.
+
+단일 구조의 framework와 달리, Mythic repository 자체는 payload types나 C2 profiles를 **포함하지 않습니다**. Agents, wrappers, 그리고 C2 profiles는 일반적으로 외부 component로 설치되며 Mythic core와 독립적으로 업데이트할 수 있습니다.
 
 ### Installation
 
-To install Mythic, follow the instructions on the official **[Mythic repo](https://github.com/its-a-feature/Mythic)**.
+Mythic을 설치하려면 공식 **[Mythic repo](https://github.com/its-a-feature/Mythic)**의 지침을 따르세요. Mythic directory에서의 일반적인 bootstrap은 다음과 같습니다:
+```bash
+sudo make
+sudo ./mythic-cli start
+```
+Mythic이 이미 실행 중이라면, 보통 `./mythic-cli install github ...`로 새 agent나 profile을 추가한 다음, Mythic을 재시작하거나 새 component를 직접 시작하면 됩니다.
 
 ### Agents
 
-Mythic은 **손상된 시스템에서 작업을 수행하는 페이로드**인 여러 에이전트를 지원합니다. 각 에이전트는 특정 요구 사항에 맞게 조정할 수 있으며, 다양한 운영 체제에서 실행될 수 있습니다.
+Mythic은 여러 agent를 지원하며, 이들은 **침해된 시스템에서 task를 수행하는 payloads**입니다. 각 agent는 특정 요구 사항에 맞게 조정할 수 있으며, 다른 운영체제에서 실행될 수 있습니다.
 
-기본적으로 Mythic에는 설치된 에이전트가 없습니다. 그러나 [**https://github.com/MythicAgents**](https://github.com/MythicAgents)에서 일부 오픈 소스 에이전트를 제공합니다.
+기본적으로 Mythic에는 설치된 agent가 없습니다. 오픈소스 community agent는 [**https://github.com/MythicAgents**](https://github.com/MythicAgents)에 있으며, [**community feature matrix**](https://mythicmeta.github.io/overview/agent_matrix.html)는 지원되는 운영체제, payload formats, wrappers, 그리고 C2 profiles를 빠르게 확인하는 데 유용합니다.
 
-To install an agent from that repo you just need to run:
+그 org에서 agent를 설치하려면 다음을 실행할 수 있습니다:
 ```bash
 sudo ./mythic-cli install github https://github.com/MythicAgents/<agent-name>
-sudo ./mythic-cli install github https://github.com/MythicAgents/apfell
+sudo ./mythic-cli install github https://github.com/MythicAgents/Apollo.git
+sudo -E ./mythic-cli install github https://github.com/MythicAgents/Apollo.git
 ```
-새로운 에이전트를 이전 명령으로 추가할 수 있으며, Mythic이 이미 실행 중인 경우에도 가능합니다.
+`sudo -E` 형식은 non-root 환경에서 설치할 때 유용합니다. Mythic이 이미 실행 중이더라도 이전 명령으로 새로운 agent를 추가할 수 있습니다.
 
-### C2 프로필
+### C2 Profiles
 
-Mythic의 C2 프로필은 **에이전트가 Mythic 서버와 통신하는 방법**을 정의합니다. 이들은 통신 프로토콜, 암호화 방법 및 기타 설정을 지정합니다. Mythic 웹 인터페이스를 통해 C2 프로필을 생성하고 관리할 수 있습니다.
+Mythic의 C2 profiles는 **agent가 Mythic server와 어떻게 통신하는지**를 정의합니다. 여기에는 통신 protocol, encryption methods, 그리고 기타 설정이 지정됩니다. Mythic web interface를 통해 C2 profiles를 생성하고 관리할 수 있습니다.
 
-기본적으로 Mythic은 프로필 없이 설치되지만, 다음 명령을 실행하여 리포에서 일부 프로필을 다운로드할 수 있습니다: [**https://github.com/MythicC2Profiles**](https://github.com/MythicC2Profiles)
+기본적으로 Mythic은 profiles 없이 설치되지만, repo [**https://github.com/MythicC2Profiles**](https://github.com/MythicC2Profiles)에서 일부 profiles를 다운로드할 수 있습니다. 실행:
 ```bash
-sudo ./mythic-cli install github https://github.com/MythicC2Profiles/<c2-profile>>
+sudo ./mythic-cli install github https://github.com/MythicC2Profiles/<c2-profile>
 sudo ./mythic-cli install github https://github.com/MythicC2Profiles/http
 ```
+Current operator-relevant profiles to keep in mind:
+
+- [`http`](https://github.com/MythicC2Profiles/http): 기본 비동기 GET/POST 트래픽.
+- [`httpx`](https://github.com/MythicC2Profiles/httpx): 여러 callback domains, fail-over/round-robin rotation, custom headers/query parameters, 그리고 메시지 transforms (`base64`, `base64url`, `xor`, `netbios`, `prepend`, `append`)를 cookies, headers, query parameters, 또는 body에 배치하는 더 유연한 HTTP 트래픽.
+- [`dynamichttp`](https://github.com/MythicC2Profiles/dynamichttp): static `http` profile이 너무 눈에 띌 때 사용하는 JSON/TOML 기반 HTTP message shaping.
+
+### Wrapper payloads
+
+Wrapper payloads는 동일한 agent logic을 유지하면서도, 전달되거나 지속되는 on-disk representation을 바꿀 수 있게 해줍니다.
+
+- `service_wrapper`: 다른 payload를 Windows service executable로 바꾸며, execution path에 유효한 service binary가 필요할 때 유용합니다.
+- `scarecrow_wrapper`: 호환되는 shellcode를 ScareCrow loader로 감싸 EXE/DLL/CPL 같은 loader-backed outputs를 생성합니다.
+
 ## [Apollo Agent](https://github.com/MythicAgents/Apollo)
 
-Apollo는 SpecterOps 교육 제공을 위해 설계된 4.0 .NET Framework를 사용하여 C#로 작성된 Windows 에이전트입니다.
+Apollo는 SpecterOps training offerings에서 사용하도록 설계된, 4.0 .NET Framework를 사용하는 C#으로 작성된 Windows agent입니다.
 
-설치하려면:
+Install it with:
 ```bash
 ./mythic-cli install github https://github.com/MythicAgents/Apollo.git
 ```
-이 에이전트는 Cobalt Strike의 Beacon과 매우 유사한 많은 명령어를 가지고 있으며 몇 가지 추가 기능이 있습니다. 그 중에서 지원하는 기능은 다음과 같습니다:
+### Current build/profile notes
 
-### 일반 작업
+- Apollo는 현재 `WinExe`, `Shellcode`, `Service`, 그리고 `Source` payloads를 emit할 수 있다.
+- 일반적으로 많이 쓰는 Apollo profiles는 `http`, `httpx`, `smb`, `tcp`, 그리고 `websocket`이다.
+- `httpx`는 domain rotation, proxy support, custom message placement, message transforms가 필요할 때, 예전의 정적인 `http` profile보다 보통 더 유연한 옵션이다.
+- Apollo는 `service_wrapper`와 `scarecrow_wrapper` 같은 wrapper payloads를 지원한다.
+- `register_file`과 `register_assembly`는 `execute_assembly`, `execute_pe`, `inline_assembly`, `execute_coff`, `powershell_import`, 그리고 `powerpick`의 staging primitives이다. 현재 Apollo builds에서는 이런 staged artifacts가 client-side에 DPAPI-protected AES256 blobs로 캐시된다.
+- `ls`와 `ps` 결과는 Mythic의 browser scripts와 file/process browser와 특히 잘 통합되며, 협업 작업에서 operator triage를 눈에 띄게 빠르게 만든다.
 
-- `cat`: 파일의 내용을 출력합니다.
-- `cd`: 현재 작업 디렉토리를 변경합니다.
-- `cp`: 한 위치에서 다른 위치로 파일을 복사합니다.
-- `ls`: 현재 디렉토리 또는 지정된 경로의 파일 및 디렉토리를 나열합니다.
-- `pwd`: 현재 작업 디렉토리를 출력합니다.
-- `ps`: 대상 시스템에서 실행 중인 프로세스를 나열합니다 (추가 정보 포함).
-- `download`: 대상 시스템에서 로컬 머신으로 파일을 다운로드합니다.
-- `upload`: 로컬 머신에서 대상 시스템으로 파일을 업로드합니다.
-- `reg_query`: 대상 시스템의 레지스트리 키 및 값을 쿼리합니다.
-- `reg_write_value`: 지정된 레지스트리 키에 새 값을 씁니다.
-- `sleep`: 에이전트의 수면 간격을 변경하여 Mythic 서버와 얼마나 자주 체크인하는지를 결정합니다.
-- 기타 여러 가지, 전체 명령어 목록을 보려면 `help`를 사용하세요.
+This agent has a lot of commands that makes it very similar to Cobalt Strike's Beacon with some extras. Among them, it supports:
 
-### 권한 상승
+### Common actions
 
-- `getprivs`: 현재 스레드 토큰에서 가능한 많은 권한을 활성화합니다.
-- `getsystem`: winlogon에 핸들을 열고 토큰을 복제하여 효과적으로 SYSTEM 수준으로 권한을 상승시킵니다.
-- `make_token`: 새로운 로그온 세션을 생성하고 이를 에이전트에 적용하여 다른 사용자를 가장할 수 있게 합니다.
-- `steal_token`: 다른 프로세스에서 기본 토큰을 훔쳐 에이전트가 해당 프로세스의 사용자를 가장할 수 있게 합니다.
-- `pth`: Pass-the-Hash 공격으로, 에이전트가 평문 비밀번호 없이 NTLM 해시를 사용하여 사용자로 인증할 수 있게 합니다.
-- `mimikatz`: Mimikatz 명령을 실행하여 메모리 또는 SAM 데이터베이스에서 자격 증명, 해시 및 기타 민감한 정보를 추출합니다.
-- `rev2self`: 에이전트의 토큰을 기본 토큰으로 되돌려 원래 수준으로 권한을 낮춥니다.
-- `ppid`: 새로운 부모 프로세스 ID를 지정하여 포스트 익스플로잇 작업의 부모 프로세스를 변경하여 작업 실행 컨텍스트에 대한 더 나은 제어를 가능하게 합니다.
-- `printspoofer`: PrintSpoofer 명령을 실행하여 인쇄 스풀러 보안 조치를 우회하여 권한 상승 또는 코드 실행을 가능하게 합니다.
-- `dcsync`: 사용자의 Kerberos 키를 로컬 머신으로 동기화하여 오프라인 비밀번호 크래킹 또는 추가 공격을 가능하게 합니다.
-- `ticket_cache_add`: 현재 로그온 세션 또는 지정된 세션에 Kerberos 티켓을 추가하여 티켓 재사용 또는 가장을 가능하게 합니다.
+- `cat`: 파일 내용을 출력한다
+- `cd`: 현재 working directory를 변경한다
+- `cp`: 한 위치에서 다른 위치로 파일을 복사한다
+- `ls`: 현재 directory 또는 지정한 path의 파일과 directory를 나열한다
+- `ifconfig`: network adapters와 interfaces를 가져온다
+- `netstat`: TCP와 UDP connection 정보를 가져온다
+- `pwd`: 현재 working directory를 출력한다
+- `ps`: 대상 시스템에서 실행 중인 processes를 나열한다(추가 정보 포함)
+- `jobs`: 장기 실행 tasking과 연결된 모든 running jobs를 나열한다
+- `download`: 대상 시스템에서 local machine으로 파일을 다운로드한다
+- `upload`: local machine에서 대상 시스템으로 파일을 업로드한다
+- `reg_query`: 대상 시스템의 registry keys와 values를 조회한다
+- `reg_write_value`: 지정한 registry key에 새 value를 쓴다
+- `sleep`: agent의 sleep interval을 변경한다. 이는 Mythic server와 얼마나 자주 check in할지를 결정한다
+- 그 외에도 많으며, 사용 가능한 전체 commands 목록은 `help`를 사용해 확인한다.
 
-### 프로세스 실행
+### Privilege escalation
 
-- `assembly_inject`: 원격 프로세스에 .NET 어셈블리 로더를 주입할 수 있습니다.
-- `execute_assembly`: 에이전트의 컨텍스트에서 .NET 어셈블리를 실행합니다.
-- `execute_coff`: 메모리에서 COFF 파일을 실행하여 컴파일된 코드를 메모리에서 실행할 수 있게 합니다.
-- `execute_pe`: 비관리 실행 파일(PE)을 실행합니다.
-- `inline_assembly`: 일회용 AppDomain에서 .NET 어셈블리를 실행하여 에이전트의 주요 프로세스에 영향을 주지 않고 코드를 임시로 실행할 수 있게 합니다.
-- `run`: 대상 시스템에서 이진 파일을 실행하며, 시스템의 PATH를 사용하여 실행 파일을 찾습니다.
-- `shinject`: 원격 프로세스에 셸코드를 주입하여 임의의 코드를 메모리에서 실행할 수 있게 합니다.
-- `inject`: 에이전트 셸코드를 원격 프로세스에 주입하여 에이전트의 코드를 메모리에서 실행할 수 있게 합니다.
-- `spawn`: 지정된 실행 파일에서 새로운 에이전트 세션을 생성하여 새로운 프로세스에서 셸코드를 실행할 수 있게 합니다.
-- `spawnto_x64` 및 `spawnto_x86`: 포스트 익스플로잇 작업에서 기본 이진 파일을 지정된 경로로 변경하여 매개변수 없이 `rundll32.exe`를 사용하는 대신 소음이 적게 합니다.
+- `getprivs`: 현재 thread token에서 가능한 한 많은 privileges를 활성화한다
+- `getsystem`: winlogon에 handle을 열고 token을 duplicate하여, 사실상 privileges를 SYSTEM level로 올린다
+- `make_token`: 새 logon session을 만들고 이를 agent에 적용하여 다른 user의 impersonation을 가능하게 한다
+- `steal_token`: 다른 process에서 primary token을 훔쳐와 agent가 그 process의 user를 impersonate할 수 있게 한다
+- `pth`: Pass-the-Hash attack으로, plaintext password 없이 NTLM hash를 사용해 user로 인증할 수 있게 한다
+- `mimikatz`: Mimikatz commands를 실행해 memory나 SAM database에서 credentials, hashes, 그리고 기타 민감한 정보를 추출한다
+- `rev2self`: agent의 token을 primary token으로 되돌려, privileges를 원래 수준으로 떨어뜨린다
+- `ppid`: 새 parent process ID를 지정해 post-exploitation jobs의 parent process를 바꾸며, job execution context를 더 잘 제어할 수 있게 한다
+- `printspoofer`: PrintSpoofer commands를 실행해 print spooler security measures를 우회하고, privilege escalation 또는 code execution을 가능하게 한다
+- `dcsync`: 사용자의 Kerberos keys를 local machine과 동기화하여, offline password cracking 또는 추가 공격을 가능하게 한다
+- `ticket_cache_add`: 현재 logon session 또는 지정한 session에 Kerberos ticket을 추가하여, ticket reuse 또는 impersonation을 가능하게 한다
 
-### Mithic Forge
+### Process execution
 
-이 기능은 Mythic Forge에서 **COFF/BOF** 파일을 로드할 수 있게 하며, 이는 대상 시스템에서 실행할 수 있는 미리 컴파일된 페이로드 및 도구의 저장소입니다. 로드할 수 있는 모든 명령어로 인해 현재 에이전트 프로세스에서 BOF로 실행하여 일반 작업을 수행할 수 있게 됩니다 (보통 더 은밀하게). 
+- `assembly_inject`: 원격 process에 .NET assembly loader를 inject할 수 있게 한다
+- `blockdlls`: Microsoft 서명이 아닌 DLL이 post-exploitation jobs에 로드되는 것을 차단한다
+- `execute_assembly`: agent context에서 .NET assembly를 실행한다
+- `execute_coff`: 메모리에서 COFF file을 실행하여 compiled code를 in-memory execution할 수 있게 한다
+- `execute_pe`: unmanaged executable (PE)을 실행한다
+- `get_injection_techniques`: 사용 가능한 injection techniques와 현재 선택된 technique을 보여준다
+- `inline_assembly`: disposable AppDomain에서 .NET assembly를 실행하여, agent의 main process에 영향을 주지 않고 code를 임시로 실행할 수 있게 한다
+- `register_assembly`: 나중에 실행할 .NET assembly를 등록한다
+- `register_file`: 나중의 `execute_*` 또는 PowerShell tasking을 위해 agent cache에 file을 등록한다
+- `run`: system의 PATH를 사용해 executable을 찾아 대상 시스템에서 binary를 실행한다
+- `set_injection_technique`: post-exploitation jobs에서 사용하는 injection primitive를 변경한다
+- `shinject`: 원격 process에 shellcode를 inject하여 arbitrary code를 in-memory execution할 수 있게 한다
+- `inject`: agent shellcode를 원격 process에 inject하여 agent code를 in-memory execution할 수 있게 한다
+- `spawn`: 지정한 executable에서 새 agent session을 생성하여, 새 process에서 shellcode 실행을 가능하게 한다
+- `spawnto_x64` and `spawnto_x86`: 매우 시끄러운 `rundll32.exe`를 params 없이 쓰는 대신, post-exploitation jobs에서 기본 binary로 사용할 path를 지정한 것으로 변경한다.
 
-설치를 시작하려면:
+### Mythic Forge
+
+This allows to **load COFF/BOF** files from the Mythic Forge, which is a repository of pre-compiled payloads and tools that can be executed on the target system. With all the commands that can be loaded it'll be possible to perform common actions executing them in the current agent process as BOFs (usually with better OPSEC than spawning a separate process).
+
+Start installing them with:
 ```bash
 ./mythic-cli install github https://github.com/MythicAgents/forge.git
 ```
-그런 다음 `forge_collections`를 사용하여 Mythic Forge의 COFF/BOF 모듈을 표시하여 에이전트의 메모리에 선택하고 로드할 수 있도록 합니다. 기본적으로 Apollo에 다음 2개의 컬렉션이 추가됩니다:
+Then, `forge_collections`를 사용해 Mythic Forge의 COFF/BOF 모듈을 표시하여 에이전트의 메모리에 선택해서 로드하고 실행할 수 있게 합니다. 기본적으로 Apollo에는 다음 2개 컬렉션이 추가됩니다:
 
 - `forge_collections {"collectionName":"SharpCollection"}`
 - `forge_collections {"collectionName":"SliverArmory"}`
 
-모듈이 하나 로드되면 `forge_bof_sa-whoami` 또는 `forge_bof_sa-netuser`와 같은 다른 명령으로 목록에 나타납니다.
+모듈이 하나 로드되면 `forge_bof_sa-whoami` 또는 `forge_bof_sa-netuser` 같은 다른 명령으로 목록에 나타납니다.
 
-### Powershell & 스크립트 실행
+### PowerShell & scripting execution
 
-- `powershell_import`: 새로운 PowerShell 스크립트(.ps1)를 에이전트 캐시에 가져와 나중에 실행할 수 있도록 합니다.
-- `powershell`: 에이전트의 컨텍스트에서 PowerShell 명령을 실행하여 고급 스크립팅 및 자동화를 가능하게 합니다.
-- `powerpick`: 희생 프로세스에 PowerShell 로더 어셈블리를 주입하고 PowerShell 명령을 실행합니다(파워셸 로깅 없이).
-- `psinject`: 지정된 프로세스에서 PowerShell을 실행하여 다른 프로세스의 컨텍스트에서 스크립트를 타겟팅하여 실행할 수 있습니다.
-- `shell`: 에이전트의 컨텍스트에서 셸 명령을 실행하며, cmd.exe에서 명령을 실행하는 것과 유사합니다.
+- `powershell_import`: 나중에 실행할 수 있도록 새 PowerShell 스크립트(.ps1)를 에이전트 캐시에 가져옵니다
+- `powershell`: 에이전트 컨텍스트에서 PowerShell 명령을 실행하며, 고급 스크립팅과 자동화를 허용합니다
+- `powerpick`: PowerShell 로더 어셈블리를 sacrificial process에 주입하고 PowerShell 명령을 실행합니다 (powershell logging 없이).
+- `psinject`: 지정된 프로세스에서 PowerShell을 실행하여, 다른 프로세스 컨텍스트에서 스크립트를 대상으로 실행할 수 있게 합니다
+- `shell`: cmd.exe에서 실행하는 것과 유사하게, 에이전트 컨텍스트에서 shell 명령을 실행합니다
 
-### 측면 이동
+### Lateral Movement
 
-- `jump_psexec`: PsExec 기술을 사용하여 Apollo 에이전트 실행 파일(apollo.exe)을 먼저 복사하고 실행하여 새로운 호스트로 측면 이동합니다.
-- `jump_wmi`: WMI 기술을 사용하여 Apollo 에이전트 실행 파일(apollo.exe)을 먼저 복사하고 실행하여 새로운 호스트로 측면 이동합니다.
-- `wmiexecute`: WMI를 사용하여 로컬 또는 지정된 원격 시스템에서 명령을 실행하며, 임시 사용을 위한 선택적 자격 증명을 제공합니다.
-- `net_dclist`: 지정된 도메인에 대한 도메인 컨트롤러 목록을 검색하여 측면 이동을 위한 잠재적 대상을 식별하는 데 유용합니다.
-- `net_localgroup`: 지정된 컴퓨터의 로컬 그룹을 나열하며, 컴퓨터가 지정되지 않은 경우 기본적으로 localhost로 설정됩니다.
-- `net_localgroup_member`: 로컬 또는 원격 컴퓨터에서 지정된 그룹의 로컬 그룹 멤버십을 검색하여 특정 그룹의 사용자 열거를 가능하게 합니다.
-- `net_shares`: 지정된 컴퓨터에서 원격 공유 및 접근 가능성을 나열하여 측면 이동을 위한 잠재적 대상을 식별하는 데 유용합니다.
-- `socks`: 대상 네트워크에서 SOCKS 5 호환 프록시를 활성화하여 손상된 호스트를 통해 트래픽을 터널링할 수 있도록 합니다. proxychains와 같은 도구와 호환됩니다.
-- `rpfwd`: 대상 호스트의 지정된 포트에서 수신 대기하고 Mythic을 통해 원격 IP 및 포트로 트래픽을 전달하여 대상 네트워크의 서비스에 원격으로 접근할 수 있도록 합니다.
-- `listpipes`: 로컬 시스템의 모든 명명된 파이프를 나열하며, IPC 메커니즘과 상호작용하여 측면 이동 또는 권한 상승에 유용할 수 있습니다.
+- `jump_psexec`: PsExec technique를 사용해 Apollo agent executable(apollo.exe)을 먼저 복사한 뒤 실행하여 새 호스트로 lateral movement를 수행합니다
+- `jump_wmi`: WMI technique를 사용해 Apollo agent executable(apollo.exe)을 먼저 복사한 뒤 실행하여 새 호스트로 lateral movement를 수행합니다
+- `link` and `unlink`: callbacks 사이에 P2P 링크를 생성하고 제거합니다(예: SMB/TCP를 통해)
+- `wmiexecute`: impersonation을 위한 선택적 credentials와 함께 WMI를 사용해 local 또는 지정된 remote system에서 명령을 실행합니다
+- `net_dclist`: 지정된 domain의 domain controllers 목록을 가져오며, lateral movement의 잠재적 target을 식별하는 데 유용합니다
+- `net_localgroup`: 지정된 computer의 local groups를 나열하며, computer가 지정되지 않으면 localhost를 기본값으로 합니다
+- `net_localgroup_member`: local 또는 remote computer에서 지정된 group의 local group membership을 가져와 특정 group의 users를 열거할 수 있게 합니다
+- `net_shares`: 지정된 computer의 remote shares와 접근 가능 여부를 나열하며, lateral movement의 잠재적 target을 식별하는 데 유용합니다
+- `socks`: 대상 network에서 SOCKS 5 호환 proxy를 활성화하여 compromised host를 통해 traffic을 터널링할 수 있게 합니다. proxychains 같은 tools와 호환됩니다
+- `rpfwd`: 대상 host의 지정된 port에서 수신을 시작하고 traffic을 Mythic을 통해 remote IP와 port로 전달하여, 대상 network의 services에 remote access할 수 있게 합니다
+- `listpipes`: local system의 모든 named pipes를 나열하며, IPC mechanisms와 상호작용하여 lateral movement나 privilege escalation에 유용할 수 있습니다
 
-### 기타 명령
-- `help`: 특정 명령에 대한 자세한 정보 또는 에이전트에서 사용할 수 있는 모든 명령에 대한 일반 정보를 표시합니다.
-- `clear`: 작업을 '지워짐'으로 표시하여 에이전트가 선택할 수 없도록 합니다. `all`을 지정하여 모든 작업을 지우거나 특정 작업을 지우기 위해 `task Num`을 지정할 수 있습니다.
+`jump_wmi` 또는 `wmiexecute` 아래에서 사용되는 더 낮은 수준의 WMI execution primitives는 [WmiExec](lateral-movement/wmiexec.md)를 확인하세요. 더 넓은 pivoting patterns는 [Tunneling and Port Forwarding](../generic-hacking/tunneling-and-port-forwarding.md)를 확인하세요.
+
+### Miscellaneous Commands
+- `help`: agent에서 사용 가능한 특정 명령이나 전체 명령에 대한 자세한 정보를 표시합니다
+- `clear`: 작업을 'cleared'로 표시하여 agents가 가져갈 수 없게 합니다. 모든 작업을 지우려면 `all`을, 특정 작업을 지우려면 `task Num`을 지정할 수 있습니다
 
 
-## [Poseidon Agent](https://github.com/MythicAgents/Poseidon)
+## [Poseidon Agent](https://github.com/MythicAgents/poseidon)
 
-Poseidon은 **Linux 및 macOS** 실행 파일로 컴파일되는 Golang 에이전트입니다.
+Poseidon은 **Linux and macOS** 실행 파일로 컴파일되는 Golang agent입니다.
 ```bash
-./mythic-cli install github https://github.com/MythicAgents/Poseidon.git
+./mythic-cli install github https://github.com/MythicAgents/poseidon.git
 ```
-사용자가 리눅스에서 사용할 수 있는 몇 가지 흥미로운 명령어가 있습니다:
+### Current build/profile notes
 
-### 일반 작업
+- 현재 Poseidon 빌드는 `x86_64`와 `arm64` 모두에서 Linux와 macOS를 대상으로 한다.
+- 지원되는 출력 형식에는 네이티브 실행 파일과 `dylib`, `so` 같은 shared-library 스타일 출력이 포함된다.
+- Poseidon은 `http`, `websocket`, `tcp`, `dynamichttp`를 지원하며, 현재 빌더는 `egress_order`와 failover thresholds 같은 multi-egress 설정을 노출한다.
+- `proxy_bypass`와 `garble` 같은 build-time 옵션은 더 깔끔한 네트워크 동작이나 추가적인 Go binary obfuscation이 필요할 때 확인할 가치가 있다.
 
-- `cat`: 파일의 내용을 출력합니다.
-- `cd`: 현재 작업 디렉토리를 변경합니다.
-- `chmod`: 파일의 권한을 변경합니다.
-- `config`: 현재 구성 및 호스트 정보를 봅니다.
-- `cp`: 한 위치에서 다른 위치로 파일을 복사합니다.
-- `curl`: 선택적 헤더와 메서드로 단일 웹 요청을 실행합니다.
-- `upload`: 파일을 대상에 업로드합니다.
-- `download`: 대상 시스템에서 로컬 머신으로 파일을 다운로드합니다.
-- 그리고 더 많은 것들
+Mythic-backed operations, JAMF abuse, 또는 MDM-as-C2 아이디어에 대한 macOS-specific tradecraft는 [macOS Red Teaming](../macos-hardening/macos-red-teaming/README.md)를 확인하라.
 
-### 민감한 정보 검색
+Linux나 macOS에서 사용할 때 흥미로운 명령들이 있다:
 
-- `triagedirectory`: 호스트의 디렉토리 내에서 민감한 파일이나 자격 증명과 같은 흥미로운 파일을 찾습니다.
-- `getenv`: 현재 모든 환경 변수를 가져옵니다.
+### Common actions
 
-### 수평 이동
+- `cat`: 파일의 내용을 출력
+- `cd`: 현재 작업 디렉터리 변경
+- `chmod`: 파일의 권한 변경
+- `config`: 현재 config와 호스트 정보 보기
+- `cp`: 한 위치에서 다른 위치로 파일 복사
+- `curl`: 선택적 헤더와 method를 사용해 단일 웹 요청 실행
+- `upload`: 대상에 파일 업로드
+- `download`: 대상 시스템에서 로컬 머신으로 파일 다운로드
+- 그리고 더 많다
 
-- `ssh`: 지정된 자격 증명을 사용하여 호스트에 SSH로 접속하고 ssh를 생성하지 않고 PTY를 엽니다.
-- `sshauth`: 지정된 자격 증명을 사용하여 지정된 호스트에 SSH로 접속합니다. 이를 통해 원격 호스트에서 특정 명령을 실행하거나 파일을 SCP하는 데 사용할 수 있습니다.
-- `link_tcp`: TCP를 통해 다른 에이전트에 연결하여 에이전트 간의 직접 통신을 가능하게 합니다.
-- `link_webshell`: 웹셸 P2P 프로필을 사용하여 에이전트에 연결하여 에이전트의 웹 인터페이스에 원격으로 접근할 수 있게 합니다.
-- `rpfwd`: 리버스 포트 포워드를 시작하거나 중지하여 대상 네트워크의 서비스에 원격으로 접근할 수 있게 합니다.
-- `socks`: 대상 네트워크에서 SOCKS5 프록시를 시작하거나 중지하여 손상된 호스트를 통해 트래픽을 터널링할 수 있게 합니다. proxychains와 같은 도구와 호환됩니다.
-- `portscan`: 호스트에서 열린 포트를 스캔하여 수평 이동이나 추가 공격을 위한 잠재적 대상을 식별하는 데 유용합니다.
+### Search Sensitive Information
 
-### 프로세스 실행
+- `triagedirectory`: 호스트의 디렉터리에서 민감한 파일이나 credentials 같은 흥미로운 파일 찾기.
+- `getenv`: 현재 모든 environment variables 가져오기.
 
-- `shell`: /bin/sh를 통해 단일 셸 명령을 실행하여 대상 시스템에서 명령을 직접 실행할 수 있게 합니다.
-- `run`: 인수와 함께 디스크에서 명령을 실행하여 대상 시스템에서 바이너리 또는 스크립트를 실행할 수 있게 합니다.
-- `pty`: 상호작용하는 PTY를 열어 대상 시스템의 셸과 직접 상호작용할 수 있게 합니다.
+### Move laterally
+
+- `ssh`: 지정된 credentials를 사용해 host에 SSH로 접속하고, ssh를 새로 띄우지 않은 채 PTY 열기.
+- `sshauth`: 지정된 credentials를 사용해 특정 host들에 SSH로 접속. 원격 host에서 특정 command를 실행하거나 파일을 SCP로 전송하는 데도 사용할 수 있다.
+- `link_tcp`: TCP를 통해 다른 agent에 연결하여 agent 간 직접 communication을 허용.
+- `link_webshell`: webshell P2P profile을 사용해 agent에 연결하여 agent의 web interface에 remote access 제공.
+- `rpfwd`: Reverse Port Forward를 시작하거나 중지하여 대상 network의 services에 remote access 제공.
+- `socks`: 대상 network에서 SOCKS5 proxy를 시작하거나 중지하여 compromised host를 통한 traffic tunneling 허용. proxychains 같은 도구와 호환.
+- `portscan`: host(s)의 open ports를 스캔하여 lateral movement 또는 추가 공격의 잠재적 target을 식별하는 데 유용.
+
+### Process execution
+
+- `shell`: /bin/sh를 통해 단일 shell command 실행하여 대상 시스템에서 command를 직접 실행.
+- `run`: arguments와 함께 disk의 command를 실행하여 대상 시스템에서 binaries나 scripts 실행.
+- `pty`: interactive PTY를 열어 대상 시스템의 shell과 직접 상호작용 가능.
 
 
+
+
+## References
+
+- [Mythic Community Agent Feature Matrix](https://mythicmeta.github.io/overview/agent_matrix.html)
+- [Apollo README](https://github.com/MythicAgents/Apollo/blob/master/README.md)
 {{#include ../banners/hacktricks-training.md}}
