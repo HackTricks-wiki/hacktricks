@@ -4,165 +4,223 @@
 
 ## Mythic क्या है?
 
-Mythic एक ओपन-सोर्स, मॉड्यूलर कमांड और कंट्रोल (C2) फ्रेमवर्क है जिसे रेड टीमिंग के लिए डिज़ाइन किया गया है। यह सुरक्षा पेशेवरों को विभिन्न एजेंटों (पेलोड) को विभिन्न ऑपरेटिंग सिस्टम, जैसे Windows, Linux, और macOS पर प्रबंधित और तैनात करने की अनुमति देता है। Mythic एजेंटों को प्रबंधित करने, कमांड निष्पादित करने, और परिणाम एकत्र करने के लिए एक उपयोगकर्ता-अनुकूल वेब इंटरफेस प्रदान करता है, जिससे यह नियंत्रित वातावरण में वास्तविक दुनिया के हमलों का अनुकरण करने के लिए एक शक्तिशाली उपकरण बनता है।
+Mythic एक open-source, modular, collaborative command and control (C2) framework है, जिसे red teaming के लिए डिज़ाइन किया गया है। यह operators को अलग-अलग operating systems, including Windows, Linux, and macOS, पर agents (payloads) को manage और deploy करने की सुविधा देता है। Mythic multi-operator tasking, file handling, SOCKS/rpfwd management, और payload generation के लिए browser UI प्रदान करता है।
 
-### स्थापना
+Monolithic frameworks के विपरीत, Mythic repository स्वयं **does not** payload types या C2 profiles ship नहीं करता। Agents, wrappers, और C2 profiles आमतौर पर external components के रूप में install किए जाते हैं और Mythic core से independently update किए जा सकते हैं।
 
-Mythic स्थापित करने के लिए, आधिकारिक **[Mythic repo](https://github.com/its-a-feature/Mythic)** पर दिए गए निर्देशों का पालन करें।
+### Installation
 
-### एजेंट
+Mythic install करने के लिए, official **[Mythic repo](https://github.com/its-a-feature/Mythic)** पर दिए गए instructions का पालन करें। Mythic directory से एक common bootstrap यह है:
+```bash
+sudo make
+sudo ./mythic-cli start
+```
+अगर Mythic पहले से चल रहा है, तो आप आम तौर पर `./mythic-cli install github ...` के साथ एक नया agent या profile जोड़ सकते हैं और फिर या तो Mythic को restart करें या सीधे नए component को शुरू करें।
 
-Mythic कई एजेंटों का समर्थन करता है, जो **वे पेलोड हैं जो समझौता किए गए सिस्टम पर कार्य करते हैं**। प्रत्येक एजेंट को विशिष्ट आवश्यकताओं के अनुसार अनुकूलित किया जा सकता है और यह विभिन्न ऑपरेटिंग सिस्टम पर चल सकता है।
+### Agents
 
-डिफ़ॉल्ट रूप से Mythic में कोई एजेंट स्थापित नहीं है। हालाँकि, यह [**https://github.com/MythicAgents**](https://github.com/MythicAgents) में कुछ ओपन-सोर्स एजेंट प्रदान करता है।
+Mythic कई agents को support करता है, जो **payloads हैं जो compromised systems पर tasks perform करते हैं**। हर agent को specific needs के अनुसार tailor किया जा सकता है और वह अलग-अलग operating systems पर चल सकता है।
 
-उस रिपॉजिटरी से एजेंट स्थापित करने के लिए, आपको बस यह चलाना होगा:
+By default Mythic में कोई agents installed नहीं होते। open-source community agents [**https://github.com/MythicAgents**](https://github.com/MythicAgents) में मिलते हैं, और [**community feature matrix**](https://mythicmeta.github.io/overview/agent_matrix.html) supported operating systems, payload formats, wrappers, और C2 profiles को जल्दी check करने के लिए useful है।
+
+उस org से एक agent install करने के लिए आप चला सकते हैं:
 ```bash
 sudo ./mythic-cli install github https://github.com/MythicAgents/<agent-name>
-sudo ./mythic-cli install github https://github.com/MythicAgents/apfell
+sudo ./mythic-cli install github https://github.com/MythicAgents/Apollo.git
+sudo -E ./mythic-cli install github https://github.com/MythicAgents/Apollo.git
 ```
-आप पिछले कमांड के साथ नए एजेंट जोड़ सकते हैं भले ही Mythic पहले से चल रहा हो।
+`sudo -E` form तब उपयोगी है जब आप non-root environment से install कर रहे हों। आप पिछले command से नए agents जोड़ सकते हैं, भले ही Mythic पहले से चल रहा हो।
 
-### C2 प्रोफाइल
+### C2 Profiles
 
-Mythic में C2 प्रोफाइल **एजेंट्स के Mythic सर्वर के साथ संवाद करने के तरीके को परिभाषित करते हैं**। वे संचार प्रोटोकॉल, एन्क्रिप्शन विधियाँ, और अन्य सेटिंग्स निर्दिष्ट करते हैं। आप Mythic वेब इंटरफेस के माध्यम से C2 प्रोफाइल बना और प्रबंधित कर सकते हैं।
+Mythic में C2 profiles यह define करते हैं कि **agents Mythic server के साथ कैसे communicate करते हैं**। वे communication protocol, encryption methods, और अन्य settings specify करते हैं। आप Mythic web interface के जरिए C2 profiles create और manage कर सकते हैं।
 
-डिफ़ॉल्ट रूप से Mythic बिना किसी प्रोफाइल के स्थापित होता है, हालाँकि, आप कुछ प्रोफाइल को repo [**https://github.com/MythicC2Profiles**](https://github.com/MythicC2Profiles) से डाउनलोड कर सकते हैं:
+By default Mythic बिना किसी profiles के install होता है, हालांकि repo [**https://github.com/MythicC2Profiles**](https://github.com/MythicC2Profiles) से कुछ profiles download करना possible है, running:
 ```bash
-sudo ./mythic-cli install github https://github.com/MythicC2Profiles/<c2-profile>>
+sudo ./mythic-cli install github https://github.com/MythicC2Profiles/<c2-profile>
 sudo ./mythic-cli install github https://github.com/MythicC2Profiles/http
 ```
+Current operator-relevant profiles to keep in mind:
+
+- [`http`](https://github.com/MythicC2Profiles/http): basic asynchronous GET/POST traffic.
+- [`httpx`](https://github.com/MythicC2Profiles/httpx): multiple callback domains, fail-over/round-robin rotation, custom headers/query parameters, और message transforms (`base64`, `base64url`, `xor`, `netbios`, `prepend`, `append`) के साथ अधिक flexible HTTP traffic, जिन्हें cookies, headers, query parameters, या body में रखा जा सकता है।
+- [`dynamichttp`](https://github.com/MythicC2Profiles/dynamichttp): JSON/TOML-driven HTTP message shaping जब static `http` profile बहुत recognizable हो।
+
+### Wrapper payloads
+
+Wrapper payloads आपको वही agent logic बनाए रखते हुए on-disk representation बदलने देते हैं, जो delivered या persisted होती है।
+
+- `service_wrapper`: दूसरे payload को Windows service executable में बदल देता है, जो तब उपयोगी है जब execution path को valid service binary चाहिए।
+- `scarecrow_wrapper`: compatible shellcode को ScareCrow loader के साथ wrap करता है ताकि EXE/DLL/CPL जैसे loader-backed outputs बनाए जा सकें।
+
 ## [Apollo Agent](https://github.com/MythicAgents/Apollo)
 
-Apollo एक Windows एजेंट है जो C# में लिखा गया है, 4.0 .NET Framework का उपयोग करते हुए, जिसे SpecterOps प्रशिक्षण प्रस्तावों में उपयोग के लिए डिज़ाइन किया गया है।
+Apollo एक Windows agent है, जो C# में लिखा गया है और 4.0 .NET Framework का उपयोग करता है, तथा SpecterOps training offerings में उपयोग के लिए बनाया गया है।
 
-इसे स्थापित करें:
+इसे इस तरह install करें:
 ```bash
 ./mythic-cli install github https://github.com/MythicAgents/Apollo.git
 ```
-इस एजेंट में कई कमांड हैं जो इसे Cobalt Strike के Beacon के बहुत समान बनाते हैं, कुछ अतिरिक्त के साथ। इनमें से, यह समर्थन करता है:
+### Current build/profile notes
 
-### सामान्य क्रियाएँ
+- Apollo अभी `WinExe`, `Shellcode`, `Service`, और `Source` payloads emit कर सकता है।
+- आम तौर पर इस्तेमाल होने वाले Apollo profiles हैं `http`, `httpx`, `smb`, `tcp`, और `websocket`।
+- जब domain rotation, proxy support, custom message placement, और message transforms की जरूरत हो, तो पुराना static `http` profile की बजाय `httpx` आम तौर पर ज्यादा flexible option होता है।
+- Apollo `service_wrapper` और `scarecrow_wrapper` जैसे wrapper payloads support करता है।
+- `register_file` और `register_assembly` `execute_assembly`, `execute_pe`, `inline_assembly`, `execute_coff`, `powershell_import`, और `powerpick` के लिए staging primitives हैं। Current Apollo builds में, ये staged artifacts client-side DPAPI-protected AES256 blobs के रूप में cache होते हैं।
+- `ls` और `ps` results, Mythic के browser scripts और file/process browser के साथ खास तौर पर अच्छी तरह integrate होते हैं, जिससे collaborative operations में operator triage noticeably faster हो जाता है।
 
-- `cat`: एक फ़ाइल की सामग्री प्रिंट करें
-- `cd`: वर्तमान कार्यशील निर्देशिका बदलें
-- `cp`: एक स्थान से दूसरे स्थान पर फ़ाइल कॉपी करें
-- `ls`: वर्तमान निर्देशिका या निर्दिष्ट पथ में फ़ाइलों और निर्देशिकाओं की सूची बनाएं
-- `pwd`: वर्तमान कार्यशील निर्देशिका प्रिंट करें
-- `ps`: लक्षित प्रणाली पर चल रही प्रक्रियाओं की सूची बनाएं (अतिरिक्त जानकारी के साथ)
-- `download`: लक्षित प्रणाली से स्थानीय मशीन पर फ़ाइल डाउनलोड करें
-- `upload`: स्थानीय मशीन से लक्षित प्रणाली पर फ़ाइल अपलोड करें
-- `reg_query`: लक्षित प्रणाली पर रजिस्ट्री कुंजी और मानों को क्वेरी करें
-- `reg_write_value`: निर्दिष्ट रजिस्ट्री कुंजी में एक नया मान लिखें
-- `sleep`: एजेंट के सोने के अंतराल को बदलें, जो यह निर्धारित करता है कि यह Mythic सर्वर के साथ कितनी बार चेक करता है
-- और भी कई, उपलब्ध कमांड की पूरी सूची देखने के लिए `help` का उपयोग करें।
+इस agent में बहुत सारे commands हैं, जो इसे कुछ extras के साथ Cobalt Strike के Beacon के काफी समान बनाते हैं। इनमें यह support करता है:
 
-### विशेषाधिकार वृद्धि
+### Common actions
 
-- `getprivs`: वर्तमान थ्रेड टोकन पर जितने संभव हो उतने विशेषाधिकार सक्षम करें
-- `getsystem`: winlogon के लिए एक हैंडल खोलें और टोकन को डुप्लिकेट करें, प्रभावी रूप से विशेषाधिकारों को SYSTEM स्तर पर बढ़ाना
-- `make_token`: एक नया लॉगिन सत्र बनाएं और इसे एजेंट पर लागू करें, जिससे किसी अन्य उपयोगकर्ता का अनुकरण करना संभव हो सके
-- `steal_token`: किसी अन्य प्रक्रिया से एक प्राथमिक टोकन चुराएं, जिससे एजेंट उस प्रक्रिया के उपयोगकर्ता का अनुकरण कर सके
-- `pth`: Pass-the-Hash हमला, जिससे एजेंट NTLM हैश का उपयोग करके एक उपयोगकर्ता के रूप में प्रमाणित हो सकता है बिना स्पष्ट पासवर्ड की आवश्यकता के
-- `mimikatz`: Mimikatz कमांड चलाएं ताकि क्रेडेंशियल्स, हैश और अन्य संवेदनशील जानकारी को मेमोरी या SAM डेटाबेस से निकाला जा सके
-- `rev2self`: एजेंट के टोकन को इसके प्राथमिक टोकन पर वापस लाएं, प्रभावी रूप से विशेषाधिकारों को मूल स्तर पर वापस लाना
-- `ppid`: पोस्ट-एक्सप्लॉइटेशन नौकरियों के लिए नए माता-पिता प्रक्रिया आईडी को निर्दिष्ट करके माता-पिता प्रक्रिया बदलें, जिससे नौकरी निष्पादन संदर्भ पर बेहतर नियंत्रण प्राप्त हो सके
-- `printspoofer`: प्रिंट स्पूलर सुरक्षा उपायों को बायपास करने के लिए PrintSpoofer कमांड चलाएं, जिससे विशेषाधिकार वृद्धि या कोड निष्पादन संभव हो सके
-- `dcsync`: एक उपयोगकर्ता के Kerberos कुंजियों को स्थानीय मशीन पर समन्वयित करें, जिससे ऑफ़लाइन पासवर्ड क्रैकिंग या आगे के हमले संभव हो सकें
-- `ticket_cache_add`: वर्तमान लॉगिन सत्र या निर्दिष्ट एक में एक Kerberos टिकट जोड़ें, जिससे टिकट पुन: उपयोग या अनुकरण संभव हो सके
+- `cat`: किसी file की contents print करें
+- `cd`: current working directory बदलें
+- `cp`: एक file को एक location से दूसरी location पर copy करें
+- `ls`: current directory या specified path में files और directories list करें
+- `ifconfig`: network adapters और interfaces देखें
+- `netstat`: TCP और UDP connection information देखें
+- `pwd`: current working directory print करें
+- `ps`: target system पर running processes list करें (extra info के साथ)
+- `jobs`: long-running tasking से जुड़े सभी running jobs list करें
+- `download`: target system से local machine पर file download करें
+- `upload`: local machine से target system पर file upload करें
+- `reg_query`: target system पर registry keys और values query करें
+- `reg_write_value`: specified registry key में नया value write करें
+- `sleep`: agent का sleep interval बदलें, जो तय करता है कि वह कितनी बार Mythic server से check in करेगा
+- और बहुत कुछ, full list of available commands देखने के लिए `help` use करें।
 
-### प्रक्रिया निष्पादन
+### Privilege escalation
 
-- `assembly_inject`: एक दूरस्थ प्रक्रिया में .NET असेंबली लोडर को इंजेक्ट करने की अनुमति देता है
-- `execute_assembly`: एजेंट के संदर्भ में .NET असेंबली निष्पादित करता है
-- `execute_coff`: मेमोरी में COFF फ़ाइल निष्पादित करता है, जिससे संकलित कोड का इन-मेमोरी निष्पादन संभव हो सके
-- `execute_pe`: एक unmanaged executable (PE) निष्पादित करता है
-- `inline_assembly`: एक नष्ट होने योग्य AppDomain में .NET असेंबली निष्पादित करता है, जिससे एजेंट की मुख्य प्रक्रिया को प्रभावित किए बिना अस्थायी रूप से कोड का निष्पादन संभव हो सके
-- `run`: लक्षित प्रणाली पर एक बाइनरी निष्पादित करता है, निष्पादन योग्य खोजने के लिए सिस्टम के PATH का उपयोग करता है
-- `shinject`: एक दूरस्थ प्रक्रिया में शेलकोड इंजेक्ट करता है, जिससे मनमाने कोड का इन-मेमोरी निष्पादन संभव हो सके
-- `inject`: एक दूरस्थ प्रक्रिया में एजेंट शेलकोड इंजेक्ट करता है, जिससे एजेंट के कोड का इन-मेमोरी निष्पादन संभव हो सके
-- `spawn`: निर्दिष्ट निष्पादन योग्य में एक नया एजेंट सत्र उत्पन्न करता है, जिससे एक नए प्रक्रिया में शेलकोड का निष्पादन संभव हो सके
-- `spawnto_x64` और `spawnto_x86`: पोस्ट-एक्सप्लॉइटेशन नौकरियों में उपयोग किए जाने वाले डिफ़ॉल्ट बाइनरी को निर्दिष्ट पथ में बदलें, बजाय इसके कि `rundll32.exe` का उपयोग बिना पैरामीटर के जो बहुत शोर करता है।
+- `getprivs`: current thread token पर जितनी संभव हों उतनी privileges enable करें
+- `getsystem`: winlogon पर handle खोलें और token duplicate करें, जिससे privileges effectively SYSTEM level तक escalate हो जाती हैं
+- `make_token`: नया logon session बनाएं और उसे agent पर apply करें, जिससे दूसरे user की impersonation संभव हो
+- `steal_token`: किसी दूसरे process से primary token चुराएं, जिससे agent उस process के user की impersonation कर सके
+- `pth`: Pass-the-Hash attack, जिससे plaintext password की जरूरत के बिना agent किसी user की NTLM hash से authenticate कर सके
+- `mimikatz`: credentials, hashes, और memory या SAM database से अन्य sensitive information निकालने के लिए Mimikatz commands चलाएं
+- `rev2self`: agent के token को उसके primary token पर revert करें, जिससे privileges वापस original level पर आ जाती हैं
+- `ppid`: नया parent process ID specify करके post-exploitation jobs के लिए parent process बदलें, जिससे job execution context पर बेहतर control मिले
+- `printspoofer`: print spooler security measures bypass करने के लिए PrintSpoofer commands चलाएं, जिससे privilege escalation या code execution संभव हो
+- `dcsync`: किसी user की Kerberos keys को local machine पर sync करें, जिससे offline password cracking या आगे के attacks संभव हों
+- `ticket_cache_add`: current logon session या specified session में Kerberos ticket जोड़ें, जिससे ticket reuse या impersonation संभव हो
 
-### Mithic Forge
+### Process execution
 
-यह **COFF/BOF** फ़ाइलों को Mythic Forge से लोड करने की अनुमति देता है, जो लक्षित प्रणाली पर निष्पादित किए जा सकने वाले पूर्व-संकलित पेलोड और उपकरणों का एक भंडार है। सभी कमांड के साथ जो लोड किए जा सकते हैं, यह सामान्य क्रियाएँ करने के लिए संभव होगा, उन्हें वर्तमान एजेंट प्रक्रिया में BOFs के रूप में निष्पादित करना (अधिक छिपा हुआ आमतौर पर)।
+- `assembly_inject`: remote process में .NET assembly loader inject करने की अनुमति देता है
+- `blockdlls`: post-exploitation jobs में non-Microsoft signed DLLs के loading को block करें
+- `execute_assembly`: agent के context में एक .NET assembly execute करता है
+- `execute_coff`: memory में COFF file execute करता है, जिससे compiled code का in-memory execution संभव होता है
+- `execute_pe`: एक unmanaged executable (PE) execute करता है
+- `get_injection_techniques`: उपलब्ध injection techniques और currently selected one दिखाएं
+- `inline_assembly`: disposable AppDomain में एक .NET assembly execute करता है, जिससे agent के main process को प्रभावित किए बिना code का temporary execution संभव होता है
+- `register_assembly`: बाद में execution के लिए एक .NET assembly register करें
+- `register_file`: बाद में `execute_*` या PowerShell tasking के लिए agent cache में एक file register करें
+- `run`: system के PATH का उपयोग करके executable ढूंढते हुए target system पर binary execute करता है
+- `set_injection_technique`: post-exploitation jobs द्वारा उपयोग की जाने वाली injection primitive बदलें
+- `shinject`: remote process में shellcode inject करता है, जिससे arbitrary code का in-memory execution संभव होता है
+- `inject`: remote process में agent shellcode inject करता है, जिससे agent के code का in-memory execution संभव होता है
+- `spawn`: specified executable में एक नया agent session spawn करता है, जिससे नए process में shellcode execute किया जा सके
+- `spawnto_x64` और `spawnto_x86`: `rundll32.exe` without params का उपयोग करने की बजाय post-exploitation jobs में उपयोग होने वाले default binary को specified path पर बदलें, जो बहुत noisy है।
 
-इन्हें स्थापित करना शुरू करें:
+### Mythic Forge
+
+यह आपको Mythic Forge से **load COFF/BOF** files करने देता है, जो pre-compiled payloads और tools का एक repository है जिन्हें target system पर execute किया जा सकता है। जितने भी commands load किए जा सकते हैं, उनके साथ current agent process में उन्हें BOFs के रूप में execute करके common actions perform करना संभव होगा (आम तौर पर separate process spawn करने की तुलना में बेहतर OPSEC के साथ)।
+
+इन्हें install करना शुरू करें:
 ```bash
 ./mythic-cli install github https://github.com/MythicAgents/forge.git
 ```
-फिर, `forge_collections` का उपयोग करें ताकि Mythic Forge से COFF/BOF मॉड्यूल दिखाए जा सकें ताकि उन्हें एजेंट की मेमोरी में चयनित और लोड किया जा सके। डिफ़ॉल्ट रूप से, Apollo में निम्नलिखित 2 संग्रह जोड़े जाते हैं:
+Then, `forge_collections` का उपयोग करके Mythic Forge से COFF/BOF modules दिखाएँ ताकि उन्हें चुनकर execution के लिए agent की memory में load किया जा सके। Default रूप से, Apollo में निम्न 2 collections जोड़ी जाती हैं:
 
 - `forge_collections {"collectionName":"SharpCollection"}`
 - `forge_collections {"collectionName":"SliverArmory"}`
 
-एक बार जब एक मॉड्यूल लोड हो जाता है, तो यह सूची में एक अन्य कमांड के रूप में दिखाई देगा जैसे `forge_bof_sa-whoami` या `forge_bof_sa-netuser`।
+एक module load होने के बाद, वह list में `forge_bof_sa-whoami` या `forge_bof_sa-netuser` जैसी एक और command के रूप में दिखाई देगा।
 
-### Powershell & स्क्रिप्टिंग निष्पादन
+### PowerShell & scripting execution
 
-- `powershell_import`: एजेंट कैश में एक नया PowerShell स्क्रिप्ट (.ps1) आयात करता है ताकि बाद में निष्पादित किया जा सके
-- `powershell`: एजेंट के संदर्भ में एक PowerShell कमांड निष्पादित करता है, जो उन्नत स्क्रिप्टिंग और स्वचालन की अनुमति देता है
-- `powerpick`: एक बलिदान प्रक्रिया में PowerShell लोडर असेंबली को इंजेक्ट करता है और एक PowerShell कमांड निष्पादित करता है (बिना PowerShell लॉगिंग के)।
-- `psinject`: एक निर्दिष्ट प्रक्रिया में PowerShell निष्पादित करता है, जो किसी अन्य प्रक्रिया के संदर्भ में स्क्रिप्ट के लक्षित निष्पादन की अनुमति देता है
-- `shell`: एजेंट के संदर्भ में एक शेल कमांड निष्पादित करता है, cmd.exe में एक कमांड चलाने के समान
+- `powershell_import`: बाद में execution के लिए agent cache में एक नया PowerShell script (.ps1) import करता है
+- `powershell`: agent के context में एक PowerShell command execute करता है, जिससे advanced scripting और automation संभव होती है
+- `powerpick`: एक PowerShell loader assembly को sacrificial process में inject करता है और एक PowerShell command execute करता है (बिना powershell logging के)
+- `psinject`: निर्दिष्ट process में PowerShell execute करता है, जिससे दूसरे process के context में scripts को targeted execution के लिए चलाया जा सकता है
+- `shell`: agent के context में एक shell command execute करता है, जो cmd.exe में command चलाने जैसा है
 
-### लेटरल मूवमेंट
+### Lateral Movement
 
-- `jump_psexec`: PsExec तकनीक का उपयोग करके एक नए होस्ट पर लेटरल मूवमेंट करता है, पहले Apollo एजेंट निष्पादन योग्य (apollo.exe) को कॉपी करके और इसे निष्पादित करके।
-- `jump_wmi`: WMI तकनीक का उपयोग करके एक नए होस्ट पर लेटरल मूवमेंट करता है, पहले Apollo एजेंट निष्पादन योग्य (apollo.exe) को कॉपी करके और इसे निष्पादित करके।
-- `wmiexecute`: WMI का उपयोग करके स्थानीय या निर्दिष्ट दूरस्थ प्रणाली पर एक कमांड निष्पादित करता है, जिसमें अनुकरण के लिए वैकल्पिक क्रेडेंशियल होते हैं।
-- `net_dclist`: निर्दिष्ट डोमेन के लिए डोमेन नियंत्रकों की एक सूची प्राप्त करता है, जो लेटरल मूवमेंट के लिए संभावित लक्ष्यों की पहचान करने में सहायक होता है।
-- `net_localgroup`: निर्दिष्ट कंप्यूटर पर स्थानीय समूहों की सूची बनाता है, यदि कोई कंप्यूटर निर्दिष्ट नहीं किया गया है तो डिफ़ॉल्ट रूप से localhost पर।
-- `net_localgroup_member`: स्थानीय या दूरस्थ कंप्यूटर पर निर्दिष्ट समूह के लिए स्थानीय समूह सदस्यता प्राप्त करता है, जो विशिष्ट समूहों में उपयोगकर्ताओं की गणना की अनुमति देता है।
-- `net_shares`: निर्दिष्ट कंप्यूटर पर दूरस्थ शेयरों और उनकी पहुंच की सूची बनाता है, जो लेटरल मूवमेंट के लिए संभावित लक्ष्यों की पहचान करने में सहायक होता है।
-- `socks`: लक्षित नेटवर्क पर SOCKS 5 अनुपालन प्रॉक्सी सक्षम करता है, जो समझौता किए गए होस्ट के माध्यम से ट्रैफ़िक को टनलिंग करने की अनुमति देता है। प्रॉक्सीचेन जैसे उपकरणों के साथ संगत।
-- `rpfwd`: लक्षित होस्ट पर निर्दिष्ट पोर्ट पर सुनना शुरू करता है और ट्रैफ़िक को Mythic के माध्यम से एक दूरस्थ IP और पोर्ट पर अग्रेषित करता है, जो लक्षित नेटवर्क पर सेवाओं तक दूरस्थ पहुंच की अनुमति देता है।
-- `listpipes`: स्थानीय प्रणाली पर सभी नामित पाइपों की सूची बनाता है, जो लेटरल मूवमेंट या विशेषाधिकार वृद्धि के लिए IPC तंत्रों के साथ बातचीत करने में सहायक हो सकता है।
+- `jump_psexec`: PsExec technique का उपयोग करके एक नए host पर laterally move करता है, पहले Apollo agent executable (apollo.exe) को copy करके और फिर उसे execute करके
+- `jump_wmi`: WMI technique का उपयोग करके एक नए host पर laterally move करता है, पहले Apollo agent executable (apollo.exe) को copy करके और फिर उसे execute करके
+- `link` और `unlink`: callbacks के बीच P2P links बनाता और हटाता है (उदाहरण के लिए SMB/TCP के माध्यम से)
+- `wmiexecute`: WMI का उपयोग करके local या निर्दिष्ट remote system पर command execute करता है, impersonation के लिए optional credentials के साथ
+- `net_dclist`: निर्दिष्ट domain के लिए domain controllers की सूची प्राप्त करता है, जो lateral movement के संभावित targets की पहचान के लिए उपयोगी है
+- `net_localgroup`: निर्दिष्ट computer पर local groups की सूची देता है, और यदि कोई computer निर्दिष्ट नहीं है तो localhost default होता है
+- `net_localgroup_member`: निर्दिष्ट group के लिए local group membership को local या remote computer पर प्राप्त करता है, जिससे specific groups में users की enumeration की जा सकती है
+- `net_shares`: निर्दिष्ट computer पर remote shares और उनकी accessibility की सूची देता है, जो lateral movement के संभावित targets की पहचान के लिए उपयोगी है
+- `socks`: target network पर SOCKS 5 compliant proxy सक्षम करता है, जिससे compromised host के through traffic tunneling संभव होता है। proxychains जैसे tools के साथ compatible है
+- `rpfwd`: target host पर निर्दिष्ट port पर listening शुरू करता है और traffic को Mythic के through remote IP और port तक forward करता है, जिससे target network पर services तक remote access संभव होता है
+- `listpipes`: local system पर सभी named pipes की सूची देता है, जो IPC mechanisms के साथ interact करके lateral movement या privilege escalation के लिए उपयोगी हो सकता है
 
-### विविध कमांड
-- `help`: एजेंट में विशिष्ट कमांड या सभी उपलब्ध कमांड के बारे में सामान्य जानकारी के बारे में विस्तृत जानकारी प्रदर्शित करता है।
-- `clear`: कार्यों को 'स्पष्ट' के रूप में चिह्नित करता है ताकि उन्हें एजेंट द्वारा नहीं उठाया जा सके। आप सभी कार्यों को स्पष्ट करने के लिए `all` निर्दिष्ट कर सकते हैं या एक विशिष्ट कार्य को स्पष्ट करने के लिए `task Num` निर्दिष्ट कर सकते हैं।
+नीचे वाले WMI execution primitives के लिए जो `jump_wmi` या `wmiexecute` के अंदर उपयोग होते हैं, [WmiExec](lateral-movement/wmiexec.md) देखें। broader pivoting patterns के लिए, [Tunneling and Port Forwarding](../generic-hacking/tunneling-and-port-forwarding.md) देखें।
 
-## [Poseidon Agent](https://github.com/MythicAgents/Poseidon)
+### Miscellaneous Commands
+- `help`: specific commands या agent में उपलब्ध सभी commands के बारे में विस्तृत जानकारी दिखाता है
+- `clear`: tasks को 'cleared' के रूप में mark करता है ताकि agents उन्हें pick up न कर सकें। आप सभी tasks clear करने के लिए `all` या किसी specific task को clear करने के लिए `task Num` specify कर सकते हैं
 
-Poseidon एक Golang एजेंट है जो **Linux और macOS** निष्पादन योग्य में संकलित होता है।
+
+## [Poseidon Agent](https://github.com/MythicAgents/poseidon)
+
+Poseidon एक Golang agent है जो **Linux and macOS** executables में compile होता है।
 ```bash
-./mythic-cli install github https://github.com/MythicAgents/Poseidon.git
+./mythic-cli install github https://github.com/MythicAgents/poseidon.git
 ```
-जब उपयोगकर्ता लिनक्स पर होता है, तो कुछ दिलचस्प कमांड होते हैं:
+### वर्तमान build/profile नोट्स
 
-### सामान्य क्रियाएँ
+- Current Poseidon builds Linux और macOS दोनों पर `x86_64` और `arm64` को target करते हैं।
+- Supported output formats में native executables के साथ-साथ `dylib` और `so` जैसे shared-library style outputs शामिल हैं।
+- Poseidon `http`, `websocket`, `tcp`, और `dynamichttp` को support करता है, और current builders `egress_order` और failover thresholds जैसे multi-egress settings expose करते हैं।
+- `proxy_bypass` और `garble` जैसे build-time options देखने लायक हैं जब आपको cleaner network behavior या extra Go binary obfuscation चाहिए।
 
-- `cat`: एक फ़ाइल की सामग्री प्रिंट करें
-- `cd`: वर्तमान कार्यशील निर्देशिका बदलें
-- `chmod`: एक फ़ाइल की अनुमतियाँ बदलें
-- `config`: वर्तमान कॉन्फ़िग और होस्ट जानकारी देखें
-- `cp`: एक फ़ाइल को एक स्थान से दूसरे स्थान पर कॉपी करें
-- `curl`: वैकल्पिक हेडर और विधि के साथ एकल वेब अनुरोध निष्पादित करें
-- `upload`: लक्ष्य पर एक फ़ाइल अपलोड करें
-- `download`: लक्ष्य प्रणाली से स्थानीय मशीन पर एक फ़ाइल डाउनलोड करें
+For macOS-specific tradecraft around Mythic-backed operations, JAMF abuse, or MDM-as-C2 ideas, check [macOS Red Teaming](../macos-hardening/macos-red-teaming/README.md).
+
+जब इसे Linux या macOS पर उपयोग किया जाता है, तो इसमें कुछ दिलचस्प commands हैं:
+
+### Common actions
+
+- `cat`: किसी file की contents print करें
+- `cd`: current working directory बदलें
+- `chmod`: किसी file की permissions बदलें
+- `config`: current config और host information देखें
+- `cp`: किसी file को एक location से दूसरी location पर copy करें
+- `curl`: optional headers और method के साथ एक single web request execute करें
+- `upload`: target पर एक file upload करें
+- `download`: target system से local machine पर एक file download करें
 - और भी बहुत कुछ
 
-### संवेदनशील जानकारी खोजें
+### Search Sensitive Information
 
-- `triagedirectory`: एक होस्ट पर एक निर्देशिका के भीतर दिलचस्प फ़ाइलें खोजें, जैसे संवेदनशील फ़ाइलें या क्रेडेंशियल्स।
-- `getenv`: सभी वर्तमान पर्यावरण चर प्राप्त करें।
+- `triagedirectory`: host पर किसी directory के भीतर interesting files ढूँढें, जैसे sensitive files या credentials।
+- `getenv`: current environment variables सभी प्राप्त करें।
 
-### पार्श्व में स्थानांतरित करें
+### Move laterally
 
-- `ssh`: निर्दिष्ट क्रेडेंशियल्स का उपयोग करके होस्ट पर SSH करें और ssh को स्पॉन किए बिना एक PTY खोलें।
-- `sshauth`: निर्दिष्ट होस्ट(ों) पर SSH करें, निर्दिष्ट क्रेडेंशियल्स का उपयोग करके। आप इसे SSH के माध्यम से दूरस्थ होस्ट पर एक विशिष्ट कमांड निष्पादित करने के लिए या फ़ाइलों को SCP करने के लिए भी उपयोग कर सकते हैं।
-- `link_tcp`: TCP के माध्यम से एक अन्य एजेंट से लिंक करें, एजेंटों के बीच सीधे संचार की अनुमति देता है।
-- `link_webshell`: वेबशेल P2P प्रोफ़ाइल का उपयोग करके एक एजेंट से लिंक करें, एजेंट के वेब इंटरफ़ेस तक दूरस्थ पहुंच की अनुमति देता है।
-- `rpfwd`: एक रिवर्स पोर्ट फॉरवर्ड शुरू या बंद करें, लक्ष्य नेटवर्क पर सेवाओं तक दूरस्थ पहुंच की अनुमति देता है।
-- `socks`: लक्ष्य नेटवर्क पर एक SOCKS5 प्रॉक्सी शुरू या बंद करें, समझौता किए गए होस्ट के माध्यम से ट्रैफ़िक के टनलिंग की अनुमति देता है। proxychains जैसे उपकरणों के साथ संगत।
-- `portscan`: खुले पोर्ट के लिए होस्ट(ों) को स्कैन करें, पार्श्व आंदोलन या आगे के हमलों के लिए संभावित लक्ष्यों की पहचान करने के लिए उपयोगी।
+- `ssh`: designated credentials का उपयोग करके host पर SSH करें और ssh spawn किए बिना एक PTY open करें।
+- `sshauth`: designated credentials का उपयोग करके specified host(s) पर SSH करें। आप इसे remote hosts पर SSH के जरिए कोई specific command execute करने के लिए भी use कर सकते हैं या files SCP करने के लिए भी।
+- `link_tcp`: TCP over दूसरे agent से link करें, जिससे agents के बीच direct communication संभव हो।
+- `link_webshell`: webshell P2P profile का उपयोग करके agent से link करें, जिससे agent के web interface तक remote access मिल सके।
+- `rpfwd`: Reverse Port Forward शुरू या stop करें, जिससे target network पर services तक remote access मिल सके।
+- `socks`: target network पर SOCKS5 proxy शुरू या stop करें, जिससे compromised host के through traffic tunneling हो सके। proxychains जैसे tools के साथ compatible।
+- `portscan`: host(s) पर खुले ports scan करें, lateral movement या आगे के attacks के लिए potential targets identify करने में उपयोगी।
 
-### प्रक्रिया निष्पादन
+### Process execution
 
-- `shell`: /bin/sh के माध्यम से एकल शेल कमांड निष्पादित करें, लक्ष्य प्रणाली पर कमांड के सीधे निष्पादन की अनुमति देता है।
-- `run`: तर्कों के साथ डिस्क से एक कमांड निष्पादित करें, लक्ष्य प्रणाली पर बाइनरी या स्क्रिप्ट के निष्पादन की अनुमति देता है।
-- `pty`: एक इंटरैक्टिव PTY खोलें, लक्ष्य प्रणाली पर शेल के साथ सीधे बातचीत की अनुमति देता है।
+- `shell`: /bin/sh के जरिए एक single shell command execute करें, जिससे target system पर commands सीधे execute की जा सकें।
+- `run`: arguments के साथ disk से एक command execute करें, जिससे target system पर binaries या scripts execute की जा सकें।
+- `pty`: एक interactive PTY खोलें, जिससे target system पर shell के साथ direct interaction हो सके।
 
+
+
+
+## References
+
+- [Mythic Community Agent Feature Matrix](https://mythicmeta.github.io/overview/agent_matrix.html)
+- [Apollo README](https://github.com/MythicAgents/Apollo/blob/master/README.md)
 {{#include ../banners/hacktricks-training.md}}
