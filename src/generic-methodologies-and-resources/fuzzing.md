@@ -141,11 +141,77 @@ python3 infra/helper.py introspector libdwarf --public-corpora
 
 Use the report to decide whether to add a new harness for an untested parser path, expand the corpus for a specific feature, or split a monolithic harness into smaller entry points.
 
+## Graph-First Fuzz Target Selection And Mutation Triage
+
+If you already have **static-analysis findings**, **mutation-testing survivors**, and **coverage reports**, don't triage them as independent lists. Build a **call graph** first, annotate nodes with **cyclomatic complexity**, **entrypoint/untrusted-input reachability**, and any external findings, then ask graph questions:
+
+- Which high-complexity functions are reachable from untrusted input?
+- Which mutation survivors sit on paths from parsers/handlers to security-critical code?
+- Which functions are architectural choke points with unusually high **blast radius**?
+
+This usually surfaces better fuzz targets than "lowest coverage" alone. A parser/decoder with **high complexity** and confirmed **external reachability** is a stronger harness candidate than an isolated internal helper with weak coverage but no attacker-controlled path.
+
+### Practical triage workflow
+
+1. Build a **code graph** from the codebase and extract per-function complexity/branch metrics.
+2. Enumerate **entrypoints** that accept attacker-controlled input: request handlers, decoders, importers, protocol parsers, CLI/file readers.
+3. Run **path queries** from those entrypoints to candidate functions to separate reachable attack surface from dead/internal-only code.
+4. Prioritize nodes that combine:
+   - high **cyclomatic complexity**
+   - confirmed **reachability from untrusted input**
+   - high **blast radius** or many downstream dependents
+   - corroborating evidence such as **SARIF** findings, audit notes, or mutation survivors
+5. Write focused harnesses for the best-scoring nodes first, especially **parsers/codecs** such as hex/Base64/IP/message decoders.
+
+### Mutation survivors: equivalent vs actionable
+
+Mutation testing often produces a noisy survivor list. Before treating every survivor as a security gap, use the graph to ask:
+
+- Is the mutated function reachable from an attacker-controlled entrypoint?
+- Are all call paths constrained by stronger invariants than the mutated check?
+- Does the node sit in dead code, formatting-only logic, or in a high-impact arithmetic/parser path?
+
+Survivors that remain unreachable or structurally constrained are often **equivalent mutants**. Survivors that stay **reachable** and touch **boundary conditions**, **overflow/carry paths**, or **security-critical arithmetic/parsing** should be promoted into:
+
+- new fuzz harnesses
+- direct property/invariant tests
+- targeted edge-case vectors
+
+### Correlate external findings onto the graph
+
+If your SAST pipeline exports **SARIF**, project findings onto graph nodes by **file + line range** and use the graph to expand the impact:
+
+- compute the **blast radius** of the flagged function
+- check whether the finding is on any path from an entrypoint
+- cluster nearby findings that collapse into the same choke point
+
+This is useful when deciding whether to spend fuzzing time on a specific function: a node that is **reachable**, **complex**, and already has **SAST hits** is often a better target than a merely complex node with no attacker path.
+
+Example workflow with Trailmark:
+
+```bash
+uv pip install trailmark
+trailmark analyze --complexity 10 path/to/project
+```
+
+```python
+from trailmark.query.api import QueryEngine
+
+engine = QueryEngine.from_directory("path/to/project", language="c")
+engine.preanalysis()
+engine.complexity_hotspots(10)
+engine.paths_between("handle_request", "parse_ipv6")
+```
+
+The important methodology is the intersection: **complexity x exposure x impact**. Use the graph to pick fuzz targets with the highest expected security value, then use mutation survivors to decide which boundaries and invariants your harness must stress.
+
 ## References
 
 - [Mutational grammar fuzzing](https://projectzero.google/2026/03/mutational-grammar-fuzzing.html)
 - [Jackalope](https://github.com/googleprojectzero/Jackalope)
 - [AFL++ Fuzzing in Depth](https://aflplus.plus/docs/fuzzing_in_depth/)
 - [AFLNet Five Years Later: On Coverage-Guided Protocol Fuzzing](https://arxiv.org/abs/2412.20324)
+- [Trailmark turns code into graphs](https://blog.trailofbits.com/2026/04/23/trailmark-turns-code-into-graphs/)
+- [trailofbits/trailmark](https://github.com/trailofbits/trailmark)
 
 {{#include ../banners/hacktricks-training.md}}
