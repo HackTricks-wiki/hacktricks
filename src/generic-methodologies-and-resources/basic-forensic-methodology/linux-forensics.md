@@ -195,6 +195,104 @@ head -1 maps #Get address of the file. It was 08048000-08049000
 dd if=mem bs=1 skip=08048000 count=1000 of=/tmp/exec2 #Recorver it
 ```
 
+## Syscall Trace Triage with SQLite and FTS5
+
+When a process is still running or can be re-executed in a lab, **`strace`** can provide a fast behavioral trace without needing kernel modules or full EDR telemetry. For large traces, avoid reading the raw log directly or pasting it into an LLM: store it in a **SQLite** database and query only the minimal subset you need.
+
+> [!WARNING]
+> Attaching `strace` changes process timing and may affect race conditions or other fragile bugs. Prefer reproducing on a copy/lab system when possible.
+
+### Capture
+
+For a new process:
+
+```bash
+strace -ff -ttt -yy -s 4096 -o /tmp/trace.log <command>
+```
+
+For a live process:
+
+```bash
+strace -ff -ttt -yy -s 4096 -o /tmp/trace.log -p <PID>
+```
+
+Useful options:
+
+- `-ff`: follow forks/threads and keep per-process outputs
+- `-ttt`: epoch timestamps for easy timeline correlation
+- `-yy`: resolve file descriptors to backing paths/sockets when possible
+- `-s 4096`: keep long path and buffer arguments from being truncated
+
+### Normalize
+
+A practical schema is one row per syscall and one row per argument:
+
+```sql
+CREATE TABLE syscalls (
+    id        INTEGER PRIMARY KEY,
+    pid       INTEGER NOT NULL,
+    timestamp REAL    NOT NULL,
+    name      TEXT    NOT NULL,
+    ret_val   INTEGER,
+    errno     TEXT
+);
+
+CREATE TABLE syscall_args (
+    id         INTEGER PRIMARY KEY,
+    syscall_id INTEGER NOT NULL REFERENCES syscalls(id),
+    position   INTEGER NOT NULL,
+    raw        TEXT    NOT NULL,
+    type       INTEGER NOT NULL
+);
+```
+
+This avoids trying to flatten heterogeneous syscall lines into a single wide table and keeps joins predictable during triage.
+
+### Index text-heavy arguments with FTS5
+
+Naive path hunting with `LIKE "%...%"` becomes very slow on large traces. Create an FTS5 index for argument text and search that instead:
+
+```sql
+CREATE VIRTUAL TABLE syscall_args_fts
+USING fts5(raw, content='syscall_args', content_rowid='id');
+
+INSERT INTO syscall_args_fts(rowid, raw)
+SELECT id, raw FROM syscall_args;
+```
+
+Example: recover file activity under `/tmp` without scanning every row:
+
+```sql
+SELECT s.timestamp, s.pid, s.name, a.position, a.raw
+FROM syscall_args_fts f
+JOIN syscall_args a ON a.id = f.rowid
+JOIN syscalls s ON s.id = a.syscall_id
+WHERE syscall_args_fts MATCH 'tmp'
+  AND s.name IN ('openat', 'stat', 'lstat', 'rename', 'unlink', 'execve')
+ORDER BY s.timestamp;
+```
+
+### High-signal investigations
+
+- **PATH hijacking / fake sudo**: search for writes and `chmod`/`rename` activity under `~/.local/bin/`, then correlate with later `execve` of privileged-looking names such as `sudo`.
+- **TOCTOU on temporary files**: pivot on the same `/tmp/...` path across `stat`, `access`, `openat`, `rename`, `unlink`, `link`, `symlink`, and `execve` to identify check/use gaps.
+- **Crash root cause**: correlate `mmap` of a file with writes or truncation of the same inode/path by another process, then inspect the signal/exit sequence for `SIGBUS`.
+- **Network destination recovery**: filter `connect`, `sendto`, `sendmsg`, `recvfrom`, and socket-related arguments to extract peer IPs and ports.
+
+### LLM-assisted trace analysis
+
+If you want an LLM to assist, expose a **read-only** SQLite handle and give it the full schema. Let it issue raw SQL instead of wrapping the database behind narrow helper functions. This usually works better for joins, temporal correlation, and FTS lookups.
+
+Practical rules:
+
+- Keep the database read-only, for example with `sqlite3 'file:trace.db?mode=ro'`.
+- Give the model examples of valid `JOIN` and `FTS5 MATCH` queries.
+- Do **not** paste raw multi-GB `strace` logs into the prompt.
+- Ask focused questions such as:
+  - "List persistent files written by this program."
+  - "Did it create or replace executables in user-controlled PATH directories?"
+  - "Explain why this trace ends in SIGBUS."
+
 ## Inspect Autostart locations
 
 ### Scheduled Tasks
@@ -556,6 +654,8 @@ git diff --no-index --diff-filter=D path/to/old_version/ path/to/new_version/
 - [Red Canary – Patching for persistence: How DripDropper Linux malware moves through the cloud](https://redcanary.com/blog/threat-intelligence/dripdropper-linux-malware/)
 - [Forensic Analysis of Linux Journals](https://stuxnet999.github.io/dfir/linux-journal-forensics/)
 - [Red Hat Enterprise Linux 9 - Auditing the system](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/security_hardening/auditing-the-system_security-hardening)
+- [Say hi to Pike!](https://www.synacktiv.com/en/publications/say-hi-to-pike.html)
+- [strace](https://strace.io/)
+- [SQLite FTS5 Extension](https://www.sqlite.org/fts5.html)
 
 {{#include ../../banners/hacktricks-training.md}}
-
