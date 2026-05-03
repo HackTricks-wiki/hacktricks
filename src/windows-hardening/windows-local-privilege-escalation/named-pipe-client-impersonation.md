@@ -2,27 +2,27 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Named Pipe client impersonation ni local privilege escalation primitive inayoruhusu thread ya named-pipe server kuchukua security context ya client inayounganishwa nayo. Kwa vitendo, attacker anayeweza kuendesha code akiwa na SeImpersonatePrivilege anaweza kulazimisha privileged client (km. huduma ya SYSTEM) iungane na pipe inayodhibitiwa na attacker, kuita ImpersonateNamedPipeClient, ku-duplika token inayotokana kuwa primary token, na kuanzisha process kama client (mara nyingi NT AUTHORITY\SYSTEM).
+Named Pipe client impersonation ni primitive ya local privilege escalation inayoruhusu thread ya server ya named-pipe kuchukua security context ya client inayounganika nayo. Kwa vitendo, attacker anayeweza kuendesha code na SeImpersonatePrivilege anaweza kulazimisha privileged client (k.m. huduma ya SYSTEM) iungane na pipe inayodhibitiwa na attacker, kuita ImpersonateNamedPipeClient, ku-duplicate token inayotokana na hilo kuwa primary token, na ku-spawn process kama client (mara nyingi NT AUTHORITY\SYSTEM).
 
-Ukurasa huu unalenga technique kuu. Kwa end-to-end exploit chains zinazolazimisha SYSTEM kuelekea pipe yako, angalia kurasa za Potato family zilizorejelewa hapa chini.
+Ukurasa huu unalenga technique ya msingi. Kwa end-to-end exploit chains zinazolazimisha SYSTEM kuja kwenye pipe yako, angalia Potato family pages zilizo rejelezwa hapa chini.
 
 ## TL;DR
-- Create named pipe: \\.\pipe\<random> na subiri connection.
-- Fanya privileged component iungane nayo (spooler/DCOM/EFSRPC/etc.).
-- Soma angalau message moja kutoka kwenye pipe, kisha ita ImpersonateNamedPipeClient.
-- Fungua impersonation token kutoka current thread, DuplicateTokenEx(TokenPrimary), na CreateProcessWithTokenW/CreateProcessAsUser ili kupata SYSTEM process.
+- Create a named pipe: \\.\pipe\<random> na subiri connection.
+- Fanya component yenye privilege iungane nayo (spooler/DCOM/EFSRPC/etc.).
+- Soma angalau message moja kutoka kwenye pipe, kisha call ImpersonateNamedPipeClient.
+- Fungua impersonation token kutoka kwenye current thread, DuplicateTokenEx(TokenPrimary), na CreateProcessWithTokenW/CreateProcessAsUser ili kupata process ya SYSTEM.
 
 ## Requirements and key APIs
-- Privileges zinazohitajika kwa kawaida na calling process/thread:
-- SeImpersonatePrivilege ili kuweza impersonate client inayounganishwa na pia kutumia CreateProcessWithTokenW.
-- Vinginevyo, baada ya impersonating SYSTEM, unaweza kutumia CreateProcessAsUser, ambayo inaweza kuhitaji SeAssignPrimaryTokenPrivilege na SeIncreaseQuotaPrivilege (hizi hutimizwa unapokuwa unamimic SYSTEM).
+- Privileges ambazo kawaida zinahitajika na calling process/thread:
+- SeImpersonatePrivilege ili kuweza impersonate client anayeunganika na pia kutumia CreateProcessWithTokenW.
+- Vinginevyo, baada ya impersonating SYSTEM, unaweza kutumia CreateProcessAsUser, ambayo huenda ikahitaji SeAssignPrimaryTokenPrivilege na SeIncreaseQuotaPrivilege (hivi hutimizwa unapokuwa unam impersonate SYSTEM).
 - Core APIs used:
 - CreateNamedPipe / ConnectNamedPipe
 - ReadFile/WriteFile (lazima usome angalau message moja kabla ya impersonation)
 - ImpersonateNamedPipeClient and RevertToSelf
 - OpenThreadToken, DuplicateTokenEx(TokenPrimary)
 - CreateProcessWithTokenW or CreateProcessAsUser
-- Impersonation level: ili kufanya actions zenye manufaa locally, client lazima iruhusu SecurityImpersonation (default kwa local RPC/named-pipe clients wengi). Clients wanaweza kupunguza hili kwa SECURITY_SQOS_PRESENT | SECURITY_IDENTIFICATION wakati wa kufungua pipe.
+- Impersonation level: ili kufanya actions zenye maana locally, client lazima aruhusu SecurityImpersonation (default kwa local RPC/named-pipe clients wengi). Clients wanaweza kupunguza hili kwa SECURITY_SQOS_PRESENT | SECURITY_IDENTIFICATION wakati wa kufungua pipe.
 
 ## Minimal Win32 workflow (C)
 ```c
@@ -94,12 +94,12 @@ Process pi; CreateProcessWithTokenW(p, 2, null, null, 0, IntPtr.Zero, null, ref 
 }
 ```
 ## Common triggers/coercions to get SYSTEM to your pipe
-Mbinu hizi hulazimisha huduma zenye privileji kuunganika na named pipe yako ili uweze kuzi-impersonate:
+Mbinu hizi hulazimisha huduma zenye ruhusa kuunganishwa kwenye named pipe yako ili uweze kuzi impersonate:
 - Print Spooler RPC trigger (PrintSpoofer)
 - DCOM activation/NTLM reflection variants (RoguePotato/JuicyPotato[NG], GodPotato)
 - EFSRPC pipes (EfsPotato/SharpEfsPotato)
 
-Tazama matumizi ya kina na compatibility hapa:
+See detailed usage and compatibility here:
 
 -
 {{#ref}}
@@ -108,54 +108,54 @@ roguepotato-and-printspoofer.md
 -
 {{#ref}}
 juicypotato.md
-{{endref}}
+{{#endref}}
 
-Ikiwa unahitaji tu mfano kamili wa kutengeneza pipe na kufanya impersonation ili kuzindua SYSTEM kutoka kwa service trigger, tazama:
+If you just need a full example of crafting the pipe and impersonating to spawn SYSTEM from a service trigger, see:
 
 -
 {{#ref}}
 from-high-integrity-to-system-with-name-pipes.md
-{{endref}}
+{{#endref}}
 -
 {{#ref}}
 service-triggers.md
-{{endref}}
+{{#endref}}
 
 ## Named Pipe IPC Abuse & MITM (ACLs, First-Instance Races, Client Hooking)
 
-Wakati service yenye privileji na process isiyo na privileji kubwa zinawasiliana kupitia `\\.\pipe\...`, chukulia pipe kama IPC boundary nyingine yoyote isiyoaminika. Zaidi ya classic server-side impersonation, weak pipe ACLs, unsafe creation flags, na client-side trust decisions vyote vinaweza kuwa local privilege escalation primitives.
+When a privileged service and a low-privileged process communicate over `\\.\pipe\...`, treat the pipe like any other untrusted IPC boundary. Beyond classic server-side impersonation, weak pipe ACLs, unsafe creation flags, and client-side trust decisions can all become local privilege escalation primitives.
 
 ### Enumerate candidate pipes first
-- Orodhesha pipes haraka kutoka PowerShell: `Get-ChildItem \\.\pipe\`
-- Sysinternals `pipelist64.exe` ni muhimu kuona instance counts na single-instance pipes.
-- Zingatia majina yanayotumiwa na services zinazoendeshwa kama `SYSTEM`, hasa helpers, updaters, launchers, na UI brokers.
+- List pipes quickly from PowerShell: `Get-ChildItem \\.\pipe\`
+- Sysinternals `pipelist64.exe` is useful to spot instance counts and single-instance pipes.
+- Prioritize names used by services running as `SYSTEM`, especially helpers, updaters, launchers, and UI brokers.
 
 ### MITM via permissive DACLs and extra pipe instances
-- Process yoyote inayoweza kuzungumza na privileged server tayari inaweza kufuzz protocol yake na kutafuta privileged verbs.
-- Kisa cha kuvutia zaidi ni wakati DACL inatoa `FILE_GENERIC_WRITE`/`GENERIC_WRITE` kwenye pipe object. Kwenye named pipes hii inajumuisha kwa njia isiyo ya moja kwa moja `FILE_CREATE_PIPE_INSTANCE` (`FILE_APPEND_DATA` hushiriki bit ileile), hivyo attacker anaweza kuunda server instance nyingine yenye jina lilelile.
-- Kwa kuwa instances zinalinganishwa kwa FIFO order, attacker-created na legitimate instances zinaweza kuchanganywa: tengeneza rogue instance kwa `CreateNamedPipe`, kisha fungua pipe name ileile kwa `CreateFile`, na subiri real client ifike kwenye rogue server instance.
-- Matokeo: observe, modify, relay, au desynchronize privileged IPC bila kuhitaji kumiliki original server process.
+- Any process that can talk to a privileged server can already fuzz its protocol and hunt privileged verbs.
+- The more interesting case is when the DACL grants `FILE_GENERIC_WRITE`/`GENERIC_WRITE` on the pipe object. On named pipes this implicitly includes `FILE_CREATE_PIPE_INSTANCE` (`FILE_APPEND_DATA` shares the same bit), so an attacker can create another server instance with the same name.
+- Because instances are matched in FIFO order, attacker-created and legitimate instances can be interleaved: create a rogue instance with `CreateNamedPipe`, then open the same pipe name with `CreateFile`, and wait for a real client to land on the rogue server instance.
+- Result: observe, modify, relay, or desynchronize privileged IPC without needing to own the original server process.
 
 ### First-instance race on pipe security descriptors
-- `lpSecurityAttributes` inaainisha tu DACL wakati first instance ya pipe name inatengenezwa.
-- Ikiwa service yenye privileji inaanza kuchelewa na haitumii `FILE_FLAG_FIRST_PIPE_INSTANCE`, attacker anaweza ku-create mapema pipe name kwa permissive DACL, kisha aache service itengeneze instances za baadaye chini ya security context iliyochaguliwa na attacker.
-- Hii hugeuza service startup kuwa race condition: shinda first instance, kisha connect au MITM clients za baadaye kwa kutumia ACL iliyodhoofishwa.
-- Mitigation kwa defenders, na key review point kwa attackers: angalia kama `CreateNamedPipe(..., dwOpenMode, ...)` inajumuisha `FILE_FLAG_FIRST_PIPE_INSTANCE`. Ikiwa sivyo, jaribu pre-creation kabla service haijaanza.
+- `lpSecurityAttributes` only defines the DACL when the first instance of a pipe name is created.
+- If a privileged service starts late and does not use `FILE_FLAG_FIRST_PIPE_INSTANCE`, an attacker can pre-create the pipe name with a permissive DACL, then let the service create later instances under the attacker-chosen security context.
+- This turns service startup into a race condition: win the first instance, then connect or MITM later clients using the weakened ACL.
+- Mitigation for defenders, and a key review point for attackers: check whether `CreateNamedPipe(..., dwOpenMode, ...)` includes `FILE_FLAG_FIRST_PIPE_INSTANCE`. If not, test pre-creation before the service starts.
 
 ### PID/signature checks are hardening, not a boundary
-- Bidhaa fulani hujaribu kuzuia access kwa kuangalia `GetNamedPipeClientProcessId`, process image path, au Authenticode signer wa client inayounganika.
-- Hii husaidia tu hadi uingize code ndani ya legitimate client: ukishakuwa ndani ya trusted process, unarithi PID/image/signature context halisi ambayo server inatarajia.
-- Kwa split desktop apps, instrumenting low-privileged UI/helper process mara nyingi ni rahisi kuliko kushambulia `SYSTEM` service moja kwa moja.
+- Some products try to restrict access by checking `GetNamedPipeClientProcessId`, process image path, or Authenticode signer of the connecting client.
+- This only helps until you inject into the legitimate client: once inside the trusted process, you inherit the exact PID/image/signature context the server expects.
+- For split desktop apps, instrumenting the low-privileged UI/helper process is often easier than attacking the `SYSTEM` service directly.
 
 ### Hook the client according to its I/O model
-- Synchronous I/O: intercept `NtWriteFile` kabla syscall haijameza buffer, na inspect/patch `NtReadFile` baada ya kurudi.
-- Overlapped I/O: hifadhi `OVERLAPPED`/`IoStatusBlock` iliyoonekana katika `NtReadFile`, kisha inspect buffer baada ya `GetOverlappedResult` au wait husika kukamilika.
-- Completion ports: `GetQueuedCompletionStatus` hufikia `NtRemoveIoCompletion`; returned `ApcContext` huunganisha kurudi na `OVERLAPPED` iliyotumiwa na original read, ambayo ndiyo pivot sahihi ya kupata buffer iliyojaa sasa.
-- Completion routines (`ReadFileEx`): completion callback hutolewa kama APC. Ikiwa unataka kubadilisha returned data au kuingiza synthetic replies, hook real completion routine na, kwa custom injection, tumia one-argument `QueueUserAPC` dispatcher inayoreconstruct expected arguments 3 za routine.
+- Synchronous I/O: intercept `NtWriteFile` before the syscall consumes the buffer, and inspect/patch `NtReadFile` after it returns.
+- Overlapped I/O: store the `OVERLAPPED`/`IoStatusBlock` seen in `NtReadFile`, then inspect the buffer after `GetOverlappedResult` or the relevant wait completes.
+- Completion ports: `GetQueuedCompletionStatus` reaches `NtRemoveIoCompletion`; the returned `ApcContext` links back to the `OVERLAPPED` used by the original read, which is the right pivot to find the now-populated buffer.
+- Completion routines (`ReadFileEx`): the completion callback is delivered as an APC. If you want to tamper with returned data or inject synthetic replies, hook the real completion routine and, for custom injection, use a one-argument `QueueUserAPC` dispatcher that reconstructs the routine's 3 expected arguments.
 
 ### Tooling notes
-- [pipetap](https://sensepost.com/blog/2025/pipetap-a-windows-named-pipe-proxy-tool/) hu-proxy named-pipe traffic kupitia injected helper DLL na hutoa workflow ya aina ya Burp kwa editing/replay.
-- [thats_no_pipe](https://github.com/synacktiv/thats_no_pipe) inatumia mbinu ya Frida na inalenga hooking `NtReadFile`/`NtWriteFile` pamoja na async/completion pivots hapo juu, kisha kusambaza traffic kwenda kwenye WebSocket-backed editing workflow.
+- [pipetap](https://sensepost.com/blog/2025/pipetap-a-windows-named-pipe-proxy-tool/) proxies named-pipe traffic through an injected helper DLL and exposes a Burp-like workflow for editing/replay.
+- [thats_no_pipe](https://github.com/synacktiv/thats_no_pipe) takes a Frida-based approach and focuses on hooking `NtReadFile`/`NtWriteFile` plus the async/completion pivots above, then forwarding traffic to a WebSocket-backed editing workflow.
 ```bash
 pip install pipetap
 ```
