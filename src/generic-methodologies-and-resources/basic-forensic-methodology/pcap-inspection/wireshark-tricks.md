@@ -2,96 +2,122 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Popraw swoje umiejętności w Wireshark
+## Improve your Wireshark skills
 
-### Samouczki
+### Tutorials
 
-Następujące samouczki są świetne do nauki kilku fajnych podstawowych trików:
+The following tutorials are amazing to learn some cool basic tricks:
 
 - [https://unit42.paloaltonetworks.com/unit42-customizing-wireshark-changing-column-display/](https://unit42.paloaltonetworks.com/unit42-customizing-wireshark-changing-column-display/)
 - [https://unit42.paloaltonetworks.com/using-wireshark-display-filter-expressions/](https://unit42.paloaltonetworks.com/using-wireshark-display-filter-expressions/)
 - [https://unit42.paloaltonetworks.com/using-wireshark-identifying-hosts-and-users/](https://unit42.paloaltonetworks.com/using-wireshark-identifying-hosts-and-users/)
 - [https://unit42.paloaltonetworks.com/using-wireshark-exporting-objects-from-a-pcap/](https://unit42.paloaltonetworks.com/using-wireshark-exporting-objects-from-a-pcap/)
 
-### Analizowane informacje
+### Analysed Information
 
-**Informacje eksperckie**
+**Expert Information**
 
-Klikając na _**Analiza** --> **Informacje eksperckie**_ uzyskasz **przegląd** tego, co dzieje się w **analizowanych** pakietach:
+Klikając _**Analyze** --> **Expert Information**_ otrzymasz **przegląd** tego, co dzieje się w **analizowanych** pakietach:
 
 ![](<../../../images/image (256).png>)
 
-**Rozwiązane adresy**
+**Resolved Addresses**
 
-Pod _**Statystyki --> Rozwiązane adresy**_ możesz znaleźć kilka **informacji**, które zostały "**rozwiązane**" przez Wireshark, takich jak port/transport do protokołu, MAC do producenta itp. Interesujące jest, co jest zaangażowane w komunikację.
+W _**Statistics --> Resolved Addresses**_ możesz znaleźć kilka **informacji**, które zostały "**resolved**" przez wireshark, takich jak port/transport do protokołu, MAC do producenta itd. Warto wiedzieć, co jest zaangażowane w komunikację.
 
 ![](<../../../images/image (893).png>)
 
-**Hierarchia protokołów**
+**Protocol Hierarchy**
 
-Pod _**Statystyki --> Hierarchia protokołów**_ możesz znaleźć **protokoły** **zaangażowane** w komunikację oraz dane o nich.
+W _**Statistics --> Protocol Hierarchy**_ możesz znaleźć **protokoły** **zaangażowane** w komunikację oraz dane o nich.
 
 ![](<../../../images/image (586).png>)
 
-**Rozmowy**
+**Conversations**
 
-Pod _**Statystyki --> Rozmowy**_ możesz znaleźć **podsumowanie rozmów** w komunikacji oraz dane o nich.
+W _**Statistics --> Conversations**_ możesz znaleźć **podsumowanie rozmów** w komunikacji oraz dane o nich.
 
 ![](<../../../images/image (453).png>)
 
-**Punkty końcowe**
+**Endpoints**
 
-Pod _**Statystyki --> Punkty końcowe**_ możesz znaleźć **podsumowanie punktów końcowych** w komunikacji oraz dane o każdym z nich.
+W _**Statistics --> Endpoints**_ możesz znaleźć **podsumowanie endpointów** w komunikacji oraz dane o każdym z nich.
 
 ![](<../../../images/image (896).png>)
 
-**Informacje DNS**
+**DNS info**
 
-Pod _**Statystyki --> DNS**_ możesz znaleźć statystyki dotyczące przechwyconego żądania DNS.
+W _**Statistics --> DNS**_ możesz znaleźć statystyki dotyczące przechwyconych zapytań DNS.
 
 ![](<../../../images/image (1063).png>)
 
-**Wykres I/O**
+**I/O Graph**
 
-Pod _**Statystyki --> Wykres I/O**_ możesz znaleźć **wykres komunikacji.**
+W _**Statistics --> I/O Graph**_ możesz znaleźć **wykres komunikacji.**
 
 ![](<../../../images/image (992).png>)
 
-### Filtry
+### Filters
 
-Tutaj możesz znaleźć filtry Wireshark w zależności od protokołu: [https://www.wireshark.org/docs/dfref/](https://www.wireshark.org/docs/dfref/)\
-Inne interesujące filtry:
+Here you can find wireshark filter depending on the protocol: [https://www.wireshark.org/docs/dfref/](https://www.wireshark.org/docs/dfref/)\
+In current Wireshark use `tls.*` instead of the old `ssl.*` filter names.\
+Other interesting filters:
 
-- `(http.request or ssl.handshake.type == 1) and !(udp.port eq 1900)`
-- HTTP i początkowy ruch HTTPS
-- `(http.request or ssl.handshake.type == 1 or tcp.flags eq 0x0002) and !(udp.port eq 1900)`
-- HTTP i początkowy ruch HTTPS + TCP SYN
-- `(http.request or ssl.handshake.type == 1 or tcp.flags eq 0x0002 or dns) and !(udp.port eq 1900)`
-- HTTP i początkowy ruch HTTPS + TCP SYN + żądania DNS
+- `(http.request or tls.handshake.type == 1) and !(udp.port eq 1900)`
+- HTTP and initial HTTPS traffic
+- `(http.request or tls.handshake.type == 1 or tcp.flags eq 0x0002) and !(udp.port eq 1900)`
+- HTTP and initial HTTPS traffic + TCP SYN
+- `(http.request or tls.handshake.type == 1 or tcp.flags eq 0x0002 or dns) and !(udp.port eq 1900)`
+- HTTP and initial HTTPS traffic + TCP SYN + DNS requests
+- `tls.handshake.extensions_server_name contains "example.com"`
+- Pivot on the SNI sent in the ClientHello even when you cannot decrypt the payload
+- `tls.handshake.extensions_alpn_str == "h2" or tls.handshake.extensions_alpn_str == "h3"`
+- Split classic HTTPS, HTTP/2 and HTTP/3 capable sessions quickly
+- `quic or http3`
+- Find modern UDP/443 traffic that will be missed if you only review TCP conversations
 
-### Wyszukiwanie
+### Search
 
-Jeśli chcesz **wyszukiwać** **treść** wewnątrz **pakietów** sesji, naciśnij _CTRL+f_. Możesz dodać nowe warstwy do głównego paska informacji (Nr, Czas, Źródło itp.) naciskając prawy przycisk i następnie edytując kolumnę.
+If you want to **search** for **content** inside the **packets** of the sessions press _CTRL+f_. You can add new layers to the main information bar (No., Time, Source, etc.) by pressing the right button and then the edit column.
 
-### Darmowe laboratoria pcap
+### Following multiplexed streams
 
-**Ćwicz z darmowymi wyzwaniami na:** [**https://www.malware-traffic-analysis.net/**](https://www.malware-traffic-analysis.net)
+Recent Wireshark versions can follow `TLS`, `HTTP/2` and `QUIC` streams directly. On noisy captures this is usually faster than only using `Follow TCP Stream`, especially when several requests share the same connection.
 
-## Identyfikacja domen
+### Free pcap labs
 
-Możesz dodać kolumnę, która pokazuje nagłówek Host HTTP:
+**Practice with the free challenges of:** [**https://www.malware-traffic-analysis.net/**](https://www.malware-traffic-analysis.net)
+
+## Identifying Domains
+
+You can add a column that shows the Host HTTP header:
 
 ![](<../../../images/image (639).png>)
 
-I kolumnę, która dodaje nazwę serwera z inicjującego połączenia HTTPS (**ssl.handshake.type == 1**):
+And a column that add the Server name from an initiating HTTPS connection (**tls.handshake.type == 1**):
 
 ![](<../../../images/image (408) (1).png>)
 
-## Identyfikacja lokalnych nazw hostów
+If the capture is mostly encrypted, adding these fields as columns will speed up triage a lot:
+
+- `tls.handshake.extensions_server_name`
+- `tls.handshake.extensions_alpn_str`
+- `tls.handshake.ja3`
+- `tls.handshake.ja4` (Wireshark 4.2+)
+
+This lets you cluster sessions by hostname, ALPN (`http/1.1`, `h2`, `h3`, etc.) and client fingerprint even when the payload itself stays encrypted. For decrypted HTTP/2 and HTTP/3 captures, it is also useful to add `http2.header.value` or `http3.headers.header.value` as columns and pivot on paths, authorities and other interesting metadata.
+```bash
+tshark -r capture.pcapng -Y "tls.handshake.type == 1" -T fields \
+-e frame.number -e ip.src -e ip.dst \
+-e tls.handshake.extensions_server_name \
+-e tls.handshake.extensions_alpn_str \
+-e tls.handshake.ja3 -e tls.handshake.ja4
+```
+## Identyfikacja lokalnych hostname’ów
 
 ### Z DHCP
 
-W aktualnym Wireshark zamiast `bootp` musisz szukać `DHCP`
+W obecnym Wireshark zamiast `bootp` musisz szukać `DHCP`
 
 ![](<../../../images/image (1013).png>)
 
@@ -99,33 +125,39 @@ W aktualnym Wireshark zamiast `bootp` musisz szukać `DHCP`
 
 ![](<../../../images/image (1003).png>)
 
-## Deszyfrowanie TLS
+## Odszyfrowywanie TLS
 
-### Deszyfrowanie ruchu https za pomocą prywatnego klucza serwera
+### Odszyfrowywanie ruchu https za pomocą prywatnego klucza serwera
 
-_edit>preferencje>protokół>ssl>_
+_edit > preferences > protocols > tls >_
 
 ![](<../../../images/image (1103).png>)
 
-Naciśnij _Edytuj_ i dodaj wszystkie dane serwera oraz prywatny klucz (_IP, Port, Protokół, Plik klucza i hasło_)
+Naciśnij _Edit_ i dodaj wszystkie dane serwera oraz prywatny klucz (_IP, Port, Protocol, Key file and password_)
 
-### Deszyfrowanie ruchu https za pomocą symetrycznych kluczy sesji
+Ta metoda działa tylko w ograniczonej liczbie przypadków. Dla obecnego ruchu TLS 1.3 / ECDHE poniższa metoda z logiem kluczy sesji jest zwykle praktycznym rozwiązaniem.
 
-Zarówno Firefox, jak i Chrome mają możliwość rejestrowania kluczy sesji TLS, które można wykorzystać z Wireshark do deszyfrowania ruchu TLS. Umożliwia to szczegółową analizę zabezpieczonej komunikacji. Więcej informacji na temat tego, jak przeprowadzić to deszyfrowanie, można znaleźć w przewodniku na stronie [Red Flag Security](https://redflagsecurity.net/2019/03/10/decrypting-tls-wireshark/).
+### Odszyfrowywanie ruchu https za pomocą symetrycznych kluczy sesji
+
+Zarówno Firefox, jak i Chrome mają możliwość zapisywania kluczy sesji TLS, które można wykorzystać z Wireshark do odszyfrowania ruchu TLS. Umożliwia to szczegółową analizę bezpiecznych komunikacji. Więcej informacji o tym, jak wykonać to odszyfrowanie, można znaleźć w przewodniku na [Red Flag Security](https://redflagsecurity.net/2019/03/10/decrypting-tls-wireshark/). To także standardowa metoda odszyfrowywania nowoczesnych przechwyceń TLS 1.3 i QUIC/HTTP/3.
 
 Aby to wykryć, przeszukaj środowisko pod kątem zmiennej `SSLKEYLOGFILE`
 
-Plik z kluczami współdzielonymi będzie wyglądał tak:
+Plik współdzielonych kluczy będzie wyglądał tak:
 
 ![](<../../../images/image (820).png>)
 
-Aby zaimportować to do Wireshark, przejdź do _edytuj > preferencje > protokół > ssl > i zaimportuj to w (Pre)-Master-Secret log filename:
+Jeśli przechwycenie jest w formacie `pcapng`, sprawdź, czy już zawiera osadzone sekrety odszyfrowywania, zanim zaczniesz przeszukiwać system plików hosta:
+```bash
+editcap --extract-secrets capture.pcapng tls-secrets.txt
+```
+Aby zaimportować to w wireshark, przejdź do \_edit > preferences > protocols > tls > i zaimportuj to w (Pre)-Master-Secret log filename:
 
 ![](<../../../images/image (989).png>)
 
-## Komunikacja ADB
+## ADB communication
 
-Wyodrębnij APK z komunikacji ADB, gdzie APK został wysłany:
+Wyodrębnij APK z ADB communication, gdzie APK został wysłany:
 ```python
 from scapy.all import *
 
@@ -152,4 +184,9 @@ f = open('all_bytes.data', 'w+b')
 f.write(all_bytes)
 f.close()
 ```
+## References
+
+- [Wireshark TLS wiki](https://wiki.wireshark.org/TLS)
+- [Decrypting and parsing HTTP/3 traffic in Wireshark](https://blog.elmo.sg/posts/parsing-decrypted-quic-traffic-in-wireshark/)
+
 {{#include ../../../banners/hacktricks-training.md}}
