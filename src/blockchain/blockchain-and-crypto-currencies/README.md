@@ -1,182 +1,182 @@
-# 区块链与加密货币
+# Blockchain and Crypto-Currencies
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## 基本概念
+## Basic Concepts
 
-- **Smart Contracts** 被定义为在满足特定条件时在区块链上执行的程序，自动化协议的执行而无需中介。
-- **Decentralized Applications (dApps)** 建立在 smart contracts 之上，具有用户友好的前端和透明、可审计的后端。
-- **Tokens & Coins** 的区别在于 coins 用作数字货币，而 tokens 则表示特定语境下的价值或所有权。
-- **Utility Tokens** 授予对服务的访问权限，**Security Tokens** 则表示资产所有权。
-- **DeFi** 指 Decentralized Finance，提供无需中央机构的金融服务。
+- **Smart Contracts** 是指在 blockchain 上在满足某些条件时执行的程序，通过自动化执行协议而无需中介。
+- **Decentralized Applications (dApps)** 基于 smart contracts 构建，具有用户友好的前端和透明、可审计的后端。
+- **Tokens & Coins** 区分了 coin 作为数字货币，而 token 在特定场景中代表价值或所有权。
+- **Utility Tokens** 授予对服务的访问权限，而 **Security Tokens** 表示资产所有权。
+- **DeFi** 代表 Decentralized Finance，提供无需中央机构的金融服务。
 - **DEX** 和 **DAOs** 分别指 Decentralized Exchange Platforms 和 Decentralized Autonomous Organizations。
 
-## 共识机制
+## Consensus Mechanisms
 
-共识机制确保区块链上交易验证的安全性和一致性：
+Consensus mechanisms ensure secure and agreed transaction validations on the blockchain:
 
-- **Proof of Work (PoW)** 依赖计算能力来验证交易。
-- **Proof of Stake (PoS)** 要求验证者持有一定数量的 tokens，相比 PoW 降低能耗。
+- **Proof of Work (PoW)** 依赖计算能力进行交易验证。
+- **Proof of Stake (PoS)** 要求验证者持有一定数量的 token，与 PoW 相比可降低能耗。
 
-## 比特币要点
+## Bitcoin Essentials
 
 ### Transactions
 
-比特币交易涉及在地址之间转移资金。交易通过数字签名进行验证，确保只有私钥的所有者才能发起转账。
+Bitcoin transactions involve transferring funds between addresses. Transactions are validated through digital signatures, ensuring only the owner of the private key can initiate transfers.
 
-#### 关键组件：
+#### Key Components:
 
-- **Multisignature Transactions** 需要多个签名来授权交易。
-- 交易由 **inputs**（资金来源）、**outputs**（目的地）、**fees**（支付给矿工）和 **scripts**（交易规则）组成。
+- **Multisignature Transactions** require multiple signatures to authorize a transaction.
+- Transactions consist of **inputs** (资金来源), **outputs** (destination), **fees** (paid to miners), and **scripts** (transaction rules).
 
 ### Lightning Network
 
-旨在通过允许在通道内进行多次交易并仅将最终状态广播到区块链来提高比特币的可扩展性。
+旨在通过允许在一个 channel 内进行多笔 transactions 来增强 Bitcoin 的可扩展性，只将最终状态广播到 blockchain。
 
-## 比特币隐私问题
+## Bitcoin Privacy Concerns
 
-隐私攻击，例如 **Common Input Ownership** 和 **UTXO Change Address Detection**，利用交易模式。像 **Mixers** 和 **CoinJoin** 这样的策略通过混淆用户之间的交易链接来提高匿名性。
+Privacy attacks, such as **Common Input Ownership** and **UTXO Change Address Detection**, exploit transaction patterns. Strategies like **Mixers** and **CoinJoin** improve anonymity by obscuring transaction links between users.
 
-## 匿名获取比特币的方法
+## Acquiring Bitcoins Anonymously
 
-方法包括现金交易、挖矿和使用 mixers。**CoinJoin** 将多笔交易混合以增加可追踪性的难度，而 **PayJoin** 将 CoinJoins 伪装成普通交易以提高隐私。
+Methods include cash trades, mining, and using mixers. **CoinJoin** mixes multiple transactions to complicate traceability, while **PayJoin** disguises CoinJoins as regular transactions for heightened privacy.
 
 # Bitcoin Privacy Atacks
 
-# 比特币隐私攻击概述
+# Summary of Bitcoin Privacy Attacks
 
-在比特币的世界中，交易的隐私和用户的匿名性常常是关注点。以下是几种攻击者可能用来破坏比特币隐私的常见方法的简要概述。
+In the world of Bitcoin, the privacy of transactions and the anonymity of users are often subjects of concern. Here's a simplified overview of several common methods through which attackers can compromise Bitcoin privacy.
 
 ## **Common Input Ownership Assumption**
 
-由于将不同用户的 inputs 组合到单笔交易中通常很少见且复杂，因此 **同一交易中的两个输入地址通常被假定属于同一所有者**。
+It is generally rare for inputs from different users to be combined in a single transaction due to the complexity involved. Thus, **two input addresses in the same transaction are often assumed to belong to the same owner**.
 
 ## **UTXO Change Address Detection**
 
-UTXO（Unspent Transaction Output，未花费交易输出）在交易中必须全部被花费。如果只将其中一部分发送到另一个地址，剩余部分会发送到一个新的 change address。观察者可以假定该新地址属于发送者，从而暴露隐私。
+A UTXO, or **Unspent Transaction Output**, must be entirely spent in a transaction. If only a part of it is sent to another address, the remainder goes to a new change address. Observers can assume this new address belongs to the sender, compromising privacy.
 
-### 示例
+### Example
 
-为缓解这一点，使用 mixing 服务或使用多个地址可以帮助混淆所有权。
+To mitigate this, mixing services or using multiple addresses can help obscure ownership.
 
-## **社交网络与论坛暴露**
+## **Social Networks & Forums Exposure**
 
-用户有时会在网上分享他们的比特币地址，这使得**将地址与其所有者关联变得容易**。
+Users sometimes share their Bitcoin addresses online, making it **easy to link the address to its owner**.
 
-## **交易图分析**
+## **Transaction Graph Analysis**
 
-交易可以可视化为图表，基于资金流动揭示用户之间的潜在联系。
+Transactions can be visualized as graphs, revealing potential connections between users based on the flow of funds.
 
-## **不必要输入启发式（Optimal Change Heuristic）**
+## **Unnecessary Input Heuristic (Optimal Change Heuristic)**
 
-该启发式基于分析具有多个 inputs 和 outputs 的交易，以猜测哪个 output 是返回给发送者的 change。
+This heuristic is based on analyzing transactions with multiple inputs and outputs to guess which output is the change returning to the sender.
 
-### 示例
+### Example
 ```bash
 2 btc --> 4 btc
 3 btc     1 btc
 ```
-如果增加更多输入导致找零输出大于任何单个输入，这会使启发式判断混淆。
+如果添加更多 inputs 会使 change output 大于任何单个 input，那么它可能会让 heuristic 产生混淆。
 
 ## **Forced Address Reuse**
 
-攻击者可能向先前使用过的地址发送少量资金，希望接收者在未来交易中将这些与其他输入合并，从而将地址连接在一起。
+Attackers 可能会向之前使用过的 addresses 发送少量资金，希望接收方在未来的交易中将这些资金与其他 inputs 合并，从而把 addresses 关联在一起。
 
-### 正确的钱包行为
+### Correct Wallet Behavior
 
-钱包应避免使用在已使用且为空的地址上收到的币，以防止这种隐私 leak。
+Wallets 应避免在已使用过的空 addresses 上使用收到的 coins，以防止这种 privacy leak。
 
 ## **Other Blockchain Analysis Techniques**
 
-- **Exact Payment Amounts:** 没有找零的交易很可能是两个属于同一用户的地址之间的支付。
-- **Round Numbers:** 交易中的整数金额通常表明这是一次支付，非整数的输出很可能是找零。
-- **Wallet Fingerprinting:** 不同钱包有独特的交易创建模式，使分析者可以识别所使用的软件并可能推断出找零地址。
-- **Amount & Timing Correlations:** 披露交易时间或金额可能使交易可被追踪。
+- **Exact Payment Amounts:** 没有 change 的 transactions 很可能发生在由同一用户拥有的两个 addresses 之间。
+- **Round Numbers:** transaction 中的整数金额表明它是 payment，而非整数的 output 很可能是 change。
+- **Wallet Fingerprinting:** 不同 wallets 有独特的 transaction 创建模式，分析人员可以识别所用的软件，并可能推断出 change address。
+- **Amount & Timing Correlations:** 公开 transaction times 或 amounts 会让 transactions 更容易被追踪。
 
 ## **Traffic Analysis**
 
-通过监控网络流量，攻击者可能将交易或区块与 IP 地址关联，从而危及用户隐私。如果某实体运行大量 Bitcoin 节点，情况尤为严重，因为这增强了其监视交易的能力。
+通过监控 network traffic，attackers 可以潜在地将 transactions 或 blocks 关联到 IP addresses，从而危及 user privacy。尤其当某个实体运营大量 Bitcoin nodes 时，这种情况更明显，因为这会增强其监控 transactions 的能力。
 
-## 更多
+## More
 
-有关隐私攻击和防御的完整列表，请参见 [Bitcoin Privacy on Bitcoin Wiki](https://en.bitcoin.it/wiki/Privacy)。
+有关 privacy attacks 和 defenses 的完整列表，请访问 [Bitcoin Privacy on Bitcoin Wiki](https://en.bitcoin.it/wiki/Privacy)。
 
-# 匿名 Bitcoin 交易
+# Anonymous Bitcoin Transactions
 
-## 获取 Bitcoins 的匿名方式
+## Ways to Get Bitcoins Anonymously
 
 - **Cash Transactions**: 通过现金获取 bitcoin。
-- **Cash Alternatives**: 购买礼品卡并在线兑换为 bitcoin。
-- **Mining**: 获得 bitcoins 最私密的方法是挖矿，尤其是单独挖矿，因为矿池可能知道矿工的 IP 地址。 [Mining Pools Information](https://en.bitcoin.it/wiki/Pooled_mining)
-- **Theft**: 理论上，窃取 bitcoin 也可能是另一种匿名获取方式，但这是非法且不推荐的。
+- **Cash Alternatives**: 购买 gift cards 并在线兑换为 bitcoin。
+- **Mining**: 赚取 bitcoins 最私密的方法是 mining，尤其是单独进行时，因为 mining pools 可能知道 miner 的 IP address。[Mining Pools Information](https://en.bitcoin.it/wiki/Pooled_mining)
+- **Theft**: 从理论上说，stealing bitcoin 也可能是匿名获取它的另一种方式，不过这是非法的，也不推荐。
 
 ## Mixing Services
 
-通过使用混币服务，用户可以发送比特币并收到不同的比特币作为回报，这使得追踪原始所有者变得困难。然而，这需要信任该服务不会保留日志并且会实际返还比特币。替代的混合选项包括 Bitcoin 赌场。
+通过使用 mixing service，用户可以 **send bitcoins** 并收到 **different bitcoins in return**，这会让追踪原始 owner 变得困难。不过，这要求信任该 service 不会保留 logs，并且会实际返还 bitcoins。其他 mixing 方式还包括 Bitcoin casinos。
 
 ## CoinJoin
 
-**CoinJoin** 将不同用户的多笔交易合并为一笔，增加了试图匹配输入和输出者的难度。尽管它有效，但具有独特输入和输出规模的交易仍可能被追踪。
+**CoinJoin** 将来自不同 users 的多个 transactions 合并为一个，使任何试图匹配 inputs 与 outputs 的人都更难处理。尽管它很有效，但具有独特 input 和 output sizes 的 transactions 仍然可能被追踪。
 
-可能使用 CoinJoin 的示例交易包括 `402d3e1df685d1fdf82f36b220079c1bf44db227df2d676625ebcbee3f6cb22a` 和 `85378815f6ee170aa8c26694ee2df42b99cff7fa9357f073c1192fff1f540238`。
+可能使用过 CoinJoin 的 example transactions 包括 `402d3e1df685d1fdf82f36b220079c1bf44db227df2d676625ebcbee3f6cb22a` 和 `85378815f6ee170aa8c26694ee2df42b99cff7fa9357f073c1192fff1f540238`。
 
-欲了解更多信息，请访问 [CoinJoin](https://coinjoin.io/en)。在 Ethereum 上类似的服务请查看 [Tornado Cash](https://tornado.cash)，它使用矿工的资金对交易进行匿名处理。
+更多信息请访问 [CoinJoin](https://coinjoin.io/en)。类似的 Ethereum service 可参考 [Tornado Cash](https://tornado.cash)，它使用来自 miners 的 funds 来 anonymizes transactions。
 
 ## PayJoin
 
-作为 CoinJoin 的一种变体，**PayJoin**（或 P2EP）将两方（例如客户和商家）之间的交易伪装成普通交易，不具有 CoinJoin 那种特征性的等额输出。这使其极难被检测，并可能使交易监控实体使用的 common-input-ownership 启发式无效。
+作为 CoinJoin 的一个变体，**PayJoin**（或 P2EP）会把两个 parties 之间的 transaction（例如 customer 和 merchant）伪装成一笔普通 transaction，而不会出现 CoinJoin 典型的相同 outputs 特征。这使其极难被检测，并且可能使 transaction surveillance entities 使用的 common-input-ownership heuristic 失效。
 ```plaintext
 2 btc --> 3 btc
 5 btc     4 btc
 ```
-Transactions like the above could be PayJoin, enhancing privacy while remaining indistinguishable from standard bitcoin transactions.
+像上面的交易可能是 PayJoin，在保持与标准 bitcoin 交易无法区分的同时增强隐私。
 
-**The utilization of PayJoin could significantly disrupt traditional surveillance methods**, making it a promising development in the pursuit of transactional privacy.
+**PayJoin 的使用可能会显著扰乱传统监控方法**，这使其成为推进交易隐私的一个很有前景的发展。
 
-# 隐私最佳实践（加密货币）
+# Cryptocurrencies 中的隐私最佳实践
 
-## **Wallet Synchronization Techniques**
+## **Wallet 同步技术**
 
-为了维护隐私和安全，与区块链同步钱包至关重要。以下两种方法尤为重要：
+为了保持隐私和安全，与 blockchain 同步 wallets 至关重要。有两种方法尤为突出：
 
-- **Full node**：通过下载整个区块链，full node 可确保最大的隐私。所有历史交易都会本地存储，使对手无法识别用户感兴趣的是哪笔交易或哪个地址。
-- **Client-side block filtering**：该方法为区块链中的每个区块创建过滤器，允许钱包在不向网络观察者暴露特定兴趣的情况下识别相关交易。轻量级钱包下载这些过滤器，只有在与用户地址匹配时才获取完整区块。
+- **Full node**：通过下载整个 blockchain，full node 可确保最大的隐私。所有曾经发生的交易都存储在本地，这使得对手无法识别用户对哪些交易或地址感兴趣。
+- **Client-side block filtering**：这种方法为 blockchain 中的每个 block 创建 filters，使 wallets 能够在不向网络观察者暴露具体兴趣的情况下识别相关交易。轻量级 wallets 会下载这些 filters，只有在与用户地址匹配时才获取完整 blocks。
 
-## **Utilizing Tor for Anonymity**
+## **利用 Tor 实现匿名性**
 
-鉴于 Bitcoin 在点对点网络上运行，建议使用 Tor 来掩盖你的 IP 地址，从而在与网络交互时增强隐私。
+鉴于 Bitcoin 运行在 peer-to-peer 网络上，建议使用 Tor 来隐藏你的 IP 地址，从而在与网络交互时增强隐私。
 
-## **Preventing Address Reuse**
+## **防止地址重用**
 
-为保护隐私，每笔交易使用新地址是至关重要的。地址重用会通过将交易关联到同一实体来损害隐私。现代钱包通过设计来阻止地址重用。
+为了保护隐私，每笔交易都必须使用一个新地址。重用地址会通过将交易关联到同一实体而损害隐私。现代 wallets 通过其设计来抑制地址重用。
 
-## **Strategies for Transaction Privacy**
+## **交易隐私策略**
 
-- **Multiple transactions**：将付款拆分成多笔交易可以模糊交易金额，抵御隐私攻击。
-- **Change avoidance**：选择不需要找零输出的交易可以通过破坏找零检测方法来增强隐私。
-- **Multiple change outputs**：如果无法避免找零，生成多个找零输出仍能改善隐私。
+- **多笔交易**：将一笔支付拆分为多笔交易可以掩盖交易金额，挫败隐私攻击。
+- **避免找零**：选择不需要 change outputs 的交易可通过破坏 change detection 方法来增强隐私。
+- **多个找零输出**：如果无法避免找零，生成多个 change outputs 仍然可以改善隐私。
 
-# **Monero: A Beacon of Anonymity**
+# **Monero：匿名性的灯塔**
 
-Monero 解决了数字交易中对绝对匿名的需求，为隐私设定了高标准。
+Monero 满足了数字交易中对绝对匿名性的需求，为隐私设立了很高的标准。
 
-# **Ethereum: Gas and Transactions**
+# **Ethereum：Gas 和交易**
 
-## **Understanding Gas**
+## **理解 Gas**
 
-Gas 用于衡量在 Ethereum 上执行操作所需的计算工作量，计价单位为 **gwei**。例如，一笔花费 2,310,000 gwei（或 0.00231 ETH）的交易涉及 gas limit 和 base fee，并包含用于激励矿工的 tip。用户可以设置 max fee 以确保不会过付，多余部分会被退还。
+Gas 衡量在 Ethereum 上执行操作所需的计算工作量，以 **gwei** 定价。例如，一笔花费 2,310,000 gwei（或 0.00231 ETH）的交易涉及 gas limit 和 base fee，并通过 tip 来激励 miners。用户可以设置 max fee 以确保不会支付过多，多余部分会被退还。
 
-## **Executing Transactions**
+## **执行交易**
 
-Ethereum 的交易涉及发送方和接收方，接收方可以是用户地址或智能合约地址。交易需要支付费用并且必须被挖矿。交易中的关键信息包括接收方、发送方的签名、数额、可选的数据、gas limit 和费用。值得注意的是，发送方地址是可以从签名推导出来的，因此不需要在交易数据中显式包含发送方地址。
+Ethereum 中的交易涉及发送方和接收方，二者可以是用户地址或 smart contract 地址。它们需要 fee，并且必须被 mined。交易中的关键信息包括接收方、发送方签名、value、可选 data、gas limit 和 fees。值得注意的是，发送方地址可由签名推导出来，因此无需写入交易数据中。
 
-这些做法和机制是任何希望在优先考虑隐私和安全的前提下参与加密货币的人必须掌握的基础。
+这些实践和机制是任何希望在优先考虑隐私和安全的同时使用 cryptocurrencies 的人的基础。
 
 ## Value-Centric Web3 Red Teaming
 
-- 清点价值承载组件（signers、oracles、bridges、automation）以了解谁可以移动资金以及如何移动。
-- 将每个组件映射到相关的 MITRE AADAPT tactics，以揭示权限提升路径。
-- 演练 flash-loan/oracle/credential/cross-chain 攻击链以验证影响并记录可被利用的前置条件。
+- Inventory value-bearing components (signers, oracles, bridges, automation) to understand who can move funds and how.
+- Map each component to relevant MITRE AADAPT tactics to expose privilege escalation paths.
+- Rehearse flash-loan/oracle/credential/cross-chain attack chains to validate impact and document exploitable preconditions.
 
 {{#ref}}
 value-centric-web3-red-teaming.md
@@ -184,7 +184,7 @@ value-centric-web3-red-teaming.md
 
 ## Web3 Signing Workflow Compromise
 
-- 对 wallet UIs 的供应链篡改可以在签名前改变 EIP-712 payloads，从而收集有效签名用于基于 delegatecall 的 proxy 接管（例如，覆盖 Safe masterCopy 的 slot-0）。
+- Supply-chain tampering of wallet UIs can mutate EIP-712 payloads right before signing, harvesting valid signatures for delegatecall-based proxy takeovers (e.g., slot-0 overwrite of Safe masterCopy).
 
 {{#ref}}
 web3-signing-workflow-compromise-safe-delegatecall-proxy-takeover.md
@@ -192,7 +192,7 @@ web3-signing-workflow-compromise-safe-delegatecall-proxy-takeover.md
 
 ## Account Abstraction (ERC-4337)
 
-- 常见的 smart-account 故障模式包括绕过 `EntryPoint` 访问控制、未签名的 gas 字段、有状态验证、ERC-1271 重放，以及通过 revert-after-validation 的 fee-drain。
+- Common smart-account failure modes include bypassing `EntryPoint` access control, unsigned gas fields, stateful validation, ERC-1271 replay, and fee-drain via revert-after-validation.
 
 {{#ref}}
 erc-4337-smart-account-security-pitfalls.md
@@ -200,10 +200,87 @@ erc-4337-smart-account-security-pitfalls.md
 
 ## Smart Contract Security
 
-- 使用 mutation testing 来发现测试套件中的盲点：
+- Mutation testing to find blind spots in test suites:
 
 {{#ref}}
 ../smart-contract-security/mutation-testing-with-slither.md
+{{#endref}}
+
+## ZK Proof / zkVM Guest Integrity
+
+When a prover uses a **zkVM** or an application-specific proof circuit to attest a claim, the verifier is only learning that the **guest program executed as written**. If the guest contains **unsafe deserialization**, **undefined behavior**, or **missing semantic constraints**, a malicious prover may generate a proof that verifies while the **public metrics or claimed invariant are false**.
+
+### Unsafe deserialization inside proof guests
+
+- Treat private witness/circuit bytes as **untrusted attacker input** even if they are hidden by the proof.
+- Avoid deserializing them with unchecked helpers such as `rkyv::access_unchecked` unless the bytes were already validated out-of-band.
+- Enum discriminants, relative pointers, lengths, and indexes loaded from untrusted serialized data must be validated before they influence control flow or memory access.
+
+Practical audit pattern:
+```rust
+let private_circuit_bytes = sp1_zkvm::io::read_vec();
+let ops = unsafe {
+rkyv::access_unchecked::<rkyv::Archived<Vec<Op>>>(&private_circuit_bytes)
+};
+```
+如果像 `op.kind` 这样的字段是一个 enum，而攻击者可以注入一个 **超出范围的 discriminant**，那么对这个值的每一次下游 `match` 都会变得可疑。
+
+### jump-table / UB bypass
+
+如果 Rust 将一个较大的 `match` 降低为 **jump table**，一个无效的 enum discriminant 可能导致 **undefined control flow**。一种危险模式是：
+
+1. 第一个 `match` 更新 **security-critical counters/constraints**。
+2. 第二个 `match` 执行 **真实的指令语义**。
+3. 一个超出范围的 discriminant 会索引越过第一个 jump table，并落到与第二个 jump table 相关的代码中。
+
+结果：操作仍然执行，但计账路径被跳过。在 zkVM 中，这可能伪造证明，报告不可能的指标，例如更少的 gates、更少的 expensive operations，或其他被篡改的 bounded resources。
+
+Review checklist:
+
+- 查找从 witness/private input 反序列化而来的、由攻击者控制的 enums。
+- 检查针对同一个 opcode/kind 字段重复出现的 `match` 语句。
+- 将 `unsafe` + unchecked deserialization + 大型 opcode dispatch 视为高风险组合。
+- 在需要时对生成的二进制进行 reverse engineer；jump-table 布局可能比源码更重要。
+
+### reversible/specialized interpreters 中缺失语义约束
+
+不要只验证内存安全；还要验证证明需要强制执行的 **语义规则**。
+
+对于 reversible/quantum-like instruction sets，确保必须不同的操作数实际上被约束为不同。一个类似 Toffoli/CCX 的操作如果按如下方式实现：
+```rust
+let v = cond & self.qubit(op.q_control1) & self.qubit(op.q_control2);
+*self.qubit_mut(op.q_target) ^= v;
+```
+如果 guest 不拒绝，就会变得不安全：
+```text
+op.q_control1 == op.q_control2 == op.q_target
+```
+在这种情况下，转换会简化为：
+```text
+q = q ^ (q & q) = 0
+```
+这会创建一个**deterministic reset primitive**，破坏可逆性假设，并使非预期计算变得更便宜。在证明资源使用量的 proof systems 中，这会让攻击者在绕过 verifier 认为正在强制执行的 cost model 的同时，通过 functional checks。
+
+### 在 ZK systems 中测试什么
+
+- 使用畸形的 witness/private-input 编码 fuzz 所有 guest parsers。
+- 在 opcode dispatch 之前断言 enum 范围验证。
+- 为 operand aliasing 和其他无效 instruction forms 添加语义检查。
+- 将报告的/public counters 与独立的 reference implementation 进行对比。
+- 记住，即使 proof 有效，如果 guest program 有 bug，仍然可能证明**错误的 statement**。
+
+## DeFi/AMM Exploitation
+
+如果你在研究 DEXes 和 AMMs 的实际 exploitation（Uniswap v4 hooks、rounding/precision abuse、flash-loan amplified threshold-crossing swaps），请查看：
+
+{{#ref}}
+defi-amm-hook-precision.md
+{{#endref}}
+
+对于缓存 virtual balances 且在 `supply == 0` 时可能被 poison 的多资产加权池，请研究：
+
+{{#ref}}
+defi-amm-virtual-balance-cache-exploitation.md
 {{#endref}}
 
 ## References
@@ -214,19 +291,8 @@ erc-4337-smart-account-security-pitfalls.md
 - [https://ethereum.org/en/developers/docs/transactions/](https://ethereum.org/en/developers/docs/transactions/)
 - [https://ethereum.org/en/developers/docs/gas/](https://ethereum.org/en/developers/docs/gas/)
 - [https://en.bitcoin.it/wiki/Privacy](https://en.bitcoin.it/wiki/Privacy#Forced_address_reuse)
-
-## DeFi/AMM Exploitation
-
-如果你正在研究 DEXes 和 AMMs 的实际利用（Uniswap v4 hooks、rounding/precision abuse、flash‑loan 放大阈值越过交换），请查看：
-
-{{#ref}}
-defi-amm-hook-precision.md
-{{#endref}}
-
-对于缓存虚拟余额且在 `supply == 0` 时可被污染的多资产加权池，请研究：
-
-{{#ref}}
-defi-amm-virtual-balance-cache-exploitation.md
-{{#endref}}
+- [Trail of Bits - We beat Google's zero-knowledge proof of quantum cryptanalysis](https://blog.trailofbits.com/2026/04/17/we-beat-googles-zero-knowledge-proof-of-quantum-cryptanalysis/)
+- [Google patched paper version](https://arxiv.org/abs/2603.28846v2)
+- [Trail of Bits proof-of-concept repository](https://github.com/trailofbits/quantum-zk-proof-poc)
 
 {{#include ../../banners/hacktricks-training.md}}
