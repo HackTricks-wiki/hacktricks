@@ -2,29 +2,29 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Named Pipe client impersonation είναι ένας μηχανισμός τοπικής κλιμάκωσης προνομίων που επιτρέπει σε ένα server thread του named-pipe να υιοθετήσει το security context ενός client που συνδέεται σε αυτό. Στην πράξη, ένας επιτιθέμενος που μπορεί να εκτελέσει κώδικα με SeImpersonatePrivilege μπορεί να εξαναγκάσει έναν προνομιούχο client (π.χ. μια υπηρεσία SYSTEM) να συνδεθεί σε ένα pipe που ελέγχει ο επιτιθέμενος, να καλέσει ImpersonateNamedPipeClient, να διπλασιάσει το προκύπτον token σε primary token και να spawn-άρει μια διεργασία ως ο client (συχνά NT AUTHORITY\SYSTEM).
+Το Named Pipe client impersonation είναι ένα local privilege escalation primitive που επιτρέπει σε ένα named-pipe server thread να υιοθετήσει το security context ενός client που συνδέεται σε αυτό. Στην πράξη, ένας attacker που μπορεί να τρέξει code με SeImpersonatePrivilege μπορεί να εξαναγκάσει έναν privileged client (π.χ. μια SYSTEM service) να συνδεθεί σε ένα attacker-controlled pipe, να καλέσει ImpersonateNamedPipeClient, να αντιγράψει το resulting token σε primary token, και να κάνει spawn ένα process ως client (συχνά NT AUTHORITY\SYSTEM).
 
-Αυτή η σελίδα επικεντρώνεται στην κύρια τεχνική. Για end-to-end exploit chains που εξαναγκάζουν SYSTEM να συνδεθεί στο pipe σας, δείτε τις σελίδες της οικογένειας Potato που αναφέρονται παρακάτω.
+Αυτή η σελίδα επικεντρώνεται στην core technique. Για end-to-end exploit chains που εξαναγκάζουν το SYSTEM να συνδεθεί στο pipe σου, δες τις Potato family σελίδες που αναφέρονται παρακάτω.
 
 ## TL;DR
-- Δημιουργήστε ένα named pipe: \\.\pipe\<random> και περιμένετε για σύνδεση.
-- Κάντε ένα προνομιούχο component να συνδεθεί σε αυτό (spooler/DCOM/EFSRPC/etc.).
-- Διαβάστε τουλάχιστον ένα μήνυμα από το pipe, στη συνέχεια καλέστε ImpersonateNamedPipeClient.
-- Ανοίξτε το impersonation token από το τρέχον νήμα, DuplicateTokenEx(TokenPrimary), και χρησιμοποιήστε CreateProcessWithTokenW/CreateProcessAsUser για να ξεκινήσετε μια διεργασία ως SYSTEM.
+- Create a named pipe: \\.\pipe\<random> και περίμενε μια σύνδεση.
+- Κάνε ένα privileged component να συνδεθεί σε αυτό.
+- Διάβασε τουλάχιστον ένα message από το pipe, και μετά κάλεσε ImpersonateNamedPipeClient.
+- Άνοιξε το impersonation token από το current thread, DuplicateTokenEx(TokenPrimary), και CreateProcessWithTokenW/CreateProcessAsUser για να πάρεις ένα SYSTEM process.
 
 ## Requirements and key APIs
-- Τα προνόμια που συνήθως χρειάζεται η καλούσα διαδικασία/νήμα:
-- SeImpersonatePrivilege για να γίνει επιτυχώς impersonate σε έναν συνδεόμενο client και για να χρησιμοποιηθεί CreateProcessWithTokenW.
-- Εναλλακτικά, αφού έχετε impersonate-άρει SYSTEM, μπορείτε να χρησιμοποιήσετε CreateProcessAsUser, το οποίο μπορεί να απαιτεί SeAssignPrimaryTokenPrivilege και SeIncreaseQuotaPrivilege (αυτά ικανοποιούνται όταν impersonate-άρετε SYSTEM).
-- Βασικά APIs που χρησιμοποιούνται:
+- Privileges που συνήθως χρειάζεται το calling process/thread:
+- SeImpersonatePrivilege για να impersonate επιτυχώς έναν connecting client και για να χρησιμοποιήσεις CreateProcessWithTokenW.
+- Εναλλακτικά, αφού impersonate SYSTEM, μπορείς να χρησιμοποιήσεις CreateProcessAsUser, το οποίο μπορεί να απαιτεί SeAssignPrimaryTokenPrivilege και SeIncreaseQuotaPrivilege (αυτά ικανοποιούνται όταν κάνεις impersonate SYSTEM).
+- Core APIs used:
 - CreateNamedPipe / ConnectNamedPipe
-- ReadFile/WriteFile (πρέπει να διαβαστεί τουλάχιστον ένα μήνυμα πριν το impersonation)
+- ReadFile/WriteFile (πρέπει να διαβάσεις τουλάχιστον ένα message πριν από το impersonation)
 - ImpersonateNamedPipeClient και RevertToSelf
 - OpenThreadToken, DuplicateTokenEx(TokenPrimary)
-- CreateProcessWithTokenW or CreateProcessAsUser
-- Επίπεδο impersonation: για να εκτελεστούν χρήσιμες ενέργειες τοπικά, ο client πρέπει να επιτρέπει SecurityImpersonation (προεπιλογή για πολλούς τοπικούς RPC/named-pipe clients). Οι clients μπορούν να μειώσουν αυτό με SECURITY_SQOS_PRESENT | SECURITY_IDENTIFICATION κατά το άνοιγμα του pipe.
+- CreateProcessWithTokenW ή CreateProcessAsUser
+- Impersonation level: για να εκτελέσεις χρήσιμες ενέργειες locally, ο client πρέπει να επιτρέπει SecurityImpersonation (default για πολλά local RPC/named-pipe clients). Οι clients μπορούν να το μειώσουν αυτό με SECURITY_SQOS_PRESENT | SECURITY_IDENTIFICATION όταν ανοίγουν το pipe.
 
-## Ελάχιστη ροή εργασίας Win32 (C)
+## Minimal Win32 workflow (C)
 ```c
 // Minimal skeleton (no error handling hardening for brevity)
 #include <windows.h>
@@ -69,11 +69,11 @@ return 0;
 }
 ```
 Σημειώσεις:
-- Εάν η ImpersonateNamedPipeClient επιστρέψει ERROR_CANNOT_IMPERSONATE (1368), βεβαιωθείτε ότι έχετε διαβάσει πρώτα από το pipe και ότι ο client δεν έχει περιορίσει την impersonation στο Identification level.
-- Προτιμήστε το DuplicateTokenEx με SecurityImpersonation και TokenPrimary για να δημιουργήσετε ένα primary token κατάλληλο για δημιουργία διεργασίας.
+- If ImpersonateNamedPipeClient επιστρέφει ERROR_CANNOT_IMPERSONATE (1368), βεβαιώσου ότι έχεις διαβάσει πρώτα από το pipe και ότι το client δεν περιόρισε το impersonation σε επίπεδο Identification.
+- Προτίμησε DuplicateTokenEx με SecurityImpersonation και TokenPrimary για να δημιουργήσεις ένα primary token κατάλληλο για process creation.
 
-## .NET γρήγορο παράδειγμα
-Στο .NET, το NamedPipeServerStream μπορεί να impersonate μέσω του RunAsClient. Μόλις γίνει impersonation, αντιγράψτε το thread token και δημιουργήστε μια διεργασία.
+## .NET quick example
+Στο .NET, το NamedPipeServerStream μπορεί να κάνει impersonate μέσω RunAsClient. Μόλις γίνει impersonating, κάνε duplicate το thread token και δημιούργησε ένα process.
 ```csharp
 using System; using System.IO.Pipes; using System.Runtime.InteropServices; using System.Diagnostics;
 class P {
@@ -93,13 +93,13 @@ Process pi; CreateProcessWithTokenW(p, 2, null, null, 0, IntPtr.Zero, null, ref 
 }
 }
 ```
-## Συνήθεις triggers/coercions για να φέρετε το SYSTEM στο pipe σας
-Αυτές οι τεχνικές εξαναγκάζουν υπηρεσίες με προνόμια να συνδεθούν στο named pipe σας ώστε να μπορείτε να τις impersonate:
+## Common triggers/coercions to get SYSTEM to your pipe
+Αυτές οι τεχνικές εξαναγκάζουν privileged services να συνδεθούν στο named pipe σου ώστε να μπορείς να τα impersonate:
 - Print Spooler RPC trigger (PrintSpoofer)
 - DCOM activation/NTLM reflection variants (RoguePotato/JuicyPotato[NG], GodPotato)
 - EFSRPC pipes (EfsPotato/SharpEfsPotato)
 
-Δείτε λεπτομερή χρήση και συμβατότητα εδώ:
+Δες αναλυτική χρήση και συμβατότητα εδώ:
 
 -
 {{#ref}}
@@ -110,7 +110,7 @@ roguepotato-and-printspoofer.md
 juicypotato.md
 {{#endref}}
 
-Αν χρειάζεστε ένα πλήρες παράδειγμα κατασκευής του pipe και impersonating για να spawn SYSTEM από ένα service trigger, δείτε:
+Αν χρειάζεσαι απλώς ένα πλήρες παράδειγμα για το πώς να φτιάξεις το pipe και να κάνεις impersonate για να spawn SYSTEM από ένα service trigger, δες:
 
 -
 {{#ref}}
@@ -121,24 +121,41 @@ from-high-integrity-to-system-with-name-pipes.md
 service-triggers.md
 {{#endref}}
 
-## Named Pipe IPC Abuse & MITM (DLL Injection, API Hooking, PID Validation Bypass)
+## Named Pipe IPC Abuse & MITM (ACLs, First-Instance Races, Client Hooking)
 
-Οι υπηρεσίες hardened με named-pipe μπορούν ακόμα να καταληφθούν με τη διεμβολή του trusted client. Εργαλεία όπως [pipetap](https://sensepost.com/blog/2025/pipetap-a-windows-named-pipe-proxy-tool/) ρίχνουν ένα helper DLL στον client, προωθούν την κίνησή του, και σας επιτρέπουν να παραποιήσετε privileged IPC πριν η υπηρεσία SYSTEM το καταναλώσει.
+Όταν ένα privileged service και ένα low-privileged process επικοινωνούν μέσω `\\.\pipe\...`, αντιμετώπισε το pipe όπως οποιοδήποτε άλλο untrusted IPC boundary. Πέρα από το κλασικό server-side impersonation, αδύναμα pipe ACLs, unsafe creation flags και client-side trust decisions μπορούν όλα να γίνουν local privilege escalation primitives.
 
-### Inline API hooking inside trusted processes
-- Εισάγετε το helper DLL (OpenProcess → CreateRemoteThread → LoadLibrary) σε οποιονδήποτε client.
-- Το DLL χρησιμοποιεί Detours για `ReadFile`, `WriteFile`, κ.λπ., αλλά μόνο όταν το `GetFileType` αναφέρει `FILE_TYPE_PIPE`. Αντιγράφει κάθε buffer/metadata σε ένα control pipe, σας επιτρέπει να το επεξεργαστείτε/απορρίψετε/αναπαράγετε, και μετά επαναφέρει το αρχικό API.
-- Μετατρέπει τον νόμιμο client σε proxy τύπου Burp: παύση UTF-8/UTF-16/raw payloads, πρόκληση error paths, αναπαραγωγή ακολουθιών, ή εξαγωγή JSON traces.
+### Enumerate candidate pipes first
+- Λίστα pipe γρήγορα από PowerShell: `Get-ChildItem \\.\pipe\`
+- Το Sysinternals `pipelist64.exe` είναι χρήσιμο για να εντοπίσεις instance counts και single-instance pipes.
+- Δώσε προτεραιότητα σε ονόματα που χρησιμοποιούνται από services που τρέχουν ως `SYSTEM`, ειδικά helpers, updaters, launchers και UI brokers.
 
-### Remote client mode to defeat PID-based validation
-- Εισάγετε σε έναν allow-listed client, μετά στο GUI επιλέξτε το pipe και το PID.
-- Το DLL καλεί `CreateFile`/`ConnectNamedPipe` μέσα στη trusted process και προωθεί το I/O πίσω σε εσάς, έτσι ο server εξακολουθεί να βλέπει το νόμιμο PID/image.
-- Παρακάμπτει φίλτρα που βασίζονται σε `GetNamedPipeClientProcessId` ή ελέγχους signed-image.
+### MITM via permissive DACLs and extra pipe instances
+- Οποιοδήποτε process μπορεί να μιλήσει με έναν privileged server μπορεί ήδη να fuzzάρει το protocol του και να ψάξει για privileged verbs.
+- Η πιο ενδιαφέρουσα περίπτωση είναι όταν η DACL δίνει `FILE_GENERIC_WRITE`/`GENERIC_WRITE` στο pipe object. Στα named pipes αυτό περιλαμβάνει έμμεσα το `FILE_CREATE_PIPE_INSTANCE` (`FILE_APPEND_DATA` μοιράζεται το ίδιο bit), οπότε ένας attacker μπορεί να δημιουργήσει άλλο server instance με το ίδιο όνομα.
+- Επειδή τα instances αντιστοιχίζονται σε FIFO order, attacker-created και legitimate instances μπορούν να εναλλάσσονται: δημιούργησε ένα rogue instance με `CreateNamedPipe`, μετά άνοιξε το ίδιο pipe name με `CreateFile`, και περίμενε μέχρι να καταλήξει ένας πραγματικός client στο rogue server instance.
+- Αποτέλεσμα: observe, modify, relay, ή desynchronize privileged IPC χωρίς να χρειάζεται να κατέχεις το αρχικό server process.
 
-### Fast enumeration and fuzzing
-- `pipelist` απαριθμεί `\\.\pipe\*`, δείχνει ACLs/SIDs, και προωθεί καταχωρήσεις σε άλλα modules για άμεσο probing.
-- Ο pipe client/message composer συνδέεται σε οποιοδήποτε όνομα και δημιουργεί UTF-8/UTF-16/raw-hex payloads· εισάγετε captured blobs, μεταβάλετε πεδία, και επαναποστείλετε για να κυνηγήσετε deserializers ή unauthenticated command verbs.
-- Το helper DLL μπορεί να φιλοξενήσει έναν loopback TCP listener ώστε εργαλεία/fuzzers να οδηγήσουν το pipe απομακρυσμένα μέσω του Python SDK.
+### First-instance race on pipe security descriptors
+- Το `lpSecurityAttributes` ορίζει το DACL μόνο όταν δημιουργείται το πρώτο instance ενός pipe name.
+- Αν ένα privileged service ξεκινά αργά και δεν χρησιμοποιεί `FILE_FLAG_FIRST_PIPE_INSTANCE`, ένας attacker μπορεί να pre-create το pipe name με permissive DACL, και μετά να αφήσει το service να δημιουργήσει αργότερα instances κάτω από το security context που διάλεξε ο attacker.
+- Αυτό μετατρέπει το service startup σε race condition: κέρδισε το first instance, και μετά connect ή MITM αργότερα clients χρησιμοποιώντας το weakened ACL.
+- Mitigation for defenders, και key review point for attackers: έλεγξε αν το `CreateNamedPipe(..., dwOpenMode, ...)` περιλαμβάνει `FILE_FLAG_FIRST_PIPE_INSTANCE`. Αν όχι, δοκίμασε pre-creation πριν ξεκινήσει το service.
+
+### PID/signature checks are hardening, not a boundary
+- Κάποια products προσπαθούν να περιορίσουν την πρόσβαση ελέγχοντας `GetNamedPipeClientProcessId`, process image path, ή Authenticode signer του connecting client.
+- Αυτό βοηθά μόνο μέχρι να injectάρεις στο legitimate client: μόλις μπεις μέσα στο trusted process, κληρονομείς το ακριβές PID/image/signature context που περιμένει ο server.
+- Για split desktop apps, το να instrumentάρεις το low-privileged UI/helper process είναι συχνά πιο εύκολο από το να επιτεθείς απευθείας στο `SYSTEM` service.
+
+### Hook the client according to its I/O model
+- Synchronous I/O: intercept `NtWriteFile` πριν το syscall καταναλώσει το buffer, και inspect/patch το `NtReadFile` αφού επιστρέψει.
+- Overlapped I/O: αποθήκευσε το `OVERLAPPED`/`IoStatusBlock` που φαίνεται στο `NtReadFile`, και μετά inspect το buffer αφού ολοκληρωθεί το `GetOverlappedResult` ή το σχετικό wait.
+- Completion ports: το `GetQueuedCompletionStatus` φτάνει στο `NtRemoveIoCompletion`; το returned `ApcContext` συνδέεται πίσω με το `OVERLAPPED` που χρησιμοποιήθηκε στο αρχικό read, το οποίο είναι το σωστό pivot για να βρεις το buffer που τώρα έχει γεμίσει.
+- Completion routines (`ReadFileEx`): το completion callback παραδίδεται ως APC. Αν θέλεις να αλλοιώσεις returned data ή να injectάρεις synthetic replies, hook την πραγματική completion routine και, για custom injection, χρησιμοποίησε έναν one-argument `QueueUserAPC` dispatcher που ανακατασκευάζει τα 3 αναμενόμενα arguments της routine.
+
+### Tooling notes
+- [pipetap](https://sensepost.com/blog/2025/pipetap-a-windows-named-pipe-proxy-tool/) κάνει proxy το named-pipe traffic μέσω ενός injected helper DLL και προσφέρει Burp-like workflow για editing/replay.
+- [thats_no_pipe](https://github.com/synacktiv/thats_no_pipe) ακολουθεί Frida-based approach και εστιάζει στο hooking των `NtReadFile`/`NtWriteFile` μαζί με τα async/completion pivots παραπάνω, και μετά κάνει forwarding του traffic σε ένα WebSocket-backed editing workflow.
 ```bash
 pip install pipetap
 ```
@@ -148,22 +165,25 @@ import pipetap
 client = pipetap.Client(("127.0.0.1", 47001))
 client.write(b"OP\x00\x01...")
 ```
-Συνδύασε τη γέφυρα TCP με επαναφορές στιγμιότυπων VM για να δοκιμάσεις την αντοχή ευπαθών αναλυτών IPC.
+### Operational considerations
+- Τα Named pipes έχουν χαμηλή latency· μεγάλες παύσεις ενώ επεξεργάζεσαι buffers μπορούν να deadlock brittle services.
+- Overlapped/completion-port/APC-driven clients χρειάζονται διαφορετικά hooks από απλά `ReadFile`/`WriteFile` detours.
+- Injection στο trusted client είναι noisy και γενικά είναι καλύτερο να περιορίζεται για exploit development, protocol reversing, ή local lab fuzzing.
 
-### Λειτουργικές παρατηρήσεις
-- Τα named pipes έχουν χαμηλή καθυστέρηση· μεγάλες παύσεις κατά την επεξεργασία των buffers μπορούν να προκαλέσουν deadlock σε ευπαθείς υπηρεσίες.
-- Η κάλυψη για overlapped/completion-port I/O είναι μερική, οπότε να περιμένετε οριακές περιπτώσεις.
-- Το injection είναι θορυβώδες και unsigned, οπότε αντιμετωπίστε το ως εργαλείο για lab/exploit-dev και όχι ως stealth implant.
+## Troubleshooting and gotchas
+- Πρέπει να διαβάσεις τουλάχιστον ένα μήνυμα από το pipe πριν καλέσεις ImpersonateNamedPipeClient· αλλιώς θα πάρεις ERROR_CANNOT_IMPERSONATE (1368).
+- Αν ο client συνδεθεί με SECURITY_SQOS_PRESENT | SECURITY_IDENTIFICATION, ο server δεν μπορεί να impersonate πλήρως· έλεγξε το impersonation level του token μέσω GetTokenInformation(TokenImpersonationLevel).
+- CreateProcessWithTokenW απαιτεί SeImpersonatePrivilege στον caller. Αν αυτό αποτύχει με ERROR_PRIVILEGE_NOT_HELD (1314), χρησιμοποίησε CreateProcessAsUser αφού έχεις ήδη impersonated SYSTEM.
+- Βεβαιώσου ότι το security descriptor του pipe σου επιτρέπει στο target service να συνδεθεί αν το hardenάρεις· από προεπιλογή, τα pipes κάτω από \\.\pipe είναι accessible σύμφωνα με το DACL του server.
 
-## Αντιμετώπιση προβλημάτων και παγίδες
-- Πρέπει να διαβάσετε τουλάχιστον ένα μήνυμα από το pipe πριν καλέσετε ImpersonateNamedPipeClient· αλλιώς θα λάβετε ERROR_CANNOT_IMPERSONATE (1368).
-- Αν ο client συνδεθεί με SECURITY_SQOS_PRESENT | SECURITY_IDENTIFICATION, ο server δεν μπορεί να εκτελέσει πλήρη impersonation· ελέγξτε το επίπεδο impersonation του token μέσω GetTokenInformation(TokenImpersonationLevel).
-- Το CreateProcessWithTokenW απαιτεί SeImpersonatePrivilege στον caller. Αν αυτό αποτύχει με ERROR_PRIVILEGE_NOT_HELD (1314), χρησιμοποιήστε CreateProcessAsUser αφού ήδη έχετε impersonate το SYSTEM.
-- Βεβαιωθείτε ότι ο security descriptor του pipe επιτρέπει στην στοχευόμενη υπηρεσία να συνδεθεί αν τον ενισχύσετε· από προεπιλογή, τα pipes υπό \\.\pipe είναι προσβάσιμα σύμφωνα με τη DACL του server.
-
-## Αναφορές
+## References
 - [Windows: ImpersonateNamedPipeClient documentation](https://learn.microsoft.com/en-us/windows/win32/api/namedpipeapi/nf-namedpipeapi-impersonatenamedpipeclient)
 - [ired.team: Windows named pipes privilege escalation](https://ired.team/offensive-security/privilege-escalation/windows-namedpipes-privilege-escalation)
+- [Microsoft: Named Pipe Security and Access Rights](https://learn.microsoft.com/en-us/windows/win32/ipc/named-pipe-security-and-access-rights)
+- [Microsoft: CreateNamedPipe function](https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-createnamedpipea)
+- [Microsoft: Named Pipe Server Using Completion Routines](https://learn.microsoft.com/en-us/windows/win32/ipc/named-pipe-server-using-completion-routines)
 - [pipetap – a Windows named pipe proxy tool](https://sensepost.com/blog/2025/pipetap-a-windows-named-pipe-proxy-tool/)
+- [Synacktiv: Hooking Windows Named Pipes](https://www.synacktiv.com/en/publications/hooking-windows-named-pipes.html)
+- [Synacktiv: thats_no_pipe](https://github.com/synacktiv/thats_no_pipe)
 
 {{#include ../../banners/hacktricks-training.md}}
