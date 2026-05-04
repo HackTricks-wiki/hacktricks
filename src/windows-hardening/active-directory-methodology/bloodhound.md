@@ -1,4 +1,4 @@
-# BloodHound & 其他 Active Directory 枚举工具
+# BloodHound & Other Active Directory Enumeration Tools
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -7,96 +7,121 @@
 adws-enumeration.md
 {{#endref}}
 
-> 注意：此页面汇总了一些最有用的实用程序，用于**枚举**和**可视化** Active Directory 关系。要通过隐蔽的 **Active Directory Web Services (ADWS)** 通道进行收集，请查看上面的参考。
+> NOTE: 本页汇总了一些最有用的用于**enumerate**和**visualise** Active Directory 关系的工具。关于通过隐蔽的 **Active Directory Web Services (ADWS)** 通道进行收集，请查看上面的参考。
 
 ---
 
 ## AD Explorer
 
-[AD Explorer](https://docs.microsoft.com/en-us/sysinternals/downloads/adexplorer) (Sysinternals) 是一个高级的 **AD 查看器 & 编辑器**，功能包括：
+[AD Explorer](https://docs.microsoft.com/en-us/sysinternals/downloads/adexplorer) (Sysinternals) 是一款高级的 **AD viewer & editor**，可用于：
 
 * 通过 GUI 浏览目录树
 * 编辑对象属性和安全描述符
-* 创建快照/比较以进行离线分析
+* 创建/比较快照以进行离线分析
 
-### 快速使用
+### Quick usage
 
-1. 启动工具并使用任何域凭据连接到 `dc01.corp.local`。
-2. 通过 `File ➜ Create Snapshot` 创建离线快照。
-3. 使用 `File ➜ Compare` 比较两个快照以发现权限漂移。
+1. 启动工具，并使用任意域凭据连接到 `dc01.corp.local`。
+2. 通过 `File ➜ Create Snapshot` 创建一个离线快照。
+3. 使用 `File ➜ Compare` 比较两个快照，以发现权限漂移。
 
 ---
 
 ## ADRecon
 
-[ADRecon](https://github.com/adrecon/ADRecon) 从域中提取大量工件（ACLs、GPOs、trusts、CA templates …）并生成一个 **Excel 报告**。
+[ADRecon](https://github.com/adrecon/ADRecon) 会从域中提取大量 artefacts（ACLs、GPOs、trusts、CA templates …），并生成一个 **Excel report**。
 ```powershell
 # On a Windows host in the domain
 PS C:\> .\ADRecon.ps1 -OutputDir C:\Temp\ADRecon
 ```
 ---
 
-## BloodHound (图谱可视化)
+## BloodHound（图形可视化）
 
-[BloodHound](https://github.com/BloodHoundAD/BloodHound) 使用图论 + Neo4j 来揭示本地部署 AD 与 Azure AD 内隐藏的权限关系。
+[BloodHound](https://github.com/SpecterOps/BloodHound) 使用图论来揭示 on-prem AD、Entra ID，以及你通过 OpenGraph 导入的任何额外 attack-surface 数据中的隐藏特权关系。
 
-### 部署 (Docker CE)
+### 部署（Docker CE）
 ```bash
 curl -L https://ghst.ly/getbhce | docker compose -f - up
 # Web UI ➜ http://localhost:8080  (user: admin / password from logs)
 ```
-### 收集器
+### Collectors
 
-* `SharpHound.exe` / `Invoke-BloodHound` – 本地或 PowerShell 变体
-* `AzureHound` – Azure AD 枚举
+* `SharpHound.exe` / `Invoke-BloodHound` – 原生或 PowerShell 版本
+* `RustHound-CE` – 适用于 Linux、macOS 和 Windows 的跨平台 CE collector
+* `NetExec --bloodhound` – 来自 Linux 的快速基于 LDAP 的收集
+* `AzureHound` – Entra ID 枚举
 * **SoaPy + BOFHound** – ADWS 收集（见顶部链接）
 
-#### 常见 SharpHound 模式
+> BloodHound CE `v8+` 在 OpenGraph 上线后更改了 collector 输出格式。从旧版 BloodHound 或更早的 CE 安装升级后，在导入数据前，请使用当前 collectors 重新运行 discovery。
+
+#### Common SharpHound modes
 ```powershell
-SharpHound.exe --CollectionMethods All           # Full sweep (noisy)
+SharpHound.exe --CollectionMethods All               # Full sweep (noisy)
 SharpHound.exe --CollectionMethods Group,LocalAdmin,Session,Trusts,ACL
 SharpHound.exe --Stealth --LDAP                      # Low noise LDAP only
+SharpHound.exe --CollectionMethods Session --Loop --Loopduration 03:09:41
 ```
-收集器生成 JSON 并由 BloodHound GUI 摄取。
+收集器生成 JSON，并通过 BloodHound GUI 导入。
 
-### 特权与登录权限收集
+#### 来自未加入域的 Windows 主机的 SharpHound
 
-Windows **token privileges**（例如 `SeBackupPrivilege`, `SeDebugPrivilege`, `SeImpersonatePrivilege`, `SeAssignPrimaryTokenPrivilege`）可以绕过 DACL 检查，因此在域范围内映射它们会暴露仅靠 ACL 图无法发现的本地 LPE 边。**Logon rights**（`SeInteractiveLogonRight`, `SeRemoteInteractiveLogonRight`, `SeNetworkLogonRight`, `SeServiceLogonRight`, `SeBatchLogonRight` 及其 `SeDeny*` 对应项）在 token 生成之前由 LSA 强制执行，并且 deny 优先，所以它们会实质性地限制横向移动（RDP/SMB/计划任务/服务登录）。
+如果你的 operator VM 未加入目标域，将 DNS 指向一台 DC，启动一个 **network-only** shell，确认你能在 DC 上看到 `SYSVOL`/`NETLOGON`，然后针对远程域进行收集：
+```cmd
+runas /netonly /user:CORP\svc_bh cmd.exe
+net view \\dc01.corp.local
+SharpHound.exe -d corp.local --CollectionMethods Group,LocalAdmin,Session,Trusts,ACL
+```
+这对于不应加入域的 disposable jump boxes 或 operator workstations 很有用。
 
-尽可能以提升权限运行收集器：UAC 会为交互管理员创建一个被过滤的 token（通过 `NtFilterToken`），剥离敏感特权并将管理员 SID 标记为 deny-only。如果你从非提升的 shell 枚举特权，高价值特权将不可见，BloodHound 也不会摄取这些边。
+#### 从 Linux/macOS 进行跨平台收集
+```bash
+# CE-compatible ZIP from Linux/macOS/Windows
+rusthound-ce -d corp.local -u svc.collector@corp.local -p 'Passw0rd!' -z
 
-现在存在两种互补的 SharpHound 收集策略：
+# Quick LDAP-driven BloodHound dump from Linux
+nxc ldap dc01.corp.local -u svc.collector -p 'Passw0rd!' --bloodhound --collection All
+```
+`RustHound-CE` 在你想从非-Windows 主机获得 CE-compatible 输出时是一个很好的默认选择。`NetExec` 则在你已经用它做 LDAP validation 或 spraying，并且只想快速导入 graph 时很方便。对于非-AD datasets，BloodHound OpenGraph 可以通过像 [ShareHound](../../network-services-pentesting/pentesting-smb/README.md) 这样的 collectors 扩展。
 
-- **GPO/SYSVOL 解析（隐蔽、低权限）：**
-1. 通过 LDAP 枚举 GPO（`(objectCategory=groupPolicyContainer)`），并读取每个 `gPCFileSysPath`。
-2. 从 SYSVOL 获取 `MACHINE\Microsoft\Windows NT\SecEdit\GptTmpl.inf` 并解析映射特权/登录权限名到 SID 的 `[Privilege Rights]` 部分。
-3. 通过 OU/站点/域上的 `gPLink` 解析 GPO 链接，列出链接容器中的计算机，并将这些权限归属到相应机器。
-4. 优点：可用普通用户运行且安静；缺点：只看到通过 GPO 推送的权限（本地调整会被遗漏）。
+### Privilege & logon-right collection
 
-- **LSA RPC 枚举（噪声大、准确）：**
-- 在具有目标主机本地管理员权限的上下文中，打开 Local Security Policy 并对每个特权/登录权限调用 `LsaEnumerateAccountsWithUserRight`，通过 RPC 枚举已分配的主体。
-- 优点：捕获本地或 GPO 之外设置的权限；缺点：产生显著网络噪声且每台主机需管理员权限。
+Windows **token privileges**（例如 `SeBackupPrivilege`、`SeDebugPrivilege`、`SeImpersonatePrivilege`、`SeAssignPrimaryTokenPrivilege`）可以绕过 DACL checks，所以在整个 domain 范围内映射它们可以暴露 ACL-only graphs 会漏掉的本地 LPE edges。**Logon rights**（`SeInteractiveLogonRight`、`SeRemoteInteractiveLogonRight`、`SeNetworkLogonRight`、`SeServiceLogonRight`、`SeBatchLogonRight` 以及它们的 `SeDeny*` 对应项）会在 token 甚至存在之前由 LSA enforced，而 deny 会优先，因此它们会实质性地限制 lateral movement（RDP/SMB/scheduled task/service logon）。
 
-**这些边暴露的典型滥用路径示例：** `CanRDP` ➜ 你的用户在该主机上也具有 `SeBackupPrivilege` ➜ 启动提升的 shell 以避免被过滤的 token ➜ 使用备份语义读取尽管有严格 DACL 的 `SAM` 和 `SYSTEM` hives ➜ 外带并离线运行 `secretsdump.py` 恢复本地 Administrator 的 NT hash，用于横向移动/权限提升。
+**尽可能以 elevated 方式运行 collectors**：UAC 会为交互式管理员创建一个 filtered token（通过 `NtFilterToken`），移除敏感 privileges，并将 admin SIDs 标记为 deny-only。如果你在 non-elevated shell 中枚举 privileges，高价值 privileges 将不可见，BloodHound 也不会 ingest 这些 edges。
 
-### 使用 BloodHound 优先化 Kerberoasting
+现在有两种互补的 SharpHound collection 策略：
 
-使用图上下文来保持 Kerberoasting 的目标聚焦：
+- **GPO/SYSVOL parsing（stealthy, low-privilege）:**
+1. 通过 LDAP 枚举 GPOs（`(objectCategory=groupPolicyContainer)`），并读取每个 `gPCFileSysPath`。
+2. 从 SYSVOL 获取 `MACHINE\Microsoft\Windows NT\SecEdit\GptTmpl.inf`，并解析 `[Privilege Rights]` 部分，该部分把 privilege/logon-right 名称映射到 SIDs。
+3. 通过 OUs/sites/domains 上的 `gPLink` 解析 GPO links，列出这些 linked containers 中的 computers，并将 rights 归属到这些机器。
+4. 优点：可在 normal user 下工作，而且很安静；缺点：只能看到通过 GPO 推送的 rights（会漏掉本地调整）。
 
-1. 使用兼容 ADWS 的收集器收集一次并离线处理：
+- **LSA RPC enumeration（noisy, accurate）:**
+- 从在目标上拥有 local admin 的上下文打开 Local Security Policy，并对每个 privilege/logon right 调用 `LsaEnumerateAccountsWithUserRight`，通过 RPC 枚举已分配的 principals。
+- 优点：能捕获在本地或 GPO 之外设置的 rights；缺点：网络流量噪音大，而且每台主机都需要 admin 权限。
+
+**这些 edges 展示出的一个示例 abuse path：** `CanRDP` ➜ 你的用户也拥有 `SeBackupPrivilege` 的 host ➜ 启动一个 elevated shell 以避免 filtered tokens ➜ 使用 backup semantics 读取 `SAM` 和 `SYSTEM` hives，即使存在 restrictive DACLs ➜ 导出并离线运行 `secretsdump.py`，恢复本地 Administrator NT hash，用于 lateral movement/privilege escalation。
+
+### Prioritising Kerberoasting with BloodHound
+
+使用 graph context 来保持 roasting 的目标性：
+
+1. 用一个 ADWS-compatible collector 收集一次，然后离线工作：
 ```bash
 rusthound-ce -d corp.local -u svc.collector -p 'Passw0rd!' -c All -z
 ```
-2. 导入 ZIP，标记被攻破的主体为 owned，并运行内置查询（*Kerberoastable Users*, *Shortest Paths to Domain Admins*）以查找具有管理员/基础设施权限的 SPN 帐户。
-3. 按爆破影响半径对 SPN 排序；在破解前检查 `pwdLastSet`、`lastLogon` 和允许的加密类型。
-4. 仅请求选定的票据，离线破解，然后用新获得的访问重新查询 BloodHound：
+2. 导入 ZIP，将已 compromised 的 principal 标记为 owned，并运行内置查询（*Kerberoastable Users*、*Shortest Paths to Domain Admins*）以找出具有 admin/infra rights 的 SPN accounts。
+3. 按 blast radius 对 SPNs 排优先级；在 cracking 之前检查 `pwdLastSet`、`lastLogon` 和允许的 encryption types。
+4. 只请求选定的 tickets，离线 crack，然后用新 access 重新查询 BloodHound：
 ```bash
 netexec ldap dc01.corp.local -u svc.collector -p 'Passw0rd!' --kerberoasting kerberoast.txt --spn svc-sql
 ```
 
 ## Group3r
 
-[Group3r](https://github.com/Group3r/Group3r) 枚举 **组策略对象** 并突出显示配置错误。
+[Group3r](https://github.com/Group3r/Group3r) 枚举 **Group Policy Objects** 并突出显示 misconfigurations。
 ```bash
 # Execute inside the domain
 Group3r.exe -f gpo.log   # -s to stdout
@@ -105,14 +130,14 @@ Group3r.exe -f gpo.log   # -s to stdout
 
 ## PingCastle
 
-[PingCastle](https://www.pingcastle.com/documentation/) 执行对 Active Directory 的 **健康检查** 并生成带有风险评分的 HTML 报告。
+[PingCastle](https://www.pingcastle.com/documentation/) 会对 Active Directory 执行 **health-check**，并生成带有风险评分的 HTML 报告。
 ```powershell
 PingCastle.exe --healthcheck --server corp.local --user bob --password "P@ssw0rd!"
 ```
-## 参考资料
+## References
 
-- [HackTheBox Mirage：串联 NFS Leaks、Dynamic DNS Abuse、NATS Credential Theft、JetStream Secrets 和 Kerberoasting](https://0xdf.gitlab.io/2025/11/22/htb-mirage.html)
+- [BloodHound Community Edition v8 Launches with OpenGraph: Identity Attack Paths Beyond Active Directory & Entra ID](https://specterops.io/blog/2025/07/29/bloodhound-community-edition-v8-launches-with-opengraph-identity-attack-paths-beyond-active-directory-entra-id/)
 - [RustHound-CE](https://github.com/g0h4n/RustHound-CE)
-- [Beyond ACLs：使用 BloodHound 映射 Windows Privilege Escalation Paths](https://www.synacktiv.com/en/publications/beyond-acls-mapping-windows-privilege-escalation-paths-with-bloodhound.html)
+- [Beyond ACLs: Mapping Windows Privilege Escalation Paths with BloodHound](https://www.synacktiv.com/en/publications/beyond-acls-mapping-windows-privilege-escalation-paths-with-bloodhound.html)
 
 {{#include ../../banners/hacktricks-training.md}}
