@@ -965,6 +965,30 @@ https://cloud.hacktricks.wiki/en/pentesting-cloud/azure-security/az-lateral-move
 ldap-signing-and-channel-binding.md
 {{#endref}}
 
+### Protocol-level fingerprinting of Impacket activity
+
+If you want to detect common AD tradecraft, **do not rely only on operator-controlled artifacts** such as renamed binaries, service names, temp batch files, or output paths. Baseline how legitimate Windows clients build [Kerberos](kerberos-authentication.md), [NTLM](../ntlm/README.md), SMB, LDAP, DCE/RPC, and WMI traffic, then look for **implementation quirks** that remain even after the operator edits `psexec.py`, `wmiexec.py`, `dcomexec.py`, `atexec.py`, or `ntlmrelayx.py`.
+
+- **High-confidence standalone candidates** (after validating against your own baseline):
+  - Authenticated DCE/RPC using `auth_context_id = 79231 + ctx_id`
+  - DCE/RPC authentication padding filled with `0xff`
+  - LDAP Kerberos binds that place a raw Kerberos `AP-REQ` directly in SPNEGO `mechToken`
+  - SMB2/3 negotiate requests with ASCII-looking `ClientGuid` values
+  - WMI `IWbemLevel1Login::NTLMLogin` using the non-standard namespace `//./root/cimv2`
+  - Hardcoded Kerberos nonce values
+- **Better as correlation/scoring features**:
+  - Sparse or duplicated Kerberos etype lists, unusual/missing `PA-DATA`, or TGS-REQ etype ordering that differs from native Windows
+  - NTLM Type 1 messages missing version info or Type 3 messages with null host names
+  - Raw NTLMSSP carried in DCE/RPC instead of SPNEGO, missing DCE/RPC verification trailers, or SPNEGO/Kerberos OID mismatches
+  - Several of these traits from the same host/user/session/time window are far stronger than any single weak field
+- **Use as enrichment, not as standalone alerts**:
+  - Default filenames, output paths, random service names, temporary batch names, default computer account names, and tool-specific HTTP/WebDAV/RDP/MSSQL strings
+  - These are easy for operators to change and are best used to explain why a cross-protocol cluster is suspicious
+- **Operational notes**:
+  - Some of these signals require decrypted traffic, [PCAP/Zeek parsing](../../generic-methodologies-and-resources/basic-forensic-methodology/pcap-inspection/README.md), ETW, or service-side visibility
+  - Validate against Samba/Linux clients, appliances, and legacy software before promoting to alerts
+  - Promote detections from enrichment -> hunting -> alerting as you build confidence in the baseline
+
 ### **Implementing Deception Techniques**
 
 - Implementing deception involves setting traps, like decoy users or computers, with features such as passwords that do not expire or are marked as Trusted for Delegation. A detailed approach includes creating users with specific rights or adding them to high privilege groups.
@@ -992,5 +1016,6 @@ ldap-signing-and-channel-binding.md
 - [TrustedSec – Holy Shuck! Weaponizing NTLM Hashes as a Wordlist](https://trustedsec.com/blog/holy-shuck-weaponizing-ntlm-hashes-as-a-wordlist)
 - [Barbhack 2025 CTF (NetExec AD Lab) – Pirates](https://0xdf.gitlab.io/2026/01/29/barbhack-2025-ctf.html)
 - [Hashcat](https://github.com/hashcat/hashcat)
+- [ThatTotallyRealMyth/Impacket-IoCs – Dissecting Impacket](https://github.com/ThatTotallyRealMyth/Impacket-IoCs)
 
 {{#include ../../banners/hacktricks-training.md}}
