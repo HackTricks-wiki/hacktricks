@@ -65,6 +65,9 @@ Additional kernel exploitation techniques:
 {{#ref}}
 ../../binary-exploitation/linux-kernel-exploitation/arm64-static-linear-map-kaslr-bypass.md
 {{#endref}}
+{{#ref}}
+../../binary-exploitation/linux-kernel-exploitation/af-alg-aead-page-cache-overwrite.md
+{{#endref}}
 
 ### CVE-2016-5195 (DirtyCow)
 
