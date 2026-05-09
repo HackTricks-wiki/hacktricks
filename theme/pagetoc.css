@@ -198,9 +198,14 @@
         margin-top: 0;
         margin-bottom: 4px;
         padding: 7px 10px;
-        font-size: 1rem;
+        box-sizing: border-box;
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-size: 1.08rem;
         font-weight: 700;
-        line-height: 1.2;
+        line-height: 1.1;
     }
     .sidesponsor-bsa {
         max-height: 40%;
