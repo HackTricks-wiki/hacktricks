@@ -124,15 +124,22 @@
     .sidesponsor:hover img{
        width: 52px;
        padding: 6px;
-       grid-column: 1;
-       grid-row: 1;
+       grid-area: sponsor-image;
+       align-self: start;
     }
     .sidesponsor:hover {
         display: grid !important;
         grid-template-columns: auto minmax(0, 1fr);
-        grid-template-rows: auto minmax(0, 1fr) auto;
+        grid-template-rows: max-content minmax(0, 1fr) max-content;
+        grid-template-areas:
+            "sponsor-image sponsor-title"
+            "sponsor-description sponsor-description"
+            "sponsor-cta sponsor-cta";
         column-gap: 8px;
-        align-items: center;
+        row-gap: 8px;
+        align-items: start;
+        align-content: start;
+        overflow: hidden;
     }
     .sidesponsor .sponsor-title{
         margin-top: 5px;
@@ -144,9 +151,10 @@
         color: var(--sponsor-fg);
     }
     .sidesponsor:hover .sponsor-title{
-        grid-column: 2;
-        grid-row: 1;
+        grid-area: sponsor-title;
         margin-left: 0;
+        margin-top: 6px;
+        margin-bottom: 0;
         font-size: 1.55rem;
         line-height: 1.15;
         overflow-wrap: anywhere;
@@ -165,11 +173,10 @@
     }
     .sidesponsor:hover .sponsor-description{
         display:block;
-        grid-column: 1 / -1;
-        grid-row: 2;
+        grid-area: sponsor-description;
         min-height: 0;
-        margin-top: 8px;
-        margin-bottom: 8px;
+        margin-top: 0;
+        margin-bottom: 0;
         overflow: auto;
     }
     .sidesponsor .sponsor-cta{
@@ -184,8 +191,8 @@
         color: var(--bg);
     }
     .sidesponsor:hover .sponsor-cta{
-        grid-column: 1 / -1;
-        grid-row: 3;
+        grid-area: sponsor-cta;
+        margin-top: 0;
     }
     .sidesponsor-bsa {
         max-height: 40%;
