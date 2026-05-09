@@ -122,8 +122,8 @@
         transition-duration: .3s;
     }
     .sidesponsor:hover img{
-       width: 52px;
-       padding: 6px;
+       width: 42px;
+       padding: 4px;
        grid-area: sponsor-image;
        align-self: start;
     }
@@ -175,9 +175,11 @@
         display:block;
         grid-area: sponsor-description;
         min-height: 0;
+        max-height: 100%;
         margin-top: 0;
         margin-bottom: 0;
         overflow: auto;
+        overscroll-behavior: contain;
     }
     .sidesponsor .sponsor-cta{
         margin-top: auto;
@@ -193,6 +195,10 @@
     .sidesponsor:hover .sponsor-cta{
         grid-area: sponsor-cta;
         margin-top: 0;
+        margin-bottom: 4px;
+        padding: 4px 6px;
+        font-size: 0.9rem;
+        line-height: 1.1;
     }
     .sidesponsor-bsa {
         max-height: 40%;
