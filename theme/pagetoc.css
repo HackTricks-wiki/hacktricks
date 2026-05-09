@@ -178,6 +178,7 @@
         max-height: 100%;
         margin-top: 0;
         margin-bottom: 0;
+        font-size: calc(1em - 1px);
         overflow: auto;
         overscroll-behavior: contain;
     }
@@ -196,9 +197,9 @@
         grid-area: sponsor-cta;
         margin-top: 0;
         margin-bottom: 4px;
-        padding: 4px 6px;
-        font-size: 0.9rem;
-        line-height: 1.1;
+        padding: 6px 8px;
+        font-size: 0.95rem;
+        line-height: 1.15;
     }
     .sidesponsor-bsa {
         max-height: 40%;
