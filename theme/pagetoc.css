@@ -197,9 +197,10 @@
         grid-area: sponsor-cta;
         margin-top: 0;
         margin-bottom: 4px;
-        padding: 6px 8px;
-        font-size: 0.95rem;
-        line-height: 1.15;
+        padding: 7px 10px;
+        font-size: 1rem;
+        font-weight: 700;
+        line-height: 1.2;
     }
     .sidesponsor-bsa {
         max-height: 40%;
