@@ -122,7 +122,24 @@
         transition-duration: .3s;
     }
     .sidesponsor:hover img{
-       width: 30%;
+       width: 42px;
+       padding: 4px;
+       grid-area: sponsor-image;
+       align-self: start;
+    }
+    .sidesponsor:hover {
+        display: grid !important;
+        grid-template-columns: auto minmax(0, 1fr);
+        grid-template-rows: max-content minmax(0, 1fr) max-content;
+        grid-template-areas:
+            "sponsor-image sponsor-title"
+            "sponsor-description sponsor-description"
+            "sponsor-cta sponsor-cta";
+        column-gap: 8px;
+        row-gap: 8px;
+        align-items: start;
+        align-content: start;
+        overflow: hidden;
     }
     .sidesponsor .sponsor-title{
         margin-top: 5px;
@@ -132,6 +149,15 @@
         font-weight: 800;
         font-size: 2rem;
         color: var(--sponsor-fg);
+    }
+    .sidesponsor:hover .sponsor-title{
+        grid-area: sponsor-title;
+        margin-left: 0;
+        margin-top: 6px;
+        margin-bottom: 0;
+        font-size: 1.55rem;
+        line-height: 1.15;
+        overflow-wrap: anywhere;
     }
     .sidesponsor .sponsor-description{
         display:none;
@@ -147,7 +173,14 @@
     }
     .sidesponsor:hover .sponsor-description{
         display:block;
-
+        grid-area: sponsor-description;
+        min-height: 0;
+        max-height: 100%;
+        margin-top: 0;
+        margin-bottom: 0;
+        font-size: calc(1em - 1px);
+        overflow: auto;
+        overscroll-behavior: contain;
     }
     .sidesponsor .sponsor-cta{
         margin-top: auto;
@@ -159,6 +192,20 @@
         border-radius: 8px;
         background-color: var(--fg);
         color: var(--bg);
+    }
+    .sidesponsor:hover .sponsor-cta{
+        grid-area: sponsor-cta;
+        margin-top: 0;
+        margin-bottom: 4px;
+        padding: 7px 10px;
+        box-sizing: border-box;
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-size: 1.08rem;
+        font-weight: 700;
+        line-height: 1.1;
     }
     .sidesponsor-bsa {
         max-height: 40%;
