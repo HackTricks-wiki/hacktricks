@@ -624,13 +624,14 @@ function playground_text(playground, hidden = true) {
 
     // Should not be needed, but it works around an issue on macOS & iOS: https://github.com/rust-lang/mdBook/issues/628
     document.addEventListener('click', function(e) {
-        if (menubarLanguagePopup.style.display === 'block' && !menubarLanguageToggleButton.contains(e.target) && !menubarLanguagePopup.contains(e.target)) {
+        if (menubarLanguagePopup.style.display === 'flex' && !menubarLanguageToggleButton.contains(e.target) && !menubarLanguagePopup.contains(e.target)) {
             hideLanguage();
         }
     });
     
     languageButtons.forEach((btn) => {
         btn.addEventListener('click', function(e) {
+            e.preventDefault();
             const regex = /(?:(?:\/)+(?<lang>[a-z]{2}(?=\/|$)))?(?<path>(?:\/)*.*)?/g
             var match = regex.exec(window.location.pathname)
           
@@ -640,7 +641,7 @@ function playground_text(playground, hidden = true) {
             const lang = match.groups.lang
             console.log(`Lang: ${lang}`)
             
-            window.location = `/${e.target.id}${path}${window.location.hash}`
+            window.location = `/${e.currentTarget.id}${path}${window.location.hash}`
         });
     })
 })();
@@ -787,4 +788,3 @@ function playground_text(playground, hidden = true) {
         document.addEventListener('scroll', updateBorder, { passive: true });
     })();
 })();
-
