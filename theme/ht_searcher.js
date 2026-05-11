@@ -86,20 +86,10 @@
     }
 
     async function loadWithFallback(remotes, local, isCloud=false){
-      if(remotes.length){
-        const [primary, ...secondary] = remotes;
-        const primaryData = await loadIndex(primary, null, isCloud);
-        if(primaryData) return primaryData;
-
-        if(local){
-          const localData = await loadIndex(null, local, isCloud);
-          if(localData) return localData;
-        }
-
-        for (const remote of secondary){
-          const data = await loadIndex(remote, null, isCloud);
-          if(data) return data;
-        }
+      /* Exhaust every GitHub-hosted index before touching the production origin. */
+      for (const remote of remotes){
+        const data = await loadIndex(remote, null, isCloud);
+        if(data) return data;
       }
 
       return local ? loadIndex(null, local, isCloud) : null;
