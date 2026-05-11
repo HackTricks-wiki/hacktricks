@@ -4,22 +4,22 @@
 
 ## Globale veranderlikes
 
-Die globale veranderlikes **sal** geërf word deur **child processes**.
+Die globale veranderlikes **sal** geërf word deur **kindprosesse**.
 
-Jy kan 'n globale veranderlike vir jou huidige sessie skep deur:
+Jy kan ’n globale veranderlike vir jou huidige sessie skep deur:
 ```bash
 export MYGLOBAL="hello world"
 echo $MYGLOBAL #Prints: hello world
 ```
-Hierdie veranderlike sal toeganklik wees vir jou huidige sessies en sy kinderprosesse.
+Hierdie veranderlike sal toeganklik wees vir jou huidige sessies en sy kindprosesse.
 
-Jy kan ’n veranderlike **verwyder** deur:
+Jy kan 'n veranderlike **verwyder** deur:
 ```bash
 unset MYGLOBAL
 ```
 ## Plaaslike veranderlikes
 
-Die **plaaslike veranderlikes** kan slegs deur die **huidige shell/script** **toegang** verkry.
+Die **plaaslike veranderlikes** kan slegs deur die **huidige shell/script** **toegang** verkry word.
 ```bash
 LOCAL="my local"
 echo $LOCAL
@@ -44,22 +44,22 @@ If you are looking for **credentials** or **interesting service configuration** 
 
 From: [https://geek-university.com/linux/common-environment-variables/](https://geek-university.com/linux/common-environment-variables/)
 
-- **DISPLAY** – die skerm wat deur **X** gebruik word. Hierdie veranderlike is gewoonlik ingestel op **:0.0**, wat die eerste skerm op die huidige rekenaar beteken.
-- **EDITOR** – die gebruiker se voorkeur-teksredigeerder.
-- **HISTFILESIZE** – die maksimum aantal lyne wat in die history-lêer vervat is.
-- **HISTSIZE** – Aantal lyne wat by die history-lêer gevoeg word wanneer die gebruiker sy sessie voltooi
+- **DISPLAY** – die display wat deur **X** gebruik word. Hierdie veranderlike word gewoonlik op **:0.0** gestel, wat die eerste display op die huidige rekenaar beteken.
+- **EDITOR** – die gebruiker se voorkeur teksredigeerder.
+- **HISTFILESIZE** – die maksimum aantal reëls in die history file.
+- **HISTSIZE** – Aantal reëls wat by die history file gevoeg word wanneer die gebruiker sy sessie beëindig
 - **HOME** – jou tuisgids.
-- **HOSTNAME** – die gasheernaam van die rekenaar.
+- **HOSTNAME** – die hostname van die rekenaar.
 - **LANG** – jou huidige taal.
-- **MAIL** – die ligging van die gebruiker se posspool. Gewoonlik **/var/spool/mail/USER**.
-- **MANPATH** – die lys van gidse om vir handleidingbladsye te soek.
-- **OSTYPE** – die tipe bedryfstelsel.
+- **MAIL** – die ligging van die gebruiker se mail spool. Gewoonlik **/var/spool/mail/USER**.
+- **MANPATH** – die lys gidse om vir manual pages te soek.
+- **OSTYPE** – die tipe operating system.
 - **PS1** – die verstek prompt in bash.
-- **PATH** – stoor die pad van al die gidse wat binêre lêers bevat wat jy wil uitvoer deur net die naam van die lêer te spesifiseer en nie die relatiewe of absolute pad nie.
-- **PWD** – die huidige werkende gids.
-- **SHELL** – die pad na die huidige command shell (byvoorbeeld, **/bin/bash**).
-- **TERM** – die huidige terminaltipe (byvoorbeeld, **xterm**).
-- **TZ** – jou tydsone.
+- **PATH** – stoor die path van al die gidse wat binary files bevat wat jy wil uitvoer deur net die naam van die lêer te spesifiseer en nie deur 'n relatiewe of absolute path nie.
+- **PWD** – die huidige working directory.
+- **SHELL** – die path na die huidige command shell (byvoorbeeld, **/bin/bash**).
+- **TERM** – die huidige terminal type (byvoorbeeld, **xterm**).
+- **TZ** – jou time zone.
 - **USER** – jou huidige gebruikersnaam.
 
 ## Interesting variables for hacking
@@ -74,13 +74,13 @@ export HISTFILESIZE=0
 ```
 ### **HISTSIZE**
 
-Verander die **waarde van hierdie veranderlike na 0**, sodat opdragte **nie in die in-memory history gehou word nie** en nie teruggeskryf sal word na die **history file** (\~/.bash_history).
+Verander die **waarde van hierdie veranderlike na 0**, sodat opdragte **nie in die in-memory history gehou** word nie en nie teruggeskryf sal word na die **history file** (\~/.bash_history).
 ```bash
 export HISTSIZE=0
 ```
 ### **HISTCONTROL**
 
-As die **waarde van hierdie veranderlike ingestel is op `ignorespace` of `ignoreboth`**, sal enige opdrag met ’n ekstra spasie vooraan nie in die history gestoor word nie.
+As die **waarde van hierdie veranderlike op `ignorespace` of `ignoreboth` gestel is**, sal enige opdrag met ’n ekstra spasie aan die begin nie in die geskiedenis gestoor word nie.
 ```bash
 export HISTCONTROL=ignorespace
 ```
@@ -91,38 +91,38 @@ $  echo "not to save"
 ```
 ### **HISTFILE**
 
-Wys die **history file** na **`/dev/null`** of ontset dit heeltemal. Dit is gewoonlik meer betroubaar as om net die history size te verander.
+Wys die **geskiedenislêer** na **`/dev/null`** of verwyder dit heeltemal. Dit is gewoonlik meer betroubaar as om net die geskiedenisgrootte te verander.
 ```bash
 export HISTFILE=/dev/null
 unset HISTFILE
 ```
 ### http_proxy & https_proxy
 
-Die prosesse sal die **proxy** wat hier verklaar is gebruik om via **http of https** aan die internet te koppel.
+Die prosesse sal die **proxy** gebruik wat hier verklaar is om via **http of https** aan die internet te koppel.
 ```bash
 export http_proxy="http://10.10.10.10:8080"
 export https_proxy="http://10.10.10.10:8080"
 ```
 ### all_proxy & no_proxy
 
-- `all_proxy`: verstek-proxy vir tools/protokolle wat dit eerbiedig.
-- `no_proxy`: omseillys (gashere/domeine/CIDRs) wat direk behoort te verbind.
+- `all_proxy`: verstek-proxy vir gereedskap/protokolle wat dit eerbiedig.
+- `no_proxy`: omseillys (gashere/domeine/CIDR's) wat direk moet koppel.
 ```bash
 export all_proxy="socks5h://10.10.10.10:1080"
 export no_proxy="localhost,127.0.0.1,.corp.local,10.0.0.0/8"
 ```
-Beide kleinletters- en hoofletters-variante kan gebruik word, afhangende van die tool (`http_proxy`/`HTTP_PROXY`, `no_proxy`/`NO_PROXY`).
+Beide kleinletter- en hooflettervariante kan gebruik word, afhangend van die tool (`http_proxy`/`HTTP_PROXY`, `no_proxy`/`NO_PROXY`).
 
 ### SSL_CERT_FILE & SSL_CERT_DIR
 
-Die prosesse sal die sertifikate wat in **hierdie env variables** aangedui word, vertrou. Dit is nuttig om tools soos **`curl`**, **`git`**, Python HTTP clients, of package managers te laat vertrou op ’n CA wat deur die attacker beheer word (byvoorbeeld, om ’n interception proxy legitiem te laat lyk).
+Die prosesse sal die sertifikate vertrou wat in **hierdie env variables** aangedui word. Dit is nuttig om tools soos **`curl`**, **`git`**, Python HTTP clients, of package managers te laat vertrou op 'n CA wat deur die attacker beheer word (byvoorbeeld, om 'n interception proxy legitiem te laat lyk).
 ```bash
 export SSL_CERT_FILE=/path/to/ca-bundle.pem
 export SSL_CERT_DIR=/path/to/ca-certificates
 ```
 ### **PATH**
 
-As ’n bevoorregte wrapper/script opdragte **sonder absolute paths** uitvoer, wen die **eerste aanvaller-beheerde directory** in `PATH`. Dit is die primitief agter baie **PATH hijacks** in `sudo`, cron jobs, shell wrappers, en custom SUID helpers. Soek vir `env_keep+=PATH`, swak `secure_path`, of wrappers wat `tar`, `service`, `cp`, `python`, ens. by naam aanroep.
+As 'n bevoorregte wrapper/script opdragte uitvoer **sonder absolute paaie**, wen die **eerste aanvaller-beheerde gids** in `PATH`. Dit is die primitiewe agter baie **PATH hijacks** in `sudo`, cron jobs, shell wrappers, en pasgemaakte SUID helpers. Soek vir `env_keep+=PATH`, swak `secure_path`, of wrappers wat `tar`, `service`, `cp`, `python`, ens. by naam aanroep.
 ```bash
 mkdir -p /dev/shm/bin
 cat > /dev/shm/bin/tar <<'EOF'
@@ -133,27 +133,27 @@ EOF
 chmod +x /dev/shm/bin/tar
 PATH=/dev/shm/bin:$PATH vulnerable-wrapper
 ```
-Vir volledige privilege-escalation-kettings wat `PATH` misbruik, kyk na [Linux Privilege Escalation](privilege-escalation/README.md).
+Vir volledige privilege-escalation-kettings wat `PATH` misbruik, kyk [Linux Privilege Escalation](privilege-escalation/README.md).
 
 ### **HOME & XDG_CONFIG_HOME**
 
-`HOME` is nie net ’n gidsverwysing nie: baie gereedskap laai outomaties **dotfiles**, **plugins**, en **per-gebruiker-konfigurasie** vanaf `$HOME` of `$XDG_CONFIG_HOME`. As ’n bevoorregte werkvloei hierdie waardes behou, kan **config injection** makliker wees as binary hijacking.
+`HOME` is nie net ’n gidsverwysing nie: baie tools laai outomaties **dotfiles**, **plugins**, en **per-user configuration** vanaf `$HOME` of `$XDG_CONFIG_HOME`. As ’n bevoorregte workflow hierdie waardes bewaar, kan **config injection** makliker wees as binary hijacking.
 ```bash
 export HOME=/dev/shm/fakehome
 export XDG_CONFIG_HOME=/dev/shm/fakehome/.config
 mkdir -p "$XDG_CONFIG_HOME"
 ```
-Interessante teikens sluit in `.gitconfig`, `.wgetrc`, `.curlrc`, `.inputrc`, `.pythonrc.py`, en tool-spesifieke lêers soos `.terraformrc`.
+Interessante teikens sluit `.gitconfig`, `.wgetrc`, `.curlrc`, `.inputrc`, `.pythonrc.py`, en tool-spesifieke lêers soos `.terraformrc` in.
 
 ### **LD_PRELOAD, LD_LIBRARY_PATH & LD_AUDIT**
 
 Hierdie veranderlikes beïnvloed die **dynamic linker**:
 
 - `LD_PRELOAD`: forseer ekstra shared objects om eerste gelaai te word.
-- `LD_LIBRARY_PATH`: voeg library search directories vooraan.
+- `LD_LIBRARY_PATH`: voeg library search directories vooraan by.
 - `LD_AUDIT`: laai auditor libraries wat library loading en symbol resolution waarneem.
 
-Hulle is uiters waardevol vir **hooking**, **instrumentation**, en **privilege escalation** as ’n geprivilegieerde command hulle behou. In **secure-execution** modus (`AT_SECURE`, bv. setuid/setgid/capabilities), stroop of beperk die loader baie van hierdie veranderlikes. Parser bugs in daardie vroeë loader-fase is egter steeds hoë-impak omdat hulle **voor** die target program loop.
+Hulle is uiters waardevol vir **hooking**, **instrumentation**, en **privilege escalation** as ’n bevoorregte command hulle behou. In **secure-execution** mode (`AT_SECURE`, bv. setuid/setgid/capabilities), stroop of beperk die loader baie van hierdie veranderlikes. Parser bugs in daardie vroeë loader stadium is egter steeds hoë-impak omdat hulle **before** die target program loop.
 ```bash
 env | grep -E '^LD_'
 ldso=$(ls /lib64/ld-linux-*.so.* /lib/*-linux-gnu/ld-linux-*.so.* 2>/dev/null | head -n1)
@@ -162,31 +162,31 @@ ldso=$(ls /lib64/ld-linux-*.so.* /lib/*-linux-gnu/ld-linux-*.so.* 2>/dev/null | 
 ```
 ### **GLIBC_TUNABLES**
 
-`GLIBC_TUNABLES` verander vroeë glibc-gedrag (byvoorbeeld, allocator tunables) en is baie nuttig in exploit labs. Dit maak ook vanuit ’n sekuriteitsperspektief saak omdat die **dynamic loader dit baie vroeg ontleed**. Die 2023 **Looney Tunables**-bug was ’n goeie herinnering dat ’n enkele omgewingsveranderlike wat in die loader ontleed word, ’n **local privilege-escalation primitive** teen SUID-programme kan word.
+`GLIBC_TUNABLES` verander vroeë glibc-gedrag (byvoorbeeld, allocator tunables) en is baie handig in exploit labs. Dit maak ook saak vanuit ’n sekuriteitsperspektief omdat die **dynamic loader dit baie vroeg ontleed**. Die 2023 **Looney Tunables**-fout was ’n goeie herinnering dat ’n enkele omgewingsveranderlike wat in die loader ontleed word, ’n **local privilege-escalation primitive** teen SUID-programme kan word.
 ```bash
 GLIBC_TUNABLES=glibc.malloc.tcache_count=0 ./binary
 ```
 ### **BASH_ENV & ENV**
 
-As **Bash** **nie-interaktief** begin word, dit kontroleer `BASH_ENV` en source daardie lêer voordat dit die teikenskrip uitvoer. Wanneer Bash as `sh` opgeroep word, of in POSIX-styl interaktiewe modus, kan `ENV` ook geraadpleeg word. Dit is ’n klassieke manier om ’n shell-wrapper in code execution te verander as die environment deur die attacker beheer word.
+As **Bash** **nie-interaktief** begin word, kontroleer dit `BASH_ENV` en source daardie lêer voordat die teikenskrip uitgevoer word. Wanneer Bash as `sh` opgeroep word, of in POSIX-styl interaktiewe modus, kan `ENV` ook geraadpleeg word. Dit is 'n klassieke manier om 'n shell wrapper in code execution te verander as die environment deur 'n attacker beheer word.
 ```bash
 cat > /tmp/pre.sh <<'EOF'
 echo '[+] sourced before the target script'
 EOF
 BASH_ENV=/tmp/pre.sh bash -c 'echo target'
 ```
-Bash self deaktiveer hierdie opstartlêers wanneer die **regte/effective IDs verskil** tensy `-p` gebruik word, so die presiese gedrag hang af van hoe die wrapper die shell aanroep.
+Bash self deaktiveer hierdie opstartlêers wanneer die **ware/effektiewe IDs verskil** tensy `-p` gebruik word, so die presiese gedrag hang af van hoe die wrapper die shell aanroep.
 
 ### **PYTHONPATH, PYTHONHOME, PYTHONSTARTUP & PYTHONINSPECT**
 
 Hierdie veranderlikes verander hoe Python begin:
 
-- `PYTHONPATH`: voeg import-soekpaaie vooraan by.
-- `PYTHONHOME`: herposisioneer die standaard library-boom.
-- `PYTHONSTARTUP`: voer ’n lêer uit voor die interaktiewe prompt.
-- `PYTHONINSPECT=1`: skakel oor na interaktiewe modus nadat ’n script klaar is.
+- `PYTHONPATH`: voeg import-soekpaaie vooraan.
+- `PYTHONHOME`: skuif die standaard library-boom.
+- `PYTHONSTARTUP`: voer 'n lêer uit voor die interaktiewe prompt.
+- `PYTHONINSPECT=1`: gaan in interaktiewe modus nadat 'n script klaar is.
 
-Hulle is nuttig teen maintenance scripts, debuggers, shells, en wrappers wat Python met ’n beheerbare environment aanroep. `python -E` en `python -I` ignoreer alle `PYTHON*` veranderlikes.
+Hulle is nuttig teen onderhoudsscripts, debuggers, shells, en wrappers wat Python met 'n beheerbare omgewing aanroep. `python -E` en `python -I` ignoreer alle `PYTHON*` veranderlikes.
 ```bash
 mkdir -p /tmp/pylib
 printf 'print("owned from PYTHONPATH")\n' > /tmp/pylib/htmod.py
@@ -195,12 +195,12 @@ PYTHONPATH=/tmp/pylib python3 -I -c 'import htmod'   # ignored in isolated mode
 ```
 ### **PERL5OPT & PERL5LIB**
 
-Perl het ewe nuttige opstart-veranderlikes:
+Perl het ewe nuttige opstartveranderlikes:
 
-- `PERL5LIB`: voeg biblioteek-gidse vooraan by.
-- `PERL5OPT`: voeg switches in asof hulle op elke `perl` command line was.
+- `PERL5LIB`: voeg library-gidse aan die voorkant by.
+- `PERL5OPT`: spuit switches in asof hulle op elke `perl` command line was.
 
-Dit kan **automatic module loading** afdwing of interpretergedrag verander voordat die teikenskrip enigiets interessant doen. Perl ignoreer hierdie veranderlikes in **taint / setuid / setgid**-kontekste, maar hulle is steeds baie belangrik vir normale root-run wrappers, CI jobs, installers, en custom sudoers rules.
+Dit kan **automatic module loading** afdwing of interpreter-gedrag verander voordat die teikenskrip enigiets interessants doen. Perl ignoreer hierdie veranderlikes in **taint / setuid / setgid** kontekste, maar hulle maak steeds baie saak vir normale root-run wrappers, CI jobs, installers, en custom sudoers rules.
 ```bash
 mkdir -p /tmp/perllib
 cat > /tmp/perllib/HT.pm <<'EOF'
@@ -210,9 +210,9 @@ BEGIN { print "PERL5OPT_TRIGGERED\n" }
 EOF
 PERL5LIB=/tmp/perllib PERL5OPT=-MHT perl -e 'print "target\n"'
 ```
-Dieselfde idee verskyn in ander runtimes (`RUBYOPT`, `NODE_OPTIONS`, ens.): wanneer ’n interpreter deur ’n bevoorregte wrapper geloods word, soek na env vars wat **module loading** of **startup behavior** wysig.
+Dieselfde idee verskyn in ander runtimes (`RUBYOPT`, `NODE_OPTIONS`, ens.): wanneer ’n interpreter deur ’n bevoorregte wrapper gelanseer word, soek na env vars wat **module loading** of **startup behavior** verander.
 
-Vanuit ’n post-exploitation perspektief, onthou ook dat geërfde environments dikwels **credentials**, **proxy settings**, **service tokens**, of **cloud keys** bevat. Kyk na [Linux Post Exploitation](linux-post-exploitation/README.md) vir `/proc/<PID>/environ` en `systemd` `Environment=` hunting.
+Van ’n post-exploitation-perspektief, onthou ook dat geërfde environments dikwels **credentials**, **proxy settings**, **service tokens**, of **cloud keys** bevat. Kyk na [Linux Post Exploitation](linux-post-exploitation/README.md) vir `/proc/<PID>/environ` en `systemd` `Environment=` hunting.
 
 ### PS1
 
@@ -228,11 +228,11 @@ Regular user:
 
 ![](<../images/image (740).png>)
 
-One, two and three backgrounded jobs:
+Een, twee en drie backgrounded jobs:
 
 ![](<../images/image (145).png>)
 
-One background job, one stopped and last command didn't finish correctly:
+Een background job, een stopped en laaste command het nie korrek klaar gemaak nie:
 
 ![](<../images/image (715).png>)
 
