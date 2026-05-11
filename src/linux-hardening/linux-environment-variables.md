@@ -1,10 +1,10 @@
-# Linux Environment Variables
+# Variables de entorno de Linux
 
 {{#include ../banners/hacktricks-training.md}}
 
 ## Variables globales
 
-Las variables globales **serán** heredadas por los **child processes**.
+Las variables globales **serán** heredadas por los **procesos hijos**.
 
 Puedes crear una variable global para tu sesión actual haciendo:
 ```bash
@@ -19,13 +19,13 @@ unset MYGLOBAL
 ```
 ## Variables locales
 
-Las **variables locales** solo pueden ser **accedidas** por el **shell/script actual**.
+Las **variables locales** solo pueden ser **accedidas** por la **shell/script actual**.
 ```bash
 LOCAL="my local"
 echo $LOCAL
 unset LOCAL
 ```
-## Listar variables actuales
+## Lista de variables actuales
 ```bash
 set
 env
@@ -33,29 +33,29 @@ printenv
 cat /proc/$$/environ
 cat /proc/`python -c "import os; print(os.getppid())"`/environ
 ```
-Los contenidos de `/proc/*/environ` están **separados por NUL**, así que estas variantes suelen ser más fáciles de leer:
+El contenido de `/proc/*/environ` está **separado por NUL**, así que estas variantes suelen ser más fáciles de leer:
 ```bash
 tr '\0' '\n' </proc/$$/environ | sort -u
 tr '\0' '\n' </proc/<PID>/environ | sort -u
 ```
-Si estás buscando **credentials** o **interesting service configuration** dentro de entornos heredados, también revisa [Linux Post Exploitation](linux-post-exploitation/README.md).
+Si estás buscando **credentials** o **interesting service configuration** dentro de entornos heredados, revisa también [Linux Post Exploitation](linux-post-exploitation/README.md).
 
 ## Common variables
 
 From: [https://geek-university.com/linux/common-environment-variables/](https://geek-university.com/linux/common-environment-variables/)
 
-- **DISPLAY** – el display usado por **X**. Esta variable suele estar configurada como **:0.0**, lo que significa el primer display en el ordenador actual.
+- **DISPLAY** – la pantalla usada por **X**. Esta variable suele establecerse en **:0.0**, lo que significa la primera pantalla en el equipo actual.
 - **EDITOR** – el editor de texto preferido del usuario.
 - **HISTFILESIZE** – el número máximo de líneas contenidas en el archivo de historial.
-- **HISTSIZE** – Número de líneas añadidas al archivo de historial cuando el usuario termina su sesión
+- **HISTSIZE** – número de líneas añadidas al archivo de historial cuando el usuario termina su sesión
 - **HOME** – tu directorio home.
-- **HOSTNAME** – el hostname del ordenador.
+- **HOSTNAME** – el hostname del equipo.
 - **LANG** – tu idioma actual.
 - **MAIL** – la ubicación del spool de correo del usuario. Normalmente **/var/spool/mail/USER**.
-- **MANPATH** – la lista de directorios que se buscarán para las páginas de manual.
+- **MANPATH** – la lista de directorios donde buscar páginas de manual.
 - **OSTYPE** – el tipo de sistema operativo.
 - **PS1** – el prompt predeterminado en bash.
-- **PATH** – almacena la ruta de todos los directorios que contienen archivos binarios que quieres ejecutar simplemente especificando el nombre del archivo y no la ruta relativa o absoluta.
+- **PATH** – almacena la ruta de todos los directorios que contienen archivos binarios que quieres ejecutar solo especificando el nombre del archivo y no la ruta relativa o absoluta.
 - **PWD** – el directorio de trabajo actual.
 - **SHELL** – la ruta al shell de comandos actual (por ejemplo, **/bin/bash**).
 - **TERM** – el tipo de terminal actual (por ejemplo, **xterm**).
@@ -64,23 +64,23 @@ From: [https://geek-university.com/linux/common-environment-variables/](https://
 
 ## Interesting variables for hacking
 
-No todas las variables son igual de útiles. Desde una perspectiva ofensiva, prioriza las variables que cambian **search paths**, **startup files**, **dynamic linker behavior**, o **audit/logging**.
+No todas las variables son igual de útiles. Desde una perspectiva ofensiva, prioriza variables que cambian **search paths**, **startup files**, **dynamic linker behavior**, o **audit/logging**.
 
 ### **HISTFILESIZE**
 
-Cambia el **valor de esta variable a 0**, así cuando **termines tu sesión** el **history file** (\~/.bash_history) será **truncado a 0 líneas**.
+Cambia el **value of this variable to 0**, así cuando **termines tu sesión** el **history file** (\~/.bash_history) será **truncated to 0 lines**.
 ```bash
 export HISTFILESIZE=0
 ```
 ### **HISTSIZE**
 
-Cambia el **valor de esta variable a 0**, de modo que los comandos **no se guarden en el historial en memoria** y no se escriban de vuelta en el **archivo de historial** (\~/.bash_history).
+Cambia el **valor de esta variable a 0**, para que los comandos **no se guarden en el historial en memoria** y no se escriban de vuelta al **archivo de historial** (\~/.bash_history).
 ```bash
 export HISTSIZE=0
 ```
 ### **HISTCONTROL**
 
-Si el **valor de esta variable se establece en `ignorespace` o `ignoreboth`**, cualquier comando precedido por un espacio extra no se guardará en el historial.
+Si el **valor de esta variable se establece en `ignorespace` o `ignoreboth`**, cualquier comando antepuesto con un espacio extra no se guardará en el historial.
 ```bash
 export HISTCONTROL=ignorespace
 ```
@@ -91,7 +91,7 @@ $  echo "not to save"
 ```
 ### **HISTFILE**
 
-Apunta el **history file** a **`/dev/null`** o elimínalo por completo. Esto suele ser más fiable que solo cambiar el tamaño del historial.
+Apunta el **history file** a **`/dev/null`** o desactívalo por completo. Esto suele ser más fiable que solo cambiar el tamaño del history.
 ```bash
 export HISTFILE=/dev/null
 unset HISTFILE
@@ -115,14 +115,14 @@ Tanto las variantes en minúsculas como en mayúsculas pueden usarse según la h
 
 ### SSL_CERT_FILE & SSL_CERT_DIR
 
-Los procesos confiarán en los certificados indicados en **estas env variables**. Esto es útil para hacer que herramientas como **`curl`**, **`git`**, clientes HTTP de Python o gestores de paquetes confíen en una CA controlada por el atacante (por ejemplo, para hacer que un proxy de interceptación parezca legítimo).
+Los procesos confiarán en los certificados indicados en **estas variables de entorno**. Esto es útil para hacer que herramientas como **`curl`**, **`git`**, clientes HTTP de Python o gestores de paquetes confíen en una CA controlada por el atacante (por ejemplo, para hacer que un proxy de interceptación parezca legítimo).
 ```bash
 export SSL_CERT_FILE=/path/to/ca-bundle.pem
 export SSL_CERT_DIR=/path/to/ca-certificates
 ```
 ### **PATH**
 
-Si un wrapper/script privilegiado ejecuta comandos **sin rutas absolutas**, el **primer directorio controlado por el atacante** en `PATH` gana. Este es el primitivo detrás de muchos **PATH hijacks** en `sudo`, trabajos cron, shell wrappers y helpers SUID personalizados. Busca `env_keep+=PATH`, `secure_path` débil o wrappers que llamen a `tar`, `service`, `cp`, `python`, etc. por nombre.
+Si un wrapper/script con privilegios ejecuta comandos **sin rutas absolutas**, el **primer directorio controlado por el atacante** en `PATH` gana. Este es el primitivo detrás de muchos **PATH hijacks** en `sudo`, trabajos de cron, shell wrappers y helpers SUID personalizados. Busca `env_keep+=PATH`, `secure_path` débil, o wrappers que llamen a `tar`, `service`, `cp`, `python`, etc. por nombre.
 ```bash
 mkdir -p /dev/shm/bin
 cat > /dev/shm/bin/tar <<'EOF'
@@ -137,7 +137,7 @@ Para cadenas completas de escalada de privilegios abusando de `PATH`, consulta [
 
 ### **HOME & XDG_CONFIG_HOME**
 
-`HOME` no es solo una referencia a un directorio: muchas herramientas cargan automáticamente **dotfiles**, **plugins** y **configuración por usuario** desde `$HOME` o `$XDG_CONFIG_HOME`. Si un flujo privilegiado conserva estos valores, la **config injection** puede ser más fácil que el binary hijacking.
+`HOME` no es solo una referencia a un directorio: muchas herramientas cargan automáticamente **dotfiles**, **plugins** y **configuración por usuario** desde `$HOME` o `$XDG_CONFIG_HOME`. Si un flujo de trabajo con privilegios preserva estos valores, la **inyección de configuración** puede ser más fácil que el secuestro de binarios.
 ```bash
 export HOME=/dev/shm/fakehome
 export XDG_CONFIG_HOME=/dev/shm/fakehome/.config
@@ -153,7 +153,7 @@ Estas variables influyen en el **dynamic linker**:
 - `LD_LIBRARY_PATH`: antepone directorios de búsqueda de librerías.
 - `LD_AUDIT`: carga librerías auditoras que observan la carga de librerías y la resolución de símbolos.
 
-Son extremadamente valiosas para **hooking**, **instrumentation**, y **privilege escalation** si un comando con privilegios las conserva. En modo de **secure-execution** (`AT_SECURE`, por ejemplo setuid/setgid/capabilities), el loader elimina o restringe muchas de estas variables. Sin embargo, los bugs de parser en esa fase temprana del loader siguen teniendo alto impacto porque se ejecutan **before** el programa objetivo.
+Son extremadamente valiosas para **hooking**, **instrumentation** y **privilege escalation** si un comando privilegiado las conserva. En modo **secure-execution** (`AT_SECURE`, por ejemplo setuid/setgid/capabilities), el loader elimina o restringe muchas de estas variables. Sin embargo, los bugs de parser en esa fase temprana del loader siguen siendo de alto impacto porque se ejecutan **before** el target program.
 ```bash
 env | grep -E '^LD_'
 ldso=$(ls /lib64/ld-linux-*.so.* /lib/*-linux-gnu/ld-linux-*.so.* 2>/dev/null | head -n1)
@@ -168,14 +168,14 @@ GLIBC_TUNABLES=glibc.malloc.tcache_count=0 ./binary
 ```
 ### **BASH_ENV & ENV**
 
-Si **Bash** se inicia de forma **no interactiva**, comprueba `BASH_ENV` y carga ese archivo antes de ejecutar el script objetivo. Cuando Bash se invoca como `sh`, o en modo interactivo estilo POSIX, `ENV` también puede ser consultado. Esta es una forma clásica de convertir un wrapper de shell en ejecución de código si el entorno está controlado por el atacante.
+Si **Bash** se inicia de forma **no interactiva**, comprueba `BASH_ENV` y carga ese archivo antes de ejecutar el script objetivo. Cuando Bash se invoca como `sh`, o en modo interactivo estilo POSIX, también puede consultarse `ENV`. Esta es una forma clásica de convertir un wrapper de shell en ejecución de código si el entorno está controlado por el atacante.
 ```bash
 cat > /tmp/pre.sh <<'EOF'
 echo '[+] sourced before the target script'
 EOF
 BASH_ENV=/tmp/pre.sh bash -c 'echo target'
 ```
-Bash por sí mismo desactiva estos archivos de inicio cuando los **IDs reales/efectivos difieren** salvo que se use `-p`, así que el comportamiento exacto depende de cómo el wrapper invoque el shell.
+Bash mismo deshabilita estos archivos de inicio cuando los **IDs reales/efectivos difieren** a menos que se use `-p`, así que el comportamiento exacto depende de cómo el wrapper invoque la shell.
 
 ### **PYTHONPATH, PYTHONHOME, PYTHONSTARTUP & PYTHONINSPECT**
 
@@ -186,7 +186,7 @@ Estas variables cambian cómo inicia Python:
 - `PYTHONSTARTUP`: ejecuta un archivo antes del prompt interactivo.
 - `PYTHONINSPECT=1`: entra en modo interactivo después de que termina un script.
 
-Son útiles contra scripts de mantenimiento, depuradores, shells y wrappers que llaman a Python con un entorno controlable. `python -E` y `python -I` ignoran todas las variables `PYTHON*`.
+Son útiles contra scripts de mantenimiento, debuggers, shells y wrappers que llaman a Python con un entorno controlable. `python -E` y `python -I` ignoran todas las variables `PYTHON*`.
 ```bash
 mkdir -p /tmp/pylib
 printf 'print("owned from PYTHONPATH")\n' > /tmp/pylib/htmod.py
@@ -197,10 +197,10 @@ PYTHONPATH=/tmp/pylib python3 -I -c 'import htmod'   # ignored in isolated mode
 
 Perl tiene variables de inicio igualmente útiles:
 
-- `PERL5LIB`: antepone directorios de bibliotecas.
-- `PERL5OPT`: inyecta switches como si estuvieran en cada línea de comandos de `perl`.
+- `PERL5LIB`: antepone directorios de librerías.
+- `PERL5OPT`: inyecta switches como si estuvieran en cada línea de comando de `perl`.
 
-Esto puede forzar la **carga automática de módulos** o cambiar el comportamiento del intérprete antes de que el script objetivo haga algo interesante. Perl ignora estas variables en contextos **taint / setuid / setgid**, pero siguen siendo muy importantes para wrappers normales ejecutados como root, trabajos de CI, instaladores y reglas personalizadas de sudoers.
+Esto puede forzar la **carga automática de módulos** o cambiar el comportamiento del intérprete antes de que el script objetivo haga algo interesante. Perl ignora estas variables en contextos de **taint / setuid / setgid**, pero siguen siendo muy importantes para wrappers normales ejecutados como root, trabajos de CI, instaladores y reglas personalizadas de sudoers.
 ```bash
 mkdir -p /tmp/perllib
 cat > /tmp/perllib/HT.pm <<'EOF'
@@ -210,9 +210,9 @@ BEGIN { print "PERL5OPT_TRIGGERED\n" }
 EOF
 PERL5LIB=/tmp/perllib PERL5OPT=-MHT perl -e 'print "target\n"'
 ```
-La misma idea aparece en otros runtimes (`RUBYOPT`, `NODE_OPTIONS`, etc.): siempre que un intérprete se lance mediante un wrapper con privilegios, busca env vars que modifiquen **module loading** o el **startup behavior**.
+La misma idea aparece en otros runtimes (`RUBYOPT`, `NODE_OPTIONS`, etc.): siempre que un intérprete se lance mediante un wrapper privilegiado, busca variables de entorno que modifiquen **module loading** o el **startup behavior**.
 
-Desde una perspectiva de post-exploitation, recuerda también que los entornos heredados suelen contener **credentials**, **proxy settings**, **service tokens** o **cloud keys**. Consulta [Linux Post Exploitation](linux-post-exploitation/README.md) para `/proc/<PID>/environ` y la búsqueda de `Environment=` en `systemd`.
+Desde una perspectiva de post-exploitation, recuerda también que los entornos heredados a menudo contienen **credentials**, **proxy settings**, **service tokens** o **cloud keys**. Revisa [Linux Post Exploitation](linux-post-exploitation/README.md) para la búsqueda de `/proc/<PID>/environ` y `systemd` `Environment=`.
 
 ### PS1
 
@@ -228,11 +228,11 @@ Usuario normal:
 
 ![](<../images/image (740).png>)
 
-Uno, dos y tres trabajos en background:
+Uno, dos y tres jobs en background:
 
 ![](<../images/image (145).png>)
 
-Un trabajo en background, uno detenido y el último comando no terminó correctamente:
+Un job en background, uno detenido y el último comando no terminó correctamente:
 
 ![](<../images/image (715).png>)
 
