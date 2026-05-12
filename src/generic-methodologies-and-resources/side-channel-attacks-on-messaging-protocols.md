@@ -1,8 +1,8 @@
-# Attacchi side-channel sui delivery receipt in messenger E2EE
+# Attacchi Side-Channel sui Delivery Receipt in Messaggeri E2EE
 
 {{#include ../banners/hacktricks-training.md}}
 
-I delivery receipt sono obbligatori nei moderni messenger end-to-end encrypted (E2EE) perché i client devono sapere quando un ciphertext è stato decriptato, così possono scartare lo stato di ratcheting e le chiavi effimere. Il server inoltra blob opachi, quindi gli acknowledgement del dispositivo (doppie spunte) vengono emessi dal destinatario dopo la decrittazione riuscita. Misurare il round-trip time (RTT) tra un'azione indotta dall'attaccante e il corrispondente delivery receipt espone un canale temporale ad alta risoluzione che leak lo stato del dispositivo, la presenza online, e può essere abusato per DoS covert. Le implementazioni multi-device "client-fanout" amplificano la leak perché ogni dispositivo registrato decripta la probe e restituisce il proprio receipt.
+I delivery receipt sono obbligatori nei moderni messaggeri end-to-end encrypted (E2EE) perché i client devono sapere quando un ciphertext è stato decifrato, così possono scartare lo stato di ratcheting e le chiavi effimere. Il server inoltra blob opachi, quindi gli acknowledgement del dispositivo (doppia spunta) vengono emessi dal destinatario dopo la decifrazione riuscita. Misurare il round-trip time (RTT) tra un'azione attivata dall'attaccante e il corrispondente delivery receipt espone un canale temporale ad alta risoluzione che leak stato del dispositivo, presenza online e può essere abusato per covert DoS. Le distribuzioni multi-device "client-fanout" amplificano il leak perché ogni device registrato decifra il probe e restituisce il proprio receipt.
 
 ## Delivery receipt sources vs. segnali visibili all'utente
 
@@ -10,50 +10,50 @@ Scegli tipi di messaggio che emettono sempre un delivery receipt ma non mostrano
 
 | Messenger | Action | Delivery receipt | Victim notification | Notes |
 |-----------|--------|------------------|---------------------|-------|
-| **WhatsApp** | Text message | ● | ● | Sempre rumoroso → utile solo per avviare lo stato. |
-| | Reaction | ● | ◐ (solo se si reagisce a un messaggio della vittima) | Le self-reactions e le rimozioni restano silenziose. |
-| | Edit | ● | Silent push dipendente dalla piattaforma | Finestra di edit ≈20 min; comunque ack’d dopo la scadenza. |
-| | Delete for everyone | ● | ○ | La UI consente ~60 h, ma i pacchetti successivi vengono comunque ack’d. |
+| **WhatsApp** | Text message | ● | ● | Sempre rumoroso -> utile solo per inizializzare lo stato. |
+| | Reaction | ● | ◐ (solo se la reaction riguarda un messaggio della vittima) | Le self-reaction e le rimozioni restano silenziose. |
+| | Edit | ● | silent push dipendente dalla piattaforma | Finestra di edit ≈20 min; ancora ack'd dopo la scadenza. |
+| | Delete for everyone | ● | ○ | La UI consente ~60 h, ma i pacchetti successivi sono ancora ack'd. |
 | **Signal** | Text message | ● | ● | Stesse limitazioni di WhatsApp. |
-| | Reaction | ● | ◐ | Le self-reactions sono invisibili alla vittima. |
-| | Edit/Delete | ● | ○ | Il server impone una finestra di ~48 h, consente fino a 10 edit, ma i pacchetti tardivi vengono comunque ack’d. |
-| **Threema** | Text message | ● | ● | I delivery receipt multi-device sono aggregati, quindi per ogni probe è visibile solo un RTT. |
+| | Reaction | ● | ◐ | Le self-reaction sono invisibili per la vittima. |
+| | Edit/Delete | ● | ○ | Il server impone una finestra di ~48 h, consente fino a 10 edit, ma i pacchetti tardivi sono ancora ack'd. |
+| **Threema** | Text message | ● | ● | I receipt multi-device sono aggregati, quindi per ogni probe diventa visibile solo un RTT. |
 
-Legenda: ● = sempre, ◐ = condizionale, ○ = mai. Il comportamento UI dipendente dalla piattaforma è annotato inline. Disabilita i read receipts se necessario, ma i delivery receipt non possono essere disattivati in WhatsApp o Signal.
+Legenda: ● = sempre, ◐ = condizionale, ○ = mai. Il comportamento UI dipendente dalla piattaforma è indicato inline. Disabilita i read receipts se necessario, ma i delivery receipt non possono essere disattivati in WhatsApp o Signal.
 
 ## Obiettivi e modelli dell'attaccante
 
-* **G1 – Device fingerprinting:** Contare quanti receipt arrivano per probe, raggruppare gli RTT per inferire OS/client (Android vs iOS vs desktop), e osservare le transizioni online/offline.
-* **G2 – Behavioural monitoring:** Trattare la serie RTT ad alta frequenza (≈1 Hz è stabile) come una serie temporale e inferire screen on/off, app foreground/background, commuting vs working hours, ecc.
-* **G3 – Resource exhaustion:** Tenere svegli radio/CPU di ogni device della vittima inviando probe silenziose infinite, scaricando batteria/dati e degradando la qualità VoIP/RTC.
+* **G1 - Device fingerprinting:** Conta quanti receipt arrivano per ogni probe, raggruppa gli RTT per inferire OS/client (Android vs iOS vs desktop) e osserva le transizioni online/offline.
+* **G2 - Behavioral monitoring:** Tratta la serie RTT ad alta frequenza (≈1 Hz è stabile) come una time-series e inferisci screen on/off, app foreground/background, commuting vs working hours, ecc.
+* **G3 - Resource exhaustion:** Tieni radios/CPU di ogni device vittima svegli inviando probe silenziosi senza fine, consumando batteria/dati e degradando la qualità VoIP/RTC.
 
-Due threat actor sono sufficienti per descrivere la superficie di abuso:
+Due attori di minaccia sono sufficienti per descrivere la superficie di abuso:
 
-1. **Creepy companion:** condivide già una chat con la vittima e abusa di self-reactions, rimozioni di reaction o edit/delete ripetuti legati a message ID già esistenti.
-2. **Spooky stranger:** registra un account burner e invia reaction che riferiscono message ID mai esistiti nella conversazione locale; WhatsApp e Signal li decriptano e li acknowledge comunque anche se la UI scarta il cambio di stato, quindi non serve una conversazione precedente.
+1. **Creepy companion:** condivide già una chat con la vittima e abusa di self-reaction, rimozioni di reaction o edit/delete ripetuti legati a ID di messaggi esistenti.
+2. **Spooky stranger:** registra un account burner e invia reaction che riferiscono message ID mai esistiti nella conversazione locale; WhatsApp e Signal li decifrano e li acknowledge ancora anche se la UI scarta il cambio di stato, quindi non serve una conversazione precedente.
 
 ## Tooling per accesso raw al protocollo
 
-Affidati a client che espongono il protocollo E2EE sottostante così puoi costruire pacchetti fuori dai vincoli della UI, specificare `message_id` arbitrari e registrare timestamp precisi:
+Affidati a client che espongono il protocollo E2EE sottostante, così puoi creare pacchetti fuori dai vincoli della UI, specificare `message_id` arbitrari e registrare timestamp precisi:
 
 * **WhatsApp:** [whatsmeow](https://github.com/tulir/whatsmeow) (Go, protocollo WhatsApp Web) o [Cobalt](https://github.com/Auties00/Cobalt) (orientato al mobile) permettono di emettere frame raw `ReactionMessage`, `ProtocolMessage` (edit/delete) e `Receipt` mantenendo sincronizzato lo stato double-ratchet.
-* **Signal:** [signal-cli](https://github.com/AsamK/signal-cli) combinato con [libsignal-service-java](https://github.com/signalapp/libsignal-service-java) espone ogni tipo di messaggio via CLI/API. Esempio di toggle di self-reaction:
+* **Signal:** [signal-cli](https://github.com/AsamK/signal-cli) combinato con [libsignal-service-java](https://github.com/signalapp/libsignal-service-java) espone ogni tipo di messaggio via CLI/API. La sintassi attuale di `signal-cli` usa `sendReaction RECIPIENT --target-author --target-timestamp`; tieni `receive` o `daemon` in esecuzione così i delivery receipt vengono davvero raccolti. Esempio di toggle self-reaction:
 ```bash
-signal-cli -u +12025550100 sendReaction --target +12025550123 \
---message-timestamp 1712345678901 --emoji "👍"
-signal-cli -u +12025550100 sendReaction --target +12025550123 \
---message-timestamp 1712345678901 --remove  # encodes empty emoji
+signal-cli -a +12025550100 sendReaction +12025550123 --target-author +12025550100 \
+--target-timestamp 1712345678901 --emoji "👍"
+signal-cli -a +12025550100 sendReaction +12025550123 --target-author +12025550100 \
+--target-timestamp 1712345678901 --remove
 ```
-* **Threema:** Il source del client Android documenta come i delivery receipt vengono consolidati prima di lasciare il device, spiegando perché lì il side channel ha banda trascurabile.
-* **Turnkey PoCs:** progetti pubblici come `device-activity-tracker` e `careless-whisper-python` automatizzano già probe di silent delete/reaction e classificazione RTT. Considerali helper di reconnaissance pronti all'uso invece che riferimenti di protocollo; la parte interessante è che confermano che l'attacco è operativamente semplice una volta che esiste accesso raw al client.
+* **Threema:** Il sorgente del client Android documenta come i delivery receipt vengono consolidati prima di uscire dal device, spiegando perché il side channel lì ha banda trascurabile.
+* **Turnkey PoCs:** [device-activity-tracker](https://github.com/gommzystudio/device-activity-tracker) include backend WhatsApp/Signal, usa di default silent delete probe e etichetta `active` vs `standby` con una soglia a rolling median (`RTT < 0.9 * median`). [careless-whisper-python](https://github.com/ctrlsam/careless-whisper-python) è un CLI più leggero, prima WhatsApp, con `--delay`, `--concurrent`, exporter CSV/Prometheus e output adatto a Grafana. Considerali entrambi helper di reconnaissance più che riferimenti di protocollo; il punto chiave è quanta poca code serve una volta che esiste accesso raw al client.
 
-Quando non è disponibile tooling custom, puoi comunque attivare azioni silenziose da WhatsApp Web o Signal Desktop e sniffare il canale websocket/WebRTC cifrato, ma le API raw rimuovono i ritardi della UI e consentono operazioni non valide.
+Quando non hai tooling custom, puoi comunque attivare azioni silenziose da WhatsApp Web o Signal Desktop e sniffare il canale websocket/WebRTC cifrato, ma le API raw rimuovono i delay della UI e permettono operazioni invalid.
 
-## Creepy companion: silent sampling loop
+## Creepy companion: ciclo di sampling silenzioso
 
-1. Scegli un qualsiasi messaggio storico che hai scritto nella chat così la vittima non vede mai cambiare i balloon di "reaction".
-2. Alterna tra un emoji visibile e un payload di reaction vuoto (codificato come `""` nei protobuf di WhatsApp o `--remove` in signal-cli). Ogni trasmissione genera un device ack nonostante nessuna delta UI per la vittima.
-3. Registra il send time e ogni arrivo del delivery receipt. Un loop a 1 Hz come il seguente fornisce trace RTT per dispositivo in modo indefinito:
+1. Scegli qualsiasi messaggio storico che hai scritto nella chat, così la vittima non vede mai cambiare i balloon di "reaction".
+2. Alterna tra un emoji visibile e un payload di reaction vuoto (codificato come `""` in WhatsApp protobufs o `--remove` in signal-cli). Ogni trasmissione produce un device ack nonostante nessun delta UI per la vittima.
+3. Timbra il send time e ogni arrivo di delivery receipt. Un loop a 1 Hz come il seguente produce tracce RTT per-device all'infinito:
 ```python
 while True:
 send_reaction(msg_id, "👍")
@@ -62,54 +62,62 @@ send_reaction(msg_id, "")  # removal
 log_receipts()
 time.sleep(0.5)
 ```
-4. Poiché WhatsApp/Signal accettano aggiornamenti di reaction illimitati, l'attaccante non deve mai pubblicare nuovo contenuto in chat né preoccuparsi delle edit window.
+4. Poiché WhatsApp/Signal accettano aggiornamenti di reaction illimitati, l'attaccante non deve mai pubblicare nuovo contenuto in chat né preoccuparsi delle finestre di edit.
 
 ## Spooky stranger: probing di numeri di telefono arbitrari
 
-1. Registra un account WhatsApp/Signal nuovo e recupera le public identity keys per il numero target (fatto automaticamente durante il setup della sessione).
-2. Costruisci un pacchetto reaction/edit/delete che riferisce un `message_id` casuale mai visto da nessuna delle due parti (WhatsApp accetta GUID arbitrari `key.id`; Signal usa timestamp in millisecondi).
-3. Invia il pacchetto anche se non esiste alcun thread. I device della vittima lo decriptano, non riescono a matchare il messaggio base, scartano il cambio di stato, ma comunque acknowledge il ciphertext in ingresso, rimandando i device receipt all'attaccante.
-4. Ripeti continuamente per costruire serie RTT senza mai comparire nella chat list della vittima.
+1. Registra un account WhatsApp/Signal nuovo e recupera le public identity keys per il numero target (fatto automaticamente durante la session setup).
+2. Crea un pacchetto reaction/edit/delete che riferisce un `message_id` casuale mai visto da entrambe le parti (WhatsApp accetta GUID arbitrari `key.id`; Signal usa timestamp in millisecondi).
+3. Invia il pacchetto anche se non esiste alcun thread. I device della vittima lo decifrano, falliscono il match con il messaggio base, scartano il cambio di stato, ma ack'ano comunque il ciphertext in arrivo, inviando delivery receipt all'attaccante.
+4. Ripeti continuamente per costruire serie RTT senza mai apparire nella chat list della vittima.
 
-## Riutilizzare edit e delete come trigger covert
+Se prima devi scoprire quali numeri sono registrati o vuoi pre-seed device inventories su larga scala, concatenalo con [contact-discovery / registration oracles](../pentesting-web/registration-vulnerabilities.md) invece di indovinare a mano range E.164 casuali.
 
-* **Delete ripetuti:** Dopo che un messaggio è stato deleted-for-everyone una volta, ulteriori pacchetti delete che riferiscono lo stesso `message_id` non hanno effetto UI ma ogni device continua a decriptarli e ad ackarli.
-* **Operazioni fuori finestra:** WhatsApp impone finestre di delete di ~60 h / edit di ~20 min nella UI; Signal impone ~48 h. I messaggi di protocollo costruiti fuori da queste finestre vengono ignorati silenziosamente sul device della vittima, ma i receipt vengono comunque trasmessi, quindi gli attaccanti possono fare probe molto tempo dopo la fine della conversazione.
-* **Payload non validi:** Corpi di edit malformati o delete che riferiscono messaggi già purgati producono lo stesso comportamento—decryption più receipt, zero artefatti visibili all'utente.
+Le build recenti di WhatsApp espongono anche `Settings -> Privacy -> Advanced -> Block unknown account messages`. Trattalo come limiter di throughput, non come fix: danneggia soprattutto flooding sostenuto solo da sconosciuti ed è irrilevante una volta che sei già un contatto noto.
 
-## Amplificazione multi-device & fingerprinting
+## Riciclo di edit e delete come trigger covert
 
-* Ogni device associato (phone, desktop app, browser companion) decripta la probe in modo indipendente e restituisce il proprio ack. Contare i receipt per probe rivela il numero esatto di device.
-* Se un device è offline, il suo receipt viene accodato ed emesso alla riconnessione. I gap quindi leak cicli online/offline e persino orari di commuting (ad es. i receipt desktop si fermano durante il viaggio).
-* Le distribuzioni degli RTT differiscono per piattaforma a causa del power management dell'OS e dei wakeup push. Raggruppa gli RTT (ad es. k-means su feature di mediana/varianza) per etichettare "Android handset", "iOS handset", "Electron desktop", ecc.
-* Poiché il sender deve recuperare l'inventario delle chiavi del destinatario prima di cifrare, l'attaccante può anche osservare quando vengono associati nuovi device; un aumento improvviso del conteggio device o un nuovo cluster RTT è un forte indicatore.
+* **Repeated deletes:** Dopo che un messaggio è stato deleted-for-everyone una volta, ulteriori pacchetti delete che riferiscono lo stesso `message_id` non hanno effetto UI ma ogni device li decifra e li acknowledge ancora.
+* **Out-of-window operations:** WhatsApp impone nella UI finestre di ~60 h per delete / ~20 min per edit; Signal impone ~48 h. I messaggi di protocollo creati fuori da queste finestre vengono ignorati silenziosamente sul device vittima ma i receipt vengono trasmessi, quindi gli attaccanti possono probing per tempi indefiniti anche molto dopo la fine della conversazione.
+* **Invalid payloads:** Corpi edit malformati o delete che riferiscono messaggi già rimossi provocano lo stesso comportamento - decifrazione più receipt, zero artefatti visibili all'utente.
 
-## Inferenza comportamentale dalle trace RTT
+## Amplificazione multi-device e fingerprinting
 
-1. Campiona a ≥1 Hz per catturare gli effetti di scheduling dell'OS. Con WhatsApp su iOS, RTT <1 s correlano fortemente con screen-on/foreground, RTT >1 s con throttling screen-off/background.
-2. Costruisci classificatori semplici (thresholding o k-means a due cluster) che etichettano ogni RTT come "active" o "idle". Aggrega le etichette in streaks per ricavare orari di sonno, commuting, lavoro, o quando il companion desktop è attivo.
-3. Correlate probe simultanee verso ogni device per vedere quando gli utenti passano da mobile a desktop, quando i companion vanno offline, e se l'app è rate limited da push o da socket persistente.
+* Ogni device associato (telefono, desktop app, browser companion) decifra il probe in modo indipendente e restituisce il proprio ack. Contare i receipt per probe rivela il numero esatto di device.
+* Se un device è offline, il suo receipt viene accodato ed emesso alla riconnessione. I gap quindi leak cicli online/offline e perfino schedule di commuting (per esempio, i receipt desktop si fermano durante il viaggio).
+* Le distribuzioni RTT differiscono per piattaforma a causa del power management dell'OS e dei wakeup push. Raggruppa gli RTT (per esempio, k-means su feature di mediana/varianza) per etichettare "Android handset", "iOS handset", "Electron desktop", ecc.
+* Poiché il mittente deve recuperare l'inventory chiavi del destinatario prima di cifrare, l'attaccante può anche osservare quando vengono associati nuovi device; un aumento improvviso del numero di device o un nuovo cluster RTT è un forte indicatore.
 
-## Inferenza della location dal delivery RTT
+## Inference comportamentale dalle tracce RTT
 
-Lo stesso primitive temporale può essere riusato per inferire dove si trova il destinatario, non solo se è attivo. Il lavoro `Hope of Delivery` ha mostrato che addestrare su distribuzioni RTT per location note del receiver consente poi all'attaccante di classificare la location della vittima usando solo le delivery confirmation:
+1. Campiona a ≥1 Hz per catturare gli effetti di scheduling dell'OS. Con WhatsApp su iOS, RTT <1 s correlano fortemente con screen-on/foreground, >1 s con throttling screen-off/background.
+2. Costruisci classificatori semplici (thresholding o k-means a due cluster) che etichettano ogni RTT come "active" o "idle". Aggrega le etichette in streaks per derivare orari di sonno, commuting, lavoro o quando il companion desktop è attivo.
+3. Correlate probe simultanee verso ogni device per vedere quando gli utenti passano da mobile a desktop, quando i companion vanno offline e se l'app è rate limited da push o da socket persistente.
+4. In reti reali, evita una singola soglia hardcoded `1 s`. Fai bootstrap di ogni device con una breve finestra di warm-up e mantieni una baseline rolling (per esempio, `threshold = 0.9 * median RTT`) così il drift Wi-Fi/cellular non manda in crisi il classificatore.
 
-* Costruisci una baseline per lo stesso target mentre si trova in più posti noti (casa, ufficio, campus, country A vs country B, ecc.).
+## Inferenza di location dal delivery RTT
+
+Lo stesso primitive temporale può essere riutilizzato per inferire dove si trova il destinatario, non solo se è attivo. Il lavoro `Hope of Delivery` ha mostrato che addestrare su distribuzioni RTT per location note del receiver permette a un attaccante di classificare poi la location della vittima basandosi solo sui delivery confirmation:
+
+* Costruisci una baseline per lo stesso target mentre si trova in più luoghi noti (casa, ufficio, campus, paese A vs paese B, ecc.).
 * Per ogni location, raccogli molti RTT di messaggi normali ed estrai feature semplici come mediana, varianza o bucket di percentile.
-* Durante l'attacco reale, confronta la nuova serie di probe contro i cluster addestrati. Il paper riporta che anche location nella stessa città possono spesso essere separate, con accuratezza `>80%` in uno scenario a 3 location.
-* Funziona meglio quando l'attaccante controlla l'ambiente di invio e fa probe in condizioni di rete simili, perché il path misurato include la access network del destinatario, la wake-up latency e l'infrastruttura del messenger.
+* Durante l'attacco reale, confronta la nuova serie di probe con i cluster addestrati. Il paper riporta che anche location nella stessa città spesso si possono separare, con accuratezza `>80%` in un setting a 3 location.
+* Funziona meglio quando l'attaccante controlla l'ambiente del sender e fa probe in condizioni di rete simili, perché il path misurato include la rete di accesso del destinatario, la wake-up latency e l'infrastruttura del messenger.
 
-A differenza degli attacchi silent reaction/edit/delete sopra, l'inferenza della location non richiede message ID non validi o pacchetti stealth che cambiano stato. Bastano messaggi normali con conferme di delivery normali, quindi il tradeoff è meno stealth ma maggiore applicabilità tra i messenger.
+A differenza degli attacchi silenziosi di reaction/edit/delete sopra, l'inferenza di location non richiede message ID invalid o pacchetti stealth che cambiano stato. Bastano messaggi normali con normali delivery confirmation, quindi il tradeoff è meno stealth ma maggiore applicabilità tra messenger.
 
-## Stealthy resource exhaustion
+## Resource exhaustion stealthy
 
-Poiché ogni probe silenziosa deve essere decriptata e ackata, inviare continuamente toggle di reaction, edit non validi o pacchetti delete-for-everyone crea un DoS a livello applicativo:
+Poiché ogni silent probe deve essere decifrato e acknowledged, inviare continuamente toggle di reaction, edit invalidi o pacchetti delete-for-everyone crea un DoS a livello application-layer:
 
-* Forza la radio/modem a trasmettere/ricevere ogni secondo → drenaggio batteria evidente, soprattutto su handset idle.
-* Genera traffico upstream/downstream non metered che consuma piani dati mobili mescolandosi al rumore TLS/WebSocket.
-* Occupa i thread crypto e introduce jitter in funzionalità sensibili alla latenza (VoIP, video call) anche se l'utente non vede mai notifiche.
+* Forza radio/modem a trasmettere/ricevere ogni secondo -> battery drain evidente, specialmente su handset idle.
+* Genera traffico upstream/downstream non misurato che consuma piani dati mobili fondendosi nel rumore TLS/WebSocket.
+* Occupa thread crypto e introduce jitter in funzioni latency-sensitive (VoIP, video call) anche se l'utente non vede notifiche.
+* Su WhatsApp, reaction invalide accettano molti più dati di quanto suggerisca un emoji normale: misurazioni pubblicate hanno trovato acceptance lato server fino a circa `1 MB` per reaction.
+* Le reaction oversized smettono di produrre delivery receipt affidabili una volta che il body supera circa `30 bytes`, ma vengono comunque inoltrate e processate prima dello scarto. Tieni piccoli i body delle reaction quando ti servono ACK; ingrandiscili solo quando l'obiettivo è puro drain o covert one-way transport.
+* Le misurazioni pubbliche hanno raggiunto circa `3.7 MB/s` (`~13.3 GB/h`) di traffico vittima in questa modalità.
 
-## References
+## Riferimenti
 
 - [Careless Whisper: Exploiting Silent Delivery Receipts to Monitor Users on Mobile Instant Messengers](https://arxiv.org/html/2411.11194v4)
 - [Hope of Delivery: Extracting User Locations From Mobile Instant Messengers](https://www.ndss-symposium.org/wp-content/uploads/2023-188-paper.pdf)
@@ -118,5 +126,7 @@ Poiché ogni probe silenziosa deve essere decriptata e ackata, inviare continuam
 - [signal-cli](https://github.com/AsamK/signal-cli)
 - [libsignal-service-java](https://github.com/signalapp/libsignal-service-java)
 - [device-activity-tracker](https://github.com/gommzystudio/device-activity-tracker)
+- [careless-whisper-python](https://github.com/ctrlsam/careless-whisper-python)
+- [How to block high volumes of unknown messages | WhatsApp Help Center](https://faq.whatsapp.com/3379690015658337)
 
 {{#include ../banners/hacktricks-training.md}}
