@@ -1,59 +1,59 @@
-# E2EE Messengers'da Delivery Receipt Side-Channel Attacks
+# E2EE Messengers'da Delivery Receipt Side-Channel Saldırıları
 
 {{#include ../banners/hacktricks-training.md}}
 
-Delivery receipt'ler modern end-to-end encrypted (E2EE) messengers içinde zorunludur çünkü clients, bir ciphertext ne zaman decrypt edildiğini bilmek zorundadır; böylece ratcheting state ve ephemeral keys'i atabilirler. Server opaque blobs iletir, bu yüzden device acknowledgements (double checkmarks) başarılı decryption sonrası recipient tarafından üretilir. Bir attacker-triggered action ile corresponding delivery receipt arasındaki round-trip time (RTT) ölçümü, device state, online presence sızdıran ve covert DoS için kötüye kullanılabilen yüksek çözünürlüklü bir timing channel açığa çıkarır. Multi-device "client-fanout" deployments leakage'i büyütür çünkü kayıtlı her device probe'u decrypt eder ve kendi receipt'ini döner.
+Delivery receipts, modern end-to-end encrypted (E2EE) messengers içinde zorunludur; çünkü istemcilerin bir ciphertext ne zaman çözüldüğünü bilmesi gerekir ki ratcheting state ve ephemeral keys'i atabilsinler. Server opaque blob'ları iletir, bu yüzden device acknowledgements (double checkmarks) başarılı decryption sonrası alıcı tarafından üretilir. Bir attacker-tetiklemeli action ile karşılık gelen delivery receipt arasındaki round-trip time (RTT) ölçümü, device state, online presence sızdıran ve covert DoS için kötüye kullanılabilen yüksek çözünürlüklü bir timing channel ortaya çıkarır. Multi-device "client-fanout" deployments, leakage'i büyütür çünkü kayıtlı her device probe'u decrypt eder ve kendi receipt'ini döndürür.
 
-## Delivery receipt sources vs. user-visible signals
+## Delivery receipt kaynakları vs. kullanıcıya görünen sinyaller
 
-Her zaman bir delivery receipt üreten ama victim üzerinde UI artifacts göstermeyen message types seçin. Aşağıdaki tablo empirically confirmed davranışı özetler:
+Kurban tarafında UI artifact'ı göstermeyen ama her zaman bir delivery receipt üreten message type'larını seçin. Aşağıdaki tablo, deneysel olarak doğrulanmış davranışı özetler:
 
 | Messenger | Action | Delivery receipt | Victim notification | Notes |
 |-----------|--------|------------------|---------------------|-------|
-| **WhatsApp** | Text message | ● | ● | Her zaman noisy → sadece state bootstrap etmek için kullanışlı. |
-| | Reaction | ● | ◐ (only if reacting to victim message) | Self-reactions ve removals sessiz kalır. |
-| | Edit | ● | Platform-dependent silent push | Edit window ≈20 min; süresi geçtikten sonra da hâlâ ack’lenir. |
-| | Delete for everyone | ● | ○ | UI yaklaşık ~60 h izin verir, ancak daha sonraki packets hâlâ ack’lenir. |
+| **WhatsApp** | Text message | ● | ● | Her zaman gürültülüdür → yalnızca state bootstrap etmek için kullanışlı. |
+| | Reaction | ● | ◐ (yalnızca victim message'ına reaction veriliyorsa) | Self-reaction ve removal sessiz kalır. |
+| | Edit | ● | Platform-dependent silent push | Edit window ≈20 dak.; expiry sonrası da hâlâ ack alınır. |
+| | Delete for everyone | ● | ○ | UI yaklaşık 60 sa. izin verir, ancak daha sonraki packets hâlâ ack alınır. |
 | **Signal** | Text message | ● | ● | WhatsApp ile aynı sınırlamalar. |
-| | Reaction | ● | ◐ | Self-reactions victim için görünmez. |
-| | Edit/Delete | ● | ○ | Server yaklaşık ~48 h window uygular, en fazla 10 edit’e izin verir, ancak geç paketler hâlâ ack’lenir. |
+| | Reaction | ● | ◐ | Self-reaction victim'a görünmez. |
+| | Edit/Delete | ● | ○ | Server yaklaşık 48 sa. window uygular, 10 edit'e kadar izin verir, ancak geç packets hâlâ ack alınır. |
 | **Threema** | Text message | ● | ● | Multi-device receipts birleştirilir, bu yüzden probe başına yalnızca bir RTT görünür. |
 
-Legend: ● = always, ◐ = conditional, ○ = never. Platform-dependent UI davranışı satır içinde not edilmiştir. Gerekirse read receipts’i devre dışı bırakın, ancak delivery receipts WhatsApp veya Signal içinde kapatılamaz.
+Legend: ● = always, ◐ = conditional, ○ = never. Platform-dependent UI behaviour satır içinde belirtilmiştir. Gerekirse read receipts'i kapatın, ancak delivery receipts WhatsApp veya Signal'da kapatılamaz.
 
 ## Attacker goals and models
 
-* **G1 – Device fingerprinting:** Probe başına kaç receipt geldiğini sayın, RTT’leri cluster’layarak OS/client (Android vs iOS vs desktop) çıkarın ve online/offline geçişlerini izleyin.
-* **G2 – Behavioural monitoring:** Yüksek frekanslı RTT serisini (≈1 Hz stabildir) bir time-series olarak ele alın ve screen on/off, app foreground/background, commuting vs working hours vb. çıkarın.
-* **G3 – Resource exhaustion:** Hiç bitmeyen silent probes göndererek her victim device’ın radios/CPUs’ini uyanık tutun, battery/data tüketin ve VoIP/RTC quality’yi düşürün.
+* **G1 – Device fingerprinting:** Her probe için kaç receipt geldiğini sayın, OS/client'i (Android vs iOS vs desktop) çıkarmak için RTT'leri kümelendirin ve online/offline geçişlerini izleyin.
+* **G2 – Behavioural monitoring:** Yüksek frekanslı RTT serisini (≈1 Hz stabil) bir time-series gibi ele alın ve screen on/off, app foreground/background, commuting vs working hours, vb. çıkarın.
+* **G3 – Resource exhaustion:** Never-ending sessiz probes göndererek her victim device'ın radio/CPU'sunu uyanık tutun, battery/data tüketin ve VoIP/RTC kalitesini düşürün.
 
-Kötüye kullanım yüzeyini tanımlamak için iki threat actor yeterlidir:
+İstismar yüzeyini tanımlamak için iki threat actor yeterlidir:
 
-1. **Creepy companion:** zaten victim ile bir chat paylaşır ve self-reactions, reaction removals veya mevcut message IDs’e bağlı tekrarlayan edits/deletes’i kötüye kullanır.
-2. **Spooky stranger:** bir burner account kaydeder ve yerel conversation içinde hiç var olmamış message IDs’e referans veren reactions gönderir; WhatsApp ve Signal UI state change’i atsa bile bunları hâlâ decrypt eder ve acknowledge eder, bu yüzden önceden conversation gerekmez.
+1. **Creepy companion:** Zaten victim ile bir chat paylaşır ve mevcut message ID'lerine bağlı self-reactions, reaction removals veya tekrarlanan edits/deletes kötüye kullanır.
+2. **Spooky stranger:** Bir burner account kaydeder ve yerel conversation içinde hiç var olmamış message ID'lerini referanslayan reactions gönderir; WhatsApp ve Signal UI state change'i atsa bile bunları yine de decrypt eder ve acknowledge eder, bu yüzden önceden conversation gerekmez.
 
-## Tooling for raw protocol access
+## Raw protocol erişimi için tooling
 
-UI kısıtlarının dışında packet üretebilmek, keyfi `message_id`s belirleyebilmek ve hassas timestamps loglayabilmek için alttaki E2EE protocol'ü açığa çıkaran clients’a güvenin:
+Altta yatan E2EE protocol'ünü açığa çıkaran clients'a güvenin; böylece UI kısıtları dışında packets oluşturabilir, keyfi `message_id`'ler belirleyebilir ve hassas timestamps kaydedebilirsiniz:
 
-* **WhatsApp:** [whatsmeow](https://github.com/tulir/whatsmeow) (Go, WhatsApp Web protocol) veya [Cobalt](https://github.com/Auties00/Cobalt) (mobile-oriented) size raw `ReactionMessage`, `ProtocolMessage` (edit/delete) ve `Receipt` frames göndermeyi, double-ratchet state’i senkron tutarken sağlar.
-* **Signal:** [signal-cli](https://github.com/AsamK/signal-cli) ile [libsignal-service-java](https://github.com/signalapp/libsignal-service-java) birleşimi her message type’ı CLI/API üzerinden açığa çıkarır. Örnek self-reaction toggle:
+* **WhatsApp:** [whatsmeow](https://github.com/tulir/whatsmeow) (Go, WhatsApp Web protocol) veya [Cobalt](https://github.com/Auties00/Cobalt) (mobile-oriented), double-ratchet state'i senkron tutarken raw `ReactionMessage`, `ProtocolMessage` (edit/delete) ve `Receipt` frames göndermenize izin verir.
+* **Signal:** [signal-cli](https://github.com/AsamK/signal-cli) ile [libsignal-service-java](https://github.com/signalapp/libsignal-service-java) birlikte, her message type'ı CLI/API üzerinden açığa çıkarır. Mevcut `signal-cli` syntax'i `sendReaction RECIPIENT --target-author --target-timestamp` kullanır; delivery receipts gerçekten toplansın diye `receive` veya `daemon` çalışır durumda olsun. Örnek self-reaction toggle:
 ```bash
-signal-cli -u +12025550100 sendReaction --target +12025550123 \
---message-timestamp 1712345678901 --emoji "👍"
-signal-cli -u +12025550100 sendReaction --target +12025550123 \
---message-timestamp 1712345678901 --remove  # encodes empty emoji
+signal-cli -a +12025550100 sendReaction +12025550123 --target-author +12025550100 \
+--target-timestamp 1712345678901 --emoji "👍"
+signal-cli -a +12025550100 sendReaction +12025550123 --target-author +12025550100 \
+--target-timestamp 1712345678901 --remove
 ```
-* **Threema:** Android client source’u, delivery receipts’in device’tan çıkmadan önce nasıl consolidate edildiğini belgeleyerek bu side channel’ın neden orada ihmal edilebilir bandwidth’e sahip olduğunu açıklar.
-* **Turnkey PoCs:** `device-activity-tracker` ve `careless-whisper-python` gibi public projects zaten silent delete/reaction probes ve RTT classification’ı otomatikleştirir. Bunları protocol reference’larından ziyade hazır reconnaissance yardımcıları olarak değerlendirin; ilginç olan kısım, raw client access mevcut olduğunda attack’in operasyonel olarak basit olduğunu doğrulamalarıdır.
+* **Threema:** Android client source'u, delivery receipts cihazdan çıkmadan önce nasıl birleştirildiğini belgeler; bu da side channel'in neden orada ihmal edilebilir bandwidth'e sahip olduğunu açıklar.
+* **Turnkey PoCs:** [device-activity-tracker](https://github.com/gommzystudio/device-activity-tracker), WhatsApp/Signal backends ile gelir, varsayılan olarak sessiz delete probes kullanır ve rolling-median threshold (`RTT < 0.9 * median`) ile `active` ve `standby` etiketler. [careless-whisper-python](https://github.com/ctrlsam/careless-whisper-python), `--delay`, `--concurrent`, CSV/Prometheus exporters ve Grafana-friendly output sunan daha hafif, WhatsApp-first bir CLI'dır. İkisini protocol reference yerine reconnaissance helper olarak değerlendirin; asıl çıkarım, raw client erişimi olduğunda ne kadar az code gerektiğidir.
 
-Özel tooling mevcut olmadığında bile WhatsApp Web veya Signal Desktop üzerinden silent actions tetikleyebilir ve encrypted websocket/WebRTC channel’ını sniff edebilirsiniz, ancak raw APIs UI delays’i kaldırır ve invalid operations’a izin verir.
+Özel tooling mevcut değilse, yine de WhatsApp Web veya Signal Desktop üzerinden sessiz actions tetikleyebilir ve şifreli websocket/WebRTC channel'ını sniff edebilirsiniz; ancak raw APIs UI delay'lerini kaldırır ve invalid operations'a izin verir.
 
-## Creepy companion: silent sampling loop
+## Creepy companion: sessiz sampling loop
 
-1. Chat içinde sizin yazdığınız herhangi bir historical message’ı seçin; böylece victim hiçbir zaman "reaction" balonlarının değiştiğini görmez.
-2. Görünür bir emoji ile empty reaction payload arasında dönüşümlü gidin (WhatsApp protobufs içinde `""` olarak veya signal-cli içinde `--remove` olarak kodlanır). Her transmission, victim için UI delta olmasa da bir device ack üretir.
-3. Send time ve her delivery receipt arrival zamanını timestamp’leyin. Aşağıdaki gibi 1 Hz loop, device başına RTT trace’lerini sonsuza kadar verir:
+1. Chat'te sizin yazdığınız herhangi bir historical message'ı seçin; böylece victim "reaction" balonlarının değiştiğini hiç görmez.
+2. Görünür bir emoji ile boş bir reaction payload'u arasında dönüşümlü gidin (WhatsApp protobuf'larında `""` olarak veya signal-cli'de `--remove` olarak kodlanır). Her transmission, victim için hiçbir UI delta olmasa da bir device ack üretir.
+3. Gönderim zamanını ve her delivery receipt varışını zaman damgasıyla kaydedin. Aşağıdaki gibi 1 Hz bir loop, her device için süresiz RTT traces sağlar:
 ```python
 while True:
 send_reaction(msg_id, "👍")
@@ -62,52 +62,60 @@ send_reaction(msg_id, "")  # removal
 log_receipts()
 time.sleep(0.5)
 ```
-4. WhatsApp/Signal sınırsız reaction updates kabul ettiği için attacker’ın yeni chat content post etmesine veya edit window’larıyla uğraşmasına gerek kalmaz.
+4. WhatsApp/Signal sınırsız reaction update kabul ettiğinden, attacker'ın yeni chat content göndermesine veya edit windows hakkında endişelenmesine gerek kalmaz.
 
-## Spooky stranger: probing arbitrary phone numbers
+## Spooky stranger: rastgele phone number'ları probe etmek
 
-1. Yeni bir WhatsApp/Signal account kaydedin ve target numara için public identity keys’i alın (session setup sırasında otomatik yapılır).
-2. Taraflardan hiçbirinde görülmemiş rastgele bir `message_id` referansı veren bir reaction/edit/delete packet hazırlayın (WhatsApp keyfi `key.id` GUID’lerini kabul eder; Signal milisecond timestamps kullanır).
-3. Hiç thread olmasa bile packet’i gönderin. Victim devices bunu decrypt eder, base message ile eşleşmeyi başarısız bulur, state change’i atar, ancak yine de incoming ciphertext’i acknowledge eder ve device receipts’i attacker’a geri yollar.
-4. Victim’ın chat listesinde hiç görünmeden RTT series oluşturmak için bunu sürekli tekrarlayın.
+1. Yeni bir WhatsApp/Signal hesabı kaydedin ve hedef numara için public identity keys'i alın (session setup sırasında otomatik yapılır).
+2. Taraflardan hiçbirinin hiç görmediği rastgele bir `message_id`'yi referanslayan reaction/edit/delete packet'i oluşturun (WhatsApp key.id olarak keyfi GUID'leri kabul eder; Signal milisecond timestamps kullanır).
+3. Thread mevcut olmasa bile packet'i gönderin. Victim device'ları bunu decrypt eder, base message ile eşleştiremez, state change'i atar, ancak yine de gelen ciphertext'i acknowledge eder ve device receipts'i attacker'a geri gönderir.
+4. Victim chat listesinde hiç görünmeden RTT serileri oluşturmak için bunu sürekli tekrarlayın.
 
-## Recycling edits and deletes as covert triggers
+Önce hangi numaraların kayıtlı olduğunu keşfetmeniz gerekiyorsa veya cihaz envanterlerini ölçekte önceden doldurmak istiyorsanız, rastgele E.164 aralıklarını elle tahmin etmek yerine bunu [contact-discovery / registration oracles](../pentesting-web/registration-vulnerabilities.md) ile zincirleyin.
 
-* **Repeated deletes:** Bir message delete-for-everyone ile bir kez silindikten sonra aynı `message_id`’ye referans veren sonraki delete packets UI üzerinde etki oluşturmaz, ancak her device yine de bunları decrypt eder ve acknowledge eder.
-* **Out-of-window operations:** WhatsApp UI’da yaklaşık ~60 h delete / ~20 min edit window uygular; Signal yaklaşık ~48 h uygular. Bu window’ların dışındaki crafted protocol messages victim device üzerinde sessizce yok sayılır, ancak receipts iletilir; bu yüzden attacker’lar conversation bittikten çok sonra bile süresiz probe yapabilir.
-* **Invalid payloads:** Bozuk edit bodies veya zaten purge edilmiş messages’e referans veren deletes aynı davranışı tetikler—decryption plus receipt, sıfır user-visible artefakt.
+Son WhatsApp builds ayrıca `Settings -> Privacy -> Advanced -> Block unknown account messages` seçeneğini de açar. Bunu bir fix değil, throughput limiter olarak değerlendirin: esasen sürdürülebilir stranger-only flooding'i zorlaştırır ve zaten bilinen bir contact olduğunuzda alakasızdır.
+
+## Edit ve delete'leri covert trigger olarak yeniden kullanma
+
+* **Repeated deletes:** Bir message bir kez delete-for-everyone yapıldıktan sonra, aynı `message_id`'yi referanslayan sonraki delete packets'lerin UI etkisi olmaz ama her device yine de bunları decrypt eder ve acknowledge eder.
+* **Out-of-window operations:** WhatsApp UI'da yaklaşık 60 sa. delete / yaklaşık 20 dak. edit window uygular; Signal yaklaşık 48 sa. uygular. Bu windows dışındaki crafted protocol messages, victim device'ta sessizce yok sayılır ancak receipts iletilir; bu yüzden attacker'lar conversation bittikten çok uzun süre sonra bile probe edebilir.
+* **Invalid payloads:** Bozuk edit body'leri veya zaten purge edilmiş messages'ları referanslayan deletes de aynı davranışı tetikler—decryption artı receipt, kullanıcıya görünür artefact yok.
 
 ## Multi-device amplification & fingerprinting
 
-* Her associated device (phone, desktop app, browser companion) probe’u bağımsız olarak decrypt eder ve kendi ack’ini döner. Probe başına receipt saymak, tam device sayısını açığa çıkarır.
-* Bir device offline ise receipt’i queue’ya alınır ve reconnect olduğunda iletilir. Bu yüzden boşluklar online/offline döngülerini ve hatta commuting schedules’ı bile sızdırır (ör. travel sırasında desktop receipts durur).
-* RTT distributions, OS power management ve push wakeups nedeniyle platforma göre farklılık gösterir. RTT’leri cluster’layın (ör. median/variance features üzerinde k-means) ve “Android handset", “iOS handset", “Electron desktop" vb. olarak etiketleyin.
-* Sender’ın encrypt etmeden önce recipient’in key inventory’sini alması gerektiğinden, attacker yeni devices eşlendiğinde bunu da gözleyebilir; device count’ta ani artış veya yeni RTT cluster güçlü bir göstergedir.
+* Her associated device (phone, desktop app, browser companion) probe'u bağımsız olarak decrypt eder ve kendi ack'ini döndürür. Probe başına receipt saymak, tam device sayısını ortaya çıkarır.
+* Bir device offline ise receipt'i kuyruğa alınır ve yeniden bağlanınca gönderilir. Bu nedenle boşluklar online/offline cycle'larını ve hatta commuting schedule'ları sızdırır (ör. travel sırasında desktop receipts durur).
+* RTT dağılımları, OS power management ve push wakeups nedeniyle platforma göre farklılık gösterir. RTT'leri kümelendirin (ör. median/variance özellikleri üzerinde k-means) ve “Android handset", “iOS handset", “Electron desktop", vb. olarak etiketleyin.
+* Sender, recipient'in key inventory'sini encrypt etmeden önce almak zorunda olduğundan, attacker yeni device'ların ne zaman eşlendiğini de gözleyebilir; device sayısında ani artış veya yeni bir RTT cluster güçlü bir göstergedir.
 
-## Behaviour inference from RTT traces
+## RTT traces'ten davranış çıkarımı
 
-1. OS scheduling effects’i yakalamak için ≥1 Hz hızında sample alın. iOS üzerinde WhatsApp ile <1 s RTT’ler screen-on/foreground ile güçlü korelasyon gösterir, >1 s ise screen-off/background throttling ile ilişkilidir.
-2. Her RTT’yi "active" veya "idle" olarak etiketleyen basit classifiers (thresholding veya iki-cluster k-means) kurun. Etiketleri streak’lere toplayarak bedtime, commuting, work hours veya desktop companion’ın ne zaman aktif olduğunu çıkarın.
-3. Kullanıcıların mobile’dan desktop’a ne zaman geçtiğini, companions’ın ne zaman offline olduğunu ve app’in push mu yoksa persistent socket ile mi rate limited edildiğini görmek için tüm devices’a aynı anda yapılan probes’u korele edin.
+1. OS scheduling effects'i yakalamak için ≥1 Hz örnekleyin. WhatsApp on iOS ile <1 s RTT'ler güçlü biçimde screen-on/foreground ile, >1 s ise screen-off/background throttling ile koreledir.
+2. Her RTT'yi "active" veya "idle" olarak etiketleyen basit classifiers (thresholding veya iki-cluster k-means) oluşturun. Etiketleri streak'lere toplayarak bedtime'ları, commuting'i, work hours'ı veya desktop companion'ın ne zaman aktif olduğunu çıkarın.
+3. Kullanıcıların mobilden desktop'a ne zaman geçtiğini, companions'ın ne zaman offline olduğunu ve app'in push mu yoksa persistent socket tarafından mı rate limited edildiğini görmek için tüm device'lara eşzamanlı probes ile korelasyon yapın.
+4. Gerçek ağlarda tek ve sabit bir `1 s` threshold kullanmaktan kaçının. Her device'ı kısa bir warm-up window ile bootstrap edin ve rolling baseline'ı koruyun (örneğin, `threshold = 0.9 * median RTT`) ki Wi-Fi/cellular drift classifier'ınızı çökertmesin.
 
-## Location inference from delivery RTT
+## Delivery RTT'den konum çıkarımı
 
-Aynı timing primitive, recipient’in yalnızca aktif olup olmadığını değil, nerede olduğunu da çıkarmak için yeniden kullanılabilir. `Hope of Delivery` çalışması, bilinen receiver locations için RTT distributions üzerinde training yapmanın, attacker’ın daha sonra victim’ın location bilgisini yalnızca delivery confirmations’tan sınıflandırmasına izin verdiğini gösterdi:
+Aynı timing primitive, alıcının yalnızca aktif olup olmadığını değil, nerede olduğunu da çıkarmak için yeniden kullanılabilir. `Hope of Delivery` çalışması, bilinen receiver location'larındaki RTT dağılımları üzerinde eğitim yapmanın, attacker'ın daha sonra victim'ın konumunu yalnızca delivery confirmations'tan sınıflandırmasına izin verdiğini gösterdi:
 
-* Aynı target için, onlar birkaç bilinen yerdeyken bir baseline oluşturun (home, office, campus, country A vs country B vb.).
-* Her location için birçok normal message RTT’si toplayın ve median, variance veya percentile buckets gibi basit features çıkarın.
-* Gerçek attack sırasında, yeni probe series’i trained clusters ile karşılaştırın. Makale, aynı şehir içindeki locations’ın bile çoğu zaman ayrılabildiğini ve 3-location ayarında `>80%` accuracy elde edilebildiğini bildiriyor.
-* Bu yöntem, attacker sender environment’ı kontrol ettiğinde ve benzer network conditions altında probe yaptığında en iyi sonucu verir; çünkü ölçülen path recipient access network, wake-up latency ve messenger infrastructure’ı içerir.
+* Aynı target için, onlar birkaç bilinen yerdeyken bir baseline oluşturun (ev, ofis, kampüs, ülke A vs ülke B, vb.).
+* Her location için çok sayıda normal message RTT'si toplayın ve median, variance veya percentile bucket'ları gibi basit features çıkarın.
+* Gerçek attack sırasında, yeni probe serisini eğitilmiş cluster'larla karşılaştırın. Paper, aynı şehir içindeki location'ların bile çoğu zaman ayrılabildiğini ve 3-location setting'de `>80%` accuracy elde edildiğini bildiriyor.
+* Bu, attacker sender environment'ı kontrol ettiğinde ve benzer network conditions altında probe attığında en iyi sonucu verir; çünkü ölçülen path recipient access network'ünü, wake-up latency'sini ve messenger infrastructure'ını içerir.
 
-Yukarıdaki silent reaction/edit/delete attacks’tan farklı olarak, location inference invalid message IDs veya stealthy state-changing packets gerektirmez. Normal delivery confirmations’lı düz plain messages yeterlidir; bu yüzden tradeoff daha az stealth, ancak messengers genelinde daha geniş uygulanabilirliktir.
+Yukarıdaki sessiz reaction/edit/delete saldırılarından farklı olarak, location inference invalid message ID'ler veya stealthy state-changing packets gerektirmez. Normal delivery confirmations içeren düz messages yeterlidir; dolayısıyla tradeoff, daha düşük stealth ama messengers genelinde daha geniş uygulanabilirliktir.
 
 ## Stealthy resource exhaustion
 
-Her silent probe decrypt edilip acknowledge edilmek zorunda olduğundan, reaction toggles, invalid edits veya delete-for-everyone packets’i sürekli göndermek application-layer DoS oluşturur:
+Her sessiz probe'un decrypt edilmesi ve acknowledge edilmesi gerektiğinden, reaction toggles, invalid edits veya delete-for-everyone packets'i sürekli göndermek bir application-layer DoS yaratır:
 
-* Radio/modem’i her saniye transmit/receive etmeye zorlar → özellikle idle handsets’lerde fark edilir battery drain.
-* TLS/WebSocket noise’una karışırken mobile data plan’lerini tüketen, ölçümlenmeyen upstream/downstream traffic üretir.
-* Kullanıcı hiçbir notification görmese bile crypto threads’i meşgul eder ve latency-sensitive features’ta (VoIP, video calls) jitter oluşturur.
+* Radio/modem'i her saniye transmit/receive etmeye zorlar → özellikle boşta duran handsets'te fark edilir battery drain.
+* TLS/WebSocket noise ile karışarak mobile data plan'larını tüketen, ölçümlenmemiş upstream/downstream traffic üretir.
+* Kullanıcı hiçbir notification görmese bile crypto threads'i meşgul eder ve latency-sensitive features'ta (VoIP, video calls) jitter oluşturur.
+* WhatsApp'ta invalid reactions, normal bir emoji'nin düşündüğünden çok daha fazla data kabul eder: yayınlanmış ölçümler, server-side acceptance'ın reaction başına yaklaşık `1 MB`'a kadar çıktığını buldu.
+* Aşırı büyük reactions, body yaklaşık `30 bytes`'ı aştığında güvenilir delivery receipts üretmeyi bırakır; ancak yine de discard edilmeden önce forward edilir ve işlenir. ACK'lere ihtiyacınız olduğunda reaction bodies'yi küçük tutun; onları yalnızca amaç saf drain veya covert one-way transport olduğunda büyütün.
+* Kamuya açık ölçümler bu modda yaklaşık `3.7 MB/s` (`~13.3 GB/h`) victim traffic'e ulaştı.
 
 ## References
 
@@ -118,5 +126,7 @@ Her silent probe decrypt edilip acknowledge edilmek zorunda olduğundan, reactio
 - [signal-cli](https://github.com/AsamK/signal-cli)
 - [libsignal-service-java](https://github.com/signalapp/libsignal-service-java)
 - [device-activity-tracker](https://github.com/gommzystudio/device-activity-tracker)
+- [careless-whisper-python](https://github.com/ctrlsam/careless-whisper-python)
+- [How to block high volumes of unknown messages | WhatsApp Help Center](https://faq.whatsapp.com/3379690015658337)
 
 {{#include ../banners/hacktricks-training.md}}
