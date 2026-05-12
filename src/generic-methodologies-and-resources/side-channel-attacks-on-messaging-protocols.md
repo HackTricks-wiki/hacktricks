@@ -37,15 +37,15 @@ Two threat actors are sufficient to describe the abuse surface:
 Rely on clients that expose the underlying E2EE protocol so you can craft packets outside UI constraints, specify arbitrary `message_id`s, and log precise timestamps:
 
 * **WhatsApp:** [whatsmeow](https://github.com/tulir/whatsmeow) (Go, WhatsApp Web protocol) or [Cobalt](https://github.com/Auties00/Cobalt) (mobile-oriented) let you emit raw `ReactionMessage`, `ProtocolMessage` (edit/delete), and `Receipt` frames while keeping the double-ratchet state in sync.
-* **Signal:** [signal-cli](https://github.com/AsamK/signal-cli) combined with [libsignal-service-java](https://github.com/signalapp/libsignal-service-java) exposes every message type via CLI/API. Example self-reaction toggle:
+* **Signal:** [signal-cli](https://github.com/AsamK/signal-cli) combined with [libsignal-service-java](https://github.com/signalapp/libsignal-service-java) exposes every message type via CLI/API. Current `signal-cli` syntax uses `sendReaction RECIPIENT --target-author --target-timestamp`; keep `receive` or `daemon` running so delivery receipts are actually collected. Example self-reaction toggle:
   ```bash
-  signal-cli -u +12025550100 sendReaction --target +12025550123 \
-      --message-timestamp 1712345678901 --emoji "👍"
-  signal-cli -u +12025550100 sendReaction --target +12025550123 \
-      --message-timestamp 1712345678901 --remove  # encodes empty emoji
+  signal-cli -a +12025550100 sendReaction +12025550123 --target-author +12025550100 \
+      --target-timestamp 1712345678901 --emoji "👍"
+  signal-cli -a +12025550100 sendReaction +12025550123 --target-author +12025550100 \
+      --target-timestamp 1712345678901 --remove
   ```
 * **Threema:** Source of the Android client documents how delivery receipts are consolidated before they leave the device, explaining why the side channel has negligible bandwidth there.
-* **Turnkey PoCs:** public projects such as `device-activity-tracker` and `careless-whisper-python` already automate silent delete/reaction probes and RTT classification. Treat them as ready-made reconnaissance helpers rather than protocol references; the interesting part is that they confirm the attack is operationally simple once raw client access exists.
+* **Turnkey PoCs:** [device-activity-tracker](https://github.com/gommzystudio/device-activity-tracker) ships WhatsApp/Signal backends, defaults to silent delete probes, and labels `active` vs `standby` with a rolling-median threshold (`RTT < 0.9 * median`). [careless-whisper-python](https://github.com/ctrlsam/careless-whisper-python) is a lighter WhatsApp-first CLI with `--delay`, `--concurrent`, CSV/Prometheus exporters, and Grafana-friendly output. Treat both as reconnaissance helpers rather than protocol references; the important takeaway is how little code is needed once raw client access exists.
 
 When custom tooling is unavailable, you can still trigger silent actions from WhatsApp Web or Signal Desktop and sniff the encrypted websocket/WebRTC channel, but raw APIs remove UI delays and allow invalid operations.
 
@@ -71,6 +71,10 @@ When custom tooling is unavailable, you can still trigger silent actions from Wh
 3. Send the packet even though no thread exists. The victim devices decrypt it, fail to match the base message, discard the state change, but still acknowledge the incoming ciphertext, sending device receipts back to the attacker.
 4. Repeat continuously to build RTT series without ever appearing in the victim’s chat list.
 
+If you first need to discover which numbers are registered or want to pre-seed device inventories at scale, chain this with [contact-discovery / registration oracles](../pentesting-web/registration-vulnerabilities.md) rather than guessing random E.164 ranges by hand.
+
+Recent WhatsApp builds also expose `Settings -> Privacy -> Advanced -> Block unknown account messages`. Treat it as a throughput limiter, not a fix: it mainly hurts sustained stranger-only flooding and is irrelevant once you are already a known contact.
+
 ## Recycling edits and deletes as covert triggers
 
 * **Repeated deletes:** After a message is deleted-for-everyone once, further delete packets referencing the same `message_id` have no UI effect but every device still decrypts and acknowledges them.
@@ -89,6 +93,7 @@ When custom tooling is unavailable, you can still trigger silent actions from Wh
 1. Sample at ≥1 Hz to capture OS scheduling effects. With WhatsApp on iOS, <1 s RTTs strongly correlate with screen-on/foreground, >1 s with screen-off/background throttling.
 2. Build simple classifiers (thresholding or two-cluster k-means) that label each RTT as "active" or "idle". Aggregate labels into streaks to derive bedtimes, commutes, work hours, or when the desktop companion is active.
 3. Correlate simultaneous probes towards every device to see when users switch from mobile to desktop, when companions go offline, and whether the app is rate limited by push vs persistent socket.
+4. In real networks, avoid a single hardcoded `1 s` threshold. Bootstrap each device with a short warm-up window and keep a rolling baseline (for example, `threshold = 0.9 * median RTT`) so Wi-Fi/cellular drift does not collapse your classifier.
 
 ## Location inference from delivery RTT
 
@@ -108,6 +113,9 @@ Because every silent probe must be decrypted and acknowledged, continuously send
 * Forces the radio/modem to transmit/receive every second → noticeable battery drain, especially on idle handsets.
 * Generates unmetered upstream/downstream traffic that consumes mobile data plans while blending into TLS/WebSocket noise.
 * Occupies crypto threads and introduces jitter in latency-sensitive features (VoIP, video calls) even though the user never sees notifications.
+* On WhatsApp, invalid reactions accept far more data than a normal emoji suggests: published measurements found server-side acceptance up to roughly `1 MB` per reaction.
+* Oversized reactions stop producing reliable delivery receipts once the body grows beyond roughly `30 bytes`, but they are still forwarded and processed before discard. Keep reaction bodies tiny when you need ACKs; inflate them only when the goal is pure drain or covert one-way transport.
+* Public measurements reached about `3.7 MB/s` (`~13.3 GB/h`) of victim traffic in this mode.
 
 ## References
 
@@ -118,5 +126,7 @@ Because every silent probe must be decrypted and acknowledged, continuously send
 - [signal-cli](https://github.com/AsamK/signal-cli)
 - [libsignal-service-java](https://github.com/signalapp/libsignal-service-java)
 - [device-activity-tracker](https://github.com/gommzystudio/device-activity-tracker)
+- [careless-whisper-python](https://github.com/ctrlsam/careless-whisper-python)
+- [How to block high volumes of unknown messages | WhatsApp Help Center](https://faq.whatsapp.com/3379690015658337)
 
 {{#include ../banners/hacktricks-training.md}}
