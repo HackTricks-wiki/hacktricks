@@ -1,14 +1,14 @@
-# macOS 函数钩子
+# macOS Function Hooking
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## 函数插入
+## Function Interposing
 
-创建一个 **dylib**，并包含一个 **`__interpose` (`__DATA___interpose`)** 部分（或一个标记为 **`S_INTERPOSING`** 的部分），其中包含指向 **原始** 和 **替代** 函数的 **函数指针** 元组。
+创建一个带有 **`__interpose` (`__DATA___interpose`)** 段（或带有 **`S_INTERPOSING`** 标志的段）的 **dylib**，其中包含指向 **original** 和 **replacement** 函数的 **function pointers** 元组。
 
-然后，使用 **`DYLD_INSERT_LIBRARIES`** 注入 dylib（插入需要在主应用加载之前发生）。显然，适用于 **`DYLD_INSERT_LIBRARIES`** 使用的 [**限制** 在这里也适用](macos-library-injection/index.html#check-restrictions)。
+然后，使用 **`DYLD_INSERT_LIBRARIES`** **inject** 这个 dylib（interposing 必须在主应用加载之前发生）。显然，适用于 **`DYLD_INSERT_LIBRARIES`** 的 [**restrictions**](macos-library-injection/index.html#check-restrictions) 在这里也同样适用。
 
-### 插入 printf
+### Interpose printf
 
 {{#tabs}}
 {{#tab name="interpose.c"}}
@@ -78,15 +78,15 @@ DYLD_INSERT_LIBRARIES=./interpose2.dylib ./hello
 Hello from interpose
 ```
 > [!WARNING]
-> **`DYLD_PRINT_INTERPOSTING`** 环境变量可用于调试插入，并将打印插入过程。
+> **`DYLD_PRINT_INTERPOSING`** env variable 可以用于调试 interposing，并且会打印 interpose 过程。
 
-还要注意，**插入发生在进程和加载的库之间**，它不适用于共享库缓存。
+另外要注意，**interposing 发生在进程和已加载的 libraries 之间**，它对 shared library cache 不起作用。
 
-### 动态插入
+### Dynamic Interposing
 
-现在也可以使用 **`dyld_dynamic_interpose`** 动态插入一个函数。这允许在运行时以编程方式插入一个函数，而不是仅仅从一开始就这样做。
+现在也可以使用函数 **`dyld_dynamic_interpose`** 动态地 interpose 一个函数。这允许你在 **runtime** 中 **programmatically** interpose 一个函数，而不是只能从 **开始** 时进行。
 
-只需指明 **要替换的函数和替换函数的元组**。
+只需要指定要 **替换的 function** 和 **replacement** function 的 **tuples**。
 ```c
 struct dyld_interpose_tuple {
 const void* replacement;
@@ -95,22 +95,60 @@ const void* replacee;
 extern void dyld_dynamic_interpose(const struct mach_header* mh,
 const struct dyld_interpose_tuple array[], size_t count);
 ```
-## 方法交换
+### 导入表重绑定 (fishhook-style)
 
-在 ObjectiveC 中，方法调用的方式是：**`[myClassInstance nameOfTheMethodFirstParam:param1 secondParam:param2]`**
+如果你已经在 **进程内** 拥有代码执行，并且想在不重启目标的情况下 hook 一个 **导入的 C function**，一个非常常见的原语是 **symbol rebinding**（由 **`fishhook`** 推广）。
 
-需要 **对象**、**方法**和 **参数**。当调用一个方法时，使用函数 **`objc_msgSend`** 发送 **msg**：`int i = ((int (*)(id, SEL, NSString *, NSString *))objc_msgSend)(someObject, @selector(method1p1:p2:), value1, value2);`
+这个技巧不使用 **`__interpose`** section，而是遍历 Mach-O 元数据（`__LINKEDIT` -> indirect symbol table -> `__la_symbol_ptr` / `__nl_symbol_ptr`），并 **覆盖当前 image 使用的 import slot**。这对于在一个 **已经运行** 的进程中 hook 函数，或者使用 **`rebind_symbols_image`** 只 hook **单个 image** 非常有用。
 
-对象是 **`someObject`**，方法是 **`@selector(method1p1:p2:)`**，参数是 **value1**，**value2**。
+> [!TIP]
+> 这只会影响那些 वास्तव上经过 **import pointer** 的调用。如果目标函数是在 **同一个 image 内直接调用** 的，那么就没有可重写的 imported slot，因此这种技巧看不到那个 call site。
+```c
+// clang -dynamiclib fishhook_demo.c fishhook.c -o fishhook_demo.dylib
+#include <stdio.h>
+#include <unistd.h>
+#include "fishhook.h"
 
-根据对象结构，可以访问一个 **方法数组**，其中 **名称** 和 **指向方法代码的指针** 被 **存放**。
+static int (*real_close)(int);
+
+int hooked_close(int fd) {
+fprintf(stderr, "[+] close(%d)\n", fd);
+return real_close(fd);
+}
+
+__attribute__((constructor))
+static void install(void) {
+struct rebinding rb = {"close", hooked_close, (void *)&real_close};
+rebind_symbols(&rb, 1);
+}
+```
+
+```bash
+DYLD_INSERT_LIBRARIES=./fishhook_demo.dylib ./hello
+```
+在最近的 macOS 版本中，许多 rebinding 目标不再位于可写的 **`__DATA`** 页中。rebinders 通常需要在 patch 指针之前，先临时将 **`__DATA_CONST`** 设为可写。除此之外，在 Apple Silicon / **`arm64e`** 上，你还应预期存在 authenticated pointers 以及 **`__AUTH_CONST.__auth_got`** 中的额外间接层，因此只扫描传统的 lazy/non-lazy symbol pointer sections 的 rebinder 可能会漏掉一些 call sites。
 
 > [!CAUTION]
-> 请注意，由于方法和类是基于其名称访问的，因此这些信息存储在二进制文件中，因此可以使用 `otool -ov </path/bin>` 或 [`class-dump </path/bin>`](https://github.com/nygard/class-dump) 来检索。
+> **`arm64e`** ABI 对许多 function pointers 使用 **Pointer Authentication (PAC)**。在 Intel 上可用的盲目 pointer writes，在 Apple Silicon 上可能会破坏某个 call site。编写你自己的 rebinder 或 inline hooker 时，要准备使用 **`<ptrauth.h>`** helpers，例如 **`ptrauth_sign_unauthenticated`** 或 **`ptrauth_auth_and_resign`**，并且要专门在 **`arm64e`** targets 上测试。
 
-### 访问原始方法
+关于 **`__AUTH`**、**`__AUTH_CONST`** 和 **`__auth_got`** 的更多细节，请查看[这一页](../macos-apps-inspecting-debugging-and-fuzzing/objects-in-memory.md)。
 
-可以访问方法的信息，例如名称、参数数量或地址，如以下示例所示：
+## Method Swizzling
+
+在 ObjectiveC 中，一个 method 的调用方式如下：**`[myClassInstance nameOfTheMethodFirstParam:param1 secondParam:param2]`**
+
+它需要 **object**、**method** 和 **params**。当 method 被调用时，会使用函数 **`objc_msgSend`** 发送一个 **msg**：`int i = ((int (*)(id, SEL, NSString *, NSString *))objc_msgSend)(someObject, @selector(method1p1:p2:), value1, value2);`
+
+object 是 **`someObject`**，method 是 **`@selector(method1p1:p2:)`**，arguments 是 **value1**、**value2**。
+
+沿着 object structures 继续，可以到达一个 **methods array**，其中存放着 **names** 和指向 method code 的 **pointers**。
+
+> [!CAUTION]
+> 请注意，由于 methods 和 classes 是基于它们的 names 来访问的，这些信息会存储在 binary 中，因此可以通过 `otool -ov </path/bin>` 或 [`class-dump </path/bin>`](https://github.com/nygard/class-dump) 将其提取出来
+
+### Accessing the raw methods
+
+可以像下面这个例子一样访问 method 的信息，例如 name、params 数量或 address：
 ```objectivec
 // gcc -framework Foundation test.m -o test
 
@@ -176,9 +214,9 @@ NSLog(@"Uppercase string: %@", uppercaseString3);
 return 0;
 }
 ```
-### Method Swizzling with method_exchangeImplementations
+### 使用 method_exchangeImplementations 的 Method Swizzling
 
-函数 **`method_exchangeImplementations`** 允许 **更改** **一个函数的实现地址为另一个函数的实现地址**。
+函数 **`method_exchangeImplementations`** 允许**更改** **一个函数与另一个函数** 的 **implementation** 的 **address**。
 
 > [!CAUTION]
 > 因此，当调用一个函数时，**执行的是另一个函数**。
@@ -215,7 +253,7 @@ method_exchangeImplementations(originalMethod, swizzledMethod);
 
 // We changed the address of one method for the other
 // Now when the method substringFromIndex is called, what is really called is swizzledSubstringFromIndex
-// And when swizzledSubstringFromIndex is called, substringFromIndex is really colled
+// And when swizzledSubstringFromIndex is called, substringFromIndex is really called
 
 // Example usage
 NSString *myString = @"Hello, World!";
@@ -226,15 +264,15 @@ return 0;
 }
 ```
 > [!WARNING]
-> 在这种情况下，如果**合法**方法的**实现代码**对**方法**的**名称**进行**验证**，它可能会**检测到**这种交换并阻止其运行。
+> 在这种情况下，如果 **legit** 方法的 **implementation code** 会 **verifies** **method** **name**，它可能会 **detect** 这种 swizzling 并阻止它运行。
 >
-> 以下技术没有这个限制。
+> 下面的 technique 没有这个限制。
 
-### 使用 method_setImplementation 进行方法交换
+### 使用 method_setImplementation 的 Method Swizzling
 
-之前的格式很奇怪，因为你正在将两个方法的实现互相更改。使用函数 **`method_setImplementation`**，你可以**更改**一个**方法的实现为另一个**。
+前面的格式很奇怪，因为你是在把两个方法的 implementation 互相替换。使用函数 **`method_setImplementation`**，你可以 **change** 一个 **method** 的 **implementation** 为另一个。
 
-只需记住，如果你打算在覆盖之前从新实现中调用原始实现，请**存储原始实现的地址**，因为稍后定位该地址会更加复杂。
+只要记住，在覆盖之前要 **store** 原始 implementation 的地址，如果你打算从新的 implementation 里调用它，因为之后再去定位那个地址就会困难得多。
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
@@ -288,15 +326,15 @@ return 0;
 ```
 ## Hooking Attack Methodology
 
-在本页中讨论了不同的函数钩取方法。然而，它们涉及到**在进程内部运行代码进行攻击**。
+在这个页面中讨论了不同的 hook 函数方式。然而，它们都涉及**在进程内部运行代码来进行攻击**。
 
-为了做到这一点，最简单的技术是通过环境变量或劫持来注入一个[Dyld](macos-library-injection/macos-dyld-hijacking-and-dyld_insert_libraries.md)。不过，我想这也可以通过[Dylib进程注入](macos-ipc-inter-process-communication/index.html#dylib-process-injection-via-task-port)来完成。
+为此，最容易使用的技术是通过环境变量注入一个 [Dyld via environment variables or hijacking](macos-library-injection/macos-dyld-hijacking-and-dyld_insert_libraries.md)。不过，我猜这也可以通过 [Dylib process injection](macos-ipc-inter-process-communication/index.html#dylib-process-injection-via-task-port) 来实现。
 
-然而，这两种选项都**限制**于**未保护**的二进制文件/进程。检查每种技术以了解更多关于限制的信息。
+然而，这两种选项都**仅限于** **未受保护的** binaries/processes。请查看每种技术以了解更多限制。
 
-然而，函数钩取攻击是非常具体的，攻击者会这样做以**从进程内部窃取敏感信息**（否则你只会进行进程注入攻击）。而这些敏感信息可能位于用户下载的应用程序中，例如MacPass。
+不过，function hooking 攻击非常具体，攻击者会这样做来**从进程内部窃取敏感信息**（否则你只会进行 process injection attack）。而这些敏感信息可能位于用户下载的 Apps 中，例如 MacPass。
 
-因此，攻击者的途径是找到一个漏洞或去掉应用程序的签名，通过应用程序的Info.plist注入**`DYLD_INSERT_LIBRARIES`**环境变量，添加类似于：
+因此，攻击者的路径要么是找到一个漏洞，要么移除应用程序的签名，通过应用程序的 Info.plist 注入 **`DYLD_INSERT_LIBRARIES`** env variable，添加类似这样的内容：
 ```xml
 <key>LSEnvironment</key>
 <dict>
@@ -304,16 +342,16 @@ return 0;
 <string>/Applications/Application.app/Contents/malicious.dylib</string>
 </dict>
 ```
-然后**重新注册**该应用程序：
+然后 **重新注册** 该应用程序：
 ```bash
 /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -f /Applications/Application.app
 ```
-在该库中添加钩子代码以提取信息：密码、消息...
+在该库中加入 hooking 代码以 exfiltrate 信息：Passwords、messages...
 
 > [!CAUTION]
-> 请注意，在较新版本的 macOS 中，如果您 **去除应用程序二进制文件的签名**，并且它之前已被执行，macOS **将不再执行该应用程序**。
+> 请注意，在较新的 macOS 版本中，如果你**去掉了签名**的应用二进制文件，并且它之前已经执行过，macOS **将不再执行**该应用。
 
-#### 库示例
+#### Library example
 ```objectivec
 // gcc -dynamiclib -framework Foundation sniff.m -o sniff.dylib
 
@@ -349,8 +387,10 @@ IMP fake_IMP = (IMP)custom_setPassword;
 real_setPassword = method_setImplementation(real_Method, fake_IMP);
 }
 ```
-## 参考
+## References
 
 - [https://nshipster.com/method-swizzling/](https://nshipster.com/method-swizzling/)
+- [https://github.com/facebook/fishhook](https://github.com/facebook/fishhook)
+- [https://clang.llvm.org/docs/PointerAuthentication.html](https://clang.llvm.org/docs/PointerAuthentication.html)
 
 {{#include ../../../banners/hacktricks-training.md}}
