@@ -4,9 +4,9 @@
 
 ## Function Interposing
 
-Kreirajte **dylib** sa **`__interpose` (`__DATA___interpose`)** sekcijom (ili sekcijom označenom sa **`S_INTERPOSING`**) koja sadrži parove **pokazivača na funkcije** koje se odnose na **originalne** i **zamenske** funkcije.
+Kreiraj **dylib** sa **`__interpose` (`__DATA___interpose`)** sekcijom (ili sekcijom označenom sa **`S_INTERPOSING`**) koja sadrži tuple-ove **pokazivača na funkcije** koji referišu na **originalnu** i **zamensku** funkciju.
 
-Zatim, **ubacite** dylib sa **`DYLD_INSERT_LIBRARIES`** (interpozicija treba da se desi pre nego što se glavna aplikacija učita). Očigledno, [**ograničenja** koja se primenjuju na korišćenje **`DYLD_INSERT_LIBRARIES`** važe i ovde](macos-library-injection/index.html#check-restrictions).
+Zatim **inject**-uj dylib pomoću **`DYLD_INSERT_LIBRARIES`** (interposing mora da se desi pre nego što se main app učita). Naravno, [**restrikcije**] primenjene na upotrebu **`DYLD_INSERT_LIBRARIES`** važe i ovde.](macos-library-injection/index.html#check-restrictions)
 
 ### Interpose printf
 
@@ -78,15 +78,15 @@ DYLD_INSERT_LIBRARIES=./interpose2.dylib ./hello
 Hello from interpose
 ```
 > [!WARNING]
-> **`DYLD_PRINT_INTERPOSTING`** env varijabla se može koristiti za debagovanje interpozicije i održaće proces interpozicije.
+> Promenljiva okruženja **`DYLD_PRINT_INTERPOSING`** može da se koristi za debagovanje interposing-a i ispisivaće interpose proces.
 
-Takođe, imajte na umu da **interpozicija se dešava između procesa i učitanih biblioteka**, ne funkcioniše sa kešom deljenih biblioteka.
+Takođe imaj na umu da se **interposing dešava između procesa i učitanih biblioteka**, i ne radi sa shared library cache.
 
-### Dinamička Interpozicija
+### Dynamic Interposing
 
-Sada je takođe moguće dinamički interponovati funkciju koristeći funkciju **`dyld_dynamic_interpose`**. Ovo omogućava programatsku interpoziciju funkcije u vreme izvođenja umesto da se to radi samo na početku.
+Sada je takođe moguće interpose-ovati funkciju dinamički koristeći funkciju **`dyld_dynamic_interpose`**. Ovo omogućava da se funkcija interpose-uje **programski** u **runtime-u** umesto da se to radi samo od **početka**.
 
-Potrebno je samo naznačiti **tuple** funkcije koju treba zameniti i funkciju zamene.
+Potrebno je samo navesti **tuple-ove** za **funkciju koja se zamenjuje i zamensku** funkciju.
 ```c
 struct dyld_interpose_tuple {
 const void* replacement;
@@ -95,22 +95,60 @@ const void* replacee;
 extern void dyld_dynamic_interpose(const struct mach_header* mh,
 const struct dyld_interpose_tuple array[], size_t count);
 ```
-## Method Swizzling
+### Ponovno povezivanje Import Table (fishhook-style)
 
-U ObjectiveC, ovako se poziva metoda: **`[myClassInstance nameOfTheMethodFirstParam:param1 secondParam:param2]`**
+Ako već imate izvršavanje koda **unutar procesa** i želite da hook-ujete **importovanu C funkciju** bez ponovnog pokretanja targeta, veoma česta tehnika je **symbol rebinding** (popularizovana od strane **`fishhook`**).
 
-Potrebni su **objekat**, **metoda** i **parametri**. Kada se metoda pozove, **msg se šalje** koristeći funkciju **`objc_msgSend`**: `int i = ((int (*)(id, SEL, NSString *, NSString *))objc_msgSend)(someObject, @selector(method1p1:p2:), value1, value2);`
+Umesto korišćenja sekcije **`__interpose`**, ova tehnika prolazi kroz Mach-O metapodatke (`__LINKEDIT` -> indirect symbol table -> `__la_symbol_ptr` / `__nl_symbol_ptr`) i **prepisuje import slot** koji koristi trenutna slika. Ovo je veoma korisno za hook-ovanje funkcija u procesu koji je **već pokrenut** ili za hook-ovanje **samo jedne slike** pomoću **`rebind_symbols_image`**.
 
-Objekat je **`someObject`**, metoda je **`@selector(method1p1:p2:)`**, a argumenti su **value1**, **value2**.
+> [!TIP]
+> Ovo utiče samo na pozive koji zaista prolaze kroz **import pointer**. Ako se target funkcija **poziva direktno unutar iste slike**, ne postoji importovani slot koji bi se prepisao, pa ova tehnika neće videti to mesto poziva.
+```c
+// clang -dynamiclib fishhook_demo.c fishhook.c -o fishhook_demo.dylib
+#include <stdio.h>
+#include <unistd.h>
+#include "fishhook.h"
 
-Prateći strukture objekata, moguće je doći do **niza metoda** gde su **imena** i **pokazivači** na kod metoda **smešteni**.
+static int (*real_close)(int);
+
+int hooked_close(int fd) {
+fprintf(stderr, "[+] close(%d)\n", fd);
+return real_close(fd);
+}
+
+__attribute__((constructor))
+static void install(void) {
+struct rebinding rb = {"close", hooked_close, (void *)&real_close};
+rebind_symbols(&rb, 1);
+}
+```
+
+```bash
+DYLD_INSERT_LIBRARIES=./fishhook_demo.dylib ./hello
+```
+Na novijim verzijama macOS-a mnogi rebinding targeti više nisu u writable **`__DATA`** stranicama. Rebinders obično moraju privremeno da učine **`__DATA_CONST`** writable pre patchovanja pokazivača. Pored toga, na Apple Silicon / **`arm64e`** treba očekivati authenticated pointers i dodatnu indirection u **`__AUTH_CONST.__auth_got`**, tako da rebinder koji skenira samo klasične lazy/non-lazy symbol pointer sekcije može da propusti neke call sites.
 
 > [!CAUTION]
-> Imajte na umu da se metode i klase pristupaju na osnovu njihovih imena, tako da se ove informacije čuvaju u binarnom formatu, pa ih je moguće preuzeti sa `otool -ov </path/bin>` ili [`class-dump </path/bin>`](https://github.com/nygard/class-dump)
+> **`arm64e`** ABI koristi **Pointer Authentication (PAC)** za mnoge function pointers. Blind pointer writes koji su ranije radili na Intel-u mogu da pokvare call site na Apple Silicon. Kada pišete sopstveni rebinder ili inline hooker, budite spremni da koristite **`<ptrauth.h>`** helpers kao što su **`ptrauth_sign_unauthenticated`** ili **`ptrauth_auth_and_resign`** i testirajte posebno na **`arm64e`** targetima.
+
+Za više detalja o **`__AUTH`**, **`__AUTH_CONST`** i **`__auth_got`**, pogledajte [ovu stranicu](../macos-apps-inspecting-debugging-and-fuzzing/objects-in-memory.md).
+
+## Method Swizzling
+
+U ObjectiveC ovako se poziva metoda: **`[myClassInstance nameOfTheMethodFirstParam:param1 secondParam:param2]`**
+
+Potrebni su **object**, **method** i **params**. A kada se metoda poziva, **msg is sent** koristeći funkciju **`objc_msgSend`**: `int i = ((int (*)(id, SEL, NSString *, NSString *))objc_msgSend)(someObject, @selector(method1p1:p2:), value1, value2);`
+
+Object je **`someObject`**, metoda je **`@selector(method1p1:p2:)`** a argumenti su **value1**, **value2**.
+
+Prateći object strukture, moguće je doći do **array of methods** gde su **names** i **pointers** ka method code **located**.
+
+> [!CAUTION]
+> Napomena da pošto se methods i classes pristupa na osnovu njihovih names, ove informacije su sačuvane u binary-ju, pa je moguće izvući ih pomoću `otool -ov </path/bin>` ili [`class-dump </path/bin>`](https://github.com/nygard/class-dump)
 
 ### Accessing the raw methods
 
-Moguće je pristupiti informacijama o metodama kao što su ime, broj parametara ili adresa kao u sledećem primeru:
+Moguće je pristupiti informacijama o methods kao što su name, number of params ili address, kao u sledećem primeru:
 ```objectivec
 // gcc -framework Foundation test.m -o test
 
@@ -176,12 +214,12 @@ NSLog(@"Uppercase string: %@", uppercaseString3);
 return 0;
 }
 ```
-### Method Swizzling sa method_exchangeImplementations
+### Method Swizzling with method_exchangeImplementations
 
 Funkcija **`method_exchangeImplementations`** omogućava da se **promeni** **adresa** **implementacije** **jedne funkcije za drugu**.
 
 > [!CAUTION]
-> Tako da kada se funkcija pozove, ono što se **izvršava je druga funkcija**.
+> Dakle, kada se jedna funkcija pozove, ono što se **izvršava je druga**.
 ```objectivec
 //gcc -framework Foundation swizzle_str.m -o swizzle_str
 
@@ -215,7 +253,7 @@ method_exchangeImplementations(originalMethod, swizzledMethod);
 
 // We changed the address of one method for the other
 // Now when the method substringFromIndex is called, what is really called is swizzledSubstringFromIndex
-// And when swizzledSubstringFromIndex is called, substringFromIndex is really colled
+// And when swizzledSubstringFromIndex is called, substringFromIndex is really called
 
 // Example usage
 NSString *myString = @"Hello, World!";
@@ -226,15 +264,15 @@ return 0;
 }
 ```
 > [!WARNING]
-> U ovom slučaju, ako **implementacioni kod legit** metode **proverava** **ime** **metode**, mogao bi da **otkrije** ovo swizzling i spreči njegovo izvršavanje.
+> U ovom slučaju, ako **implementation code of the legit** metoda **proverava** **method** **name**, mogla bi da **detektuje** ovo swizzling i spreči njegovo izvršavanje.
 >
 > Sledeća tehnika nema ovo ograničenje.
 
 ### Method Swizzling with method_setImplementation
 
-Prethodni format je čudan jer menjate implementaciju 2 metode jednu iz druge. Koristeći funkciju **`method_setImplementation`**, možete **promeniti** **implementaciju** **metode za drugu**.
+Prethodni format je čudan jer menjate implementation 2 metoda jedan drugim. Koristeći funkciju **`method_setImplementation`** možete **promeniti** **implementation** jedne **method for the other one**.
 
-Samo zapamtite da **sačuvate adresu implementacije originalne** metode ako planirate da je pozovete iz nove implementacije pre nego što je prepišete, jer će kasnije biti mnogo komplikovanije locirati tu adresu.
+Samo zapamtite da **sačuvate adresu implementation original one** ako planirate da je pozovete iz nove implementation pre nego što je prepišete, jer će kasnije biti mnogo komplikovanije da se ta adresa pronađe.
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
@@ -288,15 +326,15 @@ return 0;
 ```
 ## Hooking Attack Methodology
 
-Na ovoj stranici su diskutovani različiti načini za hook-ovanje funkcija. Međutim, oni su uključivali **izvršavanje koda unutar procesa za napad**.
+Na ovoj stranici su razmatrani različiti načini za hookovanje funkcija. Međutim, oni su uključivali **pokretanje koda unutar procesa radi napada**.
 
-Da bi se to postiglo, najlakša tehnika koja se može koristiti je injekcija [Dyld putem promenljivih okruženja ili otmice](macos-library-injection/macos-dyld-hijacking-and-dyld_insert_libraries.md). Međutim, mislim da se to takođe može uraditi putem [Dylib procesne injekcije](macos-ipc-inter-process-communication/index.html#dylib-process-injection-via-task-port).
+Da bi se to uradilo, najlakša tehnika za korišćenje je injekcija [Dyld putem environment variables ili hijacking](macos-library-injection/macos-dyld-hijacking-and-dyld_insert_libraries.md). Međutim, pretpostavljam da bi se ovo moglo uraditi i putem [Dylib process injection](macos-ipc-inter-process-communication/index.html#dylib-process-injection-via-task-port).
 
-Međutim, obe opcije su **ograničene** na **nezaštićene** binarne datoteke/procese. Proverite svaku tehniku da biste saznali više o ograničenjima.
+Međutim, obe opcije su **ograničene** na **unprotected** binarne fajlove/procese. Pogledajte svaku tehniku da biste saznali više o ograničenjima.
 
-Međutim, napad putem hook-ovanja funkcija je veoma specifičan, napadač će to uraditi da **ukrade osetljive informacije iznutra procesa** (inače biste jednostavno uradili napad injekcijom procesa). A te osetljive informacije mogu biti smeštene u aplikacijama preuzetim od strane korisnika, kao što je MacPass.
+Ipak, function hooking napad je veoma specifičan, napadač će to uraditi da bi **ukrao osetljive informacije iznutra procesa** (ako nije tako, jednostavno biste uradili process injection napad). A te osetljive informacije mogu se nalaziti u aplikacijama koje je korisnik preuzeo, kao što je MacPass.
 
-Dakle, vektor napadača bi bio da pronađe ranjivost ili ukloni potpis aplikacije, injektuje **`DYLD_INSERT_LIBRARIES`** env promenljivu kroz Info.plist aplikacije dodajući nešto poput:
+Dakle, vektor napada bi bio ili da se pronađe ranjivost ili da se ukloni potpis aplikacije, i da se kroz Info.plist aplikacije ubaci **`DYLD_INSERT_LIBRARIES`** env variable dodavanjem nečega poput:
 ```xml
 <key>LSEnvironment</key>
 <dict>
@@ -308,12 +346,12 @@ i zatim **ponovo registrujte** aplikaciju:
 ```bash
 /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -f /Applications/Application.app
 ```
-Dodajte u tu biblioteku kod za hooking kako biste eksfiltrirali informacije: Lozinke, poruke...
+Dodaj u tu biblioteku hooking kod za exfiltration informacija: Passwords, messages...
 
 > [!CAUTION]
-> Imajte na umu da u novijim verzijama macOS-a, ako **uklonite potpis** aplikacionog binarnog fajla i ako je prethodno izvršen, macOS **neće više izvršavati aplikaciju**.
+> Imajte na umu da u novijim verzijama macOS-a, ako **stripujete signature** binarnog fajla aplikacije i on je prethodno bio izvršen, macOS **neće više izvršavati aplikaciju**.
 
-#### Primer biblioteke
+#### Library example
 ```objectivec
 // gcc -dynamiclib -framework Foundation sniff.m -o sniff.dylib
 
@@ -352,5 +390,7 @@ real_setPassword = method_setImplementation(real_Method, fake_IMP);
 ## Reference
 
 - [https://nshipster.com/method-swizzling/](https://nshipster.com/method-swizzling/)
+- [https://github.com/facebook/fishhook](https://github.com/facebook/fishhook)
+- [https://clang.llvm.org/docs/PointerAuthentication.html](https://clang.llvm.org/docs/PointerAuthentication.html)
 
 {{#include ../../../banners/hacktricks-training.md}}
