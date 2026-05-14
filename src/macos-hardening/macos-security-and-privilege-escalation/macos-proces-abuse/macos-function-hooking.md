@@ -86,13 +86,13 @@ Hello from interpose
 ```
 
 > [!WARNING]
-> The **`DYLD_PRINT_INTERPOSTING`** env variable can be used to debug interposing and will print the interpose process.
+> The **`DYLD_PRINT_INTERPOSING`** env variable can be used to debug interposing and will print the interpose process.
 
 Also note that **interposing occurs between the process and the loaded libraries**, it doesn't work with the shared library cache.
 
 ### Dynamic Interposing
 
-Now it's also possible to interpose a function dynamically using the function **`dyld_dynamic_interpose`**. This allows to programatically interpose a function in run time instead of doing it only from the begining.
+Now it's also possible to interpose a function dynamically using the function **`dyld_dynamic_interpose`**. This allows to **programmatically** interpose a function in **runtime** instead of doing it only from the **beginning**.
 
 It's just needed to indicate the **tuples** of the **function to replace and the replacement** function.
 
@@ -105,6 +105,46 @@ extern void dyld_dynamic_interpose(const struct mach_header* mh,
         const struct dyld_interpose_tuple array[], size_t count);
 ```
 
+### Import Table Rebinding (fishhook-style)
+
+If you already have code execution **inside the process** and want to hook an **imported C function** without relaunching the target, a very common primitive is **symbol rebinding** (popularised by **`fishhook`**).
+
+Instead of using the **`__interpose`** section, this technique walks the Mach-O metadata (`__LINKEDIT` -> indirect symbol table -> `__la_symbol_ptr` / `__nl_symbol_ptr`) and **overwrites the import slot** used by the current image. This is very useful to hook functions in an **already-running** process or to hook **just one image** with **`rebind_symbols_image`**.
+
+> [!TIP]
+> This only affects calls that actually go through an **import pointer**. If the target function is **called directly inside the same image**, there is no imported slot to rewrite, so this technique won't see that call site.
+
+```c
+// clang -dynamiclib fishhook_demo.c fishhook.c -o fishhook_demo.dylib
+#include <stdio.h>
+#include <unistd.h>
+#include "fishhook.h"
+
+static int (*real_close)(int);
+
+int hooked_close(int fd) {
+    fprintf(stderr, "[+] close(%d)\n", fd);
+    return real_close(fd);
+}
+
+__attribute__((constructor))
+static void install(void) {
+    struct rebinding rb = {"close", hooked_close, (void *)&real_close};
+    rebind_symbols(&rb, 1);
+}
+```
+
+```bash
+DYLD_INSERT_LIBRARIES=./fishhook_demo.dylib ./hello
+```
+
+On recent macOS versions many rebinding targets are no longer in writable **`__DATA`** pages. Rebinders usually need to temporarily make **`__DATA_CONST`** writable before patching the pointer. Moreover, on Apple Silicon / **`arm64e`** you should expect authenticated pointers and extra indirection in **`__AUTH_CONST.__auth_got`**, so a rebinder that only scans the classic lazy/non-lazy symbol pointer sections may miss some call sites.
+
+> [!CAUTION]
+> The **`arm64e`** ABI uses **Pointer Authentication (PAC)** for many function pointers. Blind pointer writes that used to work on Intel can break a call site on Apple Silicon. When writing your own rebinder or inline hooker, be ready to use **`<ptrauth.h>`** helpers such as **`ptrauth_sign_unauthenticated`** or **`ptrauth_auth_and_resign`** and test specifically on **`arm64e`** targets.
+
+For more details about **`__AUTH`**, **`__AUTH_CONST`** and **`__auth_got`**, check [this page](../macos-apps-inspecting-debugging-and-fuzzing/objects-in-memory.md).
+
 ## Method Swizzling
 
 In ObjectiveC this is how a method is called like: **`[myClassInstance nameOfTheMethodFirstParam:param1 secondParam:param2]`**
@@ -116,7 +156,7 @@ The object is **`someObject`**, the method is **`@selector(method1p1:p2:)`** and
 Following the object structures, it's possible to reach an **array of methods** where the **names** and **pointers** to the method code are **located**.
 
 > [!CAUTION]
-> Note that because methods and classes are accessed based on their names, this information is store in the binary, so it's possible to retrieve it with `otool -ov </path/bin>` or [`class-dump </path/bin>`](https://github.com/nygard/class-dump)
+> Note that because methods and classes are accessed based on their names, this information is stored in the binary, so it's possible to retrieve it with `otool -ov </path/bin>` or [`class-dump </path/bin>`](https://github.com/nygard/class-dump)
 
 ### Accessing the raw methods
 
@@ -228,7 +268,7 @@ int main(int argc, const char * argv[]) {
 
     // We changed the address of one method for the other
     // Now when the method substringFromIndex is called, what is really called is swizzledSubstringFromIndex
-    // And when swizzledSubstringFromIndex is called, substringFromIndex is really colled
+    // And when swizzledSubstringFromIndex is called, substringFromIndex is really called
 
     // Example usage
     NSString *myString = @"Hello, World!";
@@ -374,6 +414,8 @@ static void customConstructor(int argc, const char **argv) {
 ## References
 
 - [https://nshipster.com/method-swizzling/](https://nshipster.com/method-swizzling/)
+- [https://github.com/facebook/fishhook](https://github.com/facebook/fishhook)
+- [https://clang.llvm.org/docs/PointerAuthentication.html](https://clang.llvm.org/docs/PointerAuthentication.html)
 
 {{#include ../../../banners/hacktricks-training.md}}
 
