@@ -4,9 +4,9 @@
 
 ## Function Interposing
 
-**`__interpose` (`__DATA___interpose`)** セクションを持つ **dylib** を作成します（または **`S_INTERPOSING`** フラグが付けられたセクション）。このセクションには、**元の** 関数と **置き換え** 関数を参照する **関数ポインタ** のタプルが含まれます。
+**`__interpose` (`__DATA___interpose`)** セクション（または **`S_INTERPOSING`** が付いたセクション）を含む **dylib** を作成し、その中に **元の** 関数と **置き換え先** 関数を参照する **関数ポインタ** のタプルを含めます。
 
-次に、**`DYLD_INSERT_LIBRARIES`** を使用して dylib を **注入** します（インターポジングはメインアプリがロードされる前に行う必要があります）。明らかに、[**`DYLD_INSERT_LIBRARIES`** の使用に適用される **制限** はここでも適用されます](macos-library-injection/index.html#check-restrictions)。
+次に、**`DYLD_INSERT_LIBRARIES`** を使ってその dylib を **inject** します（interposing はメインアプリの読み込み前に行われる必要があります）。当然ながら、**`DYLD_INSERT_LIBRARIES`** の使用に適用される [**restrictions**](macos-library-injection/index.html#check-restrictions) もここに適用されます。
 
 ### Interpose printf
 
@@ -78,15 +78,15 @@ DYLD_INSERT_LIBRARIES=./interpose2.dylib ./hello
 Hello from interpose
 ```
 > [!WARNING]
-> **`DYLD_PRINT_INTERPOSTING`** 環境変数は、インターポジションをデバッグするために使用でき、インターポーズプロセスを出力します。
+> **`DYLD_PRINT_INTERPOSING`** env variable は interposing のデバッグに使え、interpose process を出力します。
 
-また、**インターポジションはプロセスとロードされたライブラリの間で発生し**、共有ライブラリキャッシュでは機能しないことに注意してください。
+また、**interposing は process と loaded libraries の間で発生する**ことに注意してください。shared library cache では動作しません。
 
-### ダイナミックインターポジション
+### Dynamic Interposing
 
-現在、関数 **`dyld_dynamic_interpose`** を使用して関数を動的にインターポーズすることも可能です。これにより、最初からだけでなく、実行時にプログラム的に関数をインターポーズできます。
+今では、関数 **`dyld_dynamic_interpose`** を使って動的に function を interpose することも可能です。これにより、**runtime** において **programmatically** 関数を interpose でき、**beginning** からのみ行う必要はありません。
 
-**置き換える関数と置き換え関数のタプル**を指定するだけで済みます。
+必要なのは、**置き換える function** と **replacement function** の **tuples** を指定することだけです。
 ```c
 struct dyld_interpose_tuple {
 const void* replacement;
@@ -95,22 +95,60 @@ const void* replacee;
 extern void dyld_dynamic_interpose(const struct mach_header* mh,
 const struct dyld_interpose_tuple array[], size_t count);
 ```
-## メソッドスワッピング
+### Import Table Rebinding (fishhook-style)
 
-ObjectiveCでは、メソッドは次のように呼び出されます: **`[myClassInstance nameOfTheMethodFirstParam:param1 secondParam:param2]`**
+すでに **プロセス内** で code execution があり、ターゲットを再起動せずに **imported C function** を hook したい場合、非常に一般的な primitive は **symbol rebinding**（**`fishhook`** によって普及）です。
 
-**オブジェクト**、**メソッド**、および**パラメータ**が必要です。そして、メソッドが呼び出されると、**msgが送信されます**。これは関数**`objc_msgSend`**を使用します: `int i = ((int (*)(id, SEL, NSString *, NSString *))objc_msgSend)(someObject, @selector(method1p1:p2:), value1, value2);`
+**`__interpose`** セクションを使う代わりに、この technique は Mach-O メタデータ（`__LINKEDIT` -> indirect symbol table -> `__la_symbol_ptr` / `__nl_symbol_ptr`）を走査し、現在の image が使っている **import slot を上書き** します。これは、**すでに実行中** の process で function を hook したり、**`rebind_symbols_image`** を使って **1つの image だけ** を hook したりするのに非常に有用です。
 
-オブジェクトは**`someObject`**、メソッドは**`@selector(method1p1:p2:)`**、引数は**value1**、**value2**です。
+> [!TIP]
+> これは、実際に **import pointer** を通る呼び出しにのみ影響します。ターゲット関数が **同じ image 内で直接呼び出される** 場合、書き換えるべき imported slot は存在しないため、この technique ではその call site は見えません。
+```c
+// clang -dynamiclib fishhook_demo.c fishhook.c -o fishhook_demo.dylib
+#include <stdio.h>
+#include <unistd.h>
+#include "fishhook.h"
 
-オブジェクト構造に従って、**メソッドの配列**にアクセスすることが可能で、そこには**名前**と**メソッドコードへのポインタ**が**格納されています**。
+static int (*real_close)(int);
+
+int hooked_close(int fd) {
+fprintf(stderr, "[+] close(%d)\n", fd);
+return real_close(fd);
+}
+
+__attribute__((constructor))
+static void install(void) {
+struct rebinding rb = {"close", hooked_close, (void *)&real_close};
+rebind_symbols(&rb, 1);
+}
+```
+
+```bash
+DYLD_INSERT_LIBRARIES=./fishhook_demo.dylib ./hello
+```
+最近の macOS バージョンでは、多くの rebinding 対象がもはや書き込み可能な **`__DATA`** ページ上にありません。Rebinder は通常、ポインタをパッチする前に一時的に **`__DATA_CONST`** を書き込み可能にする必要があります。さらに、Apple Silicon / **`arm64e`** では、認証済みポインタと **`__AUTH_CONST.__auth_got`** における追加の間接参照を想定する必要があるため、従来の lazy/non-lazy symbol pointer セクションだけをスキャンする rebinder では、いくつかの call site を見逃す可能性があります。
 
 > [!CAUTION]
-> メソッドとクラスはその名前に基づいてアクセスされるため、この情報はバイナリに保存されます。したがって、`otool -ov </path/bin>`または[`class-dump </path/bin>`](https://github.com/nygard/class-dump)を使用して取得することが可能です。
+> **`arm64e`** ABI は、多くの関数ポインタに **Pointer Authentication (PAC)** を使用します。Intel では動作していた無差別なポインタ書き込みは、Apple Silicon では call site を壊す可能性があります。自分で rebinder や inline hooker を作成する場合は、**`<ptrauth.h>`** の **`ptrauth_sign_unauthenticated`** や **`ptrauth_auth_and_resign`** のようなヘルパーを使えるようにし、特に **`arm64e`** ターゲットでテストしてください。
 
-### 生のメソッドへのアクセス
+**`__AUTH`**、**`__AUTH_CONST`**、**`__auth_got`** の詳細については、[このページ](../macos-apps-inspecting-debugging-and-fuzzing/objects-in-memory.md) を確認してください。
 
-次の例のように、メソッドの情報（名前、パラメータの数、アドレスなど）にアクセスすることが可能です:
+## Method Swizzling
+
+ObjectiveC では、メソッドは次のように呼び出されます: **`[myClassInstance nameOfTheMethodFirstParam:param1 secondParam:param2]`**
+
+必要なのは **object**、**method**、**params** です。メソッドが呼び出されると **`objc_msgSend`** 関数を使って **msg is sent** されます: `int i = ((int (*)(id, SEL, NSString *, NSString *))objc_msgSend)(someObject, @selector(method1p1:p2:), value1, value2);`
+
+object は **`someObject`**、method は **`@selector(method1p1:p2:)`**、引数は **value1**、**value2** です。
+
+object structure をたどることで、**method の配列** に到達でき、そこに method code への **names** と **pointers** が **located** されています。
+
+> [!CAUTION]
+> method と class は名前に基づいてアクセスされるため、この情報は binary に保存されています。したがって、`otool -ov </path/bin>` や [`class-dump </path/bin>`](https://github.com/nygard/class-dump) を使って取得できます
+
+### Accessing the raw methods
+
+次の例のように、name、params の数、address などの method 情報にアクセスできます:
 ```objectivec
 // gcc -framework Foundation test.m -o test
 
@@ -176,12 +214,12 @@ NSLog(@"Uppercase string: %@", uppercaseString3);
 return 0;
 }
 ```
-### Method Swizzling with method_exchangeImplementations
+### method_exchangeImplementations を使った Method Swizzling
 
-関数 **`method_exchangeImplementations`** は **一つの関数の実装のアドレスを他の関数に変更する** ことを可能にします。
+関数 **`method_exchangeImplementations`** は、**ある関数の実装**の**アドレス**を**別の関数のものに変更**できます。
 
 > [!CAUTION]
-> したがって、関数が呼び出されると **実行されるのは他の関数です**。
+> そのため、ある関数が呼ばれると、**実行されるのは別の関数**です。
 ```objectivec
 //gcc -framework Foundation swizzle_str.m -o swizzle_str
 
@@ -215,7 +253,7 @@ method_exchangeImplementations(originalMethod, swizzledMethod);
 
 // We changed the address of one method for the other
 // Now when the method substringFromIndex is called, what is really called is swizzledSubstringFromIndex
-// And when swizzledSubstringFromIndex is called, substringFromIndex is really colled
+// And when swizzledSubstringFromIndex is called, substringFromIndex is really called
 
 // Example usage
 NSString *myString = @"Hello, World!";
@@ -226,15 +264,15 @@ return 0;
 }
 ```
 > [!WARNING]
-> この場合、**正当な**メソッドの**実装コード**が**メソッド名**を**検証**すると、このスウィズリングを**検出**し、実行を防ぐことができます。
+> この場合、正規の**method**の**実装コード**が**method**の**名前**を**検証**すると、この swizzling を**検出**して実行を防ぐことができます。
 >
-> 次の技術にはこの制限はありません。
+> 次の technique にはこの制約はありません。
 
-### method_setImplementationによるメソッドスウィズリング
+### Method Swizzling with method_setImplementation
 
-前の形式は奇妙です。なぜなら、2つのメソッドの実装を互いに変更しているからです。**`method_setImplementation`**関数を使用すると、**あるメソッドの実装を別のメソッドに変更**できます。
+前の形式は少し変です。なぜなら、2つの methods の実装を互いに入れ替えているからです。**`method_setImplementation`** 関数を使うと、ある **method** の **implementation** を別のものに**変更**できます。
 
-新しい実装から元の実装を呼び出す予定がある場合は、上書きする前に**元の実装のアドレスを保存する**ことを忘れないでください。後でそのアドレスを見つけるのは非常に複雑になります。
+あとでそのアドレスを見つけるのがずっと難しくなるので、上書きする前に、元のものの **implementation** のアドレスを**保存**しておくことを忘れないでください。新しい implementation からそれを呼び出すつもりなら特に重要です。
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
@@ -286,17 +324,17 @@ return 0;
 }
 }
 ```
-## フッキング攻撃の方法論
+## Hooking Attack Methodology
 
-このページでは、関数をフックするさまざまな方法について説明しました。しかし、これらは**攻撃のためにプロセス内でコードを実行する**ことを含んでいました。
+このページでは、関数を hook するさまざまな方法について説明しました。ただし、いずれも **attack するために process 内で code を実行する** ことが前提でした。
 
-それを行うために、最も簡単な技術は、[環境変数を介してDyldを注入するか、ハイジャックすること](macos-library-injection/macos-dyld-hijacking-and-dyld_insert_libraries.md)です。しかし、これも[Dylibプロセス注入](macos-ipc-inter-process-communication/index.html#dylib-process-injection-via-task-port)を介して行うことができると思います。
+そのために使う最も簡単な technique は、[Dyld via environment variables or hijacking](macos-library-injection/macos-dyld-hijacking-and-dyld_insert_libraries.md) を inject することです。ただし、これは [Dylib process injection](macos-ipc-inter-process-communication/index.html#dylib-process-injection-via-task-port) でも可能だと思われます。
 
-ただし、両方のオプションは**保護されていない**バイナリ/プロセスに**制限**されています。各技術を確認して、制限について詳しく学んでください。
+しかし、どちらの option も **unprotected** な binary/process に **限定** されています。制限について詳しくは各 technique を確認してください。
 
-ただし、関数フッキング攻撃は非常に特定的であり、攻撃者は**プロセス内から機密情報を盗む**ためにこれを行います（そうでなければ、プロセス注入攻撃を行うだけです）。この機密情報は、MacPassなどのユーザーがダウンロードしたアプリに存在する可能性があります。
+ただし、function hooking attack は非常に特定的で、attacker は **process 内部から sensitive information を steal する** ためにこれを行います（そうでなければ、単に process injection attack を行えばよいからです）。そして、その sensitive information は MacPass のような user downloaded Apps に存在する場合があります。
 
-したがって、攻撃者のベクターは、脆弱性を見つけるか、アプリケーションの署名を剥がし、アプリケーションのInfo.plistを介して**`DYLD_INSERT_LIBRARIES`**環境変数を注入し、次のようなものを追加することになります:
+したがって attacker の vector は、vulnerability を見つけるか、application の signature を strip して、application の Info.plist 経由で **`DYLD_INSERT_LIBRARIES`** env variable を inject し、次のようなものを追加することになります:
 ```xml
 <key>LSEnvironment</key>
 <dict>
@@ -304,16 +342,16 @@ return 0;
 <string>/Applications/Application.app/Contents/malicious.dylib</string>
 </dict>
 ```
-そして、**再登録**します。
+そして、その後 **再登録** する:
 ```bash
 /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -f /Applications/Application.app
 ```
-そのライブラリに情報を抽出するためのフックコードを追加します: パスワード、メッセージ...
+そのライブラリに、その情報を exfiltrate するための hooking code を追加する: Passwords, messages...
 
 > [!CAUTION]
-> 新しいバージョンのmacOSでは、アプリケーションバイナリの**署名を削除**し、以前に実行されていた場合、macOSは**アプリケーションを実行しなくなります**。
+> macOS の新しいバージョンでは、アプリケーション binary の **signature を strip** し、かつ以前に実行されていた場合、macOS は **もうその application を実行しません**。
 
-#### ライブラリの例
+#### Library example
 ```objectivec
 // gcc -dynamiclib -framework Foundation sniff.m -o sniff.dylib
 
@@ -352,5 +390,7 @@ real_setPassword = method_setImplementation(real_Method, fake_IMP);
 ## 参考文献
 
 - [https://nshipster.com/method-swizzling/](https://nshipster.com/method-swizzling/)
+- [https://github.com/facebook/fishhook](https://github.com/facebook/fishhook)
+- [https://clang.llvm.org/docs/PointerAuthentication.html](https://clang.llvm.org/docs/PointerAuthentication.html)
 
 {{#include ../../../banners/hacktricks-training.md}}
