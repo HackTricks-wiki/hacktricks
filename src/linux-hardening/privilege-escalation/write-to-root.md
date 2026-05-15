@@ -192,9 +192,70 @@ chmod +x server-command
 
 - **Trigger the privileged action** (e.g., pressing a UI button that spawns the helper). When root re-executes the hijacked path, grab the escalated shell with `./rootshell -p`.
 
+### Page-cache-only overwrite of readable privileged files
+
+Some kernel bugs do **not** give you an on-disk arbitrary write, but they still let you **modify the in-memory page-cache copy** of a root-owned file that you can read. If the target is later consumed via **`read()`**, **`mmap()`**, or **`execve()`**, the kernel will use the corrupted cached page even though the file on disk is unchanged.
+
+This is especially useful against **setuid binaries** and privileged config/scripts that are readable by low-privileged users:
+
+- target a readable privileged file such as `/usr/bin/su`
+- corrupt the **page cache only**
+- execute the cached copy before the page is evicted or the host reboots
+
+Technical patterns worth checking in kernel attack-surface research:
+
+- **zero-copy / splice-backed pages** reused by another subsystem
+- **in-place decrypt / decompress / transform** paths on buffers that may still reference file-backed pages
+- dropped ownership metadata such as **shared / read-only / page-cache-backed** markers during coalescing
+- namespace-reachable network/crypto surfaces that become usable after gaining namespace-local **`CAP_NET_ADMIN`**
+
+A recent XFRM/ESP-in-TCP example used exactly this pattern: queued file-backed skb fragments were later treated as private packet data after the shared-fragment marker was lost during coalescing, so the decrypt path modified the **file page cache** instead of a private skb buffer.
+
+### XOR-style page-cache writes
+
+Not every kernel page-cache bug gives a direct STORE primitive. Some primitives are **XOR-based**, so exploitation becomes:
+
+1. read the current target byte(s)
+2. compute the delta: `need = current ^ desired`
+3. choose the input/keystream/nonce that produces that XOR
+4. trigger the write primitive only for bytes that still need changing
+
+This matters because the attacker is not writing the final bytes directly; they are steering a transform so the kernel flips the cached bytes into the desired values.
+
+### Namespace-assisted reachability
+
+A recurring Linux LPE pattern is to use **user + network namespaces** to access attack surface that normally looks administrator-only:
+
+```bash
+unshare --user --map-root-user --net --fork bash
+capsh --print | grep cap_net_admin
+ip link show
+```
+
+Inside that namespace you may gain **namespace-scoped** `CAP_NET_ADMIN`, which is often enough to configure networking or XFRM state needed to hit the vulnerable path without being host root.
+
+### Detection / mitigation notes
+
+Because the file on disk is unchanged, normal file hashes may still look clean while the live page cache is poisoned. After mitigating the kernel bug, **drop the affected cache pages or reboot** before trusting executions of previously targeted binaries.
+
+Useful checks / mitigations:
+
+```bash
+sysctl kernel.unprivileged_userns_clone 2>/dev/null
+sysctl kernel.apparmor_restrict_unprivileged_userns 2>/dev/null
+lsmod | egrep '^(esp4|esp6|rxrpc)\b'
+rmmod esp4 esp6 rxrpc 2>/dev/null
+printf 'install esp4 /bin/false\ninstall esp6 /bin/false\ninstall rxrpc /bin/false\n' > /etc/modprobe.d/dirtyfrag.conf
+# after containment / patching, force cached files to reload from disk
+printf 1 > /proc/sys/vm/drop_caches
+```
+
 ## References
 
 - [HTB Bamboo – hijacking a root-executed script in a user-writable PaperCut directory](https://0xdf.gitlab.io/2026/02/03/htb-bamboo.html)
+- [Tenable: Fragnesia (CVE-2026-46300): Frequently asked questions about new Linux Kernel XFRM ESP-in-TCP privilege escalation](https://www.tenable.com/blog/fragnesia-cve-2026-46300-faq-about-new-linux-kernel-xfrm-esp-in-tcp-priv-esc)
+- [V12 Security PoC / technical details: Fragnesia](https://github.com/v12-security/pocs/tree/main/fragnesia)
+- [netdev patch: net: skbuff: preserve shared-frag marker during coalescing](https://lists.openwall.net/netdev/2026/05/13/79)
 - [HTB: Gavel](https://0xdf.gitlab.io/2026/03/14/htb-gavel.html)
 
 {{#include ../../banners/hacktricks-training.md}}
