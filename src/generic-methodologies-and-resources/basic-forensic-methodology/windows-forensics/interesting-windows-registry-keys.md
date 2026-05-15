@@ -1,101 +1,93 @@
-# Claves de Registro de Windows Interesantes
-
-### Claves de Registro de Windows Interesantes
+# Claves interesantes del Registro de Windows
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-### **Información de Versión de Windows y Propietario**
+Windows Registry hives son una de las formas más rápidas de pasar de _¿qué pasó?_ a _¿qué usuario, cuándo y desde dónde?_. Para análisis en vivo, prefiere `CurrentControlSet`; para análisis offline de hives, primero resuelve qué `ControlSet00x` estaba activo en lugar de hardcodear `ControlSet001`.
 
-- Ubicado en **`Software\Microsoft\Windows NT\CurrentVersion`**, encontrarás la versión de Windows, el Service Pack, la hora de instalación y el nombre del propietario registrado de manera sencilla.
+### Versión de Windows e información del propietario
 
-### **Nombre del Computador**
+- `SOFTWARE\Microsoft\Windows NT\CurrentVersion`: edición/build de Windows, hora de instalación, propietario registrado, nombre del producto y otros metadatos de compilación.
+- `SYSTEM\Select`: mapea `Current`, `Default` y `LastKnownGood` a los valores reales `ControlSet00x` usados por el sistema.
 
-- El nombre del host se encuentra en **`System\ControlSet001\Control\ComputerName\ComputerName`**.
+### Nombre del equipo
 
-### **Configuración de Zona Horaria**
+- `SYSTEM\CurrentControlSet\Control\ComputerName\ComputerName`: hostname actual.
 
-- La zona horaria del sistema se almacena en **`System\ControlSet001\Control\TimeZoneInformation`**.
+### Configuración de zona horaria
 
-### **Seguimiento del Tiempo de Acceso**
+- `SYSTEM\CurrentControlSet\Control\TimeZoneInformation`: zona horaria configurada y valores relacionados con DST.
 
-- Por defecto, el seguimiento del último tiempo de acceso está desactivado (**`NtfsDisableLastAccessUpdate=1`**). Para habilitarlo, usa:
-`fsutil behavior set disablelastaccess 0`
+### Seguimiento de tiempo de acceso
 
-### Versiones de Windows y Service Packs
+- `SYSTEM\CurrentControlSet\Control\FileSystem`: `NtfsDisableLastAccessUpdate` indica si se están actualizando las marcas de tiempo de último acceso de NTFS.
+- Para activarlo, usa: `fsutil behavior set disablelastaccess 0`
 
-- La **versión de Windows** indica la edición (por ejemplo, Home, Pro) y su lanzamiento (por ejemplo, Windows 10, Windows 11), mientras que los **Service Packs** son actualizaciones que incluyen correcciones y, a veces, nuevas características.
+### Detalles de apagado
 
-### Habilitando el Tiempo de Último Acceso
+- `SYSTEM\CurrentControlSet\Control\Windows`: hora del último apagado.
+- `SYSTEM\CurrentControlSet\Control\Watchdog\Display`: en sistemas antiguos también puede exponer contadores de apagado.
 
-- Habilitar el seguimiento del último tiempo de acceso te permite ver cuándo se abrieron por última vez los archivos, lo que puede ser crítico para el análisis forense o la supervisión del sistema.
+### Configuración de red
 
-### Detalles de Información de Red
+- `SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\Interfaces\{GUID}`: IPs de la interfaz, leases DHCP, gateway y datos DNS.
+- `SOFTWARE\Microsoft\Windows NT\CurrentVersion\NetworkList\Profiles\{GUID}`: nombre del perfil de red/SSID más las horas de primera y última conexión.
+- `SOFTWARE\Microsoft\Windows NT\CurrentVersion\NetworkList\Signatures\Managed\{GUID}` y `...\Unmanaged\{GUID}`: datos de correlación del perfil como la MAC del gateway y el sufijo DNS.
+- `SYSTEM\CurrentControlSet\Services\LanmanServer\Shares`: carpetas compartidas locales publicadas por el host.
 
-- El registro contiene datos extensos sobre configuraciones de red, incluyendo **tipos de redes (inalámbrica, cable, 3G)** y **categorías de red (Pública, Privada/Hogar, Dominio/Trabajo)**, que son vitales para entender la configuración de seguridad de la red y los permisos.
+### Acceso remoto e historial de recursos compartidos de red
 
-### Caché del Lado del Cliente (CSC)
+- `NTUSER.DAT\Software\Microsoft\Terminal Server Client\Default`: lista MRU de RDP saliente (`MRU0`..`MRU9`).
+- `NTUSER.DAT\Software\Microsoft\Terminal Server Client\Servers\<target>`: historial de RDP saliente por host. Las subclaves suelen almacenar `UsernameHint`, y la hora `LastWrite` de la clave es un pivote útil.
+- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\MountPoints2`: unidades de red mapeadas, recursos compartidos UNC y puntos de montaje de medios extraíbles vinculados a un usuario específico.
 
-- **CSC** mejora el acceso a archivos sin conexión al almacenar copias de archivos compartidos. Diferentes configuraciones de **CSCFlags** controlan cómo y qué archivos se almacenan en caché, afectando el rendimiento y la experiencia del usuario, especialmente en entornos con conectividad intermitente.
+### Programas que se inician automáticamente y persistencia programada
 
-### Programas de Inicio Automático
+- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Run`
+- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\RunOnce`
+- `SOFTWARE\Microsoft\Windows\CurrentVersion\Run`
+- `SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce`
+- `SOFTWARE\Microsoft\Windows NT\CurrentVersion\Schedule\TaskCache\Tree\<TaskName>` y `...\Tasks\{GUID}`: metadatos de tareas programadas. Si una tarea existe aquí pero el valor `SD` falta en `Tree\<TaskName>`, sospecha manipulación oculta de tareas al estilo Tarrask y correlaciónala con `C:\Windows\System32\Tasks\<TaskName>`.
 
-- Los programas listados en varias claves de registro `Run` y `RunOnce` se inician automáticamente al arrancar, afectando el tiempo de arranque del sistema y potencialmente siendo puntos de interés para identificar malware o software no deseado.
+### Búsquedas, rutas tecleadas y MRUs
+
+- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\WordWheelQuery`: términos de búsqueda de File Explorer.
+- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\TypedPaths`: rutas de Explorer escritas manualmente.
+- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\RunMRU`: los últimos 26 comandos de `Win + R`. `MRUList` preserva su orden.
+- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\RecentDocs`: documentos y carpetas abiertas recientemente.
+- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\ComDlg32\OpenSavePidlMRU`
+- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\ComDlg32\LastVisitedPidlMRU`
+- `NTUSER.DAT\Software\Microsoft\Office\<VERSION>\UserMRU\*\FileMRU`: archivos recientes de Office.
+
+### Seguimiento de actividad del usuario
+
+- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist\{GUID}\Count`: historial de ejecución impulsado por GUI. Los nombres de valor están codificados en ROT13, y los datos binarios incluyen contadores de ejecución y la hora de última ejecución.
+- Trata `UserAssist` como evidencia de apoyo sólida, no como un veredicto aislado: principalmente rastrea apps o archivos `.lnk` lanzados a través de Explorer y puede omitir la ejecución por línea de comandos o por servicio. En Windows 10+, algunas entradas no significan necesariamente que el proceso se ejecutó por completo.
+- `SYSTEM\CurrentControlSet\Services\bam\State\UserSettings\{SID}` y `SYSTEM\CurrentControlSet\Services\dam\State\UserSettings\{SID}`: trazas modernas de ejecución en Windows 10/11 con atribución por SID y hora de última ejecución. Son especialmente útiles para binarios ejecutados localmente, pero las entradas antiguas pueden caducar rápido y las ejecuciones desde recursos compartidos de red/medios extraíbles son menos fiables.
+- Para artefactos de ejecución más amplios como Prefetch, Amcache, ShimCache y SRUM, consulta el [Windows forensics overview](README.md#programs-executed).
 
 ### Shellbags
 
-- **Shellbags** no solo almacenan preferencias para vistas de carpetas, sino que también proporcionan evidencia forense de acceso a carpetas incluso si la carpeta ya no existe. Son invaluables para investigaciones, revelando la actividad del usuario que no es obvia a través de otros medios.
+- Shellbags se almacenan tanto en `NTUSER.DAT\Software\Microsoft\Windows\Shell\BagMRU` / `Bags` como en `UsrClass.dat\Local Settings\Software\Microsoft\Windows\Shell\BagMRU` / `Bags`.
+- Las entradas de `NTUSER.DAT` son especialmente útiles para navegación UNC/de red, mientras que `UsrClass.dat` es donde Windows Vista+ suele almacenar shellbags de carpetas locales o extraíbles.
+- Pueden mostrar la existencia de carpetas, su recorrido y preferencias de vista incluso después de que la carpeta haya sido borrada. El acceso tipo Explorer a archivos de archivo también puede dejar rastros de shellbag.
+- No todos los shellbags prueban acceso exitoso a la carpeta, así que corrobora con LNKs, Jump Lists, marcas de tiempo o mapeos de volumen.
+- Usa **[Shellbag Explorer](https://ericzimmerman.github.io/#!index.md)** o **SBECmd** para analizarlos.
 
-### Información y Forense de USB
+### Información USB
 
-- Los detalles almacenados en el registro sobre dispositivos USB pueden ayudar a rastrear qué dispositivos se conectaron a un computador, potencialmente vinculando un dispositivo a transferencias de archivos sensibles o incidentes de acceso no autorizado.
+- `HKLM\SYSTEM\CurrentControlSet\Enum\USBSTOR`: inventario principal de dispositivos USB de almacenamiento masivo (vendor, product, revision, serial/device instance).
+- `HKLM\SYSTEM\CurrentControlSet\Enum\USB`: inventario más amplio de dispositivos USB, incluyendo dispositivos que no son de almacenamiento.
+- `HKLM\SYSTEM\CurrentControlSet\Enum\USB\VID_*\PID_*\...\Properties\{83da6326-97a6-4088-9453-a1923f573b29}`: en builds recientes de Windows 10/11 este es un punto de alto valor para marcas de tiempo de ciclo de vida por dispositivo como install, first install, last arrival y last removal.
+- `HKLM\SYSTEM\MountedDevices`: mapea volúmenes e identificadores de dispositivo a letras de unidad / volume GUIDs. Solo puede sobrevivir el último mapeo para una letra de unidad dada.
+- `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\EMDMgmt`: pivote útil para números de serie de volumen y metadatos previos del medio.
+- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\MountPoints2`: historial específico del usuario de interacción con letras de unidad y recursos compartidos.
+- Los teléfonos y tablets modernos conectados vía MTP/PTP pueden **no** aparecer bajo `USBSTOR`. Revisa también `HKLM\SYSTEM\CurrentControlSet\Enum\SWD\WPDBUSENUM` y `HKLM\SOFTWARE\Microsoft\Windows Portable Devices\Devices`.
+- Para vincular un dispositivo con un usuario, pivota desde identificadores de dispositivo o volumen hacia artefactos por usuario como shellbags, LNKs, Jump Lists, `RecentDocs` y `MountPoints2`.
 
-### Número de Serie del Volumen
 
-- El **Número de Serie del Volumen** puede ser crucial para rastrear la instancia específica de un sistema de archivos, útil en escenarios forenses donde se necesita establecer el origen de un archivo a través de diferentes dispositivos.
 
-### **Detalles de Apagado**
+## Referencias
 
-- La hora de apagado y el conteo (este último solo para XP) se mantienen en **`System\ControlSet001\Control\Windows`** y **`System\ControlSet001\Control\Watchdog\Display`**.
-
-### **Configuración de Red**
-
-- Para información detallada de la interfaz de red, consulta **`System\ControlSet001\Services\Tcpip\Parameters\Interfaces{GUID_INTERFACE}`**.
-- Los tiempos de conexión de red primero y último, incluidas las conexiones VPN, se registran en varias rutas en **`Software\Microsoft\Windows NT\CurrentVersion\NetworkList`**.
-
-### **Carpetas Compartidas**
-
-- Las carpetas compartidas y configuraciones están bajo **`System\ControlSet001\Services\lanmanserver\Shares`**. Las configuraciones de Caché del Lado del Cliente (CSC) dictan la disponibilidad de archivos sin conexión.
-
-### **Programas que Inician Automáticamente**
-
-- Rutas como **`NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Run`** y entradas similares bajo `Software\Microsoft\Windows\CurrentVersion` detallan programas configurados para ejecutarse al inicio.
-
-### **Búsquedas y Rutas Escritas**
-
-- Las búsquedas de Explorer y las rutas escritas se rastrean en el registro bajo **`NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer`** para WordwheelQuery y TypedPaths, respectivamente.
-
-### **Documentos Recientes y Archivos de Office**
-
-- Los documentos recientes y los archivos de Office accedidos se anotan en `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\RecentDocs` y rutas específicas de versiones de Office.
-
-### **Elementos Más Recientemente Usados (MRU)**
-
-- Las listas MRU, que indican rutas de archivos y comandos recientes, se almacenan en varias subclaves de `ComDlg32` y `Explorer` bajo `NTUSER.DAT`.
-
-### **Seguimiento de Actividad del Usuario**
-
-- La función User Assist registra estadísticas detalladas de uso de aplicaciones, incluyendo el conteo de ejecuciones y la última hora de ejecución, en **`NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist\{GUID}\Count`**.
-
-### **Análisis de Shellbags**
-
-- Shellbags, que revelan detalles de acceso a carpetas, se almacenan en `USRCLASS.DAT` y `NTUSER.DAT` bajo `Software\Microsoft\Windows\Shell`. Usa **[Shellbag Explorer](https://ericzimmerman.github.io/#!index.md)** para el análisis.
-
-### **Historial de Dispositivos USB**
-
-- **`HKLM\SYSTEM\ControlSet001\Enum\USBSTOR`** y **`HKLM\SYSTEM\ControlSet001\Enum\USB`** contienen detalles ricos sobre dispositivos USB conectados, incluyendo fabricante, nombre del producto y marcas de tiempo de conexión.
-- El usuario asociado con un dispositivo USB específico puede ser identificado buscando en los registros `NTUSER.DAT` el **{GUID}** del dispositivo.
-- El último dispositivo montado y su número de serie de volumen pueden ser rastreados a través de `System\MountedDevices` y `Software\Microsoft\Windows NT\CurrentVersion\EMDMgmt`, respectivamente.
-
-Esta guía condensa las rutas y métodos cruciales para acceder a información detallada del sistema, red y actividad del usuario en sistemas Windows, buscando claridad y usabilidad.
-
+- [Windows Registry Forensics Cheat Sheet 2026 - Cyber Triage](https://www.cybertriage.com/blog/windows-registry-forensics-cheat-sheet-2026/)
+- [USB Device Forensics on Windows 10 and 11 - ElcomSoft](https://blog.elcomsoft.com/2026/02/usb-device-forensics-on-windows-10-and-11/)
 {{#include ../../../banners/hacktricks-training.md}}
