@@ -1,99 +1,93 @@
-# Interesting Windows Registry Keys
+# Zanimljivi Windows Registry ključevi
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-### **Windows Version and Owner Info**
+Windows Registry hive-ovi su jedan od najbržih načina da pređete sa _šta se desilo?_ na _koji korisnik, kada i odakle?_. Za live analizu preferirajte `CurrentControlSet`; za offline hive analizu prvo utvrdite koji je `ControlSet00x` bio aktivan umesto da hardkodujete `ControlSet001`.
 
-- Located at **`Software\Microsoft\Windows NT\CurrentVersion`**, you will find the Windows verzija, Service Pack, vreme instalacije i ime registrovanog vlasnika na jednostavan način.
+### Verzija Windowsa i informacije o vlasniku
 
-### **Computer Name**
+- `SOFTWARE\Microsoft\Windows NT\CurrentVersion`: Windows edition/build, vreme instalacije, registrovani vlasnik, naziv proizvoda i drugi build metapodaci.
+- `SYSTEM\Select`: mapira `Current`, `Default` i `LastKnownGood` na stvarne `ControlSet00x` vrednosti koje koristi sistem.
 
-- Ime računara se nalazi pod **`System\ControlSet001\Control\ComputerName\ComputerName`**.
+### Ime računara
 
-### **Time Zone Setting**
+- `SYSTEM\CurrentControlSet\Control\ComputerName\ComputerName`: trenutno hostname.
 
-- Vremenska zona sistema se čuva u **`System\ControlSet001\Control\TimeZoneInformation`**.
+### Podešavanje vremenske zone
 
-### **Access Time Tracking**
+- `SYSTEM\CurrentControlSet\Control\TimeZoneInformation`: konfigurisana vremenska zona i vrednosti povezane sa DST.
 
-- Po defaultu, praćenje poslednjeg vremena pristupa je isključeno (**`NtfsDisableLastAccessUpdate=1`**). Da biste ga omogućili, koristite:
-`fsutil behavior set disablelastaccess 0`
+### Praćenje vremena pristupa
 
-### Windows Versions and Service Packs
+- `SYSTEM\CurrentControlSet\Control\FileSystem`: `NtfsDisableLastAccessUpdate` označava da li se ažuriraju NTFS last-access timestamp-ovi.
+- Da biste ga omogućili, koristite: `fsutil behavior set disablelastaccess 0`
 
-- **Windows verzija** označava izdanje (npr. Home, Pro) i njegovu verziju (npr. Windows 10, Windows 11), dok su **Service Packs** ažuriranja koja uključuju ispravke i, ponekad, nove funkcije.
+### Detalji gašenja
 
-### Enabling Last Access Time
+- `SYSTEM\CurrentControlSet\Control\Windows`: vreme poslednjeg gašenja.
+- `SYSTEM\CurrentControlSet\Control\Watchdog\Display`: stariji sistemi mogu takođe izložiti brojače gašenja.
 
-- Omogućavanje praćenja poslednjeg vremena pristupa omogućava vam da vidite kada su datoteke poslednji put otvorene, što može biti ključno za forenzičku analizu ili praćenje sistema.
+### Mrežna konfiguracija
 
-### Network Information Details
+- `SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\Interfaces\{GUID}`: IP adrese interfejsa, DHCP lease-ovi, gateway i DNS podaci.
+- `SOFTWARE\Microsoft\Windows NT\CurrentVersion\NetworkList\Profiles\{GUID}`: naziv mrežnog profila/SSID plus vreme prve i poslednje veze.
+- `SOFTWARE\Microsoft\Windows NT\CurrentVersion\NetworkList\Signatures\Managed\{GUID}` i `...\Unmanaged\{GUID}`: podaci za korelaciju profila kao što su MAC adresa gateway-a i DNS sufiks.
+- `SYSTEM\CurrentControlSet\Services\LanmanServer\Shares`: lokalni shared folder-i objavljeni od strane hosta.
 
-- Registry sadrži opsežne podatke o mrežnim konfiguracijama, uključujući **tipove mreža (bežične, kablovske, 3G)** i **kategorije mreža (Javna, Privatna/Domaća, Domen/Rad)**, što je od vitalnog značaja za razumevanje mrežnih bezbednosnih postavki i dozvola.
+### Istorija daljinskog pristupa i mrežnih share-ova
 
-### Client Side Caching (CSC)
+- `NTUSER.DAT\Software\Microsoft\Terminal Server Client\Default`: outbound RDP MRU lista (`MRU0`..`MRU9`).
+- `NTUSER.DAT\Software\Microsoft\Terminal Server Client\Servers\<target>`: outbound RDP istorija po hostu. Podključevi obično čuvaju `UsernameHint`, a vreme `LastWrite` ključa je koristan pivot.
+- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\MountPoints2`: mapirani network drive-ovi, UNC share-ovi i mount point-i za removable media vezani za određenog korisnika.
 
-- **CSC** poboljšava pristup offline datotekama keširanjem kopija deljenih datoteka. Različita podešavanja **CSCFlags** kontrolišu kako i koje datoteke se keširaju, utičući na performanse i korisničko iskustvo, posebno u okruženjima sa povremenom povezanošću.
+### Programi koji se automatski pokreću i zakazani persistence
 
-### AutoStart Programs
+- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Run`
+- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\RunOnce`
+- `SOFTWARE\Microsoft\Windows\CurrentVersion\Run`
+- `SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce`
+- `SOFTWARE\Microsoft\Windows NT\CurrentVersion\Schedule\TaskCache\Tree\<TaskName>` i `...\Tasks\{GUID}`: metapodaci o zakazanim task-ovima. Ako task postoji ovde, ali `SD` vrednost nedostaje iz `Tree\<TaskName>`, posumnjajte na skriven Tarrask-style manipulaciju task-om i povežite to sa `C:\Windows\System32\Tasks\<TaskName>`.
 
-- Programi navedeni u raznim `Run` i `RunOnce` registry ključevima automatski se pokreću pri pokretanju, utičući na vreme podizanja sistema i potencijalno predstavljajući tačke interesa za identifikaciju malvera ili neželjenog softvera.
+### Pretrage, typed paths i MRU
+
+- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\WordWheelQuery`: pojmovi pretrage u File Explorer-u.
+- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\TypedPaths`: ručno unete Explorer putanje.
+- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\RunMRU`: poslednjih 26 `Win + R` komandi. `MRUList` čuva njihov redosled.
+- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\RecentDocs`: nedavno otvoreni dokumenti i folder-i.
+- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\ComDlg32\OpenSavePidlMRU`
+- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\ComDlg32\LastVisitedPidlMRU`
+- `NTUSER.DAT\Software\Microsoft\Office\<VERSION>\UserMRU\*\FileMRU`: Office recent files.
+
+### Praćenje aktivnosti korisnika
+
+- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist\{GUID}\Count`: istorija izvršavanja pokrenuta kroz GUI. Imena vrednosti su ROT13-enkodirana, a binarni podaci uključuju brojače pokretanja i vreme poslednjeg pokretanja.
+- Tretirajte `UserAssist` kao snažan podržavajući dokaz, ne kao samostalan zaključak: uglavnom prati aplikacije ili `.lnk` fajlove pokrenute kroz Explorer i može da propusti izvršavanje iz command-line-a ili servisa. Na Windows 10+, neki unosi ne znače nužno da je proces u potpunosti izvršen.
+- `SYSTEM\CurrentControlSet\Services\bam\State\UserSettings\{SID}` i `SYSTEM\CurrentControlSet\Services\dam\State\UserSettings\{SID}`: moderni Windows 10/11 execution tragovi sa SID atribucijom i vremenom poslednjeg izvršavanja. Ovo je posebno korisno za lokalno izvršene binarije, ali stariji unosi mogu brzo da zastare, a izvršavanja sa network share-ova/removable media su manje pouzdana.
+- Za šire execution artefakte kao što su Prefetch, Amcache, ShimCache i SRUM, pogledajte glavni [Windows forensics overview](README.md#programs-executed).
 
 ### Shellbags
 
-- **Shellbags** ne samo da čuvaju podešavanja za prikaz foldera, već takođe pružaju forenzičke dokaze o pristupu folderima čak i ako folder više ne postoji. Oni su neprocenjivi za istrage, otkrivajući aktivnost korisnika koja nije očigledna kroz druge načine.
+- Shellbags se čuvaju i u `NTUSER.DAT\Software\Microsoft\Windows\Shell\BagMRU` / `Bags` i u `UsrClass.dat\Local Settings\Software\Microsoft\Windows\Shell\BagMRU` / `Bags`.
+- `NTUSER.DAT` unosi su posebno korisni za UNC/network pregledanje, dok `UsrClass.dat` je mesto gde Windows Vista+ obično čuva lokalne/removable-folder shellbags.
+- Mogu da pokažu postojanje foldera, traversiranje i preferencije prikaza foldera čak i nakon što je folder obrisan. Explorer-like pristup arhivskim fajlovima takođe može ostaviti shellbag tragove.
+- Ne dokazuje svaki shellbag uspešan pristup folderu, zato to potvrdite sa LNK-ovima, Jump Lists, timestamp-ovima ili volume mapiranjima.
+- Koristite **[Shellbag Explorer](https://ericzimmerman.github.io/#!index.md)** ili **SBECmd** za parsiranje.
 
-### USB Information and Forensics
+### USB informacije
 
-- Detalji pohranjeni u registry o USB uređajima mogu pomoći u praćenju koji su uređaji bili povezani sa računarom, potencijalno povezujući uređaj sa osetljivim prenosima datoteka ili incidentima neovlašćenog pristupa.
+- `HKLM\SYSTEM\CurrentControlSet\Enum\USBSTOR`: primarni inventar USB mass-storage uređaja (vendor, product, revision, serial/device instance).
+- `HKLM\SYSTEM\CurrentControlSet\Enum\USB`: širi inventar USB uređaja, uključujući non-storage uređaje.
+- `HKLM\SYSTEM\CurrentControlSet\Enum\USB\VID_*\PID_*\...\Properties\{83da6326-97a6-4088-9453-a1923f573b29}`: na novijim Windows 10/11 build-ovima ovo je mesto visoke vrednosti za lifecycle timestamp-ove po uređaju kao što su install, first install, last arrival i last removal.
+- `HKLM\SYSTEM\MountedDevices`: mapira volume i device identifikatore na drive letters / volume GUID-ove. Može da opstane samo poslednje mapiranje za dato slovo diska.
+- `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\EMDMgmt`: koristan pivot za volume serial brojeve i prethodne media metapodatke.
+- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\MountPoints2`: istorija interakcije sa drive-letter i share-ovima specifična za korisnika.
+- Moderni telefoni i tableti povezani preko MTP/PTP možda se **neće** pojaviti pod `USBSTOR`. Proverite i `HKLM\SYSTEM\CurrentControlSet\Enum\SWD\WPDBUSENUM` i `HKLM\SOFTWARE\Microsoft\Windows Portable Devices\Devices`.
+- Da biste povezali uređaj sa korisnikom, pivotujte od identifikatora uređaja ili volume-a ka per-user artefaktima kao što su shellbags, LNK-ovi, Jump Lists, `RecentDocs` i `MountPoints2`.
 
-### Volume Serial Number
 
-- **Volume Serial Number** može biti ključan za praćenje specifične instance datotečnog sistema, korisno u forenzičkim scenarijima gde je potrebno utvrditi poreklo datoteke preko različitih uređaja.
 
-### **Shutdown Details**
+## References
 
-- Vreme gašenja i broj (potonji samo za XP) se čuvaju u **`System\ControlSet001\Control\Windows`** i **`System\ControlSet001\Control\Watchdog\Display`**.
-
-### **Network Configuration**
-
-- Za detaljne informacije o mrežnim interfejsima, pogledajte **`System\ControlSet001\Services\Tcpip\Parameters\Interfaces{GUID_INTERFACE}`**.
-- Prva i poslednja vremena mrežne veze, uključujući VPN veze, beleže se pod raznim putanjama u **`Software\Microsoft\Windows NT\CurrentVersion\NetworkList`**.
-
-### **Shared Folders**
-
-- Deljeni folderi i podešavanja su pod **`System\ControlSet001\Services\lanmanserver\Shares`**. Podešavanja Client Side Caching (CSC) određuju dostupnost offline datoteka.
-
-### **Programs that Start Automatically**
-
-- Putanje kao što su **`NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Run`** i slični unosi pod `Software\Microsoft\Windows\CurrentVersion` detaljno opisuju programe postavljene da se pokreću pri pokretanju.
-
-### **Searches and Typed Paths**
-
-- Istraživanja u Exploreru i unesene putanje se prate u registry pod **`NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer`** za WordwheelQuery i TypedPaths, respektivno.
-
-### **Recent Documents and Office Files**
-
-- Nedavne datoteke i Office datoteke koje su pristupane beleže se u `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\RecentDocs` i specifičnim putanjama verzije Office-a.
-
-### **Most Recently Used (MRU) Items**
-
-- MRU liste, koje ukazuju na nedavne putanje datoteka i komande, čuvaju se u raznim `ComDlg32` i `Explorer` podključevima pod `NTUSER.DAT`.
-
-### **User Activity Tracking**
-
-- Funkcija User Assist beleži detaljne statistike korišćenja aplikacija, uključujući broj pokretanja i vreme poslednjeg pokretanja, na **`NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist\{GUID}\Count`**.
-
-### **Shellbags Analysis**
-
-- Shellbags, koji otkrivaju detalje o pristupu folderima, čuvaju se u `USRCLASS.DAT` i `NTUSER.DAT` pod `Software\Microsoft\Windows\Shell`. Koristite **[Shellbag Explorer](https://ericzimmerman.github.io/#!index.md)** za analizu.
-
-### **USB Device History**
-
-- **`HKLM\SYSTEM\ControlSet001\Enum\USBSTOR`** i **`HKLM\SYSTEM\ControlSet001\Enum\USB`** sadrže bogate detalje o povezanim USB uređajima, uključujući proizvođača, naziv proizvoda i vremenske oznake povezivanja.
-- Korisnik povezan sa specifičnim USB uređajem može se precizno odrediti pretraživanjem `NTUSER.DAT` hives za **{GUID}** uređaja.
-- Poslednji montirani uređaj i njegov broj serije volumena mogu se pratiti kroz `System\MountedDevices` i `Software\Microsoft\Windows NT\CurrentVersion\EMDMgmt`, respektivno.
-
-This guide condenses the crucial paths and methods for accessing detailed system, network, and user activity information on Windows systems, aiming for clarity and usability.
-
+- [Windows Registry Forensics Cheat Sheet 2026 - Cyber Triage](https://www.cybertriage.com/blog/windows-registry-forensics-cheat-sheet-2026/)
+- [USB Device Forensics on Windows 10 and 11 - ElcomSoft](https://blog.elcomsoft.com/2026/02/usb-device-forensics-on-windows-10-and-11/)
 {{#include ../../../banners/hacktricks-training.md}}
