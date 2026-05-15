@@ -1,99 +1,93 @@
-# 興味深いWindowsレジストリキー
+# Interesting Windows Registry Keys
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-### **Windowsのバージョンと所有者情報**
+Windows Registry hive は、_何が起きたか?_ から _どの user が、いつ、どこから?_ へ最速で絞り込むための手段の1つです。ライブ解析では `CurrentControlSet` を優先し、オフライン hive 解析では `ControlSet001` をハードコードせず、まずどの `ControlSet00x` が有効だったかを解決してください。
 
-- **`Software\Microsoft\Windows NT\CurrentVersion`** に位置し、Windowsのバージョン、サービスパック、インストール時間、登録された所有者の名前が簡潔に表示されます。
+### Windows Version and Owner Info
 
-### **コンピュータ名**
+- `SOFTWARE\Microsoft\Windows NT\CurrentVersion`: Windows edition/build、インストール時刻、registered owner、product name、その他の build metadata。
+- `SYSTEM\Select`: `Current`、`Default`、`LastKnownGood` を、システムで使われていた実際の `ControlSet00x` 値に対応付けます。
 
-- ホスト名は **`System\ControlSet001\Control\ComputerName\ComputerName`** にあります。
+### Computer Name
 
-### **タイムゾーン設定**
+- `SYSTEM\CurrentControlSet\Control\ComputerName\ComputerName`: 現在の hostname。
 
-- システムのタイムゾーンは **`System\ControlSet001\Control\TimeZoneInformation`** に保存されています。
+### Time Zone Setting
 
-### **アクセス時間の追跡**
+- `SYSTEM\CurrentControlSet\Control\TimeZoneInformation`: 設定された time zone と DST 関連の値。
 
-- デフォルトでは、最終アクセス時間の追跡はオフになっています (**`NtfsDisableLastAccessUpdate=1`**)。これを有効にするには、次のコマンドを使用します:
-`fsutil behavior set disablelastaccess 0`
+### Access Time Tracking
 
-### Windowsのバージョンとサービスパック
+- `SYSTEM\CurrentControlSet\Control\FileSystem`: `NtfsDisableLastAccessUpdate` は、NTFS の last-access タイムスタンプが更新されているかを示します。
+- 有効にするには、`fsutil behavior set disablelastaccess 0` を使います。
 
-- **Windowsのバージョン** はエディション（例：Home、Pro）とそのリリース（例：Windows 10、Windows 11）を示し、**サービスパック** は修正や時には新機能を含む更新です。
+### Shutdown Details
 
-### 最終アクセス時間の有効化
+- `SYSTEM\CurrentControlSet\Control\Windows`: 最後の shutdown time。
+- `SYSTEM\CurrentControlSet\Control\Watchdog\Display`: 古いシステムでは shutdown counter も確認できる場合があります。
 
-- 最終アクセス時間の追跡を有効にすると、ファイルが最後に開かれた時刻を確認でき、法医学的分析やシステム監視にとって重要です。
+### Network Configuration
 
-### ネットワーク情報の詳細
+- `SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\Interfaces\{GUID}`: interface の IP、DHCP lease、gateway、DNS データ。
+- `SOFTWARE\Microsoft\Windows NT\CurrentVersion\NetworkList\Profiles\{GUID}`: network profile name/SSID と最初・最後の接続時刻。
+- `SOFTWARE\Microsoft\Windows NT\CurrentVersion\NetworkList\Signatures\Managed\{GUID}` と `...\Unmanaged\{GUID}`: gateway MAC address や DNS suffix などの profile correlation data。
+- `SYSTEM\CurrentControlSet\Services\LanmanServer\Shares`: host が公開している local shared folders。
 
-- レジストリには、**ネットワークの種類（無線、ケーブル、3G）** や **ネットワークカテゴリ（パブリック、プライベート/ホーム、ドメイン/ワーク）** を含む、ネットワーク構成に関する詳細なデータが保存されており、ネットワークセキュリティ設定や権限を理解するために重要です。
+### Remote Access and Network Share History
 
-### クライアントサイドキャッシング（CSC）
+- `NTUSER.DAT\Software\Microsoft\Terminal Server Client\Default`: outbound RDP MRU list (`MRU0`..`MRU9`)。
+- `NTUSER.DAT\Software\Microsoft\Terminal Server Client\Servers\<target>`: ホストごとの outbound RDP 履歴。Subkey には通常 `UsernameHint` が保存され、key の `LastWrite` time は有用な pivot です。
+- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\MountPoints2`: 特定 user に紐づく mapped network drives、UNC shares、removable-media mount points。
 
-- **CSC** は共有ファイルのコピーをキャッシュすることでオフラインファイルアクセスを向上させます。異なる **CSCFlags** 設定は、どのファイルがどのようにキャッシュされるかを制御し、特に接続が不安定な環境でのパフォーマンスやユーザー体験に影響を与えます。
+### Programs that Start Automatically and Scheduled Persistence
 
-### 自動起動プログラム
+- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Run`
+- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\RunOnce`
+- `SOFTWARE\Microsoft\Windows\CurrentVersion\Run`
+- `SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce`
+- `SOFTWARE\Microsoft\Windows NT\CurrentVersion\Schedule\TaskCache\Tree\<TaskName>` と `...\Tasks\{GUID}`: scheduled task metadata。ここに task が存在するのに `Tree\<TaskName>` から `SD` 値が欠けている場合は、hidden Tarrask-style task tampering を疑い、`C:\Windows\System32\Tasks\<TaskName>` と照合してください。
 
-- 様々な `Run` および `RunOnce` レジストリキーにリストされているプログラムは、起動時に自動的に起動され、システムのブート時間に影響を与え、マルウェアや不要なソフトウェアを特定するための興味深いポイントとなる可能性があります。
+### Searches, Typed Paths, and MRUs
 
-### シェルバッグ
+- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\WordWheelQuery`: File Explorer の search term。
+- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\TypedPaths`: 手動で入力された Explorer path。
+- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\RunMRU`: 直近26件の `Win + R` command。`MRUList` が順序を保持します。
+- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\RecentDocs`: 最近開いた documents と folders。
+- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\ComDlg32\OpenSavePidlMRU`
+- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\ComDlg32\LastVisitedPidlMRU`
+- `NTUSER.DAT\Software\Microsoft\Office\<VERSION>\UserMRU\*\FileMRU`: Office の recent files。
 
-- **シェルバッグ** はフォルダビューの設定を保存するだけでなく、フォルダが存在しなくてもフォルダアクセスの法医学的証拠を提供します。これは、他の手段では明らかでないユーザー活動を明らかにするため、調査にとって非常に貴重です。
+### User Activity Tracking
 
-### USB情報と法医学
+- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist\{GUID}\Count`: GUI-driven execution history。Value name は ROT13 でエンコードされ、binary data には run counter と last run time が含まれます。
+- `UserAssist` は単独の断定材料ではなく、強い補助証拠として扱ってください。主に Explorer 経由で起動された app や `.lnk` file を追跡し、command-line や service execution を見逃すことがあります。Windows 10+ では、一部の entry が process の完全な実行を必ずしも意味しません。
+- `SYSTEM\CurrentControlSet\Services\bam\State\UserSettings\{SID}` と `SYSTEM\CurrentControlSet\Services\dam\State\UserSettings\{SID}`: SID attribution と last execution time を含む、Windows 10/11 の modern execution trace。ローカル実行された binary の把握に特に有用ですが、古い entry はすぐに消えることがあり、network share や removable media からの実行は信頼性が低めです。
+- Prefetch、Amcache、ShimCache、SRUM などのより広い execution artifact については、メインの [Windows forensics overview](README.md#programs-executed) を参照してください。
 
-- レジストリに保存されたUSBデバイスに関する詳細は、どのデバイスがコンピュータに接続されていたかを追跡するのに役立ち、機密ファイルの転送や不正アクセスのインシデントにデバイスを関連付ける可能性があります。
+### Shellbags
 
-### ボリュームシリアル番号
+- Shellbags は `NTUSER.DAT\Software\Microsoft\Windows\Shell\BagMRU` / `Bags` と `UsrClass.dat\Local Settings\Software\Microsoft\Windows\Shell\BagMRU` / `Bags` の両方に保存されます。
+- `NTUSER.DAT` の entry は UNC/network browsing に特に有用で、`UsrClass.dat` は Windows Vista+ が local/removable-folder shellbags を一般的に保存する場所です。
+- フォルダが削除された後でも、folder の存在、移動、folder-view preferences を示せます。archive file への Explorer-like access も shellbag trace を残すことがあります。
+- すべての shellbag が folder への成功したアクセスを証明するわけではないため、LNK、Jump Lists、timestamps、volume mappings と照合してください。
+- 解析には **[Shellbag Explorer](https://ericzimmerman.github.io/#!index.md)** または **SBECmd** を使います。
 
-- **ボリュームシリアル番号** は、ファイルシステムの特定のインスタンスを追跡するのに重要であり、異なるデバイス間でファイルの起源を確立する必要がある法医学的シナリオで役立ちます。
+### USB Information
 
-### **シャットダウンの詳細**
+- `HKLM\SYSTEM\CurrentControlSet\Enum\USBSTOR`: USB mass-storage device の primary inventory (vendor、product、revision、serial/device instance)。
+- `HKLM\SYSTEM\CurrentControlSet\Enum\USB`: non-storage device を含む、より広い USB device inventory。
+- `HKLM\SYSTEM\CurrentControlSet\Enum\USB\VID_*\PID_*\...\Properties\{83da6326-97a6-4088-9453-a1923f573b29}`: 最近の Windows 10/11 build では、install、first install、last arrival、last removal などの per-device lifecycle timestamp を得られる重要な場所です。
+- `HKLM\SYSTEM\MountedDevices`: volume と device identifier を drive letter / volume GUID に対応付けます。特定の drive letter については最後の mapping だけが残る場合があります。
+- `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\EMDMgmt`: volume serial number と過去の media metadata への有用な pivot。
+- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\MountPoints2`: user-specific な drive-letter と share の interaction history。
+- MTP/PTP 経由で接続された modern phone や tablet は `USBSTOR` に現れない**場合があります**。`HKLM\SYSTEM\CurrentControlSet\Enum\SWD\WPDBUSENUM` と `HKLM\SOFTWARE\Microsoft\Windows Portable Devices\Devices` も確認してください。
+- device を user に結び付けるには、device や volume identifier から shellbags、LNKs、Jump Lists、`RecentDocs`、`MountPoints2` などの per-user artifact に pivot します。
 
-- シャットダウン時間とカウント（後者はXPのみ）は **`System\ControlSet001\Control\Windows`** および **`System\ControlSet001\Control\Watchdog\Display`** に保存されています。
 
-### **ネットワーク構成**
 
-- 詳細なネットワークインターフェース情報については、**`System\ControlSet001\Services\Tcpip\Parameters\Interfaces{GUID_INTERFACE}`** を参照してください。
-- VPN接続を含む最初と最後のネットワーク接続時間は、**`Software\Microsoft\Windows NT\CurrentVersion\NetworkList`** のさまざまなパスに記録されています。
+## References
 
-### **共有フォルダ**
-
-- 共有フォルダと設定は **`System\ControlSet001\Services\lanmanserver\Shares`** にあります。クライアントサイドキャッシング（CSC）設定はオフラインファイルの可用性を決定します。
-
-### **自動的に起動するプログラム**
-
-- **`NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Run`** のようなパスや、`Software\Microsoft\Windows\CurrentVersion` の下の類似のエントリは、起動時に実行されるプログラムを詳細に示しています。
-
-### **検索と入力されたパス**
-
-- エクスプローラーの検索と入力されたパスは、**`NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer`** の下でWordwheelQueryおよびTypedPathsとして追跡されています。
-
-### **最近の文書とOfficeファイル**
-
-- 最近アクセスされた文書とOfficeファイルは、`NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\RecentDocs` および特定のOfficeバージョンのパスに記録されています。
-
-### **最も最近使用された（MRU）アイテム**
-
-- 最近のファイルパスやコマンドを示すMRUリストは、`NTUSER.DAT` のさまざまな `ComDlg32` および `Explorer` サブキーに保存されています。
-
-### **ユーザー活動の追跡**
-
-- User Assist機能は、実行回数や最終実行時間を含む詳細なアプリケーション使用統計を **`NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist\{GUID}\Count`** に記録します。
-
-### **シェルバッグの分析**
-
-- フォルダアクセスの詳細を明らかにするシェルバッグは、`USRCLASS.DAT` および `NTUSER.DAT` の下の `Software\Microsoft\Windows\Shell` に保存されています。分析には **[Shellbag Explorer](https://ericzimmerman.github.io/#!index.md)** を使用してください。
-
-### **USBデバイスの履歴**
-
-- **`HKLM\SYSTEM\ControlSet001\Enum\USBSTOR`** および **`HKLM\SYSTEM\ControlSet001\Enum\USB`** には、接続されたUSBデバイスに関する豊富な詳細が含まれており、製造元、製品名、接続タイムスタンプが記録されています。
-- 特定のUSBデバイスに関連付けられたユーザーは、デバイスの **{GUID}** を探すことで `NTUSER.DAT` ハイブから特定できます。
-- 最後にマウントされたデバイスとそのボリュームシリアル番号は、それぞれ `System\MountedDevices` および `Software\Microsoft\Windows NT\CurrentVersion\EMDMgmt` を通じて追跡できます。
-
-このガイドは、Windowsシステム上の詳細なシステム、ネットワーク、およびユーザー活動情報にアクセスするための重要なパスと方法を要約し、明確さと使いやすさを目指しています。
-
+- [Windows Registry Forensics Cheat Sheet 2026 - Cyber Triage](https://www.cybertriage.com/blog/windows-registry-forensics-cheat-sheet-2026/)
+- [USB Device Forensics on Windows 10 and 11 - ElcomSoft](https://blog.elcomsoft.com/2026/02/usb-device-forensics-on-windows-10-and-11/)
 {{#include ../../../banners/hacktricks-training.md}}
