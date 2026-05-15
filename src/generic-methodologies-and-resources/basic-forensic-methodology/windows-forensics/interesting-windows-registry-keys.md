@@ -1,99 +1,93 @@
-# Interesting Windows Registry Keys
+# Funguo Muhimu za Windows Registry
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-### **Windows Version and Owner Info**
+Windows Registry hives ni mojawapo ya njia za haraka zaidi za kuhamia kutoka _nini kilitokea?_ hadi _mtumiaji gani, lini, na kutoka wapi?_. Kwa uchambuzi wa moja kwa moja prefer `CurrentControlSet`; kwa uchambuzi wa offline hive kwanza tambua ni `ControlSet00x` gani ilikuwa active badala ya kuhardcode `ControlSet001`.
 
-- Iko kwenye **`Software\Microsoft\Windows NT\CurrentVersion`**, utapata toleo la Windows, Service Pack, wakati wa usakinishaji, na jina la mmiliki aliyejiandikisha kwa njia rahisi.
+### Toleo la Windows na Taarifa za Mmiliki
 
-### **Computer Name**
+- `SOFTWARE\Microsoft\Windows NT\CurrentVersion`: Windows edition/build, wakati wa install, registered owner, product name, na metadata nyingine za build.
+- `SYSTEM\Select`: huweka `Current`, `Default`, na `LastKnownGood` kuwa values halisi za `ControlSet00x` zinazotumiwa na mfumo.
 
-- Jina la kompyuta linapatikana chini ya **`System\ControlSet001\Control\ComputerName\ComputerName`**.
+### Jina la Kompyuta
 
-### **Time Zone Setting**
+- `SYSTEM\CurrentControlSet\Control\ComputerName\ComputerName`: hostname ya sasa.
 
-- Kanda ya muda ya mfumo imehifadhiwa katika **`System\ControlSet001\Control\TimeZoneInformation`**.
+### Mipangilio ya Time Zone
 
-### **Access Time Tracking**
+- `SYSTEM\CurrentControlSet\Control\TimeZoneInformation`: time zone iliyosanidiwa na values zinazohusiana na DST.
 
-- Kwa kawaida, ufuatiliaji wa wakati wa mwisho wa ufikiaji umezimwa (**`NtfsDisableLastAccessUpdate=1`**). Ili kuuwezesha, tumia:
-`fsutil behavior set disablelastaccess 0`
+### Ufuatiliaji wa Muda wa Ufikiaji
 
-### Windows Versions and Service Packs
+- `SYSTEM\CurrentControlSet\Control\FileSystem`: `NtfsDisableLastAccessUpdate` inaonyesha kama timestamps za last-access za NTFS zinasasishwa.
+- Kuiwasha, tumia: `fsutil behavior set disablelastaccess 0`
 
-- **Toleo la Windows** linaonyesha toleo (mfano, Home, Pro) na kutolewa kwake (mfano, Windows 10, Windows 11), wakati **Service Packs** ni masasisho yanayojumuisha marekebisho na, wakati mwingine, vipengele vipya.
+### Maelezo ya Shutdown
 
-### Enabling Last Access Time
+- `SYSTEM\CurrentControlSet\Control\Windows`: wakati wa mwisho wa shutdown.
+- `SYSTEM\CurrentControlSet\Control\Watchdog\Display`: mifumo ya zamani inaweza pia kuonyesha shutdown counters.
 
-- Kuwawezesha ufuatiliaji wa wakati wa mwisho wa ufikiaji kunakuwezesha kuona wakati faili zilifunguliwa kwa mara ya mwisho, ambayo inaweza kuwa muhimu kwa uchambuzi wa forensics au ufuatiliaji wa mfumo.
+### Usanidi wa Mtandao
 
-### Network Information Details
+- `SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\Interfaces\{GUID}`: IP za interface, DHCP leases, gateway na data za DNS.
+- `SOFTWARE\Microsoft\Windows NT\CurrentVersion\NetworkList\Profiles\{GUID}`: jina la network profile/SSID pamoja na nyakati za kwanza na mwisho za connection.
+- `SOFTWARE\Microsoft\Windows NT\CurrentVersion\NetworkList\Signatures\Managed\{GUID}` na `...\Unmanaged\{GUID}`: data za correlation za profile kama gateway MAC address na DNS suffix.
+- `SYSTEM\CurrentControlSet\Services\LanmanServer\Shares`: folda za local shared zilizochapishwa na host.
 
-- Usajili una data kubwa kuhusu usanidi wa mtandao, ikiwa ni pamoja na **aina za mitandao (wireless, cable, 3G)** na **makundi ya mtandao (Public, Private/Home, Domain/Work)**, ambayo ni muhimu kwa kuelewa mipangilio ya usalama wa mtandao na ruhusa.
+### Ufikiaji wa Mbali na Historia ya Network Share
 
-### Client Side Caching (CSC)
+- `NTUSER.DAT\Software\Microsoft\Terminal Server Client\Default`: outbound RDP MRU list (`MRU0`..`MRU9`).
+- `NTUSER.DAT\Software\Microsoft\Terminal Server Client\Servers\<target>`: historia ya outbound RDP kwa kila host. Subkeys mara nyingi huhifadhi `UsernameHint`, na wakati wa `LastWrite` wa key ni pivot muhimu.
+- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\MountPoints2`: mapped network drives, UNC shares, na mount points za removable media zinazohusishwa na user fulani.
 
-- **CSC** inaboresha ufikiaji wa faili za mbali kwa kuhifadhi nakala za faili zilizoshirikiwa. Mipangilio tofauti ya **CSCFlags** inasimamia jinsi na ni faili zipi zinazohifadhiwa, ikihusisha utendaji na uzoefu wa mtumiaji, hasa katika mazingira yenye muunganisho wa muda mfupi.
+### Programu Zinazoanza Kiotomatiki na Persistence Iliyoratibiwa
 
-### AutoStart Programs
+- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Run`
+- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\RunOnce`
+- `SOFTWARE\Microsoft\Windows\CurrentVersion\Run`
+- `SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce`
+- `SOFTWARE\Microsoft\Windows NT\CurrentVersion\Schedule\TaskCache\Tree\<TaskName>` na `...\Tasks\{GUID}`: metadata za scheduled task. Ikiwa task ipo hapa lakini value ya `SD` haipo kwenye `Tree\<TaskName>`, shuku hidden Tarrask-style task tampering na ihusishe na `C:\Windows\System32\Tasks\<TaskName>`.
 
-- Programu zilizoorodheshwa katika funguo mbalimbali za `Run` na `RunOnce` za usajili zinaanzishwa kiotomatiki wakati wa kuanzisha, zikihusisha muda wa kuanzisha mfumo na kuwa maeneo ya kupigiwa mfano kwa kutambua malware au programu zisizohitajika.
+### Utafutaji, Typed Paths, na MRU
+
+- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\WordWheelQuery`: maneno ya utafutaji ya File Explorer.
+- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\TypedPaths`: paths za Explorer zilizoandikwa manually.
+- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\RunMRU`: amri 26 za mwisho za `Win + R`. `MRUList` huhifadhi mpangilio wao.
+- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\RecentDocs`: documents na folders zilizofunguliwa karibuni.
+- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\ComDlg32\OpenSavePidlMRU`
+- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\ComDlg32\LastVisitedPidlMRU`
+- `NTUSER.DAT\Software\Microsoft\Office\<VERSION>\UserMRU\*\FileMRU`: files za hivi karibuni za Office.
+
+### Ufuatiliaji wa Shughuli za User
+
+- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist\{GUID}\Count`: historia ya execution inayoendeshwa kupitia GUI. Jina la value limefichwa kwa ROT13, na data ya binary inajumuisha counters za kuendeshwa na wakati wa mwisho wa kuendeshwa.
+- Chukulia `UserAssist` kama ushahidi wa kuunga mkono wenye nguvu, si verdict pekee: hasa hufuata apps au `.lnk` files zilizozinduliwa kupitia Explorer na inaweza kukosa command-line au service execution. Kwenye Windows 10+, baadhi ya entries si lazima ziashirie kwamba process ilikimbia kikamilifu.
+- `SYSTEM\CurrentControlSet\Services\bam\State\UserSettings\{SID}` na `SYSTEM\CurrentControlSet\Services\dam\State\UserSettings\{SID}`: execution traces za kisasa za Windows 10/11 zenye SID attribution na wakati wa mwisho wa execution. Hizi ni muhimu sana kwa binaries zilizotekelezwa locally, lakini entries za zamani zinaweza kuisha haraka na executions kutoka network shares/removable media si za kuaminika sana.
+- Kwa broader execution artifacts kama Prefetch, Amcache, ShimCache, na SRUM, angalia [Windows forensics overview](README.md#programs-executed).
 
 ### Shellbags
 
-- **Shellbags** hazihifadhi tu mapendeleo ya maoni ya folda bali pia hutoa ushahidi wa forensics wa ufikiaji wa folda hata kama folda hiyo haipo tena. Ni muhimu kwa uchunguzi, ikifunua shughuli za mtumiaji ambazo si dhahiri kupitia njia nyingine.
+- Shellbags huhifadhiwa katika `NTUSER.DAT\Software\Microsoft\Windows\Shell\BagMRU` / `Bags` na `UsrClass.dat\Local Settings\Software\Microsoft\Windows\Shell\BagMRU` / `Bags`.
+- Entries za `NTUSER.DAT` ni muhimu sana kwa UNC/network browsing, huku `UsrClass.dat` ikiwa mahali ambapo Windows Vista+ mara nyingi huhifadhi local/removable-folder shellbags.
+- Zinaweza kuonyesha uwepo wa folda, traversal, na folder-view preferences hata baada ya folda kufutwa. Access ya aina ya Explorer kwa archive files pia inaweza kuacha shellbag traces.
+- Si kila shellbag inathibitisha folder access iliyofanikiwa, kwa hiyo thibitisha kwa LNKs, Jump Lists, timestamps, au volume mappings.
+- Tumia **[Shellbag Explorer](https://ericzimmerman.github.io/#!index.md)** au **SBECmd** kuzichambua.
 
-### USB Information and Forensics
+### Taarifa za USB
 
-- Maelezo yaliyohifadhiwa katika usajili kuhusu vifaa vya USB yanaweza kusaidia kufuatilia ni vifaa gani vilivyounganishwa kwenye kompyuta, ikihusisha kifaa na uhamisho wa faili nyeti au matukio ya ufikiaji usioidhinishwa.
+- `HKLM\SYSTEM\CurrentControlSet\Enum\USBSTOR`: orodha kuu ya USB mass-storage devices (vendor, product, revision, serial/device instance).
+- `HKLM\SYSTEM\CurrentControlSet\Enum\USB`: orodha pana zaidi ya USB devices, ikijumuisha devices zisizo za storage.
+- `HKLM\SYSTEM\CurrentControlSet\Enum\USB\VID_*\PID_*\...\Properties\{83da6326-97a6-4088-9453-a1923f573b29}`: kwenye builds za hivi karibuni za Windows 10/11 hili ni eneo lenye thamani kubwa kwa lifecycle timestamps za kila device kama install, first install, last arrival, na last removal.
+- `HKLM\SYSTEM\MountedDevices`: huweka ramani ya volumes na device identifiers kwa drive letters / volume GUIDs. Huenda ikabaki tu mapping ya mwisho kwa drive letter fulani.
+- `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\EMDMgmt`: pivot muhimu kwa volume serial numbers na metadata za media za awali.
+- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\MountPoints2`: historia ya mwingiliano ya drive-letter na share kwa user husika.
+- Simu na tablets za kisasa zilizounganishwa kupitia MTP/PTP huenda **zisionekane** chini ya `USBSTOR`. Kagua pia `HKLM\SYSTEM\CurrentControlSet\Enum\SWD\WPDBUSENUM` na `HKLM\SOFTWARE\Microsoft\Windows Portable Devices\Devices`.
+- Kuunganisha device na user, anza kutoka kwa device au volume identifiers kwenda kwenye per-user artifacts kama shellbags, LNKs, Jump Lists, `RecentDocs`, na `MountPoints2`.
 
-### Volume Serial Number
 
-- **Nambari ya Serial ya Volume** inaweza kuwa muhimu kwa kufuatilia tukio maalum la mfumo wa faili, inayofaa katika hali za forensics ambapo asili ya faili inahitaji kuanzishwa kati ya vifaa tofauti.
 
-### **Shutdown Details**
+## References
 
-- Wakati wa kuzima na hesabu (hii ya mwisho ni kwa XP tu) huhifadhiwa katika **`System\ControlSet001\Control\Windows`** na **`System\ControlSet001\Control\Watchdog\Display`**.
-
-### **Network Configuration**
-
-- Kwa maelezo ya kina ya kiunganishi cha mtandao, rejea **`System\ControlSet001\Services\Tcpip\Parameters\Interfaces{GUID_INTERFACE}`**.
-- Wakati wa kwanza na wa mwisho wa muunganisho wa mtandao, ikiwa ni pamoja na muunganisho wa VPN, umeandikwa chini ya njia mbalimbali katika **`Software\Microsoft\Windows NT\CurrentVersion\NetworkList`**.
-
-### **Shared Folders**
-
-- Folda na mipangilio zilizoshirikiwa ziko chini ya **`System\ControlSet001\Services\lanmanserver\Shares`**. Mipangilio ya Client Side Caching (CSC) inaamuru upatikanaji wa faili za mbali.
-
-### **Programs that Start Automatically**
-
-- Njia kama **`NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Run`** na entries zinazofanana chini ya `Software\Microsoft\Windows\CurrentVersion` zinaelezea programu zilizowekwa kuanzishwa wakati wa kuanzisha.
-
-### **Searches and Typed Paths**
-
-- Utafutaji wa Explorer na njia zilizotajwa zinafuatiliwa katika usajili chini ya **`NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer`** kwa WordwheelQuery na TypedPaths, mtawalia.
-
-### **Recent Documents and Office Files**
-
-- Hati za hivi karibuni na faili za Ofisi zilizofikiwa zimeandikwa katika `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\RecentDocs` na njia maalum za toleo la Ofisi.
-
-### **Most Recently Used (MRU) Items**
-
-- Orodha za MRU, zikionyesha njia za faili za hivi karibuni na amri, zimehifadhiwa katika funguo mbalimbali za `ComDlg32` na `Explorer` chini ya `NTUSER.DAT`.
-
-### **User Activity Tracking**
-
-- Kipengele cha User Assist kinaandika takwimu za kina za matumizi ya programu, ikiwa ni pamoja na hesabu ya kuendesha na wakati wa mwisho wa kuendesha, katika **`NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist\{GUID}\Count`**.
-
-### **Shellbags Analysis**
-
-- Shellbags, zikifunua maelezo ya ufikiaji wa folda, zimehifadhiwa katika `USRCLASS.DAT` na `NTUSER.DAT` chini ya `Software\Microsoft\Windows\Shell`. Tumia **[Shellbag Explorer](https://ericzimmerman.github.io/#!index.md)** kwa uchambuzi.
-
-### **USB Device History**
-
-- **`HKLM\SYSTEM\ControlSet001\Enum\USBSTOR`** na **`HKLM\SYSTEM\ControlSet001\Enum\USB`** zina maelezo mengi kuhusu vifaa vya USB vilivyounganishwa, ikiwa ni pamoja na mtengenezaji, jina la bidhaa, na nyakati za muunganisho.
-- Mtumiaji anayehusishwa na kifaa maalum cha USB anaweza kupatikana kwa kutafuta hives za `NTUSER.DAT` kwa **{GUID}** ya kifaa.
-- Kifaa cha mwisho kilichounganishwa na nambari yake ya serial ya volume kinaweza kufuatiliwa kupitia `System\MountedDevices` na `Software\Microsoft\Windows NT\CurrentVersion\EMDMgmt`, mtawalia.
-
-Hii mwongozo inakusanya njia muhimu na mbinu za kufikia maelezo ya kina ya mfumo, mtandao, na shughuli za mtumiaji kwenye mifumo ya Windows, ikilenga uwazi na matumizi.
-
+- [Windows Registry Forensics Cheat Sheet 2026 - Cyber Triage](https://www.cybertriage.com/blog/windows-registry-forensics-cheat-sheet-2026/)
+- [USB Device Forensics on Windows 10 and 11 - ElcomSoft](https://blog.elcomsoft.com/2026/02/usb-device-forensics-on-windows-10-and-11/)
 {{#include ../../../banners/hacktricks-training.md}}
