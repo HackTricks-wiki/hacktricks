@@ -161,9 +161,6 @@
         font-size: 1.55rem;
         line-height: 1.15;
         overflow-wrap: anywhere;
-        visibility: hidden;
-        opacity: 0;
-        animation: sponsorTextReveal .12s ease .18s forwards;
     }
     .sidesponsor .sponsor-description{
         display: block;
