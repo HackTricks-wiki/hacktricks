@@ -111,6 +111,7 @@
         display: none; /*changed via JS once ad is loaded*/
         flex-direction: column;
         text-decoration: none !important;
+        overflow: hidden;
         backdrop-filter: blur(6px);
     }
     .sidesponsor img {
@@ -142,12 +143,13 @@
         overflow: hidden;
     }
     .sidesponsor .sponsor-title{
-        margin-top: 5px;
-        margin-bottom: 5px;
+        margin-top: 3px;
+        margin-bottom: 3px;
         margin-left: 15px;
         margin-right: 15px;
         font-weight: 800;
         font-size: 2rem;
+        line-height: 1.08;
         color: var(--sponsor-fg);
     }
     .sidesponsor:hover .sponsor-title{
@@ -158,29 +160,37 @@
         font-size: 1.55rem;
         line-height: 1.15;
         overflow-wrap: anywhere;
+        animation: sponsorTextReveal .3s ease .12s both;
     }
     .sidesponsor .sponsor-description{
-        display:none;
+        display: block;
         margin-top: 5px;
         margin-bottom: 15px;
         margin-left: 15px;
         margin-right: 15px;
         color: var(--sponsor-fg);        
-        transition-property: all;
-        transition-timing-function: cubic-bezier(.4,0,.2,1);
-        transition-duration: .3s;
-        overflow: scroll;
+        max-height: 0;
+        opacity: 0;
+        visibility: hidden;
+        overflow: hidden;
+        transition:
+            opacity .18s ease .14s,
+            visibility 0s linear .32s;
     }
     .sidesponsor:hover .sponsor-description{
-        display:block;
         grid-area: sponsor-description;
         min-height: 0;
         max-height: 100%;
         margin-top: 0;
         margin-bottom: 0;
         font-size: calc(1em - 1px);
+        opacity: 1;
+        visibility: visible;
         overflow: auto;
         overscroll-behavior: contain;
+        transition:
+            opacity .18s ease .14s,
+            visibility 0s linear 0s;
     }
     .sidesponsor .sponsor-cta{
         margin-top: auto;
@@ -192,20 +202,30 @@
         border-radius: 8px;
         background-color: var(--fg);
         color: var(--bg);
+        font-weight: 800;
     }
     .sidesponsor:hover .sponsor-cta{
         grid-area: sponsor-cta;
         margin-top: 0;
         margin-bottom: 4px;
-        padding: 7px 10px;
+        padding: 10px 14px;
         box-sizing: border-box;
         max-width: 100%;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
-        font-size: 1.08rem;
-        font-weight: 700;
+        font-size: 1.2rem;
+        font-weight: 800;
         line-height: 1.1;
+        animation: sponsorTextReveal .3s ease .12s both;
+    }
+    @keyframes sponsorTextReveal {
+        0%, 45% {
+            opacity: 0;
+        }
+        100% {
+            opacity: 1;
+        }
     }
     .sidesponsor-bsa {
         max-height: 40%;
