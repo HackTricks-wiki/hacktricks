@@ -56,15 +56,24 @@ a > .hljs {
 .menu-bar-link-request-update:visited {
     display: inline-flex;
     align-items: center;
-    border-radius: 6px;
-    padding: 6px 10px;
-    color: #ffffff;
-    background: #d12f1f;
+    border: 1px solid color-mix(in srgb, var(--links) 45%, transparent);
+    border-radius: 999px;
+    padding: 5px 11px;
+    color: var(--menu-bar-link-color-hover);
+    background:
+        linear-gradient(135deg,
+            color-mix(in srgb, var(--links) 20%, transparent),
+            color-mix(in srgb, var(--sidebar-active) 16%, transparent));
     font-weight: 700;
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, #ffffff 10%, transparent);
 }
 .menu-bar-link-request-update:hover {
-    color: #ffffff;
-    background: #f04b36;
+    color: var(--menu-bar-link-color-hover);
+    border-color: color-mix(in srgb, var(--links) 70%, transparent);
+    background:
+        linear-gradient(135deg,
+            color-mix(in srgb, var(--links) 30%, transparent),
+            color-mix(in srgb, var(--sidebar-active) 24%, transparent));
 }
 #menu-bar.sticky,
 #menu-bar-hover-placeholder:hover + #menu-bar,
@@ -296,15 +305,21 @@ body.sidebar-visible #menu-bar {
 #menubar-collapse-popup .menu-bar-link-request-update:visited {
     margin: 6px 8px;
     padding: 8px 12px;
-    color: #ffffff;
-    background: #d12f1f;
+    color: var(--fg);
+    background:
+        linear-gradient(135deg,
+            color-mix(in srgb, var(--links) 18%, var(--bg)),
+            color-mix(in srgb, var(--sidebar-active) 14%, var(--bg)));
 }
 #menubar-collapse-popup .menu-bar-link:hover {
     background-color: var(--theme-hover);
 }
 #menubar-collapse-popup .menu-bar-link-request-update:hover {
-    color: #ffffff;
-    background: #f04b36;
+    color: var(--menu-bar-link-color-hover);
+    background:
+        linear-gradient(135deg,
+            color-mix(in srgb, var(--links) 28%, var(--bg)),
+            color-mix(in srgb, var(--sidebar-active) 22%, var(--bg)));
 }
 
 /* Languages Menu Popup */
