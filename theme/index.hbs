@@ -160,6 +160,9 @@
                                 <a class="menu-bar-link" href="https://tools.hacktricks.wiki/" target="_blank">
                                     HT Tools
                                 </a>
+                                <a class="menu-bar-link menu-bar-link-request-update" href="https://tools.hacktricks.wiki/hacktricks-research-request/index.html" target="_blank" rel="noopener noreferrer" data-research-request-link="true">
+                                    Request Page update
+                                </a>
                                 <a class="menu-bar-link" href="https://github.com/sponsors/carlospolop" target="_blank">
                                     Sponsor
                                 </a>
@@ -177,6 +180,7 @@
                                         <a href="https://hacktricks-training.com" target="_blank" role="menuitem" class="menu-bar-link">HT Training</a>
                                         <a href="https://cloud.hacktricks.wiki/" target="_blank" role="menuitem" class="menu-bar-link">Cloud HT</a>
                                         <a href="https://tools.hacktricks.wiki/" target="_blank" role="menuitem" class="menu-bar-link">HT Tools</a>
+                                        <a href="https://tools.hacktricks.wiki/hacktricks-research-request/index.html" target="_blank" rel="noopener noreferrer" role="menuitem" class="menu-bar-link menu-bar-link-request-update" data-research-request-link="true">Request Page update</a>
                                         <a href="https://github.com/sponsors/carlospolop" target="_blank" role="menuitem" class="menu-bar-link">Sponsor</a>
                                         <a href="https://www.linkedin.com/company/hacktricks" target="_blank" role="menuitem" class="menu-bar-link">Linkedin</a>
                                         <a href="https://twitter.com/hacktricks_live" target="_blank" role="menuitem" class="menu-bar-link">X</a>
@@ -465,6 +469,27 @@
                         var btn = document.getElementById(id);
                         if (btn) { btn.click(); }
                     });
+                });
+                document.querySelectorAll('[data-research-request-link="true"]').forEach(function (el) {
+                    try {
+                        var currentUrl = new URL(window.location.href);
+                        var allowedHosts = ['hacktricks.wiki', 'cloud.hacktricks.wiki'];
+                        if (
+                            allowedHosts.indexOf(currentUrl.hostname.toLowerCase()) === -1 ||
+                            (currentUrl.protocol !== 'https:' && currentUrl.protocol !== 'http:')
+                        ) {
+                            return;
+                        }
+                        currentUrl.username = '';
+                        currentUrl.password = '';
+                        currentUrl.search = '';
+                        currentUrl.hash = '';
+                        var target = new URL('https://tools.hacktricks.wiki/hacktricks-research-request/index.html');
+                        target.searchParams.set('origin', currentUrl.href);
+                        el.href = target.toString();
+                    } catch (_error) {
+                        el.href = 'https://tools.hacktricks.wiki/hacktricks-research-request/index.html';
+                    }
                 });
                 var translateBtn = document.querySelector('[data-toggle-translations="true"]');
                 if (translateBtn) {
