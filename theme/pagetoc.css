@@ -111,6 +111,7 @@
         display: none; /*changed via JS once ad is loaded*/
         flex-direction: column;
         text-decoration: none !important;
+        overflow: hidden;
         backdrop-filter: blur(6px);
     }
     .sidesponsor img {
@@ -126,6 +127,7 @@
        padding: 4px;
        grid-area: sponsor-image;
        align-self: start;
+       transition-duration: 0s;
     }
     .sidesponsor:hover {
         display: grid !important;
@@ -142,12 +144,13 @@
         overflow: hidden;
     }
     .sidesponsor .sponsor-title{
-        margin-top: 5px;
-        margin-bottom: 5px;
+        margin-top: 3px;
+        margin-bottom: 3px;
         margin-left: 15px;
         margin-right: 15px;
         font-weight: 800;
         font-size: 2rem;
+        line-height: 1.08;
         color: var(--sponsor-fg);
     }
     .sidesponsor:hover .sponsor-title{
@@ -160,27 +163,33 @@
         overflow-wrap: anywhere;
     }
     .sidesponsor .sponsor-description{
-        display:none;
+        display: block;
         margin-top: 5px;
         margin-bottom: 15px;
         margin-left: 15px;
         margin-right: 15px;
         color: var(--sponsor-fg);        
-        transition-property: all;
-        transition-timing-function: cubic-bezier(.4,0,.2,1);
-        transition-duration: .3s;
-        overflow: scroll;
+        max-height: 0;
+        opacity: 0;
+        visibility: hidden;
+        overflow: hidden;
+        transition:
+            opacity .18s ease .14s,
+            visibility 0s linear .32s;
     }
     .sidesponsor:hover .sponsor-description{
-        display:block;
         grid-area: sponsor-description;
         min-height: 0;
         max-height: 100%;
         margin-top: 0;
         margin-bottom: 0;
         font-size: calc(1em - 1px);
+        opacity: 1;
+        visibility: visible;
         overflow: auto;
         overscroll-behavior: contain;
+        animation: sponsorTextReveal .12s ease .18s forwards;
+        transition: none;
     }
     .sidesponsor .sponsor-cta{
         margin-top: auto;
@@ -192,20 +201,34 @@
         border-radius: 8px;
         background-color: var(--fg);
         color: var(--bg);
+        font-weight: 800;
     }
     .sidesponsor:hover .sponsor-cta{
         grid-area: sponsor-cta;
         margin-top: 0;
         margin-bottom: 4px;
-        padding: 7px 10px;
+        padding: 10px 14px;
         box-sizing: border-box;
         max-width: 100%;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
-        font-size: 1.08rem;
-        font-weight: 700;
+        font-size: 1.2rem;
+        font-weight: 800;
         line-height: 1.1;
+        visibility: hidden;
+        opacity: 0;
+        animation: sponsorTextReveal .12s ease .18s forwards;
+    }
+    @keyframes sponsorTextReveal {
+        0% {
+            opacity: 0;
+            visibility: hidden;
+        }
+        100% {
+            opacity: 1;
+            visibility: visible;
+        }
     }
     .sidesponsor-bsa {
         max-height: 40%;
