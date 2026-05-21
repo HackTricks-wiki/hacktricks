@@ -2,45 +2,47 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## AppleMobileFileIntegrity.kext και amfid
+## AppleMobileFileIntegrity.kext and amfid
 
-Επικεντρώνεται στην επιβολή της ακεραιότητας του κώδικα που εκτελείται στο σύστημα παρέχοντας τη λογική πίσω από την επαλήθευση υπογραφής κώδικα του XNU. Είναι επίσης ικανό να ελέγχει τα δικαιώματα και να χειρίζεται άλλες ευαίσθητες εργασίες όπως η επιτρεπόμενη αποσφαλμάτωσης ή η απόκτηση θυρών εργασίας.
+Εστιάζει στην επιβολή της ακεραιότητας του code που εκτελείται στο σύστημα, παρέχοντας τη λογική πίσω από το XNU's code signature verification. Μπορεί επίσης να ελέγχει entitlements και να χειρίζεται άλλες ευαίσθητες εργασίες, όπως το να επιτρέπει debugging ή την απόκτηση task ports.
 
-Επιπλέον, για ορισμένες λειτουργίες, το kext προτιμά να επικοινωνεί με το daemon του χώρου χρήστη `/usr/libexec/amfid`. Αυτή η σχέση εμπιστοσύνης έχει καταχραστεί σε πολλές jailbreaks.
+Επιπλέον, για ορισμένες operations, το kext προτιμά να επικοινωνεί με το user space running daemon `/usr/libexec/amfid`. Αυτή η σχέση εμπιστοσύνης έχει καταχραστεί σε αρκετά jailbreaks.
 
-Το AMFI χρησιμοποιεί **MACF** πολιτικές και καταχωρεί τα hooks του τη στιγμή που ξεκινά. Επίσης, η αποτροπή της φόρτωσης ή της εκφόρτωσής του θα μπορούσε να προκαλέσει πανικό του πυρήνα. Ωστόσο, υπάρχουν ορισμένα επιχειρήματα εκκίνησης που επιτρέπουν την αποδυνάμωση του AMFI:
+Σε πρόσφατες εκδόσεις macOS, το AMFI δεν εκτίθεται πλέον εύκολα ως standalone on-disk kext, οπότε το reversing συνήθως σημαίνει εργασία από το **kernelcache** ή ένα **KDK** αντί για περιήγηση στο `/System/Library/Extensions`.
 
-- `amfi_unrestricted_task_for_pid`: Επιτρέπει το task_for_pid να επιτρέπεται χωρίς απαιτούμενα δικαιώματα
-- `amfi_allow_any_signature`: Επιτρέπει οποιαδήποτε υπογραφή κώδικα
-- `cs_enforcement_disable`: Επιχειρηματικό επιχείρημα που χρησιμοποιείται για την απενεργοποίηση της επιβολής υπογραφής κώδικα
-- `amfi_prevent_old_entitled_platform_binaries`: Ακυρώνει τις πλατφόρμες δυαδικών αρχείων με δικαιώματα
-- `amfi_get_out_of_my_way`: Απενεργοποιεί εντελώς το amfi
+Το AMFI χρησιμοποιεί **MACF** policies και καταχωρεί τα hooks του τη στιγμή που ξεκινά. Επίσης, η αποτροπή του loading του ή το unloading του μπορεί να προκαλέσει kernel panic. Ωστόσο, υπάρχουν ορισμένα boot arguments που επιτρέπουν την αποδυνάμωση του AMFI:
 
-Αυτές είναι μερικές από τις πολιτικές MACF που καταχωρεί:
+- `amfi_unrestricted_task_for_pid`: Επιτρέπει το task_for_pid να επιτρέπεται χωρίς τα απαιτούμενα entitlements
+- `amfi_allow_any_signature`: Επιτρέπει οποιοδήποτε code signature
+- `cs_enforcement_disable`: System-wide argument που χρησιμοποιείται για να απενεργοποιήσει το code signing enforcement
+- `amfi_prevent_old_entitled_platform_binaries`: Void platform binaries με entitlements
+- `amfi_get_out_of_my_way`: Απενεργοποιεί πλήρως το amfi
 
-- **`cred_check_label_update_execve:`** Η ενημέρωση ετικέτας θα εκτελείται και θα επιστρέφει 1
-- **`cred_label_associate`**: Ενημερώνει την υποδοχή mac ετικέτας του AMFI με ετικέτα
-- **`cred_label_destroy`**: Αφαιρεί την υποδοχή mac ετικέτας του AMFI
-- **`cred_label_init`**: Μετακινεί 0 στην υποδοχή mac ετικέτας του AMFI
-- **`cred_label_update_execve`:** Ελέγχει τα δικαιώματα της διαδικασίας για να δει αν θα επιτρέπεται να τροποποιήσει τις ετικέτες.
-- **`file_check_mmap`:** Ελέγχει αν το mmap αποκτά μνήμη και την ορίζει ως εκτελέσιμη. Σε αυτή την περίπτωση, ελέγχει αν απαιτείται επικύρωση βιβλιοθήκης και αν ναι, καλεί τη λειτουργία επικύρωσης βιβλιοθήκης.
-- **`file_check_library_validation`**: Καλεί τη λειτουργία επικύρωσης βιβλιοθήκης που ελέγχει μεταξύ άλλων αν μια πλατφόρμα δυαδικών αρχείων φορτώνει άλλη πλατφόρμα δυαδικών αρχείων ή αν η διαδικασία και το νέο φορτωμένο αρχείο έχουν το ίδιο TeamID. Ορισμένα δικαιώματα θα επιτρέψουν επίσης τη φόρτωση οποιασδήποτε βιβλιοθήκης.
-- **`policy_initbsd`**: Ρυθμίζει τις αξιόπιστες κλειδαριές NVRAM
-- **`policy_syscall`**: Ελέγχει τις πολιτικές DYLD όπως αν το δυαδικό αρχείο έχει απεριόριστα τμήματα, αν θα επιτρέψει env vars... αυτό καλείται επίσης όταν μια διαδικασία ξεκινά μέσω `amfi_check_dyld_policy_self()`.
-- **`proc_check_inherit_ipc_ports`**: Ελέγχει αν όταν μια διαδικασία εκτελεί ένα νέο δυαδικό αρχείο, άλλες διαδικασίες με δικαιώματα SEND πάνω από την θύρα εργασίας της διαδικασίας θα πρέπει να τις διατηρήσουν ή όχι. Οι πλατφόρμες δυαδικών αρχείων επιτρέπονται, το δικαίωμα `get-task-allow` το επιτρέπει, τα δικαιώματα `task_for_pid-allow` επιτρέπονται και τα δυαδικά αρχεία με το ίδιο TeamID.
-- **`proc_check_expose_task`**: επιβάλλει δικαιώματα
-- **`amfi_exc_action_check_exception_send`**: Ένα μήνυμα εξαίρεσης αποστέλλεται στον αποσφαλματωτή
-- **`amfi_exc_action_label_associate & amfi_exc_action_label_copy/populate & amfi_exc_action_label_destroy & amfi_exc_action_label_init & amfi_exc_action_label_update`**: Κύκλος ζωής ετικέτας κατά τη διάρκεια της διαχείρισης εξαιρέσεων (αποσφαλμάτωσης)
-- **`proc_check_get_task`**: Ελέγχει τα δικαιώματα όπως το `get-task-allow` που επιτρέπει σε άλλες διαδικασίες να αποκτούν την θύρα εργασίας και το `task_for_pid-allow`, που επιτρέπει στη διαδικασία να αποκτά τις θύρες εργασίας άλλων διαδικασιών. Αν κανένα από αυτά, καλεί το `amfid permitunrestricteddebugging` για να ελέγξει αν επιτρέπεται.
-- **`proc_check_mprotect`**: Αρνείται αν το `mprotect` καλείται με την σημαία `VM_PROT_TRUSTED` που υποδεικνύει ότι η περιοχή πρέπει να αντιμετωπίζεται σαν να έχει έγκυρη υπογραφή κώδικα.
-- **`vnode_check_exec`**: Καλείται όταν εκτελέσιμα αρχεία φορτώνονται στη μνήμη και ορίζει `cs_hard | cs_kill` που θα σκοτώσει τη διαδικασία αν οποιαδήποτε από τις σελίδες γίνει μη έγκυρη
+Αυτές είναι μερικές από τις MACF policies που καταχωρεί:
+
+- **`cred_check_label_update_execve:`** Θα πραγματοποιηθεί label update και θα επιστρέψει 1
+- **`cred_label_associate`**: Ενημερώνει το mac label slot του AMFI με το label
+- **`cred_label_destroy`**: Αφαιρεί το mac label slot του AMFI
+- **`cred_label_init`**: Μετακινεί το 0 στο mac label slot του AMFI
+- **`cred_label_update_execve`:** Ελέγχει τα entitlements του process για να δει αν πρέπει να επιτραπεί η τροποποίηση των labels.
+- **`file_check_mmap`:** Ελέγχει αν το mmap αποκτά memory και το ορίζει ως executable. Σε αυτή την περίπτωση ελέγχει αν χρειάζεται library validation και, αν ναι, καλεί τη συνάρτηση library validation.
+- **`file_check_library_validation`**: Καλεί τη συνάρτηση library validation, η οποία ελέγχει μεταξύ άλλων αν ένα platform binary φορτώνει άλλο platform binary ή αν το process και το νέο loaded file έχουν το ίδιο TeamID. Ορισμένα entitlements θα επιτρέψουν επίσης τη φόρτωση οποιασδήποτε library.
+- **`policy_initbsd`**: Ρυθμίζει trusted NVRAM Keys
+- **`policy_syscall`**: Ελέγχει DYLD policies όπως αν το binary έχει unrestricted segments, αν πρέπει να επιτρέψει env vars... αυτό καλείται επίσης όταν ένα process ξεκινά μέσω `amfi_check_dyld_policy_self()`.
+- **`proc_check_inherit_ipc_ports`**: Ελέγχει αν, όταν ένα process εκτελεί ένα νέο binary, άλλα processes με SEND rights πάνω στο task port του process πρέπει να τα διατηρήσουν ή όχι. Platform binaries επιτρέπονται, το `get-task-allow` entitlement το επιτρέπει, τα `task_for_pid-allow` entitles επιτρέπονται και binaries με το ίδιο TeamID.
+- **`proc_check_expose_task`**: επιβάλλει entitlements
+- **`amfi_exc_action_check_exception_send`**: Στέλνεται exception message σε debugger
+- **`amfi_exc_action_label_associate & amfi_exc_action_label_copy/populate & amfi_exc_action_label_destroy & amfi_exc_action_label_init & amfi_exc_action_label_update`**: Lifecycle του label κατά τον χειρισμό exception (debugging)
+- **`proc_check_get_task`**: Ελέγχει entitlements όπως `get-task-allow`, το οποίο επιτρέπει σε άλλα processes να πάρουν το tasks port, και `task_for_pid-allow`, τα οποία επιτρέπουν στο process να πάρει τα tasks ports άλλων processes. Αν κανένα από αυτά δεν ισχύει, καλεί το `amfid permitunrestricteddebugging` για να ελέγξει αν επιτρέπεται.
+- **`proc_check_mprotect`**: Απορρίπτει αν το `mprotect` καλείται με το flag `VM_PROT_TRUSTED`, που υποδεικνύει ότι το region πρέπει να αντιμετωπίζεται σαν να έχει έγκυρο code signature.
+- **`vnode_check_exec`**: Καλείται όταν executable files φορτώνονται στη memory και ορίζει `cs_hard | cs_kill`, κάτι που θα σκοτώσει το process αν οποιοδήποτε από τα pages γίνει invalid
 - **`vnode_check_getextattr`**: MacOS: Ελέγχει `com.apple.root.installed` και `isVnodeQuarantined()`
-- **`vnode_check_setextattr`**: Όπως get + com.apple.private.allow-bless και εσωτερικό ισοδύναμο δικαιώματος εγκαταστάτη
-- **`vnode_check_signature`**: Κώδικας που καλεί το XNU για να ελέγξει την υπογραφή κώδικα χρησιμοποιώντας δικαιώματα, cache εμπιστοσύνης και `amfid`
-- **`proc_check_run_cs_invalid`**: Παρεμβαίνει σε κλήσεις `ptrace()` (`PT_ATTACH` και `PT_TRACE_ME`). Ελέγχει για οποιαδήποτε από τα δικαιώματα `get-task-allow`, `run-invalid-allow` και `run-unsigned-code` και αν κανένα, ελέγχει αν η αποσφαλμάτωση επιτρέπεται.
-- **`proc_check_map_anon`**: Αν το mmap καλείται με τη σημαία **`MAP_JIT`**, το AMFI θα ελέγξει για το δικαίωμα `dynamic-codesigning`.
+- **`vnode_check_setextattr`**: Όπως get + `com.apple.private.allow-bless` και internal-installer-equivalent entitlement
+- **`vnode_check_signature`**: Code που καλεί το XNU για να ελέγξει το code signature χρησιμοποιώντας entitlements, trust cache και `amfid`
+- **`proc_check_run_cs_invalid`**: Παρεμβάλλει `ptrace()` calls (`PT_ATTACH` and `PT_TRACE_ME`). Ελέγχει για οποιοδήποτε από τα entitlements `get-task-allow`, `run-invalid-allow` και `run-unsigned-code` και αν δεν υπάρχει κανένα, ελέγχει αν επιτρέπεται debugging.
+- **`proc_check_map_anon`**: Αν το `mmap` καλείται με το flag **`MAP_JIT`**, το AMFI θα ελέγξει το `dynamic-codesigning` entitlement.
 
-`AMFI.kext` εκθέτει επίσης μια API για άλλες επεκτάσεις πυρήνα, και είναι δυνατό να βρείτε τις εξαρτήσεις του με:
+`AMFI.kext` εκθέτει επίσης ένα API για άλλα kernel extensions, και είναι δυνατό να βρεθούν οι εξαρτήσεις του με:
 ```bash
 kextstat | grep " 19 " | cut -c2-5,50- | cut -d '(' -f1
 Executing: /usr/bin/kmutil showloaded
@@ -65,22 +67,39 @@ No variant specified, falling back to release
 ```
 ## amfid
 
-Αυτό είναι το daemon που εκτελείται σε λειτουργία χρήστη και θα χρησιμοποιήσει το `AMFI.kext` για να ελέγξει τις υπογραφές κώδικα σε λειτουργία χρήστη.\
-Για να επικοινωνήσει το `AMFI.kext` με το daemon, χρησιμοποιεί mach μηνύματα μέσω της θύρας `HOST_AMFID_PORT`, η οποία είναι η ειδική θύρα `18`.
+Αυτός είναι ο daemon σε user mode που το `AMFI.kext` θα χρησιμοποιήσει για να ελέγχει code signatures σε user mode.\
+Για να επικοινωνεί το `AMFI.kext` με τον daemon, χρησιμοποιεί mach messages μέσω του port `HOST_AMFID_PORT`, που είναι το ειδικό port `18`.
 
-Σημειώστε ότι στο macOS δεν είναι πλέον δυνατό για τις διαδικασίες root να καταλάβουν ειδικές θύρες, καθώς προστατεύονται από το `SIP` και μόνο το launchd μπορεί να τις αποκτήσει. Στο iOS ελέγχεται ότι η διαδικασία που στέλνει την απάντηση έχει το CDHash σκληρά κωδικοποιημένο του `amfid`.
+Σημείωσε ότι στο macOS πλέον δεν είναι δυνατό για root processes να hijack special ports, καθώς προστατεύονται από το `SIP` και μόνο το launchd μπορεί να τα αποκτήσει. Στο iOS ελέγχεται ότι το process που στέλνει πίσω την απόκριση έχει το CDHash hardcoded του `amfid`.
 
-Είναι δυνατόν να δείτε πότε ζητείται από το `amfid` να ελέγξει ένα δυαδικό και την απάντησή του, αποσφαλματώνοντάς το και θέτοντας ένα breakpoint στο `mach_msg`.
+Είναι δυνατό να δεις πότε το `amfid` ζητείται να ελέγξει ένα binary και ποια είναι η απόκρισή του, κάνοντας debugging σε αυτό και βάζοντας breakpoint στο `mach_msg`.
 
-Μόλις ληφθεί ένα μήνυμα μέσω της ειδικής θύρας, **MIG** χρησιμοποιείται για να στείλει κάθε λειτουργία στη λειτουργία που καλεί. Οι κύριες λειτουργίες έχουν αναστραφεί και εξηγηθεί μέσα στο βιβλίο.
+Μόλις ληφθεί ένα μήνυμα μέσω του special port, το **MIG** χρησιμοποιείται για να στείλει κάθε function στη function που καλεί. Οι κύριες functions αναλύθηκαν reverse-engineered και εξηγήθηκαν μέσα στο βιβλίο.
+
+### DYLD policy and library validation
+
+Οι νεότερες εκδόσεις του `dyld` καλούν πολύ νωρίς το `amfi_check_dyld_policy_self()` από το `configureProcessRestrictions()` για να ρωτήσουν το AMFI αν το process επιτρέπεται να χρησιμοποιεί `DYLD_*` path variables, interposing, fallback paths, embedded variables ή να ανέχεται failed library insertion. Επομένως, όταν κάνεις triage σε ένα injection surface, δεν αρκεί να εξετάσεις μόνο Mach-O load commands: χρειάζεται επίσης να εξετάσεις τα entitlements και τα runtime flags που το AMFI θα μετατρέψει σε `dyld` policy.
+
+Ένας πρακτικός triage loop είναι:
+```bash
+BIN=/path/to/app/Contents/MacOS/binary
+
+# Interesting AMFI-related entitlements
+codesign -d --entitlements :- "$BIN" 2>&1 | \
+egrep "disable-library-validation|clear-library-validation|allow-dyld-environment-variables|allow-jit|allow-unsigned-executable-memory|disable-executable-page-protection|get-task-allow"
+
+# Runtime flags / TeamID / hardened-runtime metadata
+codesign -dvvv "$BIN" 2>&1 | egrep "TeamIdentifier=|Runtime Version|flags="
+```
+Σε σύγχρονο macOS, πολλά Apple binaries δεν φέρουν πλέον απευθείας το `com.apple.security.cs.disable-library-validation` και αντί αυτού διανέμονται με `com.apple.private.security.clear-library-validation`. Σε αυτή την περίπτωση, το library validation δεν απενεργοποιείται τη στιγμή του `execve`: το process πρέπει να καλέσει `csops(..., CS_OPS_CLEAR_LV, ...)` στον εαυτό του, και το XNU επιτρέπει αυτή την operation μόνο στο calling process όταν υπάρχει το entitlement. Από offensive πλευρά, αυτό έχει σημασία επειδή ένας target μπορεί να γίνει injectable μόνο **αφού** φτάσει στο code path που καθαρίζει ρητά το LV (για παράδειγμα, λίγο πριν φορτώσει optional plugins).
 
 ## Provisioning Profiles
 
-Ένα provisioning profile μπορεί να χρησιμοποιηθεί για να υπογράψει κώδικα. Υπάρχουν **Developer** profiles που μπορούν να χρησιμοποιηθούν για να υπογράψουν κώδικα και να τον δοκιμάσουν, και **Enterprise** profiles που μπορούν να χρησιμοποιηθούν σε όλες τις συσκευές.
+Ένα provisioning profile μπορεί να χρησιμοποιηθεί για να sign code. Υπάρχουν **Developer** profiles που μπορούν να χρησιμοποιηθούν για να sign code και να το test, και **Enterprise** profiles που μπορούν να χρησιμοποιηθούν σε όλες τις devices.
 
-Αφού υποβληθεί μια εφαρμογή στο Apple Store, αν εγκριθεί, υπογράφεται από την Apple και το provisioning profile δεν είναι πλέον απαραίτητο.
+Αφού ένα App υποβληθεί στο Apple Store, αν εγκριθεί, signάρεται από την Apple και το provisioning profile δεν χρειάζεται πλέον.
 
-Ένα profile συνήθως χρησιμοποιεί την επέκταση `.mobileprovision` ή `.provisionprofile` και μπορεί να αποθηκευτεί με:
+Ένα profile συνήθως χρησιμοποιεί την επέκταση `.mobileprovision` ή `.provisionprofile` και μπορεί να dumped με:
 ```bash
 openssl asn1parse -inform der -in /path/to/profile
 
@@ -88,40 +107,50 @@ openssl asn1parse -inform der -in /path/to/profile
 
 security cms -D -i /path/to/profile
 ```
-Αν και μερικές φορές αναφέρονται ως πιστοποιημένα, αυτά τα προφίλ παροχής έχουν περισσότερα από ένα πιστοποιητικό:
+Αν και μερικές φορές αναφέρονται ως certificated, αυτά τα provisioning profiles έχουν περισσότερα από ένα certificate:
 
-- **AppIDName:** Ο Αναγνωριστικός Κωδικός Εφαρμογής
-- **AppleInternalProfile**: Δηλώνει ότι πρόκειται για εσωτερικό προφίλ της Apple
-- **ApplicationIdentifierPrefix**: Προστίθεται στο AppIDName (ίδιο με TeamIdentifier)
-- **CreationDate**: Η ημερομηνία σε μορφή `YYYY-MM-DDTHH:mm:ssZ`
-- **DeveloperCertificates**: Ένας πίνακας (συνήθως ενός) πιστοποιητικού/ων, κωδικοποιημένος ως δεδομένα Base64
-- **Entitlements**: Τα δικαιώματα που επιτρέπονται με τα δικαιώματα για αυτό το προφίλ
-- **ExpirationDate**: Η ημερομηνία λήξης σε μορφή `YYYY-MM-DDTHH:mm:ssZ`
-- **Name**: Το Όνομα της Εφαρμογής, το ίδιο με το AppIDName
-- **ProvisionedDevices**: Ένας πίνακας (για πιστοποιητικά προγραμματιστών) των UDIDs για τα οποία είναι έγκυρο αυτό το προφίλ
-- **ProvisionsAllDevices**: Μια boolean (true για πιστοποιητικά επιχείρησης)
-- **TeamIdentifier**: Ένας πίνακας (συνήθως ενός) αλφαριθμητικού συμβόλου/ων που χρησιμοποιούνται για την αναγνώριση του προγραμματιστή για σκοπούς αλληλεπίδρασης μεταξύ εφαρμογών
-- **TeamName**: Ένα αναγνώσιμο από άνθρωπο όνομα που χρησιμοποιείται για την αναγνώριση του προγραμματιστή
-- **TimeToLive**: Η εγκυρότητα (σε ημέρες) του πιστοποιητικού
-- **UUID**: Ένας Καθολικά Μοναδικός Αναγνωριστής για αυτό το προφίλ
-- **Version**: Αυτή τη στιγμή ορισμένο σε 1
+- **AppIDName:** Το Application Identifier
+- **AppleInternalProfile**: Υποδηλώνει ότι αυτό είναι ένα Apple Internal profile
+- **ApplicationIdentifierPrefix**: Προστίθεται πριν από το AppIDName (ίδιο με το TeamIdentifier)
+- **CreationDate**: Ημερομηνία σε μορφή `YYYY-MM-DDTHH:mm:ssZ`
+- **DeveloperCertificates**: Ένας πίνακας από (συνήθως ένα) certificate(s), κωδικοποιημένα ως Base64 data
+- **Entitlements**: Τα entitlements που επιτρέπονται με entitlements για αυτό το profile
+- **ExpirationDate**: Ημερομηνία λήξης σε μορφή `YYYY-MM-DDTHH:mm:ssZ`
+- **Name**: Το Application Name, ίδιο με το AppIDName
+- **ProvisionedDevices**: Ένας πίνακας (για developer certificates) από UDIDs για τα οποία ισχύει αυτό το profile
+- **ProvisionsAllDevices**: Ένα boolean (true για enterprise certificates)
+- **TeamIdentifier**: Ένας πίνακας από (συνήθως ένα) αλφαριθμητικό string(s) που χρησιμοποιούνται για να αναγνωρίζουν τον developer για purposes inter-app interaction
+- **TeamName**: Ένα human-readable όνομα που χρησιμοποιείται για να αναγνωρίζει τον developer
+- **TimeToLive**: Validity (σε ημέρες) του certificate
+- **UUID**: Ένα Universally Unique Identifier για αυτό το profile
+- **Version**: Αυτή τη στιγμή έχει οριστεί σε 1
 
-Σημειώστε ότι η καταχώρηση δικαιωμάτων θα περιέχει ένα περιορισμένο σύνολο δικαιωμάτων και το προφίλ παροχής θα μπορεί να δώσει μόνο αυτά τα συγκεκριμένα δικαιώματα για να αποτρέψει την παροχή ιδιωτικών δικαιωμάτων της Apple.
+Σημειώστε ότι η εγγραφή entitlements θα περιέχει ένα περιορισμένο σύνολο entitlements και το provisioning profile θα μπορεί να δώσει μόνο αυτά τα συγκεκριμένα entitlements, ώστε να αποτραπεί η παροχή private entitlements της Apple.
 
-Σημειώστε ότι τα προφίλ βρίσκονται συνήθως στο `/var/MobileDeviceProvisioningProfiles` και είναι δυνατή η έλεγχος τους με **`security cms -D -i /path/to/profile`**
+Σημειώστε ότι τα profiles συνήθως βρίσκονται στο `/var/MobileDeviceProvisioningProfiles` και είναι δυνατό να τα ελέγξετε με **`security cms -D -i /path/to/profile`**
 
-## **libmis.dyld**
+## **libmis.dylib**
 
-Αυτή είναι η εξωτερική βιβλιοθήκη που καλεί το `amfid` προκειμένου να ρωτήσει αν θα πρέπει να επιτρέψει κάτι ή όχι. Αυτό έχει κακοποιηθεί ιστορικά στο jailbreaking εκτελώντας μια παραποιημένη έκδοση της που θα επέτρεπε τα πάντα.
+Αυτή είναι η εξωτερική library που καλεί το `amfid` προκειμένου να ρωτήσει αν θα πρέπει να επιτρέψει κάτι ή όχι. Αυτό ιστορικά έχει γίνει abuse στο jailbreaking με την εκτέλεση μιας backdoored έκδοσης του, η οποία θα επέτρεπε τα πάντα.
 
 Στο macOS αυτό βρίσκεται μέσα στο `MobileDevice.framework`.
 
 ## AMFI Trust Caches
 
-Το iOS AMFI διατηρεί μια λίστα γνωστών κατακερματισμών που υπογράφονται ad-hoc, που ονομάζεται **Trust Cache** και βρίσκεται στην ενότητα `__TEXT.__const` του kext. Σημειώστε ότι σε πολύ συγκεκριμένες και ευαίσθητες λειτουργίες είναι δυνατή η επέκταση αυτού του Trust Cache με ένα εξωτερικό αρχείο.
+Τα trust caches δεν είναι μόνο ένα iOS concept. Στο σύγχρονο macOS, ειδικά στο **Apple silicon**, το static trust cache και τα loadable trust caches αποτελούν μέρος της Secure Boot chain. Όταν το **CodeDirectory hash** ενός Mach-O υπάρχει εκεί, το AMFI μπορεί να του αποδώσει **platform privilege** χωρίς να κάνει περαιτέρω authenticity checks κατά το launch time. Αυτό σημαίνει επίσης ότι η Apple μπορεί να κλειδώσει platform binaries σε μια συγκεκριμένη έκδοση OS και να αποτρέψει παλαιότερα Apple-signed binaries από το να επαναχρησιμοποιηθούν σε νεότερα συστήματα.
 
-## References
+Σε πρόσφατες εκδόσεις macOS, τα trust-cache metadata συνδέονται επίσης με τα **launch constraints**, οπότε copied system apps και binaries που ξεκινούν από τον λάθος parent/location μπορούν να απορριφθούν από το AMFI ακόμη κι αν είναι ακόμα Apple-signed. Το αναλυτικό extraction και reversing workflow καλύπτεται στο:
+
+{{#ref}}
+macos-launch-environment-constraints.md
+{{#endref}}
+
+Στην έρευνα iOS και jailbreak θα βρείτε ακόμη το παραδοσιακό model των **loadable trust caches** να χρησιμοποιείται για whitelisting ad-hoc signed binaries.
+
+## Αναφορές
 
 - [**\*OS Internals Volume III**](https://newosxbook.com/home.html)
+- [https://theevilbit.github.io/posts/com.apple.private.security.clear-library-validation/](https://theevilbit.github.io/posts/com.apple.private.security.clear-library-validation/)
+- [https://support.apple.com/guide/security/trust-caches-sec7d38fbf97/web](https://support.apple.com/guide/security/trust-caches-sec7d38fbf97/web)
 
 {{#include ../../../banners/hacktricks-training.md}}
