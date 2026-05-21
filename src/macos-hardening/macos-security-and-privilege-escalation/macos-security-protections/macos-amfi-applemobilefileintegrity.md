@@ -2,45 +2,47 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## AppleMobileFileIntegrity.kext та amfid
+## AppleMobileFileIntegrity.kext and amfid
 
-Він зосереджується на забезпеченні цілісності коду, що виконується в системі, надаючи логіку перевірки підпису коду XNU. Він також здатний перевіряти права доступу та виконувати інші чутливі завдання, такі як дозволення налагодження або отримання портів завдань.
+Він зосереджений на забезпеченні цілісності коду, що виконується в системі, надаючи логіку, яка стоїть за перевіркою code signature в XNU. Він також може перевіряти entitlements і виконувати інші чутливі завдання, такі як дозвіл debug або отримання task ports.
 
-Більше того, для деяких операцій kext надає перевагу зв'язку з демоном користувацького простору `/usr/libexec/amfid`. Ця довірча взаємозв'язок була зловживана в кількох джейлбрейках.
+Крім того, для деяких операцій kext надає перевагу зверненню до daemon у user space `/usr/libexec/amfid`. Ці відносини довіри використовувалися в кількох jailbreaks.
 
-AMFI використовує **MACF** політики і реєструє свої хуки в момент запуску. Також, запобігання його завантаженню або вивантаженню може викликати паніку ядра. Однак існують деякі аргументи завантаження, які дозволяють ослабити AMFI:
+У recent macOS versions AMFI більше не доступний зручно як окремий on-disk kext, тому reversing зазвичай означає роботу з **kernelcache** або **KDK** замість перегляду `/System/Library/Extensions`.
 
-- `amfi_unrestricted_task_for_pid`: Дозволити task_for_pid без необхідних прав доступу
-- `amfi_allow_any_signature`: Дозволити будь-який підпис коду
-- `cs_enforcement_disable`: Аргумент системного рівня, що використовується для відключення примусу підпису коду
-- `amfi_prevent_old_entitled_platform_binaries`: Скасувати платформні бінарники з правами доступу
-- `amfi_get_out_of_my_way`: Повністю відключає amfi
+AMFI використовує політики **MACF** і реєструє свої hooks у момент запуску. Також запобігання його завантаженню або його unloading може викликати kernel panic. Однак є деякі boot arguments, які дозволяють послабити AMFI:
 
-Це деякі з політик MACF, які він реєструє:
+- `amfi_unrestricted_task_for_pid`: Дозволяє `task_for_pid` без необхідних entitlements
+- `amfi_allow_any_signature`: Дозволяє будь-який code signature
+- `cs_enforcement_disable`: Системний аргумент, що використовується для вимкнення code signing enforcement
+- `amfi_prevent_old_entitled_platform_binaries`: Відкликає platform binaries з entitlements
+- `amfi_get_out_of_my_way`: Повністю вимикає amfi
 
-- **`cred_check_label_update_execve:`** Оновлення мітки буде виконано і поверне 1
-- **`cred_label_associate`**: Оновити слот mac мітки AMFI з міткою
-- **`cred_label_destroy`**: Видалити слот mac мітки AMFI
-- **`cred_label_init`**: Перемістити 0 в слот mac мітки AMFI
-- **`cred_label_update_execve`:** Перевіряє права доступу процесу, щоб визначити, чи слід дозволити змінювати мітки.
-- **`file_check_mmap`:** Перевіряє, чи mmap отримує пам'ять і встановлює її як виконувану. У цьому випадку перевіряє, чи потрібна валідація бібліотеки, і якщо так, викликає функцію валідації бібліотеки.
-- **`file_check_library_validation`**: Викликає функцію валідації бібліотеки, яка перевіряє, серед іншого, чи завантажує платформний бінарник інший платформний бінарник або чи має процес і новий завантажений файл однаковий TeamID. Деякі права доступу також дозволять завантажити будь-яку бібліотеку.
-- **`policy_initbsd`**: Налаштовує довірені ключі NVRAM
-- **`policy_syscall`**: Перевіряє політики DYLD, такі як чи має бінарник необмежені сегменти, чи слід дозволити змінні середовища... це також викликається, коли процес запускається через `amfi_check_dyld_policy_self()`.
-- **`proc_check_inherit_ipc_ports`**: Перевіряє, чи повинні інші процеси з правами SEND на порт завдання процесу зберігати їх, коли процес виконує новий бінарник. Платформні бінарники дозволені, право `get-task-allow` це дозволяє, права `task_for_pid-allow` дозволені, а бінарники з однаковим TeamID.
-- **`proc_check_expose_task`**: примусити права доступу
-- **`amfi_exc_action_check_exception_send`**: Повідомлення про виключення надсилається налагоджувачу
-- **`amfi_exc_action_label_associate & amfi_exc_action_label_copy/populate & amfi_exc_action_label_destroy & amfi_exc_action_label_init & amfi_exc_action_label_update`**: Життєвий цикл мітки під час обробки виключень (налагодження)
-- **`proc_check_get_task`**: Перевіряє права доступу, такі як `get-task-allow`, які дозволяють іншим процесам отримувати порт завдань, і `task_for_pid-allow`, які дозволяють процесу отримувати порти завдань інших процесів. Якщо жоден з цих варіантів не підходить, викликає `amfid permitunrestricteddebugging`, щоб перевірити, чи це дозволено.
-- **`proc_check_mprotect`**: Відмовити, якщо `mprotect` викликано з прапором `VM_PROT_TRUSTED`, що вказує на те, що регіон повинен розглядатися так, ніби має дійсний підпис коду.
-- **`vnode_check_exec`**: Викликається, коли виконувані файли завантажуються в пам'ять і встановлює `cs_hard | cs_kill`, що вб'є процес, якщо будь-яка з сторінок стане недійсною
-- **`vnode_check_getextattr`**: MacOS: Перевірка `com.apple.root.installed` та `isVnodeQuarantined()`
-- **`vnode_check_setextattr`**: Як отримати + com.apple.private.allow-bless та еквівалент прав доступу внутрішнього інсталятора
-- **`vnode_check_signature`**: Код, який викликає XNU для перевірки підпису коду, використовуючи права доступу, кеш довіри та `amfid`
-- **`proc_check_run_cs_invalid`**: Перехоплює виклики `ptrace()` (`PT_ATTACH` та `PT_TRACE_ME`). Перевіряє наявність будь-яких прав доступу `get-task-allow`, `run-invalid-allow` та `run-unsigned-code`, і якщо жоден з них не підходить, перевіряє, чи дозволено налагодження.
-- **`proc_check_map_anon`**: Якщо mmap викликано з прапором **`MAP_JIT`**, AMFI перевірить право `dynamic-codesigning`.
+Ось деякі з MACF policies, які він реєструє:
 
-`AMFI.kext` також надає API для інших розширень ядра, і можливо знайти його залежності за допомогою:
+- **`cred_check_label_update_execve:`** Оновлення label буде виконано і поверне 1
+- **`cred_label_associate`**: Оновлює слот mac label в AMFI значенням label
+- **`cred_label_destroy`**: Видаляє слот mac label в AMFI
+- **`cred_label_init`**: Встановлює 0 у слоті mac label в AMFI
+- **`cred_label_update_execve`:** Перевіряє entitlements процесу, щоб визначити, чи дозволено йому змінювати labels.
+- **`file_check_mmap`:** Перевіряє, чи `mmap` отримує memory і встановлює її як executable. У такому разі перевіряє, чи потрібна library validation, і якщо так, викликає функцію library validation.
+- **`file_check_library_validation`**: Викликає функцію library validation, яка серед іншого перевіряє, чи platform binary завантажує інший platform binary, або чи process і новий завантажений файл мають однаковий TeamID. Певні entitlements також дозволяють завантажувати будь-яку library.
+- **`policy_initbsd`**: Налаштовує довірені NVRAM Keys
+- **`policy_syscall`**: Перевіряє DYLD policies, наприклад, чи binary має unrestricted segments, чи слід дозволяти env vars... це також викликається, коли process запускається через `amfi_check_dyld_policy_self()`.
+- **`proc_check_inherit_ipc_ports`**: Перевіряє, чи під час виконання process нового binary інші process із SEND правами на task port цього process повинні зберегти їх чи ні. Platform binaries дозволені, entitlement `get-task-allow` дозволяє це, entitlements `task_for_pid-allow` дозволені, а також binaries з однаковим TeamID.
+- **`proc_check_expose_task`**: примусово перевіряє entitlements
+- **`amfi_exc_action_check_exception_send`**: Повідомлення exception надсилається debugger
+- **`amfi_exc_action_label_associate & amfi_exc_action_label_copy/populate & amfi_exc_action_label_destroy & amfi_exc_action_label_init & amfi_exc_action_label_update`**: Життєвий цикл label під час обробки exception (debugging)
+- **`proc_check_get_task`**: Перевіряє entitlements, такі як `get-task-allow`, який дозволяє іншим process отримувати task port, і `task_for_pid-allow`, який дозволяє process отримувати task ports інших process. Якщо жодного з них немає, він звертається до `amfid permitunrestricteddebugging`, щоб перевірити, чи це дозволено.
+- **`proc_check_mprotect`**: Відхиляє, якщо `mprotect` викликається з прапором `VM_PROT_TRUSTED`, що вказує: область має розглядатися так, ніби вона має валідний code signature.
+- **`vnode_check_exec`**: Викликається, коли executable files завантажуються в memory, і встановлює `cs_hard | cs_kill`, що завершить process, якщо будь-яка зі сторінок стане невалідною
+- **`vnode_check_getextattr`**: MacOS: Перевіряє `com.apple.root.installed` і `isVnodeQuarantined()`
+- **`vnode_check_setextattr`**: Як get + `com.apple.private.allow-bless` і internal-installer-equivalent entitlement
+- **`vnode_check_signature`**: Код, який викликає XNU для перевірки code signature за допомогою entitlements, trust cache і `amfid`
+- **`proc_check_run_cs_invalid`**: Перехоплює виклики `ptrace()` (`PT_ATTACH` і `PT_TRACE_ME`). Перевіряє наявність entitlements `get-task-allow`, `run-invalid-allow` і `run-unsigned-code`, а якщо жодного немає, перевіряє, чи дозволено debugging.
+- **`proc_check_map_anon`**: Якщо `mmap` викликається з прапором **`MAP_JIT`**, AMFI перевірятиме entitlement `dynamic-codesigning`.
+
+`AMFI.kext` також надає API для інших kernel extensions, і можна знайти його dependencies за допомогою:
 ```bash
 kextstat | grep " 19 " | cut -c2-5,50- | cut -d '(' -f1
 Executing: /usr/bin/kmutil showloaded
@@ -65,22 +67,39 @@ No variant specified, falling back to release
 ```
 ## amfid
 
-Це демон, що працює в режимі користувача, який використовує `AMFI.kext` для перевірки підписів коду в режимі користувача.\
-Для того, щоб `AMFI.kext` міг спілкуватися з демоном, він використовує mach-повідомлення через порт `HOST_AMFID_PORT`, який є спеціальним портом `18`.
+Це daemon у user mode, який `AMFI.kext` використовуватиме для перевірки code signatures у user mode.\
+Щоб `AMFI.kext` міг спілкуватися з daemon, він використовує mach messages через порт `HOST_AMFID_PORT`, який є спеціальним портом `18`.
 
-Зверніть увагу, що в macOS більше неможливо, щоб процеси root захоплювали спеціальні порти, оскільки вони захищені `SIP`, і лише launchd може їх отримати. В iOS перевіряється, що процес, який надсилає відповідь, має жорстко закодований CDHash `amfid`.
+Зауважте, що в macOS більше не можна для root processes hijack special ports, оскільки вони захищені `SIP`, і лише launchd може їх отримати. В iOS перевіряється, що процес, який надсилає response назад, має CDHash hardcoded of `amfid`.
 
-Можна побачити, коли `amfid` запитується для перевірки бінарного файлу та його відповідь, відлагоджуючи його та встановлюючи точку зупинки в `mach_msg`.
+Можна побачити, коли `amfid` запитується на перевірку binary і response від нього, налагоджуючи його та встановивши breakpoint у `mach_msg`.
 
-Коли повідомлення отримується через спеціальний порт, **MIG** використовується для надсилання кожної функції до функції, яку вона викликає. Основні функції були реверсовані та пояснені в книзі.
+Після того як message отримано через special port, використовується **MIG**, щоб передати кожну function до function, яку вона викликає. Основні functions були reversed і пояснені всередині book.
+
+### DYLD policy and library validation
+
+Пізніші версії `dyld` дуже рано викликають `amfi_check_dyld_policy_self()` з `configureProcessRestrictions()`, щоб запитати AMFI, чи може process використовувати `DYLD_*` path variables, interposing, fallback paths, embedded variables або tolerates failed library insertion. Тому під час triaging injection surface недостатньо перевіряти лише Mach-O load commands: також потрібно перевіряти entitlements і runtime flags, які AMFI перетворить на `dyld` policy.
+
+Практичний triage loop такий:
+```bash
+BIN=/path/to/app/Contents/MacOS/binary
+
+# Interesting AMFI-related entitlements
+codesign -d --entitlements :- "$BIN" 2>&1 | \
+egrep "disable-library-validation|clear-library-validation|allow-dyld-environment-variables|allow-jit|allow-unsigned-executable-memory|disable-executable-page-protection|get-task-allow"
+
+# Runtime flags / TeamID / hardened-runtime metadata
+codesign -dvvv "$BIN" 2>&1 | egrep "TeamIdentifier=|Runtime Version|flags="
+```
+На сучасних macOS багато Apple binary більше не мають `com.apple.security.cs.disable-library-validation` напряму і замість цього постачаються з `com.apple.private.security.clear-library-validation`. У такому випадку library validation не вимикається під час `execve`: процес має викликати `csops(..., CS_OPS_CLEAR_LV, ...)` для самого себе, і XNU дозволяє цю операцію лише для calling process, коли entitlement присутній. З offensive perspective це важливо, бо target може стати injectable лише **після** того, як він дійде до code path, що явно очищає LV (наприклад, незадовго до завантаження optional plugins).
 
 ## Provisioning Profiles
 
-Профіль налаштування може бути використаний для підписання коду. Є **Developer** профілі, які можуть бути використані для підписання коду та його тестування, та **Enterprise** профілі, які можуть бути використані на всіх пристроях.
+A provisioning profile can be used to sign code. There are **Developer** profiles that can be used to sign code and test it, and **Enterprise** profiles which can be used in all devices.
 
-Після того, як додаток подається до Apple Store, якщо його затверджують, він підписується Apple, і профіль налаштування більше не потрібен.
+After an App is submitted to the Apple Store, if approved, it's signed by Apple and the provisioning profile is no longer needed.
 
-Профіль зазвичай використовує розширення `.mobileprovision` або `.provisionprofile` і може бути вивантажений за допомогою:
+A profile usually use the extension `.mobileprovision` or `.provisionprofile` and can be dumped with:
 ```bash
 openssl asn1parse -inform der -in /path/to/profile
 
@@ -88,40 +107,50 @@ openssl asn1parse -inform der -in /path/to/profile
 
 security cms -D -i /path/to/profile
 ```
-Хоча іноді їх називають сертифікованими, ці профілі налаштувань мають більше, ніж сертифікат:
+Хоча інколи їх називають certificated, ці provisioning profiles містять більше, ніж сертифікат:
 
-- **AppIDName:** Ідентифікатор програми
-- **AppleInternalProfile**: Позначає це як внутрішній профіль Apple
-- **ApplicationIdentifierPrefix**: Додається до AppIDName (так само, як TeamIdentifier)
+- **AppIDName:** Application Identifier
+- **AppleInternalProfile**: Позначає це як Apple Internal profile
+- **ApplicationIdentifierPrefix**: Додається перед AppIDName (те саме, що TeamIdentifier)
 - **CreationDate**: Дата у форматі `YYYY-MM-DDTHH:mm:ssZ`
-- **DeveloperCertificates**: Масив (зазвичай один) сертифікат(ів), закодованих у форматі Base64
-- **Entitlements**: Права, дозволені для цього профілю
+- **DeveloperCertificates**: Масив (зазвичай одного) certificate(s), закодованих як Base64 data
+- **Entitlements**: entitlements, дозволені з entitlements для цього profile
 - **ExpirationDate**: Дата закінчення у форматі `YYYY-MM-DDTHH:mm:ssZ`
-- **Name**: Назва програми, така ж, як AppIDName
-- **ProvisionedDevices**: Масив (для сертифікатів розробника) UDID, для яких цей профіль є дійсним
-- **ProvisionsAllDevices**: Логічне значення (true для корпоративних сертифікатів)
-- **TeamIdentifier**: Масив (зазвичай один) алфавітно-цифровий рядок(и), що використовується для ідентифікації розробника для міжпрограмної взаємодії
-- **TeamName**: Людське ім'я, що використовується для ідентифікації розробника
-- **TimeToLive**: Термін дії (в днях) сертифіката
-- **UUID**: Універсальний унікальний ідентифікатор для цього профілю
-- **Version**: В даний час встановлено на 1
+- **Name**: Application Name, те саме, що AppIDName
+- **ProvisionedDevices**: Масив (для developer certificates) UDID, для яких цей profile valid
+- **ProvisionsAllDevices**: Булеве значення (true для enterprise certificates)
+- **TeamIdentifier**: Масив (зазвичай одного) буквено-цифрового string(s), що використовується для ідентифікації developer для міждодаткової взаємодії
+- **TeamName**: Людиночитабельна назва, що використовується для ідентифікації developer
+- **TimeToLive**: Термін дії (у днях) certificate
+- **UUID**: Universally Unique Identifier для цього profile
+- **Version**: Наразі встановлено на 1
 
-Зверніть увагу, що запис прав міститиме обмежений набір прав, і профіль налаштувань зможе надати лише ці конкретні права, щоб запобігти наданню приватних прав Apple.
+Зверніть увагу, що запис entitlements міститиме обмежений набір entitlements, і provisioning profile зможе надавати лише ці конкретні entitlements, щоб запобігти наданню Apple private entitlements.
 
-Зверніть увагу, що профілі зазвичай розташовані в `/var/MobileDeviceProvisioningProfiles`, і їх можна перевірити за допомогою **`security cms -D -i /path/to/profile`**
+Зверніть увагу, що profiles зазвичай розташовані в `/var/MobileDeviceProvisioningProfiles`, і їх можна перевірити за допомогою **`security cms -D -i /path/to/profile`**
 
-## **libmis.dyld**
+## **libmis.dylib**
 
-Це зовнішня бібліотека, яку `amfid` викликає, щоб запитати, чи слід дозволити щось чи ні. Історично це зловживалося в джейлбрейкінгу шляхом запуску зламаної версії, яка дозволяла все.
+Це зовнішня library, яку викликає `amfid`, щоб запитати, чи слід дозволити щось чи ні. Історично це зловживалося в jailbreaking шляхом запуску backdoored версії, яка дозволяла все.
 
-У macOS це знаходиться в `MobileDevice.framework`.
+У macOS це знаходиться всередині `MobileDevice.framework`.
 
 ## AMFI Trust Caches
 
-iOS AMFI підтримує список відомих хешів, які підписані ad-hoc, що називається **Trust Cache** і знаходиться в секції kext `__TEXT.__const`. Зверніть увагу, що в дуже специфічних і чутливих операціях можливо розширити цей Trust Cache за допомогою зовнішнього файлу.
+Trust caches — це не лише концепція iOS. На сучасному macOS, особливо на **Apple silicon**, static trust cache і loadable trust caches є частиною Secure Boot chain. Коли **CodeDirectory hash** Mach-O присутній там, AMFI може надати йому **platform privilege** без додаткових перевірок authenticity під час launch time. Це також означає, що Apple може прив’язувати platform binaries до конкретної OS version і запобігати replay старих Apple-signed binaries на новіших системах.
+
+У нещодавніх macOS releases metadata trust-cache також пов’язана з **launch constraints**, тому copied system apps і binaries, запущені з неправильного parent/location, можуть бути відхилені AMFI навіть якщо вони все ще Apple-signed. Детальний workflow extraction і reversing описано в:
+
+{{#ref}}
+macos-launch-environment-constraints.md
+{{#endref}}
+
+В iOS і jailbreak research ви й далі знайдете традиційну модель **loadable trust caches**, яку використовують для whitelist ad-hoc signed binaries.
 
 ## References
 
 - [**\*OS Internals Volume III**](https://newosxbook.com/home.html)
+- [https://theevilbit.github.io/posts/com.apple.private.security.clear-library-validation/](https://theevilbit.github.io/posts/com.apple.private.security.clear-library-validation/)
+- [https://support.apple.com/guide/security/trust-caches-sec7d38fbf97/web](https://support.apple.com/guide/security/trust-caches-sec7d38fbf97/web)
 
 {{#include ../../../banners/hacktricks-training.md}}
