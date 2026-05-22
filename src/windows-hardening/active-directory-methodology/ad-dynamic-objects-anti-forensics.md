@@ -2,47 +2,68 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## कार्यप्रणाली और पहचान की मूल बातें
+## Mechanics & Detection Basics
 
-- कोई भी ऑब्जेक्ट जिसे सहायक क्लास **`dynamicObject`** के साथ बनाया गया है उसे **`entryTTL`** (सेकंड काउंटडाउन) और **`msDS-Entry-Time-To-Die`** (पक्का एक्सपायरी टाइम) मिलता है। जब `entryTTL` 0 पर पहुँचता है तो **Garbage Collector इसे बिना tombstone/recycle-bin के डिलीट कर देता है**, जिससे creator/timestamps हट जाते हैं और recovery अवरुद्ध हो जाती है।
-- TTL को `entryTTL` अपडेट करके रिफ्रेश किया जा सकता है; न्यूनतम/डिफ़ॉल्ट मान **Configuration\Services\NTDS Settings → `msDS-Other-Settings` → `DynamicObjectMinTTL` / `DynamicObjectDefaultTTL`** में लागू होते हैं (1s–1y सपोर्ट करता है पर आमतौर पर डिफ़ॉल्ट 86,400s/24h होता है)। Dynamic objects **Configuration/Schema partitions में unsupported** हैं।
-- DCs पर डिलीशन में कुछ मिनट का लेग हो सकता है अगर उनकी uptime कम हो (<24h), जो attributes क्वेरी/बैकअप के लिए तंग विंडो छोड़ता है। इसे डिटेक्ट करने के लिए **नए ऑब्जेक्ट्स जिनमें `entryTTL`/`msDS-Entry-Time-To-Die` होता है** पर अलर्ट करें और orphan SIDs/broken links के साथ कोरिलेट करें।
+- **`dynamicObject`** auxiliary class के साथ बनाया गया कोई भी object **`entryTTL`** (seconds countdown) और **`msDS-Entry-Time-To-Die`** (absolute expiry) प्राप्त करता है। जब `entryTTL` 0 तक पहुंचता है, **Garbage Collector** इसे **tombstone/recycle-bin** के बिना delete कर देता है, जिससे creator/timestamps मिट जाते हैं और recovery block हो जाती है।
+- **`entryTTL` एक operational/constructed attribute** है: इसे LDAP queries में explicitly request करें। TTL को या तो expiry से पहले `entryTTL` update करके, या LDAP TTL refresh OID **`1.3.6.1.4.1.1466.101.119.1`** के जरिए refresh किया जा सकता है।
+- TTL min/default **Configuration\Services\NTDS Settings → `msDS-Other-Settings` → `DynamicObjectMinTTL` / `DynamicObjectDefaultTTL`** में enforced होते हैं। Microsoft default TTL के रूप में **86400s** और default minimum valid TTL के रूप में **900s** document करता है; दोनों **1s–1y** support करते हैं। Dynamic objects **Configuration/Schema partitions** में unsupported हैं।
+- Expiry के बाद **static→dynamic conversion** नहीं होती और tombstone phase भी नहीं आता। IR teams deleted-object controls या Recycle Bin पर भरोसा नहीं कर सकतीं; उन्हें GC के object हटाने से पहले live object/metadata capture करना होगा।
+- Refresh **replica-sensitive** है: अगर TTL को expiry के बहुत करीब renew किया जाए, तो कोई दूसरी writable replica या GC फिर भी object को locally delete कर सकती है, इससे पहले कि refresh replicate हो। इसलिए बहुत short TTLs तब सबसे अच्छे होते हैं जब attacker को पता हो कि abuse किस DC पर service होगा, जबकि defenders triage के दौरान **all naming contexts / replicas** query करें।
+- Short uptime (<24h) वाले DCs पर deletion कुछ मिनट lag कर सकती है, जिससे attributes query/backup करने के लिए एक छोटा response window मिलता है। **new objects carrying `entryTTL`/`msDS-Entry-Time-To-Die`** पर alert करके और orphan SIDs/broken links के साथ correlate करके detect करें।
 
-## MAQ एवेशन स्व-डिलीट करने वाले Computers के साथ
+## Fast Enumeration / Live Triage
 
-- Default **`ms-DS-MachineAccountQuota` = 10** किसी भी authenticated user को computers बनाने देता है। निर्माण के दौरान `dynamicObject` जोड़ने से कंप्यूटर self-delete हो जाता है और **quota स्लॉट खाली कर देता है** साथ ही सबूत मिटा देता है।
-- Powermad tweak `New-MachineAccount` के अंदर (objectClass list):
+- केवल domain NC नहीं, बल्कि RootDSE से **all `namingContexts`** query करें। Dynamic abuse **`DomainDnsZones`/`ForestDnsZones`** (`dnsNode`) या application partitions में हो सकता है।
+- Object अभी alive हो तो तुरंत **replication metadata** और linked attributes/ACLs dump करें। Expiry के बाद आपके पास सिर्फ **broken `gPLink` values, orphan SIDs, या cached DNS answers** बच सकते हैं।
+```powershell
+$root = Get-ADRootDSE
+$root.namingContexts | ForEach-Object {
+Get-ADObject -LDAPFilter '(objectClass=dynamicObject)' -SearchBase $_ `
+-Properties entryTTL,msDS-Entry-Time-To-Die,gPCFileSysPath,msDS-CreatorSID |
+Select-Object DistinguishedName,entryTTL,msDS-Entry-Time-To-Die,gPCFileSysPath,msDS-CreatorSID
+}
+repadmin /showobjmeta <DC> <distinguishedName>
+```
+## Self-Deleting Computers के साथ MAQ Evasion
+
+- Default **`ms-DS-MachineAccountQuota` = 10** किसी भी authenticated user को computers create करने देता है। Creation के दौरान `dynamicObject` जोड़ें ताकि computer self-delete हो जाए और **quota slot free** हो जाए, साथ ही evidence भी wipe हो जाए।
+- Powermad tweak inside `New-MachineAccount` (objectClass list):
 ```powershell
 $request.Attributes.Add((New-Object "System.DirectoryServices.Protocols.DirectoryAttribute" -ArgumentList "objectClass", "dynamicObject", "Computer")) > $null
 ```
-- Short TTL (उदा., 60s) अक्सर standard users के लिए विफल रहता है; AD `DynamicObjectDefaultTTL` पर fallback कर लेता है (उदाहरण: 86,400s). ADUC `entryTTL` छुपा सकता है, पर LDP/LDAP क्वेरी इसे दिखाती हैं।
+- अगर requested TTL **`DynamicObjectMinTTL`** से नीचे है, तो creation path के हिसाब से server-side adjustment या rejection की उम्मीद करें; कई domains में effective floor **900s** होता है और fallback/default **86400s** रहता है। ADUC `entryTTL` को hide कर सकता है, लेकिन LDP/LDAP queries इसे reveal कर देती हैं।
+- Object के exist करने के दौरान, defenders अभी भी computer object पर **`msDS-CreatorSID`** से unprivileged creator recover कर सकते हैं। Dynamic computer expire होने के बाद, यह attribution object के साथ ही disappear हो जाती है।
 
-## स्टील्थ Primary Group सदस्यता
+## Stealth Primary Group Membership
 
-- एक **dynamic security group** बनाएं, फिर किसी user का **`primaryGroupID`** उस group के RID पर सेट करें ताकि प्रभावशाली सदस्यता मिल सके जो **`memberOf` में दिखाई नहीं देती** पर Kerberos/access tokens में मान्य होती है।
-- TTL एक्सपायर होने पर **group delete हो जाता है भले ही primary-group delete protection हो**, जिससे user का `primaryGroupID` एक नॉन-एक्जिस्टेंट RID की ओर करप्ट हो जाता है और कोई tombstone नहीं होता जिससे जांच करना मुश्किल हो जाता है कि अधिकार कैसे दिए गए थे।
+- एक **dynamic security group** बनाएं, फिर user के **`primaryGroupID`** को उस group के RID पर set करें ताकि effective membership मिले जो **`memberOf`** में नहीं दिखती, लेकिन Kerberos/access tokens में honored होती है।
+- TTL expiry **primary-group delete protection के बावजूद group को delete** कर देती है, जिससे user के पास एक corrupted **`primaryGroupID`** रह जाता है जो non-existent RID की तरफ point करता है और privilege कैसे दी गई थी यह investigate करने के लिए कोई tombstone नहीं बचता।
+- Reporting tool-dependent है: **`Get-ADGroupMember` / `net group`** आमतौर पर primary-group-derived membership resolve करते हैं, जबकि **`memberOf`** और **`Get-ADGroup -Properties member`** नहीं करते। broader `primaryGroupID` tradecraft के लिए, [DCShadow and PGID abuse के बारे में यह दूसरा page](dcshadow.md) देखें।
+- **non-AdminSDHolder-protected** targets के लिए, attackers dynamic-group trick को **`primaryGroupID`** (या group `member` attribute) पढ़ने पर **DACL deny** के साथ pair कर सकते हैं ताकि group expire होने से पहले भी कई LDAP/PowerShell workflows से link hide रहे।
 
-## AdminSDHolder Orphan-SID प्रदूषण
+## AdminSDHolder Orphan-SID Pollution
 
-- `CN=AdminSDHolder,CN=System,...` में **short-lived dynamic user/group** के लिए ACEs जोड़ें। TTL एक्सपायर होने के बाद उस SID को template ACL में **unresolvable (“Unknown SID”)** बन जाता है, और **SDProp (~60 min)** वह orphan SID सभी protected Tier-0 objects पर propagate कर देता है।
-- फॉरेंसिक्स attribution खो देते हैं क्योंकि principal मौजूद नहीं रहता (कोई deleted-object DN नहीं)। मॉनिटरिंग के लिए **नए dynamic principals + AdminSDHolder/privileged ACLs पर अचानक orphan SIDs** पर अलर्ट करें।
+- **`CN=AdminSDHolder,CN=System,...`** में **short-lived dynamic user/group** के लिए ACEs जोड़ें। TTL expiry के बाद SID template ACL में **unresolvable (“Unknown SID”)** बन जाता है, और **SDProp (~60 min)** उस orphan SID को सभी protected Tier-0 objects पर propagate कर देता है।
+- Forensics attribution खो देती है क्योंकि principal गायब हो चुका होता है (deleted-object DN नहीं होता)। **new dynamic principals + AdminSDHolder/privileged ACLs पर sudden orphan SIDs** के लिए monitor करें।
 
-## Self-Destructing सबूत के साथ Dynamic GPO Execution
+## Self-Destructing Evidence के साथ Dynamic GPO Execution
 
-- एक malicious **dynamic `groupPolicyContainer`** ऑब्जेक्ट बनाएं जिसमें खराब **`gPCFileSysPath`** (उदा., SMB share à la GPODDITY) हो और उसे लक्षित OU में **`gPLink`** के जरिए लिंक करें।
-- क्लाइंट पॉलिसी को प्रोसेस करते हैं और attacker SMB से कंटेंट खींचते हैं। जब TTL एक्सपायर हो जाता है, तो GPO ऑब्जेक्ट (और `gPCFileSysPath`) गायब हो जाता है; केवल एक **broken `gPLink`** GUID बचता है, जो executed payload के LDAP साक्ष्यों को हटा देता है।
+- Malicious **`gPCFileSysPath`** के साथ एक **dynamic `groupPolicyContainer`** object बनाएं (जैसे GPODDITY की तरह SMB share) और इसे target OU से **`gPLink`** के जरिए link करें।
+- Clients policy process करते हैं और attacker SMB से content pull करते हैं। TTL expire होने पर GPO object (और **`gPCFileSysPath`**) vanish हो जाता है; सिर्फ एक **broken `gPLink`** GUID बचता है, जिससे executed payload का LDAP evidence हट जाता है।
+- यह classic **GPODDITY-style** cleanup से operationally cleaner है: original `gPCFileSysPath` खुद restore करने के बजाय, AD timer expire होते ही malicious GPC को automatically remove कर देता है।
 
-## Ephemeral AD-Integrated DNS रिडायरेक्शन
+## Ephemeral AD-Integrated DNS Redirection
 
-- AD DNS रिकॉर्ड्स **`dnsNode`** ऑब्जेक्ट्स होते हैं जो **DomainDnsZones/ForestDnsZones** में होते हैं। उन्हें **dynamic objects** के रूप में बनाने से अस्थायी host redirection संभव होता है (credential capture/MITM)। क्लाइंट्स malicious A/AAAA response को cache कर लेते हैं; बाद में रिकॉर्ड self-delete हो जाता है ताकि zone साफ़ दिखे (DNS Manager को व्यू रिफ्रेश करने के लिए zone reload की ज़रूरत पड़ सकती है)।
-- डिटेक्शन: replication/event logs के माध्यम से **किसी भी DNS रिकॉर्ड जो `dynamicObject`/`entryTTL` रखता है** पर अलर्ट करें; अस्थायी रिकॉर्ड स्टैंडर्ड DNS लॉग्स में कम ही दिखाई देते हैं।
+- AD DNS records **`DomainDnsZones/ForestDnsZones`** में **`dnsNode`** objects होते हैं। इन्हें **dynamic objects** की तरह create करने से temporary host redirection (credential capture/MITM) संभव होती है। Clients malicious A/AAAA response cache कर लेते हैं; record बाद में self-delete हो जाता है ताकि zone clean दिखे (DNS Manager को view refresh करने के लिए zone reload की जरूरत पड़ सकती है)।
+- Detection: replication/event logs के जरिए **`dynamicObject`/`entryTTL`** वाले किसी भी DNS record पर alert करें; transient records standard DNS logs में rarely दिखाई देते हैं।
 
 ## Hybrid Entra ID Delta-Sync Gap (Note)
 
-- Entra Connect delta sync deletes को detect करने के लिए **tombstones** पर निर्भर करता है। एक **dynamic on-prem user** Entra ID में sync हो सकता है, expire हो सकता है, और tombstone के बिना delete हो सकता है—delta sync क्लाउड अकाउंट को नहीं हटा पाएगा, जिससे एक **orphaned active Entra user** रह सकता है जब तक कि मैनुअल **full sync** न किया जाए।
+- Entra Connect delta sync deletes detect करने के लिए **tombstones** पर rely करता है। एक **dynamic on-prem user** Entra ID में sync हो सकता है, expire हो सकता है, और tombstone के बिना delete हो सकता है—delta sync cloud account को remove नहीं करेगा, जिससे **orphaned active Entra user** रह जाएगा जब तक **initial/full sync** या manual cloud cleanup force न की जाए।
 
 ## References
 
 - [Dynamic Objects in Active Directory: The Stealthy Threat](https://www.tenable.com/blog/active-directory-dynamic-objects-stealthy-threat)
+- [Adventures in Primary Group Behavior, Reporting, and Exploitation](https://trustedsec.com/blog/adventures-in-primary-group-behavior-reporting-and-exploitation)
 
 {{#include ../../banners/hacktricks-training.md}}
