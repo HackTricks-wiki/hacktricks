@@ -2,47 +2,68 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## メカニズムと検知の基本
+## Mechanisms & Detection Basics
 
-- 補助クラス **`dynamicObject`** で作成されたオブジェクトは **`entryTTL`**（秒単位のカウントダウン）と **`msDS-Entry-Time-To-Die`**（絶対期限）を持つ。`entryTTL` が 0 に到達すると **Garbage Collector が tombstone/recycle-bin なしで削除** し、作成者やタイムスタンプを消去して復旧を阻止する。
-- TTL は `entryTTL` を更新することでリフレッシュできる；最小/デフォルト値は **Configuration\Services\NTDS Settings → `msDS-Other-Settings` → `DynamicObjectMinTTL` / `DynamicObjectDefaultTTL`** で強制される（1s–1y をサポートするが、一般的には 86,400s/24h がデフォルト）。Dynamic objects は **Configuration/Schema パーティションではサポートされない**。
-- 稼働時間が短い DC（<24h）では削除が数分遅れることがあり、属性をクエリ/バックアップするための短い対応ウィンドウが残る。**`entryTTL`/`msDS-Entry-Time-To-Die` を持つ新規オブジェクトをアラート**し、孤立した SID／壊れたリンクと相関させて検知する。
+- **`dynamicObject`** という補助クラスで作成された任意のオブジェクトは、**`entryTTL`**（秒カウントダウン）と **`msDS-Entry-Time-To-Die`**（絶対期限切れ）を取得します。`entryTTL` が 0 に達すると、**Garbage Collector が tombstone/recycle-bin なしで削除**し、作成者/タイムスタンプを消去して復旧を妨げます。
+- **`entryTTL` は operational/constructed attribute** です。LDAP クエリで明示的に要求してください。TTL は、期限前に `entryTTL` を更新するか、LDAP TTL refresh OID **`1.3.6.1.4.1.1466.101.119.1`** を使って更新できます。
+- TTL の最小値/デフォルトは **Configuration\Services\NTDS Settings → `msDS-Other-Settings` → `DynamicObjectMinTTL` / `DynamicObjectDefaultTTL`** で適用されます。Microsoft はデフォルト TTL を **86400s**、デフォルトの最小有効 TTL を **900s** と文書化しており、どちらも **1s–1y** をサポートします。Dynamic objects は **Configuration/Schema partitions では unsupported** です。
+- 期限切れ後に static→dynamic 変換は **なく**、tombstone フェーズもありません。IR チームは削除済みオブジェクト制御や Recycle Bin に頼れず、GC が削除する前にライブオブジェクト/メタデータを取得する必要があります。
+- 更新は **replica-sensitive** です。TTL を期限ぎりぎりで更新すると、別の writable replica または GC が、更新がレプリケートされる前にローカルでオブジェクトを削除する可能性があります。したがって、非常に短い TTL は、攻撃者が悪用を処理する DC を把握している場合に最も有効です。一方、防御側はトリアージ時に **すべての naming contexts / replicas** を照会すべきです。
+- 24時間未満の短い稼働時間の DC では、削除が数分遅れることがあり、属性を照会/バックアップするための短い対応ウィンドウが残る場合があります。**`entryTTL`/`msDS-Entry-Time-To-Die` を持つ新規オブジェクトをアラート**し、孤立した SID や壊れたリンクと相関させて検出してください。
 
-## MAQ 回避（自己削除するコンピュータ）
+## Fast Enumeration / Live Triage
 
-- 既定の **`ms-DS-MachineAccountQuota` = 10** により、認証済みユーザはコンピュータを作成できる。作成時に `dynamicObject` を追加すると、コンピュータが自己削除して証拠を消しつつ **クォータスロットを解放** できる。
-- Powermad の `New-MachineAccount`（objectClass リスト）内の調整:
+- domain NC だけでなく、RootDSE から **すべての `namingContexts`** を照会してください。Dynamic abuse は **`DomainDnsZones`/`ForestDnsZones`**（`dnsNode`）や application partitions に存在することがあります。
+- オブジェクトがまだ生きているうちに、直ちに **replication metadata** と、リンクされた属性/ACL をダンプしてください。期限切れ後に残るのは **壊れた `gPLink` 値、孤立した SID、またはキャッシュされた DNS 応答** だけかもしれません。
+```powershell
+$root = Get-ADRootDSE
+$root.namingContexts | ForEach-Object {
+Get-ADObject -LDAPFilter '(objectClass=dynamicObject)' -SearchBase $_ `
+-Properties entryTTL,msDS-Entry-Time-To-Die,gPCFileSysPath,msDS-CreatorSID |
+Select-Object DistinguishedName,entryTTL,msDS-Entry-Time-To-Die,gPCFileSysPath,msDS-CreatorSID
+}
+repadmin /showobjmeta <DC> <distinguishedName>
+```
+## MAQ Evasion with Self-Deleting Computers
+
+- Default **`ms-DS-MachineAccountQuota` = 10** lets any authenticated user create computers. Add `dynamicObject` during creation to have the computer self-delete and **free the quota slot** while wiping evidence.
+- Powermad tweak inside `New-MachineAccount` (objectClass list):
 ```powershell
 $request.Attributes.Add((New-Object "System.DirectoryServices.Protocols.DirectoryAttribute" -ArgumentList "objectClass", "dynamicObject", "Computer")) > $null
 ```
-- 短い TTL（例: 60s）は通常ユーザでは失敗することが多く、AD は **`DynamicObjectDefaultTTL`** にフォールバックする（例: 86,400s）。ADUC は `entryTTL` を隠すことがあるが、LDP/LDAP クエリはそれを表示する。
+- If the requested TTL is **below `DynamicObjectMinTTL`**, expect server-side adjustment or rejection depending on the creation path; in many domains the effective floor is **900s** and the fallback/default remains **86400s**. ADUC may hide `entryTTL`, but LDP/LDAP queries reveal it.
+- While the object exists, defenders can still recover the unprivileged creator from **`msDS-CreatorSID`** on the computer object. Once the dynamic computer expires, that attribution disappears with the object.
 
-## ステルス primary group メンバーシップ
+## Stealth Primary Group Membership
 
-- 動的なセキュリティグループを作成し、ユーザの **`primaryGroupID`** をそのグループの RID に設定すると、`memberOf` に表示されないが Kerberos/アクセス トークンでは有効なメンバーシップを得られる。
-- TTL の期限切れにより **primary-group の削除保護があってもグループは削除され**、ユーザは存在しない RID を指す破損した `primaryGroupID` を残され、特権付与の調査に使える tombstone も存在しない。
+- Create a **dynamic security group**, then set a user’s **`primaryGroupID`** to that group’s RID to gain effective membership that **doesn’t show in `memberOf`** but is honored in Kerberos/access tokens.
+- TTL expiry **deletes the group despite primary-group delete protection**, leaving the user with a corrupted `primaryGroupID` pointing to a non-existent RID and no tombstone to investigate how the privilege was granted.
+- Reporting is tool-dependent: **`Get-ADGroupMember` / `net group`** usually resolve primary-group-derived membership, while **`memberOf`** and **`Get-ADGroup -Properties member`** do not. For broader `primaryGroupID` tradecraft, see [this other page about DCShadow and PGID abuse](dcshadow.md).
+- For **non-AdminSDHolder-protected** targets, attackers can pair the dynamic-group trick with a **DACL deny on reading `primaryGroupID`** (or the group `member` attribute) to hide the link from many LDAP/PowerShell workflows even before the group expires.
 
-## AdminSDHolder の孤立 SID 汚染
+## AdminSDHolder Orphan-SID Pollution
 
-- 短命の dynamic user/group に対する ACE を **`CN=AdminSDHolder,CN=System,...`** に追加する。TTL が切れるとテンプレート ACL 内の SID は **解決不能（“Unknown SID”）** となり、**SDProp（約60分）** によりその孤立 SID が保護されたすべての Tier-0 オブジェクトに伝播する。
-- 主体が消えるためフォレンジクスは帰属を失う（deleted-object DN がない）。**新しい dynamic principal と AdminSDHolder/特権 ACL 上の突然の孤立 SID** を監視する。
+- Add ACEs for a **short-lived dynamic user/group** to **`CN=AdminSDHolder,CN=System,...`**. After TTL expiry the SID becomes **unresolvable (“Unknown SID”)** in the template ACL, and **SDProp (~60 min)** propagates that orphan SID across all protected Tier-0 objects.
+- Forensics lose attribution because the principal is gone (no deleted-object DN). Monitor for **new dynamic principals + sudden orphan SIDs on AdminSDHolder/privileged ACLs**.
 
-## 自己消滅する証拠を伴う Dynamic GPO 実行
+## Dynamic GPO Execution with Self-Destructing Evidence
 
-- 悪意ある **`gPCFileSysPath`**（例: GPODDITY のような SMB 共有）を持つ **dynamic `groupPolicyContainer`** を作成し、対象 OU に **`gPLink`** 経由でリンクする。
-- クライアントはポリシーを処理して攻撃者の SMB からコンテンツを取得する。TTL が切れると GPO オブジェクト（および `gPCFileSysPath`）は消滅し、残るのは壊れた **`gPLink`** の GUID のみとなり、実行されたペイロードの LDAP 証拠が失われる。
+- Create a **dynamic `groupPolicyContainer`** object with a malicious **`gPCFileSysPath`** (e.g., SMB share à la GPODDITY) and **link it via `gPLink`** to a target OU.
+- Clients process the policy and pull content from attacker SMB. When TTL expires, the GPO object (and `gPCFileSysPath`) vanishes; only a **broken `gPLink`** GUID remains, removing LDAP evidence of the executed payload.
+- This is operationally cleaner than classic **GPODDITY-style** cleanup: instead of restoring the original `gPCFileSysPath` yourself, AD removes the malicious GPC automatically once the timer expires.
 
-## 短命の AD 統合 DNS リダイレクション
+## Ephemeral AD-Integrated DNS Redirection
 
-- AD の DNS レコードは **`dnsNode`** オブジェクトで、**DomainDnsZones/ForestDnsZones** に存在する。これらを **dynamic objects** として作成すると、一時的なホストリダイレクト（資格情報窃取/MITM）が可能になる。クライアントは悪意ある A/AAAA レスポンスをキャッシュし、その後レコードが自己削除されるためゾーンはクリーンに見える（DNS Manager は表示更新のためにゾーン再読み込みが必要な場合がある）。
-- 検知: レプリケーション/イベントログ経由で **`dynamicObject`/`entryTTL` を持つ任意の DNS レコード** をアラートする。短命レコードは標準の DNS ログに出ることは稀。
+- AD DNS records are **`dnsNode`** objects in **DomainDnsZones/ForestDnsZones**. Creating them as **dynamic objects** allows temporary host redirection (credential capture/MITM). Clients cache the malicious A/AAAA response; the record later self-deletes so the zone looks clean (DNS Manager may need zone reload to refresh view).
+- Detection: alert on **any DNS record carrying `dynamicObject`/`entryTTL`** via replication/event logs; transient records rarely appear in standard DNS logs.
 
-## Hybrid Entra ID Delta-Sync Gap（注意）
+## Hybrid Entra ID Delta-Sync Gap (Note)
 
-- Entra Connect の delta sync は削除検出に **tombstones** を利用する。**dynamic on-prem user** が Entra ID に同期され、期限切れで tombstone なしに削除されると、delta sync はクラウドアカウントを削除せず、手動で **full sync** を実行するまで **孤立したアクティブな Entra ユーザ** が残る。
+- Entra Connect delta sync relies on **tombstones** to detect deletes. A **dynamic on-prem user** can sync to Entra ID, expire, and delete without tombstone—delta sync won’t remove the cloud account, leaving an **orphaned active Entra user** until an **initial/full sync** or manual cloud cleanup is forced.
 
 ## References
 
 - [Dynamic Objects in Active Directory: The Stealthy Threat](https://www.tenable.com/blog/active-directory-dynamic-objects-stealthy-threat)
+- [Adventures in Primary Group Behavior, Reporting, and Exploitation](https://trustedsec.com/blog/adventures-in-primary-group-behavior-reporting-and-exploitation)
 
 {{#include ../../banners/hacktricks-training.md}}
