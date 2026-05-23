@@ -26,7 +26,7 @@ Prompt engineering is the process of designing and refining prompts to improve t
 - **Use Constraints**: Specify any constraints or limitations to guide the model's output (e.g., "The response should be concise and to the point.").
 - **Iterate and Refine**: Continuously test and refine prompts based on the model's performance to achieve better results.
 - **Make it thinking**: Use prompts that encourage the model to think step-by-step or reason through the problem, such as "Explain your reasoning for the answer you provide."
-    - Or even once gatehred a repsonse ask again the model if the response is correct and to explain why to imporve the quality of the response.
+    - Or even once gathered a response ask again the model if the response is correct and to explain why to improve the quality of the response.
 
 You can find prompt engineering guides at:
 - [https://www.promptingguide.ai/](https://www.promptingguide.ai/)
