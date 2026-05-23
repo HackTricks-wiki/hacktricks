@@ -1,299 +1,434 @@
-# 基本的なPython
+# Basic Python
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Pythonの基本
+## Python Basics
 
-### 有用な情報
+### Useful information
 
-list(xrange()) == range() --> Python3ではrangeはPython2のxrangeです（リストではなくジェネレーターです）\
-タプルとリストの違いは、タプル内の値の位置が意味を持つのに対し、リストは単に順序付けられた値であることです。タプルには構造がありますが、リストには順序があります。
+以下の例は、明示的に記載がない限りすべて **Python 3** を前提としています。\
+`range()` は Python 3 では iterable オブジェクトを返します（Python 2 の `xrange()` に似ています）。\
+**tuple** と **list** の違いは、tuple では値の **位置** に通常意味があるのに対し、list は通常、値の順序付きの並びにすぎないことです。
 
-### 主な操作
+### Main operations
 
-数を上げるには：3\*\*2（3^2ではありません）\
-2/3を実行すると1が返されます。なぜなら、2つの整数（int）を割っているからです。小数が必要な場合は浮動小数点数（2.0/3.0）で割るべきです。\
-i >= j\
-i <= j\
-i == j\
-i != j\
-a and b\
-a or b\
-not a\
-float(a)\
-int(a)\
-str(d)\
-ord("A") = 65\
-chr(65) = 'A'\
-hex(100) = '0x64'\
-hex(100)\[2:] = '64'\
-isinstance(1, int) = True\
-"a b".split(" ") = \['a', 'b']\
-" ".join(\['a', 'b']) = "a b"\
-"abcdef".startswith("ab") = True\
-"abcdef".contains("abc") = True\
-"abc\n".strip() = "abc"\
-"apbc".replace("p","") = "abc"\
-dir(str) = 利用可能なメソッドのリスト\
-help(str) = strクラスの定義\
-"a".upper() = "A"\
-"A".lower() = "a"\
-"abc".capitalize() = "Abc"\
-sum(\[1,2,3]) = 6\
-sorted(\[1,43,5,3,21,4])
+数をべき乗するには次を使います: `3**2`（`3^2` ではない）\
+`2/3 == 0.666666...` は Python 3 での挙動で、`2//3 == 0` は整数除算を行います。\
+`i >= j`\
+`i <= j`\
+`i == j`\
+`i != j`\
+`a and b`\
+`a or b`\
+`not a`\
+`float(a)`\
+`int(a)`\
+`str(d)`\
+`ord("A") == 65`\
+`chr(65) == 'A'`\
+`hex(100) == '0x64'`\
+`hex(100)[2:] == '64'`\
+`isinstance(1, int) is True`\
+`"a b".split(" ") == ['a', 'b']`\
+`" ".join(['a', 'b']) == "a b"`\
+`"abcdef".startswith("ab") is True`\
+`"abc" in "abcdef"`\
+`"abc\n".strip() == "abc"`\
+`"apbc".replace("p", "") == "abc"`\
+`dir(str)` = 利用可能なメソッドの一覧\
+`help(str)` = クラス `str` の定義\
+`"a".upper() == "A"`\
+`"A".lower() == "a"`\
+`"abc".capitalize() == "Abc"`\
+`sum([1, 2, 3]) == 6`\
+`sorted([1, 43, 5, 3, 21, 4]) == [1, 3, 4, 5, 21, 43]`
 
-**文字の結合**\
-3 \* ’a’ = ‘aaa’\
-‘a’ + ‘b’ = ‘ab’\
-‘a’ + str(3) = ‘a3’\
-\[1,2,3]+\[4,5]=\[1,2,3,4,5]
+**Join chars**\
+`3 * 'a' == 'aaa'`\
+`'a' + 'b' == 'ab'`\
+`'a' + str(3) == 'a3'`\
+`[1, 2, 3] + [4, 5] == [1, 2, 3, 4, 5]`
 
-**リストの部分**\
-‘abc’\[0] = ‘a’\
-'abc’\[-1] = ‘c’\
-'abc’\[1:3] = ‘bc’（\[1]から\[2]まで）\
-"qwertyuiop"\[:-1] = 'qwertyuio'
+**Parts of a list / string**\
+`'abc'[0] == 'a'`\
+`'abc'[-1] == 'c'`\
+`'abc'[1:3] == 'bc'`\
+`"qwertyuiop"[:-1] == 'qwertyuio'`
 
-**コメント**\
-\# 一行コメント\
-"""\
-複数行のコメント\
-もう一つ\
-"""
+**Comments**\
+`# One line comment`\
+`""" Several lines comment """`
 
-**ループ**
-```
+**Loops**
+```python
 if a:
-#somethig
+# something
 elif b:
-#something
+# something
 else:
-#something
+# something
 
-while(a):
-#comething
+while a:
+# something
 
-for i in range(0,100):
-#something from 0 to 99
+for i in range(0, 100):
+# something from 0 to 99
 
 for letter in "hola":
-#something with a letter in "hola"
+# something with each letter
+```
+### Bytes, hex and encodings
+
+これは exploit-dev、reversing、CTFs で非常に一般的です:
+```python
+b"ABC".hex() == "414243"
+bytes.fromhex("414243") == b"ABC"
+int.from_bytes(b"\x41\x42\x43", "big") == 0x414243
+(0x414243).to_bytes(3, "big") == b"ABC"
+"admin".encode() == b"admin"
+b"admin".decode() == "admin"
 ```
 ### タプル
 
-t1 = (1,'2,'three')\
-t2 = (5,6)\
-t3 = t1 + t2 = (1, '2', 'three', 5, 6)\
-(4,) = シングルトン\
-d = () 空のタプル\
-d += (4,) --> タプルに追加\
-CANT! --> t1\[1] == '新しい値'\
-list(t2) = \[5,6] --> タプルからリストへ
+`t1 = (1, '2', 'three')`\
+`t2 = (5, 6)`\
+`t3 = t1 + t2 == (1, '2', 'three', 5, 6)`\
+`(4,)` = シングルトン\
+`d = ()` 空のタプル\
+`d += (4,)` --> タプルに追加\
+`# t1[1] = 'new value'` --> タプルは immutable\
+`list(t2) == [5, 6]` --> tuple から list へ
 
-### リスト (配列)
+### List (array)
 
-d = \[] 空\
-a = \[1,2,3]\
-b = \[4,5]\
-a + b = \[1,2,3,4,5]\
-b.append(6) = \[4,5,6]\
-tuple(a) = (1,2,3) --> リストからタプルへ
+`d = []` 空\
+`a = [1, 2, 3]`\
+`b = [4, 5]`\
+`a + b == [1, 2, 3, 4, 5]`\
+`b.append(6)` --> `b == [4, 5, 6]`\
+`tuple(a) == (1, 2, 3)` --> list から tuple へ
 
-### 辞書
-
-d = {} 空\
-monthNumbers={1:’Jan’, 2: ‘feb’,’feb’:2}—> monthNumbers ->{1:’Jan’, 2: ‘feb’,’feb’:2}\
-monthNumbers\[1] = ‘Jan’\
-monthNumbers\[‘feb’] = 2\
-list(monthNumbers) = \[1,2,’feb’]\
-monthNumbers.values() = \[‘Jan’,’feb’,2]\
-keys = \[k for k in monthNumbers]\
-a={'9':9}\
-monthNumbers.update(a) = {'9':9, 1:’Jan’, 2: ‘feb’,’feb’:2}\
-mN = monthNumbers.copy() #独立したコピー\
-monthNumbers.get('key',0) #キーが存在するか確認し、monthNumbers\["key"]の値を返す。存在しない場合は0を返す
-
-### セット
-
-セットには重複がない\
-myset = set(\['a', 'b']) = {'a', 'b'}\
-myset.add('c') = {'a', 'b', 'c'}\
-myset.add('a') = {'a', 'b', 'c'} #重複なし\
-myset.update(\[1,2,3]) = set(\['a', 1, 2, 'b', 'c', 3])\
-myset.discard(10) #存在する場合は削除、存在しない場合は何もしない\
-myset.remove(10) #存在する場合は削除、存在しない場合は例外を発生\
-myset2 = set(\[1, 2, 3, 4])\
-myset.union(myset2) #myset または myset2 の値\
-myset.intersection(myset2) #myset および myset2 の値\
-myset.difference(myset2) #myset の値だが myset2 にはない\
-myset.symmetric_difference(myset2) #myset および myset2 の両方にない値\
-myset.pop() #セットの最初の要素を取得して削除\
-myset.intersection_update(myset2) #myset = myset と myset2 の両方にある要素\
-myset.difference_update(myset2) #myset = myset にあるが myset2 にはない要素\
-myset.symmetric_difference_update(myset2) #myset = 両方にない要素
-
-### クラス
-
-\_\_It\_\_ のメソッドは、このクラスのオブジェクトが他のオブジェクトより大きいかどうかを比較するために sort によって使用される。
+### Dictionary
 ```python
-class Person(name):
-def __init__(self,name):
-self.name= name
-self.lastName = name.split(‘ ‘)[-1]
-self.birthday = None
-def __It__(self, other):
-if self.lastName == other.lastName:
-return self.name < other.name
-return self.lastName < other.lastName #Return True if the lastname is smaller
+month_numbers = {1: 'Jan', 2: 'Feb', 'Feb': 2}
+month_numbers[1] == 'Jan'
+month_numbers['Feb'] == 2
+list(month_numbers) == [1, 2, 'Feb']
+list(month_numbers.values()) == ['Jan', 'Feb', 2]
+keys = [k for k in month_numbers]
+a = {'9': 9}
+month_numbers.update(a)
+mn = month_numbers.copy()  # independent copy
+month_numbers.get('key', 0)  # default value if key does not exist
+```
+### Set
 
-def setBirthday(self, month, day. year):
-self.birthday = date tame.date(year,month,day)
-def getAge(self):
-return (date time.date.today() - self.birthday).days
+set には重複はありません。\
+`myset = set(['a', 'b']) == {'a', 'b'}`\
+`myset.add('c')` --> `{'a', 'b', 'c'}`\
+`myset.add('a')` --> 変更なし\
+`myset.update([1, 2, 3])`\
+`myset.discard(10)` --> 存在する場合は削除し、存在しない場合は何もしない\
+`myset.remove(10)` --> 存在しない場合は例外を送出\
+`myset2 = set([1, 2, 3, 4])`\
+`myset.union(myset2)`\
+`myset.intersection(myset2)`\
+`myset.difference(myset2)`\
+`myset.symmetric_difference(myset2)`\
+`myset.pop()` --> 任意の要素を取得して削除する\
+`myset.intersection_update(myset2)`\
+`myset.difference_update(myset2)`\
+`myset.symmetric_difference_update(myset2)`
+
+### Classes
+
+`__lt__` のメソッドが、`sort()` / `sorted()` がオブジェクトを比較するために使用するものです。
+```python
+import datetime
+
+
+class Person:
+def __init__(self, name):
+self.name = name
+self.last_name = name.split(" ")[-1]
+self.birthday = None
+
+def __lt__(self, other):
+if self.last_name == other.last_name:
+return self.name < other.name
+return self.last_name < other.last_name
+
+def set_birthday(self, month, day, year):
+self.birthday = datetime.date(year, month, day)
+
+def get_age(self):
+return (datetime.date.today() - self.birthday).days
 
 
 class MITPerson(Person):
-nextIdNum = 0	# Attribute of the Class
-def __init__(self, name):
-Person.__init__(self,name)
-self.idNum = MITPerson.nextIdNum  —> Accedemos al atributo de la clase
-MITPerson.nextIdNum += 1 #Attribute of the class +1
+next_id_num = 0  # class attribute
 
-def __it__(self, other):
-return self.idNum < other.idNum
+def __init__(self, name):
+super().__init__(name)
+self.id_num = MITPerson.next_id_num
+MITPerson.next_id_num += 1
+
+def __lt__(self, other):
+return self.id_num < other.id_num
 ```
 ### map, zip, filter, lambda, sorted and one-liners
 
-**Map**は次のようになります: \[f(x) for x in iterable] --> map(tutple,\[a,b]) = \[(1,2,3),(4,5)]\
-m = map(lambda x: x % 3 == 0, \[1, 2, 3, 4, 5, 6, 7, 8, 9]) --> \[False, False, True, False, False, True, False, False, True]
+**Python 3** では、`map()` と `filter()` はイテレータを返すため、すべての値を一度に表示したい場合は `list()` で変換します。
 
-**zip**はfooまたはbarの短い方が停止すると停止します:
+**Map** は `[f(x) for x in iterable]` のようなものです:
+```python
+list(map(tuple, [[1, 2, 3], [4, 5]]))
+# [(1, 2, 3), (4, 5)]
+
+list(map(lambda x: x % 3 == 0, [1, 2, 3, 4, 5, 6, 7, 8, 9]))
+# [False, False, True, False, False, True, False, False, True]
 ```
+**zip** は、短い iterable が終わるとそこで停止します:
+```python
 for f, b in zip(foo, bar):
 print(f, b)
 ```
-**Lambda**は関数を定義するために使用されます\
-(lambda x,y: x+y)(5,3) = 8 --> lambdaを単純な**関数**として使用\
-**sorted**(range(-5,6), key=lambda x: x\*\* 2) = \[0, -1, 1, -2, 2, -3, 3, -4, 4, -5, 5] --> lambdaを使用してリストをソート\
-m = **filter**(lambda x: x % 3 == 0, \[1, 2, 3, 4, 5, 6, 7, 8, 9]) = \[3, 6, 9] --> lambdaを使用してフィルタリング\
-**reduce** (lambda x,y: x\*y, \[1,2,3,4]) = 24
-```
+**Lambda** は関数を定義するために使われる:\
+`(lambda x, y: x + y)(5, 3) == 8` --> lambda をシンプルな関数として使う\
+`sorted(range(-5, 6), key=lambda x: x**2)` --> lambda を使ってソートする\
+`list(filter(lambda x: x % 3 == 0, [1, 2, 3, 4, 5, 6, 7, 8, 9])) == [3, 6, 9]`\
+`reduce(lambda x, y: x * y, [1, 2, 3, 4]) == 24`
+```python
+from functools import reduce
+
+
 def make_adder(n):
-return lambda x: x+n
+return lambda x: x + n
+
+
 plus3 = make_adder(3)
-plus3(4) = 7 # 3 + 4 = 7
+plus3(4) == 7
+
 
 class Car:
-crash = lambda self: print('Boom!')
-my_car = Car(); my_car.crash() = 'Boom!'
+crash = lambda self: print("Boom!")
+
+
+my_car = Car()
+my_car.crash()  # Boom!
 ```
-mult1 = \[x for x in \[1, 2, 3, 4, 5, 6, 7, 8, 9] if x%3 == 0 ]
+`mult1 = [x for x in [1, 2, 3, 4, 5, 6, 7, 8, 9] if x % 3 == 0]`
 
 ### 例外
-```
-def divide(x,y):
+```python
+def divide(x, y):
 try:
-result = x/y
-except ZeroDivisionError, e:
-print “division by zero!” + str(e)
+result = x / y
+except ZeroDivisionError as e:
+print("division by zero! " + str(e))
 except TypeError:
-divide(int(x),int(y))
+divide(int(x), int(y))
 else:
-print “result i”, result
-finally
-print “executing finally clause in any case”
+print("result is", result)
+finally:
+print("executing finally clause in any case")
 ```
 ### Assert()
 
-条件が偽の場合、文字列が画面に表示されます。
-```
+条件が false の場合、文字列が出力されます。\
+`assert` 文は `python -O` で無効化できるため、アクセス制御や入力検証には使用しないでください。
+```python
 def avg(grades, weights):
-assert not len(grades) == 0, 'no grades data'
-assert len(grades) == 'wrong number grades'
+assert len(grades) != 0, 'no grades data'
+assert len(grades) == len(weights), 'wrong number of grades'
 ```
-### ジェネレーター、yield
+### ジェネレーター, yield
 
-ジェネレーターは、何かを返す代わりに「yield」します。アクセスすると、最初に生成された値を「返し」、再度アクセスすると次に生成された値を返します。したがって、すべての値が同時に生成されるわけではなく、すべての値を含むリストを使用する代わりに、これを使用することで多くのメモリを節約できます。
-```
-def myGen(n):
+ジェネレーターは、すべてを一度に返す代わりに、値を1つずつ**yield**します。これは、大規模な wordlist、bruteforcers、または大きなレスポンスに非常に便利です。
+```python
+def my_gen(n):
 yield n
 yield n + 1
 ```
-g = myGen(6) --> 6\
-next(g) --> 7\
-next(g) --> エラー
+`g = my_gen(6)`\
+`next(g) == 6`\
+`next(g) == 7`\
+`next(g)` --> `StopIteration`
 
 ### 正規表現
+```python
+import re
 
-import re\
-re.search("\w","hola").group() = "h"\
-re.findall("\w","hola") = \['h', 'o', 'l', 'a']\
-re.findall("\w+(la)","hola caracola") = \['la', 'la']
-
+re.search(r"\w", "hola").group() == "h"
+re.findall(r"\w", "hola") == ['h', 'o', 'l', 'a']
+re.findall(r"\w+(la)", "hola caracola") == ['la', 'la']
+```
 **特別な意味:**\
-. --> すべて\
-\w --> \[a-zA-Z0-9\_]\
-\d --> 数字\
-\s --> 空白文字\[ \n\r\t\f]\
-\S --> 非空白文字\
-^ --> 始まり\
-$ --> 終わり\
-\+ --> 1回以上\
-\* --> 0回以上\
-? --> 0回または1回の出現
+`.` --> 改行以外の任意の文字\
+`\w` --> `[a-zA-Z0-9_]`\
+`\d` --> 数字\
+`\s` --> 空白文字 `[ \n\r\t\f]`\
+`\S` --> 空白以外の文字\
+`^` --> で始まる\
+`$` --> で終わる\
+`+` --> 1回以上\
+`*` --> 0回以上\
+`?` --> 0回または1回の出現
 
 **オプション:**\
-re.search(pat,str,re.IGNORECASE)\
-IGNORECASE\
-DOTALL --> ドットが改行にマッチすることを許可\
-MULTILINE --> ^ と $ が異なる行にマッチすることを許可
+`re.search(pat, string, re.IGNORECASE)`\
+`re.search(pat, string, re.DOTALL)` --> `.` が改行にもマッチするようにする\
+`re.search(pat, string, re.MULTILINE)` --> `^` と `$` が複数行でマッチするようにする
+```python
+re.findall(r"<.*>", "<b>foo</b>and<i>so on</i>")
+# ['<b>foo</b>and<i>so on</i>']
 
-re.findall("<.\*>", "\<b>foo\</b>and\<i>so on\</i>") = \['\<b>foo\</b>and\<i>so on\</i>']\
-re.findall("<.\*?>", "\<b>foo\</b>and\<i>so on\</i>") = \['\<b>', '\</b>', '\<i>', '\</i>']
+re.findall(r"<.*?>", "<b>foo</b>and<i>so on</i>")
+# ['<b>', '</b>', '<i>', '</i>']
+```
+### IterTools
 
-IterTools\
 **product**\
-from **itertools** import product --> 1つ以上のリスト間の組み合わせを生成し、値を繰り返すこともあり、直積（分配法則）\
-print list(**product**(\[1,2,3],\[3,4])) = \[(1, 3), (1, 4), (2, 3), (2, 4), (3, 3), (3, 4)]\
-print list(**product**(\[1,2,3],repeat = 2)) = \[(1, 1), (1, 2), (1, 3), (2, 1), (2, 2), (2, 3), (3, 1), (3, 2), (3, 3)]
+`from itertools import product` --> 1つ以上のイテラブル間の cartesian product
+```python
+list(product([1, 2, 3], [3, 4]))
+# [(1, 3), (1, 4), (2, 3), (2, 4), (3, 3), (3, 4)]
 
+list(product([1, 2, 3], repeat=2))
+# [(1, 1), (1, 2), (1, 3), (2, 1), (2, 2), (2, 3), (3, 1), (3, 2), (3, 3)]
+```
 **permutations**\
-from **itertools** import **permutations** --> すべての位置におけるすべての文字の組み合わせを生成\
-print list(permutations(\['1','2','3'])) = \[('1', '2', '3'), ('1', '3', '2'), ('2', '1', '3'),... すべての可能な組み合わせ\
-print(list(permutations('123',2))) = \[('1', '2'), ('1', '3'), ('2', '1'), ('2', '3'), ('3', '1'), ('3', '2')] 長さ2のすべての可能な組み合わせ
-
+`from itertools import permutations` --> あらゆる可能な並び替え
+```python
+list(permutations(['1', '2', '3']))
+list(permutations('123', 2))
+```
 **combinations**\
-from itertools import **combinations** --> 文字を繰り返さずにすべての可能な組み合わせを生成（"ab"が存在する場合、"ba"は生成しない）\
-print(list(**combinations**('123',2))) --> \[('1', '2'), ('1', '3'), ('2', '3')]
+`from itertools import combinations` --> 重複なしのすべての組み合わせ
+```python
+list(combinations('123', 2))
+# [('1', '2'), ('1', '3'), ('2', '3')]
+```
+**組み合わせ（重複を許可）**\
+`from itertools import combinations_with_replacement`
+```python
+list(combinations_with_replacement('123', 2))
+# [('1', '1'), ('1', '2'), ('1', '3'), ('2', '2'), ('2', '3'), ('3', '3')]
+```
+**batched**\
+`from itertools import batched` --> Python 3.12+ で利用可能。大きな bruteforce の候補リストや IOC ファイルを分割するのに便利。
+```python
+list(batched(range(10), 4))
+# [(0, 1, 2, 3), (4, 5, 6, 7), (8, 9)]
+```
+### デコレータ
 
-**combinations_with_replacement**\
-from itertools import **combinations_with_replacement** --> 文字以降からすべての可能な組み合わせを生成（例えば、3番目は3番目以降から混合されるが、2番目や1番目とは混合されない）\
-print(list(**combinations_with_replacement**('1133',2))) = \[('1', '1'), ('1', '1'), ('1', '3'), ('1', '3'), ('1', '1'), ('1', '3'), ('1', '3'), ('3', '3'), ('3', '3'), ('3', '3')]
-
-### デコレーター
-
-関数が実行されるのに必要な時間を測定するデコレーター（[こちら](https://towardsdatascience.com/decorating-functions-in-python-619cbbe82c74)から）:
+関数の実行に必要な時間を測定するデコレータ:
 ```python
 from functools import wraps
 import time
+
+
 def timeme(func):
 @wraps(func)
 def wrapper(*args, **kwargs):
 print("Let's call our decorated function")
 start = time.time()
 result = func(*args, **kwargs)
-print('Execution time: {} seconds'.format(time.time() - start))
+print(f"Execution time: {time.time() - start} seconds")
 return result
+
 return wrapper
+
 
 @timeme
 def decorated_func():
 print("Decorated func!")
 ```
-実行すると、次のようなものが表示されます：
-```
+実行すると、以下のようなものが表示されます:
+```text
 Let's call our decorated function
 Decorated func!
-Execution time: 4.792213439941406e-05 seconds
+Execution time: 4.79e-05 seconds
 ```
+### pentesting に役立つ標準ライブラリのヘルパー
+
+**`pathlib` による filesystem traversal** (`Path.walk()` は Python 3.12+ で利用可能; 古い interpreter では `os.walk()` を使用):
+```python
+from pathlib import Path
+
+for root, dirs, files in Path(".").walk():
+if ".git" in dirs:
+dirs.remove(".git")
+for name in files:
+if name.endswith((".py", ".env", ".bak")):
+print(root / name)
+```
+**コマンドを安全に起動する** (`shell=False` はデフォルトで、通常はこれが望ましい):
+```python
+import subprocess
+
+cp = subprocess.run(
+["id"],
+capture_output=True,
+text=True,
+check=True,
+)
+print(cp.stdout)
+```
+シェルコマンドを**どうしても**組み立てる必要がある場合は、まず攻撃者が制御する各トークンを引用符で囲んでください:
+```python
+import shlex
+cmd = f"grep -R {shlex.quote(user_controlled)} /var/www"
+```
+**一時ファイル / ディレクトリ** (ハードコードされた `/tmp/foo` パスより安全):
+```python
+import tempfile
+from pathlib import Path
+
+with tempfile.TemporaryDirectory() as tmp:
+out = Path(tmp) / "loot.txt"
+out.write_text("secret\n")
+print(out.read_text())
+```
+HTTP 自動化については、[Python web requests に関するこちらの別ページ](web-requests.md)を確認してください。
+
+### アーカイブ展開の落とし穴（ツールとファイルパーサーにとって重要）
+
+**Python 3.14** 以降では、`tarfile.extract()` / `extractall()` はデフォルトでより安全な `data` フィルターを使用します。古い Python バージョンでは、攻撃者が制御するアーカイブを扱うときに明示的に設定してください。
+```python
+import tarfile
+import tempfile
+
+with tempfile.TemporaryDirectory() as out:
+with tarfile.open("sample.tar.gz") as tf:
+tf.extractall(out, filter="data")
+```
+`filter="data"` を使っていても、信頼できないアーカイブは新しい一時ディレクトリに展開し、どこか重要な場所へ移動する前に書き込まれた内容を検証してください。
+
+`zipfile.Path` は別物です: これはあなたのために **ファイル名をサニタイズしません**。そのため、攻撃者制御の ZIP メンバーを展開する前にパスを検証してください:
+```python
+import os
+import zipfile
+
+base = os.path.abspath("/tmp/unzip")
+with zipfile.ZipFile("sample.zip") as zf:
+for info in zf.infolist():
+final_path = os.path.abspath(os.path.join(base, info.filename))
+if os.path.commonpath([base, final_path]) != base:
+raise ValueError(f"Path traversal inside ZIP: {info.filename}")
+zf.extract(info, base)
+```
+### 忘れてはいけない危険なプリミティブ
+
+- `eval()` / `exec()` は **sandbox** ではありません。
+- `ast.literal_eval()` は Python code を実行しませんが、攻撃者制御の input によって memory / CPU denial of service に悪用される可能性があります。
+- `pickle.loads()` は **secure** ではありません。攻撃者制御の bytes を絶対に unpickle しないでください。
+- より深い offensive tricks については、[Bypass Python sandboxes](bypass-python-sandboxes/README.md)、[Python internal read gadgets](python-internal-read-gadgets.md)、[Python deserializations](../../pentesting-web/deserialization/README.md) を確認してください。
+
+## References
+
+- [Python tarfile docs](https://docs.python.org/3/library/tarfile.html)
+- [PEP 706 - Filter for tarfile.extractall](https://peps.python.org/pep-0706/)
+
 {{#include ../../banners/hacktricks-training.md}}
