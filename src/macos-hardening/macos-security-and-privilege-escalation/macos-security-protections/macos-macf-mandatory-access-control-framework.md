@@ -296,6 +296,23 @@ Example Info.plist snippet (inside your .kext):
 ```
 
 
+
+## MACF on modern macOS releases
+
+On modern macOS, Apple security policies are usually not best approached as loose standalone `.kext` bundles. Since **macOS 11**, kernel extensions are linked into **kernel collections**; on **Apple Silicon** there is no separate **SystemKC**, and third-party kexts become loadable only after being built into the **Auxiliary Kernel Collection (AuxKC)** and a reboot. For MACF research this means that built-in policies such as **Sandbox**, **AMFI**, **AppleSystemPolicy**, **CoreTrust** or **Quarantine** are usually easier to enumerate with `kmutil` than with deprecated tooling such as `kextstat`.
+
+```bash
+# Loaded policies from the running kernel
+kmutil showloaded --collection boot | egrep 'Sandbox|AppleMobileFileIntegrity|AppleSystemPolicy|CoreTrust|Quarantine'
+kmutil showloaded --collection aux  | egrep 'Sandbox|AppleMobileFileIntegrity|AppleSystemPolicy|CoreTrust|Quarantine'
+
+# Policies present in the on-disk BootKC
+kmutil inspect --show-fileset-entries   -B /System/Library/KernelCollections/BootKernelExtensions.kc   | egrep 'Sandbox|AppleMobileFileIntegrity|AppleSystemPolicy|CoreTrust|Quarantine'
+```
+
+> [!TIP]
+> On Apple Silicon, if a security kext is not in the BootKC, check the AuxKC next. This is usually more useful than hunting for a standalone bundle under `/System/Library/Extensions`.
+
 ## MACF Callouts
 
 It's common to find callouts to MACF defined in code like: **`#if CONFIG_MAC`** conditional blocks. Moreover, inside these blocks it's possible to find calls to `mac_proc_check*` which calls MACF to **check for permissions** to perform certain actions. Moreover, the format of the MACF callouts is: **`mac_<object>_<opType>_opName`**.
@@ -443,9 +460,37 @@ __END_DECLS
 #endif /*__APPLE_API_PRIVATE*/
 ```
 
+For offensive reversing, **`__mac_syscall`** is still one of the best userland chokepoints. It carries a **policy name** (for example `"Sandbox"` or `"AMFI"`), a **policy-specific selector/code**, and a pointer to the **opaque argument blob** that will be handled by `mpo_policy_syscall`. This is very useful when reversing undocumented operations from userland first and only later pivoting into the kernel implementation. Sandbox commonly reaches it via `__sandbox_ms`, and AMFI uses the same mechanism for dyld policy decisions.
+
+## Practical offensive research notes
+
+Recent macOS bugs rarely "break MACF" directly. Instead, they usually abuse a **desynchronisation between a MACF / Sandbox / TCC decision and the privileged action that happens later**.
+
+### Broker path checks vs real privileged action
+
+A recurring pattern is a privileged daemon performing a **userland pre-check** (for example `sandbox_check_by_audit_token()`) on one version of a path, and later executing the real privileged sink with a **different or non-canonical attacker-controlled path**. Recent `diskarbitrationd` / `storagekitd` research is a good example: **directory traversal** plus **symlink swaps** let the attacker pass the daemon's sandbox validation and then mount over sensitive locations such as `~/Library/Application Support/com.apple.TCC`, turning the bug into a **sandbox escape**, **local privilege escalation** or **TCC bypass** depending on the chosen mount point.
+
+When auditing root brokers reachable from the sandbox, grep first for:
+
+- `sandbox_check`, `sandbox_check_by_audit_token`
+- `realpath`, `CFURL*`, path canonicalisation helpers
+- privileged sinks such as `mount`, `rename`, `copyfile`, helper-tool XPC methods, or anything that later touches attacker-controlled paths as root
+
+### Trusted deputies with private entitlements
+
+Another practical pattern is to avoid attacking MACF hooks directly and instead abuse a **trusted process** that already carries the rights needed to cross the boundary. Recent Safari/TCC research is a good example: the interesting primitive was not "disable TCC in the kernel", but modifying local policy/configuration so an Apple-signed process with **`com.apple.private.tcc.allow`** performs the sensitive action on your behalf. In practice, high-value auditing targets are Apple daemons/apps that combine:
+
+- **private entitlements** or FDA-like reach
+- a writable config / database / mount point / policy file
+- a later sensitive operation mediated by **Sandbox**, **AMFI**, **TCC** or another MACF policy
+
+For deeper product-specific reversing, check the dedicated pages on [macOS Sandbox](macos-sandbox/README.md) and [macOS TCC](macos-tcc/README.md).
+
 ## References
 
 - [**\*OS Internals Volume III**](https://newosxbook.com/home.html)
+- [**AMFI Syscall (Offensive Security)**](https://www.offsec.com/blog/amfi-syscall/)
+- [**Uncovering Apple Vulnerabilities: diskarbitrationd and storagekitd Audit Part 2**](https://blog.kandji.io/macos-audit-story-part2)
 
 
 {{#include ../../../banners/hacktricks-training.md}}
