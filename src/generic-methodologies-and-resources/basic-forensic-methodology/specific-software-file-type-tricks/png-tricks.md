@@ -2,13 +2,13 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-**PNG files** は **CTFs**、**incident response**、および **malware staging** で非常に一般的です。というのも、**lossless** であり、**chunk-based** であり、多くのツールが **extra metadata**、**appended payloads**、または **partially corrupted chunks** を含んでいても問題なく表示するからです。
+**PNG files** は **CTF**、**incident response**、および **malware staging** で非常に一般的です。これは、**lossless** で **chunk-based** であり、多くのツールが **extra metadata**、**appended payloads**、または **partially corrupted chunks** を含んでいても、問題なくレンダリングするためです。
 
-PNG は単なる画像ではなく、**container** として扱ってください。
+PNG を単なる画像としてではなく、**container** として扱ってください。
 
 ## Quick triage
 
-LSB stego に飛び込む前に、まず container-level のチェックを行ってください。bit-plane/LSB のワークフローについては、[the dedicated image stego page](../../../stego/images/README.md) を確認してください。
+LSB stego に進む前に、まず container-level のチェックを行ってください。bit-plane/LSB ワークフローについては、[the dedicated image stego page](../../../stego/images/README.md) を確認してください。
 ```bash
 file suspect.png
 pngcheck -vp suspect.png
@@ -16,30 +16,30 @@ exiftool -a -u -g1 suspect.png
 strings -n 6 suspect.png | head
 binwalk -eM suspect.png
 ```
-確認すべき有用なもの:
+調べるべき有用なもの:
 
-- `tEXt`、`zTXt`、`iTXt`、`eXIf`、`iCCP` などの**予期しない補助 chunk**
-- **CRC エラー**または不正な chunk 長
-- `IEND` の後ろの**追加データ**
-- **複数の `IEND` マーカー**、または形式上の終了後にある復元可能な `IDAT` フラグメント
-- 取り出したときに有効な PNG であり、かつ ZIP/PDF/script のようにも見えるファイル
+- `tEXt`、`zTXt`、`iTXt`、`eXIf`、`iCCP` などの**予期しない ancillary chunks**
+- **CRC errors** または不正な chunk lengths
+- **`IEND` の後の追加データ**
+- **複数の `IEND` マーカー**、または正式なファイル終端の後に回収可能な `IDAT` fragments
+- carving したときに、PNG として有効で、**かつ** ZIP/PDF/script のようにも見えるファイル
 
-最小の有効な構造は通常、次のとおり:
+最小限の有効な構造は通常、次のとおりです:
 
 - `IHDR`（最初でなければならない）
-- `IDAT`（1つ以上の連続する chunk）
+- `IDAT`（1つ以上の連続した chunks）
 - `IEND`（最後でなければならない）
 
-## `IEND` の後ろの trailing data
+## `IEND` の後の trailing data
 
-PNG の中でも特にシグナルが強い artefact の1つは、**最後の `IEND` chunk の後ろに追加された data** です。多くの decoder はこれを無視するため、次の用途に有用です:
+PNG の最もシグナルの高い artefacts の1つは、**最終 `IEND` chunk の後に追加された data** です。多くの decoder はこれを無視するため、次の用途に有用です:
 
-- **単純な stego / hidden payload**
+- **Simple stego / hidden payloads**
 - **PNG polyglots**
-- **malware staging**
-- **不具合のある editor から古い画像データを復元する**
+- **Malware staging**
+- **バグのある editor から古い image data を復元する**
 
-簡単な検出:
+簡易検出:
 ```bash
 pngcheck -v suspect.png
 # Look for: "additional data after IEND chunk"
@@ -50,73 +50,73 @@ exiftool suspect.png
 grep -aboa $'IEND\xAE\x42\x60\x82' suspect.png
 # More than one hit is suspicious
 ```
-最終の `IEND` の後をすべて切り出したい場合は：
+最終の`IEND`の後ろをすべて切り出したい場合:
 ```bash
 IEND_OFF=$(grep -aboa $'IEND\xAE\x42\x60\x82' suspect.png | tail -n1 | cut -d: -f1)
 dd if=suspect.png of=png-trailer.bin bs=1 skip=$((IEND_OFF+8))
 file png-trailer.bin
 binwalk -eM png-trailer.bin
 ```
-また、generic archive parsers をPNGそのもの、または carve した trailer に対して直接試してください:
+また、PNG または carve された trailer に対して generic archive parser を直接試してください:
 ```bash
 7z l suspect.png
 unzip -l suspect.png
 ```
-## 切り抜き/伏せ字スクリーンショットのAcropalypse-style復元
+## クロップ/マスキングされたスクリーンショットの Acropalypse-style 復元
 
-最近のPNGフォレンジックで非常に実用的なトリックは、スクリーンショットエディタがPNGを保存する際に、先に古いファイルを**truncating**せずに**overwrote**していないかを確認することです。こうした場合、**previous image**のバイトが `IEND` の後に残ることがあり、さらに追加の `IDAT` データが部分的に再構築できることもあります。
+最近の非常に実用的な PNG フォレンジックのトリックは、スクリーンショットエディタが PNG を **上書き** したときに、古いファイルを先に **truncating** していなかったかを確認することです。そうした場合、**前の画像** のバイトが `IEND` の後に残ることがあり、場合によっては追加の `IDAT` データを部分的に復元できます。
 
-これは **aCropalypse**（Google Pixel Markup）と、それに関連する **Windows Snipping Tool** の問題で広く知られるようになりました。実際には、「cropped」または「redacted」されたPNGに古い末尾データが残っていれば、元のスクリーンショットの一部を復元できる可能性があります。
+これは **aCropalypse**（Google Pixel Markup）と、関連する **Windows Snipping Tool** の問題で広く知られるようになりました。実際には、「cropped」または「redacted」された PNG に古い末尾データがまだ含まれているなら、元のスクリーンショットの一部を復元できる可能性があります。
 
-実践的なワークフロー:
+実用的なワークフロー:
 ```bash
 pngcheck -v screenshot.png
 exiftool screenshot.png | grep -i trailer
 grep -aboa 'IDAT' screenshot.png
 grep -aboa $'IEND\xAE\x42\x60\x82' screenshot.png
 ```
-深掘り分析を強く正当化する兆候:
+深い分析を強く正当化する兆候:
 
 - `pngcheck` が **`IEND` の後に追加データ** を報告する
 - **複数の `IEND`** が見つかる
-- 画像の見かけ上の終端の後に **余分な `IDAT` チャンク** が見つかる
-- スクリーンショットの元が、影響を受けたことが知られているデバイス/エディタだった
+- 画像の見かけ上の終了後に **追加の `IDAT` chunk** がある
+- そのスクリーンショットが、影響を受けたことで知られるデバイス/エディタから来ている
 
-これが起きたら、redaction を信頼できるものとして扱う前に、ファイルを **aCropalypse recovery tool** に通してください。
+これが起きたら、redaction を信頼できるものとして扱う前に、ファイルを **aCropalypse recovery tool** に通すこと。
 
-## 実務で重要なチャンクの悪用
+## 実務で重要な chunk abuse
 
-調査で最も興味深い PNG チャンクは、たいてい明白な画像チャンクではなく、**text**、**metadata**、または **payload bytes** を運べるチャンクです:
+調査で最も興味深い PNG chunk は、たいてい目立つ画像用のものではなく、**text**、**metadata**、または **payload bytes** を運べる chunk です:
 
 - `tEXt` / `zTXt` / `iTXt` – text metadata と圧縮 text
-- `eXIf` – PNG 内の EXIF データ
+- `eXIf` – PNG 内の EXIF data
 - `iCCP` – 埋め込み ICC profile
 - `PLTE` – indexed images の palette data だが、payload-smuggling シナリオでも有用
 
-以下でダンプします:
+次でダンプする:
 ```bash
 pngcheck -vp suspect.png
 exiftool -a -u -g1 suspect.png
 ```
-PNG チャンク内での offensive payload の永続化について（たとえば、**PLTE**、**IDAT**、または一部の PHP 画像変換を生き残る **tEXt** の trick など）は、より詳細なアップロード中心のノートをこちらで確認してください:
+PNGチャンク内で offensive payload を永続化する場合（たとえば、いくつかの PHP 画像変換をすり抜ける **PLTE**、**IDAT**、または **tEXt** のトリック）については、より詳しい upload-focused の注意点をこちらで確認してください:
 
 {{#ref}}
 ../../../pentesting-web/file-upload/README.md
 {{#endref}}
 
-## 破損した PNG の修復
+## 壊れた PNG の修復
 
-整合性の確認と、壊れている正確な箇所の特定には、**pngcheck** が今でも最良の最初のツールの一つです:
+整合性の確認と、壊れている箇所の正確な特定には、**pngcheck** は今でも最初に使うべき最良のツールのひとつです:
 
 - [pngcheck](http://libpng.org/pub/png/apps/pngcheck.html)
 
-ファイルが意図的に悪意あるものではなく、単に破損しているだけなら、**PCRT** は CTF やラボ作業で、壊れたヘッダー、誤った IHDR 値、CRC 問題、または不正なチャンク配置などの一般的な問題を修復するのに役立ちます。
+ファイルが意図的な悪意ではなく破損している場合、**PCRT** は CTF や lab 作業で、bad headers、wrong IHDR values、CRC problems、malformed chunk layouts などの一般的な問題を修復するのに役立ちます。
 
-PNG を **sanitize** したい、つまり表示画像を保ったまま suspicious な trailer data を含む PNG からそれを除去したい場合、ExifTool は trailer を明示的に削除できます:
+目的が、表示される画像を保ったまま suspicious trailer data を含む PNG を **sanitize** することなら、ExifTool で trailer を明示的に削除できます:
 ```bash
 exiftool -Trailer:All= -overwrite_original suspect.png
 ```
-機密証拠については、必ず **コピー** で作業し、修復を試みる前に元データのハッシュを保持してください。
+機密証拠については、修復を試みる前に必ず**コピー**で作業し、元のハッシュを保持してください。
 
 ## References
 
