@@ -211,7 +211,7 @@ if __name__ == '__main__':
 
 In this scenario, the input was taken with `scanf("%u %u")` and the value `"1 1"` was given, so the values **`0x00000001`** of the stack come from the **user input**. You can see how this values starts in `$ebp - 8`. Therefore, in the code we have **subtracted 8 bytes to `$esp` (as in that moment `$ebp` and `$esp` had the same value)** and then we have pushed the BVS.
 
-![](<../../../images/image (136).png>)
+![Put bit vectors in th stack to find out the vallue that stack position need to - have to reach a rogram flow: In this scenario, the input was taken with scanf("%u %u") and the value "1...](<../../../images/image (136).png>)
 
 ### Static Memory values (Global variables)
 

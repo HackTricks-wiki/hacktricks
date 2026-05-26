@@ -44,7 +44,7 @@ More info and PoC in:
 
 By default an access via **SSH used to have "Full Disk Access"**. In order to disable this you need to have it listed but disabled (removing it from the list won't remove those privileges):
 
-![](<../../../../../images/image (1077).png>)
+![TCC Request by arbitrary name - SSH Bypass: By default an access via SSH used to have "Full Disk Access" . In order to disable this you need to have it listed but disabled (removing it...](<../../../../../images/image (1077).png>)
 
 Here you can find examples of how some **malwares have been able to bypass this protection**:
 

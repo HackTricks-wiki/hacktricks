@@ -30,7 +30,7 @@ When a file is deleted in this folder 2 specific files are created:
 - `$I{id}`: File information (date of when it was deleted}
 - `$R{id}`: Content of the file
 
-![](<../../../images/image (1029).png>)
+![File Backups - Recycle Bin: $R{id}: Content of the file](<../../../images/image (1029).png>)
 
 Having these files you can use the tool [**Rifiuti**](https://github.com/abelcheung/rifiuti2) to get the original address of the deleted files and the date it was deleted (use `rifiuti-vista.exe` for Vista – Win10).
 
@@ -38,7 +38,7 @@ Having these files you can use the tool [**Rifiuti**](https://github.com/abelche
 .\rifiuti-vista.exe C:\Users\student\Desktop\Recycle
 ```
 
-![](<../../../images/image (495) (1) (1) (1).png>)
+![File Backups - Recycle Bin: rifiuti-vista.exe C: Users student Desktop Recycle](<../../../images/image (495) (1) (1) (1).png>)
 
 ### Volume Shadow Copies
 
@@ -46,15 +46,15 @@ Shadow Copy is a technology included in Microsoft Windows that can create **back
 
 These backups are usually located in the `\System Volume Information` from the root of the file system and the name is composed of **UIDs** shown in the following image:
 
-![](<../../../images/image (94).png>)
+![Recycle Bin - Volume Shadow Copies: These backups are usually located in the System Volume Information from the root of the file system and the name is composed of UIDs shown in the...](<../../../images/image (94).png>)
 
 Mounting the forensics image with the **ArsenalImageMounter**, the tool [**ShadowCopyView**](https://www.nirsoft.net/utils/shadow_copy_view.html) can be used to inspect a shadow copy and even **extract the files** from the shadow copy backups.
 
-![](<../../../images/image (576).png>)
+![Recycle Bin - Volume Shadow Copies: Mounting the forensics image with the ArsenalImageMounter , the tool ShadowCopyView can be used to inspect a shadow copy and even extract the files...](<../../../images/image (576).png>)
 
 The registry entry `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\BackupRestore` contains the files and keys **to not backup**:
 
-![](<../../../images/image (254).png>)
+![Recycle Bin - Volume Shadow Copies: The registry entry HKEY LOCAL MACHINE SYSTEM CurrentControlSet Control BackupRestore contains the files and keys to not backup](<../../../images/image (254).png>)
 
 The registry `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\VSS` also contains configuration information about the `Volume Shadow Copies`.
 
@@ -114,7 +114,7 @@ The **created time** of any jumplist indicates the **the first time the file was
 
 You can inspect the jumplists using [**JumplistExplorer**](https://ericzimmerman.github.io/#!index.md).
 
-![](<../../../images/image (168).png>)
+![Recent Documents (LNK) - Jumplists: You can inspect the jumplists using JumplistExplorer](<../../../images/image (168).png>)
 
 (_Note that the timestamps provided by JumplistExplorer are related to the jumplist file itself_)
 
@@ -132,7 +132,7 @@ It's possible to identify that a USB device was used thanks to the creation of:
 
 Note that some LNK file instead of pointing to the original path, points to the WPDNSE folder:
 
-![](<../../../images/image (218).png>)
+![Shellbags - Use of Windows USBs: Note that some LNK file instead of pointing to the original path, points to the WPDNSE folder](<../../../images/image (218).png>)
 
 The files in the folder WPDNSE are a copy of the original ones, then won't survive a restart of the PC and the GUID is taken from a shellbag.
 
@@ -144,13 +144,13 @@ The files in the folder WPDNSE are a copy of the original ones, then won't survi
 
 Check the file `C:\Windows\inf\setupapi.dev.log` to get the timestamps about when the USB connection was produced (search for `Section start`).
 
-![](<../../../images/image (477) (2) (2) (2) (2) (2) (2) (2) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (14) (2).png>)
+![Registry Information - setupapi: Check the file C: Windows inf setupapi.dev.log to get the timestamps about when the USB connection was produced (search for Section start)](<../../../images/image (477) (2) (2) (2) (2) (2) (2) (2) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (14) (2).png>)
 
 ### USB Detective
 
 [**USBDetective**](https://usbdetective.com) can be used to obtain information about the USB devices that have been connected to an image.
 
-![](<../../../images/image (452).png>)
+![setupapi - USB Detective: USBDetective can be used to obtain information about the USB devices that have been connected to an image](<../../../images/image (452).png>)
 
 ### Plug and Play Cleanup
 
@@ -158,7 +158,7 @@ The scheduled task known as 'Plug and Play Cleanup' is primarily designed for th
 
 The task is located at the following path: `C:\Windows\System32\Tasks\Microsoft\Windows\Plug and Play\Plug and Play Cleanup`.
 
-A screenshot depicting the task's content is provided: ![](https://2.bp.blogspot.com/-wqYubtuR_W8/W19bV5S9XyI/AAAAAAAANhU/OHsBDEvjqmg9ayzdNwJ4y2DKZnhCdwSMgCLcBGAs/s1600/xml.png)
+A screenshot depicting the task's content is provided: ![USB Detective - Plug and Play Cleanup: The task is located at the following path: C: Windows System32 Tasks Microsoft Windows Plug and Play Plug and Play Cleanup](https://2.bp.blogspot.com/-wqYubtuR_W8/W19bV5S9XyI/AAAAAAAANhU/OHsBDEvjqmg9ayzdNwJ4y2DKZnhCdwSMgCLcBGAs/s1600/xml.png)
 
 **Key Components and Settings of the Task:**
 
@@ -181,7 +181,7 @@ Emails contain **2 interesting parts: The headers and the content** of the email
 
 Also, inside the `References` and `In-Reply-To` headers you can find the ID of the messages:
 
-![](<../../../images/image (593).png>)
+![Plug and Play Cleanup - Emails: When was the email sent](<../../../images/image (593).png>)
 
 ### Windows Mail App
 
@@ -209,7 +209,7 @@ The registry path `HKEY_CURRENT_USER\Software\Microsoft\WindowsNT\CurrentVersion
 
 You can open the PST file using the tool [**Kernel PST Viewer**](https://www.nucleustechnologies.com/es/visor-de-pst.html).
 
-![](<../../../images/image (498).png>)
+![Windows Mail App - Microsoft Outlook: You can open the PST file using the tool Kernel PST Viewer](<../../../images/image (498).png>)
 
 ### Microsoft Outlook OST Files
 
@@ -301,7 +301,7 @@ To inspect these files you can use the tool [**PEcmd.exe**](https://github.com/E
 .\PECmd.exe -d C:\Users\student\Desktop\Prefetch --html "C:\Users\student\Desktop\out_folder"
 ```
 
-![](<../../../images/image (315).png>)
+![BAM (Background Activity Moderator) - Windows Prefetch: PECmd.exe -d C: Users student Desktop Prefetch --html "C: Users student Desktop out folder"](<../../../images/image (315).png>)
 
 ### Superprefetch
 
@@ -351,7 +351,7 @@ Such data is stored within the registry at specific locations based on the versi
 
 To parse the stored information, the [**AppCompatCacheParser** tool](https://github.com/EricZimmerman/AppCompatCacheParser) is recommended for use.
 
-![](<../../../images/image (75).png>)
+![SRUM - AppCompatCache (ShimCache): To parse the stored information, the AppCompatCacheParser tool is recommended for use](<../../../images/image (75).png>)
 
 ### Amcache
 

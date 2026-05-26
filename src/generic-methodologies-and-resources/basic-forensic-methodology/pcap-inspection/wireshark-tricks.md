@@ -19,43 +19,43 @@ The following tutorials are amazing to learn some cool basic tricks:
 
 Clicking on _**Analyze** --> **Expert Information**_ you will have an **overview** of what is happening in the packets **analyzed**:
 
-![](<../../../images/image (256).png>)
+![Tutorials - Analysed Information: Clicking on Analyze -- Expert Information you will have an overview of what is happening in the packets analyzed](<../../../images/image (256).png>)
 
 **Resolved Addresses**
 
 Under _**Statistics --> Resolved Addresses**_ you can find several **information** that was "**resolved**" by wireshark like port/transport to protocol, MAC to the manufacturer, etc. It is interesting to know what is implicated in the communication.
 
-![](<../../../images/image (893).png>)
+![Tutorials - Analysed Information: Under Statistics -- Resolved Addresses you can find several information that was " resolved " by wireshark like port/transport to protocol, MAC to the...](<../../../images/image (893).png>)
 
 **Protocol Hierarchy**
 
 Under _**Statistics --> Protocol Hierarchy**_ you can find the **protocols** **involved** in the communication and data about them.
 
-![](<../../../images/image (586).png>)
+![Tutorials - Analysed Information: Under Statistics -- Protocol Hierarchy you can find the protocols involved in the communication and data about them](<../../../images/image (586).png>)
 
 **Conversations**
 
 Under _**Statistics --> Conversations**_ you can find a **summary of the conversations** in the communication and data about them.
 
-![](<../../../images/image (453).png>)
+![Tutorials - Analysed Information: Under Statistics -- Conversations you can find a summary of the conversations in the communication and data about them](<../../../images/image (453).png>)
 
 **Endpoints**
 
 Under _**Statistics --> Endpoints**_ you can find a **summary of the endpoints** in the communication and data about each of them.
 
-![](<../../../images/image (896).png>)
+![Tutorials - Analysed Information: Under Statistics -- Endpoints you can find a summary of the endpoints in the communication and data about each of them](<../../../images/image (896).png>)
 
 **DNS info**
 
 Under _**Statistics --> DNS**_ you can find statistics about the DNS request captured.
 
-![](<../../../images/image (1063).png>)
+![Tutorials - Analysed Information: Under Statistics -- DNS you can find statistics about the DNS request captured](<../../../images/image (1063).png>)
 
 **I/O Graph**
 
 Under _**Statistics --> I/O Graph**_ you can find a **graph of the communication.**
 
-![](<../../../images/image (992).png>)
+![Tutorials - Analysed Information: Under Statistics -- I/O Graph you can find a graph of the communication](<../../../images/image (992).png>)
 
 ### Filters
 
@@ -92,11 +92,11 @@ Recent Wireshark versions can follow `TLS`, `HTTP/2` and `QUIC` streams directly
 
 You can add a column that shows the Host HTTP header:
 
-![](<../../../images/image (639).png>)
+![Free pcap labs - Identifying Domains: You can add a column that shows the Host HTTP header](<../../../images/image (639).png>)
 
 And a column that add the Server name from an initiating HTTPS connection (**tls.handshake.type == 1**):
 
-![](<../../../images/image (408) (1).png>)
+![Free pcap labs - Identifying Domains: And a column that add the Server name from an initiating HTTPS connection ( tls.handshake.type == 1 )](<../../../images/image (408) (1).png>)
 
 If the capture is mostly encrypted, adding these fields as columns will speed up triage a lot:
 
@@ -121,11 +121,11 @@ tshark -r capture.pcapng -Y "tls.handshake.type == 1" -T fields \
 
 In current Wireshark instead of `bootp` you need to search for `DHCP`
 
-![](<../../../images/image (1013).png>)
+![Identifying local hostnames - From DHCP: In current Wireshark instead of bootp you need to search for DHCP](<../../../images/image (1013).png>)
 
 ### From NBNS
 
-![](<../../../images/image (1003).png>)
+![From DHCP - From NBNS: In current Wireshark instead of bootp you need to search for DHCP](<../../../images/image (1003).png>)
 
 ## Decrypting TLS
 
@@ -133,7 +133,7 @@ In current Wireshark instead of `bootp` you need to search for `DHCP`
 
 _edit > preferences > protocols > tls >_
 
-![](<../../../images/image (1103).png>)
+![Decrypting TLS - Decrypting https traffic with server private key: Decrypting https traffic with server private key](<../../../images/image (1103).png>)
 
 Press _Edit_ and add all the data of the server and the private key (_IP, Port, Protocol, Key file and password_)
 
@@ -147,7 +147,7 @@ To detect this search inside the environment for the variable `SSLKEYLOGFILE`
 
 A file of shared keys will look like this:
 
-![](<../../../images/image (820).png>)
+![Decrypting https traffic with server private key - Decrypting https traffic with symmetric session keys: A file of shared keys will look like this](<../../../images/image (820).png>)
 
 If the capture is `pcapng`, check whether it already contains embedded decryption secrets before hunting the host filesystem:
 
@@ -157,7 +157,7 @@ editcap --extract-secrets capture.pcapng tls-secrets.txt
 
 To import this in wireshark go to \_edit > preferences > protocols > tls > and import it in (Pre)-Master-Secret log filename:
 
-![](<../../../images/image (989).png>)
+![Decrypting https traffic with server private key - Decrypting https traffic with symmetric session keys: editcap --extract-secrets capture.pcapng tls-secrets.txt](<../../../images/image (989).png>)
 
 ## ADB communication
 

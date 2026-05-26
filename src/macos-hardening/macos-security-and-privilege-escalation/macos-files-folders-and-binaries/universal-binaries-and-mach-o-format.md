@@ -347,7 +347,7 @@ struct dylib {
 };
 ```
 
-![](<../../../images/image (486).png>)
+![LC DYLD ENVIRONMENT - LC LOAD DYLIB: uint32 t compatibility version; / library's compatibility vers number /](<../../../images/image (486).png>)
 
 You could also get this info from the cli with:
 

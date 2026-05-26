@@ -101,7 +101,7 @@ Example CLI using a minimal loader:
 If you want to dump LSASS despite PPL, you have 3 main options:
 1. **Use a signed kernel driver (e.g., Mimikatz + mimidrv.sys)** to **remove LSASS’s protection flag**:
 
-![](../../images/mimidrv.png)
+![Mimikatz mimidrv driver output showing credential protection interaction](../../images/mimidrv.png)
 
 2. **Bring Your Own Vulnerable Driver (BYOVD)** to run custom kernel code and disable the protection. Tools like **PPLKiller**, **gdrv-loader**, or **kdmapper** make this feasible.
 3. **Steal an existing LSASS handle** from another process that has it open (e.g., an AV process), then **duplicate it** into your process. This is the basis of the `pypykatz live lsa --method handledup` technique.
@@ -146,7 +146,7 @@ It's important to note that in **Restricted Admin mode**, attempts to access net
 
 This feature marks a significant step forward in securing remote desktop connections and protecting sensitive information from being exposed in case of a security breach.
 
-![](../../images/RAM.png)
+![Windows RAM memory diagram for credential extraction context](../../images/RAM.png)
 
 For more detailed information on visit [this resource](https://blog.ahasayen.com/restricted-admin-mode-for-rdp/).
 

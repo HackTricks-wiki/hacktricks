@@ -45,7 +45,7 @@ Get-ChildItem -Hidden C:\Users\USER\AppData\Local\Microsoft\Protect\{SID}
 
 This is what a bunch of Master Keys of a user will looks like:
 
-![](<../../images/image (1121).png>)
+![What is DPAPI - Users key generation: This is what a bunch of Master Keys of a user will looks like](<../../images/image (1121).png>)
 
 ### Machine/System key generation
 

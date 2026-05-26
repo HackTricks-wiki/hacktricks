@@ -19,7 +19,7 @@ This tool **modifies** the timestamp information inside **`$STANDARD_INFORMATION
 
 The **USN Journal** (Update Sequence Number Journal) is a feature of the NTFS (Windows NT file system) that keeps track of volume changes. The [**UsnJrnl2Csv**](https://github.com/jschicht/UsnJrnl2Csv) tool allows for the examination of these changes.
 
-![](<../../images/image (801).png>)
+![TimeStomp - Anti-forensic Tool - Usnjrnl: The USN Journal (Update Sequence Number Journal) is a feature of the NTFS (Windows NT file system) that keeps track of volume changes. The...](<../../images/image (801).png>)
 
 The previous image is the **output** shown by the **tool** where it can be observed that some **changes were performed** to the file.
 
@@ -27,13 +27,13 @@ The previous image is the **output** shown by the **tool** where it can be obser
 
 **All metadata changes to a file system are logged** in a process known as [write-ahead logging](https://en.wikipedia.org/wiki/Write-ahead_logging). The logged metadata is kept in a file named `**$LogFile**`, located in the root directory of an NTFS file system. Tools such as [LogFileParser](https://github.com/jschicht/LogFileParser) can be used to parse this file and identify changes.
 
-![](<../../images/image (137).png>)
+![Usnjrnl - $LogFile: All metadata changes to a file system are logged in a process known as write-ahead logging. The logged metadata is kept in a file named $LogFile , located in the root...](<../../images/image (137).png>)
 
 Again, in the output of the tool it's possible to see that **some changes were performed**.
 
 Using the same tool it's possible to identify to **which time the timestamps were modified**:
 
-![](<../../images/image (1089).png>)
+![Usnjrnl - $LogFile: Using the same tool it's possible to identify to which time the timestamps were modified](<../../images/image (1089).png>)
 
 - CTIME: File's creation time
 - ATIME: File's modification time
@@ -58,7 +58,7 @@ NFTS uses a cluster and the minimum information size. That means that if a file 
 
 There are tools like slacker that allow hiding data in this "hidden" space. However, an analysis of the `$logfile` and `$usnjrnl` can show that some data was added:
 
-![](<../../images/image (1060).png>)
+![SetMace - Anti-forensic Tool - Data Hiding: There are tools like slacker that allow hiding data in this "hidden" space. However, an analysis of the $logfile and $usnjrnl can show that...](<../../images/image (1060).png>)
 
 Then, it's possible to retrieve the slack space using tools like FTK Imager. Note that this kind of tool can save the content obfuscated or even encrypted.
 

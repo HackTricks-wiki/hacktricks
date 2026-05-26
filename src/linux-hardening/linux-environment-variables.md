@@ -260,19 +260,19 @@ Change how your prompt looks.
 
 Root:
 
-![](<../images/image (897).png>)
+![PERL5OPT & PERL5LIB - PS1: This is an example](<../images/image (897).png>)
 
 Regular user:
 
-![](<../images/image (740).png>)
+![PERL5OPT & PERL5LIB - PS1: One, two and three backgrounded jobs](<../images/image (740).png>)
 
 One, two and three backgrounded jobs:
 
-![](<../images/image (145).png>)
+![PERL5OPT & PERL5LIB - PS1: One, two and three backgrounded jobs](<../images/image (145).png>)
 
 One background job, one stopped and last command didn't finish correctly:
 
-![](<../images/image (715).png>)
+![PERL5OPT & PERL5LIB - PS1: One background job, one stopped and last command didn't finish correctly](<../images/image (715).png>)
 
 ## References
 

@@ -68,7 +68,7 @@ This setup helps in two big ways:
 
 By doing things this way, the owner of a file or folder can be very precise about who gets access, making sure the right people can get in and the wrong ones can't.
 
-![](https://www.ntfs.com/images/screenshots/ACEs.gif)
+![NTFS access control entry ordering diagram](https://www.ntfs.com/images/screenshots/ACEs.gif)
 
 So, this **"canonical order"** is all about making sure the access rules are clear and work well, putting specific rules first and organizing everything in a smart way.
 

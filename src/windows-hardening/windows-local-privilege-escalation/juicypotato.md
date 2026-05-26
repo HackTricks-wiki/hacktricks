@@ -136,7 +136,7 @@ c:\Users\Public>
 
 ### Launch a new CMD (if you have RDP access)
 
-![](<../../images/image (300).png>)
+![Powershell rev - Launch a new CMD (if you have RDP access): Launch a new CMD (if you have RDP access)](<../../images/image (300).png>)
 
 ## CLSID Problems
 

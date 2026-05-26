@@ -13,13 +13,13 @@ It's allocated in the **first sector of the disk after the 446B of the boot code
 It allows up to **4 partitions** (at most **just 1** can be active/**bootable**). However, if you need more partitions you can use **extended partitions**. The **final byte** of this first sector is the boot record signature **0x55AA**. Only one partition can be marked as active.\
 MBR allows **max 2.2TB**.
 
-![](<../../../images/image (350).png>)
+![Partitions - MBR (master Boot Record): MBR allows max 2.2TB](<../../../images/image (350).png>)
 
-![](<../../../images/image (304).png>)
+![Partitions - MBR (master Boot Record): MBR allows max 2.2TB](<../../../images/image (304).png>)
 
 From the **bytes 440 to the 443** of the MBR you can find the **Windows Disk Signature** (if Windows is used). The logical drive letter of the hard disk depends on the Windows Disk Signature. Changing this signature could prevent Windows from booting (tool: [**Active Disk Editor**](https://www.disk-editor.org/index.html)**)**.
 
-![](<../../../images/image (310).png>)
+![Partitions - MBR (master Boot Record): From the bytes 440 to the 443 of the MBR you can find the Windows Disk Signature (if Windows is used). The logical drive letter of the hard disk...](<../../../images/image (310).png>)
 
 **Format**
 
@@ -49,7 +49,7 @@ From the **bytes 440 to the 443** of the MBR you can find the **Windows Disk Sig
 
 In order to mount an MBR in Linux you first need to get the start offset (you can use `fdisk` and the `p` command)
 
-![](<../../../images/image (413) (3) (3) (3) (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
+![Partitions - MBR (master Boot Record): In order to mount an MBR in Linux you first need to get the start offset (you can use fdisk and the p command)](<../../../images/image (413) (3) (3) (3) (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
 
 And then use the following code
 
@@ -127,7 +127,7 @@ The partition table header defines the usable blocks on the disk. It also define
 
 **Partitions Types**
 
-![](<../../../images/image (83).png>)
+![MBR (master Boot Record) - GPT (GUID Partition Table): 56 (0x38) | 72 bytes | Partition name (36 UTF-16LE code units)](<../../../images/image (83).png>)
 
 More partition types in [https://en.wikipedia.org/wiki/GUID_Partition_Table](https://en.wikipedia.org/wiki/GUID_Partition_Table)
 
@@ -135,7 +135,7 @@ More partition types in [https://en.wikipedia.org/wiki/GUID_Partition_Table](htt
 
 After mounting the forensics image with [**ArsenalImageMounter**](https://arsenalrecon.com/downloads/), you can inspect the first sector using the Windows tool [**Active Disk Editor**](https://www.disk-editor.org/index.html)**.** In the following image an **MBR** was detected on the **sector 0** and interpreted:
 
-![](<../../../images/image (354).png>)
+![GPT (GUID Partition Table) - Inspecting: After mounting the forensics image with ArsenalImageMounter , you can inspect the first sector using the Windows tool Active Disk Editor . In the...](<../../../images/image (354).png>)
 
 If it was a **GPT table instead of an MBR** it should appear the signature _EFI PART_ in the **sector 1** (which in the previous image is empty).
 

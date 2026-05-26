@@ -1885,7 +1885,7 @@ screen -ls <username>/ # Show another user' screen sessions
 ls /run/screen/ /var/run/screen/ 2>/dev/null
 ```
 
-![](<../../images/image (141).png>)
+![screen sessions hijacking - Socket locations (some systems expose one as symlink of the other): ls /run/screen/ /var/run/screen/ 2 /dev/null](<../../images/image (141).png>)
 
 **Attach to a session**
 
@@ -1907,7 +1907,7 @@ ps aux | grep tmux #Search for tmux consoles not using default folder for socket
 tmux -S /tmp/dev_sess ls #List using that socket, you can start a tmux session in that socket with: tmux -S /tmp/dev_sess
 ```
 
-![](<../../images/image (837).png>)
+![Socket locations (some systems expose one as symlink of the other) - tmux sessions hijacking: tmux -S /tmp/dev sess ls List using that socket, you can start a tmux session in that socket...](<../../images/image (837).png>)
 
 **Attach to a session**
 

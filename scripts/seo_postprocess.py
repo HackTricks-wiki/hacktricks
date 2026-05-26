@@ -38,6 +38,16 @@ SITE_DESCRIPTIONS = {
         "web, cloud, binary exploitation, and privilege escalation techniques."
     ),
 }
+SITE_ALTERNATE_NAMES = {
+    "HackTricks": ["HT", "HackTricks Wiki"],
+}
+SITE_SAME_AS = {
+    "HackTricks": [
+        "https://github.com/HackTricks-wiki/hacktricks",
+        "https://www.linkedin.com/company/hacktricks",
+        "https://twitter.com/hacktricks_live",
+    ],
+}
 LANGUAGE_LOCALES = {
     "af": "af_ZA",
     "de": "de_DE",
@@ -163,10 +173,6 @@ def homepage_description(site_name):
     return SITE_DESCRIPTIONS.get(site_name, f"{site_name}: practical cybersecurity guides and references.")
 
 
-def strip_index_suffix(path):
-    return re.sub(r"(?:^|/)index\.html$", "", path.as_posix())
-
-
 def is_homepage(rel_path):
     return rel_path.as_posix() == "index.html"
 
@@ -211,40 +217,62 @@ def humanize_slug(value):
 
 def breadcrumb_items(site_url, lang, rel_path):
     items = [{"name": "Home", "url": canonical_url(site_url, lang, Path("index.html"))}]
-    bare_path = strip_index_suffix(rel_path)
-    if not bare_path:
+    if is_homepage(rel_path):
         return items
 
-    parts = [part for part in bare_path.split("/") if part]
-    for idx in range(len(parts)):
-        crumb_rel = Path(*parts[: idx + 1], "index.html")
-        items.append({"name": humanize_slug(parts[idx]), "url": canonical_url(site_url, lang, crumb_rel)})
+    if rel_path.name == "index.html":
+        directory_parts = list(rel_path.parent.parts)
+        page_name = None
+    else:
+        directory_parts = [] if rel_path.parent == Path(".") else list(rel_path.parent.parts)
+        page_name = rel_path.name
+
+    for idx, part in enumerate(directory_parts):
+        crumb_rel = Path(*directory_parts[: idx + 1], "index.html")
+        items.append({"name": humanize_slug(part), "url": canonical_url(site_url, lang, crumb_rel)})
+
+    if page_name:
+        items.append({"name": humanize_slug(page_name), "url": canonical_url(site_url, lang, rel_path)})
+
     return items
 
 
-def build_structured_data(site_url, lang, rel_path, title, description, site_name, image_url, languages):
+def build_structured_data(site_url, lang, rel_path, title, description, site_name, image_url, languages, lastmod):
     current_url = canonical_url(site_url, lang, rel_path)
     site_root = site_url.rstrip("/")
-    website_url = canonical_url(site_url, "en", Path("index.html"))
-    data = [
-        {
-            "@context": "https://schema.org",
-            "@type": "Organization",
-            "@id": f"{site_root}/#organization",
-            "name": site_name,
-            "url": site_root,
-            "logo": {"@type": "ImageObject", "url": image_url},
-        },
-        {
-            "@context": "https://schema.org",
-            "@type": "WebSite",
-            "@id": f"{site_root}/#website",
-            "url": site_root,
-            "name": site_name,
-            "inLanguage": languages,
-            "publisher": {"@id": f"{site_root}/#organization"},
-        },
-        {
+    data = []
+
+    if is_homepage(rel_path):
+        data.extend(
+            [
+                {
+                    "@context": "https://schema.org",
+                    "@type": "Organization",
+                    "@id": f"{site_root}/#organization",
+                    "name": site_name,
+                    "alternateName": SITE_ALTERNATE_NAMES.get(site_name, []),
+                    "url": site_root,
+                    "description": homepage_description(site_name),
+                    "logo": {"@type": "ImageObject", "url": image_url},
+                    "sameAs": SITE_SAME_AS.get(site_name, []),
+                },
+                {
+                    "@context": "https://schema.org",
+                    "@type": "WebSite",
+                    "@id": f"{site_root}/#website",
+                    "url": site_root,
+                    "name": site_name,
+                    "alternateName": SITE_ALTERNATE_NAMES.get(site_name, []),
+                    "description": homepage_description(site_name),
+                    "inLanguage": languages,
+                    "publisher": {"@id": f"{site_root}/#organization"},
+                },
+            ]
+        )
+
+    data.extend(
+        [
+            {
             "@context": "https://schema.org",
             "@type": "WebPage",
             "@id": f"{current_url}#webpage",
@@ -252,11 +280,12 @@ def build_structured_data(site_url, lang, rel_path, title, description, site_nam
             "name": title,
             "description": description,
             "inLanguage": lang,
+            "dateModified": lastmod,
             "isPartOf": {"@id": f"{site_root}/#website"},
             "about": {"@id": f"{site_root}/#organization"},
             "primaryImageOfPage": {"@type": "ImageObject", "url": image_url},
-        },
-        {
+            },
+            {
             "@context": "https://schema.org",
             "@type": "BreadcrumbList",
             "itemListElement": [
@@ -268,24 +297,18 @@ def build_structured_data(site_url, lang, rel_path, title, description, site_nam
                 }
                 for index, item in enumerate(breadcrumb_items(site_url, lang, rel_path), start=1)
             ],
-        },
-    ]
-
-    if is_homepage(rel_path):
-        data[1]["potentialAction"] = {
-            "@type": "SearchAction",
-            "target": f"{website_url}?search={{search_term_string}}",
-            "query-input": "required name=search_term_string",
-        }
+            },
+        ]
+    )
 
     return data
 
 
-def build_seo_block(site_url, lang, rel_path, languages, default_lang, title, description, site_name):
+def build_seo_block(site_url, lang, rel_path, languages, default_lang, title, description, site_name, lastmod):
     current_url = canonical_url(site_url, lang, rel_path)
     image_url = social_image_url(site_url)
     structured_data = json.dumps(
-        build_structured_data(site_url, lang, rel_path, title, description, site_name, image_url, languages),
+        build_structured_data(site_url, lang, rel_path, title, description, site_name, image_url, languages, lastmod),
         ensure_ascii=False,
         separators=(",", ":"),
     )
@@ -335,13 +358,13 @@ def update_language_menu_links(document, rel_path, languages):
     return LANGUAGE_MENU_LINK_RE.sub(replace, document)
 
 
-def update_document(document, site_url, lang, rel_path, languages, default_lang, site_name):
+def update_document(document, site_url, lang, rel_path, languages, default_lang, site_name, lastmod):
     title_match = re.search(r"<title>(.*?)</title>", document, flags=re.I | re.S)
     page_title = clean_text(title_match.group(1)) if title_match else site_name
     fallback_description = f"{site_name}: {page_title}"
     description = homepage_description(site_name) if is_homepage(rel_path) else extract_description(document, fallback_description)
     seo_block = build_seo_block(
-        site_url, lang, rel_path, languages, default_lang, page_title, description, site_name
+        site_url, lang, rel_path, languages, default_lang, page_title, description, site_name, lastmod
     )
 
     document = re.sub(
@@ -457,6 +480,7 @@ def process_pages(args):
     for html_file in iter_html_files(book_dir):
         rel_path = html_file.relative_to(book_dir)
         content = html_file.read_text(encoding="utf-8")
+        lastmod = page_lastmod(book_dir, rel_path, html_file)
         updated = update_document(
             content,
             args.site_url,
@@ -465,6 +489,7 @@ def process_pages(args):
             languages,
             args.default_lang,
             args.site_name,
+            lastmod,
         )
         html_file.write_text(updated, encoding="utf-8")
 
