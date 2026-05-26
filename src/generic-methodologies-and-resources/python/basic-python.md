@@ -2,17 +2,17 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Python Basics
+## Βασικά Python
 
-### Useful information
+### Χρήσιμες πληροφορίες
 
-Όλα τα παραδείγματα παρακάτω υποθέτουν **Python 3** εκτός αν αναφέρεται ρητά διαφορετικά.\
-`range()` επιστρέφει ένα iterable αντικείμενο στην Python 3 (παρόμοιο με το `xrange()` στην Python 2).\
+Όλα τα παρακάτω παραδείγματα υποθέτουν **Python 3** εκτός αν σημειώνεται ρητά διαφορετικά.\
+Το `range()` επιστρέφει ένα iterable object στην Python 3 (παρόμοιο με το `xrange()` στην Python 2).\
 Η διαφορά μεταξύ ενός **tuple** και μιας **list** είναι ότι η **θέση** μιας τιμής σε ένα tuple συνήθως της δίνει νόημα, ενώ μια list είναι συνήθως απλώς μια ταξινομημένη ακολουθία τιμών.
 
-### Main operations
+### Κύριες λειτουργίες
 
-Για να υψώσετε έναν αριθμό χρησιμοποιείτε: `3**2` (όχι `3^2`)\
+Για να υψώσεις έναν αριθμό χρησιμοποιείς: `3**2` (όχι `3^2`)\
 `2/3 == 0.666666...` στην Python 3, ενώ το `2//3 == 0` εκτελεί ακέραια διαίρεση.\
 `i >= j`\
 `i <= j`\
@@ -77,7 +77,7 @@ for i in range(0, 100):
 for letter in "hola":
 # something with each letter
 ```
-### Bytes, hex and encodings
+### Bytes, hex και encodings
 
 Αυτό είναι πολύ συνηθισμένο σε exploit-dev, reversing και CTFs:
 ```python
@@ -94,14 +94,14 @@ b"admin".decode() == "admin"
 `t2 = (5, 6)`\
 `t3 = t1 + t2 == (1, '2', 'three', 5, 6)`\
 `(4,)` = singleton\
-`d = ()` άδειο tuple\
+`d = ()` κενό tuple\
 `d += (4,)` --> προσθήκη σε tuple\
 `# t1[1] = 'new value'` --> τα tuples είναι immutable\
 `list(t2) == [5, 6]` --> από tuple σε list
 
 ### List (array)
 
-`d = []` άδειο\
+`d = []` κενό\
 `a = [1, 2, 3]`\
 `b = [4, 5]`\
 `a + b == [1, 2, 3, 4, 5]`\
@@ -142,7 +142,7 @@ month_numbers.get('key', 0)  # default value if key does not exist
 
 ### Classes
 
-Η μέθοδος στο `__lt__` θα είναι αυτή που θα χρησιμοποιηθεί από τα `sort()` / `sorted()` για τη σύγκριση αντικειμένων.
+Η μέθοδος στο `__lt__` θα είναι αυτή που χρησιμοποιείται από τα `sort()` / `sorted()` για τη σύγκριση αντικειμένων.
 ```python
 import datetime
 
@@ -178,9 +178,9 @@ return self.id_num < other.id_num
 ```
 ### map, zip, filter, lambda, sorted and one-liners
 
-Στο **Python 3**, τα `map()` και `filter()` επιστρέφουν iterators, οπότε μετατρέψτε τα με `list()` αν θέλετε να εκτυπώσετε όλες τις τιμές μαζί.
+Στην **Python 3**, οι `map()` και `filter()` επιστρέφουν iterators, οπότε μετατρέψτε τες με `list()` αν θέλετε να εκτυπώσετε όλες τις τιμές μαζί.
 
-Το **Map** είναι σαν `[f(x) for x in iterable]`:
+Η **Map** είναι σαν `[f(x) for x in iterable]`:
 ```python
 list(map(tuple, [[1, 2, 3], [4, 5]]))
 # [(1, 2, 3), (4, 5)]
@@ -235,8 +235,8 @@ print("executing finally clause in any case")
 ```
 ### Assert()
 
-Αν η συνθήκη είναι false, το string θα εκτυπωθεί.\
-Να θυμάστε ότι τα `assert` statements μπορούν να απενεργοποιηθούν με `python -O`, οπότε μην τα χρησιμοποιείτε για access control ή input validation.
+Αν η συνθήκη είναι false, η συμβολοσειρά θα εκτυπωθεί.\
+Να θυμάστε ότι οι δηλώσεις `assert` μπορούν να απενεργοποιηθούν με `python -O`, οπότε μην τις χρησιμοποιείτε για access control ή input validation.
 ```python
 def avg(grades, weights):
 assert len(grades) != 0, 'no grades data'
@@ -244,7 +244,7 @@ assert len(grades) == len(weights), 'wrong number of grades'
 ```
 ### Generators, yield
 
-Ένα generator, αντί να επιστρέφει τα πάντα μονομιάς, **yields** τιμές μία προς μία. Αυτό είναι πολύ χρήσιμο για τεράστια wordlists, bruteforcers ή μεγάλες αποκρίσεις.
+Ένα generator, αντί να επιστρέφει τα πάντα μονομιάς, **yields** τιμές μία προς μία. Αυτό είναι πολύ χρήσιμο για τεράστιες wordlists, bruteforcers ή μεγάλες responses.
 ```python
 def my_gen(n):
 yield n
@@ -269,7 +269,7 @@ re.findall(r"\w+(la)", "hola caracola") == ['la', 'la']
 `\d` --> ψηφίο\
 `\s` --> χαρακτήρας κενού `[ \n\r\t\f]`\
 `\S` --> μη-κενού χαρακτήρας\
-`^` --> αρχίζει με\
+`^` --> ξεκινά με\
 `$` --> τελειώνει με\
 `+` --> ένα ή περισσότερα\
 `*` --> 0 ή περισσότερα\
@@ -304,19 +304,19 @@ list(permutations(['1', '2', '3']))
 list(permutations('123', 2))
 ```
 **συνδυασμοί**\
-`from itertools import combinations` --> όλες οι δυνατές συνδυασμοί χωρίς επανάληψη
+`from itertools import combinations` --> όλοι οι δυνατοί συνδυασμοί χωρίς επανάληψη
 ```python
 list(combinations('123', 2))
 # [('1', '2'), ('1', '3'), ('2', '3')]
 ```
-**combinations_with_replacement**\
+**combination_with_replacement**\
 `from itertools import combinations_with_replacement`
 ```python
 list(combinations_with_replacement('123', 2))
 # [('1', '1'), ('1', '2'), ('1', '3'), ('2', '2'), ('2', '3'), ('3', '3')]
 ```
 **batched**\
-`from itertools import batched` --> διαθέσιμο στο Python 3.12+, χρήσιμο για να χωρίζεις σε κομμάτια μεγάλες λίστες υποψηφίων bruteforce ή αρχεία IOC
+`from itertools import batched` --> διαθέσιμο σε Python 3.12+, χρήσιμο για να χωρίζεις σε κομμάτια μεγάλες λίστες υποψηφίων για bruteforce ή αρχεία IOC
 ```python
 list(batched(range(10), 4))
 # [(0, 1, 2, 3), (4, 5, 6, 7), (8, 9)]
@@ -345,7 +345,7 @@ return wrapper
 def decorated_func():
 print("Decorated func!")
 ```
-Αν το εκτελέσεις, θα δεις κάτι σαν το παρακάτω:
+Αν το εκτελέσεις, θα δεις κάτι σαν το ακόλουθο:
 ```text
 Let's call our decorated function
 Decorated func!
@@ -364,7 +364,7 @@ for name in files:
 if name.endswith((".py", ".env", ".bak")):
 print(root / name)
 ```
-**Εκτέλεση εντολών με ασφάλεια** (`shell=False` by default είναι συνήθως αυτό που θέλεις):
+**Εκτέλεση εντολών με ασφάλεια** (`shell=False` από προεπιλογή είναι συνήθως αυτό που θέλετε):
 ```python
 import subprocess
 
@@ -376,7 +376,7 @@ check=True,
 )
 print(cp.stdout)
 ```
-Αν **πρέπει** να δημιουργήσεις μια εντολή shell, κάνε πρώτα quote κάθε attacker-controlled token:
+Αν **πρέπει** να δημιουργήσεις μια shell command, κάνε πρώτα quote κάθε token που ελέγχεται από τον attacker:
 ```python
 import shlex
 cmd = f"grep -R {shlex.quote(user_controlled)} /var/www"
@@ -391,11 +391,11 @@ out = Path(tmp) / "loot.txt"
 out.write_text("secret\n")
 print(out.read_text())
 ```
-Για αυτοματοποίηση HTTP, δείτε [this other page about Python web requests](web-requests.md).
+Για αυτοματοποίηση HTTP, ελέγξτε [this other page about Python web requests](web-requests.md).
 
-### Παγίδες στην εξαγωγή αρχείων συμπίεσης (σημαντικό για tooling και file parsers)
+### Archive extraction gotchas (important for tooling and file parsers)
 
-Από την έκδοση **Python 3.14**, τα `tarfile.extract()` / `extractall()` χρησιμοποιούν από προεπιλογή το ασφαλέστερο φίλτρο `data`. Σε παλαιότερες εκδόσεις Python θα πρέπει να το ορίσετε ρητά όταν χειρίζεστε archives που ελέγχονται από attacker.
+Ξεκινώντας από την **Python 3.14**, τα `tarfile.extract()` / `extractall()` χρησιμοποιούν από προεπιλογή το πιο ασφαλές `data` filter. Σε παλαιότερες εκδόσεις της Python πρέπει να το ορίσετε ρητά όταν χειρίζεστε archives που ελέγχονται από attacker.
 ```python
 import tarfile
 import tempfile
@@ -404,9 +404,9 @@ with tempfile.TemporaryDirectory() as out:
 with tarfile.open("sample.tar.gz") as tf:
 tf.extractall(out, filter="data")
 ```
-Ακόμα και με `filter="data"`, εξάγετε μη αξιόπιστα αρχεία σε έναν καινούριο προσωρινό κατάλογο και επαληθεύστε τι γράφτηκε πριν μετακινήσετε αρχεία οπουδήποτε ενδιαφέρον.
+Ακόμα και με `filter="data"`, εξαγάγετε μη αξιόπιστα archives σε έναν νέο προσωρινό κατάλογο και επαληθεύστε τι γράφτηκε πριν μετακινήσετε αρχεία οπουδήποτε ενδιαφέρον.
 
-Το `zipfile.Path` είναι διαφορετικό: **δεν καθαρίζει τα ονόματα αρχείων** για εσάς, οπότε επαληθεύστε τα paths πριν εξαγάγετε ZIP members υπό έλεγχο επιτιθέμενου:
+Το `zipfile.Path` είναι διαφορετικό: **δεν καθαρίζει τα filenames** για εσάς, οπότε επαληθεύστε τα paths πριν εξαγάγετε attacker-controlled ZIP members:
 ```python
 import os
 import zipfile
@@ -419,12 +419,12 @@ if os.path.commonpath([base, final_path]) != base:
 raise ValueError(f"Path traversal inside ZIP: {info.filename}")
 zf.extract(info, base)
 ```
-### Επικίνδυνες primitives που πρέπει να θυμάσαι
+### Επικίνδυνα primitives που πρέπει να θυμάστε
 
 - `eval()` / `exec()` **δεν** είναι sandboxes.
-- `ast.literal_eval()` **δεν** εκτελεί Python code, αλλά μπορεί να γίνει κατάχρηση για memory / CPU denial of service με attacker-controlled input.
-- `pickle.loads()` **δεν είναι secure**; μην κάνεις ποτέ unpickle attacker-controlled bytes.
-- Για πιο προχωρημένα offensive tricks, δες [Bypass Python sandboxes](bypass-python-sandboxes/README.md), [Python internal read gadgets](python-internal-read-gadgets.md) και [Python deserializations](../../pentesting-web/deserialization/README.md).
+- Το `ast.literal_eval()` **δεν** εκτελεί Python code, αλλά μπορεί παρ’ όλα αυτά να abused για memory / CPU denial of service με attacker-controlled input.
+- Το `pickle.loads()` **δεν** είναι secure· ποτέ μην κάνετε unpickle attacker-controlled bytes.
+- Για πιο βαθιές offensive tricks, δείτε [Bypass Python sandboxes](bypass-python-sandboxes/README.md), [Python internal read gadgets](python-internal-read-gadgets.md) και [Python deserializations](../../pentesting-web/deserialization/README.md).
 
 ## References
 
