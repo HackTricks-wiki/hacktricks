@@ -12,8 +12,8 @@ Razlika između **tuple** i **list** je u tome što **pozicija** vrednosti u tup
 
 ### Main operations
 
-Za potenciranje broja koristi se: `3**2` (ne `3^2`)\
-`2/3 == 0.666666...` u Python 3, dok `2//3 == 0` izvršava celobrojno deljenje.\
+Za podizanje broja na stepen koristiš: `3**2` (ne `3^2`)\
+`2/3 == 0.666666...` u Python 3, dok `2//3 == 0` izvodi celobrojno deljenje.\
 `i >= j`\
 `i <= j`\
 `i == j`\
@@ -79,7 +79,7 @@ for letter in "hola":
 ```
 ### Bajtovi, heks i enkodiranja
 
-Ovo je veoma često u exploit-dev, reversing i CTFs:
+Ovo je vrlo često u exploit-dev, reversing i CTFs:
 ```python
 b"ABC".hex() == "414243"
 bytes.fromhex("414243") == b"ABC"
@@ -88,16 +88,16 @@ int.from_bytes(b"\x41\x42\x43", "big") == 0x414243
 "admin".encode() == b"admin"
 b"admin".decode() == "admin"
 ```
-### Tuples
+### Tuple
 
 `t1 = (1, '2', 'three')`\
 `t2 = (5, 6)`\
 `t3 = t1 + t2 == (1, '2', 'three', 5, 6)`\
 `(4,)` = singleton\
-`d = ()` prazna tuple\
-`d += (4,)` --> dodaj u tuple\
-`# t1[1] = 'new value'` --> tuples are immutable\
-`list(t2) == [5, 6]` --> iz tuple u listu
+`d = ()` prazan tuple\
+`d += (4,)` --> dodavanje u tuple\
+`# t1[1] = 'new value'` --> tuple su immutable\
+`list(t2) == [5, 6]` --> iz tuple u list
 
 ### List (array)
 
@@ -123,26 +123,26 @@ month_numbers.get('key', 0)  # default value if key does not exist
 ```
 ### Set
 
-U setovima nema ponavljanja.\
+U set-ovima nema ponavljanja.\
 `myset = set(['a', 'b']) == {'a', 'b'}`\
 `myset.add('c')` --> `{'a', 'b', 'c'}`\
-`myset.add('a')` --> no change\
+`myset.add('a')` --> bez promene\
 `myset.update([1, 2, 3])`\
-`myset.discard(10)` --> ako postoji, ukloni ga; ako ne postoji, ništa\
-`myset.remove(10)` --> ako ne postoji, baca exception\
+`myset.discard(10)` --> ako je prisutan, ukloni ga; ako nije, ništa\
+`myset.remove(10)` --> ako nije prisutan, baca izuzetak\
 `myset2 = set([1, 2, 3, 4])`\
 `myset.union(myset2)`\
 `myset.intersection(myset2)`\
 `myset.difference(myset2)`\
 `myset.symmetric_difference(myset2)`\
-`myset.pop()` --> uzmi proizvoljan element i ukloni ga\
+`myset.pop()` --> uzima proizvoljan element i uklanja ga\
 `myset.intersection_update(myset2)`\
 `myset.difference_update(myset2)`\
 `myset.symmetric_difference_update(myset2)`
 
 ### Classes
 
-Metod u `__lt__` će biti onaj koji `sort()` / `sorted()` koristi za poređenje objekata.
+Metod u `__lt__` će biti onaj koji `sort()` / `sorted()` koriste za poređenje objekata.
 ```python
 import datetime
 
@@ -178,7 +178,7 @@ return self.id_num < other.id_num
 ```
 ### map, zip, filter, lambda, sorted and one-liners
 
-U **Python 3**, `map()` i `filter()` vraćaju iteratore, pa ih konvertujte pomoću `list()` ako želite da ispišete sve vrednosti odjednom.
+U **Python 3**, `map()` i `filter()` vraćaju iteratore, pa ih konvertujte pomoću `list()` ako želite da odjednom ispišete sve vrednosti.
 
 **Map** je kao `[f(x) for x in iterable]`:
 ```python
@@ -188,7 +188,7 @@ list(map(tuple, [[1, 2, 3], [4, 5]]))
 list(map(lambda x: x % 3 == 0, [1, 2, 3, 4, 5, 6, 7, 8, 9]))
 # [False, False, True, False, False, True, False, False, True]
 ```
-**zip** staje kada se kraći iterable završi:
+**zip** se zaustavlja kada se kraći iterable zaustavi:
 ```python
 for f, b in zip(foo, bar):
 print(f, b)
@@ -235,8 +235,8 @@ print("executing finally clause in any case")
 ```
 ### Assert()
 
-Ako je uslov false, string će biti ispisan.\
-Zapamti da se `assert` naredbe mogu onemogućiti pomoću `python -O`, zato ih nemoj koristiti za kontrolu pristupa ili validaciju ulaza.
+Ako je uslov netačan, string će biti ispisan.\
+Zapamti da se `assert` iskazi mogu onemogućiti sa `python -O`, pa ih nemoj koristiti za kontrolu pristupa ili validaciju ulaza.
 ```python
 def avg(grades, weights):
 assert len(grades) != 0, 'no grades data'
@@ -244,7 +244,7 @@ assert len(grades) == len(weights), 'wrong number of grades'
 ```
 ### Generatori, yield
 
-Generator, umesto da vraća sve odjednom, **izbacuje** vrednosti jednu po jednu. Ovo je veoma korisno za ogromne wordlists, bruteforcers ili velike odgovore.
+Generator, umesto da vrati sve odjednom, **izbacuje** vrednosti jednu po jednu. Ovo je veoma korisno za ogromne wordliste, bruteforcers ili velike odgovore.
 ```python
 def my_gen(n):
 yield n
@@ -268,7 +268,7 @@ re.findall(r"\w+(la)", "hola caracola") == ['la', 'la']
 `\w` --> `[a-zA-Z0-9_]`\
 `\d` --> cifra\
 `\s` --> whitespace znak `[ \n\r\t\f]`\
-`\S` --> znak koji nije whitespace\
+`\S` --> ne-whitespace znak\
 `^` --> počinje sa\
 `$` --> završava se sa\
 `+` --> jedan ili više\
@@ -277,8 +277,8 @@ re.findall(r"\w+(la)", "hola caracola") == ['la', 'la']
 
 **Opcije:**\
 `re.search(pat, string, re.IGNORECASE)`\
-`re.search(pat, string, re.DOTALL)` --> dozvoli da `.` match-uje novi red\
-`re.search(pat, string, re.MULTILINE)` --> dozvoli da `^` i `$` match-uju u različitim linijama
+`re.search(pat, string, re.DOTALL)` --> dozvoli da tačka odgovara novom redu\
+`re.search(pat, string, re.MULTILINE)` --> dozvoli `^` i `$` da odgovaraju u različitim linijama
 ```python
 re.findall(r"<.*>", "<b>foo</b>and<i>so on</i>")
 # ['<b>foo</b>and<i>so on</i>']
@@ -289,7 +289,7 @@ re.findall(r"<.*?>", "<b>foo</b>and<i>so on</i>")
 ### IterTools
 
 **product**\
-`from itertools import product` --> kartezijanski proizvod između 1 ili više iterable objekata
+`from itertools import product` --> kartezijanski proizvod između 1 ili više iterables
 ```python
 list(product([1, 2, 3], [3, 4]))
 # [(1, 3), (1, 4), (2, 3), (2, 4), (3, 3), (3, 4)]
@@ -298,7 +298,7 @@ list(product([1, 2, 3], repeat=2))
 # [(1, 1), (1, 2), (1, 3), (2, 1), (2, 2), (2, 3), (3, 1), (3, 2), (3, 3)]
 ```
 **permutations**\
-`from itertools import permutations` --> svaka moguća raspodela
+`from itertools import permutations` --> svaka moguća rasporedba
 ```python
 list(permutations(['1', '2', '3']))
 list(permutations('123', 2))
@@ -316,14 +316,14 @@ list(combinations_with_replacement('123', 2))
 # [('1', '1'), ('1', '2'), ('1', '3'), ('2', '2'), ('2', '3'), ('3', '3')]
 ```
 **batched**\
-`from itertools import batched` --> dostupan u Python 3.12+, koristan za deljenje velikih bruteforce lista kandidata ili IOC fajlova u manje delove
+`from itertools import batched` --> dostupan u Python 3.12+, koristan za deljenje velikih lista kandidata za bruteforce ili IOC fajlova u manje delove
 ```python
 list(batched(range(10), 4))
 # [(0, 1, 2, 3), (4, 5, 6, 7), (8, 9)]
 ```
 ### Decorators
 
-Decorator koji meri vreme potrebno da se funkcija izvrši:
+Decorator koji meri vreme koje je potrebno da se funkcija izvrši:
 ```python
 from functools import wraps
 import time
@@ -345,15 +345,15 @@ return wrapper
 def decorated_func():
 print("Decorated func!")
 ```
-Ako ga pokreneš, videćeš nešto poput sledećeg:
+Ako ga pokrenete, videćete nešto poput sledećeg:
 ```text
 Let's call our decorated function
 Decorated func!
 Execution time: 4.79e-05 seconds
 ```
-### Korisni helperi standardne biblioteke za pentesting
+### Korisni standardni library helperi za pentesting
 
-**Traversiranje filesystem-a sa `pathlib`** (`Path.walk()` je dostupan u Python 3.12+; koristite `os.walk()` na starijim interpreterima):
+**Traversiranje filesystema sa `pathlib`** (`Path.walk()` je dostupan u Python 3.12+; koristite `os.walk()` na starijim interpreterima):
 ```python
 from pathlib import Path
 
@@ -364,7 +364,7 @@ for name in files:
 if name.endswith((".py", ".env", ".bak")):
 print(root / name)
 ```
-**Bezbedno pokretanje komandi** (`shell=False` je podrazumevano i to je obično ono što želite):
+**Sigurno pokretanje komandi** (`shell=False` je po difoltu obično ono što želite):
 ```python
 import subprocess
 
@@ -376,12 +376,12 @@ check=True,
 )
 print(cp.stdout)
 ```
-Ako **morate** da napravite shell komandu, prvo stavite pod navodnike svaki token kojim upravlja napadač:
+Ako **morate** da napravite shell komandu, prvo navodite svaku token koju kontroliše napadač:
 ```python
 import shlex
 cmd = f"grep -R {shlex.quote(user_controlled)} /var/www"
 ```
-**Privremeni fajlovi / direktorijumi** (bezbednije od hardcodovanih `/tmp/foo` putanja):
+**Privremene datoteke / direktorijumi** (bezbednije od hardcodovanih `/tmp/foo` path-ova):
 ```python
 import tempfile
 from pathlib import Path
@@ -404,9 +404,9 @@ with tempfile.TemporaryDirectory() as out:
 with tarfile.open("sample.tar.gz") as tf:
 tf.extractall(out, filter="data")
 ```
-Čak i sa `filter="data"`, izdvajaj nepouzdane arhive u novi privremeni direktorijum i proveri šta je upisano pre nego što premestiš fajlove bilo gde značajno.
+Čak i sa `filter="data"`, izdvajajte nepouzdane arhive u svež privremeni direktorijum i proverite šta je upisano pre nego što premestite fajlove bilo gde interesantno.
 
-`zipfile.Path` je drugačiji: on **ne sanitizuje imena fajlova** umesto tebe, zato validiraj putanje pre nego što izdvojiš ZIP članove pod napadčevom kontrolom:
+`zipfile.Path` je drugačiji: on **ne sanitizuje nazive fajlova** umesto vas, zato validirajte putanje pre nego što izdvojite ZIP članove pod kontrolom napadača:
 ```python
 import os
 import zipfile
@@ -421,10 +421,10 @@ zf.extract(info, base)
 ```
 ### Opasne primitive koje treba zapamtiti
 
-- `eval()` / `exec()` **nisu** sandboxes.
-- `ast.literal_eval()` **ne** izvršava Python kod, ali se i dalje može zloupotrebiti za denial of service nad memorijom / CPU-om uz input pod kontrolom napadača.
-- `pickle.loads()` **nije bezbedan**; nikada nemojte unpickle-ovati bytes pod kontrolom napadača.
-- Za dublje offensive trikove, proverite [Bypass Python sandboxes](bypass-python-sandboxes/README.md), [Python internal read gadgets](python-internal-read-gadgets.md) i [Python deserializations](../../pentesting-web/deserialization/README.md).
+- `eval()` / `exec()` **nisu** sandboxovi.
+- `ast.literal_eval()` **ne** izvršava Python kod, ali i dalje može biti zloupotrebljen za denial of service nad memorijom / CPU-om uz input kojim upravlja napadač.
+- `pickle.loads()` **nije bezbedan**; nikad ne unpickle-uj bytes kojima upravlja napadač.
+- Za dublje ofanzivne trikove, pogledaj [Bypass Python sandboxes](bypass-python-sandboxes/README.md), [Python internal read gadgets](python-internal-read-gadgets.md) i [Python deserializations](../../pentesting-web/deserialization/README.md).
 
 ## References
 
