@@ -7,12 +7,12 @@
 ### Useful information
 
 Wszystkie poniższe przykłady zakładają **Python 3**, chyba że wyraźnie zaznaczono inaczej.\
-`range()` zwraca obiekt iterowalny w Python 3 (podobnie jak `xrange()` w Python 2).\
-Różnica między **tuple** a **list** polega na tym, że **pozycja** wartości w tuple zwykle nadaje jej znaczenie, podczas gdy list jest zazwyczaj po prostu uporządkowaną sekwencją wartości.
+`range()` zwraca obiekt iterowalny w Python 3 (podobny do `xrange()` w Python 2).\
+Różnica między **tuple** a **list** polega na tym, że **pozycja** wartości w tuple zwykle nadaje jej znaczenie, podczas gdy lista jest zwykle po prostu uporządkowaną sekwencją wartości.
 
 ### Main operations
 
-Aby podnieść liczbę do potęgi, używasz: `3**2` (nie `3^2`)\
+Aby podnieść liczbę do potęgi, używa się: `3**2` (nie `3^2`)\
 `2/3 == 0.666666...` w Python 3, podczas gdy `2//3 == 0` wykonuje dzielenie całkowite.\
 `i >= j`\
 `i <= j`\
@@ -94,19 +94,19 @@ b"admin".decode() == "admin"
 `t2 = (5, 6)`\
 `t3 = t1 + t2 == (1, '2', 'three', 5, 6)`\
 `(4,)` = singleton\
-`d = ()` pusta krotka\
-`d += (4,)` --> dodaj do krotki\
-`# t1[1] = 'new value'` --> krotki są niemodyfikowalne\
-`list(t2) == [5, 6]` --> z krotki do listy
+`d = ()` pusty tuple\
+`d += (4,)` --> dodaj do tuple\
+`# t1[1] = 'new value'` --> tuples są niemutowalne\
+`list(t2) == [5, 6]` --> z tuple do list
 
 ### List (array)
 
-`d = []` pusta\
+`d = []` pusty\
 `a = [1, 2, 3]`\
 `b = [4, 5]`\
 `a + b == [1, 2, 3, 4, 5]`\
 `b.append(6)` --> `b == [4, 5, 6]`\
-`tuple(a) == (1, 2, 3)` --> z listy do krotki
+`tuple(a) == (1, 2, 3)` --> z list do tuple
 
 ### Dictionary
 ```python
@@ -128,14 +128,14 @@ W setach nie ma powtórzeń.\
 `myset.add('c')` --> `{'a', 'b', 'c'}`\
 `myset.add('a')` --> brak zmian\
 `myset.update([1, 2, 3])`\
-`myset.discard(10)` --> jeśli obecny, usuń go; jeśli nie, nic\
-`myset.remove(10)` --> jeśli nieobecny, zgłasza wyjątek\
+`myset.discard(10)` --> jeśli obecny, usuwa go; jeśli nie, nic\
+`myset.remove(10)` --> jeśli nie jest obecny, zgłasza wyjątek\
 `myset2 = set([1, 2, 3, 4])`\
 `myset.union(myset2)`\
 `myset.intersection(myset2)`\
 `myset.difference(myset2)`\
 `myset.symmetric_difference(myset2)`\
-`myset.pop()` --> pobierz losowy element i usuń go\
+`myset.pop()` --> pobiera dowolny element i usuwa go\
 `myset.intersection_update(myset2)`\
 `myset.difference_update(myset2)`\
 `myset.symmetric_difference_update(myset2)`
@@ -188,7 +188,7 @@ list(map(tuple, [[1, 2, 3], [4, 5]]))
 list(map(lambda x: x % 3 == 0, [1, 2, 3, 4, 5, 6, 7, 8, 9]))
 # [False, False, True, False, False, True, False, False, True]
 ```
-**zip** zatrzymuje się, gdy krótszy iterable się kończy:
+**zip** zatrzymuje się, gdy kończy się krótsza iterowalna:
 ```python
 for f, b in zip(foo, bar):
 print(f, b)
@@ -235,14 +235,14 @@ print("executing finally clause in any case")
 ```
 ### Assert()
 
-Jeśli warunek jest fałszywy, zostanie wypisany string.\
-Pamiętaj, że instrukcje `assert` mogą zostać wyłączone przez `python -O`, więc nie używaj ich do kontroli dostępu ani walidacji danych wejściowych.
+Jeśli warunek jest fałszywy, zostanie wypisany ciąg.\
+Pamiętaj, że instrukcje `assert` mogą zostać wyłączone za pomocą `python -O`, więc nie używaj ich do kontroli dostępu ani walidacji danych wejściowych.
 ```python
 def avg(grades, weights):
 assert len(grades) != 0, 'no grades data'
 assert len(grades) == len(weights), 'wrong number of grades'
 ```
-### Generatory, yield
+### Generators, yield
 
 Generator, zamiast zwracać wszystko naraz, **yielduje** wartości jedna po drugiej. Jest to bardzo przydatne dla ogromnych wordlist, bruteforcerów lub dużych odpowiedzi.
 ```python
@@ -267,8 +267,8 @@ re.findall(r"\w+(la)", "hola caracola") == ['la', 'la']
 `.` --> dowolny znak z wyjątkiem nowej linii\
 `\w` --> `[a-zA-Z0-9_]`\
 `\d` --> cyfra\
-`\s` --> znak białej spacji `[ \n\r\t\f]`\
-`\S` --> znak niebędący białą spacją\
+`\s` --> znak białego odstępu `[ \n\r\t\f]`\
+`\S` --> znak niebędący białym odstępem\
 `^` --> zaczyna się od\
 `$` --> kończy się na\
 `+` --> jeden lub więcej\
@@ -277,8 +277,8 @@ re.findall(r"\w+(la)", "hola caracola") == ['la', 'la']
 
 **Opcje:**\
 `re.search(pat, string, re.IGNORECASE)`\
-`re.search(pat, string, re.DOTALL)` --> pozwala `.` dopasowywać nową linię\
-`re.search(pat, string, re.MULTILINE)` --> pozwala `^` i `$` dopasowywać w różnych liniach
+`re.search(pat, string, re.DOTALL)` --> pozwala, by kropka dopasowywała nową linię\
+`re.search(pat, string, re.MULTILINE)` --> pozwala `^` i `$` dopasowywać się w różnych liniach
 ```python
 re.findall(r"<.*>", "<b>foo</b>and<i>so on</i>")
 # ['<b>foo</b>and<i>so on</i>']
@@ -289,7 +289,7 @@ re.findall(r"<.*?>", "<b>foo</b>and<i>so on</i>")
 ### IterTools
 
 **product**\
-`from itertools import product` --> iloczyn kartezjański między 1 lub więcej iterowalnymi obiektami
+`from itertools import product` --> iloczyn kartezjański między 1 lub więcej iterowalnymi
 ```python
 list(product([1, 2, 3], [3, 4]))
 # [(1, 3), (1, 4), (2, 3), (2, 4), (3, 3), (3, 4)]
@@ -297,8 +297,8 @@ list(product([1, 2, 3], [3, 4]))
 list(product([1, 2, 3], repeat=2))
 # [(1, 1), (1, 2), (1, 3), (2, 1), (2, 2), (2, 3), (3, 1), (3, 2), (3, 3)]
 ```
-**permutations**\
-`from itertools import permutations` --> wszystkie możliwe układy
+**permutacje**\
+`from itertools import permutations` --> każda możliwa kombinacja układu
 ```python
 list(permutations(['1', '2', '3']))
 list(permutations('123', 2))
@@ -323,7 +323,7 @@ list(batched(range(10), 4))
 ```
 ### Dekoratory
 
-Dekorator, który mierzy czas potrzebny do wykonania funkcji:
+Dekorator, który mierzy czas potrzebny na wykonanie funkcji:
 ```python
 from functools import wraps
 import time
@@ -345,15 +345,15 @@ return wrapper
 def decorated_func():
 print("Decorated func!")
 ```
-Jeśli uruchomisz to, zobaczysz coś takiego:
+Jeśli uruchomisz to, zobaczysz coś podobnego do poniższego:
 ```text
 Let's call our decorated function
 Decorated func!
 Execution time: 4.79e-05 seconds
 ```
-### Przydatne standardowe helpery biblioteki dla pentesting
+### Przydatne standardowe helpery biblioteki do pentesting
 
-**Traversowanie systemu plików z `pathlib`** (`Path.walk()` jest dostępne w Python 3.12+; użyj `os.walk()` na starszych interpreterach):
+**Przechodzenie po systemie plików z `pathlib`** (`Path.walk()` jest dostępne w Python 3.12+; użyj `os.walk()` na starszych interpreterach):
 ```python
 from pathlib import Path
 
@@ -381,7 +381,7 @@ Jeśli **musisz** zbudować polecenie shell, najpierw cytuj każdy token kontrol
 import shlex
 cmd = f"grep -R {shlex.quote(user_controlled)} /var/www"
 ```
-**Tymczasowe pliki / katalogi** (bezpieczniejsze niż zakodowane na sztywno ścieżki `/tmp/foo`):
+**Pliki / katalogi tymczasowe** (bezpieczniejsze niż hardkodowane ścieżki `/tmp/foo`):
 ```python
 import tempfile
 from pathlib import Path
@@ -391,11 +391,11 @@ out = Path(tmp) / "loot.txt"
 out.write_text("secret\n")
 print(out.read_text())
 ```
-Dla automatyzacji HTTP sprawdź [tę inną stronę o żądaniach web w Pythonie](web-requests.md).
+Do automatyzacji HTTP sprawdź [tę inną stronę o Python web requests](web-requests.md).
 
-### Pułapki związane z ekstrakcją archiwów (ważne dla narzędzi i parserów plików)
+### Pułapki ekstrakcji archiwów (ważne dla tooling i parserów plików)
 
-Od **Python 3.14**, `tarfile.extract()` / `extractall()` domyślnie używają bezpieczniejszego filtra `data`. W starszych wersjach Pythona powinieneś ustawić go jawnie podczas obsługi archiwów kontrolowanych przez atakującego.
+Począwszy od **Python 3.14**, `tarfile.extract()` / `extractall()` domyślnie używają bezpieczniejszego filtra `data`. W starszych wersjach Pythona powinieneś ustawić go jawnie podczas obsługi archiwów kontrolowanych przez atakującego.
 ```python
 import tarfile
 import tempfile
@@ -404,9 +404,9 @@ with tempfile.TemporaryDirectory() as out:
 with tarfile.open("sample.tar.gz") as tf:
 tf.extractall(out, filter="data")
 ```
-Nawet z `filter="data"` rozpakowuj niezaufane archiwa do świeżego tymczasowego katalogu i sprawdzaj, co zostało zapisane, zanim przeniesiesz pliki gdziekolwiek istotne.
+Nawet przy `filter="data"` rozpakowuj niezaufane archiwa do świeżego katalogu tymczasowego i sprawdzaj, co zostało zapisane, zanim przeniesiesz pliki gdziekolwiek istotnego.
 
-`zipfile.Path` jest inne: ono **nie sanitizuje nazw plików** za ciebie, więc sprawdzaj ścieżki przed rozpakowaniem elementów ZIP kontrolowanych przez atakującego:
+`zipfile.Path` jest inne: ono **nie sanitizuje nazw plików** za Ciebie, więc sprawdzaj ścieżki przed rozpakowaniem elementów ZIP kontrolowanych przez atakującego:
 ```python
 import os
 import zipfile
@@ -419,12 +419,12 @@ if os.path.commonpath([base, final_path]) != base:
 raise ValueError(f"Path traversal inside ZIP: {info.filename}")
 zf.extract(info, base)
 ```
-### Niebezpieczne prymitywy, o których trzeba pamiętać
+### Niebezpieczne prymitywy, o których warto pamiętać
 
-- `eval()` / `exec()` **nie** są sandboxami.
-- `ast.literal_eval()` **nie** wykonuje kodu Python, ale nadal może być nadużyte do ataku denial of service na pamięć / CPU przy danych kontrolowanych przez atakującego.
-- `pickle.loads()` **nie jest bezpieczne**; nigdy nie deserializuj bytes kontrolowanych przez atakującego.
-- Po głębsze ofensywne triki sprawdź [Bypass Python sandboxes](bypass-python-sandboxes/README.md), [Python internal read gadgets](python-internal-read-gadgets.md) oraz [Python deserializations](../../pentesting-web/deserialization/README.md).
+- `eval()` / `exec()` **nie są** sandboxami.
+- `ast.literal_eval()` **nie wykonuje** kodu Python, ale nadal może być nadużyte do ataku typu memory / CPU denial of service przy wejściu kontrolowanym przez atakującego.
+- `pickle.loads()` **nie jest bezpieczne**; nigdy nie odpakowuj bytes kontrolowanych przez atakującego.
+- Aby poznać głębsze ofensywne triki, sprawdź [Bypass Python sandboxes](bypass-python-sandboxes/README.md), [Python internal read gadgets](python-internal-read-gadgets.md) i [Python deserializations](../../pentesting-web/deserialization/README.md).
 
 ## References
 
