@@ -4,16 +4,16 @@
 
 ## Python Basics
 
-### Useful information
+### 有用信息
 
-下面的所有示例都假设使用 **Python 3**，除非另有说明。\
-`range()` 在 Python 3 中返回一个 iterable object（类似于 Python 2 中的 `xrange()`）。\
-**tuple** 和 **list** 的区别在于，tuple 中一个值的 **position** 通常赋予它含义，而 list 通常只是一个有序的值序列。
+下面所有示例都假设使用 **Python 3**，除非另有说明。\
+`range()` 在 Python 3 中返回一个可迭代对象（类似于 Python 2 中的 `xrange()`）。\
+**tuple** 和 **list** 的区别在于，tuple 中值的**位置**通常赋予其含义，而 list 通常只是一组有序的值序列。
 
-### Main operations
+### 主要操作
 
 要进行幂运算，使用：`3**2`（不是 `3^2`）\
-在 Python 3 中，`2/3 == 0.666666...`，而 `2//3 == 0` 表示整数除法。\
+在 Python 3 中，`2/3 == 0.666666...`，而 `2//3 == 0` 执行整数除法。\
 `i >= j`\
 `i <= j`\
 `i == j`\
@@ -94,14 +94,14 @@ b"admin".decode() == "admin"
 `t2 = (5, 6)`\
 `t3 = t1 + t2 == (1, '2', 'three', 5, 6)`\
 `(4,)` = singleton\
-`d = ()` 空元组\
+`d = ()` empty tuple\
 `d += (4,)` --> add into a tuple\
 `# t1[1] = 'new value'` --> tuples are immutable\
 `list(t2) == [5, 6]` --> from tuple to list
 
 ### List (array)
 
-`d = []` 空\
+`d = []` empty\
 `a = [1, 2, 3]`\
 `b = [4, 5]`\
 `a + b == [1, 2, 3, 4, 5]`\
@@ -126,23 +126,23 @@ month_numbers.get('key', 0)  # default value if key does not exist
 在 sets 中没有重复项。\
 `myset = set(['a', 'b']) == {'a', 'b'}`\
 `myset.add('c')` --> `{'a', 'b', 'c'}`\
-`myset.add('a')` --> no change\
+`myset.add('a')` --> 无变化\
 `myset.update([1, 2, 3])`\
-`myset.discard(10)` --> 如果存在则移除；如果不存在，则什么都不做\
-`myset.remove(10)` --> 如果不存在，则抛出 exception\
+`myset.discard(10)` --> 如果存在，就移除它；如果不存在，什么都不做\
+`myset.remove(10)` --> 如果不存在，抛出异常\
 `myset2 = set([1, 2, 3, 4])`\
 `myset.union(myset2)`\
 `myset.intersection(myset2)`\
 `myset.difference(myset2)`\
 `myset.symmetric_difference(myset2)`\
-`myset.pop()` --> 获取一个任意元素并将其移除\
+`myset.pop()` --> 获取一个任意元素并移除它\
 `myset.intersection_update(myset2)`\
 `myset.difference_update(myset2)`\
 `myset.symmetric_difference_update(myset2)`
 
 ### Classes
 
-`__lt__` 中的方法将会被 `sort()` / `sorted()` 用来比较 objects。
+`__lt__` 中的方法将被 `sort()` / `sorted()` 用来比较 objects。
 ```python
 import datetime
 
@@ -178,7 +178,7 @@ return self.id_num < other.id_num
 ```
 ### map, zip, filter, lambda, sorted and one-liners
 
-在 **Python 3** 中，`map()` 和 `filter()` 会返回迭代器，所以如果你想一次性打印所有值，请用 `list()` 转换它们。
+在 **Python 3** 中，`map()` 和 `filter()` 会返回迭代器，所以如果你想一次性打印所有值，可以用 `list()` 转换它们。
 
 **Map** 类似于 `[f(x) for x in iterable]`:
 ```python
@@ -235,7 +235,7 @@ print("executing finally clause in any case")
 ```
 ### Assert()
 
-如果条件为 false，字符串将被打印。\
+如果条件为 false，这个字符串会被打印。\
 请记住，`assert` 语句可以通过 `python -O` 禁用，因此不要将它们用于访问控制或输入验证。
 ```python
 def avg(grades, weights):
@@ -244,7 +244,7 @@ assert len(grades) == len(weights), 'wrong number of grades'
 ```
 ### 生成器, yield
 
-生成器不会一次性返回所有内容，而是逐个 **yield** 值。这对于巨大的 wordlists、bruteforcers 或大型响应非常有用。
+生成器不会一次性返回所有内容，而是逐个 **yield** 值。这对于大型 wordlists、bruteforcers 或大型响应非常有用。
 ```python
 def my_gen(n):
 yield n
@@ -264,7 +264,7 @@ re.findall(r"\w", "hola") == ['h', 'o', 'l', 'a']
 re.findall(r"\w+(la)", "hola caracola") == ['la', 'la']
 ```
 **特殊含义：**\
-`.` --> 除换行外的任何字符\
+`.` --> 任意字符，除了换行\
 `\w` --> `[a-zA-Z0-9_]`\
 `\d` --> 数字\
 `\s` --> 空白字符 `[ \n\r\t\f]`\
@@ -272,8 +272,8 @@ re.findall(r"\w+(la)", "hola caracola") == ['la', 'la']
 `^` --> 以...开头\
 `$` --> 以...结尾\
 `+` --> 一个或多个\
-`*` --> 0个或多个\
-`?` --> 0个或1个出现
+`*` --> 0 个或多个\
+`?` --> 0 次或 1 次出现
 
 **选项：**\
 `re.search(pat, string, re.IGNORECASE)`\
@@ -289,7 +289,7 @@ re.findall(r"<.*?>", "<b>foo</b>and<i>so on</i>")
 ### IterTools
 
 **product**\
-`from itertools import product` --> 1 个或多个可迭代对象之间的笛卡尔积
+`from itertools import product` --> 1 个或多个 iterables 之间的 cartesian product
 ```python
 list(product([1, 2, 3], [3, 4]))
 # [(1, 3), (1, 4), (2, 3), (2, 4), (3, 3), (3, 4)]
@@ -297,8 +297,8 @@ list(product([1, 2, 3], [3, 4]))
 list(product([1, 2, 3], repeat=2))
 # [(1, 1), (1, 2), (1, 3), (2, 1), (2, 2), (2, 3), (3, 1), (3, 2), (3, 3)]
 ```
-**permutations**\
-`from itertools import permutations` --> 所有可能的排列
+**排列**\
+`from itertools import permutations` --> 每一种可能的排列
 ```python
 list(permutations(['1', '2', '3']))
 list(permutations('123', 2))
@@ -316,7 +316,7 @@ list(combinations_with_replacement('123', 2))
 # [('1', '1'), ('1', '2'), ('1', '3'), ('2', '2'), ('2', '3'), ('3', '3')]
 ```
 **batched**\
-`from itertools import batched` --> 在 Python 3.12+ 中可用，适合将大的 bruteforce 候选列表或 IOC 文件分块处理
+`from itertools import batched` --> 在 Python 3.12+ 中可用，适合将大型 bruteforce 候选列表或 IOC 文件分块处理
 ```python
 list(batched(range(10), 4))
 # [(0, 1, 2, 3), (4, 5, 6, 7), (8, 9)]
@@ -345,15 +345,15 @@ return wrapper
 def decorated_func():
 print("Decorated func!")
 ```
-如果你运行它，你会看到类似下面的内容：
+如果你运行它，你会看到类似下面这样的内容：
 ```text
 Let's call our decorated function
 Decorated func!
 Execution time: 4.79e-05 seconds
 ```
-### 用于 pentesting 的实用标准库 helper
+### 用于 pentesting 的有用标准库辅助函数
 
-**使用 `pathlib` 进行 filesystem traversal**（`Path.walk()` 在 Python 3.12+ 中可用；在较旧的解释器上使用 `os.walk()`）：
+**使用 `pathlib` 进行文件系统遍历**（`Path.walk()` 在 Python 3.12+ 中可用；在较旧的解释器上使用 `os.walk()`）：
 ```python
 from pathlib import Path
 
@@ -364,7 +364,7 @@ for name in files:
 if name.endswith((".py", ".env", ".bak")):
 print(root / name)
 ```
-**安全地 Spawn commands** (`shell=False` 默认通常是你想要的)：
+**安全地 spawn 命令**（`shell=False` 默认通常是你想要的）：
 ```python
 import subprocess
 
@@ -376,12 +376,12 @@ check=True,
 )
 print(cp.stdout)
 ```
-如果你**必须**构建一个 shell 命令，请先引用每个由攻击者控制的 token：
+如果你**必须**构建一个 shell 命令，请先对每个由攻击者控制的 token 进行引用：
 ```python
 import shlex
 cmd = f"grep -R {shlex.quote(user_controlled)} /var/www"
 ```
-**临时文件 / 目录**（比硬编码 `/tmp/foo` 路径更安全）：
+**临时文件 / 目录**（比硬编码的 `/tmp/foo` 路径更安全）：
 ```python
 import tempfile
 from pathlib import Path
@@ -391,9 +391,9 @@ out = Path(tmp) / "loot.txt"
 out.write_text("secret\n")
 print(out.read_text())
 ```
-对于 HTTP 自动化，请查看[这个关于 Python web requests 的其他页面](web-requests.md)。
+对于 HTTP 自动化，请查看 [this other page about Python web requests](web-requests.md)。
 
-### Archive extraction gotchas (important for tooling and file parsers)
+### Archive extraction gotchas (重要，适用于工具和文件解析器)
 
 从 **Python 3.14** 开始，`tarfile.extract()` / `extractall()` 默认使用更安全的 `data` filter。在较旧的 Python 版本中，处理由攻击者控制的 archives 时，你应该显式设置它。
 ```python
@@ -404,9 +404,9 @@ with tempfile.TemporaryDirectory() as out:
 with tarfile.open("sample.tar.gz") as tf:
 tf.extractall(out, filter="data")
 ```
-即使使用 `filter="data"`，也要将不受信任的压缩包解压到一个新的临时目录中，并在将文件移动到任何有价值的位置之前，验证已写入的内容。
+即使使用 `filter="data"`，也应将不可信的压缩包解压到一个全新的临时目录中，并在把文件移动到任何有价值的位置之前，先验证实际写入了什么。
 
-`zipfile.Path` 不同：它**不会为你清理文件名**，所以在提取攻击者控制的 ZIP 成员之前，先验证路径：
+`zipfile.Path` 不同：它**不会为你清理文件名**，所以在解压攻击者控制的 ZIP 成员之前，务必先验证路径：
 ```python
 import os
 import zipfile
@@ -421,10 +421,10 @@ zf.extract(info, base)
 ```
 ### 需要记住的危险原语
 
-- `eval()` / `exec()` **不是** sandbox。
-- `ast.literal_eval()` **不会**执行 Python code，但它仍然可能被攻击者控制的输入滥用，造成内存 / CPU denial of service。
-- `pickle.loads()` **不安全**；永远不要 unpickle 攻击者控制的 bytes。
-- 想了解更深入的 offensive trick，请查看 [Bypass Python sandboxes](bypass-python-sandboxes/README.md)、[Python internal read gadgets](python-internal-read-gadgets.md) 和 [Python deserializations](../../pentesting-web/deserialization/README.md)。
+- `eval()` / `exec()` **不是** 沙箱。
+- `ast.literal_eval()` **不会** 执行 Python code，但在攻击者控制的输入下，仍然可能被滥用造成 memory / CPU denial of service。
+- `pickle.loads()` **不安全**；永远不要对攻击者控制的字节流进行 unpickle。
+- 更深层的 offensive tricks，请查看 [Bypass Python sandboxes](bypass-python-sandboxes/README.md)、[Python internal read gadgets](python-internal-read-gadgets.md) 和 [Python deserializations](../../pentesting-web/deserialization/README.md)。
 
 ## References
 
