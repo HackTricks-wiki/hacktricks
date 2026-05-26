@@ -4,17 +4,17 @@
 
 ## Mechanics & Detection Basics
 
-- Будь-який об’єкт, створений з auxiliary class **`dynamicObject`**, отримує **`entryTTL`** (зворотний відлік у секундах) і **`msDS-Entry-Time-To-Die`** (абсолютний час завершення). Коли `entryTTL` досягає 0, **Garbage Collector видаляє його без tombstone/recycle-bin**, стираючи creator/timestamps і блокуючи recovery.
-- **`entryTTL` is an operational/constructed attribute**: запитуйте його явно в LDAP queries. TTL можна оновити або шляхом зміни `entryTTL` до завершення, або через LDAP TTL refresh OID **`1.3.6.1.4.1.1466.101.119.1`**.
-- Мінімальний/дефолтний TTL примусово задаються в **Configuration\Services\NTDS Settings → `msDS-Other-Settings` → `DynamicObjectMinTTL` / `DynamicObjectDefaultTTL`**. Microsoft документує **86400s** як default TTL і **900s** як default minimum valid TTL; обидва підтримують **1s–1y**. Dynamic objects **unsupported in Configuration/Schema partitions**.
-- Не існує **static→dynamic conversion** і після завершення немає tombstone phase. IR teams cannot rely on deleted-object controls or Recycle Bin; they must capture the live object/metadata before GC removes it.
-- Refresh is **replica-sensitive**: якщо TTL поновлюється занадто близько до завершення, інший writable replica або GC все одно може локально видалити об’єкт до того, як refresh реплікується. Тому дуже короткі TTL найкраще працюють, коли attacker знає, який DC буде обслуговувати abuse, тоді як defenders should query **all naming contexts / replicas** during triage.
-- Видалення може затримуватися на кілька хвилин на DCs із коротким uptime (<24h), залишаючи вузьке response window для запиту/backup attributes. Detect by **alerting on new objects carrying `entryTTL`/`msDS-Entry-Time-To-Die`** and correlating with orphan SIDs/broken links.
+- Будь-який об’єкт, створений з допоміжним класом **`dynamicObject`**, отримує **`entryTTL`** (зворотний відлік у секундах) і **`msDS-Entry-Time-To-Die`** (абсолютний час завершення). Коли `entryTTL` досягає 0, **Garbage Collector видаляє його без tombstone/recycle-bin**, стираючи creator/timestamps і блокуючи відновлення.
+- **`entryTTL` — це operational/constructed attribute**: запитуйте його явно в LDAP queries. TTL можна оновити або шляхом зміни `entryTTL` до завершення терміну, або через LDAP TTL refresh OID **`1.3.6.1.4.1.1466.101.119.1`**.
+- Мінімальний/default TTL застосовуються в **Configuration\Services\NTDS Settings → `msDS-Other-Settings` → `DynamicObjectMinTTL` / `DynamicObjectDefaultTTL`**. Microsoft документує **86400s** як default TTL і **900s** як default minimum valid TTL; обидва підтримують **1s–1y**. Dynamic objects **не підтримуються в Configuration/Schema partitions**.
+- Немає переходу **static→dynamic** і немає tombstone-фази після завершення терміну. IR teams не можуть покладатися на deleted-object controls або Recycle Bin; вони мають захопити живий об’єкт/metadata до того, як GC його видалить.
+- Refresh є **replica-sensitive**: якщо TTL поновити занадто близько до завершення, інша writable replica або GC все ще можуть локально видалити об’єкт до того, як refresh реплікується. Тому дуже короткі TTL найкраще працюють, коли атакувальник знає, який DC обслуговуватиме abuse, тоді як захисникам слід запитувати **all naming contexts / replicas** під час triage.
+- Видалення може затримуватися на кілька хвилин на DCs з коротким uptime (<24h), залишаючи вузьке вікно реагування для запиту/backup атрибутів. Виявляйте це через **alerting on new objects carrying `entryTTL`/`msDS-Entry-Time-To-Die`** та кореляцію з orphan SIDs/broken links.
 
 ## Fast Enumeration / Live Triage
 
-- Query **all `namingContexts` from RootDSE**, not only the domain NC. Dynamic abuse can live in **`DomainDnsZones`/`ForestDnsZones`** (`dnsNode`) or in application partitions.
-- While the object is still alive, immediately dump **replication metadata** and any linked attributes/ACLs. After expiry you may be left only with **broken `gPLink` values, orphan SIDs, or cached DNS answers**.
+- Запитуйте **all `namingContexts` з RootDSE**, не лише domain NC. Dynamic abuse може жити в **`DomainDnsZones`/`ForestDnsZones`** (`dnsNode`) або в application partitions.
+- Поки об’єкт ще живий, негайно витягніть **replication metadata** і будь-які linked attributes/ACLs. Після завершення терміну ви можете залишитися лише з **broken `gPLink` values, orphan SIDs, або cached DNS answers**.
 ```powershell
 $root = Get-ADRootDSE
 $root.namingContexts | ForEach-Object {
