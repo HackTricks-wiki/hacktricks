@@ -6,9 +6,9 @@
 
 ### Useful information
 
-Todos los ejemplos a continuación asumen **Python 3** a menos que se indique explícitamente.\
+Todos los ejemplos siguientes asumen **Python 3** a menos que se indique explícitamente.\
 `range()` devuelve un objeto iterable en Python 3 (similar a `xrange()` en Python 2).\
-La diferencia entre una **tuple** y una **list** es que la **posición** de un valor en una tuple normalmente le da significado, mientras que una list normalmente es solo una secuencia ordenada de valores.
+La diferencia entre una **tuple** y una **list** es que la **posición** de un valor en una tuple normalmente le da significado, mientras que una list suele ser solo una secuencia ordenada de valores.
 
 ### Main operations
 
@@ -94,14 +94,14 @@ b"admin".decode() == "admin"
 `t2 = (5, 6)`\
 `t3 = t1 + t2 == (1, '2', 'three', 5, 6)`\
 `(4,)` = singleton\
-`d = ()` tupla vacía\
-`d += (4,)` --> añadir a una tupla\
-`# t1[1] = 'new value'` --> las tuplas son inmutables\
-`list(t2) == [5, 6]` --> de tupla a lista
+`d = ()` empty tuple\
+`d += (4,)` --> add into a tuple\
+`# t1[1] = 'new value'` --> tuples are immutable\
+`list(t2) == [5, 6]` --> from tuple to list
 
 ### List (array)
 
-`d = []` vacía\
+`d = []` vacío\
 `a = [1, 2, 3]`\
 `b = [4, 5]`\
 `a + b == [1, 2, 3, 4, 5]`\
@@ -123,13 +123,13 @@ month_numbers.get('key', 0)  # default value if key does not exist
 ```
 ### Set
 
-En los sets no hay repeticiones.\
+En sets no hay repeticiones.\
 `myset = set(['a', 'b']) == {'a', 'b'}`\
 `myset.add('c')` --> `{'a', 'b', 'c'}`\
-`myset.add('a')` --> sin cambios\
+`myset.add('a')` --> no change\
 `myset.update([1, 2, 3])`\
-`myset.discard(10)` --> si está presente, se elimina; si no, nada\
-`myset.remove(10)` --> si no está presente, lanza una excepción\
+`myset.discard(10)` --> si está presente, lo elimina; si no, nothing\
+`myset.remove(10)` --> si no está presente, levanta exception\
 `myset2 = set([1, 2, 3, 4])`\
 `myset.union(myset2)`\
 `myset.intersection(myset2)`\
@@ -194,8 +194,8 @@ for f, b in zip(foo, bar):
 print(f, b)
 ```
 **Lambda** se usa para definir una función:\
-`(lambda x, y: x + y)(5, 3) == 8` --> use lambda as a simple function\
-`sorted(range(-5, 6), key=lambda x: x**2)` --> use lambda to sort\
+`(lambda x, y: x + y)(5, 3) == 8` --> usa lambda como una función simple\
+`sorted(range(-5, 6), key=lambda x: x**2)` --> usa lambda para ordenar\
 `list(filter(lambda x: x % 3 == 0, [1, 2, 3, 4, 5, 6, 7, 8, 9])) == [3, 6, 9]`\
 `reduce(lambda x, y: x * y, [1, 2, 3, 4]) == 24`
 ```python
@@ -235,8 +235,8 @@ print("executing finally clause in any case")
 ```
 ### Assert()
 
-Si la condición es falsa, la cadena se imprimirá.\
-Recuerda que las sentencias `assert` se pueden deshabilitar con `python -O`, así que no las uses para control de acceso o validación de entrada.
+Si la condición es falsa, se imprimirá la cadena.\
+Recuerda que las sentencias `assert` pueden deshabilitarse con `python -O`, así que no las uses para control de acceso o validación de entrada.
 ```python
 def avg(grades, weights):
 assert len(grades) != 0, 'no grades data'
@@ -244,7 +244,7 @@ assert len(grades) == len(weights), 'wrong number of grades'
 ```
 ### Generators, yield
 
-Un generator, en lugar de devolver todo de una vez, **yield** valores uno por uno. Esto es muy útil para listas de palabras enormes, bruteforcers o respuestas grandes.
+Un generator, en lugar de devolver todo de una vez, **yield** valores uno por uno. Esto es muy útil para wordlists enormes, bruteforcers o respuestas grandes.
 ```python
 def my_gen(n):
 yield n
@@ -264,12 +264,12 @@ re.findall(r"\w", "hola") == ['h', 'o', 'l', 'a']
 re.findall(r"\w+(la)", "hola caracola") == ['la', 'la']
 ```
 **Significados especiales:**\
-`.` --> cualquier char excepto salto de línea\
+`.` --> cualquier carácter excepto salto de línea\
 `\w` --> `[a-zA-Z0-9_]`\
 `\d` --> dígito\
-`\s` --> char de espacio en blanco `[ \n\r\t\f]`\
-`\S` --> char no espacio en blanco\
-`^` --> comienza con\
+`\s` --> carácter de espacio en blanco `[ \n\r\t\f]`\
+`\S` --> carácter que no es espacio en blanco\
+`^` --> empieza con\
 `$` --> termina con\
 `+` --> uno o más\
 `*` --> 0 o más\
@@ -277,8 +277,8 @@ re.findall(r"\w+(la)", "hola caracola") == ['la', 'la']
 
 **Opciones:**\
 `re.search(pat, string, re.IGNORECASE)`\
-`re.search(pat, string, re.DOTALL)` --> permite que el punto coincida con salto de línea\
-`re.search(pat, string, re.MULTILINE)` --> permite que `^` y `$` coincidan en diferentes líneas
+`re.search(pat, string, re.DOTALL)` --> permitir que el punto coincida con salto de línea\
+`re.search(pat, string, re.MULTILINE)` --> permitir que `^` y `$` coincidan en diferentes líneas
 ```python
 re.findall(r"<.*>", "<b>foo</b>and<i>so on</i>")
 # ['<b>foo</b>and<i>so on</i>']
@@ -297,8 +297,8 @@ list(product([1, 2, 3], [3, 4]))
 list(product([1, 2, 3], repeat=2))
 # [(1, 1), (1, 2), (1, 3), (2, 1), (2, 2), (2, 3), (3, 1), (3, 2), (3, 3)]
 ```
-**permutations**\
-`from itertools import permutations` --> todas las posibles disposiciones
+**permutaciones**\
+`from itertools import permutations` --> cada posible ordenación
 ```python
 list(permutations(['1', '2', '3']))
 list(permutations('123', 2))
@@ -316,14 +316,14 @@ list(combinations_with_replacement('123', 2))
 # [('1', '1'), ('1', '2'), ('1', '3'), ('2', '2'), ('2', '3'), ('3', '3')]
 ```
 **batched**\
-`from itertools import batched` --> disponible en Python 3.12+, útil para dividir en fragmentos grandes listas de candidatos de bruteforce o archivos IOC
+`from itertools import batched` --> disponible en Python 3.12+, útil para dividir en bloques grandes listas de candidatos de bruteforce o archivos IOC
 ```python
 list(batched(range(10), 4))
 # [(0, 1, 2, 3), (4, 5, 6, 7), (8, 9)]
 ```
 ### Decorators
 
-Decorator que mide el tiempo que una función necesita para ejecutarse:
+Decorador que mide el tiempo que una función necesita para ejecutarse:
 ```python
 from functools import wraps
 import time
@@ -351,7 +351,7 @@ Let's call our decorated function
 Decorated func!
 Execution time: 4.79e-05 seconds
 ```
-### Utilidades estándar de la biblioteca para pentesting
+### Utilidades de la biblioteca estándar para pentesting
 
 **Recorrido del sistema de archivos con `pathlib`** (`Path.walk()` está disponible en Python 3.12+; usa `os.walk()` en intérpretes más antiguos):
 ```python
@@ -376,7 +376,7 @@ check=True,
 )
 print(cp.stdout)
 ```
-Si **debes** construir un comando de shell, cita primero cada token controlado por el atacante:
+Si **debes** construir un comando de shell, primero pon entre comillas cada token controlado por el atacante:
 ```python
 import shlex
 cmd = f"grep -R {shlex.quote(user_controlled)} /var/www"
@@ -393,9 +393,9 @@ print(out.read_text())
 ```
 Para la automatización HTTP, consulta [esta otra página sobre Python web requests](web-requests.md).
 
-### Problemas al extraer archivos de archivo comprimido (importante para tooling y file parsers)
+### Problemas comunes de extracción de archivos comprimidos (importante para tooling y file parsers)
 
-A partir de **Python 3.14**, `tarfile.extract()` / `extractall()` usan por defecto el filtro más seguro `data`. En versiones antiguas de Python deberías configurarlo explícitamente al manejar archivos controlados por un atacante.
+A partir de **Python 3.14**, `tarfile.extract()` / `extractall()` usan por defecto el filtro `data`, que es más seguro. En versiones anteriores de Python deberías configurarlo explícitamente al manejar archivos comprimidos controlados por un atacante.
 ```python
 import tarfile
 import tempfile
@@ -404,9 +404,9 @@ with tempfile.TemporaryDirectory() as out:
 with tarfile.open("sample.tar.gz") as tf:
 tf.extractall(out, filter="data")
 ```
-Incluso con `filter="data"`, extrae archivos comprimidos no confiables en un directorio temporal nuevo y valida lo que se escribió antes de mover archivos a cualquier lugar interesante.
+Incluso con `filter="data"`, extrae archivos no confiables en un nuevo directorio temporal y valida lo que se escribió antes de mover archivos a cualquier lugar interesante.
 
-`zipfile.Path` es diferente: **no sanea los nombres de archivo** por ti, así que valida las rutas antes de extraer miembros de ZIP controlados por un atacante:
+`zipfile.Path` es diferente: **no sanitiza los nombres de archivo** por ti, así que valida las rutas antes de extraer miembros ZIP controlados por un atacante:
 ```python
 import os
 import zipfile
@@ -421,12 +421,12 @@ zf.extract(info, base)
 ```
 ### Primitivas peligrosas para recordar
 
-- `eval()` / `exec()` **no** son sandboxes.
-- `ast.literal_eval()` **no** ejecuta código Python, pero aun así puede ser abusado para denegación de servicio de memoria / CPU con entrada controlada por un atacante.
-- `pickle.loads()` **no es seguro**; nunca hagas unpickle de bytes controlados por un atacante.
-- Para trucos ofensivos más profundos, revisa [Bypass Python sandboxes](bypass-python-sandboxes/README.md), [Python internal read gadgets](python-internal-read-gadgets.md) y [Python deserializations](../../pentesting-web/deserialization/README.md).
+- `eval()` / `exec()` no son **sandboxes**.
+- `ast.literal_eval()` no ejecuta código Python, pero aún puede ser abusado para denegación de servicio de memoria / CPU con input controlado por un atacante.
+- `pickle.loads()` no es seguro; nunca hagas unpickle de bytes controlados por un atacante.
+- Para trucos ofensivos más profundos, consulta [Bypass Python sandboxes](bypass-python-sandboxes/README.md), [Python internal read gadgets](python-internal-read-gadgets.md) y [Python deserializations](../../pentesting-web/deserialization/README.md).
 
-## Referencias
+## References
 
 - [Python tarfile docs](https://docs.python.org/3/library/tarfile.html)
 - [PEP 706 - Filter for tarfile.extractall](https://peps.python.org/pep-0706/)
