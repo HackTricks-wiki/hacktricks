@@ -2,19 +2,19 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Mechanics & Detection Basics
+## Mechanika & Opsporing Basies
 
-- Enige objek wat geskep is met die auxiliary class **`dynamicObject`** kry **`entryTTL`** (sekondes aftelling) en **`msDS-Entry-Time-To-Die`** (absolute vervaldatum). Wanneer `entryTTL` 0 bereik, verwyder die **Garbage Collector** dit sonder tombstone/recycle-bin, wat skepper/tydstempels uitwis en herstel blokkeer.
-- **`entryTTL` is 'n operational/constructed attribute**: versoek dit eksplisiet in LDAP queries. TTL kan verfris word óf deur `entryTTL` op te dateer voor verval óf via LDAP TTL refresh OID **`1.3.6.1.4.1.1466.101.119.1`**.
-- TTL min/default word afgedwing in **Configuration\Services\NTDS Settings → `msDS-Other-Settings` → `DynamicObjectMinTTL` / `DynamicObjectDefaultTTL`**. Microsoft dokumenteer **86400s** as die default TTL en **900s** as die default minimum geldige TTL; albei ondersteun **1s–1y**. Dynamic objects is **unsupported in Configuration/Schema partitions**.
-- Daar is **geen static→dynamic conversion** en geen tombstone-fase na verval nie. IR teams kan nie op deleted-object controls of Recycle Bin staatmaak nie; hulle moet die live object/metadata vasvang voordat GC dit verwyder.
-- Refresh is **replica-sensitive**: as TTL te naby aan verval vernuwe word, kan 'n ander writable replica of GC steeds die object lokaal verwyder voordat die refresh replikeer. Baie kort TTLs werk dus die beste wanneer die attacker weet watter DC die abuse sal hanteer, terwyl defenders **all naming contexts / replicas** tydens triage moet query.
-- Verwydering kan 'n paar minute agterbly op DCs met kort uptime (<24h), wat 'n nou response window laat om attributes te query/backup. Detecteer deur **alerting op nuwe objects wat `entryTTL`/`msDS-Entry-Time-To-Die` dra** en dit te korreleer met orphan SIDs/broken links.
+- Enige objek geskep met die auxiliary class **`dynamicObject`** kry **`entryTTL`** (sekondes aftelling) en **`msDS-Entry-Time-To-Die`** (absolute vervaldatum). Wanneer `entryTTL` 0 bereik, verwyder die **Garbage Collector** dit sonder tombstone/recycle-bin, wat creator/timestamps uitwis en herstel blokkeer.
+- **`entryTTL` is an operational/constructed attribute**: versoek dit eksplisiet in LDAP queries. TTL kan hernu word óf deur `entryTTL` voor verval op te dateer óf via LDAP TTL refresh OID **`1.3.6.1.4.1.1466.101.119.1`**.
+- TTL min/default word afgedwing in **Configuration\Services\NTDS Settings → `msDS-Other-Settings` → `DynamicObjectMinTTL` / `DynamicObjectDefaultTTL`**. Microsoft dokumenteer **86400s** as die default TTL en **900s** as die default minimum valid TTL; albei ondersteun **1s–1y**. Dynamic objects is **unsupported in Configuration/Schema partitions**.
+- Daar is **no static→dynamic conversion** en geen tombstone-fase na verval nie. IR teams kan nie op deleted-object controls of Recycle Bin staatmaak nie; hulle moet die live object/metadata vasvang voordat GC dit verwyder.
+- Refresh is **replica-sensitive**: as TTL te naby aan verval hernu word, kan ’n ander writable replica of GC steeds die objek plaaslik verwyder voordat die refresh replikeer. Baie kort TTLs werk dus die beste wanneer die attacker weet watter DC die abuse sal diens, terwyl defenders **all naming contexts / replicas** tydens triage moet query.
+- Verwydering kan ’n paar minute vertraag op DCs met kort uptime (<24h), wat ’n nou response window laat om attributes te query/backup. Detect deur **alerting on new objects carrying `entryTTL`/`msDS-Entry-Time-To-Die`** en korreleer met orphan SIDs/broken links.
 
 ## Fast Enumeration / Live Triage
 
 - Query **all `namingContexts` from RootDSE**, nie net die domain NC nie. Dynamic abuse kan leef in **`DomainDnsZones`/`ForestDnsZones`** (`dnsNode`) of in application partitions.
-- Terwyl die object nog leef, dump onmiddellik **replication metadata** en enige linked attributes/ACLs. Na verval kan jy net oorbly met **broken `gPLink` values, orphan SIDs, of cached DNS answers**.
+- Terwyl die objek nog leef, dump onmiddellik **replication metadata** en enige linked attributes/ACLs. Ná verval mag jy net met **broken `gPLink` values, orphan SIDs, or cached DNS answers** oorbly.
 ```powershell
 $root = Get-ADRootDSE
 $root.namingContexts | ForEach-Object {
@@ -26,40 +26,40 @@ repadmin /showobjmeta <DC> <distinguishedName>
 ```
 ## MAQ Evasion met Self-Deleting Computers
 
-- Default **`ms-DS-MachineAccountQuota` = 10** laat enige geverifieerde gebruiker toe om computers te skep. Voeg **`dynamicObject`** by tydens skepping sodat die rekenaar homself uitvee en die **quota-sleuf vrystel** terwyl bewyse uitgevee word.
-- Powermad tweak binne **`New-MachineAccount`** (objectClass list):
+- Default **`ms-DS-MachineAccountQuota` = 10** laat enige geverifieerde gebruiker toe om computers te skep. Voeg `dynamicObject` by tydens skepping om die computer self te laat delete en die **quota slot vry te maak** terwyl bewyse uitgevee word.
+- Powermad tweak inside `New-MachineAccount` (objectClass list):
 ```powershell
 $request.Attributes.Add((New-Object "System.DirectoryServices.Protocols.DirectoryAttribute" -ArgumentList "objectClass", "dynamicObject", "Computer")) > $null
 ```
-- As die aangevraagde TTL **onder `DynamicObjectMinTTL`** is, verwag server-side aanpassing of verwerping, afhangend van die creation path; in baie domains is die effektiewe vloer **900s** en die fallback/default bly **86400s**. ADUC mag **`entryTTL`** versteek, maar LDP/LDAP queries wys dit.
-- Terwyl die object bestaan, kan defenders steeds die unprivileged creator herwin uit **`msDS-CreatorSID`** op die computer object. Sodra die dynamic computer verval, verdwyn daardie attribution saam met die object.
+- If the requested TTL is **below `DynamicObjectMinTTL`**, expect server-side adjustment or rejection depending on the creation path; in many domains the effective floor is **900s** and the fallback/default remains **86400s**. ADUC may hide `entryTTL`, but LDP/LDAP queries reveal it.
+- While the object exists, defenders can still recover the unprivileged creator from **`msDS-CreatorSID`** on the computer object. Once the dynamic computer expires, that attribution disappears with the object.
 
 ## Stealth Primary Group Membership
 
-- Skep 'n **dynamic security group**, en stel dan 'n user se **`primaryGroupID`** na daardie group se RID om effektiewe membership te kry wat **nie in `memberOf` wys nie** maar wel in Kerberos/access tokens erken word.
-- TTL expiry **delete die group ondanks primary-group delete protection**, wat die user met 'n korrupte **`primaryGroupID`** laat wat na 'n nie-bestaande RID wys en geen tombstone laat om te ondersoek hoe die privilege toegeken is nie.
-- Reporting is tool-dependent: **`Get-ADGroupMember` / `net group`** los gewoonlik primary-group-derived membership op, terwyl **`memberOf`** en **`Get-ADGroup -Properties member`** dit nie doen nie. Vir breër **`primaryGroupID`** tradecraft, sien [this other page about DCShadow and PGID abuse](dcshadow.md).
-- Vir **non-AdminSDHolder-protected** targets kan attackers die dynamic-group trick kombineer met 'n **DACL deny op lees van `primaryGroupID`** (of die group **`member`** attribute) om die link vir baie LDAP/PowerShell workflows te verberg selfs voordat die group verval.
+- Create a **dynamic security group**, then set a user’s **`primaryGroupID`** to that group’s RID to gain effective membership that **doesn’t show in `memberOf`** but is honored in Kerberos/access tokens.
+- TTL expiry **deletes the group despite primary-group delete protection**, leaving the user with a corrupted `primaryGroupID` pointing to a non-existent RID and no tombstone to investigate how the privilege was granted.
+- Reporting is tool-dependent: **`Get-ADGroupMember` / `net group`** usually resolve primary-group-derived membership, while **`memberOf`** and **`Get-ADGroup -Properties member`** do not. For broader `primaryGroupID` tradecraft, see [this other page about DCShadow and PGID abuse](dcshadow.md).
+- For **non-AdminSDHolder-protected** targets, attackers can pair the dynamic-group trick with a **DACL deny on reading `primaryGroupID`** (or the group `member` attribute) to hide the link from many LDAP/PowerShell workflows even before the group expires.
 
 ## AdminSDHolder Orphan-SID Pollution
 
-- Voeg ACEs by vir 'n **short-lived dynamic user/group** na **`CN=AdminSDHolder,CN=System,...`**. Na TTL expiry word die SID **onoplosbaar (“Unknown SID”)** in die template ACL, en **SDProp (~60 min)** versprei daardie orphan SID oor alle protected Tier-0 objects.
-- Forensics verloor attribution omdat die principal weg is (geen deleted-object DN). Monitor vir **new dynamic principals + sudden orphan SIDs on AdminSDHolder/privileged ACLs**.
+- Add ACEs for a **short-lived dynamic user/group** to **`CN=AdminSDHolder,CN=System,...`**. After TTL expiry the SID becomes **unresolvable (“Unknown SID”)** in the template ACL, and **SDProp (~60 min)** propagates that orphan SID across all protected Tier-0 objects.
+- Forensics lose attribution because the principal is gone (no deleted-object DN). Monitor for **new dynamic principals + sudden orphan SIDs on AdminSDHolder/privileged ACLs**.
 
-## Dynamic GPO Execution met Self-Destructing Evidence
+## Dynamic GPO Execution with Self-Destructing Evidence
 
-- Skep 'n **dynamic `groupPolicyContainer`** object met 'n kwaadwillige **`gPCFileSysPath`** (bv. SMB share à la GPODDITY) en **link dit via `gPLink`** na 'n target OU.
-- Clients verwerk die policy en trek content van attacker SMB af. Wanneer TTL verval, verdwyn die GPO object (en **`gPCFileSysPath`**); net 'n **broken `gPLink`** GUID bly oor, wat die LDAP-bewyse van die uitgevoerde payload verwyder.
-- Dit is operasioneel skoner as klassieke **GPODDITY-style** cleanup: in plaas daarvan om die oorspronklike **`gPCFileSysPath`** self te herstel, verwyder AD die kwaadwillige GPC outomaties sodra die timer verval.
+- Create a **dynamic `groupPolicyContainer`** object with a malicious **`gPCFileSysPath`** (e.g., SMB share à la GPODDITY) and **link it via `gPLink`** to a target OU.
+- Clients process the policy and pull content from attacker SMB. When TTL expires, the GPO object (and `gPCFileSysPath`) vanishes; only a **broken `gPLink`** GUID remains, removing LDAP evidence of the executed payload.
+- This is operationally cleaner than classic **GPODDITY-style** cleanup: instead of restoring the original `gPCFileSysPath` yourself, AD removes the malicious GPC automatically once the timer expires.
 
 ## Ephemeral AD-Integrated DNS Redirection
 
-- AD DNS records is **`dnsNode`** objects in **DomainDnsZones/ForestDnsZones**. Om hulle as **dynamic objects** te skep, laat tydelike host redirection (credential capture/MITM) toe. Clients cache die kwaadwillige A/AAAA response; die record delete later self sodat die zone skoon lyk (DNS Manager mag 'n zone reload nodig hê om die view te refresh).
-- Detection: alert op **enige DNS record wat `dynamicObject`/`entryTTL` dra** via replication/event logs; transient records verskyn selde in standaard DNS logs.
+- AD DNS records are **`dnsNode`** objects in **DomainDnsZones/ForestDnsZones**. Creating them as **dynamic objects** allows temporary host redirection (credential capture/MITM). Clients cache the malicious A/AAAA response; the record later self-deletes so the zone looks clean (DNS Manager may need zone reload to refresh view).
+- Detection: alert on **any DNS record carrying `dynamicObject`/`entryTTL`** via replication/event logs; transient records rarely appear in standard DNS logs.
 
 ## Hybrid Entra ID Delta-Sync Gap (Note)
 
-- Entra Connect delta sync maak staat op **tombstones** om deletes op te spoor. 'n **dynamic on-prem user** kan na Entra ID sync, verval, en delete sonder tombstone—delta sync sal nie die cloud account verwyder nie, wat 'n **orphaned active Entra user** laat totdat 'n **initial/full sync** of handmatige cloud cleanup afgedwing word.
+- Entra Connect delta sync relies on **tombstones** to detect deletes. A **dynamic on-prem user** can sync to Entra ID, expire, and delete without tombstone—delta sync won’t remove the cloud account, leaving an **orphaned active Entra user** until an **initial/full sync** or manual cloud cleanup is forced.
 
 ## References
 
