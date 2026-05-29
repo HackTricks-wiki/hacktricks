@@ -631,6 +631,70 @@ Below is a minimal payload that both **hides YOLO enabling** and **executes a re
 * Store the injection inside files Copilot is likely to summarise automatically (e.g. large `.md` docs, transitive dependency README, etc.).
 
 
+
+## Encrypted Reasoning-State Replay, Transcript JSON Injection, and Reasoning Side Channels
+
+Some reasoning-model APIs return **opaque reasoning/thinking items** that the client must replay on later turns. OpenAI explicitly documents that reasoning items may contain `encrypted_content` and should be preserved when continuing a conversation, while Anthropic exposes signed/opaque thinking blocks that must also be passed back unchanged.
+
+From an attacker perspective, treat these artifacts as **provider-native privileged state**, not as normal user text.
+
+### Replay of valid encrypted reasoning blobs
+
+Direct bit-level tampering usually fails because the provider authenticates the blob. However, a valid blob may still be **replayable** if it is not strongly bound to the original account, session, model, request, or transcript.
+
+Potential impact:
+- A harvested reasoning blob can be replayed unchanged in a different conversation.
+- If the provider accepts the replay and the model consumes the decrypted state, the hidden reasoning may become **semantically active** and influence later output.
+- This is more dangerous in stateless / client-managed / zero-retention workflows because the application is already expected to carry provider-native state forward.
+
+### Transcript / JSON injection of provider-native message objects
+
+A common application-layer mistake is letting untrusted users influence the **structured transcript** instead of only the plain-text user message. If the backend accepts raw provider-native JSON, an attacker may inject previously harvested reasoning blobs or other privileged objects into another user's conversation.
+
+High-risk fields/objects include:
+- OpenAI `reasoning` items or other raw Responses API objects
+- Anthropic `thinking` / `redacted_thinking` blocks
+- Tool call / tool result state
+- System / developer messages
+- Hidden metadata that the frontend was never supposed to let the user control
+
+**Abuse pattern:**
+1. Obtain a valid encrypted reasoning/thinking blob from any controlled session.
+2. Find an app that forwards user-supplied JSON into the provider transcript.
+3. Inject the blob as a privileged message object instead of plain text.
+4. The provider decrypts/replays the state and may feed attacker-chosen hidden context into the model.
+
+**Defenses:**
+- Build transcripts **server-side from a strict schema**.
+- Treat user input only as plain text/content, never as raw provider messages.
+- Drop/escape privileged keys such as `reasoning`, `thinking`, tool-state objects, `system`, `developer`, or any provider-specific metadata fields.
+
+### Secret-dependent reasoning side channel
+
+Even if the reasoning blob itself is encrypted, its **metadata** can still leak secrets. If an application prompt contains a secret and the attacker can force the model to perform **cheap reasoning for one secret value** and **expensive reasoning for another**, the visible answer can remain identical while the hidden computation differs.
+
+Useful side-channel signals:
+- Blob length / encrypted payload size
+- Token accounting such as OpenAI `reasoning_tokens`
+- Total usage cost
+- End-to-end latency / wall-clock time
+
+Typical extraction pattern:
+1. Put a secret bit/byte/string in trusted context (system prompt, hidden app instructions, retrieved secret, etc.).
+2. Ask the model to branch on one secret bit: do cheap computation **A** if the bit is `0`, expensive computation **B** if the bit is `1`.
+3. Force the visible output to be identical in both branches.
+4. Classify the bit using metadata or timing.
+5. Repeat bit-by-bit to recover bytes or strings.
+
+This means **timing alone** can be enough to leak secrets through an ordinary chat UI, even when the attacker never sees the encrypted blob or API token counters.
+
+**Defenses:**
+- Avoid letting the model perform hidden computation directly over sensitive values.
+- Apply policy / authorization checks **before** the model reasons over secrets.
+- Minimize exposed reasoning metadata where possible.
+- Consider padding / normalization of latency and token reporting, understanding that timing defenses are noisy and expensive.
+- Providers should cryptographically bind reasoning artifacts to account, session, model, request, and transcript context to reject cross-context replay.
+
 ## References
 - [Prompt injection engineering for attackers: Exploiting GitHub Copilot](https://blog.trailofbits.com/2025/08/06/prompt-injection-engineering-for-attackers-exploiting-github-copilot/)
 - [GitHub Copilot Remote Code Execution via Prompt Injection](https://embracethered.com/blog/posts/2025/github-copilot-remote-code-execution-via-prompt-injection/)
@@ -646,5 +710,9 @@ Below is a minimal payload that both **hides YOLO enabling** and **executes a re
 - [OpenAI – Memory and new controls for ChatGPT](https://openai.com/index/memory-and-new-controls-for-chatgpt/)
 - [OpenAI Begins Tackling ChatGPT Data Leak Vulnerability (url_safe analysis)](https://embracethered.com/blog/posts/2023/openai-data-exfiltration-first-mitigations-implemented/)
 - [Unit 42 – Fooling AI Agents: Web-Based Indirect Prompt Injection Observed in the Wild](https://unit42.paloaltonetworks.com/ai-agent-prompt-injection/)
+- [Anthropic extended thinking](https://docs.anthropic.com/en/docs/build-with-claude/extended-thinking)
+- [OpenAI Responses API overview](https://developers.openai.com/api/reference/responses/overview)
+- [OpenAI reasoning guide](https://developers.openai.com/api/docs/guides/reasoning?example=planning)
+- [Fooling Around with Encrypted Reasoning Blobs](https://blog.cryptographyengineering.com/2026/05/29/fooling-around-with-encrypted-reasoning-blobs/)
 
 {{#include ../banners/hacktricks-training.md}}
