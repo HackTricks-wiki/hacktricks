@@ -2,23 +2,23 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-SELinux ni mfumo wa **Mandatory Access Control (MAC) unaotegemea lebo**. Kwa vitendo, hili lina maana kwamba hata kama ruhusa za DAC, vikundi, au Linux capabilities zinaonekana za kutosha kwa kitendo fulani, kernel bado inaweza kukataa kwa sababu **muktadha wa chanzo** haukuruhusiwa kufikia **muktadha wa lengo** kwa darasa/ruhusa iliyohitajika.
+SELinux ni mfumo wa **label-based Mandatory Access Control (MAC)**. Kwa vitendo, hii inamaanisha kwamba hata kama ruhusa za DAC, groups, au Linux capabilities zinaonekana kutosha kwa kitendo fulani, kernel bado inaweza kukikataa kwa sababu **source context** hairuhusiwi kufikia **target context** kwa class/permission iliyoombwa.
 
-Muktadha kwa kawaida unaonekana kama:
+A context kwa kawaida huonekana kama:
 ```text
 user:role:type:level
 system_u:system_r:httpd_t:s0
 unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023
 ```
-Kutoka kwa mtazamo wa privesc, `type` (domain kwa ajili ya michakato, type kwa ajili ya vitu) mara nyingi ni uwanja muhimu zaidi:
+Kutoka kwa mtazamo wa privesc, `type` (domain kwa processes, type kwa objects) kwa kawaida ndio sehemu muhimu zaidi:
 
-- Mchakato unaendesha ndani ya **domain** kama `unconfined_t`, `staff_t`, `httpd_t`, `container_t`, `sysadm_t`
-- Faili na sockets zina **type** kama `admin_home_t`, `shadow_t`, `httpd_sys_rw_content_t`, `container_file_t`
-- Sera inaamua kama domain moja inaweza kusoma/kuandika/kutekeleza/kuhamia kwa nyingine
+- Process inaendeshwa ndani ya **domain** kama `unconfined_t`, `staff_t`, `httpd_t`, `container_t`, `sysadm_t`
+- Files na sockets zina **type** kama `admin_home_t`, `shadow_t`, `httpd_sys_rw_content_t`, `container_file_t`
+- Policy huamua kama domain moja inaweza kusoma/kuandika/kuexecute/kubadilika kwenda nyingine
 
-## Uorodheshaji wa haraka
+## Fast Enumeration
 
-Ikiwa SELinux imewezeshwa, iorodheshe mapema kwa sababu inaweza kueleza kwanini njia za kawaida za privesc za Linux zinashindwa au kwa nini wrapper yenye ruhusa za juu unaozunguka zana ya SELinux "harmless" ni muhimu sana:
+Kama SELinux imewashwa, ienumerate mapema kwa sababu inaweza kueleza kwa nini common Linux privesc paths hushindwa au kwa nini privileged wrapper kuzunguka "harmless" SELinux tool kwa kweli ni critical:
 ```bash
 getenforce
 sestatus
@@ -45,17 +45,17 @@ restorecon -n -v /path/of/interest 2>/dev/null
 ```
 Matokeo ya kuvutia:
 
-- `Disabled` au `Permissive` mode huondoa thamani kubwa ya SELinux kama kizuizi.
-- `unconfined_t` kwa kawaida inaonyesha SELinux ipo lakini haizuizi mchakato huo kwa njia ya maana.
-- `default_t`, `file_t`, au lebo zilizo wazi kuwa zisizo sahihi kwenye njia zilizobinafsishwa mara nyingi zinaonyesha lebo zisizofaa au utekelezaji usio kamilifu.
-- Marekebisho ya kienyeji katika `file_contexts.local` yanapata kipaumbele juu ya chaguo-msingi za sera, hivyo yapitie kwa makini.
+- Mode ya `Disabled` au `Permissive` huondoa sehemu kubwa ya thamani ya SELinux kama boundary.
+- `unconfined_t` kwa kawaida humaanisha SELinux ipo lakini haizuii mchakato huo kwa maana yoyote ya kweli.
+- `default_t`, `file_t`, au labels zilizo wazi kuwa si sahihi kwenye paths za custom mara nyingi huonyesha mislabeling au deployment isiyokamilika.
+- Local overrides katika `file_contexts.local` zina kipaumbele juu ya policy defaults, kwa hiyo zichunguze kwa makini.
 
-## Uchambuzi wa Sera
+## Policy Analysis
 
-SELinux ni rahisi kushambuliwa au kupitishwa unapoweza kujibu maswali mawili:
+SELinux ni rahisi zaidi kushambulia au bypass unapoweza kujibu maswali mawili:
 
-1. **Nini domain yangu ya sasa inaweza kufikia?**
-2. **Ni domains gani ninaweza kuhamia?**
+1. **Domain yangu ya sasa inaweza kufikia nini?**
+2. **Naweza transition kuingia domains zipi?**
 
 Zana muhimu zaidi kwa hili ni `sepolicy` na **SETools** (`seinfo`, `sesearch`, `sedta`):
 ```bash
@@ -70,63 +70,71 @@ sesearch --type_transition -s staff_t 2>/dev/null | head
 seinfo -t 2>/dev/null | head
 seinfo -r 2>/dev/null | head
 ```
-Hii ni hasa muhimu wakati host inapotumia **confined users** badala ya kuwaratibu wote kwa `unconfined_u`. Katika hali hiyo, angalia:
+Hii ni muhimu hasa wakati host inatumia **confined users** badala ya ku-map kila mtu kuwa `unconfined_u`. Katika hali hiyo, tafuta:
 
-- mepangilio ya watumiaji kupitia `semanage login -l`
-- roles zilizoruhusiwa kupitia `semanage user -l`
-- admin domains zinazoweza kufikiwa kama `sysadm_t`, `secadm_t`, `webadm_t`
-- entry za `sudoers` zinazotumia `ROLE=` au `TYPE=`
+- user mappings kupitia `semanage login -l`
+- allowed roles kupitia `semanage user -l`
+- reachable admin domains kama `sysadm_t`, `secadm_t`, `webadm_t`
+- `sudoers` entries zinazotumia `ROLE=` au `TYPE=`
 
-Iwapo `sudo -l` inaingizo kama haya, SELinux ni sehemu ya mipaka ya ruhusa:
+Kama `sudo -l` ina entries kama hizi, SELinux ni sehemu ya privilege boundary:
 ```text
 linux_user ALL=(ALL) ROLE=webadm_r TYPE=webadm_t /bin/bash
 ```
-Pia angalia ikiwa `newrole` inapatikana:
+Pia pia angalia kama `newrole` inapatikana:
 ```bash
 sudo -l
 which newrole runcon
 newrole -l 2>/dev/null
 ```
-`runcon` na `newrole` hazitumiwi moja kwa moja kama exploitable, lakini ikiwa wrapper yenye ruhusa au sheria ya `sudoers` itakuwezesha kuchagua role/type bora, zinakuwa high-value escalation primitives.
+`runcon` na `newrole` haziwezi kutumiwa kiotomatiki, lakini ikiwa wrapper yenye privilege au `sudoers` rule inakuruhusu kuchagua role/type bora zaidi, zinakuwa high-value escalation primitives.
 
-## Faili, Kubadilisha Lebo (Relabeling), na Mipangilio Mbaya Zenye Thamani Kuu
+## Files, Relabeling, and High-Value Misconfigurations
 
-Tofauti muhimu zaidi ya kiutendaji kati ya zana za kawaida za SELinux ni:
+Tofauti muhimu zaidi ya kiutendaji kati ya common SELinux tools ni:
 
-- `chcon`: mabadiliko ya lebo ya muda kwenye njia maalum
-- `semanage fcontext`: kanuni ya kudumu ya uhusiano kati ya njia na lebo
-- `restorecon` / `setfiles`: tumia tena sera/lebo ya default
+- `chcon`: badiliko la muda la label kwenye path maalum
+- `semanage fcontext`: persistent path-to-label rule
+- `restorecon` / `setfiles`: tumia tena policy/default label
 
-Hii ni muhimu sana wakati wa privesc kwa sababu **kubadilisha lebo si tu kwa mapambo**. Inaweza kubadilisha faili kutoka "imezuiwa na sera" kuwa "inasomwa/inaweza kutekelezwa na service iliyofungiwa yenye ruhusa".
+Hii ina umuhimu mkubwa sana wakati wa privesc kwa sababu **relabeling si cosmetic tu**. Inaweza kubadilisha file kutoka "blocked by policy" hadi "readable/executable by a privileged confined service".
 
-Angalia sheria za kubadilisha lebo za ndani na mwelekeo wa mabadiliko ya lebo:
+Angalia local relabel rules na relabel drift:
 ```bash
 grep -R . /etc/selinux/*/contexts/files/file_contexts.local 2>/dev/null
 restorecon -nvr / 2>/dev/null | head -n 50
 matchpathcon -V /etc/passwd /etc/shadow /usr/local/bin/* 2>/dev/null
 ```
-Amri za thamani kubwa za kutafuta katika `sudo -l`, root wrappers, automation scripts, au file capabilities:
+Kipengele kimoja cha hila lakini muhimu: `restorecon` ya kawaida **haiti kila wakati lebo ya kushukiwa kikamilifu**. Ikiwa aina lengwa iko kwenye `customizable_types`, unaweza kuhitaji `-F` ili kulazimisha kuweka upya kamili. Kutoka kwa mtazamo wa ushambuliaji, hii inaeleza kwa nini `chcon` isiyo ya kawaida wakati mwingine inaweza kuendelea kuwepo baada ya usafishaji wa kawaida wa "tayari tuliendesha restorecon".
+```bash
+grep -R . /etc/selinux/*/contexts/customizable_types 2>/dev/null | head
+restorecon -n -v /path/of/interest 2>/dev/null
+restorecon -F -v /path/of/interest 2>/dev/null
+```
+Amri zenye thamani kubwa za kutafuta katika `sudo -l`, root wrappers, automation scripts, au file capabilities:
 ```bash
 which semanage restorecon chcon setfiles semodule audit2allow runcon newrole setsebool load_policy 2>/dev/null
 getcap -r / 2>/dev/null | grep -E 'cap_mac_admin|cap_mac_override'
 ```
-Hasa ya kuvutia:
+Ikiwa uwezo wowote wa MAC unaonekana, pia kagua ukurasa wa [Linux capabilities page](linux-capabilities.md); `cap_mac_admin` na `cap_mac_override` ni za kawaida kidogo lakini zinahusiana moja kwa moja wakati SELinux ni sehemu ya mpaka.
+
+Inayovutia hasa:
 
 - `semanage fcontext`: hubadilisha kwa kudumu lebo ambayo path inapaswa kupokea
-- `restorecon` / `setfiles`: hurudia kutumia mabadiliko hayo kwa kiwango kikubwa
-- `semodule -i`: inapakia module ya sera maalum
-- `semanage permissive -a <domain_t>`: hufanya domain moja permissive bila kugeuza mashine yote
-- `setsebool -P`: hubadilisha kwa kudumu policy booleans
-- `load_policy`: inarudisha sera inayotumika
+- `restorecon` / `setfiles`: hurudisha mabadiliko hayo kwa kiwango kikubwa
+- `semodule -i`: hupakia custom policy module
+- `semanage permissive -a <domain_t>`: huifanya domain moja kuwa permissive bila kubadilisha host nzima
+- `setsebool -P`: hubadilisha policy booleans kwa kudumu
+- `load_policy`: hupakia upya active policy
 
-Hivi mara nyingi ni **helper primitives**, sio root exploits pekee. Thamani yao ni kwamba zinakuwezesha:
+Hizi mara nyingi ni **helper primitives**, si root exploits pekee. Thamani yake ni kwamba zinakuruhusu:
 
-- kufanya domain lengwa permissive
-- kupanua ufikiaji kati ya domain yako na protected type
-- kurelabeli faili zilizodhibitiwa na mshambuliaji ili huduma yenye hadhi iweze kuzisoma au kuzitekeleza
-- kuudhoofisha huduma iliyofungwa vya kutosha ili mdudu wa ndani uliopo uweze kutumika
+- kufanya target domain iwe permissive
+- kupanua access kati ya domain yako na protected type
+- kufanya relabel ya attacker-controlled files ili service yenye privileges iweze kuzisoma au kuzitekeleza
+- kudhoofisha confined service kiasi kwamba local bug iliyopo inaweza kuwa exploitable
 
-Mifano ya ukaguzi:
+Example checks:
 ```bash
 # If sudo exposes semanage/restorecon, think in terms of policy abuse
 sudo -l | grep -E 'semanage|restorecon|setfiles|semodule|runcon|newrole|setsebool|load_policy'
@@ -135,44 +143,61 @@ sudo -l | grep -E 'semanage|restorecon|setfiles|semodule|runcon|newrole|setseboo
 semanage fcontext -C -l 2>/dev/null
 restorecon -n -v /usr/local/bin /opt /srv /var/www 2>/dev/null
 ```
-Ikiwa unaweza kupakia module ya sera kama root, kwa kawaida unadhibiti mipaka ya SELinux:
+Ikiwa unaweza kupakia policy module kama root, kwa kawaida unadhibiti mpaka wa SELinux:
 ```bash
 ausearch -m AVC,USER_AVC -ts recent 2>/dev/null | audit2allow -M localfix
 sudo semodule -i localfix.pp
 ```
-Hivyo, `audit2allow`, `semodule`, na `semanage permissive` zinapaswa kutendewa kama kiolesura nyeti cha msimamizi wakati wa post-exploitation. Zinaweza kwa ukimya kugeuza chain iliyozuiwa kuwa inafanya kazi bila kubadilisha idhini za UNIX za jadi.
+Ndiyo maana `audit2allow`, `semodule`, na `semanage permissive` zinapaswa kutibiwa kama sensitive admin surfaces wakati wa post-exploitation. Zinaweza kubadilisha kimya kimya chain iliyozuiwa kuwa inayofanya kazi bila kubadilisha classic UNIX permissions.
 
-## Dalili za Ukaguzi
+## Hidden Denials and Module Extraction
 
-AVC denials mara nyingi ni ishara za kushambulia, si kelele za kujikinga tu. Zinakuambia:
+Kero ya kawaida sana ya offensive ni chain inayoshindwa kwa `EACCES` isiyo na maelezo wakati AVC denial inayotarajiwa haionekani kamwe. `dontaudit` rules zinaweza kuwa zinaficha permission halisi unayohitaji. Ikiwa unaweza kuendesha `semodule` kupitia `sudo` au wrapper nyingine yenye privileges, kuzima kwa muda `dontaudit` kunaweza kubadilisha silent failure kuwa policy clue sahihi:
+```bash
+# Rebuild policy without dontaudit rules, trigger the action again, then inspect AVCs
+sudo semodule -DB
+ausearch -m AVC,USER_AVC,SELINUX_ERR -ts recent 2>/dev/null | tail -n 50
+sudo semodule -B
 
-- ni kipengee au aina gani cha lengo ulilofikia
-- ruhusa gani ilinyimwa
-- ni domain gani unadhibiti kwa sasa
-- ikiwa mabadiliko madogo ya sera yangefanya chain ifanye kazi
+# Extract installed modules for offline review / diffing
+semodule -lfull 2>/dev/null
+semodule -E --cil <module_name> 2>/dev/null
+```
+Hii pia ni muhimu kwa kukagua kile ambacho local admins tayari walibadilisha. Small custom module au one-domain permissive rule mara nyingi ndicho chanzo cha target service kufanya kazi kwa njia iliyo loose zaidi kuliko base policy ingependekeza.
+
+## Audit Clues
+
+AVC denials mara nyingi ni offensive signal, si defensive noise tu. Zinakuambia:
+
+- ni target object/type gani uligonga
+- ni permission gani iliyokataliwa
+- ni domain gani unadhibiti sasa
+- kama mabadiliko madogo ya policy yangefanya chain ifanye kazi
 ```bash
 ausearch -m AVC,USER_AVC,SELINUX_ERR -ts recent 2>/dev/null
 journalctl -t setroubleshoot --no-pager 2>/dev/null | tail -n 50
 ```
-If a local exploit or persistence attempt keeps failing with `EACCES` or strange "permission denied" errors despite root-looking DAC permissions, SELinux is usually worth checking before discarding the vector.
+Ikiwa local exploit au jaribio la persistence linaendelea kushindwa kwa `EACCES` au errors za ajabu za "permission denied" licha ya DAC permissions zinazoonekana kama root, SELinux kwa kawaida inafaa kukaguliwa kabla ya kutupa hiyo vector.
 
-## Watumiaji wa SELinux
+## SELinux Users
 
-Kuna watumiaji wa SELinux pamoja na watumiaji wa kawaida wa Linux. Kila mtumiaji wa Linux ameambatanishwa na mtumiaji wa SELinux kama sehemu ya sera, ambayo inaruhusu mfumo kulazimisha majukumu na domains tofauti yaliyokubaliwa kwa akaunti mbalimbali.
+Kuna SELinux users pamoja na regular Linux users. Kila Linux user hupangwa kwenye SELinux user kama sehemu ya policy, ambayo huwezesha system kuweka roles na domains tofauti zinazoruhusiwa kwa accounts tofauti.
 
-Ukaguzi wa haraka:
+Quick checks:
 ```bash
 id -Z
 semanage login -l 2>/dev/null
 semanage user -l 2>/dev/null
+sudo -l 2>/dev/null
+grep -R "ROLE=\|TYPE=" /etc/sudoers /etc/sudoers.d 2>/dev/null
 ```
-Katika mifumo mingi ya kawaida, watumiaji wamepangiwa `unconfined_u`, jambo ambalo linapunguza athari za vitendo za kufungiwa kwa watumiaji. Hata hivyo, kwenye deployments zilizoimarishwa, watumiaji waliofungwa wanaweza kufanya `sudo`, `su`, `newrole`, na `runcon` kuwa za kuvutia zaidi kwa sababu **njia ya kuinua ruhusa inaweza kutegemea kuingia kwenye role/type bora ya SELinux, si tu kuwa UID 0**.
+Kwenye mifumo mingi ya kawaida, watumiaji huwekwa kwenye `unconfined_u`, jambo linalopunguza athari ya vitendo ya confinement ya user. Hata hivyo, kwenye deployments zilizohardened, users walio confined wanaweza kufanya `sudo`, `su`, `newrole`, na `runcon` kuwa za kuvutia zaidi kwa sababu **njia ya escalation inaweza kutegemea kuingia kwenye SELinux role/type bora zaidi, si tu kuwa UID 0**. Pia kumbuka kuwa baadhi ya users walio confined hawawezi kuinvoke `sudo`/`su` kabisa isipokuwa policy iruhusu wazi setuid transition ya msingi, hivyo host inayotumia `staff_u` + `sysadm_r` inaweza kugeuza sheria inayoonekana ndogo ya `sudo ROLE=` / `TYPE=` kuwa mpaka halisi wa privilege.
 
-## SELinux katika kontena
+## SELinux in Containers
 
-Container runtimes kawaida huanzisha workloads katika domain iliyofungwa kama `container_t` na kuweka lebo kwenye yaliyomo ya container kama `container_file_t`. Ikiwa mchakato wa container unatoroka lakini bado unaendesha kwa lebo ya container, uandishi kwenye host bado unaweza kushindwa kwa sababu mpaka wa lebo uliendelea kuwa mkamilifu.
+Container runtimes kwa kawaida huzindua workloads kwenye domain iliyoconfined kama `container_t` na ku-label content ya container kama `container_file_t`. Ikiwa container process itatoroka lakini bado inatumia container label, writes kwenye host bado zinaweza kushindwa kwa sababu mpaka wa label ulibaki salama.
 
-Mfano mfupi:
+Mfano wa haraka:
 ```shell
 $ podman run -d fedora sleep 100
 d4194babf6b877c7100e79de92cd6717166f7302113018686cea650ea40bd7cb
@@ -180,20 +205,24 @@ $ podman top -l label
 LABEL
 system_u:system_r:container_t:s0:c647,c780
 ```
-Operesheni za kisasa za container zinazostahili kutajwa:
+Sehemu ya `c647,c780` si mapambo. Katika deployments nyingi za container, runtimes huweka MCS categories kwa njia ya dynamic ili kwamba processes mbili zinazofanya kazi kama `container_t` bado zitenganishwe kutoka kwa kila moja. Ikiwa escape inakuweka ndani ya host namespace lakini inahifadhi original category set, category mismatches bado zinaweza kueleza kwa nini baadhi ya host paths hubaki kutosomeka au kutowezekana kuandikwa.
 
-- `--security-opt label=disable` inaweza kwa ufanisi kuhamisha mzigo wa kazi kwenda kwa aina isiyofungwa inayohusiana na container kama `spc_t`
-- bind mounts with `:z` / `:Z` husababisha relabeling ya host path kwa matumizi ya shared/private container
-- relabeling kubwa ya maudhui ya host inaweza kuwa tatizo la usalama kwa hiyo yenyewe
+Modern container operations zinazostahili kuzingatiwa:
 
-Ukurasa huu unafupisha yaliyomo kuhusu container ili kuepuka rudufu. Kwa visa vya matumizi mabaya maalum ya container na mifano ya runtime, angalia:
+- `--security-opt label=disable` inaweza kwa vitendo kuhamisha workload kwenda kwenye unconfined container-related type kama `spc_t`
+- bind mounts zenye `:z` / `:Z` huchochea relabeling ya host path kwa matumizi ya shared/private container
+- broad relabeling ya host content inaweza kuwa security issue yenyewe
+
+Ukurasa huu unaweka container content fupi ili kuepuka duplication. Kwa container-specific abuse cases na runtime examples, angalia:
 
 {{#ref}}
 container-security/protections/selinux.md
 {{#endref}}
 
-## Marejeo
+## References
 
 - [Red Hat docs: Using SELinux](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html-single/using_selinux/index)
 - [SETools: Policy analysis tools for SELinux](https://github.com/SELinuxProject/setools)
+- [Managing confined and unconfined users - RHEL 9 docs](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/using_selinux/managing-confined-and-unconfined-users_using-selinux)
+- [semodule(8) - Linux manual page](https://man7.org/linux/man-pages/man8/semodule.8.html)
 {{#include ../../banners/hacktricks-training.md}}
