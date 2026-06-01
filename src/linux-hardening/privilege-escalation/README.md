@@ -305,6 +305,32 @@ cat /proc/<PID>/fd/<FD>
 
 This is especially valuable when a process still has a deleted secret, script, database export, or flag file open.
 
+
+### Exiting-process FD theft with `pidfd_getfd(2)`
+
+On **kernels vulnerable until the fix commit** [`31e62c2ebbfd`](https://github.com/torvalds/linux/commit/31e62c2ebbfdc3fe3dbdf5e02c92a9dc67087a3a), a same-UID attacker may steal file descriptors from a **dying** process with `pidfd_getfd(2)`. The bug is in the ptrace-style authorization path used by `pidfd_getfd`: when the target is exiting and `task->mm == NULL`, `__ptrace_may_access()` skips an important dumpability check. Because `do_exit()` runs `exit_mm()` **before** `exit_files()`, there is a short window where the process has **no mm** but still has **live FDs**.
+
+This becomes a reusable privesc primitive when a **setuid/setgid helper**:
+
+1. opens a **root-only** file or privileged IPC endpoint
+2. fully drops privileges to the attacker's UID (`setuid`, `setreuid(ruid, ruid)`, `setresuid`, helper wrappers such as `permanently_set_uid()`)
+3. keeps the privileged FD open until exit
+
+If you can repeatedly trigger that helper, race its exit, and duplicate the still-open FD, you can read the file locally as the unprivileged user. Public examples include theft of **`/etc/shadow`** from `chage -l <user>` and theft of **OpenSSH host private keys** from `ssh-keysign` when it opens `/etc/ssh/ssh_host_*_key` before dropping privileges.
+
+Quick audit ideas:
+
+- enumerate privileged helpers: `find / \( -perm -4000 -o -perm -2000 \) -type f 2>/dev/null`
+- review source/strings for the shape **open sensitive file -> drop to caller UID -> exit**
+- pay special attention to helpers that open `/etc/shadow`, `/etc/ssh/ssh_host_*`, private DBs, or authenticated sockets before calling `set*uid()`
+- if the kernel is **older than Linux 5.6**, the public `pidfd_getfd` PoCs do not apply because that syscall did not exist yet
+
+Operational notes:
+
+- Stealing the FD **while the target is still alive** should normally fail with `EPERM`; the interesting window is **after** `exit_mm()` and **before** `exit_files()`.
+- Reliable exploitation usually means **spawning the target many times** and racing the exit path until one iteration lands inside the window.
+- This is mainly a **sensitive-file disclosure** primitive, but stolen material (password hashes, SSH host keys, authenticated sockets) can often be chained into full compromise.
+
 ### Process monitoring
 
 You can use tools like [**pspy**](https://github.com/DominicBreuker/pspy) to monitor processes. This can be very useful to identify vulnerable processes being executed frequently or when a set of requirements are met.
@@ -2322,5 +2348,9 @@ vmware-tools-service-discovery-untrusted-search-path-cve-2025-41244.md
 - [0xdf – HTB: Browsed](https://0xdf.gitlab.io/2026/03/28/htb-browsed.html)
 - [PEP 3147 – PYC Repository Directories](https://peps.python.org/pep-3147/)
 - [Python importlib docs](https://docs.python.org/3/library/importlib.html)
+- [0xdeadbeefnetwork/ssh-keysign-pwn](https://github.com/0xdeadbeefnetwork/ssh-keysign-pwn)
+- [Qualys TRU: CVE-2026-46333 Linux kernel ptrace path](https://blog.qualys.com/vulnerabilities-threat-research/2026/05/20/cve-2026-46333-local-root-privilege-escalation-and-credential-disclosure-in-the-linux-kernel-ptrace-path)
+- [Linux fix commit `31e62c2ebbfd`](https://github.com/torvalds/linux/commit/31e62c2ebbfdc3fe3dbdf5e02c92a9dc67087a3a)
+- [Ubuntu CVE tracker: CVE-2026-46333](https://ubuntu.com/security/CVE-2026-46333)
 
 {{#include ../../banners/hacktricks-training.md}}
