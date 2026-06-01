@@ -2,7 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-SELinux je **sistem obavezne kontrole pristupa (Mandatory Access Control — MAC) zasnovan na oznakama**. U praksi, to znači da čak i ako DAC dozvole, grupe ili Linux capabilities izgledaju dovoljni za neku akciju, kernel i dalje može odbiti tu akciju jer **source context** nema dozvolu da pristupi **target context** u traženoj klasi/dozvoli.
+SELinux je sistem **Mandatory Access Control (MAC)** zasnovan na oznakama. U praksi, to znači da čak i ako DAC dozvole, grupe ili Linux capabilities izgledaju dovoljni za neku radnju, kernel je i dalje može odbiti jer **source context** nema dozvolu da pristupi **target context** sa traženom class/permission.
 
 Kontekst obično izgleda ovako:
 ```text
@@ -10,15 +10,15 @@ user:role:type:level
 system_u:system_r:httpd_t:s0
 unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023
 ```
-Sa privesc perspektive, `type` (domen za procese, tip za objekte) je obično najvažnije polje:
+Iz perspektive privesc-a, `type` (domain za procese, type za objekte) je obično najvažnije polje:
 
-- Proces radi u **domenu** kao što su `unconfined_t`, `staff_t`, `httpd_t`, `container_t`, `sysadm_t`
-- Fajlovi i socketi imaju **tip** kao što su `admin_home_t`, `shadow_t`, `httpd_sys_rw_content_t`, `container_file_t`
-- Politika odlučuje da li jedan domen može da čita, piše, izvršava ili pređe u drugi
+- Proces radi u **domain** kao što su `unconfined_t`, `staff_t`, `httpd_t`, `container_t`, `sysadm_t`
+- Datoteke i socketi imaju **type** kao što su `admin_home_t`, `shadow_t`, `httpd_sys_rw_content_t`, `container_file_t`
+- Policy odlučuje da li jedan domain može da read/write/execute/transition to the drugi
 
-## Brza enumeracija
+## Fast Enumeration
 
-Ako je SELinux omogućen, enumerišite ga rano jer može objasniti zašto uobičajeni Linux privesc putevi ne uspevaju ili zašto privilegovani wrapper oko "harmless" SELinux alata zapravo može biti kritičan:
+Ako je SELinux enabled, enumeriši ga rano jer može da objasni zašto uobičajene Linux privesc putanje fail-uju ili zašto je privileged wrapper oko "harmless" SELinux tool-a zapravo critical:
 ```bash
 getenforce
 sestatus
@@ -27,7 +27,7 @@ ps -eZ | head
 cat /proc/self/attr/current
 ls -Zd / /root /home /tmp /etc /var/www 2>/dev/null
 ```
-Korisne dodatne provere:
+Korisne naknadne provere:
 ```bash
 # Installed policy modules and local customizations
 semodule -lfull 2>/dev/null
@@ -43,19 +43,19 @@ find / -context '*:default_t:*' -o -context '*:file_t:*' 2>/dev/null
 matchpathcon -V /path/of/interest 2>/dev/null
 restorecon -n -v /path/of/interest 2>/dev/null
 ```
-Zanimljiva zapažanja:
+Zanimljivi nalazi:
 
-- `Disabled` ili `Permissive` režim uklanja većinu vrednosti SELinux-a kao granice.
-- `unconfined_t` obično znači da je SELinux prisutan, ali da taj proces nije značajno ograničen.
+- `Disabled` ili `Permissive` režim uklanja najveći deo vrednosti SELinux-a kao granice.
+- `unconfined_t` obično znači da je SELinux prisutan, ali ne ograničava taj proces na smislen način.
 - `default_t`, `file_t`, ili očigledno pogrešne oznake na prilagođenim putanjama često ukazuju na pogrešno označavanje ili nepotpunu implementaciju.
-- Lokalna prepisivanja u `file_contexts.local` imaju prednost nad podrazumevanim vrednostima politike, zato ih pažljivo pregledajte.
+- Lokalni override-i u `file_contexts.local` imaju prednost nad podrazumevanim policy vrednostima, pa ih pažljivo pregledaj.
 
-## Analiza politike
+## Policy Analysis
 
-SELinux je mnogo lakše napasti ili zaobići kada možete odgovoriti na dva pitanja:
+SELinux je mnogo lakše napasti ili zaobići kada možeš da odgovoriš na dva pitanja:
 
-1. **Kojim resursima moj trenutni domen može pristupiti?**
-2. **U koje domene mogu da pređem?**
+1. **Šta moj trenutni domain može da pristupi?**
+2. **U koje domain-e mogu da pređem?**
 
 Najkorisniji alati za ovo su `sepolicy` i **SETools** (`seinfo`, `sesearch`, `sedta`):
 ```bash
@@ -70,14 +70,14 @@ sesearch --type_transition -s staff_t 2>/dev/null | head
 seinfo -t 2>/dev/null | head
 seinfo -r 2>/dev/null | head
 ```
-Ovo je naročito korisno kada host koristi **confined users** umesto da mapira sve na `unconfined_u`. U tom slučaju, potražite:
+Ovo je posebno korisno kada host koristi **confined users** umesto mapiranja svih na `unconfined_u`. U tom slučaju, tražite:
 
-- mapiranja korisnika putem `semanage login -l`
-- dozvoljene role putem `semanage user -l`
-- dostupne administratorske domene kao što su `sysadm_t`, `secadm_t`, `webadm_t`
+- user mappings preko `semanage login -l`
+- dozvoljene roles preko `semanage user -l`
+- dostupne admin domains kao što su `sysadm_t`, `secadm_t`, `webadm_t`
 - `sudoers` unose koji koriste `ROLE=` ili `TYPE=`
 
-Ako `sudo -l` sadrži unose poput ovih, SELinux je deo granice privilegija:
+Ako `sudo -l` sadrži unose poput ovih, SELinux je deo privilege boundary:
 ```text
 linux_user ALL=(ALL) ROLE=webadm_r TYPE=webadm_t /bin/bash
 ```
@@ -87,44 +87,52 @@ sudo -l
 which newrole runcon
 newrole -l 2>/dev/null
 ```
-`runcon` i `newrole` nisu automatski iskorišćivi, ali ako privilegovani wrapper ili `sudoers` pravilo dozvoljavaju da izaberete bolju ulogu/tip, oni postaju visoko vredne escalation primitives.
+`runcon` i `newrole` nisu automatski exploitable, ali ako privilegovani wrapper ili `sudoers` pravilo omogućava da izabereš bolji role/type, oni postaju visoko vredni escalation primitives.
 
-## Fajlovi, ponovno označavanje i pogrešne konfiguracije velike vrednosti
+## Files, Relabeling, and High-Value Misconfigurations
 
 Najvažnija operativna razlika između uobičajenih SELinux alata je:
 
-- `chcon`: privremena promena oznake na specifičnoj putanji
-- `semanage fcontext`: trajno pravilo mapiranja putanje na oznaku
-- `restorecon` / `setfiles`: ponovo primeni politiku/podrazumevanu oznaku
+- `chcon`: privremena promena label-a na određenoj path
+- `semanage fcontext`: trajno path-to-label pravilo
+- `restorecon` / `setfiles`: ponovo primeni policy/default label
 
-Ovo je veoma važno tokom privesc jer **ponovno označavanje nije samo kozmetičko**. Može promeniti fajl iz "blocked by policy" u "readable/executable by a privileged confined service".
+Ovo je veoma važno tokom privesc jer **relabeling nije samo kozmetika**. Može da pretvori fajl iz "blocked by policy" u "readable/executable by a privileged confined service".
 
-Proverite lokalna pravila za ponovno označavanje i odstupanja u označavanju:
+Proveri local relabel rules i relabel drift:
 ```bash
 grep -R . /etc/selinux/*/contexts/files/file_contexts.local 2>/dev/null
 restorecon -nvr / 2>/dev/null | head -n 50
 matchpathcon -V /etc/passwd /etc/shadow /usr/local/bin/* 2>/dev/null
 ```
-Komande visoke vrednosti koje treba tražiti u `sudo -l`, root wrappers, automation scripts, ili file capabilities:
+Jedan suptilan, ali koristan detalj: običan `restorecon` **ne vraća uvek potpuno sumnjivu oznaku**. Ako je target type u `customizable_types`, možda će ti trebati `-F` da prisiliš potpuno resetovanje. Sa ofanzivne strane, ovo objašnjava zašto neobičan `chcon` ponekad može da preživi površno čišćenje tipa „već smo pokrenuli restorecon“.
+```bash
+grep -R . /etc/selinux/*/contexts/customizable_types 2>/dev/null | head
+restorecon -n -v /path/of/interest 2>/dev/null
+restorecon -F -v /path/of/interest 2>/dev/null
+```
+Komande visoke vrednosti za traženje u `sudo -l`, root wrapperima, automatizacionim skriptama ili file capabilities:
 ```bash
 which semanage restorecon chcon setfiles semodule audit2allow runcon newrole setsebool load_policy 2>/dev/null
 getcap -r / 2>/dev/null | grep -E 'cap_mac_admin|cap_mac_override'
 ```
+Ako se pojavi bilo koja MAC capability, proveri i [Linux capabilities page](linux-capabilities.md); `cap_mac_admin` i `cap_mac_override` su neobične, ali direktno relevantne kada je SELinux deo granice.
+
 Posebno zanimljivo:
 
-- `semanage fcontext`: persistently changes what label a path should receive
-- `restorecon` / `setfiles`: reapplies those changes at scale
-- `semodule -i`: loads a custom policy module
-- `semanage permissive -a <domain_t>`: makes one domain permissive without flipping the whole host
-- `setsebool -P`: permanently changes policy booleans
-- `load_policy`: reloads the active policy
+- `semanage fcontext`: trajno menja koji label treba da dobije putanja
+- `restorecon` / `setfiles`: ponovo primenjuju te promene u velikom obimu
+- `semodule -i`: učitava custom policy modul
+- `semanage permissive -a <domain_t>`: čini jedan domain permissive bez menjanja celog hosta
+- `setsebool -P`: trajno menja policy booleans
+- `load_policy`: ponovo učitava aktivnu policy
 
-Ovo su često **helper primitives**, a ne samostalni root exploits. Njihova vrednost je u tome što vam omogućavaju da:
+Ovo su često **helper primitives**, a ne samostalni root exploits. Njihova vrednost je u tome što ti omogućavaju da:
 
-- postavite ciljni domen u permissive režim
-- proširite pristup između vašeg domena i zaštićenog type-a
-- ponovo označite (relabel) fajlove kojima upravlja napadač tako da ih privilegovana usluga može pročitati ili izvršiti
-- oslabite confined servis dovoljno da postojeći lokalni bug postane iskoristiv
+- učiniš target domain permissive
+- proširiš access između svog domaina i zaštićenog type-a
+- relabel-uješ fajlove pod kontrolom napadača tako da ih privilegovani servis može čitati ili izvršavati
+- dovoljno oslabiš confined servis da postojeći local bug postane exploitable
 
 Primeri provera:
 ```bash
@@ -135,44 +143,61 @@ sudo -l | grep -E 'semanage|restorecon|setfiles|semodule|runcon|newrole|setseboo
 semanage fcontext -C -l 2>/dev/null
 restorecon -n -v /usr/local/bin /opt /srv /var/www 2>/dev/null
 ```
-Ako možete učitati policy module kao root, obično kontrolišete SELinux granicu:
+Ako možete da učitate policy module kao root, obično kontrolišete SELinux boundary:
 ```bash
 ausearch -m AVC,USER_AVC -ts recent 2>/dev/null | audit2allow -M localfix
 sudo semodule -i localfix.pp
 ```
-Zato `audit2allow`, `semodule` i `semanage permissive` treba tretirati kao osetljive administratorske površine tokom post-exploitation. Mogu tiho pretvoriti blokirani lanac u funkcionalan bez menjanja klasičnih UNIX dozvola.
+Zato `audit2allow`, `semodule` i `semanage permissive` treba tretirati kao osetljive admin surface tokom post-exploitation. Oni mogu tiho da pretvore blokirani chain u funkcionalan, bez menjanja klasičnih UNIX permissions.
 
-## Naznake audita
+## Hidden Denials and Module Extraction
 
-AVC denials često predstavljaju ofanzivni signal, a ne samo defanzivnu buku. Pokazuju vam:
+Vrlo česta offensive frustracija je chain koji pada sa običnim `EACCES`, dok očekivano AVC denial nikada ne pojavljuje. `dontaudit` rules mogu da skrivaju tačno permission koji vam treba. Ako možete da pokrenete `semodule` kroz `sudo` ili drugi privileged wrapper, privremeno onemogućavanje `dontaudit` može pretvoriti tihi failure u precizan policy clue:
+```bash
+# Rebuild policy without dontaudit rules, trigger the action again, then inspect AVCs
+sudo semodule -DB
+ausearch -m AVC,USER_AVC,SELINUX_ERR -ts recent 2>/dev/null | tail -n 50
+sudo semodule -B
 
-- koji ciljni objekat/tip ste pogodili
-- koja dozvola je bila odbijena
-- koji domen trenutno kontrolišete
-- da li bi mala izmena politike učinila lanac funkcionalnim
+# Extract installed modules for offline review / diffing
+semodule -lfull 2>/dev/null
+semodule -E --cil <module_name> 2>/dev/null
+```
+Ovo je takođe korisno za pregled šta su lokalni administratori već promenili. Mali custom module ili pravilo sa jednim domenom u permissive režimu je često razlog zbog kog se ciljna usluga ponaša mnogo labavije nego što bi osnovna politika sugerisala.
+
+## Audit Clues
+
+AVC odricanja su često ofanzivan signal, a ne samo defanzivna buka. Govore vam:
+
+- koji target object/type ste pogodili
+- koja je permission bila denied
+- koji domain trenutno kontrolišete
+- da li bi mala promena politike učinila chain funkcionalnim
 ```bash
 ausearch -m AVC,USER_AVC,SELINUX_ERR -ts recent 2>/dev/null
 journalctl -t setroubleshoot --no-pager 2>/dev/null | tail -n 50
 ```
-Ako local exploit ili persistence attempt stalno pada sa `EACCES` ili čudnim "permission denied" greškama, uprkos root-looking DAC permissions, obično vredi proveriti SELinux pre nego što se vektor odbaci.
+Ako lokalni exploit ili pokušaj persistence stalno pada sa `EACCES` ili čudnim "permission denied" greškama uprkos DAC dozvolama koje izgledaju kao root, SELinux obično vredi proveriti pre nego što odbaciš taj vektor.
 
-## SELinux korisnici
+## SELinux Users
 
-Postoje SELinux korisnici pored običnih Linux korisnika. Svaki Linux korisnik je mapiran na SELinux korisnika u okviru politike, što omogućava sistemu da primeni različite dozvoljene uloge i domene za različite naloge.
+Postoje SELinux users pored uobičajenih Linux users. Svaki Linux user se mapira na SELinux user kao deo policy-ja, što sistemu omogućava da nametne različite dozvoljene roles i domains za različite naloge.
 
-Brze provere:
+Quick checks:
 ```bash
 id -Z
 semanage login -l 2>/dev/null
 semanage user -l 2>/dev/null
+sudo -l 2>/dev/null
+grep -R "ROLE=\|TYPE=" /etc/sudoers /etc/sudoers.d 2>/dev/null
 ```
-Na mnogim mainstream sistemima, korisnici su mapirani na `unconfined_u`, što smanjuje praktični uticaj ograničenja korisnika. U ojačanim (hardened) okruženjima, međutim, confined korisnici mogu učiniti `sudo`, `su`, `newrole` i `runcon` mnogo zanimljivijim jer **put eskalacije može zavisiti od ulaska u bolju SELinux rolu/tip, a ne samo od postizanja UID 0**.
+Na mnogim mainstream sistemima, korisnici su mapirani na `unconfined_u`, što smanjuje praktični uticaj user confinement. Na hardened deploymentima, međutim, confined korisnici mogu učiniti `sudo`, `su`, `newrole`, i `runcon` mnogo zanimljivijim jer **putanja eskalacije može zavisiti od ulaska u bolji SELinux role/type, a ne samo od postajanja UID 0**. Takođe zapamtite da neki confined korisnici uopšte ne mogu da pozovu `sudo`/`su` osim ako policy eksplicitno dozvoljava underlying setuid transition, pa host koji koristi `staff_u` + `sysadm_r` može naizgled minor `sudo ROLE=` / `TYPE=` rule pretvoriti u stvarnu privilege boundary.
 
-## SELinux u kontejnerima
+## SELinux in Containers
 
-Container runtimes često pokreću workload-e u ograničenom domenu kao što je `container_t` i označavaju sadržaj kontejnera kao `container_file_t`. Ako proces iz kontejnera pobegne ali i dalje radi sa kontejnerskom oznakom, upisi na hostu i dalje mogu da ne uspeju jer je granica oznake ostala netaknuta.
+Container runtimes obično pokreću workloads u confined domain-u kao što je `container_t` i označavaju container content kao `container_file_t`. Ako container process pobegne ali i dalje radi sa container label-om, host writes i dalje mogu da fail-uju jer je label boundary ostao netaknut.
 
-Brzi primer:
+Quick example:
 ```shell
 $ podman run -d fedora sleep 100
 d4194babf6b877c7100e79de92cd6717166f7302113018686cea650ea40bd7cb
@@ -180,13 +205,15 @@ $ podman top -l label
 LABEL
 system_u:system_r:container_t:s0:c647,c780
 ```
-Vredno pažnje u modernim operacijama sa kontejnerima:
+Deo `c647,c780` nije dekoracija. U mnogim container deployments, runtimes dinamički dodeljuju MCS categories tako da su dva procesa koja rade kao `container_t` i dalje odvojena jedan od drugog. Ako escape završi tako što si u host namespace, ali zadrži originalni set kategorija, neslaganja kategorija i dalje mogu da objasne zašto neki host putevi ostaju nečitljivi ili neupisivi.
 
-- `--security-opt label=disable` može efikasno premestiti radno opterećenje u unconfined tip povezan sa kontejnerima, kao što je `spc_t`
-- bind mounts sa `:z` / `:Z` pokreću relabelovanje host putanje za deljenu/privatnu upotrebu u kontejneru
-- široko relabelovanje sadržaja hosta može samo po sebi postati bezbednosni problem
+Modern container operations vredne pomena:
 
-Ova stranica održava sadržaj o kontejnerima kratkim da bi se izbeglo dupliranje. Za slučajeve zlonamerne upotrebe specifične za kontejnere i primere u runtime-u, pogledajte:
+- `--security-opt label=disable` može efektivno prebaciti workload na unconfined container-related type kao što je `spc_t`
+- bind mounts sa `:z` / `:Z` pokreću relabeling host path-a za shared/private container upotrebu
+- široko relabeling host sadržaja može samo po sebi postati security issue
+
+Ova strana drži container sadržaj kratak da bi se izbegla duplikacija. Za container-specific abuse cases i runtime primeri, pogledaj:
 
 {{#ref}}
 container-security/protections/selinux.md
@@ -196,4 +223,6 @@ container-security/protections/selinux.md
 
 - [Red Hat docs: Using SELinux](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html-single/using_selinux/index)
 - [SETools: Policy analysis tools for SELinux](https://github.com/SELinuxProject/setools)
+- [Managing confined and unconfined users - RHEL 9 docs](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/using_selinux/managing-confined-and-unconfined-users_using-selinux)
+- [semodule(8) - Linux manual page](https://man7.org/linux/man-pages/man8/semodule.8.html)
 {{#include ../../banners/hacktricks-training.md}}
