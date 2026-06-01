@@ -2,23 +2,23 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-SELinux 是一个 **基于标签的 Mandatory Access Control (MAC)** 系统。在实践中，这意味着即使 DAC permissions、groups 或 Linux capabilities 看起来足以执行某个动作，kernel 仍可能拒绝该操作，因为 **source context** 未被允许以请求的 class/permission 访问 **target context**。
+SELinux 是一个**基于标签的 Mandatory Access Control (MAC)** 系统。实际上，这意味着即使 DAC 权限、组或 Linux capabilities 看起来足以执行某个操作，kernel 仍然可以拒绝它，因为**source context** 不被允许以请求的 class/permission 访问**target context**。
 
-上下文通常看起来像：
+一个 context 通常看起来像这样：
 ```text
 user:role:type:level
 system_u:system_r:httpd_t:s0
 unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023
 ```
-从 privesc 角度来看，`type`（进程的 domain、对象的 type）通常是最重要的字段：
+从提权的角度来看，`type`（进程的 domain，对象的 type）通常是最重要的字段：
 
-- 进程运行在一个 **domain** 中，例如 `unconfined_t`、`staff_t`、`httpd_t`、`container_t`、`sysadm_t`
-- 文件和套接字具有 **type**，例如 `admin_home_t`、`shadow_t`、`httpd_sys_rw_content_t`、`container_file_t`
-- 策略决定一个 domain 是否可以进行 read/write/execute/transition
+- 一个进程运行在某个 **domain** 中，例如 `unconfined_t`、`staff_t`、`httpd_t`、`container_t`、`sysadm_t`
+- 文件和 socket 有一个 **type**，例如 `admin_home_t`、`shadow_t`、`httpd_sys_rw_content_t`、`container_file_t`
+- policy 决定一个 domain 是否可以对另一个 domain 进行 read/write/execute/transition
 
-## 快速枚举
+## Fast Enumeration
 
-如果启用了 SELinux，应尽早枚举它，因为它可以解释为什么常见的 Linux privesc 路径会失败，或为什么围绕一个 "harmless" 的 SELinux 工具的特权包装实际上至关重要：
+如果 SELinux 已启用，尽早枚举它，因为它可以解释为什么常见的 Linux privesc 路径会失败，或者为什么一个包裹在“无害” SELinux 工具外面的特权 wrapper 实际上至关重要：
 ```bash
 getenforce
 sestatus
@@ -43,21 +43,21 @@ find / -context '*:default_t:*' -o -context '*:file_t:*' 2>/dev/null
 matchpathcon -V /path/of/interest 2>/dev/null
 restorecon -n -v /path/of/interest 2>/dev/null
 ```
-有趣的发现：
+Interesting findings:
 
-- `Disabled` 或 `Permissive` 模式会移除 SELinux 作为边界的大部分价值。
-- `unconfined_t` 通常表示 SELinux 存在，但对该进程没有实质性约束。
-- `default_t`, `file_t`, 或者自定义路径上的明显错误标签通常表示标记错误或部署不完整。
-- 本地覆盖在 `file_contexts.local` 中优先于策略默认值，因此请仔细检查它们。
+- `Disabled` or `Permissive` mode removes most of the value of SELinux as a boundary.
+- `unconfined_t` usually means SELinux is present but not meaningfully constraining that process.
+- `default_t`, `file_t`, or obviously wrong labels on custom paths often indicate mislabeling or incomplete deployment.
+- Local overrides in `file_contexts.local` take precedence over policy defaults, so review them carefully.
 
-## 策略分析
+## Policy Analysis
 
-当你能回答以下两个问题时，攻击或绕过 SELinux 会容易得多：
+SELinux is much easier to attack or bypass when you can answer two questions:
 
-1. **我的当前域可以访问什么？**
-2. **我可以转换到哪些域？**
+1. **What can my current domain access?**
+2. **What domains can I transition into?**
 
-为此最有用的工具是 `sepolicy` 和 **SETools** (`seinfo`, `sesearch`, `sedta`)：
+The most useful tools for this are `sepolicy` and **SETools** (`seinfo`, `sesearch`, `sedta`):
 ```bash
 # Transition graph from the current domain
 sepolicy transition -s "$(id -Z | awk -F: '{print $3}')" 2>/dev/null
@@ -70,61 +70,69 @@ sesearch --type_transition -s staff_t 2>/dev/null | head
 seinfo -t 2>/dev/null | head
 seinfo -r 2>/dev/null | head
 ```
-当主机使用 **confined users** 而不是将所有人映射到 `unconfined_u` 时，这尤其有用。在这种情况下，请检查：
+当主机使用 **confined users** 而不是把所有人都映射到 `unconfined_u` 时，这一点尤其有用。在这种情况下，检查：
 
-- 用户映射：`semanage login -l`
-- 允许的角色：`semanage user -l`
-- 可到达的管理员域，例如 `sysadm_t`、`secadm_t`、`webadm_t`
-- `sudoers` 中使用 `ROLE=` 或 `TYPE=` 的条目
+- 通过 `semanage login -l` 的用户映射
+- 通过 `semanage user -l` 的允许角色
+- 可到达的 admin domains，例如 `sysadm_t`、`secadm_t`、`webadm_t`
+- 使用 `ROLE=` 或 `TYPE=` 的 `sudoers` 条目
 
-如果 `sudo -l` 包含如下条目，SELinux 就是权限边界的一部分：
+如果 `sudo -l` 包含类似这样的条目，SELinux 就是特权边界的一部分：
 ```text
 linux_user ALL=(ALL) ROLE=webadm_r TYPE=webadm_t /bin/bash
 ```
-还要检查 `newrole` 是否可用：
+另外检查 `newrole` 是否可用：
 ```bash
 sudo -l
 which newrole runcon
 newrole -l 2>/dev/null
 ```
-`runcon` 和 `newrole` 并非自动可被利用，但如果一个有特权的包装器或 `sudoers` 规则允许你选择更合适的 role/type，它们就会成为高价值的提权原语。
+`runcon` 和 `newrole` 并不能自动被利用，但如果某个 privileged wrapper 或 `sudoers` 规则让你能够选择更好的 role/type，它们就会成为高价值的提权原语。
 
-## 文件、重新标记与高价值误配置
+## Files、Relabeling 和高价值错误配置
 
 常见 SELinux 工具之间最重要的操作差异是：
 
-- `chcon`: 在特定路径上的临时标签更改
-- `semanage fcontext`: 持久的路径到标签映射规则
-- `restorecon` / `setfiles`: 重新应用策略/默认标签
+- `chcon`: 对特定路径临时修改 label
+- `semanage fcontext`: 持久化的 path-to-label 规则
+- `restorecon` / `setfiles`: 重新应用 policy/default label
 
-这在 privesc 过程中非常重要，因为 **重新标记不仅仅是表面工作**。它可以将一个文件从“被策略阻止”变为“对受限的特权服务可读/可执行”。
+这在 privesc 期间非常重要，因为**relabeling 不只是表面上的变化**。它可以把一个文件从“被 policy 阻止”变成“可被特权受限服务读取/执行”。
 
-检查本地的重新标记规则和重新标记漂移：
+检查本地 relabel 规则和 relabel drift：
 ```bash
 grep -R . /etc/selinux/*/contexts/files/file_contexts.local 2>/dev/null
 restorecon -nvr / 2>/dev/null | head -n 50
 matchpathcon -V /etc/passwd /etc/shadow /usr/local/bin/* 2>/dev/null
 ```
-在 `sudo -l`、root wrappers、automation scripts 或 file capabilities 中要搜寻的高价值命令：
+一个微妙但有用的细节：普通的 `restorecon` **并不总是能完全还原可疑的标签**。如果目标类型在 `customizable_types` 中，你可能需要使用 `-F` 来强制完全重置。从进攻角度看，这也解释了为什么一个异常的 `chcon` 有时会在一次随意的“我们已经运行过 restorecon 了”清理后仍然保留下来。
+```bash
+grep -R . /etc/selinux/*/contexts/customizable_types 2>/dev/null | head
+restorecon -n -v /path/of/interest 2>/dev/null
+restorecon -F -v /path/of/interest 2>/dev/null
+```
+在 `sudo -l`、root wrappers、automation scripts 或 file capabilities 中要重点查找的高价值命令：
 ```bash
 which semanage restorecon chcon setfiles semodule audit2allow runcon newrole setsebool load_policy 2>/dev/null
 getcap -r / 2>/dev/null | grep -E 'cap_mac_admin|cap_mac_override'
 ```
-尤其值得注意：
+如果出现任一 MAC capability，也请同时交叉检查 [Linux capabilities page](linux-capabilities.md)；`cap_mac_admin` 和 `cap_mac_override` 虽然不常见，但当 SELinux 是边界的一部分时它们直接相关。
 
-- `semanage fcontext`: 持久地更改一个路径应获得的标签
-- `restorecon` / `setfiles`: 批量重新应用这些更改
-- `semodule -i`: 加载自定义策略模块
-- `semanage permissive -a <domain_t>`: 使单个域变为 permissive，而不必切换整个主机
-- `setsebool -P`: 永久更改策略布尔值
-- `load_policy`: 重新加载活动策略
+特别值得关注：
 
-这些通常是 **辅助原语**，而不是独立的 root exploits。它们的价值在于可以让你：
+- `semanage fcontext`：持久化地更改某个 path 应该获得的 label
+- `restorecon` / `setfiles`：在大规模范围内重新应用这些更改
+- `semodule -i`：加载一个自定义 policy module
+- `semanage permissive -a <domain_t>`：让某个 domain 变为 permissive，而不影响整个主机
+- `setsebool -P`：永久更改 policy booleans
+- `load_policy`：重新加载当前 active policy
 
-- 使目标域变为 permissive
-- 放宽你的域与受保护类型之间的访问权限
-- 重新标记攻击者控制的文件，使有特权的服务能够读取或执行它们
-- 削弱受限服务，使现有的本地漏洞变得可利用
+这些通常是 **helper primitives**，而不是独立的 root exploits。它们的价值在于你可以用它们来：
+
+- 让目标 domain 变为 permissive
+- 扩大你的 domain 与受保护 type 之间的访问
+- 重新标记由 attacker-controlled files，使特权服务可以读取或执行它们
+- 削弱一个受限服务，使已有的本地 bug 变得可利用
 
 示例检查：
 ```bash
@@ -135,44 +143,61 @@ sudo -l | grep -E 'semanage|restorecon|setfiles|semodule|runcon|newrole|setseboo
 semanage fcontext -C -l 2>/dev/null
 restorecon -n -v /usr/local/bin /opt /srv /var/www 2>/dev/null
 ```
-如果你能以 root 身份加载一个 policy module，通常就能控制 SELinux 的边界：
+如果你可以以 root 加载一个 policy module，你通常就能控制 SELinux 边界：
 ```bash
 ausearch -m AVC,USER_AVC -ts recent 2>/dev/null | audit2allow -M localfix
 sudo semodule -i localfix.pp
 ```
-这就是为什么 `audit2allow`、`semodule` 和 `semanage permissive` 在 post-exploitation 期间应被视为敏感的管理界面。它们可以在不更改经典 UNIX 权限的情况下悄然将被阻止的链转换为可用链。
+这就是为什么在 post-exploitation 期间，`audit2allow`、`semodule` 和 `semanage permissive` 应被视为敏感的 admin surface。它们可以在不更改经典 UNIX permissions 的情况下，悄无声息地把一条被阻止的链转换成可工作的链。
 
-## 审计线索
+## Hidden Denials and Module Extraction
 
-AVC denials 往往是进攻信号，而不仅仅是防御噪音。它们会告诉你：
+一个很常见的 offensive 挫折是，某条链以一个平淡的 `EACCES` 失败，而预期中的 AVC denial 却从未出现。`dontaudit` rules 可能正在隐藏你真正需要的那个 permission。如果你可以通过 `sudo` 或其他 privileged wrapper 运行 `semodule`，临时禁用 `dontaudit` 可以把一次静默失败变成一个精确的 policy clue：
+```bash
+# Rebuild policy without dontaudit rules, trigger the action again, then inspect AVCs
+sudo semodule -DB
+ausearch -m AVC,USER_AVC,SELINUX_ERR -ts recent 2>/dev/null | tail -n 50
+sudo semodule -B
 
-- 你命中的目标对象/类型是什么
-- 哪种权限被拒绝
-- 你当前控制的是哪个域
-- 小幅策略更改是否能使链路生效
+# Extract installed modules for offline review / diffing
+semodule -lfull 2>/dev/null
+semodule -E --cil <module_name> 2>/dev/null
+```
+这对于审查本地管理员已经做了哪些更改也很有用。一个小的自定义 module 或一个域的 permissive rule，往往就是目标 service 的行为比基础 policy 显示得宽松得多的原因。
+
+## Audit Clues
+
+AVC denials 往往是进攻性信号，而不只是防御性噪音。它们会告诉你：
+
+- 你命中了哪个目标 object/type
+- 哪个 permission 被拒绝了
+- 你当前控制的是哪个 domain
+- 一个小的 policy 更改是否能让整条链跑通
 ```bash
 ausearch -m AVC,USER_AVC,SELINUX_ERR -ts recent 2>/dev/null
 journalctl -t setroubleshoot --no-pager 2>/dev/null | tail -n 50
 ```
-If a local exploit or persistence attempt keeps failing with `EACCES` or strange "permission denied" errors despite root-looking DAC permissions, SELinux is usually worth checking before discarding the vector.
+如果本地 exploit 或 persistence 尝试在看起来有 root 级别 DAC 权限的情况下仍然持续失败，并报 `EACCES` 或奇怪的“permission denied”错误，通常在放弃这个 vector 之前值得先检查 SELinux。
 
-## SELinux 用户
+## SELinux Users
 
-除了普通 Linux 用户之外，还有 SELinux 用户。每个 Linux 用户在策略中都被映射到一个 SELinux 用户，这让系统能够对不同账号施加不同的允许角色和域。
+除了普通 Linux users 之外，还有 SELinux users。每个 Linux user 都会作为 policy 的一部分映射到一个 SELinux user，这让系统可以对不同账户施加不同允许的 roles 和 domains。
 
-快速检查：
+Quick checks:
 ```bash
 id -Z
 semanage login -l 2>/dev/null
 semanage user -l 2>/dev/null
+sudo -l 2>/dev/null
+grep -R "ROLE=\|TYPE=" /etc/sudoers /etc/sudoers.d 2>/dev/null
 ```
-在许多主流系统上，用户被映射到 `unconfined_u`，这降低了用户限制的实际影响。但在加固的部署中，受限用户会使 `sudo`、`su`、`newrole` 和 `runcon` 更加有趣，因为 **提权路径可能依赖于进入更高的 SELinux 角色/类型，而不仅仅是成为 UID 0**。
+在许多主流系统上，用户会被映射到 `unconfined_u`，这会降低用户 confinement 的实际影响。不过在加固过的部署中，confined users 会让 `sudo`、`su`、`newrole` 和 `runcon` 变得有趣得多，因为**提权路径可能取决于进入一个更好的 SELinux role/type，而不仅仅是成为 UID 0**。还要记住，某些 confined users 根本不能调用 `sudo`/`su`，除非 policy 明确允许底层的 setuid transition，因此一个使用 `staff_u` + `sysadm_r` 的主机，可能会把看似很小的 `sudo ROLE=` / `TYPE=` 规则变成真正的 privilege boundary。
 
-## 容器中的 SELinux
+## SELinux in Containers
 
-容器运行时通常在受限域中启动工作负载（例如 `container_t`），并将容器内容标记为 `container_file_t`。如果容器进程逃逸但仍以容器标签运行，主机写入可能仍会失败，因为标签边界仍然保持完整。
+Container runtimes 通常会在一个受限 domain 中启动 workload，例如 `container_t`，并将 container 内容标记为 `container_file_t`。如果一个 container process 逃逸了，但仍然以 container label 运行，host writes 可能还是会失败，因为 label boundary 仍然保持完整。
 
-快速示例：
+Quick example:
 ```shell
 $ podman run -d fedora sleep 100
 d4194babf6b877c7100e79de92cd6717166f7302113018686cea650ea40bd7cb
@@ -180,20 +205,24 @@ $ podman top -l label
 LABEL
 system_u:system_r:container_t:s0:c647,c780
 ```
+`c647,c780` 这部分不是装饰。在许多容器部署中，runtime 会动态分配 MCS categories，这样两个以 `container_t` 运行的进程仍然彼此隔离。如果一次 escape 让你进入 host namespace，但保留了原始的 category set，category 不匹配仍然可以解释为什么某些 host 路径依然不可读或不可写。
+
 值得注意的现代容器操作：
 
-- `--security-opt label=disable` can effectively move the workload to an unconfined container-related type such as `spc_t`
-- bind mounts with `:z` / `:Z` trigger relabeling of the host path for shared/private container use
-- broad relabeling of host content can become a security issue on its own
+- `--security-opt label=disable` 可以有效地把 workload 移到一个未受限的容器相关类型，比如 `spc_t`
+- 带有 `:z` / `:Z` 的 bind mounts 会触发对 host path 的 relabeling，以供共享/私有容器使用
+- 对 host 内容进行大范围 relabeling 本身也可能成为安全问题
 
-为避免重复，本页对容器内容做了简略。有关容器特定的滥用场景和运行时示例，请查看：
+本页为了避免重复，简要保留 container 内容。关于 container-specific abuse cases 和 runtime examples，请查看：
 
 {{#ref}}
 container-security/protections/selinux.md
 {{#endref}}
 
-## 参考资料
+## References
 
 - [Red Hat docs: Using SELinux](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html-single/using_selinux/index)
 - [SETools: Policy analysis tools for SELinux](https://github.com/SELinuxProject/setools)
+- [Managing confined and unconfined users - RHEL 9 docs](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/using_selinux/managing-confined-and-unconfined-users_using-selinux)
+- [semodule(8) - Linux manual page](https://man7.org/linux/man-pages/man8/semodule.8.html)
 {{#include ../../banners/hacktricks-training.md}}
