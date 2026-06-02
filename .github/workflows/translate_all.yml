@@ -281,4 +281,4 @@ jobs:
         run: |
           aws cloudfront create-invalidation \
             --distribution-id "${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}" \
-            --paths "/$BRANCH/*" "/robots.txt" "/sitemap.xml" "/$BRANCH/sitemap.xml"
+            --paths "/$BRANCH/*" "/sitemap.xml" "/$BRANCH/sitemap.xml"
