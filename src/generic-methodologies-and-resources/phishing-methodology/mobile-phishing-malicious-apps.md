@@ -241,7 +241,7 @@ Por qué evade controles simples:
 Ver también WebSocket tradecraft y tooling:
 
 {{#ref}}
-../../pentesting-web/websocket-attacks.md
+../basic-forensic-methodology/android-malware-post-exploitation.md
 {{#endref}}
 
 
@@ -313,7 +313,7 @@ ctx.startActivity(i);
 Véase también:
 
 {{#ref}}
-../../mobile-pentesting/android-app-pentesting/accessibility-services-abuse.md
+../../pentesting-web/websocket-attacks.md
 {{#endref}}
 
 ### Overlay phishing/ransom via WebView
