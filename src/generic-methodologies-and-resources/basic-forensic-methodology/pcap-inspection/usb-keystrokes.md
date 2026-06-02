@@ -4,7 +4,7 @@
 
 If you have a pcap containing the communication via USB of a keyboard like the following one:
 
-![](<../../../images/image (962).png>)
+![USB Keystrokes: If you have a pcap containing the communication via USB of a keyboard like the following one](<../../../images/image (962).png>)
 
 USB keyboards usually speak the HID **boot protocol**, so every interrupt transfer towards the host is only 8 bytes long: one byte of modifier bits (Ctrl/Shift/Alt/Super), one reserved byte, and up to six keycodes per report. Decoding those bytes is enough to rebuild everything that was typed.
 

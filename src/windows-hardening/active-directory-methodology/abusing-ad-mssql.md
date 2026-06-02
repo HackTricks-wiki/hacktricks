@@ -257,7 +257,7 @@ From **Windows** you could also find the links and execute commands manually usi
 
 _Login using Windows authentication:_
 
-![](<../../images/image (808).png>)
+![Metasploit - Manual - Openquery(): Login using Windows authentication](<../../images/image (808).png>)
 
 #### Find Trustable Links
 
@@ -266,7 +266,7 @@ select * from master..sysservers;
 EXEC sp_linkedservers;
 ```
 
-![](<../../images/image (716).png>)
+![Manual - Openquery() - Find Trustable Links: EXEC sp linkedservers;](<../../images/image (716).png>)
 
 #### Execute queries in trustable link
 
@@ -279,7 +279,7 @@ select * from openquery("dcorp-sql1", 'select * from master..sysservers')
 > [!WARNING]
 > Check where double and single quotes are used, it's important to use them that way.
 
-![](<../../images/image (643).png>)
+![Find Trustable Links - Execute queries in trustable link: Check where double and single quotes are used, it's important to use them that way](<../../images/image (643).png>)
 
 You can continue these trusted links chain forever manually.
 

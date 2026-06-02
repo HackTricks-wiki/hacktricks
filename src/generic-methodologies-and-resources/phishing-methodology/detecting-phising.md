@@ -131,7 +131,7 @@ The post [https://0xpatrik.com/phishing-domains/](https://0xpatrik.com/phishing-
 
 However, you can do "the same" using the free web [**crt.sh**](https://crt.sh). You can **search for the keyword** and the **filter** the results **by date and CA** if you wish.
 
-![](<../../images/image (519).png>)
+![Domain names using keywords - Certificate Transparency: However, you can do "the same" using the free web crt.sh . You can search for the keyword and the filter the results by date and...](<../../images/image (519).png>)
 
 Using this last option you can even use the field Matching Identities to see if any identity from the real domain matches any of the suspicious domains (note that a suspicious domain can be a false positive).
 

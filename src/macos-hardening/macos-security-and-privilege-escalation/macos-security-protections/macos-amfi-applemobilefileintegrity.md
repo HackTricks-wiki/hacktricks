@@ -8,6 +8,8 @@ It focuses on enforcing the integrity of the code running on the system providin
 
 Moreover, for some operations, the kext prefers to contact the user space running daemon `/usr/libexec/amfid`. This trust relationship has been abused in several jailbreaks.
 
+On recent macOS versions, AMFI is no longer conveniently exposed as a standalone on-disk kext, so reversing usually means working from the **kernelcache** or a **KDK** instead of browsing `/System/Library/Extensions`.
+
 AMFI uses **MACF** policies and it registers its hooks the moment it's started. Also, preventing its loading or unloading it could trigger a kernel panic. However, there are some boot arguments that allow to debilitate AMFI:
 
 - `amfi_unrestricted_task_for_pid`: Allow task_for_pid to be allowed without required entitlements
@@ -76,6 +78,25 @@ It's possible to see when `amfid` is requested to check a binary and the respons
 
 Once a message is received via the special port **MIG** is used to send each function to the function it's calling. The main functions were reversed and explained inside the book.
 
+### DYLD policy and library validation
+
+Recent `dyld` versions call `amfi_check_dyld_policy_self()` very early from `configureProcessRestrictions()` to ask AMFI whether the process may use `DYLD_*` path variables, interposing, fallback paths, embedded variables, or tolerate failed library insertion. Therefore, when triaging an injection surface it isn't enough to inspect only Mach-O load commands: you also need to inspect the entitlements and runtime flags that AMFI will translate into `dyld` policy.
+
+A practical triage loop is:
+
+```bash
+BIN=/path/to/app/Contents/MacOS/binary
+
+# Interesting AMFI-related entitlements
+codesign -d --entitlements :- "$BIN" 2>&1 | \
+  egrep "disable-library-validation|clear-library-validation|allow-dyld-environment-variables|allow-jit|allow-unsigned-executable-memory|disable-executable-page-protection|get-task-allow"
+
+# Runtime flags / TeamID / hardened-runtime metadata
+codesign -dvvv "$BIN" 2>&1 | egrep "TeamIdentifier=|Runtime Version|flags="
+```
+
+On modern macOS many Apple binaries don't carry `com.apple.security.cs.disable-library-validation` directly anymore and instead ship with `com.apple.private.security.clear-library-validation`. In that case library validation isn't disabled at `execve` time: the process must call `csops(..., CS_OPS_CLEAR_LV, ...)` on itself, and XNU only allows that operation on the calling process when the entitlement is present. From an offensive perspective this matters because a target may become injectable only **after** it reaches the code path that explicitly clears LV (for example, shortly before loading optional plugins).
+
 ## Provisioning Profiles
 
 A provisioning profile can be used to sign code. There are **Developer** profiles that can be used to sign code and test it, and **Enterprise** profiles which can be used in all devices.
@@ -114,19 +135,29 @@ Note that the entitlements entry will contain a restricted set of entitlements a
 
 Note that profiles are usually located in `/var/MobileDeviceProvisioningProfiles` and it's possible to check them with **`security cms -D -i /path/to/profile`**
 
-## **libmis.dyld**
+## **libmis.dylib**
 
-This is the external library that `amfid` calls i order to ask if it should allow something or not. This has been historically abused in jailbreaking by running a backdoored version of it that would allow everything.
+This is the external library that `amfid` calls in order to ask if it should allow something or not. This has been historically abused in jailbreaking by running a backdoored version of it that would allow everything.
 
 In macOS this is inside `MobileDevice.framework`.
 
 ## AMFI Trust Caches
 
-iOS AMFI maintains a lost of known hashes which are signed ad-hoc, called the **Trust Cache** and found in the kext's `__TEXT.__const` section. Note that in very specific and sensitive operations It's possible to extend this Trust Cache with an external file.
+Trust caches aren't just an iOS concept. On modern macOS, especially on **Apple silicon**, the static trust cache and loadable trust caches are part of the Secure Boot chain. When a Mach-O's **CodeDirectory hash** is present there, AMFI can grant it **platform privilege** without doing further authenticity checks at launch time. This also means Apple can lock platform binaries to a specific OS version and prevent older Apple-signed binaries from being replayed on newer systems.
+
+On recent macOS releases, trust-cache metadata is also tied to **launch constraints**, so copied system apps and binaries started from the wrong parent/location can be rejected by AMFI even if they are still Apple-signed. The detailed extraction and reversing workflow is covered in:
+
+{{#ref}}
+macos-launch-environment-constraints.md
+{{#endref}}
+
+In iOS and jailbreak research you'll still find the traditional model of **loadable trust caches** being used to whitelist ad-hoc signed binaries.
 
 ## References
 
 - [**\*OS Internals Volume III**](https://newosxbook.com/home.html)
+- [https://theevilbit.github.io/posts/com.apple.private.security.clear-library-validation/](https://theevilbit.github.io/posts/com.apple.private.security.clear-library-validation/)
+- [https://support.apple.com/guide/security/trust-caches-sec7d38fbf97/web](https://support.apple.com/guide/security/trust-caches-sec7d38fbf97/web)
 
 {{#include ../../../banners/hacktricks-training.md}}
 

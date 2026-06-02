@@ -61,7 +61,7 @@ In order to debug code using DNSpy you need to:
 
 First, change the **Assembly attributes** related to **debugging**:
 
-![](<../../images/image (973).png>)
+![DNSpy Logging - DNSpy Debugging: First, change the Assembly attributes related to debugging](<../../images/image (973).png>)
 
 From:
 
@@ -80,11 +80,11 @@ DebuggableAttribute.DebuggingModes.EnableEditAndContinue)]
 
 And click on **compile**:
 
-![](<../../images/image (314) (1).png>)
+![DNSpy Logging - DNSpy Debugging: And click on compile](<../../images/image (314) (1).png>)
 
 Then save the new file via _**File >> Save module...**_:
 
-![](<../../images/image (602).png>)
+![DNSpy Logging - DNSpy Debugging: Then save the new file via File Save module](<../../images/image (602).png>)
 
 This is necessary because if you don't do this, at **runtime** several **optimisations** will be applied to the code and it could be possible that while debugging a **break-point is never hit** or some **variables don't exist**.
 
@@ -96,25 +96,25 @@ iisreset /noforce
 
 Then, in order to start debugging you should close all the opened files and inside the **Debug Tab** select **Attach to Process...**:
 
-![](<../../images/image (318).png>)
+![DNSpy Logging - DNSpy Debugging: Then, in order to start debugging you should close all the opened files and inside the Debug Tab select Attach to Process](<../../images/image (318).png>)
 
 Then select **w3wp.exe** to attach to the **IIS server** and click **attach**:
 
-![](<../../images/image (113).png>)
+![DNSpy Logging - DNSpy Debugging: Then select w3wp.exe to attach to the IIS server and click attach](<../../images/image (113).png>)
 
 Now that we are debugging the process, it's time to stop it and load all the modules. First click on _Debug >> Break All_ and then click on _**Debug >> Windows >> Modules**_:
 
-![](<../../images/image (132).png>)
+![DNSpy Logging - DNSpy Debugging: Now that we are debugging the process, it's time to stop it and load all the modules. First click on Debug Break All and then click on Debug Windows Modules](<../../images/image (132).png>)
 
-![](<../../images/image (834).png>)
+![DNSpy Logging - DNSpy Debugging: Now that we are debugging the process, it's time to stop it and load all the modules. First click on Debug Break All and then click on Debug Windows Modules](<../../images/image (834).png>)
 
 Click any module on **Modules** and select **Open All Modules**:
 
-![](<../../images/image (922).png>)
+![DNSpy Logging - DNSpy Debugging: Click any module on Modules and select Open All Modules](<../../images/image (922).png>)
 
 Right click any module in **Assembly Explorer** and click **Sort Assemblies**:
 
-![](<../../images/image (339).png>)
+![DNSpy Logging - DNSpy Debugging: Right click any module in Assembly Explorer and click Sort Assemblies](<../../images/image (339).png>)
 
 ## Java decompiler
 
@@ -129,11 +129,11 @@ Right click any module in **Assembly Explorer** and click **Sort Assemblies**:
 - Select **Windbg** debugger
 - Select "**Suspend on library load/unload**"
 
-![](<../../images/image (868).png>)
+![Debugging DLLs - Using IDA: Select " Suspend on library load/unload "](<../../images/image (868).png>)
 
 - Configure the **parameters** of the execution putting the **path to the DLL** and the function that you want to call:
 
-![](<../../images/image (704).png>)
+![Debugging DLLs - Using IDA: Configure the parameters of the execution putting the path to the DLL and the function that you want to call](<../../images/image (704).png>)
 
 Then, when you start debugging **the execution will be stopped when each DLL is loaded**, then, when rundll32 load your DLL the execution will be stopped.
 
@@ -148,7 +148,7 @@ But, how can you get to the code of the DLL that was lodaded? Using this method,
 
 Notice that when the execution is stopped by any reason in win64dbg you can see **in which code you are** looking in the **top of the win64dbg window**:
 
-![](<../../images/image (842).png>)
+![Using IDA - Using x64dbg/x32dbg: Notice that when the execution is stopped by any reason in win64dbg you can see in which code you are looking in the top of the win64dbg window](<../../images/image (842).png>)
 
 Then, looking to this ca see when the execution was stopped in the dll you want to debug.
 
@@ -191,7 +191,7 @@ blobrunner.md
 
 [**jmp2it** ](https://github.com/adamkramer/jmp2it/releases/tag/v1.4)is very similar to blobrunner. It will **allocate** the **shellcode** inside a space of memory, and start an **eternal loop**. You then need to **attach the debugger** to the process, **play start wait 2-5 secs and press stop** and you will find yourself inside the **eternal loop**. Jump to the next instruction of the eternal loop as it will be a call to the shellcode, and finally you will find yourself executing the shellcode.
 
-![](<../../images/image (509).png>)
+![Debugging a shellcode with blobrunner - Debugging a shellcode with jmp2it: jmp2it is very similar to blobrunner. It will allocate the shellcode inside a space of memory, and start an...](<../../images/image (509).png>)
 
 You can download a compiled version of [jmp2it inside the releases page](https://github.com/adamkramer/jmp2it/releases/).
 
@@ -201,17 +201,17 @@ You can download a compiled version of [jmp2it inside the releases page](https:/
 
 Note that Cutter allows you to "Open File" and "Open Shellcode". In my case when I opened the shellcode as a file it decompiled it correctly, but when I opened it as a shellcode it didn't:
 
-![](<../../images/image (562).png>)
+![Debugging a shellcode with jmp2it - Debugging shellcode using Cutter: Note that Cutter allows you to "Open File" and "Open Shellcode". In my case when I opened the shellcode as a file it...](<../../images/image (562).png>)
 
 In order to start the emulation in the place you want to, set a bp there and apparently cutter will automatically start the emulation from there:
 
-![](<../../images/image (589).png>)
+![Debugging a shellcode with jmp2it - Debugging shellcode using Cutter: In order to start the emulation in the place you want to, set a bp there and apparently cutter will automatically...](<../../images/image (589).png>)
 
-![](<../../images/image (387).png>)
+![Debugging a shellcode with jmp2it - Debugging shellcode using Cutter: In order to start the emulation in the place you want to, set a bp there and apparently cutter will automatically...](<../../images/image (387).png>)
 
 You can see the stack for example inside a hex dump:
 
-![](<../../images/image (186).png>)
+![Debugging a shellcode with jmp2it - Debugging shellcode using Cutter: You can see the stack for example inside a hex dump](<../../images/image (186).png>)
 
 ### Deobfuscating shellcode and getting executed functions
 
@@ -229,7 +229,7 @@ scdbg.exe -f shellcode /foff 0x0000004D #Start the executing in that offset
 
 scDbg also counts with a graphical launcher where you can select the options you want and execute the shellcode
 
-![](<../../images/image (258).png>)
+![Debugging shellcode using Cutter - Deobfuscating shellcode and getting executed functions: scDbg also counts with a graphical launcher where you can select the options you want and...](<../../images/image (258).png>)
 
 The **Create Dump** option will dump the final shellcode if any change is done to the shellcode dynamically in memory (useful to download the decoded shellcode). The **start offset** can be useful to start the shellcode at a specific offset. The **Debug Shell** option is useful to debug the shellcode using the scDbg terminal (however I find any of the options explained before better for this matter as you will be able to use Ida or x64dbg).
 
@@ -330,7 +330,7 @@ If you are playing a **CTF, this workaround to find the flag** could be very use
 
 To find the **entry point** search the functions by `::main` like in:
 
-![](<../../images/image (1080).png>)
+![Movfuscator - Rust: To find the entry point search the functions by ::main like in](<../../images/image (1080).png>)
 
 In this case the binary was called authenticator, so it's pretty obvious that this is the interesting main function.\
 Having the **name** of the **functions** being called, search for them on the **Internet** to learn about their **inputs** and **outputs**.
@@ -375,7 +375,7 @@ If you get the **binary** of a GBA game you can use different tools to **emulate
 
 In [**no$gba**](https://problemkaputt.de/gba.htm), in _**Options --> Emulation Setup --> Controls**_** ** you can see how to press the Game Boy Advance **buttons**
 
-![](<../../images/image (581).png>)
+![no$gba controls configuration showing Game Boy Advance button mappings](<../../images/image (581).png>)
 
 When pressed, each **key has a value** to identify it:
 
@@ -394,7 +394,7 @@ L = 256
 
 So, in this kind of program, the interesting part will be **how the program treats the user input**. In the address **0x4000130** you will find the commonly found function: **KEYINPUT**.
 
-![](<../../images/image (447).png>)
+![Ghidra view of a GBA binary referencing KEYINPUT at address 0x4000130](<../../images/image (447).png>)
 
 In the previous image you can find that the function is called from **FUN_080015a8** (addresses: _0x080015fa_ and _0x080017ac_).
 

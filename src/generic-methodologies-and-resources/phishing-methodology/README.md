@@ -254,7 +254,7 @@ You must **configure a SPF record for the new domain**. If you don't know what i
 
 You can use [https://www.spfwizard.net/](https://www.spfwizard.net) to generate your SPF policy (use the IP of the VPS machine)
 
-![](<../../images/image (1037).png>)
+![SPF Wizard form for generating an SPF record for a phishing domain](<../../images/image (1037).png>)
 
 This is the content that must be set inside a TXT record inside the domain:
 
@@ -332,7 +332,7 @@ The page [www.mail-tester.com](https://www.mail-tester.com) can indicate you if 
 - Decide from which account are you going to send the phishing emails. Suggestions: _noreply, support, servicedesk, salesforce..._
 - You can leave blank the username and password, but make sure to check the Ignore Certificate Errors
 
-![](<../../images/image (253) (1) (2) (1) (1) (2) (2) (3) (3) (5) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (15) (2).png>)
+![Create & Launch GoPhish Campaign - Sending Profile: You can leave blank the username and password, but make sure to check the Ignore Certificate Errors](<../../images/image (253) (1) (2) (1) (1) (2) (2) (3) (3) (5) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (15) (2).png>)
 
 > [!TIP]
 > It's recommended to use the "**Send Test Email**" functionality to test that everything is working.\
@@ -370,7 +370,7 @@ Note that **in order to increase the credibility of the email**, it's recommende
 - Search for **public emails** like info@ex.com or press@ex.com or public@ex.com and send them an email and wait for the response.
 - Try to contact **some valid discovered** email and wait for the response
 
-![](<../../images/image (80).png>)
+![Sending Profile - Email Template: Try to contact some valid discovered email and wait for the response](<../../images/image (80).png>)
 
 > [!TIP]
 > The Email Template also allows to **attach files to send**. If you would also like to steal NTLM challenges using some specially crafted files/documents [read this page](../../windows-hardening/ntlm/places-to-steal-ntlm-creds.md).
@@ -382,7 +382,7 @@ Note that **in order to increase the credibility of the email**, it's recommende
 - Mark **Capture Submitted Data** and **Capture Passwords**
 - Set a **redirection**
 
-![](<../../images/image (826).png>)
+![Email Template - Landing Page: Mark Capture Submitted Data and Capture Passwords](<../../images/image (826).png>)
 
 > [!TIP]
 > Usually you will need to modify the HTML code of the page and make some tests in local (maybe using some Apache server) **until you like the results.** Then, write that HTML code in the box.\
@@ -396,7 +396,7 @@ Note that **in order to increase the credibility of the email**, it's recommende
 - Set a name
 - **Import the data** (note that in order to use the template for the example you need the firstname, last name and email address of each user)
 
-![](<../../images/image (163).png>)
+![Landing Page - Users & Groups: Import the data (note that in order to use the template for the example you need the firstname, last name and email address of each user)](<../../images/image (163).png>)
 
 ### Campaign
 
@@ -404,7 +404,7 @@ Finally, create a campaign selecting a name, the email template, the landing pag
 
 Note that the **Sending Profile allow to send a test email to see how will the final phishing email looks like**:
 
-![](<../../images/image (192).png>)
+![Users & Groups - Campaign: Note that the Sending Profile allow to send a test email to see how will the final phishing email looks like](<../../images/image (192).png>)
 
 > [!TIP]
 > I would recommend to **send the test emails to 10min mails addresses** in order to avoid getting blacklisted making tests.
@@ -680,4 +680,3 @@ Defence tips:
 - [ESET GhostChat IoCs and samples](https://github.com/eset/malware-ioc/tree/master/ghostchat)
 
 {{#include ../../banners/hacktricks-training.md}}
-

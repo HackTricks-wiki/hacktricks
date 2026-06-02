@@ -29,13 +29,13 @@ advanced-html-staged-dll-sideloading.md
 
 The most common way to find missing Dlls inside a system is running [procmon](https://docs.microsoft.com/en-us/sysinternals/downloads/procmon) from sysinternals, **setting** the **following 2 filters**:
 
-![](<../../../images/image (961).png>)
+![Common Techniques - Finding missing Dlls: The most common way to find missing Dlls inside a system is running procmon from sysinternals, setting the following 2 filters](<../../../images/image (961).png>)
 
-![](<../../../images/image (230).png>)
+![Common Techniques - Finding missing Dlls: The most common way to find missing Dlls inside a system is running procmon from sysinternals, setting the following 2 filters](<../../../images/image (230).png>)
 
 and just show the **File System Activity**:
 
-![](<../../../images/image (153).png>)
+![Common Techniques - Finding missing Dlls: and just show the File System Activity](<../../../images/image (153).png>)
 
 If you are looking for **missing dlls in general** you **leave** this running for some **seconds**.\
 If you are looking for a **missing dll inside an specific executable** you should set **another filter like "Process Name" "contains" `<exec name>`, execute it, and stop capturing events**.
