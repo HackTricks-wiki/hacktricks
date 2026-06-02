@@ -241,7 +241,7 @@ document.body.appendChild(a); a.click();
 WebSocket tradecraft와 tooling도 참고:
 
 {{#ref}}
-../../pentesting-web/websocket-attacks.md
+../basic-forensic-methodology/android-malware-post-exploitation.md
 {{#endref}}
 
 
@@ -313,7 +313,7 @@ ctx.startActivity(i);
 See also:
 
 {{#ref}}
-../../mobile-pentesting/android-app-pentesting/accessibility-services-abuse.md
+../../pentesting-web/websocket-attacks.md
 {{#endref}}
 
 ### WebView를 통한 Overlay phishing/ransom
