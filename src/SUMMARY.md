@@ -49,6 +49,7 @@
   - [Ios Backup Forensics](generic-methodologies-and-resources/basic-forensic-methodology/ios-backup-forensics.md)
   - [Linux Forensics](generic-methodologies-and-resources/basic-forensic-methodology/linux-forensics.md)
   - [Malware Analysis](generic-methodologies-and-resources/basic-forensic-methodology/malware-analysis.md)
+  - [Android Malware Post-Exploitation](generic-methodologies-and-resources/basic-forensic-methodology/android-malware-post-exploitation.md)
   - [Memory dump analysis](generic-methodologies-and-resources/basic-forensic-methodology/memory-dump-analysis/README.md)
     - [Volatility - CheatSheet](generic-methodologies-and-resources/basic-forensic-methodology/memory-dump-analysis/volatility-cheatsheet.md)
   - [Partitions/File Systems/Carving](generic-methodologies-and-resources/basic-forensic-methodology/partitions-file-systems-carving/README.md)
