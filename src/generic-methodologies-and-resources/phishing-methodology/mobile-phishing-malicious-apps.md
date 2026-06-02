@@ -241,7 +241,7 @@ Zašto zaobilazi jednostavne kontrole:
 Vidi i WebSocket tradecraft i tooling:
 
 {{#ref}}
-../../pentesting-web/websocket-attacks.md
+../basic-forensic-methodology/android-malware-post-exploitation.md
 {{#endref}}
 
 
@@ -313,7 +313,7 @@ ctx.startActivity(i);
 Pogledajte i:
 
 {{#ref}}
-../../mobile-pentesting/android-app-pentesting/accessibility-services-abuse.md
+../../pentesting-web/websocket-attacks.md
 {{#endref}}
 
 ### Overlay phishing/ransom via WebView
