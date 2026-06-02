@@ -241,7 +241,7 @@ Neden basit kontrolleri atlatır:
 Ayrıca WebSocket tradecraft ve tooling için:
 
 {{#ref}}
-../../pentesting-web/websocket-attacks.md
+../basic-forensic-methodology/android-malware-post-exploitation.md
 {{#endref}}
 
 
@@ -313,7 +313,7 @@ ctx.startActivity(i);
 Ayrıca bakınız:
 
 {{#ref}}
-../../mobile-pentesting/android-app-pentesting/accessibility-services-abuse.md
+../../pentesting-web/websocket-attacks.md
 {{#endref}}
 
 ### WebView üzerinden overlay phishing/ransom
