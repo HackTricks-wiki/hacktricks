@@ -99,6 +99,84 @@ It will be mounted in `/Volumes`
 - Check the strings (is there is almost no understandable string, packed)
 - The UPX packer for MacOS generates a section called "\_\_XHDR"
 
+
+### Flutter / Dart macOS apps: WebView bridge & update triage
+
+Flutter desktop malware often keeps the **dangerous logic outside the signed bundle** and only exposes a **bridge** from a remote WebView into native Dart code. During static triage, don't stop after checking the notarization status: hunt for the bridge name, the command map, the remote config endpoints, and the update path.
+
+Quick first pass:
+
+```bash
+APP="/Applications/Target.app"
+
+# Signature, team ID, entitlements, hardened runtime
+codesign -dvv "$APP" 2>&1 | grep -E "Authority|TeamIdentifier|Runtime"
+codesign -d --entitlements :- "$APP" 2>/dev/null
+
+# Find Flutter artifacts and bundled frameworks
+find "$APP/Contents" -maxdepth 3 \( -name "*.framework" -o -name "*.dylib" -o -name "flutter_assets" \)
+
+# Hunt for bridge names, remote endpoints, Sparkle callbacks, or fake-benign command names
+strings -a "$APP/Contents/MacOS/"* "$APP/Contents/Frameworks/"*/* 2>/dev/null | \
+  grep -E "flutterInvoke|getConfig|getUpdateThanksConfig|update-delay|onUpdateCycleFinished|summarize-text|exec_sync|pdf_sync|renderPDF|read_file|write_file|get_env|read_pdf|write_pdf"
+```
+
+Flutter AOT binaries separate code from many referenced strings using the **Object Pool**, so plain disassembly is often noisy. If you recover the Dart payload (`App.framework/App`, `*.dylib`, or equivalent), use a **blutter-style workflow** (or a custom fork/port that supports the target format) to dump the object pool and rebuild function names. Prioritize:
+
+- **Bridge/channel names** such as `flutterInvoke`
+- **Remote config paths** such as `/getConfig`, `/getUpdateThanksConfig`, `/api/update-delay`
+- **Dangerous command maps** hidden behind benign names such as `renderPDF`, `read_pdf`, or `write_pdf`
+- **OS primitives** exposed to JavaScript: shell execution, file read/write, directory enumeration, `get_env`
+
+A common execution flow is:
+
+1. Load a decoy UI.
+2. After a timer or a user action like **About** / **Update**, open attacker-controlled WebView content.
+3. Receive **JSON** messages from JavaScript.
+4. Map the requested action to native Dart functions that call local shell / filesystem primitives.
+
+That architecture matters because the actor can **change behavior server-side without shipping a new notarized app**.
+
+### Sparkle updater abuse triage
+
+If the bundle uses **Sparkle**, verify whether the app only checks for updates or whether it **short-circuits the normal install prompt** and manually launches the staged update from the cache.
+
+```bash
+APP="/Applications/Target.app"
+plutil -p "$APP/Contents/Info.plist" | grep -i sparkle
+find "$APP/Contents/Frameworks" -maxdepth 2 -iname '*Sparkle*' -print
+strings -a "$APP/Contents/MacOS/"* "$APP/Contents/Frameworks/"*/* 2>/dev/null | \
+  grep -E "Sparkle|SUFeedURL|SPUUpdater|onUpdateCycleFinished|org\.sparkle-project\.Sparkle/Installation"
+```
+
+A suspicious pattern is:
+
+- callback like `onUpdateCycleFinished`
+- verification that a staged app exists under `~/Library/Caches/<bundle-id>/org.sparkle-project.Sparkle/Installation/`
+- immediate `open <staged-app>` execution
+- fast process termination (`exit()` / `dart:io exit()`)
+
+This turns a legitimate updater into a **silent version swap** mechanism.
+
+### Chromium hijack follow-up from a decoy app
+
+A useful post-exploitation check in macOS app malware is whether the app tampers with Chromium profile files instead of injecting code directly into the browser.
+
+```bash
+CHROME_PREFS="$HOME/Library/Application Support/Google/Chrome/Default/Secure Preferences"
+plutil -p "$CHROME_PREFS" 2>/dev/null | grep -A4 default_search_provider_data
+
+log show --last 1h --style compact --predicate 'eventMessage CONTAINS "Google Chrome"'
+```
+
+Interesting indicators:
+
+- reads of `IOPlatformUUID` for host fingerprinting
+- writes to `default_search_provider_data.url` or `default_search_provider_data.new_tab_url`
+- `killall "Google Chrome"` followed by relaunch with flags such as `--restore-last-session`, `--hide-crash-restore-bubble`, `--noerrdialogs`, `--disable-session-crashed-bubble`
+
+This is a low-noise way to hijack searches / new tabs while keeping the lure app itself apparently benign.
+
 ## Static Objective-C analysis
 
 ### Metadata
@@ -618,6 +696,9 @@ litefuzz -s -a tcp://localhost:5900 -i input/screenshared-session --reportcrash 
 
 ## References
 
+- [Operation FlutterBridge: macOS Malvertising Campaign Spreads New FlutterShell Backdoor](https://unit42.paloaltonetworks.com/flutterbridge-new-fluttershell-backdoor/)
+- [B(l)utter - Flutter Mobile Application Reverse Engineering Tool](https://github.com/worawit/blutter)
+- [Sparkle Project](https://sparkle-project.org/)
 - [**OS X Incident Response: Scripting and Analysis**](https://www.amazon.com/OS-Incident-Response-Scripting-Analysis-ebook/dp/B01FHOHHVS)
 - [**https://www.youtube.com/watch?v=T5xfL9tEg44**](https://www.youtube.com/watch?v=T5xfL9tEg44)
 - [**https://taomm.org/vol1/analysis.html**](https://taomm.org/vol1/analysis.html)
