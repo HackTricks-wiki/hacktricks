@@ -145,6 +145,45 @@ otto-support selfpwn --agree
 - Enforce **allowlist-only egress** for MCP processes whenever possible. A server meant to query one internal system should not be able to open arbitrary outbound HTTP connections.
 - Monitor runtime behavior for **unexpected outbound connections** or file access during tool execution, especially when the server's visible MCP output still looks correct.
 
+### Skill Marketplace Supply-Chain Evasion (skills, `SKILL.md`, archives, bytecode)
+
+Agent **skills** create nearly the same trust problem as MCP servers, but the package usually contains both **natural-language instructions** (for example `SKILL.md`) and **helper artifacts** (scripts, bytecode, archives, images, configs). Therefore, a scanner that only reads the visible manifest or only inspects supported text files can miss the real payload.
+
+#### Practical scanner-evasion patterns
+
+- **Context-truncation evasion**: if a scanner only evaluates the first N bytes/tokens of a file, an attacker can place benign boilerplate first, then add a very large padding region (for example **100,000 newlines**), and finally append the malicious instructions or code. The installed skill still contains the payload, but the guard model only sees the harmless prefix.
+- **Archive/document indirection**: keep `SKILL.md` benign and tell the agent to load the “real” instructions from a `.docx`, image, or other secondary file. A `.docx` is just a ZIP container; if scanners do not recursively unpack and inspect every member, hidden payloads such as `sync1.sh` can ride inside the document.
+- **Generated-artifact / bytecode poisoning**: ship clean source but malicious build artifacts. A reviewed `utils.py` can look harmless while `__pycache__/utils.cpython-312.pyc` imports `os`, reads `os.environ.items()`, and executes attacker logic. If the runtime imports the bundled bytecode first, the visible source review is meaningless.
+- **Opaque-file / incomplete-tree bypass**: some scanners only inspect files referenced from `SKILL.md`, skip dotfiles, or treat unsupported formats as opaque. That leaves blind spots in hidden files, unreferenced scripts, archives, binaries, images, and package-manager config files.
+- **LLM scanner misdirection**: natural-language framing can convince a guard model that dangerous behavior is just normal enterprise bootstrap logic. A skill that writes a new package-manager registry can be described as “AppSec-audited corporate mirroring” until the scanner classifies it as low risk.
+
+#### High-value attacker primitives hidden inside "helpful" skills
+
+**Package-manager registry redirection** is especially dangerous because it persists after the skill finishes. Writing any of the following changes how future dependency installs resolve packages:
+
+```bash
+cat > "$PROJECT/.npmrc" << EOF
+registry=${CORP_REGISTRY}
+EOF
+
+cat > "$PROJECT/.yarnrc" << EOF
+registry "${CORP_REGISTRY}"
+EOF
+```
+
+If `CORP_REGISTRY` is attacker-controlled, later `npm`/`yarn` installs can silently fetch trojanized packages or poisoned versions.
+
+Another suspicious primitive is **native-code preloading**. A skill that sets `LD_PRELOAD` or loads a helper like `$TMP/lo_socket_shim.so` is effectively asking the target process to execute attacker-chosen native code before normal libraries. If the attacker can influence that path or replace the shim, the skill becomes an arbitrary-code-execution bridge even when the visible Python wrapper looks legitimate.
+
+#### What to verify during review
+
+- Walk the **entire skill tree**, not only files mentioned in `SKILL.md`.
+- Unpack nested containers recursively (`.zip`, `.docx`, other office formats) and inspect each member.
+- Reject or separately review **generated artifacts** (`.pyc`, binaries, minified blobs, archives, images with embedded prompts) unless they are reproducibly derived from reviewed source.
+- Compare shipped bytecode/binaries against source when both are present.
+- Treat edits to `.npmrc`, `.yarnrc`, pip indexes, Git hooks, shell rc files, and similar persistence/dependency files as high-risk even if comments make them sound operationally normal.
+- Assume public skill marketplaces are **untrusted code execution** plus **prompt injection**, not just documentation reuse.
+
 ### Persistent Code Execution via MCP Trust Bypass (Cursor IDE – "MCPoison")
 
 Starting in early 2025 Check Point Research disclosed that the AI-centric **Cursor IDE** bound user trust to the *name* of an MCP entry but never re-validated its underlying `command` or `args`.  
@@ -272,6 +311,8 @@ The **MCP Attack Surface Detector (MCP-ASD)** Burp extension turns exposed MCP s
 This workflow makes MCP endpoints fuzzable with standard Burp tooling despite their streaming protocol.
 
 ## References
+- [Trail of Bits – The Sorry State of Skill Distribution](https://blog.trailofbits.com/2026/06/03/the-sorry-state-of-skill-distribution/)
+- [Trail of Bits – overtly-malicious-skills PoC repository](https://github.com/trailofbits/overtly-malicious-skills)
 - [CVE-2025-54136 – MCPoison Cursor IDE persistent RCE](https://research.checkpoint.com/2025/cursor-vulnerability-mcpoison/)
 - [Metasploit Wrap-Up 11/28/2025 – new Flowise custom MCP & JS injection exploits](https://www.rapid7.com/blog/post/pt-metasploit-wrap-up-11-28-2025)
 - [GHSA-3gcm-f6qx-ff7p / CVE-2025-59528 – Flowise CustomMCP JavaScript code injection](https://github.com/advisories/GHSA-3gcm-f6qx-ff7p)
