@@ -629,6 +629,7 @@
 - [10000 - Pentesting Network Data Management Protocol (ndmp)](network-services-pentesting/10000-network-data-management-protocol-ndmp.md)
 - [11211 - Pentesting Memcache](network-services-pentesting/11211-memcache/README.md)
   - [Memcache Commands](network-services-pentesting/11211-memcache/memcache-commands.md)
+- [12346/udp - Pentesting Cisco Catalyst SD-WAN Control Plane](network-services-pentesting/12346-udp-pentesting-cisco-sd-wan-control-plane.md)
 - [15672 - Pentesting RabbitMQ Management](network-services-pentesting/15672-pentesting-rabbitmq-management.md)
 - [24007,24008,24009,49152 - Pentesting GlusterFS](network-services-pentesting/24007-24008-24009-49152-pentesting-glusterfs.md)
 - [27017,27018 - Pentesting MongoDB](network-services-pentesting/27017-27018-mongodb.md)
