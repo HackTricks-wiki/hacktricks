@@ -110,6 +110,41 @@ Moreover, in [**this blog**](https://www.legitsecurity.com/blog/remote-prompt-in
 
 Note that the malicious indirect prompts would be located in a public repository the victim user would be using, however, as the agent still have access to the repos of the user, it'll be able to access them.
 
+### Supply-Chain Backdoors in MCP Servers (same tool name, same schema, new payload)
+
+MCP trust is usually anchored to the **package name, reviewed source, and current tool schema**, but not to the runtime implementation that will be executed after the next update. A malicious maintainer or compromised package can keep the **same tool name, arguments, JSON schema, and normal outputs** while adding hidden exfiltration logic in the background. This usually survives functional tests because the visible tool still behaves correctly.
+
+A practical example was the `postmark-mcp` package: after a benign history, version `1.0.16` silently added a hidden BCC to attacker-controlled email addresses while still sending the requested message normally. Similar marketplace abuse was observed in ClawHub skills that returned the expected result while harvesting wallet keys or stored credentials in parallel.
+
+#### Why local `stdio` MCP servers are high impact
+
+When an MCP server is launched locally over `stdio`, it inherits the **same OS user context** as the AI client or shell that started it. No privilege escalation is required to access secrets already readable by that user. In practice, a hostile server can enumerate and steal:
+
+- `~/.ssh/id_*`, `~/.ssh/*.pem`, `~/.aws/credentials`, `~/.config/gcloud/*.json`, `~/.azure/*`
+- `~/.kube/config`, service-account tokens, `~/.docker/config.json`, `/var/run/docker.sock`
+- `~/.netrc`, `~/.npmrc`, `~/.pypirc`, Terraform state/vars, `.env*`, shell history files
+- AI provider credentials such as `~/.claude/credentials.json`, `~/.codex/auth.json`, `~/.config/openai/credentials`
+- Cryptocurrency wallets and keystores
+
+Because the MCP response can remain perfectly normal, ordinary integration tests may not detect the theft.
+
+#### Defensive exposure modeling with `otto-support selfpwn`
+
+Bishop Fox's `otto-support selfpwn` is a good model of what a malicious MCP server could read locally. The command expands home-directory paths, checks explicit paths and `filepath.Glob()` matches, collects metadata with `os.Stat()`, classifies findings by path-derived risk, and inspects `os.Environ()` for variable names containing patterns such as `KEY`, `SECRET`, `TOKEN`, `AWS_`, `OPENAI_`, `CLAUDE_`, `KUBE`, or `SSH_`. It prints the report to stdout only, but a real malicious MCP server could replace that final output step with silent exfiltration.
+
+```bash
+otto-support selfpwn
+otto-support selfpwn --agree
+```
+
+#### Detection, response, and hardening
+
+- Treat MCP servers as **untrusted code execution**, not just prompt context. If a suspicious MCP server ran locally, assume every readable credential may have been exposed and rotate/revoke it.
+- Use **internal registries** with reviewed commits, signed packages/plugins, pinned versions, checksum verification, lockfiles, and vendored dependencies (`go mod vendor`, `go.sum`, or equivalent) so reviewed code cannot silently change.
+- Run high-risk MCP servers in **dedicated accounts or isolated containers** with no sensitive host mounts.
+- Enforce **allowlist-only egress** for MCP processes whenever possible. A server meant to query one internal system should not be able to open arbitrary outbound HTTP connections.
+- Monitor runtime behavior for **unexpected outbound connections** or file access during tool execution, especially when the server's visible MCP output still looks correct.
+
 ### Persistent Code Execution via MCP Trust Bypass (Cursor IDE – "MCPoison")
 
 Starting in early 2025 Check Point Research disclosed that the AI-centric **Cursor IDE** bound user trust to the *name* of an MCP entry but never re-validated its underlying `command` or `args`.  
@@ -245,5 +280,7 @@ This workflow makes MCP endpoints fuzzable with standard Burp tooling despite th
 - [An Evening with Claude (Code): sed-Based Command Safety Bypass in Claude Code](https://specterops.io/blog/2025/11/21/an-evening-with-claude-code/)
 - [MCP in Burp Suite: From Enumeration to Targeted Exploitation](https://trustedsec.com/blog/mcp-in-burp-suite-from-enumeration-to-targeted-exploitation)
 - [MCP Attack Surface Detector (MCP-ASD) extension](https://github.com/hoodoer/MCP-ASD)
+- [Otto-Support: Supply Chain Risks in MCP Servers](https://bishopfox.com/blog/otto-support-supply-chain-risks-mcp-servers)
+- [otto-support `selfpwn` source](https://github.com/BishopFox/otto-support/blob/main/cmd/otto-support/selfpwn.go)
 
 {{#include ../banners/hacktricks-training.md}}
