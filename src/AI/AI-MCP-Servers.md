@@ -220,6 +220,58 @@ echo 1 | sed 'r/Users/victim/.aws/credentials'
 - An attacker only needs a prompt-injection sink: a poisoned README, web content fetched through `WebFetch`, or a malicious HTTP-based MCP server can instruct the model to invoke the “legitimate” sed command under the guise of log formatting or bulk editing.
 
 
+### Broken Object-Level Authorization in MCP Tools (Direct JSON-RPC Abuse)
+
+Even when an MCP server is normally consumed through an LLM workflow, its tools are still **server-side actions reachable over the MCP transport**. If the endpoint is exposed and the attacker has a valid low-privilege account, they can often skip prompt injection entirely and invoke tools directly with JSON-RPC-style requests.
+
+A practical testing workflow is:
+
+- **Discover reachable services first**: internal discovery may only show a generic HTTP service (`nmap -sV`) rather than something obviously labeled as MCP.
+- **Probe common MCP paths** such as `/mcp` and `/sse` to confirm the service and recover server metadata.
+- **Call tools directly** with `method: "tools/call"` instead of relying on the LLM to select them.
+- **Compare authorization across all actions** on the same object type (`read`, `update`, `delete`, export, admin helpers, background jobs). It is common to find ownership checks on read/edit paths but not on destructive helpers.
+
+Typical direct invocation shape:
+
+```json
+{
+  "method": "tools/call",
+  "params": {
+    "name": "delete_ticket",
+    "arguments": {
+      "ticket_id": "4201"
+    }
+  }
+}
+```
+
+#### Why verbose/status tools matter
+
+Low-risk-looking tools such as `status`, `health`, `debug`, or inventory endpoints frequently leak data that makes authorization testing much easier. In Bishop Fox's `otto-support`, a verbose `status` call disclosed: 
+
+- internal service metadata such as `http://127.0.0.1:9004/health`
+- service names and ports
+- valid ticket statistics and an `id_range` (`4201-4205`)
+
+This turns BOLA/IDOR testing from blind guessing into **targeted object-ID validation**.
+
+#### Practical MCP authz checks
+
+1. Authenticate as the lowest-privileged user you can create or compromise.
+2. Enumerate `tools/list` and identify every tool that accepts an object identifier.
+3. Use low-risk read/list/status tools to discover valid IDs, tenant names, or object counts.
+4. Replay the same object ID across **all** related tools, not just the obvious one.
+5. Pay special attention to destructive operations (`delete_*`, `archive_*`, `close_*`, `retry_*`, `approve_*`).
+
+If `read_ticket` and `update_ticket` reject foreign objects but `delete_ticket` succeeds, the MCP server has a classic **Broken Object Level Authorization (BOLA/IDOR)** flaw even though the transport is MCP rather than REST.
+
+#### Defensive notes
+
+- Enforce **server-side authorization inside every tool handler**; never trust the LLM, client UI, prompt, or expected workflow to preserve access control.
+- Review **each action independently** because sharing an object type does not mean the implementation shares the same authorization logic.
+- Avoid leaking internal endpoints, object counts, or predictable ID ranges to low-privilege users through diagnostic tools.
+- Audit log at least the **tool name, caller identity, object ID, authorization decision, and result**, especially for destructive tool calls.
+
 ### Flowise MCP Workflow RCE (CVE-2025-59528 & CVE-2025-8943)
 
 Flowise embeds MCP tooling inside its low-code LLM orchestrator, but its **CustomMCP** node trusts user-supplied JavaScript/command definitions that are later executed on the Flowise server. Two separate code paths trigger remote command execution:
@@ -272,6 +324,7 @@ The **MCP Attack Surface Detector (MCP-ASD)** Burp extension turns exposed MCP s
 This workflow makes MCP endpoints fuzzable with standard Burp tooling despite their streaming protocol.
 
 ## References
+- [Otto Support - Testing MCP Servers](https://bishopfox.com/blog/otto-support-testing-mcp-servers)
 - [CVE-2025-54136 – MCPoison Cursor IDE persistent RCE](https://research.checkpoint.com/2025/cursor-vulnerability-mcpoison/)
 - [Metasploit Wrap-Up 11/28/2025 – new Flowise custom MCP & JS injection exploits](https://www.rapid7.com/blog/post/pt-metasploit-wrap-up-11-28-2025)
 - [GHSA-3gcm-f6qx-ff7p / CVE-2025-59528 – Flowise CustomMCP JavaScript code injection](https://github.com/advisories/GHSA-3gcm-f6qx-ff7p)
