@@ -11,17 +11,17 @@ Ikiwa **hujui Windows Access Tokens ni nini** soma ukurasa huu kabla ya kuendele
 access-tokens.md
 {{#endref}}
 
-**Huenda ukaweza kuinua privileges kwa kutumia vibaya tokens ulizo nazo tayari**
+**Huenda ukaweza kuongeza privileges kwa abusing tokens ulizo nazo tayari**
 
 ### SeImpersonatePrivilege
 
-Hii ni privilege ambayo inashikiliwa na mchakato wowote unaoruhusu impersonation (lakini si creation) ya token yoyote, mradi handle kwake inaweza kupatikana. Token yenye privilege inaweza kupatikana kutoka kwa Windows service (DCOM) kwa kuishawishi ifanye NTLM authentication dhidi ya exploit, kisha kuwezesha utekelezaji wa mchakato wenye SYSTEM privileges. Vulnerability hii inaweza kutumiwa kwa kutumia tools mbalimbali, kama [juicy-potato](https://github.com/ohpe/juicy-potato), [RogueWinRM](https://github.com/antonioCoco/RogueWinRM) (ambayo inahitaji winrm kuwa disabled), [SweetPotato](https://github.com/CCob/SweetPotato), na [PrintSpoofer](https://github.com/itm4n/PrintSpoofer).
+Hii ni privilege inayoshikiliwa na process yoyote inayoiruhusu impersonation (lakini si creation) ya token yoyote, mradi tu handle yake inaweza kupatikana. Token yenye privilege inaweza kupatikana kutoka kwenye Windows service (DCOM) kwa kuishawishi ifanye NTLM authentication dhidi ya exploit, kisha kuwezesha execution ya process yenye SYSTEM privileges. Vulnerability hii inaweza kutumiwa kwa kutumia tools mbalimbali, kama [juicy-potato](https://github.com/ohpe/juicy-potato), [RogueWinRM](https://github.com/antonioCoco/RogueWinRM) (inayohitaji winrm kuwa disabled), [SweetPotato](https://github.com/CCob/SweetPotato), na [PrintSpoofer](https://github.com/itm4n/PrintSpoofer).
 
 Modern operator notes:
 
-- **JuicyPotato is legacy**: kwenye Windows 10 1809+/Server 2019+, tumia **GodPotato**, **SigmaPotato**, **PrintNotifyPotato**, **RoguePotato**, **SharpEfsPotato/EfsPotato**, au **PrintSpoofer** kulingana na ni RPC/COM surface gani bado inaweza kufikiwa.
-- Ikiwa umeathiri service inayoendeshwa kama **`LOCAL SERVICE`** au **`NETWORK SERVICE`** na `whoami /priv` inaonyesha **filtered token** bila `SeImpersonatePrivilege`/`SeAssignPrimaryTokenPrivilege`, kwanza rejesha **default privilege set** ya account hiyo (kwa mfano kwa **FullPowers**) kisha ujaribu tena family ya potato baada ya hapo.
-- Baadhi ya newer forks ni rafiki zaidi kwa operator kuliko tools za asili. Kwa mfano, **SigmaPotato** inaongeza reflection/in-memory execution na modern Windows compatibility, ilhali **PrintNotifyPotato** hutumia vibaya PrintNotify COM service na mara nyingi huwa na manufaa wakati classic Spooler path imezimwa.
+- **JuicyPotato ni legacy**: kwenye Windows 10 1809+/Server 2019+, tumia kwa upendeleo **GodPotato**, **SigmaPotato**, **PrintNotifyPotato**, **RoguePotato**, **SharpEfsPotato/EfsPotato**, au **PrintSpoofer** kutegemea ni RPC/COM surface ipi bado inaweza kufikiwa.
+- Ikiwa umecompromise service inayoendeshwa kama **`LOCAL SERVICE`** au **`NETWORK SERVICE`** na `whoami /priv` inaonyesha **filtered token** bila `SeImpersonatePrivilege`/`SeAssignPrimaryTokenPrivilege`, kwanza rejesha **default privilege set** ya account hiyo (kwa mfano kwa **FullPowers**) kisha ujaribu tena familia ya potato baadae.
+- Baadhi ya forks za kisasa ni rafiki zaidi kwa operator kuliko tools za asili. Kwa mfano, **SigmaPotato** inaongeza reflection/in-memory execution na compatibility ya kisasa ya Windows, huku **PrintNotifyPotato** ikitumia vibaya PrintNotify COM service na mara nyingi huwa muhimu wakati njia ya kawaida ya Spooler imezimwa.
 ```cmd
 FullPowers.exe -c "cmd /c whoami /priv" -z
 GodPotato.exe -cmd "cmd /c whoami"
@@ -39,18 +39,18 @@ juicypotato.md
 
 ### SeAssignPrimaryPrivilege
 
-Ni sawa sana na **SeImpersonatePrivilege**, itatumia **njia ileile** kupata token yenye ruhusa za juu.\
-Kisha, privilege hii inaruhusu **kuassign primary token** kwa process mpya/suspended. Kwa privileged impersonation token unaweza kuderiva primary token (DuplicateTokenEx).\
-Kwa token hiyo, unaweza kuunda **new process** kwa kutumia 'CreateProcessAsUser' au kuunda process iliyosuspended na **kuweka token** (kwa ujumla, huwezi kurekebisha primary token ya process inayorun).
+Ni sawa sana na **SeImpersonatePrivilege**, itatumia **mbinu ile ile** kupata privileged token.\
+Kisha, privilege hii inaruhusu **kuassign primary token** kwa mchakato mpya/usimamishwa. Ukiwa na privileged impersonation token unaweza kupata primary token kwa kutumia DuplicateTokenEx.\
+Kwa token hiyo, unaweza kuunda **mchakato mpya** kwa 'CreateProcessAsUser' au kuunda mchakato uliosimamishwa na **kuweka token** (kwa ujumla, huwezi kurekebisha primary token ya mchakato unaoendelea).
 
 ### SeTcbPrivilege
 
-Ikiwa una token hii iliyowezeshwa unaweza kutumia **KERB_S4U_LOGON** kupata **impersonation token** kwa user yoyote bila kujua credentials, **kuongeza arbitrary group** (admins) kwenye token, kuweka **integrity level** ya token kuwa "**medium**", na kuassign token hii kwa **current thread** (SetThreadToken).
+Ukiwa na token hii imewezeshwa unaweza kutumia **KERB_S4U_LOGON** kupata **impersonation token** kwa mtumiaji yeyote mwingine bila kujua credentials, **kuongeza arbitrary group** (admins) kwenye token, kuweka **integrity level** ya token kuwa "**medium**", na kuassign token hii kwa **current thread** (SetThreadToken).
 
 ### SeBackupPrivilege
 
-System husababisha **kutoa ruhusa zote za kusoma** kwa file yoyote (imezuiliwa kwa read operations tu) kupitia privilege hii. Inatumika kwa **kusoma password hashes za Local Administrator** accounts kutoka registry, baada ya hapo, tools kama "**psexec**" au "**wmiexec**" zinaweza kutumiwa kwa hash hiyo (Pass-the-Hash technique). Hata hivyo, technique hii hushindwa chini ya hali mbili: wakati Local Administrator account imezimwa, au wakati policy ipo inayondoa administrative rights kutoka Local Administrators wanaounganika remotely.\
-Kwa vitendo, workflow ya ndani iliyoaminika zaidi kwa kawaida ni **VSS + `robocopy /b`**: tengeneza/fichua shadow copy, kisha nakili `SAM`/`SYSTEM` au `NTDS.dit` katika **backup mode**, ambayo hupitisha file ACLs.
+Mfumo unasababisha **kutoa access yote ya kusoma** kwa faili yoyote (iliyozuiliwa kwa operations za kusoma tu) kwa privilege hii. Hutumika kwa **kusoma password hashes za local Administrator** accounts kutoka kwenye registry, ambapo baada yake, tools kama "**psexec**" au "**wmiexec**" zinaweza kutumiwa na hash (Pass-the-Hash technique). Hata hivyo, technique hii hushindwa chini ya hali mbili: wakati Local Administrator account imezimwa, au wakati policy ipo inayoaondoa administrative rights kutoka kwa Local Administrators wanaounganishwa kwa mbali.\
+Kwa vitendo, workflow ya built-in iliyoaminika zaidi kwa kawaida ni **VSS + `robocopy /b`**: tengeneza/onyesha shadow copy, kisha nakili `SAM`/`SYSTEM` au `NTDS.dit` katika **backup mode**, ambayo hupita file ACLs.
 ```cmd
 :: shadow.txt
 set context persistent nowriters
@@ -77,35 +77,35 @@ Unaweza **kutumia vibaya privilege hii** kwa:
 
 ### SeRestorePrivilege
 
-Ruhusa ya **write access** kwa faili yoyote ya mfumo, bila kujali **Access Control List (ACL)** ya faili, hutolewa na privilege hii. Inafungua uwezekano mwingi wa escalation, ikiwemo uwezo wa **modify services**, kufanya DLL Hijacking, na kuweka **debuggers** kupitia Image File Execution Options pamoja na mbinu nyingine mbalimbali.
+Ruhusa ya **write access** kwa faili yoyote ya mfumo, bila kujali Access Control List (ACL) ya faili hiyo, hutolewa na privilege hii. Inafungua uwezekano mwingi wa escalation, ikiwemo uwezo wa **modify services**, kufanya DLL Hijacking, na kuweka **debuggers** kupitia Image File Execution Options pamoja na mbinu nyingine nyingi.
 
 ### SeCreateTokenPrivilege
 
-SeCreateTokenPrivilege ni ruhusa yenye nguvu, hasa muhimu wakati mtumiaji ana uwezo wa kutamka tokens, lakini pia hata bila SeImpersonatePrivilege. Uwezo huu unategemea uwezo wa kutamka token inayowakilisha mtumiaji yuleyule na ambayo integrity level yake haizidi ile ya process ya sasa.
+SeCreateTokenPrivilege ni permission yenye nguvu, hasa muhimu wakati mtumiaji ana uwezo wa impersonate tokens, lakini pia hata bila SeImpersonatePrivilege. Uwezo huu unategemea uwezo wa impersonate token inayowakilisha mtumiaji yule yule na ambayo integrity level yake haizidi ile ya process ya sasa.
 
 **Key Points:**
 
-- **Impersonation without SeImpersonatePrivilege:** Inawezekana kutumia SeCreateTokenPrivilege kwa EoP kwa kutamka tokens chini ya masharti fulani.
-- **Conditions for Token Impersonation:** Impersonation yenye mafanikio inahitaji target token iwe ya mtumiaji yuleyule na iwe na integrity level ambayo ni ndogo au sawa na integrity level ya process inayojaribu impersonation.
-- **Creation and Modification of Impersonation Tokens:** Watumiaji wanaweza kuunda impersonation token na kuiboresha kwa kuongeza SID (Security Identifier) ya group lenye privilege.
+- **Impersonation without SeImpersonatePrivilege:** Inawezekana kutumia SeCreateTokenPrivilege kwa EoP kwa impersonate tokens chini ya masharti fulani.
+- **Conditions for Token Impersonation:** Impersonation yenye mafanikio inahitaji target token iwe ya mtumiaji yule yule na iwe na integrity level ambayo ni ndogo au sawa na integrity level ya process inayojaribu impersonation.
+- **Creation and Modification of Impersonation Tokens:** Watumiaji wanaweza kuunda impersonation token na kuiboresha kwa kuongeza SID (Security Identifier) ya group yenye privilege.
 
 ### SeLoadDriverPrivilege
 
-Privilege hii huruhusu **load and unload device drivers** kwa kuunda registry entry yenye values maalum za `ImagePath` na `Type`. Kwa kuwa write access ya moja kwa moja kwa `HKLM` (HKEY_LOCAL_MACHINE) imezuiwa, `HKCU` (HKEY_CURRENT_USER) lazima itumike badala yake. Hata hivyo, ili kufanya `HKCU` itambulike na kernel kwa ajili ya driver configuration, lazima kufuatwe path maalum.
+Privilege hii inaruhusu **load and unload device drivers** kwa kuunda registry entry yenye values maalum za `ImagePath` na `Type`. Kwa kuwa write access ya moja kwa moja kwa `HKLM` (HKEY_LOCAL_MACHINE) imezuiwa, `HKCU` (HKEY_CURRENT_USER) lazima itumike badala yake. Hata hivyo, ili kufanya `HKCU` itambulike na kernel kwa ajili ya driver configuration, njia maalum lazima ifuatwe.
 
-Matumizi ya kisasa ya offensive kwa kawaida ni **BYOVD** (bring your own vulnerable driver): load **signed but vulnerable** kernel driver kisha utumie IOCTLs zake kuzima protections au kuruka hadi kernel code execution. Kumbuka kwamba kwenye builds za hivi karibuni za Windows 11/Server, **Microsoft vulnerable driver blocklist** na/au **HVCI/Memory Integrity** mara nyingi huvunja chains za zamani za public, hivyo mifano ya kawaida ya `szkg64.sys` si ya kuaminika kila mahali tena.
+Matumizi ya kisasa ya offensive kwa kawaida ni **BYOVD** (bring your own vulnerable driver): load **signed but vulnerable** kernel driver na kisha tumia IOCTLs zake kuzima protections au kuruka hadi kernel code execution. Kumbuka kwamba kwenye Windows 11/Server za hivi karibuni **Microsoft vulnerable driver blocklist** na/au **HVCI/Memory Integrity** mara nyingi huvunja public chains za zamani, hivyo mifano ya kitamaduni ya aina ya `szkg64.sys` si tena ya kuaminika kwa ujumla.
 
-Path hii ni `\Registry\User\<RID>\System\CurrentControlSet\Services\DriverName`, ambapo `<RID>` ni Relative Identifier ya mtumiaji wa sasa. Ndani ya `HKCU`, path hii yote lazima iundwe, na values mbili zinahitaji kuwekwa:
+Njia hii ni `\Registry\User\<RID>\System\CurrentControlSet\Services\DriverName`, ambapo `<RID>` ni Relative Identifier ya mtumiaji wa sasa. Ndani ya `HKCU`, njia hii yote lazima iundwe, na values mbili zinahitaji kuwekwa:
 
 - `ImagePath`, ambayo ni path ya binary itakayotekelezwa
-- `Type`, yenye value `SERVICE_KERNEL_DRIVER` (`0x00000001`).
+- `Type`, yenye value ya `SERVICE_KERNEL_DRIVER` (`0x00000001`).
 
 **Steps to Follow:**
 
-1. Access `HKCU` badala ya `HKLM` kutokana na restricted write access.
+1. Fikia `HKCU` badala ya `HKLM` kutokana na restricted write access.
 2. Unda path `\Registry\User\<RID>\System\CurrentControlSet\Services\DriverName` ndani ya `HKCU`, ambapo `<RID>` inawakilisha Relative Identifier ya mtumiaji wa sasa.
-3. Weka `ImagePath` kuwa path ya execution ya binary.
-4. Weka `Type` kama `SERVICE_KERNEL_DRIVER` (`0x00000001`).
+3. Weka `ImagePath` kuwa execution path ya binary.
+4. Weka `Type` kuwa `SERVICE_KERNEL_DRIVER` (`0x00000001`).
 ```python
 # Example Python code to set the registry values
 import winreg as reg
@@ -121,7 +121,7 @@ Njia zaidi za kutumia vibaya privilege hii katika [https://www.ired.team/offensi
 
 ### SeTakeOwnershipPrivilege
 
-Hii inafanana na **SeRestorePrivilege**. Kazi yake kuu huruhusu process **kuchukua umiliki wa object**, ikipita hitaji la explicit discretionary access kupitia utoaji wa WRITE_OWNER access rights. Mchakato huu unahusisha kwanza kupata ownership ya registry key iliyokusudiwa kwa madhumuni ya kuandika, kisha kubadilisha DACL ili kuwezesha write operations.
+Hii ni sawa na **SeRestorePrivilege**. Kazi yake kuu huruhusu process **kudai umiliki wa object**, ikiepuka hitaji la explicit discretionary access kupitia utoaji wa WRITE_OWNER access rights. Mchakato huanza kwa kwanza kupata umiliki wa registry key inayolengwa kwa madhumuni ya kuandika, kisha kubadili DACL ili kuwezesha write operations.
 ```bash
 takeown /f 'C:\some\file.txt' #Now the file is owned by you
 icacls 'C:\some\file.txt' /grant <your_username>:F #Now you have full access
@@ -139,13 +139,13 @@ c:\inetpub\wwwwroot\web.config
 ```
 ### SeDebugPrivilege
 
-Hii privilege inaruhusu **debug other processes**, ikiwemo kusoma na kuandika kwenye memory. Mikakati mbalimbali ya memory injection, inayoweza kukwepa antivirus nyingi na host intrusion prevention solutions, inaweza kutumiwa kwa privilege hii.
+Haki hii inaruhusu **debug other processes**, ikijumuisha kusoma na kuandika kwenye memory. Mikakati mbalimbali ya memory injection, inayoweza kukwepa antivirus nyingi na host intrusion prevention solutions, inaweza kutumika kwa haki hii.
 
-Kwenye Windows za kisasa, kumbuka kwamba `SeDebugPrivilege` kwa kawaida inatosha kufungua **non-protected SYSTEM processes** na ku-duplicate token zao, lakini si **dhamana** kwamba unaweza kugusa **LSASS**. Ikiwa **RunAsPPL / LSA Protection** imewezeshwa, non-protected processes haziwezi kusoma au ku-inject kwenye LSASS hata kama `SeDebugPrivilege` ipo. Katika hali hiyo, chukua token kutoka kwa SYSTEM process nyingine isiyo PPL, au chukua njia ya PPL bypass/BYOVD badala ya kudhani `procdump` itafanya kazi. Kwa mfano kamili wa token-copy kwa kutumia `SeDebugPrivilege` + `SeImpersonatePrivilege`, angalia [this page](sedebug-+-seimpersonate-copy-token.md).
+Kwenye Windows za kisasa, kumbuka kwamba `SeDebugPrivilege` kawaida inatosha kufungua **non-protected SYSTEM processes** na kuiga tokens zao, lakini **si** hakikisho kwamba unaweza kugusa **LSASS**. Ikiwa **RunAsPPL / LSA Protection** imewezeshwa, non-protected processes haziwezi kusoma au kuinject ndani ya LSASS hata kama `SeDebugPrivilege` ipo. Katika hali hiyo, chukua token kutoka kwa SYSTEM process nyingine isiyo ya PPL, au fanya chain na PPL bypass/BYOVD badala ya kudhani `procdump` itafanya kazi. Kwa mfano kamili wa kunakili token kwa kutumia `SeDebugPrivilege` + `SeImpersonatePrivilege`, angalia [this page](sedebug-+-seimpersonate-copy-token.md).
 
 #### Dump memory
 
-Unaweza kutumia [ProcDump](https://docs.microsoft.com/en-us/sysinternals/downloads/procdump) kutoka [SysInternals Suite](https://docs.microsoft.com/en-us/sysinternals/downloads/sysinternals-suite) ili **capture the memory of a process**. Hasa, hii inaweza kutumika kwa process ya **Local Security Authority Subsystem Service (**[**LSASS**](https://en.wikipedia.org/wiki/Local_Security_Authority_Subsystem_Service)**)**, ambayo inawajibika kuhifadhi user credentials mara tu user anapoingia kwenye system kwa mafanikio.
+Unaweza kutumia [ProcDump](https://docs.microsoft.com/en-us/sysinternals/downloads/procdump) kutoka [SysInternals Suite](https://docs.microsoft.com/en-us/sysinternals/downloads/sysinternals-suite) ili **capture the memory of a process**. Hasa, hii inaweza kutumika kwa process ya **Local Security Authority Subsystem Service (**[**LSASS**](https://en.wikipedia.org/wiki/Local_Security_Authority_Subsystem_Service)**)**, ambayo inawajibika kuhifadhi user credentials mara tu user anapofanikiwa kuingia kwenye system.
 
 Kisha unaweza kupakia dump hii kwenye mimikatz ili kupata passwords:
 ```
@@ -156,7 +156,7 @@ mimikatz # sekurlsa::logonpasswords
 ```
 #### RCE
 
-Kama unataka kupata `NT SYSTEM` shell unaweza kutumia:
+Ikiwa unataka kupata shell ya `NT SYSTEM` unaweza kutumia:
 
 - [**SeDebugPrivilege-Exploit (C++)**](https://github.com/bruno-1337/SeDebugPrivilege-Exploit)
 - [**SeDebugPrivilegePoC (C#)**](https://github.com/daem0nc0re/PrivFu/tree/main/PrivilegedOperations/SeDebugPrivilegePoC)
@@ -167,9 +167,9 @@ import-module psgetsys.ps1; [MyProcess]::CreateProcessFromParent(<system_pid>,<c
 ```
 ### SeManageVolumePrivilege
 
-Haki hii (Perform volume maintenance tasks) inaruhusu kufungua raw volume device handles (kwa mfano, \\.\C:) kwa direct disk I/O ambayo inapita NTFS ACLs. Ukiwa nayo unaweza kunakili bytes za faili yoyote kwenye volume kwa kusoma underlying blocks, hivyo kuwezesha arbitrary file read ya taarifa nyeti (kwa mfano, machine private keys katika %ProgramData%\Microsoft\Crypto\, registry hives, SAM/NTDS kupitia VSS). Inaleta athari kubwa hasa kwenye CA servers ambapo exfiltrating the CA private key huwezesha forging a Golden Certificate ili ku impersonate any principal.
+Haki hii (Perform volume maintenance tasks) inaruhusu kufungua raw volume device handles (mfano, \\.\C:) kwa direct disk I/O inayopitisha NTFS ACLs. Kwa hiyo unaweza kunakili bytes za faili yoyote kwenye volume kwa kusoma underlying blocks, hivyo kuwezesha arbitrary file read ya data nyeti (mfano, machine private keys katika %ProgramData%\Microsoft\Crypto\, registry hives, SAM/NTDS kupitia VSS). Ni muhimu hasa kwenye CA servers ambapo exfiltrating CA private key huwezesha kutengeneza Golden Certificate ya kughushi ili kuiga principal yoyote.
 
-Ona detailed techniques na mitigations:
+Angalia detailed techniques na mitigations:
 
 {{#ref}}
 semanagevolume-perform-volume-maintenance-tasks.md
@@ -179,25 +179,25 @@ semanagevolume-perform-volume-maintenance-tasks.md
 ```
 whoami /priv
 ```
-Tokeni **zinazoonekana kama Disabled** kwa kawaida zinaweza kuwezeshwa, kwa hiyo mara nyingi unaweza kutumia vibaya pia privilege za _Enabled_ na _Disabled_.
+**tokens** zinazoonekana kama Disabled kawaida zinaweza kuwezeshwa, kwa hiyo mara nyingi unaweza kutumia vibaya privileged zote za _Enabled_ na _Disabled_.
 
-### Wezesha Tokeni Zote
+### Enable All the tokens
 
-Ikiwa una privilege zilizo disabled, unaweza kutumia script [**EnableAllTokenPrivs.ps1**](https://raw.githubusercontent.com/fashionproof/EnableAllTokenPrivs/master/EnableAllTokenPrivs.ps1) ili kuwezesha tokeni zote:
+Ikiwa una disabled privileges, unaweza kutumia script [**EnableAllTokenPrivs.ps1**](https://raw.githubusercontent.com/fashionproof/EnableAllTokenPrivs/master/EnableAllTokenPrivs.ps1) kuenable tokens zote:
 ```bash
 .\EnableAllTokenPrivs.ps1
 whoami /priv
 ```
-Au skrini**pt** iliyopachikwa katika [**post**](https://www.leeholmes.com/adjusting-token-privileges-in-powershell/).
+Or the **script** embedded in this [**post**](https://www.leeholmes.com/adjusting-token-privileges-in-powershell/).
 
 ## Table
 
 Full token privileges cheatsheet at [https://github.com/gtworek/Priv2Admin](https://github.com/gtworek/Priv2Admin), summary below will only list direct ways to exploit the privilege to obtain an admin session or read sensitive files.
 
 | Privilege                  | Impact      | Tool                    | Execution path                                                                                                                                                                                                                                                                                                                                     | Remarks                                                                                                                                                                                                                                                                                                                        |
-| ------------------------- | ----------- | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **`SeAssignPrimaryToken`** | _**Admin**_ | 3rd party tool          | _"It would allow a user to impersonate tokens and privesc to nt system using tools such as potato.exe, rottenpotato.exe and juicypotato.exe"_                                                                                                                                                                                                      | Thank you [Aurélien Chalot](https://twitter.com/Defte_) for the update. I will try to re-phrase it to something more recipe-like soon.                                                                                                                                                                                         |
-| **`SeBackup`**             | **Threat**  | _**Built-in commands**_ | Read sensitive files with `robocopy /b` or dedicated SeBackup-aware copy helpers.                                                                                                                                                                                                                                                                 | <p>- Great for `SAM`/`SYSTEM`, `SECURITY`, `NTDS.dit`, and sometimes `%WINDIR%\MEMORY.DMP`.<br><br>- `robocopy` is convenient, but dedicated SeBackup cmdlets/APIs are often more flexible for locked/open files.</p>                                                                                                   |
+| --------------------------- | ----------- | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **`SeAssignPrimaryToken`**   | _**Admin**_ | 3rd party tool          | _"It would allow a user to impersonate tokens and privesc to nt system using tools such as potato.exe, rottenpotato.exe and juicypotato.exe"_                                                                                                                                                                                                      | Thank you [Aurélien Chalot](https://twitter.com/Defte_) for the update. I will try to re-phrase it to something more recipe-like soon.                                                                                                                                                                                         |
+| **`SeBackup`**             | **Threat**  | _**Built-in commands**_ | Soma faili nyeti kwa kutumia `robocopy /b` au zana maalum za kunakili zinazojua SeBackup.                                                                                                                                                                                                                                                                 | <p>- Ni nzuri sana kwa `SAM`/`SYSTEM`, `SECURITY`, `NTDS.dit`, na wakati mwingine `%WINDIR%\MEMORY.DMP`.<br><br>- `robocopy` ni rahisi, lakini cmdlets/APIs maalum za SeBackup mara nyingi ni rahisi zaidi kwa faili zilizofungwa/funguka.</p>                                                                                                   |
 | **`SeCreateToken`**        | _**Admin**_ | 3rd party tool          | Create arbitrary token including local admin rights with `NtCreateToken`.                                                                                                                                                                                                                                                                          |                                                                                                                                                                                                                                                                                                                                |
 | **`SeDebug`**              | _**Admin**_ | **PowerShell**          | Duplicate a **non-PPL** SYSTEM token or dump memory from a non-protected process.                                                                                                                                                                                                                                                                 | <p>LSASS dumping is commonly blocked if RunAsPPL/LSA Protection is enabled.</p><p>Script to be found at [FuzzySecurity](https://github.com/FuzzySecurity/PowerShell-Suite/blob/master/Conjure-LSASS.ps1)</p>                                                                                                               |
 | **`SeImpersonate`**        | _**Admin**_ | 3rd party tool          | Use the **Potato family** / named-pipe impersonation to spawn SYSTEM (`PrintSpoofer`, `RoguePotato`, `GodPotato`, `SigmaPotato`, `PrintNotifyPotato`, etc.).                                                                                                                                                                                    | <p>Most practical from service accounts such as IIS APPPOOL, MSSQL, scheduled tasks, or any context that already owns `SeImpersonatePrivilege`.</p>                                                                                                                                                                            |
