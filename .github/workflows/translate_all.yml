@@ -56,7 +56,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
       
@@ -243,7 +243,7 @@ jobs:
 
       # Login in AWS
       - name: Configure AWS credentials using OIDC
-        uses: aws-actions/configure-aws-credentials@v3
+        uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: us-east-1
@@ -270,6 +270,7 @@ jobs:
 
       - name: Refresh root sitemap index
         id: root_sitemap
+        shell: bash
         run: |
           set -euo pipefail
           LANGS=$(aws s3api list-objects-v2 --bucket hacktricks-wiki --delimiter / --query 'CommonPrefixes[].Prefix' --output text | tr '\t' '\n' | sed 's:/$::' | grep -E '^[a-z]{2}$' | sort | paste -sd, - || true)
@@ -286,6 +287,7 @@ jobs:
           fi
 
       - name: Invalidate CloudFront HTML and SEO assets
+        shell: bash
         run: |
           set -euo pipefail
           paths=("/$BRANCH/*" "/$BRANCH/sitemap.xml")
