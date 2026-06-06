@@ -1,45 +1,70 @@
-# Namespace ya Wakati
+# Time Namespace
 
 {{#include ../../../../../banners/hacktricks-training.md}}
 
-## Muhtasari
+## Overview
 
-Namespace ya wakati hufanya virtualize saa fulani zilizochaguliwa, hasa **`CLOCK_MONOTONIC`** na **`CLOCK_BOOTTIME`**. Ni namespace mpya na maalum zaidi kuliko mount, PID, network, au user namespaces, na si mara nyingi jambo la kwanza msimamizi anafikiria anapozungumzia container hardening. Hata hivyo, ni sehemu ya familia ya namespace za kisasa na inafaa kueleweka kimsingi.
+time namespace huvirtualize saa za saa za monotonic zilizochaguliwa badala ya host wall clock. Kwa vitendo hii inamaanisha private offsets kwa **`CLOCK_MONOTONIC`** na **`CLOCK_BOOTTIME`**, pamoja na **`CLOCK_MONOTONIC_COARSE`**, **`CLOCK_MONOTONIC_RAW`**, na **`CLOCK_BOOTTIME_ALARM`** zinazohusiana kwa karibu. Haivirtualize **`CLOCK_REALTIME`**, kwa hiyo `date` na logic ya certificate-expiry bado huona host wall clock isipokuwa mechanism nyingine iingilie kati.
 
-Madhumuni yake kuu ni kumruhusu mchakato kuona offsets zilizodhibitiwa kwa saa fulani bila kubadilisha mtazamo wa wakati wa host kwa ujumla. Hii ni muhimu kwa workflows za checkpoint/restore, upimaji wa deterministic, na baadhi ya tabia za runtime za kiwango cha juu. Si kawaida kuwa udhibiti mkubwa wa kutengwa kama mount au user namespaces, lakini bado huchangia kufanya mazingira ya mchakato kuwa ya kujitegemea zaidi.
+Lengo kuu ni kuruhusu process kuona controlled elapsed-time offsets bila kubadilisha global time view ya host. Hii ni muhimu kwa checkpoint/restore workflows, deterministic testing, na advanced runtime behavior. Kwa kawaida si control ya isolation inayojulikana sana kama mount au user namespaces, lakini bado huchangia kufanya mazingira ya process yawe self-contained zaidi.
 
-## Maabara
+Kutoka kwa mtazamo wa offensive, namespace hii kwa kawaida ni muhimu zaidi kwa **reconnaissance, timer skew, na runtime understanding** kuliko kwa direct breakout. Hata hivyo, ni muhimu kwa sababu more container runtimes na checkpoint/restore workflows sasa zinaweza kuiomba explicitly.
 
-Ikiwa kernel na userspace ya host vinaunga mkono, unaweza kuchunguza namespace kwa:
+## Lab
+
+Ikiwa host kernel na userspace zina support hiyo, unaweza inspect namespace kwa:
 ```bash
 sudo unshare --time --fork bash
 ls -l /proc/self/ns/time /proc/self/ns/time_for_children
-cat /proc/$$/timens_offsets 2>/dev/null
-```
-Uungaji mkono unatofautiana kulingana na toleo la kernel na zana, hivyo ukurasa huu unalenga zaidi kuelewa utaratibu kuliko kutegemea utaonekana katika kila mazingira ya maabara.
-
-### Mabadiliko ya Muda
-
-Linux time namespaces huvirtualiza offsets za `CLOCK_MONOTONIC` na `CLOCK_BOOTTIME`. Offsets za sasa kwa kila namespace zinaonyeshwa kupitia `/proc/<pid>/timens_offsets`, ambazo kwenye kernels zinazounga mkono pia zinaweza kubadilishwa na mchakato unaoshikilia `CAP_SYS_TIME` ndani ya namespace husika:
-```bash
-sudo unshare -Tr --mount-proc bash
-cat /proc/$$/timens_offsets
-echo "monotonic 172800000000000" > /proc/$$/timens_offsets
+python3 - <<'PY'
+import time
+print("realtime :", time.time())
+print("monotonic:", time.clock_gettime(time.CLOCK_MONOTONIC))
+print("boottime :", time.clock_gettime(time.CLOCK_BOOTTIME))
+PY
 cat /proc/uptime
+date
 ```
-Faili ina tofauti za nanosekundi. Kurekebisha `monotonic` kwa siku mbili kunabadilisha uchunguzi unaofanana na uptime ndani ya namespace hiyo bila kubadilisha saa ya kuta ya host.
+Msaada hutofautiana kulingana na kernel na versions za tool, kwa hiyo ukurasa huu zaidi unahusu kuelewa mechanism kuliko kutarajia ionekane katika kila lab environment. Uangalizi muhimu ni kwamba `date` bado inapaswa kuonyesha host wall clock, wakati thamani zinazotokana na monotonic/boottime ndio hubadilika offsets zisizo sifuri zinaposanidiwa.
 
-### Bendera za msaada za `unshare`
+### Creation Nuance
 
-Matoleo ya hivi karibuni ya `util-linux` yanatoa bendera za urahisi ambazo zinaandika offsets kiotomatiki:
+Time namespaces ni za kipekee kidogo ukilinganisha na mount, PID, au network namespaces:
+
+- `unshare(CLONE_NEWTIME)` huunda time namespace mpya kwa **future children**.
+- task inayoiita hubaki katika time namespace yake ya sasa.
+- `/proc/<pid>/ns/time_for_children` kwa hiyo mara nyingi ni ya kuvutia zaidi kuliko `/proc/<pid>/ns/time` unapofanya debugging ya runtime setup.
+
+Dirisha la kuandika pia ni maalum. Offsets katika `/proc/<pid>/timens_offsets` lazima ziandikwe kabla time namespace mpya haijajazwa kikamilifu na running tasks; kwa kawaida runtimes hufanya hivi wakati wa narrow setup window kati ya namespace creation na kuanzisha final payload. Mara task ikiwa tayari inaendeshwa humo, maandishi ya baadaye hushindwa kwa `EACCES`. Hii ndiyo sababu low-level runtimes hushughulikia time-namespace setup kama hatua ya mapema ya bootstrap badala ya kujaribu patch offsets kutoka ndani ya container process ambayo tayari imeanza.
+
+### Time Offsets
+
+Linux time namespaces huweka wazi per-namespace offsets kupitia `/proc/<pid>/timens_offsets`. Format ni seti ya clock names au IDs pamoja na second/nanosecond deltas ukilinganisha na initial time namespace.
+
+Kwa vitendo, workflow ya kuaminika zaidi inayoonekana kwa user ni kuiacha `unshare` ikuandikie offsets hizo:
 ```bash
-sudo unshare -T --monotonic="+24h" --boottime="+7d" --mount-proc bash
+sudo unshare -UrT --fork --mount-proc --monotonic 86400 --boottime 604800 bash
+cat /proc/$$/timens_offsets 2>/dev/null
+python3 - <<'PY'
+import time
+print("monotonic:", time.clock_gettime(time.CLOCK_MONOTONIC))
+print("boottime :", time.clock_gettime(time.CLOCK_BOOTTIME))
+print("uptime   :", open("/proc/uptime").read().split()[0])
+PY
 ```
-Bendera hizi kwa ujumla ni kuboresha utumiaji, lakini pia zinafanya iwe rahisi kutambua kipengele katika nyaraka na katika majaribio.
+Jambo muhimu si sintaksia sahihi ya amri bali ni tabia: container inaweza kuona mwonekano tofauti unaofanana na uptime bila kubadilisha host wall clock.
 
-## Matumizi ya Runtime
+### `unshare` Helper Flags
 
-namespaces za `time` ni mpya zaidi na hazitumiki kwa upana kama namespaces za mount au PID. OCI Runtime Specification v1.1 iliongeza msaada wazi kwa namespace ya `time` na field ya `linux.timeOffsets`, na matoleo mapya ya `runc` yanautekeleza sehemu hiyo ya modeli. Mfano mdogo wa OCI unaonekana kama:
+Matoleo ya hivi karibuni ya `util-linux` yanatoa convenience flags zinazoweka offsets kiotomatiki wakati wa kuunda namespace:
+```bash
+sudo unshare -T --fork --monotonic 86400 --boottime 604800 --mount-proc bash
+```
+Bendera hizi mara nyingi ni uboreshaji wa usability, lakini pia hufanya iwe rahisi zaidi kutambua feature kwenye documentation, test harnesses, na runtime wrappers.
+
+## Runtime Usage
+
+Time namespaces ni mpya zaidi na hazijaribiwi kwa upana kama mount au PID namespaces. OCI Runtime Specification v1.1 iliongeza explicit support kwa `time` namespace na field ya `linux.timeOffsets`, na modern runtimes zinaweza ku-map data hiyo kwenye kernel bootstrap flow. Sehemu ndogo ya OCI inaonekana hivi:
 ```json
 {
 "linux": {
@@ -53,41 +78,84 @@ namespaces za `time` ni mpya zaidi na hazitumiki kwa upana kama namespaces za mo
 }
 }
 ```
-Hii ni muhimu kwa sababu inabadilisha time namespacing kutoka primitive maalum ya kernel kuwa kitu ambacho runtimes zinaweza kuomba kwa njia portabli.
+Ini muhimu kwa sababu inabadilisha time namespacing kutoka kuwa kernel primitive ya niche hadi kitu ambacho runtimes zinaweza kuomba kwa njia ya portably. Pia inaeleza kwa nini runtime internals zinahitaji explicit synchronization step: offset lazima iandikwe kwenye `/proc/<pid>/timens_offsets` kabla ya container payload kuingia kikamilifu kwenye namespace mpya.
 
-## Athari za Usalama
+Checkpoint/restore stacks kama CRIU ni moja ya sababu kuu za dunia halisi za kuwepo kwa hii kabisa. Bila time namespaces, kurejesha workload iliyosimamishwa kungesababisha monotonic na boot-time clocks kuruka kwa kiasi cha muda ambacho workload ilikaa ikiwa suspended.
 
-Kuna simulizi chache za classic breakout zinazozunguka time namespace ikilinganishwa na aina nyingine za namespace. Hatari hapa kwa kawaida sio kwamba time namespace inatoa escape moja kwa moja, bali kwamba wasomaji wanaisahau kabisa na kwa hivyo wanakosa jinsi runtimes za hali ya juu zinaweza kuunda tabia za mchakato. Katika mazingira maalum, matazamo ya saa yaliyobadilishwa yanaweza kuathiri checkpoint/restore, observability, au forensic assumptions.
+## Security Impact
 
-## Matumizi Mabaya
+Kuna hadithi chache za classic breakout zinazohusiana na time namespace kuliko aina nyingine za namespace. Hatari hapa kwa kawaida si kwamba time namespace inawezesha escape moja kwa moja, bali kwamba wasomaji huiignore kabisa na hivyo kukosa kuona jinsi advanced runtimes zinavyoweza kuwa zina-shaped process behavior.
 
-Kawaida hakuna breakout primitive ya moja kwa moja hapa, lakini tabia ya saa iliyobadilishwa bado inaweza kuwa muhimu kwa kuelewa mazingira ya utekelezaji na kutambua sifa za runtime za hali ya juu:
+Katika mazingira maalum, views zilizobadilishwa za monotonic au boottime zinaweza kuathiri:
+
+- timeout and retry behavior
+- watchdogs na lease logic
+- `timerfd`, `nanosleep`, na `clock_nanosleep` behavior
+- checkpoint/restore forensics
+- elapsed-time telemetry na uptime-based heuristics
+
+Kwa hiyo ingawa mara chache hii ndiyo namespace ya kwanza unayobuse, kabisa inaweza kueleza tabia ya muda ya "haiwezekani" wakati wa assessment.
+
+## Abuse
+
+Kwa kawaida hakuna direct breakout primitive hapa, lakini altered clock behavior bado inaweza kuwa muhimu kwa kuelewa execution environment, kutambua advanced runtime features, na kugundua timer-based logic inayopimwa dhidi ya monotonic clocks badala ya wall clock time:
 ```bash
 readlink /proc/self/ns/time
 readlink /proc/self/ns/time_for_children
-date
-cat /proc/uptime
+cat /proc/$$/timens_offsets 2>/dev/null
+python3 - <<'PY'
+import time
+print("realtime :", time.time())
+print("monotonic:", time.clock_gettime(time.CLOCK_MONOTONIC))
+print("boottime :", time.clock_gettime(time.CLOCK_BOOTTIME))
+print("uptime   :", open("/proc/uptime").read().split()[0])
+PY
 ```
-Ikiwa unalinganisha michakato miwili, tofauti hapa zinaweza kusaidia kufafanua tabia isiyo ya kawaida ya muda, artefakti za checkpoint/restore, au utofauti wa logging ulio maalum kwa mazingira.
+Ikiwa unalinganisha processes mbili, tofauti hapa zinaweza kusaidia kueleza tabia ya ajabu ya timing, checkpoint/restore artifacts, au kutolingana kwa logging maalum ya mazingira.
+
+Mienendo ya vitendo inayohusiana na attacker:
+
+- confuse backoff, sleep, au watchdog logic iliyotekelezwa kwa kutumia monotonic clocks
+- kueleza kwa nini `/proc/uptime` na tabia inayoendeshwa na timers haitii matarajio ya host-side wall-clock
+- kutambua workflows za CRIU/checkpoint-restore na other advanced runtime features
+- kuona mazingira ambapo kujiunga na target time namespace kwa `nsenter -T -t <pid> -- ...` kunaweza kurudisha container-local timer behavior kwa debugging au post-exploitation
 
 Athari:
 
-- karibu daima reconnaissance au uelewa wa mazingira
-- inafaa kufafanua logging, uptime, au anomali za checkpoint/restore
-- si kawaida kuwa mekanismo ya moja kwa moja ya container-escape yenyewe
+- karibu kila wakati ni reconnaissance au kuelewa mazingira
+- inafaa kwa kueleza logging, uptime, au checkpoint/restore anomalies
+- inafaa kwa kuchambua monotonic-time-based sleeps, retries, na timers
+- kwa kawaida si mekanizimu ya moja kwa moja ya container-escape yenyewe
 
-Kipengele muhimu cha matumizi mabaya ni kwamba time namespaces hazivirtualizi `CLOCK_REALTIME`, hivyo zenyewe hazimiruhusu mshambuliaji kuibadilisha saa ya host au kuvunja moja kwa moja certificate-expiry checks kwa mfumo mzima. Thamani yao iko hasa katika kuchanganya mantiki inayotegemea monotonic-time, kuiga upya bug zilizojikita kwa mazingira, au kuelewa tabia ya runtime za kiwango cha juu.
+Nuance muhimu ya abuse ni kwamba time namespaces hazivirtualize `CLOCK_REALTIME`, kwa hiyo hazimpi attacker uwezo wa kufalsify host wall clock au kuvunja moja kwa moja certificate-expiry checks katika mfumo mzima. Thamani yake hasa ni kuchanganya monotonic-time-based logic, kurudisha bugs maalum za mazingira, au kuelewa advanced runtime behavior.
 
-## Ukaguzi
+## Checks
 
-Mikaguzi hii ni zaidi kuhusu kuthibitisha kama runtime inatumia private time namespace kabisa.
+Hizi checks kwa kiasi kikubwa ni kuhusu kuthibitisha kama runtime inatumia private time namespace kabisa na kama kweli imeweka nonzero offsets.
 ```bash
 readlink /proc/self/ns/time                 # Current time namespace identifier
 readlink /proc/self/ns/time_for_children    # Time namespace inherited by children
 cat /proc/$$/timens_offsets 2>/dev/null     # Monotonic and boottime offsets when supported
+lsns -t time 2>/dev/null                    # Host-side inventory when available
+python3 - <<'PY'
+import time
+print("realtime :", time.time())
+print("monotonic:", time.clock_gettime(time.CLOCK_MONOTONIC))
+print("boottime :", time.clock_gettime(time.CLOCK_BOOTTIME))
+PY
 ```
-- Katika mazingira mengi, thamani hizi hazitatoa hitimisho la usalama papo hapo, lakini zinakuambia ikiwa kipengele maalum cha runtime kinatumika.
-- Ikiwa unalinganisha mchakato miwili, tofauti hapa zinaweza kuelezea muda unaochanganya au tabia ya checkpoint/restore.
+Kinachovutia hapa ni:
 
-Kwa wengi wa container breakouts, the time namespace si udhibiti wa kwanza utakaochunguza. Hata hivyo, sehemu kamili ya container-security inapaswa kuitaja kwa sababu ni sehemu ya modern kernel model na mara nyingine ina umuhimu katika advanced runtime scenarios.
+- Katika mazingira mengi, thamani hizi hazitasababisha uthibitisho wa haraka wa usalama, lakini zinakuambia kama kipengele maalum cha runtime kinatumika.
+- Ikiwa `time_for_children` inatofautiana na `time`, caller huenda ameandaa child-only time namespace ambayo yenyewe haijaingia.
+- Ikiwa `date` inalingana na host lakini thamani za msingi za monotonic/boottime hazilingani, huenda unaangalia time namespacing badala ya wall-clock tampering.
+- Ikiwa unalinganisha processes mbili, tofauti hapa zinaweza kueleza timing ya kutatanisha au checkpoint/restore behavior.
+
+Kwa container breakouts nyingi, time namespace si control ya kwanza utakayochunguza. Hata hivyo, sehemu kamili ya container-security inapaswa kuitaja kwa sababu ni sehemu ya modern kernel model na mara chache huleta maana katika advanced runtime scenarios.
+
+## References
+
+- [Linux `time_namespaces(7)` manual page](https://man7.org/linux/man-pages/man7/time_namespaces.7.html)
+- [Time Namespaces - Linux Kernel Internals](https://kernel-internals.org/time/time-namespaces/)
+
 {{#include ../../../../../banners/hacktricks-training.md}}
