@@ -1125,6 +1125,40 @@ Detection ideas (telemetry-based)
 - Large-range `VirtualProtect` followed by custom per-section permission restoration.
 
 
+## Precision Module Stomping
+
+Module stomping executes payloads from the **`.text` section of a DLL already mapped inside the target process** instead of allocating obvious private executable memory or loading a fresh sacrificial DLL. The overwrite target should be a **loaded, disk-backed image** whose code space can absorb the payload without corrupting code paths the process still needs.
+
+### Reliable target selection
+
+Naive stomping against common modules such as `uxtheme.dll` or `comctl32.dll` is fragile: the DLL may not be loaded in the remote process, and a too-small code region will crash the process. A more reliable workflow is:
+
+1. Enumerate the target process modules and keep a **names-only include list** of DLLs already loaded.
+2. Build the payload first and record its **exact byte size**.
+3. Scan candidate DLLs on disk and compare the PE section **`.text` `Misc_VirtualSize`** against the payload size. This matters more than the file size because it reflects the size of the executable section **when mapped in memory**.
+4. Parse the **Export Address Table (EAT)** and choose an exported function RVA as the stomp start offset.
+5. Calculate the **blast radius**: if the payload exceeds the selected function boundary, it will overwrite adjacent exports laid out after it in memory.
+
+Typical recon/selection helpers seen in the wild:
+
+```cmd
+list-process-dlls.exe -p <PID> -n -o c:\payloads\modules.txt
+python find-stompable-dlls.py -d c:\Windows\System32 -i c:\payloads\modules.txt <payload_size>
+python dump-exports.py -f <dll_path>
+python blast-radius.py -f <dll_path> -fnc <export_name> -s <payload_size>
+```
+
+Operational notes
+- Prefer DLLs **already loaded** in the remote process to avoid the telemetry of `LoadLibrary`/unexpected image loads.
+- Prefer exports that are rarely executed by the target application, otherwise normal code paths may hit the stomped bytes before or after thread creation.
+- Large implants often require changing shellcode embedding from a string literal to a **byte-array/braced initializer** so the full buffer is represented correctly in the injector source.
+
+Detection ideas
+- Remote writes into **image-backed executable pages** (`MEM_IMAGE`, `PAGE_EXECUTE*`) instead of the more common private RWX/RX allocations.
+- Export entry points whose in-memory bytes no longer match the backing file on disk.
+- Remote threads or context pivots that begin execution inside a legitimate DLL export whose first bytes were recently modified.
+- Suspicious `VirtualProtect(Ex)` / `WriteProcessMemory` sequences against DLL `.text` pages followed by thread creation.
+
 ## SantaStealer Tradecraft for Fileless Evasion and Credential Theft
 
 SantaStealer (aka BluelineStealer) illustrates how modern info-stealers blend AV bypass, anti-analysis and credential access in a single workflow.
@@ -1165,6 +1199,9 @@ Sleep(exec_delay_seconds * 1000); // config-controlled delay to outlive sandboxe
 
 ## References
 
+
+- [Advanced Evasion Tradecraft: Precision Module Stomping](https://medium.com/@toneillcodes/advanced-evasion-tradecraft-precision-module-stomping-b51feb0978fe)
+- [toneillcodes/windows-process-injection](https://github.com/toneillcodes/windows-process-injection)
 - [Crystal Kit – blog](https://rastamouse.me/crystal-kit/)
 - [Crystal-Kit – GitHub](https://github.com/rasta-mouse/Crystal-Kit)
 - [Elastic – Call stacks, no more free passes for malware](https://www.elastic.co/security-labs/call-stacks-no-more-free-passes-for-malware)
