@@ -211,6 +211,54 @@ Detection/hunting tips for these variants
 - Network: outbound to CDN worker hosts or blockchain RPC endpoints from script hosts/PowerShell shortly after web browsing.
 - File/registry: temporary `.ps1` creation under `%TEMP%` plus RunMRU entries containing these one-liners; block/alert on signed-script LOLBAS (WScript/cscript/mshta) executing with external URLs or obfuscated alias strings.
 
+## Copy-and-paste attack family: CrashFix, InstallFix, FileFix
+
+The lure keeps changing (**fake CAPTCHA**, **browser crash**, **failed installer**, **file repair**, **developer dependency/update prompt**), but the execution pattern is the same: convince the victim to open a **trusted local execution surface** such as **Win+R**, `cmd.exe`, PowerShell, Terminal, or a package-manager/CLI workflow, then paste an attacker-provided command.
+
+Typical Windows bootstrap pattern:
+
+```powershell
+powershell -NoProfile -WindowStyle Hidden -Command "Set-Content $env:TEMP\verification_check.txt 'Verification completed'; Start-Process notepad.exe $env:TEMP\verification_check.txt"
+```
+
+Why this pattern is dangerous:
+- `-NoProfile` removes user-profile variability and makes the launcher more predictable.
+- `-WindowStyle Hidden` suppresses the visible console.
+- `-Command` keeps the whole first stage inline, which is ideal for clipboard delivery.
+- `$env:TEMP`, `%APPDATA%`, `AppData\Roaming`, and `Downloads` are common user-writable staging paths.
+
+Common malicious adaptations:
+1. **Drop-and-run**: write a script/DLL/EXE/HTA under a writable path and immediately launch it.
+2. **Downloader stub**: fetch the real second stage from the Internet into `%TEMP%`/`~/Library`/`/tmp` and execute it.
+3. **In-memory execution**: retrieve or decode a script and run it without an obvious initial PE drop.
+4. **LOLBAS / native host handoff**: pivot into `mshta.exe`, `wscript.exe`, `rundll32.exe`, PowerShell, Terminal, `osascript`, `curl`, or renamed native binaries so the first visible process chain looks like normal OS activity.
+
+### Variant-specific notes
+
+- **CrashFix**: malicious browser extensions or lure pages intentionally destabilize the browser, then present a fake recovery flow. In the Microsoft February 5, 2026 report, the chain progressed from a fake **uBlock Origin Lite** extension to a pasted command, abuse of `finger.exe`, a renamed copy `ct.exe`, obfuscated PowerShell, `script.ps1` under `AppData\Roaming`, portable **WinPython**, `pythonw.exe`, and persistence via **Run key** or a scheduled task named `SoftwareProtection`.
+- **InstallFix / developer workflow abuse**: malicious packages can hide the same technique behind trusted setup flows. A March 3, 2026 npm case (`@openclaw-ai/openclawai`) used a `postinstall` hook, replaced the expected CLI with an obfuscated `setup.js`, displayed a fake installer/password prompt, downloaded an encrypted second stage, launched it detached in the background, and deleted the temporary file shortly afterwards.
+- **FileFix**: the same execution model can be disguised as a corrupted document/archive/file-repair prompt where the victim is told to run a local command to recover or unlock content.
+
+### DFIR: what to triage after the paste
+
+Focus less on the lure page and more on the **bridge from browser/user action to local execution**.
+
+**Windows**
+- Process lineage: browser/`explorer.exe` → `powershell.exe` / `cmd.exe` / `mshta.exe` / `wscript.exe` / `rundll32.exe`.
+- Full command lines, especially hidden PowerShell, remote URLs, `WinHttp.WinHttpRequest.5.1`, temp-path writes, and renamed binaries.
+- Writable-path execution and follow-on artifacts under `%TEMP%`, `%APPDATA%`, `AppData\Roaming`, and `Downloads`.
+- Persistence and user-action artifacts: Run keys, scheduled tasks, `RunMRU`, `TypedPaths`, Prefetch, Shimcache, Amcache, browser history/extensions, and `Zone.Identifier` ADS.
+
+**macOS**
+- Terminal/shell history plus `curl`, `osascript`, `chmod`, `xattr`, and `launchctl` usage near the browser event.
+- Staging and persistence under `/tmp`, `/private/tmp`, `~/Library`, hidden directories, new `LaunchAgents`, `LaunchDaemons`, login items, and background items.
+
+**Linux**
+- Shell history, `auditd`/`execve` records if enabled, suspicious `curl`/`wget`/`python3`/`chmod` chains, and staging under `/tmp` or `/var/tmp`.
+- Persistence via cron, systemd user units, or `~/.config/autostart`, plus `journalctl` evidence and live network state before reboot.
+
+These campaigns often clean up temporary folders quickly, so preserve volatile evidence before rebooting when possible.
+
 ## Mitigations
 
 1. Browser hardening – disable clipboard write-access (`dom.events.asyncClipboard.clipboardItem` etc.) or require user gesture.
@@ -234,5 +282,8 @@ Detection/hunting tips for these variants
 - [The ClickFix Factory: First Exposure of IUAM ClickFix Generator](https://unit42.paloaltonetworks.com/clickfix-generator-first-of-its-kind/)
 - [2025, the year of the Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
 - [Red Canary – Intelligence Insights: February 2026](https://redcanary.com/blog/threat-intelligence/intelligence-insights-february-2026/)
+- [ClickFix, CrashFix and the growing family of copy and paste attacks](https://www.pentestpartners.com/security-blog/clickfix-crashfix-and-the-growing-family-of-copy-and-paste-attacks)
+- [New Clickfix variant "CrashFix" deploying Python Remote Access Trojan](https://www.microsoft.com/en-us/security/blog/2026/02/05/clickfix-variant-crashfix-deploying-python-rat-trojan/)
+- [GhostClaw Unmasked: A Malicious npm Package Impersonating OpenClaw to Steal Everything](https://research.jfrog.com/post/ghostclaw-unmasked/)
 
 {{#include ../../banners/hacktricks-training.md}}
