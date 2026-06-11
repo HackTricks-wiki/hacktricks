@@ -2,12 +2,76 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-निम्नलिखित कोड **SeDebug और SeImpersonate के विशेषाधिकारों का लाभ उठाता है** ताकि **SYSTEM के रूप में चल रहे एक प्रक्रिया** से टोकन को कॉपी किया जा सके और **सभी टोकन विशेषाधिकारों** के साथ। \
-इस मामले में, इस कोड को एक **Windows सेवा बाइनरी** के रूप में संकलित और उपयोग किया जा सकता है ताकि यह जांचा जा सके कि यह काम कर रहा है।\
-हालांकि, **कोड का मुख्य भाग जहां उन्नयन होता है** वह **`Exploit`** **फंक्शन** के अंदर है।\
-उस फंक्शन के अंदर आप देख सकते हैं कि **प्रक्रिया **_**lsass.exe**_** को खोजा जाता है**, फिर इसका **टोकन कॉपी किया जाता है**, और अंततः उस टोकन का उपयोग एक नए _**cmd.exe**_ को सभी कॉपी किए गए टोकन के विशेषाधिकारों के साथ स्पॉन करने के लिए किया जाता है।
+यह पेज **manual token-theft** वैरिएंट को कवर करता है, जहाँ **High Integrity** context, जिसके पास पहले से **`SeDebugPrivilege`** और **`SeImpersonatePrivilege`** हैं, एक उपयुक्त **SYSTEM** process खोलता है, **उसका token duplicate** करता है, और उस token के साथ **नया process spawn** करता है।
 
-**अन्य प्रक्रियाएँ** जो SYSTEM के रूप में चल रही हैं और जिनके पास सभी या अधिकांश टोकन विशेषाधिकार हैं: **services.exe**, **svhost.exe** (पहले में से एक), **wininit.exe**, **csrss.exe**... (_याद रखें कि आप एक सुरक्षित प्रक्रिया से टोकन कॉपी नहीं कर पाएंगे_)। इसके अलावा, आप एक प्रशासनिक के रूप में चलने वाले टूल [Process Hacker](https://processhacker.sourceforge.io/downloads.php) का उपयोग करके एक प्रक्रिया के टोकन देख सकते हैं।
+अगर आपको सिर्फ किसी privileged admin process से जल्दी `SYSTEM` shell चाहिए, तो यह भी देखें:
+
+{{#ref}}
+seimpersonate-from-high-to-system.md
+{{#endref}}
+
+अगर आपके पास **process-handle path** नहीं है लेकिन **`SeImpersonatePrivilege`** है, तो **named-pipe / Potato** route आमतौर पर आसान होता है:
+
+{{#ref}}
+named-pipe-client-impersonation.md
+{{#endref}}
+
+{{#ref}}
+roguepotato-and-printspoofer.md
+{{#endref}}
+
+## Quick triage
+
+token-copy path आज़माने से पहले, पुष्टि करें कि current process पहले से ही एक उपयोगी context में है:
+```cmd
+whoami /groups | findstr /i "high mandatory"
+whoami /priv | findstr /i "SeDebugPrivilege SeImpersonatePrivilege"
+```
+Notes:
+
+- **`SeDebugPrivilege`** आपको कई **non-protected** SYSTEM processes खोलने देता है, भले ही उनका DACL आम तौर पर आपको block कर दे।
+- **`SeImpersonatePrivilege`** बाद में **`CreateProcessWithTokenW`** को practical बनाता है।
+- अगर token-copy path से सिर्फ एक कमजोर या filtered SYSTEM token मिलता है, तो बस किसी **different SYSTEM process** से steal करें।
+
+## लक्ष्य process को carefully चुनें
+
+यह technique आम तौर पर **`lsass.exe`** के खिलाफ दिखाई जाती है, लेकिन modern Windows पर यह अक्सर **गलत target** होता है:
+
+- अगर **LSA Protection / RunAsPPL** enabled है, तो **`lsass.exe`** protected होता है और `SeDebugPrivilege` वाला normal admin process भी उसे open नहीं कर पाएगा।
+- **non-PPL SYSTEM processes** को prefer करें, जैसे **`winlogon.exe`**, **`wininit.exe`**, **`services.exe`**, या कोई early **`svchost.exe`** instance।
+- **Protected processes** और कुछ special processes, जैसे **`System`** या **`csrss.exe`**, इस technique के लिए realistic user-mode targets नहीं हैं।
+- Elevated mode में चल रहे **Process Hacker / Process Explorer** का उपयोग करके verify करें कि target token में वाकई वे privileges हैं जो आप चाहते हैं, उससे पहले कि आप उसे duplicate करें।
+
+## API details जो practice में matter करते हैं
+
+बहुत सारे public PoCs **`PROCESS_ALL_ACCESS`** और **`TOKEN_ALL_ACCESS`** request करते हैं, लेकिन यह जितना जरूरी है उससे ज्यादा noisy है। Practice में:
+
+- Target process को सिर्फ उन rights के साथ open करें जिनकी आपको जरूरत है (आम तौर पर **`PROCESS_QUERY_INFORMATION`** या **`PROCESS_QUERY_LIMITED_INFORMATION`**).
+- Token को process creation के लिए जरूरी rights के साथ open करें: **`TOKEN_QUERY | TOKEN_DUPLICATE | TOKEN_ASSIGN_PRIMARY`**.
+- **`DuplicateTokenEx(..., TokenPrimary, ...)`** का उपयोग करके एक **primary token** बनाएं; सिर्फ impersonation token नया process बनाने के लिए काफी नहीं होता।
+- अगर **`CreateProcessWithTokenW`** **`1314`** के साथ fail हो, तो **`CreateProcessAsUserW`** पर switch करें।
+- अगर आप किसी **service / Session 0** से launch कर रहे हैं, तो याद रखें कि **`CreateProcessWithTokenW`** child को **caller की session** में ही रखता है। अगर आपको visible desktop shell चाहिए, तो **`CreateProcessAsUserW`** का उपयोग करें और token को desired session में move करें।
+
+एक minimal modern flow इस तरह दिखता है:
+```c
+HANDLE hp = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, pid);
+HANDLE hTok = NULL, hDup = NULL;
+OpenProcessToken(hp, TOKEN_QUERY | TOKEN_DUPLICATE | TOKEN_ASSIGN_PRIMARY, &hTok);
+DuplicateTokenEx(hTok, MAXIMUM_ALLOWED, NULL,
+SecurityImpersonation, TokenPrimary, &hDup);
+CreateProcessWithTokenW(hDup, LOGON_WITH_PROFILE,
+L"C:\\Windows\\System32\\cmd.exe",
+NULL, 0, NULL, NULL, &si, &pi);
+```
+## Full service PoC
+
+निम्नलिखित code **`SeDebugPrivilege` और `SeImpersonatePrivilege` privileges का exploit** करता है ताकि **SYSTEM** के रूप में चल रहे एक **process** से **token copy** किया जा सके, और जिसमें **सभी token privileges** हों। इस मामले में, code को compile करके **Windows service binary** के रूप में इस्तेमाल किया जा सकता है ताकि verify किया जा सके कि यह primitive काम करता है।
+
+**elevation जहाँ होता है** उसका main part **`Exploit`** function के अंदर है। उस function में आप देख सकते हैं कि **`lsass.exe`** को search किया जाता है, उसका **token copy** किया जाता है, और अंत में वही token इस्तेमाल करके copied token के सभी privileges के साथ एक नया **`cmd.exe`** spawn किया जाता है।
+
+Modern hosts पर, आप अक्सर **`lsass.exe`** को किसी अन्य **non-PPL SYSTEM process** जैसे **`winlogon.exe`**, **`wininit.exe`**, या **`services.exe`** से replace करना चाहेंगे।
+
+SYSTEM के रूप में चल रहे और सभी या अधिकांश token privileges वाले अन्य processes हैं: **`services.exe`**, **`svchost.exe`** (कुछ शुरुआती ones), **`wininit.exe`**, **`csrss.exe`**... याद रखें कि आम तौर पर आप **protected process** से token copy नहीं कर पाएंगे।
 ```c
 // From https://cboard.cprogramming.com/windows-programming/106768-running-my-program-service.html
 #include <windows.h>
@@ -212,4 +276,8 @@ StartServiceCtrlDispatcher( serviceTable );
 return 0;
 }
 ```
+## संदर्भ
+
+- [CreateProcessWithTokenW function (Microsoft Learn)](https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-createprocesswithtokenw)
+- [Configure added LSA protection (Microsoft Learn)](https://learn.microsoft.com/en-us/windows-server/security/credentials-protection-and-management/configuring-additional-lsa-protection)
 {{#include ../../banners/hacktricks-training.md}}
