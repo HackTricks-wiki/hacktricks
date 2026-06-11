@@ -1,13 +1,77 @@
-# SeDebug + SeImpersonate - Token Kopyala
+# SeDebug + SeImpersonate - Copy Token
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Aşağıdaki kod **SeDebug ve SeImpersonate ayrıcalıklarını kullanarak** bir **SYSTEM olarak çalışan bir süreçten** ve **tüm token ayrıcalıklarıyla** token kopyalar. \
-Bu durumda, bu kod bir **Windows hizmeti ikili dosyası** olarak derlenip çalıştığını kontrol etmek için kullanılabilir.\
-Ancak, **yükseltmenin gerçekleştiği ana kod** kısmı **`Exploit`** **fonksiyonu** içindedir.\
-O fonksiyonun içinde **_lsass.exe_** adlı sürecin arandığını, ardından **token'ının kopyalandığını** ve nihayetinde o token'ın kopyalanan token'ın tüm ayrıcalıklarıyla yeni bir _**cmd.exe**_ başlatmak için kullanıldığını görebilirsiniz.
+Bu sayfa, zaten **`SeDebugPrivilege`** ve **`SeImpersonatePrivilege`** sahibi olan bir **High Integrity** context’in uygun bir **SYSTEM** process açtığı, token’ını **duplicate** ettiği ve bu token ile yeni bir process başlattığı **manual token-theft** varyantını kapsar.
 
-**SYSTEM olarak çalışan ve tüm veya çoğu token ayrıcalığına sahip diğer süreçler**: **services.exe**, **svhost.exe** (ilklerden biri), **wininit.exe**, **csrss.exe**... (_korumalı bir süreçten token kopyalayamayacağınızı unutmayın_). Ayrıca, bir sürecin token'larını görmek için yönetici olarak çalışan [Process Hacker](https://processhacker.sourceforge.io/downloads.php) aracını kullanabilirsiniz.
+Yalnızca yetkili bir admin process’ten hızlı bir `SYSTEM` shell’e ihtiyacın varsa, şunlara da bak:
+
+{{#ref}}
+seimpersonate-from-high-to-system.md
+{{#endref}}
+
+Eğer bir process-handle path’in yoksa ama **`SeImpersonatePrivilege`** varsa, **named-pipe / Potato** yolu genelde daha kolaydır:
+
+{{#ref}}
+named-pipe-client-impersonation.md
+{{#endref}}
+
+{{#ref}}
+roguepotato-and-printspoofer.md
+{{#endref}}
+
+## Quick triage
+
+Token-copy path’ini denemeden önce, mevcut process’in zaten kullanışlı bir context içinde olduğunu doğrula:
+```cmd
+whoami /groups | findstr /i "high mandatory"
+whoami /priv | findstr /i "SeDebugPrivilege SeImpersonatePrivilege"
+```
+Notlar:
+
+- **`SeDebugPrivilege`**, DACL normalde seni engellese bile birçok **korunmayan** SYSTEM process'i açmana izin verir.
+- **`SeImpersonatePrivilege`**, sonrasında **`CreateProcessWithTokenW`** kullanımını pratik hale getirir.
+- Eğer token-copy yolu yalnızca zayıf veya filtrelenmiş bir SYSTEM token veriyorsa, sadece **farklı bir SYSTEM process**'inden çal.
+
+## Hedef process'i dikkatli seç
+
+Teknik genelde **`lsass.exe`** üzerinde gösterilir, ancak modern Windows'ta bu çoğu zaman **yanlış hedeftir**:
+
+- Eğer **LSA Protection / RunAsPPL** etkinse, **`lsass.exe`** korunur ve **`SeDebugPrivilege`** olan normal bir admin process'i yine de onu açamaz.
+- **`winlogon.exe`**, **`wininit.exe`**, **`services.exe`** veya erken bir **`svchost.exe`** instance'ı gibi **PPL olmayan SYSTEM process'leri** tercih et.
+- **Protected process**'ler ve **`System`** ya da **`csrss.exe`** gibi bazı özel process'ler, bu teknik için gerçekçi user-mode hedefler değildir.
+- Hedef token'ın gerçekten istediğin privilege'lere sahip olup olmadığını kopyalamadan önce doğrulamak için yükseltilmiş olarak çalışan **Process Hacker / Process Explorer** kullan.
+
+## Pratikte önemli olan API detayları
+
+Birçok public PoC, gereğinden daha gürültülü olan **`PROCESS_ALL_ACCESS`** ve **`TOKEN_ALL_ACCESS`** ister. Pratikte:
+
+- Hedef process'i yalnızca ihtiyacın olan yetkilerle aç (genelde **`PROCESS_QUERY_INFORMATION`** veya **`PROCESS_QUERY_LIMITED_INFORMATION`**).
+- Token'ı process oluşturma için gerekli yetkilerle aç: **`TOKEN_QUERY | TOKEN_DUPLICATE | TOKEN_ASSIGN_PRIMARY`**.
+- Bir **primary token** oluşturmak için **`DuplicateTokenEx(..., TokenPrimary, ...)`** kullan; sadece impersonation token, yeni bir process oluşturmak için yeterli değildir.
+- Eğer **`CreateProcessWithTokenW`** **`1314`** hatası verirse, **`CreateProcessAsUserW`**'ye geç.
+- Bir **service / Session 0** içinden başlatıyorsan, **`CreateProcessWithTokenW`**'nin çocuğu **çağıranın session'ında** tuttuğunu unutma. Görünen bir desktop shell gerekiyorsa, **`CreateProcessAsUserW`** kullan ve token'ı istenen session'a taşı.
+
+Minimal modern akış şöyle görünür:
+```c
+HANDLE hp = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, pid);
+HANDLE hTok = NULL, hDup = NULL;
+OpenProcessToken(hp, TOKEN_QUERY | TOKEN_DUPLICATE | TOKEN_ASSIGN_PRIMARY, &hTok);
+DuplicateTokenEx(hTok, MAXIMUM_ALLOWED, NULL,
+SecurityImpersonation, TokenPrimary, &hDup);
+CreateProcessWithTokenW(hDup, LOGON_WITH_PROFILE,
+L"C:\\Windows\\System32\\cmd.exe",
+NULL, 0, NULL, NULL, &si, &pi);
+```
+## Full service PoC
+
+Aşağıdaki code, **`SeDebugPrivilege` ve `SeImpersonatePrivilege`** ayrıcalıklarını **SYSTEM olarak çalışan bir process**’ten ve **tüm token privileges** ile token kopyalamak için kullanır. Bu durumda, code derlenip **Windows service binary** olarak kullanılarak primitive’in çalıştığı doğrulanabilir.
+
+**Yükseltmenin gerçekleştiği code’un** ana kısmı **`Exploit`** function’ının içindedir. Bu function içinde **`lsass.exe`**’nin arandığını, **token’ının kopyalandığını** ve son olarak bu token ile kopyalanan token’ın tüm ayrıcalıklarıyla yeni bir **`cmd.exe`** başlatıldığını görebilirsiniz.
+
+Modern host’larda, çoğu zaman **`lsass.exe`** yerine **`winlogon.exe`**, **`wininit.exe`** veya **`services.exe`** gibi başka bir **non-PPL SYSTEM process** kullanmak isteyeceksiniz.
+
+SYSTEM olarak çalışan ve token privileges’lerinin tamamına ya da çoğuna sahip diğer process’ler şunlardır: **`services.exe`**, **`svchost.exe`** (ilk olanlardan bazıları), **`wininit.exe`**, **`csrss.exe`**... Genelde **protected process**’ten token kopyalayamayacağınızı unutmayın.
 ```c
 // From https://cboard.cprogramming.com/windows-programming/106768-running-my-program-service.html
 #include <windows.h>
@@ -212,4 +276,8 @@ StartServiceCtrlDispatcher( serviceTable );
 return 0;
 }
 ```
+## References
+
+- [CreateProcessWithTokenW function (Microsoft Learn)](https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-createprocesswithtokenw)
+- [Configure added LSA protection (Microsoft Learn)](https://learn.microsoft.com/en-us/windows-server/security/credentials-protection-and-management/configuring-additional-lsa-protection)
 {{#include ../../banners/hacktricks-training.md}}
