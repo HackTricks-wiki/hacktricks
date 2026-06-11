@@ -2,12 +2,76 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Msimbo ufuatao **unatumia mamlaka SeDebug na SeImpersonate** ili nakala token kutoka **mchakato unaotembea kama SYSTEM** na **mamlaka yote ya token**. \
-Katika kesi hii, msimbo huu unaweza kukusanywa na kutumika kama **Windows service binary** ili kuangalia kama inafanya kazi.\
-Hata hivyo, sehemu kuu ya **msimbo ambapo kuinua kunatokea** iko ndani ya **`Exploit`** **function**.\
-Ndani ya hiyo function unaweza kuona kwamba **mchakato **_**lsass.exe**_** unatafutwa**, kisha **token yake inanakiliwa**, na hatimaye token hiyo inatumika kuanzisha _**cmd.exe**_ mpya yenye mamlaka yote ya token iliyokopwa.
+Ukurasa huu unashughulikia toleo la **manual token-theft** ambapo muktadha wa **High Integrity** ambao tayari una **`SeDebugPrivilege`** na **`SeImpersonatePrivilege`** hufungua mchakato unaofaa wa **SYSTEM**, **hu-duplicate token yake**, na **huanzisha process mpya** kwa kutumia token hiyo.
 
-**Mchakato mingine** unaotembea kama SYSTEM wenye mamlaka yote au mengi ya token ni: **services.exe**, **svhost.exe** (moja ya za kwanza), **wininit.exe**, **csrss.exe**... (_kumbuka kwamba huwezi kunakili token kutoka kwa mchakato uliohifadhiwa_). Zaidi ya hayo, unaweza kutumia zana [Process Hacker](https://processhacker.sourceforge.io/downloads.php) ikifanya kazi kama msimamizi kuona token za mchakato.
+Ikiwa unahitaji tu `SYSTEM` shell ya haraka kutoka kwenye privileged admin process, pia angalia:
+
+{{#ref}}
+seimpersonate-from-high-to-system.md
+{{#endref}}
+
+Ikiwa huna njia ya process-handle lakini unayo **`SeImpersonatePrivilege`**, njia ya **named-pipe / Potato** kwa kawaida ni rahisi zaidi:
+
+{{#ref}}
+named-pipe-client-impersonation.md
+{{#endref}}
+
+{{#ref}}
+roguepotato-and-printspoofer.md
+{{#endref}}
+
+## Quick triage
+
+Kabla ya kujaribu njia ya token-copy, thibitisha kwamba current process tayari iko kwenye muktadha unaofaa:
+```cmd
+whoami /groups | findstr /i "high mandatory"
+whoami /priv | findstr /i "SeDebugPrivilege SeImpersonatePrivilege"
+```
+Notes:
+
+- **`SeDebugPrivilege`** ndicho kinachokuruhusu kufungua michakato mingi ya SYSTEM isiyo **protected** hata wakati DACL yao kwa kawaida ingekuzuia.
+- **`SeImpersonatePrivilege`** ndicho kinachofanya **`CreateProcessWithTokenW`** iwe ya vitendo baadaye.
+- Ikiwa njia ya token-copy inakupa tu SYSTEM token dhaifu au iliyochujwa, iba kutoka kwenye **different SYSTEM process**.
+
+## Pick the target process carefully
+
+Tekniko hili kwa kawaida huonyeshwa dhidi ya **`lsass.exe`**, lakini kwenye Windows za kisasa hilo mara nyingi huwa **target mbaya**:
+
+- Ikiwa **LSA Protection / RunAsPPL** imewashwa, **`lsass.exe`** inalindwa na admin process ya kawaida yenye `SeDebugPrivilege` bado haitoweza kuifungua.
+- Chagua kwa upendeleo **non-PPL SYSTEM processes** kama **`winlogon.exe`**, **`wininit.exe`**, **`services.exe`**, au instance ya mapema ya **`svchost.exe`**.
+- **Protected processes** na baadhi ya special processes kama **`System`** au **`csrss.exe`** si targets halisi za user-mode kwa tekniko hili.
+- Tumia **Process Hacker / Process Explorer** ukiwa elevated kuthibitisha kama target token kweli ina privileges unazotaka kabla ya kuiduplicate.
+
+## API details that matter in practice
+
+PoC nyingi za umma huomba **`PROCESS_ALL_ACCESS`** na **`TOKEN_ALL_ACCESS`**, lakini hilo ni kelele zaidi kuliko inavyohitajika. Kwa vitendo:
+
+- Fungua target process kwa rights tu unazohitaji (kwa kawaida **`PROCESS_QUERY_INFORMATION`** au **`PROCESS_QUERY_LIMITED_INFORMATION`**).
+- Fungua token kwa rights zinazohitajika kwa process creation: **`TOKEN_QUERY | TOKEN_DUPLICATE | TOKEN_ASSIGN_PRIMARY`**.
+- Tumia **`DuplicateTokenEx(..., TokenPrimary, ...)`** kuunda **primary token**; impersonation token pekee haitoshi kuunda process mpya.
+- Ikiwa **`CreateProcessWithTokenW`** inashindwa kwa **`1314`**, badili kwenda **`CreateProcessAsUserW`**.
+- Ukizindua kutoka kwenye **service / Session 0**, kumbuka kwamba **`CreateProcessWithTokenW`** huacha child katika **session ya caller**. Ukihitaji visible desktop shell, tumia **`CreateProcessAsUserW`** na uhamishe token kwenda session unayotaka.
+
+Flow ya kisasa ya chini kabisa inaonekana kama:
+```c
+HANDLE hp = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, pid);
+HANDLE hTok = NULL, hDup = NULL;
+OpenProcessToken(hp, TOKEN_QUERY | TOKEN_DUPLICATE | TOKEN_ASSIGN_PRIMARY, &hTok);
+DuplicateTokenEx(hTok, MAXIMUM_ALLOWED, NULL,
+SecurityImpersonation, TokenPrimary, &hDup);
+CreateProcessWithTokenW(hDup, LOGON_WITH_PROFILE,
+L"C:\\Windows\\System32\\cmd.exe",
+NULL, 0, NULL, NULL, &si, &pi);
+```
+## Full service PoC
+
+Kode berikut **memanfaatkan privilege `SeDebugPrivilege` dan `SeImpersonatePrivilege`** untuk menyalin token dari sebuah **proses yang berjalan sebagai SYSTEM** dan dengan **semua privilege token**. Dalam kasus ini, kode dapat dikompilasi dan digunakan sebagai **binary Windows service** untuk memverifikasi bahwa primitive ini berfungsi.
+
+Bagian utama dari **kode tempat elevasi terjadi** ada di dalam fungsi **`Exploit`**. Di dalam fungsi itu Anda bisa melihat bahwa **`lsass.exe`** dicari, **token**-nya disalin, dan akhirnya token itu digunakan untuk menjalankan **`cmd.exe`** baru dengan semua privilege dari token yang disalin.
+
+Pada host modern, Anda sering ingin mengganti **`lsass.exe`** dengan **proses SYSTEM non-PPL** lain seperti **`winlogon.exe`**, **`wininit.exe`**, atau **`services.exe`**.
+
+Proses lain yang berjalan sebagai SYSTEM dengan semua atau sebagian besar privilege token adalah: **`services.exe`**, **`svchost.exe`** (beberapa yang pertama), **`wininit.exe`**, **`csrss.exe`**... Ingat bahwa Anda umumnya **tidak akan bisa menyalin token dari proses yang dilindungi**.
 ```c
 // From https://cboard.cprogramming.com/windows-programming/106768-running-my-program-service.html
 #include <windows.h>
@@ -212,4 +276,8 @@ StartServiceCtrlDispatcher( serviceTable );
 return 0;
 }
 ```
+## Marejeo
+
+- [CreateProcessWithTokenW function (Microsoft Learn)](https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-createprocesswithtokenw)
+- [Configure added LSA protection (Microsoft Learn)](https://learn.microsoft.com/en-us/windows-server/security/credentials-protection-and-management/configuring-additional-lsa-protection)
 {{#include ../../banners/hacktricks-training.md}}
