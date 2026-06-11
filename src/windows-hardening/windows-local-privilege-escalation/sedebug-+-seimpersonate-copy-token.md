@@ -2,12 +2,76 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Sledeći kod **iskorišćava privilegije SeDebug i SeImpersonate** da kopira token iz **procesa koji se izvršava kao SYSTEM** i sa **svim privilegijama tokena**. \
-U ovom slučaju, ovaj kod može biti kompajliran i korišćen kao **Windows servisni binarni fajl** da proveri da li radi.\
-Međutim, glavni deo **koda gde se dešava elevacija** je unutar **`Exploit`** **funkcije**.\
-Unutar te funkcije možete videti da se **proces **_**lsass.exe**_** pretražuje**, zatim se **token kopira**, i na kraju se taj token koristi za pokretanje novog _**cmd.exe**_ sa svim privilegijama kopiranog tokena.
+Ova stranica pokriva varijantu **manuelne krađe tokena** gde **High Integrity** kontekst koji već ima **`SeDebugPrivilege`** i **`SeImpersonatePrivilege`** otvara odgovarajući **SYSTEM** proces, **duplira njegov token**, i **pokreće novi proces** sa tim tokenom.
 
-**Ostali procesi** koji se izvršavaju kao SYSTEM sa svim ili većinom privilegija tokena su: **services.exe**, **svhost.exe** (jedan od prvih), **wininit.exe**, **csrss.exe**... (_zapamtite da nećete moći da kopirate token iz zaštićenog procesa_). Pored toga, možete koristiti alat [Process Hacker](https://processhacker.sourceforge.io/downloads.php) koji se izvršava kao administrator da vidite tokene procesa.
+Ako vam treba samo brz `SYSTEM` shell iz privilegovanog admin procesa, pogledajte i:
+
+{{#ref}}
+seimpersonate-from-high-to-system.md
+{{#endref}}
+
+Ako **nemate** path za process-handle, ali imate **`SeImpersonatePrivilege`**, ruta sa **named-pipe / Potato** je obično lakša:
+
+{{#ref}}
+named-pipe-client-impersonation.md
+{{#endref}}
+
+{{#ref}}
+roguepotato-and-printspoofer.md
+{{#endref}}
+
+## Quick triage
+
+Pre nego što pokušate token-copy path, potvrdite da je trenutni proces već u korisnom kontekstu:
+```cmd
+whoami /groups | findstr /i "high mandatory"
+whoami /priv | findstr /i "SeDebugPrivilege SeImpersonatePrivilege"
+```
+Napomene:
+
+- **`SeDebugPrivilege`** je ono što ti omogućava da otvoriš mnoge **nezaštićene** SYSTEM procese čak i kada bi te njihov DACL inače blokirao.
+- **`SeImpersonatePrivilege`** je ono što čini **`CreateProcessWithTokenW`** praktičnim nakon toga.
+- Ako putanja kopiranja tokena daje samo slab ili filtriran SYSTEM token, jednostavno ukradi iz **drugog SYSTEM procesa**.
+
+## Pažljivo izaberi ciljni proces
+
+Tehnika se obično prikazuje protiv **`lsass.exe`**, ali na modernom Windowsu to je često **pogrešan cilj**:
+
+- Ako je **LSA Protection / RunAsPPL** omogućen, **`lsass.exe`** je zaštićen i normalan admin proces sa **`SeDebugPrivilege`** i dalje neće moći da ga otvori.
+- Prednost daj **ne-PPL SYSTEM procesima** kao što su **`winlogon.exe`**, **`wininit.exe`**, **`services.exe`**, ili ranoj instanci **`svchost.exe`**.
+- **Zaštićeni procesi** i neki posebni procesi kao što su **`System`** ili **`csrss.exe`** nisu realni ciljevi iz user-mode okruženja za ovu tehniku.
+- Koristi **Process Hacker / Process Explorer** pokrenut elevated da proveriš da li ciljni token zaista ima privilegije koje želiš pre nego što ga dupliraš.
+
+## Detalji API-ja koji su bitni u praksi
+
+Mnogo javnih PoC-ova traži **`PROCESS_ALL_ACCESS`** i **`TOKEN_ALL_ACCESS`**, ali to je bučnije nego što je potrebno. U praksi:
+
+- Otvori ciljni proces samo sa pravima koja su ti potrebna (obično **`PROCESS_QUERY_INFORMATION`** ili **`PROCESS_QUERY_LIMITED_INFORMATION`**).
+- Otvori token sa pravima potrebnim za kreiranje procesa: **`TOKEN_QUERY | TOKEN_DUPLICATE | TOKEN_ASSIGN_PRIMARY`**.
+- Koristi **`DuplicateTokenEx(..., TokenPrimary, ...)`** da napraviš **primary token**; samo impersonation token nije dovoljan za kreiranje novog procesa.
+- Ako **`CreateProcessWithTokenW`** padne sa **`1314`**, pređi na **`CreateProcessAsUserW`**.
+- Ako pokrećeš iz **servisa / Session 0**, zapamti da **`CreateProcessWithTokenW`** ostavlja child proces u **sesiji pozivaoca**. Ako ti treba vidljiv desktop shell, koristi **`CreateProcessAsUserW`** i prebaci token u željenu sesiju.
+
+Minimalni moderni tok izgleda ovako:
+```c
+HANDLE hp = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, pid);
+HANDLE hTok = NULL, hDup = NULL;
+OpenProcessToken(hp, TOKEN_QUERY | TOKEN_DUPLICATE | TOKEN_ASSIGN_PRIMARY, &hTok);
+DuplicateTokenEx(hTok, MAXIMUM_ALLOWED, NULL,
+SecurityImpersonation, TokenPrimary, &hDup);
+CreateProcessWithTokenW(hDup, LOGON_WITH_PROFILE,
+L"C:\\Windows\\System32\\cmd.exe",
+NULL, 0, NULL, NULL, &si, &pi);
+```
+## Full service PoC
+
+Sledeći kod **koristi privilegije `SeDebugPrivilege` i `SeImpersonatePrivilege`** da kopira token iz **procesa koji radi kao SYSTEM** i sa **svim token privilegijama**. U ovom slučaju, kod može da se kompajlira i koristi kao **Windows service binary** da bi se proverilo da li primitv funkcioniše.
+
+Glavni deo **koda gde dolazi do elevation** nalazi se unutar funkcije **`Exploit`**. Unutar te funkcije možeš da vidiš da se traži **`lsass.exe`**, njegov **token se kopira**, i na kraju se taj token koristi za pokretanje novog **`cmd.exe`** sa svim privilegijama kopiranog tokena.
+
+Na modernim hostovima, često ćeš želeti da zameniš **`lsass.exe`** nekim drugim **non-PPL SYSTEM procesom** kao što su **`winlogon.exe`**, **`wininit.exe`**, ili **`services.exe`**.
+
+Drugi procesi koji rade kao SYSTEM sa svim ili većinom token privilegija su: **`services.exe`**, **`svchost.exe`** (neki od prvih), **`wininit.exe`**, **`csrss.exe`**... Zapamti da generalno **nećeš moći da kopiraš token iz protected process-a**.
 ```c
 // From https://cboard.cprogramming.com/windows-programming/106768-running-my-program-service.html
 #include <windows.h>
@@ -212,4 +276,8 @@ StartServiceCtrlDispatcher( serviceTable );
 return 0;
 }
 ```
+## Reference
+
+- [CreateProcessWithTokenW function (Microsoft Learn)](https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-createprocesswithtokenw)
+- [Configure added LSA protection (Microsoft Learn)](https://learn.microsoft.com/en-us/windows-server/security/credentials-protection-and-management/configuring-additional-lsa-protection)
 {{#include ../../banners/hacktricks-training.md}}
