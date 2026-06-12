@@ -1,72 +1,91 @@
-# Windows Service Triggers: Enumerasyon ve Kötüye Kullanım
+# Windows Service Triggers: Enumeration and Abuse
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Windows Service Triggers, Service Control Manager (SCM)'ın bir koşul oluştuğunda bir servisi başlatmasına/durdurmasına izin verir (ör. bir IP adresi kullanıma girdiğinde, bir named pipe bağlantısı denendiğinde, bir ETW olayı yayınlandığında). Hedef serviste SERVICE_START haklarınız olmasa bile, tetikleyicisini harekete geçirerek servisi başlatabilmeniz mümkündür.
+Windows Service Triggers, Service Control Manager (SCM)’nin bir koşul gerçekleştiğinde bir service başlatmasına/durdurmasına izin verir (örn. bir IP address kullanılabilir hale gelir, bir named pipe connection girişimi yapılır, bir ETW event yayınlanır). Hedef service üzerinde SERVICE_START yetkiniz olmasa bile, trigger’ını tetikleyerek onu yine de başlatabilirsiniz.
 
-Bu sayfa, saldırgan-dostu enumerasyon ve yaygın tetikleyicileri aktive etmenin düşük sürtünmeli yollarına odaklanır.
+Bu sayfa, saldırgan dostu enumeration ve yaygın trigger’ları etkinleştirmek için düşük sürtünmeli yöntemlere odaklanır.
 
-> İpucu: Ayrıcalıklı bir yerleşik servisi (ör. RemoteRegistry, WebClient/WebDAV, EFS) başlatmak yeni RPC/named-pipe dinleyicilerini açığa çıkarabilir ve ek kötüye kullanım zincirlerini mümkün kılabilir.
+> Tip: Privileged built-in bir service’i başlatmak (örn. RemoteRegistry, WebClient/WebDAV, EFS), yeni RPC/named-pipe listener’larını açığa çıkarabilir ve ek abuse chain’lerinin kilidini açabilir.
 
-## Servis Tetikleyicilerinin Enumerasyonu
+## Enumerating Service Triggers
 
 - sc.exe (local)
-- Bir servisin tetikleyicilerini listele: `sc.exe qtriggerinfo <ServiceName>`
+- Bir service’in trigger’larını listele: `sc.exe qtriggerinfo <ServiceName>`
 - Registry (local)
-- Tetikleyiciler burada bulunur: `HKLM\SYSTEM\CurrentControlSet\Services\<ServiceName>\TriggerInfo`
+- Trigger’lar şurada bulunur: `HKLM\SYSTEM\CurrentControlSet\Services\<ServiceName>\TriggerInfo`
 - Rekürsif döküm: `reg query HKLM\SYSTEM\CurrentControlSet\Services\<ServiceName>\TriggerInfo /s`
 - Win32 API (local)
-- SERVICE_TRIGGER_INFO almak için QueryServiceConfig2'yi SERVICE_CONFIG_TRIGGER_INFO (8) ile çağırın.
-- Docs: QueryServiceConfig2[W/A] and SERVICE_TRIGGER/SERVICE_TRIGGER_SPECIFIC_DATA
+- SERVICE_TRIGGER_INFO almak için SERVICE_CONFIG_TRIGGER_INFO (8) ile QueryServiceConfig2 çağır.
+- Docs: QueryServiceConfig2[W/A] ve SERVICE_TRIGGER/SERVICE_TRIGGER_SPECIFIC_DATA
 - RPC over MS‑SCMR (remote)
-- SCM, tetikleyici bilgisini almak için uzaktan MS‑SCMR üzerinden sorgulanabilir. TrustedSec’in Titanis bunu sunar: `Scm.exe qtriggers`.
-- Impacket msrpc MS-SCMR içindeki yapıları tanımlar; bunları kullanarak uzak bir sorgu uygulayabilirsiniz.
+- SCM, MS‑SCMR kullanılarak trigger info almak için uzaktan sorgulanabilir. TrustedSec’in Titanis aracı bunu sunar: `Scm.exe qtriggers`.
+- Impacket, msrpc MS-SCMR içinde structure’ları tanımlar; bunları kullanarak remote query implemente edebilirsin.
+- PowerShell (bulk enumeration)
+- `TriggerInfo` key’si açığa çıkaran her service’i hızlıca listele:
+```powershell
+Get-ChildItem 'HKLM:\SYSTEM\CurrentControlSet\Services' |
+Where-Object { Test-Path "$($_.PSPath)\TriggerInfo" } |
+ForEach-Object { sc.exe qtriggerinfo $_.PSChildName }
+```
+- PowerShell (programmatic)
+- James Forshaw’un `NtObjectManager` module’ü, `sc.exe` output’unu parse etmeden trigger metadata’sını ayrıştırmak için `Get-Win32ServiceTrigger` sunar.
 
-## Yüksek Değerli Tetik Türleri ve Nasıl Aktive Edilirler
+## High-Value Trigger Types and How to Activate Them
 
 ### Network Endpoint Triggers
 
-Bunlar, bir istemci bir IPC uç noktasına bağlanmaya çalıştığında bir servisi başlatır. Düşük ayrıcalıklı kullanıcılar için faydalıdır çünkü SCM, istemcinin gerçekten bağlanmasından önce servisi otomatik olarak başlatacaktır.
+Bunlar, bir client IPC endpoint’i ile konuşmaya çalıştığında bir service’i başlatır. Low-priv kullanıcılar için kullanışlıdır; çünkü SCM, client’ın gerçekten bağlanabilmesinden önce service’i otomatik başlatır.
 
-- Named pipe tetikleyicisi
-- Davranış: \\.\pipe\<PipeName>'e yapılan bir istemci bağlantı denemesi, SCM'nin servisi başlatmasına ve dinlemeye başlamasına neden olur.
+- Named pipe trigger
+- Davranış: `\\.\pipe\<PipeName>` adresine yapılan client connection girişimi, SCM’nin service’i başlatmasına neden olur; böylece service dinlemeye başlayabilir.
 - Activation (PowerShell):
 ```powershell
 $pipe = new-object System.IO.Pipes.NamedPipeClientStream('.', 'PipeNameFromTrigger', [System.IO.Pipes.PipeDirection]::InOut)
 try { $pipe.Connect(1000) } catch {}
 $pipe.Dispose()
 ```
-- Ayrıca bakınız: Named Pipe Client Impersonation for post-start abuse.
+- İç yapı notu: named-pipe trigger’ları, kayıtlı trigger pipe adlarına karşı open’ları izleyen bir filesystem minifilter olan `npsvctrig.sys` tarafından desteklenir. Bu yüzden open denemesi, service’in kendisi pipe’ı oluşturmadan/dinlemeden önce bile service’i başlatabilir.
+- Ayrıca bak: Named Pipe Client Impersonation, start sonrası abuse için.
 
 - RPC endpoint trigger (Endpoint Mapper)
-- Davranış: Endpoint Mapper (EPM, TCP/135) için bir servisle ilişkili interface UUID'si sorgulandığında, SCM servisin kendi endpoint'ini kaydetmesi için servisi başlatır.
+- Davranış: Endpoint Mapper (EPM, TCP/135) üzerinde bir service ile ilişkili interface UUID’si sorgulamak, SCM’nin service’i başlatmasına neden olur; böylece endpoint’ini register edebilir.
 - Activation (Impacket):
 ```bash
-# Queries local EPM; replace UUID with the service interface GUID
+# Yerel EPM'i sorgular; UUID yerine service interface GUID'sini koy
 python3 rpcdump.py @127.0.0.1 -uuid <INTERFACE-UUID>
 ```
 
 ### Custom (ETW) Triggers
 
-Bir servis, bir ETW sağlayıcısına/olayına bağlı bir tetikleyici kaydedebilir. Eğer ek filtreler (keyword/level/binary/string) yapılandırılmamışsa, o sağlayıcıdan gelen herhangi bir olay servisi başlatır.
+Bir service, bir ETW provider/event’e bağlı bir trigger register edebilir. Ek filtreler (keyword/level/binary/string) yapılandırılmamışsa, o provider’dan gelen herhangi bir event service’i başlatır.
 
 - Örnek (WebClient/WebDAV): provider {22B6D684-FA63-4578-87C9-EFFCBE6643C7}
-- Tetikleyici listesi: `sc.exe qtriggerinfo webclient`
-- Sağlayıcının kayıtlı olduğunu doğrulayın: `logman query providers | findstr /I 22b6d684-fa63-4578-87c9-effcbe6643c7`
-- Eşleşen olaylar genellikle o sağlayıcıya log kaydı yapan kod gerektirir; filtre yoksa herhangi bir olay yeterlidir.
+- Trigger’ı listele: `sc.exe qtriggerinfo webclient`
+- Provider’ın register edildiğini doğrula: `logman query providers | findstr /I 22b6d684-fa63-4578-87c9-effcbe6643c7`
+- Eşleşen event’leri üretmek genellikle o provider’a log yazan code gerektirir; filtre yoksa herhangi bir event yeterlidir.
+- Provider’ı tetiklemek için minimal C şekli (ek ETW filtreleri yoksa):
+```c
+GUID g = {0x22B6D684,0xFA63,0x4578,{0x87,0xC9,0xEF,0xFC,0xBE,0x66,0x43,0xC7}};
+REGHANDLE h; EVENT_DESCRIPTOR d;
+EventRegister(&g, NULL, NULL, &h);
+EventDescCreate(&d, 1, 0, 0, 4, 0, 0, 0);
+EventWrite(h, &d, 0, NULL);
+EventUnregister(h);
+```
 
-### Grup İlkesi Tetikleyicileri
+### Group Policy Triggers
 
-Alt tipler: Machine/User. İlgili politika mevcutsa domain'e bağlı makinelerde tetikleyici boot sırasında çalışır. `gpupdate` tek başına değişiklik olmadan tetiklemeyebilir, ancak:
+Alt türler: Machine/User. İlgili policy’nin mevcut olduğu domain-joined host’larda, trigger boot sırasında çalışır. `gpupdate` tek başına değişiklik olmadan trigger etmez, ancak:
 
 - Activation: `gpupdate /force`
-- İlgili politika türü mevcutsa, bu güvenilir şekilde tetikleyiciyi ateşler ve servisi başlatır.
+- İlgili policy type mevcutsa, bu güvenilir şekilde trigger’ı tetikler ve service’i başlatır.
 
 ### IP Address Available
 
-İlk IP elde edildiğinde (veya sonuncusu kaybolduğunda) ateşlenir. Genellikle boot sırasında tetikler.
+İlk IP alındığında (veya son IP kaybedildiğinde) tetiklenir. Genellikle boot sırasında çalışır.
 
-- Aktivasyon: Yeniden tetiklemek için bağlantıyı kapatıp açın, örn:
+- Activation: Yeniden tetiklemek için connectivity’yi aç/kapat, örn.:
 ```cmd
 netsh interface set interface name="Ethernet" admin=disabled
 netsh interface set interface name="Ethernet" admin=enabled
@@ -74,69 +93,75 @@ netsh interface set interface name="Ethernet" admin=enabled
 
 ### Device Interface Arrival
 
-Eşleşen bir device interface geldiğinde bir servisi başlatır. Eğer veri öğesi belirtilmemişse, tetikleyici alt tip GUID'siyle eşleşen herhangi bir cihaz tetikleyiciyi ateşler. Boot sırasında ve hot‑plug sırasında değerlendirilir.
+Eşleşen bir device interface geldiğinde bir service’i başlatır. Eğer veri öğesi belirtilmemişse, trigger subtype GUID’si ile eşleşen herhangi bir device trigger’ı tetikler. Boot sırasında ve hot-plug anında değerlendirilir.
 
-- Aktivasyon: Tetikleyici alt tipi tarafından belirtilen class/hardware ID ile eşleşen bir cihazı (fiziksel veya sanal) takın/ekleyin.
+- Activation: Trigger subtype tarafından belirtilen class/hardware ID ile eşleşen bir device’ı bağla/tak (physical veya virtual).
 
 ### Domain Join State
 
-MSDN’deki kafa karıştırıcı ifadeye rağmen, bu boot sırasında domain durumunu değerlendirir:
-- DOMAIN_JOIN_GUID → domain'e bağlıysa servisi başlat
-- DOMAIN_LEAVE_GUID → sadece domain'e bağlı DEĞİLSE servisi başlat
+MSDN’deki kafa karıştırıcı ifadeye rağmen, bu boot sırasında domain state’i değerlendirir:
+- DOMAIN_JOIN_GUID → domain-joined ise service’i başlat
+- DOMAIN_LEAVE_GUID → yalnızca domain-joined DEĞİLSE service’i başlat
 
-### System State Change – WNF (belgelendirilmemiş)
+### System State Change – WNF (undocumented)
 
-Bazı servisler belgelendirilmemiş WNF tabanlı tetikleyiciler (SERVICE_TRIGGER_TYPE 0x7) kullanır. Aktivasyon, ilgili WNF state'i publish etmeyi gerektirir; ayrıntılar state adlarına bağlıdır. Araştırma arka planı: Windows Notification Facility içyapıları.
+Bazı service’ler undocumented WNF-based trigger’lar (SERVICE_TRIGGER_TYPE 0x7) kullanır. Activation, ilgili WNF state’inin yayınlanmasını gerektirir; ayrıntılar state name’e bağlıdır. Araştırma arka planı: Windows Notification Facility internals.
 
-### Aggregate Service Triggers (belgelendirilmemiş)
+### Aggregate Service Triggers (undocumented)
 
-Windows 11'de bazı servislerde (ör. CDPSvc) gözlemlenmiştir. Toplu yapılandırma şurada depolanır:
+Windows 11’de bazı service’lerde (örn. CDPSvc) gözlemlenmiştir. Aggregate configuration şu yerde saklanır:
 
 - HKLM\SYSTEM\CurrentControlSet\Control\ServiceAggregatedEvents
 
-Bir servisin Trigger değeri bir GUID'dir; o GUID ile alt anahtar toplanmış olayı tanımlar. İç bileşen olaylardan herhangi biri tetiklendiğinde servis başlatılır.
+Bir service’in Trigger değeri bir GUID’dir; bu GUID’ye sahip subkey aggregated event’i tanımlar. Bileşen event’lerden herhangi birini tetiklemek service’i başlatır.
 
-### Firewall Port Event (tuhaflıklar ve DoS riski)
+### Firewall Port Event (quirks and DoS risk)
 
-Belirli bir port/protokol ile sınırlı bir tetikleyicinin, yalnızca belirtilen port için değil herhangi bir firewall kuralı değişikliğinde (disable/delete/add) başladığı gözlemlenmiştir. Daha da kötüsü, bir porta protokol olmadan yapılandırma BFE başlangıcını reboottan sonra bozabilir, bu da birçok servisin başarısız olmasına ve firewall yönetiminin bozulmasına yol açabilir. Aşırı dikkatle ele alın.
+Belirli bir port/protocol’e scoped bir trigger’ın, sadece belirtilen portta değil, herhangi bir firewall rule değişikliğinde (disable/delete/add) başladığı gözlemlenmiştir. Daha kötüsü, protocol olmadan bir port yapılandırmak, reboot’lar boyunca BFE startup’ını bozabilir; bu da çok sayıda service failure zincirine yol açar ve firewall management’i kırar. Son derece dikkatli olun.
 
-## Pratik İş Akışı
+## Practical Workflow
 
-1) İlginç servislerdeki tetikleyicileri enumerate edin (RemoteRegistry, WebClient, EFS, …):
+1) İlginç service’lerde trigger’ları enumerate et (RemoteRegistry, WebClient, EFS, …):
 - `sc.exe qtriggerinfo <Service>`
 - `reg query HKLM\SYSTEM\CurrentControlSet\Services\<Service>\TriggerInfo /s`
 
-2) Eğer bir Network Endpoint tetikleyicisi varsa:
-- Named pipe → \\.\pipe\<PipeName> için istemci open denemesi yapın
-- RPC endpoint → interface UUID için Endpoint Mapper sorgusu yapın
+2) Eğer bir Network Endpoint trigger varsa:
+- Named pipe → `\\.\pipe\<PipeName>` için bir client open dene
+- RPC endpoint → interface UUID için bir Endpoint Mapper lookup yap
 
-3) Eğer bir ETW tetikleyicisi varsa:
-- Sağlayıcıyı ve filtreleri `sc.exe qtriggerinfo` ile kontrol edin; filtre yoksa o sağlayıcıdan gelen herhangi bir olay servisi başlatır
+3) Eğer bir ETW trigger varsa:
+- `sc.exe qtriggerinfo` ile provider ve filtreleri kontrol et; filtre yoksa o provider’dan gelen herhangi bir event service’i başlatır
 
-4) Grup İlkesi/IP/Cihaz/Domain tetikleyicileri için:
-- Çevresel kaldıraçları kullanın: `gpupdate /force`, NIC'leri toggle edin, cihazları hot-plug yapın, vb.
+4) Group Policy/IP/Device/Domain trigger’ları için:
+- Çevresel araçları kullan: `gpupdate /force`, NIC’leri toggle et, hot-plug device’lar, vb.
 
-## İlgili
+## Related
 
-- After starting a privileged service via a Named Pipe trigger, you may be able to impersonate it:
+- Named Pipe trigger aracılığıyla privileged bir service’i başlattıktan sonra, onu impersonate edebilirsin:
 
 {{#ref}}
 named-pipe-client-impersonation.md
 {{#endref}}
 
-## Hızlı komut özeti
+## Quick command recap
 
-- List triggers (local): `sc.exe qtriggerinfo <Service>`
-- Registry view: `reg query HKLM\SYSTEM\CurrentControlSet\Services\<Service>\TriggerInfo /s`
+- Trigger’ları listele (local): `sc.exe qtriggerinfo <Service>`
+- Registry görünümü: `reg query HKLM\SYSTEM\CurrentControlSet\Services\<Service>\TriggerInfo /s`
 - Win32 API: `QueryServiceConfig2(..., SERVICE_CONFIG_TRIGGER_INFO, ...)`
 - RPC remote (Titanis): `Scm.exe qtriggers`
 - ETW provider check (WebClient): `logman query providers | findstr /I 22b6d684-fa63-4578-87c9-effcbe6643c7`
 
-## Tespit ve Sertleştirme Notları
+## Gotchas / Operator Notes
 
-- TriggerInfo'yu servisler genelinde temel alın ve denetleyin. Ayrıca toplu tetikleyiciler için HKLM\SYSTEM\CurrentControlSet\Control\ServiceAggregatedEvents'i inceleyin.
-- Ayrıcalıklı servis UUID'leri için şüpheli EPM sorgularını ve servis başlatılmasından önce yapılan named-pipe bağlantı denemelerini izleyin.
-- Kimlerin servis tetikleyicilerini değiştirebileceğini kısıtlayın; tetikleyici değişikliklerinden sonra beklenmeyen BFE hatalarını şüpheli olarak ele alın.
+- Önce service start type’ını `sc.exe qc <Service>` ile kontrol et. Eğer `DISABLED` ise, trigger’ı tetiklemek yeterli değildir; önce configuration’ı değiştirecek bir yol bulmalısın.
+- Trigger-start service’ler idle olduklarında tekrar durabilir. Sonraki aksiyonun kısa ömürlü bir listener’a (RPC/named pipe/WebDAV) bağlıysa, trigger et ve hemen consume et.
+- `sc.exe qtriggerinfo`, her undocumented trigger type’ını tam olarak anlayamaz. Yeni Windows build’lerindeki aggregate trigger’lar için, backing GUID ve bileşen event’leri `HKLM\SYSTEM\CurrentControlSet\Control\ServiceAggregatedEvents` içinde doğrula.
+
+## Detection and Hardening Notes
+
+- Tüm service’ler arasında TriggerInfo için baseline oluştur ve audit et. Ayrıca aggregate trigger’lar için HKLM\SYSTEM\CurrentControlSet\Control\ServiceAggregatedEvents’i de incele.
+- Privileged service UUID’leri için şüpheli EPM lookup’larını ve service start’tan önce gelen named-pipe connection girişimlerini izle.
+- Service trigger’larını kimin değiştirebileceğini kısıtla; trigger değişikliklerinden sonra beklenmeyen BFE failure’larını şüpheli kabul et.
 
 ## References
 - [There’s More than One Way to Trigger a Windows Service (TrustedSec)](https://trustedsec.com/blog/theres-more-than-one-way-to-trigger-a-windows-service)
@@ -144,5 +169,7 @@ named-pipe-client-impersonation.md
 - [MS-SCMR: Service Control Manager Remote Protocol – QueryServiceConfig2](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-scmr/705b624a-13de-43cc-b8a2-99573da3635f)
 - [TrustedSec Titanis (SCM trigger enumeration)](https://github.com/trustedsec/Titanis)
 - [Cobalt Strike BOF example – sc_qtriggerinfo](https://github.com/trustedsec/CS-Situational-Awareness-BOF/blob/5d6f70be2e5023c340dc5f82303449504a9b7786/src/SA/sc_qtriggerinfo/entry.c#L56)
+- [Reversing npsvctrig.sys - Named Pipe Service Triggers (Inbits)](https://inbits-sec.com/posts/npsvctrig-notes/)
+- [Starting WebClient Service Programmatically (Tyranid)](https://www.tiraniddo.dev/2015/03/starting-webclient-service.html)
 
 {{#include ../../banners/hacktricks-training.md}}
