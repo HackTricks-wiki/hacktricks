@@ -1124,6 +1124,49 @@ Detection ideas (telemetry-based)
 - `advapi32!SystemFunction032` used on large contiguous image-sized buffers.
 - Large-range `VirtualProtect` followed by custom per-section permission restoration.
 
+### Runtime CFG registration for sleep-obfuscation gadgets
+
+On CFG-enabled targets, the first indirect jump into a mid-function gadget such as `jmp [rbx]` or `jmp rdi` will usually crash the process with `STATUS_STACK_BUFFER_OVERRUN` because the gadget is not present in the module's CFG metadata. To keep Ekko/Kraken-style chains alive inside hardened processes:
+
+- Register every indirect destination used by the chain with `NtSetInformationVirtualMemory(..., VmCfgCallTargetInformation, ...)` and `CFG_CALL_TARGET_VALID` entries.
+- For addresses inside loaded images (`ntdll`, `kernel32`, `advapi32`), the `MEMORY_RANGE_ENTRY` must start at the **image base** and cover the **full image size**.
+- For manually mapped/PIC/stomped regions, use the **allocation base** and allocation size instead.
+- Mark not only the dispatch gadget, but also exports reached indirectly (`NtContinue`, `SystemFunction032`, `VirtualProtect`, `GetThreadContext`, `SetThreadContext`, wait/event syscalls) and any attacker-controlled executable sections that will become indirect targets.
+
+This turns ROP/JOP-style sleep chains from "works only in non-CFG processes" into a reusable primitive for `explorer.exe`, browsers, `svchost.exe`, and other endpoints compiled with `/guard:cf`.
+
+### CET-safe stack spoofing for sleeping threads
+
+Full `CONTEXT` replacement is noisy and can break on CET Shadow Stack systems because a spoofed `Rip` must still agree with the hardware shadow stack. A safer sleep-masking pattern is:
+
+- Pick another thread in the same process and read its `NT_TIB` / TEB stack bounds (`StackBase`, `StackLimit`) via `NtQueryInformationThread`.
+- Backup the current thread's real TEB/TIB.
+- Capture the real sleeping context with `GetThreadContext`.
+- Copy **only** the real `Rip` into the spoof context, leaving the spoofed `Rsp`/stack state intact.
+- During the sleep window, copy the spoof thread's `NT_TIB` into the current TEB so stack walkers unwind inside a legitimate stack range.
+- After the wait finishes, restore the original TIB and thread context.
+
+This preserves a CET-consistent instruction pointer while misleading EDR stack walkers that trust TEB stack metadata to validate unwinds.
+
+### APC-based alternative: Kraken Mask
+
+If timer-queue dispatch is too signatured, the same sleep-encrypt-spoof-restore sequence can be executed from a suspended helper thread using queued APCs:
+
+- Create a helper thread with `NtTestAlert` as entrypoint.
+- Queue prepared `CONTEXT` frames/APCs with `NtQueueApcThread` and drain them with `NtAlertResumeThread`.
+- Store the chain state on the heap instead of the helper stack to avoid exhausting the default 64 KB thread stack.
+- Use `NtSignalAndWaitForSingleObject` to atomically signal the start event and block.
+- Suspend the main thread before restoring the TIB/context (`NtSuspendThread` → restore → `NtResumeThread`) to reduce the race window where a scanner could catch a half-restored stack.
+
+This swaps the `CreateTimerQueueTimer` + `NtContinue` signature for a helper-thread/APC signature while keeping the same RC4 masking and stack-spoofing goals.
+
+Additional detection ideas
+- `NtSetInformationVirtualMemory` with `VmCfgCallTargetInformation` shortly before sleeps, waits, or APC dispatch.
+- `GetThreadContext`/`SetThreadContext` wrapped around `WaitForSingleObject(Ex)`, `NtWaitForSingleObject`, `NtSignalAndWaitForSingleObject`, or `ConnectNamedPipe`.
+- `NtQueryInformationThread` followed by direct writes into the current thread's TEB/TIB stack bounds.
+- `NtQueueApcThread`/`NtAlertResumeThread` chains that indirectly reach `SystemFunction032`, `VirtualProtect`, or section-permission restoration helpers.
+- Repeated use of short gadget signatures such as `FF 23` (`jmp [rbx]`) or `FF E7` (`jmp rdi`) as dispatch pivots inside signed modules.
+
 
 ## SantaStealer Tradecraft for Fileless Evasion and Credential Theft
 
@@ -1190,6 +1233,7 @@ Sleep(exec_delay_seconds * 1000); // config-controlled delay to outlive sandboxe
 - [ChromElevator – Chrome App Bound Encryption Decryption](https://github.com/xaitax/Chrome-App-Bound-Encryption-Decryption)
 - [Check Point Research – GachiLoader: Defeating Node.js Malware with API Tracing](https://research.checkpoint.com/2025/gachiloader-node-js-malware-with-api-tracing/)
 - [Sleeping Beauty: Putting Adaptix to Bed with Crystal Palace](https://maorsabag.github.io/posts/adaptix-stealthpalace/sleeping-beauty/)
+- [Sleeping Beauty II: CFG, CET, and Stack Spoofing](https://maorsabag.github.io/posts/adaptix-stealthpalace/sleeping-beauty-ii)
 - [Ekko sleep obfuscation](https://github.com/Cracked5pider/Ekko)
 - [SysWhispers4 – GitHub](https://github.com/JoasASantos/SysWhispers4)
 
