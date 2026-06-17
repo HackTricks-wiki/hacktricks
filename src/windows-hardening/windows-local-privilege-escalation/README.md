@@ -625,6 +625,8 @@ For the detection and exploitation of this vulnerability, the _exploit/windows/l
 
 ### Services binaries weak permissions
 
+If a service runs as **`LocalSystem`**, **`LocalService`**, **`NetworkService`**, or a privileged domain account, but **low-privileged users can modify the service EXE or its parent folder**, the service can often be hijacked by **replacing the binary and restarting the service**.
+
 **Check if you can modify the binary that is executed by a service** or if you have **write permissions on the folder** where the binary is located ([**DLL Hijacking**](dll-hijacking/index.html))**.**\
 You can get every binary that is executed by a service using **wmic** (not in system32) and check your permissions using **icacls**:
 
@@ -637,10 +639,33 @@ for /f eol^=^"^ delims^=^" %a in (%temp%\perm.txt) do cmd.exe /c icacls "%a" 2>n
 You can also use **sc** and **icacls**:
 
 ```bash
+sc qc <service_name>
+icacls "C:\path\to\service.exe"
+
 sc query state= all | findstr "SERVICE_NAME:" >> C:\Temp\Servicenames.txt
 FOR /F "tokens=2 delims= " %i in (C:\Temp\Servicenames.txt) DO @echo %i >> C:\Temp\services.txt
 FOR /F %i in (C:\Temp\services.txt) DO @sc qc %i | findstr "BINARY_PATH_NAME" >> C:\Temp\path.txt
 ```
+
+Look for dangerous ACLs granted to **`Everyone`**, **`BUILTIN\Users`**, or **`Authenticated Users`**, especially **`(F)`**, **`(M)`**, or **`(W)`** on the service executable or on the directory containing it. A practical abuse flow is:
+
+1. Confirm the service account and executable path with `sc qc <service_name>`.
+2. Confirm that the binary is writable with `icacls <path>`.
+3. Replace the service binary with a payload or a valid malicious service binary.
+4. Restart the service with `sc stop <service_name> && sc start <service_name>` (or wait for a reboot / service trigger).
+
+Useful automated checks:
+
+```powershell
+. .\PowerUp.ps1
+Get-ModifiableServiceFile -Verbose
+
+SharpUp.exe audit ModifiableServiceBinaries
+. .\PrivescCheck.ps1
+Invoke-PrivescCheck -Extended -Audit
+```
+
+> If the service does not allow a normal user to restart it, check whether it starts automatically on boot, has a failure action that relaunches it, or can be triggered indirectly by the application using it.
 
 ### Services registry modify permissions
 
@@ -2127,5 +2152,7 @@ C:\Windows\microsoft.net\framework\v4.0.30319\MSBuild.exe -version #Compile the 
 - [Trail of Bits - C/C++ checklist challenges, solved](https://blog.trailofbits.com/2026/05/05/c/c-checklist-challenges-solved/)
 - [Microsoft Learn - RtlQueryRegistryValues function](https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/wdm/nf-wdm-rtlqueryregistryvalues)
 - [PowerShell Gallery - NtObjectManager](https://www.powershellgallery.com/packages/NtObjectManager/2.0.1)
+- [sec-zone - CVE-2026-36213](https://github.com/sec-zone/CVE-2026-36213)
+- [sec-zone - Hijack-service-binaries](https://github.com/sec-zone/Hijack-service-binaries)
 
 {{#include ../../banners/hacktricks-training.md}}
