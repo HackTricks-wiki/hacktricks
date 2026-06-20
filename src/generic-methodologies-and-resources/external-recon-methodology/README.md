@@ -95,6 +95,7 @@ For large ranges, tools like [**massdns**](https://github.com/blechschmidt/massd
 Inside a **whois** you can find a lot of interesting **information** like **organisation name**, **address**, **emails**, phone numbers... But which is even more interesting is that you can find **more assets related to the company** if you perform **reverse whois lookups by any of those fields** (for example other whois registries where the same email appears).\
 You can use online tools like:
 
+- [https://ip.thc.org/](https://ip.thc.org/) - **Free** (Web and API)
 - [https://viewdns.info/reversewhois/](https://viewdns.info/reversewhois/) - **Free**
 - [https://domaineye.com/reverse-whois](https://domaineye.com/reverse-whois) - **Free**
 - [https://www.reversewhois.io/](https://www.reversewhois.io) - **Free**
@@ -311,6 +312,12 @@ theHarvester -d tesla.com -b "anubis, baidu, bing, binaryedge, bingapi, bufferov
 ```
 
 There are **other interesting tools/APIs** that even if not directly specialised in finding subdomains could be useful to find subdomains, like:
+
+- [**IP.THC.ORG**](https://ip.thc.org) free API
+
+```bash
+curl https://ip.thc.org/tesla.com
+```
 
 - [**Crobat**](https://github.com/cgboal/sonarsearch)**:** Uses the API [https://sonar.omnisint.io](https://sonar.omnisint.io) to obtain subdomains
 
