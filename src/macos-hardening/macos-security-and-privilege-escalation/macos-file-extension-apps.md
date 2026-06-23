@@ -1,36 +1,43 @@
-# macOS ファイル拡張子 & URL スキームアプリハンドラー
+# macOS File Extension & URL scheme app handlers
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## LaunchServices データベース
+## LaunchServices Database
 
-これは、macOS にインストールされているすべてのアプリケーションのデータベースで、サポートされている URL スキームや MIME タイプなど、各インストールされたアプリケーションに関する情報を取得するためにクエリできます。
+これは、macOS にインストールされているすべてのアプリケーションのデータベースで、各インストール済みアプリケーションについて、サポートされている **URL schemes**、**document types**、**UTIs**、およびデフォルトのハンドラなどの情報を取得するために問い合わせできます。
 
-このデータベースをダンプすることが可能です:
+このデータベースは次の方法でダンプできます:
 ```
 /System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/LaunchServices.framework/Versions/A/Support/lsregister -dump
 ```
-Or using the tool [**lsdtrip**](https://newosxbook.com/tools/lsdtrip.html).
+または、ツール [**lsdtrip**](https://newosxbook.com/tools/lsdtrip.html) を使用します。
 
-**`/usr/libexec/lsd`** はデータベースの中枢です。これは **いくつかのXPCサービス** を提供します、例えば `.lsd.installation`、`.lsd.open`、`.lsd.openurl` などです。しかし、これらの公開されたXPC機能を使用するためには、アプリケーションにいくつかの権限が必要です。例えば、mimeタイプやURLスキームのデフォルトアプリを変更するための `.launchservices.changedefaulthandler` や `.launchservices.changeurlschemehandler` などです。
+**`/usr/libexec/lsd`** はデータベースの中核です。これは **いくつかの XPC services**、例えば `.lsd.installation`、`.lsd.open`、`.lsd.openurl` などを提供します。ただし、`.launchservices.changedefaulthandler` や `.launchservices.changeurlschemehandler` のような、MIME types や URL schemes のデフォルト app を変更するための公開された XPC functionalities を使えるように、applications に対して **いくつかの entitlements** も必要とします。
 
-**`/System/Library/CoreServices/launchservicesd`** はサービス `com.apple.coreservices.launchservicesd` を主張し、実行中のアプリケーションに関する情報を取得するためにクエリできます。これはシステムツール /**`usr/bin/lsappinfo`** または [**lsdtrip**](https://newosxbook.com/tools/lsdtrip.html) を使ってクエリできます。
+**`/System/Library/CoreServices/launchservicesd`** は `com.apple.coreservices.launchservicesd` サービスを提供し、実行中の applications に関する情報を取得するために問い合わせできます。system tool **`/usr/bin/lsappinfo`** または [**lsdtrip**](https://newosxbook.com/tools/lsdtrip.html) で問い合わせできます。
 
-## ファイル拡張子とURLスキームアプリハンドラー
+operator の観点では、通常 **2 つの有用な view** があることを覚えておいてください:
 
-次の行は、拡張子に応じてファイルを開くことができるアプリケーションを見つけるのに役立ちます:
+- LaunchServices / `lsd` によって管理される **registration database**（`.csstore` files によってバックアップされる）。
+- `~/Library/Preferences/com.apple.LaunchServices/com.apple.launchservices.secure.plist` の `LSHandlers` array 内に保存される、ユーザーごとの effective defaults。
+
+この区別は重要です。application は type や scheme を処理できるものとして **registered** されていても、**current default** は別の bundle ID のままかもしれません。
+
+## File Extension & URL scheme app handlers
+
+以下の行は、extension に基づいて files を開ける applications を見つけるのに役立ちます:
 ```bash
 /System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/LaunchServices.framework/Versions/A/Support/lsregister -dump | grep -E "path:|bindings:|name:"
 ```
-Or use something like [**SwiftDefaultApps**](https://github.com/Lord-Kamina/SwiftDefaultApps):
+または [**SwiftDefaultApps**](https://github.com/Lord-Kamina/SwiftDefaultApps) のようなものを使う:
 ```bash
 ./swda getSchemes #Get all the available schemes
 ./swda getApps #Get all the apps declared
 ./swda getUTIs #Get all the UTIs
 ./swda getHandler --URL ftp #Get ftp handler
 ```
-アプリケーションがサポートしている拡張子を確認するには、次のようにします:
-```
+アプリケーションがサポートする拡張子は、次のように確認できます:
+```bash
 cd /Applications/Safari.app/Contents
 grep -A3 CFBundleTypeExtensions Info.plist  | grep string
 <string>css</string>
@@ -61,4 +68,83 @@ grep -A3 CFBundleTypeExtensions Info.plist  | grep string
 <string>xbl</string>
 <string>svg</string>
 ```
+## 効果的なハンドラの列挙
+
+**current user's defaults** に最も役立つファイルは通常、次のとおりです:
+```bash
+~/Library/Preferences/com.apple.LaunchServices/com.apple.launchservices.secure.plist
+```
+そこから **URL scheme** ハンドラを dump するには:
+```bash
+plutil -extract LSHandlers json -o - ~/Library/Preferences/com.apple.LaunchServices/com.apple.launchservices.secure.plist |
+jq '.[] | select(.LSHandlerURLScheme != null) |
+{scheme: .LSHandlerURLScheme, handler: (.LSHandlerRoleAll // .LSHandlerRoleViewer // .LSHandlerRoleEditor)}'
+```
+**content-type / UTI** ハンドラをダンプするには:
+```bash
+plutil -extract LSHandlers json -o - ~/Library/Preferences/com.apple.LaunchServices/com.apple.launchservices.secure.plist |
+jq '.[] | select(.LSHandlerContentType != null) |
+{uti: .LSHandlerContentType, handler: (.LSHandlerRoleAll // .LSHandlerRoleViewer // .LSHandlerRoleEditor)}'
+```
+サンプルファイルのUTIツリーを解決するには:
+```bash
+mdls -name kMDItemContentType -name kMDItemContentTypeTree ./sample.pdf
+```
+defaults を query したり変更したりする、より使いやすい CLI が欲しい場合:
+```bash
+# Classic tool
+# https://github.com/moretension/duti
+duti -x jpg                    # Show current default for extension
+duti -s com.apple.Safari public.html all
+duti -s com.apple.Finder ftp   # Set default for ftp://
+
+# Newer tool
+# https://github.com/jackchuka/dutix
+dutix targets show public.html
+dutix targets show ftp
+dutix apps show Safari
+```
+## Interesting Info.plist keys
+
+アプリケーションバンドルをトリアージする際、最も重要なのは次のキーです:
+
+- **`CFBundleDocumentTypes`**: バンドルが開けると主張する document groups。
+- **`LSItemContentTypes`**: document types を UTIs に関連付けるための **modern / preferred** な方法。
+- **`LSHandlerRank`**: LaunchServices で使われるランク (`Owner`, `Default`, `Alternate`, `None`)。
+- **`CFBundleURLTypes`** / **`CFBundleURLSchemes`**: アプリが実装する custom URI schemes。
+- **`UTExportedTypeDeclarations`**: アプリが **owns** する UTIs。
+- **`UTImportedTypeDeclarations`**: アプリは所有しないが、システムに認識させたい UTIs。
+
+有用な quick triage コマンドは次のとおりです:
+```bash
+plutil -p /Applications/Target.app/Contents/Info.plist | \
+rg 'CFBundleDocumentTypes|CFBundleURLTypes|LSItemContentTypes|LSHandlerRank|UTExportedTypeDeclarations|UTImportedTypeDeclarations'
+```
+微妙ですが重要な点として、**`LSItemContentTypes`** が存在する場合、**`CFBundleTypeExtensions`**、**`CFBundleTypeMIMETypes`**、**`CFBundleTypeOSTypes`** のような古いキーは、実質的にレガシーな互換性データです。実際の handler resolution では、まず UTI の経路に注目してください。
+
+## Offensive notes
+
+Applications は実行されなくても interesting になり得ます。配置された、または cloned された `.app` bundle は、**ディスクに書き込まれた時点ですぐに `lsd` によって自動的に parse され**、その宣言された document types / URL schemes は、ユーザーが bundle を一度も起動しなくても登録されることがあります。
+
+これは **persistence / hijacking research** と **initial-access chains** の両方で有用です。
+
+- malicious app は **rare extension** や **custom UTI** を claim し、victim が lure file を開くのを待てます。
+- malicious app は、browser、Electron app、office document、chat client、または別の helper app から到達可能な **custom URL scheme** を register できます。
+- app bundle をビルド後に編集すると、次の方法で LaunchServices に再度 parse させることができます:
+```bash
+/System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/LaunchServices.framework/Versions/A/Support/lsregister -f /tmp/Evil.app
+```
+疑わしいバンドルをテストする際は、以下に特に注意してください:
+
+- **`LSHandlerRank=Owner`** が珍しいタイプに対して設定されている。
+- 多くの拡張子を名乗る **広範な `CFBundleDocumentTypes`** 配列。
+- ドキュメントハンドラや URI ハンドラの背後にしか興味深い動作がない **Helper / wrapper apps**。
+- LaunchServices に最終的にディスパッチされる **ショートカット風ファイル**（`.webloc`, `.inetloc`, `.fileloc`）。`.fileloc` 風のトリックや関連する Gatekeeper の観点については、[this other page](macos-security-protections/macos-fs-tricks/README.md) を確認してください。
+
+目的が、フォルダをブラウズしたりファイルを選択しただけで発生する受動的な code-execution である場合は、[Quick Look generators](macos-proces-abuse/macos-quicklook-generators.md) の専用ページも確認してください。これは別ですが、密接に関連する file-handler surface です。
+
+## References
+
+- [Objective-See - Remote Mac Exploitation Via Custom URL Schemes](https://objective-see.org/blog/blog_0x38.html)
+- [Jamf Threat Labs - Bypassing the Gate: A closer look into Gatekeeper flaws on macOS](https://www.jamf.com/blog/gatekeeper-flaws-on-macos/)
 {{#include ../../banners/hacktricks-training.md}}
