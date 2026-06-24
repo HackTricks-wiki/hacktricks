@@ -115,9 +115,15 @@
         backdrop-filter: blur(6px);
     }
     .sidesponsor img {
-        height: auto;
-        width: 60%;
+        height: 45%;
+        max-height: 150px;
+        min-height: 95px;
+        width: auto;
+        max-width: 78%;
         padding: 10px;        
+        object-fit: contain;
+        align-self: center;
+        flex: 0 0 auto;
         transition-property: all;
         transition-timing-function: cubic-bezier(.4,0,.2,1);
         transition-duration: .3s;
@@ -149,9 +155,15 @@
         margin-left: 15px;
         margin-right: 15px;
         font-weight: 800;
-        font-size: 2rem;
+        font-size: var(--sponsor-title-font-size, clamp(1.28rem, 7.2cqw, 1.75rem));
         line-height: 1.08;
         color: var(--sponsor-fg);
+        overflow-wrap: anywhere;
+        text-align: center;
+        flex: 0 0 auto;
+    }
+    .sidesponsor .sponsor-title.sponsor-title--long {
+        line-height: 1.02;
     }
     .sidesponsor:hover .sponsor-title{
         grid-area: sponsor-title;
@@ -164,8 +176,8 @@
     }
     .sidesponsor .sponsor-description{
         display: block;
-        margin-top: 5px;
-        margin-bottom: 15px;
+        margin-top: 0;
+        margin-bottom: 0;
         margin-left: 15px;
         margin-right: 15px;
         color: var(--sponsor-fg);        
