@@ -207,11 +207,11 @@ cat /sys/class/graphics/fb0/virtual_size
 
 To **open** the **raw image** you can use **GIMP**, select the **`screen.raw`** file and select as file type **Raw image data**:
 
-![](<../../../images/image (463).png>)
+![Disk Group - Video Group: To open the raw image you can use GIMP , select the screen.raw file and select as file type Raw image data](<../../../images/image (463).png>)
 
 Then modify the Width and Height to the ones used on the screen and check different Image Types (and select the one that shows better the screen):
 
-![](<../../../images/image (317).png>)
+![Disk Group - Video Group: Then modify the Width and Height to the ones used on the screen and check different Image Types (and select the one that shows better the screen)](<../../../images/image (317).png>)
 
 ## Root Group
 

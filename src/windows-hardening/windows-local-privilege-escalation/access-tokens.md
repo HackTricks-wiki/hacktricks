@@ -54,7 +54,7 @@ SeTimeZonePrivilege           Change the time zone                 Disabled
 
 or using _Process Explorer_ from Sysinternals (select process and access"Security" tab):
 
-![](<../../images/image (772).png>)
+![Access Tokens - Access Tokens: or using Process Explorer from Sysinternals (select process and access"Security" tab)](<../../images/image (772).png>)
 
 ### Local administrator
 

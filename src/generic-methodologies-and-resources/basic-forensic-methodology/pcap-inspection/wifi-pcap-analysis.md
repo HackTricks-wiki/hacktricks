@@ -6,9 +6,9 @@
 
 When you receive a capture whose principal traffic is Wifi using WireShark you can start investigating all the SSIDs of the capture with _Wireless --> WLAN Traffic_:
 
-![](<../../../images/image (106).png>)
+![Wifi Pcap Analysis - Check BSSIDs: When you receive a capture whose principal traffic is Wifi using WireShark you can start investigating all the SSIDs of the capture with Wireless --...](<../../../images/image (106).png>)
 
-![](<../../../images/image (492).png>)
+![Wifi Pcap Analysis - Check BSSIDs: When you receive a capture whose principal traffic is Wifi using WireShark you can start investigating all the SSIDs of the capture with Wireless --...](<../../../images/image (492).png>)
 
 ### Brute Force
 
@@ -38,7 +38,7 @@ Once you have detected **unknown MAC** addresses communicating inside the networ
 
 Edit --> Preferences --> Protocols --> IEEE 802.11--> Edit
 
-![](<../../../images/image (499).png>)
+![Find Unknown MAC Addresses in A Wifi Network - Decrypt Traffic: Once you have detected unknown MAC addresses communicating inside the network you can use filters like the following one:...](<../../../images/image (499).png>)
 
 {{#include ../../../banners/hacktricks-training.md}}
 

@@ -21,6 +21,19 @@ For more info about **what is Dll Hijackig** check:
 
 The first thing you need is to **identify a process** running with **more privileges** than you that is trying to **load a Dll from the System Path** you can write in.
 
+Remember that this technique depends on a **Machine/System PATH** entry, not only on your **User PATH**. Therefore, before spending time on Procmon, it's worth enumerating the **Machine PATH** entries and checking which ones are writable:
+
+```powershell
+$machinePath = [Environment]::GetEnvironmentVariable("Path", "Machine") -split ';' | Where-Object { $_ }
+$machinePath | ForEach-Object {
+    $path = $_.Trim()
+    if ($path) {
+        Write-Host "`n[*] $path"
+        icacls $path 2>$null
+    }
+}
+```
+
 The problem in this cases is that probably thoses processes are already running. To find which Dlls are lacking the services you need to launch procmon as soon as possible (before processes are loaded). So, to find lacking .dlls do:
 
 - **Create** the folder `C:\privesc_hijacking` and add the path `C:\privesc_hijacking` to **System Path env variable**. You can do this **manually** or with **PS**:
@@ -50,6 +63,9 @@ if ($envPath -notlike "*$folderPath*") {
 
 <figure><img src="../../../images/image (945).png" alt=""><figcaption></figcaption></figure>
 
+> [!TIP]
+> **Boot logging is only required for services that start too early** to observe otherwise. If you can **trigger the target service/program on demand** (for example, by interacting with its COM interface, restarting the service, or relaunching a scheduled task), it is usually faster to keep a normal Procmon capture with filters such as **`Path contains .dll`**, **`Result is NAME NOT FOUND`**, and **`Path begins with <writable_machine_path>`**.
+
 ### Missed Dlls
 
 Running this in a free **virtual (vmware) Windows 11 machine** I got these results:
@@ -65,6 +81,18 @@ In this case the .exe are useless so ignore them, the missed DLLs where from:
 | ???                             | SharedRes.dll      | `C:\Windows\system32\svchost.exe -k UnistackSvcGroup`                |
 
 After finding this, I found this interesting blog post that also explains how to [**abuse WptsExtensions.dll for privesc**](https://juggernaut-sec.com/dll-hijacking/#Windows_10_Phantom_DLL_Hijacking_-_WptsExtensionsdll). Which is what we **are going to do now**.
+
+### Other candidates worth triaging
+
+`WptsExtensions.dll` is a good example, but it is not the only recurring **phantom DLL** that shows up in privileged services. Modern hunting rules and public hijack catalogs still track names such as:
+
+| Service / Scenario | Missing DLL | Notes |
+| --- | --- | --- |
+| Task Scheduler (`Schedule`) | `WptsExtensions.dll` | Classic **SYSTEM** candidate on client systems. Good when the writable directory is in the **Machine PATH** and the service probes the DLL during startup. |
+| NetMan on Windows Server | `wlanhlp.dll` / `wlanapi.dll` | Interesting on **server editions** because the service runs as **SYSTEM** and can be **triggered on demand by a normal user** in some builds, making it better than reboot-only cases. |
+| Connected Devices Platform Service (`CDPSvc`) | `cdpsgshims.dll` | Usually yields **`NT AUTHORITY\LOCAL SERVICE`** first. That is often still enough because the token has **`SeImpersonatePrivilege`**, so you can chain it with [RoguePotato / PrintSpoofer](../roguepotato-and-printspoofer.md). |
+
+Treat these names as **triage hints**, not guaranteed wins: they are **SKU/build dependent**, and Microsoft may change the behavior between releases. The important takeaway is to look for **missing DLLs in privileged services that traverse the Machine PATH**, especially if the service can be **re-triggered without rebooting**.
 
 ### Exploitation
 
@@ -82,6 +110,10 @@ Having **generated the malicious Dll** (_in my case I used x64 rev shell and I g
 
 When the service is re-started, the **dll should be loaded and executed** (you can **reuse** the **procmon** trick to check if the **library was loaded as expected**).
 
-{{#include ../../../banners/hacktricks-training.md}}
+## References
 
+- [Windows DLL Hijacking (Hopefully) Clarified](https://itm4n.github.io/windows-dll-hijacking-clarified/)
+- [Suspicious DLL Loaded for Persistence or Privilege Escalation](https://www.elastic.co/guide/en/security/current/suspicious-dll-loaded-for-persistence-or-privilege-escalation.html)
+
+{{#include ../../../banners/hacktricks-training.md}}
 

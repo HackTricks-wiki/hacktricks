@@ -49,18 +49,6 @@ You can check their **blog** in [**https://blog.stmcyber.com**](https://blog.stm
 
 ---
 
-### [RootedCON](https://www.rootedcon.com/)
-
-<figure><img src="images/image (45).png" alt=""><figcaption></figcaption></figure>
-
-[**RootedCON**](https://www.rootedcon.com) is the most relevant cybersecurity event in **Spain** and one of the most important in **Europe**. With **the mission of promoting technical knowledge**, this congress is a boiling meeting point for technology and cybersecurity professionals in every discipline.
-
-{{#ref}}
-https://www.rootedcon.com/
-{{#endref}}
-
----
-
 ### [Intigriti](https://www.intigriti.com)
 
 <figure><img src="images/image (47).png" alt=""><figcaption></figcaption></figure>
@@ -71,21 +59,6 @@ https://www.rootedcon.com/
 
 {{#ref}}
 https://go.intigriti.com/hacktricks
-{{#endref}}
-
----
-
-### [Trickest](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks)
-
-<figure><img src="images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-\
-Use [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) to easily build and **automate workflows** powered by the world's **most advanced** community tools.
-
-Get Access Today:
-
-{{#ref}}
-https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks
 {{#endref}}
 
 ---
@@ -151,6 +124,20 @@ Learn the technologies and skills required to perform vulnerability research, pe
 
 {{#ref}}
 https://academy.8ksec.io/
+{{#endref}}
+
+---
+
+### [NaxusAI – AI Powered Security Scanner](https://academy.8ksec.io/)
+
+<figure><img src="images/logo-naxus.png" alt=""><figcaption></figcaption></figure>
+
+**NaxusAI** is an AI-powered security platform to find exploitable vulnerabilities before attackers do.
+
+**Code security tip**: sign up for NaxusAI, a smart vulnerability monitoring platform built for developers and security teams! Join us today and start using AI for **detecting, validating, and fixing real security risks before they reach production**!
+
+{{#ref}}
+https://naxusai.com
 {{#endref}}
 
 ---

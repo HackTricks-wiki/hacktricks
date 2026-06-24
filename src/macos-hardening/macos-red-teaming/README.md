@@ -41,7 +41,7 @@ You could use the script [**JamfSniper.py**](https://github.com/WithSecureLabs/J
 
 Moreover, after finding proper credentials you could be able to brute-force other usernames with the next form:
 
-![](<../../images/image (107).png>)
+![Abusing JAMF PRO - JAMF self-enrolment: Moreover, after finding proper credentials you could be able to brute-force other usernames with the next form](<../../images/image (107).png>)
 
 #### JAMF device Authentication
 

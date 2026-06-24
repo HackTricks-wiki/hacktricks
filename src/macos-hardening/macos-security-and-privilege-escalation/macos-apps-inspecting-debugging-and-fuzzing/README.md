@@ -117,7 +117,7 @@ Note that this names could be obfuscated to make the reversing of the binary mor
 
 When a function is called in a binary that uses objective-C, the compiled code instead of calling that function, it will call **`objc_msgSend`**. Which will be calling the final function:
 
-![](<../../../images/image (305).png>)
+![Metadata - Function calling: When a function is called in a binary that uses objective-C, the compiled code instead of calling that function, it will call objc msgSend . Which will be...](<../../../images/image (305).png>)
 
 The params this function expects are:
 
@@ -426,7 +426,7 @@ You need to monitor your mac with a command like **`sudo eslogger fork exec rena
 
 [**Apple Instruments**](https://developer.apple.com/library/archive/documentation/Performance/Conceptual/CellularBestPractices/Appendix/Appendix.html) are part of Xcode’s Developer tools – used for monitoring application performance, identifying memory leaks and tracking filesystem activity.
 
-![](<../../../images/image (1138).png>)
+![Crescendo - Apple Instruments: Apple Instruments are part of Xcode’s Developer tools – used for monitoring application performance, identifying memory leaks and tracking filesystem activity](<../../../images/image (1138).png>)
 
 ### fs_usage
 

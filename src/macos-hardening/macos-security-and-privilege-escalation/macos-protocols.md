@@ -24,6 +24,18 @@ bmM=$(netstat -na | grep LISTEN | egrep 'tcp4|tcp6' | grep "*.4488" | wc -l);
 printf "\nThe following services are OFF if '0', or ON otherwise:\nScreen Sharing: %s\nFile Sharing: %s\nRemote Login: %s\nRemote Mgmt: %s\nRemote Apple Events: %s\nBack to My Mac: %s\n\n" "$scrShrng" "$flShrng" "$rLgn" "$rmMgmt" "$rAE" "$bmM";
 ```
 
+### Enumerating sharing configuration locally
+
+When you already have local code execution on a Mac, **check the configured state**, not just the listening sockets. `systemsetup` and `launchctl` usually tell you whether the service is administratively enabled, while `kickstart` and `system_profiler` help confirm the effective ARD/Sharing configuration:
+
+```bash
+system_profiler SPSharingDataType
+sudo /usr/sbin/systemsetup -getremotelogin
+sudo /usr/sbin/systemsetup -getremoteappleevents
+sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -status
+sudo launchctl print-disabled system | egrep 'com.apple.screensharing|com.apple.AEServer|ssh'
+```
+
 ### Pentesting ARD
 
 Apple Remote Desktop (ARD) is an enhanced version of [Virtual Network Computing (VNC)](https://en.wikipedia.org/wiki/Virtual_Network_Computing) tailored for macOS, offering additional features. A notable vulnerability in ARD is its authentication method for the control screen password, which only uses the first 8 characters of the password, making it prone to [brute force attacks](https://thudinh.blogspot.com/2017/09/brute-forcing-passwords-with-thc-hydra.html) with tools like Hydra or [GoRedShell](https://github.com/ahhh/GoRedShell/), as there are no default rate limits.
@@ -38,12 +50,40 @@ sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resourc
 
 ARD provides versatile control levels, including observation, shared control, and full control, with sessions persisting even after user password changes. It allows sending Unix commands directly, executing them as root for administrative users. Task scheduling and Remote Spotlight search are notable features, facilitating remote, low-impact searches for sensitive files across multiple machines.
 
+From an operator perspective, **Monterey 12.1+ changed remote-enablement workflows** in managed fleets. If you already control the victim's MDM, Apple's `EnableRemoteDesktop` command is often the cleanest way to activate remote desktop functionality on newer systems. If you already have a foothold on the host, `kickstart` is still useful to inspect or reconfigure ARD privileges from the command line.
+
+### Pentesting Remote Apple Events (RAE / EPPC)
+
+Apple calls this feature **Remote Application Scripting** in modern System Settings. Under the hood it exposes the **Apple Event Manager** remotely over **EPPC** on **TCP/3031** via the `com.apple.AEServer` service. Palo Alto Unit 42 highlighted it again as a practical **macOS lateral movement** primitive because valid credentials plus an enabled RAE service allow an operator to drive scriptable applications on a remote Mac.
+
+Useful checks:
+
+```bash
+sudo /usr/sbin/systemsetup -getremoteappleevents
+sudo launchctl print-disabled system | grep AEServer
+lsof -nP -iTCP:3031 -sTCP:LISTEN
+```
+
+If you already have admin/root on the target and want to enable it:
+
+```bash
+sudo /usr/sbin/systemsetup -setremoteappleevents on
+```
+
+Basic connectivity test from another Mac:
+
+```bash
+osascript -e 'tell application "Finder" of machine "eppc://user:pass@192.0.2.10" to get name of startup disk'
+```
+
+In practice, the abuse case is not limited to Finder. Any **scriptable application** that accepts the required Apple events becomes a remote attack surface, which makes RAE especially interesting after credential theft on internal macOS networks.
+
 #### Recent Screen-Sharing / ARD vulnerabilities (2023-2025)
 
 | Year | CVE | Component | Impact | Fixed in |
 |------|-----|-----------|--------|----------|
 |2023|CVE-2023-42940|Screen Sharing|Incorrect session rendering could cause the *wrong* desktop or window to be transmitted, resulting in leakage of sensitive information|macOS Sonoma 14.2.1 (Dec 2023) |
-|2024|CVE-2024-23296|launchservicesd / login|Kernel memory-protection bypass that can be chained after a successful remote login (actively exploited in the wild)|macOS Ventura 13.6.4 / Sonoma 14.4 (Mar 2024) |
+|2024|CVE-2024-44248|Screen Sharing Server|A user with screen sharing access may be able to view **another user's screen** because of a state-management issue|macOS Ventura 13.7.2 / Sonoma 14.7.2 / Sequoia 15.1 (Oct-Dec 2024) |
 
 **Hardening tips**
 
@@ -133,6 +173,30 @@ finally:
     zeroconf.close()
 ```
 
+### macOS-specific Bonjour hunting
+
+On macOS networks, Bonjour is frequently the easiest way to find **remote administration surfaces** without touching the target directly. Apple Remote Desktop itself can discover clients through Bonjour, so the same discovery data is useful to an attacker.
+
+```bash
+# Enumerate every advertised service type first
+dns-sd -B _services._dns-sd._udp local
+
+# Then look for common macOS admin surfaces
+dns-sd -B _rfb._tcp local      # Screen Sharing / VNC
+dns-sd -B _ssh._tcp local      # Remote Login
+dns-sd -B _eppc._tcp local     # Remote Apple Events / EPPC
+
+# Resolve a specific instance to hostname, port and TXT data
+dns-sd -L "<Instance>" _rfb._tcp local
+dns-sd -L "<Instance>" _eppc._tcp local
+```
+
+For broader **mDNS spoofing, impersonation, and cross-subnet discovery** techniques, check the dedicated page:
+
+{{#ref}}
+../../network-services-pentesting/5353-udp-multicast-dns-mdns.md
+{{#endref}}
+
 ### Enumerating Bonjour over the network
 
 * **Nmap NSE** – discover services advertised by a single host:
@@ -185,5 +249,7 @@ sudo launchctl unload -w /System/Library/LaunchDaemons/com.apple.mDNSResponder.p
 - [**https://lockboxx.blogspot.com/2019/07/macos-red-teaming-206-ard-apple-remote.html**](https://lockboxx.blogspot.com/2019/07/macos-red-teaming-206-ard-apple-remote.html)
 - [**NVD – CVE-2023-42940**](https://nvd.nist.gov/vuln/detail/CVE-2023-42940)
 - [**NVD – CVE-2024-44183**](https://nvd.nist.gov/vuln/detail/CVE-2024-44183)
+- [**Palo Alto Unit 42 - Lateral Movement on macOS: Unique and Popular Techniques and In-the-Wild Examples**](https://unit42.paloaltonetworks.com/unique-popular-techniques-lateral-movement-macos/)
+- [**Apple Support - About the security content of macOS Sonoma 14.7.2**](https://support.apple.com/en-us/121840)
 
 {{#include ../../banners/hacktricks-training.md}}

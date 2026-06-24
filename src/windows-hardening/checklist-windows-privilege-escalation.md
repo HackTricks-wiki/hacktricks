@@ -29,10 +29,13 @@
 - [ ] Check if any [**AV**](https://github.com/carlospolop/hacktricks/blob/master/windows-hardening/windows-av-bypass/README.md)
 - [ ] [**AppLocker Policy**](https://github.com/carlospolop/hacktricks/blob/master/windows-hardening/authentication-credentials-uac-and-efs/README.md#applocker-policy)?
 - [ ] [**UAC**](https://github.com/carlospolop/hacktricks/blob/master/windows-hardening/authentication-credentials-uac-and-efs/uac-user-account-control/README.md)
+- [ ] [**Admin Protection / UIAccess silent elevation**](windows-local-privilege-escalation/uiaccess-admin-protection-bypass.md)?
+- [ ] [**Secure Desktop accessibility registry propagation (RegPwn)**](windows-local-privilege-escalation/secure-desktop-accessibility-registry-propagation-regpwn.md)?
 - [ ] [**User Privileges**](windows-local-privilege-escalation/index.html#users-and-groups)
 - [ ] Check [**current** user **privileges**](windows-local-privilege-escalation/index.html#users-and-groups)
 - [ ] Are you [**member of any privileged group**](windows-local-privilege-escalation/index.html#privileged-groups)?
 - [ ] Check if you have [any of these tokens enabled](windows-local-privilege-escalation/index.html#token-manipulation): **SeImpersonatePrivilege, SeAssignPrimaryPrivilege, SeTcbPrivilege, SeBackupPrivilege, SeRestorePrivilege, SeCreateTokenPrivilege, SeLoadDriverPrivilege, SeTakeOwnershipPrivilege, SeDebugPrivilege** ?
+- [ ] Check if you have [**SeManageVolumePrivilege**](windows-local-privilege-escalation/semanagevolume-perform-volume-maintenance-tasks.md) to read raw volumes and bypass file ACLs
 - [ ] [**Users Sessions**](windows-local-privilege-escalation/index.html#logged-users-sessions)?
 - [ ] Check[ **users homes**](windows-local-privilege-escalation/index.html#home-folders) (access?)
 - [ ] Check [**Password Policy**](windows-local-privilege-escalation/index.html#password-policy)
@@ -93,6 +96,7 @@
 - [ ] [**SSH keys in registry**](windows-local-privilege-escalation/index.html#ssh-keys-in-registry)?
 - [ ] Passwords in [**unattended files**](windows-local-privilege-escalation/index.html#unattended-files)?
 - [ ] Any [**SAM & SYSTEM**](windows-local-privilege-escalation/index.html#sam-and-system-backups) backup?
+- [ ] If [**SeManageVolumePrivilege**](windows-local-privilege-escalation/semanagevolume-perform-volume-maintenance-tasks.md) is present, try raw-volume reads for `SAM`, `SYSTEM`, DPAPI material, and `MachineKeys`
 - [ ] [**Cloud credentials**](windows-local-privilege-escalation/index.html#cloud-credentials)?
 - [ ] [**McAfee SiteList.xml**](windows-local-privilege-escalation/index.html#mcafee-sitelist.xml) file?
 - [ ] [**Cached GPP Password**](windows-local-privilege-escalation/index.html#cached-gpp-pasword)?
@@ -113,7 +117,12 @@
 
 - [ ] Check if you can abuse it
 
+
+
+## References
+
+- [Project Zero - Bypassing Administrator Protection by Abusing UI Access](https://projectzero.google/2026/02/windows-administrator-protection.html)
+- [MDSec - RIP RegPwn](https://www.mdsec.co.uk/2026/03/rip-regpwn/)
+
+
 {{#include ../banners/hacktricks-training.md}}
-
-
-

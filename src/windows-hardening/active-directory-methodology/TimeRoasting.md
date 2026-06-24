@@ -5,7 +5,7 @@
 TimeRoasting abuses the legacy MS-SNTP authentication extension. In MS-SNTP, a client can send a 68-byte request that embeds any computer account RID; the domain controller uses the computer account's NTLM hash (MD4) as the key to compute a MAC over the response and returns it. Attackers can collect these MS-SNTP MACs unauthenticated and crack them offline (Hashcat mode 31300) to recover computer account passwords.
 
 See section 3.1.5.1 "Authentication Request Behavior" and 4 "Protocol Examples" in the official MS-SNTP spec for details.
-![](../../images/Pasted%20image%2020250709114508.png)
+![TimeRoasting: See section 3.1.5.1 "Authentication Request Behavior" and 4 "Protocol Examples" in the official MS-SNTP spec for details](../../images/Pasted%20image%2020250709114508.png)
 When the ExtendedAuthenticatorSupported ADM element is false, the client sends a 68-byte request and embeds the RID in the least significant 31 bits of the Key Identifier subfield of the authenticator.
 
 > If the ExtendedAuthenticatorSupported ADM element is false, the client MUST construct a Client NTP Request message. The Client NTP Request message length is 68 bytes. The client sets the Authenticator field of the Client NTP Request message as described in section 2.2.1, writing the least significant 31 bits of the RID value into the least significant 31 bits of the Key Identifier subfield of the authenticator, and then writing the Key Selector value into the most significant bit of the Key Identifier subfield.

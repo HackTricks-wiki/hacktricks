@@ -40,7 +40,7 @@ PS C:\> .\ADRecon.ps1 -OutputDir C:\Temp\ADRecon
 
 ## BloodHound (graph visualisation)
 
-[BloodHound](https://github.com/BloodHoundAD/BloodHound) uses graph theory + Neo4j to reveal hidden privilege relationships inside on-prem AD & Azure AD.
+[BloodHound](https://github.com/SpecterOps/BloodHound) uses graph theory to reveal hidden privilege relationships inside on-prem AD, Entra ID, and any extra attack-surface data you ingest through OpenGraph.
 
 ### Deployment (Docker CE)
 
@@ -52,18 +52,47 @@ curl -L https://ghst.ly/getbhce | docker compose -f - up
 ### Collectors
 
 * `SharpHound.exe` / `Invoke-BloodHound` – native or PowerShell variant
-* `AzureHound` – Azure AD enumeration
+* `RustHound-CE` – cross-platform CE collector for Linux, macOS, and Windows
+* `NetExec --bloodhound` – quick LDAP-driven collection from Linux
+* `AzureHound` – Entra ID enumeration
 * **SoaPy + BOFHound** – ADWS collection (see link at top)
+
+> BloodHound CE `v8+` changed the collector output format when OpenGraph landed. After upgrading from legacy BloodHound or older CE installs, re-run discovery with current collectors before importing the data.
 
 #### Common SharpHound modes
 
 ```powershell
-SharpHound.exe --CollectionMethods All           # Full sweep (noisy)
+SharpHound.exe --CollectionMethods All               # Full sweep (noisy)
 SharpHound.exe --CollectionMethods Group,LocalAdmin,Session,Trusts,ACL
 SharpHound.exe --Stealth --LDAP                      # Low noise LDAP only
+SharpHound.exe --CollectionMethods Session --Loop --Loopduration 03:09:41
 ```
 
 The collectors generate JSON which is ingested via the BloodHound GUI.
+
+#### SharpHound from a non-domain-joined Windows host
+
+If your operator VM is not joined to the target domain, point DNS to a DC, start a **network-only** shell, verify you can see `SYSVOL`/`NETLOGON` on a DC, and then collect against the remote domain:
+
+```cmd
+runas /netonly /user:CORP\svc_bh cmd.exe
+net view \\dc01.corp.local
+SharpHound.exe -d corp.local --CollectionMethods Group,LocalAdmin,Session,Trusts,ACL
+```
+
+This is useful for disposable jump boxes or operator workstations that should not be domain-joined.
+
+#### Cross-platform collection from Linux/macOS
+
+```bash
+# CE-compatible ZIP from Linux/macOS/Windows
+rusthound-ce -d corp.local -u svc.collector@corp.local -p 'Passw0rd!' -z
+
+# Quick LDAP-driven BloodHound dump from Linux
+nxc ldap dc01.corp.local -u svc.collector -p 'Passw0rd!' --bloodhound --collection All
+```
+
+`RustHound-CE` is a good default when you want CE-compatible output from a non-Windows host. `NetExec` is convenient when you are already using it for LDAP validation or spraying and want a quick graph import. For non-AD datasets, BloodHound OpenGraph can be extended with collectors such as [ShareHound](../../network-services-pentesting/pentesting-smb/README.md).
 
 ### Privilege & logon-right collection
 
@@ -121,7 +150,7 @@ PingCastle.exe --healthcheck --server corp.local --user bob --password "P@ssw0rd
 
 ## References
 
-- [HackTheBox Mirage: Chaining NFS Leaks, Dynamic DNS Abuse, NATS Credential Theft, JetStream Secrets, and Kerberoasting](https://0xdf.gitlab.io/2025/11/22/htb-mirage.html)
+- [BloodHound Community Edition v8 Launches with OpenGraph: Identity Attack Paths Beyond Active Directory & Entra ID](https://specterops.io/blog/2025/07/29/bloodhound-community-edition-v8-launches-with-opengraph-identity-attack-paths-beyond-active-directory-entra-id/)
 - [RustHound-CE](https://github.com/g0h4n/RustHound-CE)
 - [Beyond ACLs: Mapping Windows Privilege Escalation Paths with BloodHound](https://www.synacktiv.com/en/publications/beyond-acls-mapping-windows-privilege-escalation-paths-with-bloodhound.html)
 

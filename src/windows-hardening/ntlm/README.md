@@ -28,7 +28,7 @@ You can check and configure which protocol will be used:
 
 Execute _secpol.msc_ -> Local policies -> Security Options -> Network Security: LAN Manager authentication level. There are 6 levels (from 0 to 5).
 
-![](<../../images/image (919).png>)
+![LM, NTLMv1 and NTLMv2 - GUI: Execute secpol.msc - Local policies - Security Options - Network Security: LAN Manager authentication level. There are 6 levels (from 0 to 5)](<../../images/image (919).png>)
 
 ### Registry
 
@@ -341,6 +341,12 @@ krbrelayx.py -t TARGET.DOMAIN.LOCAL -smb2support
 * Network captures with `NTLMSSP_NEGOTIATE_LOCAL_CALL` where client IP ≠ server IP.
 * Kerberos AP-REQ containing a subsession key and a client principal equal to the hostname.
 * Windows Event 4624/4648 SYSTEM logons immediately followed by remote SMB writes from the same host.
+
+For the **March 2026** local reflection variant that abuses **SMB arbitrary ports** and **TCP connection reuse** to reach `NT AUTHORITY\SYSTEM`, see:
+
+{{#ref}}
+../windows-local-privilege-escalation/local-ntlm-reflection-via-smb-arbitrary-port.md
+{{#endref}}
 
 ## References
 * [NTLM Reflection is Dead, Long Live NTLM Reflection!](https://www.synacktiv.com/en/publications/la-reflexion-ntlm-est-morte-vive-la-reflexion-ntlm-analyse-approfondie-de-la-cve-2025.html)

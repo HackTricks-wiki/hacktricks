@@ -181,6 +181,31 @@ Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders' -Name "Common Startup"
 ```
 
+### UserInitMprLogonScript
+
+- `HKCU\Environment\UserInitMprLogonScript`
+
+This per-user registry value can point to a script or command that is executed when that user logs on. It is mainly a **persistence** primitive because it only runs in the context of the affected user, but it is still worth checking during post-exploitation and autoruns reviews.
+
+> [!TIP]
+> If you can write this value for the current user, you can re-trigger execution at the next interactive logon without needing admin rights. If you can write it for another user hive, you may gain code execution when that user logs on.
+
+```bash
+reg query "HKCU\Environment" /v "UserInitMprLogonScript"
+reg add "HKCU\Environment" /v "UserInitMprLogonScript" /t REG_SZ /d "C:\Users\Public\logon.bat" /f
+reg delete "HKCU\Environment" /v "UserInitMprLogonScript" /f
+
+Get-ItemProperty -Path 'Registry::HKCU\Environment' -Name "UserInitMprLogonScript"
+Set-ItemProperty -Path 'Registry::HKCU\Environment' -Name "UserInitMprLogonScript" -Value 'C:\Users\Public\logon.bat'
+Remove-ItemProperty -Path 'Registry::HKCU\Environment' -Name "UserInitMprLogonScript"
+```
+
+Notes:
+
+- Prefer full paths to `.bat`, `.cmd`, `.ps1`, or other launcher files already readable by the target user.
+- This survives logoff/reboot until the value is removed.
+- Unlike `HKLM\...\Run`, this does **not** grant elevation by itself; it is user-scope persistence.
+
 ### Winlogon Keys
 
 `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon`
@@ -344,11 +369,12 @@ autorunsc.exe -m -nobanner -a * -ct /accepteula
 
 - [https://resources.infosecinstitute.com/common-malware-persistence-mechanisms/#gref](https://resources.infosecinstitute.com/common-malware-persistence-mechanisms/#gref)
 - [https://attack.mitre.org/techniques/T1547/001/](https://attack.mitre.org/techniques/T1547/001/)
+- [https://attack.mitre.org/techniques/T1037/001/](https://attack.mitre.org/techniques/T1037/001/)
 - [https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082&seqNum=2)
 - [https://www.itprotoday.com/cloud-computing/how-can-i-add-boot-option-starts-alternate-shell](https://www.itprotoday.com/cloud-computing/how-can-i-add-boot-option-starts-alternate-shell)
+- [https://www.rapid7.com/blog/post/pt-metasploit-wrap-up-04-03-2026](https://www.rapid7.com/blog/post/pt-metasploit-wrap-up-04-03-2026)
 
 
 
 {{#include ../../banners/hacktricks-training.md}}
-
 

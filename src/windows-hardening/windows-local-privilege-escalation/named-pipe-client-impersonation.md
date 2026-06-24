@@ -122,24 +122,41 @@ from-high-integrity-to-system-with-name-pipes.md
 service-triggers.md
 {{#endref}}
 
-## Named Pipe IPC Abuse & MITM (DLL Injection, API Hooking, PID Validation Bypass)
+## Named Pipe IPC Abuse & MITM (ACLs, First-Instance Races, Client Hooking)
 
-Named-pipe hardened services can still be hijacked by instrumenting the trusted client. Tools like [pipetap](https://sensepost.com/blog/2025/pipetap-a-windows-named-pipe-proxy-tool/) drop a helper DLL into the client, proxy its traffic, and let you tamper with privileged IPC before the SYSTEM service consumes it.
+When a privileged service and a low-privileged process communicate over `\\.\pipe\...`, treat the pipe like any other untrusted IPC boundary. Beyond classic server-side impersonation, weak pipe ACLs, unsafe creation flags, and client-side trust decisions can all become local privilege escalation primitives.
 
-### Inline API hooking inside trusted processes
-- Inject the helper DLL (OpenProcess → CreateRemoteThread → LoadLibrary) into any client.
-- The DLL Detours `ReadFile`, `WriteFile`, etc., but only when `GetFileType` reports `FILE_TYPE_PIPE`, copies each buffer/metadata to a control pipe, lets you edit/drop/replay it, then resumes the original API.
-- Turns the legitimate client into a Burp-style proxy: pause UTF-8/UTF-16/raw payloads, trigger error paths, replay sequences, or export JSON traces.
+### Enumerate candidate pipes first
+- List pipes quickly from PowerShell: `Get-ChildItem \\.\pipe\`
+- Sysinternals `pipelist64.exe` is useful to spot instance counts and single-instance pipes.
+- Prioritize names used by services running as `SYSTEM`, especially helpers, updaters, launchers, and UI brokers.
 
-### Remote client mode to defeat PID-based validation
-- Inject into an allow-listed client, then in the GUI choose the pipe plus that PID.
-- The DLL issues `CreateFile`/`ConnectNamedPipe` inside the trusted process and relays the I/O back to you, so the server still observes the legitimate PID/image.
-- Bypasses filters that rely on `GetNamedPipeClientProcessId` or signed-image checks.
+### MITM via permissive DACLs and extra pipe instances
+- Any process that can talk to a privileged server can already fuzz its protocol and hunt privileged verbs.
+- The more interesting case is when the DACL grants `FILE_GENERIC_WRITE`/`GENERIC_WRITE` on the pipe object. On named pipes this implicitly includes `FILE_CREATE_PIPE_INSTANCE` (`FILE_APPEND_DATA` shares the same bit), so an attacker can create another server instance with the same name.
+- Because instances are matched in FIFO order, attacker-created and legitimate instances can be interleaved: create a rogue instance with `CreateNamedPipe`, then open the same pipe name with `CreateFile`, and wait for a real client to land on the rogue server instance.
+- Result: observe, modify, relay, or desynchronize privileged IPC without needing to own the original server process.
 
-### Fast enumeration and fuzzing
-- `pipelist` enumerates `\\.\pipe\*`, shows ACLs/SIDs, and forwards entries to other modules for immediate probing.
-- The pipe client/message composer connects to any name and builds UTF-8/UTF-16/raw-hex payloads; import captured blobs, mutate fields, and resend to hunt deserializers or unauthenticated command verbs.
-- The helper DLL can host a loopback TCP listener so tooling/fuzzers can drive the pipe remotely via the Python SDK.
+### First-instance race on pipe security descriptors
+- `lpSecurityAttributes` only defines the DACL when the first instance of a pipe name is created.
+- If a privileged service starts late and does not use `FILE_FLAG_FIRST_PIPE_INSTANCE`, an attacker can pre-create the pipe name with a permissive DACL, then let the service create later instances under the attacker-chosen security context.
+- This turns service startup into a race condition: win the first instance, then connect or MITM later clients using the weakened ACL.
+- Mitigation for defenders, and a key review point for attackers: check whether `CreateNamedPipe(..., dwOpenMode, ...)` includes `FILE_FLAG_FIRST_PIPE_INSTANCE`. If not, test pre-creation before the service starts.
+
+### PID/signature checks are hardening, not a boundary
+- Some products try to restrict access by checking `GetNamedPipeClientProcessId`, process image path, or Authenticode signer of the connecting client.
+- This only helps until you inject into the legitimate client: once inside the trusted process, you inherit the exact PID/image/signature context the server expects.
+- For split desktop apps, instrumenting the low-privileged UI/helper process is often easier than attacking the `SYSTEM` service directly.
+
+### Hook the client according to its I/O model
+- Synchronous I/O: intercept `NtWriteFile` before the syscall consumes the buffer, and inspect/patch `NtReadFile` after it returns.
+- Overlapped I/O: store the `OVERLAPPED`/`IoStatusBlock` seen in `NtReadFile`, then inspect the buffer after `GetOverlappedResult` or the relevant wait completes.
+- Completion ports: `GetQueuedCompletionStatus` reaches `NtRemoveIoCompletion`; the returned `ApcContext` links back to the `OVERLAPPED` used by the original read, which is the right pivot to find the now-populated buffer.
+- Completion routines (`ReadFileEx`): the completion callback is delivered as an APC. If you want to tamper with returned data or inject synthetic replies, hook the real completion routine and, for custom injection, use a one-argument `QueueUserAPC` dispatcher that reconstructs the routine's 3 expected arguments.
+
+### Tooling notes
+- [pipetap](https://sensepost.com/blog/2025/pipetap-a-windows-named-pipe-proxy-tool/) proxies named-pipe traffic through an injected helper DLL and exposes a Burp-like workflow for editing/replay.
+- [thats_no_pipe](https://github.com/synacktiv/thats_no_pipe) takes a Frida-based approach and focuses on hooking `NtReadFile`/`NtWriteFile` plus the async/completion pivots above, then forwarding traffic to a WebSocket-backed editing workflow.
 
 ```bash
 pip install pipetap
@@ -151,12 +168,10 @@ client = pipetap.Client(("127.0.0.1", 47001))
 client.write(b"OP\x00\x01...")
 ```
 
-Combine the TCP bridge with VM snapshot restores to crash-test fragile IPC parsers.
-
 ### Operational considerations
 - Named pipes are low-latency; long pauses while editing buffers can deadlock brittle services.
-- Overlapped/completion-port I/O coverage is partial, so expect edge cases.
-- Injection is noisy and unsigned, so treat it as a lab/exploit-dev helper rather than a stealth implant.
+- Overlapped/completion-port/APC-driven clients need different hooks than simple `ReadFile`/`WriteFile` detours.
+- Injection into the trusted client is noisy and generally best kept for exploit development, protocol reversing, or local lab fuzzing.
 
 ## Troubleshooting and gotchas
 - You must read at least one message from the pipe before calling ImpersonateNamedPipeClient; otherwise you’ll get ERROR_CANNOT_IMPERSONATE (1368).
@@ -167,6 +182,11 @@ Combine the TCP bridge with VM snapshot restores to crash-test fragile IPC parse
 ## References
 - [Windows: ImpersonateNamedPipeClient documentation](https://learn.microsoft.com/en-us/windows/win32/api/namedpipeapi/nf-namedpipeapi-impersonatenamedpipeclient)
 - [ired.team: Windows named pipes privilege escalation](https://ired.team/offensive-security/privilege-escalation/windows-namedpipes-privilege-escalation)
+- [Microsoft: Named Pipe Security and Access Rights](https://learn.microsoft.com/en-us/windows/win32/ipc/named-pipe-security-and-access-rights)
+- [Microsoft: CreateNamedPipe function](https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-createnamedpipea)
+- [Microsoft: Named Pipe Server Using Completion Routines](https://learn.microsoft.com/en-us/windows/win32/ipc/named-pipe-server-using-completion-routines)
 - [pipetap – a Windows named pipe proxy tool](https://sensepost.com/blog/2025/pipetap-a-windows-named-pipe-proxy-tool/)
+- [Synacktiv: Hooking Windows Named Pipes](https://www.synacktiv.com/en/publications/hooking-windows-named-pipes.html)
+- [Synacktiv: thats_no_pipe](https://github.com/synacktiv/thats_no_pipe)
 
 {{#include ../../banners/hacktricks-training.md}}

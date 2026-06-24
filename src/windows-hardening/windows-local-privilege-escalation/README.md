@@ -56,6 +56,12 @@ Secure Desktop accessibility registry propagation can be abused for an arbitrary
 secure-desktop-accessibility-registry-propagation-regpwn.md
 {{#endref}}
 
+Recent Windows builds also introduced an **SMB arbitrary-port** LPE path where a privileged local NTLM authentication is reflected over a reused SMB TCP connection:
+
+{{#ref}}
+local-ntlm-reflection-via-smb-arbitrary-port.md
+{{#endref}}
+
 ## System Info
 
 ### Version info enumeration
@@ -835,6 +841,32 @@ Modern hive vulnerabilities let you groom deterministic layouts, abuse writable 
 windows-registry-hive-exploitation.md
 {{#endref}}
 
+#### `RtlQueryRegistryValues` direct-mode type confusion from attacker-controlled paths
+
+Some drivers accept a registry path from userland, validate only that it is a sane UTF-16 string, and then call `RtlQueryRegistryValues(RTL_REGISTRY_ABSOLUTE, userPath, ...)` with `RTL_QUERY_REGISTRY_DIRECT` into a stack scalar such as `int readValue`. If `RTL_QUERY_REGISTRY_TYPECHECK` is missing, `EntryContext` is interpreted according to the **actual** registry type, not the type the developer expected.
+
+This creates two useful primitives:
+
+- **Confused deputy / oracle**: a user-controlled absolute `\Registry\...` path lets the driver query attacker-chosen keys, leak existence through return codes/logs, and sometimes read values the caller could not access directly.
+- **Kernel memory corruption**: a scalar destination such as `&readValue` becomes type-confused as a `REG_QWORD`, `UNICODE_STRING`, or sized binary buffer depending on the registry value type.
+
+Practical exploitation notes:
+
+- **Windows 8+ mitigation**: if the query hits an **untrusted hive** with `RTL_QUERY_REGISTRY_DIRECT` but without `RTL_QUERY_REGISTRY_TYPECHECK`, kernel callers crash with `KERNEL_SECURITY_CHECK_FAILURE (0x139)`. To keep exploitability, look for **attacker-writable keys inside trusted system hives** instead of staging values under `HKCU`.
+- **Trusted-hive staging**: use NtObjectManager to enumerate writable descendants of `\Registry\Machine`, and re-run the scan with a duplicated **low-integrity** token to find keys reachable from sandboxed contexts:
+
+```powershell
+Get-AccessibleKey \Registry\Machine -Recurse -Access SetValue
+$token = Get-NtToken -Primary -Duplicate -IntegrityLevel Low
+Get-AccessibleKey \Registry\Machine -Recurse -Access SetValue -Token $token
+```
+
+- **`REG_QWORD`**: an 8-byte direct write into a 4-byte `int` corrupts adjacent stack data and can partially overwrite a nearby callback/function pointer.
+- **`REG_SZ` / `REG_EXPAND_SZ`**: direct mode expects `EntryContext` to point to a `UNICODE_STRING`. If the code first loads an attacker-controlled `REG_DWORD` into a stack scalar and then reuses that same buffer for a string read, the attacker controls `Length`/`MaximumLength` and partially influences the `Buffer` pointer, yielding a semi-controlled kernel write.
+- **`REG_BINARY`**: for large binary data, direct mode treats the first `LONG` at `EntryContext` as a signed buffer size. If a prior `REG_DWORD` read leaves a **negative** attacker-controlled value in the reused scalar, the next `REG_BINARY` query copies attacker bytes directly over adjacent stack slots, which is often the cleanest path to full callback-pointer overwrite.
+
+Strong hunting pattern: **heterogeneous registry reads into the same stack variable without reinitializing it**. Grep for `RTL_REGISTRY_ABSOLUTE`, `RTL_QUERY_REGISTRY_DIRECT`, reused `EntryContext` pointers, and code paths where the first registry read controls whether a second read happens.
+
 #### Abusing missing FILE_DEVICE_SECURE_OPEN on device objects (LPE + EDR kill)
 
 Some signed third‑party drivers create their device object with a strong SDDL via IoCreateDeviceSecure but forget to set FILE_DEVICE_SECURE_OPEN in DeviceCharacteristics. Without this flag, the secure DACL is not enforced when the device is opened through a path containing an extra component, letting any unprivileged user obtain a handle by using a namespace path like:
@@ -886,6 +918,72 @@ For more information about how to abuse this check:
 {{#ref}}
 dll-hijacking/writable-sys-path-dll-hijacking-privesc.md
 {{#endref}}
+
+## Node.js / Electron module resolution hijacking via `C:\node_modules`
+
+This is a **Windows uncontrolled search path** variant that affects **Node.js** and **Electron** applications when they perform a bare import such as `require("foo")` and the expected module is **missing**.
+
+Node resolves packages by walking up the directory tree and checking `node_modules` folders on each parent. On Windows, that walk can reach the drive root, so an application launched from `C:\Users\Administrator\project\app.js` may end up probing:
+
+1. `C:\Users\Administrator\project\node_modules\foo`
+2. `C:\Users\Administrator\node_modules\foo`
+3. `C:\Users\node_modules\foo`
+4. `C:\node_modules\foo`
+
+If a **low-privileged user** can create `C:\node_modules`, they can plant a malicious `foo.js` (or package folder) and wait for a **higher-privileged Node/Electron process** to resolve the missing dependency. The payload executes in the security context of the victim process, so this becomes **LPE** whenever the target runs as an administrator, from an elevated scheduled task/service wrapper, or from an auto-started privileged desktop app.
+
+This is especially common when:
+
+- a dependency is declared in `optionalDependencies`
+- a third-party library wraps `require("foo")` in `try/catch` and continues on failure
+- a package was removed from production builds, omitted during packaging, or failed to install
+- the vulnerable `require()` lives deep inside the dependency tree instead of in the main application code
+
+### Hunting vulnerable targets
+
+Use **Procmon** to prove the resolution path:
+
+- Filter by `Process Name` = target executable (`node.exe`, the Electron app EXE, or the wrapper process)
+- Filter by `Path` `contains` `node_modules`
+- Focus on `NAME NOT FOUND` and the final successful open under `C:\node_modules`
+
+Useful code-review patterns in unpacked `.asar` files or application sources:
+
+```bash
+rg -n 'require\\("[^./]' .
+rg -n "require\\('[^./]" .
+rg -n 'optionalDependencies' .
+rg -n 'try[[:space:]]*\\{[[:space:][:print:]]*require\\(' .
+```
+
+### Exploitation
+
+1. Identify the **missing package name** from Procmon or source review.
+2. Create the root lookup directory if it does not already exist:
+
+```powershell
+mkdir C:\node_modules
+```
+
+3. Drop a module with the exact expected name:
+
+```javascript
+// C:\node_modules\foo.js
+require("child_process").exec("calc.exe")
+module.exports = {}
+```
+
+4. Trigger the victim application. If the application attempts `require("foo")` and the legitimate module is absent, Node may load `C:\node_modules\foo.js`.
+
+Real-world examples of missing optional modules that fit this pattern include `bluebird` and `utf-8-validate`, but the **technique** is the reusable part: find any **missing bare import** that a privileged Windows Node/Electron process will resolve.
+
+### Detection and hardening ideas
+
+- Alert when a user creates `C:\node_modules` or writes new `.js` files/packages there.
+- Hunt for high-integrity processes reading from `C:\node_modules\*`.
+- Package all runtime dependencies in production and audit `optionalDependencies` usage.
+- Review third-party code for silent `try { require("...") } catch {}` patterns.
+- Disable optional probes when the library supports it (for example, some `ws` deployments can avoid the legacy `utf-8-validate` probe with `WS_NO_UTF_8_VALIDATE=1`).
 
 ## Network
 
@@ -1517,7 +1615,7 @@ COM classes and interfaces are defined in the registry under **HKEY\CLASSES\ROOT
 
 Inside the CLSIDs of this registry you can find the child registry **InProcServer32** which contains a **default value** pointing to a **DLL** and a value called **ThreadingModel** that can be **Apartment** (Single-Threaded), **Free** (Multi-Threaded), **Both** (Single or Multi) or **Neutral** (Thread Neutral).
 
-![](<../../images/image (729).png>)
+![Browsers History - COM DLL Overwriting: Inside the CLSIDs of this registry you can find the child registry InProcServer32 which contains a default value pointing to a DLL and a value...](<../../images/image (729).png>)
 
 Basically, if you can **overwrite any of the DLLs** that are going to be executed, you could **escalate privileges** if that DLL is going to be executed by a different user.
 
@@ -2022,5 +2120,12 @@ C:\Windows\microsoft.net\framework\v4.0.30319\MSBuild.exe -version #Compile the 
 - [A Link to the Past. Abusing Symbolic Links on Windows](https://infocon.org/cons/SyScan/SyScan%202015%20Singapore/SyScan%202015%20Singapore%20presentations/SyScan15%20James%20Forshaw%20-%20A%20Link%20to%20the%20Past.pdf)
 - [RIP RegPwn – MDSec](https://www.mdsec.co.uk/2026/03/rip-regpwn/)
 - [RegPwn BOF (Cobalt Strike BOF port)](https://github.com/Flangvik/RegPwnBOF)
+- [ZDI - Node.js Trust Falls: Dangerous Module Resolution on Windows](https://www.thezdi.com/blog/2026/4/8/nodejs-trust-falls-dangerous-module-resolution-on-windows)
+- [Node.js modules: loading from `node_modules` folders](https://nodejs.org/api/modules.html#loading-from-node_modules-folders)
+- [npm package.json: `optionalDependencies`](https://docs.npmjs.com/cli/v11/configuring-npm/package-json#optionaldependencies)
+- [Process Monitor (Procmon)](https://learn.microsoft.com/en-us/sysinternals/downloads/procmon)
+- [Trail of Bits - C/C++ checklist challenges, solved](https://blog.trailofbits.com/2026/05/05/c/c-checklist-challenges-solved/)
+- [Microsoft Learn - RtlQueryRegistryValues function](https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/wdm/nf-wdm-rtlqueryregistryvalues)
+- [PowerShell Gallery - NtObjectManager](https://www.powershellgallery.com/packages/NtObjectManager/2.0.1)
 
 {{#include ../../banners/hacktricks-training.md}}
