@@ -40,6 +40,8 @@ security dump-keychain | grep -A 5 "keychain" | grep -v "version" #List keychain
 security dump-keychain -d #Dump all the info, included secrets (the user will be asked for his password, even if root)
 ```
 
+On modern macOS the most interesting backing stores are usually **`~/Library/Keychains/login.keychain-db`** and **`/Library/Keychains/System.keychain`**. They are SQLite-backed files, but plaintext access is still brokered by **`securityd`**: stealing the raw DB mainly gives you metadata and encrypted blobs unless you also recover the user's password, `SystemKey`, or an in-memory master key.
+
 ### [Keychaindump](https://github.com/juuso/keychaindump)
 
 > [!CAUTION]
@@ -169,19 +171,25 @@ sqlite3 $HOME/Suggestions/snippets.db 'select * from emailSnippets'
 
 ### Notifications
 
-You can find the Notifications data in `$(getconf DARWIN_USER_DIR)/com.apple.notificationcenter/`
+Before **Sequoia**, you can usually find the Notification Center store in **`$(getconf DARWIN_USER_DIR)/com.apple.notificationcenter/db2/db`**. In **Sequoia+** Apple moved it to the TCC-protected group container **`$HOME/Library/Group Containers/group.com.apple.usernoted/db2/db`**.
 
-Most of the interesting information is going to be in **blob**. So you will need to **extract** that content and **transform** it to **human** **readable** or use **`strings`**. To access it you can do:
+Most of the interesting information is stored inside **blob** columns, so you will need to extract that content and transform it into something human readable (`plutil -p -`, `strings`, or a small parser). Quick triage examples:
 
 ```bash
-cd $(getconf DARWIN_USER_DIR)/com.apple.notificationcenter/
-strings $(getconf DARWIN_USER_DIR)/com.apple.notificationcenter/db2/db | grep -i -A4 slack
+# Legacy location (older releases / affected builds)
+DA=$(getconf DARWIN_USER_DIR)
+strings "$DA/com.apple.notificationcenter/db2/db" | grep -i -A4 slack
+sqlite3 "$DA/com.apple.notificationcenter/db2/db"   "select hex(data) from record order by delivered_date desc limit 1;" | xxd -r -p - | plutil -p -
+
+# Sequoia+ location (TCC-protected)
+sqlite3 "$HOME/Library/Group Containers/group.com.apple.usernoted/db2/db"   "select app_identifier, presented, datetime(delivered_date+978307200,'unixepoch'), hex(data) from record order by delivered_date desc limit 5;"
 ```
 
 #### Recent privacy issues (NotificationCenter DB)
 
-- In macOS **14.7–15.1** Apple stored banner content in the `db2/db` SQLite without proper redaction. CVEs **CVE-2024-44292/44293/40838/54504** allowed any local user to read other users' notification text just by opening the DB (no TCC prompt). Fixed in **15.2** by moving/locking the DB; on older systems the above path still leaks recent notifications and attachments.
-- The database is world-readable only on affected builds, so when hunting on legacy endpoints copy it before updating to preserve artefacts.
+- In macOS **14.7–15.1** Apple stored banner content in the `db2/db` SQLite without proper redaction. CVEs **CVE-2024-44292/44293/40838/54504** allowed any local user to read other users' notification text just by opening the DB (no TCC prompt).
+- Apple mitigated this by moving the DB into `group.com.apple.usernoted` and protecting it with TCC on newer Sequoia builds, so on current systems you normally need the right user context or a TCC bypass to read it.
+- On legacy endpoints, copy the `db`, `db-wal`, and `db-shm` files together before updating or rebooting if you want to preserve the artefacts.
 
 ### Notes
 
@@ -190,9 +198,24 @@ The users **notes** can be found in `~/Library/Group Containers/group.com.apple.
 ```bash
 sqlite3 ~/Library/Group\ Containers/group.com.apple.notes/NoteStore.sqlite .tables
 
-#To dump it in a readable format:
-for i in $(sqlite3 ~/Library/Group\ Containers/group.com.apple.notes/NoteStore.sqlite "select Z_PK from ZICNOTEDATA;"); do sqlite3 ~/Library/Group\ Containers/group.com.apple.notes/NoteStore.sqlite "select writefile('body1.gz.z', ZDATA) from ZICNOTEDATA where Z_PK = '$i';"; zcat body1.gz.Z ; done
+# ZICNOTEDATA.ZDATA is usually a gzip-compressed protobuf blob
+for i in $(sqlite3 ~/Library/Group\ Containers/group.com.apple.notes/NoteStore.sqlite "select Z_PK from ZICNOTEDATA;"); do sqlite3 ~/Library/Group\ Containers/group.com.apple.notes/NoteStore.sqlite "select writefile('body1.gz.z', ZDATA) from ZICNOTEDATA where Z_PK = '$i';"; zcat body1.gz.z ; done
 ```
+
+If the one-liner above is too noisy, export `ZICNOTEDATA.ZDATA`, gunzip it, and parse the protobuf: this is usually more reliable than running `strings` directly on the SQLite.
+
+### Background Tasks / Login Items
+
+Since **Ventura**, user-approved login items and several background tasks are tracked in **BTM** stores such as **`~/Library/Application Support/com.apple.backgroundtaskmanagementagent/backgrounditems.btm`** and the versioned system cache **`/private/var/db/com.apple.backgroundtaskmanagement/BackgroundItems-v<xx>.btm`**.
+
+These files are useful to quickly identify persistence, helper tools, and some MDM-managed background items:
+
+```bash
+plutil -p ~/Library/Application\ Support/com.apple.backgroundtaskmanagementagent/backgrounditems.btm | head -100
+sfltool dumpbtm
+```
+
+For the persistence angle and BTM internals, check [the auto-start locations page](../../macos-auto-start-locations.md#login-items) and [the Background Tasks Management notes](../macos-security-protections/README.md#background-tasks-management).
 
 ## Preferences
 
@@ -295,12 +318,13 @@ These are notifications that the user should see in the screen:
 
 - **`CFUserNotification`**: These API provides a way to show in the screen a pop-up with a message.
 - **The Bulletin Board**: This shows in iOS a banner that disappears and will be stored in the Notification Center.
-- **`NSUserNotificationCenter`**: This is the iOS bulletin board in MacOS. The database with the notifications in located in `/var/folders/<user temp>/0/com.apple.notificationcenter/db2/db`
+- **`NSUserNotificationCenter`**: This is the iOS bulletin board in MacOS. On older macOS releases the database usually lives in `/var/folders/<user temp>/0/com.apple.notificationcenter/db2/db`; on Sequoia+ it was moved to `~/Library/Group Containers/group.com.apple.usernoted/db2/db`.
 
 ## References
 
 - [HelpNetSecurity – macOS gcore entitlement allowed Keychain master key extraction (CVE-2025-24204)](https://www.helpnetsecurity.com/2025/09/04/macos-gcore-vulnerability-cve-2025-24204/)
-- [Rapid7 – Notification Center SQLite disclosure (CVE-2024-44292 et al.)](https://www.rapid7.com/db/vulnerabilities/apple-osx-notificationcenter-cve-2024-44292/)
+- [Apple Platform Security – Keychain data protection](https://support.apple.com/guide/security/keychain-data-protection-secb0694df1a/web)
+- [9to5Mac – Apple addresses privacy concerns around Notification Center database in macOS Sequoia](https://9to5mac.com/2024/09/01/security-bite-apple-addresses-privacy-concerns-around-notification-center-database-in-macos-sequoia/)
 
 {{#include ../../../banners/hacktricks-training.md}}
 
