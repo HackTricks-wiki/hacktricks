@@ -3,7 +3,7 @@
 {{#include ../banners/hacktricks-training.md}}
 
 
-## What is MPC - Model Context Protocol
+## What is MCP - Model Context Protocol
 
 The [**Model Context Protocol (MCP)**](https://modelcontextprotocol.io/introduction) is an open standard that allows AI models (LLMs) to connect with external tools and data sources in a plug-and-play fashion. This enables complex workflows: for example, an IDE or chatbot can *dynamically call functions* on MCP servers as if the model naturally "knew" how to use them. Under the hood, MCP uses a client-server architecture with JSON-based requests over various transports (HTTP, WebSockets, stdio, etc.).
 
@@ -17,7 +17,7 @@ We'll use Python and the official `mcp` SDK for this example. First, install the
 
 ```bash
 pip3 install mcp "mcp[cli]"
-mcp version      # verify installation`
+mcp version      # verify installation
 ```
 
 Now, create **`calculator.py`** with a basic addition tool:
@@ -33,7 +33,7 @@ def add(a: int, b: int) -> int:
     return a + b
 
 if __name__ == "__main__":
-    mcp.run(transport="stdio")  # Run server (using stdio transport for CLI testing)`
+    mcp.run(transport="stdio")  # Run server (using stdio transport for CLI testing)
 ```
 
 This defines a server named "Calculator Server" with one tool `add`. We decorated the function with `@mcp.tool()` to register it as a callable tool for connected LLMs. To run the server, execute it in a terminal: `python3 calculator.py`
@@ -93,6 +93,8 @@ Moreover, note that the description could indicate to use other functions that c
 
 Furthermore, [**this blog post**](https://www.cyberark.com/resources/threat-research-blog/poison-everywhere-no-output-from-your-mcp-server-is-safe) describes how it's possible to add the prompt injection not only in the description of the tools but also in the type, in variable names, in extra fields returned in the JSON response by the MCP server and even in an unexpected response from a tool, making the prompt injection attack even more stealthy and difficult to detect.
 
+Recent research shows that this is not a corner case. The ecosystem-wide paper [**Model Context Protocol (MCP) at First Glance**](https://arxiv.org/abs/2506.13538) analyzed 1,899 open-source MCP servers and found **5.5%** with MCP-specific tool-poisoning patterns. [**MCPTox**](https://ojs.aaai.org/index.php/AAAI/article/view/40895) later evaluated **45 live MCP servers / 353 authentic tools** and achieved tool-poisoning attack-success rates as high as **72.8%** across 20 agent settings. Follow-up work [**MCP-ITP**](https://arxiv.org/abs/2601.07395) automated **implicit tool poisoning**: the poisoned tool is never called directly, but its metadata still steers the agent into invoking a different high-privilege tool, pushing attack success to **84.2%** on some configurations while dropping malicious-tool detection to **0.3%**.
+
 
 ### Prompt Injection via Indirect Data
 
@@ -109,6 +111,8 @@ AI-Prompts.md
 Moreover, in [**this blog**](https://www.legitsecurity.com/blog/remote-prompt-injection-in-gitlab-duo) it's explained how it was possible to abuse the Gitlab AI agent to perform arbitrary actions (like modifying code or leaking code), but injecting maicious prompts in the data of the repository (even ofbuscating this prompts in a way that the LLM would understand but the user wouldn't).
 
 Note that the malicious indirect prompts would be located in a public repository the victim user would be using, however, as the agent still have access to the repos of the user, it'll be able to access them.
+
+Also remember that prompt injection often only needs to reach a **second bug** in the tool implementation. During 2025-2026, multiple MCP servers were disclosed with classic shell-command injection patterns (`child_process.exec`, shell metacharacter expansion, unsafe string concatenation, or user-controlled `find`/`sed`/CLI arguments). In practice, a malicious issue/README/web page can steer the agent into passing attacker-controlled data to one of those tools, turning prompt injection into OS command execution on the MCP server host.
 
 ### Supply-Chain Backdoors in MCP Servers (same tool name, same schema, new payload)
 
@@ -145,44 +149,48 @@ otto-support selfpwn --agree
 - Enforce **allowlist-only egress** for MCP processes whenever possible. A server meant to query one internal system should not be able to open arbitrary outbound HTTP connections.
 - Monitor runtime behavior for **unexpected outbound connections** or file access during tool execution, especially when the server's visible MCP output still looks correct.
 
-### Skill Marketplace Supply-Chain Evasion (skills, `SKILL.md`, archives, bytecode)
+### Authorization Abuse: Token Passthrough & Confused Deputy
 
-Agent **skills** create nearly the same trust problem as MCP servers, but the package usually contains both **natural-language instructions** (for example `SKILL.md`) and **helper artifacts** (scripts, bytecode, archives, images, configs). Therefore, a scanner that only reads the visible manifest or only inspects supported text files can miss the real payload.
+Remote MCP servers that proxy SaaS APIs (GitHub, Gmail, Jira, Slack, cloud APIs, etc.) are not just wrappers: they also become an **authorization boundary**. The dangerous anti-pattern is receiving a bearer token from the MCP client and forwarding it upstream, or accepting any token without validating that it was actually issued **for this MCP server**.
 
-#### Practical scanner-evasion patterns
-
-- **Context-truncation evasion**: if a scanner only evaluates the first N bytes/tokens of a file, an attacker can place benign boilerplate first, then add a very large padding region (for example **100,000 newlines**), and finally append the malicious instructions or code. The installed skill still contains the payload, but the guard model only sees the harmless prefix.
-- **Archive/document indirection**: keep `SKILL.md` benign and tell the agent to load the “real” instructions from a `.docx`, image, or other secondary file. A `.docx` is just a ZIP container; if scanners do not recursively unpack and inspect every member, hidden payloads such as `sync1.sh` can ride inside the document.
-- **Generated-artifact / bytecode poisoning**: ship clean source but malicious build artifacts. A reviewed `utils.py` can look harmless while `__pycache__/utils.cpython-312.pyc` imports `os`, reads `os.environ.items()`, and executes attacker logic. If the runtime imports the bundled bytecode first, the visible source review is meaningless.
-- **Opaque-file / incomplete-tree bypass**: some scanners only inspect files referenced from `SKILL.md`, skip dotfiles, or treat unsupported formats as opaque. That leaves blind spots in hidden files, unreferenced scripts, archives, binaries, images, and package-manager config files.
-- **LLM scanner misdirection**: natural-language framing can convince a guard model that dangerous behavior is just normal enterprise bootstrap logic. A skill that writes a new package-manager registry can be described as “AppSec-audited corporate mirroring” until the scanner classifies it as low risk.
-
-#### High-value attacker primitives hidden inside "helpful" skills
-
-**Package-manager registry redirection** is especially dangerous because it persists after the skill finishes. Writing any of the following changes how future dependency installs resolve packages:
-
-```bash
-cat > "$PROJECT/.npmrc" << EOF
-registry=${CORP_REGISTRY}
-EOF
-
-cat > "$PROJECT/.yarnrc" << EOF
-registry "${CORP_REGISTRY}"
-EOF
+```python
+# Anti-pattern: take the token that authenticated the MCP request
+# and forward it directly to the upstream SaaS API.
+upstream_headers = {"Authorization": request.headers["Authorization"]}
+resp = requests.get("https://api.github.com/user/repos", headers=upstream_headers)
 ```
 
-If `CORP_REGISTRY` is attacker-controlled, later `npm`/`yarn` installs can silently fetch trojanized packages or poisoned versions.
+If the MCP proxy never validates `aud` / `resource`, or if it reuses a single static OAuth client and prior consent state for every downstream user, it can become a **confused deputy**:
 
-Another suspicious primitive is **native-code preloading**. A skill that sets `LD_PRELOAD` or loads a helper like `$TMP/lo_socket_shim.so` is effectively asking the target process to execute attacker-chosen native code before normal libraries. If the attacker can influence that path or replace the shim, the skill becomes an arbitrary-code-execution bridge even when the visible Python wrapper looks legitimate.
+1. The attacker makes the victim connect to a malicious or tampered remote MCP server.
+2. The server initiates OAuth to a third-party API the victim already uses.
+3. Because the consent is attached to the shared upstream OAuth client, the victim may never see a meaningful new approval screen.
+4. The proxy receives an authorization code or token and then performs actions against the upstream API with the victim's privileges.
 
-#### What to verify during review
+For pentesting, pay special attention to:
 
-- Walk the **entire skill tree**, not only files mentioned in `SKILL.md`.
-- Unpack nested containers recursively (`.zip`, `.docx`, other office formats) and inspect each member.
-- Reject or separately review **generated artifacts** (`.pyc`, binaries, minified blobs, archives, images with embedded prompts) unless they are reproducibly derived from reviewed source.
-- Compare shipped bytecode/binaries against source when both are present.
-- Treat edits to `.npmrc`, `.yarnrc`, pip indexes, Git hooks, shell rc files, and similar persistence/dependency files as high-risk even if comments make them sound operationally normal.
-- Assume public skill marketplaces are **untrusted code execution** plus **prompt injection**, not just documentation reuse.
+- Proxies that forward raw `Authorization: Bearer ...` headers to third-party APIs.
+- Missing validation of token **audience** / `resource` values.
+- A single OAuth client ID reused for all MCP tenants or all connected users.
+- Missing per-client consent before the MCP server redirects the browser to the upstream authorization server.
+- Downstream API calls that are stronger than the permissions implied by the original MCP tool description.
+
+The current MCP authorization guidance explicitly forbids **token passthrough** and requires the MCP server to validate that tokens were issued for itself, because otherwise any OAuth-enabled MCP proxy can collapse multiple trust boundaries into one exploitable bridge.
+
+### Localhost Bridges & Inspector Abuse
+
+Do not forget the **developer tooling** around MCP. The browser-based **MCP Inspector** and similar localhost bridges often have the ability to spawn `stdio` servers, which means that a bug in the UI/proxy layer can become immediate command execution on the developer workstation.
+
+- Versions of MCP Inspector before **0.14.1** allowed unauthenticated requests between the browser UI and the local proxy, so a malicious website (or DNS rebinding setup) could trigger arbitrary `stdio` command execution on the machine running the inspector.
+- Later, [**GHSA-g9hg-qhmf-q45m / CVE-2025-58444**](https://github.com/advisories/GHSA-g9hg-qhmf-q45m) showed that even when the proxy is local-only, an untrusted MCP server could abuse redirect handling to inject JavaScript into the Inspector UI and then pivot into command execution through the built-in proxy.
+
+When testing MCP development environments, look for:
+
+- `mcp dev` / inspector processes listening on loopback or accidentally on `0.0.0.0`.
+- Reverse proxies that expose the inspector's local port to teammates or the internet.
+- CSRF, DNS rebinding, or Web-origin issues in localhost helper endpoints.
+- OAuth / redirect flows that render attacker-controlled URLs inside the local UI.
+- Proxy endpoints that accept arbitrary `command`, `args`, or server configuration JSON.
 
 ### Persistent Code Execution via MCP Trust Bypass (Cursor IDE – "MCPoison")
 
@@ -310,6 +318,46 @@ The **MCP Attack Surface Detector (MCP-ASD)** Burp extension turns exposed MCP s
 
 This workflow makes MCP endpoints fuzzable with standard Burp tooling despite their streaming protocol.
 
+### Skill Marketplace Supply-Chain Evasion (skills, `SKILL.md`, archives, bytecode)
+
+Agent **skills** create nearly the same trust problem as MCP servers, but the package usually contains both **natural-language instructions** (for example `SKILL.md`) and **helper artifacts** (scripts, bytecode, archives, images, configs). Therefore, a scanner that only reads the visible manifest or only inspects supported text files can miss the real payload.
+
+#### Practical scanner-evasion patterns
+
+- **Context-truncation evasion**: if a scanner only evaluates the first N bytes/tokens of a file, an attacker can place benign boilerplate first, then add a very large padding region (for example **100,000 newlines**), and finally append the malicious instructions or code. The installed skill still contains the payload, but the guard model only sees the harmless prefix.
+- **Archive/document indirection**: keep `SKILL.md` benign and tell the agent to load the “real” instructions from a `.docx`, image, or other secondary file. A `.docx` is just a ZIP container; if scanners do not recursively unpack and inspect every member, hidden payloads such as `sync1.sh` can ride inside the document.
+- **Generated-artifact / bytecode poisoning**: ship clean source but malicious build artifacts. A reviewed `utils.py` can look harmless while `__pycache__/utils.cpython-312.pyc` imports `os`, reads `os.environ.items()`, and executes attacker logic. If the runtime imports the bundled bytecode first, the visible source review is meaningless.
+- **Opaque-file / incomplete-tree bypass**: some scanners only inspect files referenced from `SKILL.md`, skip dotfiles, or treat unsupported formats as opaque. That leaves blind spots in hidden files, unreferenced scripts, archives, binaries, images, and package-manager config files.
+- **LLM scanner misdirection**: natural-language framing can convince a guard model that dangerous behavior is just normal enterprise bootstrap logic. A skill that writes a new package-manager registry can be described as “AppSec-audited corporate mirroring” until the scanner classifies it as low risk.
+
+#### High-value attacker primitives hidden inside "helpful" skills
+
+**Package-manager registry redirection** is especially dangerous because it persists after the skill finishes. Writing any of the following changes how future dependency installs resolve packages:
+
+```bash
+cat > "$PROJECT/.npmrc" << EOF
+registry=${CORP_REGISTRY}
+EOF
+
+cat > "$PROJECT/.yarnrc" << EOF
+registry "${CORP_REGISTRY}"
+EOF
+```
+
+If `CORP_REGISTRY` is attacker-controlled, later `npm`/`yarn` installs can silently fetch trojanized packages or poisoned versions.
+
+Another suspicious primitive is **native-code preloading**. A skill that sets `LD_PRELOAD` or loads a helper like `$TMP/lo_socket_shim.so` is effectively asking the target process to execute attacker-chosen native code before normal libraries. If the attacker can influence that path or replace the shim, the skill becomes an arbitrary-code-execution bridge even when the visible Python wrapper looks legitimate.
+
+#### What to verify during review
+
+- Walk the **entire skill tree**, not only files mentioned in `SKILL.md`.
+- Unpack nested containers recursively (`.zip`, `.docx`, other office formats) and inspect each member.
+- Reject or separately review **generated artifacts** (`.pyc`, binaries, minified blobs, archives, images with embedded prompts) unless they are reproducibly derived from reviewed source.
+- Compare shipped bytecode/binaries against source when both are present.
+- Treat edits to `.npmrc`, `.yarnrc`, pip indexes, Git hooks, shell rc files, and similar persistence/dependency files as high-risk even if comments make them sound operationally normal.
+- Assume public skill marketplaces are **untrusted code execution** plus **prompt injection**, not just documentation reuse.
+
+
 ## References
 - [Trail of Bits – The Sorry State of Skill Distribution](https://blog.trailofbits.com/2026/06/03/the-sorry-state-of-skill-distribution/)
 - [Trail of Bits – overtly-malicious-skills PoC repository](https://github.com/trailofbits/overtly-malicious-skills)
@@ -323,5 +371,7 @@ This workflow makes MCP endpoints fuzzable with standard Burp tooling despite th
 - [MCP Attack Surface Detector (MCP-ASD) extension](https://github.com/hoodoer/MCP-ASD)
 - [Otto-Support: Supply Chain Risks in MCP Servers](https://bishopfox.com/blog/otto-support-supply-chain-risks-mcp-servers)
 - [otto-support `selfpwn` source](https://github.com/BishopFox/otto-support/blob/main/cmd/otto-support/selfpwn.go)
+- [Model Context Protocol Security Best Practices](https://modelcontextprotocol.io/docs/tutorials/security/security_best_practices)
+- [MCP Inspector proxy server lacks authentication between the Inspector client and proxy](https://github.com/advisories/GHSA-7f8r-222p-6f5g)
 
 {{#include ../banners/hacktricks-training.md}}

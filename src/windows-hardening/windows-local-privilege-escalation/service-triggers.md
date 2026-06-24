@@ -21,6 +21,15 @@ This page focuses on attacker-friendly enumeration and low-friction ways to acti
 - RPC over MS‑SCMR (remote)
   - The SCM can be queried remotely to fetch trigger info using MS‑SCMR. TrustedSec’s Titanis exposes this: `Scm.exe qtriggers`.
   - Impacket defines the structures in msrpc MS-SCMR; you can implement a remote query using those.
+- PowerShell (bulk enumeration)
+  - Quickly list every service exposing a `TriggerInfo` key:
+    ```powershell
+    Get-ChildItem 'HKLM:\SYSTEM\CurrentControlSet\Services' |
+      Where-Object { Test-Path "$($_.PSPath)\TriggerInfo" } |
+      ForEach-Object { sc.exe qtriggerinfo $_.PSChildName }
+    ```
+- PowerShell (programmatic)
+  - James Forshaw's `NtObjectManager` module exposes `Get-Win32ServiceTrigger` for parsing trigger metadata without scraping `sc.exe` output.
 
 ## High-Value Trigger Types and How to Activate Them
 
@@ -36,6 +45,7 @@ These start a service when a client attempts to talk to an IPC endpoint. Useful 
     try { $pipe.Connect(1000) } catch {}
     $pipe.Dispose()
     ```
+  - Internals note: named-pipe triggers are backed by `npsvctrig.sys`, a filesystem minifilter that watches for opens against registered trigger pipe names. This is why the open attempt can start the service even before the service itself has created/listened on the pipe.
   - See also: Named Pipe Client Impersonation for post-start abuse.
 
 - RPC endpoint trigger (Endpoint Mapper)
@@ -54,6 +64,15 @@ A service can register a trigger bound to an ETW provider/event. If no additiona
   - List trigger: `sc.exe qtriggerinfo webclient`
   - Verify provider is registered: `logman query providers | findstr /I 22b6d684-fa63-4578-87c9-effcbe6643c7`
   - Emitting matching events typically requires code that logs to that provider; if no filters are present, any event suffices.
+  - Minimal C shape for firing the provider (when no additional ETW filters are configured):
+    ```c
+    GUID g = {0x22B6D684,0xFA63,0x4578,{0x87,0xC9,0xEF,0xFC,0xBE,0x66,0x43,0xC7}};
+    REGHANDLE h; EVENT_DESCRIPTOR d;
+    EventRegister(&g, NULL, NULL, &h);
+    EventDescCreate(&d, 1, 0, 0, 4, 0, 0, 0);
+    EventWrite(h, &d, 0, NULL);
+    EventUnregister(h);
+    ```
 
 ### Group Policy Triggers
 
@@ -132,6 +151,12 @@ named-pipe-client-impersonation.md
 - RPC remote (Titanis): `Scm.exe qtriggers`
 - ETW provider check (WebClient): `logman query providers | findstr /I 22b6d684-fa63-4578-87c9-effcbe6643c7`
 
+## Gotchas / Operator Notes
+
+- Check the service start type first with `sc.exe qc <Service>`. If it is `DISABLED`, firing the trigger is not enough; you must first find a way to change the configuration.
+- Trigger-start services may stop again after they become idle. If your follow-on action depends on a short-lived listener (RPC/named pipe/WebDAV), trigger and consume it immediately.
+- `sc.exe qtriggerinfo` does not fully understand every undocumented trigger type. For aggregate triggers on newer Windows builds, confirm the backing GUID and constituent events in `HKLM\SYSTEM\CurrentControlSet\Control\ServiceAggregatedEvents`.
+
 ## Detection and Hardening Notes
 
 - Baseline and audit TriggerInfo across services. Also review HKLM\SYSTEM\CurrentControlSet\Control\ServiceAggregatedEvents for aggregate triggers.
@@ -144,5 +169,7 @@ named-pipe-client-impersonation.md
 - [MS-SCMR: Service Control Manager Remote Protocol – QueryServiceConfig2](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-scmr/705b624a-13de-43cc-b8a2-99573da3635f)
 - [TrustedSec Titanis (SCM trigger enumeration)](https://github.com/trustedsec/Titanis)
 - [Cobalt Strike BOF example – sc_qtriggerinfo](https://github.com/trustedsec/CS-Situational-Awareness-BOF/blob/5d6f70be2e5023c340dc5f82303449504a9b7786/src/SA/sc_qtriggerinfo/entry.c#L56)
+- [Reversing npsvctrig.sys - Named Pipe Service Triggers (Inbits)](https://inbits-sec.com/posts/npsvctrig-notes/)
+- [Starting WebClient Service Programmatically (Tyranid)](https://www.tiraniddo.dev/2015/03/starting-webclient-service.html)
 
 {{#include ../../banners/hacktricks-training.md}}
