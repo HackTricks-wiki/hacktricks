@@ -89,11 +89,11 @@
         overflow: auto;
         display: flex;
         flex-direction: column;
-        gap:16px;
+        gap:14px;
         background-color: transparent;
     }
     .pagetoc {
-        max-height: 52%;
+        max-height: 48%;
         overflow: auto;
         border-left: 1px solid color-mix(in srgb, var(--table-border-color) 70%, transparent);
         border-radius: 12px;
@@ -102,8 +102,8 @@
         padding: 4px 4px;
     }
     .sidesponsor {
-        max-height: 48%;
-        height: 48%;
+        max-height: 52%;
+        height: 52%;
         background-color: transparent;
         border: 1px solid color-mix(in srgb, var(--table-border-color) 70%, transparent);
         border-radius: 8px;
@@ -115,12 +115,12 @@
         backdrop-filter: blur(6px);
     }
     .sidesponsor img {
-        height: 45%;
-        max-height: 150px;
-        min-height: 95px;
+        height: 50%;
+        max-height: 180px;
+        min-height: 110px;
         width: auto;
-        max-width: 78%;
-        padding: 10px;        
+        max-width: 86%;
+        padding: 8px;
         object-fit: contain;
         align-self: center;
         flex: 0 0 auto;
@@ -138,13 +138,13 @@
     .sidesponsor:hover {
         display: grid !important;
         grid-template-columns: auto minmax(0, 1fr);
-        grid-template-rows: max-content minmax(0, 1fr) max-content;
+        grid-template-rows: max-content minmax(0, 1fr) auto;
         grid-template-areas:
             "sponsor-image sponsor-title"
             "sponsor-description sponsor-description"
             "sponsor-cta sponsor-cta";
         column-gap: 8px;
-        row-gap: 8px;
+        row-gap: 10px;
         align-items: center;
         align-content: start;
         overflow: hidden;
@@ -155,8 +155,8 @@
         margin-left: 15px;
         margin-right: 15px;
         font-weight: 800;
-        font-size: var(--sponsor-title-font-size, clamp(1.28rem, 7.2cqw, 1.75rem));
-        line-height: 1.08;
+        font-size: var(--sponsor-title-font-size, clamp(1.45rem, 7.8cqw, 2rem));
+        line-height: 1.05;
         color: var(--sponsor-fg);
         overflow-wrap: anywhere;
         text-align: center;
@@ -218,9 +218,9 @@
     }
     .sidesponsor:hover .sponsor-cta{
         grid-area: sponsor-cta;
-        margin-top: 0;
-        margin-bottom: 4px;
-        padding: 10px 14px;
+        margin-top: 22px;
+        margin-bottom: 8px;
+        padding: 9px 14px;
         box-sizing: border-box;
         max-width: 100%;
         overflow: hidden;
@@ -244,8 +244,8 @@
         }
     }
     .sidesponsor-bsa {
-        max-height: 48%;
-        height: 48%;
+        max-height: 52%;
+        height: 52%;
         background-color: transparent;
         border: 1px solid color-mix(in srgb, var(--table-border-color) 70%, transparent);
         border-radius: 8px;

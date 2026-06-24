@@ -97,11 +97,11 @@
 
   function getSponsorTitleFontSize(title) {
     if (title.length > 45) {
-      return "1.25rem"
+      return "1.35rem"
     }
 
     if (title.length > 28) {
-      return "1.35rem"
+      return "1.55rem"
     }
 
     return ""
