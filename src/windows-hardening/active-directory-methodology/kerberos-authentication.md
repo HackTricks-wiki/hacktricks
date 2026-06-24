@@ -1,32 +1,76 @@
-# Kerberos 认证
+# Kerberos Authentication
 
 {{#include ../../banners/hacktricks-training.md}}
 
-**查看精彩文章：** [**https://www.tarlogic.com/en/blog/how-kerberos-works/**](https://www.tarlogic.com/en/blog/how-kerberos-works/)
+**Check the amazing post from:** [**https://www.tarlogic.com/en/blog/how-kerberos-works/**](https://www.tarlogic.com/en/blog/how-kerberos-works/)
 
-## TL;DR（针对攻击者）
-- Kerberos 是默认的 AD auth 协议；大多数横向移动链路都会触及它。有关实操速查表（AS‑REP/Kerberoasting、ticket forging、delegation abuse 等），请参见：
+## TL;DR for attackers
+- Kerberos 是默认的 AD auth protocol；大多数 lateral-movement 链都会接触到它。
+- 从 **three operator phases** 来理解：
+- **AS-REQ / AS-REP** → 使用 password/hash/certificate 获取 **TGT**。这里涉及 **AS-REP roasting**、**over-pass-the-hash / pass-the-key** 和 **PKINIT**。
+- **TGS-REQ / TGS-REP** → 使用 TGT 获取 **service tickets**。这里涉及 **Kerberoasting**、**S4U abuse**、**delegation abuse**，以及大多数 **ticket-forging tradecraft**。
+- **AP-REQ / AP-REP** → 将 ticket 呈递给 service。这里涉及 **pass-the-ticket** 和特定服务的 lateral movement。
+- 关于实操 cheatsheets（AS-REP/Kerberoasting、ticket forgery、delegation abuse 等），见：
 {{#ref}}
 ../../network-services-pentesting/pentesting-kerberos-88/README.md
 {{#endref}}
+- 将此页作为 **overview / “what changed recently”** 索引，然后跳转到专门页面： [Kerberoast](kerberoast.md)、[Resource-Based Constrained Delegation](resource-based-constrained-delegation.md)、[AD Certificates / PKINIT abuse](ad-certificates.md)、或 [BadSuccessor / dMSA abuse](acl-persistence-abuse/BadSuccessor.md)。
 
-## 最新攻击笔记（2024‑2026）
-- **RC4 finally going away** – Windows Server 2025 DCs no longer issue RC4 TGTs; Microsoft plans to disable RC4 as default for AD DCs by end of Q2 2026. 启用 RC4 以支持遗留应用的环境会在 Kerberoasting 上制造降级/快速破解的机会。
-- **PAC validation enforcement (Apr 2025)** – 2025 年 4 月更新移除了“Compatibility”模式；在启用强制验证的已修补 DC 上，伪造的 PACs/golden tickets 将被拒绝。未打补丁或旧有 DC 仍可被滥用。
-- **CVE‑2025‑26647 (altSecID CBA mapping)** – 如果 DC 未打补丁或处于 Audit 模式，链到非‑NTAuth CA 的证书但通过 SKI/altSecID 映射仍可登录。触发保护时会出现 Events 45/21。
-- **NTLM phase‑out** – Microsoft 将在未来的 Windows 发行版中默认禁用 NTLM（分阶段到 2026 年），将更多认证推向 Kerberos。预计在强化网络中会看到更多 Kerberos 的攻击面和更严格的 EPA/CBT。
-- **Cross‑domain RBCD remains powerful** – Microsoft Learn 指出 resource‑based constrained delegation 可跨域/林工作；对资源对象可写的 `msDS-AllowedToActOnBehalfOfOtherIdentity` 仍允许在不接触前端服务 ACL 的情况下进行 S4U2self→S4U2proxy 模拟。
+## Fresh attack notes (2024-2026)
+- **RC4 hardening changed the defaults, not Kerberos itself** – 现代 DC hardening 关注的是那些**没有显式设置** `msDS-SupportedEncryptionTypes` 的账户所使用的**默认假定 encryption types**。在 2026 rollout 之后，这些账户在已打补丁的 DC 上越来越多地默认变成 **AES-only**，因此盲目的 `/rc4` Kerberoast 假设会更频繁失败。不过，**显式启用 RC4 的 service accounts 仍然是很好的 offline-crack targets**。
+- **PAC validation enforcement matters for forged tickets** – 2024 的 PAC-signature hardening 意味着 **golden/diamond/sapphire/extraSID-style abuses** 需要更真实的 PAC 数据和正确的 signing context。未打补丁的域，或仍处于 compatibility/audit-style 部署的域，依然更脆弱。
+- **Certificate-based Kerberos changed twice**：
+- **Strong certificate binding**（KB5014754 timeline）使得在 fully enforced 环境中，粗糙的 certificate-to-account mappings 不再那么可靠。
+- **CVE-2025-26647** 在 **altSecID / SKI certificate mappings** 周围增加了另一层 hardening。若 DC 未打补丁、仍在 auditing，或显式绕过 NTAuth validation，pass-the-certificate / shadow-credential 后续 abuse 仍更实用。
+- **Cross-domain / cross-forest delegation abuse is still very alive** – Windows 支持现代跨 realm **S4U2Self/S4U2Proxy** flows，因此另一个 domain 中可写的 delegation attributes 仍然很有价值。真正的阻碍通常是 tooling fidelity 和 trust/policy 细节，而不是 protocol support。
+- **Windows Server 2025 introduced new Kerberos-adjacent attack surface** through **dMSA** migration logic. 如果你在 2025 domain 中看到对 OUs 或 service-account objects 的 delegated rights，不要把它简单当作“又一个 gMSA”，而是去看专门的 [BadSuccessor page](acl-persistence-abuse/BadSuccessor.md)。
 
-## 快速工具
-- **Rubeus kerberoast (AES default)**: `Rubeus.exe kerberoast /user:svc_sql /aes /nowrap /outfile:tgs.txt` — 输出 AES 哈希；考虑使用 GPU 破解，或改为针对 pre‑auth disabled users。
-- **RC4 downgrade target hunting**: 枚举仍声明 RC4 的账户：`Get-ADObject -LDAPFilter '(msDS-SupportedEncryptionTypes=4)' -Properties msDS-SupportedEncryptionTypes`，在 RC4 完全禁用之前定位弱的 kerberoast 候选对象。
+## Fast operator checks in modern domains
 
+在选择 Kerberos attack path 之前，先快速回答四个问题：
 
+1. **Which accounts are still RC4-friendly?**
+2. **Which users do not require pre-auth?**
+3. **Which objects expose delegation abuse?**
+4. **Which parts of the domain are new enough to enforce recent hardening?**
+```powershell
+# 1) Service accounts explicitly pinned to RC4 / legacy etypes
+Get-ADObject -LDAPFilter '(|(msDS-SupportedEncryptionTypes=4)(msDS-SupportedEncryptionTypes=12))' \
+-Properties samAccountName,servicePrincipalName,msDS-SupportedEncryptionTypes
+
+# 2) Service accounts with no explicit etype config
+#    (these increasingly inherit AES-only defaults on patched 2026 DCs)
+Get-ADObject -LDAPFilter '(&(servicePrincipalName=*)(!(msDS-SupportedEncryptionTypes=*)))' \
+-Properties samAccountName,servicePrincipalName
+
+# 3) AS-REP roastable users
+Get-ADUser -LDAPFilter '(&(samAccountType=805306368)(userAccountControl:1.2.840.113556.1.4.803:=4194304))' \
+-Properties userAccountControl
+
+# 4) Delegation hot spots
+Get-ADComputer -LDAPFilter '(msDS-AllowedToActOnBehalfOfOtherIdentity=*)' \
+-Properties msDS-AllowedToActOnBehalfOfOtherIdentity
+Get-ADObject -LDAPFilter '(|(userAccountControl:1.2.840.113556.1.4.803:=524288)(userAccountControl:1.2.840.113556.1.4.803:=16777216))' \
+-Properties samAccountName,servicePrincipalName,userAccountControl
+
+# 5) DC-side RC4 hardening / compatibility clues
+Get-WinEvent -LogName System | Where-Object {
+$_.ProviderName -eq 'Microsoft-Windows-Kerberos-Key-Distribution-Center' -and $_.Id -in 201..209
+}
+```
+实际解读：
+- 如果 **interesting SPN accounts** 明确支持 RC4，那么 Kerberoasting 仍然便宜且快速。
+- 如果大多数 service accounts **没有显式 etype 配置**，在已更新的 2026 DC 上预计会是 **AES-only** 行为，并应计划更慢的离线破解，或改走其他路径。
+- 如果存在 **RBCD / KCD / unconstrained delegation**，S4U 往往比暴力破解更有效。
+- 如果正在使用 **certificate auth**，请记住，失败的 PKINIT 路径 **并不总是** 代表该 cert 没用；在许多环境中，同一个 cert 仍可用于 **Schannel/LDAPS** abuse（见 [AD Certificates / PKINIT abuse](ad-certificates.md)）。
+
+## 会改变攻击计划的常见 Kerberos 错误
+- **`KDC_ERR_ETYPE_NOTSUPP`** → 目标 account / DC 不会使用你请求的 encryption type。不要只反复尝试 RC4；改为提供 **AES keys**，或改为请求 **AES** roast material。
+- **`KRB_AP_ERR_MODIFIED`** → 你很可能拿错了 **service key**、**SPN**，或者 forged ticket 与实际解密它的 service account 不匹配。
+- **`KRB_AP_ERR_SKEW`** → 你的时间不同步。先和 DC 同步，再排查其他问题。
+- 在 S4U / delegation 流程中出现 **`KDC_ERR_BADOPTION`** → 通常意味着 **sensitive/not-delegable users**、错误的 delegation model，或者你正在尝试使用 **classic KCD**，而实际上只有 **RBCD** 才会接受一个 non-forwardable 的 S4U2Self ticket。
 
 ## References
-- [Microsoft – Beyond RC4 for Windows authentication (RC4 default removal timeline)](https://www.microsoft.com/en-us/windows-server/blog/2025/12/03/beyond-rc4-for-windows-authentication)
-- [Microsoft Support – Protections for CVE-2025-26647 Kerberos authentication](https://support.microsoft.com/en-gb/topic/protections-for-cve-2025-26647-kerberos-authentication-5f5d753b-4023-4dd3-b7b7-c8b104933d53)
-- [Microsoft Support – PAC validation enforcement timeline](https://support.microsoft.com/en-us/topic/how-to-manage-pac-validation-changes-related-to-cve-2024-26248-and-cve-2024-29056-6e661d4f-799a-4217-b948-be0a1943fef1)
-- [Microsoft Learn – Kerberos constrained delegation overview (cross-domain RBCD)](https://learn.microsoft.com/en-us/windows-server/security/kerberos/kerberos-constrained-delegation-overview)
-- [Windows Central – NTLM deprecation roadmap](https://www.windowscentral.com/microsoft/windows/microsoft-plans-to-bury-its-ntlm-security-relic-after-30-years)
+- [Microsoft Learn - Detect and remediate RC4 usage in Kerberos](https://learn.microsoft.com/en-us/windows-server/security/kerberos/detect-remediate-rc4-kerberos)
+- [Microsoft Support - Latest Windows hardening guidance and key dates](https://support.microsoft.com/en-us/topic/latest-windows-hardening-guidance-and-key-dates-eb1bd411-f68c-4d74-a4e1-456721a6551b)
 {{#include ../../banners/hacktricks-training.md}}
