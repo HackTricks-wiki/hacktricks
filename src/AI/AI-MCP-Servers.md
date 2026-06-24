@@ -120,6 +120,26 @@ MCP trust is usually anchored to the **package name, reviewed source, and curren
 
 A practical example was the `postmark-mcp` package: after a benign history, version `1.0.16` silently added a hidden BCC to attacker-controlled email addresses while still sending the requested message normally. Similar marketplace abuse was observed in ClawHub skills that returned the expected result while harvesting wallet keys or stored credentials in parallel.
 
+#### Markdown skill marketplaces: semantic instruction hijacking
+
+Some agent ecosystems do not distribute compiled plug-ins or ordinary MCP servers; they distribute **instruction packages** (`SKILL.md`, `README.md`, metadata, prompt templates) that the host agent interprets with its own file, shell, browser, wallet, or SaaS permissions. In practice, a malicious skill can act like a **supply-chain backdoor expressed in natural language**:
+
+- **Fake prerequisite blocks**: the skill claims it cannot continue until the agent or user runs a setup step. Real-world campaigns used paste-site redirects (`rentry`, `glot`) that served a mutable Base64 `curl | bash` second stage, so the marketplace artifact stayed mostly static while the live payload rotated underneath.
+- **Oversized markdown padding**: malicious content is placed at the start of `README.md` / `SKILL.md`, then padded with tens of MB of junk so scanners that truncate or skip large files miss the payload while the agent still reads the interesting first lines.
+- **Runtime remote-config injection**: instead of shipping the final instruction set, the skill forces the agent to fetch remote JSON or text on every invocation and then follow attacker-controlled fields such as `referralLink`, download URLs, or tasking rules. This lets the operator change behaviour after publication without triggering marketplace re-review.
+- **Agentic financial abuse**: a skill can coordinate authenticated actions that look like normal workflow assistance (product recommendations, blockchain transactions, brokerage setup) while actually implementing affiliate fraud, wallet-key theft, or botnet-like market manipulation.
+
+The important boundary is that the **agent treats the skill text as trusted operational logic**, not as untrusted content to summarize. Therefore, no memory corruption bug is needed: the attacker only needs the skill to inherit the agent's existing authority and convince it that malicious behaviour is a prerequisite, policy, or mandatory workflow step.
+
+#### Review heuristics for third-party skills
+
+When assessing a skill marketplace or private skill registry, treat every skill as **code with prompt semantics** and verify at least:
+
+- Every outbound domain/IP/API mentioned or contacted by the skill, including paste sites and remote JSON/config fetches.
+- Whether `SKILL.md` / `README.md` contains encoded blobs, shell one-liners, “run this before continuing” gates, or hidden setup flows.
+- Abnormally large markdown files, repeated padding characters, or other content likely to hit scanner size thresholds.
+- Whether the documented purpose matches runtime behaviour; recommendation skills should not silently pull affiliate links, and utility skills should not require wallet, credential-store, or shell access unrelated to their function.
+
 #### Why local `stdio` MCP servers are high impact
 
 When an MCP server is launched locally over `stdio`, it inherits the **same OS user context** as the AI client or shell that started it. No privilege escalation is required to access secrets already readable by that user. In practice, a hostile server can enumerate and steal:
@@ -328,6 +348,9 @@ This workflow makes MCP endpoints fuzzable with standard Burp tooling despite th
 - [MCP in Burp Suite: From Enumeration to Targeted Exploitation](https://trustedsec.com/blog/mcp-in-burp-suite-from-enumeration-to-targeted-exploitation)
 - [MCP Attack Surface Detector (MCP-ASD) extension](https://github.com/hoodoer/MCP-ASD)
 - [Otto-Support: Supply Chain Risks in MCP Servers](https://bishopfox.com/blog/otto-support-supply-chain-risks-mcp-servers)
+- [OpenClaw’s Skill Marketplace and the Emerging AI Supply Chain Threat](https://unit42.paloaltonetworks.com/openclaw-ai-supply-chain-risk/)
+- [Trust No Skill: Integrity Verification for AI Agent Supply Chains](https://unit42.paloaltonetworks.com/ai-agent-supply-chain-risks/)
+- [Anatomy of a Deception: Uncovering the 'omnicogg' Dropper in ClawHub](https://research.jfrog.com/post/omnicogg-malicious-skill/)
 - [otto-support `selfpwn` source](https://github.com/BishopFox/otto-support/blob/main/cmd/otto-support/selfpwn.go)
 - [Model Context Protocol Security Best Practices](https://modelcontextprotocol.io/docs/tutorials/security/security_best_practices)
 - [MCP Inspector proxy server lacks authentication between the Inspector client and proxy](https://github.com/advisories/GHSA-7f8r-222p-6f5g)
