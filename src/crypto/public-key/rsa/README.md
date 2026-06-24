@@ -2,107 +2,167 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Hızlı triaj
+## Hızlı triage
 
-Toplanacaklar:
+Topla:
 
-- `n`, `e`, `c` (ve varsa ek ciphertextler)
-- Mesajlar arasındaki herhangi bir ilişki (aynı plaintext mi? paylaşılan modulus? yapılandırılmış plaintext?)
-- Herhangi bir leaks (kısmi `p/q`, `d` bitleri, `dp/dq`, bilinen padding)
+- `n`, `e`, `c` (ve varsa ek ciphertext'ler)
+- Mesajlar arasındaki ilişkiler (aynı plaintext? shared modulus? structured plaintext?)
+- Her türlü leak (kısmi `p/q`, `d` bitleri, `dp/dq`, bilinen padding)
 
 Sonra dene:
 
-- Faktörleme kontrolü (Factordb / `sage: factor(n)` küçük-ish için)
-- Low exponent patternleri (`e=3`, broadcast)
-- Common modulus / tekrarlayan prime'ler
-- Lattice yöntemleri (Coppersmith/LLL) bir şey neredeyse biliniyorsa
+- Factorization kontrolü (Factordb / küçük değerler için `sage: factor(n)`)
+- Düşük üs kalıpları (`e=3`, broadcast)
+- Common modulus / repeated primes
+- Bir şey neredeyse biliniyorsa lattice yöntemleri (Coppersmith/LLL)
 
 ## Yaygın RSA saldırıları
 
 ### Common modulus
 
-Eğer iki ciphertext `c1, c2` aynı mesajı **aynı modulus** `n` altında fakat farklı üslerle `e1, e2` (ve `gcd(e1,e2)=1`) şifrelenmişse, genişletilmiş Öklid algoritması ile `m` kurtarılabilir:
+Eğer iki ciphertext `c1, c2`, **aynı mesajı** **aynı modulus** `n` altında ama farklı üslerle `e1, e2` şifreliyorsa (`gcd(e1,e2)=1` ise), extended Euclidean algorithm ile `m` kurtarılabilir:
 
 `m = c1^a * c2^b mod n` burada `a*e1 + b*e2 = 1`.
 
-Örnek özet:
+Örnek akış:
 
-1. `(a, b) = xgcd(e1, e2)` hesapla böylece `a*e1 + b*e2 = 1`
-2. Eğer `a < 0` ise, `c1^a` ifadesini `inv(c1)^{-a} mod n` (aynı şeyi `b` için yap) olarak yorumla
-3. Çarp ve modulo `n` ile indir
+1. `(a, b) = xgcd(e1, e2)` hesapla, böylece `a*e1 + b*e2 = 1`
+2. `a < 0` ise `c1^a` ifadesini `inv(c1)^{-a} mod n` olarak yorumla (`b` için de aynı)
+3. Çarp ve `n` ile mod al
 
-### Shared primes across moduli
+### Modüller arasında shared primes
 
-Aynı challenge'dan birden fazla RSA modülü varsa, paylaşılan prime olup olmadığını kontrol et:
+Aynı challenge'dan birden fazla RSA modulus'un varsa, ortak bir asal paylaşıp paylaşmadıklarını kontrol et:
 
-- `gcd(n1, n2) != 1` anahtar oluşturma sürecinde katastrofik bir hataya işaret eder.
+- `gcd(n1, n2) != 1` anahtar üretiminde felaket bir başarısızlığa işaret eder.
 
-Bu durum CTF'lerde sıkça "birçok anahtarı hızlıca ürettik" veya "kötü randomness" olarak ortaya çıkar.
+Bu, CTF'lerde sıkça "bir sürü anahtarı hızlıca ürettik" veya "kötü randomness" olarak görünür.
+
+### Sparse / short-sleeve moduli
+
+Bazı bozuk big-integer generator'lar yapıyı doğrudan public modulus içine sızdırır: her limb yalnızca küçük bir random subfield içerir, bitlerin geri kalanı `0` olur. Pratikte bu, `n` boyunca **düzenli aralıklı zero block'lar** olarak görünür; çoğu zaman 32-bit veya 128-bit limb'lere hizalanır.
+
+Hızlı kontroller:
+
+- `n`'yi hex olarak dök ve sabit bir aralıkta tekrar eden zero window'lar ara.
+- `n`'yi limb'lere (`2^32`, `2^64`, `2^128`) ayırıp her limb'in alışılmadık derecede küçük olup olmadığını incele.
+- Zayıf host-key generation şüphesi varsa, **badkeys** gibi tooling ile public SSH/TLS key'leri denetle.
+
+Bu, istatistiksel bir bias'tan daha ciddidir: Eğer hem private factor `p` hem de `q` short-sleeved ise, modulus **kolayca factor edilebilir** hale gelebilir.
+
+### Structured RSA key'lerin polynomial factorization'ı
+
+Şüpheli bir limb genişliği `w` için modulus'u `B = 2^w` tabanında yaz:
+
+- `n = Σ_i n_i B^i`
+- `f_n(x) = Σ_i n_i x^i`
+
+Evaluation multiplicative olduğu için `f_a(B) * f_c(B) = (f_a * f_c)(B)`. Eğer factors da sparse limb coefficients'a sahipse, o zaman:
+
+- `n = p*q`
+- `f_n(x) = f_p(x) * f_q(x)`
+
+Saldırı akışı:
+
+1. Limb genişliği `w` için tahmin yap.
+2. Public modulus `n`'yi `2^w` tabanını kullanarak `f_n(x)`'e çevir.
+3. `f_n(x)`'i integers üzerinde factor et.
+4. Aday factor'ları tekrar `B = 2^w`'da değerlendir.
+5. Hangi adayların `n`'yi verdiğini doğrula.
+
+Bu, normal RSA'yı **kırmaz**. Yalnızca prime factor'ların kendileri çok küçük, yüksek derecede structured limb coefficients'a sahip olduğunda çalışır.
+
+### Shifted limb leakage
+
+Sparse byte'lar her zaman her limb'in düşük ucuna hizalı olmaz. Doğrudan `2^w` tabanına çeviri büyük coefficients üretirse, `2^i p` ve `2^j q`'nun o limb basis içinde sparse hale geldiği shift'ler `i,j` ara. Product polynomial yine public modulus'tan türetilebilir, factor edilebilir ve orijinal integer factor'larla yeniden birleştirilebilir.
+
+### Implementation smell: byte-to-limb RNG bug
+
+Tehlikeli bir pattern, **32-bit limb** sayısını hesaplayıp yalnızca o kadar **byte** allocate etmek ve bunları limb array'ine kopyalamaktır:
+```csharp
+int numLimbs = bits / 32;
+byte[] array = new byte[numLimbs];
+rngProvider.GetNonZeroBytes(array);
+Array.Copy(array, 0, bignumLimbs, 0, numLimbs);
+bignumLimbs[numLimbs - 1] |= 0x80000000;
+```
+Bu, her 32-bit limb için yalnızca **8 bit entropy** verir, ayrıca son limb’de zorunlu bir üst bit bulunur. Ortaya çıkan RSA primes çoğu zaman yalnızca public key’den tanınabilir ve factored edilebilir.
+
+### Related DSA failure mode
+
+Aynı bozuk big-integer routine, DSA private exponent üretimi için yeniden kullanılırsa, public key `y = g^x`, `x` için **dramatik biçimde azaltılmış ve yapılandırılmış** bir search space sızdırabilir. Limb pattern bilindiğinde, **baby-step giant-step** gibi discrete-log attacks public parameters’a karşı pratik hale gelebilir.
 
 ### Håstad broadcast / low exponent
 
-Aynı plaintext küçük `e` ile (genelde `e=3`) ve uygun padding olmadan birden fazla alıcıya gönderilmişse, CRT ve tamsayı kökü ile `m` kurtarılabilir.
+Aynı plaintext, küçük `e` ile (çoğunlukla `e=3`) ve düzgün padding olmadan birden fazla alıcıya gönderilirse, `m` değerini CRT ve integer root ile geri kazanabilirsiniz.
 
-Teknik şart:
+Teknik koşul:
 
-Aynı mesajın pairwise-coprime modüller `n_i` altında `e` ciphertext'ine sahipseniz:
+Aynı message için, pairwise-coprime moduli `n_i` altında `e` ciphertext’e sahipseniz:
 
-- CRT kullanarak `N = Π n_i` üzerinde `M = m^e`'yi yeniden oluştur
-- Eğer `m^e < N` ise, o zaman `M` gerçek integer kuvvetidir ve `m = integer_root(M, e)`
+- CRT kullanarak ürün `N = Π n_i` üzerinde `M = m^e` değerini geri kazan
+- Eğer `m^e < N` ise, `M` gerçek integer power’dır ve `m = integer_root(M, e)`
 
 ### Wiener attack: small private exponent
 
-Eğer `d` çok küçükse, sürekli kesirler (continued fractions) `e/n`'den `d`'yi kurtarabilir.
+Eğer `d` çok küçükse, continued fractions onu `e/n`’den geri kazanabilir.
 
 ### Textbook RSA pitfalls
 
-Eğer şöyle bir şey görürseniz:
+Eğer şunları görürseniz:
 
-- OAEP/PSS yok, ham modular üstelleme
+- OAEP/PSS yok, raw modular exponentiation
 - Deterministic encryption
 
-o zaman cebrik saldırılar ve oracle abuse çok daha olası hale gelir.
+o zaman algebraic attacks ve oracle abuse çok daha olası hale gelir.
 
-### Araçlar
+### Tools
 
 - RsaCtfTool: https://github.com/Ganapati/RsaCtfTool
 - SageMath (CRT, roots, CF): https://www.sagemath.org/
 
 ## Related-message patterns
 
-Aynı modulus altında iki ciphertext görürseniz ve mesajlar cebrik olarak ilişkiliyse (ör. `m2 = a*m1 + b`), Franklin–Reiter gibi "related-message" saldırılarını ara. Bunlar genellikle şunu gerektirir:
+Aynı modulus altında, mesajları algebraically related olan iki ciphertext görürseniz (ör. `m2 = a*m1 + b`), Franklin–Reiter gibi "related-message" attacks arayın. Bunlar genellikle şunları gerektirir:
 
-- aynı modulus `n`
-- aynı üs `e`
-- plaintext'ler arasındaki bilinen ilişki
+- same modulus `n`
+- same exponent `e`
+- plaintext’ler arasında bilinen ilişki
 
-Pratikte bu genellikle Sage ile polinomları modulo `n` olarak kurup bir GCD hesaplamakla çözülür.
+Pratikte bu çoğu zaman Sage ile, `n` modunda polinomlar kurup bir GCD hesaplayarak çözülür.
 
 ## Lattices / Coppersmith
 
-Bilinmeyen küçük olduğunda veya kısmi bitler, yapılandırılmış plaintext ya da yakın ilişkiler olduğunda buna başvur.
+Bilinmeyen kısmın küçük olmasını sağlayan partial bits, structured plaintext veya close relations varsa buna yönelin.
 
-Lattice yöntemleri (LLL/Coppersmith) kısmi bilgi olduğunda ortaya çıkar:
+Lattice methods (LLL/Coppersmith), partial information olduğunda ortaya çıkar:
 
-- Kısmen bilinen plaintext (bilinmeyen kuyruk içeren yapılandırılmış mesaj)
-- Kısmen bilinen `p`/`q` (üst bitler leaked)
-- İlişkili değerler arasındaki küçük bilinmeyen farklar
+- Partially known plaintext (unknown tail içeren structured message)
+- Partially known `p`/`q` (high bits leaked)
+- Related values arasında küçük unknown differences
 
-### Tanınması gerekenler
+### What to recognize
 
-Challenge'lardaki tipik ipuçları:
+Challenges içinde tipik ipuçları:
 
 - "We leaked the top/bottom bits of p"
 - "The flag is embedded like: `m = bytes_to_long(b\"HTB{\" + unknown + b\"}\")`"
 - "We used RSA but with a small random padding"
 
-### Araçlar
+### Tooling
 
-Pratikte LLL için Sage ve spesifik örnek için bilinen bir şablon kullanırsınız.
+Pratikte LLL için Sage ve belirli örnek için bilinen bir template kullanırsınız.
 
 İyi başlangıç noktaları:
 
 - Sage CTF crypto templates: https://github.com/defund/coppersmith
-- Bir survey-style referans: https://martinralbrecht.wordpress.com/2013/05/06/coppersmiths-method/
+- A survey-style reference: https://martinralbrecht.wordpress.com/2013/05/06/coppersmiths-method/
+
+## References
+
+- [Trail of Bits - Factoring "short-sleeve" RSA keys with polynomials](https://blog.trailofbits.com/2026/06/12/factoring-short-sleeve-rsa-keys-with-polynomials/)
+- [badkeys](https://badkeys.info/)
+- [badkeys standalone tool](https://github.com/badkeys/badkeys)
 
 {{#include ../../../banners/hacktricks-training.md}}
