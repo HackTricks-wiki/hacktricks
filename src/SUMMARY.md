@@ -388,6 +388,7 @@
   - [Android Enterprise Work Profile Bypass](mobile-pentesting/android-app-pentesting/android-enterprise-work-profile-bypass.md)
   - [Android Hce Nfc Emv Relay Attacks](mobile-pentesting/android-app-pentesting/android-hce-nfc-emv-relay-attacks.md)
   - [Android Task Hijacking](mobile-pentesting/android-app-pentesting/android-task-hijacking.md)
+  - [Android VPN Bypass](mobile-pentesting/android-app-pentesting/android-vpn-bypass.md)
   - [ADB Commands](mobile-pentesting/android-app-pentesting/adb-commands.md)
   - [APK decompilers](mobile-pentesting/android-app-pentesting/apk-decompilers.md)
   - [AVD - Android Virtual Device](mobile-pentesting/android-app-pentesting/avd-android-virtual-device.md)
