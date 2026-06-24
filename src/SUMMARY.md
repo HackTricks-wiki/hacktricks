@@ -590,6 +590,7 @@
 - [1521,1522-1529 - Pentesting Oracle TNS Listener](network-services-pentesting/1521-1522-1529-pentesting-oracle-listener.md)
 - [1723 - Pentesting PPTP](network-services-pentesting/1723-pentesting-pptp.md)
 - [1883 - Pentesting MQTT (Mosquitto)](network-services-pentesting/1883-pentesting-mqtt-mosquitto.md)
+- [Pentesting ISO 8583 Payment Sockets](network-services-pentesting/pentesting-iso-8583-payment-sockets.md)
 - [2049 - Pentesting NFS Service](network-services-pentesting/nfs-service-pentesting.md)
 - [2301,2381 - Pentesting Compaq/HP Insight Manager](network-services-pentesting/pentesting-compaq-hp-insight-manager.md)
 - [2375, 2376 Pentesting Docker](network-services-pentesting/2375-pentesting-docker.md)
