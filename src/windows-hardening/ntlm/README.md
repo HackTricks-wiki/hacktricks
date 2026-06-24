@@ -28,7 +28,7 @@ You can check and configure which protocol will be used:
 
 Execute _secpol.msc_ -> Local policies -> Security Options -> Network Security: LAN Manager authentication level. There are 6 levels (from 0 to 5).
 
-![](<../../images/image (919).png>)
+![LM, NTLMv1 and NTLMv2 - GUI: Execute secpol.msc - Local policies - Security Options - Network Security: LAN Manager authentication level. There are 6 levels (from 0 to 5)](<../../images/image (919).png>)
 
 ### Registry
 

@@ -77,7 +77,7 @@ ECB (Electronic Code Book) encrypts each block independently:
 - equal plaintext blocks → equal ciphertext blocks
 - this leaks structure and enables cut-and-paste style attacks
 
-![](https://upload.wikimedia.org/wikipedia/commons/thumb/e/e6/ECB_decryption.svg/601px-ECB_decryption.svg.png)
+![ECB mode decryption block diagram](https://upload.wikimedia.org/wikipedia/commons/thumb/e/e6/ECB_decryption.svg/601px-ECB_decryption.svg.png)
 
 ### Detection idea: token/cookie pattern
 

@@ -65,7 +65,7 @@ while read pass; do
 done < $passfile
 ```
 
-![](<../../../images/image (692).png>)
+![Browsers Artifacts - Firefox: echo "$pass" | python firefox decrypt.py](<../../../images/image (692).png>)
 
 ## Google Chrome
 

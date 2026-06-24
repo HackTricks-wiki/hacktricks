@@ -3,7 +3,7 @@
 {{#include ../banners/hacktricks-training.md}}
 
 
-## What is MPC - Model Context Protocol
+## What is MCP - Model Context Protocol
 
 The [**Model Context Protocol (MCP)**](https://modelcontextprotocol.io/introduction) is an open standard that allows AI models (LLMs) to connect with external tools and data sources in a plug-and-play fashion. This enables complex workflows: for example, an IDE or chatbot can *dynamically call functions* on MCP servers as if the model naturally "knew" how to use them. Under the hood, MCP uses a client-server architecture with JSON-based requests over various transports (HTTP, WebSockets, stdio, etc.).
 
@@ -17,7 +17,7 @@ We'll use Python and the official `mcp` SDK for this example. First, install the
 
 ```bash
 pip3 install mcp "mcp[cli]"
-mcp version      # verify installation`
+mcp version      # verify installation
 ```
 
 Now, create **`calculator.py`** with a basic addition tool:
@@ -33,7 +33,7 @@ def add(a: int, b: int) -> int:
     return a + b
 
 if __name__ == "__main__":
-    mcp.run(transport="stdio")  # Run server (using stdio transport for CLI testing)`
+    mcp.run(transport="stdio")  # Run server (using stdio transport for CLI testing)
 ```
 
 This defines a server named "Calculator Server" with one tool `add`. We decorated the function with `@mcp.tool()` to register it as a callable tool for connected LLMs. To run the server, execute it in a terminal: `python3 calculator.py`
@@ -93,6 +93,8 @@ Moreover, note that the description could indicate to use other functions that c
 
 Furthermore, [**this blog post**](https://www.cyberark.com/resources/threat-research-blog/poison-everywhere-no-output-from-your-mcp-server-is-safe) describes how it's possible to add the prompt injection not only in the description of the tools but also in the type, in variable names, in extra fields returned in the JSON response by the MCP server and even in an unexpected response from a tool, making the prompt injection attack even more stealthy and difficult to detect.
 
+Recent research shows that this is not a corner case. The ecosystem-wide paper [**Model Context Protocol (MCP) at First Glance**](https://arxiv.org/abs/2506.13538) analyzed 1,899 open-source MCP servers and found **5.5%** with MCP-specific tool-poisoning patterns. [**MCPTox**](https://ojs.aaai.org/index.php/AAAI/article/view/40895) later evaluated **45 live MCP servers / 353 authentic tools** and achieved tool-poisoning attack-success rates as high as **72.8%** across 20 agent settings. Follow-up work [**MCP-ITP**](https://arxiv.org/abs/2601.07395) automated **implicit tool poisoning**: the poisoned tool is never called directly, but its metadata still steers the agent into invoking a different high-privilege tool, pushing attack success to **84.2%** on some configurations while dropping malicious-tool detection to **0.3%**.
+
 
 ### Prompt Injection via Indirect Data
 
@@ -109,6 +111,86 @@ AI-Prompts.md
 Moreover, in [**this blog**](https://www.legitsecurity.com/blog/remote-prompt-injection-in-gitlab-duo) it's explained how it was possible to abuse the Gitlab AI agent to perform arbitrary actions (like modifying code or leaking code), but injecting maicious prompts in the data of the repository (even ofbuscating this prompts in a way that the LLM would understand but the user wouldn't).
 
 Note that the malicious indirect prompts would be located in a public repository the victim user would be using, however, as the agent still have access to the repos of the user, it'll be able to access them.
+
+Also remember that prompt injection often only needs to reach a **second bug** in the tool implementation. During 2025-2026, multiple MCP servers were disclosed with classic shell-command injection patterns (`child_process.exec`, shell metacharacter expansion, unsafe string concatenation, or user-controlled `find`/`sed`/CLI arguments). In practice, a malicious issue/README/web page can steer the agent into passing attacker-controlled data to one of those tools, turning prompt injection into OS command execution on the MCP server host.
+
+### Supply-Chain Backdoors in MCP Servers (same tool name, same schema, new payload)
+
+MCP trust is usually anchored to the **package name, reviewed source, and current tool schema**, but not to the runtime implementation that will be executed after the next update. A malicious maintainer or compromised package can keep the **same tool name, arguments, JSON schema, and normal outputs** while adding hidden exfiltration logic in the background. This usually survives functional tests because the visible tool still behaves correctly.
+
+A practical example was the `postmark-mcp` package: after a benign history, version `1.0.16` silently added a hidden BCC to attacker-controlled email addresses while still sending the requested message normally. Similar marketplace abuse was observed in ClawHub skills that returned the expected result while harvesting wallet keys or stored credentials in parallel.
+
+#### Why local `stdio` MCP servers are high impact
+
+When an MCP server is launched locally over `stdio`, it inherits the **same OS user context** as the AI client or shell that started it. No privilege escalation is required to access secrets already readable by that user. In practice, a hostile server can enumerate and steal:
+
+- `~/.ssh/id_*`, `~/.ssh/*.pem`, `~/.aws/credentials`, `~/.config/gcloud/*.json`, `~/.azure/*`
+- `~/.kube/config`, service-account tokens, `~/.docker/config.json`, `/var/run/docker.sock`
+- `~/.netrc`, `~/.npmrc`, `~/.pypirc`, Terraform state/vars, `.env*`, shell history files
+- AI provider credentials such as `~/.claude/credentials.json`, `~/.codex/auth.json`, `~/.config/openai/credentials`
+- Cryptocurrency wallets and keystores
+
+Because the MCP response can remain perfectly normal, ordinary integration tests may not detect the theft.
+
+#### Defensive exposure modeling with `otto-support selfpwn`
+
+Bishop Fox's `otto-support selfpwn` is a good model of what a malicious MCP server could read locally. The command expands home-directory paths, checks explicit paths and `filepath.Glob()` matches, collects metadata with `os.Stat()`, classifies findings by path-derived risk, and inspects `os.Environ()` for variable names containing patterns such as `KEY`, `SECRET`, `TOKEN`, `AWS_`, `OPENAI_`, `CLAUDE_`, `KUBE`, or `SSH_`. It prints the report to stdout only, but a real malicious MCP server could replace that final output step with silent exfiltration.
+
+```bash
+otto-support selfpwn
+otto-support selfpwn --agree
+```
+
+#### Detection, response, and hardening
+
+- Treat MCP servers as **untrusted code execution**, not just prompt context. If a suspicious MCP server ran locally, assume every readable credential may have been exposed and rotate/revoke it.
+- Use **internal registries** with reviewed commits, signed packages/plugins, pinned versions, checksum verification, lockfiles, and vendored dependencies (`go mod vendor`, `go.sum`, or equivalent) so reviewed code cannot silently change.
+- Run high-risk MCP servers in **dedicated accounts or isolated containers** with no sensitive host mounts.
+- Enforce **allowlist-only egress** for MCP processes whenever possible. A server meant to query one internal system should not be able to open arbitrary outbound HTTP connections.
+- Monitor runtime behavior for **unexpected outbound connections** or file access during tool execution, especially when the server's visible MCP output still looks correct.
+
+### Authorization Abuse: Token Passthrough & Confused Deputy
+
+Remote MCP servers that proxy SaaS APIs (GitHub, Gmail, Jira, Slack, cloud APIs, etc.) are not just wrappers: they also become an **authorization boundary**. The dangerous anti-pattern is receiving a bearer token from the MCP client and forwarding it upstream, or accepting any token without validating that it was actually issued **for this MCP server**.
+
+```python
+# Anti-pattern: take the token that authenticated the MCP request
+# and forward it directly to the upstream SaaS API.
+upstream_headers = {"Authorization": request.headers["Authorization"]}
+resp = requests.get("https://api.github.com/user/repos", headers=upstream_headers)
+```
+
+If the MCP proxy never validates `aud` / `resource`, or if it reuses a single static OAuth client and prior consent state for every downstream user, it can become a **confused deputy**:
+
+1. The attacker makes the victim connect to a malicious or tampered remote MCP server.
+2. The server initiates OAuth to a third-party API the victim already uses.
+3. Because the consent is attached to the shared upstream OAuth client, the victim may never see a meaningful new approval screen.
+4. The proxy receives an authorization code or token and then performs actions against the upstream API with the victim's privileges.
+
+For pentesting, pay special attention to:
+
+- Proxies that forward raw `Authorization: Bearer ...` headers to third-party APIs.
+- Missing validation of token **audience** / `resource` values.
+- A single OAuth client ID reused for all MCP tenants or all connected users.
+- Missing per-client consent before the MCP server redirects the browser to the upstream authorization server.
+- Downstream API calls that are stronger than the permissions implied by the original MCP tool description.
+
+The current MCP authorization guidance explicitly forbids **token passthrough** and requires the MCP server to validate that tokens were issued for itself, because otherwise any OAuth-enabled MCP proxy can collapse multiple trust boundaries into one exploitable bridge.
+
+### Localhost Bridges & Inspector Abuse
+
+Do not forget the **developer tooling** around MCP. The browser-based **MCP Inspector** and similar localhost bridges often have the ability to spawn `stdio` servers, which means that a bug in the UI/proxy layer can become immediate command execution on the developer workstation.
+
+- Versions of MCP Inspector before **0.14.1** allowed unauthenticated requests between the browser UI and the local proxy, so a malicious website (or DNS rebinding setup) could trigger arbitrary `stdio` command execution on the machine running the inspector.
+- Later, [**GHSA-g9hg-qhmf-q45m / CVE-2025-58444**](https://github.com/advisories/GHSA-g9hg-qhmf-q45m) showed that even when the proxy is local-only, an untrusted MCP server could abuse redirect handling to inject JavaScript into the Inspector UI and then pivot into command execution through the built-in proxy.
+
+When testing MCP development environments, look for:
+
+- `mcp dev` / inspector processes listening on loopback or accidentally on `0.0.0.0`.
+- Reverse proxies that expose the inspector's local port to teammates or the internet.
+- CSRF, DNS rebinding, or Web-origin issues in localhost helper endpoints.
+- OAuth / redirect flows that render attacker-controlled URLs inside the local UI.
+- Proxy endpoints that accept arbitrary `command`, `args`, or server configuration JSON.
 
 ### Persistent Code Execution via MCP Trust Bypass (Cursor IDE – "MCPoison")
 
@@ -245,5 +327,9 @@ This workflow makes MCP endpoints fuzzable with standard Burp tooling despite th
 - [An Evening with Claude (Code): sed-Based Command Safety Bypass in Claude Code](https://specterops.io/blog/2025/11/21/an-evening-with-claude-code/)
 - [MCP in Burp Suite: From Enumeration to Targeted Exploitation](https://trustedsec.com/blog/mcp-in-burp-suite-from-enumeration-to-targeted-exploitation)
 - [MCP Attack Surface Detector (MCP-ASD) extension](https://github.com/hoodoer/MCP-ASD)
+- [Otto-Support: Supply Chain Risks in MCP Servers](https://bishopfox.com/blog/otto-support-supply-chain-risks-mcp-servers)
+- [otto-support `selfpwn` source](https://github.com/BishopFox/otto-support/blob/main/cmd/otto-support/selfpwn.go)
+- [Model Context Protocol Security Best Practices](https://modelcontextprotocol.io/docs/tutorials/security/security_best_practices)
+- [MCP Inspector proxy server lacks authentication between the Inspector client and proxy](https://github.com/advisories/GHSA-7f8r-222p-6f5g)
 
 {{#include ../banners/hacktricks-training.md}}

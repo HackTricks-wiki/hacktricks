@@ -62,7 +62,7 @@ kill -s SIGUSR1 <nodejs-ps>
 
 To connect to a **Chromium-based browser**, the `chrome://inspect` or `edge://inspect` URLs can be accessed for Chrome or Edge, respectively. By clicking the Configure button, it should be ensured that the **target host and port** are correctly listed. The image shows a Remote Code Execution (RCE) example:
 
-![](<../../images/image (674).png>)
+![After an URL to access the debugger will appear. e.g. ws://127.0.0.1:9229/45ea962a-29dd-4cdd-be08-a6827840553d - Connect to inspector/debugger: To connect to a Chromium-based browser ,...](<../../images/image (674).png>)
 
 Using the **command line** you can connect to a debugger/inspector with:
 

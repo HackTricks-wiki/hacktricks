@@ -226,7 +226,7 @@ This variant still cleans up the dropper and leaves only the staged payloads, ma
 
 You can get using a **meterpreter** session. Migrate to a **process** that has the **Session** value equals to **1**:
 
-![](<../../images/image (863).png>)
+![Point ms-settings to a custom extension (.thm) and map that extension to our payload - More UAC bypass: You can get using a meterpreter session. Migrate to a process that has the Session...](<../../images/image (863).png>)
 
 (_explorer.exe_ should works)
 

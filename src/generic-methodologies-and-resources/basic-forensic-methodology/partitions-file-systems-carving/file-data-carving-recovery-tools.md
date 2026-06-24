@@ -76,7 +76,7 @@ You can find it in <https://www.cgsecurity.org/wiki/TestDisk_Download>
 
 It comes with GUI and CLI versions. You can select the **file-types** you want PhotoRec to search for.
 
-![](<../../../images/image (242).png>)
+![Run every scanner, carve JPEGs aggressively and generate a bodyfile - PhotoRec: It comes with GUI and CLI versions. You can select the file-types you want PhotoRec to search for](<../../../images/image (242).png>)
 
 ### ddrescue + ddrescueview (imaging failing drives)
 

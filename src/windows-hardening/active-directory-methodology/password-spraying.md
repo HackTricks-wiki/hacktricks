@@ -85,7 +85,7 @@ python kerbrute.py -domain jurassic.park -users users.txt -password Password123 
 
 - With the `scanner/smb/smb_login` module of **Metasploit**:
 
-![](<../../images/image (745).png>)
+![Password Spraying - Brute-Force: With the scanner/smb/smb login module of Metasploit](<../../images/image (745).png>)
 
 - Using **rpcclient**:
 

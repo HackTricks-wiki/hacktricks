@@ -17,11 +17,11 @@ A key rule is that objects can't be modified by processes with a lower integrity
 
 You can get the integrity level of a process using **Process Explorer** from **Sysinternals**, accessing the **properties** of the process and viewing the "**Security**" tab:
 
-![](<../../images/image (824).png>)
+![Integrity Levels - Integrity Levels: You can get the integrity level of a process using Process Explorer from Sysinternals , accessing the properties of the process and viewing the "...](<../../images/image (824).png>)
 
 You can also get your **current integrity level** using `whoami /groups`
 
-![](<../../images/image (325).png>)
+![Integrity Levels - Integrity Levels: You can also get your current integrity level using whoami /groups](<../../images/image (325).png>)
 
 ### Integrity Levels in File-system
 
@@ -86,7 +86,7 @@ C:\Windows\System32\cmd-low.exe NT AUTHORITY\SYSTEM:(I)(F)
 
 Now, when I run `cmd-low.exe` it will **run under a low-integrity level** instead of a medium one:
 
-![](<../../images/image (313).png>)
+![Integrity Levels in File-system - Integrity Levels in Binaries: Now, when I run cmd-low.exe it will run under a low-integrity level instead of a medium one](<../../images/image (313).png>)
 
 For curious people, if you assign high integrity level to a binary (`icacls C:\Windows\System32\cmd-high.exe /setintegritylevel high`) it won't run with high integrity level automatically (if you invoke it from a medium integrity level --by default-- it will run under a medium integrity level).
 

@@ -92,7 +92,7 @@ macos-serial-number.md
 6. Profile installation (Device) a. incl. MDM, SCEP and root CA payloads
 7. MDM command issuance (Device)
 
-![](<../../../images/image (694).png>)
+![Serial Number - Steps for enrolment and management: 7. MDM command issuance (Device)](<../../../images/image (694).png>)
 
 The file `/Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk/System/Library/PrivateFrameworks/ConfigurationProfiles.framework/ConfigurationProfiles.tbd` exports functions that can be considered **high-level "steps"** of the enrolment process.
 
@@ -100,7 +100,7 @@ The file `/Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk/System/Librar
 
 This part of the process occurs when a **user boots a Mac for the first time** (or after a complete wipe)
 
-![](<../../../images/image (1044).png>)
+![Steps for enrolment and management - Step 4: DEP check-in - Getting the Activation Record: This part of the process occurs when a user boots a Mac for the first time (or after a complete...](<../../../images/image (1044).png>)
 
 or when executing `sudo profiles show -type enrollment`
 
@@ -125,7 +125,7 @@ It follows a few steps to get the Activation Record performed by **`MCTeslaConfi
    2. The JSON payload is encrypted using Absinthe (**`NACSign`**)
    3. All requests over HTTPs, built-in root certificates are used
 
-![](<../../../images/image (566) (1).png>)
+![Steps for enrolment and management - Step 4: DEP check-in - Getting the Activation Record: 3. All requests over HTTPs, built-in root certificates are used](<../../../images/image (566) (1).png>)
 
 The response is a JSON dictionary with some important data like:
 
@@ -134,7 +134,7 @@ The response is a JSON dictionary with some important data like:
 
 ### **Step 5: Profile Retrieval**
 
-![](<../../../images/image (444).png>)
+![Step 4: DEP check-in - Getting the Activation Record - Step 5: Profile Retrieval: Step 5: Profile Retrieval](<../../../images/image (444).png>)
 
 - Request sent to **url provided in DEP profile**.
 - **Anchor certificates** are used to **evaluate trust** if provided.
@@ -145,7 +145,7 @@ The response is a JSON dictionary with some important data like:
 - Signed using the **device identity certificate (from APNS)**
 - **Certificate chain** includes expired **Apple iPhone Device CA**
 
-![](<../../../images/image (567) (1) (2) (2) (2) (2) (2) (2) (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (2) (2).png>)
+![Step 4: DEP check-in - Getting the Activation Record - Step 5: Profile Retrieval: Signed using the device identity certificate (from APNS)](<../../../images/image (567) (1) (2) (2) (2) (2) (2) (2) (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (2) (2).png>)
 
 ### Step 6: Profile Installation
 
