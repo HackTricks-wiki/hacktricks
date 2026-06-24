@@ -95,6 +95,18 @@
     return bsaScriptPromise
   }
 
+  function getSponsorTitleFontSize(title) {
+    if (title.length > 45) {
+      return "1.35rem"
+    }
+
+    if (title.length > 28) {
+      return "1.55rem"
+    }
+
+    return ""
+  }
+
   function setLegacySponsorContent(sponsor, container, nodes) {
     nodes.img.src = sponsor.image_url
     nodes.img.alt = sponsor.name
@@ -104,12 +116,13 @@
     nodes.cta.textContent = sponsor.cta
     container.style.display = "flex"
 
-    if (sponsor.name.length > 45) {
-      nodes.title.style.fontSize = "1.6rem"
-    }
+    nodes.title.classList.toggle("sponsor-title--long", sponsor.name.length > 28)
+    nodes.title.style.fontSize = getSponsorTitleFontSize(sponsor.name)
 
     if (sponsor.description.length > 250) {
       nodes.description.style.fontSize = "1.4rem"
+    } else {
+      nodes.description.style.fontSize = ""
     }
   }
 
