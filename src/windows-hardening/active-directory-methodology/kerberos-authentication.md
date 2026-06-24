@@ -1,32 +1,76 @@
-# Autenticazione Kerberos
+# Kerberos Authentication
 
 {{#include ../../banners/hacktricks-training.md}}
 
-**Consulta l'ottimo post di:** [**https://www.tarlogic.com/en/blog/how-kerberos-works/**](https://www.tarlogic.com/en/blog/how-kerberos-works/)
+**Controlla il fantastico post di:** [**https://www.tarlogic.com/en/blog/how-kerberos-works/**](https://www.tarlogic.com/en/blog/how-kerberos-works/)
 
-## TL;DR for attackers
-- Kerberos è il protocollo di auth predefinito per AD; la maggior parte delle catene di lateral-movement lo coinvolgerà. Per cheatsheet pratici (AS‑REP/Kerberoasting, ticket forging, delegation abuse, etc.) vedi:
+## TL;DR per attackers
+- Kerberos è il protocollo di autenticazione AD predefinito; la maggior parte delle catene di lateral movement lo toccherà.
+- Pensa in **tre fasi operative**:
+- **AS-REQ / AS-REP** → password/hash/certificato per ottenere un **TGT**. Qui vivono **AS-REP roasting**, **over-pass-the-hash / pass-the-key**, e **PKINIT**.
+- **TGS-REQ / TGS-REP** → usa un TGT per ottenere **service tickets**. Qui diventano rilevanti **Kerberoasting**, **S4U abuse**, **delegation abuse**, e la maggior parte del **ticket-forging tradecraft**.
+- **AP-REQ / AP-REP** → presenta il ticket al servizio. Qui avvengono **pass-the-ticket** e il lateral movement specifico del servizio.
+- Per cheatsheet pratici (AS-REP/Kerberoasting, ticket forgery, delegation abuse, ecc.) vedi:
 {{#ref}}
 ../../network-services-pentesting/pentesting-kerberos-88/README.md
 {{#endref}}
+- Usa questa pagina come indice di **panoramica / “cosa è cambiato di recente”**, poi passa alle pagine dedicate per [Kerberoast](kerberoast.md), [Resource-Based Constrained Delegation](resource-based-constrained-delegation.md), [AD Certificates / PKINIT abuse](ad-certificates.md), oppure [BadSuccessor / dMSA abuse](acl-persistence-abuse/BadSuccessor.md).
 
-## Fresh attack notes (2024‑2026)
-- **RC4 finalmente eliminato** – I DC di Windows Server 2025 non emettono più RC4 TGTs; Microsoft prevede di disabilitare RC4 come impostazione predefinita per i DC AD entro la fine del Q2 2026. Gli ambienti che riabilitano RC4 per app legacy creano opportunità di downgrade/fast‑crack per Kerberoasting.
-- **PAC validation enforcement (Apr 2025)** – Gli aggiornamenti di April 2025 rimuovono la modalità “Compatibility”; PACs forgiate/golden tickets vengono rifiutati sui DC patchati quando l'enforcement è abilitato. I DC legacy/non patchati restano sfruttabili.
-- **CVE‑2025‑26647 (altSecID CBA mapping)** – Se i DC non sono patchati o lasciati in Audit mode, i certificati concatenati a CA non‑NTAuth ma mappati via SKI/altSecID possono comunque effettuare il logon. Gli eventi 45/21 compaiono quando le protezioni si attivano.
-- **NTLM phase‑out** – Microsoft rilascerà future versioni di Windows con NTLM disabilitato di default (fasi progressive fino al 2026), spostando più autenticazione su Kerberos. Aspettati una maggiore superficie Kerberos e EPA/CBT più restrittivi nelle reti rafforzate.
-- **Cross‑domain RBCD remains powerful** – Microsoft Learn segnala che il resource‑based constrained delegation funziona attraverso domini/foreste; un attributo scrivibile `msDS-AllowedToActOnBehalfOfOtherIdentity` sugli oggetti risorsa permette ancora impersonazione S4U2self→S4U2proxy senza dover modificare gli ACL dei servizi front‑end.
+## Note rapide di attacco (2024-2026)
+- **Il rafforzamento RC4 ha cambiato i default, non Kerberos stesso** – l'hardening moderno dei DC si concentra sui **tipi di cifratura assunti di default** per gli account che non impostano esplicitamente `msDS-SupportedEncryptionTypes`. Dopo il rollout del 2026, quegli account defaultano sempre più a **AES-only** su DC patchati, quindi le assunzioni cieche `/rc4` per Kerberoast falliscono più spesso. Tuttavia, gli **service account esplicitamente abilitati a RC4** restano ottimi target offline crack.
+- **L'enforcement della validazione PAC conta per i ticket forgiati** – l'hardening della firma PAC del 2024 significa che gli abusi **golden/diamond/sapphire/extraSID-style** richiedono dati PAC più realistici e il corretto contesto di firma. I domini non patchati o lasciati in deploy di compatibilità/audit restano target più deboli.
+- **Il Kerberos basato su certificati è cambiato due volte**:
+- **Il strong certificate binding** (timeline KB5014754) rende le mappature certificate-to-account fatte in modo approssimativo meno affidabili in ambienti pienamente enforced.
+- **CVE-2025-26647** ha aggiunto un altro livello di hardening attorno alle mappature certificato **altSecID / SKI**. Se i DC non sono patchati, sono ancora in auditing, o stanno esplicitamente bypassando la validazione NTAuth, il pass-the-certificate / shadow-credential follow-on abuse resta più pratico.
+- **L'abuse della delegation cross-domain / cross-forest è ancora molto vivo** – Windows supporta i moderni flussi cross-realm **S4U2Self/S4U2Proxy**, quindi gli attributi di delegation scrivibili in un altro dominio sono ancora preziosi. Il blocco è di solito la fedeltà del tooling e i dettagli di trust/policy, non il supporto del protocollo.
+- **Windows Server 2025 ha introdotto nuova superficie d'attacco adiacente a Kerberos** tramite la logica di migrazione **dMSA**. Se vedi diritti delegati su OU o oggetti service-account in un dominio 2025, controlla la pagina dedicata [BadSuccessor page](acl-persistence-abuse/BadSuccessor.md) invece di trattarlo come “solo un altro gMSA”.
 
-## Strumenti rapidi
-- **Rubeus kerberoast (AES default)**: `Rubeus.exe kerberoast /user:svc_sql /aes /nowrap /outfile:tgs.txt` — estrae hash AES; prevedi cracking GPU o prendi di mira utenti con pre‑auth disabilitato invece.
-- **RC4 downgrade target hunting**: enumera gli account che dichiarano ancora RC4 con `Get-ADObject -LDAPFilter '(msDS-SupportedEncryptionTypes=4)' -Properties msDS-SupportedEncryptionTypes` per individuare candidati deboli per Kerberoasting prima che RC4 venga completamente disabilitato.
+## Controlli rapidi per operator in domini moderni
 
+Prima di scegliere un percorso di attacco Kerberos, rispondi rapidamente a quattro domande:
 
+1. **Quali account sono ancora RC4-friendly?**
+2. **Quali utenti non richiedono pre-auth?**
+3. **Quali oggetti espongono delegation abuse?**
+4. **Quali parti del dominio sono abbastanza nuove da imporre l'hardening recente?**
+```powershell
+# 1) Service accounts explicitly pinned to RC4 / legacy etypes
+Get-ADObject -LDAPFilter '(|(msDS-SupportedEncryptionTypes=4)(msDS-SupportedEncryptionTypes=12))' \
+-Properties samAccountName,servicePrincipalName,msDS-SupportedEncryptionTypes
 
-## References
-- [Microsoft – Beyond RC4 for Windows authentication (RC4 default removal timeline)](https://www.microsoft.com/en-us/windows-server/blog/2025/12/03/beyond-rc4-for-windows-authentication)
-- [Microsoft Support – Protections for CVE-2025-26647 Kerberos authentication](https://support.microsoft.com/en-gb/topic/protections-for-cve-2025-26647-kerberos-authentication-5f5d753b-4023-4dd3-b7b7-c8b104933d53)
-- [Microsoft Support – PAC validation enforcement timeline](https://support.microsoft.com/en-us/topic/how-to-manage-pac-validation-changes-related-to-cve-2024-26248-and-cve-2024-29056-6e661d4f-799a-4217-b948-be0a1943fef1)
-- [Microsoft Learn – Kerberos constrained delegation overview (cross-domain RBCD)](https://learn.microsoft.com/en-us/windows-server/security/kerberos/kerberos-constrained-delegation-overview)
-- [Windows Central – NTLM deprecation roadmap](https://www.windowscentral.com/microsoft/windows/microsoft-plans-to-bury-its-ntlm-security-relic-after-30-years)
+# 2) Service accounts with no explicit etype config
+#    (these increasingly inherit AES-only defaults on patched 2026 DCs)
+Get-ADObject -LDAPFilter '(&(servicePrincipalName=*)(!(msDS-SupportedEncryptionTypes=*)))' \
+-Properties samAccountName,servicePrincipalName
+
+# 3) AS-REP roastable users
+Get-ADUser -LDAPFilter '(&(samAccountType=805306368)(userAccountControl:1.2.840.113556.1.4.803:=4194304))' \
+-Properties userAccountControl
+
+# 4) Delegation hot spots
+Get-ADComputer -LDAPFilter '(msDS-AllowedToActOnBehalfOfOtherIdentity=*)' \
+-Properties msDS-AllowedToActOnBehalfOfOtherIdentity
+Get-ADObject -LDAPFilter '(|(userAccountControl:1.2.840.113556.1.4.803:=524288)(userAccountControl:1.2.840.113556.1.4.803:=16777216))' \
+-Properties samAccountName,servicePrincipalName,userAccountControl
+
+# 5) DC-side RC4 hardening / compatibility clues
+Get-WinEvent -LogName System | Where-Object {
+$_.ProviderName -eq 'Microsoft-Windows-Kerberos-Key-Distribution-Center' -and $_.Id -in 201..209
+}
+```
+Interpretazione pratica:
+- Se gli account SPN **interessanti** sono esplicitamente compatibili con RC4, il Kerberoasting resta economico e veloce.
+- Se la maggior parte degli account di servizio non ha **nessuna configurazione esplicita dell'etype**, aspettati un comportamento **solo AES** sui DC 2026 aggiornati e pianifica un cracking offline più lento o un percorso diverso.
+- Se è presente **RBCD / KCD / unconstrained delegation**, spesso S4U batte il brute-force.
+- Se è in gioco l'**autenticazione certificate**, ricorda che un percorso PKINIT fallito non significa **sempre** che il certificato sia inutile; in molti ambienti lo stesso certificato funziona ancora per abuso **Schannel/LDAPS** (vedi [AD Certificates / PKINIT abuse](ad-certificates.md)).
+
+## Errori Kerberos comuni che cambiano il piano d'attacco
+- **`KDC_ERR_ETYPE_NOTSUPP`** → L'account target / DC non userà il tipo di crittografia richiesto. Smetti di riprovare solo con RC4; fornisci chiavi **AES** o richiedi invece materiale da roast **AES**.
+- **`KRB_AP_ERR_MODIFIED`** → Probabilmente hai la **chiave di servizio sbagliata**, lo **SPN sbagliato**, oppure un ticket forgiato che non corrisponde all'account di servizio che lo sta effettivamente decifrando.
+- **`KRB_AP_ERR_SKEW`** → L'orario non è corretto. Sincronizzati con il DC prima di fare altro debug.
+- **`KDC_ERR_BADOPTION`** durante i flussi S4U / delegation → spesso significa **utenti sensibili/non delegabili**, il modello di delegation sbagliato, oppure che stai cercando di fare **classic KCD** dove solo **RBCD** accetterebbe un ticket S4U2Self non forwardable.
+
+## Riferimenti
+- [Microsoft Learn - Detect and remediate RC4 usage in Kerberos](https://learn.microsoft.com/en-us/windows-server/security/kerberos/detect-remediate-rc4-kerberos)
+- [Microsoft Support - Latest Windows hardening guidance and key dates](https://support.microsoft.com/en-us/topic/latest-windows-hardening-guidance-and-key-dates-eb1bd411-f68c-4d74-a4e1-456721a6551b)
 {{#include ../../banners/hacktricks-training.md}}
