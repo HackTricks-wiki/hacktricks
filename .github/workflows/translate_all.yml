@@ -56,7 +56,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
       
@@ -243,7 +243,7 @@ jobs:
 
       # Login in AWS
       - name: Configure AWS credentials using OIDC
-        uses: aws-actions/configure-aws-credentials@v3
+        uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: us-east-1
@@ -269,16 +269,31 @@ jobs:
           find . -type f -name 'index.html' -print | head -n 3 | xargs -r cat
 
       - name: Refresh root sitemap index
+        id: root_sitemap
+        shell: bash
         run: |
-          LANGS=$(aws s3api list-objects-v2 --bucket hacktricks-wiki --delimiter / --query 'CommonPrefixes[].Prefix' --output text | tr '\t' '\n' | sed 's:/$::' | grep -E '^[a-z]{2}$' | sort | paste -sd, -)
+          set -euo pipefail
+          LANGS=$(aws s3api list-objects-v2 --bucket hacktricks-wiki --delimiter / --query 'CommonPrefixes[].Prefix' --output text | tr '\t' '\n' | sed 's:/$::' | grep -E '^[a-z]{2}$' | sort | paste -sd, - || true)
           if [ -z "$LANGS" ]; then
             LANGS="en"
           fi
           python3 /tmp/seo_postprocess.py index --site-url https://hacktricks.wiki --languages "$LANGS" --output ./sitemap.xml
-          aws s3 cp ./sitemap.xml s3://hacktricks-wiki/sitemap.xml --content-type application/xml --cache-control max-age=300
+          if aws s3 cp s3://hacktricks-wiki/sitemap.xml /tmp/current-root-sitemap.xml >/dev/null 2>&1 && cmp -s /tmp/current-root-sitemap.xml ./sitemap.xml; then
+            echo "Root sitemap unchanged; skipping S3 upload and CloudFront invalidation for /sitemap.xml"
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            aws s3 cp ./sitemap.xml s3://hacktricks-wiki/sitemap.xml --content-type application/xml --cache-control max-age=300
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Invalidate CloudFront HTML and SEO assets
+        shell: bash
         run: |
+          set -euo pipefail
+          paths=("/$BRANCH/*" "/$BRANCH/sitemap.xml")
+          if [ "${{ steps.root_sitemap.outputs.changed }}" = "true" ]; then
+            paths+=("/sitemap.xml")
+          fi
           aws cloudfront create-invalidation \
             --distribution-id "${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}" \
-            --paths "/$BRANCH/*" "/robots.txt" "/sitemap.xml" "/$BRANCH/sitemap.xml"
+            --paths "${paths[@]}"

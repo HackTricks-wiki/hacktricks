@@ -337,6 +337,64 @@ gdb-multiarch /path/to/targetd
 target remote <device-ip>:1234
 ```
 
+### Zigbee / radio-co-processor message mapping
+
+On IoT hubs the RF stack is often split between a **radio MCU** and a Linux userland process. A useful workflow is to map the path:
+
+1. **RF frame** on the air
+2. **controller-side parser** on the radio MCU
+3. **serial/UART text or TLV protocol** forwarded to Linux (for example `/dev/tty*`)
+4. **application dispatcher** in the main daemon
+5. **protocol-specific handler / state machine**
+
+This architecture creates two reversing targets instead of one. If the controller converts binary radio frames into a textual protocol such as `Group,Command,arg1,arg2,...`, recover:
+
+- The **message groups** and dispatch tables
+- Which messages can come from the **network** versus the controller itself
+- The exact **manufacturer-specific discriminator fields** (for example Zigbee `manufacturer_code` and custom `cluster_command`)
+- Which handlers are only reachable during **commissioning**, discovery, or firmware/model download phases
+
+For Zigbee specifically, capture pairing traffic and check whether the target still relies on the default **Link Key** `ZigBeeAlliance09`. If so, sniffing commissioning traffic may expose the **Network Key**. Zigbee 3.0 install codes reduce this exposure, so note whether the tested device actually enforces them.
+
+### Manufacturer-specific protocol handlers and FSM-gated reachability
+
+Vendor-specific Zigbee/ZCL commands are often a better target than standardized clusters because they feed **custom parsing code** and internal **FSMs** with less battle-tested validation.
+
+Practical workflow:
+
+- Reverse the command dispatcher until you find the **vendor-only handler**.
+- Recover the **FSM state**, **event**, **check**, **action**, and **next-state** tables.
+- Identify **transitional states** that auto-advance and retry/error branches that eventually reset or free attacker-controlled state.
+- Confirm which legitimate protocol exchanges are required to place the daemon in the vulnerable state instead of assuming the buggy handler is always reachable.
+
+For timing-sensitive protocols, packet replay from a Python framework may be too slow. A more reliable approach is to emulate a legitimate device on real hardware (for example an **nRF52840**) with a vendor-grade stack so you can expose the correct **endpoints**, **attributes**, and commissioning timing.
+
+### Fragmented-download bug class in embedded daemons
+
+A recurring firmware bug class appears in **fragmented blob/model/configuration downloads**:
+
+1. The **first fragment** (`offset == 0`) stores `ctx->total_size` and allocates `malloc(total_size)`.
+2. Later fragments only validate the attacker-controlled **packet-local** fields such as `packet_total_size >= offset + chunk_len`.
+3. The copy uses `memcpy(&ctx->buffer[offset], chunk, chunk_len)` without checking against the **original allocated size**.
+
+This lets an attacker send:
+
+- A first valid fragment with a **small** declared total size to force a small heap allocation.
+- A later fragment with the **expected offset** but a larger `chunk_len`.
+- A forged packet-local size that satisfies the fresh checks while still overflowing the originally allocated buffer.
+
+When the vulnerable path sits behind commissioning logic, exploitation must include enough **device emulation** to drive the target into the expected model-download or blob-download state before sending the malformed fragments.
+
+### Protocol-driven `free()` triggers
+
+In embedded daemons, the easiest way to trigger heap metadata exploitation is often not "wait for cleanup" but **force the protocol's own error handling**:
+
+- Send malformed follow-up fragments to push the FSM into **retry** or **error** states.
+- Exceed the retry threshold so the daemon **resets context** and frees the corrupted buffer.
+- Use this predictable `free()` to trigger allocator-side primitives before the process crashes for unrelated reasons.
+
+This is especially useful against **musl/uClibc/dlmalloc-like** allocators in embedded Linux, where corrupting chunk metadata can turn unlink/unbin logic into a write primitive. A stable pattern is to corrupt a **size field** to redirect allocator traversal into **fake chunks staged inside the overflowed buffer**, instead of immediately clobbering real bin pointers and crashing the process.
+
 ## Binary Exploitation and Proof-of-Concept
 
 Developing a PoC for identified vulnerabilities requires a deep understanding of the target architecture and programming in lower-level languages. Binary runtime protections in embedded systems are rare, but when present, techniques like Return Oriented Programming (ROP) may be necessary.
@@ -394,11 +452,44 @@ $ ls vendor-app/assets/firmware
 firmware_v1.3.11.490_signed.bin
 ```
 
+### Updater-only anti-rollback bypass in A/B slot designs
+
+Some vendors do implement an anti-downgrade **ratchet**, but only inside the *updater* logic (for example a UDS routine over CAN, a recovery command, or a userspace OTA agent). If the **bootloader** later checks only the image signature/CRC and trusts the partition table or slot metadata, rollback protection can still be bypassed.
+
+Typical weak design:
+
+- Firmware metadata contains both a version descriptor and a **security ratchet** / monotonic counter.
+- The updater compares the image ratchet against a value stored in persistent storage and rejects older signed images.
+- The bootloader does **not** parse that ratchet and only verifies header, CRC, and signature before booting the selected slot.
+- Slot activation is stored separately in a partition table or per-slot generation counter and is **not cryptographically bound** to the exact firmware digest that was validated.
+
+This creates a **validate-one-image / boot-another-image** primitive in dual-slot systems. If the attacker can make the updater mark slot B as the next boot target using a current signed image, and can later overwrite slot B before reboot, the bootloader may still boot the downgraded image because it only trusts the already-committed slot metadata.
+
+Common abuse pattern:
+
+1. Upload a **current signed** firmware into the passive slot and run the normal validation/switch routine so the layout marks that slot as next active.
+2. **Do not reboot yet**. Re-enter the slot-preparation/erase routine in the same session.
+3. Abuse stale boot-state or stale slot-selection logic so the updater erases the **same physical slot** that was just promoted.
+4. Write an **older but still signed** firmware into that slot.
+5. Skip the validation routine that enforces the ratchet and reboot directly.
+6. The bootloader selects the promoted slot, verifies only signature/integrity, and boots the old image.
+
+Things to look for when reversing A/B update implementations:
+
+- Slot selection derived from **boot-time flags** that are not refreshed after a successful switch.
+- A `prepare_passive_slot()`-style routine that erases a slot based on stale state instead of the **current committed layout**.
+- A `part_write_layout()`-style function that only bumps a **generation counter** / active flag and does not store the validated image hash.
+- Ratchet checks implemented in userspace or updater code, but **not** in ROM / bootloader / secure boot stages.
+- Erase or recovery routines that leave the slot marked as bootable even after its content was removed and rewritten.
+
 ### Checklist for Assessing Update Logic
 
 * Is the transport/authentication of the *update endpoint* adequately protected (TLS + authentication)?
 * Does the device compare **version numbers** or a **monotonic anti-rollback counter** before flashing?
 * Is the image verified inside a secure boot chain (e.g. signatures checked by ROM code)?
+* Does the **bootloader enforce the same ratchet** as the updater, instead of only checking signature/CRC?
+* Is slot activation metadata **bound to the validated firmware digest/version**, or can a slot be modified after promotion?
+* After a slot switch succeeds, is the device forced to reboot or are later update/erase routines still reachable in the same session?
 * Does userland code perform additional sanity checks (e.g. allowed partition map, model number)?
 * Are *partial* or *backup* update flows re-using the same validation logic?
 
@@ -432,5 +523,7 @@ To practice discovering vulnerabilities in firmware, use the following vulnerabl
 - [Exploiting zero days in abandoned hardware – Trail of Bits blog](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
 - [How a $20 Smart Device Gave Me Access to Your Home](https://bishopfox.com/blog/how-a-20-smart-device-gave-me-access-to-your-home)
 - [Now You See mi: Now You're Pwned](https://labs.taszk.io/articles/post/nowyouseemi/)
+- [Synacktiv - Exploiting the Tesla Wall Connector from its charge port connector - Part 2: bypassing the anti-downgrade](https://www.synacktiv.com/en/publications/exploiting-the-tesla-wall-connector-from-its-charge-port-connector-part-2-bypassing)
+- [Make it Blink: Over-the-Air Exploitation of the Philips Hue Bridge](https://www.synacktiv.com/en/publications/make-it-blink-over-the-air-exploitation-of-the-philips-hue-bridge.html)
 
 {{#include ../../banners/hacktricks-training.md}}
