@@ -479,6 +479,39 @@ Reproduction/operator notes
 
 
 
+### Parameter-to-Prompt Injection via URL Parameters (P2P)
+
+Some AI-assisted search/chat products accept a natural-language query in a URL parameter such as `?q=` and forward it directly into the model context. If that parameter is treated as **instructions** instead of inert search text, a crafted first-party link becomes a **one-click prompt injection** that executes inside the victim's authenticated session.
+
+Generic exploitation flow:
+1. Attacker crafts a trusted application URL like `https://target/search?q=<PROMPT>`.
+2. Victim opens it while authenticated.
+3. The assistant uses the victim's own permissions/connectors to search private data.
+4. The injected prompt transforms the secret and places it into an output sink such as HTML, Markdown, a redirector URL, or an image request.
+
+Operator notes:
+- Hunt for parameters that hydrate the initial prompt, search box, conversation state, or tool arguments **before** any explicit user submission.
+- Prompt verbs such as `search`, `open`, `summarize`, `replace`, `format`, `embed`, or `create <img>` are good indicators that the parameter is reaching the model as executable instructions.
+- Treat trusted AI deep links like state-changing CSRF endpoints: if opening the URL causes the model to act, the URL itself is an injection surface.
+
+### Streaming Output HTML Race -> Scriptless Exfiltration
+
+Post-processing only the **final** model answer is not enough when tokens/chunks are streamed into the DOM. If raw partial output lands in the page even briefly, the browser may already trigger passive side effects before the final sanitizer wraps or escapes the response:
+
+- `<img src=...>` -> automatic request
+- `<iframe src=...>`, `<link rel="preload">`, `<meta http-equiv="refresh">` -> navigation/fetch side effects
+- classic [dangling markup / scriptless HTML injection](../pentesting-web/dangling-markup-html-scriptless-injection/README.md) primitives become enough for exfiltration even without JavaScript
+
+This is especially dangerous when direct exfiltration is blocked by [CSP](../pentesting-web/content-security-policy-csp-bypass/README.md). In that case, point the browser at an **allowlisted origin** that accepts a user-controlled URL and fetches it server-side (image proxy, URL previewer, import endpoint, "search by image", etc.). From the browser's point of view the request goes to an allowed host; from the application's point of view it becomes an [SSRF/exfiltration proxy](../pentesting-web/ssrf-server-side-request-forgery/README.md).
+
+Quick review checklist:
+- Sanitize/escape **each streamed chunk before DOM insertion**, not only after generation finishes.
+- Audit CSP allowlists for endpoints with fetch parameters such as `url=`, `imgurl=`, `target=`, `src=`, `preview=`, or `import=`.
+- Hunt for long/encoded AI search URLs whose query parameters contain imperative verbs, HTML tags, or instructions to place secrets into URLs.
+
+A good public case study is **SearchLeak** in Microsoft 365 Copilot Enterprise Search: a `q` URL parameter was interpreted as prompt instructions, Copilot streamed attacker-controlled `<img>` HTML before the final `<code>` wrapper was applied, and the request was routed through Bing's `searchbyimage?imgurl=` endpoint to bypass CSP and exfiltrate tenant data.
+
+
 ## Tools
 
 - [https://github.com/utkusen/promptmap](https://github.com/utkusen/promptmap)
@@ -646,5 +679,7 @@ Below is a minimal payload that both **hides YOLO enabling** and **executes a re
 - [OpenAI – Memory and new controls for ChatGPT](https://openai.com/index/memory-and-new-controls-for-chatgpt/)
 - [OpenAI Begins Tackling ChatGPT Data Leak Vulnerability (url_safe analysis)](https://embracethered.com/blog/posts/2023/openai-data-exfiltration-first-mitigations-implemented/)
 - [Unit 42 – Fooling AI Agents: Web-Based Indirect Prompt Injection Observed in the Wild](https://unit42.paloaltonetworks.com/ai-agent-prompt-injection/)
+- [SearchLeak: How We Turned M365 Copilot Into a One-Click Data Exfiltration Weapon](https://www.varonis.com/blog/searchleak)
+- [Microsoft Security Update Guide – CVE-2026-42824](https://msrc.microsoft.com/update-guide/vulnerability/CVE-2026-42824)
 
 {{#include ../banners/hacktricks-training.md}}
