@@ -51,6 +51,27 @@ Practical defensive controls (technical):
 - Disallow repo-controlled auto-approval of MCP servers; allowlist only per-user settings outside the repo.
 - Block or scrub repo-defined endpoint/environment overrides; delay all network initialization until explicit trust.
 
+### Repository-Local AI Assistant Persistence
+
+A compromised publisher, dependency, or repository writer does not need to stop at install-time execution. Another persistence layer is to commit assistant instruction/config files into the repository so the next developer who opens the project feeds attacker-controlled instructions into local tooling.
+
+High-signal paths to review:
+
+- `.claude/settings.json`
+- `.cursor/rules`
+- `.gemini/`
+- `.mcp.json`
+- `.vscode/` tasks, settings, extensions recommendations, or other editor files that steer AI helpers
+
+This pattern was highlighted in the Miasma npm supply-chain campaign: after package compromise, the attacker can use stolen maintainer access to push repository-local assistant configuration, shifting the trigger from `npm install` to **repository open / assistant load**. During reviews, treat new assistant-policy files with the same suspicion level as new workflow files, shell scripts, package hooks, or build-system metadata.
+
+Defensive checks:
+
+- Diff assistant and editor config files in PRs even when no source code changed.
+- Keep trusted AI/MCP configuration in user-controlled paths outside the repository when possible.
+- Require approval for project-level tool execution, endpoint overrides, and MCP server changes.
+- Monitor package compromise response for follow-on commits that add AI assistant files after credentials are stolen.
+
 ### Repo-Local MCP Auto-Exec via `CODEX_HOME` (Codex CLI)
 
 A closely related pattern appeared in OpenAI Codex CLI: if a repository can influence the environment used to launch `codex`, a project-local `.env` can redirect `CODEX_HOME` into attacker-controlled files and make Codex auto-start arbitrary MCP entries on launch. The important distinction is that the payload is no longer hidden in a tool description or later prompt injection: the CLI resolves its config path first, then executes the declared MCP command as part of startup.
@@ -231,5 +252,6 @@ Impact highlights
 - [Caught in the Hook: RCE and API Token Exfiltration Through Claude Code Project Files](https://research.checkpoint.com/2026/rce-and-api-token-exfiltration-through-claude-code-project-files-cve-2025-59536/)
 - [OpenAI Codex CLI Vulnerability: Command Injection](https://research.checkpoint.com/2025/openai-codex-cli-command-injection-vulnerability/)
 - [When OAuth Becomes a Weapon: Lessons from CVE-2025-6514](https://amlalabs.com/blog/oauth-cve-2025-6514/)
+- [What the Miasma campaign reveals about the new supply chain threat model and the underground market for developer credentials](https://www.tenable.com/blog/what-the-miasma-campaign-reveals-about-the-new-supply-chain-threat-model-and-the-underground)
 
 {{#include ../../banners/hacktricks-training.md}}
