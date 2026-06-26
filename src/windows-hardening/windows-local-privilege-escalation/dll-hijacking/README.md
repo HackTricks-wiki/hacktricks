@@ -55,6 +55,36 @@ Practical notes:
 - This is useful with **signed Microsoft/vendor binaries** because the trusted EXE remains untouched while the malicious managed assembly executes in-process.
 - If you already have a writable installer/update directory, AppDomainManager hijacking can be used as the **first stage**, followed by classic DLL sideloading or reflective loading for later stages.
 
+### AppDomainManager as a downloader + scheduled-task bootstrap
+
+A practical intrusion pattern is to pair the trusted managed EXE with both a malicious `*.config` and a malicious AppDomainManager DLL that acts only as a **small bootstrapper**:
+
+1. User launches a signed .NET installer or updater from a believable location such as `%USERPROFILE%\Downloads`.
+2. The adjacent config causes the CLR to load the attacker assembly **before** the legitimate app logic starts.
+3. The malicious manager performs a **path gate** (for example, only continue if the host EXE is running from `Downloads`, and only let the second stage run from `%LOCALAPPDATA%`).
+4. If the check passes, it downloads the real payload into a user-writable path such as `%LOCALAPPDATA%\PerfWatson2.exe` and installs persistence with a scheduled task.
+
+Why this variant matters:
+- The signed host EXE stays unchanged, so triage that only hashes the main binary may miss the compromise.
+- Simple **path-based anti-analysis** is common: moving the ZIP/EXE/DLL triad to Desktop, Temp, or a sandbox path can intentionally break the chain.
+- The first-stage AppDomainManager DLL can stay tiny and low-noise while the real implant is fetched later.
+
+Minimal persistence example frequently seen with this pattern:
+
+```cmd
+schtasks /create /tn "GoogleUpdaterTaskSystem140.0.7272.0" /sc onlogon /tr "%LOCALAPPDATA%\PerfWatson2.exe" /rl highest /f
+```
+
+Notes:
+- ` /rl highest` means **highest available** for that user/session; it is not a guaranteed SYSTEM escalation by itself.
+- This technique is often better categorized as **execution/persistence via .NET config abuse** than classic missing-DLL search-order hijacking, even though operators frequently chain both together.
+
+Detection pivots:
+- Signed .NET executables launched from **ZIP extraction paths**, `Downloads`, `%TEMP%`, or other user-writable folders with a **colocated** `<exe>.config`.
+- New scheduled tasks whose action points into `%LOCALAPPDATA%`, `%APPDATA%`, or `Downloads` and whose names mimic browser/vendor updaters.
+- Short-lived managed bootstrap processes that immediately download another EXE, then spawn `schtasks.exe`.
+- Samples that exit early unless the executable path matches an expected user-profile directory.
+
 ### Hijacking an existing scheduled task to relaunch the sideload chain
 
 For persistence, do not only look for **creating a new task**. Some intrusion sets wait until a legitimate installer creates a **normal updater task** and then **rewrite the task action** so the existing name, author, and trigger stay familiar to defenders.
@@ -674,6 +704,8 @@ Defensive pivots
 - [Microsoft Learn – `<appDomainManagerType>` element](https://learn.microsoft.com/en-us/dotnet/framework/configure-apps/file-schema/runtime/appdomainmanagertype-element)
 - [Microsoft Learn – `<appDomainManagerAssembly>` element](https://learn.microsoft.com/en-us/dotnet/framework/configure-apps/file-schema/runtime/appdomainmanagerassembly-element)
 - [Microsoft Learn – Task Actions](https://learn.microsoft.com/en-us/windows/win32/taskschd/task-actions)
+- [MITRE ATT&CK – T1574.014 AppDomainManager](https://attack.mitre.org/techniques/T1574/014/)
+- [Unit 42 – CL-STA-1062 Targets Southeast Asian Governments and Critical Infrastructure](https://unit42.paloaltonetworks.com/cl-sta-1062-tinyrct-backdoor/)
 
 
 {{#include ../../../banners/hacktricks-training.md}}
