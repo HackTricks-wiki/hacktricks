@@ -238,6 +238,35 @@ So the interesting technique is not the CVE itself, but the pattern:
 
 The public PoC used repeated **4-byte writes** to patch `/usr/bin/su` in memory and then executed it.
 
+#### DirtyFrag / DirtyClone: `vmsplice()` + spliced UDP + local IPsec
+
+Another important **page-cache-only privesc** pattern is the **DirtyFrag** family. The reusable technique is:
+
+1. `mmap(PROT_READ|MAP_SHARED)` a readable privileged file such as `/usr/bin/su`
+2. use `vmsplice()` + `splice()` so a **UDP skb fragment** references that **page-cache page** instead of a private packet buffer
+3. force the skb through a path that performs an **in-place transformation** (for example **XFRM/IPsec ESP** decrypt; see [IPsec/IKE VPN notes](../../network-services-pentesting/ipsec-ike-vpn-pentesting.md))
+4. if the kernel loses the **`SKBFL_SHARED_FRAG`** marker during skb cloning / coalescing / segmentation, the transform may **write directly into file-backed page cache memory**
+
+DirtyClone (CVE-2026-43503) specifically used **`iptables` `TEE`** so `nf_dup_ipv4` cloned a spliced UDP packet via `__pskb_copy_fclone()`. The cloned skb kept the page reference but lost the shared-fragment safety flag, so **`esp_input()`** treated it as safe for **in-place AES-CBC decryption** and overwrote the cached page of `/usr/bin/su` **in RAM only**.
+
+Minimal exploitation setup from the technique:
+
+```bash
+unshare -Urn
+ip link set lo up
+ip addr add 10.99.0.2/24 dev lo
+ip xfrm state add src 127.0.0.1 dst 127.0.0.1 proto esp spi 0x12345678 reqid 1 mode transport enc 'cbc(aes)' ... auth 'hmac(sha1)' ...
+ip xfrm policy add src 127.0.0.1 dst 127.0.0.1 dir out tmpl src 127.0.0.1 dst 127.0.0.1 proto esp reqid 1 mode transport
+iptables -t mangle -A OUTPUT -p udp --dport 4500 -j TEE --gateway 10.99.0.2
+```
+
+Useful takeaways:
+
+- **Namespaced `CAP_NET_ADMIN` is enough** on systems allowing `unshare -Urn`; the page cache is still host-shared
+- **AES-CBC/IV control gives a constrained overwrite**, not a fully arbitrary write, but that is often enough to patch a few branch/auth bytes in a setuid binary
+- when reviewing kernel packet paths, treat any helper that **preserves page-backed frags but drops `SKBFL_SHARED_FRAG`** as potentially reintroducing this class
+- stopgaps for this family may include **disabling unprivileged user namespaces** and **blacklisting `esp4`, `esp6`, or `rxrpc`** if those modules provide the in-place write gadget
+
 #### Exposure and hunting
 
 If you suspect this class of bug, don't rely only on disk integrity checks. Also verify:
@@ -279,5 +308,6 @@ This kind of mitigation is worth remembering for other kernel LPEs too: if explo
 - [Linux stable fix: crypto: algif_aead - Revert to operating out-of-place](https://git.kernel.org/stable/c/a664bf3d603dc3bdcf9ae47cc21e0daec706d7a5)
 - [Copy Fail advisory](https://copy.fail/)
 - [Theori / Xint technical writeup](https://xint.io/blog/copy-fail-linux-distributions)
+- [JFrog: Dissecting and Exploiting Linux LPE Variant: DirtyClone (CVE-2026-43503)](https://research.jfrog.com/post/dissecting-and-exploiting-linux-lpe-variant-dirtyclone-cve-2026-43503/)
 
 {{#include ../../banners/hacktricks-training.md}}
