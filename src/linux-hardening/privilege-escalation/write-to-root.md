@@ -238,6 +238,44 @@ So the interesting technique is not the CVE itself, but the pattern:
 
 The public PoC used repeated **4-byte writes** to patch `/usr/bin/su` in memory and then executed it.
 
+#### ESP / XFRM + netfilter TEE clone example path
+
+DirtyClone (CVE-2026-43503) shows another variant of the same **page-cache-only write-to-root** pattern, but this time the sink is **IPsec ESP decrypt** instead of `AF_ALG`.
+
+The important technique is the **metadata-laundering step**:
+
+- `splice()` places a **read-only file-backed page-cache page** into an ESP-in-UDP packet
+- the original DirtyFrag mitigation tagged that skb with `SKBFL_SHARED_FRAG` so `esp_input()` would **copy before decrypting**
+- netfilter `TEE` duplicates the packet through `nf_dup_ipv4()` -> `__pskb_copy_fclone()`
+- the clone keeps the **same physical page-cache reference** but loses `SKBFL_SHARED_FRAG`
+- `esp_input()` then treats the clone as safe and runs **in-place `cbc(aes)` decrypt** over the file-backed page
+
+So the reviewer lesson is broader than the CVE: if a mitigation depends on **skb/page metadata** to decide whether an operation must copy first, any **clone/copy path that preserves the backing page but drops the metadata** can silently re-open the write primitive.
+
+Typical exploitation flow:
+
+1. `unshare(CLONE_NEWUSER | CLONE_NEWNET)` to obtain **`CAP_NET_ADMIN` inside a private network namespace**
+2. bring loopback up and install a **netfilter `TEE` rule** in `mangle/OUTPUT`
+3. install **XFRM ESP transport SAs** via `NETLINK_XFRM`
+4. encode each target 4-byte word in the SA `seq_hi` field (DirtyFrag's word-selection trick)
+5. send the spliced ESP-in-UDP packet so the **TEE clone** reaches `esp_input()` and decrypts **in place**
+6. repeat until the page-cache copy of `/usr/bin/su` or another privileged executable contains attacker-controlled code
+
+Operationally, the impact is the same as the `AF_ALG` example: the file on disk stays clean, but `execve()` consumes the **mutated page-cache bytes** and yields root.
+
+Useful exposure checks for this variant:
+
+```bash
+unshare -Urn true 2>/dev/null && echo "user+net namespaces available"
+sysctl kernel.apparmor_restrict_unprivileged_userns 2>/dev/null
+modprobe -n -v xt_TEE 2>/dev/null
+modprobe -n -v esp4 2>/dev/null
+modprobe -n -v esp6 2>/dev/null
+lsmod | egrep 'xt_TEE|nf_dup_ipv4|esp4|esp6|x_tables'
+```
+
+Short-term attack-surface reduction is also path-specific here: upgrading to a kernel carrying `48f6a5356a33` fixes the clone path, while blocking `xt_TEE` autoload removes the **flag-laundering step** and blocking `esp4` / `esp6` removes the **decrypt sink**.
+
 #### Exposure and hunting
 
 If you suspect this class of bug, don't rely only on disk integrity checks. Also verify:
@@ -279,5 +317,9 @@ This kind of mitigation is worth remembering for other kernel LPEs too: if explo
 - [Linux stable fix: crypto: algif_aead - Revert to operating out-of-place](https://git.kernel.org/stable/c/a664bf3d603dc3bdcf9ae47cc21e0daec706d7a5)
 - [Copy Fail advisory](https://copy.fail/)
 - [Theori / Xint technical writeup](https://xint.io/blog/copy-fail-linux-distributions)
+- [DirtyClone repository / README](https://github.com/rafaeldtinoco/security/tree/main/exploits/dirtyclone)
+- [JFrog: Dissecting and Exploiting Linux LPE Variant DirtyClone (CVE-2026-43503)](https://research.jfrog.com/post/dissecting-and-exploiting-linux-lpe-variant-dirtyclone-cve-2026-43503/)
+- [Linux fix: net: skb: preserve `SKBFL_SHARED_FRAG` in `__pskb_copy_fclone()` (`48f6a5356a33`)](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=48f6a5356a33)
+- [Linux earlier mitigation: set `SKBFL_SHARED_FRAG` for spliced UDP packets (`f4c50a4034e6`)](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=f4c50a4034e6)
 
 {{#include ../../banners/hacktricks-training.md}}
