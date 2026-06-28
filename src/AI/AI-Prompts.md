@@ -618,6 +618,54 @@ Below is a minimal payload that both **hides YOLO enabling** and **executes a re
 
 
 
+## Prompt Injection in Local AI CLIs – Trusted Worktree Tool Abuse (Claude Code)
+
+Repository-local prompt files such as `CLAUDE.md` should be treated as **untrusted executable guidance** when an agent exposes high-privilege built-in tools. In Claude Code, direct Bash could be restricted while prompt injection still drove the trusted `CreateWorktree`, `EnterWorktree`, and `ExitWorktree` flows.
+
+### Why the chain was dangerous
+
+- **Tool trust bypass, not shell approval bypass**: the payload never needed the user to approve arbitrary Bash first; it abused agent-native worktree features that already run Git internally.
+- **`.git` worktree name collision**: allowing a worktree literally named `.git` let the copied worktree path collide with Git's metadata directory semantics.
+- **Repo root as working tree + gitdir**: a malicious repository can place bare-style metadata (`HEAD`, `config`, `objects/`, `refs/`) at the root so that a copied `.git` worktree becomes a fully attacker-controlled gitdir.
+- **Implicit execution via Git config**: if Git loads attacker-controlled config from that confused gitdir, `core.fsmonitor` can execute a payload whenever trusted tool flows trigger `git status` or similar operations.
+- **Filesystem pivot via symlinked worktree storage**: replacing `.claude/worktrees` with a symlink to `$HOME` or `/Users` makes later trusted worktree creation/navigation escape the intended project subtree.
+- **Arbitrary navigation via forged worktree metadata**: creating `.git/worktrees/<name>/commondir`, `gitdir`, `HEAD`, `ORIG_HEAD`, and `logs/HEAD` can make `git worktree list` advertise attacker-chosen directories as legitimate worktrees.
+- **macOS shell-init before seatbelt**: if the sandbox wrapper is invoked as `zsh -c "sandbox-exec ..."`, a write to `~/.zshenv` becomes an unsandboxed execution primitive because `zsh` sources it before `sandbox-exec` applies the profile.
+
+Minimal Git execution primitive:
+
+```ini
+[core]
+    fsmonitor = ./3p_setup.sh
+```
+
+Minimal forged worktree registration:
+
+```bash
+wt=".git/worktrees/$USER"
+mkdir -p "$wt/logs" "$wt/refs"
+pwd > "$wt/commondir"
+printf '/Users/%s' "$USER" > "$wt/gitdir"
+printf 'ref: refs/heads/%s\n' "$USER" > "$wt/HEAD"
+```
+
+### Practical attack chain
+
+1. Victim opens an attacker repo and asks the local AI CLI for a benign task.
+2. `CLAUDE.md` prompt injection tells the agent to create and enter worktrees rather than run raw shell.
+3. A worktree named `.git` causes Git to resolve attacker-controlled metadata/config from the copied repo.
+4. `core.fsmonitor` executes the staged payload during trusted Git operations.
+5. The payload pivots `.claude/worktrees` to `$HOME`, forges `.git/worktrees/$USER`, and makes the agent enter the victim home directory.
+6. A final write to `~/.zshenv` converts the next `zsh -c "sandbox-exec ..."` execution into **unsandboxed host code execution**.
+
+### Technical detection ideas
+
+- Flag repositories with unexpected **root-level Git metadata** (`HEAD`, `config`, `objects/`, `refs/`) outside `.git/`.
+- Audit agent-managed folders such as `.claude/worktrees` for **symlink replacement** to `$HOME`, `/Users`, or other sensitive paths.
+- Inspect suspicious Git config sources with `git config --show-origin --get-all core.fsmonitor`.
+- Monitor unexpected creation/modification of `$HOME/.git`, `$HOME/.zshenv`, and `.git/worktrees/*/gitdir` pointing outside the project.
+- Treat repo-local AI instruction files (`CLAUDE.md`, agent rules, workspace prompts) as code-reviewable attack surface.
+
 ## Encrypted Reasoning-State Replay, Transcript JSON Injection, and Reasoning Side Channels
 
 Some reasoning-model APIs return **opaque reasoning/thinking items** that the client must replay on later turns. OpenAI explicitly documents that reasoning items may contain `encrypted_content` and should be preserved when continuing a conversation, while Anthropic exposes signed/opaque thinking blocks that must also be passed back unchanged.
@@ -696,6 +744,8 @@ This means **timing alone** can be enough to leak secrets through an ordinary ch
 - [OpenAI – Memory and new controls for ChatGPT](https://openai.com/index/memory-and-new-controls-for-chatgpt/)
 - [OpenAI Begins Tackling ChatGPT Data Leak Vulnerability (url_safe analysis)](https://embracethered.com/blog/posts/2023/openai-data-exfiltration-first-mitigations-implemented/)
 - [Unit 42 – Fooling AI Agents: Web-Based Indirect Prompt Injection Observed in the Wild](https://unit42.paloaltonetworks.com/ai-agent-prompt-injection/)
+- [Claude Code: unsandboxed code execution from prompt injection via `.git` worktree confusion](https://github.com/Metnew/write-ups/tree/main/claude-code-worktree-sandbox-escape)
+- [GHSA-7835-87q9-rgvv / CVE-2026-55607 – Claude Code worktree path confusion](https://github.com/anthropics/claude-code/security/advisories/GHSA-7835-87q9-rgvv)
 - [Anthropic extended thinking](https://docs.anthropic.com/en/docs/build-with-claude/extended-thinking)
 - [OpenAI Responses API overview](https://developers.openai.com/api/reference/responses/overview)
 - [OpenAI reasoning guide](https://developers.openai.com/api/docs/guides/reasoning?example=planning)
