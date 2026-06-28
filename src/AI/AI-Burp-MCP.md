@@ -88,6 +88,27 @@ source /path/to/burp-mcp-agents/gemini-cli/burpgemini.sh
 burpgemini
 ```
 
+### Claude Code
+
+For a quick repo-local setup, drop a `.mcp.json` file in the bug bounty working directory so Claude Code can discover Burp's SSE server on startup:
+
+```json
+{
+  "mcpServers": {
+    "burpsuite": {
+      "type": "sse",
+      "url": "http://localhost:9876/"
+    }
+  }
+}
+```
+
+Equivalent CLI registration:
+
+```bash
+claude mcp add burpsuite --transport sse --url http://localhost:9876/
+```
+
 ### Ollama (local)
 
 Use the provided launcher helper and select a local model:
@@ -115,6 +136,43 @@ The **burp-mcp-agents** repo includes prompt templates for evidence-driven analy
 - `session_scope_hunter.md`: token audience/scope misuse.
 - `rate_limit_abuse_hunter.md`: throttling/abuse gaps.
 - `report_writer.md`: evidence-focused reporting.
+
+## Turning LLM output into validated findings
+
+Treat Burp MCP results as **hypotheses**, not as report-ready findings. A practical workflow is:
+
+1. Ask the model to stay scoped to a **specific request, parameter, or workflow**.
+2. Reproduce every claim manually in Burp/browser devtools.
+3. If the suggested payload fails, inspect the **source-to-sink flow** and the final rendered markup/DOM.
+4. Refine the payload to match the real parsing context before drafting the report.
+
+### Example: DOM XSS where new tags are filtered
+
+A common client-side pattern is reading a query-string parameter and concatenating it into `document.write()`:
+
+```javascript
+function trackSearch(query) {
+    document.write('<img src="/resources/images/tracker.gif?searchTerms='+query+'">');
+}
+var query = (new URLSearchParams(window.location.search)).get('search');
+if(query) {
+    trackSearch(query);
+}
+```
+
+Source-to-sink summary:
+
+- `window.location.search` / `URLSearchParams(...).get('search')` = attacker-controlled source
+- string concatenation into `<img src="...">` = HTML construction
+- `document.write()` = DOM XSS sink
+
+If the application blocks payloads that create **new tags**, a classic payload such as `"><img src=x onerror=alert(document.domain)>` may fail even though the sink is still exploitable. In that case, **reuse the existing element** instead of injecting a new one:
+
+```text
+x" onload=alert(1) y="z
+```
+
+This closes the original `src` attribute, injects an event handler on the already-created `<img>`, and adds a fake attribute to keep the trailing quote parseable. This is the kind of refinement that an LLM may miss but a human can confirm quickly by checking the rendered DOM.
 
 ## Optional attribution tagging
 
@@ -162,5 +220,8 @@ Operational cautions: cloud backends may exfiltrate session cookies/PII unless p
 - [Burp MCP Server BApp](https://portswigger.net/bappstore/9952290f04ed4f628e624d0aa9dccebc)
 - [PortSwigger MCP server strict Origin/header validation issue](https://github.com/PortSwigger/mcp-server/issues/34)
 - [Burp AI Agent](https://github.com/six2dez/burp-ai-agent)
+- [Using a Caido MCP Server](https://docs.caido.io/app/tutorials/mcp)
+- [Hacking in the age of AI: LLMs, agentic CLIs and MCP servers for Bug Bounty hunters](https://www.yeswehack.com/learn-bug-bounty/llm-bug-bounty-hunting-agentic-cli)
+- [Gin and Juice Shop - vulnerable application](https://ginandjuice.shop/)
 
 {{#include ../banners/hacktricks-training.md}}
