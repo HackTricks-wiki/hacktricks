@@ -4,7 +4,7 @@
 
 ## Access Tokens
 
-Кожен **користувач, що увійшов** в систему **має токен доступу з інформацією про безпеку** для цієї сесії входу. Система створює токен доступу, коли користувач входить. **Кожен процес, що виконується** від імені користувача **має копію токена доступу**. Токен ідентифікує користувача, групи користувача та привілеї користувача. Токен також містить SID входу (Security Identifier), який ідентифікує поточну сесію входу.
+Кожен **користувач, що увійшов** у систему, **має access token із security information** для цієї logon session. Система створює access token, коли користувач виконує logon. **Кожен process, запущений** від імені користувача, **має копію access token**. Token ідентифікує користувача, groups користувача та privileges користувача. Token також містить logon SID (Security Identifier), який ідентифікує поточну logon session.
 
 Ви можете побачити цю інформацію, виконавши `whoami /all`
 ```
@@ -52,54 +52,86 @@ SeTimeZonePrivilege           Change the time zone                 Disabled
 ```
 or using _Process Explorer_ from Sysinternals (select process and access"Security" tab):
 
-![](<../../images/image (772).png>)
+![Access Tokens - Access Tokens: or using Process Explorer from Sysinternals (select process and access"Security" tab)](<../../images/image (772).png>)
 
-### Локальний адміністратор
+### Local administrator
 
-Коли локальний адміністратор входить в систему, **створюються два токени доступу**: один з правами адміністратора і інший з нормальними правами. **За замовчуванням**, коли цей користувач виконує процес, використовується токен з **звичайними** (неадміністративними) **правами**. Коли цей користувач намагається **виконати** щось **як адміністратор** ("Запустити від імені адміністратора", наприклад), **UAC** буде використано для запиту дозволу.\
-Якщо ви хочете [**дізнатися більше про UAC, прочитайте цю сторінку**](../authentication-credentials-uac-and-efs/index.html#uac)**.**
+When a local administrator logins, **two access tokens are created**: One with admin rights and other one with normal rights. **By default**, when this user executes a process the one with **regular** (non-administrator) **rights is used**. When this user tries to **execute** anything **as administrator** ("Run as Administrator" for example) the **UAC** will be used to ask for permission.\
+If you want to [**learn more about the UAC read this page**](../authentication-credentials-uac-and-efs/index.html#uac)**.**
 
-### Імітація користувацьких облікових даних
+In practice, this means a **non-elevated admin shell usually runs with a filtered token**. That is why `whoami /groups` often shows **`BUILTIN\Administrators` as `Deny only`** until the process is elevated. Internally, Windows keeps a **linked elevated token** (`TokenLinkedToken`) and tracks the state with fields such as `TokenElevationType`.
 
-Якщо у вас є **дійсні облікові дані будь-якого іншого користувача**, ви можете **створити** **нову сесію входу** з цими обліковими даними:
+### Імперсонація користувача з обліковими даними
+
+If you have **valid credentials of any other user**, you can **create** a **new logon session** with those credentials :
 ```
 runas /user:domain\username cmd.exe
 ```
-**Токен доступу** також має **посилання** на сеанси входу в систему всередині **LSASS**, це корисно, якщо процесу потрібно отримати доступ до деяких об'єктів мережі.\
-Ви можете запустити процес, який **використовує різні облікові дані для доступу до мережевих служб**, використовуючи:
+**access token** також має **reference** на logon sessions всередині **LSASS**, це корисно, якщо процесу потрібно отримати доступ до деяких об’єктів мережі.\
+Ви можете запустити процес, який **uses different credentials for accessing network services** за допомогою:
 ```
 runas /user:domain\username /netonly cmd.exe
 ```
-Це корисно, якщо у вас є корисні облікові дані для доступу до об'єктів у мережі, але ці облікові дані не дійсні на поточному хості, оскільки вони будуть використовуватися лише в мережі (на поточному хості будуть використовуватися ваші поточні привілеї користувача).
+Це корисно, якщо у вас є корисні credentials для доступу до об’єктів у мережі, але ці credentials не є дійсними всередині поточного хоста, оскільки вони будуть використовуватися лише в мережі (на поточному хості будуть використовуватися ваші поточні привілеї користувача).
 
-### Типи токенів
+#### `runas /netonly` details
 
-Існує два типи токенів:
+`runas /netonly` (і C2 helpers на кшталт `make_token`) створює token **`LOGON32_LOGON_NEW_CREDENTIALS`**. Це дуже корисно розуміти під час lateral movement, тому що:
 
-- **Primary Token**: Він слугує представленням безпекових облікових даних процесу. Створення та асоціація первинних токенів з процесами є діями, які вимагають підвищених привілеїв, підкреслюючи принцип розділення привілеїв. Зазвичай, служба аутентифікації відповідає за створення токенів, тоді як служба входу обробляє їх асоціацію з оболонкою операційної системи користувача. Варто зазначити, що процеси успадковують первинний токен свого батьківського процесу під час створення.
-- **Impersonation Token**: Дозволяє серверному додатку тимчасово приймати ідентичність клієнта для доступу до захищених об'єктів. Цей механізм поділяється на чотири рівні роботи:
-- **Anonymous**: Надає серверу доступ, подібний до того, що має невизначений користувач.
-- **Identification**: Дозволяє серверу перевірити ідентичність клієнта без використання її для доступу до об'єктів.
-- **Impersonation**: Дозволяє серверу діяти під ідентичністю клієнта.
-- **Delegation**: Подібно до Impersonation, але включає можливість розширити це прийняття ідентичності на віддалені системи, з якими взаємодіє сервер, забезпечуючи збереження облікових даних.
+- **Локально**, новий процес зберігає **ту саму локальну identity**, групи, integrity level і більшість тих самих рішень щодо доступу, що й поточний token.
+- **Віддалено**, outbound authentication може використовувати **надані credentials** для SMB / WinRM / LDAP / HTTP / Kerberos / NTLM.
+- Отже, `whoami` може все ще показувати **оригінального локального користувача**, тоді як мережевий доступ відбувається як **альтернативний account**.
+
+Це чудовий варіант, коли credentials дійсні в domain або на іншому хості, але користувач **не може або не повинен входити локально** на поточну машину.
+
+### Types of tokens
+
+Доступні два типи tokens:
+
+- **Primary Token**: Він слугує представленням security credentials process. Створення та прив’язка primary tokens до processes — це дії, що потребують підвищених привілеїв, підкреслюючи принцип separation of privileges. Зазвичай authentication service відповідає за створення token, тоді як logon service обробляє його прив’язку до shell операційної системи користувача. Варто зазначити, що processes успадковують primary token свого parent process під час створення.
+- **Impersonation Token**: Дозволяє server application тимчасово прийняти identity client для доступу до secure objects. Цей механізм поділяється на чотири рівні operation:
+- **Anonymous**: Надає server access, подібний до доступу невідомого користувача.
+- **Identification**: Дозволяє server перевірити identity client без використання її для object access.
+- **Impersonation**: Дозволяє server працювати під identity client.
+- **Delegation**: Подібно до Impersonation, але включає можливість поширювати це прийняття identity на remote systems, з якими взаємодіє server, забезпечуючи збереження credentials.
 
 #### Impersonate Tokens
 
-Використовуючи модуль _**incognito**_ метасploit, якщо у вас достатньо привілеїв, ви можете легко **переглядати** та **приймати** інші **токени**. Це може бути корисно для виконання **дій так, ніби ви є іншим користувачем**. Ви також можете **підвищити привілеї** за допомогою цієї техніки.
+Використовуючи модуль _**incognito**_ у metasploit, якщо у вас достатньо привілеїв, ви можете легко **перелічити** та **impersonate** інші **tokens**. Це може бути корисно для виконання **actions as if you where the other user**. Також цим technique можна **escalate privileges**.
 
-### Привілеї токенів
+Кілька практичних приміток, які легко забути під час роботи:
 
-Дізнайтеся, які **привілеї токенів можна зловживати для підвищення привілеїв:**
+- **`CreateProcessWithTokenW`** вимагає **`SeImpersonatePrivilege`** у викликача, і новий process працюватиме в **session викликача**.
+- **`CreateProcessAsUserW`** — це звичайний fallback, коли `CreateProcessWithTokenW` завершується помилкою `1314`, або коли вам потрібно запустити процес у **session, на яку посилається token**.
+- Якщо token походить з **`LogonUser(LOGON32_LOGON_NETWORK)`**, то це зазвичай **impersonation token**, тому перед спробою створити з ним process потрібно **`DuplicateTokenEx(..., TokenPrimary, ...)`**.
+- Не кожен impersonation token однаково корисний: **`SecurityIdentification`** дає змогу інспектувати user, але **не діяти від його імені**. Якщо coercion primitive або pipe/RPC client дає лише token рівня identification, перевірте **`TokenImpersonationLevel`** і перейдіть на primitive, який дає **`SecurityImpersonation`** або краще.
+
+#### Token theft without touching LSASS
+
+Якщо у вас уже є контекст **service** або **SYSTEM** і **privileged user is logged on**, викрадення або дублювання token цього користувача часто є тихішим, ніж дамп **LSASS**. У багатьох реальних intrusions цього достатньо, щоб:
+
+- виконувати локальні дії як цей user
+- отримувати доступ до remote resources як цей user
+- виконувати AD operations без попереднього вилучення reusable credentials
+
+Для прикладів **session/user token hijacking** із привілейованого контексту дивіться [**WTS Impersonator**](../stealing-credentials/wts-impersonator.md). Пам’ятайте, що APIs на кшталт **`WTSQueryUserToken`** призначені для **highly trusted services** і зазвичай вимагають **`LocalSystem` + `SeTcbPrivilege`**, тому вони переважно корисні вже після того, як ви контролюєте service-level context. Для способів, специфічних до привілеїв, отримати спочатку **SYSTEM**, дивіться сторінки нижче.
+
+### Token Privileges
+
+Дізнайтеся, які **token privileges can be abused to escalate privileges:**
 
 
 {{#ref}}
 privilege-escalation-abusing-tokens.md
 {{#endref}}
 
-Перегляньте [**всі можливі привілеї токенів та деякі визначення на цій зовнішній сторінці**](https://github.com/gtworek/Priv2Admin).
+Подивіться [**усі можливі token privileges та деякі визначення на цій зовнішній сторінці**](https://github.com/gtworek/Priv2Admin).
 
-## Посилання
+## References
 
-Дізнайтеся більше про токени в цих навчальних матеріалах: [https://medium.com/@seemant.bisht24/understanding-and-abusing-process-tokens-part-i-ee51671f2cfa](https://medium.com/@seemant.bisht24/understanding-and-abusing-process-tokens-part-i-ee51671f2cfa) та [https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962)
+- [https://medium.com/@seemant.bisht24/understanding-and-abusing-process-tokens-part-i-ee51671f2cfa](https://medium.com/@seemant.bisht24/understanding-and-abusing-process-tokens-part-i-ee51671f2cfa)
+- [https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962)
+- [https://sensepost.com/blog/2022/abusing-windows-tokens-to-compromise-active-directory-without-touching-lsass/](https://sensepost.com/blog/2022/abusing-windows-tokens-to-compromise-active-directory-without-touching-lsass/)
+- [https://www.fox-it.com/nl-en/demystifying-cobalt-strike-s-make_token-command/](https://www.fox-it.com/nl-en/demystifying-cobalt-strike-s-make_token-command/)
 
 {{#include ../../banners/hacktricks-training.md}}
