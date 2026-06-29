@@ -4,7 +4,7 @@
 
 ## Access Tokens
 
-Każdy **użytkownik zalogowany** do systemu **posiada token dostępu z informacjami o bezpieczeństwie** dla tej sesji logowania. System tworzy token dostępu, gdy użytkownik się loguje. **Każdy proces wykonywany** w imieniu użytkownika **ma kopię tokena dostępu**. Token identyfikuje użytkownika, grupy użytkownika oraz uprawnienia użytkownika. Token zawiera również SID logowania (Identifikator bezpieczeństwa), który identyfikuje bieżącą sesję logowania.
+Każdy **użytkownik zalogowany** do systemu **posiada access token z informacjami o bezpieczeństwie** dla tej sesji logowania. System tworzy access token, gdy użytkownik się loguje. **Każdy uruchomiony proces** w imieniu użytkownika **ma kopię access token**. Token identyfikuje użytkownika, grupy użytkownika oraz uprawnienia użytkownika. Token zawiera także logon SID (Security Identifier), który identyfikuje bieżącą sesję logowania.
 
 Możesz zobaczyć te informacje, wykonując `whoami /all`
 ```
@@ -50,56 +50,88 @@ SeUndockPrivilege             Remove computer from docking station Disabled
 SeIncreaseWorkingSetPrivilege Increase a process working set       Disabled
 SeTimeZonePrivilege           Change the time zone                 Disabled
 ```
-or using _Process Explorer_ from Sysinternals (select process and access"Security" tab):
+lub używając _Process Explorer_ z Sysinternals (wybierz proces i otwórz kartę "Security"):
 
-![](<../../images/image (772).png>)
+![Access Tokens - Access Tokens: or using Process Explorer from Sysinternals (select process and access"Security" tab)](<../../images/image (772).png>)
 
-### Lokalny administrator
+### Local administrator
 
-Gdy lokalny administrator się loguje, **tworzone są dwa tokeny dostępu**: jeden z uprawnieniami administratora i drugi z normalnymi uprawnieniami. **Domyślnie**, gdy ten użytkownik uruchamia proces, używany jest ten z **zwykłymi** (nie-administratorskimi) **uprawnieniami**. Gdy ten użytkownik próbuje **wykonać** cokolwiek **jako administrator** ("Uruchom jako administrator" na przykład), **UAC** zostanie użyty do zapytania o pozwolenie.\
+Gdy lokalny administrator loguje się, **tworzone są dwa access tokens**: jeden z uprawnieniami administratora i drugi z normalnymi uprawnieniami. **Domyślnie**, gdy ten użytkownik uruchamia proces, używany jest token z **zwykłymi** (nieadministratorskimi) **uprawnieniami**. Gdy ten użytkownik próbuje **uruchomić** cokolwiek **jako administrator** (na przykład "Run as Administrator"), **UAC** zostanie użyte, aby poprosić o zgodę.\
 Jeśli chcesz [**dowiedzieć się więcej o UAC, przeczytaj tę stronę**](../authentication-credentials-uac-and-efs/index.html#uac)**.**
 
-### Uwierzytelnianie użytkownika
+W praktyce oznacza to, że **niewywindowana powłoka admina zwykle działa z filtrowanym tokenem**. Dlatego `whoami /groups` często pokazuje **`BUILTIN\Administrators` jako `Deny only`**, dopóki proces nie zostanie wywindowany. Wewnątrz Windows utrzymuje **powiązany podwyższony token** (`TokenLinkedToken`) i śledzi stan za pomocą pól takich jak `TokenElevationType`.
 
-Jeśli masz **ważne dane logowania innego użytkownika**, możesz **utworzyć** **nową sesję logowania** z tymi danymi:
+### Credentials user impersonation
+
+Jeśli masz **prawidłowe poświadczenia dowolnego innego użytkownika**, możesz **utworzyć** **nową sesję logowania** z tymi poświadczeniami :
 ```
 runas /user:domain\username cmd.exe
 ```
-**Token dostępu** ma również **referencję** sesji logowania wewnątrz **LSASS**, co jest przydatne, jeśli proces musi uzyskać dostęp do niektórych obiektów w sieci.\
-Możesz uruchomić proces, który **używa różnych poświadczeń do uzyskiwania dostępu do usług sieciowych** za pomocą:
+**access token** ma również **reference** do sesji logowania w **LSASS**, co jest przydatne, jeśli proces musi uzyskać dostęp do niektórych obiektów sieci.\
+Możesz uruchomić proces, który **uses different credentials for accessing network services** używając:
 ```
 runas /user:domain\username /netonly cmd.exe
 ```
-To jest przydatne, jeśli masz użyteczne poświadczenia do uzyskania dostępu do obiektów w sieci, ale te poświadczenia nie są ważne w bieżącym hoście, ponieważ będą używane tylko w sieci (w bieżącym hoście będą używane uprawnienia bieżącego użytkownika).
+Jest to przydatne, jeśli masz użyteczne credentials do dostępu do obiektów w sieci, ale te credentials nie są ważne na obecnym hoście, ponieważ będą używane tylko w sieci (na obecnym hoście zostaną użyte uprawnienia bieżącego użytkownika).
+
+#### Szczegóły `runas /netonly`
+
+`runas /netonly` (oraz helpery C2, takie jak `make_token`) tworza **`LOGON32_LOGON_NEW_CREDENTIALS`** token. Jest to bardzo przydatne do zrozumienia podczas lateral movement, ponieważ:
+
+- **Lokalnie**, nowy proces zachowuje **tę samą lokalną tożsamość**, grupy, poziom integralności i większość tych samych decyzji dostępu co bieżący token.
+- **Zdalnie**, uwierzytelnianie wychodzące może używać **podanych credentials** dla SMB / WinRM / LDAP / HTTP / Kerberos / NTLM.
+- Dlatego `whoami` może nadal pokazywać **oryginalnego lokalnego użytkownika**, podczas gdy dostęp sieciowy odbywa się jako **alternatywne konto**.
+
+To świetna opcja, gdy credentials są ważne w domenie lub na innym hoście, ale użytkownik **nie może lub nie powinien logować się lokalnie** na bieżącej maszynie.
 
 ### Typy tokenów
 
 Dostępne są dwa typy tokenów:
 
-- **Primary Token**: Służy jako reprezentacja poświadczeń bezpieczeństwa procesu. Tworzenie i przypisywanie tokenów głównych do procesów to działania wymagające podwyższonych uprawnień, co podkreśla zasadę separacji uprawnień. Zazwyczaj usługa uwierzytelniania jest odpowiedzialna za tworzenie tokenów, podczas gdy usługa logowania zajmuje się ich przypisaniem do powłoki systemu operacyjnego użytkownika. Warto zauważyć, że procesy dziedziczą token główny swojego procesu macierzystego w momencie tworzenia.
-- **Impersonation Token**: Umożliwia aplikacji serwerowej tymczasowe przyjęcie tożsamości klienta w celu uzyskania dostępu do zabezpieczonych obiektów. Mechanizm ten jest podzielony na cztery poziomy działania:
-- **Anonymous**: Przyznaje dostęp serwera podobny do tego, który ma nieznany użytkownik.
+- **Primary Token**: Reprezentuje bezpieczeństwo credentials procesu. Tworzenie i powiązanie primary tokens z procesami to działania wymagające podwyższonych uprawnień, co podkreśla zasadę separacji uprawnień. Zwykle usługa uwierzytelniania odpowiada za tworzenie tokenów, a usługa logowania za ich powiązanie z powłoką systemową użytkownika. Warto zauważyć, że procesy dziedziczą primary token swojego procesu nadrzędnego podczas tworzenia.
+- **Impersonation Token**: Umożliwia aplikacji serwera tymczasowe przyjęcie tożsamości klienta w celu dostępu do bezpiecznych obiektów. Mechanizm ten jest podzielony na cztery poziomy działania:
+- **Anonymous**: Przyznaje dostęp serwera podobny do dostępu niezidentyfikowanego użytkownika.
 - **Identification**: Pozwala serwerowi zweryfikować tożsamość klienta bez wykorzystywania jej do dostępu do obiektów.
 - **Impersonation**: Umożliwia serwerowi działanie pod tożsamością klienta.
-- **Delegation**: Podobnie jak Impersonation, ale obejmuje możliwość rozszerzenia tej tożsamości na zdalne systemy, z którymi serwer wchodzi w interakcje, zapewniając zachowanie poświadczeń.
+- **Delegation**: Podobne do Impersonation, ale obejmuje możliwość rozszerzenia tego przyjęcia tożsamości na zdalne systemy, z którymi serwer wchodzi w interakcję, zapewniając zachowanie credentials.
 
 #### Impersonate Tokens
 
-Używając modułu _**incognito**_ w metasploit, jeśli masz wystarczające uprawnienia, możesz łatwo **wylistować** i **przyjąć** inne **tokeny**. Może to być przydatne do wykonywania **działań tak, jakbyś był innym użytkownikiem**. Możesz również **podnieść uprawnienia** za pomocą tej techniki.
+Używając modułu _**incognito**_ w metasploit, jeśli masz wystarczające uprawnienia, możesz łatwo **wypisać** i **impersonate** inne **tokens**. Może to być przydatne do wykonywania **działań tak, jakbyś był innym użytkownikiem**. Możesz też **eskalować privileges** tą techniką.
+
+Kilka praktycznych uwag, o których łatwo zapomnieć podczas działania:
+
+- **`CreateProcessWithTokenW`** wymaga **`SeImpersonatePrivilege`** po stronie wywołującego, a nowy proces uruchomi się w **sesji wywołującego**.
+- **`CreateProcessAsUserW`** jest zwykle alternatywą, gdy `CreateProcessWithTokenW` zwraca błąd `1314`, albo gdy trzeba uruchomić proces w **sesji wskazanej przez token**.
+- Jeśli token pochodzi z **`LogonUser(LOGON32_LOGON_NETWORK)`**, to zwykle jest to **impersonation token**, więc przed próbą uruchomienia procesu trzeba użyć **`DuplicateTokenEx(..., TokenPrimary, ...)`**.
+- Nie każdy impersonation token jest równie użyteczny: **`SecurityIdentification`** pozwala sprawdzić użytkownika, ale **nie działać jako on**. Jeśli coercion primitive lub klient pipe/RPC daje tylko token na poziomie identification, sprawdź **`TokenImpersonationLevel`** i przełącz się na primitive, który daje **`SecurityImpersonation`** lub lepszy.
+
+#### Token theft bez dotykania LSASS
+
+Jeśli masz już kontekst **usługi** lub **SYSTEM** i **uprzywilejowany użytkownik jest zalogowany**, kradzież lub duplikacja tokena tego użytkownika jest często cichsza niż zrzucanie **LSASS**. W wielu rzeczywistych intruzjach wystarcza to do:
+
+- wykonywania lokalnych działań jako ten użytkownik
+- dostępu do zasobów zdalnych jako ten użytkownik
+- wykonywania operacji AD bez wcześniejszego wyciągania wielokrotnego użytku credentials
+
+Przykłady **session/user token hijacking** z uprzywilejowanego kontekstu znajdziesz w [**WTS Impersonator**](../stealing-credentials/wts-impersonator.md). Pamiętaj, że API takie jak **`WTSQueryUserToken`** są przeznaczone dla **bardzo zaufanych usług** i zwykle wymagają **`LocalSystem` + `SeTcbPrivilege`**, więc są przede wszystkim użyteczne dopiero wtedy, gdy masz już kontrolę nad kontekstem poziomu usługi. Dla metod specyficznych dla privileges, które pozwalają najpierw uzyskać **SYSTEM**, sprawdź poniższe strony.
 
 ### Token Privileges
 
-Dowiedz się, które **uprawnienia tokenów mogą być nadużywane do podnoszenia uprawnień:**
+Dowiedz się, które **token privileges można nadużyć do eskalacji privileges:**
 
 
 {{#ref}}
 privilege-escalation-abusing-tokens.md
 {{#endref}}
 
-Zobacz [**wszystkie możliwe uprawnienia tokenów i niektóre definicje na tej zewnętrznej stronie**](https://github.com/gtworek/Priv2Admin).
+Spójrz na [**wszystkie możliwe token privileges i niektóre definicje na tej zewnętrznej stronie**](https://github.com/gtworek/Priv2Admin).
 
 ## References
 
-Dowiedz się więcej o tokenach w tych samouczkach: [https://medium.com/@seemant.bisht24/understanding-and-abusing-process-tokens-part-i-ee51671f2cfa](https://medium.com/@seemant.bisht24/understanding-and-abusing-process-tokens-part-i-ee51671f2cfa) i [https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962)
+- [https://medium.com/@seemant.bisht24/understanding-and-abusing-process-tokens-part-i-ee51671f2cfa](https://medium.com/@seemant.bisht24/understanding-and-abusing-process-tokens-part-i-ee51671f2cfa)
+- [https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962)
+- [https://sensepost.com/blog/2022/abusing-windows-tokens-to-compromise-active-directory-without-touching-lsass/](https://sensepost.com/blog/2022/abusing-windows-tokens-to-compromise-active-directory-without-touching-lsass/)
+- [https://www.fox-it.com/nl-en/demystifying-cobalt-strike-s-make_token-command/](https://www.fox-it.com/nl-en/demystifying-cobalt-strike-s-make_token-command/)
 
 {{#include ../../banners/hacktricks-training.md}}
