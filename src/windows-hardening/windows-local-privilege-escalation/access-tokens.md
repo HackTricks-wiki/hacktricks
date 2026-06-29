@@ -1,12 +1,12 @@
-# Toegangstokens
+# Access Tokens
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Toegangstokens
+## Access Tokens
 
-Elke **gebruiker wat op die stelsel aangemeld is** **besit 'n toegangstoken met sekuriteitsinligting** vir daardie aanmeldsessie. Die stelsel skep 'n toegangstoken wanneer die gebruiker aanmeld. **Elke proses wat namens die gebruiker uitgevoer word** **het 'n kopie van die toegangstoken**. Die token identifiseer die gebruiker, die gebruiker se groepe, en die gebruiker se voorregte. 'n Token bevat ook 'n aanmeld SID (Sekuriteitsidentifiseerder) wat die huidige aanmeldsessie identifiseer.
+Elke **gebruiker aangemeld** by die stelsel **hou ’n access token met sekuriteitsinligting** vir daardie logon session. Die stelsel skep ’n access token wanneer die gebruiker aanmeld. **Elke proses wat uitgevoer word** namens die gebruiker **het ’n kopie van die access token**. Die token identifiseer die gebruiker, die gebruiker se groups, en die gebruiker se privileges. ’n Token bevat ook ’n logon SID (Security Identifier) wat die huidige logon session identifiseer.
 
-Jy kan hierdie inligting sien deur `whoami /all` uit te voer.
+Jy kan hierdie inligting sien deur `whoami /all` uit te voer
 ```
 whoami /all
 
@@ -52,54 +52,86 @@ SeTimeZonePrivilege           Change the time zone                 Disabled
 ```
 or using _Process Explorer_ from Sysinternals (select process and access"Security" tab):
 
-![](<../../images/image (772).png>)
+![Access Tokens - Access Tokens: or using Process Explorer from Sysinternals (select process and access"Security" tab)](<../../images/image (772).png>)
 
 ### Plaaslike administrateur
 
-Wanneer 'n plaaslike administrateur aanmeld, **word twee toegangstokens geskep**: Een met administrateurregte en die ander een met normale regte. **Standaard**, wanneer hierdie gebruiker 'n proses uitvoer, word die een met **reguliere** (nie-administrateur) **regte gebruik**. Wanneer hierdie gebruiker probeer om **enige iets** **as administrateur** uit te voer ("Run as Administrator" byvoorbeeld) sal die **UAC** gebruik word om toestemming te vra.\
-As jy wil [**meer oor die UAC leer, lees hierdie bladsy**](../authentication-credentials-uac-and-efs/index.html#uac)**.**
+Wanneer 'n plaaslike administrateur aanmeld, **word twee access tokens geskep**: Een met admin regte en 'n ander een met normale regte. **By verstek**, wanneer hierdie gebruiker 'n proses uitvoer, word die een met **gewone** (nie-administrateur) **regte gebruik**. Wanneer hierdie gebruiker probeer om enigiets **as administrator** uit te voer ("Run as Administrator" byvoorbeeld), sal die **UAC** gebruik word om toestemming te vra.\
+As jy meer wil [**leer oor die UAC, lees hierdie bladsy**](../authentication-credentials-uac-and-efs/index.html#uac)**.**
 
-### Kredensiële gebruikersverpersoonliking
+In die praktyk beteken dit dat 'n **nie-verhoogde admin shell gewoonlik met 'n filtered token loop**. Daarom wys `whoami /groups` dikwels **`BUILTIN\Administrators` as `Deny only`** totdat die proses verhoog is. Intern hou Windows 'n **linked elevated token** (`TokenLinkedToken`) en volg die toestand met velde soos `TokenElevationType`.
 
-As jy **geldige kredensiale van enige ander gebruiker** het, kan jy 'n **nuwe aanmeldsessie** met daardie kredensiale **skep**:
+### Credentials user impersonation
+
+As jy **geldige credentials van enige ander gebruiker** het, kan jy **'n nuwe aanmeldsessie skep** met daardie credentials :
 ```
 runas /user:domain\username cmd.exe
 ```
-Die **toegangsteken** het ook 'n **verwysing** na die aanmeldsessies binne die **LSASS**, dit is nuttig as die proses toegang tot sommige voorwerpe van die netwerk moet verkry.\
-Jy kan 'n proses begin wat **verskillende akrediteer vir toegang tot netwerkdienste** gebruik met:
+Die **toegangs-token** het ook ’n **verwysing** na die aanmeldsessies binne die **LSASS**, dit is nuttig as die proses toegang tot sommige voorwerpe van die netwerk moet kry.\
+Jy kan ’n proses begin wat **verskillende geloofsbriewe gebruik om netwerkdienste te verkry** met:
 ```
 runas /user:domain\username /netonly cmd.exe
 ```
-Dit is nuttig as jy nuttige akrediteerbare inligting het om toegang te verkry tot voorwerpe in die netwerk, maar daardie akrediteerbare inligting is nie geldig binne die huidige gasheer nie, aangesien dit slegs in die netwerk gebruik gaan word (in die huidige gasheer sal jou huidige gebruikersprivileges gebruik word).
+Dit is nuttig as jy nuttige credentials het om toegang te kry tot objects in die network, maar daardie credentials is nie geldig binne die huidige host nie, aangesien hulle slegs in die network gebruik gaan word (op die huidige host sal jou huidige user privileges gebruik word).
 
-### Tipes tokens
+#### `runas /netonly` details
+
+`runas /netonly` (en C2 helpers soos `make_token`) creates a **`LOGON32_LOGON_NEW_CREDENTIALS`** token. Dit is baie nuttig om te verstaan tydens lateral movement omdat:
+
+- **Plaaslik**, die nuwe proses behou dieselfde plaaslike identiteit, groups, integrity level, en die meeste van dieselfde access decisions as die huidige token.
+- **Afstand**, outbound authentication kan die **verskafde credentials** gebruik vir SMB / WinRM / LDAP / HTTP / Kerberos / NTLM.
+- Daarom kan `whoami` steeds die **oorspronklike local user** wys terwyl network access plaasvind as die **alternatiewe account**.
+
+Dit is ’n goeie opsie wanneer die credentials geldig is in die domain of op ’n ander host, maar die user **kan nie of behoort nie local aan te meld** by die huidige machine.
+
+### Types of tokens
 
 Daar is twee tipes tokens beskikbaar:
 
-- **Primêre Token**: Dit dien as 'n voorstelling van 'n proses se sekuriteitsakrediteerbare inligting. Die skepping en assosiasie van primêre tokens met prosesse is aksies wat verhoogde privileges vereis, wat die beginsel van privilege-skeiding beklemtoon. Gewoonlik is 'n verifikasiediens verantwoordelik vir token skepping, terwyl 'n aanmelddiens die assosiasie met die gebruiker se bedryfstelsel-skalie hanteer. Dit is die moeite werd om te noem dat prosesse die primêre token van hul ouer proses by skepping erf.
-- **Impersonasie Token**: Bemagtig 'n bedienertoepassing om die kliënt se identiteit tydelik aan te neem vir toegang tot veilige voorwerpe. Hierdie meganisme is gelaag in vier vlakke van werking:
-- **Anoniem**: Gee bedienertoegang soortgelyk aan dié van 'n onbekende gebruiker.
-- **Identifikasie**: Laat die bediener toe om die kliënt se identiteit te verifieer sonder om dit vir voorwerptoegang te gebruik.
-- **Impersonasie**: Stel die bediener in staat om onder die kliënt se identiteit te werk.
-- **Delegasie**: Soortgelyk aan Impersonasie, maar sluit die vermoë in om hierdie identiteit aanneming na afgeleë stelsels wat die bediener mee werk, uit te brei, wat akrediteerbare inligting behou.
+- **Primary Token**: Dit dien as ’n voorstelling van ’n process se security credentials. Die creation en association van primary tokens met processes is actions wat elevated privileges vereis, wat die beginsel van privilege separation beklemtoon. Tipies is ’n authentication service verantwoordelik vir token creation, terwyl ’n logon service die association daarvan met die user se operating system shell hanteer. Dit is die moeite werd om daarop te let dat processes die primary token van hul parent process by creation erf.
+- **Impersonation Token**: Stel ’n server application in staat om die client se identity tydelik aan te neem vir toegang tot secure objects. Hierdie mechanism is gestratifiseer in vier levels van operation:
+- **Anonymous**: Verleen server access soortgelyk aan dié van ’n unidentified user.
+- **Identification**: Laat die server toe om die client se identity te verify sonder om dit vir object access te gebruik.
+- **Impersonation**: Stel die server in staat om onder die client se identity te operate.
+- **Delegation**: Soortgelyk aan Impersonation maar sluit die vermoë in om hierdie identity assumption uit te brei na remote systems waarmee die server interaksie het, en verseker credential preservation.
 
-#### Imiteer Tokens
+#### Impersonate Tokens
 
-Deur die _**incognito**_ module van metasploit te gebruik, as jy genoeg privileges het, kan jy maklik ander **tokens** **lys** en **imiteer**. Dit kan nuttig wees om **aksies uit te voer asof jy die ander gebruiker was**. Jy kan ook **privileges verhoog** met hierdie tegniek.
+Deur die _**incognito**_ module van metasploit te gebruik, kan jy, as jy genoeg privileges het, maklik ander **tokens** **list** en **impersonate**. Dit kan nuttig wees om **actions uit te voer asof jy die ander user is**. Jy kan ook **escalate privileges** met hierdie technique.
+
+Sommige praktiese notas wat maklik is om te vergeet terwyl jy werk:
+
+- **`CreateProcessWithTokenW`** vereis **`SeImpersonatePrivilege`** in die caller en die nuwe process sal in die **caller se session** loop.
+- **`CreateProcessAsUserW`** is die gewone fallback wanneer `CreateProcessWithTokenW` faal met `1314`, of wanneer jy in die **session waarna die token verwys** wil launch.
+- As ’n token van **`LogonUser(LOGON32_LOGON_NETWORK)`** af kom, is dit gewoonlik ’n **impersonation token**, so jy benodig **`DuplicateTokenEx(..., TokenPrimary, ...)`** voordat jy probeer om ’n process daarmee te spawn.
+- Nie elke impersonation token is ewe nuttig nie: **`SecurityIdentification`** laat jou die user inspecteer maar **nie as hulle optree nie**. As ’n coercion primitive of pipe/RPC client jou net ’n identification-level token gee, check **`TokenImpersonationLevel`** en skakel oor na ’n primitive wat **`SecurityImpersonation`** of beter lewer.
+
+#### Token theft without touching LSASS
+
+As jy reeds ’n **service** of **SYSTEM** context het en ’n **privileged user is logged on**, is token steel of duplication van daardie user se token dikwels stiller as om **LSASS** te dump. In baie werklike intrusions is dit genoeg om:
+
+- plaaslike actions as daardie user uit te voer
+- remote resources as daardie user te access
+- AD operations uit te voer sonder om eers reusable credentials uit te trek
+
+Vir voorbeelde van **session/user token hijacking** vanuit ’n privileged context, kyk [**WTS Impersonator**](../stealing-credentials/wts-impersonator.md). Onthou dat APIs soos **`WTSQueryUserToken`** bedoel is vir **highly trusted services** en normaalweg **`LocalSystem` + `SeTcbPrivilege`** vereis, so hulle is hoofsaaklik nuttig sodra jy reeds ’n service-level context beheer. Vir privilege-specific maniere om eers **SYSTEM** te verkry, kyk die bladsye hieronder.
 
 ### Token Privileges
 
-Leer watter **token privileges misbruik kan word om privileges te verhoog:**
+Leer watter **token privileges kan misbruik word om privileges te escalate:**
 
 
 {{#ref}}
 privilege-escalation-abusing-tokens.md
 {{#endref}}
 
-Kyk na [**alle moontlike token privileges en 'n paar definisies op hierdie eksterne bladsy**](https://github.com/gtworek/Priv2Admin).
+Kyk gerus na [**al die moontlike token privileges en sommige definitions op hierdie external page**](https://github.com/gtworek/Priv2Admin).
 
-## Verwysings
+## References
 
-Leer meer oor tokens in hierdie tutorials: [https://medium.com/@seemant.bisht24/understanding-and-abusing-process-tokens-part-i-ee51671f2cfa](https://medium.com/@seemant.bisht24/understanding-and-abusing-process-tokens-part-i-ee51671f2cfa) en [https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962)
+- [https://medium.com/@seemant.bisht24/understanding-and-abusing-process-tokens-part-i-ee51671f2cfa](https://medium.com/@seemant.bisht24/understanding-and-abusing-process-tokens-part-i-ee51671f2cfa)
+- [https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962)
+- [https://sensepost.com/blog/2022/abusing-windows-tokens-to-compromise-active-directory-without-touching-lsass/](https://sensepost.com/blog/2022/abusing-windows-tokens-to-compromise-active-directory-without-touching-lsass/)
+- [https://www.fox-it.com/nl-en/demystifying-cobalt-strike-s-make_token-command/](https://www.fox-it.com/nl-en/demystifying-cobalt-strike-s-make_token-command/)
 
 {{#include ../../banners/hacktricks-training.md}}
