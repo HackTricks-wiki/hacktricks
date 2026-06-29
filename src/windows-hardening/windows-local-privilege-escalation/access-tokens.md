@@ -4,9 +4,9 @@
 
 ## Access Tokens
 
-Svaki **korisnik prijavljen** na sistem **ima pristupni token sa bezbednosnim informacijama** za tu sesiju prijavljivanja. Sistem kreira pristupni token kada se korisnik prijavi. **Svaki proces izvršen** u ime korisnika **ima kopiju pristupnog tokena**. Token identifikuje korisnika, korisničke grupe i privilegije korisnika. Token takođe sadrži logon SID (Identifikator bezbednosti) koji identifikuje trenutnu sesiju prijavljivanja.
+Svaki **prijavljeni korisnik** na sistem **poseduje access token sa bezbednosnim informacijama** za tu logon sesiju. Sistem kreira access token kada se korisnik prijavi. **Svaki proces koji se izvršava** u ime korisnika **ima kopiju access token-a**. Token identifikuje korisnika, grupe korisnika i privilegije korisnika. Token takođe sadrži logon SID (Security Identifier) koji identifikuje trenutnu logon sesiju.
 
-Možete videti ove informacije izvršavajući `whoami /all`
+Ove informacije možete videti izvršavanjem `whoami /all`
 ```
 whoami /all
 
@@ -52,54 +52,86 @@ SeTimeZonePrivilege           Change the time zone                 Disabled
 ```
 or using _Process Explorer_ from Sysinternals (select process and access"Security" tab):
 
-![](<../../images/image (772).png>)
+![Access Tokens - Access Tokens: or using Process Explorer from Sysinternals (select process and access"Security" tab)](<../../images/image (772).png>)
 
 ### Lokalni administrator
 
-Kada se lokalni administrator prijavi, **kreiraju se dva pristupna tokena**: jedan sa administratorskim pravima i drugi sa normalnim pravima. **Po defaultu**, kada ovaj korisnik izvrši proces, koristi se onaj sa **redovnim** (ne-administratorskim) **pravima**. Kada ovaj korisnik pokuša da **izvrši** bilo šta **kao administrator** ("Run as Administrator" na primer), koristiće se **UAC** da zatraži dozvolu.\
-Ako želite da [**saznate više o UAC, pročitajte ovu stranicu**](../authentication-credentials-uac-and-efs/index.html#uac)**.**
+Kada se lokalni administrator prijavi, **kreiraju se dva access tokena**: jedan sa admin pravima i drugi sa normalnim pravima. **Podrazumevano**, kada ovaj korisnik izvršava proces, koristi se onaj sa **regular** (non-administrator) **pravima**. Kada ovaj korisnik pokuša da **izvrši** bilo šta **kao administrator** (na primer "Run as Administrator"), **UAC** će biti korišćen da zatraži dozvolu.\
+Ako želite da [**saznate više o UAC pročitajte ovu stranicu**](../authentication-credentials-uac-and-efs/index.html#uac)**.**
 
-### Impersonacija korisničkih kredencijala
+U praksi, to znači da **non-elevated admin shell** obično radi sa filtered tokenom. Zato `whoami /groups` često prikazuje **`BUILTIN\Administrators` kao `Deny only`** dok proces nije elevated. Interno, Windows čuva **linked elevated token** (`TokenLinkedToken`) i prati stanje pomoću polja kao što je `TokenElevationType`.
 
-Ako imate **važeće kredencijale bilo kog drugog korisnika**, možete **kreirati** **novu sesiju prijavljivanja** sa tim kredencijalima:
+### Impersonacija korisnika pomoću credentials
+
+Ako imate **valid credentials bilo kog drugog korisnika**, možete **kreirati** **novu logon session** sa tim credentials :
 ```
 runas /user:domain\username cmd.exe
 ```
-**Access token** takođe ima **referencu** na sesije prijavljivanja unutar **LSASS**, što je korisno ako proces treba da pristupi nekim objektima mreže.\
-Možete pokrenuti proces koji **koristi različite akreditive za pristup mrežnim uslugama** koristeći:
+**access token** takođe ima **reference** na logon sesije unutar **LSASS**, što je korisno ako proces treba da pristupi nekim objektima na mreži.\
+Možete pokrenuti proces koji **koristi različite kredencijale za pristup mrežnim servisima** koristeći:
 ```
 runas /user:domain\username /netonly cmd.exe
 ```
-Ovo je korisno ako imate korisničke podatke za pristup objektima u mreži, ali ti podaci nisu validni unutar trenutnog hosta jer će se koristiti samo u mreži (u trenutnom hostu koristiće se privilegije trenutnog korisnika).
+Ovo je korisno ako imate korisne kredencijale za pristup objektima u mreži, ali ti kredencijali nisu validni unutar trenutnog hosta jer će se koristiti samo u mreži (na trenutnom hostu biće korišćene privilegije vašeg trenutnog korisnika).
+
+#### `runas /netonly` detalji
+
+`runas /netonly` (i C2 helpers kao što je `make_token`) kreira **`LOGON32_LOGON_NEW_CREDENTIALS`** token. Ovo je veoma korisno za razumevanje tokom lateral movement jer:
+
+- **Lokalno**, novi proces zadržava **isti lokalni identitet**, grupe, integrity level i većinu istih odluka o pristupu kao trenutni token.
+- **Udaljeno**, outbound autentikacija može koristiti **prosleđene kredencijale** za SMB / WinRM / LDAP / HTTP / Kerberos / NTLM.
+- Zato `whoami` može i dalje prikazivati **originalnog lokalnog korisnika** dok se mrežni pristup obavlja kao **alternativni nalog**.
+
+Ovo je odlična opcija kada su kredencijali validni u domenu ili na drugom hostu, ali korisnik **ne može ili ne bi trebalo da se lokalno prijavi** na trenutnu mašinu.
 
 ### Tipovi tokena
 
-Postoje dva tipa tokena dostupna:
+Postoje dva tipa tokena:
 
-- **Primarni Token**: Služi kao reprezentacija bezbednosnih podataka procesa. Kreiranje i povezivanje primarnih tokena sa procesima su radnje koje zahtevaju povišene privilegije, naglašavajući princip odvajanja privilegija. Obično, usluga autentifikacije je odgovorna za kreiranje tokena, dok usluga prijavljivanja upravlja njegovim povezivanjem sa operativnim sistemom korisnika. Vredno je napomenuti da procesi nasleđuju primarni token svog roditeljskog procesa prilikom kreiranja.
-- **Token Improvizacije**: Omogućava serverskoj aplikaciji da privremeno usvoji identitet klijenta za pristup sigurnim objektima. Ovaj mehanizam je stratifikovan u četiri nivoa operacije:
-- **Anonimno**: Daje serveru pristup sličan onom neidentifikovanog korisnika.
-- **Identifikacija**: Omogućava serveru da verifikuje identitet klijenta bez korišćenja za pristup objektima.
-- **Improvizacija**: Omogućava serveru da funkcioniše pod identitetom klijenta.
-- **Delegacija**: Slično Improvizaciji, ali uključuje sposobnost da se ovo preuzimanje identiteta proširi na udaljene sisteme sa kojima server komunicira, osiguravajući očuvanje podataka o korisniku.
+- **Primary Token**: Predstavlja security credentials procesa. Kreiranje i povezivanje primary tokena sa procesima su radnje koje zahtevaju povišene privilegije, što naglašava princip separation of privilege. Tipično, authentication service je odgovoran za kreiranje tokena, dok logon service rukuje njegovim povezivanjem sa shell-om korisnika u operativnom sistemu. Vredi napomenuti da procesi nasleđuju primary token svog roditeljskog procesa pri kreiranju.
+- **Impersonation Token**: Omogućava serverskoj aplikaciji da privremeno preuzme identitet klijenta radi pristupa secure objektima. Ovaj mehanizam je podeljen na četiri nivoa rada:
+- **Anonymous**: Daje server access nalik onom neidentifikovanog korisnika.
+- **Identification**: Omogućava serveru da proveri identitet klijenta bez korišćenja tog identiteta za access objektima.
+- **Impersonation**: Omogućava serveru da radi pod identitetom klijenta.
+- **Delegation**: Slično kao Impersonation, ali uključuje mogućnost da se ovo preuzimanje identiteta proširi na remote systems sa kojima server komunicira, uz očuvanje kredencijala.
 
-#### Tokeni za Improvizaciju
+#### Impersonate Tokens
 
-Korišćenjem _**incognito**_ modula metasploit-a, ako imate dovoljno privilegija, možete lako **navesti** i **improvizovati** druge **tokene**. Ovo može biti korisno za izvršavanje **akcija kao da ste drugi korisnik**. Takođe možete **povišiti privilegije** ovom tehnikom.
+Korišćenjem _**incognito**_ modula u metasploit-u, ako imate dovoljno privilegija, možete lako **izlistati** i **impersonate** druge **tokene**. Ovo može biti korisno za izvođenje **radnji kao da ste drugi korisnik**. Takođe možete **escalate privileges** ovom tehnikom.
 
-### Privilegije Tokena
+Neke praktične napomene koje je lako zaboraviti tokom rada:
 
-Saznajte koje **privilegije tokena mogu biti zloupotrebljene za povišenje privilegija:**
+- **`CreateProcessWithTokenW`** zahteva **`SeImpersonatePrivilege`** kod pozivaoca i novi proces će raditi u **sesiji pozivaoca**.
+- **`CreateProcessAsUserW`** je uobičajeni fallback kada **`CreateProcessWithTokenW`** zakaže sa `1314`, ili kada treba da pokrenete proces u **sesiji na koju token pokazuje**.
+- Ako token dolazi iz **`LogonUser(LOGON32_LOGON_NETWORK)`**, on je obično **impersonation token**, pa morate koristiti **`DuplicateTokenEx(..., TokenPrimary, ...)`** pre nego što pokušate da pokrenete proces sa njim.
+- Nije svaki impersonation token jednako koristan: **`SecurityIdentification`** omogućava da pregledate korisnika, ali **ne i da delujete kao on**. Ako coercion primitive ili pipe/RPC klijent daje samo token nivoa identification, proverite **`TokenImpersonationLevel`** i prebacite se na primitive koji daje **`SecurityImpersonation`** ili bolje.
+
+#### Krađa tokena bez diranja LSASS
+
+Ako već imate **service** ili **SYSTEM** kontekst i **privilegovani korisnik je prijavljen**, krađa ili dupliranje tokena tog korisnika često je tiše nego dumpovanje **LSASS**. U mnogim realnim upadima ovo je dovoljno da:
+
+- pokrećete lokalne radnje kao taj korisnik
+- pristupate remote resursima kao taj korisnik
+- obavljate AD operacije bez prethodnog izvlačenja reusable credentials
+
+Za primere **session/user token hijacking** iz privilegovanog konteksta, pogledajte [**WTS Impersonator**](../stealing-credentials/wts-impersonator.md). Zapamtite da su API-jevi kao što je **`WTSQueryUserToken`** namenjeni za **visoko poverljive servise** i obično zahtevaju **`LocalSystem` + `SeTcbPrivilege`**, pa su prvenstveno korisni tek kada već kontrolišete service-level kontekst. Za privilegije-specifične načine da prvo dobijete **SYSTEM**, pogledajte stranice ispod.
+
+### Token Privileges
+
+Saznajte koji se **token privileges mogu zloupotrebiti za escalate privileges:**
 
 
 {{#ref}}
 privilege-escalation-abusing-tokens.md
 {{#endref}}
 
-Pogledajte [**sve moguće privilegije tokena i neka objašnjenja na ovoj spoljnoj stranici**](https://github.com/gtworek/Priv2Admin).
+Pogledajte [**sve moguće token privileges i neke definicije na ovoj eksternoj stranici**](https://github.com/gtworek/Priv2Admin).
 
-## Reference
+## References
 
-Saznajte više o tokenima u ovim tutorijalima: [https://medium.com/@seemant.bisht24/understanding-and-abusing-process-tokens-part-i-ee51671f2cfa](https://medium.com/@seemant.bisht24/understanding-and-abusing-process-tokens-part-i-ee51671f2cfa) i [https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962)
+- [https://medium.com/@seemant.bisht24/understanding-and-abusing-process-tokens-part-i-ee51671f2cfa](https://medium.com/@seemant.bisht24/understanding-and-abusing-process-tokens-part-i-ee51671f2cfa)
+- [https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962)
+- [https://sensepost.com/blog/2022/abusing-windows-tokens-to-compromise-active-directory-without-touching-lsass/](https://sensepost.com/blog/2022/abusing-windows-tokens-to-compromise-active-directory-without-touching-lsass/)
+- [https://www.fox-it.com/nl-en/demystifying-cobalt-strike-s-make_token-command/](https://www.fox-it.com/nl-en/demystifying-cobalt-strike-s-make_token-command/)
 
 {{#include ../../banners/hacktricks-training.md}}
