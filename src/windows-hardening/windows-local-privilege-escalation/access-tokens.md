@@ -4,9 +4,9 @@
 
 ## Access Tokens
 
-प्रत्येक **उपयोगकर्ता जो** सिस्टम में **लॉग इन है, उसके पास उस लॉगिन सत्र के लिए सुरक्षा जानकारी के साथ एक एक्सेस टोकन होता है**। जब उपयोगकर्ता लॉग इन करता है, तो सिस्टम एक एक्सेस टोकन बनाता है। **प्रत्येक प्रक्रिया जो उपयोगकर्ता की ओर से निष्पादित होती है, उसके पास एक्सेस टोकन की एक प्रति होती है**। टोकन उपयोगकर्ता, उपयोगकर्ता के समूहों और उपयोगकर्ता के विशेषाधिकारों की पहचान करता है। एक टोकन में एक लॉगिन SID (सुरक्षा पहचानकर्ता) भी होता है जो वर्तमान लॉगिन सत्र की पहचान करता है।
+सिस्टम पर लॉग इन किया गया प्रत्येक **user** उस logon session के लिए **security information वाला access token** रखता है। सिस्टम तब access token बनाता है जब user log on करता है। **User की behalf पर execute होने वाला हर process** access token की एक copy रखता है। Token user, user के groups, और user के privileges को identify करता है। Token में एक logon SID (Security Identifier) भी होता है जो current logon session को identify करता है।
 
-आप इस जानकारी को `whoami /all` चलाकर देख सकते हैं।
+आप यह information `whoami /all` चलाकर देख सकते हैं
 ```
 whoami /all
 
@@ -50,56 +50,87 @@ SeUndockPrivilege             Remove computer from docking station Disabled
 SeIncreaseWorkingSetPrivilege Increase a process working set       Disabled
 SeTimeZonePrivilege           Change the time zone                 Disabled
 ```
-or using _Process Explorer_ from Sysinternals (select process and access"Security" tab):
+या तो Sysinternals के _Process Explorer_ का उपयोग करके (process चुनें और "Security" tab access करें):
 
-![](<../../images/image (772).png>)
+![Access Tokens - Access Tokens: or using Process Explorer from Sysinternals (select process and access"Security" tab)](<../../images/image (772).png>)
 
-### स्थानीय प्रशासक
+### Local administrator
 
-जब एक स्थानीय प्रशासक लॉगिन करता है, **दो एक्सेस टोकन बनाए जाते हैं**: एक प्रशासनिक अधिकारों के साथ और दूसरा सामान्य अधिकारों के साथ। **डिफ़ॉल्ट रूप से**, जब यह उपयोगकर्ता एक प्रक्रिया निष्पादित करता है, तो **सामान्य** (गैर-प्रशासनिक) **अधिकारों वाला** टोकन उपयोग किया जाता है। जब यह उपयोगकर्ता **प्रशासक के रूप में** कुछ **निष्पादित** करने की कोशिश करता है ("Run as Administrator" उदाहरण के लिए) तो **UAC** अनुमति मांगने के लिए उपयोग किया जाएगा.\
-यदि आप [**UAC के बारे में अधिक जानना चाहते हैं तो इस पृष्ठ को पढ़ें**](../authentication-credentials-uac-and-efs/index.html#uac)**.**
+जब एक local administrator logins करता है, **दो access tokens बनाए जाते हैं**: एक admin rights के साथ और दूसरा normal rights के साथ। **By default**, जब यह user कोई process execute करता है, तो **regular** (non-administrator) **rights वाला token उपयोग किया जाता है**। जब यह user कुछ भी **administrator के रूप में execute** करने की कोशिश करता है ("Run as Administrator" उदाहरण के लिए), तो अनुमति माँगने के लिए **UAC** उपयोग किया जाएगा।\
+अगर आप [**UAC के बारे में अधिक जानना चाहते हैं तो यह page पढ़ें**](../authentication-credentials-uac-and-efs/index.html#uac)**.**
 
-### क्रेडेंशियल्स उपयोगकर्ता अनुकरण
+व्यावहारिक रूप से, इसका मतलब है कि एक **non-elevated admin shell आमतौर पर filtered token के साथ चलता है**। इसलिए `whoami /groups` अक्सर **`BUILTIN\Administrators` को `Deny only` के रूप में दिखाता है** जब तक process elevated न हो जाए। अंदरूनी तौर पर, Windows एक **linked elevated token** (`TokenLinkedToken`) रखता है और `TokenElevationType` जैसे fields के साथ state को track करता है।
 
-यदि आपके पास **किसी अन्य उपयोगकर्ता के वैध क्रेडेंशियल्स** हैं, तो आप उन क्रेडेंशियल्स के साथ **एक नया लॉगिन सत्र** **बना सकते हैं**:
+### Credentials user impersonation
+
+अगर आपके पास **किसी दूसरे user की valid credentials** हैं, तो आप उन credentials के साथ एक **new logon session** **create** कर सकते हैं :
 ```
 runas /user:domain\username cmd.exe
 ```
-**एक्सेस टोकन** में **LSASS** के अंदर लॉगिन सत्रों का भी **संदर्भ** होता है, यह उपयोगी है यदि प्रक्रिया को नेटवर्क के कुछ ऑब्जेक्ट्स तक पहुंचने की आवश्यकता होती है।\
-आप एक प्रक्रिया लॉन्च कर सकते हैं जो **नेटवर्क सेवाओं तक पहुंचने के लिए विभिन्न क्रेडेंशियल्स का उपयोग करती है**:
+**access token** के पास **LSASS** के अंदर logon sessions का एक **reference** भी होता है, यह तब उपयोगी है जब process को network के कुछ objects access करने हों।\
+आप एक process launch कर सकते हैं जो network services access करने के लिए **different credentials** use करता है, using:
 ```
 runas /user:domain\username /netonly cmd.exe
 ```
-यह उपयोगी है यदि आपके पास नेटवर्क में वस्तुओं तक पहुँचने के लिए उपयोगी क्रेडेंशियल्स हैं लेकिन वे क्रेडेंशियल्स वर्तमान होस्ट के अंदर मान्य नहीं हैं क्योंकि वे केवल नेटवर्क में उपयोग किए जाने वाले हैं (वर्तमान होस्ट में आपके वर्तमान उपयोगकर्ता विशेषाधिकारों का उपयोग किया जाएगा)।
+यह तब उपयोगी है जब आपके पास नेटवर्क में objects तक पहुंचने के लिए उपयोगी credentials हों, लेकिन वे credentials current host के अंदर valid नहीं हों, क्योंकि उनका उपयोग केवल network में किया जाएगा (current host में आपके current user privileges का उपयोग होगा).
 
-### टोकन के प्रकार
+#### `runas /netonly` details
 
-दो प्रकार के टोकन उपलब्ध हैं:
+`runas /netonly` (और C2 helpers जैसे `make_token`) एक **`LOGON32_LOGON_NEW_CREDENTIALS`** token बनाता है. lateral movement के दौरान इसे समझना बहुत उपयोगी है क्योंकि:
 
-- **प्राथमिक टोकन**: यह एक प्रक्रिया के सुरक्षा क्रेडेंशियल्स का प्रतिनिधित्व करता है। प्राथमिक टोकनों का निर्माण और प्रक्रियाओं के साथ संघनन ऐसे कार्य हैं जिनके लिए उच्च विशेषाधिकार की आवश्यकता होती है, जो विशेषाधिकार विभाजन के सिद्धांत को उजागर करता है। आमतौर पर, टोकन निर्माण के लिए एक प्रमाणीकरण सेवा जिम्मेदार होती है, जबकि लॉगिन सेवा इसे उपयोगकर्ता के ऑपरेटिंग सिस्टम शेल के साथ संघनित करती है। यह ध्यान देने योग्य है कि प्रक्रियाएँ अपने माता-पिता की प्रक्रिया का प्राथमिक टोकन निर्माण के समय विरासत में लेती हैं।
-- **प्रतिनिधित्व टोकन**: एक सर्वर एप्लिकेशन को सुरक्षित वस्तुओं तक पहुँचने के लिए ग्राहक की पहचान को अस्थायी रूप से अपनाने की शक्ति देता है। यह तंत्र चार स्तरों में विभाजित है:
-- **गुमनाम**: सर्वर को एक अज्ञात उपयोगकर्ता के समान पहुँच प्रदान करता है।
-- **पहचान**: सर्वर को ग्राहक की पहचान की पुष्टि करने की अनुमति देता है बिना इसे वस्तु पहुँच के लिए उपयोग किए।
-- **प्रतिनिधित्व**: सर्वर को ग्राहक की पहचान के तहत कार्य करने में सक्षम बनाता है।
-- **प्रतिनिधित्व**: प्रतिनिधित्व के समान लेकिन इसमें इस पहचान को दूरस्थ प्रणालियों तक विस्तारित करने की क्षमता शामिल है जिनसे सर्वर बातचीत करता है, जिससे क्रेडेंशियल संरक्षण सुनिश्चित होता है।
+- **Locally**, नया process **same local identity**, groups, integrity level, और current token के अधिकांश same access decisions बनाए रखता है।
+- **Remotely**, outbound authentication SMB / WinRM / LDAP / HTTP / Kerberos / NTLM के लिए **supplied credentials** का उपयोग कर सकती है।
+- इसलिए `whoami` अभी भी **original local user** दिखा सकता है, जबकि network access **alternate account** के रूप में होता है।
 
-#### प्रतिनिधित्व टोकन
+यह एक बढ़िया विकल्प है जब credentials domain में या किसी दूसरे host पर valid हों, लेकिन user **current machine पर locally log on नहीं कर सकता या नहीं करना चाहिए**।
 
-यदि आपके पास पर्याप्त विशेषाधिकार हैं तो आप _**incognito**_ मॉड्यूल का उपयोग करके अन्य **टोकनों** को आसानी से **सूचीबद्ध** और **प्रतिनिधित्व** कर सकते हैं। यह **क्रियाएँ करने के लिए उपयोगी हो सकता है जैसे कि आप अन्य उपयोगकर्ता थे**। आप इस तकनीक के साथ **विशेषाधिकार बढ़ा** भी सकते हैं।
+### Types of tokens
 
-### टोकन विशेषाधिकार
+उपलब्ध tokens के दो प्रकार हैं:
 
-सीखें कि कौन से **टोकन विशेषाधिकारों का दुरुपयोग करके विशेषाधिकार बढ़ाए जा सकते हैं:**
+- **Primary Token**: यह process की security credentials का representation होता है। primary tokens का processes के साथ creation और association elevated privileges की मांग करते हैं, जो privilege separation के principle को दर्शाता है। आम तौर पर, token creation के लिए authentication service जिम्मेदार होती है, जबकि logon service उसे user के operating system shell के साथ associate करती है। यह ध्यान देने योग्य है कि processes creation के समय अपने parent process का primary token inherit करते हैं।
+- **Impersonation Token**: server application को secure objects तक पहुंचने के लिए client की identity को अस्थायी रूप से अपनाने में सक्षम बनाता है। यह mechanism operation के चार levels में विभाजित है:
+- **Anonymous**: unidentified user जैसी server access प्रदान करता है।
+- **Identification**: server को client की identity verify करने देता है, बिना उसे object access के लिए उपयोग किए।
+- **Impersonation**: server को client की identity के तहत operate करने में सक्षम बनाता है।
+- **Delegation**: Impersonation जैसा ही है, लेकिन server जिन remote systems के साथ interact करता है, वहां इस identity assumption को extend करने की क्षमता भी शामिल करता है, जिससे credential preservation सुनिश्चित होती है।
 
+#### Impersonate Tokens
+
+metasploit के _**incognito**_ module का उपयोग करके, यदि आपके पास पर्याप्त privileges हों, तो आप आसानी से अन्य **tokens** को **list** और **impersonate** कर सकते हैं। यह **ऐसे actions** करने में उपयोगी हो सकता है जैसे आप **दूसरे user** हों। आप इस technique से **privileges escalate** भी कर सकते हैं।
+
+काम करते समय कुछ practical notes, जिन्हें भूलना आसान होता है:
+
+- **`CreateProcessWithTokenW`** को caller में **`SeImpersonatePrivilege`** चाहिए, और नया process **caller's session** में चलेगा।
+- जब **`CreateProcessWithTokenW`** `1314` के साथ fail हो, या जब आपको **token द्वारा referenced session** में launch करना हो, तो **`CreateProcessAsUserW`** आम fallback है।
+- अगर token **`LogonUser(LOGON32_LOGON_NETWORK)`** से आता है, तो वह आम तौर पर **impersonation token** होता है, इसलिए process spawn करने से पहले **`DuplicateTokenEx(..., TokenPrimary, ...)`** चाहिए।
+- हर impersonation token समान रूप से उपयोगी नहीं होता: **`SecurityIdentification`** आपको user inspect करने देता है, लेकिन **उनकी तरह act** नहीं करने देता। अगर कोई coercion primitive या pipe/RPC client आपको केवल identification-level token देता है, तो **`TokenImpersonationLevel`** जांचें और ऐसे primitive पर स्विच करें जो **`SecurityImpersonation`** या उससे बेहतर दे।
+
+#### Token theft without touching LSASS
+
+अगर आपके पास पहले से **service** या **SYSTEM** context है और कोई **privileged user logged on** है, तो उस user का token steal या duplicate करना अक्सर **LSASS** dump करने से अधिक quiet होता है। कई real intrusions में यह इतना ही पर्याप्त होता है कि:
+
+- उस user के रूप में local actions चलाएं
+- उस user के रूप में remote resources access करें
+- पहले reusable credentials extract किए बिना AD operations perform करें
+
+Privileged context से **session/user token hijacking** के examples के लिए देखें [**WTS Impersonator**](../stealing-credentials/wts-impersonator.md). याद रखें कि **`WTSQueryUserToken`** जैसी APIs **highly trusted services** के लिए होती हैं और सामान्यतः **`LocalSystem` + `SeTcbPrivilege`** की आवश्यकता होती है, इसलिए ये मुख्यतः तब उपयोगी हैं जब आपके पास पहले से service-level context हो। पहले **SYSTEM** पाने के privilege-specific तरीकों के लिए नीचे दिए गए pages देखें।
+
+### Token Privileges
+
+जानें कि कौन-से **token privileges** का उपयोग **privileges escalate** करने के लिए किया जा सकता है:
 
 {{#ref}}
 privilege-escalation-abusing-tokens.md
 {{#endref}}
 
-[**सभी संभावित टोकन विशेषाधिकारों और कुछ परिभाषाओं के लिए इस बाहरी पृष्ठ पर नज़र डालें**](https://github.com/gtworek/Priv2Admin)।
+[**all the possible token privileges and some definitions on this external page**](https://github.com/gtworek/Priv2Admin) पर एक नज़र डालें।
 
-## संदर्भ
+## References
 
-टोकनों के बारे में अधिक जानें इस ट्यूटोरियल में: [https://medium.com/@seemant.bisht24/understanding-and-abusing-process-tokens-part-i-ee51671f2cfa](https://medium.com/@seemant.bisht24/understanding-and-abusing-process-tokens-part-i-ee51671f2cfa) और [https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962)
+- [https://medium.com/@seemant.bisht24/understanding-and-abusing-process-tokens-part-i-ee51671f2cfa](https://medium.com/@seemant.bisht24/understanding-and-abusing-process-tokens-part-i-ee51671f2cfa)
+- [https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962)
+- [https://sensepost.com/blog/2022/abusing-windows-tokens-to-compromise-active-directory-without-touching-lsass/](https://sensepost.com/blog/2022/abusing-windows-tokens-to-compromise-active-directory-without-touching-lsass/)
+- [https://www.fox-it.com/nl-en/demystifying-cobalt-strike-s-make_token-command/](https://www.fox-it.com/nl-en/demystifying-cobalt-strike-s-make_token-command/)
 
 {{#include ../../banners/hacktricks-training.md}}
