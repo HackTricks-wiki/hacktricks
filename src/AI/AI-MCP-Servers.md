@@ -149,6 +149,54 @@ otto-support selfpwn --agree
 - Enforce **allowlist-only egress** for MCP processes whenever possible. A server meant to query one internal system should not be able to open arbitrary outbound HTTP connections.
 - Monitor runtime behavior for **unexpected outbound connections** or file access during tool execution, especially when the server's visible MCP output still looks correct.
 
+### Execution-Layer Detection for Agentic MCP Abuse
+
+Prompt-injection against MCP clients often looks harmless in the chat transcript and only becomes obvious in the **execution layer**: which tool was called, which file was read, whether approval was bypassed, and where the data went. If your agent platform exports execution telemetry (for example OpenTelemetry from Claude Code/Cowork/Office-like agents), correlate on **`prompt.id`** or **`session.id`** instead of alerting on single chat messages.
+
+Useful normalized fields:
+- **Sequence/correlation**: `prompt.id`, `session.id`, `event.sequence`, `actor`
+- **Tool execution**: `tool_name`, `tool_input`, `tool_result`, `full_command`
+- **Approval/guardrails**: `tool_decision`, `decision`, `source`, `permission_mode_changed`, `hook_execution_complete`
+- **MCP inventory**: `mcp_server_name`, `mcp_tool_name`, `server_scope`, `plugin_installed`, `skill_activated`
+
+In **Claude Code**, third-party tool details are heavily reduced unless **`OTEL_LOG_TOOL_DETAILS=1`** is enabled. Without it, Bash arguments, MCP server/tool names, and skill names may be redacted, which makes allow-list and cross-server detections much weaker.
+
+#### High-signal detections
+
+- **Permission bypass / auto-approval abuse**: alert on `permission_mode_changed` to `bypassPermissions`, or on sensitive tools accepted with `source=config` / `source=user_permanent`. A useful correlation is **mode flip -> destructive Bash** in the same `session.id`.
+- **Secret-path read**: detect `Read`, `cat`, or `grep` against `.env`, `id_rsa`, `.aws/credentials`, `.npmrc`, keystores, or agent-specific secret files.
+- **Unsanctioned supplier inside the trust boundary**: alert on unknown `mcp_server_name`, suspicious `server_scope`, `plugin_installed` where `marketplace.is_official=false`, or `skill_activated` outside the allow-list.
+- **Dangerous Bash/tool execution**: detect `rm -rf`, `DROP DATABASE`, `git push --force`, `/dev/tcp` reverse shells, `curl ... | bash`, or `base64 -d` piped into a shell.
+
+#### Correlation patterns for indirect prompt injection
+
+The most reusable agentic detection is **untrusted read -> sensitive sink** inside a single prompt, with no intervening user prompt:
+
+```python
+for prompt_id, events in stream.group_by("prompt.id"):
+    events.sort(key=lambda e: e.sequence)
+    read = first_untrusted_read(events)
+    sink = first_sensitive_sink_after(events, read)
+    if read and sink and not user_prompt_between(events, read, sink):
+        alert(prompt_id, read, sink)
+```
+
+Increase confidence when one or more of these also happen:
+- the sink uses a **different MCP server** than the read (`cross-server hop` / confused deputy)
+- the action was **auto-approved**
+- the read touched a **secret path**
+- egress goes to a **new or unsanctioned destination**
+
+A second high-value pattern is **read secret -> send out** within the same `session.id`: sensitive file read followed by outbound `curl`, `gh gist create`, or a push to an untrusted remote.
+
+#### Telemetry limitations
+
+Execution traces are often truncated (the blog's Claude example logs only **512 characters per value** and about **4 KB total**), so they are ideal for **detection/correlation**, not always for full intent reconstruction. Claude Code also separates **tool metadata** (`OTEL_LOG_TOOL_DETAILS=1`) from **tool content** (`OTEL_LOG_TOOL_CONTENT=1`, tracing required), so a SIEM may know *which* tool ran without seeing the full payload. When the command, MCP response, or prompt content is truncated, send the alert to a judge/reviewer that can fetch the full conversation from the content/compliance plane. Also join agent telemetry with **EDR/host logs**: agent logs tell you that it launched `curl | bash`; endpoint logs tell you what the downloaded process actually did.
+
+#### Persistence / memory-poisoning hunting
+
+Treat writes to persistence files such as **`CLAUDE.md`** or repo-local agent configuration as suspicious when they happen during unrelated tasks. Cross-session drift (for the same account later behaving differently after such a write) is a good hunting signal for **memory poisoning**.
+
 ### Authorization Abuse: Token Passthrough & Confused Deputy
 
 Remote MCP servers that proxy SaaS APIs (GitHub, Gmail, Jira, Slack, cloud APIs, etc.) are not just wrappers: they also become an **authorization boundary**. The dangerous anti-pattern is receiving a bearer token from the MCP client and forwarding it upstream, or accepting any token without validating that it was actually issued **for this MCP server**.
@@ -384,5 +432,7 @@ This workflow makes MCP endpoints fuzzable with standard Burp tooling despite th
 - [otto-support `selfpwn` source](https://github.com/BishopFox/otto-support/blob/main/cmd/otto-support/selfpwn.go)
 - [Model Context Protocol Security Best Practices](https://modelcontextprotocol.io/docs/tutorials/security/security_best_practices)
 - [MCP Inspector proxy server lacks authentication between the Inspector client and proxy](https://github.com/advisories/GHSA-7f8r-222p-6f5g)
+- [Detecting Agentic Threats in Claude: Writing Rules on the Execution Layer](https://papermtn.co.uk/detecting-agentic-threats-in-claude-writing-rules-on-the-execution-layer)
+- [PaperMtn claude-enterprise-detections](https://github.com/PaperMtn/claude-enterprise-detections)
 
 {{#include ../banners/hacktricks-training.md}}
