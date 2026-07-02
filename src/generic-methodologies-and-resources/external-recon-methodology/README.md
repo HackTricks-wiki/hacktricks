@@ -142,9 +142,11 @@ Moreover, you can also search technologies using the favicon hash as explained i
 
 ```bash
 shodan search org:"Target" http.favicon.hash:116323821 --fields ip_str,port --separator " " | awk '{print $1":"$2}'
+# FOFA
+icon_hash="116323821"
 ```
 
-This is how you can **calculate the favicon hash** of a web:
+This is how you can **calculate the favicon hash** of a web (MMH3 over the **base64-encoded** favicon bytes):
 
 ```python
 import mmh3
@@ -152,14 +154,26 @@ import requests
 import codecs
 
 def fav_hash(url):
-    response = requests.get(url)
-    favicon = codecs.encode(response.content,"base64")
+    response = requests.get(url, timeout=10)
+    favicon = codecs.encode(response.content, "base64")
     fhash = mmh3.hash(favicon)
     print(f"{url} : {fhash}")
     return fhash
 ```
 
 You can also get favicon hashes at scale with [**httpx**](https://github.com/projectdiscovery/httpx) (`httpx -l targets.txt -favicon`) and then pivot in Shodan/Censys.
+
+Useful things to remember when using favicon fingerprints:
+
+- **Treat the hash as an indicator, not proof**: MMH3 is compact and collisions are possible; operators can also replace favicons or intentionally reuse a misleading icon.
+- **Probe more than** `/favicon.ico`: many products expose icons in framework/build paths or via `manifest.json`, `site.webmanifest`, `browserconfig.xml`, `apple-touch-icon*`, inline `data:` URLs, or HTML `<link rel="icon">` tags. The path itself can fingerprint a product family.
+- **Static files are often reachable when the app is not**: WAF/SSO/IdP controls may protect dynamic routes but still expose static icons. Always request the favicon directly and review `ETag`, `Last-Modified`, redirects and cache headers for weak version/build hints.
+- **Validate matches with surrounding signals**: compare title, HTML/body hash, headers, TLS certificate subjects/SANs, Shodan/Censys components, and exposed ports before concluding that a favicon identifies a product.
+- **Cluster by HTML/body hash when pivoting at scale**: if most hosts sharing a favicon collapse into one page template, the fingerprint is stronger; if the same hash splits into many unrelated templates, prefer "generic/shared/honeypot" over a product label.
+- **Honeypot heuristic**: if the same favicon hash appears across many unrelated HTML signatures, random ports, and conflicting products, treat it as a probable honeypot or generic placeholder rather than a real product fingerprint.
+- **Use a 404 probe on ambiguous targets**: fetch a real page and a nonexistent path such as `/_favicon_probe_<8-hex>` in a browser. Matching hosting-provider/parking responses often explain shared favicons better than true product overlap.
+- **Bootstrap mappings from detection rules**: Nuclei templates and public favicon datasets can provide known `favicon` ↔ `product` ↔ `CPE` mappings that are useful for rapid triage after CVE disclosures.
+- **Coverage caveat**: Shodan-style datasets are IP-centric. CDN-fronted, SNI-routed, anycast, and domain-only surfaces may be undercounted, so a low hit count does **not** mean low real-world deployment.
 
 ### **Copyright / Uniq string**
 
@@ -753,5 +767,7 @@ There are several tools out there that will perform part of the proposed actions
 
 - All free courses of [**@Jhaddix**](https://twitter.com/Jhaddix) like [**The Bug Hunter's Methodology v4.0 - Recon Edition**](https://www.youtube.com/watch?v=p4JgIu1mceI)
 - [0xdf – HTB: Guardian](https://0xdf.gitlab.io/2026/02/28/htb-guardian.html)
+- [Bishop Fox – On Favicons: From Browser Icons to Attack Surface Intelligence](https://bishopfox.com/blog/on-favicons-from-browser-icons-to-attack-surface-intelligence)
+- [BishopFox/Favicons](https://github.com/BishopFox/Favicons)
 
 {{#include ../../banners/hacktricks-training.md}}
