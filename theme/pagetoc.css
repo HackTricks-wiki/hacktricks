@@ -110,6 +110,7 @@
         padding: 5px;
         display: none; /*changed via JS once ad is loaded*/
         flex-direction: column;
+        align-items: center;
         text-decoration: none !important;
         overflow: hidden;
         backdrop-filter: blur(6px);
@@ -124,27 +125,31 @@
         object-fit: contain;
         align-self: center;
         flex: 0 0 auto;
-        transition-property: all;
-        transition-timing-function: cubic-bezier(.4,0,.2,1);
-        transition-duration: .3s;
+        transition:
+            height .36s cubic-bezier(.22,1,.36,1),
+            width .36s cubic-bezier(.22,1,.36,1),
+            max-height .36s cubic-bezier(.22,1,.36,1),
+            min-height .36s cubic-bezier(.22,1,.36,1),
+            padding .36s cubic-bezier(.22,1,.36,1),
+            transform .36s cubic-bezier(.22,1,.36,1);
     }
     .sidesponsor:hover img{
-       width: 42px;
+       width: 56px;
        padding: 4px;
        grid-area: sponsor-image;
        align-self: center;
-       transition-duration: 0s;
+       justify-self: center;
     }
     .sidesponsor:hover {
         display: grid !important;
-        grid-template-columns: auto minmax(0, 1fr);
-        grid-template-rows: max-content minmax(0, 1fr) auto;
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-rows: max-content max-content minmax(0, 1fr) auto;
         grid-template-areas:
-            "sponsor-image sponsor-title"
-            "sponsor-description sponsor-description"
-            "sponsor-cta sponsor-cta";
-        column-gap: 8px;
-        row-gap: 10px;
+            "sponsor-image"
+            "sponsor-title"
+            "sponsor-description"
+            "sponsor-cta";
+        row-gap: 3px;
         align-items: center;
         align-content: start;
         overflow: hidden;
@@ -160,6 +165,7 @@
         color: var(--sponsor-fg);
         overflow-wrap: anywhere;
         text-align: center;
+        align-self: center;
         flex: 0 0 auto;
     }
     .sidesponsor .sponsor-title.sponsor-title--long {
@@ -167,13 +173,15 @@
     }
     .sidesponsor:hover .sponsor-title{
         grid-area: sponsor-title;
-        margin-left: 0;
+        margin-left: 8px;
+        margin-right: 8px;
         margin-top: 0;
         margin-bottom: 0;
-        font-size: 1.55rem;
-        line-height: 1.15;
+        font-size: 1.45rem;
+        line-height: 1.1;
         overflow-wrap: anywhere;
         align-self: center;
+        justify-self: center;
     }
     .sidesponsor .sponsor-description{
         display: block;
@@ -186,23 +194,31 @@
         opacity: 0;
         visibility: hidden;
         overflow: hidden;
+        transform: translateY(5px);
         transition:
-            opacity .18s ease .14s,
-            visibility 0s linear .32s;
+            max-height .44s cubic-bezier(.22,1,.36,1),
+            opacity .34s ease .08s,
+            transform .44s cubic-bezier(.22,1,.36,1),
+            visibility 0s linear .44s;
     }
     .sidesponsor:hover .sponsor-description{
         grid-area: sponsor-description;
+        align-self: start;
         min-height: 0;
         max-height: 100%;
-        margin-top: 0;
+        margin-top: 3px;
         margin-bottom: 0;
         font-size: calc(1em - 1px);
         opacity: 1;
         visibility: visible;
+        transform: translateY(0);
         overflow: auto;
         overscroll-behavior: contain;
-        animation: sponsorTextReveal .12s ease .18s forwards;
-        transition: none;
+        transition:
+            max-height .44s cubic-bezier(.22,1,.36,1),
+            opacity .36s ease .08s,
+            transform .44s cubic-bezier(.22,1,.36,1),
+            visibility 0s linear 0s;
     }
     .sidesponsor .sponsor-cta{
         margin-top: auto;
@@ -218,20 +234,20 @@
     }
     .sidesponsor:hover .sponsor-cta{
         grid-area: sponsor-cta;
-        margin-top: 22px;
-        margin-bottom: 8px;
-        padding: 9px 14px;
+        margin-top: 4px;
+        margin-bottom: 2px;
+        padding: 11px 18px;
         box-sizing: border-box;
         max-width: 100%;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
-        font-size: 1.2rem;
+        font-size: 1.3rem;
         font-weight: 800;
         line-height: 1.1;
         visibility: hidden;
         opacity: 0;
-        animation: sponsorTextReveal .12s ease .18s forwards;
+        animation: sponsorTextReveal .28s ease .12s forwards;
     }
     @keyframes sponsorTextReveal {
         0% {
