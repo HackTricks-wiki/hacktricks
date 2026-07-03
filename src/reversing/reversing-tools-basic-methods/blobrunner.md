@@ -1,6 +1,86 @@
+# Blobrunner
+
 {{#include ../../banners/hacktricks-training.md}}
 
-A única linha modificada do [código original](https://github.com/OALabs/BlobRunner) é a linha 10. Para compilar, **basta criar um projeto C/C++ no Visual Studio Code, copiar e colar o código e compilá-lo**.
+[**BlobRunner**](https://github.com/OALabs/BlobRunner) é um pequeno **shellcode loader for debugging** do Windows: ele aloca memória RWX, copia o blob, imprime o endereço base / ponto de entrada e transfere a execução para lá. Isso é útil quando o sample é **raw shellcode**, um **decrypted stage extracted from malware** ou um **position-independent blob** que não tem um cabeçalho PE.
+
+O snippet abaixo mantém a ideia original, mas usa **`%p` para ponteiros impressos** para que a build x64 não trunque endereços enquanto você está tentando anexar um debugger ou rebasear o blob na sua RE tool.
+
+## Build
+
+A forma mais simples de compilar o projeto original é a partir de um **Visual Studio Developer Command Prompt**:
+```bash
+cl blobrunner.c
+cl /Feblobrunner64.exe /Foblobrunner64.out blobrunner.c
+```
+Você também pode colar o código em um pequeno projeto C no Visual Studio / VS Code e compilá-lo lá.
+
+## Padrões de uso úteis
+```bash
+# Execute from the beginning of the blob
+BlobRunner.exe shellcode.bin
+
+# Start from a known offset inside the blob
+BlobRunner.exe shellcode.bin --offset 0x100
+
+# Don't stop before transferring execution
+BlobRunner.exe shellcode.bin --nopause
+
+# Force an access violation and let the configured JIT debugger catch it
+BlobRunner.exe shellcode.bin --jit
+```
+- Em **x86**, BlobRunner pausa e depois faz um salto direto para o blob entry point.
+- Em **x64**, ele cria uma **suspended thread**, então você pode quebrar no thread start address antes de retomar a execução.
+- `--offset` é especialmente útil quando o dumped blob começa com um **decoder / unpacking stub** e você já conhece o real entry point.
+
+## Notas práticas
+
+### Corrija os endereços impressos em labs x64
+
+O código antigo do BlobRunner imprime endereços via casts como `(int)(size_t)lpvBase` e `%08x` / `%016x`. Em workflows 64-bit, isso pode truncar a metade alta do ponteiro e tornar o rebasing / breakpoint placement chato. O snippet abaixo já corrige isso ao imprimir valores **`%p`** diretamente.
+
+### `--jit` é útil para breakpoints na primeira instrução
+
+`--jit` remove o execute access do primeiro byte do shellcode e faz o Windows gerar uma **access violation** quando o blob começa a executar. Isso é útil quando você quer que o **configured JIT debugger** (por exemplo x64dbg) capture a primeira tentativa de execução em vez de você ter que correr manualmente para anexar. Depois que o debugger quebrar, restaure os execute rights e continue.
+
+Um fluxo prático no **x64dbg** é:
+```text
+setjit
+setjitauto on
+BlobRunner.exe shellcode.bin --jit
+setpagerights <region>, ExecuteReadWrite
+```
+Os dois primeiros comandos registram o x64dbg como o depurador JIT, e `setpagerights` restaura os direitos de execução na região impressa pelo BlobRunner depois que o debugger captura a access violation.
+
+### Faça time-travel no shellcode em vez de executá-lo live passo a passo
+
+Um fluxo de trabalho recente e muito prático é gravar o BlobRunner no **TTD** e então inspecionar o trace no **Binary Ninja** / **WinDbg**. Isso é ótimo quando o blob se auto-decripta, resolve APIs dinamicamente ou executa várias etapas de curta duração. Desde o **Binary Ninja 4.1**, o suporte a TTD não é mais apenas beta: ele pode conduzir reverse-debugging e simplificar diretamente do Binary Ninja o fluxo de trabalho do WinDbg / TTD.
+```bash
+TTD.exe .\blobrunner.exe .\shellcode.bin
+```
+A parte importante é **anotar o endereço base alocado impresso pelo BlobRunner** e então **rebase** a view do shellcode para esse endereço antes de reproduzir o trace. Note também que a Microsoft documenta a gravação com TTD como **invasive**: execute-a a partir de um prompt **elevated**, espere uma desaceleração perceptível e mantenha a janela de gravação curta para evitar arquivos de trace enormes.
+
+### Se o blob precisar de dados auxiliares, use um wrapper PE em vez disso
+
+Alguns shellcodes esperam que exista em memória um **second blob**, um **mapped file** ou outro **structured content**. O BlobRunner é intencionalmente minimalista, então, para esses casos, um runner como o **SCLauncher** pode ser mais conveniente porque ele pode:
+
+- pausar antes da execução,
+- inserir um breakpoint `INT3`,
+- carregar **additional content** na memória,
+- memory-map desse conteúdo extra, ou
+- envolver o shellcode dentro de um **PE** temporário para facilitar a análise em tools que preferem executáveis normais.
+
+Example:
+```bash
+SCLauncher.exe -f=shellcode.bin -pause -d=config.bin -mm
+SCLauncher.exe -f=shellcode.bin -pe -64 -ep=0x120
+```
+Para fluxos de trabalho complementares, como **jmp2it**, emulação do **Cutter** ou tracing de shellcode baseado em **scdbg**, consulte a [parent shellcode reversing page](README.md).
+
+## Source code
+
+As únicas linhas modificadas do [código original](https://github.com/OALabs/BlobRunner) são as linhas de impressão de ponteiros usadas para evitar a truncação de endereços x64.
+Para compilá-lo, basta **criar um projeto C/C++ no Visual Studio Code, copiar e colar o código e compilá-lo**.
 ```c
 #include <stdio.h>
 #include <windows.h>
@@ -65,7 +145,7 @@ printf(" [*] Allocating Memory...");
 lpvBase = VirtualAlloc(NULL, fileLen, 0x3000, 0x40);
 
 printf(".Allocated!\n");
-printf(" [*]   |-Base: 0x%08x\n", (int)(size_t)lpvBase);
+printf(" [*]   |-Base: %p\n", lpvBase);
 printf(" [*] Copying input data...\n");
 
 CopyMemory(lpvBase, buffer, fileLen);
@@ -102,7 +182,7 @@ printf(" [!] Error Creating thread...");
 return;
 }
 printf(" [*] Created Thread: [%d]\n", thread_id);
-printf(" [*] Thread Entry: 0x%016x\n", (int)(size_t)shell_entry);
+printf(" [*] Thread Entry: %p\n", shell_entry);
 
 #endif
 
@@ -127,7 +207,7 @@ VirtualProtect(shell_entry, 1 , PAGE_READWRITE, &oldp);
 printf(" [*] Resuming Thread..\n");
 ResumeThread(thread_handle);
 #else
-printf(" [*] Entry: 0x%08x\n", (int)(size_t)shell_entry);
+printf(" [*] Entry: %p\n", shell_entry);
 printf(" [*] Jumping to shellcode\n");
 __asm jmp shell_entry;
 #endif
@@ -204,4 +284,8 @@ getchar();
 return 0;
 }
 ```
+## Referências
+
+- [Time Travel Debugging Shellcode with Binary Ninja](https://www.lrqa.com/en/cyber-labs/time-travel-debugging-shellcode-with-binary-ninja/)
+- [Analyzing Shellcode with SCLauncher](https://www.thecyberyeti.com/post/analyzing-shellcode-with-sclauncher)
 {{#include ../../banners/hacktricks-training.md}}
