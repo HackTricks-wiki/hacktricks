@@ -2,9 +2,9 @@
 
 <figure><img src="images/hacktricks.gif" alt=""><figcaption></figcaption></figure>
 
-_Hacktricks 标志与动态设计由_ [_@ppieranacho_](https://www.instagram.com/ppieranacho/)_._
+_Hacktricks 标志与动效设计由_ [_@ppieranacho_](https://www.instagram.com/ppieranacho/)_._
 
-### 在本地运行 HackTricks
+### 本地运行 HackTricks
 ```bash
 # Download latest version of hacktricks
 git clone https://github.com/HackTricks-wiki/hacktricks
@@ -31,7 +31,7 @@ export LANG="master" # Leave master for english
 # Run the docker container indicating the path to the hacktricks folder
 docker run -d --rm --platform linux/amd64 -p 3337:3000 --name hacktricks -v $(pwd)/hacktricks:/app ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image bash -c "mkdir -p ~/.ssh && ssh-keyscan -H github.com >> ~/.ssh/known_hosts && cd /app && git config --global --add safe.directory /app && git checkout $LANG && git pull && MDBOOK_PREPROCESSOR__HACKTRICKS__ENV=dev mdbook serve --hostname 0.0.0.0"
 ```
-Your local copy of HackTricks will be **available at [http://localhost:3337](http://localhost:3337)** after <5 minutes (it needs to build the book, be patient).
+Your local copy of HackTricks 将在 <5 分钟后 **可用，访问 [http://localhost:3337](http://localhost:3337)**（需要构建书籍，请耐心等待）。
 
 ## HackTricks Partners
 
@@ -43,11 +43,11 @@ Your local copy of HackTricks will be **available at [http://localhost:3337](htt
 
 <figure class="sponsor-logo"><img src="images/stm (1).png" alt=""><figcaption></figcaption></figure>
 
-[**STM Cyber**](https://www.stmcyber.com) 是一家很棒的网络安全公司，其口号是 **HACK THE UNHACKABLE**。他们进行自己的研究并开发自己的 hacking tools，以便 **提供多项有价值的 cybersecurity 服务**，例如 pentesting、Red teams 和培训。
+[**STM Cyber**](https://www.stmcyber.com) 是一家很棒的 cybersecurity 公司，其口号是 **HACK THE UNHACKABLE**。他们进行自己的研究并开发自己的 hacking tools，以 **提供多种有价值的 cybersecurity 服务**，例如 pentesting、Red teams 和 training。
 
 你可以在 [**https://blog.stmcyber.com**](https://blog.stmcyber.com) 查看他们的 **blog**
 
-**STM Cyber** 也支持像 HackTricks 这样的开源 cybersecurity 项目 :)
+**STM Cyber** 也支持 HackTricks 这类 cybersecurity 开源项目 :)
 
 ---
 
@@ -55,9 +55,9 @@ Your local copy of HackTricks will be **available at [http://localhost:3337](htt
 
 <figure class="sponsor-logo"><img src="images/image (47).png" alt=""><figcaption></figcaption></figure>
 
-**Intigriti** 是欧洲排名第一的 ethical hacking 和 **bug bounty platform。**
+**Intigriti** 是 **欧洲第一** 的 ethical hacking 和 **bug bounty platform.**
 
-**Bug bounty tip**：**注册** **Intigriti**，一个由 hackers 为 hackers 创建的高级 **bug bounty platform**！今天就加入我们：[**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks)，开始赚取最高 **$100,000** 的赏金！
+**Bug bounty tip**: **sign up** for **Intigriti**，一个由 hackers 为 hackers 创建的高级 **bug bounty platform**！今天就加入我们 [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks)，开始赚取最高可达 **$100,000** 的赏金！
 
 {{#ref}}
 https://go.intigriti.com/hacktricks
@@ -71,11 +71,11 @@ https://go.intigriti.com/hacktricks
 
 加入 [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) 服务器，与有经验的 hackers 和 bug bounty hunters 交流！
 
-- **Hacking Insights:** 接触深入探讨 hacking 的刺激与挑战的内容
-- **Real-Time Hack News:** 通过实时新闻和洞察，及时了解快节奏的 hacking 世界
+- **Hacking Insights:** 参与深入探讨 hacking 的刺激与挑战的内容
+- **Real-Time Hack News:** 通过实时新闻和洞察，紧跟快速变化的 hacking 世界
 - **Latest Announcements:** 了解最新上线的 bug bounties 和关键平台更新
 
-**加入我们** [**Discord**](https://discord.com/invite/N3FrSbmwdy)，今天就开始与顶尖 hackers 协作！
+**Join us on** [**Discord**](https://discord.com/invite/N3FrSbmwdy) ，今天就开始与顶尖 hackers 协作！
 
 ---
 
@@ -83,18 +83,18 @@ https://go.intigriti.com/hacktricks
 
 <figure class="sponsor-logo"><img src="images/modern_security_logo.png" alt="Modern Security"><figcaption></figcaption></figure>
 
-Modern Security 提供 **实用的 AI Security 培训**，采用 **以工程为先、动手实验室驱动** 的方式。我们的课程面向 security engineers、AppSec professionals 和开发者，帮助他们 **构建、破解并保护真实的 AI/LLM 驱动应用**。
+Modern Security 提供 **实用的 AI Security training**，采用 **engineering-first、hands-on lab** 方法。我们的课程面向 security engineers、AppSec professionals 和 developers，帮助他们 **构建、破坏并保护真实的 AI/LLM 驱动应用**。
 
-**AI Security Certification** 侧重于真实世界技能，包括：
+**AI Security Certification** 重点关注真实世界技能，包括：
 - 保护 LLM 和 AI 驱动的应用
-- AI systems 的威胁建模
+- AI 系统的 Threat modeling
 - Embeddings、vector databases 和 RAG security
-- LLM attacks、滥用场景和实用防御
-- Secure design patterns 和部署考虑
+- LLM attacks、abuse scenarios 和实用防御
+- Secure design patterns 和 deployment 考量
 
-所有课程都 **按需提供**、**以实验室为核心**，并围绕 **真实世界的安全权衡** 设计，而不仅仅是理论。
+所有课程均为 **on-demand**、**lab-driven**，并围绕 **真实世界的 security tradeoffs** 设计，而不只是理论。
 
-👉 AI Security 课程的更多详情：
+👉 AI Security 课程更多详情：
 https://www.modernsecurity.io/courses/ai-security-certification
 
 {{#ref}}
@@ -107,14 +107,14 @@ https://modernsecurity.io/
 
 <figure class="sponsor-logo"><img src="images/image (1254).png" alt=""><figcaption></figcaption></figure>
 
-**SerpApi** 提供快速且易用的实时 API，用于 **访问 search engine results**。他们抓取 search engines、处理 proxies、解决 captchas，并为你解析所有丰富的结构化数据。
+**SerpApi** 提供快速、易用的实时 APIs，用于 **访问搜索引擎结果**。他们抓取搜索引擎、处理 proxies、解决 captchas，并为你解析所有丰富的结构化数据。
 
-订阅 SerpApi 的任一方案都可访问 50 多种不同的 API，用于抓取不同的 search engines，包括 Google、Bing、Baidu、Yahoo、Yandex 等。\
-与其他提供商不同，**SerpApi 不仅抓取 organic results**。SerpApi 的响应始终包含所有 ads、inline images 和 videos、knowledge graphs，以及 search results 中存在的其他元素和功能。
+订阅 SerpApi 任一方案即可使用 50 多种不同的 APIs 来抓取不同的搜索引擎，包括 Google、Bing、Baidu、Yahoo、Yandex 等。\
+与其他提供商不同，**SerpApi 不只是抓取 organic results**。SerpApi 的响应始终包含所有 ads、inline images 和 videos、knowledge graphs，以及搜索结果中存在的其他元素和特性。
 
-SerpApi 现有客户包括 **Apple、Shopify 和 GrubHub**。\
-更多信息请查看他们的 [**blog**](https://serpapi.com/blog/)**，**或在他们的 [**playground**](https://serpapi.com/playground) 中试用一个示例**。**\
-你可以在 [**这里**](https://serpapi.com/users/sign_up)**创建一个免费账号**。**
+SerpApi 的现有客户包括 **Apple、Shopify 和 GrubHub**。\
+更多信息请查看他们的 [**blog**](https://serpapi.com/blog/)**,** 或在他们的 [**playground**](https://serpapi.com/playground)**.** 中试用示例。\
+你可以在 [**这里**](https://serpapi.com/users/sign_up)**.** 创建一个免费账号。
 
 ---
 
@@ -122,7 +122,7 @@ SerpApi 现有客户包括 **Apple、Shopify 和 GrubHub**。\
 
 <figure class="sponsor-logo"><img src="images/image (2).png" alt=""><figcaption></figcaption></figure>
 
-学习执行 vulnerability research、penetration testing 和 reverse engineering 所需的技术与技能，以保护移动应用和设备。通过我们的按需课程 **掌握 iOS 和 Android security** 并 **获得认证**：
+学习进行 vulnerability research、penetration testing 和 reverse engineering 所需的技术与技能，以保护 mobile applications 和 devices。通过我们的 on-demand courses **掌握 iOS 和 Android security** 并 **获得认证**：
 
 {{#ref}}
 https://academy.8ksec.io/
@@ -134,9 +134,9 @@ https://academy.8ksec.io/
 
 <figure class="sponsor-logo"><img src="images/logo-naxus.png" alt=""><figcaption></figcaption></figure>
 
-**NaxusAI** 是一个由 AI 驱动的 security platform，用于在 attackers 之前发现可被利用的漏洞。
+**NaxusAI** 是一个由 AI 驱动的 security platform，用于在 attackers 之前发现可被利用的 vulnerabilities。
 
-**Code security tip**：注册 NaxusAI，这是一款为 developers 和 security teams 构建的智能漏洞监控平台！今天就加入我们，开始使用 AI 在 **真实的 security risks 到达 production 之前检测、验证并修复它们**！
+**Code security tip**: sign up for NaxusAI，一个为 developers 和 security teams 构建的智能 vulnerability monitoring platform！今天就加入我们，开始使用 AI 在 **detecting、validating 和 fixing real security risks before they reach production**！
 
 {{#ref}}
 https://naxusai.com
@@ -148,13 +148,13 @@ https://naxusai.com
 
 <figure class="sponsor-logo"><img src="images/websec (1).svg" alt=""><figcaption></figcaption></figure>
 
-[**WebSec**](https://websec.net) 是一家位于 **Amsterdam** 的专业 cybersecurity 公司，通过提供 **offensive-security services** 和 **modern** 方法，帮助 **保护** **全世界** 的企业免受最新 cybersecurity threats 的影响。
+[**WebSec**](https://websec.net) 是一家位于 **Amsterdam** 的专业 cybersecurity 公司，通过提供 **offensive-security services** 并采用 **modern** 的方法，帮助 **保护** **全世界** 的企业免受最新 cybersecurity threats 影响。
 
-WebSec 是一家国际 security company，在 Amsterdam 和 Wyoming 设有办公室。他们提供 **all-in-one security services**，这意味着他们什么都做；Pentesting、**Security** Audits、Awareness Trainings、Phishing Campagnes、Code Review、Exploit Development、Security Experts Outsourcing 以及更多服务。
+WebSec 是一家在 Amsterdam 和 Wyoming 设有办公室的国际 security company。他们提供 **all-in-one security services**，也就是说他们什么都做；Pentesting、**Security** Audits、Awareness Trainings、Phishing Campagnes、Code Review、Exploit Development、Security Experts Outsourcing 以及更多服务。
 
-WebSec 的另一项很酷之处在于，与行业平均水平不同，WebSec 对自己的技能 **非常有信心**，甚至 **保证最佳质量结果**，其网站上写着：**“If we can't hack it, You don't pay it!”**。更多信息请查看他们的 [**website**](https://websec.net/en/) 和 [**blog**](https://websec.net/blog/)！
+WebSec 的另一个很酷之处在于，不同于行业平均水平，WebSec 对自己的技能 **非常有信心**，甚至 **保证最佳质量结果**，其网站上写着 "**If we can't hack it, You don't pay it!**"。更多信息请查看他们的 [**website**](https://websec.net/en/) 和 [**blog**](https://websec.net/blog/)！
 
-除了上述内容，WebSec 还是 HackTricks 的 **坚定支持者**。
+除了上述内容，WebSec 也是 HackTricks 的 **坚定支持者**。
 
 {{#ref}}
 https://www.youtube.com/watch?v=Zq2JycGDCPM
@@ -167,13 +167,13 @@ https://www.youtube.com/watch?v=Zq2JycGDCPM
 <figure class="sponsor-logo"><img src="images/cyberhelmets-logo.png" alt="cyberhelmets logo"><figcaption></figcaption></figure>
 
 
-**Built for the field. Built around you.**\
-[**Cyber Helmets**](https://cyberhelmets.com/?ref=hacktricks) 开发并提供高效的 cybersecurity 培训，由行业专家构建并主导。他们的课程超越理论，通过使用反映真实世界 threats 的自定义环境，为团队提供深入理解和可执行技能。如需定制培训，请在 [**这里**](https://cyberhelmets.com/tailor-made-training/?ref=hacktricks) 联系我们。
+**为实战而生。围绕你而建。**\
+[**Cyber Helmets**](https://cyberhelmets.com/?ref=hacktricks) 开发并提供由行业专家构建和主导的高效 cybersecurity training。他们的项目超越理论，通过使用反映真实世界 threats 的自定义环境，为团队提供深入理解和可执行技能。有关定制培训咨询，请在 [**这里**](https://cyberhelmets.com/tailor-made-training/?ref=hacktricks) 联系我们。
 
-**Their training 的区别在于：**
-* Custom-built content and labs
-* Backed by top-tier tools and platforms
-* Designed and taught by practitioners
+**他们的 training 与众不同之处：**
+* 定制内容和 labs
+* 由顶级 tools 和 platforms 支持
+* 由从业者设计并授课
 
 {{#ref}}
 https://cyberhelmets.com/courses/?ref=hacktricks
@@ -186,17 +186,16 @@ https://cyberhelmets.com/courses/?ref=hacktricks
 <figure class="sponsor-logo"><img src="images/lasttower.png" alt="lasttower logo"><figcaption></figcaption></figure>
 
 Last Tower Solutions 为 **Education** 和 **FinTech**
-机构提供专业 cybersecurity 服务，重点是 **penetration testing、cloud security assessments**，以及
+机构提供专业的 cybersecurity services，重点包括 **penetration testing、cloud security assessments**，以及
 **compliance readiness**（SOC 2、PCI-DSS、NIST）。我们的团队包括 **OSCP 和 CISSP
-certified professionals**，为每次合作带来深厚的技术专长和行业标准洞察。
+认证专业人士**，为每一次项目带来深厚的技术专业知识和行业标准洞察。
 
-我们超越自动化扫描，提供针对
-高风险环境定制的 **manual, intelligence-driven testing**。从保护学生记录到保护金融交易，
+我们不止于自动化扫描，还提供面向高风险环境定制的 **manual、intelligence-driven testing**。从保护学生记录到保障金融交易，
 我们帮助组织守护最重要的东西。
 
 _“A quality defense requires knowing the offense, we provide security through understanding.”_
 
-通过访问我们的 [**blog**](https://www.lasttowersolutions.com/blog)，随时了解 cybersecurity 的最新动态。
+欢迎访问我们的 [**blog**](https://www.lasttowersolutions.com/blog)，及时了解最新 cybersecurity 动态。
 
 {{#ref}}
 https://www.lasttowersolutions.com/
@@ -208,33 +207,18 @@ https://www.lasttowersolutions.com/
 
 <figure class="sponsor-logo"><img src="images/k8studio.png" alt="k8studio logo"><figcaption></figcaption></figure>
 
-K8Studio IDE 让 DevOps、DevSecOps 和 developers 能够高效地管理、监控并保护 Kubernetes clusters。借助我们的 AI 驱动洞察、高级 security framework 和直观的 CloudMaps GUI，你可以可视化你的 clusters、理解它们的状态，并自信地采取行动。
+K8Studio IDE 让 DevOps、DevSecOps 和 developers 能够高效地管理、监控和保护 Kubernetes clusters。利用我们的 AI 驱动洞察、先进 security framework 和直观的 CloudMaps GUI，可视化你的 clusters，理解其状态，并自信地采取行动。
 
-此外，K8Studio **兼容所有主流 kubernetes distributions**（AWS、GCP、Azure、DO、Rancher、K3s、Openshift 等）。
+此外，K8Studio **兼容所有主要 kubernetes distributions**（AWS、GCP、Azure、DO、Rancher、K3s、Openshift 等）。
 
 {{#ref}}
 https://k8studio.io/
 {{#endref}}
 
 ---
-
-<!-- hacktricks-friends:friend:friend-carlospolop:start -->
-### [HackTricks Books](https://book.hacktricks.wiki/)
-
-<figure class="sponsor-logo"><img src="https://friends.hacktricks.wiki/assets/17181413/5e15e93e6b8523dac2ad.png" alt="HackTricks Books logo"><figcaption></figcaption></figure>
-
-这是一段用于介绍免费的 cybersecurity wiki：<b>Hacktricks Book </b> 的文本。现在就从中免费学习各种 hacking tricks！
-
-{{#ref}}
-https://book.hacktricks.wiki/
-{{#endref}}
-
----
-<!-- hacktricks-friends:friend:friend-carlospolop:end -->
-
 ## License & Disclaimer
 
-请在以下位置查看：
+Check them in:
 
 {{#ref}}
 welcome/hacktricks-values-and-faq.md
