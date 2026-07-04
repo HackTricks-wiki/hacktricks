@@ -874,7 +874,7 @@ ul#searchresults li a span.teaser em {
     }
 }
 
-@media only screen and (min-width:550px) {
+@media only screen and (min-width:800px) {
     .sidebar-float-toggle {
         position: fixed;
         top: calc(var(--menu-bar-height) + 90px);
@@ -919,15 +919,7 @@ ul#searchresults li a span.teaser em {
     margin-right: auto;
 }
 
-#sidebar-toggle-anchor:not(:checked) ~ .page-wrapper .page #container .sidetoc {
-    position: fixed;
-    right: max(var(--page-padding), calc((100vw - var(--container-max-width)) / 2));
-    top: 0;
-    width: 250px;
-    margin-top: 25px;
-}
-
-@media only screen and (max-width:549px) {
+@media only screen and (max-width:799px) {
     .sidebar-float-toggle {
         position: fixed;
         top: calc(var(--menu-bar-height) + 10px);
@@ -955,14 +947,14 @@ ul#searchresults li a span.teaser em {
     }
 }
 
-@media only screen and (max-width:549px) {
+@media only screen and (max-width:799px) {
     #sidebar-toggle-anchor:checked ~ .page-wrapper .page #container .sidebar-float-toggle {
         left: calc(100vw - 34px);
     }
 }
 
 /* Sidebar */
-@media only screen and (min-width:550px) {
+@media only screen and (min-width:800px) {
     .sidebar {
         position: sticky;
         top: 4rem;
@@ -981,7 +973,7 @@ ul#searchresults li a span.teaser em {
         display: none !important;
     }
 }
-@media only screen and (max-width:549px) {
+@media only screen and (max-width:799px) {
     .sidebar {
         position: fixed;
         bottom: 0;
@@ -997,7 +989,7 @@ ul#searchresults li a span.teaser em {
         z-index: 105;
     }
 }
-@media only screen and (max-width:549px) {
+@media only screen and (max-width:799px) {
     #sidebar {
         display: none;
     }
@@ -1013,8 +1005,23 @@ ul#searchresults li a span.teaser em {
     #sidebar-toggle-anchor:checked ~ .page-wrapper .page #container #sidebar {
         display: block !important;
     }
+    #sidebar-toggle-anchor:checked ~ .page-wrapper .page #container #sidebar .sidebar-scrollbox {
+        bottom: 58px;
+    }
+    #sidebar-toggle-anchor:checked ~ .page-wrapper .page #container #sidebar .sidebar-socials {
+        display: flex;
+    }
     #sidebar-toggle-anchor:checked ~ .page-wrapper .page #container #content {
         display: none !important;
+    }
+    #sidebar-toggle-anchor:checked ~ .page-wrapper .page > .footer {
+        display: none !important;
+    }
+    #sidebar-toggle-anchor:not(:checked) ~ .page-wrapper .page #container #content {
+        display: block !important;
+    }
+    #sidebar-toggle-anchor:not(:checked) ~ .page-wrapper .page > .footer {
+        display: flex !important;
     }
 }
 .sidebar-iframe-inner {
@@ -1056,6 +1063,11 @@ html:not(.sidebar-resizing) .sidebar {
     right: 0;
     padding: 10px 10px;
     background-color: transparent;
+}
+@media only screen and (min-width:800px) {
+    .sidebar .sidebar-scrollbox {
+        bottom: 58px;
+    }
 }
 .sidebar .sidebar-resize-handle {
     position: absolute;
@@ -1284,6 +1296,44 @@ html:not(.sidebar-resizing) .sidebar {
 }
 .footer-socials i {
     font-size: 17px;
+}
+.sidebar-socials {
+    display: none;
+}
+@media only screen and (max-width:799px) {
+    .sidebar-socials {
+        position: absolute;
+        left: 10px;
+        right: 10px;
+        bottom: 12px;
+        padding-top: 10px;
+        border-top: 1px solid var(--table-border-color);
+        background: var(--bg);
+        z-index: 2;
+    }
+}
+@media only screen and (min-width:800px) {
+    .page > .footer {
+        display: none;
+        position: fixed;
+        left: max(0px, calc((100vw - var(--container-max-width)) / 2));
+        bottom: 0;
+        width: var(--sidebar-width);
+        height: auto;
+        margin: 0;
+        padding: 10px;
+        box-sizing: border-box;
+        border-top: 1px solid var(--table-border-color);
+        background: var(--bg);
+        z-index: 107;
+    }
+    #sidebar-toggle-anchor:checked ~ .page-wrapper .page > .footer {
+        display: flex;
+    }
+    [dir=rtl] #sidebar-toggle-anchor:checked ~ .page-wrapper .page > .footer {
+        left: auto;
+        right: max(0px, calc((100vw - var(--container-max-width)) / 2));
+    }
 }
 .theme-wrapper--menubar {
     position: relative;
