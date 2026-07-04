@@ -4,7 +4,7 @@
 
 _Hacktricks logoları ve hareket tasarımı_ [_@ppieranacho_](https://www.instagram.com/ppieranacho/)_._
 
-### HackTricks’i Yerel Olarak Çalıştırın
+### HackTricks'i Yerel Olarak Çalıştırın
 ```bash
 # Download latest version of hacktricks
 git clone https://github.com/HackTricks-wiki/hacktricks
@@ -31,7 +31,7 @@ export LANG="master" # Leave master for english
 # Run the docker container indicating the path to the hacktricks folder
 docker run -d --rm --platform linux/amd64 -p 3337:3000 --name hacktricks -v $(pwd)/hacktricks:/app ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image bash -c "mkdir -p ~/.ssh && ssh-keyscan -H github.com >> ~/.ssh/known_hosts && cd /app && git config --global --add safe.directory /app && git checkout $LANG && git pull && MDBOOK_PREPROCESSOR__HACKTRICKS__ENV=dev mdbook serve --hostname 0.0.0.0"
 ```
-Yerel HackTricks kopyanız, <5 dakika sonra **[http://localhost:3337](http://localhost:3337)** adresinde **kullanılabilir olacak** (kitabın derlenmesi gerekiyor, sabırlı olun).
+Yerel HackTricks kopyanız <5 dakika sonra **[http://localhost:3337](http://localhost:3337)** adresinde **erişilebilir olacak** (kitabın derlenmesi gerekiyor, lütfen sabırlı olun).
 
 ## HackTricks Partners
 
@@ -43,11 +43,11 @@ Yerel HackTricks kopyanız, <5 dakika sonra **[http://localhost:3337](http://loc
 
 <figure class="sponsor-logo"><img src="images/stm (1).png" alt=""><figcaption></figcaption></figure>
 
-[**STM Cyber**](https://www.stmcyber.com), sloganı **HACK THE UNHACKABLE** olan harika bir siber güvenlik şirketidir. Kendi araştırmalarını yaparlar ve kendi hacking araçlarını geliştirirler; böylece **pentesting, Red teams ve training** gibi çeşitli değerli siber güvenlik hizmetleri sunarlar.
+[**STM Cyber**](https://www.stmcyber.com) **HACK THE UNHACKABLE** sloganına sahip harika bir cybersecurity şirketidir. Kendi araştırmalarını yapar ve kendi hacking araçlarını geliştirerek **pentesting, Red teams ve training** gibi çeşitli değerli cybersecurity hizmetleri sunar.
 
-**Blog**'larını [**https://blog.stmcyber.com**](https://blog.stmcyber.com) adresinden inceleyebilirsiniz
+**blog**'larını [**https://blog.stmcyber.com**](https://blog.stmcyber.com) adresinde inceleyebilirsiniz
 
-**STM Cyber**, HackTricks gibi açık kaynaklı siber güvenlik projelerini de destekler :)
+**STM Cyber**, HackTricks gibi açık kaynak cybersecurity projelerini de destekler :)
 
 ---
 
@@ -55,9 +55,9 @@ Yerel HackTricks kopyanız, <5 dakika sonra **[http://localhost:3337](http://loc
 
 <figure class="sponsor-logo"><img src="images/image (47).png" alt=""><figcaption></figcaption></figure>
 
-**Intigriti**, **Avrupa'nın 1 numaralı** ethical hacking ve **bug bounty platformudur.**
+**Intigriti**, **Europe's #1** ethical hacking ve **bug bounty platform.**
 
-**Bug bounty ipucu**: **Intigriti**'ye kaydolun, hackerlar tarafından hackerlar için oluşturulmuş premium bir **bug bounty platformu**! Bugün [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) adresinde bize katılın ve **$100,000**'a kadar bounty kazanmaya başlayın!
+**Bug bounty ipucu**: **sign up** for **Intigriti**, **hackers tarafından, hackers için oluşturulmuş premium bir bug bounty platformu**! Bugün [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) üzerinden bize katılın ve **$100,000**'a kadar bounty kazanmaya başlayın!
 
 {{#ref}}
 https://go.intigriti.com/hacktricks
@@ -69,13 +69,13 @@ https://go.intigriti.com/hacktricks
 
 <figure class="sponsor-logo"><img src="images/image (3).png" alt=""><figcaption></figcaption></figure>
 
-Deneyimli hackerlar ve bug bounty hunter'larla iletişim kurmak için [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) sunucusuna katılın!
+Deneyimli hackers ve bug bounty hunter'larla iletişim kurmak için [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) sunucusuna katılın!
 
-- **Hacking Insights:** Hacking'in heyecanına ve zorluklarına derinlemesine inen içeriklerle etkileşime geçin
-- **Real-Time Hack News:** Gerçek zamanlı haberler ve içgörülerle hızlı ilerleyen hacking dünyasını takip edin
-- **Latest Announcements:** Yeni başlayan bug bounty'lerden ve önemli platform güncellemelerinden haberdar olun
+- **Hacking Insights:** hacking'in heyecanını ve zorluklarını ele alan içeriklerle etkileşime geçin
+- **Real-Time Hack News:** gerçek zamanlı haberler ve içgörülerle hızlı tempolu hacking dünyasını takip edin
+- **Latest Announcements:** en yeni başlayan bug bounty'ler ve kritik platform güncellemeleri hakkında bilgi sahibi olun
 
-Bugün üst düzey hackerlarla işbirliği yapmaya başlamak için [**Discord**](https://discord.com/invite/N3FrSbmwdy) üzerinden bize katılın!
+En iyi hackers ile bugün iş birliği yapmaya başlamak için [**Discord**](https://discord.com/invite/N3FrSbmwdy) üzerinden bize katılın!
 
 ---
 
@@ -83,16 +83,16 @@ Bugün üst düzey hackerlarla işbirliği yapmaya başlamak için [**Discord**]
 
 <figure class="sponsor-logo"><img src="images/modern_security_logo.png" alt="Modern Security"><figcaption></figcaption></figure>
 
-Modern Security, **mühendislik öncelikli, uygulamalı laboratuvar yaklaşımıyla** pratik **AI Security training** sunar. Kurslarımız, gerçek AI/LLM destekli uygulamaları **oluşturmak, bozmak ve güvence altına almak** isteyen security engineer'lar, AppSec profesyonelleri ve geliştiriciler için hazırlanmıştır.
+Modern Security, **engineering-first, hands-on lab approach** ile **pratik AI Security training** sunar. Kurslarımız, **gerçek AI/LLM-powered applications** oluşturmak, kırmak ve güvence altına almak isteyen security engineer'lar, AppSec profesyonelleri ve developer'lar için tasarlanmıştır.
 
-**AI Security Certification** şu alanlara odaklanır:
-- LLM ve AI destekli uygulamaları güvence altına alma
-- AI sistemleri için threat modeling
+**AI Security Certification**, aşağıdakiler dahil gerçek dünya becerilerine odaklanır:
+- LLM ve AI-powered applications güvence altına alma
+- AI systems için threat modeling
 - Embeddings, vector databases ve RAG security
 - LLM attacks, abuse senaryoları ve pratik savunmalar
-- Güvenli tasarım kalıpları ve deployment değerlendirmeleri
+- Secure design patterns ve deployment considerations
 
-Tüm kurslar **on-demand**, **lab odaklı**dır ve yalnızca teoriye değil, **gerçek dünya security tradeoff'larına** göre tasarlanmıştır.
+Tüm kurslar **on-demand**, **lab-driven** ve yalnızca teoriye değil **gerçek dünya security tradeoff'larına** göre tasarlanmıştır.
 
 👉 AI Security kursu hakkında daha fazla bilgi:
 https://www.modernsecurity.io/courses/ai-security-certification
@@ -107,14 +107,14 @@ https://modernsecurity.io/
 
 <figure class="sponsor-logo"><img src="images/image (1254).png" alt=""><figcaption></figcaption></figure>
 
-**SerpApi**, **arama motoru sonuçlarına erişmek** için hızlı ve kolay gerçek zamanlı API'ler sunar. Arama motorlarını tarar, proxy'leri yönetir, captcha'ları çözer ve tüm zengin yapılandırılmış verileri sizin için ayrıştırır.
+**SerpApi**, **search engine results**'a erişmek için hızlı ve kolay gerçek zamanlı APIs sunar. Search engine'leri scrape eder, proxy'leri yönetir, captcha'ları çözer ve tüm zengin yapılandırılmış verileri sizin için ayrıştırır.
 
-SerpApi planlarından birine yapılan abonelik, Google, Bing, Baidu, Yahoo, Yandex ve daha fazlası dahil olmak üzere farklı arama motorlarını taramak için 50'den fazla farklı API'ye erişim içerir.\
-Diğer sağlayıcıların aksine, **SerpApi yalnızca organic sonuçları taramaz**. SerpApi yanıtları tutarlı biçimde tüm reklamları, satır içi görselleri ve videoları, knowledge graph'leri ve arama sonuçlarında bulunan diğer öğe ve özellikleri içerir.
+SerpApi planlarından birine abone olmak, Google, Bing, Baidu, Yahoo, Yandex ve daha fazlası dahil farklı search engine'leri scrape etmek için 50'den fazla farklı API'ye erişim içerir.\
+Diğer sağlayıcılardan farklı olarak, **SerpApi yalnızca organic results**'ı scrape etmez. SerpApi yanıtları, search results içinde bulunan tüm reklamları, inline image ve video'ları, knowledge graph'ları ve diğer öğe ve özellikleri tutarlı biçimde içerir.
 
-Mevcut SerpApi müşterileri arasında **Apple, Shopify ve GrubHub** yer alır.\
-Daha fazla bilgi için [**blog**](https://serpapi.com/blog/)**'larına** göz atın veya [**playground**](https://serpapi.com/playground)**'larında** bir örneği deneyin.\
-[**Burada**](https://serpapi.com/users/sign_up) **ücretsiz bir hesap** oluşturabilirsiniz.**
+Güncel SerpApi müşterileri arasında **Apple, Shopify ve GrubHub** bulunur.\
+Daha fazla bilgi için [**blog**](https://serpapi.com/blog/)**,** sayfalarına bakın veya [**playground**](https://serpapi.com/playground)**.** içindeki bir örneği deneyin\
+Ücretsiz bir hesap oluşturabilirsiniz [**here**](https://serpapi.com/users/sign_up)**.**
 
 ---
 
@@ -122,7 +122,7 @@ Daha fazla bilgi için [**blog**](https://serpapi.com/blog/)**'larına** göz at
 
 <figure class="sponsor-logo"><img src="images/image (2).png" alt=""><figcaption></figcaption></figure>
 
-Vulnerability research, penetration testing ve reverse engineering yapmak için gerekli teknolojileri ve becerileri öğrenerek mobil uygulamaları ve cihazları koruyun. **iOS ve Android security** alanında uzmanlaşın; on-demand kurslarımızla öğrenin ve **sertifika alın**:
+Mobil applications ve devices'ları korumak için vulnerability research, penetration testing ve reverse engineering yapmak için gereken teknolojileri ve becerileri öğrenin. **iOS ve Android security konusunda uzmanlaşın**; on-demand kurslarımızla **sertifika alın**:
 
 {{#ref}}
 https://academy.8ksec.io/
@@ -134,9 +134,9 @@ https://academy.8ksec.io/
 
 <figure class="sponsor-logo"><img src="images/logo-naxus.png" alt=""><figcaption></figcaption></figure>
 
-**NaxusAI**, saldırganlar bulmadan önce istismar edilebilir açıkları bulmak için AI-powered bir security platformudur.
+**NaxusAI**, attackers'tan önce exploitable vulnerabilities bulmak için tasarlanmış AI-powered bir security platformudur.
 
-**Code security ipucu**: Geliştiriciler ve security teams için oluşturulmuş akıllı bir vulnerability monitoring platformu olan NaxusAI'ye kaydolun! Bugün bize katılın ve **gerçek security risklerini production'a ulaşmadan önce tespit etmek, doğrulamak ve düzeltmek** için AI kullanmaya başlayın!
+**Code security ipucu**: developer'lar ve security team'leri için oluşturulmuş akıllı bir vulnerability monitoring platformu olan NaxusAI'ye **sign up** yapın! Bugün bize katılın ve **gerçek security risks production'a ulaşmadan önce detect, validate ve fix etmek** için AI kullanmaya başlayın!
 
 {{#ref}}
 https://naxusai.com
@@ -148,13 +148,13 @@ https://naxusai.com
 
 <figure class="sponsor-logo"><img src="images/websec (1).svg" alt=""><figcaption></figcaption></figure>
 
-[**WebSec**](https://websec.net), merkezi **Amsterdam**'da bulunan profesyonel bir siber güvenlik şirketidir ve **modern** bir yaklaşımla **offensive-security services** sunarak işletmeleri **dünya genelinde** en yeni siber güvenlik tehditlerine karşı **korumaya** yardımcı olur.
+[**WebSec**](https://websec.net), **Amsterdam** merkezli profesyonel bir cybersecurity şirketidir ve **modern** bir yaklaşımla **offensive-security services** sağlayarak işletmeleri **tüm dünyada** en yeni cybersecurity tehditlerine karşı **korumaya** yardımcı olur.
 
-WebSec, Amsterdam ve Wyoming'de ofisleri olan uluslararası bir güvenlik şirketidir. **Hepsi bir arada security services** sunarlar; yani her şeyi yaparlar: Pentesting, **Security** Audits, Awareness Trainings, Phishing Campagnes, Code Review, Exploit Development, Security Experts Outsourcing ve çok daha fazlası.
+WebSec, Amsterdam ve Wyoming'de ofisleri bulunan uluslararası bir security şirketidir. **all-in-one security services** sunarlar; yani her şeyi onlar yapar: Pentesting, **Security** Audits, Awareness Trainings, Phishing Campagnes, Code Review, Exploit Development, Security Experts Outsourcing ve çok daha fazlası.
 
-WebSec hakkında bir diğer güzel şey, sektör ortalamasının aksine becerilerine **çok güveniyor** olmalarıdır; o kadar ki **en iyi kalite sonuçları garanti ederler**. Web sitelerinde şu ifade yer alır: "**If we can't hack it, You don't pay it!**". Daha fazla bilgi için [**website**](https://websec.net/en/) ve [**blog**](https://websec.net/blog/)'larına göz atın!
+WebSec hakkında bir diğer havalı şey ise sektör ortalamasının aksine yeteneklerine **çok güvenmeleri** ve bu güveni **en iyi kalite sonuçları garanti etmeleri** ile göstermeleridir; web sitelerinde "**If we can't hack it, You don't pay it!**" yazar. Daha fazla bilgi için [**website**](https://websec.net/en/) ve [**blog**](https://websec.net/blog/) sayfalarına bakın!
 
-Buna ek olarak WebSec, HackTricks'in **kararlı bir destekçisidir**.
+Yukarıdakilere ek olarak WebSec, HackTricks'in de **kararlı bir destekçisidir.**
 
 {{#ref}}
 https://www.youtube.com/watch?v=Zq2JycGDCPM
@@ -167,13 +167,13 @@ https://www.youtube.com/watch?v=Zq2JycGDCPM
 <figure class="sponsor-logo"><img src="images/cyberhelmets-logo.png" alt="cyberhelmets logo"><figcaption></figcaption></figure>
 
 
-**Sahada kullanılmak üzere tasarlandı. Sizin etrafınızda şekillendirildi.**\
-[**Cyber Helmets**](https://cyberhelmets.com/?ref=hacktricks), sektör uzmanları tarafından oluşturulan ve sunulan etkili siber güvenlik eğitimleri geliştirir ve sunar. Programları teorinin ötesine geçerek ekipleri derin anlayış ve uygulanabilir becerilerle donatır; gerçek dünya tehditlerini yansıtan özel ortamlar kullanır. Özel eğitim talepleri için [**buradan**](https://cyberhelmets.com/tailor-made-training/?ref=hacktricks) bize ulaşın.
+**Saha için üretildi. Sizin etrafınızda şekillendirildi.**\
+[**Cyber Helmets**](https://cyberhelmets.com/?ref=hacktricks), sektör uzmanları tarafından oluşturulan ve yönetilen etkili cybersecurity training geliştirir ve sunar. Programları teoriyle sınırlı kalmaz; gerçek dünya tehditlerini yansıtan özel ortamlar kullanarak ekipleri derin anlayış ve uygulanabilir becerilerle donatır. Özel training talepleri için [**buradan**](https://cyberhelmets.com/tailor-made-training/?ref=hacktricks) bize ulaşın.
 
-**Eğitimlerini farklı kılan şeyler:**
+**Training'lerini farklı kılan şey:**
 * Özel olarak hazırlanmış içerik ve lab'lar
-* Üst düzey araçlar ve platformlarla desteklenir
-* Uygulayıcılar tarafından tasarlanır ve öğretilir
+* Üst seviye tools ve platformlar tarafından desteklenir
+* Practitioners tarafından tasarlanır ve öğretilir
 
 {{#ref}}
 https://cyberhelmets.com/courses/?ref=hacktricks
@@ -185,14 +185,13 @@ https://cyberhelmets.com/courses/?ref=hacktricks
 
 <figure class="sponsor-logo"><img src="images/lasttower.png" alt="lasttower logo"><figcaption></figcaption></figure>
 
-Last Tower Solutions, **Education** ve **FinTech** kurumları için uzmanlaşmış siber güvenlik hizmetleri sunar; odak noktası **penetration testing, cloud security assessments** ve
-**compliance readiness** (SOC 2, PCI-DSS, NIST)'tir. Ekibimiz, derin teknik uzmanlık ve sektör standardı içgörü sağlayan **OSCP ve CISSP sertifikalı profesyoneller** içerir.
+Last Tower Solutions, **Education** ve **FinTech** kurumları için uzmanlaşmış cybersecurity hizmetleri sunar; odak noktası **penetration testing, cloud security assessments** ve **compliance readiness**'dir (SOC 2, PCI-DSS, NIST). Ekibimiz, **OSCP ve CISSP sertifikalı profesyoneller** içerir ve her çalışmaya derin teknik uzmanlık ile sektör standardı içgörü katar.
 
-Yüksek riskli ortamlar için uyarlanmış, **manuel ve intelligence-driven testing** ile otomatik taramaların ötesine geçiyoruz. Öğrenci kayıtlarını güvence altına almaktan finansal işlemleri korumaya kadar, kuruluşların en önemli şeyleri savunmasına yardımcı oluyoruz.
+Yüksek riskli ortamlar için uyarlanmış **manual, intelligence-driven testing** ile otomatik taramaların ötesine geçiyoruz. Öğrenci kayıtlarını güvence altına almaktan finansal işlemleri korumaya kadar, kuruluşların en önemli olanı savunmasına yardımcı oluyoruz.
 
-_“Kaliteli bir savunma, saldırıyı bilmeyi gerektirir; biz anlayış yoluyla güvenlik sağlarız.”_
+_“Kaliteli bir savunma, saldırıyı bilmeyi gerektirir; anlayış yoluyla security sağlıyoruz.”_
 
-Siber güvenlikteki en son gelişmeleri öğrenmek ve güncel kalmak için [**blog**](https://www.lasttowersolutions.com/blog)'umuzu ziyaret edin.
+En son cybersecurity gelişmeleriyle ilgili bilgi sahibi olmak için [**blog**](https://www.lasttowersolutions.com/blog) sayfamızı ziyaret edin.
 
 {{#ref}}
 https://www.lasttowersolutions.com/
@@ -204,33 +203,18 @@ https://www.lasttowersolutions.com/
 
 <figure class="sponsor-logo"><img src="images/k8studio.png" alt="k8studio logo"><figcaption></figcaption></figure>
 
-K8Studio IDE, DevOps, DevSecOps ve geliştiricilerin Kubernetes cluster'larını verimli şekilde yönetmesini, izlemesini ve güvence altına almasını sağlar. AI-driven insights, gelişmiş security framework ve sezgisel CloudMaps GUI'mizden yararlanarak cluster'larınızı görselleştirin, durumlarını anlayın ve güvenle aksiyon alın.
+K8Studio IDE, DevOps, DevSecOps ve developer'ların Kubernetes cluster'larını verimli bir şekilde yönetmesini, izlemesini ve güvence altına almasını sağlar. AI-driven insights, gelişmiş security framework'ümüz ve sezgisel CloudMaps GUI'mizden yararlanarak cluster'larınızı görselleştirin, durumlarını anlayın ve güvenle harekete geçin.
 
-Ayrıca K8Studio, **tüm büyük kubernetes distributions** (AWS, GCP, Azure, DO, Rancher, K3s, Openshift ve daha fazlası) ile **uyumludur**.
+Ayrıca, K8Studio **tüm büyük kubernetes distributions** ile uyumludur (AWS, GCP, Azure, DO, Rancher, K3s, Openshift ve daha fazlası).
 
 {{#ref}}
 https://k8studio.io/
 {{#endref}}
 
 ---
-
-<!-- hacktricks-friends:friend:friend-carlospolop:start -->
-### [HackTricks Books](https://book.hacktricks.wiki/)
-
-<figure class="sponsor-logo"><img src="https://friends.hacktricks.wiki/assets/17181413/5e15e93e6b8523dac2ad.png" alt="HackTricks Books logo"><figcaption></figcaption></figure>
-
-Bu, siber güvenlik ücretsiz wiki'sini sunmak için bir metindir: <b>Hacktricks Book </b>. Tüm hacking tricks türlerini şimdi buradan ücretsiz öğrenin!
-
-{{#ref}}
-https://book.hacktricks.wiki/
-{{#endref}}
-
----
-<!-- hacktricks-friends:friend:friend-carlospolop:end -->
-
 ## License & Disclaimer
 
-Şurada kontrol edin:
+Şunları şu adreste kontrol edin:
 
 {{#ref}}
 welcome/hacktricks-values-and-faq.md
