@@ -107,8 +107,30 @@
     return ""
   }
 
+  function resolveSponsorImageUrl(imageUrl) {
+    var value = String(imageUrl || "").trim()
+
+    if (!value) {
+      return ""
+    }
+
+    if (/^https:\/\//i.test(value)) {
+      return value
+    }
+
+    if (/^\/\//.test(value)) {
+      return "https:" + value
+    }
+
+    if (value.charAt(0) === "/") {
+      return new URL(value, window.location.origin).href
+    }
+
+    return new URL(value, document.baseURI || window.location.href).href
+  }
+
   function setLegacySponsorContent(sponsor, container, nodes) {
-    nodes.img.src = sponsor.image_url
+    nodes.img.src = resolveSponsorImageUrl(sponsor.image_url)
     nodes.img.alt = sponsor.name
     nodes.title.textContent = sponsor.name
     nodes.description.innerHTML = sponsor.description
