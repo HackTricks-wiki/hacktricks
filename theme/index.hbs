@@ -32,6 +32,7 @@
         {{/if}}
 
         <!-- Fonts -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
         {{#if copy_fonts}}
         <link rel="stylesheet" href="{{ path_to_root }}fonts/fonts.css">
         {{/if}}
@@ -100,7 +101,7 @@
             var sidebar = null;
             var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
             var body = document.querySelector("body");
-            if (document.body.clientWidth >= 550) {
+            if (document.body.clientWidth >= 800) {
                 try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
                 sidebar = sidebar || 'visible';
             } else {
@@ -168,7 +169,7 @@
                                 </a>
                                 <div class="menu-socials">
                                     <button type="button" class="menu-bar-link menu-socials-toggle" aria-haspopup="true">
-                                        HT Socials <span class="menu-socials-caret" aria-hidden="true">▾</span>
+                                        Socials <span class="menu-socials-caret" aria-hidden="true">▾</span>
                                     </button>
                                     <div class="menu-socials-popup" aria-label="Social links" role="menu">
                                         <a href="https://github.com/HackTricks-wiki" target="_blank" rel="noopener noreferrer" role="menuitem" class="menu-bar-link"><i class="fa fa-github" aria-hidden="true"></i><span>GitHub</span></a>
@@ -189,7 +190,7 @@
                                         <a href="https://friends.hacktricks.wiki/" target="_blank" role="menuitem" class="menu-bar-link">HT Friends</a>
                                         <a href="https://tools.hacktricks.wiki/hacktricks-research-request/index.html" target="_blank" rel="noopener noreferrer" role="menuitem" class="menu-bar-link menu-bar-link-request-update" data-research-request-link="true">Request update</a>
                                         <button type="button" role="menuitem" class="menu-bar-link menu-action" data-toggle-socials="true">
-                                            <span>HT Socials</span> ▾
+                                            <span>Socials</span> ▾
                                         </button>
                                         <div id="menubar-socials-popup" class="menubar-socials-popup" aria-label="Social links" role="menu">
                                             <a href="https://github.com/HackTricks-wiki" target="_blank" rel="noopener noreferrer" role="menuitem" class="menu-bar-link"><i class="fa fa-github" aria-hidden="true"></i><span>GitHub</span></a>
@@ -298,6 +299,23 @@
                         <noscript>
                             <iframe class="sidebar-iframe-outer" src="{{ path_to_root }}toc.html"></iframe>
                         </noscript>
+                        <nav class="sidebar-socials footer-socials" aria-label="HackTricks social links">
+                            <a href="https://github.com/HackTricks-wiki" target="_blank" rel="noopener noreferrer" aria-label="HackTricks GitHub">
+                                <i class="fa fa-github" aria-hidden="true"></i>
+                            </a>
+                            <a href="https://github.com/sponsors/carlospolop" target="_blank" rel="noopener noreferrer" aria-label="Sponsor HackTricks">
+                                <i class="fa fa-heart" aria-hidden="true"></i>
+                            </a>
+                            <a href="https://www.linkedin.com/company/hacktricks" target="_blank" rel="noopener noreferrer" aria-label="HackTricks Linkedin">
+                                <i class="fa fa-linkedin" aria-hidden="true"></i>
+                            </a>
+                            <a href="https://twitter.com/hacktricks_live" target="_blank" rel="noopener noreferrer" aria-label="HackTricks X">
+                                <i class="fa fa-twitter" aria-hidden="true"></i>
+                            </a>
+                            <a href="https://www.youtube.com/@hacktricks_LIVE" target="_blank" rel="noopener noreferrer" aria-label="HackTricks YouTube">
+                                <i class="fa fa-youtube-play" aria-hidden="true"></i>
+                            </a>
+                        </nav>
                     </nav>
                     <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
                     <script>
@@ -583,7 +601,7 @@
                     return Number.isFinite(parsed) ? parsed : 15;
                 }
 
-                function updatePositions() {
+                function updateLeftTogglePosition() {
                     var pagePadding = getPagePadding();
                     var sidebarVisible = sidebarAnchor ? sidebarAnchor.checked : true;
 
@@ -593,7 +611,10 @@
                         var sidebarRect = sidebar.getBoundingClientRect();
                         leftToggle.style.left = Math.round(sidebarRect.right - 14) + 'px';
                     }
+                }
 
+                function updateRightTogglePosition() {
+                    var pagePadding = getPagePadding();
                     var sidetocHidden = document.documentElement.classList.contains('sidetoc-hidden');
                     if (!sidetoc || sidetoc.offsetParent === null || sidetocHidden) {
                         rightToggle.style.left = Math.round(window.innerWidth - pagePadding - 28) + 'px';
@@ -603,14 +624,29 @@
                     }
                 }
 
+                function updatePositions() {
+                    updateLeftTogglePosition();
+                    updateRightTogglePosition();
+                }
+
                 window.addEventListener('resize', updatePositions);
                 window.addEventListener('load', updatePositions);
+                rightToggle.addEventListener('click', function () {
+                    window.setTimeout(updateRightTogglePosition, 0);
+                });
                 if (sidebarAnchor) {
                     sidebarAnchor.addEventListener('change', function () {
-                        window.setTimeout(updatePositions, 260);
+                        window.setTimeout(updateLeftTogglePosition, 260);
                     });
                 }
-                document.addEventListener('transitionend', updatePositions);
+                document.addEventListener('transitionend', function (event) {
+                    if (event.target === sidetoc || event.target === rightToggle || (sidetoc && sidetoc.contains(event.target))) {
+                        updateRightTogglePosition();
+                    }
+                    if (event.target === sidebar || event.target === leftToggle || (sidebar && sidebar.contains(event.target))) {
+                        updateLeftTogglePosition();
+                    }
+                });
                 updatePositions();
             })();
         </script>
