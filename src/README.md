@@ -223,21 +223,6 @@ https://k8studio.io/
 {{#endref}}
 
 ---
-
-<!-- hacktricks-friends:friend:friend-carlospolop:start -->
-### [HackTricks Books](https://book.hacktricks.wiki/)
-
-<figure class="sponsor-logo"><img src="https://friends.hacktricks.wiki/assets/17181413/5e15e93e6b8523dac2ad.png" alt="HackTricks Books logo"><figcaption></figcaption></figure>
-
-This is an text to present the cybersecurity free wiki: <b>Hacktricks Book </b>. Learn all kind of hacking tricks for free from it now!
-
-{{#ref}}
-https://book.hacktricks.wiki/
-{{#endref}}
-
----
-<!-- hacktricks-friends:friend:friend-carlospolop:end -->
-
 ## License & Disclaimer
 
 Check them in:
