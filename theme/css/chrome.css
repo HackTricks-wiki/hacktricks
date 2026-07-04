@@ -155,18 +155,80 @@ body.sidebar-visible #menu-bar {
     margin: 0 15px;
     display: flex;
     flex-wrap: wrap;
-    column-gap: 2.6rem;
+    column-gap: 1.25rem;
     align-items: center;
 }
 .right-buttons a {
     text-decoration: none;
+}
+.menu-socials {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+}
+.menu-socials-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: 0;
+    padding: 0;
+    font: inherit;
+    background: transparent;
+    cursor: pointer;
+}
+.menu-socials-caret {
+    font-size: 14px;
+    line-height: 1;
+    opacity: 0.9;
+}
+.menu-socials-popup {
+    position: absolute;
+    right: 0;
+    top: 30px;
+    z-index: 105;
+    border-radius: 5px;
+    font-size: 14px;
+    color: var(--fg);
+    background: var(--bg);
+    border: 1px solid var(--table-border-color);
+    margin: 0;
+    padding: 0;
+    display: none;
+    flex-direction: column;
+    min-width: 140px;
+    overflow: hidden;
+}
+.menu-socials:hover .menu-socials-popup,
+.menu-socials:focus-within .menu-socials-popup {
+    display: flex;
+}
+.menu-socials-popup .menu-bar-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: 0;
+    margin: 0;
+    padding: 8px 20px;
+    line-height: 25px;
+    white-space: nowrap;
+    text-align: start;
+    color: inherit;
+    background: inherit;
+    font-size: inherit;
+}
+.menu-socials-popup .menu-bar-link i {
+    width: 16px;
+    text-align: center;
+}
+.menu-socials-popup .menu-bar-link:hover {
+    background-color: var(--theme-hover);
 }
 
 @media only screen and (min-width:800px) {
     #menubar-collapse {
         display: flex !important;
         flex-wrap: wrap;
-        column-gap: 2.6rem;
+        column-gap: 1.25rem;
         align-items: center;
     }
     
@@ -288,6 +350,22 @@ body.sidebar-visible #menu-bar {
     max-height: 50vh;
     overflow: auto;
     background: transparent;
+}
+#menubar-collapse-popup.show-socials #menubar-socials-popup {
+    display: flex;
+}
+#menubar-socials-popup {
+    display: none;
+    flex-direction: column;
+    border-top: 1px solid var(--table-border-color);
+    background: transparent;
+}
+#menubar-collapse-popup #menubar-socials-popup .menu-bar-link {
+    padding-left: 34px;
+}
+#menubar-socials-popup .menu-bar-link i {
+    width: 16px;
+    text-align: center;
 }
 #menubar-collapse-popup .menu-bar-link {
     border: 0;
@@ -1176,8 +1254,36 @@ html:not(.sidebar-resizing) .sidebar {
     height: var(--footer-height);
     border-top: 1px solid var(--table-border-color);
     margin-top: 1rem;
-    align-content: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     z-index: 106;
+}
+.footer-socials {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+}
+.footer-socials a,
+.footer-socials a:visited {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 9999px;
+    color: var(--icons);
+    text-decoration: none;
+    border: 1px solid var(--table-border-color);
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+}
+.footer-socials a:hover {
+    color: var(--icons-hover);
+    background: var(--theme-hover);
+}
+.footer-socials i {
+    font-size: 17px;
 }
 .theme-wrapper--menubar {
     position: relative;
@@ -1217,46 +1323,6 @@ html:not(.sidebar-resizing) .sidebar {
 .theme-wrapper--menubar .theme-btns button:hover {
     color: var(--icons-hover);
     background-color: var(--theme-hover);
-}
-
-.theme-wrapper--menubar .theme-orb {
-    position: absolute;
-    right: 6px;
-    top: 50%;
-    width: 8px;
-    height: 8px;
-    border-radius: 9999px;
-    background: radial-gradient(circle at 30% 30%, #ffffff, color-mix(in srgb, var(--links) 70%, transparent));
-    opacity: 0.7;
-    transform: translateY(10px);
-    filter: blur(0.2px);
-    pointer-events: none;
-    animation: theme-orb-rise 4.2s ease-in-out infinite;
-}
-
-.theme-wrapper--menubar .theme-side-icon {
-    font-size: 16px;
-    color: var(--icons);
-    opacity: 0.9;
-    line-height: 1;
-}
-
-@keyframes theme-orb-rise {
-    0% {
-        transform: translateY(10px);
-        opacity: 0;
-    }
-    35% {
-        opacity: 0.6;
-    }
-    70% {
-        transform: translateY(-22px);
-        opacity: 0.4;
-    }
-    100% {
-        transform: translateY(-30px);
-        opacity: 0;
-    }
 }
 
 /* Details/Summary */
@@ -1504,6 +1570,12 @@ details ul li:first-child {
 
 figure, figcaption{
     text-align: center;
+}
+
+.sponsor-logo img,
+#hacktricks-friends ~ h3 + figure img {
+    max-height: 100px;
+    width: auto;
 }
 
 li.chapter-item a.external-link::after {
