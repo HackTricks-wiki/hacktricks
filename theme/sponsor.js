@@ -10,6 +10,15 @@
   var crawlerSlot = document.querySelector(".bsa-crawler-slot")
   var pageviewsSlot = document.querySelector(".bsa-pageviews-slot")
 
+  var topSponsor = document.querySelector(".topsponsor")
+  var topSponsorImg = topSponsor && topSponsor.querySelector("img")
+  var topSponsorTitle =
+    topSponsor && topSponsor.querySelector(".topsponsor-title")
+  var topSponsorDescription =
+    topSponsor && topSponsor.querySelector(".topsponsor-description")
+  var topSponsorCTA =
+    topSponsor && topSponsor.querySelector(".topsponsor-cta")
+
   var bottomSponsor = document.querySelector(".bottomsponsor")
   var bottomSponsorImg = bottomSponsor && bottomSponsor.querySelector("img")
   var bottomSponsorTitle =
@@ -22,6 +31,7 @@
 
   if (
     !sponsorSide ||
+    !topSponsor ||
     !bottomSponsor ||
     !sponsorSideBsa ||
     !topSponsorBsa ||
@@ -136,16 +146,42 @@
     nodes.description.innerHTML = sponsor.description
     container.href = sponsor.link
     nodes.cta.textContent = sponsor.cta
-    container.style.display = "flex"
+    container.style.display = "grid"
+    container.classList.add("ht-sponsor-card--loaded")
+    container.setAttribute("aria-label", sponsor.name)
 
     nodes.title.classList.toggle("sponsor-title--long", sponsor.name.length > 28)
+    nodes.title.classList.toggle("ht-sponsor-title--long", sponsor.name.length > 28)
     nodes.title.style.fontSize = getSponsorTitleFontSize(sponsor.name)
 
-    if (sponsor.description.length > 250) {
-      nodes.description.style.fontSize = "1.4rem"
-    } else {
-      nodes.description.style.fontSize = ""
+    nodes.description.style.fontSize = ""
+  }
+
+  function initSponsorCardMotion(card) {
+    if (!card) {
+      return
     }
+
+    card.addEventListener("mouseenter", function() {
+      card.style.setProperty("--sponsor-lift", "-5px")
+      card.style.setProperty("--sponsor-scale", "1.02")
+    })
+
+    card.addEventListener("mouseleave", function() {
+      card.style.setProperty("--sponsor-rx", "0deg")
+      card.style.setProperty("--sponsor-ry", "0deg")
+      card.style.setProperty("--sponsor-lift", "0px")
+      card.style.setProperty("--sponsor-scale", "1")
+    })
+
+    card.addEventListener("mousemove", function(event) {
+      var rect = card.getBoundingClientRect()
+      var x = (event.clientX - rect.left) / rect.width - 0.5
+      var y = (event.clientY - rect.top) / rect.height - 0.5
+
+      card.style.setProperty("--sponsor-rx", (-y * 12).toFixed(2) + "deg")
+      card.style.setProperty("--sponsor-ry", (x * 12).toFixed(2) + "deg")
+    })
   }
 
   async function fetchLegacySponsor() {
@@ -170,6 +206,15 @@
     })
   }
 
+  function renderLegacyTopSponsor(sponsor) {
+    setLegacySponsorContent(sponsor, topSponsor, {
+      img: topSponsorImg,
+      title: topSponsorTitle,
+      description: topSponsorDescription,
+      cta: topSponsorCTA,
+    })
+  }
+
   function renderLegacyBottomSponsor(sponsor) {
     setLegacySponsorContent(sponsor, bottomSponsor, {
       img: bottomSponsorImg,
@@ -182,6 +227,7 @@
   async function loadLegacySponsor() {
     var sponsor = await fetchLegacySponsor()
     renderLegacySideSponsor(sponsor)
+    renderLegacyTopSponsor(sponsor)
     renderLegacyBottomSponsor(sponsor)
   }
 
@@ -215,6 +261,8 @@
   }
 
   async function initSponsor() {
+    ;[sponsorSide, topSponsor, bottomSponsor].forEach(initSponsorCardMotion)
+
     try {
       var useBsa = shouldUseBsa()
       window.__hacktricksAdsProvider = useBsa ? "bsa" : "legacy"
