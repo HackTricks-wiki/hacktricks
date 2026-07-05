@@ -381,33 +381,25 @@
 
                         <nav class="nav-wrapper" aria-label="Page navigation">
                             <!-- Mobile navigation buttons -->
-                            {{#if previous}}
-                                <a rel="prev" href="{{ path_to_root }}{{previous.path}}" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <a rel="prev" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left" hidden>
                                     <i class="fa fa-angle-left"></i>
                                 </a>
-                            {{/if}}
 
-                            {{#if next}}
-                                <a rel="next prefetch" href="{{ path_to_root }}{{next.path}}" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <a rel="next prefetch" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right" hidden>
                                     <i class="fa fa-angle-right"></i>
                                 </a>
-                            {{/if}}
 
                             <div style="clear: both"></div>
                         </nav>
 
                         <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                            {{#if previous}}
-                                <a rel="prev" href="{{ path_to_root }}{{previous.path}}" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                                    <i class="fa fa-angle-left"></i><span style="font-size: medium; align-self: center; margin-left: 10px;">{{previous.name}}</span>
+                                <a rel="prev" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left" hidden>
+                                    <i class="fa fa-angle-left"></i><span class="chapter-nav-label" style="font-size: medium; align-self: center; margin-left: 10px;"></span>
                                 </a>
-                            {{/if}}
 
-                            {{#if next}}
-                                <a rel="next prefetch" href="{{ path_to_root }}{{next.path}}" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                                    <span style="font-size: medium; align-self: center; margin-right: 10px;">{{next.name}}</span><i class="fa fa-angle-right"></i>
+                                <a rel="next prefetch" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right" hidden>
+                                    <span class="chapter-nav-label" style="font-size: medium; align-self: center; margin-right: 10px;"></span><i class="fa fa-angle-right"></i>
                                 </a>
-                            {{/if}}
                         </nav>
                     </div>
 
