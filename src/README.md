@@ -67,7 +67,7 @@ https://go.intigriti.com/hacktricks
 
 ---
 
-### [HACKENPROOF](https://bit.ly/3xrrDrL)
+### [Follow HackenProof](https://bit.ly/3xrrDrL)
 
 <figure class="sponsor-logo"><img src="images/image (3).png" alt=""><figcaption></figcaption></figure>
 
