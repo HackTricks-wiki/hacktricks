@@ -642,8 +642,10 @@
 
 .ht-sponsor-copy {
     min-width: 0;
+    min-height: 0;
     display: flex;
     flex-direction: column;
+    overflow: hidden;
 }
 
 .ht-sponsor-title {
@@ -663,10 +665,14 @@
     color: rgba(210, 222, 245, 0.68) !important;
     font-size: 15px;
     line-height: 1.45;
-    max-height: none !important;
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: 100% !important;
     opacity: 1 !important;
     visibility: visible !important;
-    overflow: visible !important;
+    overflow: auto !important;
+    overscroll-behavior: contain;
+    padding-right: 3px;
     transform: none !important;
 }
 
@@ -700,6 +706,8 @@
     text-align: center;
     text-transform: uppercase;
     max-width: 100%;
+    min-height: 36px;
+    flex: 0 0 auto;
     opacity: 1 !important;
     overflow: visible !important;
     visibility: visible !important;
@@ -772,16 +780,16 @@
 
 .sidesponsor {
     width: 100% !important;
-    min-height: 360px;
-    max-height: none !important;
-    height: auto !important;
+    min-height: min(360px, 52vh);
+    max-height: 52% !important;
+    height: 52% !important;
     grid-template-columns: minmax(0, 1fr);
     grid-template-areas:
         "kicker"
         "media"
         "copy"
         "cta";
-    grid-template-rows: auto auto auto auto !important;
+    grid-template-rows: auto auto minmax(0, 1fr) auto !important;
     align-items: stretch !important;
     align-content: start !important;
     gap: 9px !important;
@@ -819,12 +827,20 @@
 .sidesponsor .ht-sponsor-description {
     font-size: 15px;
     line-height: 1.4;
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: 100% !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    overflow: auto !important;
+    overscroll-behavior: contain;
+    transform: none !important;
 }
 
 .sidesponsor .ht-sponsor-cta {
     padding: 8px 10px !important;
     font-size: 11px;
-    min-height: 0;
+    min-height: 36px;
 }
 
 @media only screen and (max-width: 799px) {
