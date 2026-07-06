@@ -1,0 +1,299 @@
+.ht-discount-overlay,
+.ht-discount-overlay * {
+    box-sizing: border-box;
+}
+
+.ht-discount-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 100000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 18px;
+    background: rgba(2, 6, 16, 0.66);
+    backdrop-filter: blur(8px);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+
+.ht-discount-overlay.ht-discount-overlay--visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+.ht-discount-card {
+    --discount-accent: #2f7dff;
+    --discount-accent-2: #ff3b4e;
+    --discount-rx: 0deg;
+    --discount-ry: 0deg;
+    --discount-lift: 0px;
+    --discount-scale: 1;
+    --discount-img-x: 0px;
+    --discount-img-y: 0px;
+    position: relative;
+    width: min(92vw, 520px);
+    max-height: min(92vh, 760px);
+    isolation: isolate;
+    overflow: hidden;
+    border-radius: 16px;
+    padding: 12px;
+    background: transparent;
+    color: #eef4ff;
+    font-family: "Chakra Petch", "Open Sans", system-ui, sans-serif;
+    box-shadow: 0 26px 70px -28px rgba(0, 0, 0, 0.95), 0 0 0 1px rgba(120, 150, 255, 0.1);
+    transform: perspective(1000px) rotateX(var(--discount-rx)) rotateY(var(--discount-ry)) translateY(var(--discount-lift)) scale(var(--discount-scale));
+    transform-style: preserve-3d;
+    transition: transform 0.18s cubic-bezier(.2, .7, .3, 1);
+}
+
+.ht-discount-card::before {
+    content: "";
+    position: absolute;
+    inset: 1px;
+    z-index: -2;
+    border-radius: 15px;
+    background: linear-gradient(162deg, #0a1016, #0c0910);
+}
+
+.ht-discount-grid {
+    position: absolute;
+    inset: -1px;
+    z-index: -3;
+    border-radius: 17px;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.ht-discount-grid::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 760px;
+    height: 760px;
+    margin: -380px 0 0 -380px;
+    background: conic-gradient(from 0deg, transparent 0deg, var(--discount-accent) 58deg, transparent 128deg, var(--discount-accent-2) 208deg, transparent 300deg);
+    opacity: 0.58;
+    animation: sc-spin 5s linear infinite;
+}
+
+.ht-discount-scan {
+    position: absolute;
+    inset: 1px;
+    z-index: -1;
+    border-radius: 15px;
+    overflow: hidden;
+    pointer-events: none;
+    opacity: 0.52;
+}
+
+.ht-discount-scan::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 120px;
+    background: linear-gradient(180deg, transparent, rgba(47, 125, 255, 0.16), transparent);
+    animation: sc-scan 3.7s linear infinite;
+}
+
+.ht-discount-corners {
+    position: absolute;
+    inset: 1px;
+    z-index: -1;
+    border-radius: 15px;
+    pointer-events: none;
+    background: repeating-linear-gradient(0deg, transparent 0 2px, rgba(0, 0, 0, 0.22) 2px 3px);
+    mix-blend-mode: overlay;
+    opacity: 0.42;
+}
+
+.ht-discount-kicker {
+    position: absolute;
+    top: 11px;
+    left: 14px;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    max-width: calc(100% - 78px);
+    padding: 4px 7px;
+    border: 1px solid rgba(47, 125, 255, 0.38);
+    border-radius: 4px;
+    background: rgba(4, 10, 20, 0.72);
+    color: var(--discount-accent);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    line-height: 1.2;
+    text-transform: uppercase;
+    backdrop-filter: blur(8px);
+}
+
+.ht-discount-kicker::before {
+    content: "";
+    width: 5px;
+    height: 5px;
+    flex: 0 0 auto;
+    border-radius: 50%;
+    background: var(--discount-accent);
+    box-shadow: 0 0 8px var(--discount-accent);
+    animation: sc-blink 1.6s ease-in-out infinite;
+}
+
+.ht-discount-close {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    z-index: 3;
+    width: 34px;
+    height: 34px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(255, 255, 255, 0.26);
+    border-radius: 50%;
+    background: rgba(4, 10, 20, 0.7);
+    color: #eef4ff;
+    cursor: pointer;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 18px;
+    line-height: 1;
+    backdrop-filter: blur(8px);
+}
+
+.ht-discount-close:hover,
+.ht-discount-close:focus-visible {
+    border-color: rgba(255, 59, 78, 0.7);
+    color: #fff;
+    outline: none;
+}
+
+.ht-discount-link {
+    position: relative;
+    display: block;
+    overflow: hidden;
+    border: 1px solid rgba(47, 125, 255, 0.28);
+    border-radius: 12px;
+    background: #08101a;
+    text-decoration: none;
+}
+
+.ht-discount-link::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.18), transparent 26%, transparent 72%, rgba(47, 125, 255, 0.18));
+    mix-blend-mode: screen;
+}
+
+.ht-discount-image {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    transform: translate3d(var(--discount-img-x), var(--discount-img-y), 0) scale(1.025);
+    transition: transform 0.18s cubic-bezier(.2, .7, .3, 1);
+}
+
+.ht-discount-actions {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 10px;
+    align-items: center;
+    padding-top: 12px;
+}
+
+.ht-discount-primary,
+.ht-discount-delay {
+    min-height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    line-height: 1.2;
+    text-align: center;
+    text-transform: uppercase;
+}
+
+.ht-discount-primary {
+    border: 1px solid rgba(47, 125, 255, 0.42);
+    background: rgba(47, 125, 255, 0.1);
+    color: var(--discount-accent);
+    text-decoration: none;
+}
+
+.ht-discount-primary::after {
+    content: "->";
+    margin-left: 9px;
+    animation: sc-arrow 1.4s ease-in-out infinite;
+}
+
+.ht-discount-delay {
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.06);
+    color: rgba(238, 244, 255, 0.84);
+    cursor: pointer;
+    padding: 0 12px;
+}
+
+.ht-discount-primary:hover,
+.ht-discount-primary:focus-visible,
+.ht-discount-delay:hover,
+.ht-discount-delay:focus-visible {
+    border-color: rgba(255, 59, 78, 0.7);
+    color: #fff;
+    outline: none;
+}
+
+@media (max-width: 560px) {
+    .ht-discount-overlay {
+        padding: 10px;
+        align-items: flex-end;
+    }
+
+    .ht-discount-card {
+        width: min(100%, 430px);
+        padding: 9px;
+        border-radius: 14px;
+    }
+
+    .ht-discount-actions {
+        grid-template-columns: 1fr;
+    }
+
+    .ht-discount-kicker {
+        top: 10px;
+        left: 11px;
+        font-size: 8px;
+        letter-spacing: 0.14em;
+    }
+
+    .ht-discount-close {
+        top: 8px;
+        right: 11px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ht-discount-overlay,
+    .ht-discount-card,
+    .ht-discount-image {
+        transition: none;
+    }
+
+    .ht-discount-grid::before,
+    .ht-discount-scan::before,
+    .ht-discount-kicker::before,
+    .ht-discount-primary::after {
+        animation: none;
+    }
+}
