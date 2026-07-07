@@ -1,30 +1,30 @@
-# Kuondoa kumbukumbu za macOS
+# macOS Memory Dumping
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Mabaki ya Kumbukumbu
+## Memory Artifacts
 
-### Faili za Swap
+### Swap Files
 
-Faili za swap, kama `/private/var/vm/swapfile0`, hutoa **cache wakati kumbukumbu ya kimwili imejaa**. Wakati hakuna nafasi tena katika kumbukumbu ya kimwili, data yake imesogezwa kwenda kwenye faili ya swap na kisha kurudishwa kwenye kumbukumbu ya kimwili inapohitajika. Faili nyingi za swap zinaweza kuwepo, zikiwa na majina kama swapfile0, swapfile1, n.k.
+Swap files, kama `/private/var/vm/swapfile0`, hutumika kama **caches wakati physical memory imejaa**. Wakati hakuna nafasi tena kwenye physical memory, data yake huhamishiwa kwenye swap file na kisha kurudishwa kwenye physical memory kadri inavyohitajika. Inaweza kuwepo swap file kadhaa, zikiwa na majina kama swapfile0, swapfile1, na kadhalika.
 
 ### Hibernate Image
 
-Faili iliyopo `/private/var/vm/sleepimage` ni muhimu wakati wa **hibernation mode**. **Data kutoka kumbukumbu huhifadhiwa kwenye faili hii wakati OS X inapohibernate**. Wakati kompyuta inapoamka, mfumo hurudisha data ya kumbukumbu kutoka kwenye faili hii, ikiruhusu mtumiaji kuendelea mahali alipoacha.
+Faili iliyo katika `/private/var/vm/sleepimage` ni muhimu wakati wa **hibernation mode**. **Data kutoka memory huhifadhiwa kwenye faili hii wakati OS X inahibernates**. Kompyuta inapowashwa tena, system huchukua data ya memory kutoka kwenye faili hii, hivyo kumwezesha user kuendelea alipoishia.
 
-Inafaa kutambua kwamba kwenye mifumo ya kisasa ya MacOS, faili hii kawaida hupigwa encryption kwa sababu za usalama, na kufanya urejeshaji kuwa mgumu.
+Inafaa kutambua kwamba kwenye modern MacOS systems, faili hii kwa kawaida huwa imesimbwa kwa sababu za usalama, jambo linalofanya recovery kuwa ngumu.
 
-- Ili kukagua ikiwa encryption imewezeshwa kwa sleepimage, amri `sysctl vm.swapusage` inaweza kutumika. Hii itaonyesha kama faili imewekwa kwa encryption.
+- Ili kuangalia kama encryption imewezeshwa kwa sleepimage, command `sysctl vm.swapusage` inaweza kuendeshwa. Hii itaonyesha kama faili imesimbwa.
 
-### Logs za shinikizo la kumbukumbu
+### Memory Pressure Logs
 
-Faida nyingine muhimu inayohusiana na kumbukumbu kwenye mifumo ya MacOS ni **log ya shinikizo la kumbukumbu**. Logs hizi zipo katika `/var/log` na zina taarifa za kina kuhusu matumizi ya kumbukumbu ya mfumo na matukio ya shinikizo. Zinaweza kuwa muhimu hasa kwa kutathmini matatizo yanayohusiana na kumbukumbu au kuelewa jinsi mfumo unavyosimamia kumbukumbu kwa muda.
+Faili nyingine muhimu inayohusiana na memory kwenye MacOS systems ni **memory pressure log**. Logs hizi zipo katika `/var/log` na zina taarifa za kina kuhusu matumizi ya memory ya system na pressure events. Zinaweza kuwa muhimu sana kwa kugundua issues zinazohusiana na memory au kuelewa jinsi system inavyosimamia memory kwa muda.
 
 ## Dumping memory with osxpmem
 
-Ili kutoa kumbukumbu kwenye mashine ya MacOS unaweza kutumia [**osxpmem**](https://github.com/google/rekall/releases/download/v1.5.1/osxpmem-2.1.post4.zip).
+Ili kufanya dump ya memory kwenye MacOS machine unaweza kutumia [**osxpmem**](https://github.com/google/rekall/releases/download/v1.5.1/osxpmem-2.1.post4.zip).
 
-**Kumbuka**: Hii sasa kwa kawaida ni **legacy workflow**. `osxpmem` inategemea kuingiza kernel extension, mradi wa [Rekall](https://github.com/google/rekall) umearchivishwa, toleo la mwisho ni kutoka **2017**, na binary iliyochapishwa inalenga **Intel Macs**. Katika toleo za sasa za macOS, hasa kwenye **Apple Silicon**, kunasa RAM nzima kwa kutumia kext kawaida hubanwa na vizuizi vya kisasa vya kernel-extension, SIP, na mahitaji ya kusaini platform. Kivitendo, kwenye mifumo ya kisasa mara nyingi utamaliza kwa kufanya **process-scoped dump** badala ya picha ya RAM yote.
+**Note**: Huu kwa sasa ni zaidi ya **legacy workflow**. `osxpmem` inategemea kupakia kernel extension, project ya [Rekall](https://github.com/google/rekall) imehifadhiwa kama archive, latest release ni ya **2017**, na published binary inalenga **Intel Macs**. Kwenye current macOS releases, hasa kwenye **Apple Silicon**, kext-based full-RAM acquisition mara nyingi huzuiwa na modern kernel-extension restrictions, SIP, na platform-signing requirements. Kwa vitendo, kwenye modern systems mara nyingi utaishia kufanya **process-scoped dump** badala ya whole-RAM image.
 ```bash
 #Dump raw format
 sudo osxpmem.app/osxpmem --format raw -o /tmp/dump_mem
@@ -32,35 +32,35 @@ sudo osxpmem.app/osxpmem --format raw -o /tmp/dump_mem
 #Dump aff4 format
 sudo osxpmem.app/osxpmem -o /tmp/dump_mem.aff4
 ```
-Kama unapata hitilafu hii: `osxpmem.app/MacPmem.kext failed to load - (libkern/kext) authentication failure (file ownership/permissions); check the system/kernel logs for errors or try kextutil(8)` Unaweza kuitatua kwa kufanya:
+Ukipata kosa hili: `osxpmem.app/MacPmem.kext failed to load - (libkern/kext) authentication failure (file ownership/permissions); check the system/kernel logs for errors or try kextutil(8)` Unaweza kulirekebisha kwa kufanya hivi:
 ```bash
 sudo cp -r osxpmem.app/MacPmem.kext "/tmp/"
 sudo kextutil "/tmp/MacPmem.kext"
 #Allow the kext in "Security & Privacy --> General"
 sudo osxpmem.app/osxpmem --format raw -o /tmp/dump_mem
 ```
-**Hitilafu nyingine** zinaweza kurekebishwa kwa **kuruhusu upakiaji wa kext** katika "Security & Privacy --> General", **iruhusu** tu.
+**Makosa mengine** yanaweza kusahihishwa kwa **kuruhusu upakuaji wa kext** katika "Security & Privacy --> General", tu **ruhusu**.
 
-Unaweza pia kutumia hii **oneliner** kupakua programu, kupakia kext na dump memory:
+Unaweza pia kutumia **oneliner** hii kupakua application, kupakia kext na kudump memory:
 ```bash
 sudo su
 cd /tmp; wget https://github.com/google/rekall/releases/download/v1.5.1/osxpmem-2.1.post4.zip; unzip osxpmem-2.1.post4.zip; chown -R root:wheel osxpmem.app/MacPmem.kext; kextload osxpmem.app/MacPmem.kext; osxpmem.app/osxpmem --format raw -o /tmp/dump_mem
 ```
 ## Live process dumping with LLDB
 
-Kwa matoleo **mapya ya macOS**, njia inayofaa zaidi kawaida ni ku-dump memory ya **mchakato maalum** badala ya kujaribu ku-image memory fiziki yote.
+Kwa **matoleo ya hivi karibuni ya macOS**, njia ya vitendo zaidi kawaida ni kudump memory ya **process maalum** badala ya kujaribu ku-image all physical memory.
 
-LLDB inaweza kuhifadhi Mach-O core file kutoka kwa target hai:
+LLDB inaweza kuhifadhi Mach-O core file kutoka kwa live target:
 ```bash
 sudo lldb --attach-pid <pid>
 (lldb) process save-core /tmp/target.core
 ```
-Kwa chaguo-msingi hii kawaida huunda **skinny core**. Ili kulazimisha LLDB kujumuisha kumbukumbu zote za mchakato zilizopangwa:
+Kwa chaguo-msingi hii kwa kawaida huunda **skinny core**. Ili kulazimisha LLDB kujumuisha kumbukumbu yote ya process iliyopangwa:
 ```bash
 sudo lldb --attach-pid <pid>
 (lldb) process save-core /tmp/target-full.core --style full
 ```
-Amri za ziada muhimu kabla ya dumping:
+Amri muhimu za kufuatilia kabla ya dumping:
 ```bash
 # Show loaded images and main binary
 (lldb) image list
@@ -71,34 +71,54 @@ Amri za ziada muhimu kabla ya dumping:
 # Dump only one interesting range
 (lldb) memory read --force --outfile /tmp/region.bin --binary <start> <end>
 ```
-Hii kwa kawaida inatosha wakati lengo ni kurejesha:
+Hii kawaida inatosha wakati lengo ni kurejesha:
 
-- Vifurushi vya usanidi vilivyofichuliwa
-- Token, cookies, au credentials zilizopo katika kumbukumbu
-- Siri zilizo wazi (plaintext) ambazo zinalindwa tu wakati ziko hifadhi (at rest)
-- Ukurasa za Mach-O zilizofichuliwa baada ya unpacking / JIT / runtime patching
+- Decrypted configuration blobs
+- In-memory tokens, cookies, or credentials
+- Plaintext secrets that are only protected at rest
+- Decrypted Mach-O pages after unpacking / JIT / runtime patching
 
-Ikiwa lengo limewalindwa na the **hardened runtime**, au `taskgated` inakataza ku-attach, mara nyingi unahitaji mojawapo ya vigezo vifuatavyo:
+Ikiwa lengo linalindwa na **hardened runtime**, au ikiwa `taskgated` inakataa attach, kwa kawaida unahitaji mojawapo ya masharti haya:
 
 - Lengo lina **`get-task-allow`**
-- Debugger yako imesainiwa na entitlements sahihi za **debugger entitlement**
-- Wewe ni **root** na lengo ni mchakato wa upande wa tatu usio-hardened
+- Debugger yako imesainiwa na **debugger entitlement** sahihi
+- Wewe ni **root** na lengo ni non-hardened third-party process
 
-For more background on obtaining a task port and what can be done with it:
+Kwa maelezo zaidi kuhusu kupata task port na kile kinachoweza kufanywa nayo:
 
 {{#ref}}
 ../macos-proces-abuse/macos-ipc-inter-process-communication/macos-thread-injection-via-task-port.md
 {{#endref}}
 
-## Dump za kuchagua kwa Frida au userland readers
+### Fast pre-attach checks
 
-Wakati core kamili inakuwa noisy, ku-dump maeneo tu ya **interesting readable ranges** mara nyingi huwa haraka zaidi. Frida ni hasa muhimu kwa sababu inafanya kazi vizuri kwa ajili ya **targeted extraction** mara tu unapoweza ku-attach kwenye mchakato.
+Kabla ya kutumia muda kwenye LLDB/Frida, thibitisha haraka kama lengo linaweza kweli **dumpable**:
+```bash
+# Check entitlements that commonly decide whether an attach will work
+codesign -d --entitlements - /Applications/Target.app 2>/dev/null | \
+egrep -A1 'get-task-allow|com.apple.security.cs.debugger'
 
-Mfano wa mbinu:
+# Quick view of hardened runtime / code-signing flags
+codesign -dvvv /Applications/Target.app 2>&1 | egrep 'Runtime Version|flags='
 
-1. Orodhesha maeneo yanayosomwa/yanayoandikwa
-2. Chuja kwa module, heap, stack, au anonymous memory
-3. Dump tu maeneo yanayojumuisha candidate strings, keys, protobufs, plist/XML blobs, au decrypted code/data
+# Inspect memory layout before deciding between a full core and a selective dump
+vmmap <pid>
+```
+Secara operesheni, hii kwa kawaida inamaanisha:
+
+- App ya third-party iliyosafirishwa na **`get-task-allow`** mara nyingi inaweza kudumpiwa moja kwa moja kwa kutumia LLDB, na dump inayopatikana inaweza kufichua data iliyolindwa na TCC ambayo app tayari iliifikia.
+- Lengo **hardened** bila `get-task-allow` kwa kawaida litakataa attaches, hata kama ni `root`, isipokuwa udhibiti entitlement / policy path husika ya debugger.
+- Unhardened third-party processes bado ndizo mahali rahisi zaidi pa kutumia `lldb`, `vmmap`, Frida, au custom `task_for_pid`/`vm_read` readers.
+
+## Selective dumps with Frida or userland readers
+
+Wakati full core ni noisy sana, kudumpi **interesting readable ranges** pekee mara nyingi ni haraka zaidi. Frida ni muhimu sana kwa sababu inafanya kazi vizuri kwa **targeted extraction** mara tu unapoweza kuattach kwenye process.
+
+Mfano wa approach:
+
+1. Enumerate readable/writable ranges
+2. Filter kwa module, heap, stack, au anonymous memory
+3. Dump tu regions zinazobeba candidate strings, keys, protobufs, plist/XML blobs, au decrypted code/data
 
 Minimal Frida example to dump all readable anonymous ranges:
 ```javascript
@@ -112,21 +132,64 @@ f.close();
 } catch (e) {}
 });
 ```
-Hili ni muhimu unapotaka kuepuka faili kubwa za core na kukusanya tu:
+Hii ni muhimu unapotaka kuepuka core files kubwa na kukusanya tu:
 
-- App heap chunks containing secrets
-- Anonymous regions created by custom packers or loaders
-- JIT / unpacked code pages after changing protections
+- App heap chunks zenye secrets
+- Anonymous regions zilizoundwa na custom packers au loaders
+- JIT / unpacked code pages baada ya kubadilisha protections
 
-Zana za zamani za userland kama [`readmem`](https://github.com/gdbinit/readmem) pia zipo, lakini kwa kiasi kikubwa zimetumika zaidi kama **marejeo ya chanzo** kwa ajili ya dump za mtindo wa moja kwa moja `task_for_pid`/`vm_read` na hazidumishiwi vizuri kwa workflows za kisasa za Apple Silicon.
+Older userland tools kama [`readmem`](https://github.com/gdbinit/readmem) pia zipo, lakini kwa kawaida ni muhimu zaidi kama **source references** kwa direct `task_for_pid`/`vm_read` style dumping na hazitunzwi vizuri kwa modern Apple Silicon workflows.
 
-## Vidokezo vya triage ya haraka
+## Heap / VM snapshots with `.memgraph`
 
-- `sysctl vm.swapusage` bado ni njia ya haraka ya kuangalia **matumizi ya swap** na kama swap ni **imesimbwa**.
-- `sleepimage` bado ina umuhimu hasa kwa matukio ya **hibernate/safe sleep**, lakini mifumo ya kisasa kwa kawaida hukilinda, hivyo inapaswa kutazamwa kama **chanzo cha artifact cha kukagua**, sio kama njia ya kupata data inayotegemewa.
-- Katika toleo za hivi karibuni za macOS, **process-level dumping** kwa ujumla ni ya kweli zaidi kuliko **full physical memory imaging** isipokuwa ukidhibiti boot policy, SIP state, na kext loading.
+Ikiwa unajali zaidi kuhusu **heap objects**, **allocation provenance**, au snapshot inayoweza kuhamishwa kwenda machine nyingine, `.memgraph` mara nyingi ni practical zaidi kuliko giant Mach-O core. The `leaks` tooling inaweza kutengeneza moja kutoka kwa live process:
+```bash
+# Capture a memory graph from a live process
+leaks <pid> -outputGraph /tmp/target.memgraph
 
-## Marejeo
+# Include richer object content when you expect to inspect strings / heap data offline
+leaks <pid> -outputGraph /tmp/target-full.memgraph -fullContent
+```
+Kisha ifanyie triage offline kwa kutumia Apple tooling ya kawaida:
+```bash
+vmmap /tmp/target.memgraph
+heap /tmp/target.memgraph
+stringdups /tmp/target-full.memgraph
+malloc_history /tmp/target.memgraph 0xADDR
+```
+`stringdups` ndio sababu kuu ya kuweka `-fullContent` capture karibu, kwa sababu lebo zinazoelezea maudhui ya kumbukumbu huondolewa kutoka kwa `.memgraph` ya chini kabisa.
+
+Hii ni muhimu hasa wakati:
+
+- Unataka **snapshot ndogo, inayoweza kushirikiwa** badala ya core kamili
+- `MallocStackLogging` ilikuwa imewezeshwa na unataka **allocation backtraces**
+- Tayari unajua **interesting heap address** na unataka pivot kwa `malloc_history`
+- Unahitaji **VM/heap breakdown** ya haraka kabla ya kuamua kama dump kamili inafaa kelele
+
+## Swift-heavy targets: `swift-inspect`
+
+Kwa applications zinazohifadhi data ya thamani kubwa ndani ya **Swift runtime objects**, `swift-inspect` inaweza kuwa nyongeza nzuri kwa LLDB au Frida. Badala ya kudump kila kitu kwanza, unaweza kuuliza specific Swift runtime structures kutoka kwa live process:
+```bash
+# Usually available from the Xcode / Swift toolchain
+swift-inspect dump-raw-metadata <pid-or-name>
+swift-inspect dump-arrays <pid-or-name>
+swift-inspect dump-concurrency <pid-or-name> # Darwin-only
+```
+Hii ni muhimu kutambua:
+
+- Arrays kubwa za Swift zinazohifadhi data ya kuvutia
+- Metadata allocations zinazoonyesha types zilizopakiwa wakati wa runtime
+- Swift concurrency state (`Task`, actor, thread relationships) kabla ya kufanya dump iliyolengwa zaidi
+
+Kwa triage zaidi ya object-level runtime mara tu unapoweza tayari kuinspect process, angalia [the dedicated page on objects in memory](../macos-apps-inspecting-debugging-and-fuzzing/objects-in-memory.md).
+
+## Quick triage notes
+
+- `sysctl vm.swapusage` bado ni njia ya haraka ya kuangalia **swap usage** na kama swap ime**encrypted**.
+- `sleepimage` bado ni muhimu hasa kwa hali za **hibernate/safe sleep**, lakini systems za kisasa mara nyingi huihifadhi, hivyo inapaswa kutazamwa kama **artifact source to check**, si kama acquisition path ya kuaminika.
+- Kwenye releases za hivi karibuni za macOS, **process-level dumping** kwa ujumla ni halisi zaidi kuliko **full physical memory imaging** isipokuwa udhibiti boot policy, SIP state, na kext loading.
+
+## References
 
 - [https://www.appspector.com/blog/core-dump](https://www.appspector.com/blog/core-dump)
 - [https://afine.com/to-allow-or-not-to-get-task-allow-that-is-the-question](https://afine.com/to-allow-or-not-to-get-task-allow-that-is-the-question)
