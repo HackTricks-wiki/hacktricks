@@ -1159,6 +1159,105 @@ Detection ideas
 - Remote threads or context pivots that begin execution inside a legitimate DLL export whose first bytes were recently modified.
 - Suspicious `VirtualProtect(Ex)` / `WriteProcessMemory` sequences against DLL `.text` pages followed by thread creation.
 
+## Process Parameter Poisoning (P3)
+
+Process Parameter Poisoning (P3) is a **process-injection / EDR-evasion** technique that avoids the classic remote write path (`VirtualAllocEx` + `WriteProcessMemory`). Instead of copying bytes into an already running target, it abuses the fact that Windows **copies selected `CreateProcessW` startup parameters into the child process** and stores them inside `PEB->ProcessParameters` (`RTL_USER_PROCESS_PARAMETERS`).
+
+### Poisonable carriers copied by `CreateProcessW`
+
+Useful carriers are:
+
+- `lpCommandLine` → `RTL_USER_PROCESS_PARAMETERS.CommandLine`
+- `lpEnvironment` (with `CREATE_UNICODE_ENVIRONMENT`) → `RTL_USER_PROCESS_PARAMETERS.Environment`
+- `STARTUPINFO.lpReserved` → `RTL_USER_PROCESS_PARAMETERS.ShellInfo`
+
+Practical carrier constraints:
+
+- `lpCommandLine` must point to **writable memory** for `CreateProcessW`, and is capped at **32,767 Unicode characters** including the null terminator.
+- `lpEnvironment` must be a Unicode environment block of successive `NAME=VALUE\0` strings terminated by an extra `\0`.
+- `lpReserved` is officially reserved, so the `ShellInfo` mapping should be treated as an implementation detail rather than a stable documented contract.
+
+This turns normal process creation into the **payload-transfer primitive**. The operator creates the child process with attacker-controlled startup data and lets Windows perform the cross-process copy.
+
+### Remote lookup flow without remote write APIs
+
+After the child is created, resolve the copied buffer with **read-only** primitives:
+
+1. `NtQueryInformationProcess(ProcessBasicInformation)` → get `PROCESS_BASIC_INFORMATION.PebBaseAddress`
+2. Read the remote `PEB`
+3. Follow `PEB.ProcessParameters`
+4. Read `RTL_USER_PROCESS_PARAMETERS`
+5. Use the selected pointer:
+   - `parameters.CommandLine.Buffer`
+   - `parameters.Environment`
+   - `parameters.ShellInfo.Buffer`
+
+Minimal flow:
+
+```c
+NtQueryInformationProcess(hProcess, ProcessBasicInformation, &pbi, sizeof(pbi), &retLen);
+NtReadVirtualMemoryEx(hProcess, pbi.PebBaseAddress, &peb, sizeof(peb), &bytesRead, 0);
+NtReadVirtualMemoryEx(hProcess, peb.ProcessParameters, &params, sizeof(params), &bytesRead, 0);
+// params.CommandLine.Buffer / params.Environment / params.ShellInfo.Buffer
+```
+
+### Executing the copied parameter buffer
+
+The copied parameter region is usually `RW`, not executable. A common P3 chain is:
+
+1. Create the process normally (not suspended)
+2. Make the chosen parameter page executable with `NtProtectVirtualMemory` / `VirtualProtectEx`
+3. Reuse the main thread handle already returned in `PROCESS_INFORMATION`
+4. Redirect execution with `NtSetContextThread` (`CONTEXT_CONTROL`, overwrite `RIP`)
+
+Unlike classic thread hijacking workflows, this does **not require** `SuspendThread` / `ResumeThread`; the context can be changed on the returned main thread handle directly.
+
+This avoids several APIs commonly monitored for injection:
+
+- `VirtualAllocEx` / `NtAllocateVirtualMemory(Ex)`
+- `WriteProcessMemory` / `NtWriteVirtualMemory`
+- `CreateRemoteThread` / `NtCreateThreadEx`
+- often also `SuspendThread` / `ResumeThread`
+
+### Null-byte limitation and staged shellcode
+
+All three carriers are **string or string-like data**, so a raw payload containing `0x00` is truncated during transfer. A practical workaround is a **null-free first stage** that reconstructs constants at runtime and then loads an arbitrary second stage.
+
+A simple pattern is XOR-based constant synthesis:
+
+```asm
+mov rax, XOR_A
+mov r15, XOR_B
+xor rax, r15 ; result = desired value, without embedding 0x00 bytes
+```
+
+This lets the first stage build stack strings, API arguments, DLL paths, or a second-stage shellcode loader without embedding null bytes in the transported parameter.
+
+### Stack-based API calls from the first stage
+
+When the first stage must call APIs such as `LoadLibraryA`, it can:
+
+- push the string/buffer on the target stack
+- reserve the **32-byte x64 shadow space**
+- set `RCX`, `RDX`, `R8`, `R9` to constants or `RSP`-relative pointers
+- keep `RSP` **16-byte aligned** before the call
+
+A second stage can then be copied from the stack into a `PAGE_READWRITE` allocation, flipped to `PAGE_EXECUTE_READ` with `VirtualProtect`, and jumped to, avoiding a direct RWX allocation.
+
+### Detection ideas
+
+Good hunting opportunities mentioned by the authors:
+
+- `VirtualProtectEx` / `NtProtectVirtualMemory` making **process-parameter pages executable**
+- that protection change followed by `SetThreadContext` / `NtSetContextThread`
+- remote reads of `PEB` and then `RTL_USER_PROCESS_PARAMETERS`
+- unusually long / high-entropy `lpCommandLine`, `lpEnvironment`, or `STARTUPINFO.lpReserved` values during process creation
+
+### Notes
+
+- P3 is a **cross-process transfer trick**, not a full execution primitive by itself: the copied parameter still needs an execute-permission change and an execution redirection method.
+- `RtlCreateProcessReflection` / Dirty Vanity was considered by the authors but rejected because it internally reaches suspicious primitives such as `NtWriteVirtualMemory` and `NtCreateThreadEx`.
+
 ## SantaStealer Tradecraft for Fileless Evasion and Credential Theft
 
 SantaStealer (aka BluelineStealer) illustrates how modern info-stealers blend AV bypass, anti-analysis and credential access in a single workflow.
@@ -1199,7 +1298,6 @@ Sleep(exec_delay_seconds * 1000); // config-controlled delay to outlive sandboxe
 
 ## References
 
-
 - [Advanced Evasion Tradecraft: Precision Module Stomping](https://medium.com/@toneillcodes/advanced-evasion-tradecraft-precision-module-stomping-b51feb0978fe)
 - [toneillcodes/windows-process-injection](https://github.com/toneillcodes/windows-process-injection)
 - [Crystal Kit – blog](https://rastamouse.me/crystal-kit/)
@@ -1227,8 +1325,9 @@ Sleep(exec_delay_seconds * 1000); // config-controlled delay to outlive sandboxe
 - [ChromElevator – Chrome App Bound Encryption Decryption](https://github.com/xaitax/Chrome-App-Bound-Encryption-Decryption)
 - [Check Point Research – GachiLoader: Defeating Node.js Malware with API Tracing](https://research.checkpoint.com/2025/gachiloader-node-js-malware-with-api-tracing/)
 - [Sleeping Beauty: Putting Adaptix to Bed with Crystal Palace](https://maorsabag.github.io/posts/adaptix-stealthpalace/sleeping-beauty/)
+- [SensePost – Process Parameter Poisoning](https://sensepost.com/blog/2026/process-parameter-poisoning/)
+- [Orange Cyberdefense – p3-loader](https://github.com/Orange-Cyberdefense/p3-loader)
 - [Ekko sleep obfuscation](https://github.com/Cracked5pider/Ekko)
 - [SysWhispers4 – GitHub](https://github.com/JoasASantos/SysWhispers4)
-
 
 {{#include ../banners/hacktricks-training.md}}
