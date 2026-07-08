@@ -1297,6 +1297,19 @@ html:not(.sidebar-resizing) .sidebar {
 .footer-socials i {
     font-size: 17px;
 }
+.footer-socials a svg {
+    width: 16px;
+    height: 16px;
+    fill: currentColor;
+    vertical-align: middle;
+}
+.menu-socials-popup .menu-bar-link svg,
+#menubar-socials-popup .menu-bar-link svg {
+    width: 15px;
+    height: 15px;
+    fill: currentColor;
+    vertical-align: -0.15em;
+}
 .sidebar-socials {
     display: none;
 }
