@@ -1275,31 +1275,37 @@ html:not(.sidebar-resizing) .sidebar {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 14px;
+    gap: clamp(6px, 2vw, 14px);
+    max-width: 100%;
 }
 .footer-socials a,
 .footer-socials a:visited {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 34px;
-    height: 34px;
+    flex: 0 1 auto;
+    width: clamp(28px, 8vw, 34px);
+    height: clamp(28px, 8vw, 34px);
+    box-sizing: border-box;
     border-radius: 9999px;
     color: var(--icons);
     text-decoration: none;
     border: 1px solid var(--table-border-color);
     background: color-mix(in srgb, var(--bg) 88%, transparent);
+    overflow: hidden;
 }
 .footer-socials a:hover {
     color: var(--icons-hover);
     background: var(--theme-hover);
 }
 .footer-socials i {
-    font-size: 17px;
+    font-size: clamp(14px, 4vw, 17px);
+    line-height: 1;
 }
 .footer-socials a svg {
-    width: 16px;
-    height: 16px;
+    display: block;
+    width: clamp(14px, 4vw, 16px);
+    height: clamp(14px, 4vw, 16px);
     fill: currentColor;
     vertical-align: middle;
 }
@@ -1319,10 +1325,24 @@ html:not(.sidebar-resizing) .sidebar {
         left: 10px;
         right: 10px;
         bottom: 12px;
+        justify-content: space-between;
+        gap: clamp(4px, 1.8vw, 10px);
         padding-top: 10px;
         border-top: 1px solid var(--table-border-color);
         background: var(--bg);
         z-index: 2;
+    }
+    .sidebar-socials a,
+    .sidebar-socials a:visited {
+        width: clamp(24px, 9vw, 34px);
+        height: clamp(24px, 9vw, 34px);
+    }
+    .sidebar-socials i {
+        font-size: clamp(12px, 4vw, 16px);
+    }
+    .sidebar-socials a svg {
+        width: clamp(12px, 4vw, 15px);
+        height: clamp(12px, 4vw, 15px);
     }
 }
 @media only screen and (min-width:800px) {
