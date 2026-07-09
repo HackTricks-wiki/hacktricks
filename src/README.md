@@ -67,20 +67,6 @@ https://go.intigriti.com/hacktricks
 
 ---
 
-### [HACKENPROOF](https://bit.ly/3xrrDrL)
-
-<figure class="sponsor-logo"><img src="images/image (3).png" alt=""><figcaption></figcaption></figure>
-
-Join [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) server to communicate with experienced hackers and bug bounty hunters!
-
-- **Hacking Insights:** Engage with content that delves into the thrill and challenges of hacking
-- **Real-Time Hack News:** Keep up-to-date with fast-paced hacking world through real-time news and insights
-- **Latest Announcements:** Stay informed with the newest bug bounties launching and crucial platform updates
-
-**Join us on** [**Discord**](https://discord.com/invite/N3FrSbmwdy) and start collaborating with top hackers today!
-
----
-
 ### [Modern Security – AI & Application Security Training Platform](https://modernsecurity.io/)
 
 <figure class="sponsor-logo"><img src="images/modern_security_logo.png" alt="Modern Security"><figcaption></figcaption></figure>
@@ -242,7 +228,4 @@ welcome/hacktricks-values-and-faq.md
 ## Github Stats
 
 ![HackTricks Github Stats](https://repobeats.axiom.co/api/embed/68f8746802bcf1c8462e889e6e9302d4384f164b.svg)
-
-{{#include ./banners/hacktricks-training.md}}
-
 
