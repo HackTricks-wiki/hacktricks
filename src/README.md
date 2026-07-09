@@ -120,11 +120,19 @@ You can **create a free account** [**here**](https://serpapi.com/users/sign_up)*
 
 ---
 
-### [8kSec Academy – In-Depth Mobile Security Courses](https://academy.8ksec.io/)
+### [8kSec Academy – In-Depth Mobile & AI Security Courses](https://academy.8ksec.io/)
 
 <figure class="sponsor-logo"><img src="images/image (2).png" alt=""><figcaption></figcaption></figure>
 
-Learn the technologies and skills required to perform vulnerability research, penetration testing, and reverse engineering to protect mobile applications and devices. **Master iOS and Android security** through our on-demand courses and **get certified**:
+**8kSec Academy** trains you in offensive mobile and AI security, taught by active researchers – the same team behind the CVE writeups and talks at Black Hat, HITB, and Zer0con. Courses are self-paced, built around labs on real targets, and backed by a hands-on certification.
+ 
+The catalog runs two tracks:
+
+**Mobile Security** – iOS and Android from the app layer down: reverse engineering with Ghidra and LLDB, ARM64 exploitation, kernel internals and modern mitigations (PAC, MTE, SELinux), jailbreak and rooting mechanics.
+
+**AI Security** – two full courses spanning the field. Practical AI Security covers how LLMs, RAG pipelines, AI agents and MCP work, and how to attack and defend them. Advanced AI Security goes build-heavy at the frontier: red teaming AI systems at scale with Garak and PyRIT, exploiting MCP servers, planting and detecting model backdoors, and fine-tuning attacks and defenses on Apple Silicon.
+
+Courses and certifications:
 
 {{#ref}}
 https://academy.8ksec.io/
