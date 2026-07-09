@@ -2,9 +2,9 @@
 
 <figure><img src="images/hacktricks.gif" alt=""><figcaption></figcaption></figure>
 
-_Λογότυπα & motion design του HackTricks από τον_ [_@ppieranacho_](https://www.instagram.com/ppieranacho/)_._
+_Τα λογότυπα & το motion design του Hacktricks από τον_ [_@ppieranacho_](https://www.instagram.com/ppieranacho/)_._
 
-### Εκτέλεση του HackTricks τοπικά
+### Εκτέλεση του HackTricks Τοπικά
 ```bash
 # Download latest version of hacktricks
 git clone https://github.com/HackTricks-wiki/hacktricks
@@ -31,7 +31,7 @@ export LANG="master" # Leave master for english
 # Run the docker container indicating the path to the hacktricks folder
 docker run -d --rm --platform linux/amd64 -p 3337:3000 --name hacktricks -v $(pwd)/hacktricks:/app ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image bash -c "mkdir -p ~/.ssh && ssh-keyscan -H github.com >> ~/.ssh/known_hosts && cd /app && git config --global --add safe.directory /app && git checkout $LANG && git pull && MDBOOK_PREPROCESSOR__HACKTRICKS__ENV=dev mdbook serve --hostname 0.0.0.0"
 ```
-Η τοπική σας αντιγραφή του HackTricks θα είναι **διαθέσιμη στο [http://localhost:3337](http://localhost:3337)** μετά από <5 λεπτά (χρειάζεται να χτιστεί το βιβλίο, κάντε υπομονή).
+Ο τοπικός σας αντίγραφο του HackTricks θα είναι **διαθέσιμο στο [http://localhost:3337](http://localhost:3337)** μετά από <5 λεπτά (χρειάζεται να κάνει build το βιβλίο, κάντε υπομονή).
 
 ## HackTricks Partners
 
@@ -43,11 +43,11 @@ docker run -d --rm --platform linux/amd64 -p 3337:3000 --name hacktricks -v $(pw
 
 <figure class="sponsor-logo"><img src="images/stm (1).png" alt=""><figcaption></figcaption></figure>
 
-Η [**STM Cyber**](https://www.stmcyber.com) είναι μια εξαιρετική εταιρεία κυβερνοασφάλειας με σύνθημα **HACK THE UNHACKABLE**. Πραγματοποιούν τη δική τους έρευνα και αναπτύσσουν τα δικά τους hacking εργαλεία για να **προσφέρουν αρκετές πολύτιμες υπηρεσίες κυβερνοασφάλειας** όπως pentesting, Red teams και εκπαίδευση.
+Η [**STM Cyber**](https://www.stmcyber.com) είναι μια εξαιρετική εταιρεία cybersecurity, με σύνθημα **HACK THE UNHACKABLE**. Κάνουν τη δική τους έρευνα και αναπτύσσουν τα δικά τους hacking tools για να **προσφέρουν αρκετές πολύτιμες υπηρεσίες cybersecurity** όπως pentesting, Red teams και training.
 
 Μπορείτε να δείτε το **blog** τους στο [**https://blog.stmcyber.com**](https://blog.stmcyber.com)
 
-Η **STM Cyber** υποστηρίζει επίσης έργα ανοιχτού κώδικα κυβερνοασφάλειας όπως το HackTricks :)
+Η **STM Cyber** υποστηρίζει επίσης έργα open source στον χώρο του cybersecurity όπως το HackTricks :)
 
 ---
 
@@ -55,9 +55,9 @@ docker run -d --rm --platform linux/amd64 -p 3337:3000 --name hacktricks -v $(pw
 
 <figure class="sponsor-logo"><img src="images/image (47).png" alt=""><figcaption></figcaption></figure>
 
-Η **Intigriti** είναι η **νούμερο 1 στην Ευρώπη** ethical hacking και **bug bounty platform.**
+Η **Intigriti** είναι η **#1 στην Ευρώπη** πλατφόρμα ethical hacking και **bug bounty platform.**
 
-**Bug bounty tip**: **εγγραφείτε** στο **Intigriti**, μια premium **bug bounty platform created by hackers, for hackers**! Ελάτε μαζί μας στο [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) σήμερα και αρχίστε να κερδίζετε bounties έως **$100,000**!
+**Bug bounty tip**: **εγγραφείτε** στο **Intigriti**, μια premium **bug bounty platform που δημιουργήθηκε από hackers, για hackers**! Ελάτε μαζί μας στο [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) σήμερα και αρχίστε να κερδίζετε bounties έως και **$100,000**!
 
 {{#ref}}
 https://go.intigriti.com/hacktricks
@@ -65,34 +65,20 @@ https://go.intigriti.com/hacktricks
 
 ---
 
-### [HACKENPROOF](https://bit.ly/3xrrDrL)
-
-<figure class="sponsor-logo"><img src="images/image (3).png" alt=""><figcaption></figcaption></figure>
-
-Ελάτε στον server [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) για να επικοινωνήσετε με έμπειρους hackers και bug bounty hunters!
-
-- **Hacking Insights:** Ασχοληθείτε με περιεχόμενο που εμβαθύνει στη συγκίνηση και τις προκλήσεις του hacking
-- **Real-Time Hack News:** Μείνετε ενημερωμένοι για τον γρήγορο ρυθμό του hacking κόσμου μέσω ειδήσεων και insights σε πραγματικό χρόνο
-- **Latest Announcements:** Μείνετε ενήμεροι με τα νεότερα bug bounties που ξεκινούν και τις κρίσιμες ενημερώσεις της πλατφόρμας
-
-**Ελάτε μαζί μας στο** [**Discord**](https://discord.com/invite/N3FrSbmwdy) και αρχίστε να συνεργάζεστε με κορυφαίους hackers σήμερα!
-
----
-
 ### [Modern Security – AI & Application Security Training Platform](https://modernsecurity.io/)
 
 <figure class="sponsor-logo"><img src="images/modern_security_logo.png" alt="Modern Security"><figcaption></figcaption></figure>
 
-Η Modern Security παρέχει **πρακτική εκπαίδευση AI Security** με μια **engineering-first, hands-on lab approach**. Τα μαθήματά μας είναι φτιαγμένα για security engineers, AppSec επαγγελματίες και developers που θέλουν να **χτίσουν, σπάσουν και ασφαλίσουν πραγματικές AI/LLM-powered εφαρμογές**.
+Η Modern Security προσφέρει **πρακτική εκπαίδευση AI Security** με μια προσέγγιση **engineering-first, hands-on lab**. Τα μαθήματά μας είναι φτιαγμένα για security engineers, AppSec professionals και developers που θέλουν να **χτίζουν, σπάνε και ασφαλίζουν πραγματικές εφαρμογές με AI/LLM**.
 
-Η **AI Security Certification** εστιάζει σε δεξιότητες πραγματικού κόσμου, όπως:
-- Ασφάλιση LLM και AI-powered εφαρμογών
+Η **AI Security Certification** εστιάζει σε δεξιότητες του πραγματικού κόσμου, όπως:
+- Ασφάλεια εφαρμογών με LLM και AI
 - Threat modeling για AI συστήματα
-- Embeddings, vector databases, και RAG security
-- LLM attacks, abuse scenarios, και πρακτικές άμυνες
+- Embeddings, vector databases και RAG security
+- LLM attacks, abuse scenarios και πρακτικές άμυνες
 - Secure design patterns και ζητήματα deployment
 
-Όλα τα μαθήματα είναι **on-demand**, **lab-driven**, και σχεδιασμένα γύρω από **security tradeoffs του πραγματικού κόσμου**, όχι μόνο θεωρία.
+Όλα τα μαθήματα είναι **on-demand**, **lab-driven** και σχεδιασμένα γύρω από **πραγματικά security tradeoffs**, όχι μόνο θεωρία.
 
 👉 Περισσότερες λεπτομέρειες για το AI Security course:
 https://www.modernsecurity.io/courses/ai-security-certification
@@ -107,12 +93,12 @@ https://modernsecurity.io/
 
 <figure class="sponsor-logo"><img src="images/image (1254).png" alt=""><figcaption></figcaption></figure>
 
-Η **SerpApi** προσφέρει γρήγορα και εύκολα real-time APIs για να **έχετε πρόσβαση στα αποτελέσματα των search engines**. Κάνουν scraping στα search engines, χειρίζονται proxies, λύνουν captchas και αναλύουν όλα τα εμπλουτισμένα δομημένα δεδομένα για εσάς.
+Η **SerpApi** προσφέρει γρήγορα και εύχρηστα real-time APIs για να **έχετε πρόσβαση στα αποτελέσματα των search engines**. Κάνουν scrape τα search engines, χειρίζονται proxies, λύνουν captchas και κάνουν parse όλα τα rich structured data για εσάς.
 
 Μια συνδρομή σε ένα από τα πλάνα της SerpApi περιλαμβάνει πρόσβαση σε πάνω από 50 διαφορετικά APIs για scraping διαφορετικών search engines, όπως Google, Bing, Baidu, Yahoo, Yandex και άλλα.\
-Σε αντίθεση με άλλους παρόχους, η **SerpApi δεν κάνει απλώς scrape τα organic results**. Οι απαντήσεις της SerpApi περιλαμβάνουν σταθερά όλες τις διαφημίσεις, inline εικόνες και βίντεο, knowledge graphs και άλλα στοιχεία και δυνατότητες που υπάρχουν στα search results.
+Σε αντίθεση με άλλους παρόχους, η **SerpApi δεν κάνει scrape μόνο τα organic results**. Τα responses της SerpApi περιλαμβάνουν σταθερά όλα τα ads, inline images και videos, knowledge graphs και άλλα στοιχεία και δυνατότητες που υπάρχουν στα search results.
 
-Τρέχοντες πελάτες της SerpApi περιλαμβάνουν **Apple, Shopify και GrubHub**.\
+Στους τωρινούς πελάτες της SerpApi περιλαμβάνονται οι **Apple, Shopify και GrubHub**.\
 Για περισσότερες πληροφορίες δείτε το [**blog**](https://serpapi.com/blog/)**,** ή δοκιμάστε ένα παράδειγμα στο [**playground**](https://serpapi.com/playground)**.**\
 Μπορείτε να **δημιουργήσετε δωρεάν λογαριασμό** [**εδώ**](https://serpapi.com/users/sign_up)**.**
 
@@ -122,15 +108,15 @@ https://modernsecurity.io/
 
 <figure class="sponsor-logo"><img src="images/image (2).png" alt=""><figcaption></figcaption></figure>
 
-Η **8kSec Academy** σας εκπαιδεύει σε offensive mobile και AI security, με διδασκαλία από ενεργούς ερευνητές – την ίδια ομάδα πίσω από τα CVE writeups και τις ομιλίες στο Black Hat, HITB και Zer0con. Τα μαθήματα είναι self-paced, βασισμένα σε labs πάνω σε πραγματικούς στόχους, και υποστηρίζονται από hands-on certification.
+Η **8kSec Academy** σας εκπαιδεύει σε offensive mobile και AI security, με διδασκαλία από ενεργούς ερευνητές – την ίδια ομάδα πίσω από τα CVE writeups και τις ομιλίες σε Black Hat, HITB και Zer0con. Τα μαθήματα είναι self-paced, βασισμένα σε labs σε πραγματικούς στόχους και υποστηρίζονται από hands-on certification.
 
-Ο κατάλογος καλύπτει δύο tracks:
+Ο κατάλογος περιλαμβάνει δύο tracks:
 
-**Mobile Security** – iOS και Android από το επίπεδο της εφαρμογής και κάτω: reverse engineering με Ghidra και LLDB, ARM64 exploitation, kernel internals και σύγχρονα mitigations (PAC, MTE, SELinux), μηχανισμοί jailbreak και rooting.
+**Mobile Security** – iOS και Android από το app layer και κάτω: reverse engineering με Ghidra και LLDB, ARM64 exploitation, kernel internals και σύγχρονες mitigations (PAC, MTE, SELinux), jailbreak και rooting mechanics.
 
-**AI Security** – δύο πλήρη μαθήματα που καλύπτουν όλο το πεδίο. Το Practical AI Security εξηγεί πώς λειτουργούν τα LLMs, τα RAG pipelines, οι AI agents και το MCP, και πώς να τα επιτεθείτε και να τα αμυνθείτε. Το Advanced AI Security είναι πιο build-heavy στην αιχμή: red teaming AI συστημάτων σε κλίμακα με Garak και PyRIT, exploitation MCP servers, τοποθέτηση και ανίχνευση model backdoors, και fine-tuning attacks και άμυνες σε Apple Silicon.
+**AI Security** – δύο πλήρη courses που καλύπτουν όλο το πεδίο. Το Practical AI Security καλύπτει πώς λειτουργούν τα LLMs, τα RAG pipelines, τα AI agents και το MCP, και πώς να τα attack και defend. Το Advanced AI Security είναι πιο build-heavy στο frontier: red teaming AI systems σε κλίμακα με Garak και PyRIT, exploiting MCP servers, planting και detecting model backdoors, καθώς και fine-tuning attacks και defenses σε Apple Silicon.
 
-Μαθήματα και πιστοποιήσεις:
+Courses και certifications:
 
 {{#ref}}
 https://academy.8ksec.io/
@@ -142,9 +128,9 @@ https://academy.8ksec.io/
 
 <figure class="sponsor-logo"><img src="images/logo-naxus.png" alt=""><figcaption></figcaption></figure>
 
-Η **NaxusAI** είναι μια AI-powered security platform για να βρίσκετε exploitable vulnerabilities πριν το κάνουν οι attackers.
+Η **NaxusAI** είναι μια πλατφόρμα security με AI-powered λειτουργίες για να εντοπίζει exploitable vulnerabilities πριν το κάνουν οι attackers.
 
-**Code security tip**: εγγραφείτε στο NaxusAI, μια έξυπνη vulnerability monitoring platform φτιαγμένη για developers και security teams! Ελάτε μαζί μας σήμερα και αρχίστε να χρησιμοποιείτε AI για **ανίχνευση, επικύρωση και διόρθωση πραγματικών security risks πριν φτάσουν στην παραγωγή**!
+**Code security tip**: εγγραφείτε στο NaxusAI, μια έξυπνη πλατφόρμα παρακολούθησης vulnerabilities φτιαγμένη για developers και security teams! Ελάτε μαζί μας σήμερα και αρχίστε να χρησιμοποιείτε AI για **ανίχνευση, validation και διόρθωση πραγματικών security risks πριν φτάσουν σε production**!
 
 {{#ref}}
 https://naxusai.com
@@ -156,13 +142,13 @@ https://naxusai.com
 
 <figure class="sponsor-logo"><img src="images/websec (1).svg" alt=""><figcaption></figcaption></figure>
 
-Η [**WebSec**](https://websec.net) είναι μια επαγγελματική εταιρεία κυβερνοασφάλειας με έδρα το **Άμστερνταμ** που βοηθά στην **προστασία** επιχειρήσεων **σε όλο τον κόσμο** από τις πιο πρόσφατες απειλές κυβερνοασφάλειας, παρέχοντας **offensive-security services** με μια **modern** προσέγγιση.
+Η [**WebSec**](https://websec.net) είναι μια επαγγελματική εταιρεία cybersecurity με έδρα το **Amsterdam** που βοηθά στην **προστασία** επιχειρήσεων **σε όλο τον κόσμο** από τις πιο πρόσφατες απειλές cybersecurity, παρέχοντας **offensive-security services** με μια **μοντέρνα** προσέγγιση.
 
-Η WebSec είναι μια διεθνής εταιρεία ασφάλειας με γραφεία στο Άμστερνταμ και το Wyoming. Προσφέρουν **all-in-one security services**, που σημαίνει ότι τα κάνουν όλα: Pentesting, **Security** Audits, Awareness Trainings, Phishing Campagnes, Code Review, Exploit Development, Security Experts Outsourcing και πολλά ακόμη.
+Η WebSec είναι μια διεθνής εταιρεία security με γραφεία στο Amsterdam και το Wyoming. Προσφέρει **all-in-one security services**, που σημαίνει ότι τα κάνει όλα: Pentesting, **Security** Audits, Awareness Trainings, Phishing Campagnes, Code Review, Exploit Development, Security Experts Outsourcing και πολλά άλλα.
 
-Ένα ακόμη ωραίο στοιχείο της WebSec είναι ότι, σε αντίθεση με τον μέσο όρο του κλάδου, η WebSec είναι **πολύ σίγουρη για τις ικανότητές της**, σε τέτοιο βαθμό που **εγγυάται τα καλύτερα ποιοτικά αποτελέσματα**, και αναφέρει στον ιστότοπό της "**If we can't hack it, You don't pay it!**". Για περισσότερες πληροφορίες δείτε το [**website**](https://websec.net/en/) και το [**blog**](https://websec.net/blog/) τους!
+Ένα άλλο ωραίο στοιχείο της WebSec είναι ότι, σε αντίθεση με τον μέσο όρο του κλάδου, η WebSec είναι **πολύ σίγουρη για τις ικανότητές της**, σε τέτοιο βαθμό που **εγγυάται τα καλύτερα ποιοτικά αποτελέσματα**, και αναφέρει στην ιστοσελίδα της: "**If we can't hack it, You don't pay it!**". Για περισσότερες πληροφορίες δείτε το [**website**](https://websec.net/en/) και το [**blog**](https://websec.net/blog/)!
 
-Εκτός από τα παραπάνω, η WebSec είναι επίσης **αφοσιωμένος υποστηρικτής του HackTricks.**
+Επιπλέον, η WebSec είναι επίσης **αφοσιωμένος υποστηρικτής του HackTricks.**
 
 {{#ref}}
 https://www.youtube.com/watch?v=Zq2JycGDCPM
@@ -176,12 +162,12 @@ https://www.youtube.com/watch?v=Zq2JycGDCPM
 
 
 **Built for the field. Built around you.**\
-[**Cyber Helmets**](https://cyberhelmets.com/?ref=hacktricks) αναπτύσσει και παρέχει αποτελεσματική εκπαίδευση κυβερνοασφάλειας, χτισμένη και καθοδηγούμενη από ειδικούς του κλάδου. Τα προγράμματά τους ξεπερνούν τη θεωρία και εξοπλίζουν τις ομάδες με βαθιά κατανόηση και εφαρμόσιμες δεξιότητες, χρησιμοποιώντας προσαρμοσμένα περιβάλλοντα που αντικατοπτρίζουν πραγματικές απειλές. Για αιτήματα προσαρμοσμένης εκπαίδευσης, επικοινωνήστε μαζί μας [**εδώ**](https://cyberhelmets.com/tailor-made-training/?ref=hacktricks).
+[**Cyber Helmets**](https://cyberhelmets.com/?ref=hacktricks) αναπτύσσει και παρέχει αποτελεσματική εκπαίδευση cybersecurity, σχεδιασμένη και καθοδηγούμενη από ειδικούς του κλάδου. Τα προγράμματά τους ξεπερνούν τη θεωρία για να εξοπλίσουν ομάδες με βαθιά κατανόηση και εφαρμόσιμες δεξιότητες, χρησιμοποιώντας προσαρμοσμένα περιβάλλοντα που αντικατοπτρίζουν απειλές του πραγματικού κόσμου. Για αιτήματα για custom training, επικοινωνήστε μαζί μας [**εδώ**](https://cyberhelmets.com/tailor-made-training/?ref=hacktricks).
 
 **What sets their training apart:**
-* Προσαρμοσμένο περιεχόμενο και labs
-* Υποστηρίζεται από εργαλεία και πλατφόρμες κορυφαίου επιπέδου
-* Σχεδιασμένο και διδασκόμενο από practitioners
+* Custom-built content and labs
+* Backed by top-tier tools and platforms
+* Designed and taught by practitioners
 
 {{#ref}}
 https://cyberhelmets.com/courses/?ref=hacktricks
@@ -193,19 +179,19 @@ https://cyberhelmets.com/courses/?ref=hacktricks
 
 <figure class="sponsor-logo"><img src="images/lasttower.png" alt="lasttower logo"><figcaption></figcaption></figure>
 
-Η Last Tower Solutions παρέχει εξειδικευμένες υπηρεσίες κυβερνοασφάλειας για ιδρύματα **Εκπαίδευσης** και **FinTech**,
-με έμφαση σε **penetration testing, cloud security assessments**, και
-**compliance readiness** (SOC 2, PCI-DSS, NIST). Η ομάδα μας περιλαμβάνει **OSCP και CISSP
-πιστοποιημένους επαγγελματίες**, φέρνοντας βαθιά τεχνική εξειδίκευση και γνώση βιομηχανικών προτύπων σε
+Η Last Tower Solutions παρέχει εξειδικευμένες υπηρεσίες cybersecurity για ιδρύματα **Education** και **FinTech**
+, με έμφαση σε **penetration testing, cloud security assessments** και
+**compliance readiness** (SOC 2, PCI-DSS, NIST). Η ομάδα μας περιλαμβάνει επαγγελματίες με πιστοποιήσεις **OSCP και CISSP**,
+φέρνοντας βαθιά τεχνική τεχνογνωσία και insight επιπέδου βιομηχανίας σε
 κάθε συνεργασία.
 
-Πηγαίνουμε πέρα από τα αυτοματοποιημένα scans με **χειροκίνητο, intelligence-driven testing** προσαρμοσμένο σε
-περιβάλλοντα υψηλού κινδύνου. Από την προστασία αρχείων φοιτητών έως την ασφάλιση χρηματοοικονομικών συναλλαγών,
-βοηθάμε τους οργανισμούς να υπερασπίζονται ό,τι έχει τη μεγαλύτερη σημασία.
+Προχωράμε πέρα από τα automated scans με **manual, intelligence-driven testing** προσαρμοσμένο σε
+περιβάλλοντα υψηλού ρίσκου. Από την ασφάλεια student records μέχρι την προστασία financial transactions,
+βοηθάμε οργανισμούς να υπερασπιστούν ό,τι έχει τη μεγαλύτερη σημασία.
 
-_“Μια ποιοτική άμυνα απαιτεί γνώση της επίθεσης· παρέχουμε ασφάλεια μέσω κατανόησης.”_
+_“A quality defense requires knowing the offense, we provide security through understanding.”_
 
-Μείνετε ενημερωμένοι και έχετε πρόσβαση στα τελευταία νέα της κυβερνοασφάλειας επισκεπτόμενοι το [**blog**](https://www.lasttowersolutions.com/blog) μας.
+Μείνετε ενημερωμένοι και up to date με τα τελευταία νέα στο cybersecurity επισκεπτόμενοι το [**blog**](https://www.lasttowersolutions.com/blog) μας.
 
 {{#ref}}
 https://www.lasttowersolutions.com/
@@ -217,7 +203,7 @@ https://www.lasttowersolutions.com/
 
 <figure class="sponsor-logo"><img src="images/k8studio.png" alt="k8studio logo"><figcaption></figcaption></figure>
 
-Το K8Studio IDE δίνει τη δυνατότητα σε DevOps, DevSecOps και developers να διαχειρίζονται, να παρακολουθούν και να ασφαλίζουν Kubernetes clusters αποτελεσματικά. Αξιοποιήστε τα AI-driven insights μας, το προηγμένο security framework και το διαισθητικό CloudMaps GUI για να οπτικοποιείτε τα clusters σας, να κατανοείτε την κατάστασή τους και να ενεργείτε με αυτοπεποίθηση.
+Το K8Studio IDE δίνει τη δυνατότητα σε DevOps, DevSecOps και developers να διαχειρίζονται, να παρακολουθούν και να ασφαλίζουν αποτελεσματικά Kubernetes clusters. Αξιοποιήστε τα AI-driven insights μας, το προηγμένο security framework και το διαισθητικό CloudMaps GUI για να οπτικοποιείτε τα clusters σας, να κατανοείτε την κατάστασή τους και να ενεργείτε με σιγουριά.
 
 Επιπλέον, το K8Studio είναι **συμβατό με όλες τις κύριες kubernetes distributions** (AWS, GCP, Azure, DO, Rancher, K3s, Openshift και άλλα).
 
@@ -226,7 +212,7 @@ https://k8studio.io/
 {{#endref}}
 
 ---
-## License & Disclaimer
+## Άδεια χρήσης & Αποποίηση ευθύνης
 
 Δείτε τα στο:
 
@@ -237,5 +223,3 @@ welcome/hacktricks-values-and-faq.md
 ## Github Stats
 
 ![HackTricks Github Stats](https://repobeats.axiom.co/api/embed/68f8746802bcf1c8462e889e6e9302d4384f164b.svg)
-
-{{#include ./banners/hacktricks-training.md}}
