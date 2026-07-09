@@ -2,7 +2,7 @@
 
 <figure><img src="images/hacktricks.gif" alt=""><figcaption></figcaption></figure>
 
-_Логотипи Hacktricks і motion design від_ [_@ppieranacho_](https://www.instagram.com/ppieranacho/)_._
+_Логотипи Hacktricks та motion design від_ [_@ppieranacho_](https://www.instagram.com/ppieranacho/)_._
 
 ### Запустити HackTricks локально
 ```bash
@@ -31,7 +31,7 @@ export LANG="master" # Leave master for english
 # Run the docker container indicating the path to the hacktricks folder
 docker run -d --rm --platform linux/amd64 -p 3337:3000 --name hacktricks -v $(pwd)/hacktricks:/app ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image bash -c "mkdir -p ~/.ssh && ssh-keyscan -H github.com >> ~/.ssh/known_hosts && cd /app && git config --global --add safe.directory /app && git checkout $LANG && git pull && MDBOOK_PREPROCESSOR__HACKTRICKS__ENV=dev mdbook serve --hostname 0.0.0.0"
 ```
-Your local copy of HackTricks буде **доступна за адресою [http://localhost:3337](http://localhost:3337)** через <5 minutes (потрібно зібрати book, запасіться терпінням).
+Your local copy of HackTricks will be **available at [http://localhost:3337](http://localhost:3337)** after <5 minutes (it needs to build the book, be patient).
 
 ## HackTricks Partners
 
@@ -43,11 +43,11 @@ Your local copy of HackTricks буде **доступна за адресою [h
 
 <figure class="sponsor-logo"><img src="images/stm (1).png" alt=""><figcaption></figcaption></figure>
 
-[**STM Cyber**](https://www.stmcyber.com) — це чудова cybersecurity компанія, чий слоган — **HACK THE UNHACKABLE**. Вони проводять власні дослідження та розробляють власні hacking tools, щоб **надавати кілька цінних cybersecurity services** на кшталт pentesting, Red teams і training.
+[**STM Cyber**](https://www.stmcyber.com) — це чудова компанія з кібербезпеки, чий слоган — **HACK THE UNHACKABLE**. Вони проводять власні дослідження та розробляють власні hacking tools, щоб **надавати кілька цінних послуг з кібербезпеки** на кшталт pentesting, Red teams і training.
 
 Ви можете переглянути їхній **blog** на [**https://blog.stmcyber.com**](https://blog.stmcyber.com)
 
-**STM Cyber** також підтримують open source cybersecurity проєкти, як-от HackTricks :)
+**STM Cyber** також підтримує open source проєкти з кібербезпеки, як-от HackTricks :)
 
 ---
 
@@ -55,9 +55,9 @@ Your local copy of HackTricks буде **доступна за адресою [h
 
 <figure class="sponsor-logo"><img src="images/image (47).png" alt=""><figcaption></figcaption></figure>
 
-**Intigriti** — це **Europe's #1** ethical hacking та **bug bounty platform.**
+**Intigriti** — це **№1 у Європі** платформа для ethical hacking і **bug bounty platform.**
 
-**Bug bounty tip**: **зареєструйтеся** в **Intigriti**, premium **bug bounty platform, створеній хакерами для хакерів**! Приєднуйтесь до нас на [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) сьогодні та починайте заробляти bounties до **$100,000**!
+**Bug bounty tip**: **зареєструйтеся** в **Intigriti**, преміальній **bug bounty platform, створеній хакерами для хакерів**! Приєднуйтеся до нас на [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) вже сьогодні та почніть заробляти bounties до **$100,000**!
 
 {{#ref}}
 https://go.intigriti.com/hacktricks
@@ -69,13 +69,13 @@ https://go.intigriti.com/hacktricks
 
 <figure class="sponsor-logo"><img src="images/image (3).png" alt=""><figcaption></figcaption></figure>
 
-Приєднуйтесь до сервера [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy), щоб спілкуватися з досвідченими hackers і bug bounty hunters!
+Приєднуйтеся до сервера [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy), щоб спілкуватися з досвідченими хакерами та bug bounty hunters!
 
-- **Hacking Insights:** Долучайтеся до контенту, що занурює в захопливість і виклики hacking
-- **Real-Time Hack News:** Будьте в курсі швидкоплинного hacking world через новини та інсайти в реальному часі
-- **Latest Announcements:** Будьте поінформовані про найновіші bug bounties та важливі оновлення платформи
+- **Hacking Insights:** Долучайтеся до контенту, що занурює у захоплення та виклики hacking
+- **Real-Time Hack News:** Будьте в курсі швидкоплинного світу hacking завдяки новинам та аналітиці в реальному часі
+- **Latest Announcements:** Дізнавайтеся про нові bug bounties, що запускаються, та важливі оновлення платформи
 
-**Приєднуйтесь до нас на** [**Discord**](https://discord.com/invite/N3FrSbmwdy) і починайте співпрацювати з топовими hackers уже сьогодні!
+**Приєднуйтеся до нас у** [**Discord**](https://discord.com/invite/N3FrSbmwdy) **і починайте співпрацювати з найкращими хакерами вже сьогодні!**
 
 ---
 
@@ -85,16 +85,16 @@ https://go.intigriti.com/hacktricks
 
 Modern Security надає **практичне AI Security training** з **engineering-first, hands-on lab approach**. Наші курси створені для security engineers, AppSec professionals і developers, які хочуть **створювати, ламати та захищати реальні AI/LLM-powered applications**.
 
-**AI Security Certification** зосереджена на практичних навичках із реального світу, зокрема:
+**AI Security Certification** зосереджується на реальних навичках, зокрема:
 - Захист LLM та AI-powered applications
 - Threat modeling для AI systems
-- Embeddings, vector databases і безпека RAG
-- LLM attacks, abuse scenarios і практичні defenses
-- Secure design patterns і deployment considerations
+- Embeddings, vector databases та безпека RAG
+- LLM attacks, abuse scenarios та практичні defenses
+- Безпечні design patterns і питання deployment
 
 Усі курси **on-demand**, **lab-driven** і побудовані навколо **real-world security tradeoffs**, а не лише теорії.
 
-👉 Більше деталей про курс AI Security:
+👉 Докладніше про AI Security course:
 https://www.modernsecurity.io/courses/ai-security-certification
 
 {{#ref}}
@@ -107,22 +107,30 @@ https://modernsecurity.io/
 
 <figure class="sponsor-logo"><img src="images/image (1254).png" alt=""><figcaption></figcaption></figure>
 
-**SerpApi** пропонує швидкі й прості real-time APIs для **отримання search engine results**. Вони scrape search engines, обробляють proxies, вирішують captchas і парсять усі rich structured data для вас.
+**SerpApi** пропонує швидкі та прості real-time APIs для **access search engine results**. Вони scrape search engines, обробляють proxies, вирішують captchas і парсять для вас усі rich structured data.
 
 Підписка на один із планів SerpApi включає доступ до понад 50 різних APIs для scraping різних search engines, зокрема Google, Bing, Baidu, Yahoo, Yandex та інших.\
-На відміну від інших провайдерів, **SerpApi не просто scrape organic results**. Відповіді SerpApi стабільно включають усі ads, inline images і videos, knowledge graphs та інші елементи й функції, присутні в search results.
+На відміну від інших провайдерів, **SerpApi не просто scrape organic results**. Відповіді SerpApi послідовно містять усі ads, inline images and videos, knowledge graphs та інші елементи й функції, присутні в результатах пошуку.
 
-Поточні клієнти SerpApi включають **Apple, Shopify та GrubHub**.\
-Щоб дізнатися більше, перегляньте їхній [**blog**](https://serpapi.com/blog/)**,** або спробуйте приклад у їхньому [**playground**](https://serpapi.com/playground)**.**\
-Ви можете **створити безкоштовний акаунт** [**тут**](https://serpapi.com/users/sign_up)**.**
+Серед поточних клієнтів SerpApi — **Apple, Shopify і GrubHub**.\
+Докладніше дивіться їхній [**blog**](https://serpapi.com/blog/)**,** або спробуйте приклад у їхньому [**playground**](https://serpapi.com/playground)**.**\
+Ви можете **створити безкоштовний обліковий запис** [**тут**](https://serpapi.com/users/sign_up)**.**
 
 ---
 
-### [8kSec Academy – In-Depth Mobile Security Courses](https://academy.8ksec.io/)
+### [8kSec Academy – In-Depth Mobile & AI Security Courses](https://academy.8ksec.io/)
 
 <figure class="sponsor-logo"><img src="images/image (2).png" alt=""><figcaption></figcaption></figure>
 
-Вивчайте technologies і skills, необхідні для vulnerability research, penetration testing та reverse engineering, щоб захищати mobile applications і devices. **Опануйте iOS та Android security** через наші on-demand курси та **отримайте сертифікацію**:
+**8kSec Academy** навчає offensive mobile і AI security, а викладають активні дослідники — та сама команда, що стоїть за CVE writeups і доповідями на Black Hat, HITB та Zer0con. Курси проходяться у власному темпі, побудовані навколо labs на реальних цілях і підтримуються hands-on certification.
+
+Каталог охоплює два напрями:
+
+**Mobile Security** – iOS і Android від рівня app layer донизу: reverse engineering з Ghidra та LLDB, ARM64 exploitation, kernel internals і сучасні mitigations (PAC, MTE, SELinux), механіки jailbreak і rooting.
+
+**AI Security** – два повноцінні курси, що охоплюють цю сферу. Practical AI Security пояснює, як працюють LLMs, RAG pipelines, AI agents і MCP, а також як атакувати й захищати їх. Advanced AI Security йде в напрямку build-heavy на передовій: red teaming AI systems at scale з Garak і PyRIT, exploiting MCP servers, впровадження та виявлення model backdoors, а також fine-tuning attacks і defenses на Apple Silicon.
+
+Курси та сертифікації:
 
 {{#ref}}
 https://academy.8ksec.io/
@@ -136,7 +144,7 @@ https://academy.8ksec.io/
 
 **NaxusAI** — це AI-powered security platform для пошуку exploitable vulnerabilities до того, як це зроблять attackers.
 
-**Code security tip**: зареєструйтеся в NaxusAI, smart vulnerability monitoring platform, створеній для developers і security teams! Приєднуйтесь до нас сьогодні та починайте використовувати AI для **виявлення, валідації та виправлення реальних security risks ще до того, як вони потраплять у production**!
+**Code security tip**: зареєструйтеся в NaxusAI, розумній платформі моніторингу vulnerabilities, створеній для developers і security teams! Приєднуйтеся до нас сьогодні та почніть використовувати AI для **detecting, validating, and fixing real security risks before they reach production**!
 
 {{#ref}}
 https://naxusai.com
@@ -148,13 +156,13 @@ https://naxusai.com
 
 <figure class="sponsor-logo"><img src="images/websec (1).svg" alt=""><figcaption></figcaption></figure>
 
-[**WebSec**](https://websec.net) — це професійна cybersecurity компанія, базована в **Amsterdam**, яка допомагає **захищати** businesses **по всьому світу** від найновіших cybersecurity threats, надаючи **offensive-security services** із **modern** підходом.
+[**WebSec**](https://websec.net) — це професійна компанія з кібербезпеки, що базується в **Amsterdam**, яка допомагає **захищати** бізнес **по всьому світу** від найновіших кіберзагроз, надаючи **offensive-security services** із **modern** підходом.
 
-WebSec — це intenational security company з офісами в Amsterdam і Wyoming. Вони пропонують **all-in-one security services**, тобто роблять усе: Pentesting, **Security** Audits, Awareness Trainings, Phishing Campagnes, Code Review, Exploit Development, Security Experts Outsourcing і багато іншого.
+WebSec — це intenational security company з офісами в Amsterdam і Wyoming. Вони пропонують **all-in-one security services**, що означає, що вони роблять усе: Pentesting, **Security** Audits, Awareness Trainings, Phishing Campagnes, Code Review, Exploit Development, Security Experts Outsourcing і багато іншого.
 
-Ще одна крута річ про WebSec полягає в тому, що, на відміну від середнього рівня в індустрії, WebSec **дуже впевнені у своїх навичках**, настільки, що **гарантують найкращу якість результатів**; на їхньому сайті зазначено: "**If we can't hack it, You don't pay it!**". Щоб дізнатися більше, перегляньте їхній [**website**](https://websec.net/en/) і [**blog**](https://websec.net/blog/)!
+Ще одна крута річ про WebSec полягає в тому, що, на відміну від середнього рівня в індустрії, WebSec **дуже впевнені у своїх навичках**, настільки, що **гарантують найкращу якість результатів**; на їхньому сайті зазначено: "**If we can't hack it, You don't pay it!**". Для детальнішої інформації подивіться їхній [**website**](https://websec.net/en/) і [**blog**](https://websec.net/blog/)!
 
-Окрім цього, WebSec також є **відданим supporter of HackTricks.**
+Окрім цього, WebSec також є **відданим прихильником HackTricks.**
 
 {{#ref}}
 https://www.youtube.com/watch?v=Zq2JycGDCPM
@@ -168,12 +176,12 @@ https://www.youtube.com/watch?v=Zq2JycGDCPM
 
 
 **Built for the field. Built around you.**\
-[**Cyber Helmets**](https://cyberhelmets.com/?ref=hacktricks) розробляє та постачає ефективне cybersecurity training, створене та кероване
-industry experts. Їхні програми виходять за межі теорії, щоб забезпечити teams глибоким
-розумінням і практичними skills, використовуючи custom environments, які відображають real-world
-threats. Для запитів щодо custom training, зв’яжіться з нами [**тут**](https://cyberhelmets.com/tailor-made-training/?ref=hacktricks).
+[**Cyber Helmets**](https://cyberhelmets.com/?ref=hacktricks) розробляє та надає ефективне cybersecurity training, створене та кероване
+industry experts. Їхні програми виходять за межі теорії, щоб забезпечити команди глибоким
+розумінням і практичними навичками, використовуючи custom environments, що відображають реальні
+threats. Для запитів щодо custom training, зв’яжіться з нами [**here**](https://cyberhelmets.com/tailor-made-training/?ref=hacktricks).
 
-**Що вирізняє їхнє training:**
+**What sets their training apart:**
 * Custom-built content and labs
 * Backed by top-tier tools and platforms
 * Designed and taught by practitioners
@@ -188,19 +196,19 @@ https://cyberhelmets.com/courses/?ref=hacktricks
 
 <figure class="sponsor-logo"><img src="images/lasttower.png" alt="lasttower logo"><figcaption></figcaption></figure>
 
-Last Tower Solutions надає спеціалізовані cybersecurity services для установ **Education** і **FinTech**
-з акцентом на **penetration testing, cloud security assessments**, і
-**compliance readiness** (SOC 2, PCI-DSS, NIST). Наша команда включає **OSCP і CISSP
-certified professionals**, які приносять глибоку technical expertise та industry-standard insight у
-кожну engagement.
+Last Tower Solutions надає спеціалізовані cybersecurity services для інституцій **Education** і **FinTech**
+, з акцентом на **penetration testing, cloud security assessments** і
+**compliance readiness** (SOC 2, PCI-DSS, NIST). Наша команда включає **OSCP and CISSP
+certified professionals**, які приносять глибоку технічну експертизу та галузеве бачення до
+кожного проєкту.
 
-Ми виходимо за межі automated scans завдяки **manual, intelligence-driven testing**, адаптованому до
-high-stakes environments. Від захисту student records до охорони financial transactions,
-ми допомагаємо organizations захищати те, що має найбільше значення.
+Ми йдемо далі за автоматизовані сканування завдяки **manual, intelligence-driven testing**, адаптованому до
+середовищ із високими ставками. Від захисту студентських записів до охорони фінансових транзакцій,
+ми допомагаємо організаціям захищати те, що має найбільше значення.
 
 _“A quality defense requires knowing the offense, we provide security through understanding.”_
 
-Будьте в курсі останніх новин cybersecurity, відвідуючи наш [**blog**](https://www.lasttowersolutions.com/blog).
+Будьте в курсі останніх новин кібербезпеки, відвідавши наш [**blog**](https://www.lasttowersolutions.com/blog).
 
 {{#ref}}
 https://www.lasttowersolutions.com/
@@ -212,9 +220,9 @@ https://www.lasttowersolutions.com/
 
 <figure class="sponsor-logo"><img src="images/k8studio.png" alt="k8studio logo"><figcaption></figcaption></figure>
 
-K8Studio IDE дає змогу DevOps, DevSecOps і developers ефективно керувати, моніторити та захищати Kubernetes clusters. Використовуйте наші AI-driven insights, advanced security framework і інтуїтивний CloudMaps GUI, щоб візуалізувати ваші clusters, розуміти їхній стан і діяти впевнено.
+K8Studio IDE надає DevOps, DevSecOps і developers можливість ефективно керувати, моніторити та захищати Kubernetes clusters. Використовуйте наші AI-driven insights, advanced security framework і інтуїтивний CloudMaps GUI, щоб візуалізувати ваші clusters, розуміти їхній стан і діяти впевнено.
 
-Крім того, K8Studio **сумісний з усіма основними kubernetes distributions** (AWS, GCP, Azure, DO, Rancher, K3s, Openshift та інші).
+Крім того, K8Studio **compatible with all major kubernetes distributions** (AWS, GCP, Azure, DO, Rancher, K3s, Openshift and more).
 
 {{#ref}}
 https://k8studio.io/
@@ -223,7 +231,7 @@ https://k8studio.io/
 ---
 ## License & Disclaimer
 
-Перевірте це в:
+Check them in:
 
 {{#ref}}
 welcome/hacktricks-values-and-faq.md
