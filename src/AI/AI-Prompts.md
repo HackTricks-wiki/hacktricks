@@ -409,6 +409,32 @@ Assistant: *(If not prevented, it might execute the above OS command, causing da
 - **Limit the AI's operational permissions:** On a system level, run the AI under an account with minimal privileges. Then even if an injection slips through, it can't do serious damage (e.g., it wouldn't have permission to actually delete important files or install software).
 - **Content filtering for code:** Just as we filter language outputs, also filter code outputs. Certain keywords or patterns (like file operations, exec commands, SQL statements) could be treated with caution. If they appear as a direct result of user prompt rather than something the user explicitly asked to generate, double-check the intent.
 
+### LLM-generated code over untrusted data sources (CSV / document analyzers)
+
+A particularly dangerous pattern appears when an AI feature **generates code from user-controlled data** and the backend then **executes that code** to answer the request. Typical examples are **CSV/dataframe agents**, notebook-style assistants, or "ask questions about this file" workflows that let the model emit Python/Pandas code for server-side execution.
+
+In this design, the attacker does not need direct shell access to the server: they only need to **control part of the data the model will analyze**. A malicious CSV row, column name, or free-text field can instruct the LLM to ignore the intended task and emit Python that imports dangerous modules, reads secrets, or launches OS commands. If the application relies on a **denylist** or weak prompt constraints instead of a real sandbox, the generated code executes as the application user.
+
+**Typical exploit chain:**
+
+1. Upload a CSV/document containing prompt-injection text in a cell/header/comment field.
+2. Ask the AI to analyze or transform the file.
+3. The LLM emits Python that includes attacker-controlled logic.
+4. The backend evaluates that Python with local file/network access.
+5. The attacker gains code execution, secret access, or internal-network reachability.
+
+**What to look for during testing:**
+- Features marketed as **"chat with CSV/Excel/dataframe"**, **"code interpreter"**, **"Python agent"**, or **"auto-generate analysis code"**.
+- Backends that log or return the generated Python before/after execution.
+- Prompts claiming to block dangerous code only with wording such as "do not import os" or regex/denylist filters.
+- Server-side wrappers around `eval`, `exec`, notebook kernels, PandasAI-style helpers, or agent runtimes that automatically run model-generated code.
+
+**Defenses:**
+- Treat every uploaded file field as **untrusted prompt input**, not just the visible user question.
+- Do **not** execute raw LLM-generated Python; prefer fixed server-side operations or compile an allowlisted DSL/AST instead.
+- If code execution is unavoidable, run it inside a **real sandbox** with no shell, no outbound network, tight filesystem isolation, resource limits, and short-lived credentials.
+- Log the **exact generated code**, uploaded artifact, and execution result for incident response.
+
 ## Agentic Browsing/Search: Prompt Injection, Redirector Exfiltration, Conversation Bridging, Markdown Stealth, Memory Persistence
 
 Threat model and internals (observed on ChatGPT browsing/search):
@@ -700,5 +726,6 @@ This means **timing alone** can be enough to leak secrets through an ordinary ch
 - [OpenAI Responses API overview](https://developers.openai.com/api/reference/responses/overview)
 - [OpenAI reasoning guide](https://developers.openai.com/api/docs/guides/reasoning?example=planning)
 - [Fooling Around with Encrypted Reasoning Blobs](https://blog.cryptographyengineering.com/2026/05/29/fooling-around-with-encrypted-reasoning-blobs/)
+- [Rapid7 – Weekly Metasploit Update: Exploits for FlowiseAI CSV Agent and MacOS Package Kit](https://www.rapid7.com/blog/post/pt-weekly-metasploit-update-exploits-for-flowiseai-csv-agent-and-macos-package-kit/)
 
 {{#include ../banners/hacktricks-training.md}}
