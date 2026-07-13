@@ -1,0 +1,156 @@
+
+# Checklist - Linux Privilege Escalation
+
+{{#include ../banners/hacktricks-training.md}}
+
+### **Best tool to look for Linux local privilege escalation vectors:** [**LinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/linPEAS)
+
+### [System Information](../linux-basics/linux-privilege-escalation/index.html#system-information)
+
+- [ ] Get **OS information**
+- [ ] Check the [**PATH**](../linux-basics/linux-privilege-escalation/index.html#path), any **writable folder**?
+- [ ] Check [**env variables**](../linux-basics/linux-privilege-escalation/index.html#env-info), any sensitive detail?
+- [ ] Search for [**kernel exploits**](../linux-basics/linux-privilege-escalation/index.html#kernel-exploits) **using scripts** (DirtyCow?)
+- [ ] **Check** if the [**sudo version** is vulnerable](../linux-basics/linux-privilege-escalation/index.html#sudo-version)
+- [ ] [**Dmesg** signature verification failed](../linux-basics/linux-privilege-escalation/index.html#dmesg-signature-verification-failed)
+- [ ] Review [**kernel module and module-loading misconfigurations**](kernel-modules-and-modprobe.md#kernel-module-and-module-loading-misconfigurations): `insmod`, `modinfo`, `lsmod`, `dmesg`, signature enforcement and `modules_disabled`.
+- [ ] Check [**kernel.modprobe / modprobe_path abuse paths**](kernel-modules-and-modprobe.md#kernelmodprobe--modprobe_path-abuse-checks) if the helper path can be modified or triggered.
+- [ ] Check [**writable /lib/modules paths**](kernel-modules-and-modprobe.md#writable-libmodules-review), including writable `.ko*` files and `modules.*` metadata.
+- [ ] More system enum ([date, system stats, cpu info, printers](../linux-basics/linux-privilege-escalation/index.html#more-system-enumeration))
+- [ ] [Enumerate more defenses](../linux-basics/linux-privilege-escalation/index.html#enumerate-possible-defenses)
+
+### [Drives](../linux-basics/linux-privilege-escalation/index.html#drives)
+
+- [ ] **List mounted** drives
+- [ ] **Any unmounted drive?**
+- [ ] **Any creds in fstab?**
+
+### [**Installed Software**](../linux-basics/linux-privilege-escalation/index.html#installed-software)
+
+- [ ] **Check for**[ **useful software**](../linux-basics/linux-privilege-escalation/index.html#useful-software) **installed**
+- [ ] **Check for** [**vulnerable software**](../linux-basics/linux-privilege-escalation/index.html#vulnerable-software-installed) **installed**
+
+### [Processes](../linux-basics/linux-privilege-escalation/index.html#processes)
+
+- [ ] Is any **unknown software running**?
+- [ ] Is any software running with **more privileges than it should have**?
+- [ ] Search for **exploits of running processes** (especially the version running).
+- [ ] Can you **modify the binary** of any running process?
+- [ ] **Monitor processes** and check if any interesting process is running frequently.
+- [ ] Can you **read** some interesting **process memory** (where passwords could be saved)?
+
+### [Scheduled/Cron jobs?](../linux-basics/linux-privilege-escalation/index.html#scheduled-jobs)
+
+- [ ] Is the [**PATH** ](../linux-basics/linux-privilege-escalation/index.html#cron-path)being modified by some cron and you can **write** in it?
+- [ ] Any [**wildcard** ](../linux-basics/linux-privilege-escalation/index.html#cron-using-a-script-with-a-wildcard-wildcard-injection)in a cron job?
+- [ ] Some [**modifiable script** ](../linux-basics/linux-privilege-escalation/index.html#cron-script-overwriting-and-symlink)is being **executed** or is inside **modifiable folder**?
+- [ ] Have you detected that some **script** could be or are being [**executed** very **frequently**](../linux-basics/linux-privilege-escalation/index.html#frequent-cron-jobs)? (every 1, 2 or 5 minutes)
+
+### [Services](../linux-basics/linux-privilege-escalation/index.html#services)
+
+- [ ] Any **writable .service** file?
+- [ ] Any **writable binary** executed by a **service**?
+- [ ] Any **writable folder in systemd PATH**?
+- [ ] Any **writable systemd unit drop-in** in `/etc/systemd/system/<unit>.d/*.conf` that can override `ExecStart`/`User`?
+
+### [Timers](../linux-basics/linux-privilege-escalation/index.html#timers)
+
+- [ ] Any **writable timer**?
+
+### [Sockets](../linux-basics/linux-privilege-escalation/index.html#sockets)
+
+- [ ] Any **writable .socket** file?
+- [ ] Can you **communicate with any socket**?
+- [ ] **HTTP sockets** with interesting info?
+
+### [D-Bus](../linux-basics/linux-privilege-escalation/index.html#d-bus)
+
+- [ ] Can you **communicate with any D-Bus**?
+
+### [Network](../linux-basics/linux-privilege-escalation/index.html#network)
+
+- [ ] Enumerate the network to know where you are
+- [ ] **Open ports you couldn't access before** getting a shell inside the machine?
+- [ ] Can you **sniff traffic** using `tcpdump`?
+
+### [Users](../linux-basics/linux-privilege-escalation/index.html#users)
+
+- [ ] Generic users/groups **enumeration**
+- [ ] Do you have a **very big UID**? Is the **machine** **vulnerable**?
+- [ ] Can you [**escalate privileges thanks to a group**](../user-information/interesting-groups-linux-pe/index.html) you belong to?
+- [ ] **Clipboard** data?
+- [ ] Password Policy?
+- [ ] Try to **use** every **known password** that you have discovered previously to login **with each** possible **user**. Try to login also without a password.
+
+### [Writable PATH](../linux-basics/linux-privilege-escalation/index.html#writable-path-abuses)
+
+- [ ] If you have **write privileges over some folder in PATH** you may be able to escalate privileges
+
+### [SUDO and SUID commands](../linux-basics/linux-privilege-escalation/index.html#sudo-and-suid)
+
+- [ ] Can you execute **any command with sudo**? Can you use it to READ, WRITE or EXECUTE anything as root? ([**GTFOBins**](https://gtfobins.github.io))
+- [ ] If `sudo -l` allows `sudoedit`, check for **sudoedit argument injection** (CVE-2023-22809) via `SUDO_EDITOR`/`VISUAL`/`EDITOR` to edit arbitrary files on vulnerable versions (`sudo -V` < 1.9.12p2). Example: `SUDO_EDITOR="vim -- /etc/sudoers" sudoedit /etc/hosts`
+- [ ] Is any **exploitable SUID binary**? ([**GTFOBins**](https://gtfobins.github.io))
+- [ ] Are [**sudo** commands **limited** by **path**? can you **bypass** the restrictions](../linux-basics/linux-privilege-escalation/index.html#sudo-execution-bypassing-paths)?
+- [ ] [**Sudo/SUID binary without path indicated**](../linux-basics/linux-privilege-escalation/index.html#sudo-command-suid-binary-without-command-path)?
+- [ ] [**SUID binary specifying path**](../linux-basics/linux-privilege-escalation/index.html#suid-binary-with-command-path)? Bypass
+- [ ] [**LD_PRELOAD vuln**](../interesting-files-permissions/suid-shared-library-and-linker-abuse.md#ld_preload-ld_library_path-and-suid)
+- [ ] [**Lack of .so library in SUID binary**](../interesting-files-permissions/suid-shared-library-and-linker-abuse.md#missing-shared-object-injection) from a writable folder?
+- [ ] [**SUID RPATH/RUNPATH or writable library path**](../interesting-files-permissions/suid-shared-library-and-linker-abuse.md#rpath-and-runpath)?
+- [ ] [**SUDO tokens available**](../linux-basics/linux-privilege-escalation/index.html#reusing-sudo-tokens)? [**Can you create a SUDO token**](../linux-basics/linux-privilege-escalation/index.html#var-run-sudo-ts-less-than-username-greater-than)?
+- [ ] Can you [**read or modify sudoers files**](../linux-basics/linux-privilege-escalation/index.html#etc-sudoers-etc-sudoers-d)?
+- [ ] Can you [**modify /etc/ld.so.conf.d/**](../interesting-files-permissions/suid-shared-library-and-linker-abuse.md#linker-configuration)?
+- [ ] [**OpenBSD DOAS**](../linux-basics/linux-privilege-escalation/index.html#doas) command
+
+### [Capabilities](../linux-basics/linux-privilege-escalation/index.html#capabilities)
+
+- [ ] Has any binary any **unexpected capability**?
+
+### [ACLs](../linux-basics/linux-privilege-escalation/index.html#acls)
+
+- [ ] Has any file any **unexpected ACL**?
+
+### [Open Shell sessions](../linux-basics/linux-privilege-escalation/index.html#open-shell-sessions)
+
+- [ ] **screen**
+- [ ] **tmux**
+
+### [SSH](../linux-basics/linux-privilege-escalation/index.html#ssh)
+
+- [ ] **Debian** [**OpenSSL Predictable PRNG - CVE-2008-0166**](../linux-basics/linux-privilege-escalation/index.html#debian-openssl-predictable-prng-cve-2008-0166)
+- [ ] [**SSH Interesting configuration values**](../linux-basics/linux-privilege-escalation/index.html#ssh-interesting-configuration-values)
+
+### [Interesting Files](../linux-basics/linux-privilege-escalation/index.html#interesting-files)
+
+- [ ] **Profile files** - Read sensitive data? Write to privesc?
+- [ ] **passwd/shadow files** - Read sensitive data? Write to privesc?
+- [ ] **Check commonly interesting folders** for sensitive data
+- [ ] **Weird Location/Owned files,** you may have access to or alter executable files
+- [ ] **Modified** in last mins
+- [ ] **Sqlite DB files**
+- [ ] **Hidden files**
+- [ ] **Script/Binaries in PATH**
+- [ ] **Web files** (passwords?)
+- [ ] **Backups**?
+- [ ] **Known files that contains passwords**: Use **Linpeas** and **LaZagne**
+- [ ] **Generic search**
+
+### [**Writable Files**](../linux-basics/linux-privilege-escalation/index.html#writable-files)
+
+- [ ] **Modify python library** to execute arbitrary commands?
+- [ ] Can you **modify log files**? **Logtotten** exploit
+- [ ] Can you **modify /etc/sysconfig/network-scripts/**? Centos/Redhat exploit
+- [ ] Can you [**write in ini, int.d, systemd or rc.d files**](../linux-basics/linux-privilege-escalation/index.html#init-init-d-systemd-and-rc-d)?
+
+### [**Other tricks**](../linux-basics/linux-privilege-escalation/index.html#other-tricks)
+
+- [ ] Can you [**abuse NFS to escalate privileges**](../linux-basics/linux-privilege-escalation/index.html#nfs-privilege-escalation)?
+- [ ] Do you need to [**escape from a restrictive shell**](../linux-basics/linux-privilege-escalation/index.html#escaping-from-restricted-shells)?
+
+
+
+## References
+
+- [Sudo advisory: sudoedit arbitrary file edit](https://www.sudo.ws/security/advisories/sudoedit_any/)
+- [Oracle Linux docs: systemd drop-in configuration](https://docs.oracle.com/en/operating-systems/oracle-linux/8/systemd/ModifyingsystemdConfigurationFiles.html)
+{{#include ../banners/hacktricks-training.md}}
