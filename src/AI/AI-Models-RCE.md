@@ -13,6 +13,7 @@ At the time of the writting these are some examples of this type of vulneravilit
 | **PyTorch** (Python)        | *Insecure deserialization in* `torch.load` **(CVE-2025-32434)**                                                              | Malicious pickle in model checkpoint leads to code execution (bypassing `weights_only` safeguard)                                        | |
 | PyTorch **TorchServe**      | *ShellTorch* – **CVE-2023-43654**, **CVE-2022-1471**                                                                         | SSRF + malicious model download causes code execution; Java deserialization RCE in management API                                        | |
 | **NVIDIA Merlin Transformers4Rec** | Unsafe checkpoint deserialization via `torch.load` **(CVE-2025-23298)**                                           | Untrusted checkpoint triggers pickle reducer during `load_model_trainer_states_from_checkpoint` → code execution in ML worker            | [ZDI-25-833](https://www.zerodayinitiative.com/advisories/ZDI-25-833/) |
+| **LangGraph** (SQLite/Redis checkpointers) | SQLi + unsafe MessagePack extension hook **(CVE-2025-67644, CVE-2026-28277, CVE-2026-27022)** | User-controlled `filter` key injects SQL/JSON-path syntax, `UNION SELECT` fabricates a fake checkpoint row, then `msgpack` deserialization imports and calls attacker-chosen Python code | [Check Point 2026](https://research.checkpoint.com/2026/from-sqli-to-rce-exploiting-langgraphs-checkpointer/) |
 | **TensorFlow/Keras**        | **CVE-2021-37678** (unsafe YAML) <br> **CVE-2024-3660** (Keras Lambda)                                                      | Loading model from YAML uses `yaml.unsafe_load` (code exec) <br> Loading model with **Lambda** layer runs arbitrary Python code          | |
 | TensorFlow (TFLite)         | **CVE-2022-23559** (TFLite parsing)                                                                                          | Crafted `.tflite` model triggers integer overflow → heap corruption (potential RCE)                                                      | |
 | **Scikit-learn** (Python)   | **CVE-2020-13092** (joblib/pickle)                                                                                           | Loading a model via `joblib.load` executes pickle with attacker’s `__reduce__` payload                                                   | |
@@ -228,6 +229,61 @@ requests.post("https://target/api/resnet", data=blob,
 Any gadget reachable during deserialization (constructors, `__setstate__`, framework callbacks, etc.) can be weaponized the same way, regardless of whether the transport was HTTP, WebSocket, or a file dropped into a watched directory.
 
 
+
+### LangGraph checkpointer SQLi → MessagePack RCE
+
+This attack chain is interesting because the attacker **doesn't need to upload a malicious model file**. Instead, the application exposes an **AI-agent persistence API** (`get_state_history(..., filter=...)`) and user input reaches the checkpointer query builder.
+
+#### 1. Structural SQLi in metadata filters
+
+A vulnerable SQLite pattern looked like:
+
+```python
+for query_key, query_value in filter.items():
+    operator, param_value = _where_value(query_value)
+    predicates.append(
+        f"json_extract(CAST(metadata AS TEXT), '$.{query_key}') {operator}"
+    )
+```
+
+The value is bound later, but `query_key` is concatenated into the **JSON path string**, so a `'` inside the dictionary key breaks out of `'$.{query_key}'` and injects SQL. Same lesson applies to **JSON paths, identifiers, operators, `LIMIT`, and TTL fields**: placeholders only protect values, not structural query syntax.
+
+#### 2. `UNION SELECT` can target downstream sinks, not just data theft
+
+The query returns `type` and serialized `checkpoint` bytes, which are later consumed as:
+
+```python
+self.serde.loads_typed((type, checkpoint))
+```
+
+That means a SQLi in the `WHERE` clause can inject a **fake result row**:
+
+```sql
+UNION SELECT 'thread1', 'ns', 'checkpoint1', NULL, 'msgpack', X'<payload>', '{}'
+```
+
+If later code parses, deserializes, writes, or executes any selected column, map those columns to their sinks. In this case the fake row turns SQLi into **attacker-controlled deserialization**.
+
+#### 3. Unsafe MessagePack extension hooks are equivalent to code gadgets
+
+LangGraph's `msgpack` path used a custom extension hook that unpacked a nested tuple and executed:
+
+```python
+getattr(importlib.import_module(tup[0]), tup[1])(tup[2])
+```
+
+So a MessagePack extension object encoding something equivalent to `("os", "system", "id > /tmp/pwned")` imports `os`, resolves `system`, and runs the command. When reviewing AI frameworks, inspect **custom MessagePack/JSON/pickle revivers** for dynamic imports, reflection, or arbitrary callable dispatch.
+
+#### 4. Practical audit pattern for agent frameworks
+
+Review any user-controlled input that reaches:
+- state history / memory / replay / checkpoint listing APIs
+- structured filter builders that generate SQL or Redis query fragments
+- custom deserializers (`pickle`, `msgpack`, `json` object hooks, YAML constructors)
+- recovery paths that trust rows returned from the persistence layer
+
+This specific chain affected self-hosted LangGraph deployments using **SQLite** or **Redis** checkpointers when untrusted users could control `filter`. Patched versions noted in the disclosure were `langgraph-checkpoint-sqlite 3.0.1+`, `langgraph 1.0.10+`, `langgraph-checkpoint-redis 1.0.2+`, and `langgraph-checkpoint 4.0.1+`.
+
 ## Models to Path Traversal
 
 As commented in [**this blog post**](https://blog.huntr.com/pivoting-archive-slip-bugs-into-high-value-ai/ml-bounties), most models formats used by different AI frameworks are based on archives, usually `.zip`. Therefore, it might be possible to abuse these formats to perform path traversal attacks, allowing to read arbitrary files from the system where the model is loaded.
@@ -287,5 +343,6 @@ For a focused guide on .keras internals, Lambda-layer RCE, the arbitrary import 
 - [Unit 42 – Remote Code Execution With Modern AI/ML Formats and Libraries](https://unit42.paloaltonetworks.com/rce-vulnerabilities-in-ai-python-libraries/)
 - [Hydra instantiate docs](https://hydra.cc/docs/advanced/instantiate_objects/overview/)
 - [Hydra block-list commit (warning about RCE)](https://github.com/facebookresearch/hydra/commit/4d30546745561adf4e92ad897edb2e340d5685f0)
+- [Check Point Research – From SQLi to RCE: Exploiting LangGraph's Checkpointer](https://research.checkpoint.com/2026/from-sqli-to-rce-exploiting-langgraphs-checkpointer/)
 
 {{#include ../banners/hacktricks-training.md}}
