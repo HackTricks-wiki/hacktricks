@@ -119,12 +119,22 @@ restorecon -nvr / 2>/dev/null | head -n 50
 matchpathcon -V /etc/passwd /etc/shadow /usr/local/bin/* 2>/dev/null
 ```
 
+One subtle but useful detail: plain `restorecon` does **not always fully revert a suspicious label**. If the target type is in `customizable_types`, you may need `-F` to force a full reset. From an offensive perspective, this explains why an unusual `chcon` can sometimes survive a casual "we already ran restorecon" cleanup.
+
+```bash
+grep -R . /etc/selinux/*/contexts/customizable_types 2>/dev/null | head
+restorecon -n -v /path/of/interest 2>/dev/null
+restorecon -F -v /path/of/interest 2>/dev/null
+```
+
 High-value commands to hunt in `sudo -l`, root wrappers, automation scripts, or file capabilities:
 
 ```bash
 which semanage restorecon chcon setfiles semodule audit2allow runcon newrole setsebool load_policy 2>/dev/null
 getcap -r / 2>/dev/null | grep -E 'cap_mac_admin|cap_mac_override'
 ```
+
+If either MAC capability shows up, cross-check the [Linux capabilities page](linux-capabilities.md) as well; `cap_mac_admin` and `cap_mac_override` are unusual but directly relevant when SELinux is part of the boundary.
 
 Especially interesting:
 
@@ -162,6 +172,23 @@ sudo semodule -i localfix.pp
 
 That is why `audit2allow`, `semodule`, and `semanage permissive` should be treated as sensitive admin surfaces during post-exploitation. They can silently convert a blocked chain into a working one without changing classic UNIX permissions.
 
+## Hidden Denials and Module Extraction
+
+A very common offensive frustration is a chain that fails with a bland `EACCES` while the expected AVC denial never appears. `dontaudit` rules may be hiding the exact permission you need. If you can run `semodule` through `sudo` or another privileged wrapper, temporarily disabling `dontaudit` can turn a silent failure into a precise policy clue:
+
+```bash
+# Rebuild policy without dontaudit rules, trigger the action again, then inspect AVCs
+sudo semodule -DB
+ausearch -m AVC,USER_AVC,SELINUX_ERR -ts recent 2>/dev/null | tail -n 50
+sudo semodule -B
+
+# Extract installed modules for offline review / diffing
+semodule -lfull 2>/dev/null
+semodule -E --cil <module_name> 2>/dev/null
+```
+
+This is also useful for reviewing what local admins already changed. A small custom module or one-domain permissive rule is often the reason a target service behaves much more loosely than the base policy would suggest.
+
 ## Audit Clues
 
 AVC denials are often offensive signal, not just defensive noise. They tell you:
@@ -188,9 +215,11 @@ Quick checks:
 id -Z
 semanage login -l 2>/dev/null
 semanage user -l 2>/dev/null
+sudo -l 2>/dev/null
+grep -R "ROLE=\|TYPE=" /etc/sudoers /etc/sudoers.d 2>/dev/null
 ```
 
-On many mainstream systems, users are mapped to `unconfined_u`, which reduces the practical impact of user confinement. On hardened deployments, however, confined users can make `sudo`, `su`, `newrole`, and `runcon` much more interesting because **the escalation path may depend on entering a better SELinux role/type, not only on becoming UID 0**.
+On many mainstream systems, users are mapped to `unconfined_u`, which reduces the practical impact of user confinement. On hardened deployments, however, confined users can make `sudo`, `su`, `newrole`, and `runcon` much more interesting because **the escalation path may depend on entering a better SELinux role/type, not only on becoming UID 0**. Also remember that some confined users cannot invoke `sudo`/`su` at all unless policy explicitly allows the underlying setuid transition, so a host using `staff_u` + `sysadm_r` can turn a seemingly minor `sudo ROLE=` / `TYPE=` rule into the real privilege boundary.
 
 ## SELinux in Containers
 
@@ -205,6 +234,8 @@ $ podman top -l label
 LABEL
 system_u:system_r:container_t:s0:c647,c780
 ```
+
+The `c647,c780` part is not decoration. In many container deployments, runtimes dynamically assign MCS categories so that two processes running as `container_t` are still separated from each other. If an escape lands you in a host namespace but keeps the original category set, category mismatches can still explain why some host paths remain unreadable or unwritable.
 
 Modern container operations worth noting:
 
@@ -222,4 +253,6 @@ container-security/protections/selinux.md
 
 - [Red Hat docs: Using SELinux](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html-single/using_selinux/index)
 - [SETools: Policy analysis tools for SELinux](https://github.com/SELinuxProject/setools)
+- [Managing confined and unconfined users - RHEL 9 docs](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/using_selinux/managing-confined-and-unconfined-users_using-selinux)
+- [semodule(8) - Linux manual page](https://man7.org/linux/man-pages/man8/semodule.8.html)
 {{#include ../../banners/hacktricks-training.md}}

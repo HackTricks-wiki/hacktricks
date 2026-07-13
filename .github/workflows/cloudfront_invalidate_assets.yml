@@ -21,12 +21,12 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 2
 
       - name: Configure AWS credentials using OIDC
-        uses: aws-actions/configure-aws-credentials@v3
+        uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: us-east-1
@@ -90,6 +90,7 @@ jobs:
 
       - name: Create CloudFront invalidation
         if: steps.paths.outputs.paths != ''
+        shell: bash
         run: |
           set -euo pipefail
           set -f

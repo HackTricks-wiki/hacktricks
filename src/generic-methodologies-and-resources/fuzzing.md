@@ -205,6 +205,103 @@ engine.paths_between("handle_request", "parse_ipv6")
 
 The important methodology is the intersection: **complexity x exposure x impact**. Use the graph to pick fuzz targets with the highest expected security value, then use mutation survivors to decide which boundaries and invariants your harness must stress.
 
+## Go Fuzzing With gosentry: Stronger Engine, Typed Inputs, And Differential Checks
+
+If a Go target already has a native `testing.F` harness, a practical upgrade path is to run the same harness with [gosentry](https://github.com/trailofbits/gosentry), a forked Go toolchain that keeps `go test -fuzz` but swaps the backend to **LibAFL**.
+
+```bash
+./bin/go test -fuzz=FuzzHarness --focus-on-new-code=false --catch-races=true --catch-leaks=true
+```
+
+This is useful when the native Go fuzzer stalls on **hard comparisons**, **typed inputs**, or **parser-heavy formats**. The methodology stays the same:
+
+- Keep using `f.Add(...)` for seeds and `f.Fuzz(...)` for the callback.
+- Reuse the same harness, but run it with gosentry's `go` binary instead of the stock toolchain.
+- Treat the resulting campaign as a normal coverage-guided run, but with LibAFL scheduling/mutation and better surrounding detectors.
+
+### Turn silent failures into fuzz findings
+
+A recurring problem in Go assessments is that dangerous behaviour often does **not** crash by default. With gosentry, you can promote several classes of “bad but silent” states into findings:
+
+- `--panic-on=pkg.Func,...` to make selected logging/error paths behave like crashes (useful for `log.Fatal`-style code paths that otherwise only log and continue).
+- `--catch-races=true` to replay newly discovered queue entries with the Go race detector.
+- `--catch-leaks=true` to replay new queue entries with `goleak` and stop on goroutine leaks.
+- LibAFL hang handling to keep **infinite loops / very slow inputs** as fuzz findings instead of letting them disappear as timeouts.
+- Built-in arithmetic overflow checks by default, plus optional truncation checks through go-panikint-style instrumentation.
+
+This is especially valuable for targets where the security impact is a **panicless parser failure**, a **concurrency bug**, or a **DoS-only hang** rather than memory corruption.
+
+### Struct-aware fuzzing for typed Go APIs
+
+Native Go fuzzing mainly expects scalars such as `[]byte`, `string`, and numbers. If the code under test consumes typed objects, gosentry can fuzz **composite values** directly (structs, slices, arrays, pointers) while still mutating bytes underneath.
+
+```go
+type Input struct {
+    Data []byte
+    S    string
+    N    int
+}
+
+func FuzzStructInput(f *testing.F) {
+    f.Add(Input{Data: []byte("hello"), S: "world", N: 42})
+    f.Fuzz(func(t *testing.T, in Input) {
+        Process(in)
+    })
+}
+```
+
+Use this when building a fake wire format just for fuzzing would hide logic bugs behind harness-only parsing code. For differential or grammar-based campaigns, keep the harness input as a single `[]byte` or `string` and parse inside the callback instead.
+
+### Grammar-based fuzzing for parsers and protocol inputs
+
+For parsers, formats, and input languages, gosentry can run **Nautilus grammar fuzzing** on top of LibAFL. The grammar is a JSON array of production rules, and the harness should usually take a single `[]byte` or `string` argument.
+
+```bash
+./bin/go test -fuzz=FuzzGrammarJSON --use-grammar --grammar=./testdata/JSON.json --focus-on-new-code=false
+```
+
+Methodology notes:
+
+- Use grammar mode when byte-level mutations mostly die in early syntax checks.
+- Keep the grammar focused on the **security-relevant subset** of the language/protocol instead of modeling the full specification.
+- Use large boundary values in terminals/nonterminals to stress integer, length, and state-machine edges.
+- Grammar mode keeps inputs grammar-valid, but the target still receives **bytes/strings**, so parsing and semantic checks remain inside the harnessed code.
+
+### Differential fuzzing: compare implementations, not just crashes
+
+A strong pattern for Go ecosystems is **grammar-based differential fuzzing**: generate valid structured inputs and feed them to two parsers, clients, or state-transition engines.
+
+```go
+f.Fuzz(func(t *testing.T, data []byte) {
+    gotA, errA := ParseA(data)
+    gotB, errB := ParseB(data)
+    if (errA == nil) != (errB == nil) {
+        t.Fatalf("parser disagreement: A=%v B=%v", errA, errB)
+    }
+    _ = gotA
+    _ = gotB
+})
+```
+
+Treat the following as findings:
+
+- one implementation panics while the other rejects cleanly
+- accepted/rejected input mismatches
+- different parse trees or decoded objects
+- divergent state transitions, nonces, balances, or state roots
+
+This is a practical way to find **consensus mismatches**, **parser ambiguity**, and **spec-vs-implementation drift** that pure crash fuzzing often misses.
+
+### Reuse the campaign corpus for coverage reporting
+
+After a campaign, replay the saved queue corpus to generate a Go coverage report without manually exporting a separate corpus:
+
+```bash
+./bin/go test -fuzz=FuzzHarness --generate-coverage .
+```
+
+Run the command from the **same package** and with the **same `-fuzz` target** so gosentry resolves the right cached campaign state.
+
 ## References
 
 - [Mutational grammar fuzzing](https://projectzero.google/2026/03/mutational-grammar-fuzzing.html)
@@ -213,5 +310,7 @@ The important methodology is the intersection: **complexity x exposure x impact*
 - [AFLNet Five Years Later: On Coverage-Guided Protocol Fuzzing](https://arxiv.org/abs/2412.20324)
 - [Trailmark turns code into graphs](https://blog.trailofbits.com/2026/04/23/trailmark-turns-code-into-graphs/)
 - [trailofbits/trailmark](https://github.com/trailofbits/trailmark)
+- [Go fuzzing was missing half the toolkit. We forked the toolchain to fix it.](https://blog.trailofbits.com/2026/05/12/go-fuzzing-was-missing-half-the-toolkit.-we-forked-the-toolchain-to-fix-it./)
+- [trailofbits/gosentry](https://github.com/trailofbits/gosentry)
 
 {{#include ../banners/hacktricks-training.md}}

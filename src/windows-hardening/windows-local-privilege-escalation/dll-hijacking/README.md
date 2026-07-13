@@ -18,6 +18,70 @@ Several methods are employed for DLL hijacking, each with its effectiveness depe
 5. **WinSxS DLL Replacement**: Substituting the legitimate DLL with a malicious counterpart in the WinSxS directory, a method often associated with DLL side-loading.
 6. **Relative Path DLL Hijacking**: Placing the malicious DLL in a user-controlled directory with the copied application, resembling Binary Proxy Execution techniques.
 
+
+### AppDomainManager hijacking (`<exe>.config` + attacker assembly)
+
+Classic DLL sideloading is not the only way to make a trusted **.NET Framework** process load attacker code. If the target executable is a **managed** application, the CLR also consults an **application configuration file** named after the executable (for example `Setup.exe.config`). That file can define a custom **AppDomainManager**. If the config points to an attacker-controlled assembly placed next to the EXE, the CLR loads it **before the application's normal code path** and runs inside the trusted process.
+
+Per Microsoft's .NET Framework configuration schema, both `<appDomainManagerAssembly>` and `<appDomainManagerType>` must be present for the custom manager to be used.
+
+Minimal config:
+
+```xml
+<configuration>
+  <runtime>
+    <appDomainManagerAssembly value="EvilMgr, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" />
+    <appDomainManagerType value="EvilMgr.Loader" />
+  </runtime>
+</configuration>
+```
+
+Minimal manager:
+
+```csharp
+using System; using System.Runtime.InteropServices;
+public sealed class Loader : AppDomainManager {
+  [DllImport("user32.dll")] static extern int MessageBox(IntPtr h, string t, string c, int m);
+  public override void InitializeNewDomain(AppDomainSetup appDomainInfo) {
+    MessageBox(IntPtr.Zero, "Loaded inside trusted .NET host", "AppDomain hijack", 0);
+  }
+}
+```
+
+Practical notes:
+- This is **.NET Framework specific** tradecraft. It depends on CLR config parsing, not on the Win32 DLL search order.
+- The host must really be a **managed EXE**. Quick triage: `sigcheck -m target.exe`, `corflags target.exe`, or check for the **CLR Runtime Header** in PE metadata.
+- The config filename must match the executable name exactly (`<binary>.config`) and usually lives **next to the EXE**.
+- This is useful with **signed Microsoft/vendor binaries** because the trusted EXE remains untouched while the malicious managed assembly executes in-process.
+- If you already have a writable installer/update directory, AppDomainManager hijacking can be used as the **first stage**, followed by classic DLL sideloading or reflective loading for later stages.
+
+### Hijacking an existing scheduled task to relaunch the sideload chain
+
+For persistence, do not only look for **creating a new task**. Some intrusion sets wait until a legitimate installer creates a **normal updater task** and then **rewrite the task action** so the existing name, author, and trigger stay familiar to defenders.
+
+Reusable workflow:
+1. Install/run the legitimate software and identify the task it normally creates.
+2. Export the task XML and note the current `<Exec><Command>` / `<Arguments>` values.
+3. Replace only the action so the task starts your **trusted host EXE** from a user-writable staging directory, which then side-loads or AppDomain-loads the real payload.
+4. Re-register the same task name instead of creating a new obvious persistence artifact.
+
+```cmd
+schtasks /query /tn "<TaskName>" /xml > task.xml
+:: edit the <Exec><Command> and optional <Arguments> nodes
+schtasks /create /tn "<TaskName>" /xml task.xml /f
+```
+
+Why it is stealthier:
+- The task name can still look legitimate (for example a vendor updater).
+- The **Task Scheduler service** launches it, so parent/ancestor validation often sees the expected scheduling chain instead of `explorer.exe`.
+- DFIR teams that only hunt for **new task names** may miss a task whose registration already existed but whose action now points to `%LOCALAPPDATA%`, `%APPDATA%`, or another attacker-controlled path.
+
+Fast hunting pivots:
+- `schtasks /query /fo LIST /v | findstr /i "TaskName Task To Run"`
+- `Get-ScheduledTask | % { [pscustomobject]@{TaskName=$_.TaskName; TaskPath=$_.TaskPath; Exec=($_.Actions | % Execute)} }`
+- Compare `C:\Windows\System32\Tasks\*` XML and `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Schedule\TaskCache\Tree\*` metadata against a baseline.
+- Alert when a **vendor-looking updater task** executes from **user-writable directories** or launches a .NET EXE with a colocated `*.config` file.
+
 > [!TIP]
 > For a step-by-step chain that layers HTML staging, AES-CTR configs, and .NET implants on top of DLL sideloading, review the workflow below.
 
@@ -180,6 +244,55 @@ Operational usage example
 
 This technique has been observed in-the-wild to drive multi-stage sideloading chains: an initial launcher drops a helper DLL, which then spawns a Microsoft-signed, hijackable binary with a custom DllPath to force loading of the attacker’s DLL from a staging directory.
 
+
+### .NET AppDomainManager hijacking via `.exe.config`
+
+For **.NET Framework** targets, sideloading can be done **before `Main()`** without patching memory by abusing the application's adjacent **`.exe.config`** file. Instead of relying only on the Win32 DLL search order, the attacker places a legitimate .NET EXE next to a malicious config and one or more attacker-controlled assemblies.
+
+How the chain works:
+1. The host EXE starts and the **CLR reads `<exe>.config`**.
+2. The config sets **`<appDomainManagerAssembly>`** and **`<appDomainManagerType>`** so the runtime instantiates an attacker-controlled `AppDomainManager`.
+3. The malicious manager gets **pre-`Main()` execution** inside the trusted host process.
+4. The same config can force the CLR to resolve local assemblies first (for example `InitInstall.dll`, `Updater.dll`, `uevmonitor.dll`) and can weaken runtime validation/telemetry without inline patching.
+
+Campaign-style pattern (exact nesting can vary by directive / CLR version):
+
+```xml
+<configuration>
+  <runtime>
+    <appDomainManagerAssembly value="Updater" />
+    <appDomainManagerType value="MyAppDomainManager" />
+    <assemblyBinding xmlns="urn:schemas-microsoft-com:asm.v1">
+      <probing privatePath="." />
+      <publisherPolicy apply="no" />
+    </assemblyBinding>
+    <bypassTrustedAppStrongNames enabled="true" />
+    <etwEnable enabled="false" />
+  </runtime>
+  <startup>
+    <requiredRuntime version="v4.0.30319" safemode="true" />
+  </startup>
+</configuration>
+```
+
+Why this is useful:
+- **`<probing privatePath="."/>`** keeps assembly resolution in the application directory, turning the folder into a predictable sideloading surface.
+- **`<appDomainManagerAssembly>` + `<appDomainManagerType>`** move execution into attacker code during CLR initialization, before the legitimate app logic runs.
+- **`<bypassTrustedAppStrongNames enabled="true"/>`** can let a full-trust app load unsigned or tampered assemblies without a strong-name validation failure.
+- **`<publisherPolicy apply="no"/>`** avoids publisher-policy redirects to newer assemblies.
+- **`<requiredRuntime ... safemode="true"/>`** makes runtime selection more deterministic.
+- **`<etwEnable enabled="false"/>`** is especially interesting because the **CLR disables its own ETW visibility** from configuration instead of the implant patching `EtwEventWrite` in memory.
+
+Operational pattern seen in recent campaigns:
+- Stage 1 drops `setup.exe`, `setup.exe.config`, and local assemblies.
+- Stage 2 copies them into a believable **AppData update** folder, renames the host to something like `update.exe`, and relaunches it via a **scheduled task**.
+- Stage 3 verifies execution context (for example expected parent `svchost.exe` from Task Scheduler) before loading the final RAT DLL/export.
+
+Hunting ideas:
+- Signed or otherwise legitimate **.NET executables** running with suspicious adjacent **`.config`** files in user-writable locations.
+- `.config` files containing **`appDomainManagerAssembly`**, **`appDomainManagerType`**, **`probing privatePath="."`**, **`bypassTrustedAppStrongNames`**, or **`etwEnable enabled="false"`**.
+- Scheduled tasks that relaunch renamed update binaries from **`%LOCALAPPDATA%`** or app-specific `\bin\update\` directories.
+- Parent/child chains where a scheduled task launches a trusted .NET host that immediately loads non-vendor assemblies from its own directory.
 
 #### Exceptions on dll search order from Windows docs
 
@@ -606,6 +719,15 @@ Defensive pivots
 - [Check Point Research – Inside Ink Dragon: Revealing the Relay Network and Inner Workings of a Stealthy Offensive Operation](https://research.checkpoint.com/2025/ink-dragons-relay-network-and-offensive-operation/)
 - [Rapid7 – The Chrysalis Backdoor: A Deep Dive into Lotus Blossom’s toolkit](https://www.rapid7.com/blog/post/tr-chrysalis-backdoor-dive-into-lotus-blossoms-toolkit)
 - [0xdf – HTB Bruno ZipSlip → DLL hijack chain](https://0xdf.gitlab.io/2026/02/24/htb-bruno.html)
+- [Unit 42 – Tracking Iranian APT Screening Serpens’ 2026 Espionage Campaigns](https://unit42.paloaltonetworks.com/tracking-iran-apt-screening-serpens/)
+- [Microsoft Learn – `<appDomainManagerAssembly>` element](https://learn.microsoft.com/en-us/dotnet/framework/configure-apps/file-schema/runtime/appdomainmanagerassembly-element)
+- [Microsoft Learn – `<appDomainManagerType>` element](https://learn.microsoft.com/en-us/dotnet/framework/configure-apps/file-schema/runtime/appdomainmanagertype-element)
+- [Microsoft Learn – `<probing>` element](https://learn.microsoft.com/en-us/dotnet/framework/configure-apps/file-schema/runtime/probing-element)
+- [Microsoft Learn – `<bypassTrustedAppStrongNames>` element](https://learn.microsoft.com/en-us/dotnet/framework/configure-apps/file-schema/runtime/bypasstrustedappstrongnames-element)
+- [Microsoft Learn – `<publisherPolicy>` element](https://learn.microsoft.com/en-us/dotnet/framework/configure-apps/file-schema/runtime/publisherpolicy-element)
+- [Microsoft Learn – `<requiredRuntime>` element](https://learn.microsoft.com/en-us/dotnet/framework/configure-apps/file-schema/startup/requiredruntime-element)
+- [Check Point Research – Fast and Furious: Nimbus Manticore Operations During the Iranian Conflict](https://research.checkpoint.com/2026/fast-and-furious-nimbus-manticore-operations-during-the-iranian-conflict/)
+- [Microsoft Learn – Task Actions](https://learn.microsoft.com/en-us/windows/win32/taskschd/task-actions)
 
 
 {{#include ../../../banners/hacktricks-training.md}}

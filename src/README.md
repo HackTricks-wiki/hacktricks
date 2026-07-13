@@ -35,11 +35,15 @@ docker run -d --rm --platform linux/amd64 -p 3337:3000 --name hacktricks -v $(pw
 
 Your local copy of HackTricks will be **available at [http://localhost:3337](http://localhost:3337)** after <5 minutes (it needs to build the book, be patient).
 
-## Corporate Sponsors
+## HackTricks Partners
+
+---
+
+## HackTricks Friends
 
 ### [STM Cyber](https://www.stmcyber.com)
 
-<figure><img src="images/stm (1).png" alt=""><figcaption></figcaption></figure>
+<figure class="sponsor-logo"><img src="images/stm (1).png" alt=""><figcaption></figcaption></figure>
 
 [**STM Cyber**](https://www.stmcyber.com) is a great cybersecurity company whose slogan is **HACK THE UNHACKABLE**. They perform their own research and develop their own hacking tools to **offer several valuable cybersecurity services** like pentesting, Red teams and training.
 
@@ -51,7 +55,7 @@ You can check their **blog** in [**https://blog.stmcyber.com**](https://blog.stm
 
 ### [Intigriti](https://www.intigriti.com)
 
-<figure><img src="images/image (47).png" alt=""><figcaption></figcaption></figure>
+<figure class="sponsor-logo"><img src="images/image (47).png" alt=""><figcaption></figcaption></figure>
 
 **Intigriti** is the **Europe's #1** ethical hacking and **bug bounty platform.**
 
@@ -63,23 +67,9 @@ https://go.intigriti.com/hacktricks
 
 ---
 
-### [HACKENPROOF](https://bit.ly/3xrrDrL)
-
-<figure><img src="images/image (3).png" alt=""><figcaption></figcaption></figure>
-
-Join [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) server to communicate with experienced hackers and bug bounty hunters!
-
-- **Hacking Insights:** Engage with content that delves into the thrill and challenges of hacking
-- **Real-Time Hack News:** Keep up-to-date with fast-paced hacking world through real-time news and insights
-- **Latest Announcements:** Stay informed with the newest bug bounties launching and crucial platform updates
-
-**Join us on** [**Discord**](https://discord.com/invite/N3FrSbmwdy) and start collaborating with top hackers today!
-
----
-
 ### [Modern Security – AI & Application Security Training Platform](https://modernsecurity.io/)
 
-<figure><img src="images/modern_security_logo.png" alt="Modern Security"><figcaption></figcaption></figure>
+<figure class="sponsor-logo"><img src="images/modern_security_logo.png" alt="Modern Security"><figcaption></figcaption></figure>
 
 Modern Security delivers **practical AI Security training** with an **engineering-first, hands-on lab approach**. Our courses are built for security engineers, AppSec professionals, and developers who want to **build, break, and secure real AI/LLM-powered applications**.
 
@@ -103,7 +93,7 @@ https://modernsecurity.io/
 
 ### [SerpApi](https://serpapi.com/)
 
-<figure><img src="images/image (1254).png" alt=""><figcaption></figcaption></figure>
+<figure class="sponsor-logo"><img src="images/image (1254).png" alt=""><figcaption></figcaption></figure>
 
 **SerpApi** offers fast and easy real-time APIs to **access search engine results**. They scrape search engines, handle proxies, solve captchas, and parse all rich structured data for you.
 
@@ -116,11 +106,19 @@ You can **create a free account** [**here**](https://serpapi.com/users/sign_up)*
 
 ---
 
-### [8kSec Academy – In-Depth Mobile Security Courses](https://academy.8ksec.io/)
+### [8kSec Academy – In-Depth Mobile & AI Security Courses](https://academy.8ksec.io/)
 
-<figure><img src="images/image (2).png" alt=""><figcaption></figcaption></figure>
+<figure class="sponsor-logo"><img src="images/image (2).png" alt=""><figcaption></figcaption></figure>
 
-Learn the technologies and skills required to perform vulnerability research, penetration testing, and reverse engineering to protect mobile applications and devices. **Master iOS and Android security** through our on-demand courses and **get certified**:
+**8kSec Academy** trains you in offensive mobile and AI security, taught by active researchers – the same team behind the CVE writeups and talks at Black Hat, HITB, and Zer0con. Courses are self-paced, built around labs on real targets, and backed by a hands-on certification.
+ 
+The catalog runs two tracks:
+
+**Mobile Security** – iOS and Android from the app layer down: reverse engineering with Ghidra and LLDB, ARM64 exploitation, kernel internals and modern mitigations (PAC, MTE, SELinux), jailbreak and rooting mechanics.
+
+**AI Security** – two full courses spanning the field. Practical AI Security covers how LLMs, RAG pipelines, AI agents and MCP work, and how to attack and defend them. Advanced AI Security goes build-heavy at the frontier: red teaming AI systems at scale with Garak and PyRIT, exploiting MCP servers, planting and detecting model backdoors, and fine-tuning attacks and defenses on Apple Silicon.
+
+Courses and certifications:
 
 {{#ref}}
 https://academy.8ksec.io/
@@ -130,7 +128,7 @@ https://academy.8ksec.io/
 
 ### [NaxusAI – AI Powered Security Scanner](https://academy.8ksec.io/)
 
-<figure><img src="images/logo-naxus.png" alt=""><figcaption></figcaption></figure>
+<figure class="sponsor-logo"><img src="images/logo-naxus.png" alt=""><figcaption></figcaption></figure>
 
 **NaxusAI** is an AI-powered security platform to find exploitable vulnerabilities before attackers do.
 
@@ -144,7 +142,7 @@ https://naxusai.com
 
 ### [WebSec](https://websec.net/)
 
-<figure><img src="images/websec (1).svg" alt=""><figcaption></figcaption></figure>
+<figure class="sponsor-logo"><img src="images/websec (1).svg" alt=""><figcaption></figcaption></figure>
 
 [**WebSec**](https://websec.net) is a professional cybersecurity company based in **Amsterdam** which helps **protecting** businesses **all over the world** against the latest cybersecurity threats by providing **offensive-security services** with a **modern** approach.
 
@@ -162,7 +160,7 @@ https://www.youtube.com/watch?v=Zq2JycGDCPM
 
 ### [CyberHelmets](https://cyberhelmets.com/courses/?ref=hacktricks)
 
-<figure><img src="images/cyberhelmets-logo.png" alt="cyberhelmets logo"><figcaption></figcaption></figure>
+<figure class="sponsor-logo"><img src="images/cyberhelmets-logo.png" alt="cyberhelmets logo"><figcaption></figcaption></figure>
 
 
 **Built for the field. Built around you.**\
@@ -184,7 +182,7 @@ https://cyberhelmets.com/courses/?ref=hacktricks
 
 ### [Last Tower Solutions](https://www.lasttowersolutions.com/)
 
-<figure><img src="images/lasttower.png" alt="lasttower logo"><figcaption></figcaption></figure>
+<figure class="sponsor-logo"><img src="images/lasttower.png" alt="lasttower logo"><figcaption></figcaption></figure>
 
 Last Tower Solutions delivers specialized cybersecurity services for **Education** and **FinTech**
 institutions, with a focus on **penetration testing, cloud security assessments**, and
@@ -208,7 +206,7 @@ https://www.lasttowersolutions.com/
 
 ### [K8Studio - The Smarter GUI to Manage Kubernetes.](https://k8studio.io/)
 
-<figure><img src="images/k8studio.png" alt="k8studio logo"><figcaption></figcaption></figure>
+<figure class="sponsor-logo"><img src="images/k8studio.png" alt="k8studio logo"><figcaption></figcaption></figure>
 
 K8Studio IDE empowers DevOps, DevSecOps, and developers to manage, monitor, and secure Kubernetes clusters efficiently. Leverage our AI-driven insights, advanced security framework, and intuitive CloudMaps GUI to visualize your clusters, understand their state, and act with confidence.
 
@@ -219,7 +217,6 @@ https://k8studio.io/
 {{#endref}}
 
 ---
-
 ## License & Disclaimer
 
 Check them in:
@@ -231,7 +228,4 @@ welcome/hacktricks-values-and-faq.md
 ## Github Stats
 
 ![HackTricks Github Stats](https://repobeats.axiom.co/api/embed/68f8746802bcf1c8462e889e6e9302d4384f164b.svg)
-
-{{#include ./banners/hacktricks-training.md}}
-
 

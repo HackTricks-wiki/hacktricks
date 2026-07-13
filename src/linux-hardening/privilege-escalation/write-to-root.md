@@ -192,9 +192,92 @@ chmod +x server-command
 
 - **Trigger the privileged action** (e.g., pressing a UI button that spawns the helper). When root re-executes the hijacked path, grab the escalated shell with `./rootshell -p`.
 
+### Page-cache-only file modification of privileged binaries
+
+Some kernel bugs don't modify the file **on disk**. Instead, they let you modify only the **page cache copy** of a readable file. If you can target a **setuid** or otherwise **root-executed** binary, the next execution may run attacker-controlled bytes from memory and escalate privileges even though the file hash on disk is unchanged.
+
+This is useful to think about as a **runtime-only file write primitive**:
+
+- **Disk stays clean**: the inode and on-disk bytes do not change
+- **Memory is dirty**: processes reading/executing the cached page get the attacker-modified content
+- **Effect is temporary**: the change disappears after reboot or cache eviction
+
+This primitive sits between classic **arbitrary file write** and older **page-cache abuse** bugs such as Dirty COW / Dirty Pipe:
+
+- Dirty COW relied on a race
+- Dirty Pipe had write-position constraints
+- A page-cache-only primitive can be more reliable if the vulnerable path gives direct writes into cached file-backed pages
+
+#### Generic privesc flow
+
+1. Get a kernel primitive that can write into **file-backed page cache pages**
+2. Use it against a **readable privileged binary** or another root-executed file
+3. Trigger execution **before** the page is evicted from cache
+4. Get code execution as root while the on-disk file still looks unmodified
+
+Typical high-value targets:
+
+- **setuid-root** binaries
+- Helpers launched by **root services**
+- Binaries commonly executed from **containers sharing the host kernel/page cache**
+
+#### AF_ALG + `splice()` example path
+
+Copy Fail (CVE-2026-31431) is a good example of this class. The vulnerable path was in the Linux crypto userspace API (`AF_ALG` / `algif_aead`):
+
+- `splice()` can move references to page-cache pages from a readable file into the crypto TX scatterlist
+- the in-place `algif_aead` decrypt path reused source and destination buffers
+- `authencesn` then wrote into the destination tag region
+- when that region still referenced spliced file-backed pages, the write landed in the **page cache of the target file**
+
+So the interesting technique is not the CVE itself, but the pattern:
+
+- **feed file-backed cache pages into a kernel subsystem**
+- make the subsystem **treat them as writable output**
+- trigger a small controlled overwrite in memory
+
+The public PoC used repeated **4-byte writes** to patch `/usr/bin/su` in memory and then executed it.
+
+#### Exposure and hunting
+
+If you suspect this class of bug, don't rely only on disk integrity checks. Also verify:
+
+```bash
+uname -r
+grep CONFIG_CRYPTO_USER_API_AEAD= /boot/config-$(uname -r) 2>/dev/null
+lsmod | grep algif_aead
+find / -perm -4000 -type f 2>/dev/null
+```
+
+- `CONFIG_CRYPTO_USER_API_AEAD=m`: `algif_aead` may be loadable/unloadable as a module
+- `CONFIG_CRYPTO_USER_API_AEAD=y`: the interface is built into the kernel
+- setuid binaries are good targets because a page-cache-only patch can be enough to turn a local foothold into root
+
+#### Attack-surface reduction for the `algif_aead` path
+
+If the vulnerable interface is provided by a loadable module:
+
+```bash
+echo "install algif_aead /bin/false" > /etc/modprobe.d/disable-algif.conf
+rmmod algif_aead 2>/dev/null || true
+```
+
+If it is compiled into the kernel, some disclosures reported blocking the init path with:
+
+```bash
+initcall_blacklist=algif_aead_init
+```
+
+This kind of mitigation is worth remembering for other kernel LPEs too: if exploitation depends on a specific optional interface, disabling or blacklisting that interface can break the exploit path even before a full kernel upgrade is available.
+
 ## References
 
 - [HTB Bamboo – hijacking a root-executed script in a user-writable PaperCut directory](https://0xdf.gitlab.io/2026/02/03/htb-bamboo.html)
 - [HTB: Gavel](https://0xdf.gitlab.io/2026/03/14/htb-gavel.html)
+- [Tenable: Copy Fail (CVE-2026-31431) FAQ](https://www.tenable.com/blog/copy-fail-cve-2026-31431-frequently-asked-questions-about-linux-kernel-privilege-escalation)
+- [Openwall oss-security disclosure for CVE-2026-31431](https://www.openwall.com/lists/oss-security/2026/04/29/23)
+- [Linux stable fix: crypto: algif_aead - Revert to operating out-of-place](https://git.kernel.org/stable/c/a664bf3d603dc3bdcf9ae47cc21e0daec706d7a5)
+- [Copy Fail advisory](https://copy.fail/)
+- [Theori / Xint technical writeup](https://xint.io/blog/copy-fail-linux-distributions)
 
 {{#include ../../banners/hacktricks-training.md}}

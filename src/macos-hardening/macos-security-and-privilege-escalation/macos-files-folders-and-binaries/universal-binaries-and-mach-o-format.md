@@ -70,6 +70,21 @@ or using the [Mach-O View](https://sourceforge.net/projects/machoview/) tool:
 
 As you may be thinking usually a universal binary compiled for 2 architectures **doubles the size** of one compiled for just 1 arch.
 
+> [!TIP]
+> When triaging malware or suspicious apps, don't stop after `file` reports the "best" architecture. A universal binary can hide different imports, load commands or compiler metadata in each slice, so enumerate **all** the slices first and then inspect them independently:
+
+```bash
+BIN=/path/to/bin
+lipo -archs "$BIN"
+for A in $(lipo -archs "$BIN"); do
+  lipo -thin "$A" "$BIN" -output "/tmp/$(basename "$BIN").$A"
+  otool -hv "/tmp/$(basename "$BIN").$A"
+  otool -l "/tmp/$(basename "$BIN").$A" | egrep 'LC_BUILD_VERSION|LC_LOAD_DYLIB|LC_RPATH|LC_DYLD_CHAINED_FIXUPS|LC_CODE_SIGNATURE'
+done
+```
+
+Recent macOS SDKs also expose helpers such as `macho_for_each_slice()` and `macho_best_slice()` in `<mach-o/utils.h>`. The latter is handy to emulate what dyld/kernel would load, but scanners should still iterate every slice to avoid missing arch-specific content.
+
 ## **Mach-O Header**
 
 The header contains basic information about the file, such as magic bytes to identify it as a Mach-O file and information about the target architecture. You can find it in: `mdfind loader.h | grep -i mach-o | grep -E "loader.h$"`
@@ -248,6 +263,7 @@ Common segments loaded by this cmd:
   - `__bss`: Static variables (that have not been initialized)
   - `__objc_*` (\_\_objc_classlist, \_\_objc_protolist, etc): Information used by the Objective-C runtime
 - **`__DATA_CONST`**: \_\_DATA.\_\_const is not guaranteed to be constant (write permissions), nor are other pointers and the GOT. This section makes `__const`, some initializers and the GOT table (once resolved) **read only** using `mprotect`.
+- **`__AUTH` / `__AUTH_CONST`**: Common in recent Apple Silicon binaries. These segments hold pointers that must be authenticated at load or use time (for example `__auth_got`). If a rebinding, hook or import-patching trick only checks the legacy `__got` / `__la_symbol_ptr` sections, it may miss the real call sites in modern `arm64e` binaries. For more details on these sections check [this page](../macos-apps-inspecting-debugging-and-fuzzing/objects-in-memory.md).
 - **`__LINKEDIT`**: Contains information for the linker (dyld) such as, symbol, string, and relocation table entries. It' a generic container for contents that are neither in `__TEXT` or `__DATA` and its content is decribed in other load commands.
   - dyld information: Rebase, Non-lazy/lazy/weak binding opcodes and export info
   - Functions starts: Table of start addresses of functions
@@ -322,9 +338,41 @@ Obsolete but when configured to geenrate dumps on panic, a Mach-O core dump is c
 
 Random UUID. It's useful for anything directly but XNU caches it with the rest of the process info. It can be used in crash reports.
 
+### **`LC_BUILD_VERSION`**
+
+Modern binaries usually carry this command to declare the **target platform**, **minimum OS version**, **SDK version**, and optionally the **tool versions** used to build that slice. From an offensive/reversing perspective this is very useful to fingerprint how a sample was built and to quickly spot weird universal binaries where one slice was compiled with a different SDK or deployment target. Older binaries may still use `LC_VERSION_MIN_*` instead.
+
+```bash
+vtool -show-build /bin/ls
+otool -l /bin/ls | grep -A 8 LC_BUILD_VERSION
+```
+
 ### **`LC_DYLD_ENVIRONMENT`**
 
 Allows to indicate environment variables to the dyld beforenthe process is executed. This can be vary dangerous as it can allow to execute arbitrary code inside the process so this load command is only used in dyld build with `#define SUPPORT_LC_DYLD_ENVIRONMENT` and further restricts processing only to variables of the form `DYLD_..._PATH` specifying load paths.
+
+### **`LC_DYLD_EXPORTS_TRIE` and `LC_DYLD_CHAINED_FIXUPS`**
+
+Recent toolchains frequently store export/bind/rebase metadata in these commands instead of relying only on the older `LC_DYLD_INFO[_ONLY]` opcodes. Both are `linkedit_data_command` entries that point into **`__LINKEDIT`**:
+
+- **`LC_DYLD_EXPORTS_TRIE`**: Compact trie with the symbols exported by the image.
+- **`LC_DYLD_CHAINED_FIXUPS`**: Per-segment fixup chains used by dyld to apply rebases and binds. On Apple Silicon this is also where you will encounter many modern authenticated pointer fixups.
+
+This metadata is very handy when reconstructing imports/exports, understanding why an `@rpath`-loaded dependency resolved the way it did, or figuring out why a hook/rebinding attempt failed on a modern `arm64e` target. `dyld_info` can also be used against **cache-only dylib paths** that do not exist as standalone files on disk, which is very handy on modern macOS where many system libraries live only in the shared cache.
+
+```bash
+dyld_info -arch arm64e -exports -fixup_chains -fixup_chain_details /bin/ls
+```
+
+### **`LC_FILESET_ENTRY`**
+
+This modern load command is mostly relevant when inspecting **kernel collections / kernelcache-style filesets**. Instead of representing a single standalone image, the outer Mach-O acts as a container and each `LC_FILESET_ENTRY` points to an embedded Mach-O with its own path-like **entry id**, VM address and file offset. If you are reversing modern macOS/iOS kernel components, this command is often the bridge between the top-level container and the actual image you want to extract or disassemble.
+
+```bash
+otool -l /System/Library/KernelCollections/BootKernelExtensions.kc | grep -A 6 LC_FILESET_ENTRY
+```
+
+For practical extraction workflows, check [this other page about macOS kernel extensions and kernelcache](../mac-os-architecture/macos-kernel-extensions.md).
 
 ### **`LC_LOAD_DYLIB`**
 
@@ -416,7 +464,10 @@ In `__DATA` segment (rw-):
 
 - `_swift_typeref`, `_swift3_capture`, `_swift3_assocty`, `_swift3_types, _swift3_proto`, `_swift3_fieldmd`, `_swift3_builtin`, `_swift3_reflstr`
 
+
+
+## References
+
+- [Mach-O slices aren't as straightforward as you might think](https://objective-see.org/blog/blog_0x80.html)
+- [dyld_info(1) man page](https://keith.github.io/xcode-man-pages/dyld_info.1.html)
 {{#include ../../../banners/hacktricks-training.md}}
-
-
-
