@@ -42,6 +42,7 @@ class MDBookSidebarScrollbox extends HTMLElement {
                 }
             }
         }
+        updateChapterNavigation(links);
         // Track and set sidebar scroll position
         this.addEventListener('click', function(e) {
             if (e.target.tagName === 'A') {
@@ -83,3 +84,84 @@ class MDBookSidebarScrollbox extends HTMLElement {
     }
 }
 window.customElements.define("mdbook-sidebar-scrollbox", MDBookSidebarScrollbox);
+
+function normalizeChapterUrl(url) {
+    try {
+        var normalized = new URL(url, document.location.href);
+        normalized.hash = "";
+        normalized.search = "";
+        if (normalized.pathname.endsWith("/")) {
+            normalized.pathname += "index.html";
+        }
+        return normalized.href;
+    } catch (_) {
+        return "";
+    }
+}
+
+function setChapterNavigationLink(selector, chapter) {
+    var link = document.querySelector(selector);
+    if (!link) {
+        return;
+    }
+
+    if (!chapter) {
+        link.hidden = true;
+        link.removeAttribute("href");
+        return;
+    }
+
+    link.href = chapter.href;
+    link.hidden = false;
+
+    var label = link.querySelector(".chapter-nav-label") || link.querySelector("span");
+    if (label) {
+        label.textContent = chapter.title;
+    }
+}
+
+function updateChapterNavigation(links) {
+    var current = normalizeChapterUrl(document.location.href);
+    var seen = Object.create(null);
+    var chapters = [];
+
+    links.forEach(function (link) {
+        var rawHref = link.getAttribute("href");
+        if (!rawHref || rawHref.startsWith("#") || link.classList.contains("external-link")) {
+            return;
+        }
+
+        var url;
+        try {
+            url = new URL(link.href, document.location.href);
+        } catch (_) {
+            return;
+        }
+        if (url.origin !== document.location.origin && url.protocol !== "file:") {
+            return;
+        }
+
+        var normalized = normalizeChapterUrl(url.href);
+        if (!normalized || seen[normalized]) {
+            return;
+        }
+        seen[normalized] = true;
+
+        chapters.push({
+            href: link.href,
+            key: normalized,
+            title: link.textContent.trim()
+        });
+    });
+
+    var index = chapters.findIndex(function (chapter) {
+        return chapter.key === current;
+    });
+    var previous = index > 0 ? chapters[index - 1] : null;
+    var next = index >= 0 && index < chapters.length - 1 ? chapters[index + 1] : null;
+
+    setChapterNavigationLink(".mobile-nav-chapters.previous", previous);
+    setChapterNavigationLink(".nav-chapters.previous", previous);
+    setChapterNavigationLink(".mobile-nav-chapters.next", next);
+    setChapterNavigationLink(".nav-chapters.next", next);
+}
