@@ -14,7 +14,6 @@ WORKDIR /app
 COPY . /app
 
 # Selecciona idioma y construye la documentación
-RUN git checkout ${LANG} && git pull
 
 # Exponemos el puerto que usará mdbook
 EXPOSE 3000
