@@ -232,6 +232,61 @@ Hunting/IOCs
 - AMSI tampering via [System.Management.Automation.AmsiUtils]::amsiInitFailed.
 - Long-running business threads ending with links hosted under trusted PaaS domains.
 
+## LNK decoy-first staging → scheduled-task persistence → trusted CPL side-loading
+
+Another recurring pattern is a **document-impersonating `.lnk`** that immediately opens a benign lure while it stages the real chain in the background.
+
+Observed workflow:
+1. The shortcut **masquerades as a PDF** and uses `conhost.exe` or a similar proxy to spawn an obfuscated PowerShell downloader.
+2. The PowerShell fragments obvious tokens (`iw''r`, `g''c''i`, `r''e''n`, `c''p''i`, `&(g''cm sch*)`) so naive detections looking for `iwr`, `gci`, `ren`, `cpi`, or `schtasks` miss the command.
+3. The stager downloads the **decoy document first**, opens it for the victim, and then reconstructs the malicious files in the background.
+4. Payloads may be written with **junk extensions** and then renamed by stripping filler characters, delaying the appearance of obvious `.exe` / `.cpl` artifacts.
+5. Persistence is established with a **minute-based scheduled task** that launches a trusted host binary from a user-writable path.
+
+Minimal hunting clues from this pattern:
+
+```powershell
+# Suspicious split-token PowerShell seen in LNK chains
+iw''r
+r''e''n
+&(g''cm sch*) /create /Sc minute /tn GoogleErrorReport /tr "$env:PUBLIC\Fondue"
+```
+
+A useful staging layout to recognize is:
+- `C:\Users\Public\<decoy>.pdf`
+- `C:\Users\Public\<trusted>.exe`
+- `C:\Users\Public\<malicious>.cpl` or `.dll`
+- `C:\Windows\Tasks\<blob>.dat`
+
+### Why the second stage is stealthy
+
+In the Rapid7 case study, the scheduled task repeatedly launched **`Fondue.exe`** from `C:\Users\Public\`. Because **`APPWIZ.cpl`** was staged next to it and exported **`RunFODW`**, the trusted Microsoft binary side-loaded the attacker CPL instead of the legitimate system copy.
+
+The CPL then:
+- Reads an **AES-256-CBC** blob from `C:\Windows\Tasks\editor.dat`
+- Decrypts it through **Windows CNG / `bcrypt.dll`**
+- Allocates executable memory and copies the decrypted shellcode
+- Executes it indirectly by passing the shellcode pointer as the callback for **`EnumUILanguagesW`**
+
+That last step is worth hunting separately: malware often avoids a direct `((void(*)())buf)()` jump and instead abuses a **legitimate callback-taking WinAPI** to transfer execution.
+
+The decrypted payload in this campaign was **Donut** shellcode, which then mapped the final PE fully in memory and patched **AMSI/WLDP/ETW** in the current process before handing off execution. For deeper notes on side-loading and memory-resident post-processing, see:
+
+{{#ref}}
+../../windows-hardening/windows-local-privilege-escalation/dll-hijacking/README.md
+{{#endref}}
+
+{{#ref}}
+../../windows-hardening/av-bypass.md
+{{#endref}}
+
+Practical hunting pivots:
+- `.lnk` spawning `powershell.exe` or `conhost.exe` followed by a visible decoy document.
+- Short-lived downloads to **`C:\Users\Public\`** followed by immediate renames from nonsense extensions.
+- Scheduled tasks with bland names such as `GoogleErrorReport` executing from **user-writable directories**.
+- Trusted binaries loading **`.cpl` / `.dll`** files from the same non-system directory.
+- Base64 text blobs written under **`C:\Windows\Tasks\`** and then read by the side-loaded module.
+
 ## Steganography-delimited payloads in images (PowerShell stager)
 
 Recent loader chains deliver an obfuscated JavaScript/VBS that decodes and runs a Base64 PowerShell stager. That stager downloads an image (often GIF) that contains a Base64-encoded .NET DLL hidden as plain text between unique start/end markers. The script searches for these delimiters (examples seen in the wild: «<<sudo_png>> … <<sudo_odt>>>»), extracts the between-text, Base64-decodes it to bytes, loads the assembly in-memory and invokes a known entry method with the C2 URL.
@@ -312,6 +367,7 @@ Check the page about **places to steal NTLM creds**:
 
 - [HTB Job – LibreOffice macro → IIS webshell → GodPotato](https://0xdf.gitlab.io/2026/01/26/htb-job.html)
 - [Check Point Research – ZipLine Campaign: A Sophisticated Phishing Attack Targeting US Companies](https://research.checkpoint.com/2025/zipline-phishing-campaign/)
+- [Rapid7 – Malware à la Mode: Tracking Dropping Elephant Tradecraft Through a China-Themed Loader Chain](https://www.rapid7.com/blog/post/tr-malware-tracking-dropping-elephant-tradecraft-china-themed-loader-chain)
 - [Hijack the TypeLib – New COM persistence technique (CICADA8)](https://cicada-8.medium.com/hijack-the-typelib-new-com-persistence-technique-32ae1d284661)
 - [Unit 42 – PhantomVAI Loader Delivers a Range of Infostealers](https://unit42.paloaltonetworks.com/phantomvai-loader-delivers-infostealers/)
 - [MITRE ATT&CK – Steganography (T1027.003)](https://attack.mitre.org/techniques/T1027/003/)

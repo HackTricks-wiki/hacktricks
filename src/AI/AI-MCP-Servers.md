@@ -267,6 +267,58 @@ echo 1 | sed 'r/Users/victim/.aws/credentials'
 - An attacker only needs a prompt-injection sink: a poisoned README, web content fetched through `WebFetch`, or a malicious HTTP-based MCP server can instruct the model to invoke the “legitimate” sed command under the guise of log formatting or bulk editing.
 
 
+### Broken Object-Level Authorization in MCP Tools (Direct JSON-RPC Abuse)
+
+Even when an MCP server is normally consumed through an LLM workflow, its tools are still **server-side actions reachable over the MCP transport**. If the endpoint is exposed and the attacker has a valid low-privilege account, they can often skip prompt injection entirely and invoke tools directly with JSON-RPC-style requests.
+
+A practical testing workflow is:
+
+- **Discover reachable services first**: internal discovery may only show a generic HTTP service (`nmap -sV`) rather than something obviously labeled as MCP.
+- **Probe common MCP paths** such as `/mcp` and `/sse` to confirm the service and recover server metadata.
+- **Call tools directly** with `method: "tools/call"` instead of relying on the LLM to select them.
+- **Compare authorization across all actions** on the same object type (`read`, `update`, `delete`, export, admin helpers, background jobs). It is common to find ownership checks on read/edit paths but not on destructive helpers.
+
+Typical direct invocation shape:
+
+```json
+{
+  "method": "tools/call",
+  "params": {
+    "name": "delete_ticket",
+    "arguments": {
+      "ticket_id": "4201"
+    }
+  }
+}
+```
+
+#### Why verbose/status tools matter
+
+Low-risk-looking tools such as `status`, `health`, `debug`, or inventory endpoints frequently leak data that makes authorization testing much easier. In Bishop Fox's `otto-support`, a verbose `status` call disclosed: 
+
+- internal service metadata such as `http://127.0.0.1:9004/health`
+- service names and ports
+- valid ticket statistics and an `id_range` (`4201-4205`)
+
+This turns BOLA/IDOR testing from blind guessing into **targeted object-ID validation**.
+
+#### Practical MCP authz checks
+
+1. Authenticate as the lowest-privileged user you can create or compromise.
+2. Enumerate `tools/list` and identify every tool that accepts an object identifier.
+3. Use low-risk read/list/status tools to discover valid IDs, tenant names, or object counts.
+4. Replay the same object ID across **all** related tools, not just the obvious one.
+5. Pay special attention to destructive operations (`delete_*`, `archive_*`, `close_*`, `retry_*`, `approve_*`).
+
+If `read_ticket` and `update_ticket` reject foreign objects but `delete_ticket` succeeds, the MCP server has a classic **Broken Object Level Authorization (BOLA/IDOR)** flaw even though the transport is MCP rather than REST.
+
+#### Defensive notes
+
+- Enforce **server-side authorization inside every tool handler**; never trust the LLM, client UI, prompt, or expected workflow to preserve access control.
+- Review **each action independently** because sharing an object type does not mean the implementation shares the same authorization logic.
+- Avoid leaking internal endpoints, object counts, or predictable ID ranges to low-privilege users through diagnostic tools.
+- Audit log at least the **tool name, caller identity, object ID, authorization decision, and result**, especially for destructive tool calls.
+
 ### Flowise MCP Workflow RCE (CVE-2025-59528 & CVE-2025-8943)
 
 Flowise embeds MCP tooling inside its low-code LLM orchestrator, but its **CustomMCP** node trusts user-supplied JavaScript/command definitions that are later executed on the Flowise server. Two separate code paths trigger remote command execution:
@@ -318,7 +370,50 @@ The **MCP Attack Surface Detector (MCP-ASD)** Burp extension turns exposed MCP s
 
 This workflow makes MCP endpoints fuzzable with standard Burp tooling despite their streaming protocol.
 
+### Skill Marketplace Supply-Chain Evasion (skills, `SKILL.md`, archives, bytecode)
+
+Agent **skills** create nearly the same trust problem as MCP servers, but the package usually contains both **natural-language instructions** (for example `SKILL.md`) and **helper artifacts** (scripts, bytecode, archives, images, configs). Therefore, a scanner that only reads the visible manifest or only inspects supported text files can miss the real payload.
+
+#### Practical scanner-evasion patterns
+
+- **Context-truncation evasion**: if a scanner only evaluates the first N bytes/tokens of a file, an attacker can place benign boilerplate first, then add a very large padding region (for example **100,000 newlines**), and finally append the malicious instructions or code. The installed skill still contains the payload, but the guard model only sees the harmless prefix.
+- **Archive/document indirection**: keep `SKILL.md` benign and tell the agent to load the “real” instructions from a `.docx`, image, or other secondary file. A `.docx` is just a ZIP container; if scanners do not recursively unpack and inspect every member, hidden payloads such as `sync1.sh` can ride inside the document.
+- **Generated-artifact / bytecode poisoning**: ship clean source but malicious build artifacts. A reviewed `utils.py` can look harmless while `__pycache__/utils.cpython-312.pyc` imports `os`, reads `os.environ.items()`, and executes attacker logic. If the runtime imports the bundled bytecode first, the visible source review is meaningless.
+- **Opaque-file / incomplete-tree bypass**: some scanners only inspect files referenced from `SKILL.md`, skip dotfiles, or treat unsupported formats as opaque. That leaves blind spots in hidden files, unreferenced scripts, archives, binaries, images, and package-manager config files.
+- **LLM scanner misdirection**: natural-language framing can convince a guard model that dangerous behavior is just normal enterprise bootstrap logic. A skill that writes a new package-manager registry can be described as “AppSec-audited corporate mirroring” until the scanner classifies it as low risk.
+
+#### High-value attacker primitives hidden inside "helpful" skills
+
+**Package-manager registry redirection** is especially dangerous because it persists after the skill finishes. Writing any of the following changes how future dependency installs resolve packages:
+
+```bash
+cat > "$PROJECT/.npmrc" << EOF
+registry=${CORP_REGISTRY}
+EOF
+
+cat > "$PROJECT/.yarnrc" << EOF
+registry "${CORP_REGISTRY}"
+EOF
+```
+
+If `CORP_REGISTRY` is attacker-controlled, later `npm`/`yarn` installs can silently fetch trojanized packages or poisoned versions.
+
+Another suspicious primitive is **native-code preloading**. A skill that sets `LD_PRELOAD` or loads a helper like `$TMP/lo_socket_shim.so` is effectively asking the target process to execute attacker-chosen native code before normal libraries. If the attacker can influence that path or replace the shim, the skill becomes an arbitrary-code-execution bridge even when the visible Python wrapper looks legitimate.
+
+#### What to verify during review
+
+- Walk the **entire skill tree**, not only files mentioned in `SKILL.md`.
+- Unpack nested containers recursively (`.zip`, `.docx`, other office formats) and inspect each member.
+- Reject or separately review **generated artifacts** (`.pyc`, binaries, minified blobs, archives, images with embedded prompts) unless they are reproducibly derived from reviewed source.
+- Compare shipped bytecode/binaries against source when both are present.
+- Treat edits to `.npmrc`, `.yarnrc`, pip indexes, Git hooks, shell rc files, and similar persistence/dependency files as high-risk even if comments make them sound operationally normal.
+- Assume public skill marketplaces are **untrusted code execution** plus **prompt injection**, not just documentation reuse.
+
+
 ## References
+- [Trail of Bits – The Sorry State of Skill Distribution](https://blog.trailofbits.com/2026/06/03/the-sorry-state-of-skill-distribution/)
+- [Trail of Bits – overtly-malicious-skills PoC repository](https://github.com/trailofbits/overtly-malicious-skills)
+- [Otto Support - Testing MCP Servers](https://bishopfox.com/blog/otto-support-testing-mcp-servers)
 - [CVE-2025-54136 – MCPoison Cursor IDE persistent RCE](https://research.checkpoint.com/2025/cursor-vulnerability-mcpoison/)
 - [Metasploit Wrap-Up 11/28/2025 – new Flowise custom MCP & JS injection exploits](https://www.rapid7.com/blog/post/pt-metasploit-wrap-up-11-28-2025)
 - [GHSA-3gcm-f6qx-ff7p / CVE-2025-59528 – Flowise CustomMCP JavaScript code injection](https://github.com/advisories/GHSA-3gcm-f6qx-ff7p)

