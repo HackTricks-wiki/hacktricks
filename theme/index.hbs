@@ -32,6 +32,10 @@
         {{/if}}
 
         <!-- Fonts -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
         {{#if copy_fonts}}
         <link rel="stylesheet" href="{{ path_to_root }}fonts/fonts.css">
         {{/if}}
@@ -100,7 +104,7 @@
             var sidebar = null;
             var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
             var body = document.querySelector("body");
-            if (document.body.clientWidth >= 550) {
+            if (document.body.clientWidth >= 800) {
                 try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
                 sidebar = sidebar || 'visible';
             } else {
@@ -160,18 +164,26 @@
                                 <a class="menu-bar-link" href="https://tools.hacktricks.wiki/" target="_blank">
                                     HT Tools
                                 </a>
+                                <a class="menu-bar-link" href="https://friends.hacktricks.wiki/" target="_blank">
+                                    HT Friends
+                                </a>
                                 <a class="menu-bar-link menu-bar-link-request-update" href="https://tools.hacktricks.wiki/hacktricks-research-request/index.html" target="_blank" rel="noopener noreferrer" data-research-request-link="true">
-                                    Request Page update
+                                    Request update
                                 </a>
-                                <a class="menu-bar-link" href="https://github.com/sponsors/carlospolop" target="_blank">
-                                    Sponsor
-                                </a>
-                                <a class="menu-bar-link" href="https://www.linkedin.com/company/hacktricks" target="_blank">
-                                    Linkedin
-                                </a>
-                                <a class="menu-bar-link" href="https://twitter.com/hacktricks_live" target="_blank">
-                                    X
-                                </a>
+                                <div class="menu-socials">
+                                    <button type="button" class="menu-bar-link menu-socials-toggle" aria-haspopup="true">
+                                        Socials <span class="menu-socials-caret" aria-hidden="true">▾</span>
+                                    </button>
+                                    <div class="menu-socials-popup" aria-label="Social links" role="menu">
+                                        <a href="https://github.com/HackTricks-wiki" target="_blank" rel="noopener noreferrer" role="menuitem" class="menu-bar-link"><i class="fa fa-github" aria-hidden="true"></i><span>GitHub</span></a>
+                                        <a href="https://github.com/sponsors/carlospolop" target="_blank" rel="noopener noreferrer" role="menuitem" class="menu-bar-link"><i class="fa fa-heart" aria-hidden="true"></i><span>Sponsor</span></a>
+                                        <a href="https://www.linkedin.com/company/hacktricks" target="_blank" rel="noopener noreferrer" role="menuitem" class="menu-bar-link"><i class="fa fa-linkedin" aria-hidden="true"></i><span>Linkedin</span></a>
+                                        <a href="https://twitter.com/hacktricks_live" target="_blank" rel="noopener noreferrer" role="menuitem" class="menu-bar-link"><i class="fa fa-twitter" aria-hidden="true"></i><span>X</span></a>
+                                        <a href="https://www.youtube.com/@hacktricks_LIVE" target="_blank" rel="noopener noreferrer" role="menuitem" class="menu-bar-link"><i class="fa fa-youtube-play" aria-hidden="true"></i><span>YouTube</span></a>
+                                        <a href="https://discord.gg/G6pSQyqpAZ" target="_blank" rel="noopener noreferrer" role="menuitem" class="menu-bar-link"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.317 4.3698a19.7913 19.7913 0 0 0-4.8851-1.5152.0741.0741 0 0 0-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 0 0-.0785-.037 19.7363 19.7363 0 0 0-4.8852 1.515.0699.0699 0 0 0-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 0 0 .0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 0 0 .0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 0 0-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 0 1-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 0 1 .0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 0 1 .0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 0 1-.0066.1276 12.2986 12.2986 0 0 1-1.873.8914.0766.0766 0 0 0-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 0 0 .0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 0 0 .0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 0 0-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189z"/></svg><span>Discord</span></a>
+                                        <a href="https://t.me/+VYfD6Z1pqtbB5kcF" target="_blank" rel="noopener noreferrer" role="menuitem" class="menu-bar-link"><i class="fa fa-telegram" aria-hidden="true"></i><span>Telegram</span></a>
+                                    </div>
+                                </div>
                             </div>
                             <div class="icons">
                                 <div id="menubar-collapse-toggle" class="icon-button" type="button" title="Toggle menu bar" aria-label="Toggle Menu bar" aria-expanded="false" aria-controls="collapse">
@@ -180,10 +192,20 @@
                                         <a href="https://hacktricks-training.com" target="_blank" role="menuitem" class="menu-bar-link">HT Training</a>
                                         <a href="https://cloud.hacktricks.wiki/" target="_blank" role="menuitem" class="menu-bar-link">Cloud HT</a>
                                         <a href="https://tools.hacktricks.wiki/" target="_blank" role="menuitem" class="menu-bar-link">HT Tools</a>
-                                        <a href="https://tools.hacktricks.wiki/hacktricks-research-request/index.html" target="_blank" rel="noopener noreferrer" role="menuitem" class="menu-bar-link menu-bar-link-request-update" data-research-request-link="true">Request Page update</a>
-                                        <a href="https://github.com/sponsors/carlospolop" target="_blank" role="menuitem" class="menu-bar-link">Sponsor</a>
-                                        <a href="https://www.linkedin.com/company/hacktricks" target="_blank" role="menuitem" class="menu-bar-link">Linkedin</a>
-                                        <a href="https://twitter.com/hacktricks_live" target="_blank" role="menuitem" class="menu-bar-link">X</a>
+                                        <a href="https://friends.hacktricks.wiki/" target="_blank" role="menuitem" class="menu-bar-link">HT Friends</a>
+                                        <a href="https://tools.hacktricks.wiki/hacktricks-research-request/index.html" target="_blank" rel="noopener noreferrer" role="menuitem" class="menu-bar-link menu-bar-link-request-update" data-research-request-link="true">Request update</a>
+                                        <button type="button" role="menuitem" class="menu-bar-link menu-action" data-toggle-socials="true">
+                                            <span>Socials</span> ▾
+                                        </button>
+                                        <div id="menubar-socials-popup" class="menubar-socials-popup" aria-label="Social links" role="menu">
+                                            <a href="https://github.com/HackTricks-wiki" target="_blank" rel="noopener noreferrer" role="menuitem" class="menu-bar-link"><i class="fa fa-github" aria-hidden="true"></i><span>GitHub</span></a>
+                                            <a href="https://github.com/sponsors/carlospolop" target="_blank" rel="noopener noreferrer" role="menuitem" class="menu-bar-link"><i class="fa fa-heart" aria-hidden="true"></i><span>Sponsor</span></a>
+                                            <a href="https://www.linkedin.com/company/hacktricks" target="_blank" rel="noopener noreferrer" role="menuitem" class="menu-bar-link"><i class="fa fa-linkedin" aria-hidden="true"></i><span>Linkedin</span></a>
+                                            <a href="https://twitter.com/hacktricks_live" target="_blank" rel="noopener noreferrer" role="menuitem" class="menu-bar-link"><i class="fa fa-twitter" aria-hidden="true"></i><span>X</span></a>
+                                            <a href="https://www.youtube.com/@hacktricks_LIVE" target="_blank" rel="noopener noreferrer" role="menuitem" class="menu-bar-link"><i class="fa fa-youtube-play" aria-hidden="true"></i><span>YouTube</span></a>
+                                            <a href="https://discord.gg/G6pSQyqpAZ" target="_blank" rel="noopener noreferrer" role="menuitem" class="menu-bar-link"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.317 4.3698a19.7913 19.7913 0 0 0-4.8851-1.5152.0741.0741 0 0 0-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 0 0-.0785-.037 19.7363 19.7363 0 0 0-4.8852 1.515.0699.0699 0 0 0-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 0 0 .0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 0 0 .0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 0 0-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 0 1-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 0 1 .0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 0 1 .0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 0 1-.0066.1276 12.2986 12.2986 0 0 1-1.873.8914.0766.0766 0 0 0-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 0 0 .0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 0 0 .0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 0 0-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189z"/></svg><span>Discord</span></a>
+                                            <a href="https://t.me/+VYfD6Z1pqtbB5kcF" target="_blank" rel="noopener noreferrer" role="menuitem" class="menu-bar-link"><i class="fa fa-telegram" aria-hidden="true"></i><span>Telegram</span></a>
+                                        </div>
                                         <button type="button" role="menuitem" class="menu-bar-link menu-action" data-toggle-translations="true">
                                             <span>Translations</span> ▾
                                         </button>
@@ -210,23 +232,23 @@
                                     <span class="translations-caret" aria-hidden="true">▾</span>
                                     
                                     <div id="menubar-languages-popup" class="menubar-languages-popup" aria-label="Language menu" role="language menu">
-                                        <a id="af" href="/af/{{ path }}" hreflang="af" lang="af" role="menuitem" class="menu-bar-link">Afrikaans</a>
-                                        <a id="zh" href="/zh/{{ path }}" hreflang="zh" lang="zh" role="menuitem" class="menu-bar-link">Chinese</a>
-                                        <a id="en" href="/en/{{ path }}" hreflang="en" lang="en" role="menuitem" class="menu-bar-link">English</a>
-                                        <a id="fr" href="/fr/{{ path }}" hreflang="fr" lang="fr" role="menuitem" class="menu-bar-link">French</a>
-                                        <a id="de" href="/de/{{ path }}" hreflang="de" lang="de" role="menuitem" class="menu-bar-link">German</a>
-                                        <a id="el" href="/el/{{ path }}" hreflang="el" lang="el" role="menuitem" class="menu-bar-link">Greek</a>
-                                        <a id="hi" href="/hi/{{ path }}" hreflang="hi" lang="hi" role="menuitem" class="menu-bar-link">Hindi</a>
-                                        <a id="it" href="/it/{{ path }}" hreflang="it" lang="it" role="menuitem" class="menu-bar-link">Italian</a>
-                                        <a id="ja" href="/ja/{{ path }}" hreflang="ja" lang="ja" role="menuitem" class="menu-bar-link">Japanese</a>
-                                        <a id="ko" href="/ko/{{ path }}" hreflang="ko" lang="ko" role="menuitem" class="menu-bar-link">Korean</a>
-                                        <a id="pl" href="/pl/{{ path }}" hreflang="pl" lang="pl" role="menuitem" class="menu-bar-link">Polish</a>
-                                        <a id="pt" href="/pt/{{ path }}" hreflang="pt" lang="pt" role="menuitem" class="menu-bar-link">Portuguese</a>
-                                        <a id="sr" href="/sr/{{ path }}" hreflang="sr" lang="sr" role="menuitem" class="menu-bar-link">Serbian</a>
-                                        <a id="es" href="/es/{{ path }}" hreflang="es" lang="es" role="menuitem" class="menu-bar-link">Spanish</a>
-                                        <a id="sw" href="/sw/{{ path }}" hreflang="sw" lang="sw" role="menuitem" class="menu-bar-link">Swahili</a>
-                                        <a id="tr" href="/tr/{{ path }}" hreflang="tr" lang="tr" role="menuitem" class="menu-bar-link">Turkish</a>
-                                        <a id="uk" href="/uk/{{ path }}" hreflang="uk" lang="uk" role="menuitem" class="menu-bar-link">Ukrainian</a>
+                                        <a id="af" href="/af/{{ path }}" hreflang="af" lang="af" role="menuitem" class="menu-bar-link">🇿🇦 Afrikaans</a>
+                                        <a id="zh" href="/zh/{{ path }}" hreflang="zh" lang="zh" role="menuitem" class="menu-bar-link">🇨🇳 Chinese</a>
+                                        <a id="en" href="/en/{{ path }}" hreflang="en" lang="en" role="menuitem" class="menu-bar-link">🇬🇧 English</a>
+                                        <a id="fr" href="/fr/{{ path }}" hreflang="fr" lang="fr" role="menuitem" class="menu-bar-link">🇫🇷 French</a>
+                                        <a id="de" href="/de/{{ path }}" hreflang="de" lang="de" role="menuitem" class="menu-bar-link">🇩🇪 German</a>
+                                        <a id="el" href="/el/{{ path }}" hreflang="el" lang="el" role="menuitem" class="menu-bar-link">🇬🇷 Greek</a>
+                                        <a id="hi" href="/hi/{{ path }}" hreflang="hi" lang="hi" role="menuitem" class="menu-bar-link">🇮🇳 Hindi</a>
+                                        <a id="it" href="/it/{{ path }}" hreflang="it" lang="it" role="menuitem" class="menu-bar-link">🇮🇹 Italian</a>
+                                        <a id="ja" href="/ja/{{ path }}" hreflang="ja" lang="ja" role="menuitem" class="menu-bar-link">🇯🇵 Japanese</a>
+                                        <a id="ko" href="/ko/{{ path }}" hreflang="ko" lang="ko" role="menuitem" class="menu-bar-link">🇰🇷 Korean</a>
+                                        <a id="pl" href="/pl/{{ path }}" hreflang="pl" lang="pl" role="menuitem" class="menu-bar-link">🇵🇱 Polish</a>
+                                        <a id="pt" href="/pt/{{ path }}" hreflang="pt" lang="pt" role="menuitem" class="menu-bar-link">🇵🇹 Portuguese</a>
+                                        <a id="sr" href="/sr/{{ path }}" hreflang="sr" lang="sr" role="menuitem" class="menu-bar-link">🇷🇸 Serbian</a>
+                                        <a id="es" href="/es/{{ path }}" hreflang="es" lang="es" role="menuitem" class="menu-bar-link">🇪🇸 Spanish</a>
+                                        <a id="sw" href="/sw/{{ path }}" hreflang="sw" lang="sw" role="menuitem" class="menu-bar-link">🇹🇿 Swahili</a>
+                                        <a id="tr" href="/tr/{{ path }}" hreflang="tr" lang="tr" role="menuitem" class="menu-bar-link">🇹🇷 Turkish</a>
+                                        <a id="uk" href="/uk/{{ path }}" hreflang="uk" lang="uk" role="menuitem" class="menu-bar-link">🇺🇦 Ukrainian</a>
                                     </div>
                                 </div>
 
@@ -242,7 +264,6 @@
 
                             </div>
                             <div id="theme-wrapper" class="theme-wrapper theme-wrapper--menubar">
-                                <span class="theme-side-icon" aria-hidden="true">☀</span>
                                 <div id="theme-btns" class="theme-btns">
                                     <button id="hacktricks-light" type="button" role="radio" aria-label="Switch to light theme" aria-checked="false" class="theme">
                                         <i class="fa fa-sun-o"></i>
@@ -254,8 +275,6 @@
                                         <i class="fa fa-moon-o"></i>
                                     </button>
                                 </div>
-                                <span class="theme-side-icon" aria-hidden="true">☾</span>
-                                <span class="theme-orb" aria-hidden="true"></span>
                             </div>
 
                             {{#if print_enable}}
@@ -287,6 +306,29 @@
                         <noscript>
                             <iframe class="sidebar-iframe-outer" src="{{ path_to_root }}toc.html"></iframe>
                         </noscript>
+                        <nav class="sidebar-socials footer-socials" aria-label="HackTricks social links">
+                            <a href="https://github.com/HackTricks-wiki" target="_blank" rel="noopener noreferrer" aria-label="HackTricks GitHub">
+                                <i class="fa fa-github" aria-hidden="true"></i>
+                            </a>
+                            <a href="https://github.com/sponsors/carlospolop" target="_blank" rel="noopener noreferrer" aria-label="Sponsor HackTricks">
+                                <i class="fa fa-heart" aria-hidden="true"></i>
+                            </a>
+                            <a href="https://www.linkedin.com/company/hacktricks" target="_blank" rel="noopener noreferrer" aria-label="HackTricks Linkedin">
+                                <i class="fa fa-linkedin" aria-hidden="true"></i>
+                            </a>
+                            <a href="https://twitter.com/hacktricks_live" target="_blank" rel="noopener noreferrer" aria-label="HackTricks X">
+                                <i class="fa fa-twitter" aria-hidden="true"></i>
+                            </a>
+                            <a href="https://www.youtube.com/@hacktricks_LIVE" target="_blank" rel="noopener noreferrer" aria-label="HackTricks YouTube">
+                                <i class="fa fa-youtube-play" aria-hidden="true"></i>
+                            </a>
+                            <a href="https://discord.gg/G6pSQyqpAZ" target="_blank" rel="noopener noreferrer" aria-label="HackTricks Discord">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.317 4.3698a19.7913 19.7913 0 0 0-4.8851-1.5152.0741.0741 0 0 0-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 0 0-.0785-.037 19.7363 19.7363 0 0 0-4.8852 1.515.0699.0699 0 0 0-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 0 0 .0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 0 0 .0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 0 0-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 0 1-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 0 1 .0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 0 1 .0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 0 1-.0066.1276 12.2986 12.2986 0 0 1-1.873.8914.0766.0766 0 0 0-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 0 0 .0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 0 0 .0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 0 0-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189z"/></svg>
+                            </a>
+                            <a href="https://t.me/+VYfD6Z1pqtbB5kcF" target="_blank" rel="noopener noreferrer" aria-label="HackTricks Telegram">
+                                <i class="fa fa-telegram" aria-hidden="true"></i>
+                            </a>
+                        </nav>
                     </nav>
                     <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
                     <script>
@@ -302,15 +344,35 @@
                             <div class="topsponsor-bsa" aria-hidden="true">
                                 <div id="bsa-zone_1773736844679-9_123456"></div>
                             </div>
+                            <a class="topsponsor ht-sponsor-card ht-sponsor-card--horizontal" href="" target="_blank" rel="noopener noreferrer">
+                                <span class="ht-sponsor-grid" aria-hidden="true"></span>
+                                <span class="ht-sponsor-scan" aria-hidden="true"></span>
+                                <span class="ht-sponsor-corners" aria-hidden="true"></span>
+                                <span class="ht-sponsor-kicker">Sponsored</span>
+                                <span class="ht-sponsor-media">
+                                    <img src="" alt="" srcset="">
+                                </span>
+                                <span class="ht-sponsor-copy">
+                                    <span class="topsponsor-title ht-sponsor-title"></span>
+                                    <span class="topsponsor-description ht-sponsor-description"></span>
+                                </span>
+                                <span class="topsponsor-cta ht-sponsor-cta"></span>
+                            </a>
                             {{{ content }}}
                             <div class="bottomsponsor-wrapper">
-                                <a class="bottomsponsor" href="" target="_blank" rel="noopener noreferrer">
-                                    <img src="" alt="" srcset="">
-                                    <div class="bottomsponsor-title">
-                                    </div>
-                                    <div class="bottomsponsor-description">
-                                    </div>
-                                    <div class="bottomsponsor-cta"></div>
+                                <a class="bottomsponsor ht-sponsor-card ht-sponsor-card--horizontal" href="" target="_blank" rel="noopener noreferrer">
+                                    <span class="ht-sponsor-grid" aria-hidden="true"></span>
+                                    <span class="ht-sponsor-scan" aria-hidden="true"></span>
+                                    <span class="ht-sponsor-corners" aria-hidden="true"></span>
+                                    <span class="ht-sponsor-kicker">Sponsored</span>
+                                    <span class="ht-sponsor-media">
+                                        <img src="" alt="" srcset="">
+                                    </span>
+                                    <span class="ht-sponsor-copy">
+                                        <span class="bottomsponsor-title ht-sponsor-title"></span>
+                                        <span class="bottomsponsor-description ht-sponsor-description"></span>
+                                    </span>
+                                    <span class="bottomsponsor-cta ht-sponsor-cta"></span>
                                 </a>
                                 <div class="bottomsponsor-bsa" aria-hidden="true">
                                     <div id="bsa-zone_1773736987437-6_123456"></div>
@@ -329,33 +391,25 @@
 
                         <nav class="nav-wrapper" aria-label="Page navigation">
                             <!-- Mobile navigation buttons -->
-                            {{#if previous}}
-                                <a rel="prev" href="{{ path_to_root }}{{previous.path}}" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <a rel="prev" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left" hidden>
                                     <i class="fa fa-angle-left"></i>
                                 </a>
-                            {{/if}}
 
-                            {{#if next}}
-                                <a rel="next prefetch" href="{{ path_to_root }}{{next.path}}" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <a rel="next prefetch" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right" hidden>
                                     <i class="fa fa-angle-right"></i>
                                 </a>
-                            {{/if}}
 
                             <div style="clear: both"></div>
                         </nav>
 
                         <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                            {{#if previous}}
-                                <a rel="prev" href="{{ path_to_root }}{{previous.path}}" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                                    <i class="fa fa-angle-left"></i><span style="font-size: medium; align-self: center; margin-left: 10px;">{{previous.name}}</span>
+                                <a rel="prev" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left" hidden>
+                                    <i class="fa fa-angle-left"></i><span class="chapter-nav-label" style="font-size: medium; align-self: center; margin-left: 10px;"></span>
                                 </a>
-                            {{/if}}
 
-                            {{#if next}}
-                                <a rel="next prefetch" href="{{ path_to_root }}{{next.path}}" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                                    <span style="font-size: medium; align-self: center; margin-right: 10px;">{{next.name}}</span><i class="fa fa-angle-right"></i>
+                                <a rel="next prefetch" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right" hidden>
+                                    <span class="chapter-nav-label" style="font-size: medium; align-self: center; margin-right: 10px;"></span><i class="fa fa-angle-right"></i>
                                 </a>
-                            {{/if}}
                         </nav>
                     </div>
 
@@ -365,13 +419,19 @@
                         </button>
                         <div id="sidetoc-wrapper" class="sidetoc-wrapper">
                             <nav class="pagetoc"></nav>
-                            <a class="sidesponsor" href="" target="_blank" rel="noopener noreferrer">
-                                <img src="" alt="" srcset="">
-                                <div class="sponsor-title">
-                                </div>
-                                <div class="sponsor-description">
-                                </div>
-                                <div class="sponsor-cta"></div>
+                            <a class="sidesponsor ht-sponsor-card ht-sponsor-card--vertical" href="" target="_blank" rel="noopener noreferrer">
+                                <span class="ht-sponsor-grid" aria-hidden="true"></span>
+                                <span class="ht-sponsor-scan" aria-hidden="true"></span>
+                                <span class="ht-sponsor-corners" aria-hidden="true"></span>
+                                <span class="ht-sponsor-kicker">Sponsored</span>
+                                <span class="ht-sponsor-media">
+                                    <img src="" alt="" srcset="">
+                                </span>
+                                <span class="ht-sponsor-copy">
+                                    <span class="sponsor-title ht-sponsor-title"></span>
+                                    <span class="sponsor-description ht-sponsor-description"></span>
+                                </span>
+                                <span class="sponsor-cta ht-sponsor-cta"></span>
                             </a>
                             <div class="sidesponsor-bsa" aria-hidden="true">
                                 <div id="bsa-zone_1773737041447-5_123456"></div>
@@ -380,6 +440,29 @@
                     </div>
                 </div>
                 <div class="footer">
+                    <nav class="footer-socials" aria-label="HackTricks social links">
+                        <a href="https://github.com/HackTricks-wiki" target="_blank" rel="noopener noreferrer" aria-label="HackTricks GitHub">
+                            <i class="fa fa-github" aria-hidden="true"></i>
+                        </a>
+                        <a href="https://github.com/sponsors/carlospolop" target="_blank" rel="noopener noreferrer" aria-label="Sponsor HackTricks">
+                            <i class="fa fa-heart" aria-hidden="true"></i>
+                        </a>
+                        <a href="https://www.linkedin.com/company/hacktricks" target="_blank" rel="noopener noreferrer" aria-label="HackTricks Linkedin">
+                            <i class="fa fa-linkedin" aria-hidden="true"></i>
+                        </a>
+                        <a href="https://twitter.com/hacktricks_live" target="_blank" rel="noopener noreferrer" aria-label="HackTricks X">
+                            <i class="fa fa-twitter" aria-hidden="true"></i>
+                        </a>
+                        <a href="https://www.youtube.com/@hacktricks_LIVE" target="_blank" rel="noopener noreferrer" aria-label="HackTricks YouTube">
+                            <i class="fa fa-youtube-play" aria-hidden="true"></i>
+                        </a>
+                        <a href="https://discord.gg/G6pSQyqpAZ" target="_blank" rel="noopener noreferrer" aria-label="HackTricks Discord">
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.317 4.3698a19.7913 19.7913 0 0 0-4.8851-1.5152.0741.0741 0 0 0-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 0 0-.0785-.037 19.7363 19.7363 0 0 0-4.8852 1.515.0699.0699 0 0 0-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 0 0 .0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 0 0 .0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 0 0-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 0 1-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 0 1 .0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 0 1 .0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 0 1-.0066.1276 12.2986 12.2986 0 0 1-1.873.8914.0766.0766 0 0 0-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 0 0 .0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 0 0 .0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 0 0-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189z"/></svg>
+                        </a>
+                        <a href="https://t.me/+VYfD6Z1pqtbB5kcF" target="_blank" rel="noopener noreferrer" aria-label="HackTricks Telegram">
+                            <i class="fa fa-telegram" aria-hidden="true"></i>
+                        </a>
+                    </nav>
                 </div>
             </div>
 
@@ -512,6 +595,19 @@
                         }
                     });
                 }
+                var socialsBtn = document.querySelector('[data-toggle-socials="true"]');
+                if (socialsBtn) {
+                    socialsBtn.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        var popup = document.getElementById('menubar-collapse-popup');
+                        if (!popup) { return; }
+                        popup.classList.toggle('show-socials');
+                        popup.style.display = 'flex';
+                        var collapseToggle = document.getElementById('menubar-collapse-toggle');
+                        if (collapseToggle) { collapseToggle.setAttribute('aria-expanded', true); }
+                    });
+                }
                 var popupEl = document.getElementById('menubar-collapse-popup');
                 if (popupEl) {
                     popupEl.addEventListener('click', function (e) {
@@ -542,7 +638,7 @@
                     return Number.isFinite(parsed) ? parsed : 15;
                 }
 
-                function updatePositions() {
+                function updateLeftTogglePosition() {
                     var pagePadding = getPagePadding();
                     var sidebarVisible = sidebarAnchor ? sidebarAnchor.checked : true;
 
@@ -552,7 +648,10 @@
                         var sidebarRect = sidebar.getBoundingClientRect();
                         leftToggle.style.left = Math.round(sidebarRect.right - 14) + 'px';
                     }
+                }
 
+                function updateRightTogglePosition() {
+                    var pagePadding = getPagePadding();
                     var sidetocHidden = document.documentElement.classList.contains('sidetoc-hidden');
                     if (!sidetoc || sidetoc.offsetParent === null || sidetocHidden) {
                         rightToggle.style.left = Math.round(window.innerWidth - pagePadding - 28) + 'px';
@@ -562,14 +661,29 @@
                     }
                 }
 
+                function updatePositions() {
+                    updateLeftTogglePosition();
+                    updateRightTogglePosition();
+                }
+
                 window.addEventListener('resize', updatePositions);
                 window.addEventListener('load', updatePositions);
+                rightToggle.addEventListener('click', function () {
+                    window.setTimeout(updateRightTogglePosition, 0);
+                });
                 if (sidebarAnchor) {
                     sidebarAnchor.addEventListener('change', function () {
-                        window.setTimeout(updatePositions, 260);
+                        window.setTimeout(updateLeftTogglePosition, 260);
                     });
                 }
-                document.addEventListener('transitionend', updatePositions);
+                document.addEventListener('transitionend', function (event) {
+                    if (event.target === sidetoc || event.target === rightToggle || (sidetoc && sidetoc.contains(event.target))) {
+                        updateRightTogglePosition();
+                    }
+                    if (event.target === sidebar || event.target === leftToggle || (sidebar && sidebar.contains(event.target))) {
+                        updateLeftTogglePosition();
+                    }
+                });
                 updatePositions();
             })();
         </script>

@@ -44,12 +44,37 @@ blob = base64.b64decode(b64)
 
 ## HTML Staging Evasion Parallels
 
-Recent HTML smuggling research (Talos) highlights payloads hidden as Base64 strings inside `<script>` blocks in HTML attachments and decoded via JavaScript at runtime. The same trick can be reused for C2 responses: stage encrypted blobs inside a script tag (or other DOM element) and decode them in-memory before AES/XOR, making the page look like ordinary HTML. Talos also shows layered obfuscation (identifier renaming plus Base64/Caesar/AES) inside script tags, which maps cleanly to HTML-staged C2 blobs.
+Recent HTML smuggling research (Talos) highlights payloads hidden as Base64 strings inside `<script>` blocks in HTML attachments and decoded via JavaScript at runtime. The same trick can be reused for C2 responses: stage encrypted blobs inside a script tag (or other DOM element) and decode them in-memory before AES/XOR, making the page look like ordinary HTML. Talos also shows layered obfuscation (identifier renaming plus Base64/Caesar/AES) inside script tags, which maps cleanly to HTML-staged C2 blobs. A later Talos writeup on **hidden text salting** is also relevant here: splitting Base64 with irrelevant HTML comments or whitespace is enough to break simple regex extractors while keeping browser-side reconstruction trivial.
 
 ## Recent Variant Notes (2024-2025)
 
 - Check Point observed WIRTE campaigns in 2024 that still hinged on archive-based sideloading but used `propsys.dll` (stagerx64) as the first stage. The stager decodes the next payload with Base64 + XOR (key `53`), sends HTTP requests with a hardcoded `User-Agent`, and extracts encrypted blobs embedded between HTML tags. In one branch, the stage was reconstructed from a long list of embedded IP strings decoded via `RtlIpv4StringToAddressA`, then concatenated into the payload bytes.
 - OWN-CERT documented earlier WIRTE tooling where the side-loaded `wtsapi32.dll` dropper protected strings with Base64 + TEA and used the DLL name itself as the decryption key, then XOR/Base64-obfuscated host identification data before sending it to the C2.
+
+## Reconstructing IP-Encoded Stages
+
+WIRTE's 2024 `propsys.dll` branch shows that the next PE does not need to live as one contiguous HTML blob. The loader can stash stage bytes as dotted-quad strings and rebuild them with `RtlIpv4StringToAddressA`, a pattern closely related to Hive's **IPfuscation** tradecraft. Operationally this is useful when the actor wants the HTML page to contain what looks like harmless IOCs or config data instead of an obvious Base64 payload.
+
+```python
+import pathlib, re, socket
+
+text = pathlib.Path("stage.txt").read_text(encoding="utf-8")
+ips = re.findall(r'((?:\d{1,3}\.){3}\d{1,3})', text)
+blob = b"".join(socket.inet_aton(ip) for ip in ips)
+pathlib.Path("stage.bin").write_bytes(blob)
+```
+
+If the recovered bytes begin with `MZ`, you likely reconstructed the next PE directly. If not, check for a leading XOR/Base64 layer or small delimiter chunks between addresses.
+
+## Swappable DLL Names & Host Rotation
+
+A strong property of this pattern is that the **HTML/AES/XOR staging backend can stay identical while only the sideload pair changes**. WIRTE rotated through `netutils.dll`, `srvcli.dll`, `dwampi.dll`, `wtsapi32.dll`, and `propsys.dll` across campaigns, which is useful because:
+
+- `propsys.dll` and `wtsapi32.dll` are boring Windows DLL names that defenders expect to exist in `%System32%` / `%SysWOW64%`.
+- Public catalogs such as **HijackLibs** already map many binaries that will load those DLL names from a copied application directory, giving operators replacement hosts without redesigning the stager.
+- Only the export surface must be adapted per host. The HTML parser, AES/XOR routines, and module loader can usually be transplanted unchanged into a forwarding proxy DLL.
+
+For offensive lab work, this means you can separate the problem into **(1) find a stable signed host that resolves your chosen DLL name locally** and **(2) reuse the same staged-HTML loader logic behind that DLL**.
 
 ## Crypto & C2 Hardening
 
@@ -83,9 +108,11 @@ Because Rclone is widely used for legitimate backup workflows, defenders must fo
 
 ## Detection Pivots
 
-- Alert on **signed processes** that unexpectedly load DLLs from user-writable paths (Procmon filters + `Get-ProcessMitigation -Module`), especially when the DLL names overlap with `netutils`, `srvcli`, `dwampi`, or `wtsapi32`.
+- Alert on **signed processes** that unexpectedly load DLLs from user-writable paths (Procmon filters + `Get-ProcessMitigation -Module`), especially when the DLL names overlap with `netutils`, `srvcli`, `dwampi`, `wtsapi32`, or `propsys`.
 - Inspect suspicious HTTPS responses for **large Base64 blobs embedded inside unusual tags** or guarded by `<!-- TAG: <xyz> -->` comments.
+- Normalize HTML first: **strip comments and collapse whitespace before Base64 extraction**, because hidden-text-salting style evasion can split payloads across comment boundaries.
 - Extend HTML hunting to **Base64 strings inside `<script>` blocks** (HTML smuggling-style staging) that are decoded via JavaScript before AES/XOR processing.
+- Hunt for repeated calls to **`RtlIpv4StringToAddressA` followed by buffer assembly**, especially when the surrounding strings are long IPv4 lists rather than real network targets.
 - Hunt for **scheduled tasks** that run `svchost.exe` with non-service arguments or point back to dropper directories.
 - Track **C2 redirects** that only return payloads for exact `User-Agent` strings and otherwise bounce to legitimate news/health domains.
 - Monitor for **Rclone** binaries appearing outside IT-managed locations, new `rclone.conf` files, or sync jobs pulling from staging directories like `C:\Users\Public`.
@@ -96,5 +123,6 @@ Because Rclone is widely used for legitimate backup workflows, defenders must fo
 - [Hidden between the tags: Insights into evasion techniques in HTML smuggling](https://blog.talosintelligence.com/hidden-between-the-tags-insights-into-evasion-techniques-in-html-smuggling/)
 - [Hamas-affiliated Threat Actor WIRTE Continues its Middle East Operations and Moves to Disruptive Activity](https://research.checkpoint.com/2024/hamas-affiliated-threat-actor-expands-to-disruptive-activity/)
 - [WIRTE: In Search of Lost Time](https://www.own.security/en/ressources/blog/wirte-analyse-campagne-cyber-own-cert)
-
+- [Hive Ransomware Deploys Novel IPfuscation Technique To Avoid Detection](https://www.sentinelone.com/blog/hive-ransomware-deploys-novel-ipfuscation-technique/)
+- [Potential System DLL Sideloading From Non System Locations](https://detection.fyi/sigmahq/sigma/windows/image_load/image_load_side_load_from_non_system_location/)
 {{#include ../../../banners/hacktricks-training.md}}
