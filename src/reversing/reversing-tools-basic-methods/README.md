@@ -25,19 +25,19 @@ Software:
 
 ### [dotPeek](https://www.jetbrains.com/decompiler/)
 
-dotPeek — це decompiler, який **декомпілює та аналізує кілька форматів**, зокрема **libraries** (.dll), **Windows metadata file**s (.winmd) та **executables** (.exe). Після декомпіляції assembly можна зберегти як Visual Studio project (.csproj).
+dotPeek is a decompiler that **decompiles and examines multiple formats**, including **libraries** (.dll), **Windows metadata file**s (.winmd), and **executables** (.exe). Once decompiled, an assembly can be saved as a Visual Studio project (.csproj).
 
-Перевага тут у тому, що якщо втрачений source code потрібно відновити зі старого assembly, це може заощадити час. Крім того, dotPeek забезпечує зручну навігацію по декомпільованому коду, що робить його одним із ідеальних інструментів для **Xamarin algorithm analysis.**
+The merit here is that if a lost source code requires restoration from a legacy assembly, this action can save time. Further, dotPeek provides handy navigation throughout the decompiled code, making it one of the perfect tools for **Xamarin algorithm analysis.**
 
 ### [.NET Reflector](https://www.red-gate.com/products/reflector/)
 
-З комплексною моделлю add-in і API, який розширює tool відповідно до ваших точних потреб, .NET reflector заощаджує час і спрощує development. Давайте подивимося на безліч reverse engineering services, які надає цей tool:
+With a comprehensive add-in model and an API that extends the tool to suit your exact needs, .NET reflector saves time and simplifies development. Let's take a look at the plethora of reverse engineering services this tool provides:
 
-- Надає розуміння того, як data flows through a library or component
-- Надає розуміння implementation and usage of .NET languages and frameworks
-- Знаходить undocumented and unexposed functionality, щоб отримати більше від APIs і technologies used.
-- Знаходить dependencies і різні assemblies
-- Відстежує точне місце errors у вашому code, third-party components, and libraries.
+- Provides an insight into how the data flows through a library or component
+- Provides insight into the implementation and usage of .NET languages and frameworks
+- Finds undocumented and unexposed functionality to get more out of the APIs and technologies used.
+- Finds dependencies and different assemblies
+- Tracks down the exact location of errors in your code, third-party components, and libraries.
 - Debugs into the source of all the .NET code you work with.
 
 ### [ILSpy](https://github.com/icsharpcode/ILSpy) & [dnSpy](https://github.com/dnSpy/dnSpy/releases)
@@ -55,11 +55,11 @@ File.AppendAllText(path, "Password: " + password + "\n");
 ```
 ### DNSpy Debugging
 
-Щоб налагоджувати код за допомогою DNSpy, потрібно:
+Щоб налагоджувати код за допомогою DNSpy, вам потрібно:
 
 Спочатку змінити **Assembly attributes**, пов’язані з **debugging**:
 
-![](<../../images/image (973).png>)
+![DNSpy Logging - DNSpy Debugging: First, change the Assembly attributes related to debugging](<../../images/image (973).png>)
 
 From:
 ```aspnet
@@ -72,41 +72,41 @@ DebuggableAttribute.DebuggingModes.DisableOptimizations |
 DebuggableAttribute.DebuggingModes.IgnoreSymbolStoreSequencePoints |
 DebuggableAttribute.DebuggingModes.EnableEditAndContinue)]
 ```
-І натисніть **compile**:
+І клацніть на **compile**:
 
-![](<../../images/image (314) (1).png>)
+![DNSpy Logging - DNSpy Debugging: And click on compile](<../../images/image (314) (1).png>)
 
 Потім збережіть новий файл через _**File >> Save module...**_:
 
-![](<../../images/image (602).png>)
+![DNSpy Logging - DNSpy Debugging: Then save the new file via File Save module](<../../images/image (602).png>)
 
-Це необхідно, тому що якщо ви цього не зробите, під час **runtime** до коду буде застосовано кілька **optimisations**, і може статися так, що під час debugging **break-point never hit** або деякі **variables don't exist**.
+Це необхідно, тому що якщо ви цього не зробите, під час **runtime** до коду буде застосовано кілька **optimisations**, і може статися так, що під час debugging **break-point** ніколи не буде досягнуто або деякі **variables** не існують.
 
-Потім, якщо вашу .NET application **run** by **IIS**, ви можете **restart** її за допомогою:
+Потім, якщо вашу .NET application **run** через **IIS**, ви можете **restart** її за допомогою:
 ```
 iisreset /noforce
 ```
-Тоді, щоб почати налагодження, ви повинні закрити всі відкриті файли і у **Debug Tab** вибрати **Attach to Process...**:
+Then, in order to start debugging you should close all the opened files and inside the **Debug Tab** select **Attach to Process...**:
 
-![](<../../images/image (318).png>)
+![DNSpy Logging - DNSpy Debugging: Then, in order to start debugging you should close all the opened files and inside the Debug Tab select Attach to Process](<../../images/image (318).png>)
 
-Потім виберіть **w3wp.exe**, щоб приєднатися до **IIS server**, і натисніть **attach**:
+Then select **w3wp.exe** to attach to the **IIS server** and click **attach**:
 
-![](<../../images/image (113).png>)
+![DNSpy Logging - DNSpy Debugging: Then select w3wp.exe to attach to the IIS server and click attach](<../../images/image (113).png>)
 
-Тепер, коли ми налагоджуємо процес, час зупинити його і завантажити всі модулі. Спочатку натисніть _Debug >> Break All_, а потім натисніть на _**Debug >> Windows >> Modules**_:
+Now that we are debugging the process, it's time to stop it and load all the modules. First click on _Debug >> Break All_ and then click on _**Debug >> Windows >> Modules**_:
 
-![](<../../images/image (132).png>)
+![DNSpy Logging - DNSpy Debugging: Now that we are debugging the process, it's time to stop it and load all the modules. First click on Debug Break All and then click on Debug Windows Modules](<../../images/image (132).png>)
 
-![](<../../images/image (834).png>)
+![DNSpy Logging - DNSpy Debugging: Now that we are debugging the process, it's time to stop it and load all the modules. First click on Debug Break All and then click on Debug Windows Modules](<../../images/image (834).png>)
 
-Натисніть будь-який модуль у **Modules** і виберіть **Open All Modules**:
+Click any module on **Modules** and select **Open All Modules**:
 
-![](<../../images/image (922).png>)
+![DNSpy Logging - DNSpy Debugging: Click any module on Modules and select Open All Modules](<../../images/image (922).png>)
 
-Клацніть правою кнопкою миші будь-який модуль у **Assembly Explorer** і натисніть **Sort Assemblies**:
+Right click any module in **Assembly Explorer** and click **Sort Assemblies**:
 
-![](<../../images/image (339).png>)
+![DNSpy Logging - DNSpy Debugging: Right click any module in Assembly Explorer and click Sort Assemblies](<../../images/image (339).png>)
 
 ## Java decompiler
 
@@ -121,15 +121,15 @@ iisreset /noforce
 - Select **Windbg** debugger
 - Select "**Suspend on library load/unload**"
 
-![](<../../images/image (868).png>)
+![Debugging DLLs - Using IDA: Select " Suspend on library load/unload "](<../../images/image (868).png>)
 
 - Configure the **parameters** of the execution putting the **path to the DLL** and the function that you want to call:
 
-![](<../../images/image (704).png>)
+![Debugging DLLs - Using IDA: Configure the parameters of the execution putting the path to the DLL and the function that you want to call](<../../images/image (704).png>)
 
-Тоді, коли ви почнете налагодження, **виконання зупинятиметься під час завантаження кожної DLL**, а коли rundll32 завантажить вашу DLL, виконання буде зупинено.
+Then, when you start debugging **the execution will be stopped when each DLL is loaded**, then, when rundll32 load your DLL the execution will be stopped.
 
-Але як отримати доступ до коду DLL, яку було завантажено? За допомогою цього методу я не знаю як.
+But, how can you get to the code of the DLL that was lodaded? Using this method, I don't know how.
 
 ### Using x64dbg/x32dbg
 
@@ -138,23 +138,24 @@ iisreset /noforce
 - Change _Options --> Settings_ and select "**DLL Entry**".
 - Then **start the execution**, the debugger will stop at each dll main, at some point you will **stop in the dll Entry of your dll**. From there, just search for the points where you want to put a breakpoint.
 
-Зверніть увагу, що коли виконання зупинене з будь-якої причини у win64dbg, ви можете побачити, **в якому коді ви перебуваєте**, подивившись у **верхню частину вікна win64dbg**:
+Notice that when the execution is stopped by any reason in win64dbg you can see **in which code you are** looking in the **top of the win64dbg window**:
 
-![](<../../images/image (842).png>)
+![Using IDA - Using x64dbg/x32dbg: Notice that when the execution is stopped by any reason in win64dbg you can see in which code you are looking in the top of the win64dbg window](<../../images/image (842).png>)
 
 Then, looking to this ca see when the execution was stopped in the dll you want to debug.
 
 ## GUI Apps / Videogames
 
-[**Cheat Engine**](https://www.cheatengine.org/downloads.php) — це корисна програма, щоб знаходити, де важливі значення зберігаються в пам’яті запущеної гри, і змінювати їх. Більше інформації в:
+[**Cheat Engine**](https://www.cheatengine.org/downloads.php) is a useful program to find where important values are saved inside the memory of a running game and change them. More info in:
+
 
 {{#ref}}
 cheat-engine.md
 {{#endref}}
 
-[**PiNCE**](https://github.com/korcankaraokcu/PINCE) — це front-end/reverse engineering tool для GNU Project Debugger (GDB), орієнтований на ігри. Однак його можна використовувати для будь-чого, що пов’язано з reverse-engineering
+[**PiNCE**](https://github.com/korcankaraokcu/PINCE) is a front-end/reverse engineering tool for the GNU Project Debugger (GDB), focused on games. However, it can be used for any reverse-engineering related stuff
 
-[**Decompiler Explorer**](https://dogbolt.org/) — це web front-end до кількох decompilers. Цей веб-сервіс дає змогу порівнювати результат різних decompilers для невеликих executables.
+[**Decompiler Explorer**](https://dogbolt.org/) is a web front-end to a number of decompilers. This web service lets you compare the output of different decompilers on small executables.
 
 ## ARM & MIPS
 
@@ -167,11 +168,11 @@ https://github.com/nongiach/arm_now
 
 ### Debugging a shellcode with blobrunner
 
-[**Blobrunner**](https://github.com/OALabs/BlobRunner) буде **виділяти** **shellcode** в області пам’яті, **показуватиме** вам **memory address**, де було виділено shellcode, і **зупинятиме** виконання.\
-Потім вам потрібно **attach a debugger** (Ida або x64dbg) до процесу і поставити **breakpoint у вказаній memory address**, а потім **resume** виконання. Таким чином ви будете налагоджувати shellcode.
+[**Blobrunner**](https://github.com/OALabs/BlobRunner) will **allocate** the **shellcode** inside a space of memory, will **indicate** you the **memory address** were the shellcode was allocated and will **stop** the execution.\
+Then, you need to **attach a debugger** (Ida or x64dbg) to the process and put a **breakpoint the indicated memory address** and **resume** the execution. This way you will be debugging the shellcode.
 
-Сторінка releases на github містить zip-архіви з compiled releases: [https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5](https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5)\
-Ви можете знайти трохи модифіковану версію Blobrunner за наступним посиланням. Щоб скомпілювати її, просто **створіть C/C++ project у Visual Studio Code, скопіюйте і вставте код та зберіть його**.
+The releases github page contains zips containing the compiled releases: [https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5](https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5)\
+You can find a slightly modified version of Blobrunner in the following link. In order to compile it just **create a C/C++ project in Visual Studio Code, copy and paste the code and build it**.
 
 
 {{#ref}}
@@ -180,34 +181,34 @@ blobrunner.md
 
 ### Debugging a shellcode with jmp2it
 
-[**jmp2it** ](https://github.com/adamkramer/jmp2it/releases/tag/v1.4) дуже схожий на blobrunner. Він буде **виділяти** **shellcode** в області пам’яті та запускати **eternal loop**. Потім вам потрібно **attach the debugger** до процесу, **play start wait 2-5 secs and press stop**, і ви опинитеся всередині **eternal loop**. Перейдіть до наступної інструкції eternal loop, оскільки це буде call до shellcode, і зрештою ви побачите, як виконується shellcode.
+[**jmp2it** ](https://github.com/adamkramer/jmp2it/releases/tag/v1.4)is very similar to blobrunner. It will **allocate** the **shellcode** inside a space of memory, and start an **eternal loop**. You then need to **attach the debugger** to the process, **play start wait 2-5 secs and press stop** and you will find yourself inside the **eternal loop**. Jump to the next instruction of the eternal loop as it will be a call to the shellcode, and finally you will find yourself executing the shellcode.
 
-![](<../../images/image (509).png>)
+![Debugging a shellcode with blobrunner - Debugging a shellcode with jmp2it: jmp2it is very similar to blobrunner. It will allocate the shellcode inside a space of memory, and start an...](<../../images/image (509).png>)
 
-Ви можете завантажити compiled version [jmp2it на сторінці releases](https://github.com/adamkramer/jmp2it/releases/).
+You can download a compiled version of [jmp2it inside the releases page](https://github.com/adamkramer/jmp2it/releases/).
 
 ### Debugging shellcode using Cutter
 
-[**Cutter**](https://github.com/rizinorg/cutter/releases/tag/v1.12.0) — це GUI для radare. Використовуючи cutter, ви можете емулявати shellcode і динамічно його досліджувати.
+[**Cutter**](https://github.com/rizinorg/cutter/releases/tag/v1.12.0) is the GUI of radare. Using cutter you can emulate the shellcode and inspect it dynamically.
 
-Зверніть увагу, що Cutter дозволяє **Open File** і **Open Shellcode**. У моєму випадку, коли я відкрив shellcode як файл, він правильно decompiled його, але коли я відкрив його як shellcode — ні:
+Note that Cutter allows you to "Open File" and "Open Shellcode". In my case when I opened the shellcode as a file it decompiled it correctly, but when I opened it as a shellcode it didn't:
 
-![](<../../images/image (562).png>)
+![Debugging a shellcode with jmp2it - Debugging shellcode using Cutter: Note that Cutter allows you to "Open File" and "Open Shellcode". In my case when I opened the shellcode as a file it...](<../../images/image (562).png>)
 
-Щоб почати емуляцію в потрібному місці, встановіть там bp, і, схоже, cutter автоматично запустить емуляцію звідти:
+In order to start the emulation in the place you want to, set a bp there and apparently cutter will automatically start the emulation from there:
 
-![](<../../images/image (589).png>)
+![Debugging a shellcode with jmp2it - Debugging shellcode using Cutter: In order to start the emulation in the place you want to, set a bp there and apparently cutter will automatically...](<../../images/image (589).png>)
 
-![](<../../images/image (387).png>)
+![Debugging a shellcode with jmp2it - Debugging shellcode using Cutter: In order to start the emulation in the place you want to, set a bp there and apparently cutter will automatically...](<../../images/image (387).png>)
 
-Ви можете побачити stack, наприклад, у hex dump:
+You can see the stack for example inside a hex dump:
 
-![](<../../images/image (186).png>)
+![Debugging a shellcode with jmp2it - Debugging shellcode using Cutter: You can see the stack for example inside a hex dump](<../../images/image (186).png>)
 
 ### Deobfuscating shellcode and getting executed functions
 
-Спробуйте [**scdbg**](http://sandsprite.com/blogs/index.php?uid=7&pid=152).\
-Він покаже вам такі речі, як **які functions** використовує shellcode і чи **decoding** він сам себе в memory.
+You should try [**scdbg**](http://sandsprite.com/blogs/index.php?uid=7&pid=152).\
+It will tell you things like **which functions** is the shellcode using and if the shellcode is **decoding** itself in memory.
 ```bash
 scdbg.exe -f shellcode # Get info
 scdbg.exe -f shellcode -r #show analysis report at end of run
@@ -218,31 +219,31 @@ scdbg.exe -f shellcode /foff 0x0000004D #Start the executing in that offset
 ```
 scDbg також має графічний launcher, де ви можете вибрати потрібні опції та виконати shellcode
 
-![](<../../images/image (258).png>)
+![Debugging shellcode using Cutter - Deobfuscating shellcode and getting executed functions: scDbg also counts with a graphical launcher where you can select the options you want and...](<../../images/image (258).png>)
 
-Опція **Create Dump** збере кінцевий shellcode, якщо в shellcode під час виконання в пам’яті динамічно внесено будь-які зміни (корисно для завантаження decoded shellcode). Опція **start offset** може бути корисною, щоб запустити shellcode з певного зсуву. Опція **Debug Shell** корисна для debugging shellcode за допомогою термінала scDbg (однак для цього я вважаю кращими будь-які з опцій, пояснених раніше, оскільки ви зможете використовувати Ida або x64dbg).
+Опція **Create Dump** збере final shellcode, якщо до shellcode динамічно в пам’яті буде внесено будь-які зміни (корисно для завантаження decoded shellcode). Опція **start offset** може бути корисною, щоб запускати shellcode з певного offset. Опція **Debug Shell** корисна для debug shellcode за допомогою термінала scDbg (однак, на мій погляд, для цього краще підходять будь-які з описаних вище опцій, оскільки ви зможете використовувати Ida або x64dbg).
 
 ### Disassembling using CyberChef
 
-Завантажте ваш shellcode-файл як input і використайте такий recipe для decompile його: [https://gchq.github.io/CyberChef/#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)](<https://gchq.github.io/CyberChef/index.html#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)>)
+Завантажте ваш shellcode file як input і використайте такий recipe, щоб decompile його: [https://gchq.github.io/CyberChef/#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)](<https://gchq.github.io/CyberChef/index.html#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)>)
 
 ## MBA obfuscation deobfuscation
 
-**Mixed Boolean-Arithmetic (MBA)** obfuscation приховує прості expressions, такі як `x + y`, за формулами, що змішують arithmetic (`+`, `-`, `*`) і bitwise operators (`&`, `|`, `^`, `~`, shifts). Важлива частина полягає в тому, що ці identities зазвичай коректні лише за **fixed-width modular arithmetic**, тому carries і overflows мають значення:
+**Mixed Boolean-Arithmetic (MBA)** obfuscation приховує прості вирази, такі як `x + y`, за формулами, що змішують arithmetic (`+`, `-`, `*`) і bitwise оператори (`&`, `|`, `^`, `~`, shifts). Важлива частина полягає в тому, що ці identities зазвичай правильні лише за **fixed-width modular arithmetic**, тому carries і overflows мають значення:
 ```c
 (x ^ y) + 2 * (x & y) == x + y
 ```
-Якщо спростити такий тип виразу за допомогою generic algebra tooling, можна легко отримати неправильний результат, бо bit-width semantics були проігноровані.
+Якщо спростити такий тип виразу за допомогою generic algebra tooling, можна легко отримати хибний результат, бо semantics bit-width було проігноровано.
 
-### Practical workflow
+### Практичний workflow
 
-1. **Keep the original bit-width** з lifted code/IR/decompiler output (`8/16/32/64` bits).
-2. **Classify the expression** before trying to simplify it:
+1. **Зберігайте original bit-width** з lifted code/IR/decompiler output (`8/16/32/64` bits).
+2. **Класифікуйте expression** перед спробою його спростити:
 - **Linear**: weighted sums of bitwise atoms
 - **Semilinear**: linear plus constant masks such as `x & 0xFF`
 - **Polynomial**: products appear
 - **Mixed**: products and bitwise logic are interleaved, often with repeated subexpressions
-3. **Verify every candidate rewrite** with random testing or an SMT proof. If the equivalence cannot be proven, keep the original expression instead of guessing.
+3. **Перевіряйте кожен candidate rewrite** за допомогою random testing або SMT proof. If the equivalence cannot be proven, keep the original expression instead of guessing.
 
 ### CoBRA
 
@@ -263,9 +264,9 @@ cobra-cli --mba "(a^b)+(a&b)+(a&b)" --verify
 ```
 Корисні випадки:
 
-- **Linear MBA**: CoBRA оцінює вираз на Boolean inputs, виводить signature і запускає кілька методів відновлення, таких як pattern matching, ANF conversion і coefficient interpolation.
+- **Linear MBA**: CoBRA оцінює вираз на Boolean input, виводить signature і запускає кілька methods відновлення, таких як pattern matching, ANF conversion і coefficient interpolation.
 - **Semilinear MBA**: constant-masked atoms перебудовуються за допомогою bit-partitioned reconstruction, щоб masked regions залишалися correct.
-- **Polynomial/Mixed MBA**: products декомпозуються на cores, а повторювані subexpressions можна підняти в temporaries перед simplifing outer relation.
+- **Polynomial/Mixed MBA**: products розкладаються на cores, а repeated subexpressions можуть бути lifted into temporaries before simplifying the outer relation.
 
 Приклад mixed identity, яку зазвичай варто спробувати recover:
 ```c
@@ -309,34 +310,67 @@ If you are playing a **CTF, this workaround to find the flag** could be very use
 
 To find the **entry point** search the functions by `::main` like in:
 
-![](<../../images/image (1080).png>)
+![Movfuscator - Rust: To find the entry point search the functions by ::main like in](<../../images/image (1080).png>)
 
 In this case the binary was called authenticator, so it's pretty obvious that this is the interesting main function.\
 Having the **name** of the **functions** being called, search for them on the **Internet** to learn about their **inputs** and **outputs**.
 
+### Recovering Rust strings from ELF firmware
+
+In **Rust ELF** binaries, many static strings are not referenced as C-style NUL-terminated pointers. A common `rustc` layout is a **pointer/length tuple** inside **`.data.rel.ro`** pointing into the real string blob stored in **`.rodata`**:
+```text
+[8-byte little-endian pointer][8-byte little-endian length]
+```
+Це означає, що `strings` або стандартний аналіз Ghidra можуть об’єднувати суміжні strings або повністю пропускати cross-references.
+
+Швидкий workflow:
+```bash
+readelf -S <bin>
+objdump -h <bin>
+```
+1. Отримайте віртуальну адресу та розмір **`.rodata`**.
+2. Перебирайте **`.data.rel.ro`** по одному слову за раз.
+3. Розглядайте будь-яке значення всередині діапазону адрес `.rodata` як кандидат на вказівник на рядок.
+4. Розглядайте наступне слово як кандидат на довжину.
+5. Застосовуйте фільтри здорового глузду (наприклад, залишайте довжини між **4** і **100** байт).
+6. Читайте рівно `length` байтів з `.rodata` замість сканування до `0x00`.
+
+Мінімальна логіка екстрактора:
+```python
+for off in range(0, len(data_rel_ro), 8):
+ptr = u64(data_rel_ro[off:off+8])
+length = u64(data_rel_ro[off+8:off+16])
+if rodata_start <= ptr < rodata_end and 4 <= length <= 100:
+start = ptr - rodata_start
+print(rodata[start:start+length])
+```
+Це особливо корисно під час reversing firmware, тому що відновлені Rust strings часто розкривають **HTTP routes, RPC names, log messages, assertions, filenames, config keys, command handlers, and auth-related logic**.
+
+Якщо Ghidra пропускає ці strings, запустіть custom script/plugin, який застосовує ту саму heuristic і створює string data на відповідних `.rodata` offsets. Опубліковані інструменти `rust-strings` і `RustStrings.py` від Pen Test Partners — хороші приклади для адаптації ідеї до інших **word sizes, endianness, and section layouts**.
+
 ## **Delphi**
 
-For Delphi compiled binaries you can use [https://github.com/crypto2011/IDR](https://github.com/crypto2011/IDR)
+Для Delphi compiled binaries ви можете використовувати [https://github.com/crypto2011/IDR](https://github.com/crypto2011/IDR)
 
-If you have to reverse a Delphi binary I would suggest you to use the IDA plugin [https://github.com/Coldzer0/IDA-For-Delphi](https://github.com/Coldzer0/IDA-For-Delphi)
+Якщо вам потрібно reverse Delphi binary, я б порадив використовувати IDA plugin [https://github.com/Coldzer0/IDA-For-Delphi](https://github.com/Coldzer0/IDA-For-Delphi)
 
-Just press **ATL+f7** (import python plugin in IDA) and select the python plugin.
+Просто натисніть **ATL+f7** (import python plugin in IDA) і виберіть python plugin.
 
-This plugin will execute the binary and resolve function names dynamically at the start of the debugging. After starting the debugging press again the Start button (the green one or f9) and a breakpoint will hit in the beginning of the real code.
+Цей plugin виконає binary і динамічно розв'яже function names на початку debugging. Після старту debugging знову натисніть кнопку Start (зелену або f9), і breakpoint спрацює на початку real code.
 
-It is also very interesting because if you press a button in the graphic application the debugger will stop in the function executed by that bottom.
+Це також дуже цікаво, тому що якщо ви натиснете кнопку в graphic application, debugger зупиниться у function, яка виконується цією кнопкою.
 
 ## Golang
 
-If you have to reverse a Golang binary I would suggest you to use the IDA plugin [https://github.com/sibears/IDAGolangHelper](https://github.com/sibears/IDAGolangHelper)
+Якщо вам потрібно reverse Golang binary, я б порадив використовувати IDA plugin [https://github.com/sibears/IDAGolangHelper](https://github.com/sibears/IDAGolangHelper)
 
-Just press **ATL+f7** (import python plugin in IDA) and select the python plugin.
+Просто натисніть **ATL+f7** (import python plugin in IDA) і виберіть python plugin.
 
-This will resolve the names of the functions.
+Це розв'яже names функцій.
 
 ## Compiled Python
 
-In this page you can find how to get the python code from an ELF/EXE python compiled binary:
+На цій сторінці ви можете знайти, як отримати python code з ELF/EXE python compiled binary:
 
 
 {{#ref}}
@@ -345,18 +379,18 @@ In this page you can find how to get the python code from an ELF/EXE python comp
 
 ## GBA - Game Body Advance
 
-If you get the **binary** of a GBA game you can use different tools to **emulate** and **debug** it:
+Якщо у вас є **binary** гри для GBA, ви можете використовувати різні інструменти, щоб **emulate** і **debug** її:
 
-- [**no$gba**](https://problemkaputt.de/gba.htm) (_Download the debug version_) - Contains a debugger with interface
-- [**mgba** ](https://mgba.io)- Contains a CLI debugger
+- [**no$gba**](https://problemkaputt.de/gba.htm) (_Download the debug version_) - Містить debugger з interface
+- [**mgba** ](https://mgba.io)- Містить CLI debugger
 - [**gba-ghidra-loader**](https://github.com/pudii/gba-ghidra-loader) - Ghidra plugin
 - [**GhidraGBA**](https://github.com/SiD3W4y/GhidraGBA) - Ghidra plugin
 
-In [**no$gba**](https://problemkaputt.de/gba.htm), in _**Options --> Emulation Setup --> Controls**_** ** you can see how to press the Game Boy Advance **buttons**
+У [**no$gba**](https://problemkaputt.de/gba.htm), у _**Options --> Emulation Setup --> Controls**_** ** ви можете побачити, як натискати **buttons** Game Boy Advance
 
-![](<../../images/image (581).png>)
+![no$gba controls configuration showing Game Boy Advance button mappings](<../../images/image (581).png>)
 
-When pressed, each **key has a value** to identify it:
+Коли кнопку натиснуто, кожен **key має value**, щоб його ідентифікувати:
 ```
 A = 1
 B = 2
@@ -369,13 +403,13 @@ DOWN = 128
 R = 256
 L = 256
 ```
-Отже, у цьому типі програми цікавою частиною буде **те, як програма обробляє введення користувача**. За адресою **0x4000130** ви знайдете часто трапляючуся функцію: **KEYINPUT**.
+Отже, у такому типі програми цікава частина — це **те, як програма обробляє введення користувача**. За адресою **0x4000130** ви знайдете поширену функцію: **KEYINPUT**.
 
-![](<../../images/image (447).png>)
+![Ghidra view of a GBA binary referencing KEYINPUT at address 0x4000130](<../../images/image (447).png>)
 
-На попередньому зображенні ви можете побачити, що функцію викликають з **FUN_080015a8** (адреси: _0x080015fa_ та _0x080017ac_).
+На попередньому зображенні ви можете побачити, що функція викликається з **FUN_080015a8** (адреси: _0x080015fa_ та _0x080017ac_).
 
-У цій функції, після деяких init operations (без жодного значення):
+У цій функції, після деяких операцій ініціалізації (без жодного значення):
 ```c
 void FUN_080015a8(void)
 
@@ -408,7 +442,7 @@ uVar2 = DAT_030004dc;
 uVar1 = *puVar6;
 if ((uVar1 & DAT_030004da & ~uVar4) != 0) {
 ```
-Останній `if` перевіряє, чи **`uVar4`** є в **last Keys** і не є поточним ключем; це також називається відпусканням кнопки (поточний ключ зберігається в **`uVar1`**).
+Останній if перевіряє, що **`uVar4`** знаходиться в **last Keys** і не є поточним key, також це називається відпусканням кнопки (current key зберігається в **`uVar1`**).
 ```c
 if (uVar1 == 4) {
 DAT_030000d4 = 0;
@@ -436,15 +470,15 @@ FUN_08000864();
 if (uVar1 == 0x10) {
 DAT_030000d8 = DAT_030000d8 + 0x3a;
 ```
-У попередньому code ви можете побачити, що ми порівнюємо **uVar1** (місце, де знаходиться **value of the pressed button**) з деякими values:
+У попередньому code ви можете побачити, що ми порівнюємо **uVar1** (місце, де знаходиться **value of the pressed button**) з деякими значеннями:
 
-- Спочатку його порівнюють із **value 4** (**SELECT** button): У challenge ця button очищає screen
-- Потім його порівнюють із **value 8** (**START** button): У challenge це перевіряє, чи code є valid, щоб отримати flag.
-- У цьому case var **`DAT_030000d8`** порівнюється з 0xf3, і якщо value та сама, виконується some code.
-- В any other cases перевіряється some cont (`DAT_030000d4`). Це cont, тому що після входу в code до нього одразу додається 1.\
-**Я**кщо менше ніж 8, виконується some thing, що involves **adding** values до **`DAT_030000d8`** (basically it додає values натиснутих keys у цю variable, поки cont менший за 8).
+- Спочатку його порівнюють зі **значенням 4** (**SELECT** button): У challenge ця button очищає screen
+- Потім його порівнюють зі **значенням 8** (**START** button): У challenge це перевіряє, чи code є valid, щоб отримати flag.
+- У цьому випадку var **`DAT_030000d8`** порівнюється з 0xf3, і якщо value те саме, виконується some code.
+- В усіх інших cases перевіряється some cont (`DAT_030000d4`). Це cont, тому що воно додає 1 одразу після входу в code.\
+**Я**кщо менше ніж 8, виконується щось, що involves **додавання** values до **`DAT_030000d8`** (basically, до this variable додаються values of the keys pressed, поки cont менший за 8).
 
-So, у цьому challenge, знаючи values buttons, потрібно було **press a combination with a length smaller than 8 that the resulting addition is 0xf3.**
+Отже, у цьому challenge, знаючи values of the buttons, вам потрібно було **натиснути combination з length менше 8, щоб resulting addition була 0xf3.**
 
 **Reference for this tutorial:** [**https://exp.codes/Nostalgia/**](https://exp.codes/Nostalgia/)
 
@@ -464,5 +498,8 @@ https://www.youtube.com/watch?v=VVbRe7wr3G4
 
 - [Simplifying MBA obfuscation with CoBRA](https://blog.trailofbits.com/2026/04/03/simplifying-mba-obfuscation-with-cobra/)
 - [Trail of Bits CoBRA repository](https://github.com/trailofbits/CoBRA)
+- [Decoding Rust strings - Pen Test Partners](https://www.pentestpartners.com/security-blog/decoding-rust-strings/)
+- [pentestpartners/reverse-engineering - rust-strings](https://github.com/pentestpartners/reverse-engineering/blob/main/rust-strings)
+- [pentestpartners/reverse-engineering - RustStrings.py](https://github.com/pentestpartners/reverse-engineering/blob/main/RustStrings.py)
 
 {{#include ../../banners/hacktricks-training.md}}
