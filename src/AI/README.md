@@ -1,10 +1,10 @@
-# AI u Kibernetičkoj Bezbednosti
+# AI u sajberbezbednosti
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Glavni Algoritmi Mašinskog Učenja
+## Glavni algoritmi mašinskog učenja
 
-Najbolja polazna tačka za učenje o AI je razumevanje kako glavni algoritmi mašinskog učenja funkcionišu. Ovo će vam pomoći da razumete kako AI funkcioniše, kako ga koristiti i kako ga napasti:
+Najbolja početna tačka za učenje o AI-ju jeste razumevanje načina na koji rade glavni algoritmi mašinskog učenja. To će vam pomoći da razumete kako AI funkcioniše, kako da ga koristite i kako da ga napadate:
 
 
 {{#ref}}
@@ -28,56 +28,65 @@ Najbolja polazna tačka za učenje o AI je razumevanje kako glavni algoritmi ma�
 
 ### Arhitektura LLM-ova
 
-Na sledećoj stranici naći ćete osnove svakog komponente za izgradnju osnovnog LLM koristeći transformere:
+Na sledećoj stranici pronaći ćete osnove svake komponente potrebne za izgradnju osnovnog LLM-a pomoću transformers:
 
 
 {{#ref}}
 AI-llm-architecture/README.md
 {{#endref}}
 
-## AI Bezbednost
+## Bezbednost AI-ja
 
-### Okviri Rizika AI
+### Okviri za procenu AI rizika
 
-U ovom trenutku, glavna 2 okvira za procenu rizika AI sistema su OWASP ML Top 10 i Google SAIF:
+Trenutno su 2 glavna okvira za procenu rizika AI sistema OWASP ML Top 10 i Google SAIF:
 
 
 {{#ref}}
 AI-Risk-Frameworks.md
 {{#endref}}
 
-### Bezbednost AI Upita
+### Bezbednost AI promptova
 
-LLM-ovi su u poslednjim godinama doveli do eksplozije korišćenja AI, ali nisu savršeni i mogu biti prevareni zlonamernim upitima. Ovo je veoma važna tema za razumevanje kako koristiti AI bezbedno i kako ga napasti:
+LLM-ovi su doveli do ogromnog porasta upotrebe AI-ja poslednjih godina, ali nisu savršeni i mogu se prevariti adversarial promptovima. Ovo je veoma važna tema za razumevanje bezbednog korišćenja AI-ja i načina na koji se on može napasti:
 
 
 {{#ref}}
 AI-Prompts.md
 {{#endref}}
 
-### RCE AI Modela
+### RCE u AI modelima
 
-Veoma je uobičajeno da programeri i kompanije pokreću modele preuzete sa Interneta, međutim, samo učitavanje modela može biti dovoljno da se izvrši proizvoljan kod na sistemu. Ovo je veoma važna tema za razumevanje kako koristiti AI bezbedno i kako ga napasti:
+Veoma je uobičajeno da developeri i kompanije pokreću modele preuzete sa Interneta, međutim, samo učitavanje modela može biti dovoljno za izvršavanje proizvoljnog koda na sistemu. Ovo je veoma važna tema za razumevanje bezbednog korišćenja AI-ja i načina na koji se on može napasti:
 
 
 {{#ref}}
 AI-Models-RCE.md
 {{#endref}}
 
-### Protokol Konteksta AI Modela
+### AI Model Context Protocol
 
-MCP (Protokol Konteksta Modela) je protokol koji omogućava AI agent klijentima da se povežu sa spoljnim alatima i izvorima podataka na način "plug-and-play". Ovo omogućava složene radne tokove i interakcije između AI modela i spoljnih sistema:
+MCP (Model Context Protocol) je protokol koji omogućava AI agent klijentima da se povežu sa eksternim alatima i izvorima podataka na plug-and-play način. Ovo omogućava složene radne tokove i interakcije između AI modela i eksternih sistema:
 
 
 {{#ref}}
 AI-MCP-Servers.md
 {{#endref}}
 
-### AI-Pomoćno Fuzzing & Automatizovano Otkriće Ranljivosti
+### AI-Assisted Fuzzing & Automated Vulnerability Discovery
 
 
 {{#ref}}
 AI-Assisted-Fuzzing-and-Vulnerability-Discovery.md
+{{#endref}}
+
+### Web Black-Box AI Pentester botovi
+
+Agenti zasnovani na LLM-ovima mogu automatizovati dugotrajne black-box web pentesting radne tokove kada imaju podršku za observability, orkestraciju, upravljanje autentifikovanim sesijama i adversarial validaciju:
+
+
+{{#ref}}
+Web-Black-Box-AI-Pentester-Bots.md
 {{#endref}}
 
 {{#include ../banners/hacktricks-training.md}}
