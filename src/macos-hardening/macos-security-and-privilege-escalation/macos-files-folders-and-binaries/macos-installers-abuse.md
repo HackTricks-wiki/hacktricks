@@ -4,26 +4,26 @@
 
 ## Pkg Basic Information
 
-macOS **instalacioni paket** (poznat i kao `.pkg` datoteka) je format datoteke koji koristi macOS za **distribuciju softvera**. Ove datoteke su poput **kutije koja sadrži sve što je komadu softvera** potrebno da se ispravno instalira i pokrene.
+A macOS **installer package** (also known as a `.pkg` file) is a file format used by macOS to **distribute software**. These files are like a **box that contains everything a piece of software** needs to install and run correctly.
 
-Datoteka paketa je arhiva koja sadrži **hijerarhiju datoteka i direktorijuma koji će biti instalirani na ciljni** računar. Takođe može uključivati **skripte** za obavljanje zadataka pre i posle instalacije, kao što su postavljanje konfiguracionih datoteka ili čišćenje starih verzija softvera.
+The package file itself is an archive that holds a **hierarchy of files and directories that will be installed on the target** computer. It can also include **scripts** to perform tasks before and after the installation, like setting up configuration files or cleaning up old versions of the software.
 
 ### Hierarchy
 
 <figure><img src="../../../images/Pasted Graphic.png" alt="https://www.youtube.com/watch?v=iASSG0_zobQ"><figcaption></figcaption></figure>
 
-- **Distribution (xml)**: Prilagođavanja (naslov, tekst dobrodošlice…) i provere skripti/instalacije
-- **PackageInfo (xml)**: Informacije, zahtevi za instalaciju, lokacija instalacije, putevi do skripti koje treba pokrenuti
-- **Bill of materials (bom)**: Lista datoteka za instalaciju, ažuriranje ili uklanjanje sa dozvolama datoteka
-- **Payload (CPIO arhiva gzip kompresovana)**: Datoteke za instalaciju u `install-location` iz PackageInfo
-- **Scripts (CPIO arhiva gzip kompresovana)**: Pre i post instalacione skripte i drugi resursi ekstraktovani u privremeni direktorijum za izvršavanje.
+- **Distribution (xml)**: Prilagođavanja (naslov, tekst dobrodošlice…) i skript/provere instalacije
+- **PackageInfo (xml)**: Informacije, zahtevi za instalaciju, lokacija instalacije, putanje do skripti za pokretanje
+- **Bill of materials (bom)**: Lista fajlova za instalaciju, ažuriranje ili uklanjanje sa dozvolama za fajlove
+- **Payload (CPIO archive gzip compressed)**: Fajlovi za instalaciju u `install-location` iz PackageInfo
+- **Scripts (CPIO archive gzip compressed)**: Pre i post install skripte i više resursa izdvojenih u privremeni direktorijum za izvršavanje.
 
 ### Decompress
 ```bash
 # Tool to directly get the files inside a package
-pkgutil —expand "/path/to/package.pkg" "/path/to/out/dir"
+pkgutil --expand "/path/to/package.pkg" "/path/to/out/dir"
 
-# Get the files ina. more manual way
+# Get the files in a more manual way
 mkdir -p "/path/to/out/dir"
 cd "/path/to/out/dir"
 xar -xf "/path/to/package.pkg"
@@ -32,64 +32,103 @@ xar -xf "/path/to/package.pkg"
 cat Scripts | gzip -dc | cpio -i
 cpio -i < Scripts
 ```
-Da biste vizualizovali sadržaj instalatera bez ručnog dekompresovanja, možete koristiti besplatan alat [**Suspicious Package**](https://mothersruin.com/software/SuspiciousPackage/).
+Da biste vizuelizovali sadržaj instalera bez ručnog dekompresovanja, možete koristiti i besplatan alat [**Suspicious Package**](https://mothersruin.com/software/SuspiciousPackage/).
 
-## DMG Osnovne Informacije
+### Static triage shortcuts
 
-DMG datoteke, ili Apple Disk Images, su format datoteka koji koristi Apple-ov macOS za disk slike. DMG datoteka je u suštini **montabilna disk slika** (sadrži sopstveni fajl sistem) koja sadrži sirove blok podatke obično kompresovane i ponekad enkriptovane. Kada otvorite DMG datoteku, macOS **montira kao da je fizički disk**, omogućavajući vam pristup njenom sadržaju.
+Ako je cilj analiza, pokušajte da **izbegnete prvo otvaranje paketa sa `Installer.app`**. Neki paketi mogu da izvrše kod čim ih Installer otvori (na primer preko `system.run()` ili installer plug-in-ova), pa je offline ekstrakcija obično bezbednija početna tačka.
+```bash
+PKG="Suspicious.pkg"
+OUT="/tmp/pkg-audit"
+
+# Preserve Distribution, scripts, resources and nested component pkgs
+pkgutil --expand-full "$PKG" "$OUT"
+
+# Signature / policy checks
+pkgutil --check-signature "$PKG"
+spctl -a -vv -t install "$PKG"
+
+# Quick hunting: scripts, BOM contents and interesting primitives
+find "$OUT" -type f \( -name preinstall -o -name postinstall \) -print -exec head -n 1 {} \;
+find "$OUT" -type f \( -name Bom -o -name '*.bom' \) -exec lsbom -pf {} \; 2>/dev/null
+xmllint --format "$OUT/Distribution" 2>/dev/null | sed -n '1,200p'
+rg -n 'system\.(run|runOnce)|<script>|launchctl|osascript|curl|chmod 4[0-7]{3}|sudo -u |\$USER|\$HOME|/tmp/|/var/tmp/' "$OUT"
+```
+## Osnovne informacije o DMG
+
+DMG fajlovi, ili Apple Disk Images, su format fajla koji Apple-ov macOS koristi za disk slike. DMG fajl je u suštini **montabilna disk slika** (sadrži sopstveni fajl sistem) koja sadrži sirove blok podatke, obično kompresovane, a ponekad i enkriptovane. Kada otvorite DMG fajl, macOS ga **montira kao da je fizički disk**, što vam omogućava da pristupite njegovom sadržaju.
 
 > [!CAUTION]
-> Imajte na umu da **`.dmg`** instalateri podržavaju **toliko formata** da su u prošlosti neki od njih koji su sadržavali ranjivosti zloupotrebljavani za dobijanje **izvršavanja kernel koda**.
+> Imajte na umu da **`.dmg`** instaleri podržavaju **toliko mnogo formata** da su se u prošlosti neki od njih, koji su sadržali ranjivosti, zloupotrebljavali za dobijanje **kernel code execution**.
 
 ### Hijerarhija
 
 <figure><img src="../../../images/image (225).png" alt=""><figcaption></figcaption></figure>
 
-Hijerarhija DMG datoteke može biti različita u zavisnosti od sadržaja. Međutim, za aplikacione DMG-ove, obično prati ovu strukturu:
+Hijerarhija DMG fajla može biti različita u zavisnosti od sadržaja. Međutim, za application DMGs, obično prati ovu strukturu:
 
-- Gornji nivo: Ovo je koren disk slike. Često sadrži aplikaciju i moguće link ka folderu Aplikacije.
-- Aplikacija (.app): Ovo je stvarna aplikacija. U macOS-u, aplikacija je obično paket koji sadrži mnoge pojedinačne datoteke i foldere koji čine aplikaciju.
-- Link do Aplikacija: Ovo je prečica do foldera Aplikacije u macOS-u. Svrha ovoga je da vam olakša instalaciju aplikacije. Možete prevući .app datoteku na ovu prečicu da instalirate aplikaciju.
+- Top Level: Ovo je koren disk slike. Često sadrži aplikaciju i možda link ka Applications folderu.
+- Application (.app): Ovo je stvarna aplikacija. U macOS-u, aplikacija je obično paket koji sadrži mnogo pojedinačnih fajlova i foldera koji čine aplikaciju.
+- Applications Link: Ovo je prečica do Applications foldera u macOS-u. Svrha ovoga je da olakša instalaciju aplikacije. Možete prevući .app fajl na ovu prečicu da biste instalirali aplikaciju.
 
-## Privesc putem zloupotrebe pkg
+## Privesc preko pkg abuse
 
 ### Izvršavanje iz javnih direktorijuma
 
-Ako pre ili post instalacioni skript, na primer, izvršava iz **`/var/tmp/Installerutil`**, napadač bi mogao kontrolisati taj skript kako bi eskalirao privilegije svaki put kada se izvrši. Ili drugi sličan primer:
+Ako pre ili post installation script, na primer, izvršava nešto iz **`/var/tmp/Installerutil`**, a napadač može da kontroliše taj script, može da eskalira privilegije svaki put kada se on izvrši. Ili sličan primer:
 
 <figure><img src="../../../images/Pasted Graphic 5.png" alt="https://www.youtube.com/watch?v=iASSG0_zobQ"><figcaption><p><a href="https://www.youtube.com/watch?v=kCXhIYtODBg">https://www.youtube.com/watch?v=kCXhIYtODBg</a></p></figcaption></figure>
 
 ### AuthorizationExecuteWithPrivileges
 
-Ovo je [javna funkcija](https://developer.apple.com/documentation/security/1540038-authorizationexecutewithprivileg) koju će nekoliko instalatera i ažuriranja pozvati da **izvrši nešto kao root**. Ova funkcija prihvata **putanju** do **datoteke** koju treba **izvršiti** kao parametar, međutim, ako napadač može **modifikovati** ovu datoteku, moći će da **zloupotrebi** njeno izvršavanje sa root-om da **eskalira privilegije**.
+Ovo je [javna funkcija](https://developer.apple.com/documentation/security/1540038-authorizationexecutewithprivileg) koju će nekoliko instalera i updatera pozvati da bi **izvršili nešto kao root**. Ova funkcija kao parametar prihvata **path** do **fajla** koji treba **izvršiti**, međutim, ako napadač može da **modifikuje** taj fajl, moći će da **zloupotrebi** njegovo izvršavanje kao root da bi **eskalirao privilegije**.
 ```bash
-# Breakpoint in the function to check wich file is loaded
+# Breakpoint in the function to check which file is loaded
 (lldb) b AuthorizationExecuteWithPrivileges
-# You could also check FS events to find this missconfig
+# You could also check FS events to find this misconfig
 ```
-Za više informacija pogledajte ovaj govor: [https://www.youtube.com/watch?v=lTOItyjTTkw](https://www.youtube.com/watch?v=lTOItyjTTkw)
+Za više informacija pogledajte ovaj talk: [https://www.youtube.com/watch?v=lTOItyjTTkw](https://www.youtube.com/watch?v=lTOItyjTTkw)
 
-### Izvršenje montiranjem
+### Environment and shebang abuse
 
-Ako instalater piše u `/tmp/fixedname/bla/bla`, moguće je **napraviti montiranje** preko `/tmp/fixedname` bez vlasnika, tako da možete **modifikovati bilo koju datoteku tokom instalacije** kako biste zloupotrebili proces instalacije.
+Moderni PackageKit bagovi su pokazali da se installer skripte često izvršavaju kao **trusted root code** dok i dalje zadržavaju kontekst kojim upravlja napadač u blizini. Kada auditirate vendor pakete, obratite posebnu pažnju na:
 
-Primer za to je **CVE-2021-26089** koji je uspeo da **prepiše periodični skript** kako bi dobio izvršenje kao root. Za više informacija pogledajte govor: [**OBTS v4.0: "Mount(ain) of Bugs" - Csaba Fitzl**](https://www.youtube.com/watch?v=jSYPazD4VcE)
+- Shell interpreters kao što su `#!/bin/zsh` / `#!/bin/bash`
+- Pozive poput `sudo -u $USER`, `launchctl asuser`, ili bilo koju logiku koja veruje `$USER`, `$HOME`, `PATH`, `TMPDIR`, ili relativnim putanjama
+- Non-shell interpreters koji mogu učitavati user-controlled init fajlove ili biblioteke
+```bash
+pkgutil --expand-full Target.pkg /tmp/target-pkg
+find /tmp/target-pkg -type f \( -name preinstall -o -name postinstall \) -exec sh -c 'printf "\n### %s\n" "$1"; head -n 1 "$1"' sh {} \;
+rg -n '^#!/bin/(zsh|bash)|sudo -u |launchctl asuser|\$USER|\$HOME|PATH=|/usr/bin/env ' /tmp/target-pkg
+```
+Za grešku PackageKit root-okruženja iz 2024. (`~/.zshenv` / `~/.bash*` nasleđivanje tokom instalacija pokrenutih od strane korisnika), pogledaj [generic macOS privesc page](../macos-privilege-escalation.md). Ako je paket **Apple-signed**, ista greška u skripti može postati i **SIP/TCC-relevant** jer `system_installd` može nositi `com.apple.rootless.install.heritable`; vidi [the SIP page](../macos-security-protections/macos-sip.md).
 
-## pkg kao malware
+### Execution by mounting
 
-### Prazan Payload
+Ako installer upisuje u `/tmp/fixedname/bla/bla`, moguće je **napraviti mount** preko `/tmp/fixedname` sa noowners, tako da možeš **izmeniti bilo koji fajl tokom instalacije** i zloupotrebiti proces instalacije.
 
-Moguće je samo generisati **`.pkg`** datoteku sa **pre i post-instalacionim skriptama** bez stvarnog payload-a osim malware-a unutar skripti.
+Primer za ovo je **CVE-2021-26089**, koji je uspeo da **prepiše periodični skript** da bi dobio izvršavanje kao root. Za više informacija pogledaj predavanje: [**OBTS v4.0: "Mount(ain) of Bugs" - Csaba Fitzl**](https://www.youtube.com/watch?v=jSYPazD4VcE)
 
-### JS u Distribution xml
+## pkg as malware
 
-Moguće je dodati **`<script>`** tagove u **distribution xml** datoteku paketa i taj kod će se izvršiti i može **izvršiti komande** koristeći **`system.run`**:
+### Empty Payload
+
+Moguće je jednostavno generisati **`.pkg`** fajl sa **pre i post-install skriptama** bez ikakvog stvarnog payload-a osim malware-a unutar skripti.
+
+### JS in Distribution xml
+
+Moguće je dodati **`<script>`** tagove u **distribution xml** fajl paketa i taj kod će biti izvršen, a može i da **izvršava komande** koristeći **`system.run`**:
 
 <figure><img src="../../../images/image (1043).png" alt=""><figcaption></figcaption></figure>
 
+U distribution paketima ovo obično zavisi od toga da li fajl najvišeg nivoa `Distribution` omogućava eksterne skripte, na primer sa `allow-external-scripts="true"`. Zato pregled samo `preinstall` / `postinstall` nije dovoljan: sam **Distribution XML** može da sadrži `installation-check` / `volume-check` hook-ove i direktne `system.run()` / `system.runOnce()` putanje izvršavanja.
+```bash
+xmllint --format Distribution | sed -n '1,200p'
+rg -n 'allow-external-scripts|system\.(run|runOnce)|installation-check|volume-check|function ' Distribution
+```
 ### Backdoored Installer
 
-Zlonameran instalater koristeći skriptu i JS kod unutar dist.xml
+Zlonamerni installer koji koristi skriptu i JS kod unutar dist.xml
 ```bash
 # Package structure
 mkdir -p pkgroot/root/Applications/MyApp
@@ -113,7 +152,7 @@ cat > ./dist.xml <<EOF
 <?xml version="1.0" encoding="utf-8"?>
 <installer-gui-script minSpecVersion="1">
 <title>Malicious Installer</title>
-<options customize="allow" require-scripts="false"/>
+<options allow-external-scripts="true" customize="allow" require-scripts="true"/>
 <script>
 <![CDATA[
 function installationCheck() {
@@ -147,14 +186,16 @@ system.run("/path/to/postinstall");
 </installer-gui-script>
 EOF
 
-# Buil final
+# Build final
 productbuild --distribution dist.xml --package-path myapp.pkg final-installer.pkg
 ```
 ## Reference
 
-- [**DEF CON 27 - Raspakovanje paketa: Pogled unutar macOS instalacionih paketa i uobičajene sigurnosne slabosti**](https://www.youtube.com/watch?v=iASSG0_zobQ)
-- [**OBTS v4.0: "Divlji svet macOS instalacija" - Tony Lambert**](https://www.youtube.com/watch?v=Eow5uNHtmIg)
-- [**DEF CON 27 - Raspakovanje paketa: Pogled unutar macOS instalacionih paketa**](https://www.youtube.com/watch?v=kCXhIYtODBg)
+- [**DEF CON 27 - Unpacking Pkgs A Look Inside Macos Installer Packages And Common Security Flaws**](https://www.youtube.com/watch?v=iASSG0_zobQ)
+- [**OBTS v4.0: "The Wild World of macOS Installers" - Tony Lambert**](https://www.youtube.com/watch?v=Eow5uNHtmIg)
+- [**DEF CON 27 - Unpacking Pkgs A Look Inside MacOS Installer Packages**](https://www.youtube.com/watch?v=kCXhIYtODBg)
 - [https://redteamrecipe.com/macos-red-teaming?utm_source=pocket_shared#heading-exploiting-installer-packages](https://redteamrecipe.com/macos-red-teaming?utm_source=pocket_shared#heading-exploiting-installer-packages)
+- [**CVE-2024-27822: macOS PackageKit Privilege Escalation**](https://khronokernel.com/macos/2024/06/03/CVE-2024-27822.html)
+- [**Breaking SIP with Apple-signed Packages**](https://www.l3harris.com/newsroom/editorial/2024/03/breaking-sip-apple-signed-packages)
 
 {{#include ../../../banners/hacktricks-training.md}}
