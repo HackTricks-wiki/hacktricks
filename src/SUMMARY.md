@@ -506,6 +506,7 @@
   - [Joomla](network-services-pentesting/pentesting-web/joomla.md)
   - [JSP](network-services-pentesting/pentesting-web/jsp.md)
   - [Laravel](network-services-pentesting/pentesting-web/laravel.md)
+  - [MeshCentral](network-services-pentesting/pentesting-web/meshcentral.md)
   - [Microsoft Sharepoint](network-services-pentesting/pentesting-web/microsoft-sharepoint.md)
   - [Moodle](network-services-pentesting/pentesting-web/moodle.md)
   - [NextJS](network-services-pentesting/pentesting-web/nextjs.md)
@@ -943,6 +944,7 @@
 # 🤖 AI
 - [AI Security](AI/README.md)
   - [Ai Assisted Fuzzing And Vulnerability Discovery](AI/AI-Assisted-Fuzzing-and-Vulnerability-Discovery.md)
+  - [Web Black-Box AI Pentester Bots](AI/Web-Black-Box-AI-Pentester-Bots.md)
   - [AI Security Methodology](AI/AI-Deep-Learning.md)
   - [Burp MCP: LLM-assisted traffic review](AI/AI-Burp-MCP.md)
   - [AI MCP Security](AI/AI-MCP-Servers.md)

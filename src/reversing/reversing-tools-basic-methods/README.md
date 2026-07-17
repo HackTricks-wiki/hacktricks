@@ -335,6 +335,45 @@ To find the **entry point** search the functions by `::main` like in:
 In this case the binary was called authenticator, so it's pretty obvious that this is the interesting main function.\
 Having the **name** of the **functions** being called, search for them on the **Internet** to learn about their **inputs** and **outputs**.
 
+### Recovering Rust strings from ELF firmware
+
+In **Rust ELF** binaries, many static strings are not referenced as C-style NUL-terminated pointers. A common `rustc` layout is a **pointer/length tuple** inside **`.data.rel.ro`** pointing into the real string blob stored in **`.rodata`**:
+
+```text
+[8-byte little-endian pointer][8-byte little-endian length]
+```
+
+This means `strings` or default Ghidra analysis may merge adjacent strings or miss cross-references entirely.
+
+Quick workflow:
+
+```bash
+readelf -S <bin>
+objdump -h <bin>
+```
+
+1. Get the virtual address and size of **`.rodata`**.
+2. Enumerate **`.data.rel.ro`** one word at a time.
+3. Treat any value inside the `.rodata` address range as a candidate string pointer.
+4. Treat the next word as the candidate length.
+5. Apply sanity filters (for example, keep lengths between **4** and **100** bytes).
+6. Read exactly `length` bytes from `.rodata` instead of scanning until `0x00`.
+
+Minimal extractor logic:
+
+```python
+for off in range(0, len(data_rel_ro), 8):
+    ptr = u64(data_rel_ro[off:off+8])
+    length = u64(data_rel_ro[off+8:off+16])
+    if rodata_start <= ptr < rodata_end and 4 <= length <= 100:
+        start = ptr - rodata_start
+        print(rodata[start:start+length])
+```
+
+This is especially useful in firmware reversing because recovered Rust strings often reveal **HTTP routes, RPC names, log messages, assertions, filenames, config keys, command handlers, and auth-related logic**.
+
+If Ghidra misses those strings, run a custom script/plugin that applies the same heuristic and creates string data at the referenced `.rodata` offsets. The published `rust-strings` and `RustStrings.py` tools from Pen Test Partners are good references for adapting the idea to other **word sizes, endianness, and section layouts**.
+
 ## **Delphi**
 
 For Delphi compiled binaries you can use [https://github.com/crypto2011/IDR](https://github.com/crypto2011/IDR)
@@ -493,5 +532,8 @@ https://www.youtube.com/watch?v=VVbRe7wr3G4
 
 - [Simplifying MBA obfuscation with CoBRA](https://blog.trailofbits.com/2026/04/03/simplifying-mba-obfuscation-with-cobra/)
 - [Trail of Bits CoBRA repository](https://github.com/trailofbits/CoBRA)
+- [Decoding Rust strings - Pen Test Partners](https://www.pentestpartners.com/security-blog/decoding-rust-strings/)
+- [pentestpartners/reverse-engineering - rust-strings](https://github.com/pentestpartners/reverse-engineering/blob/main/rust-strings)
+- [pentestpartners/reverse-engineering - RustStrings.py](https://github.com/pentestpartners/reverse-engineering/blob/main/RustStrings.py)
 
 {{#include ../../banners/hacktricks-training.md}}
