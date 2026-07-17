@@ -1,113 +1,113 @@
-# AI リスク
+# AI Risks
 
 {{#include ../banners/hacktricks-training.md}}
 
 ## OWASP Top 10 Machine Learning Vulnerabilities
 
-OwaspはAIシステムに影響を与えるトップ10の機械学習脆弱性を特定しています。これらの脆弱性は、data poisoning、model inversion、adversarial attacksなど、さまざまなセキュリティ問題を引き起こす可能性があります。これらを理解することは安全なAIシステム構築に不可欠です。
+Owaspは、AI systemsに影響を与える可能性のあるmachine learning vulnerabilitiesのtop 10を特定しています。これらのvulnerabilitiesは、data poisoning、model inversion、adversarial attacksなど、さまざまなsecurity issuesにつながる可能性があります。安全なAI systemsを構築するには、これらのvulnerabilitiesを理解することが重要です。
 
-最新かつ詳細なトップ10の一覧については、[OWASP Top 10 Machine Learning Vulnerabilities](https://owasp.org/www-project-machine-learning-security-top-10/) プロジェクトを参照してください。
+machine learning vulnerabilitiesのtop 10について、最新かつ詳細な一覧は、[OWASP Top 10 Machine Learning Vulnerabilities](https://owasp.org/www-project-machine-learning-security-top-10/) projectを参照してください。
 
-- **Input Manipulation Attack**: 攻撃者が受信データに微小でしばしば目に見えない変更を加え、モデルに誤った判断をさせます。\
-*例*: 停止標識に少量の塗料を付けるだけで、自動運転車がそれを速度制限標識と「認識」してしまう。
+- **Input Manipulation Attack**: 攻撃者は**incoming data**にごく小さな、しばしば目に見えない変更を加え、modelに誤った判断をさせます。\
+*Example*: stop signに付着した少数の塗料の斑点によって、自動運転車がそれをspeed-limit signだと「認識」してしまいます。
 
-- **Data Poisoning Attack**: **training set** が意図的に不正なサンプルで汚染され、モデルに有害な規則を学習させます。\
-*例*: マルウェアのバイナリがアンチウイルスの学習コーパスで「benign」と誤ラベルされることで、類似のマルウェアがその後見逃される。
+- **Data Poisoning Attack**: **training set**に悪意のあるサンプルを意図的に混入し、modelに有害なルールを学習させます。\
+*Example*: antivirus training corpus内のmalware binariesを「benign」と誤ってlabel付けし、後に類似したmalwareをすり抜けさせます。
 
-- **Model Inversion Attack**: 出力を探ることで、攻撃者が元の入力の機微な特徴を再構築する**reverse model**を構築します。\
-*例*: 癌検出モデルの予測から患者のMRI画像を再現する。
+- **Model Inversion Attack**: 出力をprobeすることで、攻撃者は**reverse model**を構築し、元のinputsに含まれるsensitive featuresを再構成します。\
+*Example*: cancer-detection modelのpredictionsから、患者のMRI imageを再作成します。
 
-- **Membership Inference Attack**: 攻撃者は信頼度の差を見分けることで、**specific record** が学習に使われたかを判定します。\
-*例*: ある人物の銀行取引が不正検知モデルの学習データに含まれていることを確認する。
+- **Membership Inference Attack**: adversaryはconfidenceの違いを見つけることで、**specific record**がtraining中に使用されたかどうかを検証します。\
+*Example*: ある人物のbank transactionがfraud-detection modelのtraining dataに含まれていることを確認します。
 
-- **Model Theft**: 繰り返しクエリを行うことで、攻撃者は意思決定境界を学び、**clone the model's behavior**（および知的財産）を複製します。\
-*例*: ML-as-a-Service APIから十分なQ&Aペアを収集して、ほぼ同等のローカルモデルを作る。
+- **Model Theft**: 繰り返しqueryすることで、攻撃者はdecision boundariesを学習し、**model's behavior**（およびIP）をcloneできます。\
+*Example*: ML-as-a-Service APIから十分なQ&A pairsを収集し、ほぼ同等のlocal modelを構築します。
 
-- **AI Supply‑Chain Attack**: **ML pipeline** 内の任意のコンポーネント（データ、ライブラリ、pre‑trained weights、CI/CD）を侵害して下流のモデルを汚染します。\
-*例*: model-hub上の汚染された依存が多数のアプリにバックドア入りの感情分析モデルを配布する。
+- **AI Supply-Chain Attack**: **ML pipeline**内の任意のcomponent（data、libraries、pre-trained weights、CI/CD）をcompromiseし、下流のmodelsを破壊します。\
+*Example*: model-hub上のpoisoned dependencyがbackdoored sentiment-analysis modelをinstallし、多数のappsに展開します。
 
-- **Transfer Learning Attack**: 悪意あるロジックが**pre‑trained model**に植え付けられ、被害者のタスクへのfine‑tuning後も残存します。\
-*例*: 隠れたトリガーを持つvision backboneが医用画像用に適応された後でもラベルを反転させる。
+- **Transfer Learning Attack**: **pre-trained model**に悪意のあるlogicを仕込み、victimのtaskでfine-tuningした後も存続させます。\
+*Example*: hidden triggerを持つvision backboneが、medical imaging向けにadaptされた後もlabelsを反転させます。
 
-- **Model Skewing**: 微妙に偏った、または誤ラベルされたデータがモデルの出力を**shifts the model's outputs** し、攻撃者の意図を有利にします。\
-*例*: 「クリーンな」spamメールをhamとして注入し、将来の類似スパムをフィルタが通すようにする。
+- **Model Skewing**: 微妙にbiasedまたはmislabeledなdataによって、**model's outputs**を攻撃者のagendaに有利な方向へ移動させます。\
+*Example*: 「clean」なspam emailsをhamとしてlabel付けして注入し、spam filterが今後の類似emailsを通過させるようにします。
 
-- **Output Integrity Attack**: 攻撃者がモデル自体ではなく**alters model predictions in transit**して下流システムを騙します。\
-*例*: ファイル隔離処理の前にマルウェア分類器の「malicious」判定を「benign」に書き換える。
+- **Output Integrity Attack**: 攻撃者はmodel自体ではなく、**model predictions in transit**を変更して、downstream systemsを欺きます。\
+*Example*: file-quarantine stageが確認する前に、malware classifierの「malicious」判定を「benign」に反転させます。
 
-- **Model Poisoning** --- 書き込み権を獲得した後などに、**model parameters** 自体に直接的・ターゲットを絞った変更を加え、挙動を変えます。\
-*例*: 本番の不正検知モデルの重みを調整して特定のカードからの取引だけ常に承認されるようにする。
+- **Model Poisoning** --- 多くの場合write accessを取得した後、**model parameters**自体に直接かつtargetedな変更を加え、behaviorを変更します。\
+*Example*: production環境のfraud-detection modelのweightsを調整し、特定のcardsからのtransactionsが常に承認されるようにします。
 
 
 ## Google SAIF Risks
 
-Googleの [SAIF (Security AI Framework)](https://saif.google/secure-ai-framework/risks) は、AIシステムに関連するさまざまなリスクを概説しています:
+Googleの[SAIF (Security AI Framework)](https://saif.google/secure-ai-framework/risks)は、AI systemsに関連するさまざまなrisksを概説しています。
 
-- **Data Poisoning**: 悪意ある者がtraining/tuningデータを改ざん・注入し、精度劣化、バックドア埋め込み、結果の偏りを引き起こし、data-lifecycle全体でモデルの整合性を損ないます。
+- **Data Poisoning**: 悪意のあるactorsがtraining/tuning dataを変更または注入し、accuracyを低下させ、backdoorsを埋め込み、またはresultsを歪めます。これにより、data-lifecycle全体にわたってmodel integrityが損なわれます。
 
-- **Unauthorized Training Data**: 著作権や機密性のある、または許可されていないデータセットを取り込むと、法的・倫理的・性能上の責任が生じ、モデルが使用を許されていないデータから学習してしまいます。
+- **Unauthorized Training Data**: copyrighted、sensitive、または許可されていないdatasetsを取り込むと、modelが使用を許可されていないdataから学習するため、legal、ethical、performance上のliabilitiesが生じます。
 
-- **Model Source Tampering**: 供給連鎖や内部者によるモデルコード、依存関係、weightsの改竄は、訓練前後を問わず隠れたロジックを埋め込む可能性があります。
+- **Model Source Tampering**: training前またはtraining中にmodel code、dependencies、またはweightsをsupply-chainまたはinsiderが操作すると、retraining後も存続するhidden logicを埋め込む可能性があります。
 
-- **Excessive Data Handling**: データ保持やガバナンスの弱さにより、必要以上の個人データが保存・処理され、露出やコンプライアンスリスクが高まります。
+- **Excessive Data Handling**: data-retentionおよびgovernance controlsが弱いと、systemsが必要以上のpersonal dataを保存または処理し、exposureおよびcompliance riskが高まります。
 
-- **Model Exfiltration**: 攻撃者がモデルファイル／weightsを盗むことで知的財産の喪失や模倣サービス、追随攻撃を許します。
+- **Model Exfiltration**: 攻撃者がmodel files/weightsを盗み、intellectual propertyの損失を引き起こすとともに、copy-cat servicesや後続のattacksを可能にします。
 
-- **Model Deployment Tampering**: 攻撃者がモデルアーティファクトやservingインフラを改変し、実行中のモデルが検証済みのバージョンと異なり、挙動が変わる可能性があります。
+- **Model Deployment Tampering**: adversariesがmodel artifactsまたはserving infrastructureを変更し、実行中のmodelを検証済みversionと異なるものにします。これによりbehaviorが変化する可能性があります。
 
-- **Denial of ML Service**: APIへの洪水や“sponge”入力によりcompute/energyを枯渇させ、モデルをオフラインにすることができます（従来のDoS攻撃に類似）。
+- **Denial of ML Service**: APIsをfloodしたり「sponge」inputsを送信したりしてcompute/energyを枯渇させ、modelをofflineにします。これは従来のDoS attacksに類似しています。
 
-- **Model Reverse Engineering**: 大量の入出力ペアを収集することで、攻撃者はモデルを複製または蒸留し、模倣製品やカスタマイズされた敵対的攻撃を助長します。
+- **Model Reverse Engineering**: 大量のinput-output pairsを収集することで、攻撃者はmodelをcloneまたはdistilし、imitation productsやcustomized adversarial attacksに利用します。
 
-- **Insecure Integrated Component**: 脆弱なプラグイン、エージェント、上流サービスが攻撃者にコード注入や権限昇格の足掛かりを与えます。
+- **Insecure Integrated Component**: vulnerableなplugins、agents、またはupstream servicesによって、攻撃者がAI pipeline内にcodeを注入したり、privilegesをescalateしたりできます。
 
-- **Prompt Injection**: プロンプト（直接的または間接的）を作成して、システムの意図を上書きする命令を密輸し、モデルに意図しない動作をさせます。
+- **Prompt Injection**: promptsを直接または間接的に細工し、system intentをoverrideするinstructionsを紛れ込ませることで、modelに意図しないcommandsを実行させます。
 
-- **Model Evasion**: 綿密に設計された入力がモデルを誤分類させたり、hallucinateさせたり、許可されていない出力をさせ、安全性と信頼を損ないます。
+- **Model Evasion**: carefully designed inputsによってmodelにmis-classify、hallucinate、またはdisallowed contentの出力をさせ、安全性とtrustを損ないます。
 
-- **Sensitive Data Disclosure**: モデルが学習データやユーザコンテキストからプライベートまたは機密情報を漏洩し、プライバシーや規制に違反します。
+- **Sensitive Data Disclosure**: modelがtraining dataまたはuser contextからprivateまたはconfidential informationを明らかにし、privacyおよびregulationsに違反します。
 
-- **Inferred Sensitive Data**: モデルが提供されていない個人属性を推定し、推論による新たなプライバシー被害を生み出します。
+- **Inferred Sensitive Data**: modelが提供されていないpersonal attributesを推測し、inferenceを通じて新たなprivacy harmsを生み出します。
 
-- **Insecure Model Output**: 消毒されていない応答が有害なコード、誤情報、不適切なコンテンツをユーザーや下流システムに渡します。
+- **Insecure Model Output**: unsanitized responsesがharmful code、misinformation、またはinappropriate contentをusersやdownstream systemsに渡します。
 
-- **Rogue Actions**: 自律的に統合されたエージェントが、十分なユーザ監視なしに意図しない実世界の操作（ファイル書き込み、APIコール、購入など）を実行します。
+- **Rogue Actions**: 自律的にintegrateされたagentsが、十分なuser oversightなしに意図しないreal-world operations（file writes、API calls、purchasesなど）を実行します。
 
 ## Mitre AI ATLAS Matrix
 
-The [MITRE AI ATLAS Matrix](https://atlas.mitre.org/matrices/ATLAS) は、AIシステムに関連するリスクを理解し軽減するための包括的なフレームワークを提供します。これは、攻撃者がAIモデルに対して使用するさまざまな攻撃手法と戦術を分類するとともに、AIシステムを用いて異なる攻撃を実行する方法も示します。
+[MITRE AI ATLAS Matrix](https://atlas.mitre.org/matrices/ATLAS)は、AI systemsに関連するrisksを理解し、mitigateするための包括的なframeworkを提供します。adversariesがAI modelsに対して使用する可能性のあるさまざまなattack techniquesおよびtacticsを分類し、AI systemsを利用してさまざまなattacksを実行する方法も示しています。
 
 
-## LLMJacking (Token Theft & Resale of Cloud-hosted LLM Access)
+## LLMJacking（Token Theft & Cloud-hosted LLM AccessのResale）
 
-攻撃者はアクティブなセッショントークンやクラウドAPIの資格情報を盗み、無許可で有料のクラウドホスト型LLMを呼び出します。アクセスはしばしば被害者アカウントを裏で利用するreverse proxies経由で再販されます（例: "oai-reverse-proxy" の展開）。結果として金銭的損失、ポリシー外でのモデル濫用、テナントへの帰属問題が発生します。
+攻撃者はactive session tokensまたはcloud API credentialsを盗み、許可なく有料のcloud-hosted LLMsをinvokeします。Accessは、victimのaccountを前面に出すreverse proxiesを介してresellされることが多く、例として「oai-reverse-proxy」deploymentsがあります。Consequencesにはfinancial loss、policy外でのmodel misuse、victim tenantへのattributionなどが含まれます。
 
 TTPs:
-- 感染した開発者端末やブラウザからトークンを収集する；CI/CDのシークレットを盗む；leaked cookiesを買う。
-- 正規プロバイダへリクエストを転送して上流キーを隠蔽し、多数の顧客を多重化するreverse proxyを立ち上げる。
-- enterprise guardrailsやレート制限を回避するために直接base-model endpointsを悪用する。
+- 感染したdeveloper machinesまたはbrowsersからtokensをharvestし、CI/CD secretsを盗み、leaked cookiesを購入します。
+- genuine providerにrequestsをforwardするreverse proxyをstand upし、upstream keyを隠して多数のcustomersをmultiplexします。
+- enterprise guardrailsおよびrate limitsをbypassするため、direct base-model endpointsをabuseします。
 
 Mitigations:
-- トークンをdevice fingerprint、IPレンジ、client attestationにバインドする；短い有効期限を強制しMFAで更新する。
-- キーのスコープを最小限にする（ツールアクセス禁止、可能ならread-only）；異常時にローテーションする。
-- policy gatewayの背後でサーバー側で全トラフィックを終了させ、safety filters、経路ごとのクォータ、tenant isolationを強制する。
-- 異常な使用パターン（急な支出増、非典型的なリージョン、UA文字列）を監視し、疑わしいセッションを自動取り消しする。
-- 長期間有効な静的APIキーよりも、mTLSやIdPが発行した署名付きJWTを優先する。
+- tokensをdevice fingerprint、IP ranges、client attestationにbindし、short expirationsを強制してMFAでrefreshします。
+- keysのscopeを最小限にします（tool accessなし、該当する場合はread-only）。anomaly発生時にはrotateします。
+- safety filters、routeごとのquotas、tenant isolationをenforceするpolicy gatewayの背後に、すべてのtrafficをserver-sideでterminateします。
+- unusual usage patterns（突然のspend spikes、atypical regions、UA strings）をmonitorし、疑わしいsessionsをauto-revokeします。
+- long-lived static API keysよりも、IdPが発行するmTLSまたはsigned JWTsを優先します。
 
-## Self-hosted LLM推論のハードニング
+## Self-hosted LLM inference hardening
 
-機密データのためにローカルのLLMサーバを運用することは、クラウドホストAPIとは異なる攻撃面を生みます: inference/debug endpointsはプロンプトをleakする可能性があり、servingスタックは通常reverse proxyを公開し、GPUデバイスノードは大きな `ioctl()` サーフェスを提供します。オンプレのinference serviceを評価または導入する場合は、少なくとも以下の点を確認してください。
+confidential data向けにlocal LLM serverを実行すると、cloud-hosted APIsとは異なるattack surfaceが生じます。inference/debug endpointsからpromptsがleakする可能性があり、serving stackは通常reverse proxyをexposeし、GPU device nodesは大規模な`ioctl()` surfacesへのaccessを提供します。on-prem inference serviceをassessmentまたはdeployする場合は、少なくとも以下のpointsをreviewしてください。
 
-### Prompt leakage via debug and monitoring endpoints
+### Debugおよびmonitoring endpoints経由のPrompt leakage
 
-inference APIを**マルチユーザの機密サービス**として扱ってください。Debugやmonitoring経路はプロンプト内容、slot state、model metadata、内部キュー情報を露出する可能性があります。`llama.cpp` においては、`/slots` エンドポイントが特に敏感で、各スロットの状態を露出し、slot inspection/managementのためだけに存在します。
+inference APIを**multi-user sensitive service**として扱ってください。Debugまたはmonitoring routesは、prompt contents、slot state、model metadata、internal queue informationをexposeする可能性があります。`llama.cpp`では、`/slots` endpointはper-slot stateをexposeし、slot inspection/managementのみを目的としているため、特にsensitiveです。
 
-- Put a reverse proxy in front of the inference server and **deny by default**.
-- Only allowlist the exact HTTP method + path combinations that are needed by the client/UI.
-- Disable introspection endpoints in the backend itself whenever possible, for example `llama-server --no-slots`.
-- Bind the reverse proxy to `127.0.0.1` and expose it through an authenticated transport such as SSH local port forwarding instead of publishing it on the LAN.
+- inference serverの前段にreverse proxyを配置し、**deny by default**にします。
+- client/UIに必要なexactなHTTP method + path combinationsのみをallowlistします。
+- 可能な場合はbackend自体のintrospection endpointsをdisableします。たとえば`llama-server --no-slots`を使用します。
+- reverse proxyを`127.0.0.1`にbindし、LAN上でpublishするのではなく、SSH local port forwardingなどのauthenticated transportを通じてexposeします。
 
-Example allowlist with nginx:
+nginxを使用したallowlistの例:
 ```nginx
 map "$request_method:$uri" $llm_whitelist {
 default 0;
@@ -127,9 +127,9 @@ proxy_pass http://unix:/run/llama-cpp/llama-cpp.sock:;
 }
 }
 ```
-### Rootlessコンテナ（ネットワーク無効・UNIXソケット）
+### network と UNIX sockets を使用しない Rootless containers
 
-推論デーモンがUNIXソケットでの待ち受けをサポートしている場合は、TCPよりもそちらを優先し、コンテナを**ネットワークスタックなし**で実行してください:
+inference daemon が UNIX socket での listen をサポートしている場合は、TCP よりもそちらを優先し、**network stack なし**で container を実行します：
 ```bash
 podman run --rm -d \
 --network none \
@@ -145,19 +145,19 @@ ghcr.io/ggml-org/llama.cpp:server-cuda13 \
 --no-slots
 ```
 Benefits:
-- `--network none` はインバウンド／アウトバウンドの TCP/IP 露出を排除し、rootless コンテナが通常必要とするユーザーモードのヘルパーを回避します。
-- UNIX ソケットは、最初のアクセス制御レイヤとしてソケットパスに対して POSIX の permissions/ACLs を適用できます。
-- `--userns=keep-id` と rootless Podman は、コンテナの root がホストの root ではないため、コンテナのブレイクアウト時の影響を低減します。
-- モデルを読み取り専用でマウントすることで、コンテナ内からのモデル改ざんの可能性を減らします。
+- `--network none` は inbound/outbound TCP/IP exposure を削除し、rootless containers が otherwise 必要とする user-mode helpers を回避します。
+- UNIX socket により、socket path 上の POSIX permissions/ACLs を first access-control layer として使用できます。
+- `--userns=keep-id` と rootless Podman により、container breakout の影響を軽減できます。これは、container root が host root ではないためです。
+- Read-only model mounts により、container 内部からの model tampering の可能性を低減できます。
 
 ### GPU device-node minimization
 
-GPU 対応の推論では、`/dev/nvidia*` ファイルが重要なローカル攻撃対象面になります。これは大規模なドライバ側の `ioctl()` ハンドラや、共有される可能性のある GPU メモリ管理経路を露出させるためです。
+GPU-backed inference では、`/dev/nvidia*` files は、広範な driver `ioctl()` handlers と、共有される可能性のある GPU memory-management paths を公開するため、high-value local attack surfaces です。
 
-- `/dev/nvidia*` を world writable のままにしない。
-- `nvidia`、`nvidiactl`、`nvidia-uvm` を `NVreg_DeviceFileUID/GID/Mode`、udev rules、ACLs で制限し、マッピングされたコンテナの UID のみが開けるようにする。
-- ヘッドレス推論ホストでは、`nvidia_drm`、`nvidia_modeset`、`nvidia_peermem` のような不要なモジュールをブラックリスト化する。
-- 推論の起動時にランタイムが機会的に `modprobe` するのを許すのではなく、起動時に必要なモジュールだけを事前ロードする。
+- `/dev/nvidia*` を world writable のままにしないでください。
+- `NVreg_DeviceFileUID/GID/Mode`、udev rules、ACLs を使用して、`nvidia`、`nvidiactl`、`nvidia-uvm` を制限し、mapped container UID のみがそれらを open できるようにしてください。
+- headless inference hosts では、`nvidia_drm`、`nvidia_modeset`、`nvidia_peermem` などの不要な modules を blacklist してください。
+- inference startup 中に runtime が opportunistically `modprobe` できるようにするのではなく、boot 時に必要な modules のみを preload してください。
 
 Example:
 ```bash
@@ -165,18 +165,18 @@ options nvidia NVreg_DeviceFileUID=0
 options nvidia NVreg_DeviceFileGID=0
 options nvidia NVreg_DeviceFileMode=0660
 ```
-One important review point is **`/dev/nvidia-uvm`**. Even if the workload does not explicitly use `cudaMallocManaged()`, recent CUDA runtimes may still require `nvidia-uvm`. Because this device is shared and handles GPU virtual memory management, treat it as a cross-tenant data-exposure surface. If the inference backend supports it, a Vulkan backend can be an interesting trade-off because it may avoid exposing `nvidia-uvm` to the container at all.
+重要なレビュー項目の1つが **`/dev/nvidia-uvm`** です。ワークロードが明示的に `cudaMallocManaged()` を使用していない場合でも、最近の CUDA runtime では `nvidia-uvm` が必要になることがあります。この device は共有され、GPU virtual memory management を担うため、cross-tenant data-exposure surface として扱ってください。inference backend が対応している場合、Vulkan backend は興味深いトレードオフになる可能性があります。これは、container に `nvidia-uvm` を公開する必要自体を回避できる場合があるためです。
 
-### LSM confinement for inference workers
+### inference worker の LSM confinement
 
-AppArmor/SELinux/seccomp should be used as defense in depth around the inference process:
+inference process の周囲では、defense in depth として AppArmor/SELinux/seccomp を使用してください。
 
-- Allow only the shared libraries, model paths, socket directory, and GPU device nodes that are actually required.
-- Explicitly deny high-risk capabilities such as `sys_admin`, `sys_module`, `sys_rawio`, and `sys_ptrace`.
-- Keep the model directory read-only and scope writable paths to the runtime socket/cache directories only.
-- Monitor denial logs because they provide useful detection telemetry when the model server or a post-exploitation payload tries to escape its expected behaviour.
+- 実際に必要な shared library、model path、socket directory、GPU device node のみを許可します。
+- `sys_admin`、`sys_module`、`sys_rawio`、`sys_ptrace` などの high-risk capability を明示的に拒否します。
+- model directory は read-only のままにし、書き込み可能な path は runtime socket/cache directory のみに限定します。
+- denial log を監視します。model server または post-exploitation payload が想定された挙動から escape しようとした際に、有用な detection telemetry が得られるためです。
 
-Example AppArmor rules for a GPU-backed worker:
+GPU-backed worker 用の AppArmor rule の例:
 ```text
 deny capability sys_admin,
 deny capability sys_module,
@@ -189,7 +189,50 @@ deny capability sys_ptrace,
 /var/lib/models/** r,
 owner /srv/llm/** rw,
 ```
-## 参考文献
+## Phantom Squatting: LLMが幻覚したドメインによるAIサプライチェーン攻撃ベクトル
+
+Phantom squattingは、**slopsquattingのドメイン/URL版**です。存在しないパッケージ名を幻覚する代わりに、LLMは実在するブランドのもっともらしい**ポータル、API、webhook、請求、SSO、download、support用ドメイン**を幻覚し、人間やagentが使用する前に攻撃者がそのnamespaceを登録します。
+
+これは、多くのAI支援ワークフローでモデルの出力が**信頼された依存関係**として扱われるため重要です。
+- 開発者が提案されたendpointをコードやCI/CD integrationsに貼り付ける。
+- AI agentsがdocumentation、schemas、APK、ZIP、webhook targetsを自動的に取得する。
+- 生成されたrunbooksやdocsに、偽のURLが権威あるものとして埋め込まれる可能性がある。
+
+### Offensive workflow
+
+1. **幻覚面をプローブする**: `admin`、`billing`、`sandbox`、`benefits`、`api`、`download`、`support`、`webhook`、`mobile app`ポータルなど、現実的なworkflowについてbrand-specificな質問を行う。
+2. **候補を正規化する**: 生成されたURLをresolveし、NXDOMAIN responsesを親のregisterable domainに集約し、prompt familiesの重複を排除する。Prompt corporaは、例えば**Jaccard similarity**によって近似重複を除外するなど、多様性を維持する。
+3. **予測可能な幻覚を優先する**:
+- **Thermal Hallucination Persistence (THP)**: `T=0.1`のような低temperatureを含め、同じ偽ドメインが複数のtemperatureで出現する。
+- **Cross-model consensus**: 複数のLLM familiesが同じ偽ドメインを生成する。
+4. **親ドメインを登録してweaponize**し、phishing、偽APK/ZIP downloads、credential harvesters、malicious docs、またはsecrets/webhook payloadsを収集するAPI endpointsをホストする。**Pure domain-level hallucinations**は、攻撃者がnamespace全体を制御できるため最もmonetizeしやすい。subdomain/path hallucinationsも、正規化された親が未登録であれば悪用できる。
+5. **zero-reputation windowを悪用する**: 新規登録されたドメインにはblocklist history、URL reputation、成熟したtelemetryが存在しないことが多く、detectionsが追いつくまでcontrolsを回避できる。攻撃者は、crawler-onlyの良性responses、redirect cloaking、CAPTCHA gates、遅延させたpayload stagingによって、このwindowを引き延ばせる。
+
+### なぜagentsにとって危険なのか
+
+人間の被害者の場合、通常、偽ドメインにはclickと追加の操作が必要です。しかし**agentic workflow**では、LLMが**lure**と**executor**の両方になり得ます。agentは幻覚されたURLを受け取り、それをfetchしてresponseをparseし、その後tokensをleakしたり、instructionsをexecuteしたり、dependencyをdownloadしたり、人間のreviewなしにCI/CDへpoisoned dataをpushしたりする可能性があります。
+
+### Practical attacker prompts
+
+高い成果が得られるpromptsは、明示的なphishing luresではなく、通常のenterprise tasksに見えるものです。
+- 「`<brand>` integrations用のpayment sandbox URLは何ですか？」
+- 「`<brand>` build notificationsには、どのwebhook endpointを使うべきですか？」
+- 「`<brand>`のemployee benefits / billing / SSO portalはどこですか？」
+- 「`<brand>`用のAndroid APKまたはdesktop clientの直接downloadを教えてください。」
+
+### Defensive inversion
+
+これはprompt-injection problemだけでなく、proactiveなdomain-monitoring problemとして扱います。
+- **brand prompt corpus**を構築し、ユーザーやagentsが依存するLLMsを定期的にprobeする。
+- 幻覚されたURLsを保存し、temperature/models間で安定しているものを追跡する。
+- **Adversarial Exploitation Window (AEW)**を追跡する。これは最初の幻覚から攻撃者による登録までの時間である。AEWがpositiveであれば、defendersはweaponizationの前にpre-register、sinkhole、またはpre-blockできる。
+- 親ドメインの**NXDOMAIN → registered**遷移をmonitorする。
+- 登録時に、registrar、creation date、nameservers、privacy shielding、page content、screenshots、parked-page status、brand-asset similarityをtriageする。
+- agents/developersが**デフォルトでLLM-generated domainsをtrustしない**ようpolicy gatesを追加する。初回使用前に、allowlists、ownership validation、CT/RDAP checks、またはhuman approvalを要求する。
+
+これは複数のAI risk bucketsに同時に該当します。**AI supply-chain attack**、**insecure model output**、そしてagentsが幻覚されたURLを自律的にconsumeする場合の**rogue actions**です。
+
+## References
 - [Unit 42 – The Risks of Code Assistant LLMs: Harmful Content, Misuse and Deception](https://unit42.paloaltonetworks.com/code-assistant-llms/)
 - [LLMJacking scheme overview – The Hacker News](https://thehackernews.com/2024/05/researchers-uncover-llmjacking-scheme.html)
 - [oai-reverse-proxy (reselling stolen LLM access)](https://gitgud.io/khanon/oai-reverse-proxy)
@@ -197,5 +240,7 @@ owner /srv/llm/** rw,
 - [llama.cpp server README](https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md)
 - [Podman quadlets: podman-systemd.unit](https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html)
 - [CNCF Container Device Interface (CDI) specification](https://github.com/cncf-tags/container-device-interface/blob/main/SPEC.md)
+- [Unit 42 – Phantom Squatting: AI-Hallucinated Domains as a Software Supply Chain Vector](https://unit42.paloaltonetworks.com/phantom-squatting-hallucinated-web-domains/)
+- [Socket – Slopsquatting: How AI Hallucinations Are Fueling a New Class of Supply Chain Attacks](https://socket.dev/blog/slopsquatting-how-ai-hallucinations-are-fueling-a-new-class-of-supply-chain-attacks)
 
 {{#include ../banners/hacktricks-training.md}}
