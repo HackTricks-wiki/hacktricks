@@ -1,0 +1,19 @@
+# Run locally:  docker compose up   (or: podman compose up)  ->  http://localhost:3337
+services:
+  hacktricks:
+    image: ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image:latest
+    platform: linux/amd64  # published image is amd64-only
+    container_name: hacktricks
+    ports:
+      - "3337:3000"
+    volumes:
+      - .:/app
+    working_dir: /app
+    environment:
+      MDBOOK_PREPROCESSOR__HACKTRICKS__ENV: dev
+    command:
+      - bash
+      - -c
+      - >
+        git config --global --add safe.directory /app &&
+        mdbook serve --hostname 0.0.0.0 --port 3000

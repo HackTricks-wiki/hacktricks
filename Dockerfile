@@ -1,8 +1,8 @@
 FROM ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image:latest
 
 # Variable de idioma (cambia "master" a "es" si lo quieres en español, etc.)
-ARG LANG=master
-ENV LANG=${LANG}
+ARG HT_LANG=master
+ENV HT_LANG=${HT_LANG}
 
 # Configuración de git y preparación
 RUN mkdir -p ~/.ssh && \
@@ -14,7 +14,7 @@ WORKDIR /app
 COPY . /app
 
 # Selecciona idioma y construye la documentación
-RUN git checkout ${LANG} && git pull
+RUN git checkout ${HT_LANG} && git pull
 
 # Exponemos el puerto que usará mdbook
 EXPOSE 3000
