@@ -2,28 +2,28 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Pkg Basic Information
+## Pkg Βασικές Πληροφορίες
 
-Ένα **πακέτο εγκατάστασης** macOS (γνωστό και ως αρχείο `.pkg`) είναι μια μορφή αρχείου που χρησιμοποιείται από το macOS για να **διανέμει λογισμικό**. Αυτά τα αρχεία είναι σαν ένα **κουτί που περιέχει τα πάντα που χρειάζεται ένα κομμάτι λογισμικού** για να εγκατασταθεί και να λειτουργήσει σωστά.
+Ένα πακέτο εγκατάστασης macOS (**installer package**) (επίσης γνωστό ως αρχείο `.pkg`) είναι μια μορφή αρχείου που χρησιμοποιείται από το macOS για να **διανέμει λογισμικό**. Αυτά τα αρχεία είναι σαν ένα **κουτί που περιέχει όλα όσα χρειάζεται ένα κομμάτι λογισμικού** για να εγκατασταθεί και να εκτελεστεί σωστά.
 
-Το αρχείο πακέτου είναι ένα αρχείο που περιέχει μια **ιεραρχία αρχείων και καταλόγων που θα εγκατασταθούν στον στόχο** υπολογιστή. Μπορεί επίσης να περιλαμβάνει **σενάρια** για την εκτέλεση εργασιών πριν και μετά την εγκατάσταση, όπως η ρύθμιση αρχείων διαμόρφωσης ή η καθαριότητα παλαιών εκδόσεων του λογισμικού.
+Το ίδιο το αρχείο package είναι ένα archive που περιέχει μια **ιεραρχία από αρχεία και directories που θα εγκατασταθούν στον στόχο** computer. Μπορεί επίσης να περιλαμβάνει **scripts** για να εκτελούν tasks πριν και μετά την εγκατάσταση, όπως το στήσιμο configuration files ή το καθάρισμα παλιών εκδόσεων του λογισμικού.
 
-### Hierarchy
+### Ιεραρχία
 
 <figure><img src="../../../images/Pasted Graphic.png" alt="https://www.youtube.com/watch?v=iASSG0_zobQ"><figcaption></figcaption></figure>
 
-- **Distribution (xml)**: Προσαρμογές (τίτλος, κείμενο καλωσορίσματος…) και έλεγχοι σεναρίων/εγκατάστασης
-- **PackageInfo (xml)**: Πληροφορίες, απαιτήσεις εγκατάστασης, τοποθεσία εγκατάστασης, διαδρομές προς σενάρια προς εκτέλεση
-- **Bill of materials (bom)**: Λίστα αρχείων προς εγκατάσταση, ενημέρωση ή αφαίρεση με δικαιώματα αρχείων
-- **Payload (CPIO archive gzip compresses)**: Αρχεία προς εγκατάσταση στην `install-location` από το PackageInfo
-- **Scripts (CPIO archive gzip compressed)**: Σενάρια προ και μετά την εγκατάσταση και περισσότερους πόρους που εξάγονται σε έναν προσωρινό κατάλογο για εκτέλεση.
+- **Distribution (xml)**: Προσαρμογές (τίτλος, κείμενο καλωσορίσματος…) και έλεγχοι script/εγκατάστασης
+- **PackageInfo (xml)**: Πληροφορίες, απαιτήσεις εγκατάστασης, τοποθεσία εγκατάστασης, paths προς scripts που θα εκτελεστούν
+- **Bill of materials (bom)**: Λίστα αρχείων προς εγκατάσταση, ενημέρωση ή αφαίρεση με permissions αρχείων
+- **Payload (CPIO archive gzip compressed)**: Αρχεία προς εγκατάσταση στο `install-location` από το PackageInfo
+- **Scripts (CPIO archive gzip compressed)**: Pre και post install scripts και περισσότεροι resources που εξάγονται σε έναν temp directory για εκτέλεση.
 
-### Decompress
+### Αποσυμπίεση
 ```bash
 # Tool to directly get the files inside a package
-pkgutil —expand "/path/to/package.pkg" "/path/to/out/dir"
+pkgutil --expand "/path/to/package.pkg" "/path/to/out/dir"
 
-# Get the files ina. more manual way
+# Get the files in a more manual way
 mkdir -p "/path/to/out/dir"
 cd "/path/to/out/dir"
 xar -xf "/path/to/package.pkg"
@@ -32,64 +32,103 @@ xar -xf "/path/to/package.pkg"
 cat Scripts | gzip -dc | cpio -i
 cpio -i < Scripts
 ```
-Για να οπτικοποιήσετε τα περιεχόμενα του εγκαταστάτη χωρίς να το αποσυμπιέσετε χειροκίνητα, μπορείτε επίσης να χρησιμοποιήσετε το δωρεάν εργαλείο [**Suspicious Package**](https://mothersruin.com/software/SuspiciousPackage/).
+Για να οπτικοποιήσεις τα περιεχόμενα του installer χωρίς να το αποσυμπιέσεις χειροκίνητα, μπορείς επίσης να χρησιμοποιήσεις το δωρεάν εργαλείο [**Suspicious Package**](https://mothersruin.com/software/SuspiciousPackage/).
 
-## Βασικές Πληροφορίες DMG
+### Static triage shortcuts
 
-Τα αρχεία DMG, ή Apple Disk Images, είναι μια μορφή αρχείου που χρησιμοποιείται από το macOS της Apple για εικόνες δίσκων. Ένα αρχείο DMG είναι ουσιαστικά μια **τοποθετήσιμη εικόνα δίσκου** (περιέχει το δικό του σύστημα αρχείων) που περιέχει ακατέργαστα δεδομένα μπλοκ που συνήθως είναι συμπιεσμένα και μερικές φορές κρυπτογραφημένα. Όταν ανοίγετε ένα αρχείο DMG, το macOS **το τοποθετεί σαν να ήταν φυσικός δίσκος**, επιτρέποντάς σας να έχετε πρόσβαση στα περιεχόμενά του.
+Αν ο στόχος είναι η ανάλυση, προσπάθησε να **αποφύγεις να ανοίξεις πρώτα το package με το `Installer.app`**. Κάποια packages μπορούν να εκτελέσουν code μόλις τα ανοίξει το Installer (για παράδειγμα μέσω `system.run()` ή installer plug-ins), οπότε η offline extraction είναι συνήθως το ασφαλέστερο σημείο εκκίνησης.
+```bash
+PKG="Suspicious.pkg"
+OUT="/tmp/pkg-audit"
+
+# Preserve Distribution, scripts, resources and nested component pkgs
+pkgutil --expand-full "$PKG" "$OUT"
+
+# Signature / policy checks
+pkgutil --check-signature "$PKG"
+spctl -a -vv -t install "$PKG"
+
+# Quick hunting: scripts, BOM contents and interesting primitives
+find "$OUT" -type f \( -name preinstall -o -name postinstall \) -print -exec head -n 1 {} \;
+find "$OUT" -type f \( -name Bom -o -name '*.bom' \) -exec lsbom -pf {} \; 2>/dev/null
+xmllint --format "$OUT/Distribution" 2>/dev/null | sed -n '1,200p'
+rg -n 'system\.(run|runOnce)|<script>|launchctl|osascript|curl|chmod 4[0-7]{3}|sudo -u |\$USER|\$HOME|/tmp/|/var/tmp/' "$OUT"
+```
+## DMG Βασικές Πληροφορίες
+
+Τα αρχεία DMG, ή Apple Disk Images, είναι μια μορφή αρχείου που χρησιμοποιείται από το Apple's macOS για disk images. Ένα αρχείο DMG είναι ουσιαστικά ένα **mountable disk image** (περιέχει το δικό του filesystem) που περιέχει raw block data, συνήθως συμπιεσμένα και μερικές φορές κρυπτογραφημένα. Όταν ανοίγεις ένα αρχείο DMG, το macOS το **mounts ως να ήταν φυσικός δίσκος**, επιτρέποντάς σου να έχεις πρόσβαση στο περιεχόμενό του.
 
 > [!CAUTION]
-> Σημειώστε ότι οι εγκαταστάτες **`.dmg`** υποστηρίζουν **τόσες πολλές μορφές** που στο παρελθόν μερικές από αυτές που περιείχαν ευπάθειες χρησιμοποιήθηκαν για να αποκτήσουν **εκτέλεση κώδικα πυρήνα**.
+> Σημείωσε ότι τα **`.dmg`** installers υποστηρίζουν **τόσες πολλές μορφές** που στο παρελθόν μερικά από αυτά που περιείχαν vulnerabilities καταχράστηκαν για να επιτευχθεί **kernel code execution**.
 
 ### Ιεραρχία
 
 <figure><img src="../../../images/image (225).png" alt=""><figcaption></figcaption></figure>
 
-Η ιεραρχία ενός αρχείου DMG μπορεί να είναι διαφορετική ανάλογα με το περιεχόμενο. Ωστόσο, για τα DMG εφαρμογών, συνήθως ακολουθεί αυτή τη δομή:
+Η ιεραρχία ενός αρχείου DMG μπορεί να διαφέρει ανάλογα με το περιεχόμενο. Ωστόσο, για application DMGs, συνήθως ακολουθεί αυτή τη δομή:
 
-- Κορυφαίο Επίπεδο: Αυτό είναι η ρίζα της εικόνας δίσκου. Συνήθως περιέχει την εφαρμογή και πιθανώς έναν σύνδεσμο στον φάκελο Εφαρμογών.
-- Εφαρμογή (.app): Αυτή είναι η πραγματική εφαρμογή. Στο macOS, μια εφαρμογή είναι συνήθως ένα πακέτο που περιέχει πολλά μεμονωμένα αρχεία και φακέλους που συνθέτουν την εφαρμογή.
-- Σύνδεσμος Εφαρμογών: Αυτός είναι ένας συντομευμένος σύνδεσμος στον φάκελο Εφαρμογών στο macOS. Ο σκοπός αυτού είναι να διευκολύνει την εγκατάσταση της εφαρμογής. Μπορείτε να σύρετε το αρχείο .app σε αυτή τη συντόμευση για να εγκαταστήσετε την εφαρμογή.
+- Top Level: Αυτό είναι το root του disk image. Συχνά περιέχει το application και πιθανώς ένα link προς τον φάκελο Applications.
+- Application (.app): Αυτή είναι η πραγματική εφαρμογή. Στο macOS, μια εφαρμογή είναι συνήθως ένα package που περιέχει πολλά μεμονωμένα αρχεία και φακέλους που αποτελούν την εφαρμογή.
+- Applications Link: Αυτό είναι ένα shortcut προς τον φάκελο Applications στο macOS. Ο σκοπός του είναι να σου διευκολύνει την εγκατάσταση της εφαρμογής. Μπορείς να σύρεις το αρχείο .app σε αυτό το shortcut για να εγκαταστήσεις την app.
 
-## Privesc μέσω κατάχρησης pkg
+## Privesc via pkg abuse
 
-### Εκτέλεση από δημόσιους καταλόγους
+### Execution from public directories
 
-Εάν ένα σενάριο προ ή μετά την εγκατάσταση εκτελείται, για παράδειγμα, από **`/var/tmp/Installerutil`**, και ο επιτιθέμενος μπορούσε να ελέγξει αυτό το σενάριο, θα μπορούσε να κλιμακώσει τα δικαιώματα όποτε εκτελείται. Ή ένα άλλο παρόμοιο παράδειγμα:
+Αν ένα pre ή post installation script εκτελείται για παράδειγμα από το **`/var/tmp/Installerutil`**, και ένας attacker μπορεί να ελέγξει αυτό το script, μπορεί να escalate privileges κάθε φορά που εκτελείται. Ή ένα παρόμοιο παράδειγμα:
 
 <figure><img src="../../../images/Pasted Graphic 5.png" alt="https://www.youtube.com/watch?v=iASSG0_zobQ"><figcaption><p><a href="https://www.youtube.com/watch?v=kCXhIYtODBg">https://www.youtube.com/watch?v=kCXhIYtODBg</a></p></figcaption></figure>
 
 ### AuthorizationExecuteWithPrivileges
 
-Αυτή είναι μια [δημόσια συνάρτηση](https://developer.apple.com/documentation/security/1540038-authorizationexecutewithprivileg) που θα καλέσουν αρκετοί εγκαταστάτες και ενημερωτές για να **εκτελέσουν κάτι ως root**. Αυτή η συνάρτηση δέχεται το **μονοπάτι** του **αρχείου** που θα **εκτελεστεί** ως παράμετρο, ωστόσο, εάν ένας επιτιθέμενος μπορούσε να **τροποποιήσει** αυτό το αρχείο, θα μπορούσε να **καταχραστεί** την εκτέλεσή του με root για να **κλιμακώσει τα δικαιώματα**.
+Αυτή είναι μια [public function](https://developer.apple.com/documentation/security/1540038-authorizationexecutewithprivileg) που αρκετοί installers και updaters θα καλέσουν για να **execute something as root**. Αυτή η function δέχεται ως παράμετρο το **path** του **file** που θα **execute**. Ωστόσο, αν ένας attacker μπορούσε να **modify** αυτό το file, θα μπορούσε να **abuse** την εκτέλεσή του με root για να **escalate privileges**.
 ```bash
-# Breakpoint in the function to check wich file is loaded
+# Breakpoint in the function to check which file is loaded
 (lldb) b AuthorizationExecuteWithPrivileges
-# You could also check FS events to find this missconfig
+# You could also check FS events to find this misconfig
 ```
-Για περισσότερες πληροφορίες, ελέγξτε αυτή την ομιλία: [https://www.youtube.com/watch?v=lTOItyjTTkw](https://www.youtube.com/watch?v=lTOItyjTTkw)
+Για περισσότερες πληροφορίες δες αυτή την ομιλία: [https://www.youtube.com/watch?v=lTOItyjTTkw](https://www.youtube.com/watch?v=lTOItyjTTkw)
 
-### Εκτέλεση μέσω προσάρτησης
+### Κατάχρηση περιβάλλοντος και shebang
 
-Εάν ένας εγκαταστάτης γράφει στο `/tmp/fixedname/bla/bla`, είναι δυνατό να **δημιουργηθεί μια προσάρτηση** πάνω από το `/tmp/fixedname` χωρίς ιδιοκτήτες, ώστε να μπορείτε να **τροποποιήσετε οποιοδήποτε αρχείο κατά τη διάρκεια της εγκατάστασης** για να εκμεταλλευτείτε τη διαδικασία εγκατάστασης.
+Τα σύγχρονα bugs του PackageKit έδειξαν ότι τα installer scripts συχνά εκτελούνται ως **trusted root code** ενώ εξακολουθούν να διατηρούν κοντά τους attacker-controlled context. Όταν κάνεις auditing σε vendor packages, δώσε ιδιαίτερη προσοχή στα:
 
-Ένα παράδειγμα αυτού είναι το **CVE-2021-26089** που κατάφερε να **επικαλύψει ένα περιοδικό σενάριο** για να αποκτήσει εκτέλεση ως root. Για περισσότερες πληροφορίες, ρίξτε μια ματιά στην ομιλία: [**OBTS v4.0: "Mount(ain) of Bugs" - Csaba Fitzl**](https://www.youtube.com/watch?v=jSYPazD4VcE)
+- Shell interpreters όπως `#!/bin/zsh` / `#!/bin/bash`
+- Κλήσεις όπως `sudo -u $USER`, `launchctl asuser`, ή οποιαδήποτε λογική που εμπιστεύεται τα `$USER`, `$HOME`, `PATH`, `TMPDIR`, ή relative paths
+- Non-shell interpreters που μπορεί να φορτώνουν user-controlled init files ή libraries
+```bash
+pkgutil --expand-full Target.pkg /tmp/target-pkg
+find /tmp/target-pkg -type f \( -name preinstall -o -name postinstall \) -exec sh -c 'printf "\n### %s\n" "$1"; head -n 1 "$1"' sh {} \;
+rg -n '^#!/bin/(zsh|bash)|sudo -u |launchctl asuser|\$USER|\$HOME|PATH=|/usr/bin/env ' /tmp/target-pkg
+```
+Για το 2024 PackageKit root-environment bug (`~/.zshenv` / `~/.bash*` inheritance during user-initiated installs), δες [the generic macOS privesc page](../macos-privilege-escalation.md). Αν το package είναι **Apple-signed**, το ίδιο script bug μπορεί να γίνει **SIP/TCC-relevant** επειδή το `system_installd` μπορεί να μεταφέρει `com.apple.rootless.install.heritable`; δες [the SIP page](../macos-security-protections/macos-sip.md).
 
-## pkg ως κακόβουλο λογισμικό
+### Execution by mounting
 
-### Κενό Payload
+Αν ένας installer γράφει στο `/tmp/fixedname/bla/bla`, είναι δυνατό να **δημιουργήσεις ένα mount** πάνω από το `/tmp/fixedname` με noowners ώστε να μπορέσεις να **τροποποιήσεις οποιοδήποτε αρχείο κατά τη διάρκεια της εγκατάστασης** για να abuse το installation process.
 
-Είναι δυνατόν να δημιουργηθεί απλά ένα **`.pkg`** αρχείο με **προ και μετά την εγκατάσταση σενάρια** χωρίς κανένα πραγματικό payload εκτός από το κακόβουλο λογισμικό μέσα στα σενάρια.
+Ένα παράδειγμα αυτού είναι το **CVE-2021-26089** που κατάφερε να **overwrite ένα periodic script** για να αποκτήσει execution ως root. Για περισσότερες πληροφορίες δες την ομιλία: [**OBTS v4.0: "Mount(ain) of Bugs" - Csaba Fitzl**](https://www.youtube.com/watch?v=jSYPazD4VcE)
 
-### JS στο Distribution xml
+## pkg as malware
 
-Είναι δυνατόν να προστεθούν **`<script>`** ετικέτες στο **distribution xml** αρχείο του πακέτου και αυτός ο κώδικας θα εκτελείται και μπορεί να **εκτελεί εντολές** χρησιμοποιώντας **`system.run`**:
+### Empty Payload
+
+Είναι δυνατό να δημιουργήσεις απλώς ένα **`.pkg`** αρχείο με **pre and post-install scripts** χωρίς κανένα πραγματικό payload πέρα από το malware μέσα στα scripts.
+
+### JS in Distribution xml
+
+Είναι δυνατό να προσθέσεις **`<script>`** tags στο **distribution xml** αρχείο του package και αυτός ο κώδικας θα εκτελεστεί και μπορεί να **εκτελέσει commands** χρησιμοποιώντας **`system.run`**:
 
 <figure><img src="../../../images/image (1043).png" alt=""><figcaption></figcaption></figure>
 
-### Εγκαταστάτης με πίσω πόρτα
+Στα distribution packages αυτό συνήθως εξαρτάται από το αν το top-level `Distribution` αρχείο ενεργοποιεί external scripts, για παράδειγμα με `allow-external-scripts="true"`. Επομένως, η εξέταση μόνο των `preinstall` / `postinstall` δεν είναι αρκετή: το **Distribution XML** από μόνο του μπορεί να περιέχει `installation-check` / `volume-check` hooks και άμεσες διαδρομές εκτέλεσης `system.run()` / `system.runOnce()`.
+```bash
+xmllint --format Distribution | sed -n '1,200p'
+rg -n 'allow-external-scripts|system\.(run|runOnce)|installation-check|volume-check|function ' Distribution
+```
+### Backdoored Installer
 
-Κακόβουλος εγκαταστάτης που χρησιμοποιεί ένα σενάριο και κώδικα JS μέσα στο dist.xml
+Κακόβουλος installer που χρησιμοποιεί ένα script και JS code μέσα στο dist.xml
 ```bash
 # Package structure
 mkdir -p pkgroot/root/Applications/MyApp
@@ -113,7 +152,7 @@ cat > ./dist.xml <<EOF
 <?xml version="1.0" encoding="utf-8"?>
 <installer-gui-script minSpecVersion="1">
 <title>Malicious Installer</title>
-<options customize="allow" require-scripts="false"/>
+<options allow-external-scripts="true" customize="allow" require-scripts="true"/>
 <script>
 <![CDATA[
 function installationCheck() {
@@ -147,14 +186,16 @@ system.run("/path/to/postinstall");
 </installer-gui-script>
 EOF
 
-# Buil final
+# Build final
 productbuild --distribution dist.xml --package-path myapp.pkg final-installer.pkg
 ```
 ## Αναφορές
 
-- [**DEF CON 27 - Αποσυμπίεση Πακέτων Μια Ματιά Μέσα στα Πακέτα Εγκατάστασης macOS και Κοινές Ασφαλιστικές Αδυναμίες**](https://www.youtube.com/watch?v=iASSG0_zobQ)
-- [**OBTS v4.0: "Ο Άγριος Κόσμος των Εγκαταστάσεων macOS" - Tony Lambert**](https://www.youtube.com/watch?v=Eow5uNHtmIg)
-- [**DEF CON 27 - Αποσυμπίεση Πακέτων Μια Ματιά Μέσα στα Πακέτα Εγκατάστασης macOS**](https://www.youtube.com/watch?v=kCXhIYtODBg)
+- [**DEF CON 27 - Unpacking Pkgs A Look Inside Macos Installer Packages And Common Security Flaws**](https://www.youtube.com/watch?v=iASSG0_zobQ)
+- [**OBTS v4.0: "The Wild World of macOS Installers" - Tony Lambert**](https://www.youtube.com/watch?v=Eow5uNHtmIg)
+- [**DEF CON 27 - Unpacking Pkgs A Look Inside MacOS Installer Packages**](https://www.youtube.com/watch?v=kCXhIYtODBg)
 - [https://redteamrecipe.com/macos-red-teaming?utm_source=pocket_shared#heading-exploiting-installer-packages](https://redteamrecipe.com/macos-red-teaming?utm_source=pocket_shared#heading-exploiting-installer-packages)
+- [**CVE-2024-27822: macOS PackageKit Privilege Escalation**](https://khronokernel.com/macos/2024/06/03/CVE-2024-27822.html)
+- [**Breaking SIP with Apple-signed Packages**](https://www.l3harris.com/newsroom/editorial/2024/03/breaking-sip-apple-signed-packages)
 
 {{#include ../../../banners/hacktricks-training.md}}
