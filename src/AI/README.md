@@ -80,4 +80,13 @@ AI-MCP-Servers.md
 AI-Assisted-Fuzzing-and-Vulnerability-Discovery.md
 {{#endref}}
 
+### Web Black-Box AI Pentester Bots
+
+LLM-powered agents can automate long-running black-box web pentesting workflows when they are supported by observability, orchestration, authenticated session handling, and adversarial validation:
+
+
+{{#ref}}
+Web-Black-Box-AI-Pentester-Bots.md
+{{#endref}}
+
 {{#include ../banners/hacktricks-training.md}}
