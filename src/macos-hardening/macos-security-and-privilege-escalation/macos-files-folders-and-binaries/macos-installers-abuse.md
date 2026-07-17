@@ -1,29 +1,29 @@
-# macOS 安装程序滥用
+# macOS 安装包滥用
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## Pkg 基本信息
 
-macOS **安装包**（也称为 `.pkg` 文件）是一种由 macOS 用于 **分发软件** 的文件格式。这些文件就像一个 **包含软件所需的一切的盒子**，以便正确安装和运行。
+macOS **installer package**（也称为 `.pkg` 文件）是一种由 macOS 用于 **分发软件** 的文件格式。这些文件就像一个 **装着软件正常安装和运行所需全部内容的盒子**。
 
-包文件本身是一个存档，包含一个 **将在目标计算机上安装的文件和目录的层次结构**。它还可以包括 **脚本**，在安装前后执行任务，例如设置配置文件或清理旧版本的软件。
+package 文件本身是一个归档，包含将被安装到目标计算机上的 **文件和目录层级结构**。它还可以包含用于在安装前后执行任务的 **scripts**，例如设置配置文件或清理旧版本软件。
 
-### 层次结构
+### 层级结构
 
 <figure><img src="../../../images/Pasted Graphic.png" alt="https://www.youtube.com/watch?v=iASSG0_zobQ"><figcaption></figcaption></figure>
 
-- **Distribution (xml)**: 自定义（标题，欢迎文本……）和脚本/安装检查
-- **PackageInfo (xml)**: 信息，安装要求，安装位置，运行脚本的路径
-- **Bill of materials (bom)**: 要安装、更新或删除的文件列表及文件权限
-- **Payload (CPIO archive gzip compresses)**: 从 PackageInfo 中在 `install-location` 安装的文件
-- **Scripts (CPIO archive gzip compressed)**: 安装前和安装后的脚本以及提取到临时目录以供执行的更多资源。
+- **Distribution (xml)**: 自定义内容（标题、欢迎文本…）以及 script/installation 检查
+- **PackageInfo (xml)**: 信息、安装要求、安装位置、要运行的 scripts 路径
+- **Bill of materials (bom)**: 要安装、更新或移除的文件列表，以及文件权限
+- **Payload (CPIO archive gzip compressed)**: 从 PackageInfo 中的 `install-location` 安装的文件
+- **Scripts (CPIO archive gzip compressed)**: 在临时目录中提取并执行的安装前后 scripts 和更多资源。
 
-### 解压缩
+### 解压
 ```bash
 # Tool to directly get the files inside a package
-pkgutil —expand "/path/to/package.pkg" "/path/to/out/dir"
+pkgutil --expand "/path/to/package.pkg" "/path/to/out/dir"
 
-# Get the files ina. more manual way
+# Get the files in a more manual way
 mkdir -p "/path/to/out/dir"
 cd "/path/to/out/dir"
 xar -xf "/path/to/package.pkg"
@@ -32,64 +32,103 @@ xar -xf "/path/to/package.pkg"
 cat Scripts | gzip -dc | cpio -i
 cpio -i < Scripts
 ```
-为了在不手动解压缩安装程序的情况下可视化其内容，您还可以使用免费的工具 [**Suspicious Package**](https://mothersruin.com/software/SuspiciousPackage/)。
+为了在不手动解压的情况下可视化安装程序的内容，你也可以使用免费工具 [**Suspicious Package**](https://mothersruin.com/software/SuspiciousPackage/)。
 
+### 静态分拣快捷方式
+
+如果目标是分析，尽量**不要先用 `Installer.app` 打开 package**。某些 package 在 Installer 打开时就可以立即执行代码（例如通过 `system.run()` 或 installer 插件），因此离线提取通常是更安全的起点。
+```bash
+PKG="Suspicious.pkg"
+OUT="/tmp/pkg-audit"
+
+# Preserve Distribution, scripts, resources and nested component pkgs
+pkgutil --expand-full "$PKG" "$OUT"
+
+# Signature / policy checks
+pkgutil --check-signature "$PKG"
+spctl -a -vv -t install "$PKG"
+
+# Quick hunting: scripts, BOM contents and interesting primitives
+find "$OUT" -type f \( -name preinstall -o -name postinstall \) -print -exec head -n 1 {} \;
+find "$OUT" -type f \( -name Bom -o -name '*.bom' \) -exec lsbom -pf {} \; 2>/dev/null
+xmllint --format "$OUT/Distribution" 2>/dev/null | sed -n '1,200p'
+rg -n 'system\.(run|runOnce)|<script>|launchctl|osascript|curl|chmod 4[0-7]{3}|sudo -u |\$USER|\$HOME|/tmp/|/var/tmp/' "$OUT"
+```
 ## DMG 基本信息
 
-DMG 文件，或称 Apple 磁盘映像，是苹果的 macOS 用于磁盘映像的文件格式。DMG 文件本质上是一个 **可挂载的磁盘映像**（它包含自己的文件系统），其中包含通常被压缩且有时被加密的原始块数据。当您打开 DMG 文件时，macOS **将其挂载为物理磁盘**，允许您访问其内容。
+DMG 文件，或 Apple Disk Images，是 Apple 的 macOS 使用的一种磁盘映像文件格式。DMG 文件本质上是一个**可挂载的磁盘映像**（它包含自己的文件系统），其中包含原始块数据，通常经过压缩，有时还会加密。打开 DMG 文件时，macOS 会**像挂载物理磁盘一样将其挂载**，从而让你访问其中的内容。
 
 > [!CAUTION]
-> 请注意，**`.dmg`** 安装程序支持 **如此多的格式**，以至于在过去，一些包含漏洞的格式被滥用以获得 **内核代码执行**。
+> 注意，**`.dmg`** 安装程序支持**非常多的格式**，因此过去其中一些存在漏洞的格式曾被滥用于获取**kernel code execution**。
 
 ### 层级结构
 
 <figure><img src="../../../images/image (225).png" alt=""><figcaption></figcaption></figure>
 
-DMG 文件的层级结构可能会根据内容而有所不同。然而，对于应用程序 DMG，它通常遵循以下结构：
+DMG 文件的层级结构会根据其内容而不同。不过，对于 application DMG，它通常遵循如下结构：
 
-- 顶层：这是磁盘映像的根。它通常包含应用程序，并可能包含指向应用程序文件夹的链接。
-- 应用程序 (.app)：这就是实际的应用程序。在 macOS 中，应用程序通常是一个包含许多单独文件和文件夹的包，这些文件和文件夹构成了该应用程序。
-- 应用程序链接：这是指向 macOS 中应用程序文件夹的快捷方式。这样做的目的是方便您安装应用程序。您可以将 .app 文件拖到此快捷方式上以安装该应用程序。
+- 顶层：这是磁盘映像的根目录。它通常包含应用程序，以及指向 Applications 文件夹的链接。
+- Application (.app)：这是真正的应用程序。在 macOS 中，application 通常是一个 package，其中包含构成该应用程序的许多单独文件和文件夹。
+- Applications Link：这是 macOS 中 Applications 文件夹的快捷方式。这样做的目的是让你更容易安装应用程序。你可以将 .app 文件拖到这个快捷方式上来安装应用。
 
-## 通过 pkg 滥用进行特权提升
+## 通过 pkg abuse 提权
 
 ### 从公共目录执行
 
-如果预安装或后安装脚本例如从 **`/var/tmp/Installerutil`** 执行，攻击者可以控制该脚本，从而在每次执行时提升特权。或者另一个类似的例子：
+如果 pre 或 post installation script 例如从 **`/var/tmp/Installerutil`** 执行，并且攻击者可以控制该脚本，那么每次它被执行时都可以提升权限。另一个类似的例子：
 
 <figure><img src="../../../images/Pasted Graphic 5.png" alt="https://www.youtube.com/watch?v=iASSG0_zobQ"><figcaption><p><a href="https://www.youtube.com/watch?v=kCXhIYtODBg">https://www.youtube.com/watch?v=kCXhIYtODBg</a></p></figcaption></figure>
 
 ### AuthorizationExecuteWithPrivileges
 
-这是一个 [公共函数](https://developer.apple.com/documentation/security/1540038-authorizationexecutewithprivileg)，多个安装程序和更新程序将调用它以 **以 root 身份执行某些操作**。此函数接受要 **执行** 的 **文件** 的 **路径** 作为参数，然而，如果攻击者能够 **修改** 此文件，他将能够 **滥用** 其以 root 身份执行以 **提升特权**。
+这是一个[公共函数](https://developer.apple.com/documentation/security/1540038-authorizationexecutewithprivileg)，多个安装程序和更新程序都会调用它来**以 root 执行某些内容**。这个函数接受要执行的**文件**的**路径**作为参数，不过，如果攻击者能够**修改**该文件，他就可以**滥用**其 root 执行来**提权**。
 ```bash
-# Breakpoint in the function to check wich file is loaded
+# Breakpoint in the function to check which file is loaded
 (lldb) b AuthorizationExecuteWithPrivileges
-# You could also check FS events to find this missconfig
+# You could also check FS events to find this misconfig
 ```
-For more info check this talk: [https://www.youtube.com/watch?v=lTOItyjTTkw](https://www.youtube.com/watch?v=lTOItyjTTkw)
+有关更多信息，请查看这个 talk: [https://www.youtube.com/watch?v=lTOItyjTTkw](https://www.youtube.com/watch?v=lTOItyjTTkw)
 
-### 执行通过挂载
+### Environment and shebang abuse
 
-如果安装程序写入 `/tmp/fixedname/bla/bla`，可以在 `/tmp/fixedname` 上 **创建一个挂载**，并且没有所有者，这样你就可以 **在安装过程中修改任何文件** 来滥用安装过程。
+现代 PackageKit bugs 表明，installer scripts 往往会作为**trusted root code** 执行，同时仍然保留 attacker-controlled context 在附近。在审计 vendor packages 时，特别要注意：
 
-一个例子是 **CVE-2021-26089**，它成功地 **覆盖了一个定期脚本** 以获得 root 权限。有关更多信息，请查看这个演讲: [**OBTS v4.0: "Mount(ain) of Bugs" - Csaba Fitzl**](https://www.youtube.com/watch?v=jSYPazD4VcE)
+- Shell interpreters，例如 `#!/bin/zsh` / `#!/bin/bash`
+- 诸如 `sudo -u $USER`、`launchctl asuser` 之类的调用，或者任何信任 `$USER`、`$HOME`、`PATH`、`TMPDIR` 或 relative paths 的逻辑
+- 可能加载 user-controlled init files 或 libraries 的 non-shell interpreters
+```bash
+pkgutil --expand-full Target.pkg /tmp/target-pkg
+find /tmp/target-pkg -type f \( -name preinstall -o -name postinstall \) -exec sh -c 'printf "\n### %s\n" "$1"; head -n 1 "$1"' sh {} \;
+rg -n '^#!/bin/(zsh|bash)|sudo -u |launchctl asuser|\$USER|\$HOME|PATH=|/usr/bin/env ' /tmp/target-pkg
+```
+对于 2024 PackageKit root-environment bug（用户发起安装期间 `~/.zshenv` / `~/.bash*` 继承），请查看 [generic macOS privesc page](../macos-privilege-escalation.md)。如果该包是 **Apple-signed**，同样的脚本 bug 可能会变成 **SIP/TCC-relevant**，因为 `system_installd` 可能携带 `com.apple.rootless.install.heritable`；参见 [SIP page](../macos-security-protections/macos-sip.md)。
 
-## pkg 作为恶意软件
+### Execution by mounting
 
-### 空载荷
+如果安装程序会写入 `/tmp/fixedname/bla/bla`，就可以在 `/tmp/fixedname` 上**创建一个 mount**，并使用 noowners，这样你就可以在安装期间**修改任意文件**，以滥用安装过程。
 
-可以仅生成一个 **`.pkg`** 文件，里面包含 **预安装和后安装脚本**，而没有任何真正的载荷，除了脚本中的恶意软件。
+一个例子是 **CVE-2021-26089**，它成功**覆盖了一个周期性脚本**，从而获得 root 执行权限。更多信息请查看演讲： [**OBTS v4.0: "Mount(ain) of Bugs" - Csaba Fitzl**](https://www.youtube.com/watch?v=jSYPazD4VcE)
 
-### 分发 xml 中的 JS
+## pkg as malware
 
-可以在包的 **分发 xml** 文件中添加 **`<script>`** 标签，这段代码将被执行，并且可以 **使用 `system.run` 执行命令**：
+### Empty Payload
+
+可以只生成一个带有**pre and post-install scripts**的 **`.pkg`** 文件，而不包含任何真实 payload，除了脚本中的 malware。
+
+### JS in Distribution xml
+
+可以在包的 **distribution xml** 文件中添加 **`<script>`** 标签，这些代码会被执行，并且可以使用 **`system.run`** 执行命令：
 
 <figure><img src="../../../images/image (1043).png" alt=""><figcaption></figcaption></figure>
 
-### 后门安装程序
+在 distribution 包中，这通常取决于顶层 `Distribution` 文件是否启用 external scripts，例如通过 `allow-external-scripts="true"`。因此，只检查 `preinstall` / `postinstall` 还不够：**Distribution XML 本身** 也可能包含 `installation-check` / `volume-check` hooks，以及直接的 `system.run()` / `system.runOnce()` 执行路径。
+```bash
+xmllint --format Distribution | sed -n '1,200p'
+rg -n 'allow-external-scripts|system\.(run|runOnce)|installation-check|volume-check|function ' Distribution
+```
+### 被植入后门的 Installer
 
-恶意安装程序使用脚本和 dist.xml 中的 JS 代码
+使用脚本和 dist.xml 内的 JS 代码的恶意 Installer
 ```bash
 # Package structure
 mkdir -p pkgroot/root/Applications/MyApp
@@ -113,7 +152,7 @@ cat > ./dist.xml <<EOF
 <?xml version="1.0" encoding="utf-8"?>
 <installer-gui-script minSpecVersion="1">
 <title>Malicious Installer</title>
-<options customize="allow" require-scripts="false"/>
+<options allow-external-scripts="true" customize="allow" require-scripts="true"/>
 <script>
 <![CDATA[
 function installationCheck() {
@@ -147,14 +186,16 @@ system.run("/path/to/postinstall");
 </installer-gui-script>
 EOF
 
-# Buil final
+# Build final
 productbuild --distribution dist.xml --package-path myapp.pkg final-installer.pkg
 ```
-## 参考文献
+## References
 
-- [**DEF CON 27 - 解包 Pkgs 深入了解 Macos 安装包及常见安全漏洞**](https://www.youtube.com/watch?v=iASSG0_zobQ)
-- [**OBTS v4.0: "macOS 安装程序的奇妙世界" - Tony Lambert**](https://www.youtube.com/watch?v=Eow5uNHtmIg)
-- [**DEF CON 27 - 解包 Pkgs 深入了解 MacOS 安装包**](https://www.youtube.com/watch?v=kCXhIYtODBg)
+- [**DEF CON 27 - Unpacking Pkgs A Look Inside Macos Installer Packages And Common Security Flaws**](https://www.youtube.com/watch?v=iASSG0_zobQ)
+- [**OBTS v4.0: "The Wild World of macOS Installers" - Tony Lambert**](https://www.youtube.com/watch?v=Eow5uNHtmIg)
+- [**DEF CON 27 - Unpacking Pkgs A Look Inside MacOS Installer Packages**](https://www.youtube.com/watch?v=kCXhIYtODBg)
 - [https://redteamrecipe.com/macos-red-teaming?utm_source=pocket_shared#heading-exploiting-installer-packages](https://redteamrecipe.com/macos-red-teaming?utm_source=pocket_shared#heading-exploiting-installer-packages)
+- [**CVE-2024-27822: macOS PackageKit Privilege Escalation**](https://khronokernel.com/macos/2024/06/03/CVE-2024-27822.html)
+- [**Breaking SIP with Apple-signed Packages**](https://www.l3harris.com/newsroom/editorial/2024/03/breaking-sip-apple-signed-packages)
 
 {{#include ../../../banners/hacktricks-training.md}}
