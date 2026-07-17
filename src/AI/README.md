@@ -1,10 +1,10 @@
-# AI katika Usalama wa Mtandao
+# AI katika Cybersecurity
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Mifumo Mikuu ya Kujifunza Mashine
+## Algoriti Kuu za Machine Learning
 
-Mahali pazuri pa kuanzia kujifunza kuhusu AI ni kuelewa jinsi mifumo mikuu ya kujifunza mashine inavyofanya kazi. Hii itakusaidia kuelewa jinsi AI inavyofanya kazi, jinsi ya kuitumia na jinsi ya kuishambulia:
+Mwanzo bora wa kujifunza kuhusu AI ni kuelewa jinsi algoriti kuu za machine learning zinavyofanya kazi. Hii itakusaidia kuelewa jinsi AI inavyofanya kazi, jinsi ya kuitumia na jinsi ya kuishambulia:
 
 
 {{#ref}}
@@ -26,9 +26,9 @@ Mahali pazuri pa kuanzia kujifunza kuhusu AI ni kuelewa jinsi mifumo mikuu ya ku
 ./AI-Deep-Learning.md
 {{#endref}}
 
-### Msingi wa LLMs
+### Usanifu wa LLMs
 
-Katika ukurasa ufuatao utapata misingi ya kila kipengele kujenga LLM ya msingi kwa kutumia transformers:
+Katika ukurasa unaofuata utapata misingi ya kila kipengele kinachohitajika kujenga LLM ya msingi kwa kutumia transformers:
 
 
 {{#ref}}
@@ -37,9 +37,9 @@ AI-llm-architecture/README.md
 
 ## Usalama wa AI
 
-### Mifumo ya Hatari za AI
+### AI Risk Frameworks
 
-Kwa sasa, mifumo 2 kuu za kutathmini hatari za mifumo ya AI ni OWASP ML Top 10 na Google SAIF:
+Kwa sasa, frameworks 2 kuu za kutathmini risks za mifumo ya AI ni OWASP ML Top 10 na Google SAIF:
 
 
 {{#ref}}
@@ -48,36 +48,45 @@ AI-Risk-Frameworks.md
 
 ### Usalama wa AI Prompts
 
-LLMs zimefanya matumizi ya AI kuongezeka katika miaka ya hivi karibuni, lakini si kamilifu na zinaweza kudanganywa na prompts za adui. Huu ni mada muhimu sana kuelewa jinsi ya kutumia AI kwa usalama na jinsi ya kuishambulia:
+LLMs zimefanya matumizi ya AI kuongezeka sana katika miaka ya hivi karibuni, lakini si kamilifu na zinaweza kudanganywa kwa adversarial prompts. Hii ni mada muhimu sana kwa kuelewa jinsi ya kutumia AI kwa usalama na jinsi ya kuishambulia:
 
 
 {{#ref}}
 AI-Prompts.md
 {{#endref}}
 
-### RCE za AI Models
+### AI Models RCE
 
-Ni kawaida kwa waendelezaji na kampuni kuendesha mifano iliyopakuliwa kutoka Mtandao, hata hivyo, kupakia mfano tu kunaweza kuwa na kutosha kutekeleza msimbo wa kawaida kwenye mfumo. Huu ni mada muhimu sana kuelewa jinsi ya kutumia AI kwa usalama na jinsi ya kuishambulia:
+Ni jambo la kawaida kwa developers na makampuni kuendesha models zilizopakuliwa kutoka kwenye Internet, hata hivyo kupakia model tu kunaweza kutosha kutekeleza arbitrary code kwenye mfumo. Hii ni mada muhimu sana kwa kuelewa jinsi ya kutumia AI kwa usalama na jinsi ya kuishambulia:
 
 
 {{#ref}}
 AI-Models-RCE.md
 {{#endref}}
 
-### Protokali ya Muktadha wa AI Model
+### AI Model Context Protocol
 
-MCP (Model Context Protocol) ni protokali inayoruhusu wateja wa wakala wa AI kuungana na zana za nje na vyanzo vya data kwa njia ya plug-and-play. Hii inaruhusu michakato na mwingiliano tata kati ya mifano ya AI na mifumo ya nje:
+MCP (Model Context Protocol) ni protocol inayowaruhusu AI agent clients kuunganishwa na external tools na data sources kwa njia ya plug-and-play. Hii huwezesha workflows changamano na interactions kati ya AI models na external systems:
 
 
 {{#ref}}
 AI-MCP-Servers.md
 {{#endref}}
 
-### Fuzzing ya AI na Ugunduzi wa Uhalifu wa Otomatiki
+### AI-Assisted Fuzzing & Automated Vulnerability Discovery
 
 
 {{#ref}}
 AI-Assisted-Fuzzing-and-Vulnerability-Discovery.md
+{{#endref}}
+
+### Web Black-Box AI Pentester Bots
+
+Agents wanaoendeshwa na LLM wanaweza ku-automate workflows za muda mrefu za black-box web pentesting wanaposaidiwa na observability, orchestration, authenticated session handling, na adversarial validation:
+
+
+{{#ref}}
+Web-Black-Box-AI-Pentester-Bots.md
 {{#endref}}
 
 {{#include ../banners/hacktricks-training.md}}
