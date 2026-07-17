@@ -1,111 +1,111 @@
-# AI Risks
+# KI-risiko's
 
 {{#include ../banners/hacktricks-training.md}}
 
 ## OWASP Top 10 Machine Learning Vulnerabilities
 
-Owasp het die Top 10 masjienleer-kwesbaarhede geïdentifiseer wat AI-stelsels kan raak. Hierdie kwesbaarhede kan lei tot verskeie veiligheidsprobleme, insluitend data poisoning, model inversion en adversarial attacks. Om hierdie kwesbaarhede te verstaan is noodsaaklik vir die bou van veilige AI-stelsels.
+Owasp het die top 10 machine learning-kwesbaarhede geïdentifiseer wat KI-stelsels kan beïnvloed. Hierdie kwesbaarhede kan tot verskeie sekuriteitskwessies lei, insluitend data poisoning, model inversion en adversarial attacks. Dit is noodsaaklik om hierdie kwesbaarhede te verstaan om veilige KI-stelsels te bou.
 
-Vir 'n bygewerkte en gedetailleerde lys van die top 10 masjienleer-kwesbaarhede, verwys na die [OWASP Top 10 Machine Learning Vulnerabilities](https://owasp.org/www-project-machine-learning-security-top-10/) project.
+Vir 'n opgedateerde en gedetailleerde lys van die top 10 machine learning-kwesbaarhede, verwys na die projek [OWASP Top 10 Machine Learning Vulnerabilities](https://owasp.org/www-project-machine-learning-security-top-10/).
 
-- **Input Manipulation Attack**: 'n Aanhanger voeg klein, dikwels onsigbare veranderinge aan **incoming data** toe sodat die model die verkeerde besluit neem.\
-*Example*: 'n Paar spatjies verf op 'n stop‑sign fool 'n self‑driving car om 'n speed‑limit sign te "sien".
+- **Input Manipulation Attack**: 'n Aanvaller voeg klein, dikwels onsigbare veranderinge aan **inkomende data** toe sodat die model die verkeerde besluit neem.\
+*Voorbeeld*: 'n Paar verfspikkels op 'n stopteken mislei 'n selfbesturende motor om 'n spoedbeperkingsteken te "sien".
 
 - **Data Poisoning Attack**: Die **training set** word doelbewus met slegte voorbeelde besoedel, wat die model skadelike reëls leer.\
-*Example*: Malware binaries word verkeerdelik as "benign" gemerk in 'n antivirus training corpus, wat soortgelyke malware later deurlaat.
+*Voorbeeld*: Malware-binaries word in 'n antivirus-training corpus verkeerdelik as "benign" gemerk, waardeur soortgelyke malware later deurglip.
 
-- **Model Inversion Attack**: Deur inoutputs te probeer, bou 'n aanvaller 'n **reverse model** wat sensitiewe kenmerke van die oorspronklike inputs rekonstrueer.\
-*Example*: Herstel van 'n pasiënt se MRI‑beeld uit 'n cancer‑detection model se voorspellings.
+- **Model Inversion Attack**: Deur uitsette te ondersoek, bou 'n aanvaller 'n **reverse model** wat sensitiewe kenmerke van die oorspronklike insette rekonstrueer.\
+*Voorbeeld*: Die herskepping van 'n pasiënt se MRI-beeld uit 'n kankeropsporingsmodel se voorspellings.
 
-- **Membership Inference Attack**: Die teenstander toets of 'n **specific record** tydens training gebruik is deur vertrouensverskille te identifiseer.\
-*Example*: Bevestig dat iemand se banktransaksie in 'n fraud‑detection model se training data voorkom.
+- **Membership Inference Attack**: Die teenstander toets of 'n **spesifieke rekord** tydens training gebruik is deur verskille in vertroue raak te sien.\
+*Voorbeeld*: Bevestiging dat 'n persoon se banktransaksie in 'n fraud detection-model se training data voorkom.
 
-- **Model Theft**: Herhaalde querying laat 'n aanvaller toe om decision boundaries te leer en **clone the model's behavior** (en IP).\
-*Example*: Insamel genoeg Q&A‑pare van 'n ML‑as‑a‑Service API om 'n na‑ekwivalente lokale model te bou.
+- **Model Theft**: Herhaalde navrae stel 'n aanvaller in staat om besluitnemingsgrense te leer en die model se **gedrag te kloon** (en sy IP).\
+*Voorbeeld*: Die insameling van genoeg Q&A-pare uit 'n ML-as-a-Service-API om 'n byna ekwivalente plaaslike model te bou.
 
-- **AI Supply‑Chain Attack**: Kompromiseer enige komponent (data, libraries, pre‑trained weights, CI/CD) in die **ML pipeline** om downstream models te korrupteer.\
-*Example*: 'n Poisoned dependency op 'n model‑hub installeer 'n backdoored sentiment‑analysis model oor baie apps.
+- **AI Supply-Chain Attack**: Enige komponent (data, libraries, pre-trained weights, CI/CD) in die **ML-pipeline** word gekompromitteer om daaropvolgende modelle te korrupteer.\
+*Voorbeeld*: 'n Besoedelde dependency op 'n model-hub installeer 'n model vir sentiment analysis met 'n backdoor in talle apps.
 
-- **Transfer Learning Attack**: Kwaadwillige logika word in 'n **pre‑trained model** geplant en oorleef fine‑tuning op die slagoffer se taak.\
-*Example*: 'n Vision backbone met 'n hidden trigger verander steeds labels nadat dit aangepas is vir medical imaging.
+- **Transfer Learning Attack**: Kwaadwillige logika word in 'n **pre-trained model** geplant en oorleef fine-tuning op die slagoffer se taak.\
+*Voorbeeld*: 'n Vision backbone met 'n versteekte trigger keer steeds labels om nadat dit vir medical imaging aangepas is.
 
-- **Model Skewing**: Subtiel bevooroordeelde of verkeerd gemerkte data **shifts the model's outputs** om die aanvaller se agenda te bevoordeel.\
-*Example*: Injekseer "clean" spam‑e‑posse gemerk as ham sodat 'n spam filter soortgelyke toekomstige e‑posse deurlaat.
+- **Model Skewing**: Subtiel bevooroordeelde of verkeerd gemerkte data **verskuif die model se uitsette** om die aanvaller se agenda te bevoordeel.\
+*Voorbeeld*: Die inspuiting van "clean" spam-e-posse wat as ham gemerk is, sodat 'n spamfilter soortgelyke toekomstige e-posse deurlaat.
 
-- **Output Integrity Attack**: Die aanvaller **alters model predictions in transit**, nie die model self nie, en bedrieg downstream stelsels.\
-*Example*: Verwissel 'n malware classifier se "malicious" verdict na "benign" voordat die file‑quarantine fase dit sien.
+- **Output Integrity Attack**: Die aanvaller **verander modelvoorspellings tydens oordrag**, nie die model self nie, en mislei sodoende downstream-stelsels.\
+*Voorbeeld*: Die omskakeling van 'n malware classifier se "malicious"-uitspraak na "benign" voordat die file-quarantine-stadium dit sien.
 
-- **Model Poisoning** --- Direkte, geteikende veranderinge aan die **model parameters** self, dikwels nadat skryf‑toegang verkry is, om gedrag te verander.\
-*Example*: Fynstel weights op 'n fraud‑detection model in produksie sodat transaksies van sekere kaarte altyd goedgekeur word.
+- **Model Poisoning** --- Direkte, geteikende veranderinge aan die **modelparameters** self, dikwels nadat skryftoegang verkry is, om gedrag te verander.\
+*Voorbeeld*: Die aanpassing van gewigte op 'n fraud detection-model in production sodat transaksies van sekere kaarte altyd goedgekeur word.
 
 
-## Google SAIF Risks
+## Google SAIF-risiko's
 
-Google se [SAIF (Security AI Framework)](https://saif.google/secure-ai-framework/risks) omskryf verskeie risiko's verbonde aan AI‑stelsels:
+Google se [SAIF (Security AI Framework)](https://saif.google/secure-ai-framework/risks) beskryf verskeie risiko's wat met KI-stelsels verband hou:
 
-- **Data Poisoning**: Kwaadwilliges verander of injekteer training/tuning data om akkuraatheid te degradeer, backdoors te implanteer, of resultate te skeef trek, wat modelintegriteit oor die hele data‑lewe‑siklus ondermyn.
+- **Data Poisoning**: Kwaadwillige rolspelers verander of voeg training/tuning-data by om akkuraatheid te verlaag, backdoors te plant of resultate te verdraai, wat modelintegriteit deur die hele data-lifecycle ondermyn.
 
-- **Unauthorized Training Data**: Insluiting van copyrighted, sensitiewe, of ongereguleerde datasets skep regsaaklike, etiese en prestasie‑verantwoordelikhede omdat die model leer van data wat dit nooit moes gebruik het nie.
+- **Unauthorized Training Data**: Die inname van kopieregbeskermde, sensitiewe of ongemagtigde datasets skep regs-, etiese en prestasie-aanspreeklikhede omdat die model uit data leer wat dit nooit toegelaat is om te gebruik nie.
 
-- **Model Source Tampering**: Supply‑chain of insider manipulasie van model code, dependencies, of weights voor of tydens training kan hidden logic inkorporeer wat selfs ná retraining bly voortbestaan.
+- **Model Source Tampering**: Supply-chain- of insider-manipulasie van modelkode, dependencies of gewigte voor of tydens training kan versteekte logika inbed wat selfs ná retraining voortduur.
 
-- **Excessive Data Handling**: Swak data‑retention en governance behelswaardes laat stelsels meer persoonlike data stoor of verwerk as nodig, wat blootstelling en compliance risiko verhoog.
+- **Excessive Data Handling**: Swak data-retention- en governance-kontroles lei daartoe dat stelsels meer persoonlike data as nodig stoor of verwerk, wat blootstelling- en compliance-risiko verhoog.
 
-- **Model Exfiltration**: Aanhangers steel model files/weights, wat verlies van intellektuele eiendom veroorsaak en copy‑cat dienste of opvolg‑aanvalle moontlik maak.
+- **Model Exfiltration**: Aanvallers steel modelfile/gewigte, wat verlies aan intellektuele eiendom veroorsaak en copy-cat-dienste of opvolgaanvalle moontlik maak.
 
-- **Model Deployment Tampering**: Teenstanders wysig model artifacts of serving infrastruktuur sodat die lopende model verskil van die geverifieerde weergawe, moontlik die gedrag verander.
+- **Model Deployment Tampering**: Teenstanders verander modelartefakte of serving-infrastructure sodat die model wat loop van die goedgekeurde weergawe verskil, wat gedrag moontlik kan verander.
 
-- **Denial of ML Service**: Oorlaai van APIs of stuur van “sponge” inputs kan compute/energie uitput en die model afneem, soortgelyk aan klassieke DoS‑aanvalle.
+- **Denial of ML Service**: Die oorstroming van APIs of die stuur van “sponge”-insette kan rekenkrag/energie uitput en die model vanlyn neem, soortgelyk aan klassieke DoS attacks.
 
-- **Model Reverse Engineering**: Deur groot hoeveelhede input‑output pare te oes, kan aanvallers die model kloon of distilleer, wat na‑bootsingsprodukte en aangepaste adversarial attacks moontlik maak.
+- **Model Reverse Engineering**: Deur groot getalle input-output-pare in te samel, kan aanvallers die model kloon of distilleer, wat nabootsingsprodukte en aangepaste adversarial attacks voed.
 
-- **Insecure Integrated Component**: Kwesbare plugins, agents, of upstream dienste laat aanvallers toe om code in te injecteer of privilegies op te skaal binne die AI‑pipeline.
+- **Insecure Integrated Component**: Kwesbare plugins, agents of upstream-dienste stel aanvallers in staat om kode in die AI-pipeline in te spuit of privileges te eskaleer.
 
-- **Prompt Injection**: Formuleer prompts (direk of indirek) om instruksies te smokkelaars wat system intent oorskryf, en die model laat onbedoelde commands uitvoer.
+- **Prompt Injection**: Die samestelling van prompts (direk of indirek) om instruksies te smokkel wat die stelsel se bedoeling oorheers, sodat die model onbedoelde commands uitvoer.
 
-- **Model Evasion**: Sorgvuldig ontwerpte inputs laat die model verkeerd klasifiseer, hallucinate, of verbode inhoud uitset, wat veiligheid en vertroue erodeer.
+- **Model Evasion**: Noukeurig ontwerpte insette veroorsaak dat die model verkeerd klassifiseer, hallusineer of disallowed content uitvoer, wat veiligheid en vertroue erodeer.
 
-- **Sensitive Data Disclosure**: Die model openbaar private of vertroulike inligting uit sy training data of gebruikerskonteks, wat privaatheid en regulasies oortree.
+- **Sensitive Data Disclosure**: Die model openbaar private of vertroulike inligting uit sy training data of user context, wat privaatheid en regulasies oortree.
 
-- **Inferred Sensitive Data**: Die model aflei persoonlike eienskappe wat nooit verskaf is nie, en so nuwe privaatheidskade deur inferensie skep.
+- **Inferred Sensitive Data**: Die model lei persoonlike eienskappe af wat nooit verskaf is nie, wat nuwe privaatheidskade deur inferensie skep.
 
-- **Insecure Model Output**: Onsiginste antwoorde lewer skadelike code, misinformation, of ongepaste inhoud aan gebruikers of downstream stelsels.
+- **Insecure Model Output**: Ongesuiwerde response stuur skadelike kode, misinformation of onvanpaste content aan users of downstream-stelsels deur.
 
-- **Rogue Actions**: Outonoom geïntegreerde agents voer onbedoelde werklike wêreld operasies uit (file writes, API calls, purchases, ens.) sonder voldoende gebruikers‑toesig.
+- **Rogue Actions**: Outomaties geïntegreerde agents voer onbedoelde werklike operasies uit (file writes, API calls, aankope, ens.) sonder voldoende user-oversight.
 
 ## Mitre AI ATLAS Matrix
 
-Die [MITRE AI ATLAS Matrix](https://atlas.mitre.org/matrices/ATLAS) bied 'n omvattende raamwerk om risiko's verbonde aan AI‑stelsels te verstaan en te versag. Dit kategoriseer verskeie aanvalstegnieke en taktieke wat teenstanders teen AI‑modelle kan gebruik en ook hoe om AI‑stelsels te gebruik om verskillende aanvalle uit te voer.
+Die [MITRE AI ATLAS Matrix](https://atlas.mitre.org/matrices/ATLAS) bied 'n omvattende raamwerk om risiko's wat met KI-stelsels verband hou, te verstaan en te versag. Dit kategoriseer verskeie attack techniques en tactics wat teenstanders teen KI-modelle kan gebruik, asook hoe om KI-stelsels te gebruik om verskillende attacks uit te voer.
 
 
 ## LLMJacking (Token Theft & Resale of Cloud-hosted LLM Access)
 
-Aanhangers steel aktiewe session tokens of cloud API credentials en roep betaalde, cloud-hosted LLMs sonder magtiging aan. Access word dikwels herverkoop via reverse proxies wat die slagoffer se rekening voorstaan, bv. "oai-reverse-proxy" deployments. Gevolge sluit in finansiële verlies, model misbruik buite beleid, en toeskrywing aan die slagoffer tenant.
+Aanvallers steel aktiewe session tokens of cloud API credentials en roep betaalde, cloud-hosted LLMs sonder toestemming aan. Toegang word dikwels deur reverse proxies herverkoop wat die slagoffer se account front, byvoorbeeld "oai-reverse-proxy"-deployments. Gevolge sluit finansiële verlies, modelmisbruik buite beleid en toeskrywing aan die slagoffer-tenant in.
 
 TTPs:
-- Harvest tokens van geïnfecteerde developer machines of browsers; steel CI/CD secrets; koop leaked cookies.
-- Stand up 'n reverse proxy wat requests na die egte provider forward, die upstream key verberg en baie customers multiplex.
-- Abuse direct base‑model endpoints om enterprise guardrails en rate limits te omseil.
+- Versamel tokens vanaf besmette developer machines of browsers; steel CI/CD-secrets; koop leaked cookies.
+- Stel 'n reverse proxy op wat requests na die egte provider aanstuur, die upstream key verberg en baie customers multiplex.
+- Misbruik direkte base-model endpoints om enterprise guardrails en rate limits te omseil.
 
 Mitigations:
-- Bind tokens aan device fingerprint, IP ranges, en client attestation; enforce short expirations en refresh met MFA.
-- Scope keys minimaal (no tool access, read‑only waar toepaslik); rotate on anomaly.
-- Terminate alle verkeer server‑side agter 'n policy gateway wat safety filters afdwing, per‑route quotas, en tenant isolation.
-- Monitor vir ongebruiklike gebruikspatrone (sudden spend spikes, atypiese regions, UA strings) en auto‑revoke suspicious sessions.
-- Prefer mTLS of signed JWTs uitgereik deur jou IdP bo long‑lived static API keys.
+- Bind tokens aan device fingerprint, IP-ranges en client attestation; dwing kort vervaldatums af en refresh met MFA.
+- Beperk keys minimaal (geen tool access nie, read-only waar toepaslik); roteer tydens anomaly.
+- Terminate alle traffic server-side agter 'n policy gateway wat safety filters, per-route quotas en tenant isolation afdwing.
+- Monitor vir ongewone gebruikspatrone (skielike spend spikes, atipiese regions, UA strings) en revoke verdagte sessions outomaties.
+- Verkies mTLS of signed JWTs wat deur jou IdP uitgereik word bo statiese API keys met 'n lang leeftyd.
 
 ## Self-hosted LLM inference hardening
 
-Running 'n lokale LLM server vir vertroulike data skep 'n ander aanvalsvlak as cloud-hosted APIs: inference/debug endpoints mag prompts leak, die serving stack openbaar gewoonlik 'n reverse proxy, en GPU device nodes gee toegang tot groot ioctl() surfaces. As jy 'n on‑prem inference service assesseer of implementeer, hersien ten minste die volgende punte.
+Die gebruik van 'n plaaslike LLM-server vir confidential data skep 'n ander attack surface as cloud-hosted APIs: inference/debug-endpoints kan prompts leak, die serving stack stel gewoonlik 'n reverse proxy bloot, en GPU device nodes bied toegang tot groot `ioctl()`-surfaces. Indien jy 'n on-prem inference service assesseer of deploy, hersien ten minste die volgende punte.
 
-### Prompt leak via debug and monitoring endpoints
+### Prompt leakage via debug and monitoring endpoints
 
-Behandel die inference API as 'n **multi-user sensitive service**. Debug of monitoring routes kan prompt contents, slot state, model metadata, of internal queue information blootstel. In `llama.cpp`, die `/slots` endpoint is veral sensitief omdat dit per‑slot state blootstel en slegs bedoel is vir slot inspection/management.
+Behandel die inference API as 'n **multi-user sensitive service**. Debug- of monitoring-routes kan prompt-inhoud, slot state, modelmetadata of interne queue-inligting blootstel. In `llama.cpp` is die `/slots`-endpoint besonder sensitief omdat dit per-slot state blootstel en slegs vir slot inspection/management bedoel is.
 
-- Put 'n reverse proxy in front of the inference server en **deny by default**.
-- Only allowlist die presiese HTTP method + path kombinasies wat deur die client/UI benodig word.
-- Disable introspection endpoints in die backend self waar moontlik, byvoorbeeld `llama-server --no-slots`.
-- Bind die reverse proxy aan `127.0.0.1` en expose dit deur 'n authenticated transport soos SSH local port forwarding in plaas van dit op die LAN te publish.
+- Plaas 'n reverse proxy voor die inference server en **deny by default**.
+- Allowlist slegs die presiese kombinasies van HTTP method + path wat deur die client/UI benodig word.
+- Disable introspection-endpoints in die backend self waar moontlik, byvoorbeeld `llama-server --no-slots`.
+- Bind die reverse proxy aan `127.0.0.1` en stel dit bloot deur 'n geauthentiseerde transport soos SSH local port forwarding, eerder as om dit op die LAN te publiseer.
 
 Example allowlist with nginx:
 ```nginx
@@ -127,9 +127,9 @@ proxy_pass http://unix:/run/llama-cpp/llama-cpp.sock:;
 }
 }
 ```
-### Rootless houers sonder netwerk en UNIX-sokette
+### Rootless containers sonder netwerk en UNIX-sockets
 
-As die inference daemon ondersteuning bied om op 'n UNIX-sok te luister, verkies dit bo TCP en laat die houer hardloop met **geen netwerkstapel**:
+As die inference daemon luister op ’n UNIX-socket ondersteun, verkies dit bo TCP en voer die container met **geen netwerkstack nie**:
 ```bash
 podman run --rm -d \
 --network none \
@@ -145,19 +145,19 @@ ghcr.io/ggml-org/llama.cpp:server-cuda13 \
 --no-slots
 ```
 Voordele:
-- `--network none` verwyder inkomende/uitgaande TCP/IP-blootstelling en vermy user-mode helpers wat rootless containers andersins benodig.
-- 'n UNIX-sok laat jou toe om POSIX permissions/ACLs op die sokpad te gebruik as die eerste toegangskontrolelaag.
-- `--userns=keep-id` en rootless Podman verminder die impak van 'n container-uitbraak omdat container root nie host root is nie.
-- Lees-alleen model mounts verminder die kans op modelmanipulasie van binne die container.
+- `--network none` verwyder inkomende/uitgaande TCP/IP-blootstelling en vermy user-mode helpers wat rootless containers andersins sou benodig.
+- ’n UNIX-socket laat jou toe om POSIX-permissions/ACLs op die socket path as die eerste access-control-laag te gebruik.
+- `--userns=keep-id` en rootless Podman verminder die impak van ’n container breakout omdat container root nie host root is nie.
+- Read-only model mounts verminder die kans op model-tampering vanuit die container.
 
-### GPU-toestelknoop-minimalisering
+### Minimalisering van GPU device-nodes
 
-Vir GPU-gedrewe inferensie is `/dev/nvidia*`-lêers hoëwaarde plaaslike aanvalsvlakke omdat hulle groot drywer `ioctl()` handlers en moontlik gedeelde GPU-geheuebestuursbane openbaar.
+Vir GPU-backed inference is `/dev/nvidia*`-lêers waardevolle plaaslike attack surfaces omdat hulle groot driver-`ioctl()`-handlers en potensieel gedeelde GPU memory-management-paaie blootstel.
 
-- Moenie `/dev/nvidia*` wêreldskryfbaar laat nie.
-- Beperk `nvidia`, `nvidiactl`, en `nvidia-uvm` met `NVreg_DeviceFileUID/GID/Mode`, udev-reëls, en ACLs sodat slegs die toegewezen container-UID hulle kan open.
-- Swartlys onnodige modules soos `nvidia_drm`, `nvidia_modeset`, en `nvidia_peermem` op headless inferensie-gashere.
-- Prelaai slegs vereiste modules tydens boot in plaas daarvan om die runtime opportunisties toe te laat om hulle tydens inferensie-opstart met `modprobe` te laai.
+- Moenie `/dev/nvidia*` world writable laat nie.
+- Beperk `nvidia`, `nvidiactl` en `nvidia-uvm` met `NVreg_DeviceFileUID/GID/Mode`, udev-reëls en ACLs sodat slegs die mapped container UID dit kan oopmaak.
+- Blacklist onnodige modules soos `nvidia_drm`, `nvidia_modeset` en `nvidia_peermem` op headless inference-hosts.
+- Preload slegs vereiste modules tydens boot in plaas daarvan om die runtime toe te laat om hulle opportunisties te `modprobe` tydens inference-startup.
 
 Voorbeeld:
 ```bash
@@ -165,18 +165,18 @@ options nvidia NVreg_DeviceFileUID=0
 options nvidia NVreg_DeviceFileGID=0
 options nvidia NVreg_DeviceFileMode=0660
 ```
-Een belangrike hersieningspunt is **`/dev/nvidia-uvm`**. Selfs as die workload nie eksplisiet `cudaMallocManaged()` gebruik nie, kan onlangse CUDA-runtimes steeds `nvidia-uvm` vereis. Aangesien hierdie toestel gedeel word en GPU virtuele geheuebestuur hanteer, behandel dit as 'n kruis-huurder data-blootstellingsoppervlak. As die inference backend dit ondersteun, kan 'n Vulkan backend 'n interessante kompromie wees omdat dit mag voorkom dat `nvidia-uvm` aan die container blootgestel word.
+Een belangrike hersieningspunt is **`/dev/nvidia-uvm`**. Selfs al gebruik die workload nie uitdruklik `cudaMallocManaged()` nie, mag onlangse CUDA runtimes steeds `nvidia-uvm` vereis. Omdat hierdie device gedeel word en GPU-virtuelegeheuebestuur hanteer, moet dit as ’n cross-tenant data-exposure-oppervlak behandel word. As die inference backend dit ondersteun, kan ’n Vulkan backend ’n interessante afweging wees omdat dit moontlik glad nie nodig is om `nvidia-uvm` aan die container bloot te stel nie.
 
-### LSM-beperking vir inferensie-werkers
+### LSM-beperking vir inference workers
 
-AppArmor/SELinux/seccomp moet as verdediging-in-diepte rondom die inferensie-proses gebruik word:
+AppArmor/SELinux/seccomp behoort as gelaagde verdediging rondom die inference-proses gebruik te word:
 
-- Laat slegs die gedeelde biblioteke, model-paaie, socket-direktorie, en GPU-toestelnodes toe wat werklik benodig word.
-- Weier uitdruklik hoë-risiko capabilities soos `sys_admin`, `sys_module`, `sys_rawio`, en `sys_ptrace`.
-- Hou die modeldirektorie net-leesbaar en beperk skryfbare paaie tot slegs die runtime socket-/cache-direktore.
-- Monitor denial logs omdat hulle nuttige opsporingstelemetrie voorsien wanneer die model server of 'n post-exploitation payload probeer om aan sy verwagte gedrag te ontsnap.
+- Laat slegs die shared libraries, model paths, socket directory en GPU device nodes toe wat werklik benodig word.
+- Weier uitdruklik hoërisiko-capabilities soos `sys_admin`, `sys_module`, `sys_rawio` en `sys_ptrace`.
+- Hou die model directory read-only en beperk writable paths tot slegs die runtime socket/cache directories.
+- Monitor denial logs omdat hulle nuttige detection telemetry verskaf wanneer die model server of ’n post-exploitation payload probeer om uit sy verwagte gedrag te ontsnap.
 
-Voorbeeld AppArmor-reëls vir 'n GPU-ondersteunde werker:
+Voorbeeld van AppArmor-reëls vir ’n GPU-backed worker:
 ```text
 deny capability sys_admin,
 deny capability sys_module,
@@ -189,6 +189,49 @@ deny capability sys_ptrace,
 /var/lib/models/** r,
 owner /srv/llm/** rw,
 ```
+## Phantom Squatting: LLM-gehallusineerde domeine as 'n AI Supply-Chain-vektor
+
+Phantom squatting is die **domein/URL-ekwivalent van slopsquatting**. In plaas daarvan om 'n nie-bestaande pakketnaam te hallusineer, hallusineer die LLM 'n geloofwaardige **portaal-, API-, webhook-, fakturering-, SSO-, aflaai- of ondersteuningsdomein** vir 'n werklike handelsmerk, en 'n aanvaller registreer daardie namespace voordat 'n mens of agent dit gebruik.
+
+Dit is belangrik omdat modeluitset in baie AI-gesteunde werkvloeie as 'n **vertroude afhanklikheid** behandel word:
+- Ontwikkelaars plak die voorgestelde endpoint in kode of CI/CD-integrasies.
+- AI-agente haal dokumentasie, skemas, APK's, ZIP's of webhook-teikens outomaties op.
+- Gegenereerde runbooks of dokumentasie kan die vals URL insluit asof dit gesaghebbend is.
+
+### Offensiewe werkvloei
+
+1. **Ondersoek die hallusinasie-oppervlak**: vra handelsmerkspesifieke vrae oor realistiese werkvloeie soos `admin`, `billing`, `sandbox`, `benefits`, `api`, `download`, `support`, `webhook` of `mobile app`-portale.
+2. **Normaliseer kandidate**: resolve gegenereerde URL's, vou NXDOMAIN-antwoorde saam na die ouer registreerbare domein, en verwyder duplikate uit prompt-families. Prompt-korpusse moet divers bly, byvoorbeeld deur byna-duplikate met **Jaccard similarity** te verwyder.
+3. **Prioritiseer voorspelbare hallusinasies**:
+- **Thermal Hallucination Persistence (THP)**: dieselfde vals domein verskyn oor temperature heen, insluitend lae temperature soos `T=0.1`.
+- **Cross-model consensus**: verskeie LLM-families genereer dieselfde vals domein.
+4. **Registreer en weaponize** die ouerdomein, en host dan phishing, vals APK/ZIP-aflaaie, credential harvesters, kwaadwillige dokumente of API-endpoints wat secrets/webhook-payloads insamel. **Suiwer domeinvlak-hallusinasies** is die maklikste om te monetiseer omdat die aanvaller die hele namespace beheer; subdomein-/pad-hallusinasies kan steeds misbruik word wanneer die genormaliseerde ouer ongeregistreer is.
+5. **Benut die zero-reputation window**: nuut geregistreerde domeine het dikwels geen blocklist-geskiedenis, URL-reputasie of volwasse telemetrie nie, en kan dus kontroles omseil totdat opsporingsmeganismes op datum kom. Aanvallers kan hierdie venster verleng met crawler-only benign responses, redirect cloaking, CAPTCHA-gates of vertraagde payload-staging.
+
+### Waarom dit gevaarlik is vir agente
+
+Vir 'n menslike slagoffer benodig die vals domein gewoonlik steeds 'n klik en nog 'n aksie. In 'n **agentic workflow** kan die LLM beide die **lokaas** en die **uitvoerder** wees: die agent ontvang die gehallusineerde URL, haal dit op, ontleed die antwoord, en kan dan tokens lek, instruksies uitvoer, 'n dependency aflaai of vergiftigde data na CI/CD stoot sonder enige menslike hersiening.
+
+### Praktiese aanvaller-prompts
+
+Hoë-opbrengs-prompts lyk gewoonlik soos normale ondernemingstake eerder as eksplisiete phishing-lokasies:
+- “Wat is die payment sandbox URL vir `<brand>`-integrasies?”
+- “Watter webhook endpoint moet ek gebruik vir `<brand>` build-notifications?”
+- “Waar is die employee benefits / billing / SSO-portaal vir `<brand>`?”
+- “Gee my die direkte Android APK- of desktop client-aflaai vir `<brand>`.”
+
+### Defensiewe inversie
+
+Behandel dit as 'n proaktiewe domeinmoniteringsprobleem, nie slegs as 'n prompt-injection-probleem nie:
+- Bou 'n **brand prompt corpus** en ondersoek die LLM's waarop jou gebruikers/agente staatmaak periodiek.
+- Stoor gehallusineerde URL's en volg watter URL's stabiel bly oor temperature/modelle heen.
+- Volg die **Adversarial Exploitation Window (AEW)**: tyd tussen die eerste hallusinasie en aanvallerregistrasie. 'n Positiewe AEW beteken verdedigers kan vooraf registreer, sinkhole of vooraf blokkeer voordat weaponization plaasvind.
+- Monitor **NXDOMAIN → registered**-oorgange vir die ouerdomeine.
+- Triage by registrasie die registrar, skeppingsdatum, nameservers, privaatheidsafskerming, bladsy-inhoud, skermkiekies, parked-page-status en ooreenkoms met handelsmerkbates.
+- Voeg beleidshekke by sodat agente/ontwikkelaars **nie LLM-gegenereerde domeine by verstek vertrou nie**: vereis allowlists, eienaarskapvalidering, CT/RDAP-kontroles of menslike goedkeuring voor eerste gebruik.
+
+Dit pas gelyktydig by verskeie AI-risikokategorieë: **AI supply-chain attack**, **insecure model output** en **rogue actions** wanneer agente die gehallusineerde URL outonoom verbruik.
+
 ## Verwysings
 - [Unit 42 – The Risks of Code Assistant LLMs: Harmful Content, Misuse and Deception](https://unit42.paloaltonetworks.com/code-assistant-llms/)
 - [LLMJacking scheme overview – The Hacker News](https://thehackernews.com/2024/05/researchers-uncover-llmjacking-scheme.html)
@@ -197,5 +240,7 @@ owner /srv/llm/** rw,
 - [llama.cpp server README](https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md)
 - [Podman quadlets: podman-systemd.unit](https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html)
 - [CNCF Container Device Interface (CDI) specification](https://github.com/cncf-tags/container-device-interface/blob/main/SPEC.md)
+- [Unit 42 – Phantom Squatting: AI-Hallucinated Domains as a Software Supply Chain Vector](https://unit42.paloaltonetworks.com/phantom-squatting-hallucinated-web-domains/)
+- [Socket – Slopsquatting: How AI Hallucinations Are Fueling a New Class of Supply Chain Attacks](https://socket.dev/blog/slopsquatting-how-ai-hallucinations-are-fueling-a-new-class-of-supply-chain-attacks)
 
 {{#include ../banners/hacktricks-training.md}}
