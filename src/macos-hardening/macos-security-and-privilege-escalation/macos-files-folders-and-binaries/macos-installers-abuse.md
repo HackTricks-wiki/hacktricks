@@ -1,29 +1,29 @@
-# macOS Yükleyici İstismarı
+# macOS Installers Abuse
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Pkg Temel Bilgiler
+## Pkg Basic Information
 
-Bir macOS **yükleyici paketi** (aynı zamanda `.pkg` dosyası olarak da bilinir), macOS tarafından **yazılım dağıtımı** için kullanılan bir dosya formatıdır. Bu dosyalar, bir yazılım parçasının doğru bir şekilde kurulması ve çalışması için gereken her şeyi içeren bir **kutunun** içindeymiş gibi davranır.
+Bir macOS **installer package** (`.pkg` file` olarak da bilinir), macOS tarafından **software dağıtmak** için kullanılan bir dosya formatıdır. Bu dosyalar, bir software parçasının doğru şekilde install edilip çalışması için gereken her şeyi içeren bir **kutu** gibidir.
 
-Paket dosyası, hedef bilgisayara yüklenecek **dosya ve dizinlerin hiyerarşisini** tutan bir arşivdir. Ayrıca, yapılandırma dosyalarını ayarlamak veya yazılımın eski sürümlerini temizlemek gibi kurulumdan önce ve sonra görevleri yerine getirmek için **scriptler** de içerebilir.
+Package dosyasının kendisi, hedef bilgisayara install edilecek **files ve directories hiyerarşisini** barındıran bir arşivdir. Ayrıca, configuration files ayarlama veya software'in eski versiyonlarını temizleme gibi, installation öncesi ve sonrası görevleri gerçekleştirmek için **scripts** de içerebilir.
 
-### Hiyerarşi
+### Hierarchy
 
 <figure><img src="../../../images/Pasted Graphic.png" alt="https://www.youtube.com/watch?v=iASSG0_zobQ"><figcaption></figcaption></figure>
 
-- **Dağıtım (xml)**: Özelleştirmeler (başlık, karşılama metni…) ve script/kurulum kontrolleri
-- **Paket Bilgisi (xml)**: Bilgi, kurulum gereksinimleri, kurulum yeri, çalıştırılacak scriptlerin yolları
-- **Malzeme listesi (bom)**: Yüklenmesi, güncellenmesi veya kaldırılması gereken dosyaların listesi ve dosya izinleri
-- **Yük (CPIO arşivi gzip sıkıştırılmış)**: Paket Bilgisi'nden `install-location`'da yüklenecek dosyalar
-- **Scriptler (CPIO arşivi gzip sıkıştırılmış)**: Kurulumdan önce ve sonra scriptler ve yürütme için geçici bir dizine çıkarılan daha fazla kaynak.
+- **Distribution (xml)**: Customizations (title, welcome text…) ve script/installation checks
+- **PackageInfo (xml)**: Info, install requirements, install location, çalıştırılacak scripts için paths
+- **Bill of materials (bom)**: file permissions ile birlikte install, update veya remove edilecek files listesi
+- **Payload (CPIO archive gzip compressed)**: PackageInfo içindeki `install-location` konumuna install edilecek files
+- **Scripts (CPIO archive gzip compressed)**: Pre ve post install scripts ve execution için temp directory'ye çıkarılan daha fazla resource
 
-### Sıkıştırmayı Aç
+### Decompress
 ```bash
 # Tool to directly get the files inside a package
-pkgutil —expand "/path/to/package.pkg" "/path/to/out/dir"
+pkgutil --expand "/path/to/package.pkg" "/path/to/out/dir"
 
-# Get the files ina. more manual way
+# Get the files in a more manual way
 mkdir -p "/path/to/out/dir"
 cd "/path/to/out/dir"
 xar -xf "/path/to/package.pkg"
@@ -32,64 +32,103 @@ xar -xf "/path/to/package.pkg"
 cat Scripts | gzip -dc | cpio -i
 cpio -i < Scripts
 ```
-Installer'ın içeriğini manuel olarak sıkıştırmadan görselleştirmek için ücretsiz bir araç olan [**Suspicious Package**](https://mothersruin.com/software/SuspiciousPackage/) kullanabilirsiniz.
+Kurulum paketinin içeriğini elle decompress etmeden görselleştirmek için ücretsiz araç [**Suspicious Package**](https://mothersruin.com/software/SuspiciousPackage/) da kullanabilirsiniz.
 
+### Static triage shortcuts
+
+Amaç analysis ise, önce paketi `Installer.app` ile açmaktan **kaçınmaya** çalışın. Bazı paketler, `Installer` onları açar açmaz code çalıştırabilir (örneğin `system.run()` veya installer plug-ins üzerinden), bu yüzden offline extraction genellikle daha güvenli başlangıçtır.
+```bash
+PKG="Suspicious.pkg"
+OUT="/tmp/pkg-audit"
+
+# Preserve Distribution, scripts, resources and nested component pkgs
+pkgutil --expand-full "$PKG" "$OUT"
+
+# Signature / policy checks
+pkgutil --check-signature "$PKG"
+spctl -a -vv -t install "$PKG"
+
+# Quick hunting: scripts, BOM contents and interesting primitives
+find "$OUT" -type f \( -name preinstall -o -name postinstall \) -print -exec head -n 1 {} \;
+find "$OUT" -type f \( -name Bom -o -name '*.bom' \) -exec lsbom -pf {} \; 2>/dev/null
+xmllint --format "$OUT/Distribution" 2>/dev/null | sed -n '1,200p'
+rg -n 'system\.(run|runOnce)|<script>|launchctl|osascript|curl|chmod 4[0-7]{3}|sudo -u |\$USER|\$HOME|/tmp/|/var/tmp/' "$OUT"
+```
 ## DMG Temel Bilgiler
 
-DMG dosyaları veya Apple Disk Görüntüleri, Apple'ın macOS'u tarafından disk görüntüleri için kullanılan bir dosya formatıdır. Bir DMG dosyası esasen **monte edilebilir bir disk görüntüsü** (kendi dosya sistemini içerir) olup, genellikle sıkıştırılmış ve bazen şifrelenmiş ham blok verileri içerir. Bir DMG dosyasını açtığınızda, macOS **onu fiziksel bir disk gibi monte eder**, böylece içeriğine erişebilirsiniz.
+DMG dosyaları, veya Apple Disk Images, Apple’ın macOS sisteminde disk image’lar için kullanılan bir dosya formatıdır. Bir DMG dosyası aslında **mount edilebilir bir disk image**’dır (kendi filesystem’ini içerir) ve tipik olarak sıkıştırılmış, bazen de şifrelenmiş ham block data içerir. Bir DMG dosyasını açtığınızda, macOS onu **fiziksel bir diskmiş gibi mount eder**, böylece içeriğine erişebilirsiniz.
 
 > [!CAUTION]
-> **`.dmg`** yükleyicilerinin **çok sayıda formatı** desteklediğini ve geçmişte bazılarının zafiyetler içerdiğini ve **kernel kodu yürütme** elde etmek için kötüye kullanıldığını unutmayın.
+> **`.dmg`** installer’ların **çok fazla formatı** desteklediğini ve geçmişte bunlardan bazılarında vulnerability bulunanların **kernel code execution** elde etmek için abuse edildiğini unutmayın.
 
 ### Hiyerarşi
 
 <figure><img src="../../../images/image (225).png" alt=""><figcaption></figcaption></figure>
 
-Bir DMG dosyasının hiyerarşisi içeriğe bağlı olarak farklılık gösterebilir. Ancak, uygulama DMG'leri için genellikle bu yapıyı takip eder:
+Bir DMG dosyasının hiyerarşisi, içeriğe bağlı olarak farklı olabilir. Ancak application DMG’leri için genellikle şu yapıyı izler:
 
-- Üst Düzey: Bu, disk görüntüsünün köküdür. Genellikle uygulamayı ve muhtemelen Uygulamalar klasörüne bir bağlantı içerir.
-- Uygulama (.app): Bu, gerçek uygulamadır. macOS'ta bir uygulama genellikle uygulamayı oluşturan birçok bireysel dosya ve klasör içeren bir pakettir.
-- Uygulamalar Bağlantısı: Bu, macOS'taki Uygulamalar klasörüne bir kısayoldur. Bunun amacı, uygulamayı kolayca yüklemenizi sağlamaktır. .app dosyasını bu kısayola sürükleyerek uygulamayı yükleyebilirsiniz.
+- Top Level: Bu, disk image’ın root’udur. Çoğu zaman application’ı ve muhtemelen Applications klasörüne bir link içerir.
+- Application (.app): Bu, gerçek application’dır. macOS’ta bir application genellikle application’ı oluşturan birçok ayrı file ve folder içeren bir package’tir.
+- Applications Link: Bu, macOS’teki Applications klasörüne bir shortcut’tır. Bunun amacı application’ı kolayca install etmenizi sağlamaktır. App’i install etmek için .app file’ını bu shortcut’a sürükleyebilirsiniz.
 
-## pkg kötüye kullanımı ile Privesc
+## pkg abuse ile Privesc
 
-### Kamu dizinlerinden yürütme
+### Public directory’lerden execution
 
-Eğer bir ön veya sonrası yükleme betiği örneğin **`/var/tmp/Installerutil`** dizininden yürütülüyorsa ve saldırgan bu betiği kontrol edebiliyorsa, her yürütüldüğünde ayrıcalıkları artırabilir. Veya başka bir benzer örnek:
+Eğer bir pre veya post installation script örneğin **`/var/tmp/Installerutil`** içinden çalıştırılıyorsa ve bir attacker bu script’i kontrol edebiliyorsa, her çalıştırıldığında privileges yükseltebilir. Benzer başka bir örnek:
 
 <figure><img src="../../../images/Pasted Graphic 5.png" alt="https://www.youtube.com/watch?v=iASSG0_zobQ"><figcaption><p><a href="https://www.youtube.com/watch?v=kCXhIYtODBg">https://www.youtube.com/watch?v=kCXhIYtODBg</a></p></figcaption></figure>
 
 ### AuthorizationExecuteWithPrivileges
 
-Bu, birkaç yükleyici ve güncelleyici tarafından **root olarak bir şey yürütmek için** çağrılan bir [kamusal işlev](https://developer.apple.com/documentation/security/1540038-authorizationexecutewithprivileg) dir. Bu işlev, **yürütülecek dosyanın** **yolu** nu parametre olarak kabul eder, ancak bir saldırgan bu dosyayı **değiştirebilirse**, root ile yürütmesini **kötüye kullanabilir** ve **ayrıcalıkları artırabilir**.
+Bu, birkaç installer ve updater’ın **root olarak bir şey execute etmek** için çağıracağı [public function](https://developer.apple.com/documentation/security/1540038-authorizationexecutewithprivileg)tir. Bu function, parametre olarak **execute edilecek file**’ın **path**’ini alır; ancak bir attacker bu file’ı **modify** edebilirse, root ile yapılan execution’ı **abuse** ederek **privileges escalate** edebilir.
 ```bash
-# Breakpoint in the function to check wich file is loaded
+# Breakpoint in the function to check which file is loaded
 (lldb) b AuthorizationExecuteWithPrivileges
-# You could also check FS events to find this missconfig
+# You could also check FS events to find this misconfig
 ```
-For more info check this talk: [https://www.youtube.com/watch?v=lTOItyjTTkw](https://www.youtube.com/watch?v=lTOItyjTTkw)
+Daha fazla bilgi için bu konuşmayı kontrol edin: [https://www.youtube.com/watch?v=lTOItyjTTkw](https://www.youtube.com/watch?v=lTOItyjTTkw)
 
-### Montaj ile yürütme
+### Environment and shebang abuse
 
-Eğer bir yükleyici `/tmp/fixedname/bla/bla` yoluna yazıyorsa, yükleme sürecini kötüye kullanmak için **yükleme sırasında herhangi bir dosyayı değiştirmek** amacıyla `noowners` ile `/tmp/fixedname` üzerinde **bir montaj oluşturmak** mümkündür.
+Modern PackageKit hataları, installer scriptlerinin çoğu zaman **trusted root code** olarak çalıştırıldığını, ancak saldırgan tarafından kontrol edilen bağlamın yakınında tutulduğunu gösterdi. Vendor paketlerini denetlerken şunlara özellikle dikkat edin:
 
-Bunun bir örneği **CVE-2021-26089**'dur; bu, kök olarak yürütme elde etmek için **dönemsel bir betiği** **üst üste yazmayı** başarmıştır. Daha fazla bilgi için konuşmaya bakın: [**OBTS v4.0: "Mount(ain) of Bugs" - Csaba Fitzl**](https://www.youtube.com/watch?v=jSYPazD4VcE)
+- `#!/bin/zsh` / `#!/bin/bash` gibi Shell interpreterları
+- `sudo -u $USER`, `launchctl asuser` gibi çağrılar veya `$USER`, `$HOME`, `PATH`, `TMPDIR` ya da relative path'lere güvenen herhangi bir mantık
+- Kullanıcı kontrollü init dosyalarını veya libraries'leri yükleyebilen shell dışı interpreterlar
+```bash
+pkgutil --expand-full Target.pkg /tmp/target-pkg
+find /tmp/target-pkg -type f \( -name preinstall -o -name postinstall \) -exec sh -c 'printf "\n### %s\n" "$1"; head -n 1 "$1"' sh {} \;
+rg -n '^#!/bin/(zsh|bash)|sudo -u |launchctl asuser|\$USER|\$HOME|PATH=|/usr/bin/env ' /tmp/target-pkg
+```
+2024 PackageKit root-environment bug (`~/.zshenv` / `~/.bash*` inheritance during user-initiated installs) için [genel macOS privesc sayfasına](../macos-privilege-escalation.md) bakın. Paket **Apple-signed** ise, aynı script bug **SIP/TCC-relevant** hale gelebilir çünkü `system_installd` `com.apple.rootless.install.heritable` taşıyabilir; [SIP sayfasına](../macos-security-protections/macos-sip.md) bakın.
 
-## pkg kötü amaçlı yazılım olarak
+### Execution by mounting
 
-### Boş Yük
+Eğer bir installer `/tmp/fixedname/bla/bla` içine yazıyorsa, kurulum sırasında **herhangi bir dosyayı değiştirmek** ve kurulum sürecini abuse etmek için `/tmp/fixedname` üzerine noowners ile bir **mount oluşturmak** mümkündür.
 
-Gerçek bir yük olmadan sadece **kötü amaçlı yazılım** içeren **ön ve sonrası yükleme betikleri** ile bir **`.pkg`** dosyası oluşturmak mümkündür.
+Bunun bir örneği, root olarak execution almak için **periyodik bir scripti overwrite** etmeyi başaran **CVE-2021-26089**'dur. Daha fazla bilgi için şu konuşmaya bakın: [**OBTS v4.0: "Mount(ain) of Bugs" - Csaba Fitzl**](https://www.youtube.com/watch?v=jSYPazD4VcE)
 
-### Dağıtım xml'inde JS
+## pkg as malware
 
-Paketin **dağıtım xml** dosyasına **`<script>`** etiketleri eklemek mümkündür ve bu kod yürütülecek ve **`system.run`** kullanarak **komutlar** **yürütülebilir**:
+### Empty Payload
+
+Gerçek bir payload olmadan, sadece scriptlerin içindeki malware dışında, **pre ve post-install scripts** içeren bir **`.pkg`** dosyası üretmek mümkündür.
+
+### JS in Distribution xml
+
+Paketin **distribution xml** dosyasına **`<script>`** tagleri eklemek mümkündür ve bu code çalıştırılır; ayrıca **`system.run`** kullanarak komut çalıştırabilir:
 
 <figure><img src="../../../images/image (1043).png" alt=""><figcaption></figcaption></figure>
 
-### Arka kapılı Yükleyici
+Distribution paketlerinde bu genellikle üst düzey `Distribution` dosyasının external scripts'i etkinleştirmesine bağlıdır; örneğin `allow-external-scripts="true"` ile. Bu nedenle yalnızca `preinstall` / `postinstall` incelemek yeterli değildir: **Distribution XML** kendisi `installation-check` / `volume-check` hook'ları ve doğrudan `system.run()` / `system.runOnce()` execution path'leri içerebilir.
+```bash
+xmllint --format Distribution | sed -n '1,200p'
+rg -n 'allow-external-scripts|system\.(run|runOnce)|installation-check|volume-check|function ' Distribution
+```
+### Backdoored Installer
 
-dist.xml içinde bir betik ve JS kodu kullanan kötü niyetli yükleyici
+dist.xml içinde bir script ve JS code kullanarak malicious installer
 ```bash
 # Package structure
 mkdir -p pkgroot/root/Applications/MyApp
@@ -113,7 +152,7 @@ cat > ./dist.xml <<EOF
 <?xml version="1.0" encoding="utf-8"?>
 <installer-gui-script minSpecVersion="1">
 <title>Malicious Installer</title>
-<options customize="allow" require-scripts="false"/>
+<options allow-external-scripts="true" customize="allow" require-scripts="true"/>
 <script>
 <![CDATA[
 function installationCheck() {
@@ -147,14 +186,16 @@ system.run("/path/to/postinstall");
 </installer-gui-script>
 EOF
 
-# Buil final
+# Build final
 productbuild --distribution dist.xml --package-path myapp.pkg final-installer.pkg
 ```
-## Referanslar
+## References
 
-- [**DEF CON 27 - Pkg'leri Açma: Macos Yükleyici Paketlerine ve Yaygın Güvenlik Açıklarına Bir Bakış**](https://www.youtube.com/watch?v=iASSG0_zobQ)
-- [**OBTS v4.0: "macOS Yükleyicilerinin Vahşi Dünyası" - Tony Lambert**](https://www.youtube.com/watch?v=Eow5uNHtmIg)
-- [**DEF CON 27 - Pkg'leri Açma: MacOS Yükleyici Paketlerine Bir Bakış**](https://www.youtube.com/watch?v=kCXhIYtODBg)
+- [**DEF CON 27 - Unpacking Pkgs A Look Inside Macos Installer Packages And Common Security Flaws**](https://www.youtube.com/watch?v=iASSG0_zobQ)
+- [**OBTS v4.0: "The Wild World of macOS Installers" - Tony Lambert**](https://www.youtube.com/watch?v=Eow5uNHtmIg)
+- [**DEF CON 27 - Unpacking Pkgs A Look Inside MacOS Installer Packages**](https://www.youtube.com/watch?v=kCXhIYtODBg)
 - [https://redteamrecipe.com/macos-red-teaming?utm_source=pocket_shared#heading-exploiting-installer-packages](https://redteamrecipe.com/macos-red-teaming?utm_source=pocket_shared#heading-exploiting-installer-packages)
+- [**CVE-2024-27822: macOS PackageKit Privilege Escalation**](https://khronokernel.com/macos/2024/06/03/CVE-2024-27822.html)
+- [**Breaking SIP with Apple-signed Packages**](https://www.l3harris.com/newsroom/editorial/2024/03/breaking-sip-apple-signed-packages)
 
 {{#include ../../../banners/hacktricks-training.md}}
