@@ -1,73 +1,92 @@
-# AI在网络安全中的应用
+# 网络安全中的 AI
 
 {{#include ../banners/hacktricks-training.md}}
 
 ## 主要机器学习算法
 
-学习AI的最佳起点是理解主要机器学习算法的工作原理。这将帮助你理解AI是如何工作的，如何使用它以及如何攻击它：
+学习 AI 的最佳起点是了解主要机器学习算法的工作原理。这将帮助你理解 AI 的工作方式、如何使用 AI，以及如何攻击 AI：
+
 
 {{#ref}}
 ./AI-Supervised-Learning-Algorithms.md
 {{#endref}}
 
+
 {{#ref}}
 ./AI-Unsupervised-Learning-Algorithms.md
 {{#endref}}
+
 
 {{#ref}}
 ./AI-Reinforcement-Learning-Algorithms.md
 {{#endref}}
 
+
 {{#ref}}
 ./AI-Deep-Learning.md
 {{#endref}}
 
-### LLM架构
+### LLM 架构
 
-在以下页面中，你将找到构建基本LLM所需的每个组件的基础知识，使用transformers：
+在下面的页面中，你将了解使用 transformers 构建基础 LLM 所需的各个组件的基础知识：
+
 
 {{#ref}}
 AI-llm-architecture/README.md
 {{#endref}}
 
-## AI安全
+## AI 安全
 
-### AI风险框架
+### AI 风险框架
 
-目前，评估AI系统风险的主要两个框架是OWASP ML Top 10和Google SAIF：
+目前，用于评估 AI 系统风险的两个主要框架是 OWASP ML Top 10 和 Google SAIF：
+
 
 {{#ref}}
 AI-Risk-Frameworks.md
 {{#endref}}
 
-### AI提示安全
+### AI Prompts 安全
 
-LLMs在过去几年中使AI的使用激增，但它们并不完美，可能会被对抗性提示欺骗。这是一个非常重要的话题，理解如何安全地使用AI以及如何攻击它：
+近年来，LLM 推动了 AI 的爆发式应用，但它们并不完美，可能会被对抗性 prompts 欺骗。这是一个非常重要的主题，有助于理解如何安全地使用 AI 以及如何攻击 AI：
+
 
 {{#ref}}
 AI-Prompts.md
 {{#endref}}
 
-### AI模型RCE
+### AI Models RCE
 
-开发人员和公司从互联网下载模型是非常常见的，然而，仅仅加载一个模型可能就足以在系统上执行任意代码。这是一个非常重要的话题，理解如何安全地使用AI以及如何攻击它：
+开发者和公司运行从 Internet 下载的 models 是非常常见的，然而，仅加载一个 model 就可能足以在系统上执行任意代码。这是一个非常重要的主题，有助于理解如何安全地使用 AI 以及如何攻击 AI：
+
 
 {{#ref}}
 AI-Models-RCE.md
 {{#endref}}
 
-### AI模型上下文协议
+### AI Model Context Protocol
 
-MCP（模型上下文协议）是一种协议，允许AI代理客户端以即插即用的方式连接外部工具和数据源。这使得AI模型与外部系统之间的复杂工作流程和交互成为可能：
+MCP (Model Context Protocol) 是一种协议，允许 AI agent 客户端以即插即用的方式连接外部工具和数据源。这使 AI models 与外部系统之间能够实现复杂的工作流和交互：
+
 
 {{#ref}}
 AI-MCP-Servers.md
 {{#endref}}
 
-### AI辅助模糊测试与自动化漏洞发现
+### AI-Assisted Fuzzing & Automated Vulnerability Discovery
+
 
 {{#ref}}
 AI-Assisted-Fuzzing-and-Vulnerability-Discovery.md
+{{#endref}}
+
+### Web Black-Box AI Pentester Bots
+
+由 LLM 驱动的 agents 可以自动化执行长时间运行的 black-box Web pentesting 工作流，前提是它们具备 observability、orchestration、authenticated session handling 和 adversarial validation 支持：
+
+
+{{#ref}}
+Web-Black-Box-AI-Pentester-Bots.md
 {{#endref}}
 
 {{#include ../banners/hacktricks-training.md}}
