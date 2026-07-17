@@ -4,35 +4,36 @@
 
 **Δείτε το εξαιρετικό post από:** [**https://www.tarlogic.com/en/blog/how-kerberos-works/**](https://www.tarlogic.com/en/blog/how-kerberos-works/)
 
-## TL;DR for attackers
-- Το Kerberos είναι το προεπιλεγμένο AD auth protocol· οι περισσότερες lateral-movement chains θα το αγγίξουν.
-- Σκέψου σε **τρεις operator phases**:
-- **AS-REQ / AS-REP** → password/hash/certificate για να αποκτήσεις ένα **TGT**. Εδώ βρίσκονται τα **AS-REP roasting**, **over-pass-the-hash / pass-the-key**, και **PKINIT**.
-- **TGS-REQ / TGS-REP** → χρησιμοποίησε ένα TGT για να αποκτήσεις **service tickets**. Εδώ γίνονται σχετικά τα **Kerberoasting**, **S4U abuse**, **delegation abuse**, και το περισσότερο **ticket-forging tradecraft**.
-- **AP-REQ / AP-REP** → παρουσίασε το ticket στο service. Εδώ συμβαίνουν το **pass-the-ticket** και το service-specific lateral movement.
-- Για hands-on cheatsheets (AS-REP/Kerberoasting, ticket forgery, delegation abuse, κ.λπ.) δες:
+## TL;DR για attackers
+- Το Kerberos είναι το προεπιλεγμένο πρωτόκολλο AD auth· οι περισσότερες αλυσίδες lateral movement θα το αγγίξουν.
+- Σκεφτείτε το σε **τρεις φάσεις για operators**:
+- **AS-REQ / AS-REP** → password/hash/certificate για την απόκτηση ενός **TGT**. Εδώ εντάσσονται τα **AS-REP roasting**, **over-pass-the-hash / pass-the-key** και **PKINIT**.
+- **TGS-REQ / TGS-REP** → χρήση ενός TGT για την απόκτηση **service tickets**. Εδώ εντάσσονται τα **Kerberoasting**, **S4U abuse**, **delegation abuse** και το μεγαλύτερο μέρος του **ticket-forging tradecraft**.
+- **AP-REQ / AP-REP** → παρουσίαση του ticket στην υπηρεσία. Εδώ πραγματοποιούνται τα **pass-the-ticket** και το service-specific lateral movement.
+- Για πρακτικά cheatsheets (AS-REP/Kerberoasting, ticket forgery, delegation abuse κ.λπ.) δείτε:
 {{#ref}}
 ../../network-services-pentesting/pentesting-kerberos-88/README.md
 {{#endref}}
-- Χρησιμοποίησε αυτή τη σελίδα ως τον **overview / “what changed recently”** index, και μετά πήγαινε στις dedicated pages για [Kerberoast](kerberoast.md), [Resource-Based Constrained Delegation](resource-based-constrained-delegation.md), [AD Certificates / PKINIT abuse](ad-certificates.md), ή [BadSuccessor / dMSA abuse](acl-persistence-abuse/BadSuccessor.md).
+- Χρησιμοποιήστε αυτή τη σελίδα ως ευρετήριο **επισκόπησης / “τι άλλαξε πρόσφατα”** και, στη συνέχεια, μεταβείτε στις ειδικές σελίδες για [Kerberoast](kerberoast.md), [Resource-Based Constrained Delegation](resource-based-constrained-delegation.md), [AD Certificates / PKINIT abuse](ad-certificates.md) ή [BadSuccessor / dMSA abuse](acl-persistence-abuse/BadSuccessor.md).
 
-## Fresh attack notes (2024-2026)
-- **RC4 hardening changed the defaults, not Kerberos itself** – το σύγχρονο DC hardening εστιάζει στα **default assumed encryption types** για accounts που **δεν** ορίζουν ρητά `msDS-SupportedEncryptionTypes`. Μετά το 2026 rollout, αυτά τα accounts increasingly default σε **AES-only** σε patched DCs, οπότε τα blind `/rc4` Kerberoast assumptions αποτυγχάνουν πιο συχνά. Ωστόσο, τα **explicitly RC4-enabled service accounts remain excellent offline-crack targets**.
-- **PAC validation enforcement matters for forged tickets** – το 2024 PAC-signature hardening σημαίνει ότι τα **golden/diamond/sapphire/extraSID-style abuses** χρειάζονται πιο realistic PAC data και το σωστό signing context. Unpatched domains ή domains που έχουν μείνει σε compatibility/audit-style deployments παραμένουν πιο soft targets.
-- **Certificate-based Kerberos changed twice**:
-- **Strong certificate binding** (KB5014754 timeline) κάνει τα sloppy certificate-to-account mappings λιγότερο reliable σε fully enforced environments.
-- **CVE-2025-26647** πρόσθεσε άλλο ένα hardening layer γύρω από **altSecID / SKI certificate mappings**. Αν τα DCs είναι unpatched, still auditing, ή explicitly bypassing NTAuth validation, το pass-the-certificate / shadow-credential follow-on abuse παραμένει πιο practical.
-- **Cross-domain / cross-forest delegation abuse is still very alive** – Windows supports modern cross-realm **S4U2Self/S4U2Proxy** flows, οπότε τα writable delegation attributes σε άλλο domain παραμένουν πολύτιμα. Το blocker είναι συνήθως η tooling fidelity και τα trust/policy details, όχι η protocol support.
-- **Windows Server 2025 introduced new Kerberos-adjacent attack surface** μέσω του **dMSA** migration logic. Αν δεις delegated rights over OUs ή service-account objects σε ένα 2025 domain, έλεγξε τη dedicated [BadSuccessor page](acl-persistence-abuse/BadSuccessor.md) αντί να το αντιμετωπίσεις σαν “just another gMSA”.
+## Πρόσφατες σημειώσεις για attacks (2024-2026)
+- **Το RC4 hardening άλλαξε τα defaults, όχι το ίδιο το Kerberos** – το σύγχρονο DC hardening εστιάζει στους **default assumed encryption types** για accounts που **δεν** ορίζουν ρητά το `msDS-SupportedEncryptionTypes`. Μετά το rollout του 2026, αυτά τα accounts χρησιμοποιούν όλο και περισσότερο **AES-only** σε patched DCs, επομένως οι τυφλές υποθέσεις για `/rc4` Kerberoast αποτυγχάνουν συχνότερα. Ωστόσο, τα **explicitly RC4-enabled service accounts παραμένουν εξαιρετικοί στόχοι για offline cracking**.
+- **Η επιβολή του PAC validation είναι σημαντική για forged tickets** – το PAC-signature hardening του 2024 σημαίνει ότι τα **golden/diamond/sapphire/extraSID-style abuses** χρειάζονται πιο ρεαλιστικά PAC data και το σωστό signing context. Τα unpatched domains ή τα domains που παραμένουν σε compatibility/audit-style deployments είναι πιο ευάλωτοι στόχοι.
+- **Το certificate-based Kerberos άλλαξε δύο φορές**:
+- Το **Strong certificate binding** (χρονοδιάγραμμα KB5014754) καθιστά τα πρόχειρα certificate-to-account mappings λιγότερο αξιόπιστα σε πλήρως enforced environments.
+- Το **CVE-2025-26647** πρόσθεσε ένα ακόμη επίπεδο hardening γύρω από τα **altSecID / SKI certificate mappings**. Αν τα DCs είναι unpatched, εξακολουθούν να κάνουν auditing ή παρακάμπτουν ρητά το NTAuth validation, το pass-the-certificate / shadow-credential follow-on abuse παραμένει πιο πρακτικό.
+- **Το Cross-domain / cross-forest delegation abuse παραμένει πολύ ενεργό** – τα Windows υποστηρίζουν σύγχρονες ροές cross-realm **S4U2Self/S4U2Proxy**, επομένως τα writable delegation attributes σε άλλο domain παραμένουν πολύτιμα. Το εμπόδιο είναι συνήθως η ακρίβεια των tools και οι λεπτομέρειες trust/policy, όχι η υποστήριξη του πρωτοκόλλου.
+- **Το Recursive multi-domain RBCD έχει επιχειρησιακή σημασία** – σε forests με 3+ domains, τα **S4U2Self/S4U2Proxy** μπορούν να κάνουν recursion μέσω trust referrals και το **SPN-less** abuse μπορεί να απαιτεί ένα τελικό **`S4U2Self+U2U`** hop μαζί με RC4-dependent ticket handling. Δείτε το [Resource-Based Constrained Delegation](resource-based-constrained-delegation.md).
+- Το **Windows Server 2025 εισήγαγε νέα Kerberos-adjacent attack surface** μέσω της λογικής migration του **dMSA**. Αν δείτε delegated rights σε OUs ή service-account objects σε domain του 2025, ελέγξτε την ειδική [BadSuccessor page](acl-persistence-abuse/BadSuccessor.md), αντί να το αντιμετωπίσετε ως “άλλο ένα gMSA”.
 
-## Fast operator checks in modern domains
+## Γρήγοροι έλεγχοι για operators σε σύγχρονα domains
 
-Πριν επιλέξεις ένα Kerberos attack path, απάντησε γρήγορα σε τέσσερις ερωτήσεις:
+Πριν επιλέξετε μια διαδρομή Kerberos attack, απαντήστε γρήγορα σε τέσσερις ερωτήσεις:
 
-1. **Ποιοι accounts είναι ακόμα RC4-friendly;**
+1. **Ποια accounts εξακολουθούν να είναι RC4-friendly;**
 2. **Ποιοι users δεν απαιτούν pre-auth;**
-3. **Ποια objects expose delegation abuse;**
-4. **Ποια μέρη του domain είναι αρκετά νέα ώστε να enforce recent hardening;**
+3. **Ποια objects εκθέτουν delegation abuse;**
+4. **Ποια τμήματα του domain είναι αρκετά νέα ώστε να επιβάλλουν το πρόσφατο hardening;**
 ```powershell
 # 1) Service accounts explicitly pinned to RC4 / legacy etypes
 Get-ADObject -LDAPFilter '(|(msDS-SupportedEncryptionTypes=4)(msDS-SupportedEncryptionTypes=12))' \
@@ -59,18 +60,18 @@ $_.ProviderName -eq 'Microsoft-Windows-Kerberos-Key-Distribution-Center' -and $_
 }
 ```
 Πρακτική ερμηνεία:
-- Αν οι **interesting SPN accounts** είναι ρητά RC4-capable, το Kerberoasting παραμένει φθηνό και γρήγορο.
-- Αν οι περισσότερες service accounts δεν έχουν **explicit etype configuration**, αναμένετε **AES-only** συμπεριφορά σε updated 2026 DCs και σχεδιάστε για πιο αργό offline cracking ή για διαφορετική προσέγγιση.
-- Αν υπάρχει **RBCD / KCD / unconstrained delegation**, το S4U συχνά ξεπερνά το brute-force.
-- Αν το **certificate auth** είναι σε χρήση, να θυμάστε ότι ένα αποτυχημένο PKINIT path δεν σημαίνει πάντα ότι το cert είναι άχρηστο· σε πολλά περιβάλλοντα το ίδιο cert εξακολουθεί να λειτουργεί για **Schannel/LDAPS** abuse (δείτε [AD Certificates / PKINIT abuse](ad-certificates.md)).
+- Αν οι **ενδιαφέροντες λογαριασμοί SPN υποστηρίζουν ρητά RC4**, το Kerberoasting παραμένει οικονομικό και γρήγορο.
+- Αν οι περισσότεροι service accounts **δεν έχουν ρητή ρύθμιση etype**, περιμένετε συμπεριφορά **μόνο AES** σε ενημερωμένους DC του 2026 και προγραμματίστε πιο αργό offline cracking ή διαφορετική διαδρομή.
+- Αν υπάρχει **RBCD / KCD / unconstrained delegation**, το S4U συχνά υπερτερεί του brute-force.
+- Αν χρησιμοποιείται **certificate auth**, θυμηθείτε ότι μια αποτυχημένη διαδρομή PKINIT **δεν σημαίνει πάντα** ότι το cert είναι άχρηστο· σε πολλά περιβάλλοντα το ίδιο cert εξακολουθεί να λειτουργεί για abuse μέσω **Schannel/LDAPS** (δείτε [AD Certificates / PKINIT abuse](ad-certificates.md)).
 
-## Common Kerberos errors that change the attack plan
-- **`KDC_ERR_ETYPE_NOTSUPP`** → Το target account / DC δεν θα χρησιμοποιήσει τον encryption type που ζητήσατε. Σταματήστε να ξαναδοκιμάζετε μόνο με RC4· δώστε **AES keys** ή ζητήστε **AES** roast material αντί για αυτό.
-- **`KRB_AP_ERR_MODIFIED`** → Πιθανότατα έχετε το **wrong service key**, το **wrong SPN**, ή ένα forged ticket που δεν ταιριάζει με το service account που το decrypts πραγματικά.
-- **`KRB_AP_ERR_SKEW`** → Η ώρα σας είναι λάθος. Συγχρονιστείτε με το DC πριν κάνετε debugging οτιδήποτε άλλο.
-- **`KDC_ERR_BADOPTION`** κατά τη διάρκεια S4U / delegation flows → συχνά σημαίνει **sensitive/not-delegable users**, το wrong delegation model, ή ότι προσπαθείτε να κάνετε **classic KCD** εκεί όπου μόνο το **RBCD** θα δεχόταν ένα non-forwardable S4U2Self ticket.
+## Συνηθισμένα σφάλματα Kerberos που αλλάζουν το attack plan
+- **`KDC_ERR_ETYPE_NOTSUPP`** → Ο target account / DC δεν θα χρησιμοποιήσει τον τύπο κρυπτογράφησης που ζητήσατε. Σταματήστε να επαναλαμβάνετε το αίτημα μόνο με RC4· δώστε **AES keys** ή ζητήστε υλικό roast με **AES**.
+- **`KRB_AP_ERR_MODIFIED`** → Πιθανότατα έχετε το **λάθος service key**, το **λάθος SPN** ή ένα forged ticket που δεν αντιστοιχεί στο service account που το αποκρυπτογραφεί στην πραγματικότητα.
+- **`KRB_AP_ERR_SKEW`** → Η ώρα σας είναι λανθασμένη. Κάντε συγχρονισμό με τον DC πριν κάνετε οτιδήποτε άλλο για debugging.
+- **`KDC_ERR_BADOPTION`** κατά τη διάρκεια ροών S4U / delegation → συχνά σημαίνει **sensitive/not-delegable users**, λάθος μοντέλο delegation ή ότι προσπαθείτε να χρησιμοποιήσετε **classic KCD**, ενώ μόνο το **RBCD** θα αποδεχόταν ένα non-forwardable S4U2Self ticket.
 
-## References
-- [Microsoft Learn - Detect and remediate RC4 usage in Kerberos](https://learn.microsoft.com/en-us/windows-server/security/kerberos/detect-remediate-rc4-kerberos)
-- [Microsoft Support - Latest Windows hardening guidance and key dates](https://support.microsoft.com/en-us/topic/latest-windows-hardening-guidance-and-key-dates-eb1bd411-f68c-4d74-a4e1-456721a6551b)
+## Αναφορές
+- [Microsoft Learn - Εντοπισμός και αποκατάσταση χρήσης RC4 στο Kerberos](https://learn.microsoft.com/en-us/windows-server/security/kerberos/detect-remediate-rc4-kerberos)
+- [Microsoft Support - Τελευταίες οδηγίες hardening των Windows και βασικές ημερομηνίες](https://support.microsoft.com/en-us/topic/latest-windows-hardening-guidance-and-key-dates-eb1bd411-f68c-4d74-a4e1-456721a6551b)
 {{#include ../../banners/hacktricks-training.md}}
