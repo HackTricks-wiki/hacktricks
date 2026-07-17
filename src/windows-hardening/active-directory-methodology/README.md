@@ -118,6 +118,46 @@ Get-GlobalAddressList -ExchHostname [ip] -UserName [domain]\[username] -Password
 >
 > However, you should have the **name of the people working on the company** from the recon step you should have performed before this. With the name and surname you could used the script [**namemash.py**](https://gist.github.com/superkojiman/11076951) to generate potential valid usernames.
 
+### Netlogon vulnerable-channel allow-list abuse (Onelogon)
+
+Even after **Zerologon** is patched on the DC, explicitly allow-listed accounts can still be exposed to **legacy/vulnerable Netlogon secure-channel behavior**. The risky configuration is the GPO **`Domain controller: Allow vulnerable Netlogon secure channel connections`** or the matching registry value **`HKLM\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters\VulnerableChannelAllowList`**.
+
+That value is an **SDDL security descriptor** (see [Security Descriptors](security-descriptors.md)). Any account or group granted the relevant ACE in the DACL can be targeted. For example, `O:BAG:BAD:(A;;RC;;;WD)` effectively allow-lists **Everyone**.
+
+Practical operator workflow:
+
+1. **Identify allow-listed principals** by checking both **SYSVOL/GPO** and the **live DC registry**.
+2. **Resolve SIDs** found in the SDDL to real AD users/computers and prioritize **DC machine accounts**, **trust accounts**, and other privileged machines.
+3. Repeatedly attempt **MS-NRPC / Netlogon authentication** as the allow-listed account.
+4. After a successful guess, abuse **Netlogon password-setting** to reset the target account password (the public PoC sets it to an empty string).
+
+Quick triage / lab examples from the public artifact:
+
+```bash
+# Enumerate allow-listed accounts (scanner requires privileged registry access on the DC)
+poetry run scan --dc-ip <DC_IP> --username <USER> --password <PASSWORD>
+
+# Meet-in-the-middle attack against an allow-listed account
+poetry run onelogon --dc-ip <DC_IP> --dc-name <DC_HOSTNAME> --username '<TARGET_ACCOUNT>'
+
+# Faster 24-bit brute force when you control another computer account
+poetry run onelogon --dc-ip <DC_IP> --dc-name <DC_HOSTNAME> --username '<TARGET_ACCOUNT>' \
+  --comp-username '<COMP_ACCOUNT>' --comp-pass '<COMP_PASSWORD>'
+```
+
+Notes:
+
+- The **scanner** is useful because the effective allow-list may exist in **SYSVOL**, in the **registry**, or in both.
+- The exploit path itself is important because it **does not require Domain Admin privileges** once a vulnerable account has been identified.
+- Compromising a **Domain Controller machine account** such as `DC$` is especially dangerous because resetting that password can directly enable broader **AD takeover** paths.
+- **Brute-force feasibility** depends on the mode: the public artifact describes a meet-in-the-middle approach, a **24-bit** brute force when another computer account is available, and slower **32-bit** variants.
+
+Detection / hardening notes:
+
+- Audit the allow-list policy and remove anything except temporary, explicitly required compatibility exceptions.
+- Monitor DC **System** events **5827/5828/5829/5830/5831** to catch vulnerable Netlogon connections being denied, discovered, or explicitly allowed by policy.
+- Treat accounts in `VulnerableChannelAllowList` as **high-risk** until the legacy dependency is removed.
+
 ### Knowing one or several usernames
 
 Ok, so you know you have already a valid username but no passwords... Then try:
@@ -1017,5 +1057,7 @@ If you want to detect common AD tradecraft, **do not rely only on operator-contr
 - [Barbhack 2025 CTF (NetExec AD Lab) – Pirates](https://0xdf.gitlab.io/2026/01/29/barbhack-2025-ctf.html)
 - [Hashcat](https://github.com/hashcat/hashcat)
 - [ThatTotallyRealMyth/Impacket-IoCs – Dissecting Impacket](https://github.com/ThatTotallyRealMyth/Impacket-IoCs)
+- [rub-softsec/onelogon - Onelogon: Taking over Active Directory Accounts via Netlogon](https://github.com/rub-softsec/onelogon)
+- [Microsoft - How to manage the changes in Netlogon secure channel connections associated with CVE-2020-1472](https://support.microsoft.com/en-us/topic/how-to-manage-the-changes-in-netlogon-secure-channel-connections-associated-with-cve-2020-1472-f7e8cc17-0309-1d6a-304e-5ba73cd1a11e)
 
 {{#include ../../banners/hacktricks-training.md}}

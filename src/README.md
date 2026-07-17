@@ -67,20 +67,6 @@ https://go.intigriti.com/hacktricks
 
 ---
 
-### [HACKENPROOF](https://bit.ly/3xrrDrL)
-
-<figure class="sponsor-logo"><img src="images/image (3).png" alt=""><figcaption></figcaption></figure>
-
-Join [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) server to communicate with experienced hackers and bug bounty hunters!
-
-- **Hacking Insights:** Engage with content that delves into the thrill and challenges of hacking
-- **Real-Time Hack News:** Keep up-to-date with fast-paced hacking world through real-time news and insights
-- **Latest Announcements:** Stay informed with the newest bug bounties launching and crucial platform updates
-
-**Join us on** [**Discord**](https://discord.com/invite/N3FrSbmwdy) and start collaborating with top hackers today!
-
----
-
 ### [Modern Security – AI & Application Security Training Platform](https://modernsecurity.io/)
 
 <figure class="sponsor-logo"><img src="images/modern_security_logo.png" alt="Modern Security"><figcaption></figcaption></figure>
@@ -120,11 +106,19 @@ You can **create a free account** [**here**](https://serpapi.com/users/sign_up)*
 
 ---
 
-### [8kSec Academy – In-Depth Mobile Security Courses](https://academy.8ksec.io/)
+### [8kSec Academy – In-Depth Mobile & AI Security Courses](https://academy.8ksec.io/)
 
 <figure class="sponsor-logo"><img src="images/image (2).png" alt=""><figcaption></figcaption></figure>
 
-Learn the technologies and skills required to perform vulnerability research, penetration testing, and reverse engineering to protect mobile applications and devices. **Master iOS and Android security** through our on-demand courses and **get certified**:
+**8kSec Academy** trains you in offensive mobile and AI security, taught by active researchers – the same team behind the CVE writeups and talks at Black Hat, HITB, and Zer0con. Courses are self-paced, built around labs on real targets, and backed by a hands-on certification.
+ 
+The catalog runs two tracks:
+
+**Mobile Security** – iOS and Android from the app layer down: reverse engineering with Ghidra and LLDB, ARM64 exploitation, kernel internals and modern mitigations (PAC, MTE, SELinux), jailbreak and rooting mechanics.
+
+**AI Security** – two full courses spanning the field. Practical AI Security covers how LLMs, RAG pipelines, AI agents and MCP work, and how to attack and defend them. Advanced AI Security goes build-heavy at the frontier: red teaming AI systems at scale with Garak and PyRIT, exploiting MCP servers, planting and detecting model backdoors, and fine-tuning attacks and defenses on Apple Silicon.
+
+Courses and certifications:
 
 {{#ref}}
 https://academy.8ksec.io/
@@ -234,7 +228,4 @@ welcome/hacktricks-values-and-faq.md
 ## Github Stats
 
 ![HackTricks Github Stats](https://repobeats.axiom.co/api/embed/68f8746802bcf1c8462e889e6e9302d4384f164b.svg)
-
-{{#include ./banners/hacktricks-training.md}}
-
 
