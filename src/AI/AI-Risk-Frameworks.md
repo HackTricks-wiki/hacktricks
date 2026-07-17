@@ -1,110 +1,111 @@
-# AI 위험
+# AI Risks
 
 {{#include ../banners/hacktricks-training.md}}
 
 ## OWASP Top 10 Machine Learning Vulnerabilities
 
-Owasp는 AI 시스템에 영향을 줄 수 있는 상위 10가지 machine learning 취약점을 식별했습니다. 이러한 취약점은 data poisoning, model inversion, adversarial attacks 등을 포함한 다양한 보안 문제로 이어질 수 있습니다. 이러한 취약점을 이해하는 것은 안전한 AI 시스템을 구축하는 데 중요합니다.
+Owasp는 AI 시스템에 영향을 미칠 수 있는 상위 10개의 machine learning 취약점을 식별했습니다. 이러한 취약점은 data poisoning, model inversion, adversarial attacks를 비롯한 다양한 보안 문제로 이어질 수 있습니다. 안전한 AI 시스템을 구축하려면 이러한 취약점을 이해하는 것이 중요합니다.
 
-업데이트된 자세한 상위 10개 machine learning 취약점 목록은 [OWASP Top 10 Machine Learning Vulnerabilities](https://owasp.org/www-project-machine-learning-security-top-10/) 프로젝트를 참조하세요.
+상위 10개의 machine learning 취약점에 대한 최신의 상세 목록은 [OWASP Top 10 Machine Learning Vulnerabilities](https://owasp.org/www-project-machine-learning-security-top-10/) 프로젝트를 참조하세요.
 
-- **Input Manipulation Attack**: 공격자는 모델이 잘못된 결정을 내리도록 **incoming data**에 작고 종종 보이지 않는 변경을 추가합니다.\
-*예시*: 몇 점의 페인트가 묻은 stop‑sign이 self‑driving car를 속여 speed‑limit sign으로 "인식"하게 함.
+- **Input Manipulation Attack**: 공격자는 **incoming data**에 아주 작고 흔히 눈에 보이지 않는 변경을 추가하여 모델이 잘못된 결정을 내리도록 합니다.\
+*Example*: 정지 표지판에 소량의 페인트를 뿌리면 자율주행 자동차가 이를 제한 속도 표지판으로 "인식"하도록 속일 수 있습니다.
 
-- **Data Poisoning Attack**: **training set**을 의도적으로 오염시켜 모델에 해로운 규칙을 학습시킵니다.\
-*예시*: 악성코드 바이너리가 antivirus training corpus에서 "benign"으로 잘못 라벨링되어 유사한 malware가 이후 탐지를 피할 수 있게 함.
+- **Data Poisoning Attack**: **training set**을 의도적으로 악성 샘플로 오염시켜 모델이 유해한 규칙을 학습하도록 합니다.\
+*Example*: antivirus training corpus에서 malware 바이너리를 "benign"으로 잘못 라벨링하면, 이후 유사한 malware가 탐지되지 않고 통과할 수 있습니다.
 
-- **Model Inversion Attack**: 출력 값을 탐지해 공격자가 원래 입력의 민감한 특징을 재구성하는 **reverse model**을 만듭니다.\
-*예시*: cancer‑detection 모델의 예측으로부터 환자의 MRI 이미지를 재생성함.
+- **Model Inversion Attack**: 출력값을 조사하여 공격자는 원래 입력의 민감한 특징을 재구성하는 **reverse model**을 만들 수 있습니다.\
+*Example*: cancer-detection model의 예측값을 이용해 환자의 MRI 이미지를 재생성할 수 있습니다.
 
-- **Membership Inference Attack**: 공격자는 자신이 관심 있는 **specific record**가 training에 사용되었는지 confidence 차이를 통해 판단합니다.\
-*예시*: 특정인의 은행 거래가 fraud‑detection 모델의 training 데이터에 포함되었는지 확인함.
+- **Membership Inference Attack**: 공격자는 confidence 차이를 확인하여 **specific record**가 training 중 사용되었는지 테스트합니다.\
+*Example*: 특정인의 bank transaction이 fraud-detection model의 training data에 포함되어 있는지 확인할 수 있습니다.
 
-- **Model Theft**: 반복적인 쿼리로 공격자는 결정 경계를 학습하고 **clone the model's behavior**(및 IP)를 획득합니다.\
-*예시*: ML‑as‑a‑Service API에서 충분한 Q&A 쌍을 수집해 거의 동등한 로컬 모델을 구축함.
+- **Model Theft**: 반복적인 querying을 통해 공격자는 decision boundary와 **clone the model's behavior**(및 IP)를 학습할 수 있습니다.\
+*Example*: ML-as-a-Service API에서 충분한 Q&A 쌍을 수집하여 거의 동등한 local model을 구축할 수 있습니다.
 
-- **AI Supply‑Chain Attack**: ML pipeline의 어떤 구성요소(data, libraries, pre‑trained weights, CI/CD)를 손상시켜 downstream 모델을 오염시킵니다.\
-*예시*: model‑hub의 poisoned dependency가 backdoored sentiment‑analysis model을 여러 앱에 설치함.
+- **AI Supply-Chain Attack**: **ML pipeline**의 모든 구성 요소(data, libraries, pre-trained weights, CI/CD 등)를 compromise하여 downstream model을 오염시킵니다.\
+*Example*: model-hub의 poisoned dependency가 여러 앱에 backdoored sentiment-analysis model을 설치할 수 있습니다.
 
-- **Transfer Learning Attack**: 악의적 로직이 **pre‑trained model**에 심어져 피해자의 작업으로 fine‑tuning해도 남아 있습니다.\
-*예시*: hidden trigger가 있는 vision backbone이 medical imaging에 적응된 후에도 라벨을 뒤집음.
+- **Transfer Learning Attack**: 악성 로직을 **pre-trained model**에 심어 피해자의 task에 맞게 fine-tuning한 뒤에도 유지되도록 합니다.\
+*Example*: 숨겨진 trigger가 있는 vision backbone은 medical imaging에 맞게 적용된 후에도 label을 계속 뒤집을 수 있습니다.
 
-- **Model Skewing**: 미묘하게 편향되거나 잘못 라벨된 데이터가 **shifts the model's outputs**하여 공격자의 의제를 돕습니다.\
-*예시*: "clean" spam 이메일을 ham으로 라벨링해 spam filter가 유사한 미래 이메일을 통과시키게 함.
+- **Model Skewing**: 미묘하게 편향되었거나 잘못 라벨링된 data가 **model's outputs**를 공격자의 목적에 유리하도록 변경합니다.\
+*Example*: "clean" spam email을 ham으로 라벨링하여 주입하면 spam filter가 이후 유사한 email을 통과시킬 수 있습니다.
 
-- **Output Integrity Attack**: 공격자는 모델 자체가 아니라 전송 중에 **alters model predictions**, downstream 시스템을 속입니다.\
-*예시*: malware classifier의 "malicious" 판정을 file‑quarantine 단계에 도달하기 전에 "benign"으로 바꿈.
+- **Output Integrity Attack**: 공격자는 model 자체가 아니라 **model predictions in transit**를 **alter**하여 downstream system을 속입니다.\
+*Example*: file-quarantine stage에서 확인하기 전에 malware classifier의 "malicious" 판정을 "benign"으로 뒤집을 수 있습니다.
 
-- **Model Poisoning** --- 쓰기 권한을 얻은 후 종종 **model parameters** 자체에 직접적이고 표적화된 변경을 가해 동작을 바꿉니다.\
-*예시*: production의 fraud‑detection 모델의 가중치를 조정해 특정 카드의 거래가 항상 승인되도록 함.
+- **Model Poisoning** --- 직접적이고 표적화된 변경을 **model parameters** 자체에 가하며, write access를 획득한 후 동작을 변경하는 경우가 많습니다.\
+*Example*: production 환경의 fraud-detection model에서 특정 카드의 transaction이 항상 승인되도록 weights를 조정할 수 있습니다.
 
 
 ## Google SAIF Risks
 
-Google의 [SAIF (Security AI Framework)](https://saif.google/secure-ai-framework/risks)는 AI 시스템과 관련된 다양한 위험을 정리합니다:
+Google의 [SAIF (Security AI Framework)](https://saif.google/secure-ai-framework/risks)는 AI 시스템과 관련된 다양한 risks를 설명합니다:
 
-- **Data Poisoning**: 악의적 행위자가 training/tuning 데이터를 변경하거나 주입하여 정확도를 저하시켜 backdoors를 심거나 결과를 왜곡하여 모델 무결성을 손상시킵니다.
+- **Data Poisoning**: 악성 행위자가 training/tuning data를 변경하거나 주입하여 정확도를 저하시키고, backdoor를 심거나, 결과를 편향시켜 전체 data-lifecycle에서 model integrity를 훼손합니다.
 
-- **Unauthorized Training Data**: 저작권이 있거나 민감하거나 허가되지 않은 데이터셋을 수집하면 모델이 사용해서는 안 되는 데이터를 학습하게 되어 법적·윤리적·성능 상의 위험을 초래합니다.
+- **Unauthorized Training Data**: 저작권이 있거나 민감하거나 사용 허가를 받지 않은 dataset을 수집하면, model이 사용이 허용되지 않은 data로부터 학습하기 때문에 법적, 윤리적, 성능상의 문제가 발생합니다.
 
-- **Model Source Tampering**: 공급망 또는 내부자의 모델 코드, dependencies, 또는 weights에 대한 조작은 retraining 후에도 남는 숨겨진 로직을 심을 수 있습니다.
+- **Model Source Tampering**: training 전 또는 training 중에 model code, dependencies 또는 weights를 supply-chain 또는 insider가 조작하면, retraining 후에도 지속되는 숨겨진 로직이 삽입될 수 있습니다.
 
-- **Excessive Data Handling**: 약한 데이터 보관 및 거버넌스 통제로 시스템이 필요한 것보다 더 많은 개인 데이터를 저장·처리하게 되어 노출 및 규정 준수 위험을 높입니다.
+- **Excessive Data Handling**: 취약한 data-retention 및 governance control로 인해 system이 필요 이상으로 많은 personal data를 저장하거나 처리하게 되어, 노출 및 compliance risk가 증가합니다.
 
-- **Model Exfiltration**: 공격자가 모델 파일/weights를 탈취하면 지적재산권 손실과 모방 서비스 또는 후속 공격을 가능하게 합니다.
+- **Model Exfiltration**: 공격자가 model files/weights를 탈취하여 intellectual property가 손실되고, copy-cat service 또는 후속 attack이 가능해집니다.
 
-- **Model Deployment Tampering**: 공격자가 모델 아티팩트나 serving 인프라를 수정하여 실행 중인 모델이 검증된 버전과 달라져 동작이 바뀔 수 있습니다.
+- **Model Deployment Tampering**: 공격자가 model artifacts 또는 serving infrastructure를 수정하여 실행 중인 model이 검증된 version과 달라지도록 만들 수 있으며, 이로 인해 behaviour가 변경될 수 있습니다.
 
-- **Denial of ML Service**: API를 폭주시키거나 “sponge” 입력을 보내 compute/energy를 고갈시켜 모델을 오프라인으로 만드는 DoS 유사 공격을 수행할 수 있습니다.
+- **Denial of ML Service**: API를 flooding하거나 “sponge” input을 전송하여 compute/energy를 고갈시키고 model을 offline 상태로 만들 수 있으며, 이는 전통적인 DoS attack과 유사합니다.
 
-- **Model Reverse Engineering**: 많은 수의 input‑output 쌍을 수집해 공격자가 모델을 복제하거나 distill하여 모방 제품 및 맞춤형 adversarial 공격을 조장할 수 있습니다.
+- **Model Reverse Engineering**: 많은 수의 input-output pair를 수집하여 공격자가 model을 clone하거나 distil할 수 있으며, 이를 통해 모방 제품과 맞춤형 adversarial attack을 만들 수 있습니다.
 
-- **Insecure Integrated Component**: 취약한 plugins, agents, 또는 upstream 서비스가 공격자에게 코드 주입이나 권한 상승을 허용합니다.
+- **Insecure Integrated Component**: 취약한 plugin, agent 또는 upstream service를 통해 공격자가 AI pipeline 내부에 code를 주입하거나 privilege를 상승시킬 수 있습니다.
 
-- **Prompt Injection**: 직접적이거나 간접적으로 모델에 system intent를 무시하도록 지시를 밀어넣는 prompts를 제작합니다.
+- **Prompt Injection**: 직접 또는 간접적으로 prompt를 조작하여 system intent를 무시하는 instruction을 몰래 삽입하고, model이 의도하지 않은 command를 수행하도록 합니다.
 
-- **Model Evasion**: 정교하게 설계된 입력이 모델을 오분류시키거나 hallucinate하게 하거나 금지된 내용을 출력하게 하여 안전성과 신뢰를 저하시킵니다.
+- **Model Evasion**: 정교하게 설계된 input이 model을 오분류하거나 hallucinate하거나 금지된 content를 출력하도록 하여 safety와 trust를 약화시킵니다.
 
-- **Sensitive Data Disclosure**: 모델이 training 데이터나 사용자 컨텍스트에서 개인 또는 기밀 정보를 노출하여 프라이버시 및 규정 위반을 초래합니다.
+- **Sensitive Data Disclosure**: model이 training data 또는 user context에 포함된 private 또는 confidential information을 공개하여 privacy 및 regulations를 위반합니다.
 
-- **Inferred Sensitive Data**: 모델이 제공되지 않은 개인 속성을 추론하여 새로운 프라이버시 피해를 만들어냅니다.
+- **Inferred Sensitive Data**: model이 제공되지 않은 personal attribute를 추론하여 inference를 통한 새로운 privacy harm을 일으킵니다.
 
-- **Insecure Model Output**: 정제되지 않은 응답이 유해한 코드, 허위정보, 또는 부적절한 콘텐츠를 사용자나 downstream 시스템에 전달합니다.
+- **Insecure Model Output**: 정제되지 않은 response가 harmful code, misinformation 또는 부적절한 content를 user 또는 downstream system에 전달합니다.
 
-- **Rogue Actions**: 자율 통합된 agents가 적절한 사용자 감독 없이 의도치 않은 실제 작업(file writes, API calls, purchases 등)을 실행합니다.
+- **Rogue Actions**: 자율적으로 통합된 agent가 적절한 user oversight 없이 의도하지 않은 실제 작업(file writes, API calls, purchases 등)을 실행합니다.
 
 ## Mitre AI ATLAS Matrix
 
-The [MITRE AI ATLAS Matrix](https://atlas.mitre.org/matrices/ATLAS)는 AI 시스템과 관련된 위험을 이해하고 완화하기 위한 포괄적인 프레임워크를 제공합니다. 이 매트릭스는 공격자가 AI 모델에 사용할 수 있는 다양한 공격 기법과 전술을 분류하고, 또한 AI 시스템을 사용해 다양한 공격을 수행하는 방법을 다룹니다.
+[MITRE AI ATLAS Matrix](https://atlas.mitre.org/matrices/ATLAS)는 AI 시스템과 관련된 risks를 이해하고 완화하기 위한 comprehensive framework를 제공합니다. 이 framework는 adversary가 AI model에 사용할 수 있는 다양한 attack technique과 tactic을 분류하며, AI system을 사용해 다양한 attack을 수행하는 방법도 다룹니다.
+
 
 ## LLMJacking (Token Theft & Resale of Cloud-hosted LLM Access)
 
-공격자는 활성 세션 tokens 또는 cloud API credentials를 탈취하고 무단으로 유료 cloud‑hosted LLM을 호출합니다. 접근은 종종 피해자의 계정을 전면에 둔 reverse proxies(예: "oai-reverse-proxy" 배포)를 통해 재판매됩니다. 결과로는 금전적 손실, 정책 외 모델 오용, 피해 테넌트에 대한 귀속 문제가 발생할 수 있습니다.
+공격자는 active session token 또는 cloud API credential을 탈취하고 authorization 없이 유료 cloud-hosted LLM을 호출합니다. 이러한 access는 reverse proxy를 통해 재판매되는 경우가 많으며, reverse proxy는 피해자의 account를 전면에 내세웁니다. 예를 들어 "oai-reverse-proxy" deployment가 있습니다. 결과적으로 financial loss, policy를 벗어난 model misuse, 그리고 victim tenant로의 attribution이 발생할 수 있습니다.
 
 TTPs:
-- 감염된 developer 머신이나 브라우저에서 tokens를 수집; CI/CD secrets를 훔치거나 leaked cookies를 구매합니다.
-- genuine provider로 요청을 전달하고 upstream key를 숨기며 다수 고객을 multiplex하는 reverse proxy를 세웁니다.
-- enterprise guardrails와 rate limits를 우회하기 위해 직접 base‑model endpoints를 남용합니다.
+- 감염된 developer machine 또는 browser에서 token을 수집하고, CI/CD secret을 탈취하며, leaked cookie를 구매합니다.
+- genuine provider로 request를 전달하는 reverse proxy를 구축하여 upstream key를 숨기고 여러 customer의 request를 multiplex합니다.
+- direct base-model endpoint를 악용하여 enterprise guardrail과 rate limit을 우회합니다.
 
 Mitigations:
-- tokens를 device fingerprint, IP ranges, 및 client attestation에 바인딩; 짧은 만료 시간과 MFA로 갱신을 강제합니다.
-- 키의 권한을 최소화(도구 접근 금지, 가능한 경우 read‑only); 이상 징후 시 회전합니다.
-- per‑route quotas와 tenant isolation을 시행하는 정책 게이트웨이 뒤에서 서버 측에서 모든 트래픽을 종료하고 안전 필터를 적용합니다.
-- 비정상적 사용 패턴(급격한 비용 증가, 이례적 지역, UA 문자열)을 모니터링하고 의심스러운 세션을 자동으로 폐기합니다.
-- 장기 정적 API 키 대신 IdP에서 발급한 mTLS 또는 signed JWTs를 우선 사용합니다.
+- token을 device fingerprint, IP range 및 client attestation에 bind하고, 짧은 expiration을 적용하며 MFA로 refresh합니다.
+- key의 scope를 최소화하고(no tool access, 해당되는 경우 read-only), anomaly 발생 시 rotate합니다.
+- safety filter, route별 quota 및 tenant isolation을 적용하는 policy gateway 뒤에서 모든 traffic을 server-side로 terminate합니다.
+- 비정상적인 usage pattern(sudden spend spike, atypical region, UA string)을 모니터링하고 의심스러운 session을 자동으로 revoke합니다.
+- 수명이 긴 static API key보다 IdP가 발급한 mTLS 또는 signed JWT를 우선 사용합니다.
 
 ## Self-hosted LLM inference hardening
 
-confidential data를 처리하기 위해 로컬 LLM server를 운영하면 cloud‑hosted APIs와는 다른 공격 표면이 생깁니다: inference/debug endpoints가 prompts를 leak할 수 있고, serving stack은 보통 reverse proxy를 노출하며 GPU device nodes는 방대한 ioctl() 면을 제공합니다. on‑prem inference service를 평가하거나 배포하는 경우 최소한 다음 사항을 검토하세요.
+confidential data를 대상으로 local LLM server를 실행하면 cloud-hosted API와는 다른 attack surface가 생성됩니다. inference/debug endpoint에서 prompt가 leak될 수 있고, serving stack은 일반적으로 reverse proxy를 노출하며, GPU device node는 대규모 `ioctl()` surface에 access를 제공합니다. on-prem inference service를 평가하거나 deployment하는 경우 최소한 다음 항목을 검토하세요.
 
 ### Prompt leakage via debug and monitoring endpoints
 
-inference API를 **multi-user sensitive service**로 취급하세요. Debug 또는 monitoring 경로는 prompt 내용, slot 상태, model metadata, 또는 내부 큐 정보를 노출할 수 있습니다. `llama.cpp`에서는 `/slots` endpoint가 특히 민감한데, 이는 슬롯별 상태를 노출하며 슬롯 검사/관리를 위해서만 의도되었습니다.
+inference API를 **multi-user sensitive service**로 취급하세요. debug 또는 monitoring route는 prompt content, slot state, model metadata 또는 internal queue information을 노출할 수 있습니다. `llama.cpp`에서 `/slots` endpoint는 slot별 state를 노출하며 slot inspection/management 용도로만 사용되므로 특히 민감합니다.
 
-- Put a reverse proxy in front of the inference server and **deny by default**.
-- Only allowlist the exact HTTP method + path combinations that are needed by the client/UI.
-- Disable introspection endpoints in the backend itself whenever possible, for example `llama-server --no-slots`.
-- Bind the reverse proxy to `127.0.0.1` and expose it through an authenticated transport such as SSH local port forwarding instead of publishing it on the LAN.
+- inference server 앞에 reverse proxy를 배치하고 **deny by default**를 적용합니다.
+- client/UI에 필요한 정확한 HTTP method + path 조합만 allowlist에 등록합니다.
+- 가능한 경우 backend 자체에서 introspection endpoint를 비활성화합니다. 예: `llama-server --no-slots`.
+- reverse proxy를 `127.0.0.1`에 bind하고 LAN에 publish하는 대신 SSH local port forwarding과 같은 authenticated transport를 통해 노출합니다.
 
 Example allowlist with nginx:
 ```nginx
@@ -126,9 +127,9 @@ proxy_pass http://unix:/run/llama-cpp/llama-cpp.sock:;
 }
 }
 ```
-### no network와 UNIX sockets를 사용하는 Rootless containers
+### 네트워크와 UNIX 소켓이 없는 Rootless 컨테이너
 
-만약 inference daemon이 UNIX socket에서 listen을 지원한다면, TCP보다 UNIX socket을 우선 사용하고 컨테이너를 **no network stack** 상태로 실행하세요:
+추론 데몬이 UNIX 소켓 수신을 지원한다면 TCP보다 이를 우선하고, **네트워크 스택 없이** 컨테이너를 실행합니다:
 ```bash
 podman run --rm -d \
 --network none \
@@ -144,19 +145,19 @@ ghcr.io/ggml-org/llama.cpp:server-cuda13 \
 --no-slots
 ```
 이점:
-- `--network none`은 인바운드/아웃바운드 TCP/IP 노출을 제거하고 rootless 컨테이너가 그렇지 않으면 필요로 하는 user-mode helpers를 회피합니다.
-- UNIX socket을 사용하면 첫 번째 접근 제어 계층으로서 소켓 경로에 POSIX 권한/ACLs를 적용할 수 있습니다.
-- `--userns=keep-id`와 rootless Podman은 컨테이너 루트가 호스트 루트가 아니므로 container breakout의 영향을 줄입니다.
-- 읽기 전용 모델 마운트는 컨테이너 내부에서 모델 변조가 일어날 가능성을 줄입니다.
+- `--network none`은 인바운드/아웃바운드 TCP/IP 노출을 제거하고, rootless containers에 필요할 수 있는 user-mode helpers를 사용하지 않도록 합니다.
+- UNIX socket을 사용하면 socket path에 POSIX permissions/ACLs를 적용하여 첫 번째 access-control 계층으로 사용할 수 있습니다.
+- `--userns=keep-id`와 rootless Podman은 container breakout의 영향을 줄입니다. container root는 host root가 아니기 때문입니다.
+- Read-only model mounts는 container 내부에서 model tampering이 발생할 가능성을 줄입니다.
 
-### GPU 디바이스 노드 최소화
+### GPU device-node 최소화
 
-GPU 기반 inference의 경우, `/dev/nvidia*` 파일은 큰 드라이버 `ioctl()` 핸들러와 잠재적으로 공유되는 GPU 메모리 관리 경로를 노출하므로 가치가 높은 로컬 공격 표면입니다.
+GPU-backed inference에서 `/dev/nvidia*` 파일은 대규모 driver `ioctl()` handlers와 잠재적으로 shared GPU memory-management paths를 노출하므로 가치가 높은 local attack surfaces입니다.
 
-- Do not leave `/dev/nvidia*` world writable.
-- Restrict `nvidia`, `nvidiactl`, and `nvidia-uvm` with `NVreg_DeviceFileUID/GID/Mode`, udev rules, and ACLs so only the mapped container UID can open them.
-- Blacklist unnecessary modules such as `nvidia_drm`, `nvidia_modeset`, and `nvidia_peermem` on headless inference hosts.
-- Preload only required modules at boot instead of letting the runtime opportunistically `modprobe` them during inference startup.
+- `/dev/nvidia*`를 world writable 상태로 두지 마십시오.
+- `NVreg_DeviceFileUID/GID/Mode`, udev rules 및 ACLs를 사용하여 `nvidia`, `nvidiactl`, `nvidia-uvm`을 제한하고, mapped container UID만 해당 파일을 열 수 있도록 하십시오.
+- Headless inference hosts에서는 `nvidia_drm`, `nvidia_modeset`, `nvidia_peermem`과 같은 불필요한 modules를 blacklist하십시오.
+- Runtime이 inference startup 중 opportunistically `modprobe`하도록 두지 말고, boot 시 required modules만 preload하십시오.
 
 예시:
 ```bash
@@ -164,18 +165,18 @@ options nvidia NVreg_DeviceFileUID=0
 options nvidia NVreg_DeviceFileGID=0
 options nvidia NVreg_DeviceFileMode=0660
 ```
-One important review point is **`/dev/nvidia-uvm`**. Even if the workload does not explicitly use `cudaMallocManaged()`, recent CUDA runtimes may still require `nvidia-uvm`. Because this device is shared and handles GPU virtual memory management, treat it as a cross-tenant data-exposure surface. If the inference backend supports it, a Vulkan backend can be an interesting trade-off because it may avoid exposing `nvidia-uvm` to the container at all.
+중요한 검토 항목 중 하나는 **`/dev/nvidia-uvm`**입니다. workload가 명시적으로 `cudaMallocManaged()`를 사용하지 않더라도 최신 CUDA runtime에는 여전히 `nvidia-uvm`이 필요할 수 있습니다. 이 device는 공유되며 GPU virtual memory management를 처리하므로, cross-tenant data-exposure surface로 간주해야 합니다. inference backend가 지원한다면 Vulkan backend는 흥미로운 trade-off가 될 수 있습니다. container에 `nvidia-uvm`을 전혀 노출하지 않을 수 있기 때문입니다.
 
-### 추론 워커를 위한 LSM 격리
+### inference worker를 위한 LSM confinement
 
-AppArmor/SELinux/seccomp는 추론 프로세스 주변에 방어층(defense in depth)으로 사용되어야 합니다:
+inference process 주변에서 defense in depth를 구현하려면 AppArmor/SELinux/seccomp를 사용해야 합니다.
 
-- 실제로 필요한 공유 라이브러리, 모델 경로, 소켓 디렉터리 및 GPU 디바이스 노드만 허용하세요.
-- 명시적으로 `sys_admin`, `sys_module`, `sys_rawio`, `sys_ptrace` 같은 고위험 capabilities를 거부하세요.
-- 모델 디렉터리는 읽기 전용으로 유지하고, 쓰기 가능한 경로는 런타임 소켓/캐시 디렉터리로만 한정하세요.
-- 거부 로그(denial logs)를 모니터링하세요. 모델 서버나 post-exploitation 페이로드가 예상 동작을 벗어나려 할 때 유용한 탐지 텔레메트리를 제공합니다.
+- 실제로 필요한 shared library, model path, socket directory 및 GPU device node만 허용합니다.
+- `sys_admin`, `sys_module`, `sys_rawio`, `sys_ptrace`와 같은 high-risk capability를 명시적으로 거부합니다.
+- model directory는 read-only로 유지하고, writable path의 범위를 runtime socket/cache directory로만 제한합니다.
+- denial log를 모니터링합니다. model server 또는 post-exploitation payload가 예상된 동작 범위를 벗어나려고 할 때 유용한 detection telemetry를 제공하기 때문입니다.
 
-Example AppArmor rules for a GPU-backed worker:
+GPU-backed worker를 위한 AppArmor rule 예시:
 ```text
 deny capability sys_admin,
 deny capability sys_module,
@@ -188,13 +189,58 @@ deny capability sys_ptrace,
 /var/lib/models/** r,
 owner /srv/llm/** rw,
 ```
-## 참고자료
-- [Unit 42 – Code Assistant LLMs의 위험: 유해 콘텐츠, 오용 및 기만](https://unit42.paloaltonetworks.com/code-assistant-llms/)
-- [LLMJacking 개요 – The Hacker News](https://thehackernews.com/2024/05/researchers-uncover-llmjacking-scheme.html)
-- [oai-reverse-proxy (도난당한 LLM 접근권 재판매)](https://gitgud.io/khanon/oai-reverse-proxy)
-- [Synacktiv - 온프레미스 저권한 LLM 서버 배포 심층 분석](https://www.synacktiv.com/en/publications/deep-dive-into-the-deployment-of-an-on-premise-low-privileged-llm-server.html)
+## Phantom Squatting: AI가 환각한 도메인을 AI Supply-Chain Vector로 악용
+
+Phantom squatting은 **slopsquatting의 domain/URL equivalent**입니다. 존재하지 않는 package name을 환각하는 대신, LLM이 실제 브랜드에 대한 그럴듯한 **portal, API, webhook, billing, SSO, download 또는 support domain**을 환각하고, 사람이 또는 agent가 사용하기 전에 공격자가 해당 namespace를 등록합니다.
+
+이는 많은 AI-assisted workflow에서 model output이 **trusted dependency**로 취급되기 때문에 중요합니다.
+- 개발자가 제안된 endpoint를 code 또는 CI/CD integration에 붙여 넣습니다.
+- AI agent가 documentation, schema, APK, ZIP 또는 webhook target을 자동으로 가져옵니다.
+- 생성된 runbook 또는 doc가 fake URL을 authoritative한 것처럼 포함할 수 있습니다.
+
+### Offensive workflow
+
+1. **환각 표면 조사**: `admin`, `billing`, `sandbox`, `benefits`, `api`, `download`, `support`, `webhook` 또는 `mobile app` portal과 같은 현실적인 workflow에 대해 brand-specific question을 묻습니다.
+2. **후보 정규화**: 생성된 URL을 resolve하고, NXDOMAIN response를 parent registerable domain으로 축약하며, prompt family를 deduplicate합니다. Prompt corpus는 다양하게 유지해야 하며, 예를 들어 **Jaccard similarity**를 사용해 거의 중복된 항목을 제거할 수 있습니다.
+3. **예측 가능한 환각의 우선순위 지정**:
+- **Thermal Hallucination Persistence (THP)**: 동일한 fake domain이 낮은 temperature인 `T=0.1`을 포함해 여러 temperature에서 나타납니다.
+- **Cross-model consensus**: 여러 LLM family가 동일한 fake domain을 생성합니다.
+4. **parent domain을 등록하고 weaponize**한 다음, phishing, fake APK/ZIP download, credential harvester, malicious doc 또는 secret/webhook payload를 수집하는 API endpoint를 호스팅합니다. **Pure domain-level hallucination**은 공격자가 전체 namespace를 제어하기 때문에 monetize하기 가장 쉽습니다. 다만 normalized parent가 미등록 상태라면 subdomain/path hallucination도 악용할 수 있습니다.
+5. **zero-reputation window 악용**: 새로 등록된 domain은 blocklist history, URL reputation 및 성숙한 telemetry가 없는 경우가 많으므로 detection이 따라잡을 때까지 control을 우회할 수 있습니다. 공격자는 crawler에만 benign response를 제공하거나, redirect cloaking, CAPTCHA gate 또는 지연된 payload staging을 사용해 이 window를 늘릴 수 있습니다.
+
+### Agent에 위험한 이유
+
+Human victim의 경우 fake domain은 보통 click과 추가 action을 필요로 합니다. 그러나 **agentic workflow**에서는 LLM이 **lure**와 **executor**를 동시에 담당할 수 있습니다. Agent는 hallucinated URL을 받아 이를 fetch하고 response를 parse한 후, human review 없이 token을 leak하거나 instruction을 실행하거나 dependency를 download하거나 poisoned data를 CI/CD에 주입할 수 있습니다.
+
+### Practical attacker prompts
+
+High-yield prompt는 일반적으로 명시적인 phishing lure가 아니라 일반적인 enterprise task처럼 보입니다.
+- “`<brand>` integration을 위한 payment sandbox URL은 무엇인가요?”
+- “`<brand>` build notification에 사용해야 하는 webhook endpoint는 무엇인가요?”
+- “`<brand>`의 employee benefits / billing / SSO portal은 어디에 있나요?”
+- “`<brand>`의 direct Android APK 또는 desktop client download를 제공해 주세요.”
+
+### Defensive inversion
+
+이를 단순한 prompt-injection 문제가 아니라 proactive domain-monitoring 문제로 다뤄야 합니다.
+- **brand prompt corpus**를 구축하고 사용자가 의존하는 LLM 및 agent를 주기적으로 probe합니다.
+- hallucinated URL을 저장하고 temperature/model 간에 어떤 URL이 stable한지 추적합니다.
+- **Adversarial Exploitation Window (AEW)**를 추적합니다. 이는 first hallucination과 attacker registration 사이의 시간입니다. Positive AEW라면 defenders가 weaponization 전에 pre-register, sinkhole 또는 pre-block할 수 있습니다.
+- parent domain의 **NXDOMAIN → registered** transition을 모니터링합니다.
+- 등록 시 registrar, creation date, nameserver, privacy shielding, page content, screenshot, parked-page status 및 brand-asset similarity를 triage합니다.
+- Agent와 developer가 **기본적으로 LLM-generated domain을 trust하지 않도록** policy gate를 추가합니다. 최초 사용 전에 allowlist, ownership validation, CT/RDAP check 또는 human approval을 요구해야 합니다.
+
+이는 여러 AI risk bucket에 동시에 해당합니다. **AI supply-chain attack**, **insecure model output**, 그리고 agent가 hallucinated URL을 자율적으로 consume할 때의 **rogue actions**가 이에 포함됩니다.
+
+## References
+- [Unit 42 – The Risks of Code Assistant LLMs: Harmful Content, Misuse and Deception](https://unit42.paloaltonetworks.com/code-assistant-llms/)
+- [LLMJacking scheme overview – The Hacker News](https://thehackernews.com/2024/05/researchers-uncover-llmjacking-scheme.html)
+- [oai-reverse-proxy (reselling stolen LLM access)](https://gitgud.io/khanon/oai-reverse-proxy)
+- [Synacktiv - Deep-dive into the deployment of an on-premise low-privileged LLM server](https://www.synacktiv.com/en/publications/deep-dive-into-the-deployment-of-an-on-premise-low-privileged-llm-server.html)
 - [llama.cpp server README](https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md)
 - [Podman quadlets: podman-systemd.unit](https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html)
-- [CNCF Container Device Interface (CDI) 명세](https://github.com/cncf-tags/container-device-interface/blob/main/SPEC.md)
+- [CNCF Container Device Interface (CDI) specification](https://github.com/cncf-tags/container-device-interface/blob/main/SPEC.md)
+- [Unit 42 – Phantom Squatting: AI-Hallucinated Domains as a Software Supply Chain Vector](https://unit42.paloaltonetworks.com/phantom-squatting-hallucinated-web-domains/)
+- [Socket – Slopsquatting: How AI Hallucinations Are Fueling a New Class of Supply Chain Attacks](https://socket.dev/blog/slopsquatting-how-ai-hallucinations-are-fueling-a-new-class-of-supply-chain-attacks)
 
 {{#include ../banners/hacktricks-training.md}}
