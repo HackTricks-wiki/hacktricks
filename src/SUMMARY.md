@@ -948,6 +948,7 @@
   - [AI MCP Security](AI/AI-MCP-Servers.md)
   - [AI Model Data Preparation](AI/AI-Model-Data-Preparation-and-Evaluation.md)
   - [AI Models RCE](AI/AI-Models-RCE.md)
+  - [KYC Bypass Using AI](AI/KYC-Bypass-Using-AI.md)
   - [AI Prompts](AI/AI-Prompts.md)
   - [AI Risk Frameworks](AI/AI-Risk-Frameworks.md)
   - [AI Supervised Learning Algorithms](AI/AI-Supervised-Learning-Algorithms.md)
