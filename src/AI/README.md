@@ -2,9 +2,9 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Principali Algoritmi di Apprendimento Automatico
+## Principali algoritmi di Machine Learning
 
-Il miglior punto di partenza per imparare sull'AI è comprendere come funzionano i principali algoritmi di apprendimento automatico. Questo ti aiuterà a capire come funziona l'AI, come usarla e come attaccarla:
+Il punto di partenza migliore per imparare a conoscere l'AI è comprendere come funzionano i principali algoritmi di Machine Learning. Questo ti aiuterà a capire come funziona l'AI, come utilizzarla e come attaccarla:
 
 
 {{#ref}}
@@ -26,58 +26,67 @@ Il miglior punto di partenza per imparare sull'AI è comprendere come funzionano
 ./AI-Deep-Learning.md
 {{#endref}}
 
-### Architettura LLM
+### Architettura degli LLM
 
-Nella pagina seguente troverai le basi di ciascun componente per costruire un LLM di base utilizzando i trasformatori:
+Nella pagina seguente troverai le basi di ogni componente necessario per costruire un LLM di base utilizzando i transformer:
 
 
 {{#ref}}
 AI-llm-architecture/README.md
 {{#endref}}
 
-## Sicurezza AI
+## Sicurezza dell'AI
 
-### Framework di Rischio AI
+### Framework per i rischi dell'AI
 
-In questo momento, i principali 2 framework per valutare i rischi dei sistemi AI sono l'OWASP ML Top 10 e il Google SAIF:
+Al momento, i 2 principali framework per valutare i rischi dei sistemi di AI sono OWASP ML Top 10 e Google SAIF:
 
 
 {{#ref}}
 AI-Risk-Frameworks.md
 {{#endref}}
 
-### Sicurezza dei Prompt AI
+### Sicurezza dei prompt dell'AI
 
-Gli LLM hanno fatto esplodere l'uso dell'AI negli ultimi anni, ma non sono perfetti e possono essere ingannati da prompt avversari. Questo è un argomento molto importante per capire come usare l'AI in modo sicuro e come attaccarla:
+Gli LLM hanno fatto esplodere l'utilizzo dell'AI negli ultimi anni, ma non sono perfetti e possono essere ingannati da prompt avversari. Questo è un argomento molto importante per capire come utilizzare l'AI in modo sicuro e come attaccarla:
 
 
 {{#ref}}
 AI-Prompts.md
 {{#endref}}
 
-### RCE dei Modelli AI
+### RCE dei modelli di AI
 
-È molto comune per sviluppatori e aziende eseguire modelli scaricati da Internet, tuttavia caricare un modello potrebbe essere sufficiente per eseguire codice arbitrario sul sistema. Questo è un argomento molto importante per capire come usare l'AI in modo sicuro e come attaccarla:
+È molto comune per gli sviluppatori e le aziende eseguire modelli scaricati da Internet; tuttavia, il semplice caricamento di un modello potrebbe essere sufficiente per eseguire codice arbitrario sul sistema. Questo è un argomento molto importante per capire come utilizzare l'AI in modo sicuro e come attaccarla:
 
 
 {{#ref}}
 AI-Models-RCE.md
 {{#endref}}
 
-### Protocollo di Contesto del Modello AI
+### Model Context Protocol dell'AI
 
-MCP (Model Context Protocol) è un protocollo che consente ai client agenti AI di connettersi con strumenti esterni e fonti di dati in modo plug-and-play. Questo abilita flussi di lavoro complessi e interazioni tra modelli AI e sistemi esterni:
+MCP (Model Context Protocol) è un protocollo che consente ai client degli agenti di AI di connettersi a strumenti e origini dati esterni in modalità plug-and-play. Questo abilita workflow complessi e interazioni tra i modelli di AI e i sistemi esterni:
 
 
 {{#ref}}
 AI-MCP-Servers.md
 {{#endref}}
 
-### Fuzzing Assistito da AI e Scoperta Automatica di Vulnerabilità
+### Fuzzing assistito dall'AI e scoperta automatizzata delle vulnerabilità
 
 
 {{#ref}}
 AI-Assisted-Fuzzing-and-Vulnerability-Discovery.md
+{{#endref}}
+
+### Bot di AI per il pentesting Web Black-Box
+
+Gli agenti basati su LLM possono automatizzare workflow di pentesting Web black-box di lunga durata quando sono supportati da osservabilità, orchestrazione, gestione delle sessioni autenticate e validazione avversaria:
+
+
+{{#ref}}
+Web-Black-Box-AI-Pentester-Bots.md
 {{#endref}}
 
 {{#include ../banners/hacktricks-training.md}}
