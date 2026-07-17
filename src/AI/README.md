@@ -1,10 +1,10 @@
-# KI in der Cybersicherheit
+# AI in der Cybersicherheit
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Haupt-Maschinenlernalgorithmen
+## Hauptalgorithmen des Machine Learning
 
-Der beste Ausgangspunkt, um über KI zu lernen, ist zu verstehen, wie die Hauptmaschinenlernalgorithmen funktionieren. Dies wird Ihnen helfen, zu verstehen, wie KI funktioniert, wie man sie nutzt und wie man sie angreift:
+Der beste Ausgangspunkt, um etwas über AI zu lernen, ist, zu verstehen, wie die wichtigsten Machine-Learning-Algorithmen funktionieren. Dies hilft dir zu verstehen, wie AI funktioniert, wie du sie einsetzt und wie du sie angreifst:
 
 
 {{#ref}}
@@ -26,58 +26,67 @@ Der beste Ausgangspunkt, um über KI zu lernen, ist zu verstehen, wie die Hauptm
 ./AI-Deep-Learning.md
 {{#endref}}
 
-### LLMs-Architektur
+### Architektur von LLMs
 
-Auf der folgenden Seite finden Sie die Grundlagen jedes Komponenten, um ein grundlegendes LLM mit Transformatoren zu erstellen:
+Auf der folgenden Seite findest du die Grundlagen jeder Komponente, um ein grundlegendes LLM mit Transformers zu erstellen:
 
 
 {{#ref}}
 AI-llm-architecture/README.md
 {{#endref}}
 
-## KI-Sicherheit
+## AI-Sicherheit
 
-### KI-Risikorahmen
+### AI-Risk-Frameworks
 
-Im Moment sind die beiden Hauptrahmen zur Bewertung der Risiken von KI-Systemen die OWASP ML Top 10 und das Google SAIF:
+Derzeit sind die beiden wichtigsten Frameworks zur Bewertung der Risiken von AI-Systemen OWASP ML Top 10 und Google SAIF:
 
 
 {{#ref}}
 AI-Risk-Frameworks.md
 {{#endref}}
 
-### Sicherheit von KI-Prompts
+### Sicherheit von AI-Prompts
 
-LLMs haben die Nutzung von KI in den letzten Jahren explodieren lassen, aber sie sind nicht perfekt und können durch adversarielle Prompts getäuscht werden. Dies ist ein sehr wichtiges Thema, um zu verstehen, wie man KI sicher nutzt und wie man sie angreift:
+LLMs haben die Nutzung von AI in den letzten Jahren stark ausgeweitet, sind jedoch nicht perfekt und können durch adversarial Prompts getäuscht werden. Dies ist ein sehr wichtiges Thema, um zu verstehen, wie man AI sicher verwendet und wie man sie angreift:
 
 
 {{#ref}}
 AI-Prompts.md
 {{#endref}}
 
-### RCE von KI-Modellen
+### RCE in AI-Modellen
 
-Es ist sehr verbreitet, dass Entwickler und Unternehmen Modelle aus dem Internet herunterladen, jedoch kann das bloße Laden eines Modells ausreichen, um beliebigen Code auf dem System auszuführen. Dies ist ein sehr wichtiges Thema, um zu verstehen, wie man KI sicher nutzt und wie man sie angreift:
+Für Entwickler und Unternehmen ist es sehr üblich, aus dem Internet heruntergeladene Modelle auszuführen. Das bloße Laden eines Modells kann jedoch bereits ausreichen, um beliebigen Code auf dem System auszuführen. Dies ist ein sehr wichtiges Thema, um zu verstehen, wie man AI sicher verwendet und wie man sie angreift:
 
 
 {{#ref}}
 AI-Models-RCE.md
 {{#endref}}
 
-### Protokoll für den Kontext von KI-Modellen
+### AI Model Context Protocol
 
-MCP (Model Context Protocol) ist ein Protokoll, das es KI-Agenten-Clients ermöglicht, sich auf eine Plug-and-Play-Art und Weise mit externen Tools und Datenquellen zu verbinden. Dies ermöglicht komplexe Workflows und Interaktionen zwischen KI-Modellen und externen Systemen:
+MCP (Model Context Protocol) ist ein Protokoll, das es AI-Agent-Clients ermöglicht, sich auf Plug-and-Play-Art mit externen Tools und Datenquellen zu verbinden. Dies ermöglicht komplexe Workflows und Interaktionen zwischen AI-Modellen und externen Systemen:
 
 
 {{#ref}}
 AI-MCP-Servers.md
 {{#endref}}
 
-### KI-unterstütztes Fuzzing & automatisierte Schwachstellenerkennung
+### AI-gestütztes Fuzzing & automatisierte Schwachstellenerkennung
 
 
 {{#ref}}
 AI-Assisted-Fuzzing-and-Vulnerability-Discovery.md
+{{#endref}}
+
+### Web-Black-Box-AI-Pentester-Bots
+
+LLM-gestützte Agents können lang laufende Black-Box-Web-Pentesting-Workflows automatisieren, wenn sie durch Observability, Orchestrierung, authentifizierte Session-Verwaltung und adversarial Validation unterstützt werden:
+
+
+{{#ref}}
+Web-Black-Box-AI-Pentester-Bots.md
 {{#endref}}
 
 {{#include ../banners/hacktricks-training.md}}
