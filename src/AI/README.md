@@ -1,10 +1,10 @@
-# AI w Cyberbezpieczeństwie
+# AI w Cybersecurity
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Główne Algorytmy Uczenia Maszynowego
+## Główne algorytmy Machine Learning
 
-Najlepszym punktem wyjścia do nauki o AI jest zrozumienie, jak działają główne algorytmy uczenia maszynowego. Pomoże to zrozumieć, jak działa AI, jak go używać i jak go atakować:
+Najlepszym punktem wyjścia do nauki o AI jest zrozumienie działania głównych algorytmów machine learning. Pomoże Ci to zrozumieć, jak działa AI, jak go używać i jak je atakować:
 
 
 {{#ref}}
@@ -28,7 +28,7 @@ Najlepszym punktem wyjścia do nauki o AI jest zrozumienie, jak działają głó
 
 ### Architektura LLM
 
-Na następnej stronie znajdziesz podstawy każdego komponentu do zbudowania podstawowego LLM przy użyciu transformerów:
+Na poniższej stronie znajdziesz podstawy każdego komponentu potrzebnego do zbudowania podstawowego LLM przy użyciu transformerów:
 
 
 {{#ref}}
@@ -37,47 +37,56 @@ AI-llm-architecture/README.md
 
 ## Bezpieczeństwo AI
 
-### Ramy Ryzyka AI
+### Frameworki ryzyka AI
 
-W tej chwili główne 2 ramy do oceny ryzyk systemów AI to OWASP ML Top 10 i Google SAIF:
+Obecnie dwoma głównymi frameworkami służącymi do oceny ryzyka systemów AI są OWASP ML Top 10 i Google SAIF:
 
 
 {{#ref}}
 AI-Risk-Frameworks.md
 {{#endref}}
 
-### Bezpieczeństwo Podpowiedzi AI
+### Bezpieczeństwo promptów AI
 
-LLM-y spowodowały eksplozję użycia AI w ostatnich latach, ale nie są doskonałe i mogą być oszukiwane przez wrogie podpowiedzi. To bardzo ważny temat, aby zrozumieć, jak używać AI bezpiecznie i jak go atakować:
+LLM spowodowały gwałtowny wzrost wykorzystania AI w ostatnich latach, ale nie są idealne i można je oszukać za pomocą adversarial prompts. Jest to bardzo ważny temat, pozwalający zrozumieć, jak bezpiecznie używać AI i jak je atakować:
 
 
 {{#ref}}
 AI-Prompts.md
 {{#endref}}
 
-### RCE Modeli AI
+### RCE w modelach AI
 
-Bardzo powszechne jest, że deweloperzy i firmy uruchamiają modele pobrane z Internetu, jednak samo załadowanie modelu może być wystarczające do wykonania dowolnego kodu w systemie. To bardzo ważny temat, aby zrozumieć, jak używać AI bezpiecznie i jak go atakować:
+Deweloperzy i firmy bardzo często uruchamiają modele pobrane z Internetu, jednak samo załadowanie modelu może wystarczyć do wykonania dowolnego kodu w systemie. Jest to bardzo ważny temat, pozwalający zrozumieć, jak bezpiecznie używać AI i jak je atakować:
 
 
 {{#ref}}
 AI-Models-RCE.md
 {{#endref}}
 
-### Protokół Kontekstowy Modelu AI
+### AI Model Context Protocol
 
-MCP (Model Context Protocol) to protokół, który pozwala klientom agentów AI łączyć się z zewnętrznymi narzędziami i źródłami danych w sposób plug-and-play. Umożliwia to złożone przepływy pracy i interakcje między modelami AI a systemami zewnętrznymi:
+MCP (Model Context Protocol) to protokół, który pozwala klientom agentów AI łączyć się z zewnętrznymi narzędziami i źródłami danych w sposób plug-and-play. Umożliwia to tworzenie złożonych workflow oraz interakcji między modelami AI a systemami zewnętrznymi:
 
 
 {{#ref}}
 AI-MCP-Servers.md
 {{#endref}}
 
-### Fuzzing Wspomagany AI i Zautomatyzowane Odkrywanie Wrażliwości
+### AI-Assisted Fuzzing & Automated Vulnerability Discovery
 
 
 {{#ref}}
 AI-Assisted-Fuzzing-and-Vulnerability-Discovery.md
+{{#endref}}
+
+### Web Black-Box AI Pentester Bots
+
+Agenty oparte na LLM mogą automatyzować długotrwałe workflow black-box web pentestingu, gdy są wspierane przez observability, orkiestrację, obsługę uwierzytelnionych sesji i adversarial validation:
+
+
+{{#ref}}
+Web-Black-Box-AI-Pentester-Bots.md
 {{#endref}}
 
 {{#include ../banners/hacktricks-training.md}}
