@@ -212,6 +212,46 @@ When testing MCP development environments, look for:
 - OAuth / redirect flows that render attacker-controlled URLs inside the local UI.
 - Proxy endpoints that accept arbitrary `command`, `args`, or server configuration JSON.
 
+### Agent-Assisted Localhost MCP Hijacking (AutoJack pattern)
+
+If an **AI browsing agent** runs on the same workstation as a privileged local MCP control plane, **localhost is not a trust boundary**. A malicious page rendered by the agent can reach `ws://127.0.0.1` / `ws://localhost`, abuse weak WebSocket trust assumptions, and turn the agent into a **confused deputy** that drives the local control plane.
+
+This attack pattern needs three ingredients:
+
+1. A **browser-capable or HTTP-capable agent** (Playwright/Chromium surfer, webpage fetcher, `requests`, `websockets`, etc.) that can load attacker-controlled content.
+2. A **powerful localhost service** (MCP bridge, inspector, agent studio, debug API) that assumes loopback access or a localhost `Origin` is trustworthy.
+3. A **dangerous parameter** reachable from the request that ends in process execution, file write, tool invocation, or other high-impact side effects.
+
+In Microsoft's **AutoJack** research against a development build of **AutoGen Studio**, attacker-controlled web content opened a local MCP WebSocket and supplied a base64-encoded `server_params` object that was deserialized into `StdioServerParams`. The `command` and `args` fields were then passed to the stdio launcher, so the WebSocket request itself became a local process-spawn primitive.
+
+Typical audit checks for this pattern:
+
+- **Origin-only WebSocket protection** (`Origin: http://localhost` / `http://127.0.0.1`) with no real client authentication. A local agent can satisfy that assumption because it runs on the same host.
+- **Middleware auth exclusions** for `/api/ws`, `/api/mcp`, or similar upgrade paths, assuming the WebSocket handler will authenticate later. Verify the handler really does so at handshake/accept time.
+- **Client-controlled server launch parameters** such as `command`, `args`, env vars, plugin paths, or serialized `StdioServerParams` blobs.
+- **Agent/browser coexistence** on the same machine as the developer control plane. Prompt injection or attacker-controlled URLs/comments can become the delivery vector.
+
+Minimal hostile payload shape:
+
+```json
+{
+  "type": "StdioServerParams",
+  "command": "calc.exe",
+  "args": [],
+  "env": {"pwned": "true"}
+}
+```
+
+If the service accepts a query-string or message-field version of that object, test Unix/Windows variants such as `bash -c 'id'` or `powershell.exe -enc ...` as well.
+
+#### Durable fixes
+
+- Do **not** trust loopback or `Origin` alone for MCP/admin/debug control planes.
+- Enforce **authentication and authorization on every WebSocket route**, not only on REST endpoints.
+- Bind dangerous launch parameters **server-side** (store them by session ID or server policy) instead of accepting them from the WebSocket URL/body.
+- **Allowlist** which binaries or MCP servers may be spawned; never forward arbitrary `command` / `args` from the client.
+- Isolate browsing agents from developer services using a **different OS user, VM, container, or sandbox**.
+
 ### Persistent Code Execution via MCP Trust Bypass (Cursor IDE – "MCPoison")
 
 Starting in early 2025 Check Point Research disclosed that the AI-centric **Cursor IDE** bound user trust to the *name* of an MCP entry but never re-validated its underlying `command` or `args`.  
@@ -431,6 +471,7 @@ Another suspicious primitive is **native-code preloading**. A skill that sets `L
 
 
 ## References
+- [AutoJack: How a single page can RCE the host running your AI agent](https://www.microsoft.com/en-us/security/blog/2026/06/18/autojack-single-page-rce-host-running-ai-agent/)
 - [Trail of Bits – The Sorry State of Skill Distribution](https://blog.trailofbits.com/2026/06/03/the-sorry-state-of-skill-distribution/)
 - [Trail of Bits – overtly-malicious-skills PoC repository](https://github.com/trailofbits/overtly-malicious-skills)
 - [Otto Support - Testing MCP Servers](https://bishopfox.com/blog/otto-support-testing-mcp-servers)
