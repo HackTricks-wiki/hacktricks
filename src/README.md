@@ -11,7 +11,7 @@ _Hacktricks logos & motion design by_ [_@ppieranacho_](https://www.instagram.com
 git clone https://github.com/HackTricks-wiki/hacktricks
 
 # Select the language you want to use
-export LANG="master" # Leave master for english
+export HT_LANG="master" # Leave master for English
 # "af" for Afrikaans
 # "de" for German
 # "el" for Greek
@@ -30,7 +30,7 @@ export LANG="master" # Leave master for english
 # "zh" for Chinese
 
 # Run the docker container indicating the path to the hacktricks folder
-docker run -d --rm --platform linux/amd64 -p 3337:3000 --name hacktricks -v $(pwd)/hacktricks:/app ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image bash -c "mkdir -p ~/.ssh && ssh-keyscan -H github.com >> ~/.ssh/known_hosts && cd /app && git config --global --add safe.directory /app && git checkout $LANG && git pull && MDBOOK_PREPROCESSOR__HACKTRICKS__ENV=dev mdbook serve --hostname 0.0.0.0"
+docker run -d --rm --platform linux/amd64 -p 3337:3000 --name hacktricks -v $(pwd)/hacktricks:/app ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image bash -c "mkdir -p ~/.ssh && ssh-keyscan -H github.com >> ~/.ssh/known_hosts && cd /app && git config --global --add safe.directory /app && git checkout $HT_LANG && git pull && MDBOOK_PREPROCESSOR__HACKTRICKS__ENV=dev mdbook serve --hostname 0.0.0.0"
 ```
 
 Your local copy of HackTricks will be **available at [http://localhost:3337](http://localhost:3337)** after <5 minutes (it needs to build the book, be patient).
@@ -41,7 +41,7 @@ Alternatively, if you have Docker Compose you can just run the following from th
 docker compose up
 ```
 
-This uses the bundled `docker-compose.yml` to serve your local checkout at [http://localhost:3337](http://localhost:3337) with live reload.
+This uses the bundled `docker-compose.yml` to serve the branch currently checked out on the host at [http://localhost:3337](http://localhost:3337) with live reload. To change languages when using Compose, check out the desired language branch before starting the service.
 
 ## HackTricks Partners
 
