@@ -2,7 +2,7 @@
 
 <figure><img src="images/hacktricks.gif" alt=""><figcaption></figcaption></figure>
 
-_Hacktricks Logos & Motion Design von_ [_@ppieranacho_](https://www.instagram.com/ppieranacho/)_._
+_Logos und Motion Design von Hacktricks von_ [_@ppieranacho_](https://www.instagram.com/ppieranacho/)_._
 
 ### HackTricks lokal ausführen
 ```bash
@@ -31,23 +31,29 @@ export LANG="master" # Leave master for english
 # Run the docker container indicating the path to the hacktricks folder
 docker run -d --rm --platform linux/amd64 -p 3337:3000 --name hacktricks -v $(pwd)/hacktricks:/app ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image bash -c "mkdir -p ~/.ssh && ssh-keyscan -H github.com >> ~/.ssh/known_hosts && cd /app && git config --global --add safe.directory /app && git checkout $LANG && git pull && MDBOOK_PREPROCESSOR__HACKTRICKS__ENV=dev mdbook serve --hostname 0.0.0.0"
 ```
-Your local copy of HackTricks wird **nach <5 Minuten unter [http://localhost:3337](http://localhost:3337) verfügbar sein** (es muss das Buch bauen, bitte hab Geduld).
+Deine lokale Kopie von HackTricks wird nach <5 Minuten unter [http://localhost:3337](http://localhost:3337) verfügbar sein (das Buch muss erstellt werden, hab etwas Geduld).
 
-## HackTricks Partners
+Alternativ kannst du, wenn du Docker Compose hast, einfach Folgendes aus dem Stammverzeichnis des Repositories ausführen:
+```bash
+docker compose up
+```
+Dies verwendet die enthaltene `docker-compose.yml`, um deinen lokalen Checkout unter [http://localhost:3337](http://localhost:3337) mit Live Reload bereitzustellen.
+
+## HackTricks-Partner
 
 ---
 
-## HackTricks Friends
+## HackTricks-Freunde
 
 ### [STM Cyber](https://www.stmcyber.com)
 
 <figure class="sponsor-logo"><img src="images/stm (1).png" alt=""><figcaption></figcaption></figure>
 
-[**STM Cyber**](https://www.stmcyber.com) ist ein großartiges Cybersecurity-Unternehmen, dessen Slogan **HACK THE UNHACKABLE** lautet. Sie führen eigene Forschung durch und entwickeln ihre eigenen Hacking-Tools, um **mehrere wertvolle Cybersecurity-Services anzubieten**, wie pentesting, Red teams und Schulungen.
+[**STM Cyber**](https://www.stmcyber.com) ist ein großartiges Cybersecurity-Unternehmen mit dem Slogan **HACK THE UNHACKABLE**. Das Unternehmen betreibt eigene Forschung und entwickelt eigene Hacking-Tools, um **mehrere wertvolle Cybersecurity-Services anzubieten**, darunter Pentesting, Red Teams und Training.
 
-Du kannst ihren **Blog** unter [**https://blog.stmcyber.com**](https://blog.stmcyber.com) ansehen
+Du kannst ihren **Blog** unter [**https://blog.stmcyber.com**](https://blog.stmcyber.com) besuchen.
 
-**STM Cyber** unterstützt auch Open-Source-Cybersecurity-Projekte wie HackTricks :)
+**STM Cyber** unterstützt außerdem Open-Source-Cybersecurity-Projekte wie HackTricks :)
 
 ---
 
@@ -55,9 +61,9 @@ Du kannst ihren **Blog** unter [**https://blog.stmcyber.com**](https://blog.stmc
 
 <figure class="sponsor-logo"><img src="images/image (47).png" alt=""><figcaption></figcaption></figure>
 
-**Intigriti** ist Europas **#1** Plattform für ethisches Hacking und **bug bounty platform.**
+**Intigriti** ist Europas **Nr. 1** für ethisches Hacking und eine **Bug-Bounty-Plattform.**
 
-**Bug bounty tip**: Melde dich für **Intigriti** an, eine Premium-**bug bounty platform created by hackers, for hackers**! Mach heute mit unter [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) und beginne, Bounties von bis zu **$100,000** zu verdienen!
+**Bug-Bounty-Tipp**: **Registriere dich** bei **Intigriti**, einer hochwertigen **Bug-Bounty-Plattform, die von Hackern für Hacker entwickelt wurde**! Besuche uns noch heute unter [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) und beginne, Bounties von bis zu **100.000 $** zu verdienen!
 
 {{#ref}}
 https://go.intigriti.com/hacktricks
@@ -69,18 +75,18 @@ https://go.intigriti.com/hacktricks
 
 <figure class="sponsor-logo"><img src="images/modern_security_logo.png" alt="Modern Security"><figcaption></figcaption></figure>
 
-Modern Security bietet **praktisches AI Security Training** mit einem **engineering-first, hands-on lab approach**. Unsere Kurse sind für Security Engineers, AppSec-Profis und Entwickler gedacht, die **realen AI/LLM-powered applications** aufbauen, angreifen und absichern wollen.
+Modern Security bietet **praxisorientiertes AI-Security-Training** mit einem **Engineering-First-Ansatz und praktischen Labs**. Unsere Kurse richten sich an Security Engineers, AppSec-Experten und Entwickler, die **reale, von AI/LLM betriebene Anwendungen entwickeln, angreifen und absichern** möchten.
 
-Die **AI Security Certification** konzentriert sich auf praxisnahe Fähigkeiten, darunter:
-- Absichern von LLM- und AI-powered applications
-- Threat modeling für AI systems
-- Embeddings, vector databases und RAG security
-- LLM attacks, Abuse-Szenarien und praktische Abwehr
-- Sichere Designmuster und Deployment-Überlegungen
+Die **AI-Security-Zertifizierung** konzentriert sich auf praxisnahe Fähigkeiten, darunter:
+- Absicherung von LLM- und AI-Anwendungen
+- Threat Modeling für AI-Systeme
+- Embeddings, Vector-Datenbanken und RAG-Security
+- LLM-Angriffe, Missbrauchsszenarien und praktische Abwehrmaßnahmen
+- Sichere Design Patterns und Deployment-Aspekte
 
-Alle Kurse sind **on-demand**, **lab-driven** und auf **real-world security tradeoffs** ausgelegt, nicht nur auf Theorie.
+Alle Kurse sind **on-demand**, **lab-basiert** und auf **praxisnahe Security-Abwägungen** statt nur auf Theorie ausgerichtet.
 
-👉 Weitere Details zum AI Security-Kurs:
+👉 Weitere Informationen zum AI-Security-Kurs:
 https://www.modernsecurity.io/courses/ai-security-certification
 
 {{#ref}}
@@ -93,14 +99,14 @@ https://modernsecurity.io/
 
 <figure class="sponsor-logo"><img src="images/image (1254).png" alt=""><figcaption></figcaption></figure>
 
-**SerpApi** bietet schnelle und einfache Echtzeit-APIs, um auf **search engine results** zuzugreifen. Sie scrapen Suchmaschinen, handhaben Proxies, lösen captchas und parsen alle reichhaltigen strukturierten Daten für dich.
+**SerpApi** bietet schnelle und einfache Echtzeit-APIs für den **Zugriff auf Suchmaschinenergebnisse**. Das Unternehmen scrapt Suchmaschinen, verwaltet Proxies, löst Captchas und analysiert alle umfangreichen strukturierten Daten für dich.
 
-Ein Abonnement für einen der SerpApi-Tarife umfasst Zugang zu über 50 verschiedenen APIs zum Scraping verschiedener Suchmaschinen, darunter Google, Bing, Baidu, Yahoo, Yandex und mehr.\
-Im Gegensatz zu anderen Anbietern scrapt **SerpApi nicht nur organische Ergebnisse**. SerpApi-Antworten enthalten durchgehend alle Ads, inline images und Videos, knowledge graphs und andere Elemente und Funktionen, die in den Suchergebnissen vorhanden sind.
+Ein Abonnement eines der SerpApi-Angebote umfasst den Zugriff auf mehr als 50 verschiedene APIs zum Scrapen unterschiedlicher Suchmaschinen, darunter Google, Bing, Baidu, Yahoo, Yandex und weitere.\
+Im Gegensatz zu anderen Anbietern scrapt **SerpApi nicht nur organische Ergebnisse**. Die Antworten von SerpApi enthalten zuverlässig alle Anzeigen, Inline-Bilder und -Videos, Knowledge Graphs sowie weitere in den Suchergebnissen vorhandene Elemente und Funktionen.
 
 Zu den aktuellen SerpApi-Kunden gehören **Apple, Shopify und GrubHub**.\
-Weitere Informationen findest du in ihrem [**blog**](https://serpapi.com/blog/)**,** oder probiere ein Beispiel in ihrem [**playground**](https://serpapi.com/playground)**.**\
-Du kannst [**hier**](https://serpapi.com/users/sign_up) ein **kostenloses Konto erstellen**.**
+Weitere Informationen findest du in ihrem [**Blog**](https://serpapi.com/blog/)**,** oder probiere ein Beispiel in ihrem [**Playground**](https://serpapi.com/playground)** aus.**\
+Du kannst [**hier**](https://serpapi.com/users/sign_up)** ein kostenloses Konto erstellen.**
 
 ---
 
@@ -108,13 +114,13 @@ Du kannst [**hier**](https://serpapi.com/users/sign_up) ein **kostenloses Konto 
 
 <figure class="sponsor-logo"><img src="images/image (2).png" alt=""><figcaption></figcaption></figure>
 
-**8kSec Academy** schult dich in offensiver Mobile- und AI-Security, unterrichtet von aktiven Forschern – demselben Team hinter den CVE-Writeups und Talks auf Black Hat, HITB und Zer0con. Die Kurse sind im eigenen Tempo absolvierbar, basieren auf Labs an realen Zielen und werden durch eine praxisnahe Zertifizierung ergänzt.
+Die **8kSec Academy** bildet dich in offensiver Mobile- und AI-Security aus, unterrichtet von aktiven Researchern – demselben Team hinter den CVE-Writups und Vorträgen bei Black Hat, HITB und Zer0con. Die Kurse sind im eigenen Tempo absolvierbar, basieren auf Labs mit realen Zielen und werden durch eine praxisorientierte Zertifizierung ergänzt.
 
-Der Katalog umfasst zwei Tracks:
+Der Katalog umfasst zwei Bereiche:
 
-**Mobile Security** – iOS und Android von der App-Schicht abwärts: Reverse Engineering mit Ghidra und LLDB, ARM64 exploitation, Kernel-Interna und moderne Mitigations (PAC, MTE, SELinux), Jailbreak- und Rooting-Mechaniken.
+**Mobile Security** – iOS und Android von der App-Ebene abwärts: Reverse Engineering mit Ghidra und LLDB, ARM64-Exploitation, Kernel-Internals und moderne Mitigations (PAC, MTE, SELinux), Jailbreak- und Rooting-Mechanismen.
 
-**AI Security** – zwei vollständige Kurse, die das Feld abdecken. Practical AI Security behandelt, wie LLMs, RAG-Pipelines, AI agents und MCP funktionieren und wie man sie angreift und verteidigt. Advanced AI Security geht an die Frontlinie und ist stark build-orientiert: Red teaming von AI systems im großen Maßstab mit Garak und PyRIT, Ausnutzen von MCP-Servern, Platzieren und Erkennen von model backdoors sowie Fine-Tuning-Angriffe und -Abwehr auf Apple Silicon.
+**AI Security** – zwei vollständige Kurse, die das gesamte Themengebiet abdecken. Practical AI Security vermittelt, wie LLMs, RAG-Pipelines, AI-Agents und MCP funktionieren und wie man sie angreift und verteidigt. Advanced AI Security ist stark praxisorientiert und behandelt modernste Themen: Red Teaming von AI-Systemen im großen Maßstab mit Garak und PyRIT, das Ausnutzen von MCP-Servern, das Einpflanzen und Erkennen von Model-Backdoors sowie Fine-Tuning-Angriffe und -Abwehrmaßnahmen auf Apple Silicon.
 
 Kurse und Zertifizierungen:
 
@@ -128,9 +134,9 @@ https://academy.8ksec.io/
 
 <figure class="sponsor-logo"><img src="images/logo-naxus.png" alt=""><figcaption></figcaption></figure>
 
-**NaxusAI** ist eine AI-powered security platform, um ausnutzbare Schwachstellen zu finden, bevor Angreifer es tun.
+**NaxusAI** ist eine AI-gestützte Security-Plattform, um ausnutzbare Schwachstellen zu finden, bevor Angreifer dies tun.
 
-**Code security tip**: Melde dich für NaxusAI an, eine smarte Plattform zur Schwachstellenüberwachung, entwickelt für Entwickler und Security-Teams! Mach heute mit und nutze AI, um **reale Sicherheitsrisiken zu erkennen, zu validieren und zu beheben, bevor sie in die Produktion gelangen**!
+**Code-Security-Tipp**: Registriere dich bei NaxusAI, einer intelligenten Plattform zur Überwachung von Schwachstellen, die für Entwickler und Security-Teams entwickelt wurde! Beginne noch heute und nutze AI zum **Erkennen, Validieren und Beheben realer Sicherheitsrisiken, bevor diese die Produktion erreichen**!
 
 {{#ref}}
 https://naxusai.com
@@ -142,13 +148,13 @@ https://naxusai.com
 
 <figure class="sponsor-logo"><img src="images/websec (1).svg" alt=""><figcaption></figcaption></figure>
 
-[**WebSec**](https://websec.net) ist ein professionelles Cybersecurity-Unternehmen mit Sitz in **Amsterdam**, das Unternehmen **weltweit** dabei hilft, sich gegen die neuesten Cybersecurity-Bedrohungen zu **schützen**, indem es **offensive-security services** mit einem **modernen** Ansatz anbietet.
+[**WebSec**](https://websec.net) ist ein professionelles Cybersecurity-Unternehmen mit Sitz in **Amsterdam**, das Unternehmen **weltweit dabei unterstützt**, sich durch **Offensive-Security-Services** mit einem **modernen** Ansatz vor den neuesten Cybersecurity-Bedrohungen zu **schützen**.
 
-WebSec ist ein internationales Security-Unternehmen mit Niederlassungen in Amsterdam und Wyoming. Sie bieten **all-in-one security services** an, was bedeutet, dass sie alles machen: Pentesting, **Security** Audits, Awareness-Trainings, Phishing-Kampagnen, Code Review, Exploit Development, Outsourcing von Security-Experten und vieles mehr.
+WebSec ist ein internationales Security-Unternehmen mit Niederlassungen in Amsterdam und Wyoming. Das Unternehmen bietet **All-in-One-Security-Services** an, also praktisch alles: Pentesting, **Security** Audits, Awareness-Trainings, Phishing-Kampagnen, Code-Reviews, Exploit Development, Outsourcing von Security-Experten und vieles mehr.
 
-Ein weiteres cooles Ding an WebSec ist, dass sie im Gegensatz zum Branchendurchschnitt **sehr zuversichtlich in ihre Fähigkeiten** sind, so sehr, dass sie **die beste Ergebnisqualität garantieren**; auf ihrer Website steht: "**If we can't hack it, You don't pay it!**". Für mehr Infos schau dir ihre [**website**](https://websec.net/en/) und ihren [**blog**](https://websec.net/blog/) an!
+Eine weitere Besonderheit von WebSec ist, dass das Unternehmen im Gegensatz zum Branchendurchschnitt **sehr großes Vertrauen in seine Fähigkeiten** hat – so sehr, dass es **die bestmöglichen Ergebnisse garantiert**. Auf der Website heißt es: "**If we can't hack it, You don't pay it!**". Weitere Informationen findest du auf der [**Website**](https://websec.net/en/) und im [**Blog**](https://websec.net/blog/)!
 
-Zusätzlich zu den oben genannten Punkten ist WebSec auch ein **engagierter Unterstützer von HackTricks**.
+Darüber hinaus ist WebSec ein **engagierter Unterstützer von HackTricks.**
 
 {{#ref}}
 https://www.youtube.com/watch?v=Zq2JycGDCPM
@@ -161,16 +167,17 @@ https://www.youtube.com/watch?v=Zq2JycGDCPM
 <figure class="sponsor-logo"><img src="images/cyberhelmets-logo.png" alt="cyberhelmets logo"><figcaption></figcaption></figure>
 
 
-**Built for the field. Built around you.**\
-[**Cyber Helmets**](https://cyberhelmets.com/?ref=hacktricks) entwickelt und liefert effektive Cybersecurity-Schulungen, entwickelt und geleitet von
-Branchenexperten. Ihre Programme gehen über Theorie hinaus, um Teams mit tiefem
-Verständnis und umsetzbaren Fähigkeiten auszustatten, mithilfe von maßgeschneiderten Umgebungen, die reale
-Bedrohungen widerspiegeln. Für Anfragen zu maßgeschneiderten Schulungen kontaktiere uns [**hier**](https://cyberhelmets.com/tailor-made-training/?ref=hacktricks).
+**Für die Praxis entwickelt. Auf dich zugeschnitten.**\
+[**Cyber Helmets**](https://cyberhelmets.com/?ref=hacktricks) entwickelt und bietet effektive Cybersecurity-Trainings an, die von
+Branchenexperten konzipiert und geleitet werden. Die Programme gehen über
+Theorie hinaus und vermitteln Teams ein umfassendes
+Verständnis sowie praxisnahe Fähigkeiten. Dabei kommen individuelle Umgebungen zum Einsatz, die reale
+Bedrohungen widerspiegeln. Für Anfragen zu maßgeschneiderten Trainings kontaktiere uns [**hier**](https://cyberhelmets.com/tailor-made-training/?ref=hacktricks).
 
-**Was ihre Schulungen auszeichnet:**
-* Custom-built content and labs
-* Backed by top-tier tools and platforms
-* Designed and taught by practitioners
+**Was ihr Training besonders macht:**
+* Individuell entwickelte Inhalte und Labs
+* Unterstützt durch erstklassige Tools und Plattformen
+* Von Praktikern konzipiert und vermittelt
 
 {{#ref}}
 https://cyberhelmets.com/courses/?ref=hacktricks
@@ -182,19 +189,17 @@ https://cyberhelmets.com/courses/?ref=hacktricks
 
 <figure class="sponsor-logo"><img src="images/lasttower.png" alt="lasttower logo"><figcaption></figcaption></figure>
 
-Last Tower Solutions bietet spezialisierte Cybersecurity-Services für **Education**- und **FinTech**-
-Institutionen, mit Fokus auf **penetration testing, cloud security assessments** und
-**compliance readiness** (SOC 2, PCI-DSS, NIST). Unser Team umfasst **OSCP- und CISSP-
-zertifizierte Fachleute**, die tiefes technisches Fachwissen und branchenübliche Einblicke in
-jedes Engagement einbringen.
+Last Tower Solutions bietet spezialisierte Cybersecurity-Services für Einrichtungen im Bereich **Bildung** und **FinTech** an, mit einem Schwerpunkt auf **Penetrationstests, Cloud-Security-Assessments** und **Compliance-Readiness** (SOC 2, PCI-DSS, NIST). Unser Team umfasst **OSCP- und CISSP-zertifizierte
+Fachleute**, die tiefgehendes technisches Know-how und branchenübliche Expertise in jedes
+Engagement einbringen.
 
-Wir gehen über automatisierte Scans hinaus mit **manuellem, intelligence-driven testing**, zugeschnitten auf
-Umgebungen mit hohem Risiko. Vom Schutz von Schülerdaten bis zur Absicherung finanzieller Transaktionen
-helfen wir Organisationen, das zu verteidigen, was am wichtigsten ist.
+Wir gehen über automatisierte Scans hinaus und führen **manuelle, informationsgestützte Tests** durch, die auf
+Umgebungen mit hohen Anforderungen zugeschnitten sind. Vom Schutz von Schüler- und Studentendaten bis zum Schutz
+von Finanztransaktionen helfen wir Organisationen dabei, das zu verteidigen, was am wichtigsten ist.
 
-_“A quality defense requires knowing the offense, we provide security through understanding.”_
+_„Eine hochwertige Verteidigung erfordert das Verständnis des Angriffs – wir bieten Security durch Verständnis.“_
 
-Bleib informiert und auf dem neuesten Stand in Sachen Cybersecurity, indem du unseren [**blog**](https://www.lasttowersolutions.com/blog) besuchst.
+Bleibe informiert und auf dem neuesten Stand der Cybersecurity, indem du unseren [**Blog**](https://www.lasttowersolutions.com/blog) besuchst.
 
 {{#ref}}
 https://www.lasttowersolutions.com/
@@ -206,23 +211,23 @@ https://www.lasttowersolutions.com/
 
 <figure class="sponsor-logo"><img src="images/k8studio.png" alt="k8studio logo"><figcaption></figcaption></figure>
 
-K8Studio IDE befähigt DevOps, DevSecOps und Entwickler, Kubernetes-Cluster effizient zu verwalten, zu überwachen und abzusichern. Nutze unsere AI-driven insights, das fortschrittliche Security-Framework und die intuitive CloudMaps GUI, um deine Cluster zu visualisieren, ihren Zustand zu verstehen und mit Vertrauen zu handeln.
+Die K8Studio-IDE ermöglicht es DevOps-, DevSecOps-Teams und Entwicklern, Kubernetes-Cluster effizient zu verwalten, zu überwachen und abzusichern. Nutze unsere AI-gestützten Erkenntnisse, das fortschrittliche Security-Framework und die intuitive CloudMaps-GUI, um deine Cluster zu visualisieren, ihren Zustand zu verstehen und sicher zu handeln.
 
-Außerdem ist K8Studio **kompatibel mit allen wichtigen kubernetes distributions** (AWS, GCP, Azure, DO, Rancher, K3s, Openshift und mehr).
+Darüber hinaus ist K8Studio **mit allen wichtigen Kubernetes-Distributionen** kompatibel (AWS, GCP, Azure, DO, Rancher, K3s, Openshift und weitere).
 
 {{#ref}}
 https://k8studio.io/
 {{#endref}}
 
 ---
-## License & Disclaimer
+## Lizenz & Haftungsausschluss
 
-Siehe sie in:
+Siehe:
 
 {{#ref}}
 welcome/hacktricks-values-and-faq.md
 {{#endref}}
 
-## Github Stats
+## GitHub-Statistiken
 
 ![HackTricks Github Stats](https://repobeats.axiom.co/api/embed/68f8746802bcf1c8462e889e6e9302d4384f164b.svg)
