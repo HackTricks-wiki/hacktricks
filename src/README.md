@@ -2,7 +2,7 @@
 
 <figure><img src="images/hacktricks.gif" alt=""><figcaption></figcaption></figure>
 
-_Hacktricksのロゴとモーションデザイン by_ [_@ppieranacho_](https://www.instagram.com/ppieranacho/)_._
+_HackTricksのロゴとモーションデザイン：_ [_@ppieranacho_](https://www.instagram.com/ppieranacho/)_._
 
 ### HackTricksをローカルで実行する
 ```bash
@@ -10,7 +10,7 @@ _Hacktricksのロゴとモーションデザイン by_ [_@ppieranacho_](https://
 git clone https://github.com/HackTricks-wiki/hacktricks
 
 # Select the language you want to use
-export LANG="master" # Leave master for english
+export HT_LANG="master" # Leave master for English
 # "af" for Afrikaans
 # "de" for German
 # "el" for Greek
@@ -29,31 +29,31 @@ export LANG="master" # Leave master for english
 # "zh" for Chinese
 
 # Run the docker container indicating the path to the hacktricks folder
-docker run -d --rm --platform linux/amd64 -p 3337:3000 --name hacktricks -v $(pwd)/hacktricks:/app ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image bash -c "mkdir -p ~/.ssh && ssh-keyscan -H github.com >> ~/.ssh/known_hosts && cd /app && git config --global --add safe.directory /app && git checkout $LANG && git pull && MDBOOK_PREPROCESSOR__HACKTRICKS__ENV=dev mdbook serve --hostname 0.0.0.0"
+docker run -d --rm --platform linux/amd64 -p 3337:3000 --name hacktricks -v $(pwd)/hacktricks:/app ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image bash -c "mkdir -p ~/.ssh && ssh-keyscan -H github.com >> ~/.ssh/known_hosts && cd /app && git config --global --add safe.directory /app && git checkout $HT_LANG && git pull && MDBOOK_PREPROCESSOR__HACKTRICKS__ENV=dev mdbook serve --hostname 0.0.0.0"
 ```
-HackTricksのローカルコピーは、書籍のビルドに5分未満かかるため、しばらく待つと **[http://localhost:3337](http://localhost:3337)** で利用できるようになります。
+HackTricksのローカルコピーは、5分以内に**[http://localhost:3337](http://localhost:3337)**で利用可能になります（bookのビルドが必要なため、しばらくお待ちください）。
 
-または、Docker Composeがある場合は、リポジトリのルートから次のコマンドを実行するだけです。
+または、Docker Composeがある場合は、repo rootから次を実行するだけです：
 ```bash
 docker compose up
 ```
-これは同梱の `docker-compose.yml` を使用して、ローカル checkout を [http://localhost:3337](http://localhost:3337) で live reload 付きで提供します。
+これは同梱の `docker-compose.yml` を使用して、現在ホスト上で checkout されている branch を [http://localhost:3337](http://localhost:3337) で live reload 付きで提供します。Compose の使用時に言語を変更するには、service を開始する前に目的の言語の branch を checkout してください。
 
-## HackTricks Partners
+## HackTricks パートナー
 
 ---
 
-## HackTricks Friends
+## HackTricks フレンド
 
 ### [STM Cyber](https://www.stmcyber.com)
 
 <figure class="sponsor-logo"><img src="images/stm (1).png" alt=""><figcaption></figcaption></figure>
 
-[**STM Cyber**](https://www.stmcyber.com) は、**HACK THE UNHACKABLE** をスローガンとする優れた cybersecurity company です。独自の research を行い、独自の hacking tools を開発して、pentesting、Red teams、training などの**有益な cybersecurity services を複数提供**しています。
+[**STM Cyber**](https://www.stmcyber.com) は、**HACK THE UNHACKABLE** を slogan とする優れた cybersecurity company です。独自の research を行い、独自の hacking tools を開発して、pentesting、Red teams、training などの **価値ある複数の cybersecurity services を提供**しています。
 
 **blog** は [**https://blog.stmcyber.com**](https://blog.stmcyber.com) で確認できます。
 
-**STM Cyber** は HackTricks などの cybersecurity open source projects も支援しています :)
+**STM Cyber** は HackTricks のような cybersecurity open source projects も support しています :)
 
 ---
 
@@ -63,7 +63,7 @@ docker compose up
 
 **Intigriti** は、**Europe's #1** の ethical hacking および **bug bounty platform** です。
 
-**Bug bounty tip**: **Intigriti** に **sign up** しましょう。これは、**hackers によって hackers のために作られた** premium **bug bounty platform** です！今すぐ [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) から参加して、最大 **$100,000** の bounties を獲得しましょう！
+**Bug bounty tip**: **hackers によって hackers のために作られた** premium **bug bounty platform** である **Intigriti** に **sign up** しましょう！今すぐ [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) から参加して、最大 **$100,000** の bounties を獲得しましょう！
 
 {{#ref}}
 https://go.intigriti.com/hacktricks
@@ -75,16 +75,16 @@ https://go.intigriti.com/hacktricks
 
 <figure class="sponsor-logo"><img src="images/modern_security_logo.png" alt="Modern Security"><figcaption></figcaption></figure>
 
-Modern Security は、**engineering-first** かつ hands-on lab approach による**実践的な AI Security training** を提供しています。security engineers、AppSec professionals、そして**実際の AI/LLM-powered applications を構築、攻撃、防御したい** developers 向けに、courses を設計しています。
+Modern Security は、**engineering-first** かつ hands-on lab approach による **実践的な AI Security training** を提供しています。これらの courses は、security engineers、AppSec professionals、および **実際の AI/LLM-powered applications を構築、破壊、secure にしたい** developers 向けに作られています。
 
-**AI Security Certification** では、次のような real-world skills に重点を置いています。
-- LLM および AI-powered applications の保護
+**AI Security Certification** では、以下を含む real-world skills に重点を置いています。
+- LLM および AI-powered applications の secure 化
 - AI systems の threat modeling
 - Embeddings、vector databases、RAG security
 - LLM attacks、abuse scenarios、実践的な defenses
-- Secure design patterns と deployment considerations
+- Secure design patterns および deployment considerations
 
-すべての courses は **on-demand**、**lab-driven** であり、理論だけでなく**現実の security tradeoffs** を中心に設計されています。
+すべての courses は **on-demand**、**lab-driven** であり、理論だけでなく **real-world security tradeoffs** を中心に設計されています。
 
 👉 AI Security course の詳細:
 https://www.modernsecurity.io/courses/ai-security-certification
@@ -99,14 +99,14 @@ https://modernsecurity.io/
 
 <figure class="sponsor-logo"><img src="images/image (1254).png" alt=""><figcaption></figcaption></figure>
 
-**SerpApi** は、**search engine results にアクセス**するための、高速で使いやすい real-time APIs を提供しています。search engines の scraping、proxies の処理、captchas の解決、豊富な structured data の parsing をすべて代行します。
+**SerpApi** は、**search engine results にアクセス**するための高速で簡単な real-time APIs を提供しています。search engines を scrape し、proxies を処理し、captchas を解決し、すべての rich structured data を解析します。
 
 SerpApi のいずれかの plans に subscription すると、Google、Bing、Baidu、Yahoo、Yandex など、さまざまな search engines を scraping するための 50 種類以上の APIs にアクセスできます。\
-他の providers と異なり、**SerpApi は organic results だけを scrape するわけではありません**。SerpApi の responses には、search results に表示されるすべての ads、inline images and videos、knowledge graphs、その他の elements と features が常に含まれます。
+他の providers とは異なり、**SerpApi は organic results だけを scrape するわけではありません**。SerpApi の responses には、search results に存在するすべての ads、inline images and videos、knowledge graphs、その他の elements や features が一貫して含まれます。
 
-現在の SerpApi customers には **Apple、Shopify、GrubHub** などが含まれます。\
-詳細については [**blog**](https://serpapi.com/blog/)** を確認するか、[**playground**](https://serpapi.com/playground)** で example を試してください。**\
-[**こちら**](https://serpapi.com/users/sign_up) から **free account を作成**できます**。**
+現在の SerpApi customers には **Apple、Shopify、GrubHub** が含まれます。\
+詳細については [**blog**](https://serpapi.com/blog/)**、** を確認するか、[**playground**](https://serpapi.com/playground)**。** で example を試してください。\
+[**こちら**](https://serpapi.com/users/sign_up)** から **free account を作成**できます。**
 
 ---
 
@@ -114,13 +114,13 @@ SerpApi のいずれかの plans に subscription すると、Google、Bing、Ba
 
 <figure class="sponsor-logo"><img src="images/image (2).png" alt=""><figcaption></figcaption></figure>
 
-**8kSec Academy** は、現役 researchers が指導する offensive mobile および AI security をトレーニングします。講師陣は、Black Hat、HITB、Zer0con での CVE writeups や talks を担当している team と同じです。courses は self-paced で、実際の targets を使った labs を中心に構成され、hands-on certification も提供されます。
+**8kSec Academy** では、現役 researchers が教える offensive mobile and AI security を学べます。講師は、Black Hat、HITB、Zer0con で CVE writeups や talks を行っているチームと同じです。Courses は self-paced で、実際の targets を使った labs を中心に構成され、hands-on certification によって裏付けられています。
 
 catalog は 2 つの tracks で構成されています。
 
-**Mobile Security** – app layer から下位レイヤーまでの iOS と Android：Ghidra と LLDB による reverse engineering、ARM64 exploitation、kernel internals、最新の mitigations（PAC、MTE、SELinux）、jailbreak と rooting の仕組み。
+**Mobile Security** – app layer から下位レイヤーまでの iOS と Android: Ghidra と LLDB を使った reverse engineering、ARM64 exploitation、kernel internals と最新の mitigations（PAC、MTE、SELinux）、jailbreak と rooting mechanics。
 
-**AI Security** – この分野を網羅する 2 つの full courses。Practical AI Security では、LLMs、RAG pipelines、AI agents、MCP の仕組みと、それらを攻撃・防御する方法を扱います。Advanced AI Security では、最先端の build-heavy な内容として、Garak と PyRIT による AI systems の大規模な red teaming、MCP servers の exploitation、model backdoors の planting と detection、Apple Silicon 上での fine-tuning attacks と defenses を扱います。
+**AI Security** – この分野全体を網羅する 2 つの full courses。Practical AI Security では、LLMs、RAG pipelines、AI agents、MCP の仕組みと、それらを attack および defend する方法を扱います。Advanced AI Security では frontier における build-heavy な内容として、Garak と PyRIT を使った AI systems の scale に応じた red teaming、MCP servers の exploitation、model backdoors の埋め込みと検出、Apple Silicon 上での fine-tuning attacks and defenses を扱います。
 
 Courses と certifications:
 
@@ -134,9 +134,9 @@ https://academy.8ksec.io/
 
 <figure class="sponsor-logo"><img src="images/logo-naxus.png" alt=""><figcaption></figcaption></figure>
 
-**NaxusAI** は、attackers より先に exploitable vulnerabilities を発見するための AI-powered security platform です。
+**NaxusAI** は、attackers より先に exploitable vulnerabilities を見つけるための AI-powered security platform です。
 
-**Code security tip**: developers と security teams 向けに構築された smart vulnerability monitoring platform、NaxusAI に sign up しましょう！今すぐ参加して、**production に到達する前に real security risks を detecting、validating、fixing する**ために AI を使い始めましょう！
+**Code security tip**: developers と security teams 向けに構築された smart vulnerability monitoring platform、NaxusAI に sign up しましょう！今すぐ参加して、**production に到達する前に実際の security risks を検出、検証、修正**するために AI を使い始めましょう！
 
 {{#ref}}
 https://naxusai.com
@@ -148,13 +148,13 @@ https://naxusai.com
 
 <figure class="sponsor-logo"><img src="images/websec (1).svg" alt=""><figcaption></figcaption></figure>
 
-[**WebSec**](https://websec.net) は **Amsterdam** を拠点とする professional cybersecurity company で、**modern** な approach による **offensive-security services** を提供し、**世界中の** businesses を最新の cybersecurity threats から**保護**しています。
+[**WebSec**](https://websec.net) は **Amsterdam** を拠点とする professional cybersecurity company で、**modern** な approach による **offensive-security services** を提供し、最新の cybersecurity threats から **世界中の** businesses を **protect** する支援を行っています。
 
-WebSec は Amsterdam と Wyoming に offices を持つ intenational security company です。**all-in-one security services** を提供しており、Pentesting、**Security** Audits、Awareness Trainings、Phishing Campagnes、Code Review、Exploit Development、Security Experts Outsourcing など、あらゆるサービスを扱っています。
+WebSec は Amsterdam と Wyoming に offices を持つ intenational security company です。**all-in-one security services** を提供しており、Pentesting、**Security** Audits、Awareness Trainings、Phishing Campagnes、Code Review、Exploit Development、Security Experts Outsourcing など、あらゆるサービスを実施します。
 
-WebSec のもう 1 つの魅力は、industry average とは異なり、**自社の skills に非常に自信を持っている**ことです。その自信は、**最高品質の results を保証**するほどで、website には "**If we can't hack it, You don't pay it!**" と記載されています。詳細は [**website**](https://websec.net/en/) と [**blog**](https://websec.net/blog/) をご覧ください！
+WebSec のもう一つの魅力は、industry average とは異なり、**自分たちの skills に非常に自信を持っている**ことです。その自信は、**最高品質の results を guarantee** するほどで、website には "**If we can't hack it, You don't pay it!**" と記載されています。詳細は [**website**](https://websec.net/en/) と [**blog**](https://websec.net/blog/) をご覧ください！
 
-上記に加えて、WebSec は HackTricks の**熱心な supporter**でもあります。
+上記に加えて、WebSec は **HackTricks の committed supporter** でもあります。
 
 {{#ref}}
 https://www.youtube.com/watch?v=Zq2JycGDCPM
@@ -168,11 +168,11 @@ https://www.youtube.com/watch?v=Zq2JycGDCPM
 
 
 **現場のために。あなたを中心に。**\
-[**Cyber Helmets**](https://cyberhelmets.com/?ref=hacktricks) は、industry experts が開発・指導する effective cybersecurity training を提供しています。programs は theory にとどまらず、real-world threats を反映した custom environments を使用して、teams に深い understanding と actionable skills を身につけさせます。custom training に関するお問い合わせは [**こちら**](https://cyberhelmets.com/tailor-made-training/?ref=hacktricks) からご連絡ください。
+[**Cyber Helmets**](https://cyberhelmets.com/?ref=hacktricks) は、industry experts が開発・指導する効果的な cybersecurity training を提供しています。programs は理論にとどまらず、real-world threats を反映した custom environments を使用して、team に深い understanding と actionable skills を身につけさせます。custom training に関するお問い合わせは [**こちら**](https://cyberhelmets.com/tailor-made-training/?ref=hacktricks) からご連絡ください。
 
 **training の特徴:**
 * Custom-built content と labs
-* top-tier tools と platforms による支援
+* top-tier tools と platforms による support
 * practitioners が設計・指導
 
 {{#ref}}
@@ -185,14 +185,14 @@ https://cyberhelmets.com/courses/?ref=hacktricks
 
 <figure class="sponsor-logo"><img src="images/lasttower.png" alt="lasttower logo"><figcaption></figcaption></figure>
 
-Last Tower Solutions は、**Education** および **FinTech** institutions 向けに specialized cybersecurity services を提供しており、**penetration testing、cloud security assessments**、**compliance readiness**（SOC 2、PCI-DSS、NIST）に重点を置いています。team には **OSCP および CISSP
-certified professionals** が所属し、すべての engagements に高度な technical expertise と industry-standard insight を提供します。
+Last Tower Solutions は、**Education** および **FinTech** institutions 向けに specialized cybersecurity services を提供しており、**penetration testing、cloud security assessments**、および **compliance readiness**（SOC 2、PCI-DSS、NIST）に重点を置いています。team には **OSCP および CISSP
+certified professionals** が所属しており、すべての engagements に深い technical expertise と industry-standard insight をもたらします。
 
-automated scans にとどまらず、high-stakes environments に合わせた **manual、intelligence-driven testing** を実施します。student records の保護から financial transactions の防御まで、organizations が最も重要なものを守れるよう支援します。
+自動化された scans にとどまらず、**manual かつ intelligence-driven な testing** を high-stakes environments に合わせて実施します。student records の secure 化から financial transactions の保護まで、organizations が最も重要なものを defend できるよう支援します。
 
-_「質の高い defense には offense の理解が必要です。私たちは理解を通じて security を提供します。」_
+_「質の高い defense には offense を知ることが必要です。私たちは understanding を通じて security を提供します。」_
 
-最新の cybersecurity 情報を入手するには、[**blog**](https://www.lasttowersolutions.com/blog) をご覧ください。
+[**blog**](https://www.lasttowersolutions.com/blog) にアクセスして、cybersecurity の最新情報を入手し、常に up to date な状態を保ちましょう。
 
 {{#ref}}
 https://www.lasttowersolutions.com/
@@ -206,16 +206,16 @@ https://www.lasttowersolutions.com/
 
 K8Studio IDE は、DevOps、DevSecOps、developers が Kubernetes clusters を効率的に manage、monitor、secure できるようにします。AI-driven insights、advanced security framework、直感的な CloudMaps GUI を活用して、clusters を可視化し、その state を理解し、自信を持って対応できます。
 
-さらに、K8Studio は **主要なすべての kubernetes distributions**（AWS、GCP、Azure、DO、Rancher、K3s、Openshift など）と**互換性があります**。
+さらに、K8Studio は **主要なすべての kubernetes distributions**（AWS、GCP、Azure、DO、Rancher、K3s、Openshift など）に **compatible** です。
 
 {{#ref}}
 https://k8studio.io/
 {{#endref}}
 
 ---
-## License & Disclaimer
+## License と Disclaimer
 
-以下で確認できます。
+以下で確認してください:
 
 {{#ref}}
 welcome/hacktricks-values-and-faq.md
