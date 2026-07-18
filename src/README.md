@@ -35,6 +35,14 @@ docker run -d --rm --platform linux/amd64 -p 3337:3000 --name hacktricks -v $(pw
 
 Your local copy of HackTricks will be **available at [http://localhost:3337](http://localhost:3337)** after <5 minutes (it needs to build the book, be patient).
 
+Alternatively, if you have Docker Compose you can just run the following from the repo root:
+
+```bash
+docker compose up
+```
+
+This uses the bundled `docker-compose.yml` to serve your local checkout at [http://localhost:3337](http://localhost:3337) with live reload.
+
 ## HackTricks Partners
 
 ---
