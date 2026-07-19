@@ -17,7 +17,7 @@ macos-security-protections/macos-tcc/
 
 
 {{#ref}}
-../../linux-hardening/privilege-escalation/
+../../linux-hardening/linux-basics/linux-privilege-escalation/README.md
 {{#endref}}
 
 ## User Interaction
