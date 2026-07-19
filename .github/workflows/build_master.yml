@@ -179,9 +179,20 @@ jobs:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: us-east-1
       
-      # Sync the build to S3
+      # Sync the build to S3. mdBook refreshes mtimes on every build, so first
+      # age byte-identical files based on S3 ETags; `s3 sync` then uploads only
+      # genuinely changed/new output while retaining normal --delete behavior.
       - name: Sync to S3
-        run: aws s3 sync ./book s3://hacktricks-wiki/en --delete
+        run: |
+          aws s3api list-objects-v2 \
+            --bucket hacktricks-wiki \
+            --prefix en/ \
+            --output json > /tmp/s3-en-manifest.json
+          python3 scripts/mark_unchanged_s3_files.py \
+            --source ./book \
+            --manifest /tmp/s3-en-manifest.json \
+            --remote-prefix en/
+          aws s3 sync ./book s3://hacktricks-wiki/en --delete
 
       - name: Upload root sitemap index
         run: |
