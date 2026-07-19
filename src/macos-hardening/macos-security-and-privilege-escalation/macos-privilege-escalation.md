@@ -17,7 +17,7 @@ Imajte na umu da **većina trikova o privilege escalation koji utiču na Linux/U
 
 
 {{#ref}}
-../../linux-hardening/privilege-escalation/
+../../linux-hardening/linux-basics/linux-privilege-escalation/README.md
 {{#endref}}
 
 ## User Interaction
