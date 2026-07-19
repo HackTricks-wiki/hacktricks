@@ -186,3 +186,4 @@ Treat ordering as a clue, not proof. Copy operations, archive extraction, filesy
 - Use `nosuid`, `nodev`, and `noexec` where operationally appropriate, but do not treat them as a complete boundary.
 - Restrict access to `/proc/<pid>/fd`, process metadata, and cross-user process inspection where possible.
 - Monitor writable mount points, unexpected hardlinks to privileged files, and deleted-but-open sensitive files.
+{{#include ../../banners/hacktricks-training.md}}

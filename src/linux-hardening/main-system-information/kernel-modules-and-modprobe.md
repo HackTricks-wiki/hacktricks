@@ -176,3 +176,4 @@ Defensive notes:
 - Set `kernel.modules_disabled=1` after boot where operationally possible.
 - Enforce module signing on systems that require loadable modules.
 - Monitor writes to `/proc/sys/kernel/modprobe`, `/lib/modules`, and unexpected `insmod`/`modprobe` execution.
+{{#include ../../banners/hacktricks-training.md}}

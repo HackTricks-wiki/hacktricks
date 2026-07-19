@@ -1,7 +1,10 @@
+# Linux Privilege Escalation Checklist
+
+{{#include ../../banners/hacktricks-training.md}}
 
 # Checklist - Linux Privilege Escalation
 
-{{#include ../../banners/hacktricks-training.md}}
+
 
 ### **Best tool to look for Linux local privilege escalation vectors:** [**LinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/linPEAS)
 
