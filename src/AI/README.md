@@ -1,10 +1,10 @@
-# AI in der Cybersicherheit
+# AI in Cybersecurity
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Hauptalgorithmen des Machine Learning
+## Wichtigste Machine-Learning-Algorithmen
 
-Der beste Ausgangspunkt, um etwas über AI zu lernen, ist, zu verstehen, wie die wichtigsten Machine-Learning-Algorithmen funktionieren. Dies hilft dir zu verstehen, wie AI funktioniert, wie du sie einsetzt und wie du sie angreifst:
+Der beste Ausgangspunkt, um etwas über AI zu lernen, ist, zu verstehen, wie die wichtigsten Machine-Learning-Algorithmen funktionieren. Dies hilft dir zu verstehen, wie AI funktioniert, wie du sie verwendest und wie du sie angreifst:
 
 
 {{#ref}}
@@ -26,9 +26,9 @@ Der beste Ausgangspunkt, um etwas über AI zu lernen, ist, zu verstehen, wie die
 ./AI-Deep-Learning.md
 {{#endref}}
 
-### Architektur von LLMs
+### LLMs-Architektur
 
-Auf der folgenden Seite findest du die Grundlagen jeder Komponente, um ein grundlegendes LLM mit Transformers zu erstellen:
+Auf der folgenden Seite findest du die Grundlagen der einzelnen Komponenten zum Aufbau eines grundlegenden LLM unter Verwendung von Transformern:
 
 
 {{#ref}}
@@ -37,7 +37,7 @@ AI-llm-architecture/README.md
 
 ## AI-Sicherheit
 
-### AI-Risk-Frameworks
+### AI-Risikoframeworks
 
 Derzeit sind die beiden wichtigsten Frameworks zur Bewertung der Risiken von AI-Systemen OWASP ML Top 10 und Google SAIF:
 
@@ -48,7 +48,7 @@ AI-Risk-Frameworks.md
 
 ### Sicherheit von AI-Prompts
 
-LLMs haben die Nutzung von AI in den letzten Jahren stark ausgeweitet, sind jedoch nicht perfekt und können durch adversarial Prompts getäuscht werden. Dies ist ein sehr wichtiges Thema, um zu verstehen, wie man AI sicher verwendet und wie man sie angreift:
+LLMs haben die Nutzung von AI in den letzten Jahren stark ausgeweitet, sind jedoch nicht perfekt und können durch adversariale Prompts manipuliert werden. Dies ist ein sehr wichtiges Thema, um zu verstehen, wie man AI sicher verwendet und wie man sie angreift:
 
 
 {{#ref}}
@@ -64,16 +64,25 @@ Für Entwickler und Unternehmen ist es sehr üblich, aus dem Internet herunterge
 AI-Models-RCE.md
 {{#endref}}
 
+### AI-gestützter KYC Bypass
+
+Generative Videos können mit Virtual-Camera-Injection und der Manipulation von Camera-APIs kombiniert werden, um schwache KYC-, Altersverifizierungs- und biometrische Liveness-Workflows zu umgehen:
+
+
+{{#ref}}
+KYC-Bypass-Using-AI.md
+{{#endref}}
+
 ### AI Model Context Protocol
 
-MCP (Model Context Protocol) ist ein Protokoll, das es AI-Agent-Clients ermöglicht, sich auf Plug-and-Play-Art mit externen Tools und Datenquellen zu verbinden. Dies ermöglicht komplexe Workflows und Interaktionen zwischen AI-Modellen und externen Systemen:
+MCP (Model Context Protocol) ist ein Protokoll, das es AI-Agent-Clients ermöglicht, sich per Plug-and-Play mit externen Tools und Datenquellen zu verbinden. Dies ermöglicht komplexe Workflows und Interaktionen zwischen AI-Modellen und externen Systemen:
 
 
 {{#ref}}
 AI-MCP-Servers.md
 {{#endref}}
 
-### AI-gestütztes Fuzzing & automatisierte Schwachstellenerkennung
+### AI-gestütztes Fuzzing & automatisierte Vulnerability Discovery
 
 
 {{#ref}}
@@ -82,7 +91,7 @@ AI-Assisted-Fuzzing-and-Vulnerability-Discovery.md
 
 ### Web-Black-Box-AI-Pentester-Bots
 
-LLM-gestützte Agents können lang laufende Black-Box-Web-Pentesting-Workflows automatisieren, wenn sie durch Observability, Orchestrierung, authentifizierte Session-Verwaltung und adversarial Validation unterstützt werden:
+LLM-basierte Agents können lang andauernde Black-Box-Web-Pentesting-Workflows automatisieren, wenn sie durch Observability, Orchestrierung, die Verarbeitung authentifizierter Sessions und adversariales Validieren unterstützt werden:
 
 
 {{#ref}}
