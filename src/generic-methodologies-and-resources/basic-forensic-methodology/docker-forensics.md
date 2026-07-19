@@ -1,17 +1,17 @@
-# Docker Forensics
+# Uchunguzi wa Docker
 
 {{#include ../../banners/hacktricks-training.md}}
 
 
-## Container modification
+## Marekebisho ya container
 
-Kuna shaka kwamba baadhi ya kontena za docker zilipatikana na kuathiriwa:
+Kuna mashaka kwamba container fulani ya Docker iliingiliwa:
 ```bash
 docker ps
 CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
 cc03e43a052a        lamp-wordpress      "./run.sh"          2 minutes ago       Up 2 minutes        80/tcp              wordpress
 ```
-Unaweza kwa urahisi **kupata marekebisho yaliyofanywa kwa kontena hili kuhusiana na picha** kwa kutumia:
+Unaweza kwa urahisi **kupata marekebisho yaliyofanywa kwenye container hii ikilinganishwa na image** kwa:
 ```bash
 docker diff wordpress
 C /var
@@ -25,37 +25,37 @@ A /var/lib/mysql/mysql/time_zone_leap_second.MYI
 A /var/lib/mysql/mysql/general_log.CSV
 ...
 ```
-Katika amri iliyopita, **C** inamaanisha **Changed** na **A,** **Added**.\
-Ikiwa utagundua kuwa faili ya kuvutia kama `/etc/shadow` imebadilishwa, unaweza kuipakua kutoka kwenye kontena ili kuangalia shughuli za uhalifu kwa:
+Katika amri iliyotangulia, **C** inamaanisha **Changed** na **A,** **Added**.\
+Ukigundua kuwa faili fulani ya kuvutia kama `/etc/shadow` imebadilishwa, unaweza kuipakua kutoka kwenye container ili kuangalia shughuli hasidi kwa:
 ```bash
 docker cp wordpress:/etc/shadow.
 ```
-Unaweza pia **kuilinganisha na ile ya asili** kwa kuendesha kontena mpya na kutoa faili kutoka kwake:
+Unaweza pia **kuilinganisha na ya awali** kwa kuendesha container mpya na kutoa faili kutoka humo:
 ```bash
 docker run -d lamp-wordpress
 docker cp b5d53e8b468e:/etc/shadow original_shadow #Get the file from the newly created container
 diff original_shadow shadow
 ```
-Ikiwa utagundua kwamba **faili fulani ya kushangaza imeongezwa** unaweza kufikia kontena na kuangalia:
+Ukigundua kuwa **faili fulani yenye kutia shaka iliongezwa** unaweza kufikia container na kuiangalia:
 ```bash
 docker exec -it wordpress bash
 ```
-## Mabadiliko ya picha
+## Marekebisho ya Images
 
-Unapopewa picha ya docker iliyosafirishwa (labda katika muundo wa `.tar`) unaweza kutumia [**container-diff**](https://github.com/GoogleContainerTools/container-diff/releases) ili **kutolewa muhtasari wa mabadiliko**:
+Unapopewa Docker image iliyosafirishwa (huenda ikiwa katika muundo wa `.tar`), unaweza kutumia [**container-diff**](https://github.com/GoogleContainerTools/container-diff/releases) ili **kutoa muhtasari wa marekebisho**:
 ```bash
 docker save <image> > image.tar #Export the image to a .tar file
 container-diff analyze -t sizelayer image.tar
 container-diff analyze -t history image.tar
 container-diff analyze -t metadata image.tar
 ```
-Kisha, unaweza **kufungua** picha na **kufikia blobs** kutafuta faili za kushangaza ambazo huenda umepata katika historia ya mabadiliko:
+Kisha, unaweza **ku-decompress** image na **ku-access blobs** ili kutafuta files zinazotiliwa shaka ambazo huenda ulizipata katika historia ya mabadiliko:
 ```bash
 tar -xf image.tar
 ```
-### Basic Analysis
+### Uchambuzi wa Msingi
 
-Unaweza kupata **taarifa za msingi** kutoka kwa picha ukikimbia:
+Unaweza kupata **taarifa za msingi** kutoka kwenye image kwa kuendesha:
 ```bash
 docker inspect <image>
 ```
@@ -63,14 +63,14 @@ Unaweza pia kupata muhtasari wa **historia ya mabadiliko** kwa:
 ```bash
 docker history --no-trunc <image>
 ```
-Unaweza pia kuunda **dockerfile kutoka kwa picha** na:
+Unaweza pia kutengeneza **dockerfile kutoka kwenye image** kwa:
 ```bash
 alias dfimage="docker run -v /var/run/docker.sock:/var/run/docker.sock --rm alpine/dfimage"
 dfimage -sV=1.36 madhuakula/k8s-goat-hidden-in-layers>
 ```
 ### Dive
 
-Ili kupata faili zilizoongezwa/zilizobadilishwa katika picha za docker unaweza pia kutumia [**dive**](https://github.com/wagoodman/dive) (ipakue kutoka [**releases**](https://github.com/wagoodman/dive/releases/tag/v0.10.0)) chombo:
+Ili kupata faili zilizoongezwa/kubadilishwa katika Docker images, unaweza pia kutumia zana ya [**dive**](https://github.com/wagoodman/dive) (ipakue kutoka kwenye [**releases**](https://github.com/wagoodman/dive/releases/tag/v0.10.0)):
 ```bash
 #First you need to load the image in your docker repo
 sudo docker load < image.tar                                                                                                                                                                                                         1 ⨯
@@ -79,19 +79,19 @@ Loaded image: flask:latest
 #And then open it with dive:
 sudo dive flask:latest
 ```
-Hii inakuwezesha **kuvinjari kupitia blobs tofauti za picha za docker** na kuangalia faili zipi zilirekebishwa/kuongezwa. **Nyekundu** inamaanisha kuongezwa na **njano** inamaanisha kurekebishwa. Tumia **tab** kuhamia kwenye mtazamo mwingine na **space** kufunga/kufungua folda.
+Hii inakuruhusu **kuvinjari blobs tofauti za docker images** na kukagua ni mafaili yapi yamebadilishwa/kuongezwa. **Red** inamaanisha yameongezwa na **yellow** inamaanisha yamebadilishwa. Tumia **tab** kuhamia kwenye mwonekano mwingine na **space** kukunja/kufungua folda.
 
-Kwa die huwezi kufikia maudhui ya hatua tofauti za picha. Ili kufanya hivyo utahitaji **kufungua kila safu na kuifikia**.\
-Unaweza kufungua safu zote kutoka kwa picha kutoka kwenye saraka ambapo picha ilifunguliwa ukitekeleza:
+Ukitumia die hutaweza kufikia maudhui ya stages tofauti za image. Ili kufanya hivyo utahitaji **kudecompress kila layer na kuifikia**.\
+Unaweza kudecompress layers zote kutoka kwenye image ukiwa kwenye directory ambako image ilidecompressiwa, kwa kutekeleza:
 ```bash
 tar -xf image.tar
 for d in `find * -maxdepth 0 -type d`; do cd $d; tar -xf ./layer.tar; cd ..; done
 ```
-## Credentials kutoka kwa kumbukumbu
+## Credentials kutoka kwenye memory
 
-Kumbuka kwamba unapokimbia kontena la docker ndani ya mwenyeji **unaweza kuona michakato inayokimbia kwenye kontena kutoka kwa mwenyeji** kwa kukimbia tu `ps -ef`
+Kumbuka kwamba unapoendesha docker container ndani ya host, **unaweza kuona processes zinazoendesha kwenye container kutoka kwa host** kwa kuendesha tu `ps -ef`
 
-Hivyo (kama root) unaweza **kutoa kumbukumbu ya michakato** kutoka kwa mwenyeji na kutafuta **credentials** tu [**kama katika mfano ufuatao**](../../linux-hardening/privilege-escalation/index.html#process-memory).
+Kwa hiyo, (ukiwa root) unaweza **ku-dump memory ya processes** kutoka kwa host na kutafuta **credentials** [**kama ilivyo kwenye mfano ufuatao**](../../linux-hardening/linux-basics/linux-privilege-escalation/index.html#process-memory).
 
 
 {{#include ../../banners/hacktricks-training.md}}

