@@ -15,7 +15,7 @@ macos-security-protections/macos-tcc/
 कृपया ध्यान दें कि **Linux/Unix को प्रभावित करने वाली privilege escalation की अधिकांश तरकीबें MacOS मशीनों को भी प्रभावित करेंगी**। इसलिए देखें:
 
 {{#ref}}
-../../linux-hardening/privilege-escalation/
+../../linux-hardening/linux-basics/linux-privilege-escalation/README.md
 {{#endref}}
 
 ## उपयोगकर्ता इंटरैक्शन
