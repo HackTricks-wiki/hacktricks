@@ -1,6 +1,6 @@
 # Useful Linux Commands
 
-{{#include ../banners/hacktricks-training.md}}
+{{#include ../../banners/hacktricks-training.md}}
 
 ## Common Bash
 
@@ -361,6 +361,5 @@ Add `--grep 'Invalid user' --case-sensitive` or `-k` (kernel ring buffer only) w
 - [eBPFmon: A new tool for exploring and interacting with eBPF applications](https://redcanary.com/blog/linux-security/ebpfmon/)
 - [How to use the journalctl command to view Linux logs](https://www.hostinger.com/tutorials/journalctl-command)
 
-{{#include ../banners/hacktricks-training.md}}
-
+{{#include ../../banners/hacktricks-training.md}}
 

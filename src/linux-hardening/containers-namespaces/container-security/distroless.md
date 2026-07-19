@@ -148,7 +148,7 @@ That combination makes classic "download binary to disk and run it" workflows un
 The dedicated page for that is:
 
 {{#ref}}
-../../bypass-bash-restrictions/bypass-fs-protections-read-only-no-exec-distroless/
+../../linux-basics/bypass-linux-restrictions/bypass-fs-protections-read-only-no-exec-distroless/
 {{#endref}}
 
 The most relevant techniques there are:
@@ -209,7 +209,7 @@ The key point is that distroless is an **image property**, not a runtime protect
 For filesystem and memory-execution bypasses commonly needed in distroless environments:
 
 {{#ref}}
-../../bypass-bash-restrictions/bypass-fs-protections-read-only-no-exec-distroless/
+../../linux-basics/bypass-linux-restrictions/bypass-fs-protections-read-only-no-exec-distroless/
 {{#endref}}
 
 For container runtime, socket, and mount abuse that still applies to distroless workloads:

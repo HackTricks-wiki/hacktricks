@@ -1,7 +1,7 @@
 
 # Checklist - Linux Privilege Escalation
 
-{{#include ../banners/hacktricks-training.md}}
+{{#include ../../banners/hacktricks-training.md}}
 
 ### **Best tool to look for Linux local privilege escalation vectors:** [**LinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/linPEAS)
 
@@ -153,4 +153,4 @@
 
 - [Sudo advisory: sudoedit arbitrary file edit](https://www.sudo.ws/security/advisories/sudoedit_any/)
 - [Oracle Linux docs: systemd drop-in configuration](https://docs.oracle.com/en/operating-systems/oracle-linux/8/systemd/ModifyingsystemdConfigurationFiles.html)
-{{#include ../banners/hacktricks-training.md}}
+{{#include ../../banners/hacktricks-training.md}}

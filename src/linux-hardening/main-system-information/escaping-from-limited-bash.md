@@ -295,7 +295,7 @@ Also check:
 **It could also be interesting the page:**
 
 {{#ref}}
-../bypass-bash-restrictions/
+../linux-basics/bypass-linux-restrictions/
 {{#endref}}
 
 ## Python Jails
@@ -356,5 +356,4 @@ debug.debug()
 - [https://git-scm.com/docs/git-shell](https://git-scm.com/docs/git-shell)
 
 {{#include ../../banners/hacktricks-training.md}}
-
 

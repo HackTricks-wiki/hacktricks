@@ -1,6 +1,6 @@
 # Bypass Linux Restrictions
 
-{{#include ../../banners/hacktricks-training.md}}
+{{#include ../../../banners/hacktricks-training.md}}
 
 ## Common Limitations Bypasses
 
@@ -373,5 +373,4 @@ Practical use cases:
 
 - [Exploiting zero days in abandoned hardware – Trail of Bits blog](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
 
-{{#include ../../banners/hacktricks-training.md}}
-
+{{#include ../../../banners/hacktricks-training.md}}

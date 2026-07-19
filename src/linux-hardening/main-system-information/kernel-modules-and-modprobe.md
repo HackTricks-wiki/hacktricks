@@ -1,6 +1,6 @@
 # Kernel Modules and modprobe Abuse
 
-{{#include ../banners/hacktricks-training.md}}
+{{#include ../../banners/hacktricks-training.md}}
 
 ## Kernel module and module-loading misconfigurations
 

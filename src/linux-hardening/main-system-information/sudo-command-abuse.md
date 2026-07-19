@@ -1,6 +1,6 @@
 # Sudo Command Abuse
 
-{{#include ../banners/hacktricks-training.md}}
+{{#include ../../banners/hacktricks-training.md}}
 
 ## Sudo-allowed interpreters
 

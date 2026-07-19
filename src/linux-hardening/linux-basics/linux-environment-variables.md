@@ -1,6 +1,6 @@
 # Linux Environment Variables
 
-{{#include ../banners/hacktricks-training.md}}
+{{#include ../../banners/hacktricks-training.md}}
 
 ## Global variables
 
@@ -279,5 +279,4 @@ One background job, one stopped and last command didn't finish correctly:
 - [GNU Bash Manual - Bash Startup Files](https://www.gnu.org/software/bash/manual/html_node/Bash-Startup-Files.html)
 - [ld.so(8) - Linux manual page](https://man7.org/linux/man-pages/man8/ld.so.8.html)
 
-{{#include ../banners/hacktricks-training.md}}
-
+{{#include ../../banners/hacktricks-training.md}}

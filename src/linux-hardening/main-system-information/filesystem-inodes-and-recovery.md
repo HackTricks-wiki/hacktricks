@@ -1,6 +1,6 @@
 # Filesystem, Inodes and Recovery
 
-{{#include ../banners/hacktricks-training.md}}
+{{#include ../../banners/hacktricks-training.md}}
 
 Filesystem abuse is often about confusing the relationship between a visible path and the object behind it. Disk images may hide another filesystem, writable mounts may be consumed by privileged jobs, hardlinks may expose the same inode through a different name, and deleted files may still be readable through an open file descriptor.
 

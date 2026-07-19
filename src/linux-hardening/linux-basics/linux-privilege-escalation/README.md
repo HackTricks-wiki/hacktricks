@@ -1,6 +1,6 @@
 # Linux Privilege Escalation
 
-{{#include ../../banners/hacktricks-training.md}}
+{{#include ../../../banners/hacktricks-training.md}}
 
 ## System Information
 
@@ -2332,4 +2332,4 @@ Learn more and see a generalized pattern applicable to other discovery/monitorin
 - [PEP 3147 – PYC Repository Directories](https://peps.python.org/pep-3147/)
 - [Python importlib docs](https://docs.python.org/3/library/importlib.html)
 
-{{#include ../../banners/hacktricks-training.md}}
+{{#include ../../../banners/hacktricks-training.md}}

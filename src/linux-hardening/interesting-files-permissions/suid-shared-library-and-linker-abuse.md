@@ -1,6 +1,6 @@
 # SUID Shared Library and Linker Abuse
 
-{{#include ../banners/hacktricks-training.md}}
+{{#include ../../banners/hacktricks-training.md}}
 
 SUID binaries are usually reviewed for direct command execution, but custom SUID programs can also be vulnerable through the dynamic linker. The common theme is simple: a privileged executable loads code from a path or configuration that a lower-privileged user can influence.
 
