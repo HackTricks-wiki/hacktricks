@@ -1,111 +1,110 @@
-# AI rizici
+# AI Rizici
 
 {{#include ../banners/hacktricks-training.md}}
 
-## OWASP Top 10 ranjivosti mašinskog učenja
+## OWASP Top 10 Machine Learning Vulnerabilities
 
-Owasp je identifikovao 10 najvažnijih ranjivosti mašinskog učenja koje mogu uticati na AI sisteme. Ove ranjivosti mogu dovesti do različitih bezbednosnih problema, uključujući trovanje podataka, inverziju modela i adversarial napade. Razumevanje ovih ranjivosti ključno je za izgradnju bezbednih AI sistema.
+Owasp je identifikovao 10 najvažnijih machine learning ranjivosti koje mogu uticati na AI sisteme. Ove ranjivosti mogu dovesti do različitih bezbednosnih problema, uključujući data poisoning, model inversion i adversarial attacks. Razumevanje ovih ranjivosti ključno je za izgradnju bezbednih AI sistema.
 
-Za ažuriranu i detaljnu listu 10 najvažnijih ranjivosti mašinskog učenja pogledajte projekat [OWASP Top 10 Machine Learning Vulnerabilities](https://owasp.org/www-project-machine-learning-security-top-10/).
+Za ažuriranu i detaljnu listu 10 najvažnijih machine learning ranjivosti pogledajte projekat [OWASP Top 10 Machine Learning Vulnerabilities](https://owasp.org/www-project-machine-learning-security-top-10/).
 
 - **Input Manipulation Attack**: Napadač dodaje sitne, često nevidljive izmene **ulaznim podacima**, zbog čega model donosi pogrešnu odluku.\
-*Primer*: Nekoliko tačkica boje na znaku STOP navode samovozeći automobil da "vidi" znak za ograničenje brzine.
+*Primer*: Nekoliko tačkica boje na znaku STOP navodi self-driving automobil da "vidi" znak za ograničenje brzine.
 
-- **Data Poisoning Attack**: **Skup podataka za obuku** namerno se zagađuje lošim uzorcima, čime se model uči štetnim pravilima.\
-*Primer*: Binarni fajlovi malware-a označavaju se kao "bezopasni" u korpusu za obuku antivirusnog programa, pa sličan malware kasnije prolazi neotkriven.
+- **Data Poisoning Attack**: **Training set** se namerno zagađuje neispravnim uzorcima, čime se model uči štetnim pravilima.\
+*Primer*: Malware binarni fajlovi označavaju se kao "benign" u training korpusu antivirusnog programa, pa sličan malware kasnije prolazi neprimećeno.
 
-- **Model Inversion Attack**: Ispitivanjem izlaza, napadač gradi **inverzni model** koji rekonstruiše osetljive karakteristike originalnih ulaza.\
+- **Model Inversion Attack**: Ispitivanjem izlaza, napadač pravi **reverse model** koji rekonstruiše osetljive karakteristike originalnih ulaza.\
 *Primer*: Rekonstrukcija MRI snimka pacijenta na osnovu predviđanja modela za otkrivanje raka.
 
-- **Membership Inference Attack**: Napadač ispituje da li je **određeni zapis** korišćen tokom obuke, uočavanjem razlika u nivou pouzdanosti.\
-*Primer*: Potvrđivanje da se bankarska transakcija neke osobe nalazi u podacima za obuku modela za otkrivanje prevara.
+- **Membership Inference Attack**: Napadač proverava da li je **određeni zapis** korišćen tokom training procesa, posmatrajući razlike u nivou pouzdanosti.\
+*Primer*: Potvrđivanje da se bankarska transakcija neke osobe nalazi u training podacima modela za otkrivanje prevara.
 
-- **Model Theft**: Ponovljeno slanje upita omogućava napadaču da nauči granice odlučivanja i **klonira ponašanje modela** (kao i IP).\
+- **Model Theft**: Ponovljenim slanjem upita napadač može da nauči granice odlučivanja i **klonira ponašanje modela** (kao i IP).\
 *Primer*: Prikupljanje dovoljnog broja parova pitanja i odgovora sa ML-as-a-Service API-ja radi izgradnje gotovo ekvivalentnog lokalnog modela.
 
-- **AI Supply-Chain Attack**: Kompromitovanje bilo koje komponente (podataka, biblioteka, pre-trained težina, CI/CD-a) u **ML pipeline-u** radi korumpiranja narednih modela.\
-*Primer*: Zavisnost zatrovana na model-hub-u instalira model za analizu sentimenta sa backdoor-om u veliki broj aplikacija.
+- **AI Supply-Chain Attack**: Kompromitovanje bilo koje komponente (podataka, biblioteka, pre-trained težina, CI/CD-a) u **ML pipeline-u** radi izmene downstream modela.\
+*Primer*: Zagađena dependency na model-hub-u instalira backdoored model za analizu sentimenta u brojne aplikacije.
 
 - **Transfer Learning Attack**: Zlonamerna logika postavlja se u **pre-trained model** i opstaje nakon fine-tuning-a za zadatak žrtve.\
-*Primer*: Vision backbone sa skrivenim okidačem i dalje menja oznake nakon prilagođavanja za medicinsko snimanje.
+*Primer*: Vision backbone sa skrivenim triggerom i dalje menja oznake nakon prilagođavanja za medical imaging.
 
-- **Model Skewing**: Suptilno pristrasni ili pogrešno označeni podaci **pomeraju izlaze modela** u korist ciljeva napadača.\
-*Primer*: Ubacivanje "čistih" spam poruka označenih kao ham, tako da spam filter propušta slične buduće poruke.
+- **Model Skewing**: Suptilno pristrasni ili pogrešno označeni podaci **menjaju izlaze modela** u korist napadačeve agende.\
+*Primer*: Ubacivanje "čistih" spam poruka označenih kao ham, kako bi spam filter propuštao slične buduće poruke.
 
-- **Output Integrity Attack**: Napadač **menja predviđanja modela tokom prenosa**, a ne sam model, čime obmanjuje naredne sisteme.\
-*Primer*: Menjanje rezultata klasifikatora malware-a iz "zlonamerno" u "bezopasno" pre nego što ga faza karantina fajla obradi.
+- **Output Integrity Attack**: Napadač **menja predviđanja modela tokom prenosa**, a ne sam model, čime obmanjuje downstream sisteme.\
+*Primer*: Promena rezultata malware classifier-a sa "malicious" na "benign" pre nego što ga sistem za karantin fajlova obradi.
 
-- **Model Poisoning** --- Direktne, ciljane izmene samih **parametara modela**, često nakon dobijanja pristupa za pisanje, radi promene ponašanja.\
+- **Model Poisoning** --- Direktne, ciljane izmene samih **parametara modela**, često nakon dobijanja write pristupa, radi izmene ponašanja.\
 *Primer*: Podešavanje težina modela za otkrivanje prevara u produkciji tako da se transakcije sa određenih kartica uvek odobravaju.
 
 
-## Google SAIF rizici
+## Google SAIF Rizici
 
 Google-ov [SAIF (Security AI Framework)](https://saif.google/secure-ai-framework/risks) opisuje različite rizike povezane sa AI sistemima:
 
-- **Data Poisoning**: Zlonamerni akteri menjaju ili ubacuju podatke za obuku/tuning kako bi smanjili preciznost, ugradili backdoor-e ili iskrivili rezultate, čime ugrožavaju integritet modela tokom čitavog životnog ciklusa podataka.
+- **Data Poisoning**: Zlonamerni akteri menjaju ili ubacuju training/tuning podatke kako bi smanjili preciznost, ugradili backdoor-e ili iskrivili rezultate, čime ugrožavaju integritet modela kroz čitav data-lifecycle.
 
-- **Unauthorized Training Data**: Unošenje autorski zaštićenih, osetljivih ili neodobrenih skupova podataka stvara pravne, etičke i performansne rizike, jer model uči iz podataka koje nikada nije smeo da koristi.
+- **Unauthorized Training Data**: Korišćenje copyrighted, osetljivih ili nedozvoljenih datasetova stvara pravne, etičke i performansne rizike, jer model uči iz podataka koje nikada nije smeo da koristi.
 
-- **Model Source Tampering**: Manipulacija kôdom modela, zavisnostima ili težinama u lancu snabdevanja ili od strane insajdera, pre ili tokom obuke, može ugraditi skrivenu logiku koja opstaje čak i nakon ponovne obuke.
+- **Model Source Tampering**: Supply-chain ili insider manipulisanje kodom modela, dependencies-ima ili težinama pre ili tokom training-a može ugraditi skrivenu logiku koja opstaje čak i nakon retraining-a.
 
-- **Excessive Data Handling**: Slabe kontrole zadržavanja podataka i upravljanja podacima dovode do toga da sistemi čuvaju ili obrađuju više ličnih podataka nego što je potrebno, povećavajući izloženost i compliance rizik.
+- **Excessive Data Handling**: Slabe kontrole zadržavanja podataka i governance-a navode sisteme da čuvaju ili obrađuju više ličnih podataka nego što je potrebno, povećavajući izloženost i compliance rizik.
 
-- **Model Exfiltration**: Napadači kradu fajlove/težine modela, što dovodi do gubitka intelektualne svojine i omogućava kopirane servise ili naknadne napade.
+- **Model Exfiltration**: Napadači kradu fajlove/težine modela, što dovodi do gubitka intelektualne svojine i omogućava copy-cat servise ili naknadne napade.
 
-- **Model Deployment Tampering**: Napadači menjaju artefakte modela ili serving infrastrukturu, tako da se pokrenuti model razlikuje od proverenе verzije, što potencijalno menja njegovo ponašanje.
+- **Model Deployment Tampering**: Napadači menjaju artefakte modela ili serving infrastrukturu tako da se pokrenuti model razlikuje od proverene verzije, što potencijalno menja njegovo ponašanje.
 
-- **Denial of ML Service**: Preplavljivanje API-ja ili slanje “sponge” ulaza može iscrpeti računarske resurse/energiju i oboriti model, po uzoru na klasične DoS napade.
+- **Denial of ML Service**: Preplavljivanje API-ja ili slanje “sponge” ulaza može iscrpeti compute/energiju i oboriti model, slično klasičnim DoS napadima.
 
-- **Model Reverse Engineering**: Prikupljanjem velikog broja parova ulaz-izlaz, napadači mogu klonirati ili distilovati model, podstičući imitacione proizvode i prilagođene adversarial napade.
+- **Model Reverse Engineering**: Prikupljanjem velikog broja parova ulaz-izlaz, napadači mogu klonirati ili distilovati model, podstičući imitacione proizvode i prilagođene adversarial attacks.
 
-- **Insecure Integrated Component**: Ranjivi plugin-ovi, agenti ili upstream servisi omogućavaju napadačima da ubace kôd ili eskaliraju privilegije unutar AI pipeline-a.
+- **Insecure Integrated Component**: Ranjivi plugins, agents ili upstream servisi omogućavaju napadačima da ubace kod ili eskaliraju privilegije unutar AI pipeline-a.
 
-- **Prompt Injection**: Formulisanje promptova (direktno ili indirektno) radi ubacivanja instrukcija koje nadjačavaju nameru sistema, zbog čega model izvršava neželjene komande.
+- **Prompt Injection**: Formulisanje promptova (direktno ili indirektno) radi ubacivanja instrukcija koje nadjačavaju nameru sistema, navodeći model da izvrši neželjene komande.
 
-- **Model Evasion**: Pažljivo dizajnirani ulazi navode model da pogrešno klasifikuje, halucinira ili generiše nedozvoljeni sadržaj, čime se narušavaju bezbednost i poverenje.
+- **Model Evasion**: Pažljivo dizajnirani ulazi navode model da pogrešno klasifikuje, halucinira ili generiše nedozvoljen sadržaj, čime se narušavaju bezbednost i poverenje.
 
-- **Sensitive Data Disclosure**: Model otkriva privatne ili poverljive informacije iz svojih podataka za obuku ili korisničkog konteksta, čime se krše privatnost i propisi.
+- **Sensitive Data Disclosure**: Model otkriva privatne ili poverljive informacije iz svojih training podataka ili korisničkog konteksta, čime se krše privatnost i propisi.
 
-- **Inferred Sensitive Data**: Model zaključuje lične karakteristike koje nikada nisu bile navedene, stvarajući novu štetu po privatnost putem zaključivanja.
+- **Inferred Sensitive Data**: Model zaključuje lične atribute koji nikada nisu direktno navedeni, stvarajući nove povrede privatnosti putem inference-a.
 
-- **Insecure Model Output**: Nesanitizovani odgovori prosleđuju štetan kôd, dezinformacije ili neprikladan sadržaj korisnicima ili narednim sistemima.
+- **Insecure Model Output**: Nesanitizovani odgovori prosleđuju štetan kod, dezinformacije ili neprimeren sadržaj korisnicima ili downstream sistemima.
 
-- **Rogue Actions**: Autonomno integrisani agenti izvršavaju neželjene operacije u stvarnom svetu (upisivanje fajlova, API pozive, kupovine itd.) bez odgovarajućeg nadzora korisnika.
+- **Rogue Actions**: Autonomno-integrisani agents izvršavaju neželjene operacije u stvarnom svetu (upisivanje fajlova, API pozive, kupovine itd.) bez odgovarajućeg nadzora korisnika.
 
 ## Mitre AI ATLAS Matrix
 
-[MITRE AI ATLAS Matrix](https://atlas.mitre.org/matrices/ATLAS) pruža sveobuhvatan okvir za razumevanje i ublažavanje rizika povezanih sa AI sistemima. Kategorizuje različite attack tehnike i taktike koje napadači mogu koristiti protiv AI modela, kao i načine korišćenja AI sistema za izvođenje različitih napada.
+[MITRE AI ATLAS Matrix](https://atlas.mitre.org/matrices/ATLAS) pruža sveobuhvatan framework za razumevanje i ublažavanje rizika povezanih sa AI sistemima. Kategorizuje različite attack techniques i tactics koje adversaries mogu koristiti protiv AI modela, kao i načine korišćenja AI sistema za izvođenje različitih napada.
 
+## LLMJacking (Krađa tokena i preprodaja pristupa LLM-ovima hostovanim u cloud-u)
 
-## LLMJacking (krađa tokena i preprodaja pristupa LLM-ovima hostovanim u cloud-u)
-
-Napadači kradu aktivne session tokene ili cloud API akreditive i bez autorizacije pozivaju plaćene LLM-ove hostovane u cloud-u. Pristup se često preprodaje putem reverse proxy-ja koji prosleđuju zahteve preko naloga žrtve, npr. deployment-i "oai-reverse-proxy". Posledice uključuju finansijski gubitak, zloupotrebu modela izvan pravila i pripisivanje aktivnosti tenant-u žrtve.
+Napadači kradu aktivne session tokene ili cloud API credentials i bez ovlašćenja pozivaju plaćene LLM-ove hostovane u cloud-u. Pristup se često preprodaje putem reverse proxies koji prosleđuju zahteve preko naloga žrtve, npr. deployment-i "oai-reverse-proxy". Posledice uključuju finansijski gubitak, zloupotrebu modela izvan policy-ja i pripisivanje aktivnosti tenant-u žrtve.
 
 TTPs:
-- Prikupljanje tokena sa zaraženih developerskih mašina ili browser-a; krađa CI/CD tajni; kupovina procurelih kolačića.
-- Postavljanje reverse proxy-ja koji prosleđuje zahteve stvarnom provider-u, skriva upstream ključ i omogućava multipleksiranje velikog broja korisnika.
-- Zloupotreba direktnih base-model endpoint-a radi zaobilaženja enterprise guardrails-a i rate limit-a.
+- Prikupljaju tokene sa zaraženih developer računara ili browser-a; kradu CI/CD secrets; kupuju leaked cookies.
+- Postavljaju reverse proxy koji prosleđuje zahteve pravom provider-u, skrivajući upstream key i multipleksirajući više korisnika.
+- Zloupotrebljavaju direct base-model endpoints kako bi zaobišli enterprise guardrails i rate limits.
 
-Mitigacije:
-- Vezati tokene za fingerprint uređaja, IP opsege i client attestation; primenjivati kratka vreme isteka i osvežavanje uz MFA.
-- Ograničiti ključeve na minimum (bez pristupa alatima, read-only gde je primenljivo); rotirati ih pri anomalijama.
-- Sav saobraćaj terminirati na serveru iza policy gateway-a koji primenjuje safety filtere, kvote po ruti i izolaciju tenant-a.
-- Pratiti neuobičajene obrasce korišćenja (iznenadne skokove troškova, neuobičajene regione, UA string-ove) i automatski opozvati sumnjive sesije.
-- Prednost dati mTLS-u ili potpisanim JWT-ovima koje izdaje vaš IdP, umesto dugotrajnih statičkih API ključeva.
+Mitigations:
+- Vezuju tokene za device fingerprint, IP opsege i client attestation; primenjuju kratka vremena isteka i refresh uz MFA.
+- Ograničavaju ključeve na minimum (bez tool pristupa, read-only gde je primenljivo); rotiraju ih pri pojavi anomalija.
+- Sav saobraćaj završavaju server-side iza policy gateway-a koji primenjuje safety filters, kvote po route-u i izolaciju tenant-a.
+- Prate neuobičajene obrasce korišćenja (nagla povećanja troškova, neuobičajene regione, UA strings) i automatski opozivaju sumnjive sesije.
+- Prednost daju mTLS-u ili signed JWT-ovima koje izdaje vaš IdP, umesto dugotrajnih statičkih API ključeva.
 
 ## Ojačavanje self-hosted LLM inference-a
 
-Pokretanje lokalnog LLM servera za poverljive podatke stvara drugačiju attack površinu od cloud-hosted API-ja: inference/debug endpoint-i mogu da procure promptove, serving stack obično izlaže reverse proxy, a GPU device node-ovi omogućavaju pristup velikim `ioctl()` površinama. Ako procenjujete ili postavljate on-prem inference servis, pregledajte najmanje sledeće tačke.
+Pokretanje lokalnog LLM servera za poverljive podatke stvara drugačiju attack surface od cloud-hosted API-ja: inference/debug endpoints mogu leak-ovati promptove, serving stack obično izlaže reverse proxy, a GPU device nodes omogućavaju pristup velikim `ioctl()` površinama. Ako procenjujete ili deploy-ujete on-prem inference servis, pregledajte najmanje sledeće tačke.
 
-### Curenje promptova putem debug i monitoring endpoint-a
+### Curenje promptova kroz debug i monitoring endpoints
 
-Tretirajte inference API kao **osetljiv servis za više korisnika**. Debug ili monitoring rute mogu izložiti sadržaj promptova, stanje slotova, metapodatke modela ili informacije o internom redu čekanja. U `llama.cpp`, endpoint `/slots` je naročito osetljiv jer izlaže stanje po slotovima i namenjen je samo za inspekciju/upravljanje slotovima.
+Tretirajte inference API kao **multi-user sensitive service**. Debug ili monitoring routes mogu otkriti sadržaj promptova, stanje slotova, metadata modela ili informacije o internom redu čekanja. U `llama.cpp`, endpoint `/slots` je naročito osetljiv jer izlaže stanje po slotovima i namenjen je samo za pregled/upravljanje slotovima.
 
 - Postavite reverse proxy ispred inference servera i **podrazumevano sve zabranite**.
-- Dozvolite samo tačne kombinacije HTTP metoda + putanja koje su potrebne klijentu/UI-ju.
-- Onemogućite introspection endpoint-e u samom backend-u kad god je moguće, na primer `llama-server --no-slots`.
-- Vežite reverse proxy za `127.0.0.1` i izložite ga putem autentifikovanog transporta, kao što je SSH local port forwarding, umesto objavljivanja na LAN-u.
+- Dozvolite samo precizno definisane kombinacije HTTP metoda + path-ova koje su potrebne klijentu/UI-ju.
+- Onemogućite introspection endpoints u samom backend-u kad god je moguće, na primer `llama-server --no-slots`.
+- Vežite reverse proxy za `127.0.0.1` i izložite ga putem authenticated transport-a, kao što je SSH local port forwarding, umesto objavljivanja na LAN-u.
 
 Primer allowlist-e sa nginx-om:
 ```nginx
@@ -127,9 +126,9 @@ proxy_pass http://unix:/run/llama-cpp/llama-cpp.sock:;
 }
 }
 ```
-### Rootless kontejneri bez mreže i UNIX sockets
+### Rootless kontejneri bez mreže i UNIX socketi
 
-Ako inference daemon podržava osluškivanje na UNIX socketu, dajte prednost tome u odnosu na TCP i pokrenite kontejner sa **bez mrežnog steka**:
+Ako inference daemon podržava osluškivanje na UNIX socketu, dajte prednost tome u odnosu na TCP i pokrenite kontejner **bez mrežnog steka**:
 ```bash
 podman run --rm -d \
 --network none \
@@ -145,19 +144,19 @@ ghcr.io/ggml-org/llama.cpp:server-cuda13 \
 --no-slots
 ```
 Prednosti:
-- `--network none` uklanja izloženost dolaznom/odlaznom TCP/IP saobraćaju i izbegava pomoćne procese u korisničkom režimu koji bi rootless kontejnerima inače bili potrebni.
+- `--network none` uklanja ulaznu/izlaznu TCP/IP izloženost i izbegava user-mode helper-e koji bi rootless containers inače zahtevali.
 - UNIX socket omogućava korišćenje POSIX dozvola/ACL-ova na putanji socket-a kao prvog sloja kontrole pristupa.
-- `--userns=keep-id` i rootless Podman smanjuju uticaj izlaska iz kontejnera, jer root unutar kontejnera nije root na hostu.
-- Montiranja modela samo za čitanje smanjuju mogućnost menjanja modela iz kontejnera.
+- `--userns=keep-id` i rootless Podman smanjuju posledice container breakout-a jer container root nije host root.
+- Montiranje modela samo za čitanje smanjuje mogućnost izmene modela iz samog container-a.
 
 ### Minimizacija GPU device-node-ova
 
-Za inference uz GPU, `/dev/nvidia*` fajlovi predstavljaju vredne lokalne attack surface-e jer izlažu velike drajverske `ioctl()` handlere i potencijalno deljene putanje za upravljanje GPU memorijom.
+Za inference zasnovan na GPU-u, `/dev/nvidia*` fajlovi predstavljaju lokalne attack surface-e visoke vrednosti jer izlažu velike driver `ioctl()` handler-e i potencijalno deljene putanje za upravljanje GPU memorijom.
 
-- Nemojte ostaviti `/dev/nvidia*` sa dozvolom upisa za sve korisnike.
-- Ograničite `nvidia`, `nvidiactl` i `nvidia-uvm` pomoću `NVreg_DeviceFileUID/GID/Mode`, udev pravila i ACL-ova tako da samo mapirani UID kontejnera može da ih otvori.
-- Blokirajte nepotrebne module kao što su `nvidia_drm`, `nvidia_modeset` i `nvidia_peermem` na headless inference hostovima.
-- Učitajte pri pokretanju samo potrebne module, umesto da runtime po potrebi pokreće `modprobe` tokom pokretanja inference-a.
+- Ne ostavljajte `/dev/nvidia*` world writable.
+- Ograničite `nvidia`, `nvidiactl` i `nvidia-uvm` pomoću `NVreg_DeviceFileUID/GID/Mode`, udev pravila i ACL-ova tako da ih može otvoriti samo mapirani container UID.
+- Blacklist-ujte nepotrebne module kao što su `nvidia_drm`, `nvidia_modeset` i `nvidia_peermem` na headless inference hostovima.
+- Preload-ujte samo potrebne module pri boot-u, umesto da runtime oportunistički pokreće `modprobe` tokom pokretanja inference-a.
 
 Primer:
 ```bash
@@ -165,16 +164,16 @@ options nvidia NVreg_DeviceFileUID=0
 options nvidia NVreg_DeviceFileGID=0
 options nvidia NVreg_DeviceFileMode=0660
 ```
-Jedna važna stavka za proveru je **`/dev/nvidia-uvm`**. Čak i ako workload eksplicitno ne koristi `cudaMallocManaged()`, noviji CUDA runtime-i i dalje mogu zahtevati `nvidia-uvm`. Pošto je ovaj uređaj deljen i upravlja GPU virtuelnom memorijom, tretirajte ga kao površinu za izlaganje podataka između tenant-a. Ako ga inference backend podržava, Vulkan backend može biti zanimljiv kompromis, jer može u potpunosti izbeći izlaganje `nvidia-uvm` container-u.
+Jedna važna tačka za proveru je **`/dev/nvidia-uvm`**. Čak i ako workload eksplicitno ne koristi `cudaMallocManaged()`, noviji CUDA runtime-ovi i dalje mogu zahtevati `nvidia-uvm`. Pošto je ovaj uređaj deljen i upravlja virtuelnom memorijom GPU-a, tretirajte ga kao površinu za izlaganje podataka između tenant-a. Ako ga inference backend podržava, Vulkan backend može biti zanimljiv kompromis jer može potpuno izbeći izlaganje `nvidia-uvm` kontejneru.
 
 ### LSM ograničavanje inference worker-a
 
 AppArmor/SELinux/seccomp treba koristiti kao dodatni sloj zaštite oko inference procesa:
 
-- Dozvolite samo shared libraries, putanje do modela, direktorijum sa socket-om i GPU device nodes koji su zaista potrebni.
-- Izričito zabranite visokorizične capabilities kao što su `sys_admin`, `sys_module`, `sys_rawio` i `sys_ptrace`.
-- Direktorijum sa modelom držite samo za čitanje, a writable putanje ograničite isključivo na runtime socket/cache direktorijume.
-- Nadgledajte denial logs, jer pružaju korisnu telemetriju za detekciju kada model server ili post-exploitation payload pokuša da napusti očekivano ponašanje.
+- Dozvolite samo shared libraries, putanje do modela, direktorijum socket-a i GPU device nodes koji su zaista potrebni.
+- Eksplicitno zabranite visokorizične capabilities kao što su `sys_admin`, `sys_module`, `sys_rawio` i `sys_ptrace`.
+- Direktorijum modela držite samo za čitanje, a writable putanje ograničite isključivo na runtime socket/cache direktorijume.
+- Pratite denial logove jer pružaju korisnu telemetry za detekciju kada model server ili post-exploitation payload pokuša da napusti očekivano ponašanje.
 
 Primer AppArmor pravila za GPU-backed worker:
 ```text
@@ -189,32 +188,32 @@ deny capability sys_ptrace,
 /var/lib/models/** r,
 owner /srv/llm/** rw,
 ```
-## Phantom Squatting: Domeni koje je halucinirao LLM kao vektor AI supply-chain napada
+## Phantom Squatting: LLM-hallucinated domains kao vektor AI supply-chain napada
 
-Phantom squatting je **ekvivalent slopsquatting-a na nivou domena/URL-a**. Umesto da halucinira nepostojeći naziv paketa, LLM halucinira uverljiv **portal, API, webhook, billing, SSO, download ili support domen** stvarnog brenda, a napadač registruje taj namespace pre nego što ga čovek ili agent upotrebi.
+Phantom squatting je **domain/URL ekvivalent slopsquatting-a**. Umesto da izhalucinira nepostojeći naziv paketa, LLM izhalucinira uverljiv **portal, API, webhook, billing, SSO, download ili support domen** stvarnog brenda, a napadač registruje taj namespace pre nego što ga upotrebi čovek ili agent.
 
-Ovo je važno zato što se u mnogim AI-potpomognutim radnim tokovima izlaz modela tretira kao **pouzdana zavisnost**:
+Ovo je važno zato što se u mnogim AI-assisted workflow-ovima izlaz modela tretira kao **trusted dependency**:
 - Developeri kopiraju predloženi endpoint u kod ili CI/CD integracije.
-- AI agenti automatski preuzimaju dokumentaciju, šeme, APK-ove, ZIP datoteke ili webhook ciljeve.
-- Generisani runbook-ovi ili dokumentacija mogu sadržati lažni URL kao da je zvaničan.
+- AI agenti automatski preuzimaju dokumentaciju, schema-e, APK-ove, ZIP-ove ili webhook ciljeve.
+- Generisani runbook-ovi ili dokumentacija mogu ugraditi lažni URL kao da je authoritative.
 
-### Offensive workflow
+### Ofanzivni tok rada
 
-1. **Ispitajte površinu halucinacija**: postavljajte pitanja specifična za brend o realističnim workflow-ovima kao što su `admin`, `billing`, `sandbox`, `benefits`, `api`, `download`, `support`, `webhook` ili portali za `mobile app`.
-2. **Normalizujte kandidate**: razrešite generisane URL-ove, svedite NXDOMAIN odgovore na roditeljski domen koji je moguće registrovati i uklonite duplikate prompt familija. Korpus promptova treba da ostane raznovrstan, na primer odbacivanjem skoro identičnih promptova pomoću **Jaccard similarity**.
-3. **Dajte prioritet predvidljivim halucinacijama**:
+1. **Ispitaj površinu halucinacija**: postavljaj pitanja specifična za brend o realističnim workflow-ovima kao što su `admin`, `billing`, `sandbox`, `benefits`, `api`, `download`, `support`, `webhook` ili portali za `mobile app`.
+2. **Normalizuj kandidate**: razreši generisane URL-ove, svedi NXDOMAIN odgovore na parent registerable domain i ukloni duplikate prompt porodica. Prompt corpus treba da ostane raznovrstan, na primer izbacivanjem gotovo identičnih promptova pomoću **Jaccard similarity**.
+3. **Prioritizuj predvidljive halucinacije**:
 - **Thermal Hallucination Persistence (THP)**: isti lažni domen pojavljuje se pri različitim temperaturama, uključujući nisku temperaturu kao što je `T=0.1`.
-- **Konsenzus između modela**: više LLM familija generiše isti lažni domen.
-4. **Registrujte i naoružajte** roditeljski domen, a zatim hostujte phishing, lažne APK/ZIP download-e, credential harvesters, zlonamerne dokumente ili API endpoint-e koji prikupljaju secrets/webhook payloads. **Čiste domen-level halucinacije** najlakše je monetizovati jer napadač kontroliše čitav namespace; halucinacije subdomena/path-a i dalje se mogu zloupotrebiti kada je normalizovani roditeljski domen neregistrovan.
-5. **Iskoristite period bez reputacije**: novoregistrovani domeni često nemaju istoriju na blocklistama, URL reputation i zrelu telemetriju, pa mogu zaobići kontrole dok detekcije ne sustignu situaciju. Napadači mogu produžiti ovaj period pomoću benignih odgovora namenjenih samo crawler-ima, redirect cloaking-a, CAPTCHA gate-ova ili odloženog staging-a payload-a.
+- **Cross-model consensus**: više LLM familija generiše isti lažni domen.
+4. **Registruj i weaponize-uj** parent domen, a zatim hostuj phishing, lažne APK/ZIP download-e, credential harvester-e, malicioznu dokumentaciju ili API endpoint-e koji prikupljaju secrets/webhook payload-e. **Pure domain-level hallucinations** najlakše se monetizuju zato što napadač kontroliše ceo namespace; subdomain/path halucinacije se i dalje mogu zloupotrebiti kada je normalizovani parent neregistrovan.
+5. **Iskoristi zero-reputation window**: novoregistrovani domeni često nemaju blocklist istoriju, URL reputation ni zrele telemetry podatke, pa mogu zaobići kontrole dok detekcije ne sustignu situaciju. Napadači mogu produžiti ovaj period pomoću benignih odgovora dostupnih samo crawler-ima, redirect cloaking-a, CAPTCHA gate-ova ili odloženog payload staging-a.
 
 ### Zašto je opasno za agente
 
-Za ljudsku žrtvu lažni domen obično i dalje zahteva klik i još neku radnju. Kod **agentic workflow-a**, LLM može biti i **mamac** i **izvršilac**: agent primi halucinirani URL, preuzme ga, parsira odgovor, a zatim može da leak-uje tokene, izvrši instrukcije, download-uje dependency ili ubaci poisoned data u CI/CD bez ikakvog pregleda čoveka.
+Za ljudsku žrtvu, lažni domen obično i dalje zahteva klik i dodatnu radnju. U **agentic workflow-u**, LLM može biti i **mamac** i **izvršilac**: agent dobije izhalucinirani URL, preuzme ga, parsira odgovor i zatim može da leak-uje tokene, izvrši instrukcije, preuzme dependency ili ubaci poisoned data u CI/CD bez ikakvog human review-a.
 
-### Praktični napadački promptovi
+### Praktični attacker promptovi
 
-High-yield promptovi obično izgledaju kao normalni enterprise zadaci, a ne kao eksplicitni phishing mamci:
+High-yield promptovi obično izgledaju kao uobičajeni enterprise zadaci, a ne kao eksplicitni phishing mamci:
 - „Koji je payment sandbox URL za `<brand>` integracije?“
 - „Koji webhook endpoint treba da koristim za `<brand>` build notifikacije?“
 - „Gde se nalazi employee benefits / billing / SSO portal za `<brand>`?“
@@ -222,25 +221,25 @@ High-yield promptovi obično izgledaju kao normalni enterprise zadaci, a ne kao 
 
 ### Defensive inversion
 
-Tretirajte ovo kao problem proaktivnog domain monitoringa, a ne samo kao problem prompt injection-a:
-- Napravite **korpus promptova za brendove** i periodično ispitujte LLM-ove na koje se vaši korisnici/agenti oslanjaju.
-- Čuvajte halucinirane URL-ove i pratite koji su stabilni kroz različite temperature/modele.
-- Pratite **Adversarial Exploitation Window (AEW)**: vreme između prve halucinacije i registracije od strane napadača. Pozitivan AEW znači da defenderi mogu unapred registrovati domen, postaviti sinkhole ili ga blokirati pre weaponization-a.
-- Pratite prelaze **NXDOMAIN → registered** za roditeljske domene.
-- Nakon registracije proverite registrar, datum kreiranja, nameservers, privacy shielding, sadržaj stranice, screenshots, status parked-page-a i sličnost brand asset-a.
-- Dodajte policy gate-ove tako da agenti/developeri **po podrazumevanim podešavanjima ne veruju domenima koje je generisao LLM**: zahtevajte allowlists, validaciju vlasništva, CT/RDAP provere ili odobrenje čoveka pre prve upotrebe.
+Tretiraj ovo kao proaktivan problem domain monitoring-a, a ne samo kao problem prompt injection-a:
+- Napravi **brand prompt corpus** i periodično ispituj LLM-ove na koje se tvoji korisnici/agenti oslanjaju.
+- Čuvaj izhalucinirane URL-ove i prati koji od njih su stabilni pri različitim temperaturama/modelima.
+- Prati **Adversarial Exploitation Window (AEW)**: vreme između prve halucinacije i registracije od strane napadača. Pozitivan AEW znači da defenders mogu da pre-registruju, sinkhole-uju ili pre-blokiraju domen pre weaponization-a.
+- Prati prelaze **NXDOMAIN → registered** za parent domene.
+- Nakon registracije analiziraj registrar, creation date, nameserver-e, privacy shielding, sadržaj stranice, screenshots, status parked page-a i sličnost brand asset-a.
+- Dodaj policy gate-ove tako da agenti/developeri po default-u **ne veruju LLM-generated domain-ima**: zahtevaj allowlist-e, ownership validation, CT/RDAP provere ili human approval pre prve upotrebe.
 
-Ovo istovremeno pripada u nekoliko AI risk kategorija: **AI supply-chain attack**, **insecure model output** i **rogue actions** kada agenti autonomno koriste halucinirani URL.
+Ovo se istovremeno uklapa u nekoliko AI risk kategorija: **AI supply-chain attack**, **insecure model output** i **rogue actions** kada agenti autonomno koriste izhalucinirani URL.
 
 ## Reference
-- [Unit 42 – Rizici LLM-ova za pomoć pri programiranju: štetan sadržaj, zloupotreba i obmana](https://unit42.paloaltonetworks.com/code-assistant-llms/)
-- [Pregled LLMJacking šeme – The Hacker News](https://thehackernews.com/2024/05/researchers-uncover-llmjacking-scheme.html)
-- [oai-reverse-proxy (preprodaja ukradenog LLM pristupa)](https://gitgud.io/khanon/oai-reverse-proxy)
-- [Synacktiv - Detaljna analiza deployment-a on-premise LLM servera sa niskim privilegijama](https://www.synacktiv.com/en/publications/deep-dive-into-the-deployment-of-an-on-premise-low-privileged-llm-server.html)
+- [Unit 42 – Rizici Code Assistant LLM-ova: štetan sadržaj, zloupotreba i obmana](https://unit42.paloaltonetworks.com/code-assistant-llms/)
+- [Pregled LLMJacking scheme-a – The Hacker News](https://thehackernews.com/2024/05/researchers-uncover-llmjacking-scheme.html)
+- [oai-reverse-proxy (preprodaja ukradenog LLM access-a)](https://gitgud.io/khanon/oai-reverse-proxy)
+- [Synacktiv - Detaljna analiza deployment-a on-premise low-privileged LLM server-a](https://www.synacktiv.com/en/publications/deep-dive-into-the-deployment-of-an-on-premise-low-privileged-llm-server.html)
 - [llama.cpp server README](https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md)
 - [Podman quadlets: podman-systemd.unit](https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html)
-- [CNCF Container Device Interface (CDI) specifikacija](https://github.com/cncf-tags/container-device-interface/blob/main/SPEC.md)
-- [Unit 42 – Phantom Squatting: Domeni koje je halucinirao AI kao vektor Software Supply Chain napada](https://unit42.paloaltonetworks.com/phantom-squatting-hallucinated-web-domains/)
-- [Socket – Slopsquatting: Kako AI halucinacije podstiču novu klasu Supply Chain napada](https://socket.dev/blog/slopsquatting-how-ai-hallucinations-are-fueling-a-new-class-of-supply-chain-attacks)
+- [CNCF Container Device Interface (CDI) specification](https://github.com/cncf-tags/container-device-interface/blob/main/SPEC.md)
+- [Unit 42 – Phantom Squatting: AI-hallucinated domains kao vektor software supply-chain napada](https://unit42.paloaltonetworks.com/phantom-squatting-hallucinated-web-domains/)
+- [Socket – Slopsquatting: Kako AI halucinacije podstiču novu klasu supply-chain napada](https://socket.dev/blog/slopsquatting-how-ai-hallucinations-are-fueling-a-new-class-of-supply-chain-attacks)
 
 {{#include ../banners/hacktricks-training.md}}
