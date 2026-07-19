@@ -77,7 +77,6 @@ Google's [SAIF (Security AI Framework)](https://saif.google/secure-ai-framework/
 
 The [MITRE AI ATLAS Matrix](https://atlas.mitre.org/matrices/ATLAS) provides a comprehensive framework for understanding and mitigating risks associated with AI systems. It categorizes various attack techniques and tactics that adversaries may use against AI models and also how to use AI systems to perform different attacks.
 
-
 ## LLMJacking (Token Theft & Resale of Cloud-hosted LLM Access)
 
 Attackers steal active session tokens or cloud API credentials and invoke paid, cloud-hosted LLMs without authorization. Access is often resold via reverse proxies that front the victim’s account, e.g. "oai-reverse-proxy" deployments. Consequences include financial loss, model misuse outside policy, and attribution to the victim tenant.
@@ -197,6 +196,49 @@ deny capability sys_ptrace,
 owner /srv/llm/** rw,
 ```
 
+## Phantom Squatting: LLM-Hallucinated Domains as an AI Supply-Chain Vector
+
+Phantom squatting is the **domain/URL equivalent of slopsquatting**. Instead of hallucinating a non-existent package name, the LLM hallucinates a plausible **portal, API, webhook, billing, SSO, download or support domain** for a real brand, and an attacker registers that namespace before a human or agent uses it.
+
+This matters because in many AI-assisted workflows the model output is treated as a **trusted dependency**:
+- Developers paste the suggested endpoint into code or CI/CD integrations.
+- AI agents fetch documentation, schemas, APKs, ZIPs or webhook targets automatically.
+- Generated runbooks or docs can embed the fake URL as if it were authoritative.
+
+### Offensive workflow
+
+1. **Probe the hallucination surface**: ask brand-specific questions about realistic workflows such as `admin`, `billing`, `sandbox`, `benefits`, `api`, `download`, `support`, `webhook`, or `mobile app` portals.
+2. **Normalize candidates**: resolve generated URLs, collapse NXDOMAIN responses to the parent registerable domain, and deduplicate prompt families. Prompt corpora should stay diverse, for example by dropping near-duplicates with **Jaccard similarity**.
+3. **Prioritize predictable hallucinations**:
+   - **Thermal Hallucination Persistence (THP)**: the same fake domain appears across temperatures, including low temperature like `T=0.1`.
+   - **Cross-model consensus**: multiple LLM families generate the same fake domain.
+4. **Register and weaponize** the parent domain, then host phishing, fake APK/ZIP downloads, credential harvesters, malicious docs, or API endpoints that collect secrets/webhook payloads. **Pure domain-level hallucinations** are the easiest to monetize because the attacker controls the whole namespace; subdomain/path hallucinations can still be abused when the normalized parent is unregistered.
+5. **Exploit the zero-reputation window**: newly registered domains often lack blocklist history, URL reputation, and mature telemetry, so they can bypass controls until detections catch up. Attackers can stretch this window with crawler-only benign responses, redirect cloaking, CAPTCHA gates, or delayed payload staging.
+
+### Why it is dangerous for agents
+
+For a human victim, the fake domain usually still needs a click and another action. For an **agentic workflow**, the LLM can be both the **lure** and the **executor**: the agent receives the hallucinated URL, fetches it, parses the response, and may then leak tokens, execute instructions, download a dependency, or push poisoned data into CI/CD without any human review.
+
+### Practical attacker prompts
+
+High-yield prompts usually look like normal enterprise tasks instead of explicit phishing lures:
+- “What is the payment sandbox URL for `<brand>` integrations?”
+- “What webhook endpoint should I use for `<brand>` build notifications?”
+- “Where is the employee benefits / billing / SSO portal for `<brand>`?”
+- “Give me the direct Android APK or desktop client download for `<brand>`.”
+
+### Defensive inversion
+
+Treat this as a proactive domain-monitoring problem, not just a prompt-injection problem:
+- Build a **brand prompt corpus** and periodically probe the LLMs your users/agents rely on.
+- Store hallucinated URLs and track which ones are stable across temperatures/models.
+- Track the **Adversarial Exploitation Window (AEW)**: time between first hallucination and attacker registration. Positive AEW means defenders can pre-register, sinkhole, or pre-block before weaponization.
+- Monitor **NXDOMAIN → registered** transitions for the parent domains.
+- On registration, triage registrar, creation date, nameservers, privacy shielding, page content, screenshots, parked-page status, and brand-asset similarity.
+- Add policy gates so agents/developers do **not trust LLM-generated domains by default**: require allowlists, ownership validation, CT/RDAP checks, or human approval before first use.
+
+This fits several AI risk buckets at once: **AI supply-chain attack**, **insecure model output**, and **rogue actions** when agents autonomously consume the hallucinated URL.
+
 ## References
 - [Unit 42 – The Risks of Code Assistant LLMs: Harmful Content, Misuse and Deception](https://unit42.paloaltonetworks.com/code-assistant-llms/)
 - [LLMJacking scheme overview – The Hacker News](https://thehackernews.com/2024/05/researchers-uncover-llmjacking-scheme.html)
@@ -205,5 +247,7 @@ owner /srv/llm/** rw,
 - [llama.cpp server README](https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md)
 - [Podman quadlets: podman-systemd.unit](https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html)
 - [CNCF Container Device Interface (CDI) specification](https://github.com/cncf-tags/container-device-interface/blob/main/SPEC.md)
+- [Unit 42 – Phantom Squatting: AI-Hallucinated Domains as a Software Supply Chain Vector](https://unit42.paloaltonetworks.com/phantom-squatting-hallucinated-web-domains/)
+- [Socket – Slopsquatting: How AI Hallucinations Are Fueling a New Class of Supply Chain Attacks](https://socket.dev/blog/slopsquatting-how-ai-hallucinations-are-fueling-a-new-class-of-supply-chain-attacks)
 
 {{#include ../banners/hacktricks-training.md}}

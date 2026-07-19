@@ -64,6 +64,15 @@ It's very common to developers and companies to run models downloaded from the I
 AI-Models-RCE.md
 {{#endref}}
 
+### AI-Assisted KYC Bypass
+
+Generative video can be combined with virtual-camera injection and camera API manipulation to bypass weak KYC, age-verification, and biometric liveness workflows:
+
+
+{{#ref}}
+KYC-Bypass-Using-AI.md
+{{#endref}}
+
 ### AI Model Context Protocol
 
 MCP (Model Context Protocol) is a protocol that allows AI agent clients to connect with external tools and data sources in a plug-and-play fashion. This enables complex workflows and interactions between AI models and external systems:
@@ -78,6 +87,15 @@ AI-MCP-Servers.md
 
 {{#ref}}
 AI-Assisted-Fuzzing-and-Vulnerability-Discovery.md
+{{#endref}}
+
+### Web Black-Box AI Pentester Bots
+
+LLM-powered agents can automate long-running black-box web pentesting workflows when they are supported by observability, orchestration, authenticated session handling, and adversarial validation:
+
+
+{{#ref}}
+Web-Black-Box-AI-Pentester-Bots.md
 {{#endref}}
 
 {{#include ../banners/hacktricks-training.md}}

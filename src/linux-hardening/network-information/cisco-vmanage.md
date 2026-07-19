@@ -14,11 +14,14 @@ If you still need the **initial foothold** on a controller, check the dedicated 
 
 ```bash
 ps auxww | egrep 'confd|cmdptywrapper|neo4j|vdaemon'
-ss -lntp | egrep '4565|830'
+ss -lntp | egrep '4565|830|8443'
+find /run /var/run -maxdepth 2 -type s 2>/dev/null | egrep 'confd|cli|rest|mgmt'
 ls -l /etc/confd/confd_ipc_secret /usr/bin/confd_cli /usr/bin/confd_cli_user
+ls -la /home/vmanage-admin/.ssh 2>/dev/null
+grep -R "tenant-upload\|tenant-list" /opt /usr 2>/dev/null | head
 ```
 
-If `/etc/confd/confd_ipc_secret` is readable from your foothold, Path 1 and Path 2 become immediately practical.
+If `/etc/confd/confd_ipc_secret` is readable from your foothold, Path 1 and Path 2 become immediately practical. If you arrived through a remote info leak or a webshell, also check whether you can already reach `vmanage-admin` SSH material or multitenancy upload handlers: 2026 research showed both were realistic stepping stones.
 
 ## Path 1
 
@@ -207,6 +210,8 @@ ss -lntp | grep 4565
 
 This turns the 2025 bug into a good hunting pattern for similar versions: look for **local CLI shims that collect identity in userland and forward it to a more privileged wrapper**.
 
+Do not confuse **CVE-2025-20122** with the later **CVE-2026-20122**: the 2025 issue is a *local* CLI-to-root bug, while the 2026 issue is a *remote* API arbitrary file overwrite that is mostly useful for planting a foothold and then revisiting Path 1 / Path 2 / Path 4.
+
 ## Path 4 (2026 low-priv REST API to root - CVE-2026-20126)
 
 Cisco's February 2026 advisory also introduced another useful privesc class: [CVE-2026-20126](https://sec.cloudapps.cisco.com/security/center/content/CiscoSecurityAdvisory/cisco-sa-sdwan-authbp-qwCX8D4v) allowed an **authenticated, local attacker with low privileges** to gain root because of an insufficient user-authentication mechanism in the REST API.
@@ -238,18 +243,39 @@ From a HackTricks point of view, the valuable technique is broader than the spec
 3. Test whether the filename, file content, or parsed metadata is ever passed to shell commands, wrapper scripts, or `system()`-style helpers.
 4. If you can already reach `netadmin` (valid creds, stolen session, or an auth-bypass chain), file-processing bugs are often the fastest path to root.
 
+Google Cloud / Mandiant later showed a very concrete instance of this bug class being exploited through the multitenancy import path:
+
+```bash
+request tenant-upload tenant-list /home/admin/evil_tenant.csv vpn 0
+```
+
+In the observed attack, the crafted CSV ended up modifying `/etc/passwd` and `/etc/shadow` to create a temporary UID 0 account (`troot`). That makes `tenant-upload` / `tenant-list` style importers especially interesting: they are not just data-ingestion features, but potential root-owned parser front-ends.
+
+A quick shell-side hunting pattern is:
+
+```bash
+strings /usr/bin/* 2>/dev/null | grep -E 'tenant-upload|tenant-list|import|upload|backup' | head
+grep -R "tenant-upload\|tenant-list" /opt /usr 2>/dev/null | head
+```
+
 This bug class chains especially well with remote footholds that grant `netadmin` but not `root`.
 
 ## Other recent vManage/Catalyst SD-WAN Manager vulns to chain
 
+- **Unauthenticated info leak (CVE-2026-20133)** – Especially high-value because public research showed it could expose `confd_ipc_secret` or the `vmanage-admin` private key, turning a read bug into either Path 1 or a NETCONF pivot.
+- **Authenticated API arbitrary file overwrite (CVE-2026-20122)** – Different from the 2025 CLI bug above; VulnCheck used it to upload a webshell, which then makes the local privesc paths on this page immediately relevant.
 - **Authenticated UI XSS (CVE-2024-20475)** – Steal an admin session in the web UI, then pivot into API/CLI actions that eventually reach `vshell` or one of the local privesc paths above.
 - **Remote auth bypass to `netadmin` (CVE-2026-20129)** – Very strong precursor for Path 5 because `netadmin` is exactly the level required by the 2026 crafted-file privesc.
-- **Authenticated arbitrary file write (CVE-2026-20262)** – Useful for dropping files that later get parsed by privileged components or for overwriting operational artifacts consumed by root-owned helpers.
+- **Authenticated arbitrary file write (CVE-2026-20262)** – Similar offensive value to CVE-2026-20122 but through a later web UI upload path: write into a location that will later be parsed by root or by the management-plane web tier.
+- **Downgrade to resurrect old CLI privesc (CVE-2022-20775)** – 2026 intrusions showed attackers can roll back to an older vulnerable SD-WAN build, abuse the old CLI root bug, and then restore the original version.
 - **Pre-auth control-plane auth bypass (CVE-2026-20182)** – Better documented in the dedicated SD-WAN control-plane page; it can append an SSH key for `vmanage-admin`, giving you the local foothold needed to revisit this page.
+
+
 
 ## References
 
 - [Cisco Catalyst SD-WAN Vulnerabilities (CVE-2026-20126, CVE-2026-20129, etc.)](https://sec.cloudapps.cisco.com/security/center/content/CiscoSecurityAdvisory/cisco-sa-sdwan-authbp-qwCX8D4v)
 - [Cisco Catalyst SD-WAN Controller, Catalyst SD-WAN Manager, and Catalyst SD-WAN Validator Authenticated Privilege Escalation Vulnerability (CVE-2026-20245)](https://sec.cloudapps.cisco.com/security/center/content/CiscoSecurityAdvisory/cisco-sa-sdwan-privesc-4uxFrdzx)
-
+- [VulnCheck: Herding Cats - Recent Cisco SD-WAN Manager Vulnerabilities](https://www.vulncheck.com/blog/cisco-sd-wan-manager-vulns)
+- [Google Cloud / Mandiant: Zero-Day Exploitation of Vulnerability (CVE-2026-20245) in Cisco Catalyst SD-WAN Manager](https://cloud.google.com/blog/topics/threat-intelligence/zero-day-exploitation-cisco-catalyst-sd-wan-manager)
 {{#include ../../banners/hacktricks-training.md}}
