@@ -2,9 +2,9 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Główne algorytmy Machine Learning
+## Główne algorytmy uczenia maszynowego
 
-Najlepszym punktem wyjścia do nauki o AI jest zrozumienie działania głównych algorytmów machine learning. Pomoże Ci to zrozumieć, jak działa AI, jak go używać i jak je atakować:
+Najlepszym punktem wyjścia do nauki o AI jest zrozumienie działania głównych algorytmów uczenia maszynowego. Pomoże Ci to zrozumieć, jak działa AI, jak go używać i jak je atakować:
 
 
 {{#ref}}
@@ -35,7 +35,7 @@ Na poniższej stronie znajdziesz podstawy każdego komponentu potrzebnego do zbu
 AI-llm-architecture/README.md
 {{#endref}}
 
-## Bezpieczeństwo AI
+## AI Security
 
 ### Frameworki ryzyka AI
 
@@ -46,9 +46,9 @@ Obecnie dwoma głównymi frameworkami służącymi do oceny ryzyka systemów AI 
 AI-Risk-Frameworks.md
 {{#endref}}
 
-### Bezpieczeństwo promptów AI
+### Security promptów AI
 
-LLM spowodowały gwałtowny wzrost wykorzystania AI w ostatnich latach, ale nie są idealne i można je oszukać za pomocą adversarial prompts. Jest to bardzo ważny temat, pozwalający zrozumieć, jak bezpiecznie używać AI i jak je atakować:
+LLM sprawiły, że wykorzystanie AI gwałtownie wzrosło w ostatnich latach, ale nie są one doskonałe i można je oszukać za pomocą adversarial prompts. Jest to bardzo ważny temat, który pozwala zrozumieć, jak bezpiecznie używać AI i jak je atakować:
 
 
 {{#ref}}
@@ -57,32 +57,41 @@ AI-Prompts.md
 
 ### RCE w modelach AI
 
-Deweloperzy i firmy bardzo często uruchamiają modele pobrane z Internetu, jednak samo załadowanie modelu może wystarczyć do wykonania dowolnego kodu w systemie. Jest to bardzo ważny temat, pozwalający zrozumieć, jak bezpiecznie używać AI i jak je atakować:
+Deweloperzy i firmy bardzo często uruchamiają modele pobrane z Internetu, jednak samo załadowanie modelu może wystarczyć do wykonania dowolnego kodu w systemie. Jest to bardzo ważny temat, który pozwala zrozumieć, jak bezpiecznie używać AI i jak je atakować:
 
 
 {{#ref}}
 AI-Models-RCE.md
 {{#endref}}
 
-### AI Model Context Protocol
+### Omijanie KYC wspomagane przez AI
 
-MCP (Model Context Protocol) to protokół, który pozwala klientom agentów AI łączyć się z zewnętrznymi narzędziami i źródłami danych w sposób plug-and-play. Umożliwia to tworzenie złożonych workflow oraz interakcji między modelami AI a systemami zewnętrznymi:
+Generatywne wideo można połączyć z wstrzykiwaniem obrazu z virtual camera i manipulowaniem camera API, aby ominąć słabe procedury KYC, weryfikacji wieku i biometrycznej weryfikacji liveness:
+
+
+{{#ref}}
+KYC-Bypass-Using-AI.md
+{{#endref}}
+
+### Model Context Protocol AI
+
+MCP (Model Context Protocol) to protokół umożliwiający klientom agentów AI łączenie się z zewnętrznymi narzędziami i źródłami danych w sposób plug-and-play. Umożliwia to realizację złożonych przepływów pracy oraz interakcji między modelami AI a systemami zewnętrznymi:
 
 
 {{#ref}}
 AI-MCP-Servers.md
 {{#endref}}
 
-### AI-Assisted Fuzzing & Automated Vulnerability Discovery
+### Fuzzing wspomagany przez AI i automatyczne wykrywanie podatności
 
 
 {{#ref}}
 AI-Assisted-Fuzzing-and-Vulnerability-Discovery.md
 {{#endref}}
 
-### Web Black-Box AI Pentester Bots
+### Webowe black-box AI Pentester Bots
 
-Agenty oparte na LLM mogą automatyzować długotrwałe workflow black-box web pentestingu, gdy są wspierane przez observability, orkiestrację, obsługę uwierzytelnionych sesji i adversarial validation:
+Agenty oparte na LLM mogą automatyzować długotrwałe workflow black-box web pentesting, gdy są wspierane przez observability, orkiestrację, obsługę uwierzytelnionych sesji i adversarial validation:
 
 
 {{#ref}}
