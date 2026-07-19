@@ -2,9 +2,9 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## 主要机器学习算法
+## 主要 Machine Learning 算法
 
-学习 AI 的最佳起点是了解主要机器学习算法的工作原理。这将帮助你理解 AI 的工作方式、如何使用 AI，以及如何攻击 AI：
+学习 AI 的最佳起点是了解主要 Machine Learning 算法的工作原理。这将帮助你理解 AI 的工作方式、如何使用 AI 以及如何攻击 AI：
 
 
 {{#ref}}
@@ -28,16 +28,16 @@
 
 ### LLM 架构
 
-在下面的页面中，你将了解使用 transformers 构建基础 LLM 所需的各个组件的基础知识：
+在以下页面中，你将找到使用 transformers 构建基础 LLM 所需的各个组件的基础知识：
 
 
 {{#ref}}
 AI-llm-architecture/README.md
 {{#endref}}
 
-## AI 安全
+## AI Security
 
-### AI 风险框架
+### AI Risk Frameworks
 
 目前，用于评估 AI 系统风险的两个主要框架是 OWASP ML Top 10 和 Google SAIF：
 
@@ -46,9 +46,9 @@ AI-llm-architecture/README.md
 AI-Risk-Frameworks.md
 {{#endref}}
 
-### AI Prompts 安全
+### AI Prompts Security
 
-近年来，LLM 推动了 AI 的爆发式应用，但它们并不完美，可能会被对抗性 prompts 欺骗。这是一个非常重要的主题，有助于理解如何安全地使用 AI 以及如何攻击 AI：
+LLM 让 AI 在过去几年中的使用量大幅增加，但它们并不完美，可能会被 adversarial prompts 欺骗。这是理解如何安全使用 AI 以及如何攻击 AI 的重要主题：
 
 
 {{#ref}}
@@ -57,16 +57,25 @@ AI-Prompts.md
 
 ### AI Models RCE
 
-开发者和公司运行从 Internet 下载的 models 是非常常见的，然而，仅加载一个 model 就可能足以在系统上执行任意代码。这是一个非常重要的主题，有助于理解如何安全地使用 AI 以及如何攻击 AI：
+开发者和公司运行从 Internet 下载的模型非常普遍，然而，仅加载模型就可能足以在系统上执行 arbitrary code。这是理解如何安全使用 AI 以及如何攻击 AI 的重要主题：
 
 
 {{#ref}}
 AI-Models-RCE.md
 {{#endref}}
 
+### AI-Assisted KYC Bypass
+
+Generative video 可以与 virtual-camera injection 和 camera API manipulation 结合使用，以绕过防护较弱的 KYC、年龄验证和 biometric liveness 流程：
+
+
+{{#ref}}
+KYC-Bypass-Using-AI.md
+{{#endref}}
+
 ### AI Model Context Protocol
 
-MCP (Model Context Protocol) 是一种协议，允许 AI agent 客户端以即插即用的方式连接外部工具和数据源。这使 AI models 与外部系统之间能够实现复杂的工作流和交互：
+MCP（Model Context Protocol）是一种允许 AI agent 客户端以 plug-and-play 方式连接外部工具和数据源的协议。这使 AI 模型与外部系统之间能够进行复杂的工作流和交互：
 
 
 {{#ref}}
@@ -82,7 +91,7 @@ AI-Assisted-Fuzzing-and-Vulnerability-Discovery.md
 
 ### Web Black-Box AI Pentester Bots
 
-由 LLM 驱动的 agents 可以自动化执行长时间运行的 black-box Web pentesting 工作流，前提是它们具备 observability、orchestration、authenticated session handling 和 adversarial validation 支持：
+由 LLM 驱动的 agents 可以自动化长期运行的 black-box Web pentesting 工作流，但前提是这些工作流具备 observability、orchestration、authenticated session handling 和 adversarial validation 支持：
 
 
 {{#ref}}
