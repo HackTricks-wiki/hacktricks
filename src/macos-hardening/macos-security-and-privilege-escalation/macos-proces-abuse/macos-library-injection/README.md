@@ -3,11 +3,12 @@
 {{#include ../../../../banners/hacktricks-training.md}}
 
 > [!CAUTION]
-> Der Code von **dyld ist Open Source** und kann unter [https://opensource.apple.com/source/dyld/](https://opensource.apple.com/source/dyld/) gefunden werden und kann als tar mit einer **URL wie** [https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz](https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz) heruntergeladen werden.
+> Der Code von **dyld ist Open Source** und ist unter [https://opensource.apple.com/source/dyld/](https://opensource.apple.com/source/dyld/) zu finden und kann als tar über eine **URL wie** [https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz](https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz) heruntergeladen werden.
 
-## **Dyld-Prozess**
+## **Dyld Process**
 
-Schauen Sie sich an, wie Dyld Bibliotheken in Binaries lädt in:
+Sieh dir an, wie Dyld Libraries innerhalb von Binaries lädt:
+
 
 {{#ref}}
 macos-dyld-process.md
@@ -15,70 +16,71 @@ macos-dyld-process.md
 
 ## **DYLD_INSERT_LIBRARIES**
 
-Das ist wie das [**LD_PRELOAD auf Linux**](../../../../linux-hardening/privilege-escalation/index.html#ld_preload). Es ermöglicht, einen Prozess anzugeben, der ausgeführt werden soll, um eine bestimmte Bibliothek von einem Pfad zu laden (wenn die Umgebungsvariable aktiviert ist).
+Dies entspricht [**LD_PRELOAD unter Linux**](../../../../linux-hardening/linux-basics/linux-privilege-escalation/index.html#ld_preload). Damit kann für einen auszuführenden Prozess angegeben werden, eine bestimmte Library aus einem Pfad zu laden (wenn die Umgebungsvariable aktiviert ist).
 
-Diese Technik kann auch **als ASEP-Technik verwendet werden**, da jede installierte Anwendung eine plist namens "Info.plist" hat, die die **Zuweisung von Umgebungsvariablen** mit einem Schlüssel namens `LSEnvironmental` ermöglicht.
+Diese Technik kann auch als **ASEP-Technik verwendet werden**, da jede installierte Anwendung eine plist namens "Info.plist" besitzt, die das **Zuweisen von Umgebungsvariablen** über einen Schlüssel namens `LSEnvironmental` ermöglicht.
 
 > [!TIP]
-> Seit 2012 hat **Apple die Macht von `DYLD_INSERT_LIBRARIES` drastisch reduziert**.
+> Seit 2012 hat **Apple die Möglichkeiten von** **`DYLD_INSERT_LIBRARIES`** **drastisch reduziert**.
 >
-> Gehen Sie zum Code und **prüfen Sie `src/dyld.cpp`**. In der Funktion **`pruneEnvironmentVariables`** können Sie sehen, dass **`DYLD_*`** Variablen entfernt werden.
+> Gehe zum Code und **überprüfe `src/dyld.cpp`**. In der Funktion **`pruneEnvironmentVariables`** ist zu sehen, dass **`DYLD_*`**-Variablen entfernt werden.
 >
-> In der Funktion **`processRestricted`** wird der Grund für die Einschränkung festgelegt. Wenn Sie diesen Code überprüfen, können Sie sehen, dass die Gründe sind:
+> In der Funktion **`processRestricted`** wird der Grund für die Einschränkung festgelegt. Bei der Überprüfung dieses Codes ist zu sehen, dass die Gründe folgende sind:
 >
 > - Das Binary ist `setuid/setgid`
-> - Existenz des `__RESTRICT/__restrict` Abschnitts im Macho-Binary.
-> - Die Software hat Berechtigungen (hardened runtime) ohne [`com.apple.security.cs.allow-dyld-environment-variables`](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-dyld-environment-variables) Berechtigung
->  - Überprüfen Sie die **Berechtigungen** eines Binaries mit: `codesign -dv --entitlements :- </path/to/bin>`
+> - Vorhandensein eines Abschnitts `__RESTRICT/__restrict` im Mach-O-Binary.
+> - Die Software besitzt Entitlements (hardened runtime), aber kein [`com.apple.security.cs.allow-dyld-environment-variables`](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-dyld-environment-variables)-Entitlement
+>  - Überprüfe die **Entitlements** eines Binaries mit: `codesign -dv --entitlements :- </path/to/bin>`
 >
-> In neueren Versionen finden Sie diese Logik im zweiten Teil der Funktion **`configureProcessRestrictions`**. Was in neueren Versionen jedoch ausgeführt wird, sind die **Anfangsprüfungen der Funktion** (Sie können die ifs, die sich auf iOS oder Simulation beziehen, entfernen, da diese in macOS nicht verwendet werden).
+> In aktuelleren Versionen ist diese Logik im zweiten Teil der Funktion **`configureProcessRestrictions`** zu finden. In neueren Versionen wird jedoch die **Prüfung am Anfang der Funktion** ausgeführt (die ifs für iOS oder die Simulation können entfernt werden, da sie unter macOS nicht verwendet werden).
 
-### Bibliotheksvalidierung
+### Library Validation
 
-Selbst wenn das Binary die Verwendung der **`DYLD_INSERT_LIBRARIES`** Umgebungsvariable erlaubt, wird es eine benutzerdefinierte Bibliothek nicht laden, wenn das Binary die Signatur der zu ladenden Bibliothek überprüft.
+Selbst wenn das Binary die Umgebungsvariable **`DYLD_INSERT_LIBRARIES`** verwenden darf, wird es keine eigene Library laden, wenn das Binary die Signatur der zu ladenden Library überprüft.
 
-Um eine benutzerdefinierte Bibliothek zu laden, muss das Binary **eine der folgenden Berechtigungen** haben:
+Um eine eigene Library zu laden, muss das Binary **eines der folgenden Entitlements** besitzen:
 
 - [`com.apple.security.cs.disable-library-validation`](../../macos-security-protections/macos-dangerous-entitlements.md#com.apple.security.cs.disable-library-validation)
 - [`com.apple.private.security.clear-library-validation`](../../macos-security-protections/macos-dangerous-entitlements.md#com.apple.private.security.clear-library-validation)
 
-oder das Binary **sollte nicht** das **hardened runtime-Flag** oder das **Bibliotheksvalidierungs-Flag** haben.
+oder das Binary darf **nicht** das **hardened runtime flag** oder das **library validation flag** besitzen.
 
-Sie können überprüfen, ob ein Binary **hardened runtime** hat mit `codesign --display --verbose <bin>` und das Flag runtime in **`CodeDirectory`** überprüfen wie: **`CodeDirectory v=20500 size=767 flags=0x10000(runtime) hashes=13+7 location=embedded`**
+Du kannst prüfen, ob ein Binary **hardened runtime** besitzt, mit `codesign --display --verbose <bin>`, indem du das Runtime-Flag in **`CodeDirectory`** überprüfst, zum Beispiel: **`CodeDirectory v=20500 size=767 flags=0x10000(runtime) hashes=13+7 location=embedded`**
 
-Sie können auch eine Bibliothek laden, wenn sie **mit demselben Zertifikat wie das Binary signiert ist**.
+Du kannst eine Library auch laden, wenn sie mit demselben Zertifikat wie das Binary signiert ist.
 
-Finden Sie ein Beispiel, wie man dies (miss)braucht und überprüfen Sie die Einschränkungen in:
+Ein Beispiel dafür, wie dies (miss)braucht werden kann und wie die Einschränkungen überprüft werden, findest du unter:
+
 
 {{#ref}}
 macos-dyld-hijacking-and-dyld_insert_libraries.md
 {{#endref}}
 
-## Dylib-Hijacking
+## Dylib Hijacking
 
 > [!CAUTION]
-> Denken Sie daran, dass **frühere Bibliotheksvalidierungseinschränkungen ebenfalls gelten**, um Dylib-Hijacking-Angriffe durchzuführen.
+> Denke daran, dass die **zuvor genannten Einschränkungen der Library Validation ebenfalls** für Dylib Hijacking-Angriffe gelten.
 
-Wie in Windows können Sie auch in macOS **Dylibs hijacken**, um **Anwendungen** **beliebigen** **Code** auszuführen (nun, tatsächlich könnte dies von einem regulären Benutzer nicht möglich sein, da Sie möglicherweise eine TCC-Berechtigung benötigen, um in ein `.app`-Bundle zu schreiben und eine Bibliothek zu hijacken).\
-Allerdings ist die Art und Weise, wie **macOS**-Anwendungen **Bibliotheken** laden, **stärker eingeschränkt** als in Windows. Dies bedeutet, dass **Malware**-Entwickler diese Technik weiterhin für **Stealth** verwenden können, aber die Wahrscheinlichkeit, dass sie dies zur Eskalation von Berechtigungen missbrauchen können, ist viel geringer.
+Wie unter Windows kannst du auch unter macOS **dylibs hijacken**, damit **Anwendungen** **beliebigen** **Code ausführen** (tatsächlich ist dies als normaler Benutzer möglicherweise nicht möglich, da du eventuell eine TCC-Berechtigung benötigst, um in ein `.app`-Bundle zu schreiben und eine Library zu hijacken).\
+Allerdings ist die Art, wie **macOS**-Anwendungen Libraries **laden**, stärker eingeschränkt als unter Windows. Das bedeutet, dass **Malware**-Entwickler diese Technik weiterhin für **Stealth** verwenden können, die Wahrscheinlichkeit, sie zur **Privilege Escalation** zu missbrauchen, jedoch deutlich geringer ist.
 
-Zunächst ist es **häufiger**, dass **macOS-Binaries den vollständigen Pfad** zu den zu ladenden Bibliotheken angeben. Und zweitens, **macOS sucht niemals** in den Ordnern des **$PATH** nach Bibliotheken.
+Erstens ist es **häufiger**, dass **macOS-Binaries den vollständigen Pfad** zu den zu ladenden Libraries angeben. Zweitens sucht **macOS niemals** in den Ordnern von **$PATH** nach Libraries.
 
-Der **Hauptteil** des **Codes**, der mit dieser Funktionalität zusammenhängt, befindet sich in **`ImageLoader::recursiveLoadLibraries`** in `ImageLoader.cpp`.
+Der **wichtigste** Teil des **Codes** für diese Funktion befindet sich in **`ImageLoader::recursiveLoadLibraries`** in `ImageLoader.cpp`.
 
-Es gibt **4 verschiedene Header-Befehle**, die ein Macho-Binary verwenden kann, um Bibliotheken zu laden:
+Es gibt **4 verschiedene Header Commands**, die ein Mach-O-Binary zum Laden von Libraries verwenden kann:
 
-- Der **`LC_LOAD_DYLIB`** Befehl ist der gängige Befehl zum Laden einer Dylib.
-- Der **`LC_LOAD_WEAK_DYLIB`** Befehl funktioniert wie der vorherige, aber wenn die Dylib nicht gefunden wird, wird die Ausführung ohne Fehler fortgesetzt.
-- Der **`LC_REEXPORT_DYLIB`** Befehl proxy (oder re-exportiert) die Symbole von einer anderen Bibliothek.
-- Der **`LC_LOAD_UPWARD_DYLIB`** Befehl wird verwendet, wenn zwei Bibliotheken voneinander abhängen (dies wird als _aufwärts gerichtete Abhängigkeit_ bezeichnet).
+- Der **`LC_LOAD_DYLIB`**-Befehl ist der übliche Befehl zum Laden einer dylib.
+- Der **`LC_LOAD_WEAK_DYLIB`**-Befehl funktioniert wie der vorherige, aber wenn die dylib nicht gefunden wird, wird die Ausführung ohne Fehler fortgesetzt.
+- Der **`LC_REEXPORT_DYLIB`**-Befehl proxied (oder re-exportiert) die Symbole einer anderen Library.
+- Der **`LC_LOAD_UPWARD_DYLIB`**-Befehl wird verwendet, wenn zwei Libraries voneinander abhängen (dies wird als _upward dependency_ bezeichnet).
 
-Es gibt jedoch **2 Arten von Dylib-Hijacking**:
+Es gibt jedoch **2 Arten von Dylib Hijacking**:
 
-- **Fehlende schwach verlinkte Bibliotheken**: Das bedeutet, dass die Anwendung versuchen wird, eine Bibliothek zu laden, die nicht existiert, konfiguriert mit **LC_LOAD_WEAK_DYLIB**. Dann, **wenn ein Angreifer eine Dylib an dem Ort platziert, an dem sie erwartet wird, wird sie geladen**.
-- Die Tatsache, dass der Link "schwach" ist, bedeutet, dass die Anwendung weiterhin läuft, auch wenn die Bibliothek nicht gefunden wird.
-- Der **Code, der damit zusammenhängt**, befindet sich in der Funktion `ImageLoaderMachO::doGetDependentLibraries` von `ImageLoaderMachO.cpp`, wo `lib->required` nur `false` ist, wenn `LC_LOAD_WEAK_DYLIB` wahr ist.
-- **Finden Sie schwach verlinkte Bibliotheken** in Binaries mit (Sie haben später ein Beispiel, wie man Hijacking-Bibliotheken erstellt):
+- **Fehlende weak linked Libraries**: Das bedeutet, dass die Anwendung versucht, eine nicht vorhandene Library zu laden, die mit **LC_LOAD_WEAK_DYLIB** konfiguriert ist. Wenn ein **Angreifer eine dylib an der erwarteten Stelle platziert, wird sie geladen**.
+- Dass der Link "weak" ist, bedeutet, dass die Anwendung auch dann weiterläuft, wenn die Library nicht gefunden wird.
+- Der **zugehörige Code** befindet sich in der Funktion `ImageLoaderMachO::doGetDependentLibraries` von `ImageLoaderMachO.cpp`, wobei `lib->required` nur dann `false` ist, wenn `LC_LOAD_WEAK_DYLIB` true ist.
+- **Finde weak linked Libraries** in Binaries mit (weiter unten findest du ein Beispiel zum Erstellen von Hijacking-Libraries):
 - ```bash
 otool -l </path/to/bin> | grep LC_LOAD_WEAK_DYLIB -A 5 cmd LC_LOAD_WEAK_DYLIB
 cmdsize 56
@@ -87,88 +89,88 @@ time stamp 2 Wed Jun 21 12:23:31 1969
 current version 1.0.0
 compatibility version 1.0.0
 ```
-- **Konfiguriert mit @rpath**: Mach-O-Binaries können die Befehle **`LC_RPATH`** und **`LC_LOAD_DYLIB`** haben. Basierend auf den **Werten** dieser Befehle werden **Bibliotheken** aus **verschiedenen Verzeichnissen** geladen.
-- **`LC_RPATH`** enthält die Pfade einiger Ordner, die verwendet werden, um Bibliotheken durch das Binary zu laden.
-- **`LC_LOAD_DYLIB`** enthält den Pfad zu spezifischen Bibliotheken, die geladen werden sollen. Diese Pfade können **`@rpath`** enthalten, das durch die Werte in **`LC_RPATH`** ersetzt wird. Wenn es mehrere Pfade in **`LC_RPATH`** gibt, wird jeder verwendet, um die zu ladende Bibliothek zu suchen. Beispiel:
-- Wenn **`LC_LOAD_DYLIB`** `@rpath/library.dylib` enthält und **`LC_RPATH`** `/application/app.app/Contents/Framework/v1/` und `/application/app.app/Contents/Framework/v2/` enthält. Beide Ordner werden verwendet, um `library.dylib` zu laden. Wenn die Bibliothek nicht in `[...]/v1/` existiert und ein Angreifer sie dort platzieren könnte, um das Laden der Bibliothek in `[...]/v2/` zu hijacken, da die Reihenfolge der Pfade in **`LC_LOAD_DYLIB`** befolgt wird.
-- **Finden Sie rpath-Pfade und Bibliotheken** in Binaries mit: `otool -l </path/to/binary> | grep -E "LC_RPATH|LC_LOAD_DYLIB" -A 5`
+- **Mit @rpath konfiguriert**: Mach-O-Binaries können die Commands **`LC_RPATH`** und **`LC_LOAD_DYLIB`** enthalten. Abhängig von den **Werten** dieser Commands werden **Libraries** aus **unterschiedlichen Verzeichnissen** geladen.
+- **`LC_RPATH`** enthält die Pfade einiger Ordner, die vom Binary zum Laden von Libraries verwendet werden.
+- **`LC_LOAD_DYLIB`** enthält den Pfad zu bestimmten zu ladenden Libraries. Diese Pfade können **`@rpath`** enthalten, das durch die Werte in **`LC_RPATH`** ersetzt wird. Wenn es mehrere Pfade in **`LC_RPATH`** gibt, werden alle verwendet, um nach der zu ladenden Library zu suchen. Beispiel:
+- Wenn **`LC_LOAD_DYLIB`** `@rpath/library.dylib` enthält und **`LC_RPATH`** `/application/app.app/Contents/Framework/v1/` sowie `/application/app.app/Contents/Framework/v2/` enthält, werden beide Ordner zum Laden von `library.dylib` verwendet**.** Wenn die Library in `[...]/v1/` nicht existiert und ein Angreifer sie dort platzieren kann, kann er das Laden der Library in `[...]/v2/` hijacken, da die Reihenfolge der Pfade in **`LC_LOAD_DYLIB`** befolgt wird.
+- **Finde rpath-Pfade und Libraries** in Binaries mit: `otool -l </path/to/binary> | grep -E "LC_RPATH|LC_LOAD_DYLIB" -A 5`
 
-> [!NOTE] > **`@executable_path`**: Ist der **Pfad** zum Verzeichnis, das die **Hauptausführungsdatei** enthält.
+> [!NOTE] > **`@executable_path`**: Ist der **Pfad** zum Verzeichnis, das die **Haupt-Executable-Datei** enthält.
 >
-> **`@loader_path`**: Ist der **Pfad** zum **Verzeichnis**, das die **Mach-O-Binary** enthält, die den Ladebefehl enthält.
+> **`@loader_path`**: Ist der **Pfad** zum **Verzeichnis**, das das **Mach-O-Binary** enthält, welches den Load Command enthält.
 >
-> - Wenn in einem ausführbaren Programm verwendet, ist **`@loader_path`** effektiv dasselbe wie **`@executable_path`**.
-> - Wenn in einer **Dylib** verwendet, gibt **`@loader_path`** den **Pfad** zur **Dylib** an.
+> - Bei Verwendung in einer Executable ist **`@loader_path`** effektiv dasselbe wie **`@executable_path`**.
+> - Bei Verwendung in einer **dylib** liefert **`@loader_path`** den **Pfad** zur **dylib**.
 
-Die Möglichkeit, **Berechtigungen zu eskalieren**, indem man diese Funktionalität missbraucht, wäre im seltenen Fall, dass eine **Anwendung**, die **von** **root** ausgeführt wird, nach einer **Bibliothek in einem Ordner sucht, in dem der Angreifer Schreibberechtigungen hat.**
+Eine **Privilege Escalation** durch Missbrauch dieser Funktion wäre in dem seltenen Fall möglich, dass eine **von** **root** ausgeführte **Anwendung** nach einer **Library in einem Ordner sucht, für den der Angreifer Schreibberechtigungen besitzt.**
 
-> [!TIP]
-> Ein schöner **Scanner**, um **fehlende Bibliotheken** in Anwendungen zu finden, ist [**Dylib Hijack Scanner**](https://objective-see.com/products/dhs.html) oder eine [**CLI-Version**](https://github.com/pandazheng/DylibHijack).\
-> Ein schöner **Bericht mit technischen Details** zu dieser Technik kann [**hier**](https://www.virusbulletin.com/virusbulletin/2015/03/dylib-hijacking-os-x) gefunden werden.
+Ein guter **Scanner**, um **fehlende Libraries** in Anwendungen zu finden, ist [**Dylib Hijack Scanner**](https://objective-see.com/products/dhs.html) oder eine [**CLI-Version**](https://github.com/pandazheng/DylibHijack).\
+Einen guten **Bericht mit technischen Details** zu dieser Technik findest du [**hier**](https://www.virusbulletin.com/virusbulletin/2015/03/dylib-hijacking-os-x).
 
 **Beispiel**
+
 
 {{#ref}}
 macos-dyld-hijacking-and-dyld_insert_libraries.md
 {{#endref}}
 
-## Dlopen-Hijacking
+## Dlopen Hijacking
 
 > [!CAUTION]
-> Denken Sie daran, dass **frühere Bibliotheksvalidierungseinschränkungen ebenfalls gelten**, um Dlopen-Hijacking-Angriffe durchzuführen.
+> Denke daran, dass die **zuvor genannten Einschränkungen der Library Validation ebenfalls** für Dlopen Hijacking-Angriffe gelten.
 
 Aus **`man dlopen`**:
 
-- Wenn der Pfad **kein Schrägstrichzeichen enthält** (d.h. es ist nur ein Blattname), wird **dlopen() eine Suche durchführen**. Wenn **`$DYLD_LIBRARY_PATH`** beim Start gesetzt wurde, wird dyld zuerst **in diesem Verzeichnis suchen**. Als nächstes, wenn die aufrufende Mach-O-Datei oder die Hauptausführungsdatei ein **`LC_RPATH`** angibt, wird dyld **in diesen** Verzeichnissen suchen. Als nächstes, wenn der Prozess **uneingeschränkt** ist, wird dyld im **aktuellen Arbeitsverzeichnis** suchen. Schließlich wird dyld für alte Binaries einige Fallbacks versuchen. Wenn **`$DYLD_FALLBACK_LIBRARY_PATH`** beim Start gesetzt wurde, wird dyld in **diesen Verzeichnissen** suchen, andernfalls wird dyld in **`/usr/local/lib/`** suchen (wenn der Prozess uneingeschränkt ist), und dann in **`/usr/lib/`** (diese Informationen stammen aus **`man dlopen`**).
+- Wenn der Pfad **kein Slash-Zeichen enthält** (also nur aus einem Blattnamen besteht), führt **dlopen() eine Suche durch**. Wenn **`$DYLD_LIBRARY_PATH`** beim Start gesetzt war, sucht dyld zuerst **in diesem Verzeichnis**. Wenn die aufrufende Mach-O-Datei oder die Haupt-Executable ein **`LC_RPATH`** angibt, sucht dyld anschließend **in diesen** Verzeichnissen. Wenn der Prozess **unrestricted** ist, sucht dyld danach im aktuellen Arbeitsverzeichnis. Bei älteren Binaries versucht dyld zuletzt einige Fallbacks. Wenn **`$DYLD_FALLBACK_LIBRARY_PATH`** beim Start gesetzt war, sucht dyld in **diesen Verzeichnissen**, andernfalls sucht dyld in **`/usr/local/lib/`** (wenn der Prozess unrestricted ist) und anschließend in **`/usr/lib/`** (diese Information stammt aus **`man dlopen`**).
 1. `$DYLD_LIBRARY_PATH`
 2. `LC_RPATH`
-3. `CWD` (wenn uneingeschränkt)
+3. `CWD`(if unrestricted)
 4. `$DYLD_FALLBACK_LIBRARY_PATH`
-5. `/usr/local/lib/` (wenn uneingeschränkt)
+5. `/usr/local/lib/` (if unrestricted)
 6. `/usr/lib/`
 
 > [!CAUTION]
-> Wenn keine Schrägstriche im Namen vorhanden sind, gibt es 2 Möglichkeiten, ein Hijacking durchzuführen:
+> Wenn der Name keine Slashes enthält, gibt es 2 Möglichkeiten für ein Hijacking:
 >
-> - Wenn irgendein **`LC_RPATH`** **beschreibbar** ist (aber die Signatur überprüft wird, also dafür muss das Binary auch uneingeschränkt sein)
-> - Wenn das Binary **uneingeschränkt** ist und dann ist es möglich, etwas aus dem CWD zu laden (oder einen der erwähnten Umgebungsvariablen zu missbrauchen)
+> - Wenn ein **`LC_RPATH`** **beschreibbar** ist (die Signatur wird jedoch überprüft, daher muss das Binary hierfür ebenfalls unrestricted sein)
+> - Wenn das Binary **unrestricted** ist und daher etwas aus dem CWD geladen werden kann (oder eine der genannten Umgebungsvariablen missbraucht wird)
 
-- Wenn der Pfad **wie ein Framework**-Pfad aussieht (z.B. `/stuff/foo.framework/foo`), wenn **`$DYLD_FRAMEWORK_PATH`** beim Start gesetzt wurde, wird dyld zuerst in diesem Verzeichnis nach dem **Framework-Teilpfad** (z.B. `foo.framework/foo`) suchen. Als nächstes wird dyld versuchen, den **angegebenen Pfad unverändert** zu verwenden (unter Verwendung des aktuellen Arbeitsverzeichnisses für relative Pfade). Schließlich wird dyld für alte Binaries einige Fallbacks versuchen. Wenn **`$DYLD_FALLBACK_FRAMEWORK_PATH`** beim Start gesetzt wurde, wird dyld in diesen Verzeichnissen suchen. Andernfalls wird es in **`/Library/Frameworks`** suchen (auf macOS, wenn der Prozess uneingeschränkt ist), dann in **`/System/Library/Frameworks`**.
+- Wenn der Pfad wie ein **Framework**-Pfad aussieht (z. B. `/stuff/foo.framework/foo`), sucht dyld zuerst in dem Verzeichnis nach dem **partiellen Framework-Pfad** (z. B. `foo.framework/foo`), wenn **`$DYLD_FRAMEWORK_PATH`** beim Start gesetzt war. Anschließend versucht dyld den **bereitgestellten Pfad unverändert** (für relative Pfade wird das aktuelle Arbeitsverzeichnis verwendet). Bei älteren Binaries versucht dyld zuletzt einige Fallbacks. Wenn **`$DYLD_FALLBACK_FRAMEWORK_PATH`** beim Start gesetzt war, sucht dyld in diesen Verzeichnissen. Andernfalls sucht es in **`/Library/Frameworks`** (unter macOS, wenn der Prozess unrestricted ist) und anschließend in **`/System/Library/Frameworks`**.
 1. `$DYLD_FRAMEWORK_PATH`
-2. angegebener Pfad (unter Verwendung des aktuellen Arbeitsverzeichnisses für relative Pfade, wenn uneingeschränkt)
+2. supplied path (using current working directory for relative paths if unrestricted)
 3. `$DYLD_FALLBACK_FRAMEWORK_PATH`
-4. `/Library/Frameworks` (wenn uneingeschränkt)
+4. `/Library/Frameworks` (if unrestricted)
 5. `/System/Library/Frameworks`
 
 > [!CAUTION]
-> Wenn es sich um einen Framework-Pfad handelt, wäre die Möglichkeit, ihn zu hijacken:
+> Wenn es sich um einen Framework-Pfad handelt, wäre ein Hijacking folgendermaßen möglich:
 >
-> - Wenn der Prozess **uneingeschränkt** ist, indem man den **relativen Pfad vom CWD** und die erwähnten Umgebungsvariablen missbraucht (auch wenn es in den Dokumenten nicht gesagt wird, wenn der Prozess eingeschränkt ist, werden DYLD_* Umgebungsvariablen entfernt)
+> - Wenn der Prozess **unrestricted** ist, durch Missbrauch des **relativen Pfads aus dem CWD** und der genannten Umgebungsvariablen (auch wenn dies nicht in der Dokumentation steht, werden bei einem restricted Prozess DYLD\_\*-Umgebungsvariablen entfernt)
 
-- Wenn der Pfad **einen Schrägstrich enthält, aber kein Framework-Pfad ist** (d.h. ein vollständiger Pfad oder ein Teilpfad zu einer Dylib), sucht dlopen() zuerst (wenn gesetzt) in **`$DYLD_LIBRARY_PATH`** (mit dem Blattteil aus dem Pfad). Als nächstes versucht dyld **den angegebenen Pfad** (unter Verwendung des aktuellen Arbeitsverzeichnisses für relative Pfade, aber nur für uneingeschränkte Prozesse). Schließlich wird dyld für ältere Binaries einige Fallbacks versuchen. Wenn **`$DYLD_FALLBACK_LIBRARY_PATH`** beim Start gesetzt wurde, wird dyld in diesen Verzeichnissen suchen, andernfalls wird dyld in **`/usr/local/lib/`** suchen (wenn der Prozess uneingeschränkt ist), und dann in **`/usr/lib/`**.
+- Wenn der Pfad einen Slash enthält, aber kein Framework-Pfad ist (also ein vollständiger oder partieller Pfad zu einer dylib), sucht dlopen zunächst (falls gesetzt) in **`$DYLD_LIBRARY_PATH`** (mit dem Leaf-Teil des Pfads). Danach **versucht dyld den bereitgestellten Pfad** (für relative Pfade wird das aktuelle Arbeitsverzeichnis verwendet, jedoch nur für unrestricted Prozesse). Bei älteren Binaries versucht dyld zuletzt einige Fallbacks. Wenn **`$DYLD_FALLBACK_LIBRARY_PATH`** beim Start gesetzt war, sucht dyld in diesen Verzeichnissen, andernfalls sucht dyld in **`/usr/local/lib/`** (wenn der Prozess unrestricted ist) und anschließend in **`/usr/lib/`**.
 1. `$DYLD_LIBRARY_PATH`
-2. angegebener Pfad (unter Verwendung des aktuellen Arbeitsverzeichnisses für relative Pfade, wenn uneingeschränkt)
+2. supplied path (using current working directory for relative paths if unrestricted)
 3. `$DYLD_FALLBACK_LIBRARY_PATH`
-4. `/usr/local/lib/` (wenn uneingeschränkt)
+4. `/usr/local/lib/` (if unrestricted)
 5. `/usr/lib/`
 
 > [!CAUTION]
-> Wenn Schrägstriche im Namen vorhanden sind und es kein Framework ist, wäre die Möglichkeit, es zu hijacken:
+> Wenn der Name Slashes enthält und kein Framework ist, wäre ein Hijacking folgendermaßen möglich:
 >
-> - Wenn das Binary **uneingeschränkt** ist und dann ist es möglich, etwas aus dem CWD oder `/usr/local/lib` zu laden (oder einen der erwähnten Umgebungsvariablen zu missbrauchen)
+> - Wenn das Binary **unrestricted** ist und daher etwas aus dem CWD oder **`/usr/local/lib`** geladen werden kann (oder eine der genannten Umgebungsvariablen missbraucht wird)
 
 > [!TIP]
-> Hinweis: Es gibt **keine** Konfigurationsdateien, um **dlopen-Suchen** zu **steuern**.
+> Hinweis: Es gibt **keine** Konfigurationsdateien zur **Steuerung der dlopen-Suche**.
 >
-> Hinweis: Wenn die Hauptausführungsdatei ein **set\[ug]id-Binary oder codesigned mit Berechtigungen** ist, werden **alle Umgebungsvariablen ignoriert**, und es kann nur ein vollständiger Pfad verwendet werden ([überprüfen Sie die Einschränkungen von DYLD_INSERT_LIBRARIES](macos-dyld-hijacking-and-dyld_insert_libraries.md#check-dyld_insert_librery-restrictions) für detailliertere Informationen)
+> Hinweis: Wenn die Haupt-Executable ein **set\[ug]id-Binary** ist oder mit Entitlements codesigniert wurde, werden **alle Umgebungsvariablen ignoriert** und es kann nur ein vollständiger Pfad verwendet werden ([überprüfe die DYLD_INSERT_LIBRARIES-Einschränkungen](macos-dyld-hijacking-and-dyld_insert_libraries.md#check-dyld_insert_librery-restrictions) für detailliertere Informationen).
 >
-> Hinweis: Apple-Plattformen verwenden "universelle" Dateien, um 32-Bit- und 64-Bit-Bibliotheken zu kombinieren. Das bedeutet, dass es **keine separaten 32-Bit- und 64-Bit-Suchpfade** gibt.
+> Hinweis: Apple-Plattformen verwenden "universelle" Dateien, um 32-Bit- und 64-Bit-Libraries zu kombinieren. Daher gibt es **keine separaten 32-Bit- und 64-Bit-Suchpfade**.
 >
-> Hinweis: Auf Apple-Plattformen sind die meisten OS-Dylibs **im dyld-Cache kombiniert** und existieren nicht auf der Festplatte. Daher wird der Aufruf von **`stat()`** zur Vorabprüfung, ob eine OS-Dylib existiert, **nicht funktionieren**. Allerdings verwendet **`dlopen_preflight()`** die gleichen Schritte wie **`dlopen()`**, um eine kompatible Mach-O-Datei zu finden.
+> Hinweis: Auf Apple-Plattformen sind die meisten OS-dylibs im **dyld cache** kombiniert und existieren nicht auf der Festplatte. Daher funktioniert ein Aufruf von **`stat()`**, um vorab zu prüfen, ob eine OS-dylib existiert, **nicht**. **`dlopen_preflight()`** verwendet jedoch dieselben Schritte wie **`dlopen()`**, um eine kompatible Mach-O-Datei zu finden.
 
-**Überprüfen Sie die Pfade**
+**Pfade überprüfen**
 
-Lassen Sie uns alle Optionen mit dem folgenden Code überprüfen:
+Überprüfen wir alle Optionen mit dem folgenden Code:
 ```c
 // gcc dlopentest.c -o dlopentest -Wl,-rpath,/tmp/test
 #include <dlfcn.h>
@@ -211,27 +213,27 @@ fprintf(stderr, "Error loading: %s\n\n\n", dlerror());
 return 0;
 }
 ```
-Wenn Sie es kompilieren und ausführen, können Sie **sehen, wo jede Bibliothek erfolglos gesucht wurde**. Außerdem könnten Sie **die FS-Protokolle filtern**:
+Wenn du es kompilierst und ausführst, kannst du sehen, **wo nach jeder Bibliothek erfolglos gesucht wurde**. Außerdem könntest du die **FS-Logs filtern**:
 ```bash
 sudo fs_usage | grep "dlopentest"
 ```
 ## Relative Path Hijacking
 
-Wenn ein **privilegiertes Binary/App** (wie ein SUID oder ein Binary mit mächtigen Berechtigungen) eine **relative Pfad**-Bibliothek lädt (zum Beispiel mit `@executable_path` oder `@loader_path`) und **Library Validation deaktiviert** ist, könnte es möglich sein, das Binary an einen Ort zu verschieben, an dem der Angreifer die **relative Pfad geladene Bibliothek** ändern und missbrauchen kann, um Code in den Prozess einzuschleusen.
+Wenn ein **privileged binary/app** (wie ein SUID- oder ein Binary mit leistungsfähigen Entitlements) eine Library über einen **relativen Pfad** lädt (beispielsweise mithilfe von `@executable_path` oder `@loader_path`) und **Library Validation deaktiviert** ist, könnte es möglich sein, das Binary an einen Ort zu verschieben, an dem der Angreifer die über den relativen Pfad geladene Library **modifizieren** kann, und dies zum Injizieren von Code in den Prozess zu missbrauchen.
 
-## Prune `DYLD_*` und `LD_LIBRARY_PATH` Umgebungsvariablen
+## Prune `DYLD_*` and `LD_LIBRARY_PATH` env variables
 
-In der Datei `dyld-dyld-832.7.1/src/dyld2.cpp` ist es möglich, die Funktion **`pruneEnvironmentVariables`** zu finden, die jede Umgebungsvariable entfernt, die **mit `DYLD_`** und **`LD_LIBRARY_PATH=`** beginnt.
+In der Datei `dyld-dyld-832.7.1/src/dyld2.cpp` kann die Funktion **`pruneEnvironmentVariables`** gefunden werden, die alle Umgebungsvariablen entfernt, die **mit `DYLD_` beginnen** oder **`LD_LIBRARY_PATH=`** entsprechen.
 
-Es wird auch die Umgebungsvariablen **`DYLD_FALLBACK_FRAMEWORK_PATH`** und **`DYLD_FALLBACK_LIBRARY_PATH`** speziell auf **null** setzen für **suid** und **sgid** Binaries.
+Außerdem setzt sie speziell die Umgebungsvariablen **`DYLD_FALLBACK_FRAMEWORK_PATH`** und **`DYLD_FALLBACK_LIBRARY_PATH`** für **suid**- und **sgid**-Binaries auf **null**.
 
-Diese Funktion wird aus der **`_main`** Funktion derselben Datei aufgerufen, wenn OSX wie folgt angesprochen wird:
+Diese Funktion wird aus der **`_main`**-Funktion derselben Datei aufgerufen, wenn OSX als Ziel verwendet wird, etwa so:
 ```cpp
 #if TARGET_OS_OSX
 if ( !gLinkContext.allowEnvVarsPrint && !gLinkContext.allowEnvVarsPath && !gLinkContext.allowEnvVarsSharedCache ) {
 pruneEnvironmentVariables(envp, &apple);
 ```
-und diese booleschen Flags werden in derselben Datei im Code gesetzt:
+und diese Boolean-Flags werden im Code in derselben Datei gesetzt:
 ```cpp
 #if TARGET_OS_OSX
 // support chrooting from old kernel
@@ -262,11 +264,11 @@ gLinkContext.allowClassicFallbackPaths   = !isRestricted;
 gLinkContext.allowInsertFailures         = false;
 gLinkContext.allowInterposing         	 = true;
 ```
-Was im Grunde bedeutet, dass wenn die Binärdatei **suid** oder **sgid** ist, oder ein **RESTRICT**-Segment in den Headern hat oder mit dem **CS_RESTRICT**-Flag signiert wurde, dann **`!gLinkContext.allowEnvVarsPrint && !gLinkContext.allowEnvVarsPath && !gLinkContext.allowEnvVarsSharedCache`** wahr ist und die Umgebungsvariablen entfernt werden.
+Das bedeutet im Grunde, dass **`!gLinkContext.allowEnvVarsPrint && !gLinkContext.allowEnvVarsPath && !gLinkContext.allowEnvVarsSharedCache`** wahr ist und die Umgebungsvariablen entfernt werden, wenn die Binary **suid** oder **sgid** ist, ein **RESTRICT**-Segment in den Headern enthält oder mit dem Flag **CS_RESTRICT** signiert wurde.
 
-Beachten Sie, dass wenn CS_REQUIRE_LV wahr ist, die Variablen nicht entfernt werden, aber die Bibliotheksvalidierung überprüft, ob sie dasselbe Zertifikat wie die ursprüngliche Binärdatei verwenden.
+Beachte, dass die Variablen nicht entfernt werden, wenn CS_REQUIRE_LV wahr ist. Die Library validation überprüft jedoch, ob sie dasselbe Zertifikat wie die ursprüngliche Binary verwenden.
 
-## Überprüfen der Einschränkungen
+## Restrictions prüfen
 
 ### SUID & SGID
 ```bash
@@ -284,9 +286,9 @@ sudo chmod -s hello
 gcc -sectcreate __RESTRICT __restrict /dev/null hello.c -o hello-restrict
 DYLD_INSERT_LIBRARIES=inject.dylib ./hello-restrict
 ```
-### Hardened runtime
+### Hardened Runtime
 
-Erstellen Sie ein neues Zertifikat in der Schlüsselbund und verwenden Sie es, um die Binärdatei zu signieren:
+Erstellen Sie ein neues Zertifikat im Keychain und verwenden Sie es, um das Binary zu signieren:
 ```bash
 # Apply runtime proetction
 codesign -s <cert-name> --option=runtime ./hello
@@ -307,17 +309,17 @@ codesign -f -s <cert-name> --option=restrict hello-signed
 DYLD_INSERT_LIBRARIES=inject.dylib ./hello-signed # Won't work
 ```
 > [!CAUTION]
-> Beachten Sie, dass selbst wenn es Binärdateien gibt, die mit den Flags **`0x0(none)`** signiert sind, sie beim Ausführen dynamisch das **`CS_RESTRICT`**-Flag erhalten können und diese Technik daher nicht bei ihnen funktioniert.
+> Beachte, dass selbst Binaries, die mit den Flags **`0x0(none)`** signiert sind, beim Ausführen dynamisch das Flag **`CS_RESTRICT`** erhalten können. Daher funktioniert diese Technik bei ihnen nicht.
 >
-> Sie können überprüfen, ob ein Prozess dieses Flag hat mit (holen Sie sich [**csops hier**](https://github.com/axelexic/CSOps)):
+> Du kannst mit (siehe [**csops hier**](https://github.com/axelexic/CSOps)) überprüfen, ob ein proc dieses Flag besitzt:
 >
 > ```bash
 > csops -status <pid>
 > ```
 >
-> und dann überprüfen, ob das Flag 0x800 aktiviert ist.
+> und anschließend prüfen, ob das Flag 0x800 aktiviert ist.
 
-## References
+## Referenzen
 
 - [https://theevilbit.github.io/posts/dyld_insert_libraries_dylib_injection_in_macos_osx_deep_dive/](https://theevilbit.github.io/posts/dyld_insert_libraries_dylib_injection_in_macos_osx_deep_dive/)
 - [**\*OS Internals, Volume I: User Mode. By Jonathan Levin**](https://www.amazon.com/MacOS-iOS-Internals-User-Mode/dp/099105556X)
