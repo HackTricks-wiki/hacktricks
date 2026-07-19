@@ -17,7 +17,7 @@ Neem asseblief kennis dat **die meeste van die truuks oor privilege escalation w
 
 
 {{#ref}}
-../../linux-hardening/privilege-escalation/
+../../linux-hardening/linux-basics/linux-privilege-escalation/README.md
 {{#endref}}
 
 ## Gebruikerinteraksie
