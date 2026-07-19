@@ -4,9 +4,9 @@
 
 ## Overview
 
-The network namespace isolates network-related resources such as interfaces, IP addresses, routing tables, ARP/neighbor state, firewall rules, sockets, and the contents of files like `/proc/net`. This is why a container can have what looks like its own `eth0`, its own local routes, and its own loopback device without owning the host's real network stack.
+The network namespace isolates network-related resources such as interfaces, IP addresses, routing tables, ARP/neighbor state, firewall rules, sockets, the UNIX-domain abstract socket namespace, and the contents of files like `/proc/net`. This is why a container can have what looks like its own `eth0`, its own local routes, and its own loopback device without owning the host's real network stack.
 
-Security-wise, this matters because network isolation is about much more than port binding. A private network namespace limits what the workload can directly observe or reconfigure. Once that namespace is shared with the host, the container may suddenly gain visibility into host listeners, host-local services, and network control points that were never meant to be exposed to the application.
+Security-wise, this matters because network isolation is about much more than port binding. A private network namespace limits what the workload can directly observe or reconfigure. Once that namespace is shared with the host, the container may suddenly gain visibility into host listeners, host-local services, abstract AF_UNIX endpoints, and network control points that were never meant to be exposed to the application.
 
 ## Operation
 
@@ -35,7 +35,7 @@ The host-networked container no longer has its own isolated socket and interface
 
 ## Runtime Usage
 
-Docker and Podman normally create a private network namespace for each container unless configured otherwise. Kubernetes usually gives each Pod its own network namespace, shared by the containers inside that Pod but separate from the host. Incus/LXC systems also provide rich network-namespace based isolation, often with a wider variety of virtual networking setups.
+Docker and Podman normally create a private network namespace for each container unless configured otherwise. Kubernetes usually gives each Pod its own network namespace, shared by the containers inside that Pod but separate from the host. That means `127.0.0.1` is usually Pod-local rather than container-local: a listener bound only to localhost in one container is typically reachable from its sidecars and siblings. Incus/LXC systems also provide rich network-namespace based isolation, often with a wider variety of virtual networking setups.
 
 The common principle is that private networking is the default isolation boundary, while host networking is an explicit opt-out from that boundary.
 
@@ -66,6 +66,15 @@ ss -lntp | grep '127.0.0.1'
 curl -s http://127.0.0.1:2375/version 2>/dev/null
 curl -sk https://127.0.0.1:2376/version 2>/dev/null
 ```
+
+Abstract UNIX sockets are another easy-to-miss target because they are network-namespace scoped even though they do not look like TCP/UDP listeners and may not exist as filesystem paths under `/run`. A host-networked container can therefore inherit access to host-only control channels that were never bind-mounted into the container at all:
+
+```bash
+ss -xap 2>/dev/null | head -n 50
+grep -a '@' /proc/net/unix 2>/dev/null | head -n 50
+```
+
+A historical example was the `containerd-shim` abstract-socket exposure bug, but the broader lesson is more important than the specific CVE: once a workload joins the host network namespace, abstract AF_UNIX services become part of the attack surface too. If those sockets appear runtime-related or administrative, pivot to [Runtime API And Daemon Exposure](../../runtime-api-and-daemon-exposure.md).
 
 If network capabilities are present, test whether the workload can inspect or alter the visible stack:
 
@@ -100,6 +109,16 @@ for u in \
   curl -m 2 -s "$u" 2>/dev/null | head
 done
 ```
+
+In Kubernetes, remember that compromising **any** container in a multi-container Pod also gives access to localhost listeners opened by sibling containers and sidecars because the whole Pod shares one network namespace. This becomes especially relevant with service-mesh, observability, and helper containers whose admin or debug interfaces are intentionally Pod-internal rather than cluster-wide:
+
+```bash
+ss -lntup | grep -E '127.0.0.1|::1'
+curl -s http://127.0.0.1:15000/server_info 2>/dev/null | head
+curl -s http://127.0.0.1:15000/config_dump 2>/dev/null | head
+```
+
+Treat "bound to localhost" as **Pod-private**, not **container-private**. After one container in the Pod is compromised, that assumption is gone.
 
 ### Full Example: Host Networking + Local Runtime / Kubelet Access
 
@@ -137,20 +156,25 @@ ip netns identify $$ 2>/dev/null
 ip addr                      # Visible interfaces and addresses
 ip route                     # Routing table
 ss -lntup                    # Listening TCP/UDP sockets with process info
+ss -xap                      # UNIX sockets, including abstract namespace entries
+grep -a '@' /proc/net/unix   # Quick view of abstract AF_UNIX sockets in this netns
 ```
 
 What is interesting here:
 
 - If `/proc/self/ns/net` and `/proc/1/ns/net` already look host-like, the container may be sharing the host network namespace or another non-private namespace.
 - `lsns -t net` and `ip netns identify` are useful when the shell is already inside a named or persistent namespace and you want to correlate it with `/run/netns` objects from the host side.
-- `ss -lntup` is especially valuable because it reveals loopback-only listeners and local management endpoints.
+- `ss -lntup` is especially valuable because it reveals loopback-only listeners and local management endpoints. `ss -xap` and `/proc/net/unix` add the abstract-socket view that ordinary filesystem socket hunts miss.
 - Routes, interface names, firewall context, `tc` state, and eBPF attachments become much more important if `CAP_NET_ADMIN`, `CAP_NET_RAW`, or `CAP_BPF` is present.
 - In Kubernetes, failed service-name resolution from a `hostNetwork` Pod may simply mean the Pod is not using `dnsPolicy: ClusterFirstWithHostNet`, not that the service is absent.
+- In multi-container Pods, localhost listeners belong to the whole Pod network namespace, so check sidecars and sibling containers before assuming a loopback-only port is unreachable from the compromised container.
 
 When reviewing a container, always evaluate the network namespace together with the capability set. Host networking plus strong network capabilities is a very different posture from bridge networking plus a narrow default capability set.
 
 ## References
 
 - [Kubernetes NetworkPolicy and `hostNetwork` caveats](https://kubernetes.io/docs/concepts/services-networking/network-policies/)
+- [Linux `network_namespaces(7)` and abstract UNIX socket isolation](https://man7.org/linux/man-pages/man7/network_namespaces.7.html)
+- [containerd advisory: abstract Unix domain sockets exposed to host-network containers](https://github.com/containerd/containerd/security/advisories/GHSA-36xw-fx78-c5r4)
 - [eBPF token and capability requirements for network-related eBPF programs](https://docs.ebpf.io/linux/concepts/token/)
 {{#include ../../../../../banners/hacktricks-training.md}}

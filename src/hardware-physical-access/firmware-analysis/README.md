@@ -512,12 +512,54 @@ To practice discovering vulnerabilities in firmware, use the following vulnerabl
 - Damn Vulnerable IoT Device (DVID)
   - [https://github.com/Vulcainreo/DVID](https://github.com/Vulcainreo/DVID)
 
+## Recovering firmware decryption keys from embedded KMS/Vault state
+
+When an update image mixes small plaintext metadata with a large high-entropy blob, do container triage before brute-forcing anything:
+
+- Dump headers, offsets and line boundaries with `hexdump`, `xxd`, `strings -tx`, `base64 -d`, and `binwalk -E`.
+- `Salted__` usually means OpenSSL `enc` format: the next 8 bytes are the salt and the remaining bytes are ciphertext.
+- A Base64 field that decodes to exactly `256` bytes is a strong hint that you are looking at an RSA-2048 ciphertext wrapping a random firmware password/session key.
+- Detached PGP material in the same file often protects authenticity only; do not assume it is the confidentiality mechanism.
+
+If static key hunting (`grep`, `strings`, PEM/PGP searches) fails, reverse the **operational decrypt path** instead of only searching for private keys:
+
+- Decompile the updater / management binary and trace who reads the encrypted blob, which helper/API unwraps it, and the logical key name it requests.
+- Search the extracted root filesystem for KMS state (`vault/`, `transit/`, `pkcs11`, `keystore`, `sealed-secrets`) plus unit files and init scripts.
+- Treat plaintext `vault operator unseal ...`, recovery keys, bootstrap tokens, or local KMS auto-unseal scripts as equivalent to private-key material.
+
+If the appliance ships the original Vault binary and storage backend, replaying that environment is usually easier than reimplementing Vault internals:
+
+```bash
+vault server -config=/tmp/vault.hcl
+vault operator unseal <share1>
+vault operator unseal <share2>
+vault operator unseal <share3>
+
+OTP=$(vault operator generate-root -generate-otp)
+INIT=$(vault operator generate-root -init -otp="$OTP" 2>&1 | sed 's/\x1b\[[0-9;]*m//g')
+NONCE=$(printf '%s\n' "$INIT" | awk '/Nonce/ {print $2}')
+vault operator generate-root -nonce="$NONCE" "<share1>"
+vault operator generate-root -nonce="$NONCE" "<share2>"
+FINAL=$(vault operator generate-root -nonce="$NONCE" "<share3>" 2>&1 | sed 's/\x1b\[[0-9;]*m//g')
+TOKEN=$(vault operator generate-root -decode="$(printf '%s\n' "$FINAL" | awk '/Root Token/ {print $3}')" -otp="$OTP")
+```
+
+With root on the cloned KMS:
+
+- Make transit keys exportable only inside the isolated clone: `vault write transit/keys/<name>/config exportable=true`
+- Export the unwrap key: `vault read transit/export/encryption-key/<name>`
+- Try the recovered RSA key with the exact padding/hash pair used by the KMS. A failed PKCS#1 v1.5 decrypt and a failed default OAEP decrypt do **not** prove the key is wrong; many Vault-backed flows use OAEP with SHA-256, while common libraries default to SHA-1.
+- If the payload starts with `Salted__`, reproduce the vendor's OpenSSL KDF exactly (`EVP_BytesToKey`, often MD5 on legacy appliances) before attempting AES-CBC decryption.
+
+This turns "encrypted firmware" into a more general problem: **recover the appliance-side operational keys, then reproduce the exact unwrap + KDF parameters offline**.
+
 ## Trainning and Cert
 
 - [https://www.attify-store.com/products/offensive-iot-exploitation](https://www.attify-store.com/products/offensive-iot-exploitation)
 
 ## References
 
+- [Cracking Firmware with Claude: Senior-Level Skill, Junior-Level Autonomy](https://bishopfox.com/blog/cracking-firmware-with-claude-senior-level-skill-junior-level-autonomy)
 - [https://scriptingxss.gitbook.io/firmware-security-testing-methodology/](https://scriptingxss.gitbook.io/firmware-security-testing-methodology/)
 - [Practical IoT Hacking: The Definitive Guide to Attacking the Internet of Things](https://www.amazon.co.uk/Practical-IoT-Hacking-F-Chantzis/dp/1718500904)
 - [Exploiting zero days in abandoned hardware – Trail of Bits blog](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
