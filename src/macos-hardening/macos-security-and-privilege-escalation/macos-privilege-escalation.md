@@ -17,7 +17,7 @@ Bitte beachten Sie, dass **die meisten Tricks zur privilege escalation, die Linu
 
 
 {{#ref}}
-../../linux-hardening/privilege-escalation/
+../../linux-hardening/linux-basics/linux-privilege-escalation/README.md
 {{#endref}}
 
 ## Benutzerinteraktion
