@@ -17,7 +17,7 @@ Veuillez noter que **la plupart des astuces concernant privilege escalation affe
 
 
 {{#ref}}
-../../linux-hardening/privilege-escalation/
+../../linux-hardening/linux-basics/linux-privilege-escalation/README.md
 {{#endref}}
 
 ## User Interaction
