@@ -17,7 +17,7 @@ Tafadhali kumbuka kwamba **most of the tricks about privilege escalation affecti
 
 
 {{#ref}}
-../../linux-hardening/privilege-escalation/
+../../linux-hardening/linux-basics/linux-privilege-escalation/README.md
 {{#endref}}
 
 ## Mwingiliano wa Mtumiaji
