@@ -17,7 +17,7 @@ Por favor note que **a maioria dos truques sobre privilege escalation que afetam
 
 
 {{#ref}}
-../../linux-hardening/privilege-escalation/
+../../linux-hardening/linux-basics/linux-privilege-escalation/README.md
 {{#endref}}
 
 ## Interação do Usuário
