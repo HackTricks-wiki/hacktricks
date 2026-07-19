@@ -4,7 +4,7 @@
 
 ## Principali algoritmi di Machine Learning
 
-Il punto di partenza migliore per imparare a conoscere l'AI è comprendere come funzionano i principali algoritmi di Machine Learning. Questo ti aiuterà a capire come funziona l'AI, come utilizzarla e come attaccarla:
+Il punto di partenza migliore per imparare a conoscere l'AI è comprendere come funzionano i principali algoritmi di machine learning. Questo ti aiuterà a capire come funziona l'AI, come utilizzarla e come attaccarla:
 
 
 {{#ref}}
@@ -28,7 +28,7 @@ Il punto di partenza migliore per imparare a conoscere l'AI è comprendere come 
 
 ### Architettura degli LLM
 
-Nella pagina seguente troverai le basi di ogni componente necessario per costruire un LLM di base utilizzando i transformer:
+Nella pagina seguente troverai le nozioni di base di ogni componente necessaria per creare un LLM di base utilizzando i transformer:
 
 
 {{#ref}}
@@ -57,32 +57,41 @@ AI-Prompts.md
 
 ### RCE dei modelli di AI
 
-È molto comune per gli sviluppatori e le aziende eseguire modelli scaricati da Internet; tuttavia, il semplice caricamento di un modello potrebbe essere sufficiente per eseguire codice arbitrario sul sistema. Questo è un argomento molto importante per capire come utilizzare l'AI in modo sicuro e come attaccarla:
+È molto comune per sviluppatori e aziende eseguire modelli scaricati da Internet; tuttavia, il semplice caricamento di un modello potrebbe essere sufficiente per eseguire codice arbitrario sul sistema. Questo è un argomento molto importante per capire come utilizzare l'AI in modo sicuro e come attaccarla:
 
 
 {{#ref}}
 AI-Models-RCE.md
 {{#endref}}
 
-### Model Context Protocol dell'AI
+### Bypass del KYC assistito dall'AI
 
-MCP (Model Context Protocol) è un protocollo che consente ai client degli agenti di AI di connettersi a strumenti e origini dati esterni in modalità plug-and-play. Questo abilita workflow complessi e interazioni tra i modelli di AI e i sistemi esterni:
+I video generativi possono essere combinati con l'iniezione di virtual-camera e la manipolazione delle API della camera per bypassare procedure KYC, di verifica dell'età e di rilevamento della presenza biometrica poco robuste:
+
+
+{{#ref}}
+KYC-Bypass-Using-AI.md
+{{#endref}}
+
+### AI Model Context Protocol
+
+MCP (Model Context Protocol) è un protocollo che consente ai client degli agenti AI di connettersi a tool e origini dati esterni in modalità plug-and-play. Ciò abilita workflow complessi e interazioni tra modelli di AI e sistemi esterni:
 
 
 {{#ref}}
 AI-MCP-Servers.md
 {{#endref}}
 
-### Fuzzing assistito dall'AI e scoperta automatizzata delle vulnerabilità
+### Fuzzing e rilevamento automatizzato delle vulnerabilità assistiti dall'AI
 
 
 {{#ref}}
 AI-Assisted-Fuzzing-and-Vulnerability-Discovery.md
 {{#endref}}
 
-### Bot di AI per il pentesting Web Black-Box
+### Bot di pentesting web black-box basati sull'AI
 
-Gli agenti basati su LLM possono automatizzare workflow di pentesting Web black-box di lunga durata quando sono supportati da osservabilità, orchestrazione, gestione delle sessioni autenticate e validazione avversaria:
+Gli agenti basati su LLM possono automatizzare workflow di pentesting web black-box di lunga durata quando sono supportati da osservabilità, orchestrazione, gestione delle sessioni autenticate e validazione avversaria:
 
 
 {{#ref}}
