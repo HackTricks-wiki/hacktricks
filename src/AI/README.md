@@ -1,10 +1,10 @@
-# Cybersecurity'de AI
+# Siber Güvenlikte AI
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Ana Machine Learning Algoritmaları
+## Ana Makine Öğrenmesi Algoritmaları
 
-AI hakkında bilgi edinmek için en iyi başlangıç, ana machine learning algoritmalarının nasıl çalıştığını anlamaktır. Bu, AI'ın nasıl çalıştığını, nasıl kullanılacağını ve nasıl attack edileceğini anlamanıza yardımcı olacaktır:
+AI hakkında bilgi edinmek için en iyi başlangıç, ana makine öğrenmesi algoritmalarının nasıl çalıştığını anlamaktır. Bu, AI'ın nasıl çalıştığını, nasıl kullanılacağını ve nasıl saldırıya uğratılacağını anlamanıza yardımcı olacaktır:
 
 
 {{#ref}}
@@ -28,14 +28,14 @@ AI hakkında bilgi edinmek için en iyi başlangıç, ana machine learning algor
 
 ### LLM Mimarisi
 
-Aşağıdaki sayfada, transformers kullanarak temel bir LLM oluşturmak için her bir bileşenin temellerini bulabilirsiniz:
+Aşağıdaki sayfada, transformers kullanarak temel bir LLM oluşturmak için her bileşenin temellerini bulacaksınız:
 
 
 {{#ref}}
 AI-llm-architecture/README.md
 {{#endref}}
 
-## AI Security
+## AI Güvenliği
 
 ### AI Risk Framework'leri
 
@@ -46,34 +46,43 @@ AI-llm-architecture/README.md
 AI-Risk-Frameworks.md
 {{#endref}}
 
-### AI Prompt Security
+### AI Prompts Güvenliği
 
-LLM'ler son yıllarda AI kullanımını büyük ölçüde artırdı, ancak kusursuz değiller ve adversarial prompt'larla kandırılabilirler. Bu, AI'ı güvenli bir şekilde nasıl kullanacağınızı ve nasıl attack edeceğinizi anlamak için çok önemli bir konudur:
+LLM'ler son yıllarda AI kullanımını büyük ölçüde yaygınlaştırdı, ancak kusursuz değiller ve adversarial prompt'larla kandırılabilirler. Bu, AI'ı güvenli bir şekilde nasıl kullanacağınızı ve ona nasıl saldıracağınızı anlamak için çok önemli bir konudur:
 
 
 {{#ref}}
 AI-Prompts.md
 {{#endref}}
 
-### AI Models RCE
+### AI Modellerinde RCE
 
-Geliştiricilerin ve şirketlerin Internet'ten indirilen modelleri çalıştırması çok yaygındır; ancak yalnızca bir model yüklemek bile sistemde arbitrary code çalıştırmak için yeterli olabilir. Bu, AI'ı güvenli bir şekilde nasıl kullanacağınızı ve nasıl attack edeceğinizi anlamak için çok önemli bir konudur:
+Geliştiricilerin ve şirketlerin Internet'ten indirilen modelleri çalıştırması oldukça yaygındır; ancak yalnızca bir modeli yüklemek bile sistemde arbitrary code çalıştırmak için yeterli olabilir. Bu, AI'ı güvenli bir şekilde nasıl kullanacağınızı ve ona nasıl saldıracağınızı anlamak için çok önemli bir konudur:
 
 
 {{#ref}}
 AI-Models-RCE.md
 {{#endref}}
 
+### AI Destekli KYC Bypass
+
+Generative video, virtual-camera injection ve camera API manipulation ile birleştirilerek zayıf KYC, yaş doğrulama ve biometric liveness iş akışlarını bypass etmek için kullanılabilir:
+
+
+{{#ref}}
+KYC-Bypass-Using-AI.md
+{{#endref}}
+
 ### AI Model Context Protocol
 
-MCP (Model Context Protocol), AI agent client'larının harici araçlara ve veri kaynaklarına plug-and-play yöntemiyle bağlanmasını sağlayan bir protocol'dür. Bu, AI modelleri ile harici sistemler arasında karmaşık workflow'ları ve etkileşimleri mümkün kılar:
+MCP (Model Context Protocol), AI agent client'larının external tool'lara ve data source'lara plug-and-play yöntemiyle bağlanmasını sağlayan bir protokoldür. Bu, AI modelleri ile external system'ler arasında karmaşık iş akışlarını ve etkileşimleri mümkün kılar:
 
 
 {{#ref}}
 AI-MCP-Servers.md
 {{#endref}}
 
-### AI-Assisted Fuzzing & Automated Vulnerability Discovery
+### AI Destekli Fuzzing ve Automated Vulnerability Discovery
 
 
 {{#ref}}
@@ -82,7 +91,7 @@ AI-Assisted-Fuzzing-and-Vulnerability-Discovery.md
 
 ### Web Black-Box AI Pentester Bot'ları
 
-LLM destekli agent'lar; observability, orchestration, authenticated session handling ve adversarial validation ile desteklendiklerinde uzun süren black-box web pentesting workflow'larını otomatikleştirebilir:
+LLM destekli agent'lar, observability, orchestration, authenticated session handling ve adversarial validation ile desteklendiklerinde uzun süren black-box web pentesting iş akışlarını otomatikleştirebilir:
 
 
 {{#ref}}
