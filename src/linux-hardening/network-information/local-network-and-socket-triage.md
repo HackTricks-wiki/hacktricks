@@ -1,14 +1,14 @@
-# Yerel Ağ ve Socket Triage
+# Local Network ve Socket Triage
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Bir Linux host üzerinde shell elde ettikten sonra, en kullanışlı network hedefleri genellikle dışarıya açık değildir. Yalnızca loopback üzerinde çalışan servisler, veth network'leri, Unix socket'leri, geçici listener'lar, packet capture'ları ve yerel firewall kuralları credential'ları veya yalnızca yerel erişime açık attack surface'leri açığa çıkarabilir.
+Bir Linux host üzerinde shell elde ettikten sonra en kullanışlı network hedefleri çoğu zaman dışarıya açık değildir. Yalnızca loopback üzerinden erişilebilen servisler, veth network'leri, Unix socket'leri, geçici listener'lar, packet capture'lar ve local firewall kuralları credential'ları veya yalnızca local ortamda bulunan attack surface'leri açığa çıkarabilir.
 
-Bu sayfa genel remote network pentesting yerine pratik yerel post-exploitation tekniklerine odaklanır.
+Bu sayfa genel remote network pentesting yerine pratik local post-exploitation tekniklerine odaklanır.
 
-## Loopback ve Yerel Service Enumeration
+## Loopback ve Local Service Enumeration
 
-İzinler olanak verdiğinde, listening servislerini, bind adreslerini ve bunların sahibi olan process'i belirleyerek başlayın:
+Listening servislerini, bind adreslerini ve izinler elverdiğinde bunları çalıştıran process'i belirleyerek başlayın:
 ```bash
 ss -lntup
 ss -lnx
@@ -22,57 +22,57 @@ ip route
 - `veth*`, `docker*`, `br-*`, `cni*` üzerindeki `172.x`, `10.x` veya `192.168.x`: büyük olasılıkla container veya yerel lab ağlarıdır.
 - `/run`, `/var/run`, `/tmp` veya uygulama dizinlerindeki Unix socket'leri: yerel IPC yüzeyleridir.
 
-Yerel portları hafif sondalarla eşleyin:
+Yerel portları lightweight probe'larla eşleyin:
 ```bash
 for p in 80 443 8000 8080 8081 9000 5000; do
 timeout 1 bash -c "echo >/dev/tcp/127.0.0.1/$p" 2>/dev/null && echo "open: $p"
 done
 ```
-Kullanılabilir olduğunda yerel olarak `nmap` kullanın:
+Mevcutsa yerel olarak `nmap` kullanın:
 ```bash
 nmap -sT -Pn -p- 127.0.0.1
 nmap -sT -Pn --open 127.0.0.1
 ```
 ## Gizli veth ve Container Alt Ağları
 
-Container'laştırılmış veya lab ortamları, servisleri genellikle yalnızca bir bridge ya da veth alt ağı üzerinden sunar. Bir servise erişilemez olduğunu varsaymadan önce arayüzleri ve rotaları enumerate edin:
+Container veya lab ortamları genellikle servisleri yalnızca bir bridge ya da veth alt ağında sunar. Bir servisin erişilemez olduğunu varsaymadan önce arayüzleri ve rotaları listeleyin:
 ```bash
 ip -br addr
 ip route
 ip neigh
 ```
-Olası yerel alt ağları bulun:
+Olası yerel alt ağları bul:
 ```bash
 ip -o -4 addr show | awk '{print $2, $4}'
 ```
-Keşfedilmiş bir subnet'i dikkatlice tarayın:
+Keşfedilen bir subnet'i dikkatlice probe edin:
 ```bash
 nmap -sT -Pn --open 172.17.0.0/24
 nmap -sT -Pn -p 80,443,8000,8080,9000 172.17.0.0/24
 ```
-Bu technique, bir web paneli, debug endpoint'i veya yardımcı service harici taramalardan gizlenmiş ancak ele geçirilmiş host ya da container network'ünden erişilebilir olduğunda kullanışlıdır.
+Teknik, bir web paneli, debug endpoint'i veya yardımcı servis harici taramalardan gizli ancak ele geçirilmiş host ya da container network'ünden erişilebilir olduğunda kullanışlıdır.
 
 ## socat veya SSH ile Local Pivot
 
-Bir service loopback'e bağlıysa service'in kendisini değiştirmek yerine, izin verilen bir channel üzerinden açığa çıkarın.
+Bir servis loopback'e bağlıysa servisin kendisini değiştirmek yerine, izin verilen bir kanal üzerinden erişime açın.
 
-Local-only HTTP service'i SSH ile forward edin:
+Local-only HTTP servisini SSH ile yönlendirin:
 ```bash
 ssh -L 8080:127.0.0.1:8080 user@target
 ```
-Zaten shell erişiminiz varsa `socat` ile yerel bir portu köprüleyin:
+Zaten shell erişiminiz varsa, `socat` ile yerel bir portu köprüleyin:
 ```bash
 socat TCP-LISTEN:18080,fork,reuseaddr TCP:127.0.0.1:8080
 ```
-Yerel test için bir Unix socket'i TCP'ye yönlendirin:
+Yerel test için bir Unix socket'i TCP'ye forward edin:
 ```bash
 socat TCP-LISTEN:18081,fork,reuseaddr UNIX-CONNECT:/run/app/app.sock
 ```
-Bu, tek başına hiçbir şeyi exploit etmez. Yalnızca yerel kullanım ile sınırlı bir yüzeyi tooling'iniz üzerinden erişilebilir hâle getirir; böylece onunla normal bir servis gibi etkileşim kurabilirsiniz.
+Bu, kendi başına herhangi bir şeyi exploit etmez. Yalnızca local-only bir yüzeyi tooling'inizden erişilebilir hâle getirir; böylece onunla normal bir service gibi etkileşim kurabilirsiniz.
 
 ## Banner Grabbing ve Basit Protokoller
 
-Her servis HTTP değildir. Birçok yerel servis, bir banner veya tek satırlık protokol aracılığıyla yeterli bilgiyi leak eder.
+Her service HTTP değildir. Birçok local service, bir banner veya tek satırlık protokol aracılığıyla yeterli miktarda bilgi leak eder.
 
 Temel probe'lar:
 ```bash
@@ -94,9 +94,9 @@ Amaç; protokolü, kimlik doğrulama şemasını, sürümü ve servisin yerel is
 
 ## Loopback Trafiğini Yakalama
 
-Yerel trafik; başlıkları, bearer token'larını, Basic Auth kimlik bilgilerini veya uygulamaya özgü sırları açığa çıkarabilir. Yalnızca yetkili ortamlarda yakalama yapın.
+Yerel trafik; header'ları, bearer token'larını, Basic Auth kimlik bilgilerini veya uygulamaya özgü secret'ları açığa çıkarabilir. Yalnızca yetkili ortamlarda capture gerçekleştirin.
 
-Loopback HTTP trafiğini yakalayın:
+Loopback HTTP trafiğini capture edin:
 ```bash
 sudo tcpdump -i lo -A -s0 'tcp port 80 or tcp port 8080'
 ```
@@ -104,17 +104,17 @@ Belirli bir yerel servisi yakalayın:
 ```bash
 sudo tcpdump -i lo -w /tmp/loopback.pcap 'tcp port 8080'
 ```
-Yakalanan veya loglanmış bir header'dan Basic Auth'u decode edin:
+Captured veya loglanmış header'dan Basic Auth'u decode edin:
 ```bash
 printf '%s' 'dXNlcjpwYXNz' | base64 -d
 ```
-Metin yakalamalarında aranabilecek yararlı string'ler:
+Metin yakalamalarında aranacak yararlı dizeler:
 ```bash
 grep -Ei 'Authorization:|Cookie:|Bearer|Basic|token|api[_-]?key|password' /tmp/capture.txt
 ```
 ## TLS Key Logging
 
-Bir lab ortamında client process environment'ını kontrol edebiliyorsanız, `SSLKEYLOGFILE` TLS session'larını Wireshark veya uyumlu tooling ile decrypt edilebilir hale getirebilir. Bu, TLS'e saldırmadan local HTTPS trafiğini anlamak için kullanışlıdır.
+Bir lab ortamında client process environment'ını kontrol edebiliyorsanız, `SSLKEYLOGFILE` TLS oturumlarının Wireshark veya uyumlu tooling ile decrypt edilebilir hale gelmesini sağlayabilir. Bu, TLS'e doğrudan saldırmadan local HTTPS trafiğini anlamak için kullanışlıdır.
 
 Key logging etkinleştirilmiş bir client çalıştırın:
 ```bash
@@ -126,7 +126,7 @@ Trafiği aynı anda yakalayın:
 ```bash
 sudo tcpdump -i lo -w /tmp/tls.pcap 'tcp port 8443'
 ```
-Ardından `/tmp/tls.pcap` ve `/tmp/sslkeys.log` dosyalarını Wireshark'a yükleyin. Bu yalnızca client library NSS-style key logging'i desteklediğinde ve bağlantı kurulmadan önce environment'ı ayarlayabildiğinizde çalışır.
+Ardından `/tmp/tls.pcap` ve `/tmp/sslkeys.log` dosyalarını Wireshark'a yükleyin. Bu yalnızca client library NSS-style key logging desteklediğinde ve bağlantı kurulmadan önce environment'ı ayarlayabildiğinizde çalışır.
 
 ## Unix Socket Etkileşimi ve Command Injection
 
@@ -137,7 +137,7 @@ Socket'leri bulun:
 ss -lnx
 find /run /var/run /tmp -type s -ls 2>/dev/null
 ```
-Unix socket üzerinden HTTP ile etkileşim kurun:
+Unix socket üzerinden HTTP ile iletişim kur:
 ```bash
 curl --unix-socket /run/app/app.sock http://localhost/
 curl --unix-socket /run/app/app.sock -i http://localhost/admin
@@ -147,7 +147,7 @@ Raw socket ile etkileşim kur:
 printf 'status\n' | socat - UNIX-CONNECT:/run/app/app.sock
 printf 'help\n' | nc -U /run/app/app.sock
 ```
-Kullanıcı tarafından kontrol edilen socket girdisi bir shell'e veya ayrıcalıklı yardımcı programa aktarılırsa command injection'a dönüşebilir. Odaklanmış bir örnek için bkz. [Socket Command Injection](socket-command-injection.md).
+Kullanıcı tarafından kontrol edilen socket girdisi bir shell'e veya ayrıcalıklı bir yardımcı araca aktarılırsa command injection'a dönüşebilir. Odaklanmış bir örnek için bkz. [Socket Command Injection](socket-command-injection.md).
 
 ## nftables İncelemesi ve Yetkili Kural Değişiklikleri
 
@@ -159,16 +159,16 @@ sudo nft list ruleset
 sudo nft list tables
 sudo nft list chains
 ```
-Hedef portu etkileyen drop'ları arayın:
+Hedef portu etkileyen drop'ları ara:
 ```bash
 sudo nft list ruleset | grep -Ei 'drop|reject|dport|tcp|udp'
 ```
-Yetkilendirilmiş bir lab ortamında, belirli bir engelleme kuralını handle'ı ile kaldırın:
+Yetkili bir laboratuvar ortamında, belirli bir engelleme kuralını handle ile kaldırın:
 ```bash
 sudo nft -a list chain inet filter input
 sudo nft delete rule inet filter input handle <handle>
 ```
-Tam tabloları flush etmek yerine tam handle'ı silmeyi tercih edin. Teknik, davranışa neden olan kesin filtreyi belirlemek ve yalnızca o kuralı değiştirmektir.
+Tam tabloları temizlemek yerine tam handle'ı silmeyi tercih edin. Teknik, davranışa neden olan kesin filtreyi belirlemek ve yalnızca o kuralı değiştirmektir.
 
 ## Hızlı İş Akışı
 ```bash
@@ -180,4 +180,5 @@ nmap -sT -Pn --open 127.0.0.1
 find /run /var/run /tmp -type s -ls 2>/dev/null
 sudo nft list ruleset 2>/dev/null | head -n 80
 ```
-Yalnızca yerel olan, daha ayrıcalıklı bir kullanıcı olarak çalışan, admin/debug işlevlerini açığa çıkaran veya loopback/container-network istemcilerine güvenen servisleri önceliklendirin.
+Yalnızca yerel çalışan, daha ayrıcalıklı bir kullanıcı olarak çalışan, yönetim/hata ayıklama işlevlerini açığa çıkaran veya loopback/container-network istemcilerine güvenen servislere öncelik verin.
+{{#include ../../banners/hacktricks-training.md}}
