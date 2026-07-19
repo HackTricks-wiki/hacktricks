@@ -1,14 +1,14 @@
-# Triaging lokalnej sieci i socketów
+# Triaging sieci lokalnej i socketów
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Po uzyskaniu shell na hoście Linux najbardziej użyteczne cele sieciowe często nie są wystawione na zewnątrz. Usługi dostępne wyłącznie przez loopback, sieci veth, sockety Unix, tymczasowe listenery, przechwycone pakiety i lokalne reguły firewalla mogą ujawnić dane uwierzytelniające lub lokalne powierzchnie ataku.
+Po uzyskaniu shell na hoście Linux najbardziej użyteczne cele sieciowe często nie są dostępne z zewnątrz. Usługi dostępne wyłącznie przez loopback, sieci veth, sockety Unix, tymczasowe listenery, przechwycone pakiety oraz lokalne reguły firewalla mogą ujawniać dane uwierzytelniające lub lokalne powierzchnie ataku.
 
-Ta strona koncentruje się na praktycznych technikach lokalnego post-exploitation, a nie na ogólnym remote network pentestingu.
+Ta strona koncentruje się na praktycznych technikach lokalnego post-exploitation, a nie na ogólnym zdalnym pentestingu sieci.
 
-## Enumeracja loopback i lokalnych usług
+## Enumeracja usług loopback i lokalnych
 
-Zacznij od zidentyfikowania nasłuchujących usług, ich adresów bind oraz procesu, który jest ich właścicielem, jeśli pozwalają na to uprawnienia:
+Zacznij od zidentyfikowania nasłuchujących usług, ich adresów bind oraz procesu, który jest ich właścicielem, jeśli uprawnienia na to pozwalają:
 ```bash
 ss -lntup
 ss -lnx
@@ -18,8 +18,8 @@ ip route
 Ważne wzorce:
 
 - `127.0.0.1:<port>` lub `[::1]:<port>`: domyślnie dostępne tylko z hosta.
-- `0.0.0.0:<port>`: dostępne na wszystkich interfejsach IPv4, chyba że zostały odfiltrowane.
-- `172.x`, `10.x` lub `192.168.x` na `veth*`, `docker*`, `br-*`, `cni*`: prawdopodobnie sieci kontenerów lub lokalnych labów.
+- `0.0.0.0:<port>`: dostępne na wszystkich interfejsach IPv4, chyba że są filtrowane.
+- `172.x`, `10.x` lub `192.168.x` na interfejsach `veth*`, `docker*`, `br-*`, `cni*`: prawdopodobnie sieci kontenerów lub lokalnych laboratoriów.
 - Gniazda Unix w `/run`, `/var/run`, `/tmp` lub katalogach aplikacji: lokalne powierzchnie IPC.
 
 Zmapuj lokalne porty za pomocą lekkich sond:
@@ -35,7 +35,7 @@ nmap -sT -Pn --open 127.0.0.1
 ```
 ## Ukryte interfejsy veth i podsieci kontenerów
 
-Środowiska konteneryzowane lub laboratoryjne często udostępniają usługi wyłącznie przez bridge albo podsieć veth. Przed uznaniem, że usługa jest nieosiągalna, wylicz interfejsy i trasy:
+Środowiska konteneryzowane lub laboratoryjne często udostępniają usługi wyłącznie za pośrednictwem podsieci bridge lub veth. Przed założeniem, że usługa jest niedostępna, zinwentaryzuj interfejsy i trasy:
 ```bash
 ip -br addr
 ip route
@@ -45,34 +45,34 @@ Znajdź prawdopodobne podsieci lokalne:
 ```bash
 ip -o -4 addr show | awk '{print $2, $4}'
 ```
-Ostrożnie zbadaj wykrytą podsieć:
+Ostrożnie przeskanuj wykrytą podsieć:
 ```bash
 nmap -sT -Pn --open 172.17.0.0/24
 nmap -sT -Pn -p 80,443,8000,8080,9000 172.17.0.0/24
 ```
-Technika jest przydatna, gdy panel webowy, endpoint debugowania lub usługa pomocnicza jest ukryta przed zewnętrznymi skanami, ale dostępna z zaatakowanego hosta lub sieci kontenera.
+Ta technika jest przydatna, gdy panel webowy, endpoint debugowania lub usługa pomocnicza jest ukryta przed skanami zewnętrznymi, ale dostępna z zaatakowanego hosta lub sieci kontenera.
 
 ## Lokalny pivot za pomocą socat lub SSH
 
-Jeśli usługa jest zbindowana do interfejsu loopback, udostępnij ją przez dozwolony kanał zamiast zmieniać samą usługę.
+Jeśli usługa jest powiązana z loopbackiem, udostępnij ją przez dozwolony kanał zamiast zmieniać samą usługę.
 
-Przekieruj lokalną usługę HTTP dostępną tylko lokalnie za pomocą SSH:
+Przekieruj lokalną usługę HTTP dostępną wyłącznie lokalnie za pomocą SSH:
 ```bash
 ssh -L 8080:127.0.0.1:8080 user@target
 ```
-Połącz lokalny port za pomocą `socat`, gdy masz już dostęp do powłoki:
+Zmostkuj lokalny port za pomocą `socat`, gdy masz już dostęp do powłoki:
 ```bash
 socat TCP-LISTEN:18080,fork,reuseaddr TCP:127.0.0.1:8080
 ```
-Przekierowanie gniazda Unix do TCP na potrzeby lokalnych testów:
+Przekieruj socket Unix do TCP na potrzeby testów lokalnych:
 ```bash
 socat TCP-LISTEN:18081,fork,reuseaddr UNIX-CONNECT:/run/app/app.sock
 ```
-To samo w sobie nie wykorzystuje żadnej luki. Udostępnia powierzchnię dostępną wyłącznie lokalnie za pośrednictwem Twoich narzędzi, dzięki czemu możesz wchodzić z nią w interakcję jak ze zwykłą usługą.
+Samo w sobie nie wykorzystuje żadnej podatności. Sprawia, że powierzchnia dostępna wyłącznie lokalnie staje się osiągalna z używanych przez Ciebie narzędzi, dzięki czemu możesz wchodzić z nią w interakcję jak ze zwykłą usługą.
 
 ## Banner Grabbing i proste protokoły
 
-Nie każda usługa korzysta z HTTP. Wiele lokalnych usług ujawnia wystarczająco dużo informacji za pośrednictwem bannera lub jednoliniowego protokołu.
+Nie każda usługa korzysta z HTTP. Wiele usług lokalnych ujawnia wystarczająco dużo informacji za pośrednictwem bannera lub jednoliniowego protokołu.
 
 Podstawowe sondy:
 ```bash
@@ -90,17 +90,17 @@ Dla TLS:
 openssl s_client -connect 127.0.0.1:8443 -servername localhost
 curl -k -i https://127.0.0.1:8443/
 ```
-Celem jest zidentyfikowanie protokołu, schematu uwierzytelniania, wersji oraz tego, czy usługa ufa lokalnym klientom.
+Celem jest zidentyfikowanie protokołu, schematu uwierzytelniania, wersji oraz tego, czy usługa ufa klientom lokalnym.
 
-## Przechwytywanie ruchu Loopback
+## Przechwytywanie ruchu loopback
 
-Ruch lokalny może ujawnić nagłówki, tokeny bearer, dane uwierzytelniające Basic Auth lub sekrety specyficzne dla aplikacji. Przechwytuj dane wyłącznie w autoryzowanych środowiskach.
+Lokalny ruch może ujawnić nagłówki, tokeny bearer, dane uwierzytelniające Basic Auth lub sekrety specyficzne dla aplikacji. Przechwytuj ruch wyłącznie w autoryzowanych środowiskach.
 
-Przechwyć ruch HTTP Loopback:
+Przechwyć ruch HTTP loopback:
 ```bash
 sudo tcpdump -i lo -A -s0 'tcp port 80 or tcp port 8080'
 ```
-Przechwytywanie konkretnej usługi lokalnej:
+Przechwyć określoną usługę lokalną:
 ```bash
 sudo tcpdump -i lo -w /tmp/loopback.pcap 'tcp port 8080'
 ```
@@ -114,7 +114,7 @@ grep -Ei 'Authorization:|Cookie:|Bearer|Basic|token|api[_-]?key|password' /tmp/c
 ```
 ## TLS Key Logging
 
-Jeśli możesz kontrolować środowisko procesu klienta w środowisku testowym, `SSLKEYLOGFILE` może umożliwić odszyfrowywanie sesji TLS w Wiresharku lub kompatybilnych narzędziach. Jest to przydatne do analizowania lokalnego ruchu HTTPS bez atakowania samego TLS.
+Jeśli w labie możesz kontrolować środowisko procesu klienta, `SSLKEYLOGFILE` może umożliwić odszyfrowywanie sesji TLS w Wiresharku lub kompatybilnych narzędziach. Jest to przydatne do analizowania lokalnego ruchu HTTPS bez atakowania samego TLS.
 
 Uruchom klienta z włączonym key loggingiem:
 ```bash
@@ -128,7 +128,7 @@ sudo tcpdump -i lo -w /tmp/tls.pcap 'tcp port 8443'
 ```
 Następnie załaduj `/tmp/tls.pcap` i `/tmp/sslkeys.log` do Wireshark. Działa to tylko wtedy, gdy biblioteka klienta obsługuje logowanie kluczy w stylu NSS i można ustawić środowisko przed nawiązaniem połączenia.
 
-## Interakcja z Unix Socket i Command Injection
+## Interakcja z Unix Socketami i Command Injection
 
 Unix sockets to lokalne punkty końcowe IPC. Mogą udostępniać API HTTP, niestandardowe protokoły lub niebezpieczne handlery poleceń.
 
@@ -137,7 +137,7 @@ Znajdź sockety:
 ss -lnx
 find /run /var/run /tmp -type s -ls 2>/dev/null
 ```
-Interakcja z HTTP przez Unix socket:
+Interakcja z HTTP za pośrednictwem gniazda Unix:
 ```bash
 curl --unix-socket /run/app/app.sock http://localhost/
 curl --unix-socket /run/app/app.sock -i http://localhost/admin
@@ -147,7 +147,7 @@ Interakcja z surowym gniazdem:
 printf 'status\n' | socat - UNIX-CONNECT:/run/app/app.sock
 printf 'help\n' | nc -U /run/app/app.sock
 ```
-Jeśli dane wejściowe z gniazda kontrolowane przez użytkownika są przekazywane do powłoki lub uprzywilejowanego helpera, może to prowadzić do command injection. Skoncentrowany przykład znajdziesz w [Socket Command Injection](socket-command-injection.md).
+Jeśli dane wejściowe socketu kontrolowane przez użytkownika są przekazywane do powłoki lub uprzywilejowanego helpera, może to prowadzić do command injection. Skoncentrowany przykład znajdziesz tutaj: [Socket Command Injection](socket-command-injection.md).
 
 ## Przegląd nftables i autoryzowane zmiany reguł
 
@@ -159,16 +159,16 @@ sudo nft list ruleset
 sudo nft list tables
 sudo nft list chains
 ```
-Szukaj dropów dotyczących docelowego portu:
+Szukaj odrzuceń dotyczących portu docelowego:
 ```bash
 sudo nft list ruleset | grep -Ei 'drop|reject|dport|tcp|udp'
 ```
-W autoryzowanym laboratorium usuń konkretną regułę blokującą za pomocą handle:
+W autoryzowanym laboratorium usuń konkretną regułę blokującą według uchwytu:
 ```bash
 sudo nft -a list chain inet filter input
 sudo nft delete rule inet filter input handle <handle>
 ```
-Preferuj usuwanie dokładnego uchwytu zamiast opróżniania całych tabel. Technika polega na zidentyfikowaniu dokładnego filtra powodującego dane zachowanie i zmianie wyłącznie tej reguły.
+Preferuj usuwanie dokładnego uchwytu zamiast opróżniania całych tabel. Technika polega na zidentyfikowaniu dokładnego filtra powodującego dane zachowanie i zmianie tylko tej reguły.
 
 ## Szybki przebieg pracy
 ```bash
@@ -180,4 +180,5 @@ nmap -sT -Pn --open 127.0.0.1
 find /run /var/run /tmp -type s -ls 2>/dev/null
 sudo nft list ruleset 2>/dev/null | head -n 80
 ```
-Priorytetyzuj usługi dostępne wyłącznie lokalnie, uruchomione przez użytkownika o wyższych uprawnieniach, udostępniające funkcje administracyjne/debugowania lub ufające klientom z loopbacka/sieci kontenerowej.
+Priorytetowo traktuj usługi dostępne wyłącznie lokalnie, uruchomione przez użytkownika o wyższych uprawnieniach, udostępniające funkcje administracyjne/debugowania lub ufające klientom z loopback/container network.
+{{#include ../../banners/hacktricks-training.md}}
