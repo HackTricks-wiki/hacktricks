@@ -1331,7 +1331,7 @@ If you manage to write any of the files `/etc/daily.local`, `/etc/weekly.local` 
 
 ### PAM
 
-Writeup: [Linux Hacktricks PAM](../linux-hardening/linux-post-exploitation/pam-pluggable-authentication-modules.md)\
+Writeup: [Linux Hacktricks PAM](../linux-hardening/software-information/pam-pluggable-authentication-modules.md)\
 Writeup: [https://theevilbit.github.io/beyond/beyond_0005/](https://theevilbit.github.io/beyond/beyond_0005/)
 
 - Useful to bypass sandbox: [🟠](https://emojipedia.org/large-orange-circle)
@@ -1813,6 +1813,5 @@ RunService ()
 - [2025, the year of the Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
 
 {{#include ../banners/hacktricks-training.md}}
-
 
 
