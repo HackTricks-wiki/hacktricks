@@ -1,39 +1,39 @@
-# Lêerstelsel, Inodes en Herwinning
+# Lêerstelsel, Inodes en Herstel
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Misbruik van lêerstelsels gaan dikwels daaroor om die verhouding tussen ’n sigbare pad en die objek daaragter te verwar. Disk images kan ’n ander lêerstelsel verberg, writable mounts kan deur bevoorregte take gebruik word, hardlinks kan dieselfde inode deur ’n ander naam blootstel, en deleted files kan steeds deur ’n oop file descriptor gelees word.
+Lêerstelselmisbruik gaan dikwels daaroor om die verhouding tussen ’n sigbare pad en die objek daaragter te verwar. Skyfbeelde kan ’n ander lêerstelsel verberg, skryfbare mounts kan deur bevoorregte take gebruik word, hardlinks kan dieselfde inode deur ’n ander naam blootstel, en geskrapte lêers kan steeds deur ’n oop lêerbeskrywer gelees word.
 
-Hierdie bladsy fokus op die technique, nie op een spesifieke lab of target nie.
+Hierdie bladsy fokus op die tegniek, nie op een spesifieke lab of teiken nie.
 
-## Disk Images en Loop Mounts
+## Skyfbeelde en Loop Mounts
 
-’n Gewone lêer kan ’n volledige lêerstelsel bevat. Backup images, gekopieerde block devices, VM-artifacts of hernoemde blobs kan dus credentials, scripts, SSH keys, configuration files of flags bevat, selfs wanneer hulle van buite af nie nuttig lyk nie.
+’n Gewone lêer kan ’n volledige lêerstelsel bevat. Backup-beelde, gekopieerde bloktoestelle, VM-artefakte of hernoemde blobs kan dus credentials, scripts, SSH-sleutels, konfigurasielêers of flags bevat, selfs wanneer dit van buite af nie nuttig lyk nie.
 
-Identifiseer waarskynlike images:
+Identifiseer waarskynlike beelde:
 ```bash
 file ./candidate
 ls -lh ./candidate
 blkid ./candidate 2>/dev/null
 strings -a ./candidate | head -n 50
 ```
-Indien montering toegelaat word, monteer onbekende images eers in leesalleen-modus:
+Indien mounting toegelaat word, mount onbekende images eers read-only:
 ```bash
 mkdir -p /tmp/imgmnt
 sudo mount -o loop,ro ./candidate /tmp/imgmnt
 find /tmp/imgmnt -maxdepth 3 -type f -ls 2>/dev/null
 sudo umount /tmp/imgmnt
 ```
-Indien montering nie beskikbaar is nie, inspekteer die lêerstelselmetadata direk:
+Indien montering nie beskikbaar is nie, inspekteer die lêerstelsel se metadata direk:
 ```bash
 debugfs -R 'ls -l /' ./candidate 2>/dev/null
 debugfs -R 'stat /' ./candidate 2>/dev/null
 ```
-Die tegniek is nuttig omdat dit ’n lêer wat normaal lyk in ’n tweede lêerstelselboom omskep. Behandel dit as ’n manier om versteekte data te herstel, nie as ’n privilege escalation op sigself nie.
+Die tegniek is nuttig omdat dit ’n normaal lykende lêer in ’n tweede lêerstelselboom verander. Beskou dit as ’n manier om versteekte data te herwin, nie as ’n privilege escalation op sigself nie.
 
 ## Misbruik van skryfbare mounts
 
-’n Skryfbare mount word gevaarlik wanneer ’n meer bevoorregte konteks later iets daarin vertrou. Die belangrike vraag is nie net "kan ek hier skryf?" nie, maar "wie lees, voer uit, importeer of laai later hiervandaan?".
+’n Skryfbare mount word gevaarlik wanneer ’n meer bevoorregte konteks later iets daarin vertrou. Die belangrike vraag is nie net "kan ek hier skryf nie?", maar "wie lees, voer uit, importeer of laai later hiervandaan?".
 
 Vind skryfbare mounts en verdagte verbruikers:
 ```bash
@@ -44,23 +44,23 @@ grep -RniE 'cron|systemd|ExecStart|backup|hook|plugin|sh |bash |python' /mnt /me
 ```
 Algemene misbruikpatrone:
 
-- ’n Bevoorregte cron- of systemd-unit voer ’n skryfbare script vanaf die mount uit.
-- ’n Bevoorregte diens laai plugins, config, templates of helper-binaries vanaf die mount.
-- ’n Mount bevat SUID-lêers en laat modification, replacement of path manipulation toe.
-- ’n Container of chroot stel ’n host-backed path bloot wat vanaf die beperkte omgewing skryfbaar is.
+- ’n Bevoorregte cron- of systemd-eenheid voer ’n skryfbare skrip vanaf die mount uit.
+- ’n Bevoorregte diens laai plugins, config, templates of helper binaries vanaf die mount.
+- ’n Mount bevat SUID-lêers en laat wysiging, vervanging of path manipulation toe.
+- ’n Container of chroot stel ’n host-backed path bloot wat vanuit die beperkte omgewing skryfbaar is.
 
-Generiese validation-patroon:
+Generiese validasiepatroon:
 ```bash
 find /mnt /media /srv /opt -xdev -perm -4000 -type f -ls 2>/dev/null
 find /mnt /media /srv /opt -xdev -type f -writable -ls 2>/dev/null | head -n 50
 ```
-Wanneer impak in ’n gemagtigde laboratorium bewys word, hou die payload waarneembaar en minimaal, byvoorbeeld deur die uitvoer van `id` na ’n tydelike lêer te skryf. Die kerntegniek is vertraagde uitvoering deur ’n vertroude skryfbare ligging.
+Wanneer impak in ’n gemagtigde lab bewys word, hou die payload waarneembaar en minimaal, byvoorbeeld deur `id`-uitset na ’n tydelike lêer te skryf. Die kerntegniek is vertraagde uitvoering deur ’n trusted writable location.
 
-## Inodes en padverwarring
+## Inodes en Path Confusion
 
-’n Inode is die lêerstelselobjek; ’n pad is slegs ’n naam wat daarna verwys. Dit is belangrik omdat twee verskillende paaie na dieselfde inode kan verwys, en ’n uitgevee padnaam nie altyd beteken dat die data weg is nie.
+’n Inode is die filesystem-object; ’n path is slegs ’n naam wat daarna verwys. Dit is belangrik omdat twee verskillende paths na dieselfde inode kan verwys, en ’n deleted pathname beteken nie altyd dat die data weg is nie.
 
-Vergelyk lêers volgens inode en toestel:
+Vergelyk lêers volgens inode en device:
 ```bash
 ls -li /path/a /path/b
 stat -c 'dev=%d inode=%i links=%h mode=%A owner=%U:%G path=%n' /path/a /path/b
@@ -73,30 +73,30 @@ Soek direk volgens inode-nommer wanneer jy slegs metadata het:
 ```bash
 find / -xdev -inum <inode_number> -ls 2>/dev/null
 ```
-Hierdie tegniek is nuttig wanneer ’n lêer onder ’n onverwagte naam verskyn, wanneer ’n toepassing een path valideer maar ’n ander een gebruik, of wanneer ’n bevoorregte wrapper met ’n inode werk wat ook êrens anders bereikbaar is.
+Hierdie tegniek is nuttig wanneer ’n lêer onder ’n onverwagte naam verskyn, wanneer ’n toepassing een pad valideer maar ’n ander een gebruik, of wanneer ’n bevoorregte wrapper met ’n inode werk wat ook êrens anders bereikbaar is.
 
 ## Hardlink Abuse
 
-Hardlinks skep veelvuldige name vir dieselfde inode. Hulle wys nie na ’n target path soos symlinks nie; hulle is gelyke name vir dieselfde lêerobjek.
+Hardlinks skep veelvuldige name vir dieselfde inode. Hulle wys nie soos symlinks na ’n teikenpad nie; hulle is gelyke name vir dieselfde lêerobjek.
 
 Vind SUID-lêers met veelvuldige hardlinks:
 ```bash
 find / -xdev -perm -4000 -type f -links +1 -ls 2>/dev/null
 ```
-Inspekteer een verdagte lêer:
+Ondersoek een verdagte lêer:
 ```bash
 stat /path/to/suspicious
 find / -xdev -samefile /path/to/suspicious -ls 2>/dev/null
 ```
-Waarom dit belangrik is:
+Waarom dit saak maak:
 
 - ’n Sensitiewe lêer kan deur ’n minder ooglopende pad bereikbaar wees.
 - ’n SUID-wrapper kan versteek wees agter ’n naam wat nie bevoorreg lyk nie.
 - Opruiming wat een padnaam verwyder, kan ’n ander hardlink steeds aktief laat.
 
-Moderne kernstelsels en mount-opsies kan die skep van hardlinks beperk om hierdie soort misbruik te verminder, maar bestaande hardlinks is steeds die moeite werd om te hersien.
+Moderne kernels en mount-opsies kan die skepping van hardlinks beperk om hierdie soort misbruik te verminder, maar bestaande hardlinks is steeds die moeite werd om te hersien.
 
-## Herstel van verwyderde lêers deur oop FD's
+## Herstel van verwyderde lêers deur oop FD’s
 
 Wanneer ’n proses ’n lêer oop hou, kan die lêerdata steeds beskikbaar bly selfs nadat die padnaam verwyder is. Linux stel hierdie oop descriptors beskikbaar onder `/proc/<pid>/fd/`.
 
@@ -111,11 +111,11 @@ readlink /proc/<pid>/fd/<fd>
 cp /proc/<pid>/fd/<fd> /tmp/recovered-file
 file /tmp/recovered-file
 ```
-Dit is ’n praktiese tegniek vir die herstel van geskrapte logs, tydelike secrets, verwyderde binaries, geroteerde lêers of scripts wat ná uitvoering verwyder is.
+Dit is ’n praktiese tegniek om geskrapte logs, tydelike secrets, dropped binaries, geroteerde lêers of scripts wat ná uitvoering verwyder is, te herwin.
 
-## ext-herwinning met debugfs
+## ext-herstel met debugfs
 
-Op ext-lêerstelsels kan `debugfs` inode-metadata inspekteer en soms lêerinhoud vanaf ’n lêerstelselbeeld uitvoer. Werk waar moontlik op ’n kopie of ’n leesalleen-beeld.
+Op ext-filesystems kan `debugfs` inode-metadata inspekteer en soms lêerinhoud uit ’n filesystem image dump. Werk waar moontlik op ’n kopie of ’n read-only image.
 
 Lys inskrywings en inspekteer inodes:
 ```bash
@@ -128,11 +128,11 @@ Dump 'n bekende inode:
 debugfs -R 'dump <inode_number> /tmp/recovered.bin' ./disk.img
 file /tmp/recovered.bin
 ```
-Dit is nie gewaarborgde recovery nie. Dit hang af van die lêerstelsel se toestand, of blokke hergebruik is, en of die metadata steeds bestaan. Die tegniek bly waardevol omdat dit jou toelaat om inode-vlaktoestand te inspekteer sonder om op normale path traversal staat te maak.
+Dit is nie gewaarborgde herstel nie. Dit hang af van die lêerstelsel se toestand, of blokke hergebruik is, en of die metadata steeds bestaan. Die tegniek is steeds waardevol omdat dit jou toelaat om inode-vlaktoestand te inspekteer sonder om op normale padtraversering staat te maak.
 
-## Inode-uitputting en -ordening
+## Inode-uitputting en ordening
 
-Inode-uitputting vind plaas wanneer ’n lêerstelsel se file objects opraak, selfs al is daar steeds vrye skyfspasie. Dit veroorsaak gewoonlik betroubaarheidsfoute, maar dit kan ook vreemde gedrag tydens insidentreaksie of lab-triage verduidelik.
+Inode-uitputting vind plaas wanneer ’n lêerstelsel se lêerobjekte opraak, selfs al is daar steeds vrye skyfspasie. Dit veroorsaak gewoonlik betroubaarheidsfoute, maar dit kan ook vreemde gedrag tydens voorvalreaksie of laboratoriumtriage verklaar.
 
 Kontroleer inode-druk:
 ```bash
@@ -145,12 +145,13 @@ Inode-nommers en tydstempels kan ook help om aktiwiteit in eenvoudige laboratori
 find /path -xdev -printf '%i %TY-%Tm-%Td %TH:%TM %p\n' 2>/dev/null | sort -n | tail -n 50
 find /path -xdev -newermt '2026-01-01' -ls 2>/dev/null
 ```
-Behandel die volgorde as ’n aanduiding, nie as bewys nie. Kopieerbewerkings, argiefonttrekking, lêerstelseltipes, herstelbewerkings en gelyktydige skryfbewerkings kan almal allokasiepatrone verander.
+Behandel volgorde as ’n leidraad, nie as bewys nie. Kopieerbewerkings, argiefonttrekking, lêerstelseltipes, herstelbewerkings en gelyktydige skryfbewerkings kan almal allokasiepatrone verander.
 
-## Verdedigingsaantekeninge
+## Verdedigingsnotas
 
-- Monteer onbekende images as leesalleen tydens ontleding.
-- Hou bevoorregte scripts, diens-eenhede, plugins en helper-paaie buite mounts wat deur gebruikers geskryf kan word.
+- Mount onbekende images read-only tydens analise.
+- Hou bevoorregte scripts, service units, plugins en helper paths buite mounts wat deur gebruikers geskryf kan word.
 - Gebruik `nosuid`, `nodev` en `noexec` waar dit operasioneel toepaslik is, maar moenie dit as ’n volledige grens beskou nie.
-- Beperk waar moontlik toegang tot `/proc/<pid>/fd`, prosesmetadata en inspeksie van prosesse tussen verskillende gebruikers.
-- Monitor mounts waarop geskryf kan word, onverwagte hardlinks na bevoorregte lêers en sensitiewe lêers wat uitgevee maar steeds oop is.
+- Beperk waar moontlik toegang tot `/proc/<pid>/fd`, prosesmetadata en inspeksie van prosesse tussen gebruikers.
+- Monitor mounts waarop geskryf kan word, onverwagte hardlinks na bevoorregte lêers en sensitiewe lêers wat verwyder is maar steeds oop is.
+{{#include ../../banners/hacktricks-training.md}}

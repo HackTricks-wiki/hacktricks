@@ -1,15 +1,15 @@
-# Misbruik van Kernel Modules en modprobe
+# Misbruik van kernmodules en modprobe
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Wankonfigurasies van kernel modules en module-laaiing
+## Wanopstellings van kernmodules en modulelaai
 
-Kernel module-ondersteuning is ’n hoë-impak-area tydens ’n Linux privilege escalation-oorsig. Moenie elke unsigned-module-boodskap op sigself as exploitable beskou nie, maar gebruik dit om praktiese vrae te beantwoord:
+Ondersteuning vir kernmodules is ’n hoë-impak-gebied tydens ’n Linux-privilege escalation-oorsig. Moenie elke boodskap oor ’n ongetekende module op sigself as exploitable beskou nie, maar gebruik dit om praktiese vrae te beantwoord:
 
-- Kan die huidige gebruiker modules laai deur `sudo`, capabilities of ’n writable helper path?
-- Is module-laaiing steeds enabled?
+- Kan die huidige gebruiker modules laai deur `sudo`, capabilities of ’n helper path wat skryfbaar is?
+- Is modulelaai steeds enabled?
 - Is module signature enforcement disabled?
-- Is module directories of module files writable?
+- Is module directories of module files skryfbaar?
 - Kan kernel logs gelees word om te bevestig wat gebeur het?
 
 Vinnige triage:
@@ -27,14 +27,14 @@ Interpretasie:
 
 - `modules_disabled=1` beteken dat nuwe modules nie gelaai kan word totdat die stelsel herlaai word nie.
 - `module_sig_enforce=1` blokkeer gewoonlik ongetekende modules.
-- `dmesg_restrict=0` laat onbevoorregte gebruikers toe om kernellogboeke op baie stelsels te lees.
-- Skryfbare paaie onder `/lib/modules/$(uname -r)/` is gevaarlik omdat module-ontdekking en outomatiese laai daardie boomstruktuur kan vertrou.
+- `dmesg_restrict=0` laat onbevoorregte users op baie stelsels toe om kernel-logs te lees.
+- Skryfbare paths onder `/lib/modules/$(uname -r)/` is gevaarlik omdat module discovery en auto-loading daardie boomstruktuur kan vertrou.
 
-### Laai van ’n module en lees van kernuitset
+### Laai van 'n module en lees van kernel-uitvoer
 
-As jy wettige toestemming het om ’n plaaslike module te laai, plaas `insmod` die presiese `.ko`-lêer wat jy verskaf. Die module se init-funksie loop onmiddellik, en boodskappe wat met `printk()` geskryf word, verskyn in kernellogboeke.
+As jy wettige toestemming het om 'n plaaslike module te laai, voeg `insmod` die presiese `.ko`-lêer wat jy verskaf in. Die module se init-funksie loop onmiddellik, en boodskappe wat met `printk()` geskryf word, verskyn in kernel-logs.
 
-Minimale werkvloei vir hersienings- of laboratoriumomgewings:
+Minimum workflow vir review- of lab-omgewings:
 ```bash
 ls -l ./example.ko
 modinfo ./example.ko 2>/dev/null
@@ -51,9 +51,9 @@ sudo /sbin/insmod ./example.ko
 ```
 ### Sudo-toegelate `insmod`
 
-'n Sudo-reël wat 'n gebruiker toelaat om `insmod` uit te voer, is nie vergelykbaar met die toelating van 'n normale administratiewe helper nie. Die module se initialiseringskode loop in kernel-konteks sodra die `.ko` ingevoeg word, dus is die praktiese hersieningsvraag: "kan hierdie gebruiker die module wat gelaai word, kies of wysig?"
+’n Sudo-reël wat ’n gebruiker toelaat om `insmod` uit te voer, is nie vergelykbaar met die toelating van ’n normale administratiewe helper nie. Die module se initialiseringskode loop in kernelkonteks sodra die `.ko` ingevoeg word, dus is die praktiese hersieningsvraag: "kan hierdie gebruiker die module wat gelaai word, kies of wysig?"
 
-Generiese hersieningsvloei:
+Algemene hersieningsvloei:
 ```bash
 sudo -l
 ls -l ./candidate.ko
@@ -63,9 +63,9 @@ lsmod | grep -i candidate
 dmesg | tail -n 30
 sudo /sbin/rmmod candidate
 ```
-Indien die gebruiker ’n arbitrêre `.ko` kan verskaf, moet die reël as ’n volledige kompromittering van die stelsel in ’n gemagtigde assessment beskou word. ’n Veiliger operasionele patroon is om te vermy dat modulelaai deur sudo gedelegeer word; indien dit onvermydelik is, beperk die presiese pad, eienaarskap, permissions, signing policy en verwyderingswerkvloei.
+Indien die gebruiker ’n arbitrêre `.ko` kan verskaf, moet die reël in ’n gemagtigde assessment as ’n volledige stelselkompromittering beskou word. ’n Veiliger operasionele patroon is om te vermy dat die laai van modules deur sudo gedelegeer word; indien dit onvermydelik is, beperk die presiese pad, eienaarskap, toestemmings, ondertekeningsbeleid en verwyderingsproses.
 
-Vir ’n onskadelike modulebou-patroon in ’n beheerde lab lyk ’n minimale bron en Makefile soos volg:
+Vir ’n onskadelike module-boupatroon in ’n beheerde laboratorium lyk ’n minimale bronlêer en Makefile soos volg:
 ```c
 #include <linux/module.h>
 #include <linux/kernel.h>
@@ -93,16 +93,16 @@ make -C /lib/modules/$(shell uname -r)/build M=$(PWD) modules
 clean:
 make -C /lib/modules/$(shell uname -r)/build M=$(PWD) clean
 ```
-Bou en laai slegs in 'n gemagtigde laboratorium:
+Bou en laai slegs in ’n gemagtigde laboratorium:
 ```bash
 make
 sudo insmod demo.ko
 dmesg | tail -n 20
 sudo rmmod demo
 ```
-### Kontroles vir misbruik van `kernel.modprobe` / `modprobe_path`
+### `kernel.modprobe` / `modprobe_path` misbruik-kontroles
 
-`kernel.modprobe` beheer die userspace-helper wat die kernel aanroep wanneer dit hulp met die laai van modules benodig. As ’n aanvaller dit na ’n skryfbare uitvoerbare pad kan verander en ’n onbekende binêre formaat of ’n ander moduleversoekpad kan aktiveer, kan dit tot root code execution lei.
+`kernel.modprobe` beheer die userspace-helper wat die kernel aanroep wanneer dit module-laaihulp benodig. As ’n aanvaller dit na ’n skryfbare uitvoerbare pad kan verander en ’n onbekende binêre formaat of ’n ander moduleversoekpad kan aktiveer, kan dit tot root-kode-uitvoering lei.
 
 Kontroleer die huidige helper:
 ```bash
@@ -129,7 +129,7 @@ chmod +x /tmp/unknown
 /tmp/unknown 2>/dev/null || true
 cat /tmp/modprobe-helper-ran 2>/dev/null
 ```
-Op geharde stelsels behoort dit te misluk omdat onbevoorregte gebruikers nie na `kernel.modprobe` kan skryf nie, die helper-pad nie skryfbaar is nie, of module-laaipaaie geblokkeer word.
+Op beveiligde stelsels behoort dit te misluk omdat onbevoorregte gebruikers nie na `kernel.modprobe` kan skryf nie, die helper-pad nie skryfbaar is nie, of module-laaipaaie geblokkeer word.
 
 ### Hersiening van skryfbare `/lib/modules`
 
@@ -142,15 +142,16 @@ find "/lib/modules/$KREL" -type d -writable -ls 2>/dev/null
 find "/lib/modules/$KREL" -type f -name '*.ko*' -writable -ls 2>/dev/null
 find "/lib/modules/$KREL" -type f \( -name 'modules.dep' -o -name 'modules.alias' -o -name 'modules.order' \) -writable -ls 2>/dev/null
 ```
-Indien jy skryfbare module-inhoud vind, kontroleer hoe modules ontdek word:
+As jy skryfbare module-inhoud vind, kyk hoe modules ontdek word:
 ```bash
 modprobe --show-depends <module_name> 2>/dev/null
 modinfo <module_name> 2>/dev/null
 grep -R "<module_name>" /lib/modules/$(uname -r)/modules.* 2>/dev/null
 ```
-Defensiewe notas:
+Verdedigingsaantekeninge:
 
-- Hou `/lib/modules` in die besit van `root:root` en maak dit nie-skryfbaar vir gebruikers nie.
-- Stel `kernel.modules_disabled=1` ná selflaai waar dit operasioneel moontlik is.
+- Hou `/lib/modules` in die besit van `root:root` en nie-skryfbaar deur gebruikers nie.
+- Stel `kernel.modules_disabled=1` na opstart in waar dit operasioneel moontlik is.
 - Dwing module-ondertekening af op stelsels wat laaibare modules vereis.
-- Monitor skrywings na `/proc/sys/kernel/modprobe`, `/lib/modules`, en onverwagte uitvoering van `insmod`/`modprobe`.
+- Monitor skrywings na `/proc/sys/kernel/modprobe`, `/lib/modules` en onverwagte uitvoering van `insmod`/`modprobe`.
+{{#include ../../banners/hacktricks-training.md}}

