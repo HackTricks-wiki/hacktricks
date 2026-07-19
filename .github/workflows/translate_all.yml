@@ -75,6 +75,7 @@ jobs:
           wget -O get_and_save_refs.py https://raw.githubusercontent.com/HackTricks-wiki/hacktricks-cloud/master/scripts/get_and_save_refs.py
           wget -O compare_and_fix_refs.py https://raw.githubusercontent.com/HackTricks-wiki/hacktricks-cloud/master/scripts/compare_and_fix_refs.py
           wget -O translator.py https://raw.githubusercontent.com/HackTricks-wiki/hacktricks-cloud/master/scripts/translator.py
+          cp mark_unchanged_s3_files.py /tmp/mark_unchanged_s3_files.py
           cd ..
           wget -O /tmp/seo_postprocess.py https://raw.githubusercontent.com/HackTricks-wiki/hacktricks/master/scripts/seo_postprocess.py
 
@@ -263,6 +264,16 @@ jobs:
           echo "Current branch:"
           git rev-parse --abbrev-ref HEAD
           echo "Syncing $BRANCH to S3"
+          # mdBook refreshes mtimes on every build. Age byte-identical files
+          # based on single-part S3 ETags so `s3 sync` skips redundant PUTs.
+          aws s3api list-objects-v2 \
+            --bucket hacktricks-wiki \
+            --prefix "$BRANCH/" \
+            --output json > /tmp/s3-branch-manifest.json
+          python3 /tmp/mark_unchanged_s3_files.py \
+            --source ./book \
+            --manifest /tmp/s3-branch-manifest.json \
+            --remote-prefix "$BRANCH/"
           aws s3 sync ./book s3://hacktricks-wiki/$BRANCH --delete
           echo "Sync completed"
           echo "Cat 3 files from the book"
