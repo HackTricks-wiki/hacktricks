@@ -86,3 +86,4 @@ Pagers such as `less` can also expose shell execution:
 - If an interpreter is unavoidable, restrict the exact script path and prevent user-controlled arguments, writable imports, `PYTHONPATH`, and unsafe environment preservation.
 - If file editing is required, restrict the exact file path and consider `sudoedit` with patched sudo versions and strict environment handling.
 - Review `SETENV`, `env_keep`, writable working directories, writable module/import paths, `NOEXEC`, `use_pty`, and logging, but do not treat them as a complete sandbox.
+{{#include ../../banners/hacktricks-training.md}}
