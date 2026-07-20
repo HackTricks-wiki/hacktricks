@@ -171,3 +171,4 @@ The abuse is not that a hardlink changes permissions. The abuse is path confusio
 - Do not preserve `LD_PRELOAD`, `LD_LIBRARY_PATH`, or similar loader variables through sudo.
 - Monitor `/etc/ld.so.preload`, `/etc/ld.so.conf`, `/etc/ld.so.conf.d/`, and unexpected SUID files.
 - Review hardlinked SUID files and investigate custom SUID wrappers outside standard system paths.
+{{#include ../../banners/hacktricks-training.md}}

@@ -231,3 +231,4 @@ sudo nft list ruleset 2>/dev/null | head -n 80
 ```
 
 Prioritize services that are local-only, run as a more privileged user, expose admin/debug functions, or trust loopback/container-network clients.
+{{#include ../../banners/hacktricks-training.md}}
