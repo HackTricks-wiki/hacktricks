@@ -1,31 +1,37 @@
-# AdaptixC2 Витяг конфігурації та TTPs
+# Витягування конфігурації та TTPs AdaptixC2
 
 {{#include ../../banners/hacktricks-training.md}}
 
-AdaptixC2 — модульний, open‑source post‑exploitation/C2 framework з Windows x86/x64 beacons (EXE/DLL/service EXE/raw shellcode) та підтримкою BOF. Ця сторінка документує:
-- Як його RC4‑упакована конфігурація вбудована і як витягти її з beacons
-- Мережеві та профільні індикатори для HTTP/SMB/TCP listeners
-- Поширені loader та persistence TTPs, зафіксовані в реальних кампаніях, з посиланнями на відповідні сторінки технік Windows
+AdaptixC2 — це модульний open-source post-exploitation/C2 framework із beacon для Windows x86/x64 (EXE/DLL/service EXE/raw shellcode) і підтримкою BOF. На цій сторінці описано:
+- Як його RC4-packed конфігурація вбудовується в beacon і як витягнути її з beacon
+- Мережеві/profile indicators для HTTP/SMB/TCP listeners
+- Поширені loader і persistence TTPs, що спостерігаються у wild, із посиланнями на відповідні сторінки Windows techniques
 
-## Beacon профілі та поля
+Останні upstream releases також постачають DNS/DoH beacon listeners і окреме сімейство Gopher agent/listener, тому сучасна Adaptix infrastructure може піддаватися більшій кількості indicators, ніж оригінальні HTTP/SMB/TCP surfaces, навіть якщо конкретний sample усе ще використовує classic beacon agent.
+
+## Beacon profiles і fields
 
 AdaptixC2 підтримує три основні типи beacon:
-- BEACON_HTTP: web C2 з налаштовуваними servers/ports/SSL, method, URI, headers, user‑agent та власною назвою параметра
-- BEACON_SMB: named‑pipe peer‑to‑peer C2 (intranet)
-- BEACON_TCP: direct sockets, опційно з prepended marker для обфускації початку протоколу
+- BEACON_HTTP: web C2 із конфігурованими servers/ports/SSL, method, URI, headers, user-agent і custom parameter name
+- BEACON_SMB: named-pipe peer-to-peer C2 (intranet)
+- BEACON_TCP: direct sockets, опційно з prepended marker для obfuscate початку протоколу
 
-Типові поля профілю, спостережувані в HTTP конфігураціях beacon (після дешифрування):
+Це layouts beacon, публічно задокументовані в ранніх Adaptix analyses, і вони досі є найпоширенішою starting point для extraction на стороні sample. Однак поточні upstream builds також постачають `BeaconDNS` і Gopher extenders на server side, тому не слід припускати, що кожне live Adaptix deployment exposes лише HTTP/SMB/TCP infrastructure.
+
+Typical profile fields, що спостерігаються в HTTP beacon configs (після decryption):
 - agent_type (u32)
 - use_ssl (bool)
 - servers_count (u32), servers (array of strings), ports (array of u32)
-- http_method, uri, parameter, user_agent, http_headers (length‑prefixed strings)
-- ans_pre_size (u32), ans_size (u32) – used to parse response sizes
+- http_method, uri, parameter, user_agent, http_headers (length-prefixed strings)
+- ans_pre_size (u32), ans_size (u32) – використовуються для parse розмірів response
 - kill_date (u32), working_time (u32)
 - sleep_delay (u32), jitter_delay (u32)
 - listener_type (u32)
 - download_chunk_size (u32)
 
-Example default HTTP profile (from a beacon build):
+Сучасні BeaconHTTP builds також підтримують operator-selected rotation між кількома URI, user-agents, Host headers і servers, із sequential або random selection. З погляду hunting це означає, що один infected host може fan out через кілька callback paths і header combinations, не залишаючи classic RC4-packed beacon family.
+
+Приклад default HTTP profile (із beacon build):
 ```json
 {
 "agent_type": 3192652105,
@@ -48,7 +54,7 @@ Example default HTTP profile (from a beacon build):
 "download_chunk_size": 102400
 }
 ```
-Спостережено зловмисний HTTP-профіль (реальна атака):
+Зафіксований шкідливий HTTP-профіль (реальна атака):
 ```json
 {
 "agent_type": 3192652105,
@@ -71,37 +77,37 @@ Example default HTTP profile (from a beacon build):
 "download_chunk_size": 102400
 }
 ```
-## Упакування зашифрованої конфігурації та шлях завантаження
+## Пакування зашифрованої конфігурації та шлях завантаження
 
-Коли оператор натискає Create у builder, AdaptixC2 вбудовує зашифрований профіль як tail blob у beacon. Формат такий:
-- 4 bytes: configuration size (uint32, little‑endian)
-- N bytes: RC4‑encrypted configuration data
-- 16 bytes: RC4 key
+Коли operator натискає Create у builder, AdaptixC2 вбудовує зашифрований профіль у beacon як кінцевий blob. Формат:
+- 4 байти: розмір конфігурації (uint32, little-endian)
+- N байт: конфігураційні дані, зашифровані RC4
+- 16 байт: ключ RC4
 
-Завантажувач beacon копіює 16‑byte ключ із кінця та RC4‑розшифровує N‑byte блок на місці:
+Завантажувач beacon копіює 16-байтовий ключ із кінця та виконує RC4-дешифрування блоку розміром N байт на місці:
 ```c
 ULONG profileSize = packer->Unpack32();
 this->encrypt_key = (PBYTE) MemAllocLocal(16);
 memcpy(this->encrypt_key, packer->data() + 4 + profileSize, 16);
 DecryptRC4(packer->data()+4, profileSize, this->encrypt_key, 16);
 ```
-Practical implications:
-- The entire structure often lives inside the PE .rdata section.
-- Extraction is deterministic: read size, read ciphertext of that size, read the 16‑byte key placed immediately after, then RC4‑decrypt.
+Практичні наслідки:
+- Уся структура часто міститься всередині секції PE .rdata.
+- Витягування є детермінованим: прочитати розмір, прочитати ciphertext такого розміру, прочитати 16-байтовий ключ, розміщений безпосередньо після нього, а потім виконати RC4-decrypt.
 
-## Configuration extraction workflow (захисники)
+## Процес витягування конфігурації (для defenders)
 
 Напишіть extractor, який імітує логіку beacon:
-1) Знайдіть blob всередині PE (зазвичай .rdata). Практичний підхід — просканувати .rdata на наявність правдоподібного макету [size|ciphertext|16‑byte key] і спробувати RC4.
+1) Знайдіть blob усередині PE (зазвичай у .rdata). Практичний підхід — просканувати .rdata на наявність правдоподібної структури [size|ciphertext|16-byte key] і спробувати виконати RC4.
 2) Прочитайте перші 4 байти → size (uint32 LE).
 3) Прочитайте наступні N=size байтів → ciphertext.
-4) Прочитайте фінальні 16 байтів → RC4 key.
-5) RC4‑decrypt ciphertext. Потім розпарсіть plain profile як:
-- u32/boolean scalars як зазначено вище
-- length‑prefixed strings (u32 length followed by bytes; trailing NUL can be present)
-- масиви: servers_count followed by that many [string, u32 port] pairs
+4) Прочитайте останні 16 байтів → RC4 key.
+5) Виконайте RC4-decrypt ciphertext. Потім розберіть plain profile як:
+- u32/boolean scalars, зазначені вище
+- strings із префіксом довжини (u32 length, після якого йдуть bytes; trailing NUL може бути присутнім)
+- arrays: servers_count, після якого йде відповідна кількість пар [string, u32 port]
 
-Мінімальний Python proof‑of‑concept (standalone, no external deps), який працює з попередньо витягнутим blob:
+Мінімальний Python proof-of-concept (standalone, без external deps), який працює з попередньо витягнутим blob:
 ```python
 import struct
 from typing import List, Tuple
@@ -168,40 +174,78 @@ return cfg
 # cfg  = parse_http_cfg(pt)
 ```
 Поради:
-- When automating, use a PE parser to read .rdata then apply a sliding window: for each offset o, try size = u32(.rdata[o:o+4]), ct = .rdata[o+4:o+4+size], candidate key = next 16 bytes; RC4‑decrypt and check that string fields decode as UTF‑8 and lengths are sane.
-- Parse SMB/TCP profiles by following the same length‑prefixed conventions.
+- Під час автоматизації використовуйте PE parser для читання .rdata, а потім застосуйте sliding window: для кожного offset o спробуйте size = u32(.rdata[o:o+4]), ct = .rdata[o+4:o+4+size], candidate key = наступні 16 bytes; виконайте RC4-decrypt і перевірте, що string fields декодуються як UTF-8, а lengths є коректними.
+- Парсинг SMB/TCP profiles виконуйте за такими самими length-prefixed conventions.
 
-## Network fingerprinting and hunting
+## Custom listener profiles: не hard-code лише classic HTTP schema
+
+Зовнішній формат пакування (`u32 size | RC4 ciphertext | 16-byte key`) можна повторно використовувати, тому actor-customized listeners можуть зберігати той самий extraction workflow, змінюючи при цьому decrypted field layout повністю.
+
+Хорошим нещодавнім прикладом є кампанія Tropic Trooper у квітні 2026 року, під час якої extracted Adaptix beacon не містив standard HTTP/TCP profile. Натомість decrypted blob зберігав GitHub transport parameters, зокрема:
+- `repo_owner`
+- `repo_name`
+- `api_host` (наприклад, `api.github.com`)
+- `auth_token`
+- `issues_api_path`
+- `kill_date` / `working_time` / `sleep_delay` / `jitter`
+
+Практична стратегія parser:
+- Спочатку виявляйте outer RC4 blob точно як зазвичай.
+- Після decryption використовуйте branching на основі sentinel strings і field sanity, а не відразу застосовуйте HTTP parser.
+- Хорошими sentinels є `api.github.com`, `/issues?state=open`, HTTP verbs/URIs, named-pipe-style strings або очевидно коректні server/port arrays.
+- Якщо HTTP parser завершується помилкою, але plaintext містить узгоджені length-prefixed UTF-8 strings, збережіть sample і спробуйте alternative schemas замість того, щоб відкидати його як false positive.
+
+У цій кампанії custom listener використовував GitHub issues як C2 transport, а beacon звертався до `ipinfo.io`, щоб дізнатися свою зовнішню IP-адресу, оскільки GitHub API не розкриває operator безпосередньо source address victim.
+
+## Network fingerprinting і hunting
 
 HTTP
-- Поширене: POST to operator‑selected URIs (e.g., /uri.php, /endpoint/api)
-- Користувацький заголовок, що використовується для beacon ID (e.g., X‑Beacon‑Id, X‑App‑Id)
-- User‑agents, що імітують Firefox 20 або contemporary Chrome builds
-- Частота опитування видно через sleep_delay/jitter_delay
+- Типово: POST до URI, вибраних operator (наприклад, /uri.php, /endpoint/api)
+- Custom header parameter, який використовується для beacon ID (наприклад, X‑Beacon‑Id, X‑App‑Id)
+- User-agents, що імітують Firefox 20 або актуальні Chrome builds
+- Polling cadence, видимий через sleep_delay/jitter_delay
+- Новіші builds можуть rotate URIs, user-agents, Host headers і servers між callbacks, тому кластеризуйте за uncommon header names, response-size patterns, TLS reuse і timing, а не припускайте наявність однієї пари path/UA
 
 SMB/TCP
-- SMB named‑pipe listeners для intranet C2 в середовищах, де web egress обмежений
-- TCP beacons можуть додавати кілька байтів перед трафіком, щоб заобфускувати початок протоколу
+- SMB named-pipe listeners для intranet C2, де web egress обмежений
+- TCP beacons можуть додавати кілька bytes перед traffic, щоб obfuscate protocol start
 
-## Loader and persistence TTPs seen in incidents
+Поточні upstream teamserver defaults
+- `profile.yaml` наразі містить teamserver `0.0.0.0:4321`, endpoint `/endpoint`, filenames сертифіката/ключа `server.rsa.crt` і `server.rsa.key`, а також extenders для HTTP, SMB, TCP, DNS, Beacon agent і Gopher
+- Для unmatched routes default error handler повертає `Server: AdaptixC2` і `Adaptix-Version: v1.2`
+- Стандартне тіло 404 містить `AdaptixC2 404` і `You need to enter the correct connection details.`
+- Internet-wide scans у 2026 році виявили багато exposed teamservers на `4321` і багато beacon listeners на `43211`, тому обидва порти корисні як seed pivots, але їх не слід вважати exhaustive
 
-In‑memory PowerShell loaders
-- Download Base64/XOR payloads (Invoke‑RestMethod / WebClient)
-- Виділяють unmanaged memory, копіюють shellcode, змінюють захист на 0x40 (PAGE_EXECUTE_READWRITE) через VirtualProtect
+DNS/DoH listener fingerprints
+- Поточний BeaconDNS extender відповідає авторитетно (`AA=true`)
+- На queries, що не відповідають beacon protocol shape — зокрема на names із менш ніж 5 labels перед configured domain — зазвичай повертається `TXT "OK"`
+- Якщо configured base TTL залишено нульовим, listener використовує 10-секундне base value і додає до 59 секунд jitter
+- Це робить short-label active probes корисними, коли HTTP listener не exposed
+
+## Loader і persistence TTPs, помічені в incidents
+
+In-memory PowerShell loaders
+- Завантажують Base64/XOR payloads (Invoke‑RestMethod / WebClient)
+- Виділяють unmanaged memory, копіюють shellcode, перемикають protection на 0x40 (PAGE_EXECUTE_READWRITE) через VirtualProtect
 - Виконують через .NET dynamic invocation: Marshal.GetDelegateForFunctionPointer + delegate.Invoke()
 
-Check these pages for in‑memory execution and AMSI/ETW considerations:
+Trojanized signed software / staged shellcode loaders
+- У 2026 році ланцюжок Tropic Trooper використовував trojanized SumatraPDF executable (TOSHIS loader), який перенаправляв `_security_init_cookie` до malicious code замість patching PE entry point
+- Loader resolved APIs за допомогою Adler-32 hashing, завантажував decoy PDF, отримував second-stage shellcode, decrypt-ив його за допомогою AES-128-CBC через WinCrypt (`CryptDeriveKey` з hardcoded seed) і reflectively виконував Adaptix beacon у memory
+- Пізніше persistence було перенесено до scheduled tasks із benign-looking names, таких як `\MSDNSvc` або `\MicrosoftUDN`, налаштованих на повторний запуск agent приблизно кожні дві години
+
+Перегляньте ці сторінки щодо in-memory execution і AMSI/ETW considerations:
 
 {{#ref}}
 ../../windows-hardening/av-bypass.md
 {{#endref}}
 
-Виявлені механізми персистенції
-- Ярлик у Startup folder (.lnk) для повторного запуску loader при вході користувача
-- Registry Run keys (HKCU/HKLM ...\CurrentVersion\Run), часто з benign‑sounding іменами на кшталт "Updater" для запуску loader.ps1
-- DLL search‑order hijack шляхом розміщення msimg32.dll у %APPDATA%\Microsoft\Windows\Templates для вразливих процесів
+Спостережувані persistence mechanisms
+- Startup folder shortcut (.lnk) для повторного запуску loader під час logon
+- Registry Run keys (HKCU/HKLM ...\CurrentVersion\Run), часто з benign-sounding names на кшталт "Updater" для запуску loader.ps1
+- DLL search-order hijack через розміщення msimg32.dll у %APPDATA%\Microsoft\Windows\Templates для susceptible processes
 
-Technique deep‑dives and checks:
+Technique deep-dives і checks:
 
 {{#ref}}
 ../../windows-hardening/windows-local-privilege-escalation/privilege-escalation-with-autorun-binaries.md
@@ -212,28 +256,34 @@ Technique deep‑dives and checks:
 {{#endref}}
 
 Ідеї для hunting
-- PowerShell, що створює переходи RW→RX: VirtualProtect до PAGE_EXECUTE_READWRITE всередині powershell.exe
-- Патерни dynamic invocation (GetDelegateForFunctionPointer)
-- Startup .lnk у папках user або common Startup
-- Підозрілі Run keys (e.g., "Updater") і імена loader типу update.ps1/loader.ps1
-- Шляхи до DLL, доступні для запису користувачем, під %APPDATA%\Microsoft\Windows\Templates, що містять msimg32.dll
+- PowerShell, що породжує RW→RX transitions: VirtualProtect до PAGE_EXECUTE_READWRITE всередині powershell.exe
+- Dynamic invocation patterns (GetDelegateForFunctionPointer)
+- Unmatched HTTPS 404s із `Server: AdaptixC2`, `Adaptix-Version`, `AdaptixC2 404` або `You need to enter the correct connection details.`
+- DNS responses із `AA=true` і `TXT "OK"` для short queries у suspect domains
+- GitHub API traffic до `/repos/<owner>/<repo>/issues`, після якого з того самого loader/beacon chain виконуються lookups до `ipinfo.io`
+- Startup .lnk у user або common Startup folders
+- Suspicious Run keys (наприклад, "Updater") і loader names на кшталт update.ps1/loader.ps1
+- Trojanized PE samples, які redirect `_security_init_cookie` до downloader code перед показом decoy document
+- User-writable DLL paths під %APPDATA%\Microsoft\Windows\Templates, що містять msimg32.dll
 
-## Notes on OpSec fields
+## Примітки щодо OpSec fields
 
-- KillDate: timestamp після якого агент self‑expires
-- WorkingTime: години, коли агент має бути активним, щоб злитися з бізнес‑активністю
+- KillDate: timestamp, після якого agent self-expires
+- WorkingTime: години, протягом яких agent має бути active, щоб blend in із business activity
 
-Ці поля можна використовувати для кластеризації і пояснення спостережуваних періодів тиші.
+Ці fields можна використовувати для clustering і пояснення observed quiet periods.
 
-## YARA and static leads
+## YARA і static leads
 
-Unit 42 published basic YARA for beacons (C/C++ and Go) and loader API‑hashing constants. Consider complementing with rules that look for the [size|ciphertext|16‑byte‑key] layout near PE .rdata end and the default HTTP profile strings.
+Unit 42 опублікувала базові YARA для beacons (C/C++ і Go) та loader API-hashing constants. Розгляньте можливість доповнити їх rules, які шукають layout [size|ciphertext|16-byte-key] поблизу кінця PE .rdata, default HTTP profile strings і новіші server/listener markers, такі як `AdaptixC2 404`, `You need to enter the correct connection details.`, `Adaptix-Version`, `server.rsa.crt`, `server.rsa.key`, `api.github.com`, `/issues?state=open` і `ipinfo.io`.
 
 ## References
 
 - [AdaptixC2: A New Open-Source Framework Leveraged in Real-World Attacks (Unit 42)](https://unit42.paloaltonetworks.com/adaptixc2-post-exploitation-framework/)
 - [AdaptixC2 GitHub](https://github.com/Adaptix-Framework/AdaptixC2)
 - [Adaptix Framework Docs](https://adaptix-framework.gitbook.io/adaptix-framework)
+- [AdaptixC2: Fingerprinting an Open-Source C2 Framework at Scale (Censys)](https://censys.com/blog/adaptixc2-open-source-c2-framework/)
+- [Tropic Trooper Pivots to AdaptixC2 and Custom Beacon Listener (Zscaler ThreatLabz)](https://www.zscaler.com/blogs/security-research/tropic-trooper-pivots-adaptixc2-and-custom-beacon-listener)
 - [Marshal.GetDelegateForFunctionPointer – Microsoft Docs](https://learn.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.marshal.getdelegateforfunctionpointer)
 - [VirtualProtect – Microsoft Docs](https://learn.microsoft.com/en-us/windows/win32/api/memoryapi/nf-memoryapi-virtualprotect)
 - [Memory protection constants – Microsoft Docs](https://learn.microsoft.com/en-us/windows/win32/memory/memory-protection-constants)
