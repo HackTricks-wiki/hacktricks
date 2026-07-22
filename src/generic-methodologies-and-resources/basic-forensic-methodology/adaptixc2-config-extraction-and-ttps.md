@@ -1,31 +1,37 @@
-# Uchukuaji wa Usanidi wa AdaptixC2 na TTPs
+# Uchimbaji wa Configuration ya AdaptixC2 na TTPs
 
 {{#include ../../banners/hacktricks-training.md}}
 
-AdaptixC2 ni framework modular, open‑source ya post‑exploitation/C2 yenye Windows x86/x64 beacons (EXE/DLL/service EXE/raw shellcode) na BOF support. Ukurasa huu unaandika kuhusu:
-- Jinsi usanidi wake uliopakiwa kwa RC4 umeingizwa na jinsi ya kuuchota kutoka kwa beacons
-- Viashiria vya mtandao/profaili kwa listeners za HTTP/SMB/TCP
-- TTPs za kawaida za loader na persistence zilizobainika katika mazingira ya kweli, pamoja na viungo kwa kurasa za mbinu za Windows zinazohusiana
+AdaptixC2 ni framework ya modular, open-source ya post-exploitation/C2 yenye beacons za Windows x86/x64 (EXE/DLL/service EXE/raw shellcode) na support ya BOF. Ukurasa huu unaeleza:
+- Jinsi configuration yake iliyopakiwa kwa RC4 inavyopachikwa na jinsi ya kuichambua kutoka kwenye beacons
+- Viashiria vya mtandao/profile za HTTP/SMB/TCP listeners
+- Loader na persistence TTPs za kawaida zinazoonekana katika mazingira halisi, pamoja na links za kurasa husika za Windows techniques
 
-## Beacon profiles and fields
+Releases za hivi karibuni za upstream pia zinakuja na DNS/DoH beacon listeners na familia tofauti ya Gopher agent/listener, hivyo miundombinu ya kisasa ya Adaptix inaweza kufichua zaidi ya surfaces za awali za HTTP/SMB/TCP hata kama sample maalum bado inatumia classic beacon agent.
 
-AdaptixC2 inaunga mkono aina tatu kuu za beacon:
-- BEACON_HTTP: web C2 yenye servers/ports/SSL zinazoweza kusanidiwa, method, URI, headers, user‑agent, na custom parameter name
-- BEACON_SMB: named‑pipe peer‑to‑peer C2 (intranet)
-- BEACON_TCP: direct sockets, hiari zikiwa na marker iliyowekwa mwanzoni ili kuficha mwanzo wa protocol
+## Beacon profiles na fields
 
-Mashamba ya profaili ya kawaida yaliyobainika katika config za beacon za HTTP (baada ya decryption):
+AdaptixC2 inasaidia aina tatu kuu za beacon:
+- BEACON_HTTP: web C2 yenye servers/ports za configurable, method, URI, headers, user-agent, na custom parameter name
+- BEACON_SMB: named-pipe peer-to-peer C2 (intranet)
+- BEACON_TCP: direct sockets, kwa hiari ikiwa na marker iliyowekwa mwanzo ili kuficha mwanzo wa protocol
+
+Hizi ndizo beacon layouts zilizowekwa hadharani katika analyses za awali za Adaptix na bado ndizo sehemu za kawaida za kuanzia kwa extraction upande wa sample. Hata hivyo, builds za sasa za upstream pia zinakuja na `BeaconDNS` na Gopher extenders upande wa server, hivyo usidhani kwamba kila deployment ya Adaptix inayofanya kazi inafichua miundombinu ya HTTP/SMB/TCP pekee.
+
+Fields za kawaida za profile zinazoonekana katika HTTP beacon configs (baada ya decryption):
 - agent_type (u32)
 - use_ssl (bool)
 - servers_count (u32), servers (array of strings), ports (array of u32)
 - http_method, uri, parameter, user_agent, http_headers (length‑prefixed strings)
-- ans_pre_size (u32), ans_size (u32) – used to parse response sizes
+- ans_pre_size (u32), ans_size (u32) – hutumika kuchanganua response sizes
 - kill_date (u32), working_time (u32)
 - sleep_delay (u32), jitter_delay (u32)
 - listener_type (u32)
 - download_chunk_size (u32)
 
-Example default HTTP profile (from a beacon build):
+BeaconHTTP builds za hivi karibuni pia zina support ya rotation iliyochaguliwa na operator kati ya URIs, user-agents, Host headers, na servers nyingi, kwa selection ya sequential au random. Kwa mtazamo wa hunting, hii inamaanisha kuwa host moja iliyoambukizwa inaweza kusambaza callbacks kwenye callback paths na header combinations kadhaa bila kuacha classic RC4-packed beacon family.
+
+Mfano wa default HTTP profile (kutoka kwenye beacon build):
 ```json
 {
 "agent_type": 3192652105,
@@ -48,7 +54,7 @@ Example default HTTP profile (from a beacon build):
 "download_chunk_size": 102400
 }
 ```
-Profaili ya HTTP yenye nia mbaya iliyogunduliwa (shambulio la kweli):
+Wasifu wa HTTP hasidi uliobainika (shambulio halisi):
 ```json
 {
 "agent_type": 3192652105,
@@ -71,37 +77,37 @@ Profaili ya HTTP yenye nia mbaya iliyogunduliwa (shambulio la kweli):
 "download_chunk_size": 102400
 }
 ```
-## Ufungashaji wa usanidi uliosimbwa na njia ya kupakia
+## Ufungashaji wa usanidi uliosimbwa na njia ya upakiaji
 
-Wakati operator anabonyeza Create katika builder, AdaptixC2 inaweka profaili iliyosimbwa kama tail blob ndani ya beacon. Muundo ni:
-- 4 bytes: configuration size (uint32, little‑endian)
-- N bytes: RC4‑encrypted configuration data
+Operator anapobofya Create kwenye builder, AdaptixC2 huingiza profile iliyosimbwa kama tail blob ndani ya beacon. Muundo ni:
+- 4 bytes: ukubwa wa configuration (uint32, little-endian)
+- N bytes: data ya configuration iliyosimbwa kwa RC4
 - 16 bytes: RC4 key
 
-Beacon loader inakopa 16‑byte key kutoka mwisho na RC4‑decrypts N‑byte block mahali pake:
+Beacon loader hunakili key ya bytes 16 kutoka mwisho na ku-decrypt block ya N bytes kwa RC4 mahali pake:
 ```c
 ULONG profileSize = packer->Unpack32();
 this->encrypt_key = (PBYTE) MemAllocLocal(16);
 memcpy(this->encrypt_key, packer->data() + 4 + profileSize, 16);
 DecryptRC4(packer->data()+4, profileSize, this->encrypt_key, 16);
 ```
-Matokeo ya vitendo:
-- Muundo mzima mara nyingi upo ndani ya sehemu ya PE .rdata.
-- Uchimbaji ni isiyobadilika: soma size, soma ciphertext ya ukubwa huo, soma 16‑byte key iliyowekwa mara moja baada yake, kisha RC4‑decrypt.
+Athari za kiutendaji:
+- Muundo mzima mara nyingi hupatikana ndani ya PE .rdata section.
+- Extraction ni deterministic: soma size, soma ciphertext ya size hiyo, soma key ya 16-byte iliyowekwa mara moja baada yake, kisha fanya RC4-decrypt.
 
-## Mtiririko wa uchimbaji wa configuration (walinzi)
+## Workflow ya configuration extraction (defenders)
 
-Andika extractor inayofanana na mantiki ya beacon:
-1) Pata blob ndani ya PE (kawaida .rdata). Njia ya vitendo ni kuskena .rdata kutafuta muundo unaowezekana wa [size|ciphertext|16‑byte key] na kujaribu RC4.
-2) Soma 4 bytes za kwanza → size (uint32 LE).
-3) Soma bytes zifuatazo N=size → ciphertext.
-4) Soma 16 bytes za mwisho → RC4 key.
-5) RC4‑decrypt the ciphertext. Kisha changanua profaili wazi kama:
-- u32/boolean scalars kama ilivyoelezwa hapo juu
-- length‑prefixed strings (u32 length followed by bytes; trailing NUL can be present)
-- arrays: servers_count ikifuatiwa na idadi hiyo ya jozi [string, u32 port]
+Andika extractor inayoiga beacon logic:
+1) Tafuta blob ndani ya PE (kwa kawaida .rdata). Njia ya kiutendaji ni kuscan .rdata kutafuta layout inayowezekana ya [size|ciphertext|16-byte key] na kujaribu RC4.
+2) Soma bytes 4 za kwanza → size (uint32 LE).
+3) Soma bytes N zinazofuata, ambapo N=size → ciphertext.
+4) Soma bytes 16 za mwisho → RC4 key.
+5) Fanya RC4-decrypt ya ciphertext. Kisha parse plain profile kama ifuatavyo:
+- u32/boolean scalars kama ilivyobainishwa hapo juu
+- strings zenye length-prefix (u32 length ikifuatiwa na bytes; trailing NUL inaweza kuwepo)
+- arrays: servers_count ikifuatiwa na idadi hiyo ya jozi za [string, u32 port]
 
-Minimal Python proof‑of‑concept (standalone, no external deps) that works with a pre‑extracted blob:
+Minimal Python proof-of-concept (standalone, bila external deps) inayofanya kazi na blob iliyotolewa awali:
 ```python
 import struct
 from typing import List, Tuple
@@ -168,40 +174,78 @@ return cfg
 # cfg  = parse_http_cfg(pt)
 ```
 Vidokezo:
-- Wakati unapo-automate, tumia PE parser kusoma .rdata kisha tumia sliding window: kwa kila offset o, jaribu size = u32(.rdata[o:o+4]), ct = .rdata[o+4:o+4+size], candidate key = next 16 bytes; RC4‑decrypt na angalia kwamba string fields zina-decode kama UTF‑8 na lengths ni za busara.
-- Parsa profile za SMB/TCP kwa kufuata conventions za length‑prefixed sawa.
+- Wakati wa ku-automate, tumia PE parser kusoma .rdata kisha utumie sliding window: kwa kila offset o, jaribu size = u32(.rdata[o:o+4]), ct = .rdata[o+4:o+4+size], candidate key = next 16 bytes; RC4-decrypt na uangalie ikiwa string fields zinadecode kama UTF-8 na lengths ni sahihi.
+- Parse SMB/TCP profiles kwa kufuata length-prefixed conventions zilezile.
 
-## Utambuzi wa sifa za mtandao na uwindaji
+## Custom listener profiles: usi-hard-code classic HTTP schema pekee
+
+Outer packing format (`u32 size | RC4 ciphertext | 16-byte key`) inaweza kutumika tena, hivyo actor-customized listeners zinaweza kutumia extraction workflow ileile huku zikibadilisha kabisa decrypted field layout.
+
+Mfano mzuri wa hivi karibuni ni campaign ya Tropic Trooper ya Aprili 2026, ambapo Adaptix beacon iliyotolewa haikuwa na standard HTTP/TCP profile. Badala yake, decrypted blob iliweka GitHub transport parameters kama:
+- `repo_owner`
+- `repo_name`
+- `api_host` (kwa mfano `api.github.com`)
+- `auth_token`
+- `issues_api_path`
+- `kill_date` / `working_time` / `sleep_delay` / `jitter`
+
+Practical parser strategy:
+- Kwanza tambua outer RC4 blob kama kawaida kabisa.
+- Baada ya decryption, branch kwa kutumia sentinel strings na field sanity badala ya kulazimisha HTTP parser mara moja.
+- Sentinels nzuri ni pamoja na `api.github.com`, `/issues?state=open`, HTTP verbs/URIs, named-pipe-style strings, au server/port arrays zilizo valid wazi.
+- Ikiwa HTTP parser itashindwa lakini plaintext ina coherent length-prefixed UTF-8 strings, hifadhi sample na ujaribu alternative schemas badala ya kuitupa kama false positive.
+
+Katika campaign hiyo custom listener ilitumia GitHub issues kama C2 transport, na beacon ili-query `ipinfo.io` ili kujua external IP yake kwa sababu GitHub API haionyeshi moja kwa moja victim source address kwa operator.
+
+## Network fingerprinting na hunting
 
 HTTP
-- Mara nyingi: POST kwa URIs zilizochaguliwa na operator (mf., /uri.php, /endpoint/api)
-- Kigezo cha header maalum kinachotumika kwa beacon ID (mf., X‑Beacon‑Id, X‑App‑Id)
-- User‑agents zinajaribu kuiga Firefox 20 au matoleo ya Chrome ya sasa
-- Mdundo wa polling unaoonekana kupitia sleep_delay/jitter_delay
+- Common: POST kwenda kwenye URIs zilizochaguliwa na operator (kwa mfano, /uri.php, /endpoint/api)
+- Custom header parameter inayotumika kwa beacon ID (kwa mfano, X‑Beacon‑Id, X‑App‑Id)
+- User-agents zinazoiga Firefox 20 au contemporary Chrome builds
+- Polling cadence inayoonekana kupitia sleep_delay/jitter_delay
+- Builds mpya zinaweza kuzungusha URIs, user-agents, Host headers, na servers katika callbacks mbalimbali, hivyo cluster kwa kutumia uncommon header names, response-size patterns, TLS reuse, na timing badala ya kudhani kuna single path/UA pair
 
 SMB/TCP
-- SMB named‑pipe listeners kwa C2 ya intranet pale ambapo egress ya web imezuiwa
-- TCP beacons yanaweza kuweka bytes chache kabla ya trafiki ili kuficha kuanza kwa protocol
+- SMB named-pipe listeners kwa intranet C2 ambapo web egress imezuiwa
+- TCP beacons zinaweza kuweka bytes chache kabla ya traffic ili kuficha protocol start
 
-## Loader and persistence TTPs zilizoshuhudiwa katika matukio
+Current upstream teamserver defaults
+- `profile.yaml` kwa sasa inasafirisha teamserver `0.0.0.0:4321`, endpoint `/endpoint`, certificate/key filenames `server.rsa.crt` na `server.rsa.key`, pamoja na extenders za HTTP, SMB, TCP, DNS, Beacon agent, na Gopher
+- Kwenye unmatched routes, default error handler hurudisha `Server: AdaptixC2` na `Adaptix-Version: v1.2`
+- Stock 404 body ina `AdaptixC2 404` na `You need to enter the correct connection details.`
+- Internet-wide scans za mwaka 2026 ziligundua teamservers nyingi zilizo exposed kwenye `4321` na beacon listeners nyingi kwenye `43211`, kwa hiyo ports zote mbili ni useful seed pivots lakini hazipaswi kuchukuliwa kuwa exhaustive
 
-Loaders za PowerShell ambazo zinafanya kazi ndani ya kumbukumbu
-- Pakua payloads za Base64/XOR (Invoke‑RestMethod / WebClient)
-- Tenga unmanaged memory, nakili shellcode, badilisha ulinzi kwa 0x40 (PAGE_EXECUTE_READWRITE) kupitia VirtualProtect
-- Endesha kupitia .NET dynamic invocation: Marshal.GetDelegateForFunctionPointer + delegate.Invoke()
+DNS/DoH listener fingerprints
+- Current BeaconDNS extender hujibu authoritatively (`AA=true`)
+- Queries zisizolingana na beacon protocol shape — hasa names zilizo na labels chini ya 5 kabla ya configured domain — kwa kawaida hujibiwa kwa `TXT "OK"`
+- Ikiwa configured base TTL itaachwa ikiwa zero, listener hutumia base ya sekunde 10 na kuongeza hadi sekunde 59 za jitter
+- Hii hufanya short-label active probes kuwa useful wakati hakuna HTTP listener iliyo exposed
 
-Angalia kurasa hizi kuhusu utekelezaji ndani ya kumbukumbu na masuala ya AMSI/ETW:
+## Loader na persistence TTPs zilizoonekana katika incidents
+
+In‑memory PowerShell loaders
+- Hushusha Base64/XOR payloads (Invoke‑RestMethod / WebClient)
+- Hutenga unmanaged memory, hunakili shellcode, na hubadilisha protection kuwa 0x40 (PAGE_EXECUTE_READWRITE) kupitia VirtualProtect
+- Hu-execute kupitia .NET dynamic invocation: Marshal.GetDelegateForFunctionPointer + delegate.Invoke()
+
+Trojanized signed software / staged shellcode loaders
+- Chain ya Tropic Trooper ya mwaka 2026 ilitumia trojanized SumatraPDF executable (TOSHIS loader) iliyoredirect `_security_init_cookie` kwenda kwenye malicious code badala ya kupatch PE entry point
+- Loader iliresolve APIs kupitia Adler-32 hashing, ikadownload decoy PDF, ikafetch second-stage shellcode, ika-decrypt kwa AES-128-CBC kupitia WinCrypt (`CryptDeriveKey` kutoka hardcoded seed), na ika-execute Adaptix beacon reflectively kwenye memory
+- Persistence baadaye ilihamia kwenye scheduled tasks zenye majina yanayoonekana benign kama `\MSDNSvc` au `\MicrosoftUDN`, zilizoconfigurewa ku-re-launch agent takriban kila baada ya saa mbili
+
+Angalia pages hizi kuhusu in‑memory execution na AMSI/ETW considerations:
 
 {{#ref}}
 ../../windows-hardening/av-bypass.md
 {{#endref}}
 
-Mbinu za persistence zilizoshuhudiwa
-- Shortcut ya Startup folder (.lnk) ili kuzindua tena loader wakati wa logon
-- Registry Run keys (HKCU/HKLM ...\CurrentVersion\Run), mara nyingi zikiwa na majina yanayosikika kuwa yasiyotishia kama "Updater" kuanzisha loader.ps1
-- DLL search‑order hijack kwa kuweka msimg32.dll chini ya %APPDATA%\Microsoft\Windows\Templates kwa processes zinazoweza kuathiriwa
+Persistence mechanisms zilizozingatiwa
+- Startup folder shortcut (.lnk) ya ku-re-launch loader wakati wa logon
+- Registry Run keys (HKCU/HKLM ...\CurrentVersion\Run), mara nyingi zikiwa na majina yanayosikika benign kama "Updater" ili ku-start loader.ps1
+- DLL search-order hijack kwa kuweka msimg32.dll chini ya %APPDATA%\Microsoft\Windows\Templates kwa processes zilizo susceptible
 
-Uchunguzi wa kina wa mbinu na ukaguzi:
+Technique deep-dives na checks:
 
 {{#ref}}
 ../../windows-hardening/windows-local-privilege-escalation/privilege-escalation-with-autorun-binaries.md
@@ -211,29 +255,35 @@ Uchunguzi wa kina wa mbinu na ukaguzi:
 ../../windows-hardening/windows-local-privilege-escalation/dll-hijacking/README.md
 {{#endref}}
 
-Mapendekezo ya uwindaji
-- PowerShell kuanzisha mabadiliko ya RW→RX: VirtualProtect kwa PAGE_EXECUTE_READWRITE ndani ya powershell.exe
-- Mifumo ya dynamic invocation (GetDelegateForFunctionPointer)
-- Startup .lnk chini ya folda za Startup za mtumiaji au za kawaida
-- Run keys za kushangaza (mf., "Updater"), na majina ya loader kama update.ps1/loader.ps1
-- Path za DLL zinazoweza kuandikwa na mtumiaji chini ya %APPDATA%\Microsoft\Windows\Templates zenye msimg32.dll
+Hunting ideas
+- PowerShell inayospawn RW→RX transitions: VirtualProtect kwenda PAGE_EXECUTE_READWRITE ndani ya powershell.exe
+- Dynamic invocation patterns (GetDelegateForFunctionPointer)
+- Unmatched HTTPS 404s zenye `Server: AdaptixC2`, `Adaptix-Version`, `AdaptixC2 404`, au `You need to enter the correct connection details.`
+- DNS responses zenye `AA=true` na `TXT "OK"` kwa short queries chini ya suspect domains
+- GitHub API traffic kwenda `/repos/<owner>/<repo>/issues` ikifuatiwa na lookups za `ipinfo.io` kutoka kwenye loader/beacon chain ileile
+- Startup .lnk chini ya user au common Startup folders
+- Suspicious Run keys (kwa mfano, "Updater"), na loader names kama update.ps1/loader.ps1
+- Trojanized PE samples zinazo-redirect `_security_init_cookie` kwenda kwenye downloader code kabla ya kuonyesha decoy document
+- User‑writable DLL paths chini ya %APPDATA%\Microsoft\Windows\Templates zenye msimg32.dll
 
-## Vidokezo kuhusu sehemu za OpSec
+## Notes kuhusu OpSec fields
 
-- KillDate: timestamp baada ya hapo agent inajimaliza
-- WorkingTime: saa ambazo agent inapaswa kuwa hai ili kuendana na shughuli za kibiashara
+- KillDate: timestamp ambayo baada yake agent hujiexpire
+- WorkingTime: saa ambazo agent inapaswa kuwa active ili ilandane na business activity
 
-Sehemu hizi zinaweza kutumika kwa clustering na kuelezea vipindi vya ukimya vilivyobainishwa.
+Fields hizi zinaweza kutumika kwa clustering na kueleza quiet periods zilizoonekana.
 
-## YARA na vidokezo vya static
+## YARA na static leads
 
-Unit 42 ilichapisha basic YARA kwa beacons (C/C++ and Go) na loader API‑hashing constants. Fikiria kuongeza rules zinatafuta muundo wa [size|ciphertext|16‑byte‑key] karibu na mwisho wa PE .rdata na default HTTP profile strings.
+Unit 42 ilichapisha basic YARA kwa beacons (C/C++ na Go) pamoja na loader API-hashing constants. Fikiria kuongezea rules zinazoangalia [size|ciphertext|16‑byte‑key] layout karibu na mwisho wa PE .rdata, default HTTP profile strings, na server/listener markers mpya kama `AdaptixC2 404`, `You need to enter the correct connection details.`, `Adaptix-Version`, `server.rsa.crt`, `server.rsa.key`, `api.github.com`, `/issues?state=open`, na `ipinfo.io`.
 
 ## References
 
 - [AdaptixC2: A New Open-Source Framework Leveraged in Real-World Attacks (Unit 42)](https://unit42.paloaltonetworks.com/adaptixc2-post-exploitation-framework/)
 - [AdaptixC2 GitHub](https://github.com/Adaptix-Framework/AdaptixC2)
 - [Adaptix Framework Docs](https://adaptix-framework.gitbook.io/adaptix-framework)
+- [AdaptixC2: Fingerprinting an Open-Source C2 Framework at Scale (Censys)](https://censys.com/blog/adaptixc2-open-source-c2-framework/)
+- [Tropic Trooper Pivots to AdaptixC2 and Custom Beacon Listener (Zscaler ThreatLabz)](https://www.zscaler.com/blogs/security-research/tropic-trooper-pivots-adaptixc2-and-custom-beacon-listener)
 - [Marshal.GetDelegateForFunctionPointer – Microsoft Docs](https://learn.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.marshal.getdelegateforfunctionpointer)
 - [VirtualProtect – Microsoft Docs](https://learn.microsoft.com/en-us/windows/win32/api/memoryapi/nf-memoryapi-virtualprotect)
 - [Memory protection constants – Microsoft Docs](https://learn.microsoft.com/en-us/windows/win32/memory/memory-protection-constants)
