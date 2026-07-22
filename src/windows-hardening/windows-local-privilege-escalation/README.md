@@ -858,6 +858,33 @@ For race-condition bugs where the vulnerable call opens an attacker-controlled O
 kernel-race-condition-object-manager-slowdown.md
 {{#endref}}
 
+#### Cancel-safe queue UAFs, paged-pool disclosures, and I/O ring pivots
+
+Some Windows kernel LPE chains can be built from two individually weak bugs: a **cancel-safe queue lifetime race** that frees a request/CBD while the queue lock is still held, and a **lock-release-before-copy** disclosure that leaks a freed paged-pool allocation during `RtlCopyToUser`.
+
+Audit and exploitation notes:
+
+- **Free-under-lock + cancel afterwards**: look for a success path that does **Acquire -> CompleteRequest/free -> Release** while the cancel path does **Acquire -> RemoveIo(stale pointer) -> Release -> CompleteCanceledIo**. If the success path reaches `FltCompletePendedPreOperation` / `FltpFreeIrpCtrl` before releasing the CBDQ/CSQ lock, a thread blocked in `NtCancelIoFileEx -> IopCsqCancelRoutine` can resume later and pass a freed `PFLT_CALLBACK_DATA` back into the driver's remove callback.
+- **Reclaim the freed queue object** with a same-sized, attacker-controlled paged-pool allocation. `NPFS` Data Queue Entries are useful because the payload and size are controllable and you can later probe them with pipe read/peek operations. If the freed object embeds list links, overwrite them with a **cyclic list of fake request nodes in user memory** so the driver repeatedly processes attacker-defined request structures instead of terminating at the original list head.
+- **Upgrade a predictable write**: if the fake request redirects a nested context pointer used by bookkeeping writes (timestamps / QPC / refcount-adjacent fields), you may get an **address-controlled but not value-controlled** kernel write. In that case, target a sprayed pool object's **length/size** field instead of a final code/data pointer, then enumerate the spray until the corrupted object yields an **out-of-bounds paged-pool read**.
+- **Raceable disclosure pattern**: any syscall that does `ptr = obj->Buffer; unlock(obj); RtlCopyToUser(dst, ptr, size)` is a strong candidate. Reliability improves when the attacker can enlarge the copied buffer (for example by adding many list/resource entries that increase a serializer's final allocation size), because the longer copy widens the replacement window without necessarily crashing the machine.
+- **Pointer-rich refill targets**: Windows **I/O ring** registered-buffer arrays are excellent disclosure targets because their paged-pool size is attacker-controlled (`8 * regBufferCnt`) and each element is a kernel pointer to an `_IOP_MC_BUFFER_ENTRY`. Leak one of these arrays, recover the surrounding `IORING_OBJECT`, then corrupt **`RegBuffers`** and **`RegBuffersCount`** so subsequent I/O ring operations consume attacker-forged entries and provide arbitrary kernel read/write. If the only available write gives you a stable byte (for example from `KUSER_SHARED_DATA+0x14`), use **overlapping unaligned writes** to build a repeated-byte user pointer such as `0x0101010101010101`, map it with `VirtualAlloc`, and place the forged registered-buffer array there.
+
+Useful debugging indicators:
+
+```text
+NtCancelIoFileEx -> IopCsqCancelRoutine -> <driver>!RemoveIo
+<driver> success path: Acquire -> CompleteRequest/free -> Release
+RtlCopyToUser after releasing the object lock
+ExAllocatePool2(..., 8 * regBufferCnt, 'BRrI')-style variable-sized pointer arrays
+```
+
+Once you obtain arbitrary kernel read/write from the corrupted I/O ring, steal a SYSTEM token using the standard post-primitive workflow:
+
+{{#ref}}
+arbitrary-kernel-rw-token-theft.md
+{{#endref}}
+
 #### Registry hive memory corruption primitives
 
 Modern hive vulnerabilities let you groom deterministic layouts, abuse writable HKLM/HKU descendants, and convert metadata corruption into kernel paged-pool overflows without a custom driver. Learn the full chain here:
@@ -2154,5 +2181,7 @@ C:\Windows\microsoft.net\framework\v4.0.30319\MSBuild.exe -version #Compile the 
 - [PowerShell Gallery - NtObjectManager](https://www.powershellgallery.com/packages/NtObjectManager/2.0.1)
 - [sec-zone - CVE-2026-36213](https://github.com/sec-zone/CVE-2026-36213)
 - [sec-zone - Hijack-service-binaries](https://github.com/sec-zone/Hijack-service-binaries)
+- [Pwn2Own with Microslop: Chaining CLDFLT and DirectX Kernel Race Conditions for Windows LPE](https://dungnm.hashnode.dev/pwn2own-with-microslop)
+- [One I/O Ring to Rule Them All: A Full Read/Write Exploit Primitive on Windows 11](https://windows-internals.com/one-i-o-ring-to-rule-them-all-a-full-read-write-exploit-primitive-on-windows-11/)
 
 {{#include ../../banners/hacktricks-training.md}}
