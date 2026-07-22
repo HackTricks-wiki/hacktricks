@@ -1,31 +1,37 @@
-# AdaptixC2 Yapılandırma Çıkarımı ve TTPs
+# AdaptixC2 Yapılandırma Çıkarma ve TTP'ler
 
 {{#include ../../banners/hacktricks-training.md}}
 
-AdaptixC2, Windows x86/x64 beacons (EXE/DLL/service EXE/raw shellcode) ve BOF desteğine sahip modüler, open‑source post‑exploitation/C2 framework'üdür. Bu sayfa şunları belgeliyor:
-- RC4‑packed yapılandırmasının beacons içine nasıl gömüldüğünü ve beacons'tan nasıl çıkarılacağını
-- HTTP/SMB/TCP listener'ları için ağ/profil göstergeleri
-- Gerçek dünyada gözlemlenen yaygın loader ve persistence TTPs'leri; ilgili Windows teknik sayfalarına bağlantılar ile
+AdaptixC2, Windows x86/x64 beacon'larına (EXE/DLL/service EXE/raw shellcode) ve BOF desteğine sahip modüler, open-source bir post-exploitation/C2 framework'üdür. Bu sayfa şunları belgeler:
+- RC4-packed yapılandırmasının nasıl gömüldüğünü ve beacon'lardan nasıl çıkarılacağını
+- HTTP/SMB/TCP listener'ları için network/profile göstergelerini
+- Wild ortamda gözlemlenen yaygın loader ve persistence TTP'lerini ve ilgili Windows technique sayfalarına bağlantıları
+
+Güncel upstream sürümleri ayrıca DNS/DoH beacon listener'larını ve ayrı Gopher agent/listener ailesini de içerir. Bu nedenle belirli bir sample hâlâ klasik beacon agent'ını kullansa bile modern Adaptix altyapısı, orijinal HTTP/SMB/TCP yüzeylerinden daha fazlasını açığa çıkarabilir.
 
 ## Beacon profilleri ve alanları
 
-AdaptixC2 üç ana beacon tipini destekler:
-- BEACON_HTTP: yapılandırılabilir servers/ports/SSL, method, URI, headers, user‑agent ve özel bir parameter name ile web C2
-- BEACON_SMB: named‑pipe peer‑to‑peer C2 (intranet)
-- BEACON_TCP: protokol başlangıcını gizlemek için isteğe bağlı olarak öne konan bir marker ile direct sockets
+AdaptixC2 üç primary beacon type destekler:
+- BEACON_HTTP: yapılandırılabilir server/port/SSL, method, URI, header, user-agent ve özel parameter name özelliklerine sahip web C2
+- BEACON_SMB: named-pipe peer-to-peer C2 (intranet)
+- BEACON_TCP: protocol başlangıcını obfuscate etmek için başına marker eklenebilen direct socket'ler
 
-HTTP beacon konfigürasyonlarında gözlemlenen tipik profil alanları (şifre çözme sonrasında):
+Bunlar, erken Adaptix analizlerinde publicly documented edilen beacon layout'larıdır ve sample-side extraction için hâlâ en yaygın başlangıç noktalarıdır. Ancak güncel upstream build'ler server tarafında `BeaconDNS` ve Gopher extender'larını da içerir. Bu nedenle her live Adaptix deployment'ının yalnızca HTTP/SMB/TCP infrastructure açığa çıkardığını varsaymayın.
+
+HTTP beacon config'lerinde (decryption sonrasında) gözlemlenen typical profile field'ları:
 - agent_type (u32)
 - use_ssl (bool)
 - servers_count (u32), servers (array of strings), ports (array of u32)
-- http_method, uri, parameter, user_agent, http_headers (length‑prefixed strings)
-- ans_pre_size (u32), ans_size (u32) – response boyutlarını parse etmek için kullanılır
+- http_method, uri, parameter, user_agent, http_headers (length-prefixed strings)
+- ans_pre_size (u32), ans_size (u32) – response size'larını parse etmek için kullanılır
 - kill_date (u32), working_time (u32)
 - sleep_delay (u32), jitter_delay (u32)
 - listener_type (u32)
 - download_chunk_size (u32)
 
-Example default HTTP profile (from a beacon build):
+Güncel BeaconHTTP build'leri ayrıca operator tarafından birden fazla URI, user-agent, Host header ve server arasında sequential veya random selection yapılmasını destekler. Hunting açısından bu, tek bir infected host'un klasik RC4-packed beacon family'sinden ayrılmadan birden fazla callback path ve header combination'a yayılabileceği anlamına gelir.
+
+Örnek default HTTP profile (bir beacon build'inden):
 ```json
 {
 "agent_type": 3192652105,
@@ -71,37 +77,37 @@ Gözlemlenen kötü amaçlı HTTP profili (gerçek saldırı):
 "download_chunk_size": 102400
 }
 ```
-## Şifrelenmiş yapılandırma paketleme ve yükleme yolu
+## Şifreli yapılandırma paketleme ve yükleme yolu
 
-Operatör builder'da Create'a tıkladığında, AdaptixC2 şifrelenmiş profili beacon'ın sonuna bir tail blob olarak gömer. Formatı:
-- 4 bayt: yapılandırma boyutu (uint32, little‑endian)
-- N bayt: RC4 ile şifrelenmiş yapılandırma verisi
-- 16 bayt: RC4 anahtarı
+Operator builder'da Create'e tıkladığında AdaptixC2, şifreli profile beacon içinde tail blob olarak gömer. Format:
+- 4 bytes: configuration size (uint32, little-endian)
+- N bytes: RC4-encrypted configuration data
+- 16 bytes: RC4 key
 
-Beacon loader sondan 16 baytlık anahtarı kopyalar ve N baytlık bloğu yerinde RC4 ile çözer:
+Beacon loader, sondaki 16-byte key'i kopyalar ve N-byte block'u yerinde RC4 ile decrypt eder:
 ```c
 ULONG profileSize = packer->Unpack32();
 this->encrypt_key = (PBYTE) MemAllocLocal(16);
 memcpy(this->encrypt_key, packer->data() + 4 + profileSize, 16);
 DecryptRC4(packer->data()+4, profileSize, this->encrypt_key, 16);
 ```
-Practical implications:
-- Tüm yapı genellikle PE .rdata bölümünün içinde bulunur.
-- Çıkarma işlemi deterministiktir: boyutu oku, o boyutta ciphertext oku, hemen ardından yerleştirilen 16‑byte anahtarı oku, ardından RC4‑decrypt uygula.
+Pratik sonuçlar:
+- Tüm yapı çoğunlukla PE .rdata section içinde bulunur.
+- Extraction deterministiktir: size değerini okuyun, bu size değerindeki ciphertext'i okuyun, hemen ardından yerleştirilmiş 16-byte key'i okuyun ve ardından RC4 ile decrypt edin.
 
-## Konfigürasyon çıkarma iş akışı (savunucular)
+## Configuration extraction workflow (defenders)
 
-Write an extractor that mimics the beacon logic:
-1) PE içinde blob'u bulun (çoğunlukla .rdata). Pragmatik bir yaklaşım, .rdata'ı olası bir [size|ciphertext|16‑byte key] düzeni için taramak ve RC4 denemektir.
-2) İlk 4 bytes'ı oku → size (uint32 LE).
-3) Sonraki N=size bytes'ı oku → ciphertext.
-4) Son 16 bytes'ı oku → RC4 key.
-5) Ciphertext'i RC4‑decrypt edin. Sonra düz metin profili şu şekilde ayrıştırın:
-- u32/boolean scalars yukarıda belirtildiği gibi
-- length‑prefixed strings (u32 length followed by bytes; trailing NUL bulunabilir)
-- arrays: servers_count ardından o kadar [string, u32 port] çifti
+Beacon mantığını taklit eden bir extractor yazın:
+1) Blob'u PE içinde bulun (genellikle .rdata). Pratik bir yaklaşım, .rdata içinde makul bir [size|ciphertext|16-byte key] düzenini taramak ve RC4'ü denemektir.
+2) İlk 4 byte'ı okuyun → size (uint32 LE).
+3) Sonraki N=size byte'ı okuyun → ciphertext.
+4) Son 16 byte'ı okuyun → RC4 key.
+5) Ciphertext'i RC4 ile decrypt edin. Ardından plain profile'ı şu şekilde parse edin:
+- Yukarıda belirtildiği gibi u32/boolean scalar'lar
+- Length-prefixed string'ler (u32 length ve ardından byte'lar; sondaki NUL mevcut olabilir)
+- Array'ler: servers_count ve ardından bu sayıda [string, u32 port] çifti
 
-Önceden çıkarılmış bir blob ile çalışan minimal Python proof‑of‑concept (standalone, harici bağımlılık yok):
+Pre-extracted blob ile çalışan, standalone ve external deps gerektirmeyen minimal Python proof-of-concept:
 ```python
 import struct
 from typing import List, Tuple
@@ -168,40 +174,78 @@ return cfg
 # cfg  = parse_http_cfg(pt)
 ```
 İpuçları:
-- Otomasyon yaparken, .rdata okumak için bir PE parser kullanın ve ardından sliding window uygulayın: her offset o için size = u32(.rdata[o:o+4]) deneyin, ct = .rdata[o+4:o+4+size], aday anahtar = sonraki 16 byte; RC4‑decrypt uygulayıp string alanların UTF‑8 olarak çözüldüğünü ve uzunlukların makul olduğunu kontrol edin.
-- SMB/TCP profillerini aynı length‑prefixed kurallarını takip ederek parse edin.
+- Otomatikleştirme sırasında `.rdata` bölümünü okumak için bir PE parser kullanın, ardından kayan pencere uygulayın: her `o` offset’i için `size = u32(.rdata[o:o+4])`, `ct = .rdata[o+4:o+4+size]`, aday key = sonraki 16 byte olacak şekilde deneyin; RC4 ile decrypt edin ve string alanlarının UTF-8 olarak decode edildiğini ve uzunlukların makul olduğunu kontrol edin.
+- SMB/TCP profillerini aynı length-prefixed kuralları izleyerek parse edin.
 
-## Network fingerprinting and hunting
+## Custom listener profilleri: yalnızca klasik HTTP şemasını hard-code etmeyin
+
+Dış paketleme formatı (`u32 size | RC4 ciphertext | 16-byte key`) yeniden kullanılabilir olduğundan actor tarafından özelleştirilmiş listener’lar, decrypt edilen field layout’unu tamamen değiştirirken aynı extraction workflow’unu koruyabilir.
+
+Buna iyi bir güncel örnek, extracted Adaptix beacon’ın standart bir HTTP/TCP profili içermediği Nisan 2026 Tropic Trooper campaign’idir. Bunun yerine decrypted blob, aşağıdaki gibi GitHub transport parametrelerini saklıyordu:
+- `repo_owner`
+- `repo_name`
+- `api_host` (örneğin `api.github.com`)
+- `auth_token`
+- `issues_api_path`
+- `kill_date` / `working_time` / `sleep_delay` / `jitter`
+
+Pratik parser stratejisi:
+- Önce outer RC4 blob’unu her zamanki gibi tespit edin.
+- Decryption sonrasında HTTP parser’ı hemen zorlamak yerine sentinel string’lere ve field sanity kontrollerine göre dallanma yapın.
+- İyi sentinel’ler arasında `api.github.com`, `/issues?state=open`, HTTP verbs/URIs, named-pipe-style string’ler veya açıkça geçerli server/port array’leri bulunur.
+- HTTP parser başarısız olursa ancak plaintext tutarlı length-prefixed UTF-8 string’ler içeriyorsa sample’ı koruyun ve false positive olarak discard etmek yerine alternative schema’ları deneyin.
+
+Bu campaign’de custom listener, C2 transport olarak GitHub issues kullanıyordu ve beacon, GitHub API’sinin victim source address’ini operator’a doğrudan göstermemesi nedeniyle external IP’sini öğrenmek için `ipinfo.io` sorguluyordu.
+
+## Network fingerprinting ve hunting
 
 HTTP
-- Yaygın: operator‑selected URI’lere POST (ör. /uri.php, /endpoint/api)
-- Beacon ID için kullanılan custom header parametresi (ör. X‑Beacon‑Id, X‑App‑Id)
-- Firefox 20 veya o dönemin Chrome build’lerini taklit eden User‑agents
-- sleep_delay/jitter_delay ile görülebilen polling cadence
+- Yaygın: operator tarafından seçilen URI’lere POST (ör. `/uri.php`, `/endpoint/api`)
+- Beacon ID için kullanılan custom header parameter (ör. `X-Beacon-Id`, `X-App-Id`)
+- Firefox 20 veya güncel Chrome build’lerini taklit eden user-agent’lar
+- `sleep_delay`/`jitter_delay` üzerinden görülebilen polling cadence
+- Daha yeni build’ler callback’ler arasında URI’leri, user-agent’ları, Host header’larını ve server’ları rotate edebilir; bu nedenle tek bir path/UA çifti varsaymak yerine yaygın olmayan header name’leri, response-size pattern’lerini, TLS reuse’u ve timing’i temel alarak cluster oluşturun
 
 SMB/TCP
-- Web egress’in kısıtlı olduğu intranet C2 için SMB named‑pipe dinleyicileri
-- TCP beacon’lar protokol başlangıcını obfuscate etmek için trafik öncesi birkaç byte ekleyebilir
+- Web egress’in kısıtlandığı intranet C2 için SMB named-pipe listener’ları
+- TCP beacon’ları protocol başlangıcını obfuscate etmek için traffic öncesine birkaç byte ekleyebilir
 
-## Loader and persistence TTPs seen in incidents
+Current upstream teamserver defaults
+- `profile.yaml` şu anda teamserver için `0.0.0.0:4321`, `/endpoint` endpoint’ini, `server.rsa.crt` ve `server.rsa.key` certificate/key filename’lerini ve HTTP, SMB, TCP, DNS, Beacon agent ve Gopher extender’larını içerir
+- Eşleşmeyen route’larda default error handler `Server: AdaptixC2` ve `Adaptix-Version: v1.2` döndürür
+- Stock 404 body’si `AdaptixC2 404` ve `You need to enter the correct connection details.` içerir
+- 2026’daki Internet-wide scan’ler `4321` üzerinde çok sayıda exposed teamserver ve `43211` üzerinde çok sayıda beacon listener buldu; bu nedenle her iki port da faydalı seed pivot’larıdır, ancak exhaustive kabul edilmemelidir
 
-In‑memory PowerShell loaders
-- Base64/XOR payload’lar indirir (Invoke‑RestMethod / WebClient)
-- unmanaged memory allocate eder, shellcode kopyalar, VirtualProtect ile korumayı 0x40 (PAGE_EXECUTE_READWRITE) olarak değiştirir
-- .NET dynamic invocation ile çalıştırır: Marshal.GetDelegateForFunctionPointer + delegate.Invoke()
+DNS/DoH listener fingerprint’leri
+- Güncel BeaconDNS extender authoritative yanıt verir (`AA=true`)
+- Beacon protocol shape’i ile eşleşmeyen query’ler — özellikle configured domain öncesinde 5’ten az label içeren name’ler — çoğunlukla `TXT "OK"` ile yanıtlanır
+- Configured base TTL sıfır bırakılırsa listener, 10 saniyelik bir base kullanır ve buna 59 saniyeye kadar jitter ekler
+- Bu durum, HTTP listener expose edilmediğinde short-label active probe’larını kullanışlı kılar
 
-In‑memory execution ve AMSI/ETW ile ilgili hususlar için bu sayfaları kontrol edin:
+## Incident’lerde görülen Loader ve persistence TTP’leri
+
+In-memory PowerShell loader’ları
+- Base64/XOR payload’ları indirir (`Invoke-RestMethod` / WebClient)
+- Unmanaged memory allocate eder, shellcode’u kopyalar, `VirtualProtect` üzerinden protection’ı 0x40’a (`PAGE_EXECUTE_READWRITE`) değiştirir
+- .NET dynamic invocation ile çalıştırır: `Marshal.GetDelegateForFunctionPointer` + `delegate.Invoke()`
+
+Trojanized signed software / staged shellcode loader’ları
+- 2026 Tropic Trooper chain’i, PE entry point’i patch etmek yerine `_security_init_cookie`’ı malicious code’a redirect eden trojanized bir SumatraPDF executable’ı (TOSHIS loader) kullandı
+- Loader, API’leri Adler-32 hashing ile resolve etti, decoy PDF indirdi, second-stage shellcode’u fetch etti, WinCrypt üzerinden (`CryptDeriveKey`, hardcoded seed’den) AES-128-CBC ile decrypt etti ve Adaptix beacon’ını memory’de reflectively execute etti
+- Persistence daha sonra `\MSDNSvc` veya `\MicrosoftUDN` gibi benign-looking name’lere sahip scheduled task’lere taşındı; bu task’ler agent’ı yaklaşık iki saatte bir yeniden launch edecek şekilde configure edildi
+
+In-memory execution ve AMSI/ETW konuları için bu sayfalara bakın:
 
 {{#ref}}
 ../../windows-hardening/av-bypass.md
 {{#endref}}
 
 Gözlemlenen persistence mekanizmaları
-- Logon’da bir loader’ı yeniden başlatmak için Startup klasöründe shortcut (.lnk)
-- Registry Run anahtarları (HKCU/HKLM ...\CurrentVersion\Run), genellikle "Updater" gibi masum görünen isimlerle loader.ps1’i başlatmak için
-- msimg32.dll gibi DLL dosyasını %APPDATA%\Microsoft\Windows\Templates altına bırakıp susceptible process’lerde DLL search‑order hijack
+- Logon sırasında loader’ı yeniden launch etmek için Startup folder shortcut’ı (`.lnk`)
+- Loader.ps1’i başlatmak için çoğunlukla `"Updater"` gibi benign-sounding name’lere sahip Registry Run key’leri (HKCU/HKLM `...\CurrentVersion\Run`)
+- Susceptible process’ler için `%APPDATA%\Microsoft\Windows\Templates` altına `msimg32.dll` bırakarak DLL search-order hijacking
 
-Tekniğe dair derinlemesine incelemeler ve kontrol listesi:
+Teknik deep-dive’ları ve kontrolleri:
 
 {{#ref}}
 ../../windows-hardening/windows-local-privilege-escalation/privilege-escalation-with-autorun-binaries.md
@@ -212,28 +256,34 @@ Tekniğe dair derinlemesine incelemeler ve kontrol listesi:
 {{#endref}}
 
 Hunting fikirleri
-- PowerShell içinde RW→RX geçişleri: powershell.exe içinde VirtualProtect ile PAGE_EXECUTE_READWRITE
-- Dynamic invocation pattern’ları (GetDelegateForFunctionPointer)
-- Kullanıcı veya common Startup klasörleri altındaki .lnk’ler
-- Şüpheli Run anahtarları (ör. "Updater") ve update.ps1/loader.ps1 gibi loader isimleri
-- %APPDATA%\Microsoft\Windows\Templates altında kullanıcı tarafından yazılabilir DLL yolları ve içinde msimg32.dll bulunan dosyalar
+- PowerShell’in RW→RX transition’ları oluşturması: `powershell.exe` içinde `PAGE_EXECUTE_READWRITE`’a `VirtualProtect`
+- Dynamic invocation pattern’leri (`GetDelegateForFunctionPointer`)
+- `Server: AdaptixC2`, `Adaptix-Version`, `AdaptixC2 404` veya `You need to enter the correct connection details.` içeren eşleşmeyen HTTPS 404’ler
+- Şüpheli domain’ler altında short query’ler için `AA=true` ve `TXT "OK"` içeren DNS response’ları
+- `/repos/<owner>/<repo>/issues` adresine GitHub API traffic’i ve aynı loader/beacon chain’inden gelen `ipinfo.io` lookup’ları
+- User veya common Startup folder’ları altındaki Startup `.lnk` dosyaları
+- Şüpheli Run key’leri (ör. `"Updater"`) ve `update.ps1`/`loader.ps1` gibi loader name’leri
+- Decoy document göstermeden önce `_security_init_cookie`’ı downloader code’a redirect eden trojanized PE sample’ları
+- `%APPDATA%\Microsoft\Windows\Templates` altında `msimg32.dll` içeren user-writable DLL path’leri
 
-## Notes on OpSec fields
+## OpSec field’leri hakkında notlar
 
-- KillDate: agent’in kendini geçersiz kılacağı zaman damgası
-- WorkingTime: agent’in iş aktivitesiyle karışmak için aktif olması gereken saatler
+- KillDate: agent’ın self-expire olacağı timestamp
+- WorkingTime: agent’ın business activity ile blend olmak için active olması gereken saatler
 
-Bu alanlar kümelendirme için kullanılabilir ve gözlemlenen sessiz dönemleri açıklamaya yardımcı olur.
+Bu field’ler clustering için ve gözlemlenen quiet period’ları açıklamak amacıyla kullanılabilir.
 
-## YARA and static leads
+## YARA ve static ipuçları
 
-Unit 42, beacon’lar (C/C++ ve Go) ve loader API‑hashing sabitleri için temel YARA yayınladı. PE .rdata sonu yakınında [size|ciphertext|16‑byte‑key] düzenini ve varsayılan HTTP profile string’lerini arayan kurallarla tamamlamayı düşünün.
+Unit 42, beacon’lar (C/C++ ve Go) ve loader API-hashing constant’ları için basic YARA yayımladı. Bunları, PE `.rdata` sonuna yakın `[size|ciphertext|16-byte-key]` layout’una, default HTTP profile string’lerine ve `AdaptixC2 404`, `You need to enter the correct connection details.`, `Adaptix-Version`, `server.rsa.crt`, `server.rsa.key`, `api.github.com`, `/issues?state=open` ve `ipinfo.io` gibi daha yeni server/listener marker’larına bakan rule’larla tamamlamayı düşünün.
 
 ## References
 
 - [AdaptixC2: A New Open-Source Framework Leveraged in Real-World Attacks (Unit 42)](https://unit42.paloaltonetworks.com/adaptixc2-post-exploitation-framework/)
 - [AdaptixC2 GitHub](https://github.com/Adaptix-Framework/AdaptixC2)
 - [Adaptix Framework Docs](https://adaptix-framework.gitbook.io/adaptix-framework)
+- [AdaptixC2: Fingerprinting an Open-Source C2 Framework at Scale (Censys)](https://censys.com/blog/adaptixc2-open-source-c2-framework/)
+- [Tropic Trooper Pivots to AdaptixC2 and Custom Beacon Listener (Zscaler ThreatLabz)](https://www.zscaler.com/blogs/security-research/tropic-trooper-pivots-adaptixc2-and-custom-beacon-listener)
 - [Marshal.GetDelegateForFunctionPointer – Microsoft Docs](https://learn.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.marshal.getdelegateforfunctionpointer)
 - [VirtualProtect – Microsoft Docs](https://learn.microsoft.com/en-us/windows/win32/api/memoryapi/nf-memoryapi-virtualprotect)
 - [Memory protection constants – Microsoft Docs](https://learn.microsoft.com/en-us/windows/win32/memory/memory-protection-constants)
