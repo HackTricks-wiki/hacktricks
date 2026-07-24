@@ -1011,6 +1011,74 @@ certipy auth \
     -dc-ip '10.0.0.100' -pfx 'administrator.pfx' \
     -username 'administrator' -domain 'corp.local'
 ```
+
+## Requester-Controlled Chase Fallback Identity Substitution (Certighost / CVE-2026-54121)
+
+### Explanation
+
+In some AD CS enrollment paths, the CA may perform a secondary directory-object lookup (a *chase*) when request attributes such as `cdc` and `rmd` are present:
+
+- `cdc` chooses the host the CA will contact
+- `rmd` chooses the principal the CA will resolve
+
+In the vulnerable flow, the CA **trusted the requester-controlled `cdc` target as the chase endpoint** and then **used LDAP/LSA data returned by that endpoint while building the certificate**. This turns a backend connection into an **identity-substitution primitive**, not just an SSRF/forced-auth issue.
+
+The important trust-boundary failure is that the CA accepted **authentication from one domain principal** (for example, an attacker-created machine account) while consuming **identity attributes for another principal** (for example, a Domain Controller). In the published Certighost chain, the attacker returned the target DC's `objectSid` and `dNSHostName`, causing the CA to issue a certificate whose strong-mapping SID / DNS identity could be mapped to that DC during PKINIT.
+
+In practice, a low-privileged user can often bridge the authentication requirement with `ms-DS-MachineAccountQuota`:
+
+1. Create a machine account (default quota is often `10`)
+2. Use that machine as the authenticated identity for the rogue chase endpoint
+3. Return another object's identity attributes in the LDAP/LSA response
+4. Receive a CA-signed certificate that authenticates as the victim principal
+
+If the victim is a **Domain Controller computer account**, the resulting Kerberos credentials can be chained directly into [DCSync](../dcsync.md).
+
+### Abuse
+
+**Typical requirements in the published chain:**
+
+- Vulnerable pre-July-2026 AD CS chase behavior
+- A published client-auth / machine-auth template reachable by a low-privileged user (the write-up used the default `Machine` template)
+- `ms-DS-MachineAccountQuota > 0` or another way to obtain valid machine credentials
+- Network reachability from the CA to the attacker host over **SMB/LSA** and **LDAP**
+
+**High-level flow:**
+
+1. Enumerate the Enterprise CA and a target Domain Controller
+2. Create a machine account controlled by the attacker
+3. Start rogue LDAP and LSA services
+4. Submit a certificate request containing crafted `cdc` and `rmd` attributes
+5. Relay/authenticate the chase endpoint as the low-privileged machine, but return the target DC's `objectSid` and `dNSHostName`
+6. Use the issued certificate for PKINIT and then DCSync as the impersonated DC
+
+PoC dependencies and execution from the original write-up:
+
+```bash
+sudo pip install --break-system-packages git+https://github.com/fortra/impacket.git cryptography pyasn1 asn1crypto pycryptodome dnspython
+
+sudo python3 certighost.py \
+  -d abc.local \
+  -u normaluser -p '[PASSWORD]' \
+  --dc-ip 192.168.8.128
+```
+
+Once the certificate has produced a DC Kerberos ccache, a standard follow-up is:
+
+```bash
+KRB5CCNAME=<dc_machine>.ccache \
+  secretsdump.py -just-dc -k -no-pass <DOMAIN>/ -dc-ip <DC_IP>
+```
+
+### Detection / Hardening
+
+- **Patch AD CS / DCs with the July 2026 updates** that validate the chase target before the CA follows it.
+- If ordinary users do not need to join machines, set **`ms-DS-MachineAccountQuota=0`** or otherwise tightly control machine creation.
+- Restrict **CA-initiated SMB/LDAP egress** so the CA can only reach legitimate Domain Controllers for this lookup path.
+- Audit **computer-account creation and modification** (`4741` / `4742`) followed immediately by certificate enrollment from the same user.
+- Audit **Certificate Services request / issuance** events (`4886` / `4887`) for unexpected low-privileged enrollment into machine-auth templates and, where request attributes are logged or retained, inspect for unusual `cdc` / `rmd` values.
+- Alert on **Kerberos TGT requests for Domain Controller machine accounts** (`4768`) originating from unusual hosts shortly after suspicious certificate issuance.
+
 ## Compromising Forests with Certificates Explained in Passive Voice
 
 ### Breaking of Forest Trusts by Compromised CAs
@@ -1030,7 +1098,10 @@ Both scenarios lead to an **increase in the attack surface** from one forest to 
 - [Certify 2.0 – SpecterOps Blog](https://specterops.io/blog/2025/08/11/certify-2-0/)
 - [GhostPack/Certify](https://github.com/GhostPack/Certify)
 - [GhostPack/Rubeus](https://github.com/GhostPack/Rubeus)
+- [Certighost (CVE-2026-54121) original write-up / PoC](https://gist.github.com/H0j3n/a5ef2609b5f2944ac2390a191a534c26)
+- [CVE-2026-54121 – NVD](https://nvd.nist.gov/vuln/detail/CVE-2026-54121)
+- [Audit Certification Services – Microsoft Learn](https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/audit-certification-services)
+- [4741(S) A computer account was created – Microsoft Learn](https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4741)
+- [4768(S, F) A Kerberos authentication ticket (TGT) was requested – Microsoft Learn](https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4768)
 
 {{#include ../../../banners/hacktricks-training.md}}
-
-
