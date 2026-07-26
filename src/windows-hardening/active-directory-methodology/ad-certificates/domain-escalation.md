@@ -1011,6 +1011,58 @@ certipy auth \
     -dc-ip '10.0.0.100' -pfx 'administrator.pfx' \
     -username 'administrator' -domain 'corp.local'
 ```
+
+## Rogue LDAP/LSA chase callback identity substitution (Certighost / CVE-2026-54121)
+
+### Explanation
+
+**Certighost** abuses an **AD CS enrollment chase / callback path** where the CA trusts requester-supplied request attributes to resolve the identity that should be placed in the issued certificate. In the public PoC, the crafted request includes:
+
+- **`cdc`**: attacker-controlled host/IP that the CA will contact
+- **`rmd`**: the **target Domain Controller DNS name** to impersonate
+
+If the CA follows that chase, it will connect to the attacker over **SMB/LSA (`445`)** and **LDAP (`389`)**. The attacker uses a **real machine account** (usually created via the default **`ms-DS-MachineAccountQuota`**) so the callback session authenticates as a valid domain principal, but the rogue services return the **target DC's** identity attributes instead:
+
+- `sAMAccountName`
+- `objectSid` / SID
+- `dNSHostName`
+
+If the CA **doesn't cryptographically bind the returned identity to the authenticated callback principal**, it can issue a certificate for the **Domain Controller** even though the session authenticated as the attacker-controlled machine account. This makes the bug conceptually different from **Certifried**: instead of rewriting AD attributes such as `dNSHostName`, the attacker **substitutes identity data during CA callback resolution**.
+
+**Useful preconditions:**
+
+- Low-privileged **domain credentials**
+- Ability to **create or reuse a computer account**
+- Network reachability from the **CA** to attacker-controlled **ports `389` and `445`**
+- Vulnerable / unpatched CA request path (the **July 14, 2026** Microsoft update added **DC validation for `cdc`** plus a **resolved-SID comparison**)
+
+The resulting **`.pfx`** can then be used for **PKINIT**, producing a **`.ccache`** and, in the published PoC flow, the **target DC NT hash**, which is normally enough for **full domain compromise**.
+
+### Abuse
+
+The public PoC automates the full chain:
+
+1. Create or reuse an attacker-controlled **machine account**.
+2. Start **rogue LDAP and SMB/LSA listeners** on `389` and `445`.
+3. Submit a certificate request containing attacker-controlled **`cdc`** and target **`rmd`** attributes.
+4. Let the CA authenticate to the rogue listeners as the controlled machine account, but answer the identity lookups with the **target DC** attributes.
+5. Receive a CA-signed **DC certificate**, then use it for **PKINIT**.
+
+```bash
+sudo python3 certighost.py -d playground.local -u lowpriv -p 'Password1234' --dc-ip 192.168.1.10
+```
+
+Useful runtime flags from the PoC:
+
+- `--listener <ip>`: explicitly choose the callback IP advertised in `cdc`
+- `--computer-name <NAME$>`: reuse an existing machine account instead of creating a new one
+
+**Operational notes:**
+
+- The PoC needs **root** because it binds to **privileged ports** `389` and `445`.
+- Successful exploitation writes a **DC `.pfx`** and **Kerberos `.ccache`** locally.
+- Because the certificate maps to a **Domain Controller account**, follow-on actions can include **certificate-based Kerberos auth**, **DCSync**, and reuse of the recovered **machine NT hash**.
+
 ## Compromising Forests with Certificates Explained in Passive Voice
 
 ### Breaking of Forest Trusts by Compromised CAs
@@ -1027,6 +1079,8 @@ Both scenarios lead to an **increase in the attack surface** from one forest to 
 
 ## References
 
+- [aniqfakhrul/CVE-2026-54121 PoC repository](https://github.com/aniqfakhrul/CVE-2026-54121)
+- [H0j3n - Certighost technical analysis](https://gist.github.com/H0j3n/a5ef2609b5f2944ac2390a191a534c26)
 - [Certify 2.0 – SpecterOps Blog](https://specterops.io/blog/2025/08/11/certify-2-0/)
 - [GhostPack/Certify](https://github.com/GhostPack/Certify)
 - [GhostPack/Rubeus](https://github.com/GhostPack/Rubeus)
