@@ -1,4 +1,4 @@
-# BloodHound & Other Active Directory Enumeration Tools
+# BloodHound i inne narzędzia do enumeracji Active Directory
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -7,74 +7,74 @@
 adws-enumeration.md
 {{#endref}}
 
-> NOTE: Ta strona grupuje niektóre z najbardziej przydatnych narzędzi do **enumerate** i wizualizacji relacji Active Directory.  Do zbierania danych przez dyskretny kanał **Active Directory Web Services (ADWS)** sprawdź odwołanie powyżej.
+> UWAGA: Ta strona grupuje niektóre z najbardziej przydatnych narzędzi do **enumerowania** i **wizualizowania** zależności w Active Directory. Aby zbierać dane za pośrednictwem ukrytego kanału **Active Directory Web Services (ADWS)**, sprawdź powyższy odnośnik.
 
 ---
 
 ## AD Explorer
 
-[AD Explorer](https://docs.microsoft.com/en-us/sysinternals/downloads/adexplorer) (Sysinternals) to zaawansowany **AD viewer & editor**, który umożliwia:
+[AD Explorer](https://docs.microsoft.com/en-us/sysinternals/downloads/adexplorer) (Sysinternals) to zaawansowana aplikacja do **przeglądania i edycji AD**, która umożliwia:
 
-* Przeglądanie drzewa katalogu przez GUI
-* Edycję atrybutów obiektów i deskryptorów bezpieczeństwa
-* Tworzenie/porównywanie snapshotów do analizy offline
+* Przeglądanie drzewa katalogu za pomocą GUI
+* Edycję atrybutów obiektów i deskryptorów zabezpieczeń
+* Tworzenie i porównywanie snapshotów na potrzeby analizy offline
 
-### Quick usage
+### Szybkie użycie
 
-1. Uruchom narzędzie i połącz się z `dc01.corp.local` używając dowolnych poświadczeń domenowych.
-2. Utwórz offline snapshot przez `File ➜ Create Snapshot`.
+1. Uruchom narzędzie i połącz się z `dc01.corp.local` przy użyciu dowolnych poświadczeń domenowych.
+2. Utwórz snapshot offline za pomocą `File ➜ Create Snapshot`.
 3. Porównaj dwa snapshoty za pomocą `File ➜ Compare`, aby wykryć zmiany uprawnień.
 
 ---
 
 ## ADRecon
 
-[ADRecon](https://github.com/adrecon/ADRecon) wyodrębnia duży zestaw artefaktów z domeny (ACLs, GPOs, trusts, CA templates …) i generuje **Excel report**.
+[ADRecon](https://github.com/adrecon/ADRecon) wyodrębnia duży zestaw artefaktów z domeny (ACL, GPO, zaufania, szablony CA …) i tworzy **raport Excel**.
 ```powershell
 # On a Windows host in the domain
 PS C:\> .\ADRecon.ps1 -OutputDir C:\Temp\ADRecon
 ```
 ---
 
-## BloodHound (wizualizacja grafu)
+## BloodHound (wizualizacja grafowa)
 
-[BloodHound](https://github.com/SpecterOps/BloodHound) uses graph theory to reveal hidden privilege relationships inside on-prem AD, Entra ID, and any extra attack-surface data you ingest through OpenGraph.
+[BloodHound](https://github.com/SpecterOps/BloodHound) wykorzystuje teorię grafów do ujawniania ukrytych relacji uprawnień w lokalnym AD, Entra ID oraz wszelkich dodatkowych danych o powierzchni ataku, które pozyskasz za pośrednictwem OpenGraph.
 
-### Deployment (Docker CE)
+### Wdrożenie (Docker CE)
 ```bash
 curl -L https://ghst.ly/getbhce | docker compose -f - up
 # Web UI ➜ http://localhost:8080  (user: admin / password from logs)
 ```
-### Collectors
+### Kolektory
 
-* `SharpHound.exe` / `Invoke-BloodHound` – natywny lub wariant PowerShell
+* `SharpHound.exe` / `Invoke-BloodHound` – wariant natywny lub PowerShell
 * `RustHound-CE` – wieloplatformowy collector CE dla Linux, macOS i Windows
-* `NetExec --bloodhound` – szybkie collection oparte na LDAP z Linux
+* `NetExec --bloodhound` – szybkie zbieranie danych z użyciem LDAP z Linux
 * `AzureHound` – enumeracja Entra ID
-* **SoaPy + BOFHound** – collection ADWS (zobacz link na górze)
+* **SoaPy + BOFHound** – zbieranie danych przez ADWS (zobacz link na górze)
 
-> BloodHound CE `v8+` zmienił format output collectorów, gdy pojawił się OpenGraph. Po upgrade z legacy BloodHound lub starszych instalacji CE, uruchom discovery ponownie z aktualnymi collectorami przed importem danych.
+> BloodHound CE `v8+` zmienił format wyjściowy collectora po wprowadzeniu OpenGraph. Po aktualizacji ze starszego BloodHound lub starszych instalacji CE uruchom ponownie discovery za pomocą aktualnych collectorów przed zaimportowaniem danych.
 
-#### Common SharpHound modes
+#### Typowe tryby SharpHound
 ```powershell
 SharpHound.exe --CollectionMethods All               # Full sweep (noisy)
 SharpHound.exe --CollectionMethods Group,LocalAdmin,Session,Trusts,ACL
 SharpHound.exe --Stealth --LDAP                      # Low noise LDAP only
 SharpHound.exe --CollectionMethods Session --Loop --Loopduration 03:09:41
 ```
-Collectory generują JSON, który jest wczytywany przez GUI BloodHound.
+Kolektory generują JSON, który jest importowany za pomocą GUI BloodHound.
 
-#### SharpHound z hosta Windows niebędącego w domenie
+#### SharpHound z hosta Windows nienależącego do domeny
 
-Jeśli Twoja VM operatora nie jest dołączona do docelowej domeny, ustaw DNS na DC, uruchom powłokę **network-only**, sprawdź, czy widzisz `SYSVOL`/`NETLOGON` na DC, a następnie zbierz dane zdalnie z domeny:
+Jeśli maszyna operatora nie jest dołączona do docelowej domeny, skieruj DNS na kontroler domeny (DC), uruchom powłokę **network-only**, sprawdź, czy możesz wyświetlić `SYSVOL`/`NETLOGON` na kontrolerze domeny, a następnie wykonaj zbieranie danych zdalnej domeny:
 ```cmd
 runas /netonly /user:CORP\svc_bh cmd.exe
 net view \\dc01.corp.local
 SharpHound.exe -d corp.local --CollectionMethods Group,LocalAdmin,Session,Trusts,ACL
 ```
-To jest przydatne dla jednorazowych jump boxów lub stacji roboczych operatora, które nie powinny być dołączone do domeny.
+Jest to przydatne w przypadku jednorazowych jump boxów lub stacji roboczych operatorów, które nie powinny być dołączane do domeny.
 
-#### Cross-platform collection from Linux/macOS
+#### Zbieranie danych z Linux/macOS na różnych platformach
 ```bash
 # CE-compatible ZIP from Linux/macOS/Windows
 rusthound-ce -d corp.local -u svc.collector@corp.local -p 'Passw0rd!' -z
@@ -82,46 +82,66 @@ rusthound-ce -d corp.local -u svc.collector@corp.local -p 'Passw0rd!' -z
 # Quick LDAP-driven BloodHound dump from Linux
 nxc ldap dc01.corp.local -u svc.collector -p 'Passw0rd!' --bloodhound --collection All
 ```
-`RustHound-CE` jest dobrym wyborem domyślnym, gdy chcesz uzyskać wyjście zgodne z CE z hosta spoza Windows. `NetExec` jest wygodny, gdy już używasz go do walidacji LDAP lub spraying i chcesz szybko zaimportować graph. Dla zbiorów danych spoza AD, BloodHound OpenGraph można rozszerzyć o collectory takie jak [ShareHound](../../network-services-pentesting/pentesting-smb/README.md).
+`RustHound-CE` to dobry wybór domyślny, gdy chcesz uzyskać output kompatybilny z CE z hosta innego niż Windows. `NetExec` jest wygodny, gdy już używasz go do walidacji LDAP lub spraying i chcesz szybko zaimportować graf. W przypadku datasetów innych niż AD funkcjonalność BloodHound OpenGraph można rozszerzyć za pomocą collectorów, takich jak [ShareHound](../../network-services-pentesting/pentesting-smb/README.md).
 
-### Zbieranie privilege & logon-right
+### ADPathFinder (priorytetyzacja ścieżek OpenGraph)
 
-Windows **token privileges** (np. `SeBackupPrivilege`, `SeDebugPrivilege`, `SeImpersonatePrivilege`, `SeAssignPrimaryTokenPrivilege`) mogą omijać sprawdzenia DACL, więc mapowanie ich w całej domenie ujawnia lokalne edges LPE, których graphy oparte wyłącznie na ACL pomijają. **Logon rights** (`SeInteractiveLogonRight`, `SeRemoteInteractiveLogonRight`, `SeNetworkLogonRight`, `SeServiceLogonRight`, `SeBatchLogonRight` oraz ich odpowiedniki `SeDeny*`) są egzekwowane przez LSA zanim token w ogóle istnieje, a deny mają pierwszeństwo, więc realnie ograniczają lateral movement (RDP/SMB/scheduled task/service logon).
+[ADPathFinder](https://github.com/NetSPI/AD-PathFinder) działa na bazie BloodHound CE/OpenGraph, gdy graf jest zbyt duży, aby ręcznie wykonywać pivoting. Zamiast pytać tylko, czy jeden principal może uzyskać dostęp do jednego celu, narzędzie oblicza najkrótsze ścieżki od wielu użytkowników i komputerów o niskich uprawnieniach do obiektów o wysokiej wartości, grupuje ścieżki wykorzystujące te same krawędzie i wskazuje wspólne wąskie gardło, które powinno zostać naprawione w pierwszej kolejności.
+```bash
+adpathfinder --setup-bloodhound-api
+adpathfinder -i SharpHound.zip --ad
+adpathfinder -i SharpHound.zip MSSQLHound.zip ConfigManBearPig.zip --ad --pwd Contoso,ContosoIT --ntds ntds.txt -p hashcat.potfile
+```
+Po zaimportowaniu danych `MSSQLHound` i `ConfigManBearPig` jedno ustalenie może łączyć [AD CS](ad-certificates.md), [MSSQL AD abuse](abusing-ad-mssql.md) i [SCCM attack paths](sccm-management-point-relay-sql-policy-secrets.md), zamiast pozostawiać je jako osobne tropy. Przykładowa wspólna ścieżka:
+```text
+J.REPORTER > MSSQL_HasLogin > j.reporter > MSSQL_ExecuteAs > ReportSvc >
+MSSQL_Connect > lab-sql01.training.local > MSSQL_LinkedAsAdmin > sccmdb.training.local >
+MSSQL_ExecuteOnHost (as DA@TRAINING.LOCAL) > SCCMDB.TRAINING.LOCAL >
+SCCM_AssignAllPermissions > SCCM_Site(TRN)
+```
+- Śledź **effective security context** na każdej krawędzi. Ścieżka staje się krytyczna dla domeny, gdy tylko jedna tranzycja zostanie wykonana jako uprzywilejowana tożsamość domenowa, nawet jeśli rozpoczęła się od zwykłego użytkownika.
+- Zgrupowane ustalenia są idealne do **remediacji punktów krytycznych**: usunięcie jednego uprawnienia do impersonacji SQL, zaufania linked-server, ścieżki nadużycia certificate-template lub przypisania SCCM może jednocześnie zlikwidować wiele najkrótszych ścieżek.
+- Nadaj ponownie priorytet ustaleniom oznaczonym jako „medium”, uwzględniając **kontekst grafu**. Wyłączone SMB signing, ekspozycja WebClient, błędy w delegacji lub podatne na NTLM relay serwery SQL zasługują na wyższy priorytet, gdy przejęty węzeł ma dalsze ścieżki do Domain Admins, Domain Controllers, CAs lub SCCM site servers.
+- Jeśli masz również wynik `NTDS.dit` i plik potfile programu hashcat, opcja `--pwd` koreluje złamane hasła z właściwościami BloodHound, dzięki czemu możesz szybko oddzielić zwykłe ponowne użycie haseł od złamanych poświadczeń na kontach uprzywilejowanych, podatnych na Kerberoasting, AS-REP roasting lub istotnych dla ścieżki.
 
-**Uruchamiaj collectory z podniesionymi uprawnieniami**, gdy to możliwe: UAC tworzy przefiltrowany token dla interaktywnych adminów (przez `NtFilterToken`), usuwając wrażliwe privileges i oznaczając SID-y adminów jako deny-only. Jeśli enumerujesz privileges z niepodniesionej powłoki, wartościowe privileges będą niewidoczne i BloodHound nie zaimportuje tych edges.
+### Zbieranie uprawnień i praw logowania
 
-Istnieją teraz dwie uzupełniające się strategie zbierania SharpHound:
+Windows **token privileges** (np. `SeBackupPrivilege`, `SeDebugPrivilege`, `SeImpersonatePrivilege`, `SeAssignPrimaryTokenPrivilege`) mogą omijać kontrole DACL, dlatego mapowanie ich w całej domenie ujawnia lokalne krawędzie LPE, których brakuje w grafach opartych wyłącznie na ACL. **Logon rights** (`SeInteractiveLogonRight`, `SeRemoteInteractiveLogonRight`, `SeNetworkLogonRight`, `SeServiceLogonRight`, `SeBatchLogonRight` oraz odpowiadające im `SeDeny*`) są egzekwowane przez LSA, zanim token w ogóle powstanie, a odmowy mają pierwszeństwo, więc istotnie ograniczają ruch lateralny (logowanie przez RDP/SMB/zaplanowane zadanie/usługę).
 
-- **Analiza GPO/SYSVOL (stealthy, niskie uprawnienia):**
-1. Wylicz GPO przez LDAP (`(objectCategory=groupPolicyContainer)`) i odczytaj każde `gPCFileSysPath`.
-2. Pobierz `MACHINE\Microsoft\Windows NT\SecEdit\GptTmpl.inf` z SYSVOL i przeanalizuj sekcję `[Privilege Rights]`, która mapuje nazwy privilege/logon-right na SID-y.
-3. Rozwiąż linki GPO przez `gPLink` na OU/site/domainach, wypisz komputery w powiązanych kontenerach i przypisz rights do tych maszyn.
-4. Plus: działa z normalnym userem i jest cicha; minus: widzi tylko rights nadane przez GPO (lokalne zmiany są pomijane).
+**Uruchamiaj collectory z podniesionymi uprawnieniami**, gdy jest to możliwe: UAC tworzy filtered token dla administratorów interaktywnych (przez `NtFilterToken`), usuwając wrażliwe uprawnienia i oznaczając SID-y administratorów jako deny-only. Jeśli wyliczasz uprawnienia z niepodniesionej powłoki, uprawnienia o wysokiej wartości będą niewidoczne, a BloodHound nie zaimportuje tych krawędzi.
 
-- **Enumeracja LSA RPC (głośna, dokładna):**
-- Z kontekstu z local admin na celu otwórz Local Security Policy i wywołaj `LsaEnumerateAccountsWithUserRight` dla każdego privilege/logon right, aby wyliczyć przypisane principals przez RPC.
-- Plus: obejmuje rights ustawione lokalnie lub poza GPO; minus: głośny ruch sieciowy i wymagany admin na każdym hoście.
+Obecnie istnieją dwie uzupełniające się strategie zbierania danych przez SharpHound:
 
-**Przykładowa ścieżka abuse ujawniona przez te edges:** `CanRDP` ➜ host, na którym twój user ma też `SeBackupPrivilege` ➜ uruchom elevated shell, aby uniknąć filtered tokens ➜ użyj backup semantics do odczytu hive’ów `SAM` i `SYSTEM` mimo restrykcyjnych DACLs ➜ exfiltrate i uruchom `secretsdump.py` offline, aby odzyskać local Administrator NT hash do lateral movement/privilege escalation.
+- **Parsowanie GPO/SYSVOL (stealthy, z niskimi uprawnieniami):**
+1. Wylicz GPO przez LDAP (`(objectCategory=groupPolicyContainer)`) i odczytaj `gPCFileSysPath` każdego z nich.
+2. Pobierz `MACHINE\Microsoft\Windows NT\SecEdit\GptTmpl.inf` z SYSVOL i sparsuj sekcję `[Privilege Rights]`, która mapuje nazwy uprawnień/praw logowania na SID-y.
+3. Rozwiąż linki GPO za pomocą `gPLink` na OU/sites/domains, wyświetl komputery w połączonych kontenerach i przypisz te prawa do odpowiednich maszyn.
+4. Zaleta: działa ze zwykłym użytkownikiem i jest ciche; wada: pokazuje tylko prawa wdrażane przez GPO (lokalne modyfikacje zostaną pominięte).
 
-### Nadawanie priorytetu Kerberoasting z BloodHound
+- **Wyliczanie przez LSA RPC (głośne, dokładne):**
+- Z kontekstu z lokalnym administratorem na celu otwórz Local Security Policy i wywołaj `LsaEnumerateAccountsWithUserRight` dla każdego uprawnienia/prawa logowania, aby przez RPC wyliczyć przypisane principals.
+- Zaleta: obejmuje prawa ustawione lokalnie lub poza GPO; wada: generuje głośny ruch sieciowy i wymaga uprawnień administratora na każdym hoście.
 
-Używaj graph context, aby roasting był targetowany:
+**Przykładowa ścieżka nadużycia ujawniona przez te krawędzie:** `CanRDP` ➜ host, na którym użytkownik ma również `SeBackupPrivilege` ➜ uruchomienie elevated shell w celu uniknięcia filtered tokens ➜ użycie backup semantics do odczytu hive-ów `SAM` i `SYSTEM` pomimo restrykcyjnych DACL ➜ eksfiltracja i uruchomienie `secretsdump.py` offline w celu odzyskania lokalnego NT hash Administratora do ruchu lateralnego/podniesienia uprawnień.
 
-1. Zbierz dane raz za pomocą collectora zgodnego z ADWS i pracuj offline:
+### Priorytetyzacja Kerberoasting z użyciem BloodHound
+
+Używaj kontekstu grafu, aby utrzymać ukierunkowany charakter roastingu:
+
+1. Zbierz dane raz za pomocą collectora kompatybilnego z ADWS i pracuj offline:
 ```bash
 rusthound-ce -d corp.local -u svc.collector -p 'Passw0rd!' -c All -z
 ```
-2. Zaimportuj ZIP, oznacz skompromitowany principal jako owned i uruchom wbudowane zapytania (*Kerberoastable Users*, *Shortest Paths to Domain Admins*), aby wyodrębnić konta SPN z uprawnieniami admin/infra.
-3. Uszereguj SPN-y według blast radius; przejrzyj `pwdLastSet`, `lastLogon` oraz dozwolone encryption types przed cracking.
-4. Zażądaj tylko wybranych ticketów, crack offline, a następnie ponownie odpytaj BloodHound z nowym access:
+2. Zaimportuj ZIP, oznacz przejęty principal jako owned i uruchom wbudowane zapytania (*Kerberoastable Users*, *Shortest Paths to Domain Admins*), aby ujawnić konta SPN z uprawnieniami administratora/infrastruktury.
+3. Ustal priorytet SPN na podstawie blast radius; przed crackingiem sprawdź `pwdLastSet`, `lastLogon` oraz dozwolone typy szyfrowania.
+4. Zażądaj tylko wybranych ticketów, złam je offline, a następnie ponownie zapytaj BloodHound z wykorzystaniem nowego dostępu:
 ```bash
 netexec ldap dc01.corp.local -u svc.collector -p 'Passw0rd!' --kerberoasting kerberoast.txt --spn svc-sql
 ```
 
 ## Group3r
 
-[Group3r](https://github.com/Group3r/Group3r) enumeruje **Group Policy Objects** i wskazuje misconfigurations.
+[Group3r](https://github.com/Group3r/Group3r) wylicza **Group Policy Objects** i wskazuje błędne konfiguracje.
 ```bash
 # Execute inside the domain
 Group3r.exe -f gpo.log   # -s to stdout
@@ -134,10 +154,11 @@ Group3r.exe -f gpo.log   # -s to stdout
 ```powershell
 PingCastle.exe --healthcheck --server corp.local --user bob --password "P@ssw0rd!"
 ```
-## References
+## Odnośniki
 
-- [BloodHound Community Edition v8 Launches with OpenGraph: Identity Attack Paths Beyond Active Directory & Entra ID](https://specterops.io/blog/2025/07/29/bloodhound-community-edition-v8-launches-with-opengraph-identity-attack-paths-beyond-active-directory-entra-id/)
+- [BloodHound Community Edition v8 Launches with OpenGraph: Ścieżki ataku na tożsamość poza Active Directory i Entra ID](https://specterops.io/blog/2025/07/29/bloodhound-community-edition-v8-launches-with-opengraph-identity-attack-paths-beyond-active-directory-entra-id/)
 - [RustHound-CE](https://github.com/g0h4n/RustHound-CE)
-- [Beyond ACLs: Mapping Windows Privilege Escalation Paths with BloodHound](https://www.synacktiv.com/en/publications/beyond-acls-mapping-windows-privilege-escalation-paths-with-bloodhound.html)
+- [Beyond ACLs: Mapowanie ścieżek eskalacji uprawnień w Windows za pomocą BloodHound](https://www.synacktiv.com/en/publications/beyond-acls-mapping-windows-privilege-escalation-paths-with-bloodhound.html)
+- [ADPathFinder: Mapowanie ścieżek ataku OpenGraph w BloodHound CE](https://www.netspi.com/blog/technical-blog/network-pentesting/adpathfinder-opengraph-attack-path-mapping-in-bloodhound-ce/)
 
 {{#include ../../banners/hacktricks-training.md}}
