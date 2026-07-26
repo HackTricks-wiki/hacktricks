@@ -94,6 +94,30 @@ nxc ldap dc01.corp.local -u svc.collector -p 'Passw0rd!' --bloodhound --collecti
 
 `RustHound-CE` is a good default when you want CE-compatible output from a non-Windows host. `NetExec` is convenient when you are already using it for LDAP validation or spraying and want a quick graph import. For non-AD datasets, BloodHound OpenGraph can be extended with collectors such as [ShareHound](../../network-services-pentesting/pentesting-smb/README.md).
 
+### ADPathFinder (OpenGraph path prioritisation)
+
+[ADPathFinder](https://github.com/NetSPI/AD-PathFinder) sits on top of BloodHound CE/OpenGraph when the graph is too large to manually pivot. Instead of only asking whether one principal can reach one target, it calculates shortest paths from many low-privileged users and computers to high-value objects, groups paths that reuse the same edges, and surfaces the shared choke point that should be remediated first.
+
+```bash
+adpathfinder --setup-bloodhound-api
+adpathfinder -i SharpHound.zip --ad
+adpathfinder -i SharpHound.zip MSSQLHound.zip ConfigManBearPig.zip --ad --pwd Contoso,ContosoIT --ntds ntds.txt -p hashcat.potfile
+```
+
+With `MSSQLHound` and `ConfigManBearPig` data imported, one finding can cross [AD CS](ad-certificates.md), [MSSQL AD abuse](abusing-ad-mssql.md), and [SCCM attack paths](sccm-management-point-relay-sql-policy-secrets.md) instead of leaving them as separate leads. Example shared path:
+
+```text
+J.REPORTER > MSSQL_HasLogin > j.reporter > MSSQL_ExecuteAs > ReportSvc >
+MSSQL_Connect > lab-sql01.training.local > MSSQL_LinkedAsAdmin > sccmdb.training.local >
+MSSQL_ExecuteOnHost (as DA@TRAINING.LOCAL) > SCCMDB.TRAINING.LOCAL >
+SCCM_AssignAllPermissions > SCCM_Site(TRN)
+```
+
+- Track the **effective security context** at every edge. A path becomes domain-critical as soon as one transition executes as a privileged domain identity, even if it started from a normal user.
+- Grouped findings are ideal for **choke-point remediation**: removing one SQL impersonation permission, linked-server trust, certificate-template abuse path, or SCCM assignment can collapse many shortest paths at once.
+- Re-prioritise "medium" findings with **graph context**. SMB signing disabled, WebClient exposure, delegation mistakes, or NTLM-relayable SQL servers deserve higher priority when the compromised node has onward paths to Domain Admins, Domain Controllers, CAs, or SCCM site servers.
+- If you also have `NTDS.dit` output and a hashcat potfile, `--pwd` correlates cracked passwords with BloodHound properties so you can quickly separate ordinary password reuse from cracked creds on privileged, Kerberoastable, AS-REP roastable, or path-relevant accounts.
+
 ### Privilege & logon-right collection
 
 Windows **token privileges** (e.g., `SeBackupPrivilege`, `SeDebugPrivilege`, `SeImpersonatePrivilege`, `SeAssignPrimaryTokenPrivilege`) can bypass DACL checks, so mapping them domain-wide exposes local LPE edges that ACL-only graphs miss. **Logon rights** (`SeInteractiveLogonRight`, `SeRemoteInteractiveLogonRight`, `SeNetworkLogonRight`, `SeServiceLogonRight`, `SeBatchLogonRight` and their `SeDeny*` counterparts) are enforced by LSA before a token even exists, and denies take precedence, so they materially gate lateral movement (RDP/SMB/scheduled task/service logon).
@@ -153,5 +177,6 @@ PingCastle.exe --healthcheck --server corp.local --user bob --password "P@ssw0rd
 - [BloodHound Community Edition v8 Launches with OpenGraph: Identity Attack Paths Beyond Active Directory & Entra ID](https://specterops.io/blog/2025/07/29/bloodhound-community-edition-v8-launches-with-opengraph-identity-attack-paths-beyond-active-directory-entra-id/)
 - [RustHound-CE](https://github.com/g0h4n/RustHound-CE)
 - [Beyond ACLs: Mapping Windows Privilege Escalation Paths with BloodHound](https://www.synacktiv.com/en/publications/beyond-acls-mapping-windows-privilege-escalation-paths-with-bloodhound.html)
+- [ADPathFinder: OpenGraph Attack Path Mapping in BloodHound CE](https://www.netspi.com/blog/technical-blog/network-pentesting/adpathfinder-opengraph-attack-path-mapping-in-bloodhound-ce/)
 
 {{#include ../../banners/hacktricks-training.md}}
