@@ -212,6 +212,36 @@ When testing MCP development environments, look for:
 - OAuth / redirect flows that render attacker-controlled URLs inside the local UI.
 - Proxy endpoints that accept arbitrary `command`, `args`, or server configuration JSON.
 
+### Remote Process-Launch APIs Exposed Beyond Loopback
+
+Some MCP inspector/dev panels do not just proxy JSON-RPC traffic; they also expose helper endpoints that **spawn local MCP servers** from client-supplied configuration. If that HTTP API is reachable from `0.0.0.0`, reverse-proxied on a public vhost, or left unauthenticated on an internal segment, it becomes remote OS command execution.
+
+A common request shape is a `serverConfig`/`server_params` object containing `command`, `args`, and `env`, for example:
+
+```json
+{
+  "serverConfig": {
+    "command": "bash",
+    "args": ["-c", "id"],
+    "env": {}
+  },
+  "serverId": "test"
+}
+```
+
+Practical notes:
+
+- Endpoints named like `/api/mcp/connect`, `/servers/connect`, `/spawn`, or `/start` are higher risk than plain `tools/list` because they create a new local subprocess.
+- A response such as `Connection closed`, `protocol error`, or `handshake failed` may still mean **code execution already happened**: the child process ran, but it did not speak MCP after launch. Verify first with ICMP, DNS, or HTTP callbacks before moving to a shell.
+- Treat client-controlled `env`, working-directory, plugin-path, or package-install parameters as equivalent to raw `command`/`args`.
+- During audits, confirm whether the API is loopback-only, whether the reverse proxy forwards it externally, and whether authentication is enforced **before** the spawn path.
+
+Defensive priorities:
+
+- Bind inspector/dev APIs to `127.0.0.1` or a dedicated admin network.
+- Require authentication and authorization on the spawn endpoint itself.
+- Store launch definitions server-side and allowlist approved binaries; never forward raw `command` / `args` / `env` into `spawn`, `exec`, or `subprocess` calls.
+
 ### Agent-Assisted Localhost MCP Hijacking (AutoJack pattern)
 
 If an **AI browsing agent** runs on the same workstation as a privileged local MCP control plane, **localhost is not a trust boundary**. A malicious page rendered by the agent can reach `ws://127.0.0.1` / `ws://localhost`, abuse weak WebSocket trust assumptions, and turn the agent into a **confused deputy** that drives the local control plane.
@@ -490,5 +520,7 @@ Another suspicious primitive is **native-code preloading**. A skill that sets `L
 - [otto-support `selfpwn` source](https://github.com/BishopFox/otto-support/blob/main/cmd/otto-support/selfpwn.go)
 - [Model Context Protocol Security Best Practices](https://modelcontextprotocol.io/docs/tutorials/security/security_best_practices)
 - [MCP Inspector proxy server lacks authentication between the Inspector client and proxy](https://github.com/advisories/GHSA-7f8r-222p-6f5g)
+- [REC in MCPJam inspector due to HTTP Endpoint exposes](https://github.com/MCPJam/inspector/security/advisories/GHSA-232v-j27c-5pp6)
+- [HTB Kobold: MCPJam RCE, PrivateBin LFI-to-RCE, and Docker Host Takeover](https://0xdf.gitlab.io/2026/08/01/htb-kobold.html)
 
 {{#include ../banners/hacktricks-training.md}}
