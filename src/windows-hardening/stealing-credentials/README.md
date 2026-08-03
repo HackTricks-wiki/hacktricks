@@ -436,11 +436,73 @@ On the operator side, rebuild the file and run the dumper locally to recover cre
 base64 -d sqlstudio.b64 > sqlstudio.bin
 ```
 
+## Passkeys / WebAuthn credential theft from Chrome on Windows
+
+If code execution is obtained as the **victim user** on a Windows host using **Chrome + Google Password Manager synced passkeys**, passkeys become an interesting post-exploitation target even **without admin/SYSTEM**.
+
+### Interesting local artifacts
+
+```text
+%LocalAppData%\Google\Chrome\User Data\<Profile>\Sync Data\LevelDB
+%LocalAppData%\Google\Chrome\User Data\<Profile>\passkey_enclave_state
+```
+
+- **`Sync Data\LevelDB`** stores protobuf-encoded **`WebauthnCredentialSpecifics`** records. A same-user process can enumerate the **RP ID**, **username**, **credential ID**, and encrypted private-key material for synced passkeys.
+- **`passkey_enclave_state`** stores local device-enrollment state such as **`wrapped_identity_private_key`** and the wrapped secret used to recover synced credentials.
+
+Quick triage:
+
+```powershell
+Get-ChildItem "$env:LOCALAPPDATA\Google\Chrome\User Data" -Recurse -Force |
+  Where-Object { $_.FullName -match 'passkey_enclave_state|Sync Data\\LevelDB' } |
+  Select-Object FullName, Length, LastWriteTime
+```
+
+### TPM-bound key blobs can still be abused as a local signing oracle
+
+If the browser exports a TPM-backed identity key as **`NCRYPT_OPAQUE_KEY_BLOB`** and stores that blob in user-accessible state, malware does **not** need to extract the raw private key. It can simply re-import the blob on the **same machine** and ask the local TPM to sign attacker-controlled data:
+
+```c
+NCryptOpenStorageProvider(...)
+NCryptImportKey(..., NCRYPT_OPAQUE_KEY_BLOB, ...)
+NCryptSignHash(...)
+```
+
+This means **hardware binding prevents off-device export but not same-user use on the compromised endpoint**.
+
+### Practical abuse paths
+
+1. **Pass-ta-key / device-identity relay**
+   - Enumerate `WebauthnCredentialSpecifics` from Chrome's LevelDB.
+   - Start a passkey login and obtain a fresh WebAuthn challenge.
+   - Use the stolen `wrapped_identity_private_key` blob on the victim TPM to sign the cloud-authenticator request binding.
+   - Relay the returned assertion to the relying party.
+   - This is especially valuable when the RP accepts `userVerification=preferred` or fails to reject assertions with **`UV=0`**.
+2. **Pending UV-key hijack**
+   - Force re-onboarding by deleting `passkey_enclave_state` or by sending a valid signed `device/forget` operation.
+   - If onboarding leaves the device in **`uv_key_pending`**, register an attacker-controlled UV public key.
+   - If the provider does not verify attestation / secure-hardware origin for the new UV key, later signatures from the attacker key are treated as **`UV=1`**.
+3. **Master-secret / SDS recovery theft**
+   - Force recovery or rejoin so Chrome fetches the synced-passkey master secret.
+   - Watch for recreation/modification of `passkey_enclave_state`, then dump Chrome memory while the plaintext **security domain secret (SDS)** is resident.
+   - Use the recovered SDS to decrypt the encrypted fields in every `WebauthnCredentialSpecifics` record and recover portable WebAuthn private keys.
+
+### DFIR / detection ideas
+
+- Monitor **deletion/recreation** of `passkey_enclave_state`.
+- Alert on abnormal access to Chrome **`Sync Data\LevelDB`** by non-browser processes.
+- Alert on **Chrome memory dumps** or suspicious cross-process memory access.
+- Investigate repeated **Google Password Manager recovery PIN** prompts or unexpected re-onboarding.
+- Remember that WebAuthn **`signCount`** is often not useful for synced passkeys because it may remain constant, so classic clone detection is weak.
+
 ## References
 
 - [Unit 42 – An Investigation Into Years of Undetected Operations Targeting High-Value Sectors](https://unit42.paloaltonetworks.com/cl-unk-1068-targets-critical-sectors/)
 - [0xdf – HTB/VulnLab JobTwo: Word VBA macro phishing via SMTP → hMailServer credential decryption → Veeam CVE-2023-27532 to SYSTEM](https://0xdf.gitlab.io/2026/01/27/htb-jobtwo.html)
 - [Check Point Research – Inside Ink Dragon: Revealing the Relay Network and Inner Workings of a Stealthy Offensive Operation](https://research.checkpoint.com/2025/ink-dragons-relay-network-and-offensive-operation/)
+- [Unit 42 – Pass the Passkey: A Novel Attack Surface in Passwordless Authentication](https://unit42.paloaltonetworks.com/passwordless-authentication-security-risks/)
+- [Chromium – `webauthn_credential_specifics.proto`](https://chromium.googlesource.com/chromium/src/+/main/components/sync/protocol/webauthn_credential_specifics.proto)
+- [Microsoft – `NCryptCreatePersistedKey` / CNG key storage](https://learn.microsoft.com/en-us/windows/win32/api/ncrypt/nf-ncrypt-ncryptcreatepersistedkey)
 
 {{#include ../../banners/hacktricks-training.md}}
 
