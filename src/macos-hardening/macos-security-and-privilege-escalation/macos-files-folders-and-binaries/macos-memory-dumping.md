@@ -1,30 +1,30 @@
-# macOS Memory Dumping
+# Dump memorije u macOS-u
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Memory Artifacts
+## Memorijski artefakti
 
-### Swap Files
+### Swap datoteke
 
-Swap files, kao što je `/private/var/vm/swapfile0`, služe kao **keš kada je fizička memorija puna**. Kada više nema mesta u fizičkoj memoriji, njeni podaci se prebacuju u swap file i zatim vraćaju u fizičku memoriju po potrebi. Može postojati više swap file-ova, sa imenima kao što su swapfile0, swapfile1 i tako dalje.
+Swap datoteke, kao što je `/private/var/vm/swapfile0`, služe kao **keš kada je fizička memorija puna**. Kada više nema prostora u fizičkoj memoriji, njeni podaci se prenose u swap datoteku, a zatim se po potrebi vraćaju u fizičku memoriju. Može biti prisutno više swap datoteka, sa nazivima kao što su swapfile0, swapfile1 i tako dalje.
 
-### Hibernate Image
+### Hibernate slika
 
-Fajl koji se nalazi na `/private/var/vm/sleepimage` je ključan tokom **hibernation mode**. **Podaci iz memorije se čuvaju u ovom fajlu kada OS X uđe u hibernaciju**. Kada se računar probudi, sistem preuzima podatke iz memorije iz ovog fajla, omogućavajući korisniku da nastavi gde je stao.
+Datoteka koja se nalazi na `/private/var/vm/sleepimage` od ključnog je značaja tokom **režima hibernacije**. **Podaci iz memorije čuvaju se u ovoj datoteci kada OS X pređe u hibernaciju**. Kada se računar probudi, sistem preuzima podatke o memoriji iz ove datoteke, omogućavajući korisniku da nastavi tamo gde je stao.
 
-Vredi napomenuti da je na modernim MacOS sistemima ovaj fajl tipično enkriptovan iz sigurnosnih razloga, što otežava recovery.
+Vredi napomenuti da je na modernim MacOS sistemima ova datoteka obično šifrovana iz bezbednosnih razloga, što otežava oporavak podataka.
 
-- Da biste proverili da li je enkripcija omogućena za sleepimage, može se pokrenuti komanda `sysctl vm.swapusage`. Ona će pokazati da li je fajl enkriptovan.
+- Da biste proverili da li je šifrovanje omogućeno za sleepimage, možete pokrenuti komandu `sysctl vm.swapusage`. Ona će prikazati da li je datoteka šifrovana.
 
-### Memory Pressure Logs
+### Dnevnici pritiska memorije
 
-Još jedan važan fajl vezan za memoriju na MacOS sistemima je **memory pressure log**. Ovi logovi se nalaze u `/var/log` i sadrže detaljne informacije o korišćenju memorije i događajima opterećenja sistema. Mogu biti posebno korisni za dijagnostikovanje problema vezanih za memoriju ili za razumevanje kako sistem upravlja memorijom tokom vremena.
+Još jedna važna datoteka povezana sa memorijom u MacOS sistemima jeste **dnevnik pritiska memorije**. Ovi dnevnici se nalaze u `/var/log` i sadrže detaljne informacije o korišćenju memorije sistema i događajima povezanima sa pritiskom memorije. Mogu biti naročito korisni za dijagnostikovanje problema povezanih sa memorijom ili za razumevanje načina na koji sistem upravlja memorijom tokom vremena.
 
-## Dumping memory with osxpmem
+## Dump memorije pomoću osxpmem
 
-Da biste dump-ovali memoriju na MacOS mašini možete koristiti [**osxpmem**](https://github.com/google/rekall/releases/download/v1.5.1/osxpmem-2.1.post4.zip).
+Da biste napravili dump memorije na MacOS računaru, možete koristiti [**osxpmem**](https://github.com/google/rekall/releases/download/v1.5.1/osxpmem-2.1.post4.zip).
 
-**Note**: Ovo je uglavnom **legacy workflow** sada. `osxpmem` zavisi od učitavanja kernel extension-a, projekat [Rekall](https://github.com/google/rekall) je arhiviran, najnovije izdanje je iz **2017**, a objavljeni binary cilja **Intel Macs**. Na trenutnim macOS izdanjima, posebno na **Apple Silicon**, full-RAM acquisition baziran na kext-u je obično blokiran modernim ograničenjima kernel extension-a, SIP-om i zahtevima platform-signing-a. U praksi, na modernim sistemima ćete češće završiti sa **process-scoped dump** umesto sa whole-RAM image.
+**Napomena**: Ovo je sada uglavnom **zastareli workflow**. `osxpmem` zavisi od učitavanja ekstenzije kernela, projekat [Rekall](https://github.com/google/rekall) je arhiviran, najnovije izdanje je iz **2017. godine**, a objavljeni binary namenjen je **Intel Mac računarima**. Na aktuelnim macOS izdanjima, naročito na platformi **Apple Silicon**, pribavljanje cele RAM memorije pomoću kext-a obično je blokirano modernim ograničenjima kernel ekstenzija, SIP-om i zahtevima za potpisivanje platforme. U praksi ćete na modernim sistemima češće praviti **dump ograničen na proces**, umesto slike cele RAM memorije.
 ```bash
 #Dump raw format
 sudo osxpmem.app/osxpmem --format raw -o /tmp/dump_mem
@@ -32,35 +32,35 @@ sudo osxpmem.app/osxpmem --format raw -o /tmp/dump_mem
 #Dump aff4 format
 sudo osxpmem.app/osxpmem -o /tmp/dump_mem.aff4
 ```
-Ako pronađete ovu grešku: `osxpmem.app/MacPmem.kext failed to load - (libkern/kext) authentication failure (file ownership/permissions); check the system/kernel logs for errors or try kextutil(8)` možete je popraviti ovako:
+Ako pronađete ovu grešku: `osxpmem.app/MacPmem.kext failed to load - (libkern/kext) authentication failure (file ownership/permissions); check the system/kernel logs for errors or try kextutil(8)` Možete je rešiti tako što ćete:
 ```bash
 sudo cp -r osxpmem.app/MacPmem.kext "/tmp/"
 sudo kextutil "/tmp/MacPmem.kext"
 #Allow the kext in "Security & Privacy --> General"
 sudo osxpmem.app/osxpmem --format raw -o /tmp/dump_mem
 ```
-**Ostale greške** mogu biti ispravljene **dozvoljavanjem učitavanja kext-a** u "Security & Privacy --> General", samo ga **dozvoli**.
+**Druge greške** mogu biti otklonjene tako što ćete **dozvoliti učitavanje kext-a** u „Security & Privacy --> General“, samo kliknite na **Allow**.
 
-Takođe možeš da koristiš ovaj **oneliner** da preuzmeš aplikaciju, učitaš kext i dump-uješ memoriju:
+Takođe možete koristiti ovaj **oneliner** za preuzimanje aplikacije, učitavanje kext-a i dump memorije:
 ```bash
 sudo su
 cd /tmp; wget https://github.com/google/rekall/releases/download/v1.5.1/osxpmem-2.1.post4.zip; unzip osxpmem-2.1.post4.zip; chown -R root:wheel osxpmem.app/MacPmem.kext; kextload osxpmem.app/MacPmem.kext; osxpmem.app/osxpmem --format raw -o /tmp/dump_mem
 ```
-## Dumpovanje live procesa pomoću LLDB
+## Dumping živog procesa pomoću LLDB-a
 
-Za **novije verzije macOS-a**, najpraktičniji pristup je obično da se dumpuje memorija **određenog procesa** umesto da se pokušava slika kompletne fizičke memorije.
+Za **novije verzije macOS-a**, najpraktičniji pristup je obično dump memorije **određenog procesa**, umesto pokušaja da se napravi image cele fizičke memorije.
 
-LLDB može da sačuva Mach-O core file iz live target-a:
+LLDB može da sačuva Mach-O core datoteku iz živog targeta:
 ```bash
 sudo lldb --attach-pid <pid>
 (lldb) process save-core /tmp/target.core
 ```
-Podrazumevano ovo obično kreira **skinny core**. Da biste naterali LLDB da uključi svu mapiranu memoriju procesa:
+Podrazumevano, ovo obično kreira **skinny core**. Da biste primorali LLDB da uključi svu mapiranu memoriju procesa:
 ```bash
 sudo lldb --attach-pid <pid>
 (lldb) process save-core /tmp/target-full.core --style full
 ```
-Korisne naredbe za nastavak pre dumpovanja:
+Korisne naknadne komande pre dumpinga:
 ```bash
 # Show loaded images and main binary
 (lldb) image list
@@ -71,28 +71,28 @@ Korisne naredbe za nastavak pre dumpovanja:
 # Dump only one interesting range
 (lldb) memory read --force --outfile /tmp/region.bin --binary <start> <end>
 ```
-Ovo je obično dovoljno kada je cilj da se povrati:
+Ovo je obično dovoljno kada je cilj oporavak:
 
 - Decrypted configuration blobs
-- In-memory tokens, cookies, or credentials
-- Plaintext secrets that are only protected at rest
-- Decrypted Mach-O pages after unpacking / JIT / runtime patching
+- Tokena, cookies ili credentials u memoriji
+- Plaintext secrets koji su zaštićeni samo kada miruju
+- Decrypted Mach-O stranica nakon unpacking-a / JIT-a / runtime patching-a
 
-Ako je target zaštićen pomoću **hardened runtime**, ili ako `taskgated` odbije attach, obično su potrebni jedan od ovih uslova:
+Ako je cilj zaštićen **hardened runtime-om** ili `taskgated` odbije attach, obično vam je potreban jedan od sledećih uslova:
 
-- Target ima **`get-task-allow`**
-- Tvoj debugger je potpisan odgovarajućim **debugger entitlement**
-- Ti si **root** i target je non-hardened third-party proces
+- Cilj sadrži **`get-task-allow`**
+- Vaš debugger je potpisan odgovarajućim **debugger entitlement-om**
+- Vi ste **root**, a cilj je non-hardened third-party process
 
-Za više pozadine o dobijanju task porta i šta se sa njim može uraditi:
+Za više informacija o dobijanju task port-a i onome što se pomoću njega može uraditi:
 
 {{#ref}}
 ../macos-proces-abuse/macos-ipc-inter-process-communication/macos-thread-injection-via-task-port.md
 {{#endref}}
 
-### Fast pre-attach checks
+### Brze provere pre attach-a
 
-Pre nego što potrošiš vreme na LLDB/Frida, brzo proveri da li je target realno **dumpable**:
+Pre nego što potrošite vreme na LLDB/Frida, brzo proverite da li je cilj realno **dumpable**:
 ```bash
 # Check entitlements that commonly decide whether an attach will work
 codesign -d --entitlements - /Applications/Target.app 2>/dev/null | \
@@ -104,23 +104,33 @@ codesign -dvvv /Applications/Target.app 2>&1 | egrep 'Runtime Version|flags='
 # Inspect memory layout before deciding between a full core and a selective dump
 vmmap <pid>
 ```
-Operativno, ovo obično znači:
+U praksi, to obično znači:
 
-- Third-party app isporučen sa **`get-task-allow`** je često direktno dumpable sa LLDB, a rezultujući dump može otkriti TCC-protected podatke kojima je app već pristupio.
-- **hardened** target bez `get-task-allow` će često odbiti attaches, čak i kao `root`, osim ako kontrolišeš relevantne debugger entitlements / policy path.
-- Unhardened third-party procesi su i dalje najlakše mesto za korišćenje `lldb`, `vmmap`, Frida, ili custom `task_for_pid`/`vm_read` readers.
+- Aplikacija treće strane isporučena sa **`get-task-allow`** često se može direktno dump-ovati pomoću LLDB-a, a dobijeni dump može otkriti TCC-protected podatke kojima je aplikacija već pristupila.
+- **Hardened** target bez **`get-task-allow`** obično će odbiti attach, čak i kada ste **`root`**, osim ako kontrolišete relevantna debugger entitlements / policy path pravila.
+- Unhardened procesi trećih strana i dalje su najlakše mesto za korišćenje alata kao što su `lldb`, `vmmap`, Frida ili prilagođeni `task_for_pid`/`vm_read` čitači.
 
-## Selective dumps with Frida or userland readers
+### Potražite dumpable ugnježdene helpere
 
-Kada je full core previše noisy, dumpovanje samo **interesting readable ranges** je često brže. Frida je posebno korisna zato što dobro radi za **targeted extraction** jednom kada možeš da se attachuješ na proces.
+Nedavna istraživanja notarizovanih macOS aplikacija i dalje pronalaze **`get-task-allow`** u ugnježdenim helperima umesto u glavnom GUI binary-ju. Kada aplikacija najvišeg nivoa izgleda hardened, pre nego što odustanete enumerišite njene **XPC services**, **login items**, **helper tools** i bundled CLI-jeve:
+```bash
+find /Applications/Target.app -type f -perm -111 -print0 | while IFS= read -r -d '' bin; do
+codesign -d --entitlements - "$bin" 2>/dev/null | grep -q 'get-task-allow' && echo "$bin"
+done
+```
+Ugnježđena izvršna datoteka sa `get-task-allow` često je najlakše mesto za povezivanje pomoću `lldb`, izradu core dump-a ili preuzimanje memorije pomoću prilagođenog `task_for_pid` klijenta, čak i kada je glavna aplikacija bolje zaštićena.
 
-Primer approach:
+## Selektivni dumpovi uz Frida ili userland čitače
 
-1. Enumerate readable/writable ranges
-2. Filter by module, heap, stack, or anonymous memory
-3. Dump only the regions that contain candidate strings, keys, protobufs, plist/XML blobs, or decrypted code/data
+Kada je kompletan core previše bučan, često je brže dump-ovati samo **zanimljive čitljive opsege**. Frida je naročito korisna jer dobro funkcioniše za **ciljano izdvajanje** nakon što možete da se povežete sa procesom.
 
-Minimal Frida example to dump all readable anonymous ranges:
+Primer pristupa:
+
+1. Nabrojati čitljive/upisive opsege
+2. Filtrirati prema modulu, heap-u, stack-u ili anonimnoj memoriji
+3. Dump-ovati samo regione koji sadrže potencijalne stringove, ključeve, protobuf-ove, plist/XML blob-ove ili dekriptovani code/data
+
+Minimalni Frida primer za dump svih čitljivih anonimnih opsega:
 ```javascript
 Process.enumerateRanges({ protection: 'rw-', coalesce: true }).forEach(function (range) {
 try {
@@ -132,17 +142,19 @@ f.close();
 } catch (e) {}
 });
 ```
-Ovo je korisno kada želiš da izbegneš ogromne core fajlove i prikupiš samo:
+Ovo je korisno kada želite da izbegnete ogromne core fajlove i prikupite samo:
 
 - App heap chunks koji sadrže secrets
-- Anonymous region-e kreirane od strane custom packers ili loaders
-- JIT / unpacked code page-ove nakon promene protections
+- Anonymous regions koje kreiraju custom packers ili loaders
+- JIT / unpacked code pages nakon promene protections
 
-Stariji userland alati kao što je [`readmem`](https://github.com/gdbinit/readmem) takođe postoje, ali su uglavnom korisni kao **source references** za direktno `task_for_pid`/`vm_read` style dumping i nisu dobro održavani za moderne Apple Silicon workflows.
+Kada target nastavi da **alocira / oslobađa** memoriju dok vršite dump, za nestabilne opsege koristite Fridin primitiv **`readVolatile()`** umesto **`readByteArray()`**. Sporiji je, ali sprečava prekid rada targeta ako stranica postane nečitljiva usred čitanja. Za veće akvizicije može biti praktičnije i da streamujete chunks nazad pomoću `send(..., data)` i kompresujete ih na strani controller-a, umesto da kreirate hiljade malih fajlova unutar targeta.
+
+Postoje i stariji userland alati, kao što je [`readmem`](https://github.com/gdbinit/readmem), ali oni su uglavnom korisni kao **source references** za direktan dump u stilu `task_for_pid`/`vm_read` i nisu dobro održavani za moderne Apple Silicon workflows.
 
 ## Heap / VM snapshots sa `.memgraph`
 
-Ako ti je uglavnom stalo do **heap objekata**, **allocation provenance**, ili snapshot-a koji može da se premesti na drugu mašinu, `.memgraph` je često praktičniji od ogromnog Mach-O core-a. `leaks` tooling može da ga generiše iz live procesa:
+Ako vas prvenstveno zanimaju **heap objects**, **allocation provenance** ili snapshot koji se može preneti na drugu mašinu, `.memgraph` je često praktičniji od ogromnog Mach-O core-a. `leaks` tooling može da ga generiše iz live procesa:
 ```bash
 # Capture a memory graph from a live process
 leaks <pid> -outputGraph /tmp/target.memgraph
@@ -150,48 +162,74 @@ leaks <pid> -outputGraph /tmp/target.memgraph
 # Include richer object content when you expect to inspect strings / heap data offline
 leaks <pid> -outputGraph /tmp/target-full.memgraph -fullContent
 ```
-Zatim ga offline triage-uj sa standardnim Apple tooling-om:
+Zatim izvršite trijažu van mreže pomoću standardnih Apple alata:
 ```bash
 vmmap /tmp/target.memgraph
 heap /tmp/target.memgraph
 stringdups /tmp/target-full.memgraph
 malloc_history /tmp/target.memgraph 0xADDR
 ```
-`stringdups` je glavni razlog da se zadrži `-fullContent` capture, zato što se oznake koje opisuju sadržaj memorije izostavljaju iz minimalnog `.memgraph`.
+`stringdups` je glavni razlog da sačuvate capture sa opcijom `-fullContent`, jer su oznake koje opisuju sadržaj memorije izostavljene iz minimalnog `.memgraph` fajla.
 
-Ovo je posebno korisno kada:
+Ovo je naročito korisno kada:
 
-- Želiš **manji, deljiv snapshot** umesto celog core-a
-- `MallocStackLogging` je bio omogućen i želiš **allocation backtraces**
-- Već znaš **zanimljivu heap adresu** i želiš da pivotuješ pomoću `malloc_history`
-- Treba ti brz **VM/heap breakdown** pre nego što odlučiš da li se full dump isplati zbog šuma
+- želite **manji snapshot koji možete deliti** umesto kompletnog core-a
+- `MallocStackLogging` je bio omogućen i želite **allocation backtraces**
+- već znate **zanimljivu heap adresu** i želite da nastavite pomoću `malloc_history`
+- potreban vam je brzi **VM/heap pregled** pre nego što odlučite da li je full dump vredan dodatnog šuma
+
+### Diferencijalna memgraph trijaža
+
+Ako kontrolišete način na koji se target pokreće, omogućite **historical allocation logging** pre pokretanja kako bi kasniji snapshot-i sačuvali korisne alloc/free backtraces:
+```bash
+env MallocStackLoggingNoCompact=1 /path/to/TargetBinary
+```
+Zatim napravite snapshots oko interesantne radnje i uporedite ih offline:
+```bash
+# Baseline before login / decrypt / unpack
+leaks <pid> -outputGraph /tmp/pre.memgraph -fullContent -fullStackHistory
+
+# Snapshot after the sensitive action
+leaks <pid> -outputGraph /tmp/post.memgraph -fullContent -fullStackHistory
+
+# Show only new leaks introduced after the baseline
+leaks /tmp/post.memgraph -diffFrom=/tmp/pre.memgraph
+
+# Walk from roots to one candidate allocation, or filter the whole tree by class / VM type
+leaks /tmp/post.memgraph -traceTree 0xADDR
+leaks /tmp/post.memgraph -referenceTree='CFData[50k+]'
+
+# Pivot into the preserved stack history at the interesting high-water mark
+malloc_history /tmp/post.memgraph -callTree -highWaterMark
+```
+Ovo je praktičan način za izolovanje **post-authentication objekata**, **velikih `CFData` bafera** ili **anonymous VM regiona** koji se pojavljuju tek nakon faze dešifrovanja, raspakivanja ili preuzimanja tajne.
 
 ## Swift-heavy targets: `swift-inspect`
 
-Za aplikacije koje drže podatke visoke vrednosti unutar **Swift runtime objects**, `swift-inspect` može biti dobar dodatak uz LLDB ili Frida. Umesto da prvo dump-uješ sve, možeš da postavljaš upite nad određenim Swift runtime strukturama iz live procesa:
+Za aplikacije koje čuvaju podatke visoke vrednosti unutar **Swift runtime objekata**, `swift-inspect` može biti dobra dopuna alatima LLDB ili Frida. Umesto da prvo dumpujete sve, možete upitati određene Swift runtime strukture iz live procesa:
 ```bash
 # Usually available from the Xcode / Swift toolchain
 swift-inspect dump-raw-metadata <pid-or-name>
 swift-inspect dump-arrays <pid-or-name>
 swift-inspect dump-concurrency <pid-or-name> # Darwin-only
 ```
-Ovo je korisno za identifikaciju:
+Ovo je korisno za identifikovanje:
 
-- Veliki Swift nizovi koji baferuju zanimljive podatke
-- Metadata allocations koje otkrivaju tipove učitane tokom izvršavanja
-- Swift concurrency state (`Task`, actor, thread relationships) pre nego što uradite ciljaniji dump
+- Velikih Swift nizova koji baferuju zanimljive podatke
+- Metadata alokacija koje otkrivaju tipove učitane tokom runtime-a
+- Swift concurrency stanja (`Task`, odnosa između actor-a i thread-ova) pre ciljanijeg dump-a
 
-Za detaljniji object-level runtime triage kada već možete da pregledate process, pogledajte [the dedicated page on objects in memory](../macos-apps-inspecting-debugging-and-fuzzing/objects-in-memory.md).
+Za detaljniji triage na nivou objekata, kada već možete da pregledate proces, pogledajte [posvećenu stranicu o objektima u memoriji](../macos-apps-inspecting-debugging-and-fuzzing/objects-in-memory.md).
 
-## Quick triage notes
+## Kratke napomene za triage
 
-- `sysctl vm.swapusage` je i dalje brz način da proverite **swap usage** i da li je swap **encrypted**.
-- `sleepimage` je i dalje relevantan uglavnom za scenarije **hibernate/safe sleep**, ali modern systems ga često štite, pa ga treba tretirati kao **artifact source to check**, a ne kao pouzdan acquisition path.
-- Na novijim macOS verzijama, **process-level dumping** je uglavnom realističniji od **full physical memory imaging** osim ako kontrolišete boot policy, SIP state i kext loading.
+- `sysctl vm.swapusage` je i dalje brz način za proveru **upotrebe swap-a** i utvrđivanje da li je swap **šifrovan**.
+- `sleepimage` je i dalje uglavnom relevantan za scenarije **hibernate/safe sleep**, ali ga moderni sistemi često štite, pa ga treba posmatrati kao **izvor artefakata koji treba proveriti**, a ne kao pouzdan acquisition path.
+- Na novijim izdanjima macOS-a, **dumping na nivou procesa** je generalno realniji od **snimanja kompletne fizičke memorije**, osim ako kontrolišete boot policy, stanje SIP-a i učitavanje kext-ova.
 
-## References
+## Reference
 
-- [https://www.appspector.com/blog/core-dump](https://www.appspector.com/blog/core-dump)
 - [https://afine.com/to-allow-or-not-to-get-task-allow-that-is-the-question](https://afine.com/to-allow-or-not-to-get-task-allow-that-is-the-question)
+- [https://keith.github.io/xcode-man-pages/leaks.1.html](https://keith.github.io/xcode-man-pages/leaks.1.html)
 
 {{#include ../../../banners/hacktricks-training.md}}
