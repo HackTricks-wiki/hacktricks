@@ -2,95 +2,118 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
+हाल के macOS kernel exploitation का संबंध अब "एक trivial unsigned kext load करके ring-0 प्राप्त करने" से कम और **Mach/MIG parsers**, **IOKit user clients**, **XNU के अंदर data-only races**, तथा **specially entitled daemons** का दुरुपयोग करने से अधिक है, जो अब भी kernel attack surface को दोबारा खोल सकते हैं। Concrete interfaces को reverse करने के लिए [**IOKit**](macos-iokit.md) और [**kernel extensions / kernelcache extraction**](macos-kernel-extensions.md) से संबंधित pages भी देखें।
+
+## वे attack surfaces जो अब भी महत्वपूर्ण हैं
+
+- System daemons और kernel-facing services में **Mach/MIG handlers**: malformed descriptors, out-of-line (OOL) data, और stateful multi-message flows।
+- **IOKit user clients**: selector-specific parsing, entitlement-gated methods, और wrapper libraries/daemons जो वास्तविक call graph को छिपाते हैं।
+- **XNU data-only primitives**: credentials, SMR-protected pointers, read-only zones और अन्य स्थानों के आसपास races, जहाँ corruption पहले RIP/PC control प्राप्त किए बिना policy बदल सकता है।
+- **Third-party / auxiliary kernel code**: legacy kexts अब कम सामान्य हैं, लेकिन enterprise fleets, reduced-security Apple Silicon systems, और vendor `.fs` / helper bundles अब भी high-value kernel-adjacent paths बनाते हैं।
+
 ## [Pwning OTA](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/)
 
-[**इस रिपोर्ट में**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) कई कमजोरियों को समझाया गया है जिन्होंने सॉफ़्टवेयर अपडेटर को समझौता करते हुए कर्नेल को समझौता करने की अनुमति दी।\
-[**PoC**](https://github.com/jhftss/POC/tree/main/CVE-2022-46722).
+[**इस report**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) में कई OTA/update-chain bugs को combine करके software update pipeline और rootless-related capabilities का दुरुपयोग करते हुए kernel compromise तक पहुँचा गया है।
+
+[**PoC**](https://github.com/jhftss/POC/tree/main/CVE-2022-46722)।
 
 ---
 
-## 2024: In-the-wild Kernel 0-days (CVE-2024-23225 & CVE-2024-23296)
+## 2024: In-the-wild kernel protection bypass chain (CVE-2024-23225 & CVE-2024-23296)
 
-Apple ने मार्च 2024 में iOS और macOS के खिलाफ सक्रिय रूप से शोषित दो मेमोरी-क्षति बग को पैच किया (macOS 14.4/13.6.5/12.7.4 में ठीक किया गया)।
+Apple की [**March 2024 macOS security releases**](https://support.apple.com/en-us/120895) ने दो ऐसी समस्याएँ fix कीं जिनका **actively exploited** किया जा रहा था:
 
-* **CVE-2024-23225 – Kernel**
-• XNU वर्चुअल-मेमोरी सबसिस्टम में आउट-ऑफ-बाउंड्स लिखने से एक अप्रिविलेज्ड प्रक्रिया को कर्नेल एड्रेस स्पेस में मनमाना पढ़ने/लिखने की अनुमति मिलती है, PAC/KTRR को बायपास करते हुए।
-• एक तैयार XPC संदेश के माध्यम से उपयोगकर्ता स्थान से ट्रिगर किया गया जो `libxpc` में एक बफर को ओवरफ्लो करता है, फिर संदेश को पार्स करते समय कर्नेल में पिवट करता है।
-* **CVE-2024-23296 – RTKit**
-• Apple Silicon RTKit (रीयल-टाइम सह-प्रोसेसर) में मेमोरी क्षति।
-• शोषण श्रृंखलाएँ देखी गईं जिन्होंने कर्नेल R/W के लिए CVE-2024-23225 और सुरक्षित सह-प्रोसेसर सैंडबॉक्स से बाहर निकलने और PAC को निष्क्रिय करने के लिए CVE-2024-23296 का उपयोग किया।
+- **CVE-2024-23225 – Kernel**: memory-corruption bug, जहाँ arbitrary kernel read/write वाला attacker kernel memory protections को bypass कर सकता था।
+- **CVE-2024-23296 – RTKit**: एक दूसरा memory-corruption bug, जिसका public impact statement समान था।
 
-Patch level detection:
+Public root-cause details अब भी scarce हैं, लेकिन यह pair एक अच्छा reminder है कि modern Apple exploit chains को अक्सर **"सिर्फ" kernel R/W से अधिक** की आवश्यकता होती है: memory protections, coprocessor-adjacent code या secondary trust boundaries पर post-exploitation work अक्सर वह चरण होता है जहाँ वास्तविक chain stabilize होती है।
+
+त्वरित patch triage:
 ```bash
-sw_vers                 # ProductVersion 14.4 or later is patched
-authenticate sudo sysctl kern.osversion  # 23E214 or later for Sonoma
-```
-यदि अपग्रेड करना संभव नहीं है, तो कमजोर सेवाओं को बंद करके जोखिम को कम करें:
-```bash
-launchctl disable system/com.apple.analyticsd
-launchctl disable system/com.apple.rtcreportingd
+sw_vers
+uname -v
+softwareupdate --history | tail -n 20
 ```
 ---
 
-## 2023: MIG प्रकार-भ्रम – CVE-2023-41075
+## 2025: SMR + read-only credential race (CVE-2025-24118)
 
-`mach_msg()` अनुरोध जो एक अप्रिविलेज्ड IOKit उपयोगकर्ता क्लाइंट को भेजे जाते हैं, MIG द्वारा उत्पन्न गोंद-कोड में एक **प्रकार भ्रम** का कारण बनते हैं। जब उत्तर संदेश को मूल रूप से आवंटित की गई से बड़े आउट-ऑफ-लाइन वर्णनकर्ता के साथ फिर से व्याख्यायित किया जाता है, तो एक हमलावर नियंत्रित **OOB लिखने** में सक्षम हो सकता है और अंततः `root` तक बढ़ सकता है।
+Joseph Ravichandran का [**TRAVERTINE write-up**](https://jprx.io/cve-2025-24118/) एक बहुत अच्छा आधुनिक XNU case study है, क्योंकि यह **classic buffer overflow** नहीं है:
 
-प्राथमिक रूपरेखा (Sonoma 14.0-14.1, Ventura 13.5-13.6):
+- `proc_ro.p_ucred` एक **SMR-protected pointer** है, जो एक **read-only** `proc_ro` object में store किया जाता है।
+- Writers को उस pointer को **atomically** update करना आवश्यक है।
+- `kauth_cred_proc_update()` ने `p_ucred` को mutate करने के लिए `zalloc_ro_mut(...)` का उपयोग किया; x86_64 पर वह path अंततः `memcpy` / `rep movsb` तक पहुंचता है, इसलिए एक concurrent reader **torn pointer** देख सकता है।
+- यह bug एक **data-only privilege escalation** में बदल जाता है: यदि corrupted credential pointer किसी अलग valid credential object पर resolve होता है, तो current thread को पहले किसी स्पष्ट control-flow hijack को सफलतापूर्वक हासिल किए बिना अधिक privileged state inherit हो सकती है।
+
+Minimal trigger pattern:
 ```c
-// userspace stub
-typed_port_t p = get_user_client();
-uint8_t spray[0x4000] = {0x41};
-// heap-spray via IOSurfaceFastSetValue
-io_service_open_extended(...);
-// malformed MIG message triggers confusion
-mach_msg(&msg.header, MACH_SEND_MSG|MACH_RCV_MSG, ...);
+// writer thread: force frequent credential swaps
+while (1) {
+setgid(real_gid);
+setgid(saved_or_effective_gid);
+}
+
+// reader thread: repeatedly dereference current credentials
+while (1) {
+(void)getgid();
+}
 ```
-Public exploits बग का उपयोग इस प्रकार करते हैं:
-1. सक्रिय पोर्ट पॉइंटर्स के साथ `ipc_kmsg` बफर्स को स्प्रे करना।
-2. एक लटके हुए पोर्ट के `ip_kobject` को ओवरराइट करना।
-3. `mprotect()` का उपयोग करके PAC-फर्ज़ किए गए पते पर मैप किए गए शेलकोड पर कूदना।
+उपयोगी audit heuristic: जब भी कोई kernel path **SMR readers**, **read-only zone mutation**, और **credential or task metadata** को एक साथ उपयोग करता हो, तो सत्यापित करें कि updates में copy-based helpers के बजाय atomic `zalloc_ro_mut_*` variants का उपयोग किया गया है।
 
 ---
 
-## 2024-2025: तीसरे पक्ष के Kexts के माध्यम से SIP बायपास – CVE-2024-44243 (जिसे “Sigma” कहा जाता है)
+## 2024-2025: SIP bypass जो kernel loading paths को फिर से खोलता है (CVE-2024-44243)
 
-Microsoft के सुरक्षा शोधकर्ताओं ने दिखाया कि उच्च-privileged डेमन `storagekitd` को **unsigned kernel extension** लोड करने के लिए मजबूर किया जा सकता है और इस प्रकार पूरी तरह से पैच किए गए macOS (15.2 से पहले) पर **System Integrity Protection (SIP)** को पूरी तरह से निष्क्रिय कर दिया जा सकता है। हमले का प्रवाह इस प्रकार है:
+Microsoft ने दिखाया कि `storagekitd` का दुरुपयोग करके **SIP bypass** किया जा सकता है और फिर उन machines पर third-party kernel code को दोबारा relevant बनाया जा सकता है जो अन्यथा "post-kext" दिखाई देतीं। मुख्य विचार यह है:
 
-1. हमलावर के नियंत्रण में एक सहायक उत्पन्न करने के लिए निजी अधिकार `com.apple.storagekitd.kernel-management` का दुरुपयोग करना।
-2. सहायक एक तैयार की गई जानकारी-शब्दकोश के साथ `IOService::AddPersonalitiesFromKernelModule` को कॉल करता है जो एक दुर्भावनापूर्ण kext बंडल की ओर इशारा करता है।
-3. चूंकि SIP ट्रस्ट जांचें `storagekitd` द्वारा kext के स्टेज होने के *बाद* की जाती हैं, कोड रिंग-0 में मान्यता से पहले निष्पादित होता है और SIP को `csr_set_allow_all(1)` के साथ बंद किया जा सकता है।
+1. `/Library/Filesystems` के अंतर्गत एक malicious `.fs` bundle drop या overwrite करें।
+2. Disk Utility या `diskutil` के माध्यम से `storagekitd` को trigger करें।
+3. विशेष entitlements वाले daemon को **privileges को ठीक से drop किए बिना / path को validate किए बिना** bundle executables spawn करने दें।
+4. परिणामी SIP bypass का उपयोग protected file-system state को बदलने के लिए करें और Microsoft के demonstration में, kernel extension exclusion list को override करें।
 
-Detection tips:
+Kernel researchers के लिए महत्वपूर्ण lesson यह है कि **kernel attack surface को userland management daemons से फिर से introduce किया जा सकता है**, भले ही direct third-party kext loading पर कड़े restrictions लागू हों।
+
+उपयोगी triage:
 ```bash
-kmutil showloaded | grep -v com.apple   # list non-Apple kexts
-log stream --style syslog --predicate 'senderImagePath contains "storagekitd"'   # watch for suspicious child procs
+ls -la /Library/Filesystems
+find /Library/Filesystems -maxdepth 3 -type f \( -name 'mount_*' -o -name 'fsck_*' -o -name 'newfs_*' \) 2>/dev/null
+log stream --style syslog --predicate 'process == "storagekitd" || process == "diskarbitrationd"'
+kmutil showloaded --collection aux
 ```
-तत्काल सुधार के लिए macOS Sequoia 15.2 या इसके बाद के संस्करण में अपडेट करें।
-
 ---
 
-### त्वरित गणना चीटशीट
+## Fuzzing और research workflow
+
+यदि आप इस class के bugs को actively hunt कर रहे हैं, तो हाल का public work इसी दिशा की ओर संकेत कर रहा है:
+
+- [**KextFuzz**](https://www.usenix.org/conference/usenixsecurity23/presentation/yin) अभी भी Apple-Silicon-era kernel research के लिए सबसे अच्छे references में से एक है। यह coverage recover करने के लिए **static binary rewriting** का उपयोग करता है, testing के दौरान **entitlement-gated** paths को disable करता है, और userspace wrappers से interface structure का अनुमान लगाता है।
+- Project Zero का [**Simple macOS kernel extension fuzzing in userspace with IDA and TinyInst**](https://projectzero.google/2024/11/simple-macos-kernel-extension-fuzzing.html) **kext / fileset को userspace में rebase करने** का एक बहुत practical workflow दिखाता है, ताकि parser-heavy code को device पर reproduce करने से पहले काफी अधिक speed पर fuzz किया जा सके।
+- Mach-heavy targets के लिए harnesses को केवल single selector blobs के बजाय **real message layouts और multi-call state machines** के आसपास बनाएं। Project Zero की हाल की CoreAudio/Mach research और **Fuzzing at Mach Speed** जैसी conference talks दिखाती हैं कि stateful message sequences लगातार प्रभावी क्यों रहते हैं।
+
+कुछ quick local commands, जिनका आप वास्तव में अक्सर उपयोग करेंगे:
+```bash
+# Loaded auxiliary / 3rd party kernel code
+kmutil showloaded --collection aux
+
+# Fileset entries in the boot kernel collection
+kmutil inspect -B /System/Library/KernelCollections/BootKernelExtensions.kc --show-fileset-entries
+
+# Diffable version info before matching a KDK / symbols pack
+sw_vers
+uname -a
+```
+## त्वरित Enumeration Cheatsheet
 ```bash
 uname -a                          # Kernel build
+sw_vers                           # ProductVersion / BuildVersion
 kmutil showloaded                 # List loaded kernel extensions
-kextstat | grep -v com.apple      # Legacy (pre-Catalina) kext list
-sysctl kern.kaslr_enable          # Verify KASLR is ON (should be 1)
-csrutil status                    # Check SIP from RecoveryOS
-spctl --status                    # Confirms Gatekeeper state
+kmutil showloaded --collection aux  # Auxiliary / 3rd party collections
+kextstat 2>/dev/null | grep -v com.apple
+csrutil status                    # Check SIP state
+spctl --status                    # Confirm Gatekeeper state
 ```
----
+## संदर्भ
 
-## Fuzzing & Research Tools
-
-* **Luftrauser** – Mach संदेश फज़्ज़र जो MIG उपप्रणालियों को लक्षित करता है (`github.com/preshing/luftrauser`).
-* **oob-executor** – IPC आउट-ऑफ-बाउंड्स प्राइमिटिव जनरेटर जो CVE-2024-23225 अनुसंधान में उपयोग किया गया.
-* **kmutil inspect** – अंतर्निहित Apple उपयोगिता (macOS 11+) जो लोड करने से पहले kexts का स्थैतिक विश्लेषण करती है: `kmutil inspect -b io.kext.bundleID`.
-
-
-
-## References
-
-* Apple. “About the security content of macOS Sonoma 14.4.” https://support.apple.com/en-us/120895
-* Microsoft Security Blog. “Analyzing CVE-2024-44243, a macOS System Integrity Protection bypass through kernel extensions.” https://www.microsoft.com/en-us/security/blog/2025/01/13/analyzing-cve-2024-44243-a-macos-system-integrity-protection-bypass-through-kernel-extensions/
+* Joseph Ravichandran. “TRAVERTINE: CVE-2025-24118.” https://jprx.io/cve-2025-24118/
+* Microsoft Security Blog. “CVE-2024-44243 का विश्लेषण, kernel extensions के माध्यम से macOS System Integrity Protection को bypass करना।” https://www.microsoft.com/en-us/security/blog/2025/01/13/analyzing-cve-2024-44243-a-macos-system-integrity-protection-bypass-through-kernel-extensions/
 {{#include ../../../banners/hacktricks-training.md}}
