@@ -2,29 +2,29 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Memory Artifacts
+## Geheue-artefakte
 
-### Swap Files
+### Ruil-lêers
 
-Swap files, soos `/private/var/vm/swapfile0`, dien as **kasgeheue wanneer die fisiese geheue vol is**. Wanneer daar nie meer plek in fisiese geheue is nie, word die data daarvan na ’n swap file oorgedra en dan soos nodig teruggebring na fisiese geheue. Verskeie swap files kan teenwoordig wees, met name soos swapfile0, swapfile1, en so aan.
+Ruil-lêers, soos `/private/var/vm/swapfile0`, dien as **kasgeheues wanneer die fisiese geheue vol is**. Wanneer daar nie meer plek in die fisiese geheue is nie, word die data daarvan na ’n ruil-lêer oorgedra en dan, soos nodig, teruggebring na die fisiese geheue. Daar kan verskeie ruil-lêers wees, met name soos swapfile0, swapfile1, ensovoorts.
 
-### Hibernate Image
+### Hibernasiebeeld
 
-Die file geleë by `/private/var/vm/sleepimage` is noodsaaklik tydens **hibernation mode**. **Data uit memory word in hierdie file gestoor wanneer OS X hibernate**. Wanneer die rekenaar wakker word, haal die system memory data uit hierdie file, wat die user toelaat om voort te gaan waar hulle opgehou het.
+Die lêer by `/private/var/vm/sleepimage` is noodsaaklik tydens **hibernasiemodus**. **Data uit die geheue word in hierdie lêer gestoor wanneer OS X hiberneer**. Wanneer die rekenaar wakker word, haal die stelsel die geheuedata uit hierdie lêer, sodat die gebruiker kan voortgaan waar hulle opgehou het.
 
-Dit is die moeite werd om daarop te let dat op moderne MacOS systems, hierdie file tipies vir security reasons encrypted is, wat recovery moeilik maak.
+Dit is belangrik om daarop te let dat hierdie lêer op moderne MacOS-stelsels gewoonlik om sekuriteitsredes geïnkripteer is, wat herstel moeilik maak.
 
-- Om te check of encryption enabled is vir die sleepimage, kan die command `sysctl vm.swapusage` run word. Dit sal wys of die file encrypted is.
+- Om te kontroleer of encryption vir die sleepimage geaktiveer is, kan die opdrag `sysctl vm.swapusage` uitgevoer word. Dit sal wys of die lêer geïnkripteer is.
 
-### Memory Pressure Logs
+### Geheuedruk-loglêers
 
-Nog ’n belangrike memory-related file in MacOS systems is die **memory pressure log**. Hierdie logs is in `/var/log` geleë en bevat gedetailleerde inligting oor die system se memory usage en pressure events. Hulle kan veral nuttig wees vir die diagnose van memory-related issues of om te verstaan hoe die system memory oor tyd manage.
+Nog ’n belangrike geheueverwante lêer in MacOS-stelsels is die **geheuedruk-loglêer**. Hierdie loglêers is in `/var/log` geleë en bevat gedetailleerde inligting oor die stelsel se geheuegebruik en geheuedrukgebeurtenisse. Hulle kan besonder nuttig wees om geheueverwante probleme te diagnoseer of te verstaan hoe die stelsel geheue met verloop van tyd bestuur.
 
-## Dumping memory with osxpmem
+## Geheue dump met osxpmem
 
-In order to dump the memory in a MacOS machine you can use [**osxpmem**](https://github.com/google/rekall/releases/download/v1.5.1/osxpmem-2.1.post4.zip).
+Om die geheue op ’n MacOS-masjien te dump, kan jy [**osxpmem**](https://github.com/google/rekall/releases/download/v1.5.1/osxpmem-2.1.post4.zip) gebruik.
 
-**Note**: This is mostly a **legacy workflow** now. `osxpmem` depends on loading a kernel extension, the [Rekall](https://github.com/google/rekall) project is archived, the latest release is from **2017**, and the published binary targets **Intel Macs**. On current macOS releases, especially on **Apple Silicon**, kext-based full-RAM acquisition is usually blocked by modern kernel-extension restrictions, SIP, and platform-signing requirements. In practice, on modern systems you will more often end up doing a **process-scoped dump** instead of a whole-RAM image.
+**Nota**: Dit is tans meestal ’n **legacy workflow**. `osxpmem` maak staat op die laai van ’n kernel extension, die [Rekall](https://github.com/google/rekall)-projek is ge-argiveer, die nuutste vrystelling dateer uit **2017**, en die gepubliseerde binary teiken **Intel Macs**. Op huidige macOS-vrystellings, veral op **Apple Silicon**, word kext-gebaseerde full-RAM acquisition gewoonlik deur moderne kernel-extension-beperkings, SIP en platform-signing-vereistes geblokkeer. In die praktyk sal jy op moderne stelsels meer dikwels met ’n **process-scoped dump** as met ’n hele-RAM-beeld eindig.
 ```bash
 #Dump raw format
 sudo osxpmem.app/osxpmem --format raw -o /tmp/dump_mem
@@ -32,30 +32,30 @@ sudo osxpmem.app/osxpmem --format raw -o /tmp/dump_mem
 #Dump aff4 format
 sudo osxpmem.app/osxpmem -o /tmp/dump_mem.aff4
 ```
-As jy hierdie fout vind: `osxpmem.app/MacPmem.kext failed to load - (libkern/kext) authentication failure (file ownership/permissions); check the system/kernel logs for errors or try kextutil(8)` Jy kan dit regstel deur:
+As jy hierdie fout teëkom: `osxpmem.app/MacPmem.kext failed to load - (libkern/kext) authentication failure (file ownership/permissions); check the system/kernel logs for errors or try kextutil(8)` Jy kan dit regstel deur:
 ```bash
 sudo cp -r osxpmem.app/MacPmem.kext "/tmp/"
 sudo kextutil "/tmp/MacPmem.kext"
 #Allow the kext in "Security & Privacy --> General"
 sudo osxpmem.app/osxpmem --format raw -o /tmp/dump_mem
 ```
-**Ander foute** kan dalk reggestel word deur **die laai van die kext toe te laat** in "Security & Privacy --> General", just **allow** it.
+**Ander foute** kan moontlik reggestel word deur **die laai van die kext toe te laat** in "Security & Privacy --> General"; **laat dit eenvoudig toe**.
 
 Jy kan ook hierdie **oneliner** gebruik om die toepassing af te laai, die kext te laai en die geheue te dump:
 ```bash
 sudo su
 cd /tmp; wget https://github.com/google/rekall/releases/download/v1.5.1/osxpmem-2.1.post4.zip; unzip osxpmem-2.1.post4.zip; chown -R root:wheel osxpmem.app/MacPmem.kext; kextload osxpmem.app/MacPmem.kext; osxpmem.app/osxpmem --format raw -o /tmp/dump_mem
 ```
-## Live process dumping with LLDB
+## Live process dumping met LLDB
 
-Vir **onlangse macOS-weergawes** is die mees praktiese benadering gewoonlik om die memory van ’n **spesifieke proses** te dump in plaas daarvan om alle fisiese memory te image.
+Vir **onlangse macOS-weergawes** is die mees praktiese benadering gewoonlik om die geheue van ’n **spesifieke proses** te dump eerder as om alle fisiese geheue te probeer image.
 
-LLDB kan ’n Mach-O core file van ’n live target stoor:
+LLDB kan ’n Mach-O core file vanaf ’n live target stoor:
 ```bash
 sudo lldb --attach-pid <pid>
 (lldb) process save-core /tmp/target.core
 ```
-By verstek skep dit gewoonlik ’n **skinny core**. Om LLDB te forseer om al die gemapte prosesgeheue in te sluit:
+By verstek skep dit gewoonlik ’n **skinny core**. Om LLDB te dwing om alle gekarteerde prosesgeheue in te sluit:
 ```bash
 sudo lldb --attach-pid <pid>
 (lldb) process save-core /tmp/target-full.core --style full
@@ -71,28 +71,28 @@ Nuttige opvolgopdragte voor dumping:
 # Dump only one interesting range
 (lldb) memory read --force --outfile /tmp/region.bin --binary <start> <end>
 ```
-Dit is gewoonlik genoeg wanneer die doel is om te herwin:
+Dit is gewoonlik voldoende wanneer die doel is om die volgende te herwin:
 
-- Ontsleutelde konfigurasie-blobs
-- In-memory tokens, cookies, of credentials
-- Plaintext secrets wat net by rest beskerm word
-- Ontsleutelde Mach-O-bladsye ná unpacking / JIT / runtime patching
+- Gedecrypteerde konfigurasie-blobs
+- Tokens, cookies of credentials in die geheue
+- Plaintext-secrets wat slegs at rest beskerm word
+- Gedecrypteerde Mach-O-bladsye ná unpacking / JIT / runtime patching
 
-As die teiken beskerm word deur die **hardened runtime**, of as `taskgated` die attach weier, het jy tipies een van hierdie toestande nodig:
+As die teiken deur die **hardened runtime** beskerm word, of as `taskgated` die attach weier, het jy gewoonlik een van hierdie toestande nodig:
 
-- Die teiken dra **`get-task-allow`**
-- Jou debugger is gesigned met die regte **debugger entitlement**
-- Jy is **root** en die teiken is 'n nie-hardened derdeparty-proses
+- Die teiken bevat **`get-task-allow`**
+- Jou debugger is met die korrekte **debugger entitlement** onderteken
+- Jy is **root** en die teiken is ’n nie-hardened third-party-proses
 
-Vir meer agtergrond oor hoe om 'n task port te verkry en wat daarmee gedoen kan word:
+Vir meer agtergrond oor die verkryging van ’n task port en wat daarmee gedoen kan word:
 
 {{#ref}}
 ../macos-proces-abuse/macos-ipc-inter-process-communication/macos-thread-injection-via-task-port.md
 {{#endref}}
 
-### Fast pre-attach checks
+### Vinnige pre-attach-kontroles
 
-Voordat jy tyd aan LLDB/Frida bestee, verifieer vinnig of die teiken realisties **dumpable** is:
+Voordat jy tyd aan LLDB/Frida bestee, verifieer vinnig of die teiken realisties **dumpbaar** is:
 ```bash
 # Check entitlements that commonly decide whether an attach will work
 codesign -d --entitlements - /Applications/Target.app 2>/dev/null | \
@@ -104,23 +104,33 @@ codesign -dvvv /Applications/Target.app 2>&1 | egrep 'Runtime Version|flags='
 # Inspect memory layout before deciding between a full core and a selective dump
 vmmap <pid>
 ```
-Operasioneel beteken dit gewoonlik:
+In die praktyk beteken dit gewoonlik:
 
-- ’n Derdeparty-toepassing wat met **`get-task-allow`** gestuur is, is dikwels direk dumpable met LLDB, en die gevolglike dump kan TCC-beskermde data blootstel waartoe die toepassing reeds toegang gekry het.
-- ’n **hardened** teiken sonder `get-task-allow` sal gewoonlik attaches weier, selfs as `root`, tensy jy die relevante debugger entitlements / policy path beheer.
-- Unhardened derdeparty-prosesse is steeds die maklikste plek om `lldb`, `vmmap`, Frida, of custom `task_for_pid`/`vm_read` readers te gebruik.
+- ’n Derdeparty-app wat met **`get-task-allow`** verskeep is, kan dikwels direk met LLDB gedump word, en die gevolglike dump kan TCC-beskermde data blootlê waartoe die app reeds toegang verkry het.
+- ’n **hardened** teiken sonder `get-task-allow` sal attaches gewoonlik weier, selfs as `root`, tensy jy beheer het oor die toepaslike debugger entitlements / policy path.
+- Unhardened derdeparty-prosesse is steeds die maklikste plek om `lldb`, `vmmap`, Frida, of pasgemaakte `task_for_pid`/`vm_read` readers te gebruik.
 
-## Selective dumps with Frida or userland readers
+### Soek dumpable nested helpers
 
-Wanneer ’n volledige core te raserig is, is dit dikwels vinniger om net **interesting readable ranges** te dump. Frida is veral nuttig omdat dit goed werk vir **targeted extraction** sodra jy aan die proses kan attach.
+Onlangse navorsing oor notarized macOS-apps vind steeds **`get-task-allow`** in nested helpers eerder as in die hoof-GUI-binary. Wanneer ’n top-level app hardened lyk, lys sy **XPC services**, **login items**, **helper tools**, en gebundelde CLIs voordat jy tou opgooi:
+```bash
+find /Applications/Target.app -type f -perm -111 -print0 | while IFS= read -r -d '' bin; do
+codesign -d --entitlements - "$bin" 2>/dev/null | grep -q 'get-task-allow' && echo "$bin"
+done
+```
+’n Geneste executable met `get-task-allow` is dikwels die maklikste plek om met `lldb` te attach, ’n core te dump, of memory met ’n pasgemaakte `task_for_pid`-client te onttrek, selfs wanneer die hoofapp beter beveilig is.
+
+## Selektiewe dumps met Frida of userland readers
+
+Wanneer ’n volledige core te veel geraas bevat, is dit dikwels vinniger om slegs **interessante leesbare ranges** te dump. Frida is veral nuttig omdat dit goed werk vir **geteikende onttrekking** sodra jy aan die proses kan attach.
 
 Voorbeeldbenadering:
 
-1. Tel readable/writable ranges op
-2. Filter volgens module, heap, stack, of anonymous memory
-3. Dump net die regions wat kandidaat strings, keys, protobufs, plist/XML blobs, of decrypted code/data bevat
+1. Enumerate leesbare/skryfbare ranges
+2. Filter volgens module, heap, stack of anonieme memory
+3. Dump slegs die streke wat kandidaatstrings, sleutels, protobufs, plist/XML-blobs of gedekripteerde code/data bevat
 
-Minimale Frida-voorbeeld om alle readable anonymous ranges te dump:
+Minimale Frida-voorbeeld om alle leesbare anonieme ranges te dump:
 ```javascript
 Process.enumerateRanges({ protection: 'rw-', coalesce: true }).forEach(function (range) {
 try {
@@ -132,17 +142,19 @@ f.close();
 } catch (e) {}
 });
 ```
-Dit is nuttig wanneer jy reuse core files wil vermy en net die volgende wil versamel:
+Dit is nuttig wanneer jy reuse core-lêers wil vermy en slegs die volgende wil versamel:
 
 - App heap chunks wat secrets bevat
 - Anonymous regions wat deur custom packers of loaders geskep is
 - JIT / unpacked code pages nadat protections verander is
 
-Ouer userland tools soos [`readmem`](https://github.com/gdbinit/readmem) bestaan ook, maar hulle is hoofsaaklik nuttig as **source references** vir direkte `task_for_pid`/`vm_read`-styl dumping en word nie goed onderhou vir moderne Apple Silicon workflows nie.
+Wanneer die target aanhou **allocating / freeing** terwyl jy dump, verkies Frida se **`readVolatile()`** primitive bo **`readByteArray()`** vir onstabiele ranges. Dit is stadiger, maar voorkom dat die target beëindig word indien ’n page halfpad deur die read onleesbaar word. Vir groter acquisitions kan dit ook netjieser wees om chunks terug te stream met `send(..., data)` en dit aan die controller-kant te compress, eerder as om duisende klein lêers binne die target te skep.
+
+Ouer userland tools soos [`readmem`](https://github.com/gdbinit/readmem) bestaan ook, maar hulle is hoofsaaklik nuttig as **source references** vir direkte `task_for_pid`/`vm_read`-styl dumping en word nie goed vir moderne Apple Silicon-workflows onderhou nie.
 
 ## Heap / VM snapshots met `.memgraph`
 
-As jy hoofsaaklik omgee vir **heap objects**, **allocation provenance**, of 'n snapshot wat na 'n ander masjien geskuif kan word, is 'n `.memgraph` dikwels meer prakties as 'n reuse Mach-O core. Die `leaks` tooling kan een van 'n live process genereer:
+As jy hoofsaaklik omgee vir **heap objects**, **allocation provenance**, of ’n snapshot wat na ’n ander machine geskuif kan word, is ’n `.memgraph` dikwels meer prakties as ’n reuse Mach-O core. Die `leaks` tooling kan een vanaf ’n lewendige process genereer:
 ```bash
 # Capture a memory graph from a live process
 leaks <pid> -outputGraph /tmp/target.memgraph
@@ -150,48 +162,74 @@ leaks <pid> -outputGraph /tmp/target.memgraph
 # Include richer object content when you expect to inspect strings / heap data offline
 leaks <pid> -outputGraph /tmp/target-full.memgraph -fullContent
 ```
-Dan triage dit vanlyn met standaard Apple-gereedskap:
+Doen dan vanlyn triage daarmee met standaard Apple-nutsgoed:
 ```bash
 vmmap /tmp/target.memgraph
 heap /tmp/target.memgraph
 stringdups /tmp/target-full.memgraph
 malloc_history /tmp/target.memgraph 0xADDR
 ```
-`stringdups` is die hoofrede om `-fullContent` naby te hou, omdat die etikette wat geheue-inhoud beskryf, weggelaat word uit 'n minimale `.memgraph`.
+`stringdups` is die hoofrede om 'n `-fullContent`-capture te behou, omdat die labels wat memory-inhoud beskryf, uit 'n minimale `.memgraph` weggelaat word.
 
 Dit is veral nuttig wanneer:
 
-- Jy 'n **kleiner, deelbare snapshot** wil hê in plaas van 'n volle core
-- `MallocStackLogging` geaktiveer was en jy **allocation backtraces** wil hê
-- Jy reeds 'n **interessante heap-adres** ken en met `malloc_history` wil pivot
-- Jy 'n vinnige **VM/heap breakdown** nodig het voordat jy besluit of 'n volle dump die noise werd is
+- Jy 'n **kleiner, deelbare snapshot** in plaas van 'n volledige core wil hê
+- `MallocStackLogging` enabled was en jy **allocation backtraces** wil hê
+- Jy reeds 'n **interessante heap address** ken en met `malloc_history` wil pivot
+- Jy 'n vinnige **VM/heap breakdown** nodig het voordat jy besluit of 'n volledige dump die geraas werd is
+
+### Differential memgraph triage
+
+As jy beheer het oor hoe die target begin, enable **historical allocation logging** voor launch sodat latere snapshots nuttige alloc/free backtraces behou:
+```bash
+env MallocStackLoggingNoCompact=1 /path/to/TargetBinary
+```
+Neem dan snapshots rondom die interessante aksie en diff hulle vanlyn:
+```bash
+# Baseline before login / decrypt / unpack
+leaks <pid> -outputGraph /tmp/pre.memgraph -fullContent -fullStackHistory
+
+# Snapshot after the sensitive action
+leaks <pid> -outputGraph /tmp/post.memgraph -fullContent -fullStackHistory
+
+# Show only new leaks introduced after the baseline
+leaks /tmp/post.memgraph -diffFrom=/tmp/pre.memgraph
+
+# Walk from roots to one candidate allocation, or filter the whole tree by class / VM type
+leaks /tmp/post.memgraph -traceTree 0xADDR
+leaks /tmp/post.memgraph -referenceTree='CFData[50k+]'
+
+# Pivot into the preserved stack history at the interesting high-water mark
+malloc_history /tmp/post.memgraph -callTree -highWaterMark
+```
+Dit is ’n praktiese manier om **post-authentication objects**, groot `CFData`-buffers of **anonymous VM regions** te isoleer wat slegs ná ’n dekripsie-, uitpak- of geheimherwinningstadium verskyn.
 
 ## Swift-heavy targets: `swift-inspect`
 
-Vir toepassings wat hoëwaarde-data binne **Swift runtime objects** hou, kan `swift-inspect` 'n goeie aanvulling tot LLDB of Frida wees. In plaas daarvan om eers alles te dump, kan jy spesifieke Swift runtime structures vanaf 'n live process navraag doen:
+Vir toepassings wat waardevolle data binne **Swift runtime objects** hou, kan `swift-inspect` ’n goeie aanvulling tot LLDB of Frida wees. In plaas daarvan om eers alles te dump, kan jy spesifieke Swift runtime-strukture vanuit ’n lopende proses navraag doen:
 ```bash
 # Usually available from the Xcode / Swift toolchain
 swift-inspect dump-raw-metadata <pid-or-name>
 swift-inspect dump-arrays <pid-or-name>
 swift-inspect dump-concurrency <pid-or-name> # Darwin-only
 ```
-Dit is handig om te identifiseer:
+Dit is nuttig om die volgende te identifiseer:
 
-- Groot Swift arrays wat interessante data buffer
-- Metadata-toewysings wat tipes openbaar wat tydens runtime gelaai is
-- Swift concurrency state (`Task`, actor, thread relationships) voordat jy 'n meer geteikende dump doen
+- Groot Swift-arrays wat interessante data buffer
+- Metadata-allokasies wat tipes onthul wat tydens runtime gelaai is
+- Swift concurrency-toestand (`Task`, actor, thread-verhoudings) voordat ’n meer geteikende dump gedoen word
 
-Vir meer object-level runtime triage sodra jy die process reeds kan inspekteer, kyk [the dedicated page on objects in memory](../macos-apps-inspecting-debugging-and-fuzzing/objects-in-memory.md).
+Vir meer object-level runtime triage sodra jy reeds die proses kan inspekteer, kyk na [die toegewyde bladsy oor objects in memory](../macos-apps-inspecting-debugging-and-fuzzing/objects-in-memory.md).
 
-## Quick triage notes
+## Vinnige triage-aantekeninge
 
-- `sysctl vm.swapusage` is steeds 'n vinnige manier om **swap usage** te nagaan en of swap **encrypted** is.
-- `sleepimage` bly hoofsaaklik relevant vir **hibernate/safe sleep**-scenario's, maar moderne systems beskerm dit gewoonlik, so dit moet as 'n **artifact source to check** beskou word, nie as 'n betroubare acquisition path nie.
-- Op onlangse macOS releases is **process-level dumping** oor die algemeen meer realisties as **full physical memory imaging** tensy jy boot policy, SIP state en kext loading beheer.
+- `sysctl vm.swapusage` is steeds ’n vinnige manier om **swap usage** en of swap **geënkripteer** is, na te gaan.
+- `sleepimage` bly hoofsaaklik relevant vir **hibernate/safe sleep**-scenario’s, maar moderne stelsels beskerm dit gewoonlik. Dit moet dus behandel word as ’n **artifact source to check**, nie as ’n betroubare acquisition path nie.
+- Op onlangse macOS-weergawes is **process-level dumping** oor die algemeen meer realisties as **full physical memory imaging**, tensy jy boot policy, SIP state en kext loading beheer.
 
-## References
+## Verwysings
 
-- [https://www.appspector.com/blog/core-dump](https://www.appspector.com/blog/core-dump)
 - [https://afine.com/to-allow-or-not-to-get-task-allow-that-is-the-question](https://afine.com/to-allow-or-not-to-get-task-allow-that-is-the-question)
+- [https://keith.github.io/xcode-man-pages/leaks.1.html](https://keith.github.io/xcode-man-pages/leaks.1.html)
 
 {{#include ../../../banners/hacktricks-training.md}}
