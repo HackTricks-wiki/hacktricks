@@ -1,97 +1,119 @@
-# Vulnérabilités du noyau macOS
+# Vulnérabilités du kernel macOS
 
 {{#include ../../../banners/hacktricks-training.md}}
 
+L'exploitation récente du kernel macOS consiste moins à « charger un kext trivial non signé et obtenir le ring-0 » qu'à exploiter les **parsers Mach/MIG**, les **user clients IOKit**, les **data-only races dans XNU** et les **daemons disposant de privilèges spécifiques** qui peuvent encore rouvrir la surface d'attaque du kernel. Pour effectuer le reverse engineering des interfaces concrètes, consultez également les pages consacrées à [**IOKit**](macos-iokit.md) et aux [**kernel extensions / kernelcache extraction**](macos-kernel-extensions.md).
+
+## Surfaces d'attaque qui restent importantes
+
+- **Handlers Mach/MIG** dans les system daemons et les services tournés vers le kernel : descripteurs malformés, données out-of-line (OOL) et flux stateful composés de plusieurs messages.
+- **User clients IOKit** : parsing spécifique aux selectors, méthodes protégées par des entitlements et wrapper libraries/daemons qui masquent le véritable call graph.
+- **Primitives data-only de XNU** : races autour des credentials, pointeurs protégés par SMR, read-only zones et autres emplacements où une corruption modifie la policy sans obtenir au préalable le contrôle de RIP/PC.
+- **Code kernel tiers / auxiliaire** : les kexts legacy sont plus rares, mais les flottes enterprise, les systèmes Apple Silicon en reduced security et les bundles vendor `.fs` / helper créent encore des chemins à haute valeur adjacents au kernel.
+
 ## [Pwning OTA](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/)
 
-[**Dans ce rapport**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) sont expliquées plusieurs vulnérabilités qui ont permis de compromettre le noyau en compromettant le logiciel de mise à jour.\
+Dans [**ce rapport**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/), plusieurs bugs de la chaîne OTA/update sont combinés afin d'atteindre une compromission du kernel en exploitant le pipeline de software update et les capacités liées à rootless.
+
 [**PoC**](https://github.com/jhftss/POC/tree/main/CVE-2022-46722).
 
 ---
 
-## 2024 : Vulnérabilités 0-day en exploitation (CVE-2024-23225 & CVE-2024-23296)
+## 2024 : chaîne de bypass des protections du kernel in-the-wild (CVE-2024-23225 & CVE-2024-23296)
 
-Apple a corrigé deux bugs de corruption de mémoire qui étaient activement exploités contre iOS et macOS en mars 2024 (corrigés dans macOS 14.4/13.6.5/12.7.4).
+Les [**releases de sécurité macOS de mars 2024**](https://support.apple.com/en-us/120895) d'Apple ont corrigé deux problèmes qui étaient **activement exploités** :
 
-* **CVE-2024-23225 – Noyau**
-• Écriture hors limites dans le sous-système de mémoire virtuelle XNU permettant à un processus non privilégié d'obtenir une lecture/écriture arbitraire dans l'espace d'adresses du noyau, contournant PAC/KTRR.
-• Déclenché depuis l'espace utilisateur via un message XPC conçu qui déborde un tampon dans `libxpc`, puis pivote dans le noyau lorsque le message est analysé.
-* **CVE-2024-23296 – RTKit**
-• Corruption de mémoire dans le RTKit d'Apple Silicon (co-processeur en temps réel).
-• Les chaînes d'exploitation observées utilisaient CVE-2024-23225 pour R/W du noyau et CVE-2024-23296 pour échapper au bac à sable du co-processeur sécurisé et désactiver PAC.
+- **CVE-2024-23225 – Kernel** : un bug de corruption mémoire grâce auquel un attaquant disposant d'un read/write arbitraire du kernel pouvait contourner les protections de la mémoire du kernel.
+- **CVE-2024-23296 – RTKit** : un second bug de corruption mémoire avec le même impact public décrit.
 
-Détection du niveau de correctif :
+Les détails publics de la root cause restent limités, mais cette paire rappelle que les exploit chains modernes visant Apple nécessitent souvent **plus que « simplement » un kernel R/W** : le post-exploitation contre les protections mémoire, le code adjacent aux coprocessors ou les secondary trust boundaries constitue fréquemment l'étape où la chaîne réelle est stabilisée.
+
+Triage rapide des patchs :
 ```bash
-sw_vers                 # ProductVersion 14.4 or later is patched
-authenticate sudo sysctl kern.osversion  # 23E214 or later for Sonoma
-```
-Si la mise à niveau n'est pas possible, atténuez en désactivant les services vulnérables :
-```bash
-launchctl disable system/com.apple.analyticsd
-launchctl disable system/com.apple.rtcreportingd
+sw_vers
+uname -v
+softwareupdate --history | tail -n 20
 ```
 ---
 
-## 2023 : MIG Type-Confusion – CVE-2023-41075
+## 2025: SMR + read-only credential race (CVE-2025-24118)
 
-`mach_msg()` les requêtes envoyées à un client utilisateur IOKit non privilégié entraînent une **confusion de type** dans le code de liaison généré par MIG. Lorsque le message de réponse est réinterprété avec un descripteur hors ligne plus grand que celui qui a été initialement alloué, un attaquant peut réaliser un **écriture OOB** contrôlée dans les zones de tas du noyau et finalement
-escalader vers `root`.
+Le [**TRAVERTINE write-up**](https://jprx.io/cve-2025-24118/) de Joseph Ravichandran constitue une très bonne étude de cas moderne de XNU, car il ne s'agit **pas** d'un classic buffer overflow :
 
-Esquisse primitive (Sonoma 14.0-14.1, Ventura 13.5-13.6) :
+- `proc_ro.p_ucred` est un **pointeur protégé par SMR** stocké dans un objet `proc_ro` **en lecture seule**.
+- Les writers doivent mettre à jour ce pointeur de manière **atomique**.
+- `kauth_cred_proc_update()` utilisait `zalloc_ro_mut(...)` pour modifier `p_ucred` ; sur x86_64, ce chemin finit par atteindre `memcpy` / `rep movsb`, ce qui permet à un reader concurrent d'observer un **pointeur partiellement écrit**.
+- Le bug se transforme en **data-only privilege escalation** : si le pointeur de credential corrompu pointe vers un autre credential object valide, le thread courant peut hériter d'un état plus privilégié sans avoir d'abord réussi un détournement évident du control flow.
+
+Minimal trigger pattern :
 ```c
-// userspace stub
-typed_port_t p = get_user_client();
-uint8_t spray[0x4000] = {0x41};
-// heap-spray via IOSurfaceFastSetValue
-io_service_open_extended(...);
-// malformed MIG message triggers confusion
-mach_msg(&msg.header, MACH_SEND_MSG|MACH_RCV_MSG, ...);
+// writer thread: force frequent credential swaps
+while (1) {
+setgid(real_gid);
+setgid(saved_or_effective_gid);
+}
+
+// reader thread: repeatedly dereference current credentials
+while (1) {
+(void)getgid();
+}
 ```
-Les exploits publics exploitent le bug en :
-1. Pulvérisant les tampons `ipc_kmsg` avec des pointeurs de port actifs.
-2. Écrasant `ip_kobject` d'un port pendu.
-3. Sautant vers le shellcode mappé à une adresse forgée par PAC en utilisant `mprotect()`.
+Heuristique d’audit utile : lorsqu’un chemin du kernel mélange des **lecteurs SMR**, la **mutation de zones en lecture seule** et des **métadonnées d’identifiants ou de tâches**, vérifiez que les mises à jour utilisent les variantes atomiques `zalloc_ro_mut_*` plutôt que des helpers basés sur la copie.
 
 ---
 
-## 2024-2025 : Contournement de SIP via des Kexts tiers – CVE-2024-44243 (alias “Sigma”)
+## 2024-2025 : contournement de SIP qui rouvre les chemins de chargement du kernel (CVE-2024-44243)
 
-Des chercheurs en sécurité de Microsoft ont montré que le démon à privilèges élevés `storagekitd` peut être contraint de charger une **extension de noyau non signée** et ainsi désactiver complètement **System Integrity Protection (SIP)** sur macOS entièrement patché (avant 15.2). Le flux d'attaque est :
+Microsoft a montré que `storagekitd` pouvait être détourné pour **contourner SIP**, puis rendre à nouveau pertinent le code kernel tiers sur des machines qui, autrement, sembleraient être en mode « post-kext ». L’idée principale est la suivante :
 
-1. Abuser de l'attribution privée `com.apple.storagekitd.kernel-management` pour lancer un helper sous le contrôle de l'attaquant.
-2. Le helper appelle `IOService::AddPersonalitiesFromKernelModule` avec un dictionnaire d'informations conçu pointant vers un bundle de kext malveillant.
-3. Parce que les vérifications de confiance SIP sont effectuées *après* que le kext soit mis en scène par `storagekitd`, le code s'exécute en ring-0 avant validation et SIP peut être désactivé avec `csr_set_allow_all(1)`.
+1. Déposer ou écraser un bundle `.fs` malveillant sous `/Library/Filesystems`.
+2. Déclencher `storagekitd` via Disk Utility ou `diskutil`.
+3. Laisser le daemon spécialement autorisé lancer les exécutables du bundle **sans supprimer correctement les privilèges ni valider le chemin**.
+4. Utiliser le contournement de SIP obtenu pour modifier l’état protégé du système de fichiers et, dans la démonstration de Microsoft, remplacer la liste d’exclusion des extensions du kernel.
 
-Conseils de détection :
+Pour les chercheurs en sécurité du kernel, la leçon importante est que **la surface d’attaque du kernel peut être réintroduite depuis les daemons de gestion de l’espace utilisateur**, même lorsque le chargement direct de kext tiers est fortement restreint.
+
+Triage utile :
 ```bash
-kmutil showloaded | grep -v com.apple   # list non-Apple kexts
-log stream --style syslog --predicate 'senderImagePath contains "storagekitd"'   # watch for suspicious child procs
+ls -la /Library/Filesystems
+find /Library/Filesystems -maxdepth 3 -type f \( -name 'mount_*' -o -name 'fsck_*' -o -name 'newfs_*' \) 2>/dev/null
+log stream --style syslog --predicate 'process == "storagekitd" || process == "diskarbitrationd"'
+kmutil showloaded --collection aux
 ```
-La remédiation immédiate consiste à mettre à jour vers macOS Sequoia 15.2 ou une version ultérieure.
-
 ---
 
-### Feuille de triche pour l'énumération rapide
+## Fuzzing & workflow de recherche
+
+Si vous recherchez activement cette classe de bugs, les travaux publics récents vont dans la même direction :
+
+- [**KextFuzz**](https://www.usenix.org/conference/usenixsecurity23/presentation/yin) reste l'une des meilleures références pour la recherche sur le kernel à l'ère Apple Silicon. Il utilise la **réécriture binaire statique** pour récupérer la couverture, désactive les chemins **protégés par entitlement** pendant les tests et déduit la structure des interfaces à partir des wrappers userspace.
+- Le [**Simple macOS kernel extension fuzzing in userspace with IDA and TinyInst**](https://projectzero.google/2024/11/simple-macos-kernel-extension-fuzzing.html) de Project Zero présente un workflow très pratique pour **rebaser un kext / fileset dans l'espace utilisateur**, afin de pouvoir fuzzer le code principalement dédié au parsing à une vitesse bien supérieure avant de le reproduire sur l'appareil.
+- Pour les cibles fortement basées sur Mach, construisez des harnesses autour de **layouts de messages réels et de machines à états multi-appels**, plutôt que de simples blobs de selectors. Les recherches récentes sur CoreAudio/Mach menées par Project Zero et les présentations de conférences telles que **Fuzzing at Mach Speed** montrent pourquoi les séquences de messages stateful restent particulièrement efficaces.
+
+Commandes locales rapides que vous utiliserez très souvent :
+```bash
+# Loaded auxiliary / 3rd party kernel code
+kmutil showloaded --collection aux
+
+# Fileset entries in the boot kernel collection
+kmutil inspect -B /System/Library/KernelCollections/BootKernelExtensions.kc --show-fileset-entries
+
+# Diffable version info before matching a KDK / symbols pack
+sw_vers
+uname -a
+```
+## Aide-mémoire d’énumération rapide
 ```bash
 uname -a                          # Kernel build
+sw_vers                           # ProductVersion / BuildVersion
 kmutil showloaded                 # List loaded kernel extensions
-kextstat | grep -v com.apple      # Legacy (pre-Catalina) kext list
-sysctl kern.kaslr_enable          # Verify KASLR is ON (should be 1)
-csrutil status                    # Check SIP from RecoveryOS
-spctl --status                    # Confirms Gatekeeper state
+kmutil showloaded --collection aux  # Auxiliary / 3rd party collections
+kextstat 2>/dev/null | grep -v com.apple
+csrutil status                    # Check SIP state
+spctl --status                    # Confirm Gatekeeper state
 ```
----
+## Références
 
-## Fuzzing & Research Tools
-
-* **Luftrauser** – Fuzzer de messages Mach qui cible les sous-systèmes MIG (`github.com/preshing/luftrauser`).
-* **oob-executor** – Générateur de primitives hors limites IPC utilisé dans la recherche CVE-2024-23225.
-* **kmutil inspect** – Utilitaire Apple intégré (macOS 11+) pour analyser statiquement les kexts avant le chargement : `kmutil inspect -b io.kext.bundleID`.
-
-
-
-## References
-
-* Apple. “À propos du contenu de sécurité de macOS Sonoma 14.4.” https://support.apple.com/en-us/120895
-* Microsoft Security Blog. “Analyse de CVE-2024-44243, un contournement de la protection de l'intégrité du système macOS via des extensions de noyau.” https://www.microsoft.com/en-us/security/blog/2025/01/13/analyzing-cve-2024-44243-a-macos-system-integrity-protection-bypass-through-kernel-extensions/
+* Joseph Ravichandran. “TRAVERTINE : CVE-2025-24118.” https://jprx.io/cve-2025-24118/
+* Microsoft Security Blog. “Analyse de CVE-2024-44243, un bypass de la System Integrity Protection de macOS via des extensions kernel.” https://www.microsoft.com/en-us/security/blog/2025/01/13/analyzing-cve-2024-44243-a-macos-system-integrity-protection-bypass-through-kernel-extensions/
 {{#include ../../../banners/hacktricks-training.md}}
