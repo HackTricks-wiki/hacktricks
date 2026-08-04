@@ -2,96 +2,118 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
+Nedavna eksploatacija macOS kernela manje se zasniva na tome da se „učita trivijalan unsigned kext i dobije ring-0“, a više na zloupotrebi **Mach/MIG parsera**, **IOKit user client-a**, **data-only race-ova unutar XNU-a** i **daemona sa posebnim entitlements**, koji i dalje mogu ponovo otvoriti attack surface kernela. Za reverse engineering konkretnih interfejsa pogledajte i stranice o [**IOKit**](macos-iokit.md) i [**kernel extensions / kernelcache extraction**](macos-kernel-extensions.md).
+
+## Attack surfaces koji su i dalje važni
+
+- **Mach/MIG handleri** u sistemskim daemonima i servisima koji komuniciraju sa kernelom: neispravno formirani deskriptori, out-of-line (OOL) podaci i stateful tokovi sa više poruka.
+- **IOKit user client-i**: parsiranje specifično za selector, metode zaštićene entitlement-ima i wrapper biblioteke/daemoni koji skrivaju stvarni call graph.
+- **XNU data-only primitive**: race-ovi oko credentials, SMR-zaštićenih pointera, read-only zona i drugih mesta gde korupcija menja policy bez prethodnog preuzimanja kontrole nad RIP/PC.
+- **Third-party / pomoćni kernel kod**: legacy kext-ovi su ređi, ali enterprise flote, Apple Silicon sistemi sa smanjenom bezbednošću i vendor `.fs` / helper bundle-ovi i dalje stvaraju vredne kernel-adjacent putanje.
+
 ## [Pwning OTA](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/)
 
-[**U ovom izveštaju**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) objašnjene su nekoliko ranjivosti koje su omogućile kompromitovanje kernela kompromitujući softverski ažurirač.\
+U [**ovom izveštaju**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) nekoliko bugova u OTA/update-chain-u kombinovano je kako bi se došlo do kompromitovanja kernela zloupotrebom software update pipeline-a i rootless-related capabilities.
+
 [**PoC**](https://github.com/jhftss/POC/tree/main/CVE-2022-46722).
 
 ---
 
-## 2024: U divljini Kernel 0-dana (CVE-2024-23225 & CVE-2024-23296)
+## 2024: In-the-wild chain za zaobilaženje kernel zaštite (CVE-2024-23225 & CVE-2024-23296)
 
-Apple je zakrpio dve greške u korupciji memorije koje su aktivno korišćene protiv iOS-a i macOS-a u martu 2024 (ispravljeno u macOS 14.4/13.6.5/12.7.4).
+Apple-ova [**macOS security izdanja iz marta 2024.**](https://support.apple.com/en-us/120895) popravila su dva problema koji su bili **aktivno eksploatisani**:
 
-* **CVE-2024-23225 – Kernel**
-• Pisanje van granica u XNU virtuelnom memorijskom podsistemu omogućava neprivilegovanom procesu da dobije proizvoljno čitanje/pisanje u adresnom prostoru kernela, zaobilazeći PAC/KTRR.
-• Aktivira se iz korisničkog prostora putem kreirane XPC poruke koja preplavljuje bafer u `libxpc`, a zatim prelazi u kernel kada se poruka analizira.
-* **CVE-2024-23296 – RTKit**
-• Korupcija memorije u Apple Silicon RTKit (real-time ko-procesor).
-• Lanac eksploatacije koji je primećen koristio je CVE-2024-23225 za kernel R/W i CVE-2024-23296 za izlazak iz sandboxes-a sigurnog ko-procesora i onemogućavanje PAC.
+- **CVE-2024-23225 – Kernel**: bug sa korupcijom memorije pri kojem napadač sa proizvoljnim kernel read/write-om može zaobići zaštite kernel memorije.
+- **CVE-2024-23296 – RTKit**: drugi bug sa korupcijom memorije i istom javno navedenom posledicom.
 
-Patch level detection:
+Javno dostupni detalji o root cause-u i dalje su oskudni, ali ovaj par je dobar podsetnik da moderne Apple exploit chain-e često zahtevaju **više od „samo“ kernel R/W-a**: post-exploitation rad protiv zaštita memorije, coprocessor-adjacent koda ili sekundarnih trust boundary-ja često je deo u kojem se stvarni chain stabilizuje.
+
+Brza triage procena zakrpa:
 ```bash
-sw_vers                 # ProductVersion 14.4 or later is patched
-authenticate sudo sysctl kern.osversion  # 23E214 or later for Sonoma
-```
-Ako nadogradnja nije moguća, ublažite problem onemogućavanjem ranjivih usluga:
-```bash
-launchctl disable system/com.apple.analyticsd
-launchctl disable system/com.apple.rtcreportingd
+sw_vers
+uname -v
+softwareupdate --history | tail -n 20
 ```
 ---
 
-## 2023: MIG Type-Confusion – CVE-2023-41075
+## 2025: SMR + race usled read-only credentials (CVE-2025-24118)
 
-`mach_msg()` zahtevi poslati neprivilegovanom IOKit korisničkom klijentu dovode do **tipa konfuzije** u MIG generisanom lepljivom kodu. Kada se odgovor poruka ponovo interpretira sa većim van-linijskim deskriptorom nego što je prvobitno alocirano, napadač može postići kontrolisano **OOB pisanje** u kernel heap zone i na kraju
-escalirati na `root`.
+[**TRAVERTINE write-up**](https://jprx.io/cve-2025-24118/) autora Josepha Ravichandran-a predstavlja veoma dobru modernu studiju slučaja XNU-a, jer nije u pitanju klasičan buffer overflow:
 
-Primitive outline (Sonoma 14.0-14.1, Ventura 13.5-13.6):
+- `proc_ro.p_ucred` je **SMR-protected pointer** sačuvan u **read-only** objektu `proc_ro`.
+- Writers moraju da ažuriraju taj pointer **atomically**.
+- `kauth_cred_proc_update()` je koristio `zalloc_ro_mut(...)` za izmenu `p_ucred`; na x86_64 taj put na kraju dolazi do `memcpy` / `rep movsb`, pa konkurentni reader može da uoči **torn pointer**.
+- Bug se pretvara u **data-only privilege escalation**: ako se oštećeni credential pointer razreši u drugi validan credential objekat, trenutna nit može da nasledi privilegovanije stanje bez prethodnog očiglednog preuzimanja kontrole toka izvršavanja.
+
+Minimalni obrazac za pokretanje:
 ```c
-// userspace stub
-typed_port_t p = get_user_client();
-uint8_t spray[0x4000] = {0x41};
-// heap-spray via IOSurfaceFastSetValue
-io_service_open_extended(...);
-// malformed MIG message triggers confusion
-mach_msg(&msg.header, MACH_SEND_MSG|MACH_RCV_MSG, ...);
+// writer thread: force frequent credential swaps
+while (1) {
+setgid(real_gid);
+setgid(saved_or_effective_gid);
+}
+
+// reader thread: repeatedly dereference current credentials
+while (1) {
+(void)getgid();
+}
 ```
-Public exploits weaponise the bug by:
-1. Prskanjem `ipc_kmsg` bafera sa aktivnim pokazivačima portova.
-2. Prepisivanjem `ip_kobject` od visećeg porta.
-3. Skakanjem na shellcode mapiran na PAC-falsifikovanu adresu koristeći `mprotect()`.
+Korisna heuristika za audit: kad god kernel path kombinuje **SMR readers**, **read-only zone mutation** i **credential ili task metadata**, proverite da li ažuriranja koriste atomske `zalloc_ro_mut_*` varijante umesto helpera zasnovanih na kopiranju.
 
 ---
 
-## 2024-2025: SIP Bypass kroz treće strane Kexts – CVE-2024-44243 (poznat kao “Sigma”)
+## 2024-2025: SIP bypass koji ponovo otvara kernel loading paths (CVE-2024-44243)
 
-Istraživači bezbednosti iz Microsoft-a su pokazali da se visoko privilegovani demon `storagekitd` može primorati da učita **nepotpisanu kernel ekstenziju** i tako potpuno onemogući **System Integrity Protection (SIP)** na potpuno zakrčenom macOS-u (pre 15.2). Tok napada je:
+Microsoft je pokazao da se `storagekitd` može zloupotrebiti za **bypass SIP-a**, a zatim ponovo učiniti relevantnim third-party kernel code na mašinama koje bi inače izgledale kao "post-kext". Ključna ideja je:
 
-1. Zloupotreba privatnog prava `com.apple.storagekitd.kernel-management` da se pokrene pomoćni program pod kontrolom napadača.
-2. Pomoćni program poziva `IOService::AddPersonalitiesFromKernelModule` sa kreiranim info-rečnikom koji upućuje na zloćudni kext paket.
-3. Pošto se SIP provere poverenja vrše *nakon* što `storagekitd` postavi kext, kod se izvršava u ring-0 pre validacije i SIP se može isključiti sa `csr_set_allow_all(1)`.
+1. Ostaviti ili prepisati maliciozni `.fs` bundle u `/Library/Filesystems`.
+2. Pokrenuti `storagekitd` preko Disk Utility-ja ili `diskutil`.
+3. Dozvoliti posebno privileged daemon-u da pokrene bundle executables **bez pravilnog uklanjanja privilegija / validacije path-a**.
+4. Iskoristiti dobijeni SIP bypass za izmenu zaštićenog file-system state-a i, u Microsoft-ovoj demonstraciji, override-ovati kernel extension exclusion list.
 
-Detection tips:
+Za kernel istraživače, važna lekcija je da **kernel attack surface može ponovo biti uveden iz userland management daemon-a**, čak i kada je direktno učitavanje third-party kext-ova strogo ograničeno.
+
+Korisna trijaža:
 ```bash
-kmutil showloaded | grep -v com.apple   # list non-Apple kexts
-log stream --style syslog --predicate 'senderImagePath contains "storagekitd"'   # watch for suspicious child procs
+ls -la /Library/Filesystems
+find /Library/Filesystems -maxdepth 3 -type f \( -name 'mount_*' -o -name 'fsck_*' -o -name 'newfs_*' \) 2>/dev/null
+log stream --style syslog --predicate 'process == "storagekitd" || process == "diskarbitrationd"'
+kmutil showloaded --collection aux
 ```
-Odmah rešenje je ažurirati na macOS Sequoia 15.2 ili noviji.
-
 ---
 
-### Brza enumeracija Cheatsheet
+## Fuzzing i istraživački workflow
+
+Ako aktivno tražite ovu klasu bugova, nedavni javno dostupni radovi ukazuju u istom smeru:
+
+- [**KextFuzz**](https://www.usenix.org/conference/usenixsecurity23/presentation/yin) i dalje je jedna od najboljih referenci za istraživanje kernela u eri Apple Silicon-a. Koristi **static binary rewriting** za obnavljanje coverage-a, onemogućava putanje zaštićene **entitlement**-ima tokom testiranja i zaključuje strukturu interfejsa na osnovu userspace wrapper-a.
+- Project Zero-ov rad [**Simple macOS kernel extension fuzzing in userspace with IDA and TinyInst**](https://projectzero.google/2024/11/simple-macos-kernel-extension-fuzzing.html) prikazuje veoma praktičan workflow za **rebasing kext-a / fileset-a u userspace**, kako bi parser-heavy kod mogao da se fuzz-uje mnogo većom brzinom pre reprodukcije na uređaju.
+- Za Mach-heavy mete, pravite harness-e oko **real message layout-a i multi-call state machine-a**, a ne samo oko blob-ova pojedinačnih selector-a. Nedavna CoreAudio/Mach istraživanja Project Zero-a i predavanja na konferencijama, kao što je **Fuzzing at Mach Speed**, pokazuju zašto stateful sekvence poruka i dalje daju dobre rezultate.
+
+Brze lokalne komande koje ćete zaista često koristiti:
+```bash
+# Loaded auxiliary / 3rd party kernel code
+kmutil showloaded --collection aux
+
+# Fileset entries in the boot kernel collection
+kmutil inspect -B /System/Library/KernelCollections/BootKernelExtensions.kc --show-fileset-entries
+
+# Diffable version info before matching a KDK / symbols pack
+sw_vers
+uname -a
+```
+## Brzi podsetnik za enumeraciju
 ```bash
 uname -a                          # Kernel build
+sw_vers                           # ProductVersion / BuildVersion
 kmutil showloaded                 # List loaded kernel extensions
-kextstat | grep -v com.apple      # Legacy (pre-Catalina) kext list
-sysctl kern.kaslr_enable          # Verify KASLR is ON (should be 1)
-csrutil status                    # Check SIP from RecoveryOS
-spctl --status                    # Confirms Gatekeeper state
+kmutil showloaded --collection aux  # Auxiliary / 3rd party collections
+kextstat 2>/dev/null | grep -v com.apple
+csrutil status                    # Check SIP state
+spctl --status                    # Confirm Gatekeeper state
 ```
----
+## Reference
 
-## Fuzzing & Research Tools
-
-* **Luftrauser** – Mach message fuzzer koji cilja MIG pod sisteme (`github.com/preshing/luftrauser`).
-* **oob-executor** – IPC out-of-bounds primitivni generator korišćen u istraživanju CVE-2024-23225.
-* **kmutil inspect** – Ugrađeni Apple alat (macOS 11+) za statičku analizu kext-ova pre učitavanja: `kmutil inspect -b io.kext.bundleID`.
-
-
-
-## References
-
-* Apple. “About the security content of macOS Sonoma 14.4.” https://support.apple.com/en-us/120895
-* Microsoft Security Blog. “Analyzing CVE-2024-44243, a macOS System Integrity Protection bypass through kernel extensions.” https://www.microsoft.com/en-us/security/blog/2025/01/13/analyzing-cve-2024-44243-a-macos-system-integrity-protection-bypass-through-kernel-extensions/
+* Joseph Ravichandran. „TRAVERTINE: CVE-2025-24118.” https://jprx.io/cve-2025-24118/
+* Microsoft Security Blog. „Analiza CVE-2024-44243, zaobilaženje macOS System Integrity Protection mehanizma putem kernel ekstenzija.” https://www.microsoft.com/en-us/security/blog/2025/01/13/analyzing-cve-2024-44243-a-macos-system-integrity-protection-bypass-through-kernel-extensions/
 {{#include ../../../banners/hacktricks-training.md}}
