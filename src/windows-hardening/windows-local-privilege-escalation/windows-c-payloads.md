@@ -23,7 +23,7 @@ int main(void) {
 ---
 
 ## UAC Bypass – `fodhelper.exe` Registry Hijack (Medium → High integrity)
-When the trusted binary **`fodhelper.exe`** is executed, it queries the registry path below **without filtering the `DelegateExecute` verb**.  By planting our command under that key an attacker can bypass UAC *without* dropping a file to disk.
+When the trusted binary **`fodhelper.exe`** is executed, it queries the registry path below **without filtering the `DelegateExecute` verb**.  By planting our command under that key an attacker can bypass UAC *without* dropping a file to disk.<sup>[[1]](#references)</sup>
 
 *Registry path queried by `fodhelper.exe`*
 ```
@@ -69,7 +69,7 @@ int main(void) {
 ---
 
 ## UAC Bypass – Activation Context Cache Poisoning (`ctfmon.exe`, CVE-2024-6769)
-Drive remapping + activation context cache poisoning still works against patched Windows 10/11 builds because `ctfmon.exe` runs as a high-integrity trusted UI process that happily loads from the caller’s impersonated `C:` drive and reuses whatever DLL redirections `CSRSS` has cached. Abuse goes as follows: re-point `C:` at attacker-controlled storage, drop a trojanized `msctf.dll`, launch `ctfmon.exe` to gain high integrity, then ask `CSRSS` to cache a manifest that redirects a DLL used by an auto-elevated binary (e.g., `fodhelper.exe`) so the next launch inherits your payload without a UAC prompt.
+Drive remapping + activation context cache poisoning still works against patched Windows 10/11 builds because `ctfmon.exe` runs as a high-integrity trusted UI process that happily loads from the caller’s impersonated `C:` drive and reuses whatever DLL redirections `CSRSS` has cached. Abuse goes as follows: re-point `C:` at attacker-controlled storage, drop a trojanized `msctf.dll`, launch `ctfmon.exe` to gain high integrity, then ask `CSRSS` to cache a manifest that redirects a DLL used by an auto-elevated binary (e.g., `fodhelper.exe`) so the next launch inherits your payload without a UAC prompt.<sup>[[5]](#references)</sup>
 
 Practical workflow:
 1. Prepare a fake `%SystemRoot%\System32` tree and copy the legitimate binary you plan to hijack (often `ctfmon.exe`).
@@ -195,7 +195,7 @@ sedebug-+-seimpersonate-copy-token.md
 ---
 
 ## In-Memory AMSI & ETW Patch (Defence Evasion)
-Most modern AV/EDR engines rely on **AMSI** and **ETW** to inspect malicious behaviours.  Patching both interfaces early inside the current process prevents script-based payloads (e.g. PowerShell, JScript) from being scanned.
+Most modern AV/EDR engines rely on **AMSI** and **ETW** to inspect malicious behaviours.  Patching both interfaces early inside the current process prevents script-based payloads (e.g. PowerShell, JScript) from being scanned.<sup>[[2]](#references)</sup>
 
 ```c
 // gcc -o patch_amsi.exe patch_amsi.c -lntdll
@@ -228,7 +228,7 @@ int main(void) {
 ---
 
 ## Create child as Protected Process Light (PPL)
-Request a PPL protection level for a child at creation time using `STARTUPINFOEX` + `PROC_THREAD_ATTRIBUTE_PROTECTION_LEVEL`. This is a documented API and will only succeed if the target image is signed for the requested signer class (Windows/WindowsLight/Antimalware/LSA/WinTcb).
+Request a PPL protection level for a child at creation time using `STARTUPINFOEX` + `PROC_THREAD_ATTRIBUTE_PROTECTION_LEVEL`. This is a documented API and will only succeed if the target image is signed for the requested signer class (Windows/WindowsLight/Antimalware/LSA/WinTcb).<sup>[[3]](#references)[[4]](#references)</sup>
 
 ```c
 // x86_64-w64-mingw32-gcc -O2 -o spawn_ppl.exe spawn_ppl.c
@@ -272,7 +272,7 @@ Validate the result with Process Explorer/Process Hacker by checking the Protect
 ---
 
 ## Local Service -> Kernel via `appid.sys` Smart-Hash (`IOCTL 0x22A018`, CVE-2024-21338)
-`appid.sys` exposes a device object (`\\.\\AppID`) whose smart-hash maintenance IOCTL accepts user-supplied function pointers whenever the caller runs as `LOCAL SERVICE`; Lazarus is abusing that to disable PPL and load arbitrary drivers, so red teams should have a ready-made trigger for lab use.
+`appid.sys` exposes a device object (`\\.\\AppID`) whose smart-hash maintenance IOCTL accepts user-supplied function pointers whenever the caller runs as `LOCAL SERVICE`; Lazarus is abusing that to disable PPL and load arbitrary drivers, so red teams should have a ready-made trigger for lab use.<sup>[[6]](#references)</sup>
 
 Operational notes:
 - You still need a `LOCAL SERVICE` token. Steal it from `Schedule` or `WdiServiceHost` using `SeImpersonatePrivilege`, then impersonate before touching the device so ACL checks pass.
@@ -326,11 +326,12 @@ Minimal fix-up for a weaponized build: map an RWX section with `VirtualAlloc`, c
 ---
 
 ## References
-* Ron Bowes – “Fodhelper UAC Bypass Deep Dive” (2024)
-* SplinterCode – “AMSI Bypass 2023: The Smallest Patch Is Still Enough” (BlackHat Asia 2023)
-* CreateProcessAsPPL – minimal PPL process launcher: https://github.com/2x7EQ13/CreateProcessAsPPL
-* Microsoft Docs – STARTUPINFOEX / InitializeProcThreadAttributeList / UpdateProcThreadAttribute
-* DarkReading – ["Novel Exploit Chain Enables Windows UAC Bypass"](https://www.darkreading.com/vulnerabilities-threats/windows-activation-context-cache-elevation) (2024)
-* Avast Threat Labs – ["Lazarus Deploys New FudModule Rootkit"](https://decoded.avast.io/threatresearch/lazarus-deploys-new-fudmodule-rootkit/) (2024)
+
+- [1] Ron Bowes – "Fodhelper UAC Bypass Deep Dive" (2024)
+- [2] SplinterCode – "AMSI Bypass 2023: The Smallest Patch Is Still Enough" (BlackHat Asia 2023)
+- [3] [CreateProcessAsPPL – minimal PPL process launcher](https://github.com/2x7EQ13/CreateProcessAsPPL)
+- [4] [UpdateProcThreadAttribute function (Win32 apps) - Microsoft Learn](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-updateprocthreadattribute)
+- [5] [Novel Exploit Chain Enables Windows UAC Bypass](https://www.darkreading.com/vulnerabilities-threats/exploit-chain-windows-uac-bypass)
+- [6] [Lazarus and the FudModule Rootkit: Beyond BYOVD with an Admin-to-Kernel Zero-Day](https://www.gendigital.com/blog/insights/research/lazarus-and-the-fudmodule-rootkit-beyond-byovd-with-an-admin-to-kernel-zero-day)
 
 {{#include ../../banners/hacktricks-training.md}}
