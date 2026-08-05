@@ -1,28 +1,29 @@
-# Altri trucchi web
+# Altri trucchi Web
 
 {{#include ../banners/hacktricks-training.md}}
 
-### Intestazione Host
+### Host header
 
-Diverse volte il back-end si fida dell'**intestazione Host** per eseguire alcune azioni. Ad esempio, potrebbe utilizzare il suo valore come **dominio per inviare un ripristino della password**. Quindi, quando ricevi un'email con un link per ripristinare la tua password, il dominio utilizzato è quello che hai inserito nell'intestazione Host. Poi, puoi richiedere il ripristino della password di altri utenti e cambiare il dominio in uno controllato da te per rubare i loro codici di ripristino della password. [WriteUp](https://medium.com/nassec-cybersecurity-writeups/how-i-was-able-to-take-over-any-users-account-with-host-header-injection-546fff6d0f2).
+Diverse volte il back-end si fida dell'**Host header** per eseguire alcune azioni. Ad esempio, potrebbe usare il suo valore come **dominio a cui inviare un password reset**. Quindi, quando ricevi un'email con un link per reimpostare la password, il dominio utilizzato è quello inserito nell'Host header.Then, puoi richiedere il password reset di altri utenti e modificare il dominio impostandone uno controllato da te per rubare i loro codici di password reset. [WriteUp](https://medium.com/nassec-cybersecurity-writeups/how-i-was-able-to-take-over-any-users-account-with-host-header-injection-546fff6d0f2).<sup>[[1]](#references)</sup>
 
 > [!WARNING]
-> Nota che è possibile che tu non debba nemmeno aspettare che l'utente clicchi sul link per ripristinare la password per ottenere il token, poiché anche **i filtri antispam o altri dispositivi/bot intermedi potrebbero cliccarci sopra per analizzarlo**.
+> Nota che potresti non dover nemmeno aspettare che l'utente faccia clic sul link per reimpostare la password per ottenere il token, poiché è possibile che persino **i filtri antispam o altri dispositivi/bot intermedi facciano clic sul link per analizzarlo**.
 
 ### Booleani di sessione
 
-A volte, quando completi correttamente alcune verifiche, il back-end **aggiunge semplicemente un booleano con il valore "True" a un attributo di sicurezza della tua sessione**. Poi, un endpoint diverso saprà se hai superato con successo quel controllo.\
-Tuttavia, se **superi il controllo** e alla tua sessione viene concesso quel valore "True" nell'attributo di sicurezza, puoi provare ad **accedere ad altre risorse** che **dipendono dallo stesso attributo** ma a cui **non dovresti avere permessi** di accesso. [WriteUp](https://medium.com/@ozguralp/a-less-known-attack-vector-second-order-idor-attacks-14468009781a).
+A volte, quando completi correttamente una verifica, il back-end **aggiunge semplicemente un booleano con valore "True" a un attributo di sicurezza della tua sessione**. In seguito, un endpoint diverso saprà se hai superato correttamente il controllo.\
+Tuttavia, se **superi il controllo** e alla tua sessione viene assegnato il valore "True" nell'attributo di sicurezza, puoi provare ad **accedere ad altre risorse** che **dipendono dallo stesso attributo**, ma alle quali **non dovresti avere i permessi** di accesso. [WriteUp](https://medium.com/@ozguralp/a-less-known-attack-vector-second-order-idor-attacks-14468009781a).<sup>[[2]](#references)</sup>
 
 ### Funzionalità di registrazione
 
-Prova a registrarti come un utente già esistente. Prova anche a utilizzare caratteri equivalenti (punti, molti spazi e Unicode).
+Prova a registrarti come un utente già esistente. Prova anche a usare caratteri equivalenti (punti, molti spazi e Unicode).
 
-### Prendere il controllo delle email
+### Email per il takeover
 
-Registrati con un'email, prima di confermarla cambia l'email, poi, se la nuova email di conferma viene inviata alla prima email registrata, puoi prendere il controllo di qualsiasi email. Oppure, se puoi abilitare la seconda email confermando la prima, puoi anche prendere il controllo di qualsiasi account.
+Registra un'email, poi, prima di confermarla, modifica l'email; quindi, se la nuova email di conferma viene inviata al primo indirizzo email registrato, puoi effettuare il takeover di qualsiasi email. Oppure, se puoi abilitare la seconda email confermando la prima, puoi anche effettuare il takeover di qualsiasi account.
 
-### Accesso al servizio interno delle aziende che utilizzano Atlassian
+### Accesso al servicedesk interno delle aziende usando atlassian
+
 
 {{#ref}}
 https://yourcompanyname.atlassian.net/servicedesk/customer/user/login
@@ -30,8 +31,13 @@ https://yourcompanyname.atlassian.net/servicedesk/customer/user/login
 
 ### Metodo TRACE
 
-Gli sviluppatori potrebbero dimenticare di disabilitare varie opzioni di debug nell'ambiente di produzione. Ad esempio, il metodo HTTP `TRACE` è progettato per scopi diagnostici. Se abilitato, il server web risponderà alle richieste che utilizzano il metodo `TRACE` restituendo nella risposta la richiesta esatta che è stata ricevuta. Questo comportamento è spesso innocuo, ma occasionalmente porta a divulgazione di informazioni, come il nome delle intestazioni di autenticazione interne che potrebbero essere aggiunte alle richieste da proxy inversi.![Image for post](https://miro.medium.com/max/60/1*wDFRADTOd9Tj63xucenvAA.png?q=20)
+Gli sviluppatori potrebbero dimenticare di disabilitare varie opzioni di debug nell'ambiente di produzione. Ad esempio, il metodo HTTP `TRACE` è progettato per scopi diagnostici. Se abilitato, il web server risponderà alle richieste che utilizzano il metodo `TRACE` ripetendo nella risposta la richiesta esatta ricevuta. Questo comportamento è spesso innocuo, ma occasionalmente porta alla divulgazione di informazioni, come il nome degli header di autenticazione interni che potrebbero essere aggiunti alle richieste dai reverse proxy.![Image for post](https://miro.medium.com/max/60/1*wDFRADTOd9Tj63xucenvAA.png?q=20)
 
 ![Image for post](https://miro.medium.com/max/1330/1*wDFRADTOd9Tj63xucenvAA.png)
+
+## Riferimenti
+
+- [1] [How I was able to take over any user's account with Host Header injection](https://medium.com/nassec-cybersecurity-writeups/how-i-was-able-to-take-over-any-users-account-with-host-header-injection-546fff6d0f2)
+- [2] [A less known attack vector: Second order IDOR attacks](https://medium.com/@ozguralp/a-less-known-attack-vector-second-order-idor-attacks-14468009781a)
 
 {{#include ../banners/hacktricks-training.md}}

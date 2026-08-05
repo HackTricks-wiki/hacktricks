@@ -1,35 +1,35 @@
-# Text Steganography
+# Steganografia del testo
 
 {{#include ../../banners/hacktricks-training.md}}
 
 Cerca:
 
-- Unicode homoglyphs
-- Zero-width characters
-- Whitespace patterns (spaces vs tabs)
+- Homoglyph Unicode
+- Caratteri zero-width
+- Pattern di spaziatura (spazi rispetto a tab)
 
 ## Percorso pratico
 
-Se il plain text si comporta in modo inaspettato, ispeziona i codepoints e normalizza con attenzione (non distruggere le prove).
+Se il testo semplice si comporta in modo imprevisto, ispeziona i codepoint e normalizza con attenzione (non distruggere le prove).
 
 ### Tecnica
 
-Text stego si basa frequentemente su caratteri che appaiono identici (o invisibili):
+Lo stego testuale si basa frequentemente su caratteri che vengono visualizzati in modo identico (o invisibile):
 
-- Homoglyphs: diversi codepoint Unicode che appaiono uguali (Latin `a` vs Cyrillic `а`)
-- Zero-width characters: joiners, non-joiners, zero-width spaces
-- Whitespace encodings: spaces vs tabs, trailing spaces, line-length patterns
+- Homoglyph: codepoint Unicode diversi che hanno lo stesso aspetto (`a` latina rispetto a `а` cirillica)
+- Caratteri zero-width: joiner, non-joiner, spazi zero-width
+- Codifiche basate sugli spazi: spazi rispetto a tab, spazi finali, pattern della lunghezza delle righe<sup>[[1]](#references)</sup>
 
-Casi aggiuntivi ad alto segnale:
+Altri casi ad alto segnale:
 
-- Bidirectional override/control characters (possono riordinare visivamente il testo)
-- Variation selectors and combining characters used as a covert channel
+- Caratteri di override/controllo bidirezionali (possono riordinare visivamente il testo)
+- Variation selector e caratteri combining usati come covert channel
 
 ### Strumenti di decodifica
 
-- Unicode homoglyph/zero-width playground: https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder
+- Playground per homoglyph Unicode/zero-width: https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder
 
-### Ispeziona codepoints
+### Ispezionare i codepoint
 ```bash
 python3 - <<'PY'
 import sys
@@ -39,16 +39,16 @@ if ord(ch) > 127 or ch.isspace():
 print(i, hex(ord(ch)), repr(ch))
 PY
 ```
-## Canali `unicode-range` di CSS
+## Canali `unicode-range` CSS
 
-`@font-face` rules can encode bytes in `unicode-range: U+..` entries. Le regole `@font-face` possono codificare byte nelle voci `unicode-range: U+..`. Estrai i codepoint, concatena gli esadecimali e decodifica:
+Le regole `@font-face` possono codificare byte nelle voci `unicode-range: U+..`. Estrai i codepoint, concatena i valori esadecimali e decodifica:
 ```bash
 grep -o "U+[0-9A-Fa-f]\+" styles.css | tr -d 'U+\n' | xxd -r -p
 ```
-Se gli intervalli contengono più byte per dichiarazione, separa prima sulle virgole e normalizza (`tr ',+' '\n'`). Python rende semplice analizzare ed emettere byte se il formato è inconsistente.
+Se gli intervalli contengono più byte per dichiarazione, dividili prima sulle virgole e normalizzali (`tr ',+' '\n'`). Python semplifica l'analisi e la generazione dei byte quando la formattazione è incoerente.
 
 ## Riferimenti
 
-- [Flagvent 2025 (Medium) — pink, Santa’s Wishlist, Christmas Metadata, Captured Noise](https://0xdf.gitlab.io/flagvent2025/medium)
+- [1] [Flagvent 2025 (Medium) — pink, Santa’s Wishlist, Christmas Metadata, Captured Noise](https://0xdf.gitlab.io/flagvent2025/medium)
 
 {{#include ../../banners/hacktricks-training.md}}

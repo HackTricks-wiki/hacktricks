@@ -1,79 +1,79 @@
-# Algoritmi di Apprendimento Supervisionato
+# Algoritmi di apprendimento supervisionato
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Informazioni di Base
+## Informazioni di base
 
-L'apprendimento supervisionato utilizza dati etichettati per addestrare modelli che possono fare previsioni su nuovi input non visti. Nella cybersecurity, il machine learning supervisionato è ampiamente applicato a compiti come il rilevamento delle intrusioni (classificazione del traffico di rete come *normale* o *attacco*), il rilevamento di malware (distinzione tra software dannoso e benigno), il rilevamento di phishing (identificazione di siti web o email fraudolenti) e il filtraggio dello spam, tra gli altri. Ogni algoritmo ha i suoi punti di forza ed è adatto a diversi tipi di problemi (classificazione o regressione). Di seguito esaminiamo gli algoritmi chiave di apprendimento supervisionato, spieghiamo come funzionano e dimostriamo il loro utilizzo su dataset reali di cybersecurity. Discutiamo anche di come combinare modelli (apprendimento ensemble) possa spesso migliorare le prestazioni predittive.
+L'apprendimento supervisionato utilizza dati etichettati per addestrare modelli in grado di effettuare previsioni su nuovi input mai osservati. In cybersecurity, il machine learning supervisionato viene ampiamente applicato a task come il rilevamento delle intrusioni (classificando il traffico di rete come *normale* o *attacco*), il rilevamento dei malware (distinguendo il software malevolo da quello benigno), il rilevamento del phishing (identificando siti web o email fraudolenti) e il filtraggio dello spam, tra gli altri. Ogni algoritmo ha i propri punti di forza ed è adatto a diversi tipi di problemi (classificazione o regressione). Di seguito esaminiamo i principali algoritmi di apprendimento supervisionato, spieghiamo come funzionano e ne dimostriamo l'uso su dataset reali di cybersecurity. Discutiamo inoltre di come la combinazione dei modelli (ensemble learning) possa spesso migliorare le prestazioni predittive.
 
 ## Algoritmi
 
--   **Regressione Lineare:** Un algoritmo di regressione fondamentale per prevedere risultati numerici adattando un'equazione lineare ai dati.
+-   **Regressione lineare:** Un algoritmo di regressione fondamentale per prevedere risultati numerici adattando un'equazione lineare ai dati.
 
--   **Regressione Logistica:** Un algoritmo di classificazione (nonostante il suo nome) che utilizza una funzione logistica per modellare la probabilità di un risultato binario.
+-   **Regressione logistica:** Un algoritmo di classificazione (nonostante il nome) che utilizza una funzione logistica per modellare la probabilità di un risultato binario.
 
--   **Alberi Decisionali:** Modelli strutturati ad albero che suddividono i dati per caratteristiche per fare previsioni; spesso utilizzati per la loro interpretabilità.
+-   **Alberi decisionali:** Modelli strutturati ad albero che suddividono i dati in base alle feature per effettuare previsioni; spesso utilizzati per la loro interpretabilità.
 
--   **Foreste Casuali:** Un insieme di alberi decisionali (tramite bagging) che migliora l'accuratezza e riduce l'overfitting.
+-   **Random Forest:** Un ensemble di alberi decisionali (tramite bagging) che migliora l'accuratezza e riduce l'overfitting.
 
--   **Macchine a Vettori di Supporto (SVM):** Classificatori a margine massimo che trovano l'iperpiano separatore ottimale; possono utilizzare kernel per dati non lineari.
+-   **Support Vector Machines (SVM):** Classificatori a margine massimo che individuano l'iperpiano di separazione ottimale; possono utilizzare kernel per dati non lineari.
 
--   **Naive Bayes:** Un classificatore probabilistico basato sul teorema di Bayes con un'assunzione di indipendenza delle caratteristiche, utilizzato famosamente nel filtraggio dello spam.
+-   **Naive Bayes:** Un classificatore probabilistico basato sul teorema di Bayes, che assume l'indipendenza tra le feature; viene utilizzato soprattutto nel filtraggio dello spam.
 
--   **k-Nearest Neighbors (k-NN):** Un semplice classificatore "basato su istanze" che etichetta un campione in base alla classe maggioritaria dei suoi vicini più prossimi.
+-   **k-Nearest Neighbors (k-NN):** Un semplice classificatore "instance-based" che assegna un'etichetta a un campione in base alla classe maggioritaria dei suoi vicini più prossimi.
 
--   **Gradient Boosting Machines:** Modelli ensemble (ad es., XGBoost, LightGBM) che costruiscono un forte predittore aggiungendo sequenzialmente apprendisti più deboli (tipicamente alberi decisionali).
+-   **Gradient Boosting Machines:** Modelli ensemble (ad esempio, XGBoost e LightGBM) che costruiscono un predittore potente aggiungendo in sequenza learner più deboli (in genere alberi decisionali).
 
-Ogni sezione sottostante fornisce una descrizione migliorata dell'algoritmo e un **esempio di codice Python** utilizzando librerie come `pandas` e `scikit-learn` (e `PyTorch` per l'esempio di rete neurale). Gli esempi utilizzano dataset di cybersecurity disponibili pubblicamente (come NSL-KDD per il rilevamento delle intrusioni e un dataset di Siti Web di Phishing) e seguono una struttura coerente:
+Ogni sezione seguente fornisce una descrizione migliorata dell'algoritmo e un **esempio di codice Python** che utilizza librerie come `pandas` e `scikit-learn` (e `PyTorch` per l'esempio della rete neurale). Gli esempi utilizzano dataset di cybersecurity disponibili pubblicamente (come NSL-KDD per il rilevamento delle intrusioni e un dataset di siti web di phishing) e seguono una struttura coerente:
 
-1.  **Carica il dataset** (scarica tramite URL se disponibile).
+1.  **Caricare il dataset** (scaricandolo tramite URL, se disponibile).
 
-2.  **Preprocessa i dati** (ad es. codifica delle caratteristiche categoriche, scalatura dei valori, suddivisione in set di addestramento/test).
+2.  **Preprocessare i dati** (ad esempio, codificare le feature categoriche, scalare i valori e suddividere i dati in set di training e test).
 
-3.  **Addestra il modello** sui dati di addestramento.
+3.  **Addestrare il modello** sui dati di training.
 
-4.  **Valuta** su un set di test utilizzando metriche: accuratezza, precisione, richiamo, F1-score e ROC AUC per la classificazione (e errore quadratico medio per la regressione).
+4.  **Valutare** il modello su un test set utilizzando le metriche: accuracy, precision, recall, F1-score e ROC AUC per la classificazione (e mean squared error per la regressione).
 
-Esploriamo ciascun algoritmo:
+Esaminiamo ora ciascun algoritmo:
 
-### Regressione Lineare
+### Regressione lineare
 
-La regressione lineare è un algoritmo di **regressione** utilizzato per prevedere valori numerici continui. Assume una relazione lineare tra le caratteristiche di input (variabili indipendenti) e l'output (variabile dipendente). Il modello cerca di adattare una retta (o un iperpiano in dimensioni superiori) che descriva meglio la relazione tra le caratteristiche e l'obiettivo. Questo viene tipicamente fatto minimizzando la somma degli errori quadratici tra i valori previsti e quelli reali (metodo dei minimi quadrati ordinari).
+La regressione lineare è un algoritmo di **regressione** utilizzato per prevedere valori numerici continui. Presuppone una relazione lineare tra le feature di input (variabili indipendenti) e l'output (variabile dipendente). Il modello tenta di adattare una retta (o un iperpiano in dimensioni superiori) che descriva al meglio la relazione tra le feature e il target. Ciò viene generalmente effettuato minimizzando la somma degli errori quadratici tra i valori previsti e quelli effettivi (metodo dei minimi quadrati ordinari).<sup>[[8]](#references)</sup>
 
-Il modo più semplice per rappresentare la regressione lineare è con una retta:
+Il modo più semplice per rappresentare la regressione lineare è tramite una retta:
 ```plaintext
 y = mx + b
 ```
 Dove:
 
 - `y` è il valore previsto (output)
-- `m` è la pendenza della linea (coefficiente)
-- `x` è la caratteristica di input
-- `b` è l'intercetta y
+- `m` è la pendenza della retta (coefficiente)
+- `x` è la feature di input
+- `b` è l'intercetta sull'asse y
 
-L'obiettivo della regressione lineare è trovare la retta che meglio si adatta e che minimizza la differenza tra i valori previsti e i valori reali nel dataset. Naturalmente, questo è molto semplice, sarebbe una retta che separa 2 categorie, ma se vengono aggiunte più dimensioni, la retta diventa più complessa:
+L'obiettivo della regressione lineare è trovare la retta più adatta che minimizzi la differenza tra i valori previsti e i valori effettivi nel dataset. Naturalmente, questo è molto semplice: sarebbe una retta che separa 2 categorie, ma se vengono aggiunte più dimensioni, la retta diventa più complessa:
 ```plaintext
 y = w1*x1 + w2*x2 + ... + wn*xn + b
 ```
 > [!TIP]
-> *Casi d'uso nella cybersecurity:* La regressione lineare in sé è meno comune per i compiti di sicurezza core (che sono spesso classificazione), ma può essere applicata per prevedere risultati numerici. Ad esempio, si potrebbe utilizzare la regressione lineare per **prevedere il volume del traffico di rete** o **stimare il numero di attacchi in un periodo di tempo** basandosi su dati storici. Potrebbe anche prevedere un punteggio di rischio o il tempo atteso fino alla rilevazione di un attacco, date certe metriche di sistema. Nella pratica, gli algoritmi di classificazione (come la regressione logistica o gli alberi) sono più frequentemente utilizzati per rilevare intrusioni o malware, ma la regressione lineare funge da base ed è utile per analisi orientate alla regressione.
+> *Casi d'uso nella cybersecurity:* La regressione lineare è meno comune per le attività di sicurezza principali (che spesso sono problemi di classificazione), ma può essere applicata per prevedere risultati numerici. Ad esempio, si potrebbe usare la regressione lineare per **prevedere il volume del traffico di rete** o **stimare il numero di attacchi in un determinato periodo** sulla base dei dati storici. Potrebbe anche prevedere un punteggio di rischio o il tempo previsto prima del rilevamento di un attacco, date determinate metriche del sistema. Nella pratica, gli algoritmi di classificazione (come la regressione logistica o gli alberi) vengono usati più frequentemente per rilevare intrusioni o malware, ma la regressione lineare costituisce una base ed è utile per le analisi orientate alla regressione.
 
-#### **Caratteristiche chiave della regressione lineare:**
+#### **Caratteristiche principali della regressione lineare:**
 
--   **Tipo di problema:** Regressione (previsione di valori continui). Non adatta per classificazione diretta a meno che non venga applicata una soglia all'output.
+-   **Tipo di problema:** Regressione (previsione di valori continui). Non è adatta alla classificazione diretta, a meno che non venga applicata una soglia all'output.
 
--   **Interpretabilità:** Alta -- i coefficienti sono facili da interpretare, mostrando l'effetto lineare di ciascuna caratteristica.
+-   **Interpretabilità:** Elevata -- i coefficienti sono semplici da interpretare e mostrano l'effetto lineare di ciascuna feature.
 
--   **Vantaggi:** Semplice e veloce; una buona base per compiti di regressione; funziona bene quando la vera relazione è approssimativamente lineare.
+-   **Vantaggi:** Semplice e veloce; un buon modello di riferimento per i task di regressione; funziona bene quando la relazione reale è approssimativamente lineare.
 
--   **Limitazioni:** Non può catturare relazioni complesse o non lineari (senza ingegneria manuale delle caratteristiche); soggetta a underfitting se le relazioni sono non lineari; sensibile agli outlier che possono distorcere i risultati.
+-   **Limitazioni:** Non è in grado di catturare relazioni complesse o non lineari (senza un feature engineering manuale); tende all'underfitting se le relazioni non sono lineari; è sensibile agli outlier, che possono distorcere i risultati.
 
--   **Trovare la miglior adattamento:** Per trovare la retta di miglior adattamento che separa le possibili categorie, utilizziamo un metodo chiamato **Ordinary Least Squares (OLS)**. Questo metodo minimizza la somma delle differenze quadrate tra i valori osservati e i valori previsti dal modello lineare.
+-   **Individuazione del miglior adattamento:** Per individuare la retta di miglior adattamento che separa le possibili categorie, usiamo un metodo chiamato **Ordinary Least Squares (OLS)**. Questo metodo minimizza la somma delle differenze al quadrato tra i valori osservati e i valori previsti dal modello lineare.
 
 <details>
-<summary>Esempio -- Previsione della durata della connessione (Regressione) in un dataset di intrusioni
+<summary>Esempio -- Previsione della durata delle connessioni (regressione) in un dataset di intrusioni
 </summary>
-Di seguito dimostriamo la regressione lineare utilizzando il dataset di cybersecurity NSL-KDD. Tratteremo questo come un problema di regressione prevedendo la `durata` delle connessioni di rete basandoci su altre caratteristiche. (In realtà, `durata` è una caratteristica di NSL-KDD; la utilizziamo qui solo per illustrare la regressione.) Carichiamo il dataset, lo preprocessiamo (codifichiamo le caratteristiche categoriche), alleniamo un modello di regressione lineare e valutiamo l'errore quadratico medio (MSE) e il punteggio R² su un set di test.
+Di seguito dimostriamo l'uso della regressione lineare utilizzando il dataset di cybersecurity NSL-KDD. Tratteremo il problema come una regressione, prevedendo la `duration` delle connessioni di rete sulla base di altre feature. (Nella realtà, `duration` è una delle feature di NSL-KDD; la usiamo qui solo per illustrare la regressione.) Carichiamo il dataset, lo preprocessiamo (codificando le feature categoriche), addestriamo un modello di regressione lineare e valutiamo il Mean Squared Error (MSE) e il punteggio R² su un test set.
 ```python
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder
@@ -128,14 +128,14 @@ Test MSE: 3021333.56
 Test R² : -0.526
 """
 ```
-In questo esempio, il modello di regressione lineare cerca di prevedere la `durata` della connessione da altre caratteristiche di rete. Misuriamo le prestazioni con l'Errore Quadratico Medio (MSE) e R². Un R² vicino a 1.0 indicherebbe che il modello spiega la maggior parte della varianza in `durata`, mentre un R² basso o negativo indica un cattivo adattamento. (Non sorprenderti se l'R² è basso qui -- prevedere la `durata` potrebbe essere difficile dalle caratteristiche date, e la regressione lineare potrebbe non catturare i modelli se sono complessi.)
+In questo esempio, il modello di regressione lineare cerca di prevedere `duration` della connessione a partire da altre caratteristiche della rete. Misuriamo le prestazioni con il Mean Squared Error (MSE) e R². Un R² vicino a 1.0 indicherebbe che il modello spiega la maggior parte della varianza di `duration`, mentre un R² basso o negativo indica un adattamento insufficiente. (Non sorprenderti se l'R² è basso in questo caso: prevedere `duration` potrebbe essere difficile utilizzando le caratteristiche fornite e la regressione lineare potrebbe non riuscire a catturare i pattern se sono complessi.)
 </details>
 
-### Regressione Logistica
+### Regressione logistica
 
-La regressione logistica è un algoritmo di **classificazione** che modella la probabilità che un'istanza appartenga a una particolare classe (tipicamente la classe "positiva"). Nonostante il suo nome, la regressione *logistica* è utilizzata per risultati discreti (a differenza della regressione lineare che è per risultati continui). È particolarmente utilizzata per la **classificazione binaria** (due classi, ad esempio, malevolo vs. benigno), ma può essere estesa a problemi multi-classe (utilizzando approcci softmax o one-vs-rest).
+La regressione logistica è un algoritmo di **classificazione** che modella la probabilità che un'istanza appartenga a una determinata classe (in genere la classe "positiva"). Nonostante il nome, la regressione *logistica* viene utilizzata per risultati discreti (a differenza della regressione lineare, che viene usata per risultati continui). È utilizzata soprattutto per la **classificazione binaria** (due classi, ad esempio malevolo vs. benigno), ma può essere estesa a problemi multi-classe (utilizzando gli approcci softmax o one-vs-rest).<sup>[[1]](#references)</sup>
 
-La regressione logistica utilizza la funzione logistica (nota anche come funzione sigmoide) per mappare i valori previsti a probabilità. Si noti che la funzione sigmoide è una funzione con valori compresi tra 0 e 1 che cresce in una curva a S secondo le esigenze della classificazione, utile per compiti di classificazione binaria. Pertanto, ogni caratteristica di ciascun input è moltiplicata per il suo peso assegnato, e il risultato è passato attraverso la funzione sigmoide per produrre una probabilità:
+La regressione logistica utilizza la funzione logistica (nota anche come funzione sigmoide) per mappare i valori previsti su probabilità. La funzione sigmoide è una funzione con valori compresi tra 0 e 1 che cresce secondo una curva a forma di S in base alle esigenze della classificazione, caratteristica utile per le attività di classificazione binaria. Pertanto, ogni caratteristica di ciascun input viene moltiplicata per il peso assegnato e il risultato viene passato attraverso la funzione sigmoide per produrre una probabilità:
 ```plaintext
 p(y=1|x) = 1 / (1 + e^(-z))
 ```
@@ -143,30 +143,30 @@ Dove:
 
 - `p(y=1|x)` è la probabilità che l'output `y` sia 1 dato l'input `x`
 - `e` è la base del logaritmo naturale
-- `z` è una combinazione lineare delle caratteristiche di input, tipicamente rappresentata come `z = w1*x1 + w2*x2 + ... + wn*xn + b`. Nota come, ancora una volta, nella sua forma più semplice sia una retta, ma nei casi più complessi diventa un iperpiano con diverse dimensioni (una per caratteristica).
+- `z` è una combinazione lineare delle feature di input, generalmente rappresentata come `z = w1*x1 + w2*x2 + ... + wn*xn + b`. Si noti come, anche in questo caso, nella sua forma più semplice sia una retta, ma nei casi più complessi diventi un iperpiano con diverse dimensioni (una per feature).
 
 > [!TIP]
-> *Casi d'uso nella cybersecurity:* Poiché molti problemi di sicurezza sono essenzialmente decisioni sì/no, la regressione logistica è ampiamente utilizzata. Ad esempio, un sistema di rilevamento delle intrusioni potrebbe utilizzare la regressione logistica per decidere se una connessione di rete è un attacco basato sulle caratteristiche di quella connessione. Nella rilevazione di phishing, la regressione logistica può combinare le caratteristiche di un sito web (lunghezza dell'URL, presenza del simbolo "@", ecc.) in una probabilità di essere phishing. È stata utilizzata nei filtri antispam di prima generazione e rimane una solida base per molti compiti di classificazione.
+> *Casi d'uso nella cybersecurity:* Poiché molti problemi di sicurezza sono essenzialmente decisioni sì/no, la logistic regression è ampiamente utilizzata. Ad esempio, un sistema di intrusion detection potrebbe usare la logistic regression per decidere se una connessione di rete è un attacco sulla base delle feature di quella connessione. Nel phishing detection, la logistic regression può combinare le feature di un sito web (lunghezza dell'URL, presenza del simbolo "@", ecc.) in una probabilità che si tratti di phishing. È stata utilizzata nei filtri antispam di prima generazione e rimane una solida baseline per molte attività di classificazione.
 
-#### Regressione Logistica per classificazione non binaria
+#### Logistic Regression per la classificazione non binaria
 
-La regressione logistica è progettata per la classificazione binaria, ma può essere estesa per gestire problemi multi-classe utilizzando tecniche come **one-vs-rest** (OvR) o **softmax regression**. In OvR, viene addestrato un modello di regressione logistica separato per ogni classe, trattandola come la classe positiva contro tutte le altre. La classe con la probabilità prevista più alta viene scelta come previsione finale. La regressione softmax generalizza la regressione logistica a più classi applicando la funzione softmax allo strato di output, producendo una distribuzione di probabilità su tutte le classi.
+La logistic regression è progettata per la classificazione binaria, ma può essere estesa per gestire problemi multi-classe utilizzando tecniche come **one-vs-rest** (OvR) o **softmax regression**. In OvR, viene addestrato un modello di logistic regression separato per ogni classe, trattandola come classe positiva rispetto a tutte le altre. La classe con la probabilità prevista più alta viene scelta come previsione finale. La softmax regression generalizza la logistic regression a più classi applicando la funzione softmax al livello di output e producendo una distribuzione di probabilità su tutte le classi.
 
-#### **Caratteristiche chiave della Regressione Logistica:**
+#### **Caratteristiche principali della Logistic Regression:**
 
--   **Tipo di Problema:** Classificazione (di solito binaria). Prevede la probabilità della classe positiva.
+-   **Tipo di problema:** Classificazione (solitamente binaria). Prevede la probabilità della classe positiva.
 
--   **Interpretabilità:** Alta -- come nella regressione lineare, i coefficienti delle caratteristiche possono indicare come ciascuna caratteristica influisce sui log-odds dell'esito. Questa trasparenza è spesso apprezzata nella sicurezza per comprendere quali fattori contribuiscono a un allerta.
+-   **Interpretabilità:** Alta -- come nella linear regression, i coefficienti delle feature possono indicare come ogni feature influisce sui log-odds del risultato. Questa trasparenza è spesso apprezzata nella sicurezza per comprendere quali fattori contribuiscono a un alert.
 
--   **Vantaggi:** Semplice e veloce da addestrare; funziona bene quando la relazione tra le caratteristiche e i log-odds dell'esito è lineare. Produce probabilità, consentendo la valutazione del rischio. Con una regolarizzazione appropriata, generalizza bene e può gestire meglio la multicollinearità rispetto alla semplice regressione lineare.
+-   **Vantaggi:** Semplice e veloce da addestrare; funziona bene quando la relazione tra le feature e i log-odds del risultato è lineare. Produce probabilità, consentendo il risk scoring. Con una regolarizzazione appropriata, generalizza bene e può gestire la multicollinearità meglio della plain linear regression.
 
--   **Limitazioni:** Presuppone un confine decisionale lineare nello spazio delle caratteristiche (fallisce se il vero confine è complesso/non lineare). Potrebbe avere prestazioni inferiori su problemi in cui le interazioni o gli effetti non lineari sono critici, a meno che non si aggiungano manualmente caratteristiche polinomiali o di interazione. Inoltre, la regressione logistica è meno efficace se le classi non sono facilmente separabili da una combinazione lineare di caratteristiche.
+-   **Limitazioni:** Presuppone un decision boundary lineare nello spazio delle feature (non funziona se il boundary reale è complesso/non lineare). Può avere prestazioni inferiori nei problemi in cui le interazioni o gli effetti non lineari sono fondamentali, a meno di aggiungere manualmente feature polinomiali o di interazione. Inoltre, la logistic regression è meno efficace se le classi non sono facilmente separabili tramite una combinazione lineare di feature.
 
 
 <details>
-<summary>Esempio -- Rilevamento di Siti Web di Phishing con Regressione Logistica:</summary>
+<summary>Esempio -- Phishing Website Detection con Logistic Regression:</summary>
 
-Utilizzeremo un **Dataset di Siti Web di Phishing** (dal repository UCI) che contiene caratteristiche estratte di siti web (come se l'URL ha un indirizzo IP, l'età del dominio, presenza di elementi sospetti in HTML, ecc.) e un'etichetta che indica se il sito è phishing o legittimo. Addestriamo un modello di regressione logistica per classificare i siti web e poi valutiamo la sua accuratezza, precisione, richiamo, F1-score e ROC AUC su un campione di test.
+Utilizzeremo un **Phishing Websites Dataset** (dal repository UCI) che contiene feature estratte dai siti web (ad esempio, se l'URL contiene un indirizzo IP, l'età del dominio, la presenza di elementi sospetti nell'HTML, ecc.) e un'etichetta che indica se il sito è di phishing o legittimo. Addestreremo un modello di logistic regression per classificare i siti web e valuteremo quindi accuracy, precision, recall, F1-score e ROC AUC su uno split di test.
 ```python
 import pandas as pd
 from sklearn.datasets import fetch_openml
@@ -221,26 +221,26 @@ F1-score : 0.917
 ROC AUC  : 0.979
 """
 ```
-In questo esempio di rilevamento del phishing, la regressione logistica produce una probabilità per ciascun sito web di essere phishing. Valutando l'accuratezza, la precisione, il richiamo e l'F1, otteniamo un'idea delle prestazioni del modello. Ad esempio, un alto richiamo significherebbe che cattura la maggior parte dei siti di phishing (importante per la sicurezza per ridurre al minimo gli attacchi mancati), mentre un'alta precisione significa che ha pochi falsi allarmi (importante per evitare l'affaticamento degli analisti). L'ROC AUC (Area sotto la curva ROC) fornisce una misura delle prestazioni indipendente dalla soglia (1.0 è ideale, 0.5 non è meglio del caso). La regressione logistica spesso si comporta bene in tali compiti, ma se il confine decisionale tra siti di phishing e legittimi è complesso, potrebbero essere necessari modelli non lineari più potenti.
+In questo esempio di rilevamento del phishing, la regressione logistica produce una probabilità che indica se ogni sito web è di phishing. Valutando accuracy, precision, recall e F1, otteniamo un'idea delle prestazioni del modello. Ad esempio, un recall elevato significherebbe che rileva la maggior parte dei siti di phishing (un aspetto importante per la sicurezza, al fine di ridurre al minimo gli attacchi non rilevati), mentre una precision elevata significa che produce pochi falsi allarmi (un aspetto importante per evitare l'affaticamento degli analisti). La ROC AUC (Area Under the ROC Curve) fornisce una misura delle prestazioni indipendente dalla soglia (1.0 è il valore ideale, 0.5 non è migliore del caso). La regressione logistica spesso offre buone prestazioni in attività di questo tipo, ma se il confine decisionale tra siti di phishing e siti legittimi è complesso, potrebbero essere necessari modelli non lineari più potenti.
 
 </details>
 
-### Alberi Decisionali
+### Alberi decisionali
 
-Un albero decisionale è un **algoritmo di apprendimento supervisionato** versatile che può essere utilizzato sia per compiti di classificazione che di regressione. Impara un modello gerarchico simile a un albero di decisioni basato sulle caratteristiche dei dati. Ogni nodo interno dell'albero rappresenta un test su una particolare caratteristica, ogni ramo rappresenta un risultato di quel test e ogni nodo foglia rappresenta una classe prevista (per la classificazione) o un valore (per la regressione).
+Un albero decisionale è un versatile **algoritmo di apprendimento supervisionato** che può essere utilizzato sia per attività di classificazione sia di regressione. Apprende un modello gerarchico, simile a un albero, delle decisioni basato sulle feature dei dati. Ogni nodo interno dell'albero rappresenta un test su una specifica feature, ogni ramo rappresenta un risultato di tale test e ogni nodo foglia rappresenta una classe prevista (per la classificazione) o un valore (per la regressione).<sup>[[2]](#references)</sup>
 
-Per costruire un albero, algoritmi come CART (Classification and Regression Tree) utilizzano misure come **impurità di Gini** o **guadagno informativo (entropia)** per scegliere la migliore caratteristica e soglia per suddividere i dati a ciascun passo. L'obiettivo a ciascuna suddivisione è partizionare i dati per aumentare l'omogeneità della variabile target nei sottoinsiemi risultanti (per la classificazione, ogni nodo mira a essere il più puro possibile, contenendo prevalentemente una singola classe).
+Per costruire un albero, algoritmi come CART (Classification and Regression Tree) utilizzano misure quali **impurità di Gini** o **information gain (entropia)** per scegliere la feature e la soglia migliori con cui suddividere i dati a ogni passaggio. L'obiettivo di ogni suddivisione è partizionare i dati in modo da aumentare l'omogeneità della variabile target nei sottoinsiemi risultanti (per la classificazione, ogni nodo mira a essere il più puro possibile, contenendo prevalentemente una singola classe).
 
-Gli alberi decisionali sono **altamente interpretabili**: si può seguire il percorso dalla radice alla foglia per comprendere la logica dietro una previsione (ad esempio, *"SE `service = telnet` E `src_bytes > 1000` E `failed_logins > 3` ALLORA classificare come attacco"*). Questo è prezioso nella cybersecurity per spiegare perché è stato sollevato un certo allerta. Gli alberi possono gestire naturalmente sia dati numerici che categorici e richiedono poca pre-elaborazione (ad esempio, la scalatura delle caratteristiche non è necessaria).
+Gli alberi decisionali sono **altamente interpretabili** -- è possibile seguire il percorso dalla radice alla foglia per comprendere la logica alla base di una previsione (ad esempio, *"IF `service = telnet` AND `src_bytes > 1000` AND `failed_logins > 3` THEN classify as attack"*). Questo è utile nella cybersecurity per spiegare perché è stato generato un determinato alert. Gli alberi possono gestire naturalmente sia dati numerici sia categorici e richiedono poca preelaborazione (ad esempio, il feature scaling non è necessario).
 
-Tuttavia, un singolo albero decisionale può facilmente sovradattarsi ai dati di addestramento, specialmente se cresce in profondità (molte suddivisioni). Tecniche come la potatura (limitare la profondità dell'albero o richiedere un numero minimo di campioni per foglia) sono spesso utilizzate per prevenire il sovradattamento.
+Tuttavia, un singolo albero decisionale può facilmente andare in overfitting sui dati di training, soprattutto se viene fatto crescere in profondità (con molte suddivisioni). Per prevenire l'overfitting vengono spesso utilizzate tecniche come il pruning (limitare la profondità dell'albero o richiedere un numero minimo di campioni per foglia).
 
-Ci sono 3 componenti principali di un albero decisionale:
-- **Nodo Radice**: Il nodo superiore dell'albero, che rappresenta l'intero dataset.
-- **Nodi Interni**: Nodi che rappresentano caratteristiche e decisioni basate su quelle caratteristiche.
-- **Nodi Foglia**: Nodi che rappresentano il risultato finale o la previsione.
+Esistono 3 componenti principali di un albero decisionale:
+- **Root Node**: il nodo superiore dell'albero, che rappresenta l'intero dataset.
+- **Internal Nodes**: nodi che rappresentano le feature e le decisioni basate su tali feature.
+- **Leaf Nodes**: nodi che rappresentano il risultato finale o la previsione.
 
-Un albero potrebbe finire per apparire così:
+Un albero potrebbe avere un aspetto simile al seguente:
 ```plaintext
 [Root Node]
 /   \
@@ -249,36 +249,36 @@ Un albero potrebbe finire per apparire così:
 [Leaf 1] [Leaf 2] [Leaf 3] [Leaf 4]
 ```
 > [!TIP]
-> *Casi d'uso nella cybersecurity:* Gli alberi decisionali sono stati utilizzati nei sistemi di rilevamento delle intrusioni per derivare **regole** per identificare attacchi. Ad esempio, i primi IDS come i sistemi basati su ID3/C4.5 genererebbero regole leggibili dall'uomo per distinguere il traffico normale da quello malevolo. Sono anche utilizzati nell'analisi del malware per decidere se un file è malevolo in base alle sue caratteristiche (dimensione del file, entropia della sezione, chiamate API, ecc.). La chiarezza degli alberi decisionali li rende utili quando è necessaria trasparenza: un analista può ispezionare l'albero per convalidare la logica di rilevamento.
+> *Casi d'uso nella cybersecurity:* gli alberi decisionali sono stati utilizzati nei sistemi di rilevamento delle intrusioni per derivare **regole** utili a identificare gli attacchi. Ad esempio, i primi IDS basati su ID3/C4.5 generavano regole leggibili dagli esseri umani per distinguere il traffico normale da quello malevolo. Sono utilizzati anche nell'analisi dei malware per decidere se un file è malevolo in base ai suoi attributi (dimensione del file, entropia delle sezioni, chiamate API, ecc.). La chiarezza degli alberi decisionali li rende utili quando è necessaria trasparenza -- un analista può esaminare l'albero per convalidare la logica di rilevamento.
 
-#### **Caratteristiche chiave degli Alberi Decisionali:**
+#### **Caratteristiche principali degli alberi decisionali:**
 
--   **Tipo di Problema:** Sia classificazione che regressione. Comunemente utilizzati per la classificazione di attacchi vs. traffico normale, ecc.
+-   **Tipo di problema:** classificazione e regressione. Utilizzati comunemente per classificare gli attacchi rispetto al traffico normale, ecc.
 
--   **Interpretabilità:** Molto alta -- le decisioni del modello possono essere visualizzate e comprese come un insieme di regole if-then. Questo è un grande vantaggio nella sicurezza per fiducia e verifica del comportamento del modello.
+-   **Interpretabilità:** molto elevata -- le decisioni del modello possono essere visualizzate e comprese come un insieme di regole if-then. Questo è un vantaggio importante nella sicurezza, per garantire affidabilità e verificare il comportamento del modello.
 
--   **Vantaggi:** Possono catturare relazioni non lineari e interazioni tra le caratteristiche (ogni divisione può essere vista come un'interazione). Non è necessario scalare le caratteristiche o codificare in one-hot le variabili categoriche: gli alberi gestiscono questi aspetti nativamente. Inferenza veloce (la previsione è semplicemente seguire un percorso nell'albero).
+-   **Vantaggi:** possono catturare relazioni non lineari e interazioni tra le feature (ogni split può essere visto come un'interazione). Non è necessario scalare le feature o eseguire l'one-hot encoding delle variabili categoriche -- gli alberi le gestiscono nativamente. Inferenza rapida (la predizione consiste semplicemente nel seguire un percorso nell'albero).
 
--   **Limitazioni:** Inclini all'overfitting se non controllati (un albero profondo può memorizzare il set di addestramento). Possono essere instabili: piccole modifiche nei dati potrebbero portare a una struttura ad albero diversa. Come modelli singoli, la loro accuratezza potrebbe non corrispondere a metodi più avanzati (gli ensemble come Random Forests generalmente performano meglio riducendo la varianza).
+-   **Limitazioni:** sono soggetti a overfitting se non vengono controllati (un albero profondo può memorizzare il training set). Possono essere instabili -- piccole variazioni nei dati potrebbero portare a una struttura dell'albero differente. Come modelli singoli, la loro accuratezza potrebbe non essere pari a quella di metodi più avanzati (gli ensemble come Random Forests generalmente offrono prestazioni migliori riducendo la varianza).
 
--   **Trovare la Migliore Divisione:**
-- **Impurità di Gini**: Misura l'impurità di un nodo. Un'impurità di Gini più bassa indica una migliore divisione. La formula è:
+-   **Individuazione del miglior split:**
+- **Gini Impurity**: misura l'impurità di un nodo. Un valore più basso di Gini impurity indica uno split migliore. La formula è:
 
 ```plaintext
 Gini = 1 - Σ(p_i^2)
 ```
 
-Dove `p_i` è la proporzione di istanze nella classe `i`.
+Dove `p_i` è la proporzione di istanze appartenenti alla classe `i`.
 
-- **Entropia**: Misura l'incertezza nel dataset. Un'entropia più bassa indica una migliore divisione. La formula è:
+- **Entropy**: misura l'incertezza nel dataset. Un'entropia più bassa indica uno split migliore. La formula è:
 
 ```plaintext
 Entropy = -Σ(p_i * log2(p_i))
 ```
 
-Dove `p_i` è la proporzione di istanze nella classe `i`.
+Dove `p_i` è la proporzione di istanze appartenenti alla classe `i`.
 
-- **Guadagno Informativo**: La riduzione dell'entropia o dell'impurità di Gini dopo una divisione. Maggiore è il guadagno informativo, migliore è la divisione. Si calcola come:
+- **Information Gain**: la riduzione dell'entropia o della Gini impurity dopo uno split. Maggiore è l'information gain, migliore è lo split. Viene calcolato come segue:
 
 ```plaintext
 Information Gain = Entropy(parent) - (Weighted Average of Entropy(children))
@@ -286,13 +286,13 @@ Information Gain = Entropy(parent) - (Weighted Average of Entropy(children))
 
 Inoltre, un albero termina quando:
 - Tutte le istanze in un nodo appartengono alla stessa classe. Questo potrebbe portare a overfitting.
-- La profondità massima (hardcoded) dell'albero è raggiunta. Questo è un modo per prevenire l'overfitting.
-- Il numero di istanze in un nodo è al di sotto di una certa soglia. Questo è anche un modo per prevenire l'overfitting.
-- Il guadagno informativo da ulteriori divisioni è al di sotto di una certa soglia. Questo è anche un modo per prevenire l'overfitting.
+- Viene raggiunta la profondità massima (hardcoded) dell'albero. Questo è un modo per prevenire l'overfitting.
+- Il numero di istanze in un nodo è inferiore a una determinata soglia. Anche questo è un modo per prevenire l'overfitting.
+- L'information gain derivante da ulteriori split è inferiore a una determinata soglia. Anche questo è un modo per prevenire l'overfitting.
 
 <details>
-<summary>Esempio -- Albero Decisionale per il Rilevamento delle Intrusioni:</summary>
-Alleneremo un albero decisionale sul dataset NSL-KDD per classificare le connessioni di rete come *normali* o *attacco*. NSL-KDD è una versione migliorata del classico dataset KDD Cup 1999, con caratteristiche come tipo di protocollo, servizio, durata, numero di accessi falliti, ecc., e un'etichetta che indica il tipo di attacco o "normale". Mapperemo tutti i tipi di attacco a una classe di "anomalia" (classificazione binaria: normale vs anomalia). Dopo l'addestramento, valuteremo le prestazioni dell'albero sul set di test.
+<summary>Esempio -- Albero decisionale per il rilevamento delle intrusioni:</summary>
+Addestreremo un albero decisionale sul dataset NSL-KDD per classificare le connessioni di rete come *normali* o *attacchi*. NSL-KDD è una versione migliorata del classico dataset KDD Cup 1999, con feature come il tipo di protocollo, il servizio, la durata, il numero di accessi non riusciti, ecc., e un'etichetta che indica il tipo di attacco o "normal". Mapperemo tutti i tipi di attacco alla classe "anomaly" (classificazione binaria: normal vs anomaly). Dopo l'addestramento, valuteremo le prestazioni dell'albero sul test set.
 ```python
 import pandas as pd
 from sklearn.tree import DecisionTreeClassifier
@@ -356,40 +356,40 @@ F1‑score : 0.756
 ROC AUC  : 0.758
 """
 ```
-In questo esempio di albero decisionale, abbiamo limitato la profondità dell'albero a 10 per evitare un estremo overfitting (il parametro `max_depth=10`). Le metriche mostrano quanto bene l'albero distingue il traffico normale da quello di attacco. Un alto richiamo significherebbe che cattura la maggior parte degli attacchi (importante per un IDS), mentre un'alta precisione significa pochi falsi allarmi. Gli alberi decisionali raggiungono spesso una precisione decente su dati strutturati, ma un singolo albero potrebbe non raggiungere le migliori prestazioni possibili. Tuttavia, l'*interpretabilità* del modello è un grande vantaggio: potremmo esaminare le suddivisioni dell'albero per vedere, ad esempio, quali caratteristiche (ad es., `service`, `src_bytes`, ecc.) sono più influenti nel segnalare una connessione come malevola.
+In questo esempio di albero decisionale, abbiamo limitato la profondità dell'albero a 10 per evitare un overfitting estremo (il parametro `max_depth=10`). Le metriche mostrano quanto bene l'albero distingua il traffico normale da quello di attacco. Un recall elevato significherebbe che rileva la maggior parte degli attacchi (aspetto importante per un IDS), mentre una precision elevata significa pochi falsi allarmi. Gli alberi decisionali spesso raggiungono una accuracy discreta sui dati strutturati, ma un singolo albero potrebbe non raggiungere le migliori prestazioni possibili. Tuttavia, l'*interpretabilità* del modello è un grande vantaggio -- potremmo esaminare gli split dell'albero per vedere, ad esempio, quali feature (come `service`, `src_bytes`, ecc.) hanno maggiore influenza nel contrassegnare una connessione come dannosa.
 
 </details>
 
 ### Random Forests
 
-Random Forest è un metodo di **ensemble learning** che si basa sugli alberi decisionali per migliorare le prestazioni. Una random forest addestra più alberi decisionali (da qui "foresta") e combina le loro uscite per fare una previsione finale (per la classificazione, tipicamente tramite voto di maggioranza). Le due idee principali in una random forest sono **bagging** (bootstrap aggregating) e **randomness delle caratteristiche**:
+Random Forest è un metodo di **ensemble learning** che si basa sugli alberi decisionali per migliorare le prestazioni. Una random forest addestra diversi alberi decisionali (da qui "forest") e combina i loro output per effettuare una predizione finale (per la classificazione, in genere tramite voto a maggioranza). Le due idee principali di una random forest sono il **bagging** (bootstrap aggregating) e la **casualità delle feature**:
 
--   **Bagging:** Ogni albero è addestrato su un campione bootstrap casuale dei dati di addestramento (campionato con sostituzione). Questo introduce diversità tra gli alberi.
+-   **Bagging:** Ogni albero viene addestrato su un campione bootstrap casuale dei dati di training (campionato con reinserimento). Questo introduce diversità tra gli alberi.
 
--   **Randomness delle Caratteristiche:** Ad ogni suddivisione in un albero, viene considerato un sottoinsieme casuale di caratteristiche per la suddivisione (invece di tutte le caratteristiche). Questo decora ulteriormente gli alberi.
+-   **Casualità delle feature:** A ogni split di un albero, viene considerato un sottoinsieme casuale di feature per lo split (invece di tutte le feature). Questo riduce ulteriormente la correlazione tra gli alberi.
 
-Mediare i risultati di molti alberi riduce la varianza che un singolo albero decisionale potrebbe avere. In termini semplici, gli alberi individuali potrebbero overfittare o essere rumorosi, ma un gran numero di alberi diversi che votano insieme smussa quegli errori. Il risultato è spesso un modello con **maggiore accuratezza** e migliore generalizzazione rispetto a un singolo albero decisionale. Inoltre, le random forests possono fornire una stima dell'importanza delle caratteristiche (guardando a quanto ciascuna caratteristica riduce l'impurità in media).
+Calcolando la media dei risultati di molti alberi, la random forest riduce la varianza che potrebbe avere un singolo albero decisionale. In termini semplici, i singoli alberi potrebbero andare in overfitting o produrre risultati rumorosi, ma un gran numero di alberi diversificati che votano insieme attenua questi errori. Il risultato è spesso un modello con **accuracy più elevata** e una migliore capacità di generalizzazione rispetto a un singolo albero decisionale. Inoltre, le random forest possono fornire una stima dell'importanza delle feature (osservando quanto ogni split delle feature riduca mediamente l'impurità).
 
-Le random forests sono diventate un **cavallo di battaglia nella cybersecurity** per compiti come il rilevamento delle intrusioni, la classificazione del malware e il rilevamento dello spam. Spesso funzionano bene subito, con una minima regolazione, e possono gestire grandi set di caratteristiche. Ad esempio, nel rilevamento delle intrusioni, una random forest può superare un singolo albero decisionale catturando schemi di attacco più sottili con meno falsi positivi. La ricerca ha dimostrato che le random forests si comportano favorevolmente rispetto ad altri algoritmi nella classificazione degli attacchi in dataset come NSL-KDD e UNSW-NB15.
+Le random forest sono diventate un **workhorse nella cybersecurity** per attività come intrusion detection, classificazione dei malware e rilevamento dello spam. Spesso offrono buone prestazioni out-of-the-box con un tuning minimo e possono gestire grandi insiemi di feature. Ad esempio, nell'intrusion detection, una random forest può superare un singolo albero decisionale rilevando pattern di attacco più sottili con meno falsi positivi. La ricerca ha dimostrato che le random forest ottengono risultati favorevoli rispetto ad altri algoritmi nella classificazione degli attacchi in dataset come NSL-KDD e UNSW-NB15.<sup>[[3]](#references)[[9]](#references)</sup>
 
-#### **Caratteristiche chiave delle Random Forests:**
+#### **Caratteristiche principali delle Random Forests:**
 
--   **Tipo di Problema:** Principalmente classificazione (utilizzato anche per la regressione). Molto adatto per dati strutturati ad alta dimensione comuni nei log di sicurezza.
+-   **Tipo di problema:** Principalmente classificazione (utilizzate anche per la regressione). Sono particolarmente adatte ai dati strutturati ad alta dimensionalità comuni nei security log.
 
--   **Interpretabilità:** Inferiore rispetto a un singolo albero decisionale: non puoi facilmente visualizzare o spiegare centinaia di alberi contemporaneamente. Tuttavia, i punteggi di importanza delle caratteristiche forniscono alcune informazioni su quali attributi sono più influenti.
+-   **Interpretabilità:** Inferiore rispetto a un singolo albero decisionale -- non è possibile visualizzare o spiegare facilmente centinaia di alberi contemporaneamente. Tuttavia, i punteggi di importanza delle feature forniscono alcune indicazioni sugli attributi più influenti.
 
--   **Vantaggi:** Generalmente maggiore accuratezza rispetto ai modelli ad albero singolo grazie all'effetto ensemble. Robusto all'overfitting: anche se gli alberi individuali overfittano, l'ensemble generalizza meglio. Gestisce sia caratteristiche numeriche che categoriche e può gestire dati mancanti in una certa misura. È anche relativamente robusto agli outlier.
+-   **Vantaggi:** In genere offrono una accuracy superiore rispetto ai modelli basati su un singolo albero grazie all'effetto dell'ensemble. Sono robuste all'overfitting -- anche se i singoli alberi vanno in overfitting, l'ensemble generalizza meglio. Gestiscono sia feature numeriche sia categoriche e possono gestire in parte i dati mancanti. Sono inoltre relativamente robuste agli outlier.
 
--   **Limitazioni:** La dimensione del modello può essere grande (molti alberi, ognuno potenzialmente profondo). Le previsioni sono più lente rispetto a un singolo albero (poiché devi aggregare su molti alberi). Meno interpretabile: mentre conosci le caratteristiche importanti, la logica esatta non è facilmente tracciabile come una semplice regola. Se il dataset è estremamente ad alta dimensione e sparso, addestrare una foresta molto grande può essere computazionalmente pesante.
+-   **Limitazioni:** Le dimensioni del modello possono essere elevate (molti alberi, ciascuno potenzialmente profondo). Le predizioni sono più lente rispetto a quelle di un singolo albero (è necessario aggregare i risultati di molti alberi). Sono meno interpretabili -- sebbene sia possibile conoscere le feature importanti, la logica esatta non è facilmente riconducibile a una regola semplice. Se il dataset è estremamente ad alta dimensionalità e sparso, l'addestramento di una forest molto grande può essere oneroso dal punto di vista computazionale.
 
--   **Processo di Addestramento:**
-1. **Bootstrap Sampling**: Campiona casualmente i dati di addestramento con sostituzione per creare più sottoinsiemi (campioni bootstrap).
-2. **Costruzione dell'Albero**: Per ogni campione bootstrap, costruisci un albero decisionale utilizzando un sottoinsieme casuale di caratteristiche ad ogni suddivisione. Questo introduce diversità tra gli alberi.
-3. **Aggregazione**: Per i compiti di classificazione, la previsione finale viene effettuata prendendo un voto di maggioranza tra le previsioni di tutti gli alberi. Per i compiti di regressione, la previsione finale è la media delle previsioni di tutti gli alberi.
+-   **Processo di training:**
+1. **Campionamento Bootstrap**: Campionare casualmente i dati di training con reinserimento per creare diversi sottoinsiemi (campioni bootstrap).
+2. **Costruzione degli alberi**: Per ogni campione bootstrap, costruire un albero decisionale utilizzando un sottoinsieme casuale di feature a ogni split. Questo introduce diversità tra gli alberi.
+3. **Aggregazione**: Per le attività di classificazione, la predizione finale viene effettuata tramite voto a maggioranza tra le predizioni di tutti gli alberi. Per le attività di regressione, la predizione finale è la media delle predizioni di tutti gli alberi.
 
 <details>
-<summary>Esempio -- Random Forest per il Rilevamento delle Intrusioni (NSL-KDD):</summary>
-Utilizzeremo lo stesso dataset NSL-KDD (etichettato binario come normale vs anomalia) e addestreremo un classificatore Random Forest. Ci aspettiamo che la random forest si comporti altrettanto bene o meglio dell'albero decisionale singolo, grazie alla media dell'ensemble che riduce la varianza. Lo valuteremo con le stesse metriche.
+<summary>Esempio -- Random Forest per l'Intrusion Detection (NSL-KDD):</summary>
+Utilizzeremo lo stesso dataset NSL-KDD (con etichette binarie che indicano traffico normale o anomalo) e addestreremo un classificatore Random Forest. Ci aspettiamo che la random forest offra prestazioni pari o superiori a quelle del singolo albero decisionale, grazie alla riduzione della varianza ottenuta tramite la media dell'ensemble. La valuteremo utilizzando le stesse metriche.
 ```python
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder
@@ -481,35 +481,35 @@ F1-score:  0.754
 ROC AUC:   0.962
 """
 ```
-Il random forest raggiunge tipicamente risultati solidi in questo compito di rilevamento delle intrusioni. Potremmo osservare un miglioramento in metriche come F1 o AUC rispetto all'albero decisionale singolo, specialmente in richiamo o precisione, a seconda dei dati. Questo è in linea con la comprensione che *"Random Forest (RF) è un classificatore ensemble e si comporta bene rispetto ad altri classificatori tradizionali per una classificazione efficace degli attacchi."*. In un contesto di operazioni di sicurezza, un modello di random forest potrebbe segnalare attacchi in modo più affidabile riducendo i falsi allarmi, grazie alla media di molte regole decisionali. L'importanza delle caratteristiche dal forest potrebbe dirci quali caratteristiche di rete sono più indicative di attacchi (ad esempio, determinati servizi di rete o conteggi insoliti di pacchetti).
+La random forest in genere ottiene risultati solidi in questo task di intrusion detection. Potremmo osservare un miglioramento in metriche come F1 o AUC rispetto al singolo albero decisionale, soprattutto in termini di recall o precision, a seconda dei dati. Questo è in linea con la consapevolezza che *"Random Forest (RF) is an ensemble classifier and performs well compared to other traditional classifiers for effective classification of attacks."*. In un contesto di security operations, un modello random forest potrebbe rilevare gli attacchi in modo più affidabile riducendo al contempo i falsi allarmi, grazie alla media di numerose regole decisionali. La feature importance della forest potrebbe indicare quali feature di rete sono maggiormente indicative di attacchi (ad esempio, determinati servizi di rete o conteggi insoliti di pacchetti).
 
 </details>
 
 ### Support Vector Machines (SVM)
 
-Le Support Vector Machines sono potenti modelli di apprendimento supervisionato utilizzati principalmente per la classificazione (e anche per la regressione come SVR). Un SVM cerca di trovare l'**iperpiano separatore ottimale** che massimizza il margine tra due classi. Solo un sottoinsieme di punti di addestramento (i "support vectors" più vicini al confine) determina la posizione di questo iperpiano. Massimizzando il margine (distanza tra i support vectors e l'iperpiano), gli SVM tendono a ottenere una buona generalizzazione.
+Le Support Vector Machines sono potenti modelli di supervised learning utilizzati principalmente per la classificazione (e anche per la regressione come SVR). Una SVM cerca di trovare l'**iperpiano di separazione ottimale** che massimizza il margine tra due classi. Solo un sottoinsieme dei punti di training (i "support vectors" più vicini al confine) determina la posizione di questo iperpiano. Massimizzando il margine (la distanza tra i support vectors e l'iperpiano), le SVM tendono a ottenere una buona generalizzazione.<sup>[[4]](#references)</sup>
 
-La chiave della potenza degli SVM è la capacità di utilizzare **funzioni kernel** per gestire relazioni non lineari. I dati possono essere implicitamente trasformati in uno spazio delle caratteristiche di dimensione superiore dove potrebbe esistere un separatore lineare. I kernel comuni includono polinomiale, funzione di base radiale (RBF) e sigmoide. Ad esempio, se le classi di traffico di rete non sono separabili linearmente nello spazio delle caratteristiche grezze, un kernel RBF può mappare queste classi in una dimensione superiore dove l'SVM trova una divisione lineare (che corrisponde a un confine non lineare nello spazio originale). La flessibilità nella scelta dei kernel consente agli SVM di affrontare una varietà di problemi.
+Un elemento fondamentale della potenza delle SVM è la possibilità di utilizzare **funzioni kernel** per gestire relazioni non lineari. I dati possono essere trasformati implicitamente in uno spazio delle feature a dimensionalità superiore, nel quale potrebbe esistere un separatore lineare. I kernel più comuni includono quello polinomiale, la radial basis function (RBF) e il sigmoid. Ad esempio, se le classi del traffico di rete non sono linearmente separabili nello spazio delle feature grezzo, un kernel RBF può mapparle in una dimensionalità superiore, dove la SVM trova una separazione lineare (che corrisponde a un confine non lineare nello spazio originale). La flessibilità nella scelta dei kernel consente alle SVM di affrontare un'ampia varietà di problemi.
 
-Gli SVM sono noti per funzionare bene in situazioni con spazi delle caratteristiche ad alta dimensione (come dati testuali o sequenze di opcode di malware) e in casi in cui il numero di caratteristiche è grande rispetto al numero di campioni. Sono stati popolari in molte applicazioni di cybersecurity precoci come la classificazione del malware e il rilevamento delle intrusioni basato su anomalie negli anni 2000, mostrando spesso alta accuratezza.
+Le SVM sono note per ottenere buone prestazioni in situazioni con spazi delle feature ad alta dimensionalità (come i dati testuali o le sequenze di opcode dei malware) e nei casi in cui il numero di feature è elevato rispetto al numero di sample. Sono state popolari in molte prime applicazioni di cybersecurity, come la classificazione dei malware e l'intrusion detection basata su anomalie negli anni 2000, mostrando spesso un'elevata accuratezza.
 
-Tuttavia, gli SVM non scalano facilmente a dataset molto grandi (la complessità di addestramento è super-lineare nel numero di campioni e l'uso della memoria può essere elevato poiché potrebbe essere necessario memorizzare molti support vectors). In pratica, per compiti come il rilevamento delle intrusioni di rete con milioni di record, l'SVM potrebbe essere troppo lento senza un attento sottocampionamento o l'uso di metodi approssimativi.
+Tuttavia, le SVM non scalano facilmente a dataset molto grandi (la complessità del training è super-lineare rispetto al numero di sample e l'utilizzo della memoria può essere elevato, poiché potrebbe essere necessario memorizzare molti support vectors). In pratica, per task come l'intrusion detection di rete con milioni di record, una SVM potrebbe essere troppo lenta senza un'attenta subsampling o l'utilizzo di metodi approssimati.
 
-#### **Caratteristiche chiave degli SVM:**
+#### **Caratteristiche principali delle SVM:**
 
--   **Tipo di Problema:** Classificazione (binaria o multiclass tramite one-vs-one/one-vs-rest) e varianti di regressione. Spesso utilizzati nella classificazione binaria con chiara separazione del margine.
+-   **Tipo di problema:** Classificazione (binaria o multiclass tramite one-vs-one/one-vs-rest) e varianti per la regressione. Spesso utilizzate nella classificazione binaria con una separazione del margine ben definita.
 
--   **Interpretabilità:** Media -- Gli SVM non sono così interpretabili come gli alberi decisionali o la regressione logistica. Anche se puoi identificare quali punti dati sono support vectors e avere un'idea di quali caratteristiche potrebbero essere influenti (attraverso i pesi nel caso del kernel lineare), in pratica gli SVM (soprattutto con kernel non lineari) sono trattati come classificatori a scatola nera.
+-   **Interpretabilità:** Media -- le SVM non sono interpretabili quanto gli alberi decisionali o la regressione logistica. Sebbene sia possibile identificare quali punti dati sono support vectors e farsi un'idea di quali feature possano essere influenti (attraverso i pesi nel caso del kernel lineare), nella pratica le SVM (soprattutto con kernel non lineari) vengono trattate come classificatori black-box.
 
--   **Vantaggi:** Efficaci in spazi ad alta dimensione; possono modellare confini decisionali complessi con il trucco del kernel; robusti all'overfitting se il margine è massimizzato (soprattutto con un appropriato parametro di regolarizzazione C); funzionano bene anche quando le classi non sono separate da una grande distanza (trovano il miglior confine di compromesso).
+-   **Vantaggi:** Efficaci negli spazi ad alta dimensionalità; possono modellare confini decisionali complessi tramite il kernel trick; robuste rispetto all'overfitting se il margine è massimizzato (soprattutto con un parametro di regolarizzazione C appropriato); funzionano bene anche quando le classi non sono separate da una distanza elevata (trovano il miglior confine di compromesso).
 
--   **Limitazioni:** **Intensivo dal punto di vista computazionale** per grandi dataset (sia l'addestramento che la previsione scalano male man mano che i dati crescono). Richiede una sintonizzazione attenta dei parametri del kernel e di regolarizzazione (C, tipo di kernel, gamma per RBF, ecc.). Non fornisce direttamente output probabilistici (anche se si può utilizzare la scalatura di Platt per ottenere probabilità). Inoltre, gli SVM possono essere sensibili alla scelta dei parametri del kernel --- una scelta errata può portare a underfit o overfit.
+-   **Limitazioni:** **Computazionalmente intensive** per dataset di grandi dimensioni (sia il training sia la prediction scalano male all'aumentare dei dati). Richiedono un'attenta configurazione dei parametri del kernel e della regolarizzazione (C, tipo di kernel, gamma per RBF, ecc.). Non forniscono direttamente output probabilistici (anche se è possibile utilizzare Platt scaling per ottenere le probabilità). Inoltre, le SVM possono essere sensibili alla scelta dei parametri del kernel --- una scelta inadeguata può portare a underfitting o overfitting.
 
-*Use cases in cybersecurity:* Gli SVM sono stati utilizzati nella **rilevazione di malware** (ad esempio, classificando file in base a caratteristiche estratte o sequenze di opcode), **rilevamento di anomalie di rete** (classificando il traffico come normale o malevolo) e **rilevamento di phishing** (utilizzando caratteristiche degli URL). Ad esempio, un SVM potrebbe prendere le caratteristiche di un'email (conteggi di determinate parole chiave, punteggi di reputazione del mittente, ecc.) e classificarla come phishing o legittima. Sono stati anche applicati al **rilevamento delle intrusioni** su set di caratteristiche come KDD, raggiungendo spesso alta accuratezza a costo di computazione.
+*Use case nella cybersecurity:* le SVM sono state utilizzate nel **malware detection** (ad esempio, classificando file sulla base di feature estratte o sequenze di opcode), nella **network anomaly detection** (classificando il traffico come normale o malevolo) e nel **phishing detection** (utilizzando feature degli URL). Ad esempio, una SVM potrebbe ricevere le feature di un'email (conteggi di determinate keyword, punteggi di reputazione del mittente, ecc.) e classificarla come phishing o legittima. Sono state inoltre applicate all'**intrusion detection** su feature set come KDD, ottenendo spesso un'elevata accuratezza a fronte di un costo computazionale maggiore.
 
 <details>
-<summary>Esempio -- SVM per la classificazione del malware:</summary>
-Utilizzeremo di nuovo il dataset dei siti web di phishing, questa volta con un SVM. Poiché gli SVM possono essere lenti, utilizzeremo un sottoinsieme dei dati per l'addestramento se necessario (il dataset è di circa 11k istanze, che l'SVM può gestire ragionevolmente). Utilizzeremo un kernel RBF che è una scelta comune per dati non lineari, e abiliteremo le stime di probabilità per calcolare ROC AUC.
+<summary>Esempio -- SVM per la classificazione dei malware:</summary>
+Utilizzeremo nuovamente il dataset dei phishing website, questa volta con una SVM. Poiché le SVM possono essere lente, se necessario utilizzeremo un sottoinsieme dei dati per il training (il dataset contiene circa 11.000 istanze, una quantità che una SVM può gestire ragionevolmente). Utilizzeremo un kernel RBF, una scelta comune per i dati non lineari, e abiliteremo le stime delle probabilità per calcolare la ROC AUC.
 ```python
 import pandas as pd
 from sklearn.datasets import fetch_openml
@@ -577,73 +577,75 @@ F1‑score : 0.950
 ROC AUC  : 0.989
 """
 ```
-Il modello SVM restituirà metriche che possiamo confrontare con la regressione logistica sullo stesso compito. Potremmo scoprire che SVM raggiunge un'alta accuratezza e AUC se i dati sono ben separati dalle caratteristiche. D'altra parte, se il dataset avesse molto rumore o classi sovrapposte, SVM potrebbe non superare significativamente la regressione logistica. Nella pratica, gli SVM possono dare un impulso quando ci sono relazioni complesse e non lineari tra le caratteristiche e la classe -- il kernel RBF può catturare confini decisionali curvi che la regressione logistica perderebbe. Come per tutti i modelli, è necessaria una sintonizzazione attenta dei parametri `C` (regolarizzazione) e del kernel (come `gamma` per RBF) per bilanciare bias e varianza.
+Il modello SVM produrrà metriche che possiamo confrontare con la regressione logistica sullo stesso task. Potremmo scoprire che SVM raggiunge un’elevata accuratezza e un AUC alto se i dati sono ben separati dalle feature. Al contrario, se il dataset contenesse molto rumore o classi sovrapposte, SVM potrebbe non superare significativamente la regressione logistica. In pratica, le SVM possono offrire un miglioramento quando esistono relazioni complesse e non lineari tra feature e classe: il kernel RBF è in grado di catturare confini decisionali curvi che la regressione logistica non riuscirebbe a individuare. Come per tutti i modelli, è necessario un tuning accurato di `C` (regolarizzazione) e dei parametri del kernel (come `gamma` per RBF) per bilanciare bias e varianza.
 
 </details>
 
-#### Differenza tra Regressioni Logistiche e SVM
+#### Differenze tra Regressione Logistica e SVM
 
-| Aspetto | **Regressione Logistica** | **Macchine a Vettori di Supporto** |
+| Aspetto | **Regressione Logistica** | **Support Vector Machines** |
 |---|---|---|
-| **Funzione obiettivo** | Minimizza **log‑loss** (cross‑entropy). | Massimizza il **margine** mentre minimizza **hinge‑loss**. |
-| **Confine decisionale** | Trova il **iperpiano di miglior adattamento** che modella _P(y\|x)_. | Trova il **iperpiano a margine massimo** (gap più grande rispetto ai punti più vicini). |
-| **Output** | **Probabilistico** – fornisce probabilità di classe calibrate tramite σ(w·x + b). | **Deterministico** – restituisce etichette di classe; le probabilità richiedono lavoro extra (es. Platt scaling). |
-| **Regolarizzazione** | L2 (predefinito) o L1, bilancia direttamente under/over‑fitting. | Il parametro C bilancia la larghezza del margine rispetto alle classificazioni errate; i parametri del kernel aggiungono complessità. |
-| **Kernels / Non‑lineare** | La forma nativa è **lineare**; la non linearità è aggiunta tramite ingegneria delle caratteristiche. | Il **kernel trick** integrato (RBF, polinomiale, ecc.) consente di modellare confini complessi in uno spazio ad alta dimensione. |
-| **Scalabilità** | Risolve un'ottimizzazione convessa in **O(nd)**; gestisce bene n molto grandi. | L'addestramento può essere **O(n²–n³)** in termini di memoria/tempo senza risolutori specializzati; meno adatto a n enormi. |
-| **Interpretabilità** | **Alta** – i pesi mostrano l'influenza delle caratteristiche; il rapporto di probabilità è intuitivo. | **Bassa** per i kernel non lineari; i vettori di supporto sono sparsi ma non facili da spiegare. |
-| **Sensibilità agli outlier** | Usa log‑loss morbido → meno sensibile. | Hinge‑loss con margine rigido può essere **sensibile**; il margine morbido (C) mitiga. |
-| **Casi d'uso tipici** | Valutazione del credito, rischio medico, test A/B – dove contano **probabilità e spiegabilità**. | Classificazione di immagini/testo, bio‑informatica – dove contano **confini complessi** e **dati ad alta dimensione**. |
+| **Funzione obiettivo** | Minimizza la **log-loss** (cross-entropy). | Massimizza il **margine** minimizzando al contempo la **hinge-loss**. |
+| **Confine decisionale** | Trova l’**iperpiano di best-fit** che modella _P(y\|x)_. | Trova l’**iperpiano a margine massimo** (la distanza maggiore dai punti più vicini). |
+| **Output** | **Probabilistico** – restituisce probabilità di classe calibrate tramite σ(w·x + b). | **Deterministico** – restituisce etichette di classe; le probabilità richiedono un’elaborazione aggiuntiva (ad esempio Platt scaling). |
+| **Regolarizzazione** | L2 (predefinita) o L1, bilancia direttamente underfitting e overfitting. | Il parametro C bilancia l’ampiezza del margine e le misclassificazioni; i parametri del kernel aggiungono complessità. |
+| **Kernel / Non linearità** | La forma nativa è **lineare**; la non linearità viene aggiunta tramite feature engineering. | Il **kernel trick** integrato (RBF, polinomiale, ecc.) consente di modellare confini complessi in uno spazio ad alta dimensionalità. |
+| **Scalabilità** | Risolve un’ottimizzazione convessa in **O(nd)**; gestisce bene valori molto grandi di n. | Il training può richiedere **O(n²–n³)** in memoria/tempo senza solver specializzati; è meno adatto a valori enormi di n. |
+| **Interpretabilità** | **Elevata** – i pesi mostrano l’influenza delle feature; l’odds ratio è intuitivo. | **Bassa** per i kernel non lineari; i support vectors sono sparsi, ma non sono facili da spiegare. |
+| **Sensibilità agli outlier** | Utilizza una log-loss uniforme → meno sensibile. | La hinge-loss con hard margin può essere **sensibile**; il soft-margin (C) riduce il problema. |
+| **Casi d’uso tipici** | Credit scoring, rischio medico, A/B testing – quando **probabilità e spiegabilità** sono importanti. | Classificazione di immagini/testi, bioinformatica – quando contano **confini complessi** e **dati ad alta dimensionalità**. |
 
-* **Se hai bisogno di probabilità calibrate, interpretabilità, o operi su enormi dataset — scegli Regressione Logistica.**
-* **Se hai bisogno di un modello flessibile che possa catturare relazioni non lineari senza ingegneria manuale delle caratteristiche — scegli SVM (con kernel).**
-* Entrambi ottimizzano obiettivi convexi, quindi **i minimi globali sono garantiti**, ma i kernel di SVM aggiungono iper-parametri e costi computazionali.
+* **Se hai bisogno di probabilità calibrate, interpretabilità o devi operare su dataset enormi — scegli la Regressione Logistica.**
+* **Se hai bisogno di un modello flessibile in grado di catturare relazioni non lineari senza feature engineering manuale — scegli SVM (con i kernel).**
+* Entrambi ottimizzano obiettivi convessi, quindi i **minimi globali sono garantiti**, ma i kernel di SVM aggiungono iperparametri e costi computazionali.
 
-### Naive Bayes
+### Naive Bayes
 
-Naive Bayes è una famiglia di **classificatori probabilistici** basati sull'applicazione del Teorema di Bayes con una forte assunzione di indipendenza tra le caratteristiche. Nonostante questa assunzione "naive", Naive Bayes spesso funziona sorprendentemente bene per alcune applicazioni, specialmente quelle che coinvolgono dati testuali o categorici, come il rilevamento dello spam.
+Naive Bayes è una famiglia di **classificatori probabilistici** basata sull’applicazione del teorema di Bayes con una forte assunzione di indipendenza tra le feature. Nonostante questa assunzione “naive”, Naive Bayes spesso funziona sorprendentemente bene in determinate applicazioni, soprattutto quelle che coinvolgono dati testuali o categoriali, come il rilevamento dello spam.<sup>[[5]](#references)</sup>
 
 
 #### Teorema di Bayes
 
-Il teorema di Bayes è la base dei classificatori Naive Bayes. Relaziona le probabilità condizionali e marginali di eventi casuali. La formula è:
+Il teorema di Bayes è il fondamento dei classificatori Naive Bayes. Collega le probabilità condizionate e marginali degli eventi casuali. La formula è:
 ```plaintext
 P(A|B) = (P(B|A) * P(A)) / P(B)
 ```
 Dove:
-- `P(A|B)` è la probabilità posteriore della classe `A` dato il carattere `B`.
-- `P(B|A)` è la verosimiglianza del carattere `B` dato la classe `A`.
-- `P(A)` è la probabilità prior della classe `A`.
-- `P(B)` è la probabilità prior del carattere `B`.
+- `P(A|B)` è la probabilità a posteriori della classe `A` data la feature `B`.
+- `P(B|A)` è la likelihood della feature `B` data la classe `A`.
+- `P(A)` è la probabilità a priori della classe `A`.
+- `P(B)` è la probabilità a priori della feature `B`.
 
-Ad esempio, se vogliamo classificare se un testo è scritto da un bambino o un adulto, possiamo usare le parole nel testo come caratteristiche. Basandosi su alcuni dati iniziali, il classificatore Naive Bayes calcolerà precedentemente le probabilità di ciascuna parola di appartenere a ciascuna potenziale classe (bambino o adulto). Quando viene fornito un nuovo testo, calcolerà la probabilità di ciascuna potenziale classe dato le parole nel testo e sceglierà la classe con la probabilità più alta.
+Ad esempio, se vogliamo classificare se un testo è stato scritto da un bambino o da un adulto, possiamo usare le parole presenti nel testo come feature. Sulla base di alcuni dati iniziali, il classificatore Naive Bayes calcolerà in precedenza le probabilità che ogni parola appartenga a ciascuna delle classi potenziali (bambino o adulto). Quando viene fornito un nuovo testo, calcolerà la probabilità di ciascuna classe potenziale date le parole presenti nel testo e sceglierà la classe con la probabilità più alta.
 
-Come puoi vedere in questo esempio, il classificatore Naive Bayes è molto semplice e veloce, ma assume che le caratteristiche siano indipendenti, il che non è sempre il caso nei dati del mondo reale.
+Come si può vedere in questo esempio, il classificatore Naive Bayes è molto semplice e veloce, ma presuppone che le feature siano indipendenti, cosa che non sempre si verifica nei dati del mondo reale.
+
 
 #### Tipi di classificatori Naive Bayes
 
-Ci sono diversi tipi di classificatori Naive Bayes, a seconda del tipo di dati e della distribuzione delle caratteristiche:
-- **Gaussian Naive Bayes**: Assume che le caratteristiche seguano una distribuzione gaussiana (normale). È adatto per dati continui.
-- **Multinomial Naive Bayes**: Assume che le caratteristiche seguano una distribuzione multinomiale. È adatto per dati discreti, come il conteggio delle parole nella classificazione del testo.
-- **Bernoulli Naive Bayes**: Assume che le caratteristiche siano binarie (0 o 1). È adatto per dati binari, come la presenza o l'assenza di parole nella classificazione del testo.
-- **Categorical Naive Bayes**: Assume che le caratteristiche siano variabili categoriche. È adatto per dati categorici, come la classificazione della frutta in base al colore e alla forma.
+Esistono diversi tipi di classificatori Naive Bayes, a seconda del tipo di dati e della distribuzione delle feature:
+- **Gaussian Naive Bayes**: presuppone che le feature seguano una distribuzione gaussiana (normale). È adatto ai dati continui.
+- **Multinomial Naive Bayes**: presuppone che le feature seguano una distribuzione multinomiale. È adatto ai dati discreti, come il conteggio delle parole nella classificazione del testo.
+- **Bernoulli Naive Bayes**: presuppone che le feature siano binarie (0 o 1). È adatto ai dati binari, come la presenza o l'assenza di parole nella classificazione del testo.
+- **Categorical Naive Bayes**: presuppone che le feature siano variabili categoriche. È adatto ai dati categorici, come la classificazione dei frutti in base al loro colore e alla loro forma.
 
-#### **Caratteristiche chiave di Naive Bayes:**
 
--   **Tipo di problema:** Classificazione (binaria o multi-classe). Comunemente usato per compiti di classificazione del testo nella cybersecurity (spam, phishing, ecc.).
+#### **Caratteristiche principali di Naive Bayes:**
 
--   **Interpretabilità:** Media -- non è così direttamente interpretabile come un albero decisionale, ma si possono ispezionare le probabilità apprese (ad esempio, quali parole sono più probabili negli email spam rispetto a quelli legittimi). La forma del modello (probabilità per ciascuna caratteristica data la classe) può essere compresa se necessario.
+-   **Tipo di problema:** classificazione (binaria o multi-classe). Comunemente utilizzato per attività di classificazione del testo nella cybersecurity (spam, phishing, ecc.).
 
--   **Vantaggi:** **Addestramento e previsione molto veloci**, anche su grandi dataset (lineare nel numero di istanze * numero di caratteristiche). Richiede una quantità relativamente piccola di dati per stimare le probabilità in modo affidabile, specialmente con una corretta smussatura. È spesso sorprendentemente accurato come baseline, specialmente quando le caratteristiche contribuiscono indipendentemente come evidenza alla classe. Funziona bene con dati ad alta dimensione (ad esempio, migliaia di caratteristiche da testo). Non richiede una messa a punto complessa oltre alla definizione di un parametro di smussatura.
+-   **Interpretabilità:** media -- non è interpretabile direttamente quanto un decision tree, ma è possibile esaminare le probabilità apprese (ad esempio, quali parole sono più probabili nelle email di spam rispetto alle email ham). La forma del modello (le probabilità di ogni feature data la classe) può essere compresa quando necessario.
 
--   **Limitazioni:** L'assunzione di indipendenza può limitare l'accuratezza se le caratteristiche sono altamente correlate. Ad esempio, nei dati di rete, caratteristiche come `src_bytes` e `dst_bytes` potrebbero essere correlate; Naive Bayes non catturerà quell'interazione. Man mano che la dimensione dei dati cresce molto, modelli più espressivi (come ensemble o reti neurali) possono superare NB apprendendo le dipendenze delle caratteristiche. Inoltre, se è necessaria una certa combinazione di caratteristiche per identificare un attacco (non solo caratteristiche individuali indipendentemente), NB avrà difficoltà.
+-   **Vantaggi:** training e predizione **molto veloci**, anche su dataset di grandi dimensioni (lineari nel numero di istanze * numero di feature). Richiede una quantità relativamente ridotta di dati per stimare le probabilità in modo affidabile, soprattutto con uno smoothing appropriato. Spesso è sorprendentemente accurato come baseline, specialmente quando le feature contribuiscono indipendentemente all'evidenza a favore della classe. Funziona bene con dati ad alta dimensionalità (ad esempio, migliaia di feature estratte dal testo). Non richiede tuning complessi oltre alla configurazione di un parametro di smoothing.
+
+-   **Limitazioni:** l'ipotesi di indipendenza può limitare l'accuratezza se le feature sono fortemente correlate. Ad esempio, nei dati di rete, feature come `src_bytes` e `dst_bytes` potrebbero essere correlate; Naive Bayes non catturerà questa interazione. Quando la dimensione dei dati cresce molto, modelli più espressivi (come gli ensemble o le neural net) possono superare NB imparando le dipendenze tra le feature. Inoltre, se per identificare un attacco è necessaria una determinata combinazione di feature (e non solo singole feature indipendenti), NB avrà difficoltà.
 
 > [!TIP]
-> *Casi d'uso nella cybersecurity:* L'uso classico è **rilevamento dello spam** -- Naive Bayes era il nucleo dei primi filtri antispam, utilizzando le frequenze di determinati token (parole, frasi, indirizzi IP) per calcolare la probabilità che un'email sia spam. È anche usato nel **rilevamento di email di phishing** e nella **classificazione degli URL**, dove la presenza di determinate parole chiave o caratteristiche (come "login.php" in un URL, o `@` in un percorso URL) contribuisce alla probabilità di phishing. Nell'analisi del malware, si potrebbe immaginare un classificatore Naive Bayes che utilizza la presenza di determinate chiamate API o permessi nel software per prevedere se è malware. Sebbene algoritmi più avanzati spesso performino meglio, Naive Bayes rimane una buona baseline grazie alla sua velocità e semplicità.
+> *Casi d'uso nella cybersecurity:* l'uso classico è il **rilevamento dello spam** -- Naive Bayes era il nucleo dei primi filtri antispam, che utilizzavano la frequenza di determinati token (parole, frasi, indirizzi IP) per calcolare la probabilità che un'email fosse spam. Viene utilizzato anche nel **rilevamento delle email di phishing** e nella **classificazione degli URL**, dove la presenza di determinate parole chiave o caratteristiche (come "login.php" in un URL o `@` nel percorso di un URL) contribuisce alla probabilità di phishing. Nell'analisi del malware, si potrebbe immaginare un classificatore Naive Bayes che utilizzi la presenza di determinate chiamate API o autorizzazioni nel software per prevedere se si tratta di malware. Sebbene gli algoritmi più avanzati offrano spesso prestazioni migliori, Naive Bayes rimane una buona baseline grazie alla sua velocità e semplicità.
 
 <details>
-<summary>Esempio -- Naive Bayes per il rilevamento di phishing:</summary>
-Per dimostrare Naive Bayes, utilizzeremo Gaussian Naive Bayes sul dataset di intrusione NSL-KDD (con etichette binarie). Gaussian NB tratterà ciascuna caratteristica come seguente una distribuzione normale per classe. Questa è una scelta approssimativa poiché molte caratteristiche di rete sono discrete o altamente distorte, ma mostra come si applicherebbe NB ai dati delle caratteristiche continue. Potremmo anche scegliere Bernoulli NB su un dataset di caratteristiche binarie (come un insieme di avvisi attivati), ma ci atteniamo a NSL-KDD qui per continuità.
+<summary>Esempio -- Naive Bayes per il rilevamento del phishing:</summary>
+Per dimostrare Naive Bayes, utilizzeremo Gaussian Naive Bayes sul dataset di intrusioni NSL-KDD (con etichette binarie). Gaussian NB tratterà ogni feature come se seguisse una distribuzione normale per classe. Si tratta di una scelta approssimativa, poiché molte feature di rete sono discrete o fortemente asimmetriche, ma mostra come applicare NB a dati con feature continue. Potremmo anche scegliere Bernoulli NB su un dataset di feature binarie (come un insieme di alert attivati), ma qui continueremo a utilizzare NSL-KDD per coerenza.
 ```python
 import pandas as pd
 from sklearn.naive_bayes import GaussianNB
@@ -704,34 +706,34 @@ F1-score:  0.071
 ROC AUC:   0.867
 """
 ```
-Questo codice addestra un classificatore Naive Bayes per rilevare attacchi. Naive Bayes calcolerà cose come `P(service=http | Attack)` e `P(Service=http | Normal)` basandosi sui dati di addestramento, assumendo l'indipendenza tra le caratteristiche. Utilizzerà quindi queste probabilità per classificare nuove connessioni come normali o attacchi in base alle caratteristiche osservate. Le prestazioni di NB su NSL-KDD potrebbero non essere elevate come modelli più avanzati (poiché l'indipendenza delle caratteristiche è violata), ma sono spesso decenti e offrono il vantaggio di una velocità estrema. In scenari come il filtraggio delle email in tempo reale o la triage iniziale degli URL, un modello Naive Bayes può rapidamente segnalare casi ovviamente malevoli con un basso utilizzo delle risorse.
+Questo codice addestra un classificatore Naive Bayes per rilevare gli attacks. Naive Bayes calcolerà valori come `P(service=http | Attack)` e `P(Service=http | Normal)` in base ai training data, assumendo l'indipendenza tra le feature. Utilizzerà quindi queste probabilità per classificare le nuove connessioni come normali o come attacks, in base alle feature osservate. Le performance di NB su NSL-KDD potrebbero non essere elevate quanto quelle di modelli più avanzati (poiché l'indipendenza tra le feature viene violata), ma sono spesso buone e offrono il vantaggio di una velocità estrema. In scenari come il filtraggio delle email in tempo reale o il triage iniziale degli URL, un modello Naive Bayes può segnalare rapidamente i casi chiaramente malevoli con un utilizzo ridotto delle risorse.
 
 </details>
 
 ### k-Nearest Neighbors (k-NN)
 
-k-Nearest Neighbors è uno degli algoritmi di machine learning più semplici. È un metodo **non parametrico, basato su istanze** che fa previsioni basate sulla somiglianza con esempi nel set di addestramento. L'idea per la classificazione è: per classificare un nuovo punto dati, trovare i **k** punti più vicini nei dati di addestramento (i suoi "vicini più prossimi") e assegnare la classe maggioritaria tra quei vicini. La "vicinanza" è definita da una metrica di distanza, tipicamente la distanza euclidea per dati numerici (altre distanze possono essere utilizzate per diversi tipi di caratteristiche o problemi).
+k-Nearest Neighbors è uno degli algoritmi di machine learning più semplici. È un metodo **non parametrico, basato sulle istanze** che effettua le predizioni in base alla similarità con gli esempi presenti nel training set. L'idea per la classificazione è la seguente: per classificare un nuovo punto dati, si trovano i **k** punti più vicini nei training data (i suoi "nearest neighbors") e si assegna la classe maggioritaria tra questi neighbors. La "vicinanza" è definita da una metrica di distanza, in genere la distanza euclidea per i dati numerici (è possibile utilizzare altre distanze per diversi tipi di feature o problemi).<sup>[[10]](#references)</sup>
 
-K-NN richiede *nessun addestramento esplicito* -- la fase di "addestramento" consiste semplicemente nel memorizzare il dataset. Tutto il lavoro avviene durante la query (previsione): l'algoritmo deve calcolare le distanze dal punto di query a tutti i punti di addestramento per trovare i più vicini. Questo rende il tempo di previsione **lineare nel numero di campioni di addestramento**, il che può essere costoso per grandi dataset. Per questo motivo, k-NN è più adatto per dataset più piccoli o scenari in cui è possibile scambiare memoria e velocità per semplicità.
+K-NN non richiede un *training esplicito* -- la fase di "training" consiste semplicemente nel memorizzare il dataset. Tutto il lavoro avviene durante la query (prediction): l'algoritmo deve calcolare le distanze dal punto della query a tutti i punti di training per trovare quelli più vicini. Questo rende il tempo di prediction **lineare rispetto al numero di samples di training**, il che può essere costoso per dataset di grandi dimensioni. Per questo motivo, k-NN è più adatto a dataset di dimensioni ridotte o a scenari in cui è possibile sacrificare memoria e velocità in favore della semplicità.
 
-Nonostante la sua semplicità, k-NN può modellare confini decisionali molto complessi (poiché effettivamente il confine decisionale può avere qualsiasi forma dettata dalla distribuzione degli esempi). Tende a funzionare bene quando il confine decisionale è molto irregolare e si dispone di molti dati -- essenzialmente lasciando che i dati "parlino da soli". Tuttavia, in alte dimensioni, le metriche di distanza possono diventare meno significative (maledizione della dimensionalità), e il metodo può avere difficoltà a meno che non si disponga di un numero enorme di campioni.
+Nonostante la sua semplicità, k-NN può modellare decision boundaries molto complesse (poiché, di fatto, la decision boundary può avere qualsiasi forma determinata dalla distribuzione degli esempi). Tende a funzionare bene quando la decision boundary è molto irregolare e si dispone di molti dati -- in sostanza, lasciando che siano i dati a "parlare da soli". Tuttavia, in dimensioni elevate, le metriche di distanza possono diventare meno significative (curse of dimensionality) e il metodo può avere difficoltà, a meno di disporre di un numero enorme di samples.
 
-*Use cases in cybersecurity:* k-NN è stato applicato alla rilevazione di anomalie -- ad esempio, un sistema di rilevamento delle intrusioni potrebbe etichettare un evento di rete come malevolo se la maggior parte dei suoi vicini più prossimi (eventi precedenti) erano malevoli. Se il traffico normale forma cluster e gli attacchi sono outlier, un approccio K-NN (con k=1 o k piccolo) fa essenzialmente una **rilevazione di anomalie basata sui vicini più prossimi**. K-NN è stato anche utilizzato per classificare famiglie di malware tramite vettori di caratteristiche binarie: un nuovo file potrebbe essere classificato come una certa famiglia di malware se è molto vicino (nello spazio delle caratteristiche) a istanze note di quella famiglia. Nella pratica, k-NN non è comune come algoritmi più scalabili, ma è concettualmente semplice e talvolta utilizzato come baseline o per problemi su piccola scala.
+*Use cases nella cybersecurity:* k-NN è stato applicato all'anomaly detection -- per esempio, un intrusion detection system potrebbe classificare un evento di rete come malevolo se la maggior parte dei suoi nearest neighbors (eventi precedenti) era malevola. Se il traffico normale forma dei cluster e gli attacks sono outlier, un approccio K-NN (con k=1 o un valore ridotto di k) realizza essenzialmente una **nearest-neighbor anomaly detection**. K-NN è stato utilizzato anche per classificare le famiglie di malware tramite vettori di feature binarie: un nuovo file potrebbe essere classificato come appartenente a una determinata famiglia di malware se è molto vicino (nello spazio delle feature) a istanze note di quella famiglia. Nella pratica, k-NN non è comune quanto gli algoritmi più scalabili, ma è concettualmente semplice e talvolta viene utilizzato come baseline o per problemi di piccola scala.
 
-#### **Caratteristiche chiave di k-NN:**
+#### **Caratteristiche principali di k-NN:**
 
--   **Tipo di Problema:** Classificazione (esistono varianti di regressione). È un metodo di *apprendimento pigro* -- nessun adattamento esplicito del modello.
+-   **Tipo di problema:** Classification (esistono anche varianti per la regression). È un metodo di *lazy learning* -- non esegue il fitting esplicito di un modello.
 
--   **Interpretabilità:** Bassa a media -- non esiste un modello globale o una spiegazione concisa, ma si possono interpretare i risultati guardando ai vicini più prossimi che hanno influenzato una decisione (ad esempio, "questo flusso di rete è stato classificato come malevolo perché è simile a questi 3 flussi malevoli noti"). Quindi, le spiegazioni possono essere basate su esempi.
+-   **Interpretabilità:** Da bassa a media -- non esiste un modello globale o una spiegazione concisa, ma è possibile interpretare i risultati osservando i nearest neighbors che hanno influenzato una decisione (per esempio, "questo network flow è stato classificato come malevolo perché è simile a questi 3 network flow malevoli noti"). Le spiegazioni possono quindi essere basate sugli esempi.
 
--   **Vantaggi:** Molto semplice da implementare e comprendere. Non fa assunzioni sulla distribuzione dei dati (non parametrico). Può gestire naturalmente problemi multi-classe. È **adattivo** nel senso che i confini decisionali possono essere molto complessi, modellati dalla distribuzione dei dati.
+-   **Vantaggi:** Molto semplice da implementare e comprendere. Non fa assunzioni sulla distribuzione dei dati (non parametrico). Può gestire naturalmente i problemi multi-classe. È **adattivo**, nel senso che le decision boundaries possono essere molto complesse e modellate dalla distribuzione dei dati.
 
--   **Limitazioni:** La previsione può essere lenta per grandi dataset (deve calcolare molte distanze). Intenso in termini di memoria -- memorizza tutti i dati di addestramento. Le prestazioni degradano in spazi di caratteristiche ad alta dimensione perché tutti i punti tendono a diventare quasi equidistanti (rendendo il concetto di "più vicino" meno significativo). È necessario scegliere *k* (numero di vicini) in modo appropriato -- un k troppo piccolo può essere rumoroso, un k troppo grande può includere punti irrilevanti di altre classi. Inoltre, le caratteristiche dovrebbero essere scalate in modo appropriato perché i calcoli delle distanze sono sensibili alla scala.
+-   **Limitazioni:** La prediction può essere lenta per dataset di grandi dimensioni (è necessario calcolare molte distanze). Richiede molta memoria -- memorizza tutti i dati di training. Le performance peggiorano negli spazi delle feature ad alta dimensionalità perché tutti i punti tendono a diventare quasi equidistanti (rendendo meno significativo il concetto di "nearest"). È necessario scegliere *k* (il numero di neighbors) in modo appropriato -- un valore di k troppo basso può introdurre rumore, mentre un valore troppo alto può includere punti irrilevanti di altre classi. Inoltre, le feature devono essere scalate correttamente, perché i calcoli delle distanze sono sensibili alla scala.
 
 <details>
-<summary>Esempio -- k-NN per la Rilevazione di Phishing:</summary>
+<summary>Esempio -- k-NN per il rilevamento del Phishing:</summary>
 
-Utilizzeremo di nuovo NSL-KDD (classificazione binaria). Poiché k-NN è computazionalmente pesante, utilizzeremo un sottoinsieme dei dati di addestramento per mantenerlo gestibile in questa dimostrazione. Sceglieremo, ad esempio, 20.000 campioni di addestramento su un totale di 125k, e utilizzeremo k=5 vicini. Dopo l'addestramento (in realtà solo memorizzando i dati), valuteremo sul set di test. Scala anche le caratteristiche per il calcolo delle distanze per garantire che nessuna singola caratteristica domini a causa della scala.
+Utilizzeremo nuovamente NSL-KDD (classificazione binaria). Poiché k-NN è computazionalmente pesante, in questa dimostrazione utilizzeremo un subset dei dati di training per mantenere il processo gestibile. Sceglieremo, ad esempio, 20.000 training samples tra i 125k complessivi e useremo k=5 neighbors. Dopo il training (che consiste in realtà solo nel memorizzare i dati), eseguiremo la valutazione sul test set. Eseguiremo inoltre lo scaling delle feature per il calcolo delle distanze, così da assicurarci che nessuna singola feature domini a causa della sua scala.
 ```python
 import pandas as pd
 from sklearn.neighbors import KNeighborsClassifier
@@ -800,32 +802,33 @@ F1-score:  0.766
 ROC AUC:   0.837
 """
 ```
-Il modello k-NN classificherà una connessione esaminando le 5 connessioni più vicine nel sottoinsieme del set di addestramento. Se, ad esempio, 4 di quei vicini sono attacchi (anomalie) e 1 è normale, la nuova connessione sarà classificata come un attacco. Le prestazioni potrebbero essere ragionevoli, anche se spesso non sono elevate come quelle di un Random Forest o SVM ben sintonizzati sugli stessi dati. Tuttavia, k-NN può a volte brillare quando le distribuzioni delle classi sono molto irregolari e complesse, utilizzando efficacemente una ricerca basata sulla memoria. In cybersecurity, k-NN (con k=1 o k piccolo) potrebbe essere utilizzato per la rilevazione di modelli di attacco noti per esempio, o come componente in sistemi più complessi (ad es., per il clustering e poi la classificazione basata sull'appartenenza al cluster).
+Il modello k-NN classificherà una connessione osservando le 5 connessioni più vicine nel sottoinsieme del training set. Se, ad esempio, 4 di questi vicini sono attacchi (anomalie) e 1 è normale, la nuova connessione verrà classificata come un attacco. Le prestazioni potrebbero essere ragionevoli, anche se spesso non sono elevate quanto quelle di un Random Forest o di un SVM ben ottimizzato sugli stessi dati. Tuttavia, k-NN può talvolta eccellere quando le distribuzioni delle classi sono molto irregolari e complesse, utilizzando di fatto una ricerca basata sulla memoria. Nella cybersecurity, k-NN (con k=1 o un valore piccolo) potrebbe essere usato per rilevare pattern di attacco noti tramite esempi oppure come componente di sistemi più complessi (ad esempio, per il clustering e la successiva classificazione in base all'appartenenza a un cluster).
+</details>
 
-### Gradient Boosting Machines (ad es., XGBoost)
+### Gradient Boosting Machines (e.g., XGBoost)
 
-Le Gradient Boosting Machines sono tra gli algoritmi più potenti per i dati strutturati. **Gradient boosting** si riferisce alla tecnica di costruire un insieme di apprendisti deboli (spesso alberi decisionali) in modo sequenziale, dove ogni nuovo modello corregge gli errori dell'insieme precedente. A differenza del bagging (Random Forests) che costruisce alberi in parallelo e li media, il boosting costruisce alberi *uno per uno*, ciascuno concentrandosi di più sulle istanze che gli alberi precedenti hanno predetto male.
+Le Gradient Boosting Machines sono tra gli algoritmi più potenti per i dati strutturati. **Gradient boosting** si riferisce alla tecnica di costruzione di un ensemble di weak learners (spesso alberi decisionali) in modo sequenziale, in cui ogni nuovo modello corregge gli errori dell'ensemble precedente. A differenza del bagging (Random Forest), che costruisce gli alberi in parallelo e ne calcola la media, il boosting costruisce gli alberi *uno alla volta*, concentrandosi maggiormente sulle istanze classificate erroneamente dagli alberi precedenti.
 
-Le implementazioni più popolari negli ultimi anni sono **XGBoost**, **LightGBM** e **CatBoost**, tutte librerie di gradient boosting decision tree (GBDT). Hanno avuto un enorme successo nelle competizioni e applicazioni di machine learning, spesso **raggiungendo prestazioni all'avanguardia su dataset tabulari**. In cybersecurity, ricercatori e professionisti hanno utilizzato alberi potenziati per compiti come **rilevamento di malware** (utilizzando caratteristiche estratte da file o comportamento in tempo reale) e **rilevamento di intrusioni di rete**. Ad esempio, un modello di gradient boosting può combinare molte regole deboli (alberi) come "se molti pacchetti SYN e porta insolita -> probabile scansione" in un forte rilevatore composito che tiene conto di molti schemi sottili.
+Le implementazioni più popolari degli ultimi anni sono **XGBoost**, **LightGBM** e **CatBoost**, tutte librerie per alberi decisionali con gradient boosting (GBDT). Hanno avuto un enorme successo nelle competizioni e nelle applicazioni di machine learning, spesso **raggiungendo prestazioni all'avanguardia sui dataset tabulari**. Nella cybersecurity, ricercatori e professionisti hanno usato gli alberi con gradient boosting per attività come il **rilevamento di malware** (utilizzando feature estratte dai file o dal comportamento durante l'esecuzione) e il **rilevamento delle intrusioni di rete**. Ad esempio, un modello di gradient boosting può combinare molte regole deboli (alberi), come "se ci sono molti pacchetti SYN e una porta insolita -> probabile scan", in un rilevatore composito potente che tiene conto di numerosi pattern sottili.<sup>[[6]](#references)</sup>
 
-Perché gli alberi potenziati sono così efficaci? Ogni albero nella sequenza è addestrato sugli *errori residui* (gradienti) delle previsioni dell'insieme attuale. In questo modo, il modello gradualmente **"potenzia"** le aree in cui è debole. L'uso di alberi decisionali come apprendisti di base significa che il modello finale può catturare interazioni complesse e relazioni non lineari. Inoltre, il boosting ha intrinsecamente una forma di regolarizzazione incorporata: aggiungendo molti piccoli alberi (e utilizzando un tasso di apprendimento per scalare i loro contributi), spesso generalizza bene senza un enorme overfitting, a condizione che vengano scelti parametri appropriati.
+Perché gli alberi con boosting sono così efficaci? Ogni albero della sequenza viene addestrato sugli *errori residui* (gradienti) delle predizioni dell'ensemble corrente. In questo modo, il modello **"rafforza"** gradualmente le aree in cui è debole. L'uso degli alberi decisionali come base learner consente al modello finale di catturare interazioni complesse e relazioni non lineari. Inoltre, il boosting include intrinsecamente una forma di regolarizzazione integrata: aggiungendo molti alberi piccoli (e utilizzando un learning rate per ridimensionare il loro contributo), spesso generalizza bene senza un overfitting eccessivo, purché vengano scelti parametri appropriati.
 
-#### **Caratteristiche chiave del Gradient Boosting:**
+#### **Caratteristiche principali del Gradient Boosting:**
 
--   **Tipo di Problema:** Principalmente classificazione e regressione. In sicurezza, solitamente classificazione (ad es., classificare binariamente una connessione o un file). Gestisce problemi binari, multi-classe (con perdita appropriata) e persino di ranking.
+-   **Tipo di problema:** principalmente classificazione e regressione. In ambito security, solitamente classificazione (ad esempio, classificare in modo binario una connessione o un file). Gestisce problemi binari, multi-classe (con una loss appropriata) e persino problemi di ranking.
 
--   **Interpretabilità:** Bassa a media. Mentre un singolo albero potenziato è piccolo, un modello completo potrebbe avere centinaia di alberi, il che non è interpretabile per l'uomo nel suo insieme. Tuttavia, come Random Forest, può fornire punteggi di importanza delle caratteristiche, e strumenti come SHAP (SHapley Additive exPlanations) possono essere utilizzati per interpretare le singole previsioni in una certa misura.
+-   **Interpretabilità:** da bassa a media. Sebbene un singolo albero con boosting sia piccolo, un modello completo potrebbe avere centinaia di alberi, quindi non è interpretabile dall'essere umano nel suo complesso. Tuttavia, come Random Forest, può fornire punteggi di importanza delle feature, e strumenti come SHAP (SHapley Additive exPlanations) possono essere usati per interpretare in una certa misura le singole predizioni.
 
--   **Vantaggi:** Spesso l'algoritmo **con le migliori prestazioni** per dati strutturati/tabulari. Può rilevare schemi e interazioni complesse. Ha molti parametri di regolazione (numero di alberi, profondità degli alberi, tasso di apprendimento, termini di regolarizzazione) per adattare la complessità del modello e prevenire l'overfitting. Le implementazioni moderne sono ottimizzate per la velocità (ad es., XGBoost utilizza informazioni sul gradiente di secondo ordine e strutture dati efficienti). Tende a gestire meglio i dati sbilanciati quando combinato con funzioni di perdita appropriate o regolando i pesi dei campioni.
+-   **Vantaggi:** spesso l'algoritmo con le **migliori prestazioni** sui dati strutturati/tabulari. Può rilevare pattern e interazioni complesse. Dispone di numerosi parametri da ottimizzare (numero di alberi, profondità degli alberi, learning rate, termini di regolarizzazione) per adattare la complessità del modello e prevenire l'overfitting. Le implementazioni moderne sono ottimizzate per la velocità (ad esempio, XGBoost usa informazioni sui gradienti di secondo ordine e strutture dati efficienti). Tende a gestire meglio i dati sbilanciati se combinato con funzioni loss appropriate o regolando i pesi dei campioni.
 
--   **Limitazioni:** Più complesso da sintonizzare rispetto a modelli più semplici; l'addestramento può essere lento se gli alberi sono profondi o il numero di alberi è grande (anche se di solito è comunque più veloce rispetto all'addestramento di una rete neurale profonda comparabile sugli stessi dati). Il modello può overfittare se non sintonizzato (ad es., troppi alberi profondi con regolarizzazione insufficiente). A causa di molti iperparametri, utilizzare il gradient boosting in modo efficace può richiedere più esperienza o sperimentazione. Inoltre, come i metodi basati su alberi, non gestisce intrinsecamente i dati ad alta dimensione molto sparsi in modo efficiente come i modelli lineari o Naive Bayes (anche se può comunque essere applicato, ad es., nella classificazione del testo, ma potrebbe non essere la prima scelta senza ingegneria delle caratteristiche).
+-   **Limitazioni:** è più complesso da ottimizzare rispetto ai modelli più semplici; il training può essere lento se gli alberi sono profondi o se il numero di alberi è elevato (anche se di solito è comunque più veloce dell'addestramento di una rete neurale profonda comparabile sugli stessi dati). Il modello può andare in overfitting se non viene ottimizzato (ad esempio, troppi alberi profondi con una regolarizzazione insufficiente). A causa dei numerosi hyperparameter, usare efficacemente il gradient boosting può richiedere maggiore esperienza o sperimentazione. Inoltre, come i metodi basati su alberi, non gestisce intrinsecamente i dati molto sparsi e ad alta dimensionalità con la stessa efficienza dei modelli lineari o di Naive Bayes (anche se può comunque essere applicato, ad esempio nella classificazione del testo, ma potrebbe non essere la prima scelta senza feature engineering).
 
 > [!TIP]
-> *Casi d'uso in cybersecurity:* Quasi ovunque un albero decisionale o una foresta casuale potrebbero essere utilizzati, un modello di gradient boosting potrebbe raggiungere una maggiore accuratezza. Ad esempio, le competizioni di **rilevamento di malware di Microsoft** hanno visto un ampio utilizzo di XGBoost su caratteristiche ingegnerizzate da file binari. La ricerca sul **rilevamento di intrusioni di rete** riporta spesso risultati di vertice con GBDT (ad es., XGBoost su dataset CIC-IDS2017 o UNSW-NB15). Questi modelli possono prendere una vasta gamma di caratteristiche (tipi di protocollo, frequenza di determinati eventi, caratteristiche statistiche del traffico, ecc.) e combinarle per rilevare minacce. Nel rilevamento di phishing, il gradient boosting può combinare caratteristiche lessicali degli URL, caratteristiche di reputazione del dominio e caratteristiche del contenuto della pagina per raggiungere un'accuratezza molto elevata. L'approccio ensemble aiuta a coprire molti casi limite e sottigliezze nei dati.
+> *Casi d'uso nella cybersecurity:* quasi ovunque potrebbe essere usato un albero decisionale o un random forest, un modello di gradient boosting potrebbe raggiungere una precisione migliore. Ad esempio, le competizioni di **rilevamento di malware di Microsoft** hanno visto un uso intensivo di XGBoost su feature progettate a partire da file binari. La ricerca sul **rilevamento delle intrusioni di rete** riporta spesso i migliori risultati con i GBDT (ad esempio, XGBoost sui dataset CIC-IDS2017 o UNSW-NB15). Questi modelli possono utilizzare un'ampia gamma di feature (tipi di protocollo, frequenza di determinati eventi, feature statistiche del traffico, ecc.) e combinarle per rilevare le minacce. Nel rilevamento del phishing, il gradient boosting può combinare feature lessicali degli URL, feature relative alla reputazione dei domini e feature del contenuto delle pagine per ottenere una precisione molto elevata. L'approccio ensemble aiuta a coprire numerosi casi limite e dettagli sottili presenti nei dati.
 
 <details>
-<summary>Esempio -- XGBoost per il Rilevamento di Phishing:</summary>
-Utilizzeremo un classificatore di gradient boosting sul dataset di phishing. Per mantenere le cose semplici e autonome, utilizzeremo `sklearn.ensemble.GradientBoostingClassifier` (che è un'implementazione più lenta ma diretta). Normalmente, si potrebbe utilizzare `xgboost` o `lightgbm` per migliori prestazioni e funzionalità aggiuntive. Addestreremo il modello e lo valuteremo in modo simile a prima.
+<summary>Esempio -- XGBoost per il rilevamento del phishing:</summary>
+Useremo un classificatore di gradient boosting sul dataset di phishing. Per mantenere le cose semplici e autosufficienti, useremo `sklearn.ensemble.GradientBoostingClassifier` (che è un'implementazione più lenta ma semplice). Normalmente, si potrebbero usare le librerie `xgboost` o `lightgbm` per ottenere prestazioni migliori e funzionalità aggiuntive. Addestreremo il modello e ne valuteremo le prestazioni in modo simile a prima.
 ```python
 import pandas as pd
 from sklearn.datasets import fetch_openml
@@ -873,23 +876,23 @@ F1‑score:  0.957
 ROC AUC:   0.990
 """
 ```
-Il modello di gradient boosting raggiungerà probabilmente un'accuratezza e un AUC molto elevati su questo dataset di phishing (spesso questi modelli possono superare il 95% di accuratezza con una corretta messa a punto su tali dati, come visto in letteratura. Questo dimostra perché i GBDT sono considerati *"il modello all'avanguardia per i dataset tabulari"* -- spesso superano algoritmi più semplici catturando schemi complessi. In un contesto di cybersecurity, questo potrebbe significare catturare più siti di phishing o attacchi con meno errori. Naturalmente, bisogna essere cauti riguardo all'overfitting -- di solito utilizziamo tecniche come la cross-validation e monitoriamo le prestazioni su un set di validazione quando sviluppiamo un modello del genere per il deployment.
+Il modello di gradient boosting probabilmente raggiungerà un'accuratezza e un AUC molto elevati su questo dataset di phishing (spesso questi modelli possono superare il 95% di accuratezza con un tuning adeguato su dati di questo tipo, come osservato nella letteratura. Questo dimostra perché i GBDT sono considerati *"the state of the art model for tabular dataset"* -- spesso superano gli algoritmi più semplici perché sono in grado di catturare pattern complessi. In un contesto di cybersecurity, ciò potrebbe significare individuare più siti di phishing o attacchi con meno mancate rilevazioni. Naturalmente, è necessario prestare attenzione all'overfitting -- in genere useremmo tecniche come la cross-validation e monitoreremmo le prestazioni su un validation set durante lo sviluppo di un modello di questo tipo destinato al deployment.
 
 </details>
 
-### Combinare Modelli: Apprendimento Ensemble e Stacking
+### Combinazione dei modelli: Ensemble Learning e Stacking
 
-L'apprendimento ensemble è una strategia di **combinare più modelli** per migliorare le prestazioni complessive. Abbiamo già visto metodi ensemble specifici: Random Forest (un ensemble di alberi tramite bagging) e Gradient Boosting (un ensemble di alberi tramite boosting sequenziale). Ma gli ensemble possono essere creati anche in altri modi, come **voting ensembles** o **stacked generalization (stacking)**. L'idea principale è che modelli diversi possono catturare schemi diversi o avere debolezze diverse; combinandoli, possiamo **compensare gli errori di ciascun modello con i punti di forza di un altro**.
+L'ensemble learning è una strategia per **combinare più modelli** al fine di migliorare le prestazioni complessive. Abbiamo già visto metodi di ensemble specifici: Random Forest (un ensemble di alberi tramite bagging) e Gradient Boosting (un ensemble di alberi tramite boosting sequenziale). Tuttavia, gli ensemble possono essere creati anche in altri modi, ad esempio tramite **voting ensemble** o **stacked generalization (stacking)**. L'idea principale è che modelli diversi possano catturare pattern differenti o presentare debolezze diverse; combinandoli, possiamo **compensare gli errori di ciascun modello con i punti di forza degli altri**.<sup>[[13]](#references)</sup>
 
--   **Voting Ensemble:** In un semplice classificatore di voto, alleniamo più modelli diversi (ad esempio, una regressione logistica, un albero decisionale e un SVM) e li facciamo votare sulla previsione finale (voto di maggioranza per la classificazione). Se pesiamo i voti (ad esempio, peso maggiore ai modelli più accurati), si tratta di uno schema di voto pesato. Questo migliora tipicamente le prestazioni quando i modelli individuali sono ragionevolmente buoni e indipendenti -- l'ensemble riduce il rischio di errore di un modello individuale poiché altri possono correggerlo. È come avere un pannello di esperti piuttosto che un'unica opinione.
+-   **Voting Ensemble:** In un semplice classificatore basato sul voto, addestriamo più modelli diversificati (ad esempio, una regressione logistica, un decision tree e un SVM) e chiediamo loro di votare sulla predizione finale (voto di maggioranza per la classificazione). Se assegniamo un peso ai voti (ad esempio, un peso maggiore ai modelli più accurati), otteniamo uno schema di weighted voting. Questo in genere migliora le prestazioni quando i singoli modelli sono ragionevolmente validi e indipendenti -- l'ensemble riduce il rischio che un errore di un singolo modello comprometta il risultato, poiché gli altri possono correggerlo. È come avere un gruppo di esperti anziché una singola opinione.
 
--   **Stacking (Stacked Ensemble):** Lo stacking va un passo oltre. Invece di un semplice voto, allena un **meta-modello** per **imparare come combinare al meglio le previsioni** dei modelli di base. Ad esempio, alleni 3 classificatori diversi (base learners), quindi fornisci le loro uscite (o probabilità) come caratteristiche a un meta-classificatore (spesso un modello semplice come la regressione logistica) che impara il modo ottimale per mescolarli. Il meta-modello è addestrato su un set di validazione o tramite cross-validation per evitare l'overfitting. Lo stacking può spesso superare il semplice voto imparando *quali modelli fidarsi di più in quali circostanze*. In cybersecurity, un modello potrebbe essere migliore nel catturare scansioni di rete mentre un altro è migliore nel catturare beaconing di malware; un modello di stacking potrebbe imparare a fare affidamento su ciascuno in modo appropriato.
+-   **Stacking (Stacked Ensemble):** Lo stacking fa un passo ulteriore. Invece di un semplice voto, addestra un **meta-modello** per **imparare a combinare al meglio le predizioni** dei modelli di base. Ad esempio, si addestrano 3 classificatori diversi (base learners), quindi si forniscono i loro output (o le probabilità) come feature a un meta-classifier (spesso un modello semplice come la regressione logistica), che impara il modo ottimale di combinarli. Il meta-modello viene addestrato su un validation set o tramite cross-validation per evitare l'overfitting. Lo stacking può spesso superare il semplice voting, perché impara *a quali modelli dare maggiore fiducia in determinate circostanze*. Nella cybersecurity, un modello potrebbe essere più efficace nell'individuare network scan, mentre un altro potrebbe essere più efficace nell'individuare il malware beaconing; un modello di stacking potrebbe imparare a fare affidamento su ciascuno nel modo appropriato.
 
-Gli ensemble, sia tramite voto che stacking, tendono a **aumentare l'accuratezza** e la robustezza. Lo svantaggio è l'aumento della complessità e talvolta la riduzione dell'interpretabilità (anche se alcuni approcci ensemble come la media degli alberi decisionali possono ancora fornire alcune intuizioni, ad esempio, l'importanza delle caratteristiche). In pratica, se le restrizioni operative lo consentono, utilizzare un ensemble può portare a tassi di rilevamento più elevati. Molte soluzioni vincenti nelle sfide di cybersecurity (e nelle competizioni Kaggle in generale) utilizzano tecniche ensemble per spremere l'ultimo bit di prestazioni.
+Gli ensemble, siano essi basati sul voting o sullo stacking, tendono a **migliorare l'accuratezza** e la robustezza. Lo svantaggio è una maggiore complessità e, talvolta, una ridotta interpretabilità (anche se alcuni approcci di ensemble, come la media di decision tree, possono comunque fornire alcune indicazioni, ad esempio tramite la feature importance). In pratica, se i vincoli operativi lo consentono, l'utilizzo di un ensemble può portare a tassi di rilevamento più elevati. Molte soluzioni vincenti nelle competizioni di cybersecurity (e nelle competizioni Kaggle in generale) utilizzano tecniche di ensemble per ottenere gli ultimi miglioramenti in termini di prestazioni.
 
 <details>
-<summary>Esempio -- Voting Ensemble per la Rilevazione di Phishing:</summary>
-Per illustrare lo stacking dei modelli, combiniamo alcuni dei modelli di cui abbiamo discusso sul dataset di phishing. Utilizzeremo una regressione logistica, un albero decisionale e un k-NN come base learners, e utilizzeremo un Random Forest come meta-learner per aggregare le loro previsioni. Il meta-learner sarà addestrato sugli output dei base learners (utilizzando la cross-validation sul set di addestramento). Ci aspettiamo che il modello impilato si comporti altrettanto bene o leggermente meglio dei modelli individuali.
+<summary>Esempio -- Voting Ensemble per il rilevamento del phishing:</summary>
+Per illustrare lo stacking dei modelli, combiniamo alcuni dei modelli discussi nel dataset di phishing. Useremo una regressione logistica, un decision tree e un k-NN come base learners, e una Random Forest come meta-learner per aggregare le loro predizioni. Il meta-learner verrà addestrato sugli output dei base learners (utilizzando la cross-validation sul training set). Ci aspettiamo che il modello stacked abbia prestazioni pari o leggermente superiori a quelle dei singoli modelli.
 ```python
 import pandas as pd
 from sklearn.datasets import fetch_openml
@@ -968,30 +971,27 @@ F1‑score : 0.948
 ROC AUC  : 0.992
 """
 ```
-L'ensemble impilato sfrutta i punti di forza complementari dei modelli di base. Ad esempio, la regressione logistica potrebbe gestire gli aspetti lineari dei dati, l'albero decisionale potrebbe catturare interazioni specifiche simili a regole, e k-NN potrebbe eccellere nei vicinati locali dello spazio delle caratteristiche. Il meta-modello (un random forest qui) può imparare come pesare questi input. Le metriche risultanti mostrano spesso un miglioramento (anche se lieve) rispetto alle metriche di qualsiasi singolo modello. Nel nostro esempio di phishing, se la regressione logistica da sola avesse un F1 di circa 0.95 e l'albero 0.94, l'ensemble potrebbe raggiungere 0.96 raccogliendo dove ciascun modello commette errori.
+Lo stacked ensemble sfrutta i punti di forza complementari dei modelli di base. Ad esempio, la regressione logistica potrebbe gestire gli aspetti lineari dei dati, il decision tree potrebbe catturare specifiche interazioni simili a regole e k-NN potrebbe eccellere nei vicinati locali dello spazio delle feature. Il meta-modello (in questo caso una random forest) può imparare come ponderare questi input. Le metriche risultanti mostrano spesso un miglioramento (anche se lieve) rispetto alle metriche di qualsiasi singolo modello. Nel nostro esempio di phishing, se la regressione logistica avesse da sola un F1 pari, ad esempio, a 0.95 e il tree a 0.94, lo stack potrebbe raggiungere 0.96, compensando gli errori di ciascun modello.
 
-Metodi di ensemble come questo dimostrano il principio che *"combinare più modelli porta tipicamente a una migliore generalizzazione"*. In cybersecurity, questo può essere implementato avendo più motori di rilevamento (uno potrebbe essere basato su regole, uno su machine learning, uno basato su anomalie) e poi uno strato che aggrega i loro avvisi -- effettivamente una forma di ensemble -- per prendere una decisione finale con maggiore fiducia. Quando si implementano tali sistemi, è necessario considerare la complessità aggiuntiva e garantire che l'ensemble non diventi troppo difficile da gestire o spiegare. Ma da un punto di vista di accuratezza, gli ensemble e lo stacking sono strumenti potenti per migliorare le prestazioni del modello.
+I metodi di ensemble come questo dimostrano il principio secondo cui *"la combinazione di più modelli porta generalmente a una migliore generalizzazione"*. Nella cybersecurity, ciò può essere implementato disponendo di più motori di rilevamento (uno potrebbe essere basato su regole, uno sul machine learning e uno sul rilevamento delle anomalie) e poi di un livello che aggrega i loro alert -- di fatto una forma di ensemble -- per prendere una decisione finale con maggiore affidabilità. Quando si implementano sistemi di questo tipo, è necessario considerare la complessità aggiuntiva e assicurarsi che l'ensemble non diventi troppo difficile da gestire o da spiegare. Dal punto di vista dell'accuratezza, tuttavia, gli ensemble e lo stacking sono strumenti potenti per migliorare le prestazioni dei modelli.
 
 </details>
 
 
-## Riferimenti
+## References
 
-- [https://madhuramiah.medium.com/logistic-regression-6e55553cc003](https://madhuramiah.medium.com/logistic-regression-6e55553cc003)
-- [https://www.geeksforgeeks.org/decision-tree-introduction-example/](https://www.geeksforgeeks.org/decision-tree-introduction-example/)
-- [https://rjwave.org/ijedr/viewpaperforall.php?paper=IJEDR1703132](https://rjwave.org/ijedr/viewpaperforall.php?paper=IJEDR1703132)
-- [https://www.ibm.com/think/topics/support-vector-machine](https://www.ibm.com/think/topics/support-vector-machine)
-- [https://en.m.wikipedia.org/wiki/Naive_Bayes_spam_filtering](https://en.m.wikipedia.org/wiki/Naive_Bayes_spam_filtering)
-- [https://medium.com/@rupalipatelkvc/gbdt-demystified-how-lightgbm-xgboost-and-catboost-work-9479b7262644](https://medium.com/@rupalipatelkvc/gbdt-demystified-how-lightgbm-xgboost-and-catboost-work-9479b7262644)
-- [https://zvelo.com/ai-and-machine-learning-in-cybersecurity/](https://zvelo.com/ai-and-machine-learning-in-cybersecurity/)
-- [https://medium.com/@chaandram/linear-regression-explained-28d5bf1934ae](https://medium.com/@chaandram/linear-regression-explained-28d5bf1934ae)
-- [https://cybersecurity.springeropen.com/articles/10.1186/s42400-021-00103-8](https://cybersecurity.springeropen.com/articles/10.1186/s42400-021-00103-8)
-- [https://www.ibm.com/think/topics/knn](https://www.ibm.com/think/topics/knn)
-- [https://www.ibm.com/think/topics/knn](https://www.ibm.com/think/topics/knn)
-- [https://arxiv.org/pdf/2101.02552](https://arxiv.org/pdf/2101.02552)
-- [https://cybersecurity-magazine.com/how-deep-learning-enhances-intrusion-detection-systems/](https://cybersecurity-magazine.com/how-deep-learning-enhances-intrusion-detection-systems/)
-- [https://cybersecurity-magazine.com/how-deep-learning-enhances-intrusion-detection-systems/](https://cybersecurity-magazine.com/how-deep-learning-enhances-intrusion-detection-systems/)
-- [https://medium.com/@sarahzouinina/ensemble-learning-boosting-model-performance-by-combining-strengths-02e56165b901](https://medium.com/@sarahzouinina/ensemble-learning-boosting-model-performance-by-combining-strengths-02e56165b901)
-- [https://medium.com/@sarahzouinina/ensemble-learning-boosting-model-performance-by-combining-strengths-02e56165b901](https://medium.com/@sarahzouinina/ensemble-learning-boosting-model-performance-by-combining-strengths-02e56165b901)
+- [1] [Logistic Regression](https://madhuramiah.medium.com/logistic-regression-6e55553cc003)
+- [2] [Decision Tree - Introduction with example](https://www.geeksforgeeks.org/decision-tree-introduction-example/)
+- [3] [Denial of Services Attack Detection using Random Forest Classifier with Information Gain](https://rjwave.org/ijedr/viewpaperforall.php?paper=IJEDR1703132)
+- [4] [What are Support Vector Machines (SVMs)? (IBM)](https://www.ibm.com/think/topics/support-vector-machine)
+- [5] [Naive Bayes spam filtering (Wikipedia)](https://en.m.wikipedia.org/wiki/Naive_Bayes_spam_filtering)
+- [6] [GBDT Demystified: How LightGBM, XGBoost, and CatBoost Work](https://medium.com/@rupalipatelkvc/gbdt-demystified-how-lightgbm-xgboost-and-catboost-work-9479b7262644)
+- [7] [AI and Machine Learning in Cybersecurity (zvelo)](https://zvelo.com/ai-and-machine-learning-in-cybersecurity/)
+- [8] [Linear Regression Explained](https://medium.com/@chaandram/linear-regression-explained-28d5bf1934ae)
+- [9] [Performance analysis of machine learning models for intrusion detection system using Gini Impurity-based Weighted Random Forest (GIWRF) feature selection technique](https://cybersecurity.springeropen.com/articles/10.1186/s42400-021-00103-8)
+- [10] [What is the k-nearest neighbors (KNN) algorithm? (IBM)](https://www.ibm.com/think/topics/knn)
+- [11] [Phishing Attacks and Websites Classification Using Machine Learning and Multiple Datasets (A Comparative Analysis)](https://arxiv.org/pdf/2101.02552)
+- [12] [How Deep Learning Enhances Intrusion Detection Systems](https://cybersecurity-magazine.com/how-deep-learning-enhances-intrusion-detection-systems/)
+- [13] [Ensemble Learning: Boosting Model Performance by Combining Strengths](https://medium.com/@sarahzouinina/ensemble-learning-boosting-model-performance-by-combining-strengths-02e56165b901)
 
 {{#include ../banners/hacktricks-training.md}}
