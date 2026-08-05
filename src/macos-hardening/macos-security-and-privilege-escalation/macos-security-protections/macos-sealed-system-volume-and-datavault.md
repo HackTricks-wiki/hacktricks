@@ -1,19 +1,19 @@
-# macOS Verseëlde Stelselvolume & DataVault
+# macOS Sealed System Volume & DataVault
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Verseëlde Stelselvolume (SSV)
+## Sealed System Volume (SSV)
 
 ### Basiese inligting
 
-Vanaf **macOS Big Sur (11.0)** word die stelselvolume kriptografies verseël deur gebruik te maak van 'n **APFS snapshot hash tree**. Dit staan bekend as die **Sealed System Volume (SSV)**. Die stelselpartisie word as **read-only** aangemount en enige wysiging breek die seël, wat tydens opstart geverifieer word.
+Vanaf **macOS Big Sur (11.0)** word die system volume kriptografies verseël met behulp van ’n **APFS snapshot hash tree**. Dit word die **Sealed System Volume (SSV)** genoem. Die system partition word **read-only** gemount, en enige wysiging verbreek die verseëling, wat tydens boot geverifieer word.
 
 Die SSV bied:
-- **Manipulasie-opsporing** — enige wysiging aan stelsel-binaries/frameworks is opspoorbaar deur die gebroke kriptografiese seël
-- **Rollback-beskerming** — die opstartproses verifieer die integriteit van die stelsel-snapshot
-- **Rootkit-voorkoming** — selfs root kan nie volhoubaar lêers op die stelselvolume wysig nie (sonder om die seël te breek)
+- **Tamper detection** — enige wysiging aan system binaries/frameworks is opspoorbaar weens die verbreekte kriptografiese verseëling
+- **Rollback protection** — die boot-proses verifieer die integriteit van die system snapshot
+- **Rootkit prevention** — selfs root kan nie lêers op die system volume permanent wysig nie (sonder om die verseëling te verbreek)
 
-### SSV-status nagaan
+### Kontroleer SSV-status
 ```bash
 # Check if authenticated root is enabled (SSV seal verification)
 csrutil authenticated-root status
@@ -27,18 +27,18 @@ mount | grep " / "
 # Verify the system volume seal
 diskutil apfs listVolumeGroups
 ```
-### Entitlements van SSV-skrywers
+### SSV Writer Entitlements
 
-Sekere Apple-stelselbinaire het entitlements wat hulle toelaat om die verseëlde stelselvolume te wysig of te bestuur:
+Sekere Apple-stelselbinaries het entitlements wat hulle toelaat om die sealed system volume te wysig of te bestuur:
 
 | Entitlement | Doel |
 |---|---|
-| `com.apple.private.apfs.revert-to-snapshot` | Herstel die stelselvolume na 'n vorige snapshot |
-| `com.apple.private.apfs.create-sealed-snapshot` | Skep 'n nuwe verseëlde snapshot na stelselopdaterings |
-| `com.apple.rootless.install.heritable` | Skryf na SIP-beskermde paaie (geërf deur kinderprosesse) |
+| `com.apple.private.apfs.revert-to-snapshot` | Stel die system volume terug na ’n vorige snapshot |
+| `com.apple.private.apfs.create-sealed-snapshot` | Skep ’n nuwe sealed snapshot ná stelselopdaterings |
+| `com.apple.rootless.install.heritable` | Skryf na SIP-beskermde paaie (oorgeërf deur child processes) |
 | `com.apple.rootless.install` | Skryf na SIP-beskermde paaie |
 
-### Vind SSV-skrywers
+### Vind SSV Writers
 ```bash
 # Search for binaries with SSV-related entitlements
 find /System /usr -type f -perm +111 -exec sh -c '
@@ -56,9 +56,9 @@ WHERE c.name = 'ssv_writer';"
 ```
 ### Aanvalscenario's
 
-#### Snapshot Rollback Attack
+#### Snapshot-terugrolaanval
 
-As 'n aanvaller 'n binêre kompromitteer met `com.apple.private.apfs.revert-to-snapshot`, kan hulle die stelselvolume **terugrol na 'n toestand voor die opdatering**, en sodoende bekende kwesbaarhede herstel:
+As 'n aanvaller 'n binary met `com.apple.private.apfs.revert-to-snapshot` kompromitteer, kan hulle **die stelselvolume na 'n toestand voor 'n opdatering terugrol**, wat bekende kwesbaarhede herstel:
 ```bash
 # Conceptual — the snapshot revert operation would:
 # 1. List available snapshots
@@ -68,43 +68,43 @@ diskutil apfs listSnapshots disk3s1
 # This restores the system to a state with known, patched vulnerabilities
 ```
 > [!WARNING]
-> Die terugrol van 'n snapshot maak prakties **veiligheidsopdaterings ongeldig**, en herstel kern- en stelsel kwesbaarhede wat voorheen gepatch is. Dit is een van die gevaarlikste operasies moontlik op moderne macOS.
+> Snapshot rollback **maak sekuriteitsopdaterings effektief ongedaan** en herstel voorheen reggemaakte kernel- en stelselkwesbaarhede. Dit is een van die gevaarlikste bewerkings wat op moderne macOS moontlik is.
 
-#### Vervanging van stelselbinasies
+#### Vervanging van stelselbinêre lêers
 
-Met SIP bypass + SSV-skryfvermoë kan 'n aanvaller:
+Met SIP-bypass + SSV-skryfvermoë kan 'n aanvaller:
 
-1. Koppel die stelselvolume as lees-skryf
-2. Vervang 'n stelseldaemon of raamwerkbiblioteek met 'n trojaned weergawe
-3. Herseël die snapshot (of aanvaar die gebreekte seël as SIP reeds gedegradeer is)
-4. Die rootkit bly oor na herlaaibeurte en is onsigbaar vir userland-deteksie-instrumente
+1. Die stelselvolume lees-skryf monteer
+2. 'n Stelseldaemon of framework-biblioteek met 'n trojan-weergawte vervang
+3. Die snapshot herseël (of die gebreekte seël aanvaar indien SIP reeds gedegradeer is)
+4. Die rootkit bly oor herselflaaie heen bestaan en is onsigbaar vir userland-opsporingsnutsmiddels
 
 ### Werklike CVEs
 
-| CVE | Description |
+| CVE | Beskrywing |
 |---|---|
-| CVE-2021-30892 | **Shrootless** — SIP-bypas wat SSV-wysiging via `system_installd` toelaat |
-| CVE-2022-22583 | SSV-bypas deur PackageKit se snapshot-hantering |
-| CVE-2022-46689 | Wedrenstoestand wat skrywings na SIP-beskermde lêers toelaat |
+| CVE-2021-30892 | **Shrootless** — SIP-bypass wat `system_installd` se `com.apple.rootless.install.heritable`-entitlement misbruik om arbitrêre post-install-skripte uit te voer ([Microsoft](https://www.microsoft.com/en-us/security/blog/2021/10/28/microsoft-finds-new-macos-vulnerability-shrootless-that-could-bypass-system-integrity-protection/)) |
+| CVE-2022-22583 | SIP-bypass: `system_installd` het die post-install-skrip in 'n SIP-beskermde vouer onder `/tmp` geplaas, maar `/tmp` self is nie SIP-beskermd nie, dus kon die vouer vervang word deur 'n image daaroor te monteer ([Trend Micro](https://www.trendmicro.com/en_us/research/22/l/a-technical-analysis-of-cve-2022-22583-and-cve-2022-32800.html)) |
+| CVE-2022-46689 | **MacDirtyCow** — copy-on-write-race in XNU wat skryfwerk na leesalleen-root-owned lêers moontlik maak ([Worth Doing Badly](https://worthdoingbadly.com/macdirtycow/)) |
 
 ---
 
 ## DataVault
 
-### Basiese Inligting
+### Basiese inligting
 
-**DataVault** is Apple se beskermingslaag vir sensitiewe stelseldatabasisse. Selfs **root kan nie toegang tot DataVault-beskermde lêers kry nie** — slegs prosesse met spesifieke entitlements kan dit lees of wysig. Beskermde stoorplekke sluit in:
+**DataVault** is Apple se beskermingslaag vir sensitiewe stelseldatabasisse. Selfs **root kan nie toegang tot DataVault-beskermde lêers kry nie** — slegs prosesse met spesifieke entitlements kan dit lees of wysig. Beskermde stores sluit in:
 
-| Beskermde Databasis | Pad | Inhoud |
+| Beskermde databasis | Pad | Inhoud |
 |---|---|---|
-| TCC (system) | `/Library/Application Support/com.apple.TCC/TCC.db` | Stelselwyd TCC-privaatheidsbesluite |
-| TCC (user) | `~/Library/Application Support/com.apple.TCC/TCC.db` | Per-gebruiker TCC-privaatheidsbesluite |
-| Keychain (system) | `/Library/Keychains/System.keychain` | Stelsel keychain |
-| Keychain (user) | `~/Library/Keychains/login.keychain-db` | Gebruiker keychain |
+| TCC (stelsel) | `/Library/Application Support/com.apple.TCC/TCC.db` | Stelselwye TCC-privaatheidsbesluite |
+| TCC (gebruiker) | `~/Library/Application Support/com.apple.TCC/TCC.db` | TCC-privaatheidsbesluite per gebruiker |
+| Keychain (stelsel) | `/Library/Keychains/System.keychain` | Stelsel-keychain |
+| Keychain (gebruiker) | `~/Library/Keychains/login.keychain-db` | Gebruiker-keychain |
 
-DataVault-beskerming word op die **lêerstelselvlak** afgedwing deur gebruik van uitgebreide attributte en volume-beskermingsvlagte, geverifieer deur die kernel.
+DataVault-beskerming word op die **lêerstelselvlak** afgedwing deur extended attributes en volume-beskermingsvlae, wat deur die kernel geverifieer word.
 
-### DataVault-beheerder entitlements
+### DataVault Controller Entitlements
 ```
 com.apple.private.tcc.manager         — Full TCC database read/write
 com.apple.private.tcc.manager.check-by-audit-token — TCC checks via audit token
@@ -132,9 +132,9 @@ WHERE c.name = 'datavault_controller';"
 ```
 ### Aanvalscenario's
 
-#### Direkte wysiging van die TCC-databasis
+#### Direkte Wysiging van die TCC-databasis
 
-Indien 'n aanvaller 'n DataVault controller binary kompromitteer (bv. via code injection into a process with `com.apple.private.tcc.manager`), kan hulle **direk die TCC-databasis wysig** om enige toepassing enige TCC permission te gee:
+As 'n aanvaller 'n DataVault-beheerderbinêre lêer kompromitteer (byvoorbeeld deur code injection in 'n proses met `com.apple.private.tcc.manager`), kan hulle die **TCC-databasis direk wysig** om enige toepassing enige TCC-toestemming te gee:
 ```sql
 -- Grant Full Disk Access to a malicious binary (conceptual)
 INSERT INTO access (service, client, client_type, auth_value, auth_reason, auth_version)
@@ -145,27 +145,28 @@ INSERT INTO access (service, client, client_type, auth_value, auth_reason, auth_
 VALUES ('kTCCServiceCamera', 'com.attacker.malware', 0, 2, 4, 1);
 ```
 > [!CAUTION]
-> Die wysiging van die TCC-databasis is die **uiteindelike privacy bypass** — dit verleen enige toestemming stilweg, sonder enige gebruikersprompt of sigbare aanduiding. Histories het verskeie macOS privilege escalation chains geëindig met TCC-databasis-skrywings as die finale payload.
+> TCC-databasemodifikasie is die **ultieme privaatheidsomseiling** — dit verleen enige toestemming stilweg, sonder enige gebruikersaanvraag of sigbare aanduiding. Histories het verskeie macOS privilege escalation-kettings geëindig met TCC-databasis-skrywings as die finale payload.
 
 #### Toegang tot Keychain-databasis
 
-DataVault beskerm ook die keychain backing files. ’n Gekompromitteerde DataVault controller kan:
+DataVault beskerm ook die ondersteunende keychain-lêers. ’n Gekompromitteerde DataVault-beheerder kan:
 
-1. Lees die rou keychain database-lêers
-2. Extract versleutelde keychain-items
-3. Attempt offline decryption using die gebruiker se wagwoord of recovered keys
+1. Die rou keychain-databasislêers lees
+2. Geënkripteerde keychain-items onttrek
+3. Aflyn-dekripsie probeer met die gebruiker se wagwoord of herwonne sleutels
 
-### Werklike CVE's wat DataVault/TCC Bypass betrek
+### Werklike CVEs wat DataVault/TCC-omseiling behels
 
-| CVE | Description |
+| CVE | Beskrywing |
 |---|---|
-| CVE-2023-40424 | TCC bypass via symlink to DataVault-protected file |
-| CVE-2023-32364 | Sandbox bypass leading to TCC database modification |
-| CVE-2021-30713 | TCC bypass via XCSSET malware modifying TCC.db |
-| CVE-2020-9934 | TCC bypass via environment variable manipulation |
-| CVE-2020-29621 | Music app TCC bypass reaching DataVault |
+| CVE-2024-44131 | FileProvider-symlink race wat ’n bevoorregte helper toegang tot TCC-beskermde data gee ([Jamf](https://www.jamf.com/blog/tcc-bypass-steals-data-from-icloud/)) |
+| CVE-2023-40424 | As root, **skep ’n nuwe gebruiker wie se `NFSHomeDirectory` na ’n aanvaller-beheerde `TCC.db` wys**; wanneer daar aangemeld word, verwerk `tccd` dit en die toestemmings word toegepas, wat toegang tot ander gebruikers se data gee ([Kandji](https://blog.kandji.io/malware-bypass-tcc)) |
+| CVE-2021-30970 | "powerdir": verander die gebruiker se tuisgids om ’n aanvaller-beheerde TCC.db te plaas ([Microsoft](https://www.microsoft.com/en-us/security/blog/2022/01/10/new-macos-vulnerability-powerdir-could-lead-to-unauthorized-user-data-access/)) |
+| CVE-2021-30713 | Fout in bundle-conclusion wat ’n app toelaat om **die TCC-toestemmings van ’n donor-bundle te erf** sonder ’n aanvraag; dit is in die wild deur **XCSSET** uitgebuit om ’n skermskoot van die werkskerm te neem ([Jamf](https://www.jamf.com/blog/zero-day-tcc-bypass-discovered-in-xcsset-malware/)) |
+| CVE-2020-9934 | `tccd` het die databasispad vanaf `$HOME` saamgestel, sodat `launchctl setenv HOME` dit na ’n aanvaller-beheerde `TCC.db` herlei het ([Matt Shockley](https://medium.com/@mattshockl/cve-2020-9934-bypassing-the-os-x-transparency-consent-and-control-tcc-framework-for-4e14806f1de8)) |
+| CVE-2020-29621 | `coreaudiod` het `com.apple.private.tcc.manager` **besit** en biblioteekvalidering gedeaktiveer, sodat ’n HAL-inprop wat in `/Library/Audio/Plug-Ins/HAL` geplaas is, arbitrêre TCC-regte kon verleen ([Wojciech Reguła](https://wojciechregula.blog/post/play-the-music-and-bypass-tcc-aka-cve-2020-29621/)) |
 
-## References
+## Verwysings
 
 * [Apple Platform Security — Data Protection](https://support.apple.com/guide/security/data-protection-overview-sece3bee0835/web)
 * [The Nightmare of Apple OTA Updates (APFS Snapshots)](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/)
