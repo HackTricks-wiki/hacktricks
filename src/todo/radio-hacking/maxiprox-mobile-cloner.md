@@ -1,84 +1,84 @@
-# Construyendo un Clonador Móvil HID MaxiProx de 125 kHz Portátil
+# Construcción de un cloner móvil HID MaxiProx de 125 kHz portátil
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Objetivo
-Convertir un lector HID MaxiProx 5375 de 125 kHz de largo alcance alimentado por la red en un clonador de insignias portátil y alimentado por batería que coseche silenciosamente tarjetas de proximidad durante evaluaciones de seguridad física.
+Convertir un lector HID MaxiProx 5375 de largo alcance y 125 kHz, alimentado por la red eléctrica, en un cloner de badges portátil y alimentado por batería que recopile silenciosamente tarjetas de proximidad durante evaluaciones de seguridad física.
 
-La conversión cubierta aquí se basa en la serie de investigación de TrustedSec “Let’s Clone a Cloner – Part 3: Putting It All Together” y combina consideraciones mecánicas, eléctricas y de RF para que el dispositivo final pueda ser guardado en una mochila y utilizado inmediatamente en el sitio.
+La conversión descrita aquí se basa en la serie de investigaciones de TrustedSec “Let’s Clone a Cloner – Part 3: Putting It All Together” y combina aspectos mecánicos, eléctricos y de RF para que el dispositivo final pueda llevarse en una mochila y utilizarse inmediatamente en el lugar.<sup>[[1]](#references)</sup>
 
 > [!warning]
-> Manipular equipos alimentados por la red y bancos de energía de litio puede ser peligroso. Verifique cada conexión **antes** de energizar el circuito y mantenga las antenas, coaxiales y planos de tierra exactamente como estaban en el diseño de fábrica para evitar desajustar el lector.
+> Manipular equipos alimentados por la red eléctrica y power-banks de ion-litio puede ser peligroso. Verifica cada conexión **antes** de energizar el circuito y mantén las antenas, el coaxial y los planos de tierra exactamente como estaban en el diseño de fábrica para evitar desafinar el lector.
 
-## Lista de Materiales (BOM)
+## Lista de materiales (BOM)
 
-* Lector HID MaxiProx 5375 (o cualquier lector HID Prox® de largo alcance de 12 V)
-* Herramienta ESP RFID v2.2 (sniffer/logger Wiegand basado en ESP32)
-* Módulo de activación USB-PD (Power-Delivery) capaz de negociar 12 V @ ≥3 A
-* Banco de energía USB-C de 100 W (salidas 12 V perfil PD)
-* Cable de conexión de silicona de 26 AWG – rojo/blanco
-* Interruptor de palanca SPST de montaje en panel (para el interruptor de apagado del beeper)
-* Protector de interruptor NKK AT4072 / tapa a prueba de accidentes
-* Soldador, trenza de soldadura y bomba de desoldar
-* Herramientas manuales clasificadas ABS: sierra de calar, cuchillo utility, limas planas y de media caña
-* Brocas de 1/16″ (1.5 mm) y 1/8″ (3 mm)
-* Cinta de doble cara 3 M VHB y bridas
+* Lector HID MaxiProx 5375 (o cualquier lector HID Prox® de largo alcance y 12 V)
+* ESP RFID Tool v2.2 (sniffer/logger Wiegand basado en ESP32)
+* Módulo trigger USB-PD (Power-Delivery) capaz de negociar 12 V a ≥3 A
+* Power-bank USB-C de 100 W (ofrece un perfil PD de 12 V)
+* Cableado de conexión de silicona de 26 AWG con aislamiento – rojo/blanco
+* Interruptor de palanca SPST para montaje en panel (para el kill-switch del zumbador)
+* Protector de interruptor / tapa a prueba de accidentes NKK AT4072
+* Soldador, malla para desoldar y bomba desoldadora
+* Herramientas manuales aptas para ABS: sierra de marquetería, cúter, limas planas y de media caña
+* Brocas de 1/16″ (1,5 mm) y 1/8″ (3 mm)
+* Cinta adhesiva de doble cara VHB 3 M y bridas
 
-## 1. Subsistema de Alimentación
+## 1. Subsistema de alimentación
 
-1. Desolde y retire la placa hija del convertidor reductor de fábrica utilizada para generar 5 V para la PCB lógica.
-2. Monte un activador USB-PD junto a la herramienta ESP RFID y dirija el receptáculo USB-C del activador hacia el exterior del recinto.
-3. El activador PD negocia 12 V del banco de energía y lo alimenta directamente al MaxiProx (el lector espera nativamente 10–14 V). Se toma un riel secundario de 5 V de la placa ESP para alimentar cualquier accesorio.
-4. El paquete de batería de 100 W se posiciona a ras contra el espaciador interno para que **no** haya cables de alimentación colgando sobre la antena de ferrita, preservando el rendimiento de RF.
+1. Desuelda y retira la daughter-board del convertidor buck de fábrica utilizada para generar 5 V para la PCB lógica.
+2. Monta un trigger USB-PD junto al ESP RFID Tool y lleva el conector USB-C del trigger hasta el exterior de la carcasa.
+3. El trigger PD negocia 12 V desde el power-bank y los suministra directamente al MaxiProx (el lector espera nativamente entre 10 y 14 V). Se toma un rail secundario de 5 V de la placa ESP para alimentar cualquier accesorio.
+4. La batería de 100 W se coloca a ras contra el separador interno, de modo que **no haya** cables de alimentación extendidos sobre la antena de ferrita, preservando el rendimiento de RF.
 
-## 2. Interruptor de Apagado del Beeper – Operación Silenciosa
+## 2. Kill-switch del zumbador – Funcionamiento silencioso
 
-1. Localice las dos almohadillas del altavoz en la placa lógica del MaxiProx.
-2. Limpie *ambas* almohadillas, luego vuelva a soldar solo la almohadilla **negativa**.
-3. Suelde cables de 26 AWG (blanco = negativo, rojo = positivo) a las almohadillas del beeper y diríjalos a través de una ranura recién cortada hacia un interruptor SPST de montaje en panel.
-4. Cuando el interruptor está abierto, el circuito del beeper se interrumpe y el lector opera en completo silencio, ideal para la recolección encubierta de insignias.
-5. Coloque una tapa de seguridad de resorte NKK AT4072 sobre el interruptor. Amplíe cuidadosamente el orificio con una sierra de calar / lima hasta que encaje sobre el cuerpo del interruptor. El guardia previene la activación accidental dentro de una mochila.
+1. Localiza los dos pads del altavoz en la placa lógica del MaxiProx.
+2. Limpia con malla **ambos** pads y después vuelve a soldar únicamente el pad **negativo**.
+3. Suelda cables de 26 AWG (blanco = negativo, rojo = positivo) a los pads del zumbador y llévalos a través de una ranura recién cortada hasta un interruptor SPST para montaje en panel.
+4. Cuando el interruptor está abierto, el circuito del zumbador se interrumpe y el lector funciona en completo silencio, ideal para la recopilación encubierta de badges.
+5. Coloca una tapa de seguridad con resorte NKK AT4072 sobre la palanca. Amplía cuidadosamente el orificio con una sierra de marquetería / lima hasta que encaje a presión sobre el cuerpo del interruptor. El protector evita la activación accidental dentro de una mochila.
 
-## 3. Trabajo Mecánico y de Recinto
+## 3. Carcasa y trabajo mecánico
 
-• Use cortadores a ras y luego un cuchillo y lima para *eliminar* el “bump-out” interno de ABS para que la gran batería USB-C se asiente plana sobre el espaciador.
-• Crea dos canales paralelos en la pared del recinto para el cable USB-C; esto bloquea la batería en su lugar y elimina el movimiento/vibración.
+• Utiliza cortadores al ras y después un cúter y una lima para *eliminar* el “saliente” interno de ABS, de modo que la batería USB-C grande quede plana sobre el separador.
+• Excava dos canales paralelos en la pared de la carcasa para el cable USB-C; esto bloquea la batería en su posición y elimina el movimiento y la vibración.
 • Crea una abertura rectangular para el botón de **encendido** de la batería:
-1. Cinta un stencil de papel sobre la ubicación.
-2. Perfore agujeros piloto de 1/16″ en las cuatro esquinas.
-3. Amplíe con una broca de 1/8″.
-4. Una las perforaciones con una sierra de calar; termine los bordes con una lima.
-✱ Se *evitó* un Dremel rotativo: la broca de alta velocidad derrite el ABS grueso y deja un borde feo.
+1. Fija una plantilla de papel con cinta sobre la ubicación.
+2. Taladra orificios piloto de 1/16″ en las cuatro esquinas.
+3. Amplíalos con una broca de 1/8″.
+4. Une los orificios con una sierra de marquetería y termina los bordes con una lima.
+✱  Se *evitó* utilizar una Dremel giratoria: la broca de alta velocidad derrite el ABS grueso y deja un borde antiestético.
 
-## 4. Ensamblaje Final
+## 4. Montaje final
 
-1. Vuelva a instalar la placa lógica del MaxiProx y vuelva a soldar el pigtail SMA a la almohadilla de tierra de la PCB del lector.
-2. Monte la herramienta ESP RFID y el activador USB-PD usando 3 M VHB.
-3. Organice todo el cableado con bridas, manteniendo los cables de alimentación **lejos** del bucle de antena.
-4. Apriete los tornillos del recinto hasta que la batería esté ligeramente comprimida; la fricción interna evita que el paquete se desplace cuando el dispositivo retrocede después de cada lectura de tarjeta.
+1. Vuelve a instalar la placa lógica del MaxiProx y vuelve a soldar el pigtail SMA al pad de tierra de la PCB del lector.
+2. Fija el ESP RFID Tool y el trigger USB-PD con VHB 3 M.
+3. Ordena todo el cableado con bridas, manteniendo los cables de alimentación **lejos** del bucle de la antena.
+4. Aprieta los tornillos de la carcasa hasta que la batería quede ligeramente comprimida; la fricción interna evita que el pack se desplace cuando el dispositivo retrocede después de cada lectura de tarjeta.
 
-## 5. Pruebas de Alcance y Apantallamiento
+## 5. Pruebas de alcance y blindaje
 
-* Usando una tarjeta de prueba **Pupa** de 125 kHz, el clonador portátil logró lecturas consistentes a **≈ 8 cm** en aire libre, idéntico a la operación alimentada por la red.
-* Colocar el lector dentro de una caja de metal delgada (para simular un escritorio de lobby bancario) redujo el alcance a ≤ 2 cm, confirmando que los recintos metálicos sustanciales actúan como escudos de RF efectivos.
+* Utilizando una tarjeta de prueba **Pupa** de 125 kHz, el cloner portátil logró lecturas constantes a **≈ 8 cm** en aire libre, idénticas a las obtenidas con alimentación de red.<sup>[[1]](#references)</sup>
+* Colocar el lector dentro de una caja metálica de paredes finas (para simular el mostrador de un vestíbulo bancario) redujo el alcance a ≤ 2 cm, confirmando que las carcasas metálicas sustanciales actúan como blindajes de RF eficaces.<sup>[[1]](#references)</sup>
 
-## Flujo de Trabajo de Uso
+## Flujo de uso
 
-1. Cargue la batería USB-C, conéctela y encienda el interruptor de alimentación principal.
-2. (Opcional) Abra el guardia del beeper y habilite la retroalimentación audible al probar en banco; asegúrelo antes del uso encubierto en el campo.
-3. Pase junto al titular de la insignia objetivo: el MaxiProx energizará la tarjeta y la herramienta ESP RFID capturará el flujo Wiegand.
-4. Transfiera las credenciales capturadas a través de Wi-Fi o USB-UART y repita/clonéelas según sea necesario.
+1. Carga la batería USB-C, conéctala y activa el interruptor principal de alimentación.
+2. (Opcional) Abre el protector del zumbador y activa la retroalimentación audible durante las pruebas de banco; bloquéalo antes del uso encubierto en campo.
+3. Pasa junto al portador del badge objetivo: el MaxiProx energizará la tarjeta y el ESP RFID Tool capturará el flujo Wiegand.
+4. Extrae las credenciales capturadas mediante Wi-Fi o USB-UART y repítelas/clónalas según sea necesario.
 
-## Solución de Problemas
+## Solución de problemas
 
-| Síntoma | Causa Probable | Solución |
+| Síntoma | Causa probable | Solución |
 |---------|----------------|----------|
-| El lector se reinicia al presentar la tarjeta | El activador PD negoció 9 V en lugar de 12 V | Verifique los jumpers del activador / pruebe un cable USB-C de mayor potencia |
-| Sin rango de lectura | Batería o cableado sentado *sobre* la antena | Redirija los cables y mantenga 2 cm de separación alrededor del bucle de ferrita |
-| El beeper aún chirría | Interruptor conectado en el cable positivo en lugar de negativo | Mueva el interruptor de apagado para romper la traza del altavoz **negativo** |
+| El lector se reinicia al presentar una tarjeta | El trigger PD negoció 9 V en lugar de 12 V | Verifica los jumpers del trigger / prueba con un cable USB-C de mayor potencia |
+| No hay alcance de lectura | La batería o el cableado están situados *encima* de la antena | Reubica los cables y mantén una separación de 2 cm alrededor del bucle de ferrita |
+| El zumbador sigue emitiendo pitidos | El interruptor está cableado en el conductor positivo en lugar del negativo | Mueve el kill-switch para interrumpir la traza del altavoz **negativa** |
 
 ## Referencias
 
-- [Let’s Clone a Cloner – Part 3 (TrustedSec)](https://trustedsec.com/blog/lets-clone-a-cloner-part-3-putting-it-all-together)
+- [1] [Let’s Clone a Cloner – Part 3 (TrustedSec)](https://trustedsec.com/blog/lets-clone-a-cloner-part-3-putting-it-all-together)
 
 {{#include ../../banners/hacktricks-training.md}}

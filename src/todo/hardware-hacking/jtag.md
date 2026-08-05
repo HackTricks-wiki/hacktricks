@@ -9,84 +9,84 @@ README.md
 
 ## JTAGenum
 
-[**JTAGenum**](https://github.com/cyphunk/JTAGenum) es una herramienta que puedes cargar en un MCU compatible con Arduino o (experimentalmente) en una Raspberry Pi para forzar la búsqueda de pinouts JTAG desconocidos e incluso enumerar registros de instrucciones.
+[**JTAGenum**](https://github.com/cyphunk/JTAGenum) es una herramienta que puedes cargar en un MCU compatible con Arduino o, de forma experimental, en una Raspberry Pi para aplicar fuerza bruta a pinouts JTAG desconocidos e incluso enumerar registros de instrucciones.
 
-- Arduino: conecta los pines digitales D2–D11 a hasta 10 pads/puntos de prueba JTAG sospechosos, y GND de Arduino a GND del objetivo. Alimenta el objetivo por separado a menos que sepas que la línea es segura. Prefiere lógica de 3.3 V (por ejemplo, Arduino Due) o usa un convertidor de nivel/resistencias en serie al sondear objetivos de 1.8–3.3 V.
-- Raspberry Pi: la construcción de Pi expone menos GPIO utilizables (por lo que los escaneos son más lentos); consulta el repositorio para el mapa de pines actual y las restricciones.
+- Arduino: conecta los pines digitales D2–D11 a un máximo de 10 pads/puntos de prueba JTAG sospechosos, y Arduino GND a la GND del objetivo. Alimenta el objetivo por separado a menos que sepas que el rail es seguro. Prefiere lógica de 3.3 V (por ejemplo, Arduino Due) o utiliza un level shifter/resistencias en serie al probar objetivos de 1.8–3.3 V.
+- Raspberry Pi: la compilación para Pi expone menos GPIO utilizables (por lo que los escaneos son más lentos); consulta el repositorio para conocer el mapa de pines y las restricciones actuales.
 
-Una vez flasheado, abre el monitor serial a 115200 baudios y envía `h` para ayuda. Flujo típico:
+Una vez flasheado, abre el monitor serie a 115200 baudios y envía `h` para obtener ayuda. Flujo típico:
 
-- `l` encontrar bucles para evitar falsos positivos
-- `r` alternar pull‑ups internos si es necesario
-- `s` escanear para TCK/TMS/TDI/TDO (y a veces TRST/SRST)
-- `y` forzar IR para descubrir opcodes no documentados
-- `x` instantánea de escaneo de límite de estados de pines
+- `l` busca loopbacks para evitar falsos positivos
+- `r` alterna los pull-ups internos si es necesario
+- `s` busca TCK/TMS/TDI/TDO (y, a veces, TRST/SRST)
+- `y` aplica fuerza bruta al IR para descubrir opcodes no documentados
+- `x` obtiene una instantánea boundary-scan del estado de los pines
 
-![](<../../images/image (939).png>)
+![JTAG - JTAGenum: x instantánea boundary-scan del estado de los pines](<../../images/image (939).png>)
 
-![](<../../images/image (578).png>)
+![JTAG - JTAGenum: x instantánea boundary-scan del estado de los pines](<../../images/image (578).png>)
 
-![](<../../images/image (774).png>)
+![JTAG - JTAGenum: x instantánea boundary-scan del estado de los pines](<../../images/image (774).png>)
 
 
 
-Si se encuentra un TAP válido, verás líneas que comienzan con `FOUND!` indicando pines descubiertos.
+Si se encuentra un TAP válido, verás líneas que comienzan con `FOUND!`, indicando los pines descubiertos.
 
 Consejos
-- Siempre comparte tierra, y nunca impulsa pines desconocidos por encima de Vtref del objetivo. Si tienes dudas, añade resistencias en serie de 100–470 Ω en los pines candidatos.
-- Si el dispositivo utiliza SWD/SWJ en lugar de JTAG de 4 hilos, JTAGenum puede no detectarlo; prueba herramientas SWD o un adaptador que soporte SWJ‑DP.
+- Comparte siempre la conexión a tierra y nunca apliques a pines desconocidos una tensión superior a Vtref del objetivo. En caso de duda, añade resistencias de 100–470 Ω en serie a los pines candidatos.
+- Si el dispositivo utiliza SWD/SWJ en lugar de JTAG de 4 cables, es posible que JTAGenum no lo detecte; prueba herramientas SWD o un adaptador compatible con SWJ‑DP.
 
-## Caza de pines más segura y configuración de hardware
+## Búsqueda más segura de pines y configuración del hardware
 
-- Identifica Vtref y GND primero con un multímetro. Muchos adaptadores necesitan Vtref para establecer el voltaje de I/O.
-- Cambio de nivel: prefiere convertidores de nivel bidireccionales diseñados para señales push‑pull (las líneas JTAG no son de drenaje abierto). Evita convertidores I2C de dirección automática para JTAG.
-- Adaptadores útiles: placas FT2232H/FT232H (por ejemplo, Tigard), CMSIS‑DAP, J‑Link, ST‑LINK (específicos del proveedor), ESP‑USB‑JTAG (en ESP32‑Sx). Conecta al menos TCK, TMS, TDI, TDO, GND y Vtref; opcionalmente TRST y SRST.
+- Identifica primero Vtref y GND con un multímetro. Muchos adaptadores necesitan Vtref para establecer el voltaje de I/O.
+- Level shifting: prefiere level shifters bidireccionales diseñados para señales push-pull (las líneas JTAG no son open-drain). Evita los shifters de autodirección para I2C en JTAG.
+- Adaptadores útiles: placas FT2232H/FT232H (por ejemplo, Tigard), CMSIS-DAP, J-Link, ST-LINK (específico del fabricante), ESP-USB-JTAG (en ESP32-Sx). Conecta como mínimo TCK, TMS, TDI, TDO, GND y Vtref; opcionalmente TRST y SRST.
 
 ## Primer contacto con OpenOCD (escaneo e IDCODE)
 
-OpenOCD es el OSS de facto para JTAG/SWD. Con un adaptador compatible puedes escanear la cadena y leer IDCODEs:
+OpenOCD es el OSS de facto para JTAG/SWD. Con un adaptador compatible puedes escanear la cadena y leer los IDCODE:
 
-- Ejemplo genérico con un J‑Link:
+- Ejemplo genérico con un J-Link:
 ```
 openocd -f interface/jlink.cfg -c "transport select jtag; adapter speed 1000" \
 -c "init; scan_chain; shutdown"
 ```
-- ESP32‑S3 USB‑JTAG integrado (no se requiere sonda externa):
+- USB-JTAG integrado del ESP32-S3 (no se requiere una sonda externa):
 ```
 openocd -f board/esp32s3-builtin.cfg -c "init; scan_chain; shutdown"
 ```
 Notas
-- Si obtienes un IDCODE de "todos unos/ceros", verifica el cableado, la alimentación, Vtref y que el puerto no esté bloqueado por fusibles/bits de opción.
-- Consulta OpenOCD bajo nivel `irscan`/`drscan` para interacción manual con TAP al iniciar cadenas desconocidas.
+- Si obtienes un IDCODE de "all ones/zeros", comprueba el cableado, la alimentación, Vtref y que el puerto no esté bloqueado por fuses/option bytes.
+- Consulta `irscan`/`drscan` de bajo nivel de OpenOCD para la interacción manual con el TAP al inicializar cadenas desconocidas.<sup>[[1]](#references)</sup>
 
-## Detener la CPU y volcar memoria/flash
+## Detener la CPU y volcar la memoria/flash
 
-Una vez que se reconoce el TAP y se elige un script de destino, puedes detener el núcleo y volcar regiones de memoria o flash interno. Ejemplos (ajusta el destino, las direcciones base y los tamaños):
+Una vez reconocido el TAP y seleccionado un target script, puedes detener el core y volcar regiones de memoria o la flash interna. Ejemplos (ajusta el target, las direcciones base y los tamaños):
 
-- Destino genérico después de la inicialización:
+- Target genérico después de la inicialización:
 ```
 openocd -f interface/jlink.cfg -f target/stm32f1x.cfg \
 -c "init; reset halt; mdw 0x08000000 4; dump_image flash.bin 0x08000000 0x00100000; shutdown"
 ```
-- RISC‑V SoC (prefiere SBA cuando esté disponible):
+- RISC‑V SoC (preferir SBA cuando esté disponible):
 ```
 openocd -f interface/ftdi/ft232h.cfg -f target/riscv.cfg \
 -c "init; riscv set_prefer_sba on; halt; dump_image sram.bin 0x80000000 0x20000; shutdown"
 ```
-- ESP32‑S3, programa o lee a través del asistente OpenOCD:
+- ESP32-S3, programar o leer mediante OpenOCD helper:
 ```
 openocd -f board/esp32s3-builtin.cfg \
 -c "program_esp app.bin 0x10000 verify exit"
 ```
-Tips
-- Usa `mdw/mdh/mdb` para verificar la memoria antes de volcarla.
-- Para cadenas de múltiples dispositivos, establece BYPASS en no objetivos o usa un archivo de placa que defina todos los TAPs.
+Consejos
+- Usa `mdw/mdh/mdb` para comprobar rápidamente la memoria antes de realizar dumps largos.
+- Para cadenas con varios dispositivos, establece BYPASS en los dispositivos que no sean objetivos o usa un archivo de placa que defina todos los TAPs.
 
-## Trucos de escaneo de límites (EXTEST/SAMPLE)
+## Trucos de boundary-scan (EXTEST/SAMPLE)
 
-Incluso cuando el acceso de depuración de la CPU está bloqueado, el escaneo de límites puede seguir estando expuesto. Con UrJTAG/OpenOCD puedes:
-- SAMPLE para capturar el estado de los pines mientras el sistema está en funcionamiento (encontrar actividad en el bus, confirmar el mapeo de pines).
-- EXTEST para controlar los pines (por ejemplo, bit-bang líneas SPI externas a través del MCU para leerlas sin conexión si el cableado de la placa lo permite).
+Incluso cuando el acceso de depuración de la CPU está bloqueado, boundary-scan puede seguir expuesto. Con UrJTAG/OpenOCD puedes:
+- Usar SAMPLE para capturar el estado de los pines mientras el sistema está en ejecución (encontrar actividad del bus y confirmar el mapeo de pines).
+- Usar EXTEST para controlar los pines (por ejemplo, hacer bit-banging de las líneas de una memoria flash SPI externa a través del MCU para leerla offline, si el cableado de la placa lo permite).
 
 Flujo mínimo de UrJTAG con un adaptador FT2232x:
 ```
@@ -98,24 +98,24 @@ jtag> instruction EXTEST
 jtag> shift ir
 jtag> dr  <bit pattern for boundary register>
 ```
-Necesitas el BSDL del dispositivo para conocer el orden de los bits del registro de límite. Ten en cuenta que algunos proveedores bloquean las celdas de escaneo de límite en producción.
+Necesitas el BSDL del dispositivo para conocer el orden de los bits del boundary register. Ten en cuenta que algunos proveedores bloquean las celdas de boundary-scan en producción.
 
-## Objetivos modernos y notas
+## Targets modernos y notas
 
-- ESP32‑S3/C3 incluyen un puente USB‑JTAG nativo; OpenOCD puede comunicarse directamente a través de USB sin una sonda externa. Muy conveniente para triage y volcados.
-- La depuración de RISC‑V (v0.13+) es ampliamente soportada por OpenOCD; se prefiere SBA para el acceso a memoria cuando el núcleo no puede ser detenido de manera segura.
-- Muchos MCU implementan autenticación de depuración y estados de ciclo de vida. Si JTAG parece muerto pero la alimentación es correcta, el dispositivo puede estar fusionado en un estado cerrado o requiere una sonda autenticada.
+- ESP32-S3/C3 incluyen un puente USB-JTAG nativo; OpenOCD puede comunicarse directamente por USB sin una probe externa. Muy conveniente para triage y dumps.<sup>[[2]](#references)</sup>
+- El debug RISC-V (v0.13+) es ampliamente compatible con OpenOCD; prefiere SBA para el acceso a memoria cuando el core no se puede detener de forma segura.
+- Muchos MCUs implementan autenticación de debug y estados de ciclo de vida. Si JTAG parece muerto pero la alimentación es correcta, es posible que el dispositivo esté fusionado en un estado cerrado o requiera una probe autenticada.
 
-## Defensas y endurecimiento (qué esperar en dispositivos reales)
+## Defensas y hardening (qué esperar en dispositivos reales)
 
-- Desactivar permanentemente o bloquear JTAG/SWD en producción (por ejemplo, STM32 RDP nivel 2, eFuses de ESP que desactivan PAD JTAG, NXP/Nordic APPROTECT/DPAP).
-- Requerir depuración autenticada (ARMv8.2‑A ADIv6 Autenticación de Depuración, desafío-respuesta gestionado por OEM) mientras se mantiene el acceso de fabricación.
-- No enrutar almohadillas de prueba fáciles; enterrar vías de prueba, eliminar/poblar resistencias para aislar TAP, usar conectores con codificación o fijaciones de pogo-pin.
-- Bloqueo de depuración al encender: colocar el TAP detrás de un ROM temprano que imponga un arranque seguro.
+- Deshabilitar o bloquear permanentemente JTAG/SWD en producción (por ejemplo, STM32 RDP nivel 2, eFuses de ESP que deshabilitan PAD JTAG, APPROTECT/DPAP de NXP/Nordic).
+- Requerir debug autenticado (ARMv8.2-A ADIv6 Debug Authentication, challenge-response gestionado por el OEM) manteniendo el acceso de fabricación.
+- No enrutar test pads fáciles de acceder; enterrar las test vias, retirar/instalar resistencias para aislar el TAP y usar conectores con keying o fixtures de pogo-pin.
+- Bloqueo de debug al encender: proteger el TAP detrás de una ROM temprana que aplique secure boot.
 
 ## Referencias
 
-- OpenOCD User’s Guide – JTAG Commands and configuration. https://openocd.org/doc-release/html/JTAG-Commands.html
-- Espressif ESP32‑S3 JTAG debugging (USB‑JTAG, OpenOCD usage). https://docs.espressif.com/projects/esp-idf/en/latest/esp32s3/api-guides/jtag-debugging/
+- [1] [Guía del usuario de OpenOCD – comandos y configuración de JTAG](https://openocd.org/doc-release/html/JTAG-Commands.html)
+- [2] [Debug JTAG del ESP32-S3 de Espressif (USB-JTAG, uso de OpenOCD)](https://docs.espressif.com/projects/esp-idf/en/latest/esp32s3/api-guides/jtag-debugging/)
 
 {{#include ../../banners/hacktricks-training.md}}

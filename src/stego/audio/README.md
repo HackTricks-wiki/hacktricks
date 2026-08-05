@@ -1,34 +1,34 @@
-# Audio Steganography
+# Esteganografía de audio
 
 {{#include ../../banners/hacktricks-training.md}}
 
 Patrones comunes:
 
-- Spectrogram messages
-- WAV LSB embedding
-- DTMF / dial tones encoding
-- Metadata payloads
+- Mensajes en espectrogramas
+- Embedding LSB en WAV
+- Codificación DTMF / tonos de marcación
+- Payloads en metadatos
 
-## Triaje rápido
+## Análisis rápido
 
-Antes de herramientas especializadas:
+Antes de usar herramientas especializadas:
 
-- Confirma detalles del codec/container y anomalías:
+- Confirma los detalles del codec/contenedor y las anomalías:
 - `file audio`
 - `ffmpeg -v info -i audio -f null -`
-- Si el audio contiene contenido con aspecto de ruido o estructura tonal, inspecciona un spectrogram lo antes posible.
+- Si el audio contiene contenido similar a ruido o una estructura tonal, inspecciona pronto un espectrograma.
 ```bash
 ffmpeg -v info -i stego.mp3 -f null -
 ```
-## Spectrogram steganography
+## Esteganografía de espectrograma
 
 ### Técnica
 
-Spectrogram stego oculta datos modelando la energía en tiempo/frecuencia para que sean visibles solo en una representación tiempo-frecuencia (a menudo inaudible o percibida como ruido).
+La técnica spectrogram stego oculta datos dando forma a la energía a lo largo del tiempo y la frecuencia, de modo que solo sean visibles en un gráfico de tiempo-frecuencia (a menudo inaudibles o percibidos como ruido).
 
 ### Sonic Visualiser
 
-Herramienta principal para la inspección de espectrogramas:
+Herramienta principal para inspeccionar espectrogramas:
 
 - [https://www.sonicvisualiser.org/](https://www.sonicvisualiser.org/)
 
@@ -39,9 +39,9 @@ Herramienta principal para la inspección de espectrogramas:
 ```bash
 sox input.wav -n spectrogram -o spectrogram.png
 ```
-## FSK / decodificación de modem
+## Decodificación FSK / modem
 
-El audio modulado por desplazamiento de frecuencia suele verse como tonos individuales alternos en un espectrograma. Una vez que tengas una estimación aproximada del centro/desplazamiento y del baud, brute force con `minimodem`:
+El audio con **Frequency-shift keying** suele verse como tonos individuales alternos en un espectrograma.<sup>[[1]](#references)</sup> Una vez que tengas una estimación aproximada del centro, el desplazamiento y la velocidad en baudios, haz brute force con `minimodem`:
 ```bash
 # Visualize the band to pick baud/frequency
 sox noise.wav -n spectrogram -o spec.png
@@ -52,28 +52,28 @@ minimodem -f noise.wav 300
 minimodem -f noise.wav 1200
 minimodem -f noise.wav 2400
 ```
-`minimodem` ajusta la ganancia automáticamente y detecta automáticamente los tonos mark/space; ajuste `--rx-invert` o `--samplerate` si la salida está distorsionada.
+`minimodem` ajusta automáticamente la ganancia y detecta automáticamente los tonos mark/space; ajusta `--rx-invert` o `--samplerate` si la salida está distorsionada.
 
 ## WAV LSB
 
-### Técnica
+### Technique
 
-Para PCM sin comprimir (WAV), cada muestra es un entero. Modificar los bits menos significativos cambia la forma de onda muy poco, por lo que los atacantes pueden ocultar:
+Para PCM sin comprimir (WAV), cada sample es un entero. Modificar los bits bajos cambia la forma de onda muy ligeramente, por lo que los atacantes pueden ocultar:
 
-- 1 bit por muestra (o más)
-- Intercalado entre canales
-- Con un stride/permutación
+- 1 bit por sample (o más)
+- Intercalados entre canales
+- Con un stride/permutation
 
-Otras familias de ocultación de audio que puede encontrar:
+Otras familias de ocultación de audio que puedes encontrar:
 
 - Phase coding
 - Echo hiding
 - Spread-spectrum embedding
-- Codec-side channels (format-dependent and tool-dependent)
+- Codec-side channels (dependientes del formato y de la herramienta)
 
 ### WavSteg
 
-Fuente: https://github.com/ragibson/Steganography#WavSteg
+From: https://github.com/ragibson/Steganography#WavSteg
 ```bash
 python3 WavSteg.py -r -b 1 -s sound.wav -o out.bin
 python3 WavSteg.py -r -b 2 -s sound.wav -o out.bin
@@ -82,19 +82,19 @@ python3 WavSteg.py -r -b 2 -s sound.wav -o out.bin
 
 - [http://jpinsoft.net/deepsound/download.aspx](http://jpinsoft.net/deepsound/download.aspx)
 
-## DTMF / dial tones
+## DTMF / tonos de marcado
 
 ### Técnica
 
-DTMF codifica caracteres como pares de frecuencias fijas (teclado telefónico). Si el audio se asemeja a tonos de teclado o a pitidos regulares de doble frecuencia, prueba la decodificación DTMF lo antes posible.
+DTMF codifica caracteres como pares de frecuencias fijas (teclado telefónico). Si el audio se parece a tonos de teclado o pitidos regulares de doble frecuencia, prueba primero la decodificación DTMF.
 
-Decodificadores en línea:
+Decodificadores online:
 
 - [https://unframework.github.io/dtmf-detect/](https://unframework.github.io/dtmf-detect/)
 - [http://dialabc.com/sound/detect/index.html](http://dialabc.com/sound/detect/index.html)
 
 ## Referencias
 
-- [Flagvent 2025 (Medium) — pink, Santa’s Wishlist, Christmas Metadata, Captured Noise](https://0xdf.gitlab.io/flagvent2025/medium)
+- [1] [Flagvent 2025 (Medium) — pink, Santa’s Wishlist, Christmas Metadata, Captured Noise](https://0xdf.gitlab.io/flagvent2025/medium)
 
 {{#include ../../banners/hacktricks-training.md}}

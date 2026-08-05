@@ -1,56 +1,56 @@
-# FZ - 125kHz RFID
+# FZ - RFID de 125 kHz
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 
-## Intro
+## Introducción
 
-Para más información sobre cómo funcionan las etiquetas de 125kHz, consulta:
+Para obtener más información sobre cómo funcionan los tags de 125 kHz, consulta:
 
 
 {{#ref}}
 ../pentesting-rfid.md
 {{#endref}}
 
-## Actions
+## Acciones
 
-Para más información sobre estos tipos de etiquetas [**lee esta introducción**](../pentesting-rfid.md#low-frequency-rfid-tags-125khz).
+Para obtener más información sobre estos tipos de tags, [**lee esta introducción**](../pentesting-rfid.md#low-frequency-rfid-tags-125khz).
 
-### Read
+### Leer
 
-Intenta **leer** la información de la tarjeta. Luego puede **emularlas**.
+Intenta **leer** la información de la tarjeta. Después puede **emularla**.<sup>[[1]](#references)</sup>
 
 > [!WARNING]
-> Ten en cuenta que algunos intercomunicadores intentan protegerse de la duplicación de llaves enviando un comando de escritura antes de leer. Si la escritura tiene éxito, esa etiqueta se considera falsa. Cuando Flipper emula RFID, no hay forma de que el lector la distinga de la original, por lo que no ocurren tales problemas.
+> Ten en cuenta que algunos intercomunicadores intentan protegerse contra la duplicación de claves enviando un comando de escritura antes de leer. Si la escritura tiene éxito, ese tag se considera falso. Cuando Flipper emula RFID, no hay forma de que el lector lo distinga del original, por lo que no se producen estos problemas.
 
-### Add Manually
+### Añadir manualmente
 
-Puedes crear **tarjetas falsas en Flipper Zero indicando los datos** que introduces manualmente y luego emularla.
+Puedes crear **tarjetas falsas en Flipper Zero indicando los datos** manualmente y después emularlas.
 
-#### IDs on cards
+#### IDs en las tarjetas
 
-A veces, cuando obtienes una tarjeta, encontrarás el ID (o parte de él) escrito en la tarjeta visible.
+A veces, cuando obtienes una tarjeta, encontrarás el ID (o parte de él) escrito y visible en la tarjeta.
 
 - **EM Marin**
 
-Por ejemplo, en esta tarjeta EM-Marin, en la tarjeta física es posible **leer los últimos 3 de 5 bytes en claro**.\
-Los otros 2 pueden ser forzados por fuerza bruta si no puedes leerlos de la tarjeta.
+Por ejemplo, en esta tarjeta EM-Marin física es posible **leer claramente los últimos 3 de 5 bytes**.\
+Los otros 2 pueden obtenerse mediante fuerza bruta si no puedes leerlos en la tarjeta.<sup>[[1]](#references)</sup>
 
 <figure><img src="../../../images/image (104).png" alt=""><figcaption></figcaption></figure>
 
 - **HID**
 
-Lo mismo ocurre en esta tarjeta HID donde solo se pueden encontrar impresos 2 de 3 bytes en la tarjeta.
+Lo mismo ocurre en esta tarjeta HID, donde solo se pueden encontrar 2 de los 3 bytes impresos en la tarjeta.
 
 <figure><img src="../../../images/image (1014).png" alt=""><figcaption></figcaption></figure>
 
-### Emulate/Write
+### Emular/Escribir
 
-Después de **copiar** una tarjeta o **ingresar** el ID **manualmente**, es posible **emularla** con Flipper Zero o **escribirla** en una tarjeta real.
+Después de **copiar** una tarjeta o **introducir** el ID **manualmente**, es posible **emularla** con Flipper Zero o **escribirla** en una tarjeta real.<sup>[[1]](#references)</sup>
 
-## References
+## Referencias
 
-- [https://blog.flipperzero.one/rfid/](https://blog.flipperzero.one/rfid/)
+- [1] [Diving into RFID Protocols with Flipper Zero](https://blog.flipperzero.one/rfid/)
 
 
 {{#include ../../../banners/hacktricks-training.md}}

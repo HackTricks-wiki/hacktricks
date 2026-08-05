@@ -2,13 +2,13 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Cómo Funciona el Infrarrojo <a href="#how-the-infrared-port-works" id="how-the-infrared-port-works"></a>
+## Cómo funciona el infrarrojo <a href="#how-the-infrared-port-works" id="how-the-infrared-port-works"></a>
 
-**La luz infrarroja es invisible para los humanos**. La longitud de onda IR va de **0.7 a 1000 micrones**. Los controles remotos domésticos utilizan una señal IR para la transmisión de datos y operan en el rango de longitud de onda de 0.75..1.4 micrones. Un microcontrolador en el control remoto hace que un LED infrarrojo parpadee con una frecuencia específica, convirtiendo la señal digital en una señal IR.
+**La luz infrarroja es invisible para los humanos**. La longitud de onda IR va de **0,7 a 1000 micras**. Los mandos domésticos utilizan una señal IR para la transmisión de datos y funcionan en el rango de longitud de onda de 0,75..1,4 micras. Un microcontrolador en el mando hace parpadear un LED infrarrojo con una frecuencia específica, convirtiendo la señal digital en una señal IR.<sup>[[1]](#references)</sup>
 
-Para recibir señales IR se utiliza un **fotoreceptor**. Este **convierte la luz IR en pulsos de voltaje**, que ya son **señales digitales**. Generalmente, hay un **filtro de luz oscura dentro del receptor**, que deja **pasar solo la longitud de onda deseada** y elimina el ruido.
+Para recibir señales IR se utiliza un **fotoreceptor**. Este **convierte la luz IR en pulsos de voltaje**, que ya son **señales digitales**. Normalmente, hay un **filtro de luz oscura dentro del receptor**, que deja pasar **solo la longitud de onda deseada** y elimina el ruido.
 
-### Variedad de Protocolos IR <a href="#variety-of-ir-protocols" id="variety-of-ir-protocols"></a>
+### Variedad de protocolos IR <a href="#variety-of-ir-protocols" id="variety-of-ir-protocols"></a>
 
 Los protocolos IR difieren en 3 factores:
 
@@ -18,92 +18,93 @@ Los protocolos IR difieren en 3 factores:
 
 #### Formas de codificación de bits <a href="#bit-encoding-ways" id="bit-encoding-ways"></a>
 
-**1. Codificación por Distancia de Pulso**
+**1. Pulse Distance Encoding**
 
-Los bits se codifican modulando la duración del espacio entre pulsos. El ancho del pulso en sí es constante.
+Los bits se codifican modulando la duración del espacio entre pulsos. La anchura del pulso permanece constante.
 
 <figure><img src="../../images/image (295).png" alt=""><figcaption></figcaption></figure>
 
-**2. Codificación por Ancho de Pulso**
+**2. Pulse Width Encoding**
 
-Los bits se codifican mediante la modulación del ancho del pulso. El ancho del espacio después de la ráfaga de pulso es constante.
+Los bits se codifican modulando la anchura del pulso. La anchura del espacio después de la ráfaga de pulsos es constante.
 
 <figure><img src="../../images/image (282).png" alt=""><figcaption></figcaption></figure>
 
-**3. Codificación por Fase**
+**3. Phase Encoding**
 
-También se conoce como codificación Manchester. El valor lógico se define por la polaridad de la transición entre la ráfaga de pulso y el espacio. "Espacio a ráfaga de pulso" denota lógica "0", "ráfaga de pulso a espacio" denota lógica "1".
+También se conoce como codificación Manchester. El valor lógico se define por la polaridad de la transición entre la ráfaga de pulsos y el espacio. "Espacio a ráfaga de pulsos" representa la lógica "0", y "ráfaga de pulsos a espacio" representa la lógica "1".
 
 <figure><img src="../../images/image (634).png" alt=""><figcaption></figcaption></figure>
 
 **4. Combinación de las anteriores y otras exóticas**
 
 > [!TIP]
-> Hay protocolos IR que **intentan volverse universales** para varios tipos de dispositivos. Los más famosos son RC5 y NEC. Desafortunadamente, lo más famoso **no significa lo más común**. En mi entorno, conocí solo dos controles remotos NEC y ninguno RC5.
+> Existen protocolos IR que **intentan convertirse en universales** para varios tipos de dispositivos. Los más famosos son RC5 y NEC. Por desgracia, que sean los más famosos **no significa que sean los más comunes**. En mi entorno, solo encontré dos mandos NEC y ninguno RC5.
 >
-> A los fabricantes les encanta usar sus propios protocolos IR únicos, incluso dentro de la misma gama de dispositivos (por ejemplo, cajas de TV). Por lo tanto, los controles remotos de diferentes empresas y a veces de diferentes modelos de la misma empresa, no pueden trabajar con otros dispositivos del mismo tipo.
+> A los fabricantes les encanta utilizar sus propios protocolos IR únicos, incluso dentro del mismo tipo de dispositivos (por ejemplo, TV-boxes). Por lo tanto, los mandos de diferentes empresas y, a veces, de diferentes modelos de la misma empresa, no pueden funcionar con otros dispositivos del mismo tipo.
 
-### Explorando una señal IR
+### Exploración de una señal IR
 
-La forma más confiable de ver cómo se ve la señal IR del control remoto es usar un osciloscopio. No demodula ni invierte la señal recibida, simplemente se muestra "tal cual". Esto es útil para pruebas y depuración. Mostraré la señal esperada con el ejemplo del protocolo IR NEC.
+La forma más fiable de ver cómo es la señal IR del mando es utilizar un osciloscopio. Este no demodula ni invierte la señal recibida, simplemente la muestra "tal cual". Esto resulta útil para realizar pruebas y debugging. Mostraré la señal esperada utilizando como ejemplo el protocolo IR NEC.
 
 <figure><img src="../../images/image (235).png" alt=""><figcaption></figcaption></figure>
 
-Generalmente, hay un preámbulo al comienzo de un paquete codificado. Esto permite al receptor determinar el nivel de ganancia y el fondo. También hay protocolos sin preámbulo, por ejemplo, Sharp.
+Normalmente, al principio de un paquete codificado hay un preámbulo. Esto permite al receptor determinar el nivel de ganancia y el fondo. También existen protocolos sin preámbulo, como Sharp.
 
-Luego se transmiten los datos. La estructura, el preámbulo y el método de codificación de bits son determinados por el protocolo específico.
+A continuación, se transmiten los datos. La estructura, el preámbulo y el método de codificación de bits están determinados por el protocolo específico.
 
-El **protocolo IR NEC** contiene un comando corto y un código de repetición, que se envía mientras se presiona el botón. Tanto el comando como el código de repetición tienen el mismo preámbulo al principio.
+El **protocolo IR NEC** contiene un comando corto y un código de repetición, que se envía mientras se mantiene pulsado el botón. Tanto el comando como el código de repetición tienen el mismo preámbulo al principio.
 
-El **comando NEC**, además del preámbulo, consiste en un byte de dirección y un byte de número de comando, por el cual el dispositivo entiende qué debe realizarse. Los bytes de dirección y número de comando se duplican con valores inversos, para verificar la integridad de la transmisión. Hay un bit de parada adicional al final del comando.
+El **comando** NEC, además del preámbulo, consta de un byte de dirección y un byte de número de comando, mediante los cuales el dispositivo entiende qué debe realizar. Los bytes de dirección y de número de comando se duplican con valores inversos para comprobar la integridad de la transmisión. Al final del comando hay un bit de parada adicional.
 
 El **código de repetición** tiene un "1" después del preámbulo, que es un bit de parada.
 
-Para **lógica "0" y "1"** NEC utiliza Codificación por Distancia de Pulso: primero, se transmite una ráfaga de pulso después de la cual hay una pausa, cuya longitud establece el valor del bit.
+Para la **lógica "0" y "1"**, NEC utiliza Pulse Distance Encoding: primero se transmite una ráfaga de pulsos, después de la cual hay una pausa; su longitud establece el valor del bit.
 
-### Aires Acondicionados
+### Aires acondicionados
 
-A diferencia de otros controles remotos, **los aires acondicionados no transmiten solo el código del botón presionado**. También **transmiten toda la información** cuando se presiona un botón para asegurar que la **máquina de aire acondicionado y el control remoto estén sincronizados**.\
-Esto evitará que una máquina configurada a 20ºC se aumente a 21ºC con un control remoto, y luego cuando se use otro control remoto, que aún tiene la temperatura en 20ºC, para aumentar más la temperatura, se "aumentará" a 21ºC (y no a 22ºC pensando que está en 21ºC).
+A diferencia de otros mandos, **los aires acondicionados no transmiten únicamente el código del botón pulsado**. También **transmiten toda la información** al pulsar un botón para garantizar que **el aire acondicionado y el mando estén sincronizados**.\
+Esto evita que una máquina configurada a 20 ºC aumente a 21 ºC con un mando y que, después, al utilizar otro mando que todavía tiene la temperatura configurada a 20 ºC para aumentarla más, la "aumente" a 21 ºC (y no a 22 ºC, pensando que está a 21 ºC).
 
 ---
 
-## Ataques e Investigación Ofensiva <a href="#attacks" id="attacks"></a>
+## Ataques e investigación ofensiva <a href="#attacks" id="attacks"></a>
 
-Puedes atacar el Infrarrojo con Flipper Zero:
+Puedes atacar el infrarrojo con Flipper Zero:
+
 
 {{#ref}}
 flipper-zero/fz-infrared.md
 {{#endref}}
 
-### Toma de Control de Smart-TV / Set-top Box (EvilScreen)
+### Toma de control de Smart-TV / Set-top Box (EvilScreen)
 
-Un trabajo académico reciente (EvilScreen, 2022) demostró que **los controles remotos multicanal que combinan Infrarrojo con Bluetooth o Wi-Fi pueden ser abusados para secuestrar completamente los smart-TVs modernos**. La cadena de ataque combina códigos de servicio IR de alto privilegio con paquetes Bluetooth autenticados, eludiendo la aislamiento de canales y permitiendo lanzamientos arbitrarios de aplicaciones, activación de micrófonos o reinicio de fábrica sin acceso físico. Ocho televisores de diferentes proveedores — incluido un modelo de Samsung que afirma cumplir con ISO/IEC 27001 — fueron confirmados como vulnerables. La mitigación requiere correcciones de firmware del proveedor o deshabilitar completamente los receptores IR no utilizados.
+Un trabajo académico reciente (EvilScreen, 2022) demostró que **los mandos multicanal que combinan infrarrojos con Bluetooth o Wi-Fi pueden utilizarse para secuestrar completamente Smart-TVs modernas**. El ataque encadena códigos de servicio IR con privilegios elevados junto con paquetes Bluetooth autenticados, evadiendo el aislamiento entre canales y permitiendo iniciar aplicaciones arbitrarias, activar el micrófono o realizar un factory reset sin acceso físico. Se confirmó que ocho televisores convencionales de distintos proveedores —incluido un modelo de Samsung que afirmaba cumplir con ISO/IEC 27001— eran vulnerables. La mitigación requiere correcciones de firmware del proveedor o deshabilitar por completo los receptores IR que no se utilicen.<sup>[[2]](#references)</sup>
 
-### Exfiltración de Datos Air-Gapped a través de LEDs IR (familia aIR-Jumper)
+### Exfiltración de datos desde redes aisladas mediante LED IR (familia aIR-Jumper)
 
-Las cámaras de seguridad, enrutadores o incluso unidades USB maliciosas a menudo incluyen **LEDs IR de visión nocturna**. La investigación muestra que el malware puede modular estos LEDs (<10–20 kbit/s con OOK simple) para **exfiltrar secretos a través de paredes y ventanas** a una cámara externa colocada a decenas de metros de distancia. Debido a que la luz está fuera del espectro visible, los operadores rara vez lo notan. Medidas de contrarresto:
+Las cámaras de seguridad, los routers e incluso los dispositivos USB maliciosos suelen incluir **LED IR de visión nocturna**. Las investigaciones demuestran que el malware puede modular estos LED (<10–20 kbit/s con OOK simple) para **exfiltrar secretos a través de paredes y ventanas** hacia una cámara externa situada a decenas de metros. Como la luz está fuera del espectro visible, los operadores rara vez lo notan. Contramedidas:
 
-* Proteger físicamente o eliminar LEDs IR en áreas sensibles
-* Monitorear el ciclo de trabajo de los LEDs de la cámara y la integridad del firmware
-* Desplegar filtros de corte IR en ventanas y cámaras de vigilancia
+* Proteger físicamente o retirar los LED IR de las zonas sensibles
+* Monitorizar el ciclo de trabajo de los LED de la cámara y la integridad del firmware
+* Implementar filtros IR-cut en ventanas y cámaras de vigilancia
 
-Un atacante también puede usar proyectores IR fuertes para **infiltrar** comandos en la red al parpadear datos de vuelta a cámaras inseguras.
+Un atacante también puede utilizar proyectores IR potentes para **infiltrar** comandos en la red mediante el envío de datos por destellos hacia cámaras inseguras.
 
-### Fuerza Bruta de Largo Alcance y Protocolos Extendidos con Flipper Zero 1.0
+### Brute-force de largo alcance y protocolos extendidos con Flipper Zero 1.0
 
-El firmware 1.0 (septiembre de 2024) agregó **docenas de protocolos IR adicionales y módulos amplificadores externos opcionales**. Combinado con el modo de fuerza bruta de control remoto universal, un Flipper puede desactivar o reconfigurar la mayoría de los televisores/aires acondicionados públicos desde hasta 30 m usando un diodo de alta potencia.
+El firmware 1.0 (septiembre de 2024) añadió **docenas de protocolos IR adicionales y módulos amplificadores externos opcionales**. Combinado con el modo universal de brute-force de mandos, un Flipper puede desactivar o reconfigurar la mayoría de los televisores y aires acondicionados públicos desde una distancia de hasta 30 m utilizando un diodo de alta potencia.
 
 ---
 
-## Herramientas y Ejemplos Prácticos <a href="#tooling" id="tooling"></a>
+## Herramientas y ejemplos prácticos <a href="#tooling" id="tooling"></a>
 
 ### Hardware
 
-* **Flipper Zero** – transceptor portátil con modos de aprendizaje, reproducción y fuerza bruta de diccionario (ver arriba).
-* **Arduino / ESP32** + LED IR / receptor TSOP38xx – analizador/transmisor DIY barato. Combinar con la biblioteca `Arduino-IRremote` (v4.x soporta >40 protocolos).
-* **Analizadores lógicos** (Saleae/FX2) – capturar tiempos en bruto cuando el protocolo es desconocido.
-* **Smartphones con IR-blaster** (por ejemplo, Xiaomi) – prueba rápida de campo pero con rango limitado.
+* **Flipper Zero** – transceptor portátil con modos de aprendizaje, replay y dictionary-bruteforce (véase arriba).
+* **Arduino / ESP32** + LED IR / receptor TSOP38xx – analizador/transmisor DIY económico. Combínalo con la biblioteca `Arduino-IRremote` (v4.x admite más de 40 protocolos).
+* **Analizadores lógicos** (Saleae/FX2) – capturan tiempos sin procesar cuando se desconoce el protocolo.
+* **Smartphones con IR-blaster** (por ejemplo, Xiaomi) – prueba rápida en campo, pero con alcance limitado.
 
 ### Software
 
@@ -117,25 +118,25 @@ sender.sendNEC(0x20DF10EF, 32); // Samsung TV Power
 delay(5000);
 }
 ```
-* **IRscrutinizer / AnalysIR** – decodificadores GUI que importan capturas en bruto e identifican automáticamente el protocolo + generan código Pronto/Arduino.
-* **LIRC / ir-keytable (Linux)** – recibir e inyectar IR desde la línea de comandos:
+* **IRscrutinizer / AnalysIR** – decodificadores con GUI que importan capturas sin procesar, identifican automáticamente el protocolo y generan código Pronto/Arduino.
+* **LIRC / ir-keytable (Linux)** – reciben e inyectan IR desde la línea de comandos:
 ```bash
-sudo ir-keytable -p nec,rc5 -t   # volcado en vivo de códigos de escaneo decodificados
+sudo ir-keytable -p nec,rc5 -t   # live-dump decoded scancodes
 irsend SEND_ONCE samsung KEY_POWER
 ```
 
 ---
 
-## Medidas Defensivas <a href="#defense" id="defense"></a>
+## Medidas defensivas <a href="#defense" id="defense"></a>
 
-* Desactivar o cubrir los receptores IR en dispositivos desplegados en espacios públicos cuando no sean necesarios.
-* Hacer cumplir *emparejamiento* o verificaciones criptográficas entre smart-TVs y controles remotos; aislar códigos de "servicio" privilegiados.
-* Desplegar filtros de corte IR o detectores de onda continua alrededor de áreas clasificadas para romper canales ópticos encubiertos.
-* Monitorear la integridad del firmware de cámaras/aparatos IoT que exponen LEDs IR controlables.
+* Deshabilitar o cubrir los receptores IR de los dispositivos instalados en espacios públicos cuando no sean necesarios.
+* Aplicar *pairing* o comprobaciones criptográficas entre Smart-TVs y mandos; aislar los códigos de “servicio” privilegiados.
+* Implementar filtros IR-cut o detectores de onda continua alrededor de áreas clasificadas para interrumpir los canales ópticos encubiertos.
+* Monitorizar la integridad del firmware de cámaras y dispositivos IoT que expongan LED IR controlables.
 
 ## Referencias
 
-- [Publicación del blog de Flipper Zero Infrarrojo](https://blog.flipperzero.one/infrared/)
-- EvilScreen: secuestro de Smart TV a través de la imitación de control remoto (arXiv 2210.03014)
+- [1] [Publicación del blog de Flipper Zero sobre infrarrojos](https://blog.flipperzero.one/infrared/)
+- [2] [EvilScreen: Secuestro de Smart TV mediante imitación del mando a distancia](https://arxiv.org/abs/2210.03014)
 
 {{#include ../../banners/hacktricks-training.md}}
