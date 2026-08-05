@@ -4,7 +4,7 @@
 
 ## Podstawowe informacje
 
-Binaries dla Mac OS są zwykle kompilowane jako **universal binaries**. **Universal binary** może **obsługiwać wiele architektur w tym samym pliku**.
+Binaries Mac OS są zwykle kompilowane jako **universal binaries**. **Universal binary** może **obsługiwać wiele architektur w tym samym pliku**.
 
 Te binaries są zgodne ze **strukturą Mach-O**, która zasadniczo składa się z:
 
@@ -35,7 +35,7 @@ uint32_t	align;		/* alignment as a power of 2 */
 };
 </code></pre>
 
-Header zawiera bajty **magic**, po których następuje **liczba** **architektur**, które plik **zawiera** (`nfat_arch`), a każda architektura będzie miała strukturę `fat_arch`.
+Header zawiera bajty **magic**, po których następuje **liczba** **architektury**, które plik **zawiera** (`nfat_arch`), a każda architektura będzie miała strukturę `fat_arch`.
 
 Sprawdź to za pomocą:
 
@@ -71,7 +71,7 @@ lub za pomocą narzędzia [Mach-O View](https://sourceforge.net/projects/machovi
 Jak można się domyślać, universal binary skompilowany dla 2 architektur zwykle **podwaja rozmiar** w porównaniu z binary skompilowanym tylko dla 1 architektury.
 
 > [!TIP]
-> Podczas triage malware lub podejrzanych aplikacji nie kończ pracy po tym, jak `file` zgłosi „najlepszą” architekturę. Universal binary może ukrywać różne imports, load commands lub metadane compilera w każdym slice, dlatego najpierw wylicz **wszystkie** slice, a następnie analizuj je niezależnie:
+> Podczas triage malware lub podejrzanych aplikacji nie kończ po tym, jak `file` zgłosi „najlepszą” architekturę. Universal binary może ukrywać różne importy, load commands lub metadata kompilatora w każdym slice, dlatego najpierw wylicz **wszystkie** slice, a następnie przeanalizuj je niezależnie:
 ```bash
 BIN=/path/to/bin
 lipo -archs "$BIN"
@@ -81,7 +81,7 @@ otool -hv "/tmp/$(basename "$BIN").$A"
 otool -l "/tmp/$(basename "$BIN").$A" | egrep 'LC_BUILD_VERSION|LC_LOAD_DYLIB|LC_RPATH|LC_DYLD_CHAINED_FIXUPS|LC_CODE_SIGNATURE'
 done
 ```
-Nowsze macOS SDK udostępniają również funkcje pomocnicze, takie jak `macho_for_each_slice()` i `macho_best_slice()` w `<mach-o/utils.h>`. Ta druga jest przydatna do emulowania tego, co załadowałyby dyld/kernel, ale skanery nadal powinny iterować po każdym slice, aby uniknąć pominięcia zawartości specyficznej dla danej architektury.<sup>[1]</sup>
+Nowsze SDK macOS udostępniają również helpery, takie jak `macho_for_each_slice()` i `macho_best_slice()` w `<mach-o/utils.h>`. Ten drugi jest przydatny do emulowania tego, co załadowałyby dyld/kernel, ale scanners powinny nadal iterować po każdym slice, aby uniknąć pominięcia zawartości specyficznej dla architektury.<sup>[[1]](#references)</sup>
 
 ## **Nagłówek Mach-O**
 
@@ -114,18 +114,18 @@ uint32_t	reserved;	/* reserved */
 ```
 ### Typy plików Mach-O
 
-Istnieją różne typy plików, można je znaleźć zdefiniowane w [**kodzie źródłowym, na przykład tutaj**](https://opensource.apple.com/source/xnu/xnu-2050.18.24/EXTERNAL_HEADERS/mach-o/loader.h). Najważniejsze z nich to:
+Istnieją różne typy plików, których definicje można znaleźć w [**kodzie źródłowym, na przykład tutaj**](https://opensource.apple.com/source/xnu/xnu-2050.18.24/EXTERNAL_HEADERS/mach-o/loader.h). Najważniejsze z nich to:
 
-- `MH_OBJECT`: Relokowalny plik obiektowy (pośrednie produkty kompilacji, które nie są jeszcze plikami wykonywalnymi).
+- `MH_OBJECT`: Relokowalny plik obiektowy (pośrednie produkty kompilacji, niebędące jeszcze plikami wykonywalnymi).
 - `MH_EXECUTE`: Pliki wykonywalne.
 - `MH_FVMLIB`: Plik biblioteki stałej VM.
 - `MH_CORE`: Zrzuty kodu.
 - `MH_PRELOAD`: Wstępnie załadowany plik wykonywalny (nie jest już obsługiwany w XNU).
 - `MH_DYLIB`: Biblioteki dynamiczne.
 - `MH_DYLINKER`: Dynamiczny linker.
-- `MH_BUNDLE`: „Pliki wtyczek”. Generowane za pomocą `-bundle` w gcc i jawnie ładowane przez `NSBundle` lub `dlopen`.
-- `MH_DYSM`: Towarzyszący plik `.dSym` (plik z symbolami używanymi podczas debugowania).
-- `MH_KEXT_BUNDLE`: Rozszerzenia jądra.
+- `MH_BUNDLE`: "Pliki pluginów". Generowane przy użyciu `-bundle` w gcc i jawnie ładowane przez `NSBundle` lub `dlopen`.
+- `MH_DYSM`: Towarzyszący plik `.dSym` (plik z symbolami używanymi do debugowania).
+- `MH_KEXT_BUNDLE`: Rozszerzenia kernela.
 ```bash
 # Checking the mac header of a binary
 otool -arch arm64e -hv /bin/ls
@@ -133,52 +133,52 @@ Mach header
 magic  cputype cpusubtype  caps    filetype ncmds sizeofcmds      flags
 MH_MAGIC_64    ARM64          E USR00     EXECUTE    19       1728   NOUNDEFS DYLDLINK TWOLEVEL PIE
 ```
-Lub za pomocą [Mach-O View](https://sourceforge.net/projects/machoview/):
+Lub przy użyciu [Mach-O View](https://sourceforge.net/projects/machoview/):
 
 <figure><img src="../../../images/image (1133).png" alt=""><figcaption></figcaption></figure>
 
-## **Flagi Mach-O**
+## **Mach-O Flags**
 
 Kod źródłowy definiuje również kilka flag przydatnych podczas ładowania bibliotek:
 
 - `MH_NOUNDEFS`: Brak niezdefiniowanych odwołań (w pełni zlinkowany)
 - `MH_DYLDLINK`: Linkowanie przez Dyld
-- `MH_PREBOUND`: Dynamiczne odwołania są prebound.
-- `MH_SPLIT_SEGS`: Plik dzieli segmenty tylko do odczytu i do odczytu/zapisu.
+- `MH_PREBOUND`: Odwołania dynamiczne są prebound.
+- `MH_SPLIT_SEGS`: Plik dzieli segmenty r/o i r/w.
 - `MH_WEAK_DEFINES`: Binary zawiera symbole zdefiniowane jako weak
 - `MH_BINDS_TO_WEAK`: Binary używa symboli weak
 - `MH_ALLOW_STACK_EXECUTION`: Ustawia stos jako wykonywalny
-- `MH_NO_REEXPORTED_DYLIBS`: Biblioteka nie zawiera poleceń LC_REEXPORT
+- `MH_NO_REEXPORTED_DYLIBS`: Biblioteka bez poleceń LC_REEXPORT
 - `MH_PIE`: Position Independent Executable
 - `MH_HAS_TLV_DESCRIPTORS`: Istnieje sekcja zawierająca zmienne lokalne dla wątków
-- `MH_NO_HEAP_EXECUTION`: Brak wykonywania dla stron heap/data
+- `MH_NO_HEAP_EXECUTION`: Brak możliwości wykonywania dla stron heap/data
 - `MH_HAS_OBJC`: Binary zawiera sekcje oBject-C
 - `MH_SIM_SUPPORT`: Obsługa Simulator
-- `MH_DYLIB_IN_CACHE`: Używane dla dylib/frameworks w shared library cache.
+- `MH_DYLIB_IN_CACHE`: Używane dla dylibs/frameworks we współdzielonym cache bibliotek.
 
-## **Polecenia ładowania Mach-O**
+## **Mach-O Load commands**
 
-**Układ pliku w pamięci** jest określony tutaj, z uwzględnieniem **lokalizacji tablicy symboli**, kontekstu głównego wątku w momencie rozpoczęcia wykonywania oraz wymaganych **shared libraries**. Dynamic loaderowi **(dyld)** przekazywane są instrukcje dotyczące procesu ładowania binary do pamięci.
+**Układ pliku w pamięci** jest określony tutaj, wraz ze szczegółami dotyczącymi **lokalizacji tablicy symboli**, kontekstu głównego wątku w momencie rozpoczęcia wykonywania oraz wymaganych **bibliotek współdzielonych**. Dynamic loader **(dyld)** otrzymuje instrukcje dotyczące procesu ładowania binary do pamięci.
 
-Wykorzystuje strukturę **load_command**, zdefiniowaną we wspomnianym pliku **`loader.h`**:
+Wykorzystywana jest struktura **load_command**, zdefiniowana we wspomnianym pliku **`loader.h`**:
 ```objectivec
 struct load_command {
 uint32_t cmd;           /* type of load command */
 uint32_t cmdsize;       /* total size of command in bytes */
 };
 ```
-Istnieje około **50 różnych typów load commands**, które system obsługuje w różny sposób. Najczęściej używane to: `LC_SEGMENT_64`, `LC_LOAD_DYLINKER`, `LC_MAIN`, `LC_LOAD_DYLIB` oraz `LC_CODE_SIGNATURE`.
+Istnieje około **50 różnych typów load commands**, które system obsługuje w różny sposób. Najczęściej spotykane to: `LC_SEGMENT_64`, `LC_LOAD_DYLINKER`, `LC_MAIN`, `LC_LOAD_DYLIB` oraz `LC_CODE_SIGNATURE`.
 
 ### **LC_SEGMENT/LC_SEGMENT_64**
 
 > [!TIP]
-> Zasadniczo ten typ Load Command definiuje **sposób ładowania segmentów \_\_TEXT** (kodu wykonywalnego) **i \_\_DATA** (danych procesu) **zgodnie z offsetami wskazanymi w sekcji Data**, gdy binary jest wykonywany.
+> Zasadniczo ten typ Load Command definiuje, **jak załadować segmenty \_\_TEXT** (kod wykonywalny) **i \_\_DATA** (dane procesu), zgodnie z **offsetami wskazanymi w sekcji Data**, gdy binary jest wykonywany.
 
 Te commands **definiują segmenty**, które są **mapowane** do **wirtualnej przestrzeni pamięci** procesu podczas jego wykonywania.
 
-Istnieją **różne typy** segmentów, takie jak segment **\_\_TEXT**, zawierający kod wykonywalny programu, oraz segment **\_\_DATA**, zawierający dane używane przez proces. Te **segmenty znajdują się w sekcji danych** pliku Mach-O.
+Istnieją **różne typy** segmentów, takie jak segment **\_\_TEXT**, który zawiera kod wykonywalny programu, oraz segment **\_\_DATA**, który zawiera dane używane przez proces. Te **segmenty znajdują się w sekcji data** pliku Mach-O.
 
-**Każdy segment** może być dodatkowo **podzielony** na wiele **sekcji**. **Struktura load command** zawiera **informacje** o **tych sekcjach** w obrębie odpowiedniego segmentu.
+**Każdy segment** może być dalej **podzielony** na wiele **sekcji**. **Struktura load command** zawiera **informacje** o **tych sekcjach** w obrębie odpowiedniego segmentu.
 
 W nagłówku najpierw znajduje się **nagłówek segmentu**:
 
@@ -222,7 +222,7 @@ Przykład **nagłówka sekcji**:
 
 <figure><img src="../../../images/image (1108).png" alt=""><figcaption></figcaption></figure>
 
-Jeśli **dodasz** **offset sekcji** (0x37DC) do **offsetu**, pod którym zaczyna się **arch**, w tym przypadku `0x18000` --> `0x37DC + 0x18000 = 0x1B7DC`
+Jeśli **dodasz** **przesunięcie sekcji** (0x37DC) + **przesunięcie**, pod którym rozpoczyna się **architektura**, w tym przypadku `0x18000` --> `0x37DC + 0x18000 = 0x1B7DC`
 
 <figure><img src="../../../images/image (701).png" alt=""><figcaption></figcaption></figure>
 
@@ -230,40 +230,40 @@ Możliwe jest również uzyskanie **informacji o nagłówkach** z poziomu **wier
 ```bash
 otool -lv /bin/ls
 ```
-Typowe segmenty ładowane przez to polecenie:
+Common segments ładowane przez to polecenie:
 
-- **`__PAGEZERO`:** Nakazuje kernelowi **zmapować** **adres zero**, aby nie można było z niego **czytać, zapisywać do niego ani wykonywać z niego kodu**. Zmienne maxprot i minprot w strukturze są ustawione na zero, co wskazuje, że **ta strona nie ma praw odczytu-zapisu-wykonania**.
-- Ta alokacja jest ważna, ponieważ **ogranicza podatności typu NULL pointer dereference**. Dzieje się tak, ponieważ XNU wymusza twardą stronę zero, która zapewnia, że pierwsza strona (i tylko pierwsza) pamięci jest niedostępna (z wyjątkiem i386). Binary może spełnić to wymaganie, tworząc mały \_\_PAGEZERO (przy użyciu `-pagezero_size`), aby objąć pierwsze 4k, a następnie udostępniając resztę pamięci 32-bitowej zarówno w trybie użytkownika, jak i kernela.
-- **`__TEXT`**: Zawiera **wykonywalny** **kod** z uprawnieniami **odczytu** i **wykonania** (bez możliwości zapisu)**.** Typowe sekcje tego segmentu:
+- **`__PAGEZERO`:** Nakazuje kernelowi **zmapować** **adres zero**, aby nie można było z niego **czytać, zapisywać do niego ani wykonywać z niego kodu**. Zmienne maxprot i minprot w tej strukturze są ustawione na zero, co wskazuje, że **ta strona nie ma praw odczytu-zapisu-wykonania**.
+- Ta alokacja jest ważna w celu **ograniczenia podatności typu NULL pointer dereference**. Dzieje się tak, ponieważ XNU wymusza hard page zero, który zapewnia, że pierwsza strona (i tylko pierwsza) pamięci jest niedostępna (z wyjątkiem i386). Binary mogłoby spełnić to wymaganie, tworząc mały \_\_PAGEZERO (przy użyciu `-pagezero_size`), który obejmuje pierwsze 4k, oraz udostępniając pozostałą część pamięci 32-bitowej zarówno w trybie user, jak i kernel.
+- **`__TEXT`**: Zawiera **wykonywalny** kod z uprawnieniami **odczytu** i **wykonania** (bez możliwości zapisu)**.** Typowe sekcje tego segmentu:
 - `__text`: Skompilowany kod binary
-- `__const`: Stałe dane (tylko do odczytu)
-- `__[c/u/os_log]string`: Stałe tekstowe C, Unicode lub os log
-- `__stubs` i `__stubs_helper`: Używane podczas procesu ładowania dynamic library
-- `__unwind_info`: Dane do odwijania stosu.
-- Należy zauważyć, że cała ta zawartość jest podpisana, ale również oznaczona jako wykonywalna (co stwarza więcej możliwości exploitacji sekcji, które niekoniecznie wymagają tego uprawnienia, takich jak sekcje przeznaczone na stringi).
-- **`__DATA`**: Zawiera dane, które można **odczytywać** i **modyfikować** (bez możliwości wykonywania)**.**
+- `__const`: Dane stałe (tylko do odczytu)
+- `__[c/u/os_log]string`: Stałe stringi C, Unicode lub os logs
+- `__stubs` i `__stubs_helper`: Używane podczas procesu ładowania dynamicznych bibliotek
+- `__unwind_info`: Dane służące do odwijania stosu.
+- Należy zauważyć, że cała ta zawartość jest podpisana, ale również oznaczona jako wykonywalna (co tworzy więcej możliwości exploitation sections, które niekoniecznie wymagają tego uprawnienia, takich jak sekcje przeznaczone na stringi).
+- **`__DATA`**: Zawiera dane, które są **odczytywalne** i **zapisywalne** (bez możliwości wykonywania)**.**
 - `__got:` Global Offset Table
-- `__nl_symbol_ptr`: Wskaźnik symbolu non-lazy (bind podczas ładowania)
-- `__la_symbol_ptr`: Wskaźnik symbolu lazy (bind podczas użycia)
+- `__nl_symbol_ptr`: Non lazy (bind at load) symbol pointer
+- `__la_symbol_ptr`: Lazy (bind on use) symbol pointer
 - `__const`: Powinny to być dane tylko do odczytu (w praktyce nie)
 - `__cfstring`: Stringi CoreFoundation
 - `__data`: Zmienne globalne (które zostały zainicjalizowane)
 - `__bss`: Zmienne statyczne (które nie zostały zainicjalizowane)
 - `__objc_*` (\_\_objc_classlist, \_\_objc_protolist itd.): Informacje używane przez runtime Objective-C
-- **`__DATA_CONST`**: \_\_DATA.\_\_const nie gwarantuje stałości (uprawnienia do zapisu), podobnie jak inne wskaźniki i GOT. Ta sekcja sprawia, że `__const`, niektóre initializery oraz tablica GOT (po rozwiązaniu) stają się **tylko do odczytu** przy użyciu `mprotect`.
-- **`__AUTH` / `__AUTH_CONST`**: Często spotykane w nowszych binary dla Apple Silicon. Te segmenty przechowują wskaźniki, które muszą zostać uwierzytelnione podczas ładowania lub użycia (na przykład `__auth_got`). Jeśli trick związany z rebindingiem, hookiem lub patchowaniem importów sprawdza tylko starsze sekcje `__got` / `__la_symbol_ptr`, może pominąć rzeczywiste miejsca wywołań w nowoczesnych binary `arm64e`. Więcej informacji o tych sekcjach znajdziesz na [tej stronie](../macos-apps-inspecting-debugging-and-fuzzing/objects-in-memory.md).
-- **`__LINKEDIT`**: Zawiera informacje dla linkera (dyld), takie jak wpisy tablic symboli, stringów i relokacji. Jest to ogólny kontener na zawartość, która nie znajduje się ani w `__TEXT`, ani w `__DATA`, a jego zawartość jest opisana w innych load commands.
-- Informacje dyld: Rebase, opcodes wiązania non-lazy/lazy/weak oraz informacje o exportach
-- Początki funkcji: Tablica adresów początkowych funkcji
+- **`__DATA_CONST`**: \_\_DATA.\_\_const nie jest gwarantowanie stała (ma uprawnienia zapisu), podobnie jak inne pointery i GOT. Ta sekcja sprawia, że `__const`, niektóre initializery oraz tabela GOT (po rozwiązaniu) stają się **tylko do odczytu** za pomocą `mprotect`.
+- **`__AUTH` / `__AUTH_CONST`**: Często występują w nowszych binaries dla Apple Silicon. Te segmenty przechowują pointery, które muszą zostać uwierzytelnione podczas ładowania lub użycia (na przykład `__auth_got`). Jeśli rebinding, hook lub trik import-patching sprawdza tylko starsze sekcje `__got` / `__la_symbol_ptr`, może pominąć rzeczywiste miejsca wywołań w nowoczesnych binaries `arm64e`. Więcej informacji o tych sekcjach znajduje się na [tej stronie](../macos-apps-inspecting-debugging-and-fuzzing/objects-in-memory.md).
+- **`__LINKEDIT`**: Zawiera informacje dla linkera (dyld), takie jak wpisy tabeli symboli, stringów i relokacji. To ogólny kontener na zawartość, która nie znajduje się ani w `__TEXT`, ani w `__DATA`, a jego zawartość jest opisana w innych load commands.
+- Informacje dyld: Rebase, Non-lazy/lazy/weak binding opcodes oraz export info
+- Functions starts: Tabela adresów początkowych funkcji
 - Data In Code: Wyspy danych w \_\_text
-- Tablica symboli: Symbole w binary
-- Pośrednia tablica symboli: Symbole wskaźników/stubów
-- Tablica stringów
+- Symbol Table: Symbole w binary
+- Indirect Symbol Table: Symbole pointerów/stubów
+- String Table
 - Code Signature
-- **`__OBJC`**: Zawiera informacje używane przez runtime Objective-C. Informacje te mogą również znajdować się w segmencie \_\_DATA, w różnych sekcjach \_\_objc\_\*.
-- **`__RESTRICT`**: Segment bez zawartości, z pojedynczą sekcją o nazwie **`__restrict`** (również pustą), który zapewnia, że podczas uruchamiania binary zignoruje zmienne środowiskowe DYLD.
+- **`__OBJC`**: Zawiera informacje używane przez runtime Objective-C. Informacje te mogą jednak również znajdować się w segmencie \_\_DATA, w różnych sekcjach \_\_objc\_\*.
+- **`__RESTRICT`**: Segment bez zawartości, zawierający pojedynczą sekcję o nazwie **`__restrict`** (również pustą), która zapewnia, że podczas uruchamiania binary zignoruje zmienne środowiskowe DYLD.
 
-Jak można było zobaczyć w kodzie, **segmenty obsługują również flagi** (chociaż nie są one często używane):
+Jak można było zobaczyć w kodzie, **segmenty obsługują również flags** (choć nie są one zbyt często używane):
 
 - `SG_HIGHVM`: Tylko Core (nieużywane)
 - `SG_FVMLIB`: Nieużywane
@@ -272,9 +272,9 @@ Jak można było zobaczyć w kodzie, **segmenty obsługują również flagi** (c
 
 ### **`LC_UNIXTHREAD/LC_MAIN`**
 
-**`LC_MAIN`** zawiera punkt wejścia w **atrybucie entryoff**. Podczas ładowania **dyld** po prostu **dodaje** tę wartość do (znajdującej się w pamięci) **bazy binary**, a następnie **przeskakuje** do tej instrukcji, aby rozpocząć wykonywanie kodu binary.
+**`LC_MAIN`** zawiera entrypoint w **atrybucie entryoff.** Podczas ładowania **dyld** po prostu **dodaje** tę wartość do (znajdującej się w pamięci) **bazy binary**, a następnie **skacze** do tej instrukcji, aby rozpocząć wykonywanie kodu binary.
 
-**`LC_UNIXTHREAD`** zawiera wartości, które rejestry muszą mieć podczas uruchamiania głównego wątku. Zostało to już uznane za deprecated, ale **`dyld`** nadal z tego korzysta. Wartości rejestrów ustawione w ten sposób można zobaczyć za pomocą:
+**`LC_UNIXTHREAD`** zawiera wartości, które rejestry muszą mieć podczas uruchamiania głównego wątku. Jest to już deprecated, ale **`dyld`** nadal z tego korzysta. Wartości rejestrów ustawione w ten sposób można zobaczyć za pomocą:
 ```bash
 otool -l /usr/lib/dyld
 [...]
@@ -305,60 +305,60 @@ cpsr 0x00000000
 {{#endref}}
 
 
-Zawiera informacje o **code signature pliku Macho-O**. Zawiera jedynie **offset**, który **wskazuje** na **signature blob**. Zwykle znajduje się on na samym końcu pliku.\
-Jednak informacje o tej sekcji można znaleźć w [**tym wpisie na blogu**](https://davedelong.com/blog/2018/01/10/reading-your-own-entitlements/) oraz w tych [**gists**](https://gist.github.com/carlospolop/ef26f8eb9fafd4bc22e69e1a32b81da4).<sup>[3][4]</sup>
+Zawiera informacje o **code signature pliku Mach-O**. Zawiera wyłącznie **offset**, który **wskazuje** na **signature blob**. Zwykle znajduje się ona na samym końcu pliku.\
+Więcej informacji o tej sekcji można znaleźć w [**tym wpisie na blogu**](https://davedelong.com/blog/2018/01/10/reading-your-own-entitlements/) oraz w tych [**gists**](https://gist.github.com/carlospolop/ef26f8eb9fafd4bc22e69e1a32b81da4).<sup>[[3]](#references)[[4]](#references)</sup>
 
 ### **`LC_ENCRYPTION_INFO[_64]`**
 
-Obsługa szyfrowania binarnego. Jednak oczywiście, jeśli atakującemu uda się przejąć proces, będzie on w stanie wykonać dump pamięci w postaci niezaszyfrowanej.
+Obsługa szyfrowania binary. Jednak oczywiście, jeśli atakującemu uda się przejąć proces, będzie on mógł zrzucić pamięć w postaci niezaszyfrowanej.
 
 ### **`LC_LOAD_DYLINKER`**
 
-Zawiera **ścieżkę do pliku wykonywalnego dynamic linker**, który mapuje shared libraries w przestrzeni adresowej procesu. **Wartość jest zawsze ustawiona na `/usr/lib/dyld`**. Należy pamiętać, że w macOS mapowanie dylib odbywa się w **user mode**, a nie w kernel mode.
+Zawiera **ścieżkę do pliku wykonywalnego dynamic linker**, który mapuje shared libraries do przestrzeni adresowej procesu. **Wartość jest zawsze ustawiona na `/usr/lib/dyld`**. Należy pamiętać, że w macOS mapowanie dylib odbywa się w **trybie użytkownika**, a nie w trybie jądra.
 
 ### **`LC_IDENT`**
 
-Przestarzałe, ale gdy skonfigurowano generowanie dumpów w przypadku panic, tworzony jest Mach-O core dump, a wersja kernela jest ustawiana w komendzie `LC_IDENT`.
+Przestarzałe, ale gdy skonfigurowano generowanie dumpów podczas panic, tworzony jest core dump Mach-O, a wersja kernela jest ustawiana w komendzie `LC_IDENT`.
 
 ### **`LC_UUID`**
 
-Losowy UUID. Sam w sobie nie jest do niczego bezpośrednio przydatny, ale XNU cache’uje go wraz z pozostałymi informacjami o procesie. Może być używany w crash reports.
+Losowy UUID. Sam w sobie nie jest bezpośrednio do niczego przydatny, ale XNU buforuje go wraz z pozostałymi informacjami o procesie. Może być używany w raportach o awariach.
 
 ### **`LC_BUILD_VERSION`**
 
-Nowoczesne binaria zwykle zawierają tę komendę, aby zadeklarować **platformę docelową**, **minimalną wersję systemu operacyjnego**, **wersję SDK** oraz opcjonalnie **wersje narzędzi** użytych do zbudowania danego slice. Z perspektywy offensive/reversing jest to bardzo przydatne do identyfikowania sposobu zbudowania próbki oraz szybkiego wykrywania nietypowych universal binaries, w których jeden slice został skompilowany przy użyciu innego SDK lub deployment target. Starsze binaria mogą zamiast tego nadal używać `LC_VERSION_MIN_*`.
+Nowoczesne binary zwykle zawierają tę komendę w celu zadeklarowania **platformy docelowej**, **minimalnej wersji systemu operacyjnego**, **wersji SDK** oraz opcjonalnie **wersji narzędzi** użytych do zbudowania danego slice. Z perspektywy offensive/reversing jest to bardzo przydatne do fingerprintowania sposobu zbudowania sample’a oraz szybkiego wykrywania nietypowych universal binaries, w których jeden slice został skompilowany z użyciem innego SDK lub innego deployment target. Starsze binary mogą zamiast tego nadal używać `LC_VERSION_MIN_*`.
 ```bash
 vtool -show-build /bin/ls
 otool -l /bin/ls | grep -A 8 LC_BUILD_VERSION
 ```
 ### **`LC_DYLD_ENVIRONMENT`**
 
-Pozwala wskazać zmienne środowiskowe dla dyld przed wykonaniem procesu. Może to być bardzo niebezpieczne, ponieważ umożliwia wykonanie dowolnego kodu wewnątrz procesu, dlatego ten load command jest używany wyłącznie w buildach dyld z `#define SUPPORT_LC_DYLD_ENVIRONMENT` i dodatkowo ogranicza przetwarzanie tylko do zmiennych w formacie `DYLD_..._PATH`, określających load paths.
+Pozwala wskazać zmienne środowiskowe dla dyld przed wykonaniem procesu. Może to być bardzo niebezpieczne, ponieważ umożliwia wykonanie dowolnego kodu wewnątrz procesu, dlatego ta load command jest używana wyłącznie w buildach dyld z `#define SUPPORT_LC_DYLD_ENVIRONMENT` i dodatkowo ogranicza przetwarzanie tylko do zmiennych w formie `DYLD_..._PATH`, określających ścieżki ładowania.
 
 ### **`LC_DYLD_EXPORTS_TRIE` i `LC_DYLD_CHAINED_FIXUPS`**
 
-Nowsze toolchains często przechowują metadane export/bind/rebase w tych commands zamiast polegać wyłącznie na starszych opcodes `LC_DYLD_INFO[_ONLY]`. Oba są entries typu `linkedit_data_command`, które wskazują na **`__LINKEDIT`**:
+Nowsze toolchains często przechowują metadata export/bind/rebase w tych commands zamiast polegać wyłącznie na starszych opcode'ach `LC_DYLD_INFO[_ONLY]`. Oba są wpisami `linkedit_data_command`, które wskazują dane w **`__LINKEDIT`**:
 
-- **`LC_DYLD_EXPORTS_TRIE`**: Kompaktowe trie zawierające symbols eksportowane przez image.
-- **`LC_DYLD_CHAINED_FIXUPS`**: Łańcuchy fixups dla poszczególnych segmentów, używane przez dyld do stosowania rebases i binds. Na Apple Silicon znajduje się tu również wiele współczesnych authenticated pointer fixups.
+- **`LC_DYLD_EXPORTS_TRIE`**: Kompaktowe trie zawierające symbole eksportowane przez image.
+- **`LC_DYLD_CHAINED_FIXUPS`**: Łańcuchy fixupów dla poszczególnych segmentów, używane przez dyld do stosowania rebase'ów i bindów. Na Apple Silicon to również miejsce, w którym znajdziesz wiele współczesnych authenticated pointer fixups.
 
-Te metadane są bardzo przydatne podczas odtwarzania imports/exports, analizowania, dlaczego dependency załadowane przez `@rpath` zostało rozwiązane w określony sposób, lub ustalania, dlaczego próba wykonania hook/rebinding nie powiodła się na nowoczesnym celu `arm64e`. `dyld_info` można również wykorzystać względem **cache-only dylib paths**, które nie istnieją jako samodzielne pliki na dysku. Jest to bardzo przydatne w nowoczesnym macOS, gdzie wiele bibliotek systemowych znajduje się wyłącznie we shared cache.<sup>[2]</sup>
+Te metadata są bardzo przydatne podczas odtwarzania importów/eksportów, analizowania, dlaczego dependency załadowane przez `@rpath` zostało rozwiązane w określony sposób, lub ustalania, dlaczego próba hook/rebinding zakończyła się niepowodzeniem na współczesnym celu `arm64e`. `dyld_info` można również wykorzystać względem **cache-only dylib paths**, które nie istnieją jako samodzielne pliki na dysku. Jest to bardzo przydatne we współczesnym macOS, gdzie wiele bibliotek systemowych znajduje się wyłącznie w shared cache.<sup>[[2]](#references)</sup>
 ```bash
 dyld_info -arch arm64e -exports -fixup_chains -fixup_chain_details /bin/ls
 ```
 ### **`LC_FILESET_ENTRY`**
 
-To nowoczesne polecenie ładowania jest istotne głównie podczas analizowania **kernel collections / kernelcache-style filesets**. Zamiast reprezentować pojedynczy samodzielny obraz, zewnętrzny Mach-O działa jako kontener, a każdy `LC_FILESET_ENTRY` wskazuje osadzony Mach-O z własnym przypominającym ścieżkę **entry id**, adresem VM i przesunięciem w pliku. Jeśli przeprowadzasz reverse engineering nowoczesnych komponentów jądra macOS/iOS, to polecenie często stanowi łącznik między kontenerem najwyższego poziomu a właściwym obrazem, który chcesz wyodrębnić lub zdezasemblować.
+To nowoczesne polecenie ładowania jest istotne głównie podczas analizowania **kernel collections / kernelcache-style filesets**. Zamiast reprezentować pojedynczy samodzielny obraz, zewnętrzny Mach-O działa jako kontener, a każde `LC_FILESET_ENTRY` wskazuje osadzony Mach-O z własnym podobnym do ścieżki **entry id**, adresem VM i offsetem w pliku. Jeśli analizujesz wstecznie komponenty jądra modern macOS/iOS, to polecenie często stanowi pomost między kontenerem najwyższego poziomu a właściwym obrazem, który chcesz wyodrębnić lub zdezasemblować.
 ```bash
 otool -l /System/Library/KernelCollections/BootKernelExtensions.kc | grep -A 6 LC_FILESET_ENTRY
 ```
-W przypadku praktycznych procedur ekstrakcji sprawdź [tę inną stronę dotyczącą macOS kernel extensions i kernelcache](../mac-os-architecture/macos-kernel-extensions.md).
+W przypadku praktycznych procesów ekstrakcji sprawdź [tę inną stronę dotyczącą macOS kernel extensions i kernelcache](../mac-os-architecture/macos-kernel-extensions.md).
 
 ### **`LC_LOAD_DYLIB`**
 
-To polecenie ładowania opisuje zależność od **dynamicznej** **biblioteki**, która **instruuje** **loader** (dyld), aby **załadował i połączył wspomnianą bibliotekę**. Istnieje polecenie ładowania `LC_LOAD_DYLIB` **dla każdej biblioteki**, której wymaga binarny plik Mach-O.
+Ta komenda ładowania opisuje zależność od **biblioteki** **dynamicznej**, która instruuje **loader** (dyld), aby **załadował i połączył wskazaną bibliotekę**. Dla **każdej biblioteki**, której wymaga plik binarny Mach-O, istnieje komenda ładowania `LC_LOAD_DYLIB`.
 
-- To polecenie ładowania jest strukturą typu **`dylib_command`** (która zawiera strukturę dylib opisującą faktycznie zależną bibliotekę dynamiczną):
+- Ta komenda ładowania jest strukturą typu **`dylib_command`** (która zawiera strukturę dylib opisującą rzeczywistą zależną bibliotekę dynamiczną):
 ```objectivec
 struct dylib_command {
 uint32_t        cmd;            /* LC_LOAD_{,WEAK_}DYLIB */
@@ -375,7 +375,7 @@ uint32_t compatibility_version;     /* library's compatibility vers number*/
 ```
 ![LC DYLD ENVIRONMENT - LC LOAD DYLIB: uint32 t compatibility version; / library's compatibility vers number /](<../../../images/image (486).png>)
 
-Te informacje można również uzyskać z cli za pomocą:
+Te informacje można również uzyskać z poziomu CLI za pomocą:
 ```bash
 otool -L /bin/ls
 /bin/ls:
@@ -390,33 +390,33 @@ Niektóre biblioteki potencjalnie powiązane ze złośliwym oprogramowaniem to:
 - **CoreWLAN**: Skanowanie sieci Wi-Fi.
 
 > [!TIP]
-> Plik binarny Mach-O może zawierać jeden lub **więcej** **konstruktorów**, które zostaną **wykonane** **przed adresem określonym w** **LC_MAIN**.\
-> Offsety dowolnych konstruktorów są przechowywane w sekcji **\_\_mod_init_func** segmentu **\_\_DATA_CONST**.
+> Plik binarny Mach-O może zawierać jeden lub **więcej** **konstruktorów**, które zostaną **wykonane** **przed** adresem określonym w **LC_MAIN**.\
+> Przesunięcia dowolnych konstruktorów są przechowywane w sekcji **\_\_mod_init_func** segmentu **\_\_DATA_CONST**.
 
 ## **Dane Mach-O**
 
-W centrum pliku znajduje się region danych, który składa się z kilku segmentów zdefiniowanych w regionie load commands. **W każdym segmencie może znajdować się wiele sekcji danych**, a każda sekcja **zawiera kod lub dane** charakterystyczne dla danego typu.
+W centrum pliku znajduje się region danych, który składa się z kilku segmentów zdefiniowanych w regionie poleceń ładowania. **W każdym segmencie może znajdować się wiele sekcji danych**, a każda sekcja **zawiera kod lub dane** specyficzne dla danego typu.
 
 > [!TIP]
-> Dane to zasadniczo część zawierająca wszystkie **informacje**, które są ładowane przez load commands **LC_SEGMENTS_64**
+> Dane to zasadniczo część zawierająca wszystkie **informacje**, które są ładowane przez polecenia ładowania **LC_SEGMENTS_64**
 
 ![https://www.oreilly.com/api/v2/epubs/9781785883378/files/graphics/B05055_02_38.jpg](<../../../images/image (507) (3).png>)
 
 Obejmuje to:
 
 - **Tabela funkcji:** Zawiera informacje o funkcjach programu.
-- **Tabela symboli**: Zawiera informacje o zewnętrznych funkcjach używanych przez plik binarny
+- **Tabela symboli**: Zawiera informacje o zewnętrznych funkcjach używanych przez plik binarny.
 - Może również zawierać nazwy funkcji wewnętrznych, zmiennych i inne informacje.
 
 Aby to sprawdzić, możesz użyć narzędzia [**Mach-O View**](https://sourceforge.net/projects/machoview/):
 
 <figure><img src="../../../images/image (1120).png" alt=""><figcaption></figcaption></figure>
 
-Lub z poziomu CLI:
+Lub z poziomu cli:
 ```bash
 size -m /bin/ls
 ```
-## Typowe sekcje Objective-C
+## Wspólne sekcje Objective-C
 
 W segmencie `__TEXT` (r-x):
 
@@ -427,9 +427,9 @@ W segmencie `__TEXT` (r-x):
 W segmencie `__DATA` (rw-):
 
 - `__objc_classlist`: Wskaźniki do wszystkich klas Objective-C
-- `__objc_nlclslist`: Wskaźniki do Non-Lazy klas Objective-C
+- `__objc_nlclslist`: Wskaźniki do klas Objective-C Non-Lazy
 - `__objc_catlist`: Wskaźnik do kategorii
-- `__objc_nlcatlist`: Wskaźniki do Non-Lazy kategorii
+- `__objc_nlcatlist`: Wskaźniki do kategorii Non-Lazy
 - `__objc_protolist`: Lista protokołów
 - `__objc_const`: Dane stałe
 - `__objc_imageinfo`, `__objc_selrefs`, `objc__protorefs`...
@@ -440,11 +440,11 @@ W segmencie `__DATA` (rw-):
 
 
 
-## Odnośniki
+## Referencje
 
-- [1] [Mach-O slices aren't as straightforward as you might think](https://objective-see.org/blog/blog_0x80.html)
+- [1] [Wycinanki Mach-O nie są tak proste, jak mogłoby się wydawać](https://objective-see.org/blog/blog_0x80.html)
 - [2] [Strona man dyld_info(1)](https://keith.github.io/xcode-man-pages/dyld_info.1.html)
-- [3] [Reading Your Own Entitlements](https://davedelong.com/blog/2018/01/10/reading-your-own-entitlements/)
+- [3] [Odczytywanie własnych entitlements](https://davedelong.com/blog/2018/01/10/reading-your-own-entitlements/)
 - [4] [carlospolop/machoreader.py (gist)](https://gist.github.com/carlospolop/ef26f8eb9fafd4bc22e69e1a32b81da4)
 
 {{#include ../../../banners/hacktricks-training.md}}

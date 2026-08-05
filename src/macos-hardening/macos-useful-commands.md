@@ -2,13 +2,13 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-### Narzędzia do automatycznej enumeracji MacOS
+### Narzędzia do automatycznej enumeracji macOS
 
 - **MacPEAS**: [https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS](https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS)
 - **Metasploit**: [https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb](https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb)
 - **SwiftBelt**: [https://github.com/cedowens/SwiftBelt](https://github.com/cedowens/SwiftBelt)
 
-### Konkretne polecenia MacOS
+### Konkretne polecenia macOS
 ```bash
 #System info
 date
@@ -115,9 +115,9 @@ sudo apachectl (start|status|restart|stop)
 dscacheutil -flushcache
 sudo killall -HUP mDNSResponder
 ```
-### Szybkie sprawdzenie pod kątem anti-analysis / virtualization
+### Szybkie sprawdzenie pod kątem anti-analysis / wirtualizacji
 
-Niektóre stealery dla macOS wywołują `system_profiler`, aby wykrywać maszyny wirtualne, i **przerywają działanie z charakterystycznym kodem wyjścia (np. 100)**, aby uniknąć sandbox detonation<sup>[1]</sup>:
+Niektóre stealery dla macOS wywołują `system_profiler`, aby wykrywać VM i **kończą działanie z charakterystycznym kodem wyjścia (np. 100)**, unikając detonacji w sandboxie<sup>[[1]](#references)</sup>:
 ```bash
 if system_profiler SPHardwareDataType SPDisplaysDataType | grep -Eiq 'qemu|kvm|vmware|virtualbox'; then
 exit 100
@@ -125,14 +125,14 @@ fi
 ```
 ### Zainstalowane oprogramowanie i usługi
 
-Sprawdź, czy zainstalowane są **podejrzane** aplikacje oraz jakie **uprawnienia** istnieją do zainstalowanych zasobów:
+Sprawdź, czy zainstalowane są **podejrzane** aplikacje, oraz **uprawnienia** do zainstalowanych zasobów:
 ```
 system_profiler SPApplicationsDataType #Installed Apps
 system_profiler SPFrameworksDataType #Instaled framework
 lsappinfo list #Installed Apps
 launchctl list #Services
 ```
-### Procesy użytkownika
+### Procesy użytkowników
 ```bash
 # will print all the running services under that particular user domain.
 launchctl print gui/<users UID>
@@ -151,6 +151,6 @@ Bez monitów
 
 ## Referencje
 
-- [1] [2025, rok Infostealerów](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
+- [1] [2025, the year of the Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
 
 {{#include ../banners/hacktricks-training.md}}

@@ -4,33 +4,33 @@
 
 ## **Wprowadzenie do x64**
 
-x64, znane również jako x86-64, to 64-bitowa architektura procesorów używana głównie w komputerach stacjonarnych i serwerach. Wywodzi się z architektury x86 stworzonej przez firmę Intel, a następnie przyjętej przez AMD pod nazwą AMD64. Obecnie jest to dominująca architektura w komputerach osobistych i serwerach.
+x64, znane również jako x86-64, to 64-bitowa architektura procesorów używana głównie w komputerach stacjonarnych i serwerach. Wywodzi się z architektury x86 stworzonej przez firmę Intel, a następnie zaadaptowanej przez AMD pod nazwą AMD64. Obecnie jest to dominująca architektura w komputerach osobistych i serwerach.
 
 ### **Rejestry**
 
-x64 rozwija architekturę x86, oferując **16 rejestrów ogólnego przeznaczenia** oznaczonych jako `rax`, `rbx`, `rcx`, `rdx`, `rbp`, `rsp`, `rsi`, `rdi` oraz `r8` do `r15`. Każdy z nich może przechowywać wartość **64-bitową** (8-bajtową). Rejestry te mają również 32-bitowe, 16-bitowe i 8-bitowe podrejestry zapewniające kompatybilność i obsługę określonych zadań.
+x64 rozszerza architekturę x86, oferując **16 rejestrów ogólnego przeznaczenia** oznaczonych jako `rax`, `rbx`, `rcx`, `rdx`, `rbp`, `rsp`, `rsi`, `rdi` oraz od `r8` do `r15`. Każdy z nich może przechowywać wartość **64-bitową** (8-bajtową). Rejestry te mają również 32-bitowe, 16-bitowe i 8-bitowe podrejestry zapewniające kompatybilność i obsługę określonych zadań.
 
 1. **`rax`** - Tradycyjnie używany do przechowywania **wartości zwracanych** przez funkcje.
-2. **`rbx`** - Często używany jako **rejestr bazowy** dla operacji na pamięci.
+2. **`rbx`** - Często używany jako **rejestr bazowy** w operacjach na pamięci.
 3. **`rcx`** - Powszechnie używany jako **licznik pętli**.
 4. **`rdx`** - Używany w różnych rolach, w tym w rozszerzonych operacjach arytmetycznych.
 5. **`rbp`** - **Wskaźnik bazowy** ramki stosu.
-6. **`rsp`** - **Wskaźnik stosu**, śledzący jego wierzchołek.
-7. **`rsi`** i **`rdi`** - Używane jako indeksy **źródłowe** i **docelowe** w operacjach na ciągach znaków i pamięci.
+6. **`rsp`** - **Wskaźnik stosu**, śledzący wierzchołek stosu.
+7. **`rsi`** i **`rdi`** - Używane jako indeksy **źródłowy** i **docelowy** w operacjach na łańcuchach/pamięci.
 8. **`r8`** do **`r15`** - Dodatkowe rejestry ogólnego przeznaczenia wprowadzone w x64.
 
-### **Konwencja wywołań**
+### **Konwencja wywoływania**
 
-Konwencja wywołań x64 różni się w zależności od systemu operacyjnego. Na przykład:
+Konwencja wywoływania x64 różni się w zależności od systemu operacyjnego. Na przykład:
 
 - **Windows**: Pierwsze **cztery parametry** są przekazywane w rejestrach **`rcx`**, **`rdx`**, **`r8`** i **`r9`**. Kolejne parametry są umieszczane na stosie. Wartość zwracana znajduje się w **`rax`**.
-- **System V (powszechnie używany w systemach uniksopodobnych)**: Pierwsze **sześć parametrów całkowitoliczbowych lub wskaźnikowych** jest przekazywanych w rejestrach **`rdi`**, **`rsi`**, **`rdx`**, **`rcx`**, **`r8`** i **`r9`**. Wartość zwracana również znajduje się w **`rax`**.
+- **System V (powszechnie używany w systemach uniksopodobnych)**: Pierwsze **sześć parametrów całkowitych lub wskaźnikowych** jest przekazywanych w rejestrach **`rdi`**, **`rsi`**, **`rdx`**, **`rcx`**, **`r8`** i **`r9`**. Wartość zwracana również znajduje się w **`rax`**.
 
-Jeśli funkcja ma więcej niż sześć argumentów, **pozostałe zostaną przekazane na stosie**. **RSP**, czyli wskaźnik stosu, musi być **wyrównany do 16 bajtów**, co oznacza, że adres, na który wskazuje, musi być podzielny przez 16 przed wykonaniem dowolnego wywołania. Oznacza to, że zwykle musimy zadbać o prawidłowe wyrównanie RSP w naszym shellcode przed wywołaniem funkcji. W praktyce jednak wywołania systemowe często działają nawet wtedy, gdy ten wymóg nie jest spełniony.
+Jeśli funkcja ma więcej niż sześć argumentów, **pozostałe zostaną przekazane na stosie**. **RSP**, czyli wskaźnik stosu, musi być **wyrównany do 16 bajtów**, co oznacza, że wskazywany przez niego adres musi być podzielny przez 16 przed wykonaniem dowolnego wywołania. Oznacza to, że zazwyczaj musimy zapewnić prawidłowe wyrównanie RSP w naszym shellcode przed wywołaniem funkcji. W praktyce jednak wywołania systemowe często działają nawet wtedy, gdy ten wymóg nie jest spełniony.
 
-### Konwencja wywołań w Swift
+### Konwencja wywoływania w Swift
 
-Swift ma własną **konwencję wywołań**, którą można znaleźć pod adresem [**https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#x86-64**](https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#x86-64)
+Swift ma własną **konwencję wywoływania**, którą można znaleźć w [**https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#x86-64**](https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#x86-64)
 
 ### **Typowe instrukcje**
 
@@ -38,38 +38,38 @@ Instrukcje x64 oferują bogaty zestaw, zachowując kompatybilność z wcześniej
 
 - **`mov`**: **Przenosi** wartość z jednego **rejestru** lub **obszaru pamięci** do innego.
 - Przykład: `mov rax, rbx` — Przenosi wartość z `rbx` do `rax`.
-- **`push`** i **`pop`**: Umieszczają wartości na **stosie** lub pobierają je ze **stosu**.
+- **`push`** i **`pop`**: Umieszczają wartości na **stosie** lub zdejmują je ze stosu.
 - Przykład: `push rax` — Umieszcza wartość z `rax` na stosie.
-- Przykład: `pop rax` — Pobiera wartość ze szczytu stosu do `rax`.
+- Przykład: `pop rax` — Zdejmuje wartość ze szczytu stosu i umieszcza ją w `rax`.
 - **`add`** i **`sub`**: Operacje **dodawania** i **odejmowania**.
-- Przykład: `add rax, rcx` — Dodaje wartości z `rax` i `rcx`, zapisując wynik w `rax`.
+- Przykład: `add rax, rcx` — Dodaje wartości w `rax` i `rcx`, zapisując wynik w `rax`.
 - **`mul`** i **`div`**: Operacje **mnożenia** i **dzielenia**. Uwaga: mają one określone zachowanie dotyczące użycia operandów.
-- **`call`** i **`ret`**: Służą do **wywoływania funkcji** i **powracania z funkcji**.
-- **`int`**: Służy do wywoływania programowego **przerwania**. Np. `int 0x80` było używane do wywołań systemowych w 32-bitowym systemie Linux x86.
-- **`cmp`**: **Porównuje** dwie wartości i ustawia flagi procesora na podstawie wyniku.
+- **`call`** i **`ret`**: Służą do **wywoływania** funkcji i **powracania z funkcji**.
+- **`int`**: Służy do wyzwalania programowego **przerwania**. Np. `int 0x80` było używane do wywołań systemowych w 32-bitowym systemie x86 Linux.
+- **`cmp`**: **Porównuje** dwie wartości i ustawia flagi CPU na podstawie wyniku.
 - Przykład: `cmp rax, rdx` — Porównuje `rax` z `rdx`.
-- **`je`, `jne`, `jl`, `jge`, ...**: Instrukcje **skoku warunkowego**, które zmieniają przepływ sterowania na podstawie wyników wcześniejszej instrukcji `cmp` lub testu.
+- **`je`, `jne`, `jl`, `jge`, ...**: Instrukcje **warunkowego skoku**, które zmieniają przepływ sterowania na podstawie wyników wcześniejszej instrukcji `cmp` lub testu.
 - Przykład: Po instrukcji `cmp rax, rdx`, `je label` — Przeskakuje do `label`, jeśli `rax` jest równe `rdx`.
 - **`syscall`**: Służy do wykonywania **wywołań systemowych** w niektórych systemach x64 (takich jak współczesne systemy Unix).
 - **`sysenter`**: Zoptymalizowana instrukcja **wywołania systemowego** dostępna na niektórych platformach.
 
 ### **Prolog funkcji**
 
-1. **Umieszczenie starego wskaźnika bazowego na stosie**: `push rbp` (zapisuje wskaźnik bazowy wywołującego)
+1. **Umieszczenie starego wskaźnika bazowego na stosie**: `push rbp` (zapisuje wskaźnik bazowy funkcji wywołującej)
 2. **Przeniesienie bieżącego wskaźnika stosu do wskaźnika bazowego**: `mov rbp, rsp` (konfiguruje nowy wskaźnik bazowy bieżącej funkcji)
 3. **Przydzielenie miejsca na stosie dla zmiennych lokalnych**: `sub rsp, <size>` (gdzie `<size>` oznacza liczbę wymaganych bajtów)
 
 ### **Epilog funkcji**
 
 1. **Przeniesienie bieżącego wskaźnika bazowego do wskaźnika stosu**: `mov rsp, rbp` (zwalnia miejsce zmiennych lokalnych)
-2. **Zdjęcie starego wskaźnika bazowego ze stosu**: `pop rbp` (przywraca wskaźnik bazowy wywołującego)
-3. **Powrót**: `ret` (przekazuje sterowanie z powrotem do wywołującego)
+2. **Zdjęcie starego wskaźnika bazowego ze stosu**: `pop rbp` (przywraca wskaźnik bazowy funkcji wywołującej)
+3. **Powrót**: `ret` (przekazuje sterowanie z powrotem do funkcji wywołującej)
 
 ## macOS
 
 ### syscalls
 
-Istnieją różne klasy wywołań systemowych, które można [**znaleźć tutaj**](https://opensource.apple.com/source/xnu/xnu-1504.3.12/osfmk/mach/i386/syscall_sw.h)**:**
+Istnieją różne klasy syscalls, które można [**znaleźć tutaj**](https://opensource.apple.com/source/xnu/xnu-1504.3.12/osfmk/mach/i386/syscall_sw.h)**:**
 ```c
 #define SYSCALL_CLASS_NONE	0	/* Invalid */
 #define SYSCALL_CLASS_MACH	1	/* Mach */
@@ -95,9 +95,9 @@ Następnie możesz znaleźć numer każdego syscalla [**pod tym adresem**](https
 12	AUE_CHDIR	ALL	{ int chdir(user_addr_t path); }
 [...]
 ```
-Zatem, aby wywołać syscall `open` (**5**) z klasy **Unix/BSD**, należy go dodać: `0x2000000`
+Aby wywołać syscall `open` (**5**) z klasy **Unix/BSD**, należy dodać `0x2000000`
 
-Numer syscall do wywołania `open` wynosiłby `0x2000005`
+Zatem numer syscall do wywołania `open` to `0x2000005`
 
 ### Shellcodes
 
@@ -168,7 +168,7 @@ return 0;
 
 #### Shell
 
-Pobrane [**stąd**](https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/shell.s) i objaśnione.<sup>[1]</sup>
+Pobrane z [**tutaj**](https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/shell.s) i objaśnione.<sup>[[1]](#references)</sup>
 
 {{#tabs}}
 {{#tab name="with adr"}}
@@ -280,7 +280,7 @@ touch_command:  db "touch /tmp/lalala", 0
 ```
 #### Bind shell
 
-Bind shell z [https://packetstormsecurity.com/files/151731/macOS-TCP-4444-Bind-Shell-Null-Free-Shellcode.html](https://packetstormsecurity.com/files/151731/macOS-TCP-4444-Bind-Shell-Null-Free-Shellcode.html) na **porcie 4444**<sup>[2]</sup>.
+Bind shell z [https://packetstormsecurity.com/files/151731/macOS-TCP-4444-Bind-Shell-Null-Free-Shellcode.html](https://packetstormsecurity.com/files/151731/macOS-TCP-4444-Bind-Shell-Null-Free-Shellcode.html) na **porcie 4444**<sup>[[2]](#references)</sup>.
 ```armasm
 section .text
 global _main
@@ -357,7 +357,7 @@ syscall
 ```
 #### Reverse Shell
 
-Reverse shell z [https://packetstormsecurity.com/files/151727/macOS-127.0.0.1-4444-Reverse-Shell-Shellcode.html](https://packetstormsecurity.com/files/151727/macOS-127.0.0.1-4444-Reverse-Shell-Shellcode.html). Reverse shell do **127.0.0.1:4444**<sup>[3]</sup>.
+Reverse shell z [https://packetstormsecurity.com/files/151727/macOS-127.0.0.1-4444-Reverse-Shell-Shellcode.html](https://packetstormsecurity.com/files/151727/macOS-127.0.0.1-4444-Reverse-Shell-Shellcode.html). Reverse shell do **127.0.0.1:4444**<sup>[[3]](#references)</sup>.
 ```armasm
 section .text
 global _main

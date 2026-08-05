@@ -9,12 +9,12 @@
 {{#endref}}
 
 
-Binarne pliki Mach-o zawierają polecenie ładowania o nazwie **`LC_CODE_SIGNATURE`**, które wskazuje **offset** i **rozmiar** podpisów znajdujących się wewnątrz pliku binarnego. Za pomocą narzędzia GUI MachOView można znaleźć na końcu pliku binarnego sekcję o nazwie **Code Signature** zawierającą te informacje:
+Binaries Mach-o zawierają polecenie ładowania o nazwie **`LC_CODE_SIGNATURE`**, które wskazuje **offset** i **rozmiar** podpisów znajdujących się wewnątrz binary. W rzeczywistości, korzystając z narzędzia GUI MachOView, można znaleźć na końcu binary sekcję o nazwie **Code Signature** zawierającą te informacje:
 
 <figure><img src="../../../images/image (1) (1) (1) (1).png" alt="" width="431"><figcaption></figcaption></figure>
 
-Nagłówek magiczny Code Signature to **`0xFADE0CC0`** (embedded code signature) lub **`0xFADE0CC1`** (detached code signature). Następnie znajdują się informacje, takie jak długość i liczba blobów superBlob, który je zawiera.\
-Informacje te można znaleźć w [kodzie źródłowym tutaj](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/osfmk/kern/cs_blobs.h#L276):<sup>[1]</sup>
+Nagłówek magiczny Code Signature to **`0xFADE0CC0`** (embedded code signature) lub **`0xFADE0CC1`** (detached code signature). Następnie znajdują się informacje takie jak długość i liczba blobs w superBlob, który je zawiera.\
+Informacje te można znaleźć w [kodzie źródłowym tutaj](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/osfmk/kern/cs_blobs.h#L276):<sup>[[1]](#references)</sup>
 ```c
 /*
 * Structure of an embedded-signature SuperBlob
@@ -43,14 +43,14 @@ char data[];
 } CS_GenericBlob
 __attribute__ ((aligned(1)));
 ```
-Typowe bloby zawierają Code Directory, Requirements i Entitlements oraz Cryptographic Message Syntax (CMS).\
-Ponadto zwróć uwagę, że dane zakodowane w blobach są kodowane w **Big Endian.**
+Typowe bloby obejmują Code Directory, Requirements i Entitlements oraz Cryptographic Message Syntax (CMS).\
+Ponadto zwróć uwagę, że dane zakodowane w blobach są kodowane w formacie **Big Endian.**
 
-Co więcej, podpisy mogą być odłączane od plików binarnych i przechowywane w `/var/db/DetachedSignatures` (używane przez iOS).
+Ponadto sygnatury mogą być odłączane od plików binarnych i przechowywane w `/var/db/DetachedSignatures` (używane przez iOS).
 
 ## Code Directory Blob
 
-Deklarację [Code Directory Blob można znaleźć w kodzie](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/osfmk/kern/cs_blobs.h#L104):<sup>[1]</sup>
+Deklarację [Code Directory Blob można znaleźć w kodzie](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/osfmk/kern/cs_blobs.h#L104):<sup>[[1]](#references)</sup>
 ```c
 typedef struct __CodeDirectory {
 uint32_t magic;                                 /* magic number (CSMAGIC_CODEDIRECTORY) */
@@ -106,14 +106,14 @@ char end_withLinkage[0];
 } CS_CodeDirectory
 __attribute__ ((aligned(1)));
 ```
-Należy pamiętać, że istnieją różne wersje tej struktury, a starsze mogą zawierać mniej informacji.
+Należy pamiętać, że istnieją różne wersje tej struktury, a starsze z nich mogą zawierać mniej informacji.
 
 Należy pamiętać, że katalog Code może używać dowolnego algorytmu haszującego. Obecnie najczęściej używany jest **SHA256** (wskazywany przez wartość 2 w polu `hashType`), ale w przyszłości, jeśli ten hash zostanie złamany, Apple może zacząć używać innego.
 
 ## Podpisywanie stron kodu
 
-Haszowanie całego pliku binarnego byłoby nieefektywne, a nawet bezużyteczne, jeśli podczas ładowania do pamięci jest on ładowany tylko częściowo. Dlatego sygnatura kodu jest w rzeczywistości hashem hashy, w którym każda strona pliku binarnego jest haszowana indywidualnie.\
-W poprzednim kodzie **Code Directory** można zobaczyć, że **rozmiar strony jest określony** w jednym z jego pól. Ponadto, jeśli rozmiar pliku binarnego nie jest wielokrotnością rozmiaru strony, pole **CodeLimit** określa, gdzie znajduje się koniec sygnatury.
+Haszowanie całego pliku binarnego byłoby nieefektywne, a nawet bezużyteczne, jeśli jest on ładowany do pamięci tylko częściowo. Dlatego sygnatura kodu jest w rzeczywistości hashem hashy, w którym każda strona pliku binarnego jest haszowana osobno.\
+W rzeczywistości w przedstawionym wcześniej kodzie **Code Directory** można zobaczyć, że **rozmiar strony jest określony** w jednym z jego pól. Ponadto, jeśli rozmiar pliku binarnego nie jest wielokrotnością rozmiaru strony, pole **CodeLimit** określa, gdzie kończy się sygnatura.
 ```bash
 # Get all hashes of /bin/ps
 codesign -d -vvvvvv /bin/ps
@@ -184,25 +184,25 @@ openssl sha256 /tmp/*.page.*
 ```
 ## Entitlements Blob
 
-Należy pamiętać, że aplikacje mogą również zawierać **entitlement blob**, w którym zdefiniowane są wszystkie uprawnienia. Ponadto niektóre pliki binarne iOS mogą mieć swoje uprawnienia określone w specjalnym slocie -7 (zamiast w specjalnym slocie uprawnień -5).
+Należy pamiętać, że aplikacje mogą również zawierać **entitlement blob**, w którym zdefiniowane są wszystkie entitlements. Ponadto niektóre binaria iOS mogą mieć swoje entitlements określone w specjalnym slocie -7 (zamiast w specjalnym slocie entitlements -5).
 
 ## Special Slots
 
-Aplikacje MacOS nie mają wszystkiego, czego potrzebują do wykonania, wewnątrz pliku binarnego, ale korzystają również z **external resources** (zwykle znajdujących się wewnątrz **bundle** aplikacji). Dlatego w pliku binarnym istnieją sloty zawierające hashe niektórych interesujących zasobów zewnętrznych, aby sprawdzić, czy nie zostały zmodyfikowane.
+Aplikacje macOS nie mają wszystkiego, czego potrzebują do uruchomienia, wewnątrz binariów, lecz korzystają również z **external resources** (zwykle znajdujących się wewnątrz **bundle** aplikacji). Dlatego w binarium znajduje się kilka slotów zawierających hashe niektórych interesujących external resources, aby można było sprawdzić, czy nie zostały zmodyfikowane.
 
-W strukturach Code Directory można znaleźć parametr o nazwie **`nSpecialSlots`**, wskazujący liczbę special slots. Nie istnieje slot specjalny 0, a najczęściej używane sloty (od -1 do -6) to:
+W strukturach Code Directory można znaleźć parametr o nazwie **`nSpecialSlots`**, wskazujący liczbę special slots. Slot 0 nie istnieje, a najczęściej używane sloty (od -1 do -6) to:
 
 - Hash `info.plist` (lub tego znajdującego się w `__TEXT.__info__plist`).
 - Hash Requirements
 - Hash Resource Directory (hash pliku `_CodeSignature/CodeResources` wewnątrz bundle).
 - Application specific (unused)
 - Hash entitlements
-- Tylko dla podpisów kodu DMG
+- Tylko sygnatury kodu DMG
 - DER Entitlements
 
 ## Code Signing Flags
 
-Każdy proces ma powiązaną maskę bitową znaną jako `status`, która jest ustawiana przez kernel, a niektóre jej wartości mogą zostać nadpisane przez **code signature**. Te flagi, które można uwzględnić w code signing, są [defined in the code](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/osfmk/kern/cs_blobs.h#L36):<sup>[1]</sup>
+Każdy proces ma powiązaną maskę bitową znaną jako `status`, która jest inicjowana przez kernel, a niektóre z jej wartości mogą zostać nadpisane przez **code signature**. Flagi te, które mogą zostać uwzględnione w code signing, są [zdefiniowane w kodzie](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/osfmk/kern/cs_blobs.h#L36):<sup>[[1]](#references)</sup>.
 ```c
 /* code signing attributes of a process */
 #define CS_VALID                    0x00000001  /* dynamically valid */
@@ -247,15 +247,15 @@ CS_RESTRICT | CS_ENFORCEMENT | CS_REQUIRE_LV | CS_RUNTIME | CS_LINKER_SIGNED)
 
 #define CS_ENTITLEMENT_FLAGS        (CS_GET_TASK_ALLOW | CS_INSTALLER | CS_DATAVAULT_CONTROLLER | CS_NVRAM_UNRESTRICTED)
 ```
-Zauważ, że funkcja [**exec_mach_imgact**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/kern/kern_exec.c#L1420) może również dynamicznie dodawać flagi `CS_EXEC_*` podczas uruchamiania procesu.
+Zauważ, że funkcja [**exec_mach_imgact**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/kern/kern_exec.c#L1420) może również dynamicznie dodawać flagi `CS_EXEC_*` podczas uruchamiania wykonania.
 
 ## Wymagania podpisu kodu
 
-Każda aplikacja przechowuje pewne **wymagania**, które musi **spełniać**, aby można było ją uruchomić. Jeśli **aplikacja zawiera wymagania, które nie są przez nią spełnione**, nie zostanie uruchomiona (prawdopodobnie została zmodyfikowana).
+Każda aplikacja przechowuje pewne **wymagania**, które musi **spełniać**, aby można było ją uruchomić. Jeśli **aplikacja zawiera wymagania, które nie są przez nią spełnione**, nie zostanie uruchomiona (ponieważ prawdopodobnie została zmodyfikowana).
 
-Wymagania pliku binarnego korzystają ze **specjalnej gramatyki**, która jest strumieniem **wyrażeń**, i są kodowane jako bloby z użyciem `0xfade0c00` jako wartości magicznej, której **hash jest przechowywany w specjalnym slocie kodu**.
+Wymagania pliku binarnego używają **specjalnej gramatyki**, która jest strumieniem **wyrażeń**, i są kodowane jako bloby przy użyciu `0xfade0c00` jako magicznej wartości, której **hash jest przechowywany w specjalnym code slot**.
 
-Wymagania pliku binarnego można wyświetlić za pomocą:
+Wymagania pliku binarnego można wyświetlić, uruchamiając:
 ```bash
 codesign -d -r- /bin/ls
 Executable=/bin/ls
@@ -266,9 +266,9 @@ Executable=/Applications/Signal.app/Contents/MacOS/Signal
 designated => identifier "org.whispersystems.signal-desktop" and anchor apple generic and certificate 1[field.1.2.840.113635.100.6.2.6] /* exists */ and certificate leaf[field.1.2.840.113635.100.6.1.13] /* exists */ and certificate leaf[subject.OU] = U68MSDN6DR
 ```
 > [!TIP]
-> Zauważ, że te sygnatury mogą sprawdzać takie elementy jak informacje o certyfikacie, TeamID, identyfikatory, uprawnienia i wiele innych danych.
+> Zwróć uwagę, że te sygnatury mogą sprawdzać takie elementy jak informacje certyfikacyjne, TeamID, identyfikatory, entitlements i wiele innych danych.
 
-Ponadto można wygenerować skompilowane requirements za pomocą narzędzia `csreq`:
+Ponadto można wygenerować skompilowane wymagania za pomocą narzędzia `csreq`:
 ```bash
 # Generate compiled requirements
 csreq -b /tmp/output.csreq -r='identifier "org.whispersystems.signal-desktop" and anchor apple generic and certificate 1[field.1.2.840.113635.100.6.2.6] /* exists */ and certificate leaf[field.1.2.840.113635.100.6.1.13] /* exists */ and certificate leaf[subject.OU] = U68MSDN6DR'
@@ -280,60 +280,60 @@ od -A x -t x1 /tmp/output.csreq
 0000020    00  00  00  21  6f  72  67  2e  77  68  69  73  70  65  72  73
 [...]
 ```
-Możliwe jest uzyskanie dostępu do tych informacji oraz tworzenie lub modyfikowanie wymagań za pomocą niektórych API z `Security.framework`, takich jak:<sup>[4]</sup>
+Możliwe jest uzyskanie dostępu do tych informacji oraz tworzenie lub modyfikowanie wymagań za pomocą niektórych API z `Security.framework`, takich jak:<sup>[[4]](#references)</sup>
 
 #### **Sprawdzanie poprawności**
 
-- **`Sec[Static]CodeCheckValidity`**: Sprawdza poprawność SecCodeRef względem Requirement.
+- **`Sec[Static]CodeCheckValidity`**: Sprawdza poprawność SecCodeRef zgodnie z Requirement.
 - **`SecRequirementEvaluate`**: Weryfikuje requirement w kontekście certyfikatu.
-- **`SecTaskValidateForRequirement`**: Weryfikuje działający SecTask względem requirement `CFString`.
+- **`SecTaskValidateForRequirement`**: Weryfikuje działający SecTask względem requirement typu `CFString`.
 
-#### **Tworzenie i zarządzanie wymaganiami kodu**
+#### **Tworzenie i zarządzanie Code Requirements**
 
 - **`SecRequirementCreateWithData`:** Tworzy `SecRequirementRef` z danych binarnych reprezentujących requirement.
 - **`SecRequirementCreateWithString`:** Tworzy `SecRequirementRef` z wyrażenia tekstowego requirement.
 - **`SecRequirementCopy[Data/String]`**: Pobiera binarną reprezentację `SecRequirementRef`.
-- **`SecRequirementCreateGroup`**: Tworzy requirement dla członkostwa w app-group.
+- **`SecRequirementCreateGroup`**: Tworzy requirement dotyczący członkostwa w app-group.
 
-#### **Uzyskiwanie informacji o podpisywaniu kodu**
+#### **Uzyskiwanie informacji o Code Signing**
 
-- **`SecStaticCodeCreateWithPath`**: Inicjalizuje obiekt `SecStaticCodeRef` na podstawie ścieżki systemu plików w celu sprawdzenia podpisów kodu.
-- **`SecCodeCopySigningInformation`**: Pobiera informacje o podpisie z `SecCodeRef` lub `SecStaticCodeRef`.
+- **`SecStaticCodeCreateWithPath`**: Inicjalizuje obiekt `SecStaticCodeRef` na podstawie ścieżki systemu plików w celu sprawdzenia code signatures.
+- **`SecCodeCopySigningInformation`**: Pobiera informacje o signing z `SecCodeRef` lub `SecStaticCodeRef`.
 
-#### **Modyfikowanie wymagań kodu**
+#### **Modyfikowanie Code Requirements**
 
-- **`SecCodeSignerCreate`**: Tworzy obiekt `SecCodeSignerRef` do wykonywania operacji podpisywania kodu.
-- **`SecCodeSignerSetRequirement`**: Ustawia nowe wymaganie, które code signer zastosuje podczas podpisywania.
-- **`SecCodeSignerAddSignature`**: Dodaje podpis do podpisywanego kodu przy użyciu określonego signera.
+- **`SecCodeSignerCreate`**: Tworzy obiekt `SecCodeSignerRef` do wykonywania operacji code signing.
+- **`SecCodeSignerSetRequirement`**: Ustawia nowy requirement, który code signer zastosuje podczas signing.
+- **`SecCodeSignerAddSignature`**: Dodaje signature do podpisywanego code przy użyciu określonego signera.
 
-#### **Weryfikowanie kodu względem wymagań**
+#### **Weryfikowanie Code za pomocą Requirements**
 
-- **`SecStaticCodeCheckValidity`**: Weryfikuje statyczny obiekt kodu względem określonych wymagań.
+- **`SecStaticCodeCheckValidity`**: Weryfikuje statyczny obiekt code względem określonych requirements.
 
 #### **Dodatkowe przydatne API**
 
 - **`SecCodeCopy[Internal/Designated]Requirement`: Pobiera SecRequirementRef z SecCodeRef**
-- **`SecCodeCopyGuestWithAttributes`**: Tworzy `SecCodeRef` reprezentujący obiekt kodu na podstawie określonych atrybutów, co jest przydatne w sandboxingu.
+- **`SecCodeCopyGuestWithAttributes`**: Tworzy `SecCodeRef` reprezentujący obiekt code na podstawie określonych atrybutów, co jest przydatne podczas sandboxingu.
 - **`SecCodeCopyPath`**: Pobiera ścieżkę systemu plików powiązaną z `SecCodeRef`.
 - **`SecCodeCopySigningIdentifier`**: Pobiera signing identifier, np. Team ID, z `SecCodeRef`.
-- **`SecCodeGetTypeID`**: Zwraca identyfikator typu dla obiektów `SecCodeRef`.
-- **`SecRequirementGetTypeID`**: Pobiera CFTypeID elementu `SecRequirementRef`.
+- **`SecCodeGetTypeID`**: Zwraca type identifier dla obiektów `SecCodeRef`.
+- **`SecRequirementGetTypeID`**: Pobiera CFTypeID obiektu `SecRequirementRef`.
 
-#### **Flagi i stałe podpisywania kodu**
+#### **Flagi i stałe Code Signing**
 
-- **`kSecCSDefaultFlags`**: Domyślne flagi używane w wielu funkcjach Security.framework do operacji podpisywania kodu.
-- **`kSecCSSigningInformation`**: Flaga określająca, że należy pobrać informacje o podpisie.
+- **`kSecCSDefaultFlags`**: Domyślne flagi używane w wielu funkcjach Security.framework do operacji code signing.
+- **`kSecCSSigningInformation`**: Flaga określająca, że należy pobrać informacje o signing.
 
-## Wymuszanie podpisu kodu
+## Wymuszanie Code Signature
 
-To **kernel** **sprawdza podpis kodu** przed zezwoleniem na wykonanie kodu aplikacji. Ponadto jednym ze sposobów zapisywania i wykonywania nowego kodu w pamięci jest wykorzystanie JIT, jeśli `mprotect` zostanie wywołane z flagą `MAP_JIT`. Należy pamiętać, że aplikacja potrzebuje specjalnego entitlement, aby móc to zrobić.
+To **kernel** **sprawdza code signature** przed zezwoleniem na wykonanie code aplikacji. Ponadto jednym ze sposobów zapisywania i wykonywania nowego code w pamięci jest nadużycie JIT, jeśli `mprotect` zostanie wywołane z flagą `MAP_JIT`. Należy pamiętać, że aplikacja potrzebuje specjalnego entitlement, aby móc to zrobić.
 
 ## `cs_blobs` i `cs_blob`
 
-Struktura [**cs_blob**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/sys/ubc_internal.h#L106) zawiera informacje o entitlementach uruchomionego procesu. `csb_platform_binary` informuje również, czy aplikacja jest **platform binary** (co system operacyjny sprawdza w różnych momentach, aby zastosować mechanizmy bezpieczeństwa, takie jak ochrona praw SEND do task ports tych procesów).
+Struktura [**cs_blob**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/sys/ubc_internal.h#L106) zawiera informacje o entitlement działającego procesu. `csb_platform_binary` informuje również, czy aplikacja jest **platform binary** (co jest sprawdzane przez system operacyjny w różnych momentach w celu zastosowania mechanizmów bezpieczeństwa, takich jak ochrona praw SEND do task portów tych procesów).
 
 > [!WARNING]
-> Należy pamiętać, że kilka środków bezpieczeństwa zależy od tego, czy plik binarny jest **platform binary**, dlatego jednym ze sposobów eskalacji uprawnień jest **uczynienie pliku binarnego platform binary** (na przykład przez ponowne podpisanie go certyfikatem, który na to pozwala).
+> Należy pamiętać, że kilka środków bezpieczeństwa zależy od tego, czy binary jest platform binary, dlatego sposobem na eskalację uprawnień jest **uczynienie binary platform binary** (na przykład przez ponowne podpisanie go certyfikatem, który na to pozwala).
 ```c
 struct cs_blob {
 struct cs_blob  *csb_next;
@@ -392,12 +392,12 @@ bool csb_csm_managed;
 #endif
 };
 ```
-## Odnośniki
+## Odniesienia
 
-- [1] [XNU — `osfmk/kern/cs_blobs.h` (`CodeDirectory`, flagi `CS_*`, wartości magiczne blobów)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/kern/cs_blobs.h)
-- [2] [XNU — `bsd/kern/ubc_subr.c` (obsługa `cs_blob` i walidacja podpisu)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/kern/ubc_subr.c)
-- [3] [XNU — `bsd/sys/codesign.h` (operacje `csops`/`csops_audittoken`)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/sys/codesign.h)
-- [4] [Kod źródłowy frameworka Apple Security — `libsecurity_codesigning`](https://github.com/apple-oss-distributions/Security/tree/main/OSX/libsecurity_codesigning)
+- [1] [XNU — `osfmk/kern/cs_blobs.h` (`CodeDirectory`, `CS_*` flags, blob magic values)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/kern/cs_blobs.h)
+- [2] [XNU — `bsd/kern/ubc_subr.c` (`cs_blob` handling and signature validation)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/kern/ubc_subr.c)
+- [3] [XNU — `bsd/sys/codesign.h` (`csops`/`csops_audittoken` operations)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/sys/codesign.h)
+- [4] [Apple Security framework source — `libsecurity_codesigning`](https://github.com/apple-oss-distributions/Security/tree/main/OSX/libsecurity_codesigning)
 - [5] [Apple Developer — Code Signing Guide](https://developer.apple.com/library/archive/documentation/Security/Conceptual/CodeSigningGuide/Introduction/Introduction.html)
 
 {{#include ../../../banners/hacktricks-training.md}}
