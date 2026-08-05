@@ -87,12 +87,12 @@ int wmain(int argc, wchar_t **argv) {
 ```
 
 Notes and constraints:
-- Use `STARTUPINFOEX` with `InitializeProcThreadAttributeList` and `UpdateProcThreadAttribute(PROC_THREAD_ATTRIBUTE_PROTECTION_LEVEL, ...)`, then pass `EXTENDED_STARTUPINFO_PRESENT` to `CreateProcess*`.
+- Use `STARTUPINFOEX` with `InitializeProcThreadAttributeList` and `UpdateProcThreadAttribute(PROC_THREAD_ATTRIBUTE_PROTECTION_LEVEL, ...)`, then pass `EXTENDED_STARTUPINFO_PRESENT` to `CreateProcess*`.<sup>[[2]](#references)[[3]](#references)[[4]](#references)</sup>
 - The protection `DWORD` can be set to constants such as `PROTECTION_LEVEL_WINTCB_LIGHT`, `PROTECTION_LEVEL_WINDOWS`, `PROTECTION_LEVEL_WINDOWS_LIGHT`, `PROTECTION_LEVEL_ANTIMALWARE_LIGHT`, or `PROTECTION_LEVEL_LSA_LIGHT`.
 - The child only starts as PPL if its image is signed for that signer class; otherwise process creation fails, commonly with `ERROR_INVALID_IMAGE_HASH (577)` / `STATUS_INVALID_IMAGE_HASH (0xC0000428)`.
 - This is not a bypass — it’s a supported API meant for appropriately signed images. Useful to harden tools or validate PPL-protected configurations.
 
-Example CLI using a minimal loader:
+Example CLI using a minimal loader:<sup>[[1]](#references)</sup>
 - Antimalware signer: `CreateProcessAsPPL.exe 3 C:\Tools\agent.exe --svc`
 - LSA-light signer: `CreateProcessAsPPL.exe 4 C:\Windows\System32\notepad.exe`
 
@@ -115,7 +115,7 @@ reg query HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\LSA /v RunAsPPL
 
 When you running **`mimikatz privilege::debug sekurlsa::logonpasswords`** it'll probably fail with the error code `0x00000005` becasue of this.
 
-- For more information about this check [https://itm4n.github.io/lsass-runasppl/](https://itm4n.github.io/lsass-runasppl/)
+- For more information about this check [https://itm4n.github.io/lsass-runasppl/](https://itm4n.github.io/lsass-runasppl/)<sup>[[5]](#references)</sup>
 
 
 ## Credential Guard
@@ -148,7 +148,7 @@ This feature marks a significant step forward in securing remote desktop connect
 
 ![Windows RAM memory diagram for credential extraction context](../../images/RAM.png)
 
-For more detailed information on visit [this resource](https://blog.ahasayen.com/restricted-admin-mode-for-rdp/).
+For more detailed information on visit [this resource](https://blog.ahasayen.com/restricted-admin-mode-for-rdp/).<sup>[[6]](#references)</sup>
 
 ## Cached Credentials
 
@@ -164,7 +164,7 @@ Access to these cached credentials is tightly controlled, with only the **SYSTEM
 
 **Mimikatz** can be employed to extract these cached credentials using the command `lsadump::cache`.
 
-For further details, the original [source](http://juggernaut.wikidot.com/cached-credentials) provides comprehensive information.
+For further details, the original [source](http://juggernaut.wikidot.com/cached-credentials) provides comprehensive information.<sup>[[7]](#references)</sup>
 
 ## Protected Users
 
@@ -208,5 +208,7 @@ For more detailed information, consult the official [documentation](https://docs
 - [InitializeProcThreadAttributeList (Win32 API)](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-initializeprocthreadattributelist)
 - [UpdateProcThreadAttribute (Win32 API)](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-updateprocthreadattribute)
 - [LSASS RunAsPPL – background and internals](https://itm4n.github.io/lsass-runasppl/)
+- [Restricted Admin Mode for RDP](https://blog.ahasayen.com/restricted-admin-mode-for-rdp/)
+- [Cached Credentials - Juggernaut AppSec Wiki](http://juggernaut.wikidot.com/cached-credentials)
 
 {{#include ../../banners/hacktricks-training.md}}

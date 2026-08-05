@@ -41,7 +41,7 @@ After injection, authenticate with any domain account but use password `mimikatz
   - Security **Event ID 4673/4611** for sensitive privilege use or LSA authentication package registration anomalies; correlate with unexpected 4624 logons using RC4 (etype 0x17) from DCs.
 - **Hardening LSASS**
   - Keep **RunAsPPL/Credential Guard/Secure LSASS** enabled on DCs to force attackers into kernel‑mode driver deployment (more telemetry, harder exploitation).
-  - Disable legacy **RC4** where possible; Kerberos tickets limited to AES prevent the RC4 hook path used by the skeleton key.
+  - Disable legacy **RC4** where possible; Kerberos tickets limited to AES prevent the RC4 hook path used by the skeleton key.<sup>[[2]](#references)</sup>
 - Quick PowerShell hunts:
   - Detect unsigned kernel driver installs: `Get-WinEvent -FilterHashtable @{Logname='System';ID=7045} | ?{$_.message -like "*Kernel Mode Driver*"}`
   - Hunt for Mimikatz driver: `Get-WinEvent -FilterHashtable @{Logname='System';ID=7045} | ?{$_.message -like "*Kernel Mode Driver*" -and $_.message -like "*mimidrv*"}`
@@ -51,8 +51,8 @@ For additional credential‑hardening guidance check [Windows credentials protec
 
 ## References
 
-- [Netwrix – Skeleton Key attack in Active Directory (2022)](https://blog.netwrix.com/2022/11/29/skeleton-key-attack-active-directory/)
-- [TheHacker.recipes – Skeleton key (2026)](https://www.thehacker.recipes/ad/persistence/skeleton-key/)
-- [TheHacker.Tools – Mimikatz misc::skeleton module](https://tools.thehacker.recipes/mimikatz/modules/misc/skeleton)
+- [1] [Netwrix – Skeleton Key attack in Active Directory (2022)](https://blog.netwrix.com/2022/11/29/skeleton-key-attack-active-directory/)
+- [2] [TheHacker.recipes – Skeleton key (2026)](https://www.thehacker.recipes/ad/persistence/skeleton-key/)
+- [3] [TheHacker.Tools – Mimikatz misc::skeleton module](https://tools.thehacker.recipes/mimikatz/modules/misc/skeleton)
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -14,14 +14,14 @@ LAPS is designed to manage **local administrator passwords**, making them **uniq
 
 ### Legacy Microsoft LAPS attributes
 
-In the domain's computer objects, the implementation of legacy Microsoft LAPS results in the addition of two attributes:
+In the domain's computer objects, the implementation of legacy Microsoft LAPS results in the addition of two attributes:<sup>[[1]](#references)</sup>
 
 - **`ms-Mcs-AdmPwd`**: **plain-text administrator password**
 - **`ms-Mcs-AdmPwdExpirationTime`**: **password expiration time**
 
 ### Windows LAPS attributes
 
-Native Windows LAPS adds several new attributes to computer objects:
+Native Windows LAPS adds several new attributes to computer objects:<sup>[[2]](#references)</sup>
 
 - **`msLAPS-Password`**: clear-text password blob stored as JSON when encryption is not enabled
 - **`msLAPS-PasswordExpirationTime`**: scheduled expiration time
@@ -30,7 +30,7 @@ Native Windows LAPS adds several new attributes to computer objects:
 - **`msLAPS-EncryptedDSRMPassword`** / **`msLAPS-EncryptedDSRMPasswordHistory`**: encrypted DSRM password data for domain controllers
 - **`msLAPS-CurrentPasswordVersion`**: GUID-based version tracking used by newer rollback-detection logic (Windows Server 2025 forest schema)
 
-When **`msLAPS-Password`** is readable, the value is a JSON object containing the account name, update time and clear-text password, for example:
+When **`msLAPS-Password`** is readable, the value is a JSON object containing the account name, update time and clear-text password, for example:<sup>[[2]](#references)</sup>
 
 ```json
 {"n":"Administrator","t":"1d8161b41c41cde","p":"A6a3#7%..."}
@@ -115,7 +115,7 @@ $cred = Get-Credential CONTOSO\LAPSDecryptor
 Get-LapsADPassword -Identity wkstn-2 -AsPlainText -DecryptionCredential $cred
 ```
 
-A few operational details matter here:
+A few operational details matter here:<sup>[[3]](#references)</sup>
 
 - **`Get-LapsADPassword`** automatically handles **legacy LAPS**, **clear-text Windows LAPS**, and **encrypted Windows LAPS**.
 - If the password is encrypted and you can **read** but not **decrypt** it, the cmdlet returns metadata such as **`Source`**, **`DecryptionStatus`**, and **`AuthorizedDecryptor`** even when it can't return the clear-text password.
@@ -149,7 +149,7 @@ $laps.n
 $laps.p
 ```
 
-That **`n`** field matters on newer deployments because **Windows LAPS automatic account management** can target a **custom account** instead of the built-in **`Administrator`**, and newer **Windows 11 24H2 / Windows Server 2025** systems can even **randomize** that account name.
+That **`n`** field matters on newer deployments because **Windows LAPS automatic account management** can target a **custom account** instead of the built-in **`Administrator`**, and newer **Windows 11 24H2 / Windows Server 2025** systems can even **randomize** that account name.<sup>[[4]](#references)</sup>
 
 ### Linux / remote tooling
 
@@ -179,8 +179,8 @@ Notes:
 - Recent **NetExec** builds support **`ms-Mcs-AdmPwd`**, **`msLAPS-Password`**, and **`msLAPS-EncryptedPassword`**.
 - **`pyLAPS`** is still useful for **legacy Microsoft LAPS** from Linux, but it only targets **`ms-Mcs-AdmPwd`**.
 - Newer cross-platform tooling such as **`LAPS4LINUX`**, **`dpapi-ng`**-based tooling, and recent **NetExec** workflows can also handle **native Windows LAPS** from non-Windows hosts.
-- If the environment uses **encrypted Windows LAPS**, a simple LDAP read is not enough; you also need to be an **authorized decryptor** (or equivalent decryption material, such as offline domain DPAPI-NG root key material).
-- On **Windows 11 24H2 / Windows Server 2025**, don't assume the managed local admin is always **`Administrator`**. Automatic account management can create a custom account and optionally randomize its name, so discover the account name first via **`n`** / **`Account`** before using **`--laps`** at scale.
+- If the environment uses **encrypted Windows LAPS**, a simple LDAP read is not enough; you also need to be an **authorized decryptor** (or equivalent decryption material, such as offline domain DPAPI-NG root key material).<sup>[[5]](#references)</sup>
+- On **Windows 11 24H2 / Windows Server 2025**, don't assume the managed local admin is always **`Administrator`**. Automatic account management can create a custom account and optionally randomize its name, so discover the account name first via **`n`** / **`Account`** before using **`--laps`** at scale.<sup>[[4]](#references)</sup>
 
 ### Directory synchronization abuse
 
@@ -276,17 +276,17 @@ Set-DomainObject -Identity wkstn-2 -Set @{"msLAPS-PasswordExpirationTime"="13380
 
 Older snapshot / image rollback tricks are **less reliable** against recent **Windows LAPS** deployments. On **Windows 11 24H2 / Windows Server 2025**, if the forest schema includes **`msLAPS-CurrentPasswordVersion`** (**Windows Server 2025 forest schema**), the client compares a locally cached GUID with the value stored in AD and **immediately rotates the password** when a rollback creates a **torn state**.
 
-In practice, this means snapshot-based persistence or attempts to resurrect an older known local admin password can burn quickly instead of surviving until the next normal expiration.
+In practice, this means snapshot-based persistence or attempts to resurrect an older known local admin password can burn quickly instead of surviving until the next normal expiration.<sup>[[2]](#references)</sup>
 
 This protection only applies to **AD-backed Windows LAPS** and still depends on the reverted machine being able to **authenticate back to AD**. If the machine can't talk to AD anymore, **password history** or **AD backup access** may still save the day.
 
 ### Automatic account management tamper caveat
 
-When **automatic account management** is enabled, Windows LAPS owns the lifecycle of the managed local admin account. Unexpected attempts to rename, reconfigure, or otherwise tamper with that account can be rejected with **`STATUS_POLICY_CONTROLLED_ACCOUNT`** / **`ERROR_POLICY_CONTROLLED_ACCOUNT`**, so persistence that depends on silently modifying the managed LAPS account is less reliable on newer endpoints.
+When **automatic account management** is enabled, Windows LAPS owns the lifecycle of the managed local admin account. Unexpected attempts to rename, reconfigure, or otherwise tamper with that account can be rejected with **`STATUS_POLICY_CONTROLLED_ACCOUNT`** / **`ERROR_POLICY_CONTROLLED_ACCOUNT`**, so persistence that depends on silently modifying the managed LAPS account is less reliable on newer endpoints.<sup>[[4]](#references)</sup>
 
 ### Recovering historical passwords from AD backups
 
-When **Windows LAPS encryption + password history** is enabled, mounted AD backups can become an additional source of secrets. If you can access a mounted AD snapshot and use **recovery mode**, you can query older stored passwords without talking to a live DC.
+When **Windows LAPS encryption + password history** is enabled, mounted AD backups can become an additional source of secrets. If you can access a mounted AD snapshot and use **recovery mode**, you can query older stored passwords without talking to a live DC.<sup>[[3]](#references)</sup>
 
 ```bash
 # Query a mounted AD snapshot on port 50000
@@ -306,11 +306,11 @@ Then, compile the new `AdmPwd.PS.dll` and upload it to the machine in `C:\Tools\
 
 ## References
 
-- [https://4sysops.com/archives/introduction-to-microsoft-laps-local-administrator-password-solution/](https://4sysops.com/archives/introduction-to-microsoft-laps-local-administrator-password-solution/)
-- [https://learn.microsoft.com/en-us/windows-server/identity/laps/laps-technical-reference](https://learn.microsoft.com/en-us/windows-server/identity/laps/laps-technical-reference)
-- [https://learn.microsoft.com/en-us/windows-server/identity/laps/laps-scenarios-windows-server-active-directory](https://learn.microsoft.com/en-us/windows-server/identity/laps/laps-scenarios-windows-server-active-directory)
-- [https://learn.microsoft.com/en-us/windows-server/identity/laps/laps-concepts-account-management-modes](https://learn.microsoft.com/en-us/windows-server/identity/laps/laps-concepts-account-management-modes)
-- [https://blog.xpnsec.com/lapsv2-internals/](https://blog.xpnsec.com/lapsv2-internals/)
+- [1] [Introduction to Microsoft LAPS – Local Administrator Password Solution](https://4sysops.com/archives/introduction-to-microsoft-laps-local-administrator-password-solution/)
+- [2] [Windows LAPS schema and rights extensions for Windows Server Active Directory](https://learn.microsoft.com/en-us/windows-server/identity/laps/laps-technical-reference)
+- [3] [Get started with Windows LAPS and Windows Server Active Directory](https://learn.microsoft.com/en-us/windows-server/identity/laps/laps-scenarios-windows-server-active-directory)
+- [4] [Windows LAPS account management modes](https://learn.microsoft.com/en-us/windows-server/identity/laps/laps-concepts-account-management-modes)
+- [5] [LAPS 2.0 Internals - XPN Infosec Blog](https://blog.xpnsec.com/lapsv2-internals/)
 
 
 {{#include ../../banners/hacktricks-training.md}}
