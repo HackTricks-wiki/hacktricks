@@ -2,13 +2,13 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-### macOS 자동 Enumeration 도구
+### MacOS 자동 Enumeration 도구
 
 - **MacPEAS**: [https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS](https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS)
 - **Metasploit**: [https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb](https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb)
 - **SwiftBelt**: [https://github.com/cedowens/SwiftBelt](https://github.com/cedowens/SwiftBelt)
 
-### 특정 macOS 명령어
+### 특정 MacOS 명령어
 ```bash
 #System info
 date
@@ -115,9 +115,9 @@ sudo apachectl (start|status|restart|stop)
 dscacheutil -flushcache
 sudo killall -HUP mDNSResponder
 ```
-### 간단한 anti-analysis / virtualization check
+### 빠른 anti-analysis / virtualization 확인
 
-일부 macOS stealers는 VMs를 탐지하기 위해 `system_profiler`를 호출하며, sandbox detonation을 피하기 위해 **구별되는 exit code(예: 100)** 로 abort합니다<sup>[1]</sup>:
+일부 macOS stealer는 VM을 탐지하기 위해 `system_profiler`를 호출하고, sandbox detonation을 피하기 위해 **구별되는 종료 코드(예: 100)**로 중단합니다<sup>[[1]](#references)</sup>:
 ```bash
 if system_profiler SPHardwareDataType SPDisplaysDataType | grep -Eiq 'qemu|kvm|vmware|virtualbox'; then
 exit 100
@@ -125,7 +125,7 @@ fi
 ```
 ### 설치된 Software 및 Services
 
-설치된 **suspicious** applications와 설치된 resources에 대한 **privileges**를 확인합니다:
+설치된 **suspicious** 애플리케이션과 설치된 리소스에 대한 **privileges**를 확인합니다:
 ```
 system_profiler SPApplicationsDataType #Installed Apps
 system_profiler SPFrameworksDataType #Instaled framework
@@ -151,6 +151,6 @@ launchctl print gui/<user's UID>/com.company.launchagent.label
 
 ## 참고 자료
 
-- [1] [2025, the year of the Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
+- [1] [2025년, Infostealer의 해](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
 
 {{#include ../banners/hacktricks-training.md}}

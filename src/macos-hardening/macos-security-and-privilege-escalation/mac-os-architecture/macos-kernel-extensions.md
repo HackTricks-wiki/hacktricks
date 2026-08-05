@@ -4,50 +4,50 @@
 
 ## 기본 정보
 
-Kernel extensions(Kexts)은 **`.kext`** 확장자를 가진 **packages**이며, **macOS kernel space에 직접 로드되어** main operating system에 추가 기능을 제공합니다.
+Kernel extensions (Kexts)는 **`.kext`** 확장자를 가진 **패키지**로, **macOS kernel space에 직접 로드**되어 주 운영 체제에 추가 기능을 제공합니다.
 
-### Deprecation status & DriverKit / System Extensions
-**macOS Catalina (10.15)**부터 Apple은 대부분의 legacy KPI를 *deprecated*로 표시하고 **user-space에서 실행되는** **System Extensions & DriverKit** frameworks를 도입했습니다. **macOS Big Sur (11)**부터 operating system은 deprecated KPI에 의존하는 third-party kexts의 로드를 *거부*합니다. 단, machine이 **Reduced Security** mode로 boot된 경우는 예외입니다. Apple Silicon에서는 kexts를 활성화하기 위해 사용자가 추가로 다음을 수행해야 합니다.
+### 지원 중단 상태 및 DriverKit / System Extensions
+**macOS Catalina (10.15)**부터 Apple은 대부분의 레거시 KPI를 *deprecated*로 지정하고 **user-space**에서 실행되는 **System Extensions & DriverKit** framework를 도입했습니다. **macOS Big Sur (11)**부터 운영 체제는 deprecated KPI에 의존하는 third-party kexts의 로드를 거부합니다. 단, 시스템이 **Reduced Security** 모드로 boot된 경우는 예외입니다. Apple Silicon에서는 kexts를 활성화하기 위해 추가로 다음 작업이 필요합니다.
 
 1. **Recovery**로 재부팅 → *Startup Security Utility*로 이동합니다.
 2. **Reduced Security**를 선택하고 **“Allow user management of kernel extensions from identified developers”**를 선택합니다.
 3. 재부팅한 후 **System Settings → Privacy & Security**에서 kext를 승인합니다.
 
-DriverKit/System Extensions로 작성된 User-land drivers는 crash 또는 memory corruption이 kernel space가 아닌 sandboxed process에 제한되므로 **attack surface를 크게 줄입니다**.<sup>[1]</sup>
+DriverKit/System Extensions로 작성된 User-land drivers는 crash 또는 memory corruption이 kernel space가 아닌 sandbox된 process 안에 제한되므로 **attack surface를 크게 줄입니다**.<sup>[[1]](#references)</sup>
 
-> 📝 macOS Sequoia (15)부터 Apple은 여러 legacy networking 및 USB KPI를 완전히 제거했습니다. vendors를 위한 유일한 forward-compatible solution은 System Extensions로 migrate하는 것입니다.
+> 📝 macOS Sequoia (15)부터 Apple은 여러 레거시 networking 및 USB KPI를 완전히 제거했습니다. vendors가 사용할 수 있는 유일한 forward-compatible solution은 System Extensions로 migration하는 것입니다.
 
-### Requirements
+### 요구 사항
 
-당연히 이 기능은 매우 강력하므로 **kernel extension을 로드하는 것은** **복잡합니다**. kernel extension이 로드되려면 다음 **requirements**를 충족해야 합니다.
+당연히 이 기능은 매우 강력하므로 **kernel extension을 로드하는 작업은 복잡합니다**. kernel extension이 로드되려면 다음 **요구 사항**을 충족해야 합니다.
 
-- **recovery mode로 진입할 때**, kernel **extensions가 로드되도록 허용되어야** 합니다:
+- **Recovery mode로 진입할 때**, kernel **extensions를 로드할 수 있도록 허용**해야 합니다.
 
 <figure><img src="../../../images/image (327).png" alt=""><figcaption></figcaption></figure>
 
-- kernel extension은 **kernel code signing certificate로 sign되어야** 하며, 이 certificate는 **Apple만** 발급할 수 있습니다. Apple은 company와 해당 certificate가 필요한 이유를 상세히 검토합니다.
-- kernel extension은 **notarized**되어야 하며, Apple은 이를 malware에 대해 검사할 수 있습니다.
-- 그런 다음 **root** user가 **kernel extension을 로드할 수** 있으며 package 내부의 files는 **root에 속해야** 합니다.
-- upload process 중 package는 보호된 non-root location인 `/Library/StagedExtensions`에 준비되어야 합니다(`com.apple.rootless.storage.KernelExtensionManagement` grant가 필요합니다).
-- 마지막으로 로드를 시도하면 사용자는 [**confirmation request를 받게 되며**](https://developer.apple.com/library/archive/technotes/tn2459/_index.html), 이를 수락한 경우 computer를 **restart해야** 로드됩니다.
+- kernel extension은 **kernel code signing certificate로 서명**되어야 하며, 이 certificate는 **Apple만 발급**할 수 있습니다. Apple은 해당 회사와 필요한 이유를 자세히 검토합니다.
+- kernel extension은 **notarized** 상태여야 하며, Apple은 이를 malware에 대해 검사할 수 있습니다.
+- 이후 **root** user만 **kernel extension을 로드**할 수 있으며, package 내부의 파일은 **root 소유**여야 합니다.
+- upload process 중 package는 보호된 non-root location인 `/Library/StagedExtensions`에 준비되어야 합니다(`com.apple.rootless.storage.KernelExtensionManagement` grant 필요).
+- 마지막으로 로드를 시도하면 user는 [**confirmation request를 받게 되며**](https://developer.apple.com/library/archive/technotes/tn2459/_index.html), 이를 수락한 경우 컴퓨터를 **restart**해야 로드됩니다.
 
-### Loading process
+### 로드 process
 
-Catalina에서는 다음과 같았습니다. **verification** process가 **userland에서 수행된다**는 점이 흥미롭습니다. 그러나 **`com.apple.private.security.kext-management`** grant를 가진 applications만 **kernel에 extension 로드를 요청할 수** 있습니다: `kextcache`, `kextload`, `kextutil`, `kextd`, `syspolicyd`
+Catalina에서는 다음과 같았습니다. **verification** process가 userland에서 수행된다는 점이 흥미롭습니다. 그러나 **`com.apple.private.security.kext-management`** grant를 가진 applications만 kernel에 extension 로드를 **요청**할 수 있습니다: `kextcache`, `kextload`, `kextutil`, `kextd`, `syspolicyd`
 
-1. **`kextutil`** cli가 extension 로드를 위한 **verification** process를 **시작합니다**
-- **Mach service**를 사용해 message를 전송하여 **`kextd`와 통신합니다**.
-2. **`kextd`**는 **signature**와 같은 여러 항목을 **확인합니다**
-- extension이 **로드될 수 있는지 확인하기 위해** **`syspolicyd`와 통신합니다**.
-3. extension이 이전에 로드되지 않았다면 **`syspolicyd`**는 **user에게 prompt를 표시합니다**.
-- **`syspolicyd`**는 결과를 **`kextd`에 보고합니다**
-4. **`kextd`**는 최종적으로 **kernel에 extension 로드를 지시할 수 있습니다**
+1. **`kextutil`** cli가 extension 로드를 위한 **verification** process를 **시작**합니다.
+- Mach service를 사용해 메시지를 전송하여 **`kextd`**와 통신합니다.
+2. **`kextd`**는 **signature**와 같은 여러 항목을 검사합니다.
+- extension을 **로드할 수 있는지** **확인**하기 위해 **`syspolicyd`**와 통신합니다.
+3. extension이 이전에 로드된 적이 없다면 **`syspolicyd`**가 user에게 **prompt를 표시**합니다.
+- **`syspolicyd`**는 결과를 **`kextd`**에 보고합니다.
+4. 마지막으로 **`kextd`**는 kernel에 extension을 **로드하라고 알릴** 수 있습니다.
 
-**`kextd`**를 사용할 수 없는 경우 **`kextutil`**이 동일한 checks를 수행할 수 있습니다.
+**`kextd`**를 사용할 수 없는 경우 **`kextutil`**이 동일한 검사를 수행할 수 있습니다.
 
-### Enumeration & management (loaded kexts)
+### 열거 및 관리(로드된 kexts)
 
-`kextstat`는 historical tool이었지만 최근 macOS releases에서는 **deprecated**되었습니다. modern interface는 **`kmutil`**입니다:
+`kextstat`는 historical tool이었지만 최근 macOS releases에서는 **deprecated** 상태입니다. modern interface는 **`kmutil`**입니다:
 ```bash
 # List every extension currently linked in the kernel, sorted by load address
 sudo kmutil showloaded --sort
@@ -58,7 +58,7 @@ sudo kmutil showloaded --collection aux
 # Unload a specific bundle
 sudo kmutil unload -b com.example.mykext
 ```
-이전 syntax도 여전히 reference 용도로 사용할 수 있습니다:
+이전 구문도 참고용으로 여전히 사용할 수 있습니다:
 ```bash
 # (Deprecated) Get loaded kernel extensions
 kextstat
@@ -66,7 +66,7 @@ kextstat
 # (Deprecated) Get dependencies of the kext number 22
 kextstat | grep " 22 " | cut -c2-5,50- | cut -d '(' -f1
 ```
-`kmutil inspect`는 **Kernel Collection (KC)의 내용을 dump**하거나 kext가 모든 symbol dependencies를 resolve하는지 확인하는 데에도 활용할 수 있습니다:
+`kmutil inspect`는 **Kernel Collection (KC)의 내용을 dump**하거나 kext가 모든 symbol dependencies를 해결하는지 확인하는 데에도 활용할 수 있습니다:
 ```bash
 # List fileset entries contained in the boot KC
 kmutil inspect -B /System/Library/KernelCollections/BootKernelExtensions.kc --show-fileset-entries
@@ -79,38 +79,38 @@ kmutil libraries -p /Library/Extensions/FancyUSB.kext --undef-symbols
 > [!CAUTION]
 > Kernel extensions는 `/System/Library/Extensions/`에 있어야 하지만, 이 폴더로 이동해도 **어떤 binary도 찾을 수 없습니다**. 이는 **kernelcache** 때문이며, 하나의 `.kext`를 reverse하려면 이를 얻을 방법을 찾아야 합니다.
 
-**kernelcache**는 필수 device **drivers** 및 **kernel extensions**와 함께 사전 컴파일되고 사전 링크된 **XNU kernel 버전**입니다. **압축된** 형식으로 저장되며 boot-up 과정에서 memory로 압축 해제됩니다. kernelcache는 실행 가능한 kernel 버전과 중요한 drivers를 미리 준비하여 **더 빠른 boot time**을 지원합니다. 이를 통해 boot 시 이러한 component를 동적으로 loading하고 linking하는 데 소요되는 time과 resources를 줄일 수 있습니다.
+**kernelcache**는 필수 device **drivers** 및 **kernel extensions**와 함께 제공되는 **사전 컴파일 및 사전 링크된 XNU kernel 버전**입니다. **압축된** 형식으로 저장되며 boot-up 과정에서 memory로 decompression됩니다. kernelcache는 실행 가능한 kernel 및 핵심 drivers를 미리 준비해 두어 **더 빠른 boot time**을 지원합니다. 따라서 boot 시 이러한 components를 동적으로 loading하고 linking하는 데 소요되는 time과 resources를 줄일 수 있습니다.
 
-kernelcache의 주요 이점은 **loading speed**와 모든 module이 prelinked되어 있다는 점입니다(load time impediment 없음). 또한 모든 module이 prelinked되면 KXLD를 memory에서 제거할 수 있으므로 **XNU는 새로운 KEXT를 load할 수 없습니다.**
+kernelcache의 주요 이점은 **loading speed**와 모든 modules가 prelinked되어 있다는 점입니다(load time impediment 없음). 또한 모든 modules가 prelinked되면 KXLD를 memory에서 제거할 수 있으므로 **XNU는 새로운 KEXTs를 load할 수 없습니다.**
 
 > [!TIP]
-> [https://github.com/dhinakg/aeota](https://github.com/dhinakg/aeota) tool은 Apple의 AEA(A​​pple Encrypted Archive / AEA asset) container를 decrypt합니다. 이는 Apple이 OTA asset 및 일부 IPSW piece에 사용하는 encrypted container format이며, 제공된 aastuff tools로 extract할 수 있는 underlying `.dmg`/asset archive를 생성할 수 있습니다.
+> [https://github.com/dhinakg/aeota](https://github.com/dhinakg/aeota) tool은 Apple의 AEA (Apple Encrypted Archive / AEA asset) containers를 decrypt합니다. AEA는 Apple이 OTA assets 및 일부 IPSW pieces에 사용하는 encrypted container format이며, 제공된 aastuff tools로 extract할 수 있는 underlying .dmg/asset archive를 생성할 수 있습니다.
 
 
 ### Local Kerlnelcache
 
 iOS에서는 **`/System/Library/Caches/com.apple.kernelcaches/kernelcache`**에 있으며, macOS에서는 다음 명령으로 찾을 수 있습니다: **`find / -name "kernelcache" 2>/dev/null`** \
-제 macOS에서는 다음 위치에서 찾았습니다:
+macOS에서 확인한 위치는 다음과 같습니다.
 
 - `/System/Volumes/Preboot/1BAEB4B5-180B-4C46-BD53-51152B7D92DA/boot/DAD35E7BC0CDA79634C20BD1BD80678DFB510B2AAD3D25C1228BB34BCD0A711529D3D571C93E29E1D0C1264750FA043F/System/Library/Caches/com.apple.kernelcaches/kernelcache`
 
-여기에서 [**symbols가 포함된 version 14의 kernelcache**](https://x.com/tihmstar/status/1295814618242318337?lang=en)도 확인할 수 있습니다.
+[**symbols가 포함된 version 14의 kernelcache**](https://x.com/tihmstar/status/1295814618242318337?lang=en)도 여기에서 찾을 수 있습니다.
 
 #### IMG4 / BVX2 (LZFSE) compressed
 
-IMG4 file format은 Apple이 iOS 및 macOS device에서 **firmware** component(예: **kernelcache**)를 안전하게 **storing하고 verifying**하기 위해 사용하는 container format입니다. IMG4 format에는 header와 여러 tag가 포함되어 있으며, 실제 payload(kernel 또는 bootloader 등), signature, manifest properties 집합 등 서로 다른 data piece를 encapsulate합니다. 이 format은 cryptographic verification을 지원하므로 device가 firmware component를 실행하기 전에 해당 component의 authenticity와 integrity를 확인할 수 있습니다.
+IMG4 file format은 Apple이 iOS 및 macOS devices에서 **firmware** components(예: **kernelcache**)를 안전하게 **storing 및 verifying**하기 위해 사용하는 container format입니다. IMG4 format에는 header와 여러 tags가 포함되어 있으며, 실제 payload(kernel 또는 bootloader 등), signature, manifest properties set 등 서로 다른 data pieces를 encapsulate합니다. 이 format은 cryptographic verification을 지원하므로, device는 firmware component를 executing하기 전에 해당 component의 authenticity와 integrity를 확인할 수 있습니다.
 
-일반적으로 다음 component로 구성됩니다:
+일반적으로 다음 components로 구성됩니다.
 
 - **Payload (IM4P)**:
-- Often compressed (LZFSE4, LZSS, …)
+- 자주 compressed됨 (LZFSE4, LZSS, …)
 - Optionally encrypted
 - **Manifest (IM4M)**:
-- Contains Signature
+- Signature 포함
 - Additional Key/Value dictionary
 - **Restore Info (IM4R)**:
-- Also known as APNonce
-- Prevents replaying of some updates
+- APNonce라고도 함
+- 일부 updates의 replay 방지
 - OPTIONAL: Usually this isn't found
 
 Kernelcache를 Decompress합니다:
@@ -132,14 +132,14 @@ disarm -e filesets kernelcache.release.d23
 ```
 #### 커널의 Disarm symbols
 
-**`Disarm`**를 사용하면 matcher를 통해 kernelcache의 함수를 symbolicate할 수 있습니다. 이러한 matcher는 disarm이 바이너리 내부의 함수, 인자 및 panic/log 문자열을 인식하고 자동으로 symbolicate하는 방법을 알려주는 간단한 패턴 규칙(텍스트 줄)입니다.
+**`Disarm`**를 사용하면 matchers를 통해 kernelcache의 함수를 symbolicate할 수 있습니다. 이러한 matchers는 disarm이 바이너리 내부의 함수, 인자 및 panic/log 문자열을 인식하고 자동으로 symbolicate하는 방법을 알려주는 간단한 pattern 규칙(텍스트 줄)입니다.
 
 기본적으로 함수가 사용하는 문자열을 지정하면 disarm이 해당 문자열을 찾아 **symbolicate**합니다.
 ```bash
 You can find some `xnu.matchers` in [https://newosxbook.com/tools/disarm.html](https://newosxbook.com/tools/disarm.html) in the **`Matchers`** section. You can also create your own matchers.
 
 ```bash
-# disarm이 filesets를 추출한 /tmp/extracted로 이동
+# disarm이 fileset을 추출한 /tmp/extracted로 이동
 disarm -e filesets kernelcache.release.d23 # 항상 /tmp/extracted에 추출
 cd /tmp/extracted
 JMATCHERS=xnu.matchers disarm --analyze kernel.rebuilt  # xnu.matchers는 실제로 matchers가 포함된 파일임에 유의
@@ -225,7 +225,7 @@ kextex -e com.apple.security.sandbox kernelcache.release.iphone14.e
 # 모두 추출
 kextex_all kernelcache.release.iphone14.e
 
-# symbols에 대해 extension 확인
+# symbols에 대한 extension 확인
 nm -a binaries/com.apple.security.sandbox | wc -l
 ```
 
@@ -253,7 +253,7 @@ Apple’s recommended workflow is to build a **Kernel Debug Kit (KDK)** that mat
 ### One-shot local debug of a panic
 
 ```bash
-# 최신 panic을 위한 symbolication bundle 생성
+# 최신 panic용 symbolication bundle 생성
 sudo kdpwrit dump latest.kcdata
 kmutil analyze-panic latest.kcdata -o ~/panic_report.txt
 ```

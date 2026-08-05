@@ -4,19 +4,19 @@
 
 ## 기본 정보
 
-Quick Look은 macOS의 **파일 preview framework**입니다. 사용자가 Finder에서 파일을 선택하거나, Space를 누르거나, 파일 위에 마우스를 올리거나, thumbnails가 활성화된 디렉터리를 보면 Quick Look은 파일을 파싱하고 시각적 preview를 렌더링하기 위해 **generator plugin을 자동으로 로드**합니다.<sup>[1]</sup>
+Quick Look은 macOS의 **파일 미리보기 framework**입니다. 사용자가 Finder에서 파일을 선택하거나, Space를 누르거나, 파일 위에 마우스를 올리거나, thumbnails가 활성화된 디렉터리를 확인하면 Quick Look은 **generator plugin을 자동으로 로드**하여 파일을 파싱하고 시각적 미리보기를 렌더링합니다.<sup>[[1]](#references)</sup>
 
-Quick Look generators는 특정 **Uniform Type Identifiers (UTIs)**에 등록되는 **bundles**(`.qlgenerator`)입니다. macOS가 해당 UTI와 일치하는 파일의 preview를 필요로 하면 generator를 sandbox된 helper process(`QuickLookSatellite` 또는 `qlmanage`)에 로드하고 generator function을 호출합니다.
+Quick Look generators는 특정 **Uniform Type Identifiers (UTIs)** 에 등록되는 **bundles** (`.qlgenerator`)입니다. macOS가 해당 UTI와 일치하는 파일의 미리보기를 필요로 하면 generator를 sandbox된 helper process (`QuickLookSatellite` 또는 `qlmanage`)에 로드하고 generator function을 호출합니다.
 
-### 보안상 중요한 이유
+### 이것이 Security에 중요한 이유
 
 > [!WARNING]
 > Quick Look generators는 **단순히 파일을 선택하거나 보기만 해도** 트리거되며, "Open" action이 필요하지 않습니다. 따라서 이는 강력한 **passive exploitation vector**입니다. 사용자는 malicious file이 포함된 디렉터리로 이동하기만 하면 됩니다.
 
 **Attack surface:**
-- Generators는 disk, downloads, email attachments 또는 network shares에서 가져온 **임의의 파일 content를 파싱**합니다.
-- Crafted file은 generator code의 **parsing vulnerabilities**(buffer overflows, format strings, type confusion)를 exploit할 수 있습니다.
-- Preview rendering은 **자동으로** 수행되므로, malicious file이 저장된 Downloads folder를 보는 것만으로도 충분합니다.
+- Generators는 disk, downloads, email attachments 또는 network shares에서 가져온 **임의의 file content를 파싱**합니다.
+- crafted file은 generator code의 **parsing vulnerabilities** (buffer overflows, format strings, type confusion)를 exploit할 수 있습니다.
+- preview rendering은 **자동으로** 수행되므로, malicious file이 저장된 Downloads folder를 보는 것만으로도 충분합니다.
 - Quick Look은 **sandbox된 helper**에서 실행되지만, 이 context에서의 sandbox escapes가 입증된 사례가 있습니다.
 
 ## Architecture
@@ -59,11 +59,11 @@ JOIN handlers h ON eh.handler_id = h.id
 WHERE h.handler_type = 'quicklook_generator'
 ORDER BY e.path;"
 ```
-## Attack Scenarios
+## 공격 시나리오
 
-### File-Based Exploitation
+### 파일 기반 Exploitation
 
-복잡한 파일 형식(3D 모델, 과학 데이터, archive 형식)을 파싱하는 third-party Quick Look generator는 주요 target입니다:
+복잡한 파일 형식(3D 모델, 과학 데이터, archive 형식)을 파싱하는 타사 Quick Look generator는 주요 target이다:
 ```bash
 # 1. Identify a third-party generator and its UTI
 qlmanage -m plugins 2>&1 | grep -v "com.apple" | head -20
@@ -89,9 +89,9 @@ cp malicious.xyz ~/Downloads/
 5. Generator parses malicious file → code execution in QuickLookSatellite
 6. (Optional) Sandbox escape from QuickLookSatellite context
 ```
-### Third-Party Generator Replacement
+### Third-Party Generator 교체
 
-Quick Look generator bundle이 **사용자가 쓸 수 있는 위치**(`~/Library/QuickLook/`)에 설치되어 있다면 교체할 수 있습니다:
+Quick Look generator bundle이 **user-writable location** (`~/Library/QuickLook/`)에 설치되어 있으면 교체할 수 있습니다:
 ```bash
 # Check for user-writable generators
 ls -la ~/Library/QuickLook/ 2>/dev/null
@@ -111,14 +111,14 @@ qlmanage -t /path/to/malicious/file
 # Force thumbnail regeneration for a directory
 qlmanage -r cache
 ```
-## Sandbox 고려 사항
+## 샌드박스 고려 사항
 
-Quick Look generators는 sandboxed helper process 내부에서 실행됩니다. Sandbox profile은 다음을 제한합니다:
-- 파일 시스템 접근(대부분 preview되는 파일에 대해 읽기 전용)
-- Network access(제한됨)
-- IPC(제한된 mach-lookup)
+Quick Look generators는 샌드박스 처리된 helper process 내부에서 실행됩니다. 샌드박스 프로필은 다음을 제한합니다.
+- 파일 시스템 접근 (대부분 preview 중인 파일에 대한 읽기 전용 접근)
+- 네트워크 접근 (제한됨)
+- IPC (제한된 mach-lookup)
 
-그러나 Sandbox에는 알려진 escape vectors가 있습니다:
+그러나 샌드박스에는 알려진 escape vector가 있습니다:
 ```bash
 # Check the sandbox profile used by QuickLookSatellite
 sandbox-exec -p '(version 1)(allow default)' /usr/bin/true 2>&1
@@ -131,10 +131,10 @@ sandbox-exec -p '(version 1)(allow default)' /usr/bin/true 2>&1
 
 | CVE | 설명 |
 |---|---|
-| CVE-2019-8741 | crafted file을 통한 Quick Look preview memory corruption |
+| CVE-2019-8741 | 조작된 파일을 통한 Quick Look preview 메모리 손상 |
 | CVE-2018-4293 | Quick Look generator sandbox escape |
-| CVE-2020-9963 | Quick Look preview processing information disclosure |
-| CVE-2021-30876 | Thumbnail generation memory corruption |
+| CVE-2020-9963 | Quick Look preview 처리 정보 노출 |
+| CVE-2021-30876 | Thumbnail generation 메모리 손상 |
 
 ## Fuzzing Quick Look Generators
 ```bash
@@ -158,7 +158,7 @@ timeout 5 qlmanage -t /tmp/fuzz_input.targetext 2>&1
 log show --last 5s --predicate 'process == "QuickLookSatellite" AND eventMessage CONTAINS "crash"' 2>/dev/null
 done
 ```
-## 참고 자료
+## 참고 문헌
 
 - [1] [Apple Developer — Quick Look 프로그래밍 가이드](https://developer.apple.com/library/archive/documentation/UserExperience/Conceptual/Quicklook_Programming_Guide/Introduction/Introduction.html)
 - [2] [Apple 보안 업데이트 — Quick Look CVE](https://support.apple.com/en-us/HT201222)
