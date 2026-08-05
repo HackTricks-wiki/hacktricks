@@ -1,27 +1,27 @@
-# macOS PID Wiederverwendung
+# macOS PID Reuse
 
 {{#include ../../../../../../banners/hacktricks-training.md}}
 
-## PID Wiederverwendung
+## PID Reuse
 
-Wenn ein macOS **XPC-Dienst** den aufgerufenen Prozess basierend auf der **PID** und nicht auf dem **Audit-Token** überprüft, ist er anfällig für einen PID-Wiederverwendungsangriff. Dieser Angriff basiert auf einer **Rennbedingung**, bei der ein **Exploit** **Nachrichten an den XPC**-Dienst **sendet**, um die Funktionalität auszunutzen, und **kurz danach** **`posix_spawn(NULL, target_binary, NULL, &attr, target_argv, environ)`** mit der **erlaubten** Binärdatei ausführt.
+Wenn ein macOS-**XPC service** den aufrufenden Prozess anhand der **PID** und nicht anhand des **audit token** überprüft, ist er anfällig für einen PID reuse attack. Dieser Angriff basiert auf einer **race condition**, bei der ein **exploit** zunächst **messages an den XPC** service **sendet**, um dessen Funktionalität **abusing**, und **direkt danach** **`posix_spawn(NULL, target_binary, NULL, &attr, target_argv, environ)`** mit der **allowed** binary ausführt.
 
-Diese Funktion wird die **erlaubte Binärdatei** die PID **besitzen**, aber die **bösartige XPC-Nachricht wäre gerade vorher gesendet worden**. Wenn der **XPC**-Dienst die **PID** zur **Authentifizierung** des Absenders verwendet und sie **NACH** der Ausführung von **`posix_spawn`** überprüft, wird er denken, dass sie von einem **autorisierte** Prozess kommt.
+Diese Funktion sorgt dafür, dass die **allowed binary die PID besitzt**, während die **malicious XPC message** bereits **zuvor gesendet wurde**. Wenn der **XPC** service daher die **PID** verwendet, um den Absender zu **authentifizieren**, und dies **NACH** der Ausführung von **`posix_spawn`** überprüft, wird er annehmen, dass die Nachricht von einem **authorized** process stammt.
 
 ### Exploit-Beispiel
 
-Wenn Sie die Funktion **`shouldAcceptNewConnection`** oder eine von ihr aufgerufene Funktion finden, die **`processIdentifier`** aufruft und nicht **`auditToken`** aufruft. Es bedeutet höchstwahrscheinlich, dass sie die **PID des Prozesses** und nicht das Audit-Token **überprüft**.\
+Wenn du die Funktion **`shouldAcceptNewConnection`** oder eine von ihr aufgerufene Funktion findest, die **`processIdentifier`** aufruft und nicht **`auditToken`**, bedeutet dies sehr wahrscheinlich, dass sie die Prozess-PID und nicht das audit token **überprüft**.\
 Wie zum Beispiel in diesem Bild (aus der Referenz):
 
 <figure><img src="../../../../../../images/image (306).png" alt="https://wojciechregula.blog/images/2020/04/pid.png"><figcaption></figcaption></figure>
 
-Überprüfen Sie dieses Beispiel-Exploit (wiederum aus der Referenz), um die 2 Teile des Exploits zu sehen:
+Sieh dir dieses Beispiel für einen exploit an (ebenfalls aus der Referenz), um die 2 Teile des exploits zu sehen:
 
-- Einer, der **mehrere Forks generiert**
-- **Jeder Fork** wird die **Payload** an den XPC-Dienst senden, während er **`posix_spawn`** direkt nach dem Senden der Nachricht ausführt.
+- Einer, der mehrere forks **erzeugt**
+- **Jeder fork** wird das **payload** an den XPC service **senden** und direkt danach **`posix_spawn`** ausführen.
 
 > [!CAUTION]
-> Damit der Exploit funktioniert, ist es wichtig, ` export`` `` `**`OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES`** oder Folgendes in den Exploit einzufügen:
+> Damit der exploit funktioniert, ist es wichtig, ` export`` `` `**`OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES`** zu setzen oder Folgendes in den exploit einzufügen:
 >
 > ```objectivec
 > asm(".section __DATA,__objc_fork_ok\n"
@@ -31,7 +31,7 @@ Wie zum Beispiel in diesem Bild (aus der Referenz):
 
 {{#tabs}}
 {{#tab name="NSTasks"}}
-Erste Option unter Verwendung von **`NSTasks`** und Argumenten, um die Kinder zu starten, um die RC auszunutzen.
+Erste Option mit **`NSTasks`** und einem Argument, um die Kinder zu starten und die RC auszunutzen.
 ```objectivec
 // Code from https://wojciechregula.blog/post/learn-xpc-exploitation-part-2-say-no-to-the-pid/
 // gcc -framework Foundation expl.m -o expl
@@ -140,7 +140,7 @@ return 0;
 {{#endtab}}
 
 {{#tab name="fork"}}
-Dieses Beispiel verwendet ein rohes **`fork`**, um **Kinder zu starten, die die PID-Rennbedingung ausnutzen** und dann **eine weitere Rennbedingung über einen Hardlink ausnutzen:**
+Dieses Beispiel verwendet ein rohes **`fork`**, um **Kindprozesse zu starten, die die PID-Race-Condition ausnutzen**, und anschließend **eine weitere Race-Condition über einen Hardlink auszunutzen**:
 ```objectivec
 // export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
 // gcc -framework Foundation expl.m -o expl
@@ -278,11 +278,16 @@ return 0;
 
 ## Weitere Beispiele
 
-- [https://gergelykalman.com/why-you-shouldnt-use-a-commercial-vpn-amateur-hour-with-windscribe.html](https://gergelykalman.com/why-you-shouldnt-use-a-commercial-vpn-amateur-hour-with-windscribe.html)
+- [**Intego X9: Why your macOS antivirus should not trust PIDs**](https://blog.quarkslab.com/intego_lpe_macos_2.html) - LPE gegen den privilegierten Helper eines AV, der Clients anhand ihrer PID authentifizierte.
+- [**Exploiting GOG Galaxy XPC service for privilege escalation in macOS**](https://www.ibm.com/think/x-force/exploiting-gog-galaxy-xpc-service-privilege-escalation-macos)
+- [**Rootpipe Reborn (Part II)**](https://objective-see.org/blog/blog_0x41.html)
 
 ## Referenzen
 
 - [https://wojciechregula.blog/post/learn-xpc-exploitation-part-2-say-no-to-the-pid/](https://wojciechregula.blog/post/learn-xpc-exploitation-part-2-say-no-to-the-pid/)
 - [https://saelo.github.io/presentations/warcon18_dont_trust_the_pid.pdf](https://saelo.github.io/presentations/warcon18_dont_trust_the_pid.pdf)
+- [https://blog.quarkslab.com/intego_lpe_macos_2.html](https://blog.quarkslab.com/intego_lpe_macos_2.html)
+- [https://www.ibm.com/think/x-force/exploiting-gog-galaxy-xpc-service-privilege-escalation-macos](https://www.ibm.com/think/x-force/exploiting-gog-galaxy-xpc-service-privilege-escalation-macos)
+- [https://objective-see.org/blog/blog_0x41.html](https://objective-see.org/blog/blog_0x41.html)
 
 {{#include ../../../../../../banners/hacktricks-training.md}}
