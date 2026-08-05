@@ -9,12 +9,12 @@
 {{#endref}}
 
 
-Mach-o binarni fajlovi sadrže load komandu pod nazivom **`LC_CODE_SIGNATURE`**, koja ukazuje na **offset** i veličinu potpisa unutar binarnog fajla. Zapravo, pomoću GUI alata MachOView moguće je na kraju binarnog fajla pronaći odeljak pod nazivom **Code Signature** sa ovim informacijama:
+Mach-o binarni fajlovi sadrže load command pod nazivom **`LC_CODE_SIGNATURE`**, koji označava **offset** i veličinu potpisa unutar binarnog fajla. Zapravo, pomoću GUI alata MachOView moguće je pronaći odeljak pod nazivom **Code Signature** na kraju binarnog fajla, sa ovim informacijama:
 
 <figure><img src="../../../images/image (1) (1) (1) (1).png" alt="" width="431"><figcaption></figcaption></figure>
 
-Magic zaglavlje odeljka Code Signature je **`0xFADE0CC0`** (ugrađeni code signature) ili **`0xFADE0CC1`** (odvojeni code signature). Zatim imate informacije kao što su dužina i broj blob-ova superBlob-a koji ih sadrži.\
-Ove informacije je moguće pronaći u [izvornom kodu ovde](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/osfmk/kern/cs_blobs.h#L276):<sup>[1]</sup>
+Magic header odeljka Code Signature je **`0xFADE0CC0`** (embedded code signature) ili **`0xFADE0CC1`** (detached code signature). Zatim postoje informacije kao što su dužina i broj blobova superBloba koji ih sadrži.\
+Ove informacije je moguće pronaći u [izvornom kodu ovde](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/osfmk/kern/cs_blobs.h#L276):<sup>[[1]](#references)</sup>
 ```c
 /*
 * Structure of an embedded-signature SuperBlob
@@ -43,14 +43,14 @@ char data[];
 } CS_GenericBlob
 __attribute__ ((aligned(1)));
 ```
-Uobičajeni blob-ovi sadrže Code Directory, Requirements i Entitlements, kao i Cryptographic Message Syntax (CMS).\
+Uobičajeni sadržani blob-ovi su Code Directory, Requirements i Entitlements, kao i Cryptographic Message Syntax (CMS).\
 Takođe, imajte na umu da su podaci kodirani u blob-ovima kodirani u **Big Endian** formatu.
 
-Takođe, potpisi mogu biti odvojeni od binarnih datoteka i sačuvani u `/var/db/DetachedSignatures` (koristi ga iOS).
+Takođe, imajte na umu da se potpisi mogu odvojiti od binarnih datoteka i sačuvati u `/var/db/DetachedSignatures` (koristi ih iOS).
 
 ## Code Directory Blob
 
-Moguće je pronaći deklaraciju za [Code Directory Blob u kodu](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/osfmk/kern/cs_blobs.h#L104):<sup>[1]</sup>
+Moguće je pronaći deklaraciju za [Code Directory Blob u kodu](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/osfmk/kern/cs_blobs.h#L104):<sup>[[1]](#references)</sup>
 ```c
 typedef struct __CodeDirectory {
 uint32_t magic;                                 /* magic number (CSMAGIC_CODEDIRECTORY) */
@@ -110,10 +110,10 @@ Imajte na umu da postoje različite verzije ove strukture, pri čemu starije mog
 
 Imajte na umu da direktorijum Code može koristiti bilo koji hashing algoritam. Trenutno je najčešći **SHA256** (označen vrednošću 2 u polju `hashType`), ali ako ovaj hash u budućnosti bude probijen, Apple bi mogao početi da koristi neki drugi.
 
-## Potpisivanje stranica koda
+## Potpisivanje Code stranica
 
-Hashovanje celog binarnog fajla bilo bi neefikasno, pa čak i beskorisno ako se on učitava u memoriju samo delimično. Zbog toga je code signature zapravo hash hash-eva, pri čemu se svaka binarna stranica hash-uje pojedinačno.\
-Zapravo, u prethodnom kodu **Code Directory** možete videti da je **veličina stranice navedena** u jednom od njegovih polja. Štaviše, ako veličina binarnog fajla nije umnožak veličine stranice, polje **CodeLimit** određuje gde se signature završava.
+Hashing celog binarnog fajla bio bi neefikasan, a čak i beskoristan ako se on učitava samo delimično u memoriju. Zbog toga je code signature zapravo hash hash-eva, gde se svaka binarna stranica hash-uje pojedinačno.\
+Zapravo, u prethodnom kodu **Code Directory** možete videti da je **veličina stranice navedena** u jednom od njegovih polja. Štaviše, ako veličina binarnog fajla nije umnožak veličine stranice, polje **CodeLimit** određuje gde se nalazi kraj signature-a.
 ```bash
 # Get all hashes of /bin/ps
 codesign -d -vvvvvv /bin/ps
@@ -184,25 +184,25 @@ openssl sha256 /tmp/*.page.*
 ```
 ## Entitlements Blob
 
-Imajte na umu da aplikacije mogu sadržati i **entitlement blob** u kojem su definisani svi entitlements. Štaviše, neki iOS binary fajlovi mogu imati svoje entitlements navedene u posebnom slotu -7 (umesto u posebnom slotu za entitlements -5).
+Imajte na umu da aplikacije mogu sadržati i **entitlement blob**, u kojem su definisani svi entitlements. Štaviše, neki iOS binaries mogu imati svoje entitlements u posebnom slotu -7 (umesto u posebnom slotu -5 za entitlements).
 
 ## Special Slots
 
-macOS aplikacije nemaju sve što im je potrebno za izvršavanje unutar binary fajla, već koriste i **external resources** (obično unutar **bundle-a** aplikacije). Zato unutar binary fajla postoje slotovi koji sadrže hash vrednosti nekih važnih external resources, kako bi se proverilo da nisu izmenjeni.
+MacOS aplikacije nemaju sve što im je potrebno za izvršavanje unutar binary-ja, već koriste i **external resources** (obično unutar application **bundle-a**). Zbog toga u binary-ju postoje slotovi koji sadrže hash-eve nekih važnih external resources, kako bi se proverilo da nisu izmenjeni.
 
-Zapravo, u strukturama Code Directory moguće je videti parametar pod nazivom **`nSpecialSlots`**, koji označava broj special slots. Ne postoji special slot 0, a najčešći slotovi (od -1 do -6) su:
+Moguće je videti da strukture Code Directory sadrže parametar pod nazivom **`nSpecialSlots`**, koji označava broj special slots. Ne postoji special slot 0, a najčešći slotovi (od -1 do -6) su:
 
-- Hash vrednost fajla `info.plist` (ili onog unutar `__TEXT.__info__plist`).
-- Hash vrednost Requirements-a
-- Hash vrednost Resource Directory-ja (hash vrednost fajla `_CodeSignature/CodeResources` unutar bundle-a).
-- Specifično za aplikaciju (ne koristi se)
-- Hash vrednost entitlements-a
-- Isključivo DMG code signatures
+- Hash za `info.plist` (ili onaj unutar `__TEXT.__info__plist`).
+- Hash za Requirements
+- Hash za Resource Directory (hash datoteke `_CodeSignature/CodeResources` unutar bundle-a).
+- Application specific (unused)
+- Hash za entitlements
+- Samo DMG code signatures
 - DER Entitlements
 
 ## Code Signing Flags
 
-Svaki proces ima povezanu bitmasku poznatu kao `status`, koju postavlja kernel, a neke od njenih vrednosti mogu biti nadjačane pomoću **code signature**. Ove flags vrednosti koje mogu biti uključene u code signing [definisane su u kodu](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/osfmk/kern/cs_blobs.h#L36):<sup>[1]</sup>
+Svaki proces ima pridruženu bitmasku poznatu kao `status`, koju postavlja kernel, a neke od njenih vrednosti mogu biti zamenjene pomoću **code signature**. Ove flags, koje mogu biti uključene u code signing, [definisane su u kodu](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/osfmk/kern/cs_blobs.h#L36):<sup>[[1]](#references)</sup>
 ```c
 /* code signing attributes of a process */
 #define CS_VALID                    0x00000001  /* dynamically valid */
@@ -247,15 +247,15 @@ CS_RESTRICT | CS_ENFORCEMENT | CS_REQUIRE_LV | CS_RUNTIME | CS_LINKER_SIGNED)
 
 #define CS_ENTITLEMENT_FLAGS        (CS_GET_TASK_ALLOW | CS_INSTALLER | CS_DATAVAULT_CONTROLLER | CS_NVRAM_UNRESTRICTED)
 ```
-Imajte na umu da funkcija [**exec_mach_imgact**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/kern/kern_exec.c#L1420) takođe može dinamički da doda `CS_EXEC_*` flags prilikom pokretanja izvršavanja.
+Imajte na umu da funkcija [**exec_mach_imgact**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/kern/kern_exec.c#L1420) takođe može dinamički da doda oznake `CS_EXEC_*` prilikom pokretanja izvršavanja.
 
-## Zahtevi code signature-a
+## Zahtevi potpisa koda
 
 Svaka aplikacija čuva određene **zahteve** koje mora da **ispuni** da bi mogla da se izvrši. Ako **aplikacija sadrži zahteve koje sama aplikacija ne ispunjava**, neće biti izvršena (jer je verovatno izmenjena).
 
-Zahtevi binarnog fajla koriste **posebnu gramatiku** koja je tok **izraza** i kodiraju se kao blobs koristeći `0xfade0c00` kao magic vrednost, čiji se **hash čuva u posebnom code slot-u**.
+Zahtevi binarne datoteke koriste **posebnu gramatiku**, koja predstavlja tok **izraza**, a kodiraju se kao blob-ovi koristeći `0xfade0c00` kao magic vrednost, čiji se **hash čuva u posebnom code slot-u**.
 
-Zahtevi binarnog fajla mogu se prikazati pokretanjem:
+Zahtevi binarne datoteke mogu se prikazati pokretanjem:
 ```bash
 codesign -d -r- /bin/ls
 Executable=/bin/ls
@@ -266,7 +266,7 @@ Executable=/Applications/Signal.app/Contents/MacOS/Signal
 designated => identifier "org.whispersystems.signal-desktop" and anchor apple generic and certificate 1[field.1.2.840.113635.100.6.2.6] /* exists */ and certificate leaf[field.1.2.840.113635.100.6.1.13] /* exists */ and certificate leaf[subject.OU] = U68MSDN6DR
 ```
 > [!TIP]
-> Obratite pažnju na to da ovi potpisi mogu da provere podatke kao što su informacije o sertifikatu, TeamID, ID-jevi, entitlements i mnogi drugi podaci.
+> Obratite pažnju na to da ovi potpisi mogu da provere podatke kao što su informacije o sertifikatu, TeamID, IDs, entitlements i mnoge druge podatke.
 
 Pored toga, moguće je generisati neke kompajlirane zahteve pomoću alata `csreq`:
 ```bash
@@ -280,60 +280,60 @@ od -A x -t x1 /tmp/output.csreq
 0000020    00  00  00  21  6f  72  67  2e  77  68  69  73  70  65  72  73
 [...]
 ```
-Moguće je pristupiti ovim informacijama i kreirati ili izmeniti zahteve pomoću nekih API-ja iz `Security.framework`, kao što su:<sup>[4]</sup>
+Moguće je pristupiti ovim informacijama i kreirati ili izmeniti zahteve pomoću nekih API-ja iz `Security.framework`, kao što su:<sup>[[4]](#references)</sup>
 
 #### **Provera validnosti**
 
-- **`Sec[Static]CodeCheckValidity`**: Proverava validnost SecCodeRef-a prema zahtevu.
-- **`SecRequirementEvaluate`**: Proverava zahtev u kontekstu sertifikata.
-- **`SecTaskValidateForRequirement`**: Proverava pokrenuti SecTask u odnosu na zahtev tipa `CFString`.
+- **`Sec[Static]CodeCheckValidity`**: Proverava validnost SecCodeRef u odnosu na zahtev.
+- **`SecRequirementEvaluate`**: Validira zahtev u kontekstu sertifikata.
+- **`SecTaskValidateForRequirement`**: Validira pokrenuti SecTask u odnosu na `CFString` zahtev.
 
-#### **Kreiranje i upravljanje zahtevima za code signing**
+#### **Kreiranje i upravljanje zahtevima za kod**
 
 - **`SecRequirementCreateWithData`:** Kreira `SecRequirementRef` iz binarnih podataka koji predstavljaju zahtev.
 - **`SecRequirementCreateWithString`:** Kreira `SecRequirementRef` iz tekstualnog izraza zahteva.
-- **`SecRequirementCopy[Data/String]`**: Preuzima binarnu reprezentaciju objekta `SecRequirementRef`.
-- **`SecRequirementCreateGroup`**: Kreira zahtev za članstvo u app-group.
+- **`SecRequirementCopy[Data/String]`**: Preuzima reprezentaciju `SecRequirementRef` u obliku binarnih podataka.
+- **`SecRequirementCreateGroup`**: Kreira zahtev za članstvo u grupi aplikacije.
 
-#### **Pristup informacijama o code signing-u**
+#### **Pristup informacijama o potpisivanju koda**
 
-- **`SecStaticCodeCreateWithPath`**: Inicijalizuje objekat `SecStaticCodeRef` iz putanje u sistemu datoteka radi provere code signature-a.
-- **`SecCodeCopySigningInformation`**: Dobavlja informacije o code signing-u iz objekta `SecCodeRef` ili `SecStaticCodeRef`.
+- **`SecStaticCodeCreateWithPath`**: Inicijalizuje objekat `SecStaticCodeRef` iz putanje sistema datoteka radi provere potpisa koda.
+- **`SecCodeCopySigningInformation`**: Dobavlja informacije o potpisivanju iz objekta `SecCodeRef` ili `SecStaticCodeRef`.
 
-#### **Izmena zahteva za code signing**
+#### **Izmena zahteva za kod**
 
-- **`SecCodeSignerCreate`**: Kreira objekat `SecCodeSignerRef` za obavljanje operacija code signing-a.
-- **`SecCodeSignerSetRequirement`**: Postavlja novi zahtev koji će code signer primeniti tokom potpisivanja.
-- **`SecCodeSignerAddSignature`**: Dodaje signature kodu koji se potpisuje pomoću navedenog signer-a.
+- **`SecCodeSignerCreate`**: Kreira objekat `SecCodeSignerRef` za obavljanje operacija potpisivanja koda.
+- **`SecCodeSignerSetRequirement`**: Postavlja novi zahtev koji će signer koda primeniti tokom potpisivanja.
+- **`SecCodeSignerAddSignature`**: Dodaje potpis kodu koji se potpisuje pomoću navedenog signera.
 
 #### **Validacija koda pomoću zahteva**
 
-- **`SecStaticCodeCheckValidity`**: Validira objekat statičkog koda u odnosu na navedene zahteve.
+- **`SecStaticCodeCheckValidity`**: Validira statički objekat koda u odnosu na navedene zahteve.
 
 #### **Dodatni korisni API-ji**
 
-- **`SecCodeCopy[Internal/Designated]Requirement`:** Dobavlja SecRequirementRef iz SecCodeRef-a.
+- **`SecCodeCopy[Internal/Designated]Requirement`:** Dobavlja SecRequirementRef iz SecCodeRef.
 - **`SecCodeCopyGuestWithAttributes`**: Kreira `SecCodeRef` koji predstavlja objekat koda na osnovu određenih atributa, što je korisno za sandboxing.
-- **`SecCodeCopyPath`**: Preuzima putanju u sistemu datoteka povezanu sa objektom `SecCodeRef`.
-- **`SecCodeCopySigningIdentifier`**: Dobavlja signing identifier (npr. Team ID) iz objekta `SecCodeRef`.
+- **`SecCodeCopyPath`**: Preuzima putanju sistema datoteka povezanu sa objektom `SecCodeRef`.
+- **`SecCodeCopySigningIdentifier`**: Dobavlja identifikator potpisivanja (npr. Team ID) iz objekta `SecCodeRef`.
 - **`SecCodeGetTypeID`**: Vraća identifikator tipa za objekte `SecCodeRef`.
 - **`SecRequirementGetTypeID`**: Dobavlja CFTypeID objekta `SecRequirementRef`.
 
-#### **Code Signing Flags and Constants**
+#### **Zastavice i konstante potpisivanja koda**
 
-- **`kSecCSDefaultFlags`**: Podrazumevani flagovi koji se koriste u mnogim funkcijama `Security.framework` za operacije code signing-a.
-- **`kSecCSSigningInformation`**: Flag koji se koristi za navođenje da treba preuzeti informacije o code signing-u.
+- **`kSecCSDefaultFlags`**: Podrazumevane zastavice koje koriste mnoge funkcije `Security.framework` za operacije potpisivanja koda.
+- **`kSecCSSigningInformation`**: Zastavica koja određuje da treba preuzeti informacije o potpisivanju.
 
-## Sprovođenje Code Signature-a
+## Sprovođenje potpisa koda
 
-**kernel** je taj koji **proverava code signature** pre nego što dozvoli izvršavanje koda aplikacije. Pored toga, jedan od načina za upisivanje i izvršavanje novog koda u memoriji jeste zloupotreba JIT-a ako se `mprotect` pozove sa flagom `MAP_JIT`. Imajte na umu da aplikacija mora imati poseban entitlement da bi ovo mogla da uradi.
+**kernel** je taj koji **proverava potpis koda** pre nego što dozvoli izvršavanje koda aplikacije. Pored toga, jedan od načina za upisivanje i izvršavanje novog koda u memoriji jeste zloupotreba JIT-a ako se `mprotect` pozove sa zastavicom `MAP_JIT`. Imajte na umu da je aplikaciji potreban poseban entitlement da bi to mogla da uradi.
 
-## `cs_blobs` & `cs_blob`
+## `cs_blobs` i `cs_blob`
 
-Struktura [**cs_blob**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/sys/ubc_internal.h#L106) sadrži informacije o entitlement-ima procesa koji se na njoj izvršava. `csb_platform_binary` takođe označava da li je aplikacija **platform binary** (što OS proverava u različitim trenucima kako bi primenio bezbednosne mehanizme, kao što je zaštita SEND prava nad task port-ovima ovih procesa).
+Struktura [**cs_blob**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/sys/ubc_internal.h#L106) sadrži informacije o entitlementima pokrenutog procesa. `csb_platform_binary` takođe pokazuje da li je aplikacija **platform binary** (što OS proverava u različitim trenucima kako bi primenio bezbednosne mehanizme, na primer za zaštitu SEND prava nad task portovima ovih procesa).
 
 > [!WARNING]
-> Imajte na umu da nekoliko bezbednosnih mera zavisi od toga da li je binarni fajl platform binary, pa je jedan od načina za eskalaciju privilegija **pretvaranje binarnog fajla u platform binary** (na primer, ponovnim potpisivanjem sertifikatom koji to omogućava).
+> Imajte na umu da nekoliko bezbednosnih mera zavisi od toga da li je binarni fajl platform binary, pa je jedan od načina za eskalaciju privilegija **pretvoriti binarni fajl u platform binary** (na primer, ponovnim potpisivanjem sertifikatom koji to omogućava).
 ```c
 struct cs_blob {
 struct cs_blob  *csb_next;
@@ -394,9 +394,9 @@ bool csb_csm_managed;
 ```
 ## Reference
 
-- [1] [XNU — `osfmk/kern/cs_blobs.h` (`CodeDirectory`, `CS_*` flags, blob magic vrednosti)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/kern/cs_blobs.h)
+- [1] [XNU — `osfmk/kern/cs_blobs.h` (`CodeDirectory`, `CS_*` zastavice, magične vrednosti blob-ova)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/kern/cs_blobs.h)
 - [2] [XNU — `bsd/kern/ubc_subr.c` (obrada `cs_blob` i validacija potpisa)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/kern/ubc_subr.c)
-- [3] [XNU — `bsd/sys/codesign.h` (`csops`/`csops_audittoken` operacije)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/sys/codesign.h)
+- [3] [XNU — `bsd/sys/codesign.h` (operacije `csops`/`csops_audittoken`)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/sys/codesign.h)
 - [4] [Izvorni kod Apple Security framework-a — `libsecurity_codesigning`](https://github.com/apple-oss-distributions/Security/tree/main/OSX/libsecurity_codesigning)
 - [5] [Apple Developer — Vodič za Code Signing](https://developer.apple.com/library/archive/documentation/Security/Conceptual/CodeSigningGuide/Introduction/Introduction.html)
 

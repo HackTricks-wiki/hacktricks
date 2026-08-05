@@ -8,9 +8,9 @@
 - JAMF Pro: `jamf checkJSSConnection`
 - Kandji
 
-Ako uspete da **kompromitujete administratorske kredencijale** za pristup management platformi, možete **potencijalno kompromitovati sve računare** distribucijom svog malware-a na njih.
+Ako uspete da **kompromitujete administratorske kredencijale** za pristup management platformi, možete **potencijalno kompromitovati sve računare** distribucijom malware-a na njima.
 
-Za red teaming u MacOS okruženjima veoma je preporučljivo razumeti kako MDM-ovi funkcionišu:
+Za red teaming u MacOS okruženjima veoma se preporučuje razumevanje načina rada MDM-ova:
 
 
 {{#ref}}
@@ -19,36 +19,36 @@ macos-mdm/
 
 ### Korišćenje MDM-a kao C2
 
-MDM će imati dozvole za instaliranje, upite ili uklanjanje profila, instaliranje aplikacija, kreiranje lokalnih administratorskih naloga, postavljanje firmware lozinke, promenu FileVault ključa...
+MDM ima dozvole za instaliranje, ispitivanje ili uklanjanje profila, instaliranje aplikacija, kreiranje lokalnih administratorskih naloga, postavljanje firmware lozinke, promenu FileVault ključa...
 
-Da biste pokrenuli sopstveni MDM, potrebno je da **vaš CSR bude potpisan od strane vendora**, što možete pokušati da dobijete na [**https://mdmcert.download/**](https://mdmcert.download/). Za pokretanje sopstvenog MDM-a za Apple uređaje možete koristiti [**MicroMDM**](https://github.com/micromdm/micromdm).
+Da biste pokrenuli sopstveni MDM, potreban vam je **CSR potpisan od strane vendora**, što možete pokušati da dobijete putem [**https://mdmcert.download/**](https://mdmcert.download/). Za pokretanje sopstvenog MDM-a za Apple uređaje možete koristiti [**MicroMDM**](https://github.com/micromdm/micromdm).
 
-Međutim, da biste instalirali aplikaciju na enrolled uređaju, ona i dalje mora biti potpisana developerskim nalogom... međutim, prilikom MDM enrolmenta **uređaj dodaje SSL cert MDM-a kao trusted CA**, tako da sada možete potpisati bilo šta.<sup>[4]</sup>
+Međutim, da biste instalirali aplikaciju na enrolled uređaj, ona i dalje mora biti potpisana developerskim nalogom... međutim, prilikom MDM enrollment-a **uređaj dodaje SSL sertifikat MDM-a kao trusted CA**, tako da sada možete potpisati bilo šta.<sup>[[4]](#references)</sup>
 
-Da biste enrolovali uređaj u MDM, potrebno je da instalirate **`mobileconfig`** fajl kao root, što može biti isporučeno putem **pkg** fajla (možete ga kompresovati u zip, a kada se preuzme iz Safarija, biće dekompresovan).
+Da biste enrolovali uređaj u MDM, potrebno je da kao root instalirate **`mobileconfig`** fajl, koji se može isporučiti putem **pkg** fajla (možete ga kompresovati u zip, a kada se preuzme iz Safarija, biće dekompresovan).
 
 **Mythic agent Orthrus** koristi ovu tehniku.
 
 ### Zloupotreba JAMF PRO
 
-JAMF može pokretati **custom scripts** (skripte koje je razvio sysadmin), **native payloads** (kreiranje lokalnih naloga, postavljanje EFI lozinke, monitoring fajlova/procesa...) i **MDM** (konfiguracije uređaja, certifikati uređaja...).<sup>[5]</sup>
+JAMF može da pokreće **custom scripts** (skripte koje razvija sysadmin), **native payloads** (kreiranje lokalnog naloga, postavljanje EFI lozinke, nadgledanje fajlova/procesa...) i **MDM** (konfiguracije uređaja, sertifikati uređaja...).<sup>[[5]](#references)</sup>
 
 #### JAMF self-enrolment
 
-Idite na stranicu kao što je `https://<company-name>.jamfcloud.com/enroll/` da biste proverili da li je omogućen **self-enrolment**. Ako jeste, možda će **zatražiti kredencijale za pristup**.
+Posetite stranicu kao što je `https://<company-name>.jamfcloud.com/enroll/` da biste proverili da li je omogućen **self-enrolment**. Ako jeste, stranica može **zahtevati kredencijale za pristup**.
 
 Možete koristiti skriptu [**JamfSniper.py**](https://github.com/WithSecureLabs/Jamf-Attack-Toolkit/blob/master/JamfSniper.py) za izvođenje password spraying napada.
 
-Pored toga, nakon pronalaženja ispravnih kredencijala možda ćete moći da izvršite brute-force nad drugim korisničkim imenima pomoću sledeće forme:
+Pored toga, nakon pronalaženja ispravnih kredencijala, možda ćete moći da brute-force-ujete druga korisnička imena pomoću sledeće forme:
 
-![Zloupotreba JAMF PRO - JAMF self-enrolment: Pored toga, nakon pronalaženja ispravnih kredencijala možda ćete moći da izvršite brute-force nad drugim korisničkim imenima pomoću sledeće forme](<../../images/image (107).png>)
+![Zloupotreba JAMF PRO - JAMF self-enrolment: Pored toga, nakon pronalaženja ispravnih kredencijala, možda ćete moći da brute-force-ujete druga korisnička imena pomoću sledeće forme](<../../images/image (107).png>)
 
 #### JAMF device Authentication
 
 <figure><img src="../../images/image (167).png" alt=""><figcaption></figcaption></figure>
 
-**`jamf`** binary je sadržao secret za otvaranje keychain-a koji je u vreme otkrića bio **shared** među svima i glasio je: **`jk23ucnq91jfu9aj`**.<sup>[5]</sup>\
-Pored toga, jamf **persist** kao **LaunchDaemon** u **`/Library/LaunchAgents/com.jamf.management.agent.plist`**
+Binarni fajl **`jamf`** sadržao je tajnu vrednost za otvaranje keychain-a, koja je u vreme otkrića bila **deljena** među svima i glasila je: **`jk23ucnq91jfu9aj`**.<sup>[[5]](#references)</sup>\
+Pored toga, jamf se **perzistira** kao **LaunchDaemon** u **`/Library/LaunchAgents/com.jamf.management.agent.plist`**
 
 #### JAMF Device Takeover
 
@@ -66,7 +66,7 @@ plutil -convert xml1 -o - /Library/Preferences/com.jamfsoftware.jamf.plist
 <integer>4</integer>
 [...]
 ```
-Dakle, napadač bi mogao da ubaci zlonamerni paket (`pkg`) koji bi **prepisao ovu datoteku** prilikom instalacije, postavljajući **URL ka Mythic C2 listeneru iz Typhon agenta**, čime bi mogao da zloupotrebi JAMF kao C2.
+Dakle, napadač bi mogao da ubaci zlonamerni paket (`pkg`) koji bi **prepisao ovu datoteku** prilikom instalacije, postavljajući **URL na Mythic C2 listener iz Typhon agenta**, čime bi mogao da zloupotrebi JAMF kao C2.
 ```bash
 # After changing the URL you could wait for it to be reloaded or execute:
 sudo jamf policy -id 0
@@ -75,26 +75,26 @@ sudo jamf policy -id 0
 ```
 #### JAMF Impersonation
 
-Da biste **impersonate komunikaciju** između uređaja i JMF-a, potrebno vam je:
+Da biste **impersonirali komunikaciju** između uređaja i JMF-a potrebno je:
 
 - **UUID** uređaja: `ioreg -d2 -c IOPlatformExpertDevice | awk -F" '/IOPlatformUUID/{print $(NF-1)}'`
 - **JAMF keychain** sa lokacije: `/Library/Application\ Support/Jamf/JAMF.keychain`, koji sadrži sertifikat uređaja
 
-Sa ovim informacijama, **kreirajte VM** sa **ukradenim** Hardware **UUID-om** i sa **onemogućenim SIP-om**, ubacite **JAMF keychain**, uradite **hook** Jamf **agent-a** i ukradite njegove informacije.
+Koristeći ove informacije, **kreirajte VM** sa **ukradenim** Hardware **UUID-om** i sa **isključenim SIP-om**, ubacite **JAMF keychain**, izvršite **hook** Jamf **agenta** i ukradite njegove informacije.
 
-#### Krađa secrets
+#### Secrets stealing
 
 <figure><img src="../../images/image (1025).png" alt=""><figcaption><p>a</p></figcaption></figure>
 
-Takođe možete pratiti lokaciju `/Library/Application Support/Jamf/tmp/` za **custom scripts** koje administratori mogu želeti da izvrše putem Jamf-a, pošto se oni **ovde postavljaju, izvršavaju i uklanjaju**. Ove skripte mogu sadržati **credentials**.
+Takođe možete nadgledati lokaciju `/Library/Application Support/Jamf/tmp/` u potrazi za **custom scripts** koje administratori mogu želeti da izvrše putem Jamf-a, pošto se oni **postavljaju ovde, izvršavaju i uklanjaju**. Ove skripte **mogu sadržati credentials**.
 
-Međutim, **credentials** se mogu proslediti ovim skriptama kao **parameters**, pa bi bilo potrebno pratiti `ps aux | grep -i jamf` (čak i bez root privilegija).
+Međutim, **credentials** mogu biti prosleđeni ovim skriptama kao **parametri**, pa bi bilo potrebno nadgledati `ps aux | grep -i jamf` (čak i bez root privilegija).
 
-Skripta [**JamfExplorer.py**](https://github.com/WithSecureLabs/Jamf-Attack-Toolkit/blob/master/JamfExplorer.py) može da osluškuje dodavanje novih fajlova i nove argumente procesa.
+Skripta [**JamfExplorer.py**](https://github.com/WithSecureLabs/Jamf-Attack-Toolkit/blob/master/JamfExplorer.py) može osluškivati dodavanje novih fajlova i nove arguments procesa.
 
 ### macOS Remote Access
 
-Takođe, u vezi sa "posebnim" **network** **protocols** sistema **MacOS**:
+Takođe, u vezi sa "posebnim" **mrežnim** **protokolima** sistema **MacOS**:
 
 
 {{#ref}}
@@ -103,7 +103,7 @@ Takođe, u vezi sa "posebnim" **network** **protocols** sistema **MacOS**:
 
 ## Active Directory
 
-U nekim slučajevima ćete otkriti da je **MacOS računar povezan na AD**. U ovom scenariju trebalo bi da pokušate da **enumerate** active directory na način na koji ste navikli. Pronađite **pomoć** na sledećim stranicama:
+U nekim slučajevima otkrićete da je **MacOS računar povezan sa AD-om**. U ovom scenariju trebalo bi da pokušate da **enumerišete** active directory na način na koji ste navikli. Dodatnu **pomoć** možete pronaći na sledećim stranicama:
 
 
 {{#ref}}
@@ -124,11 +124,11 @@ Neki **lokalni MacOS alat** koji vam takođe može pomoći jeste `dscl`:
 ```bash
 dscl "/Active Directory/[Domain]/All Domains" ls /
 ```
-Takođe postoje neki alati pripremljeni za MacOS koji automatski enumerišu AD i omogućavaju rad sa kerberosom:
+Takođe postoje neke alatke pripremljene za MacOS za automatsko enumerisanje AD-a i rad sa kerberosom:
 
-- [**Machound**](https://github.com/XMCyber/MacHound): MacHound je proširenje alata Bloodhound za auditing, koje omogućava prikupljanje i unos informacija o odnosima u Active Directory-ju sa MacOS hostova.<sup>[2]</sup>
-- [**Bifrost**](https://github.com/its-a-feature/bifrost): Bifrost je Objective-C projekat dizajniran za interakciju sa Heimdal krb5 API-jima na macOS-u. Cilj projekta je omogućavanje kvalitetnijeg security testinga Kerberosa na macOS uređajima korišćenjem izvornih API-ja, bez potrebe za bilo kojim drugim frameworkom ili paketima na targetu.
-- [**Orchard**](https://github.com/its-a-feature/Orchard): JavaScript for Automation (JXA) alat za enumeraciju Active Directory-ja.
+- [**Machound**](https://github.com/XMCyber/MacHound): MacHound je proširenje alatke Bloodhound audting koje omogućava prikupljanje i unos odnosa Active Directory-ja na MacOS hostovima.<sup>[[2]](#references)</sup>
+- [**Bifrost**](https://github.com/its-a-feature/bifrost): Bifrost je Objective-C projekat dizajniran za interakciju sa Heimdal krb5 API-jima na macOS-u. Cilj projekta je omogućavanje boljeg security testiranja u vezi sa Kerberosom na macOS uređajima, korišćenjem nativnih API-ja bez potrebe za bilo kojim drugim framework-om ili paketima na targetu.
+- [**Orchard**](https://github.com/its-a-feature/Orchard): JavaScript for Automation (JXA) alatka za enumerisanje Active Directory-ja.
 
 ### Informacije o domenu
 ```bash
@@ -136,20 +136,20 @@ echo show com.apple.opendirectoryd.ActiveDirectory | scutil
 ```
 ### Korisnici
 
-Tri vrste MacOS korisnika su:
+Tri tipa MacOS korisnika su:
 
-- **Lokalni korisnici** — Njima upravlja lokalni OpenDirectory servis i nisu ni na koji način povezani sa Active Directory-jem.
+- **Lokalni korisnici** — Njima upravlja lokalna OpenDirectory usluga i ni na koji način nisu povezani sa Active Directory.
 - **Mrežni korisnici** — Privremeni Active Directory korisnici kojima je potrebna veza sa DC serverom radi autentifikacije.
 - **Mobilni korisnici** — Active Directory korisnici sa lokalnom rezervnom kopijom svojih akreditiva i datoteka.
 
-Lokalne informacije o korisnicima i grupama čuvaju se u fascikli _/var/db/dslocal/nodes/Default._\
-Na primer, informacije o korisniku pod imenom _mark_ čuvaju se u _/var/db/dslocal/nodes/Default/users/mark.plist_, a informacije o grupi _admin_ nalaze se u _/var/db/dslocal/nodes/Default/groups/admin.plist_.
+Lokalne informacije o korisnicima i grupama čuvaju se u folderu _/var/db/dslocal/nodes/Default._\
+Na primer, informacije o korisniku pod nazivom _mark_ čuvaju se u _/var/db/dslocal/nodes/Default/users/mark.plist_, a informacije o grupi _admin_ nalaze se u _/var/db/dslocal/nodes/Default/groups/admin.plist_.
 
-Pored korišćenja HasSession i AdminTo edges, **MacHound dodaje tri nova edge-a** u Bloodhound bazu podataka:<sup>[2]</sup>
+Pored korišćenja veza HasSession i AdminTo, **MacHound dodaje tri nove veze** u Bloodhound bazu podataka:<sup>[[2]](#references)</sup>
 
-- **CanSSH** - entitetu je dozvoljeno da koristi SSH za pristup hostu
-- **CanVNC** - entitetu je dozvoljeno da koristi VNC za pristup hostu
-- **CanAE** - entitetu je dozvoljeno da izvršava AppleEvent skripte na hostu
+- **CanSSH** - entitet kojem je dozvoljeno da koristi SSH za povezivanje sa hostom
+- **CanVNC** - entitet kojem je dozvoljeno da koristi VNC za povezivanje sa hostom
+- **CanAE** - entitet kojem je dozvoljeno da izvršava AppleEvent skripte na hostu
 ```bash
 #User enumeration
 dscl . ls /Users
@@ -179,16 +179,16 @@ Preuzmite lozinke pomoću:
 ```bash
 bifrost --action askhash --username [name] --password [password] --domain [domain]
 ```
-Moguce je pristupiti lozinki **`Computer$`** unutar System keychain-a.
+Moguce je pristupiti lozinci **`Computer$`** unutar System keychain-a.
 
 ### Over-Pass-The-Hash
 
-Dobijte TGT za odredenog user-a i service:
+Preuzmite TGT za odredenog korisnika i servis:
 ```bash
 bifrost --action asktgt --username [user] --domain [domain.com] \
 --hash [hash] --enctype [enctype] --keytab [/path/to/keytab]
 ```
-Kada se TGT prikupi, moguće je injectovati ga u trenutnu sesiju pomoću:
+Kada je TGT prikupljen, moguće je inject-ovati ga u trenutnu sesiju pomoću:
 ```bash
 bifrost --action asktgt --username test_lab_admin \
 --hash CF59D3256B62EE655F6430B0F80701EE05A0885B8B52E9C2480154AFA62E78 \
@@ -199,14 +199,14 @@ bifrost --action asktgt --username test_lab_admin \
 bifrost --action asktgs --spn [service] --domain [domain.com] \
 --username [user] --hash [hash] --enctype [enctype]
 ```
-Sa pribavljenim service tickets moguće je pokušati da se pristupi deljenim resursima na drugim računarima:
+Sa pribavljenim service tickets moguće je pokušati pristup share-ovima na drugim računarima:
 ```bash
 smbutil view //computer.fqdn
 mount -t smbfs //server/folder /local/mount/point
 ```
-## Pristupanje Keychain-u
+## Pristup Keychain-u
 
-Keychain vrlo verovatno sadrži osetljive informacije koje bi, ako im se pristupi bez generisanja prompt-a, mogle pomoći u napredovanju red team vežbe:
+Keychain vrlo verovatno sadrži osetljive informacije koje bi, ako im se pristupi bez generisanja prompta, mogle pomoći u napredovanju Red Team vežbe:
 
 
 {{#ref}}
@@ -215,13 +215,13 @@ macos-keychain.md
 
 ## Eksterne usluge
 
-MacOS Red Teaming se razlikuje od uobičajenog Windows Red Teaming-a jer je **MacOS obično direktno integrisan sa nekoliko eksternih platformi**. Uobičajena konfiguracija MacOS-a omogućava pristup računaru pomoću **OneLogin sinhronizovanih kredencijala i pristup različitim eksternim uslugama** (kao što su github, aws...) putem OneLogin-a.
+MacOS Red Teaming se razlikuje od uobičajenog Windows Red Teaming-a, jer je **MacOS obično direktno integrisan sa nekoliko eksternih platformi**. Uobičajena konfiguracija MacOS-a je pristup računaru pomoću **OneLogin sinhronizovanih kredencijala i pristupanje različitim eksternim uslugama** (kao što su github, aws...) putem OneLogin-a.
 
 ## Razne Red Team tehnike
 
 ### Safari
 
-Kada se datoteka preuzme u Safari-ju, ako je to "bezbedna" datoteka, biće **automatski otvorena**. Na primer, ako **preuzmete zip**, on će biti automatski dekompresovan:
+Kada se datoteka preuzme u Safariju, ako je to "bezbedna" datoteka, ona će biti **automatski otvorena**. Na primer, ako **preuzmete zip**, on će biti automatski dekompresovan:
 
 <figure><img src="../../images/image (226).png" alt=""><figcaption></figcaption></figure>
 

@@ -2,31 +2,31 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## **Baza podataka autorizacija**
+## **Baza autorizacija**
 
-Baza podataka koja se nalazi u `/var/db/auth.db` koristi se za čuvanje dozvola za obavljanje osetljivih operacija. Ove operacije se u potpunosti izvršavaju u **user space**-u i obično ih koriste **XPC services** koje moraju da provere **da li je klijentu koji poziva dozvoljeno** da izvrši određenu radnju, proveravajući ovu bazu podataka.
+Baza podataka koja se nalazi u `/var/db/auth.db` koristi se za čuvanje dozvola za izvršavanje osetljivih operacija. Ove operacije se u potpunosti izvršavaju u **korisničkom prostoru** i obično ih koriste **XPC services** koje treba da provere **da li je klijentski pozivalac ovlašćen** da izvrši određenu radnju, proveravajući ovu bazu podataka.
 
-Ova baza podataka se prvobitno kreira iz sadržaja datoteke `/System/Library/Security/authorization.plist`. Zatim neke usluge mogu dodati ili izmeniti ove podatke kako bi u bazu dodale druge dozvole.
+Ova baza se prvobitno kreira na osnovu sadržaja datoteke `/System/Library/Security/authorization.plist`. Zatim neke services mogu dodati ili izmeniti ovu bazu kako bi joj dodale druge dozvole.
 
 Pravila se čuvaju u tabeli `rules` unutar baze podataka i sadrže sledeće kolone:
 
-- **id**: Jedinstveni identifikator svakog pravila, koji se automatski uvećava i služi kao primarni ključ.
-- **name**: Jedinstveno ime pravila koje se koristi za njegovu identifikaciju i referenciranje unutar sistema autorizacije.
-- **type**: Određuje tip pravila, ograničen na vrednosti 1 ili 2, kako bi definisao njegovu logiku autorizacije.
+- **id**: Jedinstveni identifikator za svako pravilo, automatski se uvećava i služi kao primarni ključ.
+- **name**: Jedinstveni naziv pravila koji se koristi za njegovo identifikovanje i referenciranje u authorization system-u.
+- **type**: Navodi tip pravila, ograničen na vrednosti 1 ili 2, kako bi se definisala njegova authorization logika.
 - **class**: Kategorizuje pravilo u određenu klasu, pri čemu mora biti pozitivan ceo broj.
-- "allow" za dozvolu, "deny" za zabranu, "user" ako svojstvo grupe označava grupu čije članstvo dozvoljava pristup, "rule" označava pravilo koje treba ispuniti u nizu, a "evaluate-mechanisms" prati niz `mechanisms` čiji elementi mogu biti ugrađeni mehanizmi ili ime bundle-a unutar `/System/Library/CoreServices/SecurityAgentPlugins/` ili `/Library/Security//SecurityAgentPlugins`
-- **group**: Označava korisničku grupu povezanu sa pravilom za autorizaciju zasnovanu na grupi.
-- **kofn**: Predstavlja parametar „k-od-n“ i određuje koliko podpravila mora biti ispunjeno od ukupnog broja podpravila.
-- **timeout**: Definiše trajanje u sekundama pre nego što autorizacija dodeljena pravilom istekne.
+- "allow" za dozvolu, "deny" za zabranu, "user" ako svojstvo group navodi grupu čije članstvo omogućava pristup, "rule" označava niz pravila koja treba ispuniti, a "evaluate-mechanisms" prati niz `mechanisms` čiji elementi mogu biti builtins ili naziv bundle-a unutar `/System/Library/CoreServices/SecurityAgentPlugins/` ili `/Library/Security//SecurityAgentPlugins`
+- **group**: Navodi korisničku grupu povezanu sa pravilom za authorization zasnovanu na grupi.
+- **kofn**: Predstavlja parametar „k-od-n“, koji određuje koliko podpravila mora biti ispunjeno od ukupnog broja pravila.
+- **timeout**: Definiše trajanje u sekundama pre nego što authorization dodeljen pravilom istekne.
 - **flags**: Sadrži različite zastavice koje menjaju ponašanje i karakteristike pravila.
-- **tries**: Ograničava broj dozvoljenih pokušaja autorizacije radi povećanja bezbednosti.
+- **tries**: Ograničava broj dozvoljenih pokušaja authorization-a radi povećanja bezbednosti.
 - **version**: Prati verziju pravila radi kontrole verzija i ažuriranja.
 - **created**: Beleži vremensku oznaku kreiranja pravila u svrhu revizije.
 - **modified**: Čuva vremensku oznaku poslednje izmene pravila.
-- **hash**: Sadrži hash vrednost pravila radi osiguranja njegovog integriteta i otkrivanja neovlašćenih izmena.
+- **hash**: Sadrži hash vrednost pravila radi obezbeđivanja njegovog integriteta i otkrivanja neovlašćenih izmena.
 - **identifier**: Obezbeđuje jedinstveni string identifikator, kao što je UUID, za spoljne reference na pravilo.
-- **requirement**: Sadrži serijalizovane podatke koji definišu posebne zahteve i mehanizme autorizacije pravila.
-- **comment**: Nudi čitljiv opis ili komentar o pravilu radi dokumentacije i jasnoće.
+- **requirement**: Sadrži serijalizovane podatke koji definišu posebne authorization zahteve i mehanizme pravila.
+- **comment**: Nudi čoveku čitljiv opis ili komentar o pravilu radi dokumentacije i jasnoće.
 
 ### Primer
 ```bash
@@ -56,7 +56,7 @@ security authorizationdb read com.apple.tcc.util.admin
 </dict>
 </plist>
 ```
-Štaviše, na [https://www.dssw.co.uk/reference/authorization-rights/authenticate-admin-nonshared/](https://www.dssw.co.uk/reference/authorization-rights/authenticate-admin-nonshared/) moguće je videti značenje `authenticate-admin-nonshared`:<sup>[1]</sup>
+Štaviše, na [https://www.dssw.co.uk/reference/authorization-rights/authenticate-admin-nonshared/](https://www.dssw.co.uk/reference/authorization-rights/authenticate-admin-nonshared/) moguće je videti značenje prava `authenticate-admin-nonshared`:<sup>[[1]](#references)</sup>
 ```json
 {
 "allow-root": "false",
@@ -73,7 +73,7 @@ security authorizationdb read com.apple.tcc.util.admin
 ```
 ## Authd
 
-To je daemon koji prima zahteve za autorizaciju klijenata za izvršavanje osetljivih radnji. Radi kao XPC servis definisan unutar foldera `XPCServices/` i koristi se za upisivanje svojih logova u `/var/log/authd.log`.
+To je daemon koji prima zahteve za autorizaciju klijenata za izvršavanje osetljivih radnji. Radi kao XPC service definisan unutar foldera `XPCServices/` i koristi se za zapisivanje logova u `/var/log/authd.log`.
 
 Pored toga, pomoću security alata moguće je testirati mnoge `Security.framework` API-je. Na primer, pokretanje `AuthorizationExecuteWithPrivileges`: `security execute-with-privileges /bin/ls`
 
@@ -81,8 +81,8 @@ To će fork-ovati i izvršiti `/usr/libexec/security_authtrampoline /bin/ls` kao
 
 <figure><img src="../../../images/image (10).png" alt=""><figcaption></figcaption></figure>
 
-## References
+## Reference
 
-- [1] [authenticate-admin-nonshared - Overview of the macOS Authorization Right](https://www.dssw.co.uk/reference/authorization-rights/authenticate-admin-nonshared/)
+- [1] [authenticate-admin-nonshared - Pregled macOS prava za autorizaciju](https://www.dssw.co.uk/reference/authorization-rights/authenticate-admin-nonshared/)
 
 {{#include ../../../banners/hacktricks-training.md}}

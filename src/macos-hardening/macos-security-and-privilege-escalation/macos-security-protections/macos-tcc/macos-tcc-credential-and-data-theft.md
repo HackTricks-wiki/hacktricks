@@ -1,13 +1,13 @@
-# Krađa macOS akreditiva i podataka putem TCC dozvola
+# Krađa akreditiva i podataka putem TCC dozvola
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
 ## Pregled
 
-macOS TCC (Transparency, Consent, and Control) štiti pristup osetljivim korisničkim podacima. Kada napadač **kompromituje binary koji već ima TCC grants**, nasleđuje te dozvole. Ova stranica dokumentuje potencijal za exploitation svake TCC dozvole povezane sa krađom podataka.
+macOS TCC (Transparency, Consent, and Control) štiti pristup osetljivim korisničkim podacima. Kada napadač **kompromituje binarni fajl koji već ima TCC odobrenja**, nasleđuje te dozvole. Ova stranica dokumentuje potencijal za eksploataciju svake TCC dozvole povezane sa krađom podataka.
 
 > [!WARNING]
-> Code injection u binary sa TCC grantom (putem DYLD injection-a, dylib hijacking-a ili task port-a) **neprimetno nasleđuje sve njegove TCC dozvole**. Nema dodatnog upita niti verifikacije kada isti proces čita zaštićene podatke.
+> Ubrizgavanje koda u binarni fajl sa TCC odobrenjem (putem DYLD injection-a, dylib hijacking-a ili task port-a) **tiho nasleđuje sve njegove TCC dozvole**. Nema dodatnog upita ili verifikacije kada isti proces čita zaštićene podatke.
 
 ---
 
@@ -17,14 +17,14 @@ macOS TCC (Transparency, Consent, and Control) štiti pristup osetljivim korisni
 
 macOS Keychain čuva:
 - **Wi-Fi lozinke** — sve sačuvane akreditive bežičnih mreža
-- **Lozinke za web sajtove** — Safari, Chrome (kada koristi Keychain) i lozinke drugih browsera
+- **Lozinke za web-sajtove** — Safari, Chrome (kada koristi Keychain) i lozinke drugih browsera
 - **Lozinke aplikacija** — email nalozi, VPN akreditivi, development tokeni
-- **Sertifikate i privatne ključeve** — code signing, klijentski TLS, S/MIME enkripcija
-- **Secure notes** — tajne koje je sačuvao korisnik
+- **Sertifikate i privatne ključeve** — code signing, client TLS, S/MIME enkripcija
+- **Secure notes** — tajne koje čuva korisnik
 
 ### Entitlement: `keychain-access-groups`
 
-Keychain stavke su organizovane u **access groups**. Entitlement `keychain-access-groups` aplikacije navodi grupе kojima ona može da pristupi:
+Keychain stavke su organizovane u **grupe pristupa**. `keychain-access-groups` entitlement aplikacije navodi kojim grupama može da pristupi:
 ```xml
 <key>keychain-access-groups</key>
 <array>
@@ -85,7 +85,7 @@ NSString *password = [[NSString alloc] initWithData:passData encoding:NSUTF8Stri
 
 ### Eksploatacija
 
-Binarna datoteka sa TCC odobrenjem za kameru (putem `kTCCServiceCamera` ili `com.apple.security.device.camera` entitlementa) može da snima fotografije i video:
+Binarni fajl sa TCC dozvolom za kameru (putem `kTCCServiceCamera` ili entitlement-a `com.apple.security.device.camera`) može da snima fotografije i video:
 ```bash
 # Find camera-authorized binaries
 sqlite3 ~/Library/Application\ Support/com.apple.TCC/TCC.db \
@@ -125,13 +125,13 @@ fromConnection:(AVCaptureConnection *)connection {
 @end
 ```
 > [!TIP]
-> Počev od **macOS Sonoma**, indikator kamere u traci menija je trajan i ne može se programski sakriti. Na **starijim verzijama macOS-a**, kratkotrajno snimanje možda neće proizvesti primetan indikator.
+> Počevši od **macOS Sonoma**, indikator kamere u traci menija je trajan i ne može se programski sakriti. Na **starijim verzijama macOS-a**, kratkotrajno snimanje možda neće proizvesti primetan indikator.
 
 ---
 
 ## Pristup mikrofonu (kTCCServiceMicrophone)
 
-### Iskorišćavanje
+### Exploitation
 
 Pristup mikrofonu snima sav zvuk sa ugrađenog mikrofona, slušalica ili povezanih audio ulaznih uređaja:
 ```bash
@@ -207,7 +207,7 @@ loc.coordinate.latitude, loc.coordinate.longitude, [NSDate date]];
 
 | TCC Service | Framework | Podaci |
 |---|---|---|
-| `kTCCServiceAddressBook` | `Contacts.framework` | Imena, imejl adrese, telefoni, adrese |
+| `kTCCServiceAddressBook` | `Contacts.framework` | Imena, imejlovi, telefoni, adrese |
 | `kTCCServiceCalendar` | `EventKit` | Sastanci, učesnici, lokacije |
 | `kTCCServicePhotos` | `Photos.framework` | Fotografije, snimci ekrana, metapodaci o lokaciji |
 ```bash
@@ -240,11 +240,11 @@ usingBlock:^(CNContact *contact, BOOL *stop) {
 
 ### Entitlement: `com.apple.private.icloud-account-access`
 
-Ovaj entitlement omogućava komunikaciju sa `com.apple.iCloudHelper` XPC servisom, pružajući pristup:
-- **iCloud tokenima** — autentifikacionim tokenima za korisnikov Apple ID
+Ovaj entitlement omogućava komunikaciju sa XPC servisom `com.apple.iCloudHelper`, pružajući pristup:
+- **iCloud tokenima** — autentikacionim tokenima korisničkog Apple ID-ja
 - **iCloud Drive-u** — sinhronizovanim dokumentima sa svih uređaja
 - **iCloud Keychain-u** — lozinkama sinhronizovanim na svim Apple uređajima
-- **Find My** — lokaciji svih korisnikovih Apple uređaja<sup>[4]</sup>
+- **Find My** — lokaciji svih korisnikovih Apple uređaja<sup>[[4]](#references)</sup>
 ```bash
 # Find iCloud-entitled binaries
 sqlite3 /tmp/executables.db "
@@ -253,7 +253,7 @@ WHERE iCloudAccs = 1
 ORDER BY privileged DESC;"
 ```
 > [!CAUTION]
-> Kompromitovanje binarnog fajla sa iCloud ovlašćenjima proširuje napad sa **jednog uređaja na čitav Apple ekosistem**: druge Mac računare, iPhone, iPad i Apple Watch. iCloud Keychain sinhronizacija znači da su lozinke sa svih uređaja dostupne.
+> Kompromitovanje iCloud-entitled binary fajla proširuje napad sa **jednog uređaja na ceo Apple ekosistem**: druge Mac računare, iPhone, iPad i Apple Watch. iCloud Keychain sinhronizacija znači da su lozinke sa svih uređaja dostupne.
 
 ---
 
@@ -262,11 +262,11 @@ ORDER BY privileged DESC;"
 ### Najmoćnija TCC dozvola
 
 Full Disk Access omogućava čitanje **svakog fajla na sistemu**, uključujući:
-- Podatke drugih aplikacija (Messages, Mail, istoriju Safari-ja)
-- TCC baze podataka (otkrivajući sve druge dozvole)
+- Podatke drugih aplikacija (Messages, Mail, Safari istoriju)
+- TCC baze podataka (koje otkrivaju sve druge dozvole)
 - SSH ključeve i konfiguraciju
-- Kolačiće pregledača i tokene sesije
-- Baze podataka aplikacija i keš memoriju
+- Kolačiće browsera i tokene sesija
+- Baze podataka aplikacija i keš memorije
 ```bash
 # Find FDA-granted binaries
 sqlite3 ~/Library/Application\ Support/com.apple.TCC/TCC.db \
@@ -282,23 +282,23 @@ cat ~/.ssh/id_rsa                           # SSH private key
 
 ## Matrica prioriteta eksploatacije
 
-Prilikom procene binarnih fajlova kojima se može ubrizgati kod, a koji imaju TCC dozvole, odredite prioritete prema vrednosti podataka:
+Prilikom procene binarnih datoteka sa mogućnošću injektovanja kojima je dodeljen TCC, odredite prioritet na osnovu vrednosti podataka:
 
 | Prioritet | TCC dozvola | Zašto |
 |---|---|---|
 | **Kritično** | Full Disk Access | Pristup svemu |
-| **Kritično** | TCC Manager | Može dodeliti bilo koju dozvolu |
+| **Kritično** | TCC Manager | Može da dodeli bilo koju dozvolu |
 | **Visoko** | Keychain Access Groups | Sve sačuvane lozinke |
 | **Visoko** | iCloud Account Access | Kompromitovanje više uređaja |
 | **Visoko** | Input Monitoring (ListenEvent) | Keylogging |
-| **Visoko** | Accessibility | GUI kontrola, dodeljivanje dozvola samom sebi |
-| **Srednje** | Screen Capture | Hvatanje vizuelnih podataka |
+| **Visoko** | Accessibility | GUI kontrola, samostalno dodeljivanje dozvole |
+| **Srednje** | Screen Capture | Vizuelno prikupljanje podataka |
 | **Srednje** | Camera + Microphone | Nadzor |
 | **Srednje** | Contacts + Calendar | Podaci za social engineering |
 | **Nisko** | Location | Fizičko praćenje |
 | **Nisko** | Photos | Lični podaci |
 
-## Skripta za enumeraciju
+## Enumeration Script
 ```bash
 #!/bin/bash
 echo "=== TCC Credential Theft Surface Audit ==="
@@ -327,6 +327,6 @@ SELECT path FROM executables WHERE iCloudAccs = 1;" 2>/dev/null
 - [1] [Apple Developer — Keychain Services](https://developer.apple.com/documentation/security/keychain_services)
 - [2] [Apple Developer — TCC](https://developer.apple.com/documentation/security/protecting-the-user-s-privacy)
 - [3] [Objective-See — TCC Exploitation](https://objective-see.org/blog/blog_0x4C.html)
-- [4] [OBTS v5.0 — „What Happens on your Mac, Stays on Apple's iCloud?!" (Wojciech Regula)](https://www.youtube.com/watch?v=_6e2LhmxVc0)
+- [4] [OBTS v5.0 — „Šta se desi na vašem Mac-u, ostaje na Apple-ovom iCloud-u?!“ (Wojciech Regula)](https://www.youtube.com/watch?v=_6e2LhmxVc0)
 
 {{#include ../../../../banners/hacktricks-training.md}}

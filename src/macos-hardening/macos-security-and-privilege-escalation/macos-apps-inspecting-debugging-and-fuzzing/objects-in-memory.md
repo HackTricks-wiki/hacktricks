@@ -4,9 +4,9 @@
 
 ## CFRuntimeClass
 
-CF* objekti potiču iz CoreFoundation-a, koji pruža više od 50 klasa objekata kao što su `CFString`, `CFNumber` ili `CFAllocator`.
+CF* objekti potiču iz CoreFoundation-a, koji pruža više od 50 klasa objekata, kao što su `CFString`, `CFNumber` ili `CFAllocator`.
 
-Sve ove klase su instance klase `CFRuntimeClass`, koja, kada se pozove, vraća indeks u tabeli `__CFRuntimeClassTable`. CFRuntimeClass je definisana u [**CFRuntime.h**](https://opensource.apple.com/source/CF/CF-1153.18/CFRuntime.h.auto.html):
+Sve ove klase su instance klase `CFRuntimeClass`, koja, kada se pozove, vraća indeks u `__CFRuntimeClassTable`. CFRuntimeClass je definisana u [**CFRuntime.h**](https://opensource.apple.com/source/CF/CF-1153.18/CFRuntime.h.auto.html):
 ```objectivec
 // Some comments were added to the original code
 
@@ -55,19 +55,19 @@ uintptr_t requiredAlignment; // Or in _kCFRuntimeRequiresAlignment in the .versi
 ```
 ## Objective-C
 
-### Memorijske sekcije koje se koriste
+### Korišćene sekcije memorije
 
 Većina podataka koje koristi Objective‑C runtime menja se tokom izvršavanja, pa zato u memoriji koristi više sekcija iz Mach‑O familije segmenata `__DATA`. Istorijski su one obuhvatale:
 
 - `__objc_msgrefs` (`message_ref_t`): Reference na poruke
-- `__objc_ivar` (`ivar`): Instance promenljive
+- `__objc_ivar` (`ivar`): Promenljive instance
 - `__objc_data` (`...`): Promenljivi podaci
 - `__objc_classrefs` (`Class`): Reference na klase
-- `__objc_superrefs` (`Class`): Reference na superklase
+- `__objc_superrefs` (`Class`): Reference na nadklase
 - `__objc_protorefs` (`protocol_t *`): Reference na protokole
 - `__objc_selrefs` (`SEL`): Reference na selektore
-- `__objc_const` (`...`): Podaci klasa samo za čitanje i drugi (nadamo se) konstantni podaci
-- `__objc_imageinfo` (`version, flags`): Koristi se tokom učitavanja image-a: Trenutna verzija je `0`; Flags navode podršku za preoptimized GC itd.
+- `__objc_const` (`...`): Class r/o podaci i drugi (nadamo se) konstantni podaci
+- `__objc_imageinfo` (`version, flags`): Koristi se tokom učitavanja image-a: Trenutna verzija je `0`; Flags određuju podršku za preoptimizovani GC itd.
 - `__objc_protolist` (`protocol_t *`): Lista protokola
 - `__objc_nlcatlist` (`category_t`): Pokazivač na Non-Lazy Categories definisane u ovom binary-ju
 - `__objc_catlist` (`category_t`): Pokazivač na Categories definisane u ovom binary-ju
@@ -76,30 +76,30 @@ Većina podataka koje koristi Objective‑C runtime menja se tokom izvršavanja,
 
 Takođe koristi nekoliko sekcija u segmentu `__TEXT` za čuvanje konstanti:
 
-- `__objc_methname` (C‑String): Nazivi metoda
-- `__objc_classname` (C‑String): Nazivi klasa
+- `__objc_methname` (C‑String): Imena metoda
+- `__objc_classname` (C‑String): Imena klasa
 - `__objc_methtype` (C‑String): Tipovi metoda
 
-Moderni macOS/iOS (posebno na Apple Silicon-u) takođe smeštaju Objective‑C/Swift metadata u:
+Moderni macOS/iOS (posebno na Apple Silicon-u) takođe smešta Objective‑C/Swift metadata u:
 
-- `__DATA_CONST`: Neizmenjivi Objective‑C metadata koji se mogu deliti između procesa kao podaci samo za čitanje (na primer, mnoge `__objc_*` liste sada se nalaze ovde).
-- `__AUTH` / `__AUTH_CONST`: Segmenti koji sadrže pokazivače čija se autentičnost mora proveriti tokom učitavanja ili korišćenja na arm64e (Pointer Authentication). U njima ćete takođe videti `__auth_got` u `__AUTH_CONST`, umesto samo legacy `__la_symbol_ptr`/`__got`. Kada vršite instrumentaciju ili hooking, ne zaboravite da u modernim binary-jima uzmete u obzir i `__got` i `__auth_got` entries.
+- `__DATA_CONST`: nepromenljivi Objective‑C metadata koji se može deliti između procesa u režimu read-only (na primer, mnoge `__objc_*` liste se sada nalaze ovde).
+- `__AUTH` / `__AUTH_CONST`: segmenti koji sadrže pokazivače koji moraju biti autentifikovani prilikom učitavanja ili korišćenja na arm64e (Pointer Authentication). Takođe ćete u `__AUTH_CONST` umesto legacy `__la_symbol_ptr`/`__got` često videti samo `__auth_got`. Kada instrumentirate ili radite hooking, imajte u vidu i `__got` i `__auth_got` unose u modernim binary-jima.
 
-Za osnovne informacije o dyld pre-optimization-u (npr. selector uniquing-u i precomputaciji klasa/protokola), kao i o tome zašto su mnoge od ovih sekcija „already fixed up“ kada potiču iz shared cache-a, pogledajte Apple `objc-opt` izvore i beleške o dyld shared cache-u. Ovo utiče na to gde i kako možete patch-ovati metadata tokom runtime-a.
+Za pozadinu o dyld pre-optimizaciji (npr. selector uniquing i precomputing klasa/protokola) i o tome zašto su mnoge od ovih sekcija „već fixup-ovane“ kada dolaze iz shared cache-a, pogledajte Apple `objc-opt` izvorni kod i beleške o dyld shared cache-u. Ovo utiče na to gde i kako možete patch-ovati metadata tokom runtime-a.
 
 {{#ref}}
 ../macos-files-folders-and-binaries/universal-binaries-and-mach-o-format.md
 {{#endref}}
 
-### Type Encoding
+### Kodiranje tipova
 
 Objective‑C koristi mangling za kodiranje tipova selektora i promenljivih jednostavnih i složenih tipova:
 
-- Primitivni tipovi koriste svoje prvo slovo: `i` za `int`, `c` za `char`, `l` za `long`... i koriste veliko slovo kada su unsigned (`L` za `unsigned long`).
-- Ostali tipovi podataka koriste druga slova ili simbole, kao što su `q` za `long long`, `b` za bitfields, `B` za booleans, `#` za klase, `@` za `id`, `*` za `char *`, `^` za generičke pokazivače i `?` za nedefinisane tipove.
-- Arrays, structures i unions koriste redom `[`, `{` i `(`.
+- Primitivni tipovi koriste prvo slovo tipa `i` za `int`, `c` za `char`, `l` za `long`... i koriste veliko slovo kada je tip unsigned (`L` za `unsigned long`).
+- Drugi tipovi podataka koriste druga slova ili simbole, kao što su `q` za `long long`, `b` za bitfields, `B` za booleans, `#` za klase, `@` za `id`, `*` za `char *`, `^` za generičke pokazivače i `?` za nedefinisane tipove.
+- Nizovi, strukture i unije koriste redom `[`, `{` i `(`.
 
-#### Example Method Declaration
+#### Primer deklaracije metode
 ```objectivec
 - (NSString *)processString:(id)input withOptions:(char *)options andError:(id)error;
 ```
@@ -110,24 +110,24 @@ Selector bi bio `processString:withOptions:andError:`
 - `id` se kodira kao `@`
 - `char *` se kodira kao `*`
 
-Potpuno kodiranje tipova za metodu je:
+Potpuno kodiranje tipova za ovu metodu je:
 ```less
 @24@0:8@16*20^@24
 ```
 #### Detaljna analiza
 
-1. Povratni tip (`NSString *`): Kodiran kao `@` sa dužinom 24
-2. `self` (instanca objekta): Kodiran kao `@`, na pomeraju 0
-3. `_cmd` (selector): Kodiran kao `:`, na pomeraju 8
-4. Prvi argument (`char * input`): Kodiran kao `*`, na pomeraju 16
-5. Drugi argument (`NSDictionary * options`): Kodiran kao `@`, na pomeraju 20
-6. Treći argument (`NSError ** error`): Kodiran kao `^@`, na pomeraju 24
+1. Povratni tip (`NSString *`): kodiran kao `@`, dužine 24
+2. `self` (instanca objekta): kodiran kao `@`, na pomeraju 0
+3. `_cmd` (selektor): kodiran kao `:`, na pomeraju 8
+4. Prvi argument (`char * input`): kodiran kao `*`, na pomeraju 16
+5. Drugi argument (`NSDictionary * options`): kodiran kao `@`, na pomeraju 20
+6. Treći argument (`NSError ** error`): kodiran kao `^@`, na pomeraju 24
 
-Pomoću selector-a i encoding-a možete rekonstruisati metodu.
+Pomoću selektora i kodiranja možete rekonstruisati metodu.
 
 ### Klase
 
-Klase u Objective‑C-u su C strukture sa svojstvima, pokazivačima na metode itd. Strukturu `objc_class` moguće je pronaći u [**izvornom kodu**](https://opensource.apple.com/source/objc4/objc4-756.2/runtime/objc-runtime-new.h.auto.html):
+Klase u Objective‑C su C strukture sa svojstvima, pokazivačima na metode itd. Strukturu `objc_class` moguće je pronaći u [**izvornom kodu**](https://opensource.apple.com/source/objc4/objc4-756.2/runtime/objc-runtime-new.h.auto.html):
 ```objectivec
 struct objc_class : objc_object {
 // Class ISA;
@@ -148,9 +148,9 @@ data()->setFlags(set);
 }
 [...]
 ```
-Ova klasa koristi neke delove polja `isa` za označavanje informacija o klasi.
+Ova klasa koristi neke bitove polja `isa` za označavanje informacija o klasi.
 
-Zatim struktura sadrži pokazivač na strukturu `class_ro_t`, sačuvanu na disku, koja sadrži atribute klase kao što su njen naziv, osnovne metode, properties i instance variables. Tokom izvršavanja koristi se dodatna struktura `class_rw_t`, koja sadrži pokazivače koji se mogu menjati, kao što su metode, protocols i properties.
+Zatim, struktura sadrži pokazivač na strukturu `class_ro_t`, uskladištenu na disku, koja sadrži atribute klase kao što su njeno ime, osnovne metode, properties i instance variables. Tokom izvršavanja koristi se dodatna struktura `class_rw_t`, koja sadrži pokazivače koji se mogu menjati, kao što su metode, protokoli i properties.
 
 {{#ref}}
 ../macos-basic-objective-c.md
@@ -162,11 +162,11 @@ Zatim struktura sadrži pokazivač na strukturu `class_ro_t`, sačuvanu na disku
 
 ### Non-pointer `isa` i Pointer Authentication (arm64e)
 
-Na Apple Silicon platformi i u novijim runtime okruženjima, Objective-C `isa` nije uvek sirovi pokazivač na klasu. Na arm64e platformi to je upakovana struktura koja može sadržati i Pointer Authentication Code (PAC). U zavisnosti od platforme, može uključivati polja kao što su `nonpointer`, `has_assoc`, `weakly_referenced`, `extra_rc` i sam pokazivač na klasu (pomeren ili potpisan). To znači da slepo dereferenciranje prvih 8 bajtova Objective-C objekta neće uvek dati validan `Class` pokazivač.<sup>[2]</sup>
+Na Apple Silicon platformama i u novijim runtime okruženjima, Objective-C `isa` nije uvek sirov pokazivač na klasu. Na arm64e platformi to je upakovana struktura koja može sadržati i Pointer Authentication Code (PAC). U zavisnosti od platforme, može sadržati polja kao što su `nonpointer`, `has_assoc`, `weakly_referenced`, `extra_rc`, kao i sam pokazivač na klasu (pomeren ili potpisan). To znači da slepo dereferenciranje prvih 8 bajtova Objective-C objekta neće uvek dati validan `Class` pokazivač.<sup>[[2]](#references)</sup>
 
 Praktične napomene za debugging na arm64e:
 
-- LLDB će obično ukloniti PAC bitove kada ispisuje Objective-C objekte pomoću `po`, ali pri radu sa sirovim pokazivačima možda ćete morati ručno da uklonite autentikaciju:
+- LLDB će obično ukloniti PAC bitove umesto vas prilikom ispisivanja Objective-C objekata pomoću `po`, ali pri radu sa sirovim pokazivačima možda ćete morati ručno da uklonite authentication:
 
 ```lldb
 (lldb) expr -l objc++ -- #include <ptrauth.h>
@@ -174,20 +174,20 @@ Praktične napomene za debugging na arm64e:
 (lldb) expr -l objc++ -O -- (Class)object_getClass((id)raw)
 ```
 
-- Mnogi function/data pointers u Mach-O datoteci nalaze se u `__AUTH`/`__AUTH_CONST` i zahtevaju autentikaciju pre upotrebe. Ako radite interposing ili re-binding (npr. u stilu fishhook-a), obavezno obradite i `__auth_got`, pored legacy `__got` sekcije.
+- Mnogi pokazivači na funkcije/podatke u Mach-O datotekama nalaze se u `__AUTH`/`__AUTH_CONST` i zahtevaju authentication pre upotrebe. Ako radite interposing ili re-binding (npr. u fishhook stilu), obavezno obradite i `__auth_got`, pored legacy `__got`.
 
-Za detaljan pregled garancija jezika/ABI-ja i intrinsics dostupnih iz `<ptrauth.h>` u Clang/LLVM-u pogledajte referencu na kraju ove stranice.<sup>[1]</sup>
+Za detaljan pregled jezičkih/ABI garancija i intrinsics dostupnih u `<ptrauth.h>` iz Clang/LLVM alata, pogledajte referencu na kraju ove stranice.<sup>[[1]](#references)</sup>
 
 ### Tagged pointer objekti
 
-Neke Foundation klase izbegavaju heap allocation tako što payload objekta direktno kodiraju u vrednost pokazivača (tagged pointers). Detekcija se razlikuje u zavisnosti od platforme (npr. najznačajniji bit na arm64, a najmanje značajan na x86_64 macOS-u). Tagged objekti nemaju regularni `isa` sačuvan u memoriji; runtime određuje klasu na osnovu tag bitova.<sup>[2]</sup> Prilikom inspekcije proizvoljnih `id` vrednosti:
+Neke Foundation klase izbegavaju heap alokaciju tako što payload objekta direktno kodiraju u vrednost pokazivača (tagged pointers). Detekcija se razlikuje u zavisnosti od platforme (npr. najznačajniji bit na arm64, a najmanje značajan na x86_64 macOS). Tagged objekti nemaju uobičajeni `isa` uskladišten u memoriji; runtime određuje klasu na osnovu tag bitova.<sup>[[2]](#references)</sup> Prilikom inspekcije proizvoljnih `id` vrednosti:
 
 - Koristite runtime API-je umesto direktnog pristupanja polju `isa`: `object_getClass(obj)` / `[obj class]`.
-- U LLDB-u će `po (id)0xADDR` ispravno ispisati tagged pointer instance, jer se runtime konsultuje radi određivanja klase.
+- U LLDB-u će `po (id)0xADDR` ispravno ispisati tagged pointer instance, jer se runtime koristi za određivanje klase.
 
-### Swift heap objekti i metapodaci
+### Swift heap objekti i metadata
 
-Čiste Swift klase su takođe objekti sa header-om koji pokazuje na Swift metadata (a ne na Objective-C `isa`). Za introspekciju aktivnih Swift procesa bez njihovog menjanja možete koristiti Swift toolchain-ov `swift-inspect`, koji koristi Remote Mirror library za čitanje runtime metadata:
+Čiste Swift klase su takođe objekti sa zaglavljem koje pokazuje na Swift metadata (a ne na Objective-C `isa`). Za introspekciju aktivnih Swift procesa bez njihovog menjanja možete koristiti `swift-inspect` iz Swift toolchain-a, koji koristi Remote Mirror biblioteku za čitanje runtime metadata:
 ```bash
 # Xcode toolchain (or Swift.org toolchain) provides swift-inspect
 swift-inspect dump-raw-metadata <pid-or-name>
@@ -195,20 +195,20 @@ swift-inspect dump-arrays <pid-or-name>
 # On Darwin additionally:
 swift-inspect dump-concurrency <pid-or-name>
 ```
-Ovo je veoma korisno za mapiranje Swift heap objekata i protocol conformances prilikom reverse engineering-a mešovitih Swift/ObjC aplikacija.
+Ovo je veoma korisno za mapiranje Swift heap objekata i usklađenosti sa protokolima prilikom reverse engineering-a mešovitih Swift/ObjC aplikacija.
 
 ---
 
-## Runtime inspection cheatsheet (LLDB / Frida)
+## Cheatsheet za runtime inspekciju (LLDB / Frida)
 
 ### LLDB
 
-- Ispiši objekat ili klasu iz raw pointer-a:
+- Ispiši objekat ili klasu iz raw pokazivača:
 ```lldb
 (lldb) expr -l objc++ -O -- (id)0x0000000101234560
 (lldb) expr -l objc++ -O -- (Class)object_getClass((id)0x0000000101234560)
 ```
-- Ispitaj Objective-C klasu pomoću pokazivača na `self` metode objekta u breakpoint-u:
+- Ispitaj Objective-C klasu iz pokazivača na `self` metode objekta u breakpoint-u:
 ```lldb
 (lldb) br se -n '-[NSFileManager fileExistsAtPath:]'
 (lldb) r
@@ -222,16 +222,16 @@ Ovo je veoma korisno za mapiranje Swift heap objekata i protocol conformances pr
 (lldb) image dump section --section __DATA_CONST.__objc_selrefs
 (lldb) image dump section --section __AUTH_CONST.__auth_got
 ```
-- Pročitajte memoriju poznatog objekta klase da biste prešli na `class_ro_t` / `class_rw_t` prilikom reverse engineering-a lista metoda:
+- Pročitajte memoriju za poznati objekat klase da biste prešli na `class_ro_t` / `class_rw_t` prilikom reverseovanja lista metoda:
 ```lldb
 (lldb) image lookup -r -n _OBJC_CLASS_$_NSFileManager
 (lldb) memory read -fx -s8 0xADDRESS_OF_CLASS_OBJECT
 ```
-### Frida (Objective-C i Swift)
+### Frida (Objective‑C i Swift)
 
-Frida pruža high-level runtime bridges koji su veoma korisni za otkrivanje i instrumentaciju živih objekata bez symbols:
+Frida pruža high-level runtime bridge-ove koji su veoma korisni za otkrivanje i instrumentaciju živih objekata bez simbola:
 
-- Enumerate classes i methods, resolve stvarna imena klasa tokom runtime-a i intercept Objective-C selectors:
+- Enumerišite klase i metode, razrešite stvarna imena klasa tokom runtime-a i presrećite Objective‑C selektore:
 ```js
 if (ObjC.available) {
 // List a class' methods
@@ -249,13 +249,13 @@ console.log('fileExistsAtPath:', this.path, '=>', retval);
 });
 }
 ```
-- Swift bridge: enumerate Swift tipove i interaguj sa Swift instancama (zahteva noviju verziju Frida; veoma korisno na Apple Silicon targetima).
+- Swift bridge: enumerate Swift types and interact with Swift instances (zahteva noviji Frida; veoma korisno na Apple Silicon targets).
 
 ---
 
 ## Reference
 
-- [1] [Clang/LLVM: Pointer Authentication i ptrauth.h intrinsics (arm64e ABI)](https://clang.llvm.org/docs/PointerAuthentication.html)
-- [2] [Apple objc runtime headers - objc-object.h (tagged pointers, non-pointer isa itd.)](https://opensource.apple.com/source/objc4/objc4-818.2/runtime/objc-object.h.auto.html)
+- [1] [Clang/LLVM: Pointer Authentication and the ptrauth.h intrinsics (arm64e ABI)](https://clang.llvm.org/docs/PointerAuthentication.html)
+- [2] [Apple objc runtime headers - objc-object.h (tagged pointers, non‑pointer isa, etc.)](https://opensource.apple.com/source/objc4/objc4-818.2/runtime/objc-object.h.auto.html)
 
 {{#include ../../../banners/hacktricks-training.md}}

