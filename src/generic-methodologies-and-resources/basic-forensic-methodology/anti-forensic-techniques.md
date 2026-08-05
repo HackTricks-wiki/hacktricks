@@ -213,14 +213,14 @@ by investigators to recover the payload.
 Bring-Your-Own-Vulnerable-Driver is now routinely used for **anti-forensics** in ransomware
 intrusions.  
 The open-source tool **AuKill** loads a signed but vulnerable driver (`procexp152.sys`) to
-suspend or terminate EDR and forensic sensors **before encryption & log destruction**:
+suspend or terminate EDR and forensic sensors **before encryption & log destruction**:<sup>[[1]](#references)</sup>
 
 ```cmd
 AuKill.exe -e "C:\\Program Files\\Windows Defender\\MsMpEng.exe"
 AuKill.exe -k CrowdStrike
 ```
 
-The driver is removed afterwards, leaving minimal artifacts.  
+The driver is removed afterwards, leaving minimal artifacts.<sup>[[1]](#references)</sup>  
 Mitigations: enable the Microsoft vulnerable-driver blocklist (HVCI/SAC),
 and alert on kernel-service creation from user-writable paths.
 
@@ -229,9 +229,9 @@ and alert on kernel-service creation from user-writable paths.
 ## Linux Anti-Forensics: Self-Patching and Cloud C2 (2023–2025)
 
 ### Self‑patching compromised services to reduce detection (Linux)
-Adversaries increasingly “self‑patch” a service right after exploiting it to both prevent re‑exploitation and suppress vulnerability‑based detections. The idea is to replace vulnerable components with the latest legitimate upstream binaries/JARs, so scanners report the host as patched while persistence and C2 remain.
+Adversaries increasingly “self‑patch” a service right after exploiting it to both prevent re‑exploitation and suppress vulnerability‑based detections. The idea is to replace vulnerable components with the latest legitimate upstream binaries/JARs, so scanners report the host as patched while persistence and C2 remain.<sup>[[3]](#references)</sup>
 
-Example: Apache ActiveMQ OpenWire RCE (CVE‑2023‑46604)
+Example: Apache ActiveMQ OpenWire RCE (CVE‑2023‑46604)<sup>[[3]](#references)[[4]](#references)</sup>
 - Post‑exploitation, attackers fetched legitimate JARs from Maven Central (repo1.maven.org), deleted vulnerable JARs in the ActiveMQ install, and restarted the broker.
 - This closed the initial RCE while maintaining other footholds (cron, SSH config changes, separate C2 implants).
 

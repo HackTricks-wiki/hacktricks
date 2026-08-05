@@ -192,9 +192,9 @@ f.close()
 
 ## References
 
-- [Wireshark TLS wiki](https://wiki.wireshark.org/TLS)
-- [Decrypting and parsing HTTP/3 traffic in Wireshark](https://blog.elmo.sg/posts/parsing-decrypted-quic-traffic-in-wireshark/)
-- [Decrypting TLS Browser Traffic With Wireshark – The Easy Way!](https://redflagsecurity.net/2019/03/10/decrypting-tls-wireshark/)
+- [1] [Wireshark TLS wiki](https://wiki.wireshark.org/TLS)
+- [2] [Decrypting and parsing HTTP/3 traffic in Wireshark](https://blog.elmo.sg/posts/parsing-decrypted-quic-traffic-in-wireshark/)
+- [3] [Decrypting TLS Browser Traffic With Wireshark – The Easy Way!](https://redflagsecurity.net/2019/03/10/decrypting-tls-wireshark/)
 
 {{#include ../../../banners/hacktricks-training.md}}
 

@@ -241,13 +241,13 @@ def process_tar(tar_path: str, cache: dict, atlases) -> list[dict]:
 
 ## Performance notes
 
-- In practice, books converge to a few hundred unique glyphs (e.g., ~361 including ligatures). Cache SSIM results by perceptual hash.
+- In practice, books converge to a few hundred unique glyphs (e.g., ~361 including ligatures). Cache SSIM results by perceptual hash.<sup>[[1]](#references)</sup>
 - After initial discovery, future batches predominantly re-use known hashes; decoding becomes I/O-bound.
 - Average SSIM ≈0.95 is a strong signal; consider flagging low-scoring matches for manual review.
 
 ## Generalization to other viewers
 
-Any system that:
+Any system that:<sup>[[1]](#references)</sup>
 - Returns positioned glyph runs with request-scoped numeric IDs
 - Ships per-request vector glyphs (SVG paths or subset fonts)
 - Caps pages per request to prevent bulk export
@@ -260,7 +260,7 @@ Any system that:
 
 ## Minimal acquisition example (sketch)
 
-Use your browser’s DevTools to capture the exact headers, cookies and tokens used by the reader when requesting `/renderer/render`. Then replicate those from a script or curl. Example outline:
+Use your browser’s DevTools to capture the exact headers, cookies and tokens used by the reader when requesting `/renderer/render`. Then replicate those from a script or curl.<sup>[[1]](#references)</sup> Example outline:
 
 ```bash
 curl 'https://read.amazon.com/renderer/render' \
@@ -276,15 +276,15 @@ Adjust parameterization (book ASIN, page window, viewport) to match the reader�
 
 ## Results achievable
 
-- Collapse 100+ randomized alphabets to a single glyph space via perceptual hashing
+- Collapse 100+ randomized alphabets to a single glyph space via perceptual hashing<sup>[[1]](#references)</sup>
 - 100% mapping of unique glyphs with average SSIM ~0.95 when atlases include ligatures and variants
 - Reconstructed EPUB/HTML visually indistinguishable from the original
 
 ## References
 
-- [Kindle Web DRM: Breaking Randomized SVG Glyph Obfuscation with Raster Hashing + SSIM (Pixelmelt blog)](https://blog.pixelmelt.dev/kindle-web-drm/)
-- [CairoSVG – SVG to PNG renderer](https://cairosvg.org/)
-- [imagehash – Perceptual image hashing (pHash)](https://pypi.org/project/ImageHash/)
-- [scikit-image – Structural Similarity Index (SSIM)](https://scikit-image.org/docs/stable/api/skimage.metrics.html#skimage.metrics.structural_similarity)
+- [1] [Kindle Web DRM: Breaking Randomized SVG Glyph Obfuscation with Raster Hashing + SSIM (Pixelmelt blog)](https://blog.pixelmelt.dev/kindle-web-drm/)
+- [2] [CairoSVG – SVG to PNG renderer](https://cairosvg.org/)
+- [3] [imagehash – Perceptual image hashing (pHash)](https://pypi.org/project/ImageHash/)
+- [4] [scikit-image – Structural Similarity Index (SSIM)](https://scikit-image.org/docs/stable/api/skimage.metrics.html#skimage.metrics.structural_similarity)
 
 {{#include ../../../banners/hacktricks-training.md}}

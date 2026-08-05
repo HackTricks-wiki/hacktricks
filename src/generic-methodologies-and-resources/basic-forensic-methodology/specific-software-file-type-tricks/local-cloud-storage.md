@@ -45,7 +45,7 @@ And the main databases are:
 
 The ".dbx" extension means that the **databases** are **encrypted**. Dropbox uses **DPAPI** ([https://docs.microsoft.com/en-us/previous-versions/ms995355(v=msdn.10)?redirectedfrom=MSDN](<https://docs.microsoft.com/en-us/previous-versions/ms995355(v=msdn.10)?redirectedfrom=MSDN>))
 
-To understand better the encryption that Dropbox uses you can read [https://blog.digital-forensics.it/2017/04/brush-up-on-dropbox-dbx-decryption.html](https://blog.digital-forensics.it/2017/04/brush-up-on-dropbox-dbx-decryption.html).
+To understand better the encryption that Dropbox uses you can read [https://blog.digital-forensics.it/2017/04/brush-up-on-dropbox-dbx-decryption.html](https://blog.digital-forensics.it/2017/04/brush-up-on-dropbox-dbx-decryption.html).<sup>[[1]](#references)[[2]](#references)</sup>
 
 However, the main information is:
 
@@ -54,7 +54,7 @@ However, the main information is:
 - **Algorithm**: PBKDF2
 - **Iterations**: 1066
 
-Apart from that information, to decrypt the databases you still need:
+Apart from that information, to decrypt the databases you still need:<sup>[[2]](#references)</sup>
 
 - The **encrypted DPAPI key**: You can find it in the registry inside `NTUSER.DAT\Software\Dropbox\ks\client` (export this data as binary)
 - The **`SYSTEM`** and **`SECURITY`** hives
@@ -95,6 +95,11 @@ Other tables inside this database contain more interesting information:
 - **mount_table**: Share folders of dropbox
 - **deleted_fields**: Dropbox deleted files
 - **date_added**
+
+## References
+
+- [1] [A critical analysis of Dropbox software security (hack.lu 2012)](http://archive.hack.lu/2012/Dropbox%20security.pdf)
+- [2] [Brush up on Dropbox DBX decryption](https://blog.digital-forensics.it/2017/04/brush-up-on-dropbox-dbx-decryption.html)
 
 {{#include ../../../banners/hacktricks-training.md}}
 

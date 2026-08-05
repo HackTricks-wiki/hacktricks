@@ -232,12 +232,12 @@ DNS/DoH listener fingerprints<sup>[[4]](#references)</sup>
 
 ## Loader and persistence TTPs seen in incidents
 
-In‑memory PowerShell loaders
+In‑memory PowerShell loaders<sup>[[1]](#references)</sup>
 - Download Base64/XOR payloads (Invoke‑RestMethod / WebClient)
 - Allocate unmanaged memory, copy shellcode, switch protection to 0x40 (PAGE_EXECUTE_READWRITE) via VirtualProtect
 - Execute via .NET dynamic invocation: Marshal.GetDelegateForFunctionPointer + delegate.Invoke()
 
-Trojanized signed software / staged shellcode loaders
+Trojanized signed software / staged shellcode loaders<sup>[[5]](#references)</sup>
 - A 2026 Tropic Trooper chain used a trojanized SumatraPDF executable (TOSHIS loader) that redirected `_security_init_cookie` into malicious code instead of patching the PE entry point
 - The loader resolved APIs via Adler-32 hashing, downloaded a decoy PDF, fetched second-stage shellcode, decrypted it with AES-128-CBC through WinCrypt (`CryptDeriveKey` from a hardcoded seed), and reflectively executed an Adaptix beacon in memory
 - Persistence later moved to scheduled tasks with benign-looking names such as `\MSDNSvc` or `\MicrosoftUDN`, configured to re-launch the agent roughly every two hours
@@ -248,7 +248,7 @@ Check these pages for in‑memory execution and AMSI/ETW considerations:
 ../../windows-hardening/av-bypass.md
 {{#endref}}
 
-Persistence mechanisms observed
+Persistence mechanisms observed<sup>[[1]](#references)</sup>
 - Startup folder shortcut (.lnk) to re‑launch a loader at logon
 - Registry Run keys (HKCU/HKLM ...\CurrentVersion\Run), often with benign‑sounding names like "Updater" to start loader.ps1
 - DLL search‑order hijack by dropping msimg32.dll under %APPDATA%\Microsoft\Windows\Templates for susceptible processes
@@ -266,36 +266,36 @@ Technique deep‑dives and checks:
 Hunting ideas
 - PowerShell spawning RW→RX transitions: VirtualProtect to PAGE_EXECUTE_READWRITE inside powershell.exe
 - Dynamic invocation patterns (GetDelegateForFunctionPointer)
-- Unmatched HTTPS 404s with `Server: AdaptixC2`, `Adaptix-Version`, `AdaptixC2 404`, or `You need to enter the correct connection details.`
-- DNS responses with `AA=true` and `TXT "OK"` for short queries under suspect domains
-- GitHub API traffic to `/repos/<owner>/<repo>/issues` followed by `ipinfo.io` lookups from the same loader/beacon chain
-- Startup .lnk under user or common Startup folders
-- Suspicious Run keys (e.g., "Updater"), and loader names like update.ps1/loader.ps1
-- Trojanized PE samples that redirect `_security_init_cookie` into downloader code before showing a decoy document
-- User‑writable DLL paths under %APPDATA%\Microsoft\Windows\Templates containing msimg32.dll
+- Unmatched HTTPS 404s with `Server: AdaptixC2`, `Adaptix-Version`, `AdaptixC2 404`, or `You need to enter the correct connection details.`<sup>[[4]](#references)</sup>
+- DNS responses with `AA=true` and `TXT "OK"` for short queries under suspect domains<sup>[[4]](#references)</sup>
+- GitHub API traffic to `/repos/<owner>/<repo>/issues` followed by `ipinfo.io` lookups from the same loader/beacon chain<sup>[[5]](#references)</sup>
+- Startup .lnk under user or common Startup folders<sup>[[1]](#references)</sup>
+- Suspicious Run keys (e.g., "Updater"), and loader names like update.ps1/loader.ps1<sup>[[1]](#references)</sup>
+- Trojanized PE samples that redirect `_security_init_cookie` into downloader code before showing a decoy document<sup>[[5]](#references)</sup>
+- User‑writable DLL paths under %APPDATA%\Microsoft\Windows\Templates containing msimg32.dll<sup>[[1]](#references)</sup>
 
 ## Notes on OpSec fields
 
-- KillDate: timestamp after which the agent self‑expires
-- WorkingTime: hours when the agent should be active to blend with business activity
+- KillDate: timestamp after which the agent self‑expires<sup>[[1]](#references)</sup>
+- WorkingTime: hours when the agent should be active to blend with business activity<sup>[[1]](#references)</sup>
 
 These fields can be used for clustering and to explain observed quiet periods.
 
 ## YARA and static leads
 
-Unit 42 published basic YARA for beacons (C/C++ and Go) and loader API‑hashing constants. Consider complementing with rules that look for the [size|ciphertext|16‑byte‑key] layout near PE .rdata end, the default HTTP profile strings, and newer server/listener markers such as `AdaptixC2 404`, `You need to enter the correct connection details.`, `Adaptix-Version`, `server.rsa.crt`, `server.rsa.key`, `api.github.com`, `/issues?state=open`, and `ipinfo.io`.
+Unit 42 published basic YARA for beacons (C/C++ and Go) and loader API‑hashing constants.<sup>[[1]](#references)</sup> Consider complementing with rules that look for the [size|ciphertext|16‑byte‑key] layout near PE .rdata end, the default HTTP profile strings, and newer server/listener markers such as `AdaptixC2 404`, `You need to enter the correct connection details.`, `Adaptix-Version`, `server.rsa.crt`, `server.rsa.key`, `api.github.com`, `/issues?state=open`, and `ipinfo.io`.<sup>[[4]](#references)[[5]](#references)</sup>
 
 ## References
 
-- [AdaptixC2: A New Open-Source Framework Leveraged in Real-World Attacks (Unit 42)](https://unit42.paloaltonetworks.com/adaptixc2-post-exploitation-framework/)
-- [AdaptixC2 GitHub](https://github.com/Adaptix-Framework/AdaptixC2)
-- [Adaptix Framework Docs](https://adaptix-framework.gitbook.io/adaptix-framework)
-- [AdaptixC2: Fingerprinting an Open-Source C2 Framework at Scale (Censys)](https://censys.com/blog/adaptixc2-open-source-c2-framework/)
-- [Tropic Trooper Pivots to AdaptixC2 and Custom Beacon Listener (Zscaler ThreatLabz)](https://www.zscaler.com/blogs/security-research/tropic-trooper-pivots-adaptixc2-and-custom-beacon-listener)
-- [Marshal.GetDelegateForFunctionPointer – Microsoft Docs](https://learn.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.marshal.getdelegateforfunctionpointer)
-- [VirtualProtect – Microsoft Docs](https://learn.microsoft.com/en-us/windows/win32/api/memoryapi/nf-memoryapi-virtualprotect)
-- [Memory protection constants – Microsoft Docs](https://learn.microsoft.com/en-us/windows/win32/memory/memory-protection-constants)
-- [Invoke-RestMethod – PowerShell](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.utility/invoke-restmethod)
-- [MITRE ATT&CK T1547.001 – Registry Run Keys/Startup Folder](https://attack.mitre.org/techniques/T1547/001/)
+- [1] [AdaptixC2: A New Open-Source Framework Leveraged in Real-World Attacks (Unit 42)](https://unit42.paloaltonetworks.com/adaptixc2-post-exploitation-framework/)
+- [2] [AdaptixC2 GitHub](https://github.com/Adaptix-Framework/AdaptixC2)
+- [3] [Adaptix Framework Docs](https://adaptix-framework.gitbook.io/adaptix-framework)
+- [4] [AdaptixC2: Fingerprinting an Open-Source C2 Framework at Scale (Censys)](https://censys.com/blog/adaptixc2-open-source-c2-framework/)
+- [5] [Tropic Trooper Pivots to AdaptixC2 and Custom Beacon Listener (Zscaler ThreatLabz)](https://www.zscaler.com/blogs/security-research/tropic-trooper-pivots-adaptixc2-and-custom-beacon-listener)
+- [6] [Marshal.GetDelegateForFunctionPointer – Microsoft Docs](https://learn.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.marshal.getdelegateforfunctionpointer)
+- [7] [VirtualProtect – Microsoft Docs](https://learn.microsoft.com/en-us/windows/win32/api/memoryapi/nf-memoryapi-virtualprotect)
+- [8] [Memory protection constants – Microsoft Docs](https://learn.microsoft.com/en-us/windows/win32/memory/memory-protection-constants)
+- [9] [Invoke-RestMethod – PowerShell](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.utility/invoke-restmethod)
+- [10] [MITRE ATT&CK T1547.001 – Registry Run Keys/Startup Folder](https://attack.mitre.org/techniques/T1547/001/)
 
 {{#include ../../banners/hacktricks-training.md}}
