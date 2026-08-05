@@ -4,24 +4,24 @@
 
 ## PID Reuse
 
-Коли **XPC service** macOS перевіряє викликаний процес на основі **PID**, а не на основі **audit token**, він вразливий до атаки повторного використання PID. Ця атака базується на **умовах гонки**, де **експлойт** буде **надсилати повідомлення до XPC** служби, **зловживаючи** функціональністю, а лише **після** цього виконуючи **`posix_spawn(NULL, target_binary, NULL, &attr, target_argv, environ)`** з **дозволеним** бінарним файлом.
+Коли macOS **XPC service** перевіряє викликаний процес на основі **PID**, а не **audit token**, він є вразливим до атаки PID reuse. Ця атака ґрунтується на **race condition**, коли **exploit** має **надсилати повідомлення до XPC** service, **зловживаючи** функціональністю, і **відразу після** цього виконувати **`posix_spawn(NULL, target_binary, NULL, &attr, target_argv, environ)`** із **дозволеним** binary.
 
-Ця функція змусить **дозволений бінарний файл отримати PID**, але **зловмисне XPC повідомлення буде надіслано** безпосередньо перед цим. Отже, якщо **XPC** служба **використовує** **PID** для **автентифікації** відправника і перевіряє його **ПІСЛЯ** виконання **`posix_spawn`**, вона подумає, що воно походить від **авторизованого** процесу.
+Ця функція зробить так, що **дозволений binary володітиме PID**, але **шкідливе XPC-повідомлення вже буде надіслано** безпосередньо перед цим. Отже, якщо **XPC** service **використовує** **PID** для **автентифікації** відправника та перевіряє його **ПІСЛЯ** виконання **`posix_spawn`**, він вважатиме, що повідомлення надійшло від **авторизованого** процесу.
 
-### Приклад експлойту
+### Приклад exploit
 
-Якщо ви знайдете функцію **`shouldAcceptNewConnection`** або функцію, яку вона викликає, **яка** викликає **`processIdentifier`** і не викликає **`auditToken`**. Це, ймовірно, означає, що вона **перевіряє PID процесу**, а не токен аудиту.\
-Як, наприклад, на цьому зображенні (взято з посилання):
+Якщо ви знайдете функцію **`shouldAcceptNewConnection`** або функцію, яку вона викликає, що **викликає** **`processIdentifier`**, але не викликає **`auditToken`**, це, ймовірно, означає, що вона **перевіряє PID процесу**, а не audit token.\
+Наприклад, як на цьому зображенні (взятому з reference):
 
 <figure><img src="../../../../../../images/image (306).png" alt="https://wojciechregula.blog/images/2020/04/pid.png"><figcaption></figcaption></figure>
 
-Перевірте цей приклад експлойту (знову ж таки, взятий з посилання), щоб побачити 2 частини експлойту:
+Перегляньте цей приклад exploit (також узятий з reference), щоб побачити 2 частини exploit:
 
-- Одна, яка **генерує кілька форків**
-- **Кожен форк** буде **надсилати** **payload** до XPC служби, виконуючи **`posix_spawn`** безпосередньо після надсилання повідомлення.
+- Частина, яка **генерує кілька fork**
+- **Кожен fork** **надсилатиме** **payload** до XPC service і відразу після надсилання повідомлення виконуватиме **`posix_spawn`**.
 
 > [!CAUTION]
-> Для того, щоб експлойт працював, важливо ` export`` `` `**`OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES`** або вставити всередину експлойту:
+> Для роботи exploit важливо виконати ` export`` `` `**`OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES`** або додати в exploit:
 >
 > ```objectivec
 > asm(".section __DATA,__objc_fork_ok\n"
@@ -31,7 +31,7 @@
 
 {{#tabs}}
 {{#tab name="NSTasks"}}
-Перша опція, що використовує **`NSTasks`** та аргумент для запуску дітей для експлуатації RC
+Перший варіант із використанням **`NSTasks`** та аргументу для запуску дочірніх процесів, щоб exploit-увати RC
 ```objectivec
 // Code from https://wojciechregula.blog/post/learn-xpc-exploitation-part-2-say-no-to-the-pid/
 // gcc -framework Foundation expl.m -o expl
@@ -140,7 +140,7 @@ return 0;
 {{#endtab}}
 
 {{#tab name="fork"}}
-Цей приклад використовує сирий **`fork`** для запуску **дочірніх процесів, які експлуатуватимуть умову гонки PID** і потім експлуатуватимуть **іншу умову гонки через жорстке посилання:**
+У цьому прикладі використовується raw **`fork`** для запуску **дочірніх процесів, які використають race condition PID**, а потім використають **іншу race condition через Hard link:**
 ```objectivec
 // export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
 // gcc -framework Foundation expl.m -o expl
@@ -278,11 +278,16 @@ return 0;
 
 ## Інші приклади
 
-- [https://gergelykalman.com/why-you-shouldnt-use-a-commercial-vpn-amateur-hour-with-windscribe.html](https://gergelykalman.com/why-you-shouldnt-use-a-commercial-vpn-amateur-hour-with-windscribe.html)
+- [**Intego X9: Why your macOS antivirus should not trust PIDs**](https://blog.quarkslab.com/intego_lpe_macos_2.html) - LPE проти привілейованого helper антивіруса, який автентифікував клієнтів за PID.
+- [**Exploiting GOG Galaxy XPC service for privilege escalation in macOS**](https://www.ibm.com/think/x-force/exploiting-gog-galaxy-xpc-service-privilege-escalation-macos)
+- [**Rootpipe Reborn (Part II)**](https://objective-see.org/blog/blog_0x41.html)
 
 ## Посилання
 
 - [https://wojciechregula.blog/post/learn-xpc-exploitation-part-2-say-no-to-the-pid/](https://wojciechregula.blog/post/learn-xpc-exploitation-part-2-say-no-to-the-pid/)
 - [https://saelo.github.io/presentations/warcon18_dont_trust_the_pid.pdf](https://saelo.github.io/presentations/warcon18_dont_trust_the_pid.pdf)
+- [https://blog.quarkslab.com/intego_lpe_macos_2.html](https://blog.quarkslab.com/intego_lpe_macos_2.html)
+- [https://www.ibm.com/think/x-force/exploiting-gog-galaxy-xpc-service-privilege-escalation-macos](https://www.ibm.com/think/x-force/exploiting-gog-galaxy-xpc-service-privilege-escalation-macos)
+- [https://objective-see.org/blog/blog_0x41.html](https://objective-see.org/blog/blog_0x41.html)
 
 {{#include ../../../../../../banners/hacktricks-training.md}}

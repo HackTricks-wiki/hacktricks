@@ -6,14 +6,14 @@
 
 ### Основна інформація
 
-Починаючи з **macOS Big Sur (11.0)**, системний том криптографічно запечатаний з використанням **APFS snapshot hash tree**. Це називається **Sealed System Volume (SSV)**. Системний розділ монтується як **тільки для читання** і будь‑які модифікації руйнують печатку, яка перевіряється під час завантаження.
+Починаючи з **macOS Big Sur (11.0)**, системний том криптографічно запечатується за допомогою **APFS snapshot hash tree**. Це називається **Sealed System Volume (SSV)**. Системний розділ монтується **read-only**, а будь-яка модифікація порушує seal, що перевіряється під час завантаження.
 
 SSV забезпечує:
-- **Tamper detection** — будь‑яка модифікація системних бінарних файлів/фреймворків виявляється через порушену криптографічну печатку
-- **Rollback protection** — процес завантаження перевіряє цілісність системного snapshot
-- **Rootkit prevention** — навіть root не може постійно змінювати файли на системному томі (без руйнування печатки)
+- **Виявлення втручання** — будь-яку модифікацію системних бінарних файлів або framework можна виявити через порушений криптографічний seal
+- **Захист від rollback** — процес завантаження перевіряє цілісність системного snapshot
+- **Запобігання rootkit** — навіть root не може постійно модифікувати файли на системному томі (не порушивши seal)
 
-### Перевірка статусу SSV
+### Перевірка стану SSV
 ```bash
 # Check if authenticated root is enabled (SSV seal verification)
 csrutil authenticated-root status
@@ -27,18 +27,18 @@ mount | grep " / "
 # Verify the system volume seal
 diskutil apfs listVolumeGroups
 ```
-### Привілеї записувачів SSV
+### Права SSV Writer
 
-Деякі системні бінарні файли Apple мають entitlements (права доступу), які дозволяють їм змінювати або керувати запечатаним системним томом:
+Певні системні бінарні файли Apple мають права, які дозволяють їм змінювати або керувати sealed system volume:
 
 | Entitlement | Призначення |
 |---|---|
-| `com.apple.private.apfs.revert-to-snapshot` | Повернути системний том до попереднього знімка |
-| `com.apple.private.apfs.create-sealed-snapshot` | Створити новий запечатаний знімок після оновлень системи |
-| `com.apple.rootless.install.heritable` | Запис у шляхи, захищені SIP (успадковується дочірніми процесами) |
-| `com.apple.rootless.install` | Запис у шляхи, захищені SIP |
+| `com.apple.private.apfs.revert-to-snapshot` | Відновити system volume до попереднього snapshot |
+| `com.apple.private.apfs.create-sealed-snapshot` | Створити новий sealed snapshot після системних оновлень |
+| `com.apple.rootless.install.heritable` | Записувати до шляхів, захищених SIP (успадковується дочірніми процесами) |
+| `com.apple.rootless.install` | Записувати до шляхів, захищених SIP |
 
-### Пошук записувачів SSV
+### Пошук SSV Writers
 ```bash
 # Search for binaries with SSV-related entitlements
 find /System /usr -type f -perm +111 -exec sh -c '
@@ -56,9 +56,9 @@ WHERE c.name = 'ssv_writer';"
 ```
 ### Сценарії атак
 
-#### Snapshot Rollback Attack
+#### Атака відкату snapshot
 
-Якщо зловмисник скомпрометує binary з `com.apple.private.apfs.revert-to-snapshot`, він може **відкотити системний том до стану перед оновленням**, відновивши відомі вразливості:
+Якщо зловмисник скомпрометує бінарний файл із `com.apple.private.apfs.revert-to-snapshot`, він зможе **відкотити системний том до стану до оновлення**, відновивши відомі вразливості:
 ```bash
 # Conceptual — the snapshot revert operation would:
 # 1. List available snapshots
@@ -68,41 +68,41 @@ diskutil apfs listSnapshots disk3s1
 # This restores the system to a state with known, patched vulnerabilities
 ```
 > [!WARNING]
-> Відкат snapshot фактично **відміняє оновлення безпеки**, відновлюючи раніше виправлені уразливості ядра та системи. Це одна з найнебезпечніших операцій, які можливі в сучасному macOS.
+> Відкат snapshot фактично **скасовує security updates**, відновлюючи раніше виправлені вразливості kernel і системи. Це одна з найнебезпечніших операцій, можливих у сучасній macOS.
 
-#### Заміна системного бінарного файлу
+#### Заміна системних бінарних файлів
 
-При наявності SIP bypass та можливості запису в SSV, атакуючий може:
+За наявності SIP bypass + можливості запису до SSV attacker може:
 
-1. Вмонтувати системний том у режимі читання-запису
-2. Замінити системний демон або бібліотеку фреймворку на троянську версію
-3. Повторно запечатати snapshot (або прийняти порушену печатку, якщо SIP вже послаблено)
-4. rootkit зберігається після перезавантажень і невидимий для userland detection tools
+1. Змонтувати системний том у режимі read-write
+2. Замінити системний daemon або framework library на trojaned версію
+3. Повторно запечатати snapshot (або прийняти пошкоджений seal, якщо SIP уже degraded)
+4. Rootkit зберігається після перезавантажень і невидимий для userland detection tools
 
 ### Реальні CVE
 
-| CVE | Description |
+| CVE | Опис |
 |---|---|
-| CVE-2021-30892 | **Shrootless** — SIP bypass, що дозволяє модифікацію SSV через `system_installd` |
-| CVE-2022-22583 | SSV bypass через обробку snapshot у PackageKit |
-| CVE-2022-46689 | Умова гонки, що дозволяє запис у файли, захищені SIP |
+| CVE-2021-30892 | **Shrootless** — SIP bypass із використанням entitlement `com.apple.rootless.install.heritable` у `system_installd` для запуску довільних post-install scripts ([Microsoft](https://www.microsoft.com/en-us/security/blog/2021/10/28/microsoft-finds-new-macos-vulnerability-shrootless-that-could-bypass-system-integrity-protection/)) |
+| CVE-2022-22583 | SIP bypass: `system_installd` розміщував post-install script у SIP-protected folder під `/tmp`, але сам `/tmp` не захищений SIP, тому folder можна було підмінити, змонтувавши поверх нього image ([Trend Micro](https://www.trendmicro.com/en_us/research/22/l/a-technical-analysis-of-cve-2022-22583-and-cve-2022-32800.html)) |
+| CVE-2022-46689 | **MacDirtyCow** — race у copy-on-write в XNU, що дозволяє записувати до read-only файлів, власником яких є root ([Worth Doing Badly](https://worthdoingbadly.com/macdirtycow/)) |
 
 ---
 
 ## DataVault
 
-### Загальна інформація
+### Основна інформація
 
-**DataVault** — шар захисту Apple для чутливих системних баз даних. Навіть **root не може отримати доступ до файлів, захищених DataVault** — лише процеси з відповідними entitlements можуть читати або змінювати їх. Захищені сховища включають:
+**DataVault** — це рівень захисту Apple для чутливих системних баз даних. Навіть **root не може отримати доступ до файлів, захищених DataVault** — лише процеси з певними entitlements можуть читати або змінювати їх. До захищених сховищ належать:
 
-| Protected Database | Path | Content |
+| Захищена база даних | Шлях | Вміст |
 |---|---|---|
 | TCC (system) | `/Library/Application Support/com.apple.TCC/TCC.db` | Загальносистемні рішення TCC щодо приватності |
-| TCC (user) | `~/Library/Application Support/com.apple.TCC/TCC.db` | Рішення TCC щодо приватності для користувача |
+| TCC (user) | `~/Library/Application Support/com.apple.TCC/TCC.db` | Рішення TCC щодо приватності для окремого користувача |
 | Keychain (system) | `/Library/Keychains/System.keychain` | Системний keychain |
 | Keychain (user) | `~/Library/Keychains/login.keychain-db` | Користувацький keychain |
 
-Захист DataVault реалізується на **рівні файлової системи** за допомогою розширених атрибутів та прапорців захисту тома, що перевіряються ядром.
+Захист DataVault застосовується на **рівні файлової системи** за допомогою extended attributes і volume protection flags та перевіряється kernel.
 
 ### Entitlements контролера DataVault
 ```
@@ -111,7 +111,7 @@ com.apple.private.tcc.manager.check-by-audit-token — TCC checks via audit toke
 com.apple.private.tcc.allow           — Access specific TCC-protected resources
 com.apple.rootless.storage.TCC        — Write to TCC database (SIP-related)
 ```
-### Знаходження DataVault Controllers
+### Пошук контролерів DataVault
 ```bash
 # Check DataVault protection on the TCC database
 ls -le@ "/Library/Application Support/com.apple.TCC/TCC.db"
@@ -132,9 +132,9 @@ WHERE c.name = 'datavault_controller';"
 ```
 ### Сценарії атак
 
-#### Пряме змінення бази даних TCC
+#### Пряма модифікація бази даних TCC
 
-Якщо атакуючий скомпрометує двійковий файл контролера DataVault (наприклад, через ін'єкцію коду в процес з `com.apple.private.tcc.manager`), він може **безпосередньо змінити базу даних TCC**, щоб надати будь-якому додатку будь-який дозвіл TCC:
+Якщо attacker скомпрометує бінарний файл контролера DataVault (наприклад, через code injection у процес із `com.apple.private.tcc.manager`), він може **безпосередньо змінити базу даних TCC**, щоб надати будь-якому застосунку будь-який дозвіл TCC:
 ```sql
 -- Grant Full Disk Access to a malicious binary (conceptual)
 INSERT INTO access (service, client, client_type, auth_value, auth_reason, auth_version)
@@ -145,30 +145,31 @@ INSERT INTO access (service, client, client_type, auth_value, auth_reason, auth_
 VALUES ('kTCCServiceCamera', 'com.attacker.malware', 0, 2, 4, 1);
 ```
 > [!CAUTION]
-> Модифікація бази даних TCC є **ultimate privacy bypass** — вона надає будь‑які дозволи безшумно, без запиту користувача або видимого індикатора. Історично кілька macOS privilege escalation chains завершувалися записами в базу TCC як фінальним payload.
+> Модифікація бази даних TCC — це **найрадикальніший обхід privacy-захисту**: вона непомітно надає будь-які дозволи, без запиту користувача чи видимого індикатора. Історично кілька ланцюжків privilege escalation у macOS завершувалися записом до бази даних TCC як фінальним payload.
 
 #### Доступ до бази даних Keychain
 
-DataVault також захищає файли, що лежать в основі keychain. Скомпрометований контролер DataVault може:
+DataVault також захищає backing-файли keychain. Скомпрометований контролер DataVault може:
 
-1. Читати сирі файли бази даних keychain
-2. Витягувати зашифровані елементи keychain
-3. НамагаTися виконати офлайн-розшифрування з використанням пароля користувача або відновлених ключів
+1. Прочитати raw-файли бази даних keychain
+2. Витягнути зашифровані елементи keychain
+3. Спробувати offline-розшифрування за допомогою пароля користувача або отриманих ключів
 
-### Реальні CVE, пов'язані з DataVault/TCC bypass
+### Реальні CVE, пов’язані з обходом DataVault/TCC
 
-| CVE | Description |
+| CVE | Опис |
 |---|---|
-| CVE-2023-40424 | TCC bypass via symlink to DataVault-protected file |
-| CVE-2023-32364 | Sandbox bypass leading to TCC database modification |
-| CVE-2021-30713 | TCC bypass via XCSSET malware modifying TCC.db |
-| CVE-2020-9934 | TCC bypass via environment variable manipulation |
-| CVE-2020-29621 | Music app TCC bypass reaching DataVault |
+| CVE-2024-44131 | Symlink race у FileProvider, що дає змогу привілейованому helper отримати доступ до даних, захищених TCC ([Jamf](https://www.jamf.com/blog/tcc-bypass-steals-data-from-icloud/)) |
+| CVE-2023-40424 | Від імені root **створити нового користувача, чий `NFSHomeDirectory` вказує на контрольовану attacker-ом `TCC.db`**; під час входу `tccd` використовує її, і дозволи застосовуються, надаючи доступ до даних інших користувачів ([Kandji](https://blog.kandji.io/malware-bypass-tcc)) |
+| CVE-2021-30970 | "powerdir": змінити домашній каталог користувача, щоб розмістити контрольовану attacker-ом TCC.db ([Microsoft](https://www.microsoft.com/en-us/security/blog/2022/01/10/new-macos-vulnerability-powerdir-could-lead-to-unauthorized-user-data-access/)) |
+| CVE-2021-30713 | Вразливість у визначенні bundle, що дає змогу застосунку **успадкувати дозволи TCC donor bundle** без запиту; у wild її використовував **XCSSET** для створення screenshot робочого столу ([Jamf](https://www.jamf.com/blog/zero-day-tcc-bypass-discovered-in-xcsset-malware/)) |
+| CVE-2020-9934 | `tccd` формував шлях до DB на основі `$HOME`, тому `launchctl setenv HOME` перенаправляв його на контрольовану attacker-ом `TCC.db` ([Matt Shockley](https://medium.com/@mattshockl/cve-2020-9934-bypassing-the-os-x-transparency-consent-and-control-tcc-framework-for-4e14806f1de8)) |
+| CVE-2020-29621 | `coreaudiod` мав `com.apple.private.tcc.manager` **і** вимкнену library validation, тому HAL plug-in, розміщений у `/Library/Audio/Plug-Ins/HAL`, міг надавати довільні права TCC ([Wojciech Reguła](https://wojciechregula.blog/post/play-the-music-and-bypass-tcc-aka-cve-2020-29621/)) |
 
 ## Посилання
 
-* [Apple Platform Security — Data Protection](https://support.apple.com/guide/security/data-protection-overview-sece3bee0835/web)
-* [The Nightmare of Apple OTA Updates (APFS Snapshots)](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/)
-* [Objective-See — TCC Exploitation](https://objective-see.org/blog/blog_0x4C.html)
+* [Apple Platform Security — Захист даних](https://support.apple.com/guide/security/data-protection-overview-sece3bee0835/web)
+* [Кошмар OTA-оновлень Apple (APFS Snapshots)](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/)
+* [Objective-See — Експлуатація TCC](https://objective-see.org/blog/blog_0x4C.html)
 
 {{#include ../../../banners/hacktricks-training.md}}
