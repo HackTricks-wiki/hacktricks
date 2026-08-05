@@ -2,80 +2,80 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Intro <a href="#kfpn7" id="kfpn7"></a>
+## Introduction <a href="#kfpn7" id="kfpn7"></a>
 
-Flipper Zero peut **recevoir et transmettre des fréquences radio dans la plage de 300-928 MHz** avec son module intégré, qui peut lire, enregistrer et émuler des télécommandes. Ces télécommandes sont utilisées pour interagir avec des portails, des barrières, des serrures radio, des interrupteurs à distance, des sonnettes sans fil, des lumières intelligentes, et plus encore. Flipper Zero peut vous aider à apprendre si votre sécurité est compromise.
+Flipper Zero peut **recevoir et transmettre des fréquences radio dans la plage de 300 à 928 MHz** grâce à son module intégré, qui peut lire, enregistrer et émuler des télécommandes. Ces télécommandes sont utilisées pour interagir avec des portails, des barrières, des serrures radio, des interrupteurs commandés à distance, des sonnettes sans fil, des éclairages intelligents, et bien plus encore. Flipper Zero peut vous aider à déterminer si votre sécurité est compromise.<sup>[[1]](#references)</sup>
 
 <figure><img src="../../../images/image (714).png" alt=""><figcaption></figcaption></figure>
 
 ## Matériel Sub-GHz <a href="#kfpn7" id="kfpn7"></a>
 
-Flipper Zero dispose d'un module sub-1 GHz intégré basé sur une [﻿](https://www.st.com/en/nfc/st25r3916.html#overview)﻿[puce CC1101](https://www.ti.com/lit/ds/symlink/cc1101.pdf) et une antenne radio (la portée maximale est de 50 mètres). La puce CC1101 et l'antenne sont conçues pour fonctionner à des fréquences dans les bandes de 300-348 MHz, 387-464 MHz et 779-928 MHz.
+Flipper Zero dispose d’un module sub-1 GHz intégré basé sur une [﻿](https://www.st.com/en/nfc/st25r3916.html#overview)﻿[puce CC1101](https://www.ti.com/lit/ds/symlink/cc1101.pdf) et une antenne radio (la portée maximale est de 50 mètres). La puce CC1101 et l’antenne sont conçues pour fonctionner dans les bandes de fréquences 300-348 MHz, 387-464 MHz et 779-928 MHz.<sup>[[1]](#references)</sup>
 
 <figure><img src="../../../images/image (923).png" alt=""><figcaption></figcaption></figure>
 
 ## Actions
 
-### Analyseur de Fréquence
+### Frequency Analyzer
 
-> [!NOTE]
-> Comment trouver quelle fréquence utilise la télécommande
+> [!TIP]
+> Comment trouver la fréquence utilisée par la télécommande
 
-Lors de l'analyse, Flipper Zero scanne la force des signaux (RSSI) à toutes les fréquences disponibles dans la configuration de fréquence. Flipper Zero affiche la fréquence avec la valeur RSSI la plus élevée, avec une force de signal supérieure à -90 [dBm](https://en.wikipedia.org/wiki/DBm).
+Lors de l’analyse, Flipper Zero analyse la puissance des signaux (RSSI) sur toutes les fréquences disponibles dans la configuration des fréquences. Flipper Zero affiche la fréquence ayant la valeur RSSI la plus élevée, avec une puissance du signal supérieure à -90 [dBm](https://en.wikipedia.org/wiki/DBm).<sup>[[1]](#references)</sup>
 
 Pour déterminer la fréquence de la télécommande, procédez comme suit :
 
-1. Placez la télécommande très près à gauche de Flipper Zero.
-2. Allez dans **Menu Principal** **→ Sub-GHz**.
-3. Sélectionnez **Analyseur de Fréquence**, puis appuyez et maintenez le bouton de la télécommande que vous souhaitez analyser.
-4. Consultez la valeur de fréquence à l'écran.
+1. Placez la télécommande très près, à gauche de Flipper Zero.
+2. Accédez à **Main Menu** **→ Sub-GHz**.
+3. Sélectionnez **Frequency Analyzer**, puis maintenez enfoncé le bouton de la télécommande que vous souhaitez analyser.
+4. Consultez la valeur de la fréquence à l’écran.
 
-### Lire
+### Read
 
-> [!NOTE]
-> Trouvez des informations sur la fréquence utilisée (aussi une autre façon de trouver quelle fréquence est utilisée)
+> [!TIP]
+> Trouver des informations sur la fréquence utilisée (une autre façon de trouver la fréquence utilisée)
 
-L'option **Lire** **écoute à la fréquence configurée** sur la modulation indiquée : 433.92 AM par défaut. Si **quelque chose est trouvé** lors de la lecture, **des informations sont données** à l'écran. Ces informations pourraient être utilisées pour reproduire le signal à l'avenir.
+L’option **Read** **écoute sur la fréquence configurée** avec la modulation indiquée : 433.92 AM par défaut. Si **quelque chose est détecté** pendant la lecture, **des informations sont affichées** à l’écran. Ces informations peuvent être utilisées pour reproduire le signal ultérieurement.<sup>[[1]](#references)</sup>
 
-Pendant que Lire est en cours d'utilisation, il est possible d'appuyer sur le **bouton gauche** et **de le configurer**.\
-À ce moment, il a **4 modulations** (AM270, AM650, FM328 et FM476), et **plusieurs fréquences pertinentes** stockées :
+Pendant l’utilisation de Read, il est possible d’appuyer sur le **bouton gauche** et de **le configurer**.\
+À ce stade, il dispose de **4 modulations** (AM270, AM650, FM328 et FM476), ainsi que de **plusieurs fréquences pertinentes** enregistrées :
 
 <figure><img src="../../../images/image (947).png" alt=""><figcaption></figcaption></figure>
 
-Vous pouvez définir **n'importe quelle qui vous intéresse**, cependant, si vous **n'êtes pas sûr de la fréquence** qui pourrait être celle utilisée par la télécommande que vous avez, **activez le Hopping** (désactivé par défaut), et appuyez sur le bouton plusieurs fois jusqu'à ce que Flipper la capture et vous donne les informations dont vous avez besoin pour définir la fréquence.
+Vous pouvez définir **celle qui vous intéresse**, mais si vous **n’êtes pas certain de la fréquence** utilisée par votre télécommande, **activez Hopping** (désactivé par défaut), puis appuyez plusieurs fois sur le bouton jusqu’à ce que Flipper la capture et vous fournisse les informations nécessaires pour définir la fréquence.
 
 > [!CAUTION]
-> Le changement entre les fréquences prend du temps, donc les signaux transmis au moment du changement peuvent être manqués. Pour une meilleure réception du signal, définissez une fréquence fixe déterminée par l'Analyseur de Fréquence.
+> Le changement de fréquence prend un certain temps ; les signaux transmis au moment du changement peuvent donc être manqués. Pour une meilleure réception du signal, définissez une fréquence fixe déterminée avec Frequency Analyzer.
 
-### **Lire Brut**
+### **Read Raw**
 
-> [!NOTE]
-> Voler (et rejouer) un signal à la fréquence configurée
+> [!TIP]
+> Voler (et rejouer) un signal sur la fréquence configurée
 
-L'option **Lire Brut** **enregistre les signaux** envoyés à la fréquence d'écoute. Cela peut être utilisé pour **voler** un signal et **le répéter**.
+L’option **Read Raw** **enregistre les signaux** envoyés sur la fréquence d’écoute. Elle peut être utilisée pour **voler** un signal et le **répéter**.
 
-Par défaut, **Lire Brut est également à 433.92 en AM650**, mais si avec l'option Lire vous avez trouvé que le signal qui vous intéresse est à une **fréquence/modulation différente, vous pouvez également modifier cela** en appuyant à gauche (tout en étant dans l'option Lire Brut).
+Par défaut, **Read Raw est également réglé sur 433.92 en AM650**, mais si l’option Read vous a permis de constater que le signal qui vous intéresse utilise une **fréquence/modulation différente, vous pouvez également la modifier** en appuyant sur le bouton gauche (dans l’option Read Raw).
 
 ### Brute-Force
 
-Si vous connaissez le protocole utilisé par exemple par la porte de garage, il est possible de **générer tous les codes et de les envoyer avec le Flipper Zero.** C'est un exemple qui prend en charge les types de garages communs : [**https://github.com/tobiabocchi/flipperzero-bruteforce**](https://github.com/tobiabocchi/flipperzero-bruteforce)
+Si vous connaissez le protocole utilisé, par exemple, par la porte de garage, il est possible de **générer tous les codes et de les envoyer avec Flipper Zero.** Voici un exemple prenant en charge les types courants de portes de garage : [**https://github.com/tobiabocchi/flipperzero-bruteforce**](https://github.com/tobiabocchi/flipperzero-bruteforce)
 
-### Ajouter Manuellement
+### Add Manually
 
-> [!NOTE]
-> Ajouter des signaux à partir d'une liste de protocoles configurée
+> [!TIP]
+> Ajouter des signaux à partir d’une liste configurée de protocoles
 
 #### Liste des [protocoles pris en charge](https://docs.flipperzero.one/sub-ghz/add-new-remote) <a href="#id-3iglu" id="id-3iglu"></a>
 
-| Princeton_433 (fonctionne avec la majorité des systèmes à code statique) | 433.92 | Statique  |
+| Princeton_433 (fonctionne avec la majorité des systèmes à code statique) | 433.92 | Statique |
 | -------------------------------------------------------------- | ------ | ------- |
-| Nice Flo 12bit_433                                             | 433.92 | Statique  |
-| Nice Flo 24bit_433                                             | 433.92 | Statique  |
-| CAME 12bit_433                                                 | 433.92 | Statique  |
-| CAME 24bit_433                                                 | 433.92 | Statique  |
-| Linear_300                                                     | 300.00 | Statique  |
-| CAME TWEE                                                      | 433.92 | Statique  |
-| Gate TX_433                                                    | 433.92 | Statique  |
+| Nice Flo 12bit_433                                             | 433.92 | Statique |
+| Nice Flo 24bit_433                                             | 433.92 | Statique |
+| CAME 12bit_433                                                 | 433.92 | Statique |
+| CAME 24bit_433                                                 | 433.92 | Statique |
+| Linear_300                                                     | 300.00 | Statique |
+| CAME TWEE                                                      | 433.92 | Statique |
+| Gate TX_433                                                    | 433.92 | Statique |
 | DoorHan_315                                                    | 315.00 | Dynamique |
 | DoorHan_433                                                    | 433.92 | Dynamique |
 | LiftMaster_315                                                 | 315.00 | Dynamique |
@@ -86,19 +86,19 @@ Si vous connaissez le protocole utilisé par exemple par la porte de garage, il 
 
 ### Fournisseurs Sub-GHz pris en charge
 
-Vérifiez la liste sur [https://docs.flipperzero.one/sub-ghz/supported-vendors](https://docs.flipperzero.one/sub-ghz/supported-vendors)
+Consultez la liste sur [https://docs.flipperzero.one/sub-ghz/supported-vendors](https://docs.flipperzero.one/sub-ghz/supported-vendors)
 
 ### Fréquences prises en charge par région
 
-Vérifiez la liste sur [https://docs.flipperzero.one/sub-ghz/frequencies](https://docs.flipperzero.one/sub-ghz/frequencies)
+Consultez la liste sur [https://docs.flipperzero.one/sub-ghz/frequencies](https://docs.flipperzero.one/sub-ghz/frequencies)
 
 ### Test
 
-> [!NOTE]
-> Obtenez des dBms des fréquences enregistrées
+> [!TIP]
+> Obtenir les dBm des fréquences enregistrées
 
-## Référence
+## Références
 
-- [https://docs.flipperzero.one/sub-ghz](https://docs.flipperzero.one/sub-ghz)
+- [1] [Flipper Zero Sub-GHz documentation](https://docs.flipperzero.one/sub-ghz)
 
 {{#include ../../../banners/hacktricks-training.md}}

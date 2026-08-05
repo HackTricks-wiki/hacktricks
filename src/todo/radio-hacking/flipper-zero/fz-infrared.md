@@ -2,9 +2,9 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Intro <a href="#ir-signal-receiver-in-flipper-zero" id="ir-signal-receiver-in-flipper-zero"></a>
+## Introduction <a href="#ir-signal-receiver-in-flipper-zero" id="ir-signal-receiver-in-flipper-zero"></a>
 
-Pour plus d'informations sur le fonctionnement de l'infrarouge, consultez :
+Pour plus d'informations sur le fonctionnement de l'Infrared, consultez :
 
 
 {{#ref}}
@@ -13,29 +13,29 @@ Pour plus d'informations sur le fonctionnement de l'infrarouge, consultez :
 
 ## Récepteur de signal IR dans Flipper Zero <a href="#ir-signal-receiver-in-flipper-zero" id="ir-signal-receiver-in-flipper-zero"></a>
 
-Flipper utilise un récepteur de signal IR numérique TSOP, qui **permet d'intercepter les signaux des télécommandes IR**. Il existe des **smartphones** comme Xiaomi, qui ont également un port IR, mais gardez à l'esprit que **la plupart d'entre eux ne peuvent que transmettre** des signaux et sont **incapables de les recevoir**.
+Flipper utilise un récepteur de signal IR numérique TSOP, qui **permet d'intercepter les signaux des télécommandes IR**. Certains **smartphones**, comme Xiaomi, disposent également d'un port IR, mais gardez à l'esprit que **la plupart d'entre eux peuvent uniquement transmettre** des signaux et sont **incapables de les recevoir**.<sup>[[1]](#references)</sup>
 
-Le récepteur infrarouge de Flipper est **assez sensible**. Vous pouvez même **attraper le signal** tout en restant **quelque part entre** la télécommande et la télévision. Pointer la télécommande directement vers le port IR de Flipper n'est pas nécessaire. Cela est pratique lorsque quelqu'un change de chaîne en se tenant près de la télévision, et que vous et Flipper êtes à une certaine distance.
+Le **récepteur infrarouge de Flipper est très sensible**. Vous pouvez même **capter le signal** en restant **quelque part entre** la télécommande et le téléviseur. Il n'est pas nécessaire de pointer directement la télécommande vers le port IR de Flipper. Cela peut être utile lorsqu'une personne change de chaîne en se tenant près du téléviseur, tandis que vous et Flipper vous trouvez à une certaine distance.
 
-Comme le **décodage du signal infrarouge** se fait du côté **logiciel**, Flipper Zero prend potentiellement en charge la **réception et la transmission de tous les codes de télécommande IR**. Dans le cas de protocoles **inconnus** qui ne peuvent pas être reconnus - il **enregistre et rejoue** le signal brut exactement tel qu'il a été reçu.
+Comme le **décodage du signal infrarouge** s'effectue du côté **logiciel**, Flipper Zero prend potentiellement en charge **la réception et la transmission de tous les codes de télécommandes IR**. Dans le cas de protocoles **inconnus** qui ne peuvent pas être reconnus, il **enregistre et restitue** le signal brut exactement tel qu'il a été reçu.<sup>[[1]](#references)</sup>
 
 ## Actions
 
-### Télécommandes Universelles
+### Télécommandes universelles
 
-Flipper Zero peut être utilisé comme une **télécommande universelle pour contrôler n'importe quelle télévision, climatiseur ou centre multimédia**. Dans ce mode, Flipper **brute force** tous les **codes connus** de tous les fabricants pris en charge **selon le dictionnaire de la carte SD**. Vous n'avez pas besoin de choisir une télécommande particulière pour éteindre la télévision d'un restaurant.
+Flipper Zero peut être utilisé comme **télécommande universelle pour contrôler n'importe quel téléviseur, climatiseur ou centre multimédia**. Dans ce mode, Flipper **bruteforce** tous les **codes connus** de tous les fabricants pris en charge **selon le dictionnaire présent sur la carte SD**. Vous n'avez pas besoin de choisir une télécommande particulière pour éteindre le téléviseur d'un restaurant.<sup>[[1]](#references)</sup>
 
-Il suffit d'appuyer sur le bouton d'alimentation en mode Télécommande Universelle, et Flipper **enverra séquentiellement les commandes "Power Off"** de toutes les télévisions qu'il connaît : Sony, Samsung, Panasonic... et ainsi de suite. Lorsque la télévision reçoit son signal, elle réagira et s'éteindra.
+Il suffit d'appuyer sur le bouton d'alimentation en mode Universal Remote, et Flipper enverra **séquentiellement les commandes « Power Off »** de tous les téléviseurs qu'il connaît : Sony, Samsung, Panasonic... et ainsi de suite. Lorsque le téléviseur reçoit son signal, il réagit et s'éteint.
 
-Ce type de brute-force prend du temps. Plus le dictionnaire est grand, plus cela prendra de temps pour finir. Il est impossible de savoir quel signal exactement la télévision a reconnu, car il n'y a pas de retour d'information de la télévision.
+Un tel bruteforce prend du temps. Plus le dictionnaire est volumineux, plus il faudra de temps pour terminer. Il est impossible de savoir quel signal précis le téléviseur a reconnu, puisqu'il ne fournit aucun retour.
 
-### Apprendre une Nouvelle Télécommande
+### Apprendre une nouvelle télécommande
 
-Il est possible de **capturer un signal infrarouge** avec Flipper Zero. S'il **trouve le signal dans la base de données**, Flipper saura automatiquement **de quel appareil il s'agit** et vous permettra d'interagir avec lui.\
-S'il ne le trouve pas, Flipper peut **stocker** le **signal** et vous permettra de **le rejouer**.
+Il est possible de **capturer un signal infrarouge** avec Flipper Zero. S'il **trouve le signal dans la base de données**, Flipper **saura automatiquement de quel appareil il s'agit** et vous permettra d'interagir avec celui-ci.\
+Dans le cas contraire, Flipper peut **stocker** le **signal** et vous permettre de **le rejouer**.<sup>[[1]](#references)</sup>
 
 ## Références
 
-- [https://blog.flipperzero.one/infrared/](https://blog.flipperzero.one/infrared/)
+- [1] [Taking over TVs with Flipper Zero Infrared Port](https://blog.flipperzero.one/infrared/)
 
 {{#include ../../../banners/hacktricks-training.md}}

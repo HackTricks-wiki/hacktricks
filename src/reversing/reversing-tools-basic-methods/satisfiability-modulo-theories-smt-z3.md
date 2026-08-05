@@ -1,10 +1,10 @@
-# Très basiquement, cet outil nous aidera à trouver des valeurs pour des variables qui doivent satisfaire certaines conditions, et les calculer à la main serait très pénible. Par conséquent, vous pouvez indiquer à Z3 les conditions que les variables doivent satisfaire et il trouvera certaines valeurs (si possible).
+# Très simplement, cet outil nous aidera à trouver des valeurs pour des variables qui doivent satisfaire certaines conditions, et les calculer à la main serait très fastidieux. Vous pouvez donc indiquer à Z3 les conditions auxquelles les variables doivent satisfaire, et il trouvera certaines valeurs (si possible).
 
 {{#include ../../banners/hacktricks-training.md}}
 
-# Basic Operations
+# Opérations de base
 
-## Booleans/And/Or/Not
+## Booléens/And/Or/Not
 ```python
 # pip3 install z3-solver
 from z3 import *
@@ -60,7 +60,7 @@ print("%s = %s" % (d.name(), m[d]))
 ```
 # Arithmétique machine
 
-Les CPU modernes et les langages de programmation grand public utilisent une arithmétique sur des vecteurs de bits de taille fixe. L'arithmétique machine est disponible dans Z3Py sous forme de Bit-Vectors.
+Les CPU modernes et les langages de programmation courants utilisent l'arithmétique sur des vecteurs de bits de taille fixe. L'arithmétique machine est disponible dans Z3Py sous forme de Bit-Vectors.<sup>[[1]](#references)</sup>
 ```python
 from z3 import *
 
@@ -77,7 +77,7 @@ print(simplify(a == b)) # This is False
 ```
 ## Nombres signés/non signés
 
-Z3 fournit des versions signées spéciales des opérations arithmétiques, où il y a une différence selon que le bit-vector est traité comme signé ou non signé. Dans Z3Py, les opérateurs `<`, `<=`, `>`, `>=`, `/`, `%` et `>>` correspondent aux versions signées. Les opérateurs non signés correspondants sont `ULT`, `ULE`, `UGT`, `UGE`, `UDiv`, `URem` et `LShR`.
+Z3 fournit des versions signées spéciales des opérations arithmétiques lorsqu'il est important de déterminer si le bit-vector est traité comme signé ou non signé. Dans Z3Py, les opérateurs `<`, `<=`, `>`, `>=`, `/`, `%` et `>>` correspondent aux versions signées. Les opérateurs non signés correspondants sont `ULT`, `ULE`, `UGT`, `UGE`, `UDiv`, `URem` et `LShR`.<sup>[[1]](#references)</sup>
 ```python
 from z3 import *
 
@@ -97,9 +97,9 @@ solve(ULT(x, 0))
 ```
 ## Fonctions
 
-Les fonctions interprétées, comme l'arithmétique, ont une interprétation standard fixe. Les fonctions et constantes non interprétées sont maximement flexibles ; elles permettent toute interprétation cohérente avec les contraintes sur la fonction ou la constante.
+Les fonctions interprétées, telles que les opérations arithmétiques, ont une interprétation standard fixe. Les fonctions et constantes non interprétées sont extrêmement flexibles ; elles autorisent toute interprétation cohérente avec les contraintes appliquées à la fonction ou à la constante.<sup>[[1]](#references)</sup>
 
-Exemple : `f` appliquée deux fois à `x` donne à nouveau `x`, mais `f` appliquée une fois à `x` est différente de `x`.
+Exemple : `f` appliquée deux fois à `x` donne à nouveau `x`, mais `f` appliquée une seule fois à `x` est différente de `x`.
 ```python
 from z3 import *
 
@@ -118,13 +118,13 @@ s.add(f(x) == 4) # Find the value that generates 4 as response
 s.check()
 print(s.model())
 ```
-# Reversing-Oriented Patterns
+# Patterns orientés reversing
 
-Si vous avez besoin d’une exécution symbolique complète sur un binaire au lieu de relever manuellement seulement quelques vérifications, consultez [Angr - Examples](angr/angr-examples.md). En pratique, un flux de travail très courant consiste à récupérer les prédicats pertinents depuis le decompiler/assembly et à reconstruire uniquement les contraintes arithmétiques ou mémoire intéressantes dans Z3.
+Si vous avez besoin d'une symbolic execution complète sur un binaire au lieu de ne lever manuellement que quelques checks, consultez [Angr - Examples](angr/angr-examples.md). En pratique, un workflow très courant consiste à récupérer les prédicats pertinents depuis le decompiler/assembly, puis à reconstruire uniquement les contraintes arithmétiques ou mémoire intéressantes dans Z3.
 
-## Modélisez d’abord les données contrôlées par l’utilisateur comme des bytes
+## Modéliser d'abord les données contrôlées par l'utilisateur sous forme d'octets
 
-Pour le reversing, il est généralement préférable de commencer avec `BitVec(..., 8)` pour chaque byte d’entrée, puis de reconstruire les words exactement comme la cible le fait. Cela préserve le wrap-around, les bugs de signedness, les shifts, les rotates et les problèmes d’ordre des bytes.
+Pour le reversing, il est généralement préférable de commencer avec `BitVec(..., 8)` pour chaque octet d'entrée, puis de reconstruire les mots exactement comme le fait la cible. Cela préserve le wrap-around, les bugs de signedness, les shifts, les rotations et les problèmes d'ordre des octets.
 ```python
 from z3 import *
 
@@ -139,16 +139,16 @@ s.add(RotateRight(dword, 8) == 0x41444342)
 print(s.check())
 print(hex(s.model().eval(dword).as_long()))
 ```
-Utiles lors de la traduction de code assembly ou de décompilation :
+Aides utiles lors de la traduction de code assembly ou de decompilers :
 
-- `Concat` : reconstruire des valeurs 16/32/64-bit à partir d'octets
-- `Extract` : comparer des mots hauts/bas ou émuler des masques/décalages
-- `ZeroExt` / `SignExt` : modéliser correctement les bugs d'extension zéro/signe
-- `LShR` / `RotateLeft` / `RotateRight` : courants dans les crackmes, hashes et obfuscators
+- `Concat` : reconstituer des valeurs de 16/32/64 bits à partir d’octets
+- `Extract` : comparer les mots de poids fort/faible ou émuler des masques/décalages
+- `ZeroExt` / `SignExt` : modéliser correctement les bugs d’extension avec ou sans signe
+- `LShR` / `RotateLeft` / `RotateRight` : courants dans les crackmes, les hashes et les obfuscateurs
 
-## Modéliser les tables mémoire/registres avec des arrays
+## Modéliser les tables de mémoire/registres avec des arrays
 
-Quand un check dépend de `buf[i]`, de lookup tables ou de mémoire émulée, `Array` peut être plus propre que de créer des dizaines de variables séparées.
+Lorsqu’une vérification dépend de `buf[i]`, de lookup tables ou de mémoire émulée, `Array` peut être plus propre que de créer des dizaines de variables distinctes.
 ```python
 from z3 import *
 
@@ -165,11 +165,11 @@ s = Solver()
 s.add(word == 0x4241)
 print(s.check())
 ```
-C'est particulièrement utile lorsque le binaire copie des valeurs en mémoire avant de les valider, ou lorsque vous voulez modéliser l'effet de quelques opérations `mov`/`xor`/`add` sans exécuter tout le programme.
+C'est particulièrement pratique lorsque le binaire copie des valeurs en mémoire avant de les valider, ou lorsque vous souhaitez modéliser l'effet de quelques opérations `mov`/`xor`/`add` sans exécuter le programme complet.
 
-## Incremental solving est idéal pour le triage des branches
+## La résolution incrémentielle est idéale pour le triage des branches
 
-Lorsque vous avez déjà extrait les contraintes de base, utilisez `push()` / `pop()` (ou des assumptions) pour tester des branches alternatives sans reconstruire le solver à chaque fois:
+Lorsque vous avez déjà extrait les contraintes de base, utilisez `push()` / `pop()` (ou des assumptions) pour tester différentes branches sans reconstruire le solver à chaque fois :
 ```python
 from z3 import *
 
@@ -187,11 +187,11 @@ s.add(x < 0x100)
 print("branch 2:", s.check())
 s.pop()
 ```
-Ceci est utile lorsque vous rejouez des path conditions récupérées depuis un decompiler, ou lorsque vous voulez identifier rapidement quelle comparaison rend le modèle `unsat`.
+C'est utile lors de la relecture des conditions de chemin récupérées depuis un decompiler, ou lorsque vous voulez identifier rapidement quelle comparaison rend le modèle `unsat`.
 
-## Optimiser pour de meilleurs payloads
+## Optimiser pour obtenir des payloads plus pratiques
 
-Une fois qu’un modèle est satisfiable, `Optimize()` peut vous aider à obtenir une solution plus exploitable : par exemple, privilégier des bytes imprimables, minimiser une composante de checksum, ou maximiser une structure qui rend le password récupéré plus facile à saisir ou à copier.
+Une fois qu'un modèle est satisfiable, `Optimize()` peut vous aider à obtenir une solution plus utilisable : par exemple, privilégier les octets imprimables, minimiser un composant de checksum ou maximiser une structure qui rend le mot de passe récupéré plus facile à saisir ou à copier.
 ```python
 from z3 import *
 
@@ -204,9 +204,9 @@ o.add_soft(And(c >= 0x20, c <= 0x7e))
 print(o.check())
 print(bytes(o.model()[c].as_long() for c in key))
 ```
-## Strings/séquences pour des serials très axés sur le format
+## Chaînes/séquences pour les sérialisations à format complexe
 
-Si la cible vérifie principalement des préfixes, suffixes, sous-chaînes ou une structure de type regex, les contraintes `String`/`Seq` peuvent être plus simples que les bit-vectors octet par octet :
+Si la cible vérifie principalement les préfixes, suffixes, sous-chaînes ou une structure de type regex, les contraintes `String`/`Seq` peuvent être plus simples que les vecteurs de bits octet par octet :
 ```python
 from z3 import *
 
@@ -217,11 +217,11 @@ s.add(PrefixOf(StringVal("HTB{"), serial))
 s.add(SuffixOf(StringVal("}"), serial))
 s.add(Contains(serial, StringVal("_")))
 ```
-Cependant, dès que le binaire commence à faire de l’arithmétique, des rotations, des checksums ou des casts sur des caractères, il est généralement préférable de revenir aux bit-vectors de 8 bits.
+Cependant, dès que le binaire commence à effectuer des opérations arithmétiques, des rotations, des sommes de contrôle ou des conversions sur des caractères, il est généralement préférable de revenir aux bit-vectors de 8 bits.
 
-# Examples
+# Exemples
 
-## Sudoku solver
+## Solveur de Sudoku
 ```python
 # 9x9 matrix of integer variables
 X = [[Int("x_%s_%s" % (i+1, j+1)) for j in range(9)]
@@ -271,7 +271,8 @@ print("failed to solve")
 ```
 ## Références
 
-* [https://ericpony.github.io/z3py-tutorial/guide-examples.htm](https://ericpony.github.io/z3py-tutorial/guide-examples.htm)
-* [https://microsoft.github.io/z3guide/](https://microsoft.github.io/z3guide/)
-* [https://theory.stanford.edu/~nikolaj/programmingz3.html](https://theory.stanford.edu/~nikolaj/programmingz3.html)
+- [1] [Guide Z3Py - Exemples (ericpony)](https://ericpony.github.io/z3py-tutorial/guide-examples.htm)
+- [2] [Guide Z3 (Microsoft)](https://microsoft.github.io/z3guide/)
+- [3] [Programmer Z3 (Stanford)](https://theory.stanford.edu/~nikolaj/programmingz3.html)
+
 {{#include ../../banners/hacktricks-training.md}}

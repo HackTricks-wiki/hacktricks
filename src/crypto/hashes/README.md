@@ -2,38 +2,38 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Common CTF patterns
+## Patterns courants en CTF
 
-- "Signature" est en fait `hash(secret || message)` → length extension.
-- Unsalted password hashes → trivial cracking / lookup.
-- Confusing hash with MAC (hash != authentication).
+- « Signature » signifie en réalité `hash(secret || message)` → length extension.
+- Hashes de mots de passe non salés → cracking trivial / recherche dans des bases.
+- Confusion entre hash et MAC (hash != authentification).
 
-## Hash length extension attack
+## Attaque de length extension sur les hashes
 
 ### Technique
 
-Vous pouvez souvent exploiter cela si un serveur calcule une "signature" comme :
+Vous pouvez souvent exploiter cela si un serveur calcule une « signature » comme ceci :
 
 `sig = HASH(secret || message)`
 
-et utilise un hash de type Merkle–Damgård (exemples classiques : MD5, SHA-1, SHA-256).
+et utilise un hash Merkle–Damgård (exemples classiques : MD5, SHA-1, SHA-256).
 
 Si vous connaissez :
 
 - `message`
 - `sig`
-- hash function
-- (or can brute-force) `len(secret)`
+- la fonction de hash
+- (ou pouvez brute-force) `len(secret)`
 
 Alors vous pouvez calculer une signature valide pour :
 
 `message || padding || appended_data`
 
-sans connaître le secret.
+sans connaître le secret.<sup>[[1]](#references)</sup>
 
-### Limite importante : HMAC n'est pas affecté
+### Limitation importante : HMAC n'est pas affecté
 
-Les length extension attacks s'appliquent aux constructions comme `HASH(secret || message)` pour les Merkle–Damgård hashes. Elles ne s'appliquent pas à **HMAC** (e.g., HMAC-SHA256), qui est spécifiquement conçu pour éviter cette classe de problèmes.
+Les length extension attacks s'appliquent à des constructions comme `HASH(secret || message)` pour les hashes Merkle–Damgård. Elles ne s'appliquent pas à **HMAC** (par exemple, HMAC-SHA256), qui est spécifiquement conçu pour éviter cette classe de problèmes.<sup>[[1]](#references)</sup>
 
 ### Outils
 
@@ -52,28 +52,32 @@ https://github.com/bwall/HashPump
 https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks
 {{#endref}}
 
-## Password hashing and cracking
+## Hashing et cracking de mots de passe
 
 ### Premières questions
 
-- Is it **salted**? (look for `salt$hash` formats)
-- Is it a **fast hash** (MD5/SHA1/SHA256) or a **slow KDF** (bcrypt/scrypt/argon2/PBKDF2)?
-- Do you have a **format hint** (hashcat mode / John format)?
+- Est-il **salé** ? (cherchez des formats `salt$hash`)
+- S'agit-il d'un **hash rapide** (MD5/SHA1/SHA256) ou d'un **KDF lent** (bcrypt/scrypt/argon2/PBKDF2) ?
+- Disposez-vous d'un **indice sur le format** (mode hashcat / format John) ?
 
 ### Workflow pratique
 
-1. Identifier le hash :
+1. Identifiez le hash :
 - `hashid <hash>`
 - `hashcat --example-hashes | rg -n "<pattern>"`
-2. If unsalted and common: try online DBs and identification tooling from the crypto workflow section.
-3. Otherwise crack:
+2. S'il n'est pas salé et qu'il est courant : essayez les DBs en ligne et les outils d'identification de la section crypto workflow.
+3. Sinon, effectuez le cracking :
 - `hashcat -m <mode> -a 0 hashes.txt wordlist.txt`
 - `john --wordlist=wordlist.txt --format=<fmt> hashes.txt`
 
-### Erreurs courantes exploitables
+### Erreurs courantes que vous pouvez exploiter
 
-- Same password reused across users → crack one, pivot.
-- Truncated hashes / custom transforms → normalize and retry.
-- Weak KDF parameters (e.g., low PBKDF2 iterations) → still crackable.
+- Même mot de passe réutilisé par plusieurs utilisateurs → crackez-en un, puis pivotez.
+- Hashes tronqués / transformations personnalisées → normalisez et réessayez.
+- Paramètres de KDF faibles (par exemple, peu d'itérations PBKDF2) → toujours crackables.
+
+## Références
+
+- [1] [Everything you need to know about hash length extension attacks](https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks)
 
 {{#include ../../banners/hacktricks-training.md}}
